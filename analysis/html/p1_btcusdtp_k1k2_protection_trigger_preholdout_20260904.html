@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>BTCUSDT.P K1→K2：盈利保护触发点（15m / 5m）</title>
+<style>
+:root { color-scheme: light dark; }
+body { max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; word-wrap: break-word; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>BTCUSDT.P K1→K2：盈利保护触发点（15m / 5m）</h1>
+<p>日期：2026-09-04</p>
+<p>实验：<code>exp-btcusdtp-k1k2-protection-trigger-preholdout-20260904-v1</code></p>
+<p>状态：<strong>REJECTED；1.5R 保持不变，audit / holdout 均未打开</strong></p>
+<h2>结论</h2>
+<p>本轮只改变一件事：收盘浮盈达到多少 R 后，从下一根 K 线起把止损抬到覆盖 20bp 往返成本的位置。测试 0.75、1.00、1.25、1.50、2.00、2.50R 和完全关闭保护；信号、立即次开盘入场、K2 极值止损、3R 止盈、12 小时持有上限、6 小时冷却和成本全部冻结。</p>
+<p><strong>保护过早不是当前系统亏损的主因。</strong> 15m 关闭保护相对 1.5R 只改善平均净值 0.28bp，稳健分反而略差；5m 关闭保护改善平均净值 0.41bp、稳健分 0.37bp，远低于预注册的 +2bp 移动门。两个周期均保留 1.5R，并因绝对净值仍显著为负而禁止读取 audit。</p>
+<h2>数据与冻结规则</h2>
+<ul>
+<li>数据：OKX <code>BTC-USDT-SWAP</code>；5m 原始快照 341,567 行，SHA256 <code>767f67c2…eed5ac</code>，物理截止 2026-02-28。</li>
+<li>development：2023-01-01 至 2025-01-01，四个连续半年折；15m 形态候选 1,661，成交 345；5m 候选 9,343，成交 755。</li>
+<li>15m：SMA120、K1→K2 gap 2–8、score ≥0.40；5m：SMA40、gap 6–24、score ≥0.40。</li>
+<li>选择门：相对 1.5R 的稳健分至少 +2bp，最差折不得恶化超过 3bp，并满足样本门。开发成功还要求平均净值与稳健分 &gt;0、最差折 &gt;-5bp、四折毛收益均 &gt;0。</li>
+<li>audit 读取 0 行；仓库最终 holdout（≥2026-05-04）读取 0 行。</li>
+</ul>
+<h2>全网格结果</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>保护触发</th>
+<th>交易</th>
+<th>毛 bp</th>
+<th>净 bp</th>
+<th>稳健分</th>
+<th>最差折</th>
+<th>胜率</th>
+<th>PF</th>
+<th>TP / SL / 保护 / 超时</th>
+<th>匹配超额 bp</th>
+<th>p</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td>0.75R</td><td>345</td><td>+5.76</td><td>-14.24</td><td>-16.79</td><td>-21.07</td><td>44.06%</td><td>0.474</td><td>47 / 184 / 112 / 2</td><td>+6.26</td><td>0.0516</td></tr>
+<tr><td>15m</td><td>1.00R</td><td>345</td><td>+6.34</td><td>-13.66</td><td>-16.41</td><td>-20.90</td><td>39.42%</td><td>0.535</td><td>61 / 201 / 79 / 4</td><td>+7.32</td><td>0.0306</td></tr>
+<tr><td>15m</td><td>1.25R</td><td>345</td><td>+5.55</td><td>-14.45</td><td>-18.13</td><td>-21.40</td><td>36.23%</td><td>0.538</td><td>68 / 215 / 57 / 5</td><td>+5.87</td><td>0.0746</td></tr>
+<tr><td>15m</td><td><strong>1.50R 基准</strong></td><td>345</td><td>+6.49</td><td>-13.51</td><td><strong>-16.35</strong></td><td><strong>-20.54</strong></td><td>34.49%</td><td>0.580</td><td>79 / 221 / 39 / 6</td><td>+6.63</td><td>0.0520</td></tr>
+<tr><td>15m</td><td>2.00R</td><td>345</td><td>+6.71</td><td>-13.29</td><td>-16.82</td><td>-21.62</td><td>30.43%</td><td>0.612</td><td>91 / 235 / 11 / 8</td><td>+6.66</td><td>0.0564</td></tr>
+<tr><td>15m</td><td>2.50R</td><td>345</td><td>+6.69</td><td>-13.31</td><td>-16.59</td><td>-22.21</td><td>29.28%</td><td>0.618</td><td>93 / 239 / 3 / 10</td><td>+6.95</td><td>0.0516</td></tr>
+<tr><td>15m</td><td>关闭</td><td>345</td><td><strong>+6.77</strong></td><td><strong>-13.23</strong></td><td>-16.37</td><td>-22.21</td><td>28.99%</td><td><strong>0.621</strong></td><td>95 / 240 / 0 / 10</td><td>+7.20</td><td>0.0455</td></tr>
+<tr><td>5m</td><td>0.75R</td><td>755</td><td>+2.18</td><td>-17.82</td><td>-18.86</td><td>-20.55</td><td>47.55%</td><td>0.197</td><td>58 / 376 / 320 / 1</td><td>-0.17</td><td>0.5506</td></tr>
+<tr><td>5m</td><td>1.00R</td><td>755</td><td>+2.42</td><td>-17.58</td><td>-18.22</td><td>-20.45</td><td>43.97%</td><td>0.265</td><td>87 / 405 / 261 / 2</td><td>+0.16</td><td>0.4582</td></tr>
+<tr><td>5m</td><td>1.25R</td><td>755</td><td><strong>+3.26</strong></td><td><strong>-16.74</strong></td><td>-17.81</td><td>-20.35</td><td>41.46%</td><td>0.336</td><td>123 / 427 / 203 / 2</td><td>+1.61</td><td>0.1699</td></tr>
+<tr><td>5m</td><td><strong>1.50R 基准</strong></td><td>755</td><td>+2.68</td><td>-17.32</td><td>-17.68</td><td>-21.07</td><td>38.28%</td><td>0.355</td><td>141 / 454 / 158 / 2</td><td>+1.28</td><td>0.2315</td></tr>
+<tr><td>5m</td><td>2.00R</td><td>755</td><td>+2.24</td><td>-17.76</td><td>-18.30</td><td>-21.02</td><td>31.26%</td><td>0.413</td><td>187 / 512 / 52 / 4</td><td>+0.87</td><td>0.3251</td></tr>
+<tr><td>5m</td><td>2.50R</td><td>755</td><td>+3.04</td><td>-16.96</td><td>-17.50</td><td>-20.20</td><td>29.40%</td><td>0.458</td><td>212 / 531 / 6 / 6</td><td>+1.10</td><td>0.2912</td></tr>
+<tr><td>5m</td><td>关闭</td><td>755</td><td>+3.10</td><td>-16.90</td><td><strong>-17.32</strong></td><td><strong>-20.20</strong></td><td>29.14%</td><td><strong>0.463</strong></td><td>215 / 534 / 0 / 6</td><td>+0.94</td><td>0.3209</td></tr>
+</tbody></table>
+<p>匹配随机对照按同月 × UTC 六小时块 × 当月 ATR14 五分位构造，每个信号最多三条，复制方向、风险、保护、目标、时限和成本；它只作负对照，不参与选参。所有臂的绝对净值仍为负，任何相对随机的“少亏”都不是生产 edge。</p>
+<h2>为什么“更多赢家还能走远”仍然没有转化为收益</h2>
+<p>关闭保护确实让 TP 数增加：15m 从 79 增至 95，5m 从 141 增至 215；但它也把原本以近成本价离场的交易重新暴露给完整结构止损，SL 分别从 221 增至 240、454 增至 534。赢家尾部变长和失败尾部同时变坏，最后每笔只增加 0.28bp / 0.41bp。</p>
+<p>这说明用户观察到的“部分盈利交易能走得更远”是真实路径现象，但调整保护触发点无法提取它：当前 3R 是整单一次性退出，保护只决定未到 3R 的回撤损失。要检验赢家尾部，下一步应直接改变 <strong>target R</strong>，而不是继续微调保护。</p>
+<p>四折也不支持某个隐藏稳定峰值。基准 15m 净 bp 为 -7.70 / -20.54 / -7.91 / -18.82；5m 为 -21.07 / -16.26 / -16.91 / -15.34，均至少一折毛收益不为正。关闭保护的最差折还恶化到 -22.21bp（15m），没有跨期稳健性。</p>
+<h2>排序基线</h2>
+<p>保护臂不改变信号排序。冻结基准的 15m AUC 为 0.549，top-decile 毛 / 净为 +14.71 / -5.29bp，置换 p=0.206，单特征 top-decile 净 -10.98bp；5m AUC 0.489，top-decile 毛 / 净 +0.91 / -19.09bp，p=0.655，单特征为 -21.02bp。形态分仍没有提供足以覆盖成本的排序能力。</p>
+<h2>决策与下一实验</h2>
+<ul>
+<li>15m 与 5m 都保留 1.5R 保护；不打开 audit。</li>
+<li>不再搜索保护触发细粒度参数，避免围绕噪声过拟合。</li>
+<li>下一轮只改变固定止盈倍数：2R / 3R / 4R / 5R / 6R；其余规则保持不动。若固定目标仍失败，再独立预注册 runner，而不把两种修改混为一个实验。</li>
+</ul>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>这是 development 内筛选，p 值不能作最终确认。</li>
+<li>固定成本 20bp，未另计 funding；即使零成本，毛优势也弱且不稳定。</li>
+<li>只覆盖 BTC，不能外推其他标的。</li>
+<li>audit / holdout 均未打开；未修改 Pine、ACTIVE、frozen、forward、部署或真实订单。</li>
+</ul>
+<h2>复现</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+PYTHONPATH=. python3 -m pytest -q \
+  tests/test_research_btcusdtp_k1k2_protection_trigger.py \
+  tests/test_research_btcusdtp_k1k2_stop_buffer.py \
+  tests/test_optimize_btcusdtp_k1k2_independent_timeframes.py
+PYTHONPATH=. python3 -m scripts.research_btcusdtp_k1k2_protection_trigger \
+  --phase development
+python3 scripts/md_to_html.py \
+  analysis/p1_btcusdtp_k1k2_protection_trigger_preholdout_20260904.md \
+  --out-dir analysis/html
+</code></pre>
+<p>冻结选择、全网格、时间折、交易账本和匹配随机对照位于 <code>experiments/active/exp-btcusdtp-k1k2-protection-trigger-preholdout-20260904-v1/results/</code>。</p>
+</body>
+</html>

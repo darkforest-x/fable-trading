@@ -513,4 +513,5 @@
 - [`p1_btcusdtp_k1k2_stop_buffer_preholdout_20260904.md`](p1_btcusdtp_k1k2_stop_buffer_preholdout_20260904.md) — K2 极值外 0–0.50 ATR 止损缓冲单变量实验；两周期均保留 0 ATR，audit 未打开。
 - [`p1_btcusdtp_k1k2_sweep_reclaim_entry_preholdout_20260904.md`](p1_btcusdtp_k1k2_sweep_reclaim_entry_preholdout_20260904.md) — K2 极值扫过后收复的延迟入场实验；5m 30 分钟局部改善但未过门，两周期均拒绝。
 - [`p1_btcusdtp_k1k2_breakout_entry_preholdout_20260904.md`](p1_btcusdtp_k1k2_breakout_entry_preholdout_20260904.md) — K2 方向突破确认入场实验；风险与成交池扩张，全部窗口劣于立即入场。
+- [`p1_btcusdtp_k1k2_protection_trigger_preholdout_20260904.md`](p1_btcusdtp_k1k2_protection_trigger_preholdout_20260904.md) — 盈利保护触发点单变量实验；关闭保护仅改善 0.28/0.41bp，两周期均保留 1.5R。
 - [`p1_btcusdtp_1h_owner_causal_v2_preholdout_20260904_erratum.md`](p1_btcusdtp_1h_owner_causal_v2_preholdout_20260904_erratum.md) — 旧 1h 报告的 holdout 读取声明勘误。
