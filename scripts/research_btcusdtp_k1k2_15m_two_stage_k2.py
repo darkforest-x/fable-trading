@@ -448,12 +448,20 @@ def legacy_parity(
     """Fail closed unless delay-zero construction reproduces the legacy baseline."""
 
     params = frozen_params(config)
-    legacy = filter_pairs(build_pair_universe(frame, config, BAR), params)
+    selection_path = PROJECT / str(config["predecessor"]["selection_receipt"])
+    selection = json.loads(selection_path.read_text(encoding="utf-8"))
+    predecessor_config_path = selection_path.parents[1] / "config.json"
+    if sha256_file(predecessor_config_path) != str(selection["config_sha256"]):
+        raise RuntimeError("predecessor config no longer matches its selection receipt")
+    predecessor_config = json.loads(predecessor_config_path.read_text(encoding="utf-8"))
+    legacy = filter_pairs(
+        build_pair_universe(frame, predecessor_config, BAR), params
+    )
     keys = ["direction", "k1_i", "k2_i", "gap_bars"]
     left = legacy[keys].sort_values(keys, kind="mergesort").reset_index(drop=True)
     right = same_bar[keys].sort_values(keys, kind="mergesort").reset_index(drop=True)
     pd.testing.assert_frame_equal(left, right, check_dtype=False)
-    legacy_accepted = accept_events(legacy, frame, config, BAR, params)
+    legacy_accepted = accept_events(legacy, frame, predecessor_config, BAR, params)
     ours_accepted = accept_k2_events(same_bar, frame, config)
     accepted_keys = ["direction", "k1_i", "k2_i", "entry_i"]
     pd.testing.assert_frame_equal(
