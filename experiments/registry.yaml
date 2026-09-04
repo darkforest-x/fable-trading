@@ -4971,3 +4971,28 @@ experiments:
       confirmation are opened in order, all before the 2026-05-04 repository
       holdout. No training, TradingView, ACTIVE/frozen, forward, deployment,
       sizing, API-key or live-order state may change.
+
+  - experiment_id: exp-altcoin-1d-k1k2-close-stop-bank-repair-preholdout-20260905-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e5ede89aa20c0ca9340aa74bbbcc413c715b73c1"
+    status: active
+    question: >-
+      Can close-confirmed daily structure/MA exits and a larger gradual profit
+      ladder repair the v1 altcoin K1->K2 signal without changing any signal,
+      universe, morphology, vote or entry rule?
+    single_variable: >-
+      Four execution factors are changed sequentially, one at a time: stop
+      confirmation policy, bank schedule, trail reference, then runner buffer.
+      Development scoring clips individual R to [-1.5,+10] so a single listing-
+      era trend cannot select the policy by itself.
+    result: preregistered_not_run
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    notes: >-
+      Development is the already-seen 2022-07 through 2025-06 parent lineage.
+      The untouched 2025-07 through 2026-04 prefix is a one-shot confirmation.
+      Repository holdout starts 2026-05-04 and is forbidden. No training,
+      TradingView, ACTIVE/frozen, forward, deployment, sizing, API-key or live-
+      order state may change.
