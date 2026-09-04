@@ -121,6 +121,17 @@ def _flags(value: Any) -> str:
     return "；".join(FLAG_ZH.get(item, item) for item in str(value).split("|") if item)
 
 
+def _exit_result(row: pd.Series, arm: str) -> str:
+    """Format a fixed-target continuation outcome without hiding timeouts."""
+
+    family = str(row[f"{arm}_exit_family"])
+    if family == "target":
+        return "HIT"
+    if family == "stop":
+        return "SL"
+    return f"T {float(row[f'{arm}_return_r']):.2f}R"
+
+
 def _trade_rows(frame: pd.DataFrame) -> list[list[Any]]:
     rows: list[list[Any]] = []
     for _, trade in frame.sort_values("entry_i").iterrows():
@@ -155,6 +166,19 @@ def main() -> int:
     controls = pd.read_csv(RESULTS / "matched_controls.csv")
     monthly = pd.read_csv(RESULTS / "monthly_summary.csv")
     factors = pd.read_csv(RESULTS / "causal_flag_diagnostics.csv")
+    exit_validation = json.loads(
+        (RESULTS / "exit_target_validation.json").read_text(encoding="utf-8")
+    )
+    if exit_validation.get("status") != "pass":
+        raise RuntimeError(
+            f"refusing to report failed exit validation: {exit_validation.get('failed')}"
+        )
+    exit_summary = pd.read_csv(RESULTS / "exit_target_summary.csv")
+    exit_comparisons = pd.read_csv(RESULTS / "exit_target_comparisons.csv")
+    exit_periods = pd.read_csv(RESULTS / "exit_target_periods.csv")
+    exit_continuation = pd.read_csv(
+        RESULTS / "exit_target_continuation.csv", parse_dates=["entry_time"]
+    )
 
     events["cost_r"] = config["execution"]["round_trip_cost_fraction"] / (
         events["risk_price"] / events["entry_price"]
@@ -444,8 +468,8 @@ def main() -> int:
         [
             "3R目标",
             "固定3R",
-            "先验证盈利保护，不建议直接降到2R",
-            "8笔回吐单MFE≥1.5R但全部<2R；2R并不能救它们，却会削减原有TP",
+            "不直接整仓改5R；在开发窗预注册3R部分止盈+runner",
+            "退出复放中13/9/7笔原3R赢家继续到4R/5R/6R；但5R有4笔变差且时段不稳定",
         ],
         [
             "12根超时",
@@ -460,6 +484,76 @@ def main() -> int:
             "赢家/输家中位62.36/55.18，但排序证据弱；事后选线会污染本次holdout",
         ],
     ]
+
+    exit_arm_rows = []
+    for _, row in exit_summary.iterrows():
+        exit_arm_rows.append(
+            [
+                row["arm_label"],
+                f"{int(row['target_count'])}/{int(row['stop_count'])}/{int(row['timeout_count'])}",
+                int(row["scaled_count"]),
+                f"{int(row['net_win_count'])}/{int(row['n'])}",
+                _bp(float(row["mean_net_bp"])),
+                _pf(float(row["profit_factor"])),
+                _pct(float(row["equal_notional_compounded"])),
+                _pct(float(row["equal_risk_1pct_compounded"])),
+                _bp(float(row["excluding_partial_september_mean_net_bp"])),
+                _pct(float(row["excluding_partial_september_equal_risk_1pct_compounded"])),
+                _bp(float(row["control_mean_net_bp"])),
+                _bp(float(row["candidate_minus_control_bp"])),
+            ]
+        )
+
+    exit_comparison_rows = []
+    for _, row in exit_comparisons.iterrows():
+        holm = (
+            f"{float(row['holm_p_fixed_targets']):.4f}"
+            if np.isfinite(row["holm_p_fixed_targets"])
+            else "不适用"
+        )
+        exit_comparison_rows.append(
+            [
+                row["arm_label"],
+                _bp(float(row["mean_delta_bp_vs_3r"])),
+                f"{int(row['better_count'])}/{int(row['worse_count'])}/{int(row['equal_count'])}",
+                _bp(float(row["pre_boundary_mean_delta_bp"])),
+                _bp(float(row["post_boundary_ex_sep_mean_delta_bp"])),
+                _bp(float(row["partial_september_mean_delta_bp"])),
+                (
+                    f"[{float(row['bootstrap_95_ci_low_bp']):+.2f}, "
+                    f"{float(row['bootstrap_95_ci_high_bp']):+.2f}]"
+                ),
+                f"{float(row['signflip_p_one_sided']):.4f}",
+                holm,
+            ]
+        )
+
+    continuation_rows = []
+    for _, row in exit_continuation.iterrows():
+        fixed5_delta_bp = (
+            float(row["fixed_5R_net_return"]) - float(row["fixed_3r_net_return"])
+        ) * 10_000.0
+        continuation_rows.append(
+            [
+                _cst(row["entry_time"]),
+                "多" if int(row["direction"]) > 0 else "空",
+                int(row["fixed_3r_hold_bars"]),
+                _exit_result(row, "fixed_4R"),
+                _exit_result(row, "fixed_5R"),
+                _exit_result(row, "fixed_6R"),
+                _bp(fixed5_delta_bp),
+            ]
+        )
+
+    exit_by_arm = exit_summary.set_index("arm")
+    exit_comparison_by_arm = exit_comparisons.set_index("arm")
+    exit_period_by_arm = exit_periods.set_index(["arm", "period"])
+    fixed5_delta = (
+        exit_continuation["fixed_5R_net_return"]
+        - exit_continuation["fixed_3r_net_return"]
+    ) * 10_000.0
+    fixed5_positive = fixed5_delta[fixed5_delta.gt(0.0)].sort_values(ascending=False)
+    fixed5_top5_share = float(fixed5_positive.head(5).sum() / fixed5_delta.sum())
 
     crosscheck_rows = []
     for item in summary["source_crosschecks"]:
@@ -478,6 +572,7 @@ def main() -> int:
     artifact_paths = [
         EXPERIMENT / "config.json",
         EXPERIMENT / "protocol_amendment_01.json",
+        EXPERIMENT / "protocol_amendment_02_exit_extension.json",
         RESULTS / "source_receipt.json",
         RESULTS / "source/okx_BTC_USDT_SWAP_1H.csv.gz",
         RESULTS / "trade_ledger.csv",
@@ -492,6 +587,14 @@ def main() -> int:
         RESULTS / "overview.png",
         RESULTS / "reason_diagnostics.png",
         RESULTS / "causal_flag_diagnostics.png",
+        RESULTS / "exit_target_trade_ledger.csv",
+        RESULTS / "exit_target_summary.csv",
+        RESULTS / "exit_target_comparisons.csv",
+        RESULTS / "exit_target_periods.csv",
+        RESULTS / "exit_target_continuation.csv",
+        RESULTS / "exit_target_diagnostics.json",
+        RESULTS / "exit_target_validation.json",
+        RESULTS / "exit_target_diagnostics.png",
         PINE,
     ]
     artifact_rows = [
@@ -527,6 +630,16 @@ PF **{no_september['profit_factor_net']:.3f}**。相对 141 笔精确匹配随�
 虽少亏 **{summary['candidate_minus_control_mean_bp']:+.2f}bp/笔**，但候选自身仍为
 {matched['mean_net_bp']:+.2f}bp/笔，而且配对 `p={summary['paired_signflip_p_one_sided']:.4f}`，不能称为形态优势。
         """.strip(),
+        f"""
+Owner 随后指出“很多盈利交易其实可以止盈更高”。第 2 次、只改退出的冻结复放确认了这个观察：
+16 笔原 3R 目标单中，**13/9/7 笔**在原止损不变、总持有期仍为 12 根时继续触达 4R/5R/6R。
+整仓 5R 把全样本均值从 **{exit_by_arm.loc['fixed_3R', 'mean_net_bp']:+.2f}** 提到
+**{exit_by_arm.loc['fixed_5R', 'mean_net_bp']:+.2f}bp/笔**；但排除部分 9 月后只剩
+**{exit_by_arm.loc['fixed_5R', 'excluding_partial_september_mean_net_bp']:+.2f}bp/笔**，等风险复利仍为
+**{_pct(exit_by_arm.loc['fixed_5R', 'excluding_partial_september_equal_risk_1pct_compounded'])}**，且固定目标
+多重校正后 `p={exit_comparison_by_arm.loc['fixed_5R', 'holm_p_fixed_targets']:.4f}`。因此它是一个真实的
+右尾线索，**还不是可以直接替换 3R 的已确认参数**，也不改变本报告对当前默认系统的 REJECT。
+        """.strip(),
         "![回测总览](../experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/overview.png)",
         """
 ## 当前系统实际在交易什么
@@ -558,6 +671,12 @@ holdout 使用，不是全项目所有模型的统一次数。读取前已在 gi
 首次运行在结果落盘前因 9 月精确控制池为空而 fail-closed。运行期补丁 `3ed2ef8` 没有放宽匹配，
 也没有改任何信号/成交/收益口径：保留主交易；少于 3 个精确控制的候选明确标成 unmatched，
 仅不参加配对检验。本次共有 2 笔 unmatched，正是 9 月两笔赢家。
+""".strip(),
+        """
+Owner 在看到逐笔盈利路径后明确要求检查更高止盈，本配置因此消耗 **第 2 次 holdout 使用**。读取前已
+提交 `a27950c` 冻结退出补充合同：信号、K1/K2、下一根开盘、K2 极值止损、12 根期限、20bp 成本和
+141 笔精确匹配控制全部不变，只平行重放固定 3R/4R/5R/6R、50% 在 3R + 50% 在 6R、以及
+50% 在 3R + runner 到第 12 根/原止损。它是配置特定的事后退出诊断；任何臂都不得凭本快照 promote。
 """.strip(),
         """
 ## 数据质量
@@ -605,6 +724,77 @@ holdout 使用，不是全项目所有模型的统一次数。读取前已在 gi
 **{equal_risk['sum_net_return_r']:+.2f}R**，复利 **{_pct(equal_risk['compounded_return'])}**，最大回撤
 **{_pct(equal_risk['max_drawdown'])}**。因此“等名义 +0.10%”不能外推成常见的等风险仓位系统盈利。
 """.strip(),
+        """
+## 更高止盈诊断：你看到的是右尾，但“所有单整仓5R”还不稳
+
+这次不是拿已经触达 3R 的赢家单独计算 MFE，而是从原始入场开始，把 **49 笔候选和 141 笔精确
+匹配控制**在相同的 12 根 OHLC 上全部重放。否则会漏掉最重要的代价：原来已经落袋的 3R 单，为等
+更高目标可能回吐、超时，甚至重新打到原止损。每根若同时触及目标与止损仍保守按止损先发生。
+""".strip(),
+        _table(
+            [
+                "退出臂",
+                "目标/止损/超时",
+                "3R减仓",
+                "净赢/49",
+                "净bp/笔",
+                "PF",
+                "等名义复利",
+                "等风险复利",
+                "排除9月bp",
+                "排除9月等风险",
+                "对照bp",
+                "候选-对照bp",
+            ],
+            exit_arm_rows,
+        ),
+        f"""
+**整仓 5R 是全样本表面最优：**均值 {exit_by_arm.loc['fixed_5R', 'mean_net_bp']:+.2f}bp/笔、
+PF {exit_by_arm.loc['fixed_5R', 'profit_factor']:.3f}，而 3R 为
+{exit_by_arm.loc['fixed_3R', 'mean_net_bp']:+.2f}bp/笔、PF
+{exit_by_arm.loc['fixed_3R', 'profit_factor']:.3f}。但“目标命中”从 16 笔降为 9 笔，净赢家从 19 降为
+18；在原 3R 赢家中有 12 笔变好、4 笔变差，其中 2026-04-05 的空单从 3R 盈利变成完整 -1R 止损。
+5R 相对 3R 的净增量中，最大的 5 笔贡献 **{fixed5_top5_share * 100:.1f}%**，仍由少数趋势段主导。
+""".strip(),
+        "![止盈目标与runner诊断](../experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/exit_target_diagnostics.png)",
+        _table(
+            [
+                "退出臂",
+                "相对3R Δbp",
+                "变好/变差/不变",
+                "5月4日前Δ",
+                "5月4日后且排除9月Δ",
+                "部分9月Δ",
+                "bootstrap 95% CI",
+                "原始p",
+                "固定目标Holm p",
+            ],
+            exit_comparison_rows,
+        ),
+        f"""
+固定 4R/5R/6R 的相对增量在 5 月 4 日前都是负数、之后才转正，说明最优整仓目标随行情阶段改变；
+3R+runner 是唯一一个在两个非部分时段都比 3R 好的臂（分别
+{exit_comparison_by_arm.loc['split_3R_runner', 'pre_boundary_mean_delta_bp']:+.2f} 与
+{exit_comparison_by_arm.loc['split_3R_runner', 'post_boundary_ex_sep_mean_delta_bp']:+.2f}bp/笔），且最大回撤
+从 {_pct(exit_by_arm.loc['fixed_3R', 'equal_risk_1pct_max_drawdown'])} 缩到
+{_pct(exit_by_arm.loc['split_3R_runner', 'equal_risk_1pct_max_drawdown'])}。但它在 5 月 4 日前的绝对均值仍是
+{exit_period_by_arm.loc[('split_3R_runner', 'pre_boundary'), 'mean_net_bp']:+.2f}bp/笔，排除部分 9 月后的
+全段均值仍是 {exit_by_arm.loc['split_3R_runner', 'excluding_partial_september_mean_net_bp']:+.2f}bp/笔；
+bootstrap 下界也为 {exit_comparison_by_arm.loc['split_3R_runner', 'bootstrap_95_ci_low_bp']:+.2f}bp。
+所以更合理的下一假设是“**3R 先兑现一部分，再让剩余仓位吃右尾**”，不是现在就把所有单整仓目标
+改成 5R。
+""".strip(),
+        """
+### 原 16 笔 3R 目标单后来走到哪里
+
+`HIT` 表示在原 12 根期限、原 K2 止损下触达该目标；`SL` 表示等待期间回到原止损；`T xR` 表示
+没有触发新目标或止损，按第 12 根收盘时的毛 R。最后一列是把整仓目标改成 5R 后，该笔净收益
+相对原 3R 的变化。
+""".strip(),
+        _table(
+            ["入场(CST)", "向", "3R持有h", "4R", "5R", "6R", "5R相对3R Δbp"],
+            continuation_rows,
+        ),
         """
 ## 成功与失败的路径原因
 
@@ -761,6 +951,12 @@ K1/K2 索引、next-open、六根 cooldown、精确 K2 止损、3R、风险区�
 `3afa39c8a3bc2d85f329f3fd553b112ef0ca68e5fdc1ff143956b6b5ced09984`。
 """.strip(),
         """
+退出补充诊断另行独立验证 **PASS（23/23）**：补充合同为 use 2、三个输入哈希、六个预声明退出臂、
+候选/控制键唯一、六臂间入场与止损恒等、固定 3R 候选及控制逐笔 parity、20bp 费用只扣一次、固定与
+分批 payoff 算术、汇总/配对增量、16 笔 continuation、时段表和图表均重算一致。共核对 1,140 条
+交易×退出臂记录；分析失败不会发布半套 CSV/图表，而是在全部计算与渲染成功后原子替换产物。
+""".strip(),
+        """
 ## 风险与诚实声明
 
 - 只有 BTC 一个品种、49 笔、一次半年窗；置信区间宽，不能泛化到别的周期或币种。
@@ -771,6 +967,8 @@ K1/K2 索引、next-open、六根 cooldown、精确 K2 止损、3R、风险区�
 - 等风险 1% 是结果后追加的仓位敏感性，不是另一个经预注册验证的策略臂。
 - 19 个形态标签在读取前冻结，但与收益的关联仍是探索性；所有多重校正均未通过，禁止据此在同一快照调参。
 - `K1强度/颜色 + K2影线踩线 + 路径完整` 是读取结果后归纳的组合，尽管读取边界前后同号，仍是事后假设，未经新未见数据确认。
+- 更高止盈六臂虽在读取前冻结，但问题本身来自看过逐笔路径后的 Owner 观察，属于第 2 次、配置特定的事后 holdout 诊断；它不能提供新的确认级参数。
+- 5R 的全样本改善集中在少数趋势单，且固定目标在 5 月 4 日前后增量异号；部分 9 月只有两笔，不能据此选择 5R/6R。
 - 本轮没有训练、promote、部署、ACTIVE/frozen/forward 修改、消息发送或真金下单。
 """.strip(),
         """
@@ -790,7 +988,7 @@ K1振幅、成交量、gap 3–6、K2影线0.60、路径和状态一次性打包
 2. **信号语义 B：加入中间路径完整性。** K1 到 K2 之间不得收错 SMA40 侧，并要求 MA-side 颜色连续；先单独验证，不与 A 打包。
 3. **信号语义 C：把 K2 改成真正的“影线踩线”。** `touchDepth >= 0`，且均线不得穿过 K2 实体。重点是几何拓扑，不是把 wick share 从 0.25 猜到某个更大的数。
 4. **经济门：增加 `fee_to_risk = 0.002 / risk_pct`。** 先在开发窗确定可承受上限，再冻结；不能继续只用 ATR 风险门代替交易成本门。
-5. **退出逻辑：保持 3R，单独测试一次盈利保护。** 触及预注册的正 MFE 后，把止损抬到覆盖费用的位置；不要同时改目标、止损和持有期。
+5. **退出逻辑：把“3R 部分兑现 + runner”带回开发窗。** 先只固定减仓比例，再单独比较 runner 的原止损/保本/跟踪方式；不要同时搜索比例、移动止损和最长持有期。整仓 5R 只作为对照臂，不直接替换默认 3R。
 6. 上述单项在开发数据完成后，再由 Owner 决定是否批准一个组合配置，并只在新的未见时间窗做一次确认。
 
 不建议优先做的事：把 gap 直接缩到 3–6、强制 K1 放量、强制当前 10/10 结构、把 K2 wick 粗暴提高
@@ -831,6 +1029,11 @@ cd /Users/zhangzc/fable-trading
 PYTHONPATH=. python3 scripts/backtest_two_key_candle_pine_v8_btc_1h.py
 PYTHONPATH=. python3 scripts/validate_two_key_candle_pine_v8_btc_1h.py
 PYTHONPATH=. python3 -m pytest -q tests/test_backtest_two_key_candle_pine_v8_btc_1h.py tests/contracts/test_registries.py
+
+# 第2次配置特定 holdout 使用：只重放预声明退出臂，不改信号/入场/止损
+PYTHONPATH=. .venv/bin/python scripts/analyze_btcusdtp_1h_exit_extension.py
+PYTHONPATH=. .venv/bin/python scripts/validate_btcusdtp_1h_exit_extension.py
+.venv/bin/python -m pytest -q tests/test_analyze_btcusdtp_1h_exit_extension.py
 
 python3 scripts/build_btcusdtp_1h_pine_v8_report.py
 python3 scripts/md_to_html.py \\

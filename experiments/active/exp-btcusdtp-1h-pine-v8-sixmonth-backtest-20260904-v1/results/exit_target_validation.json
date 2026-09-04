@@ -1,0 +1,47 @@
+{
+  "status": "pass",
+  "checks": {
+    "protocol_is_holdout_use_2_and_exit_only": true,
+    "declared_input_hashes_exact": true,
+    "strict_json_and_nonpromotable": true,
+    "all_predeclared_arms_present": true,
+    "candidate_and_control_row_counts": true,
+    "candidate_keys_unique": true,
+    "control_keys_unique": true,
+    "candidate_identity_unchanged_across_arms": true,
+    "control_identity_unchanged_across_arms": true,
+    "fixed_3r_candidate_net_parity": true,
+    "fixed_3r_candidate_outcome_parity": true,
+    "fixed_3r_control_net_parity": true,
+    "cost_applied_once": true,
+    "net_r_recomputed": true,
+    "fixed_target_and_stop_payoffs_exact": true,
+    "split_3r_6r_payoffs_exact": true,
+    "runner_stop_payoffs_exact": true,
+    "summary_counts_and_means_recompute": true,
+    "paired_deltas_recompute": true,
+    "continuation_population_is_original_3r_targets": true,
+    "period_table_complete": true,
+    "target_hits_monotone": true,
+    "chart_exists": true
+  },
+  "failed": [],
+  "counts": {
+    "checks": 23,
+    "candidate_entries": 49,
+    "matched_control_entries": 141,
+    "arms": 6,
+    "trade_arm_rows": 1140,
+    "continuation_rows": 16
+  },
+  "artifact_hashes": {
+    "exit_target_trade_ledger.csv": "7ca02ba3e958c8b6a123216066187a9d4d85fe9ece9bbc8d92572178375981b9",
+    "exit_target_summary.csv": "8239c7b887741a494449861ae15fb0c781485b75d000c2078b7b4246640d2eed",
+    "exit_target_comparisons.csv": "e3f11bfd54f6fcd238ed60fa5d27e0e9410f0fe076418d16d6d714cbd76da797",
+    "exit_target_periods.csv": "5f84a1f7ec8a3a7ee5c1454e73b067b29344dd43a27575b750c0873af110852a",
+    "exit_target_continuation.csv": "e88124da93fa9b4b10e7abdba7684f06356b343c78ca14dd694e8adbd6862a82",
+    "exit_target_diagnostics.json": "658337490d600f3b615bb472891961055b756a8ba81ec186470bd1b9bedcbe90",
+    "exit_target_diagnostics.png": "721a29e033bace784584617cf1a79b9a157dc20ae5afed3e6590a227b5196929"
+  },
+  "assessment": "exploratory_exit_hypothesis_only"
+}

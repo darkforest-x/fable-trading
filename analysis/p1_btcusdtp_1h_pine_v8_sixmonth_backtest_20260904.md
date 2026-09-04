@@ -20,6 +20,15 @@ PF **0.821**。相对 141 笔精确匹配随机入场，前 47 笔候选
 虽少亏 **+8.57bp/笔**，但候选自身仍为
 -6.51bp/笔，而且配对 `p=0.2829`，不能称为形态优势。
 
+Owner 随后指出“很多盈利交易其实可以止盈更高”。第 2 次、只改退出的冻结复放确认了这个观察：
+16 笔原 3R 目标单中，**13/9/7 笔**在原止损不变、总持有期仍为 12 根时继续触达 4R/5R/6R。
+整仓 5R 把全样本均值从 **+0.60** 提到
+**+12.16bp/笔**；但排除部分 9 月后只剩
+**+1.23bp/笔**，等风险复利仍为
+**-8.31%**，且固定目标
+多重校正后 `p=0.0807`。因此它是一个真实的
+右尾线索，**还不是可以直接替换 3R 的已确认参数**，也不改变本报告对当前默认系统的 REJECT。
+
 ![回测总览](../experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/overview.png)
 
 ## 当前系统实际在交易什么
@@ -62,6 +71,11 @@ holdout 使用，不是全项目所有模型的统一次数。读取前已在 gi
 首次运行在结果落盘前因 9 月精确控制池为空而 fail-closed。运行期补丁 `3ed2ef8` 没有放宽匹配，
 也没有改任何信号/成交/收益口径：保留主交易；少于 3 个精确控制的候选明确标成 unmatched，
 仅不参加配对检验。本次共有 2 笔 unmatched，正是 9 月两笔赢家。
+
+Owner 在看到逐笔盈利路径后明确要求检查更高止盈，本配置因此消耗 **第 2 次 holdout 使用**。读取前已
+提交 `a27950c` 冻结退出补充合同：信号、K1/K2、下一根开盘、K2 极值止损、12 根期限、20bp 成本和
+141 笔精确匹配控制全部不变，只平行重放固定 3R/4R/5R/6R、50% 在 3R + 50% 在 6R、以及
+50% 在 3R + runner 到第 12 根/原止损。它是配置特定的事后退出诊断；任何臂都不得凭本快照 promote。
 
 ## 数据质量
 
@@ -108,6 +122,75 @@ holdout 使用，不是全项目所有模型的统一次数。读取前已在 gi
 如果按止损距离把每笔仓位调到固定账户风险 1%（事后仓位敏感性，不是预注册主结果），49 笔合计
 **-13.35R**，复利 **-13.31%**，最大回撤
 **-21.79%**。因此“等名义 +0.10%”不能外推成常见的等风险仓位系统盈利。
+
+## 更高止盈诊断：你看到的是右尾，但“所有单整仓5R”还不稳
+
+这次不是拿已经触达 3R 的赢家单独计算 MFE，而是从原始入场开始，把 **49 笔候选和 141 笔精确
+匹配控制**在相同的 12 根 OHLC 上全部重放。否则会漏掉最重要的代价：原来已经落袋的 3R 单，为等
+更高目标可能回吐、超时，甚至重新打到原止损。每根若同时触及目标与止损仍保守按止损先发生。
+
+| 退出臂 | 目标/止损/超时 | 3R减仓 | 净赢/49 | 净bp/笔 | PF | 等名义复利 | 等风险复利 | 排除9月bp | 排除9月等风险 | 对照bp | 候选-对照bp |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Fixed 3R | 16/30/3 | 0 | 19/49 | +0.60 | 1.017 | 0.10% | -13.31% | -6.51 | -17.62% | -15.08 | +8.57 |
+| Fixed 4R | 13/31/5 | 0 | 18/49 | +8.08 | 1.227 | 3.76% | -6.36% | -1.38 | -12.72% | -15.45 | +14.07 |
+| Fixed 5R | 9/31/9 | 0 | 18/49 | +12.16 | 1.342 | 5.80% | -0.20% | +1.23 | -8.31% | -16.49 | +17.72 |
+| Fixed 6R | 7/31/11 | 0 | 18/49 | +10.78 | 1.303 | 5.14% | 2.71% | -0.89 | -6.52% | -18.30 | +17.41 |
+| 50% 3R + 50% 6R | 7/31/11 | 16 | 18/49 | +5.69 | 1.163 | 2.60% | -5.54% | -3.70 | -12.17% | -16.69 | +12.99 |
+| 50% 3R + runner | 0/31/18 | 16 | 18/49 | +8.08 | 1.231 | 3.78% | -1.36% | -0.29 | -7.08% | -16.13 | +15.83 |
+
+**整仓 5R 是全样本表面最优：**均值 +12.16bp/笔、
+PF 1.342，而 3R 为
++0.60bp/笔、PF
+1.017。但“目标命中”从 16 笔降为 9 笔，净赢家从 19 降为
+18；在原 3R 赢家中有 12 笔变好、4 笔变差，其中 2026-04-05 的空单从 3R 盈利变成完整 -1R 止损。
+5R 相对 3R 的净增量中，最大的 5 笔贡献 **89.5%**，仍由少数趋势段主导。
+
+![止盈目标与runner诊断](../experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/exit_target_diagnostics.png)
+
+| 退出臂 | 相对3R Δbp | 变好/变差/不变 | 5月4日前Δ | 5月4日后且排除9月Δ | 部分9月Δ | bootstrap 95% CI | 原始p | 固定目标Holm p |
+|---|---|---|---|---|---|---|---|---|
+| Fixed 4R | +7.48 | 13/3/33 | -7.38 | +11.00 | +62.57 | [-0.22, +15.38] | 0.0328 | 0.0807 |
+| Fixed 5R | +11.56 | 12/4/33 | -4.60 | +13.52 | +101.25 | [+0.72, +23.68] | 0.0269 | 0.0807 |
+| Fixed 6R | +10.18 | 11/5/33 | -1.83 | +9.10 | +117.41 | [+0.00, +21.48] | 0.0358 | 0.0807 |
+| 50% 3R + 50% 6R | +5.09 | 11/5/33 | -0.91 | +4.55 | +58.71 | [+0.00, +10.68] | 0.0350 | 不适用 |
+| 50% 3R + runner | +7.48 | 10/6/33 | +7.50 | +5.62 | +37.03 | [-0.06, +16.69] | 0.0469 | 不适用 |
+
+固定 4R/5R/6R 的相对增量在 5 月 4 日前都是负数、之后才转正，说明最优整仓目标随行情阶段改变；
+3R+runner 是唯一一个在两个非部分时段都比 3R 好的臂（分别
++7.50 与
++5.62bp/笔），且最大回撤
+从 -21.79% 缩到
+-20.17%。但它在 5 月 4 日前的绝对均值仍是
+-6.36bp/笔，排除部分 9 月后的
+全段均值仍是 -0.29bp/笔；
+bootstrap 下界也为 -0.06bp。
+所以更合理的下一假设是“**3R 先兑现一部分，再让剩余仓位吃右尾**”，不是现在就把所有单整仓目标
+改成 5R。
+
+### 原 16 笔 3R 目标单后来走到哪里
+
+`HIT` 表示在原 12 根期限、原 K2 止损下触达该目标；`SL` 表示等待期间回到原止损；`T xR` 表示
+没有触发新目标或止损，按第 12 根收盘时的毛 R。最后一列是把整仓目标改成 5R 后，该笔净收益
+相对原 3R 的变化。
+
+| 入场(CST) | 向 | 3R持有h | 4R | 5R | 6R | 5R相对3R Δbp |
+|---|---|---|---|---|---|---|
+| 2026-03-09 16:00 | 多 | 12 | T 2.15R | T 2.15R | T 2.15R | -84.17 |
+| 2026-03-13 07:00 | 多 | 1 | HIT | HIT | HIT | +45.28 |
+| 2026-03-22 03:00 | 空 | 5 | HIT | HIT | HIT | +38.00 |
+| 2026-04-05 19:00 | 空 | 2 | SL | SL | SL | -65.31 |
+| 2026-04-19 00:00 | 空 | 3 | T 2.90R | T 2.90R | T 2.90R | -2.86 |
+| 2026-06-01 12:00 | 空 | 3 | HIT | HIT | HIT | +71.57 |
+| 2026-06-22 17:00 | 多 | 3 | HIT | HIT | HIT | +39.54 |
+| 2026-06-25 21:00 | 空 | 1 | HIT | HIT | T 2.88R | +179.75 |
+| 2026-07-09 21:00 | 多 | 1 | HIT | HIT | T 3.18R | +50.08 |
+| 2026-07-13 09:00 | 空 | 3 | HIT | T 3.94R | T 3.94R | +53.16 |
+| 2026-07-23 09:00 | 空 | 12 | HIT | T 3.50R | T 3.50R | +19.46 |
+| 2026-07-30 14:00 | 多 | 4 | HIT | HIT | HIT | +41.71 |
+| 2026-08-14 07:00 | 空 | 8 | HIT | HIT | HIT | +37.26 |
+| 2026-08-27 10:00 | 多 | 7 | HIT | T 1.71R | T 1.71R | -59.74 |
+| 2026-09-01 23:00 | 空 | 2 | HIT | HIT | HIT | +64.63 |
+| 2026-09-03 14:00 | 多 | 9 | HIT | T 4.49R | T 4.49R | +137.88 |
 
 ## 成功与失败的路径原因
 
@@ -340,6 +423,11 @@ K1/K2 索引、next-open、六根 cooldown、精确 K2 止损、3R、风险区�
 合同。当前 Pine 源 SHA256 为
 `3afa39c8a3bc2d85f329f3fd553b112ef0ca68e5fdc1ff143956b6b5ced09984`。
 
+退出补充诊断另行独立验证 **PASS（23/23）**：补充合同为 use 2、三个输入哈希、六个预声明退出臂、
+候选/控制键唯一、六臂间入场与止损恒等、固定 3R 候选及控制逐笔 parity、20bp 费用只扣一次、固定与
+分批 payoff 算术、汇总/配对增量、16 笔 continuation、时段表和图表均重算一致。共核对 1,140 条
+交易×退出臂记录；分析失败不会发布半套 CSV/图表，而是在全部计算与渲染成功后原子替换产物。
+
 ## 风险与诚实声明
 
 - 只有 BTC 一个品种、49 笔、一次半年窗；置信区间宽，不能泛化到别的周期或币种。
@@ -350,6 +438,8 @@ K1/K2 索引、next-open、六根 cooldown、精确 K2 止损、3R、风险区�
 - 等风险 1% 是结果后追加的仓位敏感性，不是另一个经预注册验证的策略臂。
 - 19 个形态标签在读取前冻结，但与收益的关联仍是探索性；所有多重校正均未通过，禁止据此在同一快照调参。
 - `K1强度/颜色 + K2影线踩线 + 路径完整` 是读取结果后归纳的组合，尽管读取边界前后同号，仍是事后假设，未经新未见数据确认。
+- 更高止盈六臂虽在读取前冻结，但问题本身来自看过逐笔路径后的 Owner 观察，属于第 2 次、配置特定的事后 holdout 诊断；它不能提供新的确认级参数。
+- 5R 的全样本改善集中在少数趋势单，且固定目标在 5 月 4 日前后增量异号；部分 9 月只有两笔，不能据此选择 5R/6R。
 - 本轮没有训练、promote、部署、ACTIVE/frozen/forward 修改、消息发送或真金下单。
 
 ## 应该调参数，还是改逻辑
@@ -369,7 +459,7 @@ K1振幅、成交量、gap 3–6、K2影线0.60、路径和状态一次性打包
 | gap | 2–8 | 暂时保留；不要整体收成3–6 | gap2表现最好、gap7不差；gap8仅3笔全败，样本不足以单独砍掉 |
 | 振荡器/10-10结构 | 只计分，不筛 | 不要启用整套 state 门 | 振荡器对齐仅8笔；当前结构对齐组反而更差，整包开启没有证据 |
 | 风险门 | 0.15–2.50 ATR | 新增 fee-to-risk 逻辑，而非只改 ATR 下限 | 费用中位0.66R；ATR是波动相对量，真实费用负担由止损价格百分比决定 |
-| 3R目标 | 固定3R | 先验证盈利保护，不建议直接降到2R | 8笔回吐单MFE≥1.5R但全部<2R；2R并不能救它们，却会削减原有TP |
+| 3R目标 | 固定3R | 不直接整仓改5R；在开发窗预注册3R部分止盈+runner | 退出复放中13/9/7笔原3R赢家继续到4R/5R/6R；但5R有4笔变差且时段不稳定 |
 | 12根超时 | 第12根收盘 | 低优先级，先不改 | 仅3笔超时且全部扣费后为正；失败主要在前2–6根已发生 |
 | 总 score | 展示，无阈值 | 不要现在选分数线 | 赢家/输家中位62.36/55.18，但排序证据弱；事后选线会污染本次holdout |
 
@@ -381,7 +471,7 @@ K1振幅、成交量、gap 3–6、K2影线0.60、路径和状态一次性打包
 2. **信号语义 B：加入中间路径完整性。** K1 到 K2 之间不得收错 SMA40 侧，并要求 MA-side 颜色连续；先单独验证，不与 A 打包。
 3. **信号语义 C：把 K2 改成真正的“影线踩线”。** `touchDepth >= 0`，且均线不得穿过 K2 实体。重点是几何拓扑，不是把 wick share 从 0.25 猜到某个更大的数。
 4. **经济门：增加 `fee_to_risk = 0.002 / risk_pct`。** 先在开发窗确定可承受上限，再冻结；不能继续只用 ATR 风险门代替交易成本门。
-5. **退出逻辑：保持 3R，单独测试一次盈利保护。** 触及预注册的正 MFE 后，把止损抬到覆盖费用的位置；不要同时改目标、止损和持有期。
+5. **退出逻辑：把“3R 部分兑现 + runner”带回开发窗。** 先只固定减仓比例，再单独比较 runner 的原止损/保本/跟踪方式；不要同时搜索比例、移动止损和最长持有期。整仓 5R 只作为对照臂，不直接替换默认 3R。
 6. 上述单项在开发数据完成后，再由 Owner 决定是否批准一个组合配置，并只在新的未见时间窗做一次确认。
 
 不建议优先做的事：把 gap 直接缩到 3–6、强制 K1 放量、强制当前 10/10 结构、把 K2 wick 粗暴提高
@@ -450,6 +540,7 @@ K1振幅、成交量、gap 3–6、K2影线0.60、路径和状态一次性打包
 |---|---|---|
 | experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/config.json | 6926 | 90ee08de9b9d5b7c795f6d68438c248a4541ed0d6f8b83fc1d96b55009e58f49 |
 | experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/protocol_amendment_01.json | 979 | ae0f015080615c57cf28034e3e2db23a24e76d3f182b4657b01c2c7d91a66894 |
+| experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/protocol_amendment_02_exit_extension.json | 3989 | 4f8933ce25353c177ac928fb572371b2c20175ed281390b0e09817e99dedcef4 |
 | experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/source_receipt.json | 969 | 6fe3a17020ef9198a763f8db57b13d4752ca3ccbf99a3122be759091884b69c0 |
 | experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/source/okx_BTC_USDT_SWAP_1H.csv.gz | 239188 | 01984275dc57b263fdeb209ee996e599a6759da8f6ade649442e1ac132ef2c04 |
 | experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/trade_ledger.csv | 88311 | 17231b982cec42852a583ba632b4a387b7cbd1d35d31a52d30079eedaa0f2e5f |
@@ -464,6 +555,14 @@ K1振幅、成交量、gap 3–6、K2影线0.60、路径和状态一次性打包
 | experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/overview.png | 222891 | 407d5f782da9c2d07cb3f337302277ff0d9a12e041e12afd5501e8e3e882435e |
 | experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/reason_diagnostics.png | 179822 | 9439892de8b6cdc640bdc79144cd192964b9b884bd3658eb2303d72672bfbccb |
 | experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/causal_flag_diagnostics.png | 139768 | c2c037d20642e7a8794eeb60b3b99ec948d221650a09eb2e89f8d0fba8762920 |
+| experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/exit_target_trade_ledger.csv | 333515 | 7ca02ba3e958c8b6a123216066187a9d4d85fe9ece9bbc8d92572178375981b9 |
+| experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/exit_target_summary.csv | 2341 | 8239c7b887741a494449861ae15fb0c781485b75d000c2078b7b4246640d2eed |
+| experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/exit_target_comparisons.csv | 1362 | e3f11bfd54f6fcd238ed60fa5d27e0e9410f0fe076418d16d6d714cbd76da797 |
+| experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/exit_target_periods.csv | 1646 | 5f84a1f7ec8a3a7ee5c1454e73b067b29344dd43a27575b750c0873af110852a |
+| experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/exit_target_continuation.csv | 6004 | e88124da93fa9b4b10e7abdba7684f06356b343c78ca14dd694e8adbd6862a82 |
+| experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/exit_target_diagnostics.json | 16251 | 658337490d600f3b615bb472891961055b756a8ba81ec186470bd1b9bedcbe90 |
+| experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/exit_target_validation.json | 1983 | d22b7860d547e031bc59804fe792a8768e4a26051bfb1c0a24f666934d3f7a96 |
+| experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/exit_target_diagnostics.png | 145249 | 721a29e033bace784584617cf1a79b9a157dc20ae5afed3e6590a227b5196929 |
 | experiments/active/exp-two-key-candle-feature-atlas-v3/pine/fable_two_key_candle_sma40_retest_v1.pine | 39592 | 3afa39c8a3bc2d85f329f3fd553b112ef0ca68e5fdc1ff143956b6b5ced09984 |
 
 运行环境：Python 3.9.6，numpy 2.0.2，pandas 2.3.3，scipy 1.13.1。
@@ -477,6 +576,11 @@ cd /Users/zhangzc/fable-trading
 PYTHONPATH=. python3 scripts/backtest_two_key_candle_pine_v8_btc_1h.py
 PYTHONPATH=. python3 scripts/validate_two_key_candle_pine_v8_btc_1h.py
 PYTHONPATH=. python3 -m pytest -q tests/test_backtest_two_key_candle_pine_v8_btc_1h.py tests/contracts/test_registries.py
+
+# 第2次配置特定 holdout 使用：只重放预声明退出臂，不改信号/入场/止损
+PYTHONPATH=. .venv/bin/python scripts/analyze_btcusdtp_1h_exit_extension.py
+PYTHONPATH=. .venv/bin/python scripts/validate_btcusdtp_1h_exit_extension.py
+.venv/bin/python -m pytest -q tests/test_analyze_btcusdtp_1h_exit_extension.py
 
 python3 scripts/build_btcusdtp_1h_pine_v8_report.py
 python3 scripts/md_to_html.py \
