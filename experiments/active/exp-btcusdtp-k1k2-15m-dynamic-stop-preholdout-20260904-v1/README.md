@@ -15,3 +15,20 @@ owner has not authorized this new configuration to consume it.
 
 This is research only. It cannot alter TradingView, ACTIVE, frozen, forward,
 deployment, API keys or live orders.
+
+## Final result
+
+Rejected on development. Every policy and every chronological half-year had
+negative mean net return. The best observed arm was `wick_r_ladder` at
+-15.42bp per trade versus -16.09bp for the exact-parity baseline, a paired
+improvement of only +0.66bp with familywise p=0.829. It rescued wick givebacks
+but sacrificed almost the same contribution from original 3R winners.
+
+The primary failure occurs before a profit stop can activate: 30/100 trades
+stopped before +0.5R MFE and another 20/100 stopped before +1.5R. A post-entry
+failure classifier using 20 causal features also failed expanding-window
+validation (logistic AUC 0.412; depth-2 tree AUC 0.396). The audit and repository
+holdout remained closed, and no TradingView or production state was changed.
+
+Canonical report:
+`analysis/p1_btcusdtp_k1k2_15m_dynamic_stop_preholdout_20260904.md`.

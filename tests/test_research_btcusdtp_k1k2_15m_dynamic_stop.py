@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -7,6 +10,11 @@ import pytest
 from scripts.research_btcusdtp_k1k2_15m_dynamic_stop import (
     paired_familywise_signflip,
     resolve_stop_policy,
+)
+
+RESULTS_DIR = Path(
+    "experiments/active/"
+    "exp-btcusdtp-k1k2-15m-dynamic-stop-preholdout-20260904-v1/results"
 )
 
 
@@ -182,3 +190,70 @@ def test_familywise_test_keeps_identical_entry_keys() -> None:
     assert result.loc["better", "paired_mean_improvement_bp"] == pytest.approx(20.0)
     assert result.loc["worse", "paired_mean_improvement_bp"] == pytest.approx(-10.0)
     assert np.isfinite(result["familywise_signflip_p_one_sided"]).all()
+
+
+def test_generated_receipt_preserves_parity_and_keeps_closed_periods_unread() -> None:
+    receipt = json.loads((RESULTS_DIR / "development_receipt.json").read_text())
+
+    assert receipt["holdout_rows_read"] == 0
+    assert receipt["audit_rows_read"] == 0
+    assert receipt["audit_open_allowed"] is False
+    assert receipt["development_gate_passed"] is False
+    assert receipt["selected_policy"] == "baseline_close_fee_cover_1p5r"
+    assert receipt["tradingview_replacement_allowed"] is False
+    assert receipt["predecessor_baseline_parity"] == {
+        "entries": 100,
+        "exit_price_max_abs_error": pytest.approx(1.4551915228366852e-11),
+        "net_return_max_abs_error": pytest.approx(9.93129189996722e-17),
+        "outcome_mismatches": 0,
+        "setup_keys_exact": True,
+    }
+
+
+def test_generated_policy_metrics_reconcile_and_every_fold_is_negative() -> None:
+    metrics = pd.read_csv(RESULTS_DIR / "development_policy_metrics.csv")
+    folds = pd.read_csv(RESULTS_DIR / "development_policy_folds.csv")
+
+    assert len(metrics) == 6
+    assert len(folds) == 24
+    assert (folds["mean_net_bp"] < 0).all()
+    exit_columns = [
+        "exit_target",
+        "exit_original_stop",
+        "exit_fee_cover_stop",
+        "exit_dynamic_profit_stop",
+        "exit_catastrophe_stop",
+        "exit_structure_next_open",
+        "exit_sma40_next_open",
+        "exit_timeout",
+    ]
+    assert metrics[exit_columns].sum(axis=1).tolist() == metrics["events"].tolist()
+    assert not metrics["all_halfyears_gross_positive"].any()
+
+
+def test_generated_failure_contributions_reconcile_paired_policy_deltas() -> None:
+    contributions = pd.read_csv(RESULTS_DIR / "development_failure_contributions.csv")
+    paired = pd.read_csv(RESULTS_DIR / "development_policy_familywise_tests.csv").set_index(
+        "stop_policy"
+    )
+
+    observed = contributions.groupby("stop_policy")[
+        "policy_improvement_contribution_to_all_mean_bp"
+    ].sum()
+    for policy, row in paired.iterrows():
+        assert observed.loc[policy] == pytest.approx(row["paired_mean_improvement_bp"])
+
+
+def test_generated_classifier_is_strictly_expanding_time_forward() -> None:
+    predictions = pd.read_csv(
+        RESULTS_DIR / "development_early_failure_predictions.csv.gz",
+        parse_dates=["entry_time"],
+    )
+
+    expected_training_events = {"2023H2": 22, "2024H1": 43, "2024H2": 70}
+    assert set(predictions["test_fold"]) == set(expected_training_events)
+    for fold, training_events in expected_training_events.items():
+        assert set(predictions.loc[predictions["test_fold"] == fold, "training_events"]) == {
+            training_events
+        }
+    assert predictions.groupby(["model", "setup_id"]).size().max() == 1
