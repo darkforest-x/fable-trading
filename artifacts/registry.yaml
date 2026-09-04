@@ -702,35 +702,42 @@ artifacts:
     artifact_type: report
     role: canonical_chinese_backtest_report
     source_repo: darkforest-x/fable-trading
-    source_commit: "8db4351ba9b1ffa6020cd1ad41079b303e6fa3b1"
+    source_commit: "c03d9895b0bdff4314309626bb4c0de3a19d9ecf"
     source_path: analysis/p1_btcusdtp_1h_pine_v8_sixmonth_backtest_20260904.md
-    sha256: "15a141639528478043002dc0ae2e9bc9880523d4d3c8b0f29435ae342829bd43"
-    size_bytes: 37757
+    sha256: "9d8002071bf75d46b80bc0788bcdfe77838269ed86894aad46fd501fddb19dda"
+    size_bytes: 47115
     storage_uri: "repo://analysis/p1_btcusdtp_1h_pine_v8_sixmonth_backtest_20260904.md"
     holdout_status: holdout_consumed
     training_eligible: false
     production_eligible: false
-    generator_commit: "8db4351ba9b1ffa6020cd1ad41079b303e6fa3b1"
+    generator_commit: "c03d9895b0bdff4314309626bb4c0de3a19d9ecf"
     config_hash: "90ee08de9b9d5b7c795f6d68438c248a4541ed0d6f8b83fc1d96b55009e58f49"
     data_cutoff: "2026-09-04T03:00:00Z"
-    notes: Canonical report includes matched random controls, costs, all 49 trade explanations, diagnostics, risks and reproduction commands.
+    notes: >-
+      Canonical report includes exact current rules, three realized loss
+      mechanisms, post-hoc semantic-integrity diagnostics, adjustment
+      priorities, matched random controls, costs, all 49 trade explanations,
+      risks and reproduction commands.
 
   - artifact_id: btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1-html
     artifact_type: report
     role: owner_facing_self_contained_html_with_all_trades
     source_repo: darkforest-x/fable-trading
-    source_commit: "8db4351ba9b1ffa6020cd1ad41079b303e6fa3b1"
+    source_commit: "c03d9895b0bdff4314309626bb4c0de3a19d9ecf"
     source_path: analysis/html/p1_btcusdtp_1h_pine_v8_sixmonth_backtest_20260904.html
-    sha256: "840cb0781d448ac05801d3797bfb004ee5ec0d2eaaedbc3a06105953a7e24146"
-    size_bytes: 4090059
+    sha256: "567a3e9b7778fefde3b92ad2011d14435a51ab53f6490b6a01a078e25095fa33"
+    size_bytes: 4101402
     storage_uri: "repo://analysis/html/p1_btcusdtp_1h_pine_v8_sixmonth_backtest_20260904.html"
     holdout_status: holdout_consumed
     training_eligible: false
     production_eligible: false
-    generator_commit: "8db4351ba9b1ffa6020cd1ad41079b303e6fa3b1"
+    generator_commit: "c03d9895b0bdff4314309626bb4c0de3a19d9ecf"
     config_hash: "90ee08de9b9d5b7c795f6d68438c248a4541ed0d6f8b83fc1d96b55009e58f49"
     data_cutoff: "2026-09-04T03:00:00Z"
-    notes: Self-contained mobile-readable HTML with 16 embedded figures, 11 tables and all 49 success/failure rows.
+    notes: >-
+      Self-contained mobile-readable HTML with 16 embedded figures, 16 tables,
+      the exact current rule contract, adjustment matrix and all 49
+      success/failure rows.
 
   # ---- ETH 15m causal dense-start / literal-release negative results -------
   - artifact_id: pine-eth-15m-dense-report
