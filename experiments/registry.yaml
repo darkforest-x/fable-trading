@@ -4178,3 +4178,29 @@ experiments:
       confirms that risk-scaled 3R targets, not just newly admitted trades,
       make wider stops worse. No Pine, ACTIVE/frozen/forward, deployment,
       messaging or live order changed.
+
+  - experiment_id: exp-btcusdtp-k1k2-sweep-reclaim-entry-preholdout-20260904-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c7cb51d"
+    status: active
+    question: >-
+      Can a causal post-K2 sweep-and-reclaim entry filter remove early false
+      entries while preserving the original K2 structural stop?
+    single_variable: >-
+      Entry rule only: immediate next open versus the first post-K2 candle
+      within 15/30/60/120 clock minutes that strictly sweeps the original K2
+      extreme and closes back beyond that extreme and its contemporaneous MA;
+      entry is the following open. Stop, 3R, horizon, protection, signal and
+      20bp cost remain frozen.
+    result: preregistered_before_outcomes
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_btcusdtp_k1k2_sweep_reclaim_entry_preholdout_20260904.md
+    reuse_allowed: false
+    notes: >-
+      Development is 2023-2024 in four chronological half-year folds. Each
+      arm receives a descriptive exact-stratum matched random control that is
+      excluded from selection. Audit opens only after the full development
+      success gate; no Pine, ACTIVE/frozen/forward, deployment, messaging or
+      live order is in scope.
