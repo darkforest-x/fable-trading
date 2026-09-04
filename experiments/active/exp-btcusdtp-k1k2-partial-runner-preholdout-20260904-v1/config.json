@@ -1,0 +1,133 @@
+{
+  "experiment_id": "exp-btcusdtp-k1k2-partial-runner-preholdout-20260904-v1",
+  "status": "preregistered_before_outcomes",
+  "predecessor": "exp-btcusdtp-k1k2-fixed-target-preholdout-20260904-v1",
+  "question": "Can banking part of the position at 3R while retaining an 8R runner monetize the observed winner tail better than either whole-position endpoint?",
+  "owner_authorization": {
+    "verbatim": "批准\n所有的你自行探索啊，后面的都不需要我批准，直接去执行，开始目标模式",
+    "authorized_on": "2026-09-04",
+    "scope": "autonomous 5min/15min research; this stage changes runner fraction only",
+    "holdout_policy": "one final use only after a candidate clears all pre-holdout gates",
+    "live_or_promotion_authorized": false
+  },
+  "instrument": {
+    "tradingview_symbol": "OKX:BTCUSDT.P",
+    "okx_instrument": "BTC-USDT-SWAP",
+    "timezone": "UTC"
+  },
+  "source": {
+    "audit": "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json",
+    "path": "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "rows": 341567,
+    "first_time": "2022-11-30T16:00:00Z",
+    "last_time": "2026-02-28T15:55:00Z",
+    "holdout_ohlcv_rows_materialized": 0
+  },
+  "window": {
+    "development_start_inclusive": "2023-01-01T00:00:00Z",
+    "development_end_exclusive": "2025-01-01T00:00:00Z",
+    "audit_start_inclusive": "2025-01-01T00:00:00Z",
+    "audit_end_exclusive": "2026-02-28T16:00:00Z",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "development_folds": ["2023H1", "2023H2", "2024H1", "2024H2"],
+    "audit_slices": ["2025H1", "2025H2", "2026P1"],
+    "audit_open_rule": "open only for a timeframe whose selected runner fraction passes the development success gate",
+    "audit_contamination": "baseline aggregate outcomes were previously seen; runner fractions are frozen before audit"
+  },
+  "signal_frozen": {
+    "core": "K1 directional real body truly crosses SMA(HL2); K2 wick touches it while the full body and close remain on the directional side",
+    "secondary_score": "same twelve-component equal-weight causal score as predecessor",
+    "15m": {
+      "ma_period": 120,
+      "gap_min_bars": 2,
+      "gap_max_bars": 8,
+      "score_floor": 0.40,
+      "maximum_pair_gap_bars": 48
+    },
+    "5m": {
+      "ma_period": 40,
+      "gap_min_bars": 6,
+      "gap_max_bars": 24,
+      "score_floor": 0.40,
+      "maximum_pair_gap_bars": 96
+    }
+  },
+  "factor": {
+    "name": "runner_fraction_after_3r",
+    "initial": 0.0,
+    "grid": [0.0, 0.10, 0.25, 0.50, 0.75, 1.0],
+    "first_take_r": 3.0,
+    "runner_target_r": 8.0,
+    "mechanism": "At the first intrabar hit of 3R, exit one minus runner_fraction at the 3R barrier and keep runner_fraction for 8R, protection, original stop, or timeout.",
+    "cost_policy": "Apply one 20bp position-weighted round-trip cost to the aggregate gross return; proportional partial exits do not duplicate full-position cost.",
+    "same_bar_policy": "Stop first when stop and either target coexist; if 8R is reached without a stop, 3R and 8R fills both occur at their barriers."
+  },
+  "timeframe_fixed": {
+    "15m": {
+      "horizon_bars": 48,
+      "cooldown_bars": 24,
+      "minimum_events_total": 160,
+      "minimum_events_per_development_fold": 25
+    },
+    "5m": {
+      "horizon_bars": 144,
+      "cooldown_bars": 72,
+      "minimum_events_total": 240,
+      "minimum_events_per_development_fold": 40
+    }
+  },
+  "execution_frozen": {
+    "entry": "open immediately after completed K2",
+    "k2_stop_buffer_atr": 0.0,
+    "next_open_risk_atr_min": 0.15,
+    "next_open_risk_atr_max": 2.50,
+    "fee_to_risk_max": 1.25,
+    "target_r": 3.0,
+    "horizon_clock_hours": 12,
+    "same_bar_collision": "conservative stop first",
+    "gap_policy": "barrier price",
+    "timeout_exit": "close of final horizon bar",
+    "profit_protection_trigger_close_r": 1.5,
+    "round_trip_cost_fraction": 0.002,
+    "funding": "excluded",
+    "slippage_beyond_round_trip_cost": "excluded"
+  },
+  "selection": {
+    "method": "single registered runner-fraction grid per timeframe on development only",
+    "score": "median half-year net bp minus 0.5 times population standard deviation",
+    "move_rule": "candidate must meet sample eligibility, improve robust score by at least 2bp versus zero runner, and not reduce worst-fold net bp by more than 3bp",
+    "tie_break": "higher robust score, higher worst fold, more events, then smaller runner fraction",
+    "no_pass": "retain full exit at 3R and record best observed arm separately",
+    "development_success_requires": "selected mean net bp > 0, robust score > 0, worst fold net bp > -5, and every development fold has positive gross bp",
+    "futility": "if neither timeframe passes, do not open audit or final holdout; conclude exit mechanics cannot repair the current entry pool",
+    "claim_limit": "one-dimensional runner screen with frozen 3R/8R anchors, not a global optimum"
+  },
+  "matched_control": {
+    "role": "descriptive negative control for every development arm; excluded from selection and all success gates",
+    "controls_per_trade": 3,
+    "strata": ["calendar month", "UTC six-hour block", "within-month ATR14 quintile"],
+    "copied": ["direction", "risk distance in ATR", "runner fraction", "targets", "protection", "horizon", "cost"],
+    "exclude_within_horizon_plus_one_bars_of_any_selected_signal": true,
+    "insufficient_exact_stratum_policy": "do not relax",
+    "seed": "btcusdtp-k1k2-partial-runner-20260904-v1"
+  },
+  "audit_success_gate": {
+    "mean_net_bp": ">0",
+    "matched_control_excess_bp": ">0",
+    "paired_signflip_p_one_sided": "<0.01",
+    "2025H1_and_2025H2_mean_net_bp": ">0 each"
+  },
+  "autonomous_next_stage": {
+    "on_development_failure": "stop exit-family optimization and run a causal failure-segmentation study before any further signal proposal",
+    "on_audit_failure": "stop exit-family optimization and run a causal failure-segmentation study",
+    "on_audit_success": "freeze the runner and perform the one authorized final holdout assessment"
+  },
+  "eligibility": {
+    "training_eligible": false,
+    "production_eligible": false,
+    "holdout_consumed": false,
+    "active_or_frozen_mutation_allowed": false,
+    "live_orders_allowed": false
+  }
+}
