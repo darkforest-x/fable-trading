@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from pathlib import Path
 
 import pandas as pd
 
@@ -147,3 +148,27 @@ def test_protection_selection_disables_when_improvement_gate_fails() -> None:
         None,
         "disabled_no_preregistered_improvement",
     )
+
+
+def test_delivered_pine_keeps_source_style_and_frozen_causal_gates() -> None:
+    project = Path(__file__).resolve().parents[1]
+    pine = (
+        project
+        / "experiments/active/exp-btcusdtp-1h-owner-causal-v2-preholdout-20260904-v1"
+        / "pine/fable_k1_k2_owner_causal_v2.pine"
+    ).read_text(encoding="utf-8")
+    for contract in (
+        "k1BodyRatio >= 0.65",
+        "k1MaAligned",
+        "wrongSmaCloses == 0 and alignedMaBars == gap - 1",
+        "k2TouchDepth >= 0.00",
+        "k2BodyTrendSide",
+        "longFeeToRisk <= feeToRiskMax",
+        "shortFeeToRisk <= feeToRiskMax",
+        'wickcolor = maShiftColor',
+        'bordercolor = maShiftColor',
+        '"MA Shift 40 · main"',
+    ):
+        assert contract in pine
+    assert 'text = "TP"' not in pine
+    assert 'text = "SL"' not in pine

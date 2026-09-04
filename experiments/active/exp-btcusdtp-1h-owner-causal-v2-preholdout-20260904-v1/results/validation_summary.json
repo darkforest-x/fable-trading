@@ -1,0 +1,54 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-owner-causal-v2-preholdout-20260904-v1",
+  "generated_at_utc": "2026-09-04T04:33:39.485340+00:00",
+  "stage": "frozen_preholdout_validation",
+  "source_quality": {
+    "source_file": "data/kline_deep/okx_BTC_USDT_SWAP_15m_158499.csv",
+    "source_sha256": "1d8ba1a07963743ca2e8d0acc21af102544dbe36125bda87793de29f5032a3b3",
+    "source_rows": 145669,
+    "hourly_rows": 36417,
+    "incomplete_hours_dropped": 1,
+    "hourly_gap_count": 0,
+    "first_hour": "2022-01-03T15:00:00+00:00",
+    "last_hour": "2026-02-28T23:00:00+00:00",
+    "holdout_start": "2026-05-04T00:00:00+00:00",
+    "holdout_rows_read": 0,
+    "source_hash_matches_preregistration": true
+  },
+  "holdout_rows_read": 0,
+  "selection_receipt_sha256": "64adcdf8d6fa748a9275550a1132e120616d114e1ec0c9c07c9221cfb5536750",
+  "selected_fee_to_risk_max": 1.25,
+  "selected_protection_trigger_r": 1.5,
+  "baseline_parity": {
+    "candidate_rows": 599,
+    "accepted_rows": 374,
+    "candidate_keys_exact": true,
+    "accepted_keys_exact": true
+  },
+  "overlap": {
+    "baseline_events": 94,
+    "final_events": 22,
+    "retained_exact_setups": 20,
+    "removed_baseline_setups": 74,
+    "new_due_to_k1_reselection_or_dedupe": 2
+  },
+  "success_gate_passed": false,
+  "final_metrics": {
+    "arm": "final",
+    "events": 22,
+    "mean_net_bp": -4.354997654924768,
+    "median_net_bp": -41.72324135162551,
+    "win_rate": 0.36363636363636365,
+    "profit_factor": 0.8813380844358473,
+    "equal_risk_1pct_return": -0.08308054831460543,
+    "max_drawdown": -0.15397876211702255,
+    "tp": 4,
+    "sl": 13,
+    "protected_stop": 0,
+    "timeout": 5,
+    "matched_events": 22,
+    "matched_control_excess_bp": 11.3580648215287,
+    "paired_signflip_p_one_sided": 0.19937800621993781
+  },
+  "production_mutation": false
+}

@@ -1,0 +1,21 @@
+{
+  "generated_at_utc": "2026-09-04T04:45:05.627862+00:00",
+  "source": "scored result artifacts only; no OHLCV opened",
+  "holdout_rows_read": 0,
+  "validation_events": 22,
+  "validation_gross_mean_bp": 15.645002345075412,
+  "validation_net_mean_bp": -4.354997654924591,
+  "break_even_round_trip_cost_bp": 15.645002345075412,
+  "current_round_trip_cost_bp": 20.0,
+  "protection_armed_events": 5,
+  "protection_exit_events": 0,
+  "sl_before_0_5r": 9,
+  "sl_between_0_5r_and_1_5r": 4,
+  "sl_after_1_5r": 0,
+  "interpretation": {
+    "primary_failure": "lack of post-entry continuation before 1.5R, not premature 3R profit taking",
+    "cost": "gross expectancy is positive in validation but smaller than the frozen 20 bp round-trip cost",
+    "gap": "3-5 bars is profitable in validation but strongly negative in development, so a gap restriction is not stable evidence",
+    "profit_protection": "the 1.5R rule armed on five validation paths but never changed an exit"
+  }
+}

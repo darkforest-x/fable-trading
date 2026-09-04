@@ -4002,3 +4002,38 @@ experiments:
       window hypothesis, not a confirmed parameter. No
       tuning, training, promotion, deployment, ACTIVE/frozen/forward mutation,
       messaging or order occurred.
+
+  - experiment_id: exp-btcusdtp-1h-owner-causal-v2-preholdout-20260904-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "53a82f5804dd6b6f7c77d63101883ed7cdf98a81"
+    status: rejected
+    question: >-
+      Do the Owner-approved causal K1/K2 corrections, a development-selected
+      fee-to-risk gate and an optional causal fee-cover stop produce stable
+      post-cost edge on BTCUSDT.P 1h before the repository holdout?
+    single_variable: >-
+      Owner explicitly approved the four-entry-rule bundle. Within that frozen
+      bundle, select one fee-to-risk ceiling and one protection trigger only on
+      2023-2024, commit the receipt, then replay unchanged on 2025 through
+      2026-02-28. The K2 stop, 3R target, 12-bar horizon and 20bp cost stay fixed.
+    result: >-
+      improved_but_failed_cost_floor. On frozen validation, the baseline had 94
+      trades at -19.26bp/trade; the corrected bundle had 30 at -8.73bp and the
+      1.25R fee-to-risk gate had 22 at -4.35bp (15.65bp gross, PF 0.881,
+      equal-risk -8.31%). Matched-control excess was +11.36bp but nonsignificant
+      at p=0.1994. Nine of 13 stops failed before 0.5R; the 1.5R protection rule
+      armed five times and changed zero exits. Gap response reversed between
+      development and validation, so no narrower gap was selected.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_btcusdtp_1h_owner_causal_v2_preholdout_20260904.md
+    reuse_allowed: true
+    notes: >-
+      The physical source ended at 2026-02-28, before the 2026-05-04 holdout;
+      holdout rows read was zero. The result supports the causal structure and
+      fee-to-risk directions as research hypotheses, but not deployment: gross
+      expectancy remained below the frozen 20bp round-trip cost and time-slice
+      stability failed. The research Pine was compiled and saved separately as
+      Fable K1→K2 Owner Causal V2; no training, promotion, ACTIVE/frozen/forward
+      mutation, messaging or order occurred.
