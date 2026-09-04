@@ -1,0 +1,30 @@
+{
+  "experiment_id": "exp-ethusdtp-15m-progressive-scaleout-preholdout-20260904-v1",
+  "registered_at": "2026-09-04T23:58:00+08:00",
+  "hypothesis": "A three-stage scale-out can bank real profit while leaving a slower moving-average runner, reducing profitable-excursion-to-nonpositive reversals without replacing take-profit with an ever-tighter full-position stop.",
+  "approved_semantic_bundle": [
+    "three equal-size bank tranches",
+    "one residual SMA60/ATR runner",
+    "a monotone floor that preserves banked profit net of the fixed full-position cost",
+    "conservative stop-first ambiguity handling"
+  ],
+  "tuned_in_order": ["bank_total_fraction", "step_atr"],
+  "development_only_selection": true,
+  "audit_changes_parameters": false,
+  "primary_metrics": [
+    "share of trades with >= first target MFE that finish net non-positive",
+    "mean net basis points",
+    "robust half-year mean net basis points",
+    "p95 net return retention versus the full runner"
+  ],
+  "secondary_metrics": [
+    "mean banked gross basis points",
+    "mean peak capture",
+    "median giveback in signal ATR",
+    "profit factor",
+    "matched-random excess and sign-flip p"
+  ],
+  "same_setup_comparison": "All exit arms replay the exact baseline V5 ETH setup ledger; entry selection is not allowed to change with exit duration.",
+  "repository_holdout_rows_allowed": 0,
+  "production_claim_allowed": false
+}
