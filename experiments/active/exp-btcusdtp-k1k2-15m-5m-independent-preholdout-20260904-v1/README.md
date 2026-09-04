@@ -18,3 +18,13 @@ experiments already exposed its aggregate results. It is therefore labelled
 an exploratory frozen audit. Repository holdout rows at or after 2026-05-04
 must remain physically unread. No training, promotion, deployment, ACTIVE
 mutation, forward-log mutation, or live order is in scope.
+
+## Frozen outcome
+
+Rejected on 2026-09-04. The independently selected settings increased audit
+signal density from 53 to 181 events on 15m and from 74 to 418 events on 5m,
+but mean net returns remained -25.00bp and -19.26bp per trade respectively.
+Matched-control excess was statistically indistinguishable from zero, and the
+twelve-component score had AUC below 0.5 on both timeframes. No Pine, ACTIVE,
+frozen, deployment, or live-trading state was changed. See
+`analysis/p1_btcusdtp_k1k2_15m_5m_independent_research_20260904.md`.
