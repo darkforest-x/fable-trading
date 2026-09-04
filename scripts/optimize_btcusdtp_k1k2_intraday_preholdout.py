@@ -39,7 +39,7 @@ from scripts.research_two_key_candle_ma_retest_1h import (
 PROJECT = Path(__file__).resolve().parents[1]
 EXPERIMENT = PROJECT / (
     "experiments/active/"
-    "exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v1"
+    "exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v2"
 )
 CONFIG_PATH = EXPERIMENT / "config.json"
 RESULTS = EXPERIMENT / "results"
@@ -98,14 +98,8 @@ def load_config() -> dict[str, Any]:
 
 
 def source_for_bar(config: dict[str, Any], bar: str) -> tuple[Path, dict[str, Any]]:
-    if bar == "15m":
-        source = PROJECT / config["sources"][bar]["path"]
-        expected = str(config["sources"][bar]["sha256"])
-        actual = sha256_file(source)
-        if actual != expected:
-            raise RuntimeError(f"15m source SHA drift: expected {expected}, got {actual}")
-        return source, {"source_sha256": actual, "archive_audit": None}
-    audit_path = PROJECT / "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json"
+    source_config = config["source"]
+    audit_path = PROJECT / str(source_config["audit"])
     if not audit_path.exists():
         raise RuntimeError("safe 5m archive source is not materialized")
     audit = json.loads(audit_path.read_text(encoding="utf-8"))
@@ -116,15 +110,17 @@ def source_for_bar(config: dict[str, Any], bar: str) -> tuple[Path, dict[str, An
         raise RuntimeError(f"5m archive boundary drift: {contract}")
     if int(audit.get("holdout_ohlcv_rows_materialized", -1)) != 0:
         raise RuntimeError("5m archive receipt does not prove zero holdout rows")
-    output = Path(str(audit.get("output_path")))
-    source = output if output.is_absolute() else audit_path.parent / output.name
+    source = PROJECT / str(source_config["path"])
     actual = sha256_file(source)
-    if actual != str(audit.get("output_sha256")):
-        raise RuntimeError("5m archive output SHA drift")
+    expected = str(source_config["sha256"])
+    if actual != expected or actual != str(audit.get("output_sha256")):
+        raise RuntimeError("safe archive output SHA drift")
     return source, {
         "source_sha256": actual,
         "archive_audit": str(audit_path.relative_to(PROJECT)),
         "archive_contract": contract,
+        "analysis_bar": bar,
+        "derivation": "native 5m" if bar == "5m" else "complete UTC 3x5m aggregation",
     }
 
 
@@ -145,6 +141,31 @@ def load_featured(
         raise RuntimeError(f"{bar} physical source reaches repository holdout")
     safe_end = utc(config["window"]["validation_end_exclusive"])
     raw = raw[raw["open_time"] < safe_end].copy().reset_index(drop=True)
+    native_rows = len(raw)
+    incomplete_15m = 0
+    if bar == "15m":
+        indexed = raw.set_index("open_time")
+        indexed["source_time"] = indexed.index
+        grouped = indexed.resample("15min", label="left", closed="left", origin="epoch")
+        aggregated = grouped.agg(
+            open=("open", "first"),
+            high=("high", "max"),
+            low=("low", "min"),
+            close=("close", "last"),
+            volume=("volume", "sum"),
+            source_rows=("source_time", "size"),
+            source_first=("source_time", "min"),
+            source_last=("source_time", "max"),
+        )
+        complete = aggregated["source_rows"].eq(3) & (
+            aggregated["source_last"] - aggregated["source_first"]
+        ).eq(pd.Timedelta(minutes=10))
+        incomplete_15m = int((aggregated["source_rows"].gt(0) & ~complete).sum())
+        raw = (
+            aggregated.loc[complete, ["open", "high", "low", "close", "volume"]]
+            .dropna()
+            .reset_index()
+        )
     delta = BAR_DELTAS[bar]
     raw["segment_id"] = raw["open_time"].diff().ne(delta).cumsum().astype(int)
     parts: list[pd.DataFrame] = []
@@ -159,6 +180,8 @@ def load_featured(
         "source_path": str(source.resolve().relative_to(PROJECT)),
         **source_receipt,
         "rows_read": int(len(raw)),
+        "native_5m_rows_read": int(native_rows),
+        "incomplete_15m_groups_dropped": incomplete_15m,
         "first_time": frame["open_time"].iloc[0] if len(frame) else None,
         "last_time": frame["open_time"].iloc[-1] if len(frame) else None,
         "gap_count": gaps,

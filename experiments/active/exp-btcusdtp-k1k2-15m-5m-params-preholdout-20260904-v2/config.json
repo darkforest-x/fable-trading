@@ -1,0 +1,121 @@
+{
+  "experiment_id": "exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v2",
+  "status": "preregistered_clean_successor_before_development_outcomes",
+  "predecessor": {
+    "experiment_id": "exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v1",
+    "reason_abandoned": "legacy 15m source failed physical holdout preflight before signals or outcomes"
+  },
+  "question": "Which separately selected causal K1/K2 morphology and distance parameters are stable for OKX BTCUSDT.P 15m and 5m before the repository holdout?",
+  "owner_authorization": {
+    "verbatim": "再单独针对15min  5min  做参数优化？",
+    "authorized_on": "2026-09-04",
+    "scope": "separate pre-holdout parameter optimization for 15m and 5m",
+    "holdout_reuse_authorized": false,
+    "barrier_parameter_change_authorized": false
+  },
+  "instrument": {
+    "tradingview_symbol": "OKX:BTCUSDT.P",
+    "okx_instrument": "BTC-USDT-SWAP",
+    "timezone": "UTC"
+  },
+  "source": {
+    "audit": "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json",
+    "path": "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "rows": 341567,
+    "first_time": "2022-11-30T16:00:00Z",
+    "last_time": "2026-02-28T15:55:00Z",
+    "holdout_ohlcv_rows_materialized": 0,
+    "15m_contract": "UTC-aligned groups of exactly three contiguous 5m rows; incomplete groups dropped before features",
+    "5m_contract": "native complete UTC 5m archive bars"
+  },
+  "window": {
+    "development_start_inclusive": "2023-01-01T00:00:00Z",
+    "development_end_exclusive": "2025-01-01T00:00:00Z",
+    "validation_start_inclusive": "2025-01-01T00:00:00Z",
+    "validation_end_exclusive": "2026-02-28T16:00:00Z",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "development_folds": ["2023H1", "2023H2", "2024H1", "2024H2"],
+    "validation_slices": ["2025H1", "2025H2", "2026P1"],
+    "validation_retuning": false
+  },
+  "inherited_causal_logic": {
+    "sma": "SMA40(HL2)",
+    "atr": "Pine/Wilder ATR14",
+    "k1_ma_colour_aligned": true,
+    "intermediate_closes_and_ma_colour_all_direction_aligned": true,
+    "k2_true_wick_touch_only": true,
+    "k2_close_back_on_direction_side": true
+  },
+  "inherited_start": {
+    "k1_min_body_ratio": 0.65,
+    "k1_min_range_atr": 0.95,
+    "k1_min_directional_close_location": 0.70,
+    "k1_min_sma40_cross_depth_atr": -0.05,
+    "k2_min_rejection_wick_share": 0.25,
+    "k2_max_body_ratio": 0.50,
+    "k2_min_rejection_close_location": 0.25,
+    "k2_touch_depth_atr_max": 1.50,
+    "oscillator_gate": "none",
+    "k1_min_volume_ratio_20": null,
+    "fee_to_risk_max": 1.25
+  },
+  "timeframe_fixed": {
+    "15m": {"gap_window_start": [2, 8], "horizon_bars": 48, "cooldown_bars": 24, "maximum_pair_gap_bars": 32, "minimum_events_total": 80, "minimum_events_per_development_fold": 12},
+    "5m": {"gap_window_start": [2, 8], "horizon_bars": 144, "cooldown_bars": 72, "maximum_pair_gap_bars": 72, "minimum_events_total": 120, "minimum_events_per_development_fold": 20}
+  },
+  "coordinate_order_and_grids": [
+    {"family": "gap_window", "15m": [[2, 8], [2, 12], [4, 12], [4, 16], [6, 24], [8, 32]], "5m": [[2, 8], [3, 12], [6, 18], [9, 27], [12, 36], [18, 54], [24, 72]]},
+    {"family": "k1_min_body_ratio", "values": [0.50, 0.55, 0.60, 0.65, 0.70, 0.75]},
+    {"family": "k1_min_range_atr", "values": [0.65, 0.80, 0.95, 1.10, 1.25, 1.50]},
+    {"family": "k1_min_directional_close_location", "values": [0.60, 0.65, 0.70, 0.75, 0.80, 0.85]},
+    {"family": "k1_min_sma40_cross_depth_atr", "values": [-0.05, 0.00, 0.05, 0.10, 0.15]},
+    {"family": "k2_min_rejection_wick_share", "values": [0.15, 0.20, 0.25, 0.30, 0.35, 0.45]},
+    {"family": "k2_max_body_ratio", "values": [0.30, 0.40, 0.50, 0.60, 0.70]},
+    {"family": "k2_min_rejection_close_location", "values": [0.20, 0.25, 0.35, 0.45, 0.55, 0.65]},
+    {"family": "k2_touch_depth_atr_max", "values": [0.50, 0.75, 1.00, 1.25, 1.50, 2.00]},
+    {"family": "oscillator_gate", "values": ["none", "k1_sign", "k2_sign", "both_sign", "k2_sign_and_acceleration"]},
+    {"family": "k1_min_volume_ratio_20", "values": [null, 1.00, 1.25, 1.50, 2.00]},
+    {"family": "fee_to_risk_max", "values": [0.25, 0.35, 0.50, 0.75, 1.00, 1.25, 1.50, 2.00]}
+  ],
+  "selection": {
+    "method": "one preregistered coordinate pass per timeframe on development only",
+    "score": "median half-year net bp minus 0.5 times population standard deviation",
+    "move_rule": "candidate must be eligible, improve robust score by at least 2bp, and not reduce worst-fold net bp by more than 3bp",
+    "tie_break": "higher robust score, higher worst fold, more events, then value closest to inherited start",
+    "no_pass": "retain incumbent",
+    "claim_limit": "stable coordinate-selected default, never global optimum"
+  },
+  "execution_frozen": {
+    "entry": "open immediately after completed K2",
+    "initial_stop": "exact K2 low for long and K2 high for short",
+    "next_open_risk_atr_min": 0.15,
+    "next_open_risk_atr_max": 2.50,
+    "target_r": 3.0,
+    "horizon_clock_hours": 12,
+    "same_bar_collision": "conservative stop first",
+    "gap_policy": "barrier price",
+    "timeout_exit": "close of final horizon bar",
+    "profit_protection_trigger_close_r": 1.5,
+    "round_trip_cost_fraction": 0.002,
+    "funding": "excluded",
+    "slippage_beyond_round_trip_cost": "excluded"
+  },
+  "matched_control": {
+    "controls_per_trade": 3,
+    "strata": ["calendar month", "UTC six-hour block", "within-month ATR14 quintile"],
+    "copied": ["direction", "risk distance in ATR", "exit rule", "horizon", "cost"],
+    "exclude_within_horizon_plus_one_bars_of_any_inherited_accepted_signal": true,
+    "insufficient_exact_stratum_policy": "do not relax",
+    "seed": "btcusdtp-k1k2-intraday-preholdout-20260904-v2"
+  },
+  "validation_success_gate": {
+    "mean_net_bp": ">0",
+    "matched_control_excess_bp": ">0",
+    "paired_signflip_p_one_sided": "<0.01",
+    "2025H1_and_2025H2_mean_net_bp": ">0 each",
+    "auc": "not applicable: deterministic binary rule",
+    "top_decile": "not applicable: no score-ranked model"
+  },
+  "eligibility": {"training_eligible": false, "production_eligible": false, "holdout_consumed": false, "active_or_frozen_mutation_allowed": false, "live_orders_allowed": false}
+}
