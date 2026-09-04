@@ -1,0 +1,135 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1",
+  "status": "preregistered_before_holdout_outcome_read",
+  "question": "How did the current Pine v8 Core Recall K1-to-K2 rule perform on OKX BTCUSDT.P 1h over the latest six-month window, and what observable setup/path conditions distinguish profitable, losing, and unresolved trades?",
+  "owner_authorization": {
+    "scope": "read and score prices at or after the repository holdout boundary for this exact backtest",
+    "verbatim": "批准读取 2026-05-04 之后的价格",
+    "authorized_on": "2026-09-04",
+    "configuration_holdout_use": 1
+  },
+  "instrument": {
+    "tradingview_symbol": "OKX:BTCUSDT.P",
+    "okx_instrument": "BTC-USDT-SWAP",
+    "bar": "1H",
+    "bar_duration_minutes": 60,
+    "timezone": "UTC"
+  },
+  "window": {
+    "analysis_start_inclusive": "2026-03-04T00:00:00Z",
+    "snapshot_end_exclusive": "2026-09-04T03:00:00Z",
+    "warmup_start_inclusive": "2025-08-01T00:00:00Z",
+    "unresolved_tail_policy": "keep signals in the ledger but exclude paths without a barrier hit or all 12 future bars from scored metrics"
+  },
+  "source": {
+    "primary": "official OKX public history-candles endpoint, confirmed 1H rows only",
+    "endpoint": "https://www.okx.com/api/v5/market/history-candles",
+    "isolated_snapshot": "experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/source/okx_BTC_USDT_SWAP_1H.csv.gz",
+    "crosschecks": [
+      "data/kline_fetched/okx_BTC_USDT_SWAP_1H_9699.csv",
+      "data/kline_fetched/okx_BTC_USDT_SWAP_15m_42007.csv aggregated to complete UTC hours",
+      "experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/candles/BTC_USDT_SWAP.csv"
+    ],
+    "overwrite_production_cache": false
+  },
+  "signal": {
+    "pine_source": "experiments/active/exp-two-key-candle-feature-atlas-v3/pine/fable_two_key_candle_sma40_retest_v1.pine",
+    "pine_source_sha256": "3afa39c8a3bc2d85f329f3fd553b112ef0ca68e5fdc1ff143956b6b5ced09984",
+    "pine_private_version": 8,
+    "profile": "Core recall · 2–8",
+    "directions": ["long", "short"],
+    "sma": "SMA40(HL2)",
+    "atr": "Pine/Wilder ATR14",
+    "gap_min_bars": 2,
+    "gap_max_bars": 8,
+    "k1_min_body_ratio": 0.5,
+    "k1_min_range_atr": 0.95,
+    "k1_min_directional_close_location": 0.7,
+    "k1_min_sma40_cross_depth_atr": -0.05,
+    "k2_min_rejection_wick_share": 0.25,
+    "k2_max_body_ratio": 0.5,
+    "k2_min_rejection_close_location": 0.25,
+    "k2_touch_depth_atr_min": -0.05,
+    "k2_touch_depth_atr_max": 1.5,
+    "k2_min_close_back_depth_atr": 0.0,
+    "next_open_risk_atr_min": 0.15,
+    "next_open_risk_atr_max": 2.5,
+    "dedupe": "highest Pine K1-quality per K2, earliest accepted K2 per remembered K1, global six-entry-bar cooldown, long priority only on same entry bar",
+    "cooldown_bars": 6
+  },
+  "execution": {
+    "entry": "open of the bar immediately after confirmed K2",
+    "stop": "exact completed K2 low for long and K2 high for short",
+    "target_r": 3.0,
+    "horizon_bars": 12,
+    "same_bar_collision": "conservative_sl",
+    "gap_policy": "barrier_price",
+    "timeout_exit": "close of the twelfth entry-path bar",
+    "return_convention": "linear long and linear short",
+    "round_trip_cost_fraction": 0.002,
+    "funding": "excluded",
+    "slippage_beyond_round_trip_cost": "excluded"
+  },
+  "matched_control": {
+    "controls_per_trade": 3,
+    "strata": ["calendar month", "UTC six-hour block", "within-month ATR14 quintile"],
+    "copied": ["direction", "risk distance in ATR", "3R target", "12-bar horizon", "0.2% round-trip cost"],
+    "exclude_signal_bars": true,
+    "exclude_within_bars_of_signal": 13,
+    "seed": "btcusdtp-1h-pine-v8-sixmonth-holdout-use-1"
+  },
+  "diagnostics": {
+    "frozen_before_outcomes": true,
+    "causal_flags": {
+      "edge_gap_2_7_8": "gap is 2, 7, or 8 rather than central 3-6",
+      "k1_body_below_owner_strict": "K1 body/range is below 0.65",
+      "k1_range_below_owner_strict": "K1 range/ATR is below 1.25",
+      "k1_close_below_owner_strict": "K1 directional close location is below 0.85",
+      "k1_volume_below_owner_strict": "K1 volume/prior-20 mean is below 1.25",
+      "k1_ma_colour_misaligned": "K1 HL2 is on the opposite side of SMA40",
+      "k2_wick_below_owner_strict": "K2 rejection wick share is below 0.60",
+      "k2_body_above_owner_strict": "K2 body/range is above 0.35",
+      "k2_rejection_below_owner_strict": "K2 directional rejection location is below 0.65",
+      "k2_close_back_below_owner_strict": "K2 close-back depth is below 0.25 ATR",
+      "k2_touch_outside_owner_strict": "K2 touch depth is outside 0.10-1.00 ATR",
+      "risk_outside_owner_strict": "next-open stop distance is outside 0.25-2.00 ATR",
+      "path_close_distance_large": "absolute K2-to-K1 close distance exceeds 0.75 K1 ATR",
+      "path_extension_large": "pre-retest extension exceeds 1.00 K1 ATR",
+      "path_wrong_sma40_close": "an intermediate close crossed to the wrong SMA40 side",
+      "path_ma_colour_not_continuous": "intermediate MA-side colour share is below 1.00",
+      "path_volume_relation_outside": "K2/K1 volume is outside 0.50-1.50",
+      "oscillator_state_misaligned": "owner oscillator sequence is not fully aligned",
+      "market_structure_misaligned": "confirmed 10/10 market-break state is not aligned"
+    },
+    "post_entry_path_classes": [
+      "fast_clean_tp",
+      "tp_after_drawdown",
+      "ordinary_tp",
+      "immediate_reversal_sl",
+      "giveback_then_sl",
+      "ordinary_sl",
+      "timeout_gain",
+      "timeout_loss",
+      "unresolved"
+    ],
+    "interpretation": "causal flags are descriptive pre-entry conditions; post-entry classes describe the realized path. Neither is a causal estimate or a tuned filter."
+  },
+  "evaluation": {
+    "primary_unit": "each Pine signal independently, including overlapping opportunities",
+    "portfolio_sensitivity": "one position at a time; later signals are skipped until the active trade exits",
+    "headline_success": "net return after the frozen 0.2% round-trip cost is greater than zero",
+    "report_tp_sl_timeout_separately": true,
+    "paired_test": "one-sided deterministic sign-flip test of candidate net return minus its three-control mean",
+    "permutation_resamples": 100000,
+    "bootstrap_resamples": 20000,
+    "auc": "not applicable; this is a deterministic threshold rule and no score-ranked trading arm is evaluated",
+    "top_decile": "not applicable; no score threshold or rank is selected on this holdout"
+  },
+  "eligibility": {
+    "training_eligible": false,
+    "production_eligible": false,
+    "threshold_tuning_allowed_on_this_snapshot": false,
+    "promote_allowed": false,
+    "live_orders_allowed": false
+  }
+}

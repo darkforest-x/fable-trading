@@ -3934,3 +3934,31 @@ experiments:
       10 future mutations and 10 charts. The checkpoint is 15m-native, so this
       1h use is OOD and only a review queue. No training, tuning, promotion,
       deployment, ACTIVE/frozen/forward mutation, messaging or order occurred.
+
+  - experiment_id: exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2364ae0180f96d8013ef7dd6024d3b5638334986"
+    status: active
+    question: >-
+      How did the current Pine-v8 Core Recall K1-to-K2 rule perform on
+      OKX:BTCUSDT.P 1h over the latest six-month window, and what observable
+      setup and realized-path conditions distinguish profitable, losing and
+      unresolved trades?
+    single_variable: >-
+      No strategy variable moves. Replay the already-published Pine-v8 defaults:
+      gap 2-8, six-bar global cooldown, next-open entry, exact K2-extreme stop,
+      3R target, 12-bar horizon, conservative same-bar stop and 0.2% round-trip
+      cost. All diagnostics and matched controls were frozen before outcomes.
+    result: >-
+      preregistered_before_holdout_outcome_read. Owner approved reading prices
+      at and after 2026-05-04; outcomes remain unread at this registry state.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_btcusdtp_1h_pine_v8_sixmonth_backtest_20260904.md
+    reuse_allowed: false
+    notes: >-
+      Configuration-specific holdout use #1. Source will be a frozen, confirmed,
+      gapless official OKX 1H snapshot ending 2026-09-04 03:00 UTC, stored only
+      inside this experiment. This run cannot tune thresholds, train, promote,
+      deploy, mutate ACTIVE/frozen/forward state, message anyone or place orders.
