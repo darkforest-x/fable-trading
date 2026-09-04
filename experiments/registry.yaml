@@ -4947,8 +4947,8 @@ experiments:
 
   - experiment_id: exp-altcoin-1d-k1k2-episode-runner-preholdout-20260905-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "5aca289acea8276655ce188d90dadd537cfe15b3"
-    status: active
+    source_commit: "41c5ed8503689a9260e43ec99f9552a11eed3136"
+    status: rejected
     question: >-
       Can a daily, neutral-anchored K1->K2 launch episode with gradual profit
       banking and an MA-following runner produce sparse trend exposure that
@@ -4959,23 +4959,38 @@ experiments:
       trail reference, runner ATR buffer, then banked fraction. Each stage keeps
       its incumbent and requires the preregistered sample, robust-score and
       right-tail gates.
-    result: preregistered_not_run
+    result: >-
+      research_only_sample_gate_failed_then_audit_rejected. Selection retained
+      EMA13/SMA34 because no candidate reached the preregistered fold sample
+      gate, despite a right-tail-driven +520.65bp/trade over only 22 trades.
+      Frozen audit reversed to -482.17bp/trade, PF 0.084, 4.35% win rate and
+      0/3 positive half-year folds. On 22 exact matches the setup lagged random
+      by 374.14bp/trade (cluster p=0.9392).
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
+    canonical_report: analysis/p1_altcoin_1d_k1k2_episode_runner_20260905.md
+    artifacts:
+      - altcoin-1d-k1k2-v1-audit
+      - altcoin-1d-k1k2-v1-v2-diagnostics
+      - altcoin-1d-k1k2-v1-v2-report
+      - altcoin-1d-k1k2-v1-v2-html
+      - altcoin-1d-k1k2-v1-v2-figure
     reuse_allowed: false
     notes: >-
       The explicit current-instrument cache has survivorship and listing bias;
       it is not presented as a point-in-time historical market universe. Daily
-      bars require exactly 96 contiguous 15m UTC rows. Selection, audit and
-      confirmation are opened in order, all before the 2026-05-04 repository
-      holdout. No training, TradingView, ACTIVE/frozen, forward, deployment,
-      sizing, API-key or live-order state may change.
+      bars require exactly 96 contiguous 15m UTC rows. Selection and audit were
+      opened in order; the untouched 2025-07 through 2026-04 prefix was then
+      reassigned to the separately preregistered V2 confirmation. All stages
+      remain before the 2026-05-04 repository holdout. No training, TradingView,
+      ACTIVE/frozen, forward, deployment, sizing, API-key or live-order state
+      changed.
 
   - experiment_id: exp-altcoin-1d-k1k2-close-stop-bank-repair-preholdout-20260905-v2
     source_repo: darkforest-x/fable-trading
-    source_commit: "e5ede89aa20c0ca9340aa74bbbcc413c715b73c1"
-    status: active
+    source_commit: "f880a1b7067f4b646e86298e5aa410a6ea297fb7"
+    status: rejected
     question: >-
       Can close-confirmed daily structure/MA exits and a larger gradual profit
       ladder repair the v1 altcoin K1->K2 signal without changing any signal,
@@ -4985,14 +5000,27 @@ experiments:
       confirmation policy, bank schedule, trail reference, then runner buffer.
       Development scoring clips individual R to [-1.5,+10] so a single listing-
       era trend cannot select the policy by itself.
-    result: preregistered_not_run
+    result: >-
+      exit_repair_improved_development_but_failed_frozen_confirmation. Two-close
+      structure failure improved the already-seen development mean from
+      -97.91 to -47.37bp/trade, but confirmation produced 15 trades at
+      -890.38bp/trade, PF 0.082, 13.33% win rate and 0/3 positive folds. No
+      confirmation trade reached the live-path +1.5R first bank/runner trigger;
+      the 11 exact matches lagged random by 751.42bp/trade (cluster p=0.8915).
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
+    canonical_report: analysis/p1_altcoin_1d_k1k2_episode_runner_20260905.md
+    artifacts:
+      - altcoin-1d-k1k2-v2-confirmation
+      - altcoin-1d-k1k2-v1-v2-diagnostics
+      - altcoin-1d-k1k2-v1-v2-report
+      - altcoin-1d-k1k2-v1-v2-html
+      - altcoin-1d-k1k2-v1-v2-figure
     reuse_allowed: false
     notes: >-
       Development is the already-seen 2022-07 through 2025-06 parent lineage.
       The untouched 2025-07 through 2026-04 prefix is a one-shot confirmation.
-      Repository holdout starts 2026-05-04 and is forbidden. No training,
+      Repository holdout starts 2026-05-04 and was not read. No training,
       TradingView, ACTIVE/frozen, forward, deployment, sizing, API-key or live-
-      order state may change.
+      order state changed.

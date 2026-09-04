@@ -14365,3 +14365,105 @@ artifacts:
     config_hash: "75ccc2faeace51b7d07bde2fcf9f81bbb890c0f56bb0bc5c426539912b5c9f1e"
     data_cutoff: "2026-05-01T00:00:00Z"
     notes: Static four-panel figure; registered and postmortem claims are separated in the report.
+
+  - artifact_id: altcoin-1d-k1k2-v1-audit
+    artifact_type: manifest
+    role: frozen_preholdout_v1_audit_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "41c5ed8503689a9260e43ec99f9552a11eed3136"
+    source_path: experiments/active/exp-altcoin-1d-k1k2-episode-runner-preholdout-20260905-v1/results/audit_receipt.json
+    sha256: "a0f83c3b7fd0386a56ba749d31eb8b3186d638fe93f2358459c826c4889a8f46"
+    size_bytes: 4549
+    storage_uri: "repo://experiments/active/exp-altcoin-1d-k1k2-episode-runner-preholdout-20260905-v1/results/audit_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "41c5ed8503689a9260e43ec99f9552a11eed3136"
+    config_hash: "dafee19bb45db8cc44be3a4f468f606ae1e8a795c8e801aa4d736fd6770bb55d"
+    data_cutoff: "2025-07-01T00:00:00Z"
+    notes: Frozen V1 audit; 23 trades at -482.17bp/trade, PF 0.084 and zero repository holdout rows.
+
+  - artifact_id: altcoin-1d-k1k2-v2-confirmation
+    artifact_type: manifest
+    role: frozen_preholdout_v2_confirmation_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f880a1b7067f4b646e86298e5aa410a6ea297fb7"
+    source_path: experiments/active/exp-altcoin-1d-k1k2-close-stop-bank-repair-preholdout-20260905-v2/results/confirmation_receipt.json
+    sha256: "e00970edb22092bd3eccb0052dcf1a479d36614fdd936ea77b24564c6c1282ca"
+    size_bytes: 3817
+    storage_uri: "repo://experiments/active/exp-altcoin-1d-k1k2-close-stop-bank-repair-preholdout-20260905-v2/results/confirmation_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f880a1b7067f4b646e86298e5aa410a6ea297fb7"
+    config_hash: "71f6fed30018431e23e737c4d10ff61a7e874a8eb874eced5e234cb10f5d2411"
+    data_cutoff: "2026-05-01T00:00:00Z"
+    notes: Frozen V2 confirmation; 15 trades at -890.38bp/trade, PF 0.082 and zero repository holdout rows.
+
+  - artifact_id: altcoin-1d-k1k2-v1-v2-diagnostics
+    artifact_type: manifest
+    role: registered_phase_results_and_failure_diagnostics
+    source_repo: darkforest-x/fable-trading
+    source_commit: "70214e888d0d8cd854427283186219d477d6e003"
+    source_path: analysis/output/altcoin_1d_k1k2_20260905_v1_v2/summary.json
+    sha256: "49ee1fc1c83701bc81d569e673a59b54b196331beb033f78fcae7ef2386e935d"
+    size_bytes: 8942
+    storage_uri: "repo://analysis/output/altcoin_1d_k1k2_20260905_v1_v2/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "70214e888d0d8cd854427283186219d477d6e003"
+    config_hash: "8fb0d00e46a45561aa71c0ab6ab4e5957eb380d1fb94ae2d6960aa6c347ba09e"
+    data_cutoff: "2026-05-01T00:00:00Z"
+    notes: Frozen phase metrics, matched controls, signal funnel, live-path reach and post-exit diagnostics.
+
+  - artifact_id: altcoin-1d-k1k2-v1-v2-report
+    artifact_type: report
+    role: canonical_chinese_altcoin_daily_k1k2_validation_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "70214e888d0d8cd854427283186219d477d6e003"
+    source_path: analysis/p1_altcoin_1d_k1k2_episode_runner_20260905.md
+    sha256: "fa29274992fd222d6ef627c3891dc7538f64376ffefb457b18d922e1ce35c1b1"
+    size_bytes: 23977
+    storage_uri: "repo://analysis/p1_altcoin_1d_k1k2_episode_runner_20260905.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "70214e888d0d8cd854427283186219d477d6e003"
+    config_hash: "8fb0d00e46a45561aa71c0ab6ab4e5957eb380d1fb94ae2d6960aa6c347ba09e"
+    data_cutoff: "2026-05-01T00:00:00Z"
+    notes: Full rules, sequential parameter results, time transport, matched random controls and failure attribution.
+
+  - artifact_id: altcoin-1d-k1k2-v1-v2-html
+    artifact_type: report
+    role: owner_facing_self_contained_html_altcoin_daily_k1k2_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "70214e888d0d8cd854427283186219d477d6e003"
+    source_path: analysis/html/p1_altcoin_1d_k1k2_episode_runner_20260905.html
+    sha256: "c075a69d466bf4d4f684ca05ca94f0d4a9df9fcb10344aba072cddbcae7facb9"
+    size_bytes: 357222
+    storage_uri: "repo://analysis/html/p1_altcoin_1d_k1k2_episode_runner_20260905.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "70214e888d0d8cd854427283186219d477d6e003"
+    config_hash: "8fb0d00e46a45561aa71c0ab6ab4e5957eb380d1fb94ae2d6960aa6c347ba09e"
+    data_cutoff: "2026-05-01T00:00:00Z"
+    notes: Self-contained HTML with embedded four-panel diagnostic; desktop and 390px browser QA passed.
+
+  - artifact_id: altcoin-1d-k1k2-v1-v2-figure
+    artifact_type: report
+    role: fold_transport_exit_search_followthrough_and_matched_control_figure
+    source_repo: darkforest-x/fable-trading
+    source_commit: "70214e888d0d8cd854427283186219d477d6e003"
+    source_path: analysis/output/altcoin_1d_k1k2_20260905_v1_v2/altcoin_1d_k1k2_diagnosis.png
+    sha256: "1b8d67b716f464423698fa2e8aa4f66879d37ccbf0cab87649900bfb6a3f71ae"
+    size_bytes: 243786
+    storage_uri: "repo://analysis/output/altcoin_1d_k1k2_20260905_v1_v2/altcoin_1d_k1k2_diagnosis.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "70214e888d0d8cd854427283186219d477d6e003"
+    config_hash: "8fb0d00e46a45561aa71c0ab6ab4e5957eb380d1fb94ae2d6960aa6c347ba09e"
+    data_cutoff: "2026-05-01T00:00:00Z"
+    notes: Static four-panel figure with direct labels and non-color distinctions.
