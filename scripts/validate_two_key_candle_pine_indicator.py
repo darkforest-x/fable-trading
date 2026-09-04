@@ -135,25 +135,36 @@ def validate() -> dict[str, Any]:
         and "shortEntryEvent ? high[1]" in code,
         "dynamic_and_selectable_alerts": "alert(" in code
         and "alertcondition(" in code,
-        "risk_reward_drawings": "box.new(" in code and "line.new(" in code,
-        "frozen_broad_gap": "broadProfile ? 2" in code
-        and "broadProfile ? 8" in code,
-        "visual_score_disclaimed": "形态≠盈利概率" in source,
+        "single_signal_marker": "box.new(" not in code
+        and "label.new(" not in code
+        and "line.new(" not in code
+        and 'text = "L"' in code
+        and 'text = "S"' in code
+        and "offset = -1" in code,
+        "frozen_research_broad_gap": 'profile == "Research broad · 2–8"' in code
+        and "coreRecallProfile or broadProfile ? 2" in code
+        and "coreRecallProfile or broadProfile ? 8" in code,
+        "core_recall_owner_definition": 'profile == "Core recall · 2–8"' in code
+        and "coreRecallProfile ? 0.95" in code
+        and "coreRecallProfile ? 0.70" in code
+        and "coreRecallProfile ? 0.25" in code
+        and "coreRecallProfile ? 0.50" in code,
+        "visual_score_disclaimed": "not a probability" in source,
         "reference_style_palette": "color LONG = #26A69A" in code
         and "color SHORT = #EF8E3B" in code
-        and "color RISK = #F23645" in code,
+        and "color MA_BLUE = #2962FF" in code,
         "compact_reference_style_defaults": all(
             token in code
             for token in (
-                'showSixMa = input.bool(false,',
-                'showRopeFill = input.bool(false,',
-                'showK2Preview = input.bool(false,',
-                'showPositionBoxes = input.bool(false,',
-                'showHud = input.bool(false,',
+                'showSma40 = input.bool(true,',
+                'colourBars = input.bool(true,',
+                'showSignals = input.bool(true,',
+                'showPanel = input.bool(true,',
             )
         ),
-        "compact_pattern_markers": "style = label.style_none" in code
-        and "style = line.style_dotted" in code,
+        "compact_one_line_panel": '"FABLE · " + timeframeText' in code
+        and "text_size = size.tiny" in code
+        and re.search(r"[一-龥]", code) is None,
     }
 
     source_hash = sha256_file(PINE)

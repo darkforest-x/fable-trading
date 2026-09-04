@@ -44,23 +44,30 @@ The owner-anchor morphology is also available as a Pine Script v6 overlay:
 
     pine/fable_two_key_candle_sma40_retest_v1.pine
 
-It is deliberately an indicator, not a strategy. The broad profile marks K2
-only after the bar closes and emits the causal entry on the next bar's first
-update, when both the next open and exact K2-extreme risk are known. It also
-offers the strict owner-morphology and owner-state profiles for visual
-inspection, but labels the similarity score as non-predictive because V2/V3
-found no stable post-cost edge.
+It is deliberately an indicator, not a strategy. The default Core Recall
+profile follows the owner's minimal visual definition: a directional K1 crosses
+SMA40 and a later K2 wick touches the line and closes back on the signal side.
+The frozen V2 broad thresholds remain available as Research Broad instead of
+being silently changed. A signal is accepted on the next bar's first update,
+when both the next open and exact K2-extreme risk are known, then rendered back
+on K2. The similarity score stays in the Data Window because V2/V3 found no
+stable post-cost edge.
 
 Static, official-compiler and two-anchor parity:
 
     PYTHONPATH=. .venv/bin/python scripts/validate_two_key_candle_pine_indicator.py
     PYTHONPATH=. .venv/bin/pytest -q tests/test_two_key_candle_pine_indicator.py
 
+The owner-directed diagnosis for the two additional mobile screenshots is
+recorded in `results/owner_mobile_anchor_diagnostic_20260904.json`. It consumes
+only those labelled morphology bars and their causal predecessors; no later
+return or TP/SL outcome is calculated.
+
 results/pine_compile_receipt.json binds the official TradingView Pine v6
 compile result to the exact source SHA. The source compiled with zero errors;
 adding it to the owner's current chart was blocked only because that Basic
 layout had already reached its indicator-count limit. The reference-style
-source was saved privately as version 2; it was not published and no existing
-indicator was removed from the layout. Its default view mirrors the owner's MA
-Shift reference with teal/orange candles, a thin SMA40 and compact K1/K2 marks;
-the six-MA rope, HUD and position boxes remain opt-in diagnostics.
+source is saved privately and is not published. Its price pane mirrors the
+owner's MA Shift reference with teal/orange candles, one blue SMA40, one compact
+L/S marker and a one-line tiny status chip. Labels, relation lines, six-MA
+clouds and risk/reward boxes are absent from the rendering path.

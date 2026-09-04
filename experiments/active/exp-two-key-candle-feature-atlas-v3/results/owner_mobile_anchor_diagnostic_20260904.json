@@ -1,0 +1,96 @@
+{
+  "generated_at_utc": "2026-09-04T01:41:29Z",
+  "purpose": "Owner-directed qualitative replay of the two missed mobile-chart morphology anchors; no return or outcome evaluation",
+  "holdout_authorization": "The owner explicitly supplied screenshots 2 and 3 and asked why those signals were not recognized.",
+  "holdout_consumption": {
+    "configuration": "Pine Core recall · 2–8",
+    "consumption_number": 1,
+    "scope": "Two owner-labeled BTCUSDT 1h K2 bars and the preceding causal K1 context only",
+    "future_outcome_used": false,
+    "performance_score_computed": false
+  },
+  "source": {
+    "path": "data/kline_fetched/okx_BTC_USDT_SWAP_15m_42007.csv",
+    "sha256": "abc92d95d96fae16f35e948aecb5d86987099269af5630a1e7ed74cd1fea7a0b",
+    "aggregation": "Four complete UTC-aligned 15m rows per 1h bar",
+    "pine_source_sha256": "a0dc075d508f68e0191378dbb7c22d7497a87524a767bd1b098b584cac669ca9"
+  },
+  "anchors": [
+    {
+      "name": "image_2_short",
+      "direction": "short",
+      "k1_time_utc": "2026-07-22T17:00:00Z",
+      "k2_time_utc": "2026-07-23T00:00:00Z",
+      "k2_time_asia_shanghai": "2026-07-23T08:00:00+08:00",
+      "gap_bars": 7,
+      "old_profile_result": "miss",
+      "old_profile_blockers": [
+        {
+          "feature": "k1_range_atr",
+          "actual": 0.9923558025,
+          "required": 1.0
+        },
+        {
+          "feature": "k1_close_location",
+          "actual": 0.7473466981,
+          "required": 0.75
+        }
+      ],
+      "k2_checks": {
+        "wick_share": 0.7779864763,
+        "body_ratio": 0.1874530428,
+        "rejection_close_location": 0.9654395192,
+        "sma40_touch_depth_atr": 0.4001317616,
+        "sma40_close_side_atr": 0.439679692,
+        "next_open_stop_distance_atr": 0.8398114537
+      },
+      "core_recall_result": "pass",
+      "eligible_signals_in_prior_5_bars": 0
+    },
+    {
+      "name": "image_3_long",
+      "direction": "long",
+      "k1_time_utc": "2026-07-09T06:00:00Z",
+      "k2_time_utc": "2026-07-09T12:00:00Z",
+      "k2_time_asia_shanghai": "2026-07-09T20:00:00+08:00",
+      "gap_bars": 6,
+      "old_profile_result": "miss",
+      "old_profile_blockers": [
+        {
+          "feature": "k2_wick_share",
+          "actual": 0.3085253003,
+          "required": 0.45
+        },
+        {
+          "feature": "k2_rejection_close_location",
+          "actual": 0.3085253003,
+          "required": 0.65
+        }
+      ],
+      "k1_checks": {
+        "body_ratio": 0.7163289631,
+        "range_atr": 1.2222462092,
+        "close_location": 0.9419944378,
+        "sma40_entry_depth_atr": 0.1613181684,
+        "sma40_exit_depth_atr": 0.7142121913
+      },
+      "k2_checks": {
+        "body_ratio": 0.3386493404,
+        "sma40_touch_depth_atr": 0.1448060277,
+        "sma40_close_side_atr": 0.2574561132,
+        "next_open_stop_distance_atr": 0.4022621408
+      },
+      "core_recall_result": "pass",
+      "eligible_signals_in_prior_5_bars": 0
+    }
+  ],
+  "preholdout_candidate_density_check": {
+    "window_end_exclusive": "2026-05-04T00:00:00Z",
+    "metric": "unique morphology K2 candidates per 1000 BTCUSDT 1h bars; no outcomes",
+    "research_broad": 5.3,
+    "balanced_core_recall": 15.7,
+    "unbounded_loose_recall_rejected": 48.1
+  },
+  "interpretation": "Image 2 was a brittle near-threshold miss. Image 3 exposed two rejection-shape requirements that were stricter than the owner's stated core rule. Balanced Core Recall uses rounded visual tolerances (K1 range 0.95 ATR, K1 close location 0.70, K2 wick and rejection location 0.25) while preserving the frozen Research Broad profile unchanged. Removing the gates entirely was rejected because the pre-holdout morphology density increased roughly ninefold.",
+  "honesty_statement": "The screenshots visibly contain later price action, but no later bar was read or used by the detector replay, no TP/SL outcome was calculated, and no profitability claim is made."
+}
