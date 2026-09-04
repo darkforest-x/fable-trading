@@ -13223,3 +13223,73 @@ artifacts:
     config_hash: "88a58ed65ab058d067df19ca9aeb10148b4dc21b5f2289e2853f35055c763166"
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: Self-contained owner-facing HTML generated from the canonical report.
+
+  - artifact_id: btcusdtp-k1k2-fixed-target-selection-20260904-v1
+    artifact_type: config
+    role: frozen_15m_5m_fixed_target_development_selection
+    source_repo: darkforest-x/fable-trading
+    source_commit: "673f9e0"
+    source_path: experiments/active/exp-btcusdtp-k1k2-fixed-target-preholdout-20260904-v1/results/selection_receipt.json
+    sha256: "8720fa7ad14e52710d6cae2890d978f3972d73f7a04591718da5c122cc6dc29b"
+    size_bytes: 13070
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-fixed-target-preholdout-20260904-v1/results/selection_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "673f9e0"
+    config_hash: "8da78e6b556017ca71bcabbaa6b1bcc08f884b45e242ea3fd9b7545588a839cc"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Both timeframes retained the 3R fixed-target baseline.
+
+  - artifact_id: btcusdtp-k1k2-fixed-target-report-receipt-20260904-v1
+    artifact_type: manifest
+    role: hashes_for_fixed_target_selection_and_reports
+    source_repo: darkforest-x/fable-trading
+    source_commit: "673f9e0"
+    source_path: experiments/active/exp-btcusdtp-k1k2-fixed-target-preholdout-20260904-v1/results/report_receipt.json
+    sha256: "18bf59cd7704c4df1b516887e1441475ea2dec86a1a6d5ef8ccab7739bd68bf3"
+    size_bytes: 1347
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-fixed-target-preholdout-20260904-v1/results/report_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "673f9e0"
+    config_hash: "8da78e6b556017ca71bcabbaa6b1bcc08f884b45e242ea3fd9b7545588a839cc"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Frozen hash receipt; audit_opened=false and holdout_rows_read=0.
+
+  - artifact_id: btcusdtp-k1k2-fixed-target-report-20260904-v1
+    artifact_type: report
+    role: canonical_chinese_fixed_target_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "673f9e0"
+    source_path: analysis/p1_btcusdtp_k1k2_fixed_target_preholdout_20260904.md
+    sha256: "d7e14f8ece7aa0dff2684148a70d1ddbd048d4dc49a5169237198ccdf183b4b0"
+    size_bytes: 6133
+    storage_uri: "repo://analysis/p1_btcusdtp_k1k2_fixed_target_preholdout_20260904.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "673f9e0"
+    config_hash: "8da78e6b556017ca71bcabbaa6b1bcc08f884b45e242ea3fd9b7545588a839cc"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: >-
+      Full 2R-8R grid, four time folds, matched controls and post-exit MFE
+      interpretation for whole-position fixed targets.
+
+  - artifact_id: btcusdtp-k1k2-fixed-target-html-20260904-v1
+    artifact_type: report
+    role: owner_facing_html_fixed_target_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "673f9e0"
+    source_path: analysis/html/p1_btcusdtp_k1k2_fixed_target_preholdout_20260904.html
+    sha256: "8ec00f36c77c9784c982a4ee2c5fa5ea15eff2833604c62a5cdbc86be32ecbb5"
+    size_bytes: 10023
+    storage_uri: "repo://analysis/html/p1_btcusdtp_k1k2_fixed_target_preholdout_20260904.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "673f9e0"
+    config_hash: "8da78e6b556017ca71bcabbaa6b1bcc08f884b45e242ea3fd9b7545588a839cc"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: Self-contained owner-facing HTML generated from the canonical report.

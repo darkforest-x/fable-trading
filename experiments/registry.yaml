@@ -4281,7 +4281,7 @@ experiments:
   - experiment_id: exp-btcusdtp-k1k2-fixed-target-preholdout-20260904-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "a9a967b"
-    status: active
+    status: rejected
     question: >-
       Do the observed post-3R winner tails support a higher fixed target after
       costs without destroying cross-time stability?
@@ -4289,15 +4289,23 @@ experiments:
       Fixed target only: 2/3/4/5/6/8R. Signal, immediate next-open entry,
       exact K2 stop, 1.5R close-based protection, 12-hour horizon, cooldown,
       risk gates and 20bp cost remain frozen.
-    result: preregistered_before_outcomes
+    result: >-
+      rejected_at_development_futility_gate. 15m retained 3R; 4R was nearly
+      tied but 5R and higher deteriorated sharply. 5m's best robust arms were
+      2R and 8R, improving only 1.23bp and 1.17bp versus 3R, below the
+      registered +2bp move gate, with every arm still net negative.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: null
-    artifacts: []
+    canonical_report: analysis/p1_btcusdtp_k1k2_fixed_target_preholdout_20260904.md
+    artifacts:
+      - btcusdtp-k1k2-fixed-target-selection-20260904-v1
+      - btcusdtp-k1k2-fixed-target-report-receipt-20260904-v1
+      - btcusdtp-k1k2-fixed-target-report-20260904-v1
+      - btcusdtp-k1k2-fixed-target-html-20260904-v1
     reuse_allowed: false
     notes: >-
-      Development is 2023-2024 in four chronological half-year folds. Audit
-      opens only after every registered development gate; the physical source
-      ends before repository holdout. No Pine, ACTIVE/frozen/forward,
-      deployment, messaging or live-order mutation is authorized.
+      Development used 2023-2024 in four chronological half-year folds. Each
+      target received a descriptive matched random control excluded from
+      selection. Audit did not open and holdout_rows_read=0. No Pine,
+      ACTIVE/frozen/forward, deployment, messaging or live order changed.
