@@ -1,0 +1,128 @@
+{
+  "experiment_id": "exp-altcoin-1d-k1k2-early-launch-holdout-20260905-v4",
+  "owner_directive": "Continue optimizing the altcoin daily K1->K2 trend system autonomously, keep signals sparse, preserve the MA-following runner, and use the explicitly authorized post-2026-05-04 prices for a final test only after freezing the candidate.",
+  "authorization": {
+    "owner_explicitly_approved_prices_after": "2026-05-04T00:00:00Z",
+    "holdout_consumption_number_for_this_configuration": 1,
+    "purpose": "one-shot final evaluation",
+    "parameter_change_after_open": false
+  },
+  "parents": {
+    "signal_config_path": "experiments/active/exp-altcoin-1d-k1k2-episode-runner-preholdout-20260905-v1/config.json",
+    "signal_config_sha256": "dafee19bb45db8cc44be3a4f468f606ae1e8a795c8e801aa4d736fd6770bb55d",
+    "execution_config_path": "experiments/active/exp-altcoin-1d-k1k2-close-stop-bank-repair-preholdout-20260905-v2/config.json",
+    "execution_config_sha256": "71f6fed30018431e23e737c4d10ff61a7e874a8eb874eced5e234cb10f5d2411",
+    "context_config_path": "experiments/active/exp-altcoin-1d-k1k2-market-context-preholdout-20260905-v3/config.json",
+    "context_config_sha256": "4e82ace2ed0bf1df28095453fa1a30c6421c887a5dd11f15285e83f70067531c",
+    "context_confirmation_receipt_path": "experiments/active/exp-altcoin-1d-k1k2-market-context-preholdout-20260905-v3/results/confirmation_a_receipt.json",
+    "context_confirmation_receipt_sha256": "db5f9df5bfea352e7154753bb7cd9e56df9bc9f7e6c8fdda0935879c06a4253a",
+    "universe_manifest_path": "experiments/active/exp-altcoin-1d-k1k2-market-context-preholdout-20260905-v3/universe_manifest.json",
+    "universe_manifest_sha256": "e551b63aeb897d5dfecb450ba0ccbc6292dae66ab18e63e3b3560274cf9534d7"
+  },
+  "universe": {
+    "target_partitions": [
+      "the already-opened V1/V2 development symbols",
+      "the already-opened V3 confirmation A symbols"
+    ],
+    "sealed_confirmation_b_symbols_allowed": 0,
+    "target_exclusions": ["BTC", "ETH"],
+    "breadth_universe": "all eligible target symbols from the two allowed partitions",
+    "survivorship_warning": "The membership snapshot is from September 2026 and is not a point-in-time historical exchange universe."
+  },
+  "time_contract": {
+    "warmup_start_inclusive": "2025-09-01T00:00:00Z",
+    "holdout_start_inclusive": "2026-05-04T00:00:00Z",
+    "evaluation_end_exclusive": "2026-09-01T00:00:00Z",
+    "daily_timezone": "UTC",
+    "intraday_bars_per_complete_day": 96,
+    "minimum_daily_history_bars": 140,
+    "folds": [
+      {
+        "id": "2026_MAY_JUN",
+        "start_inclusive": "2026-05-04T00:00:00Z",
+        "end_exclusive": "2026-07-01T00:00:00Z"
+      },
+      {
+        "id": "2026_JUL_AUG",
+        "start_inclusive": "2026-07-01T00:00:00Z",
+        "end_exclusive": "2026-09-01T00:00:00Z"
+      }
+    ]
+  },
+  "fixed_signal_params": {
+    "ma_profile": "ema13_sma34",
+    "neutral_recency_bars": 10,
+    "transition_min_votes": 2,
+    "k1_k2_gap_max": 5
+  },
+  "fixed_context_params": {
+    "breadth_change5_min": 0.02,
+    "breadth_level_min": -1.0,
+    "context_mean_min": -1.0,
+    "major_score_min": -1.0,
+    "relative_score_min": -1.0
+  },
+  "single_new_variable": {
+    "name": "k1_signed_slow_side_atr_max",
+    "value": 0.75,
+    "definition": "At K1 close, direction times (K1 close minus SMA34) divided by contemporaneous ATR14 must be no greater than 0.75.",
+    "interpretation": "Reject already-extended K1 bars while retaining early launches close to the slow trend reference.",
+    "availability": "known at K1 close and therefore before K2 close and next-day-open entry",
+    "discovery_disclosure": "The feature and threshold were selected postmortem from the already-opened V3 development and confirmation A ledgers; they receive no confirmatory credit."
+  },
+  "fixed_execution_params": {
+    "stop_policy": "two_close_all_hard_2_0",
+    "bank_schedule": "v1_tail80",
+    "trail_reference": "slow",
+    "runner_buffer_atr": 1.25,
+    "entry": "next complete UTC day open",
+    "round_trip_cost_fraction": 0.002,
+    "maximum_horizon_bars": 90
+  },
+  "comparators": [
+    "V2 signal and execution with no market-context gate",
+    "V3 breadth_change5 >= +2pp",
+    "V4 breadth gate plus K1 slow-line extension <= 0.75ATR"
+  ],
+  "matched_control": {
+    "controls_per_event": 2,
+    "exclude_radius_bars": 30,
+    "strata": [
+      "same symbol",
+      "calendar half-year",
+      "copied direction",
+      "within-symbol-holdout ATR14 quintile"
+    ],
+    "seed": "altcoin-1d-k1k2-early-launch-holdout-20260905-v4",
+    "p_seed": 405905
+  },
+  "sample_minimums": {
+    "events_total": 20,
+    "events_per_fold": 5,
+    "symbols_total": 15
+  },
+  "acceptance_gates": {
+    "sample_eligible": true,
+    "mean_net_positive": true,
+    "capped_mean_net_r_positive": true,
+    "profit_factor_above_one": true,
+    "positive_fold_share_min": 1.0,
+    "positive_symbol_share_min": 0.55,
+    "week_cluster_signflip_p_max": 0.01,
+    "matched_random_p_max": 0.01,
+    "matched_excess_positive": true,
+    "leave_largest_winner_out_mean_net_positive": true,
+    "portfolio_total_return_positive": true,
+    "portfolio_closed_equity_max_drawdown_max": 0.20
+  },
+  "safety": {
+    "training_eligible": false,
+    "production_eligible": false,
+    "automatic_promote": false,
+    "tradingview_write": false,
+    "active_or_forward_change": false,
+    "live_order_change": false,
+    "sealed_confirmation_b_must_not_be_opened": true,
+    "holdout_may_run_only_with_explicit_cli_flag": "--eval-holdout"
+  }
+}

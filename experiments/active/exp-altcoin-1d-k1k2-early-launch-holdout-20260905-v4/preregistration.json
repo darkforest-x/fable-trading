@@ -1,0 +1,31 @@
+{
+  "experiment_id": "exp-altcoin-1d-k1k2-early-launch-holdout-20260905-v4",
+  "registered_before_holdout_open": true,
+  "question": "After directional breadth has expanded by at least two percentage points, can rejecting K1 bars already more than 0.75ATR beyond SMA34 improve the probability of a genuine daily trend takeover without loosening the sparse K1->K2 episode?",
+  "hypothesis": "A K1 that has crossed EMA13 but remains within 0.75ATR of SMA34 is earlier in the launch. A farther K1 is more likely to be a late chase whose K2 retest has poor remaining right tail.",
+  "single_variable_contract": "Relative to frozen V3, only k1_signed_slow_side_atr_max=0.75 is added. Breadth, EMA13/SMA34, compression episode, K1/K2 morphology, votes, gap, entry, stops, bank schedule, runner, horizon, costs and portfolio risk cannot change after holdout opens.",
+  "discovery_bias": "Both the variable and 0.75 threshold were chosen after inspecting V3 development and confirmation A. Those rows are discovery only. The authorized 2026-05-04 through 2026-08-31 holdout is the sole final test for this exact configuration.",
+  "holdout_accounting": {
+    "repository_holdout_start": "2026-05-04T00:00:00Z",
+    "evaluation_end_exclusive": "2026-09-01T00:00:00Z",
+    "configuration_consumption_number": 1,
+    "owner_authorization": "The owner explicitly approved reading prices after 2026-05-04 and later authorized autonomous execution.",
+    "no_second_look": true
+  },
+  "independent_units": {
+    "cross_section": "underlying symbol",
+    "dependence_cluster": "entry ISO week",
+    "time_folds": ["2026_MAY_JUN", "2026_JUL_AUG"]
+  },
+  "controls": "Two deterministic random entries per candidate, matched on symbol, half-year, copied direction and within-symbol holdout ATR14 quintile, with identical risk, exit and 20bp cost.",
+  "decision_rule": "Every registered gate is conjunctive. Failure of any gate rejects V4. Passing all gates would create only a research/paper candidate because P0/P1, current-universe survivorship and production gates remain unresolved.",
+  "sealed_data": "The 108-symbol V3 confirmation B partition remains unopened and is not used for warmup, breadth, signals, outcomes or controls.",
+  "forbidden_after_open": [
+    "change the 0.75ATR extension cap",
+    "change the +2pp breadth gate",
+    "change K1/K2 morphology, MA lengths or vote count",
+    "change stop, take-profit, runner, cost, sizing or acceptance gates",
+    "train or select a model",
+    "write TradingView, ACTIVE, forward, deployment or live-order state"
+  ]
+}

@@ -5069,3 +5069,34 @@ experiments:
       repaired successful run used data before 2026-05-01, scored zero holdout
       rows and read zero B rows. No training, TradingView, ACTIVE, forward,
       deployment, sizing, API-key or live-order state changed.
+
+  - experiment_id: exp-altcoin-1d-k1k2-early-launch-holdout-20260905-v4
+    source_repo: darkforest-x/fable-trading
+    source_commit: "962f0b4b4f06c4d113ee606fdd7db5b036405973"
+    status: active
+    question: >-
+      After directional breadth has expanded by at least two percentage points,
+      can rejecting K1 bars already more than 0.75 ATR beyond SMA34 isolate
+      early daily trend launches without loosening the sparse K1->K2 episode?
+    single_variable: >-
+      Relative to frozen V3, only the causal K1 signed slow-line distance cap
+      k1_signed_slow_side_atr <= 0.75 is added. Signal morphology, breadth,
+      entry, close-confirmed stop, profit ladder, MA runner, 90-day horizon,
+      20bp cost and every acceptance gate remain frozen.
+    result: >-
+      preregistered_final_holdout_not_run. The variable and threshold were
+      discovered postmortem from already-opened V3 development and confirmation
+      A, so those rows receive zero confirmatory credit. The only decisive test
+      is one owner-authorized read of [2026-05-04, 2026-09-01).
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      The exact 161-symbol target universe is frozen to previously opened V1/V2
+      development plus V3 confirmation A; the 108-symbol V3 confirmation B is
+      excluded even from warmup and breadth. The evaluator requires an explicit
+      --eval-holdout flag and writes a one-shot started receipt before any price
+      source is opened. Passing would be research/paper only because P0/P1 and
+      production gates remain unresolved.
