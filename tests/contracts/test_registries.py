@@ -205,6 +205,7 @@ def test_holdout_consumption_is_declared_per_experiment_not_assumed():
         "exp-btcusdtp-15m-multifactor-confluence-preholdout-20260904-v1",
         "exp-btcusdtp-15m-runner-isolation-preholdout-20260904-v1",
         "exp-btcusdtp-k1k2-15m-5m-params-preholdout-20260904-v1",
+        "exp-altcoin-1d-k1k2-early-launch-holdout-20260905-v4",
         "exp-pine-eth-15m-v1",
         "exp-yoyo-trading-fixed-w10-classifier-holdout3d",
     }, (

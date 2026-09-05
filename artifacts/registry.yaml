@@ -14552,3 +14552,88 @@ artifacts:
     config_hash: "4e82ace2ed0bf1df28095453fa1a30c6421c887a5dd11f15285e83f70067531c"
     data_cutoff: "2026-05-01T00:00:00Z"
     notes: Four-panel static figure covering context-gate increment, fold stability, per-trade right-tail concentration and post-entry runner split.
+
+  - artifact_id: altcoin-1d-k1k2-early-launch-v4-holdout
+    artifact_type: manifest
+    role: one_shot_final_holdout_receipt_and_gate_verdict
+    source_repo: darkforest-x/fable-trading
+    source_commit: "952055924a18ba2b13843a42d518487f13a7bef1"
+    source_path: experiments/active/exp-altcoin-1d-k1k2-early-launch-holdout-20260905-v4/results/holdout_receipt.json
+    sha256: "76e1d6087af6e4e8f5a5aecc0aff05ec950325a65b5ac35b18ea414d5ad12609"
+    size_bytes: 6590
+    storage_uri: "repo://experiments/active/exp-altcoin-1d-k1k2-early-launch-holdout-20260905-v4/results/holdout_receipt.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "952055924a18ba2b13843a42d518487f13a7bef1"
+    config_hash: "3a0d4975d37709f5a2f3e661a8dae829d23bea9464baa5d6884b46aba2c4f786"
+    data_cutoff: "2026-09-01T00:00:00Z"
+    notes: Exact V4 holdout use number one; rejected for sample, fold, symbol-share, clustered-significance and matched-control gates.
+
+  - artifact_id: altcoin-1d-k1k2-early-launch-v4-diagnostics
+    artifact_type: manifest
+    role: frozen_ledger_signal_funnel_direction_censoring_and_concentration_diagnostics
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5bc0f63e7b03b2e545f482b8772b37bfe5c6ff67"
+    source_path: analysis/output/altcoin_1d_k1k2_early_launch_holdout_20260905_v4/summary.json
+    sha256: "92d61e85ec804ea06e954b651ee310112416c1bde1407ebb605f22363285fb0a"
+    size_bytes: 1949
+    storage_uri: "repo://analysis/output/altcoin_1d_k1k2_early_launch_holdout_20260905_v4/summary.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "5bc0f63e7b03b2e545f482b8772b37bfe5c6ff67"
+    config_hash: "3a0d4975d37709f5a2f3e661a8dae829d23bea9464baa5d6884b46aba2c4f786"
+    data_cutoff: "2026-09-01T00:00:00Z"
+    notes: Post-holdout diagnosis only; records n=4 direction/right-censoring confound, zero matched controls and leave-top-two failure without selecting a rerun.
+
+  - artifact_id: altcoin-1d-k1k2-early-launch-v4-report
+    artifact_type: report
+    role: canonical_chinese_altcoin_daily_final_holdout_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5bc0f63e7b03b2e545f482b8772b37bfe5c6ff67"
+    source_path: analysis/p1_altcoin_1d_k1k2_early_launch_holdout_20260905.md
+    sha256: "58c1e5da7885820d0d79e2877434f88279168f77fccf96e70d9b7da61b13d26b"
+    size_bytes: 18225
+    storage_uri: "repo://analysis/p1_altcoin_1d_k1k2_early_launch_holdout_20260905.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "5bc0f63e7b03b2e545f482b8772b37bfe5c6ff67"
+    config_hash: "3a0d4975d37709f5a2f3e661a8dae829d23bea9464baa5d6884b46aba2c4f786"
+    data_cutoff: "2026-09-01T00:00:00Z"
+    notes: Full frozen rules, source coverage, one-shot holdout results, matched-control failure, trade postmortem and prospective-only next hypotheses.
+
+  - artifact_id: altcoin-1d-k1k2-early-launch-v4-html
+    artifact_type: report
+    role: owner_facing_self_contained_html_altcoin_final_holdout_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5bc0f63e7b03b2e545f482b8772b37bfe5c6ff67"
+    source_path: analysis/html/p1_altcoin_1d_k1k2_early_launch_holdout_20260905.html
+    sha256: "fea902d55b0aa194c85bee59b4e8527dceb4c355c821ef0f8fef527e14999fc7"
+    size_bytes: 279960
+    storage_uri: "repo://analysis/html/p1_altcoin_1d_k1k2_early_launch_holdout_20260905.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "5bc0f63e7b03b2e545f482b8772b37bfe5c6ff67"
+    config_hash: "3a0d4975d37709f5a2f3e661a8dae829d23bea9464baa5d6884b46aba2c4f786"
+    data_cutoff: "2026-09-01T00:00:00Z"
+    notes: Self-contained HTML with embedded four-panel diagnosis; desktop and 390px browser QA passed with zero console errors or horizontal overflow.
+
+  - artifact_id: altcoin-1d-k1k2-early-launch-v4-figure
+    artifact_type: report
+    role: signal_funnel_trade_fold_direction_and_censoring_figure
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5bc0f63e7b03b2e545f482b8772b37bfe5c6ff67"
+    source_path: analysis/output/altcoin_1d_k1k2_early_launch_holdout_20260905_v4/altcoin_1d_k1k2_early_launch_holdout_diagnosis.png
+    sha256: "6ccbb10840263d0943edbb7a1c438c9ddfb895d8a8185f5526124ca49c3031e5"
+    size_bytes: 191782
+    storage_uri: "repo://analysis/output/altcoin_1d_k1k2_early_launch_holdout_20260905_v4/altcoin_1d_k1k2_early_launch_holdout_diagnosis.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "5bc0f63e7b03b2e545f482b8772b37bfe5c6ff67"
+    config_hash: "3a0d4975d37709f5a2f3e661a8dae829d23bea9464baa5d6884b46aba2c4f786"
+    data_cutoff: "2026-09-01T00:00:00Z"
+    notes: Static four-panel figure covering the signal funnel, candidate returns, empty second fold and direction/right-censoring confound.
