@@ -1,0 +1,1428 @@
+{
+  "schema_version": 1,
+  "created_without_price_or_outcome_inspection": true,
+  "source_universe_path": "experiments/active/exp-1h-okx-model-first-standing-top10-20260904-v1/results/universe.json",
+  "source_universe_sha256": "e9bf6421dc2fddb61d34a6fed2204f2a04c191d81c9157b52c70213b74f58682",
+  "source_universe_frozen_at": "2026-09-03T17:23:19.938193+00:00",
+  "development_universe_path": "experiments/active/exp-altcoin-1d-k1k2-episode-runner-preholdout-20260905-v1/config.json",
+  "development_symbols_excluded_from_holdbacks": [
+    "AAVE",
+    "ADA",
+    "APE",
+    "APT",
+    "ARB",
+    "ATOM",
+    "AVAX",
+    "BCH",
+    "BNB",
+    "BTC",
+    "CFX",
+    "CHZ",
+    "CRV",
+    "DOGE",
+    "DOT",
+    "EIGEN",
+    "ENA",
+    "ETC",
+    "ETH",
+    "ETHFI",
+    "FIL",
+    "GALA",
+    "GRT",
+    "HBAR",
+    "HYPE",
+    "ICP",
+    "INJ",
+    "JTO",
+    "LINK",
+    "LTC",
+    "NEAR",
+    "OKB",
+    "ONDO",
+    "OP",
+    "ORDI",
+    "PENGU",
+    "PEPE",
+    "PI",
+    "POL",
+    "SAND",
+    "SHIB",
+    "SOL",
+    "SUI",
+    "TIA",
+    "TRUMP",
+    "TRX",
+    "UNI",
+    "VIRTUAL",
+    "WLD",
+    "XLM",
+    "XRP",
+    "ZEC",
+    "ZK",
+    "ZRO"
+  ],
+  "partition": {
+    "seed": "altcoin-1d-v3-partition",
+    "blocking_variable": "legacy_and_current versus current_only source availability",
+    "within_block_assignment": "sort SHA256(seed|symbol), alternate A/B",
+    "confirmation_a_count": 109,
+    "sealed_b_count": 108,
+    "missing_source_symbols": [
+      "AEON",
+      "CASHCAT",
+      "CP",
+      "DGAI",
+      "DOS",
+      "GRVT"
+    ]
+  },
+  "confirmation_a": {
+    "0G": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_0G_USDT_SWAP_15m_31273.csv"
+      ]
+    },
+    "2Z": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_2Z_USDT_SWAP_15m_30303.csv"
+      ]
+    },
+    "ACH": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ACH_USDT_SWAP_15m_41918.csv"
+      ]
+    },
+    "ACU": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ACU_USDT_SWAP_15m_19479.csv"
+      ]
+    },
+    "AEVO": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_AEVO_USDT_SWAP_15m_41917.csv"
+      ]
+    },
+    "AGLD": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_AGLD_USDT_SWAP_15m_63470.csv",
+        "data/kline_fetched/okx_AGLD_USDT_SWAP_15m_41917.csv"
+      ]
+    },
+    "AI": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_AI_USDT_SWAP_15m_10243.csv"
+      ]
+    },
+    "ALGO": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ALGO_USDT_SWAP_15m_41917.csv"
+      ]
+    },
+    "APR": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_APR_USDT_SWAP_15m_28219.csv"
+      ]
+    },
+    "AR": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_AR_USDT_SWAP_15m_41916.csv"
+      ]
+    },
+    "ASTER": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ASTER_USDT_SWAP_15m_31295.csv"
+      ]
+    },
+    "ATH": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ATH_USDT_SWAP_15m_41916.csv"
+      ]
+    },
+    "AZTEC": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_AZTEC_USDT_SWAP_15m_17641.csv"
+      ]
+    },
+    "BAT": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_BAT_USDT_SWAP_15m_64126.csv",
+        "data/kline_fetched/okx_BAT_USDT_SWAP_15m_41914.csv"
+      ]
+    },
+    "BEAT": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_BEAT_USDT_SWAP_15m_26354.csv"
+      ]
+    },
+    "BIGTIME": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_BIGTIME_USDT_SWAP_15m_41913.csv"
+      ]
+    },
+    "BILL": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_BILL_USDT_SWAP_15m_9587.csv"
+      ]
+    },
+    "BIO": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_BIO_USDT_SWAP_15m_41913.csv"
+      ]
+    },
+    "BLEND": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_BLEND_USDT_SWAP_15m_10251.csv"
+      ]
+    },
+    "BLUR": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_BLUR_USDT_SWAP_15m_13011.csv",
+        "data/kline_fetched/okx_BLUR_USDT_SWAP_15m_41913.csv"
+      ]
+    },
+    "BRETT": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_BRETT_USDT_SWAP_15m_41913.csv"
+      ]
+    },
+    "CAP": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_CAP_USDT_SWAP_15m_4673.csv"
+      ]
+    },
+    "CC": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_CC_USDT_SWAP_15m_27515.csv"
+      ]
+    },
+    "CELO": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_CELO_USDT_SWAP_15m_61851.csv",
+        "data/kline_fetched/okx_CELO_USDT_SWAP_15m_41912.csv"
+      ]
+    },
+    "COAI": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_COAI_USDT_SWAP_15m_29049.csv"
+      ]
+    },
+    "COMP": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_COMP_USDT_SWAP_15m_64125.csv",
+        "data/kline_fetched/okx_COMP_USDT_SWAP_15m_41912.csv"
+      ]
+    },
+    "CRO": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_CRO_USDT_SWAP_15m_64122.csv",
+        "data/kline_fetched/okx_CRO_USDT_SWAP_15m_41911.csv"
+      ]
+    },
+    "CVX": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_CVX_USDT_SWAP_15m_41911.csv"
+      ]
+    },
+    "DATA": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_DATA_USDT_SWAP_15m_4097.csv"
+      ]
+    },
+    "EDEN": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_EDEN_USDT_SWAP_15m_30501.csv"
+      ]
+    },
+    "ENS": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_ENS_USDT_SWAP_15m_57240.csv",
+        "data/kline_fetched/okx_ENS_USDT_SWAP_15m_41910.csv"
+      ]
+    },
+    "ESP": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ESP_USDT_SWAP_15m_17715.csv"
+      ]
+    },
+    "F": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_F_USDT_SWAP_15m_28115.csv"
+      ]
+    },
+    "FOGO": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_FOGO_USDT_SWAP_15m_20692.csv"
+      ]
+    },
+    "GIGGLE": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_GIGGLE_USDT_SWAP_15m_28119.csv"
+      ]
+    },
+    "GLM": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_GLM_USDT_SWAP_15m_41909.csv"
+      ]
+    },
+    "GMX": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_GMX_USDT_SWAP_15m_14242.csv",
+        "data/kline_fetched/okx_GMX_USDT_SWAP_15m_41908.csv"
+      ]
+    },
+    "GRAM": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_GRAM_USDT_SWAP_15m_5545.csv"
+      ]
+    },
+    "GRASS": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_GRASS_USDT_SWAP_15m_41908.csv"
+      ]
+    },
+    "HOME": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_HOME_USDT_SWAP_15m_40970.csv"
+      ]
+    },
+    "ICX": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ICX_USDT_SWAP_15m_41907.csv"
+      ]
+    },
+    "IMX": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_IMX_USDT_SWAP_15m_41907.csv"
+      ]
+    },
+    "IOTA": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_IOTA_USDT_SWAP_15m_64117.csv",
+        "data/kline_fetched/okx_IOTA_USDT_SWAP_15m_41907.csv"
+      ]
+    },
+    "JELLYJELLY": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_JELLYJELLY_USDT_SWAP_15m_41907.csv"
+      ]
+    },
+    "JUP": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_JUP_USDT_SWAP_15m_41907.csv"
+      ]
+    },
+    "KAITO": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_KAITO_USDT_SWAP_15m_41907.csv"
+      ]
+    },
+    "KSM": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_KSM_USDT_SWAP_15m_64126.csv",
+        "data/kline_fetched/okx_KSM_USDT_SWAP_15m_41907.csv"
+      ]
+    },
+    "LA": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_LA_USDT_SWAP_15m_40971.csv"
+      ]
+    },
+    "LDO": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_LDO_USDT_SWAP_15m_41906.csv"
+      ]
+    },
+    "LINEA": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_LINEA_USDT_SWAP_15m_33275.csv"
+      ]
+    },
+    "LIT": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_LIT_USDT_SWAP_15m_22373.csv"
+      ]
+    },
+    "LPT": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_LPT_USDT_SWAP_15m_64117.csv",
+        "data/kline_fetched/okx_LPT_USDT_SWAP_15m_41906.csv"
+      ]
+    },
+    "LUNA": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_LUNA_USDT_SWAP_15m_38214.csv",
+        "data/kline_fetched/okx_LUNA_USDT_SWAP_15m_41906.csv"
+      ]
+    },
+    "MANA": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_MANA_USDT_SWAP_15m_64122.csv",
+        "data/kline_fetched/okx_MANA_USDT_SWAP_15m_41806.csv"
+      ]
+    },
+    "METIS": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_METIS_USDT_SWAP_15m_41905.csv"
+      ]
+    },
+    "MEW": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_MEW_USDT_SWAP_15m_41905.csv"
+      ]
+    },
+    "MMT": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_MMT_USDT_SWAP_15m_27137.csv"
+      ]
+    },
+    "NEIRO": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_NEIRO_USDT_SWAP_15m_41905.csv"
+      ]
+    },
+    "NEO": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_NEO_USDT_SWAP_15m_64122.csv",
+        "data/kline_fetched/okx_NEO_USDT_SWAP_15m_41905.csv"
+      ]
+    },
+    "NES": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_NES_USDT_SWAP_15m_4861.csv"
+      ]
+    },
+    "NIGHT": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_NIGHT_USDT_SWAP_15m_23781.csv"
+      ]
+    },
+    "NMR": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_NMR_USDT_SWAP_15m_41904.csv"
+      ]
+    },
+    "NOT": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_NOT_USDT_SWAP_15m_41904.csv"
+      ]
+    },
+    "OL": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_OL_USDT_SWAP_15m_27722.csv"
+      ]
+    },
+    "ONT": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_ONT_USDT_SWAP_15m_64126.csv",
+        "data/kline_fetched/okx_ONT_USDT_SWAP_15m_41904.csv"
+      ]
+    },
+    "ORDER": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ORDER_USDT_SWAP_15m_30486.csv"
+      ]
+    },
+    "PENDLE": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_PENDLE_USDT_SWAP_15m_31763.csv"
+      ]
+    },
+    "PEOPLE": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_PEOPLE_USDT_SWAP_15m_55234.csv",
+        "data/kline_fetched/okx_PEOPLE_USDT_SWAP_15m_41904.csv"
+      ]
+    },
+    "PIEVERSE": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_PIEVERSE_USDT_SWAP_15m_26021.csv"
+      ]
+    },
+    "PIPPIN": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_PIPPIN_USDT_SWAP_15m_24439.csv"
+      ]
+    },
+    "PROS": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_PROS_USDT_SWAP_15m_10331.csv"
+      ]
+    },
+    "PROVE": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_PROVE_USDT_SWAP_15m_28869.csv"
+      ]
+    },
+    "PUMP": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_PUMP_USDT_SWAP_15m_37965.csv"
+      ]
+    },
+    "PYTH": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_PYTH_USDT_SWAP_15m_41903.csv"
+      ]
+    },
+    "QTUM": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_QTUM_USDT_SWAP_15m_64122.csv",
+        "data/kline_fetched/okx_QTUM_USDT_SWAP_15m_41903.csv"
+      ]
+    },
+    "RAVE": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_RAVE_USDT_SWAP_15m_23219.csv"
+      ]
+    },
+    "RE": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_RE_USDT_SWAP_15m_5545.csv"
+      ]
+    },
+    "RENDER": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_RENDER_USDT_SWAP_15m_41903.csv"
+      ]
+    },
+    "RLS": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_RLS_USDT_SWAP_15m_24438.csv"
+      ]
+    },
+    "S": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_S_USDT_SWAP_15m_41902.csv"
+      ]
+    },
+    "SAHARA": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_SAHARA_USDT_SWAP_15m_39713.csv"
+      ]
+    },
+    "SIGN": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_SIGN_USDT_SWAP_15m_41902.csv"
+      ]
+    },
+    "SKY": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_SKY_USDT_SWAP_15m_32325.csv"
+      ]
+    },
+    "SNX": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_SNX_USDT_SWAP_15m_64122.csv",
+        "data/kline_fetched/okx_SNX_USDT_SWAP_15m_41902.csv"
+      ]
+    },
+    "SPACE": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_SPACE_USDT_SWAP_15m_19455.csv"
+      ]
+    },
+    "SPX": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_SPX_USDT_SWAP_15m_37727.csv"
+      ]
+    },
+    "SSV": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_SSV_USDT_SWAP_15m_41901.csv"
+      ]
+    },
+    "STABLE": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_STABLE_USDT_SWAP_15m_23869.csv"
+      ]
+    },
+    "STRK": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_STRK_USDT_SWAP_15m_41901.csv"
+      ]
+    },
+    "STX": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_STX_USDT_SWAP_15m_12411.csv",
+        "data/kline_fetched/okx_STX_USDT_SWAP_15m_41901.csv"
+      ]
+    },
+    "SYRUP": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_SYRUP_USDT_SWAP_15m_39065.csv"
+      ]
+    },
+    "TAO": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_TAO_USDT_SWAP_15m_41901.csv"
+      ]
+    },
+    "TRUST": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_TRUST_USDT_SWAP_15m_27045.csv"
+      ]
+    },
+    "UB": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_UB_USDT_SWAP_15m_10333.csv"
+      ]
+    },
+    "UMA": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_UMA_USDT_SWAP_15m_64125.csv",
+        "data/kline_fetched/okx_UMA_USDT_SWAP_15m_41900.csv"
+      ]
+    },
+    "UP": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_UP_USDT_SWAP_15m_12263.csv"
+      ]
+    },
+    "VANA": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_VANA_USDT_SWAP_15m_41900.csv"
+      ]
+    },
+    "VVV": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_VVV_USDT_SWAP_15m_4027.csv"
+      ]
+    },
+    "WCT": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_WCT_USDT_SWAP_15m_41900.csv"
+      ]
+    },
+    "WET": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_WET_USDT_SWAP_15m_23763.csv"
+      ]
+    },
+    "WIF": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_WIF_USDT_SWAP_15m_41900.csv"
+      ]
+    },
+    "XPL": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_XPL_USDT_SWAP_15m_33671.csv"
+      ]
+    },
+    "XTZ": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_XTZ_USDT_SWAP_15m_64126.csv",
+        "data/kline_fetched/okx_XTZ_USDT_SWAP_15m_41899.csv"
+      ]
+    },
+    "YGG": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_YGG_USDT_SWAP_15m_64125.csv",
+        "data/kline_fetched/okx_YGG_USDT_SWAP_15m_41899.csv"
+      ]
+    },
+    "ZAMA": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ZAMA_USDT_SWAP_15m_20793.csv"
+      ]
+    },
+    "ZBT": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ZBT_USDT_SWAP_15m_28869.csv"
+      ]
+    },
+    "ZETA": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ZETA_USDT_SWAP_15m_41899.csv"
+      ]
+    },
+    "ZORA": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ZORA_USDT_SWAP_15m_29541.csv"
+      ]
+    },
+    "ZRX": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ZRX_USDT_SWAP_15m_41899.csv"
+      ]
+    }
+  },
+  "sealed_confirmation_b": {
+    "1INCH": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_1INCH_USDT_SWAP_15m_64126.csv",
+        "data/kline_fetched/okx_1INCH_USDT_SWAP_15m_41918.csv"
+      ]
+    },
+    "A": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_A_USDT_SWAP_15m_41918.csv"
+      ]
+    },
+    "ACT": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ACT_USDT_SWAP_15m_41918.csv"
+      ]
+    },
+    "AERO": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_AERO_USDT_SWAP_15m_39066.csv"
+      ]
+    },
+    "AIXBT": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_AIXBT_USDT_SWAP_15m_41917.csv"
+      ]
+    },
+    "ALLO": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ALLO_USDT_SWAP_15m_26448.csv"
+      ]
+    },
+    "ANIME": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ANIME_USDT_SWAP_15m_41816.csv"
+      ]
+    },
+    "API3": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_API3_USDT_SWAP_15m_46488.csv",
+        "data/kline_fetched/okx_API3_USDT_SWAP_15m_41916.csv"
+      ]
+    },
+    "ARKM": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ARKM_USDT_SWAP_15m_41916.csv"
+      ]
+    },
+    "ARX": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ARX_USDT_SWAP_15m_5057.csv"
+      ]
+    },
+    "AT": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_AT_USDT_SWAP_15m_27627.csv"
+      ]
+    },
+    "AUCTION": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_AUCTION_USDT_SWAP_15m_41915.csv"
+      ]
+    },
+    "AVNT": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_AVNT_USDT_SWAP_15m_31253.csv"
+      ]
+    },
+    "AXS": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_AXS_USDT_SWAP_15m_64126.csv",
+        "data/kline_fetched/okx_AXS_USDT_SWAP_15m_41915.csv"
+      ]
+    },
+    "BABY": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_BABY_USDT_SWAP_15m_41914.csv"
+      ]
+    },
+    "BAND": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_BAND_USDT_SWAP_15m_64122.csv",
+        "data/kline_fetched/okx_BAND_USDT_SWAP_15m_41914.csv"
+      ]
+    },
+    "BARD": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_BARD_USDT_SWAP_15m_31651.csv"
+      ]
+    },
+    "BASED": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_BASED_USDT_SWAP_15m_13129.csv"
+      ]
+    },
+    "BERA": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_BERA_USDT_SWAP_15m_41914.csv"
+      ]
+    },
+    "BICO": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_BICO_USDT_SWAP_15m_54571.csv",
+        "data/kline_fetched/okx_BICO_USDT_SWAP_15m_41914.csv"
+      ]
+    },
+    "BOME": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_BOME_USDT_SWAP_15m_41913.csv"
+      ]
+    },
+    "BONK": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_BONK_USDT_SWAP_15m_41913.csv"
+      ]
+    },
+    "BREV": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_BREV_USDT_SWAP_15m_21759.csv"
+      ]
+    },
+    "BSB": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_BSB_USDT_SWAP_15m_12843.csv"
+      ]
+    },
+    "CHIP": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_CHIP_USDT_SWAP_15m_11003.csv"
+      ]
+    },
+    "CORE": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_CORE_USDT_SWAP_15m_13639.csv",
+        "data/kline_fetched/okx_CORE_USDT_SWAP_15m_41912.csv"
+      ]
+    },
+    "DASH": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_DASH_USDT_SWAP_15m_26983.csv"
+      ]
+    },
+    "DOOD": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_DOOD_USDT_SWAP_15m_41911.csv"
+      ]
+    },
+    "DYDX": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_DYDX_USDT_SWAP_15m_63356.csv",
+        "data/kline_fetched/okx_DYDX_USDT_SWAP_15m_41911.csv"
+      ]
+    },
+    "EDGE": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_EDGE_USDT_SWAP_15m_12925.csv"
+      ]
+    },
+    "EGLD": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_EGLD_USDT_SWAP_15m_64122.csv",
+        "data/kline_fetched/okx_EGLD_USDT_SWAP_15m_41910.csv"
+      ]
+    },
+    "ENJ": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ENJ_USDT_SWAP_15m_41910.csv"
+      ]
+    },
+    "ENSO": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ENSO_USDT_SWAP_15m_27723.csv"
+      ]
+    },
+    "ETHW": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ETHW_USDT_SWAP_15m_41910.csv"
+      ]
+    },
+    "FARTCOIN": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_FARTCOIN_USDT_SWAP_15m_41909.csv"
+      ]
+    },
+    "FLOKI": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_FLOKI_USDT_SWAP_15m_12515.csv",
+        "data/kline_fetched/okx_FLOKI_USDT_SWAP_15m_41909.csv"
+      ]
+    },
+    "FLOW": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_FLOW_USDT_SWAP_15m_41909.csv"
+      ]
+    },
+    "GAS": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_GAS_USDT_SWAP_15m_41909.csv"
+      ]
+    },
+    "GMT": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_GMT_USDT_SWAP_15m_43697.csv",
+        "data/kline_fetched/okx_GMT_USDT_SWAP_15m_41908.csv"
+      ]
+    },
+    "GPS": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_GPS_USDT_SWAP_15m_41908.csv"
+      ]
+    },
+    "H": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_H_USDT_SWAP_15m_39067.csv"
+      ]
+    },
+    "HMSTR": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_HMSTR_USDT_SWAP_15m_41908.csv"
+      ]
+    },
+    "HUMA": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_HUMA_USDT_SWAP_15m_41907.csv"
+      ]
+    },
+    "INIT": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_INIT_USDT_SWAP_15m_41907.csv"
+      ]
+    },
+    "IOST": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_IOST_USDT_SWAP_15m_64126.csv",
+        "data/kline_fetched/okx_IOST_USDT_SWAP_15m_41907.csv"
+      ]
+    },
+    "IRYS": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_IRYS_USDT_SWAP_15m_7558.csv"
+      ]
+    },
+    "KAT": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_KAT_USDT_SWAP_15m_15813.csv"
+      ]
+    },
+    "KGEN": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_KGEN_USDT_SWAP_15m_28801.csv"
+      ]
+    },
+    "KITE": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_KITE_USDT_SWAP_15m_12199.csv"
+      ]
+    },
+    "KMNO": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_KMNO_USDT_SWAP_15m_41907.csv"
+      ]
+    },
+    "LAB": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_LAB_USDT_SWAP_15m_27427.csv"
+      ]
+    },
+    "LAYER": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_LAYER_USDT_SWAP_15m_41907.csv"
+      ]
+    },
+    "LIGHT": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_LIGHT_USDT_SWAP_15m_23123.csv"
+      ]
+    },
+    "LQTY": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_LQTY_USDT_SWAP_15m_41906.csv"
+      ]
+    },
+    "MAGIC": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_MAGIC_USDT_SWAP_15m_14242.csv",
+        "data/kline_fetched/okx_MAGIC_USDT_SWAP_15m_41906.csv"
+      ]
+    },
+    "MASK": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_MASK_USDT_SWAP_15m_64126.csv",
+        "data/kline_fetched/okx_MASK_USDT_SWAP_15m_41906.csv"
+      ]
+    },
+    "ME": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ME_USDT_SWAP_15m_41906.csv"
+      ]
+    },
+    "MEGA": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_MEGA_USDT_SWAP_15m_10147.csv"
+      ]
+    },
+    "MEME": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_MEME_USDT_SWAP_15m_41905.csv"
+      ]
+    },
+    "MERL": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_MERL_USDT_SWAP_15m_41905.csv"
+      ]
+    },
+    "MET": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_MET_USDT_SWAP_15m_29554.csv"
+      ]
+    },
+    "MINA": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_MINA_USDT_SWAP_15m_41905.csv"
+      ]
+    },
+    "MON": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_MON_USDT_SWAP_15m_29555.csv"
+      ]
+    },
+    "MOODENG": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_MOODENG_USDT_SWAP_15m_41905.csv"
+      ]
+    },
+    "MORPHO": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_MORPHO_USDT_SWAP_15m_41905.csv"
+      ]
+    },
+    "MOVE": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_MOVE_USDT_SWAP_15m_41905.csv"
+      ]
+    },
+    "MUBARAK": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_MUBARAK_USDT_SWAP_15m_41905.csv"
+      ]
+    },
+    "O": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_O_USDT_SWAP_15m_5521.csv"
+      ]
+    },
+    "OFC": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_OFC_USDT_SWAP_15m_12167.csv"
+      ]
+    },
+    "ONE": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ONE_USDT_SWAP_15m_41904.csv"
+      ]
+    },
+    "OPG": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_OPG_USDT_SWAP_15m_10831.csv"
+      ]
+    },
+    "OPN": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_OPN_USDT_SWAP_15m_16483.csv"
+      ]
+    },
+    "PARTI": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_PARTI_USDT_SWAP_15m_41904.csv"
+      ]
+    },
+    "PLUME": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_PLUME_USDT_SWAP_15m_41903.csv"
+      ]
+    },
+    "PNUT": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_PNUT_USDT_SWAP_15m_41903.csv"
+      ]
+    },
+    "POPCAT": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_POPCAT_USDT_SWAP_15m_41903.csv"
+      ]
+    },
+    "RAY": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_RAY_USDT_SWAP_15m_41903.csv"
+      ]
+    },
+    "RECALL": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_RECALL_USDT_SWAP_15m_27626.csv"
+      ]
+    },
+    "RESOLV": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_RESOLV_USDT_SWAP_15m_41241.csv"
+      ]
+    },
+    "RIVER": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_RIVER_USDT_SWAP_15m_20823.csv"
+      ]
+    },
+    "ROBO": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ROBO_USDT_SWAP_15m_16085.csv"
+      ]
+    },
+    "RSR": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_RSR_USDT_SWAP_15m_64122.csv",
+        "data/kline_fetched/okx_RSR_USDT_SWAP_15m_41902.csv"
+      ]
+    },
+    "RVN": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_RVN_USDT_SWAP_15m_64125.csv",
+        "data/kline_fetched/okx_RVN_USDT_SWAP_15m_41902.csv"
+      ]
+    },
+    "SAPIEN": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_SAPIEN_USDT_SWAP_15m_26948.csv"
+      ]
+    },
+    "SATS": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_SATS_USDT_SWAP_15m_41902.csv"
+      ]
+    },
+    "SEI": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_SEI_USDT_SWAP_15m_26197.csv"
+      ]
+    },
+    "SENT": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_SENT_USDT_SWAP_15m_26167.csv"
+      ]
+    },
+    "SHELL": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_SHELL_USDT_SWAP_15m_41902.csv"
+      ]
+    },
+    "SLX": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_SLX_USDT_SWAP_15m_7101.csv"
+      ]
+    },
+    "SOON": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_SOON_USDT_SWAP_15m_41902.csv"
+      ]
+    },
+    "SOPH": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_SOPH_USDT_SWAP_15m_41902.csv"
+      ]
+    },
+    "SPK": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_SPK_USDT_SWAP_15m_40585.csv"
+      ]
+    },
+    "SUSHI": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_SUSHI_USDT_SWAP_15m_64122.csv",
+        "data/kline_fetched/okx_SUSHI_USDT_SWAP_15m_41901.csv"
+      ]
+    },
+    "THETA": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_THETA_USDT_SWAP_15m_64122.csv",
+        "data/kline_fetched/okx_THETA_USDT_SWAP_15m_41901.csv"
+      ]
+    },
+    "TRB": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_TRB_USDT_SWAP_15m_64122.csv",
+        "data/kline_fetched/okx_TRB_USDT_SWAP_15m_41901.csv"
+      ]
+    },
+    "TRIA": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_TRIA_USDT_SWAP_15m_18229.csv"
+      ]
+    },
+    "TRUTH": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_TRUTH_USDT_SWAP_15m_24837.csv"
+      ]
+    },
+    "TURBO": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_TURBO_USDT_SWAP_15m_41900.csv"
+      ]
+    },
+    "USELESS": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_USELESS_USDT_SWAP_15m_36939.csv"
+      ]
+    },
+    "W": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_W_USDT_SWAP_15m_41900.csv"
+      ]
+    },
+    "WAL": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_WAL_USDT_SWAP_15m_41900.csv"
+      ]
+    },
+    "WLFI": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_WLFI_USDT_SWAP_15m_34143.csv"
+      ]
+    },
+    "WOO": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_WOO_USDT_SWAP_15m_13091.csv",
+        "data/kline_fetched/okx_WOO_USDT_SWAP_15m_41900.csv"
+      ]
+    },
+    "YB": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_YB_USDT_SWAP_15m_29367.csv"
+      ]
+    },
+    "YFI": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_YFI_USDT_SWAP_15m_64126.csv",
+        "data/kline_fetched/okx_YFI_USDT_SWAP_15m_41899.csv"
+      ]
+    },
+    "ZEN": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ZEN_USDT_SWAP_15m_27259.csv"
+      ]
+    },
+    "ZIL": {
+      "cohort": "legacy_and_current",
+      "sources": [
+        "data/kline_preholdout_archive15m_202109_202306/okx_ZIL_USDT_SWAP_15m_64126.csv",
+        "data/kline_fetched/okx_ZIL_USDT_SWAP_15m_41899.csv"
+      ]
+    },
+    "ZKP": {
+      "cohort": "current_only",
+      "sources": [
+        "data/kline_fetched/okx_ZKP_USDT_SWAP_15m_20988.csv"
+      ]
+    }
+  }
+}

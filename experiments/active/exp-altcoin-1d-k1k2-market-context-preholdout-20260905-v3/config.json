@@ -1,0 +1,135 @@
+{
+  "experiment_id": "exp-altcoin-1d-k1k2-market-context-preholdout-20260905-v3",
+  "owner_directive": "Continue optimizing the rejected altcoin daily K1->K2 strategy by repairing entry context rather than retuning MA morphology, stops, profit taking, costs, or portfolio risk.",
+  "parents": {
+    "signal_config_path": "experiments/active/exp-altcoin-1d-k1k2-episode-runner-preholdout-20260905-v1/config.json",
+    "signal_config_sha256": "dafee19bb45db8cc44be3a4f468f606ae1e8a795c8e801aa4d736fd6770bb55d",
+    "execution_config_path": "experiments/active/exp-altcoin-1d-k1k2-close-stop-bank-repair-preholdout-20260905-v2/config.json",
+    "execution_config_sha256": "71f6fed30018431e23e737c4d10ff61a7e874a8eb874eced5e234cb10f5d2411",
+    "execution_receipt_path": "experiments/active/exp-altcoin-1d-k1k2-close-stop-bank-repair-preholdout-20260905-v2/results/development_receipt.json",
+    "execution_receipt_sha256": "7d7b157028797859e2273e3d2c8ac2c33742cd8bb6b127efb006b52e702a416f",
+    "universe_manifest_path": "experiments/active/exp-altcoin-1d-k1k2-market-context-preholdout-20260905-v3/universe_manifest.json",
+    "universe_manifest_sha256": "e551b63aeb897d5dfecb450ba0ccbc6292dae66ab18e63e3b3560274cf9534d7",
+    "fixed_signal_params": {
+      "ma_profile": "ema13_sma34",
+      "neutral_recency_bars": 10,
+      "transition_min_votes": 2,
+      "k1_k2_gap_max": 5
+    },
+    "fixed_execution_params": {
+      "stop_policy": "two_close_all_hard_2_0",
+      "bank_schedule": "v1_tail80",
+      "trail_reference": "slow",
+      "runner_buffer_atr": 1.25
+    }
+  },
+  "source_contract": {
+    "safe_end_exclusive": "2026-05-01T00:00:00Z",
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "parser_chunksize": 64,
+    "repository_holdout_rows_allowed": 0,
+    "daily_timezone": "UTC",
+    "intraday_bars_per_complete_day": 96,
+    "discard_incomplete_or_duplicate_days": true,
+    "minimum_daily_history_bars": 140
+  },
+  "reference_markets": {
+    "BTC": "data/kline_deep/okx_BTC_USDT_SWAP_15m_158499.csv",
+    "ETH": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv"
+  },
+  "splits": {
+    "development": {
+      "universe": "parent_52_already_seen",
+      "start_inclusive": "2022-07-01T00:00:00Z",
+      "end_exclusive": "2026-05-01T00:00:00Z",
+      "contains_seen_v1_v2_outcomes": true,
+      "folds": [
+        {"id": "2022H2", "start_inclusive": "2022-07-01T00:00:00Z", "end_exclusive": "2023-01-01T00:00:00Z"},
+        {"id": "2023H1", "start_inclusive": "2023-01-01T00:00:00Z", "end_exclusive": "2023-07-01T00:00:00Z"},
+        {"id": "2023H2", "start_inclusive": "2023-07-01T00:00:00Z", "end_exclusive": "2024-01-01T00:00:00Z"},
+        {"id": "2024H1", "start_inclusive": "2024-01-01T00:00:00Z", "end_exclusive": "2024-07-01T00:00:00Z"},
+        {"id": "2024H2", "start_inclusive": "2024-07-01T00:00:00Z", "end_exclusive": "2025-01-01T00:00:00Z"},
+        {"id": "2025H1", "start_inclusive": "2025-01-01T00:00:00Z", "end_exclusive": "2025-07-01T00:00:00Z"},
+        {"id": "2025H2", "start_inclusive": "2025-07-01T00:00:00Z", "end_exclusive": "2026-01-01T00:00:00Z"},
+        {"id": "2026P1", "start_inclusive": "2026-01-01T00:00:00Z", "end_exclusive": "2026-05-01T00:00:00Z"}
+      ]
+    },
+    "confirmation_a": {
+      "universe": "confirmation_a_109_symbols_never_used_by_v1_v2",
+      "start_inclusive": "2022-07-01T00:00:00Z",
+      "end_exclusive": "2026-05-01T00:00:00Z",
+      "parameter_selection_after_open": false,
+      "folds": [
+        {"id": "legacy_2022H2", "start_inclusive": "2022-07-01T00:00:00Z", "end_exclusive": "2023-01-01T00:00:00Z"},
+        {"id": "legacy_2023H1", "start_inclusive": "2023-01-01T00:00:00Z", "end_exclusive": "2023-07-01T00:00:00Z"},
+        {"id": "current_2025H2", "start_inclusive": "2025-07-01T00:00:00Z", "end_exclusive": "2026-01-01T00:00:00Z"},
+        {"id": "current_2026P1", "start_inclusive": "2026-01-01T00:00:00Z", "end_exclusive": "2026-05-01T00:00:00Z"}
+      ]
+    }
+  },
+  "context_features": {
+    "minimum_breadth_constituents": 10,
+    "relative_return_window": 20,
+    "relative_efficiency_window": 20,
+    "breadth_change_lag": 5,
+    "breadth_change_full_scale": 0.20,
+    "major_return_window": 20,
+    "breadth_score_weights": {"level": 0.75, "change": 0.25},
+    "major_score_weights": {"alignment": 0.70, "atr_scaled_momentum": 0.30},
+    "relative_score_weights": {"return_rank": 0.50, "efficiency_rank": 0.50},
+    "context_score_weights": {"breadth": 0.3333333333, "major": 0.3333333333, "relative": 0.3333333334},
+    "all_features_available_at": "completed signal-day close; entry remains next complete UTC day open"
+  },
+  "selection": {
+    "initial": {
+      "breadth_level_min": -1.0,
+      "breadth_change5_min": -1.0,
+      "major_score_min": -1.0,
+      "relative_score_min": -1.0,
+      "context_mean_min": -1.0
+    },
+    "ordered_factors": ["breadth_level_min", "breadth_change5_min", "major_score_min", "relative_score_min", "context_mean_min"],
+    "candidates": {
+      "breadth_level_min": [-1.0, 0.50, 0.60, 0.70],
+      "breadth_change5_min": [-1.0, -0.02, 0.02, 0.05],
+      "major_score_min": [-1.0, 0.50, 0.65, 0.80],
+      "relative_score_min": [-1.0, 0.50, 0.65, 0.80],
+      "context_mean_min": [-1.0, 0.50, 0.60, 0.70]
+    },
+    "primary_robust_score": "median half-year mean capped net R minus 0.5 times population standard deviation; individual net R clipped to [-1.5,+10] for selection only",
+    "minimum_robust_gain_r": 0.10,
+    "p95_raw_net_r_retention_min": 0.80,
+    "minimums": {"events_total": 30, "events_per_fold": 3, "symbols_total": 20},
+    "multiplicity_policy": "sequential coordinate screen only; no candidate is confirmatory until the frozen selection is evaluated once on confirmation A"
+  },
+  "confirmation_minimums": {"events_total": 20, "events_per_fold": 3, "symbols_total": 15},
+  "matched_control": {
+    "controls_per_event": 2,
+    "exclude_radius_bars": 30,
+    "strata": ["same symbol", "calendar half-year", "copied direction", "within-symbol-phase ATR14 quintile"],
+    "seed": "altcoin-1d-k1k2-market-context-20260905-v3",
+    "p_seed": 305905
+  },
+  "acceptance_gates": {
+    "mean_net_positive": true,
+    "capped_mean_net_r_positive": true,
+    "profit_factor_above_one": true,
+    "positive_fold_share_min": 0.75,
+    "positive_symbol_share_min": 0.55,
+    "week_cluster_signflip_p_max": 0.01,
+    "matched_random_p_max": 0.01,
+    "portfolio_total_return_positive": true,
+    "portfolio_closed_equity_max_drawdown_max": 0.20,
+    "open_sealed_confirmation_b_only_if_a_passes_all_gates": true
+  },
+  "safety": {
+    "holdout_consumed": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "automatic_promote": false,
+    "active_or_forward_change": false,
+    "live_order_change": false,
+    "tradingview_write_before_result": false,
+    "sealed_confirmation_b_must_not_be_read": true
+  }
+}

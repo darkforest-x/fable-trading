@@ -1,0 +1,32 @@
+{
+  "experiment_id": "exp-altcoin-1d-k1k2-market-context-preholdout-20260905-v3",
+  "registered_before_development_context_outcomes": true,
+  "question": "Can an orthogonal, fully causal market-context gate distinguish real daily altcoin K1->K2 launches from local false breakouts while preserving V2 execution and right-tail trend capture?",
+  "single_variable_contract": "Only entry eligibility changes. Five context thresholds are screened sequentially, one coordinate at a time. EMA13/SMA34 morphology, neutral episode, K1/K2 distance, next-day-open entry, two-close failure, 2ATR disaster stop, 20% gradual bank, SMA34 runner, 90-day horizon, 20bp cost, position risk and concurrency are immutable.",
+  "design": {
+    "development": "The previously opened 52-symbol parent universe through 2026-04 is explicitly development-only and cannot provide new confirmation.",
+    "confirmation_a": "109 symbols that never appeared in V1/V2, blocked by early-archive availability and assigned by a seeded hash before any price outcome is opened.",
+    "sealed_confirmation_b": "108 disjoint symbols remain unopened. They may be opened only after a separate committed decision, and V3 permits it only if confirmation A passes every registered gate.",
+    "independent_unit": "symbol is the cross-universe unit; entry week is the dependence cluster for return permutation",
+    "control": "same-symbol, same-half-year, copied-direction, ATR-quintile random entry with identical execution, risk and 20bp cost"
+  },
+  "causal_feature_contract": {
+    "breadth": "Directional fraction of available altcoins whose completed close, EMA13/SMA34 spread and EMA13 three-day slope all agree; plus the five-completed-day change.",
+    "major_regime": "BTC and ETH completed-day EMA13/SMA34 alignment plus direction-adjusted 20-day return scaled by contemporaneous ATR.",
+    "relative_strength": "Direction-adjusted same-day cross-sectional percentiles of trailing 20-day return and path efficiency.",
+    "availability": "Every value is fixed at K2 day close; trade entry is next complete UTC day open. No future bar, outcome, listing after the source file's available history, or sealed-B price is used."
+  },
+  "decision_rule": "Confirmation A is a one-shot transport test. Failure leaves V3 rejected and keeps B sealed. Passing A does not imply production eligibility; it only authorizes a separately committed B audit under the unchanged frozen configuration.",
+  "known_biases": [
+    "The instrument membership snapshot was frozen in September 2026 and therefore creates current-listing/survivorship bias even though no post-holdout OHLCV is read.",
+    "Some disjoint symbols have an archived 2021-2023 segment and a current 2025-2026 segment separated by a gap; indicators reset at every gap.",
+    "The development hypotheses were motivated by already viewed V1/V2 failures, so development metrics are exploratory by construction."
+  ],
+  "safety": {
+    "repository_holdout_start": "2026-05-04T00:00:00Z",
+    "latest_allowed_OHLCV": "2026-04-30T23:45:00Z",
+    "holdout_rows_allowed": 0,
+    "no_training_or_model_promotion": true,
+    "no_tradingview_or_live_execution_change": true
+  }
+}
