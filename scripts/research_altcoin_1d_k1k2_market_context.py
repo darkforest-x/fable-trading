@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 from copy import deepcopy
 from pathlib import Path
@@ -38,6 +39,7 @@ from scripts.research_two_key_candle_ma_retest_1h import sha256_file
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_PATH = Path(__file__).resolve()
 DAY = pd.Timedelta(days=1)
+CURRENT_SOURCE_MIN_FILENAME_ROWS = 30_000
 
 
 def utc(value: object) -> pd.Timestamp:
@@ -133,6 +135,36 @@ def _load_one_source(path: Path, config: Mapping[str, Any], end: pd.Timestamp) -
     ).copy()
 
 
+def _current_source_filename_rows(relative: str) -> int | None:
+    """Read the immutable fetch row count from a current-cache file name.
+
+    This does not open the OHLCV file. Current-cache names are emitted as
+    ``okx_<instrument>_15m_<row-count>.csv`` by the repository fetcher.
+    """
+
+    if "data/kline_fetched/" not in relative:
+        return None
+    match = re.search(r"_(\d+)\.csv$", relative)
+    if match is None:
+        raise RuntimeError(f"current source lacks filename row receipt: {relative}")
+    return int(match.group(1))
+
+
+def _preflight_source_without_open(relative: str) -> tuple[bool, int | None]:
+    """Reject too-short current files before any post-holdout row can be read.
+
+    The frozen source universe was captured on 2026-09-03. Thirty thousand
+    15-minute rows span 312.5 days, leaving more than the required 140 complete
+    pre-2026-05-01 days even after the post-safe tail. Explicit preholdout
+    archives are already bounded by their source contract and bypass this gate.
+    """
+
+    filename_rows = _current_source_filename_rows(relative)
+    if filename_rows is None:
+        return True, None
+    return filename_rows >= CURRENT_SOURCE_MIN_FILENAME_ROWS, filename_rows
+
+
 def load_manifest_partition(
     config: Mapping[str, Any],
     manifest: Mapping[str, Any],
@@ -160,6 +192,7 @@ def load_manifest_partition(
         for source in item["sources"]
     }
     opened_paths: set[str] = set()
+    preflight_skipped_paths: set[str] = set()
     frames: dict[str, pd.DataFrame] = {}
     quality_rows: list[dict[str, Any]] = []
     for symbol, record in sorted(records.items()):
@@ -168,6 +201,19 @@ def load_manifest_partition(
         for relative in record["sources"]:
             if relative in sealed_paths:
                 raise RuntimeError(f"A source overlaps sealed B: {relative}")
+            preflight_safe, filename_rows = _preflight_source_without_open(str(relative))
+            if not preflight_safe:
+                preflight_skipped_paths.add(str(relative))
+                path_receipts.append(
+                    {
+                        "path": relative,
+                        "rows": 0,
+                        "filename_rows": filename_rows,
+                        "prefix_sha256": None,
+                        "status": "skipped_before_open_filename_history_below_30000",
+                    }
+                )
+                continue
             opened_paths.add(str(relative))
             try:
                 raw = _load_one_source(ROOT / str(relative), config, end)
@@ -258,6 +304,8 @@ def load_manifest_partition(
         "repository_holdout_rows_read": int(quality["holdout_rows_read"].sum()),
         "sealed_b_rows_read": 0,
         "opened_source_paths": int(len(opened_paths)),
+        "preflight_skipped_source_paths": int(len(preflight_skipped_paths)),
+        "preflight_minimum_filename_rows": CURRENT_SOURCE_MIN_FILENAME_ROWS,
     }
     if summary["repository_holdout_rows_read"] != 0:
         raise RuntimeError("confirmation loader crossed repository holdout")
@@ -1082,6 +1130,7 @@ def confirmation_a_phase(config_path: Path, config: dict[str, Any]) -> dict[str,
         config_path,
         experiment / "preregistration.json",
         experiment / "universe_manifest.json",
+        experiment / "confirmation_a_boundary_amendment.json",
         SCRIPT_PATH,
     ):
         _assert_head_frozen(path)

@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-altcoin-1d-k1k2-market-context-preholdout-20260905-v3",
+  "created_after_failed_confirmation_a_attempt": true,
+  "failed_attempt": {
+    "attempt_number": 1,
+    "error": "parser reached holdout while reading data/kline_fetched/okx_BILL_USDT_SWAP_15m_9587.csv",
+    "stage_reached": "source loading before daily feature, signal, trade, return, control or gate computation",
+    "confirmation_outputs_written": 0,
+    "sealed_confirmation_b_rows_read": 0,
+    "postholdout_rows_retained_or_scored": 0,
+    "repository_holdout_boundary_contact": true,
+    "authorization_note": "This was an unintended fail-closed parser contact, not an authorized holdout evaluation; it is recorded rather than hidden."
+  },
+  "repair": {
+    "strategy_or_threshold_changed": false,
+    "rule": "Before opening a data/kline_fetched current-cache CSV, parse its immutable filename row-count receipt. Skip the path if it contains fewer than 30000 15-minute rows. Explicit preholdout archive paths bypass this gate.",
+    "minimum_current_source_filename_rows": 30000,
+    "reason": "The universe snapshot was frozen on 2026-09-03. 30000 15-minute rows span 312.5 days, which conservatively covers both the tail after the 2026-05-01 safe end and the preregistered 140 complete-day minimum. The check occurs without opening the OHLCV file.",
+    "short_source_effect": "Data-quality exclusion only; no replacement symbol, context threshold, entry, exit, cost, sizing or acceptance gate changes.",
+    "retry_condition": "This amendment, the repaired script and its test must be committed before confirmation A is retried."
+  }
+}

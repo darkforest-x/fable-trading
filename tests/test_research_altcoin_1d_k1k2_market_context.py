@@ -88,6 +88,26 @@ def test_frozen_universe_partitions_are_disjoint_and_b_is_sealed() -> None:
     )
 
 
+def test_current_source_preflight_never_opens_short_postholdout_only_files() -> None:
+    safe, rows = subject._preflight_source_without_open(
+        "data/kline_fetched/okx_BILL_USDT_SWAP_15m_9587.csv"
+    )
+    assert safe is False
+    assert rows == 9587
+
+    safe, rows = subject._preflight_source_without_open(
+        "data/kline_fetched/okx_0G_USDT_SWAP_15m_31273.csv"
+    )
+    assert safe is True
+    assert rows == 31273
+
+    safe, rows = subject._preflight_source_without_open(
+        "data/kline_preholdout_archive15m_202109_202306/okx_ACH_USDT_SWAP_15m_64126.csv"
+    )
+    assert safe is True
+    assert rows is None
+
+
 def test_trailing_features_reset_at_every_source_gap() -> None:
     frame = pd.DataFrame(
         {
