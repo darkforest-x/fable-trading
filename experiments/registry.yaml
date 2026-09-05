@@ -5084,11 +5084,14 @@ experiments:
       entry, close-confirmed stop, profit ladder, MA runner, 90-day horizon,
       20bp cost and every acceptance gate remain frozen.
     result: >-
-      preregistered_final_holdout_not_run. The variable and threshold were
-      discovered postmortem from already-opened V3 development and confirmation
-      A, so those rows receive zero confirmatory credit. The only decisive test
-      is one owner-authorized read of [2026-05-04, 2026-09-01).
-    holdout_consumed: false
+      rejected_final_holdout. The frozen gate reduced 16 raw signals to 8 after
+      breadth and 4 after the 0.75 ATR cap. Those four averaged +2056.24bp with
+      PF 5.206, but the registered minimum was 20 events/15 symbols/5 per fold;
+      July-August had zero candidate events, positive-symbol share was 50%, both
+      p-value gates failed and no exact matched-random control existed. Both
+      winners were shorts with phase-end rather than rule exits, so the apparent
+      edge cannot be separated from short beta and right censoring.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     artifacts: []
@@ -5096,7 +5099,8 @@ experiments:
     notes: >-
       The exact 161-symbol target universe is frozen to previously opened V1/V2
       development plus V3 confirmation A; the 108-symbol V3 confirmation B is
-      excluded even from warmup and breadth. The evaluator requires an explicit
-      --eval-holdout flag and writes a one-shot started receipt before any price
-      source is opened. Passing would be research/paper only because P0/P1 and
-      production gates remain unresolved.
+      excluded even from warmup and breadth. This exact V4 consumed its approved
+      [2026-05-04, 2026-09-01) holdout once. Only 149 targets were history-
+      eligible; BTC/ETH references ended 2026-07-11 and no target extended past
+      2026-08-13, limiting the registered evaluation window. No training,
+      TradingView, ACTIVE/frozen, forward, deployment or live state changed.
