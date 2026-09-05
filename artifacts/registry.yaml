@@ -14467,3 +14467,88 @@ artifacts:
     config_hash: "8fb0d00e46a45561aa71c0ab6ab4e5957eb380d1fb94ae2d6960aa6c347ba09e"
     data_cutoff: "2026-05-01T00:00:00Z"
     notes: Static four-panel figure with direct labels and non-color distinctions.
+
+  - artifact_id: altcoin-1d-k1k2-market-context-v3-confirmation
+    artifact_type: manifest
+    role: frozen_disjoint_confirmation_a_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "8f70f7dcb01bc838f9190437e258c051225fe4c7"
+    source_path: experiments/active/exp-altcoin-1d-k1k2-market-context-preholdout-20260905-v3/results/confirmation_a_receipt.json
+    sha256: "db5f9df5bfea352e7154753bb7cd9e56df9bc9f7e6c8fdda0935879c06a4253a"
+    size_bytes: 4723
+    storage_uri: "repo://experiments/active/exp-altcoin-1d-k1k2-market-context-preholdout-20260905-v3/results/confirmation_a_receipt.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "8f70f7dcb01bc838f9190437e258c051225fe4c7"
+    config_hash: "4e82ace2ed0bf1df28095453fa1a30c6421c887a5dd11f15285e83f70067531c"
+    data_cutoff: "2026-05-01T00:00:00Z"
+    notes: Rejected A receipt; 17 trades, +277.27bp/trade, PF 1.405, failed sample, symbol-share and both p-value gates; B rows read zero.
+
+  - artifact_id: altcoin-1d-k1k2-market-context-v3-diagnostics
+    artifact_type: manifest
+    role: context_increment_concentration_runner_and_feature_diagnostics
+    source_repo: darkforest-x/fable-trading
+    source_commit: "256b9451db9c71b040687b97ed3d288b30b5ff45"
+    source_path: analysis/output/altcoin_1d_k1k2_market_context_20260905_v3/summary.json
+    sha256: "1f3a36d4af86d330ac81733e1e287fb977140ab0e9286385bdabc1179546c04c"
+    size_bytes: 13049
+    storage_uri: "repo://analysis/output/altcoin_1d_k1k2_market_context_20260905_v3/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "256b9451db9c71b040687b97ed3d288b30b5ff45"
+    config_hash: "4e82ace2ed0bf1df28095453fa1a30c6421c887a5dd11f15285e83f70067531c"
+    data_cutoff: "2026-05-01T00:00:00Z"
+    notes: Frozen-ledger postmortem with gate increment, winner concentration, runner split, feature AUC and explicit boundary-incident disclosure.
+
+  - artifact_id: altcoin-1d-k1k2-market-context-v3-report
+    artifact_type: report
+    role: canonical_chinese_altcoin_daily_market_context_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "256b9451db9c71b040687b97ed3d288b30b5ff45"
+    source_path: analysis/p1_altcoin_1d_k1k2_market_context_20260905.md
+    sha256: "b0331682339b83c59e321a11b12a01b77669dde79fee96b1c748138168e33575"
+    size_bytes: 23131
+    storage_uri: "repo://analysis/p1_altcoin_1d_k1k2_market_context_20260905.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "256b9451db9c71b040687b97ed3d288b30b5ff45"
+    config_hash: "4e82ace2ed0bf1df28095453fa1a30c6421c887a5dd11f15285e83f70067531c"
+    data_cutoff: "2026-05-01T00:00:00Z"
+    notes: Full V3 rules, time split, matched random, concentration, failure attribution, IO boundary incident and next-step decision.
+
+  - artifact_id: altcoin-1d-k1k2-market-context-v3-html
+    artifact_type: report
+    role: owner_facing_self_contained_html_altcoin_context_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "256b9451db9c71b040687b97ed3d288b30b5ff45"
+    source_path: analysis/html/p1_altcoin_1d_k1k2_market_context_20260905.html
+    sha256: "354c97b40f55ab09d7b6831f5f18c3f171bbf7b6c5968cbe557d5a2c6a5ff7f0"
+    size_bytes: 325630
+    storage_uri: "repo://analysis/html/p1_altcoin_1d_k1k2_market_context_20260905.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "256b9451db9c71b040687b97ed3d288b30b5ff45"
+    config_hash: "4e82ace2ed0bf1df28095453fa1a30c6421c887a5dd11f15285e83f70067531c"
+    data_cutoff: "2026-05-01T00:00:00Z"
+    notes: Self-contained HTML with embedded figure; desktop and 390px browser QA passed with zero console errors.
+
+  - artifact_id: altcoin-1d-k1k2-market-context-v3-figure
+    artifact_type: report
+    role: phase_fold_trade_concentration_and_runner_figure
+    source_repo: darkforest-x/fable-trading
+    source_commit: "256b9451db9c71b040687b97ed3d288b30b5ff45"
+    source_path: analysis/output/altcoin_1d_k1k2_market_context_20260905_v3/altcoin_1d_k1k2_market_context_diagnosis.png
+    sha256: "1e659ce867ca61022b36dcff62259056dd4442552ce1ae179155366b32a44ae3"
+    size_bytes: 221480
+    storage_uri: "repo://analysis/output/altcoin_1d_k1k2_market_context_20260905_v3/altcoin_1d_k1k2_market_context_diagnosis.png"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "256b9451db9c71b040687b97ed3d288b30b5ff45"
+    config_hash: "4e82ace2ed0bf1df28095453fa1a30c6421c887a5dd11f15285e83f70067531c"
+    data_cutoff: "2026-05-01T00:00:00Z"
+    notes: Four-panel static figure covering context-gate increment, fold stability, per-trade right-tail concentration and post-entry runner split.

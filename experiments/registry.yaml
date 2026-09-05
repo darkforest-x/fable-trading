@@ -5027,8 +5027,8 @@ experiments:
 
   - experiment_id: exp-altcoin-1d-k1k2-market-context-preholdout-20260905-v3
     source_repo: darkforest-x/fable-trading
-    source_commit: "7d64ca97b10ab909bf1ae67e3105f4f333635a50"
-    status: active
+    source_commit: "8f70f7dcb01bc838f9190437e258c051225fe4c7"
+    status: rejected
     question: >-
       Can a fully causal market-context gate separate real daily altcoin K1->K2
       launches from local false breakouts while preserving the frozen V2 signal,
@@ -5039,17 +5039,33 @@ experiments:
       return, path efficiency and their fixed-weight mean are screened in a
       preregistered sequential coordinate order. All K1/K2 morphology and V2
       execution parameters remain immutable.
-    result: preregistered_not_run
+    result: >-
+      Development selected only directional breadth_change5 >= +2pp, improving
+      robust score by +0.2147R while remaining negative. Frozen confirmation A
+      produced 17 trades across 17 symbols at +277.27bp/trade, PF 1.405 and
+      3/4 positive folds, but failed sample, positive-symbol-share and both
+      registered p-value gates. One YGG winner contributed 113.90% of total
+      net return; leaving it out reduces the other 16 trades to -40.95bp/trade.
+      The result is rejected and confirmation B remains sealed.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_altcoin_1d_k1k2_market_context_20260905.md
-    artifacts: []
+    artifacts:
+      - altcoin-1d-k1k2-market-context-v3-confirmation
+      - altcoin-1d-k1k2-market-context-v3-diagnostics
+      - altcoin-1d-k1k2-market-context-v3-report
+      - altcoin-1d-k1k2-market-context-v3-html
+      - altcoin-1d-k1k2-market-context-v3-figure
     reuse_allowed: false
     notes: >-
       The already-viewed 52-symbol parent universe is development-only. A frozen
       109-symbol disjoint confirmation A and 108-symbol sealed confirmation B
       were assigned by cohort-blocked deterministic hash before their prices or
-      outcomes were inspected. All OHLCV access is bounded before 2026-05-01;
-      repository holdout begins 2026-05-04. No training, TradingView, ACTIVE,
-      forward, deployment, sizing, API-key or live-order state may change.
+      outcomes were inspected. The first A attempt fail-closed after the parser
+      contacted a BILL source beginning inside repository holdout; it produced
+      no features, trades, returns or outputs, retained/scored zero postholdout
+      rows and is recorded in confirmation_a_boundary_amendment.json. The
+      repaired successful run used data before 2026-05-01, scored zero holdout
+      rows and read zero B rows. No training, TradingView, ACTIVE, forward,
+      deployment, sizing, API-key or live-order state changed.
