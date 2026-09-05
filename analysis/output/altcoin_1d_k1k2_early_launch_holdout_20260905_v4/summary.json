@@ -1,0 +1,45 @@
+{
+  "experiment_id": "exp-altcoin-1d-k1k2-early-launch-holdout-20260905-v4",
+  "verdict": "rejected_final_holdout",
+  "holdout_consumption_number": 1,
+  "signal_funnel": {
+    "full_materialized_window_k1_attempts": 196,
+    "holdout_raw_executed": 16,
+    "holdout_breadth_executed": 8,
+    "holdout_candidate_executed": 4,
+    "matched_candidate_events": 0
+  },
+  "frozen_increment_tests": {
+    "breadth_selected_minus_rejected_mean_bp": 1298.1148297870986,
+    "breadth_exact_one_sided_p": 0.14234654234654234,
+    "breadth_null_allocations": 12870,
+    "extension_selected_minus_rejected_mean_bp": 2886.1508318442648,
+    "extension_exact_one_sided_p": 0.14285714285714285,
+    "extension_null_allocations": 70
+  },
+  "single_feature_baseline": {
+    "feature": "negative k1_signed_slow_side_atr",
+    "pool": "eight breadth-passing holdout trades",
+    "positive_trade_auc": 0.7333333333333333,
+    "exact_one_sided_label_permutation_p": 0.19642857142857142,
+    "exact_null_assignments": 56
+  },
+  "model_validation_auc": null,
+  "model_validation_auc_reason": "No model was trained or scored in this deterministic rule experiment.",
+  "concentration": {
+    "largest_winner_share": 0.6966039594671495,
+    "leave_largest_winner_out_mean_bp": 831.805064473215,
+    "top_two_winner_share": 1.237753906661103,
+    "leave_top_two_out_mean_bp": -977.7561861634659
+  },
+  "coverage": {
+    "eligible_target_symbols": 149,
+    "configured_target_symbols": 161,
+    "reference_last_complete_day": "2026-07-11",
+    "target_last_complete_day": "2026-08-13",
+    "registered_end_last_day": "2026-08-31",
+    "sealed_confirmation_b_paths_opened": 0
+  },
+  "figure": "analysis/output/altcoin_1d_k1k2_early_launch_holdout_20260905_v4/altcoin_1d_k1k2_early_launch_holdout_diagnosis.png",
+  "interpretation": "Post-holdout diagnostics only; they may define a future prospective preregistration but cannot justify a historical rerun or threshold change."
+}
