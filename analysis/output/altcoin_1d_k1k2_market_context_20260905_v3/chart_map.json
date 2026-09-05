@@ -1,0 +1,46 @@
+{
+  "delivery_surface": "project-mandated markdown plus md_to_html HTML",
+  "palette_policy": "hard two-root cap: blue and gold plus neutrals",
+  "charts": [
+    {
+      "segment": "context gate effect",
+      "family": "comparison",
+      "type": "grouped bar",
+      "fields": [
+        "phase",
+        "policy",
+        "mean_net_bp"
+      ]
+    },
+    {
+      "segment": "temporal stability",
+      "family": "comparison",
+      "type": "period bar",
+      "fields": [
+        "fold",
+        "mean_net_bp",
+        "events"
+      ]
+    },
+    {
+      "segment": "winner concentration",
+      "family": "distribution",
+      "type": "ranked horizontal bar",
+      "fields": [
+        "symbol",
+        "net_return"
+      ]
+    },
+    {
+      "segment": "runner diagnostic",
+      "family": "comparison",
+      "type": "two-category bar",
+      "fields": [
+        "runner_armed",
+        "mean_net_bp",
+        "events"
+      ]
+    }
+  ],
+  "qa_surface": "analysis/output/altcoin_1d_k1k2_market_context_20260905_v3/altcoin_1d_k1k2_market_context_diagnosis.png"
+}
