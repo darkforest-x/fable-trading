@@ -2,7 +2,30 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-09-06 — BTC V13 已实测，4h同向过滤未改善交易质量）
+## ⚡ 当前真相（2026-09-06 — BTC V14 实际支持检查失败，不进入收益排名）
+
+盈利goal仍active、未达成、不是blocked。本轮先提交5fc542b的builder/config/plan/tests，
+再09:43UTC真实加载原2023–2024前缀219551行。V14只测原251case/462owncontrols上的
+此前20完整连续小时严格突破，K1自身排除，不叠4h颜色或小时斜率。60case通过、191弃、
+0未知；controls53/409/0。病例四半年17/15/11/17，总60<80且最少11<12，23月/min5月
+通过月份门。严格停止于支持阶段，没有读旧收益表、没有新收益回放/排名，不能说60笔亏。
+原154triples/97unmatched不变，所有154来源已知不等于251匹配覆盖达到90%。
+
+冻结713门+14973自身小时来源。bbc1c63独立保存验证器重算prior20 extrema、K1close、
+窗口时钟/严格门/4输出hash/11committed源码/62分维度计数/154triples，全通过；不冒充
+raw5聚合重跑。3057相关tests通过44.02s。Notebook3格plainPython，复用同验证器，
+非第二独立验证、非Jupyter/fullschema。HTML12块/1真实SQL半年计数图，官方structural_only，
+没有手机/来源弹窗浏览器QA。无2025+价格物化/holdout0/训练/TV/实盘改动。
+
+交付：analysis/html/p1_btcusdtp_hourly_prior_breakout_v14_20260906.html。
+实验：experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/。
+下一项先排重后提案：同原251/462/154，唯一native5m→native15m trueflip规格。V1已有
+原251的15m状态退出，V8已有不同286cases的native15m trueflip；不得称从未试过。先冻
+两周期全部713初始状态，若15mtrueflip与旧状态路径恒等就报告语义复核，不换名创新。
+Native改变聚合/时钟/MA记忆，不是纯退出频率效应；heldMFE低不证明旧退出后没有趋势。
+详见NEXT_EXPERIMENT，尚未实现/登记/运行下一实验。继续盈利goal，不降低门救结果。
+
+### 第十三轮背景（已完成，勿重复）
 
 盈利goal仍active、未完成。本轮有实际进展：d3366d3先提交builder/config/plan/tests，
 再首跑V13原2023–2024价格前缀219551行，无2025+价格物化/holdout0。唯一变化是

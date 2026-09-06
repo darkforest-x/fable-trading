@@ -1,0 +1,295 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "BTC Hourly Breakout Support",
+    "generatedAt": "2026-09-06T09:49:51.864018+00:00",
+    "filters": [],
+    "cards": [],
+    "charts": [
+      {
+        "id": "v14_case_fold_support",
+        "title": "前20小时突破条件的半年支持数",
+        "subtitle": "2023–2024 · 原始病例机会 251 个 · 柱高为符合条件数，不是成交数或盈利数",
+        "showDescription": true,
+        "type": "bar",
+        "intent": "comparison",
+        "layout": "full",
+        "dataset": "v14_case_fold_support",
+        "sourceId": "v14_counts",
+        "question": "四个半年分别有多少原始机会满足固定突破条件？",
+        "rationale": "Four predeclared halfyear categories compare finite support counts, retaining original denominators and unknown states. Single blue series with count labels.",
+        "palette": {
+          "kind": "sequential",
+          "name": "blue"
+        },
+        "labels": {
+          "values": "all"
+        },
+        "settings": {
+          "sort": "none",
+          "categoryLabelPolicy": "wrap"
+        },
+        "maxRows": 4,
+        "valueFormat": "number",
+        "referenceLines": [
+          {
+            "axis": "y",
+            "value": 0,
+            "color": "neutral",
+            "lineStyle": "solid",
+            "label": "0 机会"
+          }
+        ],
+        "encodings": {
+          "x": {
+            "field": "fold",
+            "type": "ordinal",
+            "label": "原始开发半年"
+          },
+          "y": {
+            "field": "accepted",
+            "type": "quantitative",
+            "label": "符合突破条件的机会数",
+            "format": "number"
+          },
+          "tooltip": [
+            {
+              "field": "accepted",
+              "type": "quantitative",
+              "label": "符合条件",
+              "format": "number"
+            },
+            {
+              "field": "total",
+              "type": "quantitative",
+              "label": "全部原始机会",
+              "format": "number"
+            },
+            {
+              "field": "abstain",
+              "type": "quantitative",
+              "label": "明确不满足",
+              "format": "number"
+            },
+            {
+              "field": "unknown",
+              "type": "quantitative",
+              "label": "上下文未知",
+              "format": "number"
+            },
+            {
+              "field": "acceptance_rate",
+              "type": "quantitative",
+              "label": "符合比例",
+              "format": "percent"
+            },
+            {
+              "field": "unknown_rate",
+              "type": "quantitative",
+              "label": "未知比例",
+              "format": "percent"
+            }
+          ]
+        }
+      }
+    ],
+    "tables": [],
+    "sources": [
+      {
+        "id": "report",
+        "label": "V14 · 完整支持度报告",
+        "path": "analysis/p1_btcusdtp_hourly_prior_breakout_v14_20260906.md"
+      },
+      {
+        "id": "v14_summary",
+        "label": "V14 · 事前支持审计摘要",
+        "path": "experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/results/summary.json"
+      },
+      {
+        "id": "v14_counts",
+        "label": "V14 · 病例及自身控制的三态支持计数",
+        "path": "experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/results/counts.csv",
+        "query": {
+          "engine": "SQLite",
+          "language": "sql",
+          "sql": "SELECT key AS fold, total, accepted, abstain, unknown,\n       accepted * 1.0 / NULLIF(total, 0) AS acceptance_rate,\n       unknown * 1.0 / NULLIF(total, 0) AS unknown_rate\nFROM main.counts\nWHERE population = 'case' AND dimension = 'fold'\nORDER BY CASE key WHEN '2023H1' THEN 0 WHEN '2023H2' THEN 1\n                  WHEN '2024H1' THEN 2 WHEN '2024H2' THEN 3 ELSE 4 END",
+          "executed_at": "2026-09-06T09:49:51.864018+00:00",
+          "tables_used": [
+            "main.counts"
+          ],
+          "description": "Actual query over experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/results/counts.csv, loaded as main.counts after integer partition validation. No return or price replay.",
+          "filters": [
+            "population='case' AND dimension='fold'",
+            "All four original2023--2024 halfyears; no selected-only denominator or outcome filtering"
+          ],
+          "metric_definitions": [
+            "accepted=count of original requests satisfying their own prior20-complete-hour breakout gate; it is not executed trades or wins",
+            "total=accepted+abstain+unknown for each original fold; all251 case requests retained",
+            "acceptance_rate=accepted/total; unknown_rate=unknown/total; missing context is not known abstention",
+            "This support-only audit computes no financial outcome, fee, return, profit factor or strategy acceptance"
+          ]
+        }
+      }
+    ],
+    "blocks": [
+      {
+        "id": "report_title",
+        "type": "markdown",
+        "body": "# BTC Hourly Breakout Support",
+        "layout": "full"
+      },
+      {
+        "id": "section_01",
+        "type": "markdown",
+        "body": "## 技术摘要：结构突破筛掉很多信号，但本轮不具备预设回测支持\n\n目标仍是找到扣费后稳定盈利的小时趋势系统，**现在还没有达成**。这轮实际完成了新的单变量检查：在原251个小时穿均线信号上，仅增加“本根收盘突破此前20小时高低点”，保留60个、排除191个，没有数据未知项；原462个对照各自判断后保留53个。\n\n60个低于事前规定的80个，最少的半年只有11个，低于每半年12个。按照先冻结的停止规则，**这一项没有进入收益回测或收益排名**；没有读取旧交易结果表，也没有计算这60笔的盈亏。结论是“按既定标准样本不足”，不是“这60笔亏损”，也不是“信号更精准”。\n\n本轮只用已反复研究的2023–2024历史数据；未动用2026-05-04后的holdout，未替换TradingView或实盘设置。",
+        "layout": "full"
+      },
+      {
+        "id": "section_02",
+        "type": "markdown",
+        "body": "## 先明确分母：原信号和对照全部保留\n\n病例是原系统的251个小时直接入场机会，而不是经过本轮挑选后的赢家。对照是原来的462个自身入场机会，分属154组三个对照；另97个病例仍未匹配，不重新分配对照。所有时间按UTC，四个半年切分，每个切分末尾保留原72小时隔离。\n\n| 支持项 | 原规则不加本轮门 | 新增此前20小时突破 | 本轮含义 |\n|---|---:|---:|---|\n| 病例原机会数 | 251 | 251 | 分母没有删除 |\n| 病例允许进入后续回放 | 251 | 60（23.90%） | 不是已执行60笔交易 |\n| 病例已知不满足门 | 0 | 191（76.10%） | 不按缺失或亏损处理 |\n| 病例数据未知 | 0 | 0 | 缺数据没有造成信号减少 |\n| 对照原机会数 | 462 | 462 | 使用每个对照自己的高低点 |\n| 对照允许进入后续回放 | 462 | 53（11.47%） | 不继承病例的通过状态 |\n| 固定完整对照组 | 154 | 154 | 弃单也不删组、不重配 |\n\n这些都是入场支持数量，没有收益或成功率含义。对照保留比例低于病例，可能与病例本来就是穿均线大实体/吞没有关，不能把比例差称为超额收益。",
+        "layout": "full"
+      },
+      {
+        "id": "section_03",
+        "type": "markdown",
+        "body": "## 四个半年都有机会，但总量与最弱半年未过门\n\n\n四个半年的病例支持分别为17/55、15/66、11/55、17/75。问题不是只集中在一个月：23个月有信号，每个半年至少5个月有信号；问题是加入硬过滤后总机会过少，2024上半年也未达到预设最低数量。\n\n下图保留各期原分母、弃单和未知字段，零点起轴，仅比较支持数量，不连接成收益曲线。",
+        "layout": "full",
+        "sourceId": "v14_counts"
+      },
+      {
+        "id": "v14_support_chart",
+        "type": "chart",
+        "chartId": "v14_case_fold_support",
+        "layout": "full"
+      },
+      {
+        "id": "section_04",
+        "type": "markdown",
+        "body": "## 这次到底新增了什么规则\n\n本轮新增门只有一条：做多时，K1收盘严格高于此前20根完整小时K线的最高价；做空时，K1收盘严格低于此前20根完整小时K线的最低价。等于边界也不算突破。\n\nK1开盘时刻记作S；比较区间是S−20小时至S−1小时的小时开盘，**不包括K1本身**。区间高低点在S已可知，K1收盘在S+1小时才可知。必须20小时连续完整，并独立核对本根收盘与保存的信号收盘一致。任一必要来源不足应标未知，不能当成失败或无交易收益0。\n\n原母信号仍是SMA40（HL2）实体严格穿越，当前HL2颜色与方向一致。形态分支二选一：大实体分支要求实体占比至少0.65且振幅至少1ATR；吞没分支要求真实吞没且振幅至少0.65ATR，不额外强加大实体分支的0.65占比。两者都要求方向收盘位置至少0.7。不叠加V13的4小时颜色门，不加小时斜率门，也不优化20这个窗口。完整参数见[冻结入口配置](../../experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json)。\n\n原执行规格保留为下一阶段的固定基线：确认小时收盘后下一真实5分钟开盘入场；K1极值硬止损；最多72小时；假设往返20bp成本；完整5分钟SMA40颜色从持仓方向变成反方向后按因果顺序退出。**本轮并未执行这些交易模拟**，也没有把无交易标成“收益0”。",
+        "layout": "full"
+      },
+      {
+        "id": "section_05",
+        "type": "markdown",
+        "body": "## 通过与未通过：两项样本门失败，两项月份门通过\n\n预设“至少80个、每半年至少12个”是沿用的研究最低支持，不是统计功效计算，也不表示80个就足以证明盈利。\n\n| 事前门槛 | 实际支持 | 判断 |\n|---|---:|---|\n| 病例至少80个 | 60 | 未通过 |\n| 每个半年至少12个 | 最少11个 | 未通过 |\n| 至少12个活跃月 | 23个 | 通过 |\n| 每个半年至少3个活跃月 | 最少5个 | 通过 |\n\n多头28/130通过，空头32/121通过，两边都明显减少，并非只把某一方向全部关闭。2024年2月没有通过病例，其余月份保留在完整24个月统计中，没有删掉空月。\n\n原匹配覆盖仍是154/251=61.35%，达不到原90%要求，这是另一个未解决的验收问题；不能因为本次713条门状态都已知，就声称251个病例都有完整对照。即使四项支持门全部通过，也只能进入下一阶段，不能自动获准盈利、上线或推广。",
+        "layout": "full"
+      },
+      {
+        "id": "section_06",
+        "type": "markdown",
+        "body": "## 独立核对：逐条高低点可以复算，不用相信标签\n\n实际保存了713条完整机会记录、14973条自身小时来源（每条机会20根历史加1根K1），以及62行分维度数量统计、154行固定对照支持。病例的新门与原母表事前保存的breakout20标记全部一致；这是同一原始数据上的实现一致性，不是独立市场验证。\n\n独立校验已通过：从保存的小时来源重新核对窗口、连续性、高低点、本根收盘、严格大小关系、未知状态、数量分母与匹配身份，并核对4份输出哈希和11份提交源码收据。将K1误放入“此前区间”、把边界相等当通过、把对照套用病例门、删除空月或未知行，均由负例测试检查。原始5分钟到小时的聚合另由合成测试与源码收据约束；保存表校验不冒称又独立重放了原始行情。\n\n因果窗口实现依据已安装pandas 2.3.3的[移位规则](https://pandas.pydata.org/pandas-docs/version/2.3/reference/api/pandas.Series.shift.html)与[滚动窗口规则](https://pandas.pydata.org/pandas-docs/version/2.3/reference/api/pandas.Series.rolling.html)。20个观测本身不保证连续20小时，时间连续性另外检查。",
+        "layout": "full"
+      },
+      {
+        "id": "section_07",
+        "type": "markdown",
+        "body": "## 为什么没有胜率、PF和“调好了”的结论\n\n本轮是非收益支持审计，val AUC、排序置换p、top-decile毛/净收益、胜率、PF、单特征收益基线以及同成本随机入场收益均不适用：没有新计算或读取交易结果。原匹配对照只用于检验支持分布，不替代经济对照。\n\n同等严格的实现反证是独立来源重算与合成负例变异，检验的是“门有没有算对”，不是“门能否赚钱”。实测没有缺失值不等于市场没有风险；所有60个仍可能盈利、亏损或受到成本侵蚀，本轮对此没有结论。",
+        "layout": "full"
+      },
+      {
+        "id": "section_08",
+        "type": "markdown",
+        "body": "## 风险与诚实声明\n\n这是反复使用2023–2024样本后的探索，没有新鲜样本外盈利证据。此前V1也试过breakout20，但当时叠加了已选小时斜率且出口语义不同；旧失败保留，本轮只是减少混杂后的支持复核，不把旧参数包装成新发现。\n\nOHLCV实际物化219551行，最后到2024-12-31 23:55 UTC；归档更晚时间仅用于时间戳/哈希边界检查。holdout消耗0，没有训练、依赖升级、生产参数切换、TradingView更新或真金动作。\n\n附带笔记本的3格代码已按顺序用普通Python执行，并复用固定的同一个校验器；它不是第二套独立验证，也没有运行Jupyter内核或完整nbformat校验。HTML已通过官方打包与结构校验；本机无可用Chromium，手机布局和来源弹窗的实际浏览器检查未完成。\n\n这轮不能回答留下60个的净收益是否改善。预先选择不继续评价，是为了不在样本失败后用收益救参数；不是保证“不做的那些交易就一定差”。",
+        "layout": "full"
+      },
+      {
+        "id": "section_09",
+        "type": "markdown",
+        "body": "## 下一步：回到退出周期是否切断趋势的问题\n\n不降低支持门，不在这条分支上继续搜索10/15/30小时窗口。另行核查原251机会是否已做过“只把5分钟真实变色退出改为15分钟真实变色退出”的同母体对比；先去重，再冻结独立实验。过去其他人群上做过15分钟管理，不能直接当作这251个机会的答案。\n\n必须区分“在旧退出前没有走到1R”和“之后也没有趋势”。前者是已有持仓路径统计，不能据此断定延后退出无效。同样，延后退出也可能扩大止损或回吐；只有保持相同入口、硬止损、费用和机会分母的对照回放才能检验。盈利目标继续，当前没有接受或上线候选。",
+        "layout": "full"
+      },
+      {
+        "id": "section_10",
+        "type": "markdown",
+        "body": "## 复现与保存证据\n\n在本仓已有依赖环境执行。首次价格运行前builder/config/plan/tests已提交为5fc542b；首次检查完成于2026-09-06 09:43 UTC。结果目录不可覆盖；从无本轮产物的工作副本复现首次运行，或只运行保存证据校验，不删除已有实验结果。\n\n```bash\n.venv/bin/python -m yoyo.evaluation.hourly_impulse_prior_breakout_research\n.venv/bin/python scripts/verify_hourly_impulse_prior_breakout_v14.py\n.venv/bin/python -m pytest -q tests/test_hourly_impulse_prior_breakout*.py tests/contracts/test_registries.py tests/boundaries/test_layer_imports.py\n```\n\n生成交付物的命令如下；notebook和artifact输出须为新路径，不覆盖已有研究证据。HTML是由同一份完整artifact生成的展示副本。\n\n```bash\nexperiment=experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14\nreport=analysis/p1_btcusdtp_hourly_prior_breakout_v14_20260906.md\n.venv/bin/python -m yoyo.evaluation.hourly_impulse_prior_breakout_notebook --output \"$experiment/prior_breakout_audit.ipynb\" --check\n.venv/bin/python scripts/md_to_html.py \"$report\" --out-dir analysis/html\n.venv/bin/python -m yoyo.evaluation.hourly_impulse_prior_breakout_report --markdown \"$report\" --summary \"$experiment/results/summary.json\" --counts \"$experiment/results/counts.csv\" --output \"$experiment/artifact.json\"\nnode \"${CODEX_HOME:-$HOME/.codex}/plugins/cache/openai-curated-remote/data-analytics/0.2.10-13ceeea1f599/skills/build-report/scripts/deliver_portable_artifact.mjs\" --input \"$experiment/artifact.json\" --output analysis/html/p1_btcusdtp_hourly_prior_breakout_v14_20260906.html\n```\n\n支持源表和运行收据位于本轮实验results目录。下列附件链接按交付HTML所在的analysis/html目录解析，依赖本仓文件存在；HTML正文和图表数据本身为自包含。\n\n- [支持审计笔记本](../../experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/prior_breakout_audit.ipynb)\n- [完整验证记录](../../experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/VERIFICATION.md)\n- [逐条入场门](../../experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/results/entry_context.csv)\n- [逐请求小时来源](../../experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/results/prior_hourly_rows.csv)",
+        "layout": "full"
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-09-06T09:49:51.864018+00:00",
+    "status": "ready",
+    "datasets": {
+      "v14_case_fold_support": [
+        {
+          "fold": "2023H1",
+          "total": 55,
+          "accepted": 17,
+          "abstain": 38,
+          "unknown": 0,
+          "acceptance_rate": 0.3090909090909091,
+          "unknown_rate": 0.0
+        },
+        {
+          "fold": "2023H2",
+          "total": 66,
+          "accepted": 15,
+          "abstain": 51,
+          "unknown": 0,
+          "acceptance_rate": 0.22727272727272727,
+          "unknown_rate": 0.0
+        },
+        {
+          "fold": "2024H1",
+          "total": 55,
+          "accepted": 11,
+          "abstain": 44,
+          "unknown": 0,
+          "acceptance_rate": 0.2,
+          "unknown_rate": 0.0
+        },
+        {
+          "fold": "2024H2",
+          "total": 75,
+          "accepted": 17,
+          "abstain": 58,
+          "unknown": 0,
+          "acceptance_rate": 0.22666666666666666,
+          "unknown_rate": 0.0
+        }
+      ]
+    },
+    "accessIssues": []
+  },
+  "sources": [
+    {
+      "id": "report",
+      "label": "V14 · 完整支持度报告",
+      "path": "analysis/p1_btcusdtp_hourly_prior_breakout_v14_20260906.md"
+    },
+    {
+      "id": "v14_summary",
+      "label": "V14 · 事前支持审计摘要",
+      "path": "experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/results/summary.json"
+    },
+    {
+      "id": "v14_counts",
+      "label": "V14 · 病例及自身控制的三态支持计数",
+      "path": "experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/results/counts.csv",
+      "query": {
+        "engine": "SQLite",
+        "language": "sql",
+        "sql": "SELECT key AS fold, total, accepted, abstain, unknown,\n       accepted * 1.0 / NULLIF(total, 0) AS acceptance_rate,\n       unknown * 1.0 / NULLIF(total, 0) AS unknown_rate\nFROM main.counts\nWHERE population = 'case' AND dimension = 'fold'\nORDER BY CASE key WHEN '2023H1' THEN 0 WHEN '2023H2' THEN 1\n                  WHEN '2024H1' THEN 2 WHEN '2024H2' THEN 3 ELSE 4 END",
+        "executed_at": "2026-09-06T09:49:51.864018+00:00",
+        "tables_used": [
+          "main.counts"
+        ],
+        "description": "Actual query over experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/results/counts.csv, loaded as main.counts after integer partition validation. No return or price replay.",
+        "filters": [
+          "population='case' AND dimension='fold'",
+          "All four original2023--2024 halfyears; no selected-only denominator or outcome filtering"
+        ],
+        "metric_definitions": [
+          "accepted=count of original requests satisfying their own prior20-complete-hour breakout gate; it is not executed trades or wins",
+          "total=accepted+abstain+unknown for each original fold; all251 case requests retained",
+          "acceptance_rate=accepted/total; unknown_rate=unknown/total; missing context is not known abstention",
+          "This support-only audit computes no financial outcome, fee, return, profit factor or strategy acceptance"
+        ]
+      }
+    }
+  ]
+}

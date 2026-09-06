@@ -15251,6 +15251,109 @@ artifacts:
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: "Verifier046b92a,2270 formulas/clocks,exact286/849contexts,V7old-column parity,286/283/959denominators,1342tests. Not independent raw-price replay."
 
+
+  - artifact_id: btcusdtp-hourly-prior-breakout-v14-support
+    artifact_type: report
+    role: outcome_free_prior20_support
+    source_repo: darkforest-x/fable-trading
+    source_commit: "5fc542b"
+    source_path: experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/results/summary.json
+    sha256: "1a6f1d64ec4448d756a37f659346cea26486c1e7923eb3998985fb5a793924f4"
+    size_bytes: 4385
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "5fc542b"
+    config_hash: "223b9c91946b00aa70450d64fd3bddcf0fc92a6332bbc1322b8352c5505a5fe0"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Original251cases60pass462controls53pass;14973sourcehours. Insufficient80/min12;no outcomes."
+
+  - artifact_id: btcusdtp-hourly-prior-breakout-v14-report
+    artifact_type: report
+    role: standalone_support_technical_source
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bbc1c63"
+    source_path: analysis/p1_btcusdtp_hourly_prior_breakout_v14_20260906.md
+    sha256: "c0906af323a3e49fe8ccf1902a3b8ce0cbccf6f6d4031310a426619a4d359f68"
+    size_bytes: 11127
+    storage_uri: "repo://analysis/p1_btcusdtp_hourly_prior_breakout_v14_20260906.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "bbc1c63"
+    config_hash: "223b9c91946b00aa70450d64fd3bddcf0fc92a6332bbc1322b8352c5505a5fe0"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Full source narrative. source_commit identifies committed presentation tools, not prose date."
+
+  - artifact_id: btcusdtp-hourly-prior-breakout-v14-html
+    artifact_type: report
+    role: owner_delivery_portable_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bbc1c63"
+    source_path: analysis/html/p1_btcusdtp_hourly_prior_breakout_v14_20260906.html
+    sha256: "eb2919df85896d28173413f979a4f9df48622f20544c57126dc0db409ca96b4c"
+    size_bytes: 403847
+    storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_prior_breakout_v14_20260906.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "bbc1c63"
+    config_hash: "223b9c91946b00aa70450d64fd3bddcf0fc92a6332bbc1322b8352c5505a5fe0"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "12blocks1actualSQLchart. Officialstructural_only;mobile/source interaction not verified."
+
+  - artifact_id: btcusdtp-hourly-prior-breakout-v14-artifact
+    artifact_type: report
+    role: canonical_native_report_manifest_snapshot
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bbc1c63"
+    source_path: experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/artifact.json
+    sha256: "a8fed4b3220728357cdf78fce7192029b3899176ea2a80b1f57295dd7e78a38c"
+    size_bytes: 20970
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/artifact.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "bbc1c63"
+    config_hash: "223b9c91946b00aa70450d64fd3bddcf0fc92a6332bbc1322b8352c5505a5fe0"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Full narrative and4half count dataset;no financial outcome or profit claim."
+
+  - artifact_id: btcusdtp-hourly-prior-breakout-v14-verification
+    artifact_type: report
+    role: independent_saved_window_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bbc1c63"
+    source_path: experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/VERIFICATION.md
+    sha256: "4305a3f461896f329ed4f01fdb3cf79bbceac201b397ae92c7b0983adc983fe8"
+    size_bytes: 6220
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/VERIFICATION.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "bbc1c63"
+    config_hash: "223b9c91946b00aa70450d64fd3bddcf0fc92a6332bbc1322b8352c5505a5fe0"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "4hashes11committedsources,713windows154groups;3057tests;no raw5m reaggregation."
+
+  - artifact_id: btcusdtp-hourly-prior-breakout-v14-notebook
+    artifact_type: report
+    role: saved_support_audit_notebook
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bbc1c63"
+    source_path: experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/prior_breakout_audit.ipynb
+    sha256: "3ed662b09551bd2603d8c611e4650c2244b41989bb670aa5301b138ef5a359a9"
+    size_bytes: 13322
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/prior_breakout_audit.ipynb"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "bbc1c63"
+    config_hash: "223b9c91946b00aa70450d64fd3bddcf0fc92a6332bbc1322b8352c5505a5fe0"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "3code cells plainPython;SAME verifier reused,not secondindependent audit,noJupyter/fullschema."
+
   - artifact_id: btcusdtp-hourly-prior-colour-v13-development
     artifact_type: report
     role: fixed_prior4h_colour_comparison

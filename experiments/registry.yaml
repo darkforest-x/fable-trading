@@ -5307,26 +5307,36 @@ experiments:
 
   - experiment_id: exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14
     source_repo: darkforest-x/fable-trading
-    source_commit: "pending-builder-commit"
-    status: active
+    source_commit: "5fc542b"
+    status: inconclusive
     question: >-
       Does strict own K1 close beyond prior20 complete hourly high/low leave
       sufficient support on original251 cases and462 fixed own controls?
     single_variable: >-
       Fixed20 strict breakout, exclude K1; no slope or4h colour gate. Support
       only; no outcome files, returns or execution. Preserve154 triples.
-    result: "Preregistered, source run not yet performed; no profitability result."
+    result: >-
+      Support insufficient:60of251cases,53of462controls pass;no unknowns.
+      Casefold17/15/11/17 fails total80 andmin12,23months/min5passes.
+      No outcome tables read or returns computed. Not a profit rejection/proof.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/PROJECT_PLAN.md
-    artifacts: []
+    canonical_report: analysis/html/p1_btcusdtp_hourly_prior_breakout_v14_20260906.html
+    artifacts:
+      - btcusdtp-hourly-prior-breakout-v14-support
+      - btcusdtp-hourly-prior-breakout-v14-report
+      - btcusdtp-hourly-prior-breakout-v14-html
+      - btcusdtp-hourly-prior-breakout-v14-artifact
+      - btcusdtp-hourly-prior-breakout-v14-verification
+      - btcusdtp-hourly-prior-breakout-v14-notebook
     reuse_allowed: false
     notes: >-
-      Freeze builder/config/tests before source. Stop before outcomes if cases
-      below80 or any half below12, active months below12 or perhalf below3.
-      Reused2023--2024, old V1 breakout test was conditioned on slope and failed.
-      Not new alpha proof. Overall profitability goal remains active and unmet.
+      Builder5fc542b precedes sole source run;713context14973sourcehour rows.
+      Verifierbbc1c63 checks4outputs11sources,independent savedmaxmin,154triples.
+      3057relatedtests,notebookplainPython,HTMLstructural_only/no mobileQA.
+      Reused2023--2024,originalmatching61.35%stillbelow90%,noTV/live/holdout.
+      Goalactiveunmet;nextnative15m originalpool question only,not run.
 
   - experiment_id: exp-btcusdtp-1h-prior4h-colour-preholdout-20260906-v13
     source_repo: darkforest-x/fable-trading
