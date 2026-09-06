@@ -16,8 +16,8 @@ schema_version: 1
 experiments:
   - experiment_id: exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21
     source_repo: darkforest-x/fable-trading
-    source_commit: "a442acf"
-    status: active
+    source_commit: "6547a04"
+    status: rejected
     question: >-
       Does fixed ex-BTC four-asset rank50 mean pressure improve the original
       251 BTC hourly direct-K1 intentions under unchanged V18 cached exits?
@@ -26,18 +26,30 @@ experiments:
       score50 mean sign, external availability at own K1 OPEN. Full51hours
       per asset, exact clocks, missing unknown; no structure or exit change.
     result: >-
-      Preregistered before external OHLCV materialization. Freeze713 own
-      contexts before fixed V18 outcome access, gated by inherited support.
-      No new intrabar replay or independent-validation claim.
-    canonical_report: experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/PROJECT_PLAN.md
+      Support passes96accepted155abstain0unknown;21/26/18/31perhalfyear.
+      Pertrade net-16.7690to-21.3286bp,PF.5918to.5126. Misses42of55winners
+      while retaining83of196losers. D251+8.6114bp,p.0279;I154+1.1819bp,
+      p.4287. Only2024H2positive and concentrated. Reduced trading is not
+      improved entry quality;cached V18 reuse,no new intrabar replay.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_breadth_v21_20260906.html
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
+    artifacts:
+      - btcusdtp-hourly-breadth-v21-results
+      - btcusdtp-hourly-breadth-v21-report
+      - btcusdtp-hourly-breadth-v21-html
+      - btcusdtp-hourly-breadth-v21-artifact
+      - btcusdtp-hourly-breadth-v21-verification
+      - btcusdtp-hourly-breadth-v21-statistical-diagnostics
     reuse_allowed: false
     notes: >-
       Reused2023--2024 only, physical later prices not parsed. Explicit Binance
       external inputs do not replace original OKX BTC execution source.
       Original154triples/97unmatched and90percent coverage gate remain.
+      Frozen713owncontexts before outcomes;independent70168hour-state audit,
+      saved-accounting review and347targetedtests pass. Still netnegative;
+      no TradingView,holdout,training,ACTIVE or live-account change.
 
   - experiment_id: exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20
     source_repo: darkforest-x/fable-trading

@@ -18,6 +18,97 @@
 schema_version: 1
 
 artifacts:
+
+  - artifact_id: btcusdtp-hourly-breadth-v21-results
+    artifact_type: report
+    role: fixed_exit_all_intention_external_rank_gate_economics
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6547a04"
+    source_path: experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/results/summary.json
+    sha256: "3719ffee7cb61bdc10f5138eeb1b70e0f570117cbd285fbb74a6e30bb947d06f"
+    size_bytes: 57685
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "96accepted155abstain0unknown;net-21.3286bp,I154+1.1819bp,p.4287. Rejected;cached V18 episodes,not new intrabar replay."
+
+  - artifact_id: btcusdtp-hourly-breadth-v21-report
+    artifact_type: report
+    role: technical_external_rank_gate_failure_analysis
+    source_repo: darkforest-x/fable-trading
+    source_commit: "90b7070"
+    source_path: analysis/p1_btcusdtp_hourly_breadth_v21_20260906.md
+    sha256: "da30ae3a909f47ca78470cc10adea3fd2a9903430860dd16de5bd7623fbdf92d"
+    size_bytes: 15134
+    storage_uri: "repo://analysis/p1_btcusdtp_hourly_breadth_v21_20260906.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Reviewed narrative;source_commit names upstream evidence,not existence of final manual narrative at that revision."
+
+  - artifact_id: btcusdtp-hourly-breadth-v21-html
+    artifact_type: report
+    role: portable_technical_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9d9ba75"
+    source_path: analysis/html/p1_btcusdtp_hourly_breadth_v21_20260906.html
+    sha256: "177b65ee6d2a6d7aa6dacf70c51d3bd85a8d8ad25ab95f9d0bec5c3df293a41d"
+    size_bytes: 472445
+    storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_breadth_v21_20260906.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Official portable validation and packaging pass;15blocks2nativecharts;structural_only. No browser/mobile/source-dialog verification."
+
+  - artifact_id: btcusdtp-hourly-breadth-v21-artifact
+    artifact_type: report
+    role: canonical_external_rank_gate_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9d9ba75"
+    source_path: experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/artifact.json
+    sha256: "93985394a884b86d913f7a8e9c31a19853eba6d04f20aaa8cb6091c660dcba47"
+    size_bytes: 29172
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/artifact.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Complete13section narrative;actualSQLite713context counts and251delta bins. No hidden denominator or deleted tails."
+
+  - artifact_id: btcusdtp-hourly-breadth-v21-verification
+    artifact_type: report
+    role: independent_saved_hourly_rank_support_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "90b7070"
+    source_path: experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/results/independent_verification.json
+    sha256: "22fd707a0b534f85e8faaf7a00fa913d825f1526d9274720aa49c09bd873e9e7"
+    size_bytes: 1627
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/results/independent_verification.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Passed70168savedhours713requests62supportrows154triples and frozen source/output lineage. Not raw5aggregation,Pine,live latency or independent economics."
+
+  - artifact_id: btcusdtp-hourly-breadth-v21-statistical-diagnostics
+    artifact_type: report
+    role: saved_only_distribution_diagnostics
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9d9ba75"
+    source_path: experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/results/statistical_diagnostics.json
+    sha256: "a589c364631bb51f61a4a7b15a59829fe746abf4680d185d144e60ff144ab4e7"
+    size_bytes: 1407
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/results/statistical_diagnostics.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Bundled normality/outlier utilities executed without installation;all33D and16I outliers retained. Not independent samples or new strategy inference."
+
   - artifact_id: btcusdtp-hourly-structure-v20-results
     artifact_type: report
     role: fixed_exit_all_intention_structure_gate_economics

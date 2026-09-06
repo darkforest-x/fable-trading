@@ -1,0 +1,442 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "External Rank Pressure",
+    "generatedAt": "2026-09-06 15:08:20.878110+00:00",
+    "filters": [],
+    "cards": [],
+    "charts": [
+      {
+        "id": "support",
+        "type": "bar",
+        "title": "各半年度获准的原始 K1 机会",
+        "description": "2023—2024年；柱为外部均值同向的机会数，参考线为每半年度最低12笔，不代表收益",
+        "showDescription": true,
+        "dataset": "case_support",
+        "sourceId": "support",
+        "palette": {
+          "kind": "sequential",
+          "name": "blue"
+        },
+        "labels": {
+          "values": "all"
+        },
+        "settings": {
+          "sort": "none",
+          "categoryLabelPolicy": "wrap"
+        },
+        "referenceLines": [
+          {
+            "axis": "y",
+            "value": 12,
+            "color": "neutral",
+            "lineStyle": "dashed",
+            "label": "最低12笔"
+          }
+        ],
+        "encodings": {
+          "x": {
+            "field": "fold",
+            "type": "nominal",
+            "label": "原始半年度"
+          },
+          "y": {
+            "field": "accepted",
+            "type": "quantitative",
+            "label": "获准机会数",
+            "format": "number"
+          },
+          "tooltip": [
+            {
+              "field": "total",
+              "type": "quantitative",
+              "label": "全部机会"
+            },
+            {
+              "field": "abstain",
+              "type": "quantitative",
+              "label": "中性或反向"
+            },
+            {
+              "field": "unknown",
+              "type": "quantitative",
+              "label": "未知"
+            }
+          ]
+        }
+      },
+      {
+        "id": "delta",
+        "type": "bar",
+        "title": "逐机会净收益增量分布",
+        "description": "单位bp；候选减基准；不等宽分箱的机会计数，非概率密度；0包含保留的原路径",
+        "showDescription": true,
+        "dataset": "delta_distribution",
+        "sourceId": "delta",
+        "palette": {
+          "kind": "sequential",
+          "name": "blue"
+        },
+        "labels": {
+          "values": "all"
+        },
+        "settings": {
+          "sort": "none",
+          "categoryLabelPolicy": "wrap"
+        },
+        "encodings": {
+          "x": {
+            "field": "range_bp",
+            "type": "nominal",
+            "label": "增量范围（bp）"
+          },
+          "y": {
+            "field": "opportunities",
+            "type": "quantitative",
+            "label": "机会数",
+            "format": "number"
+          },
+          "tooltip": [
+            {
+              "field": "mean_delta_bp",
+              "type": "quantitative",
+              "label": "箱内平均增量bp"
+            },
+            {
+              "field": "mean_before_bp",
+              "type": "quantitative",
+              "label": "基准均净bp"
+            },
+            {
+              "field": "mean_after_bp",
+              "type": "quantitative",
+              "label": "候选均净bp"
+            }
+          ]
+        }
+      }
+    ],
+    "tables": [],
+    "blocks": [
+      {
+        "id": "section_0",
+        "type": "markdown",
+        "layout": "full",
+        "body": "# External Rank Pressure"
+      },
+      {
+        "id": "section_1",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 技术摘要：四币均值共振没有改善入场质量\n\n**V21 不采用，盈利目标仍未达成。** 在固定的2023—2024年 BTCUSDT.P 小时级开发样本中，加入 ETH、SOL、BNB、XRP 的历史位置均值同向门后，251个原始机会留下96笔；每笔平均净收益由 **−16.7690bp 降至 −21.3286bp**，胜率由21.91%降至13.54%。成本仍为每笔0.2%，没有修改退出、止损或手续费假设。1bp=0.01%，这些数不是账户收益率。\n\n这不是“过滤得还不够严格”就能概括的问题：规则挡掉原55笔赢家中的42笔，却仍留下196笔原亏单中的83笔。接受组的质量比被拒绝组更差。它描述外部币已经处于什么价格位置，不一定适合寻找 BTC 刚穿越均线、切换方向的那一刻；后一句是机制解释，不能当逐笔因果证明。\n\n全机会平均亏损确实缩小，但大部分来自不再交易。匹配对照净优势的增量只有+1.1819bp，95%区间跨零；唯一盈利的半年度依赖少数大赢家。未更新 TradingView，未训练或切换实盘配置。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_2",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 固定比较：交易、机会、对照是三个不同分母\n\n本轮只改一个变量：**是否允许原 K1 入场**。原始251个大实体或吞没穿均线的 BTC 小时机会、462个自身时刻的随机对照、154组三对照及97个未匹配机会全部保留。评估按2023上/下半年、2024上/下半年切分，72小时标签窗口不跨切点；这些都是已反复研究过的开发数据，不是新样本外验证。\n\n- 交易均值：只除以真正完成的交易数，基准251、候选96。\n- 全机会均值：不交易记0，本轮251个机会全已知；不会把155次放弃假装成155笔零收益成交。\n- D：同一个机会“候选净收益−基准净收益”，251对；衡量整套参加/放弃策略的变化。\n- I：同154匹配组的病例D减去对照D；另外97个I仍未知，不删除、不填0。\n- 单仓：每个方案重新计算占仓后允许的交易，候选95笔；不能沿用旧单仓掩码。\n\n原退出保持 V18：完整原生15分钟 SMA40/HL2 从同向变反向最终退出；盈利的真实5分钟反色事件按原规则兑现50%；原亏损启动失败需两根5分钟确认；K1极值硬止损、72小时上限及20bp往返成本不变。本轮复用已保存且逐字节锁定的旧退出路径，**没有重新模拟原始分钟内成交**。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_3",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 时间覆盖：样本要求通过，但不是盈利证明\n\n四个外部币各读取210,504根5分钟数据，仅限2022年12月29日至2024年12月28日21:55 UTC；前段为预热。所有来源先检查时间戳、归档与收据哈希，再按明确行数读取价格；没有解析2025年及之后的价格。合计导出70,168个完整外部小时状态。\n\n| 时间段 | 原机会 | 获准 | 放弃 | 未知 |\n|---|---:|---:|---:|---:|\n| 2023上半年 | 55 | 21 | 34 | 0 |\n| 2023下半年 | 66 | 26 | 40 | 0 |\n| 2024上半年 | 55 | 18 | 37 | 0 |\n| 2024下半年 | 75 | 31 | 44 | 0 |\n| 合计 | 251 | 96 | 155 | 0 |\n\n下图比较四个半年度获准的机会数，不是收益曲线。总数96≥80、每段至少18≥12、23个活跃月≥12、每段至少5个活跃月≥3，均通过预先固定的支持要求。随机对照370获准、92放弃、0未知，也独立计算自己的外部状态。支持数量不能代替统计功效或独立验证。",
+        "sourceId": "report"
+      },
+      {
+        "id": "support_chart",
+        "type": "chart",
+        "chartId": "support",
+        "layout": "full"
+      },
+      {
+        "id": "section_4",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 每笔质量：三个半年度更差，唯一正段不稳定\n\n| 时间段 | 基准笔数 | 基准每笔净bp | 候选笔数 | 候选每笔净bp |\n|---|---:|---:|---:|---:|\n| 2023上半年 | 55 | −12.1878 | 21 | −28.9168 |\n| 2023下半年 | 66 | −25.0855 | 26 | −34.5875 |\n| 2024上半年 | 55 | −19.0844 | 18 | −43.3809 |\n| 2024下半年 | 75 | −11.1121 | 31 | +7.7365 |\n| 全期 | 251 | −16.7690 | 96 | −21.3286 |\n\n基准每笔毛收益+3.2310bp、候选−1.3286bp，净值分别再减20bp；**新规则连毛收益也没有改善**。PF由0.5918降至0.5126。多头50笔平均净−15.6812bp，空头46笔−27.4672bp，不能把问题归为只需关闭一个方向。\n\n2024下半年31笔只有6赢25亏，净收益合计+239.8321事件bp。最大赢家是2024年12月4日18:00 UTC的多头K1，净+436.9934bp；其余30笔平均−6.5720bp。前三大赢家贡献该段正收益的70.08%。这是**集中度诊断**：正式结果没有删交易，趋势策略也允许大赢家贡献较多；但一个子时期为正，不能宣称稳定盈利。\n\n单仓重算后，基准250笔平均净−16.9703bp，候选95笔−21.9064bp。全251机会的单仓均值为−16.9027→−8.2913bp。这仍是减少出手后的整体减亏，不是保留交易质量变好。250个被处理机会不等于250笔候选交易。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_5",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 对照增量：少亏与真正新增优势必须分开\n\n| 同154个匹配组的全机会口径 | 基准均净bp | 候选均净bp | 改变量bp |\n|---|---:|---:|---:|\n| 原始K1机会 | −16.3418 | −10.0354 | +6.3063 |\n| 三随机对照的组均值 | −22.0132 | −16.8887 | +5.1245 |\n| K1减随机对照的净优势 | +5.6715 | +6.8533 | **+1.1819** |\n\n上表全为相同154组，不把全251的D减去154组的对照D。总体D=+8.6114bp，月块bootstrap的95%CI为[+0.6625,+16.2224]bp，单侧月符号翻转p=0.0279；尚未达到预先固定的0.01门。I=+1.1819bp，CI[−11.8664,+13.5247]bp，p=0.4287，不能据此认定增量优势。\n\n全251机会净均值由−16.7690变为−8.1576bp；改善113、恶化42、不变96。控制组D=+5.1245bp，CI[+2.4028,+7.6947]，p=0.0010；控制也能通过少交易减亏，正是不能只看病例总亏损缩小的原因。\n\n上述推断沿用9999次、seed20260906的日历月分块法，D和I必须共同通过；没有按本次结果另选检验或删尾部。反复开发、多次候选搜索及月份之间可能相关，意味着这些p/CI是探索证据，不是全研究家族校正后的确证结果。匹配覆盖154/251=61.35%仍低于90%要求，没有降门。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_6",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 逐笔失败：仍以启动失败为主，同时大量错杀赢家\n\n155个被放弃的机会中，113笔原亏损被避开，节省6110.5643事件bp；42笔原盈利被错过，损失3949.0936事件bp，净改善2161.4707事件bp。这里是独立事件收益的加总，不是有资金规模、仓位和复利定义的组合收益。被拒绝组原均净−13.9450bp，仍不赚钱，不能倒过来把反向过滤当成盈利方案。\n\n| 获准后实际退出原因 | 笔数 | 赢 / 亏 | 净收益合计事件bp | 解释 |\n|---|---:|---:|---:|---|\n| 5分钟启动失败两根确认 | 57 | 0 / 57 | −2713.4191 | 50笔毛亏、7笔被费用翻负 |\n| K1极值硬止损 | 11 | 0 / 11 | −843.8702 | 全部毛亏 |\n| 15分钟真实反色最终退出 | 28 | 13 / 15 | +1509.7398 | 15亏中11毛亏、4费用翻负 |\n| 合计 | 96 | 13 / 83 | −2047.5495 | 83亏中72毛亏、11费用翻负 |\n\n退出原因不是从“请求已发出”状态猜测：已用 V18 保存的详细成交表逐event_id联结，核对入出场时钟、毛净收益及退出类别。费用重要，但72/83亏单在扣费前已亏，不能把问题全部推给手续费，也不能只通过抬高止损解决。\n\n原55个赢家只保留13个（23.64%），196个亏单却保留83个（42.35%）。这个筛选对赢家更苛刻，是本轮不采用的主要证据；没有按事后退出原因制作新的入场标签。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_7",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 收益增量分布：大量零值与长尾全部保留\n\n下图对全251机会的净增量D分箱，0包含96个原路径保留的机会；正值表示避开亏损，负值表示错过盈利。分箱不等宽，纵轴是机会数而非密度，不能比较柱宽推断概率。图用于展示少交易的代价，不是新参数选择依据。\n\nD中位0、SD68.2827bp、IQR41.5935bp，范围[−362.3294,+195.3722]bp。I的154个已知值中位0、SD76.1531bp、IQR49.8491bp，另97未知保留。月均值一阶相关分别0.1694和−0.0094，不据此宣称月份独立。\n\n实际运行统计技能自带的诊断：D的Shapiro W=0.8131，p约1.13e−16；I的W=0.8117，p约8.40e−13。33个D及16个I值被IQR规则标出，**全部保留**。这些诊断不满足独立随机样本前提，不能替代原分块推断；没有改做IID t检验，也没有因为不正态而调规则。",
+        "sourceId": "report"
+      },
+      {
+        "id": "delta_chart",
+        "type": "chart",
+        "chartId": "delta",
+        "layout": "full"
+      },
+      {
+        "id": "section_8",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 源码与时钟：这是均值方向门，不是多数投票或资金流\n\n依据 ChartPrime [Multi Asset Histogram 源码](https://www.tradingview.com/script/KkoxM97D-Multi-Asset-Histogram-ChartPrime/)，每币取当前小时HL2，与此前50根HL2逐一比较：大于或相等加1，小于减1。四币原始分数等权均值再除50；自身方向乘均值大于0才允许。长度50为源码默认，**没有“最优”证据**。\n\n原公式的两个特征完整保留：相等价格偏多；均值可被少数强分数拉动。96个接受事件中，27个并无至少3/4币同向，仅28个四币全同向。例如2023年3月11日07:00 UTC空头K1，四币分数依次10、8、8、−28，归一均值−0.01，故允许做空，即使三个币为正分。这不是实现错误，本轮也没有事后换成多数门。\n\n研究适配明确偏离原图表：只用四个预定外部币、不含BTC；要求51根连续完整小时、不用原`nz`补零；对K1开盘T仅取外部小时[T−1h,T)，可用时刻T，而BTC入场为T+1h。四币缺任一个就未知，没有前填或模糊最近匹配。它避开跨所瞬时同步的隐含假设，但并未证明实时馈送延迟一定小于一小时。原图同周期请求可能随实时行情变化，需区分图上显示与已确认可用信息。[TradingView 数据请求说明](https://www.tradingview.com/pine-script-docs/concepts/other-timeframes-and-data/)\n\nBTC执行仍是原OKX数据的已保存路径；Binance四币只作额外输入，未静默换执行价。此前BTC15m ETH多因子、ETH15m BTC均线组、山寨日线广度已做过，跨资产家族不新；本轮只是这个明确公式与原251小时K1的独立对比。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_9",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 复核范围：算对了，不等于策略赚钱\n\n入场特征、会计和读取边界及既有相关测试300项、独立审计器47项合成测试，合计347项联合运行全部通过。实际独立审计重建70,168行保存小时OHLC→HL2→rank50→四币门，核对713自身请求、62支持行、154匹配组、4输入哈希、4归档收据哈希、20个已提交源文件和24输出CSV哈希。\n\n独立只读会计复核通过：96/370个获准病例/控制的旧字段完全一致；155/92弃权无交易无费；四张单仓掩码重新构造；40行指标的1240个数值与60个效果描述统计一致。候选控制单仓316笔仅为诊断，不能当可交易的第二策略。\n\n边界必须分开：保存小时重算**不等于**第二次原5分钟聚合、Pine运行、源真实性或实盘延迟验证；会计复核**未独立重算p/CI或分钟内成交路径**。本轮没有训练，因此val AUC、拟合排名的top-decile毛/净收益和单特征排名基线不适用；固定单变量本身就是候选，严格零假设参照是同币、同时间/方向与波动匹配的随机入场及原未过滤策略，不编造ML指标。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_10",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 风险与诚实声明\n\n1. 总体仍净亏，三个半年度净亏，一个正段集中于少数赢家；不满足稳定正收益。\n2. 原开发期已经反复读取，不是独立验收；匹配61.35%不足90%，不能删掉未匹配机会制造覆盖率。\n3. 四币高度共享市场风险；它们不是四份独立验证。固定存活主流币面板不能外推为全币种有效。\n4. 本次没有调整成本、止损、时间切分、入场源或止盈逻辑；没有读2025+价格、没有消耗新holdout。\n5. 静态位置同向可能不适合抓启动，是与本结果一致的解释，不是已证明的通用定律。多空对照均未证明盈利，不能直接反转该规则。\n6. HTML按官方便携报告流程交付，15块、2个原生图表；验证和打包通过，最终为`structural_only`。本机没有可用的无头Chromium，因此未验证浏览器、手机视口或来源弹窗交互，没有为此安装浏览器或绕过本地预览策略。没有保存TradingView或接入实盘。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_11",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 下一步：检验强弱是否在改变，而非已经站在哪一边\n\n下一项机制候选是同一外部均值的“上一完整小时变化”，而不是绝对均值方向；这可能保留刚切换方向的K1，但**尚未评估，不声称能赚钱**。将先查重旧日线广度变化研究，再冻结唯一变化量、同样的四币和可用时钟，独立比较原V18，不叠本轮失败门，也不并改退出。\n\n仍需回答：这是否真是额外信息，还是同一市场波动的另一表达？能否同时改善每笔净收益、匹配超额、单仓结果和各时期表现？即使开发期转正，也要另外解决独立时间验证与匹配覆盖不足，不能把目标缩为一张正收益表。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_12",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 复现命令与保存证据\n\n研究builder/config/plan在6547a04先提交，然后才读取外部价格。诊断和报告builder在9d9ba75先提交；独立审计器在90b7070先提交再执行。首次运行完成，无失败覆盖或参数重跑。\n\n```bash\ngit show 6547a04:experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/config.json\n.venv/bin/python -m pytest tests/test_hourly_impulse_breadth.py tests/test_hourly_impulse_breadth_accounting.py tests/test_hourly_impulse_breadth_research.py tests/test_verify_hourly_impulse_breadth_v21.py tests/test_hourly_impulse_structure_accounting.py tests/boundaries/test_layer_imports.py tests/contracts/test_registries.py -q --tb=short\n.venv/bin/python -m yoyo.evaluation.hourly_impulse_breadth_research\n.venv/bin/python scripts/verify_hourly_impulse_breadth_v21.py\nMPLBACKEND=Agg python3 scripts/diagnose_hourly_impulse_breadth_v21.py\npython3 scripts/md_to_html.py analysis/p1_btcusdtp_hourly_breadth_v21_20260906.md --out-dir analysis/html\n.venv/bin/python experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/build_artifact.py\nnode /Users/zhangzc/.codex/plugins/cache/openai-curated-remote/data-analytics/0.2.10-13ceeea1f599/skills/build-report/scripts/deliver_portable_artifact.mjs --input experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/artifact.json --output analysis/html/p1_btcusdtp_hourly_breadth_v21_20260906.html\n```\n\n真实重建需要本机固定归档和原V4请求/V18输出；研究与诊断命令均拒绝覆盖已存在的结果，应在受授权且保留旧证据的干净环境复现，不删除原结果“重跑”。现存结果用独立审计命令只读验证即可。诊断实际使用系统Python的numpy2.0.2/pandas2.3.3/scipy1.13.1，未改变主环境依赖。完整来源SHA、时间边界、冻结顺序在实验results的started/context_frozen/outcomes_started/summary中；逐机会case_mechanics及case_delta保留全部251身份。\n\n额外退出原因证据为V18 `results/candidate/case_trades.csv.gz`，读取前按其原summary校验SHA `f8b5009e58b5f098004c7ea5c3e8a65cfe5be135459f3f0b55f3fae83f903b9e`。所有结论含负面结果，盈利目标仍未达成。",
+        "sourceId": "report"
+      }
+    ],
+    "sources": [
+      {
+        "id": "report",
+        "label": "V21 · 完整方法、结果与限制",
+        "path": "analysis/p1_btcusdtp_hourly_breadth_v21_20260906.md"
+      },
+      {
+        "id": "support",
+        "label": "V21 · 原始713个自身外部均值方向状态",
+        "path": "experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/results/entry_context.csv.gz",
+        "query": {
+          "sql": "SELECT population, fold, COUNT(*) AS total,\nSUM(CASE WHEN breadth_gate_state='accepted' THEN 1 ELSE 0 END) AS accepted,\nSUM(CASE WHEN breadth_gate_state='abstain' THEN 1 ELSE 0 END) AS abstain,\nSUM(CASE WHEN breadth_gate_state='unknown' THEN 1 ELSE 0 END) AS unknown\nFROM entry_context GROUP BY population,fold ORDER BY population,fold",
+          "engine": "sqlite",
+          "language": "sql",
+          "tables_used": [
+            "entry_context"
+          ],
+          "description": "按原始半年度汇总各自外部均值门，不读取收益",
+          "filters": [
+            "2023--2024 original251 cases and462 fixed own controls"
+          ],
+          "executed_at": "2026-09-06T15:31:27.416941+00:00"
+        }
+      },
+      {
+        "id": "summary",
+        "label": "V21 · 冻结汇总",
+        "path": "experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/results/summary.json"
+      },
+      {
+        "id": "verification",
+        "label": "V21 · 独立四币小时分数复核",
+        "path": "experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/results/independent_verification.json"
+      },
+      {
+        "id": "delta",
+        "label": "V21 · 全251机会收益增量",
+        "path": "experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/results/case_delta.csv.gz",
+        "query": {
+          "sql": "WITH binned AS (SELECT *, CASE\n WHEN difference IS NULL THEN 99 WHEN difference < -0.01 THEN 0\n WHEN difference < -0.005 THEN 1 WHEN difference < -0.002 THEN 2\n WHEN difference < 0 THEN 3 WHEN difference = 0 THEN 4\n WHEN difference < 0.002 THEN 5 WHEN difference < 0.005 THEN 6\n WHEN difference < 0.01 THEN 7 ELSE 8 END AS bin_order FROM case_delta)\n SELECT bin_order, COUNT(*) AS opportunities, AVG(difference)*10000 AS mean_delta_bp,\n AVG(before)*10000 AS mean_before_bp, AVG(after)*10000 AS mean_after_bp\n FROM binned GROUP BY bin_order ORDER BY bin_order",
+          "engine": "sqlite",
+          "language": "sql",
+          "tables_used": [
+            "case_delta"
+          ],
+          "description": "按每机会候选减基准的净收益增量分箱，不删除零值、极端值或未知",
+          "executed_at": "2026-09-06T15:31:27.416977+00:00"
+        }
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-09-06 15:08:20.878110+00:00",
+    "status": "ready",
+    "datasets": {
+      "case_support": [
+        {
+          "population": "case",
+          "fold": "2023H1",
+          "total": 55,
+          "accepted": 21,
+          "abstain": 34,
+          "unknown": 0
+        },
+        {
+          "population": "case",
+          "fold": "2023H2",
+          "total": 66,
+          "accepted": 26,
+          "abstain": 40,
+          "unknown": 0
+        },
+        {
+          "population": "case",
+          "fold": "2024H1",
+          "total": 55,
+          "accepted": 18,
+          "abstain": 37,
+          "unknown": 0
+        },
+        {
+          "population": "case",
+          "fold": "2024H2",
+          "total": 75,
+          "accepted": 31,
+          "abstain": 44,
+          "unknown": 0
+        }
+      ],
+      "delta_distribution": [
+        {
+          "bin_order": 0,
+          "opportunities": 15,
+          "mean_delta_bp": -188.91063784555175,
+          "mean_before_bp": 188.91063784555175,
+          "mean_after_bp": 0.0,
+          "range_bp": "< −100"
+        },
+        {
+          "bin_order": 1,
+          "opportunities": 9,
+          "mean_delta_bp": -70.41297461459044,
+          "mean_before_bp": 70.41297461459044,
+          "mean_after_bp": 0.0,
+          "range_bp": "−100 to < −50"
+        },
+        {
+          "bin_order": 2,
+          "opportunities": 12,
+          "mean_delta_bp": -34.218844097540504,
+          "mean_before_bp": 34.218844097540504,
+          "mean_after_bp": 0.0,
+          "range_bp": "−50 to < −20"
+        },
+        {
+          "bin_order": 3,
+          "opportunities": 6,
+          "mean_delta_bp": -11.848521950543667,
+          "mean_before_bp": 11.848521950543667,
+          "mean_after_bp": 0.0,
+          "range_bp": "−20 to < 0"
+        },
+        {
+          "bin_order": 4,
+          "opportunities": 96,
+          "mean_delta_bp": 0.0,
+          "mean_before_bp": -21.32864084184388,
+          "mean_after_bp": -21.32864084184388,
+          "range_bp": "0"
+        },
+        {
+          "bin_order": 5,
+          "opportunities": 23,
+          "mean_delta_bp": 11.368214592557436,
+          "mean_before_bp": -11.368214592557436,
+          "mean_after_bp": 0.0,
+          "range_bp": "> 0 to < 20"
+        },
+        {
+          "bin_order": 6,
+          "opportunities": 37,
+          "mean_delta_bp": 36.70055592226891,
+          "mean_before_bp": -36.70055592226891,
+          "mean_after_bp": 0.0,
+          "range_bp": "20 to < 50"
+        },
+        {
+          "bin_order": 7,
+          "opportunities": 42,
+          "mean_delta_bp": 70.11015038348138,
+          "mean_before_bp": -70.11015038348138,
+          "mean_after_bp": 0.0,
+          "range_bp": "50 to < 100"
+        },
+        {
+          "bin_order": 8,
+          "opportunities": 11,
+          "mean_delta_bp": 140.59531875202836,
+          "mean_before_bp": -140.59531875202836,
+          "mean_after_bp": 0.0,
+          "range_bp": "≥ 100"
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "report",
+      "label": "V21 · 完整方法、结果与限制",
+      "path": "analysis/p1_btcusdtp_hourly_breadth_v21_20260906.md"
+    },
+    {
+      "id": "support",
+      "label": "V21 · 原始713个自身外部均值方向状态",
+      "path": "experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/results/entry_context.csv.gz",
+      "query": {
+        "sql": "SELECT population, fold, COUNT(*) AS total,\nSUM(CASE WHEN breadth_gate_state='accepted' THEN 1 ELSE 0 END) AS accepted,\nSUM(CASE WHEN breadth_gate_state='abstain' THEN 1 ELSE 0 END) AS abstain,\nSUM(CASE WHEN breadth_gate_state='unknown' THEN 1 ELSE 0 END) AS unknown\nFROM entry_context GROUP BY population,fold ORDER BY population,fold",
+        "engine": "sqlite",
+        "language": "sql",
+        "tables_used": [
+          "entry_context"
+        ],
+        "description": "按原始半年度汇总各自外部均值门，不读取收益",
+        "filters": [
+          "2023--2024 original251 cases and462 fixed own controls"
+        ],
+        "executed_at": "2026-09-06T15:31:27.416941+00:00"
+      }
+    },
+    {
+      "id": "summary",
+      "label": "V21 · 冻结汇总",
+      "path": "experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/results/summary.json"
+    },
+    {
+      "id": "verification",
+      "label": "V21 · 独立四币小时分数复核",
+      "path": "experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/results/independent_verification.json"
+    },
+    {
+      "id": "delta",
+      "label": "V21 · 全251机会收益增量",
+      "path": "experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/results/case_delta.csv.gz",
+      "query": {
+        "sql": "WITH binned AS (SELECT *, CASE\n WHEN difference IS NULL THEN 99 WHEN difference < -0.01 THEN 0\n WHEN difference < -0.005 THEN 1 WHEN difference < -0.002 THEN 2\n WHEN difference < 0 THEN 3 WHEN difference = 0 THEN 4\n WHEN difference < 0.002 THEN 5 WHEN difference < 0.005 THEN 6\n WHEN difference < 0.01 THEN 7 ELSE 8 END AS bin_order FROM case_delta)\n SELECT bin_order, COUNT(*) AS opportunities, AVG(difference)*10000 AS mean_delta_bp,\n AVG(before)*10000 AS mean_before_bp, AVG(after)*10000 AS mean_after_bp\n FROM binned GROUP BY bin_order ORDER BY bin_order",
+        "engine": "sqlite",
+        "language": "sql",
+        "tables_used": [
+          "case_delta"
+        ],
+        "description": "按每机会候选减基准的净收益增量分箱，不删除零值、极端值或未知",
+        "executed_at": "2026-09-06T15:31:27.416977+00:00"
+      }
+    }
+  ]
+}
