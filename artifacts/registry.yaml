@@ -14710,32 +14710,32 @@ artifacts:
     artifact_type: report
     role: canonical_chinese_negative_result_and_trade_postmortem_report
     source_repo: darkforest-x/fable-trading
-    source_commit: "824d2d1"
+    source_commit: "87ac4a6"
     source_path: analysis/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.md
-    sha256: "20daecec9215a2cd30f77b3842cf1fc95163aa6ed2c9c56050ce6967e45feed8"
-    size_bytes: 55028
+    sha256: "1363aa96ae5185d1a63f343b3bfc545674aaa2c029e4663e6317051d378a758f"
+    size_bytes: 62951
     storage_uri: "repo://analysis/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.md"
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
-    generator_commit: "824d2d1"
+    generator_commit: "87ac4a6"
     config_hash: "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
     data_cutoff: "2026-02-28T16:00:00Z"
-    notes: "Six rejected experiments; preserves V1-V5 and adds fixed-mother flat confirmation, true delayed-entry failures, missed winners and paired evidence. Latest simulation builder824d2d1; no new audit."
+    notes: "Seven rejected experiments; preserves V1-V6 and adds frozen-source requests, sufficient controls, colour-aligned failures and monthly evidence. Latest simulation builderad8f5c8; no new audit."
 
   - artifact_id: btcusdtp-hourly-impulse-v1-html
     artifact_type: report
     role: owner_facing_portable_html_report
     source_repo: darkforest-x/fable-trading
-    source_commit: "ba2ef2d"
+    source_commit: "87ac4a6"
     source_path: analysis/html/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.html
-    sha256: "a9dae83a5617a589efa73dab3c5ee87004365ac1993993de9bfae1d59dc304f9"
-    size_bytes: 831637
+    sha256: "196cd148249fd4f13f4deb985b9044ac6000a9a714bb953885c0faed580755a1"
+    size_bytes: 911728
     storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.html"
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
-    generator_commit: "ba2ef2d"
+    generator_commit: "87ac4a6"
     config_hash: "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
     data_cutoff: "2026-02-28T16:00:00Z"
     notes: "Native validation and packaging passed; structural_only because compatible Chromium headless-shell unavailable. Source dialogs, interactions and mobile visual QA not verified."
@@ -14744,18 +14744,18 @@ artifacts:
     artifact_type: manifest
     role: native_source_backed_report_schema
     source_repo: darkforest-x/fable-trading
-    source_commit: "ba2ef2d"
+    source_commit: "87ac4a6"
     source_path: analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/artifact.json
-    sha256: "474983cabada037a52e328ae72465dac4eb49e43d9e9369369e0a01a2260aa9c"
-    size_bytes: 84072
+    sha256: "3858f03294125cac75a602f70dd79144363ac8c0dae8ef8110282c2508d8c5a4"
+    size_bytes: 120113
     storage_uri: "repo://analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/artifact.json"
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
-    generator_commit: "ba2ef2d"
+    generator_commit: "87ac4a6"
     config_hash: "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
     data_cutoff: "2026-02-28T16:00:00Z"
-    notes: "Two native charts, thirty narrative/chart blocks, actual SQLite queries over saved CSVs; preserves all prior result sections and original chart/dataset. Full V1-V6 report."
+    notes: "Three native charts, thirty-five narrative/chart blocks, actual SQLite queries over saved CSVs; preserves both old charts/datasets and all prior result sections. Full V1-V7 report."
 
   - artifact_id: btcusdtp-hourly-staged-v2-development
     artifact_type: manifest
@@ -14909,3 +14909,37 @@ artifacts:
     config_hash: "c136af6f41bb7027a5052f69301caf86dd0cd03e318bd32585c6f062f94b1e23"
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: "Postrun read-only review, not raw-price replay. All14source hashes,10parent inputs,230closures and old-column parity verified;8attempt1derived files byte-identical. No live changes."
+
+  - artifact_id: btcusdtp-hourly-source-v7-development
+    artifact_type: manifest
+    role: frozen_source_first_release_negative_result_with_exact_controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ad8f5c8"
+    source_path: experiments/active/exp-btcusdtp-1h-frozen-source-preholdout-20260906-v7/results/summary.json
+    sha256: "8303b6a3fc18f5d6e12e91b95a331717c7306ce90b3be3ddcfca54db309b4984"
+    size_bytes: 19821
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-frozen-source-preholdout-20260906-v7/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ad8f5c8"
+    config_hash: "0352432f3667494f07b64fd5a8da30009f32deb89d80fab5f85322ac29ab1d83"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "959zones,286closed,283triple matches. Net-17.7878bp,excess+5.0424bp,p.1514. All5m initial aligned; economic rejection, no audit/live change."
+
+  - artifact_id: btcusdtp-hourly-source-v7-verification
+    artifact_type: report
+    role: postrun_source_clock_economic_denominator_and_failure_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ad8f5c8"
+    source_path: experiments/active/exp-btcusdtp-1h-frozen-source-preholdout-20260906-v7/VERIFICATION.md
+    sha256: "9a808f823419919373047ee0df51873fdecf17f0853feca26a8cc0eb973ec0bb"
+    size_bytes: 6764
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-frozen-source-preholdout-20260906-v7/VERIFICATION.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "ad8f5c8"
+    config_hash: "0352432f3667494f07b64fd5a8da30009f32deb89d80fab5f85322ac29ab1d83"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Read-only saved-ledger audit,18frozenhashes,1135closures,959source clocks. Not independent raw replay or prospective validation."

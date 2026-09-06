@@ -5307,8 +5307,8 @@ experiments:
 
   - experiment_id: exp-btcusdtp-1h-frozen-source-preholdout-20260906-v7
     source_repo: darkforest-x/fable-trading
-    source_commit: "ac02180"
-    status: active
+    source_commit: "ad8f5c8"
+    status: rejected
     question: >-
       Does first qualified release from a previously frozen hourly source zone
       produce net profits and measured-state random-entry excess, without
@@ -5317,11 +5317,18 @@ experiments:
       One entry-family substitution: fixed4+4 inside envelope and first8h
       close release replaces SMAcross/MA-side admission. Original impulse
       morphology, actual K1 stop, next5mopen,5m truecolour exit,72h and20bp fixed.
-    result: "Preregistered support-before-outcomes design; no result yet."
+    result: >-
+      Support passes:959zones/286requests/283 exact3control matches. All286
+      closed, mean net-17.7878bp,PF0.6087,one positive fold. Matched excess
+      +5.0424bp,p0.1514,CI[-3.871,14.019]. All entries initially5m aligned.
+      Economic gates reject; no audit. Serial identical, no live change.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    canonical_report: analysis/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.md
+    artifacts:
+      - btcusdtp-hourly-source-v7-development
+      - btcusdtp-hourly-source-v7-verification
     reuse_allowed: false
     notes: >-
       Reused2023-2024 only;80requests/12fold/90% exact3control coverage and

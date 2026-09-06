@@ -1,0 +1,635 @@
+{
+  "status": "rejected_development_no_audit",
+  "support": {
+    "zones": 959,
+    "requests": 286,
+    "request_counts_by_fold": {
+      "2023H1": 69,
+      "2023H2": 55,
+      "2024H1": 78,
+      "2024H2": 84
+    },
+    "minimum_fold_requests": 55,
+    "matched_requests": 283,
+    "assignment_coverage": 0.9895104895104895,
+    "active_request_months": 24,
+    "request_months_by_fold": {
+      "2023H1": 6,
+      "2023H2": 6,
+      "2024H1": 6,
+      "2024H2": 6
+    },
+    "unknown_zones": 0,
+    "source_statuses": {
+      "expired_no_release": 187,
+      "first_release_unqualified": 486,
+      "request_emitted": 286
+    },
+    "pnl_computed": false,
+    "gates": {
+      "request_count": true,
+      "fold_support": true,
+      "assignment_coverage": true,
+      "month_support": true,
+      "complete_source_evidence": true
+    },
+    "passed": true
+  },
+  "outcomes_computed": true,
+  "metrics": {
+    "events": 286,
+    "excluded_results": 0,
+    "rejected_entries": 0,
+    "censored": 0,
+    "mean_net_bp": -17.78780722808446,
+    "median_net_bp": -36.658903546942774,
+    "profit_factor": 0.6087167498630972,
+    "win_rate": 0.2517482517482518,
+    "p95_net_bp": 218.92992834043778,
+    "worst_fold_bp": -27.291316821937095,
+    "positive_folds": 1,
+    "minimum_fold_events": 55,
+    "folds": [
+      {
+        "fold": "2023H1",
+        "count": 69,
+        "mean": -0.0026282024554416584
+      },
+      {
+        "fold": "2023H2",
+        "count": 55,
+        "mean": -0.002518851918299049
+      },
+      {
+        "fold": "2024H1",
+        "count": 78,
+        "mean": 0.0005179307629869029
+      },
+      {
+        "fold": "2024H2",
+        "count": 84,
+        "mean": -0.0027291316821937096
+      }
+    ],
+    "robust_score_bp": -32.55092247414031,
+    "net_week_cluster_p": 0.999,
+    "net_month_cluster_p": 0.9981,
+    "extra_10bp_mean_net_bp": -27.78780722808446,
+    "leave_top_two_mean_net_bp": -21.34896112274794,
+    "range_feature_auc": 0.5853452751817237,
+    "range_top_decile_net_bp": -38.504953170663434,
+    "range_top_decile_gross_bp": -18.504953170663423,
+    "mean_hold_hours": 2.6060606060606064
+  },
+  "control_metrics": {
+    "events": 849,
+    "excluded_results": 0,
+    "rejected_entries": 0,
+    "censored": 0,
+    "mean_net_bp": -22.455271256085556,
+    "median_net_bp": -31.507698884808406,
+    "profit_factor": 0.34538210269891845,
+    "win_rate": 0.1519434628975265,
+    "p95_net_bp": 66.793864744912,
+    "worst_fold_bp": -23.000781864077126,
+    "positive_folds": 0,
+    "minimum_fold_events": 165,
+    "folds": [
+      {
+        "fold": "2023H1",
+        "count": 198,
+        "mean": -0.002211812564228196
+      },
+      {
+        "fold": "2023H2",
+        "count": 165,
+        "mean": -0.0021784964276367162
+      },
+      {
+        "fold": "2024H1",
+        "count": 234,
+        "mean": -0.002262572770896062
+      },
+      {
+        "fold": "2024H2",
+        "count": 252,
+        "mean": -0.0023000781864077127
+      }
+    ],
+    "robust_score_bp": -22.604893261716192,
+    "net_week_cluster_p": 1.0,
+    "net_month_cluster_p": 1.0,
+    "extra_10bp_mean_net_bp": -32.45527125608555,
+    "leave_top_two_mean_net_bp": -23.77492775218975,
+    "range_feature_auc": 0.5611864771748493,
+    "range_top_decile_net_bp": -28.47363165426577,
+    "range_top_decile_gross_bp": -8.47363165426576,
+    "mean_hold_hours": 1.4962701217118177
+  },
+  "matching": {
+    "paired_events": 283,
+    "mother_events": 286,
+    "assignment_coverage": 0.9895104895104895,
+    "coverage": 0.9895104895104895,
+    "mean_excess_bp": 5.042355558866433,
+    "event_mean_net_bp": -17.412915697219127,
+    "control_mean_net_bp": -22.455271256085545,
+    "effect": {
+      "n": 283,
+      "mean_bp": 5.042355558866433,
+      "median_bp": -6.027884510312704,
+      "sd_bp": 104.40609486916627,
+      "iqr_bp": 71.5048695083518,
+      "positive_fraction": 0.4416961130742049,
+      "zero_fraction": 0.0,
+      "months": 24,
+      "ci95_bp": [
+        -3.871037214779365,
+        14.019316707186158
+      ],
+      "month_cluster_p": 0.1514,
+      "month_mean_lag1_autocorrelation": 0.4709812954241156,
+      "inference": "exploratory month-cluster bootstrap/sign flip; not independent confirmation"
+    },
+    "control_mothers": 849,
+    "control_executed": 849
+  },
+  "single_position": {
+    "events": 286,
+    "excluded_results": 0,
+    "rejected_entries": 0,
+    "censored": 0,
+    "mean_net_bp": -17.78780722808446,
+    "median_net_bp": -36.658903546942774,
+    "profit_factor": 0.6087167498630972,
+    "win_rate": 0.2517482517482518,
+    "p95_net_bp": 218.92992834043778,
+    "worst_fold_bp": -27.291316821937095,
+    "positive_folds": 1,
+    "minimum_fold_events": 55,
+    "folds": [
+      {
+        "fold": "2023H1",
+        "count": 69,
+        "mean": -0.0026282024554416584
+      },
+      {
+        "fold": "2023H2",
+        "count": 55,
+        "mean": -0.002518851918299049
+      },
+      {
+        "fold": "2024H1",
+        "count": 78,
+        "mean": 0.0005179307629869029
+      },
+      {
+        "fold": "2024H2",
+        "count": 84,
+        "mean": -0.0027291316821937096
+      }
+    ],
+    "robust_score_bp": -32.55092247414031,
+    "net_week_cluster_p": 0.999,
+    "net_month_cluster_p": 0.9981,
+    "extra_10bp_mean_net_bp": -27.78780722808446,
+    "leave_top_two_mean_net_bp": -21.34896112274794,
+    "range_feature_auc": 0.5853452751817237,
+    "range_top_decile_net_bp": -38.504953170663434,
+    "range_top_decile_gross_bp": -18.504953170663423,
+    "mean_hold_hours": 2.6060606060606064
+  },
+  "request_intention_effect": {
+    "n": 286,
+    "mean_bp": -17.78780722808446,
+    "median_bp": -36.658903546942774,
+    "sd_bp": 106.4188057588004,
+    "iqr_bp": 64.34010844591054,
+    "positive_fraction": 0.2517482517482518,
+    "zero_fraction": 0.0,
+    "months": 24,
+    "ci95_bp": [
+      -28.550134302612104,
+      -7.553765760076216
+    ],
+    "month_cluster_p": 0.9981,
+    "month_mean_lag1_autocorrelation": 0.34369518654715564,
+    "inference": "exploratory month-cluster bootstrap/sign flip; not independent confirmation"
+  },
+  "zone_intention_effect": {
+    "n": 959,
+    "mean_bp": -5.30481008053405,
+    "median_bp": 0.0,
+    "sd_bp": 58.61233833481963,
+    "iqr_bp": 0.0,
+    "positive_fraction": 0.07507820646506778,
+    "zero_fraction": 0.7017726798748697,
+    "months": 24,
+    "ci95_bp": [
+      -8.248952747286038,
+      -2.283871395176118
+    ],
+    "month_cluster_p": 0.998,
+    "month_mean_lag1_autocorrelation": 0.3582761506807913,
+    "inference": "exploratory month-cluster bootstrap/sign flip; not independent confirmation"
+  },
+  "zone_outcome_counts": {
+    "first_release_unqualified": 486,
+    "transition_colour_exit": 263,
+    "expired_no_release": 187,
+    "hard_stop": 23
+  },
+  "serial_accepted_zones": 959,
+  "months": {
+    "active_months": 24,
+    "minimum_months_per_fold": 6,
+    "by_fold": {
+      "2023H1": 6,
+      "2023H2": 6,
+      "2024H1": 6,
+      "2024H2": 6
+    }
+  },
+  "entry_context": {
+    "state_counts": {
+      "aligned": 286
+    },
+    "strata": [
+      {
+        "state": "aligned",
+        "requests": 286,
+        "closed": 286,
+        "net_mean_bp": -17.78780722808446,
+        "gross_mean_bp": 2.2121927719155505,
+        "wins": 72,
+        "losses": 214,
+        "exit_5min": 0,
+        "exit_le_30min": 17,
+        "hold_median_minutes": 135.0,
+        "hold_mean_minutes": 156.36363636363637,
+        "hard_stops": 23,
+        "time_exits": 0,
+        "fee_flips": 23,
+        "loser_mfe_ge_1r": 28,
+        "mae_median_r": -0.48034334763948494,
+        "never_armed_executed": 0
+      },
+      {
+        "state": "opposite",
+        "requests": 0,
+        "closed": 0,
+        "net_mean_bp": null,
+        "gross_mean_bp": null,
+        "wins": 0,
+        "losses": 0,
+        "exit_5min": 0,
+        "exit_le_30min": 0,
+        "hold_median_minutes": null,
+        "hold_mean_minutes": null,
+        "hard_stops": 0,
+        "time_exits": 0,
+        "fee_flips": 0,
+        "loser_mfe_ge_1r": 0,
+        "mae_median_r": null,
+        "never_armed_executed": 0
+      },
+      {
+        "state": "unknown",
+        "requests": 0,
+        "closed": 0,
+        "net_mean_bp": null,
+        "gross_mean_bp": null,
+        "wins": 0,
+        "losses": 0,
+        "exit_5min": 0,
+        "exit_le_30min": 0,
+        "hold_median_minutes": null,
+        "hold_mean_minutes": null,
+        "hard_stops": 0,
+        "time_exits": 0,
+        "fee_flips": 0,
+        "loser_mfe_ge_1r": 0,
+        "mae_median_r": null,
+        "never_armed_executed": 0
+      }
+    ]
+  },
+  "diagnosis": {
+    "interpretation": "Descriptive outcome/path associations, not proven causal failure mechanisms. Bins are fixed reporting categories and do not select strategy gates. Only finite completed trade returns enter outcome metrics. Event sums may overlap and are not portfolio returns.",
+    "input_events": 286,
+    "closed_finite_events": 286,
+    "rejected_entries": 0,
+    "opened_censored": 0,
+    "closed_nonfinite": 0,
+    "invalid_entry_timestamp": 0,
+    "metrics": {
+      "n": 286,
+      "mean_net_bp": -17.78780722808446,
+      "median_net_bp": -36.658903546942774,
+      "sum_event_net_bp": -5087.312867232155,
+      "profit_factor": 0.6087167498630972,
+      "profit_factor_infinite": false,
+      "win_rate": 0.2517482517482518,
+      "loss_n": 214,
+      "flat_n": 0
+    },
+    "loss_taxonomy": {
+      "cost_flip": 23,
+      "early_reversal": 10,
+      "giveback": 14,
+      "hard_stop": 23,
+      "other_loss": 144
+    },
+    "loss_overlapping_flags": {
+      "hard_stop": 23,
+      "colour_exit": 191,
+      "fees_flip": 23,
+      "never_positive": 2,
+      "giveback": 28,
+      "early_30min": 17
+    },
+    "fee_flips_including_flat": 23,
+    "top1_share_of_positive_profits": 0.06651227191037683,
+    "top2_share_of_positive_profits": 0.12329482588587197,
+    "top2_share_of_total_net": null,
+    "leave_top_one_mean_net_bp": -19.69723108946637,
+    "leave_top_two_mean_net_bp": -21.34896112274794,
+    "configured_roundtrip_cost_fraction": 0.002,
+    "observed_cost_min": 0.002,
+    "observed_cost_max": 0.0020000000000000018,
+    "cost_contract_mismatch_n": 0,
+    "daily_monthly_basis": "Entry cohorts; sums of possibly overlapping event returns, not compounded portfolio returns."
+  },
+  "gates": {
+    "samples": true,
+    "positive_folds": false,
+    "net_profit": false,
+    "profit_factor": false,
+    "month_support": true,
+    "matched_coverage": true,
+    "matched_excess": true,
+    "single_position": false,
+    "cost_stress": false,
+    "leave_top_two": false,
+    "complete_evidence": true,
+    "net_inference": false,
+    "excess_inference": false
+  },
+  "benchmark_descriptive_only": {
+    "events": 251,
+    "excluded_results": 0,
+    "rejected_entries": 0,
+    "censored": 0,
+    "mean_net_bp": -14.306631864989344,
+    "median_net_bp": -33.613398652081,
+    "profit_factor": 0.6247088091428435,
+    "win_rate": 0.24701195219123506,
+    "p95_net_bp": 177.3703022701855,
+    "worst_fold_bp": -24.74721697123479,
+    "positive_folds": 0,
+    "minimum_fold_events": 55,
+    "folds": [
+      {
+        "fold": "2023H1",
+        "count": 55,
+        "mean": -0.001118588405388091
+      },
+      {
+        "fold": "2023H2",
+        "count": 66,
+        "mean": -0.0024747216971234788
+      },
+      {
+        "fold": "2024H1",
+        "count": 55,
+        "mean": -0.0010483220948261545
+      },
+      {
+        "fold": "2024H2",
+        "count": 75,
+        "mean": -0.0010211300038573256
+      }
+    ],
+    "robust_score_bp": -13.89687827299268,
+    "net_week_cluster_p": 0.9882,
+    "net_month_cluster_p": 0.998,
+    "extra_10bp_mean_net_bp": -24.306631864989342,
+    "leave_top_two_mean_net_bp": -17.320583181535383,
+    "range_feature_auc": 0.565284178187404,
+    "range_top_decile_net_bp": -18.513292256400042,
+    "range_top_decile_gross_bp": 1.4867077435998082,
+    "mean_hold_hours": 2.50332005312085
+  },
+  "audit_opened": false,
+  "independent_confirmation": false,
+  "source_receipt": {
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "physical_rows": 341567,
+    "phase_rows": 219551,
+    "phase_price_last_open": "2024-12-31 23:55:00+00:00",
+    "physical_last_open": "2026-02-28 15:55:00+00:00",
+    "holdout_price_rows": 0,
+    "timestamp_preflight_before_price_hash": true
+  },
+  "config_sha256": "0352432f3667494f07b64fd5a8da30009f32deb89d80fab5f85322ac29ab1d83",
+  "source_hashes": [
+    {
+      "path": "yoyo/data/hourly_impulse.py",
+      "sha256": "f1128f514456f0e1a7bf89b719b2333ebe3b12f66402d58c82764d355be97a3b"
+    },
+    {
+      "path": "yoyo/data/hourly_impulse_colour_context.py",
+      "sha256": "32c035635c435d5c079a8ad7f91061fb4bdbb7195a3be66db40fef1dbacd0c1d"
+    },
+    {
+      "path": "yoyo/data/hourly_impulse_source_zone.py",
+      "sha256": "79837405f8af5d6c194fa7eee783d76c435dcf47e2b262bc6712aba0353bc87f"
+    },
+    {
+      "path": "yoyo/layers/l3_backtest/hourly_impulse.py",
+      "sha256": "736bddb719449f8b2433262d019382df5ec75e3ee2e15f9b77389c3e31346c61"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_research.py",
+      "sha256": "804e62f5dfa537302a6cf1f0223549cdf3b3a3e42966ef59a33b6c975fd79ad4"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_context_research.py",
+      "sha256": "b55c11cbf3cfc7b55a319b65625502738f831b298e9b1c5f65c1657efe4bb9a3"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_k2_research.py",
+      "sha256": "3ce431bf8c96fc2828dd4405db7012b57b13295a169f0d67d5e95a86b1659c67"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_k2_matching.py",
+      "sha256": "50af2aa6421b5aef83082213407f31877239b92b1bd3103adabee90f5476803b"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_transition_research.py",
+      "sha256": "2ceb5a764743d9cc48e7aa2eb14d49dcc73c941381d7cdec9ad6fffba658c1f8"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_diagnostics.py",
+      "sha256": "1f20806dcfb0421be4f3581a1c24c85c220acd9b2e9b56e332d5755dcf64560f"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_source_matching.py",
+      "sha256": "2c9b1b9bd582b68d85c7a2925a9e3a429465848abc4e3c87eb4b21afdf683b87"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_source_research.py",
+      "sha256": "14cdbcf0318d2b975cca3ac40d374f72af8024e4992cad685dc75a50b137dbe0"
+    },
+    {
+      "path": "tests/test_hourly_impulse_source_zone.py",
+      "sha256": "a3918c62af2755eb0646a59c498aff050cb6068fc182aaf3a4a5c5ee673d9777"
+    },
+    {
+      "path": "tests/test_hourly_impulse_source_matching.py",
+      "sha256": "0805845581d8f1294cfa4dbaff2ffca1a0885f70002486eddf9ebe8c32ccd5a0"
+    },
+    {
+      "path": "tests/test_hourly_impulse_source_research.py",
+      "sha256": "594d47547e7e975b7a9f1ecc06e833412eac6a2fd9c4026ebad8e9cfba207a4b"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-frozen-source-preholdout-20260906-v7/config.json",
+      "sha256": "0352432f3667494f07b64fd5a8da30009f32deb89d80fab5f85322ac29ab1d83"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json",
+      "sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-frozen-source-preholdout-20260906-v7/PROJECT_PLAN.md",
+      "sha256": "0bb8ce4f9ffef746272950f2776b1745937772a7494229add4b4c1f04370b085"
+    }
+  ],
+  "allocations": [
+    {
+      "fold": "2023H1",
+      "assignment_hash": "5a0bf061e1c031492d5407d661d977047255d85ebeb294c966c5890fc6965ef8",
+      "assignments_sha256": "5a0bf061e1c031492d5407d661d977047255d85ebeb294c966c5890fc6965ef8",
+      "seed": 20260906,
+      "case_count": 69,
+      "mother_count": 69,
+      "matched_cases": 66,
+      "matched_mothers": 66,
+      "control_count": 198,
+      "count_per_mother": 3,
+      "unique_control_times": 198,
+      "control_time_reuse_allowed": false,
+      "case_status_counts": {
+        "matched": 66,
+        "missing_causal_matching_support": 3
+      },
+      "candidate_count_before_exact_keys": 4085,
+      "case_rows_removed": 0,
+      "mother_rows_removed": 0,
+      "outcomes_used": false,
+      "source_zone_gate_used": false,
+      "hourly_colour_gate_used": false,
+      "hourly_slope_gate_used": false,
+      "sma_cross_exclusion_used": false,
+      "future_window_exclusion_used": false,
+      "fallback_used": false,
+      "start_inclusive": "2023-01-01T00:00:00+00:00",
+      "end_exclusive": "2023-07-01T00:00:00+00:00",
+      "embargo_hours": 72
+    },
+    {
+      "fold": "2023H2",
+      "assignment_hash": "69aa946c32e2f8dd282caace231a84aacab0f2c4b610550f6105fca609be6ee6",
+      "assignments_sha256": "69aa946c32e2f8dd282caace231a84aacab0f2c4b610550f6105fca609be6ee6",
+      "seed": 20260906,
+      "case_count": 55,
+      "mother_count": 55,
+      "matched_cases": 55,
+      "matched_mothers": 55,
+      "control_count": 165,
+      "count_per_mother": 3,
+      "unique_control_times": 165,
+      "control_time_reuse_allowed": false,
+      "case_status_counts": {
+        "matched": 55
+      },
+      "candidate_count_before_exact_keys": 4289,
+      "case_rows_removed": 0,
+      "mother_rows_removed": 0,
+      "outcomes_used": false,
+      "source_zone_gate_used": false,
+      "hourly_colour_gate_used": false,
+      "hourly_slope_gate_used": false,
+      "sma_cross_exclusion_used": false,
+      "future_window_exclusion_used": false,
+      "fallback_used": false,
+      "start_inclusive": "2023-07-01T00:00:00+00:00",
+      "end_exclusive": "2024-01-01T00:00:00+00:00",
+      "embargo_hours": 72
+    },
+    {
+      "fold": "2024H1",
+      "assignment_hash": "5a8b7086a9e153e736cba31120494ec783af119c23e01b4928143d0865261a3f",
+      "assignments_sha256": "5a8b7086a9e153e736cba31120494ec783af119c23e01b4928143d0865261a3f",
+      "seed": 20260906,
+      "case_count": 78,
+      "mother_count": 78,
+      "matched_cases": 78,
+      "matched_mothers": 78,
+      "control_count": 234,
+      "count_per_mother": 3,
+      "unique_control_times": 234,
+      "control_time_reuse_allowed": false,
+      "case_status_counts": {
+        "matched": 78
+      },
+      "candidate_count_before_exact_keys": 4218,
+      "case_rows_removed": 0,
+      "mother_rows_removed": 0,
+      "outcomes_used": false,
+      "source_zone_gate_used": false,
+      "hourly_colour_gate_used": false,
+      "hourly_slope_gate_used": false,
+      "sma_cross_exclusion_used": false,
+      "future_window_exclusion_used": false,
+      "fallback_used": false,
+      "start_inclusive": "2024-01-01T00:00:00+00:00",
+      "end_exclusive": "2024-07-01T00:00:00+00:00",
+      "embargo_hours": 72
+    },
+    {
+      "fold": "2024H2",
+      "assignment_hash": "27b0240fe84ba4cdaca5b3eb6cb8a44b35d2c933915563e0876a46c786b36467",
+      "assignments_sha256": "27b0240fe84ba4cdaca5b3eb6cb8a44b35d2c933915563e0876a46c786b36467",
+      "seed": 20260906,
+      "case_count": 84,
+      "mother_count": 84,
+      "matched_cases": 84,
+      "matched_mothers": 84,
+      "control_count": 252,
+      "count_per_mother": 3,
+      "unique_control_times": 252,
+      "control_time_reuse_allowed": false,
+      "case_status_counts": {
+        "matched": 84
+      },
+      "candidate_count_before_exact_keys": 4260,
+      "case_rows_removed": 0,
+      "mother_rows_removed": 0,
+      "outcomes_used": false,
+      "source_zone_gate_used": false,
+      "hourly_colour_gate_used": false,
+      "hourly_slope_gate_used": false,
+      "sma_cross_exclusion_used": false,
+      "future_window_exclusion_used": false,
+      "fallback_used": false,
+      "start_inclusive": "2024-07-01T00:00:00+00:00",
+      "end_exclusive": "2025-01-01T00:00:00+00:00",
+      "embargo_hours": 72
+    }
+  ],
+  "holdout_price_rows": 0,
+  "training_eligible": false,
+  "production_eligible": false
+}

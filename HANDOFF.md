@@ -2,7 +2,31 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-09-06 — BTC 1h 第六轮空仓确认仍失败，转查入口定义）
+## ⚡ 当前真相（2026-09-06 — BTC 1h 第七轮固定源区首次突破仍未盈利）
+
+Owner 盈利 goal 仍active。V7完整builder/config/plan/tests先提交ad8f5c8，再首次读取
+2023–2024开发前缀219551行；2025+价格未打开、holdout0。四段生成959个冻结源区：
+187到期、486首突破不合格、286合格请求全闭合。StageA支持门全通过才计算收益。
+病例286笔净−17.7878bp/PF.6087/胜率25.17%，四半年−26.28/−25.19/+5.18/−27.29bp。
+匹配283/286=98.95%，849控制全闭合；配对case−17.4129/control−22.4553，超额+5.0424bp，
+CI[−3.871,+14.019]、月块p=.1514。全286笔均可单仓执行，净收益不变，不可上线。
+入场全部5min同向，无5min立即退出；214亏损中23硬止损、23费用翻负，重叠28笔曾1R。
+旧反色故障已排除，不能再用它解释本版。毛均值仅+2.2122bp，不覆盖20bp预设成本。
+
+源区规则：4+4小时内含冻结后4边界，首8h收盘出界即消费，形态不符也消费；新源仅在
+因果终态后积8新小时。入口家族替换去掉SMAcross/hourlycolour，不是孤立数值因果对比。
+下一项待登记：保持所有286请求/止损/真实open/对照分配/成本，仅5min truecolour管理
+换原生15min truecolour管理；重放相同849控制并检查单仓占位，不能筛未来MFE或仅28回吐单。
+这是管理规格替换（40根记忆3h20m→10h、聚合/确认时点同变），不是纯检查频率因果。
+保留既有5m匹配，另报15m初始同/反/未知状态，不事后挑对照；持仓外后续趋势仍未知。
+该项尚未运行，不能声称15min盈利。新旧机会不同，勿将V5的251笔与V7做逐笔配对。
+
+实验 `experiments/active/exp-btcusdtp-1h-frozen-source-preholdout-20260906-v7/`。
+完整报告 `analysis/html/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.html`。
+运行前733测试PASS；交付测试/复核见实验DELIVERY.md/VERIFICATION.md。
+没有TradingView、ACTIVE/frozen、VPS/forward、训练、部署或真金变更。
+
+### 第六轮背景（已完成，勿重复）
 
 Owner 盈利 goal 保持 active，尚未完成。V6 builder/config 先在5e70584提交，首跑因旧CSV
 与Timestamp类型parity停止；保留九文件，仅修比较类型后提交824d2d1才成功运行。
