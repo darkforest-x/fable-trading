@@ -1,0 +1,40 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-first-k2-preholdout-20260906-v4",
+  "base_config": "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json",
+  "base_config_sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a",
+  "hypothesis": "First hourly K2 rejection may avoid weak direct K1 follow-through; stop relocation is a separate nested comparison.",
+  "arms": ["direct_k1_stop", "wait_k2_k1_stop", "wait_k2_k2_stop"],
+  "policy_id": "5m_native40",
+  "wait": {"gap_min": 1, "gap_max": 8, "source_geometry": true, "cancel_on_k1_extreme": false, "require_k2_colour": false},
+  "selection": {
+    "minimum_events": 80,
+    "minimum_per_fold": 12,
+    "positive_folds": 4,
+    "minimum_profit_factor": 1.1,
+    "minimum_active_months": 12,
+    "minimum_months_per_fold": 3,
+    "matched_coverage": 0.9
+  },
+  "matching": {
+    "count_per_trade": 3,
+    "seed": 20260906,
+    "unit": "original mother intention before waiting",
+    "keys": ["month", "UTC 6h bucket", "causal ATR tercile", "known 5m colour", "known 1h colour", "known direction-adjusted 1h slope sign", "direction"],
+    "risk_transfer": "mother-decision next-open risk divided by K1 ATR, never later K2 risk",
+    "no_reuse": true,
+    "no_fallback": true
+  },
+  "inference": {
+    "primary_unit": "all original mothers including observed non-entry zeros",
+    "contrasts": ["wait_k2_k1_stop minus direct_k1_stop", "wait_k2_k2_stop minus wait_k2_k1_stop"],
+    "confidence_interval": "9999 calendar-month cluster bootstrap draws, 95% percentile, seed 20260906",
+    "test": "one-sided month-cluster sign flip, Holm over two paired contrasts",
+    "limitations": "Overlapping labels can cross months; all inference is exploratory after prior data reuse. Not a powered confirmatory study."
+  },
+  "lineage": "2023-2024 development reused after V1 48 comparisons, V2 six exits and V3 four contexts. Original requests are regenerated without outcome filtering. SMA40 and 5m native40 are fixed historical choices. Gap1..8 explicitly differs from old owner Pine gap2..8. No 2025+ price materialisation and no independent validation claim.",
+  "owner_authorization": "2026-09-06 directly develop toward profitability, research only; no orders or promotion.",
+  "no_audit_entry_point": true,
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false
+}

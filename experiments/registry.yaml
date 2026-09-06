@@ -5209,3 +5209,26 @@ experiments:
       after V1/V2 and is not independent evidence. Context known by K1 open;
       common valid support, source continuity, immutable stop and 20bp cost.
       Gates precede ranking. No audit command, live orders or promotion.
+
+  - experiment_id: exp-btcusdtp-1h-first-k2-preholdout-20260906-v4
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ab78c5c"
+    status: active
+    question: >-
+      Does waiting for the first source-valid hourly K2 improve original K1
+      mother-intention returns, and does changing only its stop source help?
+    single_variable: >-
+      Direct K1/K1 stop versus first K2/K1 stop; then the identical first K2
+      with K2 stop. Original mother requests and random mother assignments
+      remain fixed before waiting and outcomes. Same 5m exit, 20bp and deadline.
+    result: >-
+      Preregistered development-only comparison; no V4 outcomes evaluated yet.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    notes: >-
+      Reused 2023-2024 development, not independent confirmation. Gap1-8 is
+      explicitly different from legacy2-8. Source K2 geometry is evaluated
+      before intermediate-colour invalidation. Observed non-entry zeros and
+      unknown paths remain distinct. No audit, TradingView or live mutation.
