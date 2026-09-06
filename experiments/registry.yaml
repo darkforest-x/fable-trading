@@ -5304,3 +5304,26 @@ experiments:
       Reused2023-2024 only. Inherited61.35% coverage and at most55 case trades
       cannot pass90%/80 gates. Finite mechanism test, not a candidate nomination.
       All89 old control requests retained, including old invalid risks. No audit.
+
+  - experiment_id: exp-btcusdtp-1h-frozen-source-preholdout-20260906-v7
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ac02180"
+    status: active
+    question: >-
+      Does first qualified release from a previously frozen hourly source zone
+      produce net profits and measured-state random-entry excess, without
+      retrospectively moving the source or selecting later stronger releases?
+    single_variable: >-
+      One entry-family substitution: fixed4+4 inside envelope and first8h
+      close release replaces SMAcross/MA-side admission. Original impulse
+      morphology, actual K1 stop, next5mopen,5m truecolour exit,72h and20bp fixed.
+    result: "Preregistered support-before-outcomes design; no result yet."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Reused2023-2024 only;80requests/12fold/90% exact3control coverage and
+      complete source evidence required before P/L. New zones are not paired
+      with old251 mothers. No audit, TradingView, promotion or live mutation.

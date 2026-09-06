@@ -1,0 +1,28 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-frozen-source-preholdout-20260906-v7",
+  "base_config": "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json",
+  "base_config_sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a",
+  "benchmark_inputs": {
+    "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/original_mothers.csv.gz": "b3f442ad8b0959b19cb5ae58fd40bc6a3bf40b455b4be31f3758d53940eea3e6",
+    "experiments/active/exp-btcusdtp-1h-colour-transition-preholdout-20260906-v5/results/direct_k1_stop__transition_colour_case_trades.csv.gz": "6f3f7772163823d956f9f369be51db88f350067ea1b9734ba93e03714de75584"
+  },
+  "zone": {
+    "source_hours": 8, "prior_hours": 4, "inside_hours": 4,
+    "strict_envelope": true, "first_release_only": true,
+    "wait_hours": 8, "arm_embargo_hours": 80,
+    "rearm": "only eight complete bars opening at or after causal source terminal",
+    "shape": "large_or_engulf", "body_ratio_min": 0.65,
+    "range_atr_min": 1.0, "engulf_range_atr_min": 0.65,
+    "close_location_min": 0.7, "require_ma_cross": false,
+    "require_hourly_ma_side": false
+  },
+  "policy": {"id": "5m_native40", "management_minutes": 5, "ma_kind": "SMA", "ma_length": 40, "exit_mode": "transition_colour", "confirmations": 1},
+  "matching": {"count": 3, "seed": 20260906, "keys": ["symbol", "fold", "month", "utc_6h_bucket", "vol_bucket", "known_5m_colour"], "control_time_reuse": false, "fallback": false},
+  "selection": {"minimum_events": 80, "minimum_per_fold": 12, "positive_folds": 4, "minimum_profit_factor": 1.1, "minimum_active_months": 12, "minimum_months_per_fold": 3, "matched_coverage": 0.9},
+  "inference": {"draws": 9999, "seed": 20260906, "p_limit": 0.01, "method": "month-cluster bootstrap95 and one-sided signflip; exploratory repeated development", "unit": "all entry requests versus assigned random-entry requests; zone-intention ledger separate"},
+  "stage_a_requires_complete_zones": true,
+  "no_audit_entry_point": true,
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false
+}
