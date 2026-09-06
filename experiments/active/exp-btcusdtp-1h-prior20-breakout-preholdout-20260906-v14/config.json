@@ -1,0 +1,78 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14",
+  "base_config": "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json",
+  "base_config_sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a",
+  "parent_results": "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results",
+  "inputs": {
+    "original_mothers.csv.gz": "b3f442ad8b0959b19cb5ae58fd40bc6a3bf40b455b4be31f3758d53940eea3e6",
+    "control_mothers.csv.gz": "01050c7a9602f469406df515edcc73ef2f4c9db2d46529e25030934012eebd5a",
+    "assignments.csv": "671782877ee67824f7687243d5e7deae29d78a0bcba6245319ecf55629027b0f",
+    "assignment_receipt.json": "1d77ca407712520e645463d30f97d26d452ccce45e87e68c2adcbc4120c43220"
+  },
+  "development_folds": [
+    [
+      "2023H1",
+      "2023-01-01",
+      "2023-07-01"
+    ],
+    [
+      "2023H2",
+      "2023-07-01",
+      "2024-01-01"
+    ],
+    [
+      "2024H1",
+      "2024-01-01",
+      "2024-07-01"
+    ],
+    [
+      "2024H2",
+      "2024-07-01",
+      "2025-01-01"
+    ]
+  ],
+  "expected": {
+    "mothers": 251,
+    "controls": 462,
+    "matched": 154,
+    "status_counts": {
+      "matched": 154,
+      "insufficient_exact_controls": 94,
+      "missing_causal_matching_support": 3
+    }
+  },
+  "support": {
+    "minimum_events": 80,
+    "minimum_per_fold": 12,
+    "minimum_active_months": 12,
+    "minimum_months_per_fold": 3
+  },
+  "gate": {
+    "prior_hours": 20,
+    "exclude_k1": true,
+    "require_contiguous": true,
+    "long": "own_signal_close > prior_high20",
+    "short": "own_signal_close < prior_low20",
+    "equal_boundary": "abstain",
+    "missing_context": "unknown",
+    "control_gate": "own_context_no_transfer",
+    "decision": "K1_close",
+    "extra_ma_slope_or_4h_gate": false,
+    "length_grid": false
+  },
+  "inherited_execution_not_run": {
+    "cost_fraction": 0.002,
+    "max_hours": 72,
+    "stop": "K1_extreme",
+    "exit": "5m_native40_true_aligned_to_opposite"
+  },
+  "matching_coverage": {
+    "actual": 0.6135458167330677,
+    "required": 0.9,
+    "pass": false
+  },
+  "no_outcome_entry_point": true,
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false
+}

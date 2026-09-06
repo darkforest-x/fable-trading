@@ -5305,6 +5305,29 @@ experiments:
       cannot pass90%/80 gates. Finite mechanism test, not a candidate nomination.
       All89 old control requests retained, including old invalid risks. No audit.
 
+  - experiment_id: exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14
+    source_repo: darkforest-x/fable-trading
+    source_commit: "pending-builder-commit"
+    status: active
+    question: >-
+      Does strict own K1 close beyond prior20 complete hourly high/low leave
+      sufficient support on original251 cases and462 fixed own controls?
+    single_variable: >-
+      Fixed20 strict breakout, exclude K1; no slope or4h colour gate. Support
+      only; no outcome files, returns or execution. Preserve154 triples.
+    result: "Preregistered, source run not yet performed; no profitability result."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/active/exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14/PROJECT_PLAN.md
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Freeze builder/config/tests before source. Stop before outcomes if cases
+      below80 or any half below12, active months below12 or perhalf below3.
+      Reused2023--2024, old V1 breakout test was conditioned on slope and failed.
+      Not new alpha proof. Overall profitability goal remains active and unmet.
+
   - experiment_id: exp-btcusdtp-1h-prior4h-colour-preholdout-20260906-v13
     source_repo: darkforest-x/fable-trading
     source_commit: "d3366d3"
