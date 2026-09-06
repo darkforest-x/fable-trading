@@ -15252,6 +15252,108 @@ artifacts:
     notes: "Verifier046b92a,2270 formulas/clocks,exact286/849contexts,V7old-column parity,286/283/959denominators,1342tests. Not independent raw-price replay."
 
 
+  - artifact_id: btcusdtp-hourly-failed-launch-v17-results
+    artifact_type: report
+    role: full_intention_fast_unprofitable_exit_economics
+    source_repo: darkforest-x/fable-trading
+    source_commit: "10af2c7"
+    source_path: experiments/active/exp-btcusdtp-1h-failed-launch-preholdout-20260906-v17/results/summary.json
+    sha256: "268ef1b1180e491fb10ec05d90633862f35909dcdbfb4b1da3799d2ec3dac786"
+    size_bytes: 37185
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-failed-launch-preholdout-20260906-v17/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "10af2c7"
+    config_hash: "09efbf9db8b1b18e1dba13cf4d01993c302cecfe12c1141f1c899fccbdc26aa7"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "251cases462controls154triples97unknown;net-17.0782bp,all4halvesnegative. Two raw attempts;candidate executed once. Rejected."
+
+  - artifact_id: btcusdtp-hourly-failed-launch-v17-report
+    artifact_type: report
+    role: technical_failure_analysis_source
+    source_repo: darkforest-x/fable-trading
+    source_commit: "66f0ac8"
+    source_path: analysis/p1_btcusdtp_hourly_failed_launch_v17_20260906.md
+    sha256: "ea42c7056cd312c5739fc2349e9761aa0cb7d1d84a223719a7b33ee0f7ab6f2f"
+    size_bytes: 21483
+    storage_uri: "repo://analysis/p1_btcusdtp_hourly_failed_launch_v17_20260906.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "66f0ac8"
+    config_hash: "09efbf9db8b1b18e1dba13cf4d01993c302cecfe12c1141f1c899fccbdc26aa7"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Manual narrative after committed diagnostics/verifier;commit identifies upstream source,not existence of this final report at that revision. Warmup versus evaluation dates explicit."
+
+  - artifact_id: btcusdtp-hourly-failed-launch-v17-html
+    artifact_type: report
+    role: portable_technical_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "10af2c7"
+    source_path: analysis/html/p1_btcusdtp_hourly_failed_launch_v17_20260906.html
+    sha256: "defdfe42d06e44d381ab72fa1d8c51832a79f91177d7f92706b20c97e2505a52"
+    size_bytes: 448974
+    storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_failed_launch_v17_20260906.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "10af2c7"
+    config_hash: "09efbf9db8b1b18e1dba13cf4d01993c302cecfe12c1141f1c899fccbdc26aa7"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Canonical artifact official builder:16blocks1chart,structural_only;no browser/mobile/source-dialog verification."
+
+  - artifact_id: btcusdtp-hourly-failed-launch-v17-artifact
+    artifact_type: report
+    role: source_backed_technical_report_artifact
+    source_repo: darkforest-x/fable-trading
+    source_commit: "10af2c7"
+    source_path: experiments/active/exp-btcusdtp-1h-failed-launch-preholdout-20260906-v17/artifact.json
+    sha256: "4e74def7cb076c20236011020856512c002a5326271aa2ce0f13fa9d399c8556"
+    size_bytes: 44901
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-failed-launch-preholdout-20260906-v17/artifact.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "10af2c7"
+    config_hash: "09efbf9db8b1b18e1dba13cf4d01993c302cecfe12c1141f1c899fccbdc26aa7"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Full251 paired SQLite distribution;99zeros and explicit unknown bin. Targeted prose/source corrections preserve other blocks and data."
+
+  - artifact_id: btcusdtp-hourly-failed-launch-v17-verification
+    artifact_type: report
+    role: independent_saved_failed_exit_and_serial_accounting_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "10af2c7"
+    source_path: experiments/active/exp-btcusdtp-1h-failed-launch-preholdout-20260906-v17/saved_verification.json
+    sha256: "f321cb63a7406a3cd4f5de219b85b13ccc828439cae39ee6a1677287e05ed0c4"
+    size_bytes: 15863
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-failed-launch-preholdout-20260906-v17/saved_verification.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "10af2c7"
+    config_hash: "09efbf9db8b1b18e1dba13cf4d01993c302cecfe12c1141f1c899fccbdc26aa7"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Passed54outputhashes27sources6anchors2945loggededges;not raw OHLC/SMA or omitted-event/inference replay."
+
+  - artifact_id: btcusdtp-hourly-failed-launch-v17-notebook
+    artifact_type: report
+    role: inspectable_saved_ledger_verification_notebook
+    source_repo: darkforest-x/fable-trading
+    source_commit: "10af2c7"
+    source_path: experiments/active/exp-btcusdtp-1h-failed-launch-preholdout-20260906-v17/failed_launch_audit.ipynb
+    sha256: "e79c2c26230b31d8b883ce1719bf21a90b51adef06d2b123bca3a91ade2b531c"
+    size_bytes: 20357
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-failed-launch-preholdout-20260906-v17/failed_launch_audit.ipynb"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "10af2c7"
+    config_hash: "09efbf9db8b1b18e1dba13cf4d01993c302cecfe12c1141f1c899fccbdc26aa7"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "15CSV/summary/two verifier SHAs pinned;3plainPython cells executed. Reuses saved audit,not Jupyter/fullschema or independent raw replay."
+
   - artifact_id: btcusdtp-hourly-dual-partial-v16-results
     artifact_type: report
     role: native15_with_qualified_fast_partial_full_intention_economics

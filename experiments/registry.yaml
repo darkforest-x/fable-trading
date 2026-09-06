@@ -5307,8 +5307,8 @@ experiments:
 
   - experiment_id: exp-btcusdtp-1h-failed-launch-preholdout-20260906-v17
     source_repo: darkforest-x/fable-trading
-    source_commit: "2b4e6f6"
-    status: planned
+    source_commit: "10af2c7"
+    status: rejected
     question: >-
       Does a before-partial fast true reversal with still-aligned native15
       improve original251 net and fixed154 controls when nonqualified-profit
@@ -5316,14 +5316,29 @@ experiments:
     single_variable: >-
       fast_failed_launch_exit=true complements the unchanged V16 qualified
       half: actual open gross<=20bp full exits,>20bp half and slow remainder.
+    result: >-
+      Net-15.1939to-17.0782bp,PF.6796to.5716,all4halvesnegative.
+      D-1.8843bp,p.6922;I154-7.1906bp,p.8612;97unknown.152full106improve46hurt,
+      22oldwinners cut;31former partial paths truncated. Serial250net-17.2807bp.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     path: experiments/active/exp-btcusdtp-1h-failed-launch-preholdout-20260906-v17
+    canonical_report: analysis/html/p1_btcusdtp_hourly_failed_launch_v17_20260906.html
+    artifacts:
+      - btcusdtp-hourly-failed-launch-v17-results
+      - btcusdtp-hourly-failed-launch-v17-report
+      - btcusdtp-hourly-failed-launch-v17-html
+      - btcusdtp-hourly-failed-launch-v17-artifact
+      - btcusdtp-hourly-failed-launch-v17-verification
+      - btcusdtp-hourly-failed-launch-v17-notebook
+    reuse_allowed: false
     notes: >-
-      Freeze before new raw replay. Same251/462/154/97,2023--2024reuse only.
-      Not time-limited and not evidence of never having advanced; retain
-      sacrificed later recoveries. Per-arm serial recomputed, no rematching.
+      Reused2023--2024 only,not independent evidence. Attempt1 pre-candidate
+      CSVidentity parity failure preserved; scoped reader fix then attempt2
+      candidate first run. No strategy/config change or relaxed parity.
+      Saved verifier54outputs27sources2945edges;319tests,broader3600pass2oldL1
+      hashfails. HTMLstructural_only,notebookplainPython. Noholdout/TV/live.
 
   - experiment_id: exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16
     source_repo: darkforest-x/fable-trading

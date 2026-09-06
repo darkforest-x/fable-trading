@@ -2,7 +2,38 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-09-06 — BTC V16 半仓兑现少亏，下一项检验失败启动退出）
+## ⚡ 当前真相（2026-09-06 — BTC V17 快反转全平错杀恢复趋势，已拒绝）
+
+盈利goal仍active/未达成、不是blocked。V17 e5139c5先提交engine/config/plan/tests；
+attempt1 OFF case表被CSV两source ID类型parity拦住，ON未跑，9文件原样保存attempts。
+只修读入时文本转换不松parity/不改策略，10af2c7提交修复及verifier/report/notebook，
+attempt2同pre2025原价格前缀完成、candidate首次执行；交易评估2023–2024，另含2022年
+9024预热行（timestamp-only末审确认始于2022-11-30 16:00UTC）。251cases/462owncontrols/
+154triples/97unknown不变，713fast和1426slow初态先冻结，OFF V16六表全旧字段parity。
+
+唯一变化：V16尚未partial，完整fast5m真翻反、latest完整slow15m仍同向且实际open
+毛利<=20bp时全平；>20bp仍原50%兑现和slow余仓。没有移动K1stop或改变20bp/72h。
+均净−15.1939→−17.0782bp，PF.6796→.5716，四半年全负，D−1.8843bp,p.6922；
+I154−7.1906bp,p.8612，97未知仍在。152全平106改善46恶化，22旧赢家转亏，全属于
+31条原稍后partial路径；31条−3085.2460eventbp抵掉其他121全平+2612.2985。原90partial
+剩59；32新全平前已见>=1R，不能说都没启动。每臂单仓重算后恰好仍250笔，候选均净
+−17.2807bp。不要只数hardstop63→21；新200亏/51赢，少止损不等于赚钱。
+
+Saved独立验证54output/27committedsource/6anchor/2945recordededge/48monthly/全部
+D-I-serial通过；不是raw/SMA/遗漏edge/p独立重跑。V17联合319tests过；扩展3600过
+2既有L1migration hash失败未动。66f0ac8统计诊断builder提交后system python3真实工具
+运行：SD59.5442bp、56IQR极端值全留，不改推断。system27tests全过，.venv25过2可选
+tool集成skip，依赖没改。Notebook3格plainPython、pin两verifier；HTML16块1native图
+structural_only，没有mobile/theme/source-dialog浏览器QA。无holdout/TV/训练/实盘改动。
+
+交付：analysis/html/p1_btcusdtp_hourly_failed_launch_v17_20260906.html。
+V17已完成并拒绝，不是待跑。下一假说见V17/NEXT_EXPERIMENT.md：仅将亏损fast全平
+改两根连续原生5m反色确认；原盈利partial不延迟。第二根重新核slow与actualopen，
+不合格取消pending、不latch/不造无edge半仓。V1已有slow15两根确认（不能说从未试过），
+V9抽样/V12冻结小时MA不是此臂；暂无等价V1–V17组合。仍需新冻结/注册/提交后真实回放
+全251/462，不能日志拼收益。下一项尚未实现或跑收益。61.35%覆盖仍不足90%，不降门。
+
+### 第十六轮背景（已完成，以下为当时记录，勿重复）
 
 盈利goal仍active/未达成、不是blocked。c75aae5先提交builder/config/plan/engine/tests，
 随后唯一V16原2023–2024价格回放；同251cases/462owncontrols/154triples/97unmatched。
