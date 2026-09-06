@@ -18,6 +18,81 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: btcusdtp-hourly-structure-v20-results
+    artifact_type: report
+    role: fixed_exit_all_intention_structure_gate_economics
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ab77a68"
+    source_path: experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/results/summary.json
+    sha256: "2c77973d508563b73c91ef69aab46353057e7808bd247cb67378f7429b7cf6d7"
+    size_bytes: 57784
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Fixed713contexts before outcomes;cached V18 reuse,not intrabar replay. Rejected;137trades net-17.2178bp,I154-4.0900bp. Initial failure preserved."
+
+  - artifact_id: btcusdtp-hourly-structure-v20-report
+    artifact_type: report
+    role: technical_structure_gate_failure_analysis
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e2a3f2c"
+    source_path: analysis/p1_btcusdtp_hourly_structure_v20_20260906.md
+    sha256: "9ca35602a8e484acc0c2693e4b2213f672039ca9d9cec85cee4cd3976b1bc2ae"
+    size_bytes: 13967
+    storage_uri: "repo://analysis/p1_btcusdtp_hourly_structure_v20_20260906.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Manual reviewed narrative. Source commit names upstream evidence,not existence of final narrative at that revision."
+
+  - artifact_id: btcusdtp-hourly-structure-v20-html
+    artifact_type: report
+    role: portable_technical_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a70fb35"
+    source_path: analysis/html/p1_btcusdtp_hourly_structure_v20_20260906.html
+    sha256: "0d7b88c023d2b7210c79494070baab2cbd61079fe095c5b89f454f164ac11509"
+    size_bytes: 457449
+    storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_structure_v20_20260906.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Official canonical portable packaging13blocks1nativechart;structural_only. No browser/mobile/source-dialog verification."
+
+  - artifact_id: btcusdtp-hourly-structure-v20-artifact
+    artifact_type: report
+    role: canonical_structure_gate_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a70fb35"
+    source_path: experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/artifact.json
+    sha256: "8bb01158343265bfe2bae3f15cf903ca6bf084a9494b96e9eaa650ca06c8962e"
+    size_bytes: 21875
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/artifact.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Complete12section narrative and actualSQLite713context aggregation;fixed4halfyear support chart."
+
+  - artifact_id: btcusdtp-hourly-structure-v20-verification
+    artifact_type: report
+    role: independent_saved_hourly_state_support_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e2a3f2c"
+    source_path: experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/results/independent_verification.json
+    sha256: "13691974a9b310a654f341e636898128db4d204db85b02bfc0488e692b79cfbe"
+    size_bytes: 1636
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/results/independent_verification.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Passed18222hourlystates713requests62supportrows154triples and original/resumed lineage. Not raw5 aggregation,Pine runtime,economics or profit verification."
+
   # ---- pattern teacher weights (registered, not copied) --------------------
   # CLAUDE.md's fact correction of 2026-08-05: the pre-v16 detector purge
   # reached two machines, not three. These are the copies that exist here.

@@ -1,0 +1,50 @@
+{
+  "status": "passed",
+  "support_status": "fixed_episode_gate_comparison_not_independent_validation",
+  "population": {
+    "case": {
+      "total": 251,
+      "accepted": 137,
+      "abstain": 113,
+      "unknown": 1
+    },
+    "control": {
+      "total": 462,
+      "accepted": 309,
+      "abstain": 153,
+      "unknown": 0
+    }
+  },
+  "support_values": {
+    "events": 137,
+    "minimum_fold_events": 26,
+    "active_months": 24,
+    "minimum_fold_months": 6
+  },
+  "support_gates": {
+    "minimum_events": true,
+    "minimum_per_fold": true,
+    "minimum_active_months": true,
+    "minimum_months_per_fold": true
+  },
+  "hourly_rows": 18222,
+  "matched_groups": 154,
+  "unmatched": 97,
+  "matched_all_known": 154,
+  "count_rows": 62,
+  "independent_hourly_state_recomputed": true,
+  "raw_aggregation_verified": false,
+  "pine_builtin_tie_parity_verified": false,
+  "economics_verified": false,
+  "raw_price_archive_read": false,
+  "saved_hourly_ohlc_read": true,
+  "limitation": "Independent state reconstruction GIVEN saved complete-hour OHLC; raw12x5m aggregation, raw segment labels, absent-hour reason subtype, cached economics and profit are not independently verified.",
+  "support_output_hashes_verified": 4,
+  "request_input_hashes_verified": 4,
+  "source_hashes_verified": 18,
+  "builder_commit": "a70fb35dcf8e336c5708ff03fd9da58196cc29ff",
+  "resumed_accounting": true,
+  "resume_builder_commit": "ab77a685e1868044b3ed6ba454108554cd71d355",
+  "summary_sha256": "2c77973d508563b73c91ef69aab46353057e7808bd247cb67378f7429b7cf6d7",
+  "verifier_sha256": "948dae5b556dd76125ec1140638a8da463217ce34426dea5ead6e4704a7a1f35"
+}

@@ -16,8 +16,8 @@ schema_version: 1
 experiments:
   - experiment_id: exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20
     source_repo: darkforest-x/fable-trading
-    source_commit: "9029410"
-    status: active
+    source_commit: "ab77a68"
+    status: rejected
     question: >-
       Does persistent confirmed10/10 hourly structure improve the fixed251 BTC
       direct-K1 intentions under unchanged V18 exits and20bp costs?
@@ -26,19 +26,28 @@ experiments:
       Python approximation, stable-level guard and gap reset. No parameter grid,
       control rematching, entry-time or exit/cost changes.
     result: >-
-      Preregistered before feature generation; all713 contexts must freeze
-      before any outcome access. If inherited support passes, reuse fixed V18
-      independent episodes and recompute all-intention/serial/matched accounting.
-      No new intrabar replay or independent validation claim.
-    canonical_report: experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/PROJECT_PLAN.md
+      Support passes137accepted113abstain1unknown,26/30/33/48perhalfyear.
+      Pertrade net-16.7690to-17.2178bp,allfourhalvesnegative. D250known/251
+      +7.3661bp,p.0207;I154known/251-4.0900bp,p.8354. Matching excess
+      +5.6715to+1.5814bp. Reduces exposure,not evidence of better trend selection.
+      Frozen V18 episode reuse,no new intrabar replay or independent validation.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_structure_v20_20260906.html
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
+    artifacts:
+      - btcusdtp-hourly-structure-v20-results
+      - btcusdtp-hourly-structure-v20-report
+      - btcusdtp-hourly-structure-v20-html
+      - btcusdtp-hourly-structure-v20-artifact
+      - btcusdtp-hourly-structure-v20-verification
     reuse_allowed: false
     notes: >-
       Same2023--2024 development only.251cases/462owncontrols/154fixedtriples/
       97unmatched retained.61.35% matching coverage still fails90%; oldmultiasset
-      K1/K2 aligned-structure negative evidence remains. No TradingView/live change.
+      K1/K2 aligned-structure negative evidence remains. Original serialization
+      failure preserved;resume reuses unchanged frozen713contexts,no price rerun.
+      300tests and independent18222hour-state audit pass. No TradingView/live change.
 
   # ==========================================================================
   # yoyo-eth -- numeric semantic baseline, no YOLO

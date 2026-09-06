@@ -1,0 +1,73 @@
+{
+  "report_sha256": "9ca35602a8e484acc0c2693e4b2213f672039ca9d9cec85cee4cd3976b1bc2ae",
+  "sections": 12,
+  "context_rows": 713,
+  "actual_query": "SELECT population, fold, COUNT(*) AS total,\nSUM(CASE WHEN structure_gate_state='accepted' THEN 1 ELSE 0 END) AS accepted,\nSUM(CASE WHEN structure_gate_state='abstain' THEN 1 ELSE 0 END) AS abstain,\nSUM(CASE WHEN structure_gate_state='unknown' THEN 1 ELSE 0 END) AS unknown\nFROM entry_context GROUP BY population,fold ORDER BY population,fold",
+  "query_results": [
+    {
+      "population": "case",
+      "fold": "2023H1",
+      "total": 55,
+      "accepted": 26,
+      "abstain": 28,
+      "unknown": 1
+    },
+    {
+      "population": "case",
+      "fold": "2023H2",
+      "total": 66,
+      "accepted": 30,
+      "abstain": 36,
+      "unknown": 0
+    },
+    {
+      "population": "case",
+      "fold": "2024H1",
+      "total": 55,
+      "accepted": 33,
+      "abstain": 22,
+      "unknown": 0
+    },
+    {
+      "population": "case",
+      "fold": "2024H2",
+      "total": 75,
+      "accepted": 48,
+      "abstain": 27,
+      "unknown": 0
+    },
+    {
+      "population": "control",
+      "fold": "2023H1",
+      "total": 84,
+      "accepted": 52,
+      "abstain": 32,
+      "unknown": 0
+    },
+    {
+      "population": "control",
+      "fold": "2023H2",
+      "total": 120,
+      "accepted": 71,
+      "abstain": 49,
+      "unknown": 0
+    },
+    {
+      "population": "control",
+      "fold": "2024H1",
+      "total": 123,
+      "accepted": 79,
+      "abstain": 44,
+      "unknown": 0
+    },
+    {
+      "population": "control",
+      "fold": "2024H2",
+      "total": 135,
+      "accepted": 107,
+      "abstain": 28,
+      "unknown": 0
+    }
+  ],
+  "all_markdown_sections_preserved": true
+}

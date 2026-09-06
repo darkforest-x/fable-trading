@@ -2,7 +2,38 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-09-06 — ChartPrime 148项源码共振审查完成，未新增收益回测）
+## ⚡ 当前真相（2026-09-06 — V20确认结构共振已验证并拒绝，盈利目标仍未达成）
+
+ChartPrime全148项源码审查已完成（背景如下），随后真正检验固定10/10持久小时
+结构门。a70fb35提交builder/config/plan后才读pre2025价格前缀，713自身上下文及
+18222小时状态先冻结；同一原251case/462control/154triples/97unmatched，V18
+退出/K1stop/72h/20bp不变。137accepted/113abstain/1unknown，4半年度26/30/33/48，
+24个月支持通过。oldK1K2多币结构家族早已失败，不称新因子或Pine逐点parity。
+
+初次会计读取被known_5m_available的CSV字符串/UTC容器差异拦住，保留failure和
+首次访问；ab77a68仅修精确时间解析并从原四张SHA冻结表恢复，无重读行情/特征。
+cached退出会计：每笔净−16.7690→−17.2178bp，PF.5918→.6145，四半年度全部负。
+全251保留，D250known=+7.3661bp,p.0207；I154=−4.0900bp,p.8354，97仍未知。
+同154配对caseD+3.6724，而controlD+7.7624，不能将减仓少交易误称alpha。
+避92losers4183.91eventbp，但漏21winners2342.38eventbp；接受137中34赢103亏，
+91笔毛已亏（不全怪费用）；66fastfailed、17hardstop、54slowexit。结构龄中位59h，
+128沿用旧方向、仅9当根新break，不是已证实的盘整禁入器。未按年龄再选门。
+
+e2a3f2c独立stdlib verifier重建18222小时状态/713own门/62支持行/154triples，通过；
+不独立验证raw5聚合/Pine/经济。另只读审阅独立复核137/309接受旧字段、四单仓mask、
+40metrics/1240scalar与22CSV SHA；不独立p/CI或成交回放。相关300tests通过。
+HTML交付：analysis/html/p1_btcusdtp_hourly_structure_v20_20260906.html，13块1原生图；
+官方portable validation/package通过、structural_only，浏览器/手机/来源弹窗未验证。
+实验：exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20；结果原目录含失败。
+
+整体goal仍active而非完成/blocked。下一步候选是跨资产真实新增信息，但先去重旧
+BTC15m/ETH15m/山寨日线共振历史，不能包装成新发现；已有Binance5m五币在2023–2024
+时间戳完整，OKX普通5m缓存并无该期；不同源只能作为显式外部输入，不能暗换BTC
+原执行源。后续先冻结字段/池/完成时钟/缺失未知规则，再支持和固定对照检验。
+本轮不读2025+价格/holdout，不更新TV/训练/ACTIVE/实盘，不改原匹配90%门。
+V19仍仅prepared未跑；保留它的dirty引擎与其他并行ARB/依赖/ML工作，勿顺手提交。
+
+### ChartPrime源码审查背景（已完成，以下为当时记录）
 
 Owner 最新请求转为逐项研究 ChartPrime 主页全部指标，优先于 V19 的价格回放。
 exp-chartprime-public-confluence-audit-20260906-v1 已冻结完整148发布ID：134公开源码

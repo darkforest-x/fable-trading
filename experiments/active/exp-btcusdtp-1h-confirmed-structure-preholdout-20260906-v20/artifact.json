@@ -1,0 +1,275 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "Hourly Structure Gate",
+    "generatedAt": "2026-09-06 14:33:12.365560+00:00",
+    "filters": [],
+    "cards": [],
+    "charts": [
+      {
+        "id": "support",
+        "type": "bar",
+        "title": "各半年度获准的原始 K1 机会",
+        "description": "2023—2024年；柱为结构同向的机会数，参考线为每半年度最低12笔，不代表收益",
+        "showDescription": true,
+        "dataset": "case_support",
+        "sourceId": "support",
+        "palette": {
+          "kind": "sequential",
+          "name": "blue"
+        },
+        "labels": {
+          "values": "all"
+        },
+        "settings": {
+          "sort": "none",
+          "categoryLabelPolicy": "wrap"
+        },
+        "referenceLines": [
+          {
+            "axis": "y",
+            "value": 12,
+            "color": "neutral",
+            "lineStyle": "dashed",
+            "label": "最低12笔"
+          }
+        ],
+        "encodings": {
+          "x": {
+            "field": "fold",
+            "type": "nominal",
+            "label": "原始半年度"
+          },
+          "y": {
+            "field": "accepted",
+            "type": "quantitative",
+            "label": "获准机会数",
+            "format": "number"
+          },
+          "tooltip": [
+            {
+              "field": "total",
+              "type": "quantitative",
+              "label": "全部机会"
+            },
+            {
+              "field": "abstain",
+              "type": "quantitative",
+              "label": "已知反向"
+            },
+            {
+              "field": "unknown",
+              "type": "quantitative",
+              "label": "未知"
+            }
+          ]
+        }
+      }
+    ],
+    "tables": [],
+    "blocks": [
+      {
+        "id": "section_0",
+        "type": "markdown",
+        "layout": "full",
+        "body": "# Hourly Structure Gate"
+      },
+      {
+        "id": "section_1",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 结论：减少交易，没有改善留下来的交易质量\n\n**本轮不采用这个结构共振，不更新 TradingView。** 在固定 BTC 1h 大实体／吞没穿均线直接入场上，加入来自 ChartPrime Market Break 源码思想的确认结构方向门：251 个原始机会留下137笔，扣20bp成本后的平均每笔收益由−16.77bp变为−17.22bp；四个半年度依旧全部为负。不是“最优参数”，也不是盈利系统。\n\n它确实让亏损总量减少，但主要通过少交易：相对同一批随机对照的优势反而由+5.67bp降到+1.58bp。**少做一套仍然亏损的交易，与识别出了更好的趋势机会，是两件事。** 本轮完成的是固定旧逐笔退出的门策略重核，不是新行情独立验证或重新逐K回放。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_2",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 口径：原始机会、实际交易、固定配对分别比较\n\n研究区间为2023年1月—2024年12月，按原有四个半年度分开检查；这些数据已经反复用于开发，不称新样本外验证。251个原始BTC入场机会和462个控制机会始终保留。原来的154组三控制不重配；另外97个没有合格配对，超额收益保持未知。\n\n实际交易均值只以完成交易为分母。全机会收益中，已知反向不开仓记零；1个没有已确认结构方向的机会保持未知，不冒充零收益。配对变化D使用250个已知比较、保留总251行；I使用154个完整固定配对、保留97个未知。**不能拿不同分母的两个均值相减，冒充配对改善。** 1bp=0.01%，本轮往返成本固定20bp；所有收益按原始名义仓位计，不是加杠杆账户收益。事件收益相加也不是复利资金曲线。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_3",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 时间覆盖：信号不少，但覆盖合格不代表赚钱\n\n结构同向137个、已知反向113个、结构未知1个。下面每行保留原始半年度总机会；图只展示获准数量，参考线是事先冻结的最低12笔，不代表盈利标准。\n\n| 半年度 | 原始机会 | 获准 | 反向不交易 | 未知 | 原版每笔净bp | 获准交易每笔净bp |\n|---|---:|---:|---:|---:|---:|---:|\n| 2023上半年 | 55 | 26 | 28 | 1 | −12.19 | −22.62 |\n| 2023下半年 | 66 | 30 | 36 | 0 | −25.09 | −31.14 |\n| 2024上半年 | 55 | 33 | 22 | 0 | −19.08 | −10.59 |\n| 2024下半年 | 75 | 48 | 27 | 0 | −11.11 | −10.15 |\n\n24个月均有获准机会，每个半年度覆盖6个月，最低26笔；80笔总数、每半年度12笔、12个活跃月及每半年度3个月的四个实用门槛均通过。这些不是统计功效保证。控制机会有309个同向、153个反向、0个结构未知，全部使用自身时刻与价格计算。\n\n唯一结构未知是2023年6月25日03:00 UTC的多头K1：连续数据已积累53小时，但该连续段尚未建立确认突破方向。它不是那97个“未匹配”的同义词。",
+        "sourceId": "report"
+      },
+      {
+        "id": "support_chart",
+        "type": "chart",
+        "chartId": "support",
+        "layout": "full"
+      },
+      {
+        "id": "section_4",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 交易质量：毛收益远不够覆盖成本\n\n| 指标 | 原版固定V18 | 加结构门 |\n|---|---:|---:|\n| 原始机会行数 | 251 | 251 |\n| 完成交易 | 251 | 137 |\n| 已知不交易／未知机会 | 0／0 | 113／1 |\n| 实际交易平均毛收益bp | +3.23 | +2.78 |\n| 实际交易平均净收益bp | −16.77 | −17.22 |\n| 盈亏比PF：总盈利÷总亏损 | 0.592 | 0.615 |\n| 净盈利交易比例 | 21.91% | 24.82% |\n| 已知全机会平均净收益bp | −16.77（251个） | −9.44（250个） |\n| 单仓实际完成交易 | 250 | 135 |\n| 单仓实际交易平均净收益bp | −16.97 | −17.28 |\n\n胜率和PF略有提高，但平均每笔没有改善，毛收益还略降。因此不能只用“胜率升了”“交易少了”推断有用。单仓结果已经重新按占用时刻选择，没有沿用旧版的入选名单；未知机会保守保留72小时占用，这只是诊断规则，不声称实际开了未知仓位。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_5",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 对照：固定配对中的随机机会改善得更多\n\n下表所有行都使用同一154组原始配对。每组控制均值来自各自的3个随机机会，同币、原时间块与原波动桶，执行和20bp成本一致；门条件同样在控制自身计算。原匹配要求与72小时隔离不变。\n\n| 同一154组配对的均值bp | 原版 | 结构门 | 变化 |\n|---|---:|---:|---:|\n| 策略机会净收益 | −16.342 | −12.669 | +3.672 |\n| 自身三控制平均净收益 | −22.013 | −14.251 | +7.762 |\n| 策略减控制的超额收益 | +5.671 | +1.581 | **−4.090** |\n\n这解释了为什么“总亏损下降”还不够：同一个过滤条件也改善了随机机会，而且在可配对集合里改善更多。不能拿全250个D的+7.366与462个控制的+7.762直接相减；正确I是逐组计算后的−4.090bp。\n\n| 预定比较 | 已知／总行 | 平均变化bp | 95%月块区间bp | 单侧月块p |\n|---|---:|---:|---:|---:|\n| D：原始机会收益变化 | 250／251 | +7.366 | [+0.308,+13.436] | 0.0207 |\n| I：固定配对超额变化 | 154／251 | −4.090 | [−11.817,+2.916] | 0.8354 |\n| 单仓全机会收益变化 | 250／251 | +7.607 | [+0.552,+13.587] | 0.0164 |\n\n预定要求D与I同时均值及区间下界为正、p<0.01，没有通过。未拒绝某个零假设不等于证明“完全无效”；这里的结论是没有支持采用的证据，且绝对收益仍亏损。固定匹配覆盖154/251=61.35%，仍低于90%验收线；本轮没有降低这条要求。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_6",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 逐笔损益：避开92个亏损，也错过21个盈利\n\n113个反向机会中，92个原本亏损、21个原本盈利。避开的亏损合计4183.91事件bp，同时损失了2342.38事件bp的盈利机会，已知机会净改善1841.54事件bp。这里是各独立事件的加总，不是账户赚了18.42%。137个获准交易的旧入场、退出和净收益均保持原值，没有通过改动止盈止损美化结果。\n\n| 获准交易的既有退出原因 | 笔数 | 平均净bp | 解释边界 |\n|---|---:|---:|---|\n| 小级别确认失败退出 | 66 | −59.53 | 沿用原V18两次确认规则；不自动等于开仓后立即失败 |\n| K1极值硬止损 | 17 | −74.53 | 结构同向没有阻止这类不利路径 |\n| 小级别趋势变色退出 | 54 | +52.54 | 这个结果组均值为正，不代表入场前能知道属于该组 |\n\n多头81笔平均净−15.38bp；空头56笔平均净−19.88bp。没有哪个方向可以据此直接宣布已盈利。上述退出分组含事后信息，只用于解释亏损来源，**绝不能反过来拿“将来趋势退出”当入场筛选特征。**\n\n获准交易合计34赢、103亏。103个亏损里，只有12个是毛收益为正但被成本翻成净亏；另外91个毛收益本身已负。**所以不能把失败全归咎于手续费。** 两次确认失败退出的66笔和硬止损的17笔全部为净亏，趋势变色退出的54笔中也有20笔净亏。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_7",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 为什么结构共振没有解决盘整\n\n**这条状态记住的是旧结构方向，不是当下趋势强度。** 137个获准交易距离上次确认结构反转，中位数59小时，四分位数31—93小时，最长264小时。只有9个恰好在K1当根建立或反转结构方向；其他128个沿用此前的方向。\n\n因此，即使价格已经横盘、回抽，结构未出现相反确认突破时仍可能继续允许开仓。66个确认失败退出与17个硬止损说明“方向一致”没有充分识别出可持续推进的行情。这是状态定义与结果的解释，不是已证明的因果分解。**也不能据此立即调一个更短的年龄阈值，宣称就能修好。** 本轮没有对年龄、枢轴长度、MA长度或其他组合做事后搜索。\n\n这个家族也不是新发现：此前54币K1→K2版本中，结构同向分支在2025年909笔净−40.2bp、超额−35.5bp；2026年3—4月135笔净−14.6bp、超额−2.1bp。本轮仅重新检验不同的固定BTC直接K1入口，不抹掉旧负面结论。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_8",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 实验与源码：只有一个门发生变化\n\n使用完整UTC小时线，每小时必须具备12根五分钟线；不插值。枢轴固定左10／右10，中心极值等于21小时窗口极值时确认，允许并列。这是明示的Python近似，尚未逐点认证Pine内建枢轴的并列处理。中心小时开盘后11小时才可用；不是按回画标签时间提前入场。\n\n最新确认水平价格必须与前一小时相同，真实收盘穿越后才建立／反转持久方向；同方向重复穿越不重置方向。缺小时后清空状态和水平。门在自身K1收盘更新之后判断，允许K1当根突破，因此不称“K1之前已经存在的独立信息”。原源码的图表历史初始化与这里冻结的完整前缀也不同，不声称与TradingView画面全等。\n\n保留原V18的15m SMA40(HL2)原生趋势变色退出、既有盈利5m半仓退出及失败两次确认退出、K1极值止损、72小时终止和20bp成本。137笔策略与309笔控制接受行直接复用旧独立逐笔结果。市场特征只在已复用的2023—2024开发前缀上计算；本配置消耗holdout为0次，没有读取2025年及之后的价格做评分。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_9",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 复核、统计假设与风险诚实声明\n\n结构计算与会计分开验证。独立标准库验证器重建了18222根已保存完整小时OHLC上的状态、713个各自门、62行覆盖统计及154个固定三联组。它验证的是“给定小时OHLC的状态”，不是独立重采样原始5m，更不是Pine运行时或逐K成交认证。\n\n原始运行因旧CSV的`known_5m_available`字符串／时间对象容器不同而中止。修复只统一时间语义比较，1ns偏差仍拒绝；保留原失败和访问记录，从四张原哈希冻结表恢复会计，没有重读行情、重选信号或重算特征。原始构建提交a70fb35，恢复提交ab77a68，独立验证器提交e2a3f2c。\n\n本轮相关合成与合同回归300项通过。接受行原字段保持一致、三态收益、各臂单仓占用、逐组I=D−控制D均被检查。技术测试通过只说明这些实现契约通过，不说明赚钱。\n\n另一次独立只读账本审阅没有调用本轮会计助手，核对137个策略接受行的39个旧字段、309个控制接受行的48个旧字段、四张单仓掩码、40行指标及汇总共1240个标量，并核对22个读取CSV的保存哈希。描述统计重算一致；该审阅没有独立重算p／置信区间，也没有重放原始成交价格。不能把它与前述小时状态验证混称为“完整回测复现”。\n\n统计按原决策月份整块抽样9999次，种子20260906，报告95%区间和单侧月块符号翻转p；不假设重叠交易独立或收益正态。D的中位数0、标准差57.33bp、IQR26.83bp，54.8%的已知D为零；I的中位数0、标准差39.58bp、IQR14.44bp。月均D的一阶相关约0.234，月均I约0.117：跨月依赖仍可能存在，块推断只是近似。多次开发复用及历史策略搜索没有被这些p值消除，不能当最终确认。\n\n没有学习分类器或排名打分，故val AUC、排名置换p与top-decile收益不适用；不是填零，也没有挑一个盈利十分位替代全体。这里的单特征基线是无结构门版本，净收益对照是固定同条件随机机会。唯一未知不插补、不偷偷删除；97未配对超额也不补零。没有安装依赖、训练、promote、下单或修改TradingView。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_10",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 下一步：检验新增信息，不再只堆同源方向指标\n\n本轮证据支持停止采用这个10/10持久方向门，而不是继续微调它直到历史变好。下一候选优先检查跨资产同向／市场广度：先核已有ETH等档案的时钟、数据覆盖与过去是否已试过，再冻结一个明确对照。仍须保持退出与成本不变、控制使用自己的共振时刻，缺失外部行情就未知，不把缺失填成多头。\n\n这是下一步研究方向，不代表已经证明广度有效，也不授权部署。尚未解决的问题是：在入场当时，哪些信息能区分真正推进和旧方向下的来回波动？新鲜且独立的验证与合格匹配覆盖仍然缺失。整体盈利目标继续，当前版本没有通过。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_11",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 复现命令与保留的失败\n\n使用现有仓库环境；不覆盖原结果，不安装依赖。首次完整构建命令只适用于该实验结果目录尚不存在时：\n\n```bash\n.venv/bin/python -m yoyo.evaluation.hourly_impulse_structure_research\n```\n\n本次历史运行a70fb35已生成冻结特征并保留失败；提交序列化修复后实际使用以下恢复命令。它只允许尚未完成的冻结失败状态，已完成结果再次运行会拒绝，不通过删除历史来重置次数：\n\n```bash\n.venv/bin/python -m yoyo.evaluation.hourly_impulse_structure_research --resume-frozen-accounting\n```\n\n已有结果的只读重核与完整报告重建：\n\n```bash\n.venv/bin/python -m pytest tests/test_hourly_impulse_structure.py tests/test_hourly_impulse_structure_accounting.py tests/test_hourly_impulse_structure_research.py tests/test_verify_hourly_impulse_structure_v20.py tests/test_hourly_impulse_prior_breakout_research.py tests/boundaries/test_layer_imports.py tests/contracts/test_registries.py -q\n.venv/bin/python scripts/verify_hourly_impulse_structure_v20.py\npython3 scripts/md_to_html.py analysis/p1_btcusdtp_hourly_structure_v20_20260906.md --out-dir analysis/html\n.venv/bin/python experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/build_artifact.py\nnode /Users/zhangzc/.codex/plugins/cache/openai-curated-remote/data-analytics/0.2.10-13ceeea1f599/skills/build-report/scripts/deliver_portable_artifact.mjs --input experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/artifact.json --output analysis/html/p1_btcusdtp_hourly_structure_v20_20260906.html\n```\n\n研究输出位于实验`results/`：原冻结特征、完整小时状态、旧／新全机会与单仓账本、固定配对、逐笔差值、原因分组、汇总、失败记录及独立验证回执均保留。源码引用与构建输入SHA见对应回执；实际价格档案不入Git。",
+        "sourceId": "report"
+      }
+    ],
+    "sources": [
+      {
+        "id": "report",
+        "label": "V20 · 完整方法、结果与限制",
+        "path": "analysis/p1_btcusdtp_hourly_structure_v20_20260906.md"
+      },
+      {
+        "id": "support",
+        "label": "V20 · 原始713个自身入场结构状态",
+        "path": "experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/results/entry_context.csv.gz",
+        "query": {
+          "sql": "SELECT population, fold, COUNT(*) AS total,\nSUM(CASE WHEN structure_gate_state='accepted' THEN 1 ELSE 0 END) AS accepted,\nSUM(CASE WHEN structure_gate_state='abstain' THEN 1 ELSE 0 END) AS abstain,\nSUM(CASE WHEN structure_gate_state='unknown' THEN 1 ELSE 0 END) AS unknown\nFROM entry_context GROUP BY population,fold ORDER BY population,fold",
+          "engine": "sqlite",
+          "language": "sql",
+          "tables_used": [
+            "entry_context"
+          ],
+          "description": "按原始半年度汇总各自结构门，不读取收益",
+          "filters": [
+            "2023--2024 original251 cases and462 fixed own controls"
+          ],
+          "executed_at": "2026-09-06T14:41:58.450149+00:00"
+        }
+      },
+      {
+        "id": "summary",
+        "label": "V20 · 冻结汇总",
+        "path": "experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/results/summary.json"
+      },
+      {
+        "id": "verification",
+        "label": "V20 · 独立小时状态复核",
+        "path": "experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/results/independent_verification.json"
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-09-06 14:33:12.365560+00:00",
+    "status": "ready",
+    "datasets": {
+      "case_support": [
+        {
+          "population": "case",
+          "fold": "2023H1",
+          "total": 55,
+          "accepted": 26,
+          "abstain": 28,
+          "unknown": 1
+        },
+        {
+          "population": "case",
+          "fold": "2023H2",
+          "total": 66,
+          "accepted": 30,
+          "abstain": 36,
+          "unknown": 0
+        },
+        {
+          "population": "case",
+          "fold": "2024H1",
+          "total": 55,
+          "accepted": 33,
+          "abstain": 22,
+          "unknown": 0
+        },
+        {
+          "population": "case",
+          "fold": "2024H2",
+          "total": 75,
+          "accepted": 48,
+          "abstain": 27,
+          "unknown": 0
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "report",
+      "label": "V20 · 完整方法、结果与限制",
+      "path": "analysis/p1_btcusdtp_hourly_structure_v20_20260906.md"
+    },
+    {
+      "id": "support",
+      "label": "V20 · 原始713个自身入场结构状态",
+      "path": "experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/results/entry_context.csv.gz",
+      "query": {
+        "sql": "SELECT population, fold, COUNT(*) AS total,\nSUM(CASE WHEN structure_gate_state='accepted' THEN 1 ELSE 0 END) AS accepted,\nSUM(CASE WHEN structure_gate_state='abstain' THEN 1 ELSE 0 END) AS abstain,\nSUM(CASE WHEN structure_gate_state='unknown' THEN 1 ELSE 0 END) AS unknown\nFROM entry_context GROUP BY population,fold ORDER BY population,fold",
+        "engine": "sqlite",
+        "language": "sql",
+        "tables_used": [
+          "entry_context"
+        ],
+        "description": "按原始半年度汇总各自结构门，不读取收益",
+        "filters": [
+          "2023--2024 original251 cases and462 fixed own controls"
+        ],
+        "executed_at": "2026-09-06T14:41:58.450149+00:00"
+      }
+    },
+    {
+      "id": "summary",
+      "label": "V20 · 冻结汇总",
+      "path": "experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/results/summary.json"
+    },
+    {
+      "id": "verification",
+      "label": "V20 · 独立小时状态复核",
+      "path": "experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/results/independent_verification.json"
+    }
+  ]
+}
