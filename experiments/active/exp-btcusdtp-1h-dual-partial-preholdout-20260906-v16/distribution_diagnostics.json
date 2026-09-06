@@ -1,0 +1,69 @@
+{
+  "source_sha256": "d081f6e119264fa93a6fc48cbf73f460f436527fba2682a539d8297505af160b",
+  "distributions": {
+    "before": {
+      "n": 251,
+      "unknown": 0,
+      "mean_bp": -16.662360573260877,
+      "sd_bp": 113.22196172956306,
+      "quantiles_bp": [
+        -309.642740085218,
+        -146.19553799297,
+        -71.12419407191399,
+        -40.905985339121,
+        1.3659328073219998,
+        203.3169834682945,
+        665.0557685786041
+      ],
+      "iqr_bp": 72.49012687923599,
+      "shapiro_w": 0.8249471229322775,
+      "shapiro_p": 3.981017445685428e-16,
+      "iqr_outliers": 35,
+      "outliers_removed": 0
+    },
+    "after": {
+      "n": 251,
+      "unknown": 0,
+      "mean_bp": -15.19391369946408,
+      "sd_bp": 106.49410359259149,
+      "quantiles_bp": [
+        -309.642740085218,
+        -142.524404351118,
+        -70.89747247962899,
+        -37.731308818004,
+        20.510439262497002,
+        203.9126060399415,
+        441.583628554512
+      ],
+      "iqr_bp": 91.40791174212599,
+      "shapiro_w": 0.8698486424067786,
+      "shapiro_p": 8.853154893533603e-14,
+      "iqr_outliers": 20,
+      "outliers_removed": 0
+    },
+    "difference": {
+      "n": 251,
+      "unknown": 0,
+      "mean_bp": 1.468446873796813,
+      "sd_bp": 26.549842319164487,
+      "quantiles_bp": [
+        -228.062382580146,
+        -28.6835526046005,
+        0.0,
+        0.0,
+        0.0,
+        39.848247938157,
+        98.976136282525
+      ],
+      "iqr_bp": 0.0,
+      "shapiro_w": 0.6105738312305773,
+      "shapiro_p": 1.7828248453915764e-23,
+      "iqr_outliers": 90,
+      "outliers_removed": 0
+    }
+  },
+  "raw_prices_read": false,
+  "inference_method_changed": false,
+  "fallback": "assumption_checks.py import failed: no seaborn; installed scipy.stats.shapiro/numpy.quantile",
+  "warning": "Temporal dependence and repeated development exploration remain; Shapiro is descriptive, not a test-selection rule. Zero-IQR nonzero deltas are not invalid data."
+}

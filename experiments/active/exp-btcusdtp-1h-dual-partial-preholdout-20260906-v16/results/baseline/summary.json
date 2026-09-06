@@ -1,0 +1,289 @@
+{
+  "policy": {
+    "id": "15m_native40",
+    "management_minutes": 15,
+    "ma_kind": "SMA",
+    "ma_length": 40,
+    "exit_mode": "transition_colour",
+    "confirmations": 1
+  },
+  "metrics": {
+    "events": 251,
+    "excluded_results": 0,
+    "rejected_entries": 0,
+    "censored": 0,
+    "mean_net_bp": -16.662360573261154,
+    "median_net_bp": -40.90598533912136,
+    "profit_factor": 0.6657630744222071,
+    "win_rate": 0.2549800796812749,
+    "p95_net_bp": 203.31698346829518,
+    "worst_fold_bp": -32.00232871992967,
+    "positive_folds": 0,
+    "minimum_fold_events": 55,
+    "folds": [
+      {
+        "fold": "2023H1",
+        "count": 55,
+        "mean": -0.0013168674106350108
+      },
+      {
+        "fold": "2023H2",
+        "count": 66,
+        "mean": -0.0018152870265649122
+      },
+      {
+        "fold": "2024H1",
+        "count": 55,
+        "mean": -0.003200232871992967
+      },
+      {
+        "fold": "2024H2",
+        "count": 75,
+        "mean": -0.0006663438812137571
+      }
+    ],
+    "robust_score_bp": -20.317321203331346,
+    "net_week_cluster_p": 0.9816,
+    "net_month_cluster_p": 0.9948,
+    "extra_10bp_mean_net_bp": -26.662360573261154,
+    "leave_top_two_mean_net_bp": -21.4937577122359,
+    "range_feature_auc": 0.6230782085561497,
+    "range_top_decile_net_bp": 5.295959732359187,
+    "range_top_decile_gross_bp": 25.29595973235919,
+    "mean_hold_hours": 6.008300132802124
+  },
+  "control_metrics": {
+    "events": 462,
+    "excluded_results": 0,
+    "rejected_entries": 0,
+    "censored": 0,
+    "mean_net_bp": -23.7929313946148,
+    "median_net_bp": -40.46688222109238,
+    "profit_factor": 0.49903592122700946,
+    "win_rate": 0.16666666666666666,
+    "p95_net_bp": 141.2150525498916,
+    "worst_fold_bp": -32.78371548191237,
+    "positive_folds": 0,
+    "minimum_fold_events": 84,
+    "folds": [
+      {
+        "fold": "2023H1",
+        "count": 84,
+        "mean": -0.0032783715481912367
+      },
+      {
+        "fold": "2023H2",
+        "count": 120,
+        "mean": -0.0005281564144743033
+      },
+      {
+        "fold": "2024H1",
+        "count": 123,
+        "mean": -0.0030717821933535306
+      },
+      {
+        "fold": "2024H2",
+        "count": 135,
+        "mean": -0.002834386969361029
+      }
+    ],
+    "robust_score_bp": -35.07168463730127,
+    "net_week_cluster_p": 0.9998,
+    "net_month_cluster_p": 0.9984,
+    "extra_10bp_mean_net_bp": -33.7929313946148,
+    "leave_top_two_mean_net_bp": -28.23544755371353,
+    "range_feature_auc": 0.6414909765559116,
+    "range_top_decile_net_bp": -21.324270264823625,
+    "range_top_decile_gross_bp": -1.3242702648236118,
+    "mean_hold_hours": 4.561147186147186
+  },
+  "matching": {
+    "paired_events": 154,
+    "mother_events": 251,
+    "assignment_coverage": 0.6135458167330677,
+    "coverage": 0.6135458167330677,
+    "mean_excess_bp": 9.741132660383938,
+    "event_mean_net_bp": -14.051798734230859,
+    "control_mean_net_bp": -23.792931394614794,
+    "effect": {
+      "n": 154,
+      "mean_bp": 9.741132660383938,
+      "median_bp": -3.695529542918814,
+      "sd_bp": 130.1136838742718,
+      "iqr_bp": 90.3856667463788,
+      "positive_fraction": 0.4805194805194805,
+      "zero_fraction": 0.0,
+      "months": 24,
+      "ci95_bp": [
+        -8.054020445273947,
+        26.948381457157254
+      ],
+      "month_cluster_p": 0.1486,
+      "month_mean_lag1_autocorrelation": -0.1329597607337947,
+      "inference": "exploratory month-cluster bootstrap/sign flip; not independent confirmation"
+    },
+    "control_mothers": 462,
+    "control_executed": 462
+  },
+  "single_position": {
+    "events": 250,
+    "excluded_results": 0,
+    "rejected_entries": 0,
+    "censored": 0,
+    "mean_net_bp": -16.9934392641567,
+    "median_net_bp": -41.01268010281265,
+    "profit_factor": 0.660479915466383,
+    "win_rate": 0.252,
+    "p95_net_bp": 203.61243703272854,
+    "worst_fold_bp": -32.00232871992967,
+    "positive_folds": 0,
+    "minimum_fold_events": 55,
+    "folds": [
+      {
+        "fold": "2023H1",
+        "count": 55,
+        "mean": -0.0013168674106350108
+      },
+      {
+        "fold": "2023H2",
+        "count": 65,
+        "mean": -0.0019449180764361034
+      },
+      {
+        "fold": "2024H1",
+        "count": 55,
+        "mean": -0.003200232871992967
+      },
+      {
+        "fold": "2024H2",
+        "count": 75,
+        "mean": -0.0006663438812137571
+      }
+    ],
+    "robust_score_bp": -20.985306675150177,
+    "net_week_cluster_p": 0.9832,
+    "net_month_cluster_p": 0.9952,
+    "extra_10bp_mean_net_bp": -26.9934392641567,
+    "leave_top_two_mean_net_bp": -21.846987832650672,
+    "range_feature_auc": 0.6309311603429251,
+    "range_top_decile_net_bp": 7.8408146208640925,
+    "range_top_decile_gross_bp": 27.840814620864098,
+    "mean_hold_hours": 5.969333333333334
+  },
+  "serial_selected_mothers": 250,
+  "original_mothers": 251,
+  "months": {
+    "active_months": 24,
+    "minimum_months_per_fold": 6,
+    "by_fold": {
+      "2023H1": 6,
+      "2023H2": 6,
+      "2024H1": 6,
+      "2024H2": 6
+    }
+  },
+  "net_effect": {
+    "n": 251,
+    "mean_bp": -16.662360573261154,
+    "median_bp": -40.90598533912136,
+    "sd_bp": 113.22196172956338,
+    "iqr_bp": 72.49012687923661,
+    "positive_fraction": 0.2549800796812749,
+    "zero_fraction": 0.0,
+    "months": 24,
+    "ci95_bp": [
+      -27.416325828417662,
+      -5.404792501528023
+    ],
+    "month_cluster_p": 0.9948,
+    "month_mean_lag1_autocorrelation": 0.020931801414361996,
+    "inference": "exploratory month-cluster bootstrap/sign flip; not independent confirmation"
+  },
+  "diagnosis": {
+    "interpretation": "Descriptive outcome/path associations, not proven causal failure mechanisms. Bins are fixed reporting categories and do not select strategy gates. Only finite completed trade returns enter outcome metrics. Event sums may overlap and are not portfolio returns.",
+    "input_events": 251,
+    "closed_finite_events": 251,
+    "rejected_entries": 0,
+    "opened_censored": 0,
+    "closed_nonfinite": 0,
+    "invalid_entry_timestamp": 0,
+    "metrics": {
+      "n": 251,
+      "mean_net_bp": -16.662360573261154,
+      "median_net_bp": -40.90598533912136,
+      "sum_event_net_bp": -4182.25250388855,
+      "profit_factor": 0.6657630744222071,
+      "profit_factor_infinite": false,
+      "win_rate": 0.2549800796812749,
+      "loss_n": 187,
+      "flat_n": 0
+    },
+    "loss_taxonomy": {
+      "cost_flip": 12,
+      "early_reversal": 15,
+      "giveback": 29,
+      "hard_stop": 63,
+      "other_loss": 68
+    },
+    "loss_overlapping_flags": {
+      "hard_stop": 63,
+      "colour_exit": 124,
+      "fees_flip": 12,
+      "never_positive": 2,
+      "giveback": 53,
+      "early_30min": 19
+    },
+    "fee_flips_including_flat": 12,
+    "top1_share_of_positive_profits": 0.07983301639073193,
+    "top2_share_of_positive_profits": 0.14040947863599662,
+    "top2_share_of_total_net": null,
+    "leave_top_one_mean_net_bp": -19.389233089868615,
+    "leave_top_two_mean_net_bp": -21.4937577122359,
+    "configured_roundtrip_cost_fraction": 0.002,
+    "observed_cost_min": 0.002,
+    "observed_cost_max": 0.0020000000000000018,
+    "cost_contract_mismatch_n": 0,
+    "daily_monthly_basis": "Entry cohorts; sums of possibly overlapping event returns, not compounded portfolio returns."
+  },
+  "gates": {
+    "samples": true,
+    "positive_folds": false,
+    "net_profit": false,
+    "profit_factor": false,
+    "month_support": true,
+    "matched_coverage": false,
+    "matched_excess": true,
+    "single_position": false,
+    "cost_stress": false,
+    "leave_top_two": false,
+    "complete_evidence": true,
+    "net_inference": false,
+    "excess_inference": false
+  },
+  "parity": {
+    "case_trades": {
+      "rows": 251,
+      "columns": 79
+    },
+    "case_episodes": {
+      "rows": 251,
+      "columns": 37
+    },
+    "control_trades": {
+      "rows": 462,
+      "columns": 88
+    },
+    "control_episodes": {
+      "rows": 462,
+      "columns": 46
+    },
+    "matched": {
+      "rows": 251,
+      "columns": 7
+    },
+    "single_pending": {
+      "rows": 251,
+      "columns": 39
+    }
+  }
+}

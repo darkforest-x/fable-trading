@@ -2,7 +2,34 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-09-06 — BTC V15 原生15分钟退出仍亏，继续利润兑现机制）
+## ⚡ 当前真相（2026-09-06 — BTC V16 半仓兑现少亏，下一项检验失败启动退出）
+
+盈利goal仍active/未达成、不是blocked。c75aae5先提交builder/config/plan/engine/tests，
+随后唯一V16原2023–2024价格回放；同251cases/462owncontrols/154triples/97unmatched。
+基准V15native15真实翻色不变；只加完整5m真翻色、latest完整15m同向且实际open毛利
+严格>20bp时兑现50%，余仓原规则/K1stop/72h，未移动止损。快713和慢两臂1426初态
+先冻结再读旧收益；V15六表全旧字段复现，713最终路径和单仓占用完全不变。
+
+均净−16.6624→−15.1939bp，PF.6658→.6796，四半年全部负；D+1.4684bp,p.1156；
+I154+2.4747bp,p.2339，97未知仍留。单仓250笔均净−15.3889bp。90半仓57改善33少赚，
+净救回9旧亏；161未半仓160亏1赢、均净−72.0025bp。128有快事件却均无>20bp合格open，
+其中106所有事件open毛利≤0、22曾正≤20bp；另33未评估快edge（高优先级全平可截断）。
+不得说106从未浮盈，也不得把90条件子集+86.43bp当入口能力。31最终半仓者此前已有
+不合格edge，下一失败早退必须统计错杀恢复赢家。全部251快流reset0，非缺数据漏兑现。
+
+ecce7d5独立saved验证54output/24策略committed来源、6anchor、快慢上下文、1895记录
+edge/加权20bp/全部D-I-单仓通过，非第二raw/SMA/完整edge/p验证。V16联合270 tests过；
+扩展快照3365过2既有L1迁移hash失败，未修改他人文件/门。Notebook3格plainPython，
+单独pin自足verifier；不是Jupyter/fullschema。官方HTML15块/1native图structural_only，
+未mobile/theme/source-dialog浏览器QA；无新依赖/价格holdout/TV/训练/实盘改动。
+
+交付：analysis/html/p1_btcusdtp_hourly_dual_partial_v16_20260906.html。
+V16已完成并拒绝升级，不是待运行。下一项见V16/NEXT_EXPERIMENT.md：只加半仓前
+完整5m真反转且slow仍同向、open毛利未超过既有20bp时全平失败启动的分支；其余不变。
+必须先bounded排重/冻结/提交再回放全251/462，不只挑事后128亏单；重算变化后的单仓。
+下一实验尚未实现/登记/运行。61.35%覆盖失败仍需独立证据方案，不能删97来提高比例。
+
+### 第十五轮背景（已完成，勿重复）
 
 盈利goal仍active/未达成、不是blocked。V15先提交2acc280再唯一一次raw回放原2023–2024；
 保持原251cases/462owncontrols/154triples/97unmatched，无入场门。原生5m→15m SMA40

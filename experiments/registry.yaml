@@ -5307,18 +5307,38 @@ experiments:
 
   - experiment_id: exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16
     source_repo: darkforest-x/fable-trading
-    source_commit: "16019e7"
-    status: planned
+    source_commit: "c75aae5"
+    status: rejected
     question: >-
       Can one qualified native5m half realization improve original251 hourly
       intentions while keeping the native15 final path and154 control triples?
     single_variable: >-
       One50percent original-notional exit on true fast edge with latest slow
       aligned and actual open gross strictly above20bp; no entry/stop change.
+    result: >-
+      Net-16.6624to-15.1939bp,PF.6658to.6796,all4halvesnegative.
+      D+1.4684bp,p.1156;I154+2.4747bp,p.2339;97unknown.90partial57improve33hurt.
+      Serial250net-15.3889bp;all713finalpathsunchanged.Noacceptance.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     path: experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16
+    canonical_report: analysis/html/p1_btcusdtp_hourly_dual_partial_v16_20260906.html
+    artifacts:
+      - btcusdtp-hourly-dual-partial-v16-results
+      - btcusdtp-hourly-dual-partial-v16-report
+      - btcusdtp-hourly-dual-partial-v16-html
+      - btcusdtp-hourly-dual-partial-v16-artifact
+      - btcusdtp-hourly-dual-partial-v16-verification
+      - btcusdtp-hourly-dual-partial-v16-notebook
+    reuse_allowed: false
+    notes: >-
+      Reused2023--2024,not independent validation. All251 intentions included;
+      161no-partial cases160losses,not a causal entry filter.31eventual partials
+      had earlier rejected fast edges; proposed failed-launch exit is untested.
+      Saved verifier ecce7d5:54outputs24sources,713fixedpaths,1895loggededges.
+      270V16tests pass;global2unrelatedL1migrationhashfailures untouched.
+      NotebookplainPython,HTMLstructural_only.NoTV,training,promotion/live.
 
   - experiment_id: exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15
     source_repo: darkforest-x/fable-trading

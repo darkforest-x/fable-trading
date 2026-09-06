@@ -1,0 +1,487 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "BTC Hourly: Partial Profit Realization",
+    "generatedAt": "2026-09-06T10:57:23.403404+00:00",
+    "filters": [],
+    "cards": [],
+    "charts": [
+      {
+        "id": "v16_case_difference_distribution",
+        "title": "快速分批退出的逐机会收益变化分布",
+        "subtitle": "2023–2024 · 全部 251 原始机会，未知 0 · 分批版−原15m版，bp · 分箱计数非密度；零类 |Δ|≤1e−8 bp",
+        "showDescription": true,
+        "type": "bar",
+        "intent": "distribution",
+        "layout": "full",
+        "dataset": "v16_case_difference_distribution",
+        "sourceId": "v16_case_delta",
+        "question": "保持原入场和15分钟趋势退出不变，增加一次50%兑现如何影响全部机会？",
+        "rationale": "Explicit signed numeric bins preserve both tails, the zero atom and unknowns for every original request. Unequal widths mean counts, not density. One blue measure needs no legend; count labels and signed interval labels identify meaning.",
+        "palette": {
+          "kind": "sequential",
+          "name": "blue"
+        },
+        "labels": {
+          "values": "all"
+        },
+        "settings": {
+          "sort": "none",
+          "categoryLabelPolicy": "wrap"
+        },
+        "referenceLines": [
+          {
+            "axis": "y",
+            "value": 0,
+            "color": "neutral",
+            "lineStyle": "solid",
+            "label": "0 请求"
+          }
+        ],
+        "maxRows": 12,
+        "valueFormat": "number",
+        "encodings": {
+          "x": {
+            "field": "bin_label",
+            "type": "ordinal",
+            "label": "净收益变化区间（bp；分批版−原15m版）"
+          },
+          "y": {
+            "field": "bin_count",
+            "type": "quantitative",
+            "label": "原始请求数",
+            "format": "number"
+          },
+          "tooltip": [
+            {
+              "field": "bin_count",
+              "type": "quantitative",
+              "label": "区间请求数"
+            },
+            {
+              "field": "total_requests",
+              "type": "quantitative",
+              "label": "全部请求"
+            },
+            {
+              "field": "unknown_requests",
+              "type": "quantitative",
+              "label": "未知请求"
+            },
+            {
+              "field": "count_sum",
+              "type": "quantitative",
+              "label": "全部分箱计数和"
+            },
+            {
+              "field": "mean_change_bp",
+              "type": "quantitative",
+              "label": "区间变化均值",
+              "unit": "bp"
+            },
+            {
+              "field": "minimum_change_bp",
+              "type": "quantitative",
+              "label": "区间实际最小值",
+              "unit": "bp"
+            },
+            {
+              "field": "maximum_change_bp",
+              "type": "quantitative",
+              "label": "区间实际最大值",
+              "unit": "bp"
+            }
+          ]
+        }
+      }
+    ],
+    "tables": [],
+    "sources": [
+      {
+        "id": "report",
+        "label": "V16 · 独立技术报告原文",
+        "path": "analysis/p1_btcusdtp_hourly_dual_partial_v16_20260906.md"
+      },
+      {
+        "id": "v16_summary",
+        "label": "OKX archive · V16 保存的结果与诊断事实",
+        "path": "experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/results/summary.json"
+      },
+      {
+        "id": "v16_case_delta",
+        "label": "OKX archive · V16 全部案例配对变化",
+        "path": "experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/results/case_delta.csv",
+        "query": {
+          "engine": "SQLite",
+          "language": "sql",
+          "sql": "WITH bins(bin_id, bin_label, bin_lower_bp, bin_upper_bp) AS (\n  VALUES (0, '< -100', NULL, -100),\n         (1, '[-100, -50)', -100, -50),\n         (2, '[-50, -20)', -50, -20),\n         (3, '[-20, -5)', -20, -5),\n         (4, '[-5, -1e-8)', -5, -0.00000001),\n         (5, '0 · |Δ|<=1e-8', -0.00000001, 0.00000001),\n         (6, '(1e-8, 5)', 0.00000001, 5),\n         (7, '[5, 20)', 5, 20),\n         (8, '[20, 50)', 20, 50),\n         (9, '[50, 100)', 50, 100),\n         (10, '>= 100', 100, NULL),\n         (11, '未知', NULL, NULL)\n), classified AS (\n  SELECT event_id, difference * 10000 AS change_bp,\n         CASE WHEN difference IS NULL THEN 11\n              WHEN ABS(difference) <= 0.000000000001 THEN 5\n              WHEN difference * 10000 < -100 THEN 0\n              WHEN difference * 10000 < -50 THEN 1\n              WHEN difference * 10000 < -20 THEN 2\n              WHEN difference * 10000 < -5 THEN 3\n              WHEN difference < 0 THEN 4\n              WHEN difference * 10000 < 5 THEN 6\n              WHEN difference * 10000 < 20 THEN 7\n              WHEN difference * 10000 < 50 THEN 8\n              WHEN difference * 10000 < 100 THEN 9 ELSE 10 END AS bin_id\n  FROM main.case_delta\n), totals AS (\n  SELECT COUNT(*) AS total_requests, COUNT(change_bp) AS finite_requests,\n         COUNT(*) - COUNT(change_bp) AS unknown_requests FROM classified\n)\nSELECT b.bin_id, b.bin_label, b.bin_lower_bp, b.bin_upper_bp,\n       COUNT(c.event_id) AS bin_count,\n       t.total_requests, t.finite_requests, t.unknown_requests,\n       SUM(COUNT(c.event_id)) OVER () AS count_sum,\n       MIN(c.change_bp) AS minimum_change_bp,\n       MAX(c.change_bp) AS maximum_change_bp,\n       AVG(c.change_bp) AS mean_change_bp,\n       SUM(c.change_bp) AS summed_request_change_bp\nFROM bins AS b CROSS JOIN totals AS t\nLEFT JOIN classified AS c ON c.bin_id = b.bin_id\nGROUP BY b.bin_id, b.bin_label, b.bin_lower_bp, b.bin_upper_bp,\n         t.total_requests, t.finite_requests, t.unknown_requests\nORDER BY b.bin_id",
+          "executed_at": "2026-09-06T10:57:23.403404+00:00",
+          "tables_used": [
+            "main.case_delta"
+          ],
+          "description": "Actual SQLite count query over experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/results/case_delta.csv, loaded as main.case_delta. Source columns: event_id,mother_decision_time,before,after,difference. hourly_impulse_dual_partial_research.py supplied all251 original direct1h K1 episode pairs. Both arms retain native15m SMA40 true-colour full/remainder exits. Candidate alone can realize50% of the original position once on a native5m true-colour edge, provided latest completed slow15m colour is aligned and executable-open whole-position gross return exceeds0.002. The registered invariant requires identical final exit time/price/reason, held duration, MFE/MAE, slow trigger and serial occupancy; saved-ledger verification checks these separately. This compares a qualified partial-realization switch, not two management timeframes or an entry gate. No raw prices, strategy or inference are run by the presentation query.",
+          "filters": [
+            "BTC-USDT-SWAP, reused development 2023-01-01 <= mother_decision_time UTC < 2025-01-01",
+            "Every original case request, not matched-only cases or winner-only paths; no trimming or sampling",
+            "One unique event_id and exact decision time per source request; +/-infinity rejected, NULL differences retained in the unknown bin"
+          ],
+          "metric_definitions": [
+            "difference=after-before for every original direct1h K1 opportunity. before=full-position native15m transition-colour exit; after=same exit plus one qualified 50% native5m partial realization. Unknown paired outcomes remain NULL; chart bp=difference*10000.",
+            "bin_count counts requests, not probability density; numeric intervals have unequal widths and open-ended tails",
+            "Zero atom follows frozen comparison tolerance abs(difference)<=1e-12 in fractional-return units (1e-8 bp); original nonzero values are preserved in sums and means",
+            "total_requests=all source rows; finite_requests=nonnull differences; unknown_requests=null differences; count_sum=sum(bin_count) must equal total_requests",
+            "Bin min/max/mean/sum preserve paired episode changes in bp. Completed original positions bear the same20bp total roundtrip cost assumption, weighted across partial/remainder fills; immutable K1 extreme stop and original72h limit remain. Partial realized proceeds do not make a censored remainder a known whole-trade result. No unknown filling, tail trimming or account compounding."
+          ]
+        }
+      },
+      {
+        "id": "research_code",
+        "label": "V16 · 上游 Python 评估器",
+        "path": "yoyo/evaluation/hourly_impulse_dual_partial_research.py"
+      },
+      {
+        "id": "presentation_code",
+        "label": "V16 · 分布聚合与原生报告构建器",
+        "path": "yoyo/evaluation/hourly_impulse_dual_partial_report.py"
+      }
+    ],
+    "blocks": [
+      {
+        "id": "report_title",
+        "type": "markdown",
+        "body": "# BTC Hourly: Partial Profit Realization",
+        "layout": "full"
+      },
+      {
+        "id": "section_01",
+        "type": "markdown",
+        "body": "## 结论：兑现有效果，但不足以让系统赚钱\n\n\n本轮已实现并真实回测“5分钟反转时兑现一半、余仓继续跟15分钟”。全251笔平均净收益由 **−16.66bp变为−15.19bp**，胜率25.50%升至29.08%，但利润因子只有0.680，四个半年全部亏损。这是少亏，不是盈利系统，不能升级到实盘或TradingView默认策略。\n\n90笔触发半仓：57笔收益改善、33笔收益下降，161笔没有改变。9笔旧亏单转正，原64笔赢家没有变亏；不过赢家整体少赚，抵消了不少救回的损失。相对于同批原对照，增量优势I为+2.47bp，但95%区间跨零，不能说效果稳定。\n\n本轮没有改入场、均线长度、原K1止损或最终退出时点。问题因此更清楚：改善兑现只能照顾已经走出利润的交易，仍有大量交易在快周期反转时尚未赚出成本。下一项应检验失败启动的退出逻辑，而不是事后只挑这90笔盈利路径。",
+        "layout": "full",
+        "sourceId": "v16_summary"
+      },
+      {
+        "id": "section_02",
+        "type": "markdown",
+        "body": "## 先固定口径：这是同一批机会的策略对比\n\nBTCUSDT永续，已完成1小时K1直接入场；研究价格为2023至2024年，按UTC划分四个半年。251笔病例、462笔自身行情随机对照、154组三对照和97笔未匹配机会，均保持原样。原始5分钟数据实际加载219,551行，最后价格为2024年12月31日23:55 UTC；2025年之后不评分，仓库holdout价格消耗0次。\n\n每笔按原名义仓位计算，1bp=0.01%；表内“平均净收益”不是账户复利收益，事件之和也不能当作资金曲线。整笔往返成本固定20bp，包括本研究的统一成本假设；资金费率未单独建模。最多持仓72小时，初始止损始终为K1真实极值，不被半仓后重新定义。\n\n对照必须同币、同UTC自然月、同6小时时段、同因果ATR波动桶、同已知5m/1h颜色、同方向小时斜率符号，方向随病例；对照止损距离按病例risk/ATR乘对照自身ATR得到，不是复制病例价格。所有控制观察自身均线与颜色。原154组三对照不重新配对，97个缺失超额收益保持未知；61.35%覆盖未达到90%门，正收益也不能跳过这一限制。\n\n原始来源、边界、完整逐笔结果可追溯至[研究配置](../../experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/config.json)和[冻结计划](../../experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/PROJECT_PLAN.md)。本批2023–2024数据已被多轮研究使用，绝非新鲜独立验证集。",
+        "layout": "full"
+      },
+      {
+        "id": "section_03",
+        "type": "markdown",
+        "body": "## 当前交易规则：盈利分批与余仓退出是两条时钟\n\n小时K1要求实体直接严格跨SMA40(HL2)，收盘位于方向端至少70%。形态满足“大实体占比至少65%且全振幅至少1 ATR”，或“真实方向吞没且全振幅至少0.65 ATR”；吞没分支不额外强加65%实体门。颜色来自HL2相对均线，不是传统收高收低颜色。收盘确认后下一5分钟开盘入场，止损放K1相反极值。没有额外成交量、斜率或盘整过滤，也没有等待K2。\n\n两版都使用原生15分钟SMA40的真实“同向→反向”完成K线退出；入场时已反向不会被当成一个新反转，须先同向后再反向。原生15分钟是40根15分钟K线，不是5分钟线每隔15分钟看一次。硬止损仍逐根原始5分钟检查。\n\nV16唯一增加：完整5分钟SMA40从同向真实翻成反向时，若最新已完成15分钟仍同向，且下一可成交开盘的方向毛利严格大于20bp，兑现原名义仓位50%，仅一次。余下50%沿原15分钟退出、K1止损和72小时限制。资格不够的反转不能一直挂着等价格变好；必须等下一次真实新反转。\n\n开盘先处理源缺口、跳空止损、原15分钟全平和期限，再判断半仓；半仓后同根K线若触止损，只止损余仓。当前K线后续高低点不能用来决定开盘成交是否存在。这里假设观察该开盘后无额外延迟完成成交，真实滑点和执行延迟仍可能更差。",
+        "layout": "full"
+      },
+      {
+        "id": "section_04",
+        "type": "markdown",
+        "body": "## 总体与对照：胜率提高，四个半年仍全部为负\n\n\n| 指标 | 原15m趋势退出 | 加5m半仓兑现 |\n|---|---:|---:|\n| 全部病例数 | 251 | 251 |\n| 平均净收益，bp | −16.6624 | −15.1939 |\n| 中位净收益，bp | −40.9060 | −37.7313 |\n| 胜率 | 25.50% | 29.08% |\n| 利润因子 | 0.6658 | 0.6796 |\n| 平均最终持仓小时 | 6.0083 | 6.0083 |\n| 匹配病例154笔平均净收益，bp | −14.0518 | −12.0207 |\n| 匹配控制462笔平均净收益，bp | −23.7929 | −24.2365 |\n| 病例减对照平均超额，bp | +9.7411 | +12.2159 |\n| 实际单仓250笔平均净收益，bp | −16.9934 | −15.3889 |\n\n有相对优势不等于绝对赚钱：病例与对照都亏损。单仓仍选250笔，不能把独立事件251笔平均值当成实际单仓收益。候选单仓利润因子0.6767，也不足以接受。\n\n| UTC半年 | 病例数 | 原版均净，bp | 分批均净，bp | 分批−原版，bp |\n|---|---:|---:|---:|---:|\n| 2023上半年 | 55 | −13.1687 | −13.6125 | −0.4439 |\n| 2023下半年 | 66 | −18.1529 | −15.7485 | +2.4044 |\n| 2024上半年 | 55 | −32.0023 | −29.2701 | +2.7323 |\n| 2024下半年 | 75 | −6.6634 | −5.5431 | +1.1204 |\n\n后三段改善，第一段反而变差。不能把整体+1.47bp描述成跨行情稳定改善。",
+        "layout": "full",
+        "sourceId": "v16_summary"
+      },
+      {
+        "id": "section_05",
+        "type": "markdown",
+        "body": "## 半仓究竟救回多少，又牺牲多少趋势收益\n\n\n| 旧净收益→新净收益 | 笔数 | 旧平均，bp | 新平均，bp | 对增量的事件bp之和 |\n|---|---:|---:|---:|---:|\n| 亏→亏 | 178 | −69.7983 | −66.8629 | +522.5026 |\n| 亏→盈 | 9 | −9.8605 | +22.0442 | +287.1421 |\n| 盈→盈 | 64 | +130.1654 | +123.2738 | −441.0646 |\n| 盈→亏 | 0 | 不适用 | 不适用 | 0 |\n\n三组增量之和为+368.58事件bp，除251得到+1.4684bp。半仓有帮助，但“救回亏损”与“保留大趋势”不是同一件事：原赢家组净少赚441.06事件bp，抵消亏损组改善的54.5%左右。上表是固定原分母的归因，不是账户利润。\n\n20bp成本下，只在半仓净收益为正时兑现，因此旧赢家不应转成净亏，旧亏单发生这种兑现后必有改善。这是加权账本的数学性质，不是证明策略有预测能力；已兑现半仓的交易仍可能整笔亏损，余仓亏损或整笔费用仍可能超过兑现部分。",
+        "layout": "full",
+        "sourceId": "v16_summary"
+      },
+      {
+        "id": "section_06",
+        "type": "markdown",
+        "body": "## 最大漏洞在未触发的161笔，不能用赢家子集遮住\n\n以下来自[完整候选账本](../../experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/results/candidate/case_trades.csv.gz)和实际快周期事件日志，而不是用最大浮盈假造成交。分组在交易结束后定义，仅用于诊断。\n\n| 是否真实半仓成交 | 笔数 | 新净赢家数 | 原均净，bp | 新均净，bp |\n|---|---:|---:|---:|---:|\n| 已成交半仓 | 90 | 72 | +82.3351 | +86.4304 |\n| 未成交半仓 | 161 | 1 | −72.0025 | −72.0025 |\n\n90笔原本就平均赚钱，半仓平均只再增加4.10bp。若只展示其+86.43bp，就把“入场后走出利润、出现合格反转”的事后条件冒充了入场识别能力。这90笔只能在持仓过程中逐渐得知，不能倒推在原K1入场时只选择它们。\n\n未成交161笔可分为互斥三类：\n\n| 保存日志中的未成交原因 | 笔数 | 净赢家 | 硬止损 | 平均净收益，bp | 持仓中位分钟 |\n|---|---:|---:|---:|---:|---:|\n| 有快反转，但每次均不足20bp毛利 | 120 | 0 | 40 | −75.3611 | 207.5 |\n| 退出前没有评估到快真反转 | 33 | 1 | 13 | −57.5939 | 40.0 |\n| 日志含慢周期不同向拒绝 | 8 | 0 | 7 | −81.0598 | 90.0 |\n\n120笔的损失发生在还没有满足盈利兑现资格的路径上，仅调整止盈距离帮不到它们。33笔的“无反转”也不等于永远无趋势：有的很快结束，且高优先级全平时不再评估快信号。8笔含慢反向拒绝的交易也没有出现超过20bp的已记录快反转开盘；本批不存在“利润已够、仅慢颜色拒绝”的未兑现交易，所以放松慢颜色门并不能救回这些已记录事件。保存日志只能确认已记录事件，不能独立证明没有漏记更早的事件。\n\n换用经济状态的互斥切片：无已评估快事件33笔；106笔所有快反转开盘毛利均≤0，均净−82.74bp；22笔曾有正毛利但最高未超过20bp，均净−41.88bp。106笔并不是全程没有浮盈，其中11笔持仓中曾到至少1R，只是反转可成交时利润已回吐。全部251笔快流重置次数为0，本批不能用管理数据缺失解释未兑现。",
+        "layout": "full"
+      },
+      {
+        "id": "section_07",
+        "type": "markdown",
+        "body": "## 178笔亏单：硬止损与未启动损失仍占主体\n\n按[互斥失败分类](../../experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/results/candidate/diagnosis_loss_taxonomy.csv)，新亏单由63笔硬止损、15笔费用翻亏、15笔早期反转、17笔盈利回吐和68笔其他亏损组成。优先级是硬止损→费用→回吐→早退→其他；不能把重叠标记相加。\n\n| 互斥失败类 | 笔数 | 平均净收益，bp |\n|---|---:|---:|\n| 硬止损 | 63 | −84.8300 |\n| 费用翻亏 | 15 | −10.0700 |\n| 早期反转 | 15 | −48.2729 |\n| 盈利回吐 | 17 | −43.1438 |\n| 其他亏损 | 68 | −72.7752 |\n\n原止损价格和最终止损时刻未变，所以硬止损仍有63筆，其中60筆根本没有半仓成交。45笔新亏单曾在真实持有路径上达到至少1R，但这不是可成交利润，也不能用最高点替换退出价。已半仓仍亏18笔中，14笔加权毛收益非负、扣整单成本后为负，4笔连加权毛收益仍负：半仓赚钱绝不等于整单保本。\n\n方向也不应混淆：做多130笔平均−5.75bp，做空121笔平均−25.34bp，两边都没有通过。对照组仍须保留，以免把市场方向偏差当作形态优势。",
+        "layout": "full"
+      },
+      {
+        "id": "section_08",
+        "type": "markdown",
+        "body": "## 逐笔反例：既能救回回吐，也会提前卖掉大趋势\n\n以下时刻均为UTC，可通过event_id在[逐笔兑现对照](../../experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/results/partial_case_mechanics.csv)及候选完整账本核对。\n\n**救回一笔：2023年10月30日09:00做多。** 入场34,389.4，13:00在34,587.5兑现一半；16:45最终在34,388.9退出余仓。原版净−20.15bp，分批后净+8.73bp。收益来自真实成交的提前兑现，不是把止损提高到成本价。\n\n**截断一笔：2024年12月4日19:00做多。** 入场96,129.4，次日00:45在98,330.1兑现半仓，14:30余仓在102,714.8退出。原版净+665.06bp，分批后+436.99bp，少赚228.06bp。这一单说明快周期反转可能只是大趋势中的回调，不能把每次快反转都当成趋势结束。\n\n**完全救不到：2024年4月19日02:00做空。** 入场61,020.0，止损62,787.4，06:40结束；全程无半仓，净−309.64bp。价格没有给出本规则所需的合格兑现事件。是否该更早失败退出，必须用当时可见信息重新回放，不能根据最终大亏倒推一条完美止损。",
+        "layout": "full"
+      },
+      {
+        "id": "section_09",
+        "type": "markdown",
+        "body": "## 全部251笔的增量分布：大多数为零，尾部有明显取舍\n\n\n57笔改善、33笔恶化、161笔不变，所以中位增量和四分位距均为0。下图保留全部251笔，横轴为分批版减原版的净收益bp，纵轴为分箱笔数，不是收益密度。右尾是避免回吐，左尾是提前卖掉趋势；不能仅展示右尾或删掉极端值。",
+        "layout": "full",
+        "sourceId": "v16_case_delta"
+      },
+      {
+        "id": "v16_distribution_chart",
+        "type": "chart",
+        "chartId": "v16_case_difference_distribution",
+        "layout": "full"
+      },
+      {
+        "id": "section_10",
+        "type": "markdown",
+        "body": "## 统计与成本压力：改善证据不足，成本上升仍更差\n\n\n| 对比量 | 已知/原始机会 | 平均增量，bp | 95%月块区间，bp | 月块置换p |\n|---|---:|---:|---:|---:|\n| 全病例D | 251/251 | +1.4684 | [−0.7946,+3.8137] | 0.1156 |\n| 病例改善减自身对照改善I | 154/251 | +2.4747 | [−3.4006,+9.2799] | 0.2339 |\n| 单仓机会口径 | 251/251 | +1.5981 | [−0.6214,+3.8820] | 0.0932 |\n\n固定24个月分块、9,999次重采样/符号翻转、种子20260906；不是随机拆时间，也不是独立样本t检验。所有p均为多轮重复研究后的探索性结果，未通过p<0.01及区间下界大于0的原门。I仍有97笔未知，不补零。\n\n将统一成本从20bp压力增加到30bp、保持实际成交路径不变，原版均净−26.66bp，新版−25.19bp。删掉各自最大两笔赢家的敏感性均值为−21.49bp与−18.84bp，仍亏。两次部分退出的权重之和为1，并不等于支付两次整仓20bp；也不能把30bp压力测试中的止盈资格偷偷改为30bp再挑结果。\n\n没有拟合分类模型，所以val模型AUC不适用。固定单特征range/ATR的描述AUC由0.6231变0.6099；最高十分位的毛/净均值由25.30/+5.30bp变21.40/+1.40bp。这是同一旧池的小子集描述，无专门匹配对子集验证，不能以AUC或这点正收益替代全系统验收。",
+        "layout": "full",
+        "sourceId": "v16_summary"
+      },
+      {
+        "id": "section_11",
+        "type": "markdown",
+        "body": "## 方法检查与验证边界\n\n分布检查保留所有极端值。差值标准差26.55bp，Shapiro W=0.6106、p≈1.78×10⁻²³；这是描述，不据此临时换检验。由于161笔不变，差值IQR=0，机械IQR规则会把90个非零差值全标为离群；这些不是坏数据，删除会把实验效果删掉。[分布诊断文件](../../experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/distribution_diagnostics.json)保留完整分位数和未删样本数。Shapiro含义见[SciPy官方文档](https://docs.scipy.org/doc/scipy-1.13.1/reference/generated/scipy.stats.shapiro.html)。\n\n策略builder/config/计划和测试先在c75aae5提交，随后唯一一次真实回放。快713条与慢两臂1,426条初态先冻结，才读取旧收益；原V15六表所有旧字段复现通过。病例和控制共713条最终退出、时长、MFE/MAE与慢信号不变；快初态另与独立数据层校验。研究原始账本含54份输出hash和24份提交来源。\n\n本轮扩展测试快照3,365通过、2失败，失败是既有L1 candidates/render迁移hash漂移，并非本轮修改；没有改迁移账本或放宽门掩盖它们。新增V16引擎/编排/展示/notebook及独立验证联合270项通过，其中独立验证器101项。ecce7d5提交后真实保存账本核验通过：54输出hash、24已提交策略来源、六表anchor、快慢冻结初态、1,895条已记录快事件，以及原名义权重、成本、控制配对、D/I和单仓均一致。见[验证收据](../../experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/saved_verification.json)。它不重做原始K线/SMA或完整首次事件回放，不独立重算p值，也不能证明真实成交。\n\n报告已按统一HTML工具打包：15块、1个真实SQL分箱图，官方回执为structural_only。嵌入数据和静态回退结构通过，但没有可用Chromium，未验证手机、主题和来源弹窗交互；没有下载浏览器。统计辅助技能的可选seaborn缺失，使用现有SciPy/NumPy诊断，没有安装依赖。[配套notebook](../../experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/dual_partial_audit.ipynb)已顺序执行3格普通Python，复用同一保存验证器，并非第二次独立验证、Jupyter内核或完整nbformat校验。",
+        "layout": "full"
+      },
+      {
+        "id": "section_12",
+        "type": "markdown",
+        "body": "## 下一步：区分“启动失败退出”和“盈利趋势持有”\n\n下一假设已写入[下一实验说明](../../experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/NEXT_EXPERIMENT.md)，尚未实现或跑收益：半仓前，若完整5m真反转、最新15m仍同向，但实际开盘毛利不足或等于原20bp门，则全平失败启动；毛利超过门仍按本轮兑现一半，兑现后的余仓规则不变。\n\n这只新增一个失败退出分支，不改入场、MA40、止损和阈值。必须同时统计提前避开的亏损和因此丢掉的后来赢家，重算实际单仓占用，不能只数“避免止损”。尤其本轮90笔最终兑现者中，31笔此前已出现过不合格快事件；若早退，可能连这批后续盈利也丢掉。它们是必须保留的反证。先与旧快退出、分批及启动期限实验查重，再冻结和提交后回放。\n\n仍未解决的问题是：这些失败能否在当时被可靠区分？更快失败退出会不会重新造成过早离场？固定旧匹配池的61.35%覆盖怎样通过单独证据设计改善？在这些问题与真正时间独立验证完成前，不称最优参数、不承诺赚钱、不部署。盈利目标保持active，V16只是已完成的失败实验与新的诊断依据。",
+        "layout": "full"
+      },
+      {
+        "id": "section_13",
+        "type": "markdown",
+        "body": "## 可复现交付\n\n从仓库根目录、已有锁定环境运行。原结果目录存在时研究会拒绝覆盖；不要删除它来伪装首次实验。下列研究命令是从无本轮结果时的重建入口；日常复核只运行保存验证器和notebook。\n\n```bash\n.venv/bin/python -m yoyo.evaluation.hourly_impulse_dual_partial_research\n.venv/bin/python scripts/verify_hourly_impulse_dual_partial_v16.py --results experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/results\n.venv/bin/python scripts/diagnose_hourly_impulse_dual_partial_v16.py\n.venv/bin/python -m yoyo.evaluation.hourly_impulse_dual_partial_notebook --output experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/dual_partial_audit.ipynb --check\n.venv/bin/python scripts/md_to_html.py analysis/p1_btcusdtp_hourly_dual_partial_v16_20260906.md --out-dir analysis/html\n.venv/bin/python -m yoyo.evaluation.hourly_impulse_dual_partial_report --markdown analysis/p1_btcusdtp_hourly_dual_partial_v16_20260906.md --summary experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/results/summary.json --case-delta experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/results/case_delta.csv --output experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/artifact.json\nnode \"${CODEX_HOME:-$HOME/.codex}/plugins/cache/openai-curated-remote/data-analytics/0.2.10-13ceeea1f599/skills/build-report/scripts/deliver_portable_artifact.mjs\" --input experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/artifact.json --output analysis/html/p1_btcusdtp_hourly_dual_partial_v16_20260906.html\n```\n\n原始结果摘要SHA：`51ae3a00ff50b2d0a485d2ae8f37ecd4d97a0fc2bd68f6598a064b97a0876742`。配置SHA：`ce126cbe89364c1017dc7c7f92fffdba8a3a902d1a8af3f67f7bc1378eaf94b3`。报告是离线研究快照，未修改TradingView、执行账户、ACTIVE配置或训练模型。",
+        "layout": "full"
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-09-06T10:57:23.403404+00:00",
+    "status": "ready",
+    "datasets": {
+      "v16_case_difference_distribution": [
+        {
+          "bin_id": 0,
+          "bin_label": "< -100",
+          "bin_lower_bp": null,
+          "bin_upper_bp": -100.0,
+          "bin_count": 3,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": -228.062382580146,
+          "maximum_change_bp": -100.515271905137,
+          "mean_change_bp": -156.96187971742967,
+          "summed_request_change_bp": -470.885639152289
+        },
+        {
+          "bin_id": 1,
+          "bin_label": "[-100, -50)",
+          "bin_lower_bp": -100.0,
+          "bin_upper_bp": -50.0,
+          "bin_count": 2,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": -90.491968449089,
+          "maximum_change_bp": -70.929663905387,
+          "mean_change_bp": -80.710816177238,
+          "summed_request_change_bp": -161.421632354476
+        },
+        {
+          "bin_id": 2,
+          "bin_label": "[-50, -20)",
+          "bin_lower_bp": -50.0,
+          "bin_upper_bp": -20.0,
+          "bin_count": 13,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": -47.259442694094005,
+          "maximum_change_bp": -23.972490661131,
+          "mean_change_bp": -33.63550881147839,
+          "summed_request_change_bp": -437.261614549219
+        },
+        {
+          "bin_id": 3,
+          "bin_label": "[-20, -5)",
+          "bin_lower_bp": -20.0,
+          "bin_upper_bp": -5.0,
+          "bin_count": 10,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": -19.766435986159,
+          "maximum_change_bp": -6.8130239238409995,
+          "mean_change_bp": -13.4203032513803,
+          "summed_request_change_bp": -134.203032513803
+        },
+        {
+          "bin_id": 4,
+          "bin_label": "[-5, -1e-8)",
+          "bin_lower_bp": -5.0,
+          "bin_upper_bp": -1e-08,
+          "bin_count": 5,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": -3.658850556501,
+          "maximum_change_bp": -1.525053310558,
+          "mean_change_bp": -2.2874241527546,
+          "summed_request_change_bp": -11.437120763773
+        },
+        {
+          "bin_id": 5,
+          "bin_label": "0 · |Δ|<=1e-8",
+          "bin_lower_bp": -1e-08,
+          "bin_upper_bp": 1e-08,
+          "bin_count": 161,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": 0.0,
+          "maximum_change_bp": 0.0,
+          "mean_change_bp": 0.0,
+          "summed_request_change_bp": 0.0
+        },
+        {
+          "bin_id": 6,
+          "bin_label": "(1e-8, 5)",
+          "bin_lower_bp": 1e-08,
+          "bin_upper_bp": 5.0,
+          "bin_count": 2,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": 0.27369609469807266,
+          "maximum_change_bp": 3.382750430011,
+          "mean_change_bp": 1.8282232623545362,
+          "summed_request_change_bp": 3.6564465247090725
+        },
+        {
+          "bin_id": 7,
+          "bin_label": "[5, 20)",
+          "bin_lower_bp": 5.0,
+          "bin_upper_bp": 20.0,
+          "bin_count": 23,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": 6.69804371492,
+          "maximum_change_bp": 19.913118288011002,
+          "mean_change_bp": 13.771502796133392,
+          "summed_request_change_bp": 316.744564311068
+        },
+        {
+          "bin_id": 8,
+          "bin_label": "[20, 50)",
+          "bin_lower_bp": 20.0,
+          "bin_upper_bp": 50.0,
+          "bin_count": 26,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": 21.576489447404,
+          "maximum_change_bp": 48.886087957953,
+          "mean_change_bp": 33.032985155429884,
+          "summed_request_change_bp": 858.857614041177
+        },
+        {
+          "bin_id": 9,
+          "bin_label": "[50, 100)",
+          "bin_lower_bp": 50.0,
+          "bin_upper_bp": 100.0,
+          "bin_count": 6,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": 50.313377998703,
+          "maximum_change_bp": 98.976136282525,
+          "mean_change_bp": 67.421763296601,
+          "summed_request_change_bp": 404.530579779606
+        },
+        {
+          "bin_id": 10,
+          "bin_label": ">= 100",
+          "bin_lower_bp": 100.0,
+          "bin_upper_bp": null,
+          "bin_count": 0,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": null,
+          "maximum_change_bp": null,
+          "mean_change_bp": null,
+          "summed_request_change_bp": null
+        },
+        {
+          "bin_id": 11,
+          "bin_label": "未知",
+          "bin_lower_bp": null,
+          "bin_upper_bp": null,
+          "bin_count": 0,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": null,
+          "maximum_change_bp": null,
+          "mean_change_bp": null,
+          "summed_request_change_bp": null
+        }
+      ]
+    },
+    "accessIssues": []
+  },
+  "sources": [
+    {
+      "id": "report",
+      "label": "V16 · 独立技术报告原文",
+      "path": "analysis/p1_btcusdtp_hourly_dual_partial_v16_20260906.md"
+    },
+    {
+      "id": "v16_summary",
+      "label": "OKX archive · V16 保存的结果与诊断事实",
+      "path": "experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/results/summary.json"
+    },
+    {
+      "id": "v16_case_delta",
+      "label": "OKX archive · V16 全部案例配对变化",
+      "path": "experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/results/case_delta.csv",
+      "query": {
+        "engine": "SQLite",
+        "language": "sql",
+        "sql": "WITH bins(bin_id, bin_label, bin_lower_bp, bin_upper_bp) AS (\n  VALUES (0, '< -100', NULL, -100),\n         (1, '[-100, -50)', -100, -50),\n         (2, '[-50, -20)', -50, -20),\n         (3, '[-20, -5)', -20, -5),\n         (4, '[-5, -1e-8)', -5, -0.00000001),\n         (5, '0 · |Δ|<=1e-8', -0.00000001, 0.00000001),\n         (6, '(1e-8, 5)', 0.00000001, 5),\n         (7, '[5, 20)', 5, 20),\n         (8, '[20, 50)', 20, 50),\n         (9, '[50, 100)', 50, 100),\n         (10, '>= 100', 100, NULL),\n         (11, '未知', NULL, NULL)\n), classified AS (\n  SELECT event_id, difference * 10000 AS change_bp,\n         CASE WHEN difference IS NULL THEN 11\n              WHEN ABS(difference) <= 0.000000000001 THEN 5\n              WHEN difference * 10000 < -100 THEN 0\n              WHEN difference * 10000 < -50 THEN 1\n              WHEN difference * 10000 < -20 THEN 2\n              WHEN difference * 10000 < -5 THEN 3\n              WHEN difference < 0 THEN 4\n              WHEN difference * 10000 < 5 THEN 6\n              WHEN difference * 10000 < 20 THEN 7\n              WHEN difference * 10000 < 50 THEN 8\n              WHEN difference * 10000 < 100 THEN 9 ELSE 10 END AS bin_id\n  FROM main.case_delta\n), totals AS (\n  SELECT COUNT(*) AS total_requests, COUNT(change_bp) AS finite_requests,\n         COUNT(*) - COUNT(change_bp) AS unknown_requests FROM classified\n)\nSELECT b.bin_id, b.bin_label, b.bin_lower_bp, b.bin_upper_bp,\n       COUNT(c.event_id) AS bin_count,\n       t.total_requests, t.finite_requests, t.unknown_requests,\n       SUM(COUNT(c.event_id)) OVER () AS count_sum,\n       MIN(c.change_bp) AS minimum_change_bp,\n       MAX(c.change_bp) AS maximum_change_bp,\n       AVG(c.change_bp) AS mean_change_bp,\n       SUM(c.change_bp) AS summed_request_change_bp\nFROM bins AS b CROSS JOIN totals AS t\nLEFT JOIN classified AS c ON c.bin_id = b.bin_id\nGROUP BY b.bin_id, b.bin_label, b.bin_lower_bp, b.bin_upper_bp,\n         t.total_requests, t.finite_requests, t.unknown_requests\nORDER BY b.bin_id",
+        "executed_at": "2026-09-06T10:57:23.403404+00:00",
+        "tables_used": [
+          "main.case_delta"
+        ],
+        "description": "Actual SQLite count query over experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/results/case_delta.csv, loaded as main.case_delta. Source columns: event_id,mother_decision_time,before,after,difference. hourly_impulse_dual_partial_research.py supplied all251 original direct1h K1 episode pairs. Both arms retain native15m SMA40 true-colour full/remainder exits. Candidate alone can realize50% of the original position once on a native5m true-colour edge, provided latest completed slow15m colour is aligned and executable-open whole-position gross return exceeds0.002. The registered invariant requires identical final exit time/price/reason, held duration, MFE/MAE, slow trigger and serial occupancy; saved-ledger verification checks these separately. This compares a qualified partial-realization switch, not two management timeframes or an entry gate. No raw prices, strategy or inference are run by the presentation query.",
+        "filters": [
+          "BTC-USDT-SWAP, reused development 2023-01-01 <= mother_decision_time UTC < 2025-01-01",
+          "Every original case request, not matched-only cases or winner-only paths; no trimming or sampling",
+          "One unique event_id and exact decision time per source request; +/-infinity rejected, NULL differences retained in the unknown bin"
+        ],
+        "metric_definitions": [
+          "difference=after-before for every original direct1h K1 opportunity. before=full-position native15m transition-colour exit; after=same exit plus one qualified 50% native5m partial realization. Unknown paired outcomes remain NULL; chart bp=difference*10000.",
+          "bin_count counts requests, not probability density; numeric intervals have unequal widths and open-ended tails",
+          "Zero atom follows frozen comparison tolerance abs(difference)<=1e-12 in fractional-return units (1e-8 bp); original nonzero values are preserved in sums and means",
+          "total_requests=all source rows; finite_requests=nonnull differences; unknown_requests=null differences; count_sum=sum(bin_count) must equal total_requests",
+          "Bin min/max/mean/sum preserve paired episode changes in bp. Completed original positions bear the same20bp total roundtrip cost assumption, weighted across partial/remainder fills; immutable K1 extreme stop and original72h limit remain. Partial realized proceeds do not make a censored remainder a known whole-trade result. No unknown filling, tail trimming or account compounding."
+        ]
+      }
+    },
+    {
+      "id": "research_code",
+      "label": "V16 · 上游 Python 评估器",
+      "path": "yoyo/evaluation/hourly_impulse_dual_partial_research.py"
+    },
+    {
+      "id": "presentation_code",
+      "label": "V16 · 分布聚合与原生报告构建器",
+      "path": "yoyo/evaluation/hourly_impulse_dual_partial_report.py"
+    }
+  ]
+}

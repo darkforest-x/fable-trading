@@ -1,0 +1,326 @@
+{
+  "status": "passed",
+  "counts": {
+    "cases": 251,
+    "controls": 462,
+    "matched": 154,
+    "unmatched": 97
+  },
+  "effects": {
+    "case_delta": {
+      "total_pairs": 251,
+      "n": 251,
+      "unknown_pairs": 0,
+      "improved": 57,
+      "worsened": 33,
+      "unchanged": 161,
+      "mean_bp": 1.4684468737968517,
+      "sum_event_bp": 368.58016532300974
+    },
+    "excess_delta": {
+      "total_pairs": 251,
+      "n": 154,
+      "unknown_pairs": 97,
+      "improved": 45,
+      "worsened": 60,
+      "unchanged": 49,
+      "mean_bp": 2.474741942695898,
+      "sum_event_bp": 381.1102591751683
+    },
+    "serial_delta": {
+      "total_pairs": 251,
+      "n": 251,
+      "unknown_pairs": 0,
+      "improved": 57,
+      "worsened": 32,
+      "unchanged": 162,
+      "mean_bp": 1.5981181955471488,
+      "sum_event_bp": 401.12766708233437
+    }
+  },
+  "accounting": {
+    "partial_fills": {
+      "baseline/case": 0,
+      "baseline/control": 0,
+      "candidate/case": 90,
+      "candidate/control": 135
+    },
+    "unchanged_final_paths": 713,
+    "original_cost_fraction": 0.002,
+    "partial_fraction": 0.5
+  },
+  "groups": {
+    "case": {
+      "all": {
+        "n": 251,
+        "known": 251,
+        "old_mean_net_bp": -16.662360573261147,
+        "new_mean_net_bp": -15.193913699464295,
+        "mean_delta_bp": 1.4684468737968517,
+        "sum_delta_event_bp": 368.58016532300974
+      },
+      "partial": {
+        "n": 90,
+        "known": 90,
+        "old_mean_net_bp": 82.33506550131978,
+        "new_mean_net_bp": 86.43040067157544,
+        "mean_delta_bp": 4.095335170255663,
+        "sum_delta_event_bp": 368.58016532300974
+      },
+      "win_to_win": {
+        "n": 64,
+        "known": 64,
+        "old_mean_net_bp": 130.1653984008435,
+        "new_mean_net_bp": 123.27376449696249,
+        "mean_delta_bp": -6.891633903880999,
+        "sum_delta_event_bp": -441.06456984838394
+      },
+      "no_partial": {
+        "n": 161,
+        "known": 161,
+        "old_mean_net_bp": -72.00253663979707,
+        "new_mean_net_bp": -72.00253663979707,
+        "mean_delta_bp": 0.0,
+        "sum_delta_event_bp": 0.0
+      },
+      "loss_to_loss": {
+        "n": 178,
+        "known": 178,
+        "old_mean_net_bp": -69.7982798272342,
+        "new_mean_net_bp": -66.86287182070271,
+        "mean_delta_bp": 2.9354080065314934,
+        "sum_delta_event_bp": 522.5026251626058
+      },
+      "loss_to_win": {
+        "n": 9,
+        "known": 9,
+        "old_mean_net_bp": -9.860465810538079,
+        "new_mean_net_bp": 22.04421307932724,
+        "mean_delta_bp": 31.904678889865316,
+        "sum_delta_event_bp": 287.1421100087879
+      }
+    },
+    "control": {
+      "all": {
+        "n": 462,
+        "known": 462,
+        "old_mean_net_bp": -23.792931394614794,
+        "new_mean_net_bp": -24.236535916554157,
+        "mean_delta_bp": -0.44360452193936223,
+        "sum_delta_event_bp": -204.94528913598535
+      },
+      "no_partial": {
+        "n": 327,
+        "known": 327,
+        "old_mean_net_bp": -61.465598953210716,
+        "new_mean_net_bp": -61.465598953210716,
+        "mean_delta_bp": 0.0,
+        "sum_delta_event_bp": 0.0
+      },
+      "loss_to_loss": {
+        "n": 366,
+        "known": 366,
+        "old_mean_net_bp": -59.20539605255317,
+        "new_mean_net_bp": -56.43731280672892,
+        "mean_delta_bp": 2.7680832458242515,
+        "sum_delta_event_bp": 1013.118467971676
+      },
+      "partial": {
+        "n": 135,
+        "known": 135,
+        "old_mean_net_bp": 67.45864113620648,
+        "new_mean_net_bp": 65.94052788334731,
+        "mean_delta_bp": -1.5181132528591508,
+        "sum_delta_event_bp": -204.94528913598535
+      },
+      "win_to_win": {
+        "n": 77,
+        "known": 77,
+        "old_mean_net_bp": 142.20812956830463,
+        "new_mean_net_bp": 119.17923233480208,
+        "mean_delta_bp": -23.028897233502548,
+        "sum_delta_event_bp": -1773.2250869796962
+      },
+      "loss_to_win": {
+        "n": 19,
+        "known": 19,
+        "old_mean_net_bp": -14.378175044054124,
+        "new_mean_net_bp": 14.84084231763192,
+        "mean_delta_bp": 29.219017361686042,
+        "sum_delta_event_bp": 555.1613298720348
+      }
+    }
+  },
+  "raw_replay": false,
+  "inferential_p_recomputed": false,
+  "sma_recomputed": false,
+  "unlogged_edges_excluded_independently": false,
+  "limitation": "Saved clocks, colour snapshots, logged-first eligibility, formulas and receipts only; not independent raw OHLC/SMA/complete-edge replay, actual fills, inferential pipeline or profitability proof.",
+  "lineage": {
+    "anchor_tables": 6,
+    "native_context_rows": 1426,
+    "fast_context_rows": 713,
+    "recorded_fast_edges": 1895,
+    "context_freeze_is_saved_receipt_not_runtime_trace": true
+  },
+  "committed_sources_verified": 24,
+  "output_hashes_verified": 54,
+  "builder_commit": "c75aae5077b0dccea660eec877fea34882884818",
+  "source_pins": [
+    {
+      "path": "yoyo/data/hourly_impulse.py",
+      "sha256": "f1128f514456f0e1a7bf89b719b2333ebe3b12f66402d58c82764d355be97a3b"
+    },
+    {
+      "path": "yoyo/data/hourly_impulse_colour_context.py",
+      "sha256": "32c035635c435d5c079a8ad7f91061fb4bdbb7195a3be66db40fef1dbacd0c1d"
+    },
+    {
+      "path": "yoyo/layers/l3_backtest/hourly_impulse.py",
+      "sha256": "5325b9c740b076d4d244ec4e02a193cc20da7f86f5371071c9563de10d2a8897"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_research.py",
+      "sha256": "804e62f5dfa537302a6cf1f0223549cdf3b3a3e42966ef59a33b6c975fd79ad4"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_context_research.py",
+      "sha256": "b55c11cbf3cfc7b55a319b65625502738f831b298e9b1c5f65c1657efe4bb9a3"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_k2_research.py",
+      "sha256": "3ce431bf8c96fc2828dd4405db7012b57b13295a169f0d67d5e95a86b1659c67"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_management_research.py",
+      "sha256": "f9f0d439617badfda1e1838f9811d8246b8bd00d533570f95d3ec6c1d7706069"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_diagnostics.py",
+      "sha256": "1f20806dcfb0421be4f3581a1c24c85c220acd9b2e9b56e332d5755dcf64560f"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_transition_research.py",
+      "sha256": "2ceb5a764743d9cc48e7aa2eb14d49dcc73c941381d7cdec9ad6fffba658c1f8"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_launch_research.py",
+      "sha256": "698f903c98320a0bf30115a6626f052460cab3f019805bed92cf9ab8c780395f"
+    },
+    {
+      "path": "tests/test_hourly_impulse_launch_deadline.py",
+      "sha256": "5b8598c417ba63dd7958d5152ec0c37de059d9c7ec3314841bdd06d8116348e6"
+    },
+    {
+      "path": "tests/test_hourly_impulse_launch_research.py",
+      "sha256": "d8f7bb8f0f334e5590ab518c6792a3de1728826388992a4d895808aebf04d689"
+    },
+    {
+      "path": "yoyo/data/hourly_impulse_management_context.py",
+      "sha256": "4351c00e1a21050193a8a5ee8670923b04500f6b8561532e56dbf06424f38f6b"
+    },
+    {
+      "path": "yoyo/data/hourly_impulse_native_exit_context.py",
+      "sha256": "81108d5cfbbde1591f234cbf4d4322532c4f20a5156f5ad43b8bd1a54a23c9af"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_native_exit_research.py",
+      "sha256": "e46d9e94412d1ae5a78cc11c695f63036050a3d064965e015ce0f8172ca21824"
+    },
+    {
+      "path": "tests/test_hourly_impulse_native_exit_context.py",
+      "sha256": "2ce6896bfad74d165c9e7c24a159f006130e7689636681825964075b4a8b2e4e"
+    },
+    {
+      "path": "tests/test_hourly_impulse_native_exit_research.py",
+      "sha256": "0dadbbf5787349c19b5ec5d3aa30e87fecea78bafa2dcbaea1052085e0f98688"
+    },
+    {
+      "path": "tests/test_hourly_impulse_transition_15m.py",
+      "sha256": "5b8fd95f6eac57664b91f9f483684890c5c0c6c5ec7078c7c121b22691fb3bab"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_dual_partial_research.py",
+      "sha256": "9815b1d298102dc78a7421111bfb7d14b80d93e0ea5e6b101b47fe6eaa59537a"
+    },
+    {
+      "path": "tests/test_hourly_impulse_dual_partial.py",
+      "sha256": "6b290780a7bb1d5e5c7f42b3e73f9d8a0430b39f3c9ff8e6ac36380e6d78efc9"
+    },
+    {
+      "path": "tests/test_hourly_impulse_dual_partial_research.py",
+      "sha256": "ae8226c209ee946e20e06432bea6f60f83a8a2343a226269ef09a97d2c02e54e"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/config.json",
+      "sha256": "ce126cbe89364c1017dc7c7f92fffdba8a3a902d1a8af3f67f7bc1378eaf94b3"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json",
+      "sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/PROJECT_PLAN.md",
+      "sha256": "4f52c07fa6bfa8be36c7052828178aca9981226e4f0643d383712657e57e4686"
+    }
+  ],
+  "output_hashes": {
+    "anchor_parity.json": "37239451aac784bc8c73d80497c32403389b0bcaea0f3a71afb0e406fbbbee41",
+    "assignments.csv": "1a3eb85c068a154c1f3d7d61b9d6eb8b79c59c41c98fecaa8a43dc0a49847b5d",
+    "baseline/case_episodes.csv.gz": "d904981d9db66662fabfcb101a0b782b56121169cddd406d4c4a29b18db48439",
+    "baseline/case_trades.csv.gz": "772b2dc9333ee5f7e63ce92e7b3b2927b105ad4a0ba2f832093f09ad91df3ff0",
+    "baseline/classified_case_trades.csv.gz": "1b28050610ff695ab316475d1ff36a0ae9ee42759de24725838639892ebedb24",
+    "baseline/control_episodes.csv.gz": "5b41a046d32b06d0fdfc4843aef04a5eea12b97a7226f13850f88be6190c2468",
+    "baseline/control_trades.csv.gz": "9512425350d47e8fa38ead12bf295be5eec8ed5f55ed124a34218b6b51cb9e97",
+    "baseline/diagnosis_daily.csv": "cfb687c91fa0c2966019e7a8bb01f59043dd80bedaabff4029af11db16add8b5",
+    "baseline/diagnosis_direction.csv": "c3ee56b0746e7e64d15bdb3bca65a59f00781ef96906d75e516739d5380bc712",
+    "baseline/diagnosis_fixed_feature_bins.csv": "ea9176f3b7f4bb17dfd7251493394747a57713c67659c26f5ca188006b6fdfb9",
+    "baseline/diagnosis_fold.csv": "380cd63c5d277c6be5d2f1309ee8b8c51cd249c292ef2abe4fc023c5c8411a50",
+    "baseline/diagnosis_losing_trades.csv": "67ed5697717a74eba8df8c879cc35eac134224c7449f1daf647a649179dbef21",
+    "baseline/diagnosis_loss_taxonomy.csv": "b552498a5d91e9e7606be292ee793adbfb7c23d6304c08f8717cc41ba25fdf5a",
+    "baseline/diagnosis_monthly.csv": "67cd8bf6434846d049a399abc223e1090d006909dcfe218da005f7aad6da537f",
+    "baseline/diagnosis_outcome.csv": "9a51fe139d2f7879079c6bec4ac0d8e27417c8266bc9beab0101fccfa5f94725",
+    "baseline/diagnosis_outcome_direction_fold.csv": "13538c960d1d9453c742fa5b256e7024d3cc39d10b41221534c7e8b7d6a80f69",
+    "baseline/diagnosis_top_winners.csv": "902efd703d1a49300259af2fcb69b76427ffd3fed8b770db3b690c9b59896907",
+    "baseline/matched.csv": "20ed18c0eb4d48cfe21590a68689461c12c2a08e4b06adba3389a880f9d99122",
+    "baseline/single_pending.csv.gz": "d817e8a5ccb7bf4aa95aa9e176bff26770ce9b5bd98ec2f63c44f4118a19dd37",
+    "baseline/summary.json": "df2da431c28d957267a646b981c4e9e4b211ba156bb466393cb35630d2e3ff43",
+    "candidate/case_episodes.csv.gz": "0528402bb7dad51eb5a0ea8a196863e20f0fc70bc4a57c7adfe79fde1cfdfbe1",
+    "candidate/case_trades.csv.gz": "9a43891b81bf50c281db3a26d1e53188f6b7876c746b75509ae78a570826bc47",
+    "candidate/classified_case_trades.csv.gz": "345d46be58d6b71c7593e8dcdfa2e47bf2565cc65df92bd09239b213628328c3",
+    "candidate/control_episodes.csv.gz": "8a995534d98058a2efa241e9ebbd8dbb5169204790bb727ff78765364ea62847",
+    "candidate/control_trades.csv.gz": "6fc2975228852fe8afbbd62148cec64354f0cfd025c29d7cc49be0ef7e842c91",
+    "candidate/diagnosis_daily.csv": "cff3318524673106ec5a4e9b6dd09fbb4e4aab35daba5e580a3c1c6fdc07e4f0",
+    "candidate/diagnosis_direction.csv": "45f58ed2b97a80e4c1013cfd8d457bb293adda1a6e362e813293c45c578c9294",
+    "candidate/diagnosis_fixed_feature_bins.csv": "8bb8ad406fb3c6b3e53b15069333424623bac2768e7ddcc177224b8c66fdd68f",
+    "candidate/diagnosis_fold.csv": "62c099d3782a0b8cbe5225a13da66459a41055f30af0b14bcd13b949e066f7fd",
+    "candidate/diagnosis_losing_trades.csv": "6e942ddef8d2f78fde1d361ff2f6b8344901a8d856323f14581946798a15837e",
+    "candidate/diagnosis_loss_taxonomy.csv": "e75a0ee3568ba3b7545b7809c3e16532add605ce9bb0cb958acf86202b452347",
+    "candidate/diagnosis_monthly.csv": "6450ec25b8e7c4530428c28b624bd5883226acef0f25a63faccb3baba7755c2b",
+    "candidate/diagnosis_outcome.csv": "4a947ea020395314b0638103cb2039508fd42d34b0347ebd21dc5e9a5698066f",
+    "candidate/diagnosis_outcome_direction_fold.csv": "2764d9cf98d9873e7779774fa45a0f9277f4bbadce5679a464863756421d185e",
+    "candidate/diagnosis_top_winners.csv": "0cd40aea877e86bbbb837f7abb47e1c9c439c0c0fc5ca04df4b1add2ea22ebed",
+    "candidate/matched.csv": "a0a29d07d4bec5aa75b40d976ad6bbdba2e6810f6cf4d4736896f228b98a54c6",
+    "candidate/single_pending.csv.gz": "2cfe1214c565b07b38b4c302224d086bfdb5bb6a9706633f27d6d79d1bfb01b0",
+    "candidate/summary.json": "1494ea21905bc84071892940d3de294444c79a5a18fc5f1a9e321375dd9028f0",
+    "case_context.csv.gz": "73db18fb776de23ea3cf0088708514a11c4117e7d01583f740c76d83cf161b31",
+    "case_delta.csv": "d081f6e119264fa93a6fc48cbf73f460f436527fba2682a539d8297505af160b",
+    "context_frozen.json": "6bb196867557e797db33d785c30ab27e87f527e02ba9dc06d0d4ceef1dd4b718",
+    "control_context.csv.gz": "f38d03423997248dd2071fce41068cff1337b7476c8967bc8822d3fd3f329152",
+    "excess_delta.csv": "796c1b8e244bc27f67481e935c7ada6e311a51b3047bc314e308a87d605a4b57",
+    "fast_entry_context.csv.gz": "c3a48f6ed89359e4ccf62dc4168f74bcc7d25de6b51cabe047b51ed84df73c1d",
+    "monthly_case_net.csv": "f47bcce0ce50dd40a7ee0be78e5b39bdbddcd52dd9f074ad7dc5e17d0f425c20",
+    "native_entry_context.csv.gz": "cc01a8466166eb09e8f05a92756e7d307c997ee597ad7223456a08693e7d32d3",
+    "native_initial_state_counts.csv": "4aaa44197925a65c2b765ac2e3de6971b15b1c75d68edc2a7551cde628bf4312",
+    "partial_case_groups.csv": "d02c5ef6e96e0983ca8b56d2ff977f10ec1ea682e7f3e04df119a07c09d2b5a6",
+    "partial_case_mechanics.csv": "e4fca7fa3cc4511748ec71c60c3b9e339d1388e6e3426c1c2c5d921142a96ab2",
+    "partial_control_groups.csv": "05027642e6ca966a54d1d0d9acc7ae88b7f2c71310275493c8049fdfcc40c49e",
+    "partial_control_mechanics.csv": "1fc13faf57f2f529cf255e0324042f761c8dafd600f89f31a0ab926f07cecba2",
+    "partial_fast_edges.csv.gz": "6ea0db912186bcf212f705335157cc8607857d82003c9600a369e5dc488a814d",
+    "serial_delta.csv": "a96148a6ab1ecfa73c7a038a593bc40518739210ff2cef0455d35c86d0aa8070",
+    "started.json": "01a489b81c2eda8c762a0de0dc5e54b27dcc52356f9a3545873f7fb16aa5a782"
+  },
+  "summary_sha256": "51ae3a00ff50b2d0a485d2ae8f37ecd4d97a0fc2bd68f6598a064b97a0876742",
+  "verifier_sha256": "ca9566e39bff8aa5bae836a3cc979ab0052548e4e039c13f349f8271c4ab30a0",
+  "verifier_source": "scripts/verify_hourly_impulse_dual_partial_v16.py"
+}
