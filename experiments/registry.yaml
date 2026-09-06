@@ -5272,3 +5272,25 @@ experiments:
       Reused2023-2024 only. Existing61.35% matched coverage cannot pass90%
       gate; this is a mechanism comparison, not independent confirmation.
       No audit, TradingView, promotion or live mutation.
+
+  - experiment_id: exp-btcusdtp-1h-flat-realignment-preholdout-20260906-v6
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4094a1a"
+    status: active
+    question: >-
+      Does staying flat after the first K2 until completed native5m alignment
+      improve post-cost returns versus entering while the small cycle opposes?
+    single_variable: >-
+      First-K2 immediate versus first native5m aligned close/next-open entry.
+      Fixed mother+8h wait and+72h final deadline, K1 stop, transition exit,
+      20bp and all original251 mothers/462 controls; no rematching or retries.
+    result: "Preregistered before new alignment entry requests and outcomes."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Reused2023-2024 only. Inherited61.35% coverage and at most55 case trades
+      cannot pass90%/80 gates. Finite mechanism test, not a candidate nomination.
+      All89 old control requests retained, including old invalid risks. No audit.

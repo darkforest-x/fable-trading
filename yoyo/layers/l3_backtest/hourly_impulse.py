@@ -75,10 +75,18 @@ def _policy(policy: Mapping[str, Any]) -> Dict[str, Any]:
         raise ValueError("confirmations must be a positive integer")
     if selected["exit_mode"] == "transition_colour" and (minutes != 5 or confirmations != 1):
         raise ValueError("transition_colour requires management_minutes=5 and confirmations=1")
-    if not np.isfinite(selected["max_hours"]) or selected["max_hours"] <= 0:
-        raise ValueError("max_hours must be finite and positive")
-    if (pd.Timedelta(hours=selected["max_hours"]).value % FIVE_MINUTES.value) != 0:
-        raise ValueError("max_hours must align to the 5-minute execution grid")
+    # An explicit integer-minute horizon wins over inherited max_hours. Using
+    # fractional hours can truncate an exact 5m duration by 1ns in pandas 2.3.3.
+    # Without max_minutes the historical max_hours validation is unchanged.
+    if "max_minutes" in selected:
+        max_minutes = selected["max_minutes"]
+        if isinstance(max_minutes, (bool, np.bool_)) or not isinstance(max_minutes, (int, np.integer)) or max_minutes <= 0 or max_minutes % 5 != 0:
+            raise ValueError("max_minutes must be a positive integer multiple of five")
+    else:
+        if not np.isfinite(selected["max_hours"]) or selected["max_hours"] <= 0:
+            raise ValueError("max_hours must be finite and positive")
+        if (pd.Timedelta(hours=selected["max_hours"]).value % FIVE_MINUTES.value) != 0:
+            raise ValueError("max_hours must align to the 5-minute execution grid")
     if not np.isfinite(selected["cost_fraction"]) or selected["cost_fraction"] < 0:
         raise ValueError("cost_fraction must be finite and nonnegative")
     return selected
@@ -161,6 +169,10 @@ def simulate_events(
     entry + 5m. Missing/invalid observations reset the edge; a management-segment
     change starts a fresh sequence. An initially opposite/unknown state must
     first observe an aligned complete bar. No other mode uses this state.
+
+    An optional positive integer ``max_minutes`` (multiple of five) takes
+    precedence over ``max_hours``. It represents the exact remaining duration
+    for delayed entries without converting integer minutes to fractional hours.
     """
     selected = _policy(policy)
     raw = _validated_frame(raw5, ("open_time", "open", "high", "low", "close", "segment_id"), "raw5")
@@ -187,7 +199,8 @@ def simulate_events(
         for row in management.itertuples(index=False)
     }
     cutoff = _utc(end_exclusive) if end_exclusive is not None else None
-    horizon_delta = pd.Timedelta(hours=selected["max_hours"])
+    horizon_delta = (pd.Timedelta(minutes=int(selected["max_minutes"]))
+                     if "max_minutes" in selected else pd.Timedelta(hours=selected["max_hours"]))
     cost = float(selected["cost_fraction"])
     mode = selected["exit_mode"]
     outputs = []

@@ -1,0 +1,49 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-flat-realignment-preholdout-20260906-v6",
+  "base_config": "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json",
+  "base_config_sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a",
+  "parent_results": "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results",
+  "inputs": {
+    "original_mothers.csv.gz": "b3f442ad8b0959b19cb5ae58fd40bc6a3bf40b455b4be31f3758d53940eea3e6",
+    "control_mothers.csv.gz": "01050c7a9602f469406df515edcc73ef2f4c9db2d46529e25030934012eebd5a",
+    "case_wait_status.csv.gz": "c8a41ebe3b4812de1dd5e4a6ad37257c545c7da516c837ecdf4d31d5dc3c297c",
+    "control_wait_status.csv.gz": "581035a17d0ee8db6cf5671aa0ecd79c733e4873a2a3957a43937f6ff9f4989e",
+    "wait_k2_k1_stop_case_requests.csv.gz": "58e6b2e576d0ec482b72b0db92e97b5822b19184299b3d5c1535c1155557e8e7",
+    "wait_k2_k1_stop_control_requests.csv.gz": "ddeb411c2d6ac1fa7e8b62161adddb87c8f03146e3a1ab2f6c7442a2f5438198"
+  },
+  "previous_results": "experiments/active/exp-btcusdtp-1h-colour-transition-preholdout-20260906-v5/results",
+  "previous_inputs": {
+    "wait_k2_k1_stop__transition_colour_case_trades.csv.gz": "d5b7417bda1b917ee1f312a6d1e3441c1a29db7986847d5aa3314282b64d9a01",
+    "wait_k2_k1_stop__transition_colour_control_trades.csv.gz": "cbb5a8e32730d984f28bffd4cab1a3e6d0439bcf5b9b6aac8b09b1f01178171a",
+    "wait_k2_k1_stop__transition_colour_case_episodes.csv.gz": "c03400d99d1bb38edf2b9d62b8525b2cc35d1c51ba8b0868d27226146b292a89",
+    "wait_k2_k1_stop__transition_colour_control_episodes.csv.gz": "c6e898a7e389cfdb13652f1a9a10bc1156f0fcfe8da7729a30a8efb4daccb773"
+  },
+  "arms": ["k2_immediate", "k2_flat_alignment"],
+  "policy_id": "5m_native40",
+  "exit_mode": "transition_colour",
+  "wait": {
+    "mother_deadline_minutes": 480,
+    "total_horizon_minutes": 4320,
+    "first_alignment_only": true,
+    "cancel_on_k1_extreme": false,
+    "unknown_colour": "censor",
+    "risk_check": "first_actual_open_only"
+  },
+  "selection": {
+    "minimum_events": 80, "minimum_per_fold": 12, "positive_folds": 4,
+    "minimum_profit_factor": 1.1, "minimum_active_months": 12,
+    "minimum_months_per_fold": 3, "matched_coverage": 0.9
+  },
+  "inference": {
+    "unit": "all paired original mothers; known nonentry zero and unknown NaN",
+    "contrast": "flat alignment minus immediate; one planned contrast",
+    "method": "9999 month-cluster bootstrap 95% and one-sided sign-flip; seed20260906",
+    "selection_p": 0.01,
+    "limitations": "Reused observational history and sequential exploration, not randomized or independent confirmation."
+  },
+  "lineage": "Same V4 original251 mothers and462 control mothers, no rematching or old invalid-risk filtering. V5 motivates but future arming/return labels never select requests. Only2023-2024 reused development. Inherited61.35% coverage and at most55 cases cannot satisfy existing90%/80 gates.",
+  "no_audit_entry_point": true,
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false
+}
