@@ -1,0 +1,253 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("Bollinger Bands Liquidity Cloud [ChartPrime]", overlay = true, max_boxes_count = 500)
+
+show = input.bool(true, "Show Bollinger Bands", group = "Bands")
+length = input.int(20, "Length", minval = 1, group = "Bands")
+multiplier = input.float(2, "multiplier", minval = 0, maxval = 10, step = 0.125, group = "Bands")
+
+style = input.string("Volume", "Style", ["Volume", "Z-Score"], group = "Main")
+sample_size = input.int(50, "Sample Size", minval = 10, group = "Main")
+window_size = input.int(150, "Window Size", minval = 0, tooltip = "Use this to adjust the window size of the heatmap. When style is set to Z-Score a value of 0 will use all data.", group = "Main")
+look_back = input.int(50, "Lookback", minval = 0, group = "Main")
+smoothing = input.int(1, "Smoothing", minval = 1, maxval = 20, group = "Main")
+alpha = input.int(60, "Heat Map Alpha", minval = 0, maxval = 100, group = "Main")
+score_enable = input.bool(true, "Weight Score Overlay", group = "Main")
+
+high_color = input.color(#00ff00, "Color", group = "colour", inline = "Colour") 
+low_color = input.color(#FF0000, "", group = "colour", inline = "Colour")
+dev_color = input.color(color.blue, "Bollinger Bands Color", group = "colour")
+text_color = input.color(color.silver, "Text Color", group = "colour")
+
+score(source, rank_75, rank_25, median, enable)=>
+    if enable
+        if source == 1 
+            "S"
+        else if source < 1 and source >= rank_75 
+            "A"
+        else if source < rank_75 and source >= median 
+            "B"
+        else if source < median and source > rank_25 
+            "C"
+        else
+            "D"
+    else
+        ""
+
+min_max(source, min, max)=>
+    (source - min)/(max - min)
+
+rescale_invert(x, n) =>
+    inverted = 1 - x
+    rescaled = (1 - inverted) * n + inverted * 100
+    rescaled
+
+price_from_z(z, average, stdev)=>
+    average + z * stdev
+
+sq(source) => math.pow(source, 2)
+
+sinc(source, bandwidth) =>
+    if source == 0
+        1
+    else
+        math.sin(math.pi * source / bandwidth) / (math.pi * source / bandwidth)  
+
+sinc_filter(source, length)=>
+    src_size = array.size(source)
+    estimate_array = array.new<float>(src_size) 
+    float current_price = na
+    for i = 0 to src_size - 1 
+        float sum = 0
+        float sumw = 0
+        for j = 0 to src_size - 1 
+            diff = i - j
+            weight = sinc(diff, length)
+            sum += array.get(source, j) * weight
+            sumw += weight
+        current_price := sum / sumw
+        array.set(estimate_array, i, current_price >= 0 ? current_price : 0)
+    estimate_array
+
+get_vol(a, b, x, y, vol) =>
+    if y < a or x > b
+        0
+    else if x > a and y < b
+        p_range = (y - x) / (b - a)
+        p_range * vol
+    else if x <= a and y >= b
+        p_bar = (b - a) / (y - x)
+        p_bar * vol
+    else if x < a and y <= b
+        p_bar = (y - a) / (y - x)
+        p_bar * vol
+    else if x >= a and y > b
+        p_bar = (b - x) / (y - x)
+        p_bar * vol
+    else
+        vol
+
+type level
+    float start
+    float end
+
+flag = bar_index > window_size
+
+top_level    = ta.highest(high, math.max(1, window_size))
+bottom_level = ta.lowest(low, math.max(1, window_size))
+
+step = (top_level - bottom_level) / sample_size
+
+average    = ta.sma(close, length)
+stdev      = ta.stdev(close, length)
+bb_top     = average + stdev * multiplier
+bb_bottom  = average - stdev * multiplier
+
+boxes = array.new<box>(500)
+
+if flag and barstate.islast and style == "Volume"
+    for n = look_back - 1 to 0
+        levels = array.new<level>(sample_size + 1)
+        for i = 0 to sample_size - 1
+            bottom = bottom_level[n]
+            step_n = step[n]
+            array.set(levels, i, level.new(bottom + step_n * i, bottom + step_n * (i + 1)))
+
+        volume_sum = array.new<float>(sample_size + 1, 0)
+        bullish_volume = array.new<float>(sample_size + 1, 0)
+        trimmed_volume = array.new<float>()
+        trimmed_levels = array.new<level>()
+        trimmed_ratio  = array.new<float>()
+    
+        for i = 0 to math.max(1, window_size) - 1
+            High = high[i + n]
+            Low = low[i + n]
+            Volume = volume[i + n]
+            state = open[i + n] < close[i + n]
+            for j = 0 to sample_size - 1
+                get_level  = array.get(levels, j)
+                get_volume = get_vol(get_level.start, get_level.end, Low, High, Volume)
+                array.set(volume_sum, j, array.get(volume_sum, j) + get_volume)
+                if state
+                    array.set(bullish_volume, j, array.get(bullish_volume, j) + get_volume)
+    
+        filtered_volume = smoothing > 1 ? sinc_filter(volume_sum, smoothing) : volume_sum
+    
+        min_volume = array.min(volume_sum)
+        max_volume = array.max(volume_sum)
+        min_volume_filter = array.min(filtered_volume)
+        max_volume_filter = array.max(filtered_volume)
+
+        for k = 0 to sample_size - 1
+            vol_sum = min_max(array.get(volume_sum, k), min_volume, max_volume)
+            vol_bull = min_max(array.get(bullish_volume, k), min_volume, max_volume)
+            vol_filt = min_max(array.get(filtered_volume, k), min_volume_filter, max_volume_filter)
+            get_level = array.get(levels, k)
+            mid_point = math.avg(get_level.end, get_level.start)
+            if mid_point >= bb_bottom[n] and mid_point <= bb_top[n]
+                array.push(trimmed_volume, vol_filt)
+                array.push(trimmed_ratio, vol_bull)
+                array.push(trimmed_levels, get_level)
+
+        if array.size(trimmed_volume) > 0
+            rank_75 = array.percentile_linear_interpolation(trimmed_volume, 75)
+            rank_25 = array.percentile_linear_interpolation(trimmed_volume, 30)
+            median = array.median(trimmed_volume)
+            for j = 0 to array.size(trimmed_volume) - 1
+                vol = array.get(trimmed_volume, j)
+                ratio = array.get(trimmed_ratio, j)
+                price = array.get(trimmed_levels, j)
+
+                colour = color.new(color.from_gradient(ratio, 0, 1, low_color, high_color), rescale_invert(vol, alpha))
+
+                test_box = box.new(bar_index - n, price.end, bar_index - n - 1, price.start, colour, bgcolor = colour, text = score(vol, rank_75, rank_25, median, score_enable), text_color = text_color)
+
+                array.unshift(boxes, 
+                 test_box
+                 )
+ 
+var source_distribution = array.new<int>()
+var source_values = array.new<float>()
+if flag and style == "Z-Score"
+    source = math.round((close - average)/stdev, 2)
+    if array.includes(source_values, source)
+        index = array.indexof(source_values, source)
+        array.set(source_distribution, index, array.get(source_distribution, index) + 1)
+    else
+        array.push(source_values, source)
+        array.push(source_distribution, 1)
+
+    if window_size > 0 and array.size(source_values) > window_size
+        array.shift(source_values)
+        array.shift(source_distribution)
+
+    if barstate.islast
+        for n = look_back - 1 to 0
+            sorted_source_distribution = array.new<int>()
+            sorted_source_values = array.new<float>()
+        
+            for i = 0 to array.size(source_values) - 1
+                index = array.indexof(source_values, array.max(source_values, i)) 
+                array.push(sorted_source_values, array.get(source_values, index))
+                array.push(sorted_source_distribution, array.get(source_distribution, index))
+        
+            sample_window = window_size == 0 or window_size > sample_size ? sample_size : window_size - 1
+        
+            resampled_source_distribution = array.new<int>(sample_window + 1, 0)
+            resampled_source_values = array.new<level>(sample_window + 1, level.new(0, 0))
+        
+            chunk_size = math.ceil((array.size(sorted_source_values) - 1) / (sample_window + 1))
+        
+            if sample_window == sample_size
+                for i = 0 to sample_size  //resample
+                    start_idx = i * chunk_size
+                    end_idx = math.min((i + 1) * chunk_size - 1, array.size(sorted_source_values) - 1)
+                    total_distribution = 0
+        
+                    for j = start_idx to end_idx
+                        total_distribution += array.get(sorted_source_distribution, j)
+        
+                    if end_idx >= array.size(sorted_source_values) - 1
+                        break
+                    array.set(resampled_source_distribution, i, total_distribution)
+                    array.set(resampled_source_values, i, level.new(array.get(sorted_source_values, start_idx), array.get(sorted_source_values, end_idx)))
+            else
+                for i = 0 to sample_window
+                    array.set(resampled_source_distribution, i, array.get(sorted_source_distribution, i))
+                    array.set(resampled_source_values, i, level.new(array.get(sorted_source_values, i), array.get(sorted_source_values, math.min(i + 1, sample_window))))
+        
+            filtered_distribution = smoothing > 1 ? sinc_filter(resampled_source_distribution, smoothing) : resampled_source_distribution
+        
+            normalized_source_distribution = array.new<float>(sample_window)
+
+            max = array.max(filtered_distribution)
+            min = array.min(filtered_distribution)
+
+            for i = 0 to sample_window - 1
+                array.set(normalized_source_distribution, i, math.max(0, (array.get(filtered_distribution, i) - min) / (max - min)))
+
+            rank_75 = array.percentile_linear_interpolation(normalized_source_distribution, 75)
+            rank_25 = array.percentile_linear_interpolation(normalized_source_distribution, 30)
+            mean = array.median(normalized_source_distribution)
+
+            for i = 0 to array.size(normalized_source_distribution) - 1
+                value  = array.get(resampled_source_values, i)
+                top    = price_from_z(value.end, average[n], stdev[n])
+                bottom = price_from_z(value.start, average[n], stdev[n])
+                weight = array.get(normalized_source_distribution, i)
+                colour = color.new(color.from_gradient(weight, 0, 1, low_color, high_color), rescale_invert(weight, alpha))
+                if weight > 0
+                    array.set(boxes, i,
+                     box.new(bar_index - n, top, bar_index - n - 1, bottom, colour, bgcolor = colour, text = score(weight, rank_75, rank_25, mean, score_enable), text_color = text_color)
+                     )
+
+if flag and barstate.isconfirmed and array.size(boxes) > 1
+    for i = array.size(boxes) - 1 to 0 
+        box.delete(array.get(boxes, i))
+        array.remove(boxes, i)
+
+plot(show ? average : na, "Average", dev_color)
+plot(show ? bb_top : na, "Top", dev_color)
+plot(show ? bb_bottom : na, "Bottom", dev_color)

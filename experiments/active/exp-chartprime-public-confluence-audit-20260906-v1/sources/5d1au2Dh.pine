@@ -1,0 +1,157 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=6
+indicator("HTF Candle Profile [ChartPrime]", overlay = true, max_boxes_count = 500, max_polylines_count = 100, max_lines_count = 500, max_bars_back = 5000)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+tf     = input.timeframe("W", "TimeFrame", ["D", "W", "M"], tooltip = "Daily, Weekly, Monthly")
+offset = input.int(5, "Profile Offset")
+minPeriod = input.int(50, "Min Period Profile", minval = 10, tooltip = "Defines how many bars must pass before calculating the HTF candle profile to ensure enough data for accurate volume distribution.")
+dHigh  = input.bool(true, "High", group = "Levels", inline = "Levels")
+dLow   = input.bool(true, "Low", group = "Levels", inline = "Levels")
+dClose = input.bool(true, "Close", group = "Levels", inline = "Levels")
+dOpen  = input.bool(true, "Open", group = "Levels", inline = "Levels")
+dPoc   = input.bool(true, "PoC", group = "Levels", inline = "Levels", tooltip = "HTF Levels")
+
+bullishColor = input.color(color.green, "", inline = "candle")
+bearishColor = input.color(color.red, "", inline = "candle")
+
+var   start     = array.new<int>() 
+var   period    = 0 
+color changeBg  = color(na)
+
+var O  = array.new_float()
+var C  = array.new_float()
+var Op = float(na)
+var Cl = float(na)
+
+var i_Size = int(na)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+if timeframe.change(tf)[1]
+    O.push(open)
+    C.push(close)
+    start.push(bar_index)
+    changeBg := color.new(chart.fg_color, 90)
+    i_Size := bar_index - start.get(-1)
+
+if start.size() > 1
+
+    if bar_index-start.last() < minPeriod
+        period := bar_index - start.get(-2)
+        Op := O.get(-2)
+        Cl := C.last()
+    else 
+        period := bar_index - start.last()
+        Op := O.last()
+        Cl := close
+
+bgcolor(changeBg, show_last = 1000)
+plotchar(timeframe.change(tf)[1], "TimeFrame", tf, location.bottom, chart.fg_color, size = size.small, show_last = 1000)
+
+HL  = array.new<float>()
+atr = ta.atr(200) * 0.3
+
+type Profile 
+    array<line> lines 
+    array<box> boxes
+    array<label> labels
+
+if barstate.islast
+
+    var ProfileDraws = array.new<Profile>()
+
+    for i = 0 to period
+        HL.push(high[i])
+        HL.push(low[i])
+
+    max = HL.max()
+    min = HL.min()
+
+    if ProfileDraws.size() > 0
+        for p in ProfileDraws
+            for l in p.lines
+                l.delete()
+            for b in p.boxes
+                b.delete()
+            for l in p.labels
+                l.delete()
+
+    // Auto Bins Size
+    Height  = (max - min)
+    size    = math.ceil(Height / atr) 
+    step    = Height / size
+    binsVol = array.new<float>(size, 0.)
+        
+    // Collect Volume
+    for k = 0 to period
+        Close = close[k]
+
+        for i = 0 to size - 1
+
+            loww = min + step * i 
+            mid  = loww + step/2 
+
+            if math.abs(Close-mid) <= step        
+                binsVol.set(i, binsVol.get(i) + volume[k])
+
+                //break
+                    
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+    Lines = array.new<line>()
+    Boxes = array.new<box>()
+    Labels = array.new<label>()
+
+    color BarColor = Cl > Op ? bullishColor : bearishColor
+
+    for i = 0 to size-1
+        bot = HL.min() + step * i
+        top = bot + step 
+
+        VolumeVal = int(binsVol.get(i) / binsVol.max() * 50) 
+        indx      = bar_index+50+offset
+        bgColor   = color.from_gradient(VolumeVal, 0, 50, color.new(BarColor, 90), BarColor)
+
+        b = box.new(indx, top, indx-VolumeVal, bot, chart.bg_color, 1, bgcolor = bgColor)
+        Boxes.push(b)
+
+        // PoC
+        if VolumeVal == 50 and dPoc
+            Lines.push(line.new(indx-VolumeVal, math.avg(bot, top), bar_index-period, math.avg(bot, top), color = BarColor))
+            Labels.push(label.new(bar_index-period, math.avg(top, bot), str.tostring(binsVol.get(i), format.volume), color = color(na), textcolor = chart.fg_color, style = label.style_label_right))
+
+    indxBar = bar_index + 55 + offset
+
+
+
+    // Bar Render
+    Lines.push(line.new(indxBar, max, indxBar, min, color = BarColor))
+    Lines.push(line.new(indxBar, Cl, indxBar, Op, color = BarColor, width = 10))
+
+    if dHigh
+        Labels.push(label.new(indxBar, max, "High: " + str.tostring(max), style = label.style_label_down, color = color(na), textcolor = chart.fg_color))
+        Lines.push(line.new(bar_index-period, max, indxBar, max, color = BarColor, style = line.style_dashed))
+    if dLow
+        Labels.push(label.new(indxBar, min, "Low: " + str.tostring(min), style = label.style_label_up, color = color(na), textcolor = chart.fg_color))
+        Lines.push(line.new(bar_index-period, min, indxBar, min, color = BarColor, style = line.style_dashed))
+    if dClose
+        Labels.push(label.new(indxBar, Cl, "Close: " + str.tostring(Cl), style = label.style_label_left, color = color(na), textcolor = chart.fg_color))
+        Lines.push(line.new(bar_index-period, Cl, indxBar, Cl, color = BarColor, style = line.style_dotted))
+    if dOpen
+        Labels.push(label.new(indxBar, Op, "Open: " + str.tostring(Op), style = label.style_label_left, color = color(na), textcolor = chart.fg_color))
+        Lines.push(line.new(bar_index-period, Op, indxBar, Op, color = BarColor, style = line.style_dotted))
+
+    ProfileDraws.push(Profile.new(Lines, Boxes, Labels))
+// --------------------------------------------------------------------------------------------------------------------}
+

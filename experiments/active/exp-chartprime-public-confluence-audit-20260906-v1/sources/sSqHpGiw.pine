@@ -1,0 +1,164 @@
+// This work is licensed under a Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0) https://creativecommons.org/licenses/by-nc-sa/4.0/
+// © ChartPrime
+
+//@version=6
+indicator("Dynamic Deviation Channels (RSI Trigger) [ChartPrime]", overlay=true, max_labels_count=500, max_lines_count=500)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Moving Average Settings
+length       = input.int(20, title="MA Length", minval=1, group="Moving Average", tooltip="Sets the lookback period for the central moving average calculation.")
+maType       = input.string("EMA", title="MA Type", options=["SMA", "EMA", "WMA", "RMA"], group="Moving Average", tooltip="Selects the moving average type used for the mid-line channel base.")
+
+// RSI Filter Settings
+rsiLength    = input.int(20, title="RSI Length", minval=1, group="RSI Filter", tooltip="Sets the length parameter for the underlying Relative Strength Index filter.")
+rsiSource    = input.source(close, title="RSI Source", group="RSI Filter", tooltip="Selects the price data source used to calculate the RSI filter.")
+
+// Standard Deviation Multipliers
+mult1        = input.float(1.0, title="Deviation 1 Multiplier", group="Deviation Bands", tooltip="Multiplier factor determining the width of the Level 1 volatility band.")
+mult2        = input.float(2.0, title="Deviation 2 Multiplier", group="Deviation Bands", tooltip="Multiplier factor determining the width of the Level 2 volatility band.")
+mult3        = input.float(3.0, title="Deviation 3 Multiplier", group="Deviation Bands", tooltip="Multiplier factor determining the width of the Level 3 volatility band.")
+
+// Display Toggles
+showBand3    = input.bool(true, title="Show Level 3 Bands", group="Display", tooltip="Toggles the visibility of the outermost Level 3 channels and their background fills.")
+
+// Color Customization
+colBull      = input.color(color.lime, title="Bullish / Lower Color", group="Color Theme", tooltip="Color theme applied to bullish trend mid-lines, lower bands, channel fills, and signal markers.")
+colBear      = input.color(color.purple, title="Bearish / Upper Color", group="Color Theme", tooltip="Color theme applied to bearish trend mid-lines, upper bands, channel fills, and signal markers.")
+colNeutral   = input.color(color.yellow, title="Neutral Mid-Line Color", group="Color Theme", tooltip="Color displayed on the mid-line when momentum is transitioning flat.")
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Moving Average (Mid-Line) Function
+f_get_ma(type, src, len) =>
+    switch type
+        "SMA" => ta.sma(src, len)
+        "EMA" => ta.ema(src, len)
+        "WMA" => ta.wma(src, len)
+        "RMA" => ta.rma(src, len)
+        => ta.sma(src, len)
+
+midLine = f_get_ma(maType, close, length)
+
+// Mid-Line Trend Direction (Rising = Bullish, Falling = Bearish, Flat = Neutral)
+fall = ta.falling(midLine, 3)
+midLineColor = ta.rising(midLine, 3) ? colBull : fall ? colBear : colNeutral
+
+// Volatility / Standard Deviation measure based on ATR
+stDev = ta.atr(100) * 1.5
+
+// RSI Calculation with Smoothing Filter
+rsiValue = ta.sma(ta.rsi(rsiSource, rsiLength), 5)
+
+// Raw Upper & Lower Bands Calculation
+upper1_raw = midLine + (stDev * mult1)
+upper2_raw = midLine + (stDev * mult2)
+upper3_raw = midLine + (stDev * mult3)
+
+lower1_raw = midLine - (stDev * mult1)
+lower2_raw = midLine - (stDev * mult2)
+lower3_raw = midLine - (stDev * mult3)
+
+// RSI Conditional Display Logic (> 50 for upper bands, < 50 for lower bands)
+showUpper = rsiValue >= 50
+showLower = rsiValue < 50
+
+upper1 = showUpper ? upper1_raw : na
+upper2 = showUpper ? upper2_raw : na
+upper3 = (showUpper and showBand3) ? upper3_raw : na
+
+lower1 = showLower ? lower1_raw : na
+lower2 = showLower ? lower2_raw : na
+lower3 = (showLower and showBand3) ? lower3_raw : na
+
+// Signal Generation Logic with Bar Gap Control
+long  = ta.crossover(close, lower1)
+short = ta.crossunder(close, upper1)
+
+rawLong  = ta.crossover(low, lower1) or long
+rawShort = ta.crossunder(high, upper1) or short
+
+barsSinceLong  = ta.barssince(rawLong)
+barsSinceShort = ta.barssince(rawShort)
+
+longSignal  = rawLong and (nz(barsSinceLong[1], 999) >= 5)
+shortSignal = rawShort and (nz(barsSinceShort[1], 999) >= 5)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Plot Signals on Chart
+plotshape(longSignal, title="Long Signal", style=shape.triangleup, location=location.belowbar, color=colBull, size=size.tiny)
+plotshape(shortSignal, title="Short Signal", style=shape.triangledown, location=location.abovebar, color=colBear, size=size.tiny)
+
+// Mid-Line Plots with Glow Effect
+plot(midLine, title="Mid-Line (Trend)", color=midLineColor, linewidth=2)
+plot(midLine, title="Mid-Line Glow", color=color.new(midLineColor, 85), linewidth=10)
+
+// Upper Channels (Configurable Theme)
+p_u3 = plot(upper3, title="Upper Deviation 3", color=color.new(colBear, 20), linewidth=1, style=plot.style_linebr)
+p_u2 = plot(upper2, title="Upper Deviation 2", color=color.new(colBear, 40), linewidth=1, style=plot.style_linebr)
+p_u1 = plot(upper1, title="Upper Deviation 1", color=color.new(colBear, 60), linewidth=1, style=plot.style_linebr)
+
+// Lower Channels (Configurable Theme)
+p_l1 = plot(lower1, title="Lower Deviation 1", color=color.new(colBull, 60), linewidth=1, style=plot.style_linebr)
+p_l2 = plot(lower2, title="Lower Deviation 2", color=color.new(colBull, 40), linewidth=1, style=plot.style_linebr)
+p_l3 = plot(lower3, title="Lower Deviation 3", color=color.new(colBull, 20), linewidth=1, style=plot.style_linebr)
+
+// Dynamic Channel Fills
+fill(p_u1, p_u2, color=color.new(colBear, 90), title="Upper Zone 1-2")
+fill(p_u2, p_u3, color=color.new(colBear, 85), title="Upper Zone 2-3")
+fill(p_l1, p_l2, color=color.new(colBull, 90), title="Lower Zone 1-2")
+fill(p_l2, p_l3, color=color.new(colBull, 85), title="Lower Zone 2-3")
+
+// Last Bar Deviation Labels Management
+var label lbl_u3 = label.new(na, na, text="", xloc=xloc.bar_index, style=label.style_label_left, color=color.new(colBear, 80), textcolor=colBear)
+var label lbl_u2 = label.new(na, na, text="", xloc=xloc.bar_index, style=label.style_label_left, color=color.new(colBear, 80), textcolor=colBear)
+var label lbl_u1 = label.new(na, na, text="", xloc=xloc.bar_index, style=label.style_label_left, color=color.new(colBear, 80), textcolor=colBear)
+var label lbl_l1 = label.new(na, na, text="", xloc=xloc.bar_index, style=label.style_label_left, color=color.new(colBull, 80), textcolor=colBull)
+var label lbl_l2 = label.new(na, na, text="", xloc=xloc.bar_index, style=label.style_label_left, color=color.new(colBull, 80), textcolor=colBull)
+var label lbl_l3 = label.new(na, na, text="", xloc=xloc.bar_index, style=label.style_label_left, color=color.new(colBull, 80), textcolor=colBull)
+
+if barstate.islast
+    // Upper Labels Assignment
+    if not na(upper3)
+        label.set_xy(lbl_u3, bar_index, upper3)
+        label.set_text(lbl_u3, "Deviation +" + str.tostring(mult3))
+    else
+        label.set_xy(lbl_u3, na, na)
+
+    if not na(upper2)
+        label.set_xy(lbl_u2, bar_index, upper2)
+        label.set_text(lbl_u2, "Deviation +" + str.tostring(mult2))
+    else
+        label.set_xy(lbl_u2, na, na)
+
+    if not na(upper1)
+        label.set_xy(lbl_u1, bar_index, upper1)
+        label.set_text(lbl_u1, "Deviation +" + str.tostring(mult1))
+    else
+        label.set_xy(lbl_u1, na, na)
+
+    // Lower Labels Assignment
+    if not na(lower1)
+        label.set_xy(lbl_l1, bar_index, lower1)
+        label.set_text(lbl_l1, "Deviation -" + str.tostring(mult1))
+    else
+        label.set_xy(lbl_l1, na, na)
+
+    if not na(lower2)
+        label.set_xy(lbl_l2, bar_index, lower2)
+        label.set_text(lbl_l2, "Deviation -" + str.tostring(mult2))
+    else
+        label.set_xy(lbl_l2, na, na)
+
+    if not na(lower3)
+        label.set_xy(lbl_l3, bar_index, lower3)
+        label.set_text(lbl_l3, "Deviation -" + str.tostring(mult3))
+    else
+        label.set_xy(lbl_l3, na, na)

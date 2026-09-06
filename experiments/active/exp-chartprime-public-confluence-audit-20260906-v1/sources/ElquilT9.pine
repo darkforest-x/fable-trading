@@ -1,0 +1,71 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator('Price Ratio Indicator [ChartPrime]', shorttitle = "Price Ratio [ChartPrime]")
+
+// 𝙄𝙉𝙋𝙐𝙏𝙎
+//@ User Inputs
+int ma_period            = input.int(100, "MA Length", group = "MA's Settings")
+series float source      = input.source(close, group = "MA's Settings")
+string ma_type           = input.string('RMA', 'MA Type Fast',
+                                         options=['EMA', 'SMA', 'WMA', 'VWMA', 'RMA', 'DEMA', 'TEMA', 'ZLEMA', 'HMA'],
+                                         group = "MA's Settings")
+float h_level            = input.float(1.5, step = 0.1,  title = "Upper Level", group = "Levels")
+float l_level            = input.float(-1.5, step = 0.1, title = "Lower Level", group = "Levels")
+int sigline              = input.int(25, "Signal Line Length")
+
+// 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+//@ Moving Average's Function
+ma(src, ma_period, ma_type) =>
+    ma = 
+     ma_type == 'EMA' ? ta.ema(src, ma_period) :
+     ma_type == 'SMA' ? ta.sma(src, ma_period) :
+     ma_type == 'WMA' ? ta.wma(src, ma_period) :
+     ma_type == 'VWMA' ? ta.vwma(src, ma_period) :
+     ma_type == 'RMA' ? ta.rma(src, ma_period) :
+     ma_type == 'DEMA' ? ta.ema(ta.ema(src, ma_period), ma_period) :
+     ma_type == 'TEMA' ? ta.ema(ta.ema(ta.ema(src, ma_period), ma_period), ma_period) :
+     ma_type == 'ZLEMA' ? ta.ema(src + src - src[math.round(ma_period / 2)], ma_period) :
+     ma_type == 'HMA' ? ta.hma(src, ma_period) 
+     : na
+    ma
+
+
+//@ Smooth of Source
+src = math.sum(source, 5)/5
+
+//@ Ratio Price / MA's
+p_ratio = src / ma(src, ma_period, ma_type) - 1
+//@ Normalization
+p_ratio := (p_ratio - 0) / ta.stdev(p_ratio, 200)/4
+
+//@ Color Gradient Function
+color_(src) => 
+    src > 0 ? color.from_gradient(src, 0, ta.highest(src, 250), color.rgb(113, 189, 69), color.red)
+     : color.from_gradient(src, ta.lowest(src, 150), 0, color.aqua, color.green)
+
+// 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+//@ Ratio Plot
+p1 = plot(p_ratio, color = color_(p_ratio), linewidth = 2)
+
+//@ Bar HeatColor
+barcolor(color_(p_ratio))
+
+//@ Valuation Levels
+p3 = plot(l_level, color = na)
+p2 = plot(h_level, color = na)
+//@ Mid Line
+hline(0, color = color.gray)
+// Signal Line
+plot(ta.sma(p_ratio, sigline), color = #787b8648)
+
+//@ High Value Color
+fill(p1, p2, h_level, p_ratio, color.from_gradient(p_ratio, h_level/3, p_ratio, na, color.red), na)
+
+//@ Low Value Color
+fill(p1, p3, l_level, p_ratio, p_ratio < l_level/3 ? color.from_gradient(p_ratio, p_ratio, l_level/3, color.aqua, na) : na, na)
+
+// 
+var table tbl = table.new(position.bottom_right, 1, 1)
+tbl.cell(0,0,"◈", text_color = color.new(color_(p_ratio), 50), text_size = size.huge)

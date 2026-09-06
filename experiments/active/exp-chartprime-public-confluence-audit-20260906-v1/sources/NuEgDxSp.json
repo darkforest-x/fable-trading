@@ -1,0 +1,47 @@
+{
+  "id": "NuEgDxSp",
+  "title": "MACD All In One Screener [ChartPrime]",
+  "url": "https://www.tradingview.com/script/NuEgDxSp-MACD-All-In-One-Screener-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:37:05.534724+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/NuEgDxSp-MACD-All-In-One-Screener-ChartPrime/",
+  "created_at": "2024-02-12T13:25:56.842497+00:00",
+  "updated_at": "2024-02-12T21:07:14.130801+00:00",
+  "description": "INTRODUCTION\nMACD All In One Screener (ChartPrime) is a multi instrument, multi timeframe indicator designed to provide traders with a comprehensive solution to monitoring the market. This indicator is designed to be easy to use and visually appealing while also being highly flexible and feature rich. Users can pick up to 10 symbols not including the chart's symbol and set up alerts for many different signals that the MACD produces. One standout feature of this indicator is its ability to display not only each symbol individually as a MACD but you can also view its chart from within this indicator. This removes the need to flip between symbols to see the price action for your basket. \n\nOn top of that we have designed this indicator to be friendly with \"indicator on indicator\" by providing outputs for all of the standards of price that users may want. Included is an overview section that shows all of the symbols signals symbolically over time. Additionally we have included a table for easy monitoring. This table includes the symbol, its timeframe, the current alert, and its histogram state. To make things as user friendly as possible we have also included rich error handling that tells you exactly what is wrong with your configuration.\n\nHOW TO USE\nTo use this indicator, simply add it to your chart and navigate to the settings. From there select the symbols you want to monitor and the timeframes you want to use. Next you want to navigate down to the alerts section to select the what alerts you want to receive, and what symbols you want to get alerts for. Finally, you wan to create your alert using \"Any alert() function call\". Now your screener is all set up!\n\nOVERVIEW OF INPUTS\nView allows you to select what the indicator currently displays. You can pick from any one of the selected symbols, an overview of all of the symbols, or simply nothing. If you want to only use the table, \"None\" is provided so you can move the indicator into the chart panel.\n\nView Toggle lets you pick from displaying the MACD for the selected symbol or the Price Action as a candle chart. To see your \"indicator on indicator\" you will have to select a symbol from the view list. There is a bug where if you select \"Overview\" while you are using \"indicator on indicator\" your added indicator will see the last symbol you viewed. To fix this, simply change the setting of your overlaid indicator and it will correct its self.\n\nHistory Length is the number of historical bars to calculate over. This feature is here to prevent the indicator from breaking due to uneven historical data between the symbols.\n\nShow Price Line toggles a dotted line that follows the current symbols closing price when \"Price\" is selected under the \"View Toggle\" dropdown. \n\nShow Symbol Label toggles a label that displays the current symbols name and timeframe. This only impacts the single symbol view.\n\nOverview Label Color adjusts the color of the symbol labels for both overview and single symbol view. \n\nMA Type lets you pick what kind of moving average you want to use for the oscillator or signal. You can pick from the standard SMA or EMA.\n\nFast Length is a standard input for MACD. This lets you pick the period of the fast MA.\n\nSlow Length, just like Fast Lenght, is a standard input for MACD. This lets you pick the period of the slow MA.\n\nSignal Length is another standard input for MACD. This lets you configure the period of the signal MA.\n\nMACD Cross Overlay Icon is a toggle to display MACD crosses when viewing a single symbol's MACD. When the MACD has a bullish cross it will plot a bullish dot, and when it has a bearish cross it will plot a bearish dot. This is purely visual.\n\nRegular Bullish and Bearish toggles the visual display of the divergences on the single symbol view. This does not effect the indicators ability do send alerts. \n\nDivergence Look Right adjusts the number of bars into the future to look for confirmation of a signal. This directly impacts lag but enhances stability.\n\nDivergence Look Left adjusts the number of bars into the past to check for a signal. A longer period will filter out smaller moves\n\nMaximum Lookback adjusts the maximum size of a divergence.\n\nMinimum Lookback adjusts the minimum size of a divergence.\n\nDivergence Drawings picks how you want to visualize the divergence. You can pick from displaying it as a line, a label, or both.\n\nEnable Table toggles the overview table. When enabled it will show you the enabled symbols and their current state. From left to right: symbol name, timeframe, current alert, and histogram state.\n\nPosition picks where on the chart you want the table to be.\n\nText Color adjusts the text color of the table.\n\nBG Color adjusts the background color of the table.\n\nFrame Color adjust the frame color of the table.\n\nCurrent Symbol Time Frame adjusts the timeframe of the chart's symbol.\n\nSymbol 1 - 10 pick \"Symbol's\" symbol and timeframe. To use higher timeframes, the symbol's have to be the same type. You can't have a crypto and a stock using HTF at the same time as they don't have the same sessions and will result in an error. You can use unsafe mode (as described below) to potentially get around this.\n\nEnable Symbol when enabled it will give you alerts for the symbol. This also enables the symbol in the overview. If this is disabled it won't send alerts, and it will not show up in overview, or the table.\n\nWait for Close enables waiting for the bar to close before printing an alert.\n\nAlert Symbol Size picks what size you want the overview symbols to be.\n\nEnable Cross Over 0 Alert: MACD crosses over the 0 line.\n\nEnable Cross Under 0 Alert: MACD crosses under the 0 line.\n\nEnable MACD Cross Bullish Alert: Bullish MACD cross.\n\nEnable MACD Cross Bearish Alert: Bearish MACD cross.\n\nEnable Histogram Bullish Turn Alert: MACD begins to turn bullish but hasn't crossed.\n\nEnable Histogram Bearish Turn Alert: MACD begins to turn bearish but hasn't crossed.\n\nEnable Histogram Bullish Continuation Alert: MACD is in a bullish cross state and it was declining but began rising again.\n\nEnable Histogram Bearish Continuation Alert: MACD is in a bearish cross state and it was rising but began falling again.\n\nEnable Bullish/Bearish Divergence Alert enables divergence alerts. Divergences are lagging, especially on a higher timeframe. These alerts will also tell you the time in the past when the divergence occurred.\n\nColor Section is provided to allow for personalization of the indicator. Everything can be adjusted here.\n\nDisable Error Checking: Only enable this if you want to bypass the built in error checking. This will enable 'Safe Requesting'. Safe Requesting will only request enabled symbols and you will not be able to view symbols that are not enabled in this mode. Only use this if you want to mix symbol types and you know it will work. (An example would be viewing stocks and SPY at the same time.)\n\nCONCLUSION\nThe MACD All In One Screener (ChartPrime) is a versatile indicator designed to monitor multiple symbols across various timeframes. The flexibility in customization, from MACD settings to visual alerts and table presentations, allows users to tailor the screener to their needs and preferences. We hope you find this as useful and interesting as we do and wish you good luck in the market!\n\nEnjoy",
+  "script": {
+    "id": 1425405,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;499a3ecb9db34480885d4d4688ae1d0a",
+    "version_maj": 2,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B499a3ecb9db34480885d4d4688ae1d0a/2",
+  "source_http_status": 200,
+  "source_sha256": "4296b719fb928a7427d5bd765587be96875c4106e72aa6f8bf310852c8027a3a",
+  "source_lines": 1073,
+  "source_metadata": {
+    "created": "2024-02-12T21:07:13.243141Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": false,
+      "kind": "study",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 22,
+        "plotcandle": 1,
+        "plotshape": 2
+      }
+    },
+    "lastVersionMaj": "2.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "MACD All In One Screener [ChartPrime]",
+    "updated": "2024-02-12T21:07:13.243141Z",
+    "version": "2.0"
+  }
+}

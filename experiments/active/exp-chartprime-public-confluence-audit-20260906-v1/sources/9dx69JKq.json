@@ -1,0 +1,46 @@
+{
+  "id": "9dx69JKq",
+  "title": "Chebyshev Filter Divergences [ChartPrime]",
+  "url": "https://www.tradingview.com/script/9dx69JKq-Chebyshev-Filter-Divergences-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:40.433709+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/9dx69JKq-Chebyshev-Filter-Divergences-ChartPrime/",
+  "created_at": "2024-07-22T13:08:50.123544+00:00",
+  "updated_at": null,
+  "description": "The Chebyshev Filter Divergences Oscillator\n\nThe Chebyshev Filter indicator is a powerful tool designed to identify potential divergences between price and a filtered version of price based on the Chebyshev filter algorithm. It helps to spot mean reversion points by highlighting areas where price and the filtered price exhibit conflicting signals.\n\n\nChebyshev Filter Background:\nThe Chebyshev filter, named after the Russian mathematician Pafnuty Chebyshev, was invented in the mid-19th century. It's a type of filter used in signal processing and digital signal processing for smoothing or removing unwanted frequency components from a signal.\n\nIt provides a sharp cutoff between the passband and stopband of a filter while minimizing ripple in the passband or stopband.\n \nChebyshev filters are widely used in various applications, including audio and image processing, telecommunications, and financial analysis, due to their efficiency and effectiveness in filtering out noise and extracting relevant information from signals.\n\n\n◆ Indicator Calculation:\nThe indicator first applies a Chebyshev filter to the price data, producing a filtered price series. It then normalizes this filtered price series to a range, where it can be used as oscillator with divergences.\n\n\n◆ Visualization:\nThe filtered price series is plotted on the chart, highlighting areas where it deviates from its smoothed average.\n\n\nBullish and bearish divergences are marked on the chart with specific lines and colors, indicating potential shifts in market sentiment.\n\n\nSigns of change in direction are also marked on the chart, providing additional insights into possible mean reversals of price.\n\n\n\n◆ User Inputs:\nRipple (dB): Specifies the desired ripple factor in decibels for the Chebyshev filter.Normalization Length: Sets the length of the normalization period used in the Chebyshev filter.Pivots to Right and Left: Determines the number of pivot points to the right and left of the current point to consider when detecting divergences.Max and Min of Lookback Range: Specifies the maximum and minimum lookback range for identifying divergences.Show Divergences: Enables or disables the display of bullish and bearish divergences.Visual Settings: Allows customization of colors for visual clarity.\n\n\nIn conclusion, the Chebyshev Filter Divergences indicator, with its ability to identify potential mean reversion points through divergences between price and a filtered version of price, offers traders a valuable tool for decision-making in the financial markets. By highlighting areas of divergence, traders can potentially capitalize on market inefficiencies and make more informed trading decisions.",
+  "script": {
+    "id": 1718273,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;b211737e036d4f71877fbea4980c44d7",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bb211737e036d4f71877fbea4980c44d7/1",
+  "source_http_status": 200,
+  "source_sha256": "f01ba848dbbda4f1a9396643770045f31c37245650d4f0b62503e9bd50c40790",
+  "source_lines": 122,
+  "source_metadata": {
+    "created": "2024-07-22T13:08:47.530283Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": false,
+      "kind": "study",
+      "sourceInputsCount": 1,
+      "stats": {
+        "plot": 8,
+        "plotchar": 2
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Chebyshev Filter Divergences [ChartPrime]",
+    "updated": "2024-07-22T13:08:47.530283Z",
+    "version": "1.0"
+  }
+}

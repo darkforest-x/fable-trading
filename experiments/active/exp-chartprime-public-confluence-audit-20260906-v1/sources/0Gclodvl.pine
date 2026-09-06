@@ -1,0 +1,120 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("MA Multi-Timeframe [ChartPrime]", overlay = true, max_bars_back = 4000, max_polylines_count = 100)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+int   length = input.int(20, "Length", inline = "-1")
+float source = input.source(close, "", inline = "-1")
+
+string typeMA0 = input.string(title = "MA1 >>", defval = "SMA", options=["SMA", "EMA", "SMMA (RMA)", "WMA", "VWMA"], inline ="0")
+string typeMA1 = input.string(title = "MA2 >>", defval = "SMA", options=["SMA", "EMA", "SMMA (RMA)", "WMA", "VWMA"], inline="1")
+string typeMA2 = input.string(title = "MA3 >>", defval = "SMA", options=["SMA", "EMA", "SMMA (RMA)", "WMA", "VWMA"], inline="2")
+string typeMA3 = input.string(title = "MA4 >>", defval = "SMA", options=["SMA", "EMA", "SMMA (RMA)", "WMA", "VWMA"], inline="3")
+
+string ma_tf0 = input.timeframe("360", "",  inline="0")
+string ma_tf1 = input.timeframe("D",   "",  inline="1")
+string ma_tf2 = input.timeframe("W",   "",  inline="2")
+string ma_tf3 = input.timeframe("M",   "",  inline="3")
+
+string styleMA0 = input.string(title = "", defval = "Solid", options=["Solid", "Dotted", "Dashed"], inline="0")
+string styleMA1 = input.string(title = "", defval = "Solid", options=["Solid", "Dotted", "Dashed"], inline="1")
+string styleMA2 = input.string(title = "", defval = "Solid", options=["Solid", "Dotted", "Dashed"], inline="2")
+string styleMA3 = input.string(title = "", defval = "Solid", options=["Solid", "Dotted", "Dashed"], inline="3")
+
+
+color color0 = input.color(#1bc6dd, "",  inline="0")
+color color1 = input.color(#1b8fdd, "",  inline="1")
+color color2 = input.color(#6f1bdd, "",  inline="2")
+color color3 = input.color(#dd1bc3, "",  inline="3")
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+request(tf, expression)=>
+    request.security(syminfo.tickerid, tf, expression[1], lookahead = barmerge.lookahead_on)
+
+var tbl = table.new(position.top_right, 10, 10, 
+                     bgcolor      = color.new(color.gray, 90), 
+                     frame_color  = color.gray, 
+                     frame_width  = 2, 
+                     border_color = color.new(color.gray, 80), 
+                     border_width = 1)
+
+table_cell(row, txt, tf, trend, color)=>
+    table.cell(tbl, 0, 0, "MA Type:", text_color = chart.fg_color)
+    table.cell(tbl, 1, 0, "Timeframe:", text_color = chart.fg_color)
+    table.cell(tbl, 2, 0, "Price:", text_color = chart.fg_color)
+    table.cell(tbl, 0, row, "🞛 " + txt, text_color = color)
+    table.cell(tbl, 1, row, tf, text_color = color)
+    table.cell(tbl, 2, row, trend ? "⮙" : "⮛", text_color = trend ? color.lime : color.fuchsia, text_size = size.large)
+
+
+ma(tf, color, type, extend, styleMA, cell)=>
+    color color_ = color.new(color, 85)
+
+    string style = switch styleMA
+        "Solid" => line.style_solid
+        "Dashed"=> line.style_dashed
+        "Dotted"=> line.style_dotted
+
+    series float expression = switch type
+        "SMA" => ta.sma(source, length)
+        "EMA" => ta.ema(source, length)
+        "SMMA (RMA)" => ta.rma(source, length)
+        "WMA" => ta.wma(source, length)
+        "VWMA" => ta.vwma(source, length)
+
+    series float ma = request(tf, expression)
+
+    line.delete(
+         line.new(bar_index, ma, bar_index+extend, ma, color = color, style = style)[1]
+               )
+    line.delete(
+         line.new(bar_index, ma, bar_index+extend, ma, color = color_, style = style, width = 5)[1]
+               )
+
+    label.delete(
+         label.new(bar_index+extend, ma, type + ": " + tf, 
+                     style = label.style_diamond, 
+                     color = color_, 
+                     textcolor = chart.fg_color, 
+                     size = size.small
+                     )[1]
+               )
+    label.delete(
+         label.new(bar_index+extend, ma,
+                     style = label.style_diamond, 
+                     color = color, 
+                     size = size.tiny
+                     )[1]
+               )
+    if barstate.islast
+        cp = array.new<chart.point>()
+        
+        for i = 0 to 4000
+            cp.push(chart.point.from_index(bar_index[i], ma[i]))
+
+        polyline.delete(polyline.new(cp, curved = false, line_color = color, line_style = style)[1])
+        polyline.delete(polyline.new(cp, curved = false, line_color = color_, line_style = style, line_width = 5)[1])
+
+        table_cell(cell, type, tf, close > ma, color)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+ma(ma_tf0, color0, typeMA0, 15, styleMA0, 1)
+ma(ma_tf1, color1, typeMA1, 30, styleMA1, 2)
+ma(ma_tf2, color2, typeMA2, 45, styleMA2, 3)
+ma(ma_tf3, color3, typeMA3, 60, styleMA3, 4)
+
+// --------------------------------------------------------------------------------------------------------------------}

@@ -1,0 +1,394 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("RSI Heatmap Screener [ChartPrime]")
+
+import TradingView/TechnicalRating/1 as TechnN 
+
+
+color OffGrey   = color.rgb(68, 63, 63, 50)
+color Offwhite  = color.rgb(255, 255, 255, 19)
+color Alpha     = color.new(color.black,100)
+int BarTime     = time - time[1]
+string SYM      = "➞ Symbols🔸" 
+
+// --  { Inputs
+int RSILen      = input.int(14,"RSI Length")
+bool ShowAvg    = input.bool(true,"Show Average RSI")
+bool ShowMark   = input.bool(true,"Show Market Avg RSI")
+bool Which      = input.string("Detailed","HeatMap Type",options = ["Detailed", "Colorful"]) == "Detailed"
+
+
+//-- }
+
+// -- { Storage room
+
+type RSI
+    array<string> str
+    array<int> position
+    array<label> Labels
+    int Right
+    int Left
+    array<int> Xbars
+    
+
+var array<label> LL    = array.new_label()
+
+type data
+    array<string> names
+    array<bool> USEbool
+    array<float> rsiArray
+    array<string> Tips
+    
+Data = data.new(array.new_string(0),array.new_bool(0), array.new_float(0),array.new_string(0))
+RRSI = RSI.new(array.from("OVERBOUGHT","STRONG","NEUTRAL","WEAK","OVERSOLD"),
+     array.from(74,64,49,34,24),
+     array.new_label(5),
+     chart.right_visible_bar_time,
+     chart.left_visible_bar_time,
+     array.new_int())
+
+
+// -- }
+
+/// -{ Functions
+Clearname(pair)=>
+    string str = pair
+    str := str.replace_all(str,"USDT","")
+    str := str.replace_all(str,"BUSD","")
+    str
+
+
+Colz(float val)=>
+    switch
+        val > 85 => #ff2525
+        val > 70 => color.new(color.rgb(198, 194, 8),70)
+        val < 70 and val > 60 => color.new(color.rgb(125, 5, 5),70)
+        val > 40 and val < 60 => color.new(color.rgb(121, 119, 119),70)
+        val > 30 and val < 40 => color.new(#00e677, 58)
+        val < 30 and val > 20 => color.new(#089089, 56)
+        => color.new(color.fuchsia,70)
+
+GetBars(RSI self )=>
+    var int Rand  = 0
+    var AA = self.Xbars.copy()
+    if time > chart.left_visible_bar_time and time < chart.right_visible_bar_time
+        AA.push(time)
+    Rand := int(math.random((AA.min() + (BarTime * 5)) ,(AA.max() - (BarTime * 10))))
+    Rand         
+
+method normalize(float _src, int _min, int _max) =>
+    var min_src  =  10e10
+    var max_src =  -10e10
+    min_src := math.min(nz(_src, min_src), min_src)
+    max_src := math.max(nz(_src, max_src), max_src)
+    _min + (_max - _min) * (_src - min_src) / math.max(max_src - min_src, 10e-10)
+
+
+// -- }
+
+//---{ Detailed HeatMap
+method Prt(RSI self,data x)=>
+    var box avg = na , box.delete(avg)
+    if barstate.islast
+        for i = 0 to self.str.size() -1
+            label.delete(self.Labels.get(i))
+            self.Labels.set(i,label.new(
+             self.Right - (BarTime * 7 ),self.position.get(i),
+             self.str.get(i),
+             style =  label.style_none,
+             textcolor = Offwhite,xloc = xloc.bar_time))
+        if ShowAvg   
+            avg:=box.new(
+             self.Left,x.rsiArray.avg()+2,
+             self.Right,x.rsiArray.avg()-2,
+             bgcolor = color.rgb(102, 102, 105, 85),border_color = color.rgb(60, 60, 61, 85),extend = extend.both,
+             text = "Average RSI " + str.tostring(x.rsiArray.avg(),"0.##"),
+             text_size = size.normal,text_halign = text.align_center,text_color= color.orange,text_valign = text.align_center,
+             xloc = xloc.bar_time)    
+
+method PrtRSI(data self) =>
+    RSICGBAE = ta.change(fixnan(self.rsiArray.get(0)))
+    if barstate.isconfirmed
+        for i = 0 to self.USEbool.size() -1 
+            Tip = self.Tips.get(i)
+            Bar_index = GetBars(RRSI)
+            LL.push(label.new(
+                 Bar_index,self.rsiArray.get(i),
+                 Clearname(self.names.get(i)),style = label.style_circle,
+                 textcolor = color.white,color = Colz(self.rsiArray.get(i)),
+                 size = size.tiny,tooltip = Tip,xloc = xloc.bar_time))
+
+
+            
+        if LL.size()> self.USEbool.size()
+            for i = 0  to self.USEbool.size() -1 
+                label.delete(LL.shift())
+
+// -- }
+
+// { ColorHeap
+
+method Nameslabels(RSI rsi, data self)=>
+    var array<float> Levels = array.new_float(self.names.size())
+    step =  100 / self.names.size()
+    for i = 0  to self.names.size() -1 by 1
+        Pos = 20 + step * i
+        Levels.set(i,Pos)
+        label.new(rsi.Right + (BarTime * 2 ),Pos,Clearname(self.names.get(i)),style = label.style_none,textcolor = color.rgb(255, 255, 255, 57),xloc = xloc.bar_time)
+
+    Levels
+
+// }
+
+// { Worker 
+
+initialize(x,y)=>
+    if Which
+        PrtRSI(y)
+        Prt(x,y)
+    if (not Which)
+        Lev = Nameslabels(x, y)
+        Lev
+
+
+//-- }
+// --- { Screener
+bool T01     = input.bool(true, title = "" , group = SYM , inline = 's01')
+bool T02     = input.bool(true, title = "" , group = SYM , inline = 's02')
+bool T03     = input.bool(true, title = "" , group = SYM , inline = 's03')
+bool T04     = input.bool(true, title = "" , group = SYM , inline = 's04')
+bool T05     = input.bool(true, title = "" , group = SYM , inline = 's05')
+bool T06     = input.bool(true, title = "" , group = SYM , inline = 's06')
+bool T07     = input.bool(true, title = "" , group = SYM , inline = 's07')
+bool T08     = input.bool(true, title = "" , group = SYM , inline = 's08')
+bool T09     = input.bool(true, title = "" , group = SYM , inline = 's09')
+bool T10     = input.bool(true, title = "" , group = SYM , inline = 's10')
+bool T11     = input.bool(true, title = "" , group = SYM , inline = 's11')
+bool T12     = input.bool(true, title = "" , group = SYM , inline = 's12')
+bool T13     = input.bool(true, title = "" , group = SYM , inline = 's13')
+bool T14     = input.bool(true, title = "" , group = SYM , inline = 's14')
+bool T15     = input.bool(true, title = "" , group = SYM , inline = 's15')
+bool T16     = input.bool(true, title = "" , group = SYM , inline = 's16')
+bool T17     = input.bool(true, title = "" , group = SYM , inline = 's17')
+bool T18     = input.bool(true, title = "" , group = SYM , inline = 's18')
+bool T19     = input.bool(true, title = "" , group = SYM , inline = 's19')
+bool T20     = input.bool(true, title = "" , group = SYM , inline = 's20')
+bool T21     = input.bool(true, title = "" , group = SYM , inline = 's21')
+bool T22     = input.bool(true, title = "" , group = SYM , inline = 's22')
+bool T23     = input.bool(true, title = "" , group = SYM , inline = 's23')
+bool T24     = input.bool(true, title = "" , group = SYM , inline = 's24')
+bool T25     = input.bool(true, title = "" , group = SYM , inline = 's25')
+bool T26     = input.bool(true, title = "" , group = SYM , inline = 's26')
+bool T27     = input.bool(true, title = "" , group = SYM , inline = 's27')
+bool T28     = input.bool(true, title = "" , group = SYM , inline = 's28')
+bool T29     = input.bool(true, title = "" , group = SYM , inline = 's29')
+bool T30     = input.bool(true, title = "" , group = SYM , inline = 's30')
+
+string s01   = input.symbol('BTCUSDT'   ,  group = SYM , inline = 's01' , title = "Sym 1")
+string s02   = input.symbol('ETHUSDT'   ,  group = SYM , inline = 's02' , title = "Sym 2")
+string s03   = input.symbol('BNBUSDT'   ,  group = SYM , inline = 's03' , title = "Sym 3")
+string s04   = input.symbol('SOLUSDT'   ,  group = SYM , inline = 's04' , title = "Sym 4")
+string s05   = input.symbol('LDOUSDT'   ,  group = SYM , inline = 's05' , title = "Sym 5")
+string s06   = input.symbol('ADAUSDT'   ,  group = SYM , inline = 's06' , title = "Sym 6")
+string s07   = input.symbol('MATICUSDT' ,  group = SYM , inline = 's07' , title = "Sym 7")
+string s08   = input.symbol('WAVESUSDT' ,  group = SYM , inline = 's08' , title = "Sym 8")
+string s09   = input.symbol('TRXUSDT'   ,  group = SYM , inline = 's09' , title = "Sym 9")
+string s10   = input.symbol('FTMUSDT'   ,  group = SYM , inline = 's10' , title = "Sym 10")
+string s11   = input.symbol('SANDUSDT'  ,  group = SYM , inline = 's11' , title = "Sym 11")
+string s12   = input.symbol('LINKUSDT'  ,  group = SYM , inline = 's12' , title = "Sym 12")
+string s13   = input.symbol('VETUSDT'   ,  group = SYM , inline = 's13' , title = "Sym 13")
+string s14   = input.symbol('GALAUSDT'  ,  group = SYM , inline = 's14' , title = "Sym 14")
+string s15   = input.symbol('AVAXUSDT'  ,  group = SYM , inline = 's15' , title = "Sym 15")
+string s16   = input.symbol('EOSUSDT'   ,  group = SYM , inline = 's16' , title = "Sym 16")
+string s17   = input.symbol('XLMUSDT'   ,  group = SYM , inline = 's17' , title = "Sym 17")
+string s18   = input.symbol('LTCUSDT'   ,  group = SYM , inline = 's18' , title = "Sym 18")
+string s19   = input.symbol('APTUSDT'   ,  group = SYM , inline = 's19' , title = "Sym 19")
+string s20   = input.symbol('WINUSDT'   ,  group = SYM , inline = 's20' , title = "Sym 20")
+string s21   = input.symbol('DOTUSDT'   ,  group = SYM , inline = 's21' , title = "Sym 21")
+string s22   = input.symbol('BTTUSDT'   ,  group = SYM , inline = 's22' , title = "Sym 22")
+string s23   = input.symbol('BCHUSDT'   ,  group = SYM , inline = 's23' , title = "Sym 23")
+string s24   = input.symbol('OPUSDT'    ,  group = SYM , inline = 's24' , title = "Sym 24")
+string s25   = input.symbol('IOSTUSDT'  ,  group = SYM , inline = 's25' , title = "Sym 25")
+string s26   = input.symbol('CHZUSDT'   ,  group = SYM , inline = 's26' , title = "Sym 26")
+string s27   = input.symbol('LINKUSDT'  ,  group = SYM , inline = 's27' , title = "Sym 27")
+string s28   = input.symbol('LTCUSDT'   ,  group = SYM , inline = 's28' , title = "Sym 28")
+string s29   = input.symbol('AXSUSDT'   ,  group = SYM , inline = 's29' , title = "Sym 29")
+string s30   = input.symbol('MANAUSDT'  ,  group = SYM , inline = 's30' , title = "Sym 30")
+
+
+
+_requestData() =>
+    rsi = ta.rsi(close,RSILen)
+    VWAP = ta.vwap(hlc3)
+    SMA10 = ta.sma(close,10)
+    SMA20 = ta.sma(close,20)
+    SMA50 = ta.sma(close,50)
+    SMA100 = ta.sma(close,100)
+    [ratingTotal, _, _] = TechnN.calcRatingAll()
+    TVrating = TechnN.ratingStatus(ratingTotal,0.5,0.1)
+    Stoch = ta.sma(ta.stoch(close, high, low, 8), 5)
+    StochK = ta.sma(Stoch, 5)
+    Volume = volume
+    Vol = ta.sma(volume,10)
+    CLOSE = close
+    [ rsi , VWAP , SMA10 , SMA20 , SMA50 , SMA100, TVrating , Stoch , StochK , Volume ,Vol ,CLOSE ]
+
+
+GetData(pair)=>
+    [ rsi , VWAP , SMA10 , SMA20 , SMA50 , SMA100, TVrating , Stoch , StochK , Volume ,Vol, CLOSE ] = request.security(pair,"",_requestData())
+    string TIP = ""
+    Rsi = str.tostring(rsi,"0.##")
+    SMA100con = SMA100 < CLOSE  ? "✅" : "❌"
+    StochCon = Stoch > StochK   ? "✅" : "❌"
+    SMA10con = SMA10 < CLOSE    ? "✅" : "❌"
+    SMA20con = SMA20 < CLOSE    ? "✅" : "❌"
+    SMA50con = SMA50 < CLOSE    ? "✅" : "❌"
+    VWAPcon = VWAP < CLOSE      ? "✅" : "❌"
+    VolCon = Volume > Vol       ? "✅" : "❌"
+    TVCon = switch TVrating
+
+        "Strong\nSell" => "❌ 🔥"
+        "Strong\nBuy " => "✅ 🔥"
+        "Neutral"      => "〰️"
+        "Sell"         => "❌" 
+        "Buy"          => "✅"
+        
+    
+    TIP += "RSI: " + Rsi + "\n"
+    TIP += "VWAP: " + VWAPcon + "\n"
+    TIP += "SMA10: " + SMA10con + "\n"
+    TIP += "SMA20: " + SMA20con + "\n"
+    TIP += "SMA50: " + SMA50con + "\n"
+    TIP += "SMA100: " + SMA100con + "\n"
+    TIP += "Stoch: " + StochCon + "\n"
+    TIP += "Volume Rating : " + VolCon + "\n"
+    TIP += "TradingView Rating " + TVCon + "\n"
+
+    [rsi , TIP]
+    
+
+
+/// 
+[RSI01, TIP01 ] = GetData(s01) , [RSI02, TIP02 ] = GetData(s02) , [RSI03, TIP03 ] = GetData(s03) , [RSI04, TIP04 ] = GetData(s04)
+[RSI05, TIP05 ] = GetData(s05) , [RSI06, TIP06 ] = GetData(s06) , [RSI07, TIP07 ] = GetData(s07) , [RSI08, TIP08 ] = GetData(s08)
+[RSI09, TIP09 ] = GetData(s09) , [RSI10, TIP10 ] = GetData(s10) , [RSI11, TIP11 ] = GetData(s11) , [RSI12, TIP12 ] = GetData(s12)
+[RSI13, TIP13 ] = GetData(s13) , [RSI14, TIP14 ] = GetData(s14) , [RSI15, TIP15 ] = GetData(s15) , [RSI16, TIP16 ] = GetData(s16)
+[RSI17, TIP17 ] = GetData(s17) , [RSI18, TIP18 ] = GetData(s18) , [RSI19, TIP19 ] = GetData(s19) , [RSI20, TIP20 ] = GetData(s20)
+[RSI21, TIP21 ] = GetData(s21) , [RSI22, TIP22 ] = GetData(s22) , [RSI23, TIP23 ] = GetData(s23) , [RSI24, TIP24 ] = GetData(s24)
+[RSI25, TIP25 ] = GetData(s25) , [RSI26, TIP26 ] = GetData(s26) , [RSI27, TIP27 ] = GetData(s27) , [RSI28, TIP28 ] = GetData(s28)
+[RSI29, TIP29 ] = GetData(s29) , [RSI30, TIP30 ] = GetData(s30) 
+
+
+plot(RSI01,display = display.data_window,title = "RSI")
+
+     
+array<string> raw_names                     = 
+     array.from(
+         s01,s02,s03,s04,s05,s06,s07,s08,s09,s10,
+         s11,s12,s13,s14,s15,s16,s17,s18,s19,s20,
+         s21,s22,s23,s24,s25,s26,s27,s28,s29,s30
+         )
+
+array<bool> raw_bools                     = 
+     array.from(
+         T01,T02,T03,T04,T05,T06,T07,T08,T09,T10,
+         T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,
+         T21,T22,T23,T24,T25,T26,T27,T28,T29,T30
+         )
+
+
+array<float> raw_RSI                     = 
+     array.from(
+         RSI01,RSI02,RSI03,RSI04,RSI05,
+         RSI06,RSI07,RSI08,RSI09,RSI10,
+         RSI11,RSI12,RSI13,RSI14,RSI15,
+         RSI16,RSI17,RSI18,RSI19,RSI20,
+         RSI21,RSI22,RSI23,RSI24,RSI25,
+         RSI26,RSI27,RSI28,RSI29,RSI30
+         )
+
+
+array<string> raw_TIP                     = 
+     array.from(
+         TIP01,TIP02,TIP03,TIP04,TIP05,
+         TIP06,TIP07,TIP08,TIP09,TIP10,
+         TIP11,TIP12,TIP13,TIP14,TIP15,
+         TIP16,TIP17,TIP18,TIP19,TIP20,
+         TIP21,TIP22,TIP23,TIP24,TIP25,
+         TIP26,TIP27,TIP28,TIP29,TIP30
+         )
+
+
+
+for _bool in raw_bools
+    Data.USEbool.push(_bool)
+
+for i = 0 to Data.USEbool.size() -1 
+    if Data.USEbool.get(i)
+        Data.names.push(syminfo.ticker(raw_names.get(i)))
+        Data.rsiArray.push(raw_RSI.get(i))
+        Data.Tips.push(raw_TIP.get(i))
+
+// --- }
+
+// { Detailed Plotting 
+upper1  = hline(Which ? 85 : na,color = color.new(OffGrey,70))
+upper2  = hline(Which ? 70 : na,color = color.new(OffGrey,70))
+upper3  = hline(Which ? 60 : na,color = color.new(OffGrey,70))
+Middle  = hline(Which ? 50 : na,color = color.new(OffGrey,70))
+lower1  = hline(Which ? 40 : na,color = color.new(OffGrey,70))
+lower2  = hline(Which ? 30 : na,color = color.new(OffGrey,70))
+lower3  = hline(Which ? 15 : na,color = color.new(OffGrey,70))
+AVG     = plot(Which ? ShowMark ? normalize(Data.rsiArray.avg(),0,15) : na: na ,style = plot.style_line,color = OffGrey)
+Zero    = plot(Which ? ShowMark ? 0: na : na ,display = display.data_window,color = color.new(color.black,100))
+fill(upper1, upper2, top_value =  85, bottom_value = 71, bottom_color = color.new(#8d050c, 95), top_color = color.new(#e56b08, 0), editable = true)
+fill(upper2, upper3, top_value =  71, bottom_value = 60, bottom_color = color.new(#8d050c, 85) , top_color = color.new(#8d050c, 95), editable = true)
+fill(lower1, lower2, top_value =  40, bottom_value = 30, bottom_color = color.new(#045322, 90), top_color = color.new(#045623, 75), editable = true)
+fill(lower2, lower3, top_value =  27, bottom_value = 15, bottom_color = color.new(#04a49f, 0), top_color = color.new(#04a140, 95), editable = true)
+fill(AVG,Zero,color.from_gradient(Data.rsiArray.avg(),30,70,color.new(#09b8b2, 41),color.new(color.rgb(141, 7, 7),60)))
+fill(upper3,lower1,color = color.rgb(57, 54, 54, 78))
+// }
+
+lev = initialize(RRSI,Data)
+
+// -- { Colorful Build
+COOOL(ints)=>
+    color.from_gradient(ints,15,80,color.new(#f3b14f, 48),color.new(#4c1457, 24))
+
+
+plotchar(not Which ? lev.get(0) : na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(0)),offset = -5)
+plotchar(not Which ? lev.get(1) : na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(1)),offset = -5)
+plotchar(not Which ? lev.get(2) : na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(2)),offset = -5)
+plotchar(not Which ? lev.get(3) : na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(3)),offset = -5)
+plotchar(not Which ? lev.get(4) : na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(4)),offset = -5)
+plotchar(not Which ? lev.get(5) : na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(5)),offset = -5)
+plotchar(not Which ? lev.get(6) : na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(6)),offset = -5)
+plotchar(not Which ? lev.get(7) : na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(7)),offset = -5)
+plotchar(not Which ? lev.get(8) : na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(8)),offset = -5)
+plotchar(not Which ? lev.get(9) : na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(9)),offset = -5)
+plotchar(not Which ? lev.get(10): na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(10)),offset = -5)
+plotchar(not Which ? lev.get(11): na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(11)),offset = -5)
+plotchar(not Which ? lev.get(12): na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(12)),offset = -5)
+plotchar(not Which ? lev.get(13): na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(13)),offset = -5)
+plotchar(not Which ? lev.get(14): na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(14)),offset = -5)
+plotchar(not Which ? lev.get(15): na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(15)),offset = -5)
+plotchar(not Which ? lev.get(16): na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(16)),offset = -5)
+plotchar(not Which ? lev.get(17): na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(17)),offset = -5)
+plotchar(not Which ? lev.get(18): na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(18)),offset = -5)
+plotchar(not Which ? lev.get(19): na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(19)),offset = -5)
+plotchar(not Which ? lev.get(20): na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(20)),offset = -5)
+plotchar(not Which ? lev.get(21): na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(21)),offset = -5)
+plotchar(not Which ? lev.get(22): na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(22)),offset = -5)
+plotchar(not Which ? lev.get(23): na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(23)),offset = -5)
+plotchar(not Which ? lev.get(24): na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(24)),offset = -5)
+plotchar(not Which ? lev.get(25): na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(25)),offset = -5)
+plotchar(not Which ? lev.get(26): na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(26)),offset = -5)
+plotchar(not Which ? lev.get(27): na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(27)),offset = -5)
+plotchar(not Which ? lev.get(28): na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(28)),offset = -5)
+plotchar(not Which ? lev.get(29): na ,location = location.absolute,char = "☐" ,size = size.tiny,color = Colz(Data.rsiArray.get(29)),offset = -5)
+
+// }
+
+

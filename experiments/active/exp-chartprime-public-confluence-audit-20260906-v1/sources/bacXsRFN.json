@@ -1,0 +1,46 @@
+{
+  "id": "bacXsRFN",
+  "title": "Trend Levels [ChartPrime]",
+  "url": "https://www.tradingview.com/script/bacXsRFN-Trend-Levels-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:23.987877+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/bacXsRFN-Trend-Levels-ChartPrime/",
+  "created_at": "2024-10-28T14:13:43.488431+00:00",
+  "updated_at": null,
+  "description": "The Trend Levels [ChartPrime] indicator is designed to identify key trend levels (High, Mid, and Low) during market trends, based on real-time calculations of highest, lowest, and mid-level values over a customizable length. Additionally, the indicator calculates trend strength by measuring the ratio of candles closing above or below the midline, providing a clear view of the ongoing trend dynamics and strength.\n\n\n⯁ KEY FEATURES AND HOW TO USE\n\n ⯌ Trend Shift Signals:\nTrend shifts, based on highest and lowest values during input length. When high is == to highest it will change trend to up when low == lowest value it will be shift to down trend.\n\nWhenever the trend changes direction (from uptrend to downtrend or vice versa), the indicator provides visual cues in the form of arrows. This gives traders clear signals to identify potential trend reversals, enabling them to adjust their strategies accordingly.  \n ⯌ Trend Level Calculation:  \nAs soon as a trend is detected (uptrend or downtrend), the indicator starts calculating the highest, lowest, and mid-level values over the defined period. These levels are plotted on the chart as color-coded lines for easy visualization, allowing traders to quickly spot the key levels within a trend.  \n ⯌ Midline Retests:  \nThroughout the trend, the mid-level line is often retested, acting as a potential zone for pullbacks or rejections. Traders can use these retests as opportunities for entering positions or confirming trend continuation. The chart shows how price frequently interacts with the midline, helping to identify important reaction levels.  \n\n ⯌ Trend Strength Calculation:  \nThe indicator measures the trend strength by calculating the delta between the number of candles closing above and below the midline. This percentage-based delta is displayed in real-time, providing a clear indication of whether the trend is gaining or losing momentum.  \n\n\n\n⯁ USER INPUTS\n\n Length: Specifies the lookback period for calculating the highest and lowest values, which determines the key trend levels. Candle Counting: Measures the number of candles closing above and below the midline to calculate the trend strength delta.\n\n⯁ CONCLUSION  \nThe Trend Levels [ChartPrime] indicator provides traders with a powerful tool for visualizing trend dynamics, key levels of support and resistance, and real-time trend strength. By identifying midline retests, tracking candle counts, and providing trend shift signals, this indicator can help traders make well-informed decisions during market trends.",
+  "script": {
+    "id": 1949224,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;90a5bf4ab14140758a70f8d5fb9f06e3",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B90a5bf4ab14140758a70f8d5fb9f06e3/1",
+  "source_http_status": 200,
+  "source_sha256": "ec72a7052015bbc5697efe59dcb7c7af03fe12e9dbca69228c82ad53efb1aad8",
+  "source_lines": 171,
+  "source_metadata": {
+    "created": "2024-10-28T14:13:42.655303Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 3,
+        "plotcandle": 1
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Trend Levels [ChartPrime]",
+    "updated": "2024-10-28T14:13:42.655303Z",
+    "version": "1.0"
+  }
+}

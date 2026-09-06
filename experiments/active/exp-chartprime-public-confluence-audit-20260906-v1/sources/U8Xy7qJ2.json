@@ -1,0 +1,47 @@
+{
+  "id": "U8Xy7qJ2",
+  "title": "Volume Channel Flow [ChartPrime]",
+  "url": "https://www.tradingview.com/script/U8Xy7qJ2-Volume-Channel-Flow-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:23.147402+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/U8Xy7qJ2-Volume-Channel-Flow-ChartPrime/",
+  "created_at": "2026-01-13T12:09:10.897518+00:00",
+  "updated_at": null,
+  "description": "⯁ OVERVIEW — Volume Channel Flow [ChartPrime]\nThe Volume Channel Flow indicator dynamically tracks evolving trend channels while simultaneously analyzing volume distribution within each channel segment.  \nBy combining adaptive volatility-based channel boundaries with real-time volume profiling, the tool highlights directional bias, structural breakouts, and zones where buy/sell pressure is concentrated.\n\nThis makes it a powerful hybrid of a trend-tracking system and a miniature volume-profile engine that updates live as the market moves.\n\n⯁ CONCEPTS\n Dynamic Volatility Channel:  \nUpper and lower channel levels are continuously recalculated using ATR. These levels shift only when price breaks outside the previous channel, signaling a trend transition.\n Channel Segmentation:  \nWhen a channel shift occurs, the previous segment is closed and visually plotted as its own range — allowing traders to inspect each discrete “flow phase” of the market.\n Embedded Volume Profile:  \nInside each channel segment, the indicator builds a mini volume histogram using user-defined binning. This creates a quick visual read of how volume was distributed within that price range.\n Point of Control (PoC):  \nThe price level with the highest traded volume inside each completed segment is detected and plotted as a dashed horizontal PoC line.\n Flow Bias (Bullish/Bearish):  \nThe volume profile color adapts depending on whether cumulative delta volume (buy minus sell pressure) is positive or negative for the segment.\n Breakout Labels:  \nWhen a new channel is formed, arrows mark whether the breakout occurred upward or downward.\n\n\n⯁ FEATURES\n Adaptive Trend Channel Construction  \nChannels update only when price closes beyond upper or lower volatility thresholds. This isolates trend shifts with minimal noise. Channel Visualization Options  \nChoose to display full channel boxes or only trend lines using customizable styling. Real-Time Volume Profiling  \nAs long as the channel remains active, volume distribution is recalculated live on every bar. PoC Projection  \nThe PoC is drawn across the channel range, marking the highest-volume price level for each segment. Directional Delta Coloring  \nVolume profiles automatically shift to bullish or bearish colors based on cumulative delta inside the channel. Breakout Detection  \nArrows highlight each transition into a new channel regime.\n\n⯁ HOW TO USE\n Spot trend changes using breakout arrows and the creation of new trend channels.\n Gauge strength of a channel by examining the density and shape of the internal volume profile. Use PoC levels as potential support/resistance interaction zones.\n Validate momentum by checking whether volume delta shows bullish or bearish dominance. Monitor channel edges to anticipate continuation or reversal setups.\n\n⯁ CONCLUSION\nThe Volume Channel Flow [ChartPrime] indicator merges trend structure with volume analytics, providing a continuously adaptive picture of market flow.  \nIt not only detects where trend phases begin and end, but also reveals what type of volume behavior shaped each segment, offering a deeper understanding of trend strength and directional pressure.\n",
+  "script": {
+    "id": 4655921,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;9b7dabb9bdfb465d8a398093bdb47091",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B9b7dabb9bdfb465d8a398093bdb47091/1",
+  "source_http_status": 200,
+  "source_sha256": "163a937a528d6f78211aae7e5cd37d3624c6fb295ac837ef803bda6e6aedadbc",
+  "source_lines": 169,
+  "source_metadata": {
+    "created": "2026-01-13T12:09:09.74696Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;6228a1de374c49558cc1e96cfd563dda",
+      "originalScriptVersion": "0.100",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 1
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Volume Channel Flow [ChartPrime]",
+    "updated": "2026-01-13T12:09:09.74696Z",
+    "version": "1.0"
+  }
+}

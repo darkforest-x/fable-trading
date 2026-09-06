@@ -1,0 +1,233 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+
+//@version=5
+indicator("MACD Normalized [ChartPrime]", explicit_plot_zorder = true, timeframe = '', timeframe_gaps = false)
+
+enable_fill      = input.bool(true, "Enable Ribbon ")
+fast_length      = input.int(10, "Fast Length", 1)
+slow_length      = input.int(22, "Slow Length", 1)
+average_length   = input.int(42, "Average Length", 1)
+deviation        = input.float(2, "Upper Deviation", 0, 100, 0.125)
+middle_deviation = input.float(1, "Middle Deviation", 0, 100, 0.125)
+enable_candle    = input.bool(true, "Enable Candle Color")
+
+ema(src, len) => //{
+    alpha = 2 / (len + 1)
+    sum   = 0.0
+    sum  := na(sum[1]) ? src : alpha * src + (1 - alpha) * nz(sum[1])
+
+
+dema(float src, float len) =>
+    e = ema(src, len)
+    dema = 2 * e - ema(e, len)
+    dema
+
+
+ema(source)=>
+    var float ema = 0.0
+    var int count = 0
+    count := nz(count[1]) + 1
+    ema := (1.0 - 2.0 / (count + 1.0)) * nz(ema[1]) + 2.0 / (count + 1.0) * source
+    ema
+
+
+tma(src, int len) => //{
+    //src is an input.source
+    //len is an input.int
+    ema1 = ema(src, len)
+    ema2 = ema(ema1, len)
+    ema3 = ema(ema2, len)
+    tma  = 3 * (ema1 - ema2) + ema3
+
+grad_high(values)=>
+    switch values
+        39 => #2ec28c
+        38 => color.rgb(53, 194, 142)
+        37 => color.rgb(59, 195, 143)
+        36 => color.rgb(65, 195, 145)
+        35 => color.rgb(70, 195, 146)
+        34 => color.rgb(75, 196, 148)
+        33 => color.rgb(79, 196, 150)
+        32 => color.rgb(84, 196, 151)
+        31 => color.rgb(88, 197, 153)
+        30 => color.rgb(92, 197, 154)
+        29 => color.rgb(95, 197, 156)
+        28 => color.rgb(99, 198, 157)
+        27 => color.rgb(102, 198, 159)
+        26 => color.rgb(106, 198, 160)
+        25 => color.rgb(109, 199, 161)
+        24 => color.rgb(112, 199, 163)
+        23 => color.rgb(115, 199, 164)
+        22 => color.rgb(118, 200, 166)
+        21 => color.rgb(121, 200, 167)
+        20 => color.rgb(124, 200, 168)
+        19 => color.rgb(127, 201, 170)
+        18 => color.rgb(129, 201, 171)
+        17 => color.rgb(132, 201, 173)
+        16 => color.rgb(135, 202, 174)
+        15 => color.rgb(137, 202, 175)
+        14 => color.rgb(140, 202, 177)
+        13 => color.rgb(142, 203, 178)
+        12 => color.rgb(145, 203, 179)
+        11 => color.rgb(147, 203, 180)
+        10 => color.rgb(149, 204, 182)
+        9 =>  color.rgb(152, 204, 183)
+        8 =>  color.rgb(154, 204, 184)
+        7 =>  color.rgb(156, 205, 185)
+        6 =>  color.rgb(158, 205, 187)
+        5 =>  color.rgb(161, 205, 188)
+        4 =>  color.rgb(163, 206, 189)
+        3 =>  color.rgb(165, 206, 190)
+        2 =>  color.rgb(167, 206, 192)
+        1 =>  color.rgb(169, 207, 193)
+        0 =>  color.rgb(171, 207, 194)
+
+grad_low(values)=>
+    switch 39 - values
+        39 => #eb0027
+        38 => color.rgb(235, 30, 50)
+        37 => color.rgb(235, 43, 58)
+        36 => color.rgb(235, 52, 66)
+        35 => color.rgb(234, 60, 73)
+        34 => color.rgb(234, 67, 79)
+        33 => color.rgb(234, 74, 84)
+        32 => color.rgb(234, 80, 90)
+        31 => color.rgb(234, 85, 95)
+        30 => color.rgb(234, 90, 100)
+        29 => color.rgb(234, 95, 104)
+        28 => color.rgb(234, 100, 109)
+        27 => color.rgb(233, 104, 113)
+        26 => color.rgb(233, 109, 117)
+        25 => color.rgb(233, 113, 121)
+        24 => color.rgb(233, 117, 125)
+        23 => color.rgb(233, 120, 128)
+        22 => color.rgb(233, 124, 132)
+        21 => color.rgb(233, 128, 136)
+        20 => color.rgb(233, 131, 139)
+        19 => color.rgb(232, 135, 142)
+        18 => color.rgb(232, 138, 146)
+        17 => color.rgb(232, 141, 149)
+        16 => color.rgb(232, 144, 152)
+        15 => color.rgb(232, 147, 155)
+        14 => color.rgb(232, 151, 158)
+        13 => color.rgb(232, 154, 161)
+        12 => color.rgb(232, 156, 164)
+        11 => color.rgb(231, 159, 167)
+        10 => color.rgb(231, 162, 169)
+        9 =>  color.rgb(231, 165, 172)
+        8 =>  color.rgb(231, 168, 175)
+        7 =>  color.rgb(231, 170, 177)
+        6 =>  color.rgb(231, 173, 180)
+        5 =>  color.rgb(231, 176, 183)
+        4 =>  color.rgb(231, 178, 185)
+        3 =>  color.rgb(230, 181, 188)
+        2 =>  color.rgb(230, 183, 190)
+        1 =>  color.rgb(230, 186, 193)
+        0 =>  color.rgb(230, 188, 195)
+
+atan2(y, x) =>
+    var float angle = 0.0
+    if x > 0
+        angle := math.atan(y / x)
+    else
+        if x < 0 and y >= 0
+            angle := math.atan(y / x) + math.pi
+        else
+            if x < 0 and y < 0
+                angle := math.atan(y / x) - math.pi
+            else
+                if x == 0 and y > 0
+                    angle := math.pi / 2
+                else
+                    if x == 0 and y < 0
+                        angle := -math.pi / 2
+    angle
+ 
+degrees(float source) =>
+    source * 180 / math.pi
+
+trend_angle(source, length) =>
+    atr = ema(ta.highest(source, length) - ta.lowest(source, length))
+    slope = (source - source[length]) / (atr/(length) * length)
+    angle_rad = atan2(slope, 1)
+    degrees = degrees(angle_rad)
+    normalized = int((90 + degrees)/180 * 39)
+
+noise_gate(signal, ratio, level, knee_type) =>
+    // Calculate the absolute value of the signal
+    abs_signal = math.abs(signal)
+
+    // Check the value of the knee_type parameter
+    if knee_type == "hard"
+        // If the knee_type is "hard", apply a hard knee
+        if abs_signal > level
+            out = signal
+        else
+            out = signal / ratio
+    else
+        // If the knee_type is not "hard", apply a soft knee
+        if (abs_signal > level) or level == 0
+            // If the absolute value is above the threshold, return the signal as is
+            out = signal
+        else
+            // If the absolute value is below the threshold, calculate the soft knee ratio
+            soft_knee_ratio = 1 - (level - abs_signal) / level
+            // Reduce the amplitude of the signal by the soft knee ratio
+            out = signal * soft_knee_ratio
+
+// 
+
+ALPHA = color.new(color.black, 100)
+
+High = ta.sma(high, average_length)
+Low = ta.sma(low, average_length)
+
+signal = tma(hl2, fast_length)
+signal_2 = dema(hl2, slow_length)
+
+avg = math.avg(High, Low)
+
+top = High - avg
+bot = Low - avg
+
+fast = signal - avg
+slow = signal_2 - avg
+
+stdev_up = ta.stdev(high, average_length)
+stdev_down = ta.stdev(low, average_length)
+stdev_center = ta.stdev(hl2, average_length)
+stdev_avg = nz(math.avg(stdev_up, stdev_down, stdev_center))
+
+stdev_percent = ta.percentrank(stdev_avg, int(average_length))
+
+max = top + stdev_up * deviation
+up_med = top + stdev_up * middle_deviation
+down_med = bot - stdev_down * middle_deviation
+min = bot - stdev_down * deviation
+
+signal_fast = ((fast - min) / (max - min)) * 100
+signal_slow = ((slow - min) / (max - min)) * 100
+mid_top = ((up_med - min) / (max - min)) * 100
+mid_bottom = ((down_med - min) / (max - min)) * 100
+
+macd = noise_gate(signal_fast - signal_slow, 5, 0.03, "hard")
+macd_angle = trend_angle(macd, 2)
+macd_color = color.new(macd > 0 ? grad_high(macd_angle) : grad_low(macd_angle), 10)
+plot_center = plot(50, color = ALPHA)
+m_top = plot(mid_top, color = ALPHA)
+m_bot = plot(mid_bottom, color = ALPHA)
+top_plot = plot(100, color = #D31F3D)
+bottom_plot = plot(0, color = #006159)
+fill(m_top, top_plot, bottom_color = ALPHA, top_color = color.new(#DB2732, 60), top_value = 100, bottom_value = mid_top)
+fill(m_bot, bottom_plot, top_color = ALPHA, bottom_color = color.new(#006C58, 60), top_value = mid_bottom, bottom_value = 0)
+ 
+plot(macd + 50, "MACD", macd_color, style = plot.style_columns, histbase = 50)
+fast_plot = plot(signal_fast, color = color.new(#0085FF, enable_fill ? 76 : 0), linewidth = enable_fill ? 1 : 2)
+slow_plot = plot(signal_slow, color = color.new(#F3A712, enable_fill ? 76 : 0), linewidth = enable_fill ? 1 : 2)
+fill(fast_plot, slow_plot, top_value = enable_fill ? signal_fast : na, bottom_value = enable_fill ? signal_slow : na, top_color = color.new(#0085FF, 18), bottom_color = color.new(#F3A712, 50))
+
+
+
+barcolor(enable_candle ? macd_color : na)

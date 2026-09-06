@@ -1,0 +1,227 @@
+// This work is licensed under a Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0) https://creativecommons.org/licenses/by-nc-sa/4.0/
+// © ChartPrime
+
+
+//@version=6
+indicator("Macro Trend Split Profile [ChartPrime]", overlay=true, max_boxes_count=500, max_lines_count=500, max_labels_count=500)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+trendLength  = input.int(20, title="Macro Trend Length", tooltip="Higher number filters more noise")
+trendFactor  = input.float(5.0, title="Noise Filter (Multiplier)", tooltip="Multiplier for the Supertrend calculation. Higher values create a wider channel, filtering out more minor price fluctuations.")
+minLegBars   = input.int(40, title="Minimum Bars for Profile", tooltip="The minimum number of bars required in a trend leg before the profile begins to calculate and display.")
+
+profileBins  = input.int(15, title="Number of Profile Bins", tooltip="Defines the resolution of the profile. Higher numbers divide the price range into more, smaller segments.")
+profileWidth = input.int(40, title="Max Profile Width (in bars)", tooltip="Controls the maximum horizontal length of the profile histogram bars on the chart.")
+
+// Colors
+bullColor = input.color(color.rgb(18, 192, 175), title="Bull Color", tooltip="Color used for bullish histogram bars and the positive Point of Control (POC) line.")
+bearColor = input.color(color.rgb(238, 41, 41), title="Bear Color", tooltip="Color used for bearish histogram bars and the negative Point of Control (POC) line.")
+
+
+
+var int   trendStartBar = na
+var float[] barPrices   = array.new_float(0)
+var int[]   barTypes    = array.new_int(0) // 1 for Bull, -1 for Bear
+
+// Drawing objects for the current profile
+var box[] bullBoxes     = array.new_box(0)
+var box[] bearBoxes     = array.new_box(0)
+var line  bullPocLine   = na
+var line  bearPocLine   = na
+var label bullPocLabel  = na
+var label bearPocLabel  = na
+
+// Variables for Dashboard
+var float lastBullPoc = na
+var float lastBearPoc = na
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+
+// MACRO TREND DETECTION
+// We use a Supertrend to act as a noise-filtered macro trend
+[macroTrend, trendDirection] = ta.supertrend(trendFactor, trendLength)
+
+// Direction: -1 means Bullish (price above line), 1 means Bearish (price below line)
+isBullTrend = trendDirection == -1
+trendColor  = isBullTrend ? bullColor : bearColor
+
+
+// Detect when the trend flips
+trendFlipped = ta.change(trendDirection) != 0
+
+
+
+
+// RESET ON TREND FLIP
+if trendFlipped
+    // Clear the arrays holding data
+    array.clear(barPrices)
+    array.clear(barTypes)
+    
+    // Clear the drawing object references (the old boxes/lines/labels stay on the chart!)
+    array.clear(bullBoxes)
+    array.clear(bearBoxes)
+    bullPocLine := na
+    bearPocLine := na
+    bullPocLabel := na
+    bearPocLabel := na
+    
+    // Reset Dashboard Variables
+    lastBullPoc := na
+    lastBearPoc := na
+    
+    // Set the new start bar
+    trendStartBar := bar_index
+
+
+
+// COLLECT DATA & DRAW PROFILE
+if not na(trendStartBar)
+    // Identify if the current bar is a bull or bear bar
+    currentBarType = close > open ? 1 : (close < open ? -1 : 0)
+    
+    // Store this bar's data in the current trend's memory
+    array.push(barPrices, hl2) // Using typical price (High+Low)/2 for profile
+    array.push(barTypes, currentBarType)
+    
+    // Only calculate and draw if the leg is longer than our minimum rule
+    barsInTrend = bar_index - trendStartBar
+    if barsInTrend >= minLegBars
+        
+        // Find the high and low of the current trend
+        highestPrice = array.max(barPrices)
+        lowestPrice  = array.min(barPrices)
+        
+        // Calculate the height of each bin
+        binSize = (highestPrice - lowestPrice) / profileBins
+        binSize := math.max(binSize, syminfo.mintick) // Prevent division by zero
+        
+        // Arrays to count the bull/bear bars per bin
+        int[] bullCounts = array.new_int(profileBins, 0)
+        int[] bearCounts = array.new_int(profileBins, 0)
+        
+        // Loop through all saved bars in this trend and count them
+        for i = 0 to array.size(barPrices) - 1
+            price = array.get(barPrices, i)
+            bType = array.get(barTypes, i)
+            
+            // Figure out which bin this price belongs to
+            binIndex = math.floor((price - lowestPrice) / binSize)
+            binIndex := math.min(binIndex, profileBins - 1) // Cap at the top bin
+            
+            if bType == 1
+                array.set(bullCounts, binIndex, array.get(bullCounts, binIndex) + 1)
+            else if bType == -1
+                array.set(bearCounts, binIndex, array.get(bearCounts, binIndex) + 1)
+                
+        // Find the Highest POCs (Point of Control)
+        maxBullCount = array.max(bullCounts)
+        bullPocIndex = array.indexof(bullCounts, maxBullCount)
+        
+        maxBearCount = array.max(bearCounts)
+        bearPocIndex = array.indexof(bearCounts, maxBearCount)
+        
+        // Determine scaling so the boxes fit nicely on the screen
+        absoluteMaxCount = math.max(maxBullCount, maxBearCount, 1)
+        scaleFactor = profileWidth / absoluteMaxCount
+        
+        // Create or Update the Boxes
+        if array.size(bullBoxes) == 0
+            for j = 0 to profileBins - 1
+                array.push(bullBoxes, box.new(na, na, na, na))
+                array.push(bearBoxes, box.new(na, na, na, na))
+                
+        for j = 0 to profileBins - 1
+            bBoxBull = array.get(bullBoxes, j)
+            bBoxBear = array.get(bearBoxes, j)
+            
+            topY = lowestPrice + (j + 1) * binSize
+            botY = lowestPrice + j * binSize
+            
+            cBull = array.get(bullCounts, j)
+            cBear = array.get(bearCounts, j)
+            
+            // Draw Bull Box (Extending to the Right)
+            box.set_top(bBoxBull, topY), box.set_bottom(bBoxBull, botY)
+            bBoxBull.set_border_color(chart.bg_color)
+
+            box.set_left(bBoxBull, trendStartBar)
+            box.set_right(bBoxBull, trendStartBar + math.round(cBull * scaleFactor))
+            box.set_bgcolor(bBoxBull, color.new(bullColor, 70))
+            box.set_text(bBoxBull, cBull > 0 ? str.tostring(cBull) : ""), box.set_text_color(bBoxBull, color.white)
+            box.set_text_size(bBoxBull, size.tiny)
+            
+            // Draw Bear Box (Extending to the Left)
+            box.set_top(bBoxBear, topY), box.set_bottom(bBoxBear, botY)
+            bBoxBear.set_border_color(chart.bg_color)
+
+            box.set_right(bBoxBear, trendStartBar)
+            box.set_left(bBoxBear, trendStartBar - math.round(cBear * scaleFactor))
+            box.set_bgcolor(bBoxBear, color.new(bearColor, 70))
+            box.set_text(bBoxBear, cBear > 0 ? str.tostring(cBear) : ""), box.set_text_color(bBoxBear, color.white)
+            box.set_text_size(bBoxBear, size.tiny)
+            
+        // Draw and Update POC Lines & Labels
+        bullPocY = lowestPrice + (bullPocIndex + 0.5) * binSize
+        lastBullPoc := bullPocY
+
+        if na(bullPocLine)
+            bullPocLine := line.new(trendStartBar+profileWidth, bullPocY, bar_index, bullPocY, color=bullColor, style=line.style_dashed, width=1)
+            bullPocLabel := label.new(bar_index, bullPocY, text=str.tostring(bullPocY, format.mintick), color=color.new(bullColor, 100), textcolor=bullColor, style=label.style_label_left, size=size.small)
+        else
+            line.set_xy1(bullPocLine, trendStartBar+profileWidth, bullPocY)
+            line.set_xy2(bullPocLine, bar_index, bullPocY) // Stretches to current bar
+            label.set_xy(bullPocLabel, bar_index, bullPocY)
+            label.set_text(bullPocLabel, str.tostring(bullPocY, format.mintick))
+            
+        bearPocY = lowestPrice + (bearPocIndex + 0.5) * binSize
+        lastBearPoc := bearPocY
+
+        if na(bearPocLine)
+            bearPocLine := line.new(trendStartBar+profileWidth, bearPocY, bar_index, bearPocY, color=bearColor, style=line.style_dashed, width=1)
+            bearPocLabel := label.new(bar_index, bearPocY, text=str.tostring(bearPocY, format.mintick), color=color.new(bearColor, 100), textcolor=bearColor, style=label.style_label_left, size=size.small)
+        else
+            line.set_xy1(bearPocLine, trendStartBar+profileWidth, bearPocY)
+            line.set_xy2(bearPocLine, bar_index, bearPocY) // Stretches to current bar
+            label.set_xy(bearPocLabel, bar_index, bearPocY)
+            label.set_text(bearPocLabel, str.tostring(bearPocY, format.mintick))
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+// DASHBOARD
+var table dashTable = table.new(position.top_right, 2, 4, border_width=1, border_color=color.new(color.gray, 80))
+
+if barstate.islast
+    // Header Row
+    table.cell(dashTable, 0, 0, "Split Profile", text_color=color.white, bgcolor=color.new(color.gray, 60))
+    table.cell(dashTable, 1, 0, "Data", text_color=color.white, bgcolor=color.new(color.gray, 60))
+    
+    // Trend Row
+    trendText = isBullTrend ? "BULLISH" : "BEARISH"
+    table.cell(dashTable, 0, 1, "Trend", text_color=color.white, bgcolor=color.new(color.gray, 80))
+    table.cell(dashTable, 1, 1, trendText, text_color=color.white, bgcolor=trendColor)
+    
+    // +POC Row
+    bullPocStr = na(lastBullPoc) ? "Waiting... (" + str.tostring(minLegBars) + " Bars)" : str.tostring(lastBullPoc, format.mintick)
+    table.cell(dashTable, 0, 2, "+POC", text_color=bullColor, bgcolor=color.new(color.gray, 80))
+    table.cell(dashTable, 1, 2, bullPocStr, text_color=color.white, bgcolor=color.new(color.gray, 80))
+    
+    // -POC Row
+    bearPocStr = na(lastBearPoc) ? "Waiting... (" + str.tostring(minLegBars) + " Bars)" : str.tostring(lastBearPoc, format.mintick)
+    table.cell(dashTable, 0, 3, "-POC", text_color=bearColor, bgcolor=color.new(color.gray, 80))
+    table.cell(dashTable, 1, 3, bearPocStr, text_color=color.white, bgcolor=color.new(color.gray, 80))
+
+
+// Plot the Macro Trend Line
+plot(trendDirection != trendDirection[1] ? float(na) : macroTrend, color=trendColor, linewidth=3, title="Macro Trend", style = plot.style_linebr)
+// --------------------------------------------------------------------------------------------------------------------}

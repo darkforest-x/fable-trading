@@ -1,0 +1,46 @@
+{
+  "id": "lCceGyMY",
+  "title": "Kalman Volume Filter [ChartPrime]",
+  "url": "https://www.tradingview.com/script/lCceGyMY-Kalman-Volume-Filter-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:54.587828+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/lCceGyMY-Kalman-Volume-Filter-ChartPrime/",
+  "created_at": "2024-04-29T12:49:23.866810+00:00",
+  "updated_at": null,
+  "description": "The \"Kalman Volume Filter\", aims to provide insights into market volume dynamics by filtering out noise and identifying potential overbought or oversold conditions. Let's break down its components and functionality:\n\nSettings:\nUsers can adjust various parameters to customize the indicator according to their preferences:Volume Length: Defines the length of the volume period used in calculations.Stabilization Coefficient (k): Determines the level of noise reduction in the signals.Signal Line Length: Sets the length of the signal line used for identifying trends.Overbought & Oversold Zone Level: Specifies the threshold levels for identifying overbought and oversold conditions.Source: Allows users to select the price source for volume calculations.\n\nVolume Zone Oscillator (VZO):\nCalculates a volume-based oscillator indicating the direction and intensity of volume movements.Utilizes a volume direction measurement over a specified period to compute the oscillator value.Normalizes the oscillator value to improve comparability across different securities or timeframes.\n\n\nKalman Filter:\nApplies a Kalman filter to smooth out the VZO values and reduce noise.Utilizes a stabilization coefficient (k) to control the degree of smoothing.Generates a filtered output representing the underlying volume trend.\n\n\nVolume Visualization:\nDisplays the volume histogram, with color intensity indicating the strength of volume movements.Adjusts bar colors based on volume bursts to highlight significant changes in volume.\n\n\nOverbought and Oversold Zones:\nMarks overbought and oversold levels on the chart to assist in identifying potential reversal points.\n\n\nPlotting:\nPlots the Kalman Volume Filter line and a signal line for visual analysis.Utilizes different colors and fills to distinguish between rising and falling trends.Highlights specific events such as local buy or sell signals, as well as overbought or oversold conditions.\n\n\nThis indicator provides traders with a comprehensive view of volume dynamics, trend direction, and potential market turning points, aiding in informed decision-making during trading activities.\n",
+  "script": {
+    "id": 1557272,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;00cb9e80b0244a7aaca85717f6abbcab",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B00cb9e80b0244a7aaca85717f6abbcab/1",
+  "source_http_status": 200,
+  "source_sha256": "4c1792df425dd36663301de79d6c73d390c42bfa354ee1677a044ba2ef811521",
+  "source_lines": 153,
+  "source_metadata": {
+    "created": "2024-04-29T12:49:21.968497Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": false,
+      "kind": "study",
+      "sourceInputsCount": 1,
+      "stats": {
+        "plot": 8,
+        "plotchar": 4
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Kalman Volume Filter [ChartPrime]",
+    "updated": "2024-04-29T12:49:21.968497Z",
+    "version": "1.0"
+  }
+}

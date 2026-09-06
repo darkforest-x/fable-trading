@@ -1,0 +1,44 @@
+{
+  "id": "o5rNAgUw",
+  "title": "Liquidity Pro Map [ChartPrime]",
+  "url": "https://www.tradingview.com/script/o5rNAgUw-Liquidity-Pro-Map-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:45.537789+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/o5rNAgUw-Liquidity-Pro-Map-ChartPrime/",
+  "created_at": "2025-09-16T12:00:46.786276+00:00",
+  "updated_at": null,
+  "description": "⯁ OVERVIEW\nLiquidity Pro Map [ChartPrime] is a market-structure tool that simulates liquidity distribution by splitting price history into buy-side and sell-side profiles. Using candle volume and the standard deviation of close, the indicator builds two mirrored volume maps on the right-hand side of the chart. It also extends liquidity levels backwards in time until they are crossed by price, allowing you to see which zones remain untouched and where liquidity is most likely resting. Cumulative skew lines and highlighted POC levels give additional clarity on imbalance between buyers and sellers.\n\n⯁ KEY FEATURES\nDual Liquidity Profiles: The chart is divided into buy-side (green) and sell-side (red) liquidity profiles, letting you instantly compare both sides of order flow.\nLevel Extension Logic: Each liquidity level is extended back in time until price crosses it. If not crossed, it persists all the way to the indicator’s lookback period, marking zones that remain “untapped.”\nDynamic Binning with Standard Deviation: The indicator distributes candle volumes into bins using close-price deviation, creating a more realistic liquidity map than static price levels.\nCumulative Volume Skew Lines: Polylines on the right-hand side show the aggregated buy and sell volume profiles, making it easy to spot imbalance.\nPOC Identification: Highest-volume levels on both sides are marked as POC (Point of Control), providing key zones of interest.\nClear Color Coding: Gradient shading intensifies with volume concentration—dark teal/green for buy zones, dark pink/red for sell zones.\n\n⯁ HOW IT WORKS (UNDER THE HOOD)\nVolume Distribution: Each bar’s volume is assigned to a price bin based on its reference price (close ± standard deviation offset).Buy vs. Sell Splitting: If bins above last close price, volume is allocated to sell-side liquidity; otherwise, it’s allocated to buy-side liquidity.Level Extension: Boxes marking liquidity bins extend back until crossed by price. If uncrossed, they anchor all the way to the start of the lookback window.Cumulative Polylines: As bins are stacked, cumulative buy and sell values form skew polylines plotted at the right edge.POC Levels: The highest-volume bin on each side is highlighted with labels and arrows, marking where the heaviest liquidity is concentrated.\n\n⯁ USAGE\nUse buy/sell profiles to see where liquidity is likely resting. Green shelves suggest potential support zones; red shelves suggest resistance or sell liquidity pools.\nWatch untouched extended levels—these often become magnets for price as liquidity is swept.Track POC levels as primary liquidity targets, where reactions or fakeouts are most common.Compare cumulative skew lines to judge which side dominates in volume. Heavy buy skew may indicate absorption of sell pressure, and vice versa.Adjust lookback period to switch between intraday liquidity maps and larger swing-based profiles.Use separator feature to hide bins borders for better visual clarity.\nUse as a confluence tool with OBs, support/resistance, and liquidity sweep setups.\n\n⯁ CONCLUSION\nLiquidity Pro Map transforms candle volume into a structured simulation of where liquidity may rest across the chart. By dividing buy vs. sell profiles, extending untouched levels, and marking cumulative skew and POC, it equips traders with a clear visual map of potential liquidity pools. This allows for better anticipation of sweeps, reversals, and areas of high market activity.",
+  "script": {
+    "id": 3140393,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;7dc340a05cdd439a916a2fd1746b5f76",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B7dc340a05cdd439a916a2fd1746b5f76/1",
+  "source_http_status": 200,
+  "source_sha256": "98974aba02110241237528c140c7a38b388e438f458b2134f226e02fa6159014",
+  "source_lines": 173,
+  "source_metadata": {
+    "created": "2025-09-16T12:00:46.283971Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;d3ff6bfac294488fad020be9b31c941b",
+      "originalScriptVersion": "0.785",
+      "sourceInputsCount": 0
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Liquidity Pro Map [ChartPrime]",
+    "updated": "2025-09-16T12:00:46.283971Z",
+    "version": "1.0"
+  }
+}

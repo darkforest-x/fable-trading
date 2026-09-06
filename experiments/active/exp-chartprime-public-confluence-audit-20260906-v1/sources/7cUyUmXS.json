@@ -1,0 +1,45 @@
+{
+  "id": "7cUyUmXS",
+  "title": "RibboNN Machine Learning  [ChartPrime]",
+  "url": "https://www.tradingview.com/script/7cUyUmXS-RibboNN-Machine-Learning-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:37:34.144843+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/7cUyUmXS-RibboNN-Machine-Learning-ChartPrime/",
+  "created_at": "2023-07-24T16:29:54.906662+00:00",
+  "updated_at": null,
+  "description": "The RibboNN ML indicator is a powerful tool designed to predict the direction of the market and display it through a ribbon-like visual representation, with colors changing based on the prediction outcome from a conditional class. The primary focus of this indicator is to assist traders in trend following trading strategies.\n\n\nThe RibboNN ML in action\n\nPrediction Process:\nConditional Class: The indicator's predictive model relies on a conditional class, which combines information from both longcon (long condition) and short condition. These conditions are determined using specific rules and criteria, taking into account various market factors and indicators.\n\nDirection Prediction: The conditional class provides the basis for predicting the direction of the market move. When the prediction value is greater than 0, it indicates an upward trend, while a value less than 0 suggests a downward trend.\n\nNearest Neighbor (NN): To attempt to enhance the accuracy of predictions, the RibboNN ML indicator incorporates a Nearest Neighbor algorithm. This algorithm analyzes historical data from the Ribbon ML's predictive model (RMF) and identifies patterns that closely resemble the current conditional prediction class, thereby offering more robust trend forecasts.\n\nRibbon Visualization:\nThe Ribbon ML indicator visually represents its predictions through a ribbon-like display. The ribbon changes colors based on the direction predicted by the conditional class. An upward trend is represented by a green color, while a downward trend is depicted by a red color, allowing traders to quickly identify potential market directions.\n\n\n\n\nThe introduction of the Nearest Neighbor algorithm provides the Ribbon ML indicator with unique and adaptive behaviors. By dynamically analyzing historical patterns and incorporating them into predictions, the indicator can adapt to changing market conditions and offer more reliable signals for trend following trading strategies.\n\nManipulation of the NN Settings:\n\nSmaller Value of Neighbours Count:\nWhen the value of \"Neighbours Count\" is small, the algorithm considers only a few nearest neighbors for making predictions.\nA smaller value of \"Neighbours Count\" leads to more flexible decision boundaries, which can result in a more granular and sensitive model.\nHowever, using a very small value might lead to overfitting, especially if the training data contains noise or outliers.\n\nLarger Value of \"Neighbours Count\":\nWhen the value of \"Neighbours Count\" is large, the algorithm considers a larger number of nearest neighbors for making predictions.\nA larger value of \"Neighbours Count\" leads to smoother decision boundaries and helps capture the global patterns in the data.\nHowever, setting a very large value might result in a loss of local patterns and make the model less sensitive to changes in the data.",
+  "script": {
+    "id": 1114417,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;adabbd677e574d65bbb1fa51f6bb7f8c",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Badabbd677e574d65bbb1fa51f6bb7f8c/1",
+  "source_http_status": 200,
+  "source_sha256": "ee3be9e1791e137ea23e535f7bb6d2bdffd9c52a82dfa87c8486387ae5002f26",
+  "source_lines": 109,
+  "source_metadata": {
+    "created": "2023-07-24T16:29:53.835324Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 10
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "RibboNN Machine Learning [ChartPrime] ",
+    "updated": "2023-07-24T16:29:53.835324Z",
+    "version": "1.0"
+  }
+}

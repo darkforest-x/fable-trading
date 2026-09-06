@@ -1,0 +1,109 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("RibboNN Machine Learning [ChartPrime] ",shorttitle = "RibboNN [ChartPrime]" , overlay=true)
+
+string Core                                 = "Core Settings"
+string visual                               =  "Visual Settings" 
+int ShortPriod                              = input.int   (26,        'Slow Period', 1,group=Core)
+int LongPriod                               = input.int   (14,        'Fast Period',  2,group=Core)
+int Neighbours                              = math.floor(math.sqrt(input.int   (250,'Neighbours Count', 5,group=Core)))
+float BarRange                              = high - low
+var array<float> feature1                   = array.new_float(0)  
+var array<float> feature2                   = array.new_float(0) 
+var array<int>   directions                 = array.new_int(0) 
+var array<float> data                       = array.new_float()
+var array<int>   predictions                = array.new_int(0)
+float max                                   = input.float(5.0,"Long Sensitivity",tooltip = "The sensitivity level directly affects the number of class generated for uptrend",step = 0.1,maxval = 5.0,minval = 1.0) * 10 
+float max2                                  = input.float(9,"Short Sensitivity",tooltip = "The sensitivity level directly affects the number of class generated for uptrend",step = 0.1,maxval = 12.0,minval = 5.0) * 10
+color Bull                                  = input.color(#1f4037,title = "Bull",group=visual,inline = "005")
+color Bull1                                 = input.color(#99f2c8,title = "",group=visual,inline = "005")
+color bear                                  = input.color(#FF416C,title = "Bear",group=visual,inline = "005")
+color Bear1                                 = input.color(#FF4B2B,title = "",group=visual,inline = "005")
+var int signal                              = 0
+var float prediction                        = 0.0
+var LLong                                   = false 
+var SShort                                  = false 
+
+Range_MA(period)=>
+    // Calculate weighted ma
+    weight = BarRange / math.sum(BarRange, period)
+    TotalSum = math.sum(close * weight, period)
+    TotalW= math.sum(weight, period)
+    rwma = TotalSum / TotalW
+
+
+
+prediction_data(float src , int dir) =>
+    // RSI Data Calculation
+    up                 = ta.rma(math.max(ta.change(src), 0), dir)
+    down               = ta.rma(-math.min(ta.change(src), 0), dir)
+    _ISR               = down == 0 ? 100 : up == 0 ? 0 : 100 - (100 / (1 + up / down))
+    mf                 = ta.mfi(src, dir)
+    _ISR_mfi           = math.abs( _ISR + mf / 2 )
+    _ISR_mfi
+
+LongData = prediction_data(hlc3,LongPriod)
+ShortData = prediction_data(hlc3,ShortPriod)
+longcon                                     = LongData < max
+shorton                                     = ShortData > max2
+int Class                                   = shorton ? -1 : longcon ? 1 : 0
+
+
+
+
+// Nearest Neighbor Calculation
+array.push(feature1, LongData)
+array.push(feature2, ShortData)
+array.push(directions, Class)
+int size = array.size(directions)
+float dust = -999.0
+for i = 0 to size - 1
+    // Calculate the Manhattan distance of the current point to all historic points.
+    float ManD = math.abs(LongData - array.get(feature1, i)) + math.abs(ShortData - array.get(feature2, i))
+    if ManD > dust
+        dust := ManD
+        if array.size(predictions) >= Neighbours
+            array.shift(predictions)
+        array.push(predictions, array.get(directions, i))
+
+
+
+// Prediction and coloring Conditions
+prediction := array.sum(predictions) * 5 
+C = not (prediction > 0)  and not (prediction < 0)
+signal := prediction > 0  ? 1 : prediction < 0  ? -1 : C ? 0 : nz(signal[1])
+int  changed         = ta.change(signal)
+bool Uptrend  = changed and signal==1 
+bool DownTrend = changed and signal==-1 
+
+if Uptrend //and  close > Range_MA(10)
+    LLong:= true
+    SShort:= false
+
+if DownTrend //and close < Range_MA(10)
+    LLong:= false
+    SShort:= true
+
+
+_color = 
+     LLong ? color.new(color.from_gradient(prediction,0,55,Bull,Bull1),30) : 
+     SShort ? color.new(color.from_gradient(-prediction,-55,-1,bear,Bear1),30) : 
+     na
+
+
+
+
+first = plot(Range_MA(10),color = color.new(_color,80),linewidth = 1,editable = false)
+plot(Range_MA(11),color = color.new(_color,80),linewidth = 1,editable = false)
+plot(Range_MA(12),color = color.new(_color,80),linewidth = 1,editable = false)
+plot(Range_MA(13),color = color.new(_color,80),linewidth = 1,editable = false)
+plot(Range_MA(14),color = color.new(_color,80),linewidth = 1,editable = false)
+plot(Range_MA(15),color = color.new(_color,80),linewidth = 1,editable = false)
+plot(Range_MA(16),color = color.new(_color,80),linewidth = 1,editable = false)
+plot(Range_MA(17),color = color.new(_color,80),linewidth = 1,editable = false)
+plot(Range_MA(18),color = color.new(_color,80),linewidth = 1,editable = false)
+last = plot(Range_MA(20),color = color.new(_color,80),linewidth = 1,editable = false)
+fill(first,last,color= color.new(_color,90))
+

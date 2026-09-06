@@ -1,0 +1,1073 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("MACD All In One Screener [ChartPrime]", max_labels_count = 500)
+
+// DECLERATIONS {
+type settings
+    string view = "Overview"
+    string indi = "MACD"
+    int history_length = 500
+    bool show_symbol = true
+    bool show_price_line = true
+    bool confirm = true
+    string osc_type = "EMA"
+    string sig_type = "EMA"
+    int fast = 12
+    int slow = 26
+    int sig = 9
+    color macd_color = #2962FF
+    color signal_color = #FF6D00
+    color bullish_up = #26A69A
+    color bullish_down = #B2DFDB
+    color bearish_down = #FF5252
+    color bearish_up = #FFCDD2
+    color candle_bullish = #089981
+    color candle_bearish = #F23645
+    int right = 10
+    int left = 15
+    int upper_range = 100
+    int lower_range = 5
+    string divergence_label = "Line and Label"
+    bool enable_regular_bullish = true
+    bool enable_regular_bearish = true
+    color regular_bullish_color = #46C47A
+    color regular_bearish_color = #F82E2E
+    bool enable_table = true
+    string tb_location = "Bottom Right"
+    color tb_txt_col = #FFFFFF
+    color tb_bg_col = #202236e6
+    color tb_frame_col = #000000
+    color label_color = #FFFFFF
+    bool cross_over_0 = false
+    bool cross_under_0 = false
+    bool macd_cross_bullish = false
+    bool macd_cross_bearish = false
+    bool hist_bullish_turn = false
+    bool hist_bearish_turn = false
+    bool hist_bullish_continue = false
+    bool hist_bearish_continue = false
+    bool bullish_divergence = false
+    bool bearish_divergence = false
+    string char_set = "Symbol"
+
+type macd_data
+    float macd = na
+    float sig = na
+    float hist = na
+    color colour = na
+    string symbol = na
+    string timeframe = na
+    float o = na
+    float h = na
+    float l = na
+    float c = na
+    color polarity = na
+
+type signal
+    bool cross_over_0 = false
+    bool cross_under_0 = false
+    bool macd_cross_bullish = false
+    bool macd_cross_bearish = false
+    bool hist_bullish_turn = false
+    bool hist_bearish_turn = false
+    bool hist_bullish_continue = false
+    bool hist_bearish_continue = false
+    string symbol = na
+
+type symbol_data
+    bool flag = false
+    string symbol = na
+    string tooltip = na
+
+type divergence_data
+    bool print = false
+    int t = na
+    int back_t = na
+    float level = na
+    float back_level = na
+    float tr = na
+    bool polarity = na
+    string tooltip = na
+    color colour = na
+    string symbol = na
+
+method safe(signal self)=>
+    if na(self)
+        signal.new()
+    else
+        self
+
+method safe(macd_data self)=>
+    if na(self)
+        macd_data.new()
+    else
+        self
+
+method safe(symbol_data self)=>
+    if na(self)
+        symbol_data.new()
+    else
+        self
+
+method safe(divergence_data self)=>
+    if na(self)
+        divergence_data.new()
+    else
+        self
+
+method once(bool self)=>
+    self and not nz(self[1], false)
+
+method cell_config(table tb, int row, macd_data m_data, symbol_data s_data, settings s)=>
+    tb.cell_set_text(0, row, m_data.symbol)
+    tb.cell_set_text_color(0, row, s.tb_txt_col)
+    tb.cell_set_text(1, row, m_data.timeframe)
+    tb.cell_set_text_color(1, row, s.tb_txt_col)
+    tb.cell_set_text_color(2, row, s.tb_txt_col)
+    tb.cell_set_text(2, row, s_data.tooltip)
+    tb.cell_set_bgcolor(3, row, m_data.colour)
+
+location(settings s)=> 
+    switch s.tb_location
+        "Bottom Left" => position.bottom_left
+        "Bottom Middle" => position.bottom_center
+        "Bottom Right" => position.bottom_right
+        "Middle Left" => position.middle_left
+        "Middle Center" => position.middle_center
+        "Middle Right" => position.middle_right
+        "Top Left" => position.top_left
+        "Top Middle" => position.top_center
+        "Top Right" => position.top_right
+
+timeframe_type()=> 
+    switch
+        timeframe.isminutes => "M"
+        timeframe.isseconds => "S"
+
+symbol_size(string size)=>
+    switch size
+        "Tiny" => size.tiny
+        "Small" => size.small
+        "Normal" => size.normal
+        "Large" => size.large
+        "Huge" => size.huge
+        "Auto" => size.auto
+
+is_same_chart_type(string chart_type)=>
+    string current_type = syminfo.type
+    bool same = str.contains(current_type, chart_type)
+    same
+
+timeframe_multiplier_and_period(string timeframe)=>
+    int multiplier = na
+    int period = na
+
+    if timeframe == ""
+        multiplier := -1
+        period := -1
+
+    else
+        string[] seconds = str.split(timeframe, "S")
+        string[] days = str.split(timeframe, "D")
+        string[] weeks = str.split(timeframe, "W")
+        string[] months = str.split(timeframe, "M")
+
+        bool is_seconds = seconds.size() > 1
+        bool is_days = days.size() > 1
+        bool is_weeks = weeks.size() > 1
+        bool is_months = months.size() > 1
+        bool is_minutes = not is_seconds and not is_days and not is_weeks and not is_months
+
+        if is_minutes
+            multiplier := int(str.tonumber(timeframe))
+            period := 1
+        else if is_seconds
+            multiplier := int(str.tonumber(seconds.first()))
+            period := 0
+        else if is_days
+            multiplier := int(str.tonumber(days.first()))
+            period := 2
+        else if is_weeks
+            multiplier := int(str.tonumber(weeks.first()))
+            period := 3
+        else if is_months
+            multiplier := int(str.tonumber(months.first()))
+            period := 4
+
+    [multiplier, period]
+
+chart_time_period()=>
+    int period = -1
+    if timeframe.isseconds
+        period := 0
+    else if timeframe.isminutes
+        period := 1
+    else if timeframe.isdaily
+        period := 2
+    else if timeframe.isweekly
+        period := 3
+    else if timeframe.ismonthly
+        period := 4
+
+    period
+
+generate_error(string timeframe, string chart_type)=>
+    bool is_same_chart_type = is_same_chart_type(chart_type)
+
+    const string error_1 = "Timeframe multiplier must be the same or greather than chart timeframe. "
+    const string error_2 = "Symbol type must match."
+
+    bool throw_error = true
+    string error_message = ""
+
+    if not is_same_chart_type
+        throw_error := true
+        error_message := error_2 + " Chart Type: " + str.upper(syminfo.type) + ". " + "Symbol Type: " + str.upper(chart_type) + ". "
+        [throw_error, error_message]
+
+    else
+        if timeframe == ""
+            throw_error := false
+            [throw_error, error_message]
+
+        else
+            int chart_time_multiplier = timeframe.multiplier
+            int chart_time_period = chart_time_period()
+            [multiplier, period] = timeframe_multiplier_and_period(timeframe)
+
+            if chart_time_period < period
+                throw_error := false
+                [throw_error, error_message]
+
+            else if chart_time_period > period
+                throw_error := true
+                error_message := error_1
+                [throw_error, error_message]
+
+            else if chart_time_period == period and chart_time_multiplier > multiplier
+                throw_error := true
+                error_message := error_1
+                [throw_error, error_message]
+
+            else if chart_time_period == period and chart_time_multiplier < multiplier
+                throw_error := false
+                [throw_error, error_message]
+
+            else if chart_time_period == period and chart_time_multiplier == multiplier
+                throw_error := false
+                [throw_error, error_message]
+
+            else if multiplier == -1
+                throw_error := false
+                [throw_error, error_message]
+
+handle_errors(string[] symbol_times, string[] symbol_types)=>
+    for i = 0 to 10
+        string symbol_number_error_base = "Error with Symbol: "
+        string symbol_number_error = ""
+
+        if i == 0
+            symbol_number_error := symbol_number_error_base + "Current"
+        else
+            symbol_number_error := symbol_number_error_base + str.tostring(i)
+
+        string symbol_time = symbol_times.get(i)
+        string symbol_type = symbol_types.get(i)
+        [throw_error, error_message] = generate_error(symbol_time, symbol_type)
+
+        if throw_error
+            runtime.error(error_message + symbol_number_error)
+            break
+
+clwma(float source)=>
+    var float sum = 0
+    var int count = 0
+    count += 1
+    sum += source * count
+    sum/count/count
+
+in_range(bool cond, int lower_range, int upper_range) =>
+    int bars = ta.barssince(cond == true)
+    lower_range <= bars and bars <= upper_range
+
+find_divergence(float macd, float hist, float h, float l, string symbol, settings s)=>
+    float source_atr = clwma(math.abs(hist * 3))
+
+    bool pl = na(ta.pivotlow(macd, s.left, s.right)) ? false : true
+    bool ph = na(ta.pivothigh(macd, s.left, s.right)) ? false : true
+
+    bool source_hl = macd[s.right] > ta.valuewhen(pl, macd[s.right], 1) and in_range(pl[1], s.lower_range, s.upper_range)
+    bool price_ll = l[s.right] < ta.valuewhen(pl, l[s.right], 1)
+    bool bullish_condition = price_ll and source_hl and pl
+    
+    bool oscLH = macd[s.right] < ta.valuewhen(ph, macd[s.right], 1) and in_range(ph[1], s.lower_range, s.upper_range)
+    bool priceHH = h[s.right] > ta.valuewhen(ph, h[s.right], 1)
+    bool bearish_condition = priceHH and oscLH and ph
+    
+    float offset = -s.right
+
+    var float current_bullish_value = 0
+    var int current_bull_idx = 0
+    var float last_bullish_value = 0
+    var int last_bullish_idx = 0
+    var float current_bearish_value = 0
+    var int current_bearish_idx = 0
+    var float last_bearish_value = 0
+    var int last_bearish_idx = 0
+
+    if pl
+        last_bullish_value := current_bullish_value
+        last_bullish_idx := current_bull_idx
+        current_bullish_value := macd[s.right]
+        current_bull_idx := bar_index - s.right
+
+    if ph
+        last_bearish_value := current_bearish_value
+        last_bearish_idx := current_bearish_idx
+        current_bearish_value := macd[s.right]
+        current_bearish_idx := bar_index - s.right
+
+    string label_style_bullish = label.style_triangleup
+    string label_style_bearish = label.style_triangledown
+    string size = size.tiny
+
+    divergence_data ret = divergence_data.new()
+
+    if bullish_condition
+        ret := divergence_data.new(true, time[s.right], time[bar_index - last_bullish_idx], current_bullish_value, last_bullish_value, source_atr, true, "Bullish", s.regular_bullish_color, symbol)
+
+    if bearish_condition
+        ret := divergence_data.new(true, time[s.right], time[bar_index - last_bearish_idx], current_bearish_value, last_bearish_value, source_atr, false, "Bearish", s.regular_bearish_color, symbol)
+
+    ret
+
+method divergence_alerts(divergence_data self, settings s)=>
+    bool wait = (s.confirm ? barstate.isconfirmed : true)
+    bool print = self.print.once() and wait
+
+    if print
+        if self.polarity
+            if s.bullish_divergence
+                alert(self.symbol + " " + "Bullish Divergence at " + str.format_time(self.t))
+        else
+            if s.bearish_divergence
+                alert(self.symbol + " " + "Bearish Divergence at " + str.format_time(self.t))
+
+method print_divergence(divergence_data self, bool ready, settings s)=>
+    if ready
+        if self.print
+            if self.polarity
+                if s.enable_regular_bullish
+                    if str.contains(s.divergence_label, "Line")
+                        line.new(self.back_t, self.back_level, self.t, self.level, xloc.bar_time , width = 2, color = self.colour)
+
+                    if str.contains(s.divergence_label, "Label")
+                        label.new(self.t, self.level - self.tr, xloc = xloc.bar_time, color = self.colour, style = label.style_triangleup, size = size.small, tooltip = self.tooltip)
+
+            else
+                if s.enable_regular_bearish
+                    if str.contains(s.divergence_label, "Line")
+                        line.new(self.back_t, self.back_level, self.t, self.level, xloc.bar_time , width = 2, color = self.colour)
+
+                    if str.contains(s.divergence_label, "Label")
+                        label.new(self.t, self.level + self.tr, xloc = xloc.bar_time, color = self.colour, style = label.style_triangledown, size = size.small, tooltip = self.tooltip)
+
+conditional_ema(float source = close, float length = 9, bool enable = true)=>
+    var float smoothed = 0
+    if enable and not na(source[1])
+        float alpha = 2. / (length + 1)
+        smoothed := alpha * source + (1 - alpha) * nz(smoothed[1])
+
+    else
+        smoothed
+
+conditional_sma(float source = close, int length = 9, bool enable = true)=>
+    if enable and not na(source[length - 1])
+        float sum = 0
+        for i = 0 to length - 1
+            sum += nz(source[i])
+
+        float sma = sum / length
+
+    else
+        float(na) 
+
+averages(float source, int length, string style)=>
+    sma = conditional_sma(source, length, style == "SMA")
+    ema = conditional_ema(source, length, style == "EMA")
+
+    rtn = switch style
+        "SMA" => sma
+        "EMA" => ema
+        => float(na)
+
+    rtn
+
+method signals(macd_data self, settings s, bool enable = true)=>
+    bool cross_over_0 = ta.crossover(self.macd, 0) and enable
+    bool cross_under_0 = ta.crossunder(self.macd, 0) and enable
+
+    bool macd_cross_bullish = ta.crossover(self.macd, self.sig) and enable
+    bool macd_cross_bearish = ta.crossunder(self.macd, self.sig) and enable
+
+    float hist_delta = self.hist - nz(self.hist[1], 0) 
+
+    bool hist_bullish_turn = ta.crossover(hist_delta, 0) and self.hist < 0 and enable
+    bool hist_bearish_turn = ta.crossunder(hist_delta, 0) and self.hist > 0 and enable
+
+    bool hist_bullish_continue = ta.crossover(hist_delta, 0) and self.hist > 0 and not macd_cross_bullish and enable
+    bool hist_bearish_continue = ta.crossunder(hist_delta, 0) and self.hist < 0 and not macd_cross_bearish and enable
+
+    signal signals = signal.new(cross_over_0, cross_under_0, macd_cross_bullish, macd_cross_bearish, hist_bullish_turn, hist_bearish_turn, hist_bullish_continue, hist_bearish_continue, self.symbol)
+
+
+macd(settings s, string symbol, string timeframe, bool enable_signal)=>
+    color polarity_color = close > open ? s.candle_bullish : s.candle_bearish
+    string tf = (timeframe == "" ? timeframe.period : timeframe) + timeframe_type()
+
+    float fast = averages(close, s.fast, s.osc_type)
+    float slow = averages(close, s.slow, s.osc_type)
+    float macd = fast - slow
+    float sig = averages(macd, s.sig, s.osc_type)
+    float hist = macd - sig
+
+    bool hist_direction = hist > hist[1]
+    bool hist_polarity = hist > 0
+
+    color colour = hist_direction and hist_polarity ? s.bullish_up : not hist_direction and hist_polarity ? s.bullish_down : not hist_direction and not hist_polarity ? s.bearish_down : hist_direction and not hist_polarity ? s.bearish_up : na
+
+    macd_data data = macd_data.new(macd, sig, hist, colour, symbol, tf, open, high, low, close, polarity_color)
+    signal signals = data.safe().signals(s, enable_signal)
+    divergence_data divergence = find_divergence(macd, hist, high, low, symbol, s)
+
+    [data, signals, divergence]
+
+method symbol(signal self, settings s)=>
+    bool set = s.char_set == "Symbol"
+    string cross_over_0_symbol = set ? "⍏" : "0U"
+    string cross_under_0_symbol = set ? "⍖" : "0D"
+    string hist_bearish_continue_symbol = set ? "↷" : "CD"
+    string hist_bearish_turn_symbol = set ? "⭝" : "TD"
+    string hist_bullish_continue_symbol = set ? "⤿" : "CU"
+    string hist_bullish_turn_symbol = set ? "⭜" : "TU"
+    string macd_cross_bearish_symbol = set ? "🠗" : "HD"
+    string macd_cross_bullish_symbol = set ? "🠕" : "HU"
+
+    bool wait = (s.confirm ? barstate.isconfirmed : true)
+
+    bool cross_over_0 = self.cross_over_0.once() and wait
+    bool cross_under_0 = self.cross_under_0.once() and wait
+    bool hist_bearish_continue = self.hist_bearish_continue.once() and wait
+    bool hist_bearish_turn = self.hist_bearish_turn.once() and wait
+    bool hist_bullish_continue = self.hist_bullish_continue.once() and wait
+    bool hist_bullish_turn = self.hist_bullish_turn.once() and wait
+    bool macd_cross_bearish = self.macd_cross_bearish.once() and wait
+    bool macd_cross_bullish = self.macd_cross_bullish.once() and wait
+
+    bool flag = 
+     ((cross_over_0 and s.cross_over_0)
+     or (cross_under_0 and s.cross_under_0) 
+     or (hist_bearish_continue and s.hist_bearish_continue) 
+     or (hist_bearish_turn and s.hist_bearish_turn) 
+     or (hist_bullish_continue and s.hist_bullish_continue) 
+     or (hist_bullish_turn and s.hist_bullish_turn) 
+     or (macd_cross_bearish and s.macd_cross_bearish) 
+     or (macd_cross_bullish and s.macd_cross_bullish))
+     and s.view == "Overview"
+
+    string symbol = 
+       cross_over_0 and s.cross_over_0 ? cross_over_0_symbol
+     : cross_under_0 and s.cross_under_0 ? cross_under_0_symbol
+     : hist_bearish_continue and s.hist_bearish_continue ? hist_bearish_continue_symbol
+     : hist_bearish_turn and s.hist_bearish_turn ? hist_bearish_turn_symbol
+     : hist_bullish_continue and s.hist_bullish_continue ? hist_bullish_continue_symbol
+     : hist_bullish_turn and s.hist_bullish_turn ? hist_bullish_turn_symbol
+     : macd_cross_bearish and s.macd_cross_bearish ? macd_cross_bearish_symbol
+     : macd_cross_bullish and s.macd_cross_bullish ? macd_cross_bullish_symbol
+     : ""
+
+    string tooltip = 
+       cross_over_0 and s.cross_over_0 ? "Cross Over 0"
+     : cross_under_0 and s.cross_under_0 ? "Cross Under 0"
+     : hist_bearish_continue and s.hist_bearish_continue ? "Histogram Bearish Continuation"
+     : hist_bearish_turn and s.hist_bearish_turn ? "Histogram Bearish Turn"
+     : hist_bullish_continue and s.hist_bullish_continue ? "Histogram Bullish Continuation" 
+     : hist_bullish_turn and s.hist_bullish_turn ? "Histogram Bullish Turn" 
+     : macd_cross_bearish and s.macd_cross_bearish ? "MACD Cross Bearish"
+     : macd_cross_bullish and s.macd_cross_bullish ? "MACD Cross Bullish" 
+     : ""
+
+    symbol_data.new(flag, symbol, tooltip)
+
+method signal_alert(signal self, settings s)=>
+    bool wait = (s.confirm ? barstate.isconfirmed : true)
+
+    bool cross_over_0 = self.cross_over_0.once() and wait
+    bool cross_under_0 = self.cross_under_0.once() and wait
+    bool hist_bearish_continue = self.hist_bearish_continue.once() and wait
+    bool hist_bearish_turn = self.hist_bearish_turn.once() and wait
+    bool hist_bullish_continue = self.hist_bullish_continue.once() and wait
+    bool hist_bullish_turn = self.hist_bullish_turn.once() and wait
+    bool macd_cross_bearish = self.macd_cross_bearish.once() and wait
+    bool macd_cross_bullish = self.macd_cross_bullish.once() and wait
+
+    if cross_over_0 and s.cross_over_0
+        alert(self.symbol + " " + "Cross Over 0", alert.freq_all)
+
+    if cross_under_0 and s.cross_under_0
+        alert(self.symbol + " " + "Cross Under 0", alert.freq_all)
+
+    if macd_cross_bullish and s.macd_cross_bullish
+        alert(self.symbol + " " + "MACD Cross Bullish", alert.freq_all)
+
+    if macd_cross_bearish and s.macd_cross_bearish
+        alert(self.symbol + " " + "MACD Cross Bearish", alert.freq_all)
+
+    if hist_bullish_turn and s.hist_bullish_turn
+        alert(self.symbol + " " + "Histogram Bullish Turn", alert.freq_all)
+
+    if hist_bearish_turn and s.hist_bearish_turn
+        alert(self.symbol + " " + "Histogram Bearish Turn", alert.freq_all)
+
+    if hist_bullish_continue and s.hist_bullish_continue
+        alert(self.symbol + " " + "Histogram Bullish Continuation", alert.freq_all)
+
+    if hist_bearish_continue and s.hist_bearish_continue
+        alert(self.symbol + " " + "Histogram Bearish Continuation", alert.freq_all)
+
+safe_request(simple string symbol, simple string timeframe, bool enable, simple int history_length, bool ERROR_BYPASS, settings s)=>
+    macd_data data_na = macd_data.new()
+    signal signal_na = signal.new()
+    divergence_data divergence_na = divergence_data.new()
+
+    simple string safe_symbol = ticker.modify(symbol, syminfo.session)
+
+    [data, signal_data, divergence] = request.security(safe_symbol, timeframe, macd(s, ticker.standard(symbol), timeframe, enable), barmerge.gaps_off, barmerge.lookahead_on, false, calc_bars_count = history_length)
+
+    if ERROR_BYPASS
+        if enable
+            [data.safe(), signal_data.safe(), divergence.safe()]
+        else
+            [data_na, signal_na, divergence_na]
+
+    else
+        [data.safe(), signal_data.safe(), divergence.safe()]
+// }
+
+// INPUTS {
+const string group_1 = "View"
+const string view_tip = "Select what symbol you want to view. If you select Overview it will show all of the signals over time."
+const string indi_tip = "Toggle between looking at the MACD and the price of the current symbol as a candle chart. This allows you to monitor your symbols without changing your chart. You can add indicators to the price action by adding an indicator to this indicator. Just pick one of the price options."
+const string history_length_tip = "This is the number of historical bars to present. This feature is here to prevent the indicator from breaking due to uneven historical data between the symbols."
+const string show_price_line_tip = "Toggle the current closeing price line for Price view."
+const string show_symbol_tip = "Display the current symbol you are viewing beside the MACD or Price."
+const string label_color_tip = "Adjust the color of the symbol lables. This effects both overview and single view."
+
+string view = input.string("Overview", "View", ["Current", "Symbol 1", "Symbol 2", "Symbol 3", "Symbol 4", "Symbol 5", "Symbol 6", "Symbol 7", "Symbol 8", "Symbol 9", "Symbol 10", "Overview", "None"], view_tip, group = group_1)
+string indi = input.string("MACD", "View Toggle", ["MACD", "Price"], tooltip = indi_tip, group = group_1)
+int history_length = input.int(3000, "History Length", minval = 0, maxval = 5000, tooltip = history_length_tip, group = group_1)
+bool show_price_line = input.bool(true, "Show Price Line", show_price_line_tip, group = group_1)
+bool show_symbol = input.bool(true, "Show Symbol Label", show_symbol_tip, group = group_1)
+color label_color = input.color(#FFFFFF, "Overview Label Color", label_color_tip, group = group_1)
+
+const string group_2 = "MACD Settings"
+const string osc_type_tip = "Pick what average you want to use for the MACD oscillator. SMA is simple moving average while EMA is exponential moving average."
+const string sig_type_tip = "Pick what average you want to use for the MACD signal. SMA is simple moving average while EMA is exponential moving average."
+const string fast_tip = "Adjust the moving average period fast length."
+const string slow_tip = "Adjust the moving average period slow length."
+const string sig_tip = "Adjust the moving average period signal length."
+const string overlay_cross_icon_tip = "Toggle MACD cross icons in single view mode. This will print a dot when the MACD crosses."
+
+string osc_type = input.string("EMA", "Oscillator MA Type", ["SMA", "EMA"], tooltip = osc_type_tip, group = group_2)
+string sig_type = input.string("EMA", "Signal Line MA Type", ["SMA", "EMA"], tooltip = sig_type_tip, group = group_2)
+int fast = input.int(12, "Fast Length", tooltip = fast_tip, minval = 1, group = group_2)
+int slow = input.int(26, "Slow Length", tooltip = slow_tip, minval = 1, group = group_2)
+int sig = input.int(9, "Signal Length", tooltip = sig_tip, minval = 1, group = group_2)
+bool overlay_cross_icon = input.bool(true, "MACD Cross Overlay Icon", overlay_cross_icon_tip, group = group_2)
+
+const string group_3 = "MACD Divergence"
+const string enable_regular_bullish_tip = "Show bullish divergences on single view mode. This will not effect alerts."
+const string enable_regular_bearish_tip = "Show bearish divergences on single view mode. This will not effect alerts."
+const string right_tip = "Adjust the number of bars into the future to look for confirmation of a signal. This directly impacts lag but enhances stability."
+const string left_tip = "Adjust the number of bars into the past to check for a signal. A longer period will filter out smaller moves."
+const string upper_range_tip = "Adjust the maximum size of a divergence."
+const string lower_range_tip = "Adjust the minimum size of a divergence."
+const string divergence_label_tip = "Pick how you want to visualize the divergence. You can pick from displaying it as a line, a label, or both."
+
+bool enable_regular_bullish = input.bool(true, "Regular Bullish", enable_regular_bullish_tip, group = group_3)
+bool enable_regular_bearish = input.bool(true, "Regular Bearish", enable_regular_bearish_tip, group = group_3)
+int right = input.int(10, "Divergence Look Right", tooltip = right_tip, minval = 0, group = group_3)
+int left = input.int(15, "Divergence Look Left", tooltip = left_tip, minval = 0, group = group_3)
+int upper_range = input.int(100, "Maximum Lookback", tooltip = upper_range_tip, minval = 0, group = group_3)
+int lower_range = input.int(5, "Minimum Lookback", tooltip = lower_range_tip, minval = 0, group = group_3)
+string divergence_label = input.string("Line and Label", "Divergence Drawings", ["Line", "Label", "Line and Label"], tooltip = divergence_label_tip, group = group_3)
+
+const string group_4 = "Table"
+const string enable_table_tip = "Toggle a table that gives you an overview of the screener. This shows the symbol, the time frame, the current alert, and the histogram color."
+const string tb_location_tip = "Pick where on the chart you want the table to be."
+const string tb_txt_col_tip = "Adjust the text color of the table."
+const string tb_bg_col_tip = "Adjust the background color of the table."
+const string tb_frame_col_tip = "Adjust the frame color of the table."
+
+bool enable_table = input.bool(true, "Enable Table", enable_table_tip, group = group_4)
+string tb_location = input.string("Bottom Right", "Position", ["Bottom Left", "Bottom Middle", "Bottom Right", "Middle Left", "Middle Center", "Middle Right", "Top Left", "Top Middle", "Top Right"], tooltip = tb_location_tip, group = group_4)
+color tb_txt_col = input.color(#ffffff, "Text Color", tooltip = tb_txt_col_tip, group = group_4)
+color tb_bg_col = input.color(#202236E6, "BG Color", tooltip = tb_bg_col_tip, group = group_4)
+color tb_frame_col = input.color(#060607E6, "Frame Color", tooltip = tb_frame_col_tip, group = group_4)
+
+const string group_5 = "Symbol"
+const string group_5_main_tip = " To use higher timeframes the symbol's have to be the same type. You can't have a crypto and a stock using htf at the same time as they dont have the same sessions and will result in an error."
+const string current_timeframe_tip = "Pick the timeframe of the chart symbol." + group_5_main_tip
+const string symbol_1_tip = "Pick Symbol 1's symbol and timeframe." + group_5_main_tip
+const string symbol_2_tip = "Pick Symbol 2's symbol and timeframe." + group_5_main_tip
+const string symbol_3_tip = "Pick Symbol 3's symbol and timeframe." + group_5_main_tip
+const string symbol_4_tip = "Pick Symbol 4's symbol and timeframe." + group_5_main_tip
+const string symbol_5_tip = "Pick Symbol 5's symbol and timeframe." + group_5_main_tip
+const string symbol_6_tip = "Pick Symbol 6's symbol and timeframe." + group_5_main_tip
+const string symbol_7_tip = "Pick Symbol 7's symbol and timeframe." + group_5_main_tip
+const string symbol_8_tip = "Pick Symbol 8's symbol and timeframe." + group_5_main_tip
+const string symbol_9_tip = "Pick Symbol 9's symbol and timeframe." + group_5_main_tip
+const string symbol_10_tip = "Pick Symbol 10's symbol and timeframe." + group_5_main_tip
+
+string current_timeframe = input.timeframe("", "Current Symbol Time Frame", tooltip = current_timeframe_tip, group = group_5)
+
+string symbol_1 = input.symbol("MSFT", "Symbol 1", group = group_5, inline = "symbol_1")
+string symbol_1_timeframe = input.timeframe("", "", tooltip = symbol_1_tip, group = group_5, inline = "symbol_1") 
+
+string symbol_2 = input.symbol("AAPL", "Symbol 2", group = group_5, inline = "symbol_2")
+string symbol_2_timeframe = input.timeframe("", "", tooltip = symbol_2_tip, group = group_5, inline = "symbol_2") 
+
+string symbol_3 = input.symbol("NVDA", "Symbol 3", group = group_5, inline = "symbol_3")
+string symbol_3_timeframe = input.timeframe("", "", tooltip = symbol_3_tip, group = group_5, inline = "symbol_3") 
+
+string symbol_4 = input.symbol("AMZN", "Symbol 4", group = group_5, inline = "symbol_4")
+string symbol_4_timeframe = input.timeframe("", "", tooltip = symbol_4_tip, group = group_5, inline = "symbol_4") 
+
+string symbol_5 = input.symbol("META", "Symbol 5", group = group_5, inline = "symbol_5")
+string symbol_5_timeframe = input.timeframe("", "", tooltip = symbol_5_tip, group = group_5, inline = "symbol_5") 
+
+string symbol_6 = input.symbol("GOOGL", "Symbol 6", group = group_5, inline = "symbol_6")
+string symbol_6_timeframe = input.timeframe("", "", tooltip = symbol_6_tip, group = group_5, inline = "symbol_6") 
+
+string symbol_7 = input.symbol("TSLA", "Symbol 7", group = group_5, inline = "symbol_7")
+string symbol_7_timeframe = input.timeframe("", "", tooltip = symbol_7_tip, group = group_5, inline = "symbol_7") 
+
+string symbol_8 = input.symbol("COST", "Symbol 8", group = group_5, inline = "symbol_8")
+string symbol_8_timeframe = input.timeframe("", "", tooltip = symbol_8_tip, group = group_5, inline = "symbol_8") 
+
+string symbol_9 = input.symbol("WMT", "Symbol 9", group = group_5, inline = "symbol_9")
+string symbol_9_timeframe = input.timeframe("", "", tooltip = symbol_9_tip, group = group_5, inline = "symbol_9") 
+
+string symbol_10 = input.symbol("INTC", "Symbol 10", group = group_5, inline = "symbol_10")
+string symbol_10_timeframe = input.timeframe("", "", tooltip = symbol_10_tip, group = group_5, inline = "symbol_10")
+
+const string group_6 = "Enable Symbol Alerts"
+const string group_6_main_tip = " When enabled it will give you alerts for this symbol. This also enables the symbol in the overview. If this is disabled it wont send alerts and it will not show up in overview, or the table."
+const string current_alert_tip = "Enable alerts for the chart." + group_6_main_tip
+const string symbol_1_alert_tip = "Enable alerts for symbol 1." + group_6_main_tip
+const string symbol_2_alert_tip = "Enable alerts for symbol 2." + group_6_main_tip
+const string symbol_3_alert_tip = "Enable alerts for symbol 3." + group_6_main_tip
+const string symbol_4_alert_tip = "Enable alerts for symbol 4." + group_6_main_tip
+const string symbol_5_alert_tip = "Enable alerts for symbol 5." + group_6_main_tip
+const string symbol_6_alert_tip = "Enable alerts for symbol 6." + group_6_main_tip
+const string symbol_7_alert_tip = "Enable alerts for symbol 7." + group_6_main_tip
+const string symbol_8_alert_tip = "Enable alerts for symbol 8." + group_6_main_tip
+const string symbol_9_alert_tip = "Enable alerts for symbol 9." + group_6_main_tip
+const string symbol_10_alert_tip = "Enable alerts for symbol 10." + group_6_main_tip
+
+bool current_alert = input.bool(true, "Enable Current Symbol", current_alert_tip, group = group_6)
+bool symbol_1_alert = input.bool(true, "Enable Symbol 1", symbol_1_alert_tip, group = group_6)
+bool symbol_2_alert = input.bool(true, "Enable Symbol 2", symbol_2_alert_tip, group = group_6)
+bool symbol_3_alert = input.bool(true, "Enable Symbol 3", symbol_3_alert_tip, group = group_6)
+bool symbol_4_alert = input.bool(true, "Enable Symbol 4", symbol_4_alert_tip, group = group_6)
+bool symbol_5_alert = input.bool(true, "Enable Symbol 5", symbol_5_alert_tip, group = group_6)
+bool symbol_6_alert = input.bool(true, "Enable Symbol 6", symbol_6_alert_tip, group = group_6)
+bool symbol_7_alert = input.bool(true, "Enable Symbol 7", symbol_7_alert_tip, group = group_6)
+bool symbol_8_alert = input.bool(true, "Enable Symbol 8", symbol_8_alert_tip, group = group_6)
+bool symbol_9_alert = input.bool(true, "Enable Symbol 9", symbol_9_alert_tip, group = group_6)
+bool symbol_10_alert = input.bool(true, "Enable Symbol 10", symbol_10_alert_tip, group = group_6)
+
+const string group_7 = "Alert Settings"
+const string confirm_tip = "Wait for bar to close before printing an alert."
+const string symbol_size_tip = "Pick what size you want the overview symbols to be."
+const string char_set_tip = "Pick what character set to use. Apple products can exhibit rendering issues and this is used as a work around."
+
+bool confirm = input.bool(true, "Wait for Close", confirm_tip, group = group_7)
+string symbol_size = input.string("Large", "Alert Symbol Size", ["Tiny", "Small", "Normal", "Large", "Huge", "Auto"], tooltip = symbol_size_tip, group = group_7)
+string char_set = input.string("Symbol", "Character Set", ["Symbol", "Letter"], char_set_tip, group = group_7)
+
+const string group_8 = "Alerts"
+const string cross_over_0_tip = "MACD crosses over the 0 line."
+const string cross_under_0_tip = "MACD crosses under the 0 line."
+const string macd_cross_bullish_tip = "Bullish MACD cross."
+const string macd_cross_bearish_tip = "Bearish MACD cross."
+const string hist_bullish_turn_tip = "MACD begins to turn bullish but hasn't crossed."
+const string hist_bearish_turn_tip = "MACD begins to turn bearish but hasn't crossed."
+const string hist_bullish_continue_tip = "MACD is in a bullish cross state and it was declining but began rising again."
+const string hist_bearish_continue_tip = "MACD is in a bearish cross state and it was rising but began falling again."
+
+bool cross_over_0 = input.bool(true, "Enable Cross Over 0 Alert", cross_over_0_tip, group = group_8)
+bool cross_under_0 = input.bool(true, "Enable Cross Under 0 Alert", cross_under_0_tip, group = group_8)
+bool macd_cross_bullish = input.bool(true, "Enable MACD Cross Bullish Alert", macd_cross_bullish_tip, group = group_8)
+bool macd_cross_bearish = input.bool(true, "Enable MACD Cross Bearish Alert", macd_cross_bearish_tip, group = group_8)
+bool hist_bullish_turn = input.bool(true, "Enable Histogram Bullish Turn Alert", hist_bullish_turn_tip, group = group_8)
+bool hist_bearish_turn = input.bool(true, "Enable Histogram Bearish Turn Alert", hist_bearish_turn_tip, group = group_8)
+bool hist_bullish_continue = input.bool(true, "Enable Histogram Bullish Continuation Alert", hist_bullish_continue_tip, group = group_8)
+bool hist_bearish_continue = input.bool(true, "Enable Histogram Bearish Continuation Alert", hist_bearish_continue_tip, group = group_8)
+
+const string group_9 = "Extended Alerts"
+const string group_9_main_tip = " Divergences are lagging, especially on a higher timeframe. These alerts will also tell you the time in the past when the divergence occurred."
+const string bullish_divergence_tip = "Bullish divergence alert." + group_9_main_tip
+const string bearish_divergence_tip = "Bearish divergence alert." + group_9_main_tip
+
+bool bullish_divergence = input.bool(true, "Enable Bullish Divergence Alert", bullish_divergence_tip, group = group_9)
+bool bearish_divergence = input.bool(true, "Enable Bearish Divergence Alert", bearish_divergence_tip, group = group_9)
+
+const string group_10 = "MACD Color"
+color macd_color = input.color(#2962FF, "MACD Color", group = group_10)
+color signal_color = input.color(#FF6D00, "Signal Color", group = group_10)
+color bullish_up = input.color(#26A69A, "Hist Bullish Up", group = group_10)
+color bullish_down = input.color(#B2DFDB, "Hist Bullish Down", group = group_10)
+color bearish_down = input.color(#FF5252, "Hist Bearisn Down", group = group_10)
+color bearish_up = input.color(#FFCDD2, "Hist Bearish Up", group = group_10)
+color icon_up = input.color(#00FF00, "MACD Cross Up Icon Color", group = group_10)
+color icon_down = input.color(#FF0000, "MACD Cross Down Icon Color", group = group_10)
+color regular_bullish_color = input.color(#46C47A, "Bullish Divergence", group = group_10)
+color regular_bearish_color = input.color(#F82E2E, "Bearish Divergence", group = group_10)
+color overview_line_color = input.color(#b2b5beab, "Overview Line Color", group = group_10)
+
+string group_11 = "Candle Color"
+color candle_bullish = input.color(#089981, "Bullish Candle", group = group_11)
+color candle_bearish = input.color(#F23645, "Bearish Color", group = group_11)
+
+const string group_12 = "Error Checking and Safe Requesting"
+const string enable_errors_tip = "Disabled by default. Only enable if you want to bypass the built in error checking. This will enable 'Safe Requesting'. Safe Requesting will only request enabled symbols and you will not be able to view symbols that are not enabled in this mode. Only use this if you want to mix symbol types and you know it will work."
+bool ERROR_BYPASS = input.bool(false, "Disable Error Checking", enable_errors_tip, group = group_12)
+
+settings s = settings.new(
+   view
+ , indi
+ , history_length
+ , show_symbol
+ , show_price_line
+ , confirm
+ , osc_type
+ , sig_type
+ , fast
+ , slow
+ , sig
+ , macd_color
+ , signal_color
+ , bullish_up
+ , bullish_down
+ , bearish_down
+ , bearish_up
+ , candle_bullish
+ , candle_bearish
+ , right
+ , left
+ , upper_range
+ , lower_range
+ , divergence_label
+ , enable_regular_bullish
+ , enable_regular_bearish
+ , regular_bullish_color
+ , regular_bearish_color
+ , enable_table
+ , tb_location
+ , tb_txt_col
+ , tb_bg_col
+ , tb_frame_col
+ , label_color
+ , cross_over_0
+ , cross_under_0
+ , macd_cross_bullish
+ , macd_cross_bearish
+ , hist_bullish_turn
+ , hist_bearish_turn
+ , hist_bullish_continue
+ , hist_bearish_continue
+ , bullish_divergence
+ , bearish_divergence
+ , char_set
+ )
+// }
+
+// BODY {
+color alpha = color.new(color.black, 100)
+
+bool plot_macd = indi == "MACD" and view != "Overview" and view != "None"
+bool plot_candle = indi == "Price" and view != "Overview" and view != "None"
+bool ready = bar_index > last_bar_index - history_length
+
+symbol_type_0 = request.security(ticker.standard(syminfo.tickerid), timeframe.period, syminfo.type, barmerge.gaps_off, barmerge.lookahead_on)
+symbol_type_1 = request.security(symbol_1, timeframe.period, syminfo.type, barmerge.gaps_off, barmerge.lookahead_on)
+symbol_type_2 = request.security(symbol_2, timeframe.period, syminfo.type, barmerge.gaps_off, barmerge.lookahead_on)
+symbol_type_3 = request.security(symbol_3, timeframe.period, syminfo.type, barmerge.gaps_off, barmerge.lookahead_on)
+symbol_type_4 = request.security(symbol_4, timeframe.period, syminfo.type, barmerge.gaps_off, barmerge.lookahead_on)
+symbol_type_5 = request.security(symbol_5, timeframe.period, syminfo.type, barmerge.gaps_off, barmerge.lookahead_on)
+symbol_type_6 = request.security(symbol_6, timeframe.period, syminfo.type, barmerge.gaps_off, barmerge.lookahead_on)
+symbol_type_7 = request.security(symbol_7, timeframe.period, syminfo.type, barmerge.gaps_off, barmerge.lookahead_on)
+symbol_type_8 = request.security(symbol_8, timeframe.period, syminfo.type, barmerge.gaps_off, barmerge.lookahead_on)
+symbol_type_9 = request.security(symbol_9, timeframe.period, syminfo.type, barmerge.gaps_off, barmerge.lookahead_on)
+symbol_type_10 = request.security(symbol_10, timeframe.period, syminfo.type, barmerge.gaps_off, barmerge.lookahead_on)
+
+string[] symbol_times = array.from(current_timeframe, symbol_1_timeframe, symbol_2_timeframe, symbol_3_timeframe, symbol_4_timeframe, symbol_5_timeframe, symbol_6_timeframe, symbol_7_timeframe, symbol_8_timeframe, symbol_9_timeframe, symbol_10_timeframe)
+string[] symbol_types = array.from(symbol_type_0, symbol_type_1, symbol_type_2, symbol_type_3, symbol_type_4, symbol_type_5, symbol_type_6, symbol_type_7, symbol_type_8, symbol_type_9, symbol_type_10)
+
+if barstate.isfirst and not ERROR_BYPASS
+    handle_errors(symbol_times, symbol_types)
+
+// safe_request(string symbol, string timeframe, bool enable, simple int history_length, bool ERROR_BYPASS)=>
+[data_0, signal_0, divergence_0] = safe_request(ticker.standard(syminfo.tickerid), current_timeframe, current_alert, history_length, ERROR_BYPASS, s)
+[data_1, signal_1, divergence_1] = safe_request(symbol_1, symbol_1_timeframe, symbol_1_alert, history_length, ERROR_BYPASS, s)
+[data_2, signal_2, divergence_2] = safe_request(symbol_2, symbol_2_timeframe, symbol_2_alert, history_length, ERROR_BYPASS, s)
+[data_3, signal_3, divergence_3] = safe_request(symbol_3, symbol_3_timeframe, symbol_3_alert, history_length, ERROR_BYPASS, s)
+[data_4, signal_4, divergence_4] = safe_request(symbol_4, symbol_4_timeframe, symbol_4_alert, history_length, ERROR_BYPASS, s)
+[data_5, signal_5, divergence_5] = safe_request(symbol_5, symbol_5_timeframe, symbol_5_alert, history_length, ERROR_BYPASS, s)
+[data_6, signal_6, divergence_6] = safe_request(symbol_6, symbol_6_timeframe, symbol_6_alert, history_length, ERROR_BYPASS, s)
+[data_7, signal_7, divergence_7] = safe_request(symbol_7, symbol_7_timeframe, symbol_7_alert, history_length, ERROR_BYPASS, s)
+[data_8, signal_8, divergence_8] = safe_request(symbol_8, symbol_8_timeframe, symbol_8_alert, history_length, ERROR_BYPASS, s)
+[data_9, signal_9, divergence_9] = safe_request(symbol_9, symbol_9_timeframe, symbol_9_alert, history_length, ERROR_BYPASS, s)
+[data_10, signal_10, divergence_10] = safe_request(symbol_10, symbol_10_timeframe, symbol_10_alert, history_length, ERROR_BYPASS, s)
+
+symbol_data symbol_signal_0  = signal_0.symbol(s)
+symbol_data symbol_signal_1  = signal_1.symbol(s)
+symbol_data symbol_signal_2  = signal_2.symbol(s)
+symbol_data symbol_signal_3  = signal_3.symbol(s)
+symbol_data symbol_signal_4  = signal_4.symbol(s)
+symbol_data symbol_signal_5  = signal_5.symbol(s)
+symbol_data symbol_signal_6  = signal_6.symbol(s)
+symbol_data symbol_signal_7  = signal_7.symbol(s)
+symbol_data symbol_signal_8  = signal_8.symbol(s)
+symbol_data symbol_signal_9  = signal_9.symbol(s)
+symbol_data symbol_signal_10 = signal_10.symbol(s)
+
+signal_0.safe().signal_alert(s)
+signal_1.safe().signal_alert(s)
+signal_2.safe().signal_alert(s)
+signal_3.safe().signal_alert(s)
+signal_4.safe().signal_alert(s)
+signal_5.safe().signal_alert(s)
+signal_6.safe().signal_alert(s)
+signal_7.safe().signal_alert(s)
+signal_8.safe().signal_alert(s)
+signal_9.safe().signal_alert(s)
+signal_10.safe().signal_alert(s)
+
+divergence_0.divergence_alerts(s)
+divergence_1.divergence_alerts(s)
+divergence_2.divergence_alerts(s)
+divergence_3.divergence_alerts(s)
+divergence_4.divergence_alerts(s)
+divergence_5.divergence_alerts(s)
+divergence_6.divergence_alerts(s)
+divergence_7.divergence_alerts(s)
+divergence_8.divergence_alerts(s)
+divergence_9.divergence_alerts(s)
+divergence_10.divergence_alerts(s)
+
+macd_data view_data = switch s.view
+    "Current"  => data_0
+    "Symbol 1" => data_1
+    "Symbol 2" => data_2
+    "Symbol 3" => data_3
+    "Symbol 4" => data_4
+    "Symbol 5" => data_5
+    "Symbol 6" => data_6
+    "Symbol 7" => data_7
+    "Symbol 8" => data_8
+    "Symbol 9" => data_9
+    "Symbol 10" => data_10
+    => macd_data.new()
+
+signal view_signal = switch s.view
+    "Current"  => signal_0
+    "Symbol 1" => signal_1
+    "Symbol 2" => signal_2
+    "Symbol 3" => signal_3
+    "Symbol 4" => signal_4
+    "Symbol 5" => signal_5
+    "Symbol 6" => signal_6
+    "Symbol 7" => signal_7
+    "Symbol 8" => signal_8
+    "Symbol 9" => signal_9
+    "Symbol 10" => signal_10
+    => signal.new()
+
+divergence_data view_divergence = switch s.view
+    "Current"  => divergence_0
+    "Symbol 1" => divergence_1
+    "Symbol 2" => divergence_2
+    "Symbol 3" => divergence_3
+    "Symbol 4" => divergence_4
+    "Symbol 5" => divergence_5
+    "Symbol 6" => divergence_6
+    "Symbol 7" => divergence_7
+    "Symbol 8" => divergence_8
+    "Symbol 9" => divergence_9
+    "Symbol 10" => divergence_10
+    => divergence_data.new()
+ 
+if ready
+    if s.view != "Overview" and s.show_symbol
+        float y = plot_macd ? 0 : view_data.o
+        var label tickerid = label.new(bar_index, y, view_data.symbol + "\n" + view_data.timeframe, color = alpha, size = size.normal, style = label.style_label_left, textcolor = s.label_color)
+        tickerid.set_xy(bar_index, y)
+    
+    if s.view == "Overview"
+        if current_alert
+            var label title_0  = label.new(bar_index, 40, data_0.symbol, color = alpha, size = size.normal, style = label.style_label_left, textcolor = s.label_color)
+            title_0.set_x(bar_index)
+    
+        if symbol_1_alert
+            var label title_1  = label.new(bar_index, 36, data_1.symbol, color = alpha, size = size.normal, style = label.style_label_left, textcolor = s.label_color)
+            title_1.set_x(bar_index)
+    
+        if symbol_2_alert
+            var label title_2  = label.new(bar_index, 32, data_2.symbol, color = alpha, size = size.normal, style = label.style_label_left, textcolor = s.label_color)
+            title_2.set_x(bar_index)
+    
+        if symbol_3_alert
+            var label title_3  = label.new(bar_index, 28, data_3.symbol, color = alpha, size = size.normal, style = label.style_label_left, textcolor = s.label_color)
+            title_3.set_x(bar_index)
+            
+        if symbol_4_alert
+            var label title_4  = label.new(bar_index, 24, data_4.symbol, color = alpha, size = size.normal, style = label.style_label_left, textcolor = s.label_color)
+            title_4.set_x(bar_index)
+            
+        if symbol_5_alert
+            var label title_5  = label.new(bar_index, 20, data_5.symbol, color = alpha, size = size.normal, style = label.style_label_left, textcolor = s.label_color)
+            title_5.set_x(bar_index)
+
+        if symbol_6_alert
+            var label title_6  = label.new(bar_index, 16, data_6.symbol, color = alpha, size = size.normal, style = label.style_label_left, textcolor = s.label_color)
+            title_6.set_x(bar_index)
+            
+        if symbol_7_alert
+            var label title_7  = label.new(bar_index, 12, data_7.symbol, color = alpha, size = size.normal, style = label.style_label_left, textcolor = s.label_color)
+            title_7.set_x(bar_index)
+            
+        if symbol_8_alert
+            var label title_8  = label.new(bar_index, 8, data_8.symbol, color = alpha, size = size.normal, style = label.style_label_left, textcolor = s.label_color)
+            title_8.set_x(bar_index)
+            
+        if symbol_9_alert
+            var label title_9  = label.new(bar_index, 4, data_9.symbol, color = alpha, size = size.normal, style = label.style_label_left, textcolor = s.label_color)
+            title_9.set_x(bar_index)
+            
+        if symbol_10_alert
+            var label title_10 = label.new(bar_index, 0, data_10.symbol, color = alpha, size = size.normal, style = label.style_label_left, textcolor = s.label_color)
+            title_10.set_x(bar_index)
+    
+    string size = symbol_size(symbol_size)
+    
+    if symbol_signal_0.flag
+        label.new(bar_index, 40, symbol_signal_0.symbol, color = alpha, textcolor = data_0.colour, size = size, style = label.style_label_center, tooltip = symbol_signal_0.tooltip)
+    
+    if symbol_signal_1.flag
+        label.new(bar_index, 36, symbol_signal_1.symbol, color = alpha, textcolor = data_1.colour, size = size, style = label.style_label_center, tooltip = symbol_signal_1.tooltip)
+    
+    if symbol_signal_2.flag
+        label.new(bar_index, 32, symbol_signal_2.symbol, color = alpha, textcolor = data_2.colour, size = size, style = label.style_label_center, tooltip = symbol_signal_2.tooltip)
+    
+    if symbol_signal_3.flag
+        label.new(bar_index, 28, symbol_signal_3.symbol, color = alpha, textcolor = data_3.colour, size = size, style = label.style_label_center, tooltip = symbol_signal_3.tooltip)
+    
+    if symbol_signal_4.flag
+        label.new(bar_index, 24, symbol_signal_4.symbol, color = alpha, textcolor = data_4.colour, size = size, style = label.style_label_center, tooltip = symbol_signal_4.tooltip)
+    
+    if symbol_signal_5.flag
+        label.new(bar_index, 20, symbol_signal_5.symbol, color = alpha, textcolor = data_5.colour, size = size, style = label.style_label_center, tooltip = symbol_signal_5.tooltip)
+    
+    if symbol_signal_6.flag
+        label.new(bar_index, 16, symbol_signal_6.symbol, color = alpha, textcolor = data_6.colour, size = size, style = label.style_label_center, tooltip = symbol_signal_6.tooltip)
+    
+    if symbol_signal_7.flag
+        label.new(bar_index, 12, symbol_signal_7.symbol, color = alpha, textcolor = data_7.colour, size = size, style = label.style_label_center, tooltip = symbol_signal_7.tooltip)
+    
+    if symbol_signal_8.flag
+        label.new(bar_index, 8, symbol_signal_8.symbol, color = alpha, textcolor = data_8.colour, size = size, style = label.style_label_center, tooltip = symbol_signal_8.tooltip)
+    
+    if symbol_signal_9.flag
+        label.new(bar_index, 4, symbol_signal_9.symbol, color = alpha, textcolor = data_9.colour, size = size, style = label.style_label_center, tooltip = symbol_signal_9.tooltip)
+    
+    if symbol_signal_10.flag
+        label.new(bar_index, 0, symbol_signal_10.symbol, color = alpha, textcolor = data_10.colour, size = size, style = label.style_label_center, tooltip = symbol_signal_10.tooltip)
+    
+    table tb = table.new(location(s), 5, 12, s.tb_bg_col, s.tb_frame_col, border_color = s.tb_frame_col, border_width = 1, frame_width = 2)
+    
+    if s.enable_table
+        if current_alert
+            tb.cell_config(0, data_0, symbol_signal_0, s)
+    
+        if symbol_1_alert
+            tb.cell_config(1, data_1, symbol_signal_1, s)
+    
+        if symbol_2_alert
+            tb.cell_config(2, data_2, symbol_signal_2, s)
+    
+        if symbol_3_alert
+            tb.cell_config(3, data_3, symbol_signal_3, s)
+    
+        if symbol_4_alert
+            tb.cell_config(4, data_4, symbol_signal_4, s)
+    
+        if symbol_5_alert
+            tb.cell_config(5, data_5, symbol_signal_5, s)
+    
+        if symbol_6_alert
+            tb.cell_config(6, data_6, symbol_signal_6, s)
+    
+        if symbol_7_alert
+            tb.cell_config(7, data_7, symbol_signal_7, s)
+    
+        if symbol_8_alert
+            tb.cell_config(8, data_8, symbol_signal_8, s)
+    
+        if symbol_9_alert
+            tb.cell_config(9, data_9, symbol_signal_9, s)
+    
+        if symbol_10_alert
+            tb.cell_config(10, data_10, symbol_signal_10, s)
+    
+    if plot_candle and s.show_price_line
+        var line price_line = line.new(bar_index, view_data.c, bar_index, view_data.c, color = view_data.polarity, style = line.style_dotted, extend = extend.both)
+        price_line.set_xy1(bar_index - 1, view_data.c)
+        price_line.set_xy2(bar_index, view_data.c)
+        price_line.set_color(view_data.polarity)
+
+plot(current_alert and view == "Overview" ? 40 : na, "Current Overview Line", overview_line_color, 1, display = display.all - display.price_scale, editable = false, show_last = history_length)
+plot(symbol_1_alert and view == "Overview" ? 36 : na, "Symbole 1 Overview Line", overview_line_color, 1, display = display.all - display.price_scale, editable = false, show_last = history_length)
+plot(symbol_2_alert and view == "Overview" ? 32 : na, "Symbole 2 Overview Line", overview_line_color, 1, display = display.all - display.price_scale, editable = false, show_last = history_length)
+plot(symbol_3_alert and view == "Overview" ? 28 : na, "Symbole 3 Overview Line", overview_line_color, 1, display = display.all - display.price_scale, editable = false, show_last = history_length)
+plot(symbol_4_alert and view == "Overview" ? 24 : na, "Symbole 4 Overview Line", overview_line_color, 1, display = display.all - display.price_scale, editable = false, show_last = history_length)
+plot(symbol_5_alert and view == "Overview" ? 20 : na, "Symbole 5 Overview Line", overview_line_color, 1, display = display.all - display.price_scale, editable = false, show_last = history_length)
+plot(symbol_6_alert and view == "Overview" ? 16 : na, "Symbole 6 Overview Line", overview_line_color, 1, display = display.all - display.price_scale, editable = false, show_last = history_length)
+plot(symbol_7_alert and view == "Overview" ? 12 : na, "Symbole 7 Overview Line", overview_line_color, 1, display = display.all - display.price_scale, editable = false, show_last = history_length)
+plot(symbol_8_alert and view == "Overview" ? 8 : na, "Symbole 8 Overview Line", overview_line_color, 1, display = display.all - display.price_scale, editable = false, show_last = history_length)
+plot(symbol_9_alert and view == "Overview" ? 4 : na, "Symbole 9 Overview Line", overview_line_color, 1, display = display.all - display.price_scale, editable = false, show_last = history_length)
+plot(symbol_10_alert and view == "Overview" ? 0 : na, "Symbole 10 Overview Line", overview_line_color, 1, display = display.all - display.price_scale, editable = false, show_last = history_length)
+
+plot(plot_candle ? view_data.c : na, "Close", alpha, display = display.data_window, editable = false)
+plot(plot_candle ? view_data.o : na, "Open", alpha, display = display.data_window, editable = false)
+plot(plot_candle ? view_data.h : na, "High", alpha, display = display.data_window, editable = false)
+plot(plot_candle ? view_data.l : na, "Low", alpha, display = display.data_window, editable = false)
+plot(plot_candle ? math.avg(view_data.h, view_data.l) : na, "HL2", alpha, display = display.data_window, editable = false)
+plot(plot_candle ? math.avg(view_data.h, view_data.l, view_data.c) : na, "HLC3", alpha, display = display.data_window, editable = false)
+plot(plot_candle ? math.avg(view_data.o, view_data.h, view_data.l, view_data.c) : na, "OHLC4", alpha, display = display.data_window, editable = false)
+plot(plot_candle ? math.avg(view_data.h, view_data.l, view_data.c, view_data.c) : na, "HLCC4", alpha, display = display.data_window, editable = false)
+
+plot(plot_macd ? view_data.hist : na, "Histogram", view_data.colour, style = plot.style_columns, editable = false)
+plot(plot_macd ? view_data.sig : na, "Signal", s.signal_color, editable = false)
+plot(plot_macd ? view_data.macd : na, "MACD", s.macd_color, editable = false)
+
+plotshape(plot_macd and view_signal.macd_cross_bullish.once() and overlay_cross_icon ? view_data.macd : na, "Cross Over Icon", shape.circle, location.absolute, icon_up, size = size.tiny, editable = false)
+plotshape(plot_macd and view_signal.macd_cross_bearish.once() and overlay_cross_icon ? view_data.macd : na, "Cross Over Icon", shape.circle, location.absolute, icon_down, size = size.tiny, editable = false)
+
+view_divergence.print_divergence(ready and plot_macd, s)
+
+plotcandle(plot_candle ? view_data.o : na, plot_candle ? view_data.h : na, plot_candle ? view_data.l : na, plot_candle ? view_data.c : na, "Chart", view_data.polarity, view_data.polarity, bordercolor = view_data.polarity, editable = false)
+// }

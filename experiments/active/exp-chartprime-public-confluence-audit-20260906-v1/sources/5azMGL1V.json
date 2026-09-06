@@ -1,0 +1,47 @@
+{
+  "id": "5azMGL1V",
+  "title": "RSI Shift Zone [ChartPrime]",
+  "url": "https://www.tradingview.com/script/5azMGL1V-RSI-Shift-Zone-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:55.720174+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/5azMGL1V-RSI-Shift-Zone-ChartPrime/",
+  "created_at": "2025-07-22T12:01:54.299019+00:00",
+  "updated_at": "2025-07-23T08:43:33.227306+00:00",
+  "description": "OVERVIEW\nRSI Shift Zone [ChartPrime] is a sentiment-shift detection tool that bridges momentum and price action. It plots dynamic channel zones directly on the price chart whenever the RSI crosses above or below critical thresholds (default: 70 for overbought, 30 for oversold). These plotted zones reveal where market sentiment likely flipped, helping traders pinpoint powerful support/resistance clusters and breakout opportunities in real time.\n\n⯁ HOW IT WORKS\nWhen the RSI crosses either the upper or lower level:\n A new Shift Zone channel is instantly formed.\n The channel’s boundaries anchor to the high and low of the candle at the moment of crossing. A mid-line (average of high and low) is plotted for easy visual reference.\n The channel remains visible on the chart for at least a user-defined minimum number of bars (default: 15) to ensure only meaningful shifts are highlighted.\n\nThe channel is color-coded to reflect bullish or bearish sentiment, adapting dynamically based on whether the RSI breached the upper or lower level. Labels with actual RSI values can also be shown inside the zone for added context.\n\n⯁ KEY TECHNICAL DETAILS\n Uses a standard RSI calculation (default length: 14). Detects crossovers above the upper level (trend strength) and crossunders below the lower level (oversold exhaustion). Applies the channel visually on the main chart, rather than only in the indicator pane — giving traders a precise map of where sentiment shifts have historically triggered price reactions. Auto-clears the zone when the minimum bar length is satisfied and a new shift is detected.\n\n⯁ USAGE\nTraders can use these RSI Shift Zones as powerful tactical levels:\n Treat the channel’s high/low boundaries as dynamic breakout lines — watch for candles closing beyond them to confirm fresh trend continuation.\n Use the midline as an equilibrium reference for pullbacks within the zone.\n Visual RSI value labels offer quick checks on whether the zone formed due to extreme overbought or oversold conditions.\n\nCONCLUSION\nRSI Shift Zone [ChartPrime] transforms a simple RSI threshold crossing into a meaningful structural tool by projecting sentiment flips directly onto the price chart. This empowers traders to see where momentum-based turning points occur and leverage those levels for breakout plays, reversals, or high-confidence support/resistance zones — all in one glance.",
+  "script": {
+    "id": 2913900,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;ef4f0fcf9c264e9787f3ee352ba190fd",
+    "version_maj": 2,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bef4f0fcf9c264e9787f3ee352ba190fd/2",
+  "source_http_status": 200,
+  "source_sha256": "f1c4925078de83eb413256db60738caeaa652abb8f184e65e8e6fd6917ff89ed",
+  "source_lines": 99,
+  "source_metadata": {
+    "created": "2025-07-23T08:43:32.670846Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": false,
+      "kind": "study",
+      "originalScriptId": "USER;d3ff6bfac294488fad020be9b31c941b",
+      "originalScriptVersion": "0.457",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 10
+      }
+    },
+    "lastVersionMaj": "2.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "RSI Shift Zone [ChartPrime]",
+    "updated": "2025-07-23T08:43:32.670846Z",
+    "version": "2.0"
+  }
+}

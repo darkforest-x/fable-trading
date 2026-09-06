@@ -1,0 +1,74 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ExoMaven
+
+//@version=5
+indicator(title = "Historical Volatility Scale [ChartPrime]", shorttitle = "Historical Volatility Scale [V1]", overlay = true, scale = scale.none, max_lines_count = 100)
+
+
+//░█████╗░██╗░░██╗░█████╗░██████╗░████████╗  ██████╗░██████╗░██╗███╗░░░███╗███████╗
+//██╔══██╗██║░░██║██╔══██╗██╔══██╗╚══██╔══╝  ██╔══██╗██╔══██╗██║████╗░████║██╔════╝
+//██║░░╚═╝███████║███████║██████╔╝░░░██║░░░  ██████╔╝██████╔╝██║██╔████╔██║█████╗░░
+//██║░░██╗██╔══██║██╔══██║██╔══██╗░░░██║░░░  ██╔═══╝░██╔══██╗██║██║╚██╔╝██║██╔══╝░░
+//╚█████╔╝██║░░██║██║░░██║██║░░██║░░░██║░░░  ██║░░░░░██║░░██║██║██║░╚═╝░██║███████╗
+//╚════╝░╚═╝░░╚═╝╚═╝░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░  ╚═╝░░░░░╚═╝░░╚═╝╚═╝╚═╝░░░░░╚═╝╚══════╝
+
+//--------------------------------------------------------------------------------
+
+
+//░█████╗░██████╗░███████╗░█████╗░████████╗███████╗██████╗░  ██████╗░██╗░░░██╗
+//██╔══██╗██╔══██╗██╔════╝██╔══██╗╚══██╔══╝██╔════╝██╔══██╗  ██╔══██╗╚██╗░██╔╝
+//██║░░╚═╝██████╔╝█████╗░░███████║░░░██║░░░█████╗░░██║░░██║  ██████╦╝░╚████╔╝░
+//██║░░██╗██╔══██╗██╔══╝░░██╔══██║░░░██║░░░██╔══╝░░██║░░██║  ██╔══██╗░░╚██╔╝░░
+//╚█████╔╝██║░░██║███████╗██║░░██║░░░██║░░░███████╗██████╔╝  ██████╦╝░░░██║░░░
+//░╚════╝░╚═╝░░╚═╝╚══════╝╚═╝░░╚═╝░░░╚═╝░░░╚══════╝╚═════╝░  ╚═════╝░░░░╚═╝░░░
+
+//███████╗██╗░░██╗░█████╗░███╗░░░███╗░█████╗░██╗░░░██╗███████╗███╗░░██╗
+//██╔════╝╚██╗██╔╝██╔══██╗████╗░████║██╔══██╗██║░░░██║██╔════╝████╗░██║
+//█████╗░░░╚███╔╝░██║░░██║██╔████╔██║███████║╚██╗░██╔╝█████╗░░██╔██╗██║
+//██╔══╝░░░██╔██╗░██║░░██║██║╚██╔╝██║██╔══██║░╚████╔╝░██╔══╝░░██║╚████║
+//███████╗██╔╝╚██╗╚█████╔╝██║░╚═╝░██║██║░░██║░░╚██╔╝░░███████╗██║░╚███║
+//╚══════╝╚═╝░░╚═╝░╚════╝░╚═╝░░░░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░╚══════╝╚═╝░░╚══╝
+
+//-------------------------------------------------------------------------------
+
+len = input.int(title = "Length", defval = 50)
+vol = ta.stdev(close / close[1], len, true)
+vol_percentile = ta.percentrank(vol, len)
+scale_offset = 5
+scale_width = 10
+pin_offset = 5
+pin_size = size.huge
+inv = color.new(color.black, 100)
+polar_size = size.huge
+
+var scale = array.new_line()
+var line mover = na
+var label pin = na
+var label heat = na
+var label snooze = na
+
+if barstate.isfirst
+    for i = 0 to 99
+        array.push(scale, line.new(1, i, 1, i + 1, width = scale_width))
+
+    pin := label.new(na, na, color = inv, size = pin_size, text = "◀", style = label.style_label_left)
+    heat := label.new(na, na, color = inv, size = polar_size, text = "🔥", style = label.style_label_down)
+    snooze := label.new(na, na, color = inv, size = polar_size, text = "😴", style = label.style_label_up)
+
+
+if barstate.islast
+    for i = 0 to array.size(scale) - 1
+        branch = array.get(scale, i)
+        line.set_xloc(branch, bar_index + scale_offset, bar_index + scale_offset, xloc.bar_index)
+        line.set_color(branch, color.from_gradient(i, 0, 100, color.green, color.red))
+
+    label.set_xloc(pin, bar_index + pin_offset, xloc.bar_index)
+    label.set_y(pin, vol_percentile)
+    label.set_textcolor(pin, color.from_gradient(vol_percentile, 0, 100, color.green, color.red))
+
+    label.set_xloc(heat, bar_index + scale_offset, xloc.bar_index)
+    label.set_y(heat, 100)
+
+    label.set_xloc(snooze, bar_index + scale_offset, xloc.bar_index)
+    label.set_y(snooze, 0)
+    

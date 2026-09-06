@@ -1,0 +1,47 @@
+{
+  "id": "3iIKktis",
+  "title": "Macro Trend Split Profile [ChartPrime]",
+  "url": "https://www.tradingview.com/script/3iIKktis-Macro-Trend-Split-Profile-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:34:57.194528+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/3iIKktis-Macro-Trend-Split-Profile-ChartPrime/",
+  "created_at": "2026-07-28T12:30:58.000309+00:00",
+  "updated_at": null,
+  "description": "Macro Trend Split Profile [ChartPrime]\n\n🔶 OVERVIEW\n\nTraders often lose focus during long trends, failing to realize where the true market value is being built. The Macro Trend Split Profile [ChartPrime] bridges the gap between directional trend-following and volume-profile structure. It anchors a profile analysis at the start of every macro trend leg, splitting the histogram into Bullish and Bearish components.\n\nInstead of seeing a combined profile, this script visually separates where bulls were aggressive versus where bears attempted to defend, providing a clear map of which price levels represent the highest conviction for either side.\n\n🔶 HOW IT WORKS\n\nThe indicator executes its structural analysis through a three-stage engine:\n\n Noise-Filtered Macro Trend Detection: At its core, the script utilizes a Supertrend engine with a noise-filter multiplier. This provides a clean, macro-directional baseline that ignores minor retracements and identifies high-conviction trend legs. Trend-Start Profile Anchoring: Once a trend begins, the indicator initializes a memory array. It captures every candle in that trend leg and categorizes them as either Bullish (Close > Open) or Bearish (Close < Open). Split-Histogram Mapping: Once the trend leg hits your minimum bar requirement, the indicator generates a dual-sided histogram at the start point of the trend. The Bullish profile expands to the right, while the Bearish profile expands to the left, allowing for an immediate visual comparison of institutional interest. Dual Point of Control (POC) Tracking: The script calculates the Point of Control for both bulls and bears independently, drawing extended dashed lines across your chart that mark the exact price levels where each side has deposited the most structural weight.\n\n🔶 KEY FEATURES\n\n Independent POC Projection: Independently identifies the strongest bullish and bearish structural walls, helping you identify where the current trend will likely find support or resistance. Automated Dashboard: A sleek, top-right status table provides the live macro trend direction and the exact price coordinates for the active Bullish and Bearish POC levels. Dynamic Rescaling: The profile histogram automatically rescales based on the number of bars in a trend and the intensity of the volume distribution, ensuring the visual footprint always fits your chart perfectly. Trend-Leg Sanitization: When a trend flips (e.g., from bullish to bearish), the script automatically purges the old data arrays and resets the profile engine, ensuring you are never analyzing \"stale\" historical order blocks.\n\n🔶 TRADING APPLICATIONS\n\n Trend-Leg Retracement Entries: During a strong trend, monitor the Point of Control line that matches your trend direction. A dip back into the Bullish POC (during a Bullish trend) represents a high-probability zone to reload positions at a institutional fair-value level. Confluence for Reversals: If price approaches an opposing POC (e.g., Bearish POC during a Bullish trend), this marks a high-friction zone. These levels are prime candidates for taking partial profits, as they represent the most \"defended\" territory for the counter-trend side. Macro Structure Shifts: If price closes consistently beyond the most recent POC projection, it indicates that the current trend has exhausted its structural support, often serving as a signal to tighten stop-losses or prepare for a potential macro trend flip.\n\n🔶 SETTINGS\n\n Macro Trend Length & Multiplier: Controls the sensitivity of the Supertrend. Higher values filter out aggressive noise and capture only the most significant primary trend legs. Minimum Bars for Profile: Sets the threshold for how long a trend must persist before the profile begins to render, preventing false signals during short-lived, volatile consolidations. Profile Resolution (Bins/Width): Customize the granularity of the histogram segments and the horizontal space the indicator occupies on your chart to suit your workspace preference.\n\n🔶 CONCLUSION\n\nThe Macro Trend Split Profile [ChartPrime] is a surgical tool for trend traders. By splitting the volume profile into Bullish and Bearish components, it stops you from guessing where the \"other side\" is positioned and shows you exactly where the institutional battle lines are drawn.",
+  "script": {
+    "id": 6737598,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;7820a52ba7764734ab2b3af521232928",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B7820a52ba7764734ab2b3af521232928/1",
+  "source_http_status": 200,
+  "source_sha256": "79c9527ae5b53c6748c0ab4fe23430a24dd7c2e981885074f79003775a7e6b25",
+  "source_lines": 227,
+  "source_metadata": {
+    "created": "2026-07-28T12:30:56.727104Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;3f66080f4602424b87d7192dff8eaa05",
+      "originalScriptVersion": "1.0",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 1
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Macro Trend Split Profile [ChartPrime]",
+    "updated": "2026-07-28T12:30:56.727104Z",
+    "version": "1.0"
+  }
+}

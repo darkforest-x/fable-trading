@@ -5305,6 +5305,34 @@ experiments:
       cannot pass90%/80 gates. Finite mechanism test, not a candidate nomination.
       All89 old control requests retained, including old invalid risks. No audit.
 
+  - experiment_id: exp-chartprime-public-confluence-audit-20260906-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fee0dec"
+    status: accepted
+    question: Which of ChartPrime's public scripts add causally usable confluence to the trend system beyond duplicated price transformations?
+    single_variable: Source audit only; no price experiment or parameter search.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    path: experiments/active/exp-chartprime-public-confluence-audit-20260906-v1
+    canonical_report: analysis/html/p1_chartprime_public_confluence_audit_20260906.html
+    result: Static source audit complete; 148 unique publications, 134 source-read and 14 description-only. No profitability or runtime acceptance.
+    artifacts:
+      - chartprime-confluence-v1-catalogue
+      - chartprime-confluence-v1-report
+      - chartprime-confluence-v1-html
+      - chartprime-confluence-v1-artifact
+      - chartprime-confluence-v1-verification
+    reuse_allowed: false
+    notes: >-
+      Owner request20260906 supersedes immediate V19 replay. Inventory all
+      publicly listed scripts; retrieve code only for explicit public open
+      access. Preserve per-item versions, source hashes and unavailable states.
+      No profitability, full runtime nonrepainting or independent-winrate claim.
+      Accepted denotes audit completion only. No prices, holdout or strategy
+      changes; 30 evidence tests pass. HTML structural-only; browser preview
+      blocked by URL policy and not bypassed. Existing profitability goal active.
+
   - experiment_id: exp-btcusdtp-1h-failed-confirm-preholdout-20260906-v18
     source_repo: darkforest-x/fable-trading
     source_commit: "cbb25d3"

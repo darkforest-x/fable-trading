@@ -1,0 +1,42 @@
+{
+  "id": "tKw4WJVt",
+  "title": "Historical Volatility Scale [ChartPrime]",
+  "url": "https://www.tradingview.com/script/tKw4WJVt-Historical-Volatility-Scale-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:37:47.187079+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/tKw4WJVt-Historical-Volatility-Scale-ChartPrime/",
+  "created_at": "2023-03-16T22:00:54.108628+00:00",
+  "updated_at": null,
+  "description": "This indicator outputs a visual scale representing the level of volatility in the market relative to the timeframe selected on the users chart. The method of volatility used is \"historical volatility\" which is calculated by taking the standard deviation of a series of \"x\" length which contains the current closing price divided by the previous closing price for all nodes. The output of the volatility is standardized by also running an additional percentrank calculation over the raw volatility values to allow the volatility scale to oscillate properly between its minimum of 0 and maximum of 100.\n\n📗 SETTINGS\n\nLength: The length determines how many bars/nodes should be considered when calculating the standard deviation. In simple terms, the higher the length, the less sensitive and less reactive the scale will be to current price action, and larger moves would be required to trigger the scale.\n\n🧰 UTILITY\n\n\n\nThe arrow or \"The Pin\" will move upwards towards the \"fire\" emoji when the volatility is higher than the majority of values for the amount of bars back that you set the \"length\" setting to. Vise Versa for when the pin is lowering towards the \"snooze\" emoji, the volatility is less than the majority of nodes/values for the past \"length\" amount of values.\n\nWhen the volatility is low, a trader could consider utilizing more leading indicators to make their trading decisions as opposed to lagging indicator such as trend indicators. When the volatility is low, the price action is consolidation which would be bad for a trend following strategy. Vise Versa for trend strategies, having a higher volatility may be better for such strategies. \n\nIts important to remember that this indicator itself is a lagging indicator, in that it relies on historical data to showcase the current state of the markets volatility. This means that although the recommendation in the previous paragraph may make logical sense, it is not a guarantee that if the volatility is showcasing a trending market, that your trend strategies will necessarily be profitable.",
+  "script": {
+    "id": 921609,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;3d5e9ba657d142d386a747c27ef2d278",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B3d5e9ba657d142d386a747c27ef2d278/1",
+  "source_http_status": 200,
+  "source_sha256": "ec795c2fb929a086d35f99aec48fa6659f2d9249ed30d27b598eaae1ba96b902",
+  "source_lines": 74,
+  "source_metadata": {
+    "created": "2023-03-16T22:00:53.840251Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "sourceInputsCount": 0
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Historical Volatility Scale [ChartPrime]",
+    "updated": "2023-03-16T22:00:53.840251Z",
+    "version": "1.0"
+  }
+}

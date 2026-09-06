@@ -1,0 +1,67 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=6
+indicator("Step Channel Momentum Trend [ChartPrime]", overlay = true, max_labels_count = 500)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+len = input.int(3, "Length", tooltip = "Pivot Length")
+mult = input.float(0.6, "Multiplier", step =0.1, tooltip = "Bands Multiplier")
+color_t_up = input.color(color.rgb(26, 190, 127), "", inline = "Color", group = "Momentum Colors")
+color_t = input.color(color.orange, "", inline = "Color", group = "Momentum Colors")
+color_t_dn = input.color(color.rgb(202, 38, 65), "", inline = "Color", group = "Momentum Colors")
+
+var p_h = float(na)
+var p_l = float(na)
+var trend = bool(na)
+
+market_state = "Range"
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+ph = ta.pivothigh(len, len)
+pl = ta.pivotlow(len, len)
+
+if not na(ph)
+    p_h := ph
+    label.new(bar_index-len, ph, "⬥", style = label.style_label_center, textcolor = chart.fg_color, size = size.normal, color = color(na))
+if not na(pl)
+    p_l := pl
+    label.new(bar_index-len, pl, "⬥", style = label.style_label_center, textcolor = chart.fg_color, size = size.normal, color = color(na))
+
+
+avg = math.avg(p_h, p_l)
+atr = ta.atr(200)*mult
+
+upper = avg + atr
+lower = avg - atr
+
+if hl2 > upper
+    color_t := color_t_up
+    trend := true
+    market_state := "Momentum Up"
+if hl2 < lower
+    color_t := color_t_dn
+    trend := false
+    market_state := "Momentum Down"
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+plot(avg, "MidLine", color = color_t, linewidth = 3)
+plot(upper, "Upper", color = chart.fg_color, style = plot.style_linebr)
+plot(lower, "Lower", color = chart.fg_color, style = plot.style_linebr)
+
+plotcandle(open, high, low, close, title='Momentum Candles', color = color_t, wickcolor=color_t, bordercolor = color_t)
+
+if barstate.islast
+    label.delete(label.new(bar_index, close, market_state, color = color(na), textcolor = color_t, style = label.style_label_left, size = size.large)[1])
+// --------------------------------------------------------------------------------------------------------------------}

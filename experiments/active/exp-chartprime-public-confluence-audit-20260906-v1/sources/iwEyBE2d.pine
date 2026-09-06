@@ -1,0 +1,133 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("Moving Average Trend Sniper [ChartPrime]", "MATS [ChartPrime]", true)
+
+// Custom cosh function
+cosh(float x) =>
+    (math.exp(x) + math.exp(-x)) / 2
+
+// Custom acosh function
+acosh(float x) =>
+    x < 1 ? na : math.log(x + math.sqrt(x * x - 1))
+
+// Custom sinh function
+sinh(float x) =>
+    (math.exp(x) - math.exp(-x)) / 2
+
+// Custom asinh function
+asinh(float x) =>
+    math.log(x + math.sqrt(x * x + 1))
+
+// Custom inverse tangent function
+atan(float x) =>
+    math.pi / 2 - math.atan(1 / x)
+
+// Chebyshev Type I Moving Average
+chebyshevI(float src, int len, float ripple) =>
+    a = 0.
+    b = 0.
+    g = 0.
+    chebyshev = 0.
+    
+    a := cosh(1 / len * acosh(1 / (1 - ripple)))
+    b := sinh(1 / len * asinh(1 / ripple))
+    g := (a - b) / (a + b)
+    chebyshev := (1 - g) * src + g * nz(chebyshev[1])
+    chebyshev
+
+bool_to_float(bool source) =>
+    source ? 1 : 0
+
+ema(source)=>
+    var float ema = 0.0
+    var int count = 0
+    count := nz(count[1]) + 1
+    ema := (1.0 - 2.0 / (count + 1.0)) * nz(ema[1]) + 2.0 / (count + 1.0) * source
+    ema
+
+atan2(y, x) =>
+    var float angle = 0.0
+    if x > 0
+        angle := math.atan(y / x)
+    else
+        if x < 0 and y >= 0
+            angle := math.atan(y / x) + math.pi
+        else
+            if x < 0 and y < 0
+                angle := math.atan(y / x) - math.pi
+            else
+                if x == 0 and y > 0
+                    angle := math.pi / 2
+                else
+                    if x == 0 and y < 0
+                        angle := -math.pi / 2
+    angle
+
+degrees(float source) =>
+    source * 180 / math.pi
+
+tra()=>
+    atr = ema(ta.tr)
+    slope = (close - close[10]) / (atr * 10)
+    angle_rad = atan2(slope, 1)
+    degrees = degrees(angle_rad)
+    source = ta.sma((degrees > 0 ? high : low), 2)
+
+mats(source, length) =>
+    smooth = 0.
+    higher_high = math.max(math.sign(ta.change(ta.highest(length))), 0)
+    lower_low = math.max(math.sign(ta.change(ta.lowest(length)) * -1), 0)
+    time_constant = math.pow(ta.sma(bool_to_float(higher_high or lower_low), length), 2)
+    smooth := nz(smooth[1] + time_constant * (source - smooth[1]), source)
+
+    wilders_period = length * 4 - 1
+
+    atr = math.abs(nz(smooth[1]) - smooth)
+    ma_atr = ta.ema(atr, wilders_period)
+    delta_fast_atr = ta.ema(ma_atr, wilders_period) * length * 0.4
+
+    result = 0.0
+    if smooth > nz(result[1])
+        if smooth - delta_fast_atr < result[1]
+            result := result[1]
+        else
+            result := smooth - delta_fast_atr
+    else
+        if smooth + delta_fast_atr > result[1]
+            result := result[1]
+        else
+            result := smooth + delta_fast_atr
+
+    // Return
+    result
+
+length = input.int(30, "Length", 2)
+up_color = input.color(color.blue, "", inline = "color")
+down_color = input.color(color.orange, "", inline = "color")
+enable_glow = input.bool(true, "Enable Glow", inline = "color")
+
+mats = mats(tra(), length)
+
+atr = ta.atr(length)
+
+colour = ta.sma(close, 2) > mats ? up_color : down_color
+
+atr_10 = ema(ta.tr) / 2
+
+alpha = color.new(color.black, 100)
+
+max = mats + atr_10
+min = mats - atr_10
+
+center = plot(mats, "Moving Average Trend Sniper", colour, editable = true)
+plot(mats, "Moving Average Trend Sniper", color.new(colour, 70), 2, editable = true)
+plot(mats, "Moving Average Trend Sniper", color.new(colour, 80), 3, editable = true)
+plot(mats, "Moving Average Trend Sniper", color.new(colour, 90), 4, editable = true)
+
+top = plot(enable_glow ? max : na, "Moving Average Trend Sniper", alpha)
+bottom = plot(enable_glow ? min : na, "Moving Average Trend Sniper", alpha)
+
+fill(top, center, top_value =  max, bottom_value = mats, bottom_color = color.new(colour, 75), top_color = alpha, editable = true)
+fill(center, bottom, top_value =  mats, bottom_value = min, bottom_color = alpha, top_color = color.new(colour, 75), editable = true)

@@ -1,0 +1,46 @@
+{
+  "id": "hyeoDyZn",
+  "title": "LOWESS (Locally Weighted Scatterplot Smoothing) [ChartPrime]",
+  "url": "https://www.tradingview.com/script/hyeoDyZn-LOWESS-Locally-Weighted-Scatterplot-Smoothing-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:36.677907+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/hyeoDyZn-LOWESS-Locally-Weighted-Scatterplot-Smoothing-ChartPrime/",
+  "created_at": "2024-08-05T12:26:36.448049+00:00",
+  "updated_at": "2024-08-05T14:18:14.300684+00:00",
+  "description": "LOWESS (Locally Weighted Scatterplot Smoothing) [ChartPrime]\n\n⯁ OVERVIEW\nThe LOWESS (Locally Weighted Scatterplot Smoothing) [ChartPrime] indicator is an advanced technical analysis tool that combines LOWESS smoothing with a Modified Adaptive Gaussian Moving Average. This indicator provides traders with a sophisticated method for trend analysis, pivot point identification, and breakout detection.\n\n◆ KEY FEATURES\n LOWESS Smoothing: Implements Locally Weighted Scatterplot Smoothing for trend analysis. Modified Adaptive Gaussian Moving Average: Incorporates a volatility-adapted Gaussian MA for enhanced trend detection. Pivot Point Identification: Detects and visualizes significant pivot highs and lows. Breakout Detection: Tracks and optionally displays the count of consecutive breakouts. Gaussian Scatterplot: Offers a unique visualization of price movements using randomly colored points. Customizable Parameters: Allows users to adjust calculation length, pivot detection, and visualization options.\n\n◆ FUNCTIONALITY DETAILS\n\n⬥ LOWESS Calculation:\n Utilizes a weighted local regression to smooth price data. Adapts to local trends, reducing noise while preserving important price movements.\n\n⬥ Modified Adaptive Gaussian Moving Average:\n Combines Gaussian weighting with volatility adaptation using ATR and standard deviation. Smooths the Gaussian MA using LOWESS for enhanced trend visualization.\n\n⬥ Pivot Point Detection and Visualization:\n Identifies pivot highs and lows using customizable left and right bar counts. Draws lines and labels to mark broke pivot points on the chart.\n\n⬥ Breakout Tracking:\n Monitors price crossovers of pivot lines to detect breakouts. Optionally displays and updates the count of consecutive breakouts.\n\n◆ USAGE\n Trend Analysis: Use the color and direction of the smoothed Gaussian MA line to identify overall trend direction. Breakout Trading: Monitor breakouts from pivot levels and their persistence using the breakout count feature. Volatility Assessment: The spread of the Gaussian scatterplot can provide insights into market volatility.\n\n⯁ USER INPUTS\n Length: Sets the lookback period for LOWESS and Gaussian MA calculations (default: 30). Pivot Length: Determines the number of bars to the left for pivot calculation (default: 5). Count Breaks: Toggle to show the count of consecutive breakouts (default: false). Gaussian Scatterplot: Toggle to display the Gaussian MA as a scatterplot (default: true).\n\n⯁ TECHNICAL NOTES\n Implements a custom LOWESS function for efficient local regression smoothing. Uses a modified Gaussian MA calculation that adapts to market volatility. Employs Pine Script's line and label drawing capabilities for clear pivot point visualization. Utilizes random color generation for the Gaussian scatterplot to enhance visual distinction between different time periods.\n\nThe LOWESS (Locally Weighted Scatterplot Smoothing) [ChartPrime] indicator offers traders a sophisticated tool for trend analysis and breakout detection. By combining advanced smoothing techniques with pivot point analysis, it provides a comprehensive view of market dynamics. The indicator's adaptability to different market conditions and its customizable nature make it suitable for various trading styles and timeframes.",
+  "script": {
+    "id": 1746897,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;9f9f713bc85b431e84afe7178496ab62",
+    "version_maj": 2,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B9f9f713bc85b431e84afe7178496ab62/2",
+  "source_http_status": 200,
+  "source_sha256": "6b896baa0d3d215ebde0d07c4b40dd8d699aac5787ff626994449b74bdb0011c",
+  "source_lines": 176,
+  "source_metadata": {
+    "created": "2024-08-05T14:18:09.040171Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 3,
+        "plotshape": 1
+      }
+    },
+    "lastVersionMaj": "2.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "LOWESS (Locally Weighted Scatterplot Smoothing) [ChartPrime]",
+    "updated": "2024-08-05T14:18:09.040171Z",
+    "version": "2.0"
+  }
+}

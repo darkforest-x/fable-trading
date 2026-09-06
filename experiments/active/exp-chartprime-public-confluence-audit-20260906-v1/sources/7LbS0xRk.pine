@@ -1,0 +1,153 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+
+//@version=5
+indicator('Liquidations [ChartPrime]', overlay = true, max_lines_count = 500)
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// ---------------------------------------------------------------------------------------------------------------------
+bool after_time     = input.time(timestamp("2023-01-01")) < time
+
+int timePeriodMean  = input.int(40, "Lookback Period")
+
+bool _5          = input.bool(true, 'Show 5x Leverage', group='Show Leverage')
+bool _10         = input.bool(true, 'Show 10x Leverage', group='Show Leverage')
+bool _25         = input.bool(true, 'Show 25x Leverage', group='Show Leverage')
+bool _50         = input.bool(true, 'Show 50x Leverage', group='Show Leverage')
+bool _100        = input.bool(true, 'Show 100x Leverage', group='Show Leverage')
+
+
+int lines_width   = input.int(3, 'Liquidation Levels width', group = "Visual")
+color col_up      = input.color(#22ab94, "Short Liquidations Color", group = "Visual")
+color col_dn      = input.color(#f7525f, "Long Liquidations Color",  group = "Visual")
+color barcolor    = input.color(color.lime, "Bar Color", group = "Visual")
+
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// ---------------------------------------------------------------------------------------------------------------------
+// Pivot Points 
+// @Used to spot price reversal, potential places for stop losses
+pivotLeft  = timeframe.isdwm ? 2 : 3
+pivotRight = timeframe.isdwm ? 2 : 3
+
+// pivot high/low
+pivotHigh = ta.pivothigh(high, pivotLeft, pivotRight)
+pivotLow  = ta.pivotlow(low, pivotLeft, pivotRight)
+
+// Volume Calculations Function
+// @Returns bool values for certain leverages when volume above certain means
+liqudation(volume_, timePeriodMean)=>
+
+    avg      = math.avg(ta.highest(volume_, timePeriodMean), ta.lowest(volume_, timePeriodMean))
+    avgMean  = ta.sma(avg, timePeriodMean+10)
+
+    _100x = avg >= 1.2   * avgMean
+    _50x  = avg >= 1.1   * avgMean
+    _25x  = avg >= 1.05  * avgMean
+    _10x  = avg >= 1.025 * avgMean
+    _5_x  = avg > avgMean
+
+    [_100x, _50x, _25x, _10x, _5_x]
+
+[_100x, _50x, _25x, _10x, _5_x] = liqudation(volume, timePeriodMean)
+
+
+// Plot Line
+line(_x1, _x2, _y, _lineColor, _style, _width) =>
+    line.new(x1=_x1, y1=_y, x2=_x2, y2=_y, color=_lineColor, style=_style, width=_width)
+
+// Extend Lines Function
+extendLine(_lineArray) =>
+    if array.size(_lineArray) > 0
+        for _i = array.size(_lineArray) - 1 to 0 by 1
+
+            x2 = line.get_x2(array.get(_lineArray, _i))
+            yValue = line.get_y1(array.get(_lineArray, _i))
+
+            if bar_index - 1 == x2 and not(high > yValue and low < yValue)
+                line.set_x2(array.get(_lineArray, _i), bar_index)
+
+// Liquidation Lines 
+// @Function to plot Liquidation Lines with limited amount to 500
+level(_1, y, x_, array_lines, colorUp, colorDn, lines_width)=>
+
+    line l = na
+
+    // Percent at which position is liquidated
+    percentRisk =   y == 5  ? 0.20 // 20%
+                  : y == 10 ? 0.10 // 10%
+                  : y == 25 ? 0.04 //  4%
+                  : y == 50 ? 0.02 //  2%
+                  : y == 100? 0.01 //  1%
+                  : 0
+
+    if _1 and after_time
+
+        if not na(pivotLow) and x_
+            l := line( bar_index[pivotRight], 
+                       bar_index, 
+                       low[pivotRight] / (1 + percentRisk),
+                       colorDn, 
+                       line.style_solid, 
+                       lines_width
+                         )
+
+            if array.size(array_lines) == 500
+                line.delete(array.shift(array_lines))
+
+            array.push(array_lines, l)
+
+        if not na(pivotHigh) and x_
+            l := line( bar_index[pivotRight], 
+                       bar_index, 
+                       high[pivotRight] * (1 + percentRisk), 
+                       colorUp, 
+                       line.style_solid, 
+                       lines_width
+                         )
+
+            if array.size(array_lines) == 500
+                line.delete(array.shift(array_lines))
+
+            array.push(array_lines, l)
+
+        extendLine(array_lines)
+
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// ---------------------------------------------------------------------------------------------------------------------
+// Arrays of Liquidation Levels lines
+var Array_5   = array.new_line()
+var Array_10  = array.new_line()
+var Array_25  = array.new_line()
+var Array_50  = array.new_line()
+var Array_100 = array.new_line()
+
+// Show 5x, 10x, 25x, 50x, 100x Liquidation Leverages
+level(_5, 5, _5_x, Array_5, color.new(col_up,90), color.new(col_dn,90), lines_width)
+level(_10, 10, _10x, Array_10, color.new(col_up,80), color.new(col_dn,80), lines_width)
+level(_25, 25, _25x, Array_25, color.new(col_up,70), color.new(col_dn,70), lines_width)
+level(_50, 50, _50x, Array_50, color.new(col_up,60), color.new(col_dn,60), lines_width)
+level(_100, 100, _100x, Array_100, color.new(col_up,50), color.new(col_dn,50), lines_width)
+
+// BackGround Color and BarColor
+bgcolor(after_time  == false ? color.new(chart.fg_color, 95) : na)
+barcolor(after_time == false ? na : barcolor)
+
+// DashBoard of Active Liquidation Levels
+var tbl = table.new(position.middle_right, 10, 10)
+table.cell(tbl, 0, 0, "Active\nLiquidation Levels", text_color = color.new(chart.fg_color, 50))
+table.cell(tbl, 0, 1, "5X", text_color = chart.fg_color),
+ table.cell(tbl, 1, 1, "⬤", text_color = _5 ? color.lime : #4caf4f33, text_size = size.large)
+table.cell(tbl, 0, 2, "10X", text_color = chart.fg_color),
+ table.cell(tbl, 1, 2, "⬤", text_color = _10 ? color.lime : #4caf4f33, text_size = size.large)
+table.cell(tbl, 0, 3, "25X", text_color = chart.fg_color),
+ table.cell(tbl, 1, 3, "⬤", text_color = _25 ? color.lime : #4caf4f33, text_size = size.large)
+table.cell(tbl, 0, 4, "50X", text_color = chart.fg_color),
+ table.cell(tbl, 1, 4, "⬤", text_color = _50 ? color.lime : #4caf4f33, text_size = size.large)
+table.cell(tbl, 0, 5, "100X", text_color = chart.fg_color),
+ table.cell(tbl, 1, 5, "⬤", text_color = _100 ? color.lime : #4caf4f33, text_size = size.large)

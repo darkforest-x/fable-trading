@@ -1,0 +1,48 @@
+{
+  "id": "Lw0d0Ny4",
+  "title": "Swing Structure Bands [ChartPrime]",
+  "url": "https://www.tradingview.com/script/Lw0d0Ny4-Swing-Structure-Bands-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:19.832173+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/Lw0d0Ny4-Swing-Structure-Bands-ChartPrime/",
+  "created_at": "2026-01-20T12:06:37.105397+00:00",
+  "updated_at": null,
+  "description": "⯁ OVERVIEW  \nSwing Structure Bands is a structure-based trend and reaction indicator that builds adaptive price bands directly from swing highs and swing lows.  \nInstead of using fixed-length moving averages, the bands dynamically adjust their length based on how long price has been forming higher highs or lower lows, allowing the indicator to naturally align with real market structure.\n\n\nThis makes the tool especially effective for identifying swing-based support and resistance, trend continuation zones, and exhaustion reactions.\n\n⯁ CORE CONCEPT  \nThe indicator continuously tracks:\n The most recent swing high and swing low over a configurable swing window. How long price has been developing since each swing point. Dynamic moving averages whose length grows with the swing itself.\n\n\nAs long as price respects the current swing direction, the bands extend and adapt.  \nWhen structure breaks, the system resets and starts forming new swing-based bands.\n\n⯁ SWING DETECTION LOGIC  \n A Swing High is detected when price forms a local maximum relative to the swing lookback. A Swing Low is detected when price forms a local minimum relative to the swing lookback. Direction flips when price transitions from forming highs to forming lows, or vice versa.\n\nEach confirmed swing is marked on the chart, giving clear structural context.\n\n⯁ ADAPTIVE BAND CONSTRUCTION  \n Upper bands are derived from swing highs. Lower bands are derived from swing lows. Band length dynamically increases as the swing develops. Multiple MA types can be used (SMA, EMA, SMMA/RMA, WMA, VWMA).\n\n\nATR is applied as an offset to create upper and lower envelopes around each band, forming a volatility-aware structure channel.\n\n\n\n⯁ VOLATILITY FILTERING  \n If the band moves too aggressively relative to ATR, it is temporarily disabled. This prevents unstable or noisy bands during sudden expansions. Bands only remain active when price structure is stable.\n\n\nThis logic keeps the indicator focused on meaningful swings rather than short-term spikes.\n\n⯁ REACTION & SIGNAL LOGIC  \n Sell signals appear when price crosses down from the upper swing band after sufficient stabilization.\n Buy signals appear when price crosses up from the lower swing band after sufficient stabilization.\n Cooldown logic prevents signal clustering.\n\nSignals are designed as structure reactions, not momentum breakouts.\n\n⯁ VISUAL STRUCTURE CLARITY  \n Separate bullish and bearish bands with customizable colors. Optional band envelopes for visual depth. Clear swing labels marking structural turning points. Diamond markers highlight reaction zones.\n\n\nThe visualization emphasizes where price reacts to structure rather than where it accelerates.\n\n⯁ HOW TO USE  \n Use upper bands as dynamic resistance during bearish or corrective phases. Use lower bands as dynamic support during bullish phases. Combine band reactions with higher-timeframe trend direction. Look for confirmations near bands rather than mid-range entries.\n\nThe indicator works best as a structure framework rather than a standalone signal generator.\n\n⯁ IDEAL MARKET CONDITIONS  \n Trending markets with clear swing development. Markets transitioning from impulse to correction. Crypto, forex, indices, and liquid stocks.\n\n⯁ CONCLUSION  \nSwing Structure Bands offers a structurally grounded alternative to traditional moving average channels.  \nBy anchoring bands to real swing behavior and adapting dynamically over time, it provides traders with a clearer view of where price is reacting, pausing, or potentially reversing within the broader market structure.\n",
+  "script": {
+    "id": 4690240,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;83b6a0ad45b54b2fb00bc0a4cee7aa73",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B83b6a0ad45b54b2fb00bc0a4cee7aa73/1",
+  "source_http_status": 200,
+  "source_sha256": "b542fee3b66e3c85037138e20ffe3ed4c5ba1047b027609c72b905794a440f8c",
+  "source_lines": 154,
+  "source_metadata": {
+    "created": "2026-01-20T12:06:35.701801Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;6228a1de374c49558cc1e96cfd563dda",
+      "originalScriptVersion": "0.101",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 6,
+        "plotshape": 4
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Swing Structure Bands [ChartPrime]",
+    "updated": "2026-01-20T12:06:35.701801Z",
+    "version": "1.0"
+  }
+}

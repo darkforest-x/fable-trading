@@ -1,0 +1,110 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("Double Ribbon [ChartPrime]")
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+//@variable: Length of the moving average
+int len = input.int(25, "Length", minval = 10)
+
+//@variable: Source for calculating moving averages (e.g., close price)
+series float src = input.source(close, "Source")
+
+//@variable: Toggle for displaying the ribbon
+bool display_ribbon = input.bool(true, "Ribbon")
+
+// Initialize variables
+int length = 11  // Number of different SMAs to calculate for the ribbon
+int score  = 0   // Score to determine trend direction
+series float sma1 = ta.sma(src, len)  // Primary SMA for comparison
+
+// Colors for different states
+color color_up = #22c9b8  // Color for uptrend
+color color_dn = #8606a7  // Color for downtrend
+color color_n  = chart.fg_color  // Neutral color (default chart foreground color)
+
+// Arrays to store the calculated SMAs
+array<float> sma_array = array.new<float>()  // Array for longer SMAs
+array<float> sma_array1 = array.new<float>()  // Array for primary SMA
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Loop to calculate SMAs and update the score based on their relationships
+for i = 0 to length
+    // Calculate SMA with increasing lengths
+    sma = ta.sma(src, len + 1 + i)
+    
+    // Update score based on comparison of primary SMA with current SMA
+    if sma1[i] < sma
+        score += 1
+    else
+        score -= 1
+
+    // Store calculated SMAs in the arrays
+    sma_array.push(sma)
+    sma_array1.push(sma1[i])
+
+// Determine the color based on the score (trend strength)
+color color = color.from_gradient(score, -length, length, color_dn, color_up)
+
+// Determine color with transparency based on display ribbon option
+color col = color.new(color_n, display_ribbon ? 80 : 100)
+
+// Determine final color for plotting based on display ribbon option
+color collor = color.new(color, display_ribbon ? 0 : 100)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Plot the trend score as a line
+p1 = plot(ta.sma(score, 2), color = na)  // Smoothed score line (hidden)
+p2 = plot(0, color = color_n)  // Zero line for reference
+
+// Fill the area between the trend score line and zero line based on the trend
+fill(p1, p2, score * 0.8, 0, color, na)
+
+// Plot the primary SMA array
+plot(sma_array1.get(0), force_overlay = true, color = col)
+plot(sma_array1.get(1), force_overlay = true, color = col)
+plot(sma_array1.get(2), force_overlay = true, color = col)
+plot(sma_array1.get(3), force_overlay = true, color = col)
+plot(sma_array1.get(4), force_overlay = true, color = col)
+plot(sma_array1.get(5), force_overlay = true, color = col)
+plot(sma_array1.get(6), force_overlay = true, color = col)
+plot(sma_array1.get(7), force_overlay = true, color = col)
+plot(sma_array1.get(8), force_overlay = true, color = col)
+plot(sma_array1.get(9), force_overlay = true, color = col)
+plot(sma_array1.get(10), force_overlay = true, color = col)
+
+// Plot the longer SMAs (ribbon) with color based on trend
+plot(sma_array.get(0), force_overlay = true, color = collor, linewidth = 2)
+plot(sma_array.get(1), force_overlay = true, color = collor, linewidth = 2)
+plot(sma_array.get(2), force_overlay = true, color = collor, linewidth = 2)
+plot(sma_array.get(3), force_overlay = true, color = collor, linewidth = 2)
+plot(sma_array.get(4), force_overlay = true, color = collor, linewidth = 2)
+plot(sma_array.get(5), force_overlay = true, color = collor, linewidth = 2)
+plot(sma_array.get(6), force_overlay = true, color = collor, linewidth = 2)
+plot(sma_array.get(7), force_overlay = true, color = collor, linewidth = 2)
+plot(sma_array.get(8), force_overlay = true, color = collor, linewidth = 2)
+plot(sma_array.get(9), force_overlay = true, color = collor, linewidth = 2)
+plot(sma_array.get(10), force_overlay = true, color = collor, linewidth = 2)
+
+// Plot the primary SMA (main trend line)
+plot(sma1, force_overlay = true, color = display_ribbon ? color_n : na)
+
+// If it's the last bar, display a label with the trend direction and score
+if barstate.islast
+    label.delete(
+     label.new(bar_index, 0, score > 0 ? "Trend Up>>  " + str.tostring(score) : "Trend Down>>  " + str.tostring(score), 
+     color = color(na), textcolor = score > 0 ? color_up : color_dn, 
+     style = label.style_label_left)[1]
+     )
+
+// --------------------------------------------------------------------------------------------------------------------}

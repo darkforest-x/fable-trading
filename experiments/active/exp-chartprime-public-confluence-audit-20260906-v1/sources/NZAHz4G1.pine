@@ -1,0 +1,119 @@
+//@version=5
+indicator("Polynomial Regression Keltner Channel [ChartPrime]", "PR Keltner Channel [ChartPrime]", overlay=true)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+// @variable Length for calculations
+int   length            = input(100, title="Length")
+// @variable Source price series
+float src               = input(hlc3, title="Source")
+// @variable Base multiplier for ATR
+float baseATRMultiplier = input.float(3., step = 0.1, title="Base ATR Multiplier")/10
+
+// @variable Color for upper bands
+plus_color  = #2e83d3
+// @variable Color for lower bands
+minus_color = #ff6600
+
+// @variable Arrays to store upper and lower band values
+upper_array = array.new<float>(8)
+lower_array = array.new<float>(8)
+
+// @variable Arrays to store colors for upper and lower bands
+upper_color = array.new<color>(8)
+lower_color = array.new<color>(8)
+
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+//@function Calculates polynomial regression
+//@param src (series float) Source price series
+//@param length (int) Lookback period
+//@returns (float) Polynomial regression value for the current bar
+polynomial_regression(src, length) =>
+    sumX = 0.0
+    sumY = 0.0
+    sumXY = 0.0
+    sumX2 = 0.0
+    sumX3 = 0.0
+    sumX4 = 0.0
+    sumX2Y = 0.0
+    n = float(length)
+
+    for i = 0 to n - 1
+        x = float(i)
+        y = src[i]
+        sumX   += x
+        sumY   += y
+        sumXY  += x * y
+        sumX2  += x * x
+        sumX3  += x * x * x
+        sumX4  += x * x * x * x
+        sumX2Y += x * x * y
+    
+    slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX)
+    intercept = (sumY - slope * sumX) / n
+    slope + intercept
+
+
+// Calculate basis using polynomial regression
+basis = polynomial_regression(src, length)
+
+// Calculate ATR and its SMA
+atr     = ta.atr(length)
+atr_sma = ta.sma(atr, 10)
+
+// Calculate Keltner Channel Bands
+dynamicMultiplier  = (1 + (atr / atr_sma)) * baseATRMultiplier
+volatility_basis   = (1 + (atr / atr_sma)) * dynamicMultiplier * atr
+
+// Set values for upper and lower bands
+for i = 1 to 4 // 4 bands above and below basis
+    upper_array.set(i-1, basis + i * volatility_basis)
+    lower_array.set(i-1, basis - i * volatility_basis)
+    upper_color.set(i-1, color.new(plus_color, i == 4 ? 90 : i * 25))
+    lower_color.set(i-1, color.new(minus_color, i == 4 ? 90 : i * 25))
+
+// Calculate Overbought/Oversold
+float ob_os = (src - lower_array.get(0))/(upper_array.get(0) - lower_array.get(0))
+
+// Signal Conditions
+bool  trend  = basis > basis[2]
+bool  trend1 = ta.crossover(basis, basis[2])
+bool  trend2 = ta.crossunder(basis, basis[2])
+bool  os     = ta.crossunder(ta.sma(ob_os, 10), -1.5)
+bool  ob     = ta.crossover(ta.sma(ob_os, 10), 1.5)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Set colors for basis and OB/OS
+basis_trend_col = trend ? chart.fg_color : (bar_index % 3 == 0 ? chart.fg_color : na)
+color_ob_os     = color.from_gradient(ob_os, -1, 1, plus_color, minus_color)
+
+// Plot basis
+plot(basis, title="Basis", color = basis_trend_col, linewidth=1)
+
+// Plot upper and lower bands
+plot(trend ? upper_array.get(0) : na, "", upper_color.get(3), linewidth=1, style = plot.style_linebr, editable = false)
+plot(trend ? upper_array.get(1) : na, "", upper_color.get(2), linewidth=1, style = plot.style_linebr, editable = false)
+plot(trend ? upper_array.get(2) : na, "", upper_color.get(1), linewidth=1, style = plot.style_linebr, editable = false)
+plot(trend ? upper_array.get(3) : na, "", upper_color.get(0), linewidth=1, style = plot.style_linebr, editable = false)
+
+plot(trend ? na : lower_array.get(0), "", lower_color.get(3), linewidth=1, style = plot.style_linebr, editable = false)
+plot(trend ? na : lower_array.get(1), "", lower_color.get(2), linewidth=1, style = plot.style_linebr, editable = false)
+plot(trend ? na : lower_array.get(2), "", lower_color.get(1), linewidth=1, style = plot.style_linebr, editable = false)
+plot(trend ? na : lower_array.get(3), "", lower_color.get(0), linewidth=1, style = plot.style_linebr, editable = false)
+
+// Plot crossover signals
+plotchar(ta.crossover(close, lower_array.get(3)), "", "⬥", 
+             location.belowbar, color.new(plus_color, 20), 0, size = size.tiny)
+plotchar(ta.crossunder(close, upper_array.get(3)), "", "⬥", 
+             location.abovebar, color.new(minus_color, 20), 0, size = size.tiny)
+// --------------------------------------------------------------------------------------------------------------------}

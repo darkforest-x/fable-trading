@@ -1,0 +1,158 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=6
+indicator("Swing Profile Analyzer [ChartPrime]", overlay = true, max_boxes_count = 500, max_bars_back = 1000)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+int     len             = input.int(100, "Swing Length")
+int     bins            = input.int(30, group = "Profile")
+string  option_d        = input.string("All", "Profiles", ["Bull", "Bear", "All", "None"], group = "Profile")
+int     poc_wid         = input.int(2, "Poc Width")
+
+color   upper_col       = input.color(#9d14d8, "▽", inline = "cc")
+color   lower_col       = input.color(#13c25f, "△", inline = "cc")
+
+var Bins   = array.new_int(bins, 0)
+
+
+var H = float(na)
+var L = float(na)
+
+var index_h = 0
+var index_l = 0
+var trend   = bool(na)
+
+var line_z  = line(na)
+var line_up = line(na)
+var line_dn = line(na)
+
+var poc = line(na)
+
+var H_arr = array.new<int>()
+var L_arr = array.new<int>()
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎 / 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+float upper = ta.highest(len)
+float lower = ta.lowest(len)
+
+bool upper_trigger = high[1] == upper[1] and high < upper 
+bool lower_trigger = low[1] == lower[1] and low > lower
+
+if upper_trigger
+    index_h := bar_index[1]
+    H := upper
+    H_arr.push(index_h)
+if lower_trigger
+    index_l := bar_index[1]
+    L := lower
+    L_arr.push(index_l)
+if high == upper 
+    trend := true
+
+if low == lower 
+    trend := false
+
+if not trend and trend[1]
+    line_z := line.new(index_l, L, index_h, H, color = lower_col, xloc = xloc.bar_index)
+
+if trend and not trend[1]
+    line_z := line.new(index_h, H, index_l, L, color = upper_col, xloc = xloc.bar_index)
+
+line_z.set_style(line.style_dashed)
+
+
+
+if barstate.islast
+    if trend != trend[1]
+        line.delete(line_up)
+        line.delete(line_dn)
+
+    if not trend != trend[1]
+        if trend
+            line_up := line.new(index_l
+                                 , L
+                                 , index_h
+                                 , upper
+                                 , style = line.style_solid
+                                 , color = lower_col
+                                 , xloc = xloc.bar_index)
+        if not trend 
+            line_dn := line.new(index_h
+                                 , H
+                                 , index_l
+                                 , lower
+                                 , style = line.style_solid
+                                 , color = upper_col
+                                 , xloc = xloc.bar_index)
+
+    line.delete(line_dn[1])
+    line.delete(line_up[1])
+
+
+
+display = switch option_d
+    "All" => true 
+    "Bull" => not trend
+    "Bear" => trend
+    "None" => false
+    
+if trend != trend[1] and array.size(H_arr) > 0 and array.size(L_arr) > 0 
+    
+    col = trend ? upper_col : lower_col
+    label.new(array.get(trend ? H_arr : L_arr, -1), trend ? H : L, text = trend ? "▼":"▲", style = not trend ? label.style_label_up : label.style_label_down, color = color(na), textcolor = col)
+
+    if display
+        // Reset Bins
+        for i = 0 to array.size(Bins) - 1
+            array.set(Bins, i, 0)
+
+        // Bin size
+        bin_size = (H - L) / bins
+
+        // Populate Bins with frequency counts
+        for i = 0 to bins - 1
+            bin_low = L + bin_size * i
+            bin_high = bin_low + bin_size
+
+            for j = 0 to (trend ? bar_index - array.get(H_arr, -1) : bar_index - array.get(L_arr, -1))
+                if close[j] >= bin_low and close[j] < bin_high
+                    array.set(Bins, i, array.get(Bins, i) + 1)
+
+        // Draw boxes for each bin
+        for i = 0 to bins - 1
+            bin_low = L + bin_size * i
+            bin_high = bin_low + bin_size
+            bin_value = array.get(Bins, i)
+            left = array.get(trend ? H_arr : L_arr, -1)
+            right = left + bin_value
+            
+
+            box.new(
+                     left, 
+                     bin_high, 
+                     right, 
+                     bin_low,
+                     border_color = color.new(col, 70 - int(bin_value / array.max(Bins) * 100)), 
+                     border_width = 1, 
+                     bgcolor = color.new(col, 100 - int(bin_value / array.max(Bins) * 100)),
+                     text = bin_value == Bins.max() ? str.tostring(Bins.max()) : "",
+                     text_color = chart.fg_color
+                 )
+                 
+
+            if bin_value == Bins.max() 
+                poc := line.new(right, math.avg(bin_high, bin_low), (trend ? index_l : index_h), math.avg(bin_high, bin_low), color = col, width = poc_wid)
+
+        box.new(array.get(trend ? H_arr : L_arr, -1), H, (trend ? index_l : index_h), L, color.new(col, 70), 1,bgcolor = color.new(chart.fg_color, 100))
+
+if barstate.islast
+    poc.set_x2(last_bar_index)
+
+plot(na, editable = false)
+// --------------------------------------------------------------------------------------------------------------------}

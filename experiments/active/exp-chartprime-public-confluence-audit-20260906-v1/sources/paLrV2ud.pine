@@ -1,0 +1,279 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=6
+indicator("Supply & Demand: Cumulative Volume Delta Flow [ChartPrime]", "Supply & Demand: CVD Flow [ChartPrime]", overlay = true, max_boxes_count = 5000, max_polylines_count = 100, calc_bars_count = 3000)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+atrLen       = input.int(14,    "ATR Length",            minval = 1,            group = "Detection")
+momMult      = input.float(1,   "Momentum Multiplier",   minval = 0.1, step = 0.1, group = "Detection", tooltip = "Breakout candle body must be >= this multiple of ATR")
+maxBoxes     = input.int(10,    "Max Active Zones Each", minval = 1,   maxval = 50, group = "Detection", tooltip = "Max active demand and supply zones each")
+
+// Colors
+demandCol    = input.color(color.new(#22c58f, 85), "Demand Zone Color", group = "Colors")
+supplyCol    = input.color(color.new(#ef4444, 85), "Supply Zone Color", group = "Colors")
+demandBorder = input.color(color.new(#22c55e, 30), "Demand Border",     group = "Colors")
+supplyBorder = input.color(color.new(#ef4444, 30), "Supply Border",     group = "Colors")
+
+// CVD Polyline Colors
+cvdDemandCol = input.color(color.new(#22c5af, 40), "Demand CVD Wave Color", group = "Colors")
+cvdSupplyCol = input.color(color.new(#ef8844, 40), "Supply CVD Wave Color", group = "Colors")
+
+showSignals  = input.bool(true, "Show Signals", group = "Display")
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Force Historical Buffer (Fixes Runtime Error)
+var float _dummyBuffer = na
+_dummyBuffer := close[2900] + open[2900] + volume[2900]
+
+// ATR
+atr = ta.atr(atrLen)
+
+// Zone Detection (base candle = bar[2], breakout candle = bar[1])
+baseBearish    = close[2] < open[2]
+baseBullish    = close[2] > open[2]
+breakoutBody   = math.abs(close[1] - open[1])
+breakoutIsBull = close[1] > open[1]
+breakoutIsBear = close[1] < open[1]
+
+isDemandBreakout = baseBearish and breakoutIsBull and breakoutBody >= momMult * atr[1]
+isSupplyBreakout = baseBullish and breakoutIsBear and breakoutBody >= momMult * atr[1]
+
+// Zone & Polyline Storage Arrays
+var array<box>      demandBoxes      = array.new<box>()
+var array<float>    demandTops       = array.new<float>()
+var array<float>    demandBots       = array.new<float>()
+var array<int>      demandLefts      = array.new<int>()
+var array<polyline> demandDeltaLines = array.new<polyline>()
+
+var array<box>      supplyBoxes      = array.new<box>()
+var array<float>    supplyTops       = array.new<float>()
+var array<float>    supplyBots       = array.new<float>()
+var array<int>      supplyLefts      = array.new<int>()
+var array<polyline> supplyDeltaLines = array.new<polyline>()
+
+// Helper Functions
+updatePolylines(boxLeft, zTop, zBot, oldLine, lCol, fCol, isDemand) =>
+    length = math.min(int(bar_index - boxLeft), 2900) 
+    length := math.max(0, math.min(length, bar_index - 1)) // Safety clamp
+    
+    // Pre-calculate Cumulative Delta
+    tempCumDelta = 0.0
+    maxAbsDelta = 0.0
+    for k = length to 0
+        c = close[k]
+        o = open[k]
+        v = volume[k]
+        delta = c > o ? v : (c < o ? -v : 0)
+        tempCumDelta += delta
+        maxAbsDelta := math.max(maxAbsDelta, math.abs(tempCumDelta))
+        
+    pts = array.new<chart.point>()
+    boxH = zTop - zBot
+    midY = (zTop + zBot) / 2
+    
+    // Starting Anchor Point
+    startIdx = bar_index - length
+    array.push(pts, chart.point.from_index(startIdx, midY))
+
+    // Build cumulative delta coordinates
+    cumDelta = 0.0
+    for k = length to 0
+        idx = bar_index - k
+        c = close[k]
+        o = open[k]
+        v = volume[k]
+        delta = c > o ? v : (c < o ? -v : 0)
+        cumDelta += delta
+        
+        rawY = isDemand ? (zBot + (maxAbsDelta > 0 ? (cumDelta / maxAbsDelta) * boxH : 0)) : (zTop + (maxAbsDelta > 0 ? (cumDelta / maxAbsDelta) * boxH : 0))
+        y = math.max(zBot, math.min(zTop, rawY))
+        array.push(pts, chart.point.from_index(idx, y))
+
+    // Ending Anchor Point
+    endIdx = bar_index
+    array.push(pts, chart.point.from_index(endIdx, midY))
+        
+    if not na(oldLine)
+        polyline.delete(oldLine)
+        
+    newLine = polyline.new(pts, closed=true, line_color=lCol, fill_color=fCol, line_width=1)
+    [newLine, cumDelta]
+
+trimDemand() =>
+    if array.size(demandBoxes) > 0 and array.size(demandTops) > 0 and array.size(demandBots) > 0
+        old = array.shift(demandBoxes)
+        old.delete()
+        array.shift(demandTops)
+        array.shift(demandBots)
+        array.shift(demandLefts)
+        oLine = array.shift(demandDeltaLines)
+        if not na(oLine)
+            polyline.delete(oLine)
+
+trimSupply() =>
+    if array.size(supplyBoxes) > 0 and array.size(supplyTops) > 0 and array.size(supplyBots) > 0
+        old = array.shift(supplyBoxes)
+        old.delete()
+        array.shift(supplyTops)
+        array.shift(supplyBots)
+        array.shift(supplyLefts)
+        oLine = array.shift(supplyDeltaLines)
+        if not na(oLine)
+            polyline.delete(oLine)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+//  DEMAND ZONE CREATION 
+if isDemandBreakout
+    zTop    = high[2]
+    zBot    = low[2]
+    boxLeft = bar_index - 2
+
+    isOverlapping = false
+    if array.size(demandTops) > 0
+        for i = 0 to array.size(demandTops) - 1
+            oldTop = array.get(demandTops, i)
+            oldBot = array.get(demandBots, i)
+            if zBot <= oldTop and zTop >= oldBot
+                isOverlapping := true
+                break
+
+    if not isOverlapping
+        b = box.new(
+             left          = boxLeft,
+             top           = zTop,
+             right         = bar_index,
+             bottom        = zBot,
+             bgcolor       = demandCol,
+             border_color  = demandBorder,
+             border_width  = 1,
+             extend        = extend.none, 
+             text          = "Demand  |  CVD: Calculating...", 
+             text_color    = color.white,
+             text_size     = size.small,
+             text_halign   = text.align_right, 
+             text_valign   = text.align_center) 
+
+        array.push(demandBoxes, b)
+        array.push(demandTops,  zTop)
+        array.push(demandBots,  zBot)
+        array.push(demandLefts, boxLeft)
+        array.push(demandDeltaLines, polyline.new(na))
+
+if array.size(demandBoxes) > maxBoxes
+    trimDemand()
+
+//  SUPPLY ZONE CREATION 
+if isSupplyBreakout
+    zTop    = high[2]
+    zBot    = low[2]
+    boxLeft = bar_index - 2
+
+    isOverlapping = false
+    if array.size(supplyTops) > 0
+        for i = 0 to array.size(supplyTops) - 1
+            oldTop = array.get(supplyTops, i)
+            oldBot = array.get(supplyBots, i)
+            if zBot <= oldTop and zTop >= oldBot
+                isOverlapping := true
+                break
+
+    if not isOverlapping
+        b = box.new(
+             left          = boxLeft,
+             top           = zTop,
+             right         = bar_index,
+             bottom        = zBot,
+             bgcolor       = supplyCol,
+             border_color  = supplyBorder,
+             border_width  = 1,
+             extend        = extend.none, 
+             text          = "Supply  |  CVD: Calculating...", 
+             text_color    = color.white,
+             text_size     = size.small,
+             text_halign   = text.align_right, 
+             text_valign   = text.align_center) 
+
+        array.push(supplyBoxes, b)
+        array.push(supplyTops,  zTop)
+        array.push(supplyBots,  zBot)
+        array.push(supplyLefts, boxLeft)
+        array.push(supplyDeltaLines, polyline.new(na))
+
+if array.size(supplyBoxes) > maxBoxes
+    trimSupply()
+
+//  DEMAND MITIGATION & ANIMATION 
+demandSize = array.size(demandBoxes)
+if demandSize > 0
+    i = demandSize - 1
+    while i >= 0
+        if i < array.size(demandBoxes)
+            zBot  = array.get(demandBots, i)
+            zTop  = array.get(demandTops, i)
+            bLeft = array.get(demandLefts, i)
+            b     = array.get(demandBoxes, i)
+            dLine = array.get(demandDeltaLines, i)
+            
+            if close <= zBot // Mitigation
+                b.delete()
+                if not na(dLine)
+                    polyline.delete(dLine)
+                array.remove(demandBoxes, i)
+                array.remove(demandTops,  i)
+                array.remove(demandBots,  i)
+                array.remove(demandLefts, i)
+                array.remove(demandDeltaLines, i)
+            else
+                box.set_right(b, bar_index) 
+                [nD, lastCVD] = updatePolylines(bLeft, zTop, zBot, dLine, color.new(cvdDemandCol, 0), cvdDemandCol, true)
+                array.set(demandDeltaLines, i, nD)
+                box.set_text(b, "Demand  |  CVD: " + str.tostring(lastCVD, format.volume))
+                box.set_text_valign(b, text.align_bottom)
+
+        i -= 1
+
+//  SUPPLY MITIGATION & ANIMATION 
+supplySize = array.size(supplyBoxes)
+if supplySize > 0
+    i = supplySize - 1
+    while i >= 0
+        if i < array.size(supplyBoxes)
+            zBot  = array.get(supplyBots, i)
+            zTop  = array.get(supplyTops, i)
+            bLeft = array.get(supplyLefts, i)
+            b     = array.get(supplyBoxes, i)
+            sLine = array.get(supplyDeltaLines, i)
+            
+            if close >= zTop // Mitigation
+                b.delete()
+                if not na(sLine)
+                    polyline.delete(sLine)
+                array.remove(supplyBoxes, i)
+                array.remove(supplyTops,  i)
+                array.remove(supplyBots,  i)
+                array.remove(supplyLefts, i)
+                array.remove(supplyDeltaLines, i)
+            else
+                box.set_right(b, bar_index)
+                [nS, lastCVD] = updatePolylines(bLeft, zTop, zBot, sLine, color.new(cvdSupplyCol, 0), cvdSupplyCol, false)
+                array.set(supplyDeltaLines, i, nS)
+                box.set_text(b, "Supply  |  CVD: " + str.tostring(lastCVD, format.volume))
+                box.set_text_valign(b, text.align_top)
+        i -= 1
+
+//  SIGNALS 
+if showSignals and isDemandBreakout
+    label.new(bar_index, low, text="△", yloc=yloc.belowbar, style=label.style_none, textcolor=demandBorder, size=size.normal)
+
+if showSignals and isSupplyBreakout
+    label.new(bar_index, high, text="▽", yloc=yloc.abovebar, style=label.style_none, textcolor=supplyBorder, size=size.normal)

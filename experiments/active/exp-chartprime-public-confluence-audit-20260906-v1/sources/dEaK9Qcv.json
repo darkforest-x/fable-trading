@@ -1,0 +1,45 @@
+{
+  "id": "dEaK9Qcv",
+  "title": "Bollinger Bands Liquidity Cloud [ChartPrime]",
+  "url": "https://www.tradingview.com/script/dEaK9Qcv-Bollinger-Bands-Liquidity-Cloud-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:37:26.654278+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/dEaK9Qcv-Bollinger-Bands-Liquidity-Cloud-ChartPrime/",
+  "created_at": "2023-08-28T14:03:01.101703+00:00",
+  "updated_at": "2023-08-28T22:49:20.664399+00:00",
+  "description": "This indicator overlays a heatmap on the price chart, providing a detailed representation of Bollinger bands' profile. It offers insights into the price's behavior relative to these bands. There are two visualization styles to choose from: the Volume Profile and the Z-Score method.\n\n\n\nFeatures\n\nVolume Profile: This method illustrates how the price interacts with the Bollinger bands based on the traded volume.Z-Score: In this mode, the indicator samples the real distribution of Z-Scores within a specified window and rescales this distribution to the desired sample size. It then maps the distribution as a heatmap by calculating the corresponding price for each Z-Score sample and representing its weight via color and transparency.\n\n\n\nParameters\nLength: The period for the simple moving average that forms the base for the Bollinger bands.Multiplier: The number of standard deviations from the moving average to plot the upper and lower Bollinger bands.\n\nMain:\nStyle: Choose between \"Volume\" and \"Z-Score\" visual styles.Sample Size: The size of the bin. Affects the granularity of the heatmap.Window Size: The lookback window for calculating the heatmap. When set to Z-Score, a value of `0` implies using all available data. It's advisable to either use `0` or the highest practical value when using the Z-Score method.Lookback: The amount of historical data you want the heatmap to represent on the chart.Smoothing: Implements sinc smoothing to the distribution. It smoothens out the heatmap to provide a clearer visual representation.Heat Map Alpha: Controls the transparency of the heatmap. A higher value makes it more opaque, while a lower value makes it more transparent.Weight Score Overlay: A toggle that, when enabled, displays a letter score (`S`, `A`, `B`, `C`, `D`) inside the heatmap boxes, based on the weight of each data point. The scoring system categorizes each weight into one of these letters using the provided percentile ranks and the median.\n\nColor\nColor: Color for high values.Standard Deviation Color: Color to represent the standard deviation on the Bollinger bands.Text Color: Determines the color of the letter score inside the heatmap boxes. Adjusting this parameter ensures that the score is visible against the heatmap color.\n\n\n\nUsage\nOnce this indicator is applied to your chart, the heatmap will be overlaid on the price chart, providing a visual representation of the price's behavior in relation to the Bollinger bands. The intensity of the heatmap is directly tied to the price action's intensity, defined by your chosen parameters.\n\nWhen employing the Volume Profile style, a brighter and more intense area on the heatmap indicates a higher trading volume within that specific price range. On the other hand, if you opt for the Z-Score method, the intensity of the heatmap reflects the Z-Score distribution. Here, a stronger intensity is synonymous with a more frequent occurrence of a specific Z-Score.\n\nFor those seeking an added layer of granularity, there's the \"Weight Score Overlay\" feature. When activated, each box in your heatmap will sport a letter score, ranging from `S` to `D`. This score categorizes the weight of each data point, offering a concise breakdown:\n- `S`: Data points with a weight of 1.\n- `A`: Weights below 1 but greater than or equal to the 75th percentile rank.\n- `B`: Weights under the 75th percentile but at or above the median.\n- `C`: Weights beneath the median but surpassing the 25th percentile rank.\n- `D`: All that fall below the 25th percentile rank.\n\nThis scoring feature augments the heatmap's visual data, facilitating a quicker interpretation of the weight distribution across the dataset.\n\n\n\nFurther Explanations\n\nVolume Profile\n\nA volume profile is a tool used by traders to visualize the amount of trading volume occurring at specific price levels. This kind of profile provides a deep insight into the market's structure and helps traders identify key areas of support and resistance, based on where the most trading activity took place. The concept behind the volume profile is that the amount of volume at each price level can indicate the potential importance of that price.\n\nIn this indicator:\n\n- The volume profile mode creates a visual representation by sampling trading volumes across price levels. \n- The representation displays the balance between bullish and bearish volumes at each level, which is further differentiated using a color gradient from `low_color` to `high_color`.\n- The volume profile becomes more refined with sinc smoothing, helping to produce a smoother distribution of volumes.\n\n\n\nZ-Score and Distribution Resampling\n\nZ-Score, in the context of trading, represents the number of standard deviations a data point (e.g., closing price) is from the mean (average). It’s a measure of how unusual or typical a particular data point is in relation to all the data. In simpler terms, a high Z-Score indicates that the data point is far away from the mean, while a low Z-Score suggests it's close to the mean.\n\nThe unique feature of this indicator is that it samples the real distribution of z-scores within a window and then resamples this distribution to fit the desired sample size. This process is termed as \"resampling in the context of distribution sampling\". Resampling provides a way to reconstruct and potentially simplify the original distribution of z-scores, making it easier for traders to interpret.\n\nIn this indicator:\n- Each Z-Score corresponds to a price value on the chart.\n- The resampled distribution is then used to display the heatmap, with each Z-Score related price level getting a heatmap box. The weight (or importance) of each box is represented as a combination of color and transparency.\n\nHow to Interpret the Z-Score Distribution Visualization:\nWhen interpreting the Z-Score distribution through color and alpha in the visualization, it's vital to understand that you're seeing a representation of how unusual or typical certain data points are without directly viewing the numerical Z-Score values. Here's how you can interpret it:\n\n\n\n\nIntensity of Color: This often corresponds to the distance a particular data point is from the mean.Lighter shades (closer to `low_color`) typically indicate data points that are more extreme, suggesting overbought or oversold conditions. These could signify potential reversals or significant deviations from the norm.Darker shades (closer to `high_color`) represent data points closer to the mean, suggesting that the price is relatively typical compared to the historical data within the given window.\n\nAlpha (Transparency): The degree of transparency can indicate the significance or confidence of the observed deviation. More opaque boxes might suggest a stronger or more reliable deviation from the mean, implying that the observed behavior is less likely to be a random occurrence.\nMore transparent boxes could denote less certainty or a weaker deviation, meaning that the observed price behavior might not be as noteworthy.\n\n- Combining Color and Alpha: By observing both the intensity of color and the level of transparency, you get a richer understanding. For example:\n- A light, opaque box could suggest a strong, significant deviation from the mean, potentially signaling an overbought or oversold scenario.\n- A dark, transparent box might indicate a weak, insignificant deviation, suggesting the price is behaving typically and is close to its average.\n\n\n",
+  "script": {
+    "id": 1164918,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;60deb56807e64f86a8690fb55cc10085",
+    "version_maj": 3,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B60deb56807e64f86a8690fb55cc10085/3",
+  "source_http_status": 200,
+  "source_sha256": "69bf44fd674136bec2efcaa6bada313f8dda15c8f7349d85276ade9f8c16d2bb",
+  "source_lines": 253,
+  "source_metadata": {
+    "created": "2023-08-28T22:49:19.915076Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 3
+      }
+    },
+    "lastVersionMaj": "3.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Bollinger Bands Liquidity Cloud [ChartPrime]",
+    "updated": "2023-08-28T22:49:19.915076Z",
+    "version": "3.0"
+  }
+}

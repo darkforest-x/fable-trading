@@ -1,0 +1,135 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("Multiple Non-Linear Regression [ChartPrime]", shorttitle = "NonLR [ChartPrime]")
+
+// 𝙄𝙉𝙋𝙐𝙏𝙎
+int   len          = input.int(50, "Normalization Data Length", group = "Settings")
+float learningRate = input.float(0.1, "Learning Rate", minval = 0.01, step=0.01, group = "Settings")+1
+
+bool  smooth       = input.bool(false, "Smooth?", group = "Settings")
+int   smooth_len   = input.int(5, "Smooth Length", group = "Settings")
+
+// Define your coefficients
+b1 = input.float(0.5,  title="Coefficient b1 (close)", maxval = 1, step = 0.01, minval = 0.25, group = "Define start coefficients")
+b2 = input.float(0.4,  title="Coefficient b2 (open)",  maxval = 1, step = 0.01, minval = 0.25, group = "Define start coefficients")
+b3 = input.float(0.35, title="Coefficient b3 (high)",  maxval = 1, step = 0.01, minval = 0.25, group = "Define start coefficients")
+b4 = input.float(0.25, title="Coefficient b4 (low)",   maxval = 1, step = 0.01, minval = 0.25, group = "Define start coefficients")
+
+// Define your input variables
+x_1 = close 
+x_2 = open 
+x_3 = high 
+x_4 = low
+
+
+// 𝙈𝙐𝙇𝙏𝙄𝙋𝙇𝙀 𝙉𝙊𝙉-𝙇𝙄𝙉𝙀𝘼𝙍 𝙍𝙀𝙂𝙍𝙀𝙎𝙎𝙄𝙊𝙉
+// Data Normalization Function (0 - 1)
+normaliztion_data(x)=>
+    (x - ta.lowest(x, len)) / (ta.highest(x, len) - ta.lowest(x, len)) 
+
+// Multiple Non-linear Regression with 4 independent variables
+nonLinearRegression(x1, x2, x3, x4, b1, b2, b3, b4) =>
+    b_1 = b1
+    b_2 = b2
+    b_3 = b3
+    b_4 = b4
+    
+    // Check if the sum of coefficients is greater than 1
+    sumB = b1 + b2 + b3 + b4
+    if sumB > 1
+        // If the sum is greater than 1, normalize the coefficients
+        b_1 := b1 / sumB
+        b_2 := b2 / sumB
+        b_3 := b3 / sumB
+        b_4 := b4 / sumB
+
+    // Compute the polynomial equation
+    poly =  b_1 * x1 + b_2 * x2 + b_3 * x3 + b_4 * x4
+
+    // Return the result
+    poly
+
+// Error module
+errorModule(actual, predicted) =>
+    (actual - predicted)
+
+x_1 := normaliztion_data(x_1) 
+x_2 := normaliztion_data(x_2) 
+x_3 := normaliztion_data(x_3) 
+x_4 := normaliztion_data(x_4) 
+initial_val   = x_1
+
+// Compute the predicted values using the non-linear regression function
+predictedValues = nonLinearRegression(x_1, x_2, x_3, x_4, b1, b2, b3, b4)
+
+// Compute the error
+error = errorModule(initial_val, predictedValues)
+
+// Update the coefficients using gradient descent
+b1 := b1 - (learningRate * (error * x_1))
+b2 := b2 - (learningRate * (error * x_2))
+b3 := b3 - (learningRate * (error * x_3))
+b4 := b4 - (learningRate * (error * x_4))
+
+non_linerreg = nonLinearRegression(x_1, x_2, x_3, x_4, b1, b2, b3, b4) + error
+
+// Smooth if true
+if smooth 
+    non_linerreg  := math.sum(non_linerreg, smooth_len)
+    non_linerreg  := non_linerreg / smooth_len
+
+
+// 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// Plot Normalizate Data
+plot(x_1, "close", color = color.rgb(38, 240, 72, 80), style = plot.style_circles, linewidth = 3)
+plot(x_2, "open",  color = color.rgb(216, 16, 16, 80), style = plot.style_circles, linewidth = 3)
+plot(x_3, "high",  color = color.rgb(20, 219, 219, 80), style = plot.style_circles, linewidth = 3)
+plot(x_4, "low",   color = color.rgb(218, 136, 13, 80), style = plot.style_circles, linewidth = 3)
+
+// Color
+color = color.from_gradient(non_linerreg, 0, 1, color.red, color.green)
+// Mid Line 
+plot(0.5, color = #787b867c, linewidth = 2)
+// Plot Regression
+plot(non_linerreg, color = color, linewidth = 2)
+// Bar Color
+barcolor(color.from_gradient(non_linerreg, 0, 1, color.red, color.green))
+
+// Plot Normalized Data Values
+tbl = table.new(position.top_right, 10, 10)
+
+table.cell(tbl, 0, 0, "close ● ", text_color = color.rgb(38, 240, 72, 0),  text_halign = text.align_left)
+table.cell(tbl, 0, 1, "open ● ",  text_color = color.rgb(216, 16, 16, 0),  text_halign = text.align_left)
+table.cell(tbl, 0, 2, "high ● ",  text_color = color.rgb(20, 219, 219, 0), text_halign = text.align_left)
+table.cell(tbl, 0, 3, "low ● ",   text_color = color.rgb(218, 136, 13, 0), text_halign = text.align_left)
+table.cell(tbl, 1, 0, str.tostring(math.round(x_1,3)), text_color = color.rgb(38, 240, 72, 0))
+table.cell(tbl, 1, 1, str.tostring(math.round(x_2,3)), text_color = color.rgb(216, 16, 16, 0))
+table.cell(tbl, 1, 2, str.tostring(math.round(x_3,3)), text_color = color.rgb(20, 219, 219, 0))
+table.cell(tbl, 1, 3, str.tostring(math.round(x_4,3)), text_color = color.rgb(218, 136, 13, 0))
+table.cell(tbl, 0, 4, "")
+
+table.cell(tbl, 0, 5, "Predicted Value", text_color = chart.fg_color)
+table.cell(tbl, 1, 5, str.tostring(math.round(non_linerreg,3)), text_color = color)
+
+// Signals
+plotchar(series = ta.crossover(non_linerreg, 0.5),
+         title = "Positive",
+         char = "●",
+         location = location.belowbar,
+         force_overlay = true,
+         size = size.tiny,
+         color = color.green
+         )
+
+plotchar(series = ta.crossunder(non_linerreg, 0.5),
+         title = "Negative",
+         char =  "●",
+         location = location.abovebar, 
+         force_overlay = true,
+         size = size.tiny, 
+         color = color.red
+         )
+
+// ● ● ●

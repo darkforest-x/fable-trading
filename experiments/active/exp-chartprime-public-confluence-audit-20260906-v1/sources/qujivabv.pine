@@ -1,0 +1,266 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+
+//@version=6
+indicator('FVG Volume Profile [ChartPrime]', overlay = true, max_boxes_count = 500, max_lines_count = 100, max_bars_back = 5000, max_labels_count = 500)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+bool autoTf = input.bool(true, "Auto", inline = "1", group = "Volume DATA")
+string tf1 = input.timeframe(
+     "10", 
+     "", 
+     inline = "1", 
+     group = "Volume DATA", 
+     tooltip = "Select the custom timeframe for detecting volume of Fair Value Gaps. To use this setting, turn off the 'Auto' toggle. Otherwise, the indicator will follow the chart's 10 times lower timeframe automatically."
+ )
+bool   hideVP = input.bool(true, "Display", group = "FVG Volume Profile")
+int    bins   = input.int(15, "Resolution", group = "FVG Volume Profile")
+
+
+float  gap_filter = input.float(0.5, 'Filter Gaps', step = 0.01)
+
+color  bull_color = input.color(#1da370, 'Bullish Color')
+color  bear_color = input.color(#bc25d6, 'Bearish Color')
+
+
+
+type fvg 
+    box FVG 
+    bool isBull
+    array<float> volumeProfile
+    array<box> volumeBoxes
+    line poc
+    label pocLbl
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+time_ = timeframe.in_seconds(tf1)/60
+currentTime = timeframe.in_seconds("")/60
+
+// Warning 
+if time_ >= currentTime and not autoTf
+    label.delete(label.new(bar_index+3, hl2, "⚠️ Use Lower Timeframes or 'Auto mode'\nin settings", style = label.style_label_center, color = color.rgb(255, 0, 0), size = size.huge)[1])
+
+
+array<float>   c       = request.security_lower_tf('', time_ >= currentTime and not autoTf ? "" : (autoTf ? str.tostring(int(currentTime/10)) : tf1), close)
+array<float>   v       = request.security_lower_tf('', time_ >= currentTime and not autoTf ? "" : (autoTf ? str.tostring(int(currentTime/10)) : tf1), volume)
+
+float bearish_gap_size = (low[2] - high) / ta.stdev(low[2] - high, 200)
+float bullish_gap_size = (low - high[2]) / ta.stdev(low - high[2], 200)
+
+
+detectFairValueGap() =>
+    var pocLblAllow = true
+    var fvgs    = array.new<fvg>()
+    volumeP     = array.new<float>(bins, 0.)
+    volumeBoxes = array.new<box>(bins, box(na))
+    poc         = line(na)
+    pocLbl      = label(na)
+
+    // Conditions to detect bullish and bearish gaps
+    bool bullish_gap_condition = low > high[2] and high[1] > high[2] and bullish_gap_size > gap_filter
+    bool bearish_gap_condition = high < low[2] and low[1] < low[2] and bearish_gap_size > gap_filter
+
+    cls_array = c[1]
+    vol_array = v[1]
+
+    // Bullish FVG logic
+    if bullish_gap_condition
+        pocLblAllow := false
+        fvg_lower = high[2]
+        fvg_upper = low
+
+        fvg_box = box.new(bar_index - 1, fvg_upper, bar_index + 3, fvg_lower, border_color = na, border_width = 0, bgcolor = color.new(bull_color, 70))
+
+        binSize = (fvg_upper-fvg_lower)/bins
+
+        for k = 0 to bins -1
+            volumeP.set(k, 0.)
+
+        if cls_array.size() > 0
+            for k = 0 to bins -1
+
+                lower = fvg_lower + binSize * k 
+                mid = lower + binSize/2
+                for i = 0 to cls_array.size() - 1
+         
+                    cls = cls_array.get(i)
+                    vol = vol_array.get(i)
+
+                    if math.abs(cls-mid) <= binSize
+                        volumeP.set(k, volumeP.get(k) + vol)
+
+        for k = 0 to bins -1
+           
+            lower = fvg_lower + binSize * k 
+            upper = lower + binSize
+            mid = lower + binSize/2
+
+            volumeBoxes.set(k, box.new(bar_index-1, upper, bar_index-1, lower, border_width = 0))
+
+            vol = volumeP.get(k)
+            if volumeP.max() != 0 
+                if vol == volumeP.max() and not pocLblAllow
+                    poc    := line.new(bar_index-1, mid, bar_index-1, mid, color = bull_color)
+                    pocLbl := label.new(bar_index-1, mid, str.tostring(volumeP.max(), format.volume), style = label.style_label_left, color = bull_color, textcolor = chart.fg_color)
+                    pocLblAllow := true
+
+        fvgs.push(fvg.new(fvg_box, true, volumeP, volumeBoxes, poc, pocLbl))
+
+    // Bearish FVG logic
+    if bearish_gap_condition
+        pocLblAllow := false
+        fvg_upper = low[2]
+        fvg_lower = high
+
+        fvg_box = box.new(bar_index - 1, fvg_upper, bar_index + 3, fvg_lower, border_color = na, border_width = 0, bgcolor = color.new(bear_color, 70))
+
+
+        binSize = (fvg_upper-fvg_lower)/bins
+
+        for k = 0 to bins -1
+            volumeP.set(k, 0.)
+
+        if cls_array.size() > 0
+            for k = 0 to bins -1
+
+                lower = fvg_lower + binSize * k 
+                mid = lower + binSize/2
+
+                for i = 0 to cls_array.size() - 1
+
+                    cls = cls_array.get(i)
+                    vol = vol_array.get(i)
+
+                    if math.abs(cls-mid) <= binSize
+                        volumeP.set(k, volumeP.get(k) + vol)
+
+        for k = 0 to bins -1
+
+            lower = fvg_lower + binSize * k 
+            upper = lower + binSize
+            mid = lower + binSize/2
+            vol = volumeP.get(k)
+
+            volumeBoxes.set(k, box.new(bar_index-1, upper, bar_index-1, lower, border_width = 0))
+
+
+            if volumeP.max() != 0  and not pocLblAllow
+                if vol == volumeP.max()
+                    poc := line.new(bar_index-1, mid, bar_index-1, mid, color = bear_color)
+                    pocLbl := label.new(bar_index-1, mid, str.tostring(volumeP.max()*-1, format.volume), style = label.style_label_left, color = bear_color, textcolor = chart.fg_color)
+                    pocLblAllow := true
+
+
+        fvgs.push(fvg.new(fvg_box, false, volumeP, volumeBoxes, poc, pocLbl))
+
+
+    if fvgs.size() > 10
+        f = fvgs.shift()
+        f.FVG.delete()
+        f.poc.delete()
+        f.pocLbl.delete()
+
+
+        for b in  f.volumeBoxes
+            b.delete()
+
+
+    if fvgs.size() > 0
+
+        for f in fvgs
+
+            f.FVG.set_right(bar_index+25)
+
+            top = f.FVG.get_top()
+            bot = f.FVG.get_bottom()
+            left = f.FVG.get_left()
+            right = f.FVG.get_right()
+            binSize = (top-bot)/bins
+
+            boxes = f.volumeBoxes
+
+            f.poc.set_x2(right)
+            f.pocLbl.set_x(right)
+            
+            f.FVG.set_text(str.tostring(f.volumeProfile.sum(), format.volume))
+            f.FVG.set_text_halign(text.align_right)
+            if f.isBull
+                f.FVG.set_text_valign(text.align_bottom)
+            else 
+                f.FVG.set_text_valign(text.align_top)
+
+            f.FVG.set_text_size(size.normal)
+            f.FVG.set_text_color(chart.fg_color)
+            
+            if f.isBull
+                
+                if low < f.FVG.get_bottom()
+                    f.FVG.delete()
+                    for b in boxes
+                        b.delete()
+                    f.poc.delete()
+                    f.pocLbl.delete()
+                    
+                    fvgs.remove(fvgs.indexof(f))
+
+                for k = 0 to bins -1
+
+                    lower = bot + binSize * k 
+                    upper = lower + binSize
+
+                    volSum   = f.volumeProfile.max()
+                    volRatio = f.volumeProfile.get(k) / volSum * 50
+                    step = (right-left)/100
+                    boxWidth = math.round(volRatio * step)
+                    box_id = boxes.get(k)
+                    
+                    bgColor = color.from_gradient(f.volumeProfile.get(k), 0, f.volumeProfile.max(), color.new(bull_color, 100), bull_color)
+
+                    if boxWidth != 0 and hideVP
+
+                        box_id.set_right(left+boxWidth)
+                        box_id.set_bgcolor(bgColor)
+
+            else
+        
+                if high > f.FVG.get_top()
+                    f.FVG.delete()                    
+                    for b in boxes
+                        b.delete()
+                    f.poc.delete()
+                    f.pocLbl.delete()
+
+                    fvgs.remove(fvgs.indexof(f))
+
+                for k = 0 to bins -1
+
+                    lower = bot + binSize * k 
+                    upper = lower + binSize
+
+                    volSum   = f.volumeProfile.max()
+                    volRatio = f.volumeProfile.get(k) / volSum
+
+                    boxWidth = math.round(volRatio * (right-left)/2.5)
+                    box_id = boxes.get(k)
+                    
+                    bgColor = color.from_gradient(f.volumeProfile.get(k), 0, f.volumeProfile.max(), color.new(bear_color, 100), bear_color)
+
+                    if boxWidth != 0 and hideVP
+                        box_id.set_right(left+boxWidth)
+                        box_id.set_bgcolor(bgColor)
+
+
+
+detectFairValueGap()
+
+// --------------------------------------------------------------------------------------------------------------------}
+
+
+

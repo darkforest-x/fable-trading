@@ -1,0 +1,433 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+ 
+//@version=5
+indicator("Monte Carlo Future Moves [ChartPrime]", max_boxes_count=500, max_lines_count=500, max_bars_back=5000, overlay=true)
+
+prng(series float seed, series int _range=100) =>
+    var float random = 1.0
+    random :=   ((3.1415926 * random %   seed) * 271.828) % _range
+    float new_seed = ((seed * 1.618) % _range) + random
+    [random, new_seed]
+
+method probability(series float[] self, series int idx, series float sum) => self.get(idx) / sum * 100.0
+
+percent    (series float   end, series float   start) => (end -   start) / start
+add_percent(series float value, series float percent) => (1.0 + percent) * value
+
+log_returns    (series float   end, series float       start) => math.log(end / start)
+add_log_returns(series float value, series float log_returns) => math.exp(log_returns) * value
+
+returns    (series float   end, series float   start, simple bool style) => style ?     percent(  end,   start) :     log_returns(  end,   start)
+add_returns(series float value, series float returns, series bool style) => style ? add_percent(value, returns) : add_log_returns(value, returns)
+
+method add        (series int[] self, series int     idx, series int     value=1) => self.set(idx, self.get(idx) + value)
+method add_to_dist(series int[] self, series float value, series float bin_width) => self.add(int(math.abs(value) / bin_width), 1)
+
+method normal_value( series float[] self,
+                     series int      idx,
+                     simple int    scale,
+                     simple bool  invert=true) =>
+    float  min = self.min()
+    int normal = int((self.get(idx) - min) * (scale - 1) / (self.max() - min)) + 1
+    if invert
+        normal := scale - normal
+    normal
+
+sinc(series float source, series float bandwidth) =>
+    float omega = math.pi * source / bandwidth
+    source != 0.0 ? math.sin(omega) / omega : 1.0
+
+type move
+    int[]  polarity
+    int[]  up
+    int[]  down
+    float  bin_width
+    float  extreme
+    float  drift
+    string drift_style
+    bool   return_style
+    float  vol
+
+slope(series int length) =>
+    float sumx  = 0.0
+    float sumy  = 0.0
+    float sumx2 = 0.0
+    float sumxy = 0.0
+    for int i = 0 to length - 1
+        float src = close[i]
+        int idx_1 = i + 1
+        sumx     += idx_1
+        sumy     += src
+        sumx2    += math.pow(idx_1, 2)
+        sumxy    +=    src * idx_1
+    float slope = -((length * sumxy - sumx * sumy) / (length * sumx2 - sumx * sumx))
+
+standard_drift(series int length) => 
+    float log_return  = math.log(close / close[1])
+    float log_return2 = math.pow( log_return,  2 )
+    float vari = 0.0
+    float mean = 0.0
+    for int i = 0 to length - 1
+        mean += log_return[ i]
+        vari += log_return2[i]
+    mean /= length
+    vari /= length * 2
+    float drift = mean - vari
+
+drift(series int length, simple string style) =>
+    switch style
+        "Standard"          => standard_drift(length)
+        "Linear Regression" =>          slope(length)
+        =>                     0.0 // "None"
+
+volatility_adjustment(series float source, simple int length, simple bool enable) =>
+    float vol_adj = ta.sma(math.sqrt(math.sum(math.pow(source, 2), length) / (length - 1)), length) * 0.5
+    if not enable
+        vol_adj := 0.0
+    vol_adj
+
+moves(simple int       precision,
+      simple int            bins,
+      simple int        lookback,
+      simple string  drift_style,
+      simple int    drift_length,
+      simple string       source,
+      simple bool   return_style,
+      simple int           steps,
+      simple bool volatility_adj) =>
+    array<int> polarity        = array.new<int>(       2, 0)
+    array<int> delta_up_dist   = array.new<int>(bins + 1, 0)
+    array<int> delta_down_dist = array.new<int>(bins + 1, 0)
+    float      last = source=="Move" ? close[1] : open
+    float       ret = returns(close, last, return_style)
+    int    rounding = precision + (return_style ? 6 : 2)
+    float     delta = math.round(ret, rounding)
+    float   volatil = volatility_adjustment(ret, steps, volatility_adj)
+    float   extreme = math.max(math.abs(ta.highest(delta[1], lookback)),
+                               math.abs(ta.lowest (delta[1], lookback)))
+    float     drift = drift(drift_length == 0 ? lookback : drift_length, drift_style)
+    float bin_width = extreme / bins
+    if barstate.islast
+        for int i = 1 to lookback
+            if close[i] <= last[i]
+                polarity.add(1)
+                add_to_dist(delta_down_dist, delta[i], bin_width)
+            else
+                polarity.add(0)
+                add_to_dist(delta_up_dist, delta[i], bin_width)
+    move.new(polarity, delta_up_dist, delta_down_dist, bin_width, extreme, drift, drift_style, return_style, volatil)
+
+method idx_to_percent(series move     self,
+                      series int     index,
+                      series float volatil,
+                      simple bool polarity) =>
+    (polarity ? 1 : -1) * (index * self.bin_width + volatil)
+                                    
+
+monte_carlo(series move moves, series float seed, simple int steps) =>
+    array<float> monte = array.new<float>(steps)
+    float    over_seed = seed
+    int   polarity_sum = moves.polarity.sum()
+    int   moves_up_sum = moves.up.sum()
+    int   moves_dn_sum = moves.down.sum()
+    if moves.up.max() > 0 and moves.down.max() > 0
+        for int i = 0 to steps - 1
+            [polarity_random, polarity_seed] = prng(over_seed)
+            over_seed := polarity_seed
+            if moves.polarity.probability(0, polarity_sum) >= polarity_random 
+                int moves_up_size_1 = moves.up.size() - 1
+                [move_random, move_random_seed] = prng(over_seed, moves_up_size_1)
+                over_seed      := move_random_seed
+                int  up_index   = int(move_random)
+                bool move_found = false
+                while not move_found
+                    if  up_index > moves_up_size_1
+                        up_index := 0
+                    if moves.up.get(up_index) == 0
+                        up_index += 1
+                        continue
+                    [move_find_random, move_find_seed] = prng(over_seed)
+                    over_seed := move_find_seed
+                    if moves.up.probability(up_index, moves_up_sum) >= move_find_random 
+                        monte.set(i, moves.idx_to_percent(up_index, moves.vol, true))
+                        move_found := true
+                        break
+                    else
+                        up_index += 1
+                continue
+            else
+                int moves_down_size_1 = moves.down.size() - 1
+                [move_random, move_random_seed] = prng(over_seed, moves_down_size_1)
+                over_seed      := move_random_seed
+                int  down_index = int(move_random)
+                bool move_found = false
+                while not move_found
+                    if  down_index > moves_down_size_1
+                        down_index := 0
+                    if moves.down.get(down_index) == 0
+                        down_index += 1
+                        continue 
+                    [move_find_random, move_find_seed] = prng(over_seed)
+                    over_seed := move_find_seed
+                    if moves.down.probability(down_index, moves_dn_sum) >= move_find_random 
+                        monte.set(i, moves.idx_to_percent(down_index, moves.vol, false))
+                        move_found := true
+                        break
+                    else
+                        down_index += 1
+                continue
+    [monte, over_seed]
+
+add_drift(series float value, series float drift, series string style) =>
+    switch style
+        "Standard"          => add_log_returns(value, drift)
+        "Linear Regression" => value + drift
+        =>                     value // "None"
+
+sim(series move moves, series float seed, simple int steps) =>
+    float simulation = open
+    [movements, _seed] = monte_carlo(moves, seed, steps)
+    for int i = 0 to steps - 1
+        simulation := add_drift(add_returns(simulation, movements.get(i), moves.return_style), moves.drift, moves.drift_style)
+    [simulation, _seed]
+
+sinc_filter(series array<float> source, simple float length) =>
+    var float length_1 = length + 1.0
+    if length > 0.0 and source.size() > 0
+        int source_size   = array.size(source)
+        int source_size_1 = source_size - 1
+        array<float> est  = array.new<float>(source_size)
+        for int i = 0 to source_size_1
+            float sum  = 0.0
+            float sumw = 0.0
+            for int j = 0 to source_size_1
+                float weight =  sinc(i - j, length_1)
+                sum  += weight * array.get(source, j)
+                sumw += weight
+            float current_price = sum / sumw
+            array.set(est, i, current_price >= 0.0 ? current_price : 0.0)
+        est
+    else
+        source
+
+monte_carlo_distribution(series move moves,
+                         series float seed,
+                         simple int   bins,
+                         simple int  steps,
+                         simple int   sims) =>
+    array< int > distribution = array.new< int >(bins + 1, 0)
+    array<float> sim_outcomes = array.new<float>()
+    var int sims_1  = sims - 1
+    float sum_stdev = 0.0
+    float    reseed = seed
+    for int i = 0 to sims_1
+        [simulation, seed_sim] = sim(moves, reseed, steps)
+        reseed    := seed_sim
+        sum_stdev += math.pow(simulation - open, 2)
+        sim_outcomes.push(simulation)
+    float sim_lowest  = sim_outcomes.min()
+    float sim_highest = sim_outcomes.max()
+    float bin_width   = (sim_highest - sim_lowest) / bins
+    float avg_idx_up  = 0.0
+    float sum_idx_up  = 0.0
+    float avg_idx_dn  = 0.0
+    float sum_idx_dn  = 0.0
+    for int i = 0 to sim_outcomes.size() - 1
+        float outcome = sim_outcomes.get(i)
+        int idx = int((outcome - sim_lowest) / bin_width)
+        if outcome > open
+            avg_idx_up += idx
+            sum_idx_up += 1
+        else
+            avg_idx_dn += idx
+            sum_idx_dn += 1
+        distribution.add(idx)
+    float avg_up   = avg_idx_up   / sum_idx_up
+    float avg_dn = avg_idx_dn / sum_idx_dn
+    float stdev    = math.sqrt(sum_stdev / sims)
+    [distribution, bin_width, sim_lowest, sim_highest, avg_up, avg_dn, stdev, reseed]
+
+draw_distribution(series move           moves,
+                  series float           seed,
+                  series bool     orientation,
+                  simple int             bins,
+                  simple int            steps,
+                  simple int      simulations,
+                  simple int            scale,
+                  simple bool        avg_move,
+                  simple float      deviation,
+                  simple bool    enable_stdev,
+                  simple bool     enable_bias,
+                  simple bool      background,
+                  simple color max_bear_color,
+                  simple color min_bear_color,
+                  simple color max_bull_color,
+                  simple color min_bull_color,
+                  simple color dev_high_color,
+                  simple color  dev_low_color,
+                  simple color     text_color,
+                  simple bool    extend_lines,
+                  simple bool     outcomes_on,
+                  simple bool    text_on_dist,
+                  simple string  move_help_on,
+                  simple bool    max_expected,
+                  simple float      smoothing,
+                  simple bool      start_line,
+                  simple color    start_color) =>
+    var array< box>     dist = array.new< box>()
+    var array<line> avg_line = array.new<line>()
+    var string    xtend_line = extend_lines ? extend.left : extend.none
+    const color    invisible = #00000000
+    int offset    = steps
+    int direction = orientation ? 1 : -1
+    int position  = orientation ? 0 : offset
+    int width     = (scale + offset) * direction
+    [_monte, bin_width, lowest_sim, highest_sim, avg_idx_up, avg_idx_down, stdev, _seed] = monte_carlo_distribution(moves, seed, bins, steps, simulations)
+    array<float> monte = sinc_filter(_monte, smoothing)
+    float max_freq  = monte.max()
+    float half_bin  = bin_width * 0.5
+    float variation = stdev * deviation
+    float dev_up    =               open + variation
+    float dev_down  = math.max(0.0, open - variation)
+    float avg_up    = avg_idx_up   * bin_width + lowest_sim
+    float avg_down  = avg_idx_down * bin_width + lowest_sim
+    if avg_line.size() > 0
+        for int i = avg_line.size() - 1 to 0
+            avg_line.get(i).delete()
+            avg_line.remove(i)
+    if dist.size() > 0 
+        for int i = dist.size() - 1 to 0
+            dist.get(i).delete()
+            dist.remove(i)
+    int x2 = outcomes_on ?  width + bar_index :
+             orientation ? offset + bar_index :
+                               -1 + bar_index
+    if max_expected
+        float expected       = monte.indexof(max_freq) * bin_width + lowest_sim
+        color expected_color = expected > open ? min_bull_color : min_bear_color
+        avg_line.push(line.new(bar_index + position, expected, x2, expected, color=expected_color, style=line.style_solid,  extend=xtend_line, width=2))
+
+    if enable_stdev
+        avg_line.push(line.new(bar_index + position, dev_up,   x2, dev_up,   color=dev_high_color, style=line.style_dotted, extend=xtend_line, width=2))
+        avg_line.push(line.new(bar_index + position, dev_down, x2, dev_down, color=dev_low_color,  style=line.style_dotted, extend=xtend_line, width=2))
+        if   move_help_on == "Deviation Range"
+          or move_help_on == "Both"
+            avg_line.push(line.new(bar_index, open, bar_index + offset, dev_up,   color=dev_high_color, style=line.style_arrow_right))
+            avg_line.push(line.new(bar_index, open, bar_index + offset, dev_down, color=dev_low_color,  style=line.style_arrow_right))
+    if avg_move
+        avg_line.push(line.new(bar_index + position, avg_up,   x2, avg_up,   color=min_bull_color, style=line.style_dashed, extend=xtend_line, width=2))
+        avg_line.push(line.new(bar_index + position, avg_down, x2, avg_down, color=min_bear_color, style=line.style_dashed, extend=xtend_line, width=2))
+        if   move_help_on == "Expected"
+          or move_help_on == "Both"
+            avg_line.push(line.new(bar_index, open, bar_index + offset, avg_up,   color=min_bull_color, style=line.style_arrow_right))
+            avg_line.push(line.new(bar_index, open, bar_index + offset, avg_down, color=min_bear_color, style=line.style_arrow_right))
+    if start_line
+        avg_line.push(line.new(bar_index + position, open, x2, open, color=start_color, extend=xtend_line))
+    float polarity = 0.0
+    float monte_sum = monte.sum()
+    for int i = 0 to monte.size() - 1
+        float top    = (1 + i) * bin_width + lowest_sim - half_bin
+        float bottom =      i  * bin_width + lowest_sim - half_bin
+        float center = math.avg(top, bottom)
+        int   value  = monte.normal_value(i, scale)
+        float prob   = monte.probability(i, monte_sum) 
+        if center < open
+            polarity += prob
+        color grad_color = if center >= open
+            float upper = highest_sim - half_bin
+            color.from_gradient(center, open, upper, min_bull_color, max_bull_color)
+        else
+            float lower = lowest_sim + bin_width * 0.5
+            color.from_gradient(center, lower, open, max_bear_color, min_bear_color)
+        if prob > 0.0 and outcomes_on
+            int left   = bar_index + (value + offset) * direction
+            string txt = text_on_dist ? str.tostring(math.round(prob, 2)) + "%" : ""
+            dist.push(box.new(left, top, bar_index + width, bottom, text=txt, border_color=invisible, bgcolor=grad_color, text_color=text_color))
+        if background
+            int left  = bar_index + position
+            int right = outcomes_on ? (value + offset) * direction + bar_index :
+                                              orientation ? offset + bar_index :
+                                                               -1  + bar_index
+            var string ext = extend_lines ? (orientation ? extend.left : extend.right) : extend.none
+            color bg_color = color.from_gradient(monte.get(i), 0.0, max_freq, color.new(grad_color, 99), color.new(grad_color, 75))
+            dist.push(box.new(left, top, right, bottom, invisible, bgcolor=bg_color, extend=ext))
+    if enable_bias
+        int left     = outcomes_on ?  width + bar_index :
+                       orientation ? offset + bar_index :
+                                         -1 + bar_index
+        int right    = left + 2 * direction
+        float bottom = lowest_sim - half_bin
+        float div    = (highest_sim + half_bin - (lowest_sim - half_bin)) * (polarity / 100.0)
+        dist.push(box.new(left, highest_sim + half_bin, right, div + bottom, border_color=invisible, bgcolor=min_bull_color, text="🢁\n\n" + str.tostring(math.round(100.0 - polarity, 2)) + "%", text_color=text_color))
+        dist.push(box.new(left,      bottom + div,      right,       bottom, border_color=invisible, bgcolor=min_bear_color, text=str.tostring(math.round(        polarity, 2)) + "%" + "\n\n🢃", text_color=text_color))
+    _seed
+
+
+
+string source = input.string("Candle", "Derivative Source", options=["Candle", "Move"], tooltip="Candle uses the difference between Close and Open. Move uses the difference between the current close and the previous close.")
+
+string controls = "Primary Controls"
+int simulations = input.int  ( 500, "Number of Simulations", group=controls, minval= 50, step=  50, tooltip="This adjusts the number of simulations the indicator will preform. A larger number is alway preferable but isn't always feasible. The larger the number the more accurate the indicator will be.")
+int    lookback = input.int  ( 500,              "Lookback", group=controls, minval= 50, step=  50, tooltip="This determines the number of historical candles to take into account. A larger number will allow for more detail in the simulation but will also make it less relevant.")
+int       steps = input.int  (  10,     "Steps Into Future", group=controls, minval=  2, step=   1, tooltip="This determines the number of steps into the future to predict. The further into the future you go, the more resources it will utilize. potentially resulting in the indicator not loading.")
+int        bins = input.int  (  50,   "Outcome Granularity", group=controls, minval= 10, step=   5, tooltip="This is the number of rows in the final distribution of simulations. This determines the granularity of the final result.")
+float smoothing = input.float(1.75,     "Outcome Smoothing", group=controls, minval=0.0, step=0.25, tooltip="Smooth the distribution of the outcomes. When its set to 0 it will not apply smoothing.")
+int granularity = input.int  (  25,   "Returns Granularity", group=controls, minval=  5, step=   5, tooltip="This adjusts the granularity of the distribution of price movements. A larger number can be more accurate but it will sacrifice loading time.")
+
+string  adjustments = "Additional Adjustments"
+int    drift_length = input.int   (           34,             "Drift", group=adjustments, inline="drift", minval=0)
+string  drift_style = input.string(   "Standard",            "Style:", group=adjustments, inline="drift", options=["Linear Regression", "Standard", "None"], tooltip="Drift adds trend to the simulation. Without drift, the simulation will assume a trendless market. Linear Regression uses linear regression to determine trend while Standard Drift uses a volatility degraded average return.\n\nBoth are excellent options and are generally very similar. Set this to 0 to use the same window size as the lookback. A shorter period will use the short term trend while a longer period will use a longer term trend.")
+bool volatility_adj = input.bool  (         true, "Volatility Adjust", group=adjustments,            tooltip="Adjust the simulation to include the current volatility of returns. This will prevent the simulation from underestimating the variance in movements.")
+bool   return_style = input.string("Log Returns",     "Returns Style", group=adjustments, options=["Percent", "Log Returns"], tooltip="Percent uses % change for the calculations while Log Returns uses log returns for the calculations.") == "Percent"
+int       precision = input.int   (            4,         "Precision", group=adjustments,  minval=1, tooltip="Precision lets you adjust the level of rounding for the price movements. A smaller number will be faster but it will sacrifice accuracy.")
+bool wait_for_steps = input.bool  (        false,  "Update Every Bar", group=adjustments,            tooltip="Enable this to update the prediction on every bar.")
+
+string      visuals = "Visual Preferences"
+bool    orientation = input.string("Right",         "Side of Chart", group=visuals, options=["Right", "Left"], tooltip="Choose which side of the chart you want the indicator on.") == "Right"
+string move_help_on = input.string( "Both",    "Move Visualization", group=visuals, options=["Expected", "Deviation Range", "Both", "None"])
+bool       avg_move = input.bool  (   true,      "Most Likely Move", group=visuals, tooltip="This plots the most likely up and down move for the current estimation period. These may be used as targets for your trade.")
+bool   enable_stdev = input.bool  (   true,    "Standard Deviation", group=visuals,  inline="stdev")
+float     deviation = input.float (    1.0,                      "", group=visuals,  inline="stdev", minval=0.0, step=0.5, tooltip="This is the range in which most of the simulations fall between. It acts as a prediction level for a  volatile move.")
+bool    enable_bias = input.bool  (   true, "Most Likely Direction", group=visuals, tooltip="This shows you the sum of up and down probabilities. It allows you to quickly see what the likelihood of a move in either direction is.")
+bool   max_expected = input.bool  (   true,  "Max Probability Zone", group=visuals, tooltip="This highlights the area with the largest outcome probability.")
+bool    outcomes_on = input.bool  (   true,  "Outcome Distribution", group=visuals,  inline="dist")
+int           scale = input.int   (     30,                      "", group=visuals,  inline="dist", minval=10, tooltip="Enable to display the distribution of outcomes. Adjust this changes the horizontal length of the distribution.")
+bool   text_on_dist = input.bool  (   true,     "Distribution Text", group=visuals, tooltip="Enable outcome probabilities to be show in the distribution.")
+bool     background = input.bool  (   true,            "Background", group=visuals, tooltip="Display a background of the distribution for the duration of the prediction interval.")
+bool     start_line = input.bool  (   true,         "Starting Line", group=visuals, tooltip="Show the starting point of the simulation.")
+bool   extend_lines = input.bool  (   true,          "Extend Lines", group=visuals, tooltip="Extend the lines and background.")
+
+string      coloring = "Color Preferences"
+color max_bear_color = input.color(#FFA0CC,     "Bearish Colors     ", group=coloring, inline="bear")
+color min_bear_color = input.color(#FF22CC,                        "", group=coloring, inline="bear")
+color max_bull_color = input.color(#00FFFF,    "Bullish Colors      ", group=coloring, inline="bull")
+color min_bull_color = input.color(#0066FF,                        "", group=coloring, inline="bull")
+color dev_high_color = input.color(#FFB617, "Deviation Color - High:", group=coloring, inline="dev" )
+color dev_low_color  = input.color(#2672ff,                    "Low:", group=coloring, inline="dev" )
+color start_color    = input.color(#7E7E7E,        "Start Line Color", group=coloring)
+color text_color     = input.color(#FFFFFF,              "Text Color", group=coloring)
+
+
+
+move rand_moves = moves(precision, granularity, lookback, drift_style, drift_length, source, return_style, steps, volatility_adj)
+var float seed = 1
+[_, re_seed] = prng(seed)
+seed := re_seed
+
+if barstate.islast 
+    var int counter = -1
+    if counter == -1
+        int bar_index_1 = bar_index + 1
+        if bar_index_1 < lookback
+            runtime.error('Please use a "Lookback" input setting that is less than: ' + str.tostring(bar_index))
+        if bar_index_1 < drift_length
+            runtime.error('Please use a "Drift" input setting that is less than: '    + str.tostring(bar_index))
+    counter += 1
+    bool once = counter == 0 ? true : barstate.isconfirmed
+    bool wait = not wait_for_steps ? 0 == counter % steps and once :
+                                     0 == counter or barstate.isconfirmed
+    if wait
+        seed :=  draw_distribution(rand_moves, seed, orientation, bins, steps, simulations, scale, avg_move, deviation, enable_stdev, enable_bias,
+                                   background, max_bear_color, min_bear_color, max_bull_color, min_bull_color, dev_high_color, dev_low_color, text_color,
+                                   extend_lines, outcomes_on, text_on_dist, move_help_on, max_expected, smoothing, start_line, start_color)

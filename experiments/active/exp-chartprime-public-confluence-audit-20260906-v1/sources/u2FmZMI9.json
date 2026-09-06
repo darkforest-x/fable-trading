@@ -1,0 +1,45 @@
+{
+  "id": "u2FmZMI9",
+  "title": "Parabolic Scalp Take Profit[ChartPrime]",
+  "url": "https://www.tradingview.com/script/u2FmZMI9-Parabolic-Scalp-Take-Profit-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:37:47.938529+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/u2FmZMI9-Parabolic-Scalp-Take-Profit-ChartPrime/",
+  "created_at": "2023-03-10T04:51:54.796819+00:00",
+  "updated_at": "2023-03-11T13:43:12.069813+00:00",
+  "description": "Indicators can be a great way to signal when the optimal time is for taking profits. However, many indicators are lagging in nature and will get market participants out of their trades at less than optimal price points. This take profit indicator uses the concept of slope and exponential gain to calculate when the optimal time is to take profits on your trades, thus making this a leading indicator.\n\nUsage:\n\nIn essence the indicator will draw a parabolic line that starts from the market participants entry point and exponentially grows the slope of the line eventually intersecting with the price action. When price intersects with the parabolic line a take profit signal will appear in the form of an x. We have found that this take profit indicator is especially useful for scalp trades on lower timeframes.\n\nHow To Use:\n\nAdd the indicator to the chart. Click on the candle which the trade is on. Click on either the price which the trade will be at, or at the bottom of the candle in a long, or the top of a candle in a short. Select long or short. Open the settings of the indicator and adjust the aggressiveness to the desired value.\n\nSettings:\n\n- Start Time -- This is the bar in which your entry will be at, or occured at and the script will ask you to click on the bar with your mouse upon first adding the script.\n- Start Price -- This is the price in which the entry will be at, or was at and the script will ask you to click on the price with your mouse upon first adding the script.\n- Long/Short -- This is a setting which lets the script know if it is a long or a short trade, and the script will ask you to confirm this upon first adding it to the chart.\n- Aggressiveness -- This directly affects how aggressive the exponential curve is. A value of 101 is the lowest possible setting, indicating a very non-aggressive exponential buildup. A value of 200 is the highest and most aggressive setting, indicating a doubling effect per bar on the slope.",
+  "script": {
+    "id": 913412,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;d58d0754533c45abb212c8d94c40f519",
+    "version_maj": 2,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bd58d0754533c45abb212c8d94c40f519/2",
+  "source_http_status": 200,
+  "source_sha256": "b18b4188cddf424297a21b5df0488194c646c5ff60e4ea65ddf8772acabc1b44",
+  "source_lines": 42,
+  "source_metadata": {
+    "created": "2023-03-11T13:43:11.767736Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plotshape": 4
+      }
+    },
+    "lastVersionMaj": "2.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Parabolic Scalp Take Profit[ChartPrime]",
+    "updated": "2023-03-11T13:43:11.767736Z",
+    "version": "2.0"
+  }
+}

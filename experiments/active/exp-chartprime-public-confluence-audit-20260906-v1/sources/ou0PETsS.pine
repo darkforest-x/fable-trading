@@ -1,0 +1,84 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=6
+indicator("Gradient Trend Filter [ChartPrime]", overlay = true)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+float src     = input.source(close, "Source")
+int   length  = input.int(25, "Length")
+int   width   = input.int(2, "Line Width")
+
+color color1  = input.color(#22c878, "", inline = "1", group = "color")
+color color2  = input.color(#c8224e, "", inline = "1", group = "color")
+int   transp  = input.int(80, "", inline = "1", group = "color")
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+// Noise filter function
+noise_filter(src, length) =>
+    alpha = 2 / (length + 1)
+    nf_1 = 0.0
+    nf_2 = 0.0
+    nf_3 = 0.0
+
+    nf_1 := (alpha * src) + ((1 - alpha) * nz(nf_1[1]))
+    nf_2 := (alpha * nf_1) + ((1 - alpha) * nz(nf_2[1]))
+    nf_3 := (alpha * nf_2) + ((1 - alpha) * nz(nf_3[1]))
+    
+    nf_3 // Final output with three-stage smoothing
+
+
+// Bands function
+bands(src)=>
+
+    val = noise_filter(high-low, length)
+
+    upper3 = src + val * 0.618*2.5
+    upper2 = src + val * 0.382*2
+    upper1 = src + val * 0.236*1.5
+    lower1 = src - val * 0.236*1.5
+    lower2 = src - val * 0.382*2
+    lower3 = src - val * 0.618*2.5
+
+    [upper3, upper2, upper1, lower1, lower2, lower3]
+
+
+float base = noise_filter(src, length)
+
+[upper3, upper2, upper1, lower1, lower2, lower3] = bands(base)
+
+float diff = base - base[2]
+
+// Signals
+bool signal_up = ta.crossover(diff, 0) and barstate.isconfirmed
+bool signal_dn = ta.crossunder(diff, 0) and barstate.isconfirmed
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+color gradient_col = color.from_gradient(diff, ta.lowest(diff, 100), ta.highest(diff, 100), color2, color1)
+color trend_color  = color.new(gradient_col, transp)
+
+plot(base, "Filter", linewidth = width, color = diff >= 0 ? color1 : color2)
+
+up3 = plot(upper3, display = display.none, editable = false)
+up2 = plot(upper2, display = display.none, editable = false)
+up1 = plot(upper1, display = display.none, editable = false)
+lw1 = plot(lower1, display = display.none, editable = false)
+lw2 = plot(lower2, display = display.none, editable = false)
+lw3 = plot(lower3, display = display.none, editable = false)
+
+fill(up3, lw3, trend_color)
+fill(up2, lw2, trend_color)
+fill(up1, lw1, trend_color)
+
+plotshape(signal_up ? base[1] : na, "", shape.diamond, location.absolute, offset = -1, size = size.tiny, color = color.orange)
+plotshape(signal_dn ? base[1] : na, "", shape.diamond, location.absolute, offset = -1, size = size.tiny, color = color.orange)
+// --------------------------------------------------------------------------------------------------------------------}

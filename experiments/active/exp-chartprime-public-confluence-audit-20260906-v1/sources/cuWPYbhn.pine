@@ -1,0 +1,858 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("Risk Reward Optimiser [ChartPrime]",overlay = true,max_lines_count = 500,max_labels_count = 500)
+
+
+// --- { Matrix & arrays 
+type Dat
+    matrix<int> MTX
+    matrix<float> PNL
+    matrix<float> PLOT
+    matrix<float> Maxprofit
+    array<color> Col
+    array<float> MAXPF
+    array<float> MAXPNL
+    array<float> MAXWin
+    array<bool> Signals
+    array<float> MAXBOX
+    array<box> Box
+    array<float> Highs
+    array<float> LOWS
+    array<label> Labels
+    map<string, color> Colors
+
+
+var BackTest = Dat.new(
+     matrix.new<int>(7, 2, 0),
+     matrix.new<float>(7, 2, 0),
+     matrix.new<float>(7, 3, 0),
+     matrix.new<float>(7, 3, 0),
+     array.new_color(7,color.black),
+     array.new_float(7),
+     array.new_float(7),
+     array.new_float(7),
+     array.new_float(7),
+     array.new_float(1,0),
+     array.new_box(14),
+     array.new_float(50),
+     array.new_float(50),
+     array.new_label(7),
+     map.new<string, color>()
+     
+     )
+
+if barstate.isfirst
+    BackTest.Colors.put("White" , color.new(chart.fg_color,30))
+    BackTest.Colors.put("Green" , color.rgb(21, 112, 5, 42))
+    BackTest.Colors.put("Red"   , color.rgb(136, 11, 11, 39))
+    BackTest.Colors.put("Select" , color.rgb(23, 238, 216, 26))
+
+array<string> columns                  =
+     array.from('Ratio','Total Trades','Wins','Losses','Winrate','PF','PNL % ')
+
+// -- }
+
+// --- { Inputs and Vars
+EXTDeal             = false
+var bool Shape      = false
+string ENTRYG       =  "➞ Entry Setup Settings 🔸"
+string SLGROUP      =  "➞ Risk Setup Settings 🔸"
+string BACKDATE     =  "➞ Backtest date range 🔸"
+string RISKGROUP    =  "➞ Risk to Reward Settings 🔸" 
+string DASHGROUP    =  "➞ DASHGROUP Settings 🔸" 
+string DYNAMICSLG   =  "➞ Stoploss Settings 🔸" 
+string VISUAL       =  "➞ Visuals Settings🔸" 
+string EXT          =  "      🔽 External indicator Settings 🔸" 
+string INT          =  "      🔽 Internal Settings 🔸⮯" 
+string _AROON       =  "      🔸 Aroon Settings 🔸⭝" 
+string _AO          =  "      🔸 AO Settings 🔸⭝" 
+string _RSI         =  "      🔸 RSI Settings 🔸⭝" 
+string _MACD        =  "      🔸 MACD Settings 🔸⭝" 
+string _PSAR        =  "      🔸 PSAR Settings 🔸⭝" 
+string _STOCH       =  "      🔸 STOCH Settings 🔸⭝" 
+string _STOCHRSI    =  "      🔸 STOCH RSI Settings 🔸⭝" 
+string _MA          =  "      🔸 Moving Avg Settings 🔸⭝" 
+string _ST          =  "      🔸 SuperTrend Settings 🔸⭝" 
+string NAME         =  "RRO Backtester [ChartPrime]"
+string SLZ2TOOL     = "Select Which SL Type you wanna use ?! Dynamic SL or Fixed SL input"
+string RRTPTIP      = "When Dynamic system is selected this acts as RR Ratio , else its Fixed TP input"
+string EXTIP        = "Select external indicator plot"
+
+
+string position                     = input.string("Top Right", 
+     options = [
+             "Middle Right",
+             "Top Center",
+             "Top Right",
+             "Middle Left",
+             "Middle Center",
+             "Bottom Left",
+             "Bottom Center",
+             "Bottom Right"],
+     title = 'Position',
+     inline = "001",
+     group = DASHGROUP
+     )
+
+string textSize      = input.string("Small", 
+     options = [
+             "Tiny",
+             "Small",
+             "Normal",
+             "Auto"],
+     title = 'Size',
+     inline = "001",
+     group = DASHGROUP
+     )
+
+
+
+string MAXWHAT     = input.string("Winrate", 
+     options = [
+             "Winrate",
+             "Profit Factor",
+             "PNL"],
+     title = '♻️ Highlight Max',
+     inline = "002",
+     group = DASHGROUP
+     )
+
+// Date Range inputs
+bool limitRange     = input.bool(title='Backtest Date', defval=false, group=BACKDATE)
+int Stime           = input.time(defval=timestamp('11 OCT 2010 00:00 +0000'), title='Start Time', group=BACKDATE)
+int Etime           = input.time(defval=timestamp('31 Dec 2080 00:00 +0000'), title='End Time', group=BACKDATE)
+
+// Entry Inputs
+bool EntryType      = input.string("Internal", title="🌀 Entry Type          ",
+     options=["External", "Internal"],
+     group=ENTRYG,
+     inline = "00",
+     tooltip = "Internal") 
+     == "Internal"
+
+float external_indicator            = input.source(defval=close, title='         External indicator         ',
+     group=EXT,
+     tooltip=EXTIP,
+     inline = "01")
+
+float deal_start_value              = input.int(defval=100, title='         External Value               ',
+     group=EXT,
+     tooltip="Plot Value",
+     inline = "02")
+
+
+//////////////////// INTERNAL /////////////////////////
+
+bool AOActive       = input.bool(false,"AO",group = INT,inline = "02")
+bool MAActive       = input.bool(false,"MA",group = INT,inline = "02")
+bool RSIActive      = input.bool(true,"RSI",group = INT,inline = "02")
+bool MACDActive     = input.bool(false,"MACD",group = INT,inline = "02")
+bool AroonActive    = input.bool(false,"Aroon",group = INT,inline = "06")
+bool STActive       = input.bool(false,"SuperTrend",group = INT,inline = "06")
+bool StochActive    = input.bool(false,"Stochastic",group = INT,inline = "06")
+bool StochRSIActive = input.bool(false,"Stochastic RSI",group = INT,inline = "06",tooltip = "Indicators Activation")
+
+
+// ---- { External indicator built in code 
+
+// -- ARoon
+int Aroonlength = input.int(14, minval=1,group = _AROON,title = "length",inline = "0001")
+string AroonType                      = input.string("Crossover", title="Type",
+     options=["Crossover", ">","<"],
+     group=_AROON,inline = "0001"
+     )
+
+float AroonValue = input.float(40,"Value",group = _AROON,inline = "0001")
+
+
+// -- AO
+string AOType                      = input.string("Change to Green", title="Type",
+     options=["Change to Green", ">","<"],
+     group=_AO,inline = "0001"
+     )
+
+float AOValue = input.float(0.002,"Value",group = _AO,inline = "0001")
+
+// -- RSI
+
+int RSIlength = input.int(14, minval=1,group = _RSI,title = "length",inline = "0001")
+string RSIType                      = input.string("Crossover", title="Type",
+     options=["Crossover", ">","<"],
+     group=_RSI,inline = "0001"
+     )
+
+float RSIValue = input.float(40,"Value",group = _RSI,inline = "0001")
+
+// -- MACD
+int MACDFast = input.int(12, minval=1,group = _MACD,title = "Fast",inline = "0001")
+int MACDslow = input.int(26, minval=1,group = _MACD,title = "Slow",inline = "0001")
+int MACDSmooth = input.int(9, minval=1,group = _MACD,title = "Smooth",inline = "0001")
+
+string MACDType                      = input.string("Crossover", title="Type",
+     options=["Crossover", ">","<"],
+     group=_MACD,inline = "0002"
+     )
+
+float MACDValue = input.float(0.002,"Value",group = _MACD,inline = "0002")
+
+
+//--- Stoch
+
+int StochK = input.int(14, title="%K Length", minval=1,group = _STOCH,inline = "0001")
+int StochSM = input.int(1, title="%K ", minval=1,group = _STOCH,inline = "0001")
+int StochD = input.int(3, title="%D", minval=1,group = _STOCH,inline = "0001")
+string StochType                      = input.string("Crossover", title="Type",
+     options=["Crossover", ">","<"],
+     group=_STOCH,inline = "0002"
+     )
+
+float StochValue = input.float(40,"Value",group = _STOCH,inline = "0002")
+
+
+// --- StochRSI
+
+int StochRSIK   = input.int(14, title="K Smooth", minval=1,group = _STOCHRSI,inline = "0001")
+int StochRSID   = input.int(1, title="D Smooth ", minval=1,group = _STOCHRSI,inline = "0001")
+int StochRSILen = input.int(3, title="Length", minval=1,group = _STOCHRSI,inline = "0001")
+string StochRSIType                      = input.string("Crossover", title="Type",
+     options=["Crossover", ">","<"],
+     group=_STOCHRSI,inline = "0002"
+     )
+
+float StochRSIValue = input.float(40,"Value",group = _STOCHRSI,inline = "0002")
+
+int MA1 = input.int(7, title="MA1 Length", minval=1,group = _MA,inline = "0001")
+string MAType  = input.string("SMA", title="Type", options=["SMA", "EMA", "SMMA (RMA)", "WMA", "VWMA"],inline="0001",group=_MA)
+int MA2 = input.int(13, title="MA2 Length", minval=1,group = _MA,inline = "0001")
+string MAType2  = input.string("SMA", title="Type", options=["SMA", "EMA", "SMMA (RMA)", "WMA", "VWMA"],inline="0001",group=_MA)
+
+
+// --- SuperTrend
+float factor = input.float(3,"Factor",group = _ST,inline = "0001")
+int atrPeriod = input.int(14,"Period",group = _ST,inline = "0001")
+
+
+///---- Stop loss inputs 
+
+string dynamicSelect  = input.string("ATR SL", title="SL Type                ",
+     options=["ATR SL", "Pivot low", "VWAP SL"],
+     group=DYNAMICSLG,inline = "02",
+     tooltip = "Select how you want your Stoploss to be calculated")
+
+float ATRSL           = input.float(1.4,"ATR Factor           ",step = 0.1,
+     group = DYNAMICSLG,
+     inline = "03",
+     tooltip = "Only used with ATR SL")
+
+int LB                = input.int(8, minval=0,title="Pivot Lookback     ",
+     group=DYNAMICSLG,
+     inline = "04",
+     tooltip = "looks for lower low ,Only used with Pivot Low")
+
+float VWAPSL          = input.float(2.5,"Vwap Multiplier    ",step = 0.1,
+     group=DYNAMICSLG,
+     inline = "05",
+     tooltip = "Gets the Vwap value ,Only used with Vwap SL")
+
+
+// RR Values
+
+CASH       = input.int(10000,"Capital",group = RISKGROUP)
+RR1        = input.float(1.0, step=0.1,title = "RR 1",group = RISKGROUP)
+RR2        = input.float(1.5, step=0.1,title = "RR 2",group = RISKGROUP)
+RR3        = input.float(2.0, step=0.1,title = "RR 3",group = RISKGROUP)
+RR4        = input.float(2.5, step=0.1,title = "RR 4",group = RISKGROUP)
+RR5        = input.float(3.0, step=0.1,title = "RR 5",group = RISKGROUP)
+RR6        = input.float(3.5, step=0.1,title = "RR 6",group = RISKGROUP)
+RR7        = input.float(5.0, step=0.1,title = "RR 7",group = RISKGROUP)
+
+
+// visuals 
+
+ShowTrades          = input.bool(true,"Show Trades" ,inline = "002",group = VISUAL)
+ShowTP              = input.bool(true,"Show TP" ,inline = "004",group = VISUAL)
+ShowHist            = input.bool(true,"Show histogram" ,inline = "005",group = VISUAL)
+
+
+////////////////////////////////////////////////////////
+// -- }
+
+//  { General Functions 
+
+// @function            Switch between various type of MA as per use selection.
+// @param source        (series float) the series needed to calculate the wanted MA.
+// @param length        (simple int) the length of the wanted MA 
+// @returns             (float) series of the wanted MA 
+MAVG(source, length, type) =>
+    switch type
+        "SMA" => ta.sma(source, length)
+        "Bollinger Bands" => ta.sma(source, length)
+        "EMA" => ta.ema(source, length)
+        "RMA" => ta.rma(source, length)
+        "WMA" => ta.wma(source, length)
+        "VWMA" => ta.vwma(source, length)
+
+
+
+
+// @function            function to switch condition for each indicator
+// @param type          (string) the selected string by the user drop menu.
+// @param val1          (series float) the first indicator value 
+// @param val2          (series float) the 2nd indicator value 
+// @param val3          (simple float) user input value 
+// @returns             (bool) indicator conditional entry
+ConditionSwitcher(type,val1,val2,val3)=>
+    switch type
+        "Crossover" => ta.crossover(val1,val2)
+        "Change to Green" => ta.crossover(val1,val2)
+        ">" => val1 > val3
+        "<" => val1 < val3
+
+
+//--- > replaced with str.format() it gives a better time string 
+
+// @function            function to return time string from seconds
+// @param seconds       (int) seconds that we want to convert to string
+// @returns             (string) Time string
+TIMEfrom_seconds(seconds) =>
+    if seconds >= 86400
+        string string = str.tostring(math.round(seconds / 86400, 1)) + ' days'
+    else if seconds >= 3600
+        string string = str.tostring(math.round(seconds / 3600, 1)) + ' hours'
+    else
+        string string = str.tostring(math.round(seconds / 60, 1)) + ' mins'
+
+// -- }
+
+
+// @function            function to switch text & table size 
+// @param size          (string) the selected string by the user drop menu.
+// @returns             (string) table & table size 
+// --- { Dashboard  
+switchsize(size) =>
+    switch size
+        'Tiny'         => size.tiny
+        'Small'        => size.small
+        'Normal'       => size.normal
+        'Auto'         => size.auto
+
+
+// @function            function to switch & change table position
+// @param Pos           (string) the selected string by the user drop menu.
+// @returns             (string) table position
+switchPos(Pos) =>
+    switch Pos
+        "Middle Right"  => position.middle_right
+        "Top Center"    => position.top_center
+        "Top Right"     => position.top_right
+        "Middle Left"   => position.middle_left
+        "Middle Center" => position.middle_center
+        "Bottom Left"   => position.bottom_left
+        "Bottom Center" => position.bottom_center
+        "Bottom Right"  => position.bottom_right  
+
+
+
+// initiate table  
+var DataTable          = table.new(switchPos(position),
+      15,
+      50,
+      frame_color = #56555bd5,
+      frame_width = 0,
+      border_width = 0
+      )
+
+
+
+// @function            function to generate row colors depend on a condition
+// @param val           (float) the Calculation main point coming from the PNL on each table row
+// @returns             (color) color
+G_Color(val)=>
+    Pos = color.from_gradient(val,
+         0,
+         400,
+         color.rgb(1, 165, 124),
+         color.rgb(2, 85, 46, 24))
+    Nig = color.from_gradient(val,
+         -0,
+         -400,
+         color.red,
+         color.rgb(68, 5, 4))
+
+    Col = val > 0  ? Pos : Nig
+
+
+// @function            function to generate rows for a predefined table
+// @param c             (int) the column number 
+// @param r             (int) the Row number 
+// @param Text          (string) the text that we need to show in the Row 
+// @param bg            (color) the background color for the Row
+// @returns             table cell with a predefined values
+Cell(c,r,Text,bg)=>
+    table.cell(DataTable,c,r,Text,
+          bgcolor=bg,text_color = color.white,text_size = switchsize(textSize))
+
+
+// -- }
+
+// -- }
+
+//----- { SL Calculation
+// -- ATR 
+x2 = low - ta.rma(ta.tr(true), 14) * ATRSL
+// -- Pivot Low
+PVLOW =  ta.lowest(low,LB)
+// -- VWAP 
+vwap = math.sum(ta.vwap(ta.tr(true)),14) * volume
+volumz = math.sum(volume,14)
+atr_vwap_volume = math.abs(vwap / volumz)
+VWAPSLZ = low - atr_vwap_volume * VWAPSL
+
+
+
+// @function            function to switch between SL values depend on the selected SL type
+// @param SLC           (string) the selected string by the user drop menu.
+// @returns             (float) gives the wanted type stoploss value 
+my_stop(SLC) =>
+    switch SLC
+        "ATR SL" => x2
+        "Pivot low" => PVLOW
+        "VWAP SL" => VWAPSLZ
+
+sl = my_stop(dynamicSelect)
+
+// }
+
+// ---- { Deal Condition
+
+// ------ Internal indicators
+
+// --  Aroon
+Aroonupper = 100 * (ta.highestbars(high, Aroonlength) + Aroonlength)/Aroonlength
+Aroonlower = 100 * (ta.lowestbars(low, Aroonlength) + Aroonlength)/Aroonlength
+ArronLONG = ConditionSwitcher(AroonType,Aroonupper,Aroonlower,AroonValue)
+
+//  -- AO
+ao = ta.sma(hl2,5) - ta.sma(hl2,34)
+diff = ao - ao[1]
+AOLONG = ConditionSwitcher(AOType,diff,0,AOValue)
+
+// --- RSI 
+
+RSI = ta.rsi(close,RSIlength)
+RMA = ta.sma(RSI,RSIlength)
+RSILONG = ConditionSwitcher(RSIType,RSI,RMA,RSIValue)
+
+// --- MACD 
+
+[macdLine, signalLine, _] = ta.macd(close, MACDFast, MACDslow, MACDSmooth)
+MACDLong = ConditionSwitcher(MACDType,macdLine,signalLine,MACDValue)
+
+
+// --- Stoch
+
+Stochk = ta.sma(ta.stoch(close, high, low, StochK), StochSM)
+Stochd = ta.sma(Stochk, StochD)
+StochLong = ConditionSwitcher(StochType,Stochk,Stochd,StochValue)
+
+
+// --- StochRSI
+rsi1 = ta.rsi(close, StochRSILen)
+StochRSIk11 = ta.sma(ta.stoch(rsi1, rsi1, rsi1, StochRSILen), StochRSIK)
+StochRSId11 = ta.sma(StochRSIk11, StochRSID)
+StochRSILong = ConditionSwitcher(StochRSIType,StochRSIk11,StochRSId11,StochRSIValue)
+
+//--- MA 
+
+_MA1 = MAVG(close,MA1,MAType)
+_MA2 = MAVG(close,MA2,MAType2)
+MALong = ta.crossover(_MA1,_MA2)
+
+// --- SuperTrend
+
+[supertrend, direction] = ta.supertrend(factor, atrPeriod)
+STlong = ta.crossunder(direction , 0)
+
+// Internal Conditions 
+internal = (MACDActive ? MACDLong : true) and
+     (AroonActive ? ArronLONG : true) and 
+     (AOActive ? AOLONG : true) and 
+     (RSIActive ? RSILONG : true) and 
+     (StochActive ? StochLong : true) and
+     (StochRSIActive ? StochRSILong : true) and 
+     (MAActive ? MALong : true) and 
+     (STActive ? STlong : true)
+
+     
+
+
+
+// ------ Internal indicators
+
+EXTDeal := if external_indicator == deal_start_value
+    true
+
+// do we need to test within a range ?!
+// @function            function to limit the Backtesting within a range if needed
+// @returns             (bool) time == certain time we want the Backtester to operate in OR if its not active it gives True
+Backdate() =>
+    in_date_range = true
+    if limitRange
+        in_date_range := time >= Stime and time <= Etime
+        
+    else
+        in_date_range := true
+
+
+// get the abs between entry and sl 
+longDiffSL = math.abs(close - sl)
+
+// final entry condition is it going to be Internal or External ?!
+ENTRY = switch
+    EntryType => internal and Backdate()
+    not EntryType => EXTDeal and Backdate()
+
+// }
+
+// ---- { Backtester 
+
+// function to generate a diff color for each RR trade , to know which has ended and which RR still open
+GenCol(i)=>
+    ColGen = color.new(color.rgb((23 * (i + 4)) % 255, (79 * (i + 4)) % 255, (127 * (i + 4)) % 255), 30)
+    ColGen
+// COLoR = color.rgb(math.random(10,150),math.random(10,150),math.random(10,150))
+
+// Backtester function , runs the RR values on the trades 
+
+Backtest(bool sig,tp,i) =>
+    
+    var active_trade = false
+    var TP1 = 0.0
+    var SL = 0.0
+    var En = 0.0
+    var label TO_lab = na
+    if sig and not active_trade
+        // set tps
+        TP1 := close + (tp * longDiffSL)
+        SL  :=  close - longDiffSL
+        En  := close
+        active_trade:= true
+        BackTest.Col.set(i,color.new(GenCol(bar_index), 40))
+
+    if active_trade
+        // get the active trade signal for plotting 
+        BackTest.Signals.set(i,true)
+        // get the data needed for plotting 
+        BackTest.PLOT.set(i,0,En)
+        BackTest.PLOT.set(i,1,TP1)
+        BackTest.PLOT.set(i,2,SL)
+        if high >= TP1
+            // lets show which RR ratio hit the TP on chart
+            if ShowTP
+                TO_lab:=label.new(bar_index - 5 ,
+                     TP1,
+                     "RR " + str.tostring(float(tp),format= "#.00"),
+                     color = color.red,
+                     style =  label.style_none,
+                     textcolor = chart.fg_color,
+                     size = size.small)
+            tpValue = ((TP1 - En) / En) * 100
+            // lets calculate the return in USD value
+            PnlV = math.round(tpValue * CASH / 100,2)
+
+            // lets get the max profitable trade 
+            if BackTest.Maxprofit.get(i,0) < PnlV
+                BackTest.Maxprofit.set(i,0,PnlV)
+                BackTest.Maxprofit.set(i,1,bar_index)
+                BackTest.Maxprofit.set(i,2,time)
+                // label.new(bar_index,high,"BIG ONE " + str.tostring(i),size = size.huge,color = color.maroon)
+            BackTest.MTX.set(i,0,BackTest.MTX.get(i,0)+1)
+            BackTest.PNL.set(i,0,BackTest.PNL.get(i,0)+PnlV)
+            active_trade := false
+            BackTest.Signals.set(i,false)
+
+        else if low <= SL
+            slValue = -((En - SL) / En) * 100
+            PnlV = math.round(slValue * CASH / 100,2)
+            BackTest.MTX.set(i,1,BackTest.MTX.get(i,1)+1)
+            BackTest.PNL.set(i,1,BackTest.PNL.get(i,1)+(PnlV))
+            active_trade := false
+            BackTest.Signals.set(i,false)
+            
+Backtest(ENTRY,RR1,0)
+Backtest(ENTRY,RR2,1)
+Backtest(ENTRY,RR3,2)
+Backtest(ENTRY,RR4,3)
+Backtest(ENTRY,RR5,4)
+Backtest(ENTRY,RR6,5)
+Backtest(ENTRY,RR7,6)
+
+// function to calculate the PNL 
+ReturnCal(val,val2) =>
+    rtn = val + val2
+    math.round((rtn / CASH) * 100,2)
+    
+
+// function to calculate the Profit factor
+PFCal(x,y)=>
+    math.round(x/(-y),2)
+
+
+array<string> Ratios  =
+     array.from(
+             str.tostring(RR1),
+             str.tostring(RR2),
+             str.tostring(RR3),
+             str.tostring(RR4),
+             str.tostring(RR5),
+             str.tostring(RR6),
+             str.tostring(RR7)
+             )
+
+// -- }
+
+// ---- { DashBoard Build 
+if barstate.islast
+    
+    // lets build the name
+    for i = 2 to 8
+        Cell(i,0,i == 2 ? NAME : "",color.rgb(45, 45, 119))   
+
+    table.merge_cells(DataTable, 2, 0, 8, 0)
+
+    // lets build the columns
+    for i = 0 to columns.size() -1
+        Cell(i+2,1,columns.get(i),#126e79)    
+
+    // for i = 0 to BackTest.MTX.rows() -1
+    //     Col2 = color.from_gradient(math.random(10,100),
+    //          10,
+    //          120,
+    //          bottom_color =  color.rgb(100, 156, 219,36),
+    //          top_color = color.rgb(154, 18, 127,36))
+
+    // lets set the RR ratio into the table
+    for i = 0 to Ratios.size() -1
+        Col = color.from_gradient(i,
+             0,
+             Ratios.size(),
+             bottom_color = color.rgb(20, 30, 48,36),
+             top_color = color.rgb(36, 59, 85,36))
+
+        Cell(2,i+2,Ratios.get(i),Col)          
+
+
+
+for i = 0 to BackTest.MTX.rows() - 1
+    Nut = color.from_gradient(
+             i,
+             0,
+             BackTest.MTX.rows(),
+             bottom_color =  #243B55,
+             top_color = #37383b
+             )
+
+    // stats data into the table 
+    for j = 0 to BackTest.MTX.columns() - 1
+        Total = BackTest.MTX.get(i, 0) + BackTest.MTX.get(i, j)
+        Cell(3,(i+1)+ 1,str.tostring(Total),Nut)
+        if BackTest.MAXBOX.get(0)< Total
+            BackTest.MAXBOX.set(0,Total)
+
+        if j == 0
+            Cell(4,(i+1)+ 1,str.tostring(BackTest.MTX.get(i, 0)),Nut)    
+        else
+            Cell(5,(i+1)+ 1,str.tostring(BackTest.MTX.get(i, j)),Nut)
+            Cell(6,(i+1)+ 1,str.tostring(math.round((BackTest.MTX.get(i, 0) / (BackTest.MTX.get(i, 0) + BackTest.MTX.get(i, j))) * 100,2)) +" %",Nut)
+            BackTest.MAXWin.set(i,math.round((BackTest.MTX.get(i, 0) / (BackTest.MTX.get(i, 0) + BackTest.MTX.get(i, j))) * 100,2))
+
+            
+  
+                            
+for i = 0 to BackTest.PNL.rows() - 1
+    Nut = color.from_gradient(
+             i,
+             0,
+             BackTest.PNL.rows(),
+             bottom_color =  #243B55,
+             top_color = #37383b
+             )
+    for j = 0 to BackTest.PNL.columns() - 1
+        BackTest.MAXPF.set(i,PFCal(BackTest.PNL.get(i, 0),BackTest.PNL.get(i, j)))
+        BackTest.MAXPNL.set(i,ReturnCal(BackTest.PNL.get(i, 0),BackTest.PNL.get(i, j)))
+        Cell(7,(i+1)+ 1,str.tostring(PFCal(BackTest.PNL.get(i, 0),BackTest.PNL.get(i, j))) +" %",PFCal(BackTest.PNL.get(i, 0),BackTest.PNL.get(i, j))< 1 ? color.rgb(121, 12, 12, 33): Nut) 
+        Cell(8,(i+1)+ 1,
+             str.tostring(ReturnCal(BackTest.PNL.get(i, 0),BackTest.PNL.get(i, j))) + " %",
+             G_Color(ReturnCal(BackTest.PNL.get(i, 0),BackTest.PNL.get(i, j))))
+
+    tootip = "Max Profit : " + str.format("{0, number, currency}",BackTest.Maxprofit.get(i,0)) + "\n" +
+         "Max % : " + str.tostring(math.round(BackTest.Maxprofit.get(i,0) / 100,2)) + " %" + "\n" + 
+         "Bar Index " + str.tostring(BackTest.Maxprofit.get(i,1)) + "\n" + 
+         "Time : " + str.format("{0,date,medium}",BackTest.Maxprofit.get(i,2))
+                
+    table.cell_set_tooltip(DataTable,2,i+2,tooltip = tootip)
+// -- }
+
+// --------{ Histogram
+
+// lets get the ATR needed to calculate the highest point
+method volAdj(int len)=>
+    math.min(ta.atr(len) * 0.3, close * (0.3/100)) [20] /2
+
+Adj = volAdj(30)
+
+
+
+// lets calculate the mid point for the highest and lowest for the boxes 
+
+for i = 0 to 49
+    Hi = high
+    Lo = low 
+    max_bars_back(Hi,50)
+    max_bars_back(Lo,50)
+    BackTest.Highs.set(i,Hi)
+    BackTest.LOWS.set(i,Lo)
+
+// boxes highest and lowest points
+HighPoint = BackTest.Highs.avg() + ( Adj * 60)
+LowPoint = BackTest.LOWS.avg()
+
+// lets calculate each space from highest and lowest point for each trade
+Spacing = (HighPoint - LowPoint) / BackTest.MAXBOX.sum()
+
+// lets build the boxes
+if barstate.islast and ShowHist
+    var Winspace = 0.0
+    var LossSpace = 0.0
+    var Num = 0 
+    var TotalS = 0.0
+    var avgWin = 0.0
+    var avgLoss = 0.0
+    for i = 0 to BackTest.MTX.rows() - 1
+        label.delete(BackTest.Labels.get(i))
+        for j = 0 to BackTest.MTX.columns() - 1
+            // Lets calculate the win trades space
+            Winspace := (Spacing * BackTest.MTX.get(i, 0)) + LowPoint
+            // Lets calculate the lost trades space
+            LossSpace := (Spacing * BackTest.MTX.get(i, j)) + Winspace
+            // total trades
+            TotalS := BackTest.MTX.get(i, 0) + BackTest.MTX.get(i, j)
+            // lets calculate the avg loss and win %
+            avgWin := math.round(ReturnCal(BackTest.PNL.get(i, 0),BackTest.PNL.get(i, j)) / BackTest.MTX.get(i, 0),2)
+            avgLoss := math.round(ReturnCal(BackTest.PNL.get(i, 0),BackTest.PNL.get(i, j)) / BackTest.MTX.get(i, j),2)
+        
+        // lets label the AVG win and loss 
+        Tip = "Average Win : " + str.tostring(avgWin) + " %"+ "\n" + "Average Loss : " + str.tostring(avgLoss) + " %" +"\n" 
+        BackTest.Labels.set(i,label.new(bar_index+52+i+Num,LowPoint - ( Adj * 1),style = label.style_label_up,color = #126e79,tooltip = Tip ,size = size.small))     
+
+        // Green Winning BOX
+        BackTest.Box.push(box.new(bar_index+50+i+Num,Winspace,bar_index+53+i+Num,LowPoint,
+             border_color = color.rgb(0, 187, 212, 100),
+             bgcolor = #126e79,
+             text = str.tostring(BackTest.MTX.get(i, 0) / TotalS * 100,"#.00") +" %",
+             text_color = chart.fg_color,
+             text_wrap =text.wrap_auto))
+        // RED Losing BOX
+        BackTest.Box.push(box.new(bar_index+50+i+Num,LossSpace,bar_index+53+i+Num,Winspace,
+             border_color = color.rgb(0, 187, 212, 100),
+             bgcolor = #37383b,
+             text = str.tostring(Ratios.get(i)),
+             text_color = chart.fg_color))
+        Num+=3
+        //
+    // lets delete boxes if they are more than needed
+    if BackTest.Box.size() > 14
+        for i = 0 to 13
+            box.delete(BackTest.Box.shift())
+    // lets reset the num var to avoid pushing the boxes far away from price
+    Num:=0
+
+    // creating a closing box
+    var box D = na , box.delete(D)
+    D:=box.new(bar_index+50,LowPoint,bar_index+77,LowPoint - ( Adj * 1),border_color = color.rgb(0, 187, 212, 100),bgcolor = #37383b)    
+
+
+// -- }
+
+// ---- { Plotting with Array and matrix
+
+// lets plot a shape when the SL is hit 
+
+// for i = 0 to BackTest.Signals.size() -1
+//     if (BackTest.Signals.get(i)[1] == true and BackTest.Signals.get(i) == false)
+//         if low <= BackTest.PLOT.get(i,2)
+//             // changing shape condition to true 
+//             Shape:=true
+
+// plotshape(ShowSL and Shape,style= shape.labelup,color = color.rgb(208, 11, 11, 37),location = location.belowbar,text = "SL",textcolor = chart.fg_color)
+
+// resetting shape condition to false to prevent printing wrong shapes 
+// Shape:=false
+
+// lets plot trades 
+
+plot(ShowTrades and BackTest.Signals.get(0) ? BackTest.PLOT.get(0,0) : na , color = BackTest.Colors.get("White") ,style =plot.style_linebr)
+plot(ShowTrades and BackTest.Signals.get(0) ? BackTest.PLOT.get(0,1) : na , color = BackTest.Col.get(0) ,style =plot.style_linebr)
+plot(ShowTrades and BackTest.Signals.get(0) ? BackTest.PLOT.get(0,2) : na , color = BackTest.Colors.get("Red") ,style =plot.style_linebr)
+
+plot(ShowTrades and BackTest.Signals.get(1) ? BackTest.PLOT.get(1,0) : na , color = BackTest.Colors.get("White") ,style =plot.style_linebr)
+plot(ShowTrades and BackTest.Signals.get(1) ? BackTest.PLOT.get(1,1) : na , color = BackTest.Col.get(1) ,style =plot.style_linebr)
+plot(ShowTrades and BackTest.Signals.get(1) ? BackTest.PLOT.get(1,2) : na , color = BackTest.Colors.get("Red") ,style =plot.style_linebr)
+
+plot(ShowTrades and BackTest.Signals.get(2) ? BackTest.PLOT.get(2,0) : na , color = BackTest.Colors.get("White")  ,style =plot.style_linebr)
+plot(ShowTrades and BackTest.Signals.get(2) ? BackTest.PLOT.get(2,1) : na , color = BackTest.Col.get(2) ,style =plot.style_linebr)
+plot(ShowTrades and BackTest.Signals.get(2) ? BackTest.PLOT.get(2,2) : na , color = BackTest.Colors.get("Red") ,style =plot.style_linebr)
+
+plot(ShowTrades and BackTest.Signals.get(3) ? BackTest.PLOT.get(3,0) : na , color = BackTest.Colors.get("White") ,style =plot.style_linebr)
+plot(ShowTrades and BackTest.Signals.get(3) ? BackTest.PLOT.get(3,1) : na , color = BackTest.Col.get(3) ,style =plot.style_linebr)
+plot(ShowTrades and BackTest.Signals.get(3) ? BackTest.PLOT.get(3,2) : na , color = BackTest.Colors.get("Red") ,style =plot.style_linebr)
+
+plot(ShowTrades and BackTest.Signals.get(4) ? BackTest.PLOT.get(4,0) : na , color = BackTest.Colors.get("White") ,style =plot.style_linebr)
+plot(ShowTrades and BackTest.Signals.get(4) ? BackTest.PLOT.get(4,1) : na , color = BackTest.Col.get(4) ,style =plot.style_linebr)
+plot(ShowTrades and BackTest.Signals.get(4) ? BackTest.PLOT.get(4,2) : na , color = BackTest.Colors.get("Red") ,style =plot.style_linebr)
+
+plot(ShowTrades and BackTest.Signals.get(5) ? BackTest.PLOT.get(5,0) : na , color = BackTest.Colors.get("White") ,style =plot.style_linebr)
+plot(ShowTrades and BackTest.Signals.get(5) ? BackTest.PLOT.get(5,1) : na , color = BackTest.Col.get(5) ,style =plot.style_linebr)
+plot(ShowTrades and BackTest.Signals.get(5) ? BackTest.PLOT.get(5,2) : na , color = BackTest.Colors.get("Red") ,style =plot.style_linebr)
+
+plot(ShowTrades and BackTest.Signals.get(6) ? BackTest.PLOT.get(6,0) : na , color = BackTest.Colors.get("White") ,style =plot.style_linebr)
+plot(ShowTrades and BackTest.Signals.get(6) ? BackTest.PLOT.get(6,1) : na , color = BackTest.Col.get(6) ,style =plot.style_linebr)
+plot(ShowTrades and BackTest.Signals.get(6) ? BackTest.PLOT.get(6,2) : na , color = BackTest.Colors.get("Red") ,style =plot.style_linebr)
+
+
+// Lets highlight the row of the selected result
+if MAXWHAT == "PNL"
+    WinIndex = BackTest.MAXPNL.indexof(BackTest.MAXPNL.max())
+    for i = 2 to 7
+        table.cell_set_bgcolor(DataTable,i,(WinIndex+1)+ 1,BackTest.Colors.get("Select"))
+
+if MAXWHAT == "Profit Factor"
+    MAXS = BackTest.MAXPF.indexof(BackTest.MAXPF.max())
+    for i = 2 to 7
+        table.cell_set_bgcolor(DataTable,i,(MAXS+1)+ 1,BackTest.Colors.get("Select"))
+
+if MAXWHAT == "Winrate"
+    MAXSW = BackTest.MAXWin.indexof(BackTest.MAXWin.max())
+    for i = 2 to 7
+        table.cell_set_bgcolor(DataTable,i,(MAXSW+1)+ 1,BackTest.Colors.get("Select"))
+
+
+
+
+
+// -- }
+
+// ---- { to do
+
+
+// finish the external indicator config // finished
+// finish the SL logic // finished
+// Create Hist Boxes showing diff in trades for each RR  // finished
+
+// plot(BackTest.MTX.trace() ,display = display.data_window,title = "MAX")
+// plot(LOWS.size(),display = display.data_window,title = "DARA")
+
+
+// -- }

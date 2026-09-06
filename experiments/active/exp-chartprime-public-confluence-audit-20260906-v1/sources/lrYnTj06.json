@@ -1,0 +1,45 @@
+{
+  "id": "lrYnTj06",
+  "title": "Dynamic Support/Resistance Zones [ChartPrime]",
+  "url": "https://www.tradingview.com/script/lrYnTj06-Dynamic-Support-Resistance-Zones-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:37:07.144371+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/lrYnTj06-Dynamic-Support-Resistance-Zones-ChartPrime/",
+  "created_at": "2024-01-24T12:47:46.145902+00:00",
+  "updated_at": null,
+  "description": "Dynamic Support/Resistance Zones is a new way to visualize key support and resistance levels by analyzing pivot points. It aggregates these points into bins and uses different scoring methods to determine the strength of the zone. The Linear method treats every pivot the same, Time gives more importance to recent pivots, and Volume scores pivots based on trading activity.\n\nIt visually represents the strength of price zones using either a visual distribution or an overlay of colors. Areas with many aggregated pivots are marked using the High Color, indicating strong support or resistance. Fewer pivots are shown in Low Color, suggesting weaker levels. Users can also see the score using the distribution mode to more accurately determine the strength of these areas. \n\nThe indicator also includes a special moving average line, calculated from pivot prices and their weights. This gives a central pivot level, allowing you to see the average pivot position. We have also provided some smoothing for this line to make it easer to use.\n\nWe have included various options to tailor your analysis. These include selecting the scoring method for pivots and adjusting the number of pivots to consider, along with many visual aids. Traders can also set the level of filtering for the distribution of pivots. By default the filter isn't enabled but when it is enabled it allows for a less noisy experience at the expense of precision. \n\nWe have included four pivot periods that you can modify and toggle. The idea is that longer period pivots will enhance the strength of the shorter period ones providing a natural way to weight pivot levels. You can also specify whether you want to use pivot high, pivot low, or both in your analysis. \n\n\n\nHere are some details on the key inputs:\n\nWeighting Style: Choose how to score pivot points. Options include: Linear: Treats each pivot equally. Time: Gives more importance to recent pivots. Volume: Scores pivots based on trading volume.Number of Pivots: Set the number of pivots to consider in the calculation. Both pivot highs and lows are treated separately.Filtering: Adjust the level of filtering applied to the distribution of pivots. A higher value smooths the distribution, providing a cleaner visual representation at the cost of some precision. This setting is crucial for managing the trade-off between clarity and detail in the visualization of support and resistance zones.Distribution Scale: Determines the scale of the distribution on the screen. It influences both the visual aspect and the precision of the calculations, allowing for a balance between visibility and analytical accuracy.Manual Precision: Manually set the number of divisions within the range. This setting offers control over the granularity.Auto Precision: When enabled, it automatically adjusts the precision based on the average range of a candle, ensuring a minimum level of detail in the visualization.Show Distribution: Toggle the visibility of the distribution of pivot points. When activated, it provides a detailed visual representation of where pivots are concentrated.Show Score in Distribution: Opt to display the actual score within the distribution. This feature adds a quantitative element to the visual representation, offering a clearer understanding of the pivot point concentration.Distribution Overlay: Activate a heat map overlay to visualize the distribution of pivots. You can also adjusting the transparency of this overlay, providing a balanced view that does not obstruct the underlying price chart.Show Support/Resistance: Enable lines that indicate identified support and resistance levels based on the aggregated pivots. This feature provides a clear, actionable insight directly on the chart.S/R Zone Visibility: Choose to display the support/resistance zones and set their transparency. It offers an extended visual cue about the potential breadth of support or resistance areas.Pivot Level Average: Introduce a moving average line that's calculated based on the weighted pivot levels. You can also adjust the smoothness of this line.\n\n\nDynamic Support/Resistance Zones  is an intuitive and versatile trading indicator that offers a novel approach to identifying support and resistance levels by analyzing pivot points. It blends a variety of scoring methods, customizable visual representations, and a unique moving average line. With its customizable settings for pivot analysis, visual clarity, and precision, it's an nifty tool for traders looking to enhance their decision making with detailed and actionable insights.",
+  "script": {
+    "id": 1392420,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;b6adfc9446664a658e4119b86caa6ce2",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bb6adfc9446664a658e4119b86caa6ce2/1",
+  "source_http_status": 200,
+  "source_sha256": "fdcad3394a952e18eb5a2c49eb9cf22ffa1a55e35568a518caf37be89f9d746b",
+  "source_lines": 431,
+  "source_metadata": {
+    "created": "2024-01-24T12:47:45.075855Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 3
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Dynamic Support/Resistance Zones [ChartPrime]",
+    "updated": "2024-01-24T12:47:45.075855Z",
+    "version": "1.0"
+  }
+}

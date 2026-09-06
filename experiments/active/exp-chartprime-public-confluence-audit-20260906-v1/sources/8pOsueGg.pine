@@ -1,0 +1,163 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/ 
+// © ChartPrime
+
+//@version=6
+indicator("HTF Conviction Divergence Matrix [ChartPrime]", "HTF Divergences [ChartPrime]", overlay = true, max_labels_count = 500, max_boxes_count = 500, max_lines_count = 500)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+// --- Constants ---
+color BULL_COLOR     = color.rgb(30, 218, 127)
+color BEAR_COLOR     = color.rgb(137, 39, 218)
+color ACCENT_COLOR   = #5b9cf6
+color NEUTRAL_COLOR  = #787b86
+
+// --- HTF Settings ---
+htfInput            = input.timeframe("D", "High Timeframe",           group = "HTF Context", tooltip = "Select the Higher Timeframe (HTF) for trend analysis and volume calculations. Divergences are checked against this context.")
+showHtfRibbon       = input.bool(true,      "Show HTF Trend Ribbon",    group = "HTF Context", tooltip = "Displays a small bias ribbon at the bottom of the chart. Green indicates the current HTF candle is bullish (Price > Open), Red indicates it is bearish.")
+showHtfLevels       = input.bool(true,      "Show Current HTF OHLC Levels", group = "HTF Context", tooltip = "Displays horizontal levels representing the Open, High, Low, and Close of the current developing HTF candle.")
+
+// --- RSI & Divergence Settings ---
+rsiLenInput         = input.int(14,         "RSI Length",               group = "Divergence Logic", minval = 1, tooltip = "The period length used to calculate the Relative Strength Index (RSI).")
+lbRInput            = input.int(5,          "Pivot Right Lookback",     group = "Divergence Logic", tooltip = "Number of bars required to the right of a peak or trough to confirm a pivot point.")
+lbLInput            = input.int(5,          "Pivot Left Lookback",      group = "Divergence Logic", tooltip = "Number of bars required to the left of a peak or trough to identify a potential pivot point.")
+signalLabelInput    = "High Conviction"
+
+// --- Volume Validation ---
+useVolValidation    = input.bool(true,      "Require Volume Validation",group = "High-Conviction Filter", tooltip = "When enabled, divergences are only labeled as 'High Conviction' if the HTF Volume Delta aligns with the price reversal (e.g., rising delta for bullish reversals).")
+
+// --- Visuals ---
+bullColInput        = input.color(BULL_COLOR, "Bullish Color",          group = "Visuals", inline = "Colors", tooltip = "Primary color used for bullish signals, HTF high levels, and bullish bias.")
+bearColInput        = input.color(BEAR_COLOR, "Bearish Color",          group = "Visuals", inline = "Colors", tooltip = "Primary color used for bearish signals, HTF low levels, and bearish bias.")
+showPo3Projection   = input.bool(true,        "Show HTF PO3 Projection", group = "Visuals", tooltip = "Visualizes the 'Power of 3' (Accumulation, Manipulation, Distribution) by projecting the current HTF candle to the right of the price action.")
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+// --- Core Calculations ---
+bool htfNewBar = nz(ta.change(time(htfInput))) != 0
+
+// Fetch HTF Data
+[hOpen, hHigh, hLow, hClose] = request.security(syminfo.tickerid, htfInput, [open, high, low, close], gaps = barmerge.gaps_off, lookahead = barmerge.lookahead_on)
+
+// Calculate Running Volume Delta for HTF
+var float runningDelta = 0.0
+if htfNewBar
+    runningDelta := (close > open ? volume : close < open ? -volume : 0)
+else
+    runningDelta += (close > open ? volume : close < open ? -volume : 0)
+
+// RSI Calculation
+float rsiValue = ta.rsi(close, rsiLenInput)
+
+// Divergence Logic
+float phRsi = ta.pivothigh(rsiValue, lbLInput, lbRInput)
+float plRsi = ta.pivotlow(rsiValue, lbLInput, lbRInput)
+
+var float plPriceMem = na, var float plRsiMem = na, var float plDeltaMem = na, var int plIndexMem = na
+var float phPriceMem = na, var float phRsiMem = na, var float phDeltaMem = na, var int phIndexMem = na
+
+bool bullDiv = false, bool bearDiv = false
+bool bullPrime = false, bool bearPrime = false
+
+// Bullish Divergence Detection
+if not na(plRsi)
+    if not na(plPriceMem) and rsiValue[lbRInput] > plRsiMem and low[lbRInput] < plPriceMem
+        bullDiv := true
+        if useVolValidation and runningDelta > plDeltaMem
+            bullPrime := true
+    
+    plPriceMem := low[lbRInput]
+    plRsiMem   := rsiValue[lbRInput]
+    plDeltaMem := runningDelta
+    plIndexMem := bar_index - lbRInput
+
+// Bearish Divergence Detection
+if not na(phRsi)
+    if not na(phPriceMem) and rsiValue[lbRInput] < phRsiMem and high[lbRInput] > phPriceMem
+        bearDiv := true
+        if useVolValidation and runningDelta < phDeltaMem
+            bearPrime := true
+            
+    phPriceMem := high[lbRInput]
+    phRsiMem   := rsiValue[lbRInput]
+    phDeltaMem := runningDelta
+    phIndexMem := bar_index - lbRInput
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+// --- HTF OHLC Levels Tracking ---
+var int   htfStartIdx = bar_index
+var line  htfOLine = na, var line htfHLine = na, var line htfLLine = na, var line htfCLine = na
+var label htfOLbl = na, var label htfHLbl = na, var label htfLLbl = na, var label htfCLbl = na
+
+if showHtfLevels
+    if htfNewBar
+        htfStartIdx := bar_index
+        // Refresh lines on new HTF candle
+        htfOLine := line.new(htfStartIdx, hOpen, bar_index, hOpen, color = color.new(NEUTRAL_COLOR, 50), style = line.style_dashed)
+        htfHLine := line.new(htfStartIdx, hHigh, bar_index, hHigh, color = color.new(bullColInput, 50), style = line.style_dotted)
+        htfLLine := line.new(htfStartIdx, hLow, bar_index, hLow, color = color.new(bearColInput, 50), style = line.style_dotted)
+        htfCLine := line.new(htfStartIdx, hClose, bar_index, hClose, color = color.new(ACCENT_COLOR, 50), style = line.style_solid)
+        
+        htfOLbl := label.new(htfStartIdx, hOpen, "H-O", color = #00000000, textcolor = NEUTRAL_COLOR, style = label.style_label_right, size = size.tiny)
+        htfHLbl := label.new(htfStartIdx, hHigh, "H-H", color = #00000000, textcolor = bullColInput, style = label.style_label_right, size = size.tiny)
+        htfLLbl := label.new(htfStartIdx, hLow, "H-L", color = #00000000, textcolor = bearColInput, style = label.style_label_right, size = size.tiny)
+        htfCLbl := label.new(htfStartIdx, hClose, "H-C", color = #00000000, textcolor = ACCENT_COLOR, style = label.style_label_right, size = size.tiny)
+    else
+        // Update line endpoints and Y values
+        line.set_x2(htfOLine, bar_index)
+        line.set_x2(htfHLine, bar_index)
+        line.set_x2(htfLLine, bar_index)
+        line.set_x2(htfCLine, bar_index)
+        
+        line.set_y1(htfHLine, hHigh), line.set_y2(htfHLine, hHigh)
+        line.set_y1(htfLLine, hLow),  line.set_y2(htfLLine, hLow)
+        line.set_y1(htfCLine, hClose), line.set_y2(htfCLine, hClose)
+        
+        label.set_y(htfHLbl, hHigh)
+        label.set_y(htfLLbl, hLow)
+        label.set_y(htfCLbl, hClose)
+
+// --- HTF Ribbon (Context) ---
+htfIsBullish = hClose > hOpen
+plotshape(showHtfRibbon, "HTF Bias", shape.square, location.bottom, color.new(htfIsBullish ? bullColInput : bearColInput, 50), size = size.tiny, display = display.all - display.status_line)
+
+// --- Divergence Markers ---
+plotshape(bullDiv, "Bull Div", shape.triangleup, location.belowbar, bullColInput, size = size.tiny)
+plotshape(bearDiv, "Bear Div", shape.triangledown, location.abovebar, bearColInput, size = size.tiny)
+
+// --- Prime Signal Labels ---
+if bullPrime
+    label.new(bar_index, low, signalLabelInput, yloc = yloc.belowbar, color = #00000000, textcolor = bullColInput, style = label.style_label_up, size = size.small)
+    line.new(plIndexMem, plPriceMem, bar_index, low, color = bullColInput, width = 2, style = line.style_solid)
+
+if bearPrime
+    label.new(bar_index, high, signalLabelInput, yloc = yloc.abovebar, color = #00000000, textcolor = bearColInput, style = label.style_label_down, size = size.small)
+    line.new(phIndexMem, phPriceMem, bar_index, high, color = bearColInput, width = 2, style = line.style_solid)
+
+// --- HTF PO3 Projection ---
+var box  htfBody  = na
+var line htfWick  = na
+var label htfProjLbl = na
+
+if barstate.islast and showPo3Projection
+    box.delete(htfBody)
+    line.delete(htfWick)
+    label.delete(htfProjLbl)
+    
+    int startIdx = bar_index + 5
+    int endIdx   = bar_index + 11
+    int midIdx   = (startIdx + endIdx) / 2
+    
+    color htfCol = htfIsBullish ? bullColInput : bearColInput
+    htfWick  := line.new(midIdx, hHigh, midIdx, hLow, color = htfCol, width = 2)
+    htfBody  := box.new(startIdx, math.max(hOpen, hClose), endIdx, math.min(hOpen, hClose), bgcolor = color.new(htfCol, 0), border_color = htfCol)
+    htfProjLbl := label.new(midIdx, hHigh, "HTF: " + htfInput, yloc = yloc.abovebar, color = #00000000, textcolor = chart.fg_color, style = label.style_label_down, size = size.small)
+
+// --------------------------------------------------------------------------------------------------------------------}

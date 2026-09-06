@@ -1,0 +1,47 @@
+{
+  "id": "c25U5rsF",
+  "title": "RSI Probability Matrix [ChartPrime]",
+  "url": "https://www.tradingview.com/script/c25U5rsF-RSI-Probability-Matrix-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:34:53.454308+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/c25U5rsF-RSI-Probability-Matrix-ChartPrime/",
+  "created_at": "2026-08-17T12:15:13.222656+00:00",
+  "updated_at": null,
+  "description": "RSI Probability Matrix [ChartPrime]\n\n🔶 OVERVIEW\n\nTraders frequently rely on rigid, fixed overbought and oversold thresholds for the Relative Strength Index, ignoring how historical price action actually responds at different momentum levels. The RSI Probability Matrix [ChartPrime] introduces a statistical learning engine to your charts. It tracks and measures real-time trade outcomes across 10-point RSI brackets, turning historical momentum reactions into actionable win-rate probabilities.\n\nInstead of guessing whether an overbought or oversold signal holds weight, this indicator dynamically evaluates success and failure rates using an ATR-based target and stop-loss matrix.\n\n🔶 HOW IT WORKS\n\nThe indicator executes its statistical and tracking workflow through a multi-stage architecture:\n\n Dynamic Momentum Engine: Calculates a standard RSI and smoothed signal line pair, backed by an Average True Range (ATR) volatility measurement to size structural targets and stops. Real-Time Trade Tracking Array: Maintains live arrays spanning all 101 RSI index values (0 to 100), recording historical win and loss outcomes whenever buy or sell crossover triggers are hit. ATR-Based Risk Framework: When an oversold buy or overbought sell signal triggers, the engine projects dynamic target and stop-loss levels based on a custom multiplier of the current ATR value. Probability Matrix Dashboard: Aggregates the tracked data into 10-point bracket intervals, calculating real-time win percentages for both buy and sell directions across the entire chart history.\n\n🔶 KEY FEATURES\n\n Statistical Matrix Table: A clean, configurable dashboard displaying detailed trade counts and directional win probabilities broken down across structured RSI bands. Automated Signal & Outcome Markers: Pins clear entry badges onto the chart along with success (✅) or failure (❌) markers when trades hit their target or stop parameters. Gradient Color Customization: Fluidly shifts RSI line colors across customizable bullish and bearish palettes depending on prevailing momentum zones. Flexible Target Management: Full control over ATR lookback periods, multiplier thresholds, and overbought/oversold trigger boundaries to fit your strategy.\n\n🔶 TRADING APPLICATIONS\n\n Probability-Weighted Entries: Before taking a trade at a specific RSI level, check the dashboard matrix to see the historical win percentage for that exact momentum bracket. Only take setups backed by favorable statistical odds. Objective Risk-to-Reward Execution: Utilize the automated ATR target and stop lines to enforce disciplined trade management, allowing the probability engine to accurately record wins and losses. Momentum Exhaustion Filtering: Combine overbought or oversold crossovers with the matrix summary totals to identify which RSI zones hold the strongest historical defense from institutional participants.\n\n🔶 SETTINGS\n\n Indicator Settings (RSI Length / Signal / OB-OS Levels): Controls the core lookback periods and the boundary thresholds required to trigger buy and sell signals. Target & Stop Settings (ATR Length / Multiplier): Adjusts the volatility distance used to calculate structural profit targets and stop-loss zones. Dashboard Settings (Visibility / Position / Size): Configures the placement and layout of the real-time statistical probability matrix table on your workspace.\n\n🔶 CONCLUSION\n\nThe RSI Probability Matrix [ChartPrime] removes the guesswork from momentum trading. By dynamically tracking and grading historical trade success across customized RSI bands, it gives you a data-driven edge built entirely on real market feedback.",
+  "script": {
+    "id": 6854240,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;5dfdfad08cf348138e3977de614d8f3c",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B5dfdfad08cf348138e3977de614d8f3c/1",
+  "source_http_status": 200,
+  "source_sha256": "88d6e36c500269cb54e7f976a571e45dbabda124d64ffac8e0cfb1d464ebabe5",
+  "source_lines": 260,
+  "source_metadata": {
+    "created": "2026-08-17T12:15:12.317244Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": false,
+      "kind": "study",
+      "originalScriptId": "USER;207773e88759439d91c3f5155d047683",
+      "originalScriptVersion": "1.0",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 2
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "RSI Probability Matrix [ChartPrime]",
+    "updated": "2026-08-17T12:15:12.317244Z",
+    "version": "1.0"
+  }
+}

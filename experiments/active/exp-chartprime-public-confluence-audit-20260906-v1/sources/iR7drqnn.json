@@ -1,0 +1,44 @@
+{
+  "id": "iR7drqnn",
+  "title": "Smart Money Fibonacci OTE Engine [ChartPrime]",
+  "url": "https://www.tradingview.com/script/iR7drqnn-Smart-Money-Fibonacci-OTE-Engine-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:01.212779+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/iR7drqnn-Smart-Money-Fibonacci-OTE-Engine-ChartPrime/",
+  "created_at": "2026-06-29T12:30:28.801419+00:00",
+  "updated_at": null,
+  "description": "🔶 OVERVIEW\nIn the world of Smart Money Concepts (SMC), finding a \"cheap\" or \"expensive\" price is not enough—you need to find the Optimal Trade Entry (OTE). The Smart Money Fibonacci OTE Engine is an automated structural analysis tool that identifies trend shifts and projects institutional retracement zones in real-time.\nUnlike traditional Fibonacci tools that require manual drawing, this engine detects Break of Structure (BOS) events and automatically anchors a Fibonacci grid to the most relevant swing points. It specifically highlights the OTE zone, where institutional buying or selling typically occurs after a trend confirmation.\n\n🔶 CORE MECHANICS: AUTOMATED ANCHORING\nThe engine operates on a sophisticated \"Pivot and Shift\" logic:\n Swing Detection: The script monitors price for structural Swing Highs and Swing Lows based on your chosen pivot length. Fibonacci Direction Shift Recognition: A direction shift is confirmed when pivot price exceeds the previous Swing Pivot High (Higher High), and a down direction shift is confirmed when price drops below the previous Swing Pivot Low (Lower Low). Dynamic Stretching: Once a direction is established, the Fibonacci grid \"breathes\" with the market. If the trend continues to make new highs or lows, the grid automatically stretches to include the new extension, ensuring your retracement levels are always mathematically accurate.\n\n🔶 THE OPTIMAL TRADE ENTRY (OTE) ZONE\nThe OTE zone is the primary focus of this indicator. Based on ICT (Inner Circle Trader) concepts, the OTE represents the \"sweet spot\" of a retracement.\n The Range: By default, the zone is plotted between the 0.618 and 0.786 Fibonacci levels. Institutional Discount/Premium: In a bullish trend, price retreating into the OTE zone is considered \"buying at a discount.\" In a bearish trend, a rally into the OTE is \"selling at a premium.\" Visual Clarity: The zone is highlighted with a colored box (teal for bull, red for bear), making it easy to identify exactly where to look for price action reversal signals.\n\n🔶 KEY VISUAL FEATURES\n Structure Labels: Automatically marks HH (Higher High) and LL (Lower Low) points with Break-of-Structure (BOS) lines. Swing Diagonal: A dotted line connects the two anchor points of the Fibonacci grid, providing a clear visual representation of the current swing's slope and magnitude. Extended Levels: Horizontal Fibonacci lines (0.236, 0.382, 0.5, etc.) are projected across the chart, with price-sensitive labels that update every tick. Historical Mode: Toggle \"Show Previous Fibs\" to see where past OTE zones were respected, helping you backtest the current asset's adherence to Fibonacci levels.\n\n🔶 INDICATOR INPUTS\n Pivot Length: Adjust this to filter between micro-structure (short length) and macro-structure (long length). OTE Upper/Lower Levels: Fully customizable boundaries for your entry zone. Visual Styles: Change line styles (Solid, Dashed, Dotted) and colors for the grid, labels, and structure shifts to match your chart theme.\n\n🔶 TRADING UTILITY\n High-Probability Entries: Instead of \"chasing\" a breakout, wait for the Smart Money Fibonacci Engine to identify the higher high or lower low, then wait for price to return to the OTE box. Confluence Tool: Use the OTE zone in conjunction with Order Blocks or Liquidity Sweeps. When an OTE zone aligns with a previously swept EQL or EQH, the probability of a reversal increases significantly. Objective Profit Taking: Use the 0.0 (origin) and various extension levels as objective targets for scaling out of positions.\n\n🔶 CONCLUSION\nThe Smart Money Fibonacci OTE Engine [ChartPrime] removes the subjectivity from drawing Fibonacci retracements. By automating the detection of market structure and highlighting the most statistically relevant entry zones, it allows traders to focus on execution rather than chart drawing.",
+  "script": {
+    "id": 5569352,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;33a30aaf759942b99c1c81f55fb1bca6",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B33a30aaf759942b99c1c81f55fb1bca6/1",
+  "source_http_status": 200,
+  "source_sha256": "b464b771f8844e4fab9ade28cab71900623624ff3358d5b45f94d3ffafbaad5b",
+  "source_lines": 283,
+  "source_metadata": {
+    "created": "2026-06-29T12:30:19.565846Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;8282ac9345614c7487e4a864ccd0a698",
+      "originalScriptVersion": "4.0",
+      "sourceInputsCount": 0
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Smart Money Fibonacci OTE Engine [ChartPrime]",
+    "updated": "2026-06-29T12:30:19.565846Z",
+    "version": "1.0"
+  }
+}

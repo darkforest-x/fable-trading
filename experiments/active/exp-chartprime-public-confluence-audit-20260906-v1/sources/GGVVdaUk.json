@@ -1,0 +1,45 @@
+{
+  "id": "GGVVdaUk",
+  "title": "Momentum Ghost Machine [ChartPrime]",
+  "url": "https://www.tradingview.com/script/GGVVdaUk-Momentum-Ghost-Machine-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:58.575004+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/GGVVdaUk-Momentum-Ghost-Machine-ChartPrime/",
+  "created_at": "2024-03-19T13:22:22.677374+00:00",
+  "updated_at": null,
+  "description": "Momentum Ghost Machine (ChartPrime) is designed to be the next generation in momentum/rate of change analysis. This indicator utilizes the properties of one of our favorite filters to create a more accurate and stable momentum oscillator by using a high quality filtered delayed signal to do the momentum comparison. \n\nTraditional momentum/roc uses the raw price data to compare current price to previous price to generate a directional oscillator. This leaves the oscillator prone to false readings and noisy outputs that leave traders unsure of the real likelihood of a future movement. One way to mitigate this issue would be to use some sort of moving average. Unfortunately, this can only go so far because simple moving average algorithms result in a poor reconstruction of the actual shape of the underlying signal. \n\nThe windowed sinc low pass filter is a linear phase filter, meaning that it doesn't change the shape or size of the original signal when applied. This results in a faithful reconstruction of the original signal, but without the \"high frequency noise\". Just like any filter, the process of applying it requires that we have \"future\" samples resulting in a time delay for real time applications. Fortunately this is a great thing in the context of a momentum oscillator because we need some representation of past price data to compare the current price data to. By using an ideal low pass filter to generate this delayed signal we can super charge the momentum oscillator and fix the majority of issues its predecessors had. \n\n\n\nThis indicator has a few extra features that other momentum/roc indicators dont have. One major yet simple improvement is the inclusion of a moving average to help gauge the rate of change of this indicator. Since we included a moving average, we thought it would only be appropriate to add a histogram to help visualize the relationship between the signal and its average. To go further with this we have also included linear extrapolation to further help you predict the momentum and direction of this oscillator. Included with this extrapolation we have also added the histogram in the extrapolation to further enhance its visual interpretation. Finally, the inclusion of a candle coloring feature really drives how the utility of the Momentum Machine. \n\nThere are three distinct options when using the candle coloring feature: Direct, MA, and Both. With direct the candles will be colored based on the indicators direction and polarity. When it is above zero and moving up, it displays a green color. When it is above zero and moving down it will display a light green color. Conversely, when the indicator is below zero and moving down it displays a red color, and when it it moving up and below zero it will display a light red color. MA coloring will color the candles just like a MACD. If the signal is above its MA and moving up it will display a green color, and when it is above its MA and moving down it will display a light green color. \n\nWhen the signal is below its MA and moving down it will display a red color, and when its below its ma and moving up it will display a light red color. Both combines the two into a single color scheme providing you with the best of both worlds. If the indicator is above zero it will display the MA colors with a slight twist. When the indicator is moving down and is below its MA it will display a lighter color than before, and when it is below zero and is above its MA it will display a darker color color.\n\nLength of 50 with a smoothing of 100\n\n\nLength of 50 with a smoothing of 25\n\n\nBy default, the indicator is set to a momentum length of 50, with a post smoothing of 2. We have chosen the longer period for the momentum length to highlight the performance of this indicator compared to its ancestors. A major point to consider with this indicator is that you can only achieve so much smoothing for a chosen delay. This is because more data is required to produce a smoother signal at a specified length. Once you have selected your desired momentum length you can then select your desired momentum smoothing. This is made possible by the use of the windowed sinc low pass algorithm because it includes a frequency cutoff argument. This means that you can have as little or as much smoothing as you please without impacting the period of the indicator. In the provided examples above this paragraph is a visual representation of what is going on under the hood of this indicator. The blue line is the filtered signal being compared to the current closing price. As you can see, the filtered signal is very smooth and accurately represents the underlying price action without noise.\n\nWe hope that users can find the same utility as we did in this indicator and that it levels up your analysis utilizing the momentum oscillator or rate of change. \n\nEnjoy\n",
+  "script": {
+    "id": 1486561,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;6cf62fad41214d5fa275d3f576e3249f",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B6cf62fad41214d5fa275d3f576e3249f/1",
+  "source_http_status": 200,
+  "source_sha256": "932767c447ac3bd1730f42a6a23c838a2a78941915e60bb142fea21de18650d2",
+  "source_lines": 256,
+  "source_metadata": {
+    "created": "2024-03-19T13:22:21.14344Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": false,
+      "kind": "study",
+      "sourceInputsCount": 1,
+      "stats": {
+        "plot": 8
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Momentum Ghost Machine [ChartPrime]",
+    "updated": "2024-03-19T13:22:21.14344Z",
+    "version": "1.0"
+  }
+}

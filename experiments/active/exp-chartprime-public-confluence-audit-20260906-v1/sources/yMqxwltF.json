@@ -1,0 +1,47 @@
+{
+  "id": "yMqxwltF",
+  "title": "HTF Candle Volume Profile [ChartPrime]",
+  "url": "https://www.tradingview.com/script/yMqxwltF-HTF-Candle-Volume-Profile-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:04.702516+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/yMqxwltF-HTF-Candle-Volume-Profile-ChartPrime/",
+  "created_at": "2026-06-01T12:24:54.956920+00:00",
+  "updated_at": null,
+  "description": "🔶 OVERVIEW\nTraders often lose sight of the \"big picture\" when focused on lower timeframe (LTF) price action. The HTF Candle Volume Profile bridges this gap by projecting Higher Timeframe (HTF) candles—such as Daily or 4-Hour bars—directly onto your current chart. \nUnlike standard HTF candles, this indicator includes a **built-in Volume Profile for each candle**, revealing exactly where the most trading activity occurred within that specific higher timeframe period.\n\n🔶 KEY CONCEPTS: SYNTHETIC PROJECTION\nThis tool uses a \"projection\" method, meaning it draws the HTF candles and their profiles to the right of the current price action. This prevents chart clutter and allows you to compare the internal volume structure of the current and previous HTF candles side-by-side.\n Synthetic Candles: Represents the OHLC (Open, High, Low, Close) of the higher timeframe. Intra-Candle Volume Profile: A horizontal histogram built into the candle body showing volume distribution. Point of Control (POC): The specific price level within the HTF candle that saw the highest volume.\n\n🔶 VISUAL COMPONENTS\n Projected Candle Slots: You can display up to four candles:\n    * Candle 1 (C1): The currently forming HTF candle (updates in real-time).\n    * Candles 2-4 (C2-C4): The most recent historical closed HTF candles. POC Level Lines: A dashed orange line (customizable) extends from the profile back across your chart, marking the \"fairest price\" of that HTF period. High/Low Level Lines: Dotted lines marking the extremes of the HTF candles, providing immediate targets for liquidity sweeps or support/resistance. Price Labels: Optional tags that display the exact price of the High, Low, and POC for precise order entry.\n\n🔶 INDICATOR PARAMETERS\n Timeframe (HTF): Choose the \"Anchor\" timeframe (e.g., set to \"D\" while trading on the 15m chart). Profile Bins: Adjust the resolution of the volume histogram. Higher values provide a more granular look at price \"nodes.\" Projection Offset: Moves the projected candles further to the right to keep your current price action clear. Style Controls: Fully customize the colors for bullish/bearish candles and the Point of Control.\n\n🔶 TRADING APPLICATIONS\n Identifying Institutional Value: The POC of an HTF candle is where \"Big Money\" is most active. When price returns to a previous HTF POC, it often finds significant support or resistance. Trend Confirmation: Watch the \"Migration\" of the POC. If the POC of C1 is higher than the POC of C2, the HTF trend is healthily bullish. Targeting Liquidity: The High and Low level lines projected by the indicator act as natural \"draws on liquidity.\" Traders often look for price to sweep these HTF levels before looking for a reversal.\n\n🔶 CONCLUSION\nThe HTF Candle Volume Profile [ChartPrime] is an essential tool for multi-timeframe analysis. It allows you to see not just *where* price went on a higher timeframe, but *how much business* was conducted at every price point along the way.",
+  "script": {
+    "id": 5414871,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;28f1d4e416bc4440b67bf6ff79f31d67",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B28f1d4e416bc4440b67bf6ff79f31d67/1",
+  "source_http_status": 200,
+  "source_sha256": "4988ca2fc6721fb2cbcabb63078d4a9c9dca0857e4ee1e07a83cce2677fd9f70",
+  "source_lines": 320,
+  "source_metadata": {
+    "created": "2026-06-01T12:24:54.3897Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;9d01803535994e07a3900eab9b76fc3f",
+      "originalScriptVersion": "0.12",
+      "sourceInputsCount": 0,
+      "stats": {
+        "alertcondition": 1
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "HTF Candle Volume Profile [ChartPrime]",
+    "updated": "2026-06-01T12:24:54.3897Z",
+    "version": "1.0"
+  }
+}

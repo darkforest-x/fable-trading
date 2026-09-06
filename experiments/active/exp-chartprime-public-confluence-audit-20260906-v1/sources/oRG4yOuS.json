@@ -1,0 +1,46 @@
+{
+  "id": "oRG4yOuS",
+  "title": "Composite Trend Oscillator [ChartPrime]",
+  "url": "https://www.tradingview.com/script/oRG4yOuS-Composite-Trend-Oscillator-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:59.826565+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/oRG4yOuS-Composite-Trend-Oscillator-ChartPrime/",
+  "created_at": "2024-03-04T13:11:13.625375+00:00",
+  "updated_at": null,
+  "description": "CODE DUELLO:\nHave you ever stopped to wonder what the underlying filters contained within complex algorithms are actually providing for you? Wouldn't it be nice to actually visually inspect for that? Those would require some kind of wild west styled quick draw duel or some comparison method as a proper 'code duello'. Then it can be determined which filter can 'draw' the quickest from it's computational holster with the least amount of lag and smoothness.\n\nIn Pine we can do so, discovering how beneficial that would be. This can be accomplished by quickly switching from one filter to another by input() back and forth, requiring visual memory. A better way could be done by placing two indicators added to the chart and then eventually placed into one indicator pane on top of each other.\n\nBy adding a filter() helper function that calls other moving average functions chosen for comparison, it can put to the test which moving average is the best drawing filter suited to our expected needs. PhiSmoother was formerly debuted and now it is utilized in a more complex environment in a multitude of ways along side other commonly utilized filters. Now, you the reader, get to judge for yourself...\n\nFILTER VERSATILITY:\nHaving the capability to adjust between various smoothing methods such as PhiSmoother, TEMA, DEMA, WMA, EMA, and SMA  on historical market data within the code provides an advantage. Each of these filter methods offers distinct advantages and hinderances. PhiSmoother stands out often by having superb noise rejection, while also being able to manipulate the fine-tuning of the phase or lag of the indicator, enhancing responsiveness to price movements.\n\nThe following are more well-known classic filters. TEMA (Triple Exponential Moving Average) and DEMA (Double Exponential Moving Average) offer reduced transient response times to price changes fluctuations. WMA (Weighted Moving Average) assigns more weight to recent data points, making it particularly useful for reduced lag. EMA (Exponential Moving Average) strikes a balance between responsiveness and computational efficiency, making it a popular choice. SMA (Simple Moving Average) provides a straightforward calculation based on the arithmetic mean of the data. VWMA and RMA have both been excluded for varying reasons, both being unworthy of having explanation here.\n\nBy allowing for adjustment refinements between these filter methods, traders may garner the flexibility to adapt their analysis to different market dynamics, optimizing their algorithms for improved decision-making and performance on demand.\n\nINDICATOR INTRODUCTION:\nChartPrime's Composite Trend Oscillator operates as an oscillator based on the concept of a moving average ribbon. It utilizes up to 32 filters with progressively longer periods to assess trend direction and strength. Embedded within this indicator is an alternative view that utilizes the separation of the ribbon filaments to assess volatility. Both versions are excellent candidates for trend and momentum, both offering visualization of polarity, directional coloring, and filter crossings. Anyone who has former experience using RSI or stochastics may have ease of understanding applying this to their chart. \n\n\n\nCOMPOSITE CLUSTER MODES EXPLAINED:\nIn Trend Strength mode, the oscillator behavior signifies market direction and movement strength. When the oscillator is rising and above zero, the market is within a bullish phase, and visa versa. If the signal filter crosses the composite trend, this indicates a potential dynamic shift signaling a possible reversal. When the oscillator is teetering on its extremities, the market is more inclined to reverse later.\n\n\n\nWith Volatility mode, the oscillator undergoes a transformation, displaying an unbounded oscillator driven by market volatility. While it still employs the same scoring mechanism, it is now scaled according to the strength of the market move. This can aid with identification of ranging scenarios. However, one side effect is that the oscillator no longer has minimum or maximum boundaries. This can still be advantageous when considering divergences.\n\n\n\nNOTEWORTHY SETTINGS FEATURES:\nThe following input settings described offer comprehensive control over the indicator's behavior and visualization.\n\nCommon Controls:\nPrice Source Selection - The indicator offers flexibility in choosing the price source for analysis. Traders can select from multiple options.Composite Cluster Mode - Choose between \"Trend Strength\" and \"Volatility\" modes, providing insights into trend directionality or volatility weighting.Cluster Filter and Length - Selects a filter for the cluster composition. This includes a length parameter adjustment.\n\nCluster Options:\nCluster Dispersion - Users can adjust the separation between moving averages in the cluster, influencing the sensitivity of the analysis.Cluster Trimming - By modifying upper and lower trim parameters, traders can adjust the sensitivity of the moving averages within the cluster, enhancing its adaptability.PostSmooth Filter and Length - Choose a filter to refine the composite cluster's post-smoothing with a length parameter adjustment.Signal Filter and Length - Users can select a filter for the lagging signal plot, also having a length parameter adjustment.Transition Easing - Sensitivity adjustment to influence the transition between bullish and bearish colors.\n\nEnjoy",
+  "script": {
+    "id": 1461288,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;4af067e849e045bbbccaaae1e0e075cd",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B4af067e849e045bbbccaaae1e0e075cd/1",
+  "source_http_status": 200,
+  "source_sha256": "723d8005597e468426d3f50a776c1b7c88d9e4875c26a480093e65f1f4c1afdd",
+  "source_lines": 251,
+  "source_metadata": {
+    "created": "2024-03-04T13:11:12.61164Z",
+    "extra": {
+      "isCompiled": true,
+      "isMTFResolution": true,
+      "is_price_study": false,
+      "kind": "study",
+      "sourceInputsCount": 1,
+      "stats": {
+        "plot": 3
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Composite Trend Oscillator [ChartPrime]",
+    "updated": "2024-03-04T13:11:12.61164Z",
+    "version": "1.0"
+  }
+}

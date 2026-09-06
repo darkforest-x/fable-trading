@@ -1,0 +1,48 @@
+{
+  "id": "x3KNfmR3",
+  "title": "RSI Momentum Divergence Zones [ChartPrime]",
+  "url": "https://www.tradingview.com/script/x3KNfmR3-RSI-Momentum-Divergence-Zones-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:49.437731+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/x3KNfmR3-RSI-Momentum-Divergence-Zones-ChartPrime/",
+  "created_at": "2025-08-11T12:18:38.399755+00:00",
+  "updated_at": null,
+  "description": "⯁ OVERVIEW\nRSI Momentum Divergence Zones [ChartPrime] is a hybrid oscillator and chart overlay tool that detects RSI-based momentum divergences and projects them as key zones on the chart. By combining RSI divergence logic with horizontal level plotting, this indicator reveals high-probability support and resistance areas where price has historically reacted to hidden or classic divergences.\n\n⯁ KEY FEATURES\nMomentum-Based RSI Source:\nInstead of the classic RSI input, this tool uses the momentum of price as the RSI source:\n\nThis emphasizes acceleration and deceleration of price moves, sharpening divergence signals and making them more responsive to early shifts in momentum.Automatic Divergence Detection (Optional):\nWhen enabled, the indicator continuously scans for:\n— Bullish Divergence: Price makes a Lower Low while RSI forms a Higher Low\n— Bearish Divergence: Price makes a Higher High while RSI forms a Lower High\nIt ensures divergence is valid by checking the spacing between pivots (min 5, max 50 bars).Divergence Labels & Markers (RSI Pane + Chart):\nWhen a valid divergence is detected:\n— On RSI pane:\n\nLabels appear at HL/LH points (“Bull” / “Bear”)\n\nColored lines show pivot structures\n— On price chart:\n\n\nLabels (“▲ Bull” / “Bear ▼”) mark price pivot that triggered the divergence\nLines highlight the exact price level at the divergence origin\nDivergence Zones / Levels (Toggleable):\nThe indicator projects horizontal zones across the chart based on confirmed divergence points.\nThese levels dynamically extend as long as price respects them, and auto-expire once broken.\nThey act as S/R levels created by market imbalance caused by divergence reactions.\nDynamic Zone Extension Logic:\nOnce plotted, divergence levels will extend to the right:\n— If price respects the level, the zone keeps growing\n— If broken in the opposite direction, the level stops extending and turns dashed (visually showing break)\nZone Layering and Limit Control:\nYou can limit the number of simultaneous zones shown on the chart (e.g., 10 most recent).\nOld zones automatically expire and are removed to keep the chart clean and focused.\nColor Customization and Intensity:\nDifferent colors for bullish and bearish zones let you easily distinguish trend direction.\nBackground fill, line width, and transparency are all adjustable.Clean Zone Management with Arrays:\nBehind the scenes, the script uses custom divLevel type arrays to manage plotted levels, ensuring they stay up-to-date, extend correctly, and delete once invalidated.\n\n⯁ USAGE\n Use bullish divergence zones as potential demand areas and bearish ones as supply zones. Combine RSI pane labels with price-level zones to confirm strength of reversal. Watch for price approaching a divergence level to anticipate reactions or breakouts. Use divergence levels as trade triggers, stop-loss guides, or take-profit markers. Limit signal count using the “Qty Divergence Zones” setting to reduce chart clutter. Enable divergence detection only when you want to focus on key structural zones — ideal for swing or positional setups.\n\n⯁ CONCLUSION\nRSI Momentum Divergence Zones [ChartPrime] blends oscillator divergence logic with price action structure to uncover hidden strength or weakness in the market. With flexible zone plotting and clean visual signals, this tool empowers traders to identify where momentum turns into structure — turning hidden signals into tradable edges.",
+  "script": {
+    "id": 2995644,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;cf6dc608d8cd496caa1d4e2d90b26243",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bcf6dc608d8cd496caa1d4e2d90b26243/1",
+  "source_http_status": 200,
+  "source_sha256": "05d977f3567a03b76ba8171fa55b4d69b38de1a488e916f8705393859422c9de",
+  "source_lines": 134,
+  "source_metadata": {
+    "created": "2025-08-11T12:18:37.518479Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": false,
+      "kind": "study",
+      "originalScriptId": "USER;d3ff6bfac294488fad020be9b31c941b",
+      "originalScriptVersion": "0.542",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 8,
+        "plotshape": 4
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "RSI Momentum Divergence Zones [ChartPrime]",
+    "updated": "2025-08-11T12:18:37.518479Z",
+    "version": "1.0"
+  }
+}

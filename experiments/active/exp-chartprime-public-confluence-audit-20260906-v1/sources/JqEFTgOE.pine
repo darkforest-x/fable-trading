@@ -1,0 +1,88 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=6
+indicator("SuperTrend Oscillator [ChartPrime]")
+import TradingView/ta/11
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+groupST = "SuperTrend"
+multi = input.float(4, "ATR Multiplier", step = 0.1, group = groupST)
+volat = input.int(100, "ATR Length", group = groupST)
+
+groupOSC = "Oscillator"
+osctype   = input.string("HMA", "Oscillator Type", ["HMA", "SMA", "EMA"], group = groupOSC)
+oscSmooth = input.int(25, "Oscillator Smooth", group = groupOSC)
+
+colMax = input.color(#FFDFB9, "", inline = "colors")
+colMin = input.color(#e24d3f, "", inline = "colors")
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+[supertrend, direction] = ta.supertrend(multi, volat)
+
+trendCol = direction > 0 ? colMin : colMax
+
+ps = plot(direction != direction[1] ? float(na) : supertrend, "Supertrend", color = trendCol, style=plot.style_linebr, force_overlay = true)
+pc = plot(close, display = display.none, editable = false, force_overlay = true)
+
+fill(ps, pc, supertrend, close, color.new(trendCol, 80), color(na))
+
+
+atr = ta.atr(volat)*multi
+osc = switch osctype
+    "HMA" => ta.hma(close-supertrend, oscSmooth)
+    "EMA" => ta.ema(close-supertrend, oscSmooth)
+    => ta.sma(close-supertrend, oscSmooth)
+    
+osc_ = osc / atr
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+oscCol = osc_ < 0 ? color.from_gradient(osc_, -1, 0, colMin, color.gray) : color.from_gradient(osc_, 0, 1, color.gray, colMax)
+
+posc   = plot(osc_, "Oscillator Line", color = oscCol)
+p0     = plot(0, color = color(na), editable = false)
+pupper = plot(1.7, color = color(na), editable = false)
+plower = plot(-1.7, color = color(na), editable = false)
+
+
+hline(0, color = color.gray)
+
+fill(p0, posc, 1, 0, colMax, color(na))
+fill(p0, posc, 0, -1, color(na), colMin)
+
+fill(pupper, posc, 1.7, osc_ < 0 ? 0 : osc_, color.new(colMin, 70), color(na))
+
+fill(plower, posc, osc_ > 0 ? 0 : osc_, -1.7, color(na), color.new(colMax, 70))
+
+var indx = bar_index
+revDown = ta.crossunder(osc_, osc_[3]) and osc_ > 0.5
+revUp   = ta.crossover(osc_, osc_[3])  and osc_ < -0.5
+
+plotshape(revDown and bar_index - indx > 10 ? osc_[1] : float(na), "Reversal Down", shape.diamond, location.absolute, size = size.tiny, color = colMin, offset = -1)
+plotshape(revUp   and bar_index - indx > 10 ? osc_[1] : float(na), "Reversal Up",   shape.diamond, location.absolute, size = size.tiny, color = colMax, offset = -1)
+
+plotshape(revDown and bar_index - indx > 10 ? osc_[1] : float(na), "Reversal Down", shape.diamond, location.absolute, size = size.small, color = color.new(colMin, 70), offset = -1)
+plotshape(revUp   and bar_index - indx > 10 ? osc_[1] : float(na), "Reversal Up",   shape.diamond, location.absolute, size = size.small, color = color.new(colMax, 70), offset = -1)
+
+plotshape(revDown and bar_index - indx > 10, "Reversal Down", shape.diamond, location.abovebar, size = size.tiny, color = color.new(colMin, 70), offset = -1, force_overlay = true)
+plotshape(revUp   and bar_index - indx > 10, "Reversal Up",   shape.diamond, location.belowbar, size = size.tiny, color = color.new(colMax, 70), offset = -1, force_overlay = true)
+
+
+if revDown and bar_index - indx > 10
+    indx := bar_index
+if revUp and bar_index - indx > 10
+    indx := bar_index
+
+
+barcolor(oscCol)
+plotcandle(open, high, low, close, title='Title', color = oscCol, wickcolor=oscCol, bordercolor = oscCol, force_overlay = true)
+// --------------------------------------------------------------------------------------------------------------------}

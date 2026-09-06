@@ -1,0 +1,47 @@
+{
+  "id": "0vET13Ra",
+  "title": "Market Break Analytics [ChartPrime]",
+  "url": "https://www.tradingview.com/script/0vET13Ra-Market-Break-Analytics-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:19.336578+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/0vET13Ra-Market-Break-Analytics-ChartPrime/",
+  "created_at": "2026-03-10T11:23:41.246292+00:00",
+  "updated_at": null,
+  "description": "🔶 OVERVIEW  \nMarket Break Analytics is a structural momentum and volume-distribution tool designed to analyze confirmed pivot breaks and measure participation behind each structural move.\n\nInstead of simply marking a breakout, this indicator builds a complete structural map:\n• It identifies the pivot being broken  \n• Locates the true swing origin  \n• Measures volume dominance during the expansion  \n• Displays buy/sell participation as percentage strength  \n\n\n\nThis provides traders with both structure confirmation and participation analytics in one visual framework.\n\n🔶 CORE STRUCTURE LOGIC\n\n The indicator tracks confirmed pivot highs and pivot lows. A structural break occurs only after price closes beyond a confirmed pivot level. Break Up mode → Tracks bullish breaks above pivot highs. Break Dn mode → Tracks bearish breaks below pivot lows. Trend direction flips only when an opposite structural break is confirmed.\n\nThis ensures the tool reacts to true structural shifts, not temporary volatility spikes.\n\n\n🔶 SWING ORIGIN DETECTION\nOnce a break occurs:\n The algorithm scans backward to find the lowest low (for bullish breaks).\n Or the highest high (for bearish breaks).\n This swing origin becomes the structural base. A baseline is drawn from origin to current structure. A dashed expansion line visualizes the active swing.\n\nThis clearly maps the entire structural leg from origin to breakout.\n\n\n🔶 VOLUME PARTICIPATION ANALYTICS\nA unique component of this tool is the in-swing volume distribution model.\nFor each structural leg:\n Total buy volume is measured (close > open). Total sell volume is measured (close < open). Percent dominance is calculated. Buy/Sell boxes are drawn near swing completion. Color intensity reflects participation strength.\n\n\nThis answers a critical question:\nWas the breakout driven by strong participation or weak momentum?\nYou see the conviction behind the move — not just the price level.\n\n\n🔶 BREAK LINE & LABEL SYSTEM\n\nEach structural event includes:\n Break Line → Marks the exact pivot that was broken. Break Label → Visually confirms structural violation. Base Line → Shows structural origin level. Swing Line → Displays directional expansion. Swing Start Label → Displays swing start price.\n\n\nThese elements allow traders to visually separate:\n• Accumulation → Expansion → Structural shift\n\n\n🔶 HISTORY CONTROL\n History ON → All past break structures remain visible.\n History OFF → Only the most recent structure is shown.\n\n\n\nThis allows the tool to function as either:\n• A structural archive  \n• Or a clean real-time breakout monitor  \n\n\n🔶 TREND COLORING\nBars are automatically colored based on active structural direction:\n Bullish structure → Bull color. Bearish structure → Bear color. No active structure → Default chart color.\n\nThis provides immediate structural bias recognition.\n\n\n🔶 HOW TO USE\n Use Break Up mode during bullish market phases. Use Break Dn mode during bearish market phases. Watch for high buy % during bullish breaks for strong continuation setups.\n Watch for weak participation during breaks for potential fakeouts. Combine with liquidity or order block tools for confluence. Pivot strength settings can be increased to filter noise.\n\nThis tool works particularly well on:\n• Intraday trend continuation\n• Swing breakout strategies\n• Market structure confirmation systems\n\n\n🔶 WHAT MAKES IT DIFFERENT\nMost breakout tools only show:\n• A level  \n• A cross  \n• A label  \n\nMarket Break Analytics adds:\n• Structural origin detection  \n• Volume dominance mapping  \n• Swing expansion tracking  \n• Directional bias coloring  \n• Historical structural control  \n\nIt transforms simple breakouts into complete structural analysis.\n\n🔶 CONCLUSION\nMarket Break Analytics [ChartPrime] provides a comprehensive view of market structure shifts by combining:\n• Pivot break detection  \n• Swing mapping  \n• Participation analytics  \n• Structural trend visualization  \n\nInstead of reacting to price alone, traders can now evaluate the strength and quality of every structural move — gaining deeper insight into whether a break is supported by real participation or lacks conviction.",
+  "script": {
+    "id": 4935908,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;e867e737503841c1857dd6939e50d5cc",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Be867e737503841c1857dd6939e50d5cc/1",
+  "source_http_status": 200,
+  "source_sha256": "3a714019441695693642f4487754a56d8d55a0c9dcc280606abea6ff8cd66b52",
+  "source_lines": 295,
+  "source_metadata": {
+    "created": "2026-03-10T11:23:39.509256Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;6228a1de374c49558cc1e96cfd563dda",
+      "originalScriptVersion": "0.117",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plotcandle": 1
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Market Break Analytics [ChartPrime]",
+    "updated": "2026-03-10T11:23:39.509256Z",
+    "version": "1.0"
+  }
+}

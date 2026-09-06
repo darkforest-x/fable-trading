@@ -1,0 +1,44 @@
+{
+  "id": "qujivabv",
+  "title": "FVG Volume Profile [ChartPrime]",
+  "url": "https://www.tradingview.com/script/qujivabv-FVG-Volume-Profile-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:40.893736+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/qujivabv-FVG-Volume-Profile-ChartPrime/",
+  "created_at": "2025-10-13T11:48:25.584207+00:00",
+  "updated_at": null,
+  "description": "⯁ OVERVIEW\nFVG Volume Profile [ChartPrime] is a smart volume analysis tool that identifies Fair Value Gaps (FVGs) and overlays a volume profile inside each gap using data from lower timeframes. The indicator automatically selects the best time resolution or allows for manual control, giving traders deeper insight into the volume structure within each imbalance. POC levels and total volumes gives a full microstructure view inside every FVG.\n\n⯁ KEY FEATURES\nFair Value Gap Detection (Bullish & Bearish)\nDetects price gaps where inefficiency exists using a 3-bar structure.\n\n-Bullish Gaps: Low > High[2] with confirming middle bar.\n-Bearish Gaps: High < Low[2] with confirming middle bar.\n\nOnly significant gaps (filtered by standard deviation) are plotted to avoid noise.Multi-Timeframe Volume Profiling\nPulls granular candle and volume data from a lower timeframe —\n\nIn Auto Mode, uses a resolution ~10x lower than the current chart.\n\n\nIn Manual Mode, lets the user select a custom timeframe.\nThis ensures accurate intra-gap volume distribution.\nDynamic Volume Binning\nEach FVG is divided into vertical volume bins based on the Resolution input.\nEach bin displays relative volume intensity as a horizontal box, scaled by percentage of the max bin volume.Point of Control (PoC) Line & Label\nThe bin with the maximum volume inside each FVG is marked with:\nA horizontal line (PoC) extending from the left to right side.\nA label showing the absolute volume of that bin.\nColor-coded to match bullish or bearish FVGs.\nTotal Volume Label Inside FVG\nEach FVG displays the total volume sum from its profile:\n\nFor bullish FVGs, shown in the bottom-right corner.\n\nFor bearish FVGs, shown in the top-right corner.\nAuto-Removal of Invalid Gaps\nIf price fully closes the gap (crosses its bounds), the FVG, profile, and PoC are deleted automatically.\nThis keeps the chart clean and focused only on active zones.Toggleable Volume Profile Display\nUser can show or hide the volume profiles within FVGs using the \"Display\" toggle under the \"FVG Volume Profile\" group.\nOnly the PoC and FVG boxes remain visible if toggled off.\nVolume Resolution Customization\nControl the number of bins used for each FVG profile.\nHigher resolution = more bins and finer volume analysis. (default 15)\nAuto Timeframe Validation Warning\nIf the selected lower timeframe isn’t actually lower than the chart's, the script shows a visible warning label prompting adjustment.\nHelps prevent calculation errors.\n\n\n⯁ USAGE\n Use this tool to identify active imbalance zones (FVGs) with embedded volume context. Look for PoC positioning inside gaps — near top may indicate absorption or reversal zones. Combine with price action at the PoC level for precision entries. Hide volume profile for a cleaner view while retaining key POC and FVG boxes. Use resolution controls to zoom into fine-grained profiles inside large gaps. Consider Auto mode for seamless multi-timeframe analysis, or switch to Manual for full control.\n\n⯁ CONCLUSION\nFVG Volume Profile [ChartPrime] transforms raw imbalance detection into actionable insight by embedding lower-timeframe volume structure inside each Fair Value Gap. With PoC highlights, total volume labels, and customizable bin resolution, this indicator is essential for traders who want to understand not just where the gap is — but what volume did inside it.",
+  "script": {
+    "id": 3245969,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;35d63ada08384938bff191906932b9df",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B35d63ada08384938bff191906932b9df/1",
+  "source_http_status": 200,
+  "source_sha256": "93f6f08638cf70d0c19d1ec9e607b1a85039e1c2cc33f08fb1cb562a48634119",
+  "source_lines": 266,
+  "source_metadata": {
+    "created": "2025-10-13T11:48:25.136438Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;d3ff6bfac294488fad020be9b31c941b",
+      "originalScriptVersion": "0.807",
+      "sourceInputsCount": 0
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "FVG Volume Profile [ChartPrime]",
+    "updated": "2025-10-13T11:48:25.136438Z",
+    "version": "1.0"
+  }
+}

@@ -1,0 +1,122 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("Chebyshev Filter Divergences [ChartPrime]", shorttitle = "Chebyshev Filter [ChartPrime]", overlay=false)
+
+
+// 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+float ripple        = input.float(11, "Ripple (dB)", step = 0.1, group = "Chebyshev Filter")
+int   length        = input(25, "Normalization Length", group = "Chebyshev Filter")
+series float source = input.source(close, group = "Chebyshev Filter")
+
+bool show_div       = input.bool(false, "Show Divergences", group="Divergences")
+int  Upper_range    = input(60, "Max of Range",          group="Divergences")
+int  Lower_range    = input(5, "Min of Range",        group="Divergences")
+int  p_r            = input(5,  "Pivots to Right",  group="Divergences")
+int  p_l            = input(5, "Pivots to Left",  group="Divergences")
+
+color colorUp       = input.color(color.purple, group = "Visual")
+color colorDn       = input.color(color.lime, group = "Visual")
+
+// 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉
+//@function Chebyshev Filter Function
+cheb_filter(src, ripple)=>
+    // Calculate ripple factor
+    ripple_factor = math.pow(10, ripple / 20)
+
+    // Calculate filter coefficients
+    beta  = math.sqrt(1 + ripple_factor * ripple_factor) / ripple_factor
+    gamma = (math.pow(beta, 2) - 1) / math.sqrt(1 + math.pow(beta, 2))
+
+    // Initialize filter variables
+    var float filtered_price = na
+    var float prev_filtered_price = na
+
+    // Apply filter
+    if not na(source)
+        filtered_price := (1 / beta) * (src - 2 * prev_filtered_price + nz(filtered_price[2])) + 2 * (1 - gamma) * nz(filtered_price[1]) - (1 - beta + gamma) * nz(filtered_price[2])
+        prev_filtered_price := nz(filtered_price[1])
+    filtered_price
+
+filtered_price = cheb_filter(source, ripple)
+
+// Normalization
+basis = ta.sma(filtered_price, length)
+flt_price = (filtered_price - basis) / ta.stdev(filtered_price, length)
+
+
+// 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+color =  flt_price > flt_price[1] 
+          ? 
+          color.from_gradient(flt_price, -1, 2, color.new(colorUp, 60), colorUp) 
+          :
+         flt_price < flt_price[1] 
+          ?
+          color.from_gradient(flt_price, -2, 2, colorDn, color.new(colorDn, 60)) 
+          : 
+          color(na)
+
+// Plot results
+plot(flt_price, color=color.new(color,90), title="Filtered Price", linewidth = 8)
+plot(flt_price, color=color, title="Filtered Price", linewidth = 2)
+
+// Smooth Average
+avg   = ta.sma(ta.sma(flt_price, 100), 100)
+avg_  = plot(avg, color = na)
+avg_1 = plot(avg+2, color = na)
+avg_2 = plot(avg-2, color = na)
+
+// Background Color
+fill(avg_1, avg_, avg+2, avg, na, color.new(colorUp, 80))
+fill(avg_2, avg_, avg-2, avg, na, color.new(colorDn, 80))
+
+// Mid Line
+mid_line = plot(0, "Mid Line", color = #787b861a)
+
+
+// 𝘿𝙄𝙑𝙀𝙍𝙂𝙀𝙉𝘾𝙀𝙎
+pivot_L = na(ta.pivotlow(flt_price, p_l, p_r)) ? false : true
+pivot_H = na(ta.pivothigh(flt_price, p_l, p_r)) ? false : true
+
+priceLL = low[p_r]  < ta.valuewhen(pivot_L, low[p_r], 1)
+priceHH = high[p_r] > ta.valuewhen(pivot_H, high[p_r], 1)
+
+cheb_filterLH = flt_price[p_r] < ta.valuewhen(pivot_H, flt_price[p_r], 1)
+                 and Lower_range <= ta.barssince(pivot_H[1]) and ta.barssince(pivot_H[1]) <= Upper_range
+
+cheb_filterHL = flt_price[p_r] > ta.valuewhen(pivot_L, flt_price[p_r], 1)
+                 and Lower_range <= ta.barssince(pivot_L[1]) and ta.barssince(pivot_L[1]) <= Upper_range
+
+bull_div = priceLL and cheb_filterHL 
+bear_div = priceHH and cheb_filterLH
+
+// Plot Divergences
+plot(
+	 show_div ? (pivot_H ? flt_price[p_r] : na) : na,
+	 offset   = -p_r,
+	 title    ="Bearish Divergences",
+	 linewidth= 2,
+	 color    = bear_div ? color.new(colorDn, 80) : na
+	 )
+
+plot(
+     show_div ? (pivot_L ? flt_price[p_r] : na) : na,
+     offset    = -p_r,
+     title     = "Bullish Divergences",
+     linewidth = 2,
+     color     = bull_div ? color.new(colorUp, 80) : na
+     )
+
+// Signs of change in direction
+plotchar(series = ta.crossover(flt_price, flt_price[1]) ? flt_price[1] : na,
+         title = "up", char = "◇", location = location.absolute, size = size.tiny, color = color, offset = -1)
+    
+plotchar(series = ta.crossunder(flt_price, flt_price[1]) ? flt_price[1] : na,
+         title = "dn", char = "◇", location = location.absolute, size = size.tiny, color = color, offset = -1)
+
+// 
+var table tbl = table.new(position.bottom_right, 1, 1)
+tbl.cell(0,0,"◈", text_color = color.new(color, 50), text_size = size.huge)
+
+/// ◆ ♢ ❖ ◇ ⬖

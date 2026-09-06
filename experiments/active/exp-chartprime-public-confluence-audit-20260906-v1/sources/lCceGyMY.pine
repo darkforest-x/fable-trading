@@ -1,0 +1,153 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("Kalman Volume Filter [ChartPrime]", overlay = false)
+
+// 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+int VZO_length            = input.int(70, "Volume Length", group = "Settings")
+
+float k                   = input.float(0.06,
+                                         title = "Stabilization Coefficient",
+                                         step = 0.001,
+                                         maxval = 0.1,
+                                         minval = 0.01,
+                                         group = "Settings",
+                                         tooltip = "The lower coefficient 
+                                         the less noise the longer signals"
+                                         ) //  - stabilization coefficient
+
+int sig_length            = input.int(10, "Signal Line Length",maxval = 15, group = "Settings")
+float ob_os_z             = input.float(0.6, "Overbought & Oversold Zone Level", step = 0.1, group = "Settings")
+
+series float get_src      = input.source(close, "Source", group = "Settings") 
+
+color colorUp             = input.color(color.aqua, "Color Up", group = "Visual")
+color colorDn             = input.color(color.red,  "Color Dn", group = "Visual")
+
+
+// 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+
+// VOLUME ZONE OSCILLATOR
+VZO(get_src, length) =>
+    Volume_Direction    = get_src > get_src[2] ? volume : -volume
+    VZO_volume          = ta.hma(Volume_Direction, length)
+    Total_volume        = ta.hma(volume, length)
+    VZO  = VZO_volume / (Total_volume)
+    VZO := (VZO - 0) / ta.stdev(VZO, 200)
+    VZO
+
+VZO = VZO(get_src, VZO_length)
+
+// KALMAN FILTER
+series float M_n     = 0.0                        //   - the resulting value of the current calculation
+series float A_n     = VZO                       //   - the initial value of the current measurement
+series float M_n_1   = nz(M_n[1])               //   - the resulting value of the previous calculation
+
+// Kalman Filter Formula
+kalm(k)=>
+    k * A_n + (1 - k) * M_n_1
+
+// KALMAN VOLUME FILTER
+M_n := kalm(k)
+
+// Signal Line
+M_n_ = ta.sma(M_n, sig_length)
+
+
+
+// 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// Volume Histogram
+volume_ = ((volume - 0) / ta.stdev(volume, 200))/10
+volume_ := volume_ > 0.8 ? 0 : volume_
+
+color_vol = color.from_gradient(volume_, 0.1, 0.45, chart.fg_color, colorUp)
+
+plot(volume_, style = plot.style_columns, color = color.new(color_vol, 85))
+plot(volume_*-1, style = plot.style_columns, color = color.new(color_vol, 85))
+
+// Bar color based on Volume Bursts
+barcolor(color_vol)
+
+// Overbought and Oversold Zones
+p3 = plot(2, color = color.new(colorDn, 90))
+p4 = plot(ob_os_z, display = display.none)
+p5 = plot(-2, color = color.new(colorUp, 90))
+p6 = plot(-ob_os_z, display = display.none)
+
+fill(plot1 = p3,
+     plot2 = p4,
+     top_value =  2,
+     bottom_value =  ob_os_z, 
+     top_color = na,
+     bottom_color = color.new(colorDn, 70)
+     )
+
+fill(plot1 = p5,
+     plot2 = p6,
+     top_value =  -ob_os_z,
+     bottom_value = -2, 
+     top_color = color.new(colorUp, 70),
+     bottom_color = na
+     )
+
+// Plot Of Kalman Volume Filter
+p1 = plot(M_n, 
+     color = M_n > M_n_ ? colorUp : colorDn, 
+     linewidth = 1
+         )
+
+p2 = plot(M_n_, 
+     color = M_n > M_n_ ? color.new(colorUp,60) : color.new(colorDn,60), 
+     linewidth = 1
+         )
+
+fill(plot1 = p1,
+      plot2 = p2,
+      top_value =  M_n,
+      bottom_value =  M_n_, 
+      top_color = M_n > M_n_ ? colorUp : colorDn,
+      bottom_color =  M_n > M_n_ ? na : #880e4f00
+      )
+
+
+
+// 𝙎𝙄𝙂𝙉𝘼𝙇𝙎 
+plotchar(series = ta.crossover(M_n, M_n_) and M_n > -ob_os_z and M_n < ob_os_z ? M_n : na, 
+     title = "Local Buy",
+      char = "⦿",
+      location = location.absolute,
+       color = colorUp, 
+       size = size.tiny,
+       offset = -1
+       )
+
+plotchar(series = ta.crossunder(M_n, M_n_) and M_n > -ob_os_z and M_n < ob_os_z ? M_n : na, 
+     title = "Local Sell",
+      char = "⦿",
+      location = location.absolute,
+       color = colorDn, 
+       size = size.tiny,
+       offset = -1
+       )
+
+plotchar(series = ta.crossover(M_n, M_n_) and M_n < -ob_os_z ? M_n : na, 
+     title = "Oversold Buy",
+      char = "⬙",
+      location = location.absolute,
+       color = color.new(colorUp, 10), 
+       size = size.small,
+       offset = -1
+       )
+
+plotchar(series = ta.crossunder(M_n, M_n_) and M_n > ob_os_z ? M_n : na, 
+     title = "Overbought Sell",
+      char = "◈",
+      location = location.absolute,
+       color = color.new(colorDn, 10), 
+       size = size.small,
+       offset = -1
+       )
+
+// Mid Line
+hline(0, color = #787b8662)

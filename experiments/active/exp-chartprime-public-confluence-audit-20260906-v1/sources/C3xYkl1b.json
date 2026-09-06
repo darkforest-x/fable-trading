@@ -1,0 +1,48 @@
+{
+  "id": "C3xYkl1b",
+  "title": "RSI-Adaptive T3 [ChartPrime]",
+  "url": "https://www.tradingview.com/script/C3xYkl1b-RSI-Adaptive-T3-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:00.942784+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/C3xYkl1b-RSI-Adaptive-T3-ChartPrime/",
+  "created_at": "2025-06-03T12:07:25.920772+00:00",
+  "updated_at": null,
+  "description": "The RSI-Adaptive T3 is a precision trend-following tool built around the legendary T3 smoothing algorithm developed by Tim Tillson, designed to enhance responsiveness while reducing lag compared to traditional moving averages. Current implementation takes it a step further by dynamically adapting the smoothing length based on real-time RSI conditions — allowing the T3 to “breathe” with market volatility. This dynamic length makes the curve faster in trending moves and smoother during consolidations.\n\nTo help traders visualize volatility and directional momentum, adaptive volatility bands are plotted around the T3 line, with visual crossover markers and a dynamic info panel on the chart. It’s ideal for identifying trend shifts, spotting momentum surges, and adapting strategy execution to the pace of the market.\n\nHOIW IT WORKS\nAt its core, this indicator fuses two ideas:\nThe T3 Moving Average — a 6-stage recursively smoothed exponential average created by Tim Tillson, designed to reduce lag without sacrificing smoothness. It uses a volume factor to control curvature.A Dynamic Length Engine — powered by the RSI. When RSI is low (market oversold), the T3 becomes shorter and more reactive. When RSI is high (overbought), the T3 becomes longer and smoother. This creates a feedback loop between price momentum and trend sensitivity.\n\nThe result: an evolving trend line that adapts to market tempo in real-time.\n\nKEY FEATURES\n⯁ RSI-Based Adaptive Smoothing\nThe length of the T3 calculation dynamically adjusts between a Min Length and Max Length, based on the current RSI.When RSI is low → the T3 shortens, tracking reversals faster.When RSI is high → the T3 stretches, filtering out noise during euphoria phases.Displayed length is shown in a floating table, colored on a gradient between min/max values.\n\n⯁ T3 Calculation (Tim Tillson Method)\nThe script uses a 6-stage EMA cascade with a customizable Volume Factor (v), as designed by Tillson (1998).Formula:\nThis technique gives smoother yet faster curves than EMAs or DEMA/Triple EMA.\n\n⯁ Visual Trend Direction & Transitions\nThe T3 line changes color dynamically:Color Up (default: blue) → bullish curvatureColor Down (default: orange) → bearish curvaturePlot fill between T3 and delayed T3 creates a gradient ribbon to show momentum expansion/contraction.Directional shift markers (“🞛”) are plotted when T3 crosses its own delayed value — helping traders spot trend flips or pullback entries.\n\n\n⯁ Adaptive Volatility Bands\nOptional upper/lower bands are plotted around the T3 line using a user-defined volatility window (default: 100).Bands widen when volatility rises, and contract during compression — similar to Bollinger logic but centered on the adaptive T3.Shaded band zones help frame breakout setups or mean-reversion zones.\n\n\n⯁ Dynamic Info Table\nA live stats panel shows:Current adaptive lengthMaximum smoothing (▲ MaxLen)Minimum smoothing (▼ MinLen)All values update in real time and are color-coded to match trend direction.\n\n\nHOW TO USE\nUse T3 crossovers to detect trend transitions, especially during periods of volatility compression.Watch for volatility contraction in the bands — breakouts from narrow band periods often precede trend bursts.\nThe adaptive smoothing length can also be used to assess current market tempo — tighter = faster; wider = slower.\n\nCONCLUSION\nRSI-Adaptive T3 [ChartPrime] modernizes one of the most elegant smoothing algorithms in technical analysis with intelligent RSI responsiveness and built-in volatility bands. It gives traders a cleaner read on trend health, directional shifts, and expansion dynamics — all in a visually efficient package. Perfect for scalpers, swing traders, and algorithmic modelers alike, it delivers advanced logic in a plug-and-play format.",
+  "script": {
+    "id": 2726996,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;fe89cddf7e7d45b98bee998bb533ea23",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bfe89cddf7e7d45b98bee998bb533ea23/1",
+  "source_http_status": 200,
+  "source_sha256": "c5c5bbc33ef66e7a9ea0ff62deaaf1024b0636bbc05e02683173cf9008257c7e",
+  "source_lines": 88,
+  "source_metadata": {
+    "created": "2025-06-03T12:07:24.742249Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;d3ff6bfac294488fad020be9b31c941b",
+      "originalScriptVersion": "0.434",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 4,
+        "plotchar": 1
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "RSI-Adaptive T3 [ChartPrime]",
+    "updated": "2025-06-03T12:07:24.742249Z",
+    "version": "1.0"
+  }
+}

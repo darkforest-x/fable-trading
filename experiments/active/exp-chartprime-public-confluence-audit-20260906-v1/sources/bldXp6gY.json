@@ -1,0 +1,48 @@
+{
+  "id": "bldXp6gY",
+  "title": "RSI-Adaptive T3 & SAR Strategy [PrimeAutomation]",
+  "url": "https://www.tradingview.com/script/bldXp6gY-RSI-Adaptive-T3-SAR-Strategy-PrimeAutomation/",
+  "retrieved_at": "2026-09-06T13:35:32.205901+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/bldXp6gY-RSI-Adaptive-T3-SAR-Strategy-PrimeAutomation/",
+  "created_at": "2025-11-24T13:50:07.515011+00:00",
+  "updated_at": null,
+  "description": "⯁ OVERVIEW  \nThe RSI-Adaptive T3 and SAR Confluence Strategy combines adaptive smoothing with dynamic trend confirmation to identify precise trend reversals and continuation opportunities. It fuses the power of an RSI-based adaptive T3 moving average with the Parabolic SAR filter, aiming to trade in harmony with dominant momentum shifts while maintaining tight control through automatic stop-loss placement.\n\nThe RSI-Adaptive T3 is a precision trend-following tool built around the legendary T3 smoothing algorithm developed by Tim Tillson, designed to enhance responsiveness while reducing lag compared to traditional moving averages. Current implementation takes it a step further by dynamically adapting the smoothing length based on real-time RSI conditions — allowing the T3 to “breathe” with market volatility. This dynamic length makes the curve faster in trending moves and smoother during consolidations.\n\nTo help traders visualize volatility and directional momentum, adaptive volatility bands are plotted around the T3 line, with visual crossover markers and a dynamic info panel on the chart. It’s ideal for identifying trend shifts, spotting momentum surges, and adapting strategy execution to the pace of the market.\n\n⯁ LOGIC  \n The T3 moving average length dynamically adjusts based on RSI values — when RSI is high, the smoothing period shortens to react faster; when RSI is low, the period increases for stability in slow markets.  \n A Parabolic SAR filter confirms directional bias, ensuring trades only occur in alignment with the broader market trend.  \n Long Entries: Trigger when the T3 curve crosses upward while the current price remains above the SAR — signaling bullish momentum alignment.  \n Short Entries: Trigger when the T3 crosses downward while the price remains below the SAR — confirming bearish trend alignment.  \n Stops: Dynamic stops are placed using the highest or lowest price over a set lookback period, adapting automatically to market volatility.  \n\n\n⯁ FEATURES  \n RSI-Adaptive T3 Filter: Adjusts smoothing in real time to market conditions, blending responsiveness with noise reduction. SAR Confluence Check: Prevents counter-trend entries by confirming momentum direction via the Parabolic SAR. Automatic Stop Placement: Uses recent highs or lows as stop-loss anchors, minimizing risk exposure. Color-coded Visualization: The T3 line dynamically changes color based on slope direction, making momentum shifts visually intuitive. Smoothed Trend Structure: Reduces market noise, allowing cleaner, more reliable trend recognition across different assets.\n\n⯁ CONCLUSION  \nThe RSI-Adaptive T3 and SAR Confluence Strategy delivers an advanced fusion of adaptive smoothing and structural confirmation. By combining RSI-driven reactivity with Parabolic SAR trend validation, this strategy offers a balanced approach to identifying sustainable momentum reversals while maintaining strong risk management through automatic stop levels. Ideal for traders who seek precision entries aligned with adaptive trend dynamics.  \n",
+  "script": {
+    "id": 3425894,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;96d3cf8e482f4527803157f068726505",
+    "version_maj": 1,
+    "script_type": "strategy",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B96d3cf8e482f4527803157f068726505/1",
+  "source_http_status": 200,
+  "source_sha256": "6827180ea116b0d1e88a98a6826b205f68b781e98f9c1ab13a6e3476795b3ceb",
+  "source_lines": 247,
+  "source_metadata": {
+    "created": "2025-11-24T13:50:06.861892Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "strategy",
+      "originalScriptId": "USER;6228a1de374c49558cc1e96cfd563dda",
+      "originalScriptVersion": "0.57",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 4,
+        "plotchar": 1
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "RSI-Adaptive T3 & SAR Strategy [PrimeAutomation]",
+    "updated": "2025-11-24T13:50:06.861892Z",
+    "version": "1.0"
+  }
+}

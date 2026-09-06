@@ -1,0 +1,283 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+//@version=6
+
+indicator("Smart Money Fibonacci OTE Engine [ChartPrime]", overlay = true, max_bars_back = 5000, max_labels_count = 500, max_lines_count = 500, max_boxes_count = 500)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+pivotLen      = input.int(10,  "Pivot Length", minval = 1, group = "Structure",
+     tooltip = "Number of bars on each side used to detect swing highs and lows.")
+showSwingLbl  = input.bool(true, "Show Swing Labels", group = "Structure",
+     tooltip = "Show price labels at every detected swing high and swing low.")
+
+showOTE       = input.bool(true,  "Show OTE Zone", group = "Fibonacci / OTE",
+     tooltip = "Fill the Optimal Trade Entry zone between the two configurable retracement levels.")
+showFibLines  = input.bool(true,  "Show Fib Levels", group = "Fibonacci / OTE",
+     tooltip = "Draw individual horizontal Fibonacci retracement level lines.")
+showSwingLine = input.bool(true,  "Show Swing Diagonal", group = "Fibonacci / OTE",
+     tooltip = "Draw a dashed diagonal line connecting the anchor low to the anchor high (bullish) or anchor high to anchor low (bearish).")
+extendFibs    = input.bool(true,  "Extend Fib Lines", group = "Fibonacci / OTE",
+     tooltip = "Keep all Fibonacci level lines extended to the current bar in real time.")
+showPrev      = input.bool(false, "Show Previous Fibs", group = "Fibonacci / OTE",
+     tooltip = "Preserve old Fibonacci drawings on the chart when a new structure shift is detected.")
+
+oteHighInput  = input.float(0.786, "OTE Upper Level", step = 0.001, group = "Fibonacci / OTE",
+     tooltip = "Upper retracement boundary of the Optimal Trade Entry zone. Default is 0.786.")
+oteLowInput   = input.float(0.618, "OTE Lower Level", step = 0.001, group = "Fibonacci / OTE",
+     tooltip = "Lower retracement boundary of the Optimal Trade Entry zone. Default is 0.618.")
+
+_fibStyleStr  = input.string("Dashed", "Fib Line Style",  options = ["Solid", "Dashed", "Dotted"], group = "Fibonacci / OTE",
+     tooltip = "Line style for the horizontal Fibonacci retracement level lines.")
+_diagStyleStr = input.string("Dotted", "Diagonal Style",  options = ["Solid", "Dashed", "Dotted"], group = "Fibonacci / OTE",
+     tooltip = "Line style for the diagonal swing line connecting the two anchor points.")
+_bosStyleStr  = input.string("Solid",  "BOS Line Style",  options = ["Solid", "Dashed", "Dotted"], group = "Fibonacci / OTE",
+     tooltip = "Line style for the horizontal Break-of-Structure lines drawn at HH and LL.")
+
+bullCol       = input.color(color.new(#15b879, 85), "Bullish Color", group = "Colors",
+     tooltip = "Color used for bullish trend background tint and bullish structure shift line.")
+bearCol       = input.color(color.new(#dd621a, 85), "Bearish Color", group = "Colors",
+     tooltip = "Color used for bearish trend background tint and bearish structure shift line.")
+oteColBull    = input.color(color.new(#22c5bd, 70), "OTE Bull Fill", group = "Colors",
+     tooltip = "Fill color for the OTE zone when the active trend is bullish.")
+oteColBear    = input.color(color.new(#ef4444, 70), "OTE Bear Fill", group = "Colors",
+     tooltip = "Fill color for the OTE zone when the active trend is bearish.")
+fibLineCol    = input.color(color.new(#d3d3d3, 20), "Fib Line Color", group = "Colors",
+     tooltip = "Color for all horizontal Fibonacci level lines and their price labels.")
+
+fibStyle  = _fibStyleStr  == "Solid" ? line.style_solid : _fibStyleStr  == "Dotted" ? line.style_dotted : line.style_dashed
+diagStyle = _diagStyleStr == "Solid" ? line.style_solid : _diagStyleStr == "Dotted" ? line.style_dotted : line.style_dashed
+bosStyle  = _bosStyleStr  == "Solid" ? line.style_solid : _bosStyleStr  == "Dotted" ? line.style_dotted : line.style_dashed
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+pvtHi = ta.pivothigh(high, pivotLen, pivotLen)
+pvtLo = ta.pivotlow(low,   pivotLen, pivotLen)
+
+var float lastSwingHigh    = na
+var float lastSwingLow     = na
+var int   lastSwingHighBar = na
+var int   lastSwingLowBar  = na
+
+var float prevSwingHigh    = na
+var float prevSwingLow     = na
+
+var int   trendState       = 0
+
+var float fibAnchorHigh    = na
+var float fibAnchorLow     = na
+var int   fibAnchorHighBar = na
+var int   fibAnchorLowBar  = na
+
+if not na(pvtHi)
+    prevSwingHigh    := lastSwingHigh
+    lastSwingHigh    := pvtHi
+    lastSwingHighBar := bar_index - pivotLen
+
+if not na(pvtLo)
+    prevSwingLow    := lastSwingLow
+    lastSwingLow    := pvtLo
+    lastSwingLowBar := bar_index - pivotLen
+
+// Trend shift detection
+var bool bullShift = false
+var bool bearShift = false
+
+bullShift := false
+bearShift := false
+
+if not na(pvtHi) and not na(prevSwingHigh)
+    if pvtHi > prevSwingHigh and trendState <= 0
+        bullShift        := true
+        trendState       := 1
+        fibAnchorLow     := lastSwingLow
+        fibAnchorLowBar  := lastSwingLowBar
+        fibAnchorHigh    := pvtHi
+        fibAnchorHighBar := bar_index - pivotLen
+
+if not na(pvtLo) and not na(prevSwingLow)
+    if pvtLo < prevSwingLow and trendState >= 0
+        bearShift        := true
+        trendState       := -1
+        fibAnchorHigh    := lastSwingHigh
+        fibAnchorHighBar := lastSwingHighBar
+        fibAnchorLow     := pvtLo
+        fibAnchorLowBar  := bar_index - pivotLen
+
+// Extend anchor as new higher highs / lower lows form within the trend
+if trendState == 1 and not bullShift and not na(pvtHi)
+    if not na(fibAnchorHigh) and pvtHi > fibAnchorHigh
+        fibAnchorHigh    := pvtHi
+        fibAnchorHighBar := bar_index - pivotLen
+
+if trendState == -1 and not bearShift and not na(pvtLo)
+    if not na(fibAnchorLow) and pvtLo < fibAnchorLow
+        fibAnchorLow    := pvtLo
+        fibAnchorLowBar := bar_index - pivotLen
+
+// Fibonacci storage
+var array<float> fibLevels  = array.from(0.0, 0.236, 0.382, 0.5, 0.618, 0.786, 1.0)
+var array<line>  fibLines   = array.new<line>()
+var array<label> fibLabels  = array.new<label>()
+var box          oteBox     = na
+var bool         fibsDrawn  = false
+var line         swingDiag  = na
+
+fibPrice(float level, float anchorHigh, float anchorLow, bool isBull) =>
+    isBull ? anchorHigh - (anchorHigh - anchorLow) * level : anchorLow + (anchorHigh - anchorLow) * level
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Clear or freeze previous drawings on trend shift
+if bullShift or bearShift
+    if not showPrev
+        for l in fibLines
+            line.delete(l)
+        fibLines.clear()
+        for lb in fibLabels
+            label.delete(lb)
+        fibLabels.clear()
+        box.delete(oteBox)
+        oteBox := na
+        line.delete(swingDiag)
+        swingDiag := na
+    else
+        for l in fibLines
+            l.set_x2(bar_index)
+        fibLines.clear()
+        fibLabels.clear()
+        box.delete(oteBox)
+        oteBox    := na
+        swingDiag := na
+
+    if not na(fibAnchorHigh) and not na(fibAnchorLow) and not na(fibAnchorHighBar) and not na(fibAnchorLowBar)
+        bool  isBull   = trendState == 1
+        int   startBar = isBull ? fibAnchorLowBar  : fibAnchorHighBar
+        float startY   = isBull ? fibAnchorLow     : fibAnchorHigh
+        int   endBar   = isBull ? fibAnchorHighBar : fibAnchorLowBar
+        float endY     = isBull ? fibAnchorHigh    : fibAnchorLow
+        color diagCol  = isBull ? color.new(bullCol, 30) : color.new(bearCol, 30)
+
+        if showSwingLine
+            swingDiag := line.new(startBar, startY, endBar, endY,
+                 color = diagCol, width = 1, style = diagStyle)
+
+        for lvl in fibLevels
+            float price = fibPrice(lvl, fibAnchorHigh, fibAnchorLow, isBull)
+            if showFibLines
+                line ln = line.new(startBar, price, bar_index, price,
+                     color = fibLineCol, width = 1, style = fibStyle)
+                fibLines.push(ln)
+                label lb = label.new(bar_index, price,
+                     text      = str.tostring(lvl, "#.###") + "    (" + str.tostring(price, format.mintick) + ")",
+                     style     = label.style_label_left,
+                     color     = color(na),
+                     textcolor = chart.fg_color,
+                     size      = size.small)
+                fibLabels.push(lb)
+
+        if showOTE
+            float oteUpperPrice = fibPrice(oteHighInput, fibAnchorHigh, fibAnchorLow, isBull)
+            float oteLowerPrice = fibPrice(oteLowInput,  fibAnchorHigh, fibAnchorLow, isBull)
+            oteBox := box.new(startBar, math.max(oteUpperPrice, oteLowerPrice),
+                              bar_index, math.min(oteUpperPrice, oteLowerPrice),
+                              border_color = color(na),
+                              bgcolor      = isBull ? oteColBull : oteColBear)
+
+        fibsDrawn := true
+
+// Update existing drawings as swing develops
+if not bullShift and not bearShift and fibsDrawn and fibLines.size() > 0
+    if not na(fibAnchorHigh) and not na(fibAnchorLow) and not na(fibAnchorHighBar) and not na(fibAnchorLowBar)
+        bool  isBull   = trendState == 1
+        int   startBar = isBull ? fibAnchorLowBar  : fibAnchorHighBar
+        float startY   = isBull ? fibAnchorLow     : fibAnchorHigh
+        int   endBar   = isBull ? fibAnchorHighBar : fibAnchorLowBar
+        float endY     = isBull ? fibAnchorHigh    : fibAnchorLow
+        int   idx      = 0
+
+        if showSwingLine and not na(swingDiag)
+            swingDiag.set_x1(startBar)
+            swingDiag.set_y1(startY)
+            swingDiag.set_x2(endBar)
+            swingDiag.set_y2(endY)
+
+        for lvl in fibLevels
+            float price = fibPrice(lvl, fibAnchorHigh, fibAnchorLow, isBull)
+            if showFibLines and idx < fibLines.size()
+                line ln = fibLines.get(idx)
+                ln.set_y1(price)
+                ln.set_y2(price)
+                ln.set_x1(startBar)
+                if extendFibs
+                    ln.set_x2(bar_index)
+                if idx < fibLabels.size()
+                    label lb = fibLabels.get(idx)
+                    lb.set_y(price)
+                    lb.set_x(bar_index)
+                    lb.set_text(str.tostring(lvl, "#.###") + "    (" + str.tostring(price, format.mintick) + ")")
+            idx += 1
+
+        if showOTE and not na(oteBox)
+            float oteUpperPrice = fibPrice(oteHighInput, fibAnchorHigh, fibAnchorLow, isBull)
+            float oteLowerPrice = fibPrice(oteLowInput,  fibAnchorHigh, fibAnchorLow, isBull)
+            oteBox.set_left(startBar)
+            oteBox.set_right(bar_index)
+            oteBox.set_top(math.max(oteUpperPrice, oteLowerPrice))
+            oteBox.set_bottom(math.min(oteUpperPrice, oteLowerPrice))
+
+// Extend horizontal fib lines to current bar every tick
+if extendFibs and fibLines.size() >= 0
+    for l in fibLines
+        l.set_x2(bar_index)
+    if not na(oteBox)
+        oteBox.set_right(bar_index)
+    if fibLabels.size() > 0
+        for lb in fibLabels
+            lb.set_x(bar_index)
+
+// Swing high / low price labels
+if showSwingLbl and not na(pvtHi)
+    label.new(bar_index - pivotLen, pvtHi,
+         text      = str.tostring(pvtHi, format.mintick),
+         style     = label.style_label_down,
+         color     = color(na),
+         textcolor = color.new(bearCol, 20),
+         size      = size.small)
+
+if showSwingLbl and not na(pvtLo)
+    label.new(bar_index - pivotLen, pvtLo,
+         text      = str.tostring(pvtLo, format.mintick),
+         style     = label.style_label_up,
+         color     = color(na),
+         textcolor = color.new(bullCol, 20),
+         size      = size.small)
+
+// Structure shift BOS lines and labels
+if bullShift and not na(fibAnchorHigh)
+    line.new(bar_index - pivotLen * 2, fibAnchorHigh, bar_index, fibAnchorHigh,
+         color = color.new(bullCol, 30), width = 2, style = bosStyle)
+    label.new(bar_index - pivotLen, fibAnchorHigh,
+         text      = "HH ▲",
+         style     = label.style_label_down,
+         color     = color.new(bullCol, 20),
+         textcolor = color.white,
+         size      = size.small)
+
+if bearShift and not na(fibAnchorLow)
+    line.new(bar_index - pivotLen * 2, fibAnchorLow, bar_index, fibAnchorLow,
+         color = color.new(bearCol, 30), width = 2, style = bosStyle)
+    label.new(bar_index - pivotLen, fibAnchorLow,
+         text      = "LL ▼",
+         style     = label.style_label_up,
+         color     = color.new(bearCol, 20),
+         textcolor = color.white,
+         size      = size.small)
+
+// --------------------------------------------------------------------------------------------------------------------}

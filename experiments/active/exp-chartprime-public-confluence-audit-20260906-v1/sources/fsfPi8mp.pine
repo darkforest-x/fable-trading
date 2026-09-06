@@ -1,0 +1,96 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=6
+indicator("Dynamic Trend Bands [ChartPrime]", overlay = true, timeframe = "", timeframe_gaps = false)  // Declare the indicator with overlay enabled to display on the main chart
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Length for Hull Moving Average (HMA) calculation and Source
+int length = input.int(40, "Length", minval = 11, group = "Double HMA") 
+float src = input.source(close, "Source", group = "Double HMA")
+
+float multi = input.float(2.0, "Distance", step = 0.1, group = "Bands") 
+int band_size = input.int(2, "Size", group = "Bands", minval = 2, maxval = 8)
+
+color col_up = input.color(#20bfaf, "", inline = "c", group = "Color") 
+color col_m  = input.color(#aeaeae, "", inline = "c", group = "Color")  
+color col_dn = input.color(#c12176, "", inline = "c", group = "Color")  
+bool bars_col = input.bool(false, "Momentum Shift", inline = "c", group = "Color")  // [bool] Toggle bar color for momentum shifts
+bool filll = input.bool(true, "Fill Color")
+
+color col_up1 = color.new(col_up, 50)  
+color col_dn1 = color.new(col_dn, 50) 
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Double-smoothed Hull Moving Average (HMA) function
+double_hma(src, length, multi)=>
+
+    float base = ta.hma(ta.hma(close, length - 10), length)  // [series float] Double HMA for smoother trend detection
+
+    // Distance from the base line calculated using 2x the 100-period ATR for volatility-based bands
+    float dist = ta.atr(100) * multi 
+
+    // Upper and lower bands positioned around the base line
+    float upper = base + dist  
+    float lower = base - dist 
+
+    // Lower band plotting conditions: 
+    float lower_band = lower >= lower[band_size] ? lower[band_size] : na
+    float lower_band1 = lower >= lower[band_size] ? lower : na 
+
+    // Upper band plotting conditions: 
+    float upper_band = upper <= upper[band_size] ? upper[band_size] : na 
+    float upper_band1 = upper <= upper[band_size] ? upper : na  
+
+    [base, lower_band, lower_band1, upper_band, upper_band1]
+
+
+[base, lower_band, lower_band1, upper_band, upper_band1] = double_hma(src, length, multi)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+ // Plot the base (trend) line using the chart's col_m color
+plot(base, "Double HMA", color = col_m)  
+
+// Plot lower bands with line breaks for cleaner visuals
+pl = plot(lower_band1, "Lower Band 1", style = plot.style_linebr, color = col_up)  
+pl1 = plot(lower_band, "Lower Band 2", style = plot.style_linebr, color = col_up) 
+
+// Plot upper bands with line breaks for cleaner visuals
+ph = plot(upper_band, "Upper Band 1", style = plot.style_linebr, color = col_dn)  
+ph1 = plot(upper_band1,"Upper Band 2", style = plot.style_linebr, color = col_dn) 
+
+// Plot middle lines of bands
+plot(upper_band1[band_size-int(band_size/2)], "Upper Bands Middle line", style = plot.style_linebr, color = col_dn) 
+plot(lower_band1[band_size-int(band_size/2)], "Lower Bands Middle line", style = plot.style_linebr, color = col_up)  
+
+// Fill between lower and upper bands for trend zone visualization
+fill(pl1, pl, lower_band1, lower_band, col_up1, col_up1, display = filll ? display.all : display.none)  
+fill(ph1, ph, upper_band, upper_band1, col_dn1, col_dn1, display = filll ? display.all : display.none)  
+
+
+// Default bar color (transparent)
+color = #ff980000  
+
+// Switch condition for momentum shift detection:
+// - If price breaks above a falling upper band → highlight bar
+// - If price breaks below a rising lower band → highlight bar
+switch
+    upper_band1 <= upper_band1[2] and high > upper_band =>
+         color := color.orange  // Momentum shift upward
+    lower_band >= lower_band[2] and low < lower_band =>
+         color := color.orange  // Momentum shift downward
+
+// Apply bar colors based on momentum shift condition
+barcolor(color, display = bars_col ? display.all : display.none)  // Display bars only if "Momentum Shift" is enabled
+// --------------------------------------------------------------------------------------------------------------------}

@@ -1,0 +1,47 @@
+{
+  "id": "U7Ccpt7y",
+  "title": "Dynamic Volume Trace Profile [ChartPrime]",
+  "url": "https://www.tradingview.com/script/U7Ccpt7y-Dynamic-Volume-Trace-Profile-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:43.983661+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/U7Ccpt7y-Dynamic-Volume-Trace-Profile-ChartPrime/",
+  "created_at": "2025-09-29T13:00:28.269480+00:00",
+  "updated_at": null,
+  "description": "⯁ OVERVIEW\nDynamic Volume Trace Profile [ChartPrime] is a reimagined take on volume profile analysis. Instead of plotting a static horizontal histogram on the side of your chart, this indicator projects dynamic volume trace lines directly onto the price action. Each bin is color-graded according to its relative strength, creating a living “volume skeleton” of the market. The orange trace highlights the current Point of Control (POC)—the price level with maximum historical traded volume within the lookback window. On the right side, the tool builds a mini profile, showing absolute volume per bin alongside its percentage share, where the POC always represents 100% strength.\n\n⯁ KEY FEATURES\nDynamic On-Chart Bins:\nThe range between highest high and lowest low is split into 25 bins. Each bin is drawn as a horizontal trace line across the lookback chart period.Gradient Color Encoding:\nTrace lines fade from transparent to teal depending on relative volume size. The more intense the teal, the stronger the historical traded activity at that level.\nAutomatic POC Highlight:\nThe bin with the highest aggregated volume is flagged with an orange line. This POC adapts bar-by-bar as volume distribution shifts.\nRight-Side Volume Profile:\nAt the chart’s right edge, the script prints a box-style profile. Each bin shows:\n• Total volume (absolute units).\n• Percentage of max volume, in parentheses (POC bin = 100%).\nThis gives both raw and normalized context at a glance.\nAdjustable Lookback Window:\nThe lookback defines how many bars feed the profile. Increase for stable HTF zones or decrease for responsive intraday distributions.\nPOC Toggle & Styling:\nOptionally toggle POC highlighting on/off, adjust colors, and set line thickness for better integration with your chart theme.\n\n\n⯁ HOW IT WORKS (UNDER THE HOOD)\nStep Sizing:\n[h − l] over last 100 bars is divided by [bins] to calculate bin height.Volume Aggregation:\nFor each bar in the [lookback], the script checks which bin the close falls into, then adds that bar’s volume to the bin’s counter.Gradient Mapping:\nBin volume is normalized against the max volume across all bins. That value is mapped onto a gradient from transparent → teal.POC Logic:\nThe bin with highest volume is colored orange both on the dynamic trace and in the right-side profile.Right-Hand Profile:\nBoxes are drawn for each bin proportional to volume / maxVolume × 50 units, with text labels showing both absolute volume and normalized %.\n\n⯁ USAGE\nUse the orange trace as the dominant “magnet” level—price often gravitates to the POC.\n\nWatch for clusters of strong teal traces as areas of high acceptance; thin or faint zones mark low-liquidity gaps prone to fast moves.On intraday charts, tighten lookback to reveal session-based distributions. For swing or position trading, expand lookback to surface more durable volume shelves.Compare the right-side profile % to judge how “top-heavy” or “bottom-heavy” the current distribution is.Use bright, intense color traces as context for confluence with structure, OBs, or liquidity hunts.\n\n⯁ CONCLUSION\nDynamic Volume Trace Profile takes the traditional volume profile and fuses it into the body of price itself. Instead of a fixed sidebar, you see gradient traces layered directly on the chart, giving real-time context of where volume concentrated and where price may be drawn. With built-in POC highlighting, normalized % readouts, and an adaptive right-side profile, it offers both precision levels and market structure awareness in a cleaner, more intuitive form.",
+  "script": {
+    "id": 3190720,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;fbd08295f8d9474b82eff767893e13c8",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bfbd08295f8d9474b82eff767893e13c8/1",
+  "source_http_status": 200,
+  "source_sha256": "9fa7a6abe046a92809639f02b46388e8d9671ce77fc48e476f3566c89f20f854",
+  "source_lines": 109,
+  "source_metadata": {
+    "created": "2025-09-29T13:00:27.768162Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;d3ff6bfac294488fad020be9b31c941b",
+      "originalScriptVersion": "0.796",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 27
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Dynamic Volume Trace Profile [ChartPrime]",
+    "updated": "2025-09-29T13:00:27.768162Z",
+    "version": "1.0"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "id": "qvfqG21A",
+  "title": "Liquidations Zones [ChartPrime]",
+  "url": "https://www.tradingview.com/script/qvfqG21A-Liquidations-Zones-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:24.865789+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/qvfqG21A-Liquidations-Zones-ChartPrime/",
+  "created_at": "2024-10-21T12:02:51.146075+00:00",
+  "updated_at": null,
+  "description": "The Liquidation Zones [ChartPrime] indicator is designed to detect potential liquidation zones based on common leverage levels such as 10x, 25x, 50x, and 100x. By calculating percentage distances from recent pivot points, the indicator shows where leveraged positions are most likely to get liquidated. It also tracks buy and sell volumes in these zones, helping traders assess market pressure and predict liquidation scenarios. Additionally, the indicator features a heat map mode to highlight areas where orders and stop-losses might be clustered.\n\n\n⯁ KEY FEATURES AND HOW TO USE  \n ⯌ Leverage Zones Detection:  \nThe indicator identifies zones where positions with leverage ratios of 100x, 50x, 25x, and 10x are at risk of liquidation. These zones are based on percentage moves from recent pivots: a 1% move can liquidate 100x positions, a 4% move affects 25x positions, and so on.  \n ⯌ Liquidated Zones and Volume Tracking:  \nThe indicator displays liquidated zones by plotting gray areas where the price potentually liquidate positons. It calculates the volume needed to liquidate positions in these zones, showing volume from bullish candles if short positions were liquidated and volume from bearish candles for long positions. This feature helps traders assess the risk of liquidation as the price approaches these zones.  \n ⯌ Buy/Sell Volume Calculation:  \nBuy and sell volumes are calculated from the most recent pivot high or low. For buy volume, only bullish candles are considered, while for sell volume, only bearish candles are summed. This data helps traders gauge the strength of potential liquidation in different zones.  \nExample of buy and sell volume tracking in active zones:  \n\n ⯌ Liquidity Heat Map:  \nIn heat map mode, the indicator visualizes potential liquidity areas where orders and stop-losses may be clustered. This map highlights zones that are likely to experience liquidations based on leverage ratios. Additionally, it tracks the highest and lowest price levels for the past 100 bars, while also displaying buy and sell volumes. This feature is useful for predicting market moves driven by liquidation events.  \n\n\n\n\n\n\n⯁ USER INPUTS  \n Length: Determines the number of bars used to calculate pivots for liquidation zones. Extend: Controls how far the liquidation zones are extended on the chart. Leverage Options: Toggle options to display zones for different leverage levels: 10x, 25x, 50x, and 100x. Display Heat Map: Enables or disables the liquidity heat map feature.\n\n\n⯁ CONCLUSION  \nThe Liquidation Zones [ChartPrime] indicator provides a powerful tool for identifying potential liquidation zones, tracking volume pressure, and visualizing liquidity areas on the chart. With its real-time updates and multiple features, this indicator offers valuable insights for managing risk and anticipating market moves driven by leveraged positions.",
+  "script": {
+    "id": 1931192,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;6817e642967c48a0a11c5c7ca8e36cc9",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B6817e642967c48a0a11c5c7ca8e36cc9/1",
+  "source_http_status": 200,
+  "source_sha256": "5da8242fa38cb0ad31ae9584c06045a109936e4bde7c16fd8016802952f3fb12",
+  "source_lines": 205,
+  "source_metadata": {
+    "created": "2024-10-21T12:02:50.539356Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "sourceInputsCount": 0
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Liquidations Zones [ChartPrime]",
+    "updated": "2024-10-21T12:02:50.539356Z",
+    "version": "1.0"
+  }
+}

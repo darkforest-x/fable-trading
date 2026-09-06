@@ -1,0 +1,323 @@
+// This Source Code Form is subject to the terms of the Attribution-NonCommercial-ShareAlike 4.0 International License - (https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.txt)
+// © ChartPrime
+
+//@version=5
+indicator('PhiSmoother Moving Average Ribbon [ChartPrime]', 'PhiSmoother [ChartPrime]', true)
+
+PhiSmoother(series float Source, simple int Length, simple float Phase=3.7) => // @ChartPrime 
+    const float SQRT_PIx2  = math.sqrt(2.0 * math.pi)
+    const float MULTIPLIER = -0.5 / 0.93
+    float sma2 = math.avg(Source, nz(Source[1], Source))
+    if Length > 1
+        var int   length_1 = Length - 1
+        var float length_2 = Length * 0.52353
+        float E = 0.0,  float W = 0.0
+        for int i=0 to length_1
+            float alpha = (i + Phase - length_2) * MULTIPLIER
+            float  beta = 1.0 / (0.2316419 * math.abs(alpha) + 1.0)
+            float   phi = (math.exp(math.pow(alpha, 2) * -0.5)
+                          *-0.398942280) * beta *
+                          ( 0.319381530  + beta *
+                          (-0.356563782  + beta *
+                          ( 1.781477937  + beta *
+                          (-1.821255978  + beta
+                          * 1.330274429)))) + 1.011
+            if alpha < 0.0
+                phi := 1.0 - phi
+            float weight = phi / SQRT_PIx2
+            W  += weight * sma2[i]
+            E  += weight
+        W / E
+    else
+        Source
+
+cross(series float Series1, series float Series2) =>
+    (Series1 >  Series2   and Series1[1] <=  Series2[1])
+ or (Series1 <  Series2   and Series1[1] >=  Series2[1])
+
+method chameleonColor( series array<float>  Source,
+                     simple string ChameleonScheme,
+                     simple color     ColorBullish,
+                     simple color     ColorBearish) =>
+    var array<color> aColors = array.new<color>(Source.size())
+    var int   sizeOfSource_1 = Source.size() - 1
+    if ChameleonScheme == 'Progression'
+        for int i=0 to sizeOfSource_1
+            float rank = 0.0
+            for int j=0 to sizeOfSource_1
+                if i == j
+                    continue
+                if Source.get(i) > Source.get(j)
+                    rank += math.sign(j - i)
+                else if Source.get(i) < Source.get(j)
+                    rank -= math.sign(j - i)
+            aColors.set(i, color.from_gradient(rank, -sizeOfSource_1, sizeOfSource_1, ColorBearish, ColorBullish))
+    else if ChameleonScheme == 'Chameleon'
+        for int i=0 to sizeOfSource_1
+            float rank = 0.0
+            for int j=0 to i
+                if i == j
+                    continue
+                if Source.get(i) > Source.get(j)
+                    rank += math.sign(j - i)
+                else if Source.get(i) < Source.get(j)
+                    rank -= math.sign(j - i)
+            aColors.set(i, color.from_gradient(rank, -sizeOfSource_1, sizeOfSource_1, ColorBearish, ColorBullish))
+    else // ChameleonScheme == 'Binary'
+        if not na(Source[1])
+            for int i=0 to sizeOfSource_1
+                if Source.get(i) > array.get(Source[1],i)
+                    aColors.set(i, ColorBullish)
+                else
+                    aColors.set(i, ColorBearish)
+    aColors
+
+
+
+string controls = 'PhiSmoother Controls'
+float    source = input.source(close,  'Price Source', group=controls,                       tooltip='Select a price source')
+float     phase = input.float (  3.7, 'Phase Control', group=controls, maxval=4.5, step=0.5, tooltip='This allows for subtle adjustment (tweaking) of the phase/lag')
+
+string      colors = 'Coloring Preferences'
+string colorScheme = input.string('Chameleon', 'Chameleon Color Magic', group=colors, options=['Progression','Chameleon','Binary'])
+color colorBullish = input.color (    #FFCC00,   'Coloring - Bullish:', group=colors,  inline='tiles')
+color colorBearish = input.color (    #5500CC,            '  Bearish:', group=colors,  inline='tiles')
+
+string         alerts = ' Alert Controls'
+string      alertMode = input.string('OFF', 'Alert Mode:', group=alerts, options=['OFF', '3/6 crossings',  '6/9 crossings', '9/12 crossings','12/15 crossings','15/18 crossings','18/21 crossings','21/24 crossings','24/27 crossings','27/30 crossings','30/33 crossings',
+                                                                                       '33/36 crossings','36/39 crossings','39/42 crossings','42/45 crossings','45/48 crossings','48/51 crossings','51/54 crossings','54/57 crossings','57/60 crossings','60/63 crossings',
+                                                                                       '63/66 crossings','66/69 crossings','69/72 crossings','72/75 crossings','75/78 crossings','78/81 crossings','81/84 crossings','84/87 crossings','87/90 crossings'], tooltip='Select a critical period pairing to alert() on')
+string  customMessage = input.text_area( 'Default Message Here...', 'Custom Alert Message:', group=alerts, tooltip='Insert a preferred custom alert() message here. ANY modification of this overrides the original formatted alert message')
+string alertFrequency = input.string(alert.freq_once_per_bar_close,      'Alert Frequency:', group=alerts, options=[ alert.freq_all,                 // ALL alert() function calls trigger the alert
+                                                                                                                     alert.freq_once_per_bar,        // Only the 1st bar's alert() occurrence triggers one alert
+                                                                                                                     alert.freq_once_per_bar_close]) // The alert() function is called lastly at the bar's closure
+var bool CUSTOM_ALERT_IS_SET = customMessage != 'Default Message Here...'
+var bool ALERTS_ARE_ENABLED  =     alertMode != 'OFF'
+
+
+
+float phiSmooth03 = PhiSmoother(source,  3, phase)
+float phiSmooth06 = PhiSmoother(source,  6, phase)
+float phiSmooth09 = PhiSmoother(source,  9, phase)
+float phiSmooth12 = PhiSmoother(source, 12, phase)
+float phiSmooth15 = PhiSmoother(source, 15, phase)
+float phiSmooth18 = PhiSmoother(source, 18, phase)
+float phiSmooth21 = PhiSmoother(source, 21, phase)
+float phiSmooth24 = PhiSmoother(source, 24, phase)
+float phiSmooth27 = PhiSmoother(source, 27, phase)
+float phiSmooth30 = PhiSmoother(source, 30, phase)
+float phiSmooth33 = PhiSmoother(source, 33, phase)
+float phiSmooth36 = PhiSmoother(source, 36, phase)
+float phiSmooth39 = PhiSmoother(source, 39, phase)
+float phiSmooth42 = PhiSmoother(source, 42, phase)
+float phiSmooth45 = PhiSmoother(source, 45, phase)
+float phiSmooth48 = PhiSmoother(source, 48, phase)
+float phiSmooth51 = PhiSmoother(source, 51, phase)
+float phiSmooth54 = PhiSmoother(source, 54, phase)
+float phiSmooth57 = PhiSmoother(source, 57, phase)
+float phiSmooth60 = PhiSmoother(source, 60, phase)
+float phiSmooth63 = PhiSmoother(source, 63, phase)
+float phiSmooth66 = PhiSmoother(source, 66, phase)
+float phiSmooth69 = PhiSmoother(source, 69, phase)
+float phiSmooth72 = PhiSmoother(source, 72, phase)
+float phiSmooth75 = PhiSmoother(source, 75, phase)
+float phiSmooth78 = PhiSmoother(source, 78, phase)
+float phiSmooth81 = PhiSmoother(source, 81, phase)
+float phiSmooth84 = PhiSmoother(source, 84, phase)
+float phiSmooth87 = PhiSmoother(source, 87, phase)
+float phiSmooth90 = PhiSmoother(source, 90, phase)
+
+
+
+float fastHalo = na
+float slowHalo = na
+if ALERTS_ARE_ENABLED
+    var string TICKER = syminfo.tickerid
+    string closePrice = str.tostring(close, '0.##')
+    string originalMessage = ' crossing occurred at the price: ' + closePrice + ' on ' + TICKER // This may be altered for customization from this original format
+    switch alertMode
+        '3/6 crossings'  =>
+            fastHalo := phiSmooth03
+            slowHalo := phiSmooth06
+            if cross(phiSmooth03, phiSmooth06)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 3/6'   + originalMessage, alertFrequency)
+        '6/9 crossings' =>
+            fastHalo := phiSmooth06
+            slowHalo := phiSmooth09
+            if cross(phiSmooth06, phiSmooth09)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 6/9'   + originalMessage, alertFrequency)
+        '9/12 crossings' =>
+            fastHalo := phiSmooth09
+            slowHalo := phiSmooth12
+            if cross(phiSmooth09, phiSmooth12)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 9/12'  + originalMessage, alertFrequency)
+        '12/15 crossings' =>
+            fastHalo := phiSmooth12
+            slowHalo := phiSmooth15
+            if cross(phiSmooth12, phiSmooth15)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 12/15' + originalMessage, alertFrequency)
+        '15/18 crossings' =>
+            fastHalo := phiSmooth15
+            slowHalo := phiSmooth18
+            if cross(phiSmooth15, phiSmooth18)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 15/18' + originalMessage, alertFrequency)
+        '18/21 crossings' =>
+            fastHalo := phiSmooth18
+            slowHalo := phiSmooth21
+            if cross(phiSmooth18, phiSmooth21)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 18/21' + originalMessage, alertFrequency)
+        '21/24 crossings' =>
+            fastHalo := phiSmooth21
+            slowHalo := phiSmooth24
+            if cross(phiSmooth21, phiSmooth24)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 21/24' + originalMessage, alertFrequency)
+        '24/27 crossings' =>
+            fastHalo := phiSmooth24
+            slowHalo := phiSmooth27
+            if cross(phiSmooth24, phiSmooth27)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 24/27' + originalMessage, alertFrequency)
+        '27/30 crossings' =>
+            fastHalo := phiSmooth27
+            slowHalo := phiSmooth30
+            if cross(phiSmooth27, phiSmooth30)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 27/30' + originalMessage, alertFrequency)
+        '30/33 crossings' =>
+            fastHalo := phiSmooth30
+            slowHalo := phiSmooth33
+            if cross(phiSmooth30, phiSmooth33)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 30/33' + originalMessage, alertFrequency)
+        '33/36 crossings' =>
+            fastHalo := phiSmooth33
+            slowHalo := phiSmooth36
+            if cross(phiSmooth33, phiSmooth36)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 33/36' + originalMessage, alertFrequency)
+        '36/39 crossings' =>
+            fastHalo := phiSmooth36
+            slowHalo := phiSmooth39
+            if cross(phiSmooth36, phiSmooth39)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 36/39' + originalMessage, alertFrequency)
+        '39/42 crossings' =>
+            fastHalo := phiSmooth39
+            slowHalo := phiSmooth42
+            if cross(phiSmooth39, phiSmooth42)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 39/42' + originalMessage, alertFrequency)
+        '42/45 crossings' =>
+            fastHalo := phiSmooth42
+            slowHalo := phiSmooth45
+            if cross(phiSmooth42, phiSmooth45)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 42/45' + originalMessage, alertFrequency)
+        '45/48 crossings' =>
+            fastHalo := phiSmooth45
+            slowHalo := phiSmooth48
+            if cross(phiSmooth45, phiSmooth48)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 45/48' + originalMessage, alertFrequency)
+        '48/51 crossings' =>
+            fastHalo := phiSmooth48
+            slowHalo := phiSmooth51
+            if cross(phiSmooth48, phiSmooth51)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 48/51' + originalMessage, alertFrequency)
+        '51/54 crossings' =>
+            fastHalo := phiSmooth51
+            slowHalo := phiSmooth54
+            if cross(phiSmooth51, phiSmooth54)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 51/54' + originalMessage, alertFrequency)
+        '54/57 crossings' =>
+            fastHalo := phiSmooth54
+            slowHalo := phiSmooth57
+            if cross(phiSmooth54, phiSmooth57)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 54/57' + originalMessage, alertFrequency)
+        '57/60 crossings' =>
+            fastHalo := phiSmooth57
+            slowHalo := phiSmooth60
+            if cross(phiSmooth57, phiSmooth60)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 57/60' + originalMessage, alertFrequency)
+        '60/63 crossings' =>
+            fastHalo := phiSmooth60
+            slowHalo := phiSmooth63
+            if cross(phiSmooth60, phiSmooth63)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 60/63' + originalMessage, alertFrequency)
+        '63/66 crossings' =>
+            fastHalo := phiSmooth63
+            slowHalo := phiSmooth66
+            if cross(phiSmooth63, phiSmooth66)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 63/66' + originalMessage, alertFrequency)
+        '66/69 crossings' =>
+            fastHalo := phiSmooth66
+            slowHalo := phiSmooth69
+            if cross(phiSmooth66, phiSmooth69)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 66/69' + originalMessage, alertFrequency)
+        '69/72 crossings' =>
+            fastHalo := phiSmooth69
+            slowHalo := phiSmooth72
+            if cross(phiSmooth69, phiSmooth72)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 69/72' + originalMessage, alertFrequency)
+        '72/75 crossings' =>
+            fastHalo := phiSmooth72
+            slowHalo := phiSmooth75
+            if cross(phiSmooth72, phiSmooth75)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 72/75' + originalMessage, alertFrequency)
+        '75/78 crossings' =>
+            fastHalo := phiSmooth75
+            slowHalo := phiSmooth78
+            if cross(phiSmooth75, phiSmooth78)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 75/78' + originalMessage, alertFrequency)
+        '78/81 crossings' =>
+            fastHalo := phiSmooth78
+            slowHalo := phiSmooth81
+            if cross(phiSmooth78, phiSmooth81)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 78/81' + originalMessage, alertFrequency)
+        '81/84 crossings' =>
+            fastHalo := phiSmooth81
+            slowHalo := phiSmooth84
+            if cross(phiSmooth81, phiSmooth84)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 81/84' + originalMessage, alertFrequency)
+        '84/87 crossings' =>
+            fastHalo := phiSmooth84
+            slowHalo := phiSmooth87
+            if cross(phiSmooth84, phiSmooth87)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 84/87' + originalMessage, alertFrequency)
+        => // '87/90 crossings'
+            fastHalo := phiSmooth87
+            slowHalo := phiSmooth90
+            if cross(phiSmooth87, phiSmooth90)
+                alert(CUSTOM_ALERT_IS_SET ? customMessage : 'A 87/90' + originalMessage, alertFrequency)
+plot(fastHalo, '', #DDDDDD50, 4)
+plot(slowHalo, '', #DDDDDD50, 4)
+
+
+
+array<float> aPhis = array.from( phiSmooth03, phiSmooth06, phiSmooth09, phiSmooth12, phiSmooth15, phiSmooth18, phiSmooth21, phiSmooth24, phiSmooth27, phiSmooth30,
+                                 phiSmooth33, phiSmooth36, phiSmooth39, phiSmooth42, phiSmooth45, phiSmooth48, phiSmooth51, phiSmooth54, phiSmooth57, phiSmooth60,
+                                 phiSmooth63, phiSmooth66, phiSmooth69, phiSmooth72, phiSmooth75, phiSmooth78, phiSmooth81, phiSmooth84, phiSmooth87, phiSmooth90)
+array<color> aColorGradients = aPhis.chameleonColor(colorScheme, colorBullish, colorBearish)
+
+plot(phiSmooth03, '03', aColorGradients.get( 0))
+plot(phiSmooth06, '06', aColorGradients.get( 1))
+plot(phiSmooth09, '09', aColorGradients.get( 2))
+plot(phiSmooth12, '12', aColorGradients.get( 3))
+plot(phiSmooth15, '15', aColorGradients.get( 4))
+plot(phiSmooth18, '18', aColorGradients.get( 5))
+plot(phiSmooth21, '21', aColorGradients.get( 6))
+plot(phiSmooth24, '24', aColorGradients.get( 7))
+plot(phiSmooth27, '27', aColorGradients.get( 8))
+plot(phiSmooth30, '30', aColorGradients.get( 9))
+plot(phiSmooth33, '33', aColorGradients.get(10))
+plot(phiSmooth36, '36', aColorGradients.get(11))
+plot(phiSmooth39, '39', aColorGradients.get(12))
+plot(phiSmooth42, '42', aColorGradients.get(13))
+plot(phiSmooth45, '45', aColorGradients.get(14))
+plot(phiSmooth48, '48', aColorGradients.get(15))
+plot(phiSmooth51, '51', aColorGradients.get(16))
+plot(phiSmooth54, '54', aColorGradients.get(17))
+plot(phiSmooth57, '57', aColorGradients.get(18))
+plot(phiSmooth60, '60', aColorGradients.get(19))
+plot(phiSmooth63, '63', aColorGradients.get(20))
+plot(phiSmooth66, '66', aColorGradients.get(21))
+plot(phiSmooth69, '69', aColorGradients.get(22))
+plot(phiSmooth72, '72', aColorGradients.get(23))
+plot(phiSmooth75, '75', aColorGradients.get(24))
+plot(phiSmooth78, '78', aColorGradients.get(25))
+plot(phiSmooth81, '81', aColorGradients.get(26))
+plot(phiSmooth84, '84', aColorGradients.get(27))
+plot(phiSmooth87, '87', aColorGradients.get(28))
+plot(phiSmooth90, '90', aColorGradients.get(29))

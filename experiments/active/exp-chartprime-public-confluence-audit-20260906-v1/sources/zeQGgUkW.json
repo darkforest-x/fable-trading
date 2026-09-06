@@ -1,0 +1,48 @@
+{
+  "id": "zeQGgUkW",
+  "title": "Price Heat Meter [ChartPrime]",
+  "url": "https://www.tradingview.com/script/zeQGgUkW-Price-Heat-Meter-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:49.066708+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/zeQGgUkW-Price-Heat-Meter-ChartPrime/",
+  "created_at": "2025-08-25T12:04:23.266387+00:00",
+  "updated_at": null,
+  "description": "⯁ OVERVIEW\nPrice Heat Meter [ChartPrime] visualizes where price sits inside its recent range and turns that into an intuitive “temperature” read. Using rolling extremes, candles fade from ❄️ aqua (cold) near the lower bound to 🔥 red (hot) near the upper bound. The tool also trails recent extreme levels, tags unusually persistent extremes with a % “heat” label, and shows a bottom gauge (0–100%) with a live arrow so you can read market heat at a glance.\n\n⯁ KEY FEATURES\nRolling Heat Map (0–100%):\nThe script measures where the close sits between the current Lowest Low and Highest High over the chosen Length (default 50).\n\nCandles use a two-stage gradient: aqua → yellow (0–50%), then yellow → red (50–100%). This makes “how stretched are we?” instantly visible.\nDynamic Extremes with Time Decay:\nWhen a new rolling High or Low is set, the script starts a faint horizontal trail at that price. Each bar that passes without a new extreme increases a counter; the line’s color gradually fades over time and fully disappears after ~100 bars, keeping the chart clean.\nPersistent-Extreme Tags (Reversal Hints):\nIf an extreme persists for 40 bars (i.e., price hasn’t reclaimed or surpassed it), the tool stamps the original extreme pivot with its recorded Heat% at the moment the extreme formed.\n• Upper extremes print a red % label (possible exhaustion/resistance context).\n• Lower extremes print an aqua % label (possible exhaustion/support context).\nBottom Heat Gauge (0–100% Scale):\nA compact, gradient bar renders at the bottom center showing the current Heat% with an arrow/label. ❄️ anchors the left (0%), 🔥 anchors the right (100%). The arrow adopts the same candle heat color for consistency.\n\nMinimal Inputs, Clear Theme:\n• Length (lookback window for H/L)\n• Heat Color set (Cold / Mid / Hot)\nThe defaults give a balanced, legible gradient on most assets/timeframes.Signal Hygiene by Design:\nThe meter doesn’t “call” reversals. Instead, it contextualizes price within its range and highlights the aging of extremes. That keeps it robust across regimes and assets, and ideal as a confluence layer with your existing triggers.\n\n⯁ HOW IT WORKS (UNDER THE HOOD)\nRange Model:\nH = Highest(High, Length), L = Lowest(Low, Length). Heat% = 100 × (Close − L) / (H − L).Extreme Tracking & Fade:\nWhen High == H, we record/update the current upper extreme; same for Low == L on the lower side. If the extreme doesn’t change on the next bar, a counter increments and the plotted line’s opacity shifts along a 0→100 fade scale (visual decay).40-Bar Persistence Labels:\nOn the bar after the extreme forms, the code stores the bar_index and the contemporaneous Heat%. If the extreme survives 40 bars, it places a % label at the original pivot price and index—flagging levels that were meaningfully “tested by time.”Unified Color Logic:\nBoth candles and the gauge use the same two-stage gradient (Cold→Mid, then Mid→Hot), so your eye reads “heat” consistently across all elements.\n\n⯁ USAGE\nTreat >80% as “hot” and <20% as “cold” context; combine with your trigger (e.g., structure, OB, div, breakouts) instead of acting on heat alone.Watch persistent extreme labels (40-bar marks) as reference zones for reaction or liquidity grabs.Use the fading extreme lines as a memory map of where price last stretched—levels that slowly matter less as they decay.Tighten Length for intraday sensitivity or increase it for swing stability.\n\n⯁ WHY IT’S UNIQUE\nRather than another oscillator, Price Heat Meter translates simple market geometry (rolling extremes) into a readable temperature layer with time-aware extremes and a synchronized gauge. You get a continuously updated sense of stretch, persistence, and potential reversal context—without clutter or overfitting.",
+  "script": {
+    "id": 3052817,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;ba282a316a5e441086d65236ced74e8c",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bba282a316a5e441086d65236ced74e8c/1",
+  "source_http_status": 200,
+  "source_sha256": "e93973159add9a7aa6fe8aa35e81e4c28ea27d0f59586cfb602a17f9a521617f",
+  "source_lines": 91,
+  "source_metadata": {
+    "created": "2025-08-25T12:04:22.179464Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;d3ff6bfac294488fad020be9b31c941b",
+      "originalScriptVersion": "0.707",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 2,
+        "plotcandle": 1
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Price Heat Meter [ChartPrime]",
+    "updated": "2025-08-25T12:04:22.179464Z",
+    "version": "1.0"
+  }
+}

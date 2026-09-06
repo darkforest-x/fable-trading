@@ -1,0 +1,160 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=6
+indicator("Inversion Fair Value Gaps (IFVG) [ChartPrime]", "Inversion FVG [ChartPrime]", overlay = true, max_boxes_count = 100, calc_bars_count = 2000, max_bars_back = 5000)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+string dispMode    = input.string("Both", "Display Mode", options = ["Bullish Only", "Bearish Only", "Both"], group = "Filters", tooltip = "Choose which types of Fair Value Gaps to display: Bullish Only, Bearish Only, or Both.")
+float  minSizePerc = input.float(0.1, "Min Candle Size (%)", minval = 0.01, step = 0.05, group = "Filters", tooltip = "The candle's range (High-Low) must be at least this percentage of the price to be considered a displacement move.")
+int    longevity   = input.int(500, "Max Zone Longevity (Bars)", minval = 10, group = "Filters", tooltip = "Unfilled zones are retired as small 5-bar historical markers after this many bars.")
+bool   showInv     = true
+bool   showOnlyInv = input.bool(false, "Show Only Inversion Zones", group = "Analysis", tooltip = "If enabled, displacement gaps will remain hidden until they are breached and flipped into an Inversion FVG (IFVG).")
+
+color bullColor    = input.color(color.new(#00ffb3, 0), "Bullish FVG Color", group = "Style", tooltip = "Background color for Bullish displacement zones.")
+color bearColor    = input.color(color.new(#ff0077, 0), "Bearish FVG Color", group = "Style", tooltip = "Background color for Bearish displacement zones.")
+color invBorder    = input.color(#ff9a3b, "Inversion Border", group = "Style", tooltip = "The border color used to highlight an Inverted FVG (IFVG).")
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+type FVGZone
+    box   boxId
+    float top
+    float bottom
+    int   startBar
+    int   direction // 1 for Bullish, -1 for Bearish
+    bool  isInverted = false
+    bool  isMitigated = false
+
+var FVGZone[] activeZones = array.new<FVGZone>()
+
+// Displacement Detection (Percentage based)
+float BearRange = low[2] - high
+float BullRange = low - high[2]
+
+float threshold   = (close[1] * (minSizePerc / 100))
+bool  isDisplacementBear = BearRange > threshold
+bool  isDisplacementBull = BullRange > threshold
+
+
+// Directional Logic
+bool bullishFVG = isDisplacementBull and low > high[2] and (dispMode == "Bullish Only" or dispMode == "Both")
+bool bearishFVG = isDisplacementBear and high < low[2] and (dispMode == "Bearish Only" or dispMode == "Both")
+
+// Overlap Cleanup Function
+checkOverlap(float nTop, float nBot) =>
+    if activeZones.size() > 0
+        for i = activeZones.size() - 1 to 0
+            FVGZone z = activeZones.get(i)
+            if not z.isMitigated
+                if (nTop <= z.top and nTop >= z.bottom) or (nBot >= z.bottom and nBot <= z.top)
+                    z.isMitigated := true
+                    z.boxId.delete()
+                    activeZones.remove(i)
+
+// Creation
+if barstate.isconfirmed
+    if bullishFVG
+        float zTop = low
+        float zBot = high[2]
+        checkOverlap(zTop, zBot)
+        // Initial color is NA if showOnlyInv is true
+        color initBullCol = showOnlyInv ? color.new(chart.bg_color, 100) : color.new(bullColor, 70)
+        box b = box.new(bar_index[1], zTop, bar_index + 5, zBot, border_color = na, bgcolor = initBullCol, text = str.tostring(volume[1], format.volume), text_size = size.tiny, text_color = chart.fg_color, text_halign = text.align_left)
+        activeZones.push(FVGZone.new(b, zTop, zBot, bar_index, 1, false, false))
+
+    if bearishFVG
+        float zTop = low[2]
+        float zBot = high
+        checkOverlap(zTop, zBot)
+        // Initial color is NA if showOnlyInv is true
+        color initBearCol = showOnlyInv ? color.new(chart.bg_color, 100): color.new(bearColor, 70)
+        box b = box.new(bar_index[1], zTop, bar_index + 5, zBot, border_color = na, bgcolor = color.new(initBearCol, 70), text = str.tostring(volume[1], format.volume), text_size = size.tiny, text_color = chart.fg_color, text_halign = text.align_left)
+        activeZones.push(FVGZone.new(b, zTop, zBot, bar_index, -1, false, false))
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+bool retestBull = false
+bool retestBear = false
+var retestIndxBear = 0
+var retestIndxBull = 0
+
+if activeZones.size() > 0
+    for i = activeZones.size() - 1 to 0
+        FVGZone z = activeZones.get(i)
+        
+        bool shouldKill = false
+        bool tooLong    = false
+
+        if not z.isMitigated
+            // 1. Longevity Check
+            if (bar_index - z.startBar) > longevity
+                tooLong := true
+            
+            // 2. Extend Zone
+            z.boxId.set_right(bar_index + 2)
+            
+            // 3. Inversion (IFVG) & Re-Breach Removal Logic
+            if showInv
+                // Bullish Case (Mint zone)
+                if z.direction == 1
+                    if not z.isInverted and close < z.bottom // Cross down: Support becomes Resistance
+                        z.isInverted := true
+                        z.boxId.set_bgcolor(color.new(bearColor, 90))
+                        z.boxId.set_border_color(invBorder)
+                        z.boxId.set_border_style(line.style_dotted)
+                    else if z.isInverted and close > z.top // Cross back up: Resistance failed, remove zone
+                        shouldKill := true
+
+                    // Retest Logic for Inverted Support (now Resistance)
+                    if z.isInverted and high[1] >= z.bottom and high <= z.bottom and barstate.isconfirmed
+                        
+                        if bar_index - retestIndxBear > 5
+                            retestBear := true
+
+                        retestIndxBear := bar_index   
+                
+                // Bearish Case (Rose zone)
+                else if z.direction == -1
+                    if not z.isInverted and close > z.top // Cross up: Resistance becomes Support
+                        z.isInverted := true
+                        z.boxId.set_bgcolor(color.new(bullColor, 90))
+                        z.boxId.set_border_color(invBorder)
+                        z.boxId.set_border_style(line.style_dotted)
+                    else if z.isInverted and close < z.bottom // Cross back down: Support failed, remove zone
+                        shouldKill := true
+
+                    // Retest Logic for Inverted Resistance (now Support)
+                    if z.isInverted and low[1] <= z.top and low >= z.top and barstate.isconfirmed
+
+                        if bar_index - retestIndxBull > 5
+                            retestBull := true
+                     
+                        retestIndxBull := bar_index
+
+
+            // Finalize retired zones
+            if shouldKill
+                z.isMitigated := true
+                z.boxId.delete()
+            if tooLong
+                z.boxId.set_right(z.boxId.get_left() + 5)
+
+
+         
+
+// Retest Signals (Inverted FVG Retests)
+plotshape(retestBull, "Support IFVG Retest", shape.triangleup, location.belowbar, bullColor, size = size.tiny)
+plotshape(retestBear, "Resistance IFVG Retest", shape.triangledown, location.abovebar, bearColor, size = size.tiny)
+
+// --------------------------------------------------------------------------------------------------------------------}

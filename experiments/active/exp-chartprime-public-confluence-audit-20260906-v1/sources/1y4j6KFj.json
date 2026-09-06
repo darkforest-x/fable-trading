@@ -1,0 +1,48 @@
+{
+  "id": "1y4j6KFj",
+  "title": "Volume Liquidity Trend [ChartPrime]",
+  "url": "https://www.tradingview.com/script/1y4j6KFj-Volume-Liquidity-Trend-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:34:53.454989+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/1y4j6KFj-Volume-Liquidity-Trend-ChartPrime/",
+  "created_at": "2026-08-10T12:53:09.735632+00:00",
+  "updated_at": null,
+  "description": "Volume Liquidity Trend [ChartPrime]\n\n🔶 OVERVIEW\n\nStandard trend indicators track price direction but completely ignore the volume profile structural footprints left behind during the trend's development. The Volume Liquidity Trend [ChartPrime] indicator solves this by combining advanced mathematical smoothing with a dynamic, trend-isolated Volume Node Mapping Engine. \n\nThis script filters price streams through a stabilization algorithm to establish a core trend, tracks the exact duration of that trend lifecycle, and continuously projects significant historical volume anchors into the future as active liquidity levels until price completely invalidates or \"mitigates\" them.\n\n🔶 HOW IT WORKS\n\nThe indicator executes its calculations through a multi-tiered pipeline:\n\n Kalman-Based Trend Filter: The indicator filters a user-defined price source using an adaptive stabilization equation. It calculates volatility bands relative to this smoothed average (using a 2 x ATR boundary). A close above the upper band establishes a Bullish Trend, while a close below the lower band triggers a Bearish Trend. Trend-Isolated Volume Mapping: When a trend changes, a clean data sweep resets the history array. The script tracks every single candle inside the active trend and identifies the absolute highest transaction point (the 100% Peak Volume Anchor). Normalized Liquidity Vectors: Every candle within the trend has its volume calculated relative to that peak volume anchor (0% to 100%). If a historical level passes your volume cutoff threshold, the script maps a horizontal liquidity line from that candle's average price (HLC3) out into the future margin space. Automated Mitigation Tracking: The script continuously tests these horizontal volume tracks against historical price action. If subsequent candle bodies cross through an established volume line, that line is marked as \"mitigated\" (crossed) and automatically stripped from the screen to keep your chart uncluttered.\n\n🔶 KEY FEATURES\n\n Adaptive Vector Widths & Gradients: Unmitigated volume lines feature a dynamic visual profile. Lines are automatically thicker and more heavily saturated based on their relative volume strength. Furthermore, lines dynamically shift color depending on whether price is trading above (Bullish Support) or below (Bearish Resistance) the volume node. Anomalous 100% Peak Tracker: Includes a specialized alert line that forces the historical 100% transaction anchor to remain visible as a bright dashed line only after price has broken through it, signaling a breached institutional base. Real-Time Trend Analytics Panel: A sleek UI dashboard positioned at the top right tracking:\n    • Current Trend Status: Active market direction matching the volatility bands.\n    • Trend Duration: Exact bar runtime age since the initial structural breakout.\n    • 100% Vol Level: The exact price coordinate where the heaviest volume anomaly occurred during the current sequence.\n\n🔶 TRADING APPLICATIONS\n\n High-Volume Pullback Entries: During a strong trend, look for pullback entries directly into unmitigated lines that have high volume percentages (75% - 95%). These thick vector nodes represent massive resting buy/sell block clusters where institutions are likely to defend their positions. Breakout Confirmation Diamonds: The trend reversal points are highlighted on your chart with sharp diamond markers. A breakout accompanied by an immediate generation of high-percentage liquidity trails suggests an institutional backed expansion. Support & Resistance Confluence Trim: When multiple volume lines cluster closely together at a specific price zone, it builds a structural wall of institutional liquidity, marking a prime zone for target take-profits or reversal entries.\n\n🔶 SETTINGS\n\n Stabilization Coefficient: Controls the responsiveness of the underlying filtering mechanism. Lower values yield exceptionally smooth lines that are highly tolerant of short-term volatility spikes. Volume Cutoff Threshold: The sensitivity slider for plotting liquidity vectors (0.0 to 1.0). A higher setting like 0.50 filters out quiet trading periods and only draws lines for bars with significant volume footprints. Extend Lines Into Future: Determines the number of bars to project active unmitigated volume tracks into the right-hand margin blank space.\n\n🔶 CONCLUSION\n\nThe Volume Liquidity Trend [ChartPrime] indicator offers an institutional perspective by integrating volume data directly into a trailing trend model. By isolating volume profile nodes specifically to the lifetime of the current trend and introducing adaptive coloring based on price positioning, it ensures your support and resistance targets perfectly match real-time market participant behavior.",
+  "script": {
+    "id": 6812410,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;49f360a1bee245c89987f45f2744f280",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B49f360a1bee245c89987f45f2744f280/1",
+  "source_http_status": 200,
+  "source_sha256": "49dbf84ad60e9e62f8d114b116fe34ffc216e8f6e4a120ec5d735c841a666571",
+  "source_lines": 221,
+  "source_metadata": {
+    "created": "2026-08-10T12:53:07.477574Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;048a1206f1aa420ea678410991accdba",
+      "originalScriptVersion": "1.0",
+      "sourceInputsCount": 1,
+      "stats": {
+        "plot": 2,
+        "plotshape": 2
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Volume Liquidity Trend [ChartPrime]",
+    "updated": "2026-08-10T12:53:07.477574Z",
+    "version": "1.0"
+  }
+}

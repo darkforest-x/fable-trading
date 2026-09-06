@@ -1,0 +1,197 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=6
+indicator("Volume Whale Zones [ChartPrime]", overlay = true, calc_bars_count = 5000)
+
+// --------------------------------------------------------------------------------------------------------------------
+// 📌 INPUTS
+// --------------------------------------------------------------------------------------------------------------------
+lookBack    = input.int(200, "Lookback", minval = 10, inline = "lookB")
+lookBackCol = input.color(color.rgb(255, 123, 0), "", inline = "lookB")
+Zone        = input.bool(true, "Hot Zone", inline = "hz")
+HZCol       = input.color(color.red, "", inline = "hz")
+
+rows        = 50
+smoothLen   = 10
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// 📌 RANGE ENGINE 
+// --------------------------------------------------------------------------------------------------------------------
+
+var float rangeHigh = na
+var float rangeLow  = na
+
+
+clamp(x, lo, hi) =>
+    math.min(math.max(x, lo), hi)
+
+newHigh = ta.highest(high, lookBack)
+newLow  = ta.lowest(low, lookBack)
+
+if na(rangeHigh)
+    rangeHigh := newHigh
+    rangeLow  := newLow
+
+rangeExpanded = newHigh > rangeHigh or newLow < rangeLow
+
+if rangeExpanded
+    rangeHigh := newHigh
+    rangeLow  := newLow
+
+priceStep = (rangeHigh - rangeLow) / rows
+
+// --------------------------------------------------------------------------------------------------------------------
+// 📌 VOLUME PROFILE
+// --------------------------------------------------------------------------------------------------------------------
+
+var float[] volumeProfile = array.new_float()
+array.clear(volumeProfile)
+
+for i = 0 to rows - 1
+    array.push(volumeProfile, 0.0)
+
+for i = 0 to lookBack - 1
+    idx = math.floor((close[i] - rangeLow) / priceStep)
+    idx := math.max(math.min(idx, rows - 1), 0)
+    array.set(volumeProfile, idx, array.get(volumeProfile, idx) + volume[i])
+
+// --------------------------------------------------------------------------------------------------------------------
+// 📌 POC CALCULATION
+// --------------------------------------------------------------------------------------------------------------------
+
+maxVol = 0.0
+pocIdx = 0
+
+for i = 0 to rows - 1
+    binVol = array.get(volumeProfile, i)
+    if binVol > maxVol
+        maxVol := binVol
+        pocIdx := i
+
+rawPOC = rangeLow + priceStep * (pocIdx + 0.5)
+
+// --------------------------------------------------------------------------------------------------------------------
+// 📌 HOT ZONE ENGINE (STATE BASED)
+// --------------------------------------------------------------------------------------------------------------------
+
+ATR = ta.atr(200)
+
+// ---- LEVEL 0 (Base Structural Zone)
+
+var float hotZone0 = na
+
+if rangeExpanded
+    hotZone0 := rawPOC
+else
+    hotZone0 := nz(hotZone0[1])
+
+// volatility clamp
+maxJump = ATR * 2
+delta   = rawPOC - hotZone0
+delta   := clamp(delta, -maxJump, maxJump)
+
+hotZone0 += delta
+hotZone0 := ta.ema(hotZone0, smoothLen)
+
+// ---- LEVEL 1 (Refined Zone)
+
+var float hotZone1 = na
+
+if na(hotZone1)
+    hotZone1 := hotZone0
+
+band1 = ATR * 2
+if math.abs(hotZone0 - hotZone1) > band1
+    hotZone1 := hotZone0
+else
+    hotZone1 := nz(hotZone1[1])
+
+// ---- LEVEL 2 (Final Stable Zone)
+
+var float hotZone2 = na
+
+if na(hotZone2)
+    hotZone2 := hotZone1
+
+band2 = ATR * 2
+if math.abs(hotZone1 - hotZone2) > band2
+    hotZone2 := hotZone1
+else
+    hotZone2 := nz(hotZone2[1])
+
+// --------------------------------------------------------------------------------------------------------------------
+// 📌 PLOT
+// --------------------------------------------------------------------------------------------------------------------
+
+dist = ta.highest(ta.highest(ATR, 500), 500)
+
+hotZoneUp = hotZone2 + dist
+hotZoneDn = hotZone2 - dist
+hChange   = hotZone2 != hotZone2[1]
+
+hup = plot(hotZoneUp, "Hot Zone", linewidth=1, style=plot.style_stepline, show_last = 4500, display = display.none, editable = false)
+ph  = plot(hotZone2, "Hot Line", color=color.new(HZCol, hChange ? 100 : 50), linewidth=8, style=plot.style_stepline, show_last = 4500)
+hdn = plot(hotZoneDn, "Hot Zone", linewidth=1, style=plot.style_stepline, show_last = 4500, display = display.none, editable = false)
+
+plot(hotZone2, "LookBack Hot Line", color = lookBackCol, linewidth=8, style=plot.style_stepline, show_last = lookBack)
+fill(ph, hup, hotZoneUp, hotZone2, color.new(HZCol, hChange or not Zone ? 100 : 50), color.new(HZCol, 100))
+fill(ph, hdn, hotZone2, hotZoneDn, color.new(HZCol, 100), color.new(HZCol, hChange or not Zone ? 100 : 50))
+
+
+deviation = (close - hotZone2) / ATR
+
+// Clamp extreme outliers
+devClamped = clamp(deviation, -4.0, 4.0)
+
+// --------------------------------------------------------------------------------------------------------------------
+// 📌 HOT ZONE OSCILLATOR TABLE 
+// --------------------------------------------------------------------------------------------------------------------
+
+cells       = 21       
+centerIndex = math.floor(cells / 2)
+
+var table hzTable = table.new(position.bottom_center, cells, 3, frame_width = 1, frame_color = color.gray)
+
+if barstate.islast
+    // Convert deviation to cell index
+    scale = centerIndex / 4.0      // 4 = your clamp max
+
+    devIndex = centerIndex + math.round(devClamped * scale)
+
+    for col = 0 to cells - 1
+        distFromCenter = math.abs(col - centerIndex)
+
+        // smoother gradient logic
+        intensity = distFromCenter / centerIndex
+
+        if distFromCenter == 0
+            table.cell(
+             hzTable,
+             col,
+             0,
+             "Hot Zone: " + str.tostring(volumeProfile.sum(), format.volume) ,
+             bgcolor = color.rgb(238, 30, 30, 100)
+             , text_color = chart.fg_color
+             )
+
+        colColor =
+             color.new(
+                 intensity < 0.5 ? lookBackCol : color.teal,
+                 int(intensity * 80)
+             )
+
+      
+        active = col == devIndex
+
+        table.cell(
+             hzTable,
+             col,
+             1,
+             active ? "◆" : "",
+             text_color = color.rgb(255, 0, 0),
+             bgcolor = colColor, 
+             height = 1
+         )
+

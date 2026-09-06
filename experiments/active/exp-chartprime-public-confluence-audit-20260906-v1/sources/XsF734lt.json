@@ -1,0 +1,44 @@
+{
+  "id": "XsF734lt",
+  "title": "Forward-Projecting Opportunity Cone [ChartPrime]",
+  "url": "https://www.tradingview.com/script/XsF734lt-Forward-Projecting-Opportunity-Cone-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:08.971461+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/XsF734lt-Forward-Projecting-Opportunity-Cone-ChartPrime/",
+  "created_at": "2026-04-09T11:48:31.606783+00:00",
+  "updated_at": null,
+  "description": "🔶 OVERVIEW\nIn a market defined by uncertainty, the Forward-Projecting Opportunity Cone provides a mathematically grounded roadmap for price action. Instead of predicting a single direction, this tool uses historical volatility and standard deviation to project a \"cone\" of high-probability price boundaries into the future. \nBy calculating the Expected Move based on annualized volatility, the indicator visualizes where price is statistically likely to remain over a specified window, helping traders identify trend exhaustion, mean reversion opportunities, and low-probability \"tail events.\"\n\n🔶 THE MATHEMATICS OF PROBABILITY\nThe indicator operates on the principle of Standard Deviation ( σ (sigma)) applied to logarithmic returns. It calculates the annualized volatility of the asset and projects it forward using the \"Square Root of Time\" rule:\n\n\n\n 1σ Zone (68.2% Probability): The \"Normal\" range. Most price action occurs here. 2σ Zone (95.4% Probability): The \"Exhaustion\" range. Reaching these levels often suggests a significant move is underway or nearing a limit. 3σ Zone (99.7% Probability): The \"Extreme\" range. Price hitting the 3rd sigma is a rare event often followed by sharp mean reversion or \"Black Swan\" momentum.\n\n\n🔶 THE COMMAND CENTER: DYNAMIC DASHBOARD\nThe integrated dashboard is designed to act as a real-time risk-assessment engine, providing deep insights into the asset's current \"volatility health\" and the structural parameters of the projection.\n\n\n\n Annualized Volatility: Displays the raw percentage of the asset's movement potential over a year based on the current timeframe. Volatility Percentile: Contextualizes current volatility by ranking it against the last 252 bars. It tells you if the market is currently \"quiet\" or \"explosive\" compared to its own history. Volatility Regime: Automatically classifies the market into LOW (Teal), NORMAL (Violet), or HIGH (Amber) regimes, allowing you to adjust your strategy based on the current environment. Sigma Distance & Direction: Tracks exactly how many standard deviations price has moved from the anchor point and whether it is trending above or below the mean. Expected % Moves: Provides precise mathematical targets for 1 σ (sigma), 2 σ (sigma), and 3 σ (sigma) moves in percentage terms for your specific projection window. Anchor Price: Displays the exact price level where the statistical model begins. This allows for pinpoint accuracy when measuring moves from a specific Pivot High or Low. Projection Window: Shows the duration (in bars) that the current cone extends into the future, defining the specific time horizon for the probability model.\n\n🔶 CORE VISUAL INDICATIONS\n The Pivot-Anchor \"Cone Lock\": Unlike standard moving bands, this can anchor to a fixed structural point (Pivot High/Low). This allows you to measure the probability of a specific trend's lifecycle from its inception. Real-Time Zone Tracking: The indicator provides active labels like \"Inside 1 σ (sigma)\" for stable trends or \"Beyond 3 σ (sigma) ✦\" to warn of extreme volatility blowouts. Gradient Probability Mapping: The cone utilizes a fading visual engine. As the projection moves further into the future, the colors soften, representing the natural increase in market \"entropy\" and uncertainty over time.\n\n🔶 TRADING APPLICATIONS\n Mean Reversion: When price pierces the 3 σ (sigma) (Amber) zone, it is in a territory that occurs less than 1% of the time. This is a high-conviction signal to look for reversal setups.\n Trend Stability: A healthy, institutional-led trend typically grinds along the 1 σ (sigma) (Teal) boundary. If price remains here, the trend is sustainable. Mathematical Take-Profits: Use the 1 σ (sigma) and 2 σ (sigma) levels at the tip of the cone to set take-profit targets that are statistically realistic for the current market state.\n\n🔶 CONCLUSION\nThe Forward-Projecting Opportunity Cone [ChartPrime] is more than a volatility band; it is a structural probability engine. By anchoring math to price action and providing a comprehensive dashboard of risk metrics, it helps traders remain objective, avoid chasing extremes, and understand exactly where \"normal\" ends and \"opportunity\" begins.",
+  "script": {
+    "id": 5107542,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;3357ef70b4c34d95bce31077676fd332",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B3357ef70b4c34d95bce31077676fd332/1",
+  "source_http_status": 200,
+  "source_sha256": "be9240f3e1f6c4b6a6f4613599c8006240c085411faff147508911a4acbfcec0",
+  "source_lines": 358,
+  "source_metadata": {
+    "created": "2026-04-09T11:48:27.955145Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;8282ac9345614c7487e4a864ccd0a698",
+      "originalScriptVersion": "2.0",
+      "sourceInputsCount": 0
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Forward-Projecting Opportunity Cone [ChartPrime]",
+    "updated": "2026-04-09T11:48:27.955145Z",
+    "version": "1.0"
+  }
+}

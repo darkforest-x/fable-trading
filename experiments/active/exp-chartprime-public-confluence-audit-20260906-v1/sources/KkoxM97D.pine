@@ -1,0 +1,173 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("Multi Asset Histogram [ChartPrime]", overlay = false, max_labels_count = 45, max_lines_count = 55, max_bars_back = 500)
+
+// ---------------------------------------------------------------------------------------------------------------------}
+// 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// ---------------------------------------------------------------------------------------------------------------------{
+int length          = input.int(50, "Length", group = "Settings", 
+                     tooltip = "the value of number bars back is greater or less than the current value of the source")
+series float src    = input.source(hl2, 'Source', group = "Settings")
+
+// Symbols
+string sym1   = input.symbol("BTCUSD", "Symbol 1", group = "Symbols Input")
+string sym2   = input.symbol("ETHUSD", "Symbol 2", group = "Symbols Input")
+string sym3   = input.symbol("BNBUSD", "Symbol 3", group = "Symbols Input")
+string sym4   = input.symbol("SOLUSD", "Symbol 4", group = "Symbols Input")
+string sym5   = input.symbol("XRPUSD", "Symbol 5", group = "Symbols Input")
+string sym6   = input.symbol("DOGEUSD","Symbol 6", group = "Symbols Input")
+string sym7   = input.symbol("ADAUSD", "Symbol 7", group = "Symbols Input")
+string sym8   = input.symbol("AVAXUSD","Symbol 8", group = "Symbols Input")
+string sym9   = input.symbol("DOTUSD", "Symbol 9", group = "Symbols Input")
+string sym10  = input.symbol("LINKUSD","Symbol 10",group = "Symbols Input")
+
+
+// ---------------------------------------------------------------------------------------------------------------------}
+// 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// ---------------------------------------------------------------------------------------------------------------------{
+// Score Function
+trscore(src) =>
+    total = 0.0
+    for i = 1 to length 
+        total += (src >= nz(src[i]) ? 1 : -1)
+    total
+
+
+series float ticker1 = request.security(sym1, "", trscore(src))
+series float ticker2 = request.security(sym2, "", trscore(src))
+series float ticker3 = request.security(sym3, "", trscore(src))
+series float ticker4 = request.security(sym4, "", trscore(src))
+series float ticker5 = request.security(sym5, "", trscore(src))
+series float ticker6 = request.security(sym6, "", trscore(src))
+series float ticker7 = request.security(sym7, "", trscore(src))
+series float ticker8 = request.security(sym8, "", trscore(src))
+series float ticker9 = request.security(sym9, "", trscore(src))
+series float ticker10= request.security(sym10,"", trscore(src))
+
+// Declare the arrays
+valArray   = array.new<float>()
+symArray   = array.new<string>()
+
+// Push values into array
+valArray.push(ticker1),   sym_1 = str.split(sym1, ":"),  symArray.push(sym_1.get(1))
+valArray.push(ticker2),   sym_2 = str.split(sym2, ":"),  symArray.push(sym_2.get(1)) 
+valArray.push(ticker3),   sym_3 = str.split(sym3, ":"),  symArray.push(sym_3.get(1))
+valArray.push(ticker4),   sym_4 = str.split(sym4, ":"),  symArray.push(sym_4.get(1))
+valArray.push(ticker5),   sym_5 = str.split(sym5, ":"),  symArray.push(sym_5.get(1))
+valArray.push(ticker6),   sym_6 = str.split(sym6, ":"),  symArray.push(sym_6.get(1))
+valArray.push(ticker7),   sym_7 = str.split(sym7, ":"),  symArray.push(sym_7.get(1))
+valArray.push(ticker8),   sym_8 = str.split(sym8, ":"),  symArray.push(sym_8.get(1))
+valArray.push(ticker9),   sym_9 = str.split(sym9, ":"),  symArray.push(sym_9.get(1))
+valArray.push(ticker10),  sym_10= str.split(sym10,":"),  symArray.push(sym_10.get(1))
+
+// ---------------------------------------------------------------------------------------------------------------------}
+// 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// ---------------------------------------------------------------------------------------------------------------------{
+// Histogram Visualization
+if barstate.islast
+    for i = 0 to  valArray.size() - 1
+
+        val   = math.round(valArray.get(i))
+        mean  = math.round(valArray.avg())*8
+        x     = bar_index+val*8
+        y     = i*10
+        index = symArray.get(valArray.indexof(valArray.max()) < 0 ? 0 : valArray.indexof(valArray.max()))
+
+        c_p1  = chart.point.from_index(x, y)
+        c_p2  = chart.point.from_index(bar_index, y)
+
+        color      = color.from_gradient(val, -40, 40, color.red, color.aqua)
+        color_mean = color.from_gradient(valArray.avg(), -40, 40, #ff525280, #00bbd480)
+
+        // Histogram lines
+        line.new(c_p1, c_p2, width = 12, color = color.new(color, 50))
+        line.new(c_p1, c_p2, width = 4, color = color)
+
+        // Scale Lines
+        // Zero line
+        line.new( first_point = chart.point.from_index(bar_index, 95), 
+                 second_point = chart.point.from_index(bar_index, -5), 
+                 width = 1, 
+                 color = #787b8680)
+        // Right Scale
+        line.new( first_point = chart.point.from_index(bar_index+i*45, 95), 
+                 second_point = chart.point.from_index(bar_index+i*45, -5),
+                 width = i*4, 
+                 color = color.new(color.aqua, 100-i*5) 
+                 )
+        // Left Scale
+        line.new( first_point = chart.point.from_index(bar_index-i*45, 95),
+                 second_point = chart.point.from_index(bar_index-i*45, -5), 
+                 width = i*4, 
+                 color = color.new(color.red, 100-i*5) 
+                  )
+        // Mean Line
+        line.new( first_point = chart.point.from_index(bar_index+mean, 95), 
+                 second_point = chart.point.from_index(bar_index+mean, -5), 
+                 width = 1, 
+                 color = color_mean, 
+                 style = line.style_dashed
+                 )
+
+        // Values Label
+        label.new(x = x,
+                  y = y, 
+                  style = label.style_circle, 
+                  color = color, 
+                  text = str.tostring(val),
+                  textcolor = val > 0 ? color.aqua : color.red, 
+                  size = size.small
+                  )
+
+        label.new(x = x, 
+                  y = y, 
+                  text = symArray.get(i), 
+                  style = valArray.get(i) > 0 ? label.style_label_left : label.style_label_right, 
+                  color = color(na), 
+                  textcolor = color.white
+                  )
+
+        // Mean Value
+        label.new(x = bar_index+mean, 
+                  y = -5, 
+                  text = str.tostring(math.round(valArray.avg())), 
+                  style = label.style_label_up, 
+                  color = color(na), 
+                  textcolor = color.from_gradient(valArray.avg(), -40, 40, color.red, color.aqua)
+                  )
+        // Zero Line Value
+        label.new(x = bar_index, 
+                  y = -5, 
+                  text = str.tostring(0), 
+                  style = label.style_label_up, 
+                  color = color(na), 
+                  textcolor = color.gray
+                  )
+
+        //  Title Text
+        label.new(x = bar_index, 
+                  y = 95, 
+                  text = "𝖬𝗎𝗅𝗍𝗂 𝖠𝗌𝗌𝖾𝗍 𝖧𝗂𝗌𝗍𝗈𝗀𝗋𝖺𝗆", 
+                  style = label.style_label_down, 
+                  color = color(na), 
+                  textcolor = chart.fg_color,
+                  size = size.large
+                  )
+// Table Metrics
+var tbl = table.new(position.middle_right, 10, 10)
+
+index = 0
+index := valArray.indexof(valArray.max()) < 0 ? 0 : valArray.indexof(valArray.max())
+
+tbl.cell(column = 0, row = 0, text = "Dominant Asset: ", 
+                              text_color = chart.fg_color)
+tbl.cell(column = 1, row = 0, text =  str.tostring(symArray.get(index)), 
+                              text_color = color.aqua)
+tbl.cell(column = 0, row = 1, text =  "Mean Of All: ", 
+                              text_color = chart.fg_color) 
+tbl.cell(column = 1, row = 1, text =  str.tostring(math.round(valArray.avg())), 
+                 text_color = color.from_gradient(valArray.avg(), -40, 40, color.red, color.aqua))
+
+// ---------------------------------------------------------------------------------------------------------------------}

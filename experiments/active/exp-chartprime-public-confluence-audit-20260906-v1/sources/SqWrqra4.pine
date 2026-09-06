@@ -1,0 +1,335 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("Supertrend Targets [ChartPrime]", explicit_plot_zorder = true, overlay = true)
+
+source  = input.string("HLCC4", "Source", ["Smooth", "Close", "Open", "High", "Low", "Hl2", "HLC3", "OHLC4", "HLCC4"])
+stop    = input.bool(true, "Show Trailing Stop")
+show    = input.int(-4, "Levels", minval = -5, maxval = 5)
+scale   = input.int(80, "Scale", minval = 1, maxval = 100) / 100
+window  = input.int(0, "Window Length", minval = 0)
+unique  = input.bool(false, "Unique", "Make sure every data point is unique.")
+mult    = input.float(3, "Multiplier", minval = 0)
+atr     = input.int(10, "ATR Length", minval = 1)
+average = input.string("Disabled", "Custom Level", ["Average", "Average + STDEV", "Percentile", "Disabled"]) 
+rank    = input.int(75, "Percent Rank", minval = 0, maxval = 100)
+enable  = input.bool(false, "Enable Table")
+style   = input.string("Bottom Right", "Position", 
+ ["Bottom Left","Bottom Middle","Bottom Right","Middle Left","Middle Center","Middle Right",
+ "Top Left","Top Middle","Top Right"])
+
+type trend
+    float value
+    bool state
+
+type risk
+    float gain
+    float drawdown
+    float average_gain
+    float average_drawdown
+    float gain_stdev
+    float drawdown_stdev
+    float entry
+
+location() => 
+    switch style
+        "Bottom Left" => position.bottom_left
+        "Bottom Middle" => position.bottom_center
+        "Bottom Right" => position.bottom_right
+        "Middle Left" => position.middle_left
+        "Middle Center" => position.middle_center
+        "Middle Right" => position.middle_right
+        "Top Left" => position.top_left
+        "Top Middle" => position.top_center
+        "Top Right" => position.top_right
+
+percent(current, previous)=>
+    (current - previous)/previous
+
+add_percent(source, percent)=>
+    source * (1 + percent)
+
+logistic(source, bandwidth) =>
+    1 / (math.exp(source / bandwidth) + 2 + math.exp(-source / bandwidth))
+
+logistic_kernel(source, size = 256, h = 4, r = 0.5) =>
+    float weight = 0
+    float weight_sum = 0
+    for i = 0 to size
+        src = source[i]
+        k = math.pow(i, 2) / (math.pow(h, 2) * r)
+        w = logistic(k, r)
+        weight := weight + src * w
+        weight_sum := weight_sum + w
+    weight / weight_sum
+
+sinc(source, bandwidth) =>
+    if source == 0
+        1
+    else
+        math.sin(math.pi * source / bandwidth) / (math.pi * source / bandwidth)  
+
+sinc_kernel(source, size = 64, h = 4, r = 0.5) =>
+    float weight = 0
+    float weight_sum = 0
+    for i = 0 to size
+        src = source[i]
+        k = math.pow(i, 2) / (math.pow(h, 2) * r)
+        w = sinc(k, r)
+        weight := weight + src * w
+        weight_sum := weight_sum + w
+    weight / weight_sum
+
+supertrend(src, factor, atrPeriod) =>
+    atr = ta.atr(atrPeriod)
+    upper_band = src + factor * atr
+    lower_band = src - factor * atr
+    prev_lower_band = nz(lower_band[1])
+    prev_upper_band = nz(upper_band[1])
+
+    lower_band := lower_band > prev_lower_band or hl2[1] < prev_lower_band ? lower_band : prev_lower_band
+    upper_band := upper_band < prev_upper_band or hl2[1] > prev_upper_band ? upper_band : prev_upper_band
+    bool direction = na
+    float super_trend = na
+    prev_super_trend = super_trend[1]
+    if na(atr[1])
+        direction := true
+    else if prev_super_trend == prev_upper_band
+        direction := hl2 > upper_band ? false : true
+    else
+        direction := hl2 < lower_band ? true : false
+    super_trend := not direction ? lower_band : upper_band
+
+    trend.new(super_trend, direction)
+
+method flag(trend self, bool direction)=>
+    bullish = self.state != self.state[1] and not self.state
+    bearish = self.state != self.state[1] and  self.state
+
+    switch direction
+        true  => bullish
+        false => bearish
+
+method target_percent(trend self, int window, int rank)=>
+    var bullish_target = array.new<float>()
+    var bearish_target = array.new<float>()
+    var bullish_drawdown = array.new<float>()
+    var bearish_drawdown = array.new<float>()
+    var high_prices = array.new<float>()
+    var low_prices  = array.new<float>()
+
+    array.push(high_prices, high)
+    array.push(low_prices, low)
+
+    var float entry = close
+
+    if self.flag(true)
+        //if close < entry
+        percent_target = percent(array.min(low_prices), entry)
+        percent_drawdown = percent(array.max(high_prices), entry)
+        if not array.includes(bearish_target, percent_target) and unique
+            array.unshift(bearish_target, percent_target)
+        else
+            array.unshift(bearish_target, percent_target)
+
+        if not array.includes(bearish_drawdown, percent_drawdown) and unique
+            array.unshift(bearish_drawdown, percent_drawdown)
+        else
+            array.unshift(bearish_drawdown, percent_drawdown)
+        array.clear(low_prices)
+        array.clear(high_prices)
+        entry := close
+
+    if self.flag(false)
+        //if close > entry
+        percent_target = percent(array.max(high_prices), entry)
+        percent_drawdown = percent(array.min(low_prices), entry)
+        if not array.includes(bullish_target, percent_target)
+            array.unshift(bullish_target, percent_target)
+        if not array.includes(bullish_drawdown, percent_drawdown)
+            array.unshift(bullish_drawdown, percent_drawdown)
+        array.clear(high_prices)
+        array.clear(low_prices)
+        entry := close
+
+    if array.size(bullish_target) > window and window > 0
+        array.pop(bullish_target)
+        array.pop(bullish_drawdown)
+
+    if array.size(bearish_target) > window and window > 0
+        array.pop(bearish_target)
+        array.pop(bearish_drawdown)
+
+    if self.state
+        risk.new(
+         add_percent(entry, array.percentile_linear_interpolation(bearish_target, 100 - rank)), 
+         add_percent(entry, array.percentile_linear_interpolation(bearish_drawdown, rank)),
+         add_percent(entry, array.avg(bearish_target)),
+         add_percent(entry, array.avg(bearish_drawdown)),
+         array.stdev(bearish_target),
+         array.stdev(bearish_drawdown),
+         entry)
+    else
+        risk.new(
+         add_percent(entry, array.percentile_linear_interpolation(bullish_target, rank)), 
+         add_percent(entry, array.percentile_linear_interpolation(bullish_drawdown, 100 - rank)),
+         add_percent(entry, array.avg(bullish_target)),
+         add_percent(entry, array.avg(bullish_drawdown)),
+         array.stdev(bullish_target),
+         array.stdev(bullish_drawdown),
+         entry)
+
+method value_percent(trend self)=>
+    var float entry = close
+    if self.flag(true)
+        entry := close
+    if self.flag(false)
+        entry := close
+    percent(close, entry)
+
+avg = logistic_kernel(sinc_kernel(hlc3, 16, 1.5, 1.5), 16, 1.5, 1.5)
+
+source_switch = switch source
+    "Smooth" => avg
+    "Close"  => close
+    "Open"   => open
+    "High"   => high
+    "Low"    => low
+    "Hl2"    => hl2
+    "HLC3"   => hlc3
+    "OHLC4"  => ohlc4
+    "HLCC4"  => hlcc4
+    
+super_trend = supertrend(source_switch, mult, atr)
+
+custom_rank = super_trend.target_percent(window, rank)
+
+target_25  = super_trend.target_percent(window, 25 * scale)
+target_50  = super_trend.target_percent(window, 50 * scale)
+target_75  = super_trend.target_percent(window, 75 * scale)
+target_90  = super_trend.target_percent(window, 90 * scale)
+target_100 = super_trend.target_percent(window, 100 * scale)
+
+custom_gain = str.contains(average, "Average") ? target_50.average_gain : custom_rank.gain
+
+custom_drawdown = str.contains(average, "Average") ? target_50.average_drawdown : custom_rank.drawdown
+
+signal = super_trend.value_percent()
+
+colour = super_trend.state ? (signal > 0 ? color.red : color.green) : (signal > 0 ? color.green : color.red)
+
+target_50_average_gain           = plot(average != "Disabled" ? custom_gain : na, "Average Gain", color.new(color.blue, 25), 3, plot.style_steplinebr)
+target_50_average_gain_stdev     = plot(average == "Average + STDEV" ? add_percent(custom_gain, super_trend.state ? -target_50.gain_stdev : target_50.gain_stdev) : na, "STDEV Gains", color.new(color.blue, 70), 2, plot.style_steplinebr)
+target_50_average_drawdown       = plot(average != "Disabled" ? custom_drawdown : na, "Average Drawdown", color.new(color.purple, 25), 3, plot.style_steplinebr)
+target_50_average_drawdown_stdev = plot(average == "Average + STDEV" ? add_percent(custom_drawdown, super_trend.state ? target_50.drawdown_stdev : -target_50.drawdown_stdev) : na, "STDEV Drawdown", color.new(color.purple, 70), 2, plot.style_steplinebr)
+target_100_gain                  = plot(show >= 5 and show > 0 or show <= -1 ? target_100.gain : na, "Gain 100th", color.new(color.green, 70), 2, plot.style_steplinebr)
+target_100_drawdown              = plot(show >= 5 and show > 0 or show <= -1 ? target_100.drawdown : na, "Drawdown 100th", color.new(color.red, 70), 2, plot.style_steplinebr)
+target_90_gain                   = plot(show >= 4 and show > 0 or show <= -2 ? target_90.gain : na, "Gain 90th", color.new(color.green, 60), 2, plot.style_steplinebr)
+target_90_drawdown               = plot(show >= 4 and show > 0 or show <= -2 ? target_90.drawdown : na, "Drawdown 90th", color.new(color.red, 60), 2, plot.style_steplinebr)
+target_75_drawdown               = plot(show >= 3 and show > 0 or show <= -3 ? target_75.drawdown : na, "Drawdown 75th", color.new(color.red, 50), 2, plot.style_steplinebr)
+target_75_gain                   = plot(show >= 3 and show > 0 or show <= -3 ? target_75.gain : na, "Gain 75th", color.new(color.green, 50), 2, plot.style_steplinebr)
+target_50_gain                   = plot(show >= 2 and show > 0 or show <= -4 ? target_50.gain : na, "Gain 50th", color.new(color.green, 40), 2, plot.style_steplinebr)
+target_50_drawdown               = plot(show >= 2 and show > 0 or show <= -4 ? target_50.drawdown : na, "Drawdown 50th", color.new(color.red, 40), 2, plot.style_steplinebr)
+target_25_drawdown               = plot(show >= 1 and show > 0 or show <= -5 ? target_25.drawdown : na, "Drawdown 25th", color.new(color.red, 30), 2, plot.style_steplinebr)
+target_25_gain                   = plot(show >= 1 and show > 0 or show <= -5 ? target_25.gain : na, "Gain 25th", color.new(color.green, 30), 2, plot.style_steplinebr)
+
+center_line = plot(target_25.entry, "Center Line", color.gray)
+
+super_trend_line_bullish = plot(stop and not super_trend.state ? super_trend.value : na, "Super Trend BUllish", color.blue, 2, plot.style_linebr)
+super_trend_line_bearish = plot(stop and super_trend.state ? super_trend.value : na, "Super Trend Bearish", color.orange, 2, plot.style_linebr)
+
+alpha_red   = color.new(color.red, 98)
+alpha_green = color.new(color.green, 98)
+
+fill(target_100_gain, center_line, alpha_green)
+fill(target_90_gain, center_line, alpha_green)
+fill(target_75_gain, center_line, alpha_green)
+fill(target_50_gain, center_line, alpha_green)
+fill(target_25_gain, center_line, alpha_green)
+
+fill(target_100_drawdown, center_line, alpha_red)
+fill(target_90_drawdown, center_line, alpha_red)
+fill(target_75_drawdown, center_line, alpha_red)
+fill(target_50_drawdown, center_line, alpha_red)
+fill(target_25_drawdown, center_line, alpha_red)
+
+fill(target_50_average_gain, center_line, color.new(color.blue, 90))
+fill(target_50_average_drawdown, center_line, color.new(color.purple, 90))
+fill(target_50_average_gain_stdev, target_50_average_gain, color.new(color.blue, 95))
+fill(target_50_average_drawdown_stdev, target_50_average_drawdown, color.new(color.purple, 95))
+
+tbl = table.new(location(), 4, 7, color.black, color.black, 1, color.black, 1)
+
+if enable
+    table.cell_set_text(tbl, 0, 0, "Percentile")
+    table.cell_set_text_color(tbl, 0, 0, color.white)
+
+    table.cell_set_text(tbl, 1, 0, "Risk Ratio")
+    table.cell_set_text_color(tbl, 1, 0, color.white)
+
+    table.cell_set_text(tbl, 2, 0, "Take Profit")
+    table.cell_set_text_color(tbl, 2, 0, color.white)
+
+    table.cell_set_text(tbl, 3, 0, "Stop Loss")
+    table.cell_set_text_color(tbl, 3, 0, color.white)
+
+    if (show >= 1 and show > 0) or (show <= -5 and show < 0)
+        table.cell_set_text(tbl, 0, 1, str.tostring(math.round(25 * scale, 2)) + "'th")
+        table.cell_set_text_color(tbl, 0, 1, color.white)
+        table.cell_set_text(tbl, 1, 1, str.tostring(math.round(math.abs(target_25.gain - target_100.entry) / math.abs(target_25.drawdown - target_100.entry), 2)))
+        table.cell_set_text_color(tbl, 1, 1, color.white)
+        table.cell_set_text(tbl, 2, 1, str.tostring(math.round_to_mintick(math.abs(target_25.gain))))
+        table.cell_set_text_color(tbl, 2, 1, color.white)
+        table.cell_set_text(tbl, 3, 1, str.tostring(math.round_to_mintick(math.abs(target_25.drawdown))))
+        table.cell_set_text_color(tbl, 3, 1, color.white)
+
+    if (show >= 2 and show > 0) or (show <= -4 and show < 0)
+        table.cell_set_text(tbl, 0, 2, str.tostring(math.round(50 * scale, 2)) + "'th")
+        table.cell_set_text_color(tbl, 0, 2, color.white)
+        table.cell_set_text(tbl, 1, 2, str.tostring(math.round(math.abs(target_50.gain - target_100.entry) / math.abs(target_50.drawdown - target_100.entry), 2)))
+        table.cell_set_text_color(tbl, 1, 2, color.white)
+        table.cell_set_text(tbl, 2, 2, str.tostring(math.round_to_mintick(math.abs(target_50.gain))))
+        table.cell_set_text_color(tbl, 2, 2, color.white)
+        table.cell_set_text(tbl, 3, 2, str.tostring(math.round_to_mintick(math.abs(target_50.drawdown))))
+        table.cell_set_text_color(tbl, 3, 2, color.white)
+
+    if (show >= 3 and show > 0) or (show <= -3 and show < 0)
+        table.cell_set_text(tbl, 0, 3, str.tostring(math.round(75 * scale, 2)) + "'th")
+        table.cell_set_text_color(tbl, 0, 3, color.white)
+        table.cell_set_text(tbl, 1, 3, str.tostring(math.round(math.abs(target_75.gain - target_100.entry) / math.abs(target_75.drawdown - target_100.entry), 2)))
+        table.cell_set_text_color(tbl, 1, 3, color.white)
+        table.cell_set_text(tbl, 2, 3, str.tostring(math.round_to_mintick(math.abs(target_75.gain))))
+        table.cell_set_text_color(tbl, 2, 3, color.white)
+        table.cell_set_text(tbl, 3, 3, str.tostring(math.round_to_mintick(math.abs(target_75.drawdown))))
+        table.cell_set_text_color(tbl, 3, 3, color.white)
+
+    if (show >= 4 and show > 0) or (show <= -2 and show < 0)
+        table.cell_set_text(tbl, 0, 4, str.tostring(math.round(90 * scale, 2)) + "'th")
+        table.cell_set_text_color(tbl, 0, 4, color.white)
+        table.cell_set_text(tbl, 1, 4, str.tostring(math.round(math.abs(target_90.gain - target_100.entry) / math.abs(target_90.drawdown - target_100.entry), 2)))
+        table.cell_set_text_color(tbl, 1, 4, color.white)
+        table.cell_set_text(tbl, 2, 4, str.tostring(math.round_to_mintick(math.abs(target_90.gain))))
+        table.cell_set_text_color(tbl, 2, 4, color.white)
+        table.cell_set_text(tbl, 3, 4, str.tostring(math.round_to_mintick(math.abs(target_90.drawdown))))
+        table.cell_set_text_color(tbl, 3, 4, color.white)
+
+    if (show >= 5 and show > 0) or (show <= -1 and show < 0)
+        table.cell_set_text(tbl, 0, 5, str.tostring(math.round(100 * scale, 2)) + "'th")
+        table.cell_set_text_color(tbl, 0, 5, color.white)
+        table.cell_set_text(tbl, 1, 5, str.tostring(math.round(math.abs(target_100.gain - target_100.entry) / math.abs(target_100.drawdown - target_100.entry), 2)))
+        table.cell_set_text_color(tbl, 1, 5, color.white)
+        table.cell_set_text(tbl, 2, 5, str.tostring(math.round_to_mintick(math.abs(target_100.gain))))
+        table.cell_set_text_color(tbl, 2, 5, color.white)
+        table.cell_set_text(tbl, 3, 5, str.tostring(math.round_to_mintick(math.abs(target_100.drawdown))))
+        table.cell_set_text_color(tbl, 3, 5, color.white)
+
+    if average != "Disabled"
+        table.cell_set_text(tbl, 0, 6, str.contains(average, "Average") ? "Average" : average == "Percentile" ? str.tostring(rank) + "'th" : "")
+        table.cell_set_text_color(tbl, 0, 6, color.white)
+        table.cell_set_text(tbl, 1, 6, str.tostring(math.round(math.abs(custom_gain - target_100.entry) / math.abs(custom_drawdown - target_100.entry), 2)))
+        table.cell_set_text_color(tbl, 1, 6, color.white)
+        table.cell_set_text(tbl, 2, 6, str.tostring(math.round_to_mintick(math.abs(custom_gain))))
+        table.cell_set_text_color(tbl, 2, 6, color.white)
+        table.cell_set_text(tbl, 3, 6, str.tostring(math.round_to_mintick(math.abs(custom_drawdown))))
+        table.cell_set_text_color(tbl, 3, 6, color.white)

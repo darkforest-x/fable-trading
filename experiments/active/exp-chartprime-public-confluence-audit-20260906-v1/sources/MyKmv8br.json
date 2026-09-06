@@ -1,0 +1,47 @@
+{
+  "id": "MyKmv8br",
+  "title": "Linear Regression Oscillator [ChartPrime]",
+  "url": "https://www.tradingview.com/script/MyKmv8br-Linear-Regression-Oscillator-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:46.971011+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/MyKmv8br-Linear-Regression-Oscillator-ChartPrime/",
+  "created_at": "2024-06-10T13:02:40.642951+00:00",
+  "updated_at": "2024-06-11T11:59:09.987311+00:00",
+  "description": "Linear Regression Oscillator Indicator\n\nOverview:\nThe Linear Regression Oscillator is a custom TradingView indicator designed to provide insights into potential mean reversion and trend conditions. By calculating a linear regression on the closing prices over a user-defined period, this oscillator helps identify overbought and oversold levels and highlights trend changes. The indicator also offers visual cues and color-coded price bars to aid in quick decision-making.\n\nKey Features:\n\n◆ Customizable Look-Back Period:\nInput: Length\nDefault: 20\nDescription: Determines the period over which the linear regression is calculated. A longer period smooths the oscillator but may lag, while a shorter period is more responsive but may be noisier.\n\n◆ Overbought and Oversold Thresholds:\nInputs: Upper Threshold and Lower Threshold\nDefault: 1.5 and -1.5 respectively\nDescription: Define the upper and lower bounds for identifying overbought and oversold conditions. Values outside these thresholds suggest potential reversals.\n\n\n◆ Candlestick Color Plotting:\nInput: Plot Bar Color\nDefault: false\nDescription: Option to color the price bars based on the oscillator's value, providing a visual representation of market conditions. Bars turn cyan for positive oscillator values and blue for negative.\n\n\n◆ Mean Reversion and Trend Signals:\nVisual markers and labels indicate when the oscillator suggests mean reversion or trend changes, aiding in identifying key market turning points.\n\n\n◆ Invalidation Levels:\nTracks the highest and lowest prices over a recent period to set levels where the current trend signal would be considered invalidated.\n\n\n◆ Gradient Color Coding:\nUtilizes gradient color coding to enhance the visualization of oscillator values, making it easier to interpret overbought and oversold conditions.\n\n◆ Usage Notes:\nSetting the Look-Back Period:\nAdjust the \"Length\" input based on the timeframe and the type of trading you are conducting. Shorter periods are more suited for intraday trading, while longer periods can be used for swing trading.Interpreting Thresholds:\nUse the upper and lower threshold inputs to fine-tune the sensitivity of the overbought and oversold signals. Higher absolute values reduce the number of signals but increase their reliability.Candlestick Coloring:\nEnabling the \"Plot Bar Color\" option can help quickly identify the current state of the oscillator in relation to the zero line. This visual aid can be particularly useful in fast-moving markets.Mean Reversion and Trend Signals:\nPay attention to the symbols and labels on the chart indicating mean reversion and trend changes. These signals are designed to highlight potential entry and exit points.Invalidation Levels:\nUse the plotted invalidation levels as stop-loss or signal invalidation points. If the price moves beyond these levels, the current trend signal is likely invalid.\n\nThis indicator helps traders identify overbought and oversold conditions, potential mean reversions, and trend changes based on the linear regression of the closing prices over a specified look-back period.",
+  "script": {
+    "id": 1636978,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;d8ac464cee1948a7a8ba67eaf8c01dc7",
+    "version_maj": 2,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bd8ac464cee1948a7a8ba67eaf8c01dc7/2",
+  "source_http_status": 200,
+  "source_sha256": "e5a927cc8bd717ac689264fdd13eae261c0071ebe8b0ef3bd53c9f140f4d6c80",
+  "source_lines": 211,
+  "source_metadata": {
+    "created": "2024-06-11T11:59:08.022345Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": false,
+      "kind": "study",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 7,
+        "plotcandle": 1,
+        "plotchar": 4
+      }
+    },
+    "lastVersionMaj": "2.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Linear Regression Oscillator [ChartPrime]",
+    "updated": "2024-06-11T11:59:08.022345Z",
+    "version": "2.0"
+  }
+}

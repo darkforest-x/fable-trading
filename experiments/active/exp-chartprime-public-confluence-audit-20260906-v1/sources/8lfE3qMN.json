@@ -1,0 +1,48 @@
+{
+  "id": "8lfE3qMN",
+  "title": "Zone Shift [ChartPrime]",
+  "url": "https://www.tradingview.com/script/8lfE3qMN-Zone-Shift-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:53.013897+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/8lfE3qMN-Zone-Shift-ChartPrime/",
+  "created_at": "2025-07-28T12:27:24.214084+00:00",
+  "updated_at": null,
+  "description": "⯁ OVERVIEW\nZone Shift [ChartPrime] is a dynamic trend detection tool that uses EMA/HMA-based bands to determine trend shifts and plot key reaction levels. It highlights trend direction through colored candles and marks important retests with visual cues to help traders stay aligned with momentum.\n\n⯁ KEY FEATURES\n Dynamic EMA-HMA Band:\nCreates a three-line channel using the average of an EMA and HMA for the midline, and expands it using average candle range to form upper and lower bounds. This band visually adapts to market volatility.\n\n Trend Detection (Band Cross Logic):\nDetects an uptrend when the Low crosses above the top band.\nDetects a downtrend when the High crosses below the bottom band.\nBars change color to lime for uptrends and blue for downtrends.\n Trend Initiation Level:\nAt the start of a new trend, the indicator locks in the extreme point (low for uptrend, high for downtrend) and plots a dashed horizontal level, serving as a potential retest zone.\n Trend Retest Signal:\nIf price crosses back over the Trend Initiation level in the direction of the trend, a diamond label (⯁) is plotted at the retest point — confirming that price is revisiting a key shift level.\n Visual Band Layout:\n\nMidline: Dashed line shows the average of EMA and HMA.\nTop/Bottom: Solid lines showing dynamic thresholds above/below the midline.\nThese help visualize compression, expansion, and possible breakout zones.\n Color-Based Candle Plotting:\nCandles are recolored in real time according to the current trend, allowing instant visual alignment with the market’s directional bias.\n Noise-Filtered Retests:\nTo avoid repetitive signals, retests are only marked if they occur more than 5 bars after the previous one — filtering out minor fluctuations.\n\n⯁ USAGE\n Use colored candles to align trades with the dominant trend. Treat dashed trendStart levels as important support/resistance zones. Watch for ⯁ diamond labels as confirmation of retests for continuation or entry. Use band boundaries to assess trend strength and volatility expansion. Combine with your existing setups to validate momentum and zone shifts.\n\n⯁ CONCLUSION\nZone Shift [ChartPrime] helps traders visually capture trend changes and key reaction points with precision. By combining band breakouts with real-time retest signals and trend-colored candles, this tool simplifies the process of reading market structure shifts and identifying high-confluence entry areas.",
+  "script": {
+    "id": 2937203,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;7546dd15909647c886052e94bf75c5c5",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B7546dd15909647c886052e94bf75c5c5/1",
+  "source_http_status": 200,
+  "source_sha256": "6a0c9e39adb27a61c85d62dc23e152da9fd6754fe377790dbb3e8c115b92ef58",
+  "source_lines": 67,
+  "source_metadata": {
+    "created": "2025-07-28T12:27:23.632675Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;d3ff6bfac294488fad020be9b31c941b",
+      "originalScriptVersion": "0.458",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 4,
+        "plotcandle": 1
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Zone Shift [ChartPrime]",
+    "updated": "2025-07-28T12:27:23.632675Z",
+    "version": "1.0"
+  }
+}

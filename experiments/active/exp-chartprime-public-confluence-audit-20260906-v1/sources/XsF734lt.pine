@@ -1,0 +1,358 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+//@version=6
+
+indicator("Forward-Projecting Opportunity Cone [ChartPrime]", overlay = true, max_lines_count = 500, max_labels_count = 500, max_boxes_count = 500)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+grp_core = "Core Settings"
+volLength     = input.int(20,  "Volatility Length (Bars)", minval = 5,  maxval = 100, group = grp_core)
+projBars      = input.int(80,  "Projection Bars Forward",  minval = 5,  maxval = 80,  group = grp_core)
+barsPerYear   = input.int(365, "Trading Bars Per Year",    minval = 50, maxval = 365, group = grp_core, tooltip = "252 for stocks/daily. 365 for crypto. Adjust for intraday.")
+
+grp_lock = "Cone Lock"
+lockMode   = input.bool(true,  "Lock Cone to Pivot",       group = grp_lock, tooltip = "When enabled, the cone anchors to the most recent pivot high or low instead of the live bar.")
+pivotLen   = input.int(10,     "Pivot Detection Length",   minval = 2, maxval = 20, group = grp_lock)
+lockToBull = input.bool(false, "Lock to Pivot Low (Bull)", group = grp_lock, tooltip = "True = anchor to pivot low. False = anchor to pivot high.")
+
+grp_viz = "Visual Settings"
+show1Sigma     = input.bool(true, "Show 68% Zone (1σ)", group = grp_viz)
+show2Sigma     = input.bool(true, "Show 95% Zone (2σ)", group = grp_viz)
+show3Sigma     = input.bool(true, "Show 99% Zone (3σ)", group = grp_viz)
+col1Sigma      = input.color(color.new(#00d4aa, 15), "1σ Color", group = grp_viz)
+col2Sigma      = input.color(color.new(#a855f7, 15), "2σ Color", group = grp_viz)
+col3Sigma      = input.color(color.new(#f59e0b, 15), "3σ Color", group = grp_viz)
+lineWidth      = input.int(2, "Line Width", minval = 1, maxval = 4, group = grp_viz)
+showConeLabels = input.bool(true, "Show Cone Tip Labels", group = grp_viz)
+
+grp_dash = "Dashboard"
+showDash = input.bool(true, "Show Dashboard", group = grp_dash)
+dashPos  = input.string("Bottom Right", "Position", options = ["Top Right", "Top Left", "Bottom Right", "Bottom Left"], group = grp_dash)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙋𝘼𝙇𝙀𝙏𝙏𝙀
+// --------------------------------------------------------------------------------------------------------------------{
+
+C_TEAL   = #00d4aa
+C_VIOLET = #a855f7
+C_AMBER  = #f59e0b
+C_NAVY   = #0d1b2a
+C_SLATE  = #1e293b
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+logReturn = math.log(close / close[1])
+rawVol    = ta.stdev(logReturn, volLength)
+annualVol = rawVol * math.sqrt(barsPerYear)
+
+pivHigh = ta.pivothigh(high, pivotLen, pivotLen)
+pivLow  = ta.pivotlow(low,  pivotLen, pivotLen)
+
+var float lockedPrice    = na
+var int   lockedBarIndex = na
+var float lockedVol      = na
+
+if lockMode
+    if lockToBull
+        if not na(pivLow)
+            lockedPrice    := low[pivotLen]
+            lockedBarIndex := bar_index - pivotLen
+            lockedVol      := annualVol[pivotLen]
+    else
+        if not na(pivHigh)
+            lockedPrice    := high[pivotLen]
+            lockedBarIndex := bar_index - pivotLen
+            lockedVol      := annualVol[pivotLen]
+
+float anchorPrice  = lockMode and not na(lockedPrice)    ? lockedPrice    : close
+int   anchorBarIdx = lockMode and not na(lockedBarIndex) ? lockedBarIndex : bar_index
+float anchorVol    = lockMode and not na(lockedVol)      ? lockedVol      : annualVol
+
+volPercentile = ta.percentrank(annualVol, 252)
+tNow          = math.max(bar_index - anchorBarIdx, 1)
+
+sigmaMove = annualVol > 0 ? math.log(close / anchorPrice) / (annualVol * math.sqrt(float(tNow) / float(barsPerYear))) : 0.0
+
+expMove1 = (anchorPrice * math.exp(1.0 * anchorVol * math.sqrt(float(projBars) / float(barsPerYear))) - anchorPrice) / anchorPrice * 100
+expMove2 = (anchorPrice * math.exp(2.0 * anchorVol * math.sqrt(float(projBars) / float(barsPerYear))) - anchorPrice) / anchorPrice * 100
+expMove3 = (anchorPrice * math.exp(3.0 * anchorVol * math.sqrt(float(projBars) / float(barsPerYear))) - anchorPrice) / anchorPrice * 100
+
+volRegime      = volPercentile >= 60 ? "HIGH"  : volPercentile >= 30 ? "NORMAL" : "LOW"
+volRegimeColor = volPercentile >= 60 ? C_AMBER : volPercentile >= 30 ? C_VIOLET : C_TEAL
+
+priceZone      = math.abs(sigmaMove) <= 1.0 ? "Inside 1σ" : math.abs(sigmaMove) <= 2.0 ? "Inside 2σ" : math.abs(sigmaMove) <= 3.0 ? "Inside 3σ" : "Beyond 3σ ✦"
+priceZoneColor = math.abs(sigmaMove) <= 1.0 ? C_TEAL          : math.abs(sigmaMove) <= 2.0 ? C_VIOLET   : math.abs(sigmaMove) <= 3.0 ? C_AMBER    : #ef4444
+
+upper25 = anchorPrice * math.exp( 2.5 * anchorVol * math.sqrt(float(tNow) / float(barsPerYear)))
+lower25 = anchorPrice * math.exp(-2.5 * anchorVol * math.sqrt(float(tNow) / float(barsPerYear)))
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝘼𝙍𝙍𝘼𝙔𝙎 & 𝙋𝙀𝙍𝙎𝙄𝙎𝙏𝙀𝙉𝙏 𝙊𝘽𝙅𝙀𝘾𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+var line[]  lines1Up    = array.new<line>()
+var line[]  lines1Dn    = array.new<line>()
+var line[]  lines2Up    = array.new<line>()
+var line[]  lines2Dn    = array.new<line>()
+var line[]  lines3Up    = array.new<line>()
+var line[]  lines3Dn    = array.new<line>()
+var box[]   fill1Boxes  = array.new<box>()
+var box[]   fill2Boxes  = array.new<box>()
+var box[]   fill3Boxes  = array.new<box>()
+var label[] coneLabels  = array.new<label>()
+var label[] pivotLabels = array.new<label>()
+var label[] dashLabels  = array.new<label>()
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙃𝙀𝙇𝙋𝙀𝙍 𝙁𝙐𝙉𝘾𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+clearLines(line[] arr) =>
+    if arr.size() > 0
+        for i = 0 to arr.size() - 1
+            line.delete(arr.get(i))
+    arr.clear()
+
+clearBoxes(box[] arr) =>
+    if arr.size() > 0
+        for i = 0 to arr.size() - 1
+            box.delete(arr.get(i))
+    arr.clear()
+
+clearLabels(label[] arr) =>
+    if arr.size() > 0
+        for i = 0 to arr.size() - 1
+            label.delete(arr.get(i))
+    arr.clear()
+
+conePrice(float basePrice, float vol, int t, float sigmaMultiplier, int direction) =>
+    drift = direction * sigmaMultiplier * vol * math.sqrt(float(t) / float(barsPerYear))
+    basePrice * math.exp(drift)
+
+gradientTransp(int t, int totalBars, int baseTransp) =>
+    int(baseTransp + (85 - baseTransp) * float(t - 1) / float(totalBars - 1))
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+if lockMode
+    if lockToBull and not na(pivLow)
+        clearLabels(pivotLabels)
+        volPct = annualVol[pivotLen] * 100
+        pivLbl = label.new(
+             bar_index - pivotLen, low[pivotLen],
+             "📍 Cone Anchor\nPivot Low: " + str.tostring(low[pivotLen], format.mintick) + "\nVol: " + str.tostring(volPct, "#.##") + "%",
+             color = color.new(C_TEAL, 50), textcolor = color.new(C_NAVY, 0),
+             style = label.style_label_upper_right, size = size.small)
+        pivotLabels.push(pivLbl)
+    else if not lockToBull and not na(pivHigh)
+        clearLabels(pivotLabels)
+        volPct = annualVol[pivotLen] * 100
+        pivLbl = label.new(
+             bar_index - pivotLen, high[pivotLen],
+             "📍 Cone Anchor\nPivot High: " + str.tostring(high[pivotLen], format.mintick) + "\nVol: " + str.tostring(annualVol[pivotLen] * 100, "#.##") + "%",
+             color = color.new(C_AMBER, 50), textcolor = color.new(C_NAVY, 0),
+             style = label.style_label_lower_right, size = size.small)
+        pivotLabels.push(pivLbl)
+
+if barstate.islast
+    clearLines(lines1Up)
+    clearLines(lines1Dn)
+    clearLines(lines2Up)
+    clearLines(lines2Dn)
+    clearLines(lines3Up)
+    clearLines(lines3Dn)
+    clearBoxes(fill1Boxes)
+    clearBoxes(fill2Boxes)
+    clearBoxes(fill3Boxes)
+    clearLabels(coneLabels)
+
+    for t = 1 to projBars
+        x1 = anchorBarIdx + t - 1
+        x2 = anchorBarIdx + t
+
+        transp1 = gradientTransp(t, projBars, 10)
+        transp2 = gradientTransp(t, projBars, 20)
+        transp3 = gradientTransp(t, projBars, 30)
+
+        c1 = color.new(col1Sigma, transp1)
+        c2 = color.new(col2Sigma, transp2)
+        c3 = color.new(col3Sigma, transp3)
+
+        p1_1up = conePrice(anchorPrice, anchorVol, math.max(t - 1, 0), 1.0,  1)
+        p1_1dn = conePrice(anchorPrice, anchorVol, math.max(t - 1, 0), 1.0, -1)
+        p2_1up = conePrice(anchorPrice, anchorVol, t, 1.0,  1)
+        p2_1dn = conePrice(anchorPrice, anchorVol, t, 1.0, -1)
+
+        p1_2up = conePrice(anchorPrice, anchorVol, math.max(t - 1, 0), 2.0,  1)
+        p1_2dn = conePrice(anchorPrice, anchorVol, math.max(t - 1, 0), 2.0, -1)
+        p2_2up = conePrice(anchorPrice, anchorVol, t, 2.0,  1)
+        p2_2dn = conePrice(anchorPrice, anchorVol, t, 2.0, -1)
+
+        p1_3up = conePrice(anchorPrice, anchorVol, math.max(t - 1, 0), 3.0,  1)
+        p1_3dn = conePrice(anchorPrice, anchorVol, math.max(t - 1, 0), 3.0, -1)
+        p2_3up = conePrice(anchorPrice, anchorVol, t, 3.0,  1)
+        p2_3dn = conePrice(anchorPrice, anchorVol, t, 3.0, -1)
+
+        if show1Sigma
+            lines1Up.push(line.new(x1, p1_1up, x2, p2_1up, color = c1, width = lineWidth, style = line.style_solid))
+            lines1Dn.push(line.new(x1, p1_1dn, x2, p2_1dn, color = c1, width = lineWidth, style = line.style_solid))
+
+        if show2Sigma
+            lines2Up.push(line.new(x1, p1_2up, x2, p2_2up, color = c2, width = lineWidth, style = line.style_solid))
+            lines2Dn.push(line.new(x1, p1_2dn, x2, p2_2dn, color = c2, width = lineWidth, style = line.style_solid))
+
+        if show3Sigma
+            lines3Up.push(line.new(x1, p1_3up, x2, p2_3up, color = c3, width = lineWidth, style = line.style_solid))
+            lines3Dn.push(line.new(x1, p1_3dn, x2, p2_3dn, color = c3, width = lineWidth, style = line.style_solid))
+
+        fillTransp1 = gradientTransp(t, projBars, 90)
+        fillTransp2 = gradientTransp(t, projBars, 95)
+        fillTransp3 = gradientTransp(t, projBars, 99)
+
+        if show1Sigma
+            boxTop1 = math.max(p1_1up, p2_1up)
+            boxBot1 = math.min(p1_1dn, p2_1dn)
+            fill1Boxes.push(box.new(x1, boxTop1, x2, boxBot1,
+                 border_color = color.new(chart.bg_color, 100),
+                 bgcolor      = color.new(col1Sigma, fillTransp1)))
+
+        if show2Sigma
+            boxTop2 = math.max(p1_2up, p2_2up)
+            boxBot2 = math.min(p1_2dn, p2_2dn)
+            fill2Boxes.push(box.new(x1, boxTop2, x2, boxBot2,
+                 border_color = color.new(chart.bg_color, 100),
+                 bgcolor      = color.new(col2Sigma, fillTransp2)))
+
+        if show3Sigma
+            boxTop3 = math.max(p1_3up, p2_3up)
+            boxBot3 = math.min(p1_3dn, p2_3dn)
+            fill3Boxes.push(box.new(x1, boxTop3, x2, boxBot3,
+                 border_color = color.new(chart.bg_color, 100),
+                 bgcolor      = color.new(col3Sigma, fillTransp3)))
+
+    if showConeLabels
+        tipX      = anchorBarIdx + projBars
+        volPctNow = anchorVol * 100
+
+        move1up = (conePrice(anchorPrice, anchorVol, projBars, 1.0,  1) - anchorPrice) / anchorPrice * 100
+        move1dn = (anchorPrice - conePrice(anchorPrice, anchorVol, projBars, 1.0, -1)) / anchorPrice * 100
+        move2up = (conePrice(anchorPrice, anchorVol, projBars, 2.0,  1) - anchorPrice) / anchorPrice * 100
+        move2dn = (anchorPrice - conePrice(anchorPrice, anchorVol, projBars, 2.0, -1)) / anchorPrice * 100
+        move3up = (conePrice(anchorPrice, anchorVol, projBars, 3.0,  1) - anchorPrice) / anchorPrice * 100
+        move3dn = (anchorPrice - conePrice(anchorPrice, anchorVol, projBars, 3.0, -1)) / anchorPrice * 100
+
+        tip1up = conePrice(anchorPrice, anchorVol, projBars, 1.0,  1)
+        tip1dn = conePrice(anchorPrice, anchorVol, projBars, 1.0, -1)
+        tip2up = conePrice(anchorPrice, anchorVol, projBars, 2.0,  1)
+        tip2dn = conePrice(anchorPrice, anchorVol, projBars, 2.0, -1)
+        tip3up = conePrice(anchorPrice, anchorVol, projBars, 3.0,  1)
+        tip3dn = conePrice(anchorPrice, anchorVol, projBars, 3.0, -1)
+
+        volStr  = str.tostring(volPctNow, "#.##")
+        barsStr = str.tostring(projBars)
+
+        tt1u = "1σ Upper | 68% probability price stays below this level.\nMove: +" + str.tostring(move1up, "#.##") + "% | Target: " + str.tostring(tip1up, format.mintick) + "\nVol: " + volStr + "% | Window: " + barsStr + " bars"
+        tt1d = "1σ Lower | 68% probability price stays above this level.\nMove: −" + str.tostring(move1dn, "#.##") + "% | Target: " + str.tostring(tip1dn, format.mintick) + "\nVol: " + volStr + "% | Window: " + barsStr + " bars"
+        tt2u = "2σ Upper | 95% probability price stays below this level.\nMove: +" + str.tostring(move2up, "#.##") + "% | Target: " + str.tostring(tip2up, format.mintick) + "\nVol: " + volStr + "% | Window: " + barsStr + " bars"
+        tt2d = "2σ Lower | 95% probability price stays above this level.\nMove: −" + str.tostring(move2dn, "#.##") + "% | Target: " + str.tostring(tip2dn, format.mintick) + "\nVol: " + volStr + "% | Window: " + barsStr + " bars"
+        tt3u = "3σ Upper | 99% probability price stays below this level.\nMove: +" + str.tostring(move3up, "#.##") + "% | Target: " + str.tostring(tip3up, format.mintick) + "\nVol: " + volStr + "% | Extreme — mean reversion likely if reached."
+        tt3d = "3σ Lower | 99% probability price stays above this level.\nMove: −" + str.tostring(move3dn, "#.##") + "% | Target: " + str.tostring(tip3dn, format.mintick) + "\nVol: " + volStr + "% | Extreme — mean reversion likely if reached."
+
+        if show1Sigma
+            lbl1u = label.new(tipX, tip1up,
+                 "1σ  68%\n+" + str.tostring(move1up, "#.##") + "%\n" + str.tostring(tip1up, format.mintick),
+                 color = na, textcolor = color.new(C_TEAL, 20),
+                 style = label.style_label_left, size = size.small, tooltip = tt1u)
+            lbl1d = label.new(tipX, tip1dn,
+                 "1σ  68%\n−" + str.tostring(move1dn, "#.##") + "%\n" + str.tostring(tip1dn, format.mintick),
+                 color = na, textcolor = color.new(C_TEAL, 20),
+                 style = label.style_label_left, size = size.small, tooltip = tt1d)
+            coneLabels.push(lbl1u)
+            coneLabels.push(lbl1d)
+
+        if show2Sigma
+            lbl2u = label.new(tipX, tip2up,
+                 "2σ  95%\n+" + str.tostring(move2up, "#.##") + "%\n" + str.tostring(tip2up, format.mintick),
+                 color = na, textcolor = color.new(C_VIOLET, 20),
+                 style = label.style_label_left, size = size.small, tooltip = tt2u)
+            lbl2d = label.new(tipX, tip2dn,
+                 "2σ  95%\n−" + str.tostring(move2dn, "#.##") + "%\n" + str.tostring(tip2dn, format.mintick),
+                 color = na, textcolor = color.new(C_VIOLET, 20),
+                 style = label.style_label_left, size = size.small, tooltip = tt2d)
+            coneLabels.push(lbl2u)
+            coneLabels.push(lbl2d)
+
+        if show3Sigma
+            lbl3u = label.new(tipX, tip3up,
+                 "3σ  99%\n+" + str.tostring(move3up, "#.##") + "%\n" + str.tostring(tip3up, format.mintick),
+                 color = na, textcolor = color.new(C_AMBER, 20),
+                 style = label.style_label_left, size = size.small, tooltip = tt3u)
+            lbl3d = label.new(tipX, tip3dn,
+                 "3σ  99%\n−" + str.tostring(move3dn, "#.##") + "%\n" + str.tostring(tip3dn, format.mintick),
+                 color = na, textcolor = color.new(C_AMBER, 20),
+                 style = label.style_label_left, size = size.small, tooltip = tt3d)
+            coneLabels.push(lbl3u)
+            coneLabels.push(lbl3d)
+
+        if not lockMode
+            tt_info = "Cone origin | Vol: " + str.tostring(volPctNow, "#.##") + "% (annualized " + str.tostring(volLength) + "-bar HV)\nProjection: " + barsStr + " bars forward"
+            infoLbl = label.new(anchorBarIdx, anchorPrice,
+                "Vol: " + str.tostring(volPctNow, "#.##") + "%\n" + barsStr + " bar cone",
+                color = color.new(C_SLATE, 20), textcolor = color.new(C_TEAL, 0),
+                style = label.style_label_right, size = size.small, tooltip = tt_info)
+            coneLabels.push(infoLbl)
+
+    anchorLine = line.new(anchorBarIdx, anchorPrice, anchorBarIdx, anchorPrice, color = color.new(C_TEAL, 50), width = 1, style = line.style_dotted)
+    lines1Up.push(anchorLine)
+
+    if showDash
+        clearLabels(dashLabels)
+
+        dashPosConst = switch dashPos
+            "Top Right"    => position.top_right
+            "Top Left"     => position.top_left
+            "Bottom Right" => position.bottom_right
+            "Bottom Left"  => position.bottom_left
+            => position.bottom_right
+
+        volPctNow = anchorVol * 100
+        sigmaAbs  = math.abs(sigmaMove)
+        sigmaDir  = sigmaMove >= 0 ? "▲ Above" : "▼ Below"
+
+        dashText =
+             "╔══ OPPORTUNITY CONE ══╗\n" +
+             "  Ann. Volatility   " + str.tostring(volPctNow, "#.##") + "%\n" +
+             "  Vol Percentile    " + str.tostring(volPercentile, "#.#") + "%\n" +
+             "  Vol Regime        " + volRegime + "\n" +
+             "  ─────────────────────\n" +
+             "  Price Position    " + priceZone + "\n" +
+             "  Sigma Distance    " + sigmaDir + " " + str.tostring(sigmaAbs, "#.##") + "σ\n" +
+             "  ─────────────────────\n" +
+             "  1σ Move ±         " + str.tostring(expMove1, "#.##") + "%\n" +
+             "  2σ Move ±         " + str.tostring(expMove2, "#.##") + "%\n" +
+             "  3σ Move ±         " + str.tostring(expMove3, "#.##") + "%\n" +
+             "  ─────────────────────\n" +
+             "  Anchor            " + str.tostring(anchorPrice, format.mintick) + "\n" +
+             "  Window            " + str.tostring(projBars) + " bars\n" +
+             "╚═════════════════════╝"
+
+        var table dashTable = table.new(dashPosConst, 1, 1,
+             bgcolor      = color.new(C_NAVY,  5),
+             border_color = color.new(C_TEAL,  40),
+             border_width = 1,
+             frame_color  = color.new(C_VIOLET, 50),
+             frame_width  = 1)
+        table.cell(dashTable, 0, 0, dashText,
+             text_color = priceZoneColor,
+             text_size  = size.normal,
+             bgcolor    = color.new(C_NAVY, 5))
+
+
+// --------------------------------------------------------------------------------------------------------------------}

@@ -1,0 +1,176 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+
+indicator("Spiral Levels [ChartPrime]", 
+         overlay             = true, 
+         max_polylines_count = 100, 
+         max_lines_count     = 100)
+
+// ---------------------------------------------------------------------------------------------------------------------}
+// 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// ---------------------------------------------------------------------------------------------------------------------{
+
+int   leftBars        = input(4, group = "Pivots") // Number of left bars for pivot calculation
+int   rightBars       = input(4, group = "Pivots") // Number of right bars for pivot calculation
+float vol_threshold   = input.float(0.4, "Volume Filter",  step = 0.01, group = "Filter") // Volume filter threshold
+int   h_l_threshold   = input.int(20, "High & Low Filter", step = 1,    group = "Filter") // High & Low filter threshold
+
+int   numberOfSpirals = input.int(10, "Spirals shown", 1, 50, group = "Spiral")  // Number of spirals to be shown
+int   rotation        = input.int(11, "Number of spiral rotations", 1, 50, group = "Spiral") // Number of spiral rotations
+float xScale          = input.float(1.0, "X scale", group = "Spiral") // Horizontal scale of the spiral
+float yScale          = input.float(0.15, "Y scale", step = 0.01, group = "Spiral") * ta.atr(200) // Vertical scale of the spiral
+
+bool  reverse         = input.bool(false, "Reverse Spirals", group = "Spiral") // Reverse the direction of spirals
+
+// Variables //
+var   polylines       = array.new<polyline>() // Array to store polylines
+var   lines           = array.new<line>() // Array to store lines
+var   labels          = array.new<label>() // Array to store labels
+
+bool calc_allow       = (last_bar_index-bar_index) < 1000 // Condition to allow calculations
+
+ph                    = ta.pivothigh(leftBars, rightBars) // Calculate pivot high
+pl                    = ta.pivotlow(leftBars, rightBars) // Calculate pivot low
+
+bool high_filter      = ta.highest(h_l_threshold)[rightBars] == high[rightBars] // High filter condition
+bool low_filter       = ta.lowest(h_l_threshold)[rightBars]  == low[rightBars] // Low filter condition
+
+
+// ---------------------------------------------------------------------------------------------------------------------}
+// 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// ---------------------------------------------------------------------------------------------------------------------{
+
+
+//@function Checks for crosses and deletes old lines and labels.
+//@param arrayOfLines  (array<line>) Array of lines.
+//@param arrayOfLables  (array<label>) Array of labels.
+cross(arrayOfLines, arrayOfLables) =>
+    int qtyOfLines = array.size(arrayOfLines)
+
+    if calc_allow
+        for lineNo = 0 to (qtyOfLines > 0 ? qtyOfLines - 1 : na)
+
+            if lineNo < array.size(arrayOfLines)
+                line   currentLine    = array.get(arrayOfLines, lineNo)
+                label  currentLable   = array.get(arrayOfLables, lineNo)  
+                  
+                float  lineLevel      = line.get_price(currentLine, bar_index)
+                bool   lineWasCrossed = math.sign(close[1] - lineLevel) != math.sign(close - lineLevel)
+
+                if lineWasCrossed
+                    line.set_style(currentLine, line.style_dotted)  
+            
+                    array.remove(arrayOfLines, lineNo)
+                    array.remove(arrayOfLables, lineNo)
+    
+                    int(na)
+                else
+                    line.set_x2(currentLine,  bar_index)
+                    label.set_x(currentLable, bar_index)
+                    
+                    int(na)
+
+//@function Plots spiral levels.
+//@param condition  (bool) Condition to draw the spiral.
+//@param src  (float) Source for the spiral.
+//@param reverse  (bool) Reverse the direction of the spiral if true.
+spiral_level(bool condition, float src, bool reverse = true)=>
+
+    if condition
+
+        float              vol      = math.round(close > open ? volume : -volume,2)
+        float              norm_vol = vol / ta.stdev(vol, 200)
+
+        array<chart.point> points   = array.new<chart.point>()
+        float              step     = math.pi / 3
+        float              angle    = 0.0
+        var float          last_val = 0.
+
+        if norm_vol > vol_threshold or norm_vol < -vol_threshold // Volume Filter
+            for i = 0 to rotation
+
+                // Points for Spirals
+                newPoint = chart.point.from_index(
+                                                 int(math.round(angle * xScale * math.cos(angle))) + bar_index-rightBars,
+                                                 angle * (reverse ? yScale : -yScale) * math.sin(angle) + src[rightBars]
+                                                 )
+
+                last_val := angle * (reverse ? yScale : -yScale) * math.sin(angle) + src[rightBars]
+
+                angle    += step
+
+                points.push(newPoint)
+
+            // Gradient Color (Volume Based)
+            color  color_   = norm_vol > 0 
+                             ? color.from_gradient(norm_vol, 0, 1, na, #15e27f) 
+                             : color.from_gradient(norm_vol, -1, 0, #c519e4, na) 
+
+            // Spiral Plot
+            polyline spiral = polyline.new(points, 
+                                             curved     = true, 
+                                             line_color = color_, 
+                                             line_width = 2)
+
+            label    label_ = label.new(chart.point.from_index(last_bar_index, last_val),
+                                         style     = label.style_label_left, 
+                                         text      = str.tostring(vol), 
+                                         size      = size.small, 
+                                         color     = color.new(color_, 50), 
+                                         textcolor = chart.fg_color),
+
+            // Spiral Center
+            label.new(chart.point.from_index(bar_index-rightBars, src[rightBars]),
+                                         style     = label.style_circle, 
+                                         size      = size.tiny, 
+                                         color     = color.new(color_, 20))
+
+            line     line_  = line.new(points.last(), chart.point.from_index(bar_index, last_val), 
+                                         width = 2, 
+                                         color = color_)
+
+            polylines.push(spiral)
+            lines.    push(line_)
+            labels.   push(label_)
+ 
+        if polylines.size() > numberOfSpirals
+            polyline.delete(polylines.shift())
+
+        if array.size(line.all) > numberOfSpirals
+            line.delete(array.shift(line.all))
+
+
+
+// ---------------------------------------------------------------------------------------------------------------------}
+// 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// ---------------------------------------------------------------------------------------------------------------------{
+
+// Plot Spiral Levels for Pivots
+spiral_level(not na(ph) and high_filter, hl2,    reverse)
+spiral_level(not na(pl) and low_filter,  hl2, not reverse)
+
+// Check for crosses and update lines and labels
+cross(lines, labels)
+
+// Plot Pivots
+plotshape(calc_allow ? not na(ph) and high_filter : na,
+             "Pivot High", 
+             shape.diamond, 
+             location.abovebar, 
+             #c519e4, 
+             offset = -rightBars
+             )
+plotshape(calc_allow ? not na(pl) and low_filter : na, 
+             "Pivot Low", 
+             shape.diamond, 
+             location.belowbar, 
+             #15e27f, 
+             offset = -rightBars
+             )
+
+// ---------------------------------------------------------------------------------------------------------------------}
+
+if array.size(label.all) > numberOfSpirals*2
+    label.delete(array.shift(label.all))

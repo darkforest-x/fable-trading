@@ -1,0 +1,188 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=6
+indicator("Liquidity Flow Surge Profile [ChartPrime]", "LiqFlow Surge Pro [ChartPrime]", overlay = true, max_lines_count = 500, max_labels_count = 500, calc_bars_count = 3000)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+
+// --------------------------------------------------------------------------------------------------------------------{
+
+string profileDepth     = input.string("Long", "Profile Depth", options = ["Short", "Medium", "Long"], tooltip = "Controls the historical lookback for the liquidity distribution.")
+color  profileColor     = input.color(#6b7b8f, "Structural Liquidity Color", tooltip = "Base color for the structural liquidity bins.")
+bool   showBubbles      = input.bool(true, "Enable Liquidation Bubbles", group = "Liquidation Analysis")
+color  upperBubbleColor = input.color(#00ffbb, "Short Liquidation Color", group = "Liquidation Analysis", tooltip = "Color for surges appearing above the POC.")
+color  lowerBubbleColor = input.color(#ff0055, "Long Liquidation Color", group = "Liquidation Analysis", tooltip = "Color for surges appearing below the POC.")
+bool   showDashboard    = input.bool(true, "Show Liquidation Dashboard", group = "Liquidation Analysis")
+
+// Constants
+color colorNA = #44444400
+float THERMAL_SENSITIVITY = 0.5 
+int BINS_COUNT = 25
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Dynamic Period Selection
+int lookback = profileDepth == "Short" ? 150 : profileDepth == "Medium" ? 350 : 700
+
+// Define Structural Range
+float priceHigh = ta.highest(high, lookback)
+float priceLow  = ta.lowest(low, lookback)
+float binHeight = (priceHigh - priceLow) / BINS_COUNT
+
+// Data Containers
+float[] binVolumes = array.new<float>(BINS_COUNT, 0.0)
+float[] binLevels  = array.new<float>(BINS_COUNT, 0.0)
+
+// Helper for finding POC Index
+get_poc_idx(array<float> vols) =>
+    int idx = 0
+    float maxV = -1.0
+    if vols.size() > 0
+        for i = 0 to vols.size() - 1
+            if vols.get(i) > maxV
+                maxV := vols.get(i)
+                idx := i
+    idx
+
+// Single-Pass Volume Distribution Logic
+for i = 0 to BINS_COUNT - 1
+    float floor = priceLow + (binHeight * i)
+    float ceil  = floor + binHeight
+    binLevels.set(i, floor)
+    
+    // Aggregate volume for this specific bin
+    for k = 0 to lookback - 1
+        if close[k] >= floor and close[k] < ceil
+            binVolumes.set(i, binVolumes.get(i) + volume[k])
+
+// Calculate Point of Control (POC)
+int pocIndex = get_poc_idx(binVolumes)
+float maxVolFound = binVolumes.get(pocIndex)
+float pocPriceLevel = binLevels.get(pocIndex) + (binHeight / 2)
+bool priceIsBull = close > open
+
+// Volume Normalization for Bubbles
+float v500Max = ta.highest(volume, 500)
+float relativeVol = volume / (v500Max > 0 ? v500Max : 1)
+
+// Gradient Rendering Helper
+gradientColor(int index) =>
+    float intensity = binVolumes.get(index) / (maxVolFound > 0 ? maxVolFound : 1)
+    float bFloor    = binLevels.get(index)
+    float bCeil     = bFloor + binHeight
+    bool isPriceNear = (close >= bFloor and close <= bCeil) or (open >= bFloor and open <= bCeil)
+    color targradientColor = profileColor
+
+    isPriceNear ? colorNA : (intensity == 1.0 ? color.new(targradientColor, 20) : color.from_gradient(intensity, THERMAL_SENSITIVITY, 1.0, colorNA, color.new(targradientColor, 50))) 
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Plot Structural Levels (25 Plots for Fills)
+p0  = plot(binLevels.get(0),  display = display.none, editable = false)
+p1  = plot(binLevels.get(1),  display = display.none, editable = false)
+p2  = plot(binLevels.get(2),  display = display.none, editable = false)
+p3  = plot(binLevels.get(3),  display = display.none, editable = false)
+p4  = plot(binLevels.get(4),  display = display.none, editable = false)
+p5  = plot(binLevels.get(5),  display = display.none, editable = false)
+p6  = plot(binLevels.get(6),  display = display.none, editable = false)
+p7  = plot(binLevels.get(7),  display = display.none, editable = false)
+p8  = plot(binLevels.get(8),  display = display.none, editable = false)
+p9  = plot(binLevels.get(9),  display = display.none, editable = false)
+p10 = plot(binLevels.get(10), display = display.none, editable = false)
+p11 = plot(binLevels.get(11), display = display.none, editable = false)
+p12 = plot(binLevels.get(12), display = display.none, editable = false)
+p13 = plot(binLevels.get(13), display = display.none, editable = false)
+p14 = plot(binLevels.get(14), display = display.none, editable = false)
+p15 = plot(binLevels.get(15), display = display.none, editable = false)
+p16 = plot(binLevels.get(16), display = display.none, editable = false)
+p17 = plot(binLevels.get(17), display = display.none, editable = false)
+p18 = plot(binLevels.get(18), display = display.none, editable = false)
+p19 = plot(binLevels.get(19), display = display.none, editable = false)
+p20 = plot(binLevels.get(20), display = display.none, editable = false)
+p21 = plot(binLevels.get(21), display = display.none, editable = false)
+p22 = plot(binLevels.get(22), display = display.none, editable = false)
+p23 = plot(binLevels.get(23), display = display.none, editable = false)
+p24 = plot(binLevels.get(24), display = display.none, editable = false)
+pT  = plot(priceHigh,         display = display.none, editable = false)
+
+// Fill Thermal Profile
+fill(p0, p1, gradientColor(0))
+fill(p1, p2, gradientColor(1))
+fill(p2, p3, gradientColor(2))
+fill(p3, p4, gradientColor(3))
+fill(p4, p5, gradientColor(4))
+fill(p5, p6, gradientColor(5))
+fill(p6, p7, gradientColor(6))
+fill(p7, p8, gradientColor(7))
+fill(p8, p9, gradientColor(8))
+fill(p9, p10, gradientColor(9))
+fill(p10, p11, gradientColor(10))
+fill(p11, p12, gradientColor(11))
+fill(p12, p13, gradientColor(12))
+fill(p13, p14, gradientColor(13))
+fill(p14, p15, gradientColor(14))
+fill(p15, p16, gradientColor(15))
+fill(p16, p17, gradientColor(16))
+fill(p17, p18, gradientColor(17))
+fill(p18, p19, gradientColor(18))
+fill(p19, p20, gradientColor(19))
+fill(p20, p21, gradientColor(20))
+fill(p21, p22, gradientColor(21))
+fill(p22, p23, gradientColor(22))
+fill(p23, p24, gradientColor(23))
+fill(p24, pT,  gradientColor(24))
+
+// --- Optimized Liquidation Bubble Engine & Dashboard Tracker ---
+var string lastLiqType = "None"
+var float  lastLiqVol  = 0.0
+var color  lastLiqColor = chart.fg_color
+
+float atr = ta.atr(14)
+bool isSurge = showBubbles and relativeVol >= 0.4 
+
+if isSurge
+    // Determine Bubble Sizing
+    string bubbleSize = relativeVol < 0.6 ? size.tiny : 
+                         relativeVol < 0.7 ? size.small : 
+                         relativeVol < 0.8 ? size.normal : size.large
+    
+    // Dynamic Vertical Offset
+    float offset = atr * 0.3
+    float yLocation = priceIsBull ? high + offset : low - offset
+    
+    // Determine Bubble Color
+    color finalBubbleColor = priceIsBull ? upperBubbleColor : lowerBubbleColor
+    
+    // Update Dashboard Tracker
+    lastLiqType  := priceIsBull ? "Short Liquidation" : "Long Liquidation"
+    lastLiqVol   := volume
+    lastLiqColor := finalBubbleColor
+
+    // Create Unified Bubble Label
+    if (last_bar_index - bar_index) < 2000
+        label.new(bar_index, yLocation, str.tostring(volume, format.volume), 
+            color = color.new(finalBubbleColor, math.max(20, 100 - int(relativeVol * 100))), 
+            textcolor = chart.fg_color, 
+            style = label.style_circle, 
+            size = bubbleSize)
+
+// --- Dashboard Visualization ---
+var table dashTable = table.new(position.top_right, 2, 2, frame_color = color.new(chart.fg_color, 80), frame_width = 1, border_width = 1)
+
+if showDashboard and barstate.islast
+    table.cell(dashTable, 0, 0, "Last Liquidation", text_color = chart.fg_color, text_size = size.normal, bgcolor = color.new(chart.bg_color, 10))
+    table.cell(dashTable, 1, 0, "Volume", text_color = chart.fg_color, text_size = size.normal, bgcolor = color.new(chart.bg_color, 10))
+    
+    table.cell(dashTable, 0, 1, lastLiqType, text_color = lastLiqColor, text_size = size.normal, text_halign = text.align_left)
+    table.cell(dashTable, 1, 1, str.tostring(lastLiqVol, format.volume), text_color = lastLiqColor, text_size = size.normal, text_halign = text.align_right)
+
+// --------------------------------------------------------------------------------------------------------------------}

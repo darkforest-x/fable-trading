@@ -1,0 +1,42 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ExoMaven
+
+//@version=5
+indicator(title = "Parabolic Scalp Take Profit[ChartPrime]", shorttitle = "Parabolic Scalp Take Profit [V1]", overlay = true)
+
+exponential_value = input.float(title = "Aggressiveness", defval = 125, minval = 101, maxval = 200, group = "Curved Line Settings") / 100
+
+atr_len = 1000
+float atr_mult = 10 / 100//input.float(title = "Starting Slope", defval = 10, minval = 10, maxval = 100, group = "Curved Line Settings") / 100
+atr_value = ta.atr(atr_len)
+
+start_time = input.time(title = "Starting Candle Time", defval = 1, group = "Setup Settings", confirm = true)
+start_price = input.price(title = "Starting Price", defval = 1, group = "Setup Settings", confirm = true)
+start_side = input.string(title = "Starting Trade Side", defval = "Long", options = ["Long", "Short"], group = "Setup Settings", confirm = true)
+
+var bool in_trade = false
+var float current_price = na
+var float starting_slope = na
+
+if not in_trade and barstate.isconfirmed
+    if start_time == time
+        in_trade := true
+        current_price := start_side == "Long" ? start_price - (atr_value * atr_mult * 2) : start_price + (atr_value * atr_mult * 2)
+        starting_slope := start_side == "Long" ? (start_price + math.abs(atr_value * atr_mult)) - start_price : (start_price - math.abs(atr_value * atr_mult)) - start_price
+        
+else if in_trade and barstate.isconfirmed
+    starting_slope *= exponential_value
+    current_price += starting_slope
+
+    top_of_candle = close > open ? close : open
+    bot_of_candle = close < open ? close : open
+    touching = start_side == "Long" ? bot_of_candle <= current_price : top_of_candle >= current_price
+
+    if touching
+        in_trade := false
+
+plotshape(in_trade and not in_trade[1] and start_side == "Long", title = "Green Dot", style = shape.triangleup, location = location.belowbar, color = color.green, show_last = 20000, size = size.tiny)
+plotshape(in_trade and not in_trade[1] and start_side == "Short", title = "Red Dot", style = shape.triangledown, location = location.abovebar, color = color.red, show_last = 20000, size = size.tiny)
+
+plotshape(not in_trade and in_trade[1] and start_side == "Long", title = "Green Take Profit", style = shape.xcross, location = location.abovebar, color = color.blue, show_last = 20000, size = size.tiny)
+plotshape(not in_trade and in_trade[1] and start_side == "Short", title = "Red Take Profit", style = shape.xcross, location = location.belowbar, color = color.blue, show_last = 20000, size = size.tiny)

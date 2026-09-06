@@ -1,0 +1,47 @@
+{
+  "id": "qN6ElREt",
+  "title": "Power Order Blocks [ChartPrime]",
+  "url": "https://www.tradingview.com/script/qN6ElREt-Power-Order-Blocks-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:01.752563+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/qN6ElREt-Power-Order-Blocks-ChartPrime/",
+  "created_at": "2026-06-22T12:11:35.230074+00:00",
+  "updated_at": null,
+  "description": "🔶 OVERVIEW\nPower Order Blocks [ChartPrime] is an advanced structural detection engine designed to identify high-probability supply and demand zones. Unlike standard order block indicators, this tool focuses on \"Power\" — the intensity of the displacement following the block's formation, combined with a live information panel, equilibrium mapping, and touch tracking built directly into each zone.\n\nIt identifies the specific candle where institutional participants likely placed large orders, marks the resulting price inefficiency, and tracks these zones in real time until they are either mitigated or invalidated.\n\n\n🔶 CORE CONCEPT — THE DISPLACEMENT VALIDATOR\n\nThe foundation of a \"Power\" Order Block is the displacement that follows it. For a zone to be considered valid, the market must move away from it with significant force.\n\nThe script uses a Displacement Multiplier to ensure quality:\n• It compares the size of the engulfing candle to the previous candle's range.\n• If the breakout candle isn't large enough relative to the setup candle, the zone is ignored.\n• This filters out low-conviction market noise and focuses on areas of true institutional sponsorship.\n\n\n🔶 THE POWER RATING SYSTEM\n\nEvery detected block is assigned a \"Power\" percentage. This rating provides immediate context regarding the strength of the move that created the zone.\n\n• Calculation: The indicator compares the current displacement candle against the largest candle observed over a 100-bar lookback.\n• Meaning: A 100% Power rating indicates the strongest displacement seen in recent history, suggesting a massive imbalance between buyers and sellers.\n• Visual Intensity: When Power Intensity is enabled, the fill color of each block becomes more vivid as its Power % increases. High-power zones are immediately visible at a glance — weaker zones fade into the background naturally.\n\nThis allows traders to prioritize \"High Power\" zones, which typically offer more significant structural support or resistance.\n\n\n🔶 DYNAMIC ZONE MANAGEMENT\n\nThe indicator manages zones dynamically to keep the chart clean and relevant:\n\n Bullish Order Blocks (Demand): Formed when a bearish candle is followed by a high-displacement bullish candle. The zone is invalidated if price closes below the bottom of the block. Bearish Order Blocks (Supply): Formed when a bullish candle is followed by a high-displacement bearish candle. The zone is invalidated if price closes above the top of the block. Overlapping Cleanup: If a new order block forms that significantly overlaps an existing one, the script automatically removes the older, redundant zone to prevent clutter. Block Limit: A maximum of 10 active blocks per side are tracked at any time, ensuring chart performance remains clean.\n\n\n🔶 THE INFO PANEL\n\nEach active Order Block renders a dedicated Info Panel — a secondary box that floats at the right edge of the zone and updates in real time.\n\nThe panel displays:\n• Zone Direction: \"Bullish OB\" or \"Bearish OB\"\n• Power %: The relative displacement strength at the time of formation\n• Touch Counter: How many times price has tapped the zone boundary without breaking it\n\nThe touch counter is particularly valuable — a zone that has been tested multiple times without breaking demonstrates strong institutional defense and may represent a higher-conviction setup.\n\n\n🔶 EQUILIBRIUM LINE\n\nWhen Show Equilibrium Line is enabled, a line is drawn at the exact midpoint (50% level) of each Order Block.\n\n• This level represents the theoretical \"fair value\" within the zone.\n• Price often reacts precisely at the equilibrium before continuing in the original direction.\n• It provides a refined entry reference within a wider zone, improving risk-to-reward on entries.\n\n\n🔶 RETEST SIGNALS (MITIGATION)\n\nWhen Show Retest Labels is enabled, the script monitors active zones for price interaction.\n\n• If price returns to touch the boundary of a Bullish OB without breaking it, an upward arrow ⇡ appears below the bar.\n• If price returns to touch the boundary of a Bearish OB without breaking it, a downward arrow ⇣ appears above the bar.\n• A minimum 10-bar cooldown between signals prevents label spam on extended zone interactions.\n• Each confirmed retest also increments the Touch Counter inside the Info Panel.\n\n\n🔶 VISUAL ELEMENTS\n\n Main OB Body: A filled rectangle spanning the order block's price range, extending forward in time. Fill intensity reflects the Power % when Power Intensity is enabled. Info Panel: A secondary box at the right edge of each zone displaying Power % and Touch Count, updated live. Equilibrium Line: A midpoint line inside each block marking the 50% level of the zone. Retest Arrows: Clean arrow labels (⇡ / ⇣) marking the first tap into an active zone. Color Coding: Fully customizable colors for Bullish (Demand) and Bearish (Supply) zones.\n\n\n🔶 HOW TO USE\n\n Entry Zones: Wait for price to return to a high-power zone. The Retest Arrow confirms the touch. Consider entries near the equilibrium line for tighter stops. Zone Prioritization: Use the Power % to filter setups. Zones rated 70%+ represent the strongest institutional imbalances and are generally more reliable. Touch Count Context: A zone with 0 touches is fresh and untested — typically the highest probability. Zones with multiple touches may be weakening. Trend Confirmation: In a healthy trend, the market should consistently create and respect Power Order Blocks in the direction of the trend. Stop Loss Placement: Order blocks provide logical structural levels for stops — just below a Bullish OB bottom or above a Bearish OB top. Confluence: Combine the Power Rating, Equilibrium Line, and Touch Count together for the highest-quality setups.\n\n\n🔶 SETTINGS REFERENCE\n\n Displacement Multiplier: Controls how aggressive the displacement filter is. Higher values require a stronger engulfing move to validate a zone. Bullish / Bearish OB Color: Set the fill color for each zone type. Text Color: Controls the color of text inside the Info Panel. Show Equilibrium Line: Toggles the midpoint line inside each block. Power Intensity: When enabled, fill transparency scales with Power % — stronger zones appear more vivid. Show Retest Labels: Toggles the ⇡ / ⇣ arrow labels on zone interactions.\n\n\n🔶 CONCLUSION\n\nPower Order Blocks [ChartPrime] provides a systematic way to map institutional footprint on the chart. By combining strict displacement validation with a relative power rating, live info panels, equilibrium mapping, and touch tracking, it transforms raw price action into a clear and actionable map of supply and demand imbalances — allowing traders to trade alongside the strongest market moves with precision and confidence.",
+  "script": {
+    "id": 5530706,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;651873263ea641c5a2f681bee48b7a2e",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B651873263ea641c5a2f681bee48b7a2e/1",
+  "source_http_status": 200,
+  "source_sha256": "79e6178aea023bc643196d5be55e3a317682d6b9eb71c86fcdaf6951ae63423f",
+  "source_lines": 282,
+  "source_metadata": {
+    "created": "2026-06-22T12:11:34.513236Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;8282ac9345614c7487e4a864ccd0a698",
+      "originalScriptVersion": "3.0",
+      "sourceInputsCount": 0,
+      "stats": {
+        "alertcondition": 2
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Power Order Blocks [ChartPrime]",
+    "updated": "2026-06-22T12:11:34.513236Z",
+    "version": "1.0"
+  }
+}

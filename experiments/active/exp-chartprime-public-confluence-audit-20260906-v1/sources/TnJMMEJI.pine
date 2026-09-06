@@ -1,0 +1,382 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("RSI Primed [ChartPrime]")
+
+import lastguru/DominantCycle/2 as d
+
+double_exponential_moving_average(source)=>
+    var float ema1 = 0.0
+    var float ema2 = 0.0
+    var int count = 0
+    if close == close
+        count := nz(count[1]) + 1
+        ema1 := (1.0 - 2.0 / (count + 1.0)) * nz(ema1[1]) + 2.0 / (count + 1.0) * source
+        ema2 :=(1.0 - 2.0 / (count + 1.0)) * nz(ema2[1]) + 2.0 / (count + 1.0) * ema1
+    2 * ema1 - ema2
+
+patterns(Open, High, Low, Close, OHLC4, ma)=>
+
+    c_down_trend = OHLC4 < ma
+    c_up_trend = OHLC4 > ma
+
+    rsi_low = High < 40
+    rsi_high = Low > 60
+
+    c_body_hi = math.max(Close, Open)
+    c_body_lo = math.min(Close, Open)
+    c_body = c_body_hi - c_body_lo
+    c_body_avg = double_exponential_moving_average(c_body)
+    c_body_middle = c_body / 2 + c_body_lo
+    c_small_body = c_body < c_body_avg
+    c_long_body = c_body > c_body_avg
+    c_white_body = Open < Close
+    c_black_body = Open > Close
+
+    c_engulfing_bearish = c_up_trend and c_black_body and c_long_body and c_white_body[1] and c_small_body[1] and Close <= Open[1] and Open >= Close[1] and ( Close < Open[1] or Open > Close[1] ) and rsi_high
+
+    c_engulfing_bullish = c_down_trend and c_white_body and c_long_body and c_black_body[1] and c_small_body[1] and Close >= Open[1] and Open <= Close[1] and ( Close > Open[1] or Open < Close[1] ) and rsi_low
+
+    c_morning_star_bullish = false
+    if c_long_body[2] and c_small_body[1] and c_long_body
+        if c_down_trend and c_black_body[2] and c_body_hi[1] < c_body_lo[2] and c_white_body and c_body_hi >= c_body_middle[2] and c_body_hi < c_body_hi[2] and c_body_hi[1] < c_body_lo
+            c_morning_star_bullish := true
+
+    c_evening_star_bearish = false
+    if c_long_body[2] and c_small_body[1] and c_long_body
+        if c_up_trend and c_white_body[2] and c_body_lo[1] > c_body_hi[2] and c_black_body and c_body_lo <= c_body_middle[2] and c_body_lo > c_body_lo[2] and c_body_lo[1] > c_body_hi
+            c_evening_star_bearish := true
+    [c_engulfing_bearish, c_engulfing_bullish, c_morning_star_bullish, c_evening_star_bearish]
+
+grad_100(src)=>
+    color out = switch int(src)
+        0 => color.new(#1500FF , 20)
+        1 => color.new(#1709F6 , 20)
+        2 => color.new(#1912ED , 20)
+        3 => color.new(#1B1AE5 , 20)
+        4 => color.new(#1D23DC , 20)
+        5 => color.new(#1F2CD3 , 20)
+        6 => color.new(#2135CA , 20)
+        7 => color.new(#233EC1 , 20)
+        8 => color.new(#2446B9 , 20)
+        9 => color.new(#264FB0 , 20)
+        10 => color.new(#2858A7 , 20)
+        11 => color.new(#2A619E , 20)
+        12 => color.new(#2C6A95 , 20)
+        13 => color.new(#2E728D , 20)
+        14 => color.new(#307B84 , 20)
+        15 => color.new(#32847B , 20)
+        16 => color.new(#348D72 , 20)
+        17 => color.new(#36956A , 20)
+        18 => color.new(#389E61 , 20)
+        19 => color.new(#3AA758 , 20)
+        20 => color.new(#3CB04F , 20)
+        21 => color.new(#3EB946 , 20)
+        22 => color.new(#3FC13E , 20)
+        23 => color.new(#41CA35 , 20)
+        24 => color.new(#43D32C , 20)
+        25 => color.new(#45DC23 , 20)
+        26 => color.new(#47E51A , 20)
+        27 => color.new(#49ED12 , 20)
+        28 => color.new(#4BF609 , 20)
+        29 => color.new(#4DFF00 , 20)
+        30 => color.new(#53FF00 , 20)
+        31 => color.new(#59FF00 , 20)
+        32 => color.new(#5FFE00 , 20)
+        33 => color.new(#65FE00 , 20)
+        34 => color.new(#6BFE00 , 20)
+        35 => color.new(#71FE00 , 20)
+        36 => color.new(#77FD00 , 20)
+        37 => color.new(#7DFD00 , 20)
+        38 => color.new(#82FD00 , 20)
+        39 => color.new(#88FD00 , 20)
+        40 => color.new(#8EFC00 , 20)
+        41 => color.new(#94FC00 , 20)
+        42 => color.new(#9AFC00 , 20)
+        43 => color.new(#A0FB00 , 20)
+        44 => color.new(#A6FB00 , 20)
+        45 => color.new(#ACFB00 , 20)
+        46 => color.new(#B2FB00 , 20)
+        47 => color.new(#B8FA00 , 20)
+        48 => color.new(#BEFA00 , 20)
+        49 => color.new(#C4FA00 , 20)
+        50 => color.new(#CAF900 , 20)
+        51 => color.new(#D0F900 , 20)
+        52 => color.new(#D5F900 , 20)
+        53 => color.new(#DBF900 , 20)
+        54 => color.new(#E1F800 , 20)
+        55 => color.new(#E7F800 , 20)
+        56 => color.new(#EDF800 , 20)
+        57 => color.new(#F3F800 , 20)
+        58 => color.new(#F9F700 , 20)
+        59 => color.new(#FFF700 , 20)
+        60 => color.new(#FFEE00 , 20)
+        61 => color.new(#FFE600 , 20)
+        62 => color.new(#FFDE00 , 20)
+        63 => color.new(#FFD500 , 20)
+        64 => color.new(#FFCD00 , 20)
+        65 => color.new(#FFC500 , 20)
+        66 => color.new(#FFBD00 , 20)
+        67 => color.new(#FFB500 , 20)
+        68 => color.new(#FFAC00 , 20)
+        69 => color.new(#FFA400 , 20)
+        70 => color.new(#FF9C00 , 20)
+        71 => color.new(#FF9400 , 20)
+        72 => color.new(#FF8C00 , 20)
+        73 => color.new(#FF8300 , 20)
+        74 => color.new(#FF7B00 , 20)
+        75 => color.new(#FF7300 , 20)
+        76 => color.new(#FF6B00 , 20)
+        77 => color.new(#FF6200 , 20)
+        78 => color.new(#FF5A00 , 20)
+        79 => color.new(#FF5200 , 20)
+        80 => color.new(#FF4A00 , 20)
+        81 => color.new(#FF4200 , 20)
+        82 => color.new(#FF3900 , 20)
+        83 => color.new(#FF3100 , 20)
+        84 => color.new(#FF2900 , 20)
+        85 => color.new(#FF2100 , 20)
+        86 => color.new(#FF1900 , 20)
+        87 => color.new(#FF1000 , 20)
+        88 => color.new(#FF0800 , 20)
+        89 => color.new(#FF0000 , 20)
+        90 => color.new(#F60000 , 20)
+        91 => color.new(#DF0505 , 20)
+        92 => color.new(#C90909 , 20)
+        93 => color.new(#B20E0E , 20)
+        94 => color.new(#9B1313 , 20)
+        95 => color.new(#851717 , 20)
+        96 => color.new(#6E1C1C , 20)
+        97 => color.new(#572121 , 20)
+        98 => color.new(#412525 , 20)
+        99 => color.new(#2A2A2A , 20)
+        100 => color.new(#220027 , 20)
+    out
+
+grad(values)=>
+    switch values
+        39 => #6ef057
+        38 => #77ec56
+        37 => #7fe854
+        36 => #86e553
+        35 => #8ce151
+        34 => #92dd50
+        33 => #98d94f
+        32 => #9ed54d
+        31 => #a3d14c
+        30 => #a7ce4b
+        29 => #acca49
+        28 => #b0c648
+        27 => #b4c247
+        26 => #b8be46
+        25 => #bcb944
+        24 => #bfb543
+        23 => #c3b142
+        22 => #c6ad41
+        21 => #c9a93f
+        20 => #cca43e
+        19 => #cfa03d
+        18 => #d29c3c
+        17 => #d4973b
+        16 => #d79239
+        15 => #d98e38
+        14 => #dc8937
+        13 => #de8436
+        12 => #e07f35
+        11 => #e37934
+        10 => #e57433
+        9 =>  #e76e32
+        8 =>  #e96931
+        7 =>  #ea6230
+        6 =>  #ec5c2f
+        5 =>  #ee552e
+        4 =>  #f04d2d
+        3 =>  #f1452c
+        2 =>  #f33b2c
+        1 =>  #f5302b
+        0 =>  #f6212a
+
+ema(source)=>
+    var float ema = 0.0
+    var int count = 0
+    count := nz(count[1]) + 1
+    ema := (1.0 - 2.0 / (count + 1.0)) * nz(ema[1]) + 2.0 / (count + 1.0) * source
+    ema
+
+atan2(y, x) =>
+    var float angle = 0.0
+    if x > 0
+        angle := math.atan(y / x)
+    else
+        if x < 0 and y >= 0
+            angle := math.atan(y / x) + math.pi
+        else
+            if x < 0 and y < 0
+                angle := math.atan(y / x) - math.pi
+            else
+                if x == 0 and y > 0
+                    angle := math.pi / 2
+                else
+                    if x == 0 and y < 0
+                        angle := -math.pi / 2
+    angle
+
+
+// Custom cosh function
+cosh(float x) =>
+    (math.exp(x) + math.exp(-x)) / 2
+
+// Custom acosh function
+acosh(float x) =>
+    x < 1 ? na : math.log(x + math.sqrt(x * x - 1))
+
+// Custom sinh function
+sinh(float x) =>
+    (math.exp(x) - math.exp(-x)) / 2
+
+// Custom asinh function
+asinh(float x) =>
+    math.log(x + math.sqrt(x * x + 1))
+
+// Custom inverse tangent function
+atan(float x) =>
+    math.pi / 2 - math.atan(1 / x)
+
+// Chebyshev Type I Moving Average
+chebyshevI(float src, float len, float ripple) =>
+    a = 0.
+    b = 0.
+    g = 0.
+    chebyshev = 0.
+    
+    a := cosh(1 / len * acosh(1 / (1 - ripple)))
+    b := sinh(1 / len * asinh(1 / ripple))
+    g := (a - b) / (a + b)
+    chebyshev := (1 - g) * src + g * nz(chebyshev[1])
+    chebyshev
+
+degrees(float source) =>
+    source * 180 / math.pi
+
+trend_angle(source, length, smoothing_length, smoothing_ripple) =>
+    atr = ema(ta.highest(source, length) - ta.lowest(source, length))
+    slope = (source - source[length]) / (atr/(length) * length)
+    angle_rad = atan2(slope, 1)
+    degrees = chebyshevI(degrees(angle_rad), smoothing_length, smoothing_ripple)
+    normalized = int((90 + degrees)/180 * 39)
+
+ha_close(float Open = open, float High = high, float Low = low, float Close = close, bool enable = true) =>
+    ha_close = (Open + High + Low + Close) / 4
+    out = enable == true ? ha_close : Close
+ 
+ha_open(float Open = open, float High = high, float Low = low, float Close = close, bool enable = true) =>
+    ha_open  = float(na)
+    ha_close = ha_close(Open, High, Low, Close)
+    ha_open := na(ha_open[1]) ? (Open + Close) / 2 : (nz(ha_open[1]) + nz(ha_close[1])) / 2 
+    out = enable == true ? ha_open : Open
+
+ha_high(float Open = open, float High = high, float Low = low, float Close = close, bool enable = true) =>
+    ha_close = ha_close(Open, High, Low, Close)
+    ha_open  = ha_open(Open, High, Low, Close)
+    ha_high  = math.max(High, math.max(ha_open, ha_close))
+    out = enable == true ? ha_high : High
+
+ha_low(float Open = open, float High = high, float Low = low, float Close = close, bool enable = true) =>
+    ha_close = ha_close(Open, High, Low, Close)
+    ha_open  = ha_open(Open, High, Low, Close)
+    ha_low = math.min(Low,  math.min(ha_open, ha_close))
+    out = enable == true ? ha_low : Low
+
+rsi(source = close, length = 14, smoothing = 3)=>
+    close_filtered = chebyshevI(source, smoothing, 0.5)
+    up = math.max(ta.change(close_filtered), 0)
+    down = -math.min(ta.change(close_filtered), 0)
+    up_filtered = chebyshevI(up, length, 0.5)
+    down_filtered = chebyshevI(down, length, 0.5)
+    rsi = down_filtered == 0 ? 100 : 100 - (100 / (1 + up_filtered / down_filtered))
+
+ema(float source = close, float length = 9)=>
+    alpha = 2 / (length + 1)
+    var float smoothed = na
+    smoothed := alpha * source + (1 - alpha) * nz(smoothed[1])
+
+length(source, harmonic)=>
+    cycle = math.round(d.mamaPeriod(source, 1, 2048))
+    var cycles = array.new<float>(1)
+    var count_cycles = array.new<int>(1)
+    if not array.includes(cycles, cycle)
+        array.push(cycles, cycle)
+        array.push(count_cycles, 1)
+
+    else
+        index = array.indexof(cycles, cycle)
+        array.set(count_cycles, index, array.get(count_cycles, index) + 1)
+
+    max_index = array.indexof(count_cycles, array.max(count_cycles))
+    max_cycle = array.get(cycles, max_index) * harmonic
+
+style = input.string("Candle With Patterns", "Style", ["Candle", "Candle With Patterns", "Heikin Ashi", "Line"], inline = "Style")
+color_candles = input.bool(false, "Colorize", "Color the candles bassed on the RSI value.", "Style")
+ashi = style == "Heikin Ashi"
+not_line = style != "Line"
+length = input.float(24, "Length", 3, 500, 0.5)
+smoothing = input.float(3, "Smoothing", 1, 500, 0.25)
+enable_ma = input.bool(true, "Auto MA", inline = "MA")
+harmonic = input.int(1, "", 1, inline = "MA")
+colour_enable = input.bool(false, "Color Candles Overlay", "Enable this to color the chart's candles.")
+
+rsi_open = rsi(open, length, smoothing)
+rsi_high = rsi(high, length, smoothing)
+rsi_low = rsi(low, length, smoothing)
+rsi_close = rsi(close, length, smoothing)
+
+ha_close = ha_close(rsi_open, rsi_high, rsi_low, rsi_close, ashi)
+ha_open = ha_open(rsi_open, rsi_high, rsi_low, rsi_close, ashi)
+ha_high = ha_high(rsi_open, rsi_high, rsi_low, rsi_close, ashi)
+ha_low = ha_low(rsi_open, rsi_high, rsi_low, rsi_close, ashi)
+
+OHLC4 = math.avg(ha_close, ha_open, ha_high, ha_low)
+ 
+grad_100 = grad_100(ha_close)
+
+ma_length = length(OHLC4, harmonic)
+aema = chebyshevI(OHLC4, ma_length, 0.05)
+
+aema_colour = grad(trend_angle(aema, 4, 2, 0.5))
+
+bullish_color = #26a69a
+bearish_color = #ef5350
+alpha = color.new(color.black, 100)
+
+colour = color_candles ? grad_100 : ha_close > ha_open ? bullish_color : bearish_color
+
+[engulfing_bearish, engulfing_bullish, morning_star_bullish, evening_star_bearish] = patterns(ha_open, ha_high, ha_low, ha_close, OHLC4, aema)
+
+if engulfing_bullish and style == "Candle With Patterns" 
+    label.new(bar_index, -20, "EG", color = alpha, textcolor = bullish_color)
+    line.new(bar_index, 100, bar_index, 0, color = color.new(color.gray, 50), style = line.style_dashed)
+
+if morning_star_bullish and style == "Candle With Patterns" 
+    label.new(bar_index, -20, "ES", color = alpha, textcolor = bullish_color)
+    line.new(bar_index, 100, bar_index, 0, color = color.new(color.gray, 50), style = line.style_dashed)
+
+if engulfing_bearish and style == "Candle With Patterns"
+    label.new(bar_index, 120, "EG", color = alpha, textcolor = bearish_color, style = label.style_label_up)
+    line.new(bar_index, 100, bar_index, 0, color = color.new(color.gray, 50), style = line.style_dashed)
+
+if evening_star_bearish and style == "Candle With Patterns"
+    label.new(bar_index, 120, "ES", color = alpha, textcolor = bearish_color, style = label.style_label_up)
+    line.new(bar_index, 100, bar_index, 0, color = color.new(color.gray, 50), style = line.style_dashed)
+
+plotcandle(not_line ? ha_open : na, not_line ? ha_high : na, not_line ? ha_low : na, not_line ? ha_close : na, "RSI HA Candles", colour, colour, bordercolor = colour)
+plot(not not_line ? OHLC4 : na, "RSI Line", color_candles ? grad_100 : #7352FF, 2)
+plot(enable_ma ? aema : na, "MA", aema_colour, 2)
+
+barcolor(colour_enable ? grad_100 : na)
+
+top = hline(70)
+hline(50)
+bottom = hline(30)
+
+fill(top, bottom, color = color.new(#7352FF, 90))

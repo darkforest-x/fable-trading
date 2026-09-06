@@ -1,0 +1,44 @@
+{
+  "id": "paLrV2ud",
+  "title": "Supply & Demand: Cumulative Volume Delta Flow [ChartPrime]",
+  "url": "https://www.tradingview.com/script/paLrV2ud-Supply-Demand-Cumulative-Volume-Delta-Flow-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:11.473748+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/paLrV2ud-Supply-Demand-Cumulative-Volume-Delta-Flow-ChartPrime/",
+  "created_at": "2026-04-01T12:24:02.680147+00:00",
+  "updated_at": null,
+  "description": "🔶 OVERVIEW  \nThe Supply & Demand: CVD Flow indicator is a high-performance structural analysis tool that merges classic price-action Supply and Demand (S&D) zones with real-time order flow data. \n\nUnlike traditional S&D indicators that only show price boxes, this tool embeds a Cumulative Volume Delta (CVD) Wave directly inside every active zone. This allows traders to see not just where the market turned, but the intensity of the volume delta that has accumulated within that zone since its creation.\n\n🔶 CORE CONCEPT — VOLUME DELTA WITHIN STRUCTURE\n\nSupply and Demand zones represent areas where a significant imbalance between buyers and sellers occurred. \n\n Demand Zones: Created when a bearish \"base\" candle is followed by a high-momentum bullish breakout. Supply Zones: Created when a bullish \"base\" candle is followed by a high-momentum bearish breakout.\n\nBy integrating CVD, the indicator tracks the net buying vs. selling volume (Delta) that occurs as price lives within or returns to these zones. This provides a \"live\" look at whether a zone is being defended by big players or if interest is fading.\n\n🔶 THE CVD FLOW WAVE (POLYLINE ENGINE)\n\nThe standout feature of this indicator is the CVD Polyline Wave drawn inside the boxes:\n\n Visualizing Order Flow: The wave oscillates within the zone's boundaries based on cumulative volume delta. Demand CVD (Cyan): A rising wave suggests aggressive market buying is supporting the demand zone. Supply CVD (Orange): A falling wave suggests aggressive market selling is reinforcing the supply zone. Real-time Updates: The wave and the numerical CVD value in the label update dynamically with every bar, providing a clear view of the \"Volume Flow\" inside the structure.\n\n🔶 SMART DETECTION & MITIGATION\n\nTo maintain technical accuracy and chart clarity, the script employs several advanced management logic:\n\n ATR-Based Momentum: Breakouts are validated using a Momentum Multiplier. A zone is only formed if the breakout candle is significantly larger than the recent Average True Range (ATR), ensuring only high-conviction moves are captured. Overlap Protection: The script automatically checks for redundant zones. If a new zone forms over an existing one, it filters the overlap to keep the chart clean. Dynamic Mitigation: A Demand Zone is deleted instantly if price closes below its bottom (failed demand). A Supply Zone is deleted instantly if price closes above its top (failed supply).\n\n🔶 INDICATOR INPUTS\n\n ATR Length & Momentum Multiplier: Fine-tune the sensitivity of zone detection. Higher multipliers filter for \"Power\" breakouts. Max Active Zones: Limits the number of zones displayed to prevent performance lag and visual clutter. Custom Colors: Full control over zone fills, borders, and the internal CVD wave colors. Show Signals: Toggle the \"△\" and \"▽\" markers that appear at the moment of breakout.\n\n🔶 HOW TO USE\n\n Zone Validation: When price returns to a Demand zone, look at the CVD label. If the CVD is strongly positive and the wave is rising, it indicates that buyers are actively defending the level. Absorption Detection: If price is sitting in a Demand zone but the CVD wave is making lower lows, it may indicate \"absorption\"—where sellers are exhausting the available buy orders, potentially leading to a zone failure. Targeting: Use Supply zones as logical take-profit areas for longs, and Demand zones for shorts, while using the internal CVD flow to judge if price is likely to bounce or break through.\n\n🔶 CONCLUSION\n\nSupply & Demand: CVD Flow [ChartPrime] represents a new evolution in structural trading. By moving beyond simple price boxes and incorporating a high-fidelity Cumulative Volume Delta engine, it gives traders an \"X-ray\" view of the order flow dynamics driving supply and demand. \n\nIt is an essential tool for traders who want to combine the reliability of market structure with the precision of volume-based order flow analysis.",
+  "script": {
+    "id": 5062274,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;811ff515a5e4404eb53b058f1195873e",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B811ff515a5e4404eb53b058f1195873e/1",
+  "source_http_status": 200,
+  "source_sha256": "3259c3ac6136dcb9c4766aea1b364ecf53e4dae95a04f7ee62c137552a76ae31",
+  "source_lines": 279,
+  "source_metadata": {
+    "created": "2026-04-01T12:24:01.56929Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;8282ac9345614c7487e4a864ccd0a698",
+      "originalScriptVersion": "1.0",
+      "sourceInputsCount": 0
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Supply & Demand: Cumulative Volume Delta Flow [ChartPrime]",
+    "updated": "2026-04-01T12:24:01.56929Z",
+    "version": "1.0"
+  }
+}

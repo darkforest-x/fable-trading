@@ -1,0 +1,46 @@
+{
+  "id": "NZAHz4G1",
+  "title": "Polynomial Regression Keltner Channel [ChartPrime]",
+  "url": "https://www.tradingview.com/script/NZAHz4G1-Polynomial-Regression-Keltner-Channel-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:36.407045+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/NZAHz4G1-Polynomial-Regression-Keltner-Channel-ChartPrime/",
+  "created_at": "2024-08-12T12:54:21.062573+00:00",
+  "updated_at": null,
+  "description": "Polynomial Regression Keltner Channel\n\n⯁ OVERVIEW\nThe Polynomial Regression Keltner Channel [ChartPrime] indicator is an advanced technical analysis tool that combines polynomial regression with dynamic Keltner Channels. This indicator provides traders with a sophisticated method for trend analysis, volatility assessment, and identifying potential overbought and oversold conditions.\n\n◆ KEY FEATURES\n Polynomial Regression: Uses polynomial regression for trend analysis and channel basis calculation. Dynamic Keltner Channels: Implements Keltner Channels with adaptive volatility-based bands. Overbought/Oversold Detection: Provides visual cues for potential overbought and oversold market conditions.\n Trend Identification: Offers clear trend direction signals and change indicators.\n Multiple Band Levels: Displays four levels of upper and lower bands for detailed market structure analysis.\n Customizable Visualization: Allows toggling of additional indicator lines and signals for enhanced chart analysis.\n\n◆ FUNCTIONALITY DETAILS\n\n⬥ Polynomial Regression Calculation:\n Implements a custom polynomial regression function for trend analysis. Serves as the basis for the Keltner Channel, providing a smoothed centerline.\n\n\n⬥ Dynamic Keltner Channel Bands:\n Calculates ATR-based volatility for dynamic band width adjustment. Uses a base multiplier and adaptive volatility factor for flexible band calculation. Generates four levels of upper and lower bands for detailed market structure analysis.\n\n\n⬥ Overbought/Oversold Indicator line and Trend Line:\n Calculates an OB/OS value based on the price position relative to the innermost bands. Provides visual representation through color gradients and optional signal markers. Determines trend direction based on the polynomial regression line movement. Generates signals for trend changes, overbought/oversold conditions, and band crossovers.\n\n\n\n◆ USAGE\n Trend Analysis: Use the color and direction of the basis line to identify overall trend direction. Volatility Assessment: The width and expansion/contraction of the bands indicate market volatility. Support/Resistance Levels: Multiple band levels can serve as potential support and resistance areas. Overbought/Oversold Trading: Utilize OB/OS signals for potential reversal or pullback trades. Breakout Detection: Monitor price crossovers of the outermost bands for potential breakout trades.\n\n⯁ USER INPUTS\n Length: Sets the lookback period for calculations (default: 100). Source: Defines the price data used for calculations (default: HLC3). Base ATR Multiplier: Adjusts the base width of the Keltner Channels (default: 0.1). Indicator Lines: Toggle to show additional indicator lines and signals (default: false).\n\n⯁ TECHNICAL NOTES\n Implements a custom polynomial regression function for efficient trend calculation. Uses dynamic ATR-based volatility adjustment for adaptive channel width. Employs color gradients and opacity levels for intuitive visual representation of market conditions. Utilizes Pine Script's plotchar function for efficient rendering of signals and heatmaps.\n\nThe Polynomial Regression Keltner Channel [ChartPrime] indicator offers traders a sophisticated tool for trend analysis, volatility assessment, and trade signal generation. By combining polynomial regression with dynamic Keltner Channels, it provides a comprehensive view of market structure and potential trading opportunities. The indicator's adaptability to different market conditions and its customizable nature make it suitable for various trading styles and timeframes.",
+  "script": {
+    "id": 1761813,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;6899a3e8d99040f097093f9af2ef91f9",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B6899a3e8d99040f097093f9af2ef91f9/1",
+  "source_http_status": 200,
+  "source_sha256": "231d09c329e3d1f0000c742fbc7f8de57a5ce3fb5470b191885ce9fd4ad192f6",
+  "source_lines": 119,
+  "source_metadata": {
+    "created": "2024-08-12T12:54:20.189682Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "sourceInputsCount": 1,
+      "stats": {
+        "plot": 9,
+        "plotchar": 2
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Polynomial Regression Keltner Channel [ChartPrime]",
+    "updated": "2024-08-12T12:54:20.189682Z",
+    "version": "1.0"
+  }
+}

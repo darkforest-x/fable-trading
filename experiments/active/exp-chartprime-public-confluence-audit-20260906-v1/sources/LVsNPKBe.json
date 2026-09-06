@@ -1,0 +1,46 @@
+{
+  "id": "LVsNPKBe",
+  "title": "Sentiment Range MA [ChartPrime]",
+  "url": "https://www.tradingview.com/script/LVsNPKBe-Sentiment-Range-MA-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:37:14.516741+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/LVsNPKBe-Sentiment-Range-MA-ChartPrime/",
+  "created_at": "2023-10-31T18:02:16.217403+00:00",
+  "updated_at": null,
+  "description": "The \"Sentiment Range MA\" provides traders with a dynamic perspective on market activity, emphasizing both stability in chop zones and quick adaptability outside of them.\n\nKey Features:\n\nChop Zone Stability: In choppy markets, this indicator remains consistent, filtering out the noise to provide a clear view.Quick Adaptability: Should the price break out of these zones, the indicator recalibrates promptly.Dynamic Support and Resistance: Adapts based on the latest price action, serving as an evolving reference point.Emphasis on Recent Levels: The tool factors in the latest notable market levels to stay relevant and timely.\n\nConfigurations:\n\nData Source: Choose your desired metric, though many default to the closing price.Output Smoothing: Adjust the SR MA's response to market movements.Trigger Smoothing: Refine boundary definitions based on your market insights.ATR Period: Set the period for the ATR, influencing the surrounding boundary's width.Range Multiplier: Control the ATR's effect on the range.Range Switch: Flip between high-low and open-close values for range determination.\n\nVisuals\n\nSentiment Range MA Line:\n- This is the flowing line that transitions between green and red. \n- When it's green, it indicates bullish momentum in the market. This suggests a prevailing upward trend and can be an entry cue for traders who trade with the trend.\n- When it turns red, bearish sentiments dominate. It indicates the potential beginning of a downtrend or a continued downtrend. Traders might interpret this as a signal to be cautious, to short the market, or to exit long positions.The Chop Zone:\n- This is the space between the price candles and the Sentiment Range MA line. It represents a region where the price is considered to be moving sideways or without a clear direction. Price movements within the chop zone might not be substantial enough to warrant a trading decision. Only when the price breaks out of this zone do we see the Sentiment Range MA line change color, signaling a potential trading opportunity.\n\nBy interpreting these visuals, traders can make more informed decisions based on the prevailing market sentiment and trend. The chart becomes a tool, providing both an overview of the market condition and potential entry or exit points based on the Sentiment Range MA indicator's readings.\n\nDetailed Settings Overview\n\nUnderstanding the settings of the Sentiment Range MA Indicator can greatly enhance its utility in your trading strategy. Let's dive deeper into each:\n\nOutput Smoothing:\nPurpose: It refines the SR MA to provide a clearer trend perspective.\nFunctionality: \n- At `0`, it ensures the indicator responds immediately to price deviations from the chop zone.\n- At higher values, it transforms the indicator into a volatility-adjusted moving average.\nFiltering Modes:\n- Single Filtering: Prioritizes speed.\n- Double Filtering: Emphasizes stability.Trigger Smoothing:\nPurpose: Used for the range break detection.\nFunctionality: It dampens the indicator's sensitivity to sudden market volatility, preventing unnecessary triggers.ATR Length:\nPurpose: Governs the retrospective period for the chop zone.\nFunctionality: \n- Higher values offer a more consistent and broad range size, capturing more historical data.\n- Lower values allow for a more adaptive and responsive range.Range Multiplier:\nPurpose: Modifies the breadth of the range around the SR MA.\nFunctionality: Increasing the multiplier will extend the range, giving more leeway before triggering, while decreasing it will narrow the range, making the indicator more responsive to price changes.Range Style:\nPurpose: Decides which candlestick data is factored into the true range calculations.\nOptions:\n- Body: Uses the open and close values.\n- Wick: Accounts for the high and low values.\nFunctionality: Switching between styles lets you prioritize either the overall volatility (Wick) or just the concluded price action for a period (Body).\n\nBy fine-tuning these settings, traders can tailor the Sentiment Range MA Indicator to various market conditions and personal trading styles, ensuring optimal decision-making.\n\nQuick Start\n\n\n\nBased on the provided chart, here's a brief explanation of the default settings for the Sentiment Range MA Indicator:\n\nLength: Set at `20`.\n- This determines the base moving average period. A standard setting, it calculates the average price over the last 20 periods, providing traders with a clear perspective of short-term trends.ATR Length: Set at `200`.\n- This adjusts the lookback period for the Average True Range (ATR), which in turn influences the chop zone calculation. At a setting of 200, it offers a comprehensive view, considering a longer stretch of historical data.Range Multiplier: Set at `6`.\n- This multiplies the ATR value, widening or narrowing the band around the SR MA. A setting of 6 means the range around the SR MA is determined by multiplying the ATR by 6, offering a broader fluctuation zone.\n\nOn the chart, the green line represents the bullish sentiment and the red represents the bearish sentiment. Price movements above and below these lines can be used as potential buy or sell signals respectively. Fine-tuning these settings can cater the Sentiment Range MA Indicator to your specific trading strategy and market condition preferences.\n\nAlternative Settings\n\n\n\nFor traders looking to adapt to faster market conditions or prefer a more agile analysis, here's a brief description of the alternative settings for the Sentiment Range MA Indicator:\n\nLength: Set at `3`.\n- This highly responsive setting calculates the average price over the last 3 periods. Ideal for quick market movements, it offers traders insights into very short-term price trends and potentially swift trade opportunities.ATR Length: Set at `50`.\n- This shorter lookback period for the Average True Range (ATR) focuses on more recent market volatility, providing a tighter and more current chop zone calculation. It's suitable for those wanting to respond to recent market shifts.Range Multiplier: Set at `4`.\n- Multiplying the ATR by 4 narrows down the buffer around the SR MA. This creates a tighter sentiment range, possibly resulting in more frequent crossovers and trading signals.\n\nIn the provided chart, the green line still denotes bullish momentum while the red symbolizes bearish sentiment. These alternative settings might generate more frequent signals, so traders should ensure their strategy is aligned with this heightened sensitivity.\n\nWrapping Up\n\nThe Sentiment Range MA melds stability and agility, making it a valuable tool in your trading toolkit. As always, before integrating new indicators, take the time to understand its nuances and potential impacts on your strategy.",
+  "script": {
+    "id": 1256531,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;7f80af2f1e3546549f3d98785e39c76b",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B7f80af2f1e3546549f3d98785e39c76b/1",
+  "source_http_status": 200,
+  "source_sha256": "73e4859f7b00fc81e3a7f33959d4cf0c42ec1fc006382cb682855ec504287c6a",
+  "source_lines": 95,
+  "source_metadata": {
+    "created": "2023-10-31T18:02:15.213184Z",
+    "extra": {
+      "isCompiled": true,
+      "isMTFResolution": true,
+      "is_price_study": true,
+      "kind": "study",
+      "sourceInputsCount": 1,
+      "stats": {
+        "plot": 3
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Sentiment Range MA [ChartPrime]",
+    "updated": "2023-10-31T18:02:15.213184Z",
+    "version": "1.0"
+  }
+}

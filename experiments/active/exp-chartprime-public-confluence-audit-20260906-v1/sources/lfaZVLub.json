@@ -1,0 +1,48 @@
+{
+  "id": "lfaZVLub",
+  "title": "DeltaPulse Wave [ChartPrime]",
+  "url": "https://www.tradingview.com/script/lfaZVLub-DeltaPulse-Wave-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:12.105126+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/lfaZVLub-DeltaPulse-Wave-ChartPrime/",
+  "created_at": "2026-03-26T12:07:02.386022+00:00",
+  "updated_at": null,
+  "description": "🔶 OVERVIEW  \nDeltaPulse Wave [ChartPrime] is a high-contrast orderflow oscillator that visualizes institutional conviction and identifies market absorption through standardized Volume Delta analysis. By normalizing the net difference between aggressive buying and selling into a readable wave, this tool allows traders to spot trend exhaustion and high-probability reversals before they appear in the price action.\n\nThe indicator focuses on the relationship between price structure and volume delta, featuring automated divergence detection that connects price peaks to the underlying volume flow.\n\n• Standardized Relative Delta Strength (RDS)  \n• NEW: Integrated Status Dashboard (Trend, Value, & Last Signal)  \n• NEW: On-Chart \"Bull/Bear\" Signal Triangles (force_overlay)  \n• Structural Divergence Detection (Price HH vs. Wave LH)  \n• Adjustable OB/OS Volatility Thresholds  \n• Price Chart & Oscillator Sync Lines  \n\n\n\n\n🔶 CORE CONCEPT — RELATIVE DELTA\nStandard cumulative delta indicators often run off the chart or reset at arbitrary times. DeltaPulse solves this by normalizing the Delta into a fixed range (-50 to +50).\n• Surge Intensity: The gradient fill expands as volume conviction increases, highlighting where \"Smart Money\" is most active.\n• Neutral Equilibrium: The wave oscillates around a zero baseline, marking the shift between aggressive buyer and seller control.\n\n\n🔶 INTEGRATED DASHBOARD\nThe script now features a customizable dashboard that provides real-time analytics without cluttering your workspace:\n Current Wave: Tracks the exact RDS value in real-time. Trend Status: Automatically identifies the prevailing market bias based on the zero-line crossover. Last Divergence: Keeps a record of the most recent signal (Bullish or Bearish) for quick reference.\n\n\n\n🔶 ADVANCED DIVERGENCES & MARKERS\nThe oscillator includes a sophisticated divergence engine that connects structural peaks and troughs.\n On-Chart Labels: High-visibility triangles with \"Bull\" and \"Bear\" text are plotted directly on price bars (using force_overlay), ensuring you never miss a signal while focusing on price action. Filtering Logic: Only divergences with a minimum 5-bar gap are flagged, ensuring that only significant market shifts are identified. Sync Lines: Solid lines are drawn on both the Price Chart and the Oscillator, making it easy to see when price is being \"pushed\" higher on lower volume (Absorption).\n\n\n🔶 HOW TO USE\n Absorption Reversals: Look for a Bearish Divergence (Red Triangle) at a major resistance zone. This signals that aggressive buying is decreasing even as price attempts to climb higher. Trend Strength: A healthy trend should be accompanied by the wave holding above the OB Threshold (25) for bullish runs or below the OS Threshold (-25) for bearish runs. Check the Dashboard to confirm the \"Bullish/Bearish\" trend state. Snap-Back Trades: When the wave reaches extreme levels (+/- 40), it signals an over-extension that often results in a mean-reversion move toward the zero baseline.\n\n\n🔶 CONCLUSION\nDeltaPulse Wave [ChartPrime] reveals the \"hidden fuel\" of every market move. By filtering out minor fluctuations and providing both an on-chart signal system and a data-rich dashboard, it provides traders with a reliable tool for identifying institutional participation and trend exhaustion.\n",
+  "script": {
+    "id": 5028788,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;793e90b029f14888a0704a8ffedac006",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B793e90b029f14888a0704a8ffedac006/1",
+  "source_http_status": 200,
+  "source_sha256": "e92978a8e5fa0873ba25e60c37d0d4b5bea6b33533bbc28cbcb2ad39d2a9e2fe",
+  "source_lines": 159,
+  "source_metadata": {
+    "created": "2026-03-26T12:07:01.399816Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": false,
+      "kind": "study",
+      "originalScriptId": "USER;8282ac9345614c7487e4a864ccd0a698",
+      "originalScriptVersion": "0.9",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 5,
+        "plotshape": 4
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "DeltaPulse Wave [ChartPrime]",
+    "updated": "2026-03-26T12:07:01.399816Z",
+    "version": "1.0"
+  }
+}

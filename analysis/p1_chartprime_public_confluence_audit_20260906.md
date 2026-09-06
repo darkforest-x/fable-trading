@@ -1,0 +1,2772 @@
+# ChartPrime Confluence Audit
+
+## 能加入共振，但应补足不同信息，而不是叠加同色箭头
+
+本次逐项审查 ChartPrime 公开主页的 148 个脚本：134 个读取公开源码，14 个因源码受限只分析官方说明。**最值得推进的是结构脱离、相对参与量、成本区与空间这几类机制；不建议把多套均线/振荡器的颜色直接凑票。** 每项的实际公式、默认参数、信息何时可用、适合角色和单变量验证假说均在下方独立条目中。
+
+这是源码筛选结果，不是盈利验收。没有把任何新指标加入当前系统，没有跑新价格回测，也没有修改 TradingView。源码默认参数不是最优参数；148 个脚本不是 148 份独立证据。
+
+## 范围：完整公开清单，不代表全部产品源码可见
+
+截至北京时间 2026 年 9 月 6 日晚，按官方分页接口列举七页，共 148 个唯一发布 ID；与主页数量一致。不同 ID 的同名脚本保留：例如 Multiple Non-Linear Regression 有公开版和受限版，不能按名称去重。范围不含已删除、隐藏或未公开的产品。
+
+“源码已读”指检查下载到的指定版本；“仅说明”指未获公开源码，不推断其真实公式或重绘情况。每项保留作者与许可、官方链接、源码字节哈希和关键行号。来源页面版本以后可能变化，本报告是冻结快照。
+
+研究分母是脚本，不是交易。没有 OHLCV 市场样本、训练集、验证集或 holdout 消耗。AUC、置换 p、毛/净收益、胜率、匹配随机交易对照均不适用：尚未生成策略收益。对应严格检查是清单完整性、访问控制、字节哈希、引用范围和故意破坏输入时必须拒绝的测试。
+
+## 三类看起来很强、却不能直接作为共振的证据
+
+**名称与真实数据不同。** Liquidity Flow Surge Profile 用成交量相对 500 根最大量与 K 线涨跌标注多/空清算，不读取交易所清算流。Volumetric Trend Ribbon Pro 的量峰值只影响颜色，并没有进入 bullCross 的触发条件。不能因为图上写着 liquidation、CVD、Strong 就按真实订单流计票。
+
+**绘制时刻与可用时刻不同。** Trend Classifier、SuperTrend Oscillator 的部分菱形使用当前信号配 offset=-1，图上提前一根。HTF Conviction Divergence Matrix 未偏移的 HTF OHLC 配 lookahead_on，会令该大周期背景/价位在历史上提前知道；这不等于它所有本周期 RSI 背离计算都泄漏。枢轴右侧确认、最新波段重画、实时未收盘波动也要分别处理，不能统称一个“重绘”。
+
+**多个公式可能重复同一个条件。** Bayesian Trend 的概率形态输出来自相关均线得分组合，不是校准过的交易胜率。Dynamic Trend Bands 的 Source 输入被函数内部 close 覆盖。默认值、工具提示与真实执行路径都必须对照源码。
+
+对应原始来源：[Flow Surge](https://www.tradingview.com/script/EQSY3xU0/)、[VTR Pro](https://www.tradingview.com/script/sXyMhOCc/)、[Trend Classifier](https://www.tradingview.com/script/AtJtdaDe/)、[SuperTrend Oscillator](https://www.tradingview.com/script/JqEFTgOE/)、[HTF Matrix](https://www.tradingview.com/script/8pOsueGg/)、[Bayesian](https://www.tradingview.com/script/rVEhAQDO/)、[Dynamic Bands](https://www.tradingview.com/script/fsfPi8mp/)。
+
+## 库的构成：先区分信息来源，再决定要测什么
+
+下图按源码主要机制做互斥导航分类；受限脚本单独归类。数量表示条目覆盖，不表示策略质量或独立因子数量。一个脚本可能混合多种机制，因此详细条目的 category 与这里较宽的主分类可不同。价格平滑、结构、成交量代理分别有价值，但都需要与现有特征做增量比较。
+
+## 建议顺序：先减少盘整入场，再研究更好的兑现
+
+| 优先研究机制 | 可借鉴源码 | 在我们的系统中负责什么 | 使用前必须处理 |
+|---|---|---|---|
+| 已确认结构脱离 | Market Break Analytics；Breakout Boxes | K1/K2 之前的方向背景，或 K1 是否真正离开已存在区间；避免均线附近反复开仓 | 枢轴分别默认右确认10/5根；不能把确认后的结构回填到旧 K1；Market Break 默认显示单方向 |
+| 成本区与前方空间 | Session VWAP + StdDev Bands；已确认支撑阻力类 | 判断在成本区内部震荡，还是脱离成本区；避免直接撞上已知阻力 | VWAP 默认周锚，原代码时间映射的历史/实时重置需先做一致性测试；不是直接复制周末重置行为 |
+| 相对参与量 | Volumetric Trend Ribbon Pro 的 volume/SMA(volume,60)，只借鉴独立量比字段 | 比较同一入口有量支持与无量支持的增量；不能把原带突破称为量能确认 | 默认1.5只用于量峰颜色；若加成交易门是新假说，保留前置冻结与费用、匹配对照 |
+| 单一中性/冲突状态 | Trend Classifier | 作为现有均线过滤的对照或替代候选，观察能否减少来回打脸 | 橙色并非经验证的盘整；与斜率、距离、振幅重叠；移除回画的成交假象 |
+| 获利衰减与余仓管理 | SuperTrend Oscillator；Dynamic Trend Bands | 之后单独比较减仓/退出时钟，避免利润全部回吐 | 信号按实际收盘确认；兑现与保护止损分账，不能把抬高止损记成已止盈 |
+
+这些是**机制候选，不是已通过的推荐参数**。优先从一个结构状态门开始做支持度审计；不要一次把表内条件全部相与，造成只剩几笔“完美交易”。历史波动率指标只衡量自身波动分位，不等于趋势有效、也不等于波动正在扩张。真正交易所主动买卖量、持仓量或资金费率需要另一个可追溯数据源，本次不会用 OHLCV 代理冒充。
+
+既有项目已经试过斜率、穿越次数、效率、量能、突破和高周期方向等入口家族；这里不能把同类换皮当全新发现。下一步先查新公式相对旧字段的重复性，再决定是否值得一次真实实验。
+
+## 对候选名称的限定
+
+上文“成本区”指成交量加权价格或价格停留分布代理，不是持仓者真实成本；量比是单独提取的字段，不代表已证统计独立。部分公开源码采用 CC BY-NC-SA 等许可，并非全部都是 MPL；本次保留原许可与署名，后续复制、改写和分发前须逐项核对，不能把公开可读等同于任意用途许可。
+
+## 比再加一条均线更值得验证：跨资产市场广度
+
+[Multi Asset Histogram](https://www.tradingview.com/script/KkoxM97D/) 确实读取十个外部资产，默认 BTC、ETH、BNB、SOL、XRP、DOGE、ADA、AVAX、DOT、LINK 的 USD 对。它将当前 HL2 与过去50根逐根比较，逐次计+1或−1后求和；这不是涨幅或资金流。
+
+可借鉴的共振是假设：当 BTC/ETH 的 K1 启动时，其他事前固定资产是否也在同方向推进，而不是单币在均线附近抖动。研究时排除目标币自己的重复票、固定币池与数据源、只合并共同已完成时刻，缺少历史记未知，不能沿用源码 nz→0 造成的暖机偏高。原输入未锁交易所/永续口径，也不能默认与本项目一致。
+
+这比同币再加一种平滑有更明确的信息来源差异，但加密资产共同 beta 很强，仍需要同环境随机入场对照；不能说它已经提供独立超额收益。对黄金不直接套加密币池。
+
+## 原版 K 线变色不是完整趋势反转
+
+[Moving Average Shift](https://www.tradingview.com/script/aApUyBnk/) 默认用 HL2 与 SMA40 比较：HL2≥均线为青色，否则橙色，实体、影线和边框都用同一个侧色。它不检查均线斜率；振荡器的四色与转向菱形是另外一套条件。
+
+所以小周期变色表示“价格中点换到均线另一侧”，可能是真反转，也可能仅是趋势内回踩。用它当减仓或离场信号可以提出假说，但不能在定义上把它直接叫作趋势终结。源码主线和光晕的默认线宽与用户希望的细线/关闭光晕也需分开：本次只做语义审查，不修改已有图表样式。
+
+## 怎样加入 K1/K2，而不再满屏信号
+
+建议架构是“允许交易的环境 → 原有 K1/K2 → 一次有效入场 → 分账管理余仓”，不是每个指标各自开一单。首先只读已完成 bar 的环境信息；盘整或证据冲突时不放行。K1/K2 的原始定义、硬止损、成交时钟与成本先固定，单独测一个额外条件。
+
+评价保留全部原始机会：新增过滤拒绝的机会既包括亏损也包括后来赢家，必须同时统计。比较净收益、总收益机会成本、匹配随机对照超额、不同时间段、交易覆盖、错过的大趋势和尾部回撤。不能只看被筛留下来的胜率，也不能先选出后来启动的170笔再反推共同特征。
+
+若以后研究兑现，至少分别记录实际已卖出/买回的比例及成交价、仍持有部分、当时可用止损。小周期变色可作为减仓候选，不自动等于全趋势终结；但任何分批方案仍需全路径回放，不能保证留余仓一定更赚。此处不冻结新的阈值或 TP/SL 参数，也未执行任何交易。
+
+## 全部条目索引
+
+索引保留主页顺序，便于找到名称和下方同号条目。每个条目分别说明机制、参数、风险与用途；不是用统一模板把名字换一遍。受限项目也保留，不以缺源码为由悄悄排除。
+
+## 001 · Dynamic Deviation Channels (RSI Trigger) [ChartPrime]
+
+源码已读 · 波动通道/逆向回归
+
+**实际机制：** EMA20中轴；所谓标准差实为1.5×ATR100，RSI20再SMA5决定仅显上/下轨；价格或影线重穿第一轨发信号。
+
+**参数与默认值：** EMA20，RSI20，轨倍数1/2/3；同向原始信号间隔至少5根。
+
+**确认时刻与重绘风险：** 无MTF/负offset；未锁收盘，RSI切换使轨道NA，实时信号可变。
+
+**在本系统中的角色：** 趋势中防追远离均线，不宜把逆向回轨箭头直接当顺势K2。
+
+**重复性与独立性：** 价位/动量同源于MA与RSI，没有新增量能。
+
+**可验证假说（未回测）：** 只检验K1的ATR标准化离均线距离，不叠整套箭头。
+
+[官方发布页](https://www.tradingview.com/script/sSqHpGiw-Dynamic-Deviation-Channels-RSI-Trigger-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B869805e277524b6f9604264576a4bfb7/1) · 关键行 45, 52, 55, 67, 79, 88。
+
+## 002 · RSI Probability Matrix [ChartPrime]
+
+源码已读 · RSI均值回归/历史胜率表
+
+**实际机制：** RSI上穿其SMA且<40做多，反向且>60做空；信号收盘假入场，±3ATR对称障碍，按整数RSI累计胜负。
+
+**参数与默认值：** RSI14、信号14、ATR14×3、阈值40/60。
+
+**确认时刻与重绘风险：** 同根TP/SL先计TP；无成本/滑点/收盘门，表是已结束样本频率非样本外概率。
+
+**在本系统中的角色：** 只能作反向动量背景，不把Win%当K1K2盈利概率。
+
+**重复性与独立性：** 仍是RSI价格变换；统计表不构成独立因子。
+
+**可验证假说（未回测）：** 如使用需独立修正保守成交与费用后检验，不能借表内胜率筛样。
+
+[官方发布页](https://www.tradingview.com/script/c25U5rsF-RSI-Probability-Matrix-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B5dfdfad08cf348138e3977de614d8f3c/1) · 关键行 37, 60, 66, 73, 96, 135, 206。
+
+## 003 · Volume Liquidity Trend [ChartPrime]
+
+源码已读 · ATR趋势/成交量锚点
+
+**实际机制：** 固定系数递推M=k×价格+(1−k)M[1]，ATR200×2带滞回；整根量落在HLC3锚点，以趋势内最大单根量归一并剔除被实体穿越的线。
+
+**参数与默认值：** 滞后1、k=.05（近EMA39）、量门.1、延长20根。
+
+**确认时刻与重绘风险：** 仅末bar回算并删除重画，后来的最大量改变旧强度；非真实量价分布/挂单，非自适应Kalman；CC BY-NC-SA。
+
+**在本系统中的角色：** 可研究已知量锚距离或ATR趋势禁入。
+
+**重复性与独立性：** 趋势与MA40高度重叠；量锚非独立订单流。
+
+**可验证假说（未回测）：** 冻结K1时可见且未破坏的量锚，检验结构空间，不读最终画线。
+
+[官方发布页](https://www.tradingview.com/script/1y4j6KFj-Volume-Liquidity-Trend-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B49f360a1bee245c89987f45f2744f280/1) · 关键行 12, 45, 49, 52, 98, 124, 131, 136, 153。
+
+## 004 · Bolinger Bands Range RSI Oscillator [ChartPrime]
+
+源码已读 · 布林/映射RSI背离
+
+**实际机制：** SMA100±3标准差；将(RSI20−50)/30映射到该通道，再对映射曲线而非纯RSI找价动背离。
+
+**参数与默认值：** 左右pivot5/2、间距4..60，信号SMA9默认隐藏。
+
+**确认时刻与重绘风险：** 背离确认晚2根且offset−2；StrongBull在更新pivotHigh前引用本根初始false，需单测其有效性；未锁收盘。
+
+**在本系统中的角色：** 作为追涨杀跌/衰竭警示，不直接反转趋势仓。
+
+**重复性与独立性：** 映射同时混入均线与波动，不是独立RSI背离。
+
+**可验证假说（未回测）：** 先验证映射背离是否优于纯RSI同钟基线。
+
+[官方发布页](https://www.tradingview.com/script/PjtZwuhe-Bolinger-Bands-Range-RSI-Oscillator-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bee4df40e2c4e49299b461f8088b914ea/1) · 关键行 43, 54, 56, 81, 90, 94, 135, 145。
+
+## 005 · Macro Trend Split Profile [ChartPrime]
+
+源码已读 · Supertrend/价格停留分布
+
+**实际机制：** Supertrend分段，在HL2价格箱分别数阳线/阴线；POC是最多K线箱，不使用volume。
+
+**参数与默认值：** Supertrend20×5；趋势40根后展示，15箱、宽40。
+
+**确认时刻与重绘风险：** 每根重算整段箱界并把最终箱体画回趋势起点；无MTF，未锁收盘，不可将最终POC前置。
+
+**在本系统中的角色：** 可候选趋势年龄/盘整密集区描述。
+
+**重复性与独立性：** Supertrend与均线同价趋势；箱计数是停留，不是资金量。
+
+**可验证假说（未回测）：** 只用K1当时已闭合段的密集度对照，不能用最终整段。
+
+[官方发布页](https://www.tradingview.com/script/3iIKktis-Macro-Trend-Split-Profile-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B7820a52ba7764734ab2b3af521232928/1) · 关键行 12, 49, 63, 88, 91, 96, 119, 155, 172。
+
+## 006 · Trend-Reset Cumulative Delta [ChartPrime]
+
+源码已读 · ATR滞回趋势/伪CVD
+
+**实际机制：** EMA带突破重置累计有符号整根量，阳线+量，其余含十字−量；翻转首根从当根量而非0起算。
+
+**参数与默认值：** EMA50、ATR14×2；累计值Z20阈2；pivot左15右1固定。
+
+**确认时刻与重绘风险：** 未锁收盘；pivot晚1根并回标，标签用当前累计值；Z窗口跨重置，非真实主动买卖差。
+
+**在本系统中的角色：** 可研究趋势滞回/量能参与，不能称机构吸收。
+
+**重复性与独立性：** EMA与MA同源；与DeltaPulse共享阳阴线分量。
+
+**可验证假说（未回测）：** 只选一种归一化量代理，检验超越价格形态的增量。
+
+[官方发布页](https://www.tradingview.com/script/KoXIqM5l-Trend-Reset-Cumulative-Delta-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B93b08b314d6a44889f8267a1b8dd40f7/1) · 关键行 12, 37, 43, 53, 57, 68, 73, 93。
+
+## 007 · Pivot Support & Resistance Matrix [ChartPrime]
+
+源码已读 · 确认枢轴/支撑阻力密集度
+
+**实际机制：** 5/5枢轴建线，距活线≤2ATR14不新建；收盘破坏变灰；600根枢轴频数平滑成200箱剖面。
+
+**参数与默认值：** pivot5/5、回看600、ATR14×2、箱200半径3。
+
+**确认时刻与重绘风险：** 晚5根且回画；last_bar_index裁剪使历史集合依赖终点；var bin_counts末bar累加未清零，连续运行与重载有偏差。
+
+**在本系统中的角色：** 修正计数后可测K1前方已确认阻力距离/拥挤禁入。
+
+**重复性与独立性：** 价格结构比单MA更不同；不是成交量POC。
+
+**可验证假说（未回测）：** 先修累加与终点裁剪，再冻结事前结构距离作单变量。
+
+[官方发布页](https://www.tradingview.com/script/cDETyPNA-Pivot-Support-Resistance-Matrix-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B58bcf93f489f4f19b107a7712ab4bced/1) · 关键行 50, 62, 85, 90, 121, 143, 170, 178, 220。
+
+## 008 · Smart Money Fibonacci OTE Engine [ChartPrime]
+
+源码已读 · 确认摆动/Fibonacci回撤
+
+**实际机制：** 新确认pivot高于前高或低于前低时换向，以最近高低锚计算回撤；同趋势新极值会重定位整组Fib。
+
+**参数与默认值：** 对称pivot10；OTE .618..786；旧Fib默认删除。
+
+**确认时刻与重绘风险：** 晚10根确认，标签回标10根，Fib整组回算；不是收盘突破前高事件，无机构数据。
+
+**在本系统中的角色：** 可描述K2回撤深度与结构空间。
+
+**重复性与独立性：** 纯价格锚定，与市场结构同族，不能独立计票。
+
+**可验证假说（未回测）：** 按可用时点冻结摆动再测回撤深度；不直接套最终OTE。
+
+[官方发布页](https://www.tradingview.com/script/iR7drqnn-Smart-Money-Fibonacci-OTE-Engine-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B33a30aaf759942b99c1c81f55fb1bca6/1) · 关键行 58, 93, 112, 123, 130, 196, 246, 263。
+
+## 009 · Power Order Blocks [ChartPrime]
+
+源码已读 · 反向K线/位移订单块
+
+**实际机制：** 前根反向，当前收盘越前高/低且实体>.5×前根全幅，将前根高低记为OB；Power=块宽/100根最大幅。
+
+**参数与默认值：** 位移.5；最多各10块；重测信号间隔10根。
+
+**确认时刻与重绘风险：** 区块画回前根且破坏删除；重测是上根触区、当前极值退回区外，非当根刚触；未锁收盘。
+
+**在本系统中的角色：** 可做K1位移后的已知支撑/阻力回测位置。
+
+**重复性与独立性：** 无volume/订单数据，Power不是资金或胜率；与吞没K1高度重叠。
+
+**可验证假说（未回测）：** 只测K2与既存OB距离是否有增量，保留被破坏历史块。
+
+[官方发布页](https://www.tradingview.com/script/qN6ElREt-Power-Order-Blocks-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B651873263ea641c5a2f681bee48b7a2e/1) · 关键行 48, 56, 79, 98, 131, 138, 149, 154。
+
+## 010 · Volumetric Trend Ribbon Pro [ChartPrime]
+
+源码已读 · 量权均线/波动带趋势
+
+**实际机制：** VWMA30经EMA5，围绕平滑中心的量权残差平方开方成带；同向斜率+价格越带给Strong。
+
+**参数与默认值：** 长度30、平滑5、宽2、目标1.5带宽；量比SMA60阈1.5。
+
+**确认时刻与重绘风险：** 无MTF/负offset，未锁收盘；量突增只改颜色，Strong并无量门。
+
+**在本系统中的角色：** 可候选中性禁入/波动扩张背景。
+
+**重复性与独立性：** 均线方向与MA40同源，量权贡献需单独证明。
+
+**可验证假说（未回测）：** 比较相同价格门下量权与非量权中心，不把Strong当量确认。
+
+[官方发布页](https://www.tradingview.com/script/sXyMhOCc-Volumetric-Trend-Ribbon-Pro-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bdc1e4b0e471e4c128ff0fc8456640720/1) · 关键行 34, 38, 45, 47, 62, 89, 101。
+
+## 011 · HTF Candle Volume Profile [ChartPrime]
+
+源码已读 · 当前/已闭合HTF量剖面
+
+**实际机制：** 本图K线逐根合成HTF OHLC；每根全量按close装入20箱，展示当前及前三根HTF蜡烛与POC。
+
+**参数与默认值：** HTF日线、20箱、投影20、宽15。
+
+**确认时刻与重绘风险：** 不用security；当前HTF未闭合，末bar画回各HTF起点；最多4999根取样，历史不足/不整除周期需检查。
+
+**在本系统中的角色：** 已闭合HTF POC/边界可作K1结构空间。
+
+**重复性与独立性：** 不是真实成交价分布；与其他close装箱剖面同族。
+
+**可验证假说（未回测）：** 仅前一完整HTF已知POC距离作单变量，不用当前最终POC。
+
+[官方发布页](https://www.tradingview.com/script/yMqxwltF-HTF-Candle-Volume-Profile-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B28f1d4e416bc4440b67bf6ff79f31d67/1) · 关键行 12, 100, 114, 118, 196, 210, 222, 234。
+
+## 012 · Session VWAP + StdDev Bands [ChartPrime]
+
+源码已读 · 锚定VWAP/加权标准差
+
+**实际机制：** 累积HLC3×量/累积量，平方矩得真实量权标准差；触轨箭头和跨轨计数不是同一事件。
+
+**参数与默认值：** 默认周锚、HLC3、1/2/3σ、同方向冷却20根。
+
+**确认时刻与重绘风险：** security(time,lookahead_off)历史在HTF末端更新、实时可在开端更新，重置时点存在重载差；需修复并锁收盘。
+
+**在本系统中的角色：** 候选事前VWAP同侧/反复穿越禁入。
+
+**重复性与独立性：** 成交量加权价格，不是订单流；比另一MA仅增加锚定/量权。
+
+**可验证假说（未回测）：** 先统一周界重置钟，再检验K1前穿越频数。
+
+[官方发布页](https://www.tradingview.com/script/dHMkXOME-Session-VWAP-StdDev-Bands-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B69783b7908a148a39d7b4717d60d0ed2/1) · 关键行 21, 50, 59, 73, 105, 136, 153, 209。
+
+## 013 · Kinetic Trailing Stop & Targets [ChartPrime]
+
+源码已读 · 动量步进跟踪线/目标显示
+
+**实际机制：** ATR130相对50根最大值调缓冲，动量够大走guard分支；多头只上移、空头只下移，收盘穿线翻向。
+
+**参数与默认值：** 带3ATR、guard5ATR、敏感1；目标每2%。
+
+**确认时刻与重绘风险：** guard只在动量分支，不能保证永不近于5ATR；翻向未锁收盘，菱形延1根；目标线触及后画回起点，每bar只递增一级。
+
+**在本系统中的角色：** 只是退出机制候选，不能解决入口无优势。
+
+**重复性与独立性：** ATR趋势跟踪同族；目标标记不是实际分批成交。
+
+**可验证假说（未回测）：** 若研究固定入口仅换退出，先验证同根/跳空/多级目标成交。
+
+[官方发布页](https://www.tradingview.com/script/Wh9xxUzY-Kinetic-Trailing-Stop-Targets-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B009b8a46165947e08feb57dd8f405db7/1) · 关键行 20, 43, 55, 70, 73, 77, 98, 112, 136, 207。
+
+## 014 · Adaptive Momentum Velocity Ribbon
+
+源码已读 · HMA速度/加速度带
+
+**实际机制：** HMA40/80/100的2根差分为速度，再差分作加速度；箭头仅快线速度过阈，不要求三线同向。
+
+**参数与默认值：** 速度窗2、阈0；仪表1h/4h硬编码HMA20，非主图40。
+
+**确认时刻与重绘风险：** MTF lookahead_off仍取发展中高周期；空头加/减速文字与符号相反；未锁收盘。
+
+**在本系统中的角色：** 可研究一致性/价格趋势强度，不能把三个速度当三因子。
+
+**重复性与独立性：** 全为价格多重平滑，与MA40高相关，无volume。
+
+**可验证假说（未回测）：** 如选用只检验事前速度一致性，另冻结完整HTF状态。
+
+[官方发布页](https://www.tradingview.com/script/x3HqXTuL-Adaptive-Momentum-Velocity-Ribbon/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B3f359159ace340e8b2fe04dfcfaa0e73/1) · 关键行 50, 61, 66, 98, 104, 107, 137, 152。
+
+## 015 · Forward-Projecting Opportunity Cone [ChartPrime]
+
+源码已读 · 波动投影/未校准概率锥
+
+**实际机制：** 20根对数收益标准差按√t外推指数上下界；默认锚定已确认pivot高点。
+
+**参数与默认值：** 波动20、投影80、年365、pivot10、锁高点。
+
+**确认时刻与重绘风险：** pivot晚10根但锥回画原点；末bar重绘；68/95/99是分布假设非实证，tooltip把双侧覆盖写作单侧概率。
+
+**在本系统中的角色：** 只可描述风险尺度/追价距离，不能作方向或获利概率。
+
+**重复性与独立性：** 仍是价格波动，不新增趋势优势。
+
+**可验证假说（未回测）：** 先做因果时点与覆盖校准；不把锥边界预设为最优TP。
+
+[官方发布页](https://www.tradingview.com/script/XsF734lt-Forward-Projecting-Opportunity-Cone-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B3357ef70b4c34d95bce31077676fd332/1) · 关键行 49, 53, 60, 79, 133, 164, 261。
+
+## 016 · Supply & Demand: Cumulative Volume Delta Flow [ChartPrime]
+
+源码已读 · 供需区/伪CVD流
+
+**实际机制：** 前2根反色、前1根反向大实体≥ATR即建前2根全幅区，不要求突破其高低；区内曲线累计阳阴整根量。
+
+**参数与默认值：** ATR14、实体1ATR、各10区，最长回算2900。
+
+**确认时刻与重绘风险：** 形态延1根才展示并回画2根；全段最大绝对CVD重缩放旧波形，破坏删除；当前量未确认。
+
+**在本系统中的角色：** 供需距离可作K2结构描述，不是订单流门。
+
+**重复性与独立性：** 形态近大实体K1；CVD与其他阳阴量代理重复。
+
+**可验证假说（未回测）：** 冻结建区时点与原几何，独立测结构空间，不用最终曲线。
+
+[官方发布页](https://www.tradingview.com/script/paLrV2ud-Supply-Demand-Cumulative-Volume-Delta-Flow-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B811ff515a5e4404eb53b058f1195873e/1) · 关键行 39, 45, 62, 73, 95, 136, 227, 275。
+
+## 017 · DeltaPulse Wave [ChartPrime]
+
+源码已读 · 量加权动量/背离
+
+**实际机制：** EMA20阳量减阴量除EMA20总量×100，再EMA5；波峰比较价高与指标高检测背离。
+
+**参数与默认值：** 波20、平滑5、阈±25、相邻峰间距5。
+
+**确认时刻与重绘风险：** 理论幅度趋±100不是宣传±50；峰晚1根并offset−1，所有小峰均更新锚点；未锁收盘。
+
+**在本系统中的角色：** 一项参与度或衰竭因子，不直接逆趋势入场。
+
+**重复性与独立性：** 阳阴volume代理非真实买卖差，与CVD高度重合。
+
+**可验证假说（未回测）：** 只测一项归一化参与度相对纯价格的增量。
+
+[官方发布页](https://www.tradingview.com/script/lfaZVLub-DeltaPulse-Wave-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B793e90b029f14888a0704a8ffedac006/1) · 关键行 32, 38, 42, 60, 68, 74, 107。
+
+## 018 · HTF Conviction Divergence Matrix [ChartPrime]
+
+源码已读 · HTF可视化/RSI与伪Delta背离
+
+**实际机制：** 主图RSI枢轴背离加按HTF重置的阳阴量累计；HTF OHLC用于色带/投影而非背离判定。
+
+**参数与默认值：** HTF日、RSI14、pivot5/5，量验证开。
+
+**确认时刻与重绘风险：** 44行当前HTF OHLC lookahead_on无[1]使历史高低收泄漏；背离未引用这些值，但Delta用确认根非pivot根且可能跨重置。
+
+**在本系统中的角色：** 原样HTF色带禁用作因果筛选；背离只作风险提示。
+
+**重复性与独立性：** Delta仍阳阴量代理；RSI价格动量非机构确认。
+
+**可验证假说（未回测）：** 先修HTF与Delta对齐钟，再考虑独立诊断，不能借漂亮历史筛选。
+
+[官方发布页](https://www.tradingview.com/script/8pOsueGg-HTF-Conviction-Divergence-Matrix-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bc633c8a3b91e4ce99e326eedb3705b32/1) · 关键行 18, 44, 46, 54, 67, 71, 75, 128, 138。
+
+## 019 · Inversion Fair Value Gaps (IFVG) [ChartPrime]
+
+源码已读 · 三根缺口/反转缺口结构
+
+**实际机制：** 当前与前2根不重叠且缺口宽>.1%前收盘建FVG，收盘穿透后反转角色，二次失败删除。
+
+**参数与默认值：** 两向、最小.1%、寿命500、仅反转显示默认关。
+
+**确认时刻与重绘风险：** 建区/重测锁收盘且区画回1根；反转本身未锁；到期只缩短图框未从active移除，仍可能参与信号。
+
+**在本系统中的角色：** 可描述K2与先前失衡/反转支阻关系。
+
+**重复性与独立性：** 纯OHLC缺口，不是成交真空或机构持仓证明。
+
+**可验证假说（未回测）：** 先明确到期与确认状态，再测既存IFVG空间。
+
+[官方发布页](https://www.tradingview.com/script/kJ0nOczA-Inversion-Fair-Value-Gaps-IFVG-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B2c2e3b5fd8cd4718abfa7fa1fd5d0416/1) · 关键行 39, 48, 63, 70, 101, 111, 120, 147。
+
+## 020 · Volume Whale Zones [ChartPrime]
+
+源码已读 · 滚动量POC/滞回热区
+
+**实际机制：** 200根全量按close进50箱；POC经EMA10和两级2ATR200跳变滞回形成热区。
+
+**参数与默认值：** 回看200，50箱/平滑10硬编码。
+
+**确认时刻与重绘风险：** 区间仅突破旧边界才重置，非严格每根滚动箱；无MTF/负offset，当前值可变，初始热区需暖机。
+
+**在本系统中的角色：** 可研究离量密集区ATR距离作为盘整背景。
+
+**重复性与独立性：** 非鲸鱼/订单数据；与其他close量剖面同族。
+
+**可验证假说（未回测）：** 用事前密集区距离而非颜色，独立测试禁止区内追价。
+
+[官方发布页](https://www.tradingview.com/script/ldmdnX5K-Volume-Whale-Zones-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B9d6d73f6460340f8bba8659571e69c24/1) · 关键行 30, 37, 55, 73, 79, 85, 96, 105, 128, 143。
+
+## 021 · Liquidity Flow Surge Profile [ChartPrime]
+
+源码已读 · 量突增/近似价格剖面
+
+**实际机制：** 700根量按close入25箱；volume/最高volume500≥.4画气泡，close>open标空头清算，否则多头。
+
+**参数与默认值：** 默认Long700（150/350可选）、25箱、热度.5。
+
+**确认时刻与重绘风险：** 没有清算/订单数据；气泡实际不按POC分类；当前可变，末2000根显示裁剪；价格等总上界会漏装箱。
+
+**在本系统中的角色：** 只可借用量扩张/价格集中度，不能称清算共振。
+
+**重复性与独立性：** 量代理与其他volume工具重复，不提供机构身份。
+
+**可验证假说（未回测）：** 若研究仅冻结相对量一项，与K1价格扩张分开检验。
+
+[官方发布页](https://www.tradingview.com/script/EQSY3xU0-Liquidity-Flow-Surge-Profile-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B1df1d130468c406db402607f142cce6c/2) · 关键行 13, 31, 54, 60, 71, 150, 154, 160, 166, 171。
+
+## 022 · Market Break Analytics [ChartPrime]
+
+源码已读 · 确认结构突破/摆动量统计
+
+**实际机制：** 10/10枢轴，确认收盘越前高低改变方向且只交替换向；回找腿内极值，阳线量为买其余含十字为卖。
+
+**参数与默认值：** Break Up、pivot左右各10、保留历史开。
+
+**确认时刻与重绘风险：** 突破锁收盘；pivot晚10根，腿起点/中点标签回标；最终整腿量比例随后来价格量重算。
+
+**在本系统中的角色：** 可候选已确认结构破坏/前方空间，不使用事后腿起点入场。
+
+**重复性与独立性：** 结构较MA不同，但量仍阳阴代理，不是真orderflow。
+
+**可验证假说（未回测）：** 按break确认时点冻结结构，检验K1是否离开旧范围。
+
+[官方发布页](https://www.tradingview.com/script/0vET13Ra-Market-Break-Analytics-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Be867e737503841c1857dd6939e50d5cc/1) · 关键行 79, 93, 124, 127, 130, 135, 186, 227, 291。
+
+## 023 · Swing Flow Indicator [ChartPrime]
+
+源码已读 · 枢轴触发/平滑波段带
+
+**实际机制：** pivot出现后记录的是确认根high/low而非pivot价；两值均价SMA再±ATR200经20根平滑，影线越带换向。
+
+**参数与默认值：** 对称pivot10、ATR倍数2、枢轴标记关。
+
+**确认时刻与重绘风险：** pivot依赖右10根且标回原点；信号在当前根无收盘门，换向根颜色故意反色。
+
+**在本系统中的角色：** 仅波动滞回背景，不能误当真实摆动边界。
+
+**重复性与独立性：** 无量能，仍平滑价格+ATR。
+
+**可验证假说（未回测）：** 先明确记录确认价语义，再测中性区，不叠MA多票。
+
+[官方发布页](https://www.tradingview.com/script/BtGC9TGm-Swing-Flow-Indicator-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B457a1c0782874a1fb0334703bac76589/1) · 关键行 26, 38, 47, 56, 60, 67, 70。
+
+## 024 · Swing Structure Bands [ChartPrime]
+
+源码已读 · 变长摆动均线/通道
+
+**实际机制：** 100根高低极值转向重置计时，以距摆动年龄为窗口均化high/low并±ATR200；轨跳变大于ATR隐藏。
+
+**参数与默认值：** 摆动100、默认SMA、卖轨稳定>20根/买>15、间隔>10。
+
+**确认时刻与重绘风险：** Swing标签在方向换边后回贴旧极点；主曲线当前计算无未来索引，未锁收盘；买卖条件不对称。
+
+**在本系统中的角色：** 可测已知摆动结构稳定时间与K2回踩位置。
+
+**重复性与独立性：** 价位+年龄变换，不独立量能。
+
+**可验证假说（未回测）：** 使用可用时点的稳定年龄，不能把回标Swing当即时入口。
+
+[官方发布页](https://www.tradingview.com/script/Lw0d0Ny4-Swing-Structure-Bands-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B83b6a0ad45b54b2fb00bc0a4cee7aa73/1) · 关键行 44, 59, 69, 80, 91, 95, 106, 140。
+
+## 025 · Volume Channel Flow [ChartPrime]
+
+源码已读 · 冻结ATR通道/量剖面
+
+**实际机制：** 第201根以HL2±3ATR200建水平通道，收盘出界才重置；段内close附近箱累积全量及阳阴量。
+
+**参数与默认值：** 宽3ATR、最短段>10根、30箱硬编码。
+
+**确认时刻与重绘风险：** 无MTF/收盘门；末bar及突破时绘整段；abs(close−箱中)<=箱宽可重复计量，剖面绘制先于本根重算。
+
+**在本系统中的角色：** 可候选冻结区间内禁止追价/突破后的结构空间。
+
+**重复性与独立性：** 通道是价格滞回，volume不是主动买卖差。
+
+**可验证假说（未回测）：** 只测K1是否离开事前冻结范围，不把最终剖面用于旧入口。
+
+[官方发布页](https://www.tradingview.com/script/U8Xy7qJ2-Volume-Channel-Flow-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B9b7dabb9bdfb465d8a398093bdb47091/1) · 关键行 28, 49, 55, 72, 83, 103, 118, 133, 136。
+
+## 026 · Polynomial Regression Channel [ChartPrime]
+
+源码已读 · 多项式拟合/外推
+
+**实际机制：** 末bar对最近100收盘以正规方程拟合4次多项式，外推10根；带宽是滚动最大平均K线幅×2。
+
+**参数与默认值：** 收盘、周期100、次数4、外推10。
+
+**确认时刻与重绘风险：** 全历史拟合段每次重画，旧点包含其之后训练窗价格；非置信区间，矩阵病态/高阶外推需验证。
+
+**在本系统中的角色：** 原绘图不能当历史趋势信号；至多研究实时右端斜率。
+
+**重复性与独立性：** 纯价格拟合，与MA不同平滑但无独立资金信息。
+
+**可验证假说（未回测）：** 先提取逐时右端而非回拟合轨迹；未校准预测不作为TP。
+
+[官方发布页](https://www.tradingview.com/script/F7duegmG-Polynomial-Regression-Channel-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B344bc07630a34cf1b9ec8b32a5fb4d83/1) · 关键行 11, 25, 37, 46, 57, 67, 84, 100。
+
+## 027 · Pivot Trend [ChartPrime]
+
+源码已读 · ATR调整枢轴/滞回趋势
+
+**实际机制：** 对high+2ATR200及low−2ATR200找pivot，以最近上下枢轴带和收盘穿越维持趋势状态。
+
+**参数与默认值：** 左右10/10、偏移2ATR。
+
+**确认时刻与重绘风险：** 须右10根确认；曲线当时更新不负offset，当前未锁收盘，ATR参与pivot位置不是裸高低。
+
+**在本系统中的角色：** 可借鉴缓冲结构禁入，但延迟较大。
+
+**重复性与独立性：** 价格结构+ATR，与其他pivot/supertrend同族。
+
+**可验证假说（未回测）：** 比较已确认带宽/空间，不因外观稳定断言无重绘或有收益。
+
+[官方发布页](https://www.tradingview.com/script/AOTPWbpq-Pivot-Trend-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bb977d31eccc24f148e6c69554411aa1c/1) · 关键行 8, 17, 19, 22, 42, 48, 54。
+
+## 028 · SuperTrend Oscillator [ChartPrime]
+
+源码已读 · Supertrend距离振荡器
+
+**实际机制：** (close−Supertrend)经HMA25再除4ATR100；与自身3根前交叉且处于±.5外给反转提示。
+
+**参数与默认值：** Supertrend100×4、HMA25、提示间隔>10；导入TradingView/ta/11。
+
+**确认时刻与重绘风险：** 提示确认当前却offset−1；未锁收盘；库依赖版本需单独钉住。
+
+**在本系统中的角色：** 适合追价/趋势衰竭观察，不是趋势入口许可。
+
+**重复性与独立性：** 仅ATR趋势线的距离重表达，不应与Supertrend重复投票。
+
+**可验证假说（未回测）：** 单测事前距离能否剔除追远K1，不叠整组反转箭头。
+
+[官方发布页](https://www.tradingview.com/script/JqEFTgOE-SuperTrend-Oscillator-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bf44b3f73b2fd41b8aa099c7ee3ad66d3/1) · 关键行 6, 13, 26, 36, 42, 67, 70, 80。
+
+## 029 · RSI Strategy [PrimeAutomation]
+
+源码已读 · 公开自动化RSI趋势策略
+
+**实际机制：** RSI40过60买、下35卖；ATR200×4跟踪及7ATR目标，按low/high棘轮更新止损。
+
+**参数与默认值：** 10%权益、单边费.06%、收盘成交、无加仓，TP开。
+
+**确认时刻与重绘风险：** 标签回画1根；同ID多次exit/立即close需成交核验；收市开关错写MarketClosed两次，启用每bar平仓；不是20bp次开盘规格。
+
+**在本系统中的角色：** 保留目录但不替代K1K2，可借RSI趋势门作对照。
+
+**重复性与独立性：** 纯RSI/ATR，与价格趋势同源。
+
+**可验证假说（未回测）：** 先修执行契约才可比较，当前不复用面板收益。
+
+[官方发布页](https://www.tradingview.com/script/RiQzLLoh-RSI-Strategy-PrimeAutomation/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B4d22c0ddd0024ac1809a100e92802165/1) · 关键行 7, 39, 141, 163, 171, 213, 253, 271, 288。
+
+## 030 · DEMA ATR Strategy [PrimeAutomation]
+
+源码已读 · DEMA/ATR带自动化策略
+
+**实际机制：** DEMA75±1.2ATR20夹持上一线值，线越自身前2根转向；3/6/9ATR200触及后市场分批。
+
+**参数与默认值：** TP30/30/40%、10%权益、单边.06%、收盘成交；库ta/7。
+
+**确认时刻与重绘风险：** 空头条件要求当前多仓>0，空仓不直接做空；百分比分次作用余仓非原始份额；收市开关同样每bar平仓错误。
+
+**在本系统中的角色：** 仅作低通滞回机制参考，不能直接迁移收益/份额。
+
+**重复性与独立性：** DEMA+ATR仍价格滤波，无volume确认。
+
+**可验证假说（未回测）：** 先验证多空对称与真实成交份额，再讨论单一禁入特征。
+
+[官方发布页](https://www.tradingview.com/script/rqRd3f62-DEMA-ATR-Strategy-PrimeAutomation/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B0338cbd8417445d2a46bfdebfd1db51d/2) · 关键行 6, 21, 144, 156, 166, 174, 193, 209, 224, 257。
+
+## 031 · Whale Kit
+
+仅官方说明 · 邀请制综合趋势/衰竭工具
+
+**实际机制：** 官方说明为角度染色、角度型9计数、金属均值加权Fib带、Whale9及日/周200均线；没有可核源码。
+
+**参数与默认值：** 说明仅列9/200日/200周等模块，完整默认/方程未公开。
+
+**确认时刻与重绘风险：** 未获取邀请源码；确认延迟、重绘、跨周期取值均未知。
+
+**在本系统中的角色：** 可登记趋势/过伸需求，不能把9计数直接作为K1K2确认。
+
+**重复性与独立性：** 描述显示多项价格平滑，独立性未证实。
+
+**可验证假说（未回测）：** 待合法源码或可复现规格，现阶段不纳入自动研究因子。
+
+[官方发布页](https://www.tradingview.com/script/BUAvlU1k-Whale-Kit/)。未读取、猜测或绕过保护获取源码。
+
+## 032 · RSI-Adaptive T3 & SAR Strategy [PrimeAutomation]
+
+源码已读 · RSI自适应T3/SAR自动化策略
+
+**实际机制：** RSI14线性将T3长度调5..50，T3与自身前2根交叉且SAR同侧入场，初始止损取10根极值。
+
+**参数与默认值：** T3因子.7；SAR .02/.0002/.21；单边费.06%、收盘成交。
+
+**确认时刻与重绘风险：** RSI越低平滑越长，非涨跌对称强度自适应；BuyExit/SellExit已算未执行，反向T3不一定平仓；非次开盘模型。
+
+**在本系统中的角色：** 可借趋势过滤结构，不直接替换K1K2。
+
+**重复性与独立性：** T3/SAR都价格趋势，所谓Volume Factor不读取volume。
+
+**可验证假说（未回测）：** 仅评估SAR同侧增量前先冻结因果/成交与出口语义。
+
+[官方发布页](https://www.tradingview.com/script/bldXp6gY-RSI-Adaptive-T3-SAR-Strategy-PrimeAutomation/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B96d3cf8e482f4527803157f068726505/1) · 关键行 6, 139, 163, 174, 181, 192, 198, 202, 205, 226, 240。
+
+## 033 · PA Builder [PrimeAutomation]
+
+仅官方说明 · 邀请制策略组合/自动化框架
+
+**实际机制：** 说明将低通趋势、Reactor、量/动量、结构与Do-Not-Trade组合，支持三阶TP/保本/超时；非单一公开策略。
+
+**参数与默认值：** 完整默认参数及模块公式未披露；文中示例不视为默认。
+
+**确认时刻与重绘风险：** 无源码，MTF确认/成交优先级/重绘均不可审核；正R:R不能逻辑上保证正期望。
+
+**在本系统中的角色：** 可借鉴先禁入再触发的分工，不接入黑盒收益。
+
+**重复性与独立性：** 宣称多模块独立并未由源码或相关性证明。
+
+**可验证假说（未回测）：** 等待合法可复现规格；不按说明拼接多门调参。
+
+[官方发布页](https://www.tradingview.com/script/10DNcB3d-PA-Builder-PrimeAutomation/)。未读取、猜测或绕过保护获取源码。
+
+## 034 · Plus Screener [ChartPrime]
+
+仅官方说明 · 邀请制多资产状态筛选器
+
+**实际机制：** 说明含低通斜率/变化率/持续性、Reactor、形态与Z波动评分；Dynamic Reactor明确由位移推压力不用成交量。
+
+**参数与默认值：** 说明给高波动>70%解释，完整默认/归一化未知。
+
+**确认时刻与重绘风险：** 无源码，MTF更新、扫描时钟、概率校准及重绘未验证。
+
+**在本系统中的角色：** 仅环境状态展示需求参考，不把+号当高胜率K1。
+
+**重复性与独立性：** 多个模块可能共享价格滤波，资金/独立共振未获证实。
+
+**可验证假说（未回测）：** 需公开可复现状态定义后单变量检验；不按当前榜单回测。
+
+[官方发布页](https://www.tradingview.com/script/Q9WoqKJw-Plus-Screener-ChartPrime/)。未读取、猜测或绕过保护获取源码。
+
+## 035 · HTF Candle Profile [ChartPrime]
+
+源码已读 · 自建HTF蜡烛/近似量剖面
+
+**实际机制：** timeframe.change[1]记录段起点；段少于50根拼入前段，量按close附近箱累加，箱宽随ATR200×.3。
+
+**参数与默认值：** 周线、最小50根、投影5。
+
+**确认时刻与重绘风险：** 起点晚1子bar且前段拼接，非标准HTF OHLC；末bar全图回算，宽邻域可能重复计量。
+
+**在本系统中的角色：** 原样不可当因果周线POC；只借鉴已闭合结构背景。
+
+**重复性与独立性：** 本图价格量聚合非原生HTF订单流。
+
+**可验证假说（未回测）：** 先修边界并对原生HTF逐列parity，再评估POC距离。
+
+[官方发布页](https://www.tradingview.com/script/5d1au2Dh-HTF-Candle-Profile-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bb029271914134675b36598712b002cb3/1) · 关键行 12, 40, 47, 62, 69, 96, 104, 130, 139。
+
+## 036 · Bravo Essentials
+
+仅官方说明 · 邀请制量/波动与POC工具
+
+**实际机制：** 说明组合波动调整标准化量、价格频次剖面和动态POC/波动带；频次与成交量浓度是不同指标。
+
+**参数与默认值：** 提及回看、箱数、带宽可调，完整默认/公式未公开。
+
+**确认时刻与重绘风险：** 无源码，动态箱边、历史回算、确认/缺量处理未知，不能声明不重绘。
+
+**在本系统中的角色：** 盘整密集度与量扩张研究需求参考。
+
+**重复性与独立性：** 两POC/量频工具可能同源，独立性未经验证。
+
+**可验证假说（未回测）：** 需合法源码或明确独立公式才纳入，暂不作为趋势禁入门。
+
+[官方发布页](https://www.tradingview.com/script/ZLDqKWbD-Bravo-Essentials/)。未读取、猜测或绕过保护获取源码。
+
+## 037 · Breakout Boxes [ChartPrime]
+
+源码已读 · 双枢轴邻近区/突破结构
+
+**实际机制：** 两个相邻确认高/低pivot相距<.2ATR200建上下区；收盘穿外边界为Break；箱内阳阴量仅附带统计。
+
+**参数与默认值：** pivot5/5、上下厚度各.5ATR。
+
+**确认时刻与重绘风险：** 须第二pivot右5根确认后才建，箱回画至首pivot；突破锁收盘，最终量比随后来bars变化。
+
+**在本系统中的角色：** 较贴近先盘整后释放，可候选K1前结构禁入/突破。
+
+**重复性与独立性：** 结构与MA不同；量统计不是真买卖订单。
+
+**可验证假说（未回测）：** 只用建成后已知边界检验K1是否释放，禁止按箱左端提前入场。
+
+[官方发布页](https://www.tradingview.com/script/6yyxS28p-Breakout-Boxes-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bb27d585558f44d679419ac2fc234c1d8/1) · 关键行 25, 34, 38, 43, 58, 98, 104, 131, 153。
+
+## 038 · Trend Duration Forecast [ChartPrime]
+
+源码已读 · HMA趋势年龄/经验时长
+
+**实际机制：** HMA50用rising/falling3改变状态，记录已结束多空段，最近10段均值投影当前预计长度。
+
+**参数与默认值：** HMA50、检测3、样本10。
+
+**确认时刻与重绘风险：** 状态锁收盘；rising3非逐根单调，旧段标签到结束才更新实长；均值不是条件生存概率，初段/计数边界需核。
+
+**在本系统中的角色：** 可研究趋势年龄，但不可用最终Real Length识别入口。
+
+**重复性与独立性：** HMA同源价格；历史时长有新状态维度但无预测验证。
+
+**可验证假说（未回测）：** 冻结K1当时年龄与仅已结束样本，不据投影强制持仓。
+
+[官方发布页](https://www.tradingview.com/script/L3SJFfAQ-Trend-Duration-Forecast-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B2c5c233f31444ce19b94f975d981fb2a/1) · 关键行 11, 50, 52, 58, 61, 68, 112, 115, 133。
+
+## 039 · MA Oscillator Map [ChartPrime]
+
+源码已读 · 均线偏离归一化/回撤提示
+
+**实际机制：** (src−MA(close,50))/50根最大绝对偏离×100；从±100回落/回升提示，并保留前根高低水平。
+
+**参数与默认值：** SMA50、收盘源；归一化50固定。
+
+**确认时刻与重绘风险：** 当前确认后副图offset−1，主图不回移；无收盘门；换src只改分子不改MA源，零幅未防护。
+
+**在本系统中的角色：** 可候选过伸禁入而非将极端后箭头当顺势。
+
+**重复性与独立性：** 与MA Shift偏离/颜色同族，不能新名字重复计票。
+
+**可验证假说（未回测）：** 检验事前归一化过伸是否有增量，并保留弱波动分母诊断。
+
+[官方发布页](https://www.tradingview.com/script/kNmBkAml-MA-Oscillator-Map-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bba57e186df22400d8abf73790bdd4702/1) · 关键行 14, 41, 43, 49, 56, 90, 94。
+
+## 040 · FVG Volume Profile [ChartPrime]
+
+源码已读 · 三根FVG/低周期量近似剖面
+
+**实际机制：** 三根缺口以200窗缺口标准差过滤；取中间根的低周期close/volume数组，在缺口内近邻分箱。
+
+**参数与默认值：** 自动图周期/10取整分钟、15箱、门.5；手动10分。
+
+**确认时刻与重绘风险：** 建区未锁收盘且回画1根，破坏删除；5m自动得0分钟需合法性检查；邻箱重复计量，不是真footprint。
+
+**在本系统中的角色：** 可候选既存失衡区结构，不把缺口标量当买卖Delta。
+
+**重复性与独立性：** 比整根装箱细，但仍close代理；与FVG结构同族。
+
+**可验证假说（未回测）：** 先修合法LTF与完整数组/收盘钟，再测已知缺口空间。
+
+[官方发布页](https://www.tradingview.com/script/qujivabv-FVG-Volume-Profile-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B35d63ada08384938bff191906932b9df/1) · 关键行 12, 43, 51, 54, 67, 70, 79, 96, 164, 204。
+
+## 041 · Hotzones Essentials
+
+仅官方说明 · 邀请制结构区/HTF水平/开盘区间
+
+**实际机制：** 说明包含Killzone Blocks量占比、前日周月高低、窗口结束锁定ORB及收盘Level2确认。
+
+**参数与默认值：** 示例窗口08:00–08:45非默认；块数/影线或实体可调，实际默认未知。
+
+**确认时刻与重绘风险：** 无源码，真实量差来源、HTF已完成语义、ORB锁定/回标/重绘均不可核。
+
+**在本系统中的角色：** ORB闭合后释放与已知结构可借鉴，非机构活动证明。
+
+**重复性与独立性：** 结构/水平有潜在分工，量独立性未证。
+
+**可验证假说（未回测）：** 等待合法规格；可另写公开定义ORB单变量而不冒充此闭源公式。
+
+[官方发布页](https://www.tradingview.com/script/tAC98cIo-Hotzones-Essentials/)。未读取、猜测或绕过保护获取源码。
+
+## 042 · Dynamic Volume Trace Profile [ChartPrime]
+
+源码已读 · 滚动量轨迹/价格集中区
+
+**实际机制：** 100根高低划25格，用200根close附近全量算轨迹；实际循环仅1..24格，首格未填。
+
+**参数与默认值：** 回看200、25格、宽1，POC开。
+
+**确认时刻与重绘风险：** last_bar_index裁剪仅末200根，当前轨变化；邻格可重复量，梯度循环中混用尚未更新的vol.max。
+
+**在本系统中的角色：** 可研究事前集中度/前方密集区，不依赖最终彩色轨迹。
+
+**重复性与独立性：** 与其他近似量POC同族，非挂单流动性。
+
+**可验证假说（未回测）：** 先统一箱覆盖/归一化与因果窗口，再测集中度单项。
+
+[官方发布页](https://www.tradingview.com/script/U7Ccpt7y-Dynamic-Volume-Trace-Profile-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bfbd08295f8d9474b82eff767893e13c8/1) · 关键行 11, 24, 37, 44, 48, 54, 61, 79。
+
+## 043 · Specter Trend Cloud [ChartPrime]
+
+源码已读 · 双均线趋势/ATR偏移回测
+
+**实际机制：** EMA25/50排序定向，但回踩快线被顺势平移1ATR200；low重上穿/ high重下穿偏移轨才信号。
+
+**参数与默认值：** EMA25/50、ATR200、信号间隔>5。
+
+**确认时刻与重绘风险：** 回测锁收盘但offset−1回贴前根；信号不是触原EMA，图云第二轨实际快轨再偏1ATR。
+
+**在本系统中的角色：** 可作顺趋势回测形态候选，不能误认为原K1K2触线。
+
+**重复性与独立性：** 双均线+ATR仍价格维度，不是额外量能共振。
+
+**可验证假说（未回测）：** 只比较同钟的真实拒绝几何，先保留信号确认时间。
+
+[官方发布页](https://www.tradingview.com/script/x6Ll0NOu-Specter-Trend-Cloud-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B7faef9c7fe56479eacf2e9b3a33395de/1) · 关键行 11, 34, 38, 44, 52, 61, 84, 90。
+
+## 044 · Liquidity Pro Map [ChartPrime]
+
+源码已读 · 合成流动性地图/量箱
+
+**实际机制：** 阳线将量锚到low−2σ25，其他锚high+2σ；200根分90箱，当前价上称卖量、下称买量并隐藏近价箱。
+
+**参数与默认值：** 回看200、90箱；投影宽50固定。
+
+**确认时刻与重绘风险：** 末bar重算全图及最近穿越边界，邻箱重复计量；合成锚并非真实成交/挂单，当前价改变历史买卖分类。
+
+**在本系统中的角色：** 只能研究合成拥挤区，不能作为订单流共振证据。
+
+**重复性与独立性：** 价格位移+量代理，同族强相关。
+
+**可验证假说（未回测）：** 优先与不位移的普通量剖面对照，证明额外假设有用前不接入。
+
+[官方发布页](https://www.tradingview.com/script/o5rNAgUw-Liquidity-Pro-Map-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B7dc340a05cdd439a916a2fd1746b5f76/1) · 关键行 11, 20, 48, 75, 87, 98, 154, 158。
+
+## 045 · The Bravo Kit
+
+仅官方说明 · 邀请制角度/序列/Fib带套件
+
+**实际机制：** 说明以趋势角度染色及9计数提示过伸，金属均值低延迟加权构建Fib通道，并含Bravo9/日周200均线。
+
+**参数与默认值：** 完整计算长度/门与默认未公开；模块名不等于算法。
+
+**确认时刻与重绘风险：** 无源码，角度归一化、序列确认、MTF时钟与回画风险未知。
+
+**在本系统中的角色：** 可记录趋势与过伸分工，不把9号当确定反转/止盈。
+
+**重复性与独立性：** 多个价格平滑工具可能重复，独立性未验证。
+
+**可验证假说（未回测）：** 待合法源码再做因果重建，现不参与自动K1K2研究门。
+
+[官方发布页](https://www.tradingview.com/script/HdP8BG6g-The-Bravo-Kit/)。未读取、猜测或绕过保护获取源码。
+
+## 046 · Volume Profile + Pivot Levels [ChartPrime]
+
+源码已读 · 成交量分布与枢轴
+
+**实际机制：** 按收盘落入扩展价箱累加整根量，最大箱作PoC，再筛枢轴量比；非逐笔成交分布。Delta循环误用当前volume而非volume[j]，不能当真实买卖差。
+
+**参数与默认值：** 窗口200、箱50、左右pivot10、量比20%。
+
+**确认时刻与重绘风险：** pivot需右10根；主体仅islast重算并回填旧pivot/触碰历史，不能把成图旧位置当当时可用；无MTF。
+
+**在本系统中的角色：** 结构阻力位置候选
+
+**重复性与独立性：** 量维度较MA独立，但方向量仅K线代理且此版引用有疑点。
+
+**可验证假说（未回测）：** 先验证逐时点因果重建与量守恒，再单测入场距已确认高量阻力；现代码不直接接交易。
+
+[官方发布页](https://www.tradingview.com/script/KjzRRZIc-Volume-Profile-Pivot-Levels-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B950d0b67bd06483aaca44d1fb6b35595/1) · 关键行 12, 18, 40, 47, 61, 84, 86, 129, 135, 142。
+
+## 047 · Price Heat Meter [ChartPrime]
+
+源码已读 · 区间价格位置
+
+**实际机制：** 热度=100×(close-最低50)/(最高50-最低50)，极值未更新持续计数控制淡出。不是成交热度或概率。
+
+**参数与默认值：** Length50；极值标签延迟计数40固定。
+
+**确认时刻与重绘风险：** 热度无未来窗口但未收盘可变；标签等极值40根未更新后回画旧索引，不可在旧极值时交易；平坦区间分母0需未知。
+
+**在本系统中的角色：** 追价位置诊断
+
+**重复性与独立性：** 本质随机指标式区间位置，与extension/突破相关，无新增量。
+
+**可验证假说（未回测）：** 只将完成bar区间位置作固定分箱诊断，不能按标签回画时刻挑反转。
+
+[官方发布页](https://www.tradingview.com/script/zeQGgUkW-Price-Heat-Meter-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bba282a316a5e441086d65236ced74e8c/1) · 关键行 12, 31, 53, 62, 65, 66, 68, 71, 72。
+
+## 048 · RSI Momentum Divergence Zones [ChartPrime]
+
+源码已读 · 动量RSI背离
+
+**实际机制：** 先取close十根动量，再RSI14；RSI低点抬高配价格低点降低为牛背离，反向为熊；不是直接对close的RSI。
+
+**参数与默认值：** RSI14；左右pivot5、间隔5至50、保留区10。
+
+**确认时刻与重绘风险：** 固定右5根确认并offset=-5及旧位置画水平区；没有收盘门/MTF，必须在确认bar才使用。
+
+**在本系统中的角色：** 趋势衰减候选
+
+**重复性与独立性：** 仍价格动量，但比较相邻已确认波峰较MA侧色不同；非独立流量。
+
+**可验证假说（未回测）：** 仅测试确认后的逆向背离退出，不提前五根，不把线延长15根当预测。
+
+[官方发布页](https://www.tradingview.com/script/x3KNfmR3-RSI-Momentum-Divergence-Zones-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bcf6dc608d8cd496caa1d4e2d90b26243/1) · 关键行 11, 20, 23, 41, 42, 59, 68, 76, 89, 113, 126。
+
+## 049 · ZigZag Volume Profile [ChartPrime]
+
+源码已读 · 波段倾斜量分布
+
+**实际机制：** 滚动极值驱动ZigZag，沿两端连线±ATR200构箱，触及斜箱的bar整根量累加。priceHigh竟取low[1]，量窗口索引相对当前而非端点，须校验实现。
+
+**参数与默认值：** 极值150、ATR宽1、Bins10先除2、展示15段。
+
+**确认时刻与重绘风险：** 端点一根后定位且持续重写；翻向时回画旧段，不能把整段量信息放到起点；无MTF、未收盘可变。
+
+**在本系统中的角色：** 历史波段复盘
+
+**重复性与独立性：** 成交量有增量但非逐价真实成交，端点和累计窗口风险较高。
+
+**可验证假说（未回测）：** 先做端点/量窗对齐合成审计，通过后才单测最后已闭合波段PoC距离；不直接用于实时入场。
+
+[官方发布页](https://www.tradingview.com/script/TA5Q8m53-ZigZag-Volume-Profile-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bd756d26ed2fb43258b15f6d4d009fa96/1) · 关键行 14, 18, 52, 59, 62, 67, 88, 107, 109, 133, 149。
+
+## 050 · Zone Shift [ChartPrime]
+
+源码已读 · 均线带脱离与回测
+
+**实际机制：** 中线=(EMA100+HMA60)/2，上下加减SMA200振幅；完整K线从带内脱离上/下带切换趋势，冻结起始low/high作回测线。
+
+**参数与默认值：** Length100，允许60至200；回测冷却>5根。
+
+**确认时刻与重绘风险：** 趋势和回测均有isconfirmed；无MTF/负offset，仍须等整根完成；初始false不可当已验证空趋势。
+
+**在本系统中的角色：** 启动状态候选
+
+**重复性与独立性：** 仍MA+振幅，仅完整K线脱离和冻结水平状态区别于简单侧色。
+
+**可验证假说（未回测）：** 单测已确认带外脱离状态门，保持原入口退出，先核支持率。
+
+[官方发布页](https://www.tradingview.com/script/8lfE3qMN-Zone-Shift-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B7546dd15909647c886052e94bf75c5c5/1) · 关键行 11, 20, 24, 31, 36, 45, 50。
+
+## 051 · RSI Shift Zone [ChartPrime]
+
+源码已读 · RSI事件冻结区域
+
+**实际机制：** RSI14向上穿70或向下穿30时冻结当根高低为区域，至少15根后解除触发锁。设置中的上下阈值仅影响显示，触发仍写死70/30。
+
+**参数与默认值：** RSI14，上下70/30，最短区域15。
+
+**确认时刻与重绘风险：** 无MTF/收盘门；部分区域线offset=-1回画，信号和区域真实产生时刻需分开。
+
+**在本系统中的角色：** 动量启动区域
+
+**重复性与独立性：** RSI与MA同为价格滤波，不是量或概率。
+
+**可验证假说（未回测）：** 只测试收盘确认后的RSI区域失守退出；先修验阈值设置与触发不一致，不能按前移线成交。
+
+[官方发布页](https://www.tradingview.com/script/5azMGL1V-RSI-Shift-Zone-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bef4f0fcf9c264e9787f3ee352ba190fd/2) · 关键行 11, 14, 34, 36, 37, 70, 89, 97。
+
+## 052 · Market Shift Levels [ChartPrime]
+
+源码已读 · HMA转折冻结水平
+
+**实际机制：** HMA55与自身5根前值交叉时冻结当前low/high；价格相对此水平着色。三根形态中间刺穿水平而两侧未穿则标回测，标签量是三根总量。
+
+**参数与默认值：** Length55；比较延迟5、回测三根固定。
+
+**确认时刻与重绘风险：** 无MTF/收盘门；回测需当前第三根完成，却标bar_index-1，至少一根确认延迟。
+
+**在本系统中的角色：** 冻结结构回测候选
+
+**重复性与独立性：** 核心仍HMA方向，量只标签不参与过滤。
+
+**可验证假说（未回测）：** 单测确认后回测信号，不把量标签另算共振，不按中间刺穿根入场。
+
+[官方发布页](https://www.tradingview.com/script/urTBALXa-Market-Shift-Levels-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bbab4ed662c7348e78341110edaffaacb/1) · 关键行 10, 19, 21, 23, 28, 38, 39, 45, 46。
+
+## 053 · Step Channel Momentum Trend [ChartPrime]
+
+源码已读 · 枢轴中点阶梯带
+
+**实际机制：** 最后已确认高低pivot中点±ATR200×0.6；HL2在上/下带外标动量多/空，带内Range；非均线。
+
+**参数与默认值：** pivot左右3、倍数0.6。
+
+**确认时刻与重绘风险：** 枢轴需右3根，菱形回画3根；状态计算应从确认时使用。无MTF/收盘门，HL2实时变化。
+
+**在本系统中的角色：** 盘整状态候选
+
+**重复性与独立性：** 结构阶梯锚较MA不同，但仍价格与ATR；并无趋势获利证明。
+
+**可验证假说（未回测）：** 只测试带内Range禁入单门，保持原事件分母，先支持审计。
+
+[官方发布页](https://www.tradingview.com/script/AsD2fDh7-Step-Channel-Momentum-Trend-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B6fd5e94b97384ec098fcfec4a1dd4277/1) · 关键行 11, 12, 21, 28, 36, 39, 52。
+
+## 054 · MACD Support and Resistance [ChartPrime]
+
+源码已读 · MACD触发支撑阻力
+
+**实际机制：** EMA12-EMA26与EMA9信号交叉后，选择含当前共6根最高/最低作为阻力/支撑，破位删除。
+
+**参数与默认值：** 12/26/9，价格close，可切SMA；保留20水平。
+
+**确认时刻与重绘风险：** 无MTF/收盘门；水平和菱形画到所选旧极值（最多5根前），并非该旧极值当时已识别。
+
+**在本系统中的角色：** 动量转折结构位置
+
+**重复性与独立性：** MA差分强相关，六根极值增添位置而非独立因子。
+
+**可验证假说（未回测）：** 只检验当时已确认水平的入场距离门，不用回画的旧时间触发。
+
+[官方发布页](https://www.tradingview.com/script/aBQp4zd0-MACD-Support-and-Resistance-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B63867cec578d4e219ae9b3cac1ae618b/1) · 关键行 12, 17, 27, 30, 42, 53, 57, 68, 85, 107。
+
+## 055 · Hot Zones Indicator [ChartPrime]
+
+仅官方说明 · 闭源共振工具
+
+**实际机制：** 官方说明声称结构回撤线结合锚定/内部VWAP及专有动量振荡；实际公式不可核。
+
+**参数与默认值：** 说明披露可配置回撤线；核心默认数值未知。
+
+**确认时刻与重绘风险：** access3且无源码权限，未请求源码端点；pivot确认、重绘、MTF和统计显著性均未验证。
+
+**在本系统中的角色：** 只能作为需求清单
+
+**重复性与独立性：** 无法验证共振是否同源重复，不认可高概率营销为证据。
+
+**可验证假说（未回测）：** 暂不接入研究门；需合法可审计源码或逐时点可导出信号后另定验证契约。
+
+[官方发布页](https://www.tradingview.com/script/9NZuRJut-Hot-Zones-Indicator-ChartPrime/)。未读取、猜测或绕过保护获取源码。
+
+## 056 · Strategy Builder Pro [ChartPrime]
+
+仅官方说明 · 闭源策略拼装器
+
+**实际机制：** 说明列趋势滤波、量矩阵、结构、分层加仓、自动TP和外部信号组合；不是单一透明指标公式。
+
+**参数与默认值：** 提供ATR/RR/追踪等选项，默认数值及内部优化流程不可核。
+
+**确认时刻与重绘风险：** access3无权限；说明含依据回测自优化，存在选择污染风险但源码未知，不能断言实现前视或非重绘。
+
+**在本系统中的角色：** 功能需求参考
+
+**重复性与独立性：** 多个命名模块不等于独立因子，无法核数学重合。
+
+**可验证假说（未回测）：** 不替换现执行器；如获合法输出，只验证一个冻结模块，禁用自优化/复利/分层混改。
+
+[官方发布页](https://www.tradingview.com/script/PYX2notY-Strategy-Builder-Pro-ChartPrime/)。未读取、猜测或绕过保护获取源码。
+
+## 057 · RSI-Adaptive T3 [ChartPrime]
+
+源码已读 · RSI调速T3均线
+
+**实际机制：** 长度=round(5+45×(1-RSI14/100))，六级动态EMA组合T3；与自身2根前比较着色，带宽为T3的标准差100。
+
+**参数与默认值：** RSI14、T3范围5至50、factor0.7、波动100。
+
+**确认时刻与重绘风险：** 无MTF/回画/确认门；RSI越高长度越短，多空响应不对称，动态递推初始化需一致。
+
+**在本系统中的角色：** 自适应退出线候选
+
+**重复性与独立性：** 全是价格滤波；Volume Factor是T3系数，不是成交量。
+
+**可验证假说（未回测）：** 只替换管理线，先做多空镜像和递推合成校验，不并加RSI门。
+
+[官方发布页](https://www.tradingview.com/script/C3xYkl1b-RSI-Adaptive-T3-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bfe89cddf7e7d45b98bee998bb533ea23/1) · 关键行 13, 16, 24, 32, 39, 43, 58, 73。
+
+## 058 · Support and Resistance Power Channel [ChartPrime]
+
+源码已读 · 最后窗口支撑阻力复盘
+
+**实际机制：** 最近130根最高最低±0.5ATR200作区域；Buy/Sell Power仅阳/阴K根数，不用成交量。
+
+**参数与默认值：** 窗口130、向右延伸30。
+
+**确认时刻与重绘风险：** islast才算区间并遍历整个窗口回画触碰；旧标记用窗口末端信息，不能直接回测；无MTF。
+
+**在本系统中的角色：** 人工结构复盘
+
+**重复性与独立性：** 非真实资金力量，价格极值与旧突破因子相关。
+
+**可验证假说（未回测）：** 先改成每决策时点冻结窗口的因果重建，再单测离阻力距离；不能用成图历史箭头。
+
+[官方发布页](https://www.tradingview.com/script/6WDeQiyp-Support-and-Resistance-Power-Channel-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B0289c3686c524422b41ccb01bbdf1bae/1) · 关键行 11, 12, 31, 40, 61, 79, 82, 95, 113, 116, 125。
+
+## 059 · Savitzky Flow Bands [ChartPrime]
+
+源码已读 · 自定义历史滤波与追踪带
+
+**实际机制：** 16个历史系数加权并归一，再滚动均值；嵌套赋值反复覆写后半系数，并非可直接假定标准Savitzky-Golay。带距2×SMA100振幅，递推锁带，收盘穿带换向。
+
+**参数与默认值：** Length15；固定16系数、振幅100×2。
+
+**确认时刻与重绘风险：** 仅历史引用，无MTF；offset=+1把当前翻向画下一根，不是预测。无收盘门，需逐时点冻结；系数实现须验证。
+
+**在本系统中的角色：** 滤波管理线
+
+**重复性与独立性：** 仍价格平滑与波动带，非订单流。
+
+**可验证假说（未回测）：** 先用合成常数/斜坡核系数行为；通过后只比较管理线替换，不凭名称认作独立统计模型。
+
+[官方发布页](https://www.tradingview.com/script/OOpdmA9G-Savitzky-Flow-Bands-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bc8092f1249df40638d2c04fd3ea7b7ab/2) · 关键行 12, 26, 36, 39, 47, 55, 69, 88。
+
+## 060 · Trend Classifier [ChartPrime]
+
+源码已读 · 均线方向与振幅归一距离
+
+**实际机制：** 中心线 m=SMA(EMA(close,L),L)；步长 s=SMA(EMA(high-low,100),100)，上下各 m±s、m±2s、m±3s。多空强度分别计数 close 超过对应三条带的数量。m>m[1] 且多强度至少1才为多；m不升且空强度至少1才为空，其余橙色。橙色也包含价格位置与斜率冲突，不等价于经验证的盘整。400根距离百分位只控制带的透明度。
+
+**参数与默认值：** 公开版本1.0，2025-05-05，Pine 6；Length默认10，Trend Bands默认开启；振幅平滑长度100、倍数1/2/3固定。
+
+**确认时刻与重绘风险：** 无内置MTF请求；没有barstate.isconfirmed门，实时未收盘close/high/low会改变状态。第88行用当前bar斜率翻向条件，却offset=-1把菱形回画前一根；交易最早只能消费实际计算bar的完成值，不能按图上菱形所在前一根成交。收盘因果计算与回画显示必须分开。
+
+**在本系统中的角色：** 可作为一个整体的趋势/中性状态过滤候选，不能把中心线方向、三层强度、颜色再各算独立确认票。
+
+**重复性与独立性：** 与现有MA方向、价格extension、振幅过滤高度重叠；没有新增订单流或独立市场信息，不是复杂自适应分类模型。
+
+**可验证假说（未回测）：** 只增加一个完成bar非橙色状态门，保留原入口、止损、成本和匹配对照；先检查覆盖率，不同时搜索Length、带宽与入场规则。该建议尚未回测。
+
+[官方发布页](https://www.tradingview.com/script/AtJtdaDe-Trend-Classifier-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Be4c7fdbcc3614f978874b98190a4e6de/1) · 关键行 4, 11, 21, 22, 27, 31, 35, 37, 43, 45, 47, 56, 58, 60, 83, 88。
+
+## 061 · Dynamic Trend Bands [ChartPrime]
+
+源码已读 · 双重HMA与ATR趋势带
+
+**实际机制：** base=HMA(HMA(close,L-10),L)，距离=ATR100×multi；upper/lower=base±距离。lower>=lower[band_size]才显示下带组，upper<=upper[band_size]才显示上带组，两个条件独立。橙色提示使用已显示带的方向与high/low越带条件。输入Source虽然传入函数，实际计算内部写死close，Source设置不生效。
+
+**参数与默认值：** 公开版本1.0，2025-04-23，Pine 6；Length40且最小11，Source默认close，Distance2.0，Size2且范围2至8，Momentum Shift默认关闭，Fill开启。Size参与历史引用和中带定位，不只是线宽。
+
+**确认时刻与重绘风险：** 无负offset回画；没有barstate.isconfirmed。indicator声明timeframe为空默认同图，但允许切换计算周期，timeframe_gaps=false；高周期实时发展值不能视为已完成值，移植需按真实完成时间取值。不能将上下带可见性强行解释成互斥三状态分类。
+
+**在本系统中的角色：** 可作为波动调整趋势退出或单一趋势带状态的候选，不应把双HMA和ATR带各算独立共振。
+
+**重复性与独立性：** 仍是MA与波动家族，对已有均线趋势/ATR逻辑独立性较低。
+
+**可验证假说（未回测）：** 仅比较完成bar反向越带作为一个退出条件，保持入场、初始硬止损和成本不变；不同时换均线、加入口过滤和移动硬止损。尚未回测。
+
+[官方发布页](https://www.tradingview.com/script/fsfPi8mp-Dynamic-Trend-Bands-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B3168aad6b5564f6d9580778abcc394a7/1) · 关键行 4, 5, 12, 13, 15, 16, 21, 33, 35, 38, 41, 42, 45, 46, 49, 50, 55, 74, 75, 88, 89, 91, 95。
+
+## 062 · Parabolic RSI [ChartPrime]
+
+源码已读 · RSI空间抛物线SAR
+
+**实际机制：** 在RSI14±1的合成高低上递推SAR，方向翻转给信号，SAR落30以下/70以上标强信号。不是价格SAR止损线。
+
+**参数与默认值：** RSI14、阈值70/30、SAR0.02/0.02/0.2。
+
+**确认时刻与重绘风险：** 信号显式isconfirmed，无回画/MTF；RSI曲线实时会变，初始化依赖图表起点。
+
+**在本系统中的角色：** 动量衰减退出
+
+**重复性与独立性：** RSI与递推SAR仍为价格派生，不是两独立因子。
+
+**可验证假说（未回测）：** 只测完成bar逆向SAR翻转退出，不把RSI数值当价格止损。
+
+[官方发布页](https://www.tradingview.com/script/NI0Qhwy7-Parabolic-RSI-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bbbad8d295fd9441390c407e25b7ea4b3/1) · 关键行 11, 19, 28, 32, 41, 54, 89, 96, 100。
+
+## 063 · Volumatic Trend [ChartPrime]
+
+源码已读 · 双均线趋势配量显示
+
+**实际机制：** 四根1:2:2:1加权再EMA40，与EMA40比较（前者再延一根）判方向；量/1000根最大量驱动透明度，趋势段阳阴量差仅标签。
+
+**参数与默认值：** Length40、ATR200×3展示带、量归一1000。
+
+**确认时刻与重绘风险：** 无MTF/收盘门；翻向菱形offset=-1；islast统计趋势段量，不能把最后总量放回段起点。
+
+**在本系统中的角色：** 量强度诊断
+
+**重复性与独立性：** 趋势完全由价格均线决定，量只视觉；并非量确认趋势。
+
+**可验证假说（未回测）：** 保留原MA入口，只诊断信号时归一量，勿把着色自动当成交量门。
+
+[官方发布页](https://www.tradingview.com/script/4lVTa6J4-Volumatic-Trend-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B900fe53643ab4defb8b0c9bda9c70a0b/1) · 关键行 11, 29, 37, 39, 48, 64, 75, 78, 86。
+
+## 064 · Linear Regression Volume Profile [ChartPrime]
+
+源码已读 · 线性回归倾斜量分布
+
+**实际机制：** 100根close最小二乘回归，平移ATR200×0.8形成多层斜通道；触及各斜线的整根量累加，非逐价成交量。
+
+**参数与默认值：** 窗口100、上下层7、宽0.8、向右15。
+
+**确认时刻与重绘风险：** 仅islast重画整段，趋势箭头画到窗口起点；量匹配用投射终点endPrice而非当前截距，需核几何对齐。无MTF。
+
+**在本系统中的角色：** 回归位置复盘
+
+**重复性与独立性：** 量与价格拟合混合，较MA有量维度但非真实盘口。
+
+**可验证假说（未回测）：** 先验证历史索引与斜线坐标，再单测当时已知PoC距离；不直接按回画起点交易。
+
+[官方发布页](https://www.tradingview.com/script/KszZUnfJ-Linear-Regression-Volume-Profile-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B3815367e91f54d8b8d2d8877966a4cfa/1) · 关键行 12, 19, 31, 54, 58, 67, 75, 82, 95, 115, 120。
+
+## 065 · Lowess Channel + (RSI) [ChartPrime]
+
+源码已读 · 单侧加权回归通道
+
+**实际机制：** 历史25根高斯权重做线性回归，在长度中点求值；输入close±ATR200×2/4同样平滑。中线rising/falling3保留方向；RSI14仅最后bar展示。
+
+**参数与默认值：** Length25、带2、带宽10固定、RSI14。
+
+**确认时刻与重绘风险：** 虽然称centered，实际只src[i]历史引用；但缺值填0，warmup污染。变色标签回画1根，无收盘门/MTF。
+
+**在本系统中的角色：** 平滑管理线
+
+**重复性与独立性：** 回归与MA高度同源，RSI显示不参与过滤。
+
+**可验证假说（未回测）：** 只替换管理线并核初始化，不同时叠RSI门；按真实变色确认时成交。
+
+[官方发布页](https://www.tradingview.com/script/VtGWdXyA-Lowess-Channel-RSI-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Ba525e1b02b254211aa1e6fa6770900d2/1) · 关键行 11, 15, 23, 33, 44, 47, 52, 66, 76, 82, 83。
+
+## 066 · Moving Average Shift [ChartPrime]
+
+源码已读 · 现有原始MA颜色基准
+
+**实际机制：** MA默认SMA40(HL2)，HL2>=MA为青否则橙；振荡器是差值除1000根99分位后取15根变化，再HMA10，另有振荡转折。
+
+**参数与默认值：** MA SMA40/HL2；振荡15、阈值0.5。
+
+**确认时刻与重绘风险：** 无MTF/收盘门/负offset；分位数暖机/零分母要未知；蜡烛侧色不是osc色，主线宽2和glow7均源生。
+
+**在本系统中的角色：** 源码语义与样式锚
+
+**重复性与独立性：** 就是当前系统核心，不应再计为新增共振。
+
+**可验证假说（未回测）：** 先校验现系统HL2侧色与均线/影线边框parity；独立研究只可测osc转折，不重复计现有侧色。
+
+[官方发布页](https://www.tradingview.com/script/aApUyBnk-Moving-Average-Shift-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bdad326b624514b14aa513fce0b1dd803/1) · 关键行 11, 16, 30, 40, 43, 47, 55, 60, 74, 78。
+
+## 067 · HTF Candle Volume Thermometer [ChartPrime]
+
+源码已读 · 高周期柱内量热图
+
+**实际机制：** 取前一日open/close，按本地累计高低及ATR200划箱、用低周期收盘落箱累加整根量。非真实逐价量。
+
+**参数与默认值：** 周期D、分辨率Mid对应ATR/3。
+
+**确认时刻与重绘风险：** security用[1]+lookahead_on本身已完成；但H/L排除首bar，换周期时量循环含j0新周期bar，画回旧周期，需修验对齐；未收盘局部会变。
+
+**在本系统中的角色：** 量分布候选
+
+**重复性与独立性：** 增加量位置但不代表机构成交或净买卖。
+
+**可验证假说（未回测）：** 先做跨周期首尾合成审计，后只用已闭合周期PoC作一个距离门。
+
+[官方发布页](https://www.tradingview.com/script/Vo99POv0-HTF-Candle-Volume-Thermometer-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B36833024b359451cb3d58d77714fea3e/2) · 关键行 11, 24, 25, 40, 51, 55, 60, 65, 82, 102。
+
+## 068 · Gradient Trend Filter [ChartPrime]
+
+源码已读 · 三级递归均线斜率
+
+**实际机制：** 三次alpha=2/(L+1)递推平滑，base-base[2]定方向；平滑振幅乘固定系数给带，100根差值区间只调渐变。
+
+**参数与默认值：** Length25、close；比较2根固定。
+
+**确认时刻与重绘风险：** 信号isconfirmed但diamond offset=-1；无MTF；递推缺值nz=0初始化，需预热不能把启动偏差当行情。
+
+**在本系统中的角色：** 慢趋势管理候选
+
+**重复性与独立性：** 三级EMA仍高度重复MA，渐变不是独立因子。
+
+**可验证假说（未回测）：** 只比较完成bar翻向退出并还原一根回画，不与现MA作双重投票。
+
+[官方发布页](https://www.tradingview.com/script/ou0PETsS-Gradient-Trend-Filter-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B11147a43ff544d0dad331241d8972836/1) · 关键行 11, 12, 24, 34, 40, 47, 52, 60, 66, 82, 83。
+
+## 069 · Swing Profile Analyzer [ChartPrime]
+
+源码已读 · 波段价格频数分布
+
+**实际机制：** 100根滚动极值驱动波段；翻向后按旧高低区间分30箱，每根close落箱只加1，所谓PoC是停留次数最大处，不含volume。
+
+**参数与默认值：** Swing100、Bins30、展示All。
+
+**确认时刻与重绘风险：** 端点下一根识别，翻向时把整段频数回画至旧端点；最后活动段重画。无MTF/收盘门。
+
+**在本系统中的角色：** 停留位置而非量分析
+
+**重复性与独立性：** 较MA提供分布形状，但不可当资金流共振。
+
+**可验证假说（未回测）：** 只用已完成波段的停留峰位置作一个诊断，不用未完成ZigZag或旧端点入场。
+
+[官方发布页](https://www.tradingview.com/script/8S40eYNi-Swing-Profile-Analyzer-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Be277915c7e374717bbe31b13536e95b8/2) · 关键行 11, 12, 41, 59, 61, 71, 105, 108, 123, 125, 149。
+
+## 070 · Swing High/Low (ZigZag) [ChartPrime]
+
+源码已读 · 滚动极值ZigZag
+
+**实际机制：** 100根高低极值切方向，极值后一根回落定位旧端点；相反极值出现才连接前波段并延伸水平线。
+
+**参数与默认值：** Swing100；历史/破位线默认不显示。
+
+**确认时刻与重绘风险：** 端点与线段在后续翻向时回画、活动段islast重写；破位下向分支确认、上向未确认不对称。无MTF。
+
+**在本系统中的角色：** 已完成结构锚
+
+**重复性与独立性：** 纯价格极值，与突破因子相关，非额外量。
+
+**可验证假说（未回测）：** 只使用确认时间已过去的最后结构水平作单一距离诊断；禁止拿活动ZigZag作早期入场。
+
+[官方发布页](https://www.tradingview.com/script/91qV64vV-Swing-High-Low-ZigZag-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bc53f5bc4e2fb49eab79403fdfd9ea08c/1) · 关键行 27, 41, 57, 59, 88, 104, 114, 116, 161。
+
+## 071 · Fibonacci Trend [ChartPrime]
+
+源码已读 · SuperTrend锚定回撤
+
+**实际机制：** SuperTrend(4,25)切向后建锚点，再持续更新极值绘制0.236/0.382/0.5/0.618/0.786回撤线；初始另一端含3ATR200偏置，不纯粹已完成高低波段。
+
+**参数与默认值：** Trend4、延伸15、默认四个fib比例。
+
+**确认时刻与重绘风险：** 无MTF/收盘门；活动极值使整组起点至当前的历史线移动，延伸只是几何投射，不是未来价格。
+
+**在本系统中的角色：** 回撤位置候选
+
+**重复性与独立性：** 趋势来自SuperTrend，fib为同一价程重标，不是多个独立共振。
+
+**可验证假说（未回测）：** 仅冻结入场时可知回撤几何作一项诊断，不按最终端点事后筛K2。
+
+[官方发布页](https://www.tradingview.com/script/Lrpet5VK-Fibonacci-Trend-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B8143a07641de4d43be04c81f85649473/1) · 关键行 13, 22, 55, 67, 98, 104, 114, 141, 165。
+
+## 072 · Prime Bands [ChartPrime]
+
+源码已读 · 极值包络均值回归带
+
+**实际机制：** 50根高低中点±ATR200×3，再对历史上带最大/下带最小SMA15；位置归一值除标准差200后HMA15形成反转量。标SD的主带实际是ATR倍数。
+
+**参数与默认值：** Length50、SD3；HMA15、标准差200固定。
+
+**确认时刻与重绘风险：** 无MTF/负offset/收盘门；向右15线是两根差值外推，不是预测。数组达到length即shift，实际保留length-1。
+
+**在本系统中的角色：** 带外衰减退出候选
+
+**重复性与独立性：** 仍价格与波动包络，不是统计3σ概率区间。
+
+**可验证假说（未回测）：** 只测试真实完成bar带外反转退出，先验明SD非标准差，勿同时优化带距。
+
+[官方发布页](https://www.tradingview.com/script/99KbMjoz-Prime-Bands-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bfb3fa170b0494aecab338cd6ecc857e3/1) · 关键行 11, 12, 23, 26, 48, 56, 65, 90, 97, 104。
+
+## 073 · Market Structure Trend Targets [ChartPrime]
+
+源码已读 · 枢轴突破与中位数管理线
+
+**实际机制：** 确认高低pivot后high/low穿越切向；管理线=SMA10(40根close中位数)±平滑振幅200窗高低平均，不是固定单调追踪stop。
+
+**参数与默认值：** pivot左右10；振幅SMA50×2、范围200。
+
+**确认时刻与重绘风险：** pivot右10根；突破计数标签放旧pivot与当前中间，回测菱形再回画1根；无MTF/收盘门，止损plot可因触碰隐藏。
+
+**在本系统中的角色：** 结构突破或退出候选
+
+**重复性与独立性：** 结合价格极值和慢平滑，仍非独立资金流。
+
+**可验证假说（未回测）：** 仅取确认后结构方向作一个门，或另轮替换退出，不能把隐藏的stop当实际已成交。
+
+[官方发布页](https://www.tradingview.com/script/F3b5dGLx-Market-Structure-Trend-Targets-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bd3c06abad69d4dc4aa77a4ae0849216a/1) · 关键行 11, 21, 36, 42, 52, 66, 75, 89, 99, 109, 122, 130。
+
+## 074 · MA Multi-Timeframe [ChartPrime]
+
+源码已读 · 多周期均线
+
+**实际机制：** 四个周期分别算所选MA，再security取expression[1]配lookahead_on；面板比较当前close与各已完成MA。
+
+**参数与默认值：** SMA20(close)；周期6h/日/周/月。
+
+**确认时刻与重绘风险：** 高周期用前一完整bar因果取值；不能把lookahead_on一律判前视。若改为低周期需另验。面板当前close未确认，islast历史线只是已取序列重画。
+
+**在本系统中的角色：** 高周期环境显示
+
+**重复性与独立性：** 同类MA跨周期仍高度相关，不是四份独立趋势证据。
+
+**可验证假说（未回测）：** 只选择一个预先冻结的高周期侧色门，保留unknown，避免与已失败prior4h过滤重复包装。
+
+[官方发布页](https://www.tradingview.com/script/0Gclodvl-MA-Multi-Timeframe-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B742f49e3a1d043a2847fdfbd5afce4ff/1) · 关键行 12, 23, 41, 42, 68, 75, 99, 108, 115, 118。
+
+## 075 · Future Trend Channel [ChartPrime]
+
+源码已读 · 趋势段端点外推通道
+
+**实际机制：** close穿SMA100±最高100根ATR200切向；连接趋势起点HL2与当前SMA20(HL2)为中线，宽3倍该ATR；延长到未来50根算直线价格。
+
+**参数与默认值：** Trend100、宽3、投射50。
+
+**确认时刻与重绘风险：** 无MTF/收盘门；当前端点不断重写整段斜率和历史线，future只是外推非前知；不能用最终通道回测早期触碰。
+
+**在本系统中的角色：** 场景展示而非预测
+
+**重复性与独立性：** 仍MA/ATR，名称不增加独立信息。
+
+**可验证假说（未回测）：** 只保存每次决策可见斜率作诊断，不按重画后的历史通道或未来价格做策略标签。
+
+[官方发布页](https://www.tradingview.com/script/facvguC8-Future-Trend-Channel-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B97cea8f31a3c41b186b3e268df654e50/2) · 关键行 10, 16, 33, 36, 48, 60, 111, 149, 169。
+
+## 076 · Trend Levels [ChartPrime]
+
+源码已读 · 价格极值与持续结构状态
+
+**实际机制：** 当前high等于含当前bar的滚动最高值则置多，当前low等于滚动最低值则置空；同根同时满足时后执行的空条件优先。方向保持直到相反条件出现。高低中线来自本次方向持续区间；强度delta=100×(向上收盘计数-向下收盘计数)/(两者合计)，每根按当时动态中线比较收盘后累计，不是用当前中线重算整个历史段。没有独立盘整分类。
+
+**参数与默认值：** 公开版本1.0，2024-10-28，Pine 5；Length默认30。不是收盘严格突破此前30根：包含当前bar、用high/low且相等也触发。
+
+**确认时刻与重绘风险：** 没有MTF请求、负offset或未来pivot确认；但没有收盘门，未完成high/low会改变当根方向。计数初值为na，首次有效方向切换前不能把未知统计强填0。图形对象在更新本根h1/l1/m1前创建，标签/延伸线与本根随后计算的plot值需分辨。
+
+**在本系统中的角色：** 可表示入场前已经存在并持续的结构方向，与当前K1是否突破是两种不同状态。
+
+**重复性与独立性：** 比均线换色更偏价格结构，但仍与已有prior20 breakout极值/突破家族相关；不能包装成完全未测的独立市场因子。
+
+**可验证假说（未回测）：** 仅把最新已完成结构方向与交易方向一致作为一个门，不额外要求当前K1新突破；先做支持审计，保留所有原请求和各自控制。不能按赢家重新选30或其他长度。尚未回测。
+
+[官方发布页](https://www.tradingview.com/script/bacXsRFN-Trend-Levels-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B90a5bf4ab14140758a70f8d5fb9f06e3/1) · 关键行 4, 12, 18, 22, 43, 44, 45, 48, 49, 52, 53, 68, 70, 99, 110, 112, 115, 117, 120, 123, 125, 133, 141, 151。
+
+## 077 · Liquidations Zones [ChartPrime]
+
+源码已读 · 假设杠杆距离区域
+
+**实际机制：** 已确认pivot上方1/2/4/10%与下方除1.01/1.02/1.04/1.1画100/50/25/10X区；量按阳阴K估计，不接交易所强平/OI数据。
+
+**参数与默认值：** pivot左右10、延伸40、四层开启。
+
+**确认时刻与重绘风险：** 右10根确认后回画pivot；last_bar_index参与量回看长度/最近100限制，图表末端变化会改变旧显示。无MTF。
+
+**在本系统中的角色：** 假设风险地图
+
+**重复性与独立性：** 不是实际清算密集区，不算独立衍生品因子。
+
+**可验证假说（未回测）：** 只可测试已确认结构到固定百分比位置的几何假设；真实清算共振需另有合法数据，不能借此命名代替。
+
+[官方发布页](https://www.tradingview.com/script/qvfqG21A-Liquidations-Zones-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B6817e642967c48a0a11c5c7ca8e36cc9/1) · 关键行 11, 17, 26, 27, 71, 75, 93, 105, 139, 167, 170, 171。
+
+## 078 · DSL Trend Analysis [ChartPrime]
+
+源码已读 · 延迟突破更新DSL
+
+**实际机制：** close突破30根前的10根高/低阈值，才把上/下DSL更新为SMA10，否则保持；内带为±ATR200，趋势色用high/low位置，显示线是回归5。
+
+**参数与默认值：** Length10、Offset30、宽1。
+
+**确认时刻与重绘风险：** Offset是历史阈值延迟而非回画；无MTF/未来引用/收盘门，未突破侧长期保持旧值，暖机需unknown。
+
+**在本系统中的角色：** 状态记忆候选
+
+**重复性与独立性：** 仍MA、价格突破和ATR，同源性高。
+
+**可验证假说（未回测）：** 仅取已确认DSL区内外状态为一个门，先审原机会支持；不同时改阈值延迟与管理线。
+
+[官方发布页](https://www.tradingview.com/script/PjB5j8sE-DSL-Trend-Analysis-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Be6c72c6ac6104928855506fb4e2568bf/1) · 关键行 12, 14, 26, 38, 45, 58, 61, 74。
+
+## 079 · Linear Regression Channel
+
+源码已读 · 滚动回归与重画通道
+
+**实际机制：** 默认回归150终点±RMA150振幅×3为因果滚动带；可选最后窗口回归通道/投射另用残差尺度。源码残差下标反向，须单验。
+
+**参数与默认值：** 默认Bands150×3；Channel150×1、Future50×1均关闭。
+
+**确认时刻与重绘风险：** 可选islast通道重画过去；last_bar_index控制旧着色。默认标记需右3根pivot但画确认当前根，并同时要求当前close越带。无MTF/收盘门。
+
+**在本系统中的角色：** 区分滚动带与复盘通道
+
+**重复性与独立性：** 价格回归仍MA近亲，通道样式不增加独立信息。
+
+**可验证假说（未回测）：** 只测试默认滚动带状态，禁止使用最后窗口重画通道做历史信号；先验残差公式。
+
+[官方发布页](https://www.tradingview.com/script/7a8mTJpS-Linear-Regression-Channel/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Be2bd16f6ca9545e0a6b158b47662fc4d/2) · 关键行 12, 22, 45, 66, 77, 82, 99, 126, 162, 167。
+
+## 080 · Zero-Lag MA Trend Levels [ChartPrime]
+
+源码已读 · 零延迟补偿EMA
+
+**实际机制：** EMA15(close)作慢线，EMA15(2close-慢线)作补偿线；两线交叉触发，按ATR200冻结水平框；补偿线三根斜率另决定线色。
+
+**参数与默认值：** Length15；趋势框开启，ATR200固定。
+
+**确认时刻与重绘风险：** 无MTF/收盘门；交叉菱形当根，框回测箭头用当前确认却画前一根。Zero-Lag是补偿，不等于无延迟无重绘。
+
+**在本系统中的角色：** 管理滤波候选
+
+**重复性与独立性：** 纯EMA变换，与原MA高度相关。
+
+**可验证假说（未回测）：** 只比较完成bar补偿线换向管理，不把交叉和斜率作两份共振。
+
+[官方发布页](https://www.tradingview.com/script/pP2FhzAX-Zero-Lag-MA-Trend-Levels-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B0ded7d1e366849b381499bbb2b2ce9a4/1) · 关键行 10, 18, 24, 33, 61, 74, 77, 78。
+
+## 081 · Gaps Trend [ChartPrime]
+
+源码已读 · 三根缺口趋势状态
+
+**实际机制：** 当前low>两根前high且中间high更高为多FVG，反向为空；缺口除其100根标准差>0.5才切向。管理线取含当前共11根极值，触当前极值时状态清空。
+
+**参数与默认值：** 缺口门0.5、追踪长度10，默认显示追踪。
+
+**确认时刻与重绘风险：** FVG第三根才可知，框从两根前画起；无MTF/收盘门。绘图stop可变为na不代表实际成交，未知色不可强填空。
+
+**在本系统中的角色：** 价格不重叠启动候选
+
+**重复性与独立性：** 比MA多了局部不重叠结构，仍非真实订单失衡。
+
+**可验证假说（未回测）：** 仅添加完整三根同向FVG状态门，保留原K1/K2入口，不按框左沿提前交易。
+
+[官方发布页](https://www.tradingview.com/script/xZ2LRPb2-Gaps-Trend-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B61f506eb69944f5abb25714897d2df03/1) · 关键行 9, 16, 36, 48, 55, 80, 105, 129, 133。
+
+## 082 · Double Ribbon [ChartPrime]
+
+源码已读 · 多长度与延迟SMA评分
+
+**实际机制：** SMA25的历史值[i]与当前SMA(26+i)比较，低于则+1否则-1，i=0至11共12票；两根平滑评分显示。不是通常的快慢MA排列。
+
+**参数与默认值：** Length25；固定循环12项，图只画前11项。
+
+**确认时刻与重绘风险：** 无MTF/回画/收盘门；暖机else会扣分，需有效样本门；正负方向语义须用单调斜坡合成验证。
+
+**在本系统中的角色：** 趋势评分诊断
+
+**重复性与独立性：** 高度重复同一价格SMA，不是十二重独立共振。
+
+**可验证假说（未回测）：** 先检验评分方向与暖机，后只作为一个整体分数诊断，不叠计每条带。
+
+[官方发布页](https://www.tradingview.com/script/OdtelUqS-Double-Ribbon-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B0aac5a1af7ab49c583f507ccd5e0cbd4/1) · 关键行 12, 21, 23, 39, 47, 54, 67, 97, 105。
+
+## 083 · High-Low Cloud Trend [ChartPrime]
+
+源码已读 · 高低极值云带
+
+**实际机制：** 35根极值触发保存相反边界，close相对保存值决定多空，云取35根及len/4短极值；不是注释所称1/3。
+
+**参数与默认值：** Lookback35，均值回归点开启。
+
+**确认时刻与重绘风险：** 主交叉diamond offset=+1；回归标签offset=-1、需当前根确认；无MTF/收盘门。Volume/Price仅把价格换格式，不读取volume。
+
+**在本系统中的角色：** 结构包络候选
+
+**重复性与独立性：** 纯价格极值，与突破家族重复，不能当量共振。
+
+**可验证假说（未回测）：** 只测完成bar云内外状态一个门，区分真实产生时刻和±1显示偏移。
+
+[官方发布页](https://www.tradingview.com/script/1yp5FQR8-High-Low-Cloud-Trend-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B88471f2e462f49f48cf4bf23d0d3609b/2) · 关键行 11, 14, 25, 38, 44, 54, 77, 82, 89, 112。
+
+## 084 · Radius Trend [ChartPrime]
+
+源码已读 · 加速阶梯趋势带
+
+**实际机制：** 价格穿band换向，翻向后距高低SMA100振幅×2；每三根累积步长0.15，band按振幅×0.2加速移动，再SMA3。
+
+**参数与默认值：** step0.15、初始距离2、步频3。
+
+**确认时刻与重绘风险：** 第101根强制low×0.8初始化，bar_index%3使图表起点影响轨迹；无MTF/回画/收盘门。不是时间不变滤波。
+
+**在本系统中的角色：** 加速退出曲线候选
+
+**重复性与独立性：** 价格振幅+持仓阶段记忆，非独立市场信息。
+
+**可验证假说（未回测）：** 先验不同历史前缀/相位稳定性；通过后仅替换管理退出，不能直接移入固定硬止损。
+
+[官方发布页](https://www.tradingview.com/script/4KIHf36j-Radius-Trend-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B0d094652c4594b468c1bf12f7a053ad0/1) · 关键行 11, 13, 19, 26, 32, 35, 57, 60, 67。
+
+## 085 · Prime Oscillators Pro + [ChartPrime]
+
+仅官方说明 · 封闭综合振荡器
+
+**实际机制：** 官方说明组合 Money Flow Tracker、Volume Matrix、七条件评分、主振荡器及 MVP 模式；没有公开源码，不能确认资金流公式或七条件是否独立。
+
+**参数与默认值：** 公开页未给可复现默认参数；称 Peak Seekers 随所选周期自动优化。
+
+**确认时刻与重绘风险：** access=3、has_access=false；仅说明级。自动优化的训练窗口、背离确认、历史重画均无法核查，不声称非重绘。
+
+**在本系统中的角色：** 理论上可研究量价确认，但当前不足以接入因果回测。
+
+**重复性与独立性：** 声称使用量与价不等于真实订单流；与均线的相关程度未知。
+
+**可验证假说（未回测）：** 仅在获得合法、冻结且逐时保存的可用输出后，单独检验一个钱流状态；不把多模块总分当现成盈利证据。
+
+[官方发布页](https://www.tradingview.com/script/Fskx57Jg-Prime-Oscillators-Pro-ChartPrime/)。未读取、猜测或绕过保护获取源码。
+
+## 086 · Market Oracle Plus [ChartPrime]
+
+仅官方说明 · 封闭综合趋势与反转套件
+
+**实际机制：** 说明包含趋势/反转信号、自定义组合、Quantum Bands、加权均线 Reactor、VWAP 风格区间；灰色 Reactor 被解释为盘整。实际方程不可见。
+
+**参数与默认值：** Tuning、Auto Maximizer 和 MTF 可选，但可复现默认值、优化窗口未知。
+
+**确认时刻与重绘风险：** access=3、has_access=false；说明承认按回测自动选最佳参数。无法审查样本外隔离、MTF 完成时钟和重绘，不能借历史图认定实时能力。
+
+**在本系统中的角色：** 盘整状态值得提出问题，但目前只有说明级证据。
+
+**重复性与独立性：** 主要描述仍是均线、波动带与其组合；独立信息增量未知。
+
+**可验证假说（未回测）：** 若未来合法取得冻结输出，只试 Reactor 灰色是否可作为一个因果禁入门，禁止同时启用自动优化与多重确认。
+
+[官方发布页](https://www.tradingview.com/script/o5Q7FMYQ-Market-Oracle-Plus-ChartPrime/)。未读取、猜测或绕过保护获取源码。
+
+## 087 · Polynomial Regression Keltner Channel [ChartPrime]
+
+源码已读 · 回归波动通道
+
+**实际机制：** 名为多项式，实际只用一元线性 OLS 的 slope+intercept；三四次矩与二次响应累加后未使用。带距=ATR×0.3×(1+ATR/SMA10(ATR))²，画四倍阶梯。
+
+**参数与默认值：** 默认 HLC3、长度100、显示乘数3但代码除10。方向为 basis>basis[2]；无独立盘整态。
+
+**确认时刻与重绘风险：** 只读历史 src[i]，无 MTF/负偏移；当前柱可变且未强制收盘。不能称二次预测，零 ATR 分母需判未知。
+
+**在本系统中的角色：** 可作波动扩张尺度，不宜再叠一个同源趋势颜色。
+
+**重复性与独立性：** 中心仍是价格平滑；ATR 相对自身扩张是区别于单纯 MA 方向的部分。
+
+**可验证假说（未回测）：** 若有新实验，单独记录相对 ATR 扩张，不连同回归中心与反转信号一并替换；先对照已测波动特征避免重跑。
+
+[官方发布页](https://www.tradingview.com/script/NZAHz4G1-Polynomial-Regression-Keltner-Channel-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B6899a3e8d99040f097093f9af2ef91f9/1) · 关键行 8, 12, 37, 47, 58, 60, 64, 67, 71, 72, 82, 85, 115。
+
+## 088 · LOWESS (Locally Weighted Scatterplot Smoothing) [ChartPrime]
+
+源码已读 · 自适应平滑与枢轴突破
+
+**实际机制：** GaussianMA 对历史逐段极值加权，sigma=(ATR+收盘标准差)/2；所谓 LOWESS 实际是三次核加权均值再加很小的时间项，并非完整局部线性回归。
+
+**参数与默认值：** 主长30、后平滑固定10；枢轴左5右3。颜色比当前平滑值与两柱前，无盘整态。
+
+**确认时刻与重绘风险：** 枢轴至少迟3柱，线从旧枢轴起画，突破标签放当前；无 MTF。当前柱未收盘仍可改色；随机数只影响散点颜色。length=1 有除零。
+
+**在本系统中的角色：** 只能作为价格滤波对照，枢轴突破应在确认后可用。
+
+**重复性与独立性：** 与 MA 系统高度同源，复杂名称不等于新增独立因子。
+
+**可验证假说（未回测）：** 优先审查与 SMA40 的同向率和确认延迟，不把滤波翻色与已有均线翻色叠成双重独立确认。
+
+[官方发布页](https://www.tradingview.com/script/hyeoDyZn-LOWESS-Locally-Weighted-Scatterplot-Smoothing-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B9f9f713bc85b431e84afe7178496ab62/2) · 关键行 16, 19, 21, 53, 60, 65, 69, 71, 77, 82, 91, 92, 98, 109, 125, 129, 171。
+
+## 089 · Multi Deviation Scaled Moving Average [ChartPrime]
+
+源码已读 · 多尺度自适应均线评分
+
+**实际机制：** 收盘两柱差经递归滤波，以滤波值/EMA平方均根决定 alpha，再递归平滑 close；8条 DSMA 中前7条高于最慢线的比例为分数。声明 HLC3 入参实际未使用。
+
+**参数与默认值：** 周期30、敏感度60对应步长40，长度30…310；信号上穿0.3/下穿0.7，颜色分界0.5。
+
+**确认时刻与重绘风险：** 仅历史递推、无 MTF/负偏移，当前柱未确认可变。初值为0且 alpha 未封顶，需暖机与数值验证；百分比不是预测概率。
+
+**在本系统中的角色：** 可量化均线队列一致性，但不是多种独立共振。
+
+**重复性与独立性：** 八线都由同一收盘派生，与已有 MA 方向高度重复。
+
+**可验证假说（未回测）：** 只把七线同侧比例作为一个候选特征做冗余审查；不得当成七票独立信心，也不同时优化长度与敏感度。
+
+[官方发布页](https://www.tradingview.com/script/Yqc5d8Lc-Multi-Deviation-Scaled-Moving-Average-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bb9dcffe55a3f4cdd89f75b451eb2de71/1) · 关键行 11, 12, 13, 27, 39, 43, 45, 51, 56, 59, 60, 74, 88, 100, 106, 147, 148。
+
+## 090 · Chebyshev Filter Divergences [ChartPrime]
+
+源码已读 · 递归滤波标准化与背离
+
+**实际机制：** 按 ripple 派生 beta/gamma 的递归价滤波，再以25柱均值/标准差做 z 分数；颜色反映一柱斜率。背离是价极值创新而振荡器枢轴不创新。
+
+**参数与默认值：** 默认 close、ripple11dB、标准化25；背离默认关闭，左右枢轴5、间隔5…60；背景双 SMA100±2。
+
+**确认时刻与重绘风险：** 背离绘图 offset=-5，须等右5柱；斜率转向菱形 offset=-1，实际晚一柱。无 MTF、无收盘门；零标准差与初始化缺值需保留未知。
+
+**在本系统中的角色：** 较适合趋势衰竭诊断，不能回填成早于确认的退出。
+
+**重复性与独立性：** 纯价格滤波/标准化，不含新成交量信息；背离提供结构关系但仍与 MA 同源。
+
+**可验证假说（未回测）：** 只测试已确认背离的预警作用，以确认时点而非图上枢轴点计时，避免与现有翻色规则混为独立因子。
+
+[官方发布页](https://www.tradingview.com/script/9dx69JKq-Chebyshev-Filter-Divergences-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bb211737e036d4f71877fbea4980c44d7/1) · 关键行 9, 10, 13, 16, 24, 26, 29, 38, 45, 46, 50, 65, 79, 82, 85, 97, 105, 112, 116。
+
+## 091 · Multiple Non-Linear Regression [ChartPrime]
+
+源码已读 · 归一化 OHLC 混合评分
+
+**实际机制：** OHLC 各自做50柱 min-max，再按归一化系数线性混合；用当根 close 的拟合误差更新一次系数并加回误差。没有高阶项，非未来目标回归，也非跨柱保留学习权重。
+
+**参数与默认值：** b=(.5,.4,.35,.25)，学习率输入.1实际+1成为1.1；默认不平滑，可选5柱平均；过0.5发信号。
+
+**确认时刻与重绘风险：** 只用当下及过去，但当前 HLC 未确认会变；无 MTF/负偏移。区间分母为零需判未知。显示 Predicted Value 不能当作下一根预测。
+
+**在本系统中的角色：** 可视为价在自身区间中的位置分数，无独立盘整模型。
+
+**重复性与独立性：** 四个所谓自变量来自同一根 OHLC，高度相关，不是四个独立因子。
+
+**可验证假说（未回测）：** 先与单一 close 区间位置比较冗余；若无额外信息，不因‘非线性回归/学习率’名称纳入共振。
+
+[官方发布页](https://www.tradingview.com/script/s73CMR2W-Multiple-Non-Linear-Regression-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Ba8f23e59de684eb9bc0de92d4b359403/1) · 关键行 8, 9, 15, 29, 30, 33, 40, 49, 58, 62, 65, 68, 71, 76, 80, 117, 126。
+
+## 092 · Spiral Levels [ChartPrime]
+
+源码已读 · 成交量着色枢轴螺旋水平
+
+**实际机制：** 先确认4/4枢轴且其为过去20柱极值，再用确认柱带符号成交量/标准差过滤；围绕旧枢轴 HL2 画三角函数螺旋，末端值成为水平线，不是学习出的阻力。
+
+**参数与默认值：** 量阈.4、旋转11、横尺1、纵尺.15×ATR200；显示10组。
+
+**确认时刻与重绘风险：** 枢轴回画4柱，量/ATR用确认时而非枢轴时；stdev在条件函数内需验证取样。last_bar_index 限1000柱交叉更新/标记，窗口终点影响显示；无 MTF。
+
+**在本系统中的角色：** 仅可提取已确认高量枢轴，螺旋本身没有验证的方向/盘整解释。
+
+**重复性与独立性：** 引入总成交量，但方向只是烛身代理；螺旋几何不是独立市场信息。
+
+**可验证假说（未回测）：** 若研究枢轴共振，只取确认时冻结的量与价位，先移除可视螺旋及终点依赖，再与普通枢轴对照。
+
+[官方发布页](https://www.tradingview.com/script/LWkLPa6f-Spiral-Levels-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B1933e9afc42142ca9b291623b63e27a1/1) · 关键行 15, 17, 18, 21, 23, 32, 34, 37, 60, 79, 83, 84, 91, 96, 100, 117, 151, 163。
+
+## 093 · Multi Asset Histogram [ChartPrime]
+
+源码已读 · 跨资产相对位置广度
+
+**实际机制：** 每币当前 HL2 与过去50根逐一比较，大于等于记+1否则−1，合计−50…50；展示十币分数、均值及最高者。不是涨跌幅也不是资金流。
+
+**参数与默认值：** 默认 BTC/ETH/BNB/SOL/XRP/DOGE/ADA/AVAX/DOT/LINK 的 USD 对，长度50；同图周期 security。
+
+**确认时刻与重绘风险：** 当前外部柱仍可变，需所有币同一完成时刻；缺史 nz→0会伪高分，应另记未知。直方图仅最后柱绘制，向右位置是数值坐标不是预测时间。
+
+**在本系统中的角色：** 可检验大盘一致性，属于少数引入其他资产信息的候选。
+
+**重复性与独立性：** 较单币 MA 更独立，但共同市场 beta 与币间相关性仍很强。
+
+**可验证假说（未回测）：** 固定事前币池，单独检验排除本币的平均分与 K1 方向同侧；不按当前最强币选回测样本，并保留同环境随机对照。
+
+[官方发布页](https://www.tradingview.com/script/KkoxM97D-Multi-Asset-Histogram-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B8de20fa748994adaa65e52f23835b475/1) · 关键行 10, 12, 15, 24, 31, 33, 34, 38, 47, 54, 69, 73, 74, 162。
+
+## 094 · Volume Positive & Negative Levels [ChartPrime]
+
+源码已读 · 可视窗口带符号成交量水平
+
+**实际机制：** 只在收盘穿越价格箱下界且仍低于箱上界时累计整根带符号量；箱位按5000柱高低动态变化，数组按旧索引累计而未重分箱。不是完整成交价分布或真实主动买卖差。
+
+**参数与默认值：** 500箱、阈值70、最多最近500可见柱；阈值是相对最大有符号箱的画线长度。
+
+**确认时刻与重绘风险：** 计算受 chart.left_visible_bar_time 与 last_bar_index 影响；虽累计有 confirmed 门，平移/缩放会改历史集合，动态箱漂移且最大值可为零。不能直接用最终图回测。
+
+**在本系统中的角色：** 只适合说明性的可视分布，现版不具稳定因果特征契约。
+
+**重复性与独立性：** 确有总量，但方向用烛身代替，非独立订单流；显示位置还依赖视窗。
+
+**可验证假说（未回测）：** 须先固定窗口、冻结箱界并验证量守恒，再讨论单一量密集区共振；这是重建工作，不是直接套用公开图形。
+
+[官方发布页](https://www.tradingview.com/script/ELvw1jfq-Volume-Positive-Negative-Levels-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B9d4ea3cea53649c281db6a1091738bf9/2) · 关键行 17, 18, 21, 32, 38, 42, 45, 85, 91, 92, 93, 100, 108, 137, 142。
+
+## 095 · Support and Resistance (High Volume Boxes) [ChartPrime]
+
+源码已读 · 成交量枢轴支撑阻力箱
+
+**实际机制：** 以 close 的左右20枢轴建箱，确认柱带符号整量大于最近2柱量/2.5上界或小于下界时启用；宽 ATR200×1。低/高穿越箱边定义突破与守住。
+
+**参数与默认值：** 默认20/20枢轴、量过滤2、宽1ATR；十字星继承前次烛身方向，不是主动买卖量。
+
+**确认时刻与重绘风险：** 枢轴迟20柱却箱从旧枢轴起画；用的是确认柱量而非枢轴量。守住/突破标签再回画1柱；无 MTF、无收盘门，实时箱颜色可能变。
+
+**在本系统中的角色：** 可供已确认结构位共振，不能把过去箱起点当已知支撑。
+
+**重复性与独立性：** 价格结构加粗粒度成交量，与 MA 有部分差异；量确认不代表机构持仓或清算数据。
+
+**可验证假说（未回测）：** 只测试 K1 入场时已存在的最近冻结箱距离/方向，保留20柱确认迟延，不引入未来生成的箱或把回画标签提前。
+
+[官方发布页](https://www.tradingview.com/script/Uz2AJ0i4-Support-and-Resistance-High-Volume-Boxes-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bad25fb10941f48b5bc2a44a6784040c6/4) · 关键行 11, 12, 14, 21, 25, 28, 42, 43, 62, 65, 69, 74, 92, 118, 121, 154, 175, 187, 197。
+
+## 096 · Linear Regression Oscillator [ChartPrime]
+
+源码已读 · 回归趋势/均值回归
+
+**实际机制：** 20根close对倒序索引回归，但输出为−(m×bar_index+c)，再以100根均值/标准差归一，并非普通回归端点。
+
+**参数与默认值：** 20；阈值±1.5；标准化100；失效位5根。
+
+**确认时刻与重绘风险：** 未收盘改读close[1]，历史/实时输入不同；振荡器符号offset=-1，实际交叉在当前根才可知。
+
+**在本系统中的角色：** 趋势方向或过度偏离。
+
+**重复性与独立性：** 与均线/斜率同源；bar_index使结果依赖载入起点，不能视作独立因子。
+
+**可验证假说（未回测）：** 先检验不同历史起点的输出稳定性；通过后才单测零轴同向过滤。
+
+[官方发布页](https://www.tradingview.com/script/MyKmv8br-Linear-Regression-Oscillator-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bd8ac464cee1948a7a8ba67eaf8c01dc7/2) · 关键行 21, 35, 51, 57, 63, 124。
+
+## 097 · Bayesian Trend Indicator [ChartPrime]
+
+源码已读 · 多均线合成评分
+
+**实际机制：** HLC3对60/40期EMA、SMA、嵌套DEMA式、VWMA滞后1–10根比较，EMA4平滑后四路平均，以pL/[pL+(1-p)(1-L)]合成。
+
+**参数与默认值：** 慢60、快差20、信号gap10；菱形交叉0.5，颜色门<.48或>.52。
+
+**确认时刻与重绘风险：** 当前HLC3未确认可变；无MTF/负偏移。na被强制0，预热不可当空头。
+
+**在本系统中的角色：** 中慢趋势一致度。
+
+**重复性与独立性：** 所谓后验是高度相关均线分数代数，非训练或校准的获利概率。
+
+**可验证假说（未回测）：** 只检验固定0.5方向门相对单SMA门是否有增量，不把多路当四个独立共振。
+
+[官方发布页](https://www.tradingview.com/script/rVEhAQDO-Bayesian-Trend-Indicator-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bb53fd9507bd54835b1f920ceb7d6bf62/2) · 关键行 11, 31, 43, 70, 79, 83, 145。
+
+## 098 · Higher Timeframe High & Low [ChartPrime]
+
+源码已读 · 高周期结构
+
+**实际机制：** request.security取高周期high/low及中点；收盘跨界更新趋势，连续同向突破标签被抑制。
+
+**参数与默认值：** HTF日线；延伸50；趋势/突破显示默认关。
+
+**确认时刻与重绘风险：** 实时HTF[1]与历史结果[1]双索引防重画方案须核实时等价；支撑阻力符号offset=-1只能在下一根识别。
+
+**在本系统中的角色：** 上级别已完成边界/空间。
+
+**重复性与独立性：** 仍来自OHLC，但比同周期多均线多一条结构尺度。
+
+**可验证假说（未回测）：** 按真实完成时刻固定上一日高低，单测K1距顺向边界的剩余空间，不回填标签。
+
+[官方发布页](https://www.tradingview.com/script/foH3S980-Higher-Timeframe-High-Low-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B1d9af3af9a004e08ba169bf5d5f536c3/1) · 关键行 15, 37, 40, 44, 58, 105, 125。
+
+## 099 · Volume Storm Trend [ChartPrime]
+
+源码已读 · 方向成交量代理
+
+**实际机制：** close相对40根中位价，把成交量按方向分到heat/cold，各根先封顶1000；最近3值中位数再EMA10。
+
+**参数与默认值：** 中位价40；量窗3；封顶1000；平滑10。
+
+**确认时刻与重绘风险：** 使用当根close/volume，收盘才冻结；交叉天气图标offset=-1，不能提前入场。
+
+**在本系统中的角色：** 方向持续性及成交量强弱。
+
+**重复性与独立性：** 不是买卖逐笔量；高成交量币多数被截为1000，可能退化为价格方向投票。
+
+**可验证假说（未回测）：** 先审计封顶占比，再比较保留量与纯方向版是否真有新增信息。
+
+[官方发布页](https://www.tradingview.com/script/m0tmcGIF-Volume-Storm-Trend-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bb6b80a13c9c149fdae3551db57e3a42c/1) · 关键行 11, 34, 37, 43, 84, 90, 138。
+
+## 100 · Price Ratio Indicator [ChartPrime]
+
+源码已读 · 均线偏离/超伸展
+
+**实际机制：** 先SMA5(close)，再除所选MA减1；除200根标准差及4，不减滚动均值；默认RMA100，信号SMA25。
+
+**参数与默认值：** RMA100；平滑5；归一200；阈值±1.5。
+
+**确认时刻与重绘风险：** 仅当前及过去值；当根未收盘可变，长预热与零方差须显式未知。
+
+**在本系统中的角色：** 非追价/过度偏离诊断。
+
+**重复性与独立性：** 仍是价格对MA距离；DEMA/TEMA选项实际双/三重EMA，非标准消滞后公式。
+
+**可验证假说（未回测）：** 固定默认偏离阈值单测追价过滤，并与已有extension_atr对照避免重复。
+
+[官方发布页](https://www.tradingview.com/script/ElquilT9-Price-Ratio-Indicator-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bb197da8c5922460590858a86134c8cbc/3) · 关键行 9, 20, 27, 36, 39, 41, 61。
+
+## 101 · Liquidations [ChartPrime]
+
+源码已读 · 伪清算价/量价结构
+
+**实际机制：** 成交量40根最高最低均值再SMA50，按1–1.2倍分档；确认pivot后画low/(1+r)、high×(1+r)，r=1/杠杆。
+
+**参数与默认值：** 5/10/25/50/100倍；pivot日周月2+2，其他3+3。
+
+**确认时刻与重绘风险：** pivot须后2/3根才确认，线起点却回画pivot；触线后停止延伸。
+
+**在本系统中的角色：** 仅可当假设性杠杆距离/摆点空间。
+
+**重复性与独立性：** 未读取清算、持仓或订单簿；成交量分档不证明真实清算堆积。
+
+**可验证假说（未回测）：** 与相同pivot距离但随机杠杆标签的零假设比较，不能将其作为真实清算共振。
+
+[官方发布页](https://www.tradingview.com/script/7LbS0xRk-Liquidations-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bd19a3baa042b4f53997246a323e47c4b/2) · 关键行 13, 33, 42, 79, 89, 103。
+
+## 102 · Multiple Non-Linear Regression [ChartPrime]
+
+仅官方说明 · 闭源回归说明
+
+**实际机制：** 官方说明称OHLC滚动归一到0–1，系数经梯度下降调整并穿0.5发信号；未取得实现，不能验证目标、更新顺序或所谓非线性。
+
+**参数与默认值：** 说明列归一窗、学习率、起始系数和平滑，未给可核默认。
+
+**确认时刻与重绘风险：** 训练目标是否含当根/未来、历史重拟合与预热均未知。
+
+**在本系统中的角色：** 暂不进入源码级共振候选。
+
+**重复性与独立性：** 四价高度相关，且与目录另一个同名开源ID不能认定同版本。
+
+**可验证假说（未回测）：** 待合法公开源码后先做前缀不变性和时间外检验；当前不据营销描述跑策略。
+
+[官方发布页](https://www.tradingview.com/script/hQglYzEc-Multiple-Non-Linear-Regression-ChartPrime/)。未读取、猜测或绕过保护获取源码。
+
+## 103 · Kalman Volume Filter [ChartPrime]
+
+源码已读 · 方向量/固定增益滤波
+
+**实际机制：** close>close[2]赋正volume否则负；HMA70(有符号量)/HMA70(总量)，除200根标准差，再固定增益k平滑及SMA10信号。
+
+**参数与默认值：** VZO70；k=.06；信号10；区域±.6。
+
+**确认时刻与重绘风险：** 当前量价收盘才冻结；全部信号offset=-1。未估计动态误差协方差，实为固定增益递推。
+
+**在本系统中的角色：** 量价动量一致度。
+
+**重复性与独立性：** 非订单流；Kalman名称不等于新增数据，方向仍由价格定。
+
+**可验证假说（未回测）：** 用无负偏移真实交叉单测，并与去量纯价格信号比较增量。
+
+[官方发布页](https://www.tradingview.com/script/lCceGyMY-Kalman-Volume-Filter-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B00cb9e80b0244a7aaca85717f6abbcab/1) · 关键行 8, 32, 43, 48, 55, 116, 122。
+
+## 104 · Relative Average Extrapolation [ChartPrime]
+
+源码已读 · 时段条件均价/外推
+
+**实际机制：** 按日内分钟储存历史同刻权重、偏差、均价绝对变化与位置；形成日内加权均价及1/2/3倍偏差，再递推未来路径。
+
+**参数与默认值：** HLC3；Volume权重；历史天数0=全部；外推500；敏感3。
+
+**确认时刻与重绘风险：** 仅分钟周期；最后一根删除重画投影，当前时刻样本也入平均；外推未来坐标不是已知未来价。
+
+**在本系统中的角色：** 日内季节性波动带。
+
+**重复性与独立性：** 量价加时钟有潜在增量，但样本起点、交易时段定义影响明显。
+
+**可验证假说（未回测）：** 仅冻结已完成历史同刻统计，检验日内区间覆盖；禁止从最后投影图恢复历史信号。
+
+[官方发布页](https://www.tradingview.com/script/wg7rAg7u-Relative-Average-Extrapolation-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B149cd6c803134f8fa64af996fc56319d/1) · 关键行 96, 146, 179, 222, 280, 299, 305, 313, 328。
+
+## 105 · Ghost Tangent Crossings [ChartPrime]
+
+源码已读 · 确认摆点/椭圆切线
+
+**实际机制：** 确认高低pivot后用两端构造椭圆，在累计纵向变化平衡点求切线；事后向后扫描切线破位并画B。
+
+**参数与默认值：** 右确认25；Wick；动态左窗最多500；ghost默认开。
+
+**确认时刻与重绘风险：** 真实pivot至少延迟25根；B可能回贴历史；ghost随未确认极值删除重画，不可作当时信号。
+
+**在本系统中的角色：** 仅确认后的结构几何参考。
+
+**重复性与独立性：** 几何来自相同摆点，不是独立预测源。
+
+**可验证假说（未回测）：** 先记录实际确认时间，再单测确认后切线破位；禁止把回画B作为提前识别。
+
+[官方发布页](https://www.tradingview.com/script/F2vJnCdI-Ghost-Tangent-Crossings-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B14a36515645546518883c7a7db8dcde7/1) · 关键行 13, 50, 80, 156, 176, 204, 221, 271。
+
+## 106 · Momentum Ghost Machine [ChartPrime]
+
+源码已读 · 数字滤波动量
+
+**实际机制：** Blackman窗sinc低通100点，(close−滤值)/49后WMA4；与两级EMA(2、24)之差着色，用最近一二阶变化直线外推2根。
+
+**参数与默认值：** 动量50、平滑50、后平滑4、均线24；ghost开。
+
+**确认时刻与重绘风险：** 滤波只用当前过去样本；右移1/2柱为预测坐标非未来事实，最新投影随数据更新。
+
+**在本系统中的角色：** 动量加速/减速。
+
+**重复性与独立性：** 纯价格滤波，与MACD及MA变色同源，不是机器学习。
+
+**可验证假说（未回测）：** 仅冻结当前delta−MA符号做单变量比较，不把ghost命中当历史可交易信号。
+
+[官方发布页](https://www.tradingview.com/script/GGVVdaUk-Momentum-Ghost-Machine-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B6cf62fad41214d5fa275d3f576e3249f/1) · 关键行 24, 120, 145, 149, 206, 247。
+
+## 107 · Fibonacci Archer Box [ChartPrime]
+
+源码已读 · 摆点斐波那契时间价格框
+
+**实际机制：** 确认摆点反转后，以高低价差及两pivot间距×2构建斐波那契价位/时间线/椭圆；确认收盘跨固定格才报警。
+
+**参数与默认值：** pivot左10右5；框20–50根；目标时间/价格为(.5,.618)、(.382,.786)、(.236,1)。
+
+**确认时刻与重绘风险：** 框画回pivot，实际至少5根后可用；仅保留1历史框；收盘越界/时间届满失效。
+
+**在本系统中的角色：** 已确认结构空间，不是方向来源。
+
+**重复性与独立性：** 纤维图形共用两端OHLC，多个比例不能算独立共振。
+
+**可验证假说（未回测）：** 比较确认后固定价位与等距分位的目标命中，不在画框起点回填交易。
+
+[官方发布页](https://www.tradingview.com/script/6BxAQ0jS-Fibonacci-Archer-Box-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B531a4e8451fb49a286cfd31abaf3ef9a/2) · 关键行 57, 275, 285, 408, 422, 481, 541。
+
+## 108 · Composite Trend Oscillator [ChartPrime]
+
+源码已读 · 均线簇排序
+
+**实际机制：** close和3–96期Phi滤波互相比大小，按周期顺序有符号投票映射约±100；可乘簇宽相对中值，另Phi20信号。
+
+**参数与默认值：** 间距3；phase3.7；trim0；趋势模式；阈值±75。
+
+**确认时刻与重绘风险：** 当前价收盘冻结；源码34槽漏设索引5，默认na参与比较可系统偏分，须先定位验证。
+
+**在本系统中的角色：** 趋势排序/密集度。
+
+**重复性与独立性：** 所有投票来自同一价格，不能当34个独立因子。
+
+**可验证假说（未回测）：** 先修复/保留原版双轨合成验证缺槽影响；不未经审计直接优化±75过滤。
+
+[官方发布页](https://www.tradingview.com/script/oRG4yOuS-Composite-Trend-Oscillator-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B4af067e849e045bbbccaaae1e0e075cd/1) · 关键行 7, 82, 135, 172, 178, 225。
+
+## 109 · Deep Volume [ChartPrime]
+
+源码已读 · 实时成交量拆分/历史代理
+
+**实际机制：** 历史量按实体×2、影线×.375/.125权重拆多空中性；实时用varip保存每次更新close和累计量之差，按tick价变方向分量。
+
+**参数与默认值：** 均量20；会话均量20；tape20、显示6；Ratio Columns。
+
+**确认时刻与重绘风险：** 两套历史/实时算法不同，刷新后真实tick路径丢失；timenow、varip不能从OHLCV回放。
+
+**在本系统中的角色：** 仅实时记录后的微观量价验证。
+
+**重复性与独立性：** 不是交易所逐笔买卖委托，屏幕更新可能聚合多笔；历史拆量复用K线形状。
+
+**可验证假说（未回测）：** 先对实时落盘与重载差异作审计，再测试方向量增量；禁止历史代理冒充真实订单流。
+
+[官方发布页](https://www.tradingview.com/script/aBhdMbwT-Deep-Volume-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bbc2eab7b4a5d47f5baecf2d75e17f7db/2) · 关键行 59, 108, 413, 537, 560, 601, 670, 1015。
+
+## 110 · PhiSmoother Moving Average Ribbon [ChartPrime]
+
+源码已读 · 多周期价格滤波带
+
+**实际机制：** 对当前与前价平均施加Phi权重卷积，周期3至90每3一条；按不同长度的价格排序或自身变化着色。
+
+**参数与默认值：** phase3.7；Chameleon；告警OFF，频率默认收盘。
+
+**确认时刻与重绘风险：** 只取过去索引；未收盘线仍可动；没有向左回填，开告警须保留收盘频率。
+
+**在本系统中的角色：** 趋势带展开/收拢。
+
+**重复性与独立性：** 30线为单价格不同低通尺度；与Composite共用Phi，不是30项共振。
+
+**可验证假说（未回测）：** 用预注册簇宽变化与单MA斜率比较，仅检验密集后扩张是否有增量。
+
+[官方发布页](https://www.tradingview.com/script/H362NdFv-PhiSmoother-Moving-Average-Ribbon-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B1e2b579dcaf7452ba843b3e89a3288f3/1) · 关键行 7, 38, 78, 87, 99, 289。
+
+## 111 · Trending RSI [ChartPrime]
+
+源码已读 · 反解RSI/趋势振荡器
+
+**实际机制：** 先(price−RMA14)/(14/2)去趋势，按RSI反解构造70/30边界和50中线；边界Phi40，信号Phi1，可选二项式均线。
+
+**参数与默认值：** RSI14；70/30；边界40；背离左15右15、间距5–60，显示默认关。
+
+**确认时刻与重绘风险：** 背离需15根后确认并offset=-15；普通曲线当前收盘才稳定。
+
+**在本系统中的角色：** 动量相对动态边界。
+
+**重复性与独立性：** 仍纯价格，反解坐标不提供独立信息；不把趋势RSI与普通RSI并算两因子。
+
+**可验证假说（未回测）：** 仅单测已完成信号穿中线，另把背离按确认时刻独立审计。
+
+[官方发布页](https://www.tradingview.com/script/qe0D9HM1-Trending-RSI-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B8ab0d218e12d456a8f382e0e8f9867d0/1) · 关键行 42, 108, 177, 202, 214, 227, 258, 328。
+
+## 112 · MACD All In One Screener [ChartPrime]
+
+源码已读 · 多标的MACD筛选
+
+**实际机制：** 每标的EMA12−EMA26及EMA9信号，检测零轴/交叉/柱体斜率；pivot左15右10背离。信号MA代码使用osc_type而非sig_type。
+
+**参数与默认值：** 12/26/9；历史3000；10标的；Wait for Close开。
+
+**确认时刻与重绘风险：** HTF request.security未滞后表达式且lookahead_on，历史泄漏；外层收盘确认不能补救。背离回画10根。
+
+**在本系统中的角色：** 修复前禁止用于HTF共振验证。
+
+**重复性与独立性：** 相同MACD跨币可测市场广度，但币间高度相关。
+
+**可验证假说（未回测）：** 先替换为已完成HTF严格时钟并验证前缀一致，再固定标的池单测广度。
+
+[官方发布页](https://www.tradingview.com/script/NuEgDxSp-MACD-All-In-One-Screener-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B499a3ecb9db34480885d4d4688ae1d0a/2) · 关键行 295, 426, 433, 547, 570, 585, 601, 697。
+
+## 113 · Monte Carlo Future Moves [ChartPrime]
+
+源码已读 · 经验分布随机外推
+
+**实际机制：** 过去500根实体对数收益分方向分25档抽样，叠34根漂移及波动修正，500次10步终点分50箱，再sinc平滑。
+
+**参数与默认值：** Candle；500次/500窗/10步；标准漂移34；平滑1.75。
+
+**确认时刻与重绘风险：** 只lastbar画图并删除旧图；抽样历史排除当根但漂移/波动含当根，模拟从open起，非开盘已知预测。
+
+**在本系统中的角色：** 仅可作冻结时刻的情景区间。
+
+**重复性与独立性：** 模拟频率不是校准胜率；随机路径独立抽样丢失真实时间相关性。
+
+**可验证假说（未回测）：** 逐收盘冻结预测，单测区间覆盖率对历史波动基线，不用最后一张预测图回测。
+
+[官方发布页](https://www.tradingview.com/script/LGueefJE-Monte-Carlo-Future-Moves-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B39409c9e333b4bdbae7eb02ffc049d07/1) · 关键行 66, 90, 107, 128, 188, 195, 295, 368, 418。
+
+## 114 · Dynamic Support/Resistance Zones [ChartPrime]
+
+源码已读 · 摆点密度支阻
+
+**实际机制：** 5/10/20/50左右对称pivot入库，高低各50点，按价格分箱并sinc平滑找密度峰；可按时间/量加权。
+
+**参数与默认值：** 默认等权、75箱、平滑3；反弹回查100；MA默认关。
+
+**确认时刻与重绘风险：** pivot延迟5–50根；每次删旧线与反弹标记，以当前峰回查100根且读下一根close，历史命中不能当原时信号。
+
+**在本系统中的角色：** 冻结已确认支阻的空间门。
+
+**重复性与独立性：** 多尺度仍同OHLC摆点；密度图不是成交深度。
+
+**可验证假说（未回测）：** 只保存当时可知峰，再测后续首次接触，对照简单上一pivot。
+
+[官方发布页](https://www.tradingview.com/script/lrYnTj06-Dynamic-Support-Resistance-Zones-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bb6adfc9446664a658e4119b86caa6ce2/1) · 关键行 111, 123, 160, 165, 212, 334, 390。
+
+## 115 · Osmosis [ChartPrime]
+
+源码已读 · 多尺度热图
+
+**实际机制：** 同一算法按2–29尺度计算；默认EMA5−EMA(1+6L)以90根极差归一，沿尺度轴找≥70或≤30连续至少5项。
+
+**参数与默认值：** Normalized MACD；归一90；fast关；阈值70/30、连续5。
+
+**确认时刻与重绘风险：** 当前收盘冻结；streak是在同一根的参数轴连续，不是连续5根趋势。部分算法累积极值依赖样本起点。
+
+**在本系统中的角色：** 跨尺度方向一致度。
+
+**重复性与独立性：** 28行重复价格动量，非28种独立因子；Volume Delta是量序列差分非买卖差。
+
+**可验证假说（未回测）：** 单测固定尺度一致门相对普通MACD，明确不要把尺度连续误作时间确认。
+
+[官方发布页](https://www.tradingview.com/script/BuS5xuPc-Osmosis-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bef976a516b464b779a38ebed8d837b17/3) · 关键行 35, 101, 169, 173, 200, 222, 303。
+
+## 116 · Smart Money Oscillator [ChartPrime]
+
+源码已读 · 结构归一振荡器
+
+**实际机制：** 确认pivot高低与突破方向更新动态上下界；close相对前一根边界映射±100，SMA10后WMA20；BOS/CHoCH由高低越pivot。
+
+**参数与默认值：** pivot30/20；边界极值20；scale offset开；背离20/20。
+
+**确认时刻与重绘风险：** 结构延迟20根；突破使用当根high/low，收盘冻结；背离标签回画20根，隐藏空背离坐标赋值另有可疑混用。
+
+**在本系统中的角色：** 已确认结构趋势/位置。
+
+**重复性与独立性：** 无机构成交数据，Smart Money只是价格结构解释。
+
+**可验证假说（未回测）：** 单测已完成BOS方向与K1共振，另做简单pivot门对照，不按回画背离选点。
+
+[官方发布页](https://www.tradingview.com/script/EiLtieGm-Smart-Money-Oscillator-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B4a41e164cdf64e10a8225a56508b90b6/1) · 关键行 24, 33, 297, 368, 438, 473, 521, 534。
+
+## 117 · Channels With Patterns [ChartPrime]
+
+源码已读 · 斜通道+K线形态
+
+**实际机制：** 确认pivot与SMA18高低确定斜率，ATR式宽度构造通道，通道上下区筛吞没/锤子；之后按冻结斜率延长。
+
+**参数与默认值：** User；pivot10/15；ATR10×4；offset5×.125；padding50%。
+
+**确认时刻与重绘风险：** 通道起点回画pivot、实际15根后创建；锤子确认收盘，但吞没/破位alert调用可先于外层确认。
+
+**在本系统中的角色：** 已确认通道空间与拒绝形态。
+
+**重复性与独立性：** 吞没与既有K1重复；新增仅位置，ATR自定义alpha=1/(L+1)非Wilder。
+
+**可验证假说（未回测）：** 只在已创建通道内收盘测固定位置门，保持原K1形态以隔离空间增量。
+
+[官方发布页](https://www.tradingview.com/script/Sxg2rJ7L-Channels-With-Patterns-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bf72ae07a180c4563b459531bc183a782/1) · 关键行 129, 182, 210, 264, 300, 359, 510, 560, 576。
+
+## 118 · Ranges With Targets [ChartPrime]
+
+源码已读 · 日界区间突破/目标
+
+**实际机制：** 日切换时以HL2与滞后波动冻结上下界，前收盘越界触发，目标按边界风险倍数计算。
+
+**参数与默认值：** ATR30×.3与价格.003取小后滞后20除2；目标1.3R；实体过滤默认关。
+
+**确认时刻与重绘风险：** 首日柱未确认可变；收盘触发后立即用同柱全高低判TP/SL，且两项可同时计数，展示胜率不可作成交证据。
+
+**在本系统中的角色：** 可重建因果日区间突破。
+
+**重复性与独立性：** 纯OHLC突破与原K1相关，非新资金信息。
+
+**可验证假说（未回测）：** 先固定次开成交与同柱优先级，对比普通日区间突破；不沿用内置盈亏表。
+
+[官方发布页](https://www.tradingview.com/script/3swrxpw6-Ranges-With-Targets-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B6336c591959c4fb999bc2e8593991a70/1) · 关键行 37, 53, 66, 81, 112, 161, 197。
+
+## 119 · Sentiment Range MA [ChartPrime]
+
+源码已读 · 区间门控均线
+
+**实际机制：** 平滑实体越出冻结区间才重置基线与上下带，再双重平滑输出；所谓ATR实际是实体范围SMA。
+
+**参数与默认值：** 输出21、触发5、范围200×6；Body；双平滑开。
+
+**确认时刻与重绘风险：** 无枢轴回填或MTF请求；当前未收盘实体仍能改变门控，收盘后使用。
+
+**在本系统中的角色：** 盘整迟滞/趋势管理候选。
+
+**重复性与独立性：** 仅OHLC与均线平滑，不是真实情绪；与MA40强重叠。
+
+**可验证假说（未回测）：** 固定默认区间门控替换单一MA管理，检查交易频度与延迟而非叠加多条同源确认。
+
+[官方发布页](https://www.tradingview.com/script/LVsNPKBe-Sentiment-Range-MA-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B7f80af2f1e3546549f3d98785e39c76b/1) · 关键行 7, 12, 19, 27, 41, 49, 60, 73。
+
+## 120 · RSI Heatmap Screener [ChartPrime]
+
+源码已读 · 跨币RSI广度面板
+
+**实际机制：** 各币同周期RSI及均线/VWAP/随机指标评级，所选RSI取平均，再以累计极值归一展示市场曲线。
+
+**参数与默认值：** RSI14、30槽全选；含重复LINK/LTC；附SMA10/20/50/100与随机8/5/5。
+
+**确认时刻与重绘风险：** security未设前视，但币种未收盘值会变；彩色图整体offset−5，详细标签随机放在可视历史，均非信号时刻。
+
+**在本系统中的角色：** 可重建固定去重币池的市场广度。
+
+**重复性与独立性：** 跨币信息较新，内部评级仍多为价格动量；外部评级库未在本脚本展开。
+
+**可验证假说（未回测）：** 只测事前固定币池已闭合RSI广度一项，去重且禁用图上标签横坐标作历史事件。
+
+[官方发布页](https://www.tradingview.com/script/mMn35YVE-RSI-Heatmap-Screener-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bca41c41c7d0c4f95ab42b20057485194/2) · 关键行 7, 17, 73, 81, 112, 189, 222, 240, 344, 361。
+
+## 121 · Liquidity Hunter [ChartPrime]
+
+源码已读 · 长下影反转/目标展示
+
+**实际机制：** 仅做多：前柱实体小、下影长且收盘上升，滞后波动带不降即触发；止损为当前低点−1.5ATR14。
+
+**参数与默认值：** 实体≤30%、下影≥60%；目标1.5R；带宽由ATR5与价格上限滞后20计算。
+
+**确认时刻与重绘风险：** 形态用前柱，但入场/止损取当前未确认OHLC；同柱高点判目标可能早于收盘入场。
+
+**在本系统中的角色：** 可作已闭合拒绝影线形态候选。
+
+**重复性与独立性：** 没有订单簿或清算数据；CHOCH/BOS只是风险距离派生价位。
+
+**可验证假说（未回测）：** 只检验前柱下影拒绝是否改善固定K1入口，重建次开成交而不使用绘图目标作业绩。
+
+[官方发布页](https://www.tradingview.com/script/E9z8Isgd-Liquidity-Hunter-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B4d9d22bfaa104cf7a025014e4fedd1d8/2) · 关键行 25, 32, 36, 55, 65, 73, 138, 189。
+
+## 122 · Ichimoku Oscillator With Divergences [ChartPrime]
+
+源码已读 · 一目均衡/背离振荡器
+
+**实际机制：** Donchian中线构成云，信号为价格减滞后云中心，经切比雪夫和因果高斯平滑后按滚动能量归一。
+
+**参数与默认值：** 9/26/52、位移26；平滑3、窗口20、信号WMA12；背离左15右10。
+
+**确认时刻与重绘风险：** 云向前画25根不等于读取未来；背离晚10根确认再回画；普通交叉未强制收盘，bounce下向状态存在同条件立即重置风险。
+
+**在本系统中的角色：** 趋势位置或已确认背离管理。
+
+**重复性与独立性：** 纯价格多尺度变换，与MA方向/动量重复。
+
+**可验证假说（未回测）：** 仅比较确认时刻的反向背离退出，不允许把枢轴回画点当成交时刻；先单测状态机。
+
+[官方发布页](https://www.tradingview.com/script/y3NTW7he-Ichimoku-Oscillator-With-Divergences-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B1c7ca416b5484adda2e6f3e2e62d9922/1) · 关键行 7, 23, 89, 110, 196, 214, 247, 279, 287, 347, 394, 439。
+
+## 123 · Risk Reward Optimiser [ChartPrime]
+
+源码已读 · 多目标模拟/优化面板
+
+**实际机制：** 七套独立交易状态并跑不同R目标；默认入口为RSI14上穿其SMA14，仅做多，止损低点−1.4ATR14。
+
+**参数与默认值：** R=1/1.5/2/2.5/3/3.5/5；日期限制关；默认高亮最大胜率。
+
+**确认时刻与重绘风险：** 当前收盘入场却立即用同柱高低退出，TP先于SL；无成本与跳空模型，七臂持仓不同导致后续样本不同。
+
+**在本系统中的角色：** 只能借鉴目标展示，不接收内置排名作优化结论。
+
+**重复性与独立性：** 不是新共振特征；是同源技术入口加样本内目标搜索。
+
+**可验证假说（未回测）：** 先用固定母群及同成本执行器重建七臂，再进行预注册时间外比较；禁止高亮最优即宣称最优。
+
+[官方发布页](https://www.tradingview.com/script/cuWPYbhn-Risk-Reward-Optimiser-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bc2c0c6e00348449b8bdec4d354a951c8/1) · 关键行 112, 123, 148, 180, 239, 260, 402, 442, 479, 529, 551, 584, 825。
+
+## 124 · Smart Money Breakouts [ChartPrime]
+
+源码已读 · 确认枢轴结构突破
+
+**实际机制：** 20/20高低枢轴确认后，首次影线越界消费结构位；BOS/CHOCH按上次突破方向命名，涨跌柱成交量占比只作表情标签。
+
+**参数与默认值：** Length20、Wicks；SL=极值±1.5ATR14；目标1.1R、收盘止损。
+
+**确认时刻与重绘风险：** 枢轴延迟20根且线回接原枢轴；突破未强制收盘；同柱触发后用高低判目标且TP/SL可双计。
+
+**在本系统中的角色：** 可提取已确认结构突破状态。
+
+**重复性与独立性：** 所谓Smart Money没有机构流数据；量标记不是入口门。
+
+**可验证假说（未回测）：** 仅检验已确认枢轴突破是否增加固定K1超额，不把图内胜败表或回连线当因果成交。
+
+[官方发布页](https://www.tradingview.com/script/aM3PRWEM-Smart-Money-Breakouts-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bea79c79a676844a2884f43e44c1be6af/2) · 关键行 51, 71, 89, 111, 126, 138, 195, 206, 256, 308。
+
+## 125 · Trendline Breakouts With Targets [ChartPrime]
+
+源码已读 · 斜向趋势线突破
+
+**实际机制：** 连续确认高/低枢轴连成斜率线，价格由另一侧穿越投影线时触发；多只破下降阻力、空只破上升支撑。
+
+**参数与默认值：** Period10、右侧5、Wicks；延伸25；目标/止损为信号极值±20倍滞后波动带。
+
+**确认时刻与重绘风险：** 枢轴至少晚5根才知，线回画不代表当时存在；交叉无收盘门，盘中会变。
+
+**在本系统中的角色：** 可用于结构方向替换MA入口。
+
+**重复性与独立性：** 纯价格几何，区别于水平突破但并非独立资金流。
+
+**可验证假说（未回测）：** 固定10/5确认与次开执行，仅比较斜线突破和水平结构突破；不凭当前连线回溯入场。
+
+[官方发布页](https://www.tradingview.com/script/hb6J9iHI-Trendline-Breakouts-With-Targets-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B6da713fee6b24382b151242664028a26/2) · 关键行 27, 70, 78, 136, 142, 149, 166, 178, 197, 236。
+
+## 126 · Supertrend Targets [ChartPrime]
+
+源码已读 · 趋势分段/经验目标分位
+
+**实际机制：** 以源价±ATR形成递归Supertrend，但转向用HL2；每次转向汇总刚结束段的极值收益，历史段分位映射当前目标。
+
+**参数与默认值：** HLCC4、ATR10×3；窗口0即全部历史；分位缩放80%，默认显示40/60/72/80分位。
+
+**确认时刻与重绘风险：** 无外部未来数据；当前转向未收盘会变，结束段极值含转向柱；分位是历史路径统计而非胜率，去重逻辑多空不一致。
+
+**在本系统中的角色：** 目标尺度或趋势管理候选。
+
+**重复性与独立性：** 只价格/ATR与历史极值；不能当额外独立确认。
+
+**可验证假说（未回测）：** 冻结已结束段分位并次开执行，对照固定R目标；检验覆盖率与实际成本后收益而非相信分位命名。
+
+[官方发布页](https://www.tradingview.com/script/SqWrqra4-Supertrend-Targets-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bc96f20c1323645849319d7e4667e1040/1) · 关键行 7, 84, 106, 114, 122, 127, 144, 156, 191, 204。
+
+## 127 · Volume HeatMap With Profile [ChartPrime]
+
+源码已读 · 固定范围价格/量分布
+
+**实际机制：** 区间收盘价计入23个价格箱，热度/宽度主要用命中次数；POC按箱量，涨跌量按柱方向。
+
+**参数与默认值：** 23级、All、Left；固定起止时间；extend默认关、预测线关。
+
+**确认时刻与重绘风险：** 在区间终点或末柱重建再铺满历史；x箱累加volume[x]而非第i柱volume[i]，量索引需先修证。
+
+**在本系统中的角色：** 暂限展示审计，重建后可作成交密集区。
+
+**重复性与独立性：** 并非逐笔成交价分布；频次热图与真实成交量概念混用。
+
+**可验证假说（未回测）：** 先用合成不同柱量验证箱量守恒与索引，再只测试前缀冻结POC距离，禁全区间回填。
+
+[官方发布页](https://www.tradingview.com/script/fASgK4y1-Volume-HeatMap-With-Profile-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bb60e11091c91467d8dc62acaaf776ed6/1) · 关键行 14, 38, 126, 136, 145, 158, 165, 178, 229, 257, 280。
+
+## 128 · Machine Learning Momentum Oscillator [ChartPrime]
+
+源码已读 · 非标准近邻动量评分
+
+**实际机制：** 双重EMA平滑HLC3差/绝对差生成两尺度动量；历史曼哈顿距离每创更大值才入持久预测队列，标签为近2柱动量反号。
+
+**参数与默认值：** 周期名Short26/Long14；平滑13、邻居50。
+
+**确认时刻与重绘风险：** 当前特征与标签先入历史；不是前向收益训练，也非标准K近邻；队列跨柱保留、样本增长，当前柱未收盘可变。
+
+**在本系统中的角色：** 应先验证算法定义，不能当机器学习胜率。
+
+**重复性与独立性：** 仅价格动量再编码，无独立信息；价格单位带宽还加在无量纲振荡器上。
+
+**可验证假说（未回测）：** 合成序列对照标准最近邻与简单动量，先检验实现及前缀稳定性，再谈增量预测。
+
+[官方发布页](https://www.tradingview.com/script/OCl780V6-Machine-Learning-Momentum-Oscillator-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B37d463faa5b34083a394b3f3fd28f283/1) · 关键行 8, 52, 58, 67, 76, 80, 88, 94, 109, 116。
+
+## 129 · Bollinger Bands Liquidity Cloud [ChartPrime]
+
+源码已读 · 布林区间分布热图
+
+**实际机制：** 默认把历史柱量按高低区间重叠分摊到价格箱，筛出布林带内箱并评分；另一路累计Z分数频次。
+
+**参数与默认值：** BB20×2；Volume、窗口150、50箱、回画50、平滑1。
+
+**确认时刻与重绘风险：** Volume按n时刻前缀计算；Z-Score却用末端累计分布映射过去各n，存在回填泄漏，窗口限制的是不同Z值数而非150根。
+
+**在本系统中的角色：** 可测试因果前缀量密集度。
+
+**重复性与独立性：** 没有实际流动性订单簿；OHLC均匀量代理，分摊公式也需守恒测试。
+
+**可验证假说（未回测）：** 仅审定Volume路径，合成量守恒及逐前缀重放后测一项密集区距离；禁用Z历史热图标签。
+
+[官方发布页](https://www.tradingview.com/script/dEaK9Qcv-Bollinger-Bands-Liquidity-Cloud-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B60deb56807e64f86a8690fb55cc10085/3) · 关键行 8, 11, 58, 74, 96, 110, 124, 149, 171, 182, 186, 235, 246。
+
+## 130 · Smart Money Range [ChartPrime]
+
+源码已读 · 枢轴区间/示意路径
+
+**实际机制：** 确认高枢轴之后找截至当前的极值区间，数价格穿越次数作箱图，并向未来画固定折线路径。
+
+**参数与默认值：** 枢轴30/30、24级；波动带ATR30×.3滞后20除2。
+
+**确认时刻与重绘风险：** 末柱删除重建区间，枢轴晚30根才知；未来+50/+135/+170折线是人为几何，不是预测轨迹。
+
+**在本系统中的角色：** 限结构示意；若使用需冻结既知边界。
+
+**重复性与独立性：** Volumes数组累加Counter(close[x])而非volume，所谓量是触碰计数，不是机构成交数据。
+
+**可验证假说（未回测）：** 先将命名与计数分离，只比较前缀冻结区间的突破统计，禁止将预画折线当未来标签。
+
+[官方发布页](https://www.tradingview.com/script/84zEwHEm-Smart-Money-Range-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bba7bd3c4701b44da89b63c76c64a1a03/1) · 关键行 10, 33, 46, 56, 73, 85, 99, 119, 127, 154, 158, 178。
+
+## 131 · Fibo Levels with Volume Profile and Targets [ChartPrime]
+
+源码已读 · 高周期斐波/量分布目标
+
+**实际机制：** 前一高周期高低收加本地带宽生成PP±.382/.618/1倍范围；本周/月柱涨跌量比决定指向哪个目标。
+
+**参数与默认值：** Fibo D、12级、All；带宽ATR30封顶价格.3%后滞后20除2。
+
+**确认时刻与重绘风险：** security用[1]但默认lookahead_off，历史映射可能比预期迟一HTF；末柱将当前水平铺回周初；箱量volume[x]错配第i根。
+
+**在本系统中的角色：** 先修证映射与量索引，才可用已知水平距离。
+
+**重复性与独立性：** 斐波只是价格比例；量色为涨跌柱代理，不是订单流。
+
+**可验证假说（未回测）：** 逐前缀固定前日水平，仅检验目标距离一项；禁末柱目标回画及错误POC评分。
+
+[官方发布页](https://www.tradingview.com/script/3pQjf5YJ-Fibo-Levels-with-Volume-Profile-and-Targets-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B3dc0f4d5ece74d869610cbcbdca1b297/3) · 关键行 21, 33, 48, 58, 66, 89, 118, 139, 145, 188, 200。
+
+## 132 · Filtered Volume Profile [ChartPrime]
+
+源码已读 · 平滑量分布/峰值支撑
+
+**实际机制：** 200柱高低范围分100箱、按柱区间分摊量，跨价格箱sinc平滑找高分位局部峰；均值评分是缩放t密度。
+
+**参数与默认值：** Length200、平滑3、峰宽3、阈值80分位、均值20；默认仅POC线。
+
+**确认时刻与重绘风险：** 只末柱计算再向200柱起点画线；空间平滑非时间前视，但回填线不可作历史特征；窄柱量分摊非守恒须验。
+
+**在本系统中的角色：** 可重建前缀POC及价格密集区。
+
+**重复性与独立性：** t密度乘常数的Mean Score不是命中概率；涨跌柱量不代表主动买卖。
+
+**可验证假说（未回测）：** 先测箱量守恒和前缀不变性，再固定POC距离对照简单高低区间；不按评分当胜率门。
+
+[官方发布页](https://www.tradingview.com/script/EPciWdx9-Filtered-Volume-Profile-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B8427d33056114259afc95ae99b2e73ab/1) · 关键行 6, 61, 77, 89, 109, 128, 144, 155, 193, 207, 217, 276, 287。
+
+## 133 · Swing Ranges [ChartPrime]
+
+源码已读 · 已结束波段区间统计
+
+**实际机制：** 20/20枢轴定义涨跌段，汇总段量、ATR均值和VWAP中位数，末柱延伸最近高低区域并按涨跌柱量填色。
+
+**参数与默认值：** Swing20、ATR14；历史框与VWAP POC默认开。
+
+**确认时刻与重绘风险：** 结束枢轴晚20柱确认后整个波段才被框出；末柱区域重建，过去框不代表事前可知。
+
+**在本系统中的角色：** 已完成波段尺度描述或既知水平。
+
+**重复性与独立性：** 称POC实际为VWAP序列中位数，不是最大成交价格；柱颜色分量非主动订单流。
+
+**可验证假说（未回测）：** 只使用确认时间之后的上一完成波段范围，比较其归一化尺度是否增加MA入口信息。
+
+[官方发布页](https://www.tradingview.com/script/x1uxHl67-Swing-Ranges-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B9a1227ff02174bd69d4aa183b42198e1/3) · 关键行 23, 28, 47, 64, 80, 88, 96, 126, 161, 173, 241。
+
+## 134 · DCA Liquidation Calculation [ChartPrime]
+
+源码已读 · DCA仓位/清算估算器
+
+**实际机制：** 以所选币前日收盘为基价，按累计偏离与几何订单额模拟加仓均价；清算公式固定维持保证金0.5%。
+
+**参数与默认值：** 钱包1000、首单200、安全单300×1.5、10次、间距2.2%、杠杆10。
+
+**确认时刻与重绘风险：** 是静态假设表非真实成交；日[1]映射默认off；清算函数未纳多空方向及交易所阶梯/费用，PNL仅下一单数量而非全仓。
+
+**在本系统中的角色：** 不作趋势共振，只作需要校验的风险教学。
+
+**重复性与独立性：** 没有清算流数据，参数化算术不产生交易优势。
+
+**可验证假说（未回测）：** 合成多空账务与交易所公式逐项核对；未验证前不能据表调真实杠杆或补仓。
+
+[官方发布页](https://www.tradingview.com/script/DkEc7RrD-DCA-Liquidation-Calculation-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B46d9a9ac8dc94d6ba053a3eab0ccdbb7/2) · 关键行 18, 47, 55, 64, 71, 84, 120, 133, 143, 170。
+
+## 135 · RibboNN Machine Learning  [ChartPrime]
+
+源码已读 · 非标准近邻着色均线带
+
+**实际机制：** 特征为RSI+MFI/2的绝对值，阈值分类后入库；保留扫描中距离不断变大的标签，投票染色范围加权均线。
+
+**参数与默认值：** 快14慢26；输入邻居250实际floor√250=15；阈值50/90，均线10–20。
+
+**确认时刻与重绘风险：** 不是标准最近邻/未来收益学习；当前特征标签先入库，预测队列跨柱保留，未确认颜色会变。
+
+**在本系统中的角色：** 先算法审计，不可当独立ML确认。
+
+**重复性与独立性：** 价格动量与成交量加权已混合；多条均线只是同一投票着色，不等于多因子独立。
+
+**可验证假说（未回测）：** 对照简单RSI/MFI阈值与标准近邻合成结果，冻结定义后才能评估新增信息。
+
+[官方发布页](https://www.tradingview.com/script/7cUyUmXS-RibboNN-Machine-Learning-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Badabbd677e574d65bbb1fa51f6bb7f8c/1) · 关键行 9, 18, 29, 38, 47, 56, 62, 73, 98。
+
+## 136 · Retest Support Resistance Signals [ChartPrime]
+
+源码已读 · 已确认结构突破回测
+
+**实际机制：** 20/20枢轴后，整柱越过水平才转等待；随后影线触线且方向实体收在外侧即标记回测，反侧收盘取消。
+
+**参数与默认值：** Wick20/20；等待最长1000柱；显示线一次突破或300柱停止更新。
+
+**确认时刻与重绘风险：** 核心全在barstate.isconfirmed；先检等待再升级新突破，不能同柱假回测；水平线回接旧枢轴但信号在确认柱。
+
+**在本系统中的角色：** 较明确的水平K1→K2状态机候选。
+
+**重复性与独立性：** 仍是OHLC结构，与均线回测同类但参照对象不同。
+
+**可验证假说（未回测）：** 保持风险/退出不变，仅把MA触线换为确认水平的首次回测，保存等待/取消与无信号母样本。
+
+[官方发布页](https://www.tradingview.com/script/E4joH77u-Retest-Support-Resistance-Signals-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bb13da5ba075b436f8867096f8690fafd/2) · 关键行 20, 26, 38, 44, 105, 144, 153, 173, 177, 201, 214, 227, 269, 297。
+
+## 137 · Multi Kernel Regression [ChartPrime]
+
+源码已读 · 核回归平滑/转向
+
+**实际机制：** 默认以全部最近500柱对每个历史点做双边核回归；关闭重画后改为最近14柱单边核加权，斜率翻向标记。
+
+**参数与默认值：** Repaint=true；Laplace、带宽14、源close、偏差2、偏差带默认关。
+
+**确认时刻与重绘风险：** 默认历史点使用其后数据并末柱重画，不能回测；非重画分支仅source[0..13]但实时柱仍可变，两分支并非同一权重实现。
+
+**在本系统中的角色：** 只考虑明确关闭重画且收盘的平滑替代。
+
+**重复性与独立性：** 纯价格平滑，与MA高度同源；多核菜单不是多个独立信息源。
+
+**可验证假说（未回测）：** 先用未来扰动测试单边分支，再固定Laplace14替换一条管理线；不得按默认漂亮转折挑样本。
+
+[官方发布页](https://www.tradingview.com/script/o4YRa7e8-Multi-Kernel-Regression-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Ba703ab0d3d6f404591f62e5c7a323f9e/2) · 关键行 4, 6, 25, 72, 151, 170, 207, 228, 239, 245, 265, 283, 312。
+
+## 138 · Trend Channels With Liquidity Breaks [ChartPrime]
+
+源码已读 · 确认枢轴趋势通道/量标签
+
+**实际机制：** 两高或两低枢轴定斜率，ATR10×6为通道跨度；整柱离开通道标突破，WMA21量在100窗归一后分LV/MV/HV。
+
+**参数与默认值：** Length8、Wait for Break开、仅最近通道、延伸关、量底色关。
+
+**确认时刻与重绘风险：** 通道建立需确认且枢轴延迟8根；下行通道突破未加收盘门而上行有；旧通道被覆盖，线回接历史枢轴。
+
+**在本系统中的角色：** 结构趋势背景或突破量强度。
+
+**重复性与独立性：** liquidity只是相对柱量；rank实际75窗100分位后累计均值，非订单簿。
+
+**可验证假说（未回测）：** 先统一并验证闭合时钟，仅测试固定突破量分级是否增加无量突破的超额；不将多根通道线当独立共振。
+
+[官方发布页](https://www.tradingview.com/script/34t0EaMk-Trend-Channels-With-Liquidity-Breaks-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B6cabbffddfd54aa5ac0e18290a1644c7/1) · 关键行 4, 45, 52, 59, 67, 148, 153, 203, 252, 257, 277, 310。
+
+## 139 · MACD Normalized [ChartPrime]
+
+源码已读 · 归一化低延迟MACD
+
+**实际机制：** HL2的TEMA快线与DEMA慢线减去SMA高低中心，按高低标准差范围归一；差值经小幅噪声门并按两柱角度着色。
+
+**参数与默认值：** 快10、慢22、均值42；上下偏差2、中1；噪声门.03/5固定。
+
+**确认时刻与重绘风险：** 全为当前及过去价格，无显式回填；实时高低与close可改变输出，应仅闭合使用；归一值未钳制0–100。
+
+**在本系统中的角色：** 动量强度/转弱管理候选。
+
+**重复性与独立性：** 并非经典12/26/9 MACD；仍是多条均线差，与MA40趋势重叠。
+
+**可验证假说（未回测）：** 固定默认参数只替换管理动量条件，比较普通MACD/MA斜率增量，先检验零波动分母与初始化。
+
+[官方发布页](https://www.tradingview.com/script/pV1vMscr-MACD-Normalized-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bba761dcd7be744b7ba7233e5b239d774/1) · 关键行 9, 16, 22, 28, 36, 151, 158, 184, 187, 198, 210, 215。
+
+## 140 · Moving Average Trend Sniper [ChartPrime]
+
+源码已读 · 自适应迟滞均线
+
+**实际机制：** 10柱价格斜率选高/低价SMA2作源；近期新高新低频率平方作自适应增益，再以双EMA变化幅度形成迟滞跟踪线。
+
+**参数与默认值：** Length30、变化EMA119、系数length×.4；色按SMA(close,2)>线，Glow开。
+
+**确认时刻与重绘风险：** 仅历史/当前OHLC递归，无枢轴回填；开盘内会变，累计长度EMA使加载起点与预热影响输出。
+
+**在本系统中的角色：** 抑制盘整反复翻色的单线管理候选。
+
+**重复性与独立性：** 仍是价格极值频率+均线迟滞，非独立趋势资金证据。
+
+**可验证假说（未回测）：** 冻结默认30只替换管理线，检验闭合变色次数/退出延迟及扣费超额；不要把四层描边视作四因子。
+
+[官方发布页](https://www.tradingview.com/script/iwEyBE2d-Moving-Average-Trend-Sniper-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B969ff60b078c410387508a8b1f596911/1) · 关键行 43, 71, 78, 85, 91, 106, 111, 115, 124。
+
+## 141 · RSI Primed [ChartPrime]
+
+源码已读 · 平滑RSI蜡烛/周期均线
+
+**实际机制：** OHLC分别经切比雪夫RSI形成合成蜡烛，按其吞没/星线识别形态；周期库输出的历史众数决定自适应MA。
+
+**参数与默认值：** RSI24、前平滑3、Candle With Patterns；Auto MA开、harmonic1；RSI门40/60。
+
+**确认时刻与重绘风险：** 主体只用历史但未强制确认；DominantCycle/2库未展开审查，不能承诺全链因果；自适应众数依赖加载历史。
+
+**在本系统中的角色：** 可作平滑动量描述，不能替代真实K1吞没。
+
+**重复性与独立性：** 形态发生在变换后RSI蜡烛而非真实价格；与现有动量同源。
+
+**可验证假说（未回测）：** 先补库源码因果审计，再只比较合成动量反转与普通RSI；真实入场价永远取原OHLC。
+
+[官方发布页](https://www.tradingview.com/script/TnJMMEJI-RSI-Primed-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bf644ef3e55824db48ba3380b82a21e62/1) · 关键行 7, 9, 19, 37, 246, 269, 291, 304, 319, 329, 343, 354。
+
+## 142 · Prime Oscillators Pro [ChartPrime]
+
+仅官方说明 · 闭源振荡器套件
+
+**实际机制：** 官方称Trend Fusion混合价格成交量、适应带、背离和反转，Prime还有波动ribbon及峰值提示；无源码不能还原公式。
+
+**参数与默认值：** 模式、波段、背离开关及点距；具体默认未知。
+
+**确认时刻与重绘风险：** pivot延迟、自动周期优化、背离回画和实时稳定性未能验证。
+
+**在本系统中的角色：** 仅列作未验证的方向/反转说明，不纳入源码级候选。
+
+**重复性与独立性：** 多个视觉提示可能复用相同量价波段，独立性不明。
+
+**可验证假说（未回测）：** 待合法源码与逐时信号日志可得再做消融及前缀检验；不按截图胜率宣称有效。
+
+[官方发布页](https://www.tradingview.com/script/adEx1jBA-Prime-Oscillators-Pro-ChartPrime/)。未读取、猜测或绕过保护获取源码。
+
+## 143 · Market Dynamics Pro [ChartPrime]
+
+仅官方说明 · 闭源结构套件
+
+**实际机制：** 官方描述订单块、BOS/CoC、形态、MTF支阻、溢折价和FVG；明确订单块不来自订单簿。
+
+**参数与默认值：** 结构长度、三个MTF、形态body/wick等可调，默认未知。
+
+**确认时刻与重绘风险：** 说明承认摆点延迟；MTF完成约束、回画及剩余量算法无法审计。
+
+**在本系统中的角色：** 可提供研究主题，不能提供可复现计算。
+
+**重复性与独立性：** 所谓smart money与volume block不能当真实机构订单或独立资金流。
+
+**可验证假说（未回测）：** 仅在合法源码可核后测试已确认结构空间门，并用简单pivot基线比较。
+
+[官方发布页](https://www.tradingview.com/script/yGIYFkPT-Market-Dynamics-Pro-ChartPrime/)。未读取、猜测或绕过保护获取源码。
+
+## 144 · Market Oracle Pro [ChartPrime]
+
+仅官方说明 · 闭源自优化趋势套件
+
+**实际机制：** 官方称低通趋势、反转、VWAP式范围及综合分数；Auto Maximizer按历史回测挑参数并展示最好信号，公式未公开。
+
+**参数与默认值：** 信号模式、tuning、自优化开关；默认与搜索域未知。
+
+**确认时刻与重绘风险：** 同一段历史选最好参数易过拟合；无法核滚动训练边界或历史重画。
+
+**在本系统中的角色：** 暂作不可验证的套件，不作为赚钱证据。
+
+**重复性与独立性：** Prime Score汇集同品牌趋势指标，不能假定多源独立。
+
+**可验证假说（未回测）：** 必须禁同窗优化并冻结参数后做时间外对照；未公开算法前不纳入源码共振实验。
+
+[官方发布页](https://www.tradingview.com/script/sIv1KNBS-Market-Oracle-Pro-ChartPrime/)。未读取、猜测或绕过保护获取源码。
+
+## 145 · Bar Magnified Volume Profile/Fixed Range [ChartPrime]
+
+源码已读 · 低周期放大量分布
+
+**实际机制：** 取图周期约1/16的小周期高低量，将其区间与价格箱的重叠比例分摊成交量，最大量箱中点作关注位。
+
+**参数与默认值：** Lookback100、100级；宽25、偏移35；最低请求30秒。
+
+**确认时刻与重绘风险：** 仅末柱重建，不保存历史因子；最新小周期集合可能未齐，须按完整可用子柱冻结；零范围柱nz使其量丢弃。
+
+**在本系统中的角色：** 比整柱均匀分量更细的密集区代理。
+
+**重复性与独立性：** 仍不是逐笔成交/订单簿，但确实增加低周期量分布来源。
+
+**可验证假说（未回测）：** 先核子柱覆盖和量守恒，再固定前缀POC距离对照粗周期POC，不以当前分布回填过去。
+
+[官方发布页](https://www.tradingview.com/script/azaqVnio-Bar-Magnified-Volume-Profile-Fixed-Range-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B37308b07e66e4c5bac3bd28febd19c36/4) · 关键行 35, 44, 48, 51, 68, 76, 83, 89, 95, 100, 117。
+
+## 146 · Historical Volatility Scale [ChartPrime]
+
+源码已读 · 相对历史波动尺度
+
+**实际机制：** 计算close/close[1]的50窗总体标准差，再取该波动在最近50窗值中的百分位。
+
+**参数与默认值：** Length50；显示偏移5、色阶0–100；无方向门。
+
+**确认时刻与重绘风险：** 计算仅当前及过去，未收盘值会变；末柱仪表不提供历史事件，需另保存闭合序列。
+
+**在本系统中的角色：** 波动环境/扩张信息候选。
+
+**重复性与独立性：** 相对波动不同于MA方向，但与ATR和已有vol桶重叠，不能混同币间高波动。
+
+**可验证假说（未回测）：** 固定50比较其相对波动排名对原同波动桶母群是否还有增量，先不按收益挑高低分位。
+
+[官方发布页](https://www.tradingview.com/script/tKw4WJVt-Historical-Volatility-Scale-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B3d5e9ba657d142d386a747c27ef2d278/1) · 关键行 34, 35, 36, 50, 59, 65。
+
+## 147 · Parabolic Scalp Take Profit[ChartPrime]
+
+源码已读 · 手动起点指数收紧退出
+
+**实际机制：** 手选起点/价格后，线从价格逆向0.2ATR起步，初始斜率0.1ATR每柱乘1.25；实体触线停止。
+
+**参数与默认值：** Aggressiveness125%；ATR1000固定；手选多空/起时/价格。
+
+**确认时刻与重绘风险：** 状态仅收盘更新；起点手选易事后择优，触线标记不是已成交价格；1000柱ATR预热且无成本门。
+
+**在本系统中的角色：** 仅退出机制原型，不产生入口共振。
+
+**重复性与独立性：** 纯时间加速线与价格，无趋势强度或盈利保证；会机械收紧。
+
+**可验证假说（未回测）：** 固定所有既有入口并按下一开盘结算，单测指数收紧与MA退出；禁止只选图中好起点。
+
+[官方发布页](https://www.tradingview.com/script/u2FmZMI9-Parabolic-Scalp-Take-Profit-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bd58d0754533c45abb212c8d94c40f519/2) · 关键行 7, 9, 13, 21, 27, 31, 35, 38。
+
+## 148 · Quick Shot[ChartPrime]
+
+源码已读 · 均线斜率转向/指数退出
+
+**实际机制：** EMA50斜率翻正且高于EMA200触多，空镜像；从EMA起步，以初始斜率每柱乘2累积线，实体相碰退出。
+
+**参数与默认值：** Length50、慢EMA200固定、Aggressiveness8/4=2。
+
+**确认时刻与重绘风险：** 入口明确收盘确认，退出未加确认门，盘中可变；指数线不是实际挂单，需明确次开执行。
+
+**在本系统中的角色：** 趋势启动入口或时间加速退出，二者须拆开测。
+
+**重复性与独立性：** EMA方向与原MA40同源；指数退出依时间非市场成交共振。
+
+**可验证假说（未回测）：** 仅冻结指数退出作为单变量与原管理比较，保持母群/成本并记录早退与未知，不能整套入口退出同时换。
+
+[官方发布页](https://www.tradingview.com/script/IUSxvoWl-Quick-Shot-ChartPrime/) · [指定版本源码](https://pine-facade.tradingview.com/pine-facade/get/PUB%3B7b2b9648bdea4f6ea683e661a9c32994/1) · 关键行 9, 14, 16, 20, 27, 31, 33, 35, 40, 49。
+
+## 风险与诚实声明
+
+134份公开源逐项阅读不等于134项已经编译、实时重载与多周期一致性全通过；外部导入库除另存明确审查记录的调用路径外，不能视为全部递归审完。源码中的窗口、默认参数与条件有证据，经验上的有效性、相互独立性、最优周期没有被本次证明。
+
+14项仅能审官方描述，不知道其私有公式，不能提供无重绘或盈利保证。列表是当前公开存量，有删除/隐藏产品的存续偏差。图形对象随最新bar移动不必然使所有数值非因果；相反，closed-bar门也不能修复 request.security 表达式本身的未来泄漏。
+
+这是静态技术审查，不是财务建议、收益承诺或实盘升级。现有盈利目标仍未达成；本次没有用这一批指标产生任何新收益结果。选择待测候选本身有研究者自由度，未来试验仍应记录失败、采用时间切分、固定成本并保留全机会与匹配对照。
+
+## 验证：清单与源码证据通过，盈利与运行正确性尚未验证
+
+检查逐项发布ID、标题、公开权限、源码原始字节哈希、引用行范围及必填分析字段；对缺项、重复、错误哈希、闭源冒充已读、越界行等输入用负例测试拒绝。所有公开源码从官方允许 open_no_auth 的接口获取；受限条目不请求源码端点。
+
+这些检验能发现错配、遗漏与证据伪装，不能自动证明每句公式解释正确。高影响结论另做了跨审查的源码路径核对。最终报告由规范化内容生成并经过便携报告验证；具体验证收据随产物保存，未实际执行的浏览器/手机测试不能称为通过。
+
+## 下一步仍需回答的关键问题
+
+1. 新结构/成本区字段是否比已试过的斜率、距离、突破字段提供新增信息，还是只是再次筛同一批交易？
+2. 一个新过滤能否在多个时间段减少盘整损失，同时不过度牺牲后来大趋势的捕获率？
+3. 同一机制对 BTC、ETH、黄金分别是否成立？必须分币种与成本验证，不能由一个截图外推全周期。
+4. 小周期信号用于减仓还是全部离场更好？这是下一阶段退出实验，不能与入口过滤同时修改后混淆归因。
+
+建议先从完成bar的结构状态做一个可用性/覆盖审计，通过后才做固定旧退出的单变量回测。当前没有选定“最优共振组合”，也不以默认参数冒充优化结果。
+
+## 可复现路径
+
+使用仓库现有环境，不安装依赖。以下从已冻结的完整清单和人工审查文件开始：采集器仅对缺失的公开证据发起只读请求，已有文件不覆盖；下次网页更新不会改变这里冻结的源码。
+
+```bash
+.venv/bin/python experiments/active/exp-chartprime-public-confluence-audit-20260906-v1/collect_sources.py --catalogue experiments/active/exp-chartprime-public-confluence-audit-20260906-v1/catalogue.json --out experiments/active/exp-chartprime-public-confluence-audit-20260906-v1/sources
+.venv/bin/python -m pytest -q experiments/active/exp-chartprime-public-confluence-audit-20260906-v1/test_collect_sources.py experiments/active/exp-chartprime-public-confluence-audit-20260906-v1/test_build_report.py
+.venv/bin/python experiments/active/exp-chartprime-public-confluence-audit-20260906-v1/build_report.py
+```
+
+最后执行 ARTIFACT_PLAN 中选定的官方便携 HTML 打包命令；报告构建器会先自动运行仓库要求的 MD→HTML 转换。清单分页 URL、检索时间、版本与 SHA 保存在证据目录。人工语义审查不能靠重新运行采集器自动再现，三份逐项审查 JSON 是保留的判断记录。

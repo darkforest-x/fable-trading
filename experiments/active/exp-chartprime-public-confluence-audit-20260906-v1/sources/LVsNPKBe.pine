@@ -1,0 +1,95 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("Sentiment Range MA [ChartPrime]", overlay = true, timeframe = "", timeframe_gaps = false)
+
+simple_filter(float source, int length, bool duel_filter)=>
+    switch duel_filter
+        false => ta.wma(source, length)
+        true => ta.wma(ta.sma(source, length), length)
+
+sr_ma(float source = close, int output_smoothing = 3, int trigger_smoothing = 1, int atr_length = 50, float multiplier = 1, string range_switch = "Body", bool duel_filter = false)=>
+    candle_top = range_switch != "Body" ? high : math.max(open, close)
+    candle_bottom = range_switch != "Body" ? low : math.min(open, close)
+
+    smooth_top = ta.sma(candle_top, trigger_smoothing)
+    smooth_bottom = ta.sma(candle_bottom, trigger_smoothing)
+
+    tr = candle_top - candle_bottom
+    atr = ta.sma(tr, atr_length)
+
+    var float sr_ma = na
+    var float current_range = na
+    var float top_range = na
+    var float bottom_range = na
+
+    flag = smooth_top > top_range or smooth_bottom < bottom_range or na(current_range)
+
+    if flag
+        sr_ma := source
+        current_range := atr * multiplier
+        top_range := sr_ma + current_range
+        bottom_range := sr_ma - current_range
+        
+    out = simple_filter(sr_ma, output_smoothing, duel_filter)
+    smooth_top_range = simple_filter(top_range, output_smoothing, duel_filter)
+    smooth_bottom_range = simple_filter(bottom_range, output_smoothing, duel_filter)
+
+    [out, smooth_top_range, smooth_bottom_range]
+
+source = input.source(close, "Source", group = "Settings")
+output_smoothing = input.int(20, "Length", minval = 0, group = "Settings") + 1
+use_double = input.bool(true, "Double Filter", group = "Settings")
+smoothing = input.int(4, "Trigger Smoothing", minval = 0, group = "Settings") + 1
+atr_length = input.int(200, "ATR Length", minval = 1, group = "Settings")
+multiplier = input.float(6, "Range Multiplier", minval = 0, step = 0.125, group = "Settings")
+range_switch = input.string("Body", "Range Style", ["Body", "Wick"], group = "Settings")
+
+style = input.string("MA Direction", "Color Style", ["MA Direction", "MA Cross", "Solid"], group = "Color")
+bullish_color = input.color(color.rgb(33, 255, 120), "Bullish Color", group = "Color")
+bearish_color = input.color(color.rgb(255, 33, 33), "Bearish Color", group = "Color")
+
+neutral_color = input.color(color.rgb(137, 137, 137), "Neutral Color", "This doubles as the solid color.", group = "Color")
+
+[sr_ma, top_range, bottom_range] = sr_ma(source, output_smoothing, smoothing, atr_length, multiplier, range_switch, use_double)
+
+var color ma_delta = na
+var color ma_cross = na
+
+plot_neutral = high > sr_ma and low < sr_ma
+plot_bullish = low > sr_ma
+plot_bearish = high < sr_ma
+
+if plot_bullish 
+    ma_cross := bullish_color
+
+if plot_bearish
+    ma_cross := bearish_color
+
+if plot_neutral 
+    ma_cross := neutral_color
+
+ma_delta_neutral = sr_ma - nz(sr_ma[1]) == 0
+ma_delta_bullish = sr_ma - nz(sr_ma[1]) > 0
+ma_delta_bearish = sr_ma - nz(sr_ma[1]) < 0
+
+if ma_delta_bullish
+    ma_delta := bullish_color
+
+if ma_delta_bearish
+    ma_delta := bearish_color
+
+if ma_delta_neutral 
+    ma_delta := neutral_color
+
+ma_color = style == "MA Cross"? ma_cross : style == "MA Direction" ? ma_delta : neutral_color
+
+alpha = color.new(color.red, 100)
+
+ma = plot(sr_ma, "SR MA", ma_color, 3)
+top = plot(top_range, "Top Range", alpha)
+bottom = plot(bottom_range, "Bottom Range", alpha)
+
+fill(ma, top, top_value = top_range, bottom_value = sr_ma, bottom_color = color.new(ma_color, 82), top_color = alpha)
+fill(ma, bottom, top_value = sr_ma, bottom_value = bottom_range, top_color = color.new(ma_color, 82), bottom_color = alpha)

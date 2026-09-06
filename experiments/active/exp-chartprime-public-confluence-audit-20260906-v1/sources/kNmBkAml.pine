@@ -1,0 +1,101 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+
+//@version=6
+indicator("MA Oscillator Map [ChartPrime]", overlay=false)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+src 			= input(close, title="Source")
+GRP 			= "MA Settings"
+maTypeInput 	= input.string("SMA", "Type", options = ["SMA", "EMA", "SMMA (RMA)", "WMA", "VWMA"], group = GRP, display = display.data_window)
+maLengthInput 	= input.int(50, "Length", group = GRP, display = display.data_window, active = maTypeInput != "None")
+
+colUp = input.color(color.rgb(26, 144, 223), "", inline = "c", group = GRP)
+colDn = input.color(color.rgb(219, 20, 20), "", inline = "c", group = GRP)
+
+var upper = float(na)
+var lower = float(na)
+var startUp = 0
+var startDn = 0
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Smoothing MA Calculation
+ma(source, length, MAtype) =>
+	switch MAtype
+		"SMA"                   => ta.sma(source, length)
+		"SMA + Bollinger Bands" => ta.sma(source, length)
+		"EMA"                   => ta.ema(source, length)
+		"SMMA (RMA)"            => ta.rma(source, length)
+		"WMA"                   => ta.wma(source, length)
+		"VWMA"                  => ta.vwma(source, length)
+
+// MA
+MA = ma(close, maLengthInput, maTypeInput) 
+
+diff   = src - MA
+maxVal = ta.highest(math.abs(diff), 50)
+osc    = diff / maxVal * 100
+TColor = color.from_gradient(osc, -100, 100, colDn, colUp)
+
+
+if osc[1] == 100 and osc < 100
+	upper  := high[1]
+	startUp := bar_index
+if osc[1] == -100 and osc > -100
+	startDn := bar_index
+	lower  := low[1]
+
+if high > upper and bar_index - startUp > 10
+	upper := float(na) 
+if low < lower and bar_index - startDn > 10
+	lower := float(na) 
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+var tbl = table.new(position.middle_right, 100, 100, force_overlay = true, frame_color = chart.fg_color, frame_width = 1)
+
+if barstate.islast
+	for i = 0 to 20
+		tbl.cell(1, i, i == 10 ? "x" : "", bgcolor = chart.bg_color, text_color = chart.fg_color, height = 3)
+
+	for i = 0 to int(math.abs(osc/10))
+		val = int(osc/10) > 0 
+		index = val ? 10 - i : 10 + i
+		BGColor = color.from_gradient(index, 0, 20, colUp, colDn)
+
+		tbl.cell(1, index,  i == 0 ? "0%" : (i == int(math.abs(osc/10)) ? str.tostring(osc/100, "##.#%") : ""), bgcolor = BGColor, text_color = chart.fg_color, height = 3)
+
+
+posc = plot(osc, "Oscillator", force_overlay = false, color = TColor)
+pcls = plot(0, "", display = display.none, editable = false)
+hline(0)
+fill(posc, pcls, 100, 0, colUp, color(na))
+fill(posc, pcls, 0, -100, color(na), colDn)
+
+barcolor(TColor)
+plotcandle(open, high, low, close, title='Candles Color', color = TColor, wickcolor=TColor, bordercolor = TColor, force_overlay = true)
+
+
+plotshape(osc[1] == 100 and osc < 100 ? high[1] : float(na), "Upper Signals Chart", shape.diamond, force_overlay = true, location = location.absolute, size = size.tiny, color = colDn)
+plotshape(osc[1] == 100 and osc < 100 ? osc[1] : float(na), "Upper Signals", shape.diamond, force_overlay = false, location = location.absolute, size = size.tiny, color = colDn, offset = -1)
+
+plotshape(osc[1] == -100 and osc > -100 ? low[1] : float(na), "Lower Signals Chart", shape.diamond, force_overlay = true, location = location.absolute, size = size.tiny, color = colUp)
+plotshape(osc[1] == -100 and osc > -100 ? osc[1] : float(na), "Lower Signals", shape.diamond, force_overlay = false, location = location.absolute, size = size.tiny, color = colUp, offset = -1)
+
+plot(upper[1] != upper ? float(na) : upper, "Upper Level", force_overlay = true, style = plot.style_linebr, offset = 0, color = colDn)
+plot(lower[1] != lower ? float(na) : lower, "Lower Level", force_overlay = true, style = plot.style_linebr, offset = 0, color = colUp)
+plot(MA, "MA", color=chart.fg_color, force_overlay = true)
+
+
+// --------------------------------------------------------------------------------------------------------------------}

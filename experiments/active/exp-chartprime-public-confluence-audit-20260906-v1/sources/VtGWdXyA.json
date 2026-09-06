@@ -1,0 +1,47 @@
+{
+  "id": "VtGWdXyA",
+  "title": "Lowess Channel + (RSI) [ChartPrime]",
+  "url": "https://www.tradingview.com/script/VtGWdXyA-Lowess-Channel-RSI-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:09.655258+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/VtGWdXyA-Lowess-Channel-RSI-ChartPrime/",
+  "created_at": "2025-03-18T11:48:58.249686+00:00",
+  "updated_at": null,
+  "description": "The Lowess Channel + (RSI) [ChartPrime] indicator applies the LOWESS (Locally Weighted Scatterplot Smoothing) algorithm to filter price fluctuations and construct a dynamic channel. LOWESS is a non-parametric regression method that smooths noisy data by fitting weighted linear regressions at localized segments. This technique is widely used in statistical analysis to reveal trends while preserving data structure.  \n\nIn this indicator, the LOWESS algorithm is used to create a central trend line and deviation-based bands. The midline changes color based on trend direction, and diamonds are plotted when a trend shift occurs. Additionally, an RSI gauge is positioned at the end of the channel to display the current RSI level in relation to the price bands.  \n\n\n\n⯁ KEY FEATURES  \n LOWESS Price Filtering – Smooths price fluctuations to reveal the underlying trend with minimal lag.  \n Dynamic Trend Coloring – The midline changes color based on trend direction (e.g., bullish or bearish).  \n Trend Shift Diamonds – Marks points where the midline color changes, indicating a possible trend shift.  \n Deviation-Based Bands – Expands above and below the midline using ATR-based multipliers for volatility tracking.  \n RSI Gauge Display – A vertical gauge at the right side of the chart shows the current RSI level relative to the price channel.  \n Fully Customizable – Users can adjust LOWESS length, band width, colors, and enable or disable the RSI gauge and adjust RSIlength.  \n  \n\n⯁ HOW TO USE  \n Use the LOWESS midline as a trend filter—bullish when green, bearish when purple. Watch for trend shift diamonds as potential entry or exit signals. Utilize the price bands to gauge overbought and oversold zones based on volatility. Monitor the RSI gauge to confirm trend strength—high RSI near upper bands suggests overbought conditions, while low RSI near lower bands indicates oversold conditions.  \n\n⯁ CONCLUSION  \nThe Lowess Channel + (RSI) [ChartPrime] indicator offers a powerful way to analyze market trends by applying a statistically robust smoothing algorithm. Unlike traditional moving averages, LOWESS filtering provides a flexible, responsive trendline that adapts to price movements. The integrated RSI gauge enhances decision-making by displaying momentum conditions alongside trend dynamics. Whether used for trend-following or mean reversion strategies, this indicator provides traders with a well-rounded perspective on market behavior.",
+  "script": {
+    "id": 2441817,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;a525e1b02b254211aa1e6fa6770900d2",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Ba525e1b02b254211aa1e6fa6770900d2/1",
+  "source_http_status": 200,
+  "source_sha256": "75db955d3724664dcae8b82979890f43f600b9245c98a307a5a595fd0eba50a1",
+  "source_lines": 107,
+  "source_metadata": {
+    "created": "2025-03-18T11:48:57.579638Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;d3ff6bfac294488fad020be9b31c941b",
+      "originalScriptVersion": "0.360",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 5
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Lowess Channel + (RSI) [ChartPrime]",
+    "updated": "2025-03-18T11:48:57.579638Z",
+    "version": "1.0"
+  }
+}

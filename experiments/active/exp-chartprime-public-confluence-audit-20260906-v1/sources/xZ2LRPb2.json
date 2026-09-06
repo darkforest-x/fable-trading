@@ -1,0 +1,46 @@
+{
+  "id": "xZ2LRPb2",
+  "title": "Gaps Trend [ChartPrime]",
+  "url": "https://www.tradingview.com/script/xZ2LRPb2-Gaps-Trend-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:29.390157+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/xZ2LRPb2-Gaps-Trend-ChartPrime/",
+  "created_at": "2024-09-16T12:15:14.662231+00:00",
+  "updated_at": null,
+  "description": "The Gaps Trend - ChartPrime indicator is designed to detect Fair Value Gaps (FVGs) in the market and apply a trailing stop mechanism based on those gaps. It identifies both bullish and bearish gaps and provides traders with a way to manage trades dynamically as gaps appear. The indicator visually highlights gaps and uses the detected momentum to assess trend direction, helping traders identify price imbalances caused by strong buy or sell pressure.\n\n\n⯁ KEY FEATURES & HOW TO USE\n\n⯌ Fair Value Gap (FVG) Detection:  \nThe indicator automatically detects both bullish and bearish FVGs, identifying gaps between candle highs and lows. Bullish gaps are shown in green, and bearish gaps in purple. These gaps indicate price imbalances driven by strong momentum, such as when there is significant buying or selling pressure.  \nUse: Traders can use FVG detection to identify periods of high price momentum, offering insight into potential continuation or exhaustion of trends.\n\n\n⯌ Trailing Stop Feature Based on FVGs:  \nA core feature of this indicator is the trailing stop mechanism, which adjusts dynamically based on the identified FVGs. When a bullish gap is detected, the trailing stop is placed below the price to capture upward momentum, while bearish gaps result in a trailing stop placed above the price. This feature helps traders stay in trends while protecting profits as the price moves.  \nUse: The trailing stop follows the momentum of the price, ensuring that traders can stay in profitable trades during strong trends and exit when the momentum shifts.\n\nbullish set up\n\n\n\nbearish set up\n\n\n\n⯌ Trend Direction Indication:  \nThe indicator colors the chart according to the current trend direction based on the position of the price relative to the trailing stop. Green indicates an uptrend (bullish gap), while purple shows a downtrend (bearish gap). This provides traders with a quick visual assessment of trend direction based on the presence of gaps.  \nUse: Traders can monitor the chart's color to stay aligned with the market’s trend, staying long during green phases and short during purple ones.\n\n\n⯌ Gap Size Filtering:  \nEach detected gap is assigned a numerical ranking based on its size, with larger gaps having higher rankings. The gap size filter allows traders to only display gaps that meet a minimum size threshold, focusing on the most impactful gaps in terms of price movement.  \nUse: Traders can use the filter to focus on gaps of a certain size, filtering out smaller, less significant gaps. The numerical ranking helps identify the largest and most influential gaps for decision-making.\n\n\n⯌ FVG Level Visualization:  \nThe indicator can display dashed lines marking the levels of previously filled FVGs. These levels represent areas where price once experienced a gap and later filled it. Monitoring these levels can provide traders with key reference points for potential reactions in price.  \nUse: Traders can use these gap levels to track where price has filled gaps and potentially use these levels as zones for entry, exit, or assessing market behavior.\n\n\n⯁ USER INPUTS  \n Filter Gaps: Adjust the size threshold to filter gaps by their size ranking. Show Gap Levels: Toggle the display of dashed lines at filled FVG levels. Enable Trailing Stop: Activate or deactivate the trailing stop feature based on FVGs. Trailing Stop Length: Set the number of bars used to calculate the trailing stop. Bullish/Bearish Colors: Customize the colors representing bullish and bearish gaps.\n\n⯁ CONCLUSION  \nThe Gaps Trend [ChartPrime] indicator combines Fair Value Gap detection with a dynamic trailing stop feature to help traders manage trades during periods of high price momentum. By detecting gaps caused by strong buy or sell pressure and applying adaptive stops, the indicator provides a powerful tool for riding trends and managing risk. The additional ability to filter gaps by size and visualize previously filled gaps enhances its utility for both trend-following and risk management strategies.",
+  "script": {
+    "id": 1845919,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;61f506eb69944f5abb25714897d2df03",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B61f506eb69944f5abb25714897d2df03/1",
+  "source_http_status": 200,
+  "source_sha256": "1f38a93c9ca764b30fac2f452a7594d1035f8967174f70bde1ef8c3aafe10b21",
+  "source_lines": 157,
+  "source_metadata": {
+    "created": "2024-09-16T12:15:09.92862Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 2,
+        "plotshape": 1
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Gaps Trend [ChartPrime]",
+    "updated": "2024-09-16T12:15:09.92862Z",
+    "version": "1.0"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "id": "s73CMR2W",
+  "title": "Multiple Non-Linear Regression [ChartPrime]",
+  "url": "https://www.tradingview.com/script/s73CMR2W-Multiple-Non-Linear-Regression-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:40.594041+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/s73CMR2W-Multiple-Non-Linear-Regression-ChartPrime/",
+  "created_at": "2024-07-15T12:52:18.535210+00:00",
+  "updated_at": null,
+  "description": "This indicator is designed to perform multiple non-linear regression analysis using four independent variables: close, open, high, and low prices. Here's a breakdown of its components and functionalities:\n\nInputs: \nUsers can adjust several parameters:\nNormalization Data Length: Length of data used for normalization.Learning Rate: Rate at which the algorithm learns from errors.Smooth?: Option to smooth the output.Smooth Length: Length of smoothing if enabled.Define start coefficients: Initial coefficients for the regression equation.\n\nData Normalization: \nThe script normalizes input data to a range between 0 and 1 using the highest and lowest values within a specified length.\n\nNon-linear Regression:\nIt calculates the regression equation using the input coefficients and normalized data. The equation used is a weighted sum of the independent variables, with coefficients adjusted iteratively using gradient descent to minimize errors.\n\nError Calculation: \nThe script computes the error between the actual and predicted values.\n\nGradient Descent: The coefficients are updated iteratively using gradient descent to minimize the error.\n\n\nVisualization:\nPlotting of normalized input data (close, open, high, low).\nThe indicator provides visualization of normalized data values (close, open, high, low) in the form of circular markers on the chart, allowing users to easily observe the relative positions of these values in relation to each other and the regression line.\nPlotting of the regression line.Color gradient on the regression line based on its value and bar colors.\nDisplay of normalized input data and predicted value in a table.\nSignals for crossovers with a midline (0.5).\n\nInterpretation:\nUsers can interpret the regression line and its crossovers with the midline (0.5) as signals for potential buy or sell opportunities.\n\n\nThis indicator helps users analyze the relationship between multiple variables and make trading decisions based on the regression analysis. Adjusting the coefficients and parameters can fine-tune the model's performance according to specific market conditions.\n",
+  "script": {
+    "id": 1703314,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;a8f23e59de684eb9bc0de92d4b359403",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Ba8f23e59de684eb9bc0de92d4b359403/1",
+  "source_http_status": 200,
+  "source_sha256": "b400da1243b4d7d120c5dc260e4a1ce6fa17c14397bfbe8e7b2042305c0eef0b",
+  "source_lines": 135,
+  "source_metadata": {
+    "created": "2024-07-15T12:52:16.489759Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": false,
+      "kind": "study",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 6,
+        "plotchar": 2
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Multiple Non-Linear Regression [ChartPrime]",
+    "updated": "2024-07-15T12:52:16.489759Z",
+    "version": "1.0"
+  }
+}

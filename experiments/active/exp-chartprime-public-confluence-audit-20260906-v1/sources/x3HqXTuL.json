@@ -1,0 +1,48 @@
+{
+  "id": "x3HqXTuL",
+  "title": "Adaptive Momentum Velocity Ribbon",
+  "url": "https://www.tradingview.com/script/x3HqXTuL-Adaptive-Momentum-Velocity-Ribbon/",
+  "retrieved_at": "2026-09-06T13:35:08.161851+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/x3HqXTuL-Adaptive-Momentum-Velocity-Ribbon/",
+  "created_at": "2026-04-27T12:38:19.274876+00:00",
+  "updated_at": null,
+  "description": "🔶 OVERVIEW\nRisk management is the backbone of successful trading, but static trailing stops often fail to account for the \"momentum\" of a move. The Kinetic Trailing Stop & Targets is an adaptive volatility-based system designed to breathe with the market. \n\nUnlike standard ATR trailing stops that move at a fixed distance, this indicator uses a \"kinetic\" engine. It calculates the relationship between price momentum and current volatility to determine how aggressively the stop should follow price. When momentum is high, the stop \"tightens\" to protect profits; during quiet periods, it expands to avoid being \"stopped out\" by minor noise.\n\n🔶 THE KINETIC ENGINE: HOW IT WORKS\nThe indicator relies on a multi-layered calculation to determine the stop-loss placement:\n\n Dynamic Volatility Ratio: The tool tracks the current ATR relative to its 50-bar high. This creates a \"Volatility Ratio\" that dictates the width of the buffer. Momentum-Responsive Stepping: The stop doesn't just trail; it \"steps.\" If the price makes a significant move (measured by a Momentum Score), the stop reacts kinetically, jumping closer to price to lock in gains. The Guard Distance: To prevent the stop from becoming too tight and causing \"premature exits,\" a minimum Guard Distance is maintained, ensuring price always has a statistically significant \"air gap\" to fluctuate within.\n\n🔶 AUTOMATED TARGET MILESTONES\nA standout feature of this tool is the Target Level System. The moment a trend flips (indicated by the diamond shapes), the indicator marks that price as the \"Trend Origin.\"\n\n Fixed Percentage Scaling: The indicator projects horizontal milestones (e.g., +2%, +4%, +6%) from the origin point. Historical Milestone Logging: When price hits a target, a dashed line and label are permanently fixed to the chart, allowing you to see exactly where profit-taking opportunities occurred. Active Target Tracking: The dashboard displays the next upcoming target and exactly what percentage \"distance\" remains until it is hit.\n\n🔶 VISUAL FEATURES\n Trend-Colored Candles: The entire chart's aesthetic shifts based on the trend. Bullish trends are painted in teal/green, while bearish trends shift to pink/red. Flip Diamonds: High-visibility markers appear the moment a trend reversal is confirmed, signaling a shift in the stop-loss orientation. Dynamic Cloud Fill: A gradient fill between the price and the stop line provides a visual representation of the \"risk zone.\"\n\n🔶 INDICATOR SETTINGS\n ATR Smoothing Length: Adjusts the lookback for volatility. Longer lengths result in a smoother, slower-moving stop. Sensitivity: Controls the \"Kinetic\" response. Higher sensitivity makes the stop jump more aggressively during momentum spikes. Band Multiplier & Guard Distance: These two settings define the \"outer\" and \"inner\" limits of your stop-loss width. Level Spacing (%): Set the distance between your target milestones (e.g., set to 1.0 for every 1% move).\n\n🔶 TRADING UTILITY\n Trend Following: Use the Kinetic Stop to ride long-term trends without getting shaken out by volatility spikes. Scaling Out: Use the automated Target Levels as objective signals to scale out of a position (e.g., close 25% of the trade at each milestone). Volatility Filter: By observing the distance between the price and the stop, you can visualize \"volatility expansion\"—if the gap is widening, the market is becoming more chaotic.\n\n🔶 CONCLUSION\nThe Kinetic Trailing Stop & Targets [ChartPrime] is a professional-grade risk management suite. By combining momentum-aware trailing logic with fixed percentage targets, it provides traders with a clear, objective roadmap for both staying in a trade and knowing exactly when to exit.",
+  "script": {
+    "id": 5209830,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;3f359159ace340e8b2fe04dfcfaa0e73",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B3f359159ace340e8b2fe04dfcfaa0e73/1",
+  "source_http_status": 200,
+  "source_sha256": "cbc837dd79761a370f0c0a5fa055a17a7234b1abe07badc3555ea903e65d9a46",
+  "source_lines": 270,
+  "source_metadata": {
+    "created": "2026-04-27T12:38:18.687326Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;6871e212bdc84e8db587ac84e47ac6ed",
+      "originalScriptVersion": "1.0",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 3,
+        "plotshape": 5
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Adaptive Momentum Velocity Ribbon",
+    "updated": "2026-04-27T12:38:18.687326Z",
+    "version": "1.0"
+  }
+}

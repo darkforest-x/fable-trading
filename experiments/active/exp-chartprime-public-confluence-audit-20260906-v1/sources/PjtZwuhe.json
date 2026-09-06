@@ -1,0 +1,49 @@
+{
+  "id": "PjtZwuhe",
+  "title": "Bolinger Bands Range RSI Oscillator [ChartPrime]",
+  "url": "https://www.tradingview.com/script/PjtZwuhe-Bolinger-Bands-Range-RSI-Oscillator-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:34:56.710451+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/PjtZwuhe-Bolinger-Bands-Range-RSI-Oscillator-ChartPrime/",
+  "created_at": "2026-08-03T12:35:04.846209+00:00",
+  "updated_at": null,
+  "description": "🔶 OVERVIEW\n\nTraditional oscillators live in a separate sub-window beneath your price chart, forcing you to constantly split your focus between market structure and momentum data. The BB Range RSI Oscillator [ChartPrime] solves this by projecting Relative Strength Index momentum directly onto an adaptive Bollinger Bands channel right on your main chart layout.\n\nThis indicator normalizes standard RSI readings and maps them directly into price coordinates, letting you track momentum extremes, zone expansions, and automated structural divergences directly over the candles.\n\n🔶 HOW IT WORKS\n\nThe indicator executes its structural calculations through a multi-tier transformation pipeline:\n\n Adaptive Channel Matrix: The engine computes a moving average basis and applies a standard deviation multiplier to project upper and lower outer boundaries, alongside half-deviation warning lines, framing the primary price canvas. Normalized RSI Mapping: Instead of rendering a separate panel, raw RSI values are normalized on a standardized scale and mapped directly relative to the middle basis and band width, translating momentum oscillations into exact price-level coordinates. Dynamic Transparency Engine: The core oscillator line features a dynamic fade factor based on its distance from the center, shifting opacities to visually emphasize when momentum is pushing toward outer band extremes. Automated Pivot Divergence Logic: The script evaluates pivot points on the mapped oscillator coordinates against price highs and lows. It measures exact bar spacing intervals to flag regular and prime momentum divergences.\n\n🔶 KEY FEATURES\n\n On-Chart Core Oscillator: Plots a fluid momentum curve directly onto the price candles, complete with an optional smoothing signal line to track trend momentum changes. Dynamic Zone Shading: Automatically fills the upper and lower channel boundaries with custom color fills when the oscillator breaks past half-deviation or outer band extremes. Automated Divergence Callouts: Pins custom signal badges (+ Bull, Bull, Bear, + Bear) directly onto historical pivot points when structural momentum divergences are detected. Customizable Palette & Layout: Full user control over band lengths, RSI lookbacks, divergence parameters, and accent color schemes to fit your preferred charting setup.\n\n🔶 TRADING APPLICATIONS\n\n Extreme Band Rejection Entries: When the core oscillator pushes outside the outer Bollinger Band boundaries and flashes zone shading, look for price action reversal confirmations to catch institutional exhaustion moves. Momentum Divergence Reversals: Utilize the automated Bullish and Bearish divergence tags to spot hidden shifts in market pressure. A regular or prime divergence near outer bands often signals an impending trend reversal. Signal Line Crossovers: Enable the signal line to track short-term momentum shifts relative to the core mapped oscillator, giving you clean cross-over execution triggers.\n\n🔶 SETTINGS\n\n Bollinger Bands Settings (Length / Multiplier): Controls the lookback window and standard deviation width of the primary channel boundaries. RSI Oscillator Settings (Period Length / Signal Line): Adjusts the sensitivity of the underlying momentum engine and configures the optional signal line length and styling. Divergence Settings (Pivot Lookbacks / Min-Max Bars): Fine-tunes the strictness and spacing constraints used by the pivot detection engine to filter out noise.\n\n🔶 CONCLUSION\n\nThe BB Range RSI Oscillator [ChartPrime] unifies volatility bands and momentum oscillators into a single, cohesive on-chart tool. By mapping RSI directly to price structure, it gives you a clean, distraction-free environment for spotting momentum extremes and institutional divergence setups.",
+  "script": {
+    "id": 6772218,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;ee4df40e2c4e49299b461f8088b914ea",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bee4df40e2c4e49299b461f8088b914ea/1",
+  "source_http_status": 200,
+  "source_sha256": "ee7ae8a115739b3ac04adb037a00f0474866335b66153005b0b6edab0cc894e0",
+  "source_lines": 146,
+  "source_metadata": {
+    "created": "2026-08-03T12:35:03.261415Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;3f66080f4602424b87d7192dff8eaa05",
+      "originalScriptVersion": "2.0",
+      "sourceInputsCount": 0,
+      "stats": {
+        "alertcondition": 2,
+        "plot": 9,
+        "plotshape": 4
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Bolinger Bands Range RSI Oscillator [ChartPrime]",
+    "updated": "2026-08-03T12:35:03.261415Z",
+    "version": "1.0"
+  }
+}

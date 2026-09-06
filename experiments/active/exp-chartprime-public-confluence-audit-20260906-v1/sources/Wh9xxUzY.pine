@@ -1,0 +1,230 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+//@version=6
+
+indicator("Kinetic Trailing Stop & Targets [ChartPrime]", "Kinetic Trailing Stop [ChartPrime]", overlay = true, max_labels_count = 500, max_lines_count = 500)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝘾𝙊𝙉𝙎𝙏𝘼𝙉𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+BULL_COLOR = #22c594
+BEAR_COLOR = #ef449a
+GRP_STYLE  = "Style"
+GRP_LEVELS = "Target Levels"
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+smoothLen   = input.int(130,   "ATR Smoothing Length",       minval = 1,                tooltip = "Lookback period for ATR calculation.")
+bandMult    = input.float(3.0, "Band Multiplier",            minval = 0.1, step = 0.1,  tooltip = "Maximum buffer distance from price in ATR units.")
+sensitivity = input.float(1.0, "Sensitivity",                minval = 0.1, step = 0.1,  tooltip = "How quickly the stop steps up. Higher = more reactive to momentum.")
+guardMult   = input.float(5.0, "Guard Distance (ATR Units)", minval = 0.0, step = 0.1,  tooltip = "Stop never gets closer than this ATR distance from price.")
+
+bullCol     = input.color(BULL_COLOR, "Bull Color",            group = GRP_STYLE)
+bearCol     = input.color(BEAR_COLOR, "Bear Color",            group = GRP_STYLE)
+showCandles = input.bool(true,        "Trend-Colored Candles", group = GRP_STYLE,       tooltip = "Paint candles with bull/bear trend color.")
+
+levelStepPct = input.float(2.0, "Level Spacing (%)", group = GRP_LEVELS, minval = 0.01, step = 0.1, tooltip = "Percentage distance between each target level, measured from the trend origin price.")
+showLevels   = input.bool(true, "Show Target Levels", group = GRP_LEVELS)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+// ── ATR ──────────────────────────────────────────────────────────────────────
+atrVal   = ta.atr(smoothLen)
+atrVal1  = ta.highest(ta.atr(200), 100)
+safeAtr1 = atrVal1 > 0 ? atrVal1 : 1.0
+safeAtr  = atrVal  > 0 ? atrVal  : 1.0
+
+// ── Kinetic Volatility Trailing Stop ─────────────────────────────────────────
+float volRatio      = safeAtr / ta.highest(safeAtr, 50)
+float dynamicBuffer = guardMult * safeAtr + (bandMult - guardMult) * safeAtr * volRatio
+
+float barMomentum   = close - close[1]
+float momentumScore = barMomentum / safeAtr
+
+var float stopLine = na
+var int   trendDir = 1
+
+float topBand    = high + dynamicBuffer
+float bottomBand = low  - dynamicBuffer
+
+if na(stopLine) or na(atrVal)
+    stopLine := trendDir == 1 ? bottomBand : topBand
+
+bool trendFlipped = false
+if trendDir == 1
+    if close < stopLine
+        trendDir     := -1
+        stopLine     := topBand
+        trendFlipped := true
+else
+    if close > stopLine
+        trendDir     := 1
+        stopLine     := bottomBand
+        trendFlipped := true
+
+if not trendFlipped
+    if trendDir == 1
+        bool  momentumStep = momentumScore > sensitivity * volRatio
+        float guarded      = close - math.max(dynamicBuffer, guardMult * safeAtr)
+        if momentumStep
+            stopLine := math.max(stopLine, guarded)
+        else
+            stopLine := math.max(stopLine, close - bandMult * safeAtr)
+    else
+        bool  momentumStep = momentumScore < -(sensitivity * volRatio)
+        float guarded      = close + math.max(dynamicBuffer, guardMult * safeAtr)
+        if momentumStep
+            stopLine := math.min(stopLine, guarded)
+        else
+            stopLine := math.min(stopLine, close + bandMult * safeAtr)
+
+// ── Target Levels — % based ───────────────────────────────────────────────────
+var float trendOriginPrice = na
+var int   trendOriginBar   = na
+var int   nextLevelIndex   = 1
+
+if trendFlipped
+    trendOriginPrice := close
+    trendOriginBar   := bar_index
+    nextLevelIndex   := 1
+
+float nextLevelPrice = na
+if not na(trendOriginPrice)
+    float pctOffset = nextLevelIndex * (levelStepPct / 100.0)
+    nextLevelPrice  := trendDir == 1
+         ? trendOriginPrice * (1.0 + pctOffset)
+         : trendOriginPrice * (1.0 - pctOffset)
+
+bool levelHit = false
+if not na(nextLevelPrice)
+    levelHit := trendDir == 1 ? high >= nextLevelPrice : low <= nextLevelPrice
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+// ── Crossed level lines & labels ──────────────────────────────────────────────
+if showLevels and levelHit and barstate.isconfirmed and not na(trendOriginPrice) and not na(trendOriginBar)
+    float pctOffset         = nextLevelIndex * (levelStepPct / 100.0)
+    float crossedLevelPrice = trendDir == 1
+         ? trendOriginPrice * (1.0 + pctOffset)
+         : trendOriginPrice * (1.0 - pctOffset)
+
+    float pctFromOrigin = pctOffset * 100.0
+    color crossedCol    = trendDir == 1 ? bullCol : bearCol
+
+    line.new(
+         trendOriginBar, crossedLevelPrice,
+         bar_index,      crossedLevelPrice,
+         color  = color.new(crossedCol, 30),
+         style  = line.style_dashed,
+         width  = 1)
+
+    label.new(
+         trendOriginBar, crossedLevelPrice,
+         text      = "+" + str.tostring(pctFromOrigin, "#.##") + "%",
+         color     = color.new(crossedCol, 75),
+         textcolor = crossedCol,
+         style     = trendDir == 1 ? label.style_label_lower_right : label.style_label_upper_right,
+         size      = size.small)
+
+if levelHit and barstate.isconfirmed
+    nextLevelIndex += 1
+
+// ── Active (next) level ───────────────────────────────────────────────────────
+var line  activeLevelLine  = na
+var label activeLevelLabel = na
+
+float displayLevel = na
+if not na(trendOriginPrice)
+    float pctOffset = nextLevelIndex * (levelStepPct / 100.0)
+    displayLevel    := trendDir == 1
+         ? trendOriginPrice * (1.0 + pctOffset)
+         : trendOriginPrice * (1.0 - pctOffset)
+
+color activeCol = trendDir == 1 ? bullCol : bearCol
+
+if showLevels and barstate.islast and not na(displayLevel) and not na(trendOriginBar)
+    if not na(activeLevelLine)
+        line.delete(activeLevelLine)
+    if not na(activeLevelLabel)
+        label.delete(activeLevelLabel)
+
+    float pctAway = math.abs((close - displayLevel) / close) * 100.0
+
+    activeLevelLine := line.new(
+         trendOriginBar, displayLevel,
+         bar_index + 8,  displayLevel,
+         color  = color.new(activeCol, 40),
+         style  = line.style_solid,
+         width  = 1,
+         extend = extend.none)
+
+    activeLevelLabel := label.new(
+         bar_index + 8, displayLevel,
+         text      = str.tostring(pctAway, "#.##") + "% away",
+         color     = color.new(activeCol, 80),
+         textcolor = activeCol,
+         style     = trendDir == 1 ? label.style_label_lower_left : label.style_label_upper_left,
+         size      = size.small)
+
+// ── Trailing stop plot ────────────────────────────────────────────────────────
+color stopColor = color.new(trendDir == 1 ? bullCol : bearCol, 20)
+float plotStop  = trendFlipped ? na : stopLine
+
+stopPlotId  = plot(plotStop, "Kinetic Step Stop", stopColor, 2, plot.style_linebr)
+pricePlotId = plot(close, "Price", color.new(chart.fg_color, 100))
+
+fill(stopPlotId, pricePlotId,
+     trendDir == 1 ? stopLine : close,
+     trendDir == 1 ? close    : stopLine,
+     trendDir == 1 ? color.new(bullCol, 75) : color.new(bearCol, 55),
+     trendDir == 1 ? color.new(bullCol, 55) : color.new(bearCol, 75),
+     title = "Stop Fill")
+
+// ── Trend-colored candles ─────────────────────────────────────────────────────
+bool  isBullBar  = close >= open
+color candleCol  = na
+
+if showCandles
+    if trendDir == 1
+        candleCol := isBullBar ? color.new(bullCol, 15) : color.new(bullCol, 50)
+    else
+        candleCol := isBullBar ? color.new(bearCol, 50) : color.new(bearCol, 15)
+
+plotcandle(open, high, low, close,
+     title       = "Trend Candles",
+     color       = candleCol,
+     wickcolor   = candleCol,
+     bordercolor = candleCol)
+
+// ── Flip diamonds on the stop line ───────────────────────────────────────────
+plotshape(trendFlipped[1] and trendDir ==  1 ? stopLine : na, "Flip Up Outer",
+     shape.diamond, location.absolute,
+     color.new(bullCol, 50), size = size.small)
+plotshape(trendFlipped[1] and trendDir ==  1 ? stopLine : na, "Flip Up Inner",
+     shape.diamond, location.absolute,
+     color.new(bullCol, 0),  size = size.tiny)
+
+plotshape(trendFlipped[1] and trendDir == -1 ? stopLine : na, "Flip Down Outer",
+     shape.diamond, location.absolute,
+     color.new(bearCol, 50), size = size.small)
+plotshape(trendFlipped[1] and trendDir == -1 ? stopLine : na, "Flip Down Inner",
+     shape.diamond, location.absolute,
+     color.new(bearCol, 0),  size = size.tiny)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝘼𝙇𝙀𝙍𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+alertcondition(trendFlipped,                    "Trend Flip",    "Trend direction changed")
+alertcondition(trendFlipped and trendDir ==  1, "Flip Up",       "Bullish flip — stop moved below price")
+alertcondition(trendFlipped and trendDir == -1, "Flip Down",     "Bearish flip — stop moved above price")
+alertcondition(levelHit,                        "Level Crossed", "Target level crossed by wick")
+
+// --------------------------------------------------------------------------------------------------------------------}

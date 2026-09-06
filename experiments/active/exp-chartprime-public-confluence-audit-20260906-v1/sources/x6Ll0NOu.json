@@ -1,0 +1,48 @@
+{
+  "id": "x6Ll0NOu",
+  "title": "Specter Trend Cloud [ChartPrime]",
+  "url": "https://www.tradingview.com/script/x6Ll0NOu-Specter-Trend-Cloud-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:45.328014+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/x6Ll0NOu-Specter-Trend-Cloud-ChartPrime/",
+  "created_at": "2025-09-22T11:52:42.803202+00:00",
+  "updated_at": null,
+  "description": "⯁ OVERVIEW\nSpecter Trend Cloud [ChartPrime] is a flexible moving-average–based trend tool that builds a colored “cloud” around market direction and highlights key retest opportunities. Using two adaptive MAs (short vs. long), offset by ATR for volatility adjustment, it shades the background with a gradient cloud that switches color on trend flips. When price pulls back to retest the short MA during an active trend, the script plots diamond markers and extends dotted levels from that retest price. If price later breaks through that level, the extension is terminated—giving traders a clean visual of valid vs. invalid retests.\n\n⯁ KEY FEATURES\nMulti-MA Core Engine:\nChoose from SMA, EMA, SMMA (RMA), WMA, or VWMA as the base. The indicator tracks both a short-term MA (Length) and a longer twin (2 × Length).Volatility-Adjusted Offset:\nBoth MAs are shifted by ATR(200) depending on trend direction—pulling them down in uptrends, up in downtrends—so the cloud reflects realistic breathing room instead of razor-thin bands.Gradient Trend Cloud:\nBetween the two shifted MAs, the script fills a shaded region:\n• Aqua cloud = bullish trend\n• Orange cloud = bearish trend\nGradient intensity increases toward the active edge, providing a visual sense of strength.Trend Flip Logic:\nA flip occurs whenever the short MA crosses above or below the long MA. The cloud instantly changes color and begins tracking the new regime.\nRetest Detection:\nDuring an ongoing trend (no flip), if price retests the short MA within a 5-bar “cooldown,” the tool:\n• Marks the retest with diamond shapes below/above the bar.\n• Draws a dotted horizontal line from the retest price, extending into the future.\nAutomatic Level Termination:\nIf price later closes through that dotted level, the line disappears—keeping only active, respected retest levels on your chart.\n\n\n⯁ HOW IT WORKS (UNDER THE HOOD)\nMA Calculations:\nma1 = MA(src, Length), ma2 = MA(src, 2 × Length).\nTrend = ma1 > ma2 (bull) or ma1 < ma2 (bear).\nATR shift offsets both ma1 and ma2 by ±ATR depending on trend.Cloud Fill:\nPlots ma1 and ma2 (invisible for long MA). Uses fill() with semi-transparent aqua/orange gradient between the two.Retest Logic:\n• Bullish retest: ta.crossover(low, ma1) while trend = bull.\n• Bearish retest: ta.crossunder(high, ma1) while trend = bear.\nOnly valid if at least 5 bars have passed since last retest.\nWhen triggered, it stores bar index and price, draws diamonds, and extends a dotted line.Level Clearing:\nIf current high > retest upper line (bearish case) or low < retest lower line (bullish case), that line is deleted (stops extending).\n\n⯁ USAGE\nUse the cloud color as the higher-level trend bias (aqua = long, orange = short).Look for diamonds + dotted lines as pullback/retest zones where trend continuation may launch.If a retest level holds and price rebounds, it strengthens confidence in the trend.If a retest level is broken, treat it as a warning of weakening trend or possible reversal.Experiment with MA Type (SMA vs. EMA, etc.) to align sensitivity with your asset or timeframe.Adjust Length for faster flips on low timeframes or smoother signals on higher ones.\n\n⯁ CONCLUSION\nSpecter Trend Cloud combines trend detection, volatility-adjusted shading, and retest visualization into a single tool. The gradient cloud provides instant clarity on direction, while diamonds and dotted retest levels give you tactical entry/retest zones that self-clean when invalidated. It’s a versatile trend-following and confirmation layer, adaptable across multiple assets and styles.",
+  "script": {
+    "id": 3163591,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;7faef9c7fe56479eacf2e9b3a33395de",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B7faef9c7fe56479eacf2e9b3a33395de/1",
+  "source_http_status": 200,
+  "source_sha256": "4457b217a142c46ea1d23aaac1601db787b025f73d112b322131ae6fdb27c2db",
+  "source_lines": 95,
+  "source_metadata": {
+    "created": "2025-09-22T11:52:42.278603Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;d3ff6bfac294488fad020be9b31c941b",
+      "originalScriptVersion": "0.787",
+      "sourceInputsCount": 1,
+      "stats": {
+        "plot": 2,
+        "plotshape": 4
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Specter Trend Cloud [ChartPrime]",
+    "updated": "2025-09-22T11:52:42.278603Z",
+    "version": "1.0"
+  }
+}

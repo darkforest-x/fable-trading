@@ -1,0 +1,48 @@
+{
+  "id": "qe0D9HM1",
+  "title": "Trending RSI [ChartPrime]",
+  "url": "https://www.tradingview.com/script/qe0D9HM1-Trending-RSI-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:37:03.153882+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/qe0D9HM1-Trending-RSI-ChartPrime/",
+  "created_at": "2024-02-19T13:10:46.173833+00:00",
+  "updated_at": null,
+  "description": "Trending RSI  takes a new approach to RSI intended to provide all of the missing information that traditional RSI lacks. Questions such as \"why does the price continue to decline even during an oversold period?\" can be aided using the Trending RSI.\n\nThese types of movements are due to the market still trending and traditional RSI can not tell traders this. Trending RSI fixes this by introducing trend information back into the oscillator. By reverse engineering RSI we have been able to make a new indicator that is no longer bound between 0 and 100. Instead it provides the traditional 70 and 30 zones as bands, and 50 as a center line that still represent these zones perfectly. This transforms RSI into a centered oscillator instead of a normalized oscillator. When the market is trending our indicator represents this as the center line being below or above 0. Just like MACD the center line is colored to represent the market phases. This helps in identifying reversals more clearly by adding a layer of confluence to the already renowned RSI. We have also included a novel filtering technique that has a low lag to smoothing ratio. This is primarily used to smooth the bands by default but you can also utilize this on the RSI. Several alerts have been included to provide users with easy to configure signals. \n\n\n\nYou can use the center line as a directional filter for your trades by only picking trades in the direction of the center line. When the center line is above 0, the market is trending up. Conversely, when the center line is below 0 the market is trending down trend. Use the polarity of the center line to estimate the strength of retracements from the oversold and overbought zones. We have also included a special moving average to help you find the momentum of a move. The Binomial MA filter approximates a normal curve making it similar to a gaussian filter. We have also included standard divergences which are fully configurable in the settings. Finally, we have built this indicator to be compatible with the built in multi time frame option to allow users to freely pick the time frame they wish to use. It is worth noting that due to the limitations of the standard MTF implementation divergences will not plot as expected when using time frames outside of the charts time frame. This is standard and also affects the built in RSI.\n\n\n\nAll of the colors are fully adjustable with the option to enable or disable the glow effect. We have also designed this indicator to only display the information for plots that are enabled to reduce clutter and provide a cleaner charting experience. All alerts are built to work with the standard alert builder and do not have to be enabled or disabled inside of the indicator. \n\nIncluded Alerts:\nRSI Cross Over CenterRSI Cross Under CenterRSI Cross Under Upper RangeRSI Cross Over Upper RangeRSI Cross Over Lower RangeRSI Cross Under Lower RangeRSI Cross Over MARSI Cross Under MARSI Cross Over 0RSI Cross Under 0Center Cross Over 0Center Cross Under 0Center BullishCenter BearishBullish DivergenceBearish Divergence\n\nIn wrapping up, the Trending RSI aims to  enhance the conventional RSI by adding trend insights directly into the oscillator, addressing the gap that traditional RSI leaves regarding market trends. This version of RSI breaks away from the 0 to 100 range, offering bands and a center line that better represent market conditions. It includes a set of features like the Binomial MA for momentum analysis, configurable settings for divergence detection, and compatibility with multi-time frame analysis. The color customization and glow effects aim to improve visual clarity, and the inclusion of alerts is designed to streamline alert configuration. Overall, this indicator is designed to provide a more  view of the markets, suitable for traders looking to incorporate trend analysis into their RSI-based strategies.\n\nEnjoy\n",
+  "script": {
+    "id": 1436483,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;8ab0d218e12d456a8f382e0e8f9867d0",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B8ab0d218e12d456a8f382e0e8f9867d0/1",
+  "source_http_status": 200,
+  "source_sha256": "8161058dd879f8e098bdb1555c3b605e6889afd3d8d839c809fb8bb2c7a7baa8",
+  "source_lines": 358,
+  "source_metadata": {
+    "created": "2024-02-19T13:10:45.303418Z",
+    "extra": {
+      "isCompiled": true,
+      "isMTFResolution": true,
+      "is_price_study": false,
+      "kind": "study",
+      "sourceInputsCount": 1,
+      "stats": {
+        "alertcondition": 16,
+        "plot": 17,
+        "plotshape": 2
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Trending RSI [ChartPrime]",
+    "updated": "2024-02-19T13:10:45.303418Z",
+    "version": "1.0"
+  }
+}

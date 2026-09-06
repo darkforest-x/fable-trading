@@ -1,0 +1,185 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// ©  ChartPrime
+
+//@version=5
+indicator("DCA Liquidation Calculation [ChartPrime]",shorttitle = "DLC [ChartPrime]",overlay = true)
+// 
+color bgray                                         = color.rgb(118, 124, 118, 37)
+color WHITE                                         = color.rgb(210, 210, 210)
+color red                                           = color.rgb(128, 49, 49, 67)
+color white                                         = color.rgb(248, 248, 248, 14)
+color olive                                         = color.olive
+color blue                                          = color.rgb(23, 43, 77)
+color Yellow                                        = color.rgb(255, 186, 75)
+string core                                         =  "➞ Main Core Settings 🔸"
+string DCAg                                         =  "➞ DCA Logic Settings 🔸"
+string visual                                       =  "➞ Visuals Settings🔸" 
+
+float Wallet                                        = input.float(1000,title = "Wallet ➞",group = core,inline = "01")
+string symbol                                       = input.symbol("BTCUSDT",group = core,inline = "01")
+bool IS_LONG                                        = input.string(title='Strategy Type ➞ ', defval='long', options=['long', 'short'],group=DCAg,inline = "001") == "long"
+var float  BO_price                                 = 0.0
+int decimals                                        = 3
+float base_order_value                              = input.float(title='        Base order   ➞              ', defval=200, step=50, group=DCAg,inline = "002")
+float Safety_order_value                            = input.float(title='        Safety order ➞              ', defval=300, step=50, group=DCAg,inline = "003")
+int leverage                                        = input.int  (title='        leverage ➞                  ', defval=10, minval=1,step=1, group=DCAg,inline = "004")
+float Safety_orders                                 = input.float(title='        Max Safety Count ➞', defval=10, group=DCAg)
+float price_deviation                               = input.float(title='        Price Deviation ➞', minval=0.0, step=0.1, defval=2.2, group=DCAg)
+float Volume_Scale                                  = input.float(title='        Safety Volume Scale ➞', defval=1.5, step=0.1, group=DCAg)
+float Step_Scale                                    = input.float(title='        Safety Step Scale ➞', defval=1.0, step=0.1, group=DCAg)
+
+bool Showmain                                       = input.bool(true, "Show Main Table ❓",group = visual,inline = "01") 
+string position                                     = input.string("Middle Center", 
+     options = ["Middle Right","Top Center","Top Right","Middle Left","Middle Center","Bottom Left","Bottom Center","Bottom Right"],
+     title = 'Position',
+     inline = "01",
+     group = visual
+     )
+
+bool Showstats                                       = input.bool(true, "Show Stats Table ❓",group = visual,inline = "02") 
+string _position                                     = input.string("Top Right", 
+     options = ["Middle Right","Top Center","Top Right","Middle Left","Middle Center","Bottom Left","Bottom Center","Bottom Right"],
+     title = 'Position',
+     inline = "02",
+     group = visual
+     )
+
+symbol_price()=>
+    request.security(symbol,"D", close[1])
+    
+BO_price := symbol_price()
+
+    
+plot(symbol_price(),display = display.data_window)
+plot(BO_price,display = display.data_window)
+stepped_deviation(so_index) =>
+    float SD = 0
+    if so_index > 0
+        for _i = 1 to so_index by 1
+            SD := SD + price_deviation * math.pow(Step_Scale, _i - 1)
+    else
+        SD := 0
+
+
+next_so_price(so_index, _bo_price) =>
+    float SD = stepped_deviation(so_index)
+    if IS_LONG
+        float _next_so_price = _bo_price * (1 - SD / 100)
+    else
+        float _next_so_price = _bo_price * (1 + SD / 100)
+
+next_so_size_usd(so_index) =>
+    float next_so_value = (Safety_order_value) * math.pow(Volume_Scale, so_index - 1)
+
+
+next_so_qty(so_index, _bo_price) =>
+    float next_so_value = next_so_size_usd(so_index)
+    float _next_so_qty = next_so_value / next_so_price(so_index, _bo_price)
+
+
+base()=>
+    str.replace(syminfo.ticker(symbol), "USDT",  "", 0)
+
+
+liq_balance(wallet_balance, contract_qty, entry_price)=>
+    liq_price = (wallet_balance + 0 - contract_qty * entry_price) / (math.abs(contract_qty) * ((0.5 / 100) - (1)))
+    math.round(liq_price, 2)
+
+
+
+_steps_bo_size = (base_order_value) / BO_price
+
+table_position(type) =>
+    switch type
+        "Middle Right" => position.middle_right
+        "Top Center" => position.top_center
+        "Top Right" => position.top_right
+        "Middle Left" => position.middle_left
+        "Middle Center" => position.middle_center
+        "Bottom Left" => position.bottom_left
+        "Bottom Center" => position.bottom_center
+        "Bottom Right" => position.bottom_right     
+
+
+//
+if Showmain
+    color2 = color.from_gradient(ta.rsi(close, 3), 0, 100, #E6DADA, #274046)
+    table main = table.new(table_position(position), columns=20, rows=int(Safety_orders) + 4, frame_width=4,
+         frame_color=color.rgb(71, 71, 71) , border_width=2, border_color=color.black, bgcolor=bgray)
+    table.cell(main, 0, 0, 'Order # no', text_color=color.white, text_size=size.normal, width = 5, height=4)
+    table.cell(main, 1, 0, 'Deviation ( % )', text_color=color.white, text_size=size.normal)
+    table.cell(main, 2, 0, 'Size ( ' + str.tostring(base()) + ' )', text_color=color.white, text_size=size.normal)
+    table.cell(main, 3, 0, 'Volume ( ' + str.tostring(syminfo.currency) + ' )', text_color=color.white, text_size=size.normal)
+    table.cell(main, 4, 0, 'Price ( ' + str.tostring(syminfo.currency) + ' )', text_color=color.white, text_size=size.normal)
+    table.cell(main, 5, 0, 'Avg price ( ' + str.tostring(syminfo.currency) + ' )', text_color=color.white, text_size=size.normal)
+    table.cell(main, 6, 0, 'PNL ( ' + str.tostring(syminfo.currency) + ' )', text_color=color.white, text_size=size.normal)
+    table.cell(main, 7, 0, 'Liquidation Price ( ' + str.tostring(syminfo.currency) + ' )', text_color=color.white, text_size=size.normal)
+    table.cell(main, 8, 0, 'Total size ( ' + str.tostring(base()) + ' )', text_color=color.white, text_size=size.normal)
+    table.cell(main, 9, 0, 'Total Vol ( ' + str.tostring(syminfo.currency) + ' )', text_color=color.white, text_size=size.normal)
+
+    float _steps_total_size = _steps_bo_size
+    float _steps_total_volume = BO_price * _steps_bo_size
+    row_color = _steps_total_volume < Wallet ? color.green : red
+    //base order
+    table.cell(main, 0, 1, 'BO', text_color=color.white, text_size=size.normal,bgcolor = row_color)
+    table.cell(main, 1, 1, '0', text_color=color.white, text_size=size.normal,bgcolor = row_color)
+    table.cell(main, 2, 1, str.tostring(math.round(_steps_bo_size, decimals)), text_color=color.white, text_size=size.normal,bgcolor = row_color)
+    table.cell(main, 3, 1, str.tostring(math.round(BO_price * _steps_bo_size, decimals)), text_color=color.white, text_size=size.normal,bgcolor = row_color)
+    table.cell(main, 4, 1, str.tostring(math.round(BO_price, decimals)), text_color=color.white, text_size=size.normal,bgcolor = row_color)
+    table.cell(main, 5, 1, str.tostring(math.round(_steps_total_volume / _steps_total_size, decimals)), text_color=color.white, text_size=size.normal,bgcolor = row_color)
+
+    float next_so_price = 0 
+    float next_so_qty = 0
+    if Safety_orders > 0 
+        for _i = 1 to Safety_orders by 1
+            next_so_price  := next_so_price(_i, BO_price)
+            next_so_qty    := next_so_qty(_i, BO_price)
+
+            _steps_total_size   += next_so_qty
+            _steps_total_volume += next_so_qty * next_so_price
+            inrow_color = _steps_total_volume < Wallet * leverage ? color.rgb(30, 96, 86) : color.red
+
+            avg = math.round(_steps_total_volume / _steps_total_size, decimals)
+            PNL = IS_LONG ? (next_so_qty * next_so_price) - (next_so_qty * avg) : (next_so_qty * avg) - (next_so_qty * next_so_price)
+            Liq = math.round(liq_balance(Wallet,_steps_total_size,avg), decimals)
+            liq_color2 = ((math.abs(PNL) + (_steps_total_volume / leverage) ) > Wallet)
+            liqcon = Liq > 0 and _steps_total_volume < ( Wallet * leverage ) and liq_color2
+            _liqcon = Liq > 0 and _steps_total_volume < ( Wallet * leverage ) and not liq_color2
+
+            liq_color = liqcon ? color.yellow : Liq < 0 and _steps_total_volume < (Wallet * leverage) ? color.green : _liqcon ? color.rgb(191, 17, 165): color.red
+            volwithlev = leverage > 1 ? str.tostring(math.round(next_so_qty * next_so_price, 3))+" ⇢ "+"Lev: " 
+                 + str.tostring(math.round((next_so_qty * next_so_price / leverage), 3)) + "💲" : str.tostring(math.round(next_so_qty * next_so_price, decimals))
+
+            totalwithlev = leverage > 1 ? str.tostring(math.round(_steps_total_volume, decimals))+ " ⇢ " +"Lev: " 
+                 + str.tostring(math.round((_steps_total_volume / leverage), decimals)) + "💲" : str.tostring(math.round(_steps_total_volume, decimals))
+            table.cell(main, 0, _i + 2, str.tostring(_i), text_color=color.white, text_size=size.normal,bgcolor = inrow_color)
+            table.cell(main, 1, _i + 2, str.tostring(math.round(stepped_deviation(_i),decimals)) + " %", text_color=color.white, text_size=size.normal,bgcolor = inrow_color)
+            table.cell(main, 2, _i + 2, str.tostring(math.round(next_so_qty, decimals)), text_color=color.white, text_size=size.normal,bgcolor = inrow_color)
+            table.cell(main, 3, _i + 2, volwithlev, text_color=color.white, text_size=size.normal,bgcolor = inrow_color)
+            table.cell(main, 4, _i + 2, str.tostring(math.round(next_so_price, decimals)), text_color=color.white, text_size=size.normal,bgcolor = inrow_color)
+            table.cell(main, 5, _i + 2, str.tostring(math.round(_steps_total_volume / _steps_total_size, decimals)), text_color=color.white, text_size=size.normal,bgcolor = inrow_color)
+            table.cell(main, 6, _i + 2, str.tostring(math.round(PNL, decimals)) + "💲", text_color=color.white, text_size=size.normal,bgcolor =  PNL > 0 ? color.green:color.rgb(169, 35, 35, 21))
+            table.cell(main, 7, _i + 2, Liq < 0 ? "----": str.tostring(Liq), text_color=liqcon ? color.black : color.white, text_size=size.normal,bgcolor = liq_color)  
+            table.cell(main, 8, _i + 2, str.tostring(math.round(_steps_total_size, decimals)), text_color=color.white, text_size=size.normal,bgcolor = inrow_color)
+            table.cell(main, 9, _i + 2, str.tostring(totalwithlev), text_color=color.white, text_size=size.normal,bgcolor = inrow_color)
+            if Showstats
+                table stats = table.new(table_position(_position), columns=20, rows=int(Safety_orders) + 4, frame_width=3, frame_color=color.black, border_width=2, border_color=color.black, bgcolor=color.rgb(213, 220, 220, 48))
+                table.cell(stats, 0, 0, 'BOT info', text_color=color.white, text_size=size.auto, width = 5, height=4)
+                table.cell(stats, 1, 0, '', text_color=color.white, text_size=size.auto)
+                table.merge_cells(stats, 0, 0, 1, 0)
+                table.cell(stats, 0, 1, 'Required Capital ( ' + str.tostring(syminfo.currency) + ' )', text_color=color.white, text_size=size.auto)
+                capitalcon = Wallet<math.round((_steps_total_volume / leverage),decimals)
+                table.cell(stats, 1, 1, capitalcon ? "😞" + " " + str.tostring(math.round((_steps_total_volume / leverage),decimals)) + " " +str.tostring(syminfo.currency) :
+                     "🥳" + " " + str.tostring(math.round((_steps_total_volume / leverage),decimals)) + " " +str.tostring(syminfo.currency),
+                     text_color=color.white, text_size=size.auto,
+                     bgcolor=capitalcon ? color.red : color.green)
+                table.cell(stats, 0, 2, "Max Deal Value\nwith leverage", text_color=color.white, text_size=size.auto)
+                table.cell(stats, 1, 2, str.tostring(math.round((_steps_total_volume),decimals)) + " " +str.tostring(syminfo.currency),
+                     text_color=color.white, text_size=size.auto,
+                     bgcolor=Wallet * leverage < math.round((_steps_total_volume),decimals)? color.red : color.green)
+                table.cell(stats, 0, 3, "Leverage", text_color=color.white, text_size=size.auto)
+                table.cell(stats, 1, 3, "X " + str.tostring(leverage), text_color=color.white, text_size=size.auto)     
+                table.cell(stats, 0, 4, "Maximum coverage", text_color=color.white, text_size=size.auto)
+                table.cell(stats, 1, 4, str.tostring(math.round(stepped_deviation(_i),decimals)) + " %", text_color=color.white, text_size=size.auto)
+
+

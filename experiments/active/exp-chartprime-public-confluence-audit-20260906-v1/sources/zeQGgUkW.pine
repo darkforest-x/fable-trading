@@ -1,0 +1,91 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=6
+indicator("Price Heat Meter [ChartPrime]", overlay = true)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+int   length = input.int(50, "Length")
+color cold   = input.color(color.aqua, "", inline = "colors", group = "Heat Color")
+color mid    = input.color(color.yellow, "", inline = "colors", group = "Heat Color")
+color hot    = input.color(color.red, "", inline = "colors", group = "Heat Color")
+
+var countUp   = 0
+var upper     = 0.
+var countDn   = 0
+var lower     = 0.
+var upperIndx = 0
+var upperHeat = 0.
+var lowerIndx = 0
+var lowerHeat = 0.
+
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+float h = ta.highest(high, length)
+float l = ta.lowest(low, length)
+
+if h == high
+    upper := h
+
+if upper != upper[1]
+    countUp := 0
+else if upper == upper[1]
+    countUp += 1
+
+
+if l == low 
+    lower := l 
+
+if lower != lower [1] 
+    countDn := 0 
+else if lower == lower[1]
+    countDn += 1 
+
+
+// normalized distance of current close between [l, h] and scale to 0-100
+float norm = (close - l) / (h - l)
+float normPercent = norm * 100
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+color heatColor = normPercent < 50 ? color.from_gradient(normPercent, 0, 50, cold, mid) : color.from_gradient(normPercent, 50, 100, mid, hot)
+
+if h[1] == high[1] and high < h 
+    upperIndx := bar_index[1]
+    upperHeat := normPercent
+if countUp == 40 
+    label.new(upperIndx, upper, str.tostring(upperHeat, format.percent), style = label.style_label_down, color = color(na), textcolor = hot)
+
+if l[1] == low[1] and low > l 
+    lowerIndx := bar_index[1]
+    lowerHeat := normPercent
+if countDn == 40 
+    label.new(lowerIndx, l, str.tostring(lowerHeat, format.percent), style = label.style_label_up, color = color(na), textcolor = cold)
+
+if barstate.islast
+    value = math.round(norm * 50)
+    var tbl = table.new(position.bottom_center, 51, 3)
+    for i = 0 to 50
+        color = i < 25 ? color.from_gradient(i, 0, 25, cold, mid) : color.from_gradient(i, 25, 50, mid, hot)
+
+        tbl.cell(i, 1, i == 0 ? "❄️" : i == 50 ? "🔥" : "", bgcolor = color.new(color, i == 0 ? 100 : i == 50 ? 100 : 0), width = 1)
+        tbl.cell(i, 0, "")
+
+        tbl.cell(value, 0, str.tostring(normPercent, format.percent)+ "\n▼", text_color = heatColor)
+
+
+plot(upper != upper[1] ? na : upper, "Upper Extreame Level", color = color.from_gradient(countUp, 0, 100, hot, color(na)), style = plot.style_linebr)
+plot(lower != lower[1] ? na : lower, "Lower Extreame Level", color = color.from_gradient(countDn, 0, 100, cold, color(na)), style = plot.style_linebr)
+
+plotcandle(open, high, low, close, title='Heat Candles', color = heatColor, wickcolor=heatColor, bordercolor = heatColor)
+barcolor(heatColor)
+// --------------------------------------------------------------------------------------------------------------------}

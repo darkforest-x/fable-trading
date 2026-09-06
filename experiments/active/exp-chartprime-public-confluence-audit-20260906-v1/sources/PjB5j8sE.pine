@@ -1,0 +1,103 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+
+//@version=5
+indicator("DSL Trend Analysis [ChartPrime]", overlay = true)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+int   len       = input.int(10, "Length")      // Length for calculating DSL
+int   offset    = input(30, "Offset")          // Offset for threshold levels
+float width     = input.float(1, "Bands Width", step = 0.1, maxval = 2, minval = 0.5) // Width for ATR-based bands
+
+// Colors for upper and lower trends
+color upper_col = input.color(color.lime, "+", inline = "col")
+color lower_col = input.color(color.orange, "-", inline = "col")
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Function to calculate DSL lines based on price
+dsl_price(float price, int len) =>
+    // Initialize DSL lines as NaN (not plotted by default)
+    float dsl_up = na
+    float dsl_dn = na
+    float sma    = ta.sma(price, len)
+
+    // Dynamic upper and lower thresholds calculated with offset
+    float threshold_up = ta.highest(len)[offset] 
+    float threshold_dn = ta.lowest(len)[offset] 
+
+    // Calculate the DSL upper and lower lines based on price compared to the thresholds
+    dsl_up := price > threshold_up ? sma : dsl_up[1] 
+    dsl_dn := price < threshold_dn ? sma : dsl_dn[1]
+
+    // Return both DSL lines
+    [dsl_up, dsl_dn]
+
+// Function to calculate DSL bands based on ATR and width multiplier
+dsl_bands(float dsl_up, float dsl_dn) =>
+    float atr = ta.atr(200) * width // ATR-based calculation for bands
+    float upper = dsl_up - atr       // Upper DSL band
+    float lower = dsl_dn + atr       // Lower DSL band
+
+    [upper, lower]
+
+// Get DSL values based on the closing price
+[dsl_up, dsl_dn] = dsl_price(close, len)
+
+// Calculate the bands around the DSL lines
+[dsl_up1, dsl_dn1] = dsl_bands(dsl_up, dsl_dn)
+
+// Linear regression on the close price over a short period
+float linreg = ta.linreg(close, 5, 0)
+
+// Determine the trend color based on the relationship between price, DSL lines, and bands
+color trend_col = 
+               high > dsl_up1 and high < dsl_up and high > dsl_dn1
+             ? color.new(upper_col, 60)
+
+             : low > dsl_dn and low < dsl_dn1
+             ? color.new(lower_col, 60)
+
+             : high > dsl_up
+             ? upper_col 
+
+             : low < dsl_dn
+             ? lower_col 
+
+             : na
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Plot the linear regression with color based on trend analysis
+plot(linreg, "Trend Line", color = trend_col, linewidth=4, style = plot.style_linebr, force_overlay = false)
+
+// If it's the last bar, display labels for the DSL upper and lower bands
+if barstate.islast
+    label.delete(label.new(bar_index + 5, dsl_up, "Upper Band\n" + str.tostring(dsl_up, "#.##"), style = label.style_label_left, color = color(na), textcolor = chart.fg_color)[1])
+    label.delete(label.new(bar_index + 5, dsl_dn, "Lower Band\n" + str.tostring(dsl_dn, "#.##"), style = label.style_label_left, color = color(na), textcolor = chart.fg_color)[1])
+
+// Plot the DSL lines on the chart
+pu = plot(dsl_up, color=color.gray, linewidth=1, title="DSL Up")
+pd = plot(dsl_dn, color=color.gray, linewidth=1, title="DSL Down")
+
+// Plot the DSL bands
+pu1 = plot(dsl_up1, color=color.gray, linewidth=1, title="DSL Upper Band")
+pd1 = plot(dsl_dn1, color=color.gray, linewidth=1, title="DSL Lower Band")
+
+// Fill the space between the DSL lines and bands with color
+fill(pu, pu1, dsl_up, dsl_up1, color.new(upper_col, 80), color.new(upper_col, 90))
+fill(pd, pd1, dsl_dn, dsl_dn1, color.new(lower_col, 80), color.new(lower_col, 90))
+
+// Uncomment the following line to plot candles with trend color
+// plotcandle(open, high, low, close, title='Title', color = trend_col, wickcolor=trend_col, bordercolor = trend_col)
+// --------------------------------------------------------------------------------------------------------------------}

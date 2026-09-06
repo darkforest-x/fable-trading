@@ -1,0 +1,46 @@
+{
+  "id": "y3NTW7he",
+  "title": "Ichimoku Oscillator With Divergences [ChartPrime]",
+  "url": "https://www.tradingview.com/script/y3NTW7he-Ichimoku-Oscillator-With-Divergences-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:37:17.934330+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/y3NTW7he-Ichimoku-Oscillator-With-Divergences-ChartPrime/",
+  "created_at": "2023-10-11T13:19:31.713144+00:00",
+  "updated_at": null,
+  "description": "The Ichimoku Oscillator  is a trading indicator designed to streamline the interpretation of Ichimoku clouds. It aims to refine and condense the complexities of the Chikou (the lag line), presenting its implications in real-time through an oscillator format, beneficial for those familiar with Ichimoku components but to have a new interpretation of their indicators.\n\n\n\nThe basics of an Ichimoku:\nConversion Line (Tenkan-Sen): It represents a midpoint of the highest and lowest prices over a specific period, usually 9 periods, reflecting short-term price movements.Base Line (Kijun-Sen): It acts similarly to the Conversion Line but over a longer period, typically 26 periods, representing medium-term price movements.Leading Span A & B (Kumo): Span A is the average of the Conversion Line and Base Line, and Span B is the midpoint of the highest and lowest prices over a usually longer period, typically 52 periods. Their interaction denotes trend direction, and the cloud color changes depending on whether Span A is above or below Span B, indicating bullish or bearish market conditions, respectively.Lagging Span (Chikou Span): It is the current closing price plotted 26 periods behind, assisting in confirming the trend direction and potential momentum.\n\n\n\nAdvantage of an Oscillator:\nUtilizing the oscillator format allows traders to interpret market dynamics more efficiently by visualizing the momentum and trend strength in a bounded range, enabling quick assessments of overbought or oversold conditions. Creating this oscillator provides multiple advantageous; particularly in sideway markets, helping to identify potential reversal points and offering insights on market entries and exits. When building this oscillator we've put a focus on unique interpretations such as overbought and sold areas and divergences; otherwise not found in traditional Ichimoku techniques. It is important to note these divergences are naturally not 100% real time.\n\nWhen the oscillator turns green; the market is in an uptrend, red for downtrend and yellow for a transitioning market. The center line and the inner most cloud represent a balanced market state.\n\n\nKey Features & Input Parameters:\nSignal Source: Allows the selection of the price data source for signal generation, such as closing prices, and it’s the foundational parameter upon which the oscillator functions.Normalization Settings: Users can select the normalization mode (“All”, “Window”, or “Disabled”), influencing how the oscillator scales its values. When enabled, it will scale from 100 to -100, allowing the user to understand better the relative positioning of price data.Smoothing: This indicator offers advanced smoothing features, with options for additional smoothing, allowing traders to adjust the signal's sensitivity to price movements.Kumo & Chikou Visibility: Traders can customize the visibility settings of Kumo and Chikou, tailoring the display of each component to their preference, enabling a cleaner and more intuitive view of market conditions.Color Coding: Each component and condition, like bullish or bearish states, can be color-coded, providing visual cues to enhance the interpretability of market trends and states.Color on Conversion: The oscillator provides an option to color the signal based on the crossover of the conversion and base lines.Divergence: The oscillator can detect and highlight regular and hidden bullish and bearish divergences between the signal and price, aiding traders in identifying potential trend reversals or continuations.\n\n\nAlerts:\nThe list of inbuilt alerts are provided below:\n\nInside Cloud: The signal line is inside the cloud.Up Out of Cloud: The signal line crossed above the cloud.Down Out of Cloud: The signal line crossed below the cloud.Future Kumo Cross Bullish: The future Kumo lines have crossed in a bullish manner.Future Kumo Cross Bearish: The future Kumo lines have crossed in a bearish manner.Current Kumo Cross Bullish: The current Kumo lines have crossed in a bullish manner.Current Kumo Cross Bearish: The current Kumo lines have crossed in a bearish manner.Conversion Base Bullish: The conversion line crossed above the base line.Conversion Base Bearish: The conversion line crossed below the base line.Signal Bullish on Conversion Base: The signal line crossed above the maximum of conversion and base lines.Signal Bearish on Conversion Base: The signal line crossed below the minimum of conversion and base lines.Chikou Bullish: The Chikou line crossed above zero.Chikou Bearish: The Chikou line crossed below zero.Signal Over Max: The signal line crossed above the max level.Signal Over High: The signal line crossed above the high level.Signal Under Min: The signal line crossed below the min level.Signal Under Low: The signal line crossed below the low level.Chikou Over Max: The Chikou line crossed above the max level.Chikou Over High: The Chikou line crossed above the high level.Chikou Under Min: The Chikou line crossed below the min level.Chikou Under Low: The Chikou line crossed below the low level.Signal Crossover MA: The signal line crossed over the moving average.Signal Crossunder MA: The signal line crossed under the moving average.Regular Bullish Divergence: Regular bullish divergence detected.Hidden Bullish Divergence: Hidden bullish divergence detected.Regular Bearish Divergence: Regular bearish divergence detected.Hidden Bearish Divergence: Hidden bearish divergence detected.Bounce off of Kumo Up: Bullish Bounce off of Kumo.Bounce off of Kumo Down: Bearish Bounce off of Kumo.\n\n\nBy providing a cohesive visualization of the Ichimoku elements and market momentum within a bounded range, this oscillator is a unique tool and insight into markets.\n",
+  "script": {
+    "id": 1226288,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;1c7ca416b5484adda2e6f3e2e62d9922",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B1c7ca416b5484adda2e6f3e2e62d9922/1",
+  "source_http_status": 200,
+  "source_sha256": "938b9bd8165e5c66996e0e978f0564e5b387243c8e44f74943b023c2162b2945",
+  "source_lines": 467,
+  "source_metadata": {
+    "created": "2023-10-11T13:19:30.552285Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": false,
+      "kind": "study",
+      "sourceInputsCount": 1,
+      "stats": {
+        "alertcondition": 29,
+        "plot": 11
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Ichimoku Oscillator [ChartPrime]",
+    "updated": "2023-10-11T13:19:30.552285Z",
+    "version": "1.0"
+  }
+}

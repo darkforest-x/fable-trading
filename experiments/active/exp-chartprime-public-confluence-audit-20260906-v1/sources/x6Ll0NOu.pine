@@ -1,0 +1,95 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=6
+indicator("Specter Trend Cloud [ChartPrime]", overlay = true, max_lines_count = 500)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+len1        = input.int(25)
+source      = input.source(close, "Source")
+maTypeInput = input.string("EMA", "Type", options = ["SMA", "EMA", "SMMA (RMA)", "WMA", "VWMA"], display = display.data_window)
+colUp       = input.color(color.aqua, "", inline = "col")
+colDn       = input.color(color.orange, "", inline = "col")
+
+
+var indexRetest = 0
+var line lower = na
+var line upper = na
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+ma(source, length, MAtype) =>
+	switch MAtype
+		"SMA"                   => ta.sma(source, length)
+		"EMA"                   => ta.ema(source, length)
+		"SMMA (RMA)"            => ta.rma(source, length)
+		"WMA"                   => ta.wma(source, length)
+		"VWMA"                  => ta.vwma(source, length)
+
+float ma1 = ma(source, len1, maTypeInput)
+float ma2 = ma(source, len1+len1, maTypeInput)
+float atr = ta.atr(200)
+
+bool  trend  = ma1 > ma2 
+bool  tChange = trend != trend[1]
+
+color Tcolor = trend ? colUp : colDn
+
+
+if trend 
+    ma1 := ma1 - atr 
+    ma2 := ma2 - atr
+else 
+    ma1 := ma1 + atr 
+    ma2 := ma2 + atr 
+
+
+bool retestFrequancy = bar_index - indexRetest > 5 
+bool retestUp = ta.crossover(low, ma1) and not tChange and trend and retestFrequancy and barstate.isconfirmed
+bool retestDn = ta.crossunder(high, ma1) and not tChange and not trend and retestFrequancy and barstate.isconfirmed
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+if retestUp
+    lower       := na
+    indexRetest := bar_index
+    lower       := line.new(bar_index-1, low[1], bar_index, low[1])
+    
+if retestDn
+    upper       := na
+    indexRetest := bar_index
+    upper       := line.new(bar_index-1, high[1], bar_index, high[1])
+
+lower.set_x2(bar_index)
+lower.set_color(color.aqua)
+lower.set_style(line.style_dotted)
+upper.set_x2(bar_index)
+upper.set_color(color.orange)
+upper.set_style(line.style_dotted)
+
+if high > upper.get_y1()
+    upper := na
+
+if low < lower.get_y1()
+    lower := na
+
+Pma1 = plot(trend != trend[1] ? na : ma1, style = plot.style_linebr, color = Tcolor)
+Pma2 = plot(trend != trend[1] ? na : (trend ? ma1 - atr : ma1 + atr), style = plot.style_linebr, display = display.none, editable = false)
+
+fill(Pma1, Pma2, ma1, ma2, color.new(Tcolor,  60), color.new(Tcolor,  80))
+
+
+plotshape(retestUp ? low[1] - atr : na, "Retest Up", shape.diamond, location.absolute, color = Tcolor, offset = -1, size = size.tiny)
+plotshape(retestUp ? low[1] - atr : na, "Retest Up", shape.diamond, location.absolute, color = color.new(Tcolor, 70), offset = -1, size = size.small)
+
+plotshape(retestDn ? high[1] + atr : na, "Retest Dn", shape.diamond, location.absolute, color = Tcolor, offset = -1, size = size.tiny)
+plotshape(retestDn ? high[1] + atr : na, "Retest Dn", shape.diamond, location.absolute, color = color.new(Tcolor, 70), offset = -1, size = size.small)
+// --------------------------------------------------------------------------------------------------------------------}

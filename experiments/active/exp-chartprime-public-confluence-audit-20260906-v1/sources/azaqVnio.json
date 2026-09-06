@@ -1,0 +1,42 @@
+{
+  "id": "azaqVnio",
+  "title": "Bar Magnified Volume Profile/Fixed Range [ChartPrime]",
+  "url": "https://www.tradingview.com/script/azaqVnio-Bar-Magnified-Volume-Profile-Fixed-Range-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:37:46.545770+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/azaqVnio-Bar-Magnified-Volume-Profile-Fixed-Range-ChartPrime/",
+  "created_at": "2023-03-19T02:36:42.364616+00:00",
+  "updated_at": "2023-03-25T00:08:45.263846+00:00",
+  "description": "This indicator draws a volume profile by utilizing data from the lower timeframe to get a more accurate representation of where volume occurred on a bar to bar basis. The indicator creates a price range, and then splits that price range into 100 grids by default. The indicator then drops down to the lower timeframe, approximately 16 times lower than the current timeframe being viewed on the chart, and then parses through all of the lower timeframe bars, and attributes the lower timeframe bar volume to all grids that it is touching. The volume is dispersed proportionally to the grids which it is touching by whatever percent of the candle is inside each grid. For example, if one of the lower timeframe bars is interacting with \"2\" of the grids in the profile, and 60% of the candle is inside of the top grid, 60% of the volume from said candle will be attributed to the grid. \n\nTo make all of this magic happen, this script utilizes a quadratic time complexity algorithm while parsing and attributing the volume to all of the grids. Due to this type of algorithm being used in the script, many of the user inputs have been limited to allow for simplicity, but also to prevent possible errors when executing loops. For the most part, all of the settings have been thoroughly tested and configured with the right amount of limitations to prevent these errors, but also still give the user a broad range of flexibility to adjust the script to their liking.\n\n 📗 SETTINGS\n\nLookback Period: The lookback period determines how many bars back the script will search for the \"highest high\" and the \"lowest low\" which will then be used to generate the grids in-betweenNumber Of Levels: This setting determines how many grids there will be within the volume profile/fixed range. This is personal preference, however it is capped at 100 to prevent time complexity issuesProfile Length: This setting allows you to stretch or thin the volume profile. A higher number will stretch it more, vise versa a smaller number will thin it further. This does not change the volume profiles results or values, only its visual appearance.Profile Offset: This setting allows you to offset the profile to the left or right, in the event the user does not appreciate the positioning of the default location of the profile. A higher number will shift it to the right, vise versa a lower number will shift it to the left. This is personal preference and does not affect the results or values of the profile.\n\n🧰 UTILITY\n\nThe volume profile/fixed range can be used in many ways. One of the most popular methods is to identify high volume areas on the chart to be used as trade entries or exits in the event of the price revisiting the high volume areas. Take this picture as an example. The image clearly demonstrates how the 2 highest areas of volume within this magnified volume profile also line up to great areas of support and resistance in the market.\n\n\n\nHere are some other useful methods of using the volume profile/fixed range\n\nIdentify Key Support and Resistance Levels for SetupsDetermine Logical Take Profits and Stop LossesCalculate Initial R MultiplierIdentify Balanced vs Imbalanced MarketsDetermine Strength of Trends",
+  "script": {
+    "id": 934707,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;37308b07e66e4c5bac3bd28febd19c36",
+    "version_maj": 4,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B37308b07e66e4c5bac3bd28febd19c36/4",
+  "source_http_status": 200,
+  "source_sha256": "4eba1e9bdf35396b0f5ba551b04d4de3c17c10324754ad7bef93371bea89b0c6",
+  "source_lines": 122,
+  "source_metadata": {
+    "created": "2023-03-25T00:08:45.010653Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "sourceInputsCount": 0
+    },
+    "lastVersionMaj": "4.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Bar Magnified Volume Profile/Fixed Range [ChartPrime]",
+    "updated": "2023-03-25T00:08:45.010653Z",
+    "version": "4.0"
+  }
+}

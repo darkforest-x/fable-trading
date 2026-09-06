@@ -1,0 +1,154 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+
+//@version=6
+indicator("Swing Structure Bands [ChartPrime]", overlay = true, max_bars_back = 5000, max_polylines_count = 100, max_labels_count = 500)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 USER INPUTS
+// --------------------------------------------------------------------------------------------------------------------{
+
+lenSwing = input.int(100, "Swing Length")
+maType   = input.string("SMA", "MA Type", options = ["SMA", "EMA", "SMMA (RMA)", "WMA", "VWMA"], display = display.data_window)
+bands    = input.bool(true, "Bands")
+
+colDn = input.color(color.fuchsia,   "Bear Color")
+colUp = input.color(color.green, "Bull Color")
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 INDICATOR CALCULATIONS
+// --------------------------------------------------------------------------------------------------------------------{
+
+f_ema(src, len) =>
+    a = 2 / (len + 1)
+    v = 0.0
+    v := na(v[1]) ? src : a * src + (1 - a) * nz(v[1])
+
+f_rma(src, len) =>
+    a = 1 / len
+    v = 0.0
+    v := na(v[1]) ? ta.sma(src, len) : a * src + (1 - a) * nz(v[1])
+
+f_ma(src, len, type) =>
+    switch type
+        "SMA"        => ta.sma(src, len)
+        "EMA"        => f_ema(src, len)
+        "SMMA (RMA)" => f_rma(src, len)
+        "WMA"        => ta.wma(src, len)
+        "VWMA"       => ta.vwma(src, len)
+
+
+hiMax = ta.highest(lenSwing)
+loMin = ta.lowest(lenSwing)
+atr  = ta.atr(200)
+
+var dir  = 0
+var lh   = 1
+var ll   = 1
+
+var hiIdx = 0
+var hiPx  = 0.0
+
+var loIdx = 0
+var loPx  = 0.0
+
+
+isHiSw = high[1] == hiMax and high < hiMax
+isLoSw = low[1]  == loMin and low  > loMin
+
+
+if high == hiMax
+    dir := 1
+
+if low == loMin
+    dir := -1
+
+if isLoSw
+    loIdx := bar_index - 1
+    loPx  := low[1]
+    ll    := 1
+
+if isHiSw
+    hiIdx := bar_index - 1
+    hiPx  := high[1]
+    lh    := 1
+
+
+if dir != dir[1] and dir == -1
+    label.new(hiIdx, hiPx+atr, "Swing High", color = color.new(colDn, 80), textcolor = chart.fg_color, style = label.style_label_down)
+
+if dir != dir[1] and dir == 1
+    label.new(loIdx, loPx-atr, "Swing Low", color = color.new(colUp, 80), textcolor = chart.fg_color, style = label.style_label_up)
+
+
+lh += 1
+ll += 1
+
+
+maHi = f_ma(high, lh, maType)
+maLo = f_ma(low,  ll, maType)
+
+
+dHi = math.abs(maHi - maHi[1]) > atr
+dLo = math.abs(maLo - maLo[1]) > atr
+
+
+var uc = 0
+var lc = 0
+
+var uIdx = 0
+var lIdx = 0
+
+
+uc := not dHi ? uc + 1 : 0
+lc := not dLo ? lc + 1 : 0
+
+
+ub = dHi ? na : maHi
+lb = dLo ? na : maLo
+
+ub1 = dHi ? na : maHi + atr
+ub2 = dHi ? na : maHi - atr
+
+lb1 = dLo ? na : maLo + atr
+lb2 = dLo ? na : maLo - atr
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 VISUALIZATION
+// --------------------------------------------------------------------------------------------------------------------{
+
+pU  = plot(ub,  style = plot.style_linebr, color = colDn, title = "TOP Band Middle")
+pU1 = plot(ub1, style = plot.style_linebr, color = color.new(colDn, bands ? 50 : 100), title = "TOP Band Upper")
+pU2 = plot(ub2, style = plot.style_linebr, color = color.new(colDn, bands ? 50 : 100), title = "TOP Band Lower")
+
+fill(pU, pU1, ub1, ub, na, color.new(colDn, bands ? 70 : 100))
+fill(pU, pU2, ub2, ub, na, color.new(colDn, bands ? 70 : 100))
+
+
+pL  = plot(lb,  style = plot.style_linebr, color = colUp, title = "LOW Band Middle")
+pL1 = plot(lb1, style = plot.style_linebr, color = color.new(colUp, bands ? 50 : 100), title = "LOW Band Upper")
+pL2 = plot(lb2, style = plot.style_linebr, color = color.new(colUp, bands ? 50 : 100), title = "LOW Band Lower")
+
+fill(pL, pL1, lb1, lb, na, color.new(colUp, bands ? 70 : 100))
+fill(pL, pL2, lb2, lb, na, color.new(colUp, bands ? 70 : 100))
+
+
+sell = ta.crossunder(high, ub) and uc > 20
+buy  = ta.crossover(low,  lb) and lc > 15
+
+plotshape(sell and bar_index - uIdx > 10 ? high[1] + atr : na, "Sell", shape.diamond, location.absolute, size = size.tiny,  color = colDn)
+plotshape(sell and bar_index - uIdx > 10 ? high[1] + atr : na, "Sell", shape.diamond, location.absolute, size = size.small, color = color.new(colDn, 60))
+
+plotshape(buy  and bar_index - lIdx > 10 ? low[1]  - atr : na, "Buy",  shape.diamond, location.absolute, size = size.tiny,  color = colUp)
+plotshape(buy  and bar_index - lIdx > 10 ? low[1]  - atr : na, "Buy",  shape.diamond, location.absolute, size = size.small, color = color.new(colUp, 60))
+
+if sell
+    uIdx := bar_index
+
+if buy
+    lIdx := bar_index
+// --------------------------------------------------------------------------------------------------------------------}

@@ -1,0 +1,320 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+//@version=6
+
+indicator("HTF Candle Volume Profile [ChartPrime]", overlay = true, max_boxes_count = 500, max_lines_count = 500, max_labels_count = 500, max_bars_back = 5000)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+tf           = input.timeframe("D", "Timeframe",
+     tooltip  = "Select the Higher Timeframe used to build synthetic candles projected on the current chart.",
+     group    = "HTF Settings")
+offset       = input.int(20, "Projection Offset (bars)", minval = 5, maxval = 100,
+     tooltip  = "Number of bars to the right of the last bar where the synthetic candles are drawn.",
+     group    = "HTF Settings")
+
+binsQty      = input.int(20, "Profile Bins", minval = 5, maxval = 50,
+     tooltip  = "Number of price bins used to build the volume profile for each HTF candle.",
+     group    = "Volume Profile")
+profileWidth = input.int(15, "Profile Width (bars)", minval = 3, maxval = 40,
+     tooltip  = "Maximum horizontal width (in bars) of the volume profile histogram.",
+     group    = "Volume Profile")
+showPoc      = input.bool(true, "Show POC Line",
+     tooltip  = "Draw a dashed line at the Point of Control (highest volume bin) extending back to the candle start.",
+     group    = "Volume Profile")
+pocLineStyle = input.string("Dashed", "POC Line Style", options = ["Dashed", "Solid", "Dotted"],
+     tooltip  = "Visual style of the POC level line.",
+     group    = "Volume Profile")
+showHiLo     = input.bool(true, "Show High / Low Levels",
+     tooltip  = "Draw dotted lines at the High and Low of each HTF candle extending back to the candle start.",
+     group    = "Volume Profile")
+
+showLabels   = input.bool(true, "Labels",
+     tooltip  = "Show price labels on POC, High, and Low level lines.",
+     group    = "Style")
+bullCol      = input.color(color.rgb(0, 207, 93),  "Bullish Color", inline = "",
+     group    = "Style")
+bearCol      = input.color(color.rgb(248, 83, 33), "Bearish Color", inline = "",
+     group    = "Style")
+pocCol       = input.color(color.orange, "POC Color",
+     tooltip  = "Color used for the POC bin highlight and POC level line.",
+     group    = "Style")
+
+candle1_on   = input.bool(true,  "Candle 1 (Current)",
+     tooltip  = "Show the currently forming HTF candle with its volume profile.",
+     group    = "Candles")
+candle2_on   = input.bool(true,  "Candle 2",
+     tooltip  = "Show the last closed HTF candle with its volume profile.",
+     group    = "Candles")
+candle3_on   = input.bool(true,  "Candle 3",
+     tooltip  = "Show the second-to-last closed HTF candle with its volume profile.",
+     group    = "Candles")
+candle4_on   = input.bool(true,  "Candle 4",
+     tooltip  = "Show the third-to-last closed HTF candle with its volume profile.",
+     group    = "Candles")
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+//@function Convert timeframe string to a compact readable label (e.g. 4H, 1D, 15M).
+convert_tf(tf_) =>
+    s = timeframe.in_seconds(tf_)
+    m = s / 60
+    h = s / 3600
+    d = s / 86400
+    h >= 1 and h < 24 ? str.tostring(int(h)) + "H" :
+     d >= 1           ? str.tostring(int(d)) + "D" :
+     m >= 1           ? str.tostring(int(m)) + "M" : str.tostring(s) + "S"
+
+
+//@function Map a style string to a line.style constant.
+toLineStyle(s) =>
+    s == "Solid"  ? line.style_solid  :
+     s == "Dotted" ? line.style_dotted :
+                     line.style_dashed
+
+
+//@function Draw a synthetic HTF candle body + wick at a given projected bar position.
+drawCandleShape(h, l, c, o, xPos, col) =>
+    wickCol = color.new(col, 30)
+    bodyCol = color.new(col, 0)
+    line.delete(line.new(xPos, h, xPos, l, color = wickCol, width = 2)[1])
+    box.delete(box.new(xPos - 1, math.max(o, c), xPos + 1, math.min(o, c), bgcolor = bodyCol, border_color = col)[1])
+
+
+//@function Build volume profile bins, draw them to the LEFT of xAnchor, then draw POC and High/Low level lines.
+//@param h_       HTF candle high.
+//@param l_       HTF candle low.
+//@param startIdx Bar index where the HTF candle opened (left anchor for level lines).
+//@param endIdx   Bar index where the HTF candle closed (exclusive upper bound for volume scan).
+//@param xAnchor  Bar index of the projected candle body — profile grows leftward from here.
+//@param bins     Number of price bins in the profile.
+//@param width    Maximum profile width in bars.
+//@param bullish  True when close >= open (drives bin color).
+//@param pocLeftX Left x-coordinate for POC / High / Low lines (= candle start on the live chart).
+//@returns POC mid-price (float).
+drawProfile(h_, l_, startIdx, endIdx, xAnchor, bins, width, bullish, pocLeftX) =>
+
+    var boxes = array.new<box>()
+    for b in boxes
+        b.delete()
+    boxes.clear()
+
+    if na(h_) or na(l_) or h_ <= l_ or endIdx <= startIdx
+        float(na)
+
+    else
+        binSize = (h_ - l_) / bins
+        volBins = array.new<float>(bins, 0.0)
+
+        lookback = bar_index - startIdx
+        for k = 0 to math.min(lookback, 4999)
+            idx = bar_index - k
+            if idx >= startIdx and idx < endIdx
+                c_ = close[k]
+                v_ = volume[k]
+                binIdx = int(math.floor((c_ - l_) / binSize))
+                binIdx := math.max(0, math.min(binIdx, bins - 1))
+                volBins.set(binIdx, volBins.get(binIdx) + v_)
+
+        maxVol = volBins.max()
+        pocIdx = volBins.indexof(maxVol)
+        pocLow = l_ + binSize * pocIdx
+        pocMid = pocLow + binSize * 0.5
+
+        // Profile bins grow leftward from baseX
+        baseX = xAnchor - 2
+
+        for i = 0 to bins - 1
+            binVol  = volBins.get(i)
+            binLow  = l_ + binSize * i
+            binHigh = binLow + binSize
+            barW    = maxVol > 0 ? int(math.round(binVol / maxVol * width)) : 0
+            barW    := math.max(barW, 1)
+
+            isPoc = i == pocIdx
+            bgc   = isPoc ? color.new(pocCol, 20) : bullish ? color.new(bullCol, 65) : color.new(bearCol, 65)
+
+            boxes.push(box.new(baseX - barW, binHigh, baseX, binLow, bgcolor = bgc, border_color = chart.bg_color))
+
+        // POC level line — extends from candle start on the live chart to the right edge of the candle slot
+        if showPoc
+            line.delete(line.new(pocLeftX, pocMid, xAnchor + 1, pocMid,
+                 color = pocCol, style = toLineStyle(pocLineStyle), width = 1)[1])
+            if showLabels
+                label.delete(label.new(pocLeftX, pocMid,
+                     "POC\n" + str.tostring(pocMid, format.mintick),
+                     style    = label.style_label_right,
+                     color    = color.new(color.black, 100),
+                     textcolor = pocCol,
+                     size     = size.small)[1])
+
+        // High and Low dotted level lines — extend from candle start to right edge of candle slot
+        if showHiLo
+            hiCol = bullish ? color.new(bullCol, 40) : color.new(bearCol, 40)
+            loCol = bullish ? color.new(bullCol, 40) : color.new(bearCol, 40)
+
+            line.delete(line.new(pocLeftX, h_, xAnchor + 1, h_, color = hiCol, style = line.style_dotted, width = 1)[1])
+            line.delete(line.new(pocLeftX, l_, xAnchor + 1, l_, color = loCol, style = line.style_dotted, width = 1)[1])
+
+            if showLabels
+                label.delete(label.new(pocLeftX, h_,
+                     "H\n" + str.tostring(h_, format.mintick),
+                     style    = label.style_label_right,
+                     color    = color.new(color.black, 100),
+                     textcolor = hiCol,
+                     size     = size.small)[1])
+                label.delete(label.new(pocLeftX, l_,
+                     "L\n" + str.tostring(l_, format.mintick),
+                     style    = label.style_label_right,
+                     color    = color.new(color.black, 100),
+                     textcolor = loCol,
+                     size     = size.small)[1])
+
+        pocMid
+
+
+// HTF candle OHLC storage arrays
+var arrO     = array.new<float>()
+var arrC     = array.new<float>()
+var arrH     = array.new<float>()
+var arrL     = array.new<float>()
+var arrStart = array.new<int>()
+var arrEnd   = array.new<int>()
+
+// Real-time (currently forming) HTF candle trackers
+var rtHigh  = high
+var rtLow   = low
+var rtOpen  = open
+var rtStart = bar_index
+
+// On each new HTF candle, commit the just-closed candle into arrays and reset trackers
+if timeframe.change(tf)
+    arrO.push(rtOpen)
+    arrC.push(close[1])
+    arrH.push(rtHigh)
+    arrL.push(rtLow)
+    arrStart.push(rtStart)
+    arrEnd.push(bar_index)
+
+    rtHigh  := high
+    rtLow   := low
+    rtOpen  := open
+    rtStart := bar_index
+
+// Continuously update the real-time candle extremes
+rtHigh := math.max(rtHigh, high)
+rtLow  := math.min(rtLow,  low)
+
+atr200 = ta.atr(200)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Subtle background flash at each HTF candle boundary
+bgcolor(timeframe.change(tf) ? color.new(chart.fg_color, 90) : na)
+
+if barstate.islast
+    n = arrO.size()
+
+    // Slot spacing accounts for profile width + candle body + gap
+    slotSpacing = profileWidth + 8
+
+    slot1X = bar_index + offset
+    slot2X = slot1X + slotSpacing
+    slot3X = slot2X + slotSpacing
+    slot4X = slot3X + slotSpacing
+
+    // ── Candle 1: Real-time (currently forming HTF candle) ──────────────────
+    if candle1_on and not na(rtOpen)
+        c1Bull = close >= rtOpen
+        c1Col  = c1Bull ? bullCol : bearCol
+        drawCandleShape(rtHigh, rtLow, close, rtOpen, slot1X, c1Col)
+        drawProfile(rtHigh, rtLow, rtStart, bar_index + 1, slot1X, binsQty, profileWidth, c1Bull, rtStart)
+
+        if showLabels
+            label.delete(label.new(slot1X, rtHigh + atr200 * 0.3,
+                 "C1 " + convert_tf(tf),
+                 style    = label.style_label_down,
+                 color    = color.new(color.black, 100),
+                 textcolor = chart.fg_color,
+                 size     = size.small)[1])
+
+    // ── Candle 2: Last closed HTF candle ────────────────────────────────────
+    if candle2_on and n >= 1
+        h2 = arrH.get(n - 1)
+        l2 = arrL.get(n - 1)
+        o2 = arrO.get(n - 1)
+        c2 = arrC.get(n - 1)
+        s2 = arrStart.get(n - 1)
+        e2 = arrEnd.get(n - 1)
+
+        c2Bull = c2 >= o2
+        c2Col  = c2Bull ? bullCol : bearCol
+        drawCandleShape(h2, l2, c2, o2, slot2X, c2Col)
+        drawProfile(h2, l2, s2, e2, slot2X, binsQty, profileWidth, c2Bull, s2)
+
+        if showLabels
+            label.delete(label.new(slot2X, h2 + atr200 * 0.3,
+                 "C2 " + convert_tf(tf),
+                 style    = label.style_label_down,
+                 color    = color.new(color.black, 100),
+                 textcolor = chart.fg_color,
+                 size     = size.small)[1])
+
+    // ── Candle 3: Second-to-last closed HTF candle ───────────────────────────
+    if candle3_on and n >= 2
+        h3 = arrH.get(n - 2)
+        l3 = arrL.get(n - 2)
+        o3 = arrO.get(n - 2)
+        c3 = arrC.get(n - 2)
+        s3 = arrStart.get(n - 2)
+        e3 = arrEnd.get(n - 2)
+
+        c3Bull = c3 >= o3
+        c3Col  = c3Bull ? bullCol : bearCol
+        drawCandleShape(h3, l3, c3, o3, slot3X, c3Col)
+        drawProfile(h3, l3, s3, e3, slot3X, binsQty, profileWidth, c3Bull, s3)
+
+        if showLabels
+            label.delete(label.new(slot3X, h3 + atr200 * 0.3,
+                 "C3 " + convert_tf(tf),
+                 style    = label.style_label_down,
+                 color    = color.new(color.black, 100),
+                 textcolor = chart.fg_color,
+                 size     = size.small)[1])
+
+    // ── Candle 4: Third-to-last closed HTF candle ────────────────────────────
+    if candle4_on and n >= 3
+        h4 = arrH.get(n - 3)
+        l4 = arrL.get(n - 3)
+        o4 = arrO.get(n - 3)
+        c4 = arrC.get(n - 3)
+        s4 = arrStart.get(n - 3)
+        e4 = arrEnd.get(n - 3)
+
+        c4Bull = c4 >= o4
+        c4Col  = c4Bull ? bullCol : bearCol
+        drawCandleShape(h4, l4, c4, o4, slot4X, c4Col)
+        drawProfile(h4, l4, s4, e4, slot4X, binsQty, profileWidth, c4Bull, s4)
+
+        if showLabels
+            label.delete(label.new(slot4X, h4 + atr200 * 0.3,
+                 "C4 " + convert_tf(tf),
+                 style    = label.style_label_down,
+                 color    = color.new(color.black, 100),
+                 textcolor = chart.fg_color,
+                 size     = size.small)[1])
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝘼𝙇𝙀𝙍𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+alertcondition(timeframe.change(tf), "New HTF Candle", "A new HTF candle has started on the selected timeframe.")
+
+// --------------------------------------------------------------------------------------------------------------------}

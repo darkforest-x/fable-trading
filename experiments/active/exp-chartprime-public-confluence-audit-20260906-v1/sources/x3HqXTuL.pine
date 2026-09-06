@@ -1,0 +1,270 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+//@version=6
+
+indicator("Adaptive Momentum Velocity Ribbon", overlay = true, max_labels_count = 500)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+hmaLen1      = input.int(40,  "Fast HMA Length",   minval = 2,  group = "HMA Engine",
+     tooltip = "Length of the fastest Hull Moving Average. Shorter values react quicker to price changes but produce more noise.")
+hmaLen2      = input.int(80,  "Mid HMA Length",    minval = 2,  group = "HMA Engine",
+     tooltip = "Length of the middle Hull Moving Average. Balances responsiveness and smoothness.")
+hmaLen3      = input.int(100, "Slow HMA Length",   minval = 2,  group = "HMA Engine",
+     tooltip = "Length of the slowest Hull Moving Average. Acts as the trend anchor  slower to react but more reliable for major trend direction.")
+
+velLookback  = input.int(2,   "Velocity Lookback", minval = 1,  group = "Velocity",
+     tooltip = "Number of bars used to measure the slope of each HMA. A value of 2 means: current HMA minus HMA 2 bars ago. Higher values smooth the velocity signal.")
+velThreshold = input.float(0.0, "Signal Threshold", step = 0.01, group = "Velocity",
+     tooltip = "Minimum slope value the Fast HMA must cross to trigger a signal. Increase this to filter out weak signals in choppy markets.")
+
+cooldownBars = 1
+showSignals  = input.bool(true,  "Show Glow Signals",         group = "Visuals",
+     tooltip = "Toggle the bullish/bearish glow shape signals on the chart.")
+showRibbon   = input.bool(true,  "Show Gradient Ribbon",      group = "Visuals",
+     tooltip = "Toggle the heatmap gradient ribbon fill between the three HMA lines. Color saturation reflects trend expansion strength.")
+showBG       = input.bool(true,  "Show Alignment Squares",    group = "Visuals",
+     tooltip = "Plot colored squares at the bottom of the chart when all three HMAs align in the same direction. Color deepens the longer alignment persists.")
+showDash     = input.bool(true,  "Show MTF Dashboard",        group = "Visuals",
+     tooltip = "Display a multi-timeframe velocity status table in the corner of the chart.")
+
+dashPos      = input.string("Bottom Right", "Dashboard Position", options = ["Top Right", "Top Left", "Bottom Right", "Bottom Left"], group = "Visuals",
+     tooltip = "Choose where the MTF dashboard table appears on the chart.")
+
+bullBrightCol = input.color(color.new(#22c59c, 20),  "Bullish Accelerating", inline = "bull", group = "Colors",
+     tooltip = "Color when HMA slope is positive and increasing (momentum accelerating upward). Used on HMA lines, ribbon, signals, alignment squares, and dashboard.")
+bullDimCol    = input.color(color.new(#22c5c5, 80), "Bullish Decelerating",  inline = "bull", group = "Colors",
+     tooltip = "Color when HMA slope is positive but decreasing (momentum fading upward). Used on HMA lines and dashboard decel state.")
+bearBrightCol = input.color(color.new(#fca82b, 20),  "Bearish Accelerating", inline = "bear", group = "Colors",
+     tooltip = "Color when HMA slope is negative and decreasing (momentum accelerating downward). Used on HMA lines, ribbon, signals, alignment squares, and dashboard.")
+bearDimCol    = input.color(color.new(#fc892b, 80), "Bearish Decelerating",  inline = "bear", group = "Colors",
+     tooltip = "Color when HMA slope is negative but increasing (downward momentum fading). Used on HMA lines and dashboard decel state.")
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+//  HMA Engine 
+hma(src, len) =>
+    halfLen = math.round(len / 2)
+    sqrtLen = math.round(math.sqrt(len))
+    raw     = 2.0 * ta.wma(src, halfLen) - ta.wma(src, len)
+    ta.wma(raw, sqrtLen)
+
+hma1 = hma(close, hmaLen1)
+hma2 = hma(close, hmaLen2)
+hma3 = hma(close, hmaLen3)
+
+//  Velocity: slope of each HMA over velLookback bars 
+vel1 = hma1 - hma1[velLookback]
+vel2 = hma2 - hma2[velLookback]
+vel3 = hma3 - hma3[velLookback]
+
+//  Acceleration: rate of change of velocity 
+acc1 = vel1 - vel1[1]
+acc2 = vel2 - vel2[1]
+acc3 = vel3 - vel3[1]
+
+//  Adaptive line coloring based on velocity + acceleration state 
+adaptiveColor(vel, acc) =>
+    if vel > 0 and acc > 0
+        bullBrightCol   // positive + accelerating
+    else if vel > 0 and acc <= 0
+        bullDimCol      // positive + decelerating
+    else if vel < 0 and acc < 0
+        bearBrightCol   // negative + accelerating down
+    else
+        bearDimCol      // negative + flattening
+
+col1 = adaptiveColor(vel1, acc1)
+col2 = adaptiveColor(vel2, acc2)
+col3 = adaptiveColor(vel3, acc3)
+
+//  Gradient ribbon: spread normalization drives fill transparency 
+spread12    = math.abs(hma1 - hma2)
+spread23    = math.abs(hma2 - hma3)
+maxSpread12 = ta.highest(spread12, 100)
+maxSpread23 = ta.highest(spread23, 100)
+
+norm12 = maxSpread12 > 0 ? math.min(spread12 / maxSpread12, 1.0) : 0.0
+norm23 = maxSpread23 > 0 ? math.min(spread23 / maxSpread23, 1.0) : 0.0
+
+// Expanded ribbon = saturated (transp 55), pinched = faded (transp 92)
+transp12 = int(80 - norm12 * 37)
+transp23 = int(80 - norm23 * 37)
+
+isBull12    = vel1 > vel2
+isBull23    = vel2 > vel3
+ribbonCol12 = isBull12 ? color.new(bullBrightCol, transp12) : color.new(bearBrightCol, transp12)
+ribbonCol23 = isBull23 ? color.new(bullBrightCol, transp23) : color.new(bearBrightCol, transp23)
+
+//  Signal cooldown: prevents rapid re-triggering in choppy markets 
+allBullish = vel1 > 0 and vel2 > 0 and vel3 > 0
+allBearish = vel1 < 0 and vel2 < 0 and vel3 < 0
+
+bullCross = ta.crossover(vel1,  velThreshold)
+bearCross = ta.crossunder(vel1, velThreshold)
+
+var int lastSignalBar = -999
+cooldownReady = (bar_index - lastSignalBar) >= cooldownBars
+
+bullSignal = bullCross and cooldownReady
+bearSignal = bearCross and cooldownReady
+
+if bullSignal or bearSignal
+    lastSignalBar := bar_index
+
+//  Alignment heat counter: deepens square color the longer all HMAs agree 
+var int alignCount = 0
+
+if allBullish or allBearish
+    alignCount := alignCount + 1
+else
+    alignCount := 0
+
+// Transparency ramps from 75 (fresh) → 20 (sustained, 30+ bars)
+sqTransp = int(math.max(20, 75 - math.min(alignCount, 30) / 30 * 55))
+sqCol    = allBullish ? color.new(bullBrightCol, sqTransp) : allBearish ? color.new(bearBrightCol, sqTransp) : na
+
+//  MTF HMA velocity fetch 
+hmaRaw(src, len) =>
+    h = math.round(len / 2)
+    s = math.round(math.sqrt(len))
+    ta.wma(2.0 * ta.wma(src, h) - ta.wma(src, len), s)
+
+hma1h_fast = request.security(syminfo.tickerid, "60",  hmaRaw(close, 20), lookahead = barmerge.lookahead_off)
+hma1h_prev = request.security(syminfo.tickerid, "60",  hmaRaw(close, 20)[velLookback], lookahead = barmerge.lookahead_off)
+vel1h      = hma1h_fast - hma1h_prev
+acc1h_cur  = request.security(syminfo.tickerid, "60",  hmaRaw(close, 20) - hmaRaw(close, 20)[velLookback], lookahead = barmerge.lookahead_off)
+acc1h_prev = request.security(syminfo.tickerid, "60", (hmaRaw(close, 20) - hmaRaw(close, 20)[velLookback])[1], lookahead = barmerge.lookahead_off)
+acc1h      = acc1h_cur - acc1h_prev
+
+hma4h_fast = request.security(syminfo.tickerid, "240", hmaRaw(close, 20), lookahead = barmerge.lookahead_off)
+hma4h_prev = request.security(syminfo.tickerid, "240", hmaRaw(close, 20)[velLookback], lookahead = barmerge.lookahead_off)
+vel4h      = hma4h_fast - hma4h_prev
+acc4h_cur  = request.security(syminfo.tickerid, "240", hmaRaw(close, 20) - hmaRaw(close, 20)[velLookback], lookahead = barmerge.lookahead_off)
+acc4h_prev = request.security(syminfo.tickerid, "240",(hmaRaw(close, 20) - hmaRaw(close, 20)[velLookback])[1], lookahead = barmerge.lookahead_off)
+acc4h      = acc4h_cur - acc4h_prev
+
+//  Dashboard status resolver: maps vel/acc state to label + color 
+statusText(vel, acc) =>
+    if vel > 0 and acc > 0
+        ["▲ Acceleration", color.new(bullBrightCol, 0)]
+    else if vel > 0 and acc <= 0
+        ["▲ Deceleration", color.new(bullDimCol, 0)]
+    else if vel < 0 and acc < 0
+        ["▼ Deceleration", color.new(bearBrightCol, 0)]
+    else
+        ["▼ Acceleration", color.new(bearDimCol, 0)]
+
+[curTxt,  curCol]  = statusText(vel1,  acc1)
+[tf1hTxt, tf1hCol] = statusText(vel1h, acc1h)
+[tf4hTxt, tf4hCol] = statusText(vel4h, acc4h)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+//  HMA lines 
+p1 = plot(hma1, "Fast HMA",  color = col1, linewidth = 1, force_overlay = true)
+p2 = plot(hma2, "Mid HMA",   color = col2, linewidth = 2, force_overlay = true)
+p3 = plot(hma3, "Slow HMA",  color = col3, linewidth = 2, force_overlay = true)
+
+//  Gradient ribbon fills 
+fill(p1, p2, hma1, hma2, showRibbon ? ribbonCol12 : color(na), color(na), title = "Ribbon Fast–Mid")
+fill(p2, p3, hma2, hma3, showRibbon ? ribbonCol23 : color(na), color(na), title = "Ribbon Mid–Slow")
+
+//  Alignment squares: outer glow + inner core at chart bottom 
+plotshape(showBG and (allBullish or allBearish), title = "Alignment Square Outer",
+     style         = shape.circle,
+     location      = location.bottom,
+     color         = color.new(sqCol, 60),
+     size          = size.small,
+     force_overlay = true)
+
+
+//  Glow signals: outer halo + inner core diamonds on crossover/crossunder 
+atr = ta.atr(200)
+
+plotshape(showSignals and bullSignal ? low - atr : na, title = "Bull Glow Outer",
+     style         = shape.diamond,
+     location      = location.absolute,
+     color         = color.new(bullBrightCol, 65),
+     size          = size.small,
+     force_overlay = true)
+
+plotshape(showSignals and bullSignal ? low - atr : na, title = "Bull Glow Core",
+     style         = shape.diamond,
+     location      = location.absolute,
+     color         = color.new(bullBrightCol, 0),
+     size          = size.tiny,
+     force_overlay = true)
+
+plotshape(showSignals and bearSignal ? high + atr : na, title = "Bear Glow Outer",
+     style         = shape.diamond,
+     location      = location.absolute,
+     color         = color.new(bearBrightCol, 65),
+     size          = size.small,
+     force_overlay = true)
+
+plotshape(showSignals and bearSignal ? high + atr : na, title = "Bear Glow Core",
+     style         = shape.diamond,
+     location      = location.absolute,
+     color         = color.new(bearBrightCol, 0),
+     size          = size.tiny,
+     force_overlay = true)
+
+//  MTF Dashboard table 
+tablePos = switch dashPos
+    "Top Right"   => position.top_right
+    "Top Left"    => position.top_left
+    "Bottom Left" => position.bottom_left
+    =>               position.bottom_right
+
+var table dash = table.new(tablePos, 2, 4,
+     bgcolor      = color.new(#0f172a, 10),
+     border_color = color.new(#334155, 60),
+     border_width = 1,
+     frame_color  = color.new(#334155, 40),
+     frame_width  = 1)
+
+if barstate.islast and showDash
+    table.cell(dash, 0, 0, "Timeframe",
+         text_color = color.new(#94a3b8, 0),
+         text_size  = size.small,
+         bgcolor    = color.new(#1e293b, 10))
+    table.cell(dash, 1, 0, "Velocity",
+         text_color = color.new(#94a3b8, 0),
+         text_size  = size.small,
+         bgcolor    = color.new(#1e293b, 10))
+
+    table.cell(dash, 0, 1, "Current",
+         text_color = color.new(#e2e8f0, 0),
+         text_size  = size.small,
+         bgcolor    = color.new(#0f172a, 30))
+    table.cell(dash, 1, 1, curTxt,
+         text_color = curCol,
+         text_size  = size.small,
+         bgcolor    = color.new(#0f172a, 30))
+
+    table.cell(dash, 0, 2, "1H",
+         text_color = color.new(#e2e8f0, 0),
+         text_size  = size.small,
+         bgcolor    = color.new(#0f172a, 30))
+    table.cell(dash, 1, 2, tf1hTxt,
+         text_color = tf1hCol,
+         text_size  = size.small,
+         bgcolor    = color.new(#0f172a, 30))
+
+    table.cell(dash, 0, 3, "4H",
+         text_color = color.new(#e2e8f0, 0),
+         text_size  = size.small,
+         bgcolor    = color.new(#0f172a, 30))
+    table.cell(dash, 1, 3, tf4hTxt,
+         text_color = tf4hCol,
+         text_size  = size.small,
+         bgcolor    = color.new(#0f172a, 30))
+
+// --------------------------------------------------------------------------------------------------------------------}

@@ -1,0 +1,45 @@
+{
+  "id": "wg7rAg7u",
+  "title": "Relative Average Extrapolation [ChartPrime]",
+  "url": "https://www.tradingview.com/script/wg7rAg7u-Relative-Average-Extrapolation-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:54.886157+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/wg7rAg7u-Relative-Average-Extrapolation-ChartPrime/",
+  "created_at": "2024-04-15T13:50:42.705104+00:00",
+  "updated_at": null,
+  "description": "Relative Average Extrapolation (ChartPrime) is a new take on session averages, like the famous vwap. This indicator leverages patterns in the market by leveraging average-at-time to get a footprint of the average market conditions for the current time. This allows for a great estimate of market conditions throughout the day allowing for predictive forecasting. If we know what the market conditions are at a given time of day we can use this information to make assumptions about future market conditions. This is what allows us to estimate an entire session with fair accuracy. This indicator works on any intra-day time frame and will not work on time frames less than a minute, or time frames that are a day or greater in length. A unique aspect of this indicator is that it allows for analysis of pre and post market sessions independently from regular hours. This results in a cleaner and more usable vwap for each individual session. One drawback of this is that the indicator utilizes an average for the length of a session. Because of this, some after hour sessions will only have a partial estimation. The average and deviation bands will work past the point where it has been extrapolated to in this instance however. On low time frames due to the limited number of data points, the indicator can appear noisy. \n\n\nGenerally crypto doesn't have a consistent footprint making this indicator less suitable in crypto markets. Because of this we have implemented other weighting schemes to allow for more flexibility in the number of use cases for this indicator. Besides volume weighting we have also included time, volatility, and linear (none) weighting. Using any one of these weighting schemes will transform the vwap into a wma, volatility adjusted ma, or a simple moving average. All of the style are still session period and will become longer as the session progresses. \n\n\nRelative Average Extrapolation (ChartPrime) works by storing data for each time step throughout the day by utilizing a custom indexing system. It takes the a key, ie hour/minute, and transforms it into an array index to stor the current data point in its unique array. From there we can take the current time of day and advance it by one step to retrieve the data point for the next bar index. This allows us to utilize the footprint the extrapolate into the future. We use the relative rate of change for the average, the relative deviation, and relative price position to extrapolate from the current point to the end of the session. This process is fast and effective and possibly easier to use than the built in map feature. \n\nIf you have used vwap before you should be familiar with the general settings for this indicator. We have made a point to make it as intuitive for anyone who is already used to using the standard vwap. You can pick the source for the average and adjust/enable the deviation bands multipliers in the settings group. The average period is what determines the number of days to use for the average-at-time. When it is set to 0 it will use all available data. Under \"Extrapolation\" you will find the settings for the estimation. \"Direction Sensitivity\" adjusts how sensitive the indicator is to the direction of the vwap. A higher number will allow it to change directions faster, where a lower number will make it more stable throughout the session. Under the \"Style\" section you will find all of the color and style adjustments to customize the appearance of this indicator. \n\n\n\nRelative Average Extrapolation (ChartPrime) is an advanced and customizable session average indicator with the ability to estimate the direction and volatility of intra-day sessions. We hope you will find this script fascinating and useful in your trading and decision making. With its unique take on session weighting and forecasting, we believe it will be a secret weapon for traders for years to come.\n\nEnjoy\n",
+  "script": {
+    "id": 1533733,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;149cd6c803134f8fa64af996fc56319d",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B149cd6c803134f8fa64af996fc56319d/1",
+  "source_http_status": 200,
+  "source_sha256": "b14f91c87049789850a047325a0306b42b36d78957bd9c3e81433f67fc321a11",
+  "source_lines": 408,
+  "source_metadata": {
+    "created": "2024-04-15T13:50:41.659911Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "sourceInputsCount": 1,
+      "stats": {
+        "plot": 7
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Relative Average Extrapolation [ChartPrime]",
+    "updated": "2024-04-15T13:50:41.659911Z",
+    "version": "1.0"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "id": "OOpdmA9G",
+  "title": "Savitzky Flow Bands [ChartPrime]",
+  "url": "https://www.tradingview.com/script/OOpdmA9G-Savitzky-Flow-Bands-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:03.043076+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/OOpdmA9G-Savitzky-Flow-Bands-ChartPrime/",
+  "created_at": "2025-05-12T12:52:44.416580+00:00",
+  "updated_at": "2025-05-12T12:53:27.997222+00:00",
+  "description": "An advanced trend-following tool that applies the Savitzky-Golay smoothing algorithm to price and dynamically adapts trend bands to visualize directional bias and trend strength.\n\n\n\n⯁ KEY FEATURES & HOW TO USE\n Savitzky-Golay Filtered Line (Basis):\nSmooths out price noise using the Savitzky-Golay method, offering a more refined trend path than traditional moving averages. This centerline acts as the trend anchor and visually changes color depending on its slope to reflect the active trend direction.\n Dynamic Trend Bands (Upper/Lower):\nConstructed from the filtered line with a dynamic offset based on recent price volatility (ATR). These bands shift based on price pressure and are locked once price closes beyond them.\nHelpful for identifying breakout moments or exhaustion areas where reversals are likely.\n Trend Direction Detection:\nA directional signal is confirmed when price breaks and closes above the upper band (uptrend) or below the lower band (downtrend).\nProvides a clear and systematic way to identify when a trend begins.\n Trend Duration Counter (Visual Decay Line):\nA fading overlay line shows how long a trend has been active since the last reversal. The longer the trend persists, the more transparent this extension becomes.\nThis visual fading effect helps traders anticipate potential trend exhaustion and prepare for reversals or take-profit zones.\n Reversal Signals (Diamond Markers):\nDiamond shapes are plotted at each market shift, allowing users to visually pinpoint when the trend has flipped.\nThese markers act as decision zones for entry, exit, or stop-loss adjustments based on directional flow changes.\n Color-Based Bar and Candle Painting:\nCandles are painted green in uptrends and orange in downtrends, providing an intuitive glance at trend state without needing to interpret numbers.\nHelps users stay aligned with the trend visually and avoid counter-trend entries.\n\n\n⯁ CONCLUSION\nThe Savitzky Flow Bands indicator offers a modernized, visually rich way to track trend shifts using a scientific smoothing method. With dynamic trend envelopes, color-coded cues, and visual markers, it equips traders with a structured framework to follow the market's flow and make data-driven decisions. Ideal for swing traders, momentum strategists, or any trader looking to trade in sync with the prevailing trend.",
+  "script": {
+    "id": 2643378,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;c8092f1249df40638d2c04fd3ea7b7ab",
+    "version_maj": 2,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bc8092f1249df40638d2c04fd3ea7b7ab/2",
+  "source_http_status": 200,
+  "source_sha256": "4ede4255d26e51dede34da17af8b1b0c4cc0e710673addcc8ff61b0bc959613a",
+  "source_lines": 99,
+  "source_metadata": {
+    "created": "2025-05-12T12:53:26.467221Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;d3ff6bfac294488fad020be9b31c941b",
+      "originalScriptVersion": "0.409",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 3,
+        "plotcandle": 1,
+        "plotshape": 2
+      }
+    },
+    "lastVersionMaj": "2.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Savitzky Flow Bands [ChartPrime]",
+    "updated": "2025-05-12T12:53:26.467221Z",
+    "version": "2.0"
+  }
+}

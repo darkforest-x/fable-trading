@@ -1,0 +1,47 @@
+{
+  "id": "RiQzLLoh",
+  "title": "RSI Strategy [PrimeAutomation]",
+  "url": "https://www.tradingview.com/script/RiQzLLoh-RSI-Strategy-PrimeAutomation/",
+  "retrieved_at": "2026-09-06T13:35:28.234346+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/RiQzLLoh-RSI-Strategy-PrimeAutomation/",
+  "created_at": "2025-11-26T13:23:23.701886+00:00",
+  "updated_at": null,
+  "description": "⯁ OVERVIEW\nThe RSI Strategy [PrimeAutomation] is a momentum-driven trading system built around the behavior of the Relative Strength Index (RSI).  \nInstead of using traditional overbought/oversold zones, this strategy focuses on RSI breakouts with volatility-based trailing stops, adaptive profit-targets, and optional early-exit logic.  \nIt is designed to capture strong continuation moves after momentum shifts while protecting trades using ATR-based dynamic risk management.\n\n⯁ CONCEPTS\n\n RSI Breakout Momentum: Entries happen when RSI breaks above/below custom thresholds, signaling a shift in momentum rather than mean reversion. Volatility-Adjusted Risk: ATR defines both stop-loss and profit-target distances, scaling positions based on market volatility. Dynamic Trailing Stop: The strategy maintains an adaptive trailing level that tightens as price moves in the trade’s favor. Single-Position System: Only one trade at a time (no pyramiding), maximizing clarity and simplifying execution.\n\n⯁ KEY FEATURES\n RSI Signal Engine  \n  • Long when RSI crosses above Upper threshold  \n\n  • Short when RSI crosses below Lower threshold  \n\n  These levels are configurable and optimized for trend-momentum detection. ATR-Based Stop-Loss  \n  A custom ATR multiplier defines the initial stop.  \n  • Long stop = price – ATR × multiplier  \n\n  • Short stop = price + ATR × multiplier  \n\n  Stops adjust continuously using a trailing model. ATR-Based Take Profit (Optional)  \n  Profit targets scale with volatility.  \n  • Long TP = entry + ATR × TP-multiplier  \n\n  • Short TP = entry – ATR × TP-multiplier  \n\n  Users can disable TP and rely solely on trailing stops. Real-Time Trailing Logic  \n  The stop updates bar-by-bar:  \n  • In a long trade → stop moves upward only  \n  • In a short trade → stop moves downward only  \n  This keeps the stop tight as trends develop. Early Exit Module (Optional)  \n  After X bars in a trade, opposite RSI signals trigger exit.  \n  This reduces holding time during weak follow-through phases. Full Visual Layer  \n  • RSI plotted with threshold fills  \n  • Entry/TP/Stop visual lines  \n  • Color-coded zones for clarity\n\n⯁ HOW TO USE\n Look for RSI Breakouts:  \n  Focus on RSI crossing above the upper boundary (long) or below the lower boundary (short). These moments identify fresh momentum surges.\n Use ATR Levels to Manage Risk:  \n  Because stops and targets scale with volatility, the strategy adapts well to both quiet and explosive market phases. Monitor Trailing Stops for Trend Continuation:  \n  The trailing stop is the primary driver of exits—often outperforming fixed targets by catching larger runs. Use on Liquid Markets & Mid-Higher Timeframes:  \n  The system performs best where RSI and ATR signals are clean—crypto majors, FX, and indices.\n\n⯁ CONCLUSION\nThe RSI Strategy [PrimeAutomation] is a modern RSI breakout system enhanced with volatility-adaptive risk management and flexible exit logic. It is designed for traders who prefer momentum confirmation over mean reversion, offering a disciplined framework with robust protections and dynamic trend-following capability.  \nIts blend of ATR-based stops, optional profit targets, and RSI-driven entries makes it a reliable strategy across a wide range of market conditions.",
+  "script": {
+    "id": 3435971,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;4d22c0ddd0024ac1809a100e92802165",
+    "version_maj": 1,
+    "script_type": "strategy",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B4d22c0ddd0024ac1809a100e92802165/1",
+  "source_http_status": 200,
+  "source_sha256": "f6c445c832bef4cc64a65575dac25c7b8008c7912db5b2d5bd24bd9f6cd2c64e",
+  "source_lines": 314,
+  "source_metadata": {
+    "created": "2025-11-26T13:23:21.987004Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": false,
+      "kind": "strategy",
+      "originalScriptId": "USER;6228a1de374c49558cc1e96cfd563dda",
+      "originalScriptVersion": "0.77",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 7
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "RSI Strategy [PrimeAutomation]",
+    "updated": "2025-11-26T13:23:21.987004Z",
+    "version": "1.0"
+  }
+}

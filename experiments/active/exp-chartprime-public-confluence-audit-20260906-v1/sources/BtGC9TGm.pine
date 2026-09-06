@@ -1,0 +1,119 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("Swing Flow Indicator [ChartPrime]", overlay = true, max_labels_count = 500)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+int   len         = input(10)
+float mult        = input.float(2, "Bands", step = 0.1, minval = 1)
+bool  show_pivot  = input.bool(false, "High & Lows")
+color color_plus  = input.color(color.lime, "+", group = "Color", inline = "col")
+color color_minus = input.color(color.maroon, "-", group = "Color", inline = "col")
+
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+// @function Swing Flow Indicator
+// @returns trend signals, color, upper, mid and lower bands, trend direction
+swing_flow(len)=>
+
+    series float ph  = ta.pivothigh(len, len)
+    series float pl  = ta.pivotlow(len, len)
+
+    var h1    = float(na)
+    var l1    = float(na)
+    var h     = float(na)
+    var l     = float(na)
+    var m     = float(na)
+    var trend = bool (na)
+
+    series float atr = ta.atr(200)*mult
+
+    if not na(ph)
+        h1 := high
+        if show_pivot
+            label.new(bar_index[len], high[len], 
+                         text       = "⬥", 
+                         textcolor  = color.new(color_plus, 50), 
+                         color      = color(na), 
+                         style      = label.style_label_center)
+
+    if not na(pl)
+        l1 := low
+        if show_pivot
+            label.new(bar_index[len], low[len], 
+                     text       = "⬥", 
+                     textcolor  = color.new(color_minus, 50), 
+                     color      = color(na), 
+                     style      = label.style_label_center)
+
+    m := ta.sma(math.avg(h1, l1), len)
+    h := ta.sma(m + atr, len*2)
+    l := ta.sma(m - atr, len*2)
+
+    bool cross_up = ta.crossover(high, h)
+    bool cross_dn = ta.crossunder(low, l)
+
+    switch
+        cross_up => trend := true
+        cross_dn => trend := false
+
+    bool sig_up = trend != trend[1] and cross_up
+    bool sig_dn = trend != trend[1] and cross_dn
+
+    color color_trend =  trend 
+                         ? (sig_up ? color_minus : color_plus) 
+                         : (sig_dn ? color_plus : color_minus)
+
+    string distance = str.tostring((close - m) / close * 100, format.percent)
+
+    if barstate.islast
+        line.delete(line.new(bar_index, m, bar_index+15, m, color = color.new(color_trend, 50), style = line.style_dashed)[1])
+        label.delete(
+                     label.new(bar_index+15, m
+                                 ,text      = 
+                                             trend and close > m 
+                                             ? "⇧ " + distance 
+                                             : not trend and close < m 
+                                             ? "⇩ "+ distance  
+                                             : "⇨"
+
+                                 ,color     = color.new(color_trend, 50)
+                                 ,style     = label.style_label_left
+                                 ,textcolor = chart.fg_color
+                                 )[1]
+                     )
+
+    [sig_up, sig_dn, color_trend, h, m, l, trend]
+
+
+[sig_up, sig_dn, color_trend, h, m, l, trend] = swing_flow(len)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+p_h = plot(trend ? na : h, style = plot.style_linebr, color = color_trend)
+p_l = plot(trend ? l : na, style = plot.style_linebr, color = color_trend)
+p_m = plot(m, color = bar_index % 2 == 0 ? color.new(color_trend, 50) : na, display = display.all)
+
+fill(p_l, p_m, l, m, color.new(color_trend, 80), na)
+fill(p_h, p_m, h, m, color.new(color_trend, 80), na)
+
+plotchar(sig_up ? l : na, "Up",   "🞛", location.absolute, color = color_plus,   size = size.tiny)
+plotchar(sig_dn ? h : na, "Down", "🞛", location.absolute, color = color_minus, size = size.tiny)
+
+if sig_up
+    label.new(bar_index, l, str.tostring(close, "(#,###.##)"), style = label.style_label_up, color = color(na), textcolor = chart.fg_color)
+
+if sig_dn
+    label.new(bar_index, h, str.tostring(close, "(#,###.##)"), style = label.style_label_down, color = color(na), textcolor = chart.fg_color)
+
+// --------------------------------------------------------------------------------------------------------------------}

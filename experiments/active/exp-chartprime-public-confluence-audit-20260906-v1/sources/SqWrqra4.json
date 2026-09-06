@@ -1,0 +1,45 @@
+{
+  "id": "SqWrqra4",
+  "title": "Supertrend Targets [ChartPrime]",
+  "url": "https://www.tradingview.com/script/SqWrqra4-Supertrend-Targets-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:37:22.296989+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/SqWrqra4-Supertrend-Targets-ChartPrime/",
+  "created_at": "2023-09-19T10:45:59.458602+00:00",
+  "updated_at": null,
+  "description": "The Supertrend Targets indicator combines the concepts of trend-following with dynamic volatility-based target levels. It takes core simple and classical concepts and provides actionable insights. The core of this indicator revolves around the \"Supertrend\" algorithm, which essentially uses the Average True Range (ATR) and a multiplier to determine if the price of a financial instrument is in an uptrend or downtrend. The indicator generates various plot points on the trading chart, which traders can use to make informed trading decisions.\n\nUsers can set several input parameters such as the source price, custom levels, multiplier scale, length of the average true range, and the window length. Traders can also opt to enable a table that shows numeric target data by percentiles, risk ratio, take profit and stop loss points. \n\nThe generated plots and fills on the chart represent various levels of potential gains and drawdowns, acting as potential targets for taking profit or stopping losses. These include the 25th, 50th, 75th, 90th, and 100th percentiles, which are adjustable by scale. There are also plots for average gain and drawdown levels, enhanced by standard deviation curves if enabled.\n\nThe Supertrend line indicators are color-coded for ease of understanding: blue for bullish performance and orange for bearish performance. The \"Center Line\" represents the point at which traders might consider entering a position.\n\n\n\nLastly, the script presents a summary table (when enabled) at the right side of the chart displaying numeric data of the plotted targets. This data provides additional insights on the risk-reward balance for each percentile, helping traders to execute their strategies more effectively.\n\n\n\nHere's a comprehensive breakdown of its functionalities and features:\n\nInputs:\nSource: Determines the price series type (e.g., Close, Open, High, Low, etc.).Show Trailing Stop: Option to display the trailing stop on the chart.Levels: Sets the number of target levels you want to display. Can range from -5 to 5.Scale: A scaling factor for adjusting targets, can be between 1 to 100.Window Length: Length for the target computation, determines how many bars will be considered.Unique: Ensures every data point used in calculations is unique.Multiplier: Multiplier for the ATR (Average True Range) to compute the SuperTrend.ATR Length: Period for the ATR computation.Custom Level: Allows users to set their own levels using various statistics like Average, Average + STDEV, Percentile, or can be disabled.Percent Rank: Determines the percentile rank for targeting.Enable Table: Enables or disables a table display.\n\nMethods:\nFlag: Identifies bullish and bearish trend reversals.Target Percent: Determines the expected price movement (both gains and drawdowns) based on historical trend reversals.Value Percent: Computes the percentage difference between the current price and the entry price during trend reversals.\n\nPlots:\nMultiple target lines are plotted on the chart to visualize potential gain and drawdown levels. These levels are adjusted based on user settings. Additionally, the main Supertrend line is plotted to indicate the prevailing trend direction.\nGain Levels: Target levels which show potential upside from the current price.Drawdown Levels: Target levels which represent potential downside from the current price.SuperTrend Line: A line that adjusts based on price volatility and trend direction, acting as a dynamic support or resistance.\n\n\n\nIn conclusion, the \"Supertrend Targets [ChartPrime]\" indicator is a powerful tool that combines the principle of trend-following with dynamic targets, providing traders with insights into potential future price movements. The range of customization options allows traders to adapt the indicator to different trading strategies and market conditions.",
+  "script": {
+    "id": 1195829,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;c96f20c1323645849319d7e4667e1040",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bc96f20c1323645849319d7e4667e1040/1",
+  "source_http_status": 200,
+  "source_sha256": "12876a3e993bc0084f14a5263283f987bd3824125ff3141c4a714c4bf08c17b0",
+  "source_lines": 335,
+  "source_metadata": {
+    "created": "2023-09-19T10:45:58.121538Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 17
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Supertrend Targets [ChartPrime]",
+    "updated": "2023-09-19T10:45:58.121538Z",
+    "version": "1.0"
+  }
+}

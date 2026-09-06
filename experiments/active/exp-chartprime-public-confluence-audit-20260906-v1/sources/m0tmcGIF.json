@@ -1,0 +1,46 @@
+{
+  "id": "m0tmcGIF",
+  "title": "Volume Storm Trend [ChartPrime]",
+  "url": "https://www.tradingview.com/script/m0tmcGIF-Volume-Storm-Trend-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:50.119520+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/m0tmcGIF-Volume-Storm-Trend-ChartPrime/",
+  "created_at": "2024-05-20T12:38:37.280404+00:00",
+  "updated_at": null,
+  "description": "The Volume Storm Trend (VST) indicator is a robust tool for traders looking to analyze volume momentum and trend strength in the market. By incorporating key volume-based calculations and dynamic visualizations, VST provides clear insights into market conditions.\n\nComponents:\n Calculating the median of the source data. Volume Power Calculation: The indicator calculates the \"heat power\" and \"cold power\" by applying an Exponential Moving Average (EMA) to the median of volume data arrays.\n\n\n\n\nVisualization:\n Gradient Colors: The indicator uses gradient colors to visualize bullish volume and bearish volume powers, providing a clear contrast between rising and falling trends.\n Bars Fill Color: The color fill between high and low prices changes based on whether the heat power is greater than the cold power.\n Bottom Line: A zero line with changing colors based on the dominance of heat or cold power.\n Weather Symbols: Visual indicators (\"☀\" for hot weather and \"❄\" for cold weather) appear on the chart when the heat and cold powers crossover, helping traders quickly identify trend changes.\n\n\nInputs:\n Source: The input data source, typically the closing price. Median Length: The period length for calculating the median of the source. Default is 40. Volume Length: The period length for calculating the average volume. Default is 3. Show Weather: A toggle to display weather symbols on the chart. Default is false. Temperature Type: Allows users to choose between Celsius (°C) and Fahrenheit (°F) for temperature display.\n\nShow Weather Function:\nThe `Show Weather?` function enhances the VST indicator by displaying weather symbols (\"☀\" for hot and \"❄\" for cold) when there are significant crossovers between heat power and cold power. This feature adds a visual cue for potential market tops and bottoms. When the market heats to a high temperature, it often indicates a potential top, signaling traders to consider exiting long positions or preparing for a reversal.\n\n\nAdditional Features:\n Dynamic Table Display: A table displays the current \"temperature\" on the chart, indicating market heat based on the calculated heat and cold powers.\n\n\n\nThe Volume Storm Trend indicator is a powerful tool for traders\nlooking to enhance their market analysis with volume and momentum insights, providing a clear and visually appealing representation of key market dynamics.",
+  "script": {
+    "id": 1594296,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;b6b80a13c9c149fdae3551db57e3a42c",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bb6b80a13c9c149fdae3551db57e3a42c/1",
+  "source_http_status": 200,
+  "source_sha256": "669277b56ef62ace9349555668df43907a6d6f639df6ea8de008f041ce414de6",
+  "source_lines": 146,
+  "source_metadata": {
+    "created": "2024-05-20T12:38:35.679574Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": false,
+      "kind": "study",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 6,
+        "plotchar": 4
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Volume Storm Trend [ChartPrime]",
+    "updated": "2024-05-20T12:38:35.679574Z",
+    "version": "1.0"
+  }
+}

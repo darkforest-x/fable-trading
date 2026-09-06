@@ -1,0 +1,169 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+
+//@version=6
+indicator("Volume Channel Flow [ChartPrime]", overlay = true, max_bars_back = 5000, max_polylines_count = 100, max_lines_count = 500, max_labels_count = 500, max_boxes_count = 500)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+channel = input.bool(true, "Display", group = "Trend Channel")
+width = input.float(3, "Channel Width", step = 0.1, group = "Trend Channel")
+breakouts = input.bool(true, "Breakouts", group = "Trend Channel")
+colup1 = input.color(color.lime, "",  inline = "c", group = "Trend Channel")
+coldn1 = input.color(color.red, "",  inline = "c", group = "Trend Channel")
+
+profile = input.bool(true, "Display", inline = "prof", group = "Volume Profile")
+minLength = input.int(10, "Min Length", minval = 10, group = "Volume Profile")
+transparency = input.int(65, "Color Transparency", group = "Volume Profile")
+colup = input.color(color.green, "",  inline = "prof", group = "Volume Profile")
+coldn = input.color(color.red, "",  inline = "prof", group = "Volume Profile")
+
+profPOC = input.bool(true, "POC", inline = "poc", group = "Volume Profile")
+pocCol  = input.color(color.orange, "", inline = "poc", group = "Volume Profile")
+
+
+atr = ta.atr(200)* width
+var cp  = array.new<chart.point>()
+
+
+var top = float(na)
+var bot = float(na)
+var trend = bool(na)
+var count = 0 
+var start = bar_index
+var poc = float(na)
+var pocStart = 0 
+
+var isBear = bool(na)
+
+pfColor = isBear ? coldn : colup
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+if bar_index == 201
+
+    top := hl2 + atr 
+    bot := hl2 - atr 
+
+if bar_index > 201
+    if close > top
+
+        top := hl2 + atr 
+        bot := hl2 - atr 
+        trend := true
+
+    if close < bot
+
+        top := hl2 + atr 
+        bot := hl2 - atr 
+        trend := false
+
+avg = math.avg(top, bot)
+
+
+
+
+if avg == avg[1]
+    count += 1
+    
+if avg != avg[1]
+
+    if breakouts
+        if avg > avg[1]
+            label.new(bar_index, bot[1], "▲", color = color(na), style = label.style_label_up, textcolor = color.lime)
+        else 
+            label.new(bar_index, top[1], "▼", color = color(na), style = label.style_label_down, textcolor = color.red)
+
+    if count > minLength
+
+        if channel
+            line.new(start, top[1], bar_index, top[1], color = color.new(pfColor, 20), style = line.style_solid)
+            line.new(start, bot[1], bar_index, bot[1], color = color.new(pfColor, 20), style = line.style_solid)
+        box.new(start, top[1], bar_index, bot[1], color(na), 0, bgcolor = color.new(chart.fg_color, 92))    
+
+    if profPOC
+        line.new(profile ? pocStart : start, poc, bar_index, poc, color = color.new(pocCol, 20), style = line.style_dashed)
+
+    if profile
+        polyline.new(cp, true, closed = false, fill_color = color.new(pfColor, transparency), line_color = color.new(pfColor, transparency), force_overlay = true)
+
+
+    start := bar_index
+    count := 0
+    poc   := float(na)
+
+
+
+if barstate.islast 
+    if profile
+        polyline.delete(polyline.new(cp, true, closed = false, fill_color = color.new(pfColor, transparency), line_color = color.new(pfColor, transparency))[1])
+    // PoC
+    if profPOC
+        line.delete(line.new(profile ? pocStart : start, poc, bar_index, poc, color = color.new(pocCol, 20), style = line.style_solid)[1])
+
+    if channel
+        line.delete(line.new(start, top, bar_index, top, color = color.new(pfColor, 20), style = line.style_solid)[1])
+        line.delete(line.new(start, bot, bar_index, bot, color = color.new(pfColor, 20), style = line.style_solid)[1])
+
+
+
+cp.clear()
+bins = 30
+if count > minLength 
+    step = (top-bot) / bins
+
+    vol   = array.new<float>(bins, 0.)
+    delta = array.new<float>(bins, 0.)
+
+    for k = 0 to (bar_index - start)
+        cls = close[k]
+        op = open[k]
+        vo = volume[k]
+
+        for i = 0 to vol.size()-1
+
+            mid = bot + step * i + step/2
+
+            if math.abs(cls - mid) <= step 
+                vol.set(i, vol.get(i) + vo)
+
+                delta.set(i, delta.get(i) + (cls > op ? vo : - vo))
+
+    for i = 0 to vol.size()-1
+        length = int((bar_index - start) / 2)
+
+        value = int(vol.get(i) / vol.max() * length)
+        
+        if i == 0 
+            cp.push(chart.point.from_index(start, bot))
+
+        mid = bot + step * i + step/2
+
+        if vol.get(i) == vol.max() and profPOC
+            poc := mid
+            pocStart := start+value+1
+
+        if delta.sum() > 0 
+            isBear := false 
+        else 
+            isBear := true 
+
+        cp.push(chart.point.from_index(start+value+1, mid))
+
+        if i == vol.size()-1 
+            cp.push(chart.point.from_index(start, top))
+
+
+
+color = trend ? colup1 : coldn1
+
+
+plot(avg, "Channel Flow", color = color, linewidth = 3, force_overlay = true)
+
+// --------------------------------------------------------------------------------------------------------------------}

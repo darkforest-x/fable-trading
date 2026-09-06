@@ -1,0 +1,400 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("Volume HeatMap With Profile [ChartPrime]",overlay = true,max_bars_back = 3000,max_boxes_count =500,max_lines_count = 500 )
+
+
+string VISUAL                                   =  "➞ Visuals Settings🔸" 
+string CORE                                     =  "➞ Main Core Settings 🔸"
+bool showVol                                    = input.bool(false,"Show Volume",inline = "01",group = CORE)
+color Bull                                      = input.color(#1f5c03,"",inline = "01",group = CORE)
+color Bear                                      = input.color(#7a0808,"",inline = "01",group = CORE)
+
+int levs                                        = input.int(23,"        Volume Levels",tooltip = "Number of the Volume levels to check", group = CORE)
+
+string Voldata                                  = input.string("All",title = "        Volume Type",
+     group = CORE,
+     options=["Bear","Bull","All","Points"],
+     tooltip = "Choose Volume Type to Show in Boxes")
+
+bool Place                                      = input.string("Left",title = "        Placement",
+     group = CORE,
+     options=["Right","Left"],
+     tooltip = "Choose Volume Type to Show in Boxes") == "Left"
+
+
+bool showHeat                                   = input.bool(true,"Show HeatMap",group = CORE,inline = "!")
+color Heat1Col                                  = input.color(#13172233,"",inline = "!",group = CORE)
+color Heat2Col                                  = input.color(color.rgb(245, 127, 23, 80),"",inline = "!",group = CORE)
+
+bool extend                                     = input.bool(false,title = "Extend Right", group = CORE)
+bool ShowPOC                                    = input.bool(false,"Show POC",group = CORE,inline = "03")
+color POCcol                                    = input.color(#586161,"",group = CORE,inline = "03")
+bool SHowVWAP                                   = input.bool(false,"Show VWAP POC",group = CORE,inline = "04")
+color VWAPcol                                   = input.color(#586161,"",group = CORE,inline = "04")
+bool showforcast                                = input.bool(false,"Show Forecasted Zone",group = CORE,inline = "!@")
+color Forcol                                    = input.color(color.orange,"",group = CORE,inline = "!@")
+int StartTime                                   = input.time(timestamp('01 Aug 2023 00:00 +0000'),
+     "Start",
+     confirm = true,
+     group = "Calculation Points")
+int EndTime                                     = input.time(timestamp('31 Dec 2080 00:00 +0000'),
+     "End",
+     confirm = true,
+     group = "Calculation Points")
+var Start                                       = int(na)
+var End                                         = int(na)
+var COUNT                                       = int(na)
+
+//
+type Colors
+    color Red                                     
+    color offRed
+    color Green                                    
+    color offGreen
+    color CHART                                
+
+type Vol
+    array<float> Total
+    array<float> GreenV
+    array<float> RedV
+    array<float> GreenP
+    array<float> RedP
+    array<float> HIGHES
+    array<float> LOWS
+    array<float> SCR
+    array<float> VWAP
+
+
+type Drawing 
+    array<box> LevelsBOX
+    array<label> LvLabels
+    array<float> VPlevels
+    array<box> VPboxes
+    array<line> VPlines
+    array<line> Forecasting
+    array<linefill> Fills
+
+Colors = Colors.new(
+     color.rgb(255, 82, 82, 85),
+     color.rgb(243, 6, 6, 50),
+     color.rgb(73, 241, 241, 85),
+     color.rgb(73, 241, 241, 50),
+     chart.fg_color
+     )
+
+VolS = Vol.new(
+     array.new_float(),
+     array.new_float(),
+     array.new_float(),
+     array.new_float(),
+     array.new_float(),
+     array.new_float(),
+     array.new_float(),
+     array.new_float(),
+     array.new_float()
+     )
+
+var Draw = Drawing.new(
+     array.new_box(5),
+     array.new_label(2),
+     array.new_float(levs+1),
+     array.new_box(levs+3),
+     array.new_line(levs),
+     array.new_line(),
+     array.new_linefill(levs)
+     )
+
+
+
+method _Band(int len)=>
+    math.min (ta.atr (len) * 0.3, close * (0.3/100)) [20] /2
+
+band = _Band(30)
+
+
+method Volume(float Z,float X,float Q,float W)=>
+    GR = Z / Q 
+    RR = X / Q
+    GI = int(GR * W)
+    RI = int(RR * W)
+    [GI , RI , GR , RR]
+
+
+
+if (time == StartTime)
+    Start := bar_index
+if (time == EndTime)
+    End := bar_index
+
+
+ExBar = extend ? bar_index : End
+ExTime = extend ? time : EndTime
+COUNT:= math.abs(Start - ExBar)
+
+if extend ? barstate.islast: bar_index == End
+    // max_bars_back(ExBar,3000)
+    // max_bars_back(COUNT,3000)
+    int [] Points       = array.new_int(levs,0)
+    int [] BullP       = array.new_int(levs,0)
+    int [] BearP       = array.new_int(levs,0)
+    float [] Volumes    = array.new_float(levs,0.0)
+    float [] BUllV        = array.new_float(levs,0.0)
+    float [] BEARV        = array.new_float(levs,0.0)
+    for i = 0 to COUNT -1
+        VolS.HIGHES.push(high[i])
+        VolS.LOWS.push(low[i])
+        VolS.SCR.push(close[i])
+        VolS.VWAP.push(ta.vwap[i])
+
+    step = (VolS.HIGHES.max()-VolS.LOWS.min() ) / levs
+    for i=0 to levs by 1
+        array.set(Draw.VPlevels,i, VolS.LOWS.min() + step * i)
+
+    if VolS.SCR.size() == 0
+        runtime.error("Please reconfigure the start and end points")
+
+    for i=0 to array.size(VolS.SCR) -1
+        for x=0 to array.size(Draw.VPlevels) - 2  by 1
+        //if VolS.VWAP.median() > VPlevels.get(i) and VolS.VWAP.median() < VPlevels.get(i+1)
+            if array.get(VolS.SCR,i)>array.get(Draw.VPlevels,x) 
+                 and
+                 array.get(VolS.SCR,i)<array.get(Draw.VPlevels,x+1)
+                array.set(Points,x,array.get(Points,x)+1)
+                array.set(Volumes,x,array.get(Volumes,x)+volume[x])
+                if array.get(VolS.SCR,i) > open[i]
+                    array.set(BUllV,x,array.get(BUllV,x)+volume[x])
+                if array.get(VolS.SCR,i) < open[i]
+                    array.set(BEARV,x,array.get(BEARV,x)+volume[x])     
+                break
+        if array.get(VolS.SCR,i) > open[i]
+            array.push(VolS.GreenV,volume[i])
+        if array.get(VolS.SCR,i) < open[i]
+            array.push(VolS.RedV,volume[i])
+        array.push(VolS.Total,volume[i])
+        //Gradient(Points)
+    // label.new(bar_index,low,str.tostring(Points.median()))
+    [GI,RI,GR,RR ] = Volume(array.sum(VolS.GreenV),
+         array.sum(VolS.RedV),
+         array.sum(VolS.Total),
+         array.size(VolS.SCR) -1)
+    if showVol
+        for i = 0 to array.size(Points) -1
+            str = ""
+            if array.get(Volumes,i) > 0
+                str := Voldata == "All" ? str.tostring(array.get(Volumes,i),format.volume)
+                     : Voldata == "Bear" ? str.tostring(array.get(BEARV,i),format.volume):
+                     Voldata == "Points" ? str.tostring(array.get(Points,i),format.volume) :
+                     str.tostring(array.get(BUllV,i),format.volume)
+            box.delete(array.get(Draw.VPboxes,i))
+            array.set(Draw.VPboxes,i,
+                 box.new(Place ? Start + array.get(Points,i) : ExBar - array.get(Points,i),
+                     array.get(Draw.VPlevels,i+1),
+                     Place ? Start : ExBar,
+                     array.get(Draw.VPlevels,i),
+                     border_color = color.from_gradient(array.get(Points,i),0,
+                     array.max(Points),
+                     Bear,
+                     Bull),
+                     bgcolor=color.from_gradient(array.get(Points,i),0,
+                     array.max(Points),
+                     Bear,
+                     Bull),
+                     text=str,
+                     text_color=Colors.CHART,
+                     text_size = size.normal,
+                     text_valign = text.align_center,
+                     text_halign = Place ? text.align_left : text.align_right
+     
+                     ))
+
+
+
+    // for i=0 to array.size(VolS.SCR) -1
+    //     for Z=0 to array.size(Draw.VPlevels) -2
+    //         box.new(Start+i,Draw.VPlevels.get(Z+1),Start+i+10,Draw.VPlevels.get(Z),bgcolor = color.from_gradient(array.get(Points,Z),0,array.max(Points),Bear,Bull))           
+    
+    // rand = math.random(10,50)
+    // num = 0
+    // // for i=0 to  int(ExBar - Start  / 10) -1
+    // Size = (Draw.VPlevels.size() - 1 )* 2
+    // for Z = 0 to int(VolS.SCR.size() / (Draw.VPlevels.size() -2)) -2
+    //     for X = 0 to Draw.VPlevels.size() -2
+    //         box.new(Start + num,Draw.VPlevels.get(X),Start + num + 20,Draw.VPlevels.get(X+1),bgcolor = color.from_gradient(array.get(Points,X) + rand ,0,array.max(Points),Bull,Bear),border_color = color.rgb(161, 122, 24, 37),xloc = xloc.bar_index)
+    //     num+=Size
+    // line.new(Start,array.get(Draw.VPlevels,4),End, array.get(Draw.VPlevels,4),color = color.red)
+    // line.new(Start,array.get(Draw.VPlevels,5),End, array.get(Draw.VPlevels,5),color = color.rgb(82, 255, 94))
+
+    if showforcast
+        sort = Points.copy()
+        rand = math.random(10,50)
+        num = 0
+        Size = (Draw.VPlevels.size() - 1 )* 2
+        for i = 0 to 10 by 2
+            
+            sort.sort(order.descending)
+            idx  = Points.indexof(sort.get(i))
+            // for Z = 0 to int(VolS.SCR.size() / (Draw.VPlevels.size() -2)) -2
+            //     box.new(Start + num,Draw.VPlevels.get(idx),Start + num + 20,Draw.VPlevels.get(idx+1),bgcolor = color.from_gradient(array.get(Points,idx) + rand ,0,array.max(Points),Bull,Bear),border_color = color.rgb(161, 122, 24, 37),xloc = xloc.bar_index)
+            // num+=Size
+            // box.new(ExBar,array.get(Draw.VPlevels,idx),ExBar + 1 , array.get(Draw.VPlevels,idx+1),bgcolor = color.from_gradient(array.get(Points,idx) ,0,array.max(Points),Bull,Bear),border_color = color.rgb(161, 122, 37, 37),xloc = xloc.bar_index,extend = extend.right)
+            Draw.Forecasting.push(
+                     line.new(ExBar,
+                         array.get(Draw.VPlevels,idx),
+                         ExBar + 1 ,
+                         array.get(Draw.VPlevels,idx),
+                         color = Forcol,
+                         extend = extend.right,
+                         style = line.style_dashed
+                         ))
+
+        if Draw.Forecasting.size() > 6
+            for i = 0 to 5
+                line.delete(Draw.Forecasting.shift())
+
+
+    if showHeat        
+        for i = 0 to array.size(Points) -1
+            line.delete(Draw.VPlines.get(i))  
+            Draw.VPlines.set(i,
+                 line.new(showVol ? Start + Points.get(i): Start,
+                     array.get(Draw.VPlevels,i),
+                     ExBar,
+                     array.get(Draw.VPlevels,i),
+                     color =color.new(color.black,100)
+                     ))
+        
+        for Z = 0 to Draw.VPlines.size() -2
+            linefill.delete(Draw.Fills.get(Z))
+            Draw.Fills.set(Z,
+                 linefill.new(array.get(Draw.VPlines,Z),
+                     array.get(Draw.VPlines,Z+1),
+                     color= color.from_gradient(array.get(Points,Z),
+                     0,
+                     array.max(Points),Heat1Col,Heat2Col)
+                     ))
+            
+
+
+    if ShowPOC
+        var box POC = na , box.delete(POC)
+        
+        MaxVID = Volumes.indexof(Volumes.max())
+        POC:= box.new(
+                 Start,
+                 Draw.VPlevels.get(MaxVID),
+                 ExBar,Draw.VPlevels.get(MaxVID+1),
+                 color.new(POCcol,50),
+                 border_style=line.style_solid,
+                 bgcolor=color.new(POCcol,50),
+                 text="POC",
+                 text_color=Colors.CHART,
+                 text_halign  = text.align_center,
+                 text_valign = text.align_center,
+                 xloc=xloc.bar_index,
+                 text_size = size.normal)
+    if SHowVWAP
+        var vwaplebel = float(na)
+        for i = 0 to Draw.VPlevels.size() - 2
+            if VolS.VWAP.median() > Draw.VPlevels.get(i) 
+                     and 
+                     VolS.VWAP.median() < Draw.VPlevels.get(i+1)
+                vwaplebel := Draw.VPlevels.get(i)
+                break
+        var box VWAPBox = na , box.delete(VWAPBox)
+        GIndex  = Draw.VPlevels.indexof(vwaplebel)
+        VWAPBox:= box.new(
+                 Start,
+                 vwaplebel ,
+                 ExBar,
+                 Draw.VPlevels.get(GIndex+1),
+                 color.new(VWAPcol,50),
+                 border_style=line.style_solid,
+                 bgcolor=color.new(VWAPcol, 70),
+                 text="VWAP",
+                 text_color=Colors.CHART,
+                 text_halign  = text.align_center,
+                 text_valign = text.align_center,
+                 xloc=xloc.bar_index,
+                 text_size = size.normal
+                 )
+
+
+    var box BOX = na , box.delete(BOX)
+    Draw.LevelsBOX.push(box.new(StartTime,
+         VolS.HIGHES.max(),
+         ExTime,
+         VolS.LOWS.min(),
+         bgcolor = color.new(Colors.CHART,91),
+         border_color = color.new(Colors.CHART,100),
+         xloc = xloc.bar_time
+         ))
+    Draw.LevelsBOX.push(box.new(StartTime,
+         VolS.HIGHES.max()+ (band*4),
+         ExTime,
+         VolS.HIGHES.max(),
+         bgcolor = color.new(Heat2Col,85),
+         border_color =color.new(Heat2Col,50),
+         border_width = 1,xloc=xloc.bar_time
+         ))
+
+    Draw.LevelsBOX.push(box.new(StartTime,
+         VolS.LOWS.min(),
+         ExTime,
+         VolS.LOWS.min()- (band*4),
+         bgcolor = color.new(Heat2Col,85),
+         border_color =color.new(Heat2Col,50),
+         border_width = 1,xloc=xloc.bar_time
+         ))
+
+    Draw.LevelsBOX.push(box.new(Start,
+         VolS.HIGHES.max()+ (band*4),
+         Start + RI,
+         VolS.HIGHES.max(),
+         bgcolor = color.new(Colors.CHART,70),
+         border_color =color.new(Colors.CHART,50),
+         border_width = 1,
+         text = "Bear Volume", // bear
+         text_size = size.normal,
+         text_color = Colors.CHART
+         ))
+
+    Draw.LevelsBOX.push(box.new(Start,
+         VolS.LOWS.min(),
+         Start + GI,
+         VolS.LOWS.min()- (band*4),
+         bgcolor = color.new(Colors.CHART,70),
+         border_color =color.new(Colors.CHART,50),
+         border_width = 1,
+         text = "Bull Volume",// Bull
+         text_size = size.normal,
+         text_color = Colors.CHART
+         ))
+
+    Draw.LvLabels.push(
+         label.new(Start + ( GI + 9 ),
+         (VolS.LOWS.min() + VolS.LOWS.min()- (band*4)) / 2,
+         str.tostring(math.round(GR * 100,2)) + " %",
+         xloc = xloc.bar_index,
+         style = label.style_label_left,
+         textcolor= Colors.CHART,
+         color = color.new(color.black, 100)
+         ))
+    Draw.LvLabels.push(
+         label.new(Start + ( RI + 9 ),
+         (VolS.HIGHES.max()+ (band*4) + VolS.HIGHES.max()) / 2,
+         str.tostring(math.round(RR * 100,2)) + " %",
+         xloc = xloc.bar_index,
+         style = label.style_label_left,
+         textcolor= Colors.CHART,
+         color = color.new(color.black, 100)
+         ))
+    if array.size(Draw.LevelsBOX) > 5
+        for i = 0 to 4
+            box.delete(Draw.LevelsBOX.shift())
+    if array.size(Draw.LvLabels) > 2
+        for i = 0 to 1
+            label.delete(Draw.LvLabels.shift())
+
+

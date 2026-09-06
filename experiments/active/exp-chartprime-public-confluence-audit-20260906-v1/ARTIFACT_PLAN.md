@@ -37,5 +37,10 @@ QA: fail on missing/duplicate IDs, title mismatch, wrong SHA, source line
 out-of-bounds, unsupported source-read claim, missing formula/risk/role fields,
 or family partition gaps. Run synthetic failing fixtures and official portable
 validator. Inspect final HTML in CUA if possible; do not claim visual/theme QA
-from structural validation alone. Any dependency not independently audited is
-explicitly outside full-runtime verification. No Sites/public publishing.
+  from structural validation alone. Any dependency not independently audited is
+  explicitly outside full-runtime verification. No Sites/public publishing.
+
+Exact installed portable packaging command is retained in QA.md. The final
+shared validator required actual chart-query text; build_report.py executes
+SQLite INDEX_SQL/FAMILY_SQL over the exact manually classified review rows.
+No estimated chart counts or provenance-only pretend query is used.

@@ -1,0 +1,48 @@
+{
+  "id": "AsD2fDh7",
+  "title": "Step Channel Momentum Trend [ChartPrime]",
+  "url": "https://www.tradingview.com/script/AsD2fDh7-Step-Channel-Momentum-Trend-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:56.143425+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/AsD2fDh7-Step-Channel-Momentum-Trend-ChartPrime/",
+  "created_at": "2025-06-23T11:57:17.651499+00:00",
+  "updated_at": null,
+  "description": "OVERVIEW\nStep Channel Momentum Trend [ChartPrime] is a momentum-based price filtering system that adapts to market structure using pivot levels and ATR volatility. It builds a dynamic channel around a stepwise midline derived from swing highs and lows. The system colors price candles based on whether price remains inside this channel (low momentum) or breaks out (strong directional flow). This allows traders to clearly distinguish ranging conditions from trending ones and take action accordingly.\n\n⯁ STRUCTURAL MIDLNE (STEP CHANNEL CORE)\nThe midline acts as the backbone of the trend system and is based on structure rather than smoothing.\n\nCalculated as the average of the most recent confirmed Pivot High and Pivot Low.The result is a step-like horizontal line that only updates when new pivot points are confirmed.This design avoids lag and makes the line \"snap\" to recent structural shifts.It reflects the equilibrium level between recent bullish and bearish control.\n\n\nThis unique step logic creates clear regime shifts and prevents noise from distorting trend interpretation.\n\n⯁ DYNAMIC VOLATILITY BANDS (ATR FILTERING)\nTo detect momentum strength, the script constructs upper and lower bands using the ATR (Average True Range):\n\nThe distance from the midline is determined by ATR × multiplier (default: 200-period ATR × 0.6).These bands adjust dynamically to volatility, expanding in high-ATR environments and contracting in calm markets.The area between upper and lower bands represents a neutral or ranging market state.Breakouts outside the bands are treated as significant momentum shifts.\n\n\nThis filtering approach ensures that only meaningful breakouts are visually emphasized — not every candle fluctuation.\n\n⯁ MOMENTUM-BASED CANDLE COLORING\nThe system visually transforms price candles into momentum indicators:\n\nWhen price (hl2) is above the upper band, candles are green → bullish momentum.\nWhen price is below the lower band, candles are red → bearish momentum.\nWhen price is between the bands, candles are orange → low or no momentum (range).\nThe candle body, wick, and border are all colored uniformly for visual clarity.\n\nThis gives traders instant feedback on when momentum is expanding or fading — ideal for breakout, pullback, or trend-following strategies.\n\n⯁ PIVOT-BASED SWING ANCHORS\nEach confirmed pivot is plotted as a label ⬥ directly on the chart:\n\n\n\nThey also serve as potential manual entry zones, SL/TP anchors, or confirmation points.\n\n⯁ MOMENTUM STATE LABEL\nTo reinforce the current market mode, a live label is displayed at the most recent candle:\n\nDisplays either:“Momentum Up” when price breaks above the upper band.\n“Momentum Down” when price breaks below the lower band.\n“Range” when price remains between the bands.\nLabel color matches the candle color for quick identification.Automatically updates on each bar close.\n\nThis helps discretionary traders filter trades based on market phase.\n\nUSAGE\nUse the green/red zones to enter with momentum and ride trending moves.Use the orange zone to stay out or fade ranges.The step midline can act as a breakout base, pullback anchor, or bias reference.Combine with other indicators (e.g., order blocks, divergences, or volume) to build high-confluence systems.\n\nCONCLUSION\nStep Channel Momentum Trend [ChartPrime] gives traders a clean, adaptive framework for identifying trend direction, volatility-based breakouts, and ranging environments — all from structural logic and ATR responsiveness. Its stepwise midline provides clarity, while its dynamic color-coded candles make momentum shifts impossible to miss. Whether you’re scalping intraday momentum or managing swing entries, this tool helps you trade with the market’s rhythm — not against it.",
+  "script": {
+    "id": 2799769,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;6fd5e94b97384ec098fcfec4a1dd4277",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B6fd5e94b97384ec098fcfec4a1dd4277/1",
+  "source_http_status": 200,
+  "source_sha256": "4e03d50f47de5bd4fca97f89c544f29b0f891bdaee2a9be3624333946e27fee2",
+  "source_lines": 67,
+  "source_metadata": {
+    "created": "2025-06-23T11:57:16.092309Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;d3ff6bfac294488fad020be9b31c941b",
+      "originalScriptVersion": "0.450",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 3,
+        "plotcandle": 1
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Step Channel Momentum Trend [ChartPrime]",
+    "updated": "2025-06-23T11:57:16.092309Z",
+    "version": "1.0"
+  }
+}

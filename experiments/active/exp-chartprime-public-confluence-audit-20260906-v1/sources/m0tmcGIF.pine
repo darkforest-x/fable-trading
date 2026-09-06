@@ -1,0 +1,146 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("Volume Storm Trend [ChartPrime]", shorttitle = "Storm Trend [ChartPrime]", overlay = false)
+import TradingView/ta/7
+
+// ---------------------------------------------------------------------------------------------------------------------}
+// 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// ---------------------------------------------------------------------------------------------------------------------{
+int len             = input.int(40, "Median Length", 1, group = "☈")
+int n               = input.int(3, "Volume Length", 1, group = "☈")
+bool show_whether   = input.bool(false, "Show Weather?", group = "☈")
+bool show_heat      = input.bool(false, "Show HeatMap?", group = "☈")
+string c_f          = input.string("°c", "Temperature Type's", ["°c", "°f"])
+
+// Colors
+var color colorDn   = #072f64
+var color colorUp   = #25b0e7
+var color color     = na
+
+// Arrays
+var heat            = array.new_float(n, 0)
+var cold            = array.new_float(n, 0)
+
+
+// ---------------------------------------------------------------------------------------------------------------------}
+// 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// ---------------------------------------------------------------------------------------------------------------------{
+
+max_val = 1000
+src     = close
+
+source  = ta.median(src, len)
+
+// Heat and Cold Arrays
+heat.push(src > source ? (volume > max_val ? max_val : volume)  : 0)
+heat.remove(0)
+
+cold.push(src < source ? (volume > max_val ? max_val : volume) : 0)
+cold.remove(0)
+
+heat_power = ta.ema(heat.median(), 10)
+cold_power = ta.ema(cold.median(), 10)
+
+
+// ---------------------------------------------------------------------------------------------------------------------}
+// 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// ---------------------------------------------------------------------------------------------------------------------{
+// Colors
+heat_color = show_whether ? 
+                 (
+                   heat_power > 0   and heat_power < 900 
+                 ? color.from_gradient(heat_power, 0, max_val, color(na), colorUp) 
+                 : heat_power > 900 and heat_power < 999.9
+                 ? color.from_gradient(heat_power, 900, max_val, colorUp, color.yellow) 
+                 : heat_power > 999.9
+                 ? color.from_gradient(heat_power, 999.9, max_val, color.yellow, #ff7300) 
+                 : na
+                 ) 
+                 : color.from_gradient(heat_power, 0, max_val, color(na), colorUp)
+
+cold_color = show_whether ? color.from_gradient(cold_power, 0, max_val, colorUp, colorDn) 
+              : color.from_gradient(cold_power, 0, max_val, color(na), colorDn) 
+
+
+// Bars Fill Color
+p3 = plot(high, color = color(na), force_overlay = true)
+p4 = plot(low,  color = color(na), force_overlay = true)
+
+fill(
+     plot1 = p3, 
+     plot2 = p4, 
+     color = show_heat ? (heat_power > cold_power ? heat_color : cold_color) : na
+     )
+
+barcolor(show_heat ? color.new(color.white, 100) : na)
+
+// Bottom Line
+plot(series = 0, color = heat_power > cold_power ? heat_color : cold_color, linewidth = 5)
+
+// Plot Weather
+plotchar(
+         series   = show_whether ? (ta.crossover(heat_power, cold_power) ? heat_power[1] : na) : na,
+         title    = "Hot Weather", 
+         char     = "☀", 
+         size     = size.small, 
+         location = location.absolute, 
+         color    = color.orange, 
+         offset   = -1
+         )
+
+plotchar(
+         series   = show_whether ? (ta.crossunder(heat_power, cold_power) ? cold_power[1] : na) : na,
+         title    = "Cold Weather", 
+         char     = "❄", 
+         size     = size.small, 
+         location = location.absolute, 
+         color    = color.aqua, 
+         offset   = -1
+         )
+
+plotchar(
+         series        = show_whether ? (ta.crossover(heat_power, cold_power) ? low[1]*0.95 : na) : na,
+         title         = "Hot Weather Chart", 
+         char          = "☀",
+         size          = size.tiny, 
+         location      = location.absolute, 
+         color         = color.orange, 
+         offset        = -1, 
+         force_overlay = true
+         )
+
+plotchar(
+         series        = show_whether ? (ta.crossunder(heat_power, cold_power) ? high[1]*1.05 : na) : na, 
+         title         = "Cold Weather Chart",
+         char          = "❄", 
+         size          = size.tiny, 
+         location      = location.absolute,
+         color         = color.aqua, 
+         offset        = -1, 
+         force_overlay = true
+         )
+
+// Plot Sto☈m Trend
+p1 = plot(heat_power, color = colorUp, display = display.none)
+p2 = plot(cold_power, color = colorDn, display = display.none)
+p0 = plot(0, display = display.none)
+
+fill(p0, p1, heat_power, 0, heat_color, color(na))
+fill(p0, p2, cold_power, 0, cold_color, color(na))
+
+// Show Temperature
+// To convert temperatures in degrees Celsius to Fahrenheit, multiply by 1.8 (or 9/5) and add 32
+FtoC(F)=>
+    c = math.round(F > 0 ? (F/1.8-32) : (F/1.8+32), 2)
+
+temp = math.round((heat_power > cold_power ? heat_power : -cold_power)/6.775, 2)
+
+if barstate.islast and show_whether 
+    var tabl = table.new(position.middle_right, 10, 10)
+    tabl.cell(0, 0, "Temperature:", text_color = chart.fg_color, text_size = size.large)
+    temper = c_f == "°c" ? str.tostring(FtoC(temp)) + "°C" : str.tostring(temp) + "°F"
+    tabl.cell(0, 1, temper, text_color = heat_power > cold_power ? heat_color : cold_color, text_size = size.large)
+
+// ---------------------------------------------------------------------------------------------------------------------}

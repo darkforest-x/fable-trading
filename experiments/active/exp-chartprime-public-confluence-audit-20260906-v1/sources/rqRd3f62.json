@@ -1,0 +1,47 @@
+{
+  "id": "rqRd3f62",
+  "title": "DEMA ATR Strategy [PrimeAutomation]",
+  "url": "https://www.tradingview.com/script/rqRd3f62-DEMA-ATR-Strategy-PrimeAutomation/",
+  "retrieved_at": "2026-09-06T13:35:28.355529+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/rqRd3f62-DEMA-ATR-Strategy-PrimeAutomation/",
+  "created_at": "2025-11-25T11:11:57.701798+00:00",
+  "updated_at": "2026-03-19T13:42:02.230672+00:00",
+  "description": "⯁ OVERVIEW\nThe DEMA ATR Strategy combines trend-following logic with adaptive volatility filters to identify strong momentum phases and manage trades dynamically.  \nIt uses a Double Exponential Moving Average (DEMA) anchored to ATR volatility bands, creating a self-adjusting trend baseline.  \nWhen the adjusted DEMA shifts direction, the strategy enters positions and scales out profit in phases based on ATR-driven targets.\n\nThis system adapts to volatility, filters noise, and seeks sustained directional moves.\n\n⯁ KEY FEATURES\n DEMA-Volatility Hybrid Filter  \n  Uses Double EMA with ATR expansion/compression logic to form a dynamic trend baseline. Directional Shift Entries  \n  Entries occur when the adjusted DEMA flips trend (bullish crossover or bearish crossunder vs its past value).\n Noise Reduction Mechanism  \n  ATR range caps extreme moves and prevents false flips during choppy volatility spikes.\n Multi-Level Take Profits  \n  Targets scale out positions at 1×, 2×, and 3× ATR multiples in the trade direction.\n Volatility-Adaptive Targets  \n  ATR multiplier ensures profit targets expand/contract based on market conditions. Single-Direction Exposure  \n  No pyramiding; the strategy flips position only when trend shifts. Automated Trade Finalization  \n  When all profit targets trigger, the position is fully closed.\n\n⯁ STRATEGY LOGIC\n Trend Direction:  \n  DEMA baseline is modified using ATR upper/lower envelopes.  \n  • If the adjusted DEMA rises above previous value → Bullish  \n  • If it falls below previous value → Bearish\n Entry Rules:  \n  • Enter Long when bullish shift occurs and no long position exists  \n  • Enter Short when bearish shift occurs and no short position exists Take Profit Logic:  \n  3 partial exits for each trade based on ATR:\n  • TP1 = ±1× ATR  \n  • TP2 = ±2× ATR  \n  • TP3 = ±3× ATR  \n  Profit distribution: 30% / 30% / 40%\n Exit Conditions:  \n  • Exit when all TPs hit (full scale-out if sum of all TPs 100%)  \n  • Opposite trend signal closes current trade and opens new one\n\n⯁ WHEN TO USE\n Trending environments Medium–high volatility phases Swing trading and intraday trend plays\n Markets that respect momentum continuation (crypto, indices, FX majors)\n\n⯁ CONCLUSION\nThis strategy blends DEMA trend recognition with ATR-based volatility adaptation to generate cleaner directional entries and structured take-profit exits. It is designed to capture momentum phases while avoiding noise-driven false signals, delivering a disciplined and scalable trend-following approach.",
+  "script": {
+    "id": 4989475,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;0338cbd8417445d2a46bfdebfd1db51d",
+    "version_maj": 2,
+    "script_type": "strategy",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B0338cbd8417445d2a46bfdebfd1db51d/2",
+  "source_http_status": 200,
+  "source_sha256": "4c4599f46aaef42b2116fbbf48037ceb7d7a9c4b7ceee7c39478dd9bc7c4d53e",
+  "source_lines": 280,
+  "source_metadata": {
+    "created": "2026-03-19T13:42:01.300772Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "strategy",
+      "originalScriptId": "USER;6228a1de374c49558cc1e96cfd563dda",
+      "originalScriptVersion": "5.0",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 8
+      }
+    },
+    "lastVersionMaj": "2.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "DEMA ATR Strategy [PrimeAutomation]",
+    "updated": "2026-03-19T13:42:01.300772Z",
+    "version": "2.0"
+  }
+}

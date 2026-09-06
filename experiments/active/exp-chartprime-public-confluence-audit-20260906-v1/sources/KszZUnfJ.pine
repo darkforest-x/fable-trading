@@ -1,0 +1,129 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=6
+indicator("Linear Regression Volume Profile [ChartPrime]", shorttitle = "LR VolumeProfile [ChartPrime]", overlay = true, max_labels_count = 500, max_bars_back = 500, max_lines_count = 500)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+length = input.int(100, "Period")
+
+level_qty = input.int(7, "Qty", group = "Levels")
+level_style = input.string("Solid", "Style", ["Solid", "Dashed", "Dotted"], group = "Levels", inline = "lvl")
+levels_col = input.color(color.gray, "", group = "Levels", inline = "lvl")
+
+profile_width = input.int(7, "Width", group = "Profile")
+size = input.float(0.8, "Channel Size", step = 0.1, group = "Profile")
+max_col = input.color(#c022dc, "", group = "Profile", inline = "col")
+min_col = input.color(#ffeb3b, "", group = "Profile", inline = "col")
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+var array<line> profile_lines = array.new<line>()
+var array<label> profile_labels = array.new<label>()
+var array<line> Channel_lines = array.new<line>()
+
+
+linreg(_source, _length) =>
+    sumX = 0.0
+    sumY = 0.0
+    sumXSqr = 0.0
+    sumXY = 0.0
+
+    for i = 0 to _length - 1
+        val = _source[i]
+        per = i + 1.0
+        sumX += per
+        sumY += val
+        sumXSqr += per * per
+        sumXY += val * per
+        sumXY
+
+    slope = (_length * sumXY - sumX * sumY) / (_length * sumXSqr - sumX * sumX)
+    intercept = sumY / _length - slope * sumX / _length + slope
+
+    [slope, intercept]
+
+
+[slope, intercept] = linreg(close, length)
+startPrice = intercept + slope * (length - 1)
+endPrice = intercept - slope * 15
+
+
+total_vol = array.new<float>(200)
+atr       = ta.atr(200) * size
+
+style = switch level_style
+    "Solid" => line.style_solid
+    "Dashed" => line.style_dashed
+    "Dotted" => line.style_dotted
+
+draw_level(size, indx)=>
+
+    if barstate.islast
+        
+        ch_line = line.new(bar_index-length, startPrice+size, bar_index+15, endPrice+size, style = style, color = levels_col)
+
+        Channel_lines.push(ch_line)
+
+        vol = 0.
+
+        for i = 0 to length
+            h = high[i]
+            l = low[i]
+
+            level = endPrice + size + slope * i
+         
+            if h > level and l < level 
+                vol += volume[i]
+
+        total_vol.set(indx, vol)
+
+        vol
+
+draw_profile(size, vol)=>
+    if barstate.islast
+
+        val = vol / total_vol.sum() * 100
+        start = endPrice + slope * int(length / 100 * val)
+        color_ = color.from_gradient(val, 0, 25, min_col, max_col)
+
+        line_ = line.new(bar_index + 15 - int(length / 100 * val), start + size, bar_index + 15, endPrice + size, width = profile_width, color = color_)
+        label_ = label.new(bar_index + 15, endPrice + size, str.tostring(val, format.percent), style = label.style_label_left, color = color(na), textcolor = color_, size = size.small)
+
+        array.push(profile_lines, line_)
+        array.push(profile_labels, label_)
+
+
+if barstate.islast and profile_lines.size() > 0
+    for i = 0 to array.size(profile_lines) - 1
+        line.delete(array.get(profile_lines, i))
+        line.delete(array.get(Channel_lines, i))
+    for i = 0 to array.size(profile_labels) - 1
+        label.delete(array.get(profile_labels, i))
+    array.clear(profile_lines)
+    array.clear(profile_labels)
+    array.clear(Channel_lines)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+if barstate.islast
+    label.delete(label.new(bar_index-length, slope > 0 ? startPrice+atr*level_qty : startPrice-atr*level_qty
+                 , slope > 0 ? "⇘" : "⇗"
+                 , style = slope>0?label.style_label_lower_right : label.style_label_upper_right
+                 , color = min_col
+                 , textcolor = chart.bg_color)[1])
+
+for i = level_qty to -level_qty
+    draw_level(atr*i, i)
+
+if total_vol.size() > 0 
+    for i = level_qty to -level_qty
+        draw_profile(atr*i, total_vol.get(i))
+
+// --------------------------------------------------------------------------------------------------------------------}

@@ -1,0 +1,45 @@
+{
+  "id": "o4YRa7e8",
+  "title": "Multi Kernel Regression [ChartPrime]",
+  "url": "https://www.tradingview.com/script/o4YRa7e8-Multi-Kernel-Regression-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:37:35.814059+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/o4YRa7e8-Multi-Kernel-Regression-ChartPrime/",
+  "created_at": "2023-07-04T01:38:22.698477+00:00",
+  "updated_at": "2024-02-20T10:48:37.971893+00:00",
+  "description": "The \"Multi Kernel Regression\" is a versatile trading indicator that provides graphical interpretations of market trends by using different kernel regression methods. It's beneficial because it smoothes out price data, creating a clearer picture of price movements, and can be tailored according to the user's preference with various options.\n\nWhat makes this indicator uniquely versatile is the 'Kernel Select' feature, which allows you to choose from a variety of regression kernel types, such as Gaussian, Logistic, Cosine, and many more. In fact, you have 17 options in total, making this an adaptable tool for diverse market contexts.\n\nThe bandwidth input parameter directly affects the smoothness of the regression line. While a lower value will make the line more sensitive to price changes by sticking closely to the actual prices, a higher value will smooth out the line even further by placing more emphasis on distant prices.\n\nIt's worth noting that the indicator's 'Repaint' function, which re-estimates work according to the most recent data, is not a deficiency or a flaw. Instead, it’s a crucial part of its functionality, updating the regression line with the most recent data, ensuring the indicator measurements remain as accurate as possible. We have however included a non-repaint feature that provides fixed calculations, creating a steady line that does not change once it has been plotted, for a different perspective on market trends.\n\nThis indicator also allows you to customize the line color, style, and width, allowing you to seamlessly integrate it into your existing chart setup. With labels indicating potential market turn points, you can stay on top of significant price movements. \nRepaint: Enabling this allows the estimator to repaint to maintain accuracy as new data comes in.Kernel Select: This option allows you to select from an array of kernel types such as Triangular, Gaussian, Logistic, etc. Each kernel has a unique weight function which influences how the regression line is calculated.Bandwidth: This input, a scalar value, controls the regression line's sensitivity towards the price changes. A lower value makes the regression line more sensitive (closer to price) and higher value makes it smoother.Source: Here you denote which price the indicator should consider for calculation. Traditionally, this is set as the close price.Deviation: Adjust this to change the distance of the channel from the regression line. Higher values widen the channel, lower values make it smaller.Line Style: This provides options to adjust the visual style of the regression lines. Options include Solid, Dotted, and Dashed.Labels: Enabling this introduces markers at points where the market direction switches. Adjust the label size to suit your preference.Colors: Customize color schemes for bullish and bearish trends along with the text color to match your chart setup.\n\n\n\nKernel regression, the technique behind the Multi Kernel Regression Indicator, has a rich history rooted in the world of statistical analysis and machine learning.\n\nThe origins of kernel regression are linked to the work of Emanuel Parzen in the 1960s. He was a pioneer in the development of nonparametric statistics, a domain where kernel regression plays a critical role. Although originally developed for the field of probability, these methods quickly found application in various other scientific disciplines, notably in econometrics and finance.\n\nKernel regression became really popular in the 1980s and 1990s along with the rise of other nonparametric techniques, like local regression and spline smoothing. It was during this time that kernel regression methods were extensively studied and widely applied in the fields of machine learning and data science.\n\nWhat makes the kernel regression ideal for various statistical tasks, including financial market analysis, is its flexibility. Unlike linear regression, which assumes a specific functional form for the relationship between the independent and dependent variables, kernel regression makes no such assumptions. It creates a smooth curve fit to the data, which makes it extremely useful in capturing complex relationships in data.\n\nIn the context of stock market analysis, kernel regression techniques came into use in the late 20th century as computational power improved and these techniques could be more easily applied. Since then, they have played a fundamental role in financial market modeling, market prediction, and the development of trading indicators, like the Multi Kernel Regression Indicator.\n\nToday, the use of kernel regression has solidified its place in the world of trading and market analysis, being widely recognized as one of the most effective methods for capturing and visualizing market trends.\nThe Multi Kernel Regression Indicator is built upon kernel regression, a versatile statistical method pioneered by Emanuel Parzen in the 1960s and subsequently refined for financial market analysis. It provides a robust and flexible approach to capturing complex market data relationships.\n\nThis indicator is more than just a charting tool; it reflects the power of computational trading methods, combining statistical robustness with visual versatility. It's an invaluable asset for traders, capturing and interpreting complex market trends while integrating seamlessly into diverse trading scenarios.\n\nIn summary, the Multi Kernel Regression Indicator stands as a testament to kernel regression's historic legacy, modern computational power, and contemporary trading insight.\n\n\n",
+  "script": {
+    "id": 1438058,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;a703ab0d3d6f404591f62e5c7a323f9e",
+    "version_maj": 2,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Ba703ab0d3d6f404591f62e5c7a323f9e/2",
+  "source_http_status": 200,
+  "source_sha256": "26f4e6338be02aaaf75be65a700850b84860920dd339d36eab706b165579b718",
+  "source_lines": 324,
+  "source_metadata": {
+    "created": "2024-02-20T10:48:38.699757Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "sourceInputsCount": 1,
+      "stats": {
+        "plot": 3
+      }
+    },
+    "lastVersionMaj": "2.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Multi Kernel Regression [ChartPrime]",
+    "updated": "2024-02-20T10:48:38.699757Z",
+    "version": "2.0"
+  }
+}

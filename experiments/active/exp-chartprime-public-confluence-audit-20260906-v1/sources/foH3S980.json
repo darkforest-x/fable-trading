@@ -1,0 +1,46 @@
+{
+  "id": "foH3S980",
+  "title": "Higher Timeframe High & Low [ChartPrime]",
+  "url": "https://www.tradingview.com/script/foH3S980-Higher-Timeframe-High-Low-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:48.749169+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/foH3S980-Higher-Timeframe-High-Low-ChartPrime/",
+  "created_at": "2024-05-27T13:08:31.199902+00:00",
+  "updated_at": null,
+  "description": "The Higher Timeframe High & Low Indicator plots key levels (high, low, and average price) from a higher timeframe onto the current chart, aiding traders in identifying significant support and resistance zones. \nThe indicator also detects and labels breakout points and can display trend directions based on these higher timeframe levels breakout points.\n\n\nKey Features:\n\n◆ Higher Timeframe Levels:\nPlots the high, low, and average price from a selected higher timeframe onto the current chart.\nExtends these levels into the future for better visualization.\n\n\n◆ Breakout Detection:\nIdentifies and labels breakouts above the higher timeframe high or below the higher timeframe low.\nBreakout points are clearly marked with labels indicating \"High Break\" or \"Low Break\" with timeframe mark.\nIf the following break out type is the same that previous, it does not marked by labels, but still marked by bar color.\n\n\n◆ Trend Visualization:\nOptionally displays trend direction by changing bar colors and line styles based on breakout conditions.\nTrend indication helps in identifying bullish or bearish market conditions.\n\n\n◆ Support and Resistance Indication:\nMarks support and resistance points with '◆' symbols when the current timeframe's high or low interacts with the higher timeframe's levels.\n\n\n◆ Period separation:\nBackground color changes to indicate period separation if enabled.\n\n\n◆ Inputs:\nExtension to the right of High and Low: Sets the number of bars to extend the high and low lines into the future.Timeframe: Selects the higher timeframe (e.g., Daily) to use for plotting high and low levels.Period Separator: Toggles the visual separator for periods.Show Trend?: Toggles the trend visualization, changing bar colors and plot styles based on breakouts.Show Breakout Labels?: Toggles the Breakout Labels visualization.\n\n\nIndicator Logic:\nHistorical vs. Real-Time Bars: Adjusts values based on whether the bar is historical or real-time to ensure accurate plotting.High and Low Prices: Retrieves the high and low prices from the selected higher timeframe.Breakout Conditions: Determines if the current price has crossed above the higher timeframe high (high break) or below the higher timeframe low (low break).Color and Trend Logic: Adjusts colors and checks for breakouts to avoid multiple labels and indicate trend direction.\n\n\nUsage Notes:\nThis indicator is ideal for traders looking to integrate multi-timeframe analysis into their strategy.\n\nThe higher timeframe levels act as significant support and resistance zones, helping traders identify potential reversal or continuation points.\n\nThe breakout labels and trend visualization provide additional context for trading decisions, indicating when the price has breached key levels and is likely to continue in that direction.\n\nThis indicator enhances chart analysis by providing clear, visual cues from higher timeframe data, helping traders make more informed decisions based on a broader market perspective.",
+  "script": {
+    "id": 1607880,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;1d9af3af9a004e08ba169bf5d5f536c3",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B1d9af3af9a004e08ba169bf5d5f536c3/1",
+  "source_http_status": 200,
+  "source_sha256": "9df134fa9e706f012787db0ce5663d710db941a737bcf6b94716d87dde6744bd",
+  "source_lines": 187,
+  "source_metadata": {
+    "created": "2024-05-27T13:08:29.974137Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 3,
+        "plotchar": 2
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Higher Timeframe High & Low [ChartPrime]",
+    "updated": "2024-05-27T13:08:29.974137Z",
+    "version": "1.0"
+  }
+}

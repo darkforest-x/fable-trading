@@ -1,0 +1,44 @@
+{
+  "id": "cDETyPNA",
+  "title": "Pivot Support & Resistance Matrix [ChartPrime]",
+  "url": "https://www.tradingview.com/script/cDETyPNA-Pivot-Support-Resistance-Matrix-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:00.550756+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/cDETyPNA-Pivot-Support-Resistance-Matrix-ChartPrime/",
+  "created_at": "2026-07-06T12:45:57.703629+00:00",
+  "updated_at": null,
+  "description": "Pivot Support & Resistance Matrix [ChartPrime]\n\n🔶 OVERVIEW\n\nTraders often struggle to identify which support and resistance levels are truly critical and which ones are just temporary market noise. The Pivot Support & Resistance Matrix [ChartPrime] solves this by combining automated, proximity-filtered structural lines with a real-time, volume-cleared Polyline Pivot Profile Engine. \n\nInstead of cluttering your chart with every single minor pivot, this script utilizes an ATR-based buffer system to only track key structural levels. Furthermore, it pools all historical pivot points into a customized histogram matrix displayed right in your margin, pinpointing the absolute **Pivot Point of Control (POC)** where historical order blocks are most heavily clustered.\n\n🔶 HOW IT WORKS\n\nThe script processes market structure through a multi-tiered calculation architecture:\n\n Proximity-Filtered S/R Generation: The script monitors classic structural highs and lows ($Pivot\\ High / Low$). To prevent messy line stacking, it implements an automated proximity filter using an  \\times Multiplier$ threshold. A fresh Support or Resistance line will only spawn if there isn't an active, unbroken line already sitting within that price buffer. Dynamic Breakout Conversion & Volume Logging: Active lines automatically extend forward in time. The exact moment price closes past a level, the script transforms its state: it turns into a dashed, neutral-colored broken level, and replaces its price label with the exact transaction volume that occurred on the breakout candle (formatted cleanly as K or M). Polyline Profile Matrix: At the right edge of your screen, the script divides the high-to-low calculation lookback window into a customized array of price bins. It then scans through all historical pivots, plotting a seamless, shaded polyline histogram based on pivot density. Pivot Point of Control (POC): The single price bin that contains the highest concentration of historical pivot touches is highlighted across your entire chart as a solid red **Pivot POC Line**, displaying exactly how many times institutions used that precise level for market reversals.\n\n🔶 KEY FEATURES\n\n Smart ATR Density Filtering: Prevents redundant lines from overlapping in tightly consolidated ranges, providing clean, high-conviction key levels instead of generic lines on every candle. Post-Breakout Volume Memory: Instead of deleting broken lines, they switch to a dashed visual state while logging the breakout volume. This tells you instantly whether a level was smashed with heavy institutional backup or weakly drifted through. Adaptive Profile Theme Coloring: The polyline histogram dynamically matches the current market state. If more historical support pivots have been registered than resistance levels inside your lookback window, the profile automatically adopts the Support color theme, signaling a bullish structural baseline (and vice versa). Bin Smoothing Radius Configuration: To account for minor market fluctuations, each pivot point distributes its structural weight to adjacent price bins based on a user-defined radius, creating a smooth, professional-grade market profile.\n\n🔶 TRADING APPLICATIONS\n\n High-Volume Breakout Validation: When an established support or resistance line is broken, check the volume tag left on the line. A break showing high volume (e.g., $4.5M$) indicates a high-probability trend continuation or verified Market Structure Shift. Pivot POC Magnet Re-entries: The red Pivot POC line acts as a major institutional fair-value anchor. When price expands far away from it, it serves as an excellent structural target; conversely, during macro retracements, it behaves as the strongest anticipated bounce zone. Profile Value Area Exits: Use the outer limits of the polyline histogram to judge market extensions. If price stretches completely beyond the top or bottom boundaries of the pivot profile, it indicates highly overextended conditions, alerting you to tighten stop losses or secure open profits.\n\n🔶 SETTINGS\n\n Pivot Left/Right Bars: Sets the lookback structural count required to verify a local swing high or swing low. Higher values isolate macro key levels, while lower values target scalping ranges. Calculation Lookback Window: Restricts profile tracking and line management to a strict historical window (e.g., last 600 bars), preserving processing speeds and focusing your data on recent market developments. ATR Proximity Multiplier: The minimum distance required between horizontal lines. Increase this multiplier to dramatically clean up your chart and leave only the most prominent structural boundaries. Number of Bins & Smoothing Radius: Controls the resolution of your polyline profile. Higher bins provide finer price accuracy, while a higher smoothing radius blends adjacent bins for a cleaner visual histogram.\n\n🔶 CONCLUSION\n\nThe Pivot Support & Resistance Matrix [ChartPrime] indicator completely modernizes standard support and resistance trading. By combining price-filtered line tracking with a structural density profile, it allows traders to clearly see where major liquidity walls stand and precisely how much volume was required to break them down.",
+  "script": {
+    "id": 6609372,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;58bcf93f489f4f19b107a7712ab4bced",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B58bcf93f489f4f19b107a7712ab4bced/1",
+  "source_http_status": 200,
+  "source_sha256": "682b6b9997997b3bacdd54504e3e6b530bd84982b735f0d4e0cbe990b602e280",
+  "source_lines": 229,
+  "source_metadata": {
+    "created": "2026-07-06T12:45:56.226605Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;ae9625f6ca26420aa0cbef8a539010c7",
+      "originalScriptVersion": "0.5",
+      "sourceInputsCount": 0
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Pivot Support & Resistance Matrix [ChartPrime]",
+    "updated": "2026-07-06T12:45:56.226605Z",
+    "version": "1.0"
+  }
+}

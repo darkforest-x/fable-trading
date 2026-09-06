@@ -1,0 +1,42 @@
+{
+  "id": "facvguC8",
+  "title": "Future Trend Channel [ChartPrime]",
+  "url": "https://www.tradingview.com/script/facvguC8-Future-Trend-Channel-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:22.155442+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/facvguC8-Future-Trend-Channel-ChartPrime/",
+  "created_at": "2024-11-04T12:58:37.947565+00:00",
+  "updated_at": "2024-11-07T17:10:43.242721+00:00",
+  "description": "The Future Trend Channel [ChartPrime] indicator is a dynamic tool for identifying trends and projecting future prices based on channel formations. The indicator uses SMA (Simple Moving Average) and volatility calculations to plot channels that visually represent trends. It also detects moments of lower momentum, indicated by neutral color changes in the channels, and projects future price levels for up to 50 bars ahead.\n\n⯁ KEY FEATURES AND HOW TO USE  \n ⯌ Dynamic Trend Channels:  \nThe indicator draws channels when a trend is identified. It uses a combination of SMA and volatility to determine the direction and strength of the trend. Each channel is visualized with a specific color, where green indicates an uptrend and orange represents a downtrend.  \nExample of channels during uptrend and downtrend:  \n ⯌ Momentum-Based Color Shifts:  \nThe indicator adapts its channel colors based on momentum changes. When the starting point (Y1) of a channel is higher than its ending point (Y2) during an uptrend, the channel turns neutral, indicating lower momentum and a possible ranging market. The same applies in a downtrend, where the channel turns neutral if Y1 is lower than Y2.  \nExample of neutral momentum channels:  \n ⯌ Future Price Projection:  \nAt the end of each channel, the indicator generates a projected future price based on the midpoint of the channel. By default, this projection is made 50 bars into the future, but users can adjust the number of bars to their preference.  \nExample of future price projection:  \n ⯌ Diamond Signals for Valid Trends:  \nLime-colored diamonds appear when an uptrend channel is confirmed, while orange diamonds indicate valid downtrend channels. These signals confirm the presence of a strong trend and help identify valid entry and exit points. Neutral channels, which indicate lower momentum, do not show diamond signals.  \nExample of trend confirmation signals:  \n ⯌ Customizable Settings:  \nUsers can adjust the channel length (how far back the trend is analyzed) and the width (which determines the channel boundaries based on volatility). The future price projection can also be customized to forecast further or fewer bars into the future.\n\n⯁ USER INPUTS  \n Trend Length: Sets the number of bars used to calculate the trend channels. Channel Width: Adjusts the width of the channels, based on volatility (ATR multiplier). Up and Down Colors: Allows customization of the colors used for uptrend and downtrend channels. Future Bars: Sets the number of bars used for future price projection.\n\n⯁ CONCLUSION  \nThe Future Trend Channel [ChartPrime] indicator is a versatile tool for identifying and trading trends. With its ability to detect momentum shifts and project future prices, it provides traders with key insights for making more informed decisions. The use of diamond signals for trend validation adds an extra layer of confirmation, helping traders act with greater confidence during volatile or trending markets.",
+  "script": {
+    "id": 1975400,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;97cea8f31a3c41b186b3e268df654e50",
+    "version_maj": 2,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B97cea8f31a3c41b186b3e268df654e50/2",
+  "source_http_status": 200,
+  "source_sha256": "a94f22c3e5e975e5e9215b71f389e3cefcfddad2440b55569e93b0b269eccc31",
+  "source_lines": 182,
+  "source_metadata": {
+    "created": "2024-11-07T17:10:41.586767Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "sourceInputsCount": 0
+    },
+    "lastVersionMaj": "2.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Future Trend Channel [ChartPrime]",
+    "updated": "2024-11-07T17:10:41.586767Z",
+    "version": "2.0"
+  }
+}

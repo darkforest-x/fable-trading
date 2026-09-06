@@ -1,0 +1,221 @@
+// This work is licensed under a Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0) https://creativecommons.org/licenses/by-nc-sa/4.0/
+// © ChartPrime
+
+//@version=6
+indicator("Volume Liquidity Trend [ChartPrime]", overlay = true, max_bars_back = 5000, max_labels_count = 500, max_lines_count = 500)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Kalman Filter Configuration Window
+int length         = input.int(1, "Previous Value Bars Back", maxval = 3, minval = 1, 
+                       group = "SETTINGS", 
+                       tooltip = "Determines how many bars back the historical state of the filter is pulled from. Values can range from 1 to 3.")
+
+float k            = input.float(0.05, "Stabilization Coefficient", step = 0.001, 
+                       group = "SETTINGS", 
+                       tooltip = "The smaller the coefficient, the smoother and more lag-tolerant the Kalman Line becomes.")
+
+float volThreshold = input.float(0.1, "Volume Cutoff Threshold", minval = 0.0, maxval = 1.0, step = 0.05,
+                       group = "SETTINGS",
+                       tooltip = "Filters out low volume levels. Only historical bars with a normalized volume higher than this value will generate liquidity lines.")
+
+series float A_n   = input.source(close, "Source",
+                       group = "SETTINGS",
+                       tooltip = "The price source data stream processed by the underlying calculations.")
+
+int extendLines    = input.int(20, "Extend Lines Into Future", minval = 0, maxval = 500, step = 5,
+                       group = "SETTINGS",
+                       tooltip = "Defines how many bars into the right margin blank space to extend unmitigated historical liquidity levels and their associated tags.")
+
+// Theme & Interface Settings
+color colorUp      = input.color(color.aqua, "Bullish Trend Color", group = "VISUAL", tooltip = "Color applied to lines and accents during an active uptrend.")
+color colorDn      = input.color(#e76108, "Bearish Trend Color", group = "VISUAL", tooltip = "Color applied to lines and accents during an active downtrend.")
+
+// Anomaly Configurations
+bool showMaxVolLine = input.bool(true, "Show 100% Volume Anchor Line", group = "ANOMALY HIGHLIGHTS", tooltip = "Toggle to force-display a continuous reference line at the highest volume level of the current trend ONLY after price has crossed it.")
+color maxVolColor   = input.color(color.red, "100% Volume Line Color", group = "ANOMALY HIGHLIGHTS", tooltip = "Visual profile color applied to your maximum volume marker line.")
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄Official𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Memory allocation container for Kalman filtering sequence
+series float M_n   = na 
+series float M_n_1 = nz(M_n[length]) 
+
+// Core Math Execution Engine
+M_n := k * A_n + (1 - k) * M_n_1
+
+// Volatility bands calculation
+float atr   = ta.atr(200) * 2
+float upper = M_n + atr
+float lower = M_n - atr
+
+// Trend tracking system state machine
+var bool trend = false 
+
+if ta.crossover(close, upper)
+    trend := true
+if ta.crossunder(close, lower)
+    trend := false
+
+bool trendChange = trend != trend[1]
+
+// Establish visual coordinate lines based on tracking structural states
+float trendLine  = trendChange ? float(na) : (trend ? lower : upper)
+color trendCol   = trend ? colorUp : colorDn
+
+// Memory location for trend-tracking bar index offsets
+var int start = 0
+if trendChange
+    start := bar_index
+
+// Calculate trend age duration 
+int barsAgo = bar_index - start
+
+// Find the 100% volume level dynamically across history
+float maxVolInTrend = ta.highest(volume, math.max(1, barsAgo + 1))
+float maxVolPrice   = na
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Draw primary volatility boundaries
+pt = plot(trendLine, "Trend Volatility Line", style = plot.style_linebr, color = trendCol, linewidth = 2)
+pp = plot(close, "Price Anchor Line", editable = false, display = display.none)
+
+// Adaptive backdrop ribbon fill
+fill(pt, pp, close, trendLine, color.new(trendCol, 100), color.new(trendCol, 75), "Trend Band Fill")
+
+// Plot trend reversal diamond highlights directly onto the trailing barrier lines
+plotshape(trendChange and trend     ? lower : na, "Bullish Breakout Diamond", shape.diamond, location.absolute, colorUp, size = size.small)
+plotshape(trendChange and not trend ? upper : na, "Bearish Breakout Diamond", shape.diamond, location.absolute, colorDn, size = size.small)
+
+// Execution routine for generating dynamic trailing matrix lines
+if barstate.islast
+
+    // Instantiate transient arrays for vector transformations
+    float[] vol  = array.new<float>()
+    var line[] lines = array.new<line>()
+    var label[] labels = array.new<label>()
+    var table displayTable = table.new(position.top_right, 2, 3, bgcolor = color.new(color.black, 20), border_color = chart.bg_color, border_width = 1)
+    
+    // Perform clean sweep over stale graphic objects across redraw loops
+    for l in lines
+        line.delete(l)
+    array.clear(lines)
+    
+    for lbl in labels
+        label.delete(lbl)
+    array.clear(labels)
+
+    // Segment 1: Extract structural volume footprints throughout current cycle length
+    for i = 0 to bar_index - start 
+        array.push(vol, volume[i])
+
+    // Segment 2: Process valid trend volumes and project historical profiles forward
+    if array.size(vol) > 0
+        float structuralMaxVol = array.max(vol)
+        
+        for i = 0 to array.size(vol) - 1
+            float n_vol = array.get(vol, i) / structuralMaxVol
+
+            // Track down the absolute 100% volume candle level for our metrics summary block
+            if n_vol == 1
+                maxVolPrice := hlc3[i]
+
+            if n_vol > volThreshold
+                float lineLevel = hlc3[i]
+                bool isCrossed  = false
+
+                // Segment 3: Scan future candle paths ahead of data point for channel invalidation
+                if i > 0
+                    for j = i - 1 to 0
+                        float bodyMax = math.max(close[j], open[j])
+                        float bodyMin = math.min(close[j], open[j])
+
+                        if bodyMin <= lineLevel and bodyMax >= lineLevel
+                            isCrossed := true
+                            break 
+
+                // Draw 100% volume reference line conditional on being crossed by price action
+                if n_vol == 1 and showMaxVolLine and isCrossed
+                    line maxLine = line.new(bar_index - i, hlc3[i], bar_index + extendLines, hlc3[i], color = maxVolColor, width = 2, style = line.style_dashed)
+                    array.push(lines, maxLine)
+
+                    label maxLblb = label.new(bar_index - i, hlc3[i], "100%", style = label.style_label_right, color = maxVolColor, textcolor = chart.fg_color)
+                    array.push(labels, maxLblb)
+
+                // Segment 4: Instantiate visual markers for unmitigated volume anchors
+                if not isCrossed
+                    col =  close > lineLevel ? colorUp : colorDn
+                    color lineColor = color.from_gradient(n_vol, 0, 1, color(na), color.new(col, 30))
+                    color labelColor = color.from_gradient(n_vol, 0, 1, color(na), color.new(col, 0))
+
+                    int targetX     = bar_index + extendLines
+                    
+                    // Render variable-width liquidity trail vectors (extended into right margin space)
+                    line l = line.new(bar_index - i, lineLevel, targetX, lineLevel, color = lineColor, width = int(n_vol * 15))
+                    array.push(lines, l)
+                    
+                    // Assign relative visual sizing scalars 
+                    string lblSize = size.normal
+                    if n_vol <= 0.45
+                        lblSize := size.tiny
+                    else if n_vol <= 0.60
+                        lblSize := size.small
+                    else if n_vol <= 0.75
+                        lblSize := size.normal
+                    else if n_vol <= 0.90
+                        lblSize := size.large
+                    else
+                        lblSize := size.large
+                        
+                    // Formulate textual data string
+                    string pctText = str.tostring(math.round(n_vol * 100)) + "%"
+                        
+                    // Draw terminal node point element at the extended coordinate projection index
+                    label lbl = label.new(
+                                  x = targetX, 
+                                  y = lineLevel, 
+                                  text = "", 
+                                  style = label.style_circle, 
+                                  color = labelColor, 
+                                  textcolor = chart.fg_color, 
+                                  size = lblSize
+                                 )
+                    array.push(labels, lbl)
+
+                    // Draw companion offset value tracking metrics tag right next to extended target
+                    label lblTxt = label.new(
+                                     x = targetX+1, 
+                                     y = lineLevel, 
+                                     text = pctText, 
+                                     style = label.style_label_left, 
+                                     color = color(na), 
+                                     textcolor = chart.fg_color, 
+                                     size = size.normal,
+                                     yloc = yloc.price,
+                                     textalign = text.align_left
+                                    )
+                    array.push(labels, lblTxt)
+
+    // Segment 5: Update Statistics Dashboard Panel Elements
+    string trendLabel = trend ? "BULLISH" : "BEARISH"
+    color displayCol  = trend ? colorUp : colorDn
+    
+    // Row 1: Trend Mode Details
+    table.cell(displayTable, 0, 0, "Current Trend",   text_color = color.white, text_size = size.small, text_halign = text.align_left)
+    table.cell(displayTable, 1, 0, trendLabel,        text_color = displayCol,  text_size = size.small, text_halign = text.align_right)
+    
+    // Row 2: Trend Runtime Duration Age
+    table.cell(displayTable, 0, 1, "Trend Duration",  text_color = color.white, text_size = size.small, text_halign = text.align_left)
+    table.cell(displayTable, 1, 1, str.tostring(barsAgo) + " bars ago", text_color = color.white, text_size = size.small, text_halign = text.align_right)
+    
+    // Row 3: Peak Volume Anchor Point Price Coordinates
+    table.cell(displayTable, 0, 2, "100% Vol Level",  text_color = color.white, text_size = size.small, text_halign = text.align_left)
+    table.cell(displayTable, 1, 2, na(maxVolPrice) ? "N/A" : str.tostring(maxVolPrice, "#.##"), text_color = maxVolColor, text_size = size.small, text_halign = text.align_right)
+// --------------------------------------------------------------------------------------------------------------------}

@@ -1,0 +1,46 @@
+{
+  "id": "rVEhAQDO",
+  "title": "Bayesian Trend Indicator [ChartPrime]",
+  "url": "https://www.tradingview.com/script/rVEhAQDO-Bayesian-Trend-Indicator-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:47.444633+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/rVEhAQDO-Bayesian-Trend-Indicator-ChartPrime/",
+  "created_at": "2024-06-03T12:59:51.707682+00:00",
+  "updated_at": "2024-06-03T13:00:46.301336+00:00",
+  "description": "Bayesian Trend Indicator \n\nOverview:\nIn probability theory and statistics, Bayes' theorem (alternatively Bayes' law or Bayes' rule), named after Thomas Bayes, describes the probability of an event, based on prior knowledge of conditions that might be related to the event.\n\nThe \"Bayesian Trend Indicator\" is a sophisticated technical analysis tool designed to assess the direction of price trends in financial markets. It combines the principles of Bayesian probability theory with moving average analysis to provide traders with a comprehensive understanding of market sentiment and potential trend reversals.\n\nAt its core, the indicator utilizes multiple moving averages, including the Exponential Moving Average (EMA), Simple Moving Average (SMA), Double Exponential Moving Average (DEMA), and Volume Weighted Moving Average (VWMA). These moving averages are calculated based on user-defined parameters such as length and gap length, allowing traders to customize the indicator to suit their trading strategies and preferences.\n\nThe indicator begins by calculating the trend for both fast and slow moving averages using a Smoothed Gradient Signal Function. This function assigns a numerical value to each data point based on its relationship with historical data, indicating the strength and direction of the trend.\n\n\nNext, the indicator calculates prior probabilities using the trend information from the slow moving averages and likelihood probabilities using the trend information from the fast moving averages. These probabilities represent the likelihood of an uptrend or downtrend based on historical data.\n\n\n\nUsing Bayes' theorem, the indicator then combines the prior and likelihood probabilities to calculate posterior probabilities, which reflect the updated probability of an uptrend or downtrend given the current market conditions. These posterior probabilities serve as a key signal for traders, informing them about the prevailing market sentiment and potential trend reversals.\n\n\n\n\n\nKey Features:\n\n◆ The trend direction:\nTo visually represent the trend direction, the indicator colors the bars on the chart based on the posterior probabilities. Bars are colored green to indicate an uptrend when the posterior probability is greater than 0.5 (>50%), while bars are colored red to indicate a downtrend when the posterior probability is less than 0.5 (<50%).\n\n\n◆ Dashboard on the chart\nAdditionally, the indicator displays a dashboard on the chart, providing traders with detailed information about the probability of an uptrend, as well as the trends for each type of moving average. This dashboard serves as a valuable reference for traders to monitor trend strength and make informed trading decisions.\n\n\n◆ Probability labels and signals:\nFurthermore, the indicator includes probability labels and signals, which are displayed near the corresponding bars on the chart. These labels indicate the posterior probability of a trend, while small diamonds above or below bars indicate crossover or crossunder events when the posterior probability crosses the 0.5 threshold (50%).\nThe posterior probability of a trend\n\nCrossover or Crossunder events\n\n\n◆ User Inputs\nSource:\nDescription: Defines the price source for the indicator's calculations. Users can select between different price values like close, open, high, low, etc.MA's Length:\nDescription: Sets the length for the moving averages used in the trend calculations. A larger length will smooth out the moving averages, making the indicator less sensitive to short-term fluctuations.Gap Length Between Fast and Slow MA's:\nDescription: Determines the difference in lengths between the slow and fast moving averages. A higher gap length will increase the difference, potentially identifying stronger trend signals.Gap Signals:\nDescription: Defines the gap used for the smoothed gradient signal function. This parameter affects the sensitivity of the trend signals by setting the number of bars used in the signal calculations.\n\n\n\nIn summary, the \"Bayesian Trend Indicator\" is a powerful tool that leverages Bayesian probability theory and moving average analysis to help traders identify trend direction, assess market sentiment, and make informed trading decisions in various financial markets.",
+  "script": {
+    "id": 1621770,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;b53fd9507bd54835b1f920ceb7d6bf62",
+    "version_maj": 2,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bb53fd9507bd54835b1f920ceb7d6bf62/2",
+  "source_http_status": 200,
+  "source_sha256": "69643df563295a210eab5de4cc78070a92f7b277e483d881e6e3fbf38f3cfdd5",
+  "source_lines": 160,
+  "source_metadata": {
+    "created": "2024-06-03T13:00:45.351398Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "sourceInputsCount": 1,
+      "stats": {
+        "plotcandle": 1,
+        "plotchar": 2
+      }
+    },
+    "lastVersionMaj": "2.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Bayesian Trend Indicator [ChartPrime]",
+    "updated": "2024-06-03T13:00:45.351398Z",
+    "version": "2.0"
+  }
+}

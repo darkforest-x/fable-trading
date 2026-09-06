@@ -2,7 +2,32 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-09-06 — BTC V18 两根确认已回测，仍拒绝升级）
+## ⚡ 当前真相（2026-09-06 — ChartPrime 148项源码共振审查完成，未新增收益回测）
+
+Owner 最新请求转为逐项研究 ChartPrime 主页全部指标，优先于 V19 的价格回放。
+exp-chartprime-public-confluence-audit-20260906-v1 已冻结完整148发布ID：134公开源码
+逐项审读、14受限只审官方说明，无遗漏/重复/采集错误。三份reviews按45/50/53分区，
+134原始字节SHA、发布权限/脚本ID/版本/URL与独立目录联结、引用行界全部通过。
+6ebad6b采集builder先提交后采集；fee0dec报告builder先提交后构建，30本轮tests通过。
+静态语义审查不是Pine编译/实时完整运行验证，部分外部库未递归展开，条目显式注明。
+
+交付：analysis/html/p1_chartprime_public_confluence_audit_20260906.html，165原生块、
+148逐项说明、1分类图/1完整索引。官方portable验证/打包通过，structural_only；
+未装headless浏览器，CUA本地file预览被安全策略阻止，未绕过；手机/theme/来源弹窗未验。
+主要结论：优先验证已确认结构、跨资产广度、量权成本区/相对量字段的增量，不凑MA票。
+原MA Shift是HL2对SMA40侧色≠斜率/osc色；offset=-1显示≠真实可用时间；未偏移
+HTF lookahead_on仅按受影响字段判泄漏；delta/liquidation多数是OHLCV代理。
+Multi Asset Histogram确有10外部资产输入，但需固定事前币池、数据源/完成时钟、
+去本币和缺历史处理，不能称10独立因子或已获超额。默认参数均非“最优”。
+
+本轮未读价格/holdout、未回测、未保存TV/改样式、未训练/ACTIVE/实盘操作。
+盈利goal仍active且未达成。下一步若继续实现，先冻结一个共振字段，核对与已测
+入口家族重复性与支持度，再按时间/全机会/成本/匹配对照单变量验证；不并改退出。
+V19 failed-reduce的引擎/runner/verifier/合成tests与plan/config已准备在工作树，
+但未提交实验、未登记、未跑任何真实价格；勿称已盈利或按V18线性拼收益。
+不要覆盖并行ARB/其它未提交工作；未动生产/依赖/分支。
+
+### 第十八轮背景（已完成并拒绝，以下为当时记录）
 
 盈利goal仍active/未达成、不是blocked。cbb25d3先提交builder/config/plan/tests后
 唯一raw回放pre2025前缀219551行含pre2023warmup9024；交易评估2023–2024旧开发集。

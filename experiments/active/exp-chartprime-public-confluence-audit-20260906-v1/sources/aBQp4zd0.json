@@ -1,0 +1,48 @@
+{
+  "id": "aBQp4zd0",
+  "title": "MACD Support and Resistance [ChartPrime]",
+  "url": "https://www.tradingview.com/script/aBQp4zd0-MACD-Support-and-Resistance-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:58.935327+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/aBQp4zd0-MACD-Support-and-Resistance-ChartPrime/",
+  "created_at": "2025-06-09T12:03:56.049299+00:00",
+  "updated_at": null,
+  "description": "⯁ OVERVIEW\nMACD Support and Resistance [ChartPrime] is a dynamic support/resistance mapping tool powered by MACD crossover logic. Each time the MACD line crosses the signal line, the indicator scans for recent price extremes and locks them in as potential support or resistance zones. These levels are automatically cleaned up if price breaks them, keeping the chart focused on active market structure. The system includes a built-in MACD display with visual markers, along with contextual highs and lows to help define the current environment.\n\n⯁ MACD-BASED SUPPORT/RESISTANCE GENERATION\nThe core logic uses the MACD oscillator crossover as a trigger event to generate structural levels:\n\nWhen MACD crosses above its signal line:\n  → The script scans the last 5 bars for the lowest low.\n  → A support level is plotted at that price.\nWhen MACD crosses below its signal line:\n  → The script scans the last 5 bars for the highest high.\n  → A resistance level is plotted at that price.\n\n\nThese dynamic levels reflect where price recently reversed or paused, making them prime zones for reaction, continuation, or invalidation.\n\n⯁ LEVEL MANAGEMENT AND VALIDATION\nTo keep the chart clean and relevant:\n\nA maximum of 20 active levels are allowed at once.Older levels are automatically removed if the list exceeds the limit.If price closes below a support level or above a resistance level, the corresponding line is deleted.\n\nThis ensures that only currently respected levels remain on the chart — a major advantage for active traders.\n\n\n⯁ MACD VISUALIZATION + SIGNAL MARKERS\nA full MACD system is rendered on the lower panel for visual confirmation:\n\nThe MACD line and Signal line are both plotted and color-coded dynamically.A filled area] highlights the spread between them to emphasize momentum strength.\n\n*A diamond marker is drawn each time MACD crosses its signal line, alerting traders to potential trend shifts.\n\n\n\nThese visuals make it easy to understand the timing of the support/resistance updates.\n\n⯁ LOCAL EXTREME REFERENCE LINES\nTo help contextualize current price position relative to recent market extremes:\n\nA Local High line is plotted based on the highest MACD value over the past 100 bars].\n\n*A Local Low line is plotted based on the lowest MACD value over the past 100 bars].\n\n*These levels are rendered lightly and serve as dynamic range boundaries.\n\n\nThey assist traders in identifying overextended or compressed MACD behavior.\n\n⯁ USAGE\nUse the generated S/R levels as breakout or reversal zones.Watch for MACD diamond markers to confirm the timing of new levels.Combine these reactive zones with other ChartPrime confluence tools for higher-confidence entries.Use the Local High/Low zones as a volatility envelope to guide risk and trend continuation potential.\n\n⯁ CONCLUSION\nMACD Support and Resistance [ChartPrime] takes a classic momentum indicator and adds real-time structural awareness. By linking MACD crossover events to recent price extremes, it identifies the zones where market sentiment shifted — and continues to monitor their strength. Whether you're a breakout trader or looking to fade key reaction points, this tool delivers clean, actionable levels based on momentum and structure — not guesswork.",
+  "script": {
+    "id": 2749164,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;63867cec578d4e219ae9b3cac1ae618b",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B63867cec578d4e219ae9b3cac1ae618b/1",
+  "source_http_status": 200,
+  "source_sha256": "7b97ded19309f99d7c47e9715a0dbbe2d02492f48281a98c6830e8ff275d2213",
+  "source_lines": 125,
+  "source_metadata": {
+    "created": "2025-06-09T12:03:55.386123Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": false,
+      "kind": "study",
+      "originalScriptId": "USER;d3ff6bfac294488fad020be9b31c941b",
+      "originalScriptVersion": "0.442",
+      "sourceInputsCount": 1,
+      "stats": {
+        "plot": 4,
+        "plotshape": 2
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "MACD Support and Resistance [ChartPrime]",
+    "updated": "2025-06-09T12:03:55.386123Z",
+    "version": "1.0"
+  }
+}

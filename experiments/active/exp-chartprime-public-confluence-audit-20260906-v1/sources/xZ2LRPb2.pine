@@ -1,0 +1,157 @@
+//@version=5
+indicator("Gaps Trend [ChartPrime]", overlay = true, max_boxes_count = 500, max_lines_count = 100)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Input for filtering gaps by size
+float gap_filter     = input.float(0.5, "Filter Gaps", step = 0.01)
+
+// Toggle for showing Fair Value Gaps (FVG) levels
+bool show_fvg_levels = input.bool(false, "Show Gap Levels")
+
+// Trailing stop inputs
+bool enable_trailing = input.bool(true, "", inline = "1", group = "Trailing Stop")
+int trailing_length  = input.int(10, "Trailing Stop Length", inline = "1", group = "Trailing Stop")
+
+// Color inputs for bullish and bearish gap lines and areas
+color bull_color = input.color(#17d1bf, "Bullish Color")
+color bear_color = input.color(#bc25d6, "Bearish Color")
+
+// Variables for chart points and trailing stop logic
+var color       fvg_color       = color(na)
+var bool        trend_direction = na
+var float       trailing_stop   = na
+
+// Arrays for tracking highest and lowest values for trailing stop calculation
+array<float> trailing_highs = array.new<float>(1)
+array<float> trailing_lows  = array.new<float>(1)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Calculate bearish and bullish gap sizes, normalized by the standard deviation
+float bearish_gap_size = (low[2] - high) / ta.stdev(low[2] - high, 100)
+float bullish_gap_size = (low - high[2]) / ta.stdev(low - high[2], 100)
+
+// @function Detects Fair Value Gaps (FVG)
+// @returns [bool, float, float] Returns whether FVG is detected and its upper/lower levels
+detectFairValueGap() =>
+    var float       fvg_upper    = na
+    var float       fvg_lower    = na
+    var array<line> gaps_levels  = array.new<line>(1, line(na))
+
+    // Conditions to detect bullish and bearish gaps
+    bool bullish_gap_condition = low > high[2] and high[1] > high[2] and bullish_gap_size > gap_filter
+    bool bearish_gap_condition = high < low[2] and low[1] < low[2]   and bearish_gap_size > gap_filter
+
+    // Bullish FVG logic
+    if bullish_gap_condition
+        fvg_upper            := high[2]
+        fvg_lower            := low
+
+        gaps_levels.push(line.new(bar_index - 2, fvg_upper, bar_index - 2, fvg_upper, 
+                                     color = bull_color, 
+                                     style = line.style_dashed))
+        box.new(
+             bar_index - 2, fvg_upper, bar_index + 3, fvg_lower, 
+             border_color    = na, 
+             border_width    = 0, 
+             bgcolor         = color.new(bull_color, 60),
+             text            = str.tostring(math.round(bullish_gap_size, 2)), 
+             text_size       = size.tiny, 
+             text_color      = chart.fg_color,
+             text_halign     = text.align_right,
+             text_valign     = text.align_bottom
+             )
+
+    // Bearish FVG logic
+    if bearish_gap_condition
+        fvg_upper            := low[2]
+        fvg_lower            := high
+
+        gaps_levels.push(line.new(bar_index - 2, fvg_upper, bar_index - 2, fvg_upper, 
+                                     color = bear_color, 
+                                     style = line.style_dashed))
+
+        box.new(
+             bar_index - 2, fvg_upper, bar_index + 3, fvg_lower, 
+             border_color    = na, 
+             border_width    = 0, 
+             bgcolor         = color.new(bear_color, 60),
+             text            = str.tostring(math.round(bearish_gap_size, 2)), 
+             text_size       = size.tiny, 
+             text_color      = chart.fg_color,
+             text_halign     = text.align_right,
+             text_valign     = text.align_top
+             )
+
+    if show_fvg_levels
+        for i = 0 to gaps_levels.size() -1
+            line  line_id = gaps_levels.get(i)
+            float level   = line_id.get_y1()
+
+            if high > level and low < level 
+                line_id.set_x2(bar_index)
+                gaps_levels.set(i, line(na))
+
+
+    [bullish_gap_condition, bearish_gap_condition, fvg_upper]
+
+[bullish_gap_detected, bearish_gap_detected, fvg_upper] = detectFairValueGap()
+
+// Switch between bullish and bearish FVG
+switch
+    bullish_gap_detected =>
+     fvg_color          := bull_color,
+     trend_direction    := true
+
+    bearish_gap_detected =>
+     fvg_color          := bear_color,
+     trend_direction    := false
+
+
+// Loop through highs and lows for trailing stop calculation
+for i = 0 to trailing_length
+    array.push(trailing_lows, low[i])
+    array.push(trailing_highs, high[i])
+
+// Set trailing stop based on trend direction
+switch
+    trend_direction     => trailing_stop := array.min(trailing_lows)
+    not trend_direction => trailing_stop := array.max(trailing_highs)
+
+// Reset trailing stop if price crosses stop level
+switch
+    trailing_stop == low  => trailing_stop := na, trend_direction := na
+    trailing_stop == high => trailing_stop := na, trend_direction := na
+
+
+// Set the trend color based on trailing stop and price position
+trend_color = close > trailing_stop ? bull_color : bear_color
+
+// Plot the trailing stop and trend color logic
+plotshape(  
+             ta.cross(close, trailing_stop) ? trailing_stop : na, "", 
+             style    = shape.diamond, 
+             location = location.absolute, 
+             color    = trend_color, 
+             size     = size.tiny
+             )
+
+// Plot the trailing stop line and fill
+ts_plot    = plot(
+                  enable_trailing ? (ta.cross(close, trailing_stop) ? na : trailing_stop) : na, 
+                  color         = trend_color,
+                  linewidth     = 1, 
+                  style         = plot.style_linebr
+                  )
+
+price_plot = plot(hl2, display = display.none, editable = false)
+
+// Fill between price and trailing stop for visual clarity
+fill(ts_plot, price_plot, trailing_stop, hl2, color.new(trend_color, 90), na)
+
+// --------------------------------------------------------------------------------------------------------------------}

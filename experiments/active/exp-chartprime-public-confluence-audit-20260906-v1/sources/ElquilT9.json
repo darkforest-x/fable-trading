@@ -1,0 +1,45 @@
+{
+  "id": "ElquilT9",
+  "title": "Price Ratio Indicator [ChartPrime]",
+  "url": "https://www.tradingview.com/script/ElquilT9-Price-Ratio-Indicator-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:50.544815+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/ElquilT9-Price-Ratio-Indicator-ChartPrime/",
+  "created_at": "2024-05-13T14:19:48.453947+00:00",
+  "updated_at": "2024-05-14T17:37:11.151089+00:00",
+  "description": "The Price Ratio Indicator is a versatile tool designed to analyze the relationship between the price of an asset and its moving average. It helps traders identify overbought and oversold conditions in the market, as well as potential trend reversals.\n\n\n\n◈ User Inputs:\nMA Length: Specifies the length of the moving average used in the calculation.MA Type Fast: Allows users to choose from various types of moving averages such as Exponential Moving Average (EMA), Simple Moving Average (SMA), Weighted Moving Average (WMA), Volume Weighted Moving Average (VWMA), Relative Moving Average (RMA), Double Exponential Moving Average (DEMA), Triple Exponential Moving Average (TEMA), Zero-Lag Exponential Moving Average (ZLEMA), and Hull Moving Average (HMA).Upper Level and Lower Level: Define the threshold levels for identifying overbought and oversold conditions.Signal Line Length: Determines the length of the signal line used for smoothing the indicator's values.\n\n\n\n◈ Indicator Calculation:\nThe indicator calculates the ratio between the price of the asset and the selected moving average, subtracts 1 from the ratio, and then smooths the result using the chosen signal line length.\n\n\n\n\n◈ Visualization:\nThe main plot displays the price ratio, with color gradients indicating the strength and direction of the ratio.The bar color changes dynamically based on the ratio, providing a visual representation of market conditions.Invisible Horizontal lines indicate the upper and lower threshold levels for overbought and oversold conditions.A signal line, smoothed using the specified length, helps identify trends and potential reversal points.High and low value regions are filled with color gradients, enhancing visualization of extreme price movements.\n\n\n\n\nMA type HMA gives faster changes of the indicator (Each MA has its own specifics):\n\nMA type TEMA:\n\n\n\n\n◈ Additional Features:\nA symbol displayed at the bottom right corner of the chart provides a quick visual reference to the current state of the indicator, with color intensity indicating the strength of the ratio.\n\n\n\n\nOverall, the Price Ratio Indicator offers traders valuable insights into price dynamics and helps them make informed trading decisions based on the relationship between price and moving averages. Adjusting the input parameters allows for customization according to individual trading preferences and market conditions.",
+  "script": {
+    "id": 1583955,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;b197da8c5922460590858a86134c8cbc",
+    "version_maj": 3,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bb197da8c5922460590858a86134c8cbc/3",
+  "source_http_status": 200,
+  "source_sha256": "e7ee48c91e1c622408016f68acbf519397be61a0fe5b87d55a64917f7dde0edb",
+  "source_lines": 71,
+  "source_metadata": {
+    "created": "2024-05-14T17:37:10.066062Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": false,
+      "kind": "study",
+      "sourceInputsCount": 1,
+      "stats": {
+        "plot": 4
+      }
+    },
+    "lastVersionMaj": "3.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Price Ratio Indicator [ChartPrime]",
+    "updated": "2024-05-14T17:37:10.066062Z",
+    "version": "3.0"
+  }
+}

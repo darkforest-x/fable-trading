@@ -1,0 +1,56 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ExoMaven
+
+//@version=5
+indicator(title = "Quick Shot[ChartPrime]", shorttitle = "Quick Shot [V1]", overlay = true)
+
+
+//User Input
+length = input.int(title = "Length", defval = 50, maxval = 100, minval = 10, group = "Dot Settings")
+exp_mult = input.int(title = "Agressiveness", defval = 8, minval = 5, maxval = 12, step = 1, group = "Curved Line Settings") / 4
+
+
+//Indicators
+ma = ta.ema(close, length)
+ma2 = ta.ema(close, 200)
+ma_up = ta.crossover(ma, ma[1]) and ma > ma2 and barstate.isconfirmed
+ma_dn = ta.crossunder(ma, ma[1]) and ma < ma2 and barstate.isconfirmed
+
+
+//Main Logic
+var bool exp_go = false
+var float exp_sl = na
+float exp_value = na
+var float high_val = na
+var float low_val = na
+
+exp_go := ma_up or ma_dn ? true : exp_go
+high_val := ma_up ? high : high > high_val ? high : high_val
+low_val  := ma_dn ? low : low < low_val ? low : low_val
+// exp_sl := ma_up or ma_dn ? ma - ma[1] : exp_sl > 0 and high_val > high_val[1] ? exp_sl * exp_mult : exp_sl < 0 and low_val < low_val[1] ? exp_sl * exp_mult : exp_sl
+exp_sl := ma_up or ma_dn ? ma - ma[1] : exp_sl > 0 or exp_sl < 0 ? exp_sl * exp_mult : exp_sl
+exp_value := ma_up or ma_dn ? ma : exp_go ? exp_value[1] + exp_sl : na
+exp_go := exp_value > exp_value[1] ? (exp_value < (close < open ? close : open) ? true : false) : exp_value < exp_value[1] ? (exp_value > (close > open ? close : open) ? true : false) : exp_go
+
+buy_exit = exp_value > exp_value[1] and not exp_go and exp_go[1]
+sell_exit = exp_value < exp_value[1] and not exp_go and exp_go[1]
+
+
+//Plots
+plotshape(ma_up, title = "Buy", style = shape.circle, location = location.belowbar, color = color.green, show_last = 20000, size = size.tiny)
+plotshape(ma_dn, title = "Sell", style = shape.circle, location = location.abovebar, color = color.red, show_last = 20000, size = size.tiny)
+
+plotshape(buy_exit, title = "Buy Exit", style = shape.xcross, location = location.abovebar, color = color.blue, show_last = 20000, size = size.tiny)
+plotshape(sell_exit, title = "Sell Exit", style = shape.xcross, location = location.belowbar, color = color.blue, show_last = 20000, size = size.tiny)
+
+plot(exp_value, title = "Exp Line", color = exp_value < close ? color.new(color.green, 25) : color.new(color.red, 25), linewidth = 1, style = plot.style_cross)
+
+
+//Alertconditions
+alertcondition(condition = ma_up, title = "Green Dot Alert")
+alertcondition(condition = ma_dn, title = "Red Dot")
+
+alertcondition(condition = buy_exit, title = "Green Dot Exit")
+alertcondition(condition = sell_exit, title = "Red Dot Exit")
+
+

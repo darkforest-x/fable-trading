@@ -1,0 +1,49 @@
+{
+  "id": "JqEFTgOE",
+  "title": "SuperTrend Oscillator [ChartPrime]",
+  "url": "https://www.tradingview.com/script/JqEFTgOE-SuperTrend-Oscillator-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:27.864580+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/JqEFTgOE-SuperTrend-Oscillator-ChartPrime/",
+  "created_at": "2025-12-01T13:52:22.498305+00:00",
+  "updated_at": null,
+  "description": "⯁ OVERVIEW\nThe SuperTrend Oscillator [ChartPrime] is a hybrid momentum–trend indicator that transforms the classic SuperTrend into a full-strength oscillator.  \nInstead of simply plotting SuperTrend direction on the chart, this tool measures the distance between price and SuperTrend, normalizes it by volatility, and converts it into a dynamic oscillator that highlights trend strength, momentum extremes, and high-precision reversal points.\n\n⯁ CONCEPTS\n SuperTrend Engine: The indicator extracts the SuperTrend baseline and direction using ATR-based volatility. This acts as the core structure from which the oscillator is built. Volatility-Adjusted Oscillation: (close − SuperTrend) is divided by ATR to standardize momentum across all markets and timeframes. Adaptive Oscillator Types: The signal can be transformed using HMA, EMA, or SMA smoothing for varying responsiveness. Momentum Extremes: Values above +1.7 or below −1.7 signal stretched price conditions where reversals are more likely. Reversal Logic: The oscillator compares its current value with its value three bars ago. Large positive or negative pivots indicate momentum shifts.\n\n⯁ FEATURES\n Trend-Colored SuperTrend Line  \n  The SuperTrend line shifts color based on direction, giving immediate context for oscillator readings.\n Full Oscillator Transformation  \n  Converts price–SuperTrend distance into a normalized oscillator, showing when momentum is expanding, contracting, or reaching exhaustion.\n Gradient Momentum Coloring  \n  The oscillator line and candles are colored using a two-sided gradient:  \n  • Red tones for bearish momentum  \n  • Orange/cream tones for bullish momentum  \n  • Gray tones for low momentum  \n\n  This makes strength visually intuitive. Extreme Zones (±1.7 Bands)  \n  Built-in upper and lower thresholds highlight zones where price is statistically overextended.\n Dual Fill Layers  \n  The area above/below zero is filled in different colors to emphasize bullish or bearish oscillator regime. Reversal Diamonds  \n  The script highlights significant reversals when:  \n  • Momentum shifts downward from high values (bearish pivot)  \n  • Momentum shifts upward from deep lows (bullish pivot)  \n  These diamonds help pinpoint exhaustion-based turning points.\n\n\n⯁ HOW TO USE\n Identify Trend Strength:  \n  A rising oscillator above 0 confirms bullish SuperTrend conditions; falling below 0 confirms bearish ones. Spot Momentum Extremes:  \n  Readings above +1.7 or below −1.7 often signal overextended price moves. Use Reversal Diamonds as Pivot Alerts:  \n  Diamond markers indicate high-probability turning points when momentum sharply reverses from extreme zones. Confirm Trend Shifts with Color Changes:  \n  Candle and oscillator colors shift based on momentum direction, providing clean visual alignment with SuperTrend direction. Combine with Structure or OB Zones:  \n  Reversal signals become more reliable when they occur at key S/R, order blocks, or liquidity sweeps.\n\n⯁ CONCLUSION\nThe SuperTrend Oscillator [ChartPrime] modernizes the SuperTrend by transforming it into a volatility-aware oscillator with clear reversal markers, trend coloring, and momentum normalization.  \nThis tool is ideal for traders who want both trend context and precise timing signals, blending SuperTrend’s reliability with the dynamics of a professional-grade momentum oscillator.\n",
+  "script": {
+    "id": 3460315,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;f44b3f73b2fd41b8aa099c7ee3ad66d3",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bf44b3f73b2fd41b8aa099c7ee3ad66d3/1",
+  "source_http_status": 200,
+  "source_sha256": "da5ba27be2c50d9b21e05751ef946421e84d08887567b40ecd011eab561671d6",
+  "source_lines": 88,
+  "source_metadata": {
+    "created": "2025-12-01T13:52:20.605601Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": false,
+      "kind": "study",
+      "originalScriptId": "USER;6228a1de374c49558cc1e96cfd563dda",
+      "originalScriptVersion": "0.87",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 6,
+        "plotcandle": 1,
+        "plotshape": 6
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "SuperTrend Oscillator [ChartPrime]",
+    "updated": "2025-12-01T13:52:20.605601Z",
+    "version": "1.0"
+  }
+}

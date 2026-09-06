@@ -1,0 +1,42 @@
+{
+  "id": "ELvw1jfq",
+  "title": "Volume Positive & Negative Levels [ChartPrime]",
+  "url": "https://www.tradingview.com/script/ELvw1jfq-Volume-Positive-Negative-Levels-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:43.969669+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/ELvw1jfq-Volume-Positive-Negative-Levels-ChartPrime/",
+  "created_at": "2024-06-24T12:36:20.805470+00:00",
+  "updated_at": "2024-06-24T12:37:04.602090+00:00",
+  "description": "Volume Positive & Negative Levels [ChartPrime]\n\nOverview:\nThe Volume Positive & Negative Levels indicator by ChartPrime is designed to provide traders with a clear visualization of volume activity across different price levels. By plotting volume levels as histograms, this tool helps identify significant areas of buying (positive volume) and selling (negative volume) pressure, enhancing the ability to spot potential support and resistance zones.\n\nKey Features:\n\n⯁ Lookback Period:\n   - The `lookbackPeriod` parameter, set to 500 bars, determines the range over which the volume analysis is conducted, ensuring a comprehensive view of the market’s volume activity. The maximum lookback period is 500 bars or the bars currently visible on the chart, whichever is smaller.\n\n\n⯁ Dynamic Volume Calculation:\n   - Volume is calculated dynamically based on the price action, with positive volume indicating buying pressure (close > open) and negative volume indicating selling pressure (close < open).\n\n⯁ Color Coding for Clarity:\n   - Positive Volume: Represented with a distinct color (`#ad9a2c`), making it easy to identify areas of buying interest.   - Negative Volume: Highlighted with another color (`#ad2cad`), simplifying the detection of selling pressure.\n\n\nVolume Threshold and Bins:\n   - The indicator allows users to set a volume threshold (`volume_level`) to highlight significant volume levels, with the default set at 70.   - The number of bins (`numBins`) defines the granularity of the volume profile, with a higher number providing more detail.\n\n\n⯁ Volume Profile Visualization:\n   - The volume profile is plotted as a histogram, with the height of each bar proportional to the volume at that price level. This visualization helps in quickly assessing the strength of volume at various price points.\n\n\n⯁ Interactive Labels and Threshold Indicators:\n   - Labels: The indicator uses labels to mark significant volume levels, providing quick reference points for traders.   - Threshold Lines: Lines are drawn at specified volume thresholds, with colors and widths dynamically adjusted based on the volume levels.\n\n⯁ User Inputs:\n- Volume Threshold (`volume_level`): Sets the minimum volume required to highlight significant levels.- Number of Bins (`numBins`): Determines the resolution of the volume profile.- Line Width (`line_withd`): Specifies the width of the lines used in the visualization.\n\n\nThe Volume Positive & Negative Levels indicator is a powerful tool for traders looking to gain deeper insights into market dynamics. By providing a clear visual representation of volume activity across different price levels, it helps traders identify key support and resistance zones, spot trends, and make more informed trading decisions. Whether you are a day trader or a swing trader, this indicator enhances your ability to analyze volume data effectively, improving your overall trading strategy.",
+  "script": {
+    "id": 1661758,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;9d4ea3cea53649c281db6a1091738bf9",
+    "version_maj": 2,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B9d4ea3cea53649c281db6a1091738bf9/2",
+  "source_http_status": 200,
+  "source_sha256": "845b2a4cfebf645190070b5975a4c168eb56840de29fb8a542d4e9d460c4766f",
+  "source_lines": 154,
+  "source_metadata": {
+    "created": "2024-06-24T12:37:02.767592Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "sourceInputsCount": 0
+    },
+    "lastVersionMaj": "2.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Volume Positive & Negative Levels [ChartPrime]",
+    "updated": "2024-06-24T12:37:02.767592Z",
+    "version": "2.0"
+  }
+}

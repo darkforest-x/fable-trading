@@ -1,0 +1,47 @@
+{
+  "id": "8pOsueGg",
+  "title": "HTF Conviction Divergence Matrix [ChartPrime]",
+  "url": "https://www.tradingview.com/script/8pOsueGg-HTF-Conviction-Divergence-Matrix-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:12.841912+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/8pOsueGg-HTF-Conviction-Divergence-Matrix-ChartPrime/",
+  "created_at": "2026-03-23T12:05:48.648400+00:00",
+  "updated_at": null,
+  "description": "🔶 OVERVIEW  \nHTF Conviction Divergence Matrix [ChartPrime] is a professional-grade reversal detection engine that synchronizes momentum oscillators with institutional volume flow across multiple timeframes. Unlike standard divergence tools that only track price and RSI, this indicator utilizes a \"Matrix\" validation engine that requires Volume Delta alignment to confirm institutional participation before flagging a signal.\n\nThe tool provides a comprehensive high-timeframe (HTF) workspace, featuring dynamic OHLC structural levels, a multi-timeframe bias ribbon, and a real-time \"Power of 3\" (PO3) projection.\n\n• Conviction-Based RSI Divergence Matrix  \n• NEW: High-Conviction Volumetric Filtering  \n• Dynamic HTF OHLC Structural Levels (Open, High, Low, Close)  \n• Multi-Timeframe Trend Bias Ribbon (Bottom-fixed)  \n• Automated \"Power of 3\" (PO3) Candle Projection  \n• Precision Pivot Trendline Plotting  \n• Customizable \"High Conviction\" Signal Labels  \n\n\n🔶 CORE CONCEPT — THE CONVICTION MATRIX  \nStandard divergences often suffer from \"exhaustion traps\" where price continues to move against the signal due to a lack of institutional backing. HTF Conviction Divergence Matrix solves this by integrating Cumulative Volume Delta into the reversal logic:\n• High-Conviction Filter: A divergence is only labeled as \"High Conviction\" if the HTF Volume Delta aligns with the price reversal. For a bullish divergence, we look for rising delta (buying pressure); for bearish, we look for falling delta (selling pressure).\n• Institutional Confirmation: By filtering out low-volume divergences, the script helps traders focus on areas where \"Smart Money\" is actively rotating positions, significantly increasing the probability of a successful reversal.\n\n\n🔶 HTF STRUCTURAL LAYERS  \nTo provide institutional-level context, the indicator features a dynamic structural mapping system that identifies key HTF levels in real-time.\n Period-Origin Levels: The script draws the Open, High, Low, and Close of the current HTF candle, starting exactly at the period's origin. This allows traders to see how lower-timeframe price action is interacting with the \"Higher Timeframe Range\" as it develops. Dynamic S/R: These levels act as automated support and resistance zones. Reversals occurring at the HTF High (H-H) or HTF Low (H-L) are historically higher probability than those occurring in the middle of the range. HTF Bias Ribbon: A discrete ribbon at the bottom of the chart tracks whether the HTF candle is currently Bullish (Price > Open) or Bearish (Price < Open), providing an instant \"Go/No-Go\" filter for trend-alignment.\n\n\n🔶 PO3 PROJECTION (POWER OF 3)  \nThe indicator features an automated \"Power of 3\" projection system to the right of the price action. \n Accumulation, Manipulation, Distribution: The PO3 projection visualizes the current HTF candle's internal structure (Wick vs. Body), allowing you to anticipate \"Expansion\" phases before they occur on the lower timeframe. Real-Time Updates: The projection updates bar-by-bar, showing the exact HTF High/Low expansion relative to the current session.\n\n\n🔶 HOW TO USE  \n Spotting High-Conviction Reversals: Look for the High Conviction label accompanied by a solid trendline. These signals represent a rare alignment of Price, Momentum (RSI), and Institutional Flow (Volume Delta). Trading the HTF Range: Use the H-H (HTF High) and H-L (HTF Low) levels as primary targets or reversal zones. A signal appearing at an HTF range extremity is a \"Prime\" setup. Trend Alignment: Check the HTF Bias Ribbon at the bottom. For the highest probability, only take Bullish signals when the ribbon is Green (HTF Bullish Context). Managing Exits: Use the HTF Open (H-O) level as a \"Magnet\" or \"Equilibrium\" point for mean-reversion trades.\n\n\n🔶 CONCLUSION  \nHTF Conviction Divergence Matrix [ChartPrime] transforms the traditional RSI divergence into a multi-factor institutional tool. By prioritizing volume intensity and HTF structural context, it removes the guesswork from reversal trading and helps traders identify where the real market rotations are happening.\n",
+  "script": {
+    "id": 5010455,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;c633c8a3b91e4ce99e326eedb3705b32",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bc633c8a3b91e4ce99e326eedb3705b32/1",
+  "source_http_status": 200,
+  "source_sha256": "27a90a850b57073b24e33e4ce2bfa5505acb9942f2ce51a00edca625fdb75692",
+  "source_lines": 163,
+  "source_metadata": {
+    "created": "2026-03-23T12:05:47.708997Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;8282ac9345614c7487e4a864ccd0a698",
+      "originalScriptVersion": "0.3",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plotshape": 3
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "HTF Conviction Divergence Matrix [ChartPrime]",
+    "updated": "2026-03-23T12:05:47.708997Z",
+    "version": "1.0"
+  }
+}

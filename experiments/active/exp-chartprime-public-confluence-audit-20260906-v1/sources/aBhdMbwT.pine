@@ -1,0 +1,1428 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("Deep Volume [ChartPrime]", format = format.volume, max_lines_count = 332, max_boxes_count = 500, max_labels_count = 500)
+
+type properties 
+    string volume_style
+    int candle_average_length
+    bool enable_average_daily
+    int daily_volume_average_length
+    int daily_volume_location_offset
+    bool enable_table
+    string location
+    int window_size
+    int length
+    bool enable_time
+    bool enable_time_delta
+    bool enable_order_size
+    bool enable_volume
+    bool enable_price_change
+    bool enable_price
+    bool enable_speed_of_tape
+    bool enable_average_order_size
+    bool enable_average_volume
+    bool enable_volume_ratio
+    bool enable_average_price_change
+    bool enable_sensitivity
+    bool enable_scaled_sensitivity
+    color bullish_candle_color
+    color neutral_candle_color
+    color bearish_candle_color
+    color sum_candle_avg_color
+    color bullish_candle_avg_color
+    color bearish_candle_avg_color
+    color bullish_table_color
+    color neutral_table_color
+    color bearish_table_color
+    color table_grad_bullish_up
+    color table_grad_bullish_down
+    color table_grad_bearish_down
+    color talbe_grad_bearish_up
+    color label_neutral_color
+    color label_bullish_color
+    color table_color
+    color text_color
+
+volume_style = input.string(
+       "Ratio Columns"
+     , "Volume Style"
+     , [
+           "Ratio Columns"
+         , "Polar"
+         , "Disabled"
+         ]
+     , group = "Volume"
+     )
+
+candle_average_length = input.int(
+       20
+     , "Volume Average Length"
+     , minval = 1
+     , group = "Volume"
+     )
+
+enable_average_daily = input.bool(
+      false
+     , "Enable Session Volume"
+     , group = "Session Volume"
+     )
+
+daily_volume_average_length = input.int(
+       20
+     , "Average Session Volume Length"
+     , minval = 1
+     , group = "Session Volume"
+     )
+
+daily_volume_location_offset = input.int(
+       11
+     , "Session Volume Location Offset"
+     , group = "Session Volume"
+     )
+
+enable_table = input.bool(
+       true
+     , "Enable Table"
+     , group = "Table"
+     )
+
+location = input.string(
+       "Bottom Right"
+     , "Position"
+     , [
+           "Bottom Left"
+         , "Bottom Middle"
+         , "Bottom Right"
+         , "Middle Left"
+         , "Middle Center"
+         , "Middle Right"
+         , "Top Left"
+         , "Top Middle"
+         , "Top Right"
+         ]
+     , group = "Table"
+     )
+
+window_size = input.int(
+       6
+     , "Tape Window Size"
+     , minval = 1
+     , group = "Table"
+     )
+
+length = input.int(
+       20
+     , "Average Length"
+     , minval = 1
+     , group = "Table"
+     )
+
+enable_time = input.bool(
+       true
+     , "Enable Time"
+     , tooltip = "Time of tick"
+     , group = "Table"
+     )
+
+enable_time_delta = input.bool(
+      false
+     , "Enable Time Delta"
+     , tooltip = "Time between ticks"
+     , group = "Table"
+     )
+
+enable_order_size = input.bool(
+      true
+     , "Enable Order Size"
+     , tooltip = "Price ✕ Volume"
+     , group = "Table"
+     )
+
+enable_volume = input.bool(
+      true
+     , "Enable Volume"
+     , tooltip = "Volume change between ticks"
+     , group = "Table"
+     )
+
+enable_price_change = input.bool(
+      false
+     , "Enable Price Change"
+     , tooltip = "Price change between ticks"
+     , group = "Table"
+     )
+
+enable_price = input.bool(
+      false
+     , "Enable Price"
+     , tooltip = "Price at tick"
+     , group = "Table"
+     )
+
+enable_speed_of_tape = input.bool(
+      false
+     , "Enable Speed of Tape"
+     , tooltip = "Average time delta"
+     , group = "Table"
+     )
+
+enable_average_order_size = input.bool(
+      true
+     , "Enable Average Order Size"
+     , tooltip = "Average order size"
+     , group = "Table"
+     )
+
+
+enable_average_volume = input.bool(
+      true
+     , "Enable Average Volume"
+     , tooltip = "Average tick volume"
+     , group = "Table"
+     )
+
+enable_volume_ratio = input.bool(
+      false
+     , "Enable Volume Ratio"
+     , tooltip = "100% is completely bullish, -100% is completely bearish, 0% is completely neutral. (Up Volume ÷ Total Volume - 0.5) ✕ 200."
+     , group = "Table"
+     )
+
+enable_average_price_change = input.bool(
+      false
+     , "Enable Average Price Change"
+     , tooltip = "Average absolute price move"
+     , group = "Table"
+     )
+
+enable_sensitivity = input.bool(
+      false
+     , "Enable Sensitivity"
+     , tooltip = "This metric aims to provide a scale for how much the price can move for one unit of volume. |Price Change| ÷ Volume Change."
+     , group = "Table"
+     )
+
+enable_scaled_sensitivity = input.bool(
+      false
+     , "Enable Relative Sensitivity"
+     , tooltip = "This metric aims to provide a standardized price movement size for the average volume. Sensitivity ✕ Average Volume."
+     , group = "Table"
+     )
+
+bullish_candle_color = input.color(
+       color.rgb(0, 193, 96, 40)
+     , "Plot Colors"
+     , inline = "Plot"
+     , group = "Colors"
+     )
+neutral_candle_color = input.color(
+       color.rgb(128, 128, 128, 40)
+     , ""
+     , inline = "Plot"
+     , group = "Colors"
+     )
+
+bearish_candle_color = input.color(
+       color.rgb(255, 38, 38, 40)
+     , ""
+     , inline = "Plot"
+     , group = "Colors"
+     )
+
+sum_candle_avg_color = input.color(
+       color.rgb(62, 114, 255)
+     , "Column Ratio Average"
+     , group = "Colors"
+     )
+
+bullish_candle_avg_color = input.color(
+       color.rgb(104, 62, 255)
+     , "Polar Bullish Average"
+     , group = "Colors"
+     )
+
+bearish_candle_avg_color = input.color(
+       color.rgb(255, 171, 16)
+     , "Polar Bearish Average"
+     , group = "Colors"
+     )
+
+bullish_table_color = input.color(
+       color.rgb(29, 160, 95)
+     , "Table Polarity"
+     , inline = "Table"
+     , group = "Colors"
+     )
+
+neutral_table_color = input.color(
+       color.rgb(92, 92, 92)
+     , ""
+     , inline = "Table"
+     , group = "Colors"
+     )
+
+bearish_table_color = input.color(
+       color.rgb(212, 15, 15)
+     , ""
+     , inline = "Table"
+     , group = "Colors"
+     )
+
+table_grad_bullish_up = input.color(
+       color.rgb(29, 160, 95)
+     , "Table Bullish Gradient"
+     , inline = "Bullish Table"
+     , group = "Colors"
+     )
+
+table_grad_bullish_down = input.color(
+       color.rgb(109, 134, 124)
+     , ""
+     , inline = "Bullish Table"
+     , group = "Colors"
+     )
+
+table_grad_bearish_down = input.color(
+       color.rgb(212, 15, 15)
+     , "Table Bearish Gradient"
+     , inline = "Bearish Table"
+     , group = "Colors"
+     )
+
+talbe_grad_bearish_up = input.color(
+       color.rgb(161, 112, 112)
+     , ""
+     , inline = "Bearish Table"
+     , group = "Colors"
+     )
+
+label_bullish_color = input.color(
+       color.rgb(0, 148, 12)
+     , "Session Volume"
+     , inline = "Session Color"
+     , group = "Colors"
+     )
+
+label_neutral_color = input.color(
+       color.rgb(85, 89, 126)
+     , ""
+     , inline = "Session Color"
+     , group = "Colors"
+     )
+
+table_color = input.color(
+       color.rgb(58, 57, 78)
+     , "Table Color"
+     , group = "Colors"
+     )
+
+text_color = input.color(
+       color.rgb(250, 250, 250)
+     , "Table Text"
+     , group = "Colors"
+     )
+
+settings = properties.new(
+   volume_style
+ , candle_average_length
+ , enable_average_daily
+ , daily_volume_average_length
+ , daily_volume_location_offset
+ , enable_table
+ , location
+ , window_size
+ , length
+ , enable_time
+ , enable_time_delta
+ , enable_order_size
+ , enable_volume
+ , enable_price_change
+ , enable_price
+ , enable_speed_of_tape
+ , enable_average_order_size
+ , enable_average_volume
+ , enable_volume_ratio
+ , enable_average_price_change
+ , enable_sensitivity
+ , enable_scaled_sensitivity
+ , bullish_candle_color
+ , neutral_candle_color
+ , bearish_candle_color
+ , sum_candle_avg_color
+ , bullish_candle_avg_color
+ , bearish_candle_avg_color
+ , bullish_table_color
+ , neutral_table_color
+ , bearish_table_color
+ , table_grad_bullish_up
+ , table_grad_bullish_down
+ , table_grad_bearish_down
+ , talbe_grad_bearish_up
+ , label_neutral_color
+ , label_bullish_color
+ , table_color
+ , text_color
+ )
+
+type vec2
+    float x = 0
+    float y = 0
+
+type vec3
+    float x = 0
+    float y = 0
+    float z = 0
+
+type tick_data
+    float price = na
+    float price_delta = na
+    float vol = na
+    bool polarity = na
+    string t = na
+    int t_delta = na
+    string state = na
+
+type volume_data
+    float bullish = 0
+    float bearish = 0
+    float neutral = 0
+    int bullish_count = 0
+    int bearish_count = 0
+    int neutral_count = 0
+    int total_count = 0
+
+type tape_average
+    float[] avg
+    float[] ratio
+    color[] col
+
+location(location)=> 
+    switch location
+        "Bottom Left" => position.bottom_left
+        "Bottom Middle" => position.bottom_center
+        "Bottom Right" => position.bottom_right
+        "Middle Left" => position.middle_left
+        "Middle Center" => position.middle_center
+        "Middle Right" => position.middle_right
+        "Top Left" => position.top_left
+        "Top Middle" => position.top_center
+        "Top Right" => position.top_right
+
+historical_volume()=>
+    direction = close > open
+    rng = high - low
+    top_body = math.max(open, close)
+    bottom_body = math.min(open, close)
+
+    top_wick_length = high - top_body
+    bottom_wick_length = bottom_body - low
+    body_length = top_body - bottom_body
+
+    weighted_top_wick_normal_length = top_wick_length * 0.375
+    weighted_bottom_wick_normal_length = bottom_wick_length * 0.375
+
+    weighted_top_wick_neutral_length = top_wick_length * 0.125
+    weighted_bottom_wick_neutral_length = bottom_wick_length * 0.125
+
+    weighted_body_length = body_length * 2
+
+    adjusted_rng = weighted_top_wick_normal_length + weighted_bottom_wick_normal_length + weighted_body_length + weighted_top_wick_neutral_length + weighted_bottom_wick_neutral_length
+
+    top_wick_neutral = weighted_top_wick_neutral_length / adjusted_rng
+    bottom_wick_neutral = weighted_bottom_wick_neutral_length / adjusted_rng
+
+    top_wick_normal = weighted_top_wick_normal_length / adjusted_rng
+    bottom_wick_normal = weighted_bottom_wick_normal_length / adjusted_rng
+    body = weighted_body_length / adjusted_rng
+
+    bullish = (direction ? body + bottom_wick_normal : bottom_wick_normal) * volume
+    bearish = (direction ? top_wick_normal : body + top_wick_normal) * volume
+    neutral = (top_wick_neutral + bottom_wick_neutral) * volume
+
+    vec3.new(bullish, bearish, neutral)
+
+window_avg(float source, int length, bool flag)=>
+    var average = array.new<float>()
+    var count = 0
+    if flag
+        if count < length
+            average.push(source)
+            count += 1
+        else
+            average.push(source)
+            average.shift()
+    average.avg()
+
+daily_volume(properties settings)=>
+    var float daily_volume = 0
+    
+    if session.isfirstbar
+        daily_volume := 0
+
+    daily_volume += volume
+
+    flag = session.islastbar and barstate.isconfirmed
+
+    avg_daily_volume = window_avg(daily_volume, length, flag)
+
+    vec2.new(daily_volume, avg_daily_volume)
+
+method round(float self, int place = 2)=>
+    math.round(self, place)
+
+method round_to_first_significant(float self)=>
+    float out = 0
+    if self < 0.01 and self > -0.01
+        exponent = math.floor(math.log10(math.abs(self)))
+        out := math.round(self / math.pow(10, exponent - 1)) * math.pow(10, exponent - 1)
+
+    else
+        out := self.round(2)
+
+    nz(out, 0)
+
+method round_to_mintick(float self)=>
+    math.round_to_mintick(self)
+
+method to_string(float self)=>
+    str.tostring(self)
+
+method to_string(int self)=>
+    str.tostring(self)
+ 
+method format_time(int self, bool ms = false)=>
+    if ms
+        if self >= 1000
+            str.tostring(self/1000) + "s"
+        else
+            str.tostring(self) + "ms"
+    else
+        str.format("{0,time,HH:mm:ss}", self)
+
+method format_volume(float self)=>
+    if self >= 9.9
+        str.tostring(self, format.volume)
+    else
+        str.tostring(self.round_to_first_significant())
+
+method ready(tick_data[] self, bool real_time = false)=>
+    if real_time
+        self.size() > 0 and barstate.isrealtime
+    else
+        self.size() > 0
+
+method color_grad(float self, bool wait_for_new = false, properties settings)=>
+    varip ready_color = false
+    varip color colour = na
+
+    if barstate.isrealtime
+        if barstate.isnew or not wait_for_new
+            ready_color := true
+        
+        if ready_color
+            colour := self < 0.5 ? 
+             color.from_gradient(self, 0, 0.5, settings.table_grad_bearish_down, settings.talbe_grad_bearish_up) :
+             color.from_gradient(self, 0.5, 1, settings.table_grad_bullish_down, settings.table_grad_bullish_up)
+    else
+        na
+
+method color_polarity(bool self, properties settings)=>
+    switch self
+        true => settings.bullish_table_color
+        false => settings.bearish_table_color
+        => settings.neutral_table_color
+
+get_tick()=>
+    varip string state = ""
+
+    varip float old_price = 0 
+    varip float new_price = 0
+    varip float price_delta = 0
+
+    varip float old_volume = 0
+    varip float new_volume = 0
+    varip float volume_delta = 0
+
+    varip int old_time = 0
+    varip int new_time = na
+    varip float time_delta = 0
+
+    varip bool polarity = na
+    varip bool tick_ready = false
+
+    varip float daily_vol = 0
+    varip float avg_daily_vol = 0
+
+    varip tick_data data = tick_data.new()
+
+    if barstate.isrealtime
+        new_price := close
+        new_volume := volume
+        new_time := timenow
+
+        if barstate.isnew
+            old_volume := 0
+            if session.isfirstbar_regular
+                state := "🗓"
+
+            else
+                state := "🗘"
+
+        else
+            state := ""
+
+        if tick_ready
+            price_delta := new_price - old_price
+            volume_delta := new_volume - old_volume
+            time_delta := new_time - old_time
+
+            if new_price > old_price
+                polarity := true
+
+            if new_price < old_price
+                polarity := false
+
+            if new_price == old_price
+                polarity := na
+
+        old_price := new_price
+        old_volume := new_volume
+        old_time := new_time    
+
+        if tick_ready
+            data := tick_data.new(new_price, price_delta, volume_delta, polarity, new_time.format_time(), int(time_delta), state)
+
+        tick_ready := true
+
+    data
+
+get_tape(tick_data tick, properties settings)=>
+    varip tape = array.new<tick_data>()
+    varip candle = array.new<tick_data>()
+    active = not na(tick.price)
+
+    if barstate.isrealtime and active
+        if barstate.isnew
+            candle.clear()
+
+        if tick.vol != 0
+            tape.unshift(tick)
+        candle.unshift(tick)
+
+        if tape.size() > length
+            tape.pop()
+
+    [tape, candle]
+
+method order_size(tick_data self, bool round = true)=>
+    switch round
+        true => math.round_to_mintick(self.vol * self.price)
+        false => self.vol * self.price
+
+method get_volume(tick_data[] self)=>
+    varip float bullish = 0
+    varip float bearish = 0
+    varip float neutral = 0
+    varip int bullish_count = 0
+    varip int bearish_count = 0
+    varip int neutral_count = 0
+
+    varip volume_data data = volume_data.new()
+
+    if self.ready(true) 
+        bullish := 0
+        bearish := 0
+        neutral := 0
+
+        bullish_count := 0
+        bearish_count := 0
+        neutral_count := 0
+
+        for i = 0 to self.size() - 1
+            vol = self.get(i).vol
+            polarity = self.get(i).polarity
+            bullish += polarity ? vol : 0
+            bearish += not polarity ? vol : 0
+            neutral += na(polarity) ? vol : 0
+            bullish_count += polarity ? 1 : 0
+            bearish_count += not polarity ? 1 : 0
+            neutral_count += na(polarity) ? 1 : 0
+
+        data := volume_data.new(bullish, bearish, neutral, bullish_count, bearish_count, neutral_count, self.size())
+
+    data
+
+method volume_sum(volume_data self, bool include_neutral = true)=>
+    if include_neutral
+        self.bullish + self.bearish + self.neutral
+    else
+        self.bullish + self.bearish
+
+method volume_ratio(volume_data self)=>
+    self.bullish / self.volume_sum()
+
+method volume_dist(volume_data self, bool full = true)=>
+    sum = self.volume_sum(full)
+    vec3.new(self.bullish/sum, self.bearish/sum, self.neutral/sum)
+
+method candle_average(volume_data self, properties settings)=>
+    var ready = false
+
+    history = historical_volume()
+    neutral = history.z / 2
+    bullish = history.x + neutral
+    bearish = history.y + neutral
+    sum = bullish + bearish
+
+    var total_avg = array.new<float>()
+    var bullish_avg = array.new<float>()
+    var bearish_avg = array.new<float>()
+
+    if not barstate.isrealtime
+        total_avg.unshift(sum)
+        bullish_avg.unshift(bullish)
+        bearish_avg.unshift(bearish)
+        
+    if barstate.isnew
+        ready := true
+
+    if barstate.isrealtime and ready and barstate.isconfirmed
+        total_avg.unshift(self.volume_sum())
+        bullish_avg.unshift(self.bullish + self.neutral / 2)
+        bearish_avg.unshift(self.bearish + self.neutral / 2)
+
+    if total_avg.size() > settings.candle_average_length
+        total_avg.pop()
+        bullish_avg.pop()
+        bearish_avg.pop()
+        
+    vec3.new(total_avg.avg(), bullish_avg.avg(), bearish_avg.avg())
+
+
+method volume_average(volume_data self, vec3 history, properties settings)=>
+    varip ready = false
+    candle_average = self.candle_average(settings)
+
+    var lines = array.new<line>()
+
+    var float current_total = 0
+    var float current_bullish = 0
+    var float current_bearish = 0
+    var float previous_total = na
+    var float previous_bullish = na
+    var float previous_bearish = na
+
+    neutral = history.z / 2
+    bullish = history.x + neutral
+    bearish = history.y + neutral
+
+    hist_sum_avg = ta.sma(volume, settings.candle_average_length)
+    hist_bullish_avg = ta.sma(bullish, settings.candle_average_length)
+    hist_bearish_avg = ta.sma(bearish, settings.candle_average_length)
+
+    if line.all.size() > 167
+        line.all.first().delete()
+
+    if not ready
+        if settings.volume_style == "Ratio Columns"
+            line.new(
+                   bar_index - 1
+                 , hist_sum_avg[1]
+                 , bar_index
+                 , hist_sum_avg
+                 , color = settings.sum_candle_avg_color
+                 , width = 3
+                 )
+
+        if settings.volume_style == "Polar"
+            line.new(
+                   bar_index - 1
+                 , hist_bullish_avg[1]
+                 , bar_index
+                 , hist_bullish_avg
+                 , color = settings.bullish_candle_avg_color
+                 , width = 3
+                 )
+
+            line.new(
+                   bar_index - 1
+                 , -hist_bearish_avg[1]
+                 , bar_index
+                 , -hist_bearish_avg
+                 , color = settings.bearish_candle_avg_color
+                 , width = 3
+                 )
+
+    if barstate.isrealtime
+        if barstate.isnew
+            ready := true
+
+        if ready
+            if na(previous_total)
+                previous_total := hist_sum_avg[1]
+                previous_bullish := hist_bullish_avg[1]
+                previous_bearish := -hist_bearish_avg[1]
+
+            current_total := candle_average.x
+            current_bullish := candle_average.y
+            current_bearish := -candle_average.z
+
+            if settings.volume_style == "Ratio Columns"
+                line.new(
+                       bar_index - 1
+                     , previous_total
+                     , bar_index
+                     , current_total
+                     , color = settings.sum_candle_avg_color
+                     , width = 3
+                     )
+
+            if settings.volume_style == "Polar"
+                line.new(
+                       bar_index - 1
+                     , previous_bullish
+                     , bar_index
+                     , current_bullish
+                     , color = settings.bullish_candle_avg_color
+                     , width = 3
+                     )
+
+                line.new(
+                       bar_index - 1
+                     , previous_bearish
+                     , bar_index
+                     , current_bearish
+                     , color = settings.bearish_candle_avg_color
+                     , width = 3
+                     )
+
+            previous_total := current_total
+            previous_bullish := current_bullish
+            previous_bearish := current_bearish
+
+method ratio_bar(volume_data self, vec3 history, properties settings)=>
+    varip ready = false
+
+    ratio = self.volume_dist()
+    sum = self.volume_sum()
+
+    ratio_top = sum
+    ratio_bullish_bottom = ratio_top - ratio_top * ratio.x
+    ratio_bearish_top = ratio_top * ratio.y
+
+    polar_neutral = self.neutral / 2
+
+    polar_bullish = self.bullish + polar_neutral
+    polar_bearish = -(self.bearish + polar_neutral)
+
+    if barstate.isrealtime
+        if barstate.isnew
+            ready := true
+
+        if ready
+            if settings.volume_style == "Ratio Columns"
+                box.new(
+                       bar_index - 1
+                     , ratio_top
+                     , bar_index
+                     , ratio_bullish_bottom
+                     , settings.bullish_candle_color
+                     , bgcolor = settings.bullish_candle_color
+                     )
+
+                label.new(
+                       bar_index
+                     , 0
+                     , ""
+                     , color = color.new(color.black, 100)
+                     , tooltip = 
+                           "Total: " + sum.format_volume() + "\n"
+                         + "Bullish: " + (sum * ratio.x).format_volume() + "\n" 
+                         + "Bearish: " + (sum * ratio.y).format_volume() + "\n"
+                         + "Neutral: " + (sum * ratio.z).format_volume()
+                     )
+
+                box.new(
+                       bar_index - 1
+                     , ratio_bullish_bottom
+                     , bar_index
+                     , ratio_bearish_top
+                     , settings.neutral_candle_color
+                     , bgcolor = settings.neutral_candle_color
+                     )
+
+                box.new(
+                       bar_index - 1
+                     , ratio_bearish_top
+                     , bar_index
+                     , 0
+                     , settings.bearish_candle_color
+                     , bgcolor = settings.bearish_candle_color
+                     )
+
+            if settings.volume_style == "Polar"
+                box.new(
+                       bar_index - 1
+                     , polar_bullish
+                     , bar_index
+                     , polar_neutral
+                     , settings.bullish_candle_color
+                     , bgcolor = settings.bullish_candle_color
+                     )
+
+                label.new(
+                       bar_index
+                     , 0
+                     , ""
+                     , color = color.new(color.black, 100)
+                     , tooltip = 
+                           "Total: " + sum.format_volume() + "\n"
+                         + "Bullish: " + (sum * ratio.x).format_volume() + "\n" 
+                         + "Bearish: " + (sum * ratio.y).format_volume() + "\n"
+                         + "Neutral: " + (sum * ratio.z).format_volume()
+                     )
+
+                box.new(
+                       bar_index - 1
+                     , -polar_neutral
+                     , bar_index
+                     , polar_bearish
+                     , settings.bearish_candle_color
+                     , bgcolor = settings.bearish_candle_color
+                     )
+
+                box.new(
+                       bar_index - 1
+                     , polar_neutral
+                     , bar_index
+                     , -polar_neutral
+                     , settings.neutral_candle_color
+                     , bgcolor = settings.neutral_candle_color
+                     )
+
+    if not ready
+        bullish = history.x
+        bearish = history.y
+        neutral = history.z
+        history_sum = bullish + bearish + neutral
+
+        if settings.volume_style == "Ratio Columns"
+            box.new(
+                   bar_index - 1
+                 , history_sum
+                 , bar_index
+                 , bearish + neutral
+                 , settings.neutral_candle_color
+                 , bgcolor = settings.bullish_candle_color
+                 , border_width = 2
+                 )
+
+            label.new(
+                   bar_index
+                 , 0
+                 , ""
+                 , color = color.new(color.black, 100)
+                 , tooltip = 
+                       "Total: " + history_sum.format_volume() + "\n"
+                     + "Bullish: " + bullish.format_volume() + "\n" 
+                     + "Bearish: " + bearish.format_volume() + "\n"
+                     + "Neutral: " + neutral.format_volume()
+                 )
+
+            box.new(
+                   bar_index - 1
+                 , bearish + neutral
+                 , bar_index
+                 , bearish
+                 , settings.neutral_candle_color
+                 , bgcolor = settings.neutral_candle_color
+                 , border_width = 2
+                 )
+
+            box.new(
+                   bar_index - 1
+                 , bearish
+                 , bar_index
+                 , 0
+                 , settings.neutral_candle_color
+                 , bgcolor = settings.bearish_candle_color
+                 , border_width = 2
+                 )
+
+        if settings.volume_style == "Polar"
+            box.new(
+                   bar_index - 1
+                 , bullish + neutral / 2
+                 , bar_index
+                 , neutral / 2
+                 , settings.neutral_candle_color
+                 , bgcolor = settings.bullish_candle_color
+                 , border_width = 2
+                 )
+
+            label.new(
+                   bar_index
+                 , 0
+                 , ""
+                 , color = color.new(color.black, 100)
+                 , tooltip = 
+                       "Total: " + history_sum.format_volume() + "\n"
+                     + "Bullish: " + bullish.format_volume() + "\n" 
+                     + "Bearish: " + bearish.format_volume() + "\n"
+                     + "Neutral: " + neutral.format_volume()
+                 )
+
+            box.new(
+                   bar_index - 1
+                 , neutral / 2
+                 , bar_index
+                 , -neutral / 2
+                 , settings.neutral_candle_color
+                 , bgcolor = settings.neutral_candle_color
+                 , border_width = 2
+                 )
+
+            box.new(
+                   bar_index - 1
+                 , -neutral / 2
+                 , bar_index
+                 , -bearish - neutral / 2
+                 , settings.neutral_candle_color
+                 , bgcolor = settings.bearish_candle_color
+                 , border_width = 2
+                 )
+
+method live_average(volume_data self, properties settings)=>
+    varip avg = array.new<float>()
+    varip ratio = array.new<float>()
+    varip col = array.new<color>()
+    varip tape_average average = na
+
+    if barstate.isrealtime
+        avg.unshift(self.volume_sum()/self.total_count)
+        ratio.unshift((self.volume_ratio() - 0.5) * 200)
+        col.unshift(self.volume_ratio().color_grad(false, settings))
+
+        if avg.size() > length
+            avg.pop()
+            ratio.pop()
+            col.pop()
+            
+        average := tape_average.new(avg, ratio, col)
+
+method average_price_per_volume(tick_data[] self, int length = 10)=>
+    varip avg_price_per_volume = array.new<float>()
+    varip float avg = 0
+
+    if self.ready(true)
+        avg := 0
+
+        if avg_price_per_volume.size() > length
+            avg_price_per_volume.pop()
+
+        for i = 0 to self.size() - 1
+            tick = self.get(i)
+            avg += nz(math.abs(tick.price_delta) / tick.vol, 0)
+
+        avg_price_per_volume.unshift(avg / self.size())
+
+        avg_price_per_volume
+
+method average_abs_price_change(tick_data[] self, int length = 10)=>
+    varip avg_abs_price_change = array.new<float>()
+    varip float avg = 0 
+
+    if self.ready(true)
+        avg := 0
+
+        for i = 0 to self.size() - 1
+            tick = self.get(i)
+            avg += math.abs(tick.price_delta)
+
+        avg_abs_price_change.unshift(avg / self.size())
+
+        avg_abs_price_change
+
+method average_position_size(tick_data[] self, length = 10)=>
+    varip avg_position_size = array.new<float>()
+    varip float avg = 0
+
+    if self.ready(true)
+        avg := 0
+
+        if avg_position_size.size() > length
+            avg_position_size.pop()
+
+        for i = 0 to self.size() - 1
+            tick = self.get(i).order_size(false)
+            avg += tick
+
+        avg_position_size.unshift(math.round_to_mintick(avg / self.size()))
+
+        avg_position_size
+        
+method speed_of_tape(tick_data[] self, int length = 10)=>
+    varip avg_time = array.new<int>()
+    varip float avg = 0
+
+    if self.ready(true)
+        avg := 0
+
+        if avg_time.size() > length
+            avg_time.pop()
+
+        for i = 0 to self.size() - 1
+            tick = self.get(i).t_delta
+            avg += tick
+        
+        avg_time.unshift(int(avg / self.size()))
+
+        avg_time
+
+method set_cell(table self, int column, int row, string word, color bg_color, color text_color, string tip = "")=>
+    self.cell_set_text(column, row, word)
+    self.cell_set_text_color(column, row, text_color)
+    self.cell_set_bgcolor(column, row, bg_color)
+    self.cell_set_tooltip(column, row, tip)
+
+init_table(tick_data[] tape, properties settings)=>
+
+    if tape.ready() and enable_table
+        tb = table.new(location(settings.location), 16, tape.size() + 1, settings.table_color, frame_color = settings.table_color, frame_width = 2)
+
+        tb.set_cell(
+               0
+             , 0
+             , ""
+             , settings.table_color
+             , settings.text_color
+             , "New candle"
+             )
+
+        if settings.enable_time
+            tb.set_cell(
+                   1
+                 , 0
+                 , "Time"
+                 , settings.table_color
+                 , settings.text_color
+                 , "Time of tick"
+                 )
+
+        if settings.enable_time_delta
+            tb.set_cell(
+                   2
+                 , 0
+                 , "Time Delta"
+                 , settings.table_color
+                 , settings.text_color
+                 , "Time between ticks"
+                 )
+
+        if settings.enable_order_size
+            tb.set_cell(
+                   3
+                 , 0
+                 , "Order Size"
+                 , settings.table_color
+                 , settings.text_color
+                 , "Price ✕ Volume"
+                 )
+
+        if settings.enable_volume
+            tb.set_cell(
+                   4
+                 , 0
+                 , "Volume"
+                 , settings.table_color
+                 , settings.text_color
+                 , "Volume change between ticks"
+                 )
+
+        if settings.enable_price_change
+            tb.set_cell(
+                   5
+                 , 0
+                 , "Price Change"
+                 , settings.table_color
+                 , settings.text_color
+                 , "Price change between ticks"
+                 )
+
+        if settings.enable_price
+            tb.set_cell(
+                   6
+                 , 0
+                 , "Price"
+                 , settings.table_color
+                 , settings.text_color
+                 , "Price at tick"
+                 )
+
+        if settings.enable_speed_of_tape
+            tb.set_cell(
+                   7
+                 , 0
+                 , "Speed of Tape"
+                 , settings.table_color
+                 , settings.text_color
+                 , "Average time delta"
+                 )
+
+        if settings.enable_average_order_size
+            tb.set_cell(
+                   8
+                 , 0
+                 , "Average Order Size"
+                 , settings.table_color
+                 , settings.text_color
+                 , "Average order size"
+                 )
+
+        if settings.enable_average_volume
+            tb.set_cell(
+                   9
+                 , 0
+                 , "Average Volume"
+                 , settings.table_color
+                 , settings.text_color
+                 , "Average tick volume"
+                 )
+
+        if settings.enable_volume_ratio
+            tb.set_cell(
+                   10
+                 , 0
+                 , "Ratio"
+                 , settings.table_color
+                 , settings.text_color
+                 , "100% is completely bullish, -100% is completely bearish, 0% is completely neutral. (Up Volume ÷ Total Volume - 0.5) ✕ 200."
+                 )
+
+        if settings.enable_average_price_change
+            tb.set_cell(
+                   11
+                 , 0
+                 , "Average Price Change"
+                 , settings.table_color
+                 , settings.text_color
+                 , "Average absolute price move"
+                 )
+
+        if settings.enable_sensitivity
+            tb.set_cell(
+                   12
+                 , 0
+                 , "Sensitivity"
+                 , settings.table_color
+                 , settings.text_color
+                 , "This metric aims to provide a scale for how much the price can move for one unit of volume. |Price Change| ÷ Volume Change."
+                 )
+
+        if settings.enable_scaled_sensitivity
+            tb.set_cell(
+                   13
+                 , 0
+                 , "Relative Sensitivity"
+                 , settings.table_color
+                 , settings.text_color
+                 , "This metric aims to provide a standardized price movement size for the average volume. Sensitivity ✕ Average Volume."
+                 )
+
+        tb
+
+    else
+        tb = table.new(location(location), 0, 0, settings.table_color)
+
+method set_table(table self, tick_data[] tape, properties settings)=>
+
+    tape_volume_average = tape.get_volume().live_average(settings)
+    speed_of_tape = tape.speed_of_tape(settings.length)
+    average_price_per_volume = tape.average_price_per_volume(settings.length)
+    average_position_size = tape.average_position_size(settings.length)
+    average_abs_price_change = tape.average_abs_price_change(settings.length)
+
+    if tape.ready(true) and enable_table
+        tape_size = tape.size() - 1
+        print_length = tape_size >= settings.window_size ? settings.window_size : tape_size
+
+        for i = 0 to print_length 
+            j = i + 1
+
+            tick = tape.get(i)
+            polarity_color = tick.polarity.color_polarity(settings)
+
+            tape_speed = speed_of_tape.get(i)
+            average = tape_volume_average.avg.get(i)
+            ratio = tape_volume_average.ratio.get(i)
+            avg_color = tape_volume_average.col.get(i)
+            sensitivity = average_price_per_volume.get(i)
+            average_sensitivity = sensitivity * average
+            avg_size = average_position_size.get(i)
+            avg_price_change = average_abs_price_change.get(i)
+
+            self.set_cell(
+                   0
+                 , j
+                 , tick.state
+                 , settings.table_color
+                 , settings.text_color
+                 )
+
+            if settings.enable_time
+                self.set_cell(
+                       1
+                     , j
+                     , tick.t
+                     , polarity_color
+                     , settings.text_color
+                     )
+
+            if settings.enable_time_delta
+                self.set_cell(
+                       2
+                     , j
+                     , tick.t_delta.format_time(true)
+                     , polarity_color
+                     , settings.text_color
+                     )
+
+            if settings.enable_order_size
+                self.set_cell(
+                       3
+                     , j
+                     , "$" + tick.order_size().format_volume()
+                     , polarity_color
+                     , settings.text_color
+                     )
+
+            if settings.enable_volume
+                self.set_cell(
+                       4
+                     , j
+                     , tick.vol.format_volume()
+                     , polarity_color
+                     , settings.text_color
+                     )
+
+            if settings.enable_price_change
+                self.set_cell(
+                       5
+                     , j
+                     , "$" + tick.price_delta.to_string()
+                     , polarity_color
+                     , settings.text_color
+                     )
+
+            if settings.enable_price
+                self.set_cell(
+                       6
+                     , j
+                     , "$" + tick.price.to_string()
+                     , polarity_color
+                     , settings.text_color
+                     )
+
+            if settings.enable_speed_of_tape
+                self.set_cell(
+                       7
+                     , j
+                     , tape_speed.format_time(true)
+                     , avg_color
+                     , settings.text_color
+                     )
+
+            if settings.enable_average_order_size
+                self.set_cell(
+                       8
+                     , j
+                     , "$" + avg_size.format_volume()
+                     , avg_color
+                     , settings.text_color
+                     )
+
+            if settings.enable_average_volume
+                self.set_cell(
+                       9
+                     , j
+                     , average.format_volume()
+                     , avg_color
+                     , settings.text_color
+                     )
+
+            if settings.enable_volume_ratio
+                self.set_cell(
+                       10
+                     , j
+                     , ratio.round(2).to_string() + "%"
+                     , avg_color
+                     , settings.text_color
+                     )
+
+            if settings.enable_average_price_change
+                self.set_cell(
+                       11
+                     , j
+                     , "$" + avg_price_change.round_to_mintick().to_string()
+                     , avg_color
+                     , settings.text_color
+                     )
+
+            if settings.enable_sensitivity
+                self.set_cell(
+                       12
+                     , j
+                     , "$" + sensitivity.round_to_first_significant().to_string()
+                     , avg_color
+                     , settings.text_color
+                     )
+
+            if settings.enable_scaled_sensitivity
+                self.set_cell(
+                       13
+                     , j
+                     , "$" + average_sensitivity.round_to_first_significant().to_string()
+                     , avg_color
+                     , settings.text_color
+                     )
+
+daily_lable(properties settings)=>
+    var label daily_label = label.new(
+           x = bar_index + 10
+         , y = 0
+         , color = color.new(color.red, 100)
+         , text = ""
+         , style = label.style_label_center
+         , textcolor = text_color
+         ) 
+
+    if enable_average_daily
+        history = daily_volume(settings)
+        color daily_volume_color = color.from_gradient(history.x, 0, history.y * 0.7, settings.label_neutral_color, settings.label_bullish_color)
+    
+        daily_label.set_x(bar_index + settings.daily_volume_location_offset)
+        daily_label.set_color(daily_volume_color)
+        daily_label.set_text(
+             "Session Volume: " + history.x.format_volume() + "\n" 
+             + "Average Session Volume: " + history.y.format_volume())
+
+main(properties settings)=>
+    history = historical_volume()
+
+    tick = get_tick()
+    [tape, candle] = get_tape(tick, settings)
+
+    candle_volume = candle.get_volume()
+    candle_average = candle_volume.volume_average(history, settings)
+    candle_dist_bar = candle_volume.ratio_bar(history, settings)
+
+    daily_lable(settings)
+
+    tb = init_table(tape, settings)
+    tb.set_table(tape, settings)
+
+main(settings)
+
+plot(settings.volume_style != "Disabled" ? 0 : na, "0 Line", neutral_candle_color, show_last = 172)

@@ -1,0 +1,200 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("Liquidity Hunter [ChartPrime]",shorttitle = "Liquidity Hunter [ChartPrime]" ,overlay = true,max_lines_count = 500,max_labels_count = 500,max_bars_back = 500,max_boxes_count = 500)
+
+string CORE              =  "➞ Core Settings 🔸"
+var bool TradeisON       = false
+var bool ChochisON       = false
+var bool BOSisON         = false
+var int LongIndex        = na
+var float LongLow        = low
+var int ChoIndex         = bar_index
+var int Bosindex         = bar_index
+
+var float TP             = 0.0
+var float CHOCH          = 0.0
+var float BOS            = 0.0
+var float SL             = 0.0
+var line TPline          = na
+var line Choch           = na
+var label LAB            = na
+
+
+float body              = input.float(30,"Body %",step = 0.1,maxval = 100,group = CORE ,inline = "001",tooltip = "Body Value will be lower than this ")
+float Wick              = input.float(60,"Wick %",step = 0.1,maxval = 100,group = CORE ,inline = "002",tooltip = "Wick Value will be higher than this ")
+bool ShowTargets        = input.bool(true,"Show Targets",group = CORE ,inline = "003")
+float RR               = input.float(1.5,"Target ",step = 0.1 , tooltip = "RR Target Multiplyer ",group = CORE)
+
+atrPercent = (ta.atr(5)/close) * 100
+
+method _Band(int len)=>
+    math.min(ta.atr(len) * 0.3, close * (0.3/100)) [20] /2
+
+
+LowerWickRange() =>
+	math.min(open[1], close[1]) - low[1]
+
+
+BodyPercantage() =>
+
+    math.abs(open[1] - close[1]) / math.abs(high[1] - low[1]) * 100
+
+
+WickPercantage(data) =>
+
+    data / math.abs(high[1] - low[1]) * 100
+
+
+plot(WickPercantage(LowerWickRange()), color=color.rgb(78, 255, 43), title="LOWER WICK % ",display = display.data_window)
+
+
+plot(BodyPercantage(), color=color.rgb(64, 226, 251), title="Body % of the Bar",display = display.data_window)
+
+LONGCondition()=>
+    var float Slope = 0
+    var int TIME = 1
+    var int LTIME = 1
+    TIME := time[5]
+    LTIME := TIME[1]
+    Slope := (close[1] - close[2]) / (TIME - LTIME)
+    CON = BodyPercantage() <= body and WickPercantage(LowerWickRange()) >= Wick and (Slope * time > 0) and _Band(5) >= _Band(5)[1]//(ta.atr(5) >= ta.atr(5)[1] or ta.atr(5) <= ta.atr(5)[1])
+    CON
+
+Long = LONGCondition()
+x2 = low - ta.rma(ta.tr(true), 14) * 1.5
+longDiffSL = math.abs(close - x2)
+
+
+
+Zband = _Band(30)
+if true 
+    if Long and (not TradeisON)
+        LongIndex:= bar_index
+        LongLow:= low
+        TP:= close + (RR * longDiffSL)
+        CHOCH:= close + (RR/2 * longDiffSL)
+        SL:= close  - longDiffSL
+        BOS:= low - (Zband *15)
+        Message = str.tostring(math.round(WickPercantage(LowerWickRange()),2))+" %"
+        Message+= ""
+        
+        box.new(
+             bar_index-1,
+             high + (Zband *0.5),
+             bar_index+1,
+             low - (Zband *0.5),
+             border_color=  color.new(#bdf71d, 50),
+             bgcolor=color.new(#bdf71d,80)
+             )
+
+        box.new(
+             bar_index-2,
+             low - (Zband *0.5),
+             bar_index+2,
+             low - (Zband *2.5),
+             border_color=  color.new(#bdf71d, 50),
+             bgcolor=color.new(#bdf71d,80),
+             text = Message,
+             text_color = color.white,
+             text_size = size.auto
+             )
+        if ShowTargets
+            line.new(
+                 bar_index,
+                 high,
+                 bar_index,
+                 TP,
+                 width=2,
+                 color = #047b88,
+                 style= line.style_dashed
+                 )
+
+            TPline:= line.new(
+                 bar_index,
+                 TP,
+                 bar_index+2,
+                 TP,
+                 style= line.style_dashed,
+                 color = #047b88
+                 )
+                 
+            LAB:=label.new(
+                 bar_index,
+                 TP,
+                 "Target",
+                 color = color.rgb(102, 102, 100),
+                 style= label.style_label_left,
+                 size=size.small,
+                 textcolor = color.white
+                 )
+        TradeisON:= true
+        ChochisON:= false
+        BOSisON:= false
+
+
+
+    if TradeisON
+        line.set_x2(TPline,bar_index)
+        label.set_x(LAB,bar_index+1)
+
+        // lets draw the CHOCH 
+        if close >= CHOCH and not (ChochisON)
+            ChoIndex:= bar_index
+            line.new(LongIndex,
+                 CHOCH,
+                 ChoIndex,
+                 CHOCH,
+                 width=1,
+                 color =#185d04,
+                 style= line.style_dashed)
+
+            label.new(math.floor((LongIndex+ChoIndex)/2),
+                 CHOCH + (Zband*1.1),
+                 "CHOCH",
+                 style = label.style_label_center,
+                 color = color.new(color.black,100),
+                 textcolor = color.white,
+                 size = size.small)
+
+            ChochisON:=true     
+        // lets draw the BOS 
+        if close <= BOS and not (BOSisON)
+            Bosindex:= bar_index
+            line.new(LongIndex,
+                 BOS,
+                 Bosindex,
+                 BOS,
+                 width=1,
+                 color = #890303,
+                 style= line.style_dashed)
+
+            label.new(math.floor((LongIndex+Bosindex)/2),
+                 BOS - (Zband*1.1),
+                 "BOS",
+                 style = label.style_label_center,
+                 color = color.new(color.black,100),
+                 textcolor = color.white,
+                 size = size.small)
+
+            line.new(LongIndex,
+                 LongLow - (Zband *2.5),
+                 LongIndex,
+                 BOS,
+                 width=1,
+                 color = #890303,
+                 style= line.style_dashed)
+            BOSisON:= true    
+        if high >= TP 
+            label.set_color(LAB,color.rgb(6, 128, 10, 37))
+            TradeisON:=false
+
+        if close <= SL
+            label.set_color(LAB,color.new(color.rgb(246, 7, 7),70))
+            TradeisON:=false
+
+
+
+
+barcolor(TradeisON ? color.rgb(6, 249, 71) : na)

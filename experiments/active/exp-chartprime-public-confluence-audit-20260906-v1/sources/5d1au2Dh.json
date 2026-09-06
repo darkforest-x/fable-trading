@@ -1,0 +1,47 @@
+{
+  "id": "5d1au2Dh",
+  "title": "HTF Candle Profile [ChartPrime]",
+  "url": "https://www.tradingview.com/script/5d1au2Dh-HTF-Candle-Profile-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:36.483755+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/5d1au2Dh-HTF-Candle-Profile-ChartPrime/",
+  "created_at": "2025-11-17T12:29:15.345018+00:00",
+  "updated_at": null,
+  "description": "⯁ OVERVIEW  \nThe HTF Candle Profile [ChartPrime] visualizes higher-timeframe candle structure and its internal volume distribution directly on lower-timeframe charts. It automatically detects changes in higher-timeframe periods (daily, weekly, or monthly) and constructs a complete volume profile for each, allowing traders to see how volume is distributed across the range of that higher-timeframe candle. This helps identify whether momentum is supported by real volume strength or trapped price movement.\n\n⯁ LOGIC  \n When a new higher-timeframe candle begins, the indicator starts collecting data for its open, high, low, close, and volume range. \n Once sufficient bars have passed (defined by the Min Period Profile input), it calculates a full profile using adaptive bin sizing derived from the range (High–Low) and ATR for scaling precision.  \n The resulting bins represent the volume concentration at each price level of that higher-timeframe candle. A Point of Control (PoC) is highlighted — the level where the most volume occurred.\n The indicator then draws the higher-timeframe candle body and wicks at the chart’s right side, giving visual context of bullish or bearish sentiment.  \n\n\n⯁ FEATURES  \n Automatic HTF Detection: Identifies new Daily, Weekly, or Monthly periods and updates profiles in real time.  \n Dynamic Bin Calculation: Automatically adjusts bin size based on ATR and candle height for accurate volume granularity. Volume Profile Rendering: Displays colored volume bars extending from the candle, showing where trading activity was concentrated. Higher-Timeframe Candle Representation: Plots the full HTF candle (open, close, high, low) on the right side of the chart for visual clarity. PoC Level & Labels: Marks the point of maximum volume within the candle profile with a line and volume label. Configurable Levels: Toggle display of Open, Close, High, Low, and PoC for each higher-timeframe segment. Color-coded Sentiment: Candle and profile colors reflect bullish or bearish momentum.  \n\n\n⯁ CONCLUSION  \nThe HTF Candle Profile [ChartPrime] bridges lower- and higher-timeframe analysis by embedding high-resolution volume data within each major candle. It enables traders to see where liquidity and trading activity cluster inside higher-timeframe structures — revealing whether trends are volume-backed or hollow. Perfect for combining structural insight with volume confluence when analyzing market sentiment transitions across timeframes.",
+  "script": {
+    "id": 3393725,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;b029271914134675b36598712b002cb3",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bb029271914134675b36598712b002cb3/1",
+  "source_http_status": 200,
+  "source_sha256": "cdb2db7a0c6fec9c7ab6a79b6799faef9665f466bdc666ac4c0c1a84c1bc4dca",
+  "source_lines": 157,
+  "source_metadata": {
+    "created": "2025-11-17T12:29:14.784017Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;6228a1de374c49558cc1e96cfd563dda",
+      "originalScriptVersion": "0.38",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plotchar": 1
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "HTF Candle Profile [ChartPrime]",
+    "updated": "2025-11-17T12:29:14.784017Z",
+    "version": "1.0"
+  }
+}

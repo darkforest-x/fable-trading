@@ -1,0 +1,47 @@
+{
+  "id": "KoXIqM5l",
+  "title": "Trend-Reset Cumulative Delta [ChartPrime]",
+  "url": "https://www.tradingview.com/script/KoXIqM5l-Trend-Reset-Cumulative-Delta-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:34:57.910609+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/KoXIqM5l-Trend-Reset-Cumulative-Delta-ChartPrime/",
+  "created_at": "2026-07-13T12:33:14.401490+00:00",
+  "updated_at": null,
+  "description": "Trend-Reset Cumulative Delta [ChartPrime]\n\n🔶 OVERVIEW\n\nStandard Cumulative Delta indicators track the net difference between buying and selling volume from a fixed starting point (like the start of the day). While useful, they often become skewed by historical data that is no longer relevant to the current market trend.\n\nThe Trend-Reset Cumulative Delta solves this by using a Volatility-Based Reset Mechanism. It utilizes an ATR (Average True Range) envelope to define the current trend; the moment price breaks out of this envelope, the Cumulative Delta \"resets.\" This ensures you are only seeing the volume pressure relevant to the active trend.\n\n\n\n🔶 THE RESET LOGIC: ATR BANDS\n\nThe indicator tracks a central EMA surrounded by volatility bands. This creates a \"dynamic corridor\" for price:\n\n Bullish Trend: When price closes above the Upper ATR Band, the trend turns bullish and the Delta counter resets to 0. Bearish Trend: When price closes below the Lower ATR Band, the trend turns bearish and the Delta counter resets to 0.\n\nBy resetting at every major trend shift, the indicator highlights the \"fresh\" volume entering the move, making it easier to spot exhaustion or trend strength without the baggage of old data.\n\n🔶 KEY FEATURES\n\n Z-Score Pivot Filter: Not all pivots are equal. This indicator uses a Z-Score calculation to identify \"outlier\" volume events. It highlights pivots where the Cumulative Delta is significantly higher (statistically) than the recent average. Trend Summary Labels: At the end of every trend cycle, a label appears summarizing the Total Volume and Net Delta of that specific move. This allows you to compare the \"effort vs. result\" of previous trends side-by-side. Dual-Chart Projection: Filtered volume pivots can be projected directly onto the price chart, showing you exactly which candle saw a statistical volume extreme. Dynamic Column Coloring: \n    * Bright Colors: Volume is increasing in the direction of the trend.\n    * Faded Colors: Volume pressure is slowing down (potential divergence/exhaustion).\n\n🔶 TRADING APPLICATIONS\n\n Effort vs. Result (Divergence): If price is making new trend highs but the Trend-Reset Delta columns are becoming smaller or fading in color, it indicates that the \"effort\" (volume) is not supporting the move. Institutional Absorption: Look for the Z-Score Pivot markers (▼/▲). When these appear at structural support or resistance, it signifies that a massive amount of volume was transacted, often indicating institutional absorption. Trend Strength Comparison: Use the Trend Summary Labels to look back at previous cycles. If the previous Bullish trend had a Net Delta of +1M and the current Bullish trend only has +200k, the current move is significantly more fragile.\n\n🔶 CONCLUSION\n\nThe Trend-Reset Cumulative Delta [ChartPrime] provides a cleaner, more actionable view of volume flow. By stripping away irrelevant historical volume and focusing on the current volatility-defined trend, it helps traders identify when a trend is being fueled by fresh capital—or when it's simply running on fumes.",
+  "script": {
+    "id": 6648755,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;93b08b314d6a44889f8267a1b8dd40f7",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B93b08b314d6a44889f8267a1b8dd40f7/1",
+  "source_http_status": 200,
+  "source_sha256": "1092719bb5cdb86f15e6f652c12e9a188129375d69b62853c7180c5d814277b3",
+  "source_lines": 123,
+  "source_metadata": {
+    "created": "2026-07-13T12:33:12.578867Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": false,
+      "kind": "study",
+      "originalScriptId": "USER;ae9625f6ca26420aa0cbef8a539010c7",
+      "originalScriptVersion": "1.0",
+      "sourceInputsCount": 1,
+      "stats": {
+        "plot": 4
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Trend-Reset Cumulative Delta [ChartPrime]",
+    "updated": "2026-07-13T12:33:12.578867Z",
+    "version": "1.0"
+  }
+}

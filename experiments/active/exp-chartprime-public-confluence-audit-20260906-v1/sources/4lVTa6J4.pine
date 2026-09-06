@@ -1,0 +1,98 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=6
+indicator("Volumatic Trend [ChartPrime]", overlay = true, max_bars_back = 5000)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+int length = input.int(40)
+bool vol_h = input.bool(true, "Volume Histogram")
+color color_up = input.color(#247ac0, "Up Trend")
+color color_dn = input.color(#c88829, "Down Trend")
+
+var upper = float(na)
+var lower = float(na)
+var lower_vol = float(na)
+var upper_vol = float(na)
+var step_up = float(na)
+var step_dn = float(na)
+var last_index = int(na)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+ema_swma(x, length) =>
+    ta.ema(x[3] * 1 / 6 + x[2] * 2 / 6 + x[1] * 2 / 6 + x[0] * 1 / 6, length)
+
+atr = ta.atr(200)
+
+
+ema1 = ema_swma(close, length)
+ema2 = ta.ema(close, length)
+trend = ema1[1] < ema2
+
+if trend != trend[1]
+    upper := ema1 + atr * 3
+    lower := ema1 - atr * 3
+    lower_vol := lower + atr*4
+    upper_vol := upper - atr*4
+    step_up := (lower_vol-lower) / 100
+    step_dn := (upper-upper_vol) / 100
+    last_index := bar_index
+
+vol = int(volume / ta.percentile_linear_interpolation(volume, 1000, 100) * 100)
+
+vol_up = step_up * vol
+vol_dn = step_dn * vol
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+color color = trend ? color_up : color_dn
+color grad_col = color.from_gradient(vol, 0, 25, chart.bg_color, color)
+color grad_col1 = color.from_gradient(vol, 0, 10, chart.bg_color, color)
+color col_vol_up = trend ? grad_col : color(na)
+color col_vol_dn = not trend ? grad_col : color(na)
+
+plotcandle(open, high, low, close, title='Volumatic Candles Trend', color = grad_col1, wickcolor=grad_col1, bordercolor = grad_col1, force_overlay = true)
+
+plotcandle(lower, lower, lower + vol_up, lower + vol_up, title='Volume Up Trend', color = col_vol_up, wickcolor=col_vol_up, bordercolor = col_vol_up, display = vol_h ? display.all : display.none, editable = false, force_overlay = true)
+plotcandle(upper, upper, upper - vol_dn, upper - vol_dn, title='Volume Down Trend', color = col_vol_dn, wickcolor=col_vol_dn, bordercolor = col_vol_dn, display = vol_h ? display.all : display.none, editable = false, force_overlay = true)
+
+plot(trend and vol_h ? na : upper, color = color, style = plot.style_linebr, display = vol_h ? display.all : display.none, editable = false, force_overlay = true)
+plot(trend and vol_h ? lower : na, color = color, style = plot.style_linebr, display = vol_h ? display.all : display.none, editable = false, force_overlay = true)
+
+plot(ema1, "Trend Line", color = color.new(color, 20), linewidth = 2, force_overlay = true)
+
+
+plotshape(trend != trend[1] ? ema1[1] : na, "Trend Change", shape.diamond, location.absolute, color = color, size = size.tiny, offset = -1, force_overlay = true)
+
+
+volume_ = close > open ? volume : -volume
+
+if barstate.islast
+    
+    delta = 0. 
+    total = 0.
+    for i = 0 to (bar_index - last_index)
+        total += volume[i]
+        delta += volume_[i]
+
+    lblb = label.new(bar_index, vol_h ? (trend ? lower + vol_up : upper - vol_dn) : ema1
+             , "Delta > "+str.tostring(delta, format.volume) + "\n" 
+              + "--------------------" + "\n"
+              + "Total > "+str.tostring(total, format.volume) 
+
+             , textalign = text.align_left
+             , style = label.style_label_left, color = grad_col1)
+
+    label.delete(lblb[1])
+
+// --------------------------------------------------------------------------------------------------------------------}

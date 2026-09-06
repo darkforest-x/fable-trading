@@ -1,0 +1,173 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=6
+indicator("Liquidity Pro Map [ChartPrime]", overlay = true, max_lines_count = 500, max_boxes_count = 500)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+lookbackBars      = input.int(200, "Lookback Period")
+binResolution     = input.int(90, "Resolution (Bins)")
+separetor         = input.bool(true, "Separate Bins") ? 1 : 0
+colorBuyVolume    = input.color(color.rgb(14, 236, 165), "Buy Volume Color")
+colorSellVolume   = input.color(color.rgb(236, 14, 165), "Sell Volume Color")
+
+profileOffset     = 50
+barStartIndex     = bar_index + 2
+
+priceDeviation    = ta.stdev(close, 25) * 2
+priceReference    = close > open ? low - priceDeviation : high + priceDeviation
+
+// ──────────────────────────────── ACCUMULATORS ────────────────────────────────
+totalUpperWidth   = 0
+runningUpperWidth = 0
+maxUpperWidth     = 0
+totalSellVolume   = 0.0
+
+totalLowerWidth   = 0
+runningLowerWidth = 0
+maxLowerWidth     = 0
+totalBuyVolume    = 0.0
+
+type ProfileDraw 
+    array<box>    profileBoxes
+    array<box>    levelBoxes
+    polyline      sellLine
+    polyline      buyLine
+    array<label>  volumeLabels
+
+var allProfiles = array.new<ProfileDraw>()
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+if barstate.islast
+    // Clear previous drawings
+    if allProfiles.size() > 0
+        for prf in allProfiles
+            for bx in prf.levelBoxes
+                bx.delete()
+            for bx in prf.profileBoxes
+                bx.delete()
+            for lbl in prf.volumeLabels
+                lbl.delete()
+            prf.sellLine.delete()
+            prf.buyLine.delete()
+
+    srcValues      = array.new<float>()
+    sellPoints     = array.new<chart.point>()
+    buyPoints      = array.new<chart.point>()
+    volumeBins     = array.new<float>(binResolution, 0.0)
+
+    levelBoxesArr  = array.new<box>()
+    profileBoxesArr= array.new<box>()
+    labelsArr      = array.new<label>()
+
+    pocSellFound = false
+    pocBuyFound  = false
+
+
+    // Collect reference prices
+    for i = 0 to lookbackBars - 1
+        srcValues.push(priceReference[i])
+      
+    minPrice = srcValues.min()
+    maxPrice = srcValues.max()
+    priceStep = (maxPrice - minPrice) / binResolution
+
+    // Assign volume into bins
+    for bar = 0 to lookbackBars - 1
+        for bin = 0 to binResolution - 1
+            binLow  = minPrice + priceStep * bin
+            binMid  = binLow + priceStep/2
+            if math.abs(priceReference[bar] - binMid) <= priceStep and not (math.abs(close - binMid) < priceStep * 2)
+                volumeBins.set(bin, volumeBins.get(bin) + volume[bar])
+
+    // Split volume into buy/sell groups
+    for bin = 0 to binResolution - 1
+        binLow   = minPrice + priceStep * bin
+        binMid   = binLow + priceStep/2
+        binValue = volumeBins.get(bin)
+
+        relativeWidth = int(binValue / volumeBins.max() * profileOffset)
+
+        if close < binMid
+            totalSellVolume += binValue
+            totalUpperWidth += relativeWidth
+            maxUpperWidth := math.max(maxUpperWidth, relativeWidth)
+        else
+            totalBuyVolume += binValue
+            totalLowerWidth += relativeWidth
+            maxLowerWidth := math.max(maxLowerWidth, relativeWidth)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+    for bin = 0 to binResolution - 1
+        binLow   = minPrice + priceStep * bin
+        binHigh  = binLow + priceStep
+        binMid   = binLow + priceStep/2
+        binValue = volumeBins.get(bin)
+
+        relativeWidth = int(binValue / volumeBins.max() * profileOffset)
+
+        if not (math.abs(close - binMid) < priceStep * 2)
+            if close < binMid 
+                runningUpperWidth   += int(binValue / volumeBins.max() * maxUpperWidth)
+                scaledStep          = math.round((runningUpperWidth / totalUpperWidth * 50))
+                cp                  = chart.point.from_index(barStartIndex + scaledStep, binHigh)
+                sellPoints.push(cp)
+
+                if relativeWidth == maxUpperWidth and not pocSellFound
+                    labelsArr.push(label.new(barStartIndex + relativeWidth, binMid, style = "llf", color = color(na), text = "◀ " + str.tostring(binValue, format.volume), textcolor = colorSellVolume))
+                    pocSellFound := true
+
+                if bin == binResolution - 1
+                    labelsArr.push(label.new(cp, style = "ldn", color = color(na), text = str.tostring(totalSellVolume, format.volume) + "\n▼", textcolor = colorSellVolume))
+
+            else 
+                runningLowerWidth   += int(binValue / volumeBins.max() * maxLowerWidth)
+                scaledStep          = math.round(maxLowerWidth - (runningLowerWidth / totalLowerWidth * 50))
+                cp                  = chart.point.from_index(barStartIndex + scaledStep, binLow)
+                buyPoints.push(cp)
+
+                if relativeWidth == maxLowerWidth and not pocBuyFound
+                    labelsArr.push(label.new(barStartIndex + relativeWidth, binMid, style = "llf", color = color(na), text = "◀ " + str.tostring(binValue, format.volume), textcolor = colorBuyVolume))
+                    pocBuyFound := true
+                if bin == 0
+                    labelsArr.push(label.new(cp, style = "lup", color = color(na), text = "▲\n" + str.tostring(totalBuyVolume, format.volume), textcolor = colorBuyVolume))
+
+            // Gradient coloring
+            binColorProfile = close < binMid 
+                 ? color.from_gradient(relativeWidth, 0, maxUpperWidth, color.rgb(255, 82, 82, 90), colorSellVolume) 
+                 : color.from_gradient(relativeWidth, 0, maxLowerWidth, color.rgb(105, 255, 82, 90), colorBuyVolume)
+
+            binColorLevels = close < binMid 
+                 ? color.from_gradient(relativeWidth, 0, maxUpperWidth, color(na), colorSellVolume) 
+                 : color.from_gradient(relativeWidth, 0, maxLowerWidth, color(na), colorBuyVolume)
+
+            levelBoxesArr.push(box.new(bar_index - lookbackBars - relativeWidth/5, binHigh, bar_index, binLow, chart.bg_color, separetor, bgcolor = binColorLevels))
+            profileBoxesArr.push(box.new(barStartIndex, binHigh, barStartIndex + relativeWidth, binLow, chart.bg_color, separetor, bgcolor = binColorProfile))
+
+    // Extend level boxes to cross candles
+    if levelBoxesArr.size() > 0
+        for bx in levelBoxesArr
+            for i = lookbackBars - 1 to 0
+                hi = high[i]
+                lo = low[i]
+                mid = math.avg(bx.get_top(), bx.get_bottom())
+                crossed = hi > mid and lo < mid
+                if crossed
+                    bx.set_left(bar_index - i + 1)
+
+    // Final polylines
+    sellLinePlot = polyline.new(sellPoints, line_color = colorSellVolume, force_overlay = true, line_width = 2)
+    buyLinePlot  = polyline.new(buyPoints, line_color = colorBuyVolume, force_overlay = true, line_width = 2)
+
+    allProfiles.push(ProfileDraw.new(profileBoxesArr, levelBoxesArr, sellLinePlot, buyLinePlot, labelsArr))
+// --------------------------------------------------------------------------------------------------------------------}

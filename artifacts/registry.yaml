@@ -15253,6 +15253,106 @@ artifacts:
 
 
 
+  - artifact_id: chartprime-confluence-v1-catalogue
+    artifact_type: manifest
+    role: public_indicator_static_source_audit_catalogue
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6ebad6b"
+    source_path: experiments/active/exp-chartprime-public-confluence-audit-20260906-v1/catalogue.json
+    sha256: "15eb91896e7bebee9728bda4ecf3ba2d190ae640cebfc87f01ad214f86e1c365"
+    size_bytes: 83574
+    storage_uri: "repo://experiments/active/exp-chartprime-public-confluence-audit-20260906-v1/catalogue.json"
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "6ebad6b"
+    config_hash: "15eb91896e7bebee9728bda4ecf3ba2d190ae640cebfc87f01ad214f86e1c365"
+    notes: >-
+      Static public source audit, not market data; holdout N/A is represented
+      as unknown because the registry has no not-applicable enum. 148 items,
+      134 open source and 14 description-only; no profitability or runtime
+      acceptance. HTML structural-only, browser visual QA unavailable.
+
+  - artifact_id: chartprime-confluence-v1-report
+    artifact_type: report
+    role: public_indicator_static_source_audit_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fee0dec"
+    source_path: analysis/p1_chartprime_public_confluence_audit_20260906.md
+    sha256: "f87f56615a2a44d396b1505ee71883133d3b8cc200ac4c73274dc3e5505e7f8a"
+    size_bytes: 174027
+    storage_uri: "repo://analysis/p1_chartprime_public_confluence_audit_20260906.md"
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fee0dec"
+    config_hash: "15eb91896e7bebee9728bda4ecf3ba2d190ae640cebfc87f01ad214f86e1c365"
+    notes: >-
+      Static public source audit, not market data; holdout N/A is represented
+      as unknown because the registry has no not-applicable enum. 148 items,
+      134 open source and 14 description-only; no profitability or runtime
+      acceptance. HTML structural-only, browser visual QA unavailable.
+
+  - artifact_id: chartprime-confluence-v1-html
+    artifact_type: report
+    role: public_indicator_static_source_audit_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fee0dec"
+    source_path: analysis/html/p1_chartprime_public_confluence_audit_20260906.html
+    sha256: "8e623f810d4e3a1028bcd90f58412cdd140d879beb024b7a428d1af7f2da9e5a"
+    size_bytes: 1948638
+    storage_uri: "repo://analysis/html/p1_chartprime_public_confluence_audit_20260906.html"
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fee0dec"
+    config_hash: "15eb91896e7bebee9728bda4ecf3ba2d190ae640cebfc87f01ad214f86e1c365"
+    notes: >-
+      Static public source audit, not market data; holdout N/A is represented
+      as unknown because the registry has no not-applicable enum. 148 items,
+      134 open source and 14 description-only; no profitability or runtime
+      acceptance. HTML structural-only, browser visual QA unavailable.
+
+  - artifact_id: chartprime-confluence-v1-artifact
+    artifact_type: manifest
+    role: public_indicator_static_source_audit_artifact
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fee0dec"
+    source_path: experiments/active/exp-chartprime-public-confluence-audit-20260906-v1/artifact.json
+    sha256: "3897bacd8c8e25e3e24d600f6f4b47ab9b035aff6fe3b3b2418d1e9a3b586b5d"
+    size_bytes: 514087
+    storage_uri: "repo://experiments/active/exp-chartprime-public-confluence-audit-20260906-v1/artifact.json"
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fee0dec"
+    config_hash: "15eb91896e7bebee9728bda4ecf3ba2d190ae640cebfc87f01ad214f86e1c365"
+    notes: >-
+      Static public source audit, not market data; holdout N/A is represented
+      as unknown because the registry has no not-applicable enum. 148 items,
+      134 open source and 14 description-only; no profitability or runtime
+      acceptance. HTML structural-only, browser visual QA unavailable.
+
+  - artifact_id: chartprime-confluence-v1-verification
+    artifact_type: manifest
+    role: public_indicator_static_source_audit_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "fee0dec"
+    source_path: experiments/active/exp-chartprime-public-confluence-audit-20260906-v1/validation.json
+    sha256: "cdb9806a9e0db07579ff54583e4b6ec5d8f0bfff4d4202fbb598b9498895fea0"
+    size_bytes: 756
+    storage_uri: "repo://experiments/active/exp-chartprime-public-confluence-audit-20260906-v1/validation.json"
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fee0dec"
+    config_hash: "15eb91896e7bebee9728bda4ecf3ba2d190ae640cebfc87f01ad214f86e1c365"
+    notes: >-
+      Static public source audit, not market data; holdout N/A is represented
+      as unknown because the registry has no not-applicable enum. 148 items,
+      134 open source and 14 description-only; no profitability or runtime
+      acceptance. HTML structural-only, browser visual QA unavailable.
+
   - artifact_id: btcusdtp-hourly-failed-confirm-v18-results
     artifact_type: report
     role: full_intention_two_bar_confirmation_economics

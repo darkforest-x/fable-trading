@@ -1,0 +1,542 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("Fibonacci Archer Box [ChartPrime]", overlay = true, max_lines_count = 500, max_labels_count = 500, max_polylines_count = 100, max_bars_back = 5000)
+
+type pivot
+    float current = na
+    int current_idx = na
+    float previous = na
+    int previous_idx = na
+
+type fib_box
+    line[] body_x
+    line[] body_y
+    line[] fan_upper
+    line[] fan_lower
+    line[] target
+    polyline[] angles
+    label[] labels
+
+type box_settings
+    bool levels
+    bool[] enabled_levels
+    bool times
+    bool[] enabled_time
+    bool fan
+    bool[] enabled_fan
+    bool extend_fan
+    bool angles
+    bool[] enabled_angle
+    color[] colors
+    float fill_alpha
+    bool enable_level_fill
+    bool enable_time_fill
+    bool enable_fan_fill
+    bool enable_angle_fill
+    bool enable_labels
+    bool[] enable_target
+    int[] x_target_value
+    int[] y_target_value
+    bool enable_target_fill
+    float target_fill_alpha
+
+target_switch(string target)=>
+    switch target
+        "0.236" => 1
+        "0.382" => 2
+        "0.5" => 3
+        "0.618" => 4
+        "0.786" => 5
+        "1" => 6
+
+fib(float n)=>
+    (math.pow(math.phi, n) - math.pow(-math.phi, -1)) / math.sqrt(5)
+
+fib_level(int n) =>
+    cycle_offset = 5 - n % 6
+    fib_offset = cycle_offset < 1 ? 0 : cycle_offset == 1 ? 0.5 : cycle_offset > 3 ? cycle_offset - 2 : cycle_offset - 1 
+    complete_cycles = math.max(0, math.floor(n/6))
+    complete_cycles + math.round(cycle_offset == 3 ? 0.5 : (n > -1 ? fib(40 + fib_offset) / fib(40 + fib_offset + fib_offset) : 0), 3)
+
+create_box_locations(float price_range, int idx_range)=>
+    int[] x = array.new<int>()
+    float[] y = array.new<float>()
+    for i = -1 to 5
+        float fib = fib_level(i)
+        x.push(int(idx_range * fib))
+        y.push(price_range * fib)
+
+    [x, y]
+
+method dump(line[] self)=>
+    if self.size() > 0
+        for i = self.size() - 1 to 0
+            self.get(i).delete()
+            self.remove(i)
+
+method dump(polyline[] self)=>
+    if self.size() > 0
+        for i = self.size() - 1 to 0
+            self.get(i).delete()
+            self.remove(i)
+
+method dump(label[] self)=>
+    if self.size() > 0
+        for i = self.size() - 1 to 0
+            self.get(i).delete()
+            self.remove(i)
+
+method dump(fib_box[] self, int history)=>
+    if self.size() > (history - 1)
+        fib_box get = self.first()
+        get.body_x.dump()
+        get.body_y.dump()
+        get.fan_upper.dump()
+        get.fan_lower.dump()
+        get.target.dump()
+        get.angles.dump()
+        get.labels.dump()
+        self.remove(0)
+
+generate_ellipse(int start_x, int end_x, float start_y, float end_y, bool order)=>
+    chart.point[] points = array.new<chart.point>()
+    float w = (end_x - start_x)
+    float h = (end_y - start_y)
+
+    int x = na
+
+    int start = order ? 0 : 90
+    int end = order ? 90 : 0
+
+    for i = 0 to 90
+        int new_x = int(w * math.cos(math.toradians(i)))
+        float y = h * math.sin(math.toradians(i))
+        if x != new_x
+            points.push(chart.point.new(na, start_x + x, start_y + y))
+        x := new_x
+
+    if order
+        points.unshift(chart.point.new(na, end_x, start_y))
+        points.push(chart.point.new(na, start_x, end_y))
+    else
+        points.reverse()
+        points.unshift(chart.point.new(na, start_x, end_y))
+        points.push(chart.point.new(na, end_x, start_y))
+    points
+
+target_box(chart.point[] angle, int[] x, float[] y, int start_x, float start_y, int p, int x_target, int y_target)=>
+    chart.point[] target_box = array.new<chart.point>()
+    for i = 0 to angle.size() - 1
+        chart.point angle_point = angle.get(i)
+        int angle_idx = angle_point.index
+        if angle_idx >= (start_x + x.get(x_target - 1)) and angle_idx <= (start_x + x.get(x_target))
+            target_box.push(angle_point)
+    target_box.push(chart.point.new(na, start_x + x.get(x_target - 1), start_y + y.get(y_target) * p))
+    target_box.push(chart.point.new(na, start_x + x.get(x_target), start_y + y.get(y_target) * p))
+    target_box.push(chart.point.new(na, start_x + x.get(x_target), start_y + y.get(y_target - 1) * p))
+    target_box
+
+f_sort(int[] x, int[] y, bool[] enable)=>
+    int[] temp = array.new<int>()
+    int[] new_x = array.new<int>()
+    int[] new_y = array.new<int>()
+    bool[] new_enable = array.new<bool>()
+    for i = 0 to 2
+        int score = y.get(i) + math.max(0, x.get(i) - y.get(i))
+        if i == 0
+            temp.push(score)
+            new_x.push(x.get(i))
+            new_y.push(y.get(i))
+            new_enable.push(enable.get(i))
+        else if i == 1
+            if score > temp.max()
+                new_x.push(x.get(i))
+                new_y.push(y.get(i))
+                new_enable.push(enable.get(i))
+            else
+                new_x.unshift(x.get(i))
+                new_y.unshift(y.get(i))
+                new_enable.unshift(enable.get(i))
+        else
+            if score > temp.max()
+                new_x.push(x.get(i))
+                new_y.push(y.get(i))
+                new_enable.push(enable.get(i))
+            else if score < temp.min()
+                new_x.unshift(x.get(i))
+                new_y.unshift(y.get(i))
+                new_enable.unshift(enable.get(i))
+            else
+                new_x.insert(1, x.get(i))
+                new_y.insert(1, y.get(i))
+                new_enable.insert(1, enable.get(i))
+    [new_x, new_y, new_enable]
+
+create_fib_box(float bottom, float top, int start_idx, float price_range, int idx_range, bool polarity, box_settings s)=>
+    color na_color = color.new(color.black, 100)
+    line[] body_x = array.new<line>()
+    line[] body_y = array.new<line>()
+    line[] fan_upper = array.new<line>()
+    line[] fan_lower = array.new<line>()
+    line[] target = array.new<line>()
+    polyline[] angles = array.new<polyline>()
+    label[] labels = array.new<label>()
+
+    [_x, _y] = create_box_locations(price_range, idx_range)
+    [new_x, new_y, new_target_enable] = f_sort(s.x_target_value, s.y_target_value, s.enable_target)
+
+    int x_point = 0
+    int y_point = 0
+    int target_point = 0
+    int fan_point = s.enabled_fan.some() ? s.enabled_fan.indexof(true) : 6 
+    int angle_point = s.enabled_angle.some() ? s.enabled_angle.indexof(true) : 0
+    int angle_start = s.enabled_angle.indexof(true)
+    float y_start = polarity ? bottom : top
+    float y_end = polarity ? top : bottom
+    int p = polarity ? 1 : -1
+
+    for i = 0 to 6
+        float fib_level = fib_level(i - 1)
+        color c = s.colors.get(i)
+        int x = _x.get(i)
+        float y = _y.get(i)
+        bool x_enabled = s.enabled_time.get(i)
+        bool y_enabled = s.enabled_levels.get(i)
+        bool fan_enabled = s.enabled_fan.get(i)
+        bool angle_enabled = s.enabled_angle.get(i)
+
+        body_y.push(line.new(start_idx, y_start + y * p, idx_range + start_idx, y_start + y * p, color = y_enabled and s.levels ? c : na_color))
+        if y_enabled and s.enable_labels and s.levels
+            labels.push(label.new(start_idx + idx_range, y_start + y * p, str.tostring(fib_level) + " (" + str.tostring(y_start + y * p, format.mintick) + ")", color = na_color, style = label.style_label_left, textcolor = c))
+
+        body_x.push(line.new(start_idx + x, y_start, start_idx + x, y_end, color = x_enabled and s.times ? c : na_color))
+        if x_enabled and s.enable_labels and s.times
+            labels.push(label.new(start_idx + x, bottom, str.tostring(fib_level), color = na_color, style = label.style_label_up, textcolor = c))
+
+        if i > 0
+            chart.point[] angle_points = generate_ellipse(start_idx, start_idx + x, y_start, y_start + y * p, true)
+            if target_point <= 2 and s.enable_target_fill
+                if i == new_y.get(target_point) + math.max(0, new_x.get(target_point) - new_y.get(target_point))
+                    chart.point[] target_points = target_box(angle_points, _x, _y, start_idx, y_start, p, new_x.get(target_point), new_y.get(target_point))
+                    if new_target_enable.get(target_point)
+                        angles.push(polyline.new(target_points, false, false, xloc.bar_index, na_color, color.new(c, math.max(0, s.target_fill_alpha))))
+                    target_point += 1
+
+            if i == angle_point 
+                chart.point[] back_points = array.new<chart.point>()
+                back_points.push(chart.point.new(na, start_idx + x, y_start))
+                back_points.push(chart.point.new(na, start_idx, y_start))
+                back_points.push(chart.point.new(na, start_idx, y_start + y * p))
+                angles.push(polyline.new(back_points, false, false, xloc.bar_index, na_color, s.angles and angle_enabled and s.enable_angle_fill ? color.new(c, s.fill_alpha) : na_color))
+                angles.push(polyline.new(angle_points, false, false, xloc.bar_index, s.angles and angle_enabled ? c : na_color, s.angles and angle_enabled and s.enable_angle_fill ? color.new(c, s.fill_alpha) : na_color))
+            else
+                chart.point[] back_points = generate_ellipse(start_idx, start_idx + _x.get(angle_point), y_start, y_start + _y.get(angle_point) * p, false)
+                chart.point[] angle_fill = back_points.concat(angle_points)
+                angles.push(polyline.new(angle_fill, false, false, xloc.bar_index, na_color, s.angles and angle_enabled and s.enable_angle_fill ? color.new(c, s.fill_alpha) : na_color))
+                angles.push(polyline.new(angle_points, false, false, xloc.bar_index, s.angles and angle_enabled ? c : na_color, na_color))
+
+        if i > 0
+            if s.fan
+                fan_upper.push(line.new(start_idx, y_start, start_idx + x, y_end, extend = s.extend_fan ? extend.right : extend.none, color = fan_enabled ? c : na_color))
+                if i < 6
+                    fan_lower.push(line.new(start_idx, y_start, idx_range + start_idx, y_start + y * p, extend = s.extend_fan ? extend.right : extend.none, color = fan_enabled ? c : na_color))
+
+            if s.enable_level_fill and y_enabled and s.levels
+                linefill.new(body_y.get(y_point), body_y.get(i), color.new(c, s.fill_alpha))
+            if s.enable_time_fill and x_enabled and s.times
+                linefill.new(body_x.get(x_point), body_x.get(i), color.new(c, s.fill_alpha))
+
+            if s.enable_fan_fill and s.fan 
+                if fan_enabled and i < 6
+                    linefill.new(fan_upper.get(i - 1), fan_upper.get(fan_point - 1), color.new(s.colors.get(i - 1), s.fill_alpha))
+                    linefill.new(fan_lower.get(i - 1), fan_lower.get(fan_point - 1), color.new(s.colors.get(i - 1), s.fill_alpha))
+                if i == 6 and fan_point != 6
+                    linefill.new(fan_lower.get(fan_point - 1), fan_upper.get(i - 1), color.new(s.colors.get(fan_point), s.fill_alpha))
+                    linefill.new(fan_upper.get(fan_point - 1), fan_upper.get(i - 1), color.new(s.colors.get(fan_point), s.fill_alpha))
+
+        if y_enabled
+            y_point := i
+        if x_enabled
+            x_point := i
+        if fan_enabled
+            fan_point := i
+        if angle_enabled
+            angle_point := i
+
+    if s.enable_target.some()
+        for i = 0 to 2
+            if s.enable_target.get(i)
+                target.push(line.new(start_idx, y_start, start_idx + _x.get(s.x_target_value.get(i)), y_start + _y.get(s.y_target_value.get(i)) * p, style = line.style_arrow_right, color = color.from_gradient(1, 0, 2, s.colors.get(s.x_target_value.get(i)), s.colors.get(s.y_target_value.get(i))), width = 3))
+
+    fib_box.new(body_x, body_y, fan_upper, fan_lower, target, angles, labels)
+
+in_box(float max, float min, int start_idx)=>
+    bool inside = true
+    for i = 0 to (bar_index - start_idx)
+        if close[i] > max or close[i] < min
+            inside := false
+            break
+    inside
+
+const string pivot_group = "Pivot"
+string pivot_type = input.string("Wick", "Pivot Style", ["Wick", "Body"], group = pivot_group)
+int pivot_back = input.int(10, "Pivot Lookback", minval = 1, group = pivot_group)
+int pivot_forward = input.int(5, "Pivot Lookforward", minval = 1, group = pivot_group)
+int maximum_range = input.int(50, "Maximum Size", minval = 1, group = pivot_group)
+int minimum_range = input.int(20, "Minimum Size", minval = 1, group = pivot_group)
+const string style_group = "Reversal Settings"
+string enable_box = input.string("Both", "Direction", ["Both", "Bullish", "Bearish", "None"], group = style_group)
+string bullish_style = input.string("Both", "Bullish Reversal Style", ["Higher Low", "Lower Low", "Both"], group = style_group)
+string bearish_style = input.string("Both", "Bearish Reversal Style", ["Higher High", "Lower High", "Both"], group = style_group)
+int history_length = input.int(1, "History", minval = 1, maxval = 8, group = style_group)
+const string target_group = "Targets"
+bool enable_target_1 = input.bool(true, "Enable Target", group = target_group)
+string x_target_1 = input.string("0.5", "Target Location", ["0.236", "0.382", "0.5", "0.618", "0.786", "1"], inline = "Target1", group = target_group)
+string y_target_1 = input.string("0.618", "", ["0.236", "0.382", "0.5", "0.618", "0.786", "1"], inline = "Target1", group = target_group)
+bool enable_target_2 = input.bool(true, "Enable Target", group = target_group)
+string x_target_2 = input.string("0.382", "Target Location", ["0.236", "0.382", "0.5", "0.618", "0.786", "1"], inline = "Target2", group = target_group)
+string y_target_2 = input.string("0.786", "", ["0.236", "0.382", "0.5", "0.618", "0.786", "1"], inline = "Target2", group = target_group)
+bool enable_target_3 = input.bool(true, "Enable Target", group = target_group)
+string x_target_3 = input.string("0.236", "Target Location", ["0.236", "0.382", "0.5", "0.618", "0.786", "1"], inline = "Target3", group = target_group)
+string y_target_3 = input.string("1", "", ["0.236", "0.382", "0.5", "0.618", "0.786", "1"], inline = "Target3", group = target_group)
+const string levels = "Levels"
+bool enable_levels = input.bool(true, "Enable Fibonacci Retracement Levels", group = levels)
+bool enable_level_0 = input.bool(true, "Enable Fibonacci Retracement 0", group = levels)
+bool enable_level_1 = input.bool(true, "Enable Fibonacci Retracement 0.236", group = levels)
+bool enable_level_2 = input.bool(true, "Enable Fibonacci Retracement 0.382", group = levels)
+bool enable_level_3 = input.bool(true, "Enable Fibonacci Retracement 0.5", group = levels)
+bool enable_level_4 = input.bool(true, "Enable Fibonacci Retracement 0.618", group = levels)
+bool enable_level_5 = input.bool(true, "Enable Fibonacci Retracement 0.786", group = levels)
+bool enable_level_7 = input.bool(true, "Enable Fibonacci Retracement 1", group = levels)
+const string times = "Times"
+bool enable_times = input.bool(true, "Enable Fibonacci Time Lines", group = times)
+bool enable_time_0 = input.bool(true, "Enable Fibonacci Time 0", group = times)
+bool enable_time_1 = input.bool(true, "Enable Fibonacci Time 0.236", group = times)
+bool enable_time_2 = input.bool(true, "Enable Fibonacci Time 0.382", group = times)
+bool enable_time_3 = input.bool(true, "Enable Fibonacci Time 0.5", group = times)
+bool enable_time_4 = input.bool(true, "Enable Fibonacci Time 0.618", group = times)
+bool enable_time_5 = input.bool(true, "Enable Fibonacci Time 0.786", group = times)
+bool enable_time_7 = input.bool(true, "Enable Fibonacci Time 1", group = times)
+const string fan = "Fan"
+bool enable_fan = input.bool(false, "Enable Fibonacci Fan", group = fan)
+bool extend_fan = input.bool(false, "Extend Fan", group = fan)
+bool enable_fan_1 = input.bool(true, "Enable Fibonacci Retracement 0.236", group = fan)
+bool enable_fan_2 = input.bool(true, "Enable Fibonacci Retracement 0.382", group = fan)
+bool enable_fan_3 = input.bool(true, "Enable Fibonacci Retracement 0.5", group = fan)
+bool enable_fan_4 = input.bool(true, "Enable Fibonacci Retracement 0.618", group = fan)
+bool enable_fan_5 = input.bool(true, "Enable Fibonacci Retracement 0.786", group = fan)
+bool enable_fan_6 = input.bool(true, "Enable Fibonacci Retracement 1", group = fan)
+const string angle_group = "Angle"
+bool enable_angles = input.bool(true, "Enable Fibonacci Angles", group = angle_group)
+bool enable_angle_1 = input.bool(true, "Enable Fibonacci Angle 0.236", group = angle_group)
+bool enable_angle_2 = input.bool(true, "Enable Fibonacci Angle 0.382", group = angle_group)
+bool enable_angle_3 = input.bool(true, "Enable Fibonacci Angle 0.5", group = angle_group)
+bool enable_angle_4 = input.bool(true, "Enable Fibonacci Angle 0.618", group = angle_group)
+bool enable_angle_5 = input.bool(true, "Enable Fibonacci Angle 0.786", group = angle_group)
+bool enable_angle_6 = input.bool(true, "Enable Fibonacci Angle 1", group = angle_group)
+const string markers_group = "Markers"
+bool show_crosses = input.bool(true, "Show Fibonacci Level Crosses", group = markers_group)
+bool show_target_hit = input.bool(true, "Show Target Hit", group = markers_group)
+bool enable_labels = input.bool(true, "Show Labels", group = markers_group)
+const string color_group = "Visual"
+float fill_alpha = input.float(94, "Fill Alpha", minval = 0, maxval = 100, group = color_group)
+bool enable_level_fill = input.bool(true, "Enable Body Fill", group = color_group)
+bool enable_time_fill = input.bool(true, "Enable Time Fill", group = color_group)
+bool enable_fan_fill = input.bool(true, "Enable Fan Fill", group = color_group)
+bool enable_angle_fill = input.bool(true, "Enable Angle Fill", group = color_group)
+bool enable_target_fill = input.bool(true, "Enable Target Fill", group = color_group)
+float target_fill_alpha = input.float(50, "Target Fill Alpha", minval = 0, maxval = 100, group = color_group)
+color color_0 = input.color(#77787F, "0", group = color_group)
+color color_1 = input.color(#F42537, "0.236", group = color_group)
+color color_2 = input.color(#F28900, "0.382", group = color_group)
+color color_3 = input.color(#46A642, "0.5", group = color_group)
+color color_4 = input.color(#108C75, "0.618", group = color_group)
+color color_5 = input.color(#0CAABF, "0.786", group = color_group)
+color color_7 = input.color(#77787F, "1", group = color_group)
+color target_hit_color = input.color(#463cd4, "Target Hit Color", group = color_group)
+
+const bool[] enabled_levels = array.from(enable_level_0, enable_level_1, enable_level_2, enable_level_3, enable_level_4, enable_level_5, enable_level_7)
+const bool[] enabled_time = array.from(enable_time_0, enable_time_1, enable_time_2, enable_time_3, enable_time_4, enable_time_5, enable_time_7)
+const bool[] enabled_fan = array.from(false, enable_fan_1, enable_fan_2, enable_fan_3, enable_fan_4, enable_fan_5, enable_fan_6)
+const bool[] enabled_angles = array.from(false, enable_angle_1, enable_angle_2, enable_angle_3, enable_angle_4, enable_angle_5, enable_angle_6)
+const color[] colors = array.from(color_0, color_1, color_2, color_3, color_4, color_5, color_7)
+bool[] enabled_targets = array.from(enable_target_1, enable_target_2, enable_target_3)
+int[] x_target_value = array.from(target_switch(x_target_1), target_switch(x_target_2), target_switch(x_target_3))
+int[] y_target_value = array.from(target_switch(y_target_1), target_switch(y_target_2), target_switch(y_target_3))
+
+box_settings settings = box_settings.new(enable_levels
+                                         , enabled_levels
+                                         , enable_times
+                                         , enabled_time
+                                         , enable_fan
+                                         , enabled_fan
+                                         , extend_fan
+                                         , enable_angles
+                                         , enabled_angles
+                                         , colors
+                                         , fill_alpha
+                                         , enable_level_fill
+                                         , enable_time_fill
+                                         , enable_fan_fill
+                                         , enable_angle_fill
+                                         , enable_labels
+                                         , enabled_targets
+                                         , x_target_value
+                                         , y_target_value
+                                         , enable_target_fill
+                                         , target_fill_alpha)
+
+bool bullish_enable = enable_box == "Bullish" or enable_box == "Both"
+bool bearish_enable = enable_box == "Bearish" or enable_box == "Both"
+
+float high_source = pivot_type == "Wick" ? high : math.max(open, close)
+float low_source = pivot_type == "Wick" ? low : math.min(open, close)
+
+var bool active = false
+var float current_top_value = 0
+var float current_bottom_value = 0
+var int current_end_idx = na
+var bool polarity = na
+
+var fib_box[] fib_boxes =  array.new<fib_box>()
+
+var pivot pivot_high = pivot.new(na, na, na, na)
+var pivot pivot_low = pivot.new(na, na, na, na)
+
+bool ph = not na(ta.pivothigh(high_source, pivot_back, pivot_forward))
+bool pl = not na(ta.pivotlow(low_source, pivot_back, pivot_forward))
+
+if ph
+    pivot_high := pivot.new(high_source[pivot_forward], bar_index - pivot_forward, pivot_high.current, pivot_high.current_idx)
+
+if pl
+    pivot_low := pivot.new(low_source[pivot_forward], bar_index - pivot_forward, pivot_low.current, pivot_low.current_idx)
+
+bool same_idx = pivot_high.current_idx == pivot_low.current_idx
+
+float high_bull = same_idx ? pivot_high.previous : pivot_high.current
+int high_bull_idx = same_idx ? pivot_high.previous_idx : pivot_high.current_idx
+        
+if pivot_low.current != current_bottom_value
+ and high_bull > pivot_low.current 
+ and (bullish_style == "Lower Low" ? pivot_low.current < pivot_low.previous : bullish_style == "Higher Low" ? pivot_low.current > pivot_low.previous : true)
+ and high_source[pivot_forward] < high_bull 
+ and pivot_low.current_idx > high_bull_idx 
+ and bullish_enable
+ and barstate.isconfirmed
+ and not active
+
+    float price_range = high_bull - pivot_low.current
+    int idx_range = (pivot_low.current_idx - high_bull_idx) * 2
+
+    if bar_index < (pivot_low.current_idx + idx_range) 
+     and in_box(high_bull, pivot_low.current, pivot_low.current_idx) 
+     and idx_range >= minimum_range
+     and idx_range <= maximum_range
+
+        fib_boxes.dump(history_length)
+
+        fib_boxes.push(create_fib_box(pivot_low.current, high_bull, pivot_low.current_idx, price_range, idx_range, true, settings))
+        current_top_value := high_bull
+        current_bottom_value := pivot_low.current
+        current_end_idx := pivot_low.current_idx + idx_range
+        active := true
+        polarity := true
+
+
+float low_bear = same_idx ? pivot_low.previous : pivot_low.current
+int low_bear_idx = same_idx ? pivot_low.previous_idx : pivot_low.current_idx
+
+if pivot_high.current != current_top_value 
+ and pivot_high.current > low_bear 
+ and (bearish_style == "Higher High" ? pivot_high.current > pivot_high.previous  : bearish_style == "Lower High" ? pivot_high.current < pivot_high.previous : true)
+ and pivot_high.current_idx > low_bear_idx 
+ and bearish_enable
+ and barstate.isconfirmed
+ and not active
+
+    float price_range = pivot_high.current - low_bear
+    int idx_range = (pivot_high.current_idx - low_bear_idx) * 2
+
+    if bar_index < (pivot_high.current_idx + idx_range) 
+     and in_box(pivot_high.current, low_bear, pivot_high.current_idx) 
+     and idx_range >= minimum_range
+     and idx_range <= maximum_range
+
+        fib_boxes.dump(history_length)
+
+        fib_boxes.push(create_fib_box(low_bear, pivot_high.current, pivot_high.current_idx, price_range, idx_range, false, settings))
+        current_top_value := pivot_high.current
+        current_bottom_value := low_bear
+        current_end_idx := pivot_high.current_idx + idx_range
+        active := true
+        polarity := false
+
+bool[] level_alerts = array.new<bool>(7, false)
+bool[] time_alerts = array.new<bool>(7, false)
+bool[] target_alert = array.new<bool>(3, false)
+
+if active and barstate.isconfirmed
+    fib_box current_box = fib_boxes.last()
+    for i = 6 to 0
+        time_line = current_box.body_x.get(i)
+        level_line = current_box.body_y.get(i)
+        if enabled_levels.get(i)
+            if polarity
+                if close[1] < level_line.get_y2() and close >= level_line.get_y2()
+                    level_alerts.set(i, true)
+            else
+                if close[1] > level_line.get_y2() and close <= level_line.get_y2()
+                    level_alerts.set(i, true)
+
+        if enabled_time.get(i)
+            if bar_index[1] < time_line.get_x1() and bar_index >= time_line.get_x1()
+                time_alerts.set(i, true)
+
+    for i = 0 to 2
+        if bar_index[1] < current_box.body_x.get(x_target_value.get(i)).get_x1() and bar_index >= current_box.body_x.get(x_target_value.get(i)).get_x1()
+            if polarity
+                if close[1] < current_box.body_y.get(y_target_value.get(i)).get_y2() and close >= current_box.body_y.get(y_target_value.get(i)).get_y2()
+                    target_alert.set(i, true)
+            else
+                if close[1] > current_box.body_y.get(y_target_value.get(i)).get_y2() and close <= current_box.body_y.get(y_target_value.get(i)).get_y2()
+                    target_alert.set(i, true)
+
+
+plotshape(show_crosses and level_alerts.some() and active and polarity, "Fibonacci Level Cross Over", shape.circle, location.belowbar, colors.get(math.max(0, level_alerts.indexof(true))))
+plotshape(show_crosses and level_alerts.some() and active and not polarity, "Fibonacci Level Cross Under", shape.circle, location.abovebar, colors.get(math.max(0, level_alerts.indexof(true))))
+plotshape(show_target_hit and target_alert.some() and active and polarity, "Target Hit", shape.cross, location.belowbar, target_hit_color)
+plotshape(show_target_hit and target_alert.some() and active and not polarity, "Target Hit", shape.cross, location.abovebar, target_hit_color)
+
+alertcondition(level_alerts.get(0) and active and polarity, "Cross Over 0 Level")
+alertcondition(level_alerts.get(1) and active and polarity, "Cross Over 0.236 Level")
+alertcondition(level_alerts.get(2) and active and polarity, "Cross Over 0.382 Level")
+alertcondition(level_alerts.get(3) and active and polarity, "Cross Over 0.5 Level")
+alertcondition(level_alerts.get(4) and active and polarity, "Cross Over 0.618 Level")
+alertcondition(level_alerts.get(5) and active and polarity, "Cross Over 0.786 Level")
+alertcondition(level_alerts.get(6) and active and polarity, "Cross Over 1 Level")
+
+alertcondition(level_alerts.get(0) and active and not polarity, "Cross Under 0 level")
+alertcondition(level_alerts.get(1) and active and not polarity, "Cross Under 0.236 level")
+alertcondition(level_alerts.get(2) and active and not polarity, "Cross Under 0.382 level")
+alertcondition(level_alerts.get(3) and active and not polarity, "Cross Under 0.5 level")
+alertcondition(level_alerts.get(4) and active and not polarity, "Cross Under 0.618 level")
+alertcondition(level_alerts.get(5) and active and not polarity, "Cross Under 0.786 level")
+alertcondition(level_alerts.get(6) and active and not polarity, "Cross Under 1 level")
+
+alertcondition(time_alerts.get(0) and active, "Cross 0 Time")
+alertcondition(time_alerts.get(1) and active, "Cross 0.236 Time")
+alertcondition(time_alerts.get(2) and active, "Cross 0.382 Time")
+alertcondition(time_alerts.get(3) and active, "Cross 0.5 Time")
+alertcondition(time_alerts.get(4) and active, "Cross 0.618 Time")
+alertcondition(time_alerts.get(5) and active, "Cross 0.786 Time")
+alertcondition(time_alerts.get(6) and active, "Cross 1 Time")
+
+alertcondition(target_alert.get(0) and active, "Target 1 Hit")
+alertcondition(target_alert.get(1) and active, "Target 2 Hit")
+alertcondition(target_alert.get(2) and active, "Target 3 Hit")
+
+if active and (open > current_top_value or open < current_bottom_value or bar_index > current_end_idx) and barstate.isconfirmed
+    active := false

@@ -1,0 +1,109 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=6
+indicator("Dynamic Volume Trace Profile [ChartPrime]", overlay = true, max_labels_count = 500, max_lines_count = 500)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+int   lookback            = input.int(200, "LookBack")
+bool  displayDynamicBins  = input.bool(true, "Dynamic Volume Traces", inline = "dynamic")
+color dynamicBinsCol      = input.color(color.teal, "", inline = "dynamic")
+int   width_              = input.int(1, "", inline = "dynamic", minval = 0)
+bool  poc                 = input.bool(true, "Max Volume Trace", inline = "poc")
+color pocCol              = input.color(color.orange, "", inline = "poc")
+
+
+int bins     = 25
+int showN    = lookback
+
+
+// Range and step
+h       = ta.highest(high, 100)
+l       = ta.lowest(low,  100)
+step    = (h - l) / bins
+
+var levels  = array.new_float(bins, na)
+var cols    = array.new_color(bins, color.new(color.white, 100))
+var vol     = array.new<float>(bins, 0)
+var profile = array.new<box>()
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+if last_bar_index - bar_index < showN
+
+    if profile.size() > 0 
+        for lvl in profile
+            lvl.delete()
+        profile.clear()
+
+    for i = 1 to bins - 1
+        Getvolume = 0.
+        lower     = l + step * i
+     
+        for k = 0 to lookback - 1
+            if math.abs(close[k]-lower) <= step
+                Getvolume += volume[k]
+
+        levels.set(i, lower)
+        vol.   set(i, Getvolume)
+        cols.  set(i, color.from_gradient(Getvolume, 0, vol.max(), na, dynamicBinsCol))
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+    if barstate.islast
+
+        for i = 1 to bins - 1
+            level   = l + step * i
+            volData = vol.get(i)
+            right_  = int(volData / vol.max() * 50)
+
+            lvl     = box.new(bar_index+5, level+step/2, bar_index+5+right_, level-step/2
+                             , chart.bg_color
+                             , 1
+                             , bgcolor = volData == vol.max() and poc ? pocCol : cols.get(i)
+                             , text = str.tostring(volData, format.volume) + "  (" + str.tostring(volData / vol.max()*100, format.percent) + ")", text_halign = text.align_left)
+            profile.push(lvl)
+
+
+// Plot levels (show only the last 'showN' bars)
+display_ = displayDynamicBins ? display.all : display.none
+
+plot(array.get(levels, 0 ), color = vol.get(0 ) == vol.max() and poc ? pocCol : array.get(cols, 0), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 1 ), color = vol.get(1 ) == vol.max() and poc ? pocCol : array.get(cols, 1), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 2 ), color = vol.get(2 ) == vol.max() and poc ? pocCol : array.get(cols, 2), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 3 ), color = vol.get(3 ) == vol.max() and poc ? pocCol : array.get(cols, 3), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 4 ), color = vol.get(4 ) == vol.max() and poc ? pocCol : array.get(cols, 4), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 5 ), color = vol.get(5 ) == vol.max() and poc ? pocCol : array.get(cols, 5), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 6 ), color = vol.get(6 ) == vol.max() and poc ? pocCol : array.get(cols, 6), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 7 ), color = vol.get(7 ) == vol.max() and poc ? pocCol : array.get(cols, 7), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 8 ), color = vol.get(8 ) == vol.max() and poc ? pocCol : array.get(cols, 8), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 9 ), color = vol.get(9 ) == vol.max() and poc ? pocCol : array.get(cols, 9), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 10), color = vol.get(10) == vol.max() and poc ? pocCol : array.get(cols, 10), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 11), color = vol.get(11) == vol.max() and poc ? pocCol : array.get(cols, 11), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 12), color = vol.get(12) == vol.max() and poc ? pocCol : array.get(cols, 12), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 13), color = vol.get(13) == vol.max() and poc ? pocCol : array.get(cols, 13), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 14), color = vol.get(14) == vol.max() and poc ? pocCol : array.get(cols, 14), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 15), color = vol.get(15) == vol.max() and poc ? pocCol : array.get(cols, 15), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 16), color = vol.get(16) == vol.max() and poc ? pocCol : array.get(cols, 16), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 17), color = vol.get(17) == vol.max() and poc ? pocCol : array.get(cols, 17), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 18), color = vol.get(18) == vol.max() and poc ? pocCol : array.get(cols, 18), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 19), color = vol.get(19) == vol.max() and poc ? pocCol : array.get(cols, 19), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 20), color = vol.get(20) == vol.max() and poc ? pocCol : array.get(cols, 20), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 21), color = vol.get(21) == vol.max() and poc ? pocCol : array.get(cols, 21), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 22), color = vol.get(22) == vol.max() and poc ? pocCol : array.get(cols, 22), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 23), color = vol.get(23) == vol.max() and poc ? pocCol : array.get(cols, 23), show_last = showN, editable = false, display = display_, linewidth = width_)
+plot(array.get(levels, 24), color = vol.get(24) == vol.max() and poc ? pocCol : array.get(cols, 24), show_last = showN, editable = false, display = display_, linewidth = width_)
+
+
+// For reference
+plot(h, "Upper", color = chart.fg_color,  show_last = showN, display = display.none)
+plot(l, "Lower", color = chart.fg_color, show_last = showN, display = display.none)
+// --------------------------------------------------------------------------------------------------------------------}

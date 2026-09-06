@@ -1,0 +1,270 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © Chartprime
+
+//@version=5
+indicator("Swing Ranges [ChartPrime]",overlay = true,max_boxes_count = 500,max_bars_back = 300)
+color Offwhite                                  = color.rgb(255, 255, 255, 71)
+color _offwhite                                 = color.rgb(255, 255, 255, 50)
+color  Red1                                     = color.rgb(255, 82, 82, 85)
+color  Red2                                     = color.rgb(243, 6, 6, 50)
+color green                                     = color.rgb(73, 241, 241, 85)
+color green2                                    = color.rgb(73, 241, 241, 50)
+color Black                                     = color.rgb(7, 7, 7)
+color Yellow                                    = color.rgb(254, 229, 4)
+
+int atrLen                                      = 30
+float mult                                      = 0.3
+float per                                       = 5.0
+var float prevHigh                              = na
+var float prevLow                               = na
+var int prevHighIndex                           = na
+var int prevLowIndex                            = na
+int sync                                        = bar_index
+int swingbars                                   = input.int(20, 'Swing Length', tooltip='Bar # for swings' )
+int ATRPeriod                                   = input.int(14, 'ATR Period' )
+bool showHis                                    = input.bool(true,"Show Historical Boxes")
+bool showPOC                                    = input.bool(true,"Show VWAP POC",inline = "!")
+color POCcolor                                  = input.color(#46ecf8,"",inline = "!")
+float pivHi                                     = ta.pivothigh(high, swingbars, swingbars)
+float pivLo                                     = ta.pivotlow(low, swingbars, swingbars)
+float atr                                       = ta.atr(ATRPeriod)
+float atrPercent                                = (atr/close) * 100
+
+
+// --- {Arrays
+var box [] LevelsBOX                            = array.new_box()
+var label [] Levelslabel                        = array.new_label()
+float [] Volume                                 = array.new_float()
+float [] TotalVolume                            = array.new_float()
+float [] Greenvolume                            = array.new_float()
+float [] redvolume                              = array.new_float()
+float [] ATR                                    = array.new_float()
+float [] VWAP                                   = array.new_float()
+// -- }
+
+
+
+//Piv levels
+if not na(pivHi)
+    prevHigh := pivHi
+    prevHighIndex := sync - swingbars
+
+if not na(pivLo)
+    prevLow := pivLo
+    prevLowIndex := sync - swingbars
+
+
+DPlace(data,sign) =>
+	if sign == "+"
+        data + (data * 0.0015)
+	else if sign == "-"		
+        data - (data * 0.0015)
+
+
+dump            = (pivLo - prevHigh) / prevHigh * 100
+pump            = (pivHi - prevLow) / prevLow * 100
+perc            =   close * (per/100)
+srdatr          =   ta.atr (atrLen) * mult
+band            =   math.min (srdatr, perc) [swingbars] /2
+HH              =   DPlace(prevHigh,"+")    +band
+HL              =   DPlace(prevHigh,"+")    -band
+LH              =   DPlace(prevLow,"-")     +band
+LL              =   DPlace(prevLow,"-")     -band
+
+
+
+
+
+
+
+Volume(GV,RV,TV,BC)=>
+    GR = GV / TV 
+    RR = RV / TV
+    GI = int(GR * BC)
+    RI = int(RR * BC)
+    [GI , RI , GR , RR]
+
+
+Message(dir)=>
+    Message = ""
+    Message+= dir == pump ? "Price pumped : " + str.tostring(math.round(pump,2),format.percent) + " %\n" : "Price dumped :" + str.tostring(math.round(dump,2),format.percent) + "\n"
+    Message+= "ATR avarage : " + str.tostring(math.round(array.avg(ATR),4),format.percent) + "\n"
+    Message+= "VWAP Mean : " + str.tostring(array.median(VWAP),format.mintick) + "\n"
+    Message+= "Volume avarage : " + str.tostring(array.sum(Volume),format.volume)  + "\n"
+    Message+= "BAR count: " + str.tostring(array.size(Volume)) + "\n"
+
+if prevLow[1] != prevLow and showHis
+    BIndex = int(((sync - swingbars) - prevHighIndex))
+    for i = 0 to BIndex 
+        array.push(Volume,math.round(volume[swingbars + i],2))
+        array.push(ATR,atrPercent[swingbars + i])
+        array.push(VWAP,ta.vwap[swingbars + i])
+
+    if array.size(Volume) > BIndex +1 
+        array.shift(Volume)
+        array.shift(ATR)
+    box.new(prevHighIndex,
+         prevHigh,
+         sync - swingbars,
+         pivLo,
+         bgcolor = Red1,
+         border_color =Red2,
+         border_width = 1)
+    label.new(prevHighIndex + int(((sync - swingbars) - prevHighIndex) / 2),
+         prevHigh,text = "",
+         tooltip = Message(dump),
+         size = size.tiny,
+         color = Red2)
+    line.new(prevHighIndex,
+         array.median(VWAP),
+         sync - swingbars,
+         array.median(VWAP),
+         color = Yellow,
+         width = 2)
+
+
+if prevHigh[1] != prevHigh and showHis
+    BIndex = int(((sync - swingbars) - prevLowIndex))
+    for i = 0 to BIndex 
+        array.push(Volume,math.round(volume[swingbars + i],2))
+        array.push(ATR,atrPercent[swingbars + i])
+        array.push(VWAP,ta.vwap[swingbars + i])
+
+    if array.size(Volume) > BIndex +1 
+        array.shift(Volume)
+        array.shift(ATR)
+    box.new(prevLowIndex,
+         pivHi,
+         sync - swingbars,
+         prevLow,
+         bgcolor =green,
+         border_color = green2,
+         border_width = 1)
+    label.new(prevLowIndex + int(((sync - swingbars) - prevLowIndex) / 2) ,
+         prevLow,
+         text = "",
+         tooltip = Message(pump),
+         size = size.tiny,
+         color = green2,
+         style = label.style_label_up)
+
+    if prevHigh > array.median(VWAP)
+        line.new(prevLowIndex,
+             array.median(VWAP),
+             sync - swingbars,
+             array.median(VWAP),
+             color = Yellow,
+             width = 2)
+
+
+
+if barstate.islast
+    BIndex = int(((sync - swingbars) - prevHighIndex))
+    for i = 0 to BIndex 
+        array.push(Volume,math.round(volume[swingbars + i],2))
+        array.push(ATR,atrPercent[swingbars + i])
+        array.push(VWAP,ta.vwap[swingbars + i])
+
+    if array.size(Volume) > BIndex +1 
+        array.shift(Volume)
+        array.shift(ATR)
+    Bindex = sync - prevHighIndex
+    IndexB = (sync + 50 )- prevHighIndex
+    for i = 1 to Bindex
+        if close[i] > open[i]
+            array.push(Greenvolume,volume[i])
+        if close[i] < open[i]
+            array.push(redvolume,volume[i])
+        array.push(TotalVolume,volume[i])
+
+    [GI , RI,GR,RR ] = Volume(array.sum(Greenvolume),array.sum(redvolume),array.sum(TotalVolume),IndexB)
+    colorS = close > LH ? green : Red1 , ColorB = close > LH ? green2 : Red2
+    _colorS = close > HH ? green : Red1 , _ColorB = close > HH ? green2 : Red2
+    leftover = 100  - ((RR + GR) * 100 )
+    array.push(LevelsBOX,
+         box.new(prevHighIndex,
+         LH,
+         sync + 50,
+         LL,
+         bgcolor = colorS,
+         border_color =ColorB,
+         border_width = 1))
+    array.push(LevelsBOX,
+         box.new(prevHighIndex,
+         HH,
+         sync + 50,
+         HL,
+         bgcolor = _colorS,
+         border_color =_ColorB,
+         border_width = 1))
+    array.push(LevelsBOX,
+         box.new(prevHighIndex,
+         LH,
+         prevHighIndex + GI,
+         LL,
+         bgcolor = Offwhite,
+         border_color =_offwhite,
+         border_width = 1,
+         text = "Bull Volume",
+         text_size = size.normal,
+         text_color = Black))
+    array.push(LevelsBOX,
+         box.new(prevHighIndex,
+         HH,
+         prevHighIndex + RI,
+         HL,
+         bgcolor = Offwhite,
+         border_color =_offwhite,
+         border_width = 1,
+         text = "Bear Volume",
+         text_size = size.normal,
+         text_color = Black))
+
+
+
+    array.push(Levelslabel,
+         label.new(prevHighIndex + ( GI + 9 ),
+         (LL + LH) / 2,
+         str.tostring(math.round(GR * 100,2)) + " %",
+         xloc = xloc.bar_index,
+         style = label.style_label_left,
+         textcolor= color.white,
+         color = color.new(color.black, 100)))
+    array.push(Levelslabel,
+         label.new(prevHighIndex + ( RI + 9 ),
+         (HL + HH) / 2,
+         str.tostring(math.round(RR * 100,2)) + " %",
+         xloc = xloc.bar_index,
+         style = label.style_label_left,
+         textcolor= color.white,
+         color = color.new(color.black, 100)))
+    var line POC = na , line.delete(POC)
+    if showPOC
+        POC:=line.new(prevHighIndex,
+             array.median(VWAP),
+             sync + 50,
+             array.median(VWAP),
+             color = POCcolor,
+             width = 2,
+             style = line.style_dotted)    
+    var box left = na , box.delete(left)
+    if leftover > 0 
+        
+        left:=box.new(prevHighIndex + ( RI + 20 ),
+         HH,
+         prevHighIndex + ( RI + 30 ),
+         HL,
+         bgcolor = color.rgb(255, 137, 68, 15),
+         border_color =color.rgb(255, 137, 68, 8),
+         border_width = 1,
+         text = "NV " + str.tostring(math.round(leftover,2)) +" %",
+         text_size = size.small,
+         text_color = Black)
+
+
+    if array.size(LevelsBOX) > 4
+        for i = 0 to 3
+            box.delete(array.shift(LevelsBOX))
+    if array.size(Levelslabel) > 2
+        for i = 0 to 1
+            label.delete(array.shift(Levelslabel))

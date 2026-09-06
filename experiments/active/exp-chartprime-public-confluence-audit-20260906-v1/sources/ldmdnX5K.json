@@ -1,0 +1,47 @@
+{
+  "id": "ldmdnX5K",
+  "title": "Volume Whale Zones [ChartPrime]",
+  "url": "https://www.tradingview.com/script/ldmdnX5K-Volume-Whale-Zones-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:15.708308+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/ldmdnX5K-Volume-Whale-Zones-ChartPrime/",
+  "created_at": "2026-03-17T11:04:56.512468+00:00",
+  "updated_at": null,
+  "description": "🔶 OVERVIEW  \nVolume Whale Zones [ChartPrime] is a dynamic structural volume engine designed to detect and stabilize the most actively traded price region inside a rolling range.\n\nInstead of plotting a traditional static Volume Profile, this indicator builds a state-based, volatility-adjusted Point of Control (PoC) model that evolves only when true structural expansion occurs.\n\nThe result is a highly stable institutional-grade “Hot Zone” — a price area where market participation is most concentrated.\n\n\n🔶 CORE PHILOSOPHY\n\nMost volume tools react instantly to small fluctuations.  \nVolume Whale Zones [ChartPrime] does not.\nIt is built on three core principles:\n Structural range expansion matters more than small fluctuations. Volume concentration must be volatility-adjusted. Stability requires state logic, not raw recalculation.\nThis prevents noise and highlights meaningful accumulation or distribution zones.\n\n\n🔶 RANGE ENGINE\nThe indicator continuously tracks:\n Highest high over the lookback window. Lowest low over the lookback window. Whether the range has structurally expanded.\nThe Hot Zone only recalculates aggressively when:\n• A new structural high forms  \n• Or a new structural low forms  \n\nIf the range does not expand, the zone remains stable.\nThis avoids over-reactive behavior during sideways movement.\n\n\n🔶 VOLUME PROFILE CORE\nInside the defined range:\n The range is divided into 50 price rows. Volume is accumulated per price bin. The highest volume bin becomes the raw PoC.\nUnlike traditional Volume Profile:\n• This profile recalculates continuously\n• But structural filtering prevents instability\n\n\n🔶 THREE-LAYER HOT ZONE STABILIZATION ENGINE\nThis is the most important part of the model.\nThe Hot Zone is built in three stages:\n\nLevel 0 – Structural Base  \n Raw PoC is detected. Movement is volatility-clamped using ATR. Sudden jumps are limited to ATR × 2. EMA smoothing is applied.\nLevel 1 – Refined Zone  \n Only updates if price displacement exceeds ATR threshold. Filters minor structural shifts. Acts as a mid-level stabilizer.\nLevel 2 – Final Stable Zone  \n Only updates if Level 1 exceeds another ATR band. Creates long-term stability. Prevents rapid zone flickering.\n\n\nThe final output is a multi-stage stabilized participation level.\n\n\n🔶 VOLATILITY CLAMPING\nTo prevent distortion during extreme moves:\n PoC movement is limited using ATR × 2. Outlier jumps are capped. Sudden spikes cannot instantly shift the Hot Zone.\nThis produces institutional-style smoothing behavior.\n\n\n🔶 VISUAL STRUCTURE\n Thick central line → Final Hot Zone. Optional wide shaded zone above and below. Stepline structure highlights state shifts. Color transparency increases when structure changes.\n\nThe zone only visually reacts when real structural change occurs.\n\n\n🔶 HOT ZONE DEVIATION OSCILLATOR\nThe indicator includes a built-in deviation measurement:\n Deviation = (Close − Hot Zone) / ATR. Values are clamped between -4 and +4. Displayed as a centered horizontal oscillator table. Active cell marks current price displacement.\nThis gives traders immediate context:\n• Is price stretched above value?  \n• Is price compressed below value?  \n• Is price sitting directly at the participation core?\n\n\n\n\n\n🔶 LOOKBACK ORANGE HOT ZONE (CONTEXT OVERLAY)\nThe indicator plots two visual “Hot Zone” layers:\n1) Main Hot Zone (Stable Structural Line)  \n The thick red Hot Zone line is the fully stabilized output (Level 2). It persists across history and only shifts when structural + ATR conditions are met.\n\n2) Lookback Hot Zone (Orange Window Line)  \n The orange line is the same Hot Zone level, but displayed only for the last Lookback bars. This gives traders a clean “recent context” view without long historical clutter. It helps compare where the zone currently sits versus older structural states.\n\n\nSo visually you get:\n• Long-term stable zone (main)  \n• Short-term contextual zone (orange lookback window)\n\n\n🔶 WHAT THE HOT ZONE REPRESENTS\nThe Hot Zone acts as:\n Institutional equilibrium area. Participation gravity center.\n Accumulation/distribution magnet.\n Reversion anchor during mean cycles.\nPrice often:\n• Reacts around it  \n• Consolidates near it  \n• Expands away from it  \n• Returns to it after extremes  \n\n\n🔶 HOW TO USE\n Use the Hot Zone as a value anchor. Trade mean reversion when deviation is extreme. Look for breakouts when price compresses tightly around the zone. Combine with structure tools or liquidity sweeps. Use deviation to filter overextended moves.\nBest suited for:\n• Range traders  \n• Intraday scalpers  \n• Swing continuation traders  \n• Liquidity-based strategies  \n\n\n🔶 DIFFERENCE FROM TRADITIONAL POC\nTraditional PoC:\n• Recalculates every bar  \n• Flickers frequently  \n• Is highly reactive  \n\nVolume Whale Zones [ChartPrime]:\n• State-based  \n• Volatility-filtered  \n• Multi-layer stabilized  \n• Structure-aware  \n\nThis produces far cleaner institutional behavior.\n\n\n🔶 CONCLUSION\n\nVolume Whale Zones [ChartPrime] transforms raw volume data into a stabilized structural participation model.\n\nBy combining:\n• Rolling range detection  \n• Dynamic volume profiling  \n• ATR-based clamping  \n• Multi-stage stabilization  \n• Deviation analytics  \n\nIt delivers a powerful value engine that reveals where the market is truly active — and where price is statistically stretched.\n\nThis is not just a PoC.  \nIt is a volatility-aware institutional participation zone.",
+  "script": {
+    "id": 4976627,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;9d6d73f6460340f8bba8659571e69c24",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B9d6d73f6460340f8bba8659571e69c24/1",
+  "source_http_status": 200,
+  "source_sha256": "6d278b63874ce4bc6ef1455de535406e7feb98b9b6eda028256931e7a6a33db5",
+  "source_lines": 197,
+  "source_metadata": {
+    "created": "2026-03-17T11:04:54.442237Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;6228a1de374c49558cc1e96cfd563dda",
+      "originalScriptVersion": "3.0",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 4
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Volume Whale Zones [ChartPrime]",
+    "updated": "2026-03-17T11:04:54.442237Z",
+    "version": "1.0"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "id": "KkoxM97D",
+  "title": "Multi Asset Histogram [ChartPrime]",
+  "url": "https://www.tradingview.com/script/KkoxM97D-Multi-Asset-Histogram-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:43.771050+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/KkoxM97D-Multi-Asset-Histogram-ChartPrime/",
+  "created_at": "2024-07-01T12:52:53.993410+00:00",
+  "updated_at": null,
+  "description": "Multi Asset Histogram Indicator\n\nOverview:\nThe \"Multi Asset Histogram\" indicator provides a comprehensive visualization of the performance of multiple assets relative to each other. By calculating a score for each asset and displaying it in a histogram format, this indicator helps traders quickly identify the trends, dominant asset and the average performance of the assets in the selected group.\n\nKey Features:\n\n◆ Multi-Asset Score Calculation:\nThe indicator calculates a trend score for each selected asset based on the price source (e.g., hl2).\nThe trend score is determined by comparing the current price to the prices over the past bars back defined by user, adding or subtracting points based on whether the current price is higher or lower than previous prices.\n\n\n◆ Flexible Symbol Input:\nTraders can input up to 10 different symbols (e.g., BTCUSD, ETHUSD, etc.) to be included in the histogram analysis.\n\n\n◆ Dynamic Visualization:\nA histogram is plotted for each asset, with bars colored based on the score, providing a clear visual representation of the relative performance.\nColor gradients from red to aqua indicate the performance, with red representing negative scores and aqua representing positive scores.\n\n◆ Adaptive Histogram Lines:\nThe width and placement of histogram lines adapt based on the calculated scores, ensuring clear visualization regardless of the values.\nDashed lines represent the mean score of all assets, helping traders identify the overall market trend.\n\n◆Detailed Labels and Values:\nLabels are placed on the histogram to display the exact score for each asset.\n\n\nMean value and zero line labels provide additional context for the overall performance.\n\n\n◆ Visual Scaling Lines:\nZero line and mean line are clearly marked, helping traders understand the distribution and scale of scores.\n\nScales on the left and right of the histogram indicate the performance range.\n\n\n◆ Informative Table:\nA table is displayed on the chart, showing the dominant asset (the one with the highest score) and the mean score of all assets.\nThe table updates dynamically to reflect real-time changes in asset performance.\n\n\n◆ Settings:\nLength: The value of number bars back is greater or less than the current value of the sourceSource: The price source to be used for score calculation (e.g., hl2).Symbols: Up to 10 different asset symbols can be input for analysis.\n\n\nUsage Notes:\nThis indicator is useful for traders who monitor multiple assets simultaneously and need a quick visual reference to identify the strongest and weakest performers.\nThe color coding and dynamic labels make it easy to interpret the relative performance and make informed trading decisions.\n\n\nThis indicator is designed to enhance multi-asset analysis by providing a clear, visual representation of each asset's performance relative to the others, making it easier to identify trends and dominant assets in the market.",
+  "script": {
+    "id": 1675331,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;8de20fa748994adaa65e52f23835b475",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B8de20fa748994adaa65e52f23835b475/1",
+  "source_http_status": 200,
+  "source_sha256": "58d49892627a886094b269c7b9d7ac15ae9ba1c0844696fc0cd85ab7856b3ae5",
+  "source_lines": 173,
+  "source_metadata": {
+    "created": "2024-07-01T12:52:53.405797Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": false,
+      "kind": "study",
+      "sourceInputsCount": 1
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Multi Asset Histogram [ChartPrime]",
+    "updated": "2024-07-01T12:52:53.405797Z",
+    "version": "1.0"
+  }
+}

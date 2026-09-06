@@ -1,0 +1,48 @@
+{
+  "id": "sSqHpGiw",
+  "title": "Dynamic Deviation Channels (RSI Trigger) [ChartPrime]",
+  "url": "https://www.tradingview.com/script/sSqHpGiw-Dynamic-Deviation-Channels-RSI-Trigger-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:34:53.453888+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/sSqHpGiw-Dynamic-Deviation-Channels-RSI-Trigger-ChartPrime/",
+  "created_at": "2026-08-31T12:23:32.068485+00:00",
+  "updated_at": null,
+  "description": "Dynamic Deviation Channels (RSI Trigger) [ChartPrime]\n\n🔶 OVERVIEW\n\nStandard volatility channels paint static bands across your entire chart, ignoring shifting market momentum and leading to false breakouts in trending environments. The Dynamic Deviation Channels (RSI Trigger) [ChartPrime] solves this by combining ATR-based volatility bands with a dynamic Relative Strength Index filter. \n\nInstead of showing overlapping channels on both sides simultaneously, the indicator intelligently displays upper bands only when momentum is bullish/neutral and lower bands only when momentum shifts bearish, keeping your workspace clean and focused on active market participation zones.\n\n🔶 HOW IT WORKS\n\nThe indicator processes market structure and momentum through a multi-stage execution pipeline:\n\n Adaptive Mid-Line Trend Matrix: Computes a configurable moving average (SMA, EMA, WMA, or RMA) to serve as the central channel baseline, dynamically coloring itself based on short-term price slopes. ATR Volatility Multipliers: Expands outward from the central basis using multi-tiered ATR deviations to establish structured Level 1, Level 2, and Level 3 boundary channels. RSI Directional Filtering: A smoothed RSI engine checks prevailing momentum state. When the RSI value is at or above 50, upper channel bands activate; when it drops below 50, lower channel bands engage. Smart Signal Generation: Plots precise entry triangles when price interacts with the primary deviation bands, utilizing a built-in bar gap control to prevent signal clustering.\n\n🔶 KEY FEATURES\n\n Conditional Band Rendering: Automatically hides inactive channel zones based on RSI momentum thresholds, eliminating chart clutter during strong directional trends. Multi-Tiered Deviation Zones: Features three distinct deviation multiplier levels with custom background fills to highlight volatility expansion and over-extension zones. Glowing Mid-Line Display: A highlighted central moving average complete with a soft glow effect for immediate trend-direction recognition. Live Deviation Labels:** Clean, real-time price labels pinned to the final bar of each active upper and lower deviation boundary for instant reference.\n\n\n🔶 TRADING APPLICATIONS\n\n Momentum-Aligned Rebounds:** When lower bands are active during a bearish-to-neutral momentum phase, look for price rejections off Deviation Level 1 or 2 to catch high-probability counter-trend bounces.\n* Volatility Expansion Breakouts:** Monitor price interaction with outermost Level 3 bands. A clean break past these boundaries during high-volatility regimes signals an aggressive continuation move.\n* Trend Filtering via Mid-Line:** Use the glowing central moving average slope and color state to determine primary bias before taking entries off individual deviation levels.\n\n\n🔶 SETTINGS\n\n Moving Average (Length / Type): Controls the lookback period and calculation method (SMA, EMA, WMA, RMA) for the central baseline channel. RSI Filter (Length / Source): Adjusts the sensitivity and data input source used by the momentum filter engine to toggle upper and lower band visibility. Deviation Bands (Multipliers / Display Toggles): Customizes the width spacing for all three deviation tiers and lets you toggle the visibility of the outermost channels.\n\n🔶 CONCLUSION\n\nThe Dynamic Deviation Channels (RSI Trigger) [ChartPrime] brings clarity to volatility channel analysis. By filtering band display through real-time RSI momentum, it ensures you are only looking at the structural levels that matter most for your current market direction.",
+  "script": {
+    "id": 6939350,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;869805e277524b6f9604264576a4bfb7",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B869805e277524b6f9604264576a4bfb7/1",
+  "source_http_status": 200,
+  "source_sha256": "0cc45137be9b668662afd633a3b275a8b2c8d532fd20a3689a9c9fa95f7d7447",
+  "source_lines": 164,
+  "source_metadata": {
+    "created": "2026-08-31T12:23:30.709153Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;8e9ed5fb37ee4aa095b4df0eb88cff11",
+      "originalScriptVersion": "0.2",
+      "sourceInputsCount": 1,
+      "stats": {
+        "plot": 8,
+        "plotshape": 2
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Dynamic Deviation Channels (RSI Trigger) [ChartPrime]",
+    "updated": "2026-08-31T12:23:30.709153Z",
+    "version": "1.0"
+  }
+}

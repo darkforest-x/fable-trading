@@ -1,0 +1,45 @@
+{
+  "id": "LWkLPa6f",
+  "title": "Spiral Levels [ChartPrime]",
+  "url": "https://www.tradingview.com/script/LWkLPa6f-Spiral-Levels-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:36:41.264502+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/LWkLPa6f-Spiral-Levels-ChartPrime/",
+  "created_at": "2024-07-08T13:07:46.162396+00:00",
+  "updated_at": null,
+  "description": "SPIRAL LEVELS\n\n⯁ OVERVIEW\nThe Spiral Levels [ChartPrime] indicator, designed for use on TradingView and developed with Pine Script™, leveraging a combination of traditional pivot points and spiral geometry to visualize support and resistance levels on the chart. By plotting spirals from pivot points, the indicator provides a distinctive perspective on potential price movements.\n\nIt's an experiment inspired from spirals in the Pine documentation and the concept of using spirals to add padding/offsets to SR zones in a market (an idea we plan to expand on in the future).\n\n◆ USAGE\n  ● Identifying Pivot Points: The indicator identifies significant pivot highs and lows based on user-defined criteria.\n  ● Filtered Pivot Points: Pivot points for spirals are filtered using volume and high/low thresholds to ensure they are significant.\n\n\n  ● Spiral Visualization: Spirals are plotted from these pivots, indicating potential future support and resistance levels or as liquidity zones. \nAdditionally, the plotted levels can serve as liquidity zones where the price might attempt to grab liquidity, providing a deeper understanding of market behavior at significant volume levels.\n\n\n  ● Volume-Based Coloring: Spirals are colored based on volume data, providing additional context about the strength of the price movement.\n\n\n  ● Labeling and Line Extensions: Labels display volume information, and lines extend from the end of the spirals to the current bar for clarity.\n\n\n● Spiral Rotation: By adjusting the \"Number of spiral rotations\" input, you can control the number of rotations each spiral makes around a pivot point, offering more detailed insights. This also allows you to control the distance of levels from a pivot. More rotations will extend the spiral further from the pivot point, potentially identifying support and resistance levels or liquidity zones at greater distances.\n\nThis modification emphasizes that the number of rotations not only provides more detailed insights but also affects the spatial distribution of the identified levels relative to the pivot point.\n\n\n\n⯁ USER INPUTS\n  ● Pivots\nLeft Bars: Determines the number of bars to the left of the pivot.Right Bars: Determines the number of bars to the right of the pivot.\n  ● Filter\nVolume Filter: Sets the threshold for volume filtering.High & Low Filter: Sets the threshold for filtering pivot highs and lows.\n  ● Spiral\nSpirals Shown: Specifies the number of spirals to be displayed on the chart.Number of spiral rotations: Sets the number of rotations for each spiral.X Scale: Adjusts the horizontal scale of the spirals.Y Scale: Adjusts the vertical scale of the spirals, relative to the ATR(200).Reverse Spirals: Option to reverse the direction of the spirals.\n\n\n⯁ TECHNICAL NOTES\nThe indicator uses Pine Script's polyline feature for smooth spiral rendering.It implements a custom cross detection function to manage line and label visibility.The script is optimized to limit calculations to the last 1000 bars for performance.It automatically manages the number of displayed elements to prevent clutter and ensure smooth performance.\n\n\nThe Spiral Levels ChartPrime indicator offers a unique and visually engaging method to identify potential support and resistance levels. By integrating volume data and pivot points with spiral geometry, traders can gain valuable insights into market dynamics and make more informed trading decisions.",
+  "script": {
+    "id": 1688937,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;1933e9afc42142ca9b291623b63e27a1",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B1933e9afc42142ca9b291623b63e27a1/1",
+  "source_http_status": 200,
+  "source_sha256": "f4d6cad705a247c11506145ce092c6ef9c8077229de26839463cd9318f139445",
+  "source_lines": 176,
+  "source_metadata": {
+    "created": "2024-07-08T13:07:44.849151Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plotshape": 2
+      }
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Spiral Levels [ChartPrime]",
+    "updated": "2024-07-08T13:07:44.849151Z",
+    "version": "1.0"
+  }
+}

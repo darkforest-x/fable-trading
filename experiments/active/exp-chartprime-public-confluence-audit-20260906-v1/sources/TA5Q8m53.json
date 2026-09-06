@@ -1,0 +1,44 @@
+{
+  "id": "TA5Q8m53",
+  "title": "ZigZag Volume Profile [ChartPrime]",
+  "url": "https://www.tradingview.com/script/TA5Q8m53-ZigZag-Volume-Profile-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:52.634602+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/TA5Q8m53-ZigZag-Volume-Profile-ChartPrime/",
+  "created_at": "2025-08-04T12:10:51.110251+00:00",
+  "updated_at": null,
+  "description": "⯁ OVERVIEW\nZigZag Volume Profile [ChartPrime] combines swing structure with volume analytics by plotting a ZigZag of major price swings and overlaying a detailed volume profile around each swing. At the end of each swing, it highlights the Point of Control (POC) — the price level with the highest traded volume — and extends it forward to identify key areas of potential support or resistance.\n\n⯁ KEY FEATURES\nZigZag Swing Detection:\nAutomatically detects swing highs and lows based on a user-defined length, creating clean visual segments of market structure.\nThese segments act as boundaries for volume profile calculations.\n\n\nZigZag Channel Visualization:\nThe ZigZag structure is connected with sloped lines, forming a visual “channel” of the price movement.\nThe ZigZag can optionally, scaled by ATR.\nVolume Profile Around Each Swing:\nFor every completed swing (high to low or low to high), the indicator constructs a full volume profile using user-defined bin counts.\nIt scans volume across price levels in the swing and plots histogram-style bins using a gradient color to indicate volume magnitude.\nDynamic Bin Width and Slope Adjustment:\nBins are distributed across a vertical ATR-based range, and their width is adjusted based on the percentage of total swing volume.\nThe volume fill direction is adapted to the swing’s slope for visually aligned plotting.\nPOC Detection and Extension:\nThe highest volume bin in each swing is identified as the Point of Control (POC).\nThis level is plotted with a thicker line and extended horizontally into the future as a key reaction level.\nAutomatic POC Expiry on Price Interaction:\nPOC lines are continuously extended unless breached by price.\nWhen price crosses the POC level, the extension is terminated — signaling that the level may have been absorbed.Clean Volume Bin Visualization:\nBin colors range from green (low volume) to blue (higher volume), with the POC always marked in red by default for easy identification.\nVolume percentages are optionally labeled at each bin level.\n\n\nFlexible Swing Profile Parameters:\nUsers can control:Number of volume binsBin widthChannel width (ATR factor)Visibility of the swing channel or POC linesEfficient Memory Handling:\nOld POC lines and volume profiles are automatically removed from memory after a threshold to keep charts clean and performant.\n\n⯁ USAGE\n Use ZigZag swings to define market structure visually. Analyze volume profile around each swing to understand where most trading activity occurred. Use POC extensions as dynamic support/resistance zones for entries, stops, or take-profits. Watch for price interaction with extended POC lines — breaks may suggest absorbed liquidity or breakout potential. Use the ATR-based channel width to adapt profiles based on market volatility.\n\n⯁ CONCLUSION\nZigZag Volume Profile [ChartPrime] offers a powerful fusion of structure and volume. By plotting detailed volume profiles over each price swing and extending the POC as actionable S/R levels, this tool provides deep insight into market participation zones — giving traders a tactical edge in both ranging and trending environments.",
+  "script": {
+    "id": 2965970,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;d756d26ed2fb43258b15f6d4d009fa96",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bd756d26ed2fb43258b15f6d4d009fa96/1",
+  "source_http_status": 200,
+  "source_sha256": "ebd8e71ed682d1f3c199705aace26df2f64f82ab64b0f698ab53af382000961a",
+  "source_lines": 186,
+  "source_metadata": {
+    "created": "2025-08-04T12:10:50.004166Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;d3ff6bfac294488fad020be9b31c941b",
+      "originalScriptVersion": "0.505",
+      "sourceInputsCount": 0
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "ZigZag Volume Profile [ChartPrime]",
+    "updated": "2025-08-04T12:10:50.004166Z",
+    "version": "1.0"
+  }
+}

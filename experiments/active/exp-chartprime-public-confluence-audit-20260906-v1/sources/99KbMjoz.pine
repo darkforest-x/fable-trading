@@ -1,0 +1,138 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// @ ChartPrime
+
+//@version=5
+indicator("Prime Bands [ChartPrime]", "Prime Bands [ChartPrime]", overlay = true)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+int  length   = input.int(50)
+int  sd       = input.int(3, "Standart Deviation", [1,2,3])
+
+// Colors
+color color_plus  = input.color(#48d81c, "+", inline = "Color")
+color color_minus = input.color(#d8611c, "-", inline = "Color")
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+method check_size(array<float> array, val, size)=>
+    array.push(array, val)
+    if array.size(array) >= size
+        array.shift(array)
+
+label_plot(src, sd, col = chart.fg_color)=>
+    txt = sd == 0 
+             ? str.tostring(sd, "#") + " " 
+             : sd == 3
+             ? str.tostring(sd, "+#")+ " SD " 
+             : str.tostring(sd, "#") + " SD "
+
+    label.delete(
+     label.new(bar_index+15, src, 
+                 txt + str.tostring(src, "(#,###.##)"), 
+                 style     = label.style_label_left, 
+                 color     = color(na), 
+                 textcolor = col)[1]
+                 )
+
+method line_new(float src, slope, color = chart.fg_color, width = 1)=>
+    line.delete(
+     line.new(bar_index, src, bar_index+15, src+slope, width = width, color = color)[1]
+     )
+
+slope(src)=>
+    src-src[2]
+
+mean_reversion(src, mid, lower, upper)=>
+    float source   = src - mid
+    float mean_rev = (src - lower) / (upper-lower)
+
+    mean_rev := ta.hma(mean_rev / ta.stdev(mean_rev, 200), 15)-1
+    mean_rev := math.min(4, math.max(-4, mean_rev))
+    mean_rev
+
+
+prime_bands(length)=>
+    var upper = array.new<float>()
+    var lower = array.new<float>()
+    var color = color(na)
+
+    float Hg    = ta.highest(length)
+    float Lw    = ta.lowest(length)
+    float base  = math.avg(Hg, Lw)
+    float atr   = ta.atr(200)
+    float up_b  = base + atr*sd
+    float low_b = base - atr*sd
+
+    upper.check_size(up_b, length)
+    lower.check_size(low_b, length)
+
+    float up_band  = ta.sma(upper.max(), 15)
+    float low_band = ta.sma(lower.min(), 15)
+    float mid_band = math.avg(up_band, low_band)
+    float slope1   = slope(mid_band)
+    float slope2   = slope(up_band)
+    float slope3   = slope(low_band)
+
+    float mean_rev = mean_reversion(hl2, mid_band, low_band, up_band)
+
+    bool sig_down = ta.crossunder(mean_rev, mean_rev[1])
+                      and high > up_band  
+                       and mean_rev > ta.highest(mean_rev, length)[10]
+
+    bool sig_up   = ta.crossover(mean_rev, mean_rev[1]) 
+                      and low  < low_band
+                       and mean_rev < ta.lowest(mean_rev, length)[10]
+
+    if ta.crossover(mid_band, mid_band[2])
+        color := color_plus
+    if ta.crossunder(mid_band, mid_band[2])
+        color := color_minus
+
+    if barstate.islast
+        line_new(mid_band, slope1, color, 2)
+        line_new(up_band, slope2)
+        line_new(low_band, slope3)
+
+        label_plot(up_band+slope2, +sd)
+        label_plot(low_band+slope3, -sd)        
+        label_plot(mid_band+slope1, 0, color)        
+
+    [up_band, mid_band, low_band, color, sig_down, sig_up, mean_rev]
+
+
+[up_band, mid_band, low_band, color, sig_down, sig_up, mean_rev] = prime_bands(length)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+ph = plot(up_band, color = chart.fg_color)
+pm = plot(mid_band, color = color, linewidth = 2)
+pl = plot(low_band, color = chart.fg_color)
+
+fill(pm, ph, up_band, mid_band, na, color.new(color, 90))
+fill(pm, pl, mid_band, low_band, color.new(color, 90), na)
+
+plotchar(sig_up, "Signal Up", "🞛", location.belowbar, color = color_plus, size = size.tiny)
+plotchar(sig_down, "Signal Dn", "🞜", location.abovebar, color = color_minus, size = size.tiny)
+
+if barstate.islast
+    var tbl = table.new(position.middle_right, 100, 100)
+    for i = 0 to 9
+        tbl.cell(1, i+1, bgcolor = color.from_gradient(i, 0, 8, color_minus, color_plus))
+        tbl.cell(0, i+1, ">>", text_color = color(na))
+
+        tbl.cell(0, 9-math.round((hl2 > up_band ? 4 : hl2 < low_band ? -4 : mean_rev)+4), ">>", text_color = color.from_gradient(i, 0, 8, color_minus, color_plus))
+        if i == 9
+            tbl.cell(1, 9+1, str.tostring(-sd)+"\nSD", text_color = chart.fg_color)
+        else if i == 0
+            tbl.cell(1, 0, "SD\n"+str.tostring(sd), text_color = chart.fg_color)
+
+// --------------------------------------------------------------------------------------------------------------------}

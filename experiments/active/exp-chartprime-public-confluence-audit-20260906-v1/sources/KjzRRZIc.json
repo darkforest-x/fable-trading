@@ -1,0 +1,44 @@
+{
+  "id": "KjzRRZIc",
+  "title": "Volume Profile + Pivot Levels [ChartPrime]",
+  "url": "https://www.tradingview.com/script/KjzRRZIc-Volume-Profile-Pivot-Levels-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:35:48.976944+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/KjzRRZIc-Volume-Profile-Pivot-Levels-ChartPrime/",
+  "created_at": "2025-09-01T11:59:59.598814+00:00",
+  "updated_at": null,
+  "description": "⯁ OVERVIEW\nVolume Profile + Pivot Levels [ChartPrime] combines a rolling volume profile with price pivots to surface the most meaningful levels in your selected lookback window. It builds a left-side profile from traded volume, highlights the session’s Point of Control (PoC), and then filters pivot highs/lows so only those aligned with significant profile volume are promoted to chart levels. Each promoted level extends forward until price retests it—so your chart stays focused on levels that actually matter.\n\n⯁ KEY FEATURES\nRolling Volume Profile (Period & Resolution)\nCalculates a profile over the last Period bars (default 200). The profile is discretized into Volume Profile Resolution bins (default 50) between the highest high and lowest low inside the window. Each bin accumulates traded volume and is drawn as a smooth left-side polyline for compact, lightweight rendering.\n\nDelta-Aware Coloring\nThe script tracks up-minus-down volume across all period to compute a net Delta. The profile, PoC line, and PoC label adopt a teal tone when net positive, and maroon when net negative—an immediate read on buyer/seller dominance inside the window.Point of Control (PoC) + Volume Label\nAutomatically marks the highest-volume bin as the PoC. A horizontal PoC line extends to the last bar, and a label shows the absolute volume at the PoC. Toggle visibility via PoC input.\n\nPivot Detection with Volume Filter\nIdentifies raw pivots using Length (default 10) on both sides of the bar. Each candidate pivot is then validated against the profile: only pivots that land within their bin and meet or exceed the Filter % threshold (percentage of PoC volume) are promoted to chart levels. This removes weak, low-participation pivots.\n\nForward-Extending, Self-Stopping Levels\nPromoted pivot levels extend forward as dotted rays. As soon as price intersects a level (high/low straddles it), that level stops extending—so your chart doesn’t clutter with stale zones.\nConcise Level Labels (Volume + %)\nEach promoted pivot prints a compact label at the pivot bar with its bin’s absolute volume and percentage of PoC volume (ordering flips for highs vs. lows for quick read).\nLightweight Visuals\nThe volume profile is rendered as a smooth polyline rather than dozens of boxes, keeping charts responsive even at higher resolutions.\n\n⯁ SETTINGS\nVolume Profile → Period: Lookback window used to compute the profile (max 500).Volume Profile → Resolution: Number of bins; higher = finer structure.Volume Profile → PoC: Toggle PoC line and volume label.Pivots → Display: Show/hide volume-validated pivot levels.Pivots → Length: Pivot detection left/right bars.Pivots → Filter % 0–100: Minimum bin strength (as % of PoC) required to promote a pivot level.\n\n⯁ USAGE\nRead PoC direction/color for a quick net-flow bias within your window.Prioritize promoted pivot levels—they’re backed by meaningful participation.Watch for first retests of promoted levels; the line will stop extending once tested.Adjust Period/Resolution to match your timeframe (scalps → higher resolution, shorter period; swings → lower resolution, longer period).Tighten or loosen Filter % to control how selective the level promotion is.\n\n⯁ WHY IT’S UNIQUE\nInstead of plotting every pivot or every profile bar, this tool cross-checks pivots against the profile’s internal volume weighting. You only see levels where price structure and liquidity overlap—clean, data-driven levels that self-retire after interaction, so you can focus on what the market actually defends.",
+  "script": {
+    "id": 3081364,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;950d0b67bd06483aaca44d1fb6b35595",
+    "version_maj": 1,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3B950d0b67bd06483aaca44d1fb6b35595/1",
+  "source_http_status": 200,
+  "source_sha256": "052a609673d59a874bbc9ac075b3314ba47b399cb41acfb0afac679ad38cb0ca",
+  "source_lines": 161,
+  "source_metadata": {
+    "created": "2025-09-01T11:59:59.104359Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": true,
+      "kind": "study",
+      "originalScriptId": "USER;d3ff6bfac294488fad020be9b31c941b",
+      "originalScriptVersion": "0.717",
+      "sourceInputsCount": 0
+    },
+    "lastVersionMaj": "1.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Volume Profile + Pivot Levels [ChartPrime]",
+    "updated": "2025-09-01T11:59:59.104359Z",
+    "version": "1.0"
+  }
+}

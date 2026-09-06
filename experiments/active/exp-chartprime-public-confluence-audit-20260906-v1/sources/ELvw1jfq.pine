@@ -1,0 +1,154 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=5
+indicator("Volume Positive & Negative Levels [ChartPrime]",
+          overlay             = true,
+          max_polylines_count = 100, 
+          max_bars_back       = 500, 
+          max_lines_count     = 500,
+          max_labels_count    = 500)
+
+
+// ---------------------------------------------------------------------------------------------------------------------}
+// 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+
+// ---------------------------------------------------------------------------------------------------------------------{
+int volume_level  = input.int(70, "Volume Threshold") // Threshold for significant volume levels
+int numBins       = input.int(500, "Number of Bins") // Number of bins for volume profile
+int line_withd    = input(2, "Line Width") // Line width for drawing
+
+int lookbackPeriod = 500 // Lookback period for analysis
+float high_        = ta.highest(100) // Highest price over 100 bars
+
+// Colors for positive and negative volume
+var color color_up = #c4ab21 
+var color color_dn = #c421c4 
+
+// ---------------------------------------------------------------------------------------------------------------------}
+// 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// ---------------------------------------------------------------------------------------------------------------------{
+// Determine if the current bar is within the visible range and lookback period
+bool isAllowed = time >= chart.left_visible_bar_time and (last_bar_index - bar_index) < lookbackPeriod
+
+// Set background color based on whether the current bar is allowed
+bgcolor(isAllowed ? na : #36597533)
+
+// Calculate the highest and lowest prices over 5000 bars
+highestPrice = ta.highest(5000)
+lowestPrice  = ta.lowest (5000)
+
+// Calculate the bin size for volume profile
+binSize = (highestPrice - lowestPrice) / numBins
+
+// Initialize arrays to store volume for each bin and points for drawing
+var float[] volumeBins = array.new_float(numBins, 0)
+var points1            = array.new<chart.point>()
+var points2            = array.new<chart.point>()
+
+// @function        Draws a polyline connecting the points in the provided array with specified color and width
+// @param points    (array<chart.point>) Array of points to connect with a polyline
+// @param color     (color) Color of the polyline
+// @returns         (void)
+method draw_polyLine(array <chart.point> points, color)=>
+    polyline.new(points, 
+                 curved     = false, 
+                 line_color = color, 
+                 line_width = line_withd)
+
+// @function        Draws a line between two chart points with specified color and width
+// @param point_1   (chart.point) Starting point of the line
+// @param point_2   (chart.point) Ending point of the line
+// @param color     (color) Color of the line
+// @param width     (int) Width of the line
+// @returns         (void)
+draw_Line(chart.point point_1, 
+          chart.point point_2, color = chart.fg_color, width = 1)=>
+    line.new(point_1, point_2,
+             color = color, 
+             width = width)
+
+// @function        Draws a label at the specified point with given text, color, and style
+// @param point     (chart.point) Location where the label should be drawn
+// @param txt       (string) Text to display in the label
+// @param color     (color) Text color of the label
+// @param style     (label.style) Style of the label
+// @returns         (void)
+method draw_Lable(chart.point point, string txt = "", color = chart.fg_color, style = label.style_label_left)=>
+    label.new(point, txt, 
+              style     = style, 
+              color     = color(na), 
+              textcolor = color, 
+              size      = size.large)
+
+// Main logic for calculating volume profile
+if isAllowed and barstate.isconfirmed
+    for i = 0 to numBins - 1
+        binLower = lowestPrice + i * binSize
+        binUpper = binLower + binSize
+
+        // Accumulate volume in the corresponding bin
+        if ta.cross(close, binLower) and close < binUpper
+            vol = close > open ? volume : -volume
+            volumeBins.set(i, volumeBins.get(i) + vol)
+
+
+// ---------------------------------------------------------------------------------------------------------------------}
+// 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// ---------------------------------------------------------------------------------------------------------------------{
+// Plot the Volume Profile as a histogram
+if barstate.islast and isAllowed
+    for i = 0 to numBins - 1
+
+        int   n        = bar_index + 150 // Offset for plotting points
+        float binLower = lowestPrice + i * binSize
+        float binUpper = binLower + binSize
+
+        float volumeLevel = array.get(volumeBins, i)
+        int   lineLength  = math.round((volumeLevel / array.max(volumeBins)) * 100 )
+
+        // Define points for drawing
+        chart.point point_zero      = chart.point.from_index(n, binLower)
+        chart.point point_volume_1  = chart.point.from_index(n - lineLength, binLower)
+        chart.point point_volume_2  = chart.point.from_index(n + lineLength, binLower)
+        chart.point point_high      = chart.point.from_index(n - volume_level, high_)
+        chart.point point_threshold = chart.point.from_index(n - volume_level, binLower)
+        chart.point point_vol_level = chart.point.from_index(n - lookbackPeriod-150, binLower)
+
+        // Positive volume
+        switch 
+            volumeLevel > 0 =>
+                points1.push(point_zero)
+                points1.push(point_volume_1)
+                points1.push(point_zero)
+
+                points1.draw_polyLine(color_up)
+
+        // Negative Volume
+        switch
+            volumeLevel < 0 =>
+                points2.push(point_zero)
+                points2.push(point_volume_2)
+                points2.push(point_zero)
+
+                points2.draw_polyLine(color_dn)
+
+        // Draw threshold line and label for significant volume levels
+        if lineLength > volume_level
+            color color = color.from_gradient(lineLength, 0, 250, color(na), color_up)
+            draw_Line(point_threshold, point_vol_level, color, 10)
+            point_zero.draw_Lable("+", color_up)
+
+        if lineLength*-1 > volume_level
+            color color = color.from_gradient(lineLength*-1, 0, 250, color(na), color_dn)
+            draw_Line(point_threshold, point_vol_level, color, 10)
+            point_zero.draw_Lable("-", color_dn)
+
+        // Draw volume threshold line
+        if volumeLevel > 0 or volumeLevel < 0
+            draw_Line(point_threshold, point_high)
+
+        // Label for volume threshold
+        point_high.draw_Lable(str.tostring(volume_level), style = label.style_label_down)
+
+// ---------------------------------------------------------------------------------------------------------------------}

@@ -1,0 +1,162 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=6
+indicator("Breakout Boxes [ChartPrime]", overlay = true, max_boxes_count = 500, max_labels_count = 500, calc_bars_count = 5000)
+
+type pivot 
+    float val 
+    int index
+
+type Box 
+    box body 
+    box sell 
+    box buy 
+
+
+var Highs    = pivot.new()
+var Lows     = pivot.new()
+var upperBox = Box.new()
+var lowerBox = Box.new()
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+pivotLen  = input.int(5, "Pivot Detection Length")
+boxWidth1 = input.int(5, "Upper Box Width", inline = "up")/10, boxUpCol = input.color(#ce1c7b, "", inline = "up")
+boxWidth2 = input.int(5, "Lower Box Width", inline = "lw")/10, boxDnCol = input.color(#1ed87e, "", inline = "lw")
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+ph = ta.pivothigh(pivotLen, pivotLen)
+pl = ta.pivotlow(pivotLen, pivotLen)
+
+aTr  = ta.atr(200)
+atr0 = aTr * 0.2
+atr1 = aTr * boxWidth1
+atr2 = aTr * boxWidth2
+
+// Upper Box Detection
+if not na(ph)
+    
+    if math.abs(Highs.val-ph) < atr0 
+
+        if upperBox.body.get_right() > bar_index-pivotLen 
+
+            upperBox.buy.set_right(upperBox.body.get_left())
+            upperBox.buy.set_border_color(color(na))
+            upperBox.sell.set_right(upperBox.body.get_left())
+            upperBox.sell.set_border_color(color(na))
+            
+
+            upperBox.body.set_right(upperBox.body.get_left())
+            upperBox.body.set_border_color(color(na))
+
+        upperBox.body := box.new(Highs.index, Highs.val+atr1, bar_index, Highs.val, bgcolor = color(na), border_color = boxUpCol, text_halign = text.align_right, border_width = 2)
+
+        upperBox.buy := box.new(Highs.index, math.avg(Highs.val+atr1, Highs.val), Highs.index, Highs.val, border_color = boxUpCol, bgcolor = color.new(boxUpCol, 90), text_halign = text.align_left)
+        upperBox.sell := box.new(Highs.index, math.avg(Highs.val+atr1, Highs.val), Highs.index, Highs.val+atr1, border_color = boxUpCol, bgcolor = color.new(boxUpCol, 90), text_halign = text.align_left)
+
+
+    Highs.val := ph
+    Highs.index :=bar_index[pivotLen]
+
+// Lower Box Detection
+if not na(pl)
+    
+    if math.abs(Lows.val-pl) < atr0 
+
+        if lowerBox.body.get_right() > bar_index-pivotLen 
+            lowerBox.buy.set_right(lowerBox.body.get_left())
+            lowerBox.buy.set_border_color(color(na))
+            lowerBox.sell.set_right(lowerBox.body.get_left())
+            lowerBox.sell.set_border_color(color(na))
+
+            lowerBox.body.set_right(lowerBox.body.get_left())
+            lowerBox.body.set_border_color(color(na))
+
+
+        lowerBox.body := box.new(Lows.index, Lows.val, bar_index, Lows.val-atr2, bgcolor = color(na), border_color = boxDnCol, text_halign = text.align_right, border_width = 2)
+
+        lowerBox.buy  := box.new(Lows.index, math.avg(Lows.val-atr2, Lows.val), Lows.index, Lows.val-atr2, border_color = boxDnCol, bgcolor = color.new(boxDnCol, 90), text_halign = text.align_left)
+        lowerBox.sell := box.new(Lows.index, math.avg(Lows.val-atr2, Lows.val), Lows.index, Lows.val, border_color = boxDnCol, bgcolor = color.new(boxDnCol, 90), text_halign = text.align_left)
+
+
+    Lows.val := pl
+    Lows.index :=bar_index[pivotLen]
+
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Upeer Box
+if not na(upperBox.body)
+
+    Buy = 0.
+    Sell = 0.
+    upperBox.body.set_right(bar_index)
+
+    for i = 0 to bar_index - (upperBox.body.get_left() - 5)
+
+        if close[i] > open[i]
+            Buy += volume[i]
+        else 
+            Sell += volume[i]
+
+    tot = Buy + Sell
+
+    upperBox.body.set_text("Total " + str.tostring(tot, format.volume))
+
+    size = int((upperBox.body.get_right() - upperBox.body.get_left()))
+    mid = math.avg(upperBox.body.get_bottom(), upperBox.body.get_top())
+
+    upperBox.buy.set_right(upperBox.body.get_left()+int(size*(Buy/tot)))
+    upperBox.buy.set_text("+Volume " + str.tostring(Buy/tot*100, format.percent) )
+
+    upperBox.sell.set_right(upperBox.body.get_left()+int(size*(Sell/tot)))
+    upperBox.sell.set_text("-Volume " + str.tostring(Sell/tot*100, format.percent) )
+
+// Lower Box
+if not na(lowerBox.body)
+
+    Buy = 0.
+    Sell = 0.
+    lowerBox.body.set_right(bar_index)
+
+    for i = 0 to bar_index - (lowerBox.body.get_left() - 5)
+
+        if close[i] > open[i]
+            Buy += volume[i]
+        else 
+            Sell += volume[i]
+
+    tot = Buy + Sell
+
+    lowerBox.body.set_text("Total " + str.tostring(tot, format.volume))
+
+    size = int((lowerBox.body.get_right() - lowerBox.body.get_left()))
+    mid = math.avg(lowerBox.body.get_bottom(), lowerBox.body.get_top())
+
+    lowerBox.buy.set_right(lowerBox.body.get_left()+int(size*(Buy/tot)))
+    lowerBox.buy.set_text("+Volume " + str.tostring(Buy/tot*100, format.percent) )
+
+    lowerBox.sell.set_right(lowerBox.body.get_left()+int(size*(Sell/tot)))
+    lowerBox.sell.set_text("-Volume " + str.tostring(Sell/tot*100, format.percent) )
+
+
+// Breakout signals
+if barstate.isconfirmed
+
+    if ta.crossover(close, upperBox.body.get_top())
+        upperBox := Box.new(na, na, na)
+        label.new(bar_index, low-aTr, "⯁\nBreakUp", textcolor = boxUpCol, style = label.style_label_up, color = color.new(boxUpCol, 80))
+
+    if ta.crossunder(close, lowerBox.body.get_bottom())
+        lowerBox := Box.new(na, na, na)
+        label.new(bar_index, high+aTr, "BreakDn\n⯁", textcolor = boxDnCol, style = label.style_label_down, color = color.new(boxDnCol, 80))
+// --------------------------------------------------------------------------------------------------------------------}

@@ -1,0 +1,99 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+
+//@version=6
+indicator("Savitzky Flow Bands [ChartPrime]", overlay = true)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+int   length              = input(15, "Length")
+
+color color_up            = input.color(#31ca45, "Up")
+color color_dn            = input.color(color.rgb(255, 113, 18), "Down")
+
+bool candles              = input.bool(true, "CandleStick Color")
+
+var direction = int(na)
+var count = 0
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+savitzky_golay_filter_w_15_vectors(source) =>
+    float sum            = 0.0
+    float polynomial     = 0.0
+    float[] coefficients = array.new<float>(16)
+    // Predefined 15 coefficients
+    for i = -4 to 4
+        coefficients.set(i + 4, i) // from -4 to 5
+        if i == 4
+            for j = 5 to -4
+                for g = 8 to 15 
+                    coefficients.set(g, j) // from 5 to -4
+
+    // Calculate normalization factor as the sum of absolute values of coefficients
+    float norm_factor = coefficients.sum()
+
+    // Loop through coefficients and calculate the weighted sum
+    for i = 0 to coefficients.size()-1
+        sum := sum + coefficients.get(i) * source[i]
+
+    // Calculate the smoothed value
+    for i = 1 to length-1
+        polynomial := math.sum(sum / norm_factor, i) / i
+
+    polynomial
+
+// Apply the filter to close prices
+basis = savitzky_golay_filter_w_15_vectors(close)
+
+
+distance = ta.sma(high-low, 100) * 2
+
+h_band = basis + distance
+l_band = basis - distance
+
+prevLowerBand = nz(l_band[1])
+prevUpperBand = nz(h_band[1])
+
+l_band := l_band > prevLowerBand or close[1] < prevLowerBand ? l_band : prevLowerBand
+h_band := h_band < prevUpperBand or close[1] > prevUpperBand ? h_band : prevUpperBand
+
+if close > h_band
+    direction := 1 
+if close < l_band
+    direction := 0 
+
+change = direction != direction[1]
+
+t_color = basis > basis[2] ? color_up : color_dn
+t_band = direction > 0 ? l_band : h_band
+
+
+if direction == direction
+    count += 1
+if change
+    count := 0
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// --------------------------------------------------------------------------------------------------------------------{
+
+plot(basis, color=t_color, title="Filter", style = plot.style_circles)
+
+plotshape(change ? t_band : na, "", shape.diamond, color = color_up, size = size.tiny, location = location.absolute, offset = 1)
+plotshape(change ? t_band : na, "", shape.diamond, color = color.new(color_up, 70), size = size.small, location = location.absolute, offset = 1)
+
+plot(change ? na : (direction > 0 ? l_band : h_band), "Trend Band", style = plot.style_linebr, color = color_up)
+plot(change ? na : (direction > 0 ? l_band : h_band), "Trend Extinguishing", style = plot.style_linebr, color = color.from_gradient(count, 10, 100, color_up, color(na)), linewidth = 4)
+
+
+candl_col =  (direction > 0 ? color_up : color_dn) 
+barcolor(candl_col, display = candles ? display.all : display.none, editable = candles)
+plotcandle(open, high, low, close, title='Title', color = candl_col, wickcolor=candl_col, bordercolor = candl_col, force_overlay = true, display = candles ? display.all : display.none, editable = candles)
+
+// --------------------------------------------------------------------------------------------------------------------}

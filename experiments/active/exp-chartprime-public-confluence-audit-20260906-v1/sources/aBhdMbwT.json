@@ -1,0 +1,45 @@
+{
+  "id": "aBhdMbwT",
+  "title": "Deep Volume [ChartPrime]",
+  "url": "https://www.tradingview.com/script/aBhdMbwT-Deep-Volume-ChartPrime/",
+  "retrieved_at": "2026-09-06T13:37:01.994685+00:00",
+  "http_status": 200,
+  "final_url": "https://www.tradingview.com/script/aBhdMbwT-Deep-Volume-ChartPrime/",
+  "created_at": "2024-02-29T13:38:01.103044+00:00",
+  "updated_at": "2024-02-29T13:39:00.745946+00:00",
+  "description": "Deep Volume is an indicator designed to give you high fidelity volume information. It does this by utilizing real time data provided by Tradingview to generate a wide range of metrics. We have included a convenient column chart to visualize the polarity of the volume, and a table to see the real time data. This works by utilizing pine script's varip feature to get information within candles. This is convenient as it allows users to get lower time frame information without the use of ltf functions. The result is seconds level data with out the need to be on a lower time frame chart. As a result, as you increase the time frame of the chart the updates will become slower. This is because Tradingview doesn't update the chart information as frequently on higher time frames as there isn't as much of a need.\n\n\n\nThis indicator works on real time data so to compensate for this we generate a simulated history based on candle structure. This helps in estimating the state of the moving average before the real time data starts. As a result the estimated history isn't as accurate and should be treated as such. That being said it is nice to have an estimation when the indicator is first loaded onto the chart.\n\n\n\nFinally we have included a cumulative volume comparison that shows you how much volume there is compared to the average cumulative volume for the day. This metric utilizes a gradient to help you interpret the information at a glance. Low daily volume is represented with grays by default, while normal volume and greater is represented with a green color by default.\n\n\n\nThe table is partitioned into two sections; tick data, and average data. On the left you will see color coded information based on the direction of the move. On the left, the information is color coded based on the average movement direction. You can control how much information is displayed in the table within the indicators settings. This is defaulted to 20 but it can be as long or short as you like. Every new candle open the far left of the table you will see a 🗘 symbol and at the start of a new session you will see a 🗓 symbol. \n\n\n\nThe included metrics are as follows:\n\nTime: This displays the time of the real time data update. \nTime Delta: This displays the elapsed time between updates.\nOrder Size: This is the volume times the price change between updates.\nVolume: This is the volume change for the update. \nPrice Change: This is the change in price since the last update.\nPrice: This is the price of the asset at the time of the update.\nSpeed of Tape: This is the average time delta. Use this to see how quickly the market is moving.\nAverage Order Size: This is the average order size.\nAverage Volume: This is the average volume\nVolume Ratio: This the the ratio of bullish to bearish volume as expressed by a percent. 100% is all bullish within the window and -100% is all bearish within the window.\nAverage Price Change: This is the average price change within the window.\nSensitivity: This is a volatility metric designed to show you the price change per 1 volume unit.\nRelative Sensitivity: This is a volatility metric designed to show you the average price change per average volume.\n\nEnjoy",
+  "script": {
+    "id": 1454455,
+    "content": "",
+    "access": 1,
+    "script_id_part": "PUB;bc2eab7b4a5d47f5baecf2d75e17f7db",
+    "version_maj": 2,
+    "script_type": "study",
+    "lib_id": "",
+    "has_access": true,
+    "is_favorite": false,
+    "script_package": null
+  },
+  "evidence_level": "official_source_retrieved_not_yet_manually_reviewed",
+  "source_url": "https://pine-facade.tradingview.com/pine-facade/get/PUB%3Bbc2eab7b4a5d47f5baecf2d75e17f7db/2",
+  "source_http_status": 200,
+  "source_sha256": "018f2c1b5fa9529e18df2ddee200cc4e65d32f246e208cc078e243184ce68297",
+  "source_lines": 1428,
+  "source_metadata": {
+    "created": "2024-02-29T13:38:58.927348Z",
+    "extra": {
+      "isCompiled": true,
+      "is_price_study": false,
+      "kind": "study",
+      "sourceInputsCount": 0,
+      "stats": {
+        "plot": 1
+      }
+    },
+    "lastVersionMaj": "2.0",
+    "scriptAccess": "open_no_auth",
+    "scriptName": "Deep Volume [ChartPrime]",
+    "updated": "2024-02-29T13:38:58.927348Z",
+    "version": "2.0"
+  }
+}
