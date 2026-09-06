@@ -12,6 +12,7 @@ import argparse
 from datetime import datetime, timezone
 import json
 import re
+import sqlite3
 
 import pandas as pd
 
@@ -27,6 +28,13 @@ STAGES = ["same_month", "same_utc6h", "same_vol_bucket", "same_5m_colour", "same
 LABELS = {"same_slope": "六键齐全后不足", "fold_embargo": "期末禁入后不足",
           "cross_exclusion": "排除本小时/前小时穿线后不足", "unused_before": "共用供给已占用",
           "missing_support": "母样本因果支持缺失"}
+SQL = """SELECT s.stage, MAX(s.stage_label) AS stage_label,
+ COUNT(*) AS mother_count, c.all_mothers, c.unmatched_mothers,
+ c.matched_mothers, 3 AS required_controls,
+ 1.0 * COUNT(*) / c.unmatched_mothers AS share_unmatched
+FROM main.shortages s CROSS JOIN main.cohort c
+GROUP BY s.stage, c.all_mothers, c.unmatched_mothers, c.matched_mothers
+ORDER BY MIN(s.stage_order)"""
 
 
 def shortage_rows(audit, summary):
@@ -54,13 +62,15 @@ def shortage_rows(audit, summary):
                 raise ValueError("Unmatched row does not have a shortage")
         else:
             raise ValueError("Unknown original support status")
-        classified.append(stage)
-    counts = pd.Series(classified, dtype="object").value_counts().to_dict()
-    order = [name for name in STAGES+["missing_support"] if name in counts]
-    return [{"stage": name, "stage_label": LABELS.get(name, name), "mother_count": int(counts[name]),
-             "all_mothers": len(audit), "unmatched_mothers": len(classified),
-             "matched_mothers": summary["greedy_matched"], "required_controls": 3,
-             "share_unmatched": counts[name]/len(classified)} for name in order]
+        classified.append({"event_id":row["event_id"],"stage":stage,
+            "stage_label":LABELS.get(stage,stage),"stage_order":(STAGES+["missing_support"]).index(stage)})
+    # Python validates each ordered row; this SQL really aggregates the resulting
+    # maternal classifications, rather than pretending SQL computed the features.
+    with sqlite3.connect(":memory:") as db:
+        pd.DataFrame(classified,columns=["event_id","stage","stage_label","stage_order"]).to_sql("shortages",db,index=False)
+        pd.DataFrame([{"all_mothers":len(audit),"unmatched_mothers":len(classified),
+            "matched_mothers":summary["greedy_matched"]}]).to_sql("cohort",db,index=False)
+        return pd.read_sql_query(SQL,db).to_dict("records")
 
 
 def sections(markdown):
@@ -121,6 +131,15 @@ def build_artifact(markdown, summary, audit, *, markdown_path, summary_path, aud
     sources=[{"id":name,"label":{"report":"V10 · 完整技术报告","v10_summary":"V10 · 保存的容量证书",
         "v10_mothers":"V10 · 全部原始母样本支持账本","presentation_code":"V10 · 顺序计数及报告代码"}[name],"path":path}
         for name,path in identities.items()]
+    next(source for source in sources if source["id"]=="v10_mothers")["query"]={
+        "engine":"SQLite","language":"sql","sql":SQL,"executed_at":timestamp,
+        "tables_used":["main.shortages","main.cohort"],
+        "description":"Actual SQLite aggregation in shortage_rows over classifications derived from "+identities["v10_mothers"]+". Python first validates full maternal IDs/status counts and classifies each row at the first frozen stage below three; main.shortages holds event_id,stage,stage_label,stage_order. main.cohort holds original/matched/unmatched denominators. SQL aggregates these classifications; it does not compute trading features or returns.",
+        "filters":["All original BTC-USDT-SWAP2023-2024 mothers; only unmatched mothers enter the shortage chart, no outcome filtering",
+                   "Missing causal support has its own category, not fabricated zero candidate supply"],
+        "metric_definitions":["mother_count counts unmatched maternal IDs once, not unique candidate timestamps or mother-candidate edges",
+            "First shortage means first frozen ordered stage count below3; descriptive order, not causal effect of removing a filter",
+            "share_unmatched=mother_count/unmatched_mothers; all_mothers includes matched and unmatched requests"]}
     chart={"id":"shortage","title":"未匹配母样本的首个供给不足阶段",
         "subtitle":f"2023–2024 · 全部{len(audit)}母样本中{sum(x['mother_count'] for x in rows)}未匹配 · 顺序描述，非排除规则的因果重要性",
         "type":"bar","intent":"comparison","layout":"full","dataset":"shortage","sourceId":"v10_mothers",
