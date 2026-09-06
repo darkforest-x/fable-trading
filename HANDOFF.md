@@ -2,7 +2,32 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-09-06 — BTC V14 实际支持检查失败，不进入收益排名）
+## ⚡ 当前真相（2026-09-06 — BTC V15 原生15分钟退出仍亏，继续利润兑现机制）
+
+盈利goal仍active/未达成、不是blocked。V15先提交2acc280再唯一一次raw回放原2023–2024；
+保持原251cases/462owncontrols/154triples/97unmatched，无入场门。原生5m→15m SMA40
+真实翻色同时改变聚合/seed/记忆，不是纯晚退。1426自身初态先冻结才读收益，V5六表
+全部旧字段基准parity通过。均净−14.3066→−16.6624bp，四半年皆负；D−2.3557bp,p.7302；
+I154+.5946bp,p.4696，97unknown不可删。15m实际单仓250笔均净−16.9934bp，不接受升级。
+
+失败分解：19亏转盈、17盈转亏、170持续亏平均更深；50旧colour→新硬止损抵消多数
+colour路径改善，硬止损14→63。187新亏中53heldMFE≥1R、134不足；3个≥1R最大毛浮盈
+仍未覆盖20bp，不能MFE当成交。15m初态反向32贡献多数增量恶化，但同向219仍亏；
+48/53回吐已同向，不能宣称过滤初态就赚钱。当前源码旧state15语义232/251同净、19差，
+非完整V1历史账本复现。逐笔原因/反例/所有失败已进HTML，不只呈现赢家。
+
+45c1d23独立saved验证54output/21committed来源、时钟/账本/D/I/单仓/上下文通过；非第二
+raw/SMA/firstedge/p重算。最终V15新增233tests过；扩展3194过2迁移hash失败（非本轮
+L1 candidates/render），不修他人改动/不改门。Notebook3格plainPython、非Jupyter/fullschema，
+当前pinV15→V12→V11，复用同verifier。HTML16块/1nativeSQL分箱，structural_only未mobileQA。
+
+交付：analysis/html/p1_btcusdtp_hourly_native_exit_v15_20260906.html。
+下一项详见V15/NEXT_EXPERIMENT.md：在原native15完整251上，仅增加完整5m真翻色且
+完整15m仍同向、可成交open毛利覆盖成本时先兑现50%；余仓原规则，不移动止损/加门。
+先查重/冻结/提交再回放，不能旧MFE拼收益。下一实验尚未登记/实现/运行，继续goal。
+无2025+价格评估/holdout0/训练/TV/实盘改动。V15不得重复包装成尚未测试。
+
+### 第十四轮背景（已完成，勿重复）
 
 盈利goal仍active、未达成、不是blocked。本轮先提交5fc542b的builder/config/plan/tests，
 再09:43UTC真实加载原2023–2024前缀219551行。V14只测原251case/462owncontrols上的

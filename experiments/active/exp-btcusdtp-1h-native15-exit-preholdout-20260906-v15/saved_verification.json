@@ -1,0 +1,108 @@
+{
+  "counts": {
+    "cases": 251,
+    "controls": 462,
+    "matched": 154,
+    "unmatched": 97
+  },
+  "effects": {
+    "case_delta": {
+      "total_pairs": 251,
+      "n": 251,
+      "unknown_pairs": 0,
+      "improved": 79,
+      "worsened": 157,
+      "unchanged": 15,
+      "mean_bp": -2.3557287082715495,
+      "sum_event_bp": -591.2879057761588
+    },
+    "excess_delta": {
+      "total_pairs": 251,
+      "n": 154,
+      "unknown_pairs": 97,
+      "improved": 79,
+      "worsened": 75,
+      "unchanged": 0,
+      "mean_bp": 0.5946002624257842,
+      "sum_event_bp": 91.56844041357077
+    },
+    "serial_delta": {
+      "total_pairs": 251,
+      "n": 251,
+      "unknown_pairs": 0,
+      "improved": 78,
+      "worsened": 158,
+      "unchanged": 15,
+      "mean_bp": -2.6191044538915693,
+      "sum_event_bp": -657.3952179267839
+    }
+  },
+  "raw_replay": false,
+  "inferential_p_recomputed": false,
+  "native_context": {
+    "baseline/case": {
+      "n": 251,
+      "aligned": 247,
+      "opposite": 4,
+      "unknown": 0
+    },
+    "baseline/control": {
+      "n": 462,
+      "aligned": 453,
+      "opposite": 9,
+      "unknown": 0
+    },
+    "candidate/case": {
+      "n": 251,
+      "aligned": 219,
+      "opposite": 32,
+      "unknown": 0
+    },
+    "candidate/control": {
+      "n": 462,
+      "aligned": 400,
+      "opposite": 62,
+      "unknown": 0
+    }
+  },
+  "context_receipt": {
+    "rows": 1426,
+    "state_groups": 8,
+    "declared_pre_outcome_freeze": true,
+    "independent_price_recomputation": false
+  },
+  "mechanics": {
+    "n": 251,
+    "known": 251,
+    "later": 218,
+    "stop_after": 63,
+    "stop_before": 14,
+    "same_time": 15,
+    "earlier": 18
+  },
+  "monthly_rows": 48,
+  "semantic_diagnostic": {
+    "case": {
+      "n": 251,
+      "known": 251,
+      "later": 19,
+      "stop_after": 63,
+      "stop_before": 54,
+      "same_time": 232
+    },
+    "control": {
+      "n": 462,
+      "known": 462,
+      "same_time": 417,
+      "stop_after": 107,
+      "stop_before": 91,
+      "later": 45
+    }
+  },
+  "status": "passed",
+  "output_hashes_verified": 54,
+  "committed_sources_verified": 21,
+  "builder_commit": "2acc2800b8780f53ad243dc64851531c9093c854",
+  "summary_sha256": "d27f820b26b6bb2dd56bd7b1eba5017907656ea70dc7bd08cbe5c1c1c14f80d4",
+  "limitation": "Saved clocks, formulas and receipts only; no independent raw OHLC/SMA/first-edge replay, inference rerun or profitability proof."
+}

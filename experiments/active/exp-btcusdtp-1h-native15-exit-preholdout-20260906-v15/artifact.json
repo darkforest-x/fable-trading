@@ -1,0 +1,493 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "Native Exit Timing — BTC Hourly V15",
+    "generatedAt": "2026-09-06T10:19:34.799460+00:00",
+    "filters": [],
+    "cards": [],
+    "charts": [
+      {
+        "id": "v15_case_difference_distribution",
+        "title": "原生15分钟与5分钟退出的逐机会收益变化分布",
+        "subtitle": "2023–2024 · 全部 251 原始机会，未知 0 · 原生15m−5m，bp · 分箱计数非密度；零类 |Δ|≤1e−8 bp",
+        "showDescription": true,
+        "type": "bar",
+        "intent": "distribution",
+        "layout": "full",
+        "dataset": "v15_case_difference_distribution",
+        "sourceId": "v15_case_delta",
+        "question": "保持原1h入场不变，原生管理规格变化如何影响全部机会？",
+        "rationale": "Explicit signed numeric bins preserve both tails, the zero atom and unknowns for every original request. Unequal widths mean counts, not density. One blue measure needs no legend; count labels and signed interval labels identify meaning.",
+        "palette": {
+          "kind": "sequential",
+          "name": "blue"
+        },
+        "labels": {
+          "values": "all"
+        },
+        "settings": {
+          "sort": "none",
+          "categoryLabelPolicy": "wrap"
+        },
+        "referenceLines": [
+          {
+            "axis": "y",
+            "value": 0,
+            "color": "neutral",
+            "lineStyle": "solid",
+            "label": "0 请求"
+          }
+        ],
+        "maxRows": 12,
+        "valueFormat": "number",
+        "encodings": {
+          "x": {
+            "field": "bin_label",
+            "type": "ordinal",
+            "label": "净收益变化区间（bp；原生15m−5m）"
+          },
+          "y": {
+            "field": "bin_count",
+            "type": "quantitative",
+            "label": "原始请求数",
+            "format": "number"
+          },
+          "tooltip": [
+            {
+              "field": "bin_count",
+              "type": "quantitative",
+              "label": "区间请求数"
+            },
+            {
+              "field": "total_requests",
+              "type": "quantitative",
+              "label": "全部请求"
+            },
+            {
+              "field": "unknown_requests",
+              "type": "quantitative",
+              "label": "未知请求"
+            },
+            {
+              "field": "count_sum",
+              "type": "quantitative",
+              "label": "全部分箱计数和"
+            },
+            {
+              "field": "mean_change_bp",
+              "type": "quantitative",
+              "label": "区间变化均值",
+              "unit": "bp"
+            },
+            {
+              "field": "minimum_change_bp",
+              "type": "quantitative",
+              "label": "区间实际最小值",
+              "unit": "bp"
+            },
+            {
+              "field": "maximum_change_bp",
+              "type": "quantitative",
+              "label": "区间实际最大值",
+              "unit": "bp"
+            }
+          ]
+        }
+      }
+    ],
+    "tables": [],
+    "sources": [
+      {
+        "id": "report",
+        "label": "V15 · 独立技术报告原文",
+        "path": "analysis/p1_btcusdtp_hourly_native_exit_v15_20260906.md"
+      },
+      {
+        "id": "v15_summary",
+        "label": "OKX archive · V15 保存的结果与诊断事实",
+        "path": "experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/results/summary.json"
+      },
+      {
+        "id": "v15_case_delta",
+        "label": "OKX archive · V15 全部案例配对变化",
+        "path": "experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/results/case_delta.csv",
+        "query": {
+          "engine": "SQLite",
+          "language": "sql",
+          "sql": "WITH bins(bin_id, bin_label, bin_lower_bp, bin_upper_bp) AS (\n  VALUES (0, '< -100', NULL, -100),\n         (1, '[-100, -50)', -100, -50),\n         (2, '[-50, -20)', -50, -20),\n         (3, '[-20, -5)', -20, -5),\n         (4, '[-5, -1e-8)', -5, -0.00000001),\n         (5, '0 · |Δ|<=1e-8', -0.00000001, 0.00000001),\n         (6, '(1e-8, 5)', 0.00000001, 5),\n         (7, '[5, 20)', 5, 20),\n         (8, '[20, 50)', 20, 50),\n         (9, '[50, 100)', 50, 100),\n         (10, '>= 100', 100, NULL),\n         (11, '未知', NULL, NULL)\n), classified AS (\n  SELECT event_id, difference * 10000 AS change_bp,\n         CASE WHEN difference IS NULL THEN 11\n              WHEN ABS(difference) <= 0.000000000001 THEN 5\n              WHEN difference * 10000 < -100 THEN 0\n              WHEN difference * 10000 < -50 THEN 1\n              WHEN difference * 10000 < -20 THEN 2\n              WHEN difference * 10000 < -5 THEN 3\n              WHEN difference < 0 THEN 4\n              WHEN difference * 10000 < 5 THEN 6\n              WHEN difference * 10000 < 20 THEN 7\n              WHEN difference * 10000 < 50 THEN 8\n              WHEN difference * 10000 < 100 THEN 9 ELSE 10 END AS bin_id\n  FROM main.case_delta\n), totals AS (\n  SELECT COUNT(*) AS total_requests, COUNT(change_bp) AS finite_requests,\n         COUNT(*) - COUNT(change_bp) AS unknown_requests FROM classified\n)\nSELECT b.bin_id, b.bin_label, b.bin_lower_bp, b.bin_upper_bp,\n       COUNT(c.event_id) AS bin_count,\n       t.total_requests, t.finite_requests, t.unknown_requests,\n       SUM(COUNT(c.event_id)) OVER () AS count_sum,\n       MIN(c.change_bp) AS minimum_change_bp,\n       MAX(c.change_bp) AS maximum_change_bp,\n       AVG(c.change_bp) AS mean_change_bp,\n       SUM(c.change_bp) AS summed_request_change_bp\nFROM bins AS b CROSS JOIN totals AS t\nLEFT JOIN classified AS c ON c.bin_id = b.bin_id\nGROUP BY b.bin_id, b.bin_label, b.bin_lower_bp, b.bin_upper_bp,\n         t.total_requests, t.finite_requests, t.unknown_requests\nORDER BY b.bin_id",
+          "executed_at": "2026-09-06T10:19:34.799460+00:00",
+          "tables_used": [
+            "main.case_delta"
+          ],
+          "description": "Actual SQLite count query over experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/results/case_delta.csv, loaded as main.case_delta. Source columns: event_id,mother_decision_time,before,after,difference. hourly_impulse_native_exit_research.py supplied all251 original direct1h K1 episode pairs. before=native5m SMA40 true-colour exit; after=native15m SMA40 true-colour exit. The entry cohort is unchanged and is not the source-zone breakout cohort. Native aggregation, initial available colour and SMA40 memory3h20m versus10h change together. No raw prices, strategy or inference are run by the presentation query.",
+          "filters": [
+            "BTC-USDT-SWAP, reused development 2023-01-01 <= mother_decision_time UTC < 2025-01-01",
+            "Every original case request, not matched-only cases or winner-only paths; no trimming or sampling",
+            "One unique event_id and exact decision time per source request; +/-infinity rejected, NULL differences retained in the unknown bin"
+          ],
+          "metric_definitions": [
+            "difference=after-before for every original direct1h K1 opportunity, no new entry gate. after=native15m and before=native5m transition-colour management, both SMA40(HL2). Unknown paired outcomes remain NULL; chart bp=difference*10000. This is not pure sampling cadence.",
+            "bin_count counts requests, not probability density; numeric intervals have unequal widths and open-ended tails",
+            "Zero atom follows frozen comparison tolerance abs(difference)<=1e-12 in fractional-return units (1e-8 bp); original nonzero values are preserved in sums and means",
+            "total_requests=all source rows; finite_requests=nonnull differences; unknown_requests=null differences; count_sum=sum(bin_count) must equal total_requests",
+            "Bin min/max/mean/sum preserve original paired episode changes in bp. Each completed trade bears the same20bp roundtrip assumption, immutable K1 extreme stop and original72h limit. No filling unknowns, trimming tails or compounding event sums into account returns."
+          ]
+        }
+      },
+      {
+        "id": "research_code",
+        "label": "V15 · 上游 Python 评估器",
+        "path": "yoyo/evaluation/hourly_impulse_native_exit_research.py"
+      },
+      {
+        "id": "presentation_code",
+        "label": "V15 · 分布聚合与原生报告构建器",
+        "path": "yoyo/evaluation/hourly_impulse_native_exit_report.py"
+      }
+    ],
+    "blocks": [
+      {
+        "id": "report_title",
+        "type": "markdown",
+        "body": "# Native Exit Timing — BTC Hourly V15",
+        "layout": "full"
+      },
+      {
+        "id": "section_01",
+        "type": "markdown",
+        "body": "## 技术摘要：赢家更大，但系统没有更赚钱\n\n\n固定原来的251笔小时入场，将小周期管理从原生5分钟换为原生15分钟，**扣20bp成本后，每笔均值从−14.31变成−16.66bp，四个半年全部仍为负**。这轮不接受15分钟版替代原版，也不宣称已找到盈利参数。\n\n有收益改善的79笔、恶化的157笔、基本不变的15笔。盈利单可以吃到更长行情，但硬止损从14增至63笔；17笔旧盈利变成亏损。单独放慢退出没有解决假启动与利润回吐。固定随机对照上的增量仅+0.59bp，区间跨零，不足以说明新规则有优势。",
+        "layout": "full",
+        "sourceId": "v15_summary"
+      },
+      {
+        "id": "section_02",
+        "type": "markdown",
+        "body": "## 口径：比较整套原生管理规格，不是单纯晚一点退出\n\n入场对象为OKX BTC-USDT永续、2023年至2024年的小时信号。保留原251病例、462个自身随机入场对照，原154组三对照不重配；97个缺配病例始终保留为对照未知。匹配覆盖率61.35%低于原90%验收线，不能为了通过而降低门槛。这是重复研究区间，不是新的独立测试。\n\n固定对照来自同一合约、同一日历月与UTC六小时时段、此前30日因果ATR比例三分桶、相同方向，以及原5分钟/小时颜色和小时斜率状态；每个对照时刻不复用。对照止损用病例风险/ATR比例乘对照自己的ATR构造，不冒充随机K线自身极值。退出、72小时和成本相同；本轮不为15分钟新颜色重新配对。\n\n1bp=0.01%；每笔净收益为方向收益减0.20%往返成本；1R为该笔实际入场至K1极值的初始价格风险。表内是单笔收益均值，不是账户复利回报。硬止损仍按原始5分钟路径检查，15分钟图上看不到的期间止损没有被跳过。\n\n原生5分钟SMA40涵盖约3小时20分钟，原生15分钟SMA40涵盖10小时；聚合、初始颜色、均线记忆和退出时钟一起变化。218笔晚退、18笔反而早退、15笔同刻退出，说明这不是把同一退出统一延后。",
+        "layout": "full"
+      },
+      {
+        "id": "section_03",
+        "type": "markdown",
+        "body": "## 当前交易规则：小时确认直接开仓，小周期真实反转退出\n\n小时均线为SMA40(HL2)，HL2=(最高+最低)/2；颜色由HL2在均线哪一侧决定，不是普通收盘高于开盘的红绿，也不是均线斜率。多头要求小时实体严格从均线下方贯穿至上方，空头镜像。\n\n形态满足两条之一：大实体占振幅至少65%且振幅至少1ATR；或真实看涨/看跌吞没且振幅至少0.65ATR。吞没分支**没有额外65%实体占比要求**。两者均要求收盘处于本方向振幅的末端30%内、ATR有效、方向与当前MA侧一致。当前原始入场没有额外4小时颜色、前20小时突破、量能、效率或均线斜率过滤；本轮不加入这些门。\n\n小时K线完成后的精确下一根5分钟开盘价入场，不在未完成小时里提前交易，也不等待K2。止损固定K1真实低点/高点；跳空穿止损按开盘价处理，同5分钟模糊路径按止损优先。最长72小时，不跨半年边界尾部强拼完整交易。\n\n退出比较为：最新已完成的原生5分钟或15分钟K线，发生真实“同向→反向”颜色转换后，在下一可成交5分钟开盘平仓。入场已反向不会被误认为新发生反转；要先看到同向再反向。硬止损一直有效。本轮没有移动止损、分批兑现或固定3R止盈。",
+        "layout": "full"
+      },
+      {
+        "id": "section_04",
+        "type": "markdown",
+        "body": "## 总体结果：胜率和PF改善也掩盖不了净亏损\n\n\n| 指标 | 原生5分钟 | 原生15分钟 |\n|---|---:|---:|\n| 完整交易 | 251 | 251 |\n| 每笔净收益 | −14.31bp | −16.66bp |\n| 净收益中位数 | −33.61bp | −40.91bp |\n| 净胜率 | 24.70% | 25.50% |\n| 盈亏总额比PF | 0.625 | 0.666 |\n| 平均持仓 | 2.50小时 | 6.01小时 |\n| 硬止损 | 14 | 63 |\n| 成本增加到30bp后均净 | −24.31bp | −26.66bp |\n| 去掉最赚钱两笔后均净 | −17.32bp | −21.49bp |\n\n这不是“少量好趋势让总体盈利”。赢家尾部虽更大，但中位交易更差；删掉最大的两笔盈利后两版都更亏。原生15分钟的实际单仓只能执行250笔，平均−16.99bp；不能沿用5分钟版251笔全执行的集合来算单仓业绩。",
+        "layout": "full",
+        "sourceId": "v15_summary"
+      },
+      {
+        "id": "section_05",
+        "type": "markdown",
+        "body": "## 时间分段和对照：没有一个半年实现整体正收益\n\n\n| 半年 | 原始机会 | 5分钟均净 | 15分钟均净 |\n|---|---:|---:|---:|\n| 2023上半年 | 55 | −11.19bp | −13.17bp |\n| 2023下半年 | 66 | −24.75bp | −18.15bp |\n| 2024上半年 | 55 | −10.48bp | −32.00bp |\n| 2024下半年 | 75 | −10.21bp | −6.66bp |\n\n两段改善、两段恶化，其中2024上半年恶化最明显。以下**只在原154个完整匹配病例及其462个自身对照上比较**，不与全251均值混为同一分母。\n\n| 相同154组匹配支持 | 5分钟 | 15分钟 |\n|---|---:|---:|\n| 病例均净 | −11.81bp | −14.05bp |\n| 三对照平均均净 | −20.96bp | −23.79bp |\n| 病例减自身对照 | +9.15bp | +9.74bp |\n\n病例比随机对照少亏，不等于病例赚钱。更慢退出也改变随机入场的回报，不能把条件超额+9.74bp当作策略的绝对收益。",
+        "layout": "full",
+        "sourceId": "v15_summary"
+      },
+      {
+        "id": "section_06",
+        "type": "markdown",
+        "body": "## 逐笔差值：多数机会没有从慢退出中受益\n\n\n图保留全部251个机会，展示原生15分钟减5分钟的净收益变化；包含零变化和未知类别，不裁掉大赢家或大亏损。79笔改善、157笔恶化、15笔近零；变化中位数−9.98bp。横轴为固定区间，纵轴是笔数，**不是概率密度**。右尾可以显著改善个别趋势交易，但不足以抵消左侧恶化。",
+        "layout": "full",
+        "sourceId": "v15_case_delta"
+      },
+      {
+        "id": "v15_distribution_chart",
+        "type": "chart",
+        "chartId": "v15_case_difference_distribution",
+        "layout": "full"
+      },
+      {
+        "id": "section_07",
+        "type": "markdown",
+        "body": "## 失败规律：新增硬止损抵消了成功延长的趋势利润\n\n| 同一机会的盈亏变化 | 笔数 | 原均净 | 新均净 | 平均变化 |\n|---|---:|---:|---:|---:|\n| 两版都亏 | 170 | −53.60bp | −69.87bp | −16.27bp |\n| 亏转盈 | 19 | −24.02bp | +127.63bp | +151.65bp |\n| 盈转亏 | 17 | +43.73bp | −37.34bp | −81.07bp |\n| 两版都赢 | 45 | +116.31bp | +131.24bp | +14.92bp |\n\n按出场原因重分组，50笔“旧变色退出→新硬止损”平均恶化38.68bp；187笔两版均为变色退出的机会平均改善7.09bp。两者事件差值之和分别为−1934.11与+1325.53bp，另1笔硬止损转变色改善17.30bp、13笔原止损不变，合计−591.29事件bp；除以全部251即每笔−2.36bp。事件和不是账户收益。\n\n因此本轮观察到的主要代价是：**部分原本及时退出的无效启动，被更慢规则继续持有，直到触发原始硬止损**。并不是脚本偷偷把止损价格调高或调低了；入场与初始风险逐字段保持一致。该分组是已发生路径的描述，不是可在开仓时识别赢家的模型。[逐笔路径账本](../../experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/results/native_exit_mechanics.csv)",
+        "layout": "full"
+      },
+      {
+        "id": "section_08",
+        "type": "markdown",
+        "body": "## 不能把“曾经1R”直接当作必然可以净止盈\n\n15分钟版187笔亏损中，53笔持仓内最高有利波动达到1R，134笔没有达到。53笔又包括14笔硬止损、10笔毛赚净亏和29笔其他利润回吐；这是互斥拆分，不与重叠诊断旗重复相加。\n\n更重要的是，53笔中3笔即使按记录到的最高有利价格估算，毛收益也未超过20bp成本。1R是相对风险，不是净收益；风险太小的单子，1R未必覆盖交易成本。最高有利价格只是事后路径极值，不保证可以在那个价格成交。\n\n同时，原5分钟版154笔“亏损且持仓内未到1R”的单子，有25笔在更慢版本持仓期间后来到达1R，其中13笔最终转为净盈利。**旧持仓期间没有启动，不等于以后没有趋势**。不能仅凭旧MFE给后续行情贴“永远没机会”的标签。[完整候选诊断](../../experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/results/candidate/classified_case_trades.csv.gz)",
+        "layout": "full"
+      },
+      {
+        "id": "section_09",
+        "type": "markdown",
+        "body": "## 初始颜色解释部分恶化，但删掉反色单也救不了系统\n\n入场时5分钟同向247笔、反向4笔；15分钟同向219笔、反向32笔，无未知。15分钟初始反向32笔均净−31.42bp，贡献本轮总恶化约83.75%；这是完整事前状态，不是事后挑出来的图形。\n\n但同向219笔仍平均−14.51bp，包含53笔硬止损和48笔曾到1R后亏损。50笔新增硬止损中43笔本来就同向。**只增加“15分钟初始同向”过滤并不能据此宣称修好了系统**，更不能根据这次观察立即改变分母宣布最优。\n\n另外预先约定的旧状态语义对照显示：当前源码在同一251机会下，15分钟真实转换和反向状态退出有232笔净收益相同、19笔不同；不是全新的一批趋势。这个对照未与V1历史全部账本做逐字段一致性检查，尤其控制组沿用的是V4固定配对，不能称完整复现V1。",
+        "layout": "full"
+      },
+      {
+        "id": "section_10",
+        "type": "markdown",
+        "body": "## 可核对的交易例子：慢退出既会救单，也可能提前砍错\n\n| 入场UTC、方向 | 5分钟单笔净收益/持仓 | 15分钟净收益/持仓 | 说明 |\n|---|---:|---:|---|\n| 2024-08-23 13:00，多 | −59.38bp / 115分钟 | +421.67bp / 900分钟 | 真正延长后吃到趋势 |\n| 2024-06-04 11:00，多 | +233.39bp / 485分钟 | −11.67bp / 120分钟 | 15分钟反而更早退出；均线并非同一条 |\n| 2024-04-19 02:00，空 | −115.72bp / 80分钟 | −309.64bp / 280分钟 | 从旧变色退出拖成硬止损 |\n\n例子按已观察到的最大改善/明显恶化展示，不是随机样本或新的验证集。不能用单张漂亮盈利图代替全部251笔。[完整路径而非精选截图](../../experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/results/native_exit_mechanics.csv)",
+        "layout": "full"
+      },
+      {
+        "id": "section_11",
+        "type": "markdown",
+        "body": "## 不确定性与单特征基线：AUC上升不代表盈利成立\n\n\n| 固定配对检验 | 有效/总机会 | 平均变化 | 月分块95%区间 | 单侧p |\n|---|---:|---:|---:|---:|\n| 病例变化D | 251/251 | −2.36bp | [−9.91,+5.00]bp | 0.7302 |\n| 病例变化减对照变化I | 154/251 | +0.59bp | [−14.36,+14.49]bp | 0.4696 |\n| 单仓全部机会变化 | 251/251 | −2.62bp | [−10.04,+4.52]bp | 0.7580 |\n\n固定日历月分块抽样/符号翻转9999次、种子20260906，检验“改善>0”；不使用随机时间切分。D与I均未通过p<0.01及区间下限大于零的联合门。分块近似不能证明月份独立，重复多轮研究后的p更不能作为全新确认；这里没有事后更换统计方法或调整接受线。\n\n本轮未训练分类器，所以模型验证AUC不适用。可复核的单特征基线为K1振幅/ATR：其描述性AUC从0.565升至0.623；按该特征排序的顶部十分位毛/净均值从+1.49/−18.51bp变为+25.30/+5.30bp。它仍是同一反复使用样本上的小子集，不是独立样本选股盈利证明，也不能覆盖全池亏损；该子集没有另配新的随机对照。",
+        "layout": "full",
+        "sourceId": "v15_summary"
+      },
+      {
+        "id": "section_12",
+        "type": "markdown",
+        "body": "## 验证范围与风险：账本通过不等于实盘通过\n\n构建器先提交2acc280，再执行唯一一次V15原始行情回放；两个周期的1426个自身初始状态冻结后才读取收益表。原生5分钟六张基准表与V5所有旧字段一致，原始入场/止损/风险在两臂相同。实际物化219551行、价格截止2024-12-31 23:55 UTC；物理归档后续日期仅用于时间戳边界检查。本配置第0次消耗holdout；没有2025+价格评估、训练、TradingView或实盘修改。\n\n45c1d23保存账本验证器重新核对54个输出哈希、21份已提交来源、251/462/154/97分母、原生时钟、相同价格路径约束、占仓和净收益公式，通过。它**没有独立重新聚合原始行情/SMA、寻找首个翻色或重算推断p**；不能把保存表一致性说成第二次完整回测。\n\n本轮新增233项测试全部通过。扩展检查当时3194通过、2失败：迁移哈希守门分别指向非本轮修改的L1 candidates.py及render.py，未修改守门规则或回滚他人工作。这两个仓库问题仍存在，不宣称全仓测试通过。Notebook三格普通Python从头执行并固定V15→V12→V11全部验证器哈希；未运行Jupyter内核和完整nbformat schema。\n\n分布检查保留全部尾部，配对差值32个IQR离群观察未删除；Shapiro p≈4.89×10⁻¹⁹，仅说明明显非正态形状，不能证明样本独立。技能自带检查脚本因缺少seaborn无法导入，改用已安装SciPy及NumPy做同类描述检查，没有安装或更改依赖。[SciPy Shapiro说明](https://docs.scipy.org/doc/scipy-1.13.1/reference/generated/scipy.stats.shapiro.html)、[NumPy分位数说明](https://numpy.org/doc/2.0/reference/generated/numpy.quantile.html)。HTML使用官方单文件生成器，实际仅通过结构校验：本机没有可用Chromium，手机交互、来源弹窗和明暗外观均未做浏览器验收；无脚本语义表保留。\n\n仍未模拟资金费率、盘口滑点、延迟和逐笔顺序。20bp加10bp压力不是完整交易成本模型。任何正收益目标都不是盈利保证；当前两个版本都不满足上线条件。",
+        "layout": "full"
+      },
+      {
+        "id": "section_13",
+        "type": "markdown",
+        "body": "## 下一步：真实兑现部分利润，而不是统一拖延所有退出\n\n下一项先查重、预注册再实施：保留原生15分钟剩余仓位管理，只增加一次“已完成5分钟真实反转、最新完整15分钟仍同向时，若下一可成交开盘已覆盖整仓20bp成本，则先兑现原仓50%”的动态兑现事件。剩余仓位保持原15分钟退出和K1止损，不同时添加初始颜色门、R阈值或移动止损网格。\n\n这是待测试的单一机制，**本轮未实现、未回测，也没有估算其盈利**。即使先兑现一半，剩余一半止损后整笔仍可能净亏；必须重新逐路径记账，不能把已有53笔MFE当成必然可兑现利润。还要核对当前开盘触发与成交成本假设，不能用未完成K线颜色或未来最高价。\n\n进一步的问题是：这种双周期分批兑现能否改善全251病例及相同154对照支持，而不牺牲19笔被慢退出救回的趋势？如果仍负，继续分开研究无效启动，不把盈利子集包装成“最优系统”。",
+        "layout": "full"
+      },
+      {
+        "id": "section_14",
+        "type": "markdown",
+        "body": "## 复现与逐笔材料\n\n下面命令从仓库根目录执行；回放会拒绝覆盖既有results。全新复现须使用明确记录的新输出尝试，不能删除本次原始证据。源码、配置和计划要先提交；保存验证、Notebook和HTML不会再次读取原始价格。\n\n```bash\n.venv/bin/python -m pytest -q tests/test_hourly_impulse_native_exit_research.py tests/test_hourly_impulse_native_exit_context.py tests/test_hourly_impulse_native_exit_verifier.py tests/test_hourly_impulse_native_exit_report.py tests/test_hourly_impulse_native_exit_notebook.py\n.venv/bin/python -m yoyo.evaluation.hourly_impulse_native_exit_research\n.venv/bin/python scripts/verify_hourly_impulse_native_exit_v15.py\n.venv/bin/python scripts/diagnose_hourly_impulse_native_exit_v15.py\n.venv/bin/python -m yoyo.evaluation.hourly_impulse_native_exit_notebook --root . --output experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/native_exit_audit.ipynb --check\n.venv/bin/python scripts/md_to_html.py analysis/p1_btcusdtp_hourly_native_exit_v15_20260906.md --out-dir analysis/html\n.venv/bin/python -m yoyo.evaluation.hourly_impulse_native_exit_report --markdown analysis/p1_btcusdtp_hourly_native_exit_v15_20260906.md --summary experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/results/summary.json --case-delta experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/results/case_delta.csv --output experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/artifact.json\nnode \"${CODEX_HOME:-$HOME/.codex}/plugins/cache/openai-curated-remote/data-analytics/0.2.10-13ceeea1f599/skills/build-report/scripts/deliver_portable_artifact.mjs\" --input experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/artifact.json --output analysis/html/p1_btcusdtp_hourly_native_exit_v15_20260906.html\n```\n\n[保存账本独立校验收据](../../experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/saved_verification.json) · [可执行审计Notebook](../../experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/native_exit_audit.ipynb)。Notebook复用同一验证器，不算第二个独立实现。",
+        "layout": "full"
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-09-06T10:19:34.799460+00:00",
+    "status": "ready",
+    "datasets": {
+      "v15_case_difference_distribution": [
+        {
+          "bin_id": 0,
+          "bin_label": "< -100",
+          "bin_lower_bp": null,
+          "bin_upper_bp": -100.0,
+          "bin_count": 10,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": -245.05535333832498,
+          "maximum_change_bp": -100.626755997407,
+          "mean_change_bp": -148.4726982480102,
+          "summed_request_change_bp": -1484.726982480102
+        },
+        {
+          "bin_id": 1,
+          "bin_label": "[-100, -50)",
+          "bin_lower_bp": -100.0,
+          "bin_upper_bp": -50.0,
+          "bin_count": 32,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": -97.772175915906,
+          "maximum_change_bp": -50.290898333498,
+          "mean_change_bp": -68.13453077372165,
+          "summed_request_change_bp": -2180.304984759093
+        },
+        {
+          "bin_id": 2,
+          "bin_label": "[-50, -20)",
+          "bin_lower_bp": -50.0,
+          "bin_upper_bp": -20.0,
+          "bin_count": 52,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": -49.56608409504,
+          "maximum_change_bp": -20.704507654909,
+          "mean_change_bp": -31.69437352778025,
+          "summed_request_change_bp": -1648.107423444573
+        },
+        {
+          "bin_id": 3,
+          "bin_label": "[-20, -5)",
+          "bin_lower_bp": -20.0,
+          "bin_upper_bp": -5.0,
+          "bin_count": 44,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": -19.869222994699,
+          "maximum_change_bp": -5.499074545991,
+          "mean_change_bp": -12.529105998163864,
+          "summed_request_change_bp": -551.28066391921
+        },
+        {
+          "bin_id": 4,
+          "bin_label": "[-5, -1e-8)",
+          "bin_lower_bp": -5.0,
+          "bin_upper_bp": -1e-08,
+          "bin_count": 19,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": -4.782797921406,
+          "maximum_change_bp": -0.1132118193125642,
+          "mean_change_bp": -2.2725935273961695,
+          "summed_request_change_bp": -43.179277020527216
+        },
+        {
+          "bin_id": 5,
+          "bin_label": "0 · |Δ|<=1e-8",
+          "bin_lower_bp": -1e-08,
+          "bin_upper_bp": 1e-08,
+          "bin_count": 15,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": 0.0,
+          "maximum_change_bp": 0.0,
+          "mean_change_bp": 0.0,
+          "summed_request_change_bp": 0.0
+        },
+        {
+          "bin_id": 6,
+          "bin_label": "(1e-8, 5)",
+          "bin_lower_bp": 1e-08,
+          "bin_upper_bp": 5.0,
+          "bin_count": 10,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": 0.4749779898594042,
+          "maximum_change_bp": 4.627392104641,
+          "mean_change_bp": 2.4591903513274405,
+          "summed_request_change_bp": 24.591903513274403
+        },
+        {
+          "bin_id": 7,
+          "bin_label": "[5, 20)",
+          "bin_lower_bp": 5.0,
+          "bin_upper_bp": 20.0,
+          "bin_count": 20,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": 5.007445854269999,
+          "maximum_change_bp": 19.210484445987998,
+          "mean_change_bp": 11.76964843051625,
+          "summed_request_change_bp": 235.392968610325
+        },
+        {
+          "bin_id": 8,
+          "bin_label": "[20, 50)",
+          "bin_lower_bp": 20.0,
+          "bin_upper_bp": 50.0,
+          "bin_count": 21,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": 20.400133000155,
+          "maximum_change_bp": 49.661648943516,
+          "mean_change_bp": 33.389869633106095,
+          "summed_request_change_bp": 701.187262295228
+        },
+        {
+          "bin_id": 9,
+          "bin_label": "[50, 100)",
+          "bin_lower_bp": 50.0,
+          "bin_upper_bp": 100.0,
+          "bin_count": 14,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": 56.281415798031,
+          "maximum_change_bp": 99.146902531385,
+          "mean_change_bp": 74.71699151367429,
+          "summed_request_change_bp": 1046.03788119144
+        },
+        {
+          "bin_id": 10,
+          "bin_label": ">= 100",
+          "bin_lower_bp": 100.0,
+          "bin_upper_bp": null,
+          "bin_count": 14,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": 102.013719329498,
+          "maximum_change_bp": 481.055141755232,
+          "mean_change_bp": 236.36438644550836,
+          "summed_request_change_bp": 3309.101410237117
+        },
+        {
+          "bin_id": 11,
+          "bin_label": "未知",
+          "bin_lower_bp": null,
+          "bin_upper_bp": null,
+          "bin_count": 0,
+          "total_requests": 251,
+          "finite_requests": 251,
+          "unknown_requests": 0,
+          "count_sum": 251,
+          "minimum_change_bp": null,
+          "maximum_change_bp": null,
+          "mean_change_bp": null,
+          "summed_request_change_bp": null
+        }
+      ]
+    },
+    "accessIssues": []
+  },
+  "sources": [
+    {
+      "id": "report",
+      "label": "V15 · 独立技术报告原文",
+      "path": "analysis/p1_btcusdtp_hourly_native_exit_v15_20260906.md"
+    },
+    {
+      "id": "v15_summary",
+      "label": "OKX archive · V15 保存的结果与诊断事实",
+      "path": "experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/results/summary.json"
+    },
+    {
+      "id": "v15_case_delta",
+      "label": "OKX archive · V15 全部案例配对变化",
+      "path": "experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/results/case_delta.csv",
+      "query": {
+        "engine": "SQLite",
+        "language": "sql",
+        "sql": "WITH bins(bin_id, bin_label, bin_lower_bp, bin_upper_bp) AS (\n  VALUES (0, '< -100', NULL, -100),\n         (1, '[-100, -50)', -100, -50),\n         (2, '[-50, -20)', -50, -20),\n         (3, '[-20, -5)', -20, -5),\n         (4, '[-5, -1e-8)', -5, -0.00000001),\n         (5, '0 · |Δ|<=1e-8', -0.00000001, 0.00000001),\n         (6, '(1e-8, 5)', 0.00000001, 5),\n         (7, '[5, 20)', 5, 20),\n         (8, '[20, 50)', 20, 50),\n         (9, '[50, 100)', 50, 100),\n         (10, '>= 100', 100, NULL),\n         (11, '未知', NULL, NULL)\n), classified AS (\n  SELECT event_id, difference * 10000 AS change_bp,\n         CASE WHEN difference IS NULL THEN 11\n              WHEN ABS(difference) <= 0.000000000001 THEN 5\n              WHEN difference * 10000 < -100 THEN 0\n              WHEN difference * 10000 < -50 THEN 1\n              WHEN difference * 10000 < -20 THEN 2\n              WHEN difference * 10000 < -5 THEN 3\n              WHEN difference < 0 THEN 4\n              WHEN difference * 10000 < 5 THEN 6\n              WHEN difference * 10000 < 20 THEN 7\n              WHEN difference * 10000 < 50 THEN 8\n              WHEN difference * 10000 < 100 THEN 9 ELSE 10 END AS bin_id\n  FROM main.case_delta\n), totals AS (\n  SELECT COUNT(*) AS total_requests, COUNT(change_bp) AS finite_requests,\n         COUNT(*) - COUNT(change_bp) AS unknown_requests FROM classified\n)\nSELECT b.bin_id, b.bin_label, b.bin_lower_bp, b.bin_upper_bp,\n       COUNT(c.event_id) AS bin_count,\n       t.total_requests, t.finite_requests, t.unknown_requests,\n       SUM(COUNT(c.event_id)) OVER () AS count_sum,\n       MIN(c.change_bp) AS minimum_change_bp,\n       MAX(c.change_bp) AS maximum_change_bp,\n       AVG(c.change_bp) AS mean_change_bp,\n       SUM(c.change_bp) AS summed_request_change_bp\nFROM bins AS b CROSS JOIN totals AS t\nLEFT JOIN classified AS c ON c.bin_id = b.bin_id\nGROUP BY b.bin_id, b.bin_label, b.bin_lower_bp, b.bin_upper_bp,\n         t.total_requests, t.finite_requests, t.unknown_requests\nORDER BY b.bin_id",
+        "executed_at": "2026-09-06T10:19:34.799460+00:00",
+        "tables_used": [
+          "main.case_delta"
+        ],
+        "description": "Actual SQLite count query over experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/results/case_delta.csv, loaded as main.case_delta. Source columns: event_id,mother_decision_time,before,after,difference. hourly_impulse_native_exit_research.py supplied all251 original direct1h K1 episode pairs. before=native5m SMA40 true-colour exit; after=native15m SMA40 true-colour exit. The entry cohort is unchanged and is not the source-zone breakout cohort. Native aggregation, initial available colour and SMA40 memory3h20m versus10h change together. No raw prices, strategy or inference are run by the presentation query.",
+        "filters": [
+          "BTC-USDT-SWAP, reused development 2023-01-01 <= mother_decision_time UTC < 2025-01-01",
+          "Every original case request, not matched-only cases or winner-only paths; no trimming or sampling",
+          "One unique event_id and exact decision time per source request; +/-infinity rejected, NULL differences retained in the unknown bin"
+        ],
+        "metric_definitions": [
+          "difference=after-before for every original direct1h K1 opportunity, no new entry gate. after=native15m and before=native5m transition-colour management, both SMA40(HL2). Unknown paired outcomes remain NULL; chart bp=difference*10000. This is not pure sampling cadence.",
+          "bin_count counts requests, not probability density; numeric intervals have unequal widths and open-ended tails",
+          "Zero atom follows frozen comparison tolerance abs(difference)<=1e-12 in fractional-return units (1e-8 bp); original nonzero values are preserved in sums and means",
+          "total_requests=all source rows; finite_requests=nonnull differences; unknown_requests=null differences; count_sum=sum(bin_count) must equal total_requests",
+          "Bin min/max/mean/sum preserve original paired episode changes in bp. Each completed trade bears the same20bp roundtrip assumption, immutable K1 extreme stop and original72h limit. No filling unknowns, trimming tails or compounding event sums into account returns."
+        ]
+      }
+    },
+    {
+      "id": "research_code",
+      "label": "V15 · 上游 Python 评估器",
+      "path": "yoyo/evaluation/hourly_impulse_native_exit_research.py"
+    },
+    {
+      "id": "presentation_code",
+      "label": "V15 · 分布聚合与原生报告构建器",
+      "path": "yoyo/evaluation/hourly_impulse_native_exit_report.py"
+    }
+  ]
+}

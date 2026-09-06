@@ -1,0 +1,60 @@
+{
+  "source_sha256": "98e312a22f98ff0d40dabf2e2fc84dcc07d28f35d1fc54c57ac0453426ad5a8f",
+  "distributions": {
+    "before": {
+      "n": 251,
+      "unknown": 0,
+      "quantiles_bp": [
+        -172.347133206305,
+        -116.967924578615,
+        -54.922710550592996,
+        -33.613398652081,
+        -0.9261796445230325,
+        177.3703022701855,
+        398.63685399771305
+      ],
+      "shapiro_w": 0.8096073051082999,
+      "shapiro_p": 7.902679024284484e-17,
+      "iqr_outliers": 35,
+      "outliers_removed": 0
+    },
+    "after": {
+      "n": 251,
+      "unknown": 0,
+      "quantiles_bp": [
+        -309.642740085218,
+        -146.19553799297,
+        -71.12419407191399,
+        -40.905985339121,
+        1.3659328073219998,
+        203.3169834682945,
+        665.0557685786041
+      ],
+      "shapiro_w": 0.8249471229322775,
+      "shapiro_p": 3.981017445685428e-16,
+      "iqr_outliers": 35,
+      "outliers_removed": 0
+    },
+    "difference": {
+      "n": 251,
+      "unknown": 0,
+      "quantiles_bp": [
+        -245.05535333832498,
+        -89.61655538672451,
+        -33.1205526779025,
+        -9.975451443786001,
+        8.2567319359375,
+        109.501087024412,
+        481.055141755232
+      ],
+      "shapiro_w": 0.7549401120932978,
+      "shapiro_p": 4.888026060482633e-19,
+      "iqr_outliers": 32,
+      "outliers_removed": 0
+    }
+  },
+  "raw_prices_read": false,
+  "fallback": "statistical-analysis assumption_checks.py import failed: no seaborn; direct installed scipy.stats.shapiro and numpy.quantile",
+  "inference_method_changed": false,
+  "warning": "Shapiro is descriptive under temporal dependence; it cannot establish independent observations or drive posthoc method choice."
+}

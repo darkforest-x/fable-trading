@@ -15252,6 +15252,108 @@ artifacts:
     notes: "Verifier046b92a,2270 formulas/clocks,exact286/849contexts,V7old-column parity,286/283/959denominators,1342tests. Not independent raw-price replay."
 
 
+  - artifact_id: btcusdtp-hourly-native-exit-v15-results
+    artifact_type: report
+    role: native5_vs_native15_full_intention_economics
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2acc280"
+    source_path: experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/results/summary.json
+    sha256: "d27f820b26b6bb2dd56bd7b1eba5017907656ea70dc7bd08cbe5c1c1c14f80d4"
+    size_bytes: 38067
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2acc280"
+    config_hash: "109717dcf37d7fbe0523906b57d34a542dfd4bcc9f6a13683ce4570c93096e36"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Original251/462/154/97 retained;no financial acceptance. HTMLstructural_only;notebooknotJupyter,verifiernotrawreplay."
+
+  - artifact_id: btcusdtp-hourly-native-exit-v15-report
+    artifact_type: report
+    role: technical_failure_analysis_source
+    source_repo: darkforest-x/fable-trading
+    source_commit: "45c1d23"
+    source_path: analysis/p1_btcusdtp_hourly_native_exit_v15_20260906.md
+    sha256: "40c3e0d55a0d8ad033a4f908114110ce946fd6f6c836aa967a73c3900e3bd3a4"
+    size_bytes: 16267
+    storage_uri: "repo://analysis/p1_btcusdtp_hourly_native_exit_v15_20260906.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "45c1d23"
+    config_hash: "109717dcf37d7fbe0523906b57d34a542dfd4bcc9f6a13683ce4570c93096e36"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Original251/462/154/97 retained;no financial acceptance. HTMLstructural_only;notebooknotJupyter,verifiernotrawreplay."
+
+  - artifact_id: btcusdtp-hourly-native-exit-v15-html
+    artifact_type: report
+    role: portable_technical_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c42a44b"
+    source_path: analysis/html/p1_btcusdtp_hourly_native_exit_v15_20260906.html
+    sha256: "b209435595cc75a165a2f76012d0a2d7aab47b766ac14e43340b237a8d31b484"
+    size_bytes: 442349
+    storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_native_exit_v15_20260906.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c42a44b"
+    config_hash: "109717dcf37d7fbe0523906b57d34a542dfd4bcc9f6a13683ce4570c93096e36"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Original251/462/154/97 retained;no financial acceptance. HTMLstructural_only;notebooknotJupyter,verifiernotrawreplay."
+
+  - artifact_id: btcusdtp-hourly-native-exit-v15-artifact
+    artifact_type: report
+    role: canonical_native_report_payload
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c42a44b"
+    source_path: experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/artifact.json
+    sha256: "dbad5a80e05bfd28c7dcc211219765278e87d6d7775003842676d1f8a9372c7a"
+    size_bytes: 38420
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/artifact.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c42a44b"
+    config_hash: "109717dcf37d7fbe0523906b57d34a542dfd4bcc9f6a13683ce4570c93096e36"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Original251/462/154/97 retained;no financial acceptance. HTMLstructural_only;notebooknotJupyter,verifiernotrawreplay."
+
+  - artifact_id: btcusdtp-hourly-native-exit-v15-verification
+    artifact_type: report
+    role: independent_saved_ledger_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "45c1d23"
+    source_path: experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/saved_verification.json
+    sha256: "212ffbd4825ab054b36c32607bab308c912c7b5af48d7f4123c6a897c28844cb"
+    size_bytes: 2429
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/saved_verification.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "45c1d23"
+    config_hash: "109717dcf37d7fbe0523906b57d34a542dfd4bcc9f6a13683ce4570c93096e36"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Original251/462/154/97 retained;no financial acceptance. HTMLstructural_only;notebooknotJupyter,verifiernotrawreplay."
+
+  - artifact_id: btcusdtp-hourly-native-exit-v15-notebook
+    artifact_type: report
+    role: saved_ledger_plain_python_notebook
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c42a44b"
+    source_path: experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/native_exit_audit.ipynb
+    sha256: "510964c6e673ef0fd7aecb9ce28ce1bd7be7f8fc3ef57e74076032315d31f61b"
+    size_bytes: 17102
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/native_exit_audit.ipynb"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c42a44b"
+    config_hash: "109717dcf37d7fbe0523906b57d34a542dfd4bcc9f6a13683ce4570c93096e36"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Original251/462/154/97 retained;no financial acceptance. HTMLstructural_only;notebooknotJupyter,verifiernotrawreplay."
+
   - artifact_id: btcusdtp-hourly-prior-breakout-v14-support
     artifact_type: report
     role: outcome_free_prior20_support
