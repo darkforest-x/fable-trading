@@ -1,0 +1,149 @@
+{
+  "config_sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a",
+  "entry": {
+    "ma_kind": "SMA",
+    "ma_length": 40,
+    "shape": "large_or_engulf",
+    "body_ratio_min": 0.65,
+    "range_atr_min": 1,
+    "engulf_range_atr_min": 0.65,
+    "close_location_min": 0.7,
+    "min_volume_ratio": 0,
+    "max_cross_count": 999,
+    "min_efficiency": 0,
+    "require_ma_slope": true,
+    "require_breakout20": false,
+    "min_extension_atr": 0,
+    "max_extension_atr": 99,
+    "side": "both"
+  },
+  "policy": {
+    "id": "5m_native40",
+    "management_minutes": 5,
+    "ma_kind": "SMA",
+    "ma_length": 40,
+    "exit_mode": "colour",
+    "confirmations": 1
+  },
+  "metrics": {
+    "events": 111,
+    "excluded_results": 0,
+    "rejected_entries": 0,
+    "censored": 0,
+    "mean_net_bp": -6.991774483673787,
+    "median_net_bp": -29.784946236559566,
+    "profit_factor": 0.809386610372955,
+    "win_rate": 0.2972972972972973,
+    "p95_net_bp": 202.21019080160164,
+    "worst_fold_bp": -24.369767552179425,
+    "positive_folds": 1,
+    "minimum_fold_events": 21,
+    "folds": [
+      {
+        "fold": "2023H1",
+        "count": 21,
+        "mean": 0.00011809208641178748
+      },
+      {
+        "fold": "2023H2",
+        "count": 27,
+        "mean": -0.0024369767552179424
+      },
+      {
+        "fold": "2024H1",
+        "count": 27,
+        "mean": -0.0004225846122834668
+      },
+      {
+        "fold": "2024H2",
+        "count": 36,
+        "mean": -8.001315724690138e-05
+      }
+    ],
+    "robust_score_bp": -7.604397370077569,
+    "net_week_cluster_p": 0.7682,
+    "net_month_cluster_p": 0.8562,
+    "extra_10bp_mean_net_bp": -16.991774483673787,
+    "leave_top_two_mean_net_bp": -13.742638364933734,
+    "range_feature_auc": 0.567987567987568,
+    "range_top_decile_net_bp": -40.03783781090054,
+    "range_top_decile_gross_bp": -20.037837810900538,
+    "mean_hold_hours": 2.5735735735735736,
+    "eligible": true
+  },
+  "matched": {
+    "coverage": 0.9819819819819819,
+    "mean_excess_bp": 11.255414343456465,
+    "control_mean_net_bp": -17.87475928115829,
+    "month_cluster_p": 0.0763,
+    "control_rows": 327,
+    "unique_control_times": 327,
+    "control_time_reuse_allowed": false
+  },
+  "baseline_metrics": {
+    "events": 251,
+    "excluded_results": 0,
+    "rejected_entries": 0,
+    "censored": 0,
+    "mean_net_bp": -15.369866315322785,
+    "median_net_bp": -36.71761198535737,
+    "profit_factor": 0.6794253961150191,
+    "win_rate": 0.24701195219123506,
+    "p95_net_bp": 203.31698346829518,
+    "worst_fold_bp": -27.24585676367809,
+    "positive_folds": 0,
+    "minimum_fold_events": 55,
+    "folds": [
+      {
+        "fold": "2023H1",
+        "count": 55,
+        "mean": -0.0013031453155738972
+      },
+      {
+        "fold": "2023H2",
+        "count": 66,
+        "mean": -0.002026664082839553
+      },
+      {
+        "fold": "2024H1",
+        "count": 55,
+        "mean": -0.0027245856763678093
+      },
+      {
+        "fold": "2024H2",
+        "count": 75,
+        "mean": -0.00040664813987196494
+      }
+    ],
+    "robust_score_bp": -20.948767172134147,
+    "net_week_cluster_p": 0.9753,
+    "net_month_cluster_p": 0.9938,
+    "extra_10bp_mean_net_bp": -25.369866315322785,
+    "leave_top_two_mean_net_bp": -20.1908819743141,
+    "range_feature_auc": 0.6336405529953917,
+    "range_top_decile_net_bp": 5.295959732359187,
+    "range_top_decile_gross_bp": 25.29595973235919,
+    "mean_hold_hours": 5.689907038512616
+  },
+  "baseline_matched": {
+    "coverage": 0.9880478087649402,
+    "mean_excess_bp": -0.7709036595950215,
+    "control_mean_net_bp": -14.484796579710025,
+    "month_cluster_p": 0.5732,
+    "control_rows": 744,
+    "unique_control_times": 744,
+    "control_time_reuse_allowed": false
+  },
+  "source": {
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "physical_rows": 341567,
+    "phase_rows": 219551,
+    "phase_price_last_open": "2024-12-31 23:55:00+00:00",
+    "physical_last_open": "2026-02-28 15:55:00+00:00",
+    "holdout_price_rows": 0,
+    "timestamp_preflight_before_price_hash": true
+  },
+  "candidates_evaluated": 48,
+  "audit_results_seen": false,
+  "status": "frozen_candidate_for_transport_not_profit_claim"
+}
