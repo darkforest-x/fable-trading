@@ -52,6 +52,14 @@ alignment and new executable OPEN must reconfirm failure. Any rejection consumes
 the pending edge; it cannot create a partial fill without a fresh true edge.
 Only this opt-in adds pending lifecycle diagnostics. Default/explicit-one
 confirmation retains every V17 field and execution rule unchanged.
+
+V19 optionally realizes only50% of original notional on that confirmed failed
+condition. This is risk reduction, not profitable taking. The untouched50%
+continues the native15/K1-stop/deadline path; after any partial there is no
+further fast fill. An unknown remainder keeps the whole trade return unknown.
+Only actual risk-reduced paths use Decimal quote returns for both legs before
+original-notional weighting. Thus two exact20bp fills minus20bp remain zero;
+all default and non-reduced paths retain their historical float accounting.
 """
 from __future__ import annotations
 
@@ -161,6 +169,14 @@ def _policy(policy: Mapping[str, Any]) -> Dict[str, Any]:
                 or failed_confirmations not in (1, 2)
                 or (failed_confirmations == 2 and not selected.get("fast_failed_launch_exit", False))):
             raise ValueError("fast_failed_launch_confirmations must be integer1 or2;2 requires fast_failed_launch_exit=True")
+    if "fast_failed_launch_fraction" in selected:
+        failed_fraction = selected["fast_failed_launch_fraction"]
+        if (isinstance(failed_fraction, (bool, np.bool_))
+                or not isinstance(failed_fraction, (int, float, np.integer, np.floating))
+                or not np.isfinite(failed_fraction) or failed_fraction not in (0.5, 1)
+                or (failed_fraction == 0.5 and (not selected.get("fast_failed_launch_exit", False)
+                    or selected.get("fast_failed_launch_confirmations", 1) != 2))):
+            raise ValueError("fast_failed_launch_fraction requires numeric0.5 or1;0.5 needs fast_failed_launch_exit=True and confirmations2")
     # An explicit integer-minute horizon wins over inherited max_hours. Using
     # fractional hours can truncate an exact 5m duration by 1ns in pandas 2.3.3.
     # Without max_minutes the historical max_hours validation is unchanged.
@@ -309,6 +325,18 @@ def _failed_confirm_diagnostics() -> Dict[str, Any]:
         "failed_confirm_open_price": np.nan, "failed_confirm_gross_return": np.nan,
         "failed_confirm_slow_open_time": pd.NaT, "failed_confirm_slow_available_at": pd.NaT,
         "failed_confirm_slow_side": np.nan, "failed_confirm_slow_state": "unknown",
+    }
+
+
+def _failed_reduce_diagnostics() -> Dict[str, Any]:
+    """Risk-reduction fills are distinct from profitable fast fills/full exits."""
+    return {
+        "failed_reduce_enabled": True, "failed_reduce_target_fraction": 0.5,
+        "failed_reduce_role": "risk_reduction", "failed_reduce_fill_count": 0,
+        "failed_reduce_status": "entry_not_validated", "failed_reduce_fraction": 0.0,
+        "failed_reduce_fill_time": pd.NaT, "failed_reduce_fill_price": np.nan,
+        "failed_reduce_full_notional_gross_return": np.nan,
+        "failed_reduce_realised_gross_return": 0.0, "failed_reduce_realised_net_return": 0.0,
     }
 
 
@@ -544,6 +572,7 @@ def simulate_events(
     fast_partial_enabled = "fast_partial_fraction" in selected
     failed_launch_enabled = bool(selected.get("fast_failed_launch_exit", False))
     failed_confirm_enabled = selected.get("fast_failed_launch_confirmations", 1) == 2
+    failed_reduce_enabled = selected.get("fast_failed_launch_fraction", 1) == 0.5
     if fast_partial_enabled:
         if fast_management_featured is None:
             raise ValueError("fast_partial_fraction requires fast_management_featured")
@@ -568,6 +597,8 @@ def simulate_events(
             empty_columns += [name for name in _failed_launch_diagnostics() if name not in empty_columns]
         if failed_confirm_enabled:
             empty_columns += [name for name in _failed_confirm_diagnostics() if name not in empty_columns]
+        if failed_reduce_enabled:
+            empty_columns += [name for name in _failed_reduce_diagnostics() if name not in empty_columns]
         return pd.DataFrame(columns=empty_columns)
 
     times = raw["open_time"].to_numpy()
@@ -629,6 +660,8 @@ def simulate_events(
             result.update(_failed_launch_diagnostics())
         if failed_confirm_enabled:
             result.update(_failed_confirm_diagnostics())
+        if failed_reduce_enabled:
+            result.update(_failed_reduce_diagnostics())
         index = time_index.get(entry_time)
         if index is None or (cutoff is not None and entry_time >= cutoff):
             outputs.append(result)
@@ -656,6 +689,8 @@ def simulate_events(
             result["failed_launch_status"] = "watching"
         if failed_confirm_enabled:
             result["failed_confirm_status"] = "watching"
+        if failed_reduce_enabled:
+            result["failed_reduce_status"] = "watching"
         if launch_enabled:
             result["launch_status"] = "pending"
         if frozen_ma_enabled:
@@ -728,6 +763,8 @@ def simulate_events(
         def finish(time: pd.Timestamp, price: float, outcome: str, closed: bool) -> None:
             nonlocal failed_pending
             gross = (_failed_launch_gross(price, entry, direction) if outcome == "fast_failed_launch"
+                     else realised + remaining*_failed_launch_gross(price, entry, direction)
+                     if failed_reduce_enabled and result["failed_reduce_fill_count"] == 1
                      else realised + remaining * direction * (price / entry - 1.0))
             result.update(
                 exit_time=time, exit_price=price, outcome=outcome, closed=closed,
@@ -765,6 +802,14 @@ def simulate_events(
                 result["failed_confirm_events"] = json.dumps(failed_confirm_events, sort_keys=True, allow_nan=False)
                 result["failed_confirm_status"] = ("confirmed_closed" if outcome == "fast_failed_launch"
                                                    else "prior_exit" if closed else "unknown_source")
+            if failed_reduce_enabled:
+                reduced = result["failed_reduce_fill_count"] == 1
+                result["failed_reduce_status"] = (("risk_reduced_closed" if closed else "risk_reduced_censored") if reduced
+                                                   else "not_reduced_exit" if closed else "unknown_source")
+                if reduced:
+                    result["partial_fast_status"] = "risk_reduced_closed" if closed else "risk_reduced_censored"
+                    result["failed_confirm_status"] = "confirmed_reduced_closed" if closed else "confirmed_reduced_censored"
+                    result["failed_launch_status"] = "risk_reduced_closed" if closed else "risk_reduced_censored"
 
         def log_failed_confirm(action: str, reason: str, observed_at: pd.Timestamp,
                                observation: Optional[dict] = None, terminal: Optional[dict] = None) -> None:
@@ -966,7 +1011,7 @@ def simulate_events(
                         # V17 trigger scalars still denote the original real
                         # aligned->opposite edge, not this opposite->opposite
                         # observation. The new fields identify the actual fill.
-                        result.update(failed_launch_count=1,
+                        result.update(failed_launch_count=0 if failed_reduce_enabled else 1,
                             failed_launch_trigger_previous_open_time=pd.Timestamp(edge["previous_fast"]["open_time"]),
                             failed_launch_trigger_previous_available_at=pd.Timestamp(edge["previous_fast"]["open_time"])+FIVE_MINUTES,
                             failed_launch_trigger_open_time=pd.Timestamp(edge["current_fast"]["open_time"]),
@@ -984,14 +1029,30 @@ def simulate_events(
                             failed_confirm_open_price=open_, failed_confirm_gross_return=observation["gross_return"],
                             failed_confirm_slow_open_time=slow_bar.open_time, failed_confirm_slow_available_at=slow_available,
                             failed_confirm_slow_side=slow_side, failed_confirm_slow_state=slow_state)
+                        if failed_reduce_enabled:
+                            observation.update(fill_action="risk_reduce", fill_fraction=0.5,
+                                               fill_price=float(open_), fill_available_at=now.isoformat())
                         log_failed_confirm("confirmed", "consecutive_opposite_failed_profit", now, observation)
                         failed_pending = None
-                        finish(now, open_, "fast_failed_launch", True)
-                        completed = True
-                        break
-                    log_failed_confirm("cancelled", cancellation, now, observation)
-                    result["failed_confirm_cancel_count"] += 1
-                    failed_pending = None
+                        if failed_reduce_enabled:
+                            # The opening risk reduction has already happened;
+                            # current HLC may later stop/censor only the remainder.
+                            realised = 0.5*observation["gross_return"]
+                            remaining = 0.5
+                            result.update(partial_fraction=0.5, partial_exit_time=now, partial_exit_price=open_,
+                                failed_reduce_fill_count=1, failed_reduce_fraction=0.5,
+                                failed_reduce_fill_time=now, failed_reduce_fill_price=open_,
+                                failed_reduce_full_notional_gross_return=observation["gross_return"],
+                                failed_reduce_realised_gross_return=realised,
+                                failed_reduce_realised_net_return=realised-0.5*cost)
+                        else:
+                            finish(now, open_, "fast_failed_launch", True)
+                            completed = True
+                            break
+                    else:
+                        log_failed_confirm("cancelled", cancellation, now, observation)
+                        result["failed_confirm_cancel_count"] += 1
+                        failed_pending = None
                 if fast_side is None or not fast_consecutive:
                     if fast_side is not None and fast_previous_bar is not None:
                         fast_reason = "management_sequence_change"

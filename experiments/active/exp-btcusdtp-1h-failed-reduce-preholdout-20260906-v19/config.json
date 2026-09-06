@@ -1,0 +1,144 @@
+{
+  "base_config": "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json",
+  "base_config_sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a",
+  "entry_context_inputs": {
+    "direct_k1_stop_case_context.csv.gz": "bf3cb2796c5ede1cb731fee75833d292184f7a9ce6d69b37663dc519462bb4d7",
+    "direct_k1_stop_control_context.csv.gz": "a239256f8139e262e4f3b5a573a9d5879cde16717c1e17bc459df860ca28b1bc"
+  },
+  "entry_context_results": "experiments/active/exp-btcusdtp-1h-colour-transition-preholdout-20260906-v5/results",
+  "experiment_id": "exp-btcusdtp-1h-failed-reduce-preholdout-20260906-v19",
+  "failed_reduce_contract": {
+    "baseline_confirmed_fraction": 1.0,
+    "before_partial_only": true,
+    "cancelled_edge_consumed": true,
+    "candidate_confirmed_fraction": 0.5,
+    "confirmation_count": 2,
+    "confirmation_is_not_a_flip": true,
+    "confirmed_action_open_gross_not_above": 0.002,
+    "confirmed_fill_equals_baseline_full_clock": true,
+    "context_freeze_before_outcomes": true,
+    "cost_stress_changes_trigger": false,
+    "decimal_quote_accounting_only_on_new_reduced_paths": true,
+    "entry_gates": false,
+    "fast_minutes": 5,
+    "first_trigger_fields_preserved": true,
+    "first_true_fast_edge_only": true,
+    "fresh_alignment_then_edge_required_to_rearm": true,
+    "future_mfe_never_a_fill": true,
+    "incomplete_trade_remains_unknown": true,
+    "latest_completed_slow_rechecked_at_confirmation": true,
+    "ma_kind": "SMA",
+    "ma_length": 40,
+    "maximum_combined_fast_fills": 1,
+    "next_adjacent_confirmation_only": true,
+    "original_notional_fraction": true,
+    "pre2023_feature_warmup_included": true,
+    "price_prefix_before": "2025-01-01T00:00:00Z",
+    "priority": [
+      "gap_invalid_open",
+      "gap_stop",
+      "slow_full_exit",
+      "deadline",
+      "pending_confirmation_or_fast_edge_at_open",
+      "current_intrabar_stop"
+    ],
+    "profitable_partial_fraction": 0.5,
+    "profitable_real_edge_not_delayed": true,
+    "profitable_true_edge_unchanged": true,
+    "raw_stop_minutes": 5,
+    "realised_partial_does_not_uncensor_remainder": true,
+    "recovered_confirm_profit_cancels_only": true,
+    "reduction_is_not_tp": true,
+    "remainder_uses_original_slow_stop_deadline": true,
+    "same_valid_source_segments": true,
+    "serial_recomputed_for_each_arm": true,
+    "slow_minutes": 15
+  },
+  "holdout_consumed": false,
+  "inference": {
+    "draws": 9999,
+    "joint_required": [
+      "case_delta",
+      "excess_delta"
+    ],
+    "method": "month_cluster",
+    "p_limit": 0.01,
+    "seed": 20260906
+  },
+  "inputs": {
+    "case_episodes.csv.gz": "f1d6d8c29af2c78f4fe0a3c79560b1ac9e21062202d3ac1b462b640463ad8e02",
+    "case_trades.csv.gz": "f8b5009e58b5f098004c7ea5c3e8a65cfe5be135459f3f0b55f3fae83f903b9e",
+    "control_episodes.csv.gz": "cdc677b08fab6185d2be363e871fe2f7cce0f5d72cdec52196e7c61ff52282e0",
+    "control_trades.csv.gz": "8d279aa8ffb21a3de01f090845fc9624732fb8a2158f69cb65237178e3f46af5",
+    "matched.csv": "3604757c56daee054c3caed6fe9dbf28018c72a73c0faf151de3c97c76b60a8b",
+    "single_pending.csv.gz": "c72d429fbd2193fa107d4335be835c37909596aedbc0184c50acababe23cd1ab",
+    "summary.json": "a1506379446a1f8bfbb3ed4017f2ad5d85a55100b6a1f67647546cb9e1b15226"
+  },
+  "known_support": {
+    "cases": 251,
+    "controls": 462,
+    "coverage_gate_unattainable": true,
+    "matched": 154
+  },
+  "mother_inputs": {
+    "assignment_receipt.json": "1d77ca407712520e645463d30f97d26d452ccce45e87e68c2adcbc4120c43220",
+    "assignments.csv": "671782877ee67824f7687243d5e7deae29d78a0bcba6245319ecf55629027b0f",
+    "control_mothers.csv.gz": "01050c7a9602f469406df515edcc73ef2f4c9db2d46529e25030934012eebd5a",
+    "original_mothers.csv.gz": "b3f442ad8b0959b19cb5ae58fd40bc6a3bf40b455b4be31f3758d53940eea3e6"
+  },
+  "mother_results": "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results",
+  "no_audit_entry_point": true,
+  "parent_results": "experiments/active/exp-btcusdtp-1h-failed-confirm-preholdout-20260906-v18/results/candidate",
+  "policies": [
+    {
+      "confirmations": 1,
+      "exit_mode": "transition_colour",
+      "fast_failed_launch_confirmations": 2,
+      "fast_failed_launch_exit": true,
+      "fast_partial_fraction": 0.5,
+      "id": "15m_native40_failed_confirm2",
+      "ma_kind": "SMA",
+      "ma_length": 40,
+      "management_minutes": 15
+    },
+    {
+      "confirmations": 1,
+      "exit_mode": "transition_colour",
+      "fast_failed_launch_confirmations": 2,
+      "fast_failed_launch_exit": true,
+      "fast_failed_launch_fraction": 0.5,
+      "fast_partial_fraction": 0.5,
+      "id": "15m_native40_failed_reduce_half",
+      "ma_kind": "SMA",
+      "ma_length": 40,
+      "management_minutes": 15
+    }
+  ],
+  "production_eligible": false,
+  "scope_stop_rule": "If net remains nonpositive or joint D/I evidence fails, end pure exit microtuning on this cohort; audit entry edge before another such variant.",
+  "selection": {
+    "matched_coverage": 0.9,
+    "minimum_active_months": 12,
+    "minimum_events": 80,
+    "minimum_months_per_fold": 3,
+    "minimum_per_fold": 12,
+    "minimum_profit_factor": 1.1,
+    "positive_folds": 4
+  },
+  "structure_columns": [
+    "event_id",
+    "exit_time",
+    "exit_price",
+    "outcome",
+    "closed",
+    "hold_minutes",
+    "max_favourable_r",
+    "max_adverse_r"
+  ],
+  "structure_inputs": {
+    "case_trades.csv.gz": "9a43891b81bf50c281db3a26d1e53188f6b7876c746b75509ae78a570826bc47",
+    "control_trades.csv.gz": "6fc2975228852fe8afbbd62148cec64354f0cfd025c29d7cc49be0ef7e842c91"
+  },
+  "structure_reference": "experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/results/candidate",
+  "training_eligible": false
+}

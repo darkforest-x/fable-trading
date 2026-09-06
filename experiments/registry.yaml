@@ -14,6 +14,31 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btcusdtp-1h-failed-reduce-preholdout-20260906-v19
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a0c2433"
+    status: active
+    question: >-
+      Does reducing50percent instead of closing100percent at the existing
+      confirmed losing fast exit preserve profitable slow-trend remainders?
+    single_variable: >-
+      Confirmed failure execution fraction1.0to0.5;original251K1/462controls,
+      two5minute confirmation,15minute slow exit,K1stop,72h and20bp unchanged.
+    result: >-
+      Prepared before ChartPrime audit,now resumed without V20--V22 entry
+      filters. Preregistered before raw replay;713fast1426slow contexts freeze
+      before V18 anchors. Two case serial masks,154triples97unmatched retained.
+    canonical_report: experiments/active/exp-btcusdtp-1h-failed-reduce-preholdout-20260906-v19/PROJECT_PLAN.md
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    notes: >-
+      Risk reduction is not TP;unknown remainder keeps whole trade unknown.
+      V16 final structural anchor only,no averaging old full trade PnL.
+      Stop pure exit microtuning if net nonpositive or joint D/I evidence fails.
+      Reused2023--2024 development,not new OOS;matching90percent not lowered.
+
   - experiment_id: exp-btcusdtp-1h-external-change-preholdout-20260907-v22
     source_repo: darkforest-x/fable-trading
     source_commit: "f5a0e50"
