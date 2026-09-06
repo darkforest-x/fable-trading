@@ -5305,6 +5305,21 @@ experiments:
       cannot pass90%/80 gates. Finite mechanism test, not a candidate nomination.
       All89 old control requests retained, including old invalid risks. No audit.
 
+  - experiment_id: exp-btcusdtp-1h-failed-confirm-preholdout-20260906-v18
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: planned
+    question: Does adjacent two-bar confirmation reduce V17 sacrificed recoveries without worsening full-population economics?
+    single_variable: fast_failed_launch_confirmations=2; profitable real-edge half and slow15 remainder unchanged.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    path: experiments/active/exp-btcusdtp-1h-failed-confirm-preholdout-20260906-v18
+    canonical_report: analysis/html/p1_btcusdtp_hourly_failed_confirm_v18_20260906.html
+    artifacts: []
+    reuse_allowed: false
+    notes: Full251 and462 own controls;154 fixed triples and97 unknown. Reused pre2025 prefix includes earlier warmup. No independent-validation claim.
+
   - experiment_id: exp-btcusdtp-1h-failed-launch-preholdout-20260906-v17
     source_repo: darkforest-x/fable-trading
     source_commit: "10af2c7"

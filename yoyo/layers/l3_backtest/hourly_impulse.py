@@ -45,6 +45,13 @@ V17 optionally closes the entire still-unrealised position on that same known
 fast edge/slow-aligned event when the current open fails the frozen20bp test.
 Equality belongs to this failed-launch branch. Neither its decision nor its
 fill inspects current raw5 high, low or close; no future failure label is used.
+
+V18 optionally waits for exactly the next completed native5 opposite bar after
+that failed-launch edge. The same management segment, latest completed native15
+alignment and new executable OPEN must reconfirm failure. Any rejection consumes
+the pending edge; it cannot create a partial fill without a fresh true edge.
+Only this opt-in adds pending lifecycle diagnostics. Default/explicit-one
+confirmation retains every V17 field and execution rule unchanged.
 """
 from __future__ import annotations
 
@@ -147,6 +154,13 @@ def _policy(policy: Mapping[str, Any]) -> Dict[str, Any]:
         if (not isinstance(selected["fast_failed_launch_exit"], (bool, np.bool_))
                 or "fast_partial_fraction" not in selected):
             raise ValueError("fast_failed_launch_exit requires a boolean with the native15 fast_partial_fraction policy")
+    if "fast_failed_launch_confirmations" in selected:
+        failed_confirmations = selected["fast_failed_launch_confirmations"]
+        if (isinstance(failed_confirmations, (bool, np.bool_))
+                or not isinstance(failed_confirmations, (int, np.integer))
+                or failed_confirmations not in (1, 2)
+                or (failed_confirmations == 2 and not selected.get("fast_failed_launch_exit", False))):
+            raise ValueError("fast_failed_launch_confirmations must be integer1 or2;2 requires fast_failed_launch_exit=True")
     # An explicit integer-minute horizon wins over inherited max_hours. Using
     # fractional hours can truncate an exact 5m duration by 1ns in pandas 2.3.3.
     # Without max_minutes the historical max_hours validation is unchanged.
@@ -275,6 +289,27 @@ def _failed_launch_gross(price: float, entry: float, direction: float) -> float:
     with localcontext() as context:
         context.prec = 40
         return float(Decimal(str(direction))*(Decimal(str(price))-Decimal(str(entry)))/Decimal(str(entry)))
+
+
+def _failed_confirm_diagnostics() -> Dict[str, Any]:
+    """V18-only lifecycle; trigger scalars in failed_launch retain the real edge.
+
+    Confirmation scalars below describe the second opposite observation/fill,
+    not a second aligned-to-opposite edge. JSON lifecycle events retain every
+    created edge, including cancellations and higher-priority terminations.
+    """
+    return {
+        "failed_confirm_enabled": True, "failed_confirm_required": 2,
+        "failed_confirm_create_count": 0, "failed_confirm_confirm_count": 0,
+        "failed_confirm_cancel_count": 0, "failed_confirm_priority_termination_count": 0,
+        "failed_confirm_status": "entry_not_validated", "failed_confirm_last_reason": "",
+        "failed_confirm_events": "[]", "failed_confirm_created_at": pd.NaT,
+        "failed_confirm_due_at": pd.NaT, "failed_confirm_previous_open_time": pd.NaT,
+        "failed_confirm_open_time": pd.NaT, "failed_confirm_available_at": pd.NaT,
+        "failed_confirm_open_price": np.nan, "failed_confirm_gross_return": np.nan,
+        "failed_confirm_slow_open_time": pd.NaT, "failed_confirm_slow_available_at": pd.NaT,
+        "failed_confirm_slow_side": np.nan, "failed_confirm_slow_state": "unknown",
+    }
 
 
 def _native40_frame(frame: pd.DataFrame, minutes: int, name: str) -> None:
@@ -508,6 +543,7 @@ def simulate_events(
     frozen_ma_enabled = "frozen_ma_exit" in selected
     fast_partial_enabled = "fast_partial_fraction" in selected
     failed_launch_enabled = bool(selected.get("fast_failed_launch_exit", False))
+    failed_confirm_enabled = selected.get("fast_failed_launch_confirmations", 1) == 2
     if fast_partial_enabled:
         if fast_management_featured is None:
             raise ValueError("fast_partial_fraction requires fast_management_featured")
@@ -530,6 +566,8 @@ def simulate_events(
             empty_columns += [name for name in _fast_partial_diagnostics() if name not in empty_columns]
         if failed_launch_enabled:
             empty_columns += [name for name in _failed_launch_diagnostics() if name not in empty_columns]
+        if failed_confirm_enabled:
+            empty_columns += [name for name in _failed_confirm_diagnostics() if name not in empty_columns]
         return pd.DataFrame(columns=empty_columns)
 
     times = raw["open_time"].to_numpy()
@@ -589,6 +627,8 @@ def simulate_events(
             result.update(_fast_partial_diagnostics())
         if failed_launch_enabled:
             result.update(_failed_launch_diagnostics())
+        if failed_confirm_enabled:
+            result.update(_failed_confirm_diagnostics())
         index = time_index.get(entry_time)
         if index is None or (cutoff is not None and entry_time >= cutoff):
             outputs.append(result)
@@ -614,6 +654,8 @@ def simulate_events(
         result["risk_atr"] = risk / atr
         if failed_launch_enabled:
             result["failed_launch_status"] = "watching"
+        if failed_confirm_enabled:
+            result["failed_confirm_status"] = "watching"
         if launch_enabled:
             result["launch_status"] = "pending"
         if frozen_ma_enabled:
@@ -633,6 +675,7 @@ def simulate_events(
         transition_previous_sample_at = None
         transition_seed_pending = False
         fast_previous_side, fast_previous_bar, fast_events = None, None, []
+        failed_pending, failed_confirm_events = None, []
         if mode == "transition_colour":
             initial_available_at = entry_time if interval == FIVE_MINUTES else entry_time.floor("15min")
             initial_management = management_at.get(initial_available_at)
@@ -683,6 +726,7 @@ def simulate_events(
                 result["bars_to_first_positive"] = bars
 
         def finish(time: pd.Timestamp, price: float, outcome: str, closed: bool) -> None:
+            nonlocal failed_pending
             gross = (_failed_launch_gross(price, entry, direction) if outcome == "fast_failed_launch"
                      else realised + remaining * direction * (price / entry - 1.0))
             result.update(
@@ -709,6 +753,29 @@ def simulate_events(
                                                   else "prior_exit" if closed else "unknown_source")
                 if outcome == "fast_failed_launch":
                     result["partial_fast_status"] = "failed_launch_closed"
+            if failed_confirm_enabled:
+                if failed_pending is not None:
+                    # No lower-priority management or current-HLC inspection
+                    # is added to justify a terminal fill/source censor.
+                    log_failed_confirm("terminated", outcome, max(time, now), terminal={
+                        "outcome": outcome, "closed": closed,
+                        "exit_time": time.isoformat(), "exit_price": float(price)})
+                    result["failed_confirm_priority_termination_count"] += 1
+                    failed_pending = None
+                result["failed_confirm_events"] = json.dumps(failed_confirm_events, sort_keys=True, allow_nan=False)
+                result["failed_confirm_status"] = ("confirmed_closed" if outcome == "fast_failed_launch"
+                                                   else "prior_exit" if closed else "unknown_source")
+
+        def log_failed_confirm(action: str, reason: str, observed_at: pd.Timestamp,
+                               observation: Optional[dict] = None, terminal: Optional[dict] = None) -> None:
+            failed_confirm_events.append({
+                "pending_id": failed_pending["id"], "action": action, "reason": reason,
+                "created_at": failed_pending["created_at"].isoformat(),
+                "due_at": failed_pending["due_at"].isoformat(),
+                "observed_at": observed_at.isoformat(), "edge": failed_pending["edge"],
+                "observation": observation, "terminal": terminal,
+            })
+            result["failed_confirm_last_reason"] = reason
 
         for i in range(index, len(raw)):
             now = pd.Timestamp(times[i])
@@ -862,6 +929,69 @@ def simulate_events(
                 fast_consecutive = (fast_previous_bar is not None and fast_bar is not None
                     and fast_bar.open_time == fast_previous_bar.open_time + FIVE_MINUTES
                     and fast_bar.segment_id == fast_previous_bar.segment_id)
+                if failed_pending is not None:
+                    # Only the immediately next completed native5 bar can
+                    # confirm. Its OPEN is known; its HLC is still future.
+                    slow_available = now.floor("15min")
+                    slow_bar = management_at.get(slow_available)
+                    slow_side, slow_reason = _transition_observation(slow_bar, slow_available, time_index, prices, segments,
+                        interval, source_through=now)
+                    slow_state = "unknown" if slow_side is None else "aligned" if direction*slow_side > 0 else "opposite"
+                    qualifies = _fast_partial_profit(open_, entry, direction)
+                    observation = {
+                        "available_at": now.isoformat(), "open_price": float(open_),
+                        "gross_return": _failed_launch_gross(open_, entry, direction),
+                        "profit_qualified": qualifies,
+                        "previous_fast": _partial_source(fast_previous_bar, fast_previous_side, time_index, segments),
+                        "current_fast": _partial_source(fast_bar, fast_side, time_index, segments),
+                        "fast_reason": fast_reason,
+                        "fast_consecutive": False if pd.isna(fast_consecutive) else bool(fast_consecutive),
+                        "slow": _partial_source(slow_bar, slow_side, time_index, segments),
+                        "slow_available_at": slow_available.isoformat(), "slow_state": slow_state, "slow_reason": slow_reason,
+                    }
+                    pending_bar = failed_pending["bar"]
+                    same_pending_sequence = (fast_bar is not None
+                        and fast_bar.open_time == pending_bar.open_time+FIVE_MINUTES
+                        and fast_bar.segment_id == pending_bar.segment_id)
+                    cancellation = ("confirmation_clock_mismatch" if now != failed_pending["due_at"]
+                        else fast_reason if fast_side is None
+                        else "management_sequence_change" if not fast_consecutive or not same_pending_sequence
+                        else "fast_not_opposite" if direction*fast_side >= 0
+                        else "already_partial" if remaining < 1
+                        else "slow_unknown" if slow_side is None
+                        else "slow_not_aligned" if slow_state != "aligned"
+                        else "profit_recovered" if qualifies else None)
+                    if cancellation is None:
+                        edge = failed_pending["edge"]
+                        # V17 trigger scalars still denote the original real
+                        # aligned->opposite edge, not this opposite->opposite
+                        # observation. The new fields identify the actual fill.
+                        result.update(failed_launch_count=1,
+                            failed_launch_trigger_previous_open_time=pd.Timestamp(edge["previous_fast"]["open_time"]),
+                            failed_launch_trigger_previous_available_at=pd.Timestamp(edge["previous_fast"]["open_time"])+FIVE_MINUTES,
+                            failed_launch_trigger_open_time=pd.Timestamp(edge["current_fast"]["open_time"]),
+                            failed_launch_trigger_available_at=pd.Timestamp(edge["available_at"]),
+                            failed_launch_trigger_previous_side=edge["previous_fast"]["side"],
+                            failed_launch_trigger_side=edge["current_fast"]["side"],
+                            failed_launch_trigger_open_price=edge["open_price"],
+                            failed_launch_trigger_gross_return=edge["gross_return"],
+                            failed_launch_slow_open_time=pd.Timestamp(edge["slow"]["open_time"]),
+                            failed_launch_slow_available_at=pd.Timestamp(edge["slow_available_at"]),
+                            failed_launch_slow_side=edge["slow"]["side"], failed_launch_slow_state=edge["slow_state"],
+                            failed_confirm_confirm_count=1,
+                            failed_confirm_previous_open_time=pending_bar.open_time,
+                            failed_confirm_open_time=fast_bar.open_time, failed_confirm_available_at=now,
+                            failed_confirm_open_price=open_, failed_confirm_gross_return=observation["gross_return"],
+                            failed_confirm_slow_open_time=slow_bar.open_time, failed_confirm_slow_available_at=slow_available,
+                            failed_confirm_slow_side=slow_side, failed_confirm_slow_state=slow_state)
+                        log_failed_confirm("confirmed", "consecutive_opposite_failed_profit", now, observation)
+                        failed_pending = None
+                        finish(now, open_, "fast_failed_launch", True)
+                        completed = True
+                        break
+                    log_failed_confirm("cancelled", cancellation, now, observation)
+                    result["failed_confirm_cancel_count"] += 1
+                    failed_pending = None
                 if fast_side is None or not fast_consecutive:
                     if fast_side is not None and fast_previous_bar is not None:
                         fast_reason = "management_sequence_change"
@@ -880,8 +1010,8 @@ def simulate_events(
                         action = ("already_partial" if remaining < 1 else "slow_unknown" if slow_side is None
                             else "slow_not_aligned" if slow_state != "aligned" else "insufficient_profit" if not qualifies else "executed")
                         if failed_launch_enabled and action == "insufficient_profit":
-                            action = "failed_launch_exit"
-                        event_gross = (_failed_launch_gross(open_, entry, direction) if action == "failed_launch_exit"
+                            action = "failed_launch_pending" if failed_confirm_enabled else "failed_launch_exit"
+                        event_gross = (_failed_launch_gross(open_, entry, direction) if action in {"failed_launch_exit", "failed_launch_pending"}
                                        else float(direction*(open_/entry-1.0)))
                         fast_events.append({"available_at":now.isoformat(),"open_price":float(open_),
                             "gross_return":event_gross,"profit_threshold":0.002,
@@ -891,7 +1021,14 @@ def simulate_events(
                             "slow":_partial_source(slow_bar,slow_side,time_index,segments),
                             "slow_available_at":slow_available.isoformat(),"slow_state":slow_state,"slow_reason":slow_reason})
                         result["partial_fast_flip_count"] += 1
-                        if action == "failed_launch_exit":
+                        if action == "failed_launch_pending":
+                            result["failed_confirm_create_count"] += 1
+                            failed_pending = {"id": result["failed_confirm_create_count"],
+                                "bar": fast_bar, "edge": fast_events[-1],
+                                "created_at": now, "due_at": now+FIVE_MINUTES}
+                            result.update(failed_confirm_created_at=now, failed_confirm_due_at=now+FIVE_MINUTES)
+                            log_failed_confirm("created", "failed_profit_edge", now)
+                        elif action == "failed_launch_exit":
                             result.update(failed_launch_count=1,
                                 failed_launch_trigger_previous_open_time=fast_previous_bar.open_time,
                                 failed_launch_trigger_previous_available_at=fast_previous_bar.open_time+FIVE_MINUTES,

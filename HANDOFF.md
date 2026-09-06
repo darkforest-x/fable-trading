@@ -2,7 +2,21 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-09-06 — BTC V17 快反转全平错杀恢复趋势，已拒绝）
+## ⚡ 当前真相（2026-09-06 — BTC V18 相邻两根确认实现完成，待冻结后回放）
+
+盈利goal仍active/未达成。本轮仅将V17亏损fast full改为下一根完整native5
+反色确认，盈利真edge50%和slow15余仓/K1stop/20bp/72h全部不变。新pending
+独立日志，确认不是新flip；第二open若恢复盈利只取消、不得无edge半仓。
+全251/462/154triples/97unknown保留；旧nonfull全字段parity、首pending等于
+旧full时钟；已知新退出至少晚5min，未知可同刻。新实验目录v18已登记planned，
+config/PROJECT_PLAN/ARTIFACT_PLAN冻结，尚未读取本轮raw价格/计算收益。
+engine117synthetic、L3总1059通过；root runner43通过，diagnostics25过2可选
+utility集成skip。扩展3754通过2既有L1migration hash失败，未改L1或ledger。
+下一步：预审通过后先提交builder/config/plan/tests，再唯一回放pre2025价格
+前缀（含pre2023warmup），OFF先锚V17六表，候选全体回放/逐臂单仓重算。
+报告/独立saved verifier/notebook正并行开发；无holdout/TV/训练/实盘修改。
+
+### 第十七轮背景（已完成并拒绝，以下为当时记录）
 
 盈利goal仍active/未达成、不是blocked。V17 e5139c5先提交engine/config/plan/tests；
 attempt1 OFF case表被CSV两source ID类型parity拦住，ON未跑，9文件原样保存attempts。
