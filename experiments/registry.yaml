@@ -5212,8 +5212,8 @@ experiments:
 
   - experiment_id: exp-btcusdtp-1h-first-k2-preholdout-20260906-v4
     source_repo: darkforest-x/fable-trading
-    source_commit: "ab78c5c"
-    status: active
+    source_commit: "a169fa6"
+    status: rejected
     question: >-
       Does waiting for the first source-valid hourly K2 improve original K1
       mother-intention returns, and does changing only its stop source help?
@@ -5222,10 +5222,19 @@ experiments:
       with K2 stop. Original mother requests and random mother assignments
       remain fixed before waiting and outcomes. Same 5m exit, 20bp and deadline.
     result: >-
-      Preregistered development-only comparison; no V4 outcomes evaluated yet.
+      All three arms rejected. Original251 mothers: direct251 trades -14.02bp;
+      firstK2 with K1stop55 trades -22.92bp, K2stop55 trades -22.16bp. Waiting
+      improves the same55 mothers versus their direct -43.15bp but misses55
+      of62 original winners. Matched coverage154/251=61.35%. No audit.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.html
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
+    artifacts:
+      - btcusdtp-hourly-first-k2-v4-development
+      - btcusdtp-hourly-first-k2-v4-verification
+      - btcusdtp-hourly-impulse-v1-report
+      - btcusdtp-hourly-impulse-v1-html
     reuse_allowed: false
     notes: >-
       Reused 2023-2024 development, not independent confirmation. Gap1-8 is

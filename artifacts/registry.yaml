@@ -14710,18 +14710,18 @@ artifacts:
     artifact_type: report
     role: canonical_chinese_negative_result_and_trade_postmortem_report
     source_repo: darkforest-x/fable-trading
-    source_commit: "3ab1c71"
+    source_commit: "a169fa6"
     source_path: analysis/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.md
-    sha256: "023697ec2f6a0b7bed9bf2fd1e2c870dd6c332f138226f71257e07c28c3c3efe"
-    size_bytes: 28518
+    sha256: "3bce29766c6d03d967ad0e1f366f3c98f86b0b6cb8c52af48931d0e6f74008fb"
+    size_bytes: 36982
     storage_uri: "repo://analysis/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.md"
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
-    generator_commit: "3ab1c71"
+    generator_commit: "a169fa6"
     config_hash: "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
     data_cutoff: "2026-02-28T16:00:00Z"
-    notes: "Three rejected experiments; includes gross/net costs, prior-context controls, retained/removed signals, individual losses and post-entry selection caveat."
+    notes: "Four rejected experiments; includes original-mother versus actual-trade denominators, same-mother timing decomposition, missed winners, causal controls and fast-exit caveat."
 
   - artifact_id: btcusdtp-hourly-impulse-v1-html
     artifact_type: report
@@ -14729,8 +14729,8 @@ artifacts:
     source_repo: darkforest-x/fable-trading
     source_commit: "be28e69"
     source_path: analysis/html/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.html
-    sha256: "1960128d27bfe6553a994885f596ff503ab5ad74a4dbebffc9807f778906ffd6"
-    size_bytes: 573256
+    sha256: "dbd008a0d24d26cd411ddf4ec8931d1322f2ae45b5662469a8a93ba5f40134d8"
+    size_bytes: 665106
     storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.html"
     holdout_status: pre_holdout
     training_eligible: false
@@ -14746,8 +14746,8 @@ artifacts:
     source_repo: darkforest-x/fable-trading
     source_commit: "be28e69"
     source_path: analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/artifact.json
-    sha256: "0839f93241b378f97449ab6518b2cebb29bc60e97b2ee7b7c463cfc748fa72a1"
-    size_bytes: 43835
+    sha256: "8442e57303e9aebfd9d98521a88d1a10b4346c8d65f6f998a159aa7cc747eedd"
+    size_bytes: 53864
     storage_uri: "repo://analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/artifact.json"
     holdout_status: pre_holdout
     training_eligible: false
@@ -14755,7 +14755,7 @@ artifacts:
     generator_commit: "be28e69"
     config_hash: "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
     data_cutoff: "2026-02-28T16:00:00Z"
-    notes: "One native chart, eighteen source-backed narrative/chart blocks, actual SQLite presentation query over saved CSV; covers V1-V3."
+    notes: "One native chart, twenty-one narrative/chart blocks, actual SQLite presentation query over saved CSV; full preserved report covers V1-V4."
 
   - artifact_id: btcusdtp-hourly-staged-v2-development
     artifact_type: manifest
@@ -14807,3 +14807,37 @@ artifacts:
     config_hash: "e216cc592ad08af9e0e20ec974442fc24f7ebe3e2565a30849d8437b43396734"
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: "All four arms rejected. Prior4h substitution -16.56bp; nested cap -11.38bp, only 47/91 fully matched. Common support 248/251. No audit or live mutation."
+
+  - artifact_id: btcusdtp-hourly-first-k2-v4-development
+    artifact_type: manifest
+    role: fixed_mother_first_k2_and_stop_source_development_rejection
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a169fa6"
+    source_path: experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/summary.json
+    sha256: "d8a033ef9afc98a0ffebd1b57d4d8788bf594347a3f46209a76579d60e09376a"
+    size_bytes: 37368
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a169fa6"
+    config_hash: "a5ab44feb152afc8a89dd659d7ef4d4af198e9120cb7e012597207df3495c3c7"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Three arms rejected; all251 real mothers retained,55K2trades. Same462controlmothers; matchedcoverage61.35%. No audit, promotion or live change."
+
+  - artifact_id: btcusdtp-hourly-first-k2-v4-verification
+    artifact_type: report
+    role: saved_ledger_parity_and_denominator_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a169fa6"
+    source_path: experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/VERIFICATION.md
+    sha256: "551599b98e2c1a98d933a9adab1a35f4477c48ffa41e158caebc98c41b7bcc3d"
+    size_bytes: 4541
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/VERIFICATION.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "a169fa6"
+    config_hash: "a5ab44feb152afc8a89dd659d7ef4d4af198e9120cb7e012597207df3495c3c7"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Manual post-run saved-ledger audit, not preregistration or an independent price replay. Same55 timing improvement and missed196 decomposition, early-exit caveat."
