@@ -15046,6 +15046,126 @@ artifacts:
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: "Read-only saved-ledger audit,18frozenhashes,1135closures,959source clocks. Not independent raw replay or prospective validation."
 
+
+  - artifact_id: btcusdtp-hourly-support-v10-capacity
+    artifact_type: report
+    role: outcome_free_support_audit_capacity
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b205f04"
+    source_path: experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/summary.json
+    sha256: "6279ce97ac051e168e632291218a697ffc7558db611bcf5e007f23b51bb55440"
+    size_bytes: 69046
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b6e9056"
+    config_hash: "119c3eada5959ecbeed4b2d308bd6d0a6ae5dbfa03c45c39a145ad5321a82bb0"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Frozen graph capacity154/251; strict90% coverage rejected; no profit computation."
+
+  - artifact_id: btcusdtp-hourly-support-v10-graph
+    artifact_type: dataset
+    role: outcome_free_support_audit_graph
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b205f04"
+    source_path: experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/eligible_edges.csv.gz
+    sha256: "9987da0f2da458e0aacdc9a989302dd29abf50a8649a0d5fe0b33fb5398ca362"
+    size_bytes: 35975
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/eligible_edges.csv.gz"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "b6e9056"
+    config_hash: "119c3eada5959ecbeed4b2d308bd6d0a6ae5dbfa03c45c39a145ad5321a82bb0"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "1829 legal edges for all251 maternal IDs retained in mother_audit;1666 unique candidates. Saved graph only."
+
+  - artifact_id: btcusdtp-hourly-support-v10-report
+    artifact_type: report
+    role: outcome_free_support_audit_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b205f04"
+    source_path: analysis/p1_btcusdtp_hourly_support_v10_20260906.md
+    sha256: "9ac34e60f5cb9695383fcb34be33013d89dc7d7700b389b8f8e2cbe3677ba749"
+    size_bytes: 14597
+    storage_uri: "repo://analysis/p1_btcusdtp_hourly_support_v10_20260906.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "279f261"
+    config_hash: "119c3eada5959ecbeed4b2d308bd6d0a6ae5dbfa03c45c39a145ad5321a82bb0"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Authored technical source; all V1-V9 reports preserved; original goal remains unachieved."
+
+  - artifact_id: btcusdtp-hourly-support-v10-html
+    artifact_type: report
+    role: outcome_free_support_audit_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b205f04"
+    source_path: analysis/html/p1_btcusdtp_hourly_support_v10_20260906.html
+    sha256: "9e498cc13d8667ea87be240408fe431b76794a78e4d469b5dd88e655f750bf32"
+    size_bytes: 479620
+    storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_support_v10_20260906.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "279f261"
+    config_hash: "119c3eada5959ecbeed4b2d308bd6d0a6ae5dbfa03c45c39a145ad5321a82bb0"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "17blocks,1native shortage count chart. Official structural_only; browser/mobile interaction not verified."
+
+  - artifact_id: btcusdtp-hourly-support-v10-artifact
+    artifact_type: report
+    role: outcome_free_support_audit_artifact
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b205f04"
+    source_path: experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/artifact.json
+    sha256: "059a5a3e1fc965067e8d933477b875d899547b6014d5419ef2069536e7a8d383"
+    size_bytes: 25994
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/artifact.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "279f261"
+    config_hash: "119c3eada5959ecbeed4b2d308bd6d0a6ae5dbfa03c45c39a145ad5321a82bb0"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Canonical native report; actual SQLite aggregation over validated maternal shortage classifications."
+
+  - artifact_id: btcusdtp-hourly-support-v10-verification
+    artifact_type: report
+    role: outcome_free_support_audit_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b205f04"
+    source_path: experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/VERIFICATION.md
+    sha256: "d0bf7971a885afdabf61e2d057b7b3b97d2b844bd7d36234de4345989f3e7280"
+    size_bytes: 7557
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/VERIFICATION.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2129bca"
+    config_hash: "119c3eada5959ecbeed4b2d308bd6d0a6ae5dbfa03c45c39a145ad5321a82bb0"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Independent saved-graph proof upper154=feasible154;12output and14source hashes;1623tests. No raw replay."
+
+  - artifact_id: btcusdtp-hourly-support-v10-notebook
+    artifact_type: report
+    role: outcome_free_support_audit_notebook
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b205f04"
+    source_path: analysis/output/btcusdtp_hourly_support_v10_20260906/support_audit.ipynb
+    sha256: "11f3fe2a9aca80a311011bedcac00c94340cbf35186124f19128e9093ad4c3b0"
+    size_bytes: 22517
+    storage_uri: "repo://analysis/output/btcusdtp_hourly_support_v10_20260906/support_audit.ipynb"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "1062c79"
+    config_hash: "119c3eada5959ecbeed4b2d308bd6d0a6ae5dbfa03c45c39a145ad5321a82bb0"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "13cells,5codecells plain-Python top-down checked; no Jupyter kernel/full nbformat schema validation."
+
   - artifact_id: btcusdtp-hourly-cadence-v9-development
     artifact_type: report
     role: fixed_feature_decision_cadence_comparison

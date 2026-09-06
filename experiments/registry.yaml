@@ -5321,15 +5321,24 @@ experiments:
       feasible allocation154.97 missing groups=3 missing support+19 exact
       cells+1 fold boundary+71 cross exclusion+3 shared supply conflict.
       Not a profitability test; no new returns calculated.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_support_v10_20260906.html
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts:
+      - btcusdtp-hourly-support-v10-capacity
+      - btcusdtp-hourly-support-v10-graph
+      - btcusdtp-hourly-support-v10-report
+      - btcusdtp-hourly-support-v10-html
+      - btcusdtp-hourly-support-v10-artifact
+      - btcusdtp-hourly-support-v10-verification
+      - btcusdtp-hourly-support-v10-notebook
     reuse_allowed: false
     notes: >-
-      All old mother/control/assignment fields and receipts must match before
-      capacity inference. Persist graph before solver; require optimal integer
-      certificate.226 complete mothers needed. No new returns or2025+prices.
+      b6e9056 committed before first development-prefix rebuild. All old fields
+      and receipts passed; graph checkpoint before solver.1623 tests passed;
+      independent saved-graph bound154 equals feasible154. No new returns or
+      2025+prices. HTML structural_only; notebook plain-Python, not Jupyter.
 
   - experiment_id: exp-btcusdtp-1h-decision-cadence-preholdout-20260906-v9
     source_repo: darkforest-x/fable-trading
