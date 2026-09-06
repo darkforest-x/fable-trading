@@ -5305,6 +5305,26 @@ experiments:
       cannot pass90%/80 gates. Finite mechanism test, not a candidate nomination.
       All89 old control requests retained, including old invalid risks. No audit.
 
+  - experiment_id: exp-btcusdtp-1h-failed-launch-preholdout-20260906-v17
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2b4e6f6"
+    status: planned
+    question: >-
+      Does a before-partial fast true reversal with still-aligned native15
+      improve original251 net and fixed154 controls when nonqualified-profit
+      opens fully exit instead of waiting for slow management?
+    single_variable: >-
+      fast_failed_launch_exit=true complements the unchanged V16 qualified
+      half: actual open gross<=20bp full exits,>20bp half and slow remainder.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    path: experiments/active/exp-btcusdtp-1h-failed-launch-preholdout-20260906-v17
+    notes: >-
+      Freeze before new raw replay. Same251/462/154/97,2023--2024reuse only.
+      Not time-limited and not evidence of never having advanced; retain
+      sacrificed later recoveries. Per-arm serial recomputed, no rematching.
+
   - experiment_id: exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16
     source_repo: darkforest-x/fable-trading
     source_commit: "c75aae5"

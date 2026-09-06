@@ -1,0 +1,106 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-failed-launch-preholdout-20260906-v17",
+  "base_config": "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json",
+  "base_config_sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a",
+  "mother_results": "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results",
+  "mother_inputs": {
+    "original_mothers.csv.gz": "b3f442ad8b0959b19cb5ae58fd40bc6a3bf40b455b4be31f3758d53940eea3e6",
+    "control_mothers.csv.gz": "01050c7a9602f469406df515edcc73ef2f4c9db2d46529e25030934012eebd5a",
+    "assignments.csv": "671782877ee67824f7687243d5e7deae29d78a0bcba6245319ecf55629027b0f",
+    "assignment_receipt.json": "1d77ca407712520e645463d30f97d26d452ccce45e87e68c2adcbc4120c43220"
+  },
+  "parent_results": "experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/results/candidate",
+  "inputs": {
+    "case_episodes.csv.gz": "0528402bb7dad51eb5a0ea8a196863e20f0fc70bc4a57c7adfe79fde1cfdfbe1",
+    "case_trades.csv.gz": "9a43891b81bf50c281db3a26d1e53188f6b7876c746b75509ae78a570826bc47",
+    "control_episodes.csv.gz": "8a995534d98058a2efa241e9ebbd8dbb5169204790bb727ff78765364ea62847",
+    "control_trades.csv.gz": "6fc2975228852fe8afbbd62148cec64354f0cfd025c29d7cc49be0ef7e842c91",
+    "matched.csv": "a0a29d07d4bec5aa75b40d976ad6bbdba2e6810f6cf4d4736896f228b98a54c6",
+    "single_pending.csv.gz": "2cfe1214c565b07b38b4c302224d086bfdb5bb6a9706633f27d6d79d1bfb01b0",
+    "summary.json": "1494ea21905bc84071892940d3de294444c79a5a18fc5f1a9e321375dd9028f0"
+  },
+  "policies": [
+    {
+      "id": "15m_native40_dual_partial",
+      "management_minutes": 15,
+      "ma_kind": "SMA",
+      "ma_length": 40,
+      "exit_mode": "transition_colour",
+      "confirmations": 1,
+      "fast_partial_fraction": 0.5
+    },
+    {
+      "id": "15m_native40_failed_launch",
+      "management_minutes": 15,
+      "ma_kind": "SMA",
+      "ma_length": 40,
+      "exit_mode": "transition_colour",
+      "confirmations": 1,
+      "fast_partial_fraction": 0.5,
+      "fast_failed_launch_exit": true
+    }
+  ],
+  "selection": {
+    "minimum_events": 80,
+    "minimum_per_fold": 12,
+    "positive_folds": 4,
+    "minimum_profit_factor": 1.1,
+    "minimum_active_months": 12,
+    "minimum_months_per_fold": 3,
+    "matched_coverage": 0.9
+  },
+  "inference": {
+    "draws": 9999,
+    "seed": 20260906,
+    "p_limit": 0.01,
+    "joint_required": [
+      "case_delta",
+      "excess_delta"
+    ],
+    "method": "month_cluster"
+  },
+  "known_support": {
+    "cases": 251,
+    "controls": 462,
+    "matched": 154,
+    "coverage_gate_unattainable": true
+  },
+  "no_audit_entry_point": true,
+  "holdout_consumed": false,
+  "production_eligible": false,
+  "training_eligible": false,
+  "entry_context_results": "experiments/active/exp-btcusdtp-1h-colour-transition-preholdout-20260906-v5/results",
+  "entry_context_inputs": {
+    "direct_k1_stop_case_context.csv.gz": "bf3cb2796c5ede1cb731fee75833d292184f7a9ce6d69b37663dc519462bb4d7",
+    "direct_k1_stop_control_context.csv.gz": "a239256f8139e262e4f3b5a573a9d5879cde16717c1e17bc459df860ca28b1bc"
+  },
+  "failed_launch_contract": {
+    "context_freeze_before_outcomes": true,
+    "fast_minutes": 5,
+    "slow_minutes": 15,
+    "raw_stop_minutes": 5,
+    "ma_kind": "SMA",
+    "ma_length": 40,
+    "true_fast_edge_only": true,
+    "slow_must_be_latest_completed_aligned": true,
+    "before_partial_only": true,
+    "full_exit_if_open_gross_not_above": 0.002,
+    "profitable_partial_fraction": 0.5,
+    "maximum_partial_executions": 1,
+    "cost_stress_changes_trigger": false,
+    "entry_gates": false,
+    "time_limited_launch_claim": false,
+    "final_path_unchanged": false,
+    "serial_recomputed_for_each_arm": true,
+    "priority": [
+      "gap_invalid_open",
+      "gap_stop",
+      "slow_full_exit",
+      "deadline",
+      "fast_full_or_partial_at_open",
+      "current_intrabar_stop"
+    ],
+    "future_mfe_never_a_fill": true,
+    "incomplete_trade_remains_unknown": true
+  }
+}

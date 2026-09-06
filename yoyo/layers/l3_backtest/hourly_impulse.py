@@ -40,6 +40,11 @@ the latest fully completed native15 colour is aligned and the current raw5
 open's directional gross gain strictly exceeds20bp. Decimal price strings make
 exact fee-boundary equality fail without a floating-point tolerance/grid:
 https://docs.python.org/3.9/library/decimal.html
+
+V17 optionally closes the entire still-unrealised position on that same known
+fast edge/slow-aligned event when the current open fails the frozen20bp test.
+Equality belongs to this failed-launch branch. Neither its decision nor its
+fill inspects current raw5 high, low or close; no future failure label is used.
 """
 from __future__ import annotations
 
@@ -138,6 +143,10 @@ def _policy(policy: Mapping[str, Any]) -> Dict[str, Any]:
                 or "decision_minutes" in selected or "frozen_ma_exit" in selected
                 or launch_keys.intersection(selected)):
             raise ValueError("fast_partial_fraction requires0.5 with transition_colour/native15/confirmations1 and no other optional exit policy")
+    if "fast_failed_launch_exit" in selected:
+        if (not isinstance(selected["fast_failed_launch_exit"], (bool, np.bool_))
+                or "fast_partial_fraction" not in selected):
+            raise ValueError("fast_failed_launch_exit requires a boolean with the native15 fast_partial_fraction policy")
     # An explicit integer-minute horizon wins over inherited max_hours. Using
     # fractional hours can truncate an exact 5m duration by 1ns in pandas 2.3.3.
     # Without max_minutes the historical max_hours validation is unchanged.
@@ -235,6 +244,37 @@ def _fast_partial_profit(open_: float, entry: float, direction: float) -> bool:
     with localcontext() as context:
         context.prec = 40
         return Decimal(str(direction)) * (Decimal(str(open_))-Decimal(str(entry))) > Decimal("0.002")*Decimal(str(entry))
+
+
+def _failed_launch_diagnostics() -> Dict[str, Any]:
+    """Only True adds fields; False preserves the complete V16 output schema.
+
+    Source MA/HL2/segments remain in the shared partial_fast_events JSON. These
+    scalar clocks identify the same failed_launch_exit record, not a new edge.
+    """
+    return {
+        "failed_launch_enabled": True, "failed_launch_count": 0,
+        "failed_launch_profit_threshold": 0.002, "failed_launch_status": "entry_not_validated",
+        "failed_launch_trigger_previous_open_time": pd.NaT,
+        "failed_launch_trigger_previous_available_at": pd.NaT,
+        "failed_launch_trigger_open_time": pd.NaT, "failed_launch_trigger_available_at": pd.NaT,
+        "failed_launch_trigger_previous_side": np.nan, "failed_launch_trigger_side": np.nan,
+        "failed_launch_trigger_open_price": np.nan, "failed_launch_trigger_gross_return": np.nan,
+        "failed_launch_slow_open_time": pd.NaT, "failed_launch_slow_available_at": pd.NaT,
+        "failed_launch_slow_side": np.nan, "failed_launch_slow_state": "unknown",
+    }
+
+
+def _failed_launch_gross(price: float, entry: float, direction: float) -> float:
+    """New full-fill accounting only: exact20bp equals the float20bp cost.
+
+    Decimal quote-unit arithmetic avoids classifying a theoretical break-even
+    full exit as a positive winner through float price/entry cancellation. No
+    historical V16 partial, full, marked or cost calculations are changed.
+    """
+    with localcontext() as context:
+        context.prec = 40
+        return float(Decimal(str(direction))*(Decimal(str(price))-Decimal(str(entry)))/Decimal(str(entry)))
 
 
 def _native40_frame(frame: pd.DataFrame, minutes: int, name: str) -> None:
@@ -437,6 +477,21 @@ def simulate_events(
     remaining gross returns; the event threshold stays fixed20bp. Final status
     is entry_not_validated/no_partial_exit/partial_closed/partial_censored/
     unknown_source; watching is internal only. Default output is unchanged.
+
+    ``fast_failed_launch_exit=True`` adds a full exit only to the above policy:
+    before any partial, a valid fast edge with latest slow colour aligned exits
+    at the current executable open when the SAME strict20bp Decimal test fails.
+    Equality is failure. No current-bar HLC, future edge, realised winner label,
+    seed-only opposite state or alternative threshold enters the condition.
+    Original source/gap stop/slow exit/horizon priority remains unchanged. The
+    full exit precedes current HLC validation and intrabar stops because those
+    values are not known at the open. An earlier source gap still censors.
+    This new full-fill gross uses Decimal quote differences before converting
+    to float: exact20bp minus the float20bp cost is zero, not a tiny winner.
+    The shared JSON action is failed_launch_exit; no partial is fabricated.
+    failed_launch_status is entry_not_validated/failed_launch_closed/prior_exit/
+    unknown_source (watching is internal); partial_fast_status also becomes
+    failed_launch_closed on this outcome. False adds no fields or behaviour.
     """
     selected = _policy(policy)
     raw = _validated_frame(raw5, ("open_time", "open", "high", "low", "close", "segment_id"), "raw5")
@@ -452,6 +507,7 @@ def simulate_events(
         raise ValueError("event_id must be unique for independent paired outcomes")
     frozen_ma_enabled = "frozen_ma_exit" in selected
     fast_partial_enabled = "fast_partial_fraction" in selected
+    failed_launch_enabled = bool(selected.get("fast_failed_launch_exit", False))
     if fast_partial_enabled:
         if fast_management_featured is None:
             raise ValueError("fast_partial_fraction requires fast_management_featured")
@@ -472,6 +528,8 @@ def simulate_events(
             empty_columns += [name for name in _frozen_ma_diagnostics() if name not in empty_columns]
         if fast_partial_enabled:
             empty_columns += [name for name in _fast_partial_diagnostics() if name not in empty_columns]
+        if failed_launch_enabled:
+            empty_columns += [name for name in _failed_launch_diagnostics() if name not in empty_columns]
         return pd.DataFrame(columns=empty_columns)
 
     times = raw["open_time"].to_numpy()
@@ -529,6 +587,8 @@ def simulate_events(
             result.update(_frozen_ma_diagnostics(float(event["ma"]), entry_time))
         if fast_partial_enabled:
             result.update(_fast_partial_diagnostics())
+        if failed_launch_enabled:
+            result.update(_failed_launch_diagnostics())
         index = time_index.get(entry_time)
         if index is None or (cutoff is not None and entry_time >= cutoff):
             outputs.append(result)
@@ -552,6 +612,8 @@ def simulate_events(
             continue
         result["risk_pct"] = risk / entry
         result["risk_atr"] = risk / atr
+        if failed_launch_enabled:
+            result["failed_launch_status"] = "watching"
         if launch_enabled:
             result["launch_status"] = "pending"
         if frozen_ma_enabled:
@@ -621,7 +683,8 @@ def simulate_events(
                 result["bars_to_first_positive"] = bars
 
         def finish(time: pd.Timestamp, price: float, outcome: str, closed: bool) -> None:
-            gross = realised + remaining * direction * (price / entry - 1.0)
+            gross = (_failed_launch_gross(price, entry, direction) if outcome == "fast_failed_launch"
+                     else realised + remaining * direction * (price / entry - 1.0))
             result.update(
                 exit_time=time, exit_price=price, outcome=outcome, closed=closed,
                 hold_minutes=(time - entry_time).total_seconds() / 60.0,
@@ -641,6 +704,11 @@ def simulate_events(
                 result["partial_fast_events"] = json.dumps(fast_events, sort_keys=True, allow_nan=False)
                 result["partial_fast_status"] = (("partial_closed" if closed else "partial_censored") if remaining < 1
                                                   else "no_partial_exit" if closed else "unknown_source")
+            if failed_launch_enabled:
+                result["failed_launch_status"] = ("failed_launch_closed" if outcome == "fast_failed_launch"
+                                                  else "prior_exit" if closed else "unknown_source")
+                if outcome == "fast_failed_launch":
+                    result["partial_fast_status"] = "failed_launch_closed"
 
         for i in range(index, len(raw)):
             now = pd.Timestamp(times[i])
@@ -811,15 +879,38 @@ def simulate_events(
                         qualifies = _fast_partial_profit(open_, entry, direction)
                         action = ("already_partial" if remaining < 1 else "slow_unknown" if slow_side is None
                             else "slow_not_aligned" if slow_state != "aligned" else "insufficient_profit" if not qualifies else "executed")
+                        if failed_launch_enabled and action == "insufficient_profit":
+                            action = "failed_launch_exit"
+                        event_gross = (_failed_launch_gross(open_, entry, direction) if action == "failed_launch_exit"
+                                       else float(direction*(open_/entry-1.0)))
                         fast_events.append({"available_at":now.isoformat(),"open_price":float(open_),
-                            "gross_return":float(direction*(open_/entry-1.0)),"profit_threshold":0.002,
+                            "gross_return":event_gross,"profit_threshold":0.002,
                             "profit_qualified":qualifies,"action":action,
                             "previous_fast":_partial_source(fast_previous_bar,fast_previous_side,time_index,segments),
                             "current_fast":_partial_source(fast_bar,fast_side,time_index,segments),
                             "slow":_partial_source(slow_bar,slow_side,time_index,segments),
                             "slow_available_at":slow_available.isoformat(),"slow_state":slow_state,"slow_reason":slow_reason})
                         result["partial_fast_flip_count"] += 1
-                        if action == "executed":
+                        if action == "failed_launch_exit":
+                            result.update(failed_launch_count=1,
+                                failed_launch_trigger_previous_open_time=fast_previous_bar.open_time,
+                                failed_launch_trigger_previous_available_at=fast_previous_bar.open_time+FIVE_MINUTES,
+                                failed_launch_trigger_open_time=fast_bar.open_time,
+                                failed_launch_trigger_available_at=now,
+                                failed_launch_trigger_previous_side=fast_previous_side,
+                                failed_launch_trigger_side=fast_side,
+                                failed_launch_trigger_open_price=open_,
+                                failed_launch_trigger_gross_return=event_gross,
+                                failed_launch_slow_open_time=slow_bar.open_time,
+                                failed_launch_slow_available_at=slow_available,
+                                failed_launch_slow_side=slow_side, failed_launch_slow_state=slow_state)
+                            # This full fill is already executable at the open;
+                            # its current HLC and any later source failure have
+                            # no authority to cancel it or add a partial fill.
+                            finish(now, open_, "fast_failed_launch", True)
+                            completed = True
+                            break
+                        elif action == "executed":
                             realised = 0.5*direction*(open_/entry-1.0)
                             remaining = 0.5
                             result.update(partial_fraction=0.5,partial_exit_time=now,partial_exit_price=open_,
