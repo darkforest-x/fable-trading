@@ -1,0 +1,148 @@
+{
+  "report_sha256": "d42d051e7ab33f4484b52143ee11454f911c83ad2655c21ff4650800561c5d29",
+  "sections": 14,
+  "context_rows": 713,
+  "actual_query": "SELECT population, fold, COUNT(*) AS total,\nSUM(CASE WHEN breadth_gate_state='accepted' THEN 1 ELSE 0 END) AS accepted,\nSUM(CASE WHEN breadth_gate_state='abstain' THEN 1 ELSE 0 END) AS abstain,\nSUM(CASE WHEN breadth_gate_state='unknown' THEN 1 ELSE 0 END) AS unknown\nFROM entry_context GROUP BY population,fold ORDER BY population,fold",
+  "query_results": [
+    {
+      "population": "case",
+      "fold": "2023H1",
+      "total": 55,
+      "accepted": 23,
+      "abstain": 32,
+      "unknown": 0
+    },
+    {
+      "population": "case",
+      "fold": "2023H2",
+      "total": 66,
+      "accepted": 37,
+      "abstain": 29,
+      "unknown": 0
+    },
+    {
+      "population": "case",
+      "fold": "2024H1",
+      "total": 55,
+      "accepted": 29,
+      "abstain": 26,
+      "unknown": 0
+    },
+    {
+      "population": "case",
+      "fold": "2024H2",
+      "total": 75,
+      "accepted": 33,
+      "abstain": 42,
+      "unknown": 0
+    },
+    {
+      "population": "control",
+      "fold": "2023H1",
+      "total": 84,
+      "accepted": 46,
+      "abstain": 38,
+      "unknown": 0
+    },
+    {
+      "population": "control",
+      "fold": "2023H2",
+      "total": 120,
+      "accepted": 69,
+      "abstain": 51,
+      "unknown": 0
+    },
+    {
+      "population": "control",
+      "fold": "2024H1",
+      "total": 123,
+      "accepted": 85,
+      "abstain": 38,
+      "unknown": 0
+    },
+    {
+      "population": "control",
+      "fold": "2024H2",
+      "total": 135,
+      "accepted": 91,
+      "abstain": 44,
+      "unknown": 0
+    }
+  ],
+  "delta_query": "WITH binned AS (SELECT *, CASE\n WHEN difference IS NULL THEN 99 WHEN difference < -0.01 THEN 0\n WHEN difference < -0.005 THEN 1 WHEN difference < -0.002 THEN 2\n WHEN difference < 0 THEN 3 WHEN difference = 0 THEN 4\n WHEN difference < 0.002 THEN 5 WHEN difference < 0.005 THEN 6\n WHEN difference < 0.01 THEN 7 ELSE 8 END AS bin_order FROM case_delta)\n SELECT bin_order, COUNT(*) AS opportunities, AVG(difference)*10000 AS mean_delta_bp,\n AVG(before)*10000 AS mean_before_bp, AVG(after)*10000 AS mean_after_bp\n FROM binned GROUP BY bin_order ORDER BY bin_order",
+  "delta_query_results": [
+    {
+      "bin_order": 0,
+      "opportunities": 13,
+      "mean_delta_bp": -222.33173854626895,
+      "mean_before_bp": 222.33173854626895,
+      "mean_after_bp": 0.0,
+      "range_bp": "< −100"
+    },
+    {
+      "bin_order": 1,
+      "opportunities": 7,
+      "mean_delta_bp": -66.16851140039314,
+      "mean_before_bp": 66.16851140039314,
+      "mean_after_bp": 0.0,
+      "range_bp": "−100 to < −50"
+    },
+    {
+      "bin_order": 2,
+      "opportunities": 8,
+      "mean_delta_bp": -32.39541702061663,
+      "mean_before_bp": 32.39541702061663,
+      "mean_after_bp": 0.0,
+      "range_bp": "−50 to < −20"
+    },
+    {
+      "bin_order": 3,
+      "opportunities": 4,
+      "mean_delta_bp": -8.86363717642875,
+      "mean_before_bp": 8.86363717642875,
+      "mean_after_bp": 0.0,
+      "range_bp": "−20 to < 0"
+    },
+    {
+      "bin_order": 4,
+      "opportunities": 122,
+      "mean_delta_bp": 0.0,
+      "mean_before_bp": -23.03409412809516,
+      "mean_after_bp": -23.03409412809516,
+      "range_bp": "0"
+    },
+    {
+      "bin_order": 5,
+      "opportunities": 15,
+      "mean_delta_bp": 11.061567180414,
+      "mean_before_bp": -11.061567180414,
+      "mean_after_bp": 0.0,
+      "range_bp": "> 0 to < 20"
+    },
+    {
+      "bin_order": 6,
+      "opportunities": 41,
+      "mean_delta_bp": 35.71975322220939,
+      "mean_before_bp": -35.71975322220939,
+      "mean_after_bp": 0.0,
+      "range_bp": "20 to < 50"
+    },
+    {
+      "bin_order": 7,
+      "opportunities": 32,
+      "mean_delta_bp": 68.68402796834819,
+      "mean_before_bp": -68.68402796834819,
+      "mean_after_bp": 0.0,
+      "range_bp": "50 to < 100"
+    },
+    {
+      "bin_order": 8,
+      "opportunities": 9,
+      "mean_delta_bp": 135.40539391148056,
+      "mean_before_bp": -135.40539391148056,
+      "mean_after_bp": 0.0,
+      "range_bp": "≥ 100"
+    }
+  ],
+  "all_markdown_sections_preserved": true
+}

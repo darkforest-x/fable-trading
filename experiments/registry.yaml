@@ -16,8 +16,8 @@ schema_version: 1
 experiments:
   - experiment_id: exp-btcusdtp-1h-external-change-preholdout-20260907-v22
     source_repo: darkforest-x/fable-trading
-    source_commit: "e715d9f"
-    status: active
+    source_commit: "f5a0e50"
+    status: rejected
     question: >-
       Does the adjacent completed-hour change of four external rank50 scores
       improve fixed251 hourly direct-K1 participation under original V18 exits?
@@ -26,13 +26,22 @@ experiments:
       measured at ownK1OPEN from exact prior two complete hours,52hour union.
       ETH/SOL/BNB/XRP unchanged;no V21 absolute alignment or exit/cost change.
     result: >-
-      Preregistered before new feature materialization. Saved V21 hourlytrace
-      SHA pinned;all713owncontexts must freeze and support pass before V18
-      outcomes. Same154triples/97unmatched;not independent validation.
-    canonical_report: experiments/active/exp-btcusdtp-1h-external-change-preholdout-20260907-v22/PROJECT_PLAN.md
+      Support passes122accepted129abstain0unknown;23/37/29/33perhalfyear.
+      Pertrade net-16.7690to-23.0341bp,PF.5918to.4662,all4halvesnegative.
+      Avoids97losers but misses32winners;2580eventbp fees saved while
+      1181.1392gross lost. D251+5.5732bp,p.0905;I154+.1758bp,p.4899.
+      Same154triples/97unmatched;cached V18,no new raw replay or OOS.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_breadth_change_v22_20260907.html
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
+    artifacts:
+      - btcusdtp-hourly-breadth-change-v22-results
+      - btcusdtp-hourly-breadth-change-v22-report
+      - btcusdtp-hourly-breadth-change-v22-html
+      - btcusdtp-hourly-breadth-change-v22-artifact
+      - btcusdtp-hourly-breadth-change-v22-verification
+      - btcusdtp-hourly-breadth-change-v22-statistical-diagnostics
     reuse_allowed: false
     notes: >-
       Rank change includes rolling membership effects,not measured money flow.

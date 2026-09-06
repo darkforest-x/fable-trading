@@ -2,7 +2,36 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-09-06 — V21跨币静态位置共振已拒绝，盈利目标仍未达成）
+## ⚡ 当前真相（2026-09-07 — V22跨币变化门已拒绝，goal active但盈利目标未达成）
+
+f5a0e50先提交V22公式/config/plan，再唯一读取SHA锁定的V21保存小时trace，
+没有新raw5/2025+价格。四币rank50相邻完整小时变化，仅direction*raw整数差>0
+允许，不叠V21。自有K1OPEN T取外部OPEN T−1h/T−2h，52连续小时并集；
+713自身上下文/62支持行先冻结才复用原V18退出。251/462/154/97与20bp全不变。
+
+122accepted129abstain0unknown；23/37/29/33perhalf、23月支持通过。每笔净
+−16.7690→−23.0341bp，PF.5918→.4662，四半年度毛净全负。122中23赢99亏，
+99亏=80毛亏+19费翻负；75fastfailed/12hardstop/35slowexit。避97losers但漏32winners；
+省2580eventbp费，却丢1181.1392eventbp毛，只净改善1398.8608。D251+5.5732bp,
+CI[−2.2801,12.6209],p.0905；matched154D+7.2528/controlD+7.0770,
+I+.1758bp,CI[−10.8010,10.5092],p.4899，97未知不删。单仓122均−23.0341；
+matching61.35%仍低于90%。盈利半仓28笔23赢是持仓后标签，严禁用作入场门。
+
+c84f12e诊断/报告builder、8752fea独立verifier先提交后实际执行。530联合测试过。
+独立保存小时审计70168rows/713context/62support/154triples/24source/23CSVhash通过；
+非raw5/Pine/live/经济独立回放。另只读账本审计旧字段、四单仓mask、40×17指标、
+费用/退出/双腿已验；V18CSV往返仅净字段<1e−16差，守1e−12，不夸逐bit。
+HTML：analysis/html/p1_btcusdtp_hourly_breadth_change_v22_20260907.html，
+16块2native图，官方validation/package过、structural_only；浏览器/手机/来源弹窗未验。
+
+V22已完成拒绝，勿重跑成待优化。下一步见V22/NEXT_EXPERIMENT.md：回到已准备未跑
+的V19确认失败后50%风险减仓，先审prepared代码归属/契约、登记提交，再真实双腿回放；
+不是按V16/V18全笔收益取平均。V19原停止条件不变：若净不正或jointD/I失败，结束
+这批队列纯退出微调，改做独立观察时钟的入场持续性审计与足够对照。不继续扫描rank
+阈值/周期/币池。本轮无TV/训练/ACTIVE/订单/依赖改动，所有并行ARB及V19 dirty保留。
+当前goal工具active；盈利未达成，未标complete或blocked，旧V21交付状态记录仅历史。
+
+### V21静态外部位置共振背景（已完成并拒绝，以下为当时记录）
 
 ChartPrime 148项审查已完成；V20结构门已拒绝（背景如下）。V21固定ETH/SOL/BNB/XRP
 四币native1h HL2 rank50等权均值方向门，不含BTC，不是多数投票或资金流。自有K1
