@@ -11,11 +11,11 @@ from __future__ import annotations
 import argparse
 from datetime import datetime, timezone
 import json
-import re
+from pathlib import PurePosixPath
 
 import pandas as pd
 
-from yoyo.evaluation.hourly_impulse_management_report import build_artifact as build_base
+from yoyo.evaluation.hourly_impulse_management_report import _fence, build_artifact as build_base
 from yoyo.evaluation.hourly_impulse_report import ROOT, safe_identity
 
 
@@ -35,16 +35,30 @@ def build_artifact(markdown, summary, case_delta, **kwargs):
         raise ValueError("V9 report requires same native5m SMA40 and check5m/check15m policies")
     # V8 tokens in literal prose/fences are not rewritten. New directives are
     # deliberately a separate versioned dialect, not an unsourced title change.
-    translated = re.sub(r"(?m)^<!-- V9_DISTRIBUTION -->$", "<!-- V8_DISTRIBUTION -->", markdown)
-    translated = re.sub(r"(?m)^<!-- SOURCE: v9_summary -->$", "<!-- SOURCE: v8_summary -->", translated)
-    if markdown.count("<!-- V9_DISTRIBUTION -->") != 1 or "<!-- V8_DISTRIBUTION -->" in markdown:
+    lines, active, count = [], None, 0
+    for line in markdown.splitlines(keepends=True):
+        outside = active is None
+        active = _fence(line.rstrip("\r\n"), active)
+        if outside and line.strip() == "<!-- V8_DISTRIBUTION -->":
+            raise ValueError("V8 distribution directive is not valid in V9")
+        if outside and line.strip() == "<!-- V9_DISTRIBUTION -->":
+            count += 1
+            line = line.replace("<!-- V9_DISTRIBUTION -->", "<!-- V8_DISTRIBUTION -->")
+        elif outside and line.strip() == "<!-- SOURCE: v9_summary -->":
+            line = line.replace("<!-- SOURCE: v9_summary -->", "<!-- SOURCE: v8_summary -->")
+        elif outside and line.strip() == "<!-- SOURCE: v9_mechanics -->":
+            line = line.replace("<!-- SOURCE: v9_mechanics -->", "<!-- SOURCE: v8_case_delta -->")
+        lines.append(line)
+    if count != 1:
         raise ValueError("exactly one V9 distribution directive required")
+    translated = "".join(lines)
     artifact = build_base(translated, summary, case_delta, **kwargs)
     names = {"v8_summary": "v9_summary", "v8_case_delta": "v9_case_delta"}
     manifest = artifact["manifest"]
     for block in manifest["blocks"]:
         if "sourceId" in block:
-            block["sourceId"] = names.get(block["sourceId"], block["sourceId"])
+            block["sourceId"] = ("v9_mechanics" if block["sourceId"] == "v8_case_delta"
+                                 else names.get(block["sourceId"], block["sourceId"]))
         if block["type"] == "chart":
             block.update(id="v9_distribution_chart", chartId=CHART_ID)
     # manifest.sources and top-level sources share this same canonical list.
@@ -68,6 +82,8 @@ def build_artifact(markdown, summary, case_delta, **kwargs):
                 "difference=after-before on each original request; after is native5m SMA40 checked every15m, "
                 "before is the same native5m SMA40 checked every5m. Both are net returns; chart bp=difference*10000."
             )
+    artifact["sources"].append({"id": "v9_mechanics", "label": "V9 · 完整逐笔盈亏与退出配对明细",
+        "path": str(PurePosixPath(safe_identity(kwargs["case_delta_path"])).parent/"paired_case_mechanics.csv.gz")})
     chart = manifest["charts"][0]
     chart.update(id=CHART_ID, dataset=CHART_ID, sourceId="v9_case_delta",
                  title="退出检查频率变化的逐请求收益分布",

@@ -62,6 +62,25 @@ def test_native15_evidence_cannot_be_relabelled_as_pure_cadence():
         build_artifact(md, summary, delta, **kwargs)
 
 
+@pytest.mark.parametrize("fence", ["```", "~~~~"])
+def test_fenced_version_directives_remain_literal(fence):
+    md, summary, delta, kwargs = fixture()
+    literal = f"{fence}text\n<!-- SOURCE: v9_summary -->\n<!-- V9_DISTRIBUTION -->\n<!-- V8_DISTRIBUTION -->\n{fence}"
+    md += "\n## Literal example\n"+literal+"\n"
+    artifact = build_artifact(md, summary, delta, **kwargs)
+    assert artifact["manifest"]["blocks"][-1]["body"] == "## Literal example\n"+literal
+    assert "sourceId" not in artifact["manifest"]["blocks"][-1]
+
+
+def test_mechanics_block_has_its_own_actual_csv_source():
+    md, summary, delta, kwargs = fixture()
+    md += "\n## Cases\n<!-- SOURCE: v9_mechanics -->\nPaired examples.\n"
+    artifact = build_artifact(md, summary, delta, **kwargs)
+    assert artifact["manifest"]["blocks"][-1]["sourceId"] == "v9_mechanics"
+    source = next(row for row in artifact["sources"] if row["id"] == "v9_mechanics")
+    assert source["path"] == "experiments/v9/paired_case_mechanics.csv.gz"
+
+
 @pytest.mark.parametrize("replacement", ["", "<!-- V8_DISTRIBUTION -->", "<!-- V9_DISTRIBUTION -->\n<!-- V9_DISTRIBUTION -->"])
 def test_directive_required(replacement):
     md, summary, delta, kwargs = fixture()
