@@ -1,5 +1,6 @@
 """Synthetic-only full-denominator cached structure-gate accounting checks."""
 import ast
+from io import StringIO
 from pathlib import Path
 
 import numpy as np
@@ -231,6 +232,25 @@ def test_timezone_equivalence_is_valid_but_naive_own_clocks_are_not():
     context["signal_time"] = context.signal_time.dt.tz_localize(None)
     with pytest.raises(ValueError, match="timezone"):
         a.evaluate_cached(cases, controls, context)
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+def test_available_suffix_csv_string_timestamp_parity_still_rejects_one_ns(reverse):
+    cases, controls, context = fixture()
+    available = controls.decision_time-pd.Timedelta(minutes=5)
+    # Reproduce the two historical readers entirely in memory: one leaves the
+    # _available column as CSV strings, the other parses it as aware timestamps.
+    csv_values = pd.read_csv(StringIO(pd.DataFrame({"known_5m_available": available}).to_csv(index=False)))
+    controls["known_5m_available"] = available if reverse else csv_values.known_5m_available
+    own_values = csv_values.known_5m_available if reverse else available
+    context["known_5m_available"] = context.event_id.map(dict(zip(controls.event_id, own_values)))
+    original = controls.copy(deep=True)
+    tables, _ = a.evaluate_cached(cases, controls, context)
+    pd.testing.assert_frame_equal(original, tables["candidate_control_episodes"][original.columns], check_exact=True)
+    changed = context.copy(deep=True)
+    changed.loc[3, "known_5m_available"] = pd.Timestamp(changed.loc[3, "known_5m_available"])+pd.Timedelta(nanoseconds=1)
+    with pytest.raises(AssertionError):
+        a.evaluate_cached(cases, controls, changed)
 
 
 def test_mirrored_own_structure_directions_and_parent_direction_validation():

@@ -15,6 +15,7 @@ Pine clock: https://www.tradingview.com/pine-script-docs/concepts/repainting/
 from __future__ import annotations
 
 import json
+import argparse
 import subprocess
 from copy import deepcopy
 
@@ -130,7 +131,7 @@ def audit_population(raw, mothers, controls, assignments):
     }
 
 
-def read_outcomes_after_freeze(results, summary, context):
+def read_outcomes_after_freeze(results, summary, context, marker="outcomes_started.json"):
     """No outcome file, including its hash, is touched on a failed support run."""
     if not summary["support_pass"] or not all(summary["support_gates"].values()):
         raise ValueError("Insufficient support prohibits outcome access")
@@ -140,7 +141,10 @@ def read_outcomes_after_freeze(results, summary, context):
     for name, expected in freeze["output_hashes"].items():
         if digest(results/name) != expected:
             raise ValueError("Frozen feature evidence changed")
-    write_json(results/"outcomes_started.json", {"at": pd.Timestamp.now(tz="UTC"),
+    marker_path = results/marker
+    if marker_path.exists():
+        raise ValueError("Preserve earlier outcome-access attempt")
+    write_json(marker_path, {"at": pd.Timestamp.now(tz="UTC"),
         "context_frozen_sha256": digest(results/"context_frozen.json"),
         "cached_fixed_episode_accounting_only": True, "intrabar_replays": 0})
     for name, expected in OUTCOME_INPUTS.items():
@@ -209,5 +213,61 @@ def run():
     print(json.dumps({k: summary[k] for k in ("status", "population", "support_values", "support_gates", "outcomes_read")}))
 
 
+def resume_frozen_accounting():
+    """Resume a failed serialization/accounting attempt without market access.
+
+    Preserve the original failure and access timestamps. Only the immutable
+   713 frozen feature rows are reused; no threshold/source/state recalculation.
+    This entrypoint refuses an existing summary or economic output file.
+    """
+    results = EXPERIMENT/"results"
+    if not (results/"failure.json").exists() or (results/"summary.json").exists():
+        raise ValueError("Only an incomplete failed frozen attempt can resume")
+    config_path, plan_path = EXPERIMENT/"config.json", EXPERIMENT/"PROJECT_PLAN.md"
+    config = json.loads(config_path.read_text())
+    base_path = ROOT/BASE_CONFIG
+    if digest(base_path) != BASE_SHA256:
+        raise ValueError("Frozen base changed")
+    verify_config(config, json.loads(base_path.read_text()))
+    sources = committed_sources([ROOT/p for p in SOURCES]+[config_path, base_path, plan_path])
+    started = json.loads((results/"started.json").read_text())
+    original_sources = {item["path"]: item["sha256"] for item in started["sources"]}
+    for path in ("yoyo/data/hourly_impulse.py", "yoyo/data/hourly_impulse_structure.py"):
+        if original_sources[path] != digest(ROOT/path):
+            raise ValueError("Feature generator changed since frozen attempt")
+    for name, expected in INPUTS.items():
+        if digest(ROOT/PARENT/name) != expected:
+            raise ValueError("Original request input changed")
+    freeze = json.loads((results/"context_frozen.json").read_text())
+    for name, expected in freeze["output_hashes"].items():
+        if digest(results/name) != expected:
+            raise ValueError("Original frozen feature evidence changed")
+    context = read_table(results/"entry_context.csv.gz")
+    view = support_view(context)
+    values, gates = support.support_gates(view)
+    summary = {"support_pass": all(gates.values()), "support_values": values, "support_gates": gates,
+        "population": {p: support.count_states(view.loc[view.population.eq(p)]) for p in ("case", "control")},
+        "matching": {"assigned": 154, "unassigned": 97, "coverage": 154/251, "required": .9, "pass": False}}
+    tables, economics = read_outcomes_after_freeze(results, summary, context, "outcomes_resumed_1.json")
+    if any((results/(name+".csv.gz")).exists() for name in tables):
+        raise ValueError("Cannot overwrite any earlier economic output")
+    for name, frame in tables.items():
+        write_csv(results/(name+".csv.gz"), frame)
+    summary.update(economics=economics, outcomes_read=True,
+        status="fixed_episode_gate_comparison_not_independent_validation", experiment_id=EXPERIMENT_ID,
+        generated_at=pd.Timestamp.now(tz="UTC"), sources=started["sources"], resume_sources=sources,
+        resume_builder_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
+        source_receipt=freeze["source_receipt"], config_sha256=digest(config_path),
+        output_hashes={p.name: digest(p) for p in sorted(results.glob("*.csv.gz"))},
+        holdout_consumed=False, new_intrabar_replays=0, training_eligible=False, production_eligible=False,
+        independent_validation=False, overall_goal_achieved=False, preserved_first_failure="failure.json",
+        frozen_features_recomputed=False)
+    write_json(results/"summary.json", summary)
+    print(json.dumps({k: summary[k] for k in ("status", "population", "support_values", "support_gates", "outcomes_read")}))
+
+
 if __name__ == "__main__":
-    run()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--resume-frozen-accounting", action="store_true")
+    args = parser.parse_args()
+    resume_frozen_accounting() if args.resume_frozen_accounting else run()

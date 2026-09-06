@@ -137,7 +137,7 @@ def _check_context(episodes, context, population):
     shared = [c for c in own if c in old and not c.startswith("structure_")]
     for col in shared:
         a, b = old[col], own[col]
-        time = col.endswith(("_time", "_deadline", "_until", "_available_at", "_bar_open"))
+        time = col.endswith(("_time", "_deadline", "_until", "_available", "_available_at", "_bar_open"))
         if time:
             a, b = _times(a), _times(b)
         pd.testing.assert_series_equal(a, b, check_dtype=False, check_names=False,

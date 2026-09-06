@@ -68,3 +68,14 @@ def test_outcome_hash_loop_after_feature_freeze_check():
     function = source.split("def read_outcomes_after_freeze", 1)[1].split("def run", 1)[0]
     assert function.index('context_frozen.json') < function.index('OUTCOME_INPUTS.items()')
     assert function.index('output_hashes') < function.index('OUTCOME_INPUTS.items()')
+
+
+def test_resume_cannot_regenerate_features_or_read_prices():
+    tree = ast.parse(Path(subject.__file__).read_text())
+    node = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "resume_frozen_accounting")
+    calls = {n.func.id if isinstance(n.func, ast.Name) else n.func.attr for n in ast.walk(node)
+        if isinstance(n, ast.Call) and isinstance(n.func, (ast.Name, ast.Attribute))}
+    assert not calls & {"load_source", "audit_population", "add_structure_context", "add_hourly_structure_state", "simulate_events"}
+    source = ast.unparse(node)
+    assert "context_frozen.json" in source and "output_hashes" in source
+    assert "outcomes_resumed_1.json" in source and "failure.json" in source
