@@ -88,8 +88,11 @@ def assert_saved_columns(before: pd.DataFrame, after: pd.DataFrame) -> None:
     left = before.sort_values("event_id").reset_index(drop=True).copy()
     right = after.sort_values("event_id").reset_index(drop=True)[left.columns].copy()
     for column in left:
-        if pd.api.types.is_datetime64_any_dtype(right[column]):
+        nonnull = right[column].dropna()
+        temporal_objects = len(nonnull) > 0 and nonnull.map(lambda value: isinstance(value, pd.Timestamp)).all()
+        if pd.api.types.is_datetime64_any_dtype(right[column]) or temporal_objects:
             left[column] = pd.to_datetime(left[column], utc=True, format="mixed")
+            right[column] = pd.to_datetime(right[column], utc=True, format="mixed")
         if left[column].isna().all() and right[column].isna().all():
             left[column] = right[column]
         elif right[column].dtype == object:

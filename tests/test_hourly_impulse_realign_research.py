@@ -43,6 +43,16 @@ def test_full_parity_normalizes_serialized_time_but_never_ignores_old_extra_colu
         assert_saved_columns(a, b.assign(old_extra=.006))
 
 
+def test_full_parity_normalizes_mixed_timestamp_objects_and_nat():
+    a = pd.DataFrame({"event_id": ["a", "b"], "armed_at": [np.nan, "2024-01-01 00:00:00+00:00"]})
+    b = pd.DataFrame({"event_id": ["a", "b"], "armed_at": pd.Series([pd.NaT, pd.Timestamp("2024-01-01", tz="UTC")], dtype=object)})
+    assert_saved_columns(a, b)
+    wrong = b.copy()
+    wrong.loc[1, "armed_at"] += pd.Timedelta(nanoseconds=1)
+    with pytest.raises(AssertionError):
+        assert_saved_columns(a, wrong)
+
+
 def episodes(values, executed):
     n = len(values)
     return pd.DataFrame({"event_id": list("abcde")[:n],
