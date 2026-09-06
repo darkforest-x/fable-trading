@@ -14,6 +14,31 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a442acf"
+    status: active
+    question: >-
+      Does fixed ex-BTC four-asset rank50 mean pressure improve the original
+      251 BTC hourly direct-K1 intentions under unchanged V18 cached exits?
+    single_variable: >-
+      Entry participation only: equal ETH/SOL/BNB/XRP native-hourly HL2
+      score50 mean sign, external availability at own K1 OPEN. Full51hours
+      per asset, exact clocks, missing unknown; no structure or exit change.
+    result: >-
+      Preregistered before external OHLCV materialization. Freeze713 own
+      contexts before fixed V18 outcome access, gated by inherited support.
+      No new intrabar replay or independent-validation claim.
+    canonical_report: experiments/active/exp-btcusdtp-1h-external-breadth-preholdout-20260906-v21/PROJECT_PLAN.md
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    notes: >-
+      Reused2023--2024 only, physical later prices not parsed. Explicit Binance
+      external inputs do not replace original OKX BTC execution source.
+      Original154triples/97unmatched and90percent coverage gate remain.
+
   - experiment_id: exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20
     source_repo: darkforest-x/fable-trading
     source_commit: "ab77a68"
