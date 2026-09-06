@@ -5307,8 +5307,8 @@ experiments:
 
   - experiment_id: exp-btcusdtp-1h-management-spec-preholdout-20260906-v8
     source_repo: darkforest-x/fable-trading
-    source_commit: pending_preregistered_builder
-    status: preregistered
+    source_commit: "e460539"
+    status: rejected
     question: >-
       Does native15m SMA40 true-colour management improve fixed V7 requests
       over native5m after20bp and relative to the exact same assigned controls?
@@ -5320,7 +5320,18 @@ experiments:
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    result: >-
+      Fixed286 net-17.7878 to-19.9065bp,PF.6087to.6812,stops23to86.
+      D286=-2.1187bp,p=.6196;I283=-3.0774bp,p=.6498. All intervals cross0.
+      Newserial262trades net-15.0081bp;959intention delta+1.2046bp,p=.2738.
+      No audit, all economic improvement gates rejected.
+    artifacts:
+      - btcusdtp-hourly-management-v8-development
+      - btcusdtp-hourly-management-v8-facts
+      - btcusdtp-hourly-management-v8-report
+      - btcusdtp-hourly-management-v8-html
+      - btcusdtp-hourly-management-v8-artifact
+      - btcusdtp-hourly-management-v8-verification
     reuse_allowed: false
     notes: >-
       Reused2023-2024 only. Full5m replay parity must precede15m outcomes.

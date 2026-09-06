@@ -14927,6 +14927,108 @@ artifacts:
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: "959zones,286closed,283triple matches. Net-17.7878bp,excess+5.0424bp,p.1514. All5m initial aligned; economic rejection, no audit/live change."
 
+  - artifact_id: btcusdtp-hourly-management-v8-development
+    artifact_type: research_result
+    role: fixed_request_native_management_spec_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e460539"
+    source_path: experiments/active/exp-btcusdtp-1h-management-spec-preholdout-20260906-v8/results/summary.json
+    sha256: "8deef40bafe83d9e955b6b039adf0474aa4dcbf26f5870c070b6eccb02357f9f"
+    size_bytes: 25732
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-management-spec-preholdout-20260906-v8/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e460539"
+    config_hash: "c2a3f5bef7ef19db397b2c99e3d485c9dd85dc7eafde0cfc5d8aa67d3925c419"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Rejected:286cases,849controls,959zones; native15m net-19.9065bp,D-2.1187bp,I-3.0774bp. Reused development only, no audit/live."
+
+  - artifact_id: btcusdtp-hourly-management-v8-facts
+    artifact_type: research_result
+    role: saved_ledger_failure_and_serial_diagnostics
+    source_repo: darkforest-x/fable-trading
+    source_commit: "061f254"
+    source_path: experiments/active/exp-btcusdtp-1h-management-spec-preholdout-20260906-v8/diagnostics/report_facts.json
+    sha256: "46aeeccbdb572b036d0dc6923a7732f0f1c880044cf446c53af0afafa0bca2bd"
+    size_bytes: 38018
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-management-spec-preholdout-20260906-v8/diagnostics/report_facts.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "061f254"
+    config_hash: "c2a3f5bef7ef19db397b2c99e3d485c9dd85dc7eafde0cfc5d8aa67d3925c419"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "All286 paired mechanics,29winner-to-loser/24loser-to-winner; pure saved-result analysis, no new price read."
+
+  - artifact_id: btcusdtp-hourly-management-v8-report
+    artifact_type: report
+    role: standalone_v8_technical_source
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f86324c"
+    source_path: analysis/p1_btcusdtp_hourly_management_v8_20260906.md
+    sha256: "52e1969c0a3ef30bb6e6c2797c09b5138f4dc8845084063ee9338cf81a9fa73b"
+    size_bytes: 17193
+    storage_uri: "repo://analysis/p1_btcusdtp_hourly_management_v8_20260906.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f86324c"
+    config_hash: "c2a3f5bef7ef19db397b2c99e3d485c9dd85dc7eafde0cfc5d8aa67d3925c419"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Authored after saved results; f86324c identifies presentation builder, not a prior commit containing this prose. Old V1-V7 unchanged."
+
+  - artifact_id: btcusdtp-hourly-management-v8-html
+    artifact_type: report
+    role: owner_delivery_portable_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f86324c"
+    source_path: analysis/html/p1_btcusdtp_hourly_management_v8_20260906.html
+    sha256: "d2b6426598d60d0509685940c7fe049cf2ac2d549c83d77384c61604be89e3b4"
+    size_bytes: 504856
+    storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_management_v8_20260906.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f86324c"
+    config_hash: "c2a3f5bef7ef19db397b2c99e3d485c9dd85dc7eafde0cfc5d8aa67d3925c419"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "14blocks,1native12bin count chart,all286. Official package structural_only; missing headless-shell, not browser/mobile QA."
+
+  - artifact_id: btcusdtp-hourly-management-v8-artifact
+    artifact_type: report
+    role: canonical_native_report_manifest_snapshot
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f86324c"
+    source_path: analysis/output/btcusdtp_hourly_management_v8_20260906/artifact.json
+    sha256: "3f1b068261cb571f6038713c51b12ce92c05e45f7e7b7fcb14b231c9767f8bfb"
+    size_bytes: 38625
+    storage_uri: "repo://analysis/output/btcusdtp_hourly_management_v8_20260906/artifact.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f86324c"
+    config_hash: "c2a3f5bef7ef19db397b2c99e3d485c9dd85dc7eafde0cfc5d8aa67d3925c419"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Source-backed standalone V8 full narrative and real SQLite distribution, no bespoke chart runtime."
+
+  - artifact_id: btcusdtp-hourly-management-v8-verification
+    artifact_type: report
+    role: independent_saved_ledger_and_clock_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e460539"
+    source_path: experiments/active/exp-btcusdtp-1h-management-spec-preholdout-20260906-v8/VERIFICATION.md
+    sha256: "b6938816f230031f989c5880b5708c183e8ef9607c9f1dedc681afd0d16e2215"
+    size_bytes: 6828
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-management-spec-preholdout-20260906-v8/VERIFICATION.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "e460539"
+    config_hash: "c2a3f5bef7ef19db397b2c99e3d485c9dd85dc7eafde0cfc5d8aa67d3925c419"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "2270 formulas/clocks,unchanged286/849entryrisk,286/283/959pairing; independent959serial loop. Not independent rawprice replay."
+
   - artifact_id: btcusdtp-hourly-source-v7-verification
     artifact_type: report
     role: postrun_source_clock_economic_denominator_and_failure_audit
