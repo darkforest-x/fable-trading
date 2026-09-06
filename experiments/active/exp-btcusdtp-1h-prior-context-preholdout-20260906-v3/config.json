@@ -1,0 +1,43 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-prior-context-preholdout-20260906-v3",
+  "base_config": "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json",
+  "base_config_sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a",
+  "hypothesis": "Replace hourly slope with genuinely prior completed 4h trend context, then test one non-chasing cap, while holding execution fixed.",
+  "policy_id": "5m_native40",
+  "context": {"minutes": 240, "ma_kind": "SMA", "ma_length": 40, "known_by": "K1 open", "common_valid_support": true},
+  "arms": [
+    {"id": "original", "require_hourly_slope": false, "require_context_trend": false, "max_extension_atr": 99},
+    {"id": "hourly_slope", "require_hourly_slope": true, "require_context_trend": false, "max_extension_atr": 99},
+    {"id": "prior4h_trend", "require_hourly_slope": false, "require_context_trend": true, "max_extension_atr": 99},
+    {"id": "prior4h_not_chasing", "require_hourly_slope": false, "require_context_trend": true, "max_extension_atr": 1.5}
+  ],
+  "selection": {
+    "minimum_events": 80,
+    "minimum_per_fold": 12,
+    "positive_folds": 4,
+    "minimum_profit_factor": 1.1,
+    "minimum_active_months": 12,
+    "minimum_months_per_fold": 3,
+    "matched_coverage": 0.9,
+    "strictly_positive_net_and_matched_excess": true,
+    "single_position_net_positive": true,
+    "extra_10bp_stress_positive": true,
+    "leave_top_two_positive": true,
+    "rank_only_passing_new_arms": true,
+    "ranking": "robust_score_bp descending, worst_fold_bp descending, id ascending"
+  },
+  "matching": {
+    "count_per_trade": 3,
+    "seed": 20260906,
+    "extra_keys": ["prior4h colour", "prior4h slope sign", "exact arm eligibility"],
+    "base_keys": ["month", "UTC 6h bucket", "causal ATR tercile", "known management colour", "direction"],
+    "no_control_time_reuse": true,
+    "assignment_before_outcomes": true
+  },
+  "lineage": "2023-2024 development reused after V1 48 comparisons and V2 six exits. 5m native40 and extension 1.5 have already been examined. Only the prior-context substitution and its nested extension test are new hypotheses. No independent discovery claim; 2025 onward prices are not materialised in V3.",
+  "no_audit_entry_point": true,
+  "owner_authorization": "2026-09-06 directly develop toward profitability, research only; no orders or promotion.",
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false
+}

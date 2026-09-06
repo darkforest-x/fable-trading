@@ -5178,3 +5178,28 @@ experiments:
       Post-V1 negative-result research; 2023-2024 development is reused and the
       prior historical transport was already seen. No new transport evaluation
       unless every preregistered development go-gate passes. No live mutations.
+
+  - experiment_id: exp-btcusdtp-1h-prior-context-preholdout-20260906-v3
+    source_repo: darkforest-x/fable-trading
+    source_commit: "1eaf03f"
+    status: active
+    question: >-
+      Does genuinely prior completed 4h context improve hourly impulse entries
+      beyond the same-context random beta, with execution held fixed?
+    single_variable: >-
+      Four frozen arms: original and hourly-slope replays, prior4h trend as a
+      substitute for hourly slope, then the single nested extension<=1.5 cap.
+      No exit, economics, morphology, MA-length or direction grid.
+    result: >-
+      Preregistered development-only comparison. All control requests are
+      assigned before outcomes; same prior4h state and exact arm eligibility.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Owner's autonomous profitability research request. 2023-2024 is reused
+      after V1/V2 and is not independent evidence. Context known by K1 open;
+      common valid support, source continuity, immutable stop and 20bp cost.
+      Gates precede ranking. No audit command, live orders or promotion.
