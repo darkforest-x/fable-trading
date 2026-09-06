@@ -1,6 +1,7 @@
 """Frozen V17 contract and all-intention attribution without price-file access."""
 from copy import deepcopy
 import inspect
+import io
 import json
 
 import numpy as np
@@ -137,3 +138,37 @@ def test_edge_export_keeps_arms_and_source_json_with_empty_schema():
     assert out.arm.tolist()==["baseline","candidate"]
     assert out.population.tolist()==["case","control"]
     assert all(json.loads(s)=={"ma":101} for s in out.current_fast)
+
+
+def test_v16_complete_synthetic_csv_roundtrip_preserves_source_ids():
+    from test_hourly_impulse_failed_launch import fixture,run,V16
+    frame=run(fixture(),V16)
+    csv=frame.to_csv(index=False)
+    with pytest.raises(AssertionError):r.assert_saved_parity(r.read_frame(io.StringIO(csv)),frame)
+    r.assert_saved_parity(r.read_parent_frame(io.StringIO(csv)),frame)
+
+
+@pytest.mark.parametrize("lexeme",["0","007","","nan","0.0"])
+@pytest.mark.parametrize("column",["partial_fast_initial_management_segment_id","partial_fast_initial_raw_segment_id"])
+def test_opaque_ids_preserved_before_inference_and_wrong_ids_fail(lexeme,column):
+    frame=pd.DataFrame({"event_id":["x"],column:[lexeme],"mg_entry_raw_segment_id":[0],
+        "entry_time":[pd.Timestamp("2024-01-01",tz="UTC")],"net_return":[.02]})
+    csv=frame.to_csv(index=False)
+    got=r.read_parent_frame(io.StringIO(csv))
+    assert got[column].iloc[0]==lexeme
+    r.assert_saved_parity(got,frame)
+    old=r.read_frame(io.StringIO(csv))
+    pd.testing.assert_frame_equal(got.drop(columns=column),old.drop(columns=column))
+    wrong=got.copy();wrong.loc[0,column]="different-id"
+    with pytest.raises(AssertionError):r.assert_saved_parity(wrong,frame)
+
+
+def test_default_replay_reader_and_strict_identity_remain_unchanged():
+    assert inspect.signature(r.replay_arm).parameters["saved_reader"].default is None
+    source=inspect.getsource(r.replay_arm)
+    assert "load_saved=read_frame if saved_reader is None else saved_reader" in source
+    assert source.count("saved=load_saved(")==2
+    assert "saved_reader=read_parent_frame" in inspect.getsource(r.run)
+    c="partial_fast_initial_raw_segment_id"
+    with pytest.raises(AssertionError):
+        r.assert_saved_parity(pd.DataFrame({"event_id":["x"],c:["007"]}),pd.DataFrame({"event_id":["x"],c:["7"]}))

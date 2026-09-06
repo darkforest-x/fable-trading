@@ -97,3 +97,17 @@ converted to analysis/html/p1_btcusdtp_hourly_failed_launch_v17_20260906.html.
 Canonical source-backed report with one useful full paired-delta distribution,
 exact audit tables and honest browser/notebook QA limitations. If rejected,
 record failure and choose the next hypothesis from full-sample evidence.
+
+## Runtime correction before attempt2 (no strategy revision)
+
+Attempt1 at e5139c5 stopped during OFF case-trades strict saved parity,
+before ON simulation. Two partial-fast source IDs had been inferred as
+integers by CSV loading, while engine semantics are opaque strings.
+Preserve all nine original files and started/failure receipts under
+attempts/attempt_01_csv_segment_identity. A synthetic full V16 CSV
+roundtrip identifies exactly these two fields; reading-time converters
+preserve 0,007,empty,literal nan,0.0. Wrong identities still fail.
+Inject a V17-only saved reader; default native reader, generic parity,
+strategy config, prices, costs and all gates stay unchanged. Commit this
+correction and tests before attempt2. Report two raw attempts, one
+pre-candidate failure and one candidate execution, if retry completes.

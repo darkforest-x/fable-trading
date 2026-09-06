@@ -9,6 +9,7 @@ and own controls remain, with per-arm serial occupancy recomputed.
 
 Pandas2.3 one-to-one identity joins and Decimal quote-price boundary semantics:
 https://pandas.pydata.org/pandas-docs/version/2.3.3/reference/api/pandas.merge.html
+https://pandas.pydata.org/pandas-docs/version/2.3.3/reference/api/pandas.read_csv.html
 https://docs.python.org/3.9/library/decimal.html#decimal.Decimal
 Inference reuses the predeclared calendar-month resampling, not random splits:
 https://numpy.org/doc/2.0/reference/random/generated/numpy.random.Generator.choice.html
@@ -87,6 +88,21 @@ def verify_config(config, base):
     e=base["execution"]
     if base["development_folds"]!=FOLDS or e["max_hours"]!=72 or e["cost_fraction"]!=.002 or e["stop_first"] is not True:
         raise ValueError("Only original2023--2024,stop-first/72h/20bp permitted")
+
+
+def read_parent_frame(path):
+    """Preserve two opaque source-ID lexemes before CSV inference, not after.
+
+    The V16 engine emits these source identities as strings. Numeric-looking
+    IDs and literal 'nan' are identities, not numbers/missing data. All other
+    fields retain the original read_frame contract; strict parity is unchanged.
+    """
+    names=("partial_fast_initial_management_segment_id", "partial_fast_initial_raw_segment_id")
+    frame=pd.read_csv(path,converters={name:lambda value:value for name in names})
+    for column in frame:
+        if column.endswith(("_time","_deadline")):
+            frame[column]=pd.to_datetime(frame[column],utc=True,format="mixed")
+    return frame
 
 
 def failed_launch_mechanics(before, after):
@@ -196,7 +212,7 @@ def run():
             "entry_gates":False,"outcomes_hashed_or_read":False})
         pin(ROOT/PARENT,INPUTS)
         old=replay_arm(study,POLICIES[0],mothers,native,results/"baseline",config,
-            parent=ROOT/PARENT,parent_prefix="",simulator=simulate_dual)
+            parent=ROOT/PARENT,parent_prefix="",simulator=simulate_dual,saved_reader=read_parent_frame)
         write_json(results/"anchor_parity.json",old[0]["parity"])
         new=replay_arm(study,POLICIES[1],mothers,native,results/"candidate",config,simulator=simulate_dual)
         for arm in (old,new):

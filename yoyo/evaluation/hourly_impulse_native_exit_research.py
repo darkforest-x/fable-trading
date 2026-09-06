@@ -96,12 +96,13 @@ def assert_native_initial_state(trades):
 
 
 def replay_arm(study, policy, mothers, contexts, folder, config, *, parent=None,
-               simulator=None, parent_prefix="direct_k1_stop__transition_colour_"):
+               simulator=None, parent_prefix="direct_k1_stop__transition_colour_", saved_reader=None):
     """Replay a native arm; optional injection preserves the V15 default API."""
     folder.mkdir()
     trades,episodes,parity={},{},{}
     folds=[f[0] for f in FOLDS]
     prefix=parent_prefix
+    load_saved=read_frame if saved_reader is None else saved_reader
     for label in ("case","control"):
         validate_direct_context(contexts[label])
         t=(simulate_native if simulator is None else simulator)(study,contexts[label],policy)
@@ -109,7 +110,7 @@ def replay_arm(study, policy, mothers, contexts, folder, config, *, parent=None,
         e=episode_ledger(mothers[label],direct_requests(mothers[label])[1],t)
         if parent is not None:
             for suffix,table in (("trades",t),("episodes",e)):
-                saved=read_frame(parent/(prefix+label+"_"+suffix+".csv.gz"))
+                saved=load_saved(parent/(prefix+label+"_"+suffix+".csv.gz"))
                 assert_saved_parity(saved,table)
                 parity[label+"_"+suffix]={"rows":len(saved),"columns":len(saved.columns)}
         trades[label],episodes[label]=t,e
@@ -119,7 +120,7 @@ def replay_arm(study, policy, mothers, contexts, folder, config, *, parent=None,
     serial=single_pending_ledger(episodes["case"])
     if parent is not None:
         for name,table,suffix in (("matched",pairs,".csv"),("single_pending",serial,".csv.gz")):
-            saved=read_frame(parent/(prefix+name+suffix))
+            saved=load_saved(parent/(prefix+name+suffix))
             assert_saved_parity(saved,table)
             parity[name]={"rows":len(saved),"columns":len(saved.columns)}
     write_csv(folder/"matched.csv",pairs)
