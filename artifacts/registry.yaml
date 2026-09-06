@@ -15250,3 +15250,122 @@ artifacts:
     config_hash: "efb52888167cde56b8bec745baeb131317ef58bee2267238bba8cb25683027f2"
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: "Verifier046b92a,2270 formulas/clocks,exact286/849contexts,V7old-column parity,286/283/959denominators,1342tests. Not independent raw-price replay."
+
+  - artifact_id: btcusdtp-hourly-launch-v11-development
+    artifact_type: report
+    role: fixed_launch_deadline_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: "33f31f0"
+    source_path: experiments/active/exp-btcusdtp-1h-launch-deadline-preholdout-20260906-v11/results/summary.json
+    sha256: "36048749c4cdc22ccde3fecd0b6158dc89a669590418bc3528cd1334191ffc12"
+    size_bytes: 35332
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-launch-deadline-preholdout-20260906-v11/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "33f31f0"
+    config_hash: "8e7d638f16e75bdb3ef6a5c56b5de20601832b22ca4cd4050bb0a11598c06ffe"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Rejected:251cases/462controls,154matched; net-13.4534bp,D+.8533bp,I-.5983bp.49other output hashes pinned. Reused2023-2024; no2025+prices."
+
+  - artifact_id: btcusdtp-hourly-launch-v11-facts
+    artifact_type: report
+    role: saved_ledger_failure_decomposition
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d0c583b"
+    source_path: experiments/active/exp-btcusdtp-1h-launch-deadline-preholdout-20260906-v11/facts/facts.json
+    sha256: "069e85cde2bf1383af0765c294a95f318890a8a0278498cebf54b97870fd70d7"
+    size_bytes: 3512
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-launch-deadline-preholdout-20260906-v11/facts/facts.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d0c583b"
+    config_hash: "8e7d638f16e75bdb3ef6a5c56b5de20601832b22ca4cd4050bb0a11598c06ffe"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Saved-only decomposition:15win-to-loss,4loss-to-win; matched154 worsened1.3325bp,unmatched97 improved4.3234bp. No new price or threshold selection."
+
+  - artifact_id: btcusdtp-hourly-launch-v11-report
+    artifact_type: report
+    role: standalone_v11_technical_source
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d0c583b"
+    source_path: analysis/p1_btcusdtp_hourly_launch_v11_20260906.md
+    sha256: "cedbe3837f146a1fafe7975b5cac41d333a5148847130c969ec8dfa7da3b9eb6"
+    size_bytes: 16843
+    storage_uri: "repo://analysis/p1_btcusdtp_hourly_launch_v11_20260906.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d0c583b"
+    config_hash: "8e7d638f16e75bdb3ef6a5c56b5de20601832b22ca4cd4050bb0a11598c06ffe"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Complete negative findings and counterexamples; control risk/ATR transfer and terminal-versus-path distinction reviewed. source_commit identifies builder, not earlier prose."
+
+  - artifact_id: btcusdtp-hourly-launch-v11-html
+    artifact_type: report
+    role: owner_delivery_portable_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d0c583b"
+    source_path: analysis/html/p1_btcusdtp_hourly_launch_v11_20260906.html
+    sha256: "35fb11191bd9d0b577f7dc971abc26bc4b20bfe60e8fbe0c76b05bfe3b631c71"
+    size_bytes: 502165
+    storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_launch_v11_20260906.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d0c583b"
+    config_hash: "8e7d638f16e75bdb3ef6a5c56b5de20601832b22ca4cd4050bb0a11598c06ffe"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "16blocks,1actualSQL251request count chart. Official portable pipeline structural_only; mobile/browser/source interaction not verified."
+
+  - artifact_id: btcusdtp-hourly-launch-v11-artifact
+    artifact_type: report
+    role: canonical_native_report_manifest_snapshot
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d0c583b"
+    source_path: experiments/active/exp-btcusdtp-1h-launch-deadline-preholdout-20260906-v11/artifact.json
+    sha256: "9e4f136186a6bfaf962b272eef0b97ab5c6b4e2c77251f426a8ea668d326be24"
+    size_bytes: 39083
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-launch-deadline-preholdout-20260906-v11/artifact.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d0c583b"
+    config_hash: "8e7d638f16e75bdb3ef6a5c56b5de20601832b22ca4cd4050bb0a11598c06ffe"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Complete authored narrative and real SQLite signed-bin distribution. Deterministic rebuild after prose corrections; no financial snapshot changes."
+
+  - artifact_id: btcusdtp-hourly-launch-v11-verification
+    artifact_type: report
+    role: independent_saved_ledger_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2c332ed"
+    source_path: experiments/active/exp-btcusdtp-1h-launch-deadline-preholdout-20260906-v11/VERIFICATION.md
+    sha256: "8025a445e244a22a659065120f3257f9ce882271cd06671b87351e5ca6af1884"
+    size_bytes: 10099
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-launch-deadline-preholdout-20260906-v11/VERIFICATION.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2c332ed"
+    config_hash: "8e7d638f16e75bdb3ef6a5c56b5de20601832b22ca4cd4050bb0a11598c06ffe"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Verifier2c332ed:49outputs/15source hashes,1426formulas/clocks,251/154paired,48month rows;2068tests. First asymmetric-column audit bug corrected; no raw second replay or independent p recomputation."
+
+  - artifact_id: btcusdtp-hourly-launch-v11-notebook
+    artifact_type: report
+    role: saved_case_ledger_audit_notebook
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d0c583b"
+    source_path: analysis/output/btcusdtp_hourly_launch_v11_20260906/launch_audit.ipynb
+    sha256: "c193af757216642ab52c88f18cd3bded7d2e1da770f77b3dce0a46d34cdc16d6"
+    size_bytes: 18958
+    storage_uri: "repo://analysis/output/btcusdtp_hourly_launch_v11_20260906/launch_audit.ipynb"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d0c583b"
+    config_hash: "8e7d638f16e75bdb3ef6a5c56b5de20601832b22ca4cd4050bb0a11598c06ffe"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "11cells,4code cells plain-Python top-down passed;251pairs,127timeouts,502cost checks. No Jupyter kernel/full nbformat schema,controls,inference or raw path verification."

@@ -1,0 +1,111 @@
+{
+  "matching_strata": [
+    {
+      "support": "matched",
+      "n": 154,
+      "known": 154,
+      "old_net_bp": -11.81482244704074,
+      "new_net_bp": -13.147291128484227,
+      "delta_bp": -1.3324686814434834,
+      "event_sum_delta_bp": -205.20017694229645
+    },
+    {
+      "support": "unmatched",
+      "n": 97,
+      "known": 97,
+      "old_net_bp": -18.262700425443825,
+      "new_net_bp": -13.939299553322915,
+      "delta_bp": 4.323400872120909,
+      "event_sum_delta_bp": 419.3698845957282
+    }
+  ],
+  "transitions": [
+    {
+      "transition": "loss_to_loss",
+      "n": 185,
+      "timeout_count": 99,
+      "old_net_bp": -51.27137786636626,
+      "new_net_bp": -43.7601151080519,
+      "delta_bp": 7.511262758314361,
+      "event_sum_delta_bp": 1389.5836102881567
+    },
+    {
+      "transition": "loss_to_win",
+      "n": 4,
+      "timeout_count": 4,
+      "old_net_bp": -20.817670683341248,
+      "new_net_bp": 24.38791584228,
+      "delta_bp": 45.20558652562125,
+      "event_sum_delta_bp": 180.822346102485
+    },
+    {
+      "transition": "win_to_loss",
+      "n": 15,
+      "timeout_count": 15,
+      "old_net_bp": 52.96353339372886,
+      "new_net_bp": -24.0817035893992,
+      "delta_bp": -77.04523698312805,
+      "event_sum_delta_bp": -1155.6785547469208
+    },
+    {
+      "transition": "win_to_win",
+      "n": 47,
+      "timeout_count": 9,
+      "old_net_bp": 110.27782955303968,
+      "new_net_bp": 106.0106445745229,
+      "delta_bp": -4.267184978516787,
+      "event_sum_delta_bp": -200.55769399028898
+    }
+  ],
+  "exit_failure_groups": [
+    {
+      "outcome": "hard_stop",
+      "n": 14,
+      "wins": 0,
+      "losses": 14,
+      "gross_negative_losses": 14,
+      "positive_gross_cost_losses": 0,
+      "mean_net_bp": -77.06591386302172,
+      "old_mean_net_bp": -77.06591386302172
+    },
+    {
+      "outcome": "launch_timeout_exit",
+      "n": 127,
+      "wins": 13,
+      "losses": 114,
+      "gross_negative_losses": 92,
+      "positive_gross_cost_losses": 22,
+      "mean_net_bp": -32.22807640169125,
+      "old_mean_net_bp": -33.91445205250565
+    },
+    {
+      "outcome": "transition_colour_exit",
+      "n": 110,
+      "wins": 38,
+      "losses": 72,
+      "gross_negative_losses": 57,
+      "positive_gross_cost_losses": 15,
+      "mean_net_bp": 16.319032787619978,
+      "old_mean_net_bp": 16.319032787619978
+    }
+  ],
+  "launch_states": {
+    "timeout_exit": 127,
+    "progress_confirmed": 78,
+    "prior_exit": 46
+  },
+  "all_pairs": 251,
+  "unknown_pairs": 0,
+  "all_delta_bp": 0.8532657675435518,
+  "total_event_delta_bp": 214.1697076534315,
+  "interpretation": "Retrospective post-treatment descriptions. Matching strata retain all original mothers; do not select these groups as live filters.",
+  "examples_rule": "Three largest negative and positive timeout changes, selected AFTER outcomes, never a strategy gate.",
+  "source_summary_sha256": "36048749c4cdc22ccde3fecd0b6158dc89a669590418bc3528cd1334191ffc12",
+  "source_paths": {
+    "experiments/active/exp-btcusdtp-1h-launch-deadline-preholdout-20260906-v11/results/paired_case_mechanics.csv.gz": "11ccf71b1a893f06be2c9ac71ccee27cff62d65bfcfddbbf5aa0bfdef129c623",
+    "experiments/active/exp-btcusdtp-1h-launch-deadline-preholdout-20260906-v11/results/baseline/matched.csv": "b4c5d5b3a9848428eb2b90189b03c29812f33c8df1f46068ca3540fcb988f38f"
+  },
+  "builder_sha256": "7f6dcfedee1d85f2951dacdc425c97cbf93715ddfec47cd5dab6bce68f6fa502",
+  "raw_prices_read": false,
+  "new_parameters_tested": false
+}

@@ -5307,14 +5307,16 @@ experiments:
 
   - experiment_id: exp-btcusdtp-1h-launch-deadline-preholdout-20260906-v11
     source_repo: darkforest-x/fable-trading
-    source_commit: "pending-builder-commit"
-    status: active
+    source_commit: "33f31f0"
+    status: rejected
     question: >-
       Does closing unlaunched positions at60min improve original V5 direct
       K1 trades after20bp and relative to their fixed original control triples?
     result: >-
-      Preregistered mechanism; not run. Known154/251 matching ceiling means
-      whole-system acceptance is unavailable even if paired outcomes improve.
+      Fixed251 net-14.3066 to-13.4534bp,PF.6247to.6007,wins62to51.
+      D251=+.8533bp,p=.3640;I154=-.5983bp,p=.5682,97unknown. Allfourfolds
+      negative;127timeouts,15win-to-loss versus4loss-to-win. Financial gates
+      rejected;154/251 support remains61.35% below90%, no candidate acceptance.
     single_variable: >-
       Add one60min deadline if no completed postentry5m close reached0.5initialR.
       Fixed251cases/462controls,entry,K1stop,5mtrueflip,72h and20bp; no rematching.
@@ -5322,12 +5324,20 @@ experiments:
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts:
+      - btcusdtp-hourly-launch-v11-development
+      - btcusdtp-hourly-launch-v11-facts
+      - btcusdtp-hourly-launch-v11-report
+      - btcusdtp-hourly-launch-v11-html
+      - btcusdtp-hourly-launch-v11-artifact
+      - btcusdtp-hourly-launch-v11-verification
+      - btcusdtp-hourly-launch-v11-notebook
     reuse_allowed: false
     notes: >-
-      Reused2023-2024 mechanism test only. V10 proved61.35% strict support
-      ceiling versus90% gate; no candidate acceptance even if paired gains.
-      Full V5 allcolumn baseline parity before candidate outcomes. No audit/live.
+      Builder33f31f0 precedes first replay; fullV5 allcolumn parity passed.
+      Reused2023-2024 only, no2025+prices or holdout. Independent saved-ledger
+      verifier2c332ed checks49outputs/15sources, notrawsecondreplay;2068tests.
+      HTML structural_only; notebook plainPython notJupyter. No TV/live change.
 
   - experiment_id: exp-btcusdtp-1h-matching-support-preholdout-20260906-v10
     source_repo: darkforest-x/fable-trading

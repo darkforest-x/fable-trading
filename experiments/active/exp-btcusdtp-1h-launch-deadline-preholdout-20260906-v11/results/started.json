@@ -1,0 +1,83 @@
+{
+  "at": "2026-09-06 07:45:20.496435+00:00",
+  "sources": [
+    {
+      "path": "yoyo/data/hourly_impulse.py",
+      "sha256": "f1128f514456f0e1a7bf89b719b2333ebe3b12f66402d58c82764d355be97a3b"
+    },
+    {
+      "path": "yoyo/data/hourly_impulse_colour_context.py",
+      "sha256": "32c035635c435d5c079a8ad7f91061fb4bdbb7195a3be66db40fef1dbacd0c1d"
+    },
+    {
+      "path": "yoyo/layers/l3_backtest/hourly_impulse.py",
+      "sha256": "c64aee14ddeaff57cef048c5788d001d527f682bd38cdc34539ff044c0cd2ff3"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_research.py",
+      "sha256": "804e62f5dfa537302a6cf1f0223549cdf3b3a3e42966ef59a33b6c975fd79ad4"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_context_research.py",
+      "sha256": "b55c11cbf3cfc7b55a319b65625502738f831b298e9b1c5f65c1657efe4bb9a3"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_k2_research.py",
+      "sha256": "3ce431bf8c96fc2828dd4405db7012b57b13295a169f0d67d5e95a86b1659c67"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_management_research.py",
+      "sha256": "f9f0d439617badfda1e1838f9811d8246b8bd00d533570f95d3ec6c1d7706069"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_diagnostics.py",
+      "sha256": "1f20806dcfb0421be4f3581a1c24c85c220acd9b2e9b56e332d5755dcf64560f"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_transition_research.py",
+      "sha256": "2ceb5a764743d9cc48e7aa2eb14d49dcc73c941381d7cdec9ad6fffba658c1f8"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_launch_research.py",
+      "sha256": "698f903c98320a0bf30115a6626f052460cab3f019805bed92cf9ab8c780395f"
+    },
+    {
+      "path": "tests/test_hourly_impulse_launch_deadline.py",
+      "sha256": "5b8598c417ba63dd7958d5152ec0c37de059d9c7ec3314841bdd06d8116348e6"
+    },
+    {
+      "path": "tests/test_hourly_impulse_launch_research.py",
+      "sha256": "48bf31a424ae5fabc3925efefe218cbffe7ae722b4a51e0330ec6faedcb4d2cc"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-launch-deadline-preholdout-20260906-v11/config.json",
+      "sha256": "8e7d638f16e75bdb3ef6a5c56b5de20601832b22ca4cd4050bb0a11598c06ffe"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json",
+      "sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-launch-deadline-preholdout-20260906-v11/PROJECT_PLAN.md",
+      "sha256": "bad980e9b80e9b65cbe0550d6a405a709620dd4d6e21359db9e3011c3ad286a3"
+    }
+  ],
+  "inputs": {
+    "direct_k1_stop_case_context.csv.gz": "bf3cb2796c5ede1cb731fee75833d292184f7a9ce6d69b37663dc519462bb4d7",
+    "direct_k1_stop_control_context.csv.gz": "a239256f8139e262e4f3b5a573a9d5879cde16717c1e17bc459df860ca28b1bc",
+    "direct_k1_stop__transition_colour_case_trades.csv.gz": "6f3f7772163823d956f9f369be51db88f350067ea1b9734ba93e03714de75584",
+    "direct_k1_stop__transition_colour_case_episodes.csv.gz": "bcc83278b9bb79b3281fbf5d478530697a156408ea74b805012cdb0c6291cd81",
+    "direct_k1_stop__transition_colour_control_trades.csv.gz": "f8576bd23181ad94be5c1c67608761dd6e5b8dcd16324f12f6a58c4a8631376a",
+    "direct_k1_stop__transition_colour_control_episodes.csv.gz": "65df9793687d816ac1dda7488038f4656239396e6aabdf1925c03f0d16891b45",
+    "direct_k1_stop__transition_colour_matched.csv": "b4c5d5b3a9848428eb2b90189b03c29812f33c8df1f46068ca3540fcb988f38f",
+    "direct_k1_stop__transition_colour_single_pending.csv.gz": "bb8157da8486263120b87146cad84c53f99c5c0f58a36e52a2a002f2f0052fbb",
+    "summary.json": "4ab9e30e7c95aa672d9359a16b00bfe82d204f5e2980c41672cf1e09b0347d3a"
+  },
+  "mother_inputs": {
+    "original_mothers.csv.gz": "b3f442ad8b0959b19cb5ae58fd40bc6a3bf40b455b4be31f3758d53940eea3e6",
+    "control_mothers.csv.gz": "01050c7a9602f469406df515edcc73ef2f4c9db2d46529e25030934012eebd5a",
+    "assignments.csv": "671782877ee67824f7687243d5e7deae29d78a0bcba6245319ecf55629027b0f",
+    "assignment_receipt.json": "1d77ca407712520e645463d30f97d26d452ccce45e87e68c2adcbc4120c43220"
+  },
+  "builder_commit": "33f31f025f342f706dd4f0ea7ed9852891167ebb"
+}
