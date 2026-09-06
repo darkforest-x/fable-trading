@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
+from datetime import timedelta
 import importlib.util
 import json
 import math
@@ -198,8 +199,8 @@ def verify_native_context(rows, original_contexts, tables):
             require(MG_FIELDS <= row.keys(), "Missing native context field")
             original,trade = originals[key],trades[key]
             parity([{field:original[field] for field in ("event_id","decision_time","direction")}],[row])
-            if MG_FIELDS <= trade.keys():
-                parity([{field:row[field] for field in MG_FIELDS | {"event_id"}}],[trade])
+            require(MG_FIELDS <= trade.keys(),"Executed native seed source fields lost")
+            parity([{field:row[field] for field in MG_FIELDS | {"event_id"}}],[trade])
             equal_number(row["mg_entry_native_minutes"],minutes,"Native management interval drift")
             state = row["mg_entry_state"]
             known = boolean(row["mg_entry_known"])
@@ -331,7 +332,8 @@ def verify_monthly(tables, rows):
     expected = {}
     for arm in ARMS:
         for row in tables[arm]["case_episodes"]:
-            key = (arm,row["fold"],str(row["mother_decision_time"])[:7])
+            month = (b.EPOCH+timedelta(seconds=stamp(row["mother_decision_time"])//10**9)).strftime("%Y-%m")
+            key = (arm,row["fold"],month)
             expected.setdefault(key,[]).append(number(row["episode_net_return"],nullable=True))
     actual = {}
     for row in rows:

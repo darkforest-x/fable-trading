@@ -1,8 +1,12 @@
 """V15 synthetic saved-row counterexamples; no market or historical reads."""
 from copy import deepcopy
 from datetime import datetime,timedelta
+from datetime import timezone
+from collections import Counter,defaultdict
+import hashlib
 import importlib.util
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -60,6 +64,7 @@ def contexts(data):
                     mg_entry_reason=trade["transition_initial_reason"],mg_entry_known=state!="unknown",mg_entry_ma=100.,
                     mg_entry_hl2=101. if side==1 else 99.,mg_entry_management_segment_id="native-7",mg_entry_raw_segment_id="source-12",
                     mg_entry_native_minutes=minutes))
+                trade.update({field:rows[-1][field] for field in v.MG_FIELDS})
     return rows, originals
 
 
@@ -204,3 +209,142 @@ def test_offquarter_hard_stop_legal_and_colour_gap_priority():
     v.check_native_clock(row,15)
     row=native(f.trade("x",0),15,hold=30,gross=-.1)
     with pytest.raises(v.VerificationError):v.check_native_clock(row,15)
+
+
+def mechanics_summary(rows):
+    grouped=defaultdict(list)
+    for row in rows:grouped[row["outcome_transition"]].append(row)
+    groups=[]
+    for name,part in sorted(grouped.items()):
+        vals=[row["delta_net_bp"] for row in part if row["delta_net_bp"] is not None]
+        groups.append(dict(group=name,n=len(part),known=len(vals),old_mean_net_bp=v.mean([r["baseline_net_bp"] for r in part]),
+            new_mean_net_bp=v.mean([r["candidate_net_bp"] for r in part]),mean_delta_bp=v.mean(vals),sum_delta_event_bp=sum(vals) if vals else None))
+    return dict(total=len(rows),known=sum(row["delta_net_bp"] is not None for row in rows),
+        transitions=dict(Counter(row["outcome_transition"] for row in rows)),groups=groups,
+        later_exits=sum(row["exit_delay_minutes"]>0 for row in rows),earlier_exits=sum(row["exit_delay_minutes"]<0 for row in rows),
+        same_exit_time=sum(row["exit_delay_minutes"]==0 for row in rows))
+
+
+def disk_fixture(tmp_path,monkeypatch):
+    data=fixture(full=True);tables,arms,effects=data
+    native_rows,orig=contexts(data)
+    results=tmp_path/v.EXPERIMENT_PATH/"results"
+    olddir,motherdir=tmp_path/v.PARENT_PATH,tmp_path/v.MOTHER_PATH
+    assignments=[dict(event_id=row["event_id"],match_status="matched" if i<154 else "unmatchable") for i,row in enumerate(orig["case"])]
+    for label in ("case","control"):
+        # Original requests contain all known-at-entry fields, never outcomes.
+        orig[label]=[{key:r[key] for key in v.FIXED_FIELDS if key not in ("entry_time","entry_price","risk_pct","risk_atr")}
+            | ({"parent_event_id":r["parent_event_id"]} if label=="control" else {}) for r in tables["baseline"][label+"_trades"]]
+        f.write_csv(olddir/("direct_k1_stop_"+label+"_context.csv.gz"),orig[label])
+        f.write_csv(motherdir/("original_mothers.csv.gz" if label=="case" else "control_mothers.csv.gz"),orig[label])
+        f.write_csv(results/(label+"_context.csv.gz"),orig[label])
+    for name,file in v.TABLE_FILES.items():
+        old=[{k:x for k,x in row.items() if k not in v.MG_FIELDS} for row in tables["baseline"][name]]
+        f.write_csv(olddir/("direct_k1_stop__transition_colour_"+file),old)
+        for arm in v.ARMS:f.write_csv(results/arm/file,tables[arm][name])
+    f.write_json(olddir/"summary.json",{"old":"synthetic"});f.write_json(motherdir/"assignment_receipt.json",{"n":154})
+    f.write_csv(motherdir/"assignments.csv",assignments);f.write_csv(results/"assignments.csv",assignments)
+    for name in ("case_delta","excess_delta","serial_delta"):f.write_csv(results/(name+".csv"),tables[name])
+    f.write_json(results/"anchor_parity.json",{name:dict(rows=len(tables["baseline"][name]),
+        columns=len([k for k in tables["baseline"][name][0] if k not in v.MG_FIELDS])) for name in v.TABLE_FILES})
+    f.write_csv(results/"native_entry_context.csv.gz",native_rows)
+    counts=Counter((r["arm"],r["population"],r["mg_entry_state"]) for r in native_rows)
+    counts=[dict(arm=a,population=p,mg_entry_state=s,n=n) for (a,p,s),n in sorted(counts.items())]
+    f.write_csv(results/"native_initial_state_counts.csv",counts)
+    f.write_json(results/"context_frozen.json",dict(at="2026-09-06T01:00:01Z",before_outcome_reads=True,
+        outcomes_hashed_or_read=False,entry_gates=False,rows=1426,counts=counts,context_sha256=v.sha(results/"native_entry_context.csv.gz")))
+    rows=mechanics(data);ms=mechanics_summary(rows)
+    f.write_csv(results/"native_exit_mechanics.csv",rows);f.write_csv(results/"mechanism_groups.csv",ms["groups"])
+    f.write_csv(results/"monthly_case_net.csv",[r for r in f.monthly(data) if r["n"]])
+    semantics={}
+    for label in ("case","control"):
+        state=deepcopy(tables["candidate"][label+"_trades"])
+        for row in state:row["outcome"]="colour_exit"
+        fake=({"baseline":{"case_trades":state},"candidate":{"case_trades":tables["candidate"][label+"_trades"]}},)
+        rows=mechanics(fake);semantics[label]={**mechanics_summary(rows),"same_net":len(rows)}
+        f.write_csv(results/("semantic_state15_"+label+"_trades.csv.gz"),state)
+        f.write_csv(results/("semantic_state15_"+label+"_delta.csv"),rows)
+    base=dict(execution=dict(cost_fraction=.002,max_hours=72,stop_first=True),
+        development_folds=[[fold,a,z] for fold,(a,z) in v.FOLDS.items()],source={"sha256":"synthetic-source-not-read"})
+    f.write_json(tmp_path/v.BASE_PATH,base)
+    config=dict(experiment_id=v.EXPERIMENT_ID,base_config=v.BASE_PATH,base_config_sha256=v.sha(tmp_path/v.BASE_PATH),
+        parent_results=v.PARENT_PATH,mother_results=v.MOTHER_PATH,inputs={p.name:v.sha(p) for p in olddir.iterdir()},
+        mother_inputs={p.name:v.sha(p) for p in motherdir.iterdir()},policies=v.POLICIES,native_contract=v.NATIVE_CONTRACT,
+        known_support=dict(cases=251,controls=462,matched=154,coverage_gate_unattainable=True),
+        inference=dict(draws=9999,seed=20260906,p_limit=.01,joint_required=["case_delta","excess_delta"],method="month_cluster"),
+        selection=dict(minimum_events=80,minimum_per_fold=12,positive_folds=4,minimum_profit_factor=1.1,
+            minimum_active_months=12,minimum_months_per_fold=3,matched_coverage=.9),
+        no_audit_entry_point=True,holdout_consumed=False,production_eligible=False,training_eligible=False)
+    f.write_json(tmp_path/v.EXPERIMENT_PATH/"config.json",config)
+    sourcepaths=v.REQUIRED_CODE_SOURCES|{v.EXPERIMENT_PATH+"/config.json",v.EXPERIMENT_PATH+"/PROJECT_PLAN.md",v.BASE_PATH}
+    committed={path:(tmp_path/path).read_bytes() if (tmp_path/path).exists() else ("synthetic source "+path).encode() for path in sourcepaths}
+    sources=[dict(path=path,sha256=hashlib.sha256(content).hexdigest()) for path,content in sorted(committed.items())]
+    f.write_json(results/"started.json",dict(at="2026-09-06T01:00:00Z",builder_commit="a"*40,sources=sources))
+    for arm,policy in zip(v.ARMS,v.POLICIES):
+        arms[arm]["policy"]=policy;f.write_json(results/arm/"summary.json",arms[arm])
+    summary=dict(experiment_id=v.EXPERIMENT_ID,status="diagnostic_only_no_candidate_acceptance",arms=arms,effects=effects,
+        holdout_consumed=False,production_eligible=False,training_eligible=False,audit_prices_loaded=False,
+        config_sha256=v.sha(tmp_path/v.EXPERIMENT_PATH/"config.json"),native_context=counts,mechanics=ms,semantics=semantics,
+        known_coverage_ceiling=154/251,coverage_required=.9,source=dict(sha256=base["source"]["sha256"],holdout_price_rows=0,
+        phase_price_last_open="2024-12-31T23:55:00Z"),inputs=config["inputs"],mother_inputs=config["mother_inputs"],
+        sources=sources,gates=dict(matched_coverage=False),all_financial_gates_pass=False)
+    def refresh():
+        summary["output_hashes"]={str(p.relative_to(results)):v.sha(p) for p in results.rglob("*") if p.is_file() and p!=results/"summary.json"}
+        f.write_json(results/"summary.json",summary)
+    refresh()
+    def fake_git(command,**kwargs):
+        assert command[:2]==["git","show"]
+        if "--format=%ct" in command:return SimpleNamespace(stdout=str(int(datetime(2026,9,6,tzinfo=timezone.utc).timestamp())))
+        commit,path=command[2].split(":",1);assert commit=="a"*40 and not path.startswith("data/")
+        return SimpleNamespace(stdout=committed[path])
+    monkeypatch.setattr(v.b.subprocess,"run",fake_git)
+    return results,summary,config,committed,refresh
+
+
+def test_full_directory_preserves_all_files_and_validates_committed_sources(tmp_path,monkeypatch):
+    results,summary,config,committed,refresh=disk_fixture(tmp_path,monkeypatch)
+    before={str(p.relative_to(tmp_path)):p.read_bytes() for p in tmp_path.rglob("*") if p.is_file()}
+    output=v.verify(tmp_path)
+    assert output["counts"]==dict(cases=251,controls=462,matched=154,unmatched=97)
+    assert output["context_receipt"]["rows"]==1426 and output["committed_sources_verified"]==21
+    assert output["effects"]["excess_delta"]["n"]==154
+    assert {str(p.relative_to(tmp_path)):p.read_bytes() for p in tmp_path.rglob("*") if p.is_file()}==before
+
+
+@pytest.mark.parametrize("mutation",["output_hash","extra_output","missing_output","input_hash","source_bytes","omitted_source",
+    "config_file","committed_config","context_hash","context_late_order","context_selected","counts","support_promotion","failure","semantic_delta","anchor"])
+def test_directory_corruption_fails_closed(tmp_path,monkeypatch,mutation):
+    results,summary,config,committed,refresh=disk_fixture(tmp_path,monkeypatch)
+    if mutation=="output_hash":(results/"case_delta.csv").write_text("damaged")
+    elif mutation=="extra_output":(results/"stray.csv").write_text("stray")
+    elif mutation=="missing_output":(results/"case_delta.csv").unlink()
+    elif mutation=="input_hash":(tmp_path/v.PARENT_PATH/"summary.json").write_text("changed old evidence")
+    elif mutation=="source_bytes":committed["yoyo/layers/l3_backtest/hourly_impulse.py"]+=b"changed"
+    elif mutation=="omitted_source":
+        summary["sources"]=summary["sources"][1:];start=v.read_json(results/"started.json");start["sources"]=summary["sources"]
+        f.write_json(results/"started.json",start);refresh()
+    elif mutation=="config_file":
+        config["policies"]=deepcopy(config["policies"]);config["policies"][1]["decision_minutes"]=15
+        f.write_json(tmp_path/v.EXPERIMENT_PATH/"config.json",config)
+    elif mutation=="committed_config":
+        path=v.EXPERIMENT_PATH+"/config.json";committed[path]+=b"\n"
+        for source in summary["sources"]:
+            if source["path"]==path:source["sha256"]=hashlib.sha256(committed[path]).hexdigest()
+        start=v.read_json(results/"started.json");start["sources"]=summary["sources"];f.write_json(results/"started.json",start);refresh()
+    elif mutation in ("context_hash","context_late_order","context_selected"):
+        path=results/"context_frozen.json";row=v.read_json(path)
+        row[{"context_hash":"context_sha256","context_late_order":"outcomes_hashed_or_read","context_selected":"entry_gates"}[mutation]]="wrong" if mutation=="context_hash" else True
+        f.write_json(path,row);refresh()
+    elif mutation=="counts":summary["native_context"]=deepcopy(summary["native_context"]);summary["native_context"][0]["n"]-=1;refresh()
+    elif mutation=="support_promotion":summary["all_financial_gates_pass"]=True;refresh()
+    elif mutation=="semantic_delta":
+        path=results/"semantic_state15_case_delta.csv";rows=v.read_csv(path);rows[0]["delta_net_bp"]=1;f.write_csv(path,rows);refresh()
+    elif mutation=="anchor":
+        path=results/"anchor_parity.json";row=v.read_json(path);row["case_trades"]["columns"]-=1;f.write_json(path,row);refresh()
+    else:f.write_json(results/"failure.json",{"status":"failed"});refresh()
+    with pytest.raises(v.VerificationError):v.verify(tmp_path)
+
+
+def test_missing_results_fail_closed_without_writes(tmp_path):
+    with pytest.raises(v.VerificationError):v.verify(tmp_path)
+    assert not list(tmp_path.rglob("*"))
