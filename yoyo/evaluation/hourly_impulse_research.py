@@ -281,7 +281,7 @@ class Study:
             p = cluster_p(matched["excess"], matched["entry_time"], monthly=True)
             coverage = len(matched) / max(1, len(trades.loc[trades["closed"].eq(True)]))
             control_mean = matched["control_mean_return"].mean()*10000
-            unique = closed["entry_time"].nunique()
+            unique = control_frame["entry_time"].nunique()
         else:
             excess, p, coverage, control_mean, unique = None, None, 0, None, 0
         return control_frame, pair_frame, {"coverage":coverage,"mean_excess_bp":excess,"control_mean_net_bp":control_mean,"month_cluster_p":p,"control_rows":len(control_frame),"unique_control_times":unique,"control_time_reuse_allowed":False}
