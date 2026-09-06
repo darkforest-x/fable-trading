@@ -45,7 +45,7 @@ def replay(sides, *, raw=None, mg=None, direction=1, stop=None, cutoff=None, **p
     ).iloc[0]
 
 
-@pytest.mark.parametrize("minutes,confirmations", [(15, 1), (60, 1), (5, 2), (5, True)])
+@pytest.mark.parametrize("minutes,confirmations", [(15, 2), (60, 1), (5, 2), (5, True)])
 def test_transition_policy_rejects_other_clocks_or_confirmation_counts(minutes, confirmations):
     with pytest.raises(ValueError):
         replay([1, -1], management_minutes=minutes, confirmations=confirmations)

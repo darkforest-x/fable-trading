@@ -5305,6 +5305,28 @@ experiments:
       cannot pass90%/80 gates. Finite mechanism test, not a candidate nomination.
       All89 old control requests retained, including old invalid risks. No audit.
 
+  - experiment_id: exp-btcusdtp-1h-management-spec-preholdout-20260906-v8
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending_preregistered_builder
+    status: preregistered
+    question: >-
+      Does native15m SMA40 true-colour management improve fixed V7 requests
+      over native5m after20bp and relative to the exact same assigned controls?
+    single_variable: >-
+      Management specification replacement, including native aggregation,
+      observation clock and MA memory. Fixed286cases/849controls/959zones,
+      actual entries/K1stops/72h/20bp; no rematching or selection.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_management_v8_20260906.html
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Reused2023-2024 only. Full5m replay parity must precede15m outcomes.
+      Both case delta and case-minus-control delta must improve; serial
+      intentions use all959zones. No audit, TradingView or live mutation.
+
   - experiment_id: exp-btcusdtp-1h-frozen-source-preholdout-20260906-v7
     source_repo: darkforest-x/fable-trading
     source_commit: "ad8f5c8"

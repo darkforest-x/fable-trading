@@ -14,10 +14,11 @@ entry notional (including partial exits); funding is explicitly not modelled.
 Intrabar SL/TP collisions are stop-first. Excursions on a barrier-exit bar use
 the open and fill only because the order of OHLC extrema is unknown.
 
-The optional native-5m transition exit uses an adjacent completed-bar colour
+The optional native-5m/15m transition exit uses an adjacent completed-bar colour
 edge, not an opposite-colour state. Its clock follows pandas 2.3.3 Timestamp /
 Timedelta arithmetic and TradingView's confirmed-bar availability semantics:
 https://pandas.pydata.org/pandas-docs/version/2.3.3/reference/api/pandas.Timedelta.html
+https://pandas.pydata.org/pandas-docs/version/2.3/reference/api/pandas.Timestamp.floor.html
 https://www.tradingview.com/pine-script-docs/language/execution-model/
 """
 from __future__ import annotations
@@ -73,8 +74,8 @@ def _policy(policy: Mapping[str, Any]) -> Dict[str, Any]:
         raise ValueError("management_minutes must be 5, 15, or 60")
     if isinstance(confirmations, bool) or int(confirmations) != confirmations or confirmations < 1:
         raise ValueError("confirmations must be a positive integer")
-    if selected["exit_mode"] == "transition_colour" and (minutes != 5 or confirmations != 1):
-        raise ValueError("transition_colour requires management_minutes=5 and confirmations=1")
+    if selected["exit_mode"] == "transition_colour" and (minutes not in (5, 15) or confirmations != 1):
+        raise ValueError("transition_colour requires management_minutes=5 or 15 and confirmations=1")
     # An explicit integer-minute horizon wins over inherited max_hours. Using
     # fractional hours can truncate an exact 5m duration by 1ns in pandas 2.3.3.
     # Without max_minutes the historical max_hours validation is unchanged.
@@ -98,18 +99,24 @@ def _transition_observation(
     time_index: Mapping[pd.Timestamp, int],
     prices: np.ndarray,
     segments: np.ndarray,
+    interval: pd.Timedelta = FIVE_MINUTES,
+    *,
+    source_through: Optional[pd.Timestamp] = None,
 ) -> tuple:
-    """Validate one native-5m colour using information available at its close.
+    """Validate one native colour using only completed source bars and an open.
 
-    Only the exact just-completed management bar and its source raw5 OHLC are
-    inspected. At ``available_at`` only the new raw5 open is read. Management
+    The exact management bar ending at ``available_at`` supplies colour. All
+    raw5 OHLC from its open through the last completed raw5 bar are validated;
+    at ``source_through`` (default available_at) only the new raw5 open is read.
+    A 15m seed at a +5/+10 entry phase additionally validates the intervening
+    completed raw5 bars, never the unfinished entry bar's extrema. Management
     segment numbers have their own counting space: source continuity instead
     maps both timestamps to raw5 segment numbers. The slope is not used by this
     exit and a missing slope does not invalidate an otherwise known colour.
     """
     if bar is None:
         return None, "missing_management"
-    if bar.open_time + FIVE_MINUTES != available_at:
+    if bar.open_time + interval != available_at:
         return None, "stale_management"
     try:
         side, ma, low, high, close = map(float, (bar.ma_side, bar.ma, bar.low, bar.high, bar.close))
@@ -121,20 +128,28 @@ def _transition_observation(
         return None, "invalid_management"
     if pd.isna(bar.segment_id) or (isinstance(bar.segment_id, (float, np.floating)) and not np.isfinite(bar.segment_id)):
         return None, "unknown_management_segment"
-    source_index = time_index.get(bar.open_time)
-    next_index = time_index.get(available_at)
-    if source_index is None or next_index is None:
+    through = available_at if source_through is None else source_through
+    source_span = through - bar.open_time
+    if through < available_at or source_span.value % FIVE_MINUTES.value != 0:
         return None, "missing_source"
-    source_segments = (segments[source_index], segments[next_index])
+    source_indices = [
+        time_index.get(bar.open_time + offset * FIVE_MINUTES)
+        for offset in range(int(source_span / FIVE_MINUTES) + 1)
+    ]
+    if any(index is None for index in source_indices):
+        return None, "missing_source"
+    source_segments = [segments[index] for index in source_indices]
     unknown_source_segment = any(
         pd.isna(segment) or (isinstance(segment, (float, np.floating)) and not np.isfinite(segment))
         for segment in source_segments
     )
-    if unknown_source_segment or source_segments[0] != source_segments[1]:
+    if unknown_source_segment or any(segment != source_segments[0] for segment in source_segments[1:]):
         return None, "source_segment_change"
-    source_open, source_high, source_low, source_close = prices[source_index]
-    if not np.isfinite(prices[source_index]).all() or min(prices[source_index]) <= 0 or not source_low <= min(source_open, source_close) <= max(source_open, source_close) <= source_high:
-        return None, "invalid_completed_source"
+    for source_index in source_indices[:-1]:
+        source_open, source_high, source_low, source_close = prices[source_index]
+        if not np.isfinite(prices[source_index]).all() or min(prices[source_index]) <= 0 or not source_low <= min(source_open, source_close) <= max(source_open, source_close) <= source_high:
+            return None, "invalid_completed_source"
+    next_index = source_indices[-1]
     if not np.isfinite(prices[next_index, 0]) or prices[next_index, 0] <= 0:
         return None, "invalid_source_open"
     return side, "valid"
@@ -158,17 +173,21 @@ def simulate_events(
     as a completed trade, and censored ``net_return``/``net_r`` are NaN.
 
     At a shared timestamp: gap-open hard stop, completed-management exit,
-    maximum-duration exit, then current-bar intrabar barriers. Management bars
-    beginning before entry cannot trigger any exit. In ``partial_colour`` half
+    maximum-duration exit, then current-bar intrabar barriers. For state exits,
+    management bars beginning before entry cannot trigger an exit. In ``partial_colour`` half
     the original position exits once on first opposite colour; its remainder
     exits after any two consecutive opposite management bars.
 
-    ``transition_colour`` is explicitly native 5m / one confirmation. The bar
-    ending exactly at entry initializes colour but cannot exit. Only a valid
-    aligned-to-opposite edge across adjacent complete bars exits, earliest at
-    entry + 5m. Missing/invalid observations reset the edge; a management-segment
-    change starts a fresh sequence. An initially opposite/unknown state must
-    first observe an aligned complete bar. No other mode uses this state.
+    ``transition_colour`` supports native 5m or 15m / one confirmation. The
+    latest bar ending at or before entry initializes colour but cannot exit.
+    Only a valid aligned-to-opposite edge across adjacent complete bars exits.
+    Native 15m is seeded at entry.floor("15min"); its next completed bar can
+    straddle a +5/+10-phase entry, with earliest exits +15/+10/+5 minutes at
+    entry phases 0/+5/+10. It updates ONLY on expected 15m closes: intervening
+    raw5 bars preserve state but still check hard stops. Missing/invalid expected
+    observations reset the edge; a management-segment change starts a fresh
+    sequence. Initially opposite/unknown must first observe an aligned complete
+    bar. Native 5m retains its exact-entry seed and earliest +5m exit.
 
     An optional positive integer ``max_minutes`` (multiple of five) takes
     precedence over ``max_hours``. It represents the exact remaining duration
@@ -265,9 +284,11 @@ def simulate_events(
         transition_previous_side = None
         transition_previous_bar = None
         if mode == "transition_colour":
-            initial_management = management_at.get(entry_time)
+            initial_available_at = entry_time if interval == FIVE_MINUTES else entry_time.floor("15min")
+            initial_management = management_at.get(initial_available_at)
             transition_previous_side, initial_reason = _transition_observation(
-                initial_management, entry_time, time_index, prices, segments,
+                initial_management, initial_available_at, time_index, prices, segments,
+                interval, source_through=entry_time,
             )
             result["transition_initial_reason"] = initial_reason
             if transition_previous_side is not None:
@@ -327,13 +348,14 @@ def simulate_events(
                 break
 
             management_bar = management_at.get(now)
-            if mode == "transition_colour" and now > entry_time:
+            if mode == "transition_colour" and now > entry_time and (interval == FIVE_MINUTES or now == now.floor("15min")):
                 current_side, reset_reason = _transition_observation(
                     management_bar, now, time_index, prices, segments,
+                    interval,
                 )
                 consecutive = (
                     transition_previous_bar is not None and management_bar is not None
-                    and management_bar.open_time == transition_previous_bar.open_time + FIVE_MINUTES
+                    and management_bar.open_time == transition_previous_bar.open_time + interval
                     and management_bar.segment_id == transition_previous_bar.segment_id
                 )
                 if current_side is None or not consecutive:

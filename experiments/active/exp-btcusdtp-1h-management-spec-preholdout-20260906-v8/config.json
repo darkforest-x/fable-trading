@@ -1,0 +1,30 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-management-spec-preholdout-20260906-v8",
+  "base_config": "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json",
+  "base_config_sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a",
+  "parent_results": "experiments/active/exp-btcusdtp-1h-frozen-source-preholdout-20260906-v7/results",
+  "inputs": {
+    "case_requests.csv.gz": "86eca6fdd773b61203abbe2a6d3d1c575021d5d9303bf1b00b0445eb9296c041",
+    "control_requests.csv.gz": "71f35b4841199a72d67f05ba17cae265bd38dfa2b4ea06d30700dd6bcd1e1f39",
+    "source_zones.csv.gz": "d2a2fcf124b74dfdb0a75f3cf22870a02f75c268229cc7012bd8bcc4c8cfd170",
+    "assignments.csv.gz": "c7839e588071179a90b28d44e5f0b1d616c3feb9524c9e9bb78cb4c57821c77f",
+    "case_trades.csv.gz": "8f1e867f52baf9ee56af86a95e879d6248f97920bb0d6980265bba5c4114023e",
+    "control_trades.csv.gz": "9818809642ac8fbc70bf50557938582b2d19667e9d6a1f324bad44d6b7e8a3fd",
+    "case_request_outcomes.csv.gz": "34af7c88f323602b3acb345491876502d97f1a00349b933ef91c8f50bdf6cc65",
+    "control_request_outcomes.csv.gz": "8832309d44dc6bf11c4032f5080f48d185801b777e79b7e6dd237e72c376d5f7",
+    "matched_request_outcomes.csv": "2363ba35644fe6ee9f92797d935fca7c0141fc91524f5e29ee9a659575caa031",
+    "single_pending_zone_ledger.csv.gz": "d0bbbb055ae32ccbb25fad3652ded44c26ad91aa65dcc94d918507a9592f4e5c",
+    "summary.json": "8303b6a3fc18f5d6e12e91b95a331717c7306ce90b3be3ddcfca54db309b4984",
+    "support.json": "9f950a76c527aa6a212ad1f94b5f4915e07497adfe2ffe61468741fc111c0074"
+  },
+  "policies": [
+    {"id": "5m_native40", "management_minutes": 5, "ma_kind": "SMA", "ma_length": 40, "exit_mode": "transition_colour", "confirmations": 1},
+    {"id": "15m_native40", "management_minutes": 15, "ma_kind": "SMA", "ma_length": 40, "exit_mode": "transition_colour", "confirmations": 1}
+  ],
+  "selection": {"minimum_events": 80, "minimum_per_fold": 12, "positive_folds": 4, "minimum_profit_factor": 1.1, "minimum_active_months": 12, "minimum_months_per_fold": 3, "matched_coverage": 0.9},
+  "inference": {"draws": 9999, "seed": 20260906, "p_limit": 0.01, "joint_required": ["case_delta", "excess_delta"]},
+  "no_audit_entry_point": true,
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false
+}
