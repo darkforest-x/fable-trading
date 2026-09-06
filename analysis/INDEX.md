@@ -8,6 +8,8 @@
 
 ## 按日期倒序
 
+本轮增量入口（2026-09-06，保留上方生成快照及其他会话改动）：[Hourly Trend Exit Confirmation](html/p1_btcusdtp_hourly_failed_confirm_v18_20260906.html) · [源报告](p1_btcusdtp_hourly_failed_confirm_v18_20260906.md)。两根确认救回4笔但全251均净−16.77bp、四半年皆负，拒绝升级。
+
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
 | 2026-09-05 | [`p1_eth_xau_15m_asset_specific_k1k2_20260905.md`](p1_eth_xau_15m_asset_specific_k1k2_20260905.md) | ETH / XAU 15m：品种专属 K1→K2 趋势策略审计 | ETH 与 XAU 已分别完成均线、状态变化票、runner 和微止盈参数选择，但冻结确认期分别为 -77.26/-50.41bp 每笔，均未通过；不写入 TradingView 或生产。 |

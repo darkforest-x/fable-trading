@@ -5307,18 +5307,33 @@ experiments:
 
   - experiment_id: exp-btcusdtp-1h-failed-confirm-preholdout-20260906-v18
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: planned
+    source_commit: "cbb25d3"
+    status: rejected
     question: Does adjacent two-bar confirmation reduce V17 sacrificed recoveries without worsening full-population economics?
     single_variable: fast_failed_launch_confirmations=2; profitable real-edge half and slow15 remainder unchanged.
+    result: >-
+      Net-17.0782to-16.7690bp,PF.5716to.5918,all4halvesnegative.
+      D+.3092bp,p.414;I154+.6462bp,p.3935;97unknown.4recoveredwinners,
+      138stillfull,3waitingstops. Serial250net-16.9703bp. No acceptance.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     path: experiments/active/exp-btcusdtp-1h-failed-confirm-preholdout-20260906-v18
     canonical_report: analysis/html/p1_btcusdtp_hourly_failed_confirm_v18_20260906.html
-    artifacts: []
+    artifacts:
+      - btcusdtp-hourly-failed-confirm-v18-results
+      - btcusdtp-hourly-failed-confirm-v18-report
+      - btcusdtp-hourly-failed-confirm-v18-html
+      - btcusdtp-hourly-failed-confirm-v18-artifact
+      - btcusdtp-hourly-failed-confirm-v18-verification
+      - btcusdtp-hourly-failed-confirm-v18-notebook
     reuse_allowed: false
-    notes: Full251 and462 own controls;154 fixed triples and97 unknown. Reused pre2025 prefix includes earlier warmup. No independent-validation claim.
+    notes: >-
+      Full251/462 own controls;154triples97unknown. Single raw replay after
+      cbb25d3 freeze. Saved verifier82a3651 checks55outputs30sources1110pending
+      rows;351tests2optionalutilityskips. HTML19blocks1chartstructural_only.
+      Reused pre2025 prefix includes earlier warmup. No independent-validation
+      claim;matchedcase worsened,positive I comes from worse controls.
 
   - experiment_id: exp-btcusdtp-1h-failed-launch-preholdout-20260906-v17
     source_repo: darkforest-x/fable-trading

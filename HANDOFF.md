@@ -2,19 +2,37 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-09-06 — BTC V18 相邻两根确认实现完成，待冻结后回放）
+## ⚡ 当前真相（2026-09-06 — BTC V18 两根确认已回测，仍拒绝升级）
 
-盈利goal仍active/未达成。本轮仅将V17亏损fast full改为下一根完整native5
-反色确认，盈利真edge50%和slow15余仓/K1stop/20bp/72h全部不变。新pending
-独立日志，确认不是新flip；第二open若恢复盈利只取消、不得无edge半仓。
-全251/462/154triples/97unknown保留；旧nonfull全字段parity、首pending等于
-旧full时钟；已知新退出至少晚5min，未知可同刻。新实验目录v18已登记planned，
-config/PROJECT_PLAN/ARTIFACT_PLAN冻结，尚未读取本轮raw价格/计算收益。
-engine117synthetic、L3总1059通过；root runner43通过，diagnostics25过2可选
-utility集成skip。扩展3754通过2既有L1migration hash失败，未改L1或ledger。
-下一步：预审通过后先提交builder/config/plan/tests，再唯一回放pre2025价格
-前缀（含pre2023warmup），OFF先锚V17六表，候选全体回放/逐臂单仓重算。
-报告/独立saved verifier/notebook正并行开发；无holdout/TV/训练/实盘修改。
+盈利goal仍active/未达成、不是blocked。cbb25d3先提交builder/config/plan/tests后
+唯一raw回放pre2025前缀219551行含pre2023warmup9024；交易评估2023–2024旧开发集。
+全251/462/154triples/97unknown保留，713fast/1426slow先冻结再读取旧结果。
+OFF V17六表全旧字段复现，候选99case/140control非旧full路径不变，逐臂重算单仓。
+
+仅亏损fast full延后到相邻第二根完整native5仍反色且新actualopen未赚够20bp，
+慢15m仍同向才确认全平；盈利真edge50%和slow余仓/K1stop/20bp/72h不变。
+均净−17.0782→−16.7690bp，PF.5716→.5918，四半年全负，D+.3092bp,p.414；
+I154+.6462bp,p.3935，却来自匹配case−.2950而control−.9412，不能称病例改善。
+152旧full建180pending=138确认+33取消+9优先终止。70改善81更差100同收益，
+其中99同路径。4亏转盈+425.649eventbp抵196继续亏−348.049，51赢家不变。
+138仍full增量−231.186、3等待stop−48.865、11slow+357.651。原V16被切22赢家
+只救4，18仍亏；31被切partial只恢复5。V18仍比V16均净低1.5751bp。
+实际serial250均净−16.9703bp，全251机会未选置零均净−16.9027，不混分母。
+
+82a3651saved verifier/report/notebook已提交后执行；55output/30source/6anchor/
+2245trueedge/1110lifecycle/48monthly/费用-D-I-serial审计通过，非raw/SMA/漏记edge/p
+独立回放。07ab093PATH_QUERIES提交后saved-only归因。最终351tests过2utilityskip；
+system27诊断tests全过、实际工具执行，未装包。直接pytest路径失败后改python-m
+正确本仓import；未改代码救测试。扩展3754过2既有L1hash失败未动。Notebook3格
+plainPython，pin三verifier；HTML19块1native图structural_only、未手机/theme浏览器QA。
+
+交付：analysis/html/p1_btcusdtp_hourly_failed_confirm_v18_20260906.html。
+V18已完成拒绝，勿重跑成待完成。下一项见V18/NEXT_EXPERIMENT.md：保持两根确认
+只把确认后的100%全平改50%风险减仓，余仓原slow15/K1stop/72h，任何半仓后快腿
+仅一次；第二open恢复>20bp仍只取消，不造无edge半仓。不是V1slow状态半仓、V2
+固定R或V16盈利edge半仓，不能线性拼旧收益。尚未实现/登记/评估下一配置；先冻结
+新builder/计划/测试并提交再真实全体回放。覆盖61.35%不足90%仍不降门。
+本轮无2025+价格/holdout/TV/训练/ACTIVE/实盘改动，不能承诺盈利。
 
 ### 第十七轮背景（已完成并拒绝，以下为当时记录）
 
