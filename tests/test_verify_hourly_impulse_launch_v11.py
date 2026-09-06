@@ -268,8 +268,9 @@ def diagnostics(tables):
     rows=[]
     for old,new in zip(tables["baseline"]["case_trades"],tables["candidate"]["case_trades"]):
         row={"event_id":old["event_id"]}
-        row.update({k+"_before":value for k,value in old.items() if k!="event_id"})
-        row.update({k+"_after":value for k,value in new.items() if k!="event_id"})
+        shared=old.keys() & new.keys()
+        row.update({k+"_before" if k in shared else k:value for k,value in old.items() if k!="event_id"})
+        row.update({k+"_after" if k in shared else k:value for k,value in new.items() if k!="event_id"})
         a,b=old["net_return"],new["net_return"]
         timeout=new["outcome"]=="launch_timeout_exit"
         row.update(difference=b-a,timeout_exit=timeout,
@@ -298,7 +299,36 @@ def diagnostics(tables):
 
 def test_all_mechanics_months_and_distributions_reconciled():
     tables,_,_=fixture()
-    assert v.verify_diagnostics(tables,*diagnostics(tables))==dict(paired_rows=3,monthly_rows=2,untrimmed_distributions=3)
+    data=diagnostics(tables)
+    assert "launch_progress_r" in data[0][0] and "launch_progress_r_after" not in data[0][0]
+    assert v.verify_diagnostics(tables,*data)==dict(paired_rows=3,monthly_rows=2,untrimmed_distributions=3)
+
+
+@pytest.mark.parametrize("mutation",["missing","changed","wrong_suffix","overwritten_clock"])
+def test_candidate_only_unsuffixed_columns_checked_fully(mutation):
+    tables,_,_=fixture();rows,groups,monthly,summary=diagnostics(tables)
+    if mutation=="missing":rows[0].pop("launch_progress_r")
+    elif mutation=="changed":rows[0]["launch_progress_r"]=.75
+    elif mutation=="wrong_suffix":rows[0]["launch_progress_r_after"]=rows[0].pop("launch_progress_r")
+    else:rows[0]["launch_deadline_at"]="2023-01-02T01:00:00.000000001Z"
+    with pytest.raises(v.VerificationError):v.verify_diagnostics(tables,rows,groups,monthly,summary)
+
+
+def test_unique_before_field_is_not_misread_as_merge_suffix():
+    tables,_,_=fixture()
+    for row in tables["baseline"]["case_trades"]:row["old_only_before"]="literal-old"
+    rows,groups,monthly,summary=diagnostics(tables)
+    assert rows[0]["old_only_before"]=="literal-old"
+    v.verify_diagnostics(tables,rows,groups,monthly,summary)
+    rows[0]["old_only_before"]="overwritten"
+    with pytest.raises(v.VerificationError):v.verify_diagnostics(tables,rows,groups,monthly,summary)
+
+
+def test_shared_suffix_cannot_overwrite_unique_field():
+    tables,_,_=fixture()
+    for row in tables["candidate"]["case_trades"]:row["entry_price_before"]=123
+    rows,groups,monthly,summary=diagnostics(tables)
+    with pytest.raises(v.VerificationError):v.verify_diagnostics(tables,rows,groups,monthly,summary)
 
 
 @pytest.mark.parametrize("target",["paired_time","paired_net","paired_difference","paired_group","paired_timeout",
@@ -377,3 +407,18 @@ def test_all_output_hashes_required(tmp_path,failure):
 def test_valid_output_hash_coverage(tmp_path):
     path=tmp_path/"case.csv";path.write_text("a\n1\n");(tmp_path/"summary.json").write_text("{}")
     assert v.verify_output_hashes(tmp_path,{"case.csv":hashlib.sha256(path.read_bytes()).hexdigest()})==1
+
+
+def test_study_must_follow_builder_commit(monkeypatch,tmp_path):
+    started=dict(builder_commit="a"*40,at="2023-01-02T00:00:00Z")
+    unix=int(datetime(2023,1,2,tzinfo=timezone.utc).timestamp())
+    monkeypatch.setattr(v.subprocess,"run",lambda *a,**k:SimpleNamespace(stdout=str(unix)))
+    v.verify_commit_time(tmp_path,started)
+    monkeypatch.setattr(v.subprocess,"run",lambda *a,**k:SimpleNamespace(stdout=str(unix+1)))
+    with pytest.raises(v.VerificationError):v.verify_commit_time(tmp_path,started)
+
+
+def test_missing_commit_metadata_not_skipped(monkeypatch,tmp_path):
+    def failed(args,**kwargs):raise subprocess.CalledProcessError(128,args)
+    monkeypatch.setattr(v.subprocess,"run",failed)
+    with pytest.raises(v.VerificationError):v.verify_commit_time(tmp_path,dict(builder_commit="a"*40,at="2023-01-02T00:00:00Z"))

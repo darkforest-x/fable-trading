@@ -403,14 +403,23 @@ def verify_diagnostics(tables, mechanics_rows, group_rows, monthly_rows, summary
     require(old.keys() == mechanics.keys() == new.keys(), "Mechanics dropped original cases")
     transitions, grouped, distributions = Counter(), defaultdict(list), defaultdict(list)
     for key, row in mechanics.items():
-        expected = {"event_id": key}
+        shared = old[key].keys() & new[key].keys()
+        used_columns = {"event_id"}
         for suffix, source in (("before", old[key]), ("after", new[key])):
-            expected.update({c+"_"+suffix: value for c, value in source.items() if c != "event_id"})
-        # Suffixed time names must still receive exact nanosecond comparisons.
-        for suffix in ("before", "after"):
-            actual = {c[:-len(suffix)-1]: value for c, value in row.items() if c.endswith("_"+suffix)}
-            actual["event_id"] = key
-            parity([old[key] if suffix == "before" else new[key]], [actual])
+            # A merge suffixes only overlapping non-key columns; candidate-only
+            # launch diagnostics retain their original names. Restore each side
+            # using its authoritative saved schema, not string-suffix guessing.
+            actual = {"event_id":key}
+            for column in source:
+                if column == "event_id":
+                    continue
+                merged = column+"_"+suffix if column in shared else column
+                require(merged not in used_columns, "Ambiguous merged source column collision")
+                require(merged in row, "Mechanics lost source column: " + merged)
+                used_columns.add(merged)
+                actual[column] = row[merged]
+            # Recovered original time names retain nanosecond-exact comparison.
+            parity([source], [actual])
         a, b = (number(source[key]["net_return"], nullable=True) for source in (old, new))
         known = boolean(old[key]["closed"]) and boolean(new[key]["closed"]) and a is not None and b is not None
         delta = b-a if known else None
@@ -493,6 +502,16 @@ def verify_output_hashes(results, hashes):
     return len(hashes)
 
 
+def verify_commit_time(root, started):
+    try:
+        value = subprocess.run(["git","show","-s","--format=%ct",started["builder_commit"]],
+                               cwd=root,check=True,capture_output=True,text=True).stdout.strip()
+    except subprocess.CalledProcessError as exc:
+        raise VerificationError("Builder commit metadata unavailable") from exc
+    require(re.fullmatch(r"\d+",value) is not None, "Invalid git commit timestamp")
+    require(int(value)*10**9 <= stamp(started["at"]), "Study started before its builder commit")
+
+
 def verify(root=ROOT, experiment_path=EXPERIMENT_PATH):
     root = Path(root)
     experiment = safe_path(root, experiment_path)
@@ -510,7 +529,15 @@ def verify(root=ROOT, experiment_path=EXPERIMENT_PATH):
     equal_number(summary["known_coverage_ceiling"], 154/251, "Coverage ceiling drift")
     equal_number(summary["coverage_required"], .9, "Coverage gate weakened")
     require(sha(experiment/"config.json") == summary["config_sha256"], "Config hash mismatch")
-    require(sha(safe_path(root, config["base_config"])) == config["base_config_sha256"], "Base config hash mismatch")
+    base_path = safe_path(root, config["base_config"])
+    require(sha(base_path) == config["base_config_sha256"], "Base config hash mismatch")
+    base = read_json(base_path)
+    require(base["execution"]["cost_fraction"] == .002 and base["execution"]["max_hours"] == 72 and
+            base["execution"]["stop_first"] is True, "Base economics drift")
+    require(summary["source"]["sha256"] == base["source"]["sha256"] and
+            summary["source"]["holdout_price_rows"] == 0 and
+            stamp(summary["source"]["phase_price_last_open"]) < date_stamp("2025-01-01"),
+            "Saved source receipt exceeds development price boundary")
     for directory, key in ((config["parent_results"], "inputs"), (config["mother_results"], "mother_inputs")):
         require(config[key] == summary[key] == started[key], "Frozen input receipt mismatch")
         require(directory.startswith("experiments/active/") and directory.endswith("/results"), "Input directory not saved evidence")
@@ -522,6 +549,7 @@ def verify(root=ROOT, experiment_path=EXPERIMENT_PATH):
     source_count = verify_committed_sources(root,started,summary,
         {"yoyo/layers/l3_backtest/hourly_impulse.py","yoyo/evaluation/hourly_impulse_launch_research.py",
          experiment_path+"/config.json",experiment_path+"/PROJECT_PLAN.md"})
+    verify_commit_time(root,started)
     tables = {arm: {name: read_csv(results/arm/file) for name, file in TABLE_FILES.items()} for arm in ARMS}
     for name in ("case_delta", "excess_delta", "serial_delta"):
         tables[name] = read_csv(results/(name+".csv"))
