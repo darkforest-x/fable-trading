@@ -5307,8 +5307,8 @@ experiments:
 
   - experiment_id: exp-btcusdtp-1h-decision-cadence-preholdout-20260906-v9
     source_repo: darkforest-x/fable-trading
-    source_commit: pending_preregistration_commit
-    status: preregistered
+    source_commit: "12df0a0"
+    status: rejected
     question: >-
       Does sampling unchanged native5m SMA40 colour at15m decision clocks
       improve fixed V7 requests after20bp and relative to fixed controls?
@@ -5320,6 +5320,22 @@ experiments:
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
+    result: >-
+      Fixed286 net-17.7878 to-16.4331bp,PF.6087to.6380,stops23to26.
+      D286=+1.3547bp,p=.2269;I283=+.8283bp,p=.3229,three unmatched unknown.
+      Both959 intentions/286 serial trades;207 lose-to-lose,7 lose-to-win,
+      4 win-to-lose,68 win-to-win. Financial/improvement gates rejected.
+    artifacts:
+      - btcusdtp-hourly-cadence-v9-development
+      - btcusdtp-hourly-cadence-v9-report
+      - btcusdtp-hourly-cadence-v9-html
+      - btcusdtp-hourly-cadence-v9-artifact
+      - btcusdtp-hourly-cadence-v9-verification
+    reuse_allowed: false
+    notes: >-
+      Same5m feature contexts byte-identical; oldV7 all-column parity passed.
+      2270 saved outcomes independently audited;1342 tests pass. Reused2023-2024
+      only; no audit, independent forward claim, TradingView or live mutation.
 
   - experiment_id: exp-btcusdtp-1h-management-spec-preholdout-20260906-v8
     source_repo: darkforest-x/fable-trading

@@ -2,15 +2,33 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-09-06 — BTC V9 退出检查频率实验登记中）
+## ⚡ 当前真相（2026-09-06 — BTC V9 完成，退出降频仍未盈利）
 
-Owner盈利goal仍active。V8为已完成负结果，V9仅验证原5mSMA40不变、决策检查5m→15m，
-raw5风险与质量检查仍每5m。固定V7全部286case/849control/959zone，成本20bp、K1stop、
-72h、入场时价/方向/风险、四2023–2024半年全不变；先提交builder/合成测试/计划，再开价格。
-首次检查floor15(entry)+15m；中途valid色不更新/arm/latch，invalid/缺口/segment清链。
-V9仍是源区突破支线的机制实验，不是原“1h穿MA直接入场”全系统的盈利验收。
-计划：experiments/active/exp-btcusdtp-1h-decision-cadence-preholdout-20260906-v9/PROJECT_PLAN.md。
-尚无V9回测结论，不动TradingView/生产/训练/真金，不开2025+/holdout。
+Owner盈利goal仍active。V9 prereg/config/builder/tests先在12df0a0提交，再首次运行；
+旧2023–2024开发期含事前预热共219551价格行，截止2024-12-31 23:55 UTC，holdout0。
+原生5mSMA40完全不变，仅决策检查5m→15m；raw5风险和质量仍每5m。固定V7全部
+286case/849control/959zone，入场时价/方向/K1stop/ATR/risk/20bp/72h与控制分配全不变。
+旧V7六表全旧字段parity通过；两臂context逐字段及解压CSV字节一致，所有2270结果闭合。
+
+新净−16.4331bp（旧−17.7878），PF.6380（旧.6087），胜75/286（旧72），SL26（旧23）。
+D286=+1.3547bp，CI[−1.596,+5.043]，p=.2269；I283=+.8283bp，CI[−2.413,+4.375]，
+p=.3229，3未匹配仍NaN。新配对case−16.1045/control−21.9751，超额+5.8706bp、p=.1160。
+四半年新病例−21.24/−23.96/+3.61/−26.17bp，只有一段正；完整财务与改善门拒绝。
+207两版皆亏、7亏转盈、4盈转亏、68皆赢。211新亏单只有27笔在实际持仓曾≥1R
+（重叠标签14giveback+12costflip+1hardstop）；不能将所有亏损归因于止盈没拿住。
+两版单仓都959意图/286交易、0跳过，意图均值−5.3048→−4.9008bp，不是删单改善。
+
+独立CSV验证器046b92a核验2270收益/成本/时钟、286/283/959配对和独立单仓循环。
+最终1342测试通过；三路只读代码/保存账本/报告复核无阻断。不是独立原始行情第二重放。
+报告builder78f7243；HTML结构验证通过，但无兼容浏览器，手机视觉和交互未验证。
+交付：analysis/html/p1_btcusdtp_hourly_cadence_v9_20260906.html；旧V1–V8原样保留。
+实验：experiments/active/exp-btcusdtp-1h-decision-cadence-preholdout-20260906-v9/。
+
+下一步仍未登记/运行：回到owner原“1h大实体/真实吞没穿MA直接入场”的入口家族，
+先诊断原251case只有154匹配（61.35%）的事前支持不足，再设计入场持续性实验；不得
+偷偷放松核心匹配、筛未来赢家/MFE，或重命名旧共振/分批失败规则再跑。V7–V9是源区
+突破机制支线，不是原入口全系统的盈利验收。已有后续价格不是干净独立验证样本。
+无TradingView、ACTIVE/frozen、VPS/forward、训练、部署或真金变更。盈利目标未完成。
 
 ### 第八轮背景（已完成，勿重复）
 

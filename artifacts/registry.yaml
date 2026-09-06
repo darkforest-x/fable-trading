@@ -15045,3 +15045,88 @@ artifacts:
     config_hash: "0352432f3667494f07b64fd5a8da30009f32deb89d80fab5f85322ac29ab1d83"
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: "Read-only saved-ledger audit,18frozenhashes,1135closures,959source clocks. Not independent raw replay or prospective validation."
+
+  - artifact_id: btcusdtp-hourly-cadence-v9-development
+    artifact_type: research_result
+    role: fixed_feature_decision_cadence_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: "12df0a0"
+    source_path: experiments/active/exp-btcusdtp-1h-decision-cadence-preholdout-20260906-v9/results/summary.json
+    sha256: "5d0b9e7dd960f945f8f7c622df99e176c01e8db8ffcfe359fa53cf130e5eb8bd"
+    size_bytes: 31423
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-decision-cadence-preholdout-20260906-v9/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "12df0a0"
+    config_hash: "efb52888167cde56b8bec745baeb131317ef58bee2267238bba8cb25683027f2"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Rejected:286cases,849controls,959zones; check15m net-16.4331bp,D+1.3547bp,I+.8283bp,intervals cross0. Native5m features unchanged; reused development."
+
+  - artifact_id: btcusdtp-hourly-cadence-v9-report
+    artifact_type: report
+    role: standalone_v9_technical_source
+    source_repo: darkforest-x/fable-trading
+    source_commit: "78f7243"
+    source_path: analysis/p1_btcusdtp_hourly_cadence_v9_20260906.md
+    sha256: "f2faf9404ed5970c231856869004fc0b8c77d4c47813f8b33caa7e62f1a481da"
+    size_bytes: 15608
+    storage_uri: "repo://analysis/p1_btcusdtp_hourly_cadence_v9_20260906.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "78f7243"
+    config_hash: "efb52888167cde56b8bec745baeb131317ef58bee2267238bba8cb25683027f2"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Authored after saved results;78f7243 identifies presentation builder, not prior prose commit. Full V1-V8 preserved. Original hourly MA-cross entry not validated."
+
+  - artifact_id: btcusdtp-hourly-cadence-v9-html
+    artifact_type: report
+    role: owner_delivery_portable_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "78f7243"
+    source_path: analysis/html/p1_btcusdtp_hourly_cadence_v9_20260906.html
+    sha256: "0c2933f2176430f2db5970e5e6f279f8e585f48c9674bb2976bf1a4cf7abaf74"
+    size_bytes: 466649
+    storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_cadence_v9_20260906.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "78f7243"
+    config_hash: "efb52888167cde56b8bec745baeb131317ef58bee2267238bba8cb25683027f2"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "15blocks,1native12bin count chart,all286. Official package structural_only; missing headless-shell, mobile and interaction QA not verified."
+
+  - artifact_id: btcusdtp-hourly-cadence-v9-artifact
+    artifact_type: report
+    role: canonical_native_report_manifest_snapshot
+    source_repo: darkforest-x/fable-trading
+    source_commit: "78f7243"
+    source_path: analysis/output/btcusdtp_hourly_cadence_v9_20260906/artifact.json
+    sha256: "def46ad9aa5b2f7d37e866e6841711051435186a3180af6313471d549c1ebe1f"
+    size_bytes: 37464
+    storage_uri: "repo://analysis/output/btcusdtp_hourly_cadence_v9_20260906/artifact.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "78f7243"
+    config_hash: "efb52888167cde56b8bec745baeb131317ef58bee2267238bba8cb25683027f2"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Complete V9 narrative and real SQLite distribution with saved summary/delta/mechanics source identities; no bespoke chart runtime."
+
+  - artifact_id: btcusdtp-hourly-cadence-v9-verification
+    artifact_type: report
+    role: independent_saved_ledger_and_sampled_clock_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "046b92a"
+    source_path: experiments/active/exp-btcusdtp-1h-decision-cadence-preholdout-20260906-v9/VERIFICATION.md
+    sha256: "85326833e206a72cec830227e3e402f0f3e93e128e4bd14e906e60ab8f6ca793"
+    size_bytes: 7053
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-decision-cadence-preholdout-20260906-v9/VERIFICATION.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "046b92a"
+    config_hash: "efb52888167cde56b8bec745baeb131317ef58bee2267238bba8cb25683027f2"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Verifier046b92a,2270 formulas/clocks,exact286/849contexts,V7old-column parity,286/283/959denominators,1342tests. Not independent raw-price replay."
