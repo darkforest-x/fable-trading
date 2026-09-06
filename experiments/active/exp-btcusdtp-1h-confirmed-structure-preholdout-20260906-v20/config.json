@@ -1,0 +1,99 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20",
+  "base_config": "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json",
+  "base_config_sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a",
+  "parent_requests": "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results",
+  "request_inputs": {
+    "original_mothers.csv.gz": "b3f442ad8b0959b19cb5ae58fd40bc6a3bf40b455b4be31f3758d53940eea3e6",
+    "control_mothers.csv.gz": "01050c7a9602f469406df515edcc73ef2f4c9db2d46529e25030934012eebd5a",
+    "assignments.csv": "671782877ee67824f7687243d5e7deae29d78a0bcba6245319ecf55629027b0f",
+    "assignment_receipt.json": "1d77ca407712520e645463d30f97d26d452ccce45e87e68c2adcbc4120c43220"
+  },
+  "outcomes": "experiments/active/exp-btcusdtp-1h-failed-confirm-preholdout-20260906-v18/results/candidate",
+  "outcome_inputs": {
+    "case_episodes.csv.gz": "f1d6d8c29af2c78f4fe0a3c79560b1ac9e21062202d3ac1b462b640463ad8e02",
+    "control_episodes.csv.gz": "cdc677b08fab6185d2be363e871fe2f7cce0f5d72cdec52196e7c61ff52282e0",
+    "matched.csv": "3604757c56daee054c3caed6fe9dbf28018c72a73c0faf151de3c97c76b60a8b",
+    "single_pending.csv.gz": "c72d429fbd2193fa107d4335be835c37909596aedbc0184c50acababe23cd1ab"
+  },
+  "development_folds": [
+    [
+      "2023H1",
+      "2023-01-01",
+      "2023-07-01"
+    ],
+    [
+      "2023H2",
+      "2023-07-01",
+      "2024-01-01"
+    ],
+    [
+      "2024H1",
+      "2024-01-01",
+      "2024-07-01"
+    ],
+    [
+      "2024H2",
+      "2024-07-01",
+      "2025-01-01"
+    ]
+  ],
+  "phase_end_exclusive": "2025-01-01",
+  "expected": {
+    "mothers": 251,
+    "controls": 462,
+    "matched": 154,
+    "status_counts": {
+      "matched": 154,
+      "insufficient_exact_controls": 94,
+      "missing_causal_matching_support": 3
+    }
+  },
+  "support": {
+    "minimum_events": 80,
+    "minimum_per_fold": 12,
+    "minimum_active_months": 12,
+    "minimum_months_per_fold": 3
+  },
+  "gate": {
+    "left": 10,
+    "right": 10,
+    "window": 21,
+    "pivot_rule": "centre_equals_window_extreme_ties_allowed",
+    "pine_builtin_tie_parity_verified": false,
+    "unchanged_level_price_required": true,
+    "persistent": true,
+    "decision": "own_K1_close_after_state_update",
+    "gap_resets_state_and_levels": true,
+    "no_break_on_k1_requirement": true,
+    "own_controls": true,
+    "unknown_is_abstention": false,
+    "length_search": false
+  },
+  "fixed_execution": {
+    "policy": "15m_native40_failed_confirm2",
+    "cost_fraction": 0.002,
+    "max_hours": 72,
+    "stop": "K1_extreme",
+    "unchanged_cached_episodes": true,
+    "new_intrabar_replays": 0,
+    "serial_recomputed_per_arm": true
+  },
+  "outcome_read_rule": "only_after713context_freeze_and_all_support_gates_pass",
+  "inference": {
+    "unit": "paired_original_intention",
+    "clusters": "calendar_month",
+    "draws": 9999,
+    "seed": 20260906,
+    "alpha": 0.01,
+    "joint_required": [
+      "case_delta",
+      "excess_delta"
+    ],
+    "reused_development_not_confirmatory": true
+  },
+  "matching_coverage_required": 0.9,
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false
+}

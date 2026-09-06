@@ -14,6 +14,32 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9029410"
+    status: active
+    question: >-
+      Does persistent confirmed10/10 hourly structure improve the fixed251 BTC
+      direct-K1 intentions under unchanged V18 exits and20bp costs?
+    single_variable: >-
+      Own K1-close persistent structure direction gate; explicit tie-inclusive
+      Python approximation, stable-level guard and gap reset. No parameter grid,
+      control rematching, entry-time or exit/cost changes.
+    result: >-
+      Preregistered before feature generation; all713 contexts must freeze
+      before any outcome access. If inherited support passes, reuse fixed V18
+      independent episodes and recompute all-intention/serial/matched accounting.
+      No new intrabar replay or independent validation claim.
+    canonical_report: experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/PROJECT_PLAN.md
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    notes: >-
+      Same2023--2024 development only.251cases/462owncontrols/154fixedtriples/
+      97unmatched retained.61.35% matching coverage still fails90%; oldmultiasset
+      K1/K2 aligned-structure negative evidence remains. No TradingView/live change.
+
   # ==========================================================================
   # yoyo-eth -- numeric semantic baseline, no YOLO
   # ==========================================================================
