@@ -2,7 +2,36 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-09-06 — BTC V12 已实测，冻结均线失效退出仍亏损）
+## ⚡ 当前真相（2026-09-06 — BTC V13 已实测，4h同向过滤未改善交易质量）
+
+盈利goal仍active、未完成。本轮有实际进展：d3366d3先提交builder/config/plan/tests，
+再首跑V13原2023–2024价格前缀219551行，无2025+价格物化/holdout0。唯一变化是
+K1 OPEN前最近完整4h HL2/SMA40颜色同向准入；40连续4h足够，不夹带43根斜率预热。
+保留原251病例/462控制/154triples、K1stop/20bp/72h和V5native5m trueflip，不叠V12出口。
+先冻结713 owncontextgate，再全旧六表全字段parity，候选实际回放accepted且旧字段全同。
+
+病例121accepted/127abstain/3unknown，控制311/151/0。Actual121净−18.9541bp，PF.5476，
+30胜91亏，四半年全负；并未提升交易质量。已知248含127弃单0均−9.2478bp，不能和原
+全251均−14.3066直接相减。同248before−14.1018，D+4.8540，CI[−2.309,11.427]p=.0927。
+95避亏抵4405.14事件bp，但32漏赢损3201.34；127被弃本也净−9.4787，不可反转门称盈利。
+I154−1.6531bp，CI[−11.453,7.333]p=.6295，原97仍未知；控制改善更多。3未知全warmup，
+原也未匹配。单仓firstunknown占72h，其余2unknown被阻塞；独立episode仍NaN，serial
+只1unknown/250known，249被处理不等于249交易，实际121无变。91亏里75heldMFE<1R、
+83毛非正、8成本翻负；不是大多数只差止盈。原14硬止损仍留11，却漏32/62原赢家。
+
+独立保存验证器7c56ef3核51输出/20源码hash、三态费用、D/I/串行/48月表；不重放raw
+或独立重算p。最终2879相关tests通过。notebook5格plainPython，1145交易成本/432保留
+旧字段/713门/D通过；非Jupyter/fullschema。HTML16块/1真实SQL全251分布，官方
+structural_only，无Chromium，手机/来源弹窗视觉未验证。详见V13 VERIFICATION。
+
+交付：analysis/html/p1_btcusdtp_hourly_prior_colour_v13_20260906.html。
+实验：experiments/active/exp-btcusdtp-1h-prior4h-colour-preholdout-20260906-v13/。
+下一步已只读排重：require_breakout20在V1随已选1h斜率+旧colour测试过，111→16净−40.557，
+失败保留；max_cross_count/min_efficiency也做过。只可单独复核原251/V5trueflip上prior20
+结构突破，不叠本次4h门、不扫N；先因果支持数，不够80/min12则不靠看收益救参数。
+NEXT_EXPERIMENT仅提案，尚未登记/实现/运行。新鲜独立验证与90%覆盖未解决，不自动上线。
+
+### 第十二轮背景（已完成，勿重复）
 
 盈利goal仍active、未完成。本轮是实际进展：c5ce2f2先提交builder/config/plan/tests再回放；
 V12仅在原V5 native5m trueflip上加frozen_ma_exit，K1自身1hSMA40冻结边界，完整持仓5m

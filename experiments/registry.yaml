@@ -5307,8 +5307,8 @@ experiments:
 
   - experiment_id: exp-btcusdtp-1h-prior4h-colour-preholdout-20260906-v13
     source_repo: darkforest-x/fable-trading
-    source_commit: "0c31a72"
-    status: active
+    source_commit: "d3366d3"
+    status: rejected
     question: >-
       Does prior completed4h colour at K1 OPEN improve V5 full-opportunity
       net returns and same fixed-control excess without changing execution?
@@ -5316,16 +5316,26 @@ experiments:
       One pure40bar4hHL2/SMA colour entry gate, no slope/ATR gate. Original251
       cases462controls154triples;20bp,K1stop,72h,native5mtrueflip unchanged.
     result: >-
-      Registered before first V13 price run. No result yet. Explicit tri-state
-      accounting preserves known abstention0 and unknownNaN, full denominators.
+      Case121accepted127abstain3unknown; actualselected net-18.9541bp PF.5476,
+      30wins91losses, all4foldsnegative. Same248known D+4.8540bp p.0927;
+      fixedI154-1.6531bp p.6295,97unknown. No profitable candidate.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: experiments/active/exp-btcusdtp-1h-prior4h-colour-preholdout-20260906-v13/PROJECT_PLAN.md
+    canonical_report: analysis/html/p1_btcusdtp_hourly_prior_colour_v13_20260906.html
+    artifacts:
+      - btcusdtp-hourly-prior-colour-v13-development
+      - btcusdtp-hourly-prior-colour-v13-report
+      - btcusdtp-hourly-prior-colour-v13-html
+      - btcusdtp-hourly-prior-colour-v13-artifact
+      - btcusdtp-hourly-prior-colour-v13-verification
+      - btcusdtp-hourly-prior-colour-v13-notebook
     reuse_allowed: false
     notes: >-
-      Parent commit above; builder commit recorded before replay. Reused2023--2024
-      only; known61.35% matching coverage cannot pass90%. NoTV/live/holdout change.
+      d3366d3 builder beforeactualreplay,713pre-outcome gates,fullV5parity then
+      actual432acceptedreplays. Verifier7c56ef3 checks51outputs20sourcecommits,
+      notraw/p recomputation;2879tests. HTMLstructural_only,notebookplainPython.
+      All251/462motherrows retained,3unknownnot0;reused2023--2024only.NoTV/live.
 
   - experiment_id: exp-btcusdtp-1h-frozen-ma-exit-preholdout-20260906-v12
     source_repo: darkforest-x/fable-trading

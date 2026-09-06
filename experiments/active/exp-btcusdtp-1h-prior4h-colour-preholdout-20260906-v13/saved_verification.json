@@ -1,0 +1,84 @@
+{
+  "counts": {
+    "cases": 251,
+    "controls": 462,
+    "matched": 154,
+    "unmatched": 97
+  },
+  "gate_counts": {
+    "case": {
+      "accepted": 121,
+      "abstain": 127,
+      "unknown": 3
+    },
+    "control": {
+      "accepted": 311,
+      "abstain": 151,
+      "unknown": 0
+    }
+  },
+  "effects": {
+    "case_delta": {
+      "total_pairs": 251,
+      "n": 248,
+      "unknown_pairs": 3,
+      "improved": 95,
+      "worsened": 32,
+      "unchanged": 121,
+      "mean_bp": 4.854035111504136
+    },
+    "excess_delta": {
+      "total_pairs": 251,
+      "n": 154,
+      "unknown_pairs": 97,
+      "improved": 49,
+      "worsened": 55,
+      "unchanged": 50,
+      "mean_bp": -1.6530889597756018
+    },
+    "serial_delta": {
+      "total_pairs": 251,
+      "n": 250,
+      "unknown_pairs": 1,
+      "improved": 97,
+      "worsened": 32,
+      "unchanged": 121,
+      "mean_bp": 5.159513441420081
+    }
+  },
+  "raw_replay": false,
+  "inferential_p_recomputed": false,
+  "limitation": "Saved-ledger consistency; no independent40bar/SMA/source-continuity or intrabar replay; no profitability proof.",
+  "mechanics": {
+    "case": {
+      "total": 251,
+      "accepted": 121,
+      "abstain": 127,
+      "unknown": 3,
+      "known_pairs": 248,
+      "avoided_net_losers": 95,
+      "missed_net_winners": 32,
+      "avoided_loss_total_bp": 4405.143671487937,
+      "missed_winner_total_bp": 3201.34296383491
+    },
+    "control": {
+      "total": 462,
+      "accepted": 311,
+      "abstain": 151,
+      "unknown": 0,
+      "known_pairs": 462,
+      "avoided_net_losers": 130,
+      "missed_net_winners": 21,
+      "avoided_loss_total_bp": 4811.499390182604,
+      "missed_winner_total_bp": 2056.8919912651527
+    }
+  },
+  "monthly_rows": 48,
+  "status": "passed",
+  "output_hashes_verified": 51,
+  "committed_sources_verified": 20,
+  "builder_commit": "d3366d3f3fdc4b7b3d1393742dd358734bc81d3f",
+  "summary_sha256": "97a590bc4743f8fac4d1d273964b4b68c5ee7b71c6901f9315747524e86644b7",
+  "verifier_commit": "7c56ef3",
+  "command": ".venv/bin/python scripts/verify_hourly_impulse_prior_colour_v13.py"
+}

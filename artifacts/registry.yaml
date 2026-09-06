@@ -15251,6 +15251,108 @@ artifacts:
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: "Verifier046b92a,2270 formulas/clocks,exact286/849contexts,V7old-column parity,286/283/959denominators,1342tests. Not independent raw-price replay."
 
+  - artifact_id: btcusdtp-hourly-prior-colour-v13-development
+    artifact_type: report
+    role: fixed_prior4h_colour_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d3366d3"
+    source_path: experiments/active/exp-btcusdtp-1h-prior4h-colour-preholdout-20260906-v13/results/summary.json
+    sha256: "97a590bc4743f8fac4d1d273964b4b68c5ee7b71c6901f9315747524e86644b7"
+    size_bytes: 35623
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-prior4h-colour-preholdout-20260906-v13/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "d3366d3"
+    config_hash: "506f97b99d9935a07985f8922412fad4cc4835b51d23a6de961635eb59b11e2a"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "251case462control;121selected net-18.9541bp,D248known+4.854,I154-1.653;51other outputs pinned. Reused2023-2024,noholdout."
+
+  - artifact_id: btcusdtp-hourly-prior-colour-v13-report
+    artifact_type: report
+    role: standalone_v13_technical_source
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7c56ef3"
+    source_path: analysis/p1_btcusdtp_hourly_prior_colour_v13_20260906.md
+    sha256: "fff78688cc30482c3c01bc12f3f8872670c36e651570091990ad219ee198213e"
+    size_bytes: 17864
+    storage_uri: "repo://analysis/p1_btcusdtp_hourly_prior_colour_v13_20260906.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7c56ef3"
+    config_hash: "506f97b99d9935a07985f8922412fad4cc4835b51d23a6de961635eb59b11e2a"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Complete negative findings and three-state denominators. source_commit identifies committed presentation tooling, not prose date."
+
+  - artifact_id: btcusdtp-hourly-prior-colour-v13-html
+    artifact_type: report
+    role: owner_delivery_portable_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7c56ef3"
+    source_path: analysis/html/p1_btcusdtp_hourly_prior_colour_v13_20260906.html
+    sha256: "77b9a03aeda2898f5305f9a9ccbafbb2040ee08e37e91cba87f9151a52279bea"
+    size_bytes: 521497
+    storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_prior_colour_v13_20260906.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7c56ef3"
+    config_hash: "506f97b99d9935a07985f8922412fad4cc4835b51d23a6de961635eb59b11e2a"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "16blocks/1actualSQL all251 count chart. Official structural_only; no mobile/browser/source-interaction verification."
+
+  - artifact_id: btcusdtp-hourly-prior-colour-v13-artifact
+    artifact_type: report
+    role: canonical_native_report_manifest_snapshot
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7c56ef3"
+    source_path: experiments/active/exp-btcusdtp-1h-prior4h-colour-preholdout-20260906-v13/artifact.json
+    sha256: "7e42a3c1c7819a09cfdbeaf5bf321e5dbe2436d0d193c7d49f1142717542dc65"
+    size_bytes: 39778
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-prior4h-colour-preholdout-20260906-v13/artifact.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7c56ef3"
+    config_hash: "506f97b99d9935a07985f8922412fad4cc4835b51d23a6de961635eb59b11e2a"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Full narrative and actualSQLite signed-bin counts incl3unknown. Actual trades differ from zero-inclusive opportunities. No financial changes."
+
+  - artifact_id: btcusdtp-hourly-prior-colour-v13-verification
+    artifact_type: report
+    role: independent_saved_ledger_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7c56ef3"
+    source_path: experiments/active/exp-btcusdtp-1h-prior4h-colour-preholdout-20260906-v13/VERIFICATION.md
+    sha256: "a960f0e4619ac9076978978c749c5b4f3466404660c423f5cd2e1396bdc5aafe"
+    size_bytes: 6537
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-prior4h-colour-preholdout-20260906-v13/VERIFICATION.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7c56ef3"
+    config_hash: "506f97b99d9935a07985f8922412fad4cc4835b51d23a6de961635eb59b11e2a"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "51outputs20committedsources;tri-statecosts,D/I/serial,48monthlyrows;2879relatedtests. Notrawreplay or independentp."
+
+  - artifact_id: btcusdtp-hourly-prior-colour-v13-notebook
+    artifact_type: report
+    role: saved_three_state_policy_audit_notebook
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7c56ef3"
+    source_path: experiments/active/exp-btcusdtp-1h-prior4h-colour-preholdout-20260906-v13/prior_colour_audit.ipynb
+    sha256: "96c1561cfb57711f9ee46061fffd700e539305b4f54ff10675add10c92a38437"
+    size_bytes: 28482
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-prior4h-colour-preholdout-20260906-v13/prior_colour_audit.ipynb"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "7c56ef3"
+    config_hash: "506f97b99d9935a07985f8922412fad4cc4835b51d23a6de961635eb59b11e2a"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "5code cells plainPythonexecuted,1145costrows432acceptedoldfields713gates and251D248known. NoJupyter/fullschema/raw/I/p validation."
+
   - artifact_id: btcusdtp-hourly-frozen-ma-v12-development
     artifact_type: report
     role: fixed_frozen_ma_exit_comparison
