@@ -33,10 +33,19 @@ The independent V12 frozen-MA exit reads the completed signal hour's supplied
 ``ma`` once, available at ``signal_time + 1h == decision_time``. After entry,
 only valid, fully held raw5 CLOSE values can latch a strict wrong-side exit for
 the next real raw5 open. The entry boundary never follows management-bar MA.
+
+V16's opt-in fast partial adds one50% realization to native15 trueflip exits.
+An adjacent completed native5 aligned-to-opposite edge can execute only while
+the latest fully completed native15 colour is aligned and the current raw5
+open's directional gross gain strictly exceeds20bp. Decimal price strings make
+exact fee-boundary equality fail without a floating-point tolerance/grid:
+https://docs.python.org/3.9/library/decimal.html
 """
 from __future__ import annotations
 
 from typing import Any, Dict, Mapping, Optional
+from decimal import Decimal, localcontext
+import json
 
 import numpy as np
 import pandas as pd
@@ -119,6 +128,16 @@ def _policy(policy: Mapping[str, Any]) -> Dict[str, Any]:
                 or isinstance(confirmations, (bool, np.bool_)) or confirmations != 1
                 or selected.get("decision_minutes", 5) != 5 or launch_keys.intersection(selected)):
             raise ValueError("frozen_ma_exit requires boolean True with transition_colour/native5/confirmations1/decision5 and no launch policy")
+    if "fast_partial_fraction" in selected:
+        fraction = selected["fast_partial_fraction"]
+        if (isinstance(fraction, (bool, np.bool_))
+                or not isinstance(fraction, (int, float, np.integer, np.floating))
+                or not np.isfinite(fraction) or fraction != 0.5
+                or selected["exit_mode"] != "transition_colour" or minutes != 15
+                or isinstance(confirmations, (bool, np.bool_)) or confirmations != 1
+                or "decision_minutes" in selected or "frozen_ma_exit" in selected
+                or launch_keys.intersection(selected)):
+            raise ValueError("fast_partial_fraction requires0.5 with transition_colour/native15/confirmations1 and no other optional exit policy")
     # An explicit integer-minute horizon wins over inherited max_hours. Using
     # fractional hours can truncate an exact 5m duration by 1ns in pandas 2.3.3.
     # Without max_minutes the historical max_hours validation is unchanged.
@@ -186,6 +205,62 @@ def _frozen_ma_diagnostics(boundary: float = np.nan, available_at: Any = pd.NaT)
         "frozen_ma_trigger_close": np.nan, "frozen_ma_completed_close_count": 0,
         "frozen_ma_status": "entry_not_validated",
     }
+
+
+def _fast_partial_diagnostics() -> Dict[str, Any]:
+    """Only the opt-in dual-clock policy adds these source/outcome fields."""
+    return {
+        "partial_fast_enabled": True, "partial_fast_fraction": 0.5,
+        "partial_fast_profit_threshold": 0.002,
+        "partial_fast_initial_state": "unknown", "partial_fast_initial_side": np.nan,
+        "partial_fast_initial_reason": "entry_not_validated",
+        "partial_fast_initial_open_time": pd.NaT, "partial_fast_initial_available_at": pd.NaT,
+        "partial_fast_initial_management_segment_id": "", "partial_fast_initial_raw_segment_id": "",
+        "partial_fast_initial_ma": np.nan, "partial_fast_initial_hl2": np.nan,
+        "partial_fast_first_armed_at": pd.NaT, "partial_fast_reset_count": 0,
+        "partial_fast_last_reset_reason": "", "partial_fast_flip_count": 0,
+        "partial_fast_fill_count": 0, "partial_fast_realised_net_return": 0.0,
+        "partial_fast_events": "[]", "partial_fast_status": "entry_not_validated",
+        "partial_fast_trigger_previous_open_time": pd.NaT,
+        "partial_fast_trigger_open_time": pd.NaT, "partial_fast_trigger_available_at": pd.NaT,
+        "partial_fast_trigger_previous_side": np.nan, "partial_fast_trigger_side": np.nan,
+        "partial_fast_trigger_gross_return": np.nan,
+        "partial_fast_slow_open_time": pd.NaT, "partial_fast_slow_available_at": pd.NaT,
+        "partial_fast_slow_side": np.nan, "partial_fast_slow_state": "unknown",
+    }
+
+
+def _fast_partial_profit(open_: float, entry: float, direction: float) -> bool:
+    """Strict20bp in decimal quote units; never use future highs or tolerance."""
+    with localcontext() as context:
+        context.prec = 40
+        return Decimal(str(direction)) * (Decimal(str(open_))-Decimal(str(entry))) > Decimal("0.002")*Decimal(str(entry))
+
+
+def _native40_frame(frame: pd.DataFrame, minutes: int, name: str) -> None:
+    """Provenance gate only for the new branch; never infer native metadata."""
+    if (frame.attrs.get("ma_kind") != "SMA" or frame.attrs.get("ma_length") != 40
+            or frame.attrs.get("bar_minutes") != minutes):
+        raise ValueError(name+" must carry native{}m SMA40 feature metadata".format(minutes))
+
+
+def _partial_source(bar: Any, side: Optional[float], time_index: Mapping, segments: np.ndarray) -> dict:
+    """JSON-safe observed source diagnostics; invalid values stay null, not0."""
+    if bar is None:
+        return {"open_time": None, "side": None, "ma": None, "hl2": None,
+                "management_segment_id": None, "raw_segment_id": None}
+    def finite(value):
+        try:
+            value = float(value)
+        except (TypeError, ValueError):
+            return None
+        return value if np.isfinite(value) else None
+    high, low = finite(bar.high), finite(bar.low)
+    raw_index = time_index.get(bar.open_time)
+    return {"open_time": bar.open_time.isoformat(), "side": side, "ma": finite(bar.ma),
+            "hl2": high/2+low/2 if high is not None and low is not None else None,
+            "management_segment_id": None if pd.isna(bar.segment_id) else str(bar.segment_id),
+            "raw_segment_id": None if raw_index is None or pd.isna(segments[raw_index]) else str(segments[raw_index])}
 
 
 def _transition_observation(
@@ -257,6 +332,7 @@ def simulate_events(
     policy: Mapping[str, Any],
     *,
     end_exclusive: Optional[Any] = None,
+    fast_management_featured: Optional[pd.DataFrame] = None,
 ) -> pd.DataFrame:
     """Replay each entry against 5m bars with completed-bar management timing.
 
@@ -339,6 +415,28 @@ def simulate_events(
     bars. Returned frozen_ma_status is entry_not_validated, prior_exit,
     structure_exit or unknown_source; watching/exit_pending are internal only.
     No extra fields or entry validation affect old modes when this key is absent.
+
+    ``fast_partial_fraction=0.5`` instead adds one partial to native15 trueflip
+    only, using a separate native5 ``fast_management_featured`` frame. Both
+    frames require explicit native SMA40 attrs; missing or unrelated fast data
+    is rejected, never inferred. The latest completed native5 seed initializes
+    its own adjacent aligned-to-opposite edges, with the same observation and
+    reset rules. A fresh edge is consumed even if not profitable or slow-side
+    aligned; it is not latched for a later price. On that exact next raw5 open,
+    only a valid latest native15 observation (floor15, no older fallback),
+    still aligned, plus strictly >20bp directional gross gain can realize50%
+    of ORIGINAL notional once. Remaining50% keeps original slow exits, fixed
+    K1 stop and horizon. No stop is moved. Source/open gap, gap stop, original
+    slow full exit and total deadline precede partial evaluation; intrabar
+    hard stops then act on remaining notional. Partial never reads current HLC.
+    Every evaluated fast edge is recorded as JSON in partial_fast_events;
+    higher-priority terminal events need not evaluate lower-priority fast edges.
+    Censoring preserves realised partial diagnostics but full net remains NaN.
+    Floating nonfinite raw segment IDs censor in this branch, as in V11/V12.
+    Costs are deducted once on original notional after weighted realized and
+    remaining gross returns; the event threshold stays fixed20bp. Final status
+    is entry_not_validated/no_partial_exit/partial_closed/partial_censored/
+    unknown_source; watching is internal only. Default output is unchanged.
     """
     selected = _policy(policy)
     raw = _validated_frame(raw5, ("open_time", "open", "high", "low", "close", "segment_id"), "raw5")
@@ -353,6 +451,17 @@ def simulate_events(
     if entries["event_id"].duplicated().any():
         raise ValueError("event_id must be unique for independent paired outcomes")
     frozen_ma_enabled = "frozen_ma_exit" in selected
+    fast_partial_enabled = "fast_partial_fraction" in selected
+    if fast_partial_enabled:
+        if fast_management_featured is None:
+            raise ValueError("fast_partial_fraction requires fast_management_featured")
+        _native40_frame(management_featured, 15, "management_featured")
+        _native40_frame(fast_management_featured, 5, "fast_management_featured")
+        fast_management = _validated_frame(fast_management_featured,
+            ("open_time", "ma", "ma_side", "ma_slope_atr", "low", "high", "close", "segment_id"),
+            "fast_management_featured")
+    elif fast_management_featured is not None:
+        raise ValueError("fast_management_featured is only valid with fast_partial_fraction")
     if frozen_ma_enabled:
         _validate_frozen_ma_entries(entries)
     if entries.empty:
@@ -361,6 +470,8 @@ def simulate_events(
             empty_columns += [name for name in _launch_diagnostics() if name not in empty_columns]
         if frozen_ma_enabled:
             empty_columns += [name for name in _frozen_ma_diagnostics() if name not in empty_columns]
+        if fast_partial_enabled:
+            empty_columns += [name for name in _fast_partial_diagnostics() if name not in empty_columns]
         return pd.DataFrame(columns=empty_columns)
 
     times = raw["open_time"].to_numpy()
@@ -372,6 +483,8 @@ def simulate_events(
         row.open_time + interval: row
         for row in management.itertuples(index=False)
     }
+    fast_management_at = ({row.open_time + FIVE_MINUTES: row for row in fast_management.itertuples(index=False)}
+                          if fast_partial_enabled else {})
     cutoff = _utc(end_exclusive) if end_exclusive is not None else None
     horizon_delta = (pd.Timedelta(minutes=int(selected["max_minutes"]))
                      if "max_minutes" in selected else pd.Timedelta(hours=selected["max_hours"]))
@@ -414,6 +527,8 @@ def simulate_events(
             result.update(_launch_diagnostics(entry_time))
         if frozen_ma_enabled:
             result.update(_frozen_ma_diagnostics(float(event["ma"]), entry_time))
+        if fast_partial_enabled:
+            result.update(_fast_partial_diagnostics())
         index = time_index.get(entry_time)
         if index is None or (cutoff is not None and entry_time >= cutoff):
             outputs.append(result)
@@ -455,6 +570,7 @@ def simulate_events(
         transition_observed_bar = None
         transition_previous_sample_at = None
         transition_seed_pending = False
+        fast_previous_side, fast_previous_bar, fast_events = None, None, []
         if mode == "transition_colour":
             initial_available_at = entry_time if interval == FIVE_MINUTES else entry_time.floor("15min")
             initial_management = management_at.get(initial_available_at)
@@ -477,6 +593,24 @@ def simulate_events(
                 if direction * transition_previous_side > 0:
                     result["transition_armed_at"] = entry_time
                     result["transition_first_armed_at"] = entry_time
+
+        if fast_partial_enabled:
+            fast_seed = fast_management_at.get(entry_time)
+            fast_previous_side, fast_reason = _transition_observation(
+                fast_seed, entry_time, time_index, prices, segments,
+            )
+            result.update(partial_fast_initial_reason=fast_reason, partial_fast_status="watching")
+            if fast_previous_side is not None:
+                fast_previous_bar = fast_seed
+                seed_source = _partial_source(fast_seed, fast_previous_side, time_index, segments)
+                result.update(partial_fast_initial_side=fast_previous_side,
+                    partial_fast_initial_state="aligned" if direction*fast_previous_side > 0 else "opposite",
+                    partial_fast_initial_open_time=fast_seed.open_time, partial_fast_initial_available_at=entry_time,
+                    partial_fast_initial_management_segment_id=seed_source["management_segment_id"],
+                    partial_fast_initial_raw_segment_id=seed_source["raw_segment_id"],
+                    partial_fast_initial_ma=seed_source["ma"], partial_fast_initial_hl2=seed_source["hl2"])
+                if direction*fast_previous_side > 0:
+                    result["partial_fast_first_armed_at"] = entry_time
 
         def record_excursion(high: float, low: float, bars: int) -> None:
             favourable = (high - entry) / risk if direction == 1 else (entry - low) / risk
@@ -503,12 +637,16 @@ def simulate_events(
             if frozen_ma_enabled:
                 result["frozen_ma_status"] = ("structure_exit" if outcome == "frozen_ma_exit"
                                               else "prior_exit" if closed else "unknown_source")
+            if fast_partial_enabled:
+                result["partial_fast_events"] = json.dumps(fast_events, sort_keys=True, allow_nan=False)
+                result["partial_fast_status"] = (("partial_closed" if closed else "partial_censored") if remaining < 1
+                                                  else "no_partial_exit" if closed else "unknown_source")
 
         for i in range(index, len(raw)):
             now = pd.Timestamp(times[i])
             if cutoff is not None and now >= cutoff:
                 break
-            invalid_optional_segment = ((launch_enabled or frozen_ma_enabled)
+            invalid_optional_segment = ((launch_enabled or frozen_ma_enabled or fast_partial_enabled)
                                         and isinstance(segments[i], (float, np.floating))
                                         and not np.isfinite(segments[i]))
             if (previous_open is not None and now != previous_open + FIVE_MINUTES) or pd.isna(segments[i]) or segments[i] != first_segment or invalid_optional_segment:
@@ -650,6 +788,53 @@ def simulate_events(
                     finish(now, open_, "launch_timeout_exit", True)
                     completed = True
                     break
+            if fast_partial_enabled and now > entry_time:
+                fast_bar = fast_management_at.get(now)
+                fast_side, fast_reason = _transition_observation(fast_bar, now, time_index, prices, segments)
+                fast_consecutive = (fast_previous_bar is not None and fast_bar is not None
+                    and fast_bar.open_time == fast_previous_bar.open_time + FIVE_MINUTES
+                    and fast_bar.segment_id == fast_previous_bar.segment_id)
+                if fast_side is None or not fast_consecutive:
+                    if fast_side is not None and fast_previous_bar is not None:
+                        fast_reason = "management_sequence_change"
+                    if fast_side is None or fast_previous_bar is not None:
+                        result["partial_fast_reset_count"] += 1
+                        result["partial_fast_last_reset_reason"] = fast_reason
+                    fast_previous_side = None
+                if fast_side is not None:
+                    if fast_previous_side is not None and direction*fast_previous_side > 0 and direction*fast_side < 0:
+                        slow_available = now.floor("15min")
+                        slow_bar = management_at.get(slow_available)
+                        slow_side, slow_reason = _transition_observation(slow_bar, slow_available, time_index, prices, segments,
+                            interval, source_through=now)
+                        slow_state = "unknown" if slow_side is None else "aligned" if direction*slow_side > 0 else "opposite"
+                        qualifies = _fast_partial_profit(open_, entry, direction)
+                        action = ("already_partial" if remaining < 1 else "slow_unknown" if slow_side is None
+                            else "slow_not_aligned" if slow_state != "aligned" else "insufficient_profit" if not qualifies else "executed")
+                        fast_events.append({"available_at":now.isoformat(),"open_price":float(open_),
+                            "gross_return":float(direction*(open_/entry-1.0)),"profit_threshold":0.002,
+                            "profit_qualified":qualifies,"action":action,
+                            "previous_fast":_partial_source(fast_previous_bar,fast_previous_side,time_index,segments),
+                            "current_fast":_partial_source(fast_bar,fast_side,time_index,segments),
+                            "slow":_partial_source(slow_bar,slow_side,time_index,segments),
+                            "slow_available_at":slow_available.isoformat(),"slow_state":slow_state,"slow_reason":slow_reason})
+                        result["partial_fast_flip_count"] += 1
+                        if action == "executed":
+                            realised = 0.5*direction*(open_/entry-1.0)
+                            remaining = 0.5
+                            result.update(partial_fraction=0.5,partial_exit_time=now,partial_exit_price=open_,
+                                partial_fast_fill_count=1,partial_fast_realised_net_return=realised-0.5*cost,
+                                partial_fast_trigger_previous_open_time=fast_previous_bar.open_time,
+                                partial_fast_trigger_open_time=fast_bar.open_time,partial_fast_trigger_available_at=now,
+                                partial_fast_trigger_previous_side=fast_previous_side,partial_fast_trigger_side=fast_side,
+                                partial_fast_trigger_gross_return=direction*(open_/entry-1.0),
+                                partial_fast_slow_open_time=slow_bar.open_time,partial_fast_slow_available_at=slow_available,
+                                partial_fast_slow_side=slow_side,partial_fast_slow_state=slow_state)
+                    if direction*fast_side > 0 and pd.isna(result["partial_fast_first_armed_at"]):
+                        result["partial_fast_first_armed_at"] = now
+                    fast_previous_bar, fast_previous_side = fast_bar, fast_side
+                else:
+                    fast_previous_bar = None
             # An unfinished source bar cannot disclose high/low or close.
             if cutoff is not None and now + FIVE_MINUTES > cutoff:
                 last_time, last_close = now, open_

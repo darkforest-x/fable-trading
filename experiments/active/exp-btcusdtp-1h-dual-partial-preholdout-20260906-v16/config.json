@@ -1,0 +1,101 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16",
+  "base_config": "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json",
+  "base_config_sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a",
+  "mother_results": "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results",
+  "mother_inputs": {
+    "original_mothers.csv.gz": "b3f442ad8b0959b19cb5ae58fd40bc6a3bf40b455b4be31f3758d53940eea3e6",
+    "control_mothers.csv.gz": "01050c7a9602f469406df515edcc73ef2f4c9db2d46529e25030934012eebd5a",
+    "assignments.csv": "671782877ee67824f7687243d5e7deae29d78a0bcba6245319ecf55629027b0f",
+    "assignment_receipt.json": "1d77ca407712520e645463d30f97d26d452ccce45e87e68c2adcbc4120c43220"
+  },
+  "parent_results": "experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/results/candidate",
+  "inputs": {
+    "case_episodes.csv.gz": "d904981d9db66662fabfcb101a0b782b56121169cddd406d4c4a29b18db48439",
+    "case_trades.csv.gz": "772b2dc9333ee5f7e63ce92e7b3b2927b105ad4a0ba2f832093f09ad91df3ff0",
+    "control_episodes.csv.gz": "5b41a046d32b06d0fdfc4843aef04a5eea12b97a7226f13850f88be6190c2468",
+    "control_trades.csv.gz": "9512425350d47e8fa38ead12bf295be5eec8ed5f55ed124a34218b6b51cb9e97",
+    "matched.csv": "20ed18c0eb4d48cfe21590a68689461c12c2a08e4b06adba3389a880f9d99122",
+    "single_pending.csv.gz": "d817e8a5ccb7bf4aa95aa9e176bff26770ce9b5bd98ec2f63c44f4118a19dd37",
+    "summary.json": "bc7813969875fca5b5205feeee2be97cba2837ce5e003dc610af84606a438f8e"
+  },
+  "policies": [
+    {
+      "id": "15m_native40",
+      "management_minutes": 15,
+      "ma_kind": "SMA",
+      "ma_length": 40,
+      "exit_mode": "transition_colour",
+      "confirmations": 1
+    },
+    {
+      "id": "15m_native40_dual_partial",
+      "management_minutes": 15,
+      "ma_kind": "SMA",
+      "ma_length": 40,
+      "exit_mode": "transition_colour",
+      "confirmations": 1,
+      "fast_partial_fraction": 0.5
+    }
+  ],
+  "selection": {
+    "minimum_events": 80,
+    "minimum_per_fold": 12,
+    "positive_folds": 4,
+    "minimum_profit_factor": 1.1,
+    "minimum_active_months": 12,
+    "minimum_months_per_fold": 3,
+    "matched_coverage": 0.9
+  },
+  "inference": {
+    "draws": 9999,
+    "seed": 20260906,
+    "p_limit": 0.01,
+    "joint_required": [
+      "case_delta",
+      "excess_delta"
+    ],
+    "method": "month_cluster"
+  },
+  "known_support": {
+    "cases": 251,
+    "controls": 462,
+    "matched": 154,
+    "coverage_gate_unattainable": true
+  },
+  "no_audit_entry_point": true,
+  "holdout_consumed": false,
+  "production_eligible": false,
+  "training_eligible": false,
+  "entry_context_results": "experiments/active/exp-btcusdtp-1h-colour-transition-preholdout-20260906-v5/results",
+  "entry_context_inputs": {
+    "direct_k1_stop_case_context.csv.gz": "bf3cb2796c5ede1cb731fee75833d292184f7a9ce6d69b37663dc519462bb4d7",
+    "direct_k1_stop_control_context.csv.gz": "a239256f8139e262e4f3b5a573a9d5879cde16717c1e17bc459df860ca28b1bc"
+  },
+  "dual_partial_contract": {
+    "context_freeze_before_outcomes": true,
+    "fast_minutes": 5,
+    "slow_minutes": 15,
+    "raw_stop_minutes": 5,
+    "fast_ma_kind": "SMA",
+    "fast_ma_length": 40,
+    "slow_must_be_latest_completed_aligned": true,
+    "true_fast_edge_only": true,
+    "original_notional_fraction": 0.5,
+    "maximum_executions": 1,
+    "strict_open_gross_above": 0.002,
+    "cost_stress_changes_trigger": false,
+    "entry_gates": false,
+    "final_path_unchanged": true,
+    "priority": [
+      "gap_invalid_open",
+      "gap_stop",
+      "slow_full_exit",
+      "deadline",
+      "fast_partial_at_open",
+      "current_intrabar_stop"
+    ],
+    "future_mfe_never_a_fill": true,
+    "incomplete_trade_remains_unknown": true
+  }
+}

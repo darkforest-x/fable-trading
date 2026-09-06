@@ -5305,6 +5305,21 @@ experiments:
       cannot pass90%/80 gates. Finite mechanism test, not a candidate nomination.
       All89 old control requests retained, including old invalid risks. No audit.
 
+  - experiment_id: exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16
+    source_repo: darkforest-x/fable-trading
+    source_commit: "16019e7"
+    status: planned
+    question: >-
+      Can one qualified native5m half realization improve original251 hourly
+      intentions while keeping the native15 final path and154 control triples?
+    single_variable: >-
+      One50percent original-notional exit on true fast edge with latest slow
+      aligned and actual open gross strictly above20bp; no entry/stop change.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    path: experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16
+
   - experiment_id: exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15
     source_repo: darkforest-x/fable-trading
     source_commit: "2acc280"

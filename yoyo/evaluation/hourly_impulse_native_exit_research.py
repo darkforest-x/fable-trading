@@ -95,14 +95,16 @@ def assert_native_initial_state(trades):
         raise ValueError("Independent native context and engine seed time disagree")
 
 
-def replay_arm(study, policy, mothers, contexts, folder, config, *, parent=None):
+def replay_arm(study, policy, mothers, contexts, folder, config, *, parent=None,
+               simulator=None, parent_prefix="direct_k1_stop__transition_colour_"):
+    """Replay a native arm; optional injection preserves the V15 default API."""
     folder.mkdir()
     trades,episodes,parity={},{},{}
     folds=[f[0] for f in FOLDS]
-    prefix="direct_k1_stop__transition_colour_"
+    prefix=parent_prefix
     for label in ("case","control"):
         validate_direct_context(contexts[label])
-        t=simulate_native(study,contexts[label],policy)
+        t=(simulate_native if simulator is None else simulator)(study,contexts[label],policy)
         assert_native_initial_state(t)
         e=episode_ledger(mothers[label],direct_requests(mothers[label])[1],t)
         if parent is not None:
