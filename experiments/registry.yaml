@@ -5181,8 +5181,8 @@ experiments:
 
   - experiment_id: exp-btcusdtp-1h-prior-context-preholdout-20260906-v3
     source_repo: darkforest-x/fable-trading
-    source_commit: "1eaf03f"
-    status: active
+    source_commit: "3ab1c71"
+    status: rejected
     question: >-
       Does genuinely prior completed 4h context improve hourly impulse entries
       beyond the same-context random beta, with execution held fixed?
@@ -5191,12 +5191,18 @@ experiments:
       substitute for hourly slope, then the single nested extension<=1.5 cap.
       No exit, economics, morphology, MA-length or direction grid.
     result: >-
-      Preregistered development-only comparison. All control requests are
-      assigned before outcomes; same prior4h state and exact arm eligibility.
+      All four arms rejected on reused development. Original/hourly-slope
+      replay: 248/109 events at -13.81/-6.62bp net. Prior4h substitution:
+      105 events -16.56bp, matched excess +0.69bp, p=0.4639. Its nested
+      non-chasing cap: 91 events -11.38bp; coverage only 51.65%. No audit.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.html
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts:
+      - btcusdtp-hourly-context-v3-development
+      - btcusdtp-hourly-impulse-v1-report
+      - btcusdtp-hourly-impulse-v1-html
     reuse_allowed: false
     notes: >-
       Owner's autonomous profitability research request. 2023-2024 is reused

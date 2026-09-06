@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light dark" />
 <meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; img-src data: blob:; font-src data:; style-src &#39;unsafe-inline&#39;; script-src &#39;unsafe-inline&#39; blob:; connect-src &#39;none&#39;; media-src data: blob:; worker-src blob:; frame-src &#39;self&#39; data: blob:; object-src &#39;none&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;" />
 <meta name="referrer" content="no-referrer" />
-<title>1h 穿线与跨周期退出：两轮盈利验证</title>
+<title>1h 穿线与跨周期退出：三轮盈利验证</title>
 <style data-data-analytics-portable-fallback="true">
 :root{color-scheme:light dark;--portable-canvas:#fff;--portable-surface:#fff;--portable-surface-subtle:#f7f7f7;--portable-ink:#0d0d0d;--portable-muted:#5d5d5d;--portable-tertiary:#8f8f8f;--portable-table-text:#5d5d5d;--portable-border:rgba(13,13,13,.1);--portable-accent:#0285ff;--portable-positive:#00692a;--portable-positive-bg:#edfaf2;--portable-negative:#ba2623;--portable-negative-bg:#fff0f0;--portable-warning-bg:#fff8e6;--portable-warning-border:#e7b84b;--portable-radius:16px;--portable-safe-area-top:env(safe-area-inset-top,0px);--portable-safe-area-right:env(safe-area-inset-right,0px);--portable-safe-area-bottom:env(safe-area-inset-bottom,0px);--portable-safe-area-left:env(safe-area-inset-left,0px);font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--portable-canvas);color:var(--portable-ink)}
 @media(prefers-color-scheme:dark){:root{--portable-canvas:#181818;--portable-surface:#212121;--portable-surface-subtle:#2a2a2a;--portable-ink:#dfdfdf;--portable-muted:#cdcdcd;--portable-tertiary:#afafaf;--portable-table-text:#cdcdcd;--portable-border:rgba(255,255,255,.12);--portable-accent:#66b5ff;--portable-positive:#79d996;--portable-positive-bg:rgba(64,180,99,.16);--portable-negative:#ff8583;--portable-negative-bg:rgba(224,74,70,.16);--portable-warning-bg:#302817;--portable-warning-border:#8b6a20}.portable-static-chart-light{display:none!important}.portable-static-chart-dark{display:block!important}}
@@ -34,14 +34,14 @@ html:not([data-portable-source-tooltips-ready]) .portable-chart-summary>.portabl
 </style>
 </head>
 <body>
-<main id="data-analytics-portable-fallback" class="portable-fallback" data-portable-fallback="true" data-portable-surface="report"><header class="portable-page-header"><div class="portable-page-heading"><p class="portable-surface-label">Data Analytics report</p><h1>1h 穿线与跨周期退出：两轮盈利验证</h1></div><div class="portable-page-meta"><time datetime="2026-09-06T02:08:12.649853+00:00">Sep 6, 2026, 2:08 AM UTC</time></div></header><div class="portable-block-stack">
+<main id="data-analytics-portable-fallback" class="portable-fallback" data-portable-fallback="true" data-portable-surface="report"><header class="portable-page-header"><div class="portable-page-heading"><p class="portable-surface-label">Data Analytics report</p><h1>1h 穿线与跨周期退出：三轮盈利验证</h1></div><div class="portable-page-meta"><time datetime="2026-09-06T02:29:41.146528+00:00">Sep 6, 2026, 2:29 AM UTC</time></div></header><div class="portable-block-stack">
 <div class="portable-block portable-layout-full" data-artifact-block-id="section_01" data-artifact-block-type="markdown" data-layout="full"><section class="portable-markdown"><h2>Executive Summary</h2>
-<ul><li><strong>尚未得到可宣称赚钱的版本。</strong> 已实现 1h 大实体／真实吞没穿线直接入场，完成 48 项开发比较、一次冻结规则的后续时间段检验，再追加 6 种真实分批止盈方案。所有候选均未通过相应盈利门。</li><li><strong>主要缺口在入场优势，不只是止损止盈参数。</strong> 基础规则开发期 251 笔，平均净收益 −15.37bp；加入同向均线斜率、改用 5min 退出后，开发期改善至 −6.99bp，后续 74 笔仍为 −12.14bp。比随机少亏不等于赚钱。</li><li><strong>利润回吐存在，但分批兑现尚不足以修复系统。</strong> 基础开发期有 50 笔曾达 1R 浮盈而最终净亏。实际测试分批兑现后，胜率可以上升，但六种方案仍全部净亏。</li><li><strong>不覆盖现有 TradingView，不部署实盘。</strong> 下一步应验证入场前的趋势环境与突破位置，而不是继续单凭盈利截图放宽信号或无限延长持仓。盈利目标保持未完成状态。</li></ul></section></div>
+<ul><li><strong>尚未得到可宣称赚钱的版本。</strong> 已实现 1h 大实体／真实吞没穿线直接入场，完成 48 项开发比较、一次冻结规则的后续时间段检验，再追加 6 种真实分批止盈、4 组入场背景比较。所有候选均未通过相应盈利门。</li><li><strong>主要缺口在入场优势，不只是止损止盈参数。</strong> 基础规则开发期 251 笔，平均净收益 −15.37bp；加入同向均线斜率、改用 5min 退出后，开发期改善至 −6.99bp，后续 74 笔仍为 −12.14bp。比随机少亏不等于赚钱。</li><li><strong>利润回吐存在，但分批兑现尚不足以修复系统。</strong> 基础开发期有 50 笔曾达 1R 浮盈而最终净亏。实际测试分批兑现后，胜率可以上升，但六种方案仍全部净亏。</li><li><strong>4h 共振不是现成的解药。</strong> 使用 K1 开始前已知的 4h 颜色和斜率，105 笔仍平均 −16.56bp；限制追远后 91 笔为 −11.38bp。距离限制剔除了一批更差交易，但没有证明策略已盈利。</li><li><strong>不覆盖现有 TradingView，不部署实盘。</strong> 盈利目标保持未完成状态；下一步应比较直接 K1 与等待 K2 回踩，而不是继续单凭盈利截图放宽信号或无限延长持仓。</li></ul></section></div>
 <div class="portable-block portable-layout-full" data-artifact-block-id="section_02" data-artifact-block-type="markdown" data-layout="full"><section class="portable-markdown"><h2>先明确：统计的是每笔交易，不是账户收益</h2>
 <p>本轮对象为 <strong>OKX BTC-USDT-SWAP（BTCUSDT.P）</strong>，信号周期 1h，执行数据 5min，管理周期分别为 5min、15min、1h。行情归档共 341,567 行，物理时间范围为 2022 年 11 月 30 日 16:00 UTC 至 2026 年 2 月 28 日 15:55 UTC。</p>
 <p>开发使用 2023–2024 年，按四个半年度分开；V1 冻结规则后的检验使用 2025 上半年、2025 下半年和 2026 年 1–2 月。每段末尾 72 小时禁止新入场，避免交易标签跨越切点。V1 原始规则开发 251 笔、后续 176 笔；V1 候选开发 111 笔、后续 74 笔。这些策略交易均完整闭合，没有把未平仓浮盈算进净收益。</p>
 <p><strong>1bp = 0.01%；−15.37bp 等于每笔平均 −0.1537%，不是整个账户亏损 15.37%。</strong> 毛收益按入场名义本金计算；净收益每笔扣除固定 20bp（0.2%）往返成本。PF 是盈利净收益之和／亏损净收益绝对值之和；胜率按扣费后大于零计算。独立事件可能重叠，因此不把事件收益求和冒充复利账户收益；另做真实不重叠单仓筛选。</p>
-<p>这些历史年份此前被其他研究使用过，后续段只能称为<strong>冻结规则的历史迁移检验</strong>，不是全项目从未见过的独立样本。本轮两实验均未读取仓库定义的 2026 年 5 月 4 日及之后 holdout 价格，holdout 消耗次数为 0。V1 后续历史段本配置使用第 1 次；V2 开发失败后没有再次打开后续段。</p></section></div>
+<p>这些历史年份此前被其他研究使用过，后续段只能称为<strong>冻结规则的历史迁移检验</strong>，不是全项目从未见过的独立样本。本轮三实验均未读取仓库定义的 2026 年 5 月 4 日及之后 holdout 价格，holdout 消耗次数为 0。V1 后续历史段本配置使用第 1 次；V2 开发失败后没有再次打开后续段，V3 没有后续段运行入口。</p></section></div>
 <div class="portable-block portable-layout-full" data-artifact-block-id="section_03" data-artifact-block-type="markdown" data-layout="full"><section class="portable-markdown"><h2>这轮实际交易规则：不是看到绿柱就买</h2>
 <p>做多规则如下，做空镜像：</p>
 <ol><li>以原生 1h 的 HL2 计算 SMA40。当前 K 线必须<strong>收盘完成</strong>，且实体满足 <code>open &lt; MA &lt; close</code>；只有影线碰线不算实体贯穿。</li><li>满足“大实体”或“真实看涨吞没”之一。大实体要求实体占全振幅至少 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-1"><span class="portable-source-value-text">65%</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-1" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 65%</span><strong>Source: OKX archive · config</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json</span></span></span>、全振幅至少为 ATR14 的 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-2"><span class="portable-source-value-text">1</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-2" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 1</span><strong>Source: OKX archive · config</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json</span></span></span> 倍。真实吞没要求上一根实际阴线，当前实际阳线实体包住上一根实体，至少一侧严格超出；吞没分支振幅至少 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-3"><span class="portable-source-value-text">0.65</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-3" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 0.65</span><strong>Source: OKX archive · config</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json</span></span></span> ATR。</li><li>做多收盘位于整根 K 线的上方 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-4"><span class="portable-source-value-text">30%</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-4" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 30%</span><strong>Source: OKX archive · config</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json</span></span></span> 内；做空位于下方 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-5"><span class="portable-source-value-text">30%</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-5" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 30%</span><strong>Source: OKX archive · config</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json</span></span></span> 内。HL2 相对均线的状态颜色必须与方向一致。</li><li>信号在小时结束后才成立，下一根真实 5min 开盘价成交，不在已知大阳线的起点补画入场，也不使用未收盘 1h 数据。<strong>这轮是 K1 直接入场分支，不再等 K2。</strong></li><li>初始止损为 K1 的实际最低点／最高点。测试期间不扩大止损；5min 内止损与目标都触及按止损先发生；跳空穿止损按真实 open 成交。</li><li>基础退出为入场后第一根完整 15min K 线起，HL2 状态反向时，在确认时点对应的下一根 5min open 退出。无论盈亏都执行，所以它是“反色退出”，不是保证有利润的“止盈”。最长 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-6"><span class="portable-source-value-text">72</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-6" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 72</span><strong>Source: OKX archive · config</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json</span></span></span> 小时。</li></ol>
@@ -107,16 +107,27 @@ ORDER BY mean_net_bp DESC, policy_id ASC</code></pre></div></div></div>
 <p>以 +1R 平半仓为例，<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-135"><span class="portable-source-value-text">44</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-135" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 44</span><strong>Source: OKX archive · v2 summary</strong><span class="portable-source-meta">File: analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/all_arm_summary.json</span></span></span> 笔真正触发分批：与不分批相比 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-136"><span class="portable-source-value-text">29</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-136" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 29</span><strong>Source: OKX archive · v2 summary</strong><span class="portable-source-meta">File: analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/all_arm_summary.json</span></span></span> 笔改善、<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-137"><span class="portable-source-value-text">15</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-137" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 15</span><strong>Source: OKX archive · v2 summary</strong><span class="portable-source-meta">File: analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/all_arm_summary.json</span></span></span> 笔变差、<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-138"><span class="portable-source-value-text">67</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-138" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 67</span><strong>Source: OKX archive · v2 summary</strong><span class="portable-source-meta">File: analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/all_arm_summary.json</span></span></span> 笔不变，救回 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-139"><span class="portable-source-value-text">7</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-139" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 7</span><strong>Source: OKX archive · v2 summary</strong><span class="portable-source-meta">File: analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/all_arm_summary.json</span></span></span> 笔原本非盈利交易。改善交易贡献合计 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-140"><span class="portable-source-value-text">+982.14</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-140" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for +982.14</span><strong>Source: OKX archive · v2 summary</strong><span class="portable-source-meta">File: analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/all_arm_summary.json</span></span></span> 个“事件 bp”，变差交易损失 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-141"><span class="portable-source-value-text">−856.07</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-141" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for −856.07</span><strong>Source: OKX archive · v2 summary</strong><span class="portable-source-meta">File: analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/all_arm_summary.json</span></span></span>，净改善除以 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-142"><span class="portable-source-value-text">111</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-142" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 111</span><strong>Source: OKX archive · v2 summary</strong><span class="portable-source-meta">File: analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/all_arm_summary.json</span></span></span> 笔仅 +1.14bp。这些是相同名义仓位的事件差额之和，不是账户收益。</p>
 <p>“两次各平 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-143"><span class="portable-source-value-text">25%</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-143" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 25%</span><strong>Source: OKX archive · v2 summary</strong><span class="portable-source-meta">File: analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/all_arm_summary.json</span></span></span> 后转 1h”有 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-144"><span class="portable-source-value-text">44</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-144" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 44</span><strong>Source: OKX archive · v2 summary</strong><span class="portable-source-meta">File: analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/all_arm_summary.json</span></span></span> 笔触发接管，平均 +75.63bp，但其中仍有 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-145"><span class="portable-source-value-text">20</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-145" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 20</span><strong>Source: OKX archive · v2 summary</strong><span class="portable-source-meta">File: analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/all_arm_summary.json</span></span></span> 笔最终净亏；未触发的 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-146"><span class="portable-source-value-text">67</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-146" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 67</span><strong>Source: OKX archive · v2 summary</strong><span class="portable-source-meta">File: analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/all_arm_summary.json</span></span></span> 笔平均约 −60.30bp，最终全体仍 −6.42bp。<strong>不能单独拿接管后的高均值证明策略有效，也不能提前知道哪些交易会进入这个子集。</strong></p>
 <p>这里最重要的结论是：<strong>分批可以改善一部分回吐，同时也会截断一些大赢家；胜率从 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-147"><span class="portable-source-value-text">25.23%</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-147" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 25.23%</span><strong>Source: OKX archive · v2 summary</strong><span class="portable-source-meta">File: analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/all_arm_summary.json</span></span></span> 升到 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-148"><span class="portable-source-value-text">31.53%</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-148" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 31.53%</span><strong>Source: OKX archive · v2 summary</strong><span class="portable-source-meta">File: analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/all_arm_summary.json</span></span></span> 并未使净期望转正。</strong> 六项开发门均失败，因此没有再次读取后续时间段给 V2 调参或验收。</p></section><div class="portable-inline-source portable-source-summary" data-source-id="v2_summary"><div class="portable-inline-source-content portable-source-summary-content"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 第二轮：真正分批止盈做了，仍不能修复负期望</span><strong>Source: OKX archive · v2 summary</strong><span class="portable-source-meta">File: analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/all_arm_summary.json</span></div></div></div>
-<div class="portable-block portable-layout-full" data-artifact-block-id="section_13" data-artifact-block-type="markdown" data-layout="full"><section class="portable-markdown"><h2>下一步只改入场环境，不再盲目叠加止盈参数</h2>
+<div class="portable-block portable-layout-full" data-artifact-block-id="section_13" data-artifact-block-type="markdown" data-layout="full"><section class="portable-markdown"><h2>第三轮：真正事前的 4h 共振也没有修复净期望</h2>
+<p>V3 固定 V1 选择过的 5min／SMA40 首次反色退出、K1 极值止损和 20bp 成本，只比较入场过滤。4h 使用完整 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-149"><span class="portable-source-value-text">48</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-149" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 48</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 根 5min 聚合，背景在 <strong>K1 开始前</strong> 已经闭合；4h SMA40(HL2) 颜色和三根斜率同向，才算背景一致。它替代小时斜率，而不是偷偷叠加两者。所有臂共享有效背景支持：<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-150"><span class="portable-source-value-text">251</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-150" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 251</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 个原候选中 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-151"><span class="portable-source-value-text">3</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-151" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 3</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 个背景无效，剩余 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-152"><span class="portable-source-value-text">248</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-152" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 248</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 个；旧小时斜率锚点因共同支持从 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-153"><span class="portable-source-value-text">111</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-153" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 111</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 变为 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-154"><span class="portable-source-value-text">109</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-154" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 109</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span>。笔数变化不是重新调了形态阈值。</p>
+<p>| 入场过滤（均 5min 退出） | 笔数 | 净 bp/笔 | PF | 胜率 | 配对策略／随机净 bp | 超额 bp | 完整配对覆盖 | |---|---:|---:|---:|---:|---|---:|---:| | 原始穿线 | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-155"><span class="portable-source-value-text">248</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-155" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 248</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-156"><span class="portable-source-value-text">−13.81</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-156" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for −13.81</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-157"><span class="portable-source-value-text">0.636</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-157" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 0.636</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-158"><span class="portable-source-value-text">25.00%</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-158" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 25.00%</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-159"><span class="portable-source-value-text">−16.52</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-159" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for −16.52</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span>／<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-160"><span class="portable-source-value-text">−19.13</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-160" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for −19.13</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-161"><span class="portable-source-value-text">+2.61</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-161" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for +2.61</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | 172/248，<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-162"><span class="portable-source-value-text">69.35%</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-162" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 69.35%</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | | 原有 1h 同向斜率 | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-163"><span class="portable-source-value-text">109</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-163" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 109</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-164"><span class="portable-source-value-text">−6.62</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-164" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for −6.62</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-165"><span class="portable-source-value-text">0.820</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-165" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 0.820</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-166"><span class="portable-source-value-text">30.28%</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-166" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 30.28%</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-167"><span class="portable-source-value-text">−15.47</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-167" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for −15.47</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span>／<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-168"><span class="portable-source-value-text">−25.71</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-168" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for −25.71</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-169"><span class="portable-source-value-text">+10.25</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-169" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for +10.25</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | 79/109，<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-170"><span class="portable-source-value-text">72.48%</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-170" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 72.48%</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | | 改用事前 4h 颜色＋斜率 | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-171"><span class="portable-source-value-text">105</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-171" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 105</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-172"><span class="portable-source-value-text">−16.56</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-172" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for −16.56</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-173"><span class="portable-source-value-text">0.603</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-173" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 0.603</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-174"><span class="portable-source-value-text">23.81%</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-174" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 23.81%</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-175"><span class="portable-source-value-text">−22.11</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-175" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for −22.11</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span>／<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-176"><span class="portable-source-value-text">−22.80</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-176" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for −22.80</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-177"><span class="portable-source-value-text">+0.69</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-177" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for +0.69</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | 95/105，<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-178"><span class="portable-source-value-text">90.48%</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-178" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 90.48%</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | | 4h 同向，且离 1h MA 不超过 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-179"><span class="portable-source-value-text">1.5</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-179" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 1.5</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> ATR | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-180"><span class="portable-source-value-text">91</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-180" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 91</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-181"><span class="portable-source-value-text">−11.38</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-181" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for −11.38</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-182"><span class="portable-source-value-text">0.691</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-182" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 0.691</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-183"><span class="portable-source-value-text">24.18%</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-183" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 24.18%</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-184"><span class="portable-source-value-text">−10.01</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-184" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for −10.01</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span>／<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-185"><span class="portable-source-value-text">−24.87</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-185" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for −24.87</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-186"><span class="portable-source-value-text">+14.86</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-186" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for +14.86</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | 47/91，<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-187"><span class="portable-source-value-text">51.65%</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-187" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 51.65%</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> |</p>
+<p>控制也必须处于相同的事前 4h 颜色、斜率符号，满足本臂的距离／斜率要求，再匹配月份、日内时段、波动桶和小周期颜色。匹配更严格后，一些事件找不到三笔不复用的对照；所有未配对事件仍计入策略净收益，没有删除它们美化结果。四组事件和控制均无删失或拒绝成交，单仓筛选收益与事件均值相同。</p>
+<p>4h 臂与“不追远”臂的配对月块 p 分别为 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-188"><span class="portable-source-value-text">0.4639</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-188" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 0.4639</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span>／<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-189"><span class="portable-source-value-text">0.1324</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-189" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 0.1324</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span>；仅对两项新假设作 Holm 调整后为 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-190"><span class="portable-source-value-text">0.4639</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-190" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 0.4639</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span>／<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-191"><span class="portable-source-value-text">0.2648</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-191" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 0.2648</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span>。这不消除 V1/V2 以及更早研究使用同一历史的选择偏差。</p>
+<p>| 时期 | 4h 同向：笔数／净 bp | 4h＋不追远：笔数／净 bp | |---|---|---| | 2023 上半年 | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-192"><span class="portable-source-value-text">23</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-192" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 23</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span>／<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-193"><span class="portable-source-value-text">−25.53</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-193" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for −25.53</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-194"><span class="portable-source-value-text">21</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-194" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 21</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span>／<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-195"><span class="portable-source-value-text">−16.15</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-195" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for −16.15</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | | 2023 下半年 | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-196"><span class="portable-source-value-text">23</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-196" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 23</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span>／<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-197"><span class="portable-source-value-text">−29.89</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-197" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for −29.89</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-198"><span class="portable-source-value-text">22</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-198" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 22</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span>／<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-199"><span class="portable-source-value-text">−27.81</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-199" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for −27.81</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | | 2024 上半年 | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-200"><span class="portable-source-value-text">25</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-200" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 25</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span>／<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-201"><span class="portable-source-value-text">−6.31</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-201" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for −6.31</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-202"><span class="portable-source-value-text">21</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-202" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 21</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span>／<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-203"><span class="portable-source-value-text">−19.14</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-203" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for −19.14</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | | 2024 下半年 | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-204"><span class="portable-source-value-text">34</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-204" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 34</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span>／<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-205"><span class="portable-source-value-text">−9.01</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-205" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for −9.01</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> | <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-206"><span class="portable-source-value-text">27</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-206" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 27</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span>／<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-207"><span class="portable-source-value-text">+11.75</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-207" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for +11.75</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> |</p>
+<p>4h 同向筛选保留的 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-208"><span class="portable-source-value-text">105</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-208" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 105</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔平均 −16.56bp，剔除的 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-209"><span class="portable-source-value-text">143</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-209" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 143</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔平均 −11.80bp，<strong>被保留的并不更好</strong>。按全部 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-210"><span class="portable-source-value-text">248</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-210" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 248</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 个原始候选分摊，该臂收益贡献为 −7.01bp；相比原始 −13.81bp 总亏损变少，主要伴随交易变少，不能把它称为每笔质量改善。</p>
+<p>不追远臂额外移除 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-211"><span class="portable-source-value-text">14</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-211" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 14</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔，这些交易平均 −50.23bp，将保留交易均值改善 5.18bp，但仍三个半年度为负。尤其 2024 上半年被剔除的 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-212"><span class="portable-source-value-text">4</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-212" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 4</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔平均原本 +61.08bp，因此该时期反而变差。全体 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-213"><span class="portable-source-value-text">91</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-213" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 91</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔中有 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-214"><span class="portable-source-value-text">69</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-214" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 69</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔净亏：<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-215"><span class="portable-source-value-text">7</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-215" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 7</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔硬止损、<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-216"><span class="portable-source-value-text">7</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-216" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 7</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔毛利不足费用、<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-217"><span class="portable-source-value-text">7</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-217" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 7</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔至少 1R 回吐（按互斥分类优先级）、<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-218"><span class="portable-source-value-text">10</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-218" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 10</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔早反转、<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-219"><span class="portable-source-value-text">38</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-219" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 38</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔其他亏损；重叠标记中有 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-220"><span class="portable-source-value-text">62</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-220" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 62</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔为反色退出、<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-221"><span class="portable-source-value-text">15</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-221" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 15</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔曾至少 1R 浮盈后仍未净赚。多头 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-222"><span class="portable-source-value-text">56</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-222" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 56</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔平均 −12.75bp，空头 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-223"><span class="portable-source-value-text">35</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-223" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 35</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔 −9.19bp，不能只归咎于某一个方向。</p>
+<p>原始共同样本 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-224"><span class="portable-source-value-text">186</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-224" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 186</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔亏损中，有 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-225"><span class="portable-source-value-text">152</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-225" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 152</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔在<strong>持仓期间</strong>未到 1R，<span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-226"><span class="portable-source-value-text">173</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-226" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 173</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔经变色退出，只有 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-227"><span class="portable-source-value-text">13</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-227" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 13</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔硬止损；仅 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-228"><span class="portable-source-value-text">28</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-228" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 28</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔在 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-229"><span class="portable-source-value-text">30</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-229" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 30</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 分钟内退出。限制追远版同样有 54/69 笔亏损在持仓期间未到 1R。这说明失败不能全部归为“止损太紧”或“第一根小周期闪一下就出”，但也不能由此断言退出后永远不会走趋势；退出后的路径需要另设统一观察窗，不能偷换成已持仓收益。</p>
+<p>该臂毛期望仅 +8.62bp，不足以覆盖 20bp；再加 10bp 压力为 −21.38bp，去掉最大两笔盈利为 −19.75bp。它的单特征 range/ATR AUC 虽达 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-230"><span class="portable-source-value-text">0.678</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-230" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 0.678</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span>、最高十分位 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-231"><span class="portable-source-value-text">10</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-231" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 10</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 笔毛／净均值 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-232"><span class="portable-source-value-text">+28.82</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-232" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for +28.82</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span>／+8.82bp，但这是开发数据上的小子集，不能覆盖全体负收益、分期失败和仅 <span class="portable-source-tooltip portable-source-value" data-portable-source-host="true" tabindex="0" aria-describedby="portable-source-tooltip-233"><span class="portable-source-value-text">51.65%</span><span class="portable-source-tooltip-content" id="portable-source-tooltip-233" role="tooltip"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 51.65%</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></span></span> 的匹配覆盖问题。</p>
+<p><strong>V3 四组均拒绝，未打开 2025 年以后价格，未产生可上线候选。</strong> 本轮只检验“4h SMA40 颜色＋斜率”这一背景定义，不能由此断言所有共振或结构过滤都无效。</p></section><div class="portable-inline-source portable-source-summary" data-source-id="v3_summary"><div class="portable-inline-source-content portable-source-summary-content"><span class="portable-source-tooltip-heading" aria-hidden="true">Source for 第三轮：真正事前的 4h 共振也没有修复净期望</span><strong>Source: OKX archive · v3 summary</strong><span class="portable-source-meta">File: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></div></div></div>
+<div class="portable-block portable-layout-full" data-artifact-block-id="section_14" data-artifact-block-type="markdown" data-layout="full"><section class="portable-markdown"><h2>下一步：区分追远、假突破与进出场时钟，而非继续堆过滤</h2>
 <p>当前证据支持继续研究，不能支持上线。下一轮的研究问题应缩小为：<strong>1h 强势穿线发生在什么已知环境里，后续延续才明显优于同条件随机入场？</strong></p>
-<ol><li>在信号发生前，用已收盘的更高周期趋势和结构位置区分“逆大势反抽”“趋势内回撤后的再启动”“区间内部来回穿线”。这是待验证的分类，不声称这些标签已能稳定预测利润。</li><li>将相对自身的量价扩张、突破后剩余空间作为候选因子逐项比较；不把“振幅越大”直接等同于“趋势越强”。现有单桶开发盈利、后续反转，说明需要跨时期对照。</li><li>固定一个退出锚点先验证入场增量，再单独重测分批／余仓跟随。不能把未来是否达到 1R、最终持有超过 12 小时、是否后来走出大趋势用于入场筛选。</li><li>新候选必须继续跨时间、扣成本、单仓、匹配随机对照，并对多次研究使用历史数据明确记账。已有负面后续段不能重新贴“独立样本”的标签。</li></ol>
-<p>尚待回答的关键问题：更高周期过滤究竟增加了信号信息，还是只增加行情方向 beta？直接 K1 入场是否不如等待回踩的 K1→K2 分支？分批降低的回吐是否抵得上提前减仓失去的长尾？这些需要新的预登记比较，当前数字不能替它们作结论。</p></section></div>
-<div class="portable-block portable-layout-full" data-artifact-block-id="section_14" data-artifact-block-type="markdown" data-layout="full"><section class="portable-markdown"><h2>风险与诚实声明</h2>
-<ul><li><strong>没有盈利承诺。</strong> 两轮结果均未通过，当前没有新的生产合格配置，也没有“最优参数”的结论。</li><li>历史迁移段此前被项目其他研究使用过；V2 又是在看过 V1 失败后提出的新假设。开发 p 值未校正全部历史研究次数，不当作发现优势的独立证据。</li><li>月块／周块置换是依赖近似，不保证消除所有跨边界持仓相关性。匹配对照仍未覆盖所有环境维度；正超额但负绝对收益仍不合格。</li><li>未建模实际资金费率、限价排队和逐 tick 滑点。统一 20bp 是预设成本，不是实测成交成本。另加 10bp 只做压力测试，不能替代真实执行数据。</li><li>5min 同 bar 的先后顺序不可见，统一止损优先；未闭合／数据缺口交易不计为真实盈利。1h 对照的控制账本中有 3 笔删失，完整三配对门因此降低了覆盖率，没有用浮盈填补。</li><li>纯规则研究未训练 YOLO／LGBM，未修改已有 Pine、TradingView、ACTIVE/frozen、VPS、forward 日志或任何真实仓位。</li><li>报告数据与结构验证通过；本机 Chrome 在标准报告工具中启动超时，因此 HTML 的浏览器交互和手机视口尚未通过自动验证，不把结构检查称为视觉验收。</li></ul></section></div>
-<div class="portable-block portable-layout-full" data-artifact-block-id="section_15" data-artifact-block-type="markdown" data-layout="full"><section class="portable-markdown"><h2>复现与证据索引</h2>
-<p>代码、配置和结果使用 Python 3、pandas 2.3.3、NumPy 2.0.2；使用现有环境，无新增依赖。执行核心及数据、边界、报告相关测试共 191 项通过。数据 SHA-256 为 <code>767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac</code>。</p>
+<ol><li>V3 没有支持“只加 4h 颜色＋斜率即可修复”的假设。下一项应回到原始 K1→K2 逻辑：将同一批 K1 的直接入场，与预先定义的回踩／拒绝后入场对照；同时报告等不到回踩而错过的大趋势，不能只数成功回踩。</li><li>将相对自身的量价扩张、突破后剩余空间作为候选因子逐项比较；不把“振幅越大”直接等同于“趋势越强”。现有单桶开发盈利、后续反转，说明需要跨时期对照。</li><li>固定一个退出锚点先验证入场增量，再单独重测分批／余仓跟随。不能把未来是否达到 1R、最终持有超过 12 小时、是否后来走出大趋势用于入场筛选。</li><li>新候选必须继续跨时间、扣成本、单仓、匹配随机对照，并对多次研究使用历史数据明确记账。已有负面后续段不能重新贴“独立样本”的标签。</li></ol>
+<p>尚待回答的关键问题：结构上的回踩再启动是否比颜色／斜率共振增加更多信息？直接 K1 入场是否不如等待回踩的 K1→K2 分支？5min 反色是否对某类事先可识别的 1h 趋势过早？这些需要新的预登记比较，当前数字不能替它们作结论。</p></section></div>
+<div class="portable-block portable-layout-full" data-artifact-block-id="section_15" data-artifact-block-type="markdown" data-layout="full"><section class="portable-markdown"><h2>风险与诚实声明</h2>
+<ul><li><strong>没有盈利承诺。</strong> 三轮结果均未通过，当前没有新的生产合格配置，也没有“最优参数”的结论。</li><li>历史迁移段此前被项目其他研究使用过；V2 又是在看过 V1 失败后提出的新假设。开发 p 值未校正全部历史研究次数，不当作发现优势的独立证据。</li><li>月块／周块置换是依赖近似，不保证消除所有跨边界持仓相关性。匹配对照仍未覆盖所有环境维度；正超额但负绝对收益仍不合格。</li><li>统计复核区分“本次没通过”与“真实优势必为零”。非显著 p 值不证明没有效果；重复开发数据也不能提供可直接推广到未来的置信保证。这里按预设经济门拒绝候选，不宣称已完成零效应等价检验。</li><li>未建模实际资金费率、限价排队和逐 tick 滑点。统一 20bp 是预设成本，不是实测成交成本。另加 10bp 只做压力测试，不能替代真实执行数据。</li><li>5min 同 bar 的先后顺序不可见，统一止损优先；未闭合／数据缺口交易不计为真实盈利。1h 对照的控制账本中有 3 笔删失，完整三配对门因此降低了覆盖率，没有用浮盈填补。</li><li>纯规则研究未训练 YOLO／LGBM，未修改已有 Pine、TradingView、ACTIVE/frozen、VPS、forward 日志或任何真实仓位。</li><li>报告数据与结构验证通过；本机 Chrome 在标准报告工具中启动超时，因此 HTML 的浏览器交互和手机视口尚未通过自动验证，不把结构检查称为视觉验收。</li></ul></section></div>
+<div class="portable-block portable-layout-full" data-artifact-block-id="section_16" data-artifact-block-type="markdown" data-layout="full"><section class="portable-markdown"><h2>复现与证据索引</h2>
+<p>代码、配置和结果使用 Python 3、pandas 2.3.3、NumPy 2.0.2；使用现有环境，无新增依赖。执行核心、数据、边界、报告及注册表相关测试共 279 项通过，其中 V3 新增 72 项。数据 SHA-256 为 <code>767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac</code>。</p>
 <p>主要证据目录：</p>
-<ul><li>V1 配置／逐笔／搜索／后续检验：<code>experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/</code></li><li>V1 亏损、特征分桶、逐笔配对和随机对照：<code>analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/</code></li><li>V2 配置／六种退出／失败门：<code>experiments/active/exp-btcusdtp-1h-staged-realisation-preholdout-20260906-v2/</code></li><li>V2 逐笔增益／损失与全部六臂控制：<code>analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/</code></li></ul>
+<ul><li>V1 配置／逐笔／搜索／后续检验：<code>experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/</code></li><li>V1 亏损、特征分桶、逐笔配对和随机对照：<code>analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/</code></li><li>V2 配置／六种退出／失败门：<code>experiments/active/exp-btcusdtp-1h-staged-realisation-preholdout-20260906-v2/</code></li><li>V2 逐笔增益／损失与全部六臂控制：<code>analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/</code></li><li>V3 事前背景、四臂分配收据／逐笔／亏损／控制：<code>experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/</code></li></ul>
 <p>以下是按当时顺序从零执行的命令，不要在现有结果目录上强行覆盖。驱动器会拒绝重复开发选参和重复后续段检验；复核已有结果应读取已提交账本，确需新重建应另登记输出版本。</p>
 <pre><code># Builder/config committed first: c4e611f; working directory is fable-trading.
 PYTHONPATH=. .venv/bin/pytest -q tests/test_hourly_impulse_data.py tests/test_hourly_impulse_execution.py tests/test_hourly_impulse_research.py tests/boundaries/test_layer_imports.py
@@ -130,15 +141,18 @@ PYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_exit_controls
 PYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_staged_research --phase development
 # All-arm diagnostic helper committed at 0a8d332; no selection changes.
 PYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_staged_diagnostics
+# V3 four-arm builder/config committed at 3ab1c71 before development outcomes.
+PYTHONPATH=. .venv/bin/pytest -q tests/test_hourly_impulse_context.py tests/test_hourly_impulse_context_matching.py tests/test_hourly_impulse_context_research.py
+PYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_context_research
 python3 scripts/md_to_html.py analysis/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.md --out-dir analysis/html</code></pre>
-<p>实现时核对了官方 <a href="https://pandas.pydata.org/pandas-docs/version/2.3/reference/api/pandas.merge_asof.html" rel="noreferrer">pandas backward as-of 时序匹配</a> 和 <a href="https://numpy.org/doc/2.0/reference/generated/numpy.isfinite.html" rel="noreferrer">NumPy 有限值检查</a>。实验设计技能用于固定对照和切分；报告／可视化技能用于整合完整失败证据；源码驱动开发技能用于核对颜色与时钟；extract-approach 已记录前视对照、反色退出和分批兑现三个教训。</p></section></div></div><section class="portable-sources" aria-labelledby="portable-sources-heading"><h2 id="portable-sources-heading">Sources</h2><ol><li><strong>OKX archive · colour source</strong><span class="portable-source-meta">experiments/active/exp-btcusdtp-1h-owner-causal-v2-preholdout-20260904-v1/pine/fable_k1_k2_owner_causal_v2.pine</span></li><li><strong>OKX archive · config</strong><span class="portable-source-meta">experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json</span></li><li><strong>OKX archive · dev losers</strong><span class="portable-source-meta">analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/development_baseline_losing_trades.csv.gz</span></li><li><strong>OKX archive · diagnoses</strong><span class="portable-source-meta">analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/summary.json</span></li><li><strong>OKX archive · exit search</strong><span class="portable-source-meta">experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/results/development_search.csv · SQLite · 2026-09-06T02:08:12.649853+00:00</span><p>Presentation SELECT actually executed over the saved development_search CSV. The upstream strategy calculation is Python in yoyo/evaluation/hourly_impulse_research.py, using the OKX BTC-USDT-SWAP archive; SQL does not rerun that backtest. One row per registered exit policy; n, win_rate and profit_factor retain review context. The shared renderer may override sequential blue with green/red for mixed-sign bars.</p><details class="portable-source-query" open><summary>SQL query</summary><pre><code>SELECT value AS policy_id,
+<p>实现时核对了官方 <a href="https://pandas.pydata.org/pandas-docs/version/2.3/reference/api/pandas.merge_asof.html" rel="noreferrer">pandas backward as-of 时序匹配</a> 和 <a href="https://numpy.org/doc/2.0/reference/generated/numpy.isfinite.html" rel="noreferrer">NumPy 有限值检查</a>。实验设计技能用于固定对照和切分；报告／可视化技能用于整合完整失败证据；源码驱动开发技能用于核对颜色与时钟；extract-approach 已记录前视对照、反色退出和分批兑现三个教训。</p></section></div></div><section class="portable-sources" aria-labelledby="portable-sources-heading"><h2 id="portable-sources-heading">Sources</h2><ol><li><strong>OKX archive · colour source</strong><span class="portable-source-meta">experiments/active/exp-btcusdtp-1h-owner-causal-v2-preholdout-20260904-v1/pine/fable_k1_k2_owner_causal_v2.pine</span></li><li><strong>OKX archive · config</strong><span class="portable-source-meta">experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json</span></li><li><strong>OKX archive · dev losers</strong><span class="portable-source-meta">analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/development_baseline_losing_trades.csv.gz</span></li><li><strong>OKX archive · diagnoses</strong><span class="portable-source-meta">analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/summary.json</span></li><li><strong>OKX archive · exit search</strong><span class="portable-source-meta">experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/results/development_search.csv · SQLite · 2026-09-06T02:29:41.146528+00:00</span><p>Presentation SELECT actually executed over the saved development_search CSV. The upstream strategy calculation is Python in yoyo/evaluation/hourly_impulse_research.py, using the OKX BTC-USDT-SWAP archive; SQL does not rerun that backtest. One row per registered exit policy; n, win_rate and profit_factor retain review context. The shared renderer may override sequential blue with green/red for mixed-sign bars.</p><details class="portable-source-query" open><summary>SQL query</summary><pre><code>SELECT value AS policy_id,
        CAST(events AS INTEGER) AS n,
        CAST(mean_net_bp AS REAL) AS mean_net_bp,
        CAST(win_rate AS REAL) AS win_rate,
        CAST(profit_factor AS REAL) AS profit_factor
 FROM main.development_search
 WHERE stage = &#39;exit&#39;
-ORDER BY mean_net_bp DESC, policy_id ASC</code></pre></details></li><li><strong>OKX archive · report</strong><span class="portable-source-meta">analysis/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.md</span></li><li><strong>OKX archive · research code</strong><span class="portable-source-meta">yoyo/evaluation/hourly_impulse_research.py</span></li><li><strong>OKX archive · v2 summary</strong><span class="portable-source-meta">analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/all_arm_summary.json</span></li></ol></section></main>
+ORDER BY mean_net_bp DESC, policy_id ASC</code></pre></details></li><li><strong>OKX archive · report</strong><span class="portable-source-meta">analysis/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.md</span></li><li><strong>OKX archive · research code</strong><span class="portable-source-meta">yoyo/evaluation/hourly_impulse_research.py</span></li><li><strong>OKX archive · v2 summary</strong><span class="portable-source-meta">analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/all_arm_summary.json</span></li><li><strong>OKX archive · v3 summary</strong><span class="portable-source-meta">experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json</span></li></ol></section></main>
 <script data-data-analytics-portable-source-tooltips="true">(() => {
   const RUNTIME_FLAG = "__dataAnalyticsPortableSourceTooltipsInitialized";
   const READY_ATTRIBUTE = "data-portable-source-tooltips-ready";
@@ -479,252 +493,306 @@ ORDER BY mean_net_bp DESC, policy_id ASC</code></pre></details></li><li><strong>
 })();</script>
 <div id="data-analytics-portable-reader" aria-hidden="true" inert></div>
 <template id="data-analytics-portable-artifact-payload-source" data-compression="gzip-base64">
-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
+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
 </template>
 <template id="data-analytics-portable-reader-runtime-source" data-compression="gzip-base64">
 H4sIAAAAAAACE+y9aXfbxrYg+v3+CiqdpwauSgwpeQQN8zoaYieeYtlJHEUtQGRRhA0CDABKViSe

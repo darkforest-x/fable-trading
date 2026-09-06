@@ -14710,18 +14710,18 @@ artifacts:
     artifact_type: report
     role: canonical_chinese_negative_result_and_trade_postmortem_report
     source_repo: darkforest-x/fable-trading
-    source_commit: "0a8d332"
+    source_commit: "3ab1c71"
     source_path: analysis/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.md
-    sha256: "06772b09cbea14fc38fc5233438eb86e7b11a1f7910fa9901dc9161387549353"
-    size_bytes: 23351
+    sha256: "023697ec2f6a0b7bed9bf2fd1e2c870dd6c332f138226f71257e07c28c3c3efe"
+    size_bytes: 28518
     storage_uri: "repo://analysis/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.md"
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
-    generator_commit: "0a8d332"
+    generator_commit: "3ab1c71"
     config_hash: "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
     data_cutoff: "2026-02-28T16:00:00Z"
-    notes: "Two rejected experiments; includes gross/net costs, non-chasing near-flat arm, individual losses and post-entry selection caveat."
+    notes: "Three rejected experiments; includes gross/net costs, prior-context controls, retained/removed signals, individual losses and post-entry selection caveat."
 
   - artifact_id: btcusdtp-hourly-impulse-v1-html
     artifact_type: report
@@ -14729,8 +14729,8 @@ artifacts:
     source_repo: darkforest-x/fable-trading
     source_commit: "be28e69"
     source_path: analysis/html/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.html
-    sha256: "0d615e4e15d1c8b8da70712cd8c6aa436cc958761e65d4eb21a3f71390fbc04e"
-    size_bytes: 513062
+    sha256: "1960128d27bfe6553a994885f596ff503ab5ad74a4dbebffc9807f778906ffd6"
+    size_bytes: 573256
     storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.html"
     holdout_status: pre_holdout
     training_eligible: false
@@ -14746,8 +14746,8 @@ artifacts:
     source_repo: darkforest-x/fable-trading
     source_commit: "be28e69"
     source_path: analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/artifact.json
-    sha256: "84b3b7057d0c9dc19a1e20a5acaad0833c6c4df5b8ea52656449aeb72cc98428"
-    size_bytes: 38115
+    sha256: "0839f93241b378f97449ab6518b2cebb29bc60e97b2ee7b7c463cfc748fa72a1"
+    size_bytes: 43835
     storage_uri: "repo://analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/artifact.json"
     holdout_status: pre_holdout
     training_eligible: false
@@ -14755,7 +14755,7 @@ artifacts:
     generator_commit: "be28e69"
     config_hash: "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
     data_cutoff: "2026-02-28T16:00:00Z"
-    notes: "One native chart, seventeen source-backed narrative/chart blocks, actual SQLite presentation query over saved CSV."
+    notes: "One native chart, eighteen source-backed narrative/chart blocks, actual SQLite presentation query over saved CSV; covers V1-V3."
 
   - artifact_id: btcusdtp-hourly-staged-v2-development
     artifact_type: manifest
@@ -14790,3 +14790,20 @@ artifacts:
     config_hash: "c48b0868c97fe1c49f3ff4e865ba159a5b8eeb45fc2d8878abe5561474740583"
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: "Same 111 contracts and 327 assigned control times across all six arms; reports partial gains and clipped winners."
+
+  - artifact_id: btcusdtp-hourly-context-v3-development
+    artifact_type: manifest
+    role: prior_context_four_arm_development_rejection_with_exact_controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: "3ab1c71"
+    source_path: experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json
+    sha256: "5bd374e08a964f9162365c5f435918e792c0815db8c1fcf6c02bea4886190701"
+    size_bytes: 47452
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "3ab1c71"
+    config_hash: "e216cc592ad08af9e0e20ec974442fc24f7ebe3e2565a30849d8437b43396734"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "All four arms rejected. Prior4h substitution -16.56bp; nested cap -11.38bp, only 47/91 fully matched. Common support 248/251. No audit or live mutation."
