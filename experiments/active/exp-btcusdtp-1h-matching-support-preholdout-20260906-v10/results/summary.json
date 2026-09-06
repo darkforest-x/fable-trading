@@ -1,0 +1,2641 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-matching-support-preholdout-20260906-v10",
+  "status": "strict_support_unattainable",
+  "mothers": 251,
+  "greedy_matched": 154,
+  "greedy_controls": 462,
+  "maximum_matched": 154,
+  "maximum_coverage": 0.6135458167330677,
+  "allocation_recoverable": 0,
+  "required_complete_mothers": 226,
+  "coverage_gate_attainable": false,
+  "matching_edges": 1829,
+  "capacity": {
+    "optimal": true,
+    "solution_verified": true,
+    "mother_count": 251,
+    "candidate_count": 1666,
+    "edge_count": 1829,
+    "count_per_mother": 3,
+    "time_limit": 30.0,
+    "mothers_without_edges": [
+      "2023-01-06T00:00:00+00:00_L",
+      "2023-02-11T21:00:00+00:00_L",
+      "2023-03-11T01:00:00+00:00_L",
+      "2023-04-19T08:00:00+00:00_S",
+      "2023-05-24T03:00:00+00:00_S",
+      "2023-06-06T16:00:00+00:00_L",
+      "2023-06-13T15:00:00+00:00_S",
+      "2023-06-25T03:00:00+00:00_L",
+      "2023-06-25T11:00:00+00:00_L",
+      "2023-06-25T14:00:00+00:00_S",
+      "2023-07-20T14:00:00+00:00_S",
+      "2023-09-12T03:00:00+00:00_L",
+      "2023-09-27T03:00:00+00:00_L",
+      "2023-10-15T11:00:00+00:00_S",
+      "2023-10-31T18:00:00+00:00_L",
+      "2023-12-23T01:00:00+00:00_S",
+      "2024-04-03T14:00:00+00:00_L",
+      "2024-07-12T13:00:00+00:00_L",
+      "2024-07-21T14:00:00+00:00_L",
+      "2024-09-11T16:00:00+00:00_L",
+      "2024-10-14T03:00:00+00:00_L",
+      "2024-10-27T03:00:00+00:00_L",
+      "2024-11-17T11:00:00+00:00_S",
+      "2024-11-17T13:00:00+00:00_S",
+      "2024-12-14T20:00:00+00:00_S"
+    ],
+    "connected_component_count": 231,
+    "connected_component_upper_bound": 154,
+    "components": [
+      {
+        "component_id": 0,
+        "mother_ids": [
+          "2023-01-02T02:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 7,
+        "edge_count": 7,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 1,
+        "mother_ids": [
+          "2023-01-06T00:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 2,
+        "mother_ids": [
+          "2023-01-08T14:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 3,
+        "mother_ids": [
+          "2023-01-08T20:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 4,
+        "mother_ids": [
+          "2023-01-18T15:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 5,
+        "mother_ids": [
+          "2023-01-23T10:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 6,
+        "mother_ids": [
+          "2023-01-23T20:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 45,
+        "edge_count": 45,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 7,
+        "mother_ids": [
+          "2023-01-25T20:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 6,
+        "edge_count": 6,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 8,
+        "mother_ids": [
+          "2023-01-27T16:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 9,
+        "mother_ids": [
+          "2023-01-28T20:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 10,
+        "mother_ids": [
+          "2023-01-30T09:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 11,
+        "mother_ids": [
+          "2023-02-05T11:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 16,
+        "edge_count": 16,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 12,
+        "mother_ids": [
+          "2023-02-07T09:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 13,
+        "mother_ids": [
+          "2023-02-11T21:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 14,
+        "mother_ids": [
+          "2023-02-13T01:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 15,
+        "mother_ids": [
+          "2023-02-13T08:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 16,
+        "mother_ids": [
+          "2023-02-14T08:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 11,
+        "edge_count": 11,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 17,
+        "mother_ids": [
+          "2023-02-16T23:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 18,
+        "mother_ids": [
+          "2023-02-19T17:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 19,
+        "mother_ids": [
+          "2023-02-20T09:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 20,
+        "mother_ids": [
+          "2023-02-23T02:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 3,
+        "edge_count": 3,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 21,
+        "mother_ids": [
+          "2023-02-23T11:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 10,
+        "edge_count": 10,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 22,
+        "mother_ids": [
+          "2023-02-28T19:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 14,
+        "edge_count": 14,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 23,
+        "mother_ids": [
+          "2023-03-07T01:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 5,
+        "edge_count": 5,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 24,
+        "mother_ids": [
+          "2023-03-11T01:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 25,
+        "mother_ids": [
+          "2023-03-11T07:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 6,
+        "edge_count": 6,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 26,
+        "mother_ids": [
+          "2023-03-19T14:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 16,
+        "edge_count": 16,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 27,
+        "mother_ids": [
+          "2023-03-20T18:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 35,
+        "edge_count": 35,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 28,
+        "mother_ids": [
+          "2023-04-02T04:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 7,
+        "edge_count": 7,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 29,
+        "mother_ids": [
+          "2023-04-03T08:00:00+00:00_L",
+          "2023-04-18T09:00:00+00:00_L"
+        ],
+        "mother_count": 2,
+        "candidate_count": 6,
+        "edge_count": 12,
+        "complete_mother_upper_bound": 2
+      },
+      {
+        "component_id": 30,
+        "mother_ids": [
+          "2023-04-03T14:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 19,
+        "edge_count": 19,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 31,
+        "mother_ids": [
+          "2023-04-09T06:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 11,
+        "edge_count": 11,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 32,
+        "mother_ids": [
+          "2023-04-09T18:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 24,
+        "edge_count": 24,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 33,
+        "mother_ids": [
+          "2023-04-14T15:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 34,
+        "mother_ids": [
+          "2023-04-16T18:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 3,
+        "edge_count": 3,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 35,
+        "mother_ids": [
+          "2023-04-18T08:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 12,
+        "edge_count": 12,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 36,
+        "mother_ids": [
+          "2023-04-19T08:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 37,
+        "mother_ids": [
+          "2023-04-25T17:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 4,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 38,
+        "mother_ids": [
+          "2023-04-29T13:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 5,
+        "edge_count": 5,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 39,
+        "mother_ids": [
+          "2023-05-01T01:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 16,
+        "edge_count": 16,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 40,
+        "mother_ids": [
+          "2023-05-03T20:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 6,
+        "edge_count": 6,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 41,
+        "mother_ids": [
+          "2023-05-05T13:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 4,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 42,
+        "mother_ids": [
+          "2023-05-15T01:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 23,
+        "edge_count": 23,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 43,
+        "mother_ids": [
+          "2023-05-22T13:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 44,
+        "mother_ids": [
+          "2023-05-24T03:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 45,
+        "mother_ids": [
+          "2023-06-06T16:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 46,
+        "mother_ids": [
+          "2023-06-12T08:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 10,
+        "edge_count": 10,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 47,
+        "mother_ids": [
+          "2023-06-12T13:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 48,
+        "mother_ids": [
+          "2023-06-13T15:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 49,
+        "mother_ids": [
+          "2023-06-14T05:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 50,
+        "mother_ids": [
+          "2023-06-18T14:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 13,
+        "edge_count": 13,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 51,
+        "mother_ids": [
+          "2023-06-25T03:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 52,
+        "mother_ids": [
+          "2023-06-25T11:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 53,
+        "mother_ids": [
+          "2023-06-25T14:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 54,
+        "mother_ids": [
+          "2023-07-02T17:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 5,
+        "edge_count": 5,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 55,
+        "mother_ids": [
+          "2023-07-10T12:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 56,
+        "mother_ids": [
+          "2023-07-13T13:00:00+00:00_L",
+          "2023-07-26T12:00:00+00:00_L"
+        ],
+        "mother_count": 2,
+        "candidate_count": 28,
+        "edge_count": 56,
+        "complete_mother_upper_bound": 2
+      },
+      {
+        "component_id": 57,
+        "mother_ids": [
+          "2023-07-14T17:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 58,
+        "mother_ids": [
+          "2023-07-17T22:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 16,
+        "edge_count": 16,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 59,
+        "mother_ids": [
+          "2023-07-18T02:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 7,
+        "edge_count": 7,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 60,
+        "mother_ids": [
+          "2023-07-19T14:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 4,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 61,
+        "mother_ids": [
+          "2023-07-20T14:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 62,
+        "mother_ids": [
+          "2023-07-23T04:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 16,
+        "edge_count": 16,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 63,
+        "mother_ids": [
+          "2023-07-24T02:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 8,
+        "edge_count": 8,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 64,
+        "mother_ids": [
+          "2023-07-26T02:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 9,
+        "edge_count": 9,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 65,
+        "mother_ids": [
+          "2023-07-28T14:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 3,
+        "edge_count": 3,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 66,
+        "mother_ids": [
+          "2023-07-30T13:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 17,
+        "edge_count": 17,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 67,
+        "mother_ids": [
+          "2023-08-06T12:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 3,
+        "edge_count": 3,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 68,
+        "mother_ids": [
+          "2023-08-11T15:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 18,
+        "edge_count": 18,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 69,
+        "mother_ids": [
+          "2023-08-12T01:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 19,
+        "edge_count": 19,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 70,
+        "mother_ids": [
+          "2023-08-12T14:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 71,
+        "mother_ids": [
+          "2023-08-13T18:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 72,
+        "mother_ids": [
+          "2023-08-13T21:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 73,
+        "mother_ids": [
+          "2023-08-23T10:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 10,
+        "edge_count": 10,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 74,
+        "mother_ids": [
+          "2023-08-24T14:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 75,
+        "mother_ids": [
+          "2023-08-29T06:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 12,
+        "edge_count": 12,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 76,
+        "mother_ids": [
+          "2023-08-29T14:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 4,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 77,
+        "mother_ids": [
+          "2023-09-03T17:00:00+00:00_L",
+          "2023-09-15T22:00:00+00:00_L"
+        ],
+        "mother_count": 2,
+        "candidate_count": 7,
+        "edge_count": 14,
+        "complete_mother_upper_bound": 2
+      },
+      {
+        "component_id": 78,
+        "mother_ids": [
+          "2023-09-06T07:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 7,
+        "edge_count": 7,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 79,
+        "mother_ids": [
+          "2023-09-07T11:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 80,
+        "mother_ids": [
+          "2023-09-10T21:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 81,
+        "mother_ids": [
+          "2023-09-11T05:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 82,
+        "mother_ids": [
+          "2023-09-12T03:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 83,
+        "mother_ids": [
+          "2023-09-17T07:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 4,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 84,
+        "mother_ids": [
+          "2023-09-17T16:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 14,
+        "edge_count": 14,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 85,
+        "mother_ids": [
+          "2023-09-26T20:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 4,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 86,
+        "mother_ids": [
+          "2023-09-27T03:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 87,
+        "mother_ids": [
+          "2023-10-06T09:00:00+00:00_L",
+          "2023-10-30T08:00:00+00:00_L"
+        ],
+        "mother_count": 2,
+        "candidate_count": 9,
+        "edge_count": 18,
+        "complete_mother_upper_bound": 2
+      },
+      {
+        "component_id": 88,
+        "mother_ids": [
+          "2023-10-06T12:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 12,
+        "edge_count": 12,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 89,
+        "mother_ids": [
+          "2023-10-08T06:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 90,
+        "mother_ids": [
+          "2023-10-08T15:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 91,
+        "mother_ids": [
+          "2023-10-15T11:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 92,
+        "mother_ids": [
+          "2023-10-18T09:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 3,
+        "edge_count": 3,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 93,
+        "mother_ids": [
+          "2023-10-31T12:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 19,
+        "edge_count": 19,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 94,
+        "mother_ids": [
+          "2023-10-31T18:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 95,
+        "mother_ids": [
+          "2023-11-01T05:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 5,
+        "edge_count": 5,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 96,
+        "mother_ids": [
+          "2023-11-01T14:00:00+00:00_S",
+          "2023-11-02T15:00:00+00:00_S"
+        ],
+        "mother_count": 2,
+        "candidate_count": 2,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 97,
+        "mother_ids": [
+          "2023-11-06T04:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 98,
+        "mother_ids": [
+          "2023-11-07T18:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 99,
+        "mother_ids": [
+          "2023-11-13T03:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 100,
+        "mother_ids": [
+          "2023-11-15T11:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 5,
+        "edge_count": 5,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 101,
+        "mother_ids": [
+          "2023-11-21T11:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 102,
+        "mother_ids": [
+          "2023-11-22T18:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 103,
+        "mother_ids": [
+          "2023-11-26T10:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 8,
+        "edge_count": 8,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 104,
+        "mother_ids": [
+          "2023-12-01T01:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 3,
+        "edge_count": 3,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 105,
+        "mother_ids": [
+          "2023-12-07T08:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 106,
+        "mother_ids": [
+          "2023-12-08T11:00:00+00:00_L",
+          "2023-12-16T15:00:00+00:00_L"
+        ],
+        "mother_count": 2,
+        "candidate_count": 6,
+        "edge_count": 12,
+        "complete_mother_upper_bound": 2
+      },
+      {
+        "component_id": 107,
+        "mother_ids": [
+          "2023-12-20T04:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 21,
+        "edge_count": 21,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 108,
+        "mother_ids": [
+          "2023-12-22T18:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 10,
+        "edge_count": 10,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 109,
+        "mother_ids": [
+          "2023-12-22T19:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 4,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 110,
+        "mother_ids": [
+          "2023-12-23T01:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 111,
+        "mother_ids": [
+          "2023-12-24T05:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 112,
+        "mother_ids": [
+          "2023-12-24T13:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 3,
+        "edge_count": 3,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 113,
+        "mother_ids": [
+          "2023-12-25T21:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 3,
+        "edge_count": 3,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 114,
+        "mother_ids": [
+          "2023-12-26T05:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 15,
+        "edge_count": 15,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 115,
+        "mother_ids": [
+          "2024-01-03T11:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 116,
+        "mother_ids": [
+          "2024-01-10T22:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 6,
+        "edge_count": 6,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 117,
+        "mother_ids": [
+          "2024-01-14T13:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 118,
+        "mother_ids": [
+          "2024-01-14T19:00:00+00:00_S",
+          "2024-01-28T18:00:00+00:00_S"
+        ],
+        "mother_count": 2,
+        "candidate_count": 2,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 119,
+        "mother_ids": [
+          "2024-01-15T10:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 120,
+        "mother_ids": [
+          "2024-01-15T14:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 11,
+        "edge_count": 11,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 121,
+        "mother_ids": [
+          "2024-01-20T01:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 3,
+        "edge_count": 3,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 122,
+        "mother_ids": [
+          "2024-01-29T15:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 123,
+        "mother_ids": [
+          "2024-01-31T20:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 7,
+        "edge_count": 7,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 124,
+        "mother_ids": [
+          "2024-02-07T03:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 9,
+        "edge_count": 9,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 125,
+        "mother_ids": [
+          "2024-02-12T09:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 4,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 126,
+        "mother_ids": [
+          "2024-02-12T14:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 15,
+        "edge_count": 15,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 127,
+        "mother_ids": [
+          "2024-02-16T10:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 23,
+        "edge_count": 23,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 128,
+        "mother_ids": [
+          "2024-02-18T14:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 9,
+        "edge_count": 9,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 129,
+        "mother_ids": [
+          "2024-02-19T17:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 17,
+        "edge_count": 17,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 130,
+        "mother_ids": [
+          "2024-02-21T23:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 131,
+        "mother_ids": [
+          "2024-02-25T17:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 18,
+        "edge_count": 18,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 132,
+        "mother_ids": [
+          "2024-02-29T19:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 17,
+        "edge_count": 17,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 133,
+        "mother_ids": [
+          "2024-03-02T20:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 134,
+        "mother_ids": [
+          "2024-03-11T06:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 14,
+        "edge_count": 14,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 135,
+        "mother_ids": [
+          "2024-03-12T16:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 3,
+        "edge_count": 3,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 136,
+        "mother_ids": [
+          "2024-03-14T13:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 3,
+        "edge_count": 3,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 137,
+        "mother_ids": [
+          "2024-03-16T01:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 17,
+        "edge_count": 17,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 138,
+        "mother_ids": [
+          "2024-03-20T14:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 4,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 139,
+        "mother_ids": [
+          "2024-03-27T05:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 18,
+        "edge_count": 18,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 140,
+        "mother_ids": [
+          "2024-03-28T06:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 3,
+        "edge_count": 3,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 141,
+        "mother_ids": [
+          "2024-03-29T07:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 3,
+        "edge_count": 3,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 142,
+        "mother_ids": [
+          "2024-03-29T14:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 143,
+        "mother_ids": [
+          "2024-04-01T05:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 4,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 144,
+        "mother_ids": [
+          "2024-04-03T14:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 145,
+        "mother_ids": [
+          "2024-04-03T19:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 14,
+        "edge_count": 14,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 146,
+        "mother_ids": [
+          "2024-04-05T11:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 147,
+        "mother_ids": [
+          "2024-04-10T19:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 4,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 148,
+        "mother_ids": [
+          "2024-04-18T13:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 149,
+        "mother_ids": [
+          "2024-04-19T01:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 13,
+        "edge_count": 13,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 150,
+        "mother_ids": [
+          "2024-04-21T22:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 18,
+        "edge_count": 18,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 151,
+        "mother_ids": [
+          "2024-04-30T08:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 17,
+        "edge_count": 17,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 152,
+        "mother_ids": [
+          "2024-05-06T12:00:00+00:00_S",
+          "2024-05-10T14:00:00+00:00_S"
+        ],
+        "mother_count": 2,
+        "candidate_count": 6,
+        "edge_count": 12,
+        "complete_mother_upper_bound": 2
+      },
+      {
+        "component_id": 153,
+        "mother_ids": [
+          "2024-05-07T08:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 154,
+        "mother_ids": [
+          "2024-05-07T11:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 12,
+        "edge_count": 12,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 155,
+        "mother_ids": [
+          "2024-05-12T08:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 3,
+        "edge_count": 3,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 156,
+        "mother_ids": [
+          "2024-05-13T06:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 41,
+        "edge_count": 41,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 157,
+        "mother_ids": [
+          "2024-05-20T04:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 4,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 158,
+        "mother_ids": [
+          "2024-05-20T06:00:00+00:00_S",
+          "2024-05-30T06:00:00+00:00_S"
+        ],
+        "mother_count": 2,
+        "candidate_count": 14,
+        "edge_count": 28,
+        "complete_mother_upper_bound": 2
+      },
+      {
+        "component_id": 159,
+        "mother_ids": [
+          "2024-05-23T11:00:00+00:00_L",
+          "2024-05-26T13:00:00+00:00_L"
+        ],
+        "mother_count": 2,
+        "candidate_count": 29,
+        "edge_count": 58,
+        "complete_mother_upper_bound": 2
+      },
+      {
+        "component_id": 160,
+        "mother_ids": [
+          "2024-06-02T11:00:00+00:00_L",
+          "2024-06-10T14:00:00+00:00_L"
+        ],
+        "mother_count": 2,
+        "candidate_count": 25,
+        "edge_count": 50,
+        "complete_mother_upper_bound": 2
+      },
+      {
+        "component_id": 161,
+        "mother_ids": [
+          "2024-06-04T10:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 12,
+        "edge_count": 12,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 162,
+        "mother_ids": [
+          "2024-06-06T19:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 10,
+        "edge_count": 10,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 163,
+        "mother_ids": [
+          "2024-06-10T12:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 11,
+        "edge_count": 11,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 164,
+        "mother_ids": [
+          "2024-06-18T00:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 165,
+        "mother_ids": [
+          "2024-07-07T13:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 4,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 166,
+        "mother_ids": [
+          "2024-07-11T01:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 27,
+        "edge_count": 27,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 167,
+        "mother_ids": [
+          "2024-07-12T13:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 168,
+        "mother_ids": [
+          "2024-07-18T04:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 169,
+        "mother_ids": [
+          "2024-07-21T14:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 170,
+        "mother_ids": [
+          "2024-07-23T02:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 18,
+        "edge_count": 18,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 171,
+        "mother_ids": [
+          "2024-07-24T18:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 12,
+        "edge_count": 12,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 172,
+        "mother_ids": [
+          "2024-07-27T21:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 18,
+        "edge_count": 18,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 173,
+        "mother_ids": [
+          "2024-07-28T23:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 9,
+        "edge_count": 9,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 174,
+        "mother_ids": [
+          "2024-07-31T19:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 20,
+        "edge_count": 20,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 175,
+        "mother_ids": [
+          "2024-08-02T14:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 14,
+        "edge_count": 14,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 176,
+        "mother_ids": [
+          "2024-08-08T01:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 10,
+        "edge_count": 10,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 177,
+        "mother_ids": [
+          "2024-08-15T17:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 3,
+        "edge_count": 3,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 178,
+        "mother_ids": [
+          "2024-08-16T09:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 179,
+        "mother_ids": [
+          "2024-08-16T16:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 7,
+        "edge_count": 7,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 180,
+        "mother_ids": [
+          "2024-08-19T22:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 5,
+        "edge_count": 5,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 181,
+        "mother_ids": [
+          "2024-08-20T15:00:00+00:00_S",
+          "2024-08-21T14:00:00+00:00_S",
+          "2024-08-30T14:00:00+00:00_S"
+        ],
+        "mother_count": 3,
+        "candidate_count": 1,
+        "edge_count": 3,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 182,
+        "mother_ids": [
+          "2024-08-22T20:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 4,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 183,
+        "mother_ids": [
+          "2024-08-23T12:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 11,
+        "edge_count": 11,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 184,
+        "mother_ids": [
+          "2024-08-31T13:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 14,
+        "edge_count": 14,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 185,
+        "mother_ids": [
+          "2024-09-04T19:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 4,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 186,
+        "mother_ids": [
+          "2024-09-05T03:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 11,
+        "edge_count": 11,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 187,
+        "mother_ids": [
+          "2024-09-06T13:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 4,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 188,
+        "mother_ids": [
+          "2024-09-11T16:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 189,
+        "mother_ids": [
+          "2024-09-13T07:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 17,
+        "edge_count": 17,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 190,
+        "mother_ids": [
+          "2024-09-21T22:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 191,
+        "mother_ids": [
+          "2024-09-22T21:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 9,
+        "edge_count": 9,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 192,
+        "mother_ids": [
+          "2024-09-22T22:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 11,
+        "edge_count": 11,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 193,
+        "mother_ids": [
+          "2024-09-24T00:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 4,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 194,
+        "mother_ids": [
+          "2024-10-03T07:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 6,
+        "edge_count": 6,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 195,
+        "mother_ids": [
+          "2024-10-05T22:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 15,
+        "edge_count": 15,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 196,
+        "mother_ids": [
+          "2024-10-06T01:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 12,
+        "edge_count": 12,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 197,
+        "mother_ids": [
+          "2024-10-07T19:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 10,
+        "edge_count": 10,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 198,
+        "mother_ids": [
+          "2024-10-07T22:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 3,
+        "edge_count": 3,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 199,
+        "mother_ids": [
+          "2024-10-14T00:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 200,
+        "mother_ids": [
+          "2024-10-14T03:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 201,
+        "mother_ids": [
+          "2024-10-17T06:00:00+00:00_S",
+          "2024-10-17T09:00:00+00:00_S"
+        ],
+        "mother_count": 2,
+        "candidate_count": 3,
+        "edge_count": 6,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 202,
+        "mother_ids": [
+          "2024-10-18T01:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 9,
+        "edge_count": 9,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 203,
+        "mother_ids": [
+          "2024-10-19T14:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 19,
+        "edge_count": 19,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 204,
+        "mother_ids": [
+          "2024-10-24T00:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 205,
+        "mother_ids": [
+          "2024-10-27T03:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 206,
+        "mother_ids": [
+          "2024-10-30T20:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 15,
+        "edge_count": 15,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 207,
+        "mother_ids": [
+          "2024-10-31T01:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 10,
+        "edge_count": 10,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 208,
+        "mother_ids": [
+          "2024-10-31T10:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 5,
+        "edge_count": 5,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 209,
+        "mother_ids": [
+          "2024-11-01T15:00:00+00:00_S",
+          "2024-11-04T16:00:00+00:00_S"
+        ],
+        "mother_count": 2,
+        "candidate_count": 4,
+        "edge_count": 8,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 210,
+        "mother_ids": [
+          "2024-11-02T08:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 211,
+        "mother_ids": [
+          "2024-11-04T10:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 212,
+        "mother_ids": [
+          "2024-11-05T05:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 213,
+        "mother_ids": [
+          "2024-11-13T13:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 34,
+        "edge_count": 34,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 214,
+        "mother_ids": [
+          "2024-11-17T11:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 215,
+        "mother_ids": [
+          "2024-11-17T13:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 216,
+        "mother_ids": [
+          "2024-11-18T15:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 217,
+        "mother_ids": [
+          "2024-11-22T15:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 19,
+        "edge_count": 19,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 218,
+        "mother_ids": [
+          "2024-11-23T14:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 8,
+        "edge_count": 8,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 219,
+        "mother_ids": [
+          "2024-11-23T15:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 2,
+        "edge_count": 2,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 220,
+        "mother_ids": [
+          "2024-11-24T08:00:00+00:00_S",
+          "2024-11-30T10:00:00+00:00_S"
+        ],
+        "mother_count": 2,
+        "candidate_count": 2,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 221,
+        "mother_ids": [
+          "2024-11-28T18:00:00+00:00_L",
+          "2024-11-28T22:00:00+00:00_L"
+        ],
+        "mother_count": 2,
+        "candidate_count": 4,
+        "edge_count": 8,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 222,
+        "mother_ids": [
+          "2024-12-04T16:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 3,
+        "edge_count": 3,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 223,
+        "mother_ids": [
+          "2024-12-04T18:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 1,
+        "edge_count": 1,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 224,
+        "mother_ids": [
+          "2024-12-06T17:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 4,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 225,
+        "mother_ids": [
+          "2024-12-08T19:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 3,
+        "edge_count": 3,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 226,
+        "mother_ids": [
+          "2024-12-09T14:00:00+00:00_L",
+          "2024-12-13T16:00:00+00:00_L",
+          "2024-12-24T13:00:00+00:00_L"
+        ],
+        "mother_count": 3,
+        "candidate_count": 1,
+        "edge_count": 3,
+        "complete_mother_upper_bound": 0
+      },
+      {
+        "component_id": 227,
+        "mother_ids": [
+          "2024-12-09T15:00:00+00:00_S",
+          "2024-12-23T13:00:00+00:00_S"
+        ],
+        "mother_count": 2,
+        "candidate_count": 12,
+        "edge_count": 24,
+        "complete_mother_upper_bound": 2
+      },
+      {
+        "component_id": 228,
+        "mother_ids": [
+          "2024-12-13T14:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 4,
+        "edge_count": 4,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 229,
+        "mother_ids": [
+          "2024-12-14T19:00:00+00:00_L"
+        ],
+        "mother_count": 1,
+        "candidate_count": 17,
+        "edge_count": 17,
+        "complete_mother_upper_bound": 1
+      },
+      {
+        "component_id": 230,
+        "mother_ids": [
+          "2024-12-14T20:00:00+00:00_S"
+        ],
+        "mother_count": 1,
+        "candidate_count": 0,
+        "edge_count": 0,
+        "complete_mother_upper_bound": 0
+      }
+    ],
+    "unmatched_ids_scope": "this optimal allocation only; not individual impossibility",
+    "solver_called": true,
+    "solver_status": 0,
+    "solver_message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+    "solver_objective": -154.0,
+    "solver_dual_bound": -154.0,
+    "solver_mip_gap": 0.0,
+    "solver_node_count": 1.0,
+    "proof": "verified_milp_optimum",
+    "matched_mothers": 154,
+    "allocated_controls": 462,
+    "unmatched_mothers": 97,
+    "unmatched_mother_ids": [
+      "2023-01-06T00:00:00+00:00_L",
+      "2023-01-08T14:00:00+00:00_L",
+      "2023-01-08T20:00:00+00:00_L",
+      "2023-01-18T15:00:00+00:00_S",
+      "2023-01-23T10:00:00+00:00_L",
+      "2023-01-27T16:00:00+00:00_L",
+      "2023-01-28T20:00:00+00:00_S",
+      "2023-01-30T09:00:00+00:00_S",
+      "2023-02-07T09:00:00+00:00_L",
+      "2023-02-11T21:00:00+00:00_L",
+      "2023-02-13T01:00:00+00:00_S",
+      "2023-02-13T08:00:00+00:00_S",
+      "2023-02-16T23:00:00+00:00_S",
+      "2023-02-19T17:00:00+00:00_S",
+      "2023-02-20T09:00:00+00:00_L",
+      "2023-03-11T01:00:00+00:00_L",
+      "2023-04-14T15:00:00+00:00_S",
+      "2023-04-19T08:00:00+00:00_S",
+      "2023-05-22T13:00:00+00:00_L",
+      "2023-05-24T03:00:00+00:00_S",
+      "2023-06-06T16:00:00+00:00_L",
+      "2023-06-12T13:00:00+00:00_S",
+      "2023-06-13T15:00:00+00:00_S",
+      "2023-06-14T05:00:00+00:00_S",
+      "2023-06-25T03:00:00+00:00_L",
+      "2023-06-25T11:00:00+00:00_L",
+      "2023-06-25T14:00:00+00:00_S",
+      "2023-07-10T12:00:00+00:00_S",
+      "2023-07-14T17:00:00+00:00_S",
+      "2023-07-20T14:00:00+00:00_S",
+      "2023-08-12T14:00:00+00:00_L",
+      "2023-08-13T18:00:00+00:00_L",
+      "2023-08-13T21:00:00+00:00_S",
+      "2023-08-24T14:00:00+00:00_S",
+      "2023-09-07T11:00:00+00:00_S",
+      "2023-09-10T21:00:00+00:00_L",
+      "2023-09-11T05:00:00+00:00_L",
+      "2023-09-12T03:00:00+00:00_L",
+      "2023-09-27T03:00:00+00:00_L",
+      "2023-10-08T06:00:00+00:00_S",
+      "2023-10-08T15:00:00+00:00_S",
+      "2023-10-15T11:00:00+00:00_S",
+      "2023-10-31T18:00:00+00:00_L",
+      "2023-11-01T14:00:00+00:00_S",
+      "2023-11-02T15:00:00+00:00_S",
+      "2023-11-06T04:00:00+00:00_S",
+      "2023-11-07T18:00:00+00:00_L",
+      "2023-11-13T03:00:00+00:00_S",
+      "2023-11-21T11:00:00+00:00_S",
+      "2023-11-22T18:00:00+00:00_L",
+      "2023-12-07T08:00:00+00:00_S",
+      "2023-12-23T01:00:00+00:00_S",
+      "2023-12-24T05:00:00+00:00_S",
+      "2024-01-03T11:00:00+00:00_S",
+      "2024-01-14T13:00:00+00:00_L",
+      "2024-01-14T19:00:00+00:00_S",
+      "2024-01-15T10:00:00+00:00_S",
+      "2024-01-28T18:00:00+00:00_S",
+      "2024-01-29T15:00:00+00:00_L",
+      "2024-02-21T23:00:00+00:00_L",
+      "2024-03-02T20:00:00+00:00_S",
+      "2024-03-29T14:00:00+00:00_S",
+      "2024-04-03T14:00:00+00:00_L",
+      "2024-04-05T11:00:00+00:00_S",
+      "2024-04-18T13:00:00+00:00_L",
+      "2024-05-07T08:00:00+00:00_L",
+      "2024-06-18T00:00:00+00:00_S",
+      "2024-07-12T13:00:00+00:00_L",
+      "2024-07-18T04:00:00+00:00_S",
+      "2024-07-21T14:00:00+00:00_L",
+      "2024-08-16T09:00:00+00:00_L",
+      "2024-08-20T15:00:00+00:00_S",
+      "2024-08-21T14:00:00+00:00_S",
+      "2024-08-30T14:00:00+00:00_S",
+      "2024-09-11T16:00:00+00:00_L",
+      "2024-09-21T22:00:00+00:00_L",
+      "2024-10-14T00:00:00+00:00_S",
+      "2024-10-14T03:00:00+00:00_L",
+      "2024-10-17T09:00:00+00:00_S",
+      "2024-10-24T00:00:00+00:00_L",
+      "2024-10-27T03:00:00+00:00_L",
+      "2024-11-01T15:00:00+00:00_S",
+      "2024-11-02T08:00:00+00:00_S",
+      "2024-11-04T10:00:00+00:00_L",
+      "2024-11-05T05:00:00+00:00_L",
+      "2024-11-17T11:00:00+00:00_S",
+      "2024-11-17T13:00:00+00:00_S",
+      "2024-11-18T15:00:00+00:00_L",
+      "2024-11-23T15:00:00+00:00_S",
+      "2024-11-24T08:00:00+00:00_S",
+      "2024-11-28T22:00:00+00:00_L",
+      "2024-11-30T10:00:00+00:00_S",
+      "2024-12-04T18:00:00+00:00_L",
+      "2024-12-09T14:00:00+00:00_L",
+      "2024-12-13T16:00:00+00:00_L",
+      "2024-12-14T20:00:00+00:00_S",
+      "2024-12-24T13:00:00+00:00_L"
+    ],
+    "complete_mother_upper_bound": 154
+  },
+  "folds": [
+    {
+      "fold": "2023H1",
+      "mothers": 55,
+      "greedy_matched": 28,
+      "maximum_matched": 28,
+      "allocation_recoverable": 0,
+      "greedy_coverage": 0.509090909090909,
+      "maximum_coverage": 0.509090909090909,
+      "active_hourly_rows": 4271,
+      "active_candidate_eligible": 3562,
+      "historical_cumulative_pool_before_keys": 4005
+    },
+    {
+      "fold": "2023H2",
+      "mothers": 66,
+      "greedy_matched": 40,
+      "maximum_matched": 40,
+      "allocation_recoverable": 0,
+      "greedy_coverage": 0.6060606060606061,
+      "maximum_coverage": 0.6060606060606061,
+      "active_hourly_rows": 4344,
+      "active_candidate_eligible": 3622,
+      "historical_cumulative_pool_before_keys": 7636
+    },
+    {
+      "fold": "2024H1",
+      "mothers": 55,
+      "greedy_matched": 41,
+      "maximum_matched": 41,
+      "allocation_recoverable": 0,
+      "greedy_coverage": 0.7454545454545455,
+      "maximum_coverage": 0.7454545454545455,
+      "active_hourly_rows": 4296,
+      "active_candidate_eligible": 3676,
+      "historical_cumulative_pool_before_keys": 11368
+    },
+    {
+      "fold": "2024H2",
+      "mothers": 75,
+      "greedy_matched": 45,
+      "maximum_matched": 45,
+      "allocation_recoverable": 0,
+      "greedy_coverage": 0.6,
+      "maximum_coverage": 0.6,
+      "active_hourly_rows": 4344,
+      "active_candidate_eligible": 3722,
+      "historical_cumulative_pool_before_keys": 15146
+    }
+  ],
+  "old_status_counts": {
+    "matched": 154,
+    "insufficient_exact_controls": 94,
+    "missing_causal_matching_support": 3
+  },
+  "historical_full_parity": true,
+  "original_assignment_feasible": true,
+  "outcomes_read_or_computed": false,
+  "profitability_test": false,
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "limitation": "Offline exact same-month support; not online allocation, random treatment assignment, or profit evidence.",
+  "source_receipt": {
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "physical_rows": 341567,
+    "phase_rows": 219551,
+    "phase_price_last_open": "2024-12-31 23:55:00+00:00",
+    "physical_last_open": "2026-02-28 15:55:00+00:00",
+    "holdout_price_rows": 0,
+    "timestamp_preflight_before_price_hash": true
+  },
+  "config_sha256": "119c3eada5959ecbeed4b2d308bd6d0a6ae5dbfa03c45c39a145ad5321a82bb0",
+  "output_hashes": {
+    "candidate_stages.csv.gz": "bf94a9dd6a4cd59dab26261c1b8113a3d73fa4a282a5725b8a8e7790269245e8",
+    "eligible_edges.csv.gz": "9987da0f2da458e0aacdc9a989302dd29abf50a8649a0d5fe0b33fb5398ca362",
+    "fold_coverage.csv.gz": "d3b47d372775537f2b433cf72fc66edcdd73977898fcd899ee756c2bb1ebbe41",
+    "greedy_assignments.csv.gz": "e6cbc41d89383a1dad4999393bc932be92dd9516a8c4675de2dbe79d5298b170",
+    "greedy_controls.csv.gz": "855b9e1585216433b66529e1d1326cb26bc40c1ba4bdf4fda4cc30a3ad3079e1",
+    "greedy_edges.csv.gz": "79e14e77bf62b91882a23779828ffe390c2416752195ac607c49db1ec9608d65",
+    "key_supply.csv.gz": "476120abdc6b6f6ecb5830b21e46057870185070b1a2f530b06d498e5015ef64",
+    "matching_frame.csv.gz": "0a6a0c8461b33d13a9ca28346023033b56d7a00af1b39a6c827a774deb7a3009",
+    "maximum_allocation.csv.gz": "b2013974fd48e9f61eb74c7c4c856fa569cd54b4c5229e2fc2e4c22e37b47829",
+    "mother_audit.csv.gz": "27c5515e5b5764d892dbe247be3f6012ec348043496b8fea7fba1472cf799eff",
+    "original_mothers.csv.gz": "b3f442ad8b0959b19cb5ae58fd40bc6a3bf40b455b4be31f3758d53940eea3e6",
+    "stage_counts.csv.gz": "f9a8a1299c98c2dde4abdba99b5b39556d3daef88a4aeead60040c7007ca29b4"
+  },
+  "source_receipts": [
+    {
+      "path": "yoyo/data/hourly_impulse.py",
+      "sha256": "f1128f514456f0e1a7bf89b719b2333ebe3b12f66402d58c82764d355be97a3b"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_research.py",
+      "sha256": "804e62f5dfa537302a6cf1f0223549cdf3b3a3e42966ef59a33b6c975fd79ad4"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_context_research.py",
+      "sha256": "b55c11cbf3cfc7b55a319b65625502738f831b298e9b1c5f65c1657efe4bb9a3"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_k2_matching.py",
+      "sha256": "50af2aa6421b5aef83082213407f31877239b92b1bd3103adabee90f5476803b"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_matching_support.py",
+      "sha256": "eeaf4635f4c3bf11391b6b580ffc4d3e4229bc2de9bab9d01320697d4111c548"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_matching_capacity.py",
+      "sha256": "715de053060b95c278336838fde7e5e4dbdd99466e8865e948c8580cc07293ee"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_support_research.py",
+      "sha256": "f83061bcae52e4c2e0281732354817a5b45f9a83607a27131345e8c19e2fb84c"
+    },
+    {
+      "path": "tests/test_hourly_impulse_k2_matching.py",
+      "sha256": "feb2d4a91521ef9d588a66877ee9b0ccf4a64f7f410f66a9d4f6f4668f50abae"
+    },
+    {
+      "path": "tests/test_hourly_impulse_matching_support.py",
+      "sha256": "2e693bcf9089999259e3049a0174808b9f50641d0e1ea9024d0e1cea5d862d78"
+    },
+    {
+      "path": "tests/test_hourly_impulse_matching_capacity.py",
+      "sha256": "125d23c66e376b7c1f23becec4eeb2757934b2f40e2ca9c30ad74b4785962583"
+    },
+    {
+      "path": "tests/test_hourly_impulse_support_research.py",
+      "sha256": "dda6a890b46d20e84103b891a3c51a2a3b401a9f3f4e4f4b2110c19dc39cd683"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/config.json",
+      "sha256": "119c3eada5959ecbeed4b2d308bd6d0a6ae5dbfa03c45c39a145ad5321a82bb0"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json",
+      "sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/PROJECT_PLAN.md",
+      "sha256": "08bfd6310db2a6654a6127b9e5d45510ddd55f18f8599b7c57dbd7ed1c8be627"
+    }
+  ],
+  "generated_at": "2026-09-06 06:58:06.390000+00:00"
+}

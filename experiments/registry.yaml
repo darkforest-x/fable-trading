@@ -5307,14 +5307,20 @@ experiments:
 
   - experiment_id: exp-btcusdtp-1h-matching-support-preholdout-20260906-v10
     source_repo: darkforest-x/fable-trading
-    source_commit: pending_preregistered_builder
-    status: preregistered
+    source_commit: "b6e9056"
+    status: rejected
     question: >-
       Can unchanged exact matching support90% of all251 original hourly
       MA-cross mothers with three unique controls, under optimal allocation?
     single_variable: >-
       Outcome-free allocation-support audit; entry, risk, matching keys,
       control count, seed, exclusions and2023-2024 folds unchanged.
+    result: >-
+      Maximum154 of251 equals old greedy154;61.35% coverage,0 recoverable,
+      required226 unreachable. Independent231-component bound154 equals
+      feasible allocation154.97 missing groups=3 missing support+19 exact
+      cells+1 fold boundary+71 cross exclusion+3 shared supply conflict.
+      Not a profitability test; no new returns calculated.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false

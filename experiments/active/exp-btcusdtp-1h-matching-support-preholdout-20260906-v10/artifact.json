@@ -1,0 +1,333 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "BTC Hourly Support Audit",
+    "generatedAt": "2026-09-06T07:20:33.607124+00:00",
+    "filters": [],
+    "cards": [],
+    "charts": [
+      {
+        "id": "shortage",
+        "title": "未匹配母样本的首个供给不足阶段",
+        "subtitle": "2023–2024 · 全部251母样本中97未匹配 · 顺序描述，非排除规则的因果重要性",
+        "type": "bar",
+        "intent": "comparison",
+        "layout": "full",
+        "dataset": "shortage",
+        "sourceId": "v10_mothers",
+        "question": "匹配缺口最先出现在哪一层？",
+        "rationale": "Five ordered discrete stages; exact counts retain all unmatched mothers. Blue marks, labels and ordered stage names distinguish groups without relying on colour.",
+        "palette": {
+          "kind": "sequential",
+          "name": "blue"
+        },
+        "labels": {
+          "values": "all"
+        },
+        "settings": {
+          "sort": "none",
+          "categoryLabelPolicy": "wrap"
+        },
+        "maxRows": 18,
+        "valueFormat": "number",
+        "referenceLines": [
+          {
+            "axis": "y",
+            "value": 0,
+            "color": "neutral",
+            "lineStyle": "solid",
+            "label": "0 母样本"
+          }
+        ],
+        "encodings": {
+          "x": {
+            "field": "stage_label",
+            "type": "ordinal",
+            "label": "首个低于3控制的阶段 / 缺支持"
+          },
+          "y": {
+            "field": "mother_count",
+            "type": "quantitative",
+            "label": "母样本数",
+            "format": "number"
+          },
+          "tooltip": [
+            {
+              "field": "mother_count",
+              "type": "quantitative",
+              "label": "本阶段"
+            },
+            {
+              "field": "all_mothers",
+              "type": "quantitative",
+              "label": "全部母样本"
+            },
+            {
+              "field": "unmatched_mothers",
+              "type": "quantitative",
+              "label": "全部未匹配"
+            }
+          ]
+        }
+      }
+    ],
+    "tables": [],
+    "sources": [
+      {
+        "id": "report",
+        "label": "V10 · 完整技术报告",
+        "path": "analysis/p1_btcusdtp_hourly_support_v10_20260906.md"
+      },
+      {
+        "id": "v10_summary",
+        "label": "V10 · 保存的容量证书",
+        "path": "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/summary.json"
+      },
+      {
+        "id": "v10_mothers",
+        "label": "V10 · 全部原始母样本支持账本",
+        "path": "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/mother_audit.csv.gz",
+        "query": {
+          "engine": "SQLite",
+          "language": "sql",
+          "sql": "SELECT s.stage, MAX(s.stage_label) AS stage_label,\n COUNT(*) AS mother_count, c.all_mothers, c.unmatched_mothers,\n c.matched_mothers, 3 AS required_controls,\n 1.0 * COUNT(*) / c.unmatched_mothers AS share_unmatched\nFROM main.shortages s CROSS JOIN main.cohort c\nGROUP BY s.stage, c.all_mothers, c.unmatched_mothers, c.matched_mothers\nORDER BY MIN(s.stage_order)",
+          "executed_at": "2026-09-06T07:20:33.607124+00:00",
+          "tables_used": [
+            "main.shortages",
+            "main.cohort"
+          ],
+          "description": "Actual SQLite aggregation in shortage_rows over classifications derived from experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/mother_audit.csv.gz. Python first validates full maternal IDs/status counts and classifies each row at the first frozen stage below three; main.shortages holds event_id,stage,stage_label,stage_order. main.cohort holds original/matched/unmatched denominators. SQL aggregates these classifications; it does not compute trading features or returns.",
+          "filters": [
+            "All original BTC-USDT-SWAP2023-2024 mothers; only unmatched mothers enter the shortage chart, no outcome filtering",
+            "Missing causal support has its own category, not fabricated zero candidate supply"
+          ],
+          "metric_definitions": [
+            "mother_count counts unmatched maternal IDs once, not unique candidate timestamps or mother-candidate edges",
+            "First shortage means first frozen ordered stage count below3; descriptive order, not causal effect of removing a filter",
+            "share_unmatched=mother_count/unmatched_mothers; all_mothers includes matched and unmatched requests"
+          ]
+        }
+      },
+      {
+        "id": "presentation_code",
+        "label": "V10 · 顺序计数及报告代码",
+        "path": "yoyo/evaluation/hourly_impulse_support_report.py"
+      }
+    ],
+    "blocks": [
+      {
+        "id": "title",
+        "type": "markdown",
+        "body": "# BTC Hourly Support Audit",
+        "layout": "full"
+      },
+      {
+        "id": "section_0",
+        "type": "markdown",
+        "body": "## 结论：换配对算法不能提高当前严格对照覆盖率\n\n\n**原始 251 个小时穿均线入场，最多只能得到 154 组三对照，覆盖率 61.35%。旧贪心分配已经达到这个上限，可恢复数量为 0。** 预先规定的 90% 覆盖需要 226 组，还差 72 组；本轮明确未通过覆盖门。\n\n这不是盈利回测，没有产生新收益。它排除了一个具体误判：不能把旧对照覆盖不足归咎于分配器，再用重新分配后的条件收益声称整个系统有效。盈利目标仍未达成，不能上线。",
+        "layout": "full",
+        "sourceId": "v10_summary"
+      },
+      {
+        "id": "section_1",
+        "type": "markdown",
+        "body": "## 对象与口径：完整原始入口，不是挑出的赢家\n\n本轮固定原 V4 保留的全部 251 个 K1 母样本，来自 OKX BTC-USDT-SWAP 的 2023–2024 开发期；不是 V7–V9 的源区突破入口。原信号由完成的 1h 大实体或真实吞没 K 线贯穿 SMA40(HL2) 产生，下一根真实 5m 开盘入场，初始风险由 K1 实际极值决定。没有增加过滤、等待 K2、改变止损或重算退出。\n\n每个母样本必须完整匹配 **3 个不同控制时刻**，全局不复用。保持同月、UTC 六小时时段、因果 ATR 三分位、已完成 5m 颜色、已完成 1h 颜色、方向调整后的小时斜率符号六项条件；不允许缺键相配。母风险/ATR 转移到控制自身开盘和 ATR 后，合成止损还必须有限且为正。\n\n“覆盖率”分母始终是全部 251 母样本，不因未配对而缩小。控制时刻数量、母样本数量和“母×候选”机会数是三个不同单位。",
+        "layout": "full"
+      },
+      {
+        "id": "section_2",
+        "type": "markdown",
+        "body": "## 四个时间段都没有分配增益\n\n\n| 开发时间段 | 原始母数 | 旧完整组 | 最大完整组 | 最大覆盖率 | 可增加组数 |\n|---|---:|---:|---:|---:|---:|\n| 2023 上半年 | 55 | 28 | 28 | 50.91% | 0 |\n| 2023 下半年 | 66 | 40 | 40 | 60.61% | 0 |\n| 2024 上半年 | 55 | 41 | 41 | 74.55% | 0 |\n| 2024 下半年 | 75 | 45 | 45 | 60.00% | 0 |\n| 合计 | 251 | 154 | 154 | 61.35% | 0 |\n\n这不是“平均达标但某个时段差”：每段都低于 90%，任何一段都没有靠重新分配增加母数。它只说明当前严格对照设计的支持上限，不说明未匹配交易一定更差，也不说明修改交易规则无效。",
+        "layout": "full",
+        "sourceId": "v10_summary"
+      },
+      {
+        "id": "section_3",
+        "type": "markdown",
+        "body": "## 97 个缺配样本：缺口究竟出现在哪里\n\n\n按冻结的过滤顺序，记录首次低于三个候选的阶段，得到互斥分解。以下数字可以相加，但它们**不是移除各条件的独立因果效果**，更不是盈利因子的“重要性排名”。\n\n| 首个不足阶段 | 母样本数 | 含义 |\n|---|---:|---|\n| 六键全部匹配后 | 19 | 到斜率符号这一层，原始同状态小时行已不足 3 |\n| 期末 72h 禁入后 | 1 | 再去掉严格期末范围外的候选后不足 |\n| 排除本小时/前小时穿线后 | 71 | 本阶段排除后，合法非穿线控制首次低于 3 |\n| 共享供给已被占用 | 3 | 自己原有至少 3 候选，但同组共享的候选不够两个母各取 3 |\n| 母本身因果支持缺失 | 3 | ATR 三分位桶不可用；其他列可用不等于这一桶可用 |\n| 合计 | 97 | 全部 251 母样本中的未配对样本 |\n\n原始小时行在排除穿线之前可能包括信号自身，不能称为已经可用的随机控制。71 是“首次低于三”的母数，不是被删掉的候选数，也不代表放开穿线排除就能得到可信对照。",
+        "layout": "full",
+        "sourceId": "v10_mothers"
+      },
+      {
+        "id": "shortage_chart",
+        "type": "chart",
+        "chartId": "shortage",
+        "layout": "full"
+      },
+      {
+        "id": "section_4",
+        "type": "markdown",
+        "body": "## 94 个候选不足：大多在分配前就不够\n\n\n排除母自身缺支持的 3 个样本后，94 个不足样本在任何控制被分配之前：22 个没有合法候选，36 个只有 1 个，33 个只有 2 个，只有 3 个至少有 3 个。即 **91/94 在开始分配前就达不到三对照**。\n\n| 分配前合法候选数 | 母样本数 |\n|---|---:|\n| 0 | 22 |\n| 1 | 36 |\n| 2 | 33 |\n| 3 | 1 |\n| 4 | 2 |\n\n母自身支持缺失的那 3 条可用数量保留为空值，不能记成“零候选”。此外，94 母的“母×候选”机会累计从六键后的 414，经过期末限制变成 407，再经过穿线排除变成 113，最后未占用机会为 104；这些不是 414 或 113 个不同市场时刻。",
+        "layout": "full",
+        "sourceId": "v10_mothers"
+      },
+      {
+        "id": "section_5",
+        "type": "markdown",
+        "body": "## 为什么剩下三个也不能通过重新分配多救一组\n\n| 母 ID 所用 K1 开盘时间（UTC） | 分配前候选 | 已被占用 | 剩余 |\n|---|---:|---:|---:|\n| 2024-10-17 09:00，空 | 3 | 3 | 0 |\n| 2024-11-04 16:00，空 | 4 | 3 | 1 |\n| 2024-11-28 22:00，多 | 4 | 3 | 1 |\n\n母 ID 用 K1 开盘命名，真实决策在其后一小时，不能误当成这根开盘就知道了完整形态。每个冲突组件都含 2 母，但总共只有 3、4、4 个不同候选：三对照规则下都最多满足其中 1 母。\n\n因此存在“换入这一个”的可能，没有“多加这一个”的容量。不能看到某个最优解未选择某母，就宣称它在所有最优解里都不可选择。\n\n实际最大解只把 2024-11-01 16:00 UTC 的已获配空头，换成 2024-11-04 17:00 UTC 的空头（这里均为决策时刻）；组数不变，也没有拿新分配去重算收益。本节同时核对母账本、完整合法边与容量组件列表。",
+        "layout": "full"
+      },
+      {
+        "id": "section_6",
+        "type": "markdown",
+        "body": "## 三个实例：不是笼统地说样本不足\n\n\n| 母决策时刻 UTC | 同小时颜色状态数 | 同斜率状态数 | 期末范围内状态数 | 最终合法候选 | 首先不足的阶段 |\n|---|---:|---:|---:|---:|---|\n| 2023-01-06 01:00，多 | 11 | 2 | 2 | 0 | 六键齐全后 |\n| 2023-01-08 21:00，多 | 17 | 3 | 3 | 2 | 穿线排除后 |\n| 2023-06-13 16:00，空 | 15 | 5 | 2 | 0 | 期末限制后 |\n\n前两例展示“很像当前市场状态”与“合法随机对照”不同：加入斜率和排除穿线会把可比状态缩到不足三。第三例不能越过预先规定的期末范围凑足候选。这些时刻对应信号收盘后的决策，不是提前一小时入场。",
+        "layout": "full",
+        "sourceId": "v10_mothers"
+      },
+      {
+        "id": "section_7",
+        "type": "markdown",
+        "body": "## 排除条件重叠，不能把损失重复相加\n\n全 248 个支持有效母，经六键、期末范围和支持条件后有 2,640 条“母×候选”机会（2,364 个不同时刻）。其中穿线排除涉及 811 条，实际母时刻排除涉及 294 条，后者全部包含在前者中。因此合法边是 **2,640−811=1,829**，不是再减 294。\n\n最终 1,829 条边对应 1,666 个不同候选时刻。候选阶段表的 73,180 行是 18,295 个小时状态按四个 fold 重复审计，不能当成 73,180 个独立控制。该节依据完整匹配状态、母分阶段记录和合法边联合核验，强调计数单位及交集。",
+        "layout": "full"
+      },
+      {
+        "id": "section_8",
+        "type": "markdown",
+        "body": "## 容量证据：独立上界与可行下界相等\n\n\n完整图有 251 个母节点、1,666 个不同候选时刻、1,829 条合法母候选边，分成 231 个连通组件。每组件完整母数不可能超过 `min(母数, floor(不同候选数/3))`；这些组件上界相加为 154。\n\n旧 462 个控制已经构成 154 组合法且不复用的完整三配对，给出可行下界 154。上界与下界相等，便可证明最大值就是 154；不是只凭求解器“成功”字样判断。二元整数模型也返回目标 −154、对偶界 −154、最优状态和零间隙，整数解另行检查。\n\n优化对象是完整母组 `sum(y)`，约束每母 `sum(x)=3*y`、每候选 `sum(x)<=1`。最大化总匹配边再除以三可能把零散半组算进去，不适用。",
+        "layout": "full",
+        "sourceId": "v10_summary"
+      },
+      {
+        "id": "section_9",
+        "type": "markdown",
+        "body": "## 覆盖已经选择了不同的市场状态\n\n\n| 原信号方向与小时均线斜率 | 全母数 | 匹配母数 | 匹配率 | 候选不足 | 母支持缺失 |\n|---|---:|---:|---:|---:|---:|\n| 同向 | 111 | 103 | 92.79% | 6 | 2 |\n| 反向 | 140 | 51 | 36.43% | 88 | 1 |\n\n样本中没有零斜率母。94 个候选不足中 88 个与小时斜率反向。匹配的 154 母中同向占 66.88%，而原始 251 母中同向只占 44.22%；**已匹配群体并不代表全部入口**。\n\n这支持的是“对照结论有条件适用范围”，不是“把反向斜率都删掉就盈利”。本轮没有计算任何组的交易结果。全月候选供给和能否配对也不能用作实时入场特征。",
+        "layout": "full",
+        "sourceId": "v10_mothers"
+      },
+      {
+        "id": "section_10",
+        "type": "markdown",
+        "body": "## 数据与因果时钟\n\n运行前已提交配置、方案、构建器和合成测试（`b6e9056`），再核验原 V1 配置以及 V4 四份事前账本的 SHA256。重新生成后，原 251 母所有保存字段、462 控制所有字段、251 分配记录及四份分配收据逐项一致，才允许计算容量。\n\n只物化原归档中截止 2024-12-31 23:55 UTC 的 219,551 行 5m 价格，包含事前预热；没有物化 2025+ 价格，holdout 价格消耗 **0 次**。原归档整文件的时间戳/哈希校验，不等于把后续价格用于特征或结果。\n\nATR 桶用同连续片段内先前 720 小时的 ATR 比例，向后移一格，最少 168 小时。小时状态在小时收盘完成，5m 状态也必须恰在决策时完成；控制使用自身时点数据。本小时和前一小时穿线被排除，不排除未来穿线。候选严格早于各半年结束前 72 小时。\n\n原匹配允许同月但晚于母决策的控制。这是离线同期对照支持分析，不是在线、逐前缀不变的分配器，也不是随机分配处理的实验。完整价格状态未由第二套独立原始行情管道重放；图的容量证明只针对保存且通过重建核对的合法图。",
+        "layout": "full"
+      },
+      {
+        "id": "section_11",
+        "type": "markdown",
+        "body": "## 验证、零假设与财务指标为何不适用\n\n纯合成图覆盖小图穷举、贪心反例、共享瓶颈、跨方向候选时间不复用、整数解和对偶证书异常、超时，以及打乱 ID/顺序和注入无关收益列后不改变结果。真实运行在求解前保存完整图及来源收据；失败会保留明确失败文件并停止，不会自动换种子补跑。\n\n独立保存账本验证器只用标准库读取审计 CSV/JSON，重算图组件、配对约束、哈希与时钟，不调用原求解器或交易执行器。完整验证记录随实验交付。\n\n本轮没有训练、预测分数、正负收益标签或新收益计算。因此 val AUC、正类率、top-decile 毛/净收益、胜率、排序置换 p 和单特征收益基线均**不适用**；独立验证样本数为 **0**。不能用配对成功率冒充交易成功率。相应严格对照是数学上界/可行下界闭合、小图穷举真值和无关结果注入不变性；历史财务失败仍保留在原报告。",
+        "layout": "full"
+      },
+      {
+        "id": "section_12",
+        "type": "markdown",
+        "body": "## 风险与诚实声明\n\n本轮回答的是“当前严格对照能覆盖多少原入口”，不是“怎样保证赚钱”。覆盖门未通过，不能把条件对照超额外推到全部交易。原始时段被反复研究，不是新鲜独立样本；后来真正出现正开发收益时，仍需要先冻结规则再用未用于选择的前向数据检验。\n\n顺序分解依赖冻结过滤顺序，排除标记可重叠；不得当作各项规则的独立因果重要性。最大分配与旧贪心组数相同，不代表所选母身份完全一样；没有使用新分配重算收益。没有修改 TradingView、生产阈值、ACTIVE、forward、训练或实盘。\n\nHTML 使用统一便携阅读器；若交付回执为 `structural_only`，表示结构和嵌入数据一致性通过，但没有兼容浏览器做手机视觉/交互验证。Notebook 普通 Python 逐格检查不等于 Jupyter 内核执行；缺少内核的验证范围会明确保留。",
+        "layout": "full"
+      },
+      {
+        "id": "section_13",
+        "type": "markdown",
+        "body": "## 下一步：继续研究交易规则，不再调配对器\n\n停止在当前母群上调分配种子、控制数量、复用或放松匹配键来制造“通过”。后续规则实验应把两种问题分开：**全部 251 母的同机会策略变化**，以及 **154 支持群内的条件对照超额变化**；两者都如实报告，后者不能代替前者，也不能跳过原覆盖门宣称全系统通过。\n\n下一轮回到入场后的启动持续性：先检查新的失败启动/结构失效规则是否与已失败的斜率、延迟同向、K2 等待和源区突破实验重复，再冻结一个单变量。不能选未来跑出大行情的母样本来反推门槛，不能把少亏写成已赚钱。该交易实验尚未登记或运行，本文不提前声称有效。\n\n斜率过滤等既有实验记录在 `analysis/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.md`，不是从本轮支持账本推断出来的历史；不能把同一过滤换名字再称为新发现。",
+        "layout": "full"
+      },
+      {
+        "id": "section_14",
+        "type": "markdown",
+        "body": "## 复现与证据\n\n原始构建命令需要本仓原哈希归档，且 V10 `results` 尚不存在；现有结果严禁删除覆盖，已有结果用保存账本验证器复核。重新构建另行登记新输出尝试。\n\n```bash\ngit branch --show-current\n.venv/bin/python -m pytest tests/test_hourly_impulse_matching_support.py tests/test_hourly_impulse_matching_capacity.py tests/test_hourly_impulse_support_research.py tests/test_hourly_impulse_k2_matching.py -q\n.venv/bin/python -m yoyo.evaluation.hourly_impulse_support_research\n.venv/bin/python scripts/verify_hourly_impulse_support_v10.py\n.venv/bin/python -m pytest tests/test_hourly_impulse_support_report.py tests/test_verify_hourly_impulse_support_v10.py tests/test_hourly_impulse_support_notebook.py -q\npython3 scripts/md_to_html.py analysis/p1_btcusdtp_hourly_support_v10_20260906.md --out-dir analysis/html\n.venv/bin/python -m yoyo.evaluation.hourly_impulse_support_report --markdown analysis/p1_btcusdtp_hourly_support_v10_20260906.md --summary experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/summary.json --audit experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/mother_audit.csv.gz --output experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/artifact.json\n```\n\n随后用已安装 Data Analytics 插件的 `skills/build-report/scripts/deliver_portable_artifact.mjs`，将该 `artifact.json` 打包到同名 HTML。精确交付命令、测试结果与 notebook 命令见实验 `VERIFICATION.md`；主交付是 HTML，不是截图。\n\n源码与证据根目录：`experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/`。数据源归档是 `data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv`，SHA256 `767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac`；配置、输入四表和输出十二表的逐文件哈希都在保存收据内。\n\n数学求解状态使用 [SciPy 1.13.1 MILP 官方接口](https://docs.scipy.org/doc/scipy-1.13.1/reference/generated/scipy.optimize.milp.html)，时钟/身份核验使用 [pandas 2.3 merge 契约](https://pandas.pydata.org/pandas-docs/version/2.3/reference/api/pandas.DataFrame.merge.html)。这些文档只支持实现语义，不是策略盈利证据。",
+        "layout": "full"
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-09-06T07:20:33.607124+00:00",
+    "status": "ready",
+    "datasets": {
+      "shortage": [
+        {
+          "stage": "same_slope",
+          "stage_label": "六键齐全后不足",
+          "mother_count": 19,
+          "all_mothers": 251,
+          "unmatched_mothers": 97,
+          "matched_mothers": 154,
+          "required_controls": 3,
+          "share_unmatched": 0.1958762886597938
+        },
+        {
+          "stage": "fold_embargo",
+          "stage_label": "期末禁入后不足",
+          "mother_count": 1,
+          "all_mothers": 251,
+          "unmatched_mothers": 97,
+          "matched_mothers": 154,
+          "required_controls": 3,
+          "share_unmatched": 0.010309278350515464
+        },
+        {
+          "stage": "cross_exclusion",
+          "stage_label": "排除本小时/前小时穿线后不足",
+          "mother_count": 71,
+          "all_mothers": 251,
+          "unmatched_mothers": 97,
+          "matched_mothers": 154,
+          "required_controls": 3,
+          "share_unmatched": 0.7319587628865979
+        },
+        {
+          "stage": "unused_before",
+          "stage_label": "共用供给已占用",
+          "mother_count": 3,
+          "all_mothers": 251,
+          "unmatched_mothers": 97,
+          "matched_mothers": 154,
+          "required_controls": 3,
+          "share_unmatched": 0.030927835051546393
+        },
+        {
+          "stage": "missing_support",
+          "stage_label": "母样本因果支持缺失",
+          "mother_count": 3,
+          "all_mothers": 251,
+          "unmatched_mothers": 97,
+          "matched_mothers": 154,
+          "required_controls": 3,
+          "share_unmatched": 0.030927835051546393
+        }
+      ]
+    },
+    "accessIssues": []
+  },
+  "sources": [
+    {
+      "id": "report",
+      "label": "V10 · 完整技术报告",
+      "path": "analysis/p1_btcusdtp_hourly_support_v10_20260906.md"
+    },
+    {
+      "id": "v10_summary",
+      "label": "V10 · 保存的容量证书",
+      "path": "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/summary.json"
+    },
+    {
+      "id": "v10_mothers",
+      "label": "V10 · 全部原始母样本支持账本",
+      "path": "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/mother_audit.csv.gz",
+      "query": {
+        "engine": "SQLite",
+        "language": "sql",
+        "sql": "SELECT s.stage, MAX(s.stage_label) AS stage_label,\n COUNT(*) AS mother_count, c.all_mothers, c.unmatched_mothers,\n c.matched_mothers, 3 AS required_controls,\n 1.0 * COUNT(*) / c.unmatched_mothers AS share_unmatched\nFROM main.shortages s CROSS JOIN main.cohort c\nGROUP BY s.stage, c.all_mothers, c.unmatched_mothers, c.matched_mothers\nORDER BY MIN(s.stage_order)",
+        "executed_at": "2026-09-06T07:20:33.607124+00:00",
+        "tables_used": [
+          "main.shortages",
+          "main.cohort"
+        ],
+        "description": "Actual SQLite aggregation in shortage_rows over classifications derived from experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/mother_audit.csv.gz. Python first validates full maternal IDs/status counts and classifies each row at the first frozen stage below three; main.shortages holds event_id,stage,stage_label,stage_order. main.cohort holds original/matched/unmatched denominators. SQL aggregates these classifications; it does not compute trading features or returns.",
+        "filters": [
+          "All original BTC-USDT-SWAP2023-2024 mothers; only unmatched mothers enter the shortage chart, no outcome filtering",
+          "Missing causal support has its own category, not fabricated zero candidate supply"
+        ],
+        "metric_definitions": [
+          "mother_count counts unmatched maternal IDs once, not unique candidate timestamps or mother-candidate edges",
+          "First shortage means first frozen ordered stage count below3; descriptive order, not causal effect of removing a filter",
+          "share_unmatched=mother_count/unmatched_mothers; all_mothers includes matched and unmatched requests"
+        ]
+      }
+    },
+    {
+      "id": "presentation_code",
+      "label": "V10 · 顺序计数及报告代码",
+      "path": "yoyo/evaluation/hourly_impulse_support_report.py"
+    }
+  ]
+}
