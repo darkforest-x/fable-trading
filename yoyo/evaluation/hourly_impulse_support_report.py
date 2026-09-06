@@ -43,6 +43,8 @@ def shortage_rows(audit, summary):
         raise ValueError("Full unique original mother population required")
     if audit.match_status.value_counts().to_dict() != summary["old_status_counts"]:
         raise ValueError("Saved support status counts disagree")
+    if int(audit.match_status.eq("matched").sum()) != summary["greedy_matched"]:
+        raise ValueError("Matched denominator disagrees")
     classified = []
     for row in audit.to_dict("records"):
         if row["match_status"] == "matched":

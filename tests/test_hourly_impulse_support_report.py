@@ -19,11 +19,12 @@ def test_all_unmatched_counted_once():
     assert all(x["all_mothers"]==3 and x["unmatched_mothers"]==2 for x in rows)
 
 
-@pytest.mark.parametrize("change",["id","status","upward","missing","negative","fraction","fake_match"])
+@pytest.mark.parametrize("change",["id","status","denominator","upward","missing","negative","fraction","fake_match"])
 def test_invalid_evidence_fails(change):
     a,s=fixture()
     if change=="id": a.loc[1,"event_id"]="a"
     elif change=="status": s["old_status_counts"]={}
+    elif change=="denominator": s["greedy_matched"]=2
     elif change=="upward": a.loc[1,"same_utc6h_count"]=3
     elif change=="missing": a.loc[1,"same_slope_count"]=None
     elif change=="negative": a.loc[1,"unused_before_count"]=-1
