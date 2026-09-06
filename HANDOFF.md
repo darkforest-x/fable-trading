@@ -2,7 +2,17 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-09-06 — BTC 1h 第八轮慢管理仍未盈利）
+## ⚡ 当前真相（2026-09-06 — BTC V9 退出检查频率实验登记中）
+
+Owner盈利goal仍active。V8为已完成负结果，V9仅验证原5mSMA40不变、决策检查5m→15m，
+raw5风险与质量检查仍每5m。固定V7全部286case/849control/959zone，成本20bp、K1stop、
+72h、入场时价/方向/风险、四2023–2024半年全不变；先提交builder/合成测试/计划，再开价格。
+首次检查floor15(entry)+15m；中途valid色不更新/arm/latch，invalid/缺口/segment清链。
+V9仍是源区突破支线的机制实验，不是原“1h穿MA直接入场”全系统的盈利验收。
+计划：experiments/active/exp-btcusdtp-1h-decision-cadence-preholdout-20260906-v9/PROJECT_PLAN.md。
+尚无V9回测结论，不动TradingView/生产/训练/真金，不开2025+/holdout。
+
+### 第八轮背景（已完成，勿重复）
 
 Owner盈利goal仍active。V8 prereg+builder在e460539先提交，成功首跑仅旧开发2023–2024，
 无2025+价格／holdout0。固定V7全部286请求、849控制、959源区，原生5mSMA40 trueflip

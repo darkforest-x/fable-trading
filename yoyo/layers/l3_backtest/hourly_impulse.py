@@ -14,8 +14,10 @@ entry notional (including partial exits); funding is explicitly not modelled.
 Intrabar SL/TP collisions are stop-first. Excursions on a barrier-exit bar use
 the open and fill only because the order of OHLC extrema is unknown.
 
-The optional native-5m/15m transition exit uses an adjacent completed-bar colour
-edge, not an opposite-colour state. Its clock follows pandas 2.3.3 Timestamp /
+The default native-5m/15m transition exit uses an adjacent completed-bar colour
+edge, not an opposite-colour state. Optional quarter-hour decision cadence
+instead compares samples of unchanged native5 colour, validating raw5 and
+native5 management continuity between samples. Its clock follows pandas 2.3.3 Timestamp /
 Timedelta arithmetic and TradingView's confirmed-bar availability semantics:
 https://pandas.pydata.org/pandas-docs/version/2.3.3/reference/api/pandas.Timedelta.html
 https://pandas.pydata.org/pandas-docs/version/2.3/reference/api/pandas.Timestamp.floor.html
@@ -76,6 +78,14 @@ def _policy(policy: Mapping[str, Any]) -> Dict[str, Any]:
         raise ValueError("confirmations must be a positive integer")
     if selected["exit_mode"] == "transition_colour" and (minutes not in (5, 15) or confirmations != 1):
         raise ValueError("transition_colour requires management_minutes=5 or 15 and confirmations=1")
+    if "decision_minutes" in selected:
+        decision_minutes = selected["decision_minutes"]
+        if (isinstance(decision_minutes, (bool, np.bool_))
+                or not isinstance(decision_minutes, (int, np.integer))
+                or decision_minutes not in (5, 15)
+                or selected["exit_mode"] != "transition_colour"
+                or minutes != 5 or confirmations != 1):
+            raise ValueError("decision_minutes requires integer 5 or 15 with transition_colour/native5/confirmations1")
     # An explicit integer-minute horizon wins over inherited max_hours. Using
     # fractional hours can truncate an exact 5m duration by 1ns in pandas 2.3.3.
     # Without max_minutes the historical max_hours validation is unchanged.
@@ -189,6 +199,16 @@ def simulate_events(
     sequence. Initially opposite/unknown must first observe an aligned complete
     bar. Native 5m retains its exact-entry seed and earliest +5m exit.
 
+    Optional ``decision_minutes=15`` is a different specification: retain
+    native 5m features, but sample their latest completed colour only at UTC
+    :00/:15/:30/:45. The exact-entry native5 seed may form the first edge with
+    the next quarter-hour sample; later samples must be adjacent quarters.
+    Valid unsampled colours neither arm, update nor latch the sampled state.
+    Missing/invalid native5 observations or native segment changes still reset
+    it on EVERY 5m step. A known sample after a reset can seed a new sequence.
+    All raw5 risk/quality checks are unchanged. Explicit decision_minutes=5 is
+    identical to omission; this option is not supported by any other mode.
+
     An optional positive integer ``max_minutes`` (multiple of five) takes
     precedence over ``max_hours``. It represents the exact remaining duration
     for delayed entries without converting integer minutes to fractional hours.
@@ -222,6 +242,7 @@ def simulate_events(
                      if "max_minutes" in selected else pd.Timedelta(hours=selected["max_hours"]))
     cost = float(selected["cost_fraction"])
     mode = selected["exit_mode"]
+    sampled_cadence = selected.get("decision_minutes") == 15
     outputs = []
 
     for event in entries.to_dict("records"):
@@ -250,6 +271,9 @@ def simulate_events(
                 transition_trigger_available_at=pd.NaT,
                 transition_reset_count=0, transition_last_reset_reason="",
             )
+        if sampled_cadence:
+            result.update(transition_decision_minutes=15, transition_sample_count=0,
+                          transition_trigger_previous_available_at=pd.NaT)
         index = time_index.get(entry_time)
         if index is None or (cutoff is not None and entry_time >= cutoff):
             outputs.append(result)
@@ -283,6 +307,9 @@ def simulate_events(
         completed = False
         transition_previous_side = None
         transition_previous_bar = None
+        transition_observed_bar = None
+        transition_previous_sample_at = None
+        transition_seed_pending = False
         if mode == "transition_colour":
             initial_available_at = entry_time if interval == FIVE_MINUTES else entry_time.floor("15min")
             initial_management = management_at.get(initial_available_at)
@@ -293,6 +320,10 @@ def simulate_events(
             result["transition_initial_reason"] = initial_reason
             if transition_previous_side is not None:
                 transition_previous_bar = initial_management
+                if sampled_cadence:
+                    transition_observed_bar = initial_management
+                    transition_previous_sample_at = entry_time
+                    transition_seed_pending = True
                 result.update(
                     transition_initial_side=transition_previous_side,
                     transition_initial_state="aligned" if direction * transition_previous_side > 0 else "opposite",
@@ -348,7 +379,55 @@ def simulate_events(
                 break
 
             management_bar = management_at.get(now)
-            if mode == "transition_colour" and now > entry_time and (interval == FIVE_MINUTES or now == now.floor("15min")):
+            if sampled_cadence and now > entry_time:
+                # Observation continuity and decision sampling are separate
+                # clocks. Never turn an unsampled colour into a latched exit.
+                current_side, reset_reason = _transition_observation(
+                    management_bar, now, time_index, prices, segments,
+                )
+                observed_consecutive = (
+                    transition_observed_bar is not None and management_bar is not None
+                    and management_bar.open_time == transition_observed_bar.open_time + FIVE_MINUTES
+                    and management_bar.segment_id == transition_observed_bar.segment_id
+                )
+                if current_side is None or (transition_observed_bar is not None and not observed_consecutive):
+                    if current_side is not None:
+                        reset_reason = "management_sequence_change"
+                    transition_previous_side, transition_previous_bar = None, None
+                    transition_previous_sample_at, transition_seed_pending = None, False
+                    result["transition_armed_at"] = pd.NaT
+                    result["transition_reset_count"] += 1
+                    result["transition_last_reset_reason"] = reset_reason
+                transition_observed_bar = management_bar if current_side is not None else None
+                if now == now.floor("15min"):
+                    result["transition_sample_count"] += 1
+                    if current_side is not None:
+                        sampled_consecutive = transition_previous_sample_at is not None and (
+                            (transition_seed_pending and now == entry_time.floor("15min") + pd.Timedelta(minutes=15))
+                            or (not transition_seed_pending and now == transition_previous_sample_at + pd.Timedelta(minutes=15))
+                        )
+                        if transition_previous_sample_at is not None and not sampled_consecutive:
+                            transition_previous_side, transition_previous_bar = None, None
+                            result["transition_armed_at"] = pd.NaT
+                            result["transition_reset_count"] += 1
+                            result["transition_last_reset_reason"] = "sampled_sequence_change"
+                        if transition_previous_side is not None and direction * transition_previous_side > 0 and direction * current_side < 0:
+                            result.update(
+                                transition_trigger_previous_open_time=transition_previous_bar.open_time,
+                                transition_trigger_previous_available_at=transition_previous_sample_at,
+                                transition_trigger_open_time=management_bar.open_time,
+                                transition_trigger_available_at=now,
+                            )
+                            finish(now, open_, "transition_colour_exit", True)
+                            completed = True
+                            break
+                        if direction * current_side > 0 and pd.isna(result["transition_armed_at"]):
+                            result["transition_armed_at"] = now
+                            if pd.isna(result["transition_first_armed_at"]):
+                                result["transition_first_armed_at"] = now
+                        transition_previous_bar, transition_previous_side = management_bar, current_side
+                        transition_previous_sample_at, transition_seed_pending = now, False
+            elif mode == "transition_colour" and now > entry_time and (interval == FIVE_MINUTES or now == now.floor("15min")):
                 current_side, reset_reason = _transition_observation(
                     management_bar, now, time_index, prices, segments,
                     interval,

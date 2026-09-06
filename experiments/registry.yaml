@@ -5305,6 +5305,22 @@ experiments:
       cannot pass90%/80 gates. Finite mechanism test, not a candidate nomination.
       All89 old control requests retained, including old invalid risks. No audit.
 
+  - experiment_id: exp-btcusdtp-1h-decision-cadence-preholdout-20260906-v9
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending_preregistration_commit
+    status: preregistered
+    question: >-
+      Does sampling unchanged native5m SMA40 colour at15m decision clocks
+      improve fixed V7 requests after20bp and relative to fixed controls?
+    single_variable: >-
+      Decision cadence5m to15m only; native5m features,286cases/849controls/
+      959zones, actual entries/K1stops/72h/20bp unchanged. No rematching.
+      Mechanism research, not a validation of original hourly MA-cross entry.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_cadence_v9_20260906.html
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+
   - experiment_id: exp-btcusdtp-1h-management-spec-preholdout-20260906-v8
     source_repo: darkforest-x/fable-trading
     source_commit: "e460539"
