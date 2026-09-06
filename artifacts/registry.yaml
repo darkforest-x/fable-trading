@@ -14710,52 +14710,52 @@ artifacts:
     artifact_type: report
     role: canonical_chinese_negative_result_and_trade_postmortem_report
     source_repo: darkforest-x/fable-trading
-    source_commit: "af9d4d8"
+    source_commit: "824d2d1"
     source_path: analysis/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.md
-    sha256: "93efcbe71191e8159c7e2b23cbd7c48c35fb075cd06c21d159cc850f7d4bb8e7"
-    size_bytes: 44099
+    sha256: "20daecec9215a2cd30f77b3842cf1fc95163aa6ed2c9c56050ce6967e45feed8"
+    size_bytes: 55028
     storage_uri: "repo://analysis/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.md"
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
-    generator_commit: "af9d4d8"
+    generator_commit: "824d2d1"
     config_hash: "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
     data_cutoff: "2026-02-28T16:00:00Z"
-    notes: "Five rejected experiments; preserves V1-V4 and adds actual entry-colour state, true transitions, failure cancellation, mother denominators and unchanged controls."
+    notes: "Six rejected experiments; preserves V1-V5 and adds fixed-mother flat confirmation, true delayed-entry failures, missed winners and paired evidence. Latest simulation builder824d2d1; no new audit."
 
   - artifact_id: btcusdtp-hourly-impulse-v1-html
     artifact_type: report
     role: owner_facing_portable_html_report
     source_repo: darkforest-x/fable-trading
-    source_commit: "be28e69"
+    source_commit: "ba2ef2d"
     source_path: analysis/html/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.html
-    sha256: "3e31e24f43385a94ae1051b9ee038dbaa045353668ac68da1a998935909323b9"
-    size_bytes: 758608
+    sha256: "a9dae83a5617a589efa73dab3c5ee87004365ac1993993de9bfae1d59dc304f9"
+    size_bytes: 831637
     storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.html"
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
-    generator_commit: "be28e69"
+    generator_commit: "ba2ef2d"
     config_hash: "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
     data_cutoff: "2026-02-28T16:00:00Z"
-    notes: "Native schema and structure passed. Standard Chrome attempts timed out; interaction and mobile visual QA not verified."
+    notes: "Native validation and packaging passed; structural_only because compatible Chromium headless-shell unavailable. Source dialogs, interactions and mobile visual QA not verified."
 
   - artifact_id: btcusdtp-hourly-impulse-v1-native-artifact
     artifact_type: manifest
     role: native_source_backed_report_schema
     source_repo: darkforest-x/fable-trading
-    source_commit: "be28e69"
+    source_commit: "ba2ef2d"
     source_path: analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/artifact.json
-    sha256: "1ff2a8c9714a45c8ac4e15342944a9a72e2e5e96c25da4df66a330bfa2e48b59"
-    size_bytes: 61812
+    sha256: "474983cabada037a52e328ae72465dac4eb49e43d9e9369369e0a01a2260aa9c"
+    size_bytes: 84072
     storage_uri: "repo://analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/artifact.json"
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
-    generator_commit: "be28e69"
+    generator_commit: "ba2ef2d"
     config_hash: "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
     data_cutoff: "2026-02-28T16:00:00Z"
-    notes: "One native chart, twenty-four narrative/chart blocks, actual SQLite presentation query over saved CSV; full preserved report covers V1-V5."
+    notes: "Two native charts, thirty narrative/chart blocks, actual SQLite queries over saved CSVs; preserves all prior result sections and original chart/dataset. Full V1-V6 report."
 
   - artifact_id: btcusdtp-hourly-staged-v2-development
     artifact_type: manifest
@@ -14875,3 +14875,37 @@ artifacts:
     config_hash: "faabd4a9a90e13ef65d7825ab2beb05227c0a5d7da5300b1a2031806c97aec55"
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: "Postrun review, not prereg or independent raw replay. Records1672closures,857oldparity,51vs47losers and gain-loss cancellation."
+
+  - artifact_id: btcusdtp-hourly-realignment-v6-development
+    artifact_type: manifest
+    role: flat_alignment_fixed_mother_and_control_negative_result
+    source_repo: darkforest-x/fable-trading
+    source_commit: "824d2d1"
+    source_path: experiments/active/exp-btcusdtp-1h-flat-realignment-preholdout-20260906-v6/results/summary.json
+    sha256: "3bc60c1c73e1111b0e469d75b84d9b80d174da09732c3a3c3d601601f72cbf8c"
+    size_bytes: 23683
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-flat-realignment-preholdout-20260906-v6/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "824d2d1"
+    config_hash: "c136af6f41bb7027a5052f69301caf86dd0cd03e318bd32585c6f062f94b1e23"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Rejected: case47 attempts46 trades, all24 real delays lose; same251 maternal opportunities and462 controls, paired-.657bp. No audit or live change."
+
+  - artifact_id: btcusdtp-hourly-realignment-v6-verification
+    artifact_type: report
+    role: independent_saved_ledger_alignment_clock_cost_parity_and_failure_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "824d2d1"
+    source_path: experiments/active/exp-btcusdtp-1h-flat-realignment-preholdout-20260906-v6/VERIFICATION.md
+    sha256: "1f61159b3c5ba759db8cad1e6d9ec65b3513f20eb336f4be4846f1f8e7f79767"
+    size_bytes: 8904
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-flat-realignment-preholdout-20260906-v6/VERIFICATION.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "824d2d1"
+    config_hash: "c136af6f41bb7027a5052f69301caf86dd0cd03e318bd32585c6f062f94b1e23"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Postrun read-only review, not raw-price replay. All14source hashes,10parent inputs,230closures and old-column parity verified;8attempt1derived files byte-identical. No live changes."

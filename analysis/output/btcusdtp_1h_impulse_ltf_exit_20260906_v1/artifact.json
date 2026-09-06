@@ -3,8 +3,8 @@
   "manifest": {
     "version": 1,
     "surface": "report",
-    "title": "1h 穿线与跨周期退出：五轮盈利验证",
-    "generatedAt": "2026-09-06T03:37:39.363538+00:00",
+    "title": "1h 穿线与跨周期退出：六轮盈利验证",
+    "generatedAt": "2026-09-06T04:21:47.134453+00:00",
     "filters": [],
     "cards": [],
     "charts": [
@@ -82,6 +82,62 @@
             }
           ]
         }
+      },
+      {
+        "id": "v6_paired_distribution",
+        "title": "入场等待的配对收益变化分布",
+        "subtitle": "全部原始机会 · 横轴为新减旧的净收益变化区间（bp）· 纵轴为机会数，不是密度",
+        "showDescription": true,
+        "type": "bar",
+        "intent": "distribution",
+        "dataset": "v6_paired_distribution",
+        "sourceId": "v6_distribution",
+        "layout": "full",
+        "question": "改进是广泛发生，还是多数不变、少数改变相互抵消？",
+        "rationale": "Count categories isolate the zero atom and retain unknowns. Unequal interval widths are explicit and never shown as numeric density. Prior report charts remain intact.",
+        "palette": {
+          "kind": "sequential",
+          "name": "blue"
+        },
+        "labels": {
+          "values": "all"
+        },
+        "settings": {
+          "sort": "none",
+          "categoryLabelPolicy": "wrap"
+        },
+        "valueFormat": "number",
+        "maxRows": 10,
+        "encodings": {
+          "x": {
+            "field": "interval_bp",
+            "type": "ordinal",
+            "label": "配对变化区间（bp）"
+          },
+          "y": {
+            "field": "mothers",
+            "type": "quantitative",
+            "label": "原始机会数",
+            "format": "number"
+          },
+          "tooltip": [
+            {
+              "field": "mothers",
+              "type": "quantitative",
+              "label": "机会数"
+            },
+            {
+              "field": "mean_change_bp",
+              "type": "quantitative",
+              "label": "区间内均值（bp）"
+            },
+            {
+              "field": "all_mothers",
+              "type": "quantitative",
+              "label": "完整分母"
+            }
+          ]
+        }
       }
     ],
     "tables": [],
@@ -115,7 +171,7 @@
           "language": "sql",
           "sql": "SELECT value AS policy_id,\n       CAST(events AS INTEGER) AS n,\n       CAST(mean_net_bp AS REAL) AS mean_net_bp,\n       CAST(win_rate AS REAL) AS win_rate,\n       CAST(profit_factor AS REAL) AS profit_factor\nFROM main.development_search\nWHERE stage = 'exit'\nORDER BY mean_net_bp DESC, policy_id ASC",
           "description": "Presentation SELECT actually executed over the saved development_search CSV. The upstream strategy calculation is Python in yoyo/evaluation/hourly_impulse_research.py, using the OKX BTC-USDT-SWAP archive; SQL does not rerun that backtest. One row per registered exit policy; n, win_rate and profit_factor retain review context. The shared renderer may override sequential blue with green/red for mixed-sign bars.",
-          "executed_at": "2026-09-06T03:37:39.363538+00:00",
+          "executed_at": "2026-09-06T04:21:47.134453+00:00",
           "tables_used": [
             "main.development_search"
           ],
@@ -171,25 +227,65 @@
         "id": "v5_summary",
         "label": "OKX archive · v5 summary",
         "path": "experiments/active/exp-btcusdtp-1h-colour-transition-preholdout-20260906-v5/results/summary.json"
+      },
+      {
+        "id": "v6_ledgers",
+        "label": "OKX archive · v6 ledgers",
+        "path": "experiments/active/exp-btcusdtp-1h-flat-realignment-preholdout-20260906-v6/results"
+      },
+      {
+        "id": "v6_plan",
+        "label": "OKX archive · v6 plan",
+        "path": "experiments/active/exp-btcusdtp-1h-flat-realignment-preholdout-20260906-v6/PROJECT_PLAN.md"
+      },
+      {
+        "id": "v6_summary",
+        "label": "OKX archive · v6 summary",
+        "path": "experiments/active/exp-btcusdtp-1h-flat-realignment-preholdout-20260906-v6/results/summary.json"
+      },
+      {
+        "id": "v6_distribution",
+        "label": "V6 · 全部原始机会配对变化",
+        "path": "experiments/active/exp-btcusdtp-1h-flat-realignment-preholdout-20260906-v6/results/paired_changes.csv.gz",
+        "query": {
+          "engine": "SQLite",
+          "language": "sql",
+          "sql": "WITH classified AS (\n  SELECT CASE WHEN difference IS NULL THEN 9\n              WHEN ABS(difference) <= 0.000000000001 THEN 4\n              WHEN difference * 10000 < -50 THEN 0\n              WHEN difference * 10000 < -20 THEN 1\n              WHEN difference * 10000 < -5 THEN 2\n              WHEN difference < 0 THEN 3\n              WHEN difference * 10000 < 5 THEN 5\n              WHEN difference * 10000 < 20 THEN 6\n              WHEN difference * 10000 < 50 THEN 7 ELSE 8 END AS bucket,\n         difference * 10000 AS change_bp\n  FROM main.paired_mothers\n)\nSELECT bucket, COUNT(*) AS mothers, SUM(change_bp) AS summed_event_change_bp,\n       AVG(change_bp) AS mean_change_bp, MIN(change_bp) AS minimum_change_bp,\n       MAX(change_bp) AS maximum_change_bp\nFROM classified GROUP BY bucket ORDER BY bucket",
+          "executed_at": "2026-09-06T04:21:47.134453+00:00",
+          "tables_used": [
+            "main.paired_mothers"
+          ],
+          "description": "Presentation count query over saved paired_changes.csv.gz. Upstream returns are Python outcomes from hourly_impulse_realign_research.py; SQL does not rerun prices or a strategy.",
+          "filters": [
+            "BTC-USDT-SWAP development2023-2024",
+            "All original mothers, including known nonentry zeros and unknowns",
+            "One row per maternal event_id"
+          ],
+          "metric_definitions": [
+            "difference=(flat-alignment episode return)-(immediate episode return); bp=difference*10000",
+            "Known nontrade return0; unknown remainsNULL. Absolute difference<=1e-12 counted unchanged, matching the paired audit",
+            "Y is count, not probability density; intervals have unequal widths. Summed event changes are not compounded account P/L"
+          ]
+        }
       }
     ],
     "blocks": [
       {
         "id": "report_title",
         "type": "markdown",
-        "body": "# 1h 穿线与跨周期退出：五轮盈利验证",
+        "body": "# 1h 穿线与跨周期退出：六轮盈利验证",
         "layout": "full"
       },
       {
         "id": "section_01",
         "type": "markdown",
-        "body": "## Executive Summary\n\n- **尚未得到可宣称赚钱的版本。** 已实现 1h 大实体／真实吞没穿线直接入场，完成 48 项开发比较、一次冻结规则的后续时间段检验，再追加 6 种真实分批止盈、4 组入场背景比较、3 组固定原始机会的 K1／K2 比较，以及两组入场的真正翻色退出比较。所有候选均未通过相应盈利门。\n- **当前入场与退出组合尚未显示覆盖成本的优势。** 基础规则开发期 251 笔，平均净收益 −15.37bp；加入同向均线斜率、改用 5min 退出后，开发期改善至 −6.99bp，后续 74 笔仍为 −12.14bp。比随机少亏不等于赚钱，退出状态机的影响也尚未完全区分。\n- **利润回吐存在，但分批兑现尚不足以修复系统。** 基础开发期有 50 笔曾达 1R 浮盈而最终净亏。实际测试分批兑现后，胜率可以上升，但六种方案仍全部净亏。\n- **4h 共振不是现成的解药。** 使用 K1 开始前已知的 4h 颜色和斜率，105 笔仍平均 −16.56bp；限制追远后 91 笔为 −11.38bp。距离限制剔除了一批更差交易，但没有证明策略已盈利。\n- **等 K2 改善部分入场，但仍未盈利。** 同一批 251 个原始 K1 中，55 个等到 K2；其直接入场原本平均 −43.15bp，等待后改善至 −22.92bp。改用 K2 止损仍为 −22.16bp，只有 4 笔净赢；等待又错过原来 62 笔赢家中的 55 笔。\n- **K2 的快速退出原因已查实，但持仓等恢复也没救活收益。** 55 笔 K2 中 33 笔入场时 5min 已经反色，原来 27 笔仅持有 5min 的交易全部在其中。改成真正同向→反向才退出，胜率翻倍至 14.55%，净均值却只从 −22.92bp 改善到 −22.45bp，硬止损由 2 笔增至 11 笔。\n- **不覆盖现有 TradingView，不部署实盘。** 盈利目标保持未完成状态；下一步单独验证“在空仓状态等小周期恢复再入场”，不能用增加硬止损或无限延长持仓保证收益。",
+        "body": "## Executive Summary\n\n- **尚未得到可宣称赚钱的版本。** 已实现 1h 大实体／真实吞没穿线直接入场，完成 48 项开发比较、一次冻结规则的后续时间段检验，再追加 6 种真实分批止盈、4 组入场背景比较、3 组固定原始机会的 K1／K2 比较、两组真正翻色退出比较，以及空仓等小周期恢复的单变量试验。所有候选均未通过相应盈利门。\n- **当前入场与退出组合尚未显示覆盖成本的优势。** 基础规则开发期 251 笔，平均净收益 −15.37bp；加入同向均线斜率、改用 5min 退出后，开发期改善至 −6.99bp，后续 74 笔仍为 −12.14bp。比随机少亏不等于赚钱，退出状态机的影响也尚未完全区分。\n- **利润回吐存在，但分批兑现尚不足以修复系统。** 基础开发期有 50 笔曾达 1R 浮盈而最终净亏。实际测试分批兑现后，胜率可以上升，但六种方案仍全部净亏。\n- **4h 共振不是现成的解药。** 使用 K1 开始前已知的 4h 颜色和斜率，105 笔仍平均 −16.56bp；限制追远后 91 笔为 −11.38bp。距离限制剔除了一批更差交易，但没有证明策略已盈利。\n- **等 K2 改善部分入场，但仍未盈利。** 同一批 251 个原始 K1 中，55 个等到 K2；其直接入场原本平均 −43.15bp，等待后改善至 −22.92bp。改用 K2 止损仍为 −22.16bp，只有 4 笔净赢；等待又错过原来 62 笔赢家中的 55 笔。\n- **K2 的快速退出原因已查实，但持仓等恢复也没救活收益。** 55 笔 K2 中 33 笔入场时 5min 已经反色，原来 27 笔仅持有 5min 的交易全部在其中。改成真正同向→反向才退出，胜率翻倍至 14.55%，净均值却只从 −22.92bp 改善到 −22.45bp，硬止损由 2 笔增至 11 笔。\n- **空仓等同向确认也已实测失败。** 成交55→46笔、净均值−22.45→−30.42bp。真正延迟的24笔全部亏损，等待中位50min、入场平均追价13.01bp；14笔追价使入场到固定止损的距离变大。减少硬止损不等于提高收益。\n- **不覆盖现有 TradingView，不部署实盘。** 盈利目标保持未完成状态；下一步重新检验启动过程与入场优势，不再把反复增加确认当作现成的解药。",
         "layout": "full"
       },
       {
         "id": "section_02",
         "type": "markdown",
-        "body": "## 先明确：统计的是每笔交易，不是账户收益\n\n本轮对象为 **OKX BTC-USDT-SWAP（BTCUSDT.P）**，信号周期 1h，执行数据 5min，管理周期分别为 5min、15min、1h。行情归档共 341,567 行，物理时间范围为 2022 年 11 月 30 日 16:00 UTC 至 2026 年 2 月 28 日 15:55 UTC。\n\n开发使用 2023–2024 年，按四个半年度分开；V1 冻结规则后的检验使用 2025 上半年、2025 下半年和 2026 年 1–2 月。每段末尾 72 小时禁止新入场，避免交易标签跨越切点。V1 原始规则开发 251 笔、后续 176 笔；V1 候选开发 111 笔、后续 74 笔。这些策略交易均完整闭合，没有把未平仓浮盈算进净收益。\n\n**1bp = 0.01%；−15.37bp 等于每笔平均 −0.1537%，不是整个账户亏损 15.37%。** 毛收益按入场名义本金计算；净收益每笔扣除固定 20bp（0.2%）往返成本。PF 是盈利净收益之和／亏损净收益绝对值之和；胜率按扣费后大于零计算。独立事件可能重叠，因此不把事件收益求和冒充复利账户收益；另做真实不重叠单仓筛选。\n\n这些历史年份此前被其他研究使用过，后续段只能称为**冻结规则的历史迁移检验**，不是全项目从未见过的独立样本。本轮五实验均未读取仓库定义的 2026 年 5 月 4 日及之后 holdout 价格，holdout 消耗次数为 0。V1 后续历史段本配置使用第 1 次；V2 开发失败后没有再次打开后续段，V3/V4/V5 没有后续段运行入口。",
+        "body": "## 先明确：统计的是每笔交易，不是账户收益\n\n本轮对象为 **OKX BTC-USDT-SWAP（BTCUSDT.P）**，信号周期 1h，执行数据 5min，管理周期分别为 5min、15min、1h。行情归档共 341,567 行，物理时间范围为 2022 年 11 月 30 日 16:00 UTC 至 2026 年 2 月 28 日 15:55 UTC。\n\n开发使用 2023–2024 年，按四个半年度分开；V1 冻结规则后的检验使用 2025 上半年、2025 下半年和 2026 年 1–2 月。每段末尾 72 小时禁止新入场，避免交易标签跨越切点。V1 原始规则开发 251 笔、后续 176 笔；V1 候选开发 111 笔、后续 74 笔。这些策略交易均完整闭合，没有把未平仓浮盈算进净收益。\n\n**1bp = 0.01%；−15.37bp 等于每笔平均 −0.1537%，不是整个账户亏损 15.37%。** 毛收益按入场名义本金计算；净收益每笔扣除固定 20bp（0.2%）往返成本。PF 是盈利净收益之和／亏损净收益绝对值之和；胜率按扣费后大于零计算。独立事件可能重叠，因此不把事件收益求和冒充复利账户收益；另做真实不重叠单仓筛选。\n\n这些历史年份此前被其他研究使用过，后续段只能称为**冻结规则的历史迁移检验**，不是全项目从未见过的独立样本。本轮六实验均未读取仓库定义的 2026 年 5 月 4 日及之后 holdout 价格，holdout 消耗次数为 0。V1 后续历史段本配置使用第 1 次；V2 开发失败后没有再次打开后续段，V3/V4/V5/V6 没有后续段运行入口。",
         "layout": "full"
       },
       {
@@ -316,26 +412,67 @@
       {
         "id": "section_20",
         "type": "markdown",
-        "body": "## 下一步：在空仓状态验证小周期恢复，而非继续持仓等待\n\n当前证据支持继续研究，不能支持上线。下一轮的研究问题应缩小为：**1h 强势穿线发生在什么已知环境里，后续延续才明显优于同条件随机入场？**\n\n1. V5 已完成入场已知状态与真正翻色的核对，不能重复当新实验。下一项单独比较：K2 后若 5min 仍反向，先保持空仓，等第一根已收盘同向 K 线才重新判断入场；等待不能超出既有母 K1 的 8h 期限，总退出截止仍为母时刻 +72h。必须用确认后的真实下一 open 重新计入场价、风险和费用，保留所有过期、失效和未启动机会。\n2. 将相对自身的量价扩张、突破后剩余空间作为候选因子逐项比较；不把“振幅越大”直接等同于“趋势越强”。现有单桶开发盈利、后续反转，说明需要跨时期对照。\n3. 固定一个退出锚点先验证入场增量，再单独重测分批／余仓跟随。不能把未来是否达到 1R、最终持有超过 12 小时、是否后来走出大趋势用于入场筛选。\n4. 新候选必须继续跨时间、扣成本、单仓、匹配随机对照，并对多次研究使用历史数据明确记账。已有负面后续段不能重新贴“独立样本”的标签。\n\n尚待回答的关键问题：空仓等待小周期方向重建，省下的确认前亏损能否覆盖确认延迟／追价造成的损失？即便删除入场反色，剩余已同向交易的毛收益仍低于20bp，如何改善其延续幅度？如何保留没有回踩的强启动，又不恢复震荡乱开？这些需要新的预登记比较，不能直接筛出后来恢复的赢家来回答。",
-        "layout": "full"
+        "body": "## V6：先空仓等同向确认，成交更少却亏得更重\n\n\n**这轮没有改善绝对收益，也没有超过固定匹配对照。** 仍以原251个K1机会为完整分母，只对已有首个K2做“立即入场”与“先空仓等5min同向”的比较；两边均使用V5的真正翻色退出、K1原始极值止损、20bp成本和原母+72h总截止。\n\n下表把实际成交分母与原始机会分母分开。少交易可以少亏一些，但不能把未交易零值稀释后的均值当成交易期望。\n\n| 指标 | K2立即入场 | 空仓等同向 |\n|---|---:|---:|\n| 原始机会 | 251 | 251 |\n| 实际闭合交易 | 55 | 46 |\n| 净均值／成交，bp | −22.45 | −30.42 |\n| 毛均值／成交，bp | −2.45 | −10.42 |\n| 净赢／成交 | 8/55（14.55%） | 3/46（6.52%） |\n| PF | 0.245 | 0.172 |\n| 每原始机会净均值，bp | −4.919 | −5.576 |\n| 2023上半年，笔数／净bp | 13／−42.17 | 12／−51.11 |\n| 2023下半年，笔数／净bp | 19／−19.30 | 12／−29.40 |\n| 2024上半年，笔数／净bp | 12／−5.61 | 12／−14.02 |\n| 2024下半年，笔数／净bp | 11／−22.94 | 10／−26.51 |\n| 硬止损 | 11 | 4 |\n| 盈利变为费用后亏损 | 12 | 6 |\n| 亏损且持仓期MFE≥1R | 6 | 7 |\n| 亏损且30min内离场 | 22 | 29 |\n| 再加10bp成本后净均值 | −32.45 | −40.42 |\n| 去掉最大两笔盈利后净均值 | −28.68 | −37.66 |\n\n少了7个硬止损，却也少了5个赢家，并增加了快速反转亏损。四个半年全负，真实非重叠单待定／单仓筛选后，新方案45笔仍−30.09bp；这里没有把减少止损次数当作成功标准。两方案活跃月份均23，匹配覆盖仍只有154/251=61.35%，低于90%门；新样本46也小于80门。",
+        "layout": "full",
+        "sourceId": "v6_summary"
       },
       {
         "id": "section_21",
         "type": "markdown",
-        "body": "## 风险与诚实声明\n\n- **没有盈利承诺。** 五轮结果均未通过，当前没有新的生产合格配置，也没有“最优参数”的结论。\n- 历史迁移段此前被项目其他研究使用过；V2 又是在看过 V1 失败后提出的新假设。开发 p 值未校正全部历史研究次数，不当作发现优势的独立证据。\n- 月块／周块置换是依赖近似，不保证消除所有跨边界持仓相关性。匹配对照仍未覆盖所有环境维度；正超额但负绝对收益仍不合格。\n- 统计复核区分“本次没通过”与“真实优势必为零”。非显著 p 值不证明没有效果；重复开发数据也不能提供可直接推广到未来的置信保证。这里按预设经济门拒绝候选，不宣称已完成零效应等价检验。\n- 未建模实际资金费率、限价排队和逐 tick 滑点。统一 20bp 是预设成本，不是实测成交成本。另加 10bp 只做压力测试，不能替代真实执行数据。\n- 5min 同 bar 的先后顺序不可见，统一止损优先；未闭合／数据缺口交易不计为真实盈利。1h 对照的控制账本中有 3 笔删失，完整三配对门因此降低了覆盖率，没有用浮盈填补。\n- 纯规则研究未训练 YOLO／LGBM，未修改已有 Pine、TradingView、ACTIVE/frozen、VPS、forward 日志或任何真实仓位。\n- 报告数据与结构验证通过；本机 Chrome 在标准报告工具中启动超时，因此 HTML 的浏览器交互和手机视口尚未通过自动验证，不把结构检查称为视觉验收。",
-        "layout": "full"
+        "body": "## V6：追价吃掉改善，24笔真正延迟的成交全部亏损\n\n\n**变化完全来自K2决策时小周期已经反向的33个机会。** 原先同向的22笔原样成交、原样退出；另196个未等到K2的原始机会也没有改动。不能因为新入场状态全是同向，就宣布这个过滤有效——这只是新规则的定义。\n\n33个原先反向的机会中，24个延迟后真实成交、8个到期没有确认、1个首次确认开盘时风险非正而拒绝。只看两方案都成交的同一批46个机会，旧均值为−24.23bp、新均值为−30.42bp，依然变差，排除了仅由成交分母变化造成的错觉。\n\n| 真正延迟且成交的同24笔 | 立即入场 | 延迟确认后 |\n|---|---:|---:|\n| 平均每笔净收益，bp | −28.62 | −40.48 |\n| 净盈利笔数 | 2 | 0 |\n| 确认等待中位数 | 不等待 | 50min |\n| 之后持仓中位数 | 45min | 20min |\n| 初始止损距离／ATR中位数 | 0.668 | 0.776 |\n\n24笔的方向性入场价变化平均+13.01bp、中位+10.22bp；正号代表更差的追价。14笔追价全部恶化，10笔价格更好全部改善，但没有一笔改善到净盈利。固定K1止损价格没有挪远；是新成交价使14笔的风险距离变大。\n\n这里的“确认”并不等于趋势继续：24笔有18笔在新入场30min内离场，其中6笔仅5min。新路径22笔最终因翻色退出、2笔硬止损。少数等待后出现更好价格，不足以抵消其他机会的追价与后续反转。\n\n进一步核对，**19/24笔的退出时间与退出价格完全相同**，仅这些交易的晚入场就使净收益合计减少296.11事件bp。持仓内记录最大顺向幅度换算毛收益bp，中位从15.54降到8.15；新20/24笔的记录顺向幅度不足20bp成本，旧为15/24。因此弱延续不只是风险R分母变大的错觉。但这仅描述模拟持仓内路径，不表示其后永远没有趋势，也不能拿未来MFE当入场条件。\n\n两个由赢转亏的例子均退出不变：2024-03-12 16:00 UTC空头母机会，延35min、追价85.38bp，净+16.57→−69.24bp；2024-12-06 17:00 UTC多头母机会，延60min、追价55.64bp，净+25.66→−29.93bp。这些例子解释失败机制，不是用两笔代表所有交易。\n\n原8笔赢家中，3笔仍盈利且完全不变；3笔因8h内未确认而错过；2笔因追价从盈利变亏。被少交易避开的6个原亏损合计187.64事件bp，同时错过3个原赢家合计67.74事件bp，参与变化净节省119.90事件bp；但同样成交的机会合计恶化284.70事件bp，最终净损164.80事件bp。**事件bp合计只是配对归因，不是账户收益。**",
+        "layout": "full",
+        "sourceId": "v6_ledgers"
       },
       {
         "id": "section_22",
         "type": "markdown",
-        "body": "## 复现与证据索引\n\n代码、配置和结果使用 Python 3、pandas 2.3.3、NumPy 2.0.2；使用现有环境，无新增依赖。执行核心、数据、边界、报告及注册表相关测试共 443 项通过，其中 V4 新增 60 项，V5 新增 104 项。数据 SHA-256 为 `767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac`。\n\n主要证据目录：\n\n- V1 配置／逐笔／搜索／后续检验：`experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/`\n- V1 亏损、特征分桶、逐笔配对和随机对照：`analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/`\n- V2 配置／六种退出／失败门：`experiments/active/exp-btcusdtp-1h-staged-realisation-preholdout-20260906-v2/`\n- V2 逐笔增益／损失与全部六臂控制：`analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/`\n- V3 事前背景、四臂分配收据／逐笔／亏损／控制：`experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/`\n- V4 原始机会、首 K2 请求、未交易终态、逐笔与母对照：`experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/`；额外核对记录在该实验 `VERIFICATION.md`。\n- V5 入场颜色、反色／翻色逐笔与完整对照：`experiments/active/exp-btcusdtp-1h-colour-transition-preholdout-20260906-v5/results/`；该实验 `VERIFICATION.md` 记录分母、恒等回归、收益抵消和检查限制。\n\n以下是按当时顺序从零执行的命令，不要在现有结果目录上强行覆盖。驱动器会拒绝重复开发选参和重复后续段检验；复核已有结果应读取已提交账本，确需新重建应另登记输出版本。\n\n```bash\n# Builder/config committed first: c4e611f; working directory is fable-trading.\nPYTHONPATH=. .venv/bin/pytest -q tests/test_hourly_impulse_data.py tests/test_hourly_impulse_execution.py tests/test_hourly_impulse_research.py tests/boundaries/test_layer_imports.py\nPYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_research --phase development\n# Exact selection was committed at 9767c47 before the audit.\nPYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_research --phase audit\n# Diagnostics builders committed at 3eaf9bb and 97955b3.\nPYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_diagnostics --results-dir experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/results --output-dir analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1\nPYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_exit_controls\n# V2 builder/config committed at 824abc9; failed development stops here.\nPYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_staged_research --phase development\n# All-arm diagnostic helper committed at 0a8d332; no selection changes.\nPYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_staged_diagnostics\n# V3 four-arm builder/config committed at 3ab1c71 before development outcomes.\nPYTHONPATH=. .venv/bin/pytest -q tests/test_hourly_impulse_context.py tests/test_hourly_impulse_context_matching.py tests/test_hourly_impulse_context_research.py\nPYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_context_research\n# V4 builder/config committed at a169fa6 before waiting and outcomes.\nPYTHONPATH=. .venv/bin/pytest -q tests/test_hourly_impulse*.py tests/contracts/test_registries.py tests/boundaries/test_layer_imports.py\nPYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_k2_research\n# V5 builder/config committed at af9d4d8 before entry context and outcomes.\nPYTHONPATH=. .venv/bin/pytest -q tests/test_hourly_impulse*.py tests/contracts/test_registries.py tests/boundaries/test_layer_imports.py\nPYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_transition_research\npython3 scripts/md_to_html.py analysis/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.md --out-dir analysis/html\n```\n\n实现时核对了官方 [pandas backward as-of 时序匹配](https://pandas.pydata.org/pandas-docs/version/2.3/reference/api/pandas.merge_asof.html) 和 [NumPy 分组重采样所用随机抽取](https://numpy.org/doc/2.0/reference/random/generated/numpy.random.Generator.choice.html)。实验设计与统计技能用于固定原始机会、对照、时间切分和月簇不确定性；报告／可视化技能用于整合完整失败证据；源码驱动开发技能用于核对颜色与时钟；extract-approach 已补记等待收益分母与 K2／中间棒颜色的教训。",
+        "body": "## V6：多数机会不变，配对效应也不支持盈利改进\n\n\n下方按“新方案减旧方案”的每原始机会净收益变化分组，包含全部251个机会，零变化和未知单列。区间宽度不同，柱高表示机会数而非密度；不能把218个不变机会隐藏掉，只画改善例子。\n\n16个机会改善、17个恶化、218个不变，未知0。完整母分母上的变化为**−0.657bp／机会**，月簇95%区间[−1.946,+0.454]bp，单侧置换p=0.8377。这不证明所有确认方式无效，但不支持本轮方案有正向改善。其分解是参与变化+0.478bp、同样成交时点变化−1.134bp，合计与总变化一致。",
+        "layout": "full",
+        "sourceId": "v6_summary"
+      },
+      {
+        "id": "v6_distribution_chart",
+        "type": "chart",
+        "chartId": "v6_paired_distribution",
+        "layout": "full"
+      },
+      {
+        "id": "section_23",
+        "type": "markdown",
+        "body": "## V6：时间、缺失与对照仍按同一规则处理\n\n\n本轮唯一变化是入场时间。K2已经同向则立即入场；原先反向则在空仓状态逐根检查，第一根已完成5min同向K线一经确认，就按同一时刻开始的下一根5min开盘价尝试一次。若风险非正，拒绝后不能再挑后面的好价格。原母+8h包含边界，先判断恰好此时完成的确认，再判断到期；不是从K2重新给8h。\n\n等待中碰到K1止损极值不新增取消条件，延续V4设置，以免这轮同时改变两个变量；新入场仍按原固定极值检查风险。缺失管理色或价格会使首次确认不可知，记未知而非跳过去寻找一个有利确认。实际剩余时间用整数分钟计算，避免浮点小时少1ns，且从未重启原母+72h总时钟。\n\n旧对照89个K2请求全部保留，包含旧开盘风险无效的21个；不能先按旧68笔成交筛选。每个对照仍保留自己原来的固定止损，确认后只重算风险，不重平移止损。原母与对照匹配关系不变，未成交已知零值与缺失NaN分开。",
+        "layout": "full",
+        "sourceId": "v6_plan"
+      },
+      {
+        "id": "section_24",
+        "type": "markdown",
+        "body": "## V6：固定对照、费用压力与逐笔复核均未支持上线\n\n\n对照比较使用154个有完整3配对的原始机会，以下均值都是**每配对原始机会**，不是每笔成交。新策略本身仍为负，随机对照也变差，所以超额从−1.31改善至−0.83bp不能被解释为赚钱。\n\n| 154个配对原始机会 | K2立即入场 | 空仓等同向 |\n|---|---:|---:|\n| 策略净均值，bp | −2.384 | −3.188 |\n| 同规则控制净均值，bp | −1.070 | −2.360 |\n| 策略减控制，bp | −1.313 | −0.828 |\n| 超额月簇95%区间，bp | [−5.700,+3.703] | [−4.867,+4.143] |\n| 单侧月簇p | 0.6897 | 0.6155 |\n| 控制母机会／真实成交 | 462／68 | 462／61 |\n\n新控制的其余状态没有被丢弃：22个确认到期、6个首次开盘无效风险，以及V4已有257个未等到K2、113个错误侧收盘失效、3个颜色失效。案例与控制原始机会全部已知，无缺失填零。单待定／单仓允许的原始机会250→249，新方案多占用等待窗口后少做一笔，本表独立事件结果并未冒充单仓结果。\n\n单特征振幅／ATR基线，新方案AUC=0.5194、最大十分位毛／净−20.23／−40.23bp。没有训练排名模型，模型val AUC不适用，不能拿该特征AUC或“全同向”替代经济验证。全部验收门中，仅月份支持与完整母证据通过，其余经济、对照、样本和配对效应门均未通过。",
+        "layout": "full",
+        "sourceId": "v6_summary"
+      },
+      {
+        "id": "section_25",
+        "type": "markdown",
+        "body": "## 下一步：回到启动过程，不再用确认延迟修补同一组弱入场\n\n当前证据支持继续研究，不能支持上线。下一轮优先检验：**事前冻结源区后的首次实体释放，是否比静态穿均线更能识别可交易的启动？** 这是待验证的入口定义替换，不是已经获得优势。\n\n1. V5与V6已分别完成“持仓等待真正翻色”和“空仓等待同向确认”；不能把它们重复当新实验，也不再对这55个K2机会追加任意等待阈值，希望凑出盈利。\n2. 历史核查发现，V1的MA长度、振幅、量比、翻色次数、效率、斜率、20根突破、距离门，以及ETH/XAU的压缩／释放／承接票数都已测过。新假设的差别只能落在**事前固定源区、首次突破一次性消费、不能后移挑漂亮K1**，而非重命名旧过滤器。一个待预注册起点是前后各4根完整小时，后4根包络严格包含于前4根时冻结后段；未来最多8h，首根收盘出界即消费，仅该根满足原大实体／吞没形态及实体跨边界时尝试入场。此4+4与8h不是最优参数。\n3. 固定一个退出锚点先验证入场增量，再单独重测分批／余仓跟随。不能把未来是否达到 1R、最终持有超过 12 小时、是否后来走出大趋势用于入场筛选。\n4. 新机会从全部完整1h历史生成，不再从旧55笔筛选；全部源区到期、首次释放不合格、实际入场、未知分别留账。先冻结支持门和同月／时段／波动／方向／已知小周期状态对照方案，再看收益。新旧母池不同，只能作描述性基准，不能声称旧251与新机会逐笔配对改善。仍需跨时间、扣成本、单仓检验；已有负面后续段不能重新贴“独立样本”的标签。\n\n尚待回答的关键问题：什么已知的启动过程能在确认后留下足够延续空间？怎样保留没有回踩的强启动，又不恢复震荡乱开？新设计需在看收益前解决控制样本支持与时间外验证，不能继续在必然不足80笔的子池内筛选，也不能直接抽取后来恢复的赢家。",
+        "layout": "full"
+      },
+      {
+        "id": "section_26",
+        "type": "markdown",
+        "body": "## 风险与诚实声明\n\n- **没有盈利承诺。** 六轮结果均未通过，当前没有新的生产合格配置，也没有“最优参数”的结论。\n- 历史迁移段此前被项目其他研究使用过；V2 又是在看过 V1 失败后提出的新假设。开发 p 值未校正全部历史研究次数，不当作发现优势的独立证据。\n- 月块／周块置换是依赖近似，不保证消除所有跨边界持仓相关性。匹配对照仍未覆盖所有环境维度；正超额但负绝对收益仍不合格。\n- 统计复核区分“本次没通过”与“真实优势必为零”。非显著 p 值不证明没有效果；重复开发数据也不能提供可直接推广到未来的置信保证。这里按预设经济门拒绝候选，不宣称已完成零效应等价检验。\n- 未建模实际资金费率、限价排队和逐 tick 滑点。统一 20bp 是预设成本，不是实测成交成本。另加 10bp 只做压力测试，不能替代真实执行数据。\n- 5min 同 bar 的先后顺序不可见，统一止损优先；未闭合／数据缺口交易不计为真实盈利。1h 对照的控制账本中有 3 笔删失，完整三配对门因此降低了覆盖率，没有用浮盈填补。\n- 纯规则研究未训练 YOLO／LGBM，未修改已有 Pine、TradingView、ACTIVE/frozen、VPS、forward 日志或任何真实仓位。\n- 报告数据、原生结构及打包验证通过。先前标准Chrome启动超时；本次标准工具未找到兼容的Chromium headless-shell，仅返回structural_only。因此HTML的浏览器交互和手机视口仍未通过自动验证，不把结构检查称为视觉验收。",
+        "layout": "full"
+      },
+      {
+        "id": "section_27",
+        "type": "markdown",
+        "body": "## 复现与证据索引\n\n代码、配置和结果使用 Python 3、pandas 2.3.3、NumPy 2.0.2；使用现有环境，无新增依赖。执行核心、数据、边界、报告及注册表相关测试共 589 项通过，其中V6新增146项，含全部97种五分钟等待时点的同母截止验证。数据 SHA-256 为 `767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac`。\n\nV6固定配置哈希 `c136af6f41bb7027a5052f69301caf86dd0cd03e318bd32585c6f062f94b1e23`。第一次执行在旧版时间戳类型parity处停止，九个请求／状态收据文件完整保留于 `attempt_01_parity_serialization/`；这次已读取开发前缀，不能说没有消耗数据。仅修CSV文本与混合Timestamp/NaT类型比较，补“+1ns必须失败”测试后，提交 `824d2d1` 再执行成功；策略、配置、对照不变。两次价格物化都止于2024年末，没有2025以后审计或holdout价格读取。\n\n统计核验保留全部251个配对差值：均值−0.657bp、SD10.744bp、中位与IQR均0，月均差值lag1相关−0.138。SciPy Shapiro–Wilk W=0.3768、p=1.72×10⁻²⁸，零质量与尾部明显，不按正态独立样本处理。配套假设检查脚本因缺seaborn无法导入，使用已有SciPy数值检查及原生分类计数图；没有安装依赖、删除离群值或根据结果改检验。月簇推断仍只是依赖近似与探索证据。\n\n主要证据目录：\n\n- V1 配置／逐笔／搜索／后续检验：`experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/`\n- V1 亏损、特征分桶、逐笔配对和随机对照：`analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/`\n- V2 配置／六种退出／失败门：`experiments/active/exp-btcusdtp-1h-staged-realisation-preholdout-20260906-v2/`\n- V2 逐笔增益／损失与全部六臂控制：`analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/`\n- V3 事前背景、四臂分配收据／逐笔／亏损／控制：`experiments/active/exp-btcusdtp-1h-prior-context-preholdout-20260906-v3/results/`\n- V4 原始机会、首 K2 请求、未交易终态、逐笔与母对照：`experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/`；额外核对记录在该实验 `VERIFICATION.md`。\n- V5 入场颜色、反色／翻色逐笔与完整对照：`experiments/active/exp-btcusdtp-1h-colour-transition-preholdout-20260906-v5/results/`；该实验 `VERIFICATION.md` 记录分母、恒等回归、收益抵消和检查限制。\n- V6 空仓确认请求、所有终态、逐笔与固定控制：`experiments/active/exp-btcusdtp-1h-flat-realignment-preholdout-20260906-v6/results/`；`ATTEMPTS.md`保留失败执行，`VERIFICATION.md`记录独立复核。等待碰止损诊断只涵盖已发出确认的请求，不代表所有过期等待。\n\n以下是按当时顺序从零执行的命令，不要在现有结果目录上强行覆盖。驱动器会拒绝重复开发选参和重复后续段检验；复核已有结果应读取已提交账本，确需新重建应另登记输出版本。\n\n```bash\n# Builder/config committed first: c4e611f; working directory is fable-trading.\nPYTHONPATH=. .venv/bin/pytest -q tests/test_hourly_impulse_data.py tests/test_hourly_impulse_execution.py tests/test_hourly_impulse_research.py tests/boundaries/test_layer_imports.py\nPYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_research --phase development\n# Exact selection was committed at 9767c47 before the audit.\nPYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_research --phase audit\n# Diagnostics builders committed at 3eaf9bb and 97955b3.\nPYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_diagnostics --results-dir experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/results --output-dir analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1\nPYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_exit_controls\n# V2 builder/config committed at 824abc9; failed development stops here.\nPYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_staged_research --phase development\n# All-arm diagnostic helper committed at 0a8d332; no selection changes.\nPYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_staged_diagnostics\n# V3 four-arm builder/config committed at 3ab1c71 before development outcomes.\nPYTHONPATH=. .venv/bin/pytest -q tests/test_hourly_impulse_context.py tests/test_hourly_impulse_context_matching.py tests/test_hourly_impulse_context_research.py\nPYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_context_research\n# V4 builder/config committed at a169fa6 before waiting and outcomes.\nPYTHONPATH=. .venv/bin/pytest -q tests/test_hourly_impulse*.py tests/contracts/test_registries.py tests/boundaries/test_layer_imports.py\nPYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_k2_research\n# V5 builder/config committed at af9d4d8 before entry context and outcomes.\nPYTHONPATH=. .venv/bin/pytest -q tests/test_hourly_impulse*.py tests/contracts/test_registries.py tests/boundaries/test_layer_imports.py\nPYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_transition_research\n# V6 original builder5e70584; serialization-only parity correction824d2d1.\n# First failed attempt is preserved, not overwritten; see V6 ATTEMPTS.md.\nPYTHONPATH=. .venv/bin/pytest -q tests/test_hourly_impulse*.py tests/contracts/test_registries.py tests/boundaries/test_layer_imports.py\nPYTHONPATH=. .venv/bin/python -m yoyo.evaluation.hourly_impulse_realign_research\npython3 scripts/md_to_html.py analysis/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.md --out-dir analysis/html\n```\n\n交付HTML使用已提交的 `yoyo.evaluation.hourly_impulse_report` 原生结构构建器，以及 `ba2ef2d` 的 `hourly_impulse_realign_report` 添加配对分布；随后由Data Analytics 0.2.10的标准 `deliver_portable_artifact.mjs` 以 `--input analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/artifact.json --output analysis/html/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.html` 打包。保存的artifact是完整可重打包输入，包含30块正文／图表、两张原生图、实际SQL与来源映射；旧退出图及其8行数据逐字节不变。不是用基础Markdown转换页替代完整交付。\n\n实现时核对了官方 [pandas backward as-of 时序匹配](https://pandas.pydata.org/pandas-docs/version/2.3/reference/api/pandas.merge_asof.html) 和 [NumPy 分组重采样所用随机抽取](https://numpy.org/doc/2.0/reference/random/generated/numpy.random.Generator.choice.html)。实验设计与统计技能用于固定原始机会、对照、时间切分和月簇不确定性；报告／可视化技能用于整合完整失败证据；源码驱动开发技能用于核对颜色与时钟；extract-approach 已补记等待分母、精确时钟与确认追价消耗趋势空间的教训。",
         "layout": "full"
       }
     ]
   },
   "snapshot": {
     "version": 1,
-    "generatedAt": "2026-09-06T03:37:39.363538+00:00",
+    "generatedAt": "2026-09-06T04:21:47.134453+00:00",
     "status": "ready",
     "datasets": {
       "exit_policy_results": [
@@ -435,6 +572,108 @@
           "mean_net_bp_signed": "-18.56 bp",
           "profit_factor_label": "0.5955303012267341"
         }
+      ],
+      "v6_paired_distribution": [
+        {
+          "bucket": 0,
+          "interval_bp": "< -50",
+          "mothers": 3,
+          "all_mothers": 251,
+          "summed_event_change_bp": -203.98470136613102,
+          "mean_change_bp": -67.994900455377,
+          "minimum_change_bp": -85.80315321145801,
+          "maximum_change_bp": -55.586299212868
+        },
+        {
+          "bucket": 1,
+          "interval_bp": "[-50, -20)",
+          "mothers": 4,
+          "all_mothers": 251,
+          "summed_event_change_bp": -144.019868432016,
+          "mean_change_bp": -36.004967108004,
+          "minimum_change_bp": -45.93934122153001,
+          "maximum_change_bp": -27.346036742079
+        },
+        {
+          "bucket": 2,
+          "interval_bp": "[-20, -5)",
+          "mothers": 8,
+          "all_mothers": 251,
+          "summed_event_change_bp": -93.375979387042,
+          "mean_change_bp": -11.67199742338025,
+          "minimum_change_bp": -17.425969258673,
+          "maximum_change_bp": -6.413748294554
+        },
+        {
+          "bucket": 3,
+          "interval_bp": "[-5, 0)",
+          "mothers": 2,
+          "all_mothers": 251,
+          "summed_event_change_bp": -5.147097867816,
+          "mean_change_bp": -2.573548933908,
+          "minimum_change_bp": -3.1574397134649996,
+          "maximum_change_bp": -1.9896581543510001
+        },
+        {
+          "bucket": 4,
+          "interval_bp": "0 · 不变",
+          "mothers": 218,
+          "all_mothers": 251,
+          "summed_event_change_bp": 0.0,
+          "mean_change_bp": 0.0,
+          "minimum_change_bp": 0.0,
+          "maximum_change_bp": 0.0
+        },
+        {
+          "bucket": 5,
+          "interval_bp": "(0, 5)",
+          "mothers": 4,
+          "all_mothers": 251,
+          "summed_event_change_bp": 8.265673963923117,
+          "mean_change_bp": 2.0664184909807792,
+          "minimum_change_bp": 0.04600831736811806,
+          "maximum_change_bp": 3.6556584414159996
+        },
+        {
+          "bucket": 6,
+          "interval_bp": "[5, 20)",
+          "mothers": 6,
+          "all_mothers": 251,
+          "summed_event_change_bp": 81.436948897362,
+          "mean_change_bp": 13.572824816227,
+          "minimum_change_bp": 5.667185221998,
+          "maximum_change_bp": 19.680753594104
+        },
+        {
+          "bucket": 7,
+          "interval_bp": "[20, 50)",
+          "mothers": 5,
+          "all_mothers": 251,
+          "summed_event_change_bp": 141.076293239514,
+          "mean_change_bp": 28.2152586479028,
+          "minimum_change_bp": 21.229161333620002,
+          "maximum_change_bp": 37.985289323114
+        },
+        {
+          "bucket": 8,
+          "interval_bp": ">= 50",
+          "mothers": 1,
+          "all_mothers": 251,
+          "summed_event_change_bp": 50.944290387787994,
+          "mean_change_bp": 50.944290387787994,
+          "minimum_change_bp": 50.944290387787994,
+          "maximum_change_bp": 50.944290387787994
+        },
+        {
+          "bucket": 9,
+          "interval_bp": "未知",
+          "mothers": 0,
+          "all_mothers": 251,
+          "summed_event_change_bp": null,
+          "mean_change_bp": null,
+          "minimum_change_bp": null,
+          "maximum_change_bp": null
+        }
       ]
     },
     "accessIssues": []
@@ -469,7 +708,7 @@
         "language": "sql",
         "sql": "SELECT value AS policy_id,\n       CAST(events AS INTEGER) AS n,\n       CAST(mean_net_bp AS REAL) AS mean_net_bp,\n       CAST(win_rate AS REAL) AS win_rate,\n       CAST(profit_factor AS REAL) AS profit_factor\nFROM main.development_search\nWHERE stage = 'exit'\nORDER BY mean_net_bp DESC, policy_id ASC",
         "description": "Presentation SELECT actually executed over the saved development_search CSV. The upstream strategy calculation is Python in yoyo/evaluation/hourly_impulse_research.py, using the OKX BTC-USDT-SWAP archive; SQL does not rerun that backtest. One row per registered exit policy; n, win_rate and profit_factor retain review context. The shared renderer may override sequential blue with green/red for mixed-sign bars.",
-        "executed_at": "2026-09-06T03:37:39.363538+00:00",
+        "executed_at": "2026-09-06T04:21:47.134453+00:00",
         "tables_used": [
           "main.development_search"
         ],
@@ -525,6 +764,46 @@
       "id": "v5_summary",
       "label": "OKX archive · v5 summary",
       "path": "experiments/active/exp-btcusdtp-1h-colour-transition-preholdout-20260906-v5/results/summary.json"
+    },
+    {
+      "id": "v6_ledgers",
+      "label": "OKX archive · v6 ledgers",
+      "path": "experiments/active/exp-btcusdtp-1h-flat-realignment-preholdout-20260906-v6/results"
+    },
+    {
+      "id": "v6_plan",
+      "label": "OKX archive · v6 plan",
+      "path": "experiments/active/exp-btcusdtp-1h-flat-realignment-preholdout-20260906-v6/PROJECT_PLAN.md"
+    },
+    {
+      "id": "v6_summary",
+      "label": "OKX archive · v6 summary",
+      "path": "experiments/active/exp-btcusdtp-1h-flat-realignment-preholdout-20260906-v6/results/summary.json"
+    },
+    {
+      "id": "v6_distribution",
+      "label": "V6 · 全部原始机会配对变化",
+      "path": "experiments/active/exp-btcusdtp-1h-flat-realignment-preholdout-20260906-v6/results/paired_changes.csv.gz",
+      "query": {
+        "engine": "SQLite",
+        "language": "sql",
+        "sql": "WITH classified AS (\n  SELECT CASE WHEN difference IS NULL THEN 9\n              WHEN ABS(difference) <= 0.000000000001 THEN 4\n              WHEN difference * 10000 < -50 THEN 0\n              WHEN difference * 10000 < -20 THEN 1\n              WHEN difference * 10000 < -5 THEN 2\n              WHEN difference < 0 THEN 3\n              WHEN difference * 10000 < 5 THEN 5\n              WHEN difference * 10000 < 20 THEN 6\n              WHEN difference * 10000 < 50 THEN 7 ELSE 8 END AS bucket,\n         difference * 10000 AS change_bp\n  FROM main.paired_mothers\n)\nSELECT bucket, COUNT(*) AS mothers, SUM(change_bp) AS summed_event_change_bp,\n       AVG(change_bp) AS mean_change_bp, MIN(change_bp) AS minimum_change_bp,\n       MAX(change_bp) AS maximum_change_bp\nFROM classified GROUP BY bucket ORDER BY bucket",
+        "executed_at": "2026-09-06T04:21:47.134453+00:00",
+        "tables_used": [
+          "main.paired_mothers"
+        ],
+        "description": "Presentation count query over saved paired_changes.csv.gz. Upstream returns are Python outcomes from hourly_impulse_realign_research.py; SQL does not rerun prices or a strategy.",
+        "filters": [
+          "BTC-USDT-SWAP development2023-2024",
+          "All original mothers, including known nonentry zeros and unknowns",
+          "One row per maternal event_id"
+        ],
+        "metric_definitions": [
+          "difference=(flat-alignment episode return)-(immediate episode return); bp=difference*10000",
+          "Known nontrade return0; unknown remainsNULL. Absolute difference<=1e-12 counted unchanged, matching the paired audit",
+          "Y is count, not probability density; intervals have unequal widths. Summed event changes are not compounded account P/L"
+        ]
+      }
     }
   ]
 }

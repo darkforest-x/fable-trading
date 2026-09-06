@@ -5275,8 +5275,8 @@ experiments:
 
   - experiment_id: exp-btcusdtp-1h-flat-realignment-preholdout-20260906-v6
     source_repo: darkforest-x/fable-trading
-    source_commit: "4094a1a"
-    status: active
+    source_commit: "824d2d1"
+    status: rejected
     question: >-
       Does staying flat after the first K2 until completed native5m alignment
       improve post-cost returns versus entering while the small cycle opposes?
@@ -5284,11 +5284,21 @@ experiments:
       First-K2 immediate versus first native5m aligned close/next-open entry.
       Fixed mother+8h wait and+72h final deadline, K1 stop, transition exit,
       20bp and all original251 mothers/462 controls; no rematching or retries.
-    result: "Preregistered before new alignment entry requests and outcomes."
+    result: >-
+      Same251 mothers: immediate55 trades -22.45bp; flat47 attempts/46 trades
+      -30.42bp, eight confirmation expiries and one invalidrisk. All24 truly
+      delayed trades lose; medianwait50min, mean directional chasing13.01bp.
+      Paired delta-.657bp per mother, CI[-1.946,+.454],p=.8377. Allfourfolds
+      negative, matchedcoverage61.35%, newserial45 trades -30.09bp. No audit.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.html
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts:
+      - btcusdtp-hourly-realignment-v6-development
+      - btcusdtp-hourly-realignment-v6-verification
+      - btcusdtp-hourly-impulse-v1-report
+      - btcusdtp-hourly-impulse-v1-html
     reuse_allowed: false
     notes: >-
       Reused2023-2024 only. Inherited61.35% coverage and at most55 case trades
