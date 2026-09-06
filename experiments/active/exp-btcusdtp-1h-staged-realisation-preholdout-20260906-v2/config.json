@@ -1,0 +1,39 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-staged-realisation-preholdout-20260906-v2",
+  "parent_experiment": "exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1",
+  "base_config": "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json",
+  "base_config_sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a",
+  "hypothesis": "Realise a fixed part of profit at causal R thresholds, then optionally let the remainder follow completed 1h colour; initial K1 stop never moves.",
+  "evidence": "V1 development had 50 net losers with at least 1R favourable excursion. This is retrospective description, not permission to select those winners before entry. V1 historical transport was also seen; V2 is a new post-audit hypothesis and cannot claim pristine transport.",
+  "entry_override": {"require_ma_slope": true},
+  "management": {"early_minutes": 15, "runner_minutes": 60, "ma_kind": "SMA", "ma_length": 40},
+  "cost_fraction": 0.002,
+  "max_hours": 72,
+  "stop": "immutable K1 actual extreme",
+  "policies": [
+    {"id": "colour15", "partial_targets": [], "takeover_r": null},
+    {"id": "half1r_colour15", "partial_targets": [[1, 0.5]], "takeover_r": null},
+    {"id": "half1r_runner1h", "partial_targets": [[1, 0.5]], "takeover_r": 1},
+    {"id": "quarter1r_quarter2r_runner1h", "partial_targets": [[1, 0.25], [2, 0.25]], "takeover_r": 1},
+    {"id": "quarter1r_quarter2r_colour15", "partial_targets": [[1, 0.25], [2, 0.25]], "takeover_r": null},
+    {"id": "no_partial_runner1h", "partial_targets": [], "takeover_r": 1}
+  ],
+  "selection": {
+    "criterion": "median fold mean net bp minus half their standard deviation",
+    "development_minimum_events": 80,
+    "development_minimum_per_fold": 12,
+    "development_positive_folds": 4,
+    "development_min_profit_factor": 1.1,
+    "development_min_mean_net_bp": 0,
+    "matched_coverage": 0.9,
+    "matched_positive_excess": true,
+    "no_new_audit_if_development_fails": true,
+    "no_entry_retune": true,
+    "no_policy_grid_expansion": true
+  },
+  "lineage": "2023–2024 reused development. Only if preregistered development gates pass, freeze and commit one finalist before 2025–Feb2026 transport use #2 for this rule family. Repository holdout remains unread.",
+  "owner_authorization": "Directly develop toward profitability; previous requests explicitly included partial TP and trend-following exits. This experiment is research only, not orders or promotion.",
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false
+}

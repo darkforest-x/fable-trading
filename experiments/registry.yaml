@@ -5136,3 +5136,25 @@ experiments:
       Only the physically safe OKX 5m archive ending 2026-02-28 is used. Each
       fold excludes its final 72h from new entry. Prior research used these
       historical years; this is transport evidence, not a pristine holdout.
+
+  - experiment_id: exp-btcusdtp-1h-staged-realisation-preholdout-20260906-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9767c47"
+    status: active
+    question: >-
+      Can real 1R/2R partial profit-taking and a causally activated hourly
+      runner reduce giveback without sacrificing enough winners to remain net negative?
+    single_variable: >-
+      Six frozen exit-policy alternatives on identical V1 same-slope hourly
+      entries. No new entry threshold search. Policy contrasts separate partial
+      realisation from higher-clock takeover where possible.
+    result: Preregistered before staged outcomes; synthetic execution tests pending.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Post-V1 negative-result research; 2023-2024 development is reused and the
+      prior historical transport was already seen. No new transport evaluation
+      unless every preregistered development go-gate passes. No live mutations.
