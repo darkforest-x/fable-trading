@@ -5305,6 +5305,28 @@ experiments:
       cannot pass90%/80 gates. Finite mechanism test, not a candidate nomination.
       All89 old control requests retained, including old invalid risks. No audit.
 
+  - experiment_id: exp-btcusdtp-1h-frozen-ma-exit-preholdout-20260906-v12
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending_first_builder_commit
+    status: active
+    question: >-
+      Does a completed held5m close beyond the frozen own signal-hour MA,
+      executed next real open, improve original V5 cases and fixed controls?
+    result: Not run yet; implementation and preflight checks in progress.
+    single_variable: >-
+      Add frozen_ma_exit=true to native5m trueflip. Keep251cases/462controls,
+      154triples,entry,K1stop,72h and20bp. No timed launch test or rematching.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Preregistered reused2023-2024 mechanism test. Freeze713 own-MA entry
+      geometries before outcomes and verify full original baseline parity.
+      Inherited61.35% matched support cannot pass90% acceptance gate.
+      No2025+prices, TradingView or live changes; no profit claim.
+
   - experiment_id: exp-btcusdtp-1h-launch-deadline-preholdout-20260906-v11
     source_repo: darkforest-x/fable-trading
     source_commit: "33f31f0"

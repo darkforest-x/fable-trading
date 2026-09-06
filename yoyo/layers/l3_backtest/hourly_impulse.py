@@ -28,6 +28,11 @@ an optimized default. Only valid, fully held post-entry raw5 CLOSE observations
 available in (entry, entry+60min] can confirm +0.5 of the frozen initial risk.
 Neither entry/seed prices, intrabar extrema nor management colour supply this
 progress. Source: the V10 NEXT_EXPERIMENT.md launch-progress specification.
+
+The independent V12 frozen-MA exit reads the completed signal hour's supplied
+``ma`` once, available at ``signal_time + 1h == decision_time``. After entry,
+only valid, fully held raw5 CLOSE values can latch a strict wrong-side exit for
+the next real raw5 open. The entry boundary never follows management-bar MA.
 """
 from __future__ import annotations
 
@@ -107,6 +112,13 @@ def _policy(policy: Mapping[str, Any]) -> Dict[str, Any]:
                 or isinstance(confirmations, (bool, np.bool_))
                 or confirmations != 1 or selected.get("decision_minutes", 5) != 5):
             raise ValueError("launch deadline requires integer 60 minutes / 0.5R with transition_colour/native5/confirmations1/decision5")
+    if "frozen_ma_exit" in selected:
+        enabled = selected["frozen_ma_exit"]
+        if (not isinstance(enabled, (bool, np.bool_)) or not enabled
+                or selected["exit_mode"] != "transition_colour" or minutes != 5
+                or isinstance(confirmations, (bool, np.bool_)) or confirmations != 1
+                or selected.get("decision_minutes", 5) != 5 or launch_keys.intersection(selected)):
+            raise ValueError("frozen_ma_exit requires boolean True with transition_colour/native5/confirmations1/decision5 and no launch policy")
     # An explicit integer-minute horizon wins over inherited max_hours. Using
     # fractional hours can truncate an exact 5m duration by 1ns in pandas 2.3.3.
     # Without max_minutes the historical max_hours validation is unchanged.
@@ -132,6 +144,47 @@ def _launch_diagnostics(entry_time: Optional[pd.Timestamp] = None) -> Dict[str, 
         "launch_progress_reached": False, "launch_progress_first_at": pd.NaT,
         "launch_completed_close_count": 0, "launch_max_completed_close_r": np.nan,
         "launch_deadline_checked_at": pd.NaT, "launch_status": "entry_not_validated",
+    }
+
+
+def _validate_frozen_ma_entries(entries: pd.DataFrame) -> None:
+    """Fail the whole request set if its supposedly known hourly MA is invalid.
+
+    Reads only entry ``ma``, ``signal_time`` and ``decision_time``. No prices,
+    future features or outcomes enter this provenance/clock check. Numeric
+    epochs are rejected rather than guessing timestamp units. Empty requests
+    still need the two opt-in columns, but do not create any observations.
+    """
+    missing = {"ma", "signal_time"} - set(entries.columns)
+    if missing:
+        raise ValueError("frozen_ma_exit entries missing columns: {}".format(sorted(missing)))
+    numeric_types = (int, float, np.integer, np.floating)
+    for row in entries[["ma", "signal_time", "decision_time"]].itertuples(index=False):
+        if isinstance(row.ma, (bool, np.bool_)) or not isinstance(row.ma, numeric_types):
+            raise ValueError("frozen_ma_exit ma must be a finite positive nonboolean number")
+        try:
+            boundary = float(row.ma)
+        except (ValueError, TypeError, OverflowError) as error:
+            raise ValueError("frozen_ma_exit ma must be finite and positive") from error
+        if not np.isfinite(boundary) or boundary <= 0:
+            raise ValueError("frozen_ma_exit ma must be finite and positive")
+        if any(isinstance(value, numeric_types+(bool, np.bool_)) for value in (row.signal_time, row.decision_time)):
+            raise ValueError("frozen_ma_exit requires explicit hourly timestamps, not numeric epochs")
+        try:
+            signal, decision = _utc(row.signal_time), _utc(row.decision_time)
+        except (ValueError, TypeError, OverflowError) as error:
+            raise ValueError("frozen_ma_exit requires valid completed-hour signal timestamps") from error
+        if signal != signal.floor("h") or decision != decision.floor("h") or signal+pd.Timedelta(hours=1) != decision:
+            raise ValueError("frozen_ma_exit requires aligned signal_time + 1h == decision_time")
+
+
+def _frozen_ma_diagnostics(boundary: float = np.nan, available_at: Any = pd.NaT) -> Dict[str, Any]:
+    return {
+        "frozen_ma_enabled": True, "frozen_ma_boundary": boundary,
+        "frozen_ma_available_at": available_at, "frozen_ma_entry_distance_atr": np.nan,
+        "frozen_ma_trigger_open_time": pd.NaT, "frozen_ma_trigger_available_at": pd.NaT,
+        "frozen_ma_trigger_close": np.nan, "frozen_ma_completed_close_count": 0,
+        "frozen_ma_status": "entry_not_validated",
     }
 
 
@@ -265,6 +318,27 @@ def simulate_events(
     IDs retain existing equality/continuity semantics. Default modes are not
     affected by this additional source validation.
     Omission of both keys preserves historical output columns and values.
+
+    Independent ``frozen_ma_exit=True`` requires a real boolean true value;
+    omit the key to disable it (False and numeric truthy values are rejected).
+    It supports only native5 transition/decision5/one confirmation and cannot
+    combine with launch-deadline keys. Every supplied ``ma`` must be numeric,
+    finite, positive and nonboolean; ``signal_time`` and ``decision_time`` must
+    be valid aligned hours exactly one hour apart, or the whole call raises.
+    The frozen boundary is entry ``ma``, available at the signal hour's close,
+    not a later management MA. For an executable entry its signed distance is
+    direction*(entry_price-boundary)/signal_atr. Any fully held, valid raw5
+    CLOSE strictly on the wrong side latches an exit, even if entry already
+    starts wrong-side. Equality, seed/pre-entry closes and wicks never trigger.
+    At the next actual raw5 open, gap stop, original trueflip and total horizon
+    precede ``frozen_ma_exit``; a rebound cannot cancel the latch. A source gap,
+    invalid open or nonfinite floating raw segment censors without a fill.
+    Invalid management colour only resets the old edge, not this price latch.
+    Trigger fields may remain populated when an original exit wins that same
+    timestamp. Counted closes exclude intrabar-stop bars and unfinished exit
+    bars. Returned frozen_ma_status is entry_not_validated, prior_exit,
+    structure_exit or unknown_source; watching/exit_pending are internal only.
+    No extra fields or entry validation affect old modes when this key is absent.
     """
     selected = _policy(policy)
     raw = _validated_frame(raw5, ("open_time", "open", "high", "low", "close", "segment_id"), "raw5")
@@ -278,10 +352,15 @@ def simulate_events(
         raise ValueError("entries missing columns: {}".format(sorted(required_entries - set(entries.columns))))
     if entries["event_id"].duplicated().any():
         raise ValueError("event_id must be unique for independent paired outcomes")
+    frozen_ma_enabled = "frozen_ma_exit" in selected
+    if frozen_ma_enabled:
+        _validate_frozen_ma_entries(entries)
     if entries.empty:
         empty_columns = list(entries.columns) + ["entry_time", "exit_time", "closed", "outcome", "net_return", "net_r"]
         if "launch_deadline_minutes" in selected:
             empty_columns += [name for name in _launch_diagnostics() if name not in empty_columns]
+        if frozen_ma_enabled:
+            empty_columns += [name for name in _frozen_ma_diagnostics() if name not in empty_columns]
         return pd.DataFrame(columns=empty_columns)
 
     times = raw["open_time"].to_numpy()
@@ -333,6 +412,8 @@ def simulate_events(
                           transition_trigger_previous_available_at=pd.NaT)
         if launch_enabled:
             result.update(_launch_diagnostics(entry_time))
+        if frozen_ma_enabled:
+            result.update(_frozen_ma_diagnostics(float(event["ma"]), entry_time))
         index = time_index.get(entry_time)
         if index is None or (cutoff is not None and entry_time >= cutoff):
             outputs.append(result)
@@ -358,6 +439,9 @@ def simulate_events(
         result["risk_atr"] = risk / atr
         if launch_enabled:
             result["launch_status"] = "pending"
+        if frozen_ma_enabled:
+            result.update(frozen_ma_entry_distance_atr=direction*(entry-result["frozen_ma_boundary"])/atr,
+                          frozen_ma_status="watching")
         target = entry + direction * 3.0 * risk
         deadline = entry_time + horizon_delta
         remaining, realised, opposite_streak = 1.0, 0.0, 0
@@ -416,15 +500,18 @@ def simulate_events(
             if launch_enabled and not result["launch_progress_reached"]:
                 result["launch_status"] = ("timeout_exit" if outcome == "launch_timeout_exit"
                                            else "prior_exit" if closed else "unknown_source")
+            if frozen_ma_enabled:
+                result["frozen_ma_status"] = ("structure_exit" if outcome == "frozen_ma_exit"
+                                              else "prior_exit" if closed else "unknown_source")
 
         for i in range(index, len(raw)):
             now = pd.Timestamp(times[i])
             if cutoff is not None and now >= cutoff:
                 break
-            invalid_launch_segment = (launch_enabled
-                                      and isinstance(segments[i], (float, np.floating))
-                                      and not np.isfinite(segments[i]))
-            if (previous_open is not None and now != previous_open + FIVE_MINUTES) or pd.isna(segments[i]) or segments[i] != first_segment or invalid_launch_segment:
+            invalid_optional_segment = ((launch_enabled or frozen_ma_enabled)
+                                        and isinstance(segments[i], (float, np.floating))
+                                        and not np.isfinite(segments[i]))
+            if (previous_open is not None and now != previous_open + FIVE_MINUTES) or pd.isna(segments[i]) or segments[i] != first_segment or invalid_optional_segment:
                 finish(last_time, last_close, "data_gap_censored", False)
                 completed = True
                 break
@@ -553,6 +640,10 @@ def simulate_events(
                 finish(now, open_, "time_exit", True)
                 completed = True
                 break
+            if frozen_ma_enabled and now == result["frozen_ma_trigger_available_at"]:
+                finish(now, open_, "frozen_ma_exit", True)
+                completed = True
+                break
             if launch_enabled and now == result["launch_deadline_at"]:
                 result["launch_deadline_checked_at"] = now
                 if not result["launch_progress_reached"]:
@@ -581,6 +672,12 @@ def simulate_events(
                 completed = True
                 break
             record_excursion(high, low, bars)
+            if frozen_ma_enabled:
+                result["frozen_ma_completed_close_count"] += 1
+                if pd.isna(result["frozen_ma_trigger_available_at"]) and direction*(close-result["frozen_ma_boundary"]) < 0:
+                    result.update(frozen_ma_trigger_open_time=now,
+                                  frozen_ma_trigger_available_at=now+FIVE_MINUTES,
+                                  frozen_ma_trigger_close=close, frozen_ma_status="exit_pending")
             if launch_enabled and now + FIVE_MINUTES <= result["launch_deadline_at"]:
                 # This raw5 bar is complete, validated and remained held: a
                 # resting stop above has already won any intrabar collision.
