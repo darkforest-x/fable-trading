@@ -5110,3 +5110,29 @@ experiments:
       eligible; BTC/ETH references ended 2026-07-11 and no target extended past
       2026-08-13, limiting the registered evaluation window. No training,
       TradingView, ACTIVE/frozen, forward, deployment or live state changed.
+
+  - experiment_id: exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: "3f339af"
+    status: active
+    question: >-
+      Can completed 1h large-body or real engulfing MA crossings followed by
+      lower-timeframe colour exits produce stable returns after 20bp costs?
+    single_variable: >-
+      Owner explicitly requested the new entry/exit architecture. Development
+      first compares exits on identical entries, then one preregistered finite
+      single-coordinate pass over entry morphology and context. The selected
+      configuration is committed before the historical transport audit.
+    result: >-
+      Preregistered. Causal OHLC features, 5m execution, 15m/5m/1h confirmation
+      clocks and immutable K1-extreme stop have synthetic tests. No outcomes yet.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Authorised on 2026-09-06: directly develop the system toward profitability.
+      Only the physically safe OKX 5m archive ending 2026-02-28 is used. Each
+      fold excludes its final 72h from new entry. Prior research used these
+      historical years; this is transport evidence, not a pristine holdout.

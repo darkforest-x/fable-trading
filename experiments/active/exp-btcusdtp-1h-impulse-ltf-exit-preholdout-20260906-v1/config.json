@@ -1,0 +1,302 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1",
+  "owner_authorization": {
+    "verbatim": "你直接去做，要把这套系统做到赚钱",
+    "date": "2026-09-06",
+    "proposal": "1h 大阳/大阴或吞没直接贯穿均线入场，跟随小周期趋势，反向颜色退出",
+    "research_parameter_exploration": true,
+    "live_orders": false
+  },
+  "instrument": "OKX:BTCUSDT.P",
+  "source": {
+    "path": "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+    "audit": "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json",
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "end_exclusive": "2026-02-28T16:00:00Z"
+  },
+  "development_folds": [
+    [
+      "2023H1",
+      "2023-01-01",
+      "2023-07-01"
+    ],
+    [
+      "2023H2",
+      "2023-07-01",
+      "2024-01-01"
+    ],
+    [
+      "2024H1",
+      "2024-01-01",
+      "2024-07-01"
+    ],
+    [
+      "2024H2",
+      "2024-07-01",
+      "2025-01-01"
+    ]
+  ],
+  "audit_folds": [
+    [
+      "2025H1",
+      "2025-01-01",
+      "2025-07-01"
+    ],
+    [
+      "2025H2",
+      "2025-07-01",
+      "2026-01-01"
+    ],
+    [
+      "2026P1",
+      "2026-01-01",
+      "2026-02-28T16:00:00Z"
+    ]
+  ],
+  "lineage": "Historical years have been used by prior research. Audit is a frozen-rule transport check, not a globally pristine independent sample. No repository holdout prices in this experiment.",
+  "baseline": {
+    "ma_kind": "SMA",
+    "ma_length": 40,
+    "shape": "large_or_engulf",
+    "body_ratio_min": 0.65,
+    "range_atr_min": 1,
+    "engulf_range_atr_min": 0.65,
+    "close_location_min": 0.7,
+    "min_volume_ratio": 0,
+    "max_cross_count": 999,
+    "min_efficiency": 0,
+    "require_ma_slope": false,
+    "require_breakout20": false,
+    "min_extension_atr": 0,
+    "max_extension_atr": 99,
+    "side": "both"
+  },
+  "execution": {
+    "entry": "exact next 5m open after completed 1h signal",
+    "initial_stop": "K1 actual extreme",
+    "cost_fraction": 0.002,
+    "max_hours": 72,
+    "stop_first": true,
+    "funding": "not modelled; stress additional roundtrip cost separately",
+    "slippage": "gap through stop fills at open; base 20bp assumed all-in other execution costs"
+  },
+  "baseline_policy": {
+    "management_minutes": 15,
+    "ma_kind": "SMA",
+    "ma_length": 40,
+    "exit_mode": "colour",
+    "confirmations": 1
+  },
+  "exit_policies": [
+    {
+      "id": "15m_first",
+      "management_minutes": 15,
+      "ma_kind": "SMA",
+      "ma_length": 40,
+      "exit_mode": "colour",
+      "confirmations": 1
+    },
+    {
+      "id": "15m_two",
+      "management_minutes": 15,
+      "ma_kind": "SMA",
+      "ma_length": 40,
+      "exit_mode": "colour",
+      "confirmations": 2
+    },
+    {
+      "id": "15m_slope",
+      "management_minutes": 15,
+      "ma_kind": "SMA",
+      "ma_length": 40,
+      "exit_mode": "slope_colour",
+      "confirmations": 1
+    },
+    {
+      "id": "15m_half",
+      "management_minutes": 15,
+      "ma_kind": "SMA",
+      "ma_length": 40,
+      "exit_mode": "partial_colour",
+      "confirmations": 2
+    },
+    {
+      "id": "5m_native40",
+      "management_minutes": 5,
+      "ma_kind": "SMA",
+      "ma_length": 40,
+      "exit_mode": "colour",
+      "confirmations": 1
+    },
+    {
+      "id": "5m_clock120",
+      "management_minutes": 5,
+      "ma_kind": "SMA",
+      "ma_length": 120,
+      "exit_mode": "colour",
+      "confirmations": 1
+    },
+    {
+      "id": "1h_first",
+      "selection_eligible": false,
+      "management_minutes": 60,
+      "ma_kind": "SMA",
+      "ma_length": 40,
+      "exit_mode": "colour",
+      "confirmations": 1
+    },
+    {
+      "id": "fixed3R",
+      "selection_eligible": false,
+      "management_minutes": 15,
+      "ma_kind": "SMA",
+      "ma_length": 40,
+      "exit_mode": "fixed_3r",
+      "confirmations": 1
+    }
+  ],
+  "coordinate_pass": [
+    {
+      "key": "ma_kind",
+      "values": [
+        "SMA",
+        "EMA"
+      ]
+    },
+    {
+      "key": "ma_length",
+      "values": [
+        20,
+        30,
+        40,
+        60
+      ]
+    },
+    {
+      "key": "shape",
+      "values": [
+        "large_or_engulf",
+        "large_only",
+        "engulf_only"
+      ]
+    },
+    {
+      "key": "range_atr_min",
+      "values": [
+        0.8,
+        1,
+        1.25,
+        1.5,
+        2
+      ]
+    },
+    {
+      "key": "body_ratio_min",
+      "values": [
+        0.55,
+        0.65,
+        0.75
+      ]
+    },
+    {
+      "key": "min_volume_ratio",
+      "values": [
+        0,
+        1,
+        1.5,
+        2
+      ]
+    },
+    {
+      "key": "max_cross_count",
+      "values": [
+        999,
+        6,
+        3,
+        1
+      ]
+    },
+    {
+      "key": "min_efficiency",
+      "values": [
+        0,
+        0.15,
+        0.25,
+        0.35
+      ]
+    },
+    {
+      "key": "require_ma_slope",
+      "values": [
+        false,
+        true
+      ]
+    },
+    {
+      "key": "require_breakout20",
+      "values": [
+        false,
+        true
+      ]
+    },
+    {
+      "key": "max_extension_atr",
+      "values": [
+        99,
+        0.5,
+        1,
+        1.5
+      ]
+    },
+    {
+      "key": "side",
+      "values": [
+        "both",
+        "long",
+        "short"
+      ]
+    }
+  ],
+  "selection": {
+    "minimum_total": 80,
+    "minimum_per_fold": 12,
+    "score": "median independent-event fold net bp minus 0.5*std fold means",
+    "move_margin_bp": 2,
+    "worst_fold_tolerance_bp": 3,
+    "paired_exit_common_entries": true,
+    "coordinate_passes": 1,
+    "no_audit_retune": true
+  },
+  "matching": {
+    "count_per_trade": 3,
+    "keys": [
+      "same calendar month",
+      "UTC time-of-day 6h block",
+      "causal prior-30day ATR-percentile tercile",
+      "direction",
+      "LTF colour alignment at entry"
+    ],
+    "exclude_raw_hour_crosses_known_at_entry_lookback_hours": 1,
+    "copy": "initial risk/ATR, exit policy, 72h, 20bp",
+    "reuse": "No control timestamp is reused across events. Inference uses calendar-month clusters shared by each case and its controls; overlapping paths are not independent observations.",
+    "seed": 20260906
+  },
+  "audit_gates": {
+    "closed_events": 60,
+    "minimum_per_fold": 8,
+    "positive_full_halfyears": 2,
+    "mean_net_bp": 0,
+    "profit_factor": 1.1,
+    "matched_coverage": 0.9,
+    "matched_excess_bp": 0,
+    "matched_month_cluster_p": 0.01,
+    "net_week_cluster_p": 0.01,
+    "net_month_cluster_p": 0.01,
+    "single_position_mean_net_bp": 0,
+    "extra_10bp_stress_mean_net_bp": 0
+  },
+  "status": "preregistered_before_price_results",
+  "training_eligible": false,
+  "production_eligible": false,
+  "holdout_consumed": false
+}
