@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from hashlib import sha256
 import json
 from pathlib import Path
+import sqlite3
 import subprocess
 from urllib.parse import quote
 
@@ -21,6 +22,8 @@ E = Path(__file__).resolve().parent
 ROOT = E.parents[2]
 CATALOGUE_HASH = "15eb91896e7bebee9728bda4ecf3ba2d190ae640cebfc87f01ad214f86e1c365"
 TITLE = "ChartPrime Confluence Audit"
+INDEX_SQL = "SELECT number, title, family, evidence, publication_id FROM catalogue ORDER BY number"
+FAMILY_SQL = "SELECT family, COUNT(*) AS script_count, (SELECT COUNT(*) FROM catalogue) AS total_scripts FROM catalogue GROUP BY family ORDER BY script_count DESC, family"
 REPORT = "analysis/p1_chartprime_public_confluence_audit_20260906.md"
 REVIEW_FILES = ("reviews_000_044.json", "reviews_045_094.json", "reviews_095_147.json")
 TEXT_FIELDS = ("id", "title", "category", "formula", "parameters", "clock_risk",
@@ -134,9 +137,9 @@ def build(cat, reviews, cards, validation):
     source_base = E.relative_to(ROOT).as_posix()
     sources = [{"id":"catalogue", "label":"TradingView / ChartPrime · 冻结完整公开清单与逐项审查",
                 "href":cat["profile_url"], "path":source_base+"/catalogue.json",
-                "query":{"language":"python", "engine":"Python stdlib", "executed_at":stamp,
-                         "tables_used":[source_base+"/catalogue.json"]+[source_base+"/"+p for p in REVIEW_FILES],
-                         "description":"Exact ID joins plus manually assigned primary-family counts; build_report.py. No market rows or return estimates.",
+                "query":{"language":"sql", "engine":"SQLite", "sql":INDEX_SQL,"executed_at":stamp,
+                         "tables_used":["main.catalogue"],
+                         "description":"Actual SQLite selection after exact ID joins of catalogue.json and the three manually authored reviews_*.json in "+source_base+"; manually assigned navigation family, not market data or return estimates. Executed by build_report.py.",
                          "filters":["All 148 publications on frozen ChartPrime profile; no sampling or title deduplication"],
                          "metric_definitions":["script_count = count of unique publication IDs in a mutually exclusive manually assigned main-mechanism family", "Closed-source family counts inaccessible source cards, not failed downloads"]}}]
     blocks = [{"id":"title", "type":"markdown", "layout":"full", "body":"# "+TITLE}]
@@ -188,11 +191,20 @@ def build(cat, reviews, cards, validation):
     for sid, body in tail:
         blocks.append({"id":sid,"type":"markdown","layout":"full","body":body})
         text_sections.append(body)
-    counts = Counter(fam.values())
-    family_rows = [{"family":k,"script_count":v,"total_scripts":148} for k,v in sorted(counts.items(), key=lambda kv:(-kv[1],kv[0]))]
+    # Execute the actual provenance queries over the exact same reviewed rows.
+    with sqlite3.connect(":memory:") as connection:
+        connection.row_factory = sqlite3.Row
+        connection.execute("CREATE TABLE catalogue (number INTEGER PRIMARY KEY, title TEXT, family TEXT, evidence TEXT, publication_id TEXT UNIQUE)")
+        connection.executemany("INSERT INTO catalogue VALUES (?, ?, ?, ?, ?)",
+                               [(r["number"],r["title"],r["family"],r["evidence"],r["publication_id"]) for r in index_rows])
+        index_rows = [dict(row) for row in connection.execute(INDEX_SQL)]
+        family_rows = [dict(row) for row in connection.execute(FAMILY_SQL)]
+    family_source = dict(sources[0], id="family_counts", label="TradingView / ChartPrime · 按人工主要机制分类的实际分组计数")
+    family_source["query"] = dict(sources[0]["query"], sql=FAMILY_SQL)
+    sources.append(family_source)
     manifest = {"version":1,"surface":"report","title":TITLE,"generatedAt":stamp,"filters":[],"cards":[],
         "charts":[{"id":"families","title":"公开脚本主要机制分类","type":"bar","intent":"comparison","layout":"full",
-                   "dataset":"families","sourceId":"catalogue","maxRows":8,"valueFormat":"number",
+                   "dataset":"families","sourceId":"family_counts","maxRows":8,"valueFormat":"number",
                    "question":"148个公开脚本主要属于哪些机制，而不是独立胜率信号？",
                    "rationale":"One full-width count series across eight mutually exclusive manually reviewed navigation families; not a profitability ranking.",
                    "palette":{"kind":"sequential","name":"blue"},"labels":{"values":"all"},
