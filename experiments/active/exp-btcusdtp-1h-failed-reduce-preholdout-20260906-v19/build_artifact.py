@@ -57,7 +57,7 @@ def main():
     sources = [
         {"id":"report","label":"V19 · 完整规则、结果与限制","path":REPORT},
         {"id":"summary","label":"V19 · 冻结回放结果","path":REL+"/results/summary.json"},
-        {"id":"verification","label":"V19 · 独立保存账本验证","path":REL+"/results/independent_verification.json"},
+        {"id":"verification","label":"V19 · 独立保存账本验证","path":REL+"/independent_verification.json"},
         {"id":"delta","label":"V19 · 全251机会净收益增量","path":REL+"/results/case_delta.csv",
          "query":{"sql":QUERY,"engine":"sqlite","language":"sql","tables_used":["case_delta"],
              "executed_at":stamp,"description":"直接按保存逐机会净增量分箱，包括零、极端值与未知",
