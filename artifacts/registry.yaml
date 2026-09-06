@@ -14637,3 +14637,156 @@ artifacts:
     config_hash: "3a0d4975d37709f5a2f3e661a8dae829d23bea9464baa5d6884b46aba2c4f786"
     data_cutoff: "2026-09-01T00:00:00Z"
     notes: Static four-panel figure covering the signal funnel, candidate returns, empty second fold and direction/right-censoring confound.
+
+  - artifact_id: btcusdtp-hourly-impulse-v1-selection
+    artifact_type: manifest
+    role: frozen_development_selection_and_source_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c4e611f"
+    source_path: experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/results/selection.json
+    sha256: "1d0b8c17a4d04bece2c61f30151f907b2178b8d2b31ae3fedc56b3ce8abe7945"
+    size_bytes: 4236
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/results/selection.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c4e611f"
+    config_hash: "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "48 finite comparison rows; candidate remains net negative. Selection committed before transport."
+
+  - artifact_id: btcusdtp-hourly-impulse-v1-audit
+    artifact_type: manifest
+    role: historical_transport_rejection_with_matched_controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9767c47"
+    source_path: experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/results/audit_summary.json
+    sha256: "0570805d634e8a68db599ce6727751f1b10db5eebf656dd70a0aef1c49601597"
+    size_bytes: 6460
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/results/audit_summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "9767c47"
+    config_hash: "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: "2025 to February 2026 historical transport; 74 events, -12.14bp net, rejected. Not globally pristine."
+
+  - artifact_id: btcusdtp-hourly-impulse-v1-diagnostics
+    artifact_type: manifest
+    role: loss_taxonomy_fixed_bins_paired_exits_and_lineage
+    source_repo: darkforest-x/fable-trading
+    source_commit: "3eaf9bb"
+    source_path: analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/summary.json
+    sha256: "b954f7f1a188ac41dfd3dba719566a3e9102febc1601e89b9ee610dfd367b992"
+    size_bytes: 27681
+    storage_uri: "repo://analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "3eaf9bb"
+    config_hash: "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: "Every loss is preserved; overlapping flags are not summed as exclusive causes. Source ledgers hashed."
+
+  - artifact_id: btcusdtp-hourly-impulse-v1-exit-controls
+    artifact_type: manifest
+    role: all_eight_exit_policies_exact_causal_controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: "be28e69"
+    source_path: analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/exit_controls/summary.json
+    sha256: "db65e4058e12373b3b9f1d66895f4bbec06bf7c765962d934213cfc94b44140a"
+    size_bytes: 3325
+    storage_uri: "repo://analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/exit_controls/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "be28e69"
+    config_hash: "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Same 251 entries; each exit control outcome recomputed. Full three-control pairs only."
+
+  - artifact_id: btcusdtp-hourly-impulse-v1-report
+    artifact_type: report
+    role: canonical_chinese_negative_result_and_trade_postmortem_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "0a8d332"
+    source_path: analysis/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.md
+    sha256: "06772b09cbea14fc38fc5233438eb86e7b11a1f7910fa9901dc9161387549353"
+    size_bytes: 23351
+    storage_uri: "repo://analysis/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "0a8d332"
+    config_hash: "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: "Two rejected experiments; includes gross/net costs, non-chasing near-flat arm, individual losses and post-entry selection caveat."
+
+  - artifact_id: btcusdtp-hourly-impulse-v1-html
+    artifact_type: report
+    role: owner_facing_portable_html_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "be28e69"
+    source_path: analysis/html/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.html
+    sha256: "0d615e4e15d1c8b8da70712cd8c6aa436cc958761e65d4eb21a3f71390fbc04e"
+    size_bytes: 513062
+    storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "be28e69"
+    config_hash: "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: "Native schema and structure passed. Standard Chrome attempts timed out; interaction and mobile visual QA not verified."
+
+  - artifact_id: btcusdtp-hourly-impulse-v1-native-artifact
+    artifact_type: manifest
+    role: native_source_backed_report_schema
+    source_repo: darkforest-x/fable-trading
+    source_commit: "be28e69"
+    source_path: analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/artifact.json
+    sha256: "84b3b7057d0c9dc19a1e20a5acaad0833c6c4df5b8ea52656449aeb72cc98428"
+    size_bytes: 38115
+    storage_uri: "repo://analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/artifact.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "be28e69"
+    config_hash: "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
+    data_cutoff: "2026-02-28T16:00:00Z"
+    notes: "One native chart, seventeen source-backed narrative/chart blocks, actual SQLite presentation query over saved CSV."
+
+  - artifact_id: btcusdtp-hourly-staged-v2-development
+    artifact_type: manifest
+    role: six_staged_exits_development_gate_rejection
+    source_repo: darkforest-x/fable-trading
+    source_commit: "824abc9"
+    source_path: experiments/active/exp-btcusdtp-1h-staged-realisation-preholdout-20260906-v2/results/selection.json
+    sha256: "dfb82a3551c9367009267b4055e90036dbe5c58711453d7431266ce6771aebb7"
+    size_bytes: 981
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-staged-realisation-preholdout-20260906-v2/results/selection.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "824abc9"
+    config_hash: "c48b0868c97fe1c49f3ff4e865ba159a5b8eeb45fc2d8878abe5561474740583"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "All six fixed policies negative; no new transport opened after development gates failed."
+
+  - artifact_id: btcusdtp-hourly-staged-v2-diagnostics
+    artifact_type: manifest
+    role: all_six_staged_exits_matched_controls_and_paired_diagnostics
+    source_repo: darkforest-x/fable-trading
+    source_commit: "0a8d332"
+    source_path: analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/all_arm_summary.json
+    sha256: "60904aa9a84c588eeaacaa82e430ec5986e0e8120aef5379ce4016781f67646d"
+    size_bytes: 30198
+    storage_uri: "repo://analysis/output/btcusdtp_1h_staged_realisation_20260906_v2/all_arm_summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "0a8d332"
+    config_hash: "c48b0868c97fe1c49f3ff4e865ba159a5b8eeb45fc2d8878abe5561474740583"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Same 111 contracts and 327 assigned control times across all six arms; reports partial gains and clipped winners."

@@ -5113,8 +5113,8 @@ experiments:
 
   - experiment_id: exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: "3f339af"
-    status: active
+    source_commit: "c4e611f"
+    status: rejected
     question: >-
       Can completed 1h large-body or real engulfing MA crossings followed by
       lower-timeframe colour exits produce stable returns after 20bp costs?
@@ -5124,12 +5124,22 @@ experiments:
       single-coordinate pass over entry morphology and context. The selected
       configuration is committed before the historical transport audit.
     result: >-
-      Preregistered. Causal OHLC features, 5m execution, 15m/5m/1h confirmation
-      clocks and immutable K1-extreme stop have synthetic tests. No outcomes yet.
+      All eight same-entry exits lost net over 251 development events. The
+      finite 48-row search froze a same-slope 5m-exit candidate at 111 events,
+      -6.99bp net. Historical transport: 74 events, -12.14bp, PF 0.627;
+      matched excess +9.32bp with month-block p=0.148. No profitability claim.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.html
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts:
+      - btcusdtp-hourly-impulse-v1-selection
+      - btcusdtp-hourly-impulse-v1-audit
+      - btcusdtp-hourly-impulse-v1-diagnostics
+      - btcusdtp-hourly-impulse-v1-exit-controls
+      - btcusdtp-hourly-impulse-v1-report
+      - btcusdtp-hourly-impulse-v1-html
+      - btcusdtp-hourly-impulse-v1-native-artifact
     reuse_allowed: false
     notes: >-
       Authorised on 2026-09-06: directly develop the system toward profitability.
@@ -5139,8 +5149,8 @@ experiments:
 
   - experiment_id: exp-btcusdtp-1h-staged-realisation-preholdout-20260906-v2
     source_repo: darkforest-x/fable-trading
-    source_commit: "9767c47"
-    status: active
+    source_commit: "824abc9"
+    status: rejected
     question: >-
       Can real 1R/2R partial profit-taking and a causally activated hourly
       runner reduce giveback without sacrificing enough winners to remain net negative?
@@ -5148,11 +5158,21 @@ experiments:
       Six frozen exit-policy alternatives on identical V1 same-slope hourly
       entries. No new entry threshold search. Policy contrasts separate partial
       realisation from higher-clock takeover where possible.
-    result: Preregistered before staged outcomes; synthetic execution tests pending.
+    result: >-
+      Six staged exits on the same 111 events all lost net (-10.76 to -6.42bp).
+      All had only one of four positive folds. Actual half-at-1R realisation
+      improved the anchor by 1.14bp, not enough to make it profitable. All-arm
+      controls matched 109 events each, without changing assignments. No new
+      historical transport was opened after the development gates failed.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.html
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts:
+      - btcusdtp-hourly-staged-v2-development
+      - btcusdtp-hourly-staged-v2-diagnostics
+      - btcusdtp-hourly-impulse-v1-report
+      - btcusdtp-hourly-impulse-v1-html
     reuse_allowed: false
     notes: >-
       Post-V1 negative-result research; 2023-2024 development is reused and the

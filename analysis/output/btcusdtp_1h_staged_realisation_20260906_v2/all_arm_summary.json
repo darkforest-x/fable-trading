@@ -1,0 +1,846 @@
+{
+  "status": "descriptive_completion_no_selection_change_no_transport",
+  "source_manifest": [
+    {
+      "path": "yoyo/evaluation/hourly_impulse_staged_diagnostics.py",
+      "sha256": "91cc77bbbccce3bf2e6a1ab808551349aeed1a2fced1562c3ac05d41473da28f"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-staged-realisation-preholdout-20260906-v2/config.json",
+      "sha256": "c48b0868c97fe1c49f3ff4e865ba159a5b8eeb45fc2d8878abe5561474740583"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-staged-realisation-preholdout-20260906-v2/results/selection.json",
+      "sha256": "dfb82a3551c9367009267b4055e90036dbe5c58711453d7431266ce6771aebb7"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_staged_research.py",
+      "sha256": "2aec08db0f344bc066a866b7830073bdebaa9b5ff6f9f7b8302f58b36034edab"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_research.py",
+      "sha256": "804e62f5dfa537302a6cf1f0223549cdf3b3a3e42966ef59a33b6c975fd79ad4"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_diagnostics.py",
+      "sha256": "0e30d154c270434c0d5e7025e5eeb2b10791460f2878ee94fe5dec2d23612996"
+    },
+    {
+      "path": "yoyo/layers/l3_backtest/hourly_impulse_staged.py",
+      "sha256": "4407f1909bfe26c08eab80fe55e871cae61d14b37bc9b79b2554d78e03b11f2d"
+    },
+    {
+      "path": "yoyo/layers/l3_backtest/hourly_impulse.py",
+      "sha256": "908ad2dd731326ba43453bd7c38b43a2dfc12cf44673c26cec924e5f48a54985"
+    },
+    {
+      "path": "yoyo/data/hourly_impulse.py",
+      "sha256": "f1128f514456f0e1a7bf89b719b2333ebe3b12f66402d58c82764d355be97a3b"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json",
+      "sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-staged-realisation-preholdout-20260906-v2/results/development_colour15_trades.csv.gz",
+      "sha256": "0d99c7ee0e59837385bc5d79114e50b03f1e570bcba67d2f1c7707c10ee462c6"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-staged-realisation-preholdout-20260906-v2/results/development_half1r_colour15_trades.csv.gz",
+      "sha256": "79d4671a9a29404deed28844d754f9a31abe7a35722b75bc822001d1a143d4c8"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-staged-realisation-preholdout-20260906-v2/results/development_half1r_runner1h_trades.csv.gz",
+      "sha256": "78aec5ff3aece68734033e53c059220a5b9b3cd780a874caad06febcc308d6ff"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-staged-realisation-preholdout-20260906-v2/results/development_quarter1r_quarter2r_runner1h_trades.csv.gz",
+      "sha256": "2582a9a05f1792a24aee4c7a09423708cdef5dfd7098fd028a25161efdffd4ec"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-staged-realisation-preholdout-20260906-v2/results/development_quarter1r_quarter2r_colour15_trades.csv.gz",
+      "sha256": "39ac8848d6aba90569e9b67dc4c6b3fca881ef40ba6d6bf9efb30baf8219c2c6"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-staged-realisation-preholdout-20260906-v2/results/development_no_partial_runner1h_trades.csv.gz",
+      "sha256": "f108c6407adf6c9d563630534474c7e7023a6702d29cd73867e44276e31b1770"
+    }
+  ],
+  "source_receipt": {
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "physical_rows": 341567,
+    "phase_rows": 219551,
+    "phase_price_last_open": "2024-12-31 23:55:00+00:00",
+    "physical_last_open": "2026-02-28 15:55:00+00:00",
+    "holdout_price_rows": 0,
+    "timestamp_preflight_before_price_hash": true
+  },
+  "phase": "development",
+  "registered_event_count": 111,
+  "registered_arm_count": 6,
+  "reference": "colour15",
+  "entry": {
+    "ma_kind": "SMA",
+    "ma_length": 40,
+    "shape": "large_or_engulf",
+    "body_ratio_min": 0.65,
+    "range_atr_min": 1,
+    "engulf_range_atr_min": 0.65,
+    "close_location_min": 0.7,
+    "min_volume_ratio": 0,
+    "max_cross_count": 999,
+    "min_efficiency": 0,
+    "require_ma_slope": true,
+    "require_breakout20": false,
+    "min_extension_atr": 0,
+    "max_extension_atr": 99,
+    "side": "both"
+  },
+  "original_selection_unchanged": {
+    "config_sha256": "c48b0868c97fe1c49f3ff4e865ba159a5b8eeb45fc2d8878abe5561474740583",
+    "entry": {
+      "ma_kind": "SMA",
+      "ma_length": 40,
+      "shape": "large_or_engulf",
+      "body_ratio_min": 0.65,
+      "range_atr_min": 1,
+      "engulf_range_atr_min": 0.65,
+      "close_location_min": 0.7,
+      "min_volume_ratio": 0,
+      "max_cross_count": 999,
+      "min_efficiency": 0,
+      "require_ma_slope": true,
+      "require_breakout20": false,
+      "min_extension_atr": 0,
+      "max_extension_atr": 99,
+      "side": "both"
+    },
+    "policy": {
+      "id": "quarter1r_quarter2r_colour15",
+      "partial_targets": [
+        [
+          1,
+          0.25
+        ],
+        [
+          2,
+          0.25
+        ]
+      ],
+      "takeover_r": null
+    },
+    "gate_checks": {
+      "samples": true,
+      "positive_folds": false,
+      "net_profit": false,
+      "profit_factor": false,
+      "matched_coverage": true,
+      "matched_excess": true
+    },
+    "go_to_transport": false,
+    "status": "rejected_development_no_new_transport"
+  },
+  "identical_control_assignments_verified": true,
+  "arms": {
+    "colour15": {
+      "policy": {
+        "id": "colour15",
+        "partial_targets": [],
+        "takeover_r": null
+      },
+      "metrics": {
+        "events": 111,
+        "excluded_results": 0,
+        "rejected_entries": 0,
+        "censored": 0,
+        "mean_net_bp": -10.762684664185125,
+        "median_net_bp": -32.895793392195,
+        "profit_factor": 0.758361981693323,
+        "win_rate": 0.25225225225225223,
+        "p95_net_bp": 202.517364468398,
+        "worst_fold_bp": -27.038872029413408,
+        "positive_folds": 1,
+        "minimum_fold_events": 21,
+        "folds": [
+          {
+            "fold": "2023H1",
+            "count": 21,
+            "mean": -0.0008682187781390192
+          },
+          {
+            "fold": "2023H2",
+            "count": 27,
+            "mean": -0.0027038872029413407
+          },
+          {
+            "fold": "2024H1",
+            "count": 27,
+            "mean": -0.0018836467508967852
+          },
+          {
+            "fold": "2024H2",
+            "count": 36,
+            "mean": 0.000628616981169275
+          }
+        ],
+        "robust_score_bp": -19.975628974617052,
+        "net_week_cluster_p": 0.8311,
+        "net_month_cluster_p": 0.8363,
+        "extra_10bp_mean_net_bp": -20.762684664185123,
+        "leave_top_two_mean_net_bp": -18.156744404180184,
+        "range_feature_auc": 0.6450086058519794,
+        "range_top_decile_net_bp": -23.7402962748505,
+        "range_top_decile_gross_bp": -3.740296274850499,
+        "mean_hold_hours": 5.191441441441442
+      },
+      "path_diagnostics": {
+        "closed_events": 111,
+        "net_losers": 83,
+        "losers_mfe_ge1r": 22,
+        "losers_never_positive": 2,
+        "losers_fee_flips": 5,
+        "losers_hard_stop": 17,
+        "losers_colour_exit": 66,
+        "losers_with_partial_realisation": 0,
+        "partial_realised_events": 0,
+        "partial_fill_count": 0,
+        "partial_original_fraction_mean": 0.0,
+        "realised_partial_gross_sum_event_bp": 0.0,
+        "realised_partial_net_sum_event_bp": 0.0,
+        "takeover_triggered_events": 0,
+        "takeover_active_events": 0,
+        "takeover_active_mean_net_bp": null,
+        "takeover_active_net_losers": 0,
+        "positive_return_sum_event_bp": 3749.3404926468565,
+        "negative_return_sum_event_bp": -4943.998490371405,
+        "loss_taxonomy": {
+          "cost_flip": 5,
+          "early_reversal": 20,
+          "giveback": 15,
+          "hard_stop": 17,
+          "other_loss": 26
+        },
+        "cohort_warning": "Partial fills and takeover are post-entry outcomes, not causal entry filters; event sums are not portfolio returns."
+      },
+      "matched": {
+        "coverage": 0.9819819819819819,
+        "mean_excess_bp": 4.0706749327018015,
+        "matched_event_mean_net_bp": -10.545990905445915,
+        "control_mean_net_bp": -14.616665838147721,
+        "month_cluster_p": 0.3526,
+        "control_rows": 327,
+        "unique_control_times": 327,
+        "control_time_reuse_allowed": false
+      },
+      "paired_vs_colour15": {
+        "reference": "colour15",
+        "candidate": "colour15",
+        "registered_same_entry_events": 111,
+        "same_event_closed": 111,
+        "not_closed_in_both": 0,
+        "mean_delta_net_bp": 0.0,
+        "median_delta_net_bp": 0.0,
+        "gained_delta_sum_event_bp": 0.0,
+        "lost_delta_sum_event_bp": 0.0,
+        "net_delta_sum_event_bp": 0.0,
+        "improved_events": 0,
+        "worsened_events": 0,
+        "unchanged_events": 111,
+        "rescued_baseline_nonpositive_to_profit": 0,
+        "baseline_profit_to_nonpositive": 0,
+        "baseline_losers_improvement_sum_event_bp": 0.0,
+        "baseline_winners_trimmed_profit_sum_event_bp": 0.0,
+        "same_events_reference_mean_net_bp": -10.762684664185125,
+        "same_events_candidate_mean_net_bp": -10.762684664185125
+      }
+    },
+    "half1r_colour15": {
+      "policy": {
+        "id": "half1r_colour15",
+        "partial_targets": [
+          [
+            1,
+            0.5
+          ]
+        ],
+        "takeover_r": null
+      },
+      "metrics": {
+        "events": 111,
+        "excluded_results": 0,
+        "rejected_entries": 0,
+        "censored": 0,
+        "mean_net_bp": -9.626961828893425,
+        "median_net_bp": -24.310693213353996,
+        "profit_factor": 0.7573121357859771,
+        "win_rate": 0.3153153153153153,
+        "p95_net_bp": 169.74009268297203,
+        "worst_fold_bp": -21.913037123509444,
+        "positive_folds": 1,
+        "minimum_fold_events": 21,
+        "folds": [
+          {
+            "fold": "2023H1",
+            "count": 21,
+            "mean": -0.0009658404933111747
+          },
+          {
+            "fold": "2023H2",
+            "count": 27,
+            "mean": -0.002068724686025581
+          },
+          {
+            "fold": "2024H1",
+            "count": 27,
+            "mean": -0.002191303712350944
+          },
+          {
+            "fold": "2024H2",
+            "count": 36,
+            "mean": 0.0007901150226384392
+          }
+        ],
+        "robust_score_bp": -21.151739519343842,
+        "net_week_cluster_p": 0.8373,
+        "net_month_cluster_p": 0.866,
+        "extra_10bp_mean_net_bp": -19.626961828893425,
+        "leave_top_two_mean_net_bp": -14.578412035321271,
+        "range_feature_auc": 0.6526315789473685,
+        "range_top_decile_net_bp": 0.09027043038433054,
+        "range_top_decile_gross_bp": 20.090270430384336,
+        "mean_hold_hours": 5.191441441441442
+      },
+      "path_diagnostics": {
+        "closed_events": 111,
+        "net_losers": 76,
+        "losers_mfe_ge1r": 15,
+        "losers_never_positive": 2,
+        "losers_fee_flips": 13,
+        "losers_hard_stop": 17,
+        "losers_colour_exit": 59,
+        "losers_with_partial_realisation": 15,
+        "partial_realised_events": 44,
+        "partial_fill_count": 44,
+        "partial_original_fraction_mean": 0.1981981981981982,
+        "realised_partial_gross_sum_event_bp": 1988.9344623256181,
+        "realised_partial_net_sum_event_bp": 1548.9344623256218,
+        "takeover_triggered_events": 0,
+        "takeover_active_events": 0,
+        "takeover_active_mean_net_bp": null,
+        "takeover_active_net_losers": 0,
+        "positive_return_sum_event_bp": 3334.5642158881355,
+        "negative_return_sum_event_bp": -4403.156978895307,
+        "loss_taxonomy": {
+          "cost_flip": 13,
+          "early_reversal": 20,
+          "hard_stop": 17,
+          "other_loss": 26
+        },
+        "cohort_warning": "Partial fills and takeover are post-entry outcomes, not causal entry filters; event sums are not portfolio returns."
+      },
+      "matched": {
+        "coverage": 0.9819819819819819,
+        "mean_excess_bp": 6.793342807399853,
+        "matched_event_mean_net_bp": -9.882565742393096,
+        "control_mean_net_bp": -16.675908549792947,
+        "month_cluster_p": 0.2205,
+        "control_rows": 327,
+        "unique_control_times": 327,
+        "control_time_reuse_allowed": false
+      },
+      "paired_vs_colour15": {
+        "reference": "colour15",
+        "candidate": "half1r_colour15",
+        "registered_same_entry_events": 111,
+        "same_event_closed": 111,
+        "not_closed_in_both": 0,
+        "mean_delta_net_bp": 1.1357228352916995,
+        "median_delta_net_bp": 0.0,
+        "gained_delta_sum_event_bp": 982.1375787639566,
+        "lost_delta_sum_event_bp": -856.072344046578,
+        "net_delta_sum_event_bp": 126.06523471737864,
+        "improved_events": 29,
+        "worsened_events": 15,
+        "unchanged_events": 67,
+        "rescued_baseline_nonpositive_to_profit": 7,
+        "baseline_profit_to_nonpositive": 0,
+        "baseline_losers_improvement_sum_event_bp": 792.9613222941305,
+        "baseline_winners_trimmed_profit_sum_event_bp": -856.0723440465779,
+        "same_events_reference_mean_net_bp": -10.762684664185125,
+        "same_events_candidate_mean_net_bp": -9.626961828893425
+      }
+    },
+    "half1r_runner1h": {
+      "policy": {
+        "id": "half1r_runner1h",
+        "partial_targets": [
+          [
+            1,
+            0.5
+          ]
+        ],
+        "takeover_r": 1
+      },
+      "metrics": {
+        "events": 111,
+        "excluded_results": 0,
+        "rejected_entries": 0,
+        "censored": 0,
+        "mean_net_bp": -8.662674752128181,
+        "median_net_bp": -24.310693213353996,
+        "profit_factor": 0.7891403228466489,
+        "win_rate": 0.27927927927927926,
+        "p95_net_bp": 179.04503965615498,
+        "worst_fold_bp": -26.91423897408244,
+        "positive_folds": 1,
+        "minimum_fold_events": 21,
+        "folds": [
+          {
+            "fold": "2023H1",
+            "count": 21,
+            "mean": -0.0009503833469580905
+          },
+          {
+            "fold": "2023H2",
+            "count": 27,
+            "mean": -0.002691423897408244
+          },
+          {
+            "fold": "2024H1",
+            "count": 27,
+            "mean": -0.0026127963558328776
+          },
+          {
+            "fold": "2024H2",
+            "count": 36,
+            "mean": 0.0018615640937502055
+          }
+        ],
+        "robust_score_bp": -27.04032862765414,
+        "net_week_cluster_p": 0.7348,
+        "net_month_cluster_p": 0.7045,
+        "extra_10bp_mean_net_bp": -18.662674752128183,
+        "leave_top_two_mean_net_bp": -20.14121723145181,
+        "range_feature_auc": 0.6693548387096774,
+        "range_top_decile_net_bp": 42.39037120626192,
+        "range_top_decile_gross_bp": 62.39037120626192,
+        "mean_hold_hours": 11.155405405405407
+      },
+      "path_diagnostics": {
+        "closed_events": 111,
+        "net_losers": 80,
+        "losers_mfe_ge1r": 19,
+        "losers_never_positive": 2,
+        "losers_fee_flips": 10,
+        "losers_hard_stop": 28,
+        "losers_colour_exit": 52,
+        "losers_with_partial_realisation": 19,
+        "partial_realised_events": 44,
+        "partial_fill_count": 44,
+        "partial_original_fraction_mean": 0.1981981981981982,
+        "realised_partial_gross_sum_event_bp": 1988.9344623256181,
+        "realised_partial_net_sum_event_bp": 1548.9344623256218,
+        "takeover_triggered_events": 44,
+        "takeover_active_events": 44,
+        "takeover_active_mean_net_bp": 69.97362626033676,
+        "takeover_active_net_losers": 19,
+        "positive_return_sum_event_bp": 3598.617482307214,
+        "negative_return_sum_event_bp": -4560.174379793442,
+        "loss_taxonomy": {
+          "cost_flip": 6,
+          "early_reversal": 20,
+          "hard_stop": 28,
+          "other_loss": 26
+        },
+        "cohort_warning": "Partial fills and takeover are post-entry outcomes, not causal entry filters; event sums are not portfolio returns."
+      },
+      "matched": {
+        "coverage": 0.9819819819819819,
+        "mean_excess_bp": 5.372920381813153,
+        "matched_event_mean_net_bp": -8.817073260160173,
+        "control_mean_net_bp": -14.189993641973327,
+        "month_cluster_p": 0.3667,
+        "control_rows": 327,
+        "unique_control_times": 327,
+        "control_time_reuse_allowed": false
+      },
+      "paired_vs_colour15": {
+        "reference": "colour15",
+        "candidate": "half1r_runner1h",
+        "registered_same_entry_events": 111,
+        "same_event_closed": 111,
+        "not_closed_in_both": 0,
+        "mean_delta_net_bp": 2.1000099120569464,
+        "median_delta_net_bp": 0.0,
+        "gained_delta_sum_event_bp": 2104.488536203613,
+        "lost_delta_sum_event_bp": -1871.387435965292,
+        "net_delta_sum_event_bp": 233.10110023832104,
+        "improved_events": 26,
+        "worsened_events": 18,
+        "unchanged_events": 67,
+        "rescued_baseline_nonpositive_to_profit": 6,
+        "baseline_profit_to_nonpositive": 3,
+        "baseline_losers_improvement_sum_event_bp": 696.4793423791041,
+        "baseline_winners_trimmed_profit_sum_event_bp": -1868.3360176351503,
+        "same_events_reference_mean_net_bp": -10.762684664185125,
+        "same_events_candidate_mean_net_bp": -8.662674752128181
+      }
+    },
+    "quarter1r_quarter2r_runner1h": {
+      "policy": {
+        "id": "quarter1r_quarter2r_runner1h",
+        "partial_targets": [
+          [
+            1,
+            0.25
+          ],
+          [
+            2,
+            0.25
+          ]
+        ],
+        "takeover_r": 1
+      },
+      "metrics": {
+        "events": 111,
+        "excluded_results": 0,
+        "rejected_entries": 0,
+        "censored": 0,
+        "mean_net_bp": -6.420595973633413,
+        "median_net_bp": -30.489556915804002,
+        "profit_factor": 0.8516304946902878,
+        "win_rate": 0.2702702702702703,
+        "p95_net_bp": 211.01346635999948,
+        "worst_fold_bp": -28.003450829957178,
+        "positive_folds": 1,
+        "minimum_fold_events": 21,
+        "folds": [
+          {
+            "fold": "2023H1",
+            "count": 21,
+            "mean": -0.000998932020229219
+          },
+          {
+            "fold": "2023H2",
+            "count": 27,
+            "mean": -0.0028003450829957176
+          },
+          {
+            "fold": "2024H1",
+            "count": 27,
+            "mean": -0.002560443282456559
+          },
+          {
+            "fold": "2024H2",
+            "count": 36,
+            "mean": 0.00262361786068595
+          }
+        ],
+        "robust_score_bp": -28.63356844615369,
+        "net_week_cluster_p": 0.6585,
+        "net_month_cluster_p": 0.633,
+        "extra_10bp_mean_net_bp": -16.42059597363341,
+        "leave_top_two_mean_net_bp": -19.15306742524521,
+        "range_feature_auc": 0.6296296296296297,
+        "range_top_decile_net_bp": 43.99814376019434,
+        "range_top_decile_gross_bp": 63.998143760194345,
+        "mean_hold_hours": 11.155405405405407
+      },
+      "path_diagnostics": {
+        "closed_events": 111,
+        "net_losers": 81,
+        "losers_mfe_ge1r": 20,
+        "losers_never_positive": 2,
+        "losers_fee_flips": 13,
+        "losers_hard_stop": 28,
+        "losers_colour_exit": 53,
+        "losers_with_partial_realisation": 20,
+        "partial_realised_events": 44,
+        "partial_fill_count": 75,
+        "partial_original_fraction_mean": 0.16891891891891891,
+        "realised_partial_gross_sum_event_bp": 2380.5544405697983,
+        "realised_partial_net_sum_event_bp": 2005.554440569799,
+        "takeover_triggered_events": 44,
+        "takeover_active_events": 44,
+        "takeover_active_mean_net_bp": 75.62977954244859,
+        "takeover_active_net_losers": 20,
+        "positive_return_sum_event_bp": 4090.76824670797,
+        "negative_return_sum_event_bp": -4803.454399781278,
+        "loss_taxonomy": {
+          "cost_flip": 5,
+          "early_reversal": 20,
+          "giveback": 2,
+          "hard_stop": 28,
+          "other_loss": 26
+        },
+        "cohort_warning": "Partial fills and takeover are post-entry outcomes, not causal entry filters; event sums are not portfolio returns."
+      },
+      "matched": {
+        "coverage": 0.9819819819819819,
+        "mean_excess_bp": 7.6331123150420135,
+        "matched_event_mean_net_bp": -6.768623299624897,
+        "control_mean_net_bp": -14.401735614666912,
+        "month_cluster_p": 0.3229,
+        "control_rows": 327,
+        "unique_control_times": 327,
+        "control_time_reuse_allowed": false
+      },
+      "paired_vs_colour15": {
+        "reference": "colour15",
+        "candidate": "quarter1r_quarter2r_runner1h",
+        "registered_same_entry_events": 111,
+        "same_event_closed": 111,
+        "not_closed_in_both": 0,
+        "mean_delta_net_bp": 4.342088690551713,
+        "median_delta_net_bp": 0.0,
+        "gained_delta_sum_event_bp": 2220.601420206091,
+        "lost_delta_sum_event_bp": -1738.6295755548508,
+        "net_delta_sum_event_bp": 481.97184465124013,
+        "improved_events": 25,
+        "worsened_events": 19,
+        "unchanged_events": 67,
+        "rescued_baseline_nonpositive_to_profit": 6,
+        "baseline_profit_to_nonpositive": 4,
+        "baseline_losers_improvement_sum_event_bp": 575.8510820897772,
+        "baseline_winners_trimmed_profit_sum_event_bp": -1641.412777378441,
+        "same_events_reference_mean_net_bp": -10.762684664185125,
+        "same_events_candidate_mean_net_bp": -6.420595973633413
+      }
+    },
+    "quarter1r_quarter2r_colour15": {
+      "policy": {
+        "id": "quarter1r_quarter2r_colour15",
+        "partial_targets": [
+          [
+            1,
+            0.25
+          ],
+          [
+            2,
+            0.25
+          ]
+        ],
+        "takeover_r": null
+      },
+      "metrics": {
+        "events": 111,
+        "excluded_results": 0,
+        "rejected_entries": 0,
+        "censored": 0,
+        "mean_net_bp": -9.083240013596315,
+        "median_net_bp": -27.873105117073003,
+        "profit_factor": 0.7781499471856878,
+        "win_rate": 0.3153153153153153,
+        "p95_net_bp": 203.431752901714,
+        "worst_fold_bp": -20.352501816109296,
+        "positive_folds": 1,
+        "minimum_fold_events": 21,
+        "folds": [
+          {
+            "fold": "2023H1",
+            "count": 21,
+            "mean": -0.0009840980161855907
+          },
+          {
+            "fold": "2023H2",
+            "count": 27,
+            "mean": -0.0020352501816109296
+          },
+          {
+            "fold": "2024H1",
+            "count": 27,
+            "mean": -0.0018879078001382407
+          },
+          {
+            "fold": "2024H2",
+            "count": 36,
+            "mean": 0.000715759991561275
+          }
+        ],
+        "robust_score_bp": -19.834424448740265,
+        "net_week_cluster_p": 0.8119,
+        "net_month_cluster_p": 0.8399,
+        "extra_10bp_mean_net_bp": -19.083240013596317,
+        "leave_top_two_mean_net_bp": -14.525367907754083,
+        "range_feature_auc": 0.6210526315789474,
+        "range_top_decile_net_bp": -11.82501292223309,
+        "range_top_decile_gross_bp": 8.174987077766916,
+        "mean_hold_hours": 5.191441441441442
+      },
+      "path_diagnostics": {
+        "closed_events": 111,
+        "net_losers": 76,
+        "losers_mfe_ge1r": 15,
+        "losers_never_positive": 2,
+        "losers_fee_flips": 10,
+        "losers_hard_stop": 17,
+        "losers_colour_exit": 59,
+        "losers_with_partial_realisation": 15,
+        "partial_realised_events": 44,
+        "partial_fill_count": 67,
+        "partial_original_fraction_mean": 0.15090090090090091,
+        "realised_partial_gross_sum_event_bp": 1919.7862472664929,
+        "realised_partial_net_sum_event_bp": 1584.786247266494,
+        "takeover_triggered_events": 0,
+        "takeover_active_events": 0,
+        "takeover_active_mean_net_bp": null,
+        "takeover_active_net_losers": 0,
+        "positive_return_sum_event_bp": 3536.4500203548287,
+        "negative_return_sum_event_bp": -4544.68966186402,
+        "loss_taxonomy": {
+          "cost_flip": 8,
+          "early_reversal": 20,
+          "giveback": 5,
+          "hard_stop": 17,
+          "other_loss": 26
+        },
+        "cohort_warning": "Partial fills and takeover are post-entry outcomes, not causal entry filters; event sums are not portfolio returns."
+      },
+      "matched": {
+        "coverage": 0.9819819819819819,
+        "mean_excess_bp": 6.819660444668405,
+        "matched_event_mean_net_bp": -9.314938734199925,
+        "control_mean_net_bp": -16.13459917886833,
+        "month_cluster_p": 0.2308,
+        "control_rows": 327,
+        "unique_control_times": 327,
+        "control_time_reuse_allowed": false
+      },
+      "paired_vs_colour15": {
+        "reference": "colour15",
+        "candidate": "quarter1r_quarter2r_colour15",
+        "registered_same_entry_events": 111,
+        "same_event_closed": 111,
+        "not_closed_in_both": 0,
+        "mean_delta_net_bp": 1.6794446505888112,
+        "median_delta_net_bp": 0.0,
+        "gained_delta_sum_event_bp": 765.050624339201,
+        "lost_delta_sum_event_bp": -578.632268123843,
+        "net_delta_sum_event_bp": 186.41835621535805,
+        "improved_events": 31,
+        "worsened_events": 13,
+        "unchanged_events": 67,
+        "rescued_baseline_nonpositive_to_profit": 7,
+        "baseline_profit_to_nonpositive": 0,
+        "baseline_losers_improvement_sum_event_bp": 510.64464287917804,
+        "baseline_winners_trimmed_profit_sum_event_bp": -578.632268123843,
+        "same_events_reference_mean_net_bp": -10.762684664185125,
+        "same_events_candidate_mean_net_bp": -9.083240013596315
+      }
+    },
+    "no_partial_runner1h": {
+      "policy": {
+        "id": "no_partial_runner1h",
+        "partial_targets": [],
+        "takeover_r": 1
+      },
+      "metrics": {
+        "events": 111,
+        "excluded_results": 0,
+        "rejected_entries": 0,
+        "censored": 0,
+        "mean_net_bp": -8.834110510654693,
+        "median_net_bp": -40.501558619571995,
+        "profit_factor": 0.8308859197029241,
+        "win_rate": 0.22522522522522523,
+        "p95_net_bp": 212.13695199670798,
+        "worst_fold_bp": -39.49285625706667,
+        "positive_folds": 1,
+        "minimum_fold_events": 21,
+        "folds": [
+          {
+            "fold": "2023H1",
+            "count": 21,
+            "mean": -0.000837304485432871
+          },
+          {
+            "fold": "2023H2",
+            "count": 27,
+            "mean": -0.003949285625706667
+          },
+          {
+            "fold": "2024H1",
+            "count": 27,
+            "mean": -0.002726632037860652
+          },
+          {
+            "fold": "2024H2",
+            "count": 36,
+            "mean": 0.0027715151233928003
+          }
+        ],
+        "robust_score_bp": -30.516337620013047,
+        "net_week_cluster_p": 0.6744,
+        "net_month_cluster_p": 0.6228,
+        "extra_10bp_mean_net_bp": -18.834110510654693,
+        "leave_top_two_mean_net_bp": -28.324367124920318,
+        "range_feature_auc": 0.6255813953488372,
+        "range_top_decile_net_bp": 60.85990527690458,
+        "range_top_decile_gross_bp": 80.8599052769046,
+        "mean_hold_hours": 11.155405405405407
+      },
+      "path_diagnostics": {
+        "closed_events": 111,
+        "net_losers": 86,
+        "losers_mfe_ge1r": 25,
+        "losers_never_positive": 2,
+        "losers_fee_flips": 4,
+        "losers_hard_stop": 28,
+        "losers_colour_exit": 58,
+        "losers_with_partial_realisation": 0,
+        "partial_realised_events": 0,
+        "partial_fill_count": 0,
+        "partial_original_fraction_mean": 0.0,
+        "realised_partial_gross_sum_event_bp": 0.0,
+        "realised_partial_net_sum_event_bp": 0.0,
+        "takeover_triggered_events": 44,
+        "takeover_active_events": 44,
+        "takeover_active_mean_net_bp": 69.54114059678125,
+        "takeover_active_net_losers": 25,
+        "positive_return_sum_event_bp": 4817.785252472419,
+        "negative_return_sum_event_bp": -5798.371519155091,
+        "loss_taxonomy": {
+          "cost_flip": 4,
+          "early_reversal": 20,
+          "giveback": 8,
+          "hard_stop": 28,
+          "other_loss": 26
+        },
+        "cohort_warning": "Partial fills and takeover are post-entry outcomes, not causal entry filters; event sums are not portfolio returns."
+      },
+      "matched": {
+        "coverage": 0.9819819819819819,
+        "mean_excess_bp": 1.2298300815283474,
+        "matched_event_mean_net_bp": -8.41500594098013,
+        "control_mean_net_bp": -9.644836022508477,
+        "month_cluster_p": 0.4819,
+        "control_rows": 327,
+        "unique_control_times": 327,
+        "control_time_reuse_allowed": false
+      },
+      "paired_vs_colour15": {
+        "reference": "colour15",
+        "candidate": "no_partial_runner1h",
+        "registered_same_entry_events": 111,
+        "same_event_closed": 111,
+        "not_closed_in_both": 0,
+        "mean_delta_net_bp": 1.9285741535304362,
+        "median_delta_net_bp": 0.0,
+        "gained_delta_sum_event_bp": 2899.352675749231,
+        "lost_delta_sum_event_bp": -2685.280944707353,
+        "net_delta_sum_event_bp": 214.07173104187845,
+        "improved_events": 11,
+        "worsened_events": 29,
+        "unchanged_events": 71,
+        "rescued_baseline_nonpositive_to_profit": 4,
+        "baseline_profit_to_nonpositive": 7,
+        "baseline_losers_improvement_sum_event_bp": 240.77533870192116,
+        "baseline_winners_trimmed_profit_sum_event_bp": -2245.438809515088,
+        "same_events_reference_mean_net_bp": -10.762684664185125,
+        "same_events_candidate_mean_net_bp": -8.834110510654693
+      }
+    }
+  },
+  "funding_modelled": false,
+  "interpretation": "Observed failure paths and partial/takeover cohorts are descriptive, not causal or usable as future-entry filters. All sums are overlapping event-notional sums, not portfolio returns. No arm was selected or retuned by this helper."
+}
