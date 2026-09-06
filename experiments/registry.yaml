@@ -5305,6 +5305,30 @@ experiments:
       cannot pass90%/80 gates. Finite mechanism test, not a candidate nomination.
       All89 old control requests retained, including old invalid risks. No audit.
 
+  - experiment_id: exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b951e35"
+    status: active
+    question: >-
+      Does native15m SMA40 true-transition exit improve original251 hourly
+      direct intentions beyond their same fixed154 random-control triples?
+    single_variable: >-
+      Native management specification5m to15m; original entry/K1stop/72h/20bp
+      and raw5m risk clock fixed. Not cadence-only; no gates or rematching.
+    result: >-
+      Preregistered before prices/outcomes. Freeze both1426 own initial states
+      before outcome reads. Original matching61.35% cannot pass90% gate.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/active/exp-btcusdtp-1h-native15-exit-preholdout-20260906-v15/PROJECT_PLAN.md
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Reused2023--2024,not independent validation. Native15 opposite-state
+      semantic diagnostic is not a selected third arm or full V1 ledger replay.
+      No audit,TradingView,training,promotion or live mutation.
+
   - experiment_id: exp-btcusdtp-1h-prior20-breakout-preholdout-20260906-v14
     source_repo: darkforest-x/fable-trading
     source_commit: "5fc542b"
