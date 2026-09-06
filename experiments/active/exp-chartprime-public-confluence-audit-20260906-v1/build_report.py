@@ -14,6 +14,7 @@ from hashlib import sha256
 import json
 from pathlib import Path
 import subprocess
+from urllib.parse import quote
 
 
 E = Path(__file__).resolve().parent
@@ -27,10 +28,10 @@ TEXT_FIELDS = ("id", "title", "category", "formula", "parameters", "clock_risk",
 # Indices reference the byte-frozen catalogue, not mutable titles or live order.
 FAMILIES = {
     "趋势与均线": [0,3,13,22,23,24,26,37,38,42,52,58,59,60,62,64,65,67,70,71,75,77,78,79,80,81,82,83,86,87,88,95,98,102,107,109,118,128,139,147],
-    "动量与波动": [16,27,46,47,50,53,56,61,89,110,115,121,138,140,145],
-    "结构与区间": [6,7,8,15,18,19,21,36,39,43,49,51,57,69,72,74,91,93,94,97,106,113,116,117,120,123,124,129,130,132,135,137],
-    "成交量与成本区": [2,4,5,9,10,11,20,41,45,48,63,68,76,100,108,126,131,144],
-    "多周期与扫描": [17,34,66,73,92,99,111,119],
+    "动量与波动": [16,27,46,47,50,53,56,61,89,99,110,115,121,138,140,145],
+    "结构与区间": [6,7,8,15,18,19,21,36,39,43,49,51,57,68,69,72,74,91,93,94,97,106,113,116,117,120,123,124,129,130,132,135,137],
+    "成交量与成本区": [2,4,5,9,10,11,20,41,45,48,63,76,100,108,126,131,144],
+    "多周期与扫描": [17,34,66,73,92,111,119],
     "预测与统计模型": [1,14,25,90,96,103,104,105,112,114,127,134,136],
     "策略与退出工具": [12,28,29,31,122,125,133,146],
     "源码受限": [30,32,33,35,40,44,54,55,84,85,101,141,142,143],
@@ -62,7 +63,12 @@ def validate(catalogue, reviews, records, blobs):
         require(row["title"] == card["title"] == item["title"], f"{sid} title mismatch")
         require(card["id"] == sid and card["url"] == item["url"], f"{sid} identity mismatch")
         require(not card.get("error"), f"{sid} collection error")
-        is_open = card.get("script", {}).get("access") == 1 and card["script"].get("has_access") is True
+        script = card.get("script", {})
+        require(script.get("access") == item.get("script_access_raw"), f"{sid} catalogue access mismatch")
+        require(script.get("script_id_part") == item.get("script_id_part")
+                and str(script.get("version_maj")) == str(item.get("version")), f"{sid} catalogue source identity mismatch")
+        is_open = item["script_access_raw"] == 1
+        require(script.get("has_access") is is_open, f"{sid} explicit permission mismatch")
         refs = row.get("source_lines")
         require(isinstance(refs, list), f"{sid} source lines must be list")
         if is_open:
@@ -74,7 +80,10 @@ def validate(catalogue, reviews, records, blobs):
             require(lines == card["source_lines"], f"{sid} source line count mismatch")
             require(refs and all(type(n) is int and 1 <= n <= lines for n in refs), f"{sid} source line out of bounds")
             require(row["source_url"] == card["source_url"], f"{sid} source URL mismatch")
+            expected_url = "https://pine-facade.tradingview.com/pine-facade/get/{}/{}".format(quote(item["script_id_part"], safe=""), item["version"])
+            require(card["source_url"] == expected_url, f"{sid} catalogue source URL mismatch")
             require(card.get("source_metadata", {}).get("scriptAccess") == "open_no_auth", f"{sid} public access mismatch")
+            require(str(card["source_metadata"].get("version", "")).split(".")[0] == str(item["version"]), f"{sid} payload version mismatch")
         else:
             require(row["review_level"] == "description_only", f"{sid} inaccessible source claim")
             require(not refs and not row.get("source_sha256") and sid not in blobs, f"{sid} closed source fabricated")
@@ -139,6 +148,15 @@ def build(cat, reviews, cards, validation):
             blocks.append({"id":"family_plot", "type":"chart", "chartId":"families", "layout":"full"})
         if sid == "index_intro":
             blocks.append({"id":"index_table", "type":"table", "tableId":"index", "layout":"full"})
+        if sid == "shortlist":
+            additions = [
+                ("proxy_limits", "## 对候选名称的限定\n\n上文“成本区”指成交量加权价格或价格停留分布代理，不是持仓者真实成本；量比是单独提取的字段，不代表已证统计独立。部分公开源码采用 CC BY-NC-SA 等许可，并非全部都是 MPL；本次保留原许可与署名，后续复制、改写和分发前须逐项核对，不能把公开可读等同于任意用途许可。"),
+                ("breadth", "## 比再加一条均线更值得验证：跨资产市场广度\n\n[Multi Asset Histogram](https://www.tradingview.com/script/KkoxM97D/) 确实读取十个外部资产，默认 BTC、ETH、BNB、SOL、XRP、DOGE、ADA、AVAX、DOT、LINK 的 USD 对。它将当前 HL2 与过去50根逐根比较，逐次计+1或−1后求和；这不是涨幅或资金流。\n\n可借鉴的共振是假设：当 BTC/ETH 的 K1 启动时，其他事前固定资产是否也在同方向推进，而不是单币在均线附近抖动。研究时排除目标币自己的重复票、固定币池与数据源、只合并共同已完成时刻，缺少历史记未知，不能沿用源码 nz→0 造成的暖机偏高。原输入未锁交易所/永续口径，也不能默认与本项目一致。\n\n这比同币再加一种平滑有更明确的信息来源差异，但加密资产共同 beta 很强，仍需要同环境随机入场对照；不能说它已经提供独立超额收益。对黄金不直接套加密币池。"),
+                ("core_colour", "## 原版 K 线变色不是完整趋势反转\n\n[Moving Average Shift](https://www.tradingview.com/script/aApUyBnk/) 默认用 HL2 与 SMA40 比较：HL2≥均线为青色，否则橙色，实体、影线和边框都用同一个侧色。它不检查均线斜率；振荡器的四色与转向菱形是另外一套条件。\n\n所以小周期变色表示“价格中点换到均线另一侧”，可能是真反转，也可能仅是趋势内回踩。用它当减仓或离场信号可以提出假说，但不能在定义上把它直接叫作趋势终结。源码主线和光晕的默认线宽与用户希望的细线/关闭光晕也需分开：本次只做语义审查，不修改已有图表样式。"),
+            ]
+            for extra_id, extra_body in additions:
+                blocks.append({"id":extra_id,"type":"markdown","layout":"full","body":extra_body})
+                text_sections.append(extra_body)
     index_rows = []
     for i, row in enumerate(ordered):
         sid = row["id"]

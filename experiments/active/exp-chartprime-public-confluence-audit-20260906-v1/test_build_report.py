@@ -20,13 +20,16 @@ def fixture():
     rows = []
     records = {}
     for item in items:
+        item.update(script_access_raw=1 if item["id"] == "Abcd1234" else 3,
+                    script_id_part="PUB;"+item["id"],version="1")
         row = {field:"reviewed" for field in report.TEXT_FIELDS}
         row.update(item, source_lines=[], source_sha256=None, source_url=item["url"], review_level="description_only")
         card = dict(item,script={"access":3,"has_access":False})
         if item["id"] == "Abcd1234":
-            row.update(source_sha256=digest,source_lines=[1,3],source_url="https://pine-facade.tradingview.com/public-test",review_level="source_read")
+            row.update(source_sha256=digest,source_lines=[1,3],source_url="https://pine-facade.tradingview.com/pine-facade/get/PUB%3BAbcd1234/1",review_level="source_read")
             card.update(script={"access":1,"has_access":True},source_sha256=digest,source_lines=3,
-                        source_url=row["source_url"],source_metadata={"scriptAccess":"open_no_auth"})
+                        source_url=row["source_url"],source_metadata={"scriptAccess":"open_no_auth","version":"1.0"})
+        card["script"].update(script_id_part=item["script_id_part"],version_maj=1)
         rows.append(row)
         records[item["id"]] = card
     return cat,rows,records,{"Abcd1234":raw}
@@ -58,6 +61,10 @@ def test_crlf_text_normalization_is_not_exact_source():
     (lambda c,r,s,b:s["Abcd1234"]["source_metadata"].update(scriptAccess="closed"),"public access mismatch"),
     (lambda c,r,s,b:s["Abcd1234"].update(error="network failed"),"collection error"),
     (lambda c,r,s,b:r[0].update(source_url="https://other.test/"),"URL mismatch"),
+    (lambda c,r,s,b:s["Closed12"]["script"].update(access=1,has_access=True),"catalogue access mismatch"),
+    (lambda c,r,s,b:s["Abcd1234"]["script"].update(script_id_part="PUB;Wrong"),"catalogue source identity"),
+    (lambda c,r,s,b:s["Abcd1234"]["script"].update(version_maj=2),"catalogue source identity"),
+    (lambda c,r,s,b:s["Abcd1234"]["source_metadata"].update(version="2.0"),"payload version"),
     (lambda c,r,s,b:c.update(complete=False),"incomplete catalogue"),
     (lambda c,r,s,b:c.update(actual_count=3),"count mismatch"),
     (lambda c,r,s,b:b.update(Extra123=b"bad"),"extra Pine source"),
