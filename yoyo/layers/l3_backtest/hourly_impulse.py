@@ -22,6 +22,12 @@ Timedelta arithmetic and TradingView's confirmed-bar availability semantics:
 https://pandas.pydata.org/pandas-docs/version/2.3.3/reference/api/pandas.Timedelta.html
 https://pandas.pydata.org/pandas-docs/version/2.3/reference/api/pandas.Timestamp.floor.html
 https://www.tradingview.com/pine-script-docs/language/execution-model/
+
+The optional V11 launch deadline is a separately preregistered hypothesis, not
+an optimized default. Only valid, fully held post-entry raw5 CLOSE observations
+available in (entry, entry+60min] can confirm +0.5 of the frozen initial risk.
+Neither entry/seed prices, intrabar extrema nor management colour supply this
+progress. Source: the V10 NEXT_EXPERIMENT.md launch-progress specification.
 """
 from __future__ import annotations
 
@@ -86,6 +92,21 @@ def _policy(policy: Mapping[str, Any]) -> Dict[str, Any]:
                 or selected["exit_mode"] != "transition_colour"
                 or minutes != 5 or confirmations != 1):
             raise ValueError("decision_minutes requires integer 5 or 15 with transition_colour/native5/confirmations1")
+    launch_keys = {"launch_deadline_minutes", "launch_progress_r"}
+    if launch_keys.intersection(selected):
+        if not launch_keys.issubset(selected):
+            raise ValueError("launch_deadline_minutes and launch_progress_r must be supplied together")
+        launch_minutes = selected["launch_deadline_minutes"]
+        launch_progress = selected["launch_progress_r"]
+        if (isinstance(launch_minutes, (bool, np.bool_))
+                or not isinstance(launch_minutes, (int, np.integer)) or launch_minutes != 60
+                or isinstance(launch_progress, (bool, np.bool_))
+                or not isinstance(launch_progress, (int, float, np.integer, np.floating))
+                or not np.isfinite(launch_progress) or launch_progress != 0.5
+                or selected["exit_mode"] != "transition_colour" or minutes != 5
+                or isinstance(confirmations, (bool, np.bool_))
+                or confirmations != 1 or selected.get("decision_minutes", 5) != 5):
+            raise ValueError("launch deadline requires integer 60 minutes / 0.5R with transition_colour/native5/confirmations1/decision5")
     # An explicit integer-minute horizon wins over inherited max_hours. Using
     # fractional hours can truncate an exact 5m duration by 1ns in pandas 2.3.3.
     # Without max_minutes the historical max_hours validation is unchanged.
@@ -101,6 +122,17 @@ def _policy(policy: Mapping[str, Any]) -> Dict[str, Any]:
     if not np.isfinite(selected["cost_fraction"]) or selected["cost_fraction"] < 0:
         raise ValueError("cost_fraction must be finite and nonnegative")
     return selected
+
+
+def _launch_diagnostics(entry_time: Optional[pd.Timestamp] = None) -> Dict[str, Any]:
+    """Add fields only for the opt-in launch policy, including empty requests."""
+    return {
+        "launch_enabled": True, "launch_deadline_minutes": 60, "launch_progress_r": 0.5,
+        "launch_deadline_at": pd.NaT if entry_time is None else entry_time + pd.Timedelta(minutes=60),
+        "launch_progress_reached": False, "launch_progress_first_at": pd.NaT,
+        "launch_completed_close_count": 0, "launch_max_completed_close_r": np.nan,
+        "launch_deadline_checked_at": pd.NaT, "launch_status": "entry_not_validated",
+    }
 
 
 def _transition_observation(
@@ -212,6 +244,27 @@ def simulate_events(
     An optional positive integer ``max_minutes`` (multiple of five) takes
     precedence over ``max_hours``. It represents the exact remaining duration
     for delayed entries without converting integer minutes to fractional hours.
+
+    Paired opt-in keys ``launch_deadline_minutes=60, launch_progress_r=0.5``
+    are supported only by native5 transition / decision5 / one confirmation.
+    A valid, fully held raw5 CLOSE reaching +0.5 frozen initial R, available
+    at entry+5 through entry+60 minutes inclusive, permanently cancels this
+    deadline. Management missing/invalid colour resets only the colour edge,
+    not this independent price-progress state. With no progress, entry+60
+    exits at its real raw5 open after existing gap stops, colour exits and
+    maximum-duration exits. A just-completed boundary close can cancel first.
+    Missing source/clock/open still censors; an unfinished exit bar's HLC is
+    not required. Diagnostics count only complete, validated, unstopped bars
+    while actually held and at most the first twelve post-entry raw5 closes.
+    ``launch_status`` is entry_not_validated, pending (internal only),
+    progress_confirmed (permanent), prior_exit, timeout_exit, or unknown_source.
+    ``launch_deadline_checked_at`` is set only if the live path actually
+    reaches the deadline check after all higher-priority original exits.
+    In this opt-in branch a floating raw ``segment_id`` that is not finite
+    also censors as unknown source before any price exit; finite opaque source
+    IDs retain existing equality/continuity semantics. Default modes are not
+    affected by this additional source validation.
+    Omission of both keys preserves historical output columns and values.
     """
     selected = _policy(policy)
     raw = _validated_frame(raw5, ("open_time", "open", "high", "low", "close", "segment_id"), "raw5")
@@ -226,7 +279,10 @@ def simulate_events(
     if entries["event_id"].duplicated().any():
         raise ValueError("event_id must be unique for independent paired outcomes")
     if entries.empty:
-        return pd.DataFrame(columns=list(entries.columns) + ["entry_time", "exit_time", "closed", "outcome", "net_return", "net_r"])
+        empty_columns = list(entries.columns) + ["entry_time", "exit_time", "closed", "outcome", "net_return", "net_r"]
+        if "launch_deadline_minutes" in selected:
+            empty_columns += [name for name in _launch_diagnostics() if name not in empty_columns]
+        return pd.DataFrame(columns=empty_columns)
 
     times = raw["open_time"].to_numpy()
     time_index = {pd.Timestamp(time): i for i, time in enumerate(times)}
@@ -243,6 +299,7 @@ def simulate_events(
     cost = float(selected["cost_fraction"])
     mode = selected["exit_mode"]
     sampled_cadence = selected.get("decision_minutes") == 15
+    launch_enabled = "launch_deadline_minutes" in selected
     outputs = []
 
     for event in entries.to_dict("records"):
@@ -274,6 +331,8 @@ def simulate_events(
         if sampled_cadence:
             result.update(transition_decision_minutes=15, transition_sample_count=0,
                           transition_trigger_previous_available_at=pd.NaT)
+        if launch_enabled:
+            result.update(_launch_diagnostics(entry_time))
         index = time_index.get(entry_time)
         if index is None or (cutoff is not None and entry_time >= cutoff):
             outputs.append(result)
@@ -297,6 +356,8 @@ def simulate_events(
             continue
         result["risk_pct"] = risk / entry
         result["risk_atr"] = risk / atr
+        if launch_enabled:
+            result["launch_status"] = "pending"
         target = entry + direction * 3.0 * risk
         deadline = entry_time + horizon_delta
         remaining, realised, opposite_streak = 1.0, 0.0, 0
@@ -352,12 +413,18 @@ def simulate_events(
             )
             if closed:
                 result.update(gross_return=gross, net_return=gross - cost, net_r=(gross - cost) / (risk / entry))
+            if launch_enabled and not result["launch_progress_reached"]:
+                result["launch_status"] = ("timeout_exit" if outcome == "launch_timeout_exit"
+                                           else "prior_exit" if closed else "unknown_source")
 
         for i in range(index, len(raw)):
             now = pd.Timestamp(times[i])
             if cutoff is not None and now >= cutoff:
                 break
-            if (previous_open is not None and now != previous_open + FIVE_MINUTES) or pd.isna(segments[i]) or segments[i] != first_segment:
+            invalid_launch_segment = (launch_enabled
+                                      and isinstance(segments[i], (float, np.floating))
+                                      and not np.isfinite(segments[i]))
+            if (previous_open is not None and now != previous_open + FIVE_MINUTES) or pd.isna(segments[i]) or segments[i] != first_segment or invalid_launch_segment:
                 finish(last_time, last_close, "data_gap_censored", False)
                 completed = True
                 break
@@ -486,6 +553,12 @@ def simulate_events(
                 finish(now, open_, "time_exit", True)
                 completed = True
                 break
+            if launch_enabled and now == result["launch_deadline_at"]:
+                result["launch_deadline_checked_at"] = now
+                if not result["launch_progress_reached"]:
+                    finish(now, open_, "launch_timeout_exit", True)
+                    completed = True
+                    break
             # An unfinished source bar cannot disclose high/low or close.
             if cutoff is not None and now + FIVE_MINUTES > cutoff:
                 last_time, last_close = now, open_
@@ -508,6 +581,19 @@ def simulate_events(
                 completed = True
                 break
             record_excursion(high, low, bars)
+            if launch_enabled and now + FIVE_MINUTES <= result["launch_deadline_at"]:
+                # This raw5 bar is complete, validated and remained held: a
+                # resting stop above has already won any intrabar collision.
+                # Colour validity has no authority over observed price progress.
+                progress = direction * (close - entry)
+                progress_r = progress / risk
+                result["launch_completed_close_count"] += 1
+                prior_max = result["launch_max_completed_close_r"]
+                result["launch_max_completed_close_r"] = progress_r if pd.isna(prior_max) else max(prior_max, progress_r)
+                if not result["launch_progress_reached"] and progress >= selected["launch_progress_r"] * risk:
+                    result.update(launch_progress_reached=True,
+                                  launch_progress_first_at=now + FIVE_MINUTES,
+                                  launch_status="progress_confirmed")
             last_time, last_close = now + FIVE_MINUTES, close
             previous_open = now
 

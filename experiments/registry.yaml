@@ -5305,6 +5305,30 @@ experiments:
       cannot pass90%/80 gates. Finite mechanism test, not a candidate nomination.
       All89 old control requests retained, including old invalid risks. No audit.
 
+  - experiment_id: exp-btcusdtp-1h-launch-deadline-preholdout-20260906-v11
+    source_repo: darkforest-x/fable-trading
+    source_commit: "pending-builder-commit"
+    status: active
+    question: >-
+      Does closing unlaunched positions at60min improve original V5 direct
+      K1 trades after20bp and relative to their fixed original control triples?
+    result: >-
+      Preregistered mechanism; not run. Known154/251 matching ceiling means
+      whole-system acceptance is unavailable even if paired outcomes improve.
+    single_variable: >-
+      Add one60min deadline if no completed postentry5m close reached0.5initialR.
+      Fixed251cases/462controls,entry,K1stop,5mtrueflip,72h and20bp; no rematching.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_launch_v11_20260906.html
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Reused2023-2024 mechanism test only. V10 proved61.35% strict support
+      ceiling versus90% gate; no candidate acceptance even if paired gains.
+      Full V5 allcolumn baseline parity before candidate outcomes. No audit/live.
+
   - experiment_id: exp-btcusdtp-1h-matching-support-preholdout-20260906-v10
     source_repo: darkforest-x/fable-trading
     source_commit: "b6e9056"
