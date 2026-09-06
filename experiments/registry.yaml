@@ -5307,25 +5307,37 @@ experiments:
 
   - experiment_id: exp-btcusdtp-1h-frozen-ma-exit-preholdout-20260906-v12
     source_repo: darkforest-x/fable-trading
-    source_commit: pending_first_builder_commit
-    status: active
+    source_commit: "c5ce2f2"
+    status: rejected
     question: >-
       Does a completed held5m close beyond the frozen own signal-hour MA,
       executed next real open, improve original V5 cases and fixed controls?
-    result: Not run yet; implementation and preflight checks in progress.
+    result: >-
+      Fixed251 net-14.3066 to-13.9493bp,PF.6247to.6306,wins62 unchanged.
+      Twenty structural exits:10better/10worse,all remain losses;231unchanged.
+      D+.3573bp,p=.1846;I154+1.3436bp,p=.1324 mainly control damage;97unknown.
+      Allfourfolds negative and61.35% support below90%; no acceptance.
     single_variable: >-
       Add frozen_ma_exit=true to native5m trueflip. Keep251cases/462controls,
       154triples,entry,K1stop,72h and20bp. No timed launch test or rematching.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    canonical_report: analysis/html/p1_btcusdtp_hourly_frozen_ma_v12_20260906.html
+    artifacts:
+      - btcusdtp-hourly-frozen-ma-v12-development
+      - btcusdtp-hourly-frozen-ma-v12-facts
+      - btcusdtp-hourly-frozen-ma-v12-report
+      - btcusdtp-hourly-frozen-ma-v12-html
+      - btcusdtp-hourly-frozen-ma-v12-artifact
+      - btcusdtp-hourly-frozen-ma-v12-verification
+      - btcusdtp-hourly-frozen-ma-v12-notebook
     reuse_allowed: false
     notes: >-
-      Preregistered reused2023-2024 mechanism test. Freeze713 own-MA entry
-      geometries before outcomes and verify full original baseline parity.
-      Inherited61.35% matched support cannot pass90% acceptance gate.
-      No2025+prices, TradingView or live changes; no profit claim.
+      c5ce2f2 before first actual replay;713 own-hour MA/close and pre-outcome
+      geometry,fullV5allcolumn parity. Verifiercafc14d checks52outputs/18sources,
+      notrawsecondreplay or p recomputation;2534tests passed. HTMLstructural_only,
+      notebookplainPython. Reused2023-2024,no2025+prices/TV/live changes.
 
   - experiment_id: exp-btcusdtp-1h-launch-deadline-preholdout-20260906-v11
     source_repo: darkforest-x/fable-trading

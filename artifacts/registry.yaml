@@ -15251,6 +15251,125 @@ artifacts:
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: "Verifier046b92a,2270 formulas/clocks,exact286/849contexts,V7old-column parity,286/283/959denominators,1342tests. Not independent raw-price replay."
 
+  - artifact_id: btcusdtp-hourly-frozen-ma-v12-development
+    artifact_type: report
+    role: fixed_frozen_ma_exit_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c5ce2f2"
+    source_path: experiments/active/exp-btcusdtp-1h-frozen-ma-exit-preholdout-20260906-v12/results/summary.json
+    sha256: "a0e57d7c235feab76135828f8b2067b840c7600b7a543af022571cad44fb8a3a"
+    size_bytes: 37948
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-frozen-ma-exit-preholdout-20260906-v12/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c5ce2f2"
+    config_hash: "0830a19026a302032f40fb6c02534d19a125ab73a82cbded0be48cfd78bbbea4"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Rejected:251cases/462controls,154matched; net-13.9493bp,D+.3573bp,I+1.3436bp.52other outputs pinned. Reused2023-2024 only."
+
+  - artifact_id: btcusdtp-hourly-frozen-ma-v12-facts
+    artifact_type: report
+    role: saved_ledger_failure_decomposition
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c5ce2f2"
+    source_path: experiments/active/exp-btcusdtp-1h-frozen-ma-exit-preholdout-20260906-v12/facts/facts.json
+    sha256: "488a240d17910a6867e3b8aae52459ee22de2dd607afd2a9ea1427e6398abbbc"
+    size_bytes: 4378
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-frozen-ma-exit-preholdout-20260906-v12/facts/facts.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c5ce2f2"
+    config_hash: "0830a19026a302032f40fb6c02534d19a125ab73a82cbded0be48cfd78bbbea4"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "All251 paired denominators;20changed remain losses,62winners retained. Five CSV hashes; retrospective signed examples, not entry filters."
+
+  - artifact_id: btcusdtp-hourly-frozen-ma-v12-report
+    artifact_type: report
+    role: standalone_v12_technical_source
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c5ce2f2"
+    source_path: analysis/p1_btcusdtp_hourly_frozen_ma_v12_20260906.md
+    sha256: "79c583d696b9b628f36241f9a16a16286a4d7c75f80167df31a590f113eb17b7"
+    size_bytes: 16140
+    storage_uri: "repo://analysis/p1_btcusdtp_hourly_frozen_ma_v12_20260906.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c5ce2f2"
+    config_hash: "0830a19026a302032f40fb6c02534d19a125ab73a82cbded0be48cfd78bbbea4"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Complete negative findings, own-MA control geometry and source-reviewed failure examples. source_commit identifies committed builder, not prose date."
+
+  - artifact_id: btcusdtp-hourly-frozen-ma-v12-html
+    artifact_type: report
+    role: owner_delivery_portable_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c5ce2f2"
+    source_path: analysis/html/p1_btcusdtp_hourly_frozen_ma_v12_20260906.html
+    sha256: "ca239081c8e997a3c46c69a3b1d28ef3209560d79d643d1d4df73ecba3ebee7f"
+    size_bytes: 513508
+    storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_frozen_ma_v12_20260906.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c5ce2f2"
+    config_hash: "0830a19026a302032f40fb6c02534d19a125ab73a82cbded0be48cfd78bbbea4"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "15blocks/1actualSQL251-request count chart. Official structural_only; no browser/mobile/source interaction verification."
+
+  - artifact_id: btcusdtp-hourly-frozen-ma-v12-artifact
+    artifact_type: report
+    role: canonical_native_report_manifest_snapshot
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c5ce2f2"
+    source_path: experiments/active/exp-btcusdtp-1h-frozen-ma-exit-preholdout-20260906-v12/artifact.json
+    sha256: "342d7089ec1fbab43ce5fbc57bc0040cea1dc00ba080b660741f0337a520884c"
+    size_bytes: 38947
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-frozen-ma-exit-preholdout-20260906-v12/artifact.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c5ce2f2"
+    config_hash: "0830a19026a302032f40fb6c02534d19a125ab73a82cbded0be48cfd78bbbea4"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Complete narrative and real SQLite signed counts; deterministic rebuild after source/prose review, no financial output changes."
+
+  - artifact_id: btcusdtp-hourly-frozen-ma-v12-verification
+    artifact_type: report
+    role: independent_saved_ledger_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "cafc14d"
+    source_path: experiments/active/exp-btcusdtp-1h-frozen-ma-exit-preholdout-20260906-v12/VERIFICATION.md
+    sha256: "786097b88c02f760baa5de437b7d4466f14a737d8e7a72cca58855b398bea280"
+    size_bytes: 9886
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-frozen-ma-exit-preholdout-20260906-v12/VERIFICATION.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "cafc14d"
+    config_hash: "0830a19026a302032f40fb6c02534d19a125ab73a82cbded0be48cfd78bbbea4"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "52outputs/18sources,1426trade formulas,713geometry,48months;2534related tests. Not raw replay or independent p recomputation."
+
+  - artifact_id: btcusdtp-hourly-frozen-ma-v12-notebook
+    artifact_type: report
+    role: saved_case_ledger_and_geometry_audit_notebook
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c5ce2f2"
+    source_path: analysis/output/btcusdtp_hourly_frozen_ma_v12_20260906/frozen_ma_audit.ipynb
+    sha256: "18dff6a6548d5f339ba83b9da959e4f7f371fdd91f52f5a75f2caf6d3e66a471"
+    size_bytes: 29361
+    storage_uri: "repo://analysis/output/btcusdtp_hourly_frozen_ma_v12_20260906/frozen_ma_audit.ipynb"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c5ce2f2"
+    config_hash: "0830a19026a302032f40fb6c02534d19a125ab73a82cbded0be48cfd78bbbea4"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "13cells/5code cells plainPython executed;251pairs,502cost checks,713geometry. No Jupyter/fullschema/controlPnL/inference/raw validation."
+
   - artifact_id: btcusdtp-hourly-launch-v11-development
     artifact_type: report
     role: fixed_launch_deadline_comparison

@@ -1,0 +1,128 @@
+{
+  "all_pairs": 251,
+  "unknown_pairs": 0,
+  "all_delta_bp": 0.35734261165912357,
+  "total_event_delta_bp": 89.69299552644001,
+  "frozen_ma_states": {
+    "prior_exit": 231,
+    "structure_exit": 20
+  },
+  "interpretation": "Post-treatment groups and extreme examples are descriptions, never entry filters or proof of causal selection.",
+  "examples_rule": "Up to three strictly negative/positive changes beyond1e-8bp among frozen exits, selected after outcomes; no duplication or threshold fitting.",
+  "matching_strata": [
+    {
+      "group": "matched",
+      "n": 154,
+      "known": 154,
+      "frozen_exit_count": 10,
+      "old_net_bp": -11.81482244704074,
+      "new_net_bp": -11.67068484942224,
+      "delta_bp": 0.1441375976185,
+      "event_sum_delta_bp": 22.197190033249
+    },
+    {
+      "group": "unmatched",
+      "n": 97,
+      "known": 97,
+      "frozen_exit_count": 10,
+      "old_net_bp": -18.262700425443825,
+      "new_net_bp": -17.56686737912227,
+      "delta_bp": 0.6958330463215568,
+      "event_sum_delta_bp": 67.49580549319101
+    }
+  ],
+  "win_loss_transitions": [
+    {
+      "group": "loss_to_loss",
+      "n": 189,
+      "known": 189,
+      "frozen_exit_count": 20,
+      "old_net_bp": -50.62685496302181,
+      "new_net_bp": -50.15228884912531,
+      "delta_bp": 0.474566113896508,
+      "event_sum_delta_bp": 89.69299552644001
+    },
+    {
+      "group": "win_to_win",
+      "n": 62,
+      "known": 62,
+      "frozen_exit_count": 0,
+      "old_net_bp": 96.41146757901288,
+      "new_net_bp": 96.41146757901288,
+      "delta_bp": 0.0,
+      "event_sum_delta_bp": 0.0
+    }
+  ],
+  "geometry_outcomes": [
+    {
+      "group": "inside",
+      "n": 251,
+      "known": 251,
+      "frozen_exit_count": 20,
+      "old_net_bp": -14.306631864989344,
+      "new_net_bp": -13.949289253330218,
+      "delta_bp": 0.35734261165912357,
+      "event_sum_delta_bp": 89.69299552644001
+    }
+  ],
+  "exit_failure_groups": [
+    {
+      "outcome": "frozen_ma_exit",
+      "n": 20,
+      "wins": 0,
+      "losses": 20,
+      "gross_nonpositive_losses": 20,
+      "positive_gross_cost_losses": 0,
+      "paired_known": 20,
+      "old_net_bp": -79.92953609122308,
+      "new_net_bp": -75.44488631490113
+    },
+    {
+      "outcome": "hard_stop",
+      "n": 11,
+      "wins": 0,
+      "losses": 11,
+      "gross_nonpositive_losses": 11,
+      "positive_gross_cost_losses": 0,
+      "paired_known": 11,
+      "old_net_bp": -74.64389245241345,
+      "new_net_bp": -74.64389245241345
+    },
+    {
+      "outcome": "transition_colour_exit",
+      "n": 220,
+      "wins": 62,
+      "losses": 158,
+      "gross_nonpositive_losses": 130,
+      "positive_gross_cost_losses": 28,
+      "paired_known": 220,
+      "old_net_bp": -5.324050269596888,
+      "new_net_bp": -5.324050269596888
+    }
+  ],
+  "source_summary_sha256": "a0e57d7c235feab76135828f8b2067b840c7600b7a543af022571cad44fb8a3a",
+  "sources": [
+    {
+      "path": "yoyo/evaluation/hourly_impulse_frozen_ma_facts.py",
+      "sha256": "4a01c813fa6a135b517ae0f7390a0c60cca861352e4a95f9d315b94eba59dfa1"
+    },
+    {
+      "path": "tests/test_hourly_impulse_frozen_ma_facts.py",
+      "sha256": "82ab0cd928674f061aa45ff6f3e27a7c7aada0db71577584b79d7fc2e079c0cf"
+    }
+  ],
+  "source_paths": {
+    "experiments/active/exp-btcusdtp-1h-frozen-ma-exit-preholdout-20260906-v12/results/paired_case_mechanics.csv.gz": "cf8c680f9d0d6e85946f69d9d2c39f8b1db23fc5a861f19125f0ef0529b26ada",
+    "experiments/active/exp-btcusdtp-1h-frozen-ma-exit-preholdout-20260906-v12/results/baseline/matched.csv": "b4c5d5b3a9848428eb2b90189b03c29812f33c8df1f46068ca3540fcb988f38f",
+    "experiments/active/exp-btcusdtp-1h-frozen-ma-exit-preholdout-20260906-v12/results/entry_geometry.csv": "b05d8f056e3e3394c8ef5480598970e6e293300b8abb9c61a2af0475201d5e80"
+  },
+  "output_hashes": {
+    "matching_strata.csv": "90755cd59590185889d15fbead0da41b9ca535e48f56883293b12df7bbb88d65",
+    "win_loss_transitions.csv": "9f7bb32dcf20268e64ba2d9c986ab2c8db953eda63c910001f8b761fe6c4044c",
+    "geometry_outcomes.csv": "69d99cbc2783c5e1bbb42af05171751c6b6b43272b732542ba565b35e21a5904",
+    "exit_failure_groups.csv": "c4c701462af424170cd5d01c30b3149ffe579d1def1048df54dc25ab633d9dbf",
+    "retrospective_examples.csv": "3a747fca092c39e819818b4757711f504f732c4f2bb9aa7a7a99fb3ec0283641"
+  },
+  "raw_prices_read": false,
+  "new_parameters_tested": false
+}
