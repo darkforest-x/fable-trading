@@ -1,0 +1,44 @@
+{
+  "config_sha256": "c48b0868c97fe1c49f3ff4e865ba159a5b8eeb45fc2d8878abe5561474740583",
+  "entry": {
+    "ma_kind": "SMA",
+    "ma_length": 40,
+    "shape": "large_or_engulf",
+    "body_ratio_min": 0.65,
+    "range_atr_min": 1,
+    "engulf_range_atr_min": 0.65,
+    "close_location_min": 0.7,
+    "min_volume_ratio": 0,
+    "max_cross_count": 999,
+    "min_efficiency": 0,
+    "require_ma_slope": true,
+    "require_breakout20": false,
+    "min_extension_atr": 0,
+    "max_extension_atr": 99,
+    "side": "both"
+  },
+  "policy": {
+    "id": "quarter1r_quarter2r_colour15",
+    "partial_targets": [
+      [
+        1,
+        0.25
+      ],
+      [
+        2,
+        0.25
+      ]
+    ],
+    "takeover_r": null
+  },
+  "gate_checks": {
+    "samples": true,
+    "positive_folds": false,
+    "net_profit": false,
+    "profit_factor": false,
+    "matched_coverage": true,
+    "matched_excess": true
+  },
+  "go_to_transport": false,
+  "status": "rejected_development_no_new_transport"
+}

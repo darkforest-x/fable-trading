@@ -1,0 +1,210 @@
+{
+  "source": {
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "physical_rows": 341567,
+    "phase_rows": 341567,
+    "phase_price_last_open": "2026-02-28 15:55:00+00:00",
+    "physical_last_open": "2026-02-28 15:55:00+00:00",
+    "holdout_price_rows": 0,
+    "timestamp_preflight_before_price_hash": true
+  },
+  "audit_use": 1,
+  "lineage": "Historical years have been used by prior research. Audit is a frozen-rule transport check, not a globally pristine independent sample. No repository holdout prices in this experiment.",
+  "baseline": {
+    "metrics": {
+      "events": 176,
+      "excluded_results": 0,
+      "rejected_entries": 0,
+      "censored": 0,
+      "mean_net_bp": -18.511009391910445,
+      "median_net_bp": -43.82305046222611,
+      "profit_factor": 0.626972984619117,
+      "win_rate": 0.2784090909090909,
+      "p95_net_bp": 207.42723929170538,
+      "worst_fold_bp": -52.36978033741013,
+      "positive_folds": 0,
+      "minimum_fold_events": 22,
+      "folds": [
+        {
+          "fold": "2025H1",
+          "count": 73,
+          "mean": -0.0010261599703867458
+        },
+        {
+          "fold": "2025H2",
+          "count": 81,
+          "mean": -0.0016749453174949268
+        },
+        {
+          "fold": "2026P1",
+          "count": 22,
+          "mean": -0.005236978033741012
+        }
+      ],
+      "robust_score_bp": -26.0050803313367,
+      "net_week_cluster_p": 0.992,
+      "net_month_cluster_p": 0.9923,
+      "extra_10bp_mean_net_bp": -28.511009391910445,
+      "leave_top_two_mean_net_bp": -23.23664714848262,
+      "range_feature_auc": 0.6024425518238792,
+      "range_top_decile_net_bp": -51.05108263897077,
+      "range_top_decile_gross_bp": -31.051082638970755,
+      "mean_hold_hours": 6.107007575757576,
+      "eligible": true
+    },
+    "matched": {
+      "coverage": 0.9943181818181818,
+      "mean_excess_bp": -9.161976476947718,
+      "control_mean_net_bp": -11.485060161122375,
+      "month_cluster_p": 0.8221,
+      "control_rows": 525,
+      "unique_control_times": 525,
+      "control_time_reuse_allowed": false
+    },
+    "single_position": {
+      "events": 175,
+      "excluded_results": 0,
+      "rejected_entries": 0,
+      "censored": 0,
+      "mean_net_bp": -18.82445688395809,
+      "median_net_bp": -43.82620573199157,
+      "profit_factor": 0.6228118674384473,
+      "win_rate": 0.2742857142857143,
+      "p95_net_bp": 208.24508121427394,
+      "worst_fold_bp": -56.59416519711663,
+      "positive_folds": 0,
+      "minimum_fold_events": 21,
+      "folds": [
+        {
+          "fold": "2025H1",
+          "count": 73,
+          "mean": -0.0010261599703867458
+        },
+        {
+          "fold": "2025H2",
+          "count": 81,
+          "mean": -0.0016749453174949268
+        },
+        {
+          "fold": "2026P1",
+          "count": 21,
+          "mean": -0.005659416519711663
+        }
+      ],
+      "robust_score_bp": -26.991523202235285,
+      "net_week_cluster_p": 0.9929,
+      "net_month_cluster_p": 0.9929,
+      "extra_10bp_mean_net_bp": -28.82445688395809,
+      "leave_top_two_mean_net_bp": -23.581034136141056,
+      "range_feature_auc": 0.5989173228346457,
+      "range_top_decile_net_bp": -51.05108263897077,
+      "range_top_decile_gross_bp": -31.051082638970755,
+      "mean_hold_hours": 6.097619047619047
+    }
+  },
+  "candidate": {
+    "metrics": {
+      "events": 74,
+      "excluded_results": 0,
+      "rejected_entries": 0,
+      "censored": 0,
+      "mean_net_bp": -12.13588871753615,
+      "median_net_bp": -27.637701445109556,
+      "profit_factor": 0.6268643322784757,
+      "win_rate": 0.32432432432432434,
+      "p95_net_bp": 101.2366425896559,
+      "worst_fold_bp": -26.316609230271656,
+      "positive_folds": 1,
+      "minimum_fold_events": 6,
+      "folds": [
+        {
+          "fold": "2025H1",
+          "count": 30,
+          "mean": 0.0007583241951222228
+        },
+        {
+          "fold": "2025H2",
+          "count": 38,
+          "mean": -0.0026316609230271656
+        },
+        {
+          "fold": "2026P1",
+          "count": 6,
+          "mean": -0.002092031214733649
+        }
+      ],
+      "robust_score_bp": -28.356657816085114,
+      "net_week_cluster_p": 0.9314,
+      "net_month_cluster_p": 0.9275,
+      "extra_10bp_mean_net_bp": -22.135888717536147,
+      "leave_top_two_mean_net_bp": -19.15124258494773,
+      "range_feature_auc": 0.6033333333333334,
+      "range_top_decile_net_bp": -18.878887318988497,
+      "range_top_decile_gross_bp": 1.1211126810115046,
+      "mean_hold_hours": 2.5563063063063063,
+      "eligible": false
+    },
+    "matched": {
+      "coverage": 1.0,
+      "mean_excess_bp": 9.319311151017477,
+      "control_mean_net_bp": -21.455199868553624,
+      "month_cluster_p": 0.148,
+      "control_rows": 222,
+      "unique_control_times": 222,
+      "control_time_reuse_allowed": false
+    },
+    "single_position": {
+      "events": 74,
+      "excluded_results": 0,
+      "rejected_entries": 0,
+      "censored": 0,
+      "mean_net_bp": -12.13588871753615,
+      "median_net_bp": -27.637701445109556,
+      "profit_factor": 0.6268643322784757,
+      "win_rate": 0.32432432432432434,
+      "p95_net_bp": 101.2366425896559,
+      "worst_fold_bp": -26.316609230271656,
+      "positive_folds": 1,
+      "minimum_fold_events": 6,
+      "folds": [
+        {
+          "fold": "2025H1",
+          "count": 30,
+          "mean": 0.0007583241951222228
+        },
+        {
+          "fold": "2025H2",
+          "count": 38,
+          "mean": -0.0026316609230271656
+        },
+        {
+          "fold": "2026P1",
+          "count": 6,
+          "mean": -0.002092031214733649
+        }
+      ],
+      "robust_score_bp": -28.356657816085114,
+      "net_week_cluster_p": 0.9314,
+      "net_month_cluster_p": 0.9275,
+      "extra_10bp_mean_net_bp": -22.135888717536147,
+      "leave_top_two_mean_net_bp": -19.15124258494773,
+      "range_feature_auc": 0.6033333333333334,
+      "range_top_decile_net_bp": -18.878887318988497,
+      "range_top_decile_gross_bp": 1.1211126810115046,
+      "mean_hold_hours": 2.5563063063063063
+    }
+  },
+  "gate_checks": {
+    "samples": false,
+    "mean": false,
+    "profit_factor": false,
+    "both_full_halfyears_positive": false,
+    "net_cluster_p": false,
+    "matched_coverage": true,
+    "matched_positive": true,
+    "matched_p": false,
+    "single_position": false,
+    "cost_stress": false
+  },
+  "status": "rejected_transport"
+}

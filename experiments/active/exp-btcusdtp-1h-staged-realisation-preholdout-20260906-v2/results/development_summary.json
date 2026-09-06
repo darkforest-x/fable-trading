@@ -1,0 +1,642 @@
+{
+  "phase": "development",
+  "source": {
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "physical_rows": 341567,
+    "phase_rows": 219551,
+    "phase_price_last_open": "2024-12-31 23:55:00+00:00",
+    "physical_last_open": "2026-02-28 15:55:00+00:00",
+    "holdout_price_rows": 0,
+    "timestamp_preflight_before_price_hash": true
+  },
+  "entry": {
+    "ma_kind": "SMA",
+    "ma_length": 40,
+    "shape": "large_or_engulf",
+    "body_ratio_min": 0.65,
+    "range_atr_min": 1,
+    "engulf_range_atr_min": 0.65,
+    "close_location_min": 0.7,
+    "min_volume_ratio": 0,
+    "max_cross_count": 999,
+    "min_efficiency": 0,
+    "require_ma_slope": true,
+    "require_breakout20": false,
+    "min_extension_atr": 0,
+    "max_extension_atr": 99,
+    "side": "both"
+  },
+  "arms": [
+    {
+      "policy": {
+        "id": "colour15",
+        "partial_targets": [],
+        "takeover_r": null
+      },
+      "metrics": {
+        "events": 111,
+        "excluded_results": 0,
+        "rejected_entries": 0,
+        "censored": 0,
+        "mean_net_bp": -10.762684664185393,
+        "median_net_bp": -32.89579339219582,
+        "profit_factor": 0.7583619816933189,
+        "win_rate": 0.25225225225225223,
+        "p95_net_bp": 202.51736446839863,
+        "worst_fold_bp": -27.038872029413774,
+        "positive_folds": 1,
+        "minimum_fold_events": 21,
+        "folds": [
+          {
+            "fold": "2023H1",
+            "count": 21,
+            "mean": -0.000868218778139049
+          },
+          {
+            "fold": "2023H2",
+            "count": 27,
+            "mean": -0.0027038872029413775
+          },
+          {
+            "fold": "2024H1",
+            "count": 27,
+            "mean": -0.0018836467508968045
+          },
+          {
+            "fold": "2024H2",
+            "count": 36,
+            "mean": 0.0006286169811692537
+          }
+        ],
+        "robust_score_bp": -19.975628974617315,
+        "net_week_cluster_p": 0.8311,
+        "net_month_cluster_p": 0.8363,
+        "extra_10bp_mean_net_bp": -20.762684664185393,
+        "leave_top_two_mean_net_bp": -18.156744404180472,
+        "range_feature_auc": 0.6450086058519794,
+        "range_top_decile_net_bp": -23.740296274850625,
+        "range_top_decile_gross_bp": -3.7402962748506186,
+        "mean_hold_hours": 5.191441441441442
+      },
+      "matched": {
+        "coverage": 0.9819819819819819,
+        "mean_excess_bp": 4.070674932701547,
+        "matched_event_mean_net_bp": -10.545990905446178,
+        "control_mean_net_bp": -14.616665838147721,
+        "month_cluster_p": 0.3526,
+        "control_rows": 327,
+        "unique_control_times": 327,
+        "control_time_reuse_allowed": false
+      },
+      "single_position": {
+        "events": 111,
+        "excluded_results": 0,
+        "rejected_entries": 0,
+        "censored": 0,
+        "mean_net_bp": -10.762684664185393,
+        "median_net_bp": -32.89579339219582,
+        "profit_factor": 0.7583619816933189,
+        "win_rate": 0.25225225225225223,
+        "p95_net_bp": 202.51736446839863,
+        "worst_fold_bp": -27.038872029413774,
+        "positive_folds": 1,
+        "minimum_fold_events": 21,
+        "folds": [
+          {
+            "fold": "2023H1",
+            "count": 21,
+            "mean": -0.000868218778139049
+          },
+          {
+            "fold": "2023H2",
+            "count": 27,
+            "mean": -0.0027038872029413775
+          },
+          {
+            "fold": "2024H1",
+            "count": 27,
+            "mean": -0.0018836467508968045
+          },
+          {
+            "fold": "2024H2",
+            "count": 36,
+            "mean": 0.0006286169811692537
+          }
+        ],
+        "robust_score_bp": -19.975628974617315,
+        "net_week_cluster_p": 0.8311,
+        "net_month_cluster_p": 0.8363,
+        "extra_10bp_mean_net_bp": -20.762684664185393,
+        "leave_top_two_mean_net_bp": -18.156744404180472,
+        "range_feature_auc": 0.6450086058519794,
+        "range_top_decile_net_bp": -23.740296274850625,
+        "range_top_decile_gross_bp": -3.7402962748506186,
+        "mean_hold_hours": 5.191441441441442
+      }
+    },
+    {
+      "policy": {
+        "id": "half1r_colour15",
+        "partial_targets": [
+          [
+            1,
+            0.5
+          ]
+        ],
+        "takeover_r": null
+      },
+      "metrics": {
+        "events": 111,
+        "excluded_results": 0,
+        "rejected_entries": 0,
+        "censored": 0,
+        "mean_net_bp": -9.626961828893572,
+        "median_net_bp": -24.31069321335409,
+        "profit_factor": 0.7573121357859754,
+        "win_rate": 0.3153153153153153,
+        "p95_net_bp": 169.7400926829723,
+        "worst_fold_bp": -21.91303712350955,
+        "positive_folds": 1,
+        "minimum_fold_events": 21,
+        "folds": [
+          {
+            "fold": "2023H1",
+            "count": 21,
+            "mean": -0.0009658404933111769
+          },
+          {
+            "fold": "2023H2",
+            "count": 27,
+            "mean": -0.0020687246860256166
+          },
+          {
+            "fold": "2024H1",
+            "count": 27,
+            "mean": -0.002191303712350955
+          },
+          {
+            "fold": "2024H2",
+            "count": 36,
+            "mean": 0.0007901150226384315
+          }
+        ],
+        "robust_score_bp": -21.151739519344062,
+        "net_week_cluster_p": 0.8373,
+        "net_month_cluster_p": 0.866,
+        "extra_10bp_mean_net_bp": -19.62696182889357,
+        "leave_top_two_mean_net_bp": -14.578412035321437,
+        "range_feature_auc": 0.6526315789473685,
+        "range_top_decile_net_bp": 0.09027043038434789,
+        "range_top_decile_gross_bp": 20.090270430384354,
+        "mean_hold_hours": 5.191441441441442
+      }
+    },
+    {
+      "policy": {
+        "id": "half1r_runner1h",
+        "partial_targets": [
+          [
+            1,
+            0.5
+          ]
+        ],
+        "takeover_r": 1
+      },
+      "metrics": {
+        "events": 111,
+        "excluded_results": 0,
+        "rejected_entries": 0,
+        "censored": 0,
+        "mean_net_bp": -8.662674752128352,
+        "median_net_bp": -24.31069321335409,
+        "profit_factor": 0.7891403228466463,
+        "win_rate": 0.27927927927927926,
+        "p95_net_bp": 179.04503965615547,
+        "worst_fold_bp": -26.91423897408283,
+        "positive_folds": 1,
+        "minimum_fold_events": 21,
+        "folds": [
+          {
+            "fold": "2023H1",
+            "count": 21,
+            "mean": -0.0009503833469580999
+          },
+          {
+            "fold": "2023H2",
+            "count": 27,
+            "mean": -0.002691423897408283
+          },
+          {
+            "fold": "2024H1",
+            "count": 27,
+            "mean": -0.002612796355832888
+          },
+          {
+            "fold": "2024H2",
+            "count": 36,
+            "mean": 0.0018615640937501962
+          }
+        ],
+        "robust_score_bp": -27.040328627654272,
+        "net_week_cluster_p": 0.7348,
+        "net_month_cluster_p": 0.7045,
+        "extra_10bp_mean_net_bp": -18.662674752128353,
+        "leave_top_two_mean_net_bp": -20.141217231451993,
+        "range_feature_auc": 0.6693548387096774,
+        "range_top_decile_net_bp": 42.390371206261875,
+        "range_top_decile_gross_bp": 62.39037120626188,
+        "mean_hold_hours": 11.155405405405407
+      }
+    },
+    {
+      "policy": {
+        "id": "quarter1r_quarter2r_runner1h",
+        "partial_targets": [
+          [
+            1,
+            0.25
+          ],
+          [
+            2,
+            0.25
+          ]
+        ],
+        "takeover_r": 1
+      },
+      "metrics": {
+        "events": 111,
+        "excluded_results": 0,
+        "rejected_entries": 0,
+        "censored": 0,
+        "mean_net_bp": -6.420595973633641,
+        "median_net_bp": -30.489556915804776,
+        "profit_factor": 0.8516304946902837,
+        "win_rate": 0.2702702702702703,
+        "p95_net_bp": 211.01346635999968,
+        "worst_fold_bp": -28.003450829957675,
+        "positive_folds": 1,
+        "minimum_fold_events": 21,
+        "folds": [
+          {
+            "fold": "2023H1",
+            "count": 21,
+            "mean": -0.0009989320202292372
+          },
+          {
+            "fold": "2023H2",
+            "count": 27,
+            "mean": -0.0028003450829957675
+          },
+          {
+            "fold": "2024H1",
+            "count": 27,
+            "mean": -0.0025604432824565715
+          },
+          {
+            "fold": "2024H2",
+            "count": 36,
+            "mean": 0.0026236178606859383
+          }
+        ],
+        "robust_score_bp": -28.633568446153888,
+        "net_week_cluster_p": 0.6585,
+        "net_month_cluster_p": 0.633,
+        "extra_10bp_mean_net_bp": -16.42059597363364,
+        "leave_top_two_mean_net_bp": -19.153067425245453,
+        "range_feature_auc": 0.6296296296296297,
+        "range_top_decile_net_bp": 43.998143760194125,
+        "range_top_decile_gross_bp": 63.99814376019414,
+        "mean_hold_hours": 11.155405405405407
+      }
+    },
+    {
+      "policy": {
+        "id": "quarter1r_quarter2r_colour15",
+        "partial_targets": [
+          [
+            1,
+            0.25
+          ],
+          [
+            2,
+            0.25
+          ]
+        ],
+        "takeover_r": null
+      },
+      "metrics": {
+        "events": 111,
+        "excluded_results": 0,
+        "rejected_entries": 0,
+        "censored": 0,
+        "mean_net_bp": -9.083240013596532,
+        "median_net_bp": -27.873105117073287,
+        "profit_factor": 0.7781499471856842,
+        "win_rate": 0.3153153153153153,
+        "p95_net_bp": 203.43175290171462,
+        "worst_fold_bp": -20.352501816109683,
+        "positive_folds": 1,
+        "minimum_fold_events": 21,
+        "folds": [
+          {
+            "fold": "2023H1",
+            "count": 21,
+            "mean": -0.0009840980161856074
+          },
+          {
+            "fold": "2023H2",
+            "count": 27,
+            "mean": -0.002035250181610968
+          },
+          {
+            "fold": "2024H1",
+            "count": 27,
+            "mean": -0.0018879078001382563
+          },
+          {
+            "fold": "2024H2",
+            "count": 36,
+            "mean": 0.0007157599915612593
+          }
+        ],
+        "robust_score_bp": -19.83442444874045,
+        "net_week_cluster_p": 0.8119,
+        "net_month_cluster_p": 0.8399,
+        "extra_10bp_mean_net_bp": -19.08324001359653,
+        "leave_top_two_mean_net_bp": -14.525367907754314,
+        "range_feature_auc": 0.6210526315789474,
+        "range_top_decile_net_bp": -11.825012922233137,
+        "range_top_decile_gross_bp": 8.174987077766867,
+        "mean_hold_hours": 5.191441441441442
+      },
+      "matched": {
+        "coverage": 0.9819819819819819,
+        "mean_excess_bp": 6.8196604446681794,
+        "matched_event_mean_net_bp": -9.314938734200156,
+        "control_mean_net_bp": -16.13459917886833,
+        "month_cluster_p": 0.2308,
+        "control_rows": 327,
+        "unique_control_times": 327,
+        "control_time_reuse_allowed": false
+      },
+      "single_position": {
+        "events": 111,
+        "excluded_results": 0,
+        "rejected_entries": 0,
+        "censored": 0,
+        "mean_net_bp": -9.083240013596532,
+        "median_net_bp": -27.873105117073287,
+        "profit_factor": 0.7781499471856842,
+        "win_rate": 0.3153153153153153,
+        "p95_net_bp": 203.43175290171462,
+        "worst_fold_bp": -20.352501816109683,
+        "positive_folds": 1,
+        "minimum_fold_events": 21,
+        "folds": [
+          {
+            "fold": "2023H1",
+            "count": 21,
+            "mean": -0.0009840980161856074
+          },
+          {
+            "fold": "2023H2",
+            "count": 27,
+            "mean": -0.002035250181610968
+          },
+          {
+            "fold": "2024H1",
+            "count": 27,
+            "mean": -0.0018879078001382563
+          },
+          {
+            "fold": "2024H2",
+            "count": 36,
+            "mean": 0.0007157599915612593
+          }
+        ],
+        "robust_score_bp": -19.83442444874045,
+        "net_week_cluster_p": 0.8119,
+        "net_month_cluster_p": 0.8399,
+        "extra_10bp_mean_net_bp": -19.08324001359653,
+        "leave_top_two_mean_net_bp": -14.525367907754314,
+        "range_feature_auc": 0.6210526315789474,
+        "range_top_decile_net_bp": -11.825012922233137,
+        "range_top_decile_gross_bp": 8.174987077766867,
+        "mean_hold_hours": 5.191441441441442
+      }
+    },
+    {
+      "policy": {
+        "id": "no_partial_runner1h",
+        "partial_targets": [],
+        "takeover_r": 1
+      },
+      "metrics": {
+        "events": 111,
+        "excluded_results": 0,
+        "rejected_entries": 0,
+        "censored": 0,
+        "mean_net_bp": -8.83411051065495,
+        "median_net_bp": -40.50155861957226,
+        "profit_factor": 0.8308859197029204,
+        "win_rate": 0.22522522522522523,
+        "p95_net_bp": 212.1369519967087,
+        "worst_fold_bp": -39.49285625706712,
+        "positive_folds": 1,
+        "minimum_fold_events": 21,
+        "folds": [
+          {
+            "fold": "2023H1",
+            "count": 21,
+            "mean": -0.0008373044854328952
+          },
+          {
+            "fold": "2023H2",
+            "count": 27,
+            "mean": -0.0039492856257067116
+          },
+          {
+            "fold": "2024H1",
+            "count": 27,
+            "mean": -0.0027266320378606704
+          },
+          {
+            "fold": "2024H2",
+            "count": 36,
+            "mean": 0.002771515123392784
+          }
+        ],
+        "robust_score_bp": -30.516337620013296,
+        "net_week_cluster_p": 0.6744,
+        "net_month_cluster_p": 0.6228,
+        "extra_10bp_mean_net_bp": -18.834110510654952,
+        "leave_top_two_mean_net_bp": -28.324367124920588,
+        "range_feature_auc": 0.6255813953488372,
+        "range_top_decile_net_bp": 60.85990527690443,
+        "range_top_decile_gross_bp": 80.85990527690443,
+        "mean_hold_hours": 11.155405405405407
+      }
+    }
+  ],
+  "best": {
+    "policy": {
+      "id": "quarter1r_quarter2r_colour15",
+      "partial_targets": [
+        [
+          1,
+          0.25
+        ],
+        [
+          2,
+          0.25
+        ]
+      ],
+      "takeover_r": null
+    },
+    "metrics": {
+      "events": 111,
+      "excluded_results": 0,
+      "rejected_entries": 0,
+      "censored": 0,
+      "mean_net_bp": -9.083240013596532,
+      "median_net_bp": -27.873105117073287,
+      "profit_factor": 0.7781499471856842,
+      "win_rate": 0.3153153153153153,
+      "p95_net_bp": 203.43175290171462,
+      "worst_fold_bp": -20.352501816109683,
+      "positive_folds": 1,
+      "minimum_fold_events": 21,
+      "folds": [
+        {
+          "fold": "2023H1",
+          "count": 21,
+          "mean": -0.0009840980161856074
+        },
+        {
+          "fold": "2023H2",
+          "count": 27,
+          "mean": -0.002035250181610968
+        },
+        {
+          "fold": "2024H1",
+          "count": 27,
+          "mean": -0.0018879078001382563
+        },
+        {
+          "fold": "2024H2",
+          "count": 36,
+          "mean": 0.0007157599915612593
+        }
+      ],
+      "robust_score_bp": -19.83442444874045,
+      "net_week_cluster_p": 0.8119,
+      "net_month_cluster_p": 0.8399,
+      "extra_10bp_mean_net_bp": -19.08324001359653,
+      "leave_top_two_mean_net_bp": -14.525367907754314,
+      "range_feature_auc": 0.6210526315789474,
+      "range_top_decile_net_bp": -11.825012922233137,
+      "range_top_decile_gross_bp": 8.174987077766867,
+      "mean_hold_hours": 5.191441441441442
+    },
+    "matched": {
+      "coverage": 0.9819819819819819,
+      "mean_excess_bp": 6.8196604446681794,
+      "matched_event_mean_net_bp": -9.314938734200156,
+      "control_mean_net_bp": -16.13459917886833,
+      "month_cluster_p": 0.2308,
+      "control_rows": 327,
+      "unique_control_times": 327,
+      "control_time_reuse_allowed": false
+    },
+    "single_position": {
+      "events": 111,
+      "excluded_results": 0,
+      "rejected_entries": 0,
+      "censored": 0,
+      "mean_net_bp": -9.083240013596532,
+      "median_net_bp": -27.873105117073287,
+      "profit_factor": 0.7781499471856842,
+      "win_rate": 0.3153153153153153,
+      "p95_net_bp": 203.43175290171462,
+      "worst_fold_bp": -20.352501816109683,
+      "positive_folds": 1,
+      "minimum_fold_events": 21,
+      "folds": [
+        {
+          "fold": "2023H1",
+          "count": 21,
+          "mean": -0.0009840980161856074
+        },
+        {
+          "fold": "2023H2",
+          "count": 27,
+          "mean": -0.002035250181610968
+        },
+        {
+          "fold": "2024H1",
+          "count": 27,
+          "mean": -0.0018879078001382563
+        },
+        {
+          "fold": "2024H2",
+          "count": 36,
+          "mean": 0.0007157599915612593
+        }
+      ],
+      "robust_score_bp": -19.83442444874045,
+      "net_week_cluster_p": 0.8119,
+      "net_month_cluster_p": 0.8399,
+      "extra_10bp_mean_net_bp": -19.08324001359653,
+      "leave_top_two_mean_net_bp": -14.525367907754314,
+      "range_feature_auc": 0.6210526315789474,
+      "range_top_decile_net_bp": -11.825012922233137,
+      "range_top_decile_gross_bp": 8.174987077766867,
+      "mean_hold_hours": 5.191441441441442
+    }
+  },
+  "lineage": "2023–2024 reused development. Only if preregistered development gates pass, freeze and commit one finalist before 2025–Feb2026 transport use #2 for this rule family. Repository holdout remains unread.",
+  "selection": {
+    "config_sha256": "c48b0868c97fe1c49f3ff4e865ba159a5b8eeb45fc2d8878abe5561474740583",
+    "entry": {
+      "ma_kind": "SMA",
+      "ma_length": 40,
+      "shape": "large_or_engulf",
+      "body_ratio_min": 0.65,
+      "range_atr_min": 1,
+      "engulf_range_atr_min": 0.65,
+      "close_location_min": 0.7,
+      "min_volume_ratio": 0,
+      "max_cross_count": 999,
+      "min_efficiency": 0,
+      "require_ma_slope": true,
+      "require_breakout20": false,
+      "min_extension_atr": 0,
+      "max_extension_atr": 99,
+      "side": "both"
+    },
+    "policy": {
+      "id": "quarter1r_quarter2r_colour15",
+      "partial_targets": [
+        [
+          1,
+          0.25
+        ],
+        [
+          2,
+          0.25
+        ]
+      ],
+      "takeover_r": null
+    },
+    "gate_checks": {
+      "samples": true,
+      "positive_folds": false,
+      "net_profit": false,
+      "profit_factor": false,
+      "matched_coverage": true,
+      "matched_excess": true
+    },
+    "go_to_transport": false,
+    "status": "rejected_development_no_new_transport"
+  }
+}

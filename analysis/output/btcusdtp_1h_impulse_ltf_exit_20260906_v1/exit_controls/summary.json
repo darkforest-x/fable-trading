@@ -1,0 +1,103 @@
+{
+  "source": {
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "physical_rows": 341567,
+    "phase_rows": 219551,
+    "phase_price_last_open": "2024-12-31 23:55:00+00:00",
+    "physical_last_open": "2026-02-28 15:55:00+00:00",
+    "holdout_price_rows": 0,
+    "timestamp_preflight_before_price_hash": true
+  },
+  "arms": [
+    {
+      "id": "15m_first",
+      "coverage": 0.9880478087649402,
+      "mean_excess_bp": -0.770903659594755,
+      "control_mean_net_bp": -14.484796579710025,
+      "month_cluster_p": 0.5732,
+      "control_rows": 744,
+      "unique_control_times": 744,
+      "control_time_reuse_allowed": false,
+      "matched_event_mean_net_bp": -15.25570023930478
+    },
+    {
+      "id": "15m_two",
+      "coverage": 0.9880478087649402,
+      "mean_excess_bp": -6.089333983893954,
+      "control_mean_net_bp": -12.099022704184598,
+      "month_cluster_p": 0.8386,
+      "control_rows": 744,
+      "unique_control_times": 744,
+      "control_time_reuse_allowed": false,
+      "matched_event_mean_net_bp": -18.188356688078553
+    },
+    {
+      "id": "15m_slope",
+      "coverage": 0.9880478087649402,
+      "mean_excess_bp": -1.3688112180720202,
+      "control_mean_net_bp": -14.387103699984545,
+      "month_cluster_p": 0.574,
+      "control_rows": 744,
+      "unique_control_times": 744,
+      "control_time_reuse_allowed": false,
+      "matched_event_mean_net_bp": -15.755914918056561
+    },
+    {
+      "id": "15m_half",
+      "coverage": 0.9880478087649402,
+      "mean_excess_bp": -3.4301188217443817,
+      "control_mean_net_bp": -13.291909641947315,
+      "month_cluster_p": 0.7402,
+      "control_rows": 744,
+      "unique_control_times": 744,
+      "control_time_reuse_allowed": false,
+      "matched_event_mean_net_bp": -16.72202846369169
+    },
+    {
+      "id": "5m_native40",
+      "coverage": 0.9880478087649402,
+      "mean_excess_bp": 3.271579533663019,
+      "control_mean_net_bp": -17.084647305923237,
+      "month_cluster_p": 0.2087,
+      "control_rows": 744,
+      "unique_control_times": 744,
+      "control_time_reuse_allowed": false,
+      "matched_event_mean_net_bp": -13.813067772260215
+    },
+    {
+      "id": "5m_clock120",
+      "coverage": 0.9840637450199203,
+      "mean_excess_bp": -1.098702269233918,
+      "control_mean_net_bp": -17.137097990364374,
+      "month_cluster_p": 0.5909,
+      "control_rows": 741,
+      "unique_control_times": 741,
+      "control_time_reuse_allowed": false,
+      "matched_event_mean_net_bp": -18.235800259598292
+    },
+    {
+      "id": "1h_first",
+      "coverage": 0.9760956175298805,
+      "mean_excess_bp": -24.476379554881987,
+      "control_mean_net_bp": 11.401194765522034,
+      "month_cluster_p": 0.9217,
+      "control_rows": 741,
+      "unique_control_times": 741,
+      "control_time_reuse_allowed": false,
+      "matched_event_mean_net_bp": -13.07518478935995
+    },
+    {
+      "id": "fixed3R",
+      "coverage": 0.9880478087649402,
+      "mean_excess_bp": 0.06648771106377567,
+      "control_mean_net_bp": -11.68454439061583,
+      "month_cluster_p": 0.4975,
+      "control_rows": 744,
+      "unique_control_times": 744,
+      "control_time_reuse_allowed": false,
+      "matched_event_mean_net_bp": -11.61805667955206
+    }
+  ],
+  "selection_changed": false,
+  "audit_prices_read": false
+}
