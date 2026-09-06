@@ -2,7 +2,17 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-09-06 — BTC V9 完成，退出降频仍未盈利）
+## ⚡ 当前真相（2026-09-06 — BTC V10 已预登记，尚未重建真实行情）
+
+V10 仅审计原251个1h穿MA母信号的匹配支持。固定原V4的154组/462控制、
+全部字段/分配哈希、6键、3控制、不复用和原2023–2024切分；不读取/计算收益。
+保存完整候选/排除/占用图后，求最大完整三配对母数；90%需226，不放松门。
+builder/config/plan和合成测试必须先提交，才运行；超时保留图及failure.json，
+不能冒称容量不可达。2025+价格/holdout不读取，无训练/TV/实盘变更。
+入口：experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/。
+盈利goal仍active，容量改善不是盈利证据。V9结论及下一步动机完整保留在下。
+
+### 第九轮背景（已完成，勿重复）
 
 Owner盈利goal仍active。V9 prereg/config/builder/tests先在12df0a0提交，再首次运行；
 旧2023–2024开发期含事前预热共219551价格行，截止2024-12-31 23:55 UTC，holdout0。

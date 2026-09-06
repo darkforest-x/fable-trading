@@ -1,0 +1,42 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-matching-support-preholdout-20260906-v10",
+  "base_config": "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json",
+  "base_config_sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a",
+  "parent_results": "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results",
+  "inputs": {
+    "original_mothers.csv.gz": "b3f442ad8b0959b19cb5ae58fd40bc6a3bf40b455b4be31f3758d53940eea3e6",
+    "control_mothers.csv.gz": "01050c7a9602f469406df515edcc73ef2f4c9db2d46529e25030934012eebd5a",
+    "assignments.csv": "671782877ee67824f7687243d5e7deae29d78a0bcba6245319ecf55629027b0f",
+    "assignment_receipt.json": "1d77ca407712520e645463d30f97d26d452ccce45e87e68c2adcbc4120c43220"
+  },
+  "matching": {
+    "count": 3,
+    "seed": 20260906,
+    "embargo_hours": 72,
+    "no_reuse": true,
+    "no_fallback": true,
+    "keys_unchanged": true
+  },
+  "capacity": {
+    "minimum_coverage": 0.9,
+    "required_complete_mothers": 226,
+    "time_limit_seconds": 30.0,
+    "optimal_required": true,
+    "outcomes_used": false
+  },
+  "expected": {
+    "mothers": 251,
+    "controls": 462,
+    "matched": 154,
+    "status_counts": {
+      "matched": 154,
+      "insufficient_exact_controls": 94,
+      "missing_causal_matching_support": 3
+    }
+  },
+  "no_audit_entry_point": true,
+  "no_outcome_entry_point": true,
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false
+}
