@@ -5305,6 +5305,28 @@ experiments:
       cannot pass90%/80 gates. Finite mechanism test, not a candidate nomination.
       All89 old control requests retained, including old invalid risks. No audit.
 
+  - experiment_id: exp-btcusdtp-1h-prior4h-colour-preholdout-20260906-v13
+    source_repo: darkforest-x/fable-trading
+    source_commit: "0c31a72"
+    status: active
+    question: >-
+      Does prior completed4h colour at K1 OPEN improve V5 full-opportunity
+      net returns and same fixed-control excess without changing execution?
+    single_variable: >-
+      One pure40bar4hHL2/SMA colour entry gate, no slope/ATR gate. Original251
+      cases462controls154triples;20bp,K1stop,72h,native5mtrueflip unchanged.
+    result: >-
+      Registered before first V13 price run. No result yet. Explicit tri-state
+      accounting preserves known abstention0 and unknownNaN, full denominators.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/active/exp-btcusdtp-1h-prior4h-colour-preholdout-20260906-v13/PROJECT_PLAN.md
+    reuse_allowed: false
+    notes: >-
+      Parent commit above; builder commit recorded before replay. Reused2023--2024
+      only; known61.35% matching coverage cannot pass90%. NoTV/live/holdout change.
+
   - experiment_id: exp-btcusdtp-1h-frozen-ma-exit-preholdout-20260906-v12
     source_repo: darkforest-x/fable-trading
     source_commit: "c5ce2f2"
