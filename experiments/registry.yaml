@@ -5244,8 +5244,8 @@ experiments:
 
   - experiment_id: exp-btcusdtp-1h-colour-transition-preholdout-20260906-v5
     source_repo: darkforest-x/fable-trading
-    source_commit: "7d9fa0a"
-    status: active
+    source_commit: "af9d4d8"
+    status: rejected
     question: >-
       Does requiring a genuine native5m aligned-to-opposite edge improve
       hourly impulse exits, instead of exiting an already-opposite state?
@@ -5253,11 +5253,20 @@ experiments:
       Opposite-state versus actual colour transition; exact V4 maternal
       requests, controls, initial stop, costs and absolute deadline fixed.
       Direct251 primary, complete K2 maternal policy diagnostic only.
-    result: "Preregistered before entry-colour diagnostics or new outcomes."
+    result: >-
+      Direct251 net -14.02 to-14.31bp; K2same55 -22.92 to-22.45bp.
+      K2old27 immediate exits all had opposite entry5m colour. Trueflip
+      doubles winners4to8 but hardstops2to11; nine fail before arming.
+      All fourfolds negative. Matchedcoverage61.35%; no audit opened.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.html
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts:
+      - btcusdtp-hourly-transition-v5-development
+      - btcusdtp-hourly-transition-v5-verification
+      - btcusdtp-hourly-impulse-v1-report
+      - btcusdtp-hourly-impulse-v1-html
     reuse_allowed: false
     notes: >-
       Reused2023-2024 only. Existing61.35% matched coverage cannot pass90%

@@ -14710,18 +14710,18 @@ artifacts:
     artifact_type: report
     role: canonical_chinese_negative_result_and_trade_postmortem_report
     source_repo: darkforest-x/fable-trading
-    source_commit: "a169fa6"
+    source_commit: "af9d4d8"
     source_path: analysis/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.md
-    sha256: "3bce29766c6d03d967ad0e1f366f3c98f86b0b6cb8c52af48931d0e6f74008fb"
-    size_bytes: 36982
+    sha256: "93efcbe71191e8159c7e2b23cbd7c48c35fb075cd06c21d159cc850f7d4bb8e7"
+    size_bytes: 44099
     storage_uri: "repo://analysis/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.md"
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
-    generator_commit: "a169fa6"
+    generator_commit: "af9d4d8"
     config_hash: "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
     data_cutoff: "2026-02-28T16:00:00Z"
-    notes: "Four rejected experiments; includes original-mother versus actual-trade denominators, same-mother timing decomposition, missed winners, causal controls and fast-exit caveat."
+    notes: "Five rejected experiments; preserves V1-V4 and adds actual entry-colour state, true transitions, failure cancellation, mother denominators and unchanged controls."
 
   - artifact_id: btcusdtp-hourly-impulse-v1-html
     artifact_type: report
@@ -14729,8 +14729,8 @@ artifacts:
     source_repo: darkforest-x/fable-trading
     source_commit: "be28e69"
     source_path: analysis/html/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.html
-    sha256: "dbd008a0d24d26cd411ddf4ec8931d1322f2ae45b5662469a8a93ba5f40134d8"
-    size_bytes: 665106
+    sha256: "3e31e24f43385a94ae1051b9ee038dbaa045353668ac68da1a998935909323b9"
+    size_bytes: 758608
     storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.html"
     holdout_status: pre_holdout
     training_eligible: false
@@ -14746,8 +14746,8 @@ artifacts:
     source_repo: darkforest-x/fable-trading
     source_commit: "be28e69"
     source_path: analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/artifact.json
-    sha256: "8442e57303e9aebfd9d98521a88d1a10b4346c8d65f6f998a159aa7cc747eedd"
-    size_bytes: 53864
+    sha256: "1ff2a8c9714a45c8ac4e15342944a9a72e2e5e96c25da4df66a330bfa2e48b59"
+    size_bytes: 61812
     storage_uri: "repo://analysis/output/btcusdtp_1h_impulse_ltf_exit_20260906_v1/artifact.json"
     holdout_status: pre_holdout
     training_eligible: false
@@ -14755,7 +14755,7 @@ artifacts:
     generator_commit: "be28e69"
     config_hash: "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
     data_cutoff: "2026-02-28T16:00:00Z"
-    notes: "One native chart, twenty-one narrative/chart blocks, actual SQLite presentation query over saved CSV; full preserved report covers V1-V4."
+    notes: "One native chart, twenty-four narrative/chart blocks, actual SQLite presentation query over saved CSV; full preserved report covers V1-V5."
 
   - artifact_id: btcusdtp-hourly-staged-v2-development
     artifact_type: manifest
@@ -14841,3 +14841,37 @@ artifacts:
     config_hash: "a5ab44feb152afc8a89dd659d7ef4d4af198e9120cb7e012597207df3495c3c7"
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: "Manual post-run saved-ledger audit, not preregistration or an independent price replay. Same55 timing improvement and missed196 decomposition, early-exit caveat."
+
+  - artifact_id: btcusdtp-hourly-transition-v5-development
+    artifact_type: manifest
+    role: entry_colour_state_vs_transition_fixed_mother_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9d4d8"
+    source_path: experiments/active/exp-btcusdtp-1h-colour-transition-preholdout-20260906-v5/results/summary.json
+    sha256: "4ab9e30e7c95aa672d9359a16b00bfe82d204f5e2980c41672cf1e09b0347d3a"
+    size_bytes: 41369
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-colour-transition-preholdout-20260906-v5/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "af9d4d8"
+    config_hash: "faabd4a9a90e13ef65d7825ab2beb05227c0a5d7da5300b1a2031806c97aec55"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Fourarms rejected; direct4 and K2 27 changed paths only. Trueflip does not fix postcost profitability. No audit or live change."
+
+  - artifact_id: btcusdtp-hourly-transition-v5-verification
+    artifact_type: report
+    role: independent_saved_ledger_clock_cost_parity_and_failure_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "af9d4d8"
+    source_path: experiments/active/exp-btcusdtp-1h-colour-transition-preholdout-20260906-v5/VERIFICATION.md
+    sha256: "b1aefa6352024568616b0549f1f3faa3ffd7a1258cc65568e368486919bdb5bd"
+    size_bytes: 6196
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-colour-transition-preholdout-20260906-v5/VERIFICATION.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "af9d4d8"
+    config_hash: "faabd4a9a90e13ef65d7825ab2beb05227c0a5d7da5300b1a2031806c97aec55"
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Postrun review, not prereg or independent raw replay. Records1672closures,857oldparity,51vs47losers and gain-loss cancellation."
