@@ -13,6 +13,12 @@ position, without compounding. Cost is one fixed round-trip fraction of original
 entry notional (including partial exits); funding is explicitly not modelled.
 Intrabar SL/TP collisions are stop-first. Excursions on a barrier-exit bar use
 the open and fill only because the order of OHLC extrema is unknown.
+
+The optional native-5m transition exit uses an adjacent completed-bar colour
+edge, not an opposite-colour state. Its clock follows pandas 2.3.3 Timestamp /
+Timedelta arithmetic and TradingView's confirmed-bar availability semantics:
+https://pandas.pydata.org/pandas-docs/version/2.3.3/reference/api/pandas.Timedelta.html
+https://www.tradingview.com/pine-script-docs/language/execution-model/
 """
 from __future__ import annotations
 
@@ -57,7 +63,8 @@ def _policy(policy: Mapping[str, Any]) -> Dict[str, Any]:
     if selected["exit_mode"] == "hour_colour":
         selected["management_minutes"] = 60
     if selected["exit_mode"] not in {
-        "colour", "hour_colour", "slope_colour", "partial_colour", "fixed_3r"
+        "colour", "hour_colour", "slope_colour", "partial_colour", "fixed_3r",
+        "transition_colour",
     }:
         raise ValueError("Unknown exit_mode")
     minutes = selected["management_minutes"]
@@ -66,6 +73,8 @@ def _policy(policy: Mapping[str, Any]) -> Dict[str, Any]:
         raise ValueError("management_minutes must be 5, 15, or 60")
     if isinstance(confirmations, bool) or int(confirmations) != confirmations or confirmations < 1:
         raise ValueError("confirmations must be a positive integer")
+    if selected["exit_mode"] == "transition_colour" and (minutes != 5 or confirmations != 1):
+        raise ValueError("transition_colour requires management_minutes=5 and confirmations=1")
     if not np.isfinite(selected["max_hours"]) or selected["max_hours"] <= 0:
         raise ValueError("max_hours must be finite and positive")
     if (pd.Timedelta(hours=selected["max_hours"]).value % FIVE_MINUTES.value) != 0:
@@ -73,6 +82,54 @@ def _policy(policy: Mapping[str, Any]) -> Dict[str, Any]:
     if not np.isfinite(selected["cost_fraction"]) or selected["cost_fraction"] < 0:
         raise ValueError("cost_fraction must be finite and nonnegative")
     return selected
+
+
+def _transition_observation(
+    bar: Any,
+    available_at: pd.Timestamp,
+    time_index: Mapping[pd.Timestamp, int],
+    prices: np.ndarray,
+    segments: np.ndarray,
+) -> tuple:
+    """Validate one native-5m colour using information available at its close.
+
+    Only the exact just-completed management bar and its source raw5 OHLC are
+    inspected. At ``available_at`` only the new raw5 open is read. Management
+    segment numbers have their own counting space: source continuity instead
+    maps both timestamps to raw5 segment numbers. The slope is not used by this
+    exit and a missing slope does not invalidate an otherwise known colour.
+    """
+    if bar is None:
+        return None, "missing_management"
+    if bar.open_time + FIVE_MINUTES != available_at:
+        return None, "stale_management"
+    try:
+        side, ma, low, high, close = map(float, (bar.ma_side, bar.ma, bar.low, bar.high, bar.close))
+    except (TypeError, ValueError):
+        return None, "invalid_management"
+    if not np.isfinite([side, ma, low, high, close]).all():
+        return None, "nonfinite_management"
+    if side not in (-1.0, 1.0) or min(ma, low, high, close) <= 0 or not low <= close <= high:
+        return None, "invalid_management"
+    if pd.isna(bar.segment_id) or (isinstance(bar.segment_id, (float, np.floating)) and not np.isfinite(bar.segment_id)):
+        return None, "unknown_management_segment"
+    source_index = time_index.get(bar.open_time)
+    next_index = time_index.get(available_at)
+    if source_index is None or next_index is None:
+        return None, "missing_source"
+    source_segments = (segments[source_index], segments[next_index])
+    unknown_source_segment = any(
+        pd.isna(segment) or (isinstance(segment, (float, np.floating)) and not np.isfinite(segment))
+        for segment in source_segments
+    )
+    if unknown_source_segment or source_segments[0] != source_segments[1]:
+        return None, "source_segment_change"
+    source_open, source_high, source_low, source_close = prices[source_index]
+    if not np.isfinite(prices[source_index]).all() or min(prices[source_index]) <= 0 or not source_low <= min(source_open, source_close) <= max(source_open, source_close) <= source_high:
+        return None, "invalid_completed_source"
+    if not np.isfinite(prices[next_index, 0]) or prices[next_index, 0] <= 0:
+        return None, "invalid_source_open"
+    return side, "valid"
 
 
 def simulate_events(
@@ -97,6 +154,13 @@ def simulate_events(
     beginning before entry cannot trigger any exit. In ``partial_colour`` half
     the original position exits once on first opposite colour; its remainder
     exits after any two consecutive opposite management bars.
+
+    ``transition_colour`` is explicitly native 5m / one confirmation. The bar
+    ending exactly at entry initializes colour but cannot exit. Only a valid
+    aligned-to-opposite edge across adjacent complete bars exits, earliest at
+    entry + 5m. Missing/invalid observations reset the edge; a management-segment
+    change starts a fresh sequence. An initially opposite/unknown state must
+    first observe an aligned complete bar. No other mode uses this state.
     """
     selected = _policy(policy)
     raw = _validated_frame(raw5, ("open_time", "open", "high", "low", "close", "segment_id"), "raw5")
@@ -143,6 +207,17 @@ def simulate_events(
             max_favourable_r=0.0, max_adverse_r=0.0,
             bars_to_first_positive=np.nan, funding_modelled=False,
         )
+        if mode == "transition_colour":
+            result.update(
+                transition_initial_state="unknown", transition_initial_side=np.nan,
+                transition_initial_reason="entry_not_validated",
+                transition_initial_open_time=pd.NaT,
+                transition_armed_at=pd.NaT, transition_first_armed_at=pd.NaT,
+                transition_trigger_previous_open_time=pd.NaT,
+                transition_trigger_open_time=pd.NaT,
+                transition_trigger_available_at=pd.NaT,
+                transition_reset_count=0, transition_last_reset_reason="",
+            )
         index = time_index.get(entry_time)
         if index is None or (cutoff is not None and entry_time >= cutoff):
             outputs.append(result)
@@ -174,6 +249,24 @@ def simulate_events(
         previous_open = None
         previous_management_close = None
         completed = False
+        transition_previous_side = None
+        transition_previous_bar = None
+        if mode == "transition_colour":
+            initial_management = management_at.get(entry_time)
+            transition_previous_side, initial_reason = _transition_observation(
+                initial_management, entry_time, time_index, prices, segments,
+            )
+            result["transition_initial_reason"] = initial_reason
+            if transition_previous_side is not None:
+                transition_previous_bar = initial_management
+                result.update(
+                    transition_initial_side=transition_previous_side,
+                    transition_initial_state="aligned" if direction * transition_previous_side > 0 else "opposite",
+                    transition_initial_open_time=initial_management.open_time,
+                )
+                if direction * transition_previous_side > 0:
+                    result["transition_armed_at"] = entry_time
+                    result["transition_first_armed_at"] = entry_time
 
         def record_excursion(high: float, low: float, bars: int) -> None:
             favourable = (high - entry) / risk if direction == 1 else (entry - low) / risk
@@ -221,7 +314,42 @@ def simulate_events(
                 break
 
             management_bar = management_at.get(now)
-            if mode != "fixed_3r" and management_bar is not None and management_bar.open_time >= entry_time:
+            if mode == "transition_colour" and now > entry_time:
+                current_side, reset_reason = _transition_observation(
+                    management_bar, now, time_index, prices, segments,
+                )
+                consecutive = (
+                    transition_previous_bar is not None and management_bar is not None
+                    and management_bar.open_time == transition_previous_bar.open_time + FIVE_MINUTES
+                    and management_bar.segment_id == transition_previous_bar.segment_id
+                )
+                if current_side is None or not consecutive:
+                    if current_side is not None and transition_previous_bar is not None:
+                        reset_reason = "management_sequence_change"
+                    transition_previous_side = None
+                    result["transition_armed_at"] = pd.NaT
+                    if current_side is None or transition_previous_bar is not None:
+                        result["transition_reset_count"] += 1
+                        result["transition_last_reset_reason"] = reset_reason
+                if current_side is not None:
+                    if transition_previous_side is not None and direction * transition_previous_side > 0 and direction * current_side < 0:
+                        result.update(
+                            transition_trigger_previous_open_time=transition_previous_bar.open_time,
+                            transition_trigger_open_time=management_bar.open_time,
+                            transition_trigger_available_at=now,
+                        )
+                        finish(now, open_, "transition_colour_exit", True)
+                        completed = True
+                        break
+                    if direction * current_side > 0 and pd.isna(result["transition_armed_at"]):
+                        result["transition_armed_at"] = now
+                        if pd.isna(result["transition_first_armed_at"]):
+                            result["transition_first_armed_at"] = now
+                    transition_previous_bar = management_bar
+                    transition_previous_side = current_side
+                else:
+                    transition_previous_bar = None
+            elif mode not in {"fixed_3r", "transition_colour"} and management_bar is not None and management_bar.open_time >= entry_time:
                 if previous_management_close is not None and now != previous_management_close + interval:
                     opposite_streak = 0
                 previous_management_close = now

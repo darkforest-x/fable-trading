@@ -1,0 +1,42 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-colour-transition-preholdout-20260906-v5",
+  "base_config": "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json",
+  "base_config_sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a",
+  "parent_results": "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results",
+  "inputs": {
+    "original_mothers.csv.gz": "b3f442ad8b0959b19cb5ae58fd40bc6a3bf40b455b4be31f3758d53940eea3e6",
+    "control_mothers.csv.gz": "01050c7a9602f469406df515edcc73ef2f4c9db2d46529e25030934012eebd5a",
+    "case_wait_status.csv.gz": "c8a41ebe3b4812de1dd5e4a6ad37257c545c7da516c837ecdf4d31d5dc3c297c",
+    "control_wait_status.csv.gz": "581035a17d0ee8db6cf5671aa0ecd79c733e4873a2a3957a43937f6ff9f4989e",
+    "direct_k1_stop_case_requests.csv.gz": "b1317c6593447975634325a1d5c27f39a73a6519c5a44f6195d3218e918f4e7e",
+    "direct_k1_stop_control_requests.csv.gz": "e22160960cfa9ff675dacce72dc652c65144bd3443e3eaf27f112165cdb2b74e",
+    "wait_k2_k1_stop_case_requests.csv.gz": "58e6b2e576d0ec482b72b0db92e97b5822b19184299b3d5c1535c1155557e8e7",
+    "wait_k2_k1_stop_control_requests.csv.gz": "ddeb411c2d6ac1fa7e8b62161adddb87c8f03146e3a1ab2f6c7442a2f5438198",
+    "direct_k1_stop_case_trades.csv.gz": "d59b05a6bb108380f895cb191c053881a6f7c47cdbc1707d9c41853cc3fc9c4b",
+    "direct_k1_stop_control_trades.csv.gz": "0a1139a4dcbfb8a22d105eab798537250df00ba3196fd860916e138dd11c469e",
+    "wait_k2_k1_stop_case_trades.csv.gz": "b0517b66324024a8964ac8171f3a92b580a3ee1a492446ce5bc89df737167d1c",
+    "wait_k2_k1_stop_control_trades.csv.gz": "981c24ec17c6052ab103334c6afd0a4d6c903c2a32b6f7151fd32d72cc16b328"
+  },
+  "cohorts": ["direct_k1_stop", "wait_k2_k1_stop"],
+  "exit_modes": ["colour", "transition_colour"],
+  "primary_cohort": "direct_k1_stop",
+  "policy_id": "5m_native40",
+  "selection": {
+    "minimum_events": 80, "minimum_per_fold": 12, "positive_folds": 4,
+    "minimum_profit_factor": 1.1, "minimum_active_months": 12,
+    "minimum_months_per_fold": 3, "matched_coverage": 0.9
+  },
+  "inference": {
+    "unit": "paired original mother, known non-entry zero, unknown NaN",
+    "contrasts": "transition minus state for direct primary and K2 diagnostic; Holm over two",
+    "method": "9999 calendar-month cluster bootstrap 95% percentile CI and one-sided sign flip, seed 20260906",
+    "selection_p": 0.01,
+    "diagnostic_strata": ["aligned", "opposite", "unknown"],
+    "limitations": "Not randomized live treatment; reused historical paths, month dependence and sequential search prevent confirmatory interpretation."
+  },
+  "lineage": "V1-V4 reused 2023-2024. Exact V4 original/control mothers, waiting requests and terminations are pinned, not selected by returns. K2 is a pre-existing alternative policy, never a future-defined filter for direct entry. No 2025+ prices or new holdout use.",
+  "no_audit_entry_point": true,
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false
+}

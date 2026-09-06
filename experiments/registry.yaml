@@ -5241,3 +5241,25 @@ experiments:
       explicitly different from legacy2-8. Source K2 geometry is evaluated
       before intermediate-colour invalidation. Observed non-entry zeros and
       unknown paths remain distinct. No audit, TradingView or live mutation.
+
+  - experiment_id: exp-btcusdtp-1h-colour-transition-preholdout-20260906-v5
+    source_repo: darkforest-x/fable-trading
+    source_commit: "7d9fa0a"
+    status: active
+    question: >-
+      Does requiring a genuine native5m aligned-to-opposite edge improve
+      hourly impulse exits, instead of exiting an already-opposite state?
+    single_variable: >-
+      Opposite-state versus actual colour transition; exact V4 maternal
+      requests, controls, initial stop, costs and absolute deadline fixed.
+      Direct251 primary, complete K2 maternal policy diagnostic only.
+    result: "Preregistered before entry-colour diagnostics or new outcomes."
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Reused2023-2024 only. Existing61.35% matched coverage cannot pass90%
+      gate; this is a mechanism comparison, not independent confirmation.
+      No audit, TradingView, promotion or live mutation.
