@@ -111,6 +111,9 @@ def coverage(frame: pd.DataFrame, month: str) -> dict:
         if not np.allclose(frame[f'taker_buy_{unit}_volume'] + frame[f'taker_sell_{unit}_volume'],
                            frame[total], rtol=1e-14, atol=1e-12):
             raise BinanceArchiveError('derived flow conservation failed')
+        if not np.allclose(frame[f'taker_buy_{unit}_volume'] - frame[f'taker_sell_{unit}_volume'],
+                           frame[f'delta_{unit}_volume'], rtol=1e-14, atol=1e-12):
+            raise BinanceArchiveError('derived delta conservation failed')
     # Diagnostic only: float/source decimal rounding may create boundary noise.
     # Do not reject, clip or filter bars using these exact-bound comparisons.
     vwap_diagnostics = {}
@@ -172,7 +175,7 @@ def sources() -> None:
                          months=len(rows)), ensure_ascii=False), flush=True)
 
 
-def audit_month(receipt: dict, config: dict) -> dict:
+def audit_month(receipt: dict, config: dict, *, allow_network: bool = True) -> dict:
     month = receipt['month']
     unknown = dict(month=month, expected_bars=len(grid(month)), valid_bars=0,
                    missing_bars=0, unknown_bars=len(grid(month)), coverage_rate=0)
@@ -193,7 +196,12 @@ def audit_month(receipt: dict, config: dict) -> dict:
         payload = own_zip.read_bytes()
         origin = 'experiment_download'
     else:
-        payload = _request_bytes(receipt['archive_url'], retries=3, timeout=25)
+        if not allow_network:
+            raise BinanceArchiveError('Verification cannot fetch new prices')
+        try:
+            payload = _request_bytes(receipt['archive_url'], retries=3, timeout=25)
+        except BinanceArchiveError as exc:
+            return dict(unknown, status='unknown', reason='zip_request_failed: '+str(exc))
         if payload is None:
             return dict(unknown, status='unknown', reason='zip_404')
         origin = 'experiment_download'
@@ -271,8 +279,51 @@ def audit() -> None:
     print(json.dumps({k:v for k,v in result.items() if k not in ('monthly','source_hashes')}, ensure_ascii=False), flush=True)
 
 
+def verify() -> None:
+    """Recheck original outputs after a reviewed audit-only code correction.
+
+    Original source_manifest and summary are immutable. Source scope, raw SHA,
+    parser and config MUST remain frozen. No new network reads are allowed.
+    Record the current verifier commit separately, never relabel the original
+    result as having been produced by later code.
+    """
+    config, current = checked_sources()
+    manifest_raw = (HERE/'source_manifest.json').read_bytes()
+    manifest = json.loads(manifest_raw)
+    summary_raw = (HERE/'summary.json').read_bytes()
+    summary = json.loads(summary_raw)
+    if digest(manifest_raw) != summary['source_manifest_sha256']:
+        raise BinanceArchiveError('Original manifest drift')
+    for rel, expected in manifest['source_hashes'].items():
+        original = subprocess.check_output(['git', 'show', manifest['source_commit']+':'+rel], cwd=ROOT)
+        if digest(original) != expected:
+            raise BinanceArchiveError('Original source lineage drift')
+        if rel != str(Path(__file__).relative_to(ROOT)) and current['source_hashes'][rel] != expected:
+            raise BinanceArchiveError('Parser/config cannot change in an audit correction')
+    if tuple(r['month'] for r in manifest['months']) != MONTHS:
+        raise BinanceArchiveError('Original roster drift')
+    for receipt in manifest['months']:
+        name = f"BTCUSDT-5m-{receipt['month']}.zip"
+        if not ((ROOT/config['raw_cache']/name).exists() or
+                (ROOT/config['data_output']/'downloads'/name).exists()):
+            raise BinanceArchiveError('Verification cannot fetch new prices')
+    rows = [audit_month(receipt, config, allow_network=False) for receipt in manifest['months']]
+    if rows != summary['monthly'] or any(summary[k] != v for k,v in aggregate(rows).items()):
+        raise BinanceArchiveError('Corrected checks disagree with original saved result')
+    if (HERE/'summary.json').read_bytes() != summary_raw or (HERE/'source_manifest.json').read_bytes() != manifest_raw:
+        raise BinanceArchiveError('Original evidence changed during verification')
+    result = dict(status='passed', original_source_commit=manifest['source_commit'],
+        verifier_source_commit=current['source_commit'], verifier_source_hashes=current['source_hashes'],
+        summary_sha256=digest(summary_raw), source_manifest_sha256=digest(manifest_raw),
+        validated_months=len(rows), validated_bars=sum(r['valid_bars'] for r in rows),
+        exact_all_monthly_fields=True, original_summary_unchanged=True,
+        no_new_network_or_dates=True, generated_at=pd.Timestamp.now(tz='UTC').isoformat())
+    save_json(HERE/'verification.json', result)
+    print(json.dumps(result), flush=True)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('phase', choices=['sources', 'audit'])
+    parser.add_argument('phase', choices=['sources', 'audit', 'verify'])
     args = parser.parse_args()
-    sources() if args.phase == 'sources' else audit()
+    {'sources':sources, 'audit':audit, 'verify':verify}[args.phase]()

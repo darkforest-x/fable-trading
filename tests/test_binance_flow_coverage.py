@@ -52,7 +52,7 @@ def test_full_calendar_and_flow_color_not_identical():
     assert result['total_vwap_outside_ohlc_bars'] == 0
 
 
-@pytest.mark.parametrize('change', ['duplicate', 'shifted', 'null', 'clock', 'close', 'flow', 'inf'])
+@pytest.mark.parametrize('change', ['duplicate', 'shifted', 'null', 'clock', 'close', 'flow', 'delta', 'inf'])
 def test_corrupted_outputs_rejected(change):
     f = frame()
     if change == 'duplicate':
@@ -67,6 +67,8 @@ def test_corrupted_outputs_rejected(change):
         f.loc[0, 'close_time'] += pd.Timedelta(milliseconds=1)
     elif change == 'flow':
         f.loc[0, 'taker_sell_quote_volume'] = 999
+    elif change == 'delta':
+        f.loc[0, 'delta_quote_volume'] = 999
     elif change == 'inf':
         f.loc[0, 'quote_volume'] = float('inf')
     with pytest.raises(BinanceArchiveError):
@@ -120,3 +122,42 @@ def test_aggregate_unknown_is_not_zero_volume_or_missing():
     assert result['candle_flow_opposite_rate'] is None
     with pytest.raises(BinanceArchiveError, match='roster'):
         audit.aggregate(rows[:-1])
+
+
+def valid_receipt(tmp_path, monkeypatch):
+    monkeypatch.setattr(audit, 'ROOT', tmp_path)
+    buffer = io.BytesIO()
+    row = '1704067200000,101,102,99,100,10,1704067499999,1000,7,7,700,0\n'
+    with zipfile.ZipFile(buffer, 'w') as z:
+        z.writestr('BTCUSDT-5m-2024-01.csv', row)
+    payload = buffer.getvalue()
+    expected = audit.digest(payload)
+    checksum = (expected+'  BTCUSDT-5m-2024-01.zip\n').encode()
+    audit.immutable(tmp_path/'new/checksums/x', checksum)
+    receipt = dict(month='2024-01', status='verified_checksum', checksum_file='x',
+        checksum_sha256=audit.digest(checksum), expected_sha256=expected,
+        archive_url='https://data.binance.vision/fixture-only')
+    return receipt, payload, dict(data_output='new', raw_cache='old')
+
+
+def test_valid_zip_roundtrip_replay_without_network(tmp_path, monkeypatch):
+    receipt, payload, config = valid_receipt(tmp_path, monkeypatch)
+    audit.immutable(tmp_path/'old/BTCUSDT-5m-2024-01.zip', payload)
+    monkeypatch.setattr(audit, '_request_bytes', lambda *a, **k: pytest.fail('network forbidden'))
+    first = audit.audit_month(receipt, config)
+    second = audit.audit_month(receipt, config)
+    assert first == second
+    assert first['status'] == 'gapped' and first['valid_bars'] == 1
+    assert first['csv_roundtrip_exact'] and first['ohlcv_exact_parity']
+    assert audit.digest((tmp_path/first['output_path']).read_bytes()) == first['output_sha256']
+
+
+def test_zip_network_error_retains_unknown_month(tmp_path, monkeypatch):
+    receipt, _, config = valid_receipt(tmp_path, monkeypatch)
+    def fail(*args, **kwargs):
+        raise BinanceArchiveError('request failed')
+    monkeypatch.setattr(audit, '_request_bytes', fail)
+    result = audit.audit_month(receipt, config)
+    assert result['status'] == 'unknown'
+    assert result['unknown_bars'] == 8928 and result['missing_bars'] == 0
+    assert result['reason'].startswith('zip_request_failed')
