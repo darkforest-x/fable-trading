@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending_source_freeze
+    status: active
+    question: Does pre-K1 directional volume improvement retain cross-time support?
+    single_variable: Add derived lagged DeltaPulse20/5 slope gate to originalSMA251 and744 own-clock controls.
+    result: Frozen before support;no new outcome labels or2025plus inputs.
+    canonical_report: experiments/active/exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31/PROJECT_PLAN.md
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: Prior100hour warmup;80total12perhalf12months3monthsperhalf;not native source signal or orderflow.
+
   - experiment_id: exp-btcusdtp-1h-classifier-economics-preholdout-20260907-v30
     source_repo: darkforest-x/fable-trading
     source_commit: "917f333"
