@@ -1,0 +1,288 @@
+{
+  "status": "alignment_verified_not_economics",
+  "generated_at": "2026-09-07T08:35:11.561092+00:00",
+  "source_commit": "372ed6a3843a3efded25a1ea2c5391dbf73f1cea",
+  "config_sha256": "363399449f1368f0a55c31a571b452546e1beb5120159a6b3d732bb74e406b24",
+  "cohorts": {
+    "case": {
+      "mothers": 251,
+      "requests": 55,
+      "wait_status_counts": {
+        "expired_no_k2": 100,
+        "invalidated_wrong_close": 95,
+        "request_emitted": 55,
+        "invalidated_ma_colour": 1
+      }
+    },
+    "control": {
+      "mothers": 462,
+      "requests": 89,
+      "wait_status_counts": {
+        "expired_no_k2": 257,
+        "invalidated_wrong_close": 113,
+        "request_emitted": 89,
+        "invalidated_ma_colour": 3
+      }
+    }
+  },
+  "groups": [
+    {
+      "cohort": "case",
+      "window_kind": "k1",
+      "status": "complete",
+      "windows": 251,
+      "defined": 251,
+      "source_bars": 3012,
+      "zero_bars": 0
+    },
+    {
+      "cohort": "case",
+      "window_kind": "k2",
+      "status": "complete",
+      "windows": 55,
+      "defined": 55,
+      "source_bars": 660,
+      "zero_bars": 0
+    },
+    {
+      "cohort": "case",
+      "window_kind": "post_k1_through_k2",
+      "status": "complete",
+      "windows": 55,
+      "defined": 55,
+      "source_bars": 2160,
+      "zero_bars": 0
+    },
+    {
+      "cohort": "control",
+      "window_kind": "k1",
+      "status": "complete",
+      "windows": 462,
+      "defined": 462,
+      "source_bars": 5544,
+      "zero_bars": 0
+    },
+    {
+      "cohort": "control",
+      "window_kind": "k2",
+      "status": "complete",
+      "windows": 89,
+      "defined": 89,
+      "source_bars": 1068,
+      "zero_bars": 0
+    },
+    {
+      "cohort": "control",
+      "window_kind": "post_k1_through_k2",
+      "status": "complete",
+      "windows": 89,
+      "defined": 89,
+      "source_bars": 4140,
+      "zero_bars": 0
+    }
+  ],
+  "windows": 1001,
+  "historical_status_counts": {
+    "complete": 1001
+  },
+  "observed_delivery_status_counts": {
+    "unavailable_bars": 1001
+  },
+  "prefix_checks": [
+    {
+      "cutoff": "2023-04-01T00:00:00+00:00",
+      "windows": 94,
+      "exact": true
+    },
+    {
+      "cutoff": "2023-07-01T00:00:00+00:00",
+      "windows": 209,
+      "exact": true
+    },
+    {
+      "cutoff": "2023-10-01T00:00:00+00:00",
+      "windows": 365,
+      "exact": true
+    },
+    {
+      "cutoff": "2024-01-01T00:00:00+00:00",
+      "windows": 483,
+      "exact": true
+    },
+    {
+      "cutoff": "2024-04-01T00:00:00+00:00",
+      "windows": 610,
+      "exact": true
+    },
+    {
+      "cutoff": "2024-07-01T00:00:00+00:00",
+      "windows": 741,
+      "exact": true
+    },
+    {
+      "cutoff": "2024-10-01T00:00:00+00:00",
+      "windows": 860,
+      "exact": true
+    },
+    {
+      "cutoff": "2025-01-01T00:00:00+00:00",
+      "windows": 1001,
+      "exact": true
+    }
+  ],
+  "files": {
+    "data/k1k2_genuine_flow_alignment_v35/case_mothers.csv": {
+      "sha256": "5ef363183943369953d0d1eff9b6c35f412c87be81d1a7dcbb46b5635157a5ec",
+      "rows": 251,
+      "columns": [
+        "event_id",
+        "signal_time",
+        "decision_time",
+        "direction",
+        "fold"
+      ]
+    },
+    "data/k1k2_genuine_flow_alignment_v35/case_requests.csv": {
+      "sha256": "6bb958fe17ffb1b7b73939a13d8a80f0764a9c0c7629b281d4dc140725d76fe4",
+      "rows": 55,
+      "columns": [
+        "event_id",
+        "direction",
+        "fold",
+        "mother_signal_time",
+        "mother_decision_time",
+        "k2_time",
+        "decision_time",
+        "wait_hours"
+      ]
+    },
+    "data/k1k2_genuine_flow_alignment_v35/case_statuses.csv": {
+      "sha256": "0581ef8352e54ff443ca81bb8a076af5e9874a6e4000476aca9fcceed04c3332",
+      "rows": 251,
+      "columns": [
+        "event_id",
+        "mother_signal_time",
+        "mother_decision_time",
+        "terminal_time",
+        "status",
+        "k2_time"
+      ]
+    },
+    "data/k1k2_genuine_flow_alignment_v35/control_mothers.csv": {
+      "sha256": "bdd3343f2eb1b05563094e5bccba4e99a38bc9c73bb495048c6e1c8e463a9696",
+      "rows": 462,
+      "columns": [
+        "event_id",
+        "signal_time",
+        "decision_time",
+        "direction",
+        "fold"
+      ]
+    },
+    "data/k1k2_genuine_flow_alignment_v35/control_requests.csv": {
+      "sha256": "b0f7d8034614585cb102237ca5de12bd4e8f71c284275538a535849ac85d6b20",
+      "rows": 89,
+      "columns": [
+        "event_id",
+        "direction",
+        "fold",
+        "mother_signal_time",
+        "mother_decision_time",
+        "k2_time",
+        "decision_time",
+        "wait_hours"
+      ]
+    },
+    "data/k1k2_genuine_flow_alignment_v35/control_statuses.csv": {
+      "sha256": "8d8806520d294b1bc220b86ee33c1b8b87232bccb5795745ede808efa4384c21",
+      "rows": 462,
+      "columns": [
+        "event_id",
+        "mother_signal_time",
+        "mother_decision_time",
+        "terminal_time",
+        "status",
+        "k2_time"
+      ]
+    },
+    "data/k1k2_genuine_flow_alignment_v35/windows.csv": {
+      "sha256": "92168af9cb990d8d948870f281d3534b155ee0eb7ee12a02c55640938138e635",
+      "rows": 1001,
+      "columns": [
+        "window_id",
+        "event_id",
+        "cohort",
+        "fold",
+        "window_kind",
+        "window_start",
+        "window_end",
+        "decision_time",
+        "direction"
+      ]
+    },
+    "data/k1k2_genuine_flow_alignment_v35/historical_features.csv": {
+      "sha256": "685cdf008b2e2201b9912b2c3689a8804a5d06d93c887779d7af45253fed4447",
+      "rows": 1001,
+      "columns": [
+        "window_id",
+        "event_id",
+        "cohort",
+        "fold",
+        "window_kind",
+        "window_start",
+        "window_end",
+        "decision_time",
+        "direction",
+        "expected_bars",
+        "observed_bars",
+        "available_bars",
+        "missing_bars",
+        "unavailable_bars",
+        "zero_volume_bars",
+        "status",
+        "quote_volume_sum",
+        "delta_quote_volume_sum",
+        "imbalance",
+        "directional_imbalance",
+        "flow_defined",
+        "max_source_available_at"
+      ]
+    },
+    "data/k1k2_genuine_flow_alignment_v35/observed_delivery_features.csv": {
+      "sha256": "154d54d41a5b9ba5015e042ca49dbfe986d26aa979d283e85793b11d4671c900",
+      "rows": 1001,
+      "columns": [
+        "window_id",
+        "event_id",
+        "cohort",
+        "fold",
+        "window_kind",
+        "window_start",
+        "window_end",
+        "decision_time",
+        "direction",
+        "expected_bars",
+        "observed_bars",
+        "available_bars",
+        "missing_bars",
+        "unavailable_bars",
+        "zero_volume_bars",
+        "status",
+        "quote_volume_sum",
+        "delta_quote_volume_sum",
+        "imbalance",
+        "directional_imbalance",
+        "flow_defined",
+        "max_source_available_at"
+      ]
+    }
+  },
+  "source_flow_bars": 210528,
+  "source_flow_zero_bars": 38,
+  "zero_bars_in_event_windows": 0,
+  "economic_labels_read": false,
+  "holdout_consumed": false,
+  "execution_source_replaced": false,
+  "training_eligible": false,
+  "production_eligible": false
+}

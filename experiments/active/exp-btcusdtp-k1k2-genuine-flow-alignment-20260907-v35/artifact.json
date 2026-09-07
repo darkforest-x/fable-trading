@@ -1,0 +1,411 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "K1/K2 Flow Clocks · V35",
+    "generatedAt": "2026-09-07T08:42:02.307077+00:00",
+    "sources": [
+      {
+        "id": "report",
+        "label": "V35 · 对齐结论、定义与风险",
+        "path": "analysis/p1_btcusdtp_k1k2_genuine_flow_alignment_v35_20260907.md"
+      },
+      {
+        "id": "summary",
+        "label": "V35 · 原始对齐及八季度回放",
+        "path": "experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/summary.json"
+      },
+      {
+        "id": "config",
+        "label": "V35 · 冻结输入与无收益投影",
+        "path": "experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/config.json"
+      },
+      {
+        "id": "case_status",
+        "label": "V35 · 原事件名单与窗口复算",
+        "path": "experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/report_data.json",
+        "query": {
+          "sql": "SELECT status, COUNT(*) AS mothers,\n        (SELECT COUNT(*) FROM case_statuses) AS total_mothers,\n        1.0*COUNT(*)/(SELECT COUNT(*) FROM case_statuses) AS share\n        FROM case_statuses GROUP BY status ORDER BY mothers DESC, status",
+          "engine": "sqlite",
+          "language": "sql",
+          "executed_at": "2026-09-07T08:37:57.277923+00:00",
+          "tables_used": [
+            "main.case_mothers",
+            "main.case_statuses",
+            "main.features",
+            "main.parents"
+          ],
+          "description": "全部原母群和终态的身份/时钟投影；仅检查状态与原对照覆盖，不读收益",
+          "filters": [
+            "V4 fixed original hourly cohort and original assigned controls; development 2023-2024 only; no outcome selection"
+          ],
+          "metric_definitions": {
+            "share": "terminal-status mother count / all original case mothers; not win rate",
+            "requests": "request_emitted statuses, not filled trades",
+            "source_bar_occurrences": "available 5m bar occurrences across overlapping windows; not distinct bars"
+          }
+        }
+      },
+      {
+        "id": "fold_counts",
+        "label": "V35 · 原事件名单与窗口复算",
+        "path": "experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/report_data.json",
+        "query": {
+          "sql": "SELECT m.fold, COUNT(*) AS mothers,\n        SUM(s.status='request_emitted') AS requests,\n        SUM(s.status='expired_no_k2') AS expired,\n        SUM(s.status='invalidated_wrong_close') AS wrong_close,\n        SUM(s.status='invalidated_ma_colour') AS wrong_colour\n        FROM case_mothers m JOIN case_statuses s USING(event_id)\n        GROUP BY m.fold ORDER BY m.fold",
+          "engine": "sqlite",
+          "language": "sql",
+          "executed_at": "2026-09-07T08:37:57.277923+00:00",
+          "tables_used": [
+            "main.case_mothers",
+            "main.case_statuses",
+            "main.features",
+            "main.parents"
+          ],
+          "description": "全部原母群和终态的身份/时钟投影；仅检查状态与原对照覆盖，不读收益",
+          "filters": [
+            "V4 fixed original hourly cohort and original assigned controls; development 2023-2024 only; no outcome selection"
+          ],
+          "metric_definitions": {
+            "share": "terminal-status mother count / all original case mothers; not win rate",
+            "requests": "request_emitted statuses, not filled trades",
+            "source_bar_occurrences": "available 5m bar occurrences across overlapping windows; not distinct bars"
+          }
+        }
+      },
+      {
+        "id": "alignment",
+        "label": "V35 · 原事件名单与窗口复算",
+        "path": "experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/report_data.json",
+        "query": {
+          "sql": "SELECT cohort,window_kind,status,COUNT(*) AS windows,\n        SUM(flow_defined) AS defined, SUM(available_bars) AS source_bar_occurrences,\n        SUM(zero_volume_bars) AS zero_bar_occurrences\n        FROM features GROUP BY cohort,window_kind,status ORDER BY cohort,window_kind,status",
+          "engine": "sqlite",
+          "language": "sql",
+          "executed_at": "2026-09-07T08:37:57.277923+00:00",
+          "tables_used": [
+            "main.case_mothers",
+            "main.case_statuses",
+            "main.features",
+            "main.parents"
+          ],
+          "description": "全部原母群和终态的身份/时钟投影；仅检查状态与原对照覆盖，不读收益",
+          "filters": [
+            "V4 fixed original hourly cohort and original assigned controls; development 2023-2024 only; no outcome selection"
+          ],
+          "metric_definitions": {
+            "share": "terminal-status mother count / all original case mothers; not win rate",
+            "requests": "request_emitted statuses, not filled trades",
+            "source_bar_occurrences": "available 5m bar occurrences across overlapping windows; not distinct bars"
+          }
+        }
+      },
+      {
+        "id": "control_coverage",
+        "label": "V35 · 原事件名单与窗口复算",
+        "path": "experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/report_data.json",
+        "query": {
+          "sql": "WITH coverage AS (SELECT parent_event_id, COUNT(*) AS n FROM parents GROUP BY parent_event_id)\n        SELECT m.fold,COUNT(*) AS mothers, SUM(COALESCE(c.n,0)=3) AS mothers_with_three_controls,\n        SUM(COALESCE(c.n,0)=0) AS mothers_without_controls,\n        SUM(s.status='request_emitted') AS requests,\n        SUM(s.status='request_emitted' AND COALESCE(c.n,0)=3) AS requests_with_three_original_controls\n        FROM case_mothers m JOIN case_statuses s USING(event_id)\n        LEFT JOIN coverage c ON m.event_id=c.parent_event_id GROUP BY m.fold ORDER BY m.fold",
+          "engine": "sqlite",
+          "language": "sql",
+          "executed_at": "2026-09-07T08:37:57.277923+00:00",
+          "tables_used": [
+            "main.case_mothers",
+            "main.case_statuses",
+            "main.features",
+            "main.parents"
+          ],
+          "description": "全部原母群和终态的身份/时钟投影；仅检查状态与原对照覆盖，不读收益",
+          "filters": [
+            "V4 fixed original hourly cohort and original assigned controls; development 2023-2024 only; no outcome selection"
+          ],
+          "metric_definitions": {
+            "share": "terminal-status mother count / all original case mothers; not win rate",
+            "requests": "request_emitted statuses, not filled trades",
+            "source_bar_occurrences": "available 5m bar occurrences across overlapping windows; not distinct bars"
+          }
+        }
+      }
+    ],
+    "blocks": [
+      {
+        "id": "section_0",
+        "type": "markdown",
+        "layout": "full",
+        "body": "# K1/K2 Flow Clocks · V35"
+      },
+      {
+        "id": "section_1",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## Executive Summary\n\n- **真实成交方向已接到 K1/K2 时钟。** 2023–2024 的 1,001 个事件窗口全部完整，八个季度截点的历史重放逐字段一致，没有使用收益列、未来行情或新参数。\n- **当前瓶颈不再是缺成交量，而是母群太窄。** 原 251 个小时级 K1 只有 55 个形成有效 K2 请求；其中仅 31 个有原来的完整三对照。继续在这小批样本上筛共振阈值，容易把偶然性当规律。\n- **下一步先纠正研究单位，再验证经济价值。** 从完整、因果的 K1→K2 形态生成候选与对照，不能一直套用“直接 K1 入场”留下的小母群。目标模式继续；本轮没有新的盈利结论，也没有更新 TradingView 或实盘。"
+      },
+      {
+        "id": "section_2",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 先分清母信号、请求和交易\n\n**本轮复用的是旧 V4 的固定小时级母群，不是全市场 K1/K2。** 原母信号来自 OKX BTC 永续的大实体或吞没贯穿 SMA40 研究，再分别等待首个合格 K2。主动买卖量来自 Binance USD-M 的同币种五分钟档案，只作外部共振输入，没有替换执行交易所。\n\n“母信号”是在 K1 收盘已成立的机会；“有效 K2 请求”是在之后某根 K2 收盘出现的形态请求；是否真实成交还要经过执行规则。本报告的 **55 是请求数，不是成交数、胜率或盈利笔数**。四个半年度沿用 2023 上半年至 2024 下半年开发区间，历史区间已被多次研究，不能称独立样本外。\n\n本轮只改变真实 flow 与事件的对齐方式，均线、K1/K2 条件、成本、止盈止损、冷却和实盘配置均未修改。SMA40 是旧名单的来源，不是本轮证明的最优周期。"
+      },
+      {
+        "id": "section_3",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 不是缺数据：多数母信号在等到 K2 前已终止\n\n**只有 21.91% 的原母信号形成 K2 请求。** 下图以全部 251 个母信号为分母：100 个等待超时，95 个因中间收盘回到错误一侧失效，55 个有效请求，1 个因 HL2 均线侧烛色失效。这里的颜色是高低价中点相对均线的位置，不是均线斜率。它解释的是旧规则如何减少信号，不能证明被挡掉的行情本来会盈利。\n\n数量最多的两类是等待超时和错误侧收盘，而不是颜色那一类。因此仅继续调颜色共振或均线外观，并不能解决当前母群供给量的问题；贸然放宽中间收盘规则，也还没有经济证据支持。",
+        "sourceId": "case_status"
+      },
+      {
+        "id": "case_status_chart",
+        "type": "chart",
+        "layout": "full",
+        "chartId": "case_status"
+      },
+      {
+        "id": "section_4",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 旧版首个 K2 的规则本身就很严格\n\n**它不是“看见回踩就标”，而是固定 K1 的首个有效回踩。** K1 之后第 1–8 根小时 K 线逐根检查：拒绝影线至少占全烛 25%，实体不超过 50%，收盘拒绝位置至少 25%，触线深度在 0–1.5 ATR，实体必须完整留在交易方向那一侧。均线只能进入拒绝影线，不能进入实体。\n\n有效 K2 的几何形态先判断；如果该根不合格，且收盘或 HL2 颜色到了错误一侧，原 K1 立即失效，不能事后用更后面的漂亮回踩救回这次机会。K2 自身颜色不要求必然同向。这些是源代码的实际先后顺序，不是根据截图补出的解释。间隔 1–8 也是 V4 历史设定，区别于早期 Pine 的 2–8。\n\n本轮没有读取失败机会之后的价格。因此只能确认“在哪条形态规则终止”，尚不能把超时、错误侧收盘等同于“亏损原因”，更不能直接认定应该放宽哪一个参数。"
+      },
+      {
+        "id": "section_5",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 四个半年都很小，原对照并未覆盖全部请求\n\n**原控制记录虽有 462 条，却只覆盖 154 个母信号。** 每个被匹配的母信号各有三条原对照，剩下 97 个母信号没有对照。不能把 462 条记录解释成全 251 个母信号都配齐。\n\n| 开发区间 | 原 K1 母信号 | 有效 K2 请求 | 有三对照的母信号 | 有三对照的 K2 请求 |\n|---|---:|---:|---:|---:|\n| 2023 上半年 | 55 | 13 | 28 | 4 |\n| 2023 下半年 | 66 | 19 | 40 | 12 |\n| 2024 上半年 | 55 | 12 | 41 | 10 |\n| 2024 下半年 | 75 | 11 | 45 | 5 |\n| 合计 | 251 | 55 | 154 | 31 |\n\nK2 请求中原配对覆盖为 **31/55＝56.36%**。原控制自身独立等待后有 89 个 K2 请求，但它们既不是与 55 个案例一一对应，也不能作为一个独立赢家池直接比较。以后比较共振开关时，必须保留所选母事件的全部原对照，包括没有等到 K2 的对照；缺配对则明确缺证据，不补均值。\n\n这不是新的收益判决。它说明在现有 55 个请求里再加一层门，只会进一步减少可用样本。原 V4 预设的至少 80 个事件、每半年至少 12 个以及 90% 匹配覆盖，也不能从这里获得通过声明。"
+      },
+      {
+        "id": "section_6",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 三类特征各自落在正确的决策时刻\n\n**K1 特征不允许偷用后来是否出现 K2。** 全部母信号都保留 K1 特征，等待终态另存，绝不作为 K1 收盘时已经知道的输入。\n\n| 窗口 | 计算内容 | 可使用时刻 | 案例窗口 | 控制窗口 |\n|---|---|---|---:|---:|\n| K1 原生小时 | K1 开盘至收盘的主动买卖量 | K1 收盘 | 251 | 462 |\n| K2 原生小时 | K2 开盘至收盘的主动买卖量 | K2 收盘 | 55 | 89 |\n| K1 后累计至 K2 | K1 收盘起，到 K2 收盘为止，包含 K2 | K2 收盘 | 55 | 89 |\n\n六组共 1,001 个窗口，全部完整且金额分母为正。成交不平衡使用“累计主动买金额减累计主动卖金额，再除累计总成交金额”，不是把每根的不平衡率直接平均。另保留按做多/做空方向调整的数值，但本轮没有用它筛参数、排序或预测收益。\n\n完整两年档案有 38 根已知零成交 K 线，这批事件窗口没有覆盖它们。全零、混合零成交、缺根和迟到状态均通过合成反例检查；不能因为真实事件恰好没碰上零量，就把零量处理当成实盘验证过。窗口之间会重叠，源 K 线“计次”不能相加当唯一 K 线数。"
+      },
+      {
+        "id": "section_7",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 历史边界通过，仍不代表当时确实收到\n\n**八个季度截点均与完整历史的同一批过去特征逐字段一致。** 累计校验窗口数依次为 94、209、365、483、610、741、860、1,001；这是重复前缀复核，不是八份独立交易样本。\n\n与此分开，实盘到达模式要求真实接收时间。月度档案没有这种日志，所以全部 1,001 个窗口在该模式下明确不可用。这个反证说明系统不会把事后档案冒充实时收到，**并不是说历史上这 1,001 次都真的迟到了**。\n\n合成测试还发现秒、毫秒、微秒的 datetime 表示被误按纳秒判格，已在真实运行前统一精度并修复。未来成交量的改动与追加不会改变过去特征，缺失首根/中间/尾根不会被补齐，迟到数据不会被借用。"
+      },
+      {
+        "id": "section_8",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 与上一版比较：完成对齐，没有增加盈利证据\n\n| 检查项 | V34 | V35 |\n|---|---|---|\n| 两年真实主动成交量 | 210,528 根源数据验真 | 复用相同字节与哈希，不另换源 |\n| K1/K2 事件时钟 | 未连接 | 1,001 个窗口完整连接 |\n| 原母群/请求分母 | 未审计 | 251 母信号、55 请求、31 有原三对照 |\n| 历史截点不变性 | 未做事件级复核 | 八季度前缀逐字段一致 |\n| 实盘接收时间 | 未验证 | 明确没有日志，不给可用标记 |\n| 新收益与胜率 | 未评估 | 仍未评估 |\n\nAUC、收益置换 p、top-decile 毛/净收益、胜率、单特征经济基线在本轮均不适用：没有读取未来标签或模拟任何交易。对应的严格零假设检查是未来扰动、逐格 oracle、零/缺失/迟到、不同 datetime 表示和前缀重放。原配对身份覆盖已核查，但**没有据此计算匹配随机收益对照**。"
+      },
+      {
+        "id": "section_9",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 下一步：重建完整形态母群，再固定一个共振假设\n\n1. **不在这 55 个请求上继续旋参数。** 先审查并复用更早的完整 K1→K2 形态定义，在获准开发期安全前缀重建因果候选。不能调用会读取到 2026 年的旧整段加载器，也不能从已成交或盈利清单反推候选。\n2. **先核查供给与对照，再读新收益。** 保留所有形态机会、失效原因、原始决策时刻和未配对标记；如果分段/对照支持仍不足，明确报告，不用更多阈值凑好结果。\n3. **只冻结一个真实量假设。** 候选是回踩时逆向主动成交是否减弱，但窗口、比较基准和判定规则尚未选定，更没有称它有效。固定后才做原路径退出、真实成本、同币同时间块同波动对照及失败归因。新阈值预设、成本/障碍或 holdout 动用遵守 Owner 边界。\n\n还需要回答：完整 K1/K2 母群能否提供足够分段支持？跨交易所主动量是否有可迁移的净增益？在有真实接收日志之前，怎样评估进入实盘的延迟风险？这些问题不会由一张漂亮历史截图或一次完整对齐自动解决。"
+      },
+      {
+        "id": "section_10",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 风险与诚实声明\n\n- 当前主目标仍未完成：没有证明稳健赚钱，不承诺盈利，不自动部署、下单、改仓或保存到 TradingView。\n- 2023–2024 仍是反复使用的开发数据；本轮新增收益列读取为零，2025 年以后开盘的行情和 holdout 未读取，成本与止盈止损规则未改。\n- V35 接的是小时级旧母群，不是 15 分钟、ETH、黄金或山寨币日线已经完成适配。它只是可复用的时钟与缺失状态基础。\n- 报告包含原规则的终态统计，但终态只用于事后审计，不冒充 K1 时刻的因果特征。被挡事件之后是否赚钱，本轮没有判断。\n- 交付使用数据质量/源码核验、性质测试、报告与可视化流程；它们要求分离输入完整、样本支持和收益结论。笔记代码顺序执行不等于 Jupyter kernel/UI 验证；浏览器验收状态见 QA，不隐瞒未执行的检查。"
+      },
+      {
+        "id": "section_11",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 复现与证据\n\n对齐 builder/config/plan 先提交 **372ed6a** 再运行；报告对照身份投影先提交 **14174d4** 再读取。全量源/输出哈希在实验目录的 config、summary、report_data 和 artifact_build_receipt 中。原 V4/V34 不覆盖。\n\n```bash\n.venv/bin/python -m pytest -q tests/test_k1k2_genuine_flow_alignment.py tests/test_k1k2_genuine_flow_audit.py tests/test_k1k2_genuine_flow_report.py\n.venv/bin/python -m yoyo.evaluation.k1k2_genuine_flow_audit\n.venv/bin/python -m yoyo.evaluation.k1k2_genuine_flow_report prepare\npython3 scripts/md_to_html.py analysis/p1_btcusdtp_k1k2_genuine_flow_alignment_v35_20260907.md --out-dir analysis/html\n.venv/bin/python -m yoyo.evaluation.k1k2_genuine_flow_report package\nnode /Users/zhangzc/.codex/plugins/cache/openai-curated-remote/data-analytics/0.2.10-13ceeea1f599/skills/build-report/scripts/deliver_portable_artifact.mjs --input experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/artifact.json --output analysis/html/p1_btcusdtp_k1k2_genuine_flow_alignment_v35_20260907.html\n```\n\n构建命令适用于已提交源码、已恢复精确哈希输入且没有 V35 输出的初次重建。原目录为一次性写入；再次运行拒绝覆盖，不能为了重跑删除原证据。已存在产物的复核使用随附 verification.ipynb 与哈希检查。报告 SQL 只读取身份/状态及已对齐的覆盖列，官方 pandas `read_csv(usecols=...)` 契约见[对应文档](https://pandas.pydata.org/pandas-docs/version/2.3.3/reference/api/pandas.read_csv.html)。"
+      }
+    ],
+    "charts": [
+      {
+        "id": "case_status",
+        "type": "bar",
+        "title": "原 K1 母信号等待结果",
+        "description": "2023–2024 · 251 个固定母信号；分类是形态终态，不是盈亏",
+        "showDescription": true,
+        "dataset": "case_status",
+        "sourceId": "case_status",
+        "palette": {
+          "kind": "categorical",
+          "name": "blueGold"
+        },
+        "encodings": {
+          "x": {
+            "field": "label",
+            "type": "nominal",
+            "label": "等待结果"
+          },
+          "y": {
+            "field": "mothers",
+            "type": "quantitative",
+            "label": "母信号数"
+          },
+          "tooltip": [
+            {
+              "field": "total_mothers",
+              "type": "quantitative",
+              "label": "原母群总数"
+            },
+            {
+              "field": "share",
+              "type": "quantitative",
+              "label": "占比（0–1）"
+            }
+          ]
+        }
+      }
+    ],
+    "cards": [],
+    "tables": [],
+    "filters": []
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-09-07T08:42:02.307077+00:00",
+    "status": "ready",
+    "datasets": {
+      "case_status": [
+        {
+          "status": "expired_no_k2",
+          "mothers": 100,
+          "total_mothers": 251,
+          "share": 0.398406374501992,
+          "label": "等待超时"
+        },
+        {
+          "status": "invalidated_wrong_close",
+          "mothers": 95,
+          "total_mothers": 251,
+          "share": 0.3784860557768924,
+          "label": "回到错误一侧"
+        },
+        {
+          "status": "request_emitted",
+          "mothers": 55,
+          "total_mothers": 251,
+          "share": 0.21912350597609562,
+          "label": "有效 K2 请求"
+        },
+        {
+          "status": "invalidated_ma_colour",
+          "mothers": 1,
+          "total_mothers": 251,
+          "share": 0.00398406374501992,
+          "label": "HL2侧颜色失效"
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "report",
+      "label": "V35 · 对齐结论、定义与风险",
+      "path": "analysis/p1_btcusdtp_k1k2_genuine_flow_alignment_v35_20260907.md"
+    },
+    {
+      "id": "summary",
+      "label": "V35 · 原始对齐及八季度回放",
+      "path": "experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/summary.json"
+    },
+    {
+      "id": "config",
+      "label": "V35 · 冻结输入与无收益投影",
+      "path": "experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/config.json"
+    },
+    {
+      "id": "case_status",
+      "label": "V35 · 原事件名单与窗口复算",
+      "path": "experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/report_data.json",
+      "query": {
+        "sql": "SELECT status, COUNT(*) AS mothers,\n        (SELECT COUNT(*) FROM case_statuses) AS total_mothers,\n        1.0*COUNT(*)/(SELECT COUNT(*) FROM case_statuses) AS share\n        FROM case_statuses GROUP BY status ORDER BY mothers DESC, status",
+        "engine": "sqlite",
+        "language": "sql",
+        "executed_at": "2026-09-07T08:37:57.277923+00:00",
+        "tables_used": [
+          "main.case_mothers",
+          "main.case_statuses",
+          "main.features",
+          "main.parents"
+        ],
+        "description": "全部原母群和终态的身份/时钟投影；仅检查状态与原对照覆盖，不读收益",
+        "filters": [
+          "V4 fixed original hourly cohort and original assigned controls; development 2023-2024 only; no outcome selection"
+        ],
+        "metric_definitions": {
+          "share": "terminal-status mother count / all original case mothers; not win rate",
+          "requests": "request_emitted statuses, not filled trades",
+          "source_bar_occurrences": "available 5m bar occurrences across overlapping windows; not distinct bars"
+        }
+      }
+    },
+    {
+      "id": "fold_counts",
+      "label": "V35 · 原事件名单与窗口复算",
+      "path": "experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/report_data.json",
+      "query": {
+        "sql": "SELECT m.fold, COUNT(*) AS mothers,\n        SUM(s.status='request_emitted') AS requests,\n        SUM(s.status='expired_no_k2') AS expired,\n        SUM(s.status='invalidated_wrong_close') AS wrong_close,\n        SUM(s.status='invalidated_ma_colour') AS wrong_colour\n        FROM case_mothers m JOIN case_statuses s USING(event_id)\n        GROUP BY m.fold ORDER BY m.fold",
+        "engine": "sqlite",
+        "language": "sql",
+        "executed_at": "2026-09-07T08:37:57.277923+00:00",
+        "tables_used": [
+          "main.case_mothers",
+          "main.case_statuses",
+          "main.features",
+          "main.parents"
+        ],
+        "description": "全部原母群和终态的身份/时钟投影；仅检查状态与原对照覆盖，不读收益",
+        "filters": [
+          "V4 fixed original hourly cohort and original assigned controls; development 2023-2024 only; no outcome selection"
+        ],
+        "metric_definitions": {
+          "share": "terminal-status mother count / all original case mothers; not win rate",
+          "requests": "request_emitted statuses, not filled trades",
+          "source_bar_occurrences": "available 5m bar occurrences across overlapping windows; not distinct bars"
+        }
+      }
+    },
+    {
+      "id": "alignment",
+      "label": "V35 · 原事件名单与窗口复算",
+      "path": "experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/report_data.json",
+      "query": {
+        "sql": "SELECT cohort,window_kind,status,COUNT(*) AS windows,\n        SUM(flow_defined) AS defined, SUM(available_bars) AS source_bar_occurrences,\n        SUM(zero_volume_bars) AS zero_bar_occurrences\n        FROM features GROUP BY cohort,window_kind,status ORDER BY cohort,window_kind,status",
+        "engine": "sqlite",
+        "language": "sql",
+        "executed_at": "2026-09-07T08:37:57.277923+00:00",
+        "tables_used": [
+          "main.case_mothers",
+          "main.case_statuses",
+          "main.features",
+          "main.parents"
+        ],
+        "description": "全部原母群和终态的身份/时钟投影；仅检查状态与原对照覆盖，不读收益",
+        "filters": [
+          "V4 fixed original hourly cohort and original assigned controls; development 2023-2024 only; no outcome selection"
+        ],
+        "metric_definitions": {
+          "share": "terminal-status mother count / all original case mothers; not win rate",
+          "requests": "request_emitted statuses, not filled trades",
+          "source_bar_occurrences": "available 5m bar occurrences across overlapping windows; not distinct bars"
+        }
+      }
+    },
+    {
+      "id": "control_coverage",
+      "label": "V35 · 原事件名单与窗口复算",
+      "path": "experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/report_data.json",
+      "query": {
+        "sql": "WITH coverage AS (SELECT parent_event_id, COUNT(*) AS n FROM parents GROUP BY parent_event_id)\n        SELECT m.fold,COUNT(*) AS mothers, SUM(COALESCE(c.n,0)=3) AS mothers_with_three_controls,\n        SUM(COALESCE(c.n,0)=0) AS mothers_without_controls,\n        SUM(s.status='request_emitted') AS requests,\n        SUM(s.status='request_emitted' AND COALESCE(c.n,0)=3) AS requests_with_three_original_controls\n        FROM case_mothers m JOIN case_statuses s USING(event_id)\n        LEFT JOIN coverage c ON m.event_id=c.parent_event_id GROUP BY m.fold ORDER BY m.fold",
+        "engine": "sqlite",
+        "language": "sql",
+        "executed_at": "2026-09-07T08:37:57.277923+00:00",
+        "tables_used": [
+          "main.case_mothers",
+          "main.case_statuses",
+          "main.features",
+          "main.parents"
+        ],
+        "description": "全部原母群和终态的身份/时钟投影；仅检查状态与原对照覆盖，不读收益",
+        "filters": [
+          "V4 fixed original hourly cohort and original assigned controls; development 2023-2024 only; no outcome selection"
+        ],
+        "metric_definitions": {
+          "share": "terminal-status mother count / all original case mothers; not win rate",
+          "requests": "request_emitted statuses, not filled trades",
+          "source_bar_occurrences": "available 5m bar occurrences across overlapping windows; not distinct bars"
+        }
+      }
+    }
+  ]
+}

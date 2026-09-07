@@ -16,20 +16,34 @@ schema_version: 1
 experiments:
   - experiment_id: exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35
     source_repo: darkforest-x/fable-trading
-    source_commit: "9aeebd9"
-    status: active
+    source_commit: "372ed6a"
+    status: accepted
     question: Can verified genuine quote flow be joined causally to original hourly K1/K2 clocks without outcome selection?
     single_variable: Clock alignment only; V4 original mothers/statuses/requests and V34 2023-2024 external flow; no gate or economics.
-    result: Frozen no-outcome projection and temporal/zero-state contract; real alignment not run yet.
+    result: >-
+      Input alignment accepted only:1001complete windows,8quarter exactprefix checks,419tests passed.
+      Original251K1 mothers yield55K2 requests;462controls cover154mothers,only31K2requests have3originalcontrols.
+      No new economics; observed delivery unknown for all1001windows; no parameter selection.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    canonical_report: analysis/html/p1_btcusdtp_k1k2_genuine_flow_alignment_v35_20260907.html
+    artifacts:
+      - btcusdtp-flow-v35-summary
+      - btcusdtp-flow-v35-config
+      - btcusdtp-flow-v35-report-data
+      - btcusdtp-flow-v35-artifact
+      - btcusdtp-flow-v35-html
+      - btcusdtp-flow-v35-notebook
+      - btcusdtp-flow-v35-review
+      - btcusdtp-flow-v35-qa
+      - btcusdtp-flow-v35-delivery
     reuse_allowed: false
     notes: >-
-      source_commit is prior V34 baseline; exact builder commit will be recorded before run.
+      Builder372ed6a before materialization; report-only control identity audit14174d4; report2484b83.
       Plan experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/PROJECT_PLAN.md.
       Original251K1 mother subcohort, not whole-market K1K2; historical close boundary is not observed delivery.
+      Accepted alignment is not profitable strategy acceptance; reuse_allowed remains false for economic decisions.
   - experiment_id: exp-btcusdtp-genuine-flow-coverage-20260907-v34
     source_repo: darkforest-x/fable-trading
     source_commit: "49c0d8c"

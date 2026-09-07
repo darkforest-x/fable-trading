@@ -19,6 +19,168 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: btcusdtp-flow-v35-summary
+    artifact_type: manifest
+    role: temporal_alignment_and_output_lineage
+    source_repo: darkforest-x/fable-trading
+    source_commit: "372ed6a"
+    source_path: experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/summary.json
+    sha256: "8ffa81964aa5b02815b1aa97f0616c6b4a06508728325f3c7c105db44c300107"
+    size_bytes: 7115
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/summary.json"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      Input alignment only; no economics. Source clocks historical, not actual delivery.
+      Data CSV hashes in summary; original V4/V34 untouched. HTML structural_only;
+      notebook stdlib code execution, not Jupyter kernel/UI validation.
+
+  - artifact_id: btcusdtp-flow-v35-config
+    artifact_type: manifest
+    role: frozen_no_outcome_alignment_contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: "372ed6a"
+    source_path: experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/config.json
+    sha256: "363399449f1368f0a55c31a571b452546e1beb5120159a6b3d732bb74e406b24"
+    size_bytes: 3995
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/config.json"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      Input alignment only; no economics. Source clocks historical, not actual delivery.
+      Data CSV hashes in summary; original V4/V34 untouched. HTML structural_only;
+      notebook stdlib code execution, not Jupyter kernel/UI validation.
+
+  - artifact_id: btcusdtp-flow-v35-report-data
+    artifact_type: dataset
+    role: original_mother_control_identity_coverage
+    source_repo: darkforest-x/fable-trading
+    source_commit: "14174d4"
+    source_path: experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/report_data.json
+    sha256: "640030b4c253eda2fa4b48ae98ff0000a8384e14ad298ad1e1d9c15eed4cb511"
+    size_bytes: 5794
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/report_data.json"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      Input alignment only; no economics. Source clocks historical, not actual delivery.
+      Data CSV hashes in summary; original V4/V34 untouched. HTML structural_only;
+      notebook stdlib code execution, not Jupyter kernel/UI validation.
+
+  - artifact_id: btcusdtp-flow-v35-artifact
+    artifact_type: report
+    role: canonical_clock_alignment_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2484b83"
+    source_path: experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/artifact.json
+    sha256: "6e712e0fafbd30aaf607568524dd78a5fe5b0c61be2fcd55df8a3657d5af9346"
+    size_bytes: 28478
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/artifact.json"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      Input alignment only; no economics. Source clocks historical, not actual delivery.
+      Data CSV hashes in summary; original V4/V34 untouched. HTML structural_only;
+      notebook stdlib code execution, not Jupyter kernel/UI validation.
+
+  - artifact_id: btcusdtp-flow-v35-html
+    artifact_type: report
+    role: portable_clock_alignment_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2484b83"
+    source_path: analysis/html/p1_btcusdtp_k1k2_genuine_flow_alignment_v35_20260907.html
+    sha256: "1a82fb793eb1d64b13b74e3426e9f615565bf692fc63efe601936d245849eff6"
+    size_bytes: 409346
+    storage_uri: "repo://analysis/html/p1_btcusdtp_k1k2_genuine_flow_alignment_v35_20260907.html"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      Input alignment only; no economics. Source clocks historical, not actual delivery.
+      Data CSV hashes in summary; original V4/V34 untouched. HTML structural_only;
+      notebook stdlib code execution, not Jupyter kernel/UI validation.
+
+  - artifact_id: btcusdtp-flow-v35-notebook
+    artifact_type: report
+    role: stdlib_executed_verification_notebook
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2484b83"
+    source_path: experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/verification.ipynb
+    sha256: "1bef8a687361124d29eed000325789494c73419f6c2b002a2b52da254f145da0"
+    size_bytes: 4771
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/verification.ipynb"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      Input alignment only; no economics. Source clocks historical, not actual delivery.
+      Data CSV hashes in summary; original V4/V34 untouched. HTML structural_only;
+      notebook stdlib code execution, not Jupyter kernel/UI validation.
+
+  - artifact_id: btcusdtp-flow-v35-review
+    artifact_type: report
+    role: second_opinion_denominator_and_clock_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2484b83"
+    source_path: experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/REVIEW.md
+    sha256: "251d008d34b8ffbc0c83fd3e898477d72365439383defae39c6348562c419d07"
+    size_bytes: 2685
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/REVIEW.md"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      Input alignment only; no economics. Source clocks historical, not actual delivery.
+      Data CSV hashes in summary; original V4/V34 untouched. HTML structural_only;
+      notebook stdlib code execution, not Jupyter kernel/UI validation.
+
+  - artifact_id: btcusdtp-flow-v35-qa
+    artifact_type: report
+    role: synthetic_and_real_prefix_qa
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2484b83"
+    source_path: experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/QA.md
+    sha256: "ff1fd2f297a1ca1c7217832d5f1657e0c85ac3966a8d025843bc86a1465a1727"
+    size_bytes: 3648
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/QA.md"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      Input alignment only; no economics. Source clocks historical, not actual delivery.
+      Data CSV hashes in summary; original V4/V34 untouched. HTML structural_only;
+      notebook stdlib code execution, not Jupyter kernel/UI validation.
+
+  - artifact_id: btcusdtp-flow-v35-delivery
+    artifact_type: report
+    role: portable_structural_verification_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2484b83"
+    source_path: experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/delivery_receipt.json
+    sha256: "8e86ec8ac463cd854eed229702507779e13c04041e4769aee47b421950df1a7e"
+    size_bytes: 583
+    storage_uri: "repo://experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/delivery_receipt.json"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      Input alignment only; no economics. Source clocks historical, not actual delivery.
+      Data CSV hashes in summary; original V4/V34 untouched. HTML structural_only;
+      notebook stdlib code execution, not Jupyter kernel/UI validation.
+
   - artifact_id: btcusdtp-flow-v34-summary
     artifact_type: manifest
     role: flow_dataset_lineage_and_coverage

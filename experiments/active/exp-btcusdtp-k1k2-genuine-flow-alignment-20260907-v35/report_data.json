@@ -1,0 +1,172 @@
+{
+  "data": {
+    "case_status": [
+      {
+        "status": "expired_no_k2",
+        "mothers": 100,
+        "total_mothers": 251,
+        "share": 0.398406374501992
+      },
+      {
+        "status": "invalidated_wrong_close",
+        "mothers": 95,
+        "total_mothers": 251,
+        "share": 0.3784860557768924
+      },
+      {
+        "status": "request_emitted",
+        "mothers": 55,
+        "total_mothers": 251,
+        "share": 0.21912350597609562
+      },
+      {
+        "status": "invalidated_ma_colour",
+        "mothers": 1,
+        "total_mothers": 251,
+        "share": 0.00398406374501992
+      }
+    ],
+    "fold_counts": [
+      {
+        "fold": "2023H1",
+        "mothers": 55,
+        "requests": 13,
+        "expired": 25,
+        "wrong_close": 17,
+        "wrong_colour": 0
+      },
+      {
+        "fold": "2023H2",
+        "mothers": 66,
+        "requests": 19,
+        "expired": 22,
+        "wrong_close": 24,
+        "wrong_colour": 1
+      },
+      {
+        "fold": "2024H1",
+        "mothers": 55,
+        "requests": 12,
+        "expired": 20,
+        "wrong_close": 23,
+        "wrong_colour": 0
+      },
+      {
+        "fold": "2024H2",
+        "mothers": 75,
+        "requests": 11,
+        "expired": 33,
+        "wrong_close": 31,
+        "wrong_colour": 0
+      }
+    ],
+    "alignment": [
+      {
+        "cohort": "case",
+        "window_kind": "k1",
+        "status": "complete",
+        "windows": 251,
+        "defined": 251,
+        "source_bar_occurrences": 3012,
+        "zero_bar_occurrences": 0
+      },
+      {
+        "cohort": "case",
+        "window_kind": "k2",
+        "status": "complete",
+        "windows": 55,
+        "defined": 55,
+        "source_bar_occurrences": 660,
+        "zero_bar_occurrences": 0
+      },
+      {
+        "cohort": "case",
+        "window_kind": "post_k1_through_k2",
+        "status": "complete",
+        "windows": 55,
+        "defined": 55,
+        "source_bar_occurrences": 2160,
+        "zero_bar_occurrences": 0
+      },
+      {
+        "cohort": "control",
+        "window_kind": "k1",
+        "status": "complete",
+        "windows": 462,
+        "defined": 462,
+        "source_bar_occurrences": 5544,
+        "zero_bar_occurrences": 0
+      },
+      {
+        "cohort": "control",
+        "window_kind": "k2",
+        "status": "complete",
+        "windows": 89,
+        "defined": 89,
+        "source_bar_occurrences": 1068,
+        "zero_bar_occurrences": 0
+      },
+      {
+        "cohort": "control",
+        "window_kind": "post_k1_through_k2",
+        "status": "complete",
+        "windows": 89,
+        "defined": 89,
+        "source_bar_occurrences": 4140,
+        "zero_bar_occurrences": 0
+      }
+    ],
+    "control_coverage": [
+      {
+        "fold": "2023H1",
+        "mothers": 55,
+        "mothers_with_three_controls": 28,
+        "mothers_without_controls": 27,
+        "requests": 13,
+        "requests_with_three_original_controls": 4
+      },
+      {
+        "fold": "2023H2",
+        "mothers": 66,
+        "mothers_with_three_controls": 40,
+        "mothers_without_controls": 26,
+        "requests": 19,
+        "requests_with_three_original_controls": 12
+      },
+      {
+        "fold": "2024H1",
+        "mothers": 55,
+        "mothers_with_three_controls": 41,
+        "mothers_without_controls": 14,
+        "requests": 12,
+        "requests_with_three_original_controls": 10
+      },
+      {
+        "fold": "2024H2",
+        "mothers": 75,
+        "mothers_with_three_controls": 45,
+        "mothers_without_controls": 30,
+        "requests": 11,
+        "requests_with_three_original_controls": 5
+      }
+    ]
+  },
+  "queries": {
+    "case_status": "SELECT status, COUNT(*) AS mothers,\n        (SELECT COUNT(*) FROM case_statuses) AS total_mothers,\n        1.0*COUNT(*)/(SELECT COUNT(*) FROM case_statuses) AS share\n        FROM case_statuses GROUP BY status ORDER BY mothers DESC, status",
+    "fold_counts": "SELECT m.fold, COUNT(*) AS mothers,\n        SUM(s.status='request_emitted') AS requests,\n        SUM(s.status='expired_no_k2') AS expired,\n        SUM(s.status='invalidated_wrong_close') AS wrong_close,\n        SUM(s.status='invalidated_ma_colour') AS wrong_colour\n        FROM case_mothers m JOIN case_statuses s USING(event_id)\n        GROUP BY m.fold ORDER BY m.fold",
+    "alignment": "SELECT cohort,window_kind,status,COUNT(*) AS windows,\n        SUM(flow_defined) AS defined, SUM(available_bars) AS source_bar_occurrences,\n        SUM(zero_volume_bars) AS zero_bar_occurrences\n        FROM features GROUP BY cohort,window_kind,status ORDER BY cohort,window_kind,status",
+    "control_coverage": "WITH coverage AS (SELECT parent_event_id, COUNT(*) AS n FROM parents GROUP BY parent_event_id)\n        SELECT m.fold,COUNT(*) AS mothers, SUM(COALESCE(c.n,0)=3) AS mothers_with_three_controls,\n        SUM(COALESCE(c.n,0)=0) AS mothers_without_controls,\n        SUM(s.status='request_emitted') AS requests,\n        SUM(s.status='request_emitted' AND COALESCE(c.n,0)=3) AS requests_with_three_original_controls\n        FROM case_mothers m JOIN case_statuses s USING(event_id)\n        LEFT JOIN coverage c ON m.event_id=c.parent_event_id GROUP BY m.fold ORDER BY m.fold"
+  },
+  "source_commit": "14174d4248105ef8b2d78d95f8f39b2c24f1f778",
+  "generated_at": "2026-09-07T08:37:57.277923+00:00",
+  "summary_sha256": "8ffa81964aa5b02815b1aa97f0616c6b4a06508728325f3c7c105db44c300107",
+  "original_control_projection": [
+    "event_id",
+    "parent_event_id",
+    "direction",
+    "fold"
+  ],
+  "parents_file": "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/control_mothers.csv.gz",
+  "parents_sha256": "01050c7a9602f469406df515edcc73ef2f4c9db2d46529e25030934012eebd5a",
+  "economic_labels_read": false
+}

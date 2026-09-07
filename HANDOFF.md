@@ -18,6 +18,26 @@
 未启动新训练；training_eligible/production_eligible=false，holdout未读。旧val是反复使用的
 开发集，挖掘队列不能估总体召回；exposure_review.json明确独立性尚未建立，未冻结连续窗roster。
 
+## ⚡ 当前真相（2026-09-07 — V35因果对齐完成，K2请求/对照供给不足）
+
+目标模式active继续；372ed6a先冻结后只读V4纯身份/时钟/终态投影和V34真实quote flow。
+251固定1h K1母→55首K2请求（100超时、95错误侧收盘、1HL2侧烛色），非全市场K1K2；
+462原控制只覆盖154母，97母无控；55请求仅31有三控（93原控制，其中25发出K2）。
+四半年K2 13/19/12/11，paired4/12/10/5，不能55case对89control K2直接比较。
+1,001窗口全部complete：case251/55/55，control462/89/89（K1/K2/K1close-throughK2close）。
+八季度prefix逐字段一致；全年38零量不落事件窗，零/缺根/未知到达已做合成反例。
+historical complete≠observed delivery：无日志，所以后者1001不可用，不等于历史都迟到。
+
+E35 experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/，data独立
+data/k1k2_genuine_flow_alignment_v35；summary/config/报告数据/REVIEW/QA/三cell笔记齐。
+14174d4先冻结报告control parent身份复算，2484b83报告及HL2术语修正；419tests过13旧警告。
+报告analysis/html/p1_btcusdtp_k1k2_genuine_flow_alignment_v35_20260907.html；canonical通过，
+structural_only无Chromium、无UI验收；notebook为stdlib顺序执行，非Jupyterkernel。
+新增收益/2025+行情/holdout读取0；原V4/V34/TV/成本/TP-SL/阈值/ACTIVE/实盘未改。
+下一步不在55小子群反复旋参：先审查更早完整K1K2形态定义，在2023–2024安全前缀
+重建因果候选母群和对照支持，再冻结单一真实flow假设；不能调用旧load_featured读到2026，
+不能从成交/赢家名单重建候选。样本、对照、净优势各自验收，不把本轮输入通过当盈利。
+
 ## ⚡ 当前真相（2026-09-07 — V34真实主动成交量覆盖完成，盈利未验证）
 
 Owner“那开始下一步啊，开始目标模式”：49c0d8c先冻结后只读Binance BTCUSDT5m
