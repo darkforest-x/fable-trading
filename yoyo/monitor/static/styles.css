@@ -1991,3 +1991,20 @@ h2 {
     display:none;
   }
 }
+
+/* The full-universe view keeps unavailable states explicit. */
+.phase-badge.error { background: #34212a; color: #ee8a93; }
+.phase-badge.stale { background: #342c20; color: #d7b780; }
+.phase-badge.loading { background: #23313d; color: #8ca0b0; }
+.watch-scope { flex-shrink: 0; }
+.watch-scope button { white-space: nowrap; }
+@media (max-width: 1040px) {
+  .watch-filter { flex-wrap: wrap; }
+  .watch-explanation { width: 100%; }
+}
+@media (max-width: 600px) {
+  .watch-filter { display: flex; flex-wrap: wrap; gap: 9px; }
+  .watch-filter .search-field { flex-basis: calc(100% - 150px); }
+  .watch-filter .watch-scope { height: 34px; }
+  .watch-explanation { margin-top: 0; }
+}

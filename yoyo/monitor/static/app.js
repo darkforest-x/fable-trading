@@ -5,7 +5,7 @@
   const $ = (id) => document.getElementById(id);
   const state = {
     view: "signals", signals: [], markets: [], status: null, health: null,
-    signalsLoaded: false, marketsLoaded: false, signalTotal: 0, rowLimit: 200, search: "", watchSearch: "",
+    signalsLoaded: false, marketsLoaded: false, signalTotal: 0, rowLimit: 200, search: "", watchSearch: "", watchScope: "building",
     timeframe: "all", side: "all", kind: "all", selected: null,
     chartKey: null, chart: null, chartRequest: 0, chartController: null,
     syncing: false, lastSync: null, errors: {}, chartHover: null,
@@ -34,15 +34,20 @@
   const quoteSymbol = (symbol) => /-USD-SWAP$/.test(String(symbol)) ? "USD" : "USDT";
   const normalSearch = (value) => String(value).toUpperCase().replace(/[^A-Z0-9]/g, "");
   const displayPhase = (phase) => phaseNames[phase] || String(phase || "观察中");
+  const marketPhase = (item) => item.error ? "读取异常" : item.stale ? "行情过期" : item.ready === false ? "数据预热" : displayPhase(item.phase);
   const shortDate = (ms) => finite(ms) && Number(ms) > 0 ? new Intl.DateTimeFormat("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }).format(Number(ms)) : "—";
   const fullDate = (ms) => finite(ms) && Number(ms) > 0 ? new Intl.DateTimeFormat("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(Number(ms)) : "—";
   const clockTime = (ms) => finite(ms) && Number(ms) > 0 ? new Intl.DateTimeFormat("zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(Number(ms)) : "—";
   function price(value) {
     if (!finite(value)) return "—";
     const n = Number(value);
-    const abs = Math.abs(n);
-    const digits = abs >= 1000 ? 2 : abs >= 10 ? 3 : abs >= 1 ? 4 : abs >= .01 ? 5 : Math.min(10, Math.max(6, -Math.floor(Math.log10(abs || 1)) + 3));
-    return n.toLocaleString("en-US", { minimumFractionDigits: Math.min(2, digits), maximumFractionDigits: digits });
+    return n.toLocaleString("en-US", { minimumFractionDigits: Math.abs(n) >= 1 ? 2 : 0, maximumFractionDigits: 12 });
+  }
+  function axisPrice(value) {
+    if (!finite(value)) return "—";
+    const n = Number(value), abs = Math.abs(n);
+    const digits = abs >= 1000 ? 2 : abs >= 10 ? 3 : abs >= 1 ? 4 : Math.min(12, Math.max(5, -Math.floor(Math.log10(abs || 1)) + 3));
+    return n.toLocaleString("en-US", { minimumFractionDigits: abs >= 1 ? 2 : 0, maximumFractionDigits: digits });
   }
   function ageLabel(ms) {
     if (!finite(ms) || Number(ms) <= 0) return "尚无记录";
@@ -146,15 +151,17 @@
   }
   function renderWatch() {
     const q = normalSearch(state.watchSearch);
-    const items = state.markets.filter((item) => isBuilding(item) && (!q || normalSearch(item.symbol).includes(q)))
+    const items = state.markets.filter((item) => (state.watchScope === "all" || isBuilding(item)) && (!q || normalSearch(item.symbol).includes(q)))
       .sort((a, b) => numeric(b.zero_bars) - numeric(a.zero_bars) || numeric(b.near_zero_bars) - numeric(a.near_zero_bars) || String(a.symbol).localeCompare(String(b.symbol)));
     $("watch-count").textContent = `${items.length} 个窗口`;
+    $("watch-section-title").textContent = state.watchScope === "all" ? "全市场合约" : "蓄势中的合约";
+    $("watch-explanation").textContent = state.watchScope === "all" ? "包含趋势、蓄势与预热状态，点击合约查看结构。" : "零轴停留越久，越值得关注后续释放。";
     $("watch-empty").classList.toggle("hidden", items.length > 0);
     const emptyTitle = $("watch-empty").querySelector("h3");
     const emptyDescription = $("watch-empty").querySelector("p");
-    emptyTitle.textContent = state.errors.markets && !state.marketsLoaded ? "观察数据暂时不可用" : state.watchSearch ? "没有匹配的蓄势合约" : state.marketsLoaded ? "等待蓄势结构出现" : "正在读取观察窗口";
-    emptyDescription.textContent = state.errors.markets && !state.marketsLoaded ? "正在自动重试，连接恢复后会显示真实状态。" : "符合条件的观察窗口会列在这里；蓄势状态不代表已经启动。";
-    $("watch-rows").innerHTML = items.map((item) => `<tr class="watch-row" tabindex="0" data-market-symbol="${escapeHTML(item.symbol)}" data-market-timeframe="${escapeHTML(item.timeframe)}" aria-label="查看 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(item.timeframe)} 蓄势图表"><td><div class="symbol-label">${escapeHTML(shortSymbol(item.symbol))}<span class="symbol-quote">${escapeHTML(quoteSymbol(item.symbol))}</span></div></td><td><span class="timeframe-tag">${escapeHTML(item.timeframe)}</span></td><td><span class="phase-badge ${["ready", "armed"].includes(item.phase) ? "ready" : ""}">${escapeHTML(displayPhase(item.phase))}</span></td><td><span class="axis-duration">${escapeHTML(number(item.zero_bars))}<small>根</small></span><span class="mini-bar" aria-hidden="true"><i style="width:${Math.max(0, Math.min(100, numeric(item.zero_bars) / 34 * 100))}%"></i></span></td><td><span class="${item.dense ? "dense-tag" : "muted-text"}">${item.dense ? "已密集" : "—"}</span></td><td><span class="${item.htf_side === "long" ? "side-long" : item.htf_side === "short" ? "side-short" : "muted-text"}">${escapeHTML(sideName(item.htf_side))}</span></td><td class="price-cell">${escapeHTML(price(item.price))}</td></tr>`).join("");
+    emptyTitle.textContent = state.errors.markets && !state.marketsLoaded ? "观察数据暂时不可用" : state.watchSearch ? state.watchScope === "all" ? "没有匹配的合约" : "当前没有匹配的蓄势合约" : state.marketsLoaded ? state.watchScope === "all" ? "等待全市场扫描" : "等待蓄势结构出现" : "正在读取观察窗口";
+    emptyDescription.textContent = state.errors.markets && !state.marketsLoaded ? "正在自动重试，连接恢复后会显示真实状态。" : state.watchScope === "all" ? "全市场合约会在扫描后列出，当前状态不等于入场信号。" : "可切换全部合约查看其他交易对；蓄势状态不代表已经启动。";
+    $("watch-rows").innerHTML = items.map((item) => `<tr class="watch-row" tabindex="0" data-market-symbol="${escapeHTML(item.symbol)}" data-market-timeframe="${escapeHTML(item.timeframe)}" aria-label="查看 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(item.timeframe)} ${escapeHTML(marketPhase(item))}图表"><td><div class="symbol-label">${escapeHTML(shortSymbol(item.symbol))}<span class="symbol-quote">${escapeHTML(quoteSymbol(item.symbol))}</span></div></td><td><span class="timeframe-tag">${escapeHTML(item.timeframe)}</span></td><td><span title="${escapeHTML(item.error || (item.stale ? "当前保留过期行情，等待更新" : ""))}" class="phase-badge ${item.error ? "error" : item.stale ? "stale" : item.ready === false ? "loading" : ["ready", "armed"].includes(item.phase) ? "ready" : ""}">${escapeHTML(marketPhase(item))}</span></td><td><span class="axis-duration">${escapeHTML(number(item.zero_bars))}<small>根</small></span><span class="mini-bar" aria-hidden="true"><i style="width:${Math.max(0, Math.min(100, numeric(item.zero_bars) / 34 * 100))}%"></i></span></td><td><span class="${item.dense ? "dense-tag" : "muted-text"}">${item.dense ? "已密集" : "—"}</span></td><td><span class="${item.htf_side === "long" ? "side-long" : item.htf_side === "short" ? "side-short" : "muted-text"}">${escapeHTML(sideName(item.htf_side))}</span></td><td class="price-cell">${escapeHTML(price(item.price))}</td></tr>`).join("");
   }
   function factsHTML(entries) {
     return entries.map(([key, value]) => `<dt>${escapeHTML(key)}</dt><dd>${escapeHTML(value)}</dd>`).join("");
@@ -235,7 +242,7 @@
     $("detail-market-label").textContent = `OKX · ${quoteSymbol(item.symbol)} 永续${quoteSymbol(item.symbol) === "USD" ? " · 币本位" : ""}`;
     $("detail-timeframe").textContent = item.timeframe || "—";
     $("detail-price").textContent = price(item.price);
-    const name = item.kind ? eventNames[item.kind] || item.kind : displayPhase(item.phase);
+    const name = item.kind ? eventNames[item.kind] || item.kind : marketPhase(item);
     $("detail-event-badge").innerHTML = `<span class="signal-badge ${item.side === "short" ? "short" : item.side === "long" ? "" : "neutral"}">${sideArrow(item.side)} ${escapeHTML(name)}</span>`;
     const tvSymbol = String(item.symbol || "").replace(/-/g, "").replace(/SWAP$/, ".P");
     $("tradingview-link").href = `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(`OKX:${tvSymbol}`)}&interval=${item.timeframe === "4H" ? "240" : "60"}`;
@@ -316,7 +323,7 @@
     for (let i = 0; i < 4; i++) {
       const y = priceTop + i / 3 * (priceBottom - priceTop);
       const value = pMax - i / 3 * (pMax - pMin);
-      parts.push(`<line x1="${left}" x2="${width - right + 3}" y1="${y}" y2="${y}" stroke="#21313e" stroke-width=".65" stroke-dasharray="2 4"/><text x="${width - right + 9}" y="${y + 3}">${escapeHTML(price(value))}</text>`);
+      parts.push(`<line x1="${left}" x2="${width - right + 3}" y1="${y}" y2="${y}" stroke="#21313e" stroke-width=".65" stroke-dasharray="2 4"/><text x="${width - right + 9}" y="${y + 3}">${escapeHTML(axisPrice(value))}</text>`);
     }
     const labelIndices = [...new Set([0, Math.round((candles.length - 1) / 3), Math.round((candles.length - 1) * 2 / 3), candles.length - 1])];
     labelIndices.forEach((i) => {
@@ -442,6 +449,11 @@
   }));
   $("symbol-search").addEventListener("input", (event) => { state.search = event.target.value; state.rowLimit = 200; renderSignals(); });
   $("watch-search").addEventListener("input", (event) => { state.watchSearch = event.target.value; renderWatch(); });
+  document.querySelectorAll("[data-watch-scope]").forEach((button) => button.addEventListener("click", () => {
+    state.watchScope = button.dataset.watchScope;
+    document.querySelectorAll("[data-watch-scope]").forEach((other) => { const selected = other === button; other.classList.toggle("selected", selected); other.setAttribute("aria-pressed", String(selected)); });
+    renderWatch();
+  }));
   $("side-filter").addEventListener("change", (event) => { state.side = event.target.value; state.rowLimit = 200; renderSignals(); });
   $("kind-filter").addEventListener("change", (event) => { state.kind = event.target.value; state.rowLimit = 200; renderSignals(); });
   $("refresh-button").addEventListener("click", refresh);
