@@ -6635,3 +6635,17 @@ experiments:
       extension96f08a5. P00 cumulative holdout use3; P04/P08/P10/P11/P12 use2; other P01-P16 use1.
       Complete113451 event/334103 control prices and closed clocks verified;33 fixed-notional paths cross zero.
       No raw K-line writes, model training, production gates, costs, TP/SL or live operations changed.'
+
+  - experiment_id: exp-owner-box-curation-20260907-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3a07fb65180c535fc6b8a4935853f2a322a9c30a
+    status: active
+    question: Can installed dataset audit tools prioritize review of existing Owner box suggestions while retaining every source identity?
+    single_variable: Workflow-only audit of the frozen 2513 primary review images; no model or label changes.
+    result: Preregistered; source freeze before Datumaro, CleanVision, FiftyOne catalog and existing-project review-view execution.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: Owner authorized backend curation. Only primary images enter audit; no fourth Label Studio project, new training, automatic deletion, new Gold or synthetic Cleanlab predictions.

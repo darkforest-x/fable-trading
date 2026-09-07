@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "protocol_id": "owner_box_curation_v1",
+  "owner_authorization": "2026-09-07: 那你去处理吧, in response to connecting installed dataset tools to the existing prefilled Owner review workflow",
+  "dataset_name": "fable_owner_box_curation_20260907_v1",
+  "label_studio_project_id": 77,
+  "population": 2513,
+  "input_role": "asset_roles.image only; annotation_images/*.png",
+  "proposal_field": "proposal_boxes",
+  "proposal_is_ground_truth": false,
+  "proposal_is_model_prediction": false,
+  "inputs": {
+    "datasets/owner_box_refinement_20260907_v1/manifest.jsonl": "7588f9c62f26a66986f747f9dd27dff8f6c216a6b26f307e705cba2880c3a641",
+    "datasets/owner_box_refinement_20260907_v1/admin/build_receipt.json": "315d7eb5e5c0656a0c9d212e98ea0155bb20b95c4a975ca45b36d2a688a8b3f1",
+    "experiments/active/exp-owner-box-refinement-20260907-v1/results/current_event_coverage.json": "cf4dab936de2a38612e830de5f1774de28ca1cceb24b95456b0ab21cbb0610cc",
+    "experiments/active/exp-owner-box-refinement-20260907-v1/results/import_receipt.json": "6615e447613b9f6ddc221055232bf2442793895d8fb11a96b2f1b0a3a3f639d9"
+  },
+  "tools": {
+    "datumaro": "1.12.0 DetectionValidator on primary-image proposal boxes; warnings are not label truth",
+    "cleanvision": "0.3.7; exact_duplicates, near_duplicates, odd_size, odd_aspect_ratio; one worker",
+    "fiftyone": "1.21.0; persistent backend catalog, metadata, proposal boxes, audit tags and saved views",
+    "cleanlab": "2.9.0; eligibility check first; require time-safe out-of-sample object detection predictions"
+  },
+  "near_duplicate_scope": "Installed CleanVision uses equal perceptual hash keys; candidates only, not proof of semantic equality",
+  "review_queue": {
+    "priority_count": 50,
+    "rank_keys": ["existing_visible_negative_conflict first", "duplicate_review_candidate first", "envelope_expansion_ratio descending", "review_id ascending"],
+    "envelope_expansion_ratio": "proposal pixel height divided by same-canvas wick-only reference height; descriptive ranking, never a label-quality probability",
+    "saved_views": ["priority first50", "duplicate candidates", "negative-window conflicts", "original exact stars104"]
+  },
+  "preserve_all_samples": true,
+  "preserve_source_bytes": true,
+  "preserve_label_studio_tasks_predictions_annotations_drafts": true,
+  "no_new_label_studio_project": true,
+  "source_freeze_required_before_execution": true,
+  "holdout_start": "2026-05-04T00:00:00Z",
+  "new_training": false,
+  "new_model_inference": false,
+  "new_gold": false,
+  "training_eligible": false,
+  "production_eligible": false
+}
