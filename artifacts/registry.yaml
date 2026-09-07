@@ -19053,3 +19053,60 @@ artifacts:
     production_eligible: false
     generator_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
     notes: "4172 full training event groups plus 276 candidate tasks. Blank human annotation; isolated future context, original 32000 variants unchanged."
+
+  - artifact_id: imacd-okx-descriptive-20260907-summary
+    artifact_type: manifest
+    role: descriptive_indicator_audit_not_economic_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 01ab3369dccadb41e7c701b53920affa8c930bcb
+    source_path: experiments/active/exp-imacd-okx-descriptive-20260907-v1/summary.json
+    sha256: 2e8af736e016ed3d1a491e0e47fbace7f0c368b68888e91574fbb74e31875676
+    size_bytes: 16586
+    storage_uri: repo://experiments/active/exp-imacd-okx-descriptive-20260907-v1/summary.json
+    holdout_status: holdout_consumed
+    data_cutoff: '2026-07-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: Owner2026-09-07authorized all dates; fixed34/9 configuration use1; no economic backtest.
+  - artifact_id: imacd-okx-descriptive-20260907-metrics
+    artifact_type: manifest
+    role: descriptive_indicator_audit_not_economic_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 01ab3369dccadb41e7c701b53920affa8c930bcb
+    source_path: experiments/active/exp-imacd-okx-descriptive-20260907-v1/metrics.csv
+    sha256: 631c60d3dd6aac666238d7f18a3145cf9d9051fc5d2114e7a7e1f0199257a226
+    size_bytes: 5157
+    storage_uri: repo://experiments/active/exp-imacd-okx-descriptive-20260907-v1/metrics.csv
+    holdout_status: holdout_consumed
+    data_cutoff: '2026-07-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: Owner2026-09-07authorized all dates; fixed34/9 configuration use1; no economic backtest.
+  - artifact_id: imacd-okx-descriptive-20260907-qa
+    artifact_type: manifest
+    role: descriptive_indicator_audit_not_economic_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 01ab3369dccadb41e7c701b53920affa8c930bcb
+    source_path: experiments/active/exp-imacd-okx-descriptive-20260907-v1/qa.json
+    sha256: d0aa90ece138c9cae39c5be51b0bc1c6c576eef8c6b747bd490eca1d357daf6a
+    size_bytes: 602
+    storage_uri: repo://experiments/active/exp-imacd-okx-descriptive-20260907-v1/qa.json
+    holdout_status: holdout_consumed
+    data_cutoff: '2026-07-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: Owner2026-09-07authorized all dates; fixed34/9 configuration use1; no economic backtest.
+  - artifact_id: imacd-okx-descriptive-20260907-report
+    artifact_type: report
+    role: descriptive_indicator_audit_not_economic_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 01ab3369dccadb41e7c701b53920affa8c930bcb
+    source_path: analysis/html/p0_imacd_okx_multitimeframe_20260907.html
+    sha256: 2f6b8bc477ca3ac4409ac8f5d2535687e31206aa46f2ab91facfb78563910b07
+    size_bytes: 33193
+    storage_uri: repo://analysis/html/p0_imacd_okx_multitimeframe_20260907.html
+    holdout_status: holdout_consumed
+    data_cutoff: '2026-07-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: Owner2026-09-07authorized all dates; fixed34/9 configuration use1; no economic backtest.

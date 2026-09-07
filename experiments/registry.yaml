@@ -6518,3 +6518,24 @@ experiments:
       - grade-a-labelstudio-manual-20260907-html
     reuse_allowed: false
     notes: 32000 images represent 4172 event groups; the 240 candidate sample plus36 repeats is a separate project. Future clipped before holdout, no automatic propagation or new training.
+
+  - experiment_id: exp-imacd-okx-descriptive-20260907-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 01ab3369dccadb41e7c701b53920affa8c930bcb
+    status: inconclusive
+    question: What do raw IMACD34/9 crosses mean on OKX BTC/ETH across timeframes?
+    single_variable: Fixed original34/9; descriptive cross-zone and event-frequency audit only.
+    result: 21 valid series; core15m/1h/4h opposite-zone crosses52-54pct. Profitability untested; BTC1m unavailable and weekly
+      warmup insufficient.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/html/p0_imacd_okx_multitimeframe_20260907.html
+    artifacts:
+    - imacd-okx-descriptive-20260907-summary
+    - imacd-okx-descriptive-20260907-metrics
+    - imacd-okx-descriptive-20260907-qa
+    - imacd-okx-descriptive-20260907-report
+    reuse_allowed: true
+    notes: Owner explicitly authorized all periods; fixed configuration holdout use1.4tests,2000scalar bars,105ledger assertions.
+      HTML structural check only; local-file browser policy denied visual check.

@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Impulse MACD 34/9：OKX BTCUSDT.P / ETHUSDT.P 多周期分析</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>Impulse MACD 34/9：OKX BTCUSDT.P / ETHUSDT.P 多周期分析</h1>
+<p>日期：2026-09-07。分析对象是 Owner 本次粘贴的 Pine v5 指标；默认 lengthMA=34、lengthSignal=9。</p>
+<p><strong>结论：它适合表达“价格相对平滑通道的偏离及偏离变化”，但当前金叉/死叉箭头把趋势延续、逆势修复与回到中性区混在了一起，不能直接当作统一买卖规则。</strong> 本次原参数统计中，BTC、ETH 的 15m、1h、4h 交叉有约52%–54%发生在与箭头方向相反的 md 区域。这个数字不是错误率或亏损率。</p>
+<p>本报告包含公式审计、21组实际OKX时间序列的信号诊断、周期差异、代码问题和Notion证据。没有定义完整策略，因此没有伪造胜率、收益、最佳参数或当前盘口建议。</p>
+<h2>1. 数据、授权与证据边界</h2>
+<ul>
+<li>Owner 本次明确授权：“okx交易所就行；每个周期都看；任何时间段数据都可以使用不要有任何限制”。<strong>这是该固定描述配置第1次消耗holdout</strong>，包含2026-05-04及之后数据；不是未见样本验收，更不授予生产资格。</li>
+<li>本次OKX公共历史K线接口探测返回HTTP403。实际统计来自本仓已有OKX BTC_USDT_SWAP / ETH_USDT_SWAP历史CSV，原始K线只读；没有换用币安，没有新增或覆盖K线缓存。</li>
+<li>1m统计区间为2026-04-21至06-30；3m为2026-04-01至06-30；5m为2026-01-01至06-30；15m至1d为2023-01-01至2026-06-30。均以UTC定义，区间终点为2026-07-01 00:00 UTC。</li>
+<li>BTC 1m源文件缺失，不从3m/5m假造1m。周线仅233根，未满足固定340根热身，故不报周线频率。秒线、任意自定义分钟线与月线没有实证统计，后文只解释适用逻辑。</li>
+<li>每个连续段排除前340根热身；高周期从15m完整聚合，日线为UTC日界、周线为周一UTC日界；缺失子K不补值。21组有效统计区间均连续无缺口。同周期BTC/ETH采用相同请求区间。</li>
+<li>不同周期的数据年份不同，不能从本表评选“最赚钱周期”。340根是本次审计的保守热身约定，不是Pine运行必须达到的根数；相同OHLC与相同初始化之外，尚未完成TradingView原生逐bar数值对照。</li>
+</ul>
+<h2>2. 逐层拆解：这个指标究竟量了什么</h2>
+<h3>2.1 原料只有价格，没有成交量或订单流</h3>
+<p>src=(high+low+close)/3。open、volume、持仓量、主动买卖量、资金费率均未参与。 因此它不能直接证明“主力进场”“资金流入”“多空真实成交量反转”，也不判断K线本身是阳线还是阴线。</p>
+<h3>2.2 上下轨是SMMA，不是34根普通均线</h3>
+<p>hi=SMMA34(high)，lo=SMMA34(low)。首个值由34根SMA播种，之后：</p>
+<pre><code>
+SMMA[t] = (33 × SMMA[t−1] + price[t]) / 34
+</code></pre>
+<p>alpha=1/34，旧状态影响每根乘33/34；影响半衰期约23.2根，记忆并不在第34根突然归零。在4h图上，23.2根约3.9天。 同样的有效输入与播种下，这对应Wilder/RMA形式。两个calc_smma调用各自持有独立历史，不会因局部变量同名而把high和low混算。参见<a href="https://www.tradingview.com/pine-script-docs/language/user-defined-functions/">TradingView函数作用域说明</a>。</p>
+<h3>2.3 所谓zlema，实际代数公式是DEMA</h3>
+<pre><code>
+ema1 = EMA34(hlc3)
+ema2 = EMA34(ema1)
+mi = 2 × ema1 − ema2
+</code></pre>
+<p>这正是DEMA公式。命名沿用旧脚本，不影响公式执行，但“零滞后”不能理解为提前知道未来，也不保证转折零延迟；差分补偿会在突然反转时产生超调。它也不同于先对price做滞后补偿再EMA的另一类ZLEMA写法。参见<a href="https://www.tradingview.com/support/solutions/43000589132-double-exponential-moving-average-ema/">TradingView DEMA公式</a>。</p>
+<h3>2.4 md是“带死区的偏离”</h3>
+<table><thead><tr>
+<th>条件</th>
+<th>md</th>
+<th>准确含义</th>
+</tr></thead><tbody>
+<tr><td>mi &gt; hi</td><td>mi−hi &gt; 0</td><td>快速平滑价格在上轨外</td></tr>
+<tr><td>lo ≤ mi ≤ hi</td><td>0</td><td>快速平滑价格位于带内</td></tr>
+<tr><td>mi &lt; lo</td><td>mi−lo &lt; 0</td><td>快速平滑价格在下轨外</td></tr>
+</tbody></table>
+<p>也可以写成：</p>
+<pre><code>
+c = (hi+lo)/2 = SMMA34(hl2)
+w = (hi−lo)/2 = SMMA34(high−low)/2
+d = mi−c
+md = sign(d) × max(abs(d)−w, 0)
+</code></pre>
+<p>这个等价式说明：通道宽度是平滑单根高低幅度，不是ATR，也没有计入跨bar跳空的true range。 md=0只证明mi在通道内，不能单凭它证明“市场低波动”“六均线密集”或“即将突破”。持续宽幅来回波动也可能进入带内。 LazyBear原作的目的就是削弱均线带内摆动；目的不能自动当作盈利效果。参见<a href="https://www.tradingview.com/script/qt6xLfLi-Impulse-MACD-LazyBear/">原作</a>。</p>
+<h3>2.5 sb、sh与箭头不是三票独立证据</h3>
+<p>sb=SMA9(md)，sh=md−sb。 金叉严格等价于sh本根&gt;0、上根≤0；死叉等价于sh本根&lt;0、上根≥0。 因此“md金叉 + 蓝柱翻正”完全重复，“死叉 + 蓝柱翻负”也完全重复。</p>
+<p>SMA9是均值，不是动量的一阶导数。其每根变化是(md[t]−md[t−9])/9，旧高值离开窗口也能让信号线下移。 甚至当md本根下降时，也可能发生金叉：用md序列100、−10、−10、−10、−10、−10、−10、−10、−1、−2，最后两根的md从−1降至−2，而sb从29/9降至−73/9，仍然金叉。 “相对近期基线改善”比“价格上涨加速”更准确。该序列是代数示例，不是交易案例。</p>
+<h2>3. 应当怎样读图与信号</h2>
+<h3>3.1 先看主线正负，再看蓝柱</h3>
+<table><thead><tr>
+<th>状态</th>
+<th>优先解释</th>
+<th>不应直接推导</th>
+</tr></thead><tbody>
+<tr><td>md&gt;0，sh&gt;0</td><td>上轨外偏离高于近期均值</td><td>必定继续涨、适合追价</td></tr>
+<tr><td>md&gt;0，sh&lt;0</td><td>上轨外偏离低于近期均值</td><td>已进入空头趋势</td></tr>
+<tr><td>md&lt;0，sh&lt;0</td><td>下轨外偏离低于近期均值</td><td>跌幅一定还会扩大</td></tr>
+<tr><td>md&lt;0，sh&gt;0</td><td>下轨外偏离相对近期修复</td><td>已经转成多头趋势</td></tr>
+<tr><td>md=0，sh≠0</td><td>已回带内，信号线还记着过去</td><td>已经向箭头方向突破</td></tr>
+<tr><td>md=0，sh=0</td><td>两者都在零点</td><td>一定马上启动</td></tr>
+</tbody></table>
+<p>若md连续9根为0，sb也为0；在继续为0期间，严格交叉不会凭空重复产生。 但从负md回到0时，旧sb可能仍为负，可以出现金叉；从正md回到0则可能出现死叉。这是回到中性区，不是自动完成相反方向突破。</p>
+<h3>3.2 同一种箭头至少包含三类事件</h3>
+<ul>
+<li>金叉且md&lt;0：空头偏离修复，属于逆势转折候选；金叉且md=0：回到/处于带内；金叉且md&gt;0：多头区域的相对增强候选。</li>
+<li>死叉且md&gt;0：多头偏离减弱；死叉且md=0：带内事件；死叉且md&lt;0：空头区域的相对增强候选。</li>
+<li>这些是描述分类，并非某类必赚或必亏。过滤成“金叉且md&gt;0”会减少逆势事件，也可能错过最早一段反转；必须另做单变量对照，不能口头宣布改善。</li>
+</ul>
+<h3>3.3 四种颜色实际在比较src，不在比较md与sb</h3>
+<table><thead><tr>
+<th>颜色</th>
+<th>代码的精确条件</th>
+</tr></thead><tbody>
+<tr><td>lime</td><td>src&gt;mi 且 src&gt;hi</td></tr>
+<tr><td>green</td><td>src&gt;mi 且 src≤hi</td></tr>
+<tr><td>red</td><td>src≤mi 且 src&lt;lo</td></tr>
+<tr><td>orange</td><td>src≤mi 且 src≥lo</td></tr>
+</tbody></table>
+<p>颜色不直接检查md斜率、sh、交叉或K线实体方向。红柱不等于死叉，绿柱不等于金叉；深绿/橙色也不能简单翻译为固定的弱多/弱空级别。 md与sh两组直方图叠画会遮挡，尤其半透明蓝柱可能干扰读色。主线改线图或给蓝柱独立视觉层可改善阅读，但不会改变信息含量。 顶/底部三角形只是绘图位置，不代表已经识别出价格顶部/底部；大小也不代表信号强弱。</p>
+<h2>4. OKX实际数据：信号频率与反复交叉</h2>
+<p>交叉为金叉+死叉。反区交叉指金叉时md&lt;0或死叉时md&gt;0。3根反叉率指本次交叉之后3根内出现反向交叉，占有完整后续3根可观察的交叉数量；<strong>不是止损率、假信号率或亏损率</strong>。最终3根无法完整观察的信号已从该分母剔除。</p>
+<table><thead><tr>
+<th>币/周期</th>
+<th>有效bar</th>
+<th>金叉/死叉</th>
+<th>日均交叉</th>
+<th>md为零%</th>
+<th>反区交叉%</th>
+<th>3根反叉%</th>
+</tr></thead><tbody>
+<tr><td>BTC 1m</td><td>无源数据</td><td>不报告</td><td>不报告</td><td>不报告</td><td>不报告</td><td>不报告</td></tr>
+<tr><td>BTC 3m</td><td>43680</td><td>1229/1225</td><td>26.97</td><td>17.4</td><td>53.5</td><td>11.5</td></tr>
+<tr><td>BTC 5m</td><td>52128</td><td>1482/1474</td><td>16.33</td><td>17.5</td><td>53.3</td><td>12.0</td></tr>
+<tr><td>BTC 15m</td><td>122592</td><td>3299/3279</td><td>5.15</td><td>19.7</td><td>52.4</td><td>11.4</td></tr>
+<tr><td>BTC 30m</td><td>61296</td><td>1608/1615</td><td>2.52</td><td>19.3</td><td>52.2</td><td>12.4</td></tr>
+<tr><td>BTC 1h</td><td>30648</td><td>796/782</td><td>1.24</td><td>17.7</td><td>53.6</td><td>11.6</td></tr>
+<tr><td>BTC 2h</td><td>15324</td><td>394/403</td><td>0.62</td><td>17.5</td><td>54.1</td><td>10.9</td></tr>
+<tr><td>BTC 4h</td><td>7662</td><td>206/208</td><td>0.32</td><td>14.9</td><td>53.6</td><td>12.1</td></tr>
+<tr><td>BTC 6h</td><td>5108</td><td>124/127</td><td>0.20</td><td>14.2</td><td>54.6</td><td>9.2</td></tr>
+<tr><td>BTC 12h</td><td>2554</td><td>64/66</td><td>0.10</td><td>14.9</td><td>54.6</td><td>3.8</td></tr>
+<tr><td>BTC 1d</td><td>1277</td><td>26/28</td><td>0.04</td><td>13.8</td><td>57.4</td><td>11.1</td></tr>
+<tr><td>BTC 1w</td><td>233根不足340热身</td><td>不报告</td><td>不报告</td><td>不报告</td><td>不报告</td><td>不报告</td></tr>
+<tr><td>ETH 1m</td><td>102240</td><td>2904/2915</td><td>81.96</td><td>16.6</td><td>54.5</td><td>11.6</td></tr>
+<tr><td>ETH 3m</td><td>43680</td><td>1221/1213</td><td>26.75</td><td>19.0</td><td>53.4</td><td>11.9</td></tr>
+<tr><td>ETH 5m</td><td>52128</td><td>1420/1417</td><td>15.67</td><td>19.8</td><td>52.4</td><td>10.9</td></tr>
+<tr><td>ETH 15m</td><td>122592</td><td>3257/3240</td><td>5.09</td><td>19.9</td><td>52.6</td><td>11.9</td></tr>
+<tr><td>ETH 30m</td><td>61296</td><td>1627/1595</td><td>2.52</td><td>20.3</td><td>52.2</td><td>10.6</td></tr>
+<tr><td>ETH 1h</td><td>30648</td><td>772/768</td><td>1.21</td><td>18.6</td><td>53.4</td><td>9.5</td></tr>
+<tr><td>ETH 2h</td><td>15324</td><td>396/390</td><td>0.62</td><td>19.9</td><td>53.3</td><td>10.4</td></tr>
+<tr><td>ETH 4h</td><td>7662</td><td>200/197</td><td>0.31</td><td>17.5</td><td>54.4</td><td>13.1</td></tr>
+<tr><td>ETH 6h</td><td>5108</td><td>128/131</td><td>0.20</td><td>15.0</td><td>53.7</td><td>9.7</td></tr>
+<tr><td>ETH 12h</td><td>2554</td><td>73/78</td><td>0.12</td><td>15.7</td><td>51.0</td><td>14.7</td></tr>
+<tr><td>ETH 1d</td><td>1277</td><td>31/34</td><td>0.05</td><td>15.7</td><td>52.3</td><td>12.3</td></tr>
+<tr><td>ETH 1w</td><td>233根不足340热身</td><td>不报告</td><td>不报告</td><td>不报告</td><td>不报告</td><td>不报告</td></tr>
+</tbody></table>
+<h3>4.1 能从数据里确定什么</h3>
+<ol>
+<li>BTC 15m共6578次，ETH共6497次，平均每天约5.15/5.09次；1h约1.24/1.21次；4h約每3.08/3.22天一次。这是全时段平均，不表示每天均匀出现。</li>
+<li>BTC/ETH的15m、1h、4h反区交叉均超过52%。因此如果你原意是“只顺势做启动”，当前箭头定义确实没有表达这个意图；这些逆势事件是否有反转收益尚未测试。</li>
+<li>15m的md约有19.7%/19.9%时间被压成零。但只有约2.4%交叉恰好发生在md=0；主要语义混淆来自相反区域的交叉，不能把所有问题归咎于零线。</li>
+<li>BTC 1h的3根反叉率约11.6%，ETH约9.5%；4h约12.1%/13.1%。不能说“切4h后反复交叉就消失”。而且3根1h和3根4h是不同等待时长。</li>
+<li>ETH 1m平均每天约82次交叉。这种原始事件密度意味着自动逐信号交易会高度依赖成本与执行；它不是每天82次独立机会。</li>
+<li>相同参数在BTC/ETH上的交叉密度相近，不能由“ETH通常波动大”的印象直接推导出“ETH交叉一定更多”。这次5m ETH反而略少；12h ETH较多。没有对收益与波动状态做过归因。</li>
+</ol>
+<h3>4.2 与标准MACD的同表基线</h3>
+<p>标准MACD定义为close的EMA12−EMA26，信号线为EMA9。只比较交叉次数。 这不是上一版本盈利对照：本指标没有上一版经过本口径的收益结果。由于两者平滑、周期、输入与阈值机制均不同，减少的次数不能全部归因于“过滤震荡”这一单独机制。</p>
+<table><thead><tr>
+<th>币/周期</th>
+<th>IMACD交叉</th>
+<th>标准MACD交叉</th>
+<th>次数减少%</th>
+</tr></thead><tbody>
+<tr><td>BTC 3m</td><td>2454</td><td>3463</td><td>29.1</td></tr>
+<tr><td>BTC 5m</td><td>2956</td><td>4021</td><td>26.5</td></tr>
+<tr><td>BTC 15m</td><td>6578</td><td>9761</td><td>32.6</td></tr>
+<tr><td>BTC 30m</td><td>3223</td><td>4705</td><td>31.5</td></tr>
+<tr><td>BTC 1h</td><td>1578</td><td>2337</td><td>32.5</td></tr>
+<tr><td>BTC 2h</td><td>797</td><td>1123</td><td>29.0</td></tr>
+<tr><td>BTC 4h</td><td>414</td><td>567</td><td>27.0</td></tr>
+<tr><td>BTC 6h</td><td>251</td><td>385</td><td>34.8</td></tr>
+<tr><td>BTC 12h</td><td>130</td><td>168</td><td>22.6</td></tr>
+<tr><td>BTC 1d</td><td>54</td><td>96</td><td>43.8</td></tr>
+<tr><td>ETH 1m</td><td>5819</td><td>8475</td><td>31.3</td></tr>
+<tr><td>ETH 3m</td><td>2434</td><td>3562</td><td>31.7</td></tr>
+<tr><td>ETH 5m</td><td>2837</td><td>4109</td><td>31.0</td></tr>
+<tr><td>ETH 15m</td><td>6497</td><td>9710</td><td>33.1</td></tr>
+<tr><td>ETH 30m</td><td>3222</td><td>4651</td><td>30.7</td></tr>
+<tr><td>ETH 1h</td><td>1540</td><td>2314</td><td>33.4</td></tr>
+<tr><td>ETH 2h</td><td>786</td><td>1119</td><td>29.8</td></tr>
+<tr><td>ETH 4h</td><td>397</td><td>580</td><td>31.6</td></tr>
+<tr><td>ETH 6h</td><td>259</td><td>388</td><td>33.2</td></tr>
+<tr><td>ETH 12h</td><td>151</td><td>183</td><td>17.5</td></tr>
+<tr><td>ETH 1d</td><td>65</td><td>99</td><td>34.3</td></tr>
+</tbody></table>
+<p>15m两币约少三分之一交叉，1h也相似。<strong>数量减少已被观察到；错误率下降、收益改善尚未被证明。</strong></p>
+<h2>5. 不同周期的使用含义</h2>
+<p>34与9是bar数量，切换周期会改变观察时间尺度。以下是名义跨度，不是精确滞后，也不是固定持仓期限。</p>
+<table><thead><tr>
+<th>图表</th>
+<th>34根跨度</th>
+<th>9根跨度</th>
+<th>可研究的角色及主要问题</th>
+</tr></thead><tbody>
+<tr><td>1m</td><td>34分钟</td><td>9分钟</td><td>执行观察；事件非常密集，点差和手续费占比高，BTC缺实证源</td></tr>
+<tr><td>3m</td><td>1小时42分</td><td>27分钟</td><td>更短择时；容易被一次快速波动连续触发</td></tr>
+<tr><td>5m</td><td>2小时50分</td><td>45分钟</td><td>日内择时；需要先定义上层背景和退出</td></tr>
+<tr><td>15m</td><td>8小时30分</td><td>2小时15分</td><td>日内候选，和本仓15m形态研究容易对齐</td></tr>
+<tr><td>30m</td><td>17小时</td><td>4小时30分</td><td>日内到短波段之间；不等于把15m信号投票合并</td></tr>
+<tr><td>1h</td><td>34小时</td><td>9小时</td><td>可作为结构与动量研究主周期，符合你的历史笔记偏好</td></tr>
+<tr><td>2h</td><td>68小时</td><td>18小时</td><td>中间尺度；必须固定UTC聚合边界</td></tr>
+<tr><td>4h</td><td>5天16小时</td><td>36小时</td><td>波段背景与较慢转折，仍会出现逆势交叉</td></tr>
+<tr><td>6h</td><td>8天12小时</td><td>54小时</td><td>更慢背景；日界和会话对齐会改变K线</td></tr>
+<tr><td>12h</td><td>17天</td><td>4天12小时</td><td>信号更稀疏，反转确认可能跨数日</td></tr>
+<tr><td>1d</td><td>34天</td><td>9天</td><td>中期状态；本段只有54/65次交叉，不能据此证明稳定胜率</td></tr>
+<tr><td>1w</td><td>34周</td><td>9周</td><td>长期状态；缓存仅233根，未过本次热身要求，不报可靠统计</td></tr>
+<tr><td>月线/更长</td><td>34个月及以上</td><td>9个月及以上</td><td>可计算不等于样本充足；永续历史可覆盖的独立行情周期很少</td></tr>
+</tbody></table>
+<p>2m、10m、45m等自定义周期同样遵循34×周期与9×周期的尺度关系，但本轮未逐一统计。没有证据支持存在“任何周期都有效”的统一胜率。</p>
+<p>多周期研究可以拆为：4h已收盘状态说明背景，1h已收盘结构定义候选，15m已收盘事件定义择时。该分工只是待验证设计，并没有证明优于单周期；不能要求三个周期同一时刻金叉，也不能把同源价格信号当成三个独立样本。 如果未来加request.security，上层未收盘K线仍会变化；低周期barstate.isconfirmed不能替高周期确认。必须使用有证据支持的已确认HTF读取方式，并把该确认引入的延迟写清楚。</p>
+<h2>6. BTC与ETH永续：归一化、结构与成本</h2>
+<h3>6.1 不跨币比较绝对柱高</h3>
+<p>md的单位是价格（USDT），不是百分比。BTC的md=100和ETH的md=10没有直接可比性。 正价格倍乘会把md/sb/sh同比放大，但不改变理论交叉。这也解释了“BTC柱子大”本身不代表更强。 若做跨币排序，可以另研究md/close、sh/close或md/ATR、sh/ATR；分母必须只使用当前已收盘及之前的数据。ATR长度和实现需明确；本次没有新增、训练或优化这些特征。 不要把<code>md/ATR</code>再做SMA当成原指标的等价显示：分母随时间变化时，这会改变信号定义。</p>
+<h3>6.2 按市场结构区分用途</h3>
+<ul>
+<li>持续趋势：反向交叉经常先表达偏离减弱，适合研究减仓/退出提示；直接反手则是在押注趋势反转。</li>
+<li>回踩后延续：价格结构仍有效时，同方向恢复事件可作为候选，但IMACD不是独立于均线的新数据源。</li>
+<li>横盘震荡：死区能减少事件，却不能辨认所有区间；通道边界附近仍可能反复切换。</li>
+<li>快速V形反转：DEMA响应较快，但SMMA与信号线仍记着旧行情；确认可能落后于价格，且补偿可能超调。</li>
+<li>高波动单根冲击：高低点同时影响src与通道，柱体变化不能简单归因为买卖力量；应分辨冲击与持续结构。</li>
+</ul>
+<p>BTC和ETH应分别报告这些状态下的结果，再考察共同性。不能只用币种名称作为状态替代。若同时开同向BTC/ETH仓位，也不能默认两笔风险互相独立。</p>
+<h3>6.3 永续的可交易性不由箭头决定</h3>
+<p>代码没有仓位、杠杆、保护止损、退出、资金费率、点差、成交量或成交价格模型。 每次往返净收益须至少扣除双边手续费、滑点/点差及持仓期间资金费用；资金费用也可能为收入，应按实际方向、持仓与结算时间记账。OKX可能调整资金结算频率，不能把固定8小时写成永恒事实。参见<a href="https://www.okx.com/en-us/help/perps-funding-fee-mechanism">OKX资金费用机制</a>与<a href="https://www.okx.com/en-sg/help/trading-fee-rules-faq">交易费用说明</a>。 本仓统一0.2%=20bp往返成本只是既有研究口径，不是查过你的账户后得出的实际费率。本次没有改变成本假设，也没有计算净收益。 例如仅讨论代数：毛利15bp、往返成本20bp，则净值为−5bp；杠杆不改变该单位名义本金上的正负号。 图表成交价、标记价格、指数价格也应区分；止损触发与强平机制不是这个指标所模拟的内容。</p>
+<h2>7. 代码审查与最小改进</h2>
+<h3>7.1 没有明显未来函数，但有盘中变化</h3>
+<p>这段代码没有request.security、负向偏移绘图或未来pivot确认引用。固定已收盘OHLC下，计算是因果递推。 但当前bar的high、low、close一直变，原crossUp/crossDn未加收盘确认，因此盘中箭头和背景可能出现后消失，警报也可能与收盘后图形不一致。严格说不能宣传“完全不重绘”。参见<a href="https://www.tradingview.com/pine-script-docs/v5/concepts/repainting/">TradingView Pine v5重绘说明</a>。</p>
+<p>如果你的意图是收盘后才确认，可将原交叉定义替换为下面的语义修正；这里没有加入零轴过滤、趋势门或修改34/9：</p>
+<pre><code>
+rawCrossUp = ta.crossover(md, sb)
+rawCrossDn = ta.crossunder(md, sb)
+ready = not na(hi) and not na(lo) and not na(sb)
+crossUp = ready and barstate.isconfirmed and rawCrossUp
+crossDn = ready and barstate.isconfirmed and rawCrossDn
+</code></pre>
+<p>随后plotshape、bgcolor、alertcondition共同引用修正后的crossUp/crossDn；UI创建警报选择“每根K线收盘一次”。历史已收盘信号原则上保留，改变的是盘中输出与早期未就绪输出。 这段是建议片段，没有代你修改TradingView或配置警报，也没有宣称原生编译已通过。警报保存的是脚本和参数的快照；改脚本后需按平台机制重建相应警报。参见<a href="https://www.tradingview.com/pine-script-docs/v5/concepts/alerts/">TradingView警报文档</a>。</p>
+<h3>7.2 输入、初始化与命名</h3>
+<ul>
+<li>input.int至少加minval=1，避免0/负周期运行错误。lengthSignal=1会使sh恒0；lengthMA=1时mi=hlc3位于high/low内，md恒0；合法输入也可能退化为完全无信号，应在说明中写明。</li>
+<li>预热期间hi/lo为na，原三元表达式可能把md显示为0；不应把刚加载图表的这些零当成真实盘整。上面的ready改善初始显示语义，但递推收敛仍需足够历史。</li>
+<li>calc_smma里可把<code>seed=ta.sma(src,len)</code>移到每次调用都执行的位置，再用seed播种，便于静态检查与维护；不要随手替成普通EMA或pandas默认ewm初始化。</li>
+<li>警报文案“买入信号/卖出信号”容易使相对交叉被理解成交易指令，建议写“IMACD收盘金叉/死叉，需结合主线零轴位置”。</li>
+<li>粘贴内容包含Markdown的<code>**</code>、转义下划线及<code>&amp;#x20;</code>；如果这些字符确实进入Pine Editor，要恢复成纯文本。不要把展示格式当作可编译源码。</li>
+</ul>
+<h2>8. 你Notion里的相关资料及它们能证明什么</h2>
+<p>本次检索Impulse、MACD、LazyBear、IMACD、金叉、BTCUSDT及精确短语Impulse MACD，并读取以下6个相关页面。IMACD字面查询未命中；没有据此声称整个工作区没有其他相关材料。</p>
+<table><thead><tr>
+<th>页面</th>
+<th>实际读到的内容</th>
+<th>与本指标的关系及证据级别</th>
+</tr></thead><tbody>
+<tr><td><a href="https://app.notion.com/p/2ac8856479af8063b17bc02256e564a9">交易系统-更新中</a></td><td>明确todo：回测Impulse MACD + 均线密集；另有规则要精确、超过3根不符合预期退出、偏好1–4h、盘整不做</td><td>最直接的后续研究方向；todo不是已完成验证，旧风险比例不是本轮建议</td></tr>
+<tr><td><a href="https://app.notion.com/p/2248856479af80d8b0fdcb7360750e01">CM_Williams_Vix_Fix交易系统</a></td><td>Stochastic+Vix+VixTop的多头条件与1:2止盈；后面单列Stochastic+Vix+Impulse MACD，做多规则callout为空，写周末回测100次</td><td>不能把前一节规则直接填进后一节当成已定义的IMACD规则</td></tr>
+<tr><td><a href="https://app.notion.com/p/2258856479af80d5bbf3dd45c59278d2">Stochastic + Vix + Impulse MACD策略回测</a></td><td>目前只链接bonk 1h子页</td><td>是回测资料入口，不是BTC/ETH完整逐笔结果</td></tr>
+<tr><td><a href="https://app.notion.com/p/2278856479af809fbeeeebe17910a3e6">bonk 1h</a></td><td>14%、7.6%、8.67%文字配截图；贴有Stochastic超卖金叉Pine代码</td><td>无完整样本分母、失败单、成本或资金曲线，不能据此推导本IMACD胜率，贴出的也不是本指标代码</td></tr>
+<tr><td><a href="https://app.notion.com/p/2248856479af80d6b3d4d7f1aa36d8dc">btc 4h</a></td><td>2025-07-03“回测一周”，1:1推止损、难把握波幅、研究绿柱等级；含“不止损的话，基本会盈利”</td><td>位于Vix系统下，不能确定绿柱等级6.8指IMACD；少量回看不能排除途中巨大亏损与强平</td></tr>
+<tr><td><a href="https://app.notion.com/p/2358856479af8047bcfccab5ea9a2f0e">2025下半年</a></td><td>1h按趋势、MACD金叉+放量、Stoch RSI修复、放量突破结构分层观察</td><td>可借鉴维度分工；写的是MACD，不能无证据替换成IMACD</td></tr>
+</tbody></table>
+<p>此次使用页面文本与页面层级；没有核验截图中的逐笔成交或视频内容，不用截图旁边的百分数冒充统计结果。</p>
+<p>对你的研究方向，最值得保留的是“结构定义候选、指标描述状态、交易规则决定如何承担风险”的分工。 IMACD不包含成交量，所以放量条件在信息源上与它不同；但Stoch、均线和IMACD大多仍来自同组价格，不应把条件数量当成独立证据数量。 VixFix是由价格构建的代理指标，不是加密市场真实期权隐含波动率，更不是你交易合约的资金流。</p>
+<h2>9. 什么尚未检验，以及下一步选项</h2>
+<p><strong>本次是非方向性指标语义与频率审计，没有定义交易收益标签或拟合预测器。</strong> 因此val AUC、val正类率、置换收益p值、top-decile毛/净收益、胜率、匹配随机入场收益均不适用；不是留空，也不编数字。有效bar数、交叉数、日期范围与标准MACD信号基线已列出。 同等结构零假设与可证伪检查：常价路径产生0交叉；正比例缩放和平移保持交叉；价格镜像交换金死叉；截断未来不改变已有输出；缺少子K的聚合桶被剔除。4项测试通过，2000根2022年bar的独立标量递推对照md/sb/交叉通过，保存结果另有105条账目断言通过。</p>
+<p>下一步可选，均不是本轮已验证结论：</p>
+<ol>
+<li><strong>最小语义整理</strong>：图上把“反区修复、带内交叉、同区增强”分开显示，收盘确认；34/9保持。UI可读性与盈利是两个验收问题。</li>
+<li><strong>复核Notion里的IMACD+均线密集</strong>：冻结同一候选集合，只比较不加IMACD与一个明确的IMACD条件，匹配同币×同时间块×同波动桶对照。不能同时改入场、止损与退出。</li>
+<li><strong>比较入场与退出用途</strong>：固定已定义的入场，把交叉作为退出事件单独检验，区分首次反向变化与原本已处于反向状态；不把事件直接当持续状态。</li>
+<li><strong>补齐数据</strong>：恢复OKX来源后再补BTC 1m和足够长周期历史；不因缺样本就偷偷减少340热身。任意自定义周期需独立声明聚合起点与样本范围。</li>
+</ol>
+<p>盈利回测开始前，需要Owner确定希望测试的是趋势延续还是逆势修复，以及完整退出、止损/止盈、仓位与成交规则。本次“所有日期都可用”已经解决时间授权，不需要重复请求；它没有替这些交易规则做选择。</p>
+<h2>10. 风险与诚实声明</h2>
+<ul>
+<li>本次21组描述序列不是21份独立实验；多个周期共用原始行情，BTC与ETH也有共同市场因素。</li>
+<li>“反区交叉52%–54%”不代表胜率46%–48%；“3根反叉率”不是亏损概率。</li>
+<li>少交叉不等于更好，日线低频也不等于安全；本报告不推荐用当前箭头机械反手或高杠杆执行。</li>
+<li>数据不是2026-09-07最新盘口，不能据此说“现在BTC/ETH应该做多/做空”。来源哈希只证明本次读到的文件身份，不替代与交易所逐根核验或TradingView原生parity。</li>
+<li>1m BTC与周线实证缺口明确存在。统计没有覆盖所有可能的自定义周期、所有年份或每种市场状态。</li>
+<li>已授权holdout用于这次描述审计，因此相关时段不能再被这个研究线称为完全未见；本次未计算收益或调参。</li>
+<li>未修改指标默认参数、生产配置、ACTIVE、交易阈值、成本、止损倍数、警报、实盘仓位或Notion内容；training_eligible=false、production_eligible=false。</li>
+</ul>
+<h2>11. 复现、产物与来源</h2>
+<p>builder先冻结于Git提交01ab336，再运行本次统计。依赖使用现有.venv，未安装或修改库。</p>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+.venv/bin/python -m pytest -q tests/test_imacd_indicator_audit.py
+.venv/bin/python -m yoyo.evaluation.imacd_indicator_audit
+python3 scripts/md_to_html.py analysis/p0_imacd_okx_multitimeframe_20260907.md --out-dir analysis/html
+</code></pre>
+<p>复现要求保留原输入CSV并核对summary.json内逐文件SHA256；其中数据路径不入Git。网络403与来源不在Git意味着不能声称在一台全新电脑上无需原数据即可从零重建。读取相同CSV后，计算过程可复现；不要在未获授权的未来新配置中照搬holdout读取。</p>
+<ul>
+<li>源码：<a href="/Users/zhangzc/fable-trading/yoyo/evaluation/imacd_indicator_audit.py">imacd_indicator_audit.py</a></li>
+<li>固定方案：<a href="/Users/zhangzc/fable-trading/experiments/active/exp-imacd-okx-descriptive-20260907-v1/PLAN.md">PLAN.md</a></li>
+<li>完整机器结果与来源哈希：<a href="/Users/zhangzc/fable-trading/experiments/active/exp-imacd-okx-descriptive-20260907-v1/summary.json">summary.json</a></li>
+<li>可筛选表：<a href="/Users/zhangzc/fable-trading/experiments/active/exp-imacd-okx-descriptive-20260907-v1/metrics.csv">metrics.csv</a></li>
+<li>验证收据：<a href="/Users/zhangzc/fable-trading/experiments/active/exp-imacd-okx-descriptive-20260907-v1/qa.json">qa.json</a></li>
+<li>学习笔记：<a href="/Users/zhangzc/fable-trading/docs/learnings/imacd-cross-is-relative-state-not-independent-confirmation.md">交叉等价与状态语义</a></li>
+</ul>
+<p>主要公开依据已在相关段落链接：LazyBear原作、TradingView DEMA公式、函数作用域、Pine v5重绘和警报说明，以及OKX资金费用和交易费用说明。指标机制细节以Owner本次实际代码为准，不以公开脚本简介替代代码。</p>
+</body>
+</html>
