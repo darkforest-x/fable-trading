@@ -130,7 +130,7 @@
 
 - 系统还没有达到稳定赚钱目标。V36盈利、最低样本、分段、PF、活跃月份、匹配覆盖及显著性均未通过；只“全部36配对结果已知”通过。
 - 2023–2024是反复用过的开发时期，不是独立验收。0.2%是固定假设成本，不含逐笔真实资金费结算；理论收盘可用不等于实时网络收到。没有盘口成交/滑点验证，无收益保证。
-- 本轮调查发生一次读取边界失误：源码搜索误显示了一行旧2026年9月3日锚点。这是**本配置第1次意外holdout查看**，不是授权验收；未用于假设、特征、候选或收益评分。登记已保守标为曾查看。回测和退出时钟诊断本身仍只读取2023–2024，不声称整个调查零越界。
+- 本轮有两次意外越界展示：源码搜索显示一行旧2026年9月3日锚点；报告整理时，检查共享注册表差异又展示了另一个任务已写入的2026年9月1日ARB截图结果。分别记为**本配置第1、第2次意外holdout查看**，均非本配置授权验收，未用于假设、特征、候选或收益评分。登记保守标为曾查看；回测和退出时钟诊断本身仍只读取2023–2024。后续仅查看本轮明确行段，不展开其他任务的差异内容。
 - 本轮首次回放在收益前因派生列重复合并失败，已补测试后重新提交；另修正未知开盘被误记现金的接口问题，未因结果调整策略。原始成功输出不覆盖。
 - 最终扩展检查852项通过、4项失败：两项旧模型迁移哈希不一致；两项holdout消费名单检查失败，其中本轮V36意外查看的新增记录确实触发守门。未把意外查看列为已授权，也未改守门名单使其变绿。系统Python另外有3个非数值依赖版本不符；项目venv版本正确，NumPy2.0.2/pandas2.3.3在两者一致。本轮相关297项测试通过，不等于全仓通过。
 - 没有训练、promote、部署、下单、改仓或修改TradingView。报告的浏览器级验证状态见QA；文件存在不能当作手机实测通过。
@@ -148,7 +148,7 @@
 .venv/bin/python -m yoyo.evaluation.owner_k1k2_flow_report clock
 python3 scripts/md_to_html.py analysis/p1_btcusdtp_owner_k1k2_genuine_flow_v36_20260907.md --out-dir analysis/html
 .venv/bin/python -m yoyo.evaluation.owner_k1k2_flow_report package
-node /Users/zhangzc/.codex/plugins/cache/openai-curated-remote/data-analytics/0.2.10-13ceeea1f599/skills/build-report/scripts/deliver_portable_artifact.mjs --input experiments/active/exp-btcusdtp-owner-k1k2-genuine-flow-20260907-v36/artifact_reviewed.json --output analysis/html/p1_btcusdtp_owner_k1k2_genuine_flow_v36_20260907.html
+node /Users/zhangzc/.codex/plugins/cache/openai-curated-remote/data-analytics/0.2.10-13ceeea1f599/skills/build-report/scripts/deliver_portable_artifact.mjs --input experiments/active/exp-btcusdtp-owner-k1k2-genuine-flow-20260907-v36/artifact_reviewed2.json --output analysis/html/p1_btcusdtp_owner_k1k2_genuine_flow_v36_20260907.html
 ```
 
 运行器为一次性写入：已存在的研究产物会拒绝覆盖，这是正常保护；复建只能在无该输出的审计环境中用原冻结配置执行，不删除本机证据重跑。对应逐笔文件为`data/owner_k1k2_genuine_flow_v36/case_trades.csv`、`control_trades.csv`和`paired_contrasts.csv`；颜色时钟逐笔表位于本实验目录`clock_audit.csv`。

@@ -97,7 +97,7 @@ def package():
         dict(id="summary",label="V36 · 原始研究摘要",path=str(REL/"summary.json")),
         dict(id="clock_summary",label="V36 · 入场与退出时钟核对",path=str(REL/"clock_audit.json")),
         dict(id="clock_rows",label="V36 · 63笔颜色时钟逐笔证据",path=str(REL/"clock_audit.csv")),
-        dict(id="clock_crosscounts",label="V36 · 退出类型与新翻色交叉计数",path=str(REL/"artifact_reviewed_build_receipt.json"))]
+        dict(id="clock_crosscounts",label="V36 · 退出类型与新翻色交叉计数",path=str(REL/"artifact_reviewed2_build_receipt.json"))]
     for key,query in QUERIES.items():
         sources.append(dict(id=key,label="V36 · 已保存逐笔结果复算",path=str(REL/"report_data.json"),
             query=dict(sql=query,language="sql",engine="sqlite",executed_at=saved["generated_at"],
@@ -123,8 +123,8 @@ def package():
     artifact=dict(surface="report",manifest=dict(version=1,surface="report",title=TITLE,generatedAt=stamp,
         sources=sources,blocks=blocks,charts=[chart],cards=[],tables=[],filters=[]),
         snapshot=dict(version=1,generatedAt=stamp,status="ready",datasets=dict(folds=saved["data"]["folds"])),sources=sources)
-    write_json(HERE/"artifact_reviewed.json",artifact)
-    write_json(HERE/"artifact_reviewed_build_receipt.json",dict(source_commit=commit,report_sha256=sha(ROOT/REPORT),
+    write_json(HERE/"artifact_reviewed2.json",artifact)
+    write_json(HERE/"artifact_reviewed2_build_receipt.json",dict(source_commit=commit,report_sha256=sha(ROOT/REPORT),
         summary_sha256=sha(HERE/"summary.json"),report_data_sha256=sha(HERE/"report_data.json"),
         clock_audit_sha256=sha(HERE/"clock_audit.json"),clock_rows_sha256=sha(HERE/"clock_audit.csv"),
         clock_crosscounts=clock_crosscounts,
