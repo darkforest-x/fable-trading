@@ -2,21 +2,20 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## YOLO 当前进度（2026-09-07：盲审包已交付，等 Owner 逐样本答案）
+## YOLO 当前进度（2026-09-07：简化审核＋未来40根，等Owner点选）
 
-已按 Owner“按照你的想法来做，去吧”准备提准第一步：240 去重候选 +36 盲重复，
-共276题、163币，2021-07～2025-10。跨venue/双方向/正负完整成员区间+150bar
-排除145个（含旧30个）；240原项像素重放全过。正式页 http://127.0.0.1:8769/，
-每题保存后点“保存到本机”，快照在 datasets/grade_a_owner_calibration_20260907_v1/answers/。
-服务重启：`.venv/bin/python -m yoyo.datasets.grade_a_calibration serve --port 8769`。
-构建源码708ffe2；最终UI修复c6ddb71。111项相关测试+16项registry测试通过；
-本机保存/恢复/导入、桌面与手机实测，QA在8770与/tmp隔离，交付检查Owner0/276。
-报告：analysis/html/p1_15m_grade_a_owner_calibration_20260907.html。
-实验：experiments/active/exp-15m-grade-a-owner-calibration-20260907-v1/。
-下一步读取真实答案、报重复一致性与框义分歧，再按training_plan.json冻结同币/venue/
-半年/核心长度/完整变体组的等量难负替换。其余数据和1280 close full40配方不变。
-未启动新训练；training_eligible/production_eligible=false，holdout未读。旧val是反复使用的
-开发集，挖掘队列不能估总体召回；exposure_review.json明确独立性尚未建立，未冻结连续窗roster。
+Owner指出旧审核太复杂，并明确需要后续40根（10小时）。已改辅助审核schema2：
+显示原候选框/方向、原输入截止线及后续40根，主要点“是 / 不是 / 拿不准”后自动保存下一题。
+纠正框/方向/备注折叠可选；“不是”仅拒绝提案，不自动转整图负例。地址仍 http://127.0.0.1:8769/。
+原240事件+36重复/顺序不变；240原输入重放、276对图/时钟、36重复、286旧文件SHA全过。
+旧Chrome多头草稿已备份在旧pack answers，未计为完成。新包 datasets/grade_a_owner_assisted_20260907_v2/；
+未来独立review_future_only目录/manifest，无labels；新增40根依赖与既有150bar保护区重叠0。
+源码295a3b8，最终UI fb981e6；27新增/122联合测试过，真实点选/自动落盘/撤回/恢复/拖框/
+缺图禁用及手机横滚已验。完整QA在原实验results/assisted_v2/。未启动训练、推理或holdout读取。
+重启：`.venv/bin/python -m yoyo.datasets.grade_a_assisted_review serve --port 8769`。
+报告 analysis/html/p1_15m_grade_a_assisted_future40_20260907.html。
+新答案不能冒充旧盲审κ，也不能自动升级Gold；拿到真实答案后先报分歧，再审资格/匹配。
+assisted_v2_protocol.json为当前审核协议，旧PLAN与training_plan的盲审要求按此修订，训练仍需数据门。
 
 ## ⚡ 当前真相（2026-09-07 — V37真翻转退出仍亏，改善来自未匹配少数赢家）
 

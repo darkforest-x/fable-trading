@@ -80,3 +80,14 @@ IAB 中 Blob 下载提示出现，但 download 事件未返回且没有确认文
 同源服务发送当前审核快照，写入本包 `answers/answers_<UTC>_<SHA>.json`，每次追加，
 保留历史答案，不覆写 labels 或训练数据。离线 JSON 导入导出仍保留作外部浏览器备用。
 这一补充不改变样本、顺序、图片、manifest 或评估协议；旧 HTML 与收据留在 ui_history。
+
+## Owner修订：辅助审核与未来40根（2026-09-07）
+
+Owner明确旧表单过于复杂且需要未来40根。当前交付改用 `assisted_v2_protocol.json`：
+同一批240事件/36重复，三按钮确认原提案，原框/方向提示和额外40根可见；纠正为可选。
+本修订覆盖上文要求不看更远未来及每张强制从空白标框的审核界面要求，原schema1证据保留。
+未来独立目录/manifest，原输入与旧草稿286文件哈希不变；未来上下文不是训练图。
+辅助一致率不能替代盲审κ；REJECT不自动映射NO_SIGNAL，需明确无目标裁决及后续匹配门。
+未来扩大后的依赖隔离已独立核查，当前0重叠。任何后续出现重叠的候选不得进入训练替换。
+服务命令改为 `.venv/bin/python -m yoyo.datasets.grade_a_assisted_review serve --port 8769`。
+详细交付：`analysis/html/p1_15m_grade_a_assisted_future40_20260907.html`。

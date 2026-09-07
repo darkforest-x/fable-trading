@@ -18453,3 +18453,138 @@ artifacts:
     production_eligible: false
     generator_commit: "c6ddb71eba85f055d32f6f1d927a91403a5a09b1"
     notes: "240 unique candidate events plus 36 blind repeats; Owner answers pending, no independent accuracy certification."
+
+  - artifact_id: grade-a-assisted-future40-20260907-protocol
+    artifact_type: "config"
+    role: "owner_assisted_review_future40_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "295a3b89b77921c199806915f6b3f5aab7558aa8"
+    source_path: "experiments/active/exp-15m-grade-a-owner-calibration-20260907-v1/assisted_v2_protocol.json"
+    sha256: "feb364a661df2db01d3b7f7e4af9ae48bad713ae4f77025b24875dbb010197b0"
+    size_bytes: 12688
+    storage_uri: "repo://experiments/active/exp-15m-grade-a-owner-calibration-20260907-v1/assisted_v2_protocol.json"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "295a3b89b77921c199806915f6b3f5aab7558aa8"
+    notes: "Owner-requested simplified aided review with 40 future bars. Original W18 inputs unchanged; REJECT alone is not NO_SIGNAL; schema1 evidence preserved."
+
+  - artifact_id: grade-a-assisted-future40-20260907-manifest
+    artifact_type: "manifest"
+    role: "owner_assisted_review_future40_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "295a3b89b77921c199806915f6b3f5aab7558aa8"
+    source_path: "datasets/grade_a_owner_assisted_20260907_v2/public/manifest.json"
+    sha256: "d1fb86c6b98ec84033647d3abaf404350f3c49a0cff10fbdfe475a47c3acda41"
+    size_bytes: 187238
+    storage_uri: "repo://datasets/grade_a_owner_assisted_20260907_v2/public/manifest.json"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "295a3b89b77921c199806915f6b3f5aab7558aa8"
+    notes: "Owner-requested simplified aided review with 40 future bars. Original W18 inputs unchanged; REJECT alone is not NO_SIGNAL; schema1 evidence preserved."
+
+  - artifact_id: grade-a-assisted-future40-20260907-future-manifest
+    artifact_type: "manifest"
+    role: "owner_assisted_review_future40_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "295a3b89b77921c199806915f6b3f5aab7558aa8"
+    source_path: "datasets/grade_a_owner_assisted_20260907_v2/review_future_only/manifest.json"
+    sha256: "a687d4a468fc7575faf0a6e78b18ce30f7c015e9376437d7d35c83d2af4b09af"
+    size_bytes: 177007
+    storage_uri: "repo://datasets/grade_a_owner_assisted_20260907_v2/review_future_only/manifest.json"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "295a3b89b77921c199806915f6b3f5aab7558aa8"
+    notes: "Owner-requested simplified aided review with 40 future bars. Original W18 inputs unchanged; REJECT alone is not NO_SIGNAL; schema1 evidence preserved."
+
+  - artifact_id: grade-a-assisted-future40-20260907-ui
+    artifact_type: "report"
+    role: "owner_assisted_review_future40_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "fb981e646e4843b4d25645f308d85d1f317dee05"
+    source_path: "datasets/grade_a_owner_assisted_20260907_v2/public/index.html"
+    sha256: "1ee578953804de2f6962f7a94faaa1f37a220c83fa3b6c66581739446318916b"
+    size_bytes: 168683
+    storage_uri: "repo://datasets/grade_a_owner_assisted_20260907_v2/public/index.html"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fb981e646e4843b4d25645f308d85d1f317dee05"
+    notes: "Owner-requested simplified aided review with 40 future bars. Original W18 inputs unchanged; REJECT alone is not NO_SIGNAL; schema1 evidence preserved."
+
+  - artifact_id: grade-a-assisted-future40-20260907-lineage
+    artifact_type: "manifest"
+    role: "owner_assisted_review_future40_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "295a3b89b77921c199806915f6b3f5aab7558aa8"
+    source_path: "datasets/grade_a_owner_assisted_20260907_v2/admin/lineage.jsonl"
+    sha256: "9de3555a56271bc63aa22c931ba5e2116c77efed11ada2a318300781a1448e6d"
+    size_bytes: 259343
+    storage_uri: "repo://datasets/grade_a_owner_assisted_20260907_v2/admin/lineage.jsonl"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "295a3b89b77921c199806915f6b3f5aab7558aa8"
+    notes: "Owner-requested simplified aided review with 40 future bars. Original W18 inputs unchanged; REJECT alone is not NO_SIGNAL; schema1 evidence preserved."
+
+  - artifact_id: grade-a-assisted-future40-20260907-receipt
+    artifact_type: "report"
+    role: "owner_assisted_review_future40_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "fb981e646e4843b4d25645f308d85d1f317dee05"
+    source_path: "experiments/active/exp-15m-grade-a-owner-calibration-20260907-v1/results/assisted_v2/build_receipt.json"
+    sha256: "d5db8f23a579edb4923d42f5e6487066a952b4de9293ee76ffd7fa035e18ce48"
+    size_bytes: 1188
+    storage_uri: "repo://experiments/active/exp-15m-grade-a-owner-calibration-20260907-v1/results/assisted_v2/build_receipt.json"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fb981e646e4843b4d25645f308d85d1f317dee05"
+    notes: "Owner-requested simplified aided review with 40 future bars. Original W18 inputs unchanged; REJECT alone is not NO_SIGNAL; schema1 evidence preserved."
+
+  - artifact_id: grade-a-assisted-future40-20260907-physical-qa
+    artifact_type: "report"
+    role: "owner_assisted_review_future40_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "fb981e646e4843b4d25645f308d85d1f317dee05"
+    source_path: "experiments/active/exp-15m-grade-a-owner-calibration-20260907-v1/results/assisted_v2/physical_qa.json"
+    sha256: "83ef5667a12ede9cf0bfab242398198b6f5566345b2cfe81fb7207718220294c"
+    size_bytes: 2089
+    storage_uri: "repo://experiments/active/exp-15m-grade-a-owner-calibration-20260907-v1/results/assisted_v2/physical_qa.json"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fb981e646e4843b4d25645f308d85d1f317dee05"
+    notes: "Owner-requested simplified aided review with 40 future bars. Original W18 inputs unchanged; REJECT alone is not NO_SIGNAL; schema1 evidence preserved."
+
+  - artifact_id: grade-a-assisted-future40-20260907-browser-qa
+    artifact_type: "report"
+    role: "owner_assisted_review_future40_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "fb981e646e4843b4d25645f308d85d1f317dee05"
+    source_path: "experiments/active/exp-15m-grade-a-owner-calibration-20260907-v1/results/assisted_v2/browser_qa.json"
+    sha256: "e0f0bfa68ca8cc35133517e929f2f38e38aa288b7d8afb9e79a1756e96b94463"
+    size_bytes: 1573
+    storage_uri: "repo://experiments/active/exp-15m-grade-a-owner-calibration-20260907-v1/results/assisted_v2/browser_qa.json"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fb981e646e4843b4d25645f308d85d1f317dee05"
+    notes: "Owner-requested simplified aided review with 40 future bars. Original W18 inputs unchanged; REJECT alone is not NO_SIGNAL; schema1 evidence preserved."
+
+  - artifact_id: grade-a-assisted-future40-20260907-html
+    artifact_type: "report"
+    role: "owner_assisted_review_future40_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "fb981e646e4843b4d25645f308d85d1f317dee05"
+    source_path: "analysis/html/p1_15m_grade_a_assisted_future40_20260907.html"
+    sha256: "7ebd7b42e023fb5a0f88288f96a5310991e0f7225d6c1f16b21502f4f3d1abd3"
+    size_bytes: 9310
+    storage_uri: "repo://analysis/html/p1_15m_grade_a_assisted_future40_20260907.html"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fb981e646e4843b4d25645f308d85d1f317dee05"
+    notes: "Owner-requested simplified aided review with 40 future bars. Original W18 inputs unchanged; REJECT alone is not NO_SIGNAL; schema1 evidence preserved."

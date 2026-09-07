@@ -6406,12 +6406,12 @@ experiments:
 
   - experiment_id: exp-15m-grade-a-owner-calibration-20260907-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 708ffe21b05253bb70609cb92a3699aa5d876ad1
+    source_commit: 295a3b89b77921c199806915f6b3f5aab7558aa8
     status: active
-    question: Can blinded Owner class and geometry judgments calibrate current Grade-A proposals before matched hard-negative replacement?
+    question: Can Owner judgments aided by original proposals and future40 context identify usable Grade-A examples before matched hard-negative replacement?
     single_variable: Development data curation only; frozen proposal pool and original input pixels, no model or threshold change.
-    result: Built 240 unique events plus 36 blind repeats; 145 source events excluded, 240 pixel replays passed. Local-save UI delivered; Owner answers pending.
-    canonical_report: analysis/p1_15m_grade_a_owner_calibration_20260907.md
+    result: Owner requested simpler future40 review; delivered schema2 aided three-choice UI, 240 events plus36 repeats, all original inputs preserved. No training.
+    canonical_report: analysis/p1_15m_grade_a_assisted_future40_20260907.md
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
@@ -6425,5 +6425,14 @@ experiments:
       - grade-a-owner-calibration-20260907-qa
       - grade-a-owner-calibration-20260907-report
       - grade-a-owner-calibration-20260907-html
+      - grade-a-assisted-future40-20260907-protocol
+      - grade-a-assisted-future40-20260907-manifest
+      - grade-a-assisted-future40-20260907-future-manifest
+      - grade-a-assisted-future40-20260907-ui
+      - grade-a-assisted-future40-20260907-lineage
+      - grade-a-assisted-future40-20260907-receipt
+      - grade-a-assisted-future40-20260907-physical-qa
+      - grade-a-assisted-future40-20260907-browser-qa
+      - grade-a-assisted-future40-20260907-html
     reuse_allowed: false
-    notes: Owner authorized the proposed workflow on 2026-09-07. Human labels are not inferred; reused validation is development-only and independent evaluation remains not established.
+    notes: Owner 2026-09-07 requested future40 and simplified review. Old blind protocol/answers retained separately. 286 old hashes unchanged; 0 expanded dependency overlaps. Reject is not automatic background; no holdout or new inference.

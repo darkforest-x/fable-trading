@@ -8,6 +8,11 @@
 
 ## 按日期倒序
 
+### 2026-09-07 — YOLO审核简化＋未来40根
+
+- [新版审核改进HTML](html/p1_15m_grade_a_assisted_future40_20260907.html) · [源报告](p1_15m_grade_a_assisted_future40_20260907.md)
+- 原240事件+36重复改为带原框提示的三按钮辅助审核，显示后续40根；自动保存/可撤回，纠正可选。286旧文件不变，276图像对/时钟QA通过；未训练、未读holdout，旧盲审证据单独保留。
+
 ### 2026-09-07 — V32前置量波经济检验未通过
 
 [完整HTML](html/p1_btcusdtp_hourly_volume_wave_economics_v32_20260907.html) · [MD源](p1_btcusdtp_hourly_volume_wave_economics_v32_20260907.md)

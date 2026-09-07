@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>YOLO 人工审核简化与未来 40 根对照</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>YOLO 人工审核简化与未来 40 根对照</h1>
+<p>2026-09-07 · <code>assisted_future40_v2</code> · 原实验 <code>exp-15m-grade-a-owner-calibration-20260907-v1</code> 的 Owner 协议修订。</p>
+<p>Owner 指出“这个审核对人工来说过于复杂，且人工审核需要看到未来 K 线”，并选择后续 <strong>40 根（10 小时）</strong>。本轮据此改为辅助审核：直接展示原候选方向与框，主要回答“是 / 不是 / 拿不准”，纠正操作可选。原图之外的未来仅供人看，原输入保持不变。</p>
+<p><a href="http://127.0.0.1:8769/">打开新版人工审核页</a>；旧地址已切换新版。</p>
+<h2>使用变化</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>旧版</th>
+<th>新版</th>
+</tr></thead><tbody>
+<tr><td>默认图像</td><td>原 18 根</td><td>原 18 根＋右侧 40 根</td></tr>
+<tr><td>主要操作</td><td>类别、核心首末、纵坐标、框义、保存</td><td>三选一后保存并下一张</td></tr>
+<tr><td>框</td><td>每张从空白填写</td><td>展示原提案，需要时纠正</td></tr>
+<tr><td>辅助字段</td><td>主表单必填多项</td><td>折叠、可不填</td></tr>
+<tr><td>保存</td><td>每题保存，再手动备份</td><td>主选择自动本机备份；保留手动恢复/导入导出</td></tr>
+<tr><td>统计含义</td><td>无提案提示的类别/几何盲审</td><td>看到提案和未来的辅助判断，独立 schema 2</td></tr>
+</tbody></table>
+<p>“不是”只表示这个提案有误，不能自动成为整图负例。可选“整个原始输入都没有目标形态”才记录明确无目标的判断；仍需后续数据与匹配审查。修改方向和框只作用于人工答案，未经后续处理不会改任何训练标签。</p>
+<h2>数据与隔离证据</h2>
+<p>保持原来的 <strong>240 个不同事件＋36 个重复项，共 276 题</strong>，顺序不变。候选抽样正负比例是提案分层，Owner 确认正类率仍未知。本轮没有独立 val，val 样本数为 0；不是一次模型训练或市场准确率评估。</p>
+<p>所有未来窗口实际检查为 <strong>58 根、57 个连续 15m 间隔</strong>，第一/第18/第58根分别对应旧起点、旧终点与新增终点。最晚新增 K 线为 <strong>2025-10-24 17:30 UTC</strong>，收盘 <strong>17:45 UTC</strong>。原样本起点最早为 2021-07-17 01:45 UTC。</p>
+<table><thead><tr>
+<th>构建检查</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>原 W18 输入像素重放</td><td>240 / 240 通过</td></tr>
+<tr><td>原包、已保存草稿、原数据契约文件哈希</td><td>286 / 286 保持一致</td></tr>
+<tr><td>未来扩展后与已有成员的 150-bar 保护区重叠</td><td>0 / 240</td></tr>
+<tr><td>新增模型推理 / 训练 / holdout 读取</td><td>0 / 0 / 0</td></tr>
+</tbody></table>
+<p>新版路径为 <code>datasets/grade_a_owner_assisted_20260907_v2/</code>：原图复制在 <code>public/input_images/</code>，未来图和独立 manifest 在 <code>review_future_only/</code>，后者禁止 labels。扩展图会根据完整 58 根重算纵轴，因此不能拿它左侧的截图当原训练图；独立保留的 W18 文件才是原输入。</p>
+<p>框使用原 YOLO 连续坐标，经旧图像素→bar/price→新图像素转换。没有依据未来走势重画候选，也没有把 K 线极值冒充原 YOLO 纵框。人工修正框坐标固定在原 W18 图中。</p>
+<h2>复现与使用</h2>
+<pre><code>
+# 在 fable-trading 根目录，使用已有锁版本的 .venv。
+git branch --show-current
+.venv/bin/python -m pytest tests/test_grade_a_assisted_review.py tests/test_grade_a_calibration.py tests/boundaries/test_layer_imports.py -q
+
+# 首次构建：需已有旧审核包和 protocol 中冻结的本地源归档；已存在的包拒绝覆盖。
+# 先提交 builder/protocol，再执行；图片与 UI 可分别 source-first 构建。
+.venv/bin/python -m yoyo.datasets.grade_a_assisted_review build-images
+# 提交模板后挂接 UI，不重建图像或改变答案身份。
+.venv/bin/python -m yoyo.datasets.grade_a_assisted_review publish-ui
+
+# 打开已有包：
+.venv/bin/python -m yoyo.datasets.grade_a_assisted_review serve --port 8769
+# http://127.0.0.1:8769/
+
+# 收到真实答案后使用实际文件名，当前不产生 Owner 评分：
+.venv/bin/python -m yoyo.datasets.grade_a_assisted_review score \
+  --answers /path/to/assisted_answers.json \
+  --output /path/to/new_assisted_score.json
+
+python3 scripts/md_to_html.py analysis/p1_15m_grade_a_assisted_future40_20260907.md --out-dir analysis/html
+</code></pre>
+<p>图像生成源码提交 <code>295a3b8</code>。<code>assisted_v2_protocol.json</code> 固定 61 份源代码/元数据哈希；<code>results/assisted_v2/build_receipt.json</code> 记录输出身份与后续 UI 提交。</p>
+<h2>风险与诚实声明</h2>
+<p>本轮是审核工具和数据隔离改进，未产生收益序列。因此 val AUC、收益排序置换 p、top-decile 毛/净收益、交易胜率、单特征收益基线及匹配随机入场对照不适用；工程零假设是“新增人工未来上下文不改变原输入”，逐文件哈希与原 W18 像素重放均通过。未来图对人有帮助，不等于模型获得了可在实时预测使用的未来信息。</p>
+<p>27 项新增后端测试及合计 122 项聚焦测试通过。独立复核用空闲 TCP 连接验证图像服务不会被浏览器预连接堵住；迟到旧快照、同时间戳不同内容和重复 lineage 均被拒绝。浏览器实测三按钮自动保存/切题、撤回、刷新/本机恢复、原图拖框均通过；缺失未来图禁止确认，恢复图像后可重试。手机 390×844 下页面宽 390、大图宽 1080，实际横滚 480px；窗口覆盖已恢复。独立产物 QA 检查 276 对原图/未来图、36 重复对、全部时钟及 286 旧文件哈希通过。具体证据见 <code>results/assisted_v2/browser_qa.json</code> 与 <code>physical_qa.json</code>。</p>
+<p>新旧审核协议分开保存，旧浏览器里未完成的多头草稿已经备份，没有当成已确认正例。辅助审核的一致率只能解释当前带提示的任务，不能冒充旧盲审 κ 或独立市场准确率。未升级 Gold、训练资格或生产资格。</p>
+<p>额外执行注册表测试为 15 通过、1 失败：共享工作区的 holdout 消耗集合比测试期望多一个既有实验 <code>exp-btcusdtp-owner-k1k2-genuine-flow-20260907-v36</code>。该失败在本轮注册表修改前已出现，本轮未改它的声明或放宽守门测试。此次新增审核产物全部保持 <code>pre_holdout</code>，训练与生产资格为 false；交付提交中的注册表另行检查加载和引用完整性。</p>
+<h2>下一步</h2>
+<p>使用新版页面逐图判断即可。获得真实答案后，先汇报分歧与可用样本，再继续已规划的数据整理；不把点击“不是”自动翻译为训练负标签。</p>
+</body>
+</html>
