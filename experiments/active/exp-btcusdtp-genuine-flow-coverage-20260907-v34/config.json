@@ -1,0 +1,21 @@
+{
+  "experiment_id": "exp-btcusdtp-genuine-flow-coverage-20260907-v34",
+  "symbol": "BTCUSDT",
+  "source_exchange": "binance_usdm",
+  "interval": "5m",
+  "start_inclusive": "2023-01-01T00:00:00Z",
+  "end_exclusive": "2025-01-01T00:00:00Z",
+  "raw_cache": "data/kline_preholdout_binance_um5m/downloads/BTCUSDT",
+  "data_output": "data/genuine_flow_coverage_v34",
+  "expected_months": 24,
+  "expected_bars": 210528,
+  "missing_policy": "retain_missing_and_unknown_separately_no_fill_no_dedup",
+  "checksum_policy": "retrieve_official_checksums_before_reading_zips_fail_on_cache_mismatch",
+  "availability": "theoretical_close_boundary_only_not_observed_live_delivery",
+  "economic_labels_read": false,
+  "execution_source_replaced": false,
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "threshold_or_exit_changes": []
+}
