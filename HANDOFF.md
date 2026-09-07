@@ -18,7 +18,29 @@
 未启动新训练；training_eligible/production_eligible=false，holdout未读。旧val是反复使用的
 开发集，挖掘队列不能估总体召回；exposure_review.json明确独立性尚未建立，未冻结连续窗roster。
 
-## ⚡ 当前真相（2026-09-07 — V36真实量门失败，已定位反色延续早退）
+## ⚡ 当前真相（2026-09-07 — V37真翻转退出仍亏，改善来自未匹配少数赢家）
+
+目标active，未盈利。457dc62冻结后仅改colour→transition_colour，共振两臂关闭；
+同BinanceUSD-M BTCUSDT2023–2024、原63病例/108控，非当前完整15m Pine策略。
+病例平均净−22.54→−12.81bp，中位−21.97→−29.94bp；13好25坏25不变；硬止损5→20。
+17笔从未激活同向后止损。44个不同K1不等于独立样本。四半年仅2023H2平均净正。
+原匹配36病例自身−1.08bp变化，27未匹配贡献超过全部净改善；最大两赢家都未匹配。
+配对增量+2.06bp，CI[−7.83,10.61]、p=.3697，绝对超额−1.44bp；拒绝，不降门。
+初态同向16笔两臂不变且均净−21.65bp；初态反向47包含最大两赢家，不能一刀切禁止。
+
+E37 experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/；13数据输出
+在data/owner_k1k2_transition_exit_v37，单仓新59笔净−13.29bp、阻塞4。summary/report_data/
+REVIEW/QA/收据齐全。报告analysis/html/p1_btcusdtp_owner_k1k2_transition_exit_v37_20260907.html。
+canonical最终artifact_final.json由0791e19构建，原生验证通过、HTML structural_only；
+未验手机/主题/来源弹窗。两早期报告包及失败保留；没有再跑经济回测或覆盖原始证据。
+398聚焦测试通过，新增报告SQL最后3过；非全仓绿，V36旧4失败未绕过。无新holdout读取，
+V36两次旧文本暴露仍按原QA保留；不改成本/TP-SL/依赖/TV/ACTIVE/训练/实盘。
+
+下一步NEXT_ACTION.md：先审K2后待确认再入场的因果时钟、原K2止损是否仍有效、未确认/
+失效/未知请求如何保留，所有原控同规则；然后冻结单一新假设。原72h持仓期限不能偷当
+新入场有效期。不要把未来曾激活、首5m早退、MFE或赢家身份当入场过滤，勿扩大行情范围。
+
+## ⚡ 历史结果（2026-09-07 — V36真实量门失败，已定位反色延续早退）
 
 目标active，盈利目标未达。4e57139冻结后回测BinanceUSD-M BTCUSDT2023–2024；
 完整1h源码纯形态63K2/44K1，非当前15m完整Pine接受逻辑。真实量同向保留23笔，
