@@ -30,10 +30,10 @@ QUERIES={
  SELECT 'control',event_id,signal_time,direction,classifier_known,classifier_center,
  classifier_previous_center,classifier_step FROM controls),
  flags AS (SELECT c.*,h.close,
- ((direction=1 AND classifier_center>classifier_previous_center) OR
-  (direction=-1 AND classifier_center<=classifier_previous_center)) slope_pass,
- ((direction=1 AND h.close>classifier_center+classifier_step) OR
-  (direction=-1 AND h.close<classifier_center-classifier_step)) distance_pass
+ ((c.direction=1 AND c.classifier_center>c.classifier_previous_center) OR
+  (c.direction=-1 AND c.classifier_center<=c.classifier_previous_center)) slope_pass,
+ ((c.direction=1 AND h.close>c.classifier_center+c.classifier_step) OR
+  (c.direction=-1 AND h.close<c.classifier_center-c.classifier_step)) distance_pass
  FROM contexts c LEFT JOIN hours h ON substr(replace(c.signal_time,'T',' '),1,19)=substr(h.open_time,1,19)),
  categories AS (SELECT *,CASE WHEN classifier_known=0 THEN 'unknown'
  WHEN slope_pass AND distance_pass THEN 'accepted'
