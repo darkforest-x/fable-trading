@@ -3,12 +3,15 @@
 Native monthly bar chart: all24 UTC months, accepted own case events, zero
 origin, single blue root; retain original/known/abstain/unknown denominators.
 Tables in the technical narrative serve exact support/threshold lookup.
-No SQL was executed; chart dataset is a direct projection of frozen counts.
+Chart dataset executes the recorded SQLite projection of frozen counts.
+https://pandas.pydata.org/pandas-docs/version/2.3/reference/api/pandas.DataFrame.to_sql.html
+https://pandas.pydata.org/pandas-docs/version/2.3/reference/api/pandas.read_sql_query.html
 """
 from pathlib import Path
 import hashlib
 import json
 import re
+import sqlite3
 import subprocess
 
 import pandas as pd
@@ -18,6 +21,7 @@ E = Path(__file__).resolve().parent
 REL = E.relative_to(ROOT).as_posix()
 REPORT = "analysis/p1_btcusdtp_hourly_structure_event_support_v25_20260907.md"
 TITLE = "Structure Event Support"
+QUERY = "SELECT * FROM counts WHERE population='case' AND dimension='month' ORDER BY key"
 
 
 def sha(path):
@@ -45,14 +49,19 @@ def main():
     if len(sections) < 8:
         raise ValueError("Incomplete technical narrative")
     counts = pd.read_csv(E/"results/counts.csv.gz")
-    monthly = counts.loc[counts.population.eq("case") & counts.dimension.eq("month")].sort_values("key")
+    with sqlite3.connect(":memory:") as connection:
+        counts.to_sql("counts", connection, index=False)
+        monthly = pd.read_sql_query(QUERY, connection)
     if len(monthly) != 24 or monthly.total.sum() != 251 or monthly.accepted.sum() != summary["population"]["case"]["accepted"]:
         raise ValueError("Monthly display must retain all251 cases and24 months")
     data = monthly.to_dict("records")
     stamp = pd.Timestamp.now(tz="UTC").isoformat()
     sources = [
         {"id":"report", "label":"V25 · 定义、支持分母、验证与限制", "path":REPORT},
-        {"id":"monthly", "label":"V25 · frozen counts直接筛case/month并按UTC月份排序；无SQL", "path":REL+"/results/counts.csv.gz"},
+        {"id":"monthly", "label":"V25 · frozen counts中全部case月份，保留零月", "path":REL+"/results/counts.csv.gz",
+         "query":{"sql":QUERY,"engine":"sqlite","language":"sql","tables_used":["counts"],
+                  "executed_at":stamp,"description":"实际SQLite查询冻结62行计数；输出全部24个UTC月份与原251分母",
+                  "filters":["population=case; dimension=month; no outcome selection"]}},
         {"id":"summary", "label":"V25 · 只审支持、不读取收益", "path":REL+"/results/summary.json"},
     ]
     chart = {"id":"monthly", "type":"bar", "title":"每月K1结构事件数（2023–2024）",
@@ -84,7 +93,7 @@ def main():
                               "palette":"single blue root","non_color":"month labels and exact values",
                               "question":"是否有足够月份观察当前K1方向事件","dataset":"monthly"}],
                "table_rationale":"Exact threshold/denominator audit; no redundant charts for few threshold lookups",
-               "actual_sql_queries":[],"new_prices_or_outcomes_read":False}
+               "actual_sql_queries":[QUERY],"new_prices_or_outcomes_read":False}
     (E/"artifact_build_receipt.json").write_text(json.dumps(receipt,ensure_ascii=False,indent=2,allow_nan=False)+"\n")
     print(json.dumps({"sections":len(sections),"blocks":len(blocks),"charts":1,"months":24}))
 
