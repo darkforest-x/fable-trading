@@ -120,6 +120,11 @@ def package() -> None:
         raise ValueError('Incomplete report structure')
     stamp = pd.Timestamp.now(tz='UTC').isoformat()
     sources = [dict(id='report',label='V34 · 覆盖审计、定义与限制',path=str(REPORT))]
+    sources.append(dict(id='reviewed_data',label='V34 · 全量SQL复算与零量明细',path=str(REL/'report_data.json')))
+    for name,label in [('summary','全量原始覆盖结果'),('source_manifest','24份官方校验来源'),
+                       ('verification','补强全量复验'),('unit_audit','原始十进制单位审计')]:
+        sources.append(dict(id=name,label='V34 · '+label,path=str(REL/(name+'.json'))))
+    sources.append(dict(id='v33',label='V33 · 合成接口阶段',path='experiments/active/exp-btcusdtp-trend-research-reset-flow-input-20260907-v33/QA.md'))
     for name in QUERIES:
         sources.append(dict(id=name,label='V34 · 真实流量档案的描述性复算',path=str(REL/'report_data.json'),
             query=dict(sql=QUERIES[name],engine='sqlite',language='sql',tables_used=['main.bars','main.calendar']
@@ -140,8 +145,9 @@ def package() -> None:
                      dict(field='valid_bars',type='quantitative',label='全部有效根数')]))
     blocks=[]
     for i,section in enumerate(sections):
+        provenance = 'reviewed_data' if section.startswith(('## 真买卖量','## 逐月明细')) else None
         blocks.append(dict(id='section_'+str(i),type='markdown',layout='full',body=section,
-                           **({'sourceId':'report'} if i else {})))
+                           **({'sourceId':provenance} if provenance else {})))
         if section.startswith('## 真买卖量'):
             blocks.append(dict(id='opposite_chart',type='chart',layout='full',chartId='opposite'))
     if sum(b['type']=='chart' for b in blocks)!=1:
@@ -151,7 +157,8 @@ def package() -> None:
         snapshot=dict(version=1,generatedAt=stamp,status='ready',datasets=dict(monthly=saved['data']['monthly'])),sources=sources)
     write(HERE/'artifact.json',artifact)
     write(HERE/'artifact_build_receipt.json',dict(source_commit=commit,report_sha256=sha(ROOT/REPORT),
-        report_data_sha256=sha(HERE/'report_data.json'),sections=len(sections),charts=1,generated_at=stamp))
+        report_data_sha256=sha(HERE/'report_data.json'),unit_audit_sha256=sha(HERE/'unit_audit.json'),
+        sections=len(sections),charts=1,generated_at=stamp))
     notebook(saved)
     print(json.dumps(dict(sections=len(sections),charts=1,rows=len(saved['data']['monthly']))))
 
