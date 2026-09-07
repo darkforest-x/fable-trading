@@ -1,0 +1,227 @@
+//@version=6
+// IMACD formula credited to LazyBear; formation follows the repository V3 study.
+// Research display only: no orders, strategy fills, stops or performance claims.
+// Visual revision 1.1: source calculations and confirmed state machine match V1.
+// Confirmed HTF values use expression[1] + lookahead_on. At an HTF boundary,
+// close-only decisions see the new state one chart bar later than the Python study.
+indicator("IMACD · 密集趋势", shorttitle="IMACD", overlay=false, max_bars_back=1500)
+
+string gSignal = "01 · 信号模式"
+string mode = input.string("密集启动", "模式", options=["密集启动", "密集＋共振", "密集＋共振等待"], group=gSignal, tooltip="密集启动：零轴整理与均线密集后离开零轴。共振模式：再要求价格离开均线带、已收盘高周期允许；等待模式可等待后续确认。", display=display.none)
+int lengthMA = input.int(34, "IMACD 长度", minval=2, maxval=200, group=gSignal, display=display.none)
+int lengthSignal = input.int(9, "信号线长度", minval=1, maxval=100, group=gSignal, display=display.none)
+int minZero = input.int(1, "启动前至少连续零轴根数", minval=1, maxval=200, group=gSignal, tooltip="默认1，不强制长横盘。调高会减少信号，也可能错过大趋势。", display=display.none)
+int waitBars = input.int(9, "最多等待根数", minval=0, maxval=50, group=gSignal, display=display.none)
+
+string gDense = "02 · 六均线密集"
+int denseWindow = input.int(12, "形成窗口（不含启动当根）", minval=2, maxval=100, group=gDense, display=display.none)
+float maxWidth = input.float(3.0, "平均均线带宽 / ATR 上限", minval=0.1, step=0.1, group=gDense, display=display.none)
+int minCrosses = input.int(2, "窗口内至少交织次数", minval=0, maxval=100, group=gDense, display=display.none)
+int denseMemory = input.int(34, "共振模式：密集记忆根数", minval=1, maxval=200, group=gDense, display=display.none)
+
+string gMtf = "03 · 多周期（仅共振模式参与过滤）"
+bool autoTf = input.bool(true, "自动匹配高 / 低周期", group=gMtf, display=display.none)
+string manualHtf = input.timeframe("1D", "手动高周期", group=gMtf, display=display.none)
+string manualLtf = input.timeframe("60", "手动低周期", group=gMtf, display=display.none)
+string htfMode = input.string("同向或零轴", "高周期许可", options=["主线同向", "主线或动量同向", "同向或零轴"], group=gMtf, tooltip="同向或零轴：高周期md或sh同向，或者md精确为0。仅使用已确认高周期，不使用正在形成的大K线。", display=display.none)
+bool useLower = input.bool(false, "再要求低周期主线同向", group=gMtf, tooltip="启用时，缺少低周期数据就不发新信号；不会把缺数据当共振。", display=display.none)
+
+string gView = "04 · 显示"
+bool showMa = input.bool(true, "主图显示 SMA / EMA 20、60、120", group=gView, display=display.none)
+bool showMarks = input.bool(true, "主图显示启动 / 退出", group=gView, display=display.none)
+bool showDense = input.bool(true, "副图显示零轴密集点", group=gView, display=display.none)
+bool showState = input.bool(false, "副图显示趋势持有背景", group=gView, display=display.none)
+bool showPanel = input.bool(true, "显示状态面板", group=gView, display=display.none)
+bool colorBars = input.bool(false, "按 IMACD 给 K 线染色", group=gView, display=display.none)
+bool showMomentum = input.bool(false, "显示辅助动量 sh", group=gView, display=display.none)
+bool showPanelDetails = input.bool(false, "展开详细状态", group=gView, display=display.none)
+bool showSignalText = input.bool(false, "在标记旁显示文字", group=gView, display=display.none)
+
+// Every call has its own history; the SMA seed is evaluated on every bar.
+f_smma(float source, int length) =>
+    float seed = ta.sma(source, length)
+    var float value = na
+    value := na(value[1]) ? seed : (value[1] * (length - 1) + source) / length
+    value
+
+f_imacd() =>
+    float hi = f_smma(high, lengthMA)
+    float lo = f_smma(low, lengthMA)
+    float e1 = ta.ema(hlc3, lengthMA)
+    float e2 = ta.ema(e1, lengthMA)
+    float mi = 2.0 * e1 - e2
+    float md = mi > hi ? mi - hi : mi < lo ? mi - lo : 0.0
+    float sb = ta.sma(md, lengthSignal)
+    [md, sb, md - sb, mi, hi, lo]
+
+f_higher() =>
+    [x, y, z, mi, hi, lo] = f_imacd()
+    [x[1], z[1], time_close[1], bar_index[1]]
+
+f_lower() =>
+    [x, y, z, mi, hi, lo] = f_imacd()
+    [x, time_close, bar_index]
+
+f_flip(float a, float b) =>
+    float d = a - b
+    (d > 0 and d[1] <= 0) or (d < 0 and d[1] >= 0) ? 1.0 : 0.0
+
+f_zone(float value) =>
+    na(value) ? "数据不足" : value > 0 ? "多" : value < 0 ? "空" : "零轴"
+
+[md, sb, sh, mi, hi, lo] = f_imacd()
+float s20 = ta.sma(close, 20)
+float e20 = ta.ema(close, 20)
+float s60 = ta.sma(close, 60)
+float e60 = ta.ema(close, 60)
+float s120 = ta.sma(close, 120)
+float e120 = ta.ema(close, 120)
+float ropeHigh = math.max(s20, e20, s60, e60, s120, e120)
+float ropeLow = math.min(s20, e20, s60, e60, s120, e120)
+float atr = f_smma(ta.tr(true), 14)
+float width = atr > 0 ? (ropeHigh - ropeLow) / atr : na
+float flips = (f_flip(s20, e20) + f_flip(s20, s60) + f_flip(s20, e60) + f_flip(s20, s120) + f_flip(s20, e120) +
+    f_flip(e20, s60) + f_flip(e20, e60) + f_flip(e20, s120) + f_flip(e20, e120) +
+    f_flip(s60, e60) + f_flip(s60, s120) + f_flip(s60, e120) + f_flip(e60, s120) + f_flip(e60, e120) + f_flip(s120, e120))
+// shift(1) is essential: the breakout candle cannot rewrite its formation.
+float priorWidth = ta.sma(width[1], denseWindow)
+float priorCrosses = math.sum(flips[1], denseWindow)
+bool fullWindow = math.sum(not na(width[1]) ? 1.0 : 0.0, denseWindow) == denseWindow
+bool denseNow = fullWindow and not na(priorWidth) and priorWidth <= maxWidth and priorCrosses >= minCrosses
+bool denseRecent = ta.highest(denseNow ? 1.0 : 0.0, denseMemory) == 1.0
+int warmup = math.max(340, lengthMA * 10)
+bool ready = bar_index >= warmup and not na(priorWidth) and not na(sb)
+
+float seconds = timeframe.isticks ? na : timeframe.in_seconds()
+string autoHtf = seconds <= 900 ? "60" : seconds <= 1800 ? "120" : seconds <= 3600 ? "240" : seconds <= 7200 ? "360" : seconds <= 43200 ? "1D" : seconds <= 86400 ? "1W" : seconds <= 604800 ? "1M" : "12M"
+string autoLtf = seconds <= 15 ? "1S" : seconds <= 60 ? "15S" : seconds <= 300 ? "1" : seconds <= 900 ? "5" : seconds <= 3600 ? "15" : seconds <= 7200 ? "30" : seconds <= 21600 ? "60" : seconds <= 43200 ? "240" : seconds <= 86400 ? "360" : "1D"
+string htf = autoTf ? autoHtf : manualHtf
+string ltf = autoTf ? autoLtf : manualLtf
+bool confluence = mode != "密集启动"
+bool waiting = mode == "密集＋共振等待"
+if barstate.isfirst
+    if na(seconds) or not chart.is_standard
+        runtime.error("请使用普通时间 K 线。")
+    if confluence and timeframe.in_seconds(htf) <= seconds
+        runtime.error("高周期必须大于当前图表周期，请调整多周期设置。")
+    if confluence and useLower and timeframe.in_seconds(ltf) >= seconds
+        runtime.error("低周期必须小于当前图表周期，请调整多周期设置。")
+
+[hMdRaw, hShRaw, hClose, hIndex] = request.security(syminfo.tickerid, htf, f_higher(), gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on)
+bool hKnown = hIndex >= warmup and not na(hMdRaw) and not na(hShRaw) and hClose <= time
+float hMd = hKnown ? hMdRaw : na
+float hSh = hKnown ? hShRaw : na
+bool hLong = hKnown and (htfMode == "主线同向" ? hMd > 0 : hMd > 0 or hSh > 0 or (htfMode == "同向或零轴" and hMd == 0))
+bool hShort = hKnown and (htfMode == "主线同向" ? hMd < 0 : hMd < 0 or hSh < 0 or (htfMode == "同向或零轴" and hMd == 0))
+
+float lMd = na
+if confluence and useLower
+    [values, closes, indexes] = request.security_lower_tf(syminfo.tickerid, ltf, f_lower())
+    int count = array.size(values)
+    if count > 0
+        int last = count - 1
+        if array.get(closes, last) <= time_close and array.get(indexes, last) >= warmup
+            lMd := array.get(values, last)
+bool lowerLong = not useLower or (not na(lMd) and lMd > 0)
+bool lowerShort = not useLower or (not na(lMd) and lMd < 0)
+bool releaseLong = close > ropeHigh
+bool releaseShort = close < ropeLow
+
+// State means indicator-side trend tracking, not a broker position.
+var int zeroRun = 0
+var int trendSide = 0
+var int pendingSide = 0
+var int anchorBar = na
+bool longSignal = false
+bool shortSignal = false
+bool exitLong = false
+bool exitShort = false
+bool armed = false
+if barstate.isconfirmed
+    int anchorSide = ready and md[1] == 0 and zeroRun >= minZero ? (md > 0 ? 1 : md < 0 ? -1 : 0) : 0
+    // Exit is independent of all formation and timeframe gates.
+    if trendSide != 0 and md * trendSide <= 0
+        exitLong := trendSide == 1
+        exitShort := trendSide == -1
+        trendSide := 0
+    if pendingSide != 0 and (md * pendingSide <= 0 or bar_index - anchorBar > waitBars)
+        pendingSide := 0
+        anchorBar := na
+    if trendSide == 0 and anchorSide != 0
+        pendingSide := 0
+        anchorBar := na
+        bool formed = confluence ? denseRecent : denseNow
+        if formed
+            pendingSide := anchorSide
+            anchorBar := bar_index
+            armed := true
+    if trendSide == 0 and pendingSide != 0
+        bool allowed = not confluence or (pendingSide == 1 ? releaseLong and hLong and lowerLong : releaseShort and hShort and lowerShort)
+        if allowed
+            longSignal := pendingSide == 1
+            shortSignal := pendingSide == -1
+            trendSide := pendingSide
+            pendingSide := 0
+            anchorBar := na
+        else if not waiting or bar_index - anchorBar >= waitBars
+            pendingSide := 0
+            anchorBar := na
+    zeroRun := not na(hi) and not na(lo) and md == 0 ? zeroRun + 1 : 0
+
+color mdColor = hlc3 > mi ? (hlc3 > hi ? color.lime : color.green) : (hlc3 < lo ? color.red : color.orange)
+// Two directional colors; the original bar-color formula above is unchanged.
+color bull = #089981
+color bear = #F23645
+color amber = #C99535
+color ink = chart.fg_color
+color paper = chart.bg_color
+bool expanding = math.abs(md) >= math.abs(md[1])
+color impulseColor = color.new(md >= 0 ? bull : bear, expanding ? 18 : 65)
+hline(0, "零轴", color=color.new(ink, 82), linestyle=hline.style_solid)
+plot(md, "IMACD", color=impulseColor, style=plot.style_columns, histbase=0, display=display.pane + display.data_window)
+plot(sb, "信号线", color=color.new(ink, 34), linewidth=1, display=display.pane + display.data_window)
+plot(showMomentum ? sh : na, "辅助动量", color=color.new(#5B8FF9, 35), linewidth=1, display=display.pane + display.data_window)
+plot(showDense and ready and barstate.isconfirmed and md == 0 and denseNow ? 0 : na, "零轴蓄势", color=amber, style=plot.style_circles, linewidth=2, display=display.pane)
+bgcolor(showState ? (trendSide == 1 ? color.new(bull, 96) : trendSide == -1 ? color.new(bear, 96) : na) : na, title="趋势底色")
+barcolor(colorBars ? mdColor : na)
+// Muted pairs. Values remain in the Data Window, not on every chart axis.
+plot(showMa ? s20 : na, "SMA20", color=color.new(#309C91, 20), linewidth=1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMa ? e20 : na, "EMA20", color=color.new(#309C91, 68), linewidth=1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMa ? s60 : na, "SMA60", color=color.new(#6087BC, 25), linewidth=1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMa ? e60 : na, "EMA60", color=color.new(#6087BC, 70), linewidth=1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMa ? s120 : na, "SMA120", color=color.new(#9498A3, 20), linewidth=1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMa ? e120 : na, "EMA120", color=color.new(#9498A3, 65), linewidth=1, force_overlay=true, display=display.pane + display.data_window)
+plotshape(showMarks and not showSignalText and longSignal, title="多头启动", style=shape.triangleup, location=location.belowbar, color=bull, size=size.tiny, force_overlay=true, display=display.pane)
+plotshape(showMarks and not showSignalText and shortSignal, title="空头启动", style=shape.triangledown, location=location.abovebar, color=bear, size=size.tiny, force_overlay=true, display=display.pane)
+plotshape(showMarks and exitLong, title="多头结束", style=shape.xcross, location=location.abovebar, color=color.new(ink, 40), size=size.tiny, force_overlay=true, display=display.pane)
+plotshape(showMarks and exitShort, title="空头结束", style=shape.xcross, location=location.belowbar, color=color.new(ink, 40), size=size.tiny, force_overlay=true, display=display.pane)
+plotshape(showMarks and showSignalText and longSignal, title="多头文字", text="多", style=shape.triangleup, location=location.belowbar, color=bull, textcolor=bull, size=size.tiny, force_overlay=true, display=display.pane)
+plotshape(showMarks and showSignalText and shortSignal, title="空头文字", text="空", style=shape.triangledown, location=location.abovebar, color=bear, textcolor=bear, size=size.tiny, force_overlay=true, display=display.pane)
+plot(priorWidth, "形成带宽/ATR", display=display.data_window)
+plot(priorCrosses, "形成交织次数", display=display.data_window)
+plot(trendSide, "持有方向 1多 -1空 0等待", display=display.data_window)
+
+// Compact by default; theme colors keep the panel quiet on light and dark charts.
+var table panel = table.new(position.top_right, 2, 5, border_width=0, frame_width=0)
+if barstate.islast and showPanel
+    color stateColor = trendSide == 1 ? bull : trendSide == -1 ? bear : pendingSide != 0 ? amber : color.new(ink, 35)
+    string stateText = not ready ? "预热" : trendSide == 1 ? "多头持有" : trendSide == -1 ? "空头持有" : pendingSide != 0 ? "等待共振" : "等待启动"
+    string modeText = waiting ? "等待共振" : confluence ? "多周期" : "密集启动"
+    string timingText = confluence ? "高周期 " + htf : "收盘确认"
+    table.cell(panel, 0, 0, "IMACD", bgcolor=color.new(paper, 8), text_color=color.new(ink, 32), text_size=size.small, text_halign=text.align_left)
+    table.cell(panel, 1, 0, stateText, bgcolor=color.new(stateColor, 92), text_color=stateColor, text_size=size.small)
+    table.cell(panel, 0, 1, modeText, bgcolor=color.new(paper, 8), text_color=color.new(ink, 48), text_size=size.tiny, text_halign=text.align_left)
+    table.cell(panel, 1, 1, timingText, bgcolor=color.new(paper, 8), text_color=color.new(ink, 48), text_size=size.tiny)
+    if showPanelDetails
+        table.cell(panel, 0, 2, "高周期 " + htf, bgcolor=color.new(paper, 8), text_color=color.new(ink, 42), text_size=size.tiny, text_halign=text.align_left)
+        table.cell(panel, 1, 2, confluence ? "md " + f_zone(hMd) + " / sh " + f_zone(hSh) : "未启用", bgcolor=color.new(paper, 8), text_color=color.new(ink, 25), text_size=size.tiny)
+        table.cell(panel, 0, 3, "低周期 " + ltf, bgcolor=color.new(paper, 8), text_color=color.new(ink, 42), text_size=size.tiny, text_halign=text.align_left)
+        table.cell(panel, 1, 3, confluence and useLower ? f_zone(lMd) : "未启用", bgcolor=color.new(paper, 8), text_color=color.new(ink, 25), text_size=size.tiny)
+        table.cell(panel, 0, 4, "带宽 / 交织", bgcolor=color.new(paper, 8), text_color=color.new(ink, 42), text_size=size.tiny, text_halign=text.align_left)
+        table.cell(panel, 1, 4, str.tostring(priorWidth, "#.00") + " / " + str.tostring(priorCrosses, "#"), bgcolor=color.new(paper, 8), text_color=color.new(ink, 25), text_size=size.tiny)
+
+alertcondition(longSignal, "IMACD 多头启动", "{{exchange}}:{{ticker}} {{interval}} IMACD密集多头启动；本K线已收盘。")
+alertcondition(shortSignal, "IMACD 空头启动", "{{exchange}}:{{ticker}} {{interval}} IMACD密集空头启动；本K线已收盘。")
+alertcondition(exitLong, "IMACD 多头趋势结束", "{{exchange}}:{{ticker}} {{interval}} IMACD主线回零或转负，多头趋势结束。")
+alertcondition(exitShort, "IMACD 空头趋势结束", "{{exchange}}:{{ticker}} {{interval}} IMACD主线回零或转正，空头趋势结束。")
+alertcondition(armed and pendingSide != 0, "IMACD 等待共振", "{{exchange}}:{{ticker}} {{interval}} 密集零轴启动已出现，等待周期确认。")
