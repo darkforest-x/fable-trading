@@ -18,6 +18,118 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: btcusdtp-owner-pending-v38-config
+    artifact_type: config
+    role: v38_entry_clock_non_economic_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ab872f00685f85909d0311108dd4855a64262b11"
+    source_path: experiments/active/exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38/config.json
+    sha256: "dd39bcd558c2396a7ee72259743bc2c1f30289dc8759e5db45647d93c8cb5e41"
+    size_bytes: 881
+    storage_uri: "repo://experiments/active/exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38/config.json"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: Clock audit only;171original requests retained;no new economic result;HTML structural_only.
+  - artifact_id: btcusdtp-owner-pending-v38-summary
+    artifact_type: manifest
+    role: v38_entry_clock_non_economic_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ab872f00685f85909d0311108dd4855a64262b11"
+    source_path: experiments/active/exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38/summary.json
+    sha256: "c81405a86e3161f87f09f8da5fbf42f19aac7ea45c9e971339ed87e9d89bd919"
+    size_bytes: 9929
+    storage_uri: "repo://experiments/active/exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38/summary.json"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: Clock audit only;171original requests retained;no new economic result;HTML structural_only.
+  - artifact_id: btcusdtp-owner-pending-v38-pre-audit
+    artifact_type: manifest
+    role: v38_entry_clock_non_economic_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ab872f00685f85909d0311108dd4855a64262b11"
+    source_path: experiments/active/exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38/pre_audit_receipt.json
+    sha256: "fa88a92b4caee22c9ccee49e67dabf95d243af640b7e005bad9a65438bf3691d"
+    size_bytes: 1003
+    storage_uri: "repo://experiments/active/exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38/pre_audit_receipt.json"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: Clock audit only;171original requests retained;no new economic result;HTML structural_only.
+  - artifact_id: btcusdtp-owner-pending-v38-report-data
+    artifact_type: manifest
+    role: v38_entry_clock_non_economic_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a766b0e"
+    source_path: experiments/active/exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38/report_data.json
+    sha256: "e467e7471d380a564a39869771259563035841c13338e712061caafabc1e4570"
+    size_bytes: 9870
+    storage_uri: "repo://experiments/active/exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38/report_data.json"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: Clock audit only;171original requests retained;no new economic result;HTML structural_only.
+  - artifact_id: btcusdtp-owner-pending-v38-artifact
+    artifact_type: report
+    role: v38_entry_clock_non_economic_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a766b0e"
+    source_path: experiments/active/exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38/artifact.json
+    sha256: "46aedc1a6c00d87457be16e36d54a02f07ae265a0d6e65bf0501161d9e31d0c6"
+    size_bytes: 21600
+    storage_uri: "repo://experiments/active/exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38/artifact.json"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: Clock audit only;171original requests retained;no new economic result;HTML structural_only.
+  - artifact_id: btcusdtp-owner-pending-v38-notebook
+    artifact_type: report
+    role: v38_entry_clock_non_economic_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a766b0e"
+    source_path: experiments/active/exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38/review.ipynb
+    sha256: "5dd213c7509c59eb47098b206e3c31349eec7e55c1a3ec58a0424a1042ff5beb"
+    size_bytes: 12676
+    storage_uri: "repo://experiments/active/exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38/review.ipynb"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: Clock audit only;171original requests retained;no new economic result;HTML structural_only.
+  - artifact_id: btcusdtp-owner-pending-v38-qa
+    artifact_type: report
+    role: v38_entry_clock_non_economic_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a766b0e"
+    source_path: experiments/active/exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38/QA.md
+    sha256: "0b4a441a4a76ed23e295d0e04049e19f05d17e5b1d65493d61f291744e2aa804"
+    size_bytes: 5565
+    storage_uri: "repo://experiments/active/exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38/QA.md"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: Clock audit only;171original requests retained;no new economic result;HTML structural_only.
+  - artifact_id: btcusdtp-owner-pending-v38-html
+    artifact_type: report
+    role: v38_entry_clock_non_economic_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: "a766b0e"
+    source_path: analysis/html/p1_btcusdtp_owner_k1k2_pending_entry_v38_20260907.html
+    sha256: "ff033fee4e42ea5266a9fbfab1f72705e9f16078c6dbccae444d4bcbfe008bc8"
+    size_bytes: 403868
+    storage_uri: "repo://analysis/html/p1_btcusdtp_owner_k1k2_pending_entry_v38_20260907.html"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: Clock audit only;171original requests retained;no new economic result;HTML structural_only.
   - artifact_id: pine-allin-eth4h-20260907-manifest
     artifact_type: manifest
     role: independent_preholdout_research_replay

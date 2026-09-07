@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "experiment_id": "exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38",
+  "recorded_at": "2026-09-07T11:21:17.004956+00:00",
+  "status": "share_with_caveats",
+  "verification_level": "structural_only",
+  "canonical_html": {
+    "path": "analysis/html/p1_btcusdtp_owner_k1k2_pending_entry_v38_20260907.html",
+    "bytes": 403868,
+    "sha256": "ff033fee4e42ea5266a9fbfab1f72705e9f16078c6dbccae444d4bcbfe008bc8"
+  },
+  "artifact": {
+    "path": "experiments/active/exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38/artifact.json",
+    "sha256": "46aedc1a6c00d87457be16e36d54a02f07ae265a0d6e65bf0501161d9e31d0c6",
+    "snapshot_status": "ready",
+    "datasets": 1,
+    "sources": 6,
+    "charts": 1,
+    "embedded_html_payload_matches": true
+  },
+  "provenance": {
+    "audit_source_commit": "ab872f00685f85909d0311108dd4855a64262b11",
+    "report_build_source_commit": "a766b0ec52389192f97ef780e5d3da2964cdc0e8",
+    "artifact_build_receipt": "artifact_build_receipt.json",
+    "five_saved_build_hashes_match": true
+  },
+  "pipeline": {
+    "evidence_basis": "main_thread_execution_result",
+    "independently_reexecuted_by_delivery_reviewer": false,
+    "validate_artifact_ok": true,
+    "validation": "passed",
+    "package": "passed",
+    "verification": "structural_only"
+  },
+  "checks": {
+    "focused_pytest_passed": 494,
+    "focused_pytest_evidence": "PREFLIGHT.md; not rerun for this receipt",
+    "report_pytest_passed": 48,
+    "report_pytest_evidence": "main_thread_execution_result; not independently rerun",
+    "saved_output_consistency_assertions_passed": 733,
+    "saved_output_evidence": "REVIEW.md; assertions are not pytest cases",
+    "independent_html_and_hash_checks_passed": 18,
+    "combined_test_count": null
+  },
+  "browser": {
+    "status": "unavailable",
+    "reason": "Chromium headless shell is not installed",
+    "evidence_basis": "main_thread_portable_verification_result",
+    "sourceDialog": "not_verified",
+    "sourceInteraction": "not_verified",
+    "viewports": [],
+    "screenshots": [],
+    "mobile_visual_qa": "not_verified",
+    "theme_visual_qa": "not_verified"
+  },
+  "notebook": {
+    "executed_code_cells": 3,
+    "execution_method": "stdlib_sequential_exec",
+    "jupyter_kernel": false
+  },
+  "economics_materialized": false,
+  "profitability_verified": false,
+  "production_eligible": false,
+  "qa_path": "experiments/active/exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38/QA.md"
+}

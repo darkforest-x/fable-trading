@@ -56,21 +56,29 @@ experiments:
       Plan experiments/active/exp-btcusdtp-owner-k1k2-delayed-entry-20260907-v39/PROJECT_PLAN.md.
   - experiment_id: exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38
     source_repo: darkforest-x/fable-trading
-    source_commit: "3651944"
-    status: active
+    source_commit: "ab872f00685f85909d0311108dd4855a64262b11"
+    status: inconclusive
     question: At which causal boundary can an original K2 request first qualify after native5 colour confirmation without an earlier fixed-stop breach?
     single_variable: Entry-clock feasibility audit only; same63case108control requests; one-hour administrative observation; no economic arm or expiry.
-    result: Pending one-shot non-economic audit; implementation frozen before source materialization.
+    result: Clock feasibility passed;case38eligible15invalidated10pending/control65eligible24invalidated19pending;no economic outcomes,so profitability remains inconclusive.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: null
-    artifacts: []
+    canonical_report: analysis/html/p1_btcusdtp_owner_k1k2_pending_entry_v38_20260907.html
+    artifacts:
+      - btcusdtp-owner-pending-v38-config
+      - btcusdtp-owner-pending-v38-summary
+      - btcusdtp-owner-pending-v38-pre-audit
+      - btcusdtp-owner-pending-v38-report-data
+      - btcusdtp-owner-pending-v38-artifact
+      - btcusdtp-owner-pending-v38-notebook
+      - btcusdtp-owner-pending-v38-qa
+      - btcusdtp-owner-pending-v38-html
     reuse_allowed: false
     notes: >-
       Exact approved Binance USD-M BTCUSDT2023-2024 source and original pre-outcome receipt only.
       Unknown and pending are not zero returns. Formation seed extrema cannot invalidate waiting.
-      Parent commit above; exact execution commit will be recorded in pre_audit_receipt.
+      All171prefix checks and946trace rows verified.Only9of36matched groups fullyeligible;do not select them as survivors.
       Plan experiments/active/exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38/PROJECT_PLAN.md.
   - experiment_id: exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37
     source_repo: darkforest-x/fable-trading
