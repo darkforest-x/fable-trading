@@ -5,3 +5,5 @@
 - **有效路径**：保留早期包与拒绝收据，新增独立 delivery 构建器，从已保存交易核对半年均值后增加有用的稳定性对照图。先提交新构建器，再生成 artifact_final；不重跑经济结果、不覆盖失败证据。
 - **通用规则**：选定表面后先将最小真实 payload 送入实际校验器。只对字段和 mock 做单测，容易漏掉表面级必需项。
 - **牵连**：`owner_k1k2_delayed_entry_delivery.py`、V39 原 `artifact.json` 与新增 `artifact_final.json`，源 MD 最终复现命令同步更新。
+
+同轮补充：仅增加图仍不足够，真实验证器还要求图源记录实际 SQL。应真实将保存交易加载到内存 SQLite 并执行固定聚合，再与独立 pandas/原 fold 表复核；不能编造一段未执行的 SQL 来填校验字段。
