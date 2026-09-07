@@ -14,6 +14,28 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btcusdtp-trend-research-reset-flow-input-20260907-v33
+    source_repo: darkforest-x/fable-trading
+    source_commit: "247039c"
+    status: active
+    question: Can genuine taker-flow fields be preserved separately before another trend confluence experiment?
+    single_variable: Separate opt-in flow parser; no entry, exit, threshold, cost, or real-data experiment yet.
+    result: >-
+      Source audit identifies native taker fields discarded by existing OHLCV projection.
+      Plan separates structure-retest entries, genuine flow inputs and native4h event research.
+      Opt-in parser implemented;70 synthetic tests and258 joint tests pass.
+      Real-data coverage and economic value are not evaluated.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/html/v33_research_reset/PROJECT_PLAN.html
+    artifacts:
+      - btcusdtp-research-reset-v33-plan-html
+    reuse_allowed: false
+    notes: >-
+      Plan/config in experiments/active/exp-btcusdtp-trend-research-reset-flow-input-20260907-v33.
+      Source_commit identifies parser/tests;source-first plan384053c,not a completed economic experiment.
+      No prices or economic labels read; old V1-V32 negative results remain unchanged.
   - experiment_id: exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32
     source_repo: darkforest-x/fable-trading
     source_commit: "4cbcc93"

@@ -19,6 +19,23 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: btcusdtp-research-reset-v33-plan-html
+    artifact_type: report
+    role: research_design_not_economic_results
+    source_repo: darkforest-x/fable-trading
+    source_commit: "384053c"
+    source_path: analysis/html/v33_research_reset/PROJECT_PLAN.html
+    sha256: "e3b98edc6d0bce08b8b9d735a68964efb4c214235e653cd671c8dcde13b98308"
+    size_bytes: 11567
+    storage_uri: "repo://analysis/html/v33_research_reset/PROJECT_PLAN.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      Source-first research plan; historical reports quoted, no new price or outcome rows read.
+      Standard Markdown-to-HTML conversion; structural heading/table checks only, no visual UI QA.
+      Three routes proposed; only genuine flow input synthetic parser is implemented this turn.
+
   - artifact_id: btcusdtp-hourly-wave-v32-results
     artifact_type: report
     role: volume_wave_economic_results

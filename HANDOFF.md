@@ -18,6 +18,28 @@
 未启动新训练；training_eligible/production_eligible=false，holdout未读。旧val是反复使用的
 开发集，挖掘队列不能估总体召回；exposure_review.json明确独立性尚未建立，未冻结连续窗roster。
 
+## ⚡ 当前真相（2026-09-07 — V33改换研究路线，真实量输入模块完成，未跑新收益）
+
+Owner追问为什么一直不行、能否多换思路。本轮源码/历史报告查重：既有动态退出、
+真实分批、首次收缩突破、K2等确认、4h背景/广度均已测，不能包装成未试过。
+V24/V30/V32固定4h诊断不等价于动态路径，但这些失败和早期路径负结果全保留。
+三条候选独立记录：结构位突破后K2回踩（不硬绑MA）、真实taker流量、原生4h事件15m执行。
+仅第二条输入接口已实现，另两条是草案，不是新回测或获准阈值/障碍改动。
+
+384053c先提交plan/config/两条learning，247039c提交独立flow parser与合成测试。
+原Binance规范化仅输出OHLCV；新yoyo/data/binance_um_flow_archives.py显式保留
+taker买币量/金额、quote量/count，派生sell/delta，不冒充OI/盘口/资金净流入。
+原七列逐字段dtype不变，旧parser/缓存不改；保留source_exchange=binance_usdm，
+不是OKX执行源替代。earliest_available_at仅完整bar理论边界，不是实际网络到达。
+70新合成tests，最终258联合tests过（13旧警告）。首次发现旧test取non_15m_gaps，
+单独不加载新模块也失败；仅修为既有non_bar_gaps并补5m/15m缺口反例，QA保留过程。
+
+计划HTML analysis/html/v33_research_reset/PROJECT_PLAN.html，标准转换/结构检查，
+无browser/mobile视觉验证。E33有PROJECT_PLAN/config/QA。真实行情/新收益/holdout读取0，
+TV/成本/TP-SL/阈值/ACTIVE/训练/生产均未改；goal仍usageLimited，不能称后台持续执行。
+下一步另冻结2023–2024真实成交方向数据的来源/覆盖检查，先验证可用再立经济假设；
+不得直接又把新量字段叠到旧门并无限旋参数，不得把数据接口通过当盈利通过。
+
 ## ⚡ 当前真相（2026-09-07 — V32前置量波经济失败，改善完全由少扣成本）
 
 Owner“继续下一步”：4cbcc93先冻结 V31门的4h/20bp经济检验，再读取保存V24标签。

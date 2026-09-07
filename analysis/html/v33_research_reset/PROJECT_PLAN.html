@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>V33：研究方向复核与真实成交方向输入</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>V33：研究方向复核与真实成交方向输入</h1>
+<h2>状态与当前授权</h2>
+<p>Owner 问“现在遇到什么卡点了，怎么一直不行，能不能多换几个思路”。本轮执行的是源码查重与独立数据解析模块的合成验证；不是新一轮收益选参。</p>
+<ul>
+<li>仅读已有代码、计划、报告和官方字段文档；不读取真实行情行或新经济标签。</li>
+<li>不改费用、TP/SL、阈值预设、旧实验裁决、TradingView、ACTIVE、生产或模型。</li>
+<li>新解析器只接收内存中的 ZIP 字节，不下载、不写缓存、不选择交易。</li>
+<li>真实数据覆盖、市场价值和收益结果均未检验。不能把合成测试通过称为新策略通过。</li>
+</ul>
+<h2>方法复核：真正的阻碍</h2>
+<ol>
+<li><strong>最近的问题过窄。</strong> V30/V32 只能在原 SMA40 的 251 个事件里做减法，不能找回原入口生成器遗漏的事件。但 V26/V28 已另测 VWMA40 的 288 个入口并失败，因此不能说整个项目从未变过母群。</li>
+<li><strong>估计对象不等价。</strong> <code>hourly_impulse_fixed_clock.py</code> 的四小时净变化不含止损、分批退出或风险配置。它能诊断固定持有，不能逻辑否定所有路径退出。V32 的失败不能事后改判通过，未来新的路径研究也不必借用该诊断作普遍前置门。</li>
+<li><strong>不是只差一点手续费。</strong> V32 的 100 笔保留事件里，55 笔终点毛亏、7 笔毛利不足成本。248 个已知机会上的少交易改善 +11.469797bp 中，免付成本贡献 +11.935484bp，毛收益选择贡献反而 -0.465687bp。</li>
+<li><strong>样本和重复研究。</strong> V32 仅 24 个月簇、100 个保留事件；四个半年都净负。联合显著性门严格并非这次负均值的借口。多轮复用 2023–2024 的结果仍是探索，不是新增独立证据。</li>
+<li><strong>输入信息并未真正换轴。</strong> <code>binance_um_archives.py</code> 的输入有真实 taker 买量，但输出丢弃；最新量波是阳阴量代理。这是数据投影选择的局限，不是交易所数据缺失的证明。</li>
+</ol>
+<h2>已测路线去重（旧数字是历史报告引用，不是本轮重算）</h2>
+<table><thead><tr>
+<th>家族</th>
+<th>既有证据</th>
+<th>本轮不能再宣称</th>
+</tr></thead><tbody>
+<tr><td>换 MA / 波动 / 斜率 / 简单突破</td><td>V1 做过 SMA/EMA、20/30/40/60 等逐变量比较，冻结候选后续 74 笔净 -12.14bp</td><td>“终于不固定 40”、全局最优、只多已验证</td></tr>
+<tr><td>真实分批 TP / 更慢 runner</td><td>V2 六个分支均净负；两档各 25% 后走 1h 均净 -6.42bp</td><td>“以前没试分批”，或只拿接管子集证明有效</td></tr>
+<tr><td>K2 等待及小周期恢复</td><td>V4–V6 已尝试；等待存在追价和漏掉直接延续的代价</td><td>只将下一根确认改名后重试</td></tr>
+<tr><td>压缩后首次突破</td><td>V7 新母群 286 笔净 -17.79bp，V8 换管理周期仍失败</td><td>“首次突破”这个概念从未测过</td></tr>
+<tr><td>真翻色、快慢双腿、失败确认与减半</td><td>V15–V19 实际逐笔路径回放均未获盈利证据</td><td>固定终点批评可以撤销所有旧路径失败</td></tr>
+<tr><td>15m 严格趋势去重</td><td>已分离持仓与 regime，信号明显减少但未跨期盈利</td><td>再加冷却即可解决趋势质量</td></tr>
+<tr><td>K2 后追突破 / 扫回再入场</td><td>20260904 两个独立实验均已测，15m/5m 未过门</td><td>所有突破或扫回均为新机制</td></tr>
+<tr><td>结构 / 跨币广度 / 量波</td><td>V20–V32 分别检验状态、变化、量权和代理量；有失败也有支持不足</td><td>共振数量等于独立信息量</td></tr>
+</tbody></table>
+<h2>三条不同路线及界限</h2>
+<h3>A：结构位突破与回踩承接——新入口定义草案，未执行</h3>
+<ul>
+<li>K1 表示突破信号形成前已确认的价格结构位，而不强制大实体在 MA 两侧开收。</li>
+<li>K2 回踩的是冻结突破位，并在收盘确认承接；MA 仅作背景，不能重新把“准确触 SMA40”塞回硬门。</li>
+<li>与 V7 区间首次突破即进、V14 在旧 K1 上加 prior20 门、K2 后再追 K2 极值不同：这里改变事件生成与回踩对象，不只是删旧信号或等更远的确认价。</li>
+<li>仍只是假设。确定结构确认窗、容差、失效时刻和成交规则之前，不读取分组收益；任何涉及阈值、障碍的改动按 owner 规则确认。枢轴按确认时刻可用，不回标成提前信号。</li>
+<li>要同时回答漏掉多少原入口、新增什么形态、成本后增益和漏掉大赢家的代价，不能只展示漂亮正例。</li>
+</ul>
+<h3>B：真实主动买卖量——本轮只实现输入层</h3>
+<ul>
+<li>保留官方 USD-M kline 的主动买入基础币量、主动买入报价币成交额、总成交额、成交次数。</li>
+<li>同单位推导主动卖出与买卖差；未来可检验 K1 突破和 K2 回踩的实际成交方向关系。尚未选择窗口、阈值或交易门。</li>
+<li>这不是 OI，也不能区分开多、平空或称为主力资金净流入。Binance 外部输入与 OKX 交易报价必须分别标识。</li>
+<li>官方提供字段不代表本地历史完整、盘中实时可见或具有可交易优势。先做独立历史覆盖与因果时钟检查，再决定是否进入经济实验。</li>
+<li>输入层通过后仍不得直接称为 TradingView 原生可用；Pine 数据源能力须另核，不用 OHLCV 伪造缺失字段。</li>
+</ul>
+<h3>C：原生 4h 趋势事件、15m 执行——新的时间尺度草案，未执行</h3>
+<ul>
+<li>入口事件从完整 4h 结构形成，15m 只负责执行；不是给旧 1h K1 加同向 4h 色门。</li>
+<li>目的：检验更长尺度的趋势幅度能否覆盖成本，而非预设它一定更强。</li>
+<li>BTC/ETH 分别报告，不能用多币合并掩盖单币失败；稀疏事件按月/趋势簇处理，不把多周期同一行情当独立样本。</li>
+<li>不同时扫多个持仓上限、止盈比例和均线；阈值、障碍变更另行确认。旧 4h 背景过滤、山寨日线实验不被重命名为这条路线的正面证据。</li>
+</ul>
+<h2>解析器的接口与验收合同</h2>
+<p>路径：<code>yoyo/data/binance_um_flow_archives.py</code>。独立入口 <code>parse_flow_month_zip</code>；旧 <code>parse_month_zip</code> 不变，旧缓存不重建。</p>
+<p>先沿用 SHA256、成员名、十二列结构、时间与 OHLCV 合法性检查，然后对 flow 字段加严格校验。拒绝非有限数、负量、买量超过对应总量、非整数成交次数或零成交矛盾；不能裁剪成好看数字。理论最早完整 bar 可用时刻为 <code>open_time + interval</code>，不把 open_time 当全部成交已知时刻；历史月包发布时间/实时接收延迟未校准。</p>
+<p>验收只用合成 ZIP：OHLCV 投影一致、字段保留、买卖量会计、反烛色真实量示例、周期与单位、坏 SHA/列/数值拒绝、零成交与时钟。未使用真实价格、无收益统计，因此 AUC、胜率、top-decile、随机交易收益与 p 值不适用；严格替代对照为同一合成蜡烛只改变 taker 买量时，OHLCV 恒定而净成交方向必须改变，破坏流量约束必须 fail-closed。</p>
+<h2>下一条允许动作</h2>
+<p>先提交输入模块、合成测试、本计划及登记，再另行冻结仅 2023–2024 的真实来源覆盖检查（只审完整性，不看收益）。本轮不自动开始该读取。</p>
+<p>如果后续覆盖可信，先提名一个真实成交方向字段；原入口与现有一个冻结路径退出保持，分别报告成本后期望、同规则背景对照、单仓权益/浮亏回撤及未知数据。4h markout 可并列诊断，不作为普遍执行前置门。若改变 A/C 的入场/阈值或障碍，先取得对应明确范围授权。不降低 20bp 救回测。</p>
+<h2>来源与复现</h2>
+<ul>
+<li><code>analysis/p1_btcusdtp_hourly_impulse_ltf_exit_20260906.md</code></li>
+<li><code>analysis/p1_btcusdtp_hourly_volume_wave_economics_v32_20260907.md</code></li>
+<li><code>analysis/p1_btcusdtp_15m_trend_regime_live_entry_20260904.md</code></li>
+<li><code>analysis/p1_btcusdtp_k1k2_breakout_entry_preholdout_20260904.md</code></li>
+<li><code>analysis/p1_btcusdtp_k1k2_sweep_reclaim_entry_preholdout_20260904.md</code></li>
+<li>官方字段：https://github.com/binance/binance-public-data#futures</li>
+<li>官方 bar 数据定义：https://developers.binance.com/en/docs/products/derivatives-trading-usds-futures/market-data/rest-api/Kline-Candlestick-Data</li>
+<li>路径模拟边界：https://www.freqtrade.io/en/stable/backtesting/#assumptions-made-by-backtesting</li>
+</ul>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+.venv/bin/python -m pytest -q tests/test_binance_um_flow_archives.py tests/test_binance_um_archives.py tests/boundaries/test_layer_imports.py
+</code></pre>
+<p>本计划不是新的回测收益交付；新策略盈利未解决。不改历史报告来消除过去的失败。</p>
+</body>
+</html>
