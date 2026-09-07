@@ -186,7 +186,7 @@ def notebook(saved: dict) -> None:
              "print(json.dumps(overview, ensure_ascii=False))\n"),
         md('## Takeaways\n输入完整且不同于颜色代理，不代表交易有正期望。下一实验需单独冻结因果时钟与验证方案。')]
     namespace={}
-    for i,cell in enumerate(c for c in cells if c['cell_type']=='code',1):
+    for i,cell in enumerate((c for c in cells if c['cell_type']=='code'),1):
         capture=io.StringIO()
         with contextlib.redirect_stdout(capture):
             exec(compile(''.join(cell['source']),f'V34 notebook cell {i}','exec'),namespace)
