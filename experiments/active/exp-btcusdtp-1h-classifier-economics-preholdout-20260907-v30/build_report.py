@@ -163,7 +163,7 @@ def package():
         dataset="monthly", sourceId="monthly", **common,
         encodings=dict(x=dict(field="month", type="temporal", label="UTC月份"),
             y=dict(field="net_bp", type="quantitative", label="bp"), color=dict(field="series", type="nominal", label="组别"),
-            tooltip=[dict(field="events", type="quantitative", label="母事件数"),dict(field="positive", type="quantitative", label="成本后正向母事件数")]))]
+            tooltip=[dict(field="events", type="quantitative", label="母事件数"),dict(field="positive", type="quantitative", label="K1正标签母事件数（非控制组）")]))]
     # Exact subgroup comparisons are tables in the narrative; the single chart
     # is the 24-point time pattern, not decorative duplication of those tables.
     blocks = []
