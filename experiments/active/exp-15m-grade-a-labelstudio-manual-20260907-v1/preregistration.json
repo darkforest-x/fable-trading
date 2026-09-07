@@ -1,0 +1,33 @@
+{
+  "experiment_id": "exp-15m-grade-a-labelstudio-manual-20260907-v1",
+  "owner_request": "Import full datasets into Label Studio for manual labeling; 240 was only a candidate sample. Preserve requested 40 future bars for human context.",
+  "protocol_id": "manual_from_blank_future40_v1",
+  "training_images": 32000,
+  "training_event_groups": 4172,
+  "candidate_unique_events": 240,
+  "candidate_repeat_tasks": 36,
+  "holdout_start": "2026-05-04T00:00:00+00:00",
+  "future_bars_requested": 40,
+  "future_policy": "At most 40 contiguous bars after original representative, truncated before holdout or missing data; actual count shown.",
+  "source_sha256": {
+    "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+    "datasets/grade_a_owner_assisted_20260907_v2/public/manifest.json": "d1fb86c6b98ec84033647d3abaf404350f3c49a0cff10fbdfe475a47c3acda41",
+    "datasets/grade_a_owner_assisted_20260907_v2/review_future_only/manifest.json": "a687d4a468fc7575faf0a6e78b18ce30f7c015e9376437d7d35c83d2af4b09af",
+    "datasets/grade_a_owner_assisted_20260907_v2/admin/lineage.jsonl": "9de3555a56271bc63aa22c931ba5e2116c77efed11ada2a318300781a1448e6d",
+    "yoyo/layers/l1_detection/render.py": "def5b7317c13e37fc43657243a7cc900bc3fafee71bdf2e405e0336a1a3c0eea",
+    "yoyo/layers/l1_detection/data.py": "bce9af28b00d1deb8346cafb19654e18d4987d42b3849b420a9739b5e9aeb265",
+    "yoyo/datasets/fifteen_minute_launch_candidates.py": "b31fe35bfeff8626889691bf404a87223fb18dedcf7b52841f1c618821de976e",
+    "configs/labelstudio/grade_a_manual_future40.xml": "9a6394d87348504e7fad92f1b6c69eeedbe42fb9366e67030744250c32f1bd8a"
+  },
+  "labels": {
+    "多头": "LONG",
+    "空头": "SHORT"
+  },
+  "training_eligible": false,
+  "production_eligible": false,
+  "training_started": false,
+  "holdout_consumed": false,
+  "read_scope": "bounded pre-holdout prefixes only; no raw whole-file digest for mixed-period sources",
+  "image_annotation_target": "original representative only; future/context unbound to rectangle control",
+  "coordinate_transfer": "Store original ChartTransform for each variant; no direct normalized coordinate copying; no writeback in this task"
+}

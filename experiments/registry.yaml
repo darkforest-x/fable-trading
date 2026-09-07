@@ -6484,3 +6484,18 @@ experiments:
       - grade-a-assisted-future40-20260907-html
     reuse_allowed: false
     notes: Owner 2026-09-07 requested future40 and simplified review. Old blind protocol/answers retained separately. 286 old hashes unchanged; 0 expanded dependency overlaps. Reject is not automatic background; no holdout or new inference.
+
+  - experiment_id: exp-15m-grade-a-labelstudio-manual-20260907-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: source-first-pending
+    status: active
+    question: Can Owner redraw all 4172 current training event groups from blank with isolated future40 context?
+    single_variable: Annotation workflow and human labels only; original 32000 training variants unchanged.
+    result: Owner requested full Label Studio manual annotation; builders prepared before generation.
+    canonical_report: null
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: 32000 images represent 4172 event groups; the 240 candidate sample plus36 repeats is a separate project. Future clipped before holdout, no automatic propagation or new training.

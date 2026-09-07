@@ -1,0 +1,27 @@
+<View>
+  <Header value="框住密集形态本体：左图画框，右图看后续走势" size="4"/>
+  <RectangleLabels name="pattern" toName="image" strokeWidth="2">
+    <Label value="多头" background="#16a34a" hotkey="1"/>
+    <Label value="空头" background="#dc2626" hotkey="2"/>
+  </RectangleLabels>
+  <Choices name="no_box_reason" toName="image" choice="single" showInline="true">
+    <Choice value="无目标形态"/>
+    <Choice value="拿不准"/>
+  </Choices>
+  <Header value="$caption" size="5"/>
+  <View style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+    <View style="flex:1;min-width:350px">
+      <Header value="在这里画框" size="5"/>
+      <Image name="image" value="$image" width="100%" maxWidth="100%" zoom="true" zoomControl="true" crosshair="true"/>
+    </View>
+    <View style="flex:1.2;min-width:400px">
+      <Header value="后续走势参考" size="5"/>
+      <Image name="future" value="$future_image" width="100%" maxWidth="100%" zoom="true" zoomControl="true"/>
+    </View>
+  </View>
+  <Collapse>
+    <Panel value="查看更多前文（可选）">
+      <Image name="context" value="$context_image" width="100%" maxWidth="900px" zoom="true" zoomControl="true"/>
+    </Panel>
+  </Collapse>
+</View>
