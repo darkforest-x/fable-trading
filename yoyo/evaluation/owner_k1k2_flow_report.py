@@ -1,6 +1,7 @@
-"""V36 report-only SQL reconciliation over hash-verified saved event outcomes.
+"""V36 reporting and post-result clock diagnostics over frozen research evidence.
 
-No market-file reads, new policy, thresholds, tuning, or execution replay.
+SQL and packaging read saved outcomes only; clock audit rereads the same approved
+2023-2024 source. No new policy, thresholds, tuning, or execution replay.
 Canonical portable report contract uses the installed Data Analytics reader.
 """
 from __future__ import annotations
@@ -82,12 +83,17 @@ def package():
     commit,s=guard()
     saved=json.loads((HERE/"report_data.json").read_text())
     if saved["summary_sha256"]!=sha(HERE/"summary.json"): raise ValueError("Summary drift")
+    clock_evidence=json.loads((HERE/"clock_audit.json").read_text())
+    if clock_evidence["summary_sha256"]!=sha(HERE/"summary.json"): raise ValueError("Clock summary drift")
+    if clock_evidence["csv_sha256"]!=sha(HERE/"clock_audit.csv"): raise ValueError("Clock rows drift")
     if subprocess.check_output(["git","show",commit+":"+REPORT],cwd=ROOT)!=(ROOT/REPORT).read_bytes():
         raise ValueError("Commit narrative before packaging")
     sections=[p.strip() for p in re.split(r"(?m)(?=^## )",(ROOT/REPORT).read_text().strip())]
     if not sections[0].startswith("# "+TITLE) or len(sections)<7: raise ValueError("Incomplete report spine")
     sources=[dict(id="report",label="V36 · 结论、定义、风险及复现",path=REPORT),
-        dict(id="summary",label="V36 · 原始研究摘要",path=str(REL/"summary.json"))]
+        dict(id="summary",label="V36 · 原始研究摘要",path=str(REL/"summary.json")),
+        dict(id="clock_summary",label="V36 · 入场与退出时钟核对",path=str(REL/"clock_audit.json")),
+        dict(id="clock_rows",label="V36 · 63笔颜色时钟逐笔证据",path=str(REL/"clock_audit.csv"))]
     for key,query in QUERIES.items():
         sources.append(dict(id=key,label="V36 · 已保存逐笔结果复算",path=str(REL/"report_data.json"),
             query=dict(sql=query,language="sql",engine="sqlite",executed_at=saved["generated_at"],
@@ -116,6 +122,7 @@ def package():
     write_json(HERE/"artifact.json",artifact)
     write_json(HERE/"artifact_build_receipt.json",dict(source_commit=commit,report_sha256=sha(ROOT/REPORT),
         summary_sha256=sha(HERE/"summary.json"),report_data_sha256=sha(HERE/"report_data.json"),
+        clock_audit_sha256=sha(HERE/"clock_audit.json"),clock_rows_sha256=sha(HERE/"clock_audit.csv"),
         sections=len(sections),charts=1,generated_at=stamp))
     print(json.dumps(dict(sections=len(sections),charts=1)))
 
