@@ -1,0 +1,93 @@
+{
+  "auto_launch": false,
+  "baseline_experiment": "exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1",
+  "baseline_manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+  "baseline_weights_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+  "evaluation": {
+    "acceptance": "do not declare an accuracy improvement from mined calibration, mAP alone or an unestablished independent set",
+    "existing_val": "reused development comparison only, not independent",
+    "holdout": false,
+    "primary_surfaces": [
+      "earliest available event recall",
+      "post2 event recall",
+      "negative fired images per1000 and event rate",
+      "core boundary/strict localization diagnostics"
+    ],
+    "statistics": "paired same-event comparisons with event clusters and Holm correction for declared primary family; single-seed limitation retained",
+    "threshold_tuning": false
+  },
+  "fixed": [
+    "all 6800 train positive images and labels",
+    "all 4800 development validation images and labels",
+    "easy-negative images and labels",
+    "27200 train images; 1:3 positive-negative ratio",
+    "close MA source, original 1280x742 renderer, no palette/line width changes",
+    "official yolo11s.pt initialization; no warm start from fitted checkpoint",
+    "native imgsz1280, same seed and full40 optimizer recipe",
+    "conf0.25 NMS0.70 true-IoU0.50 and identical comparison runtime"
+  ],
+  "independent_evaluation_ready": false,
+  "matching_constraints": [
+    "Owner NO_SIGNAL for the whole proposed input, not merely wrong predicted class",
+    "same canonical symbol, same venue, same half-year, train split, same core length and same full group of 7/8 supported positions as replaced event",
+    "both positive and negative Owner-protected regions excluded in complete dependencies; candidate cannot replace a positive or validation image",
+    "no replacement reused; match complete negative-event groups, never partial slots; freeze IDs and hashes before training",
+    "uncertain, multiple cores, insufficient context, positive disagreement and inconsistent repeats quarantined",
+    "retain original hard-negative if no safe match; report actual count; if zero feasible replacements do not train"
+  ],
+  "must_precede_launch": [
+    "completed Owner annotations with explicit class and box meaning",
+    "repeat consistency and ambiguity report reviewed; protocol stable",
+    "full matched replacement ledger and versioned dataset identity frozen",
+    "dataset rebuild separately committed source-first with all image/label/split parity checks",
+    "Mac/3060/CI dependency contract and local/remote all-file preflight"
+  ],
+  "owner_authorization_reference": "preregistration.json",
+  "production_eligible": false,
+  "recipe": {
+    "augmentations": {
+      "copy_paste": 0.0,
+      "degrees": 0.0,
+      "erasing": 0.0,
+      "fliplr": 0.0,
+      "flipud": 0.0,
+      "hsv_h": 0.0,
+      "hsv_s": 0.0,
+      "hsv_v": 0.0,
+      "mixup": 0.0,
+      "mosaic": 0.0,
+      "perspective": 0.0,
+      "scale": 0.1,
+      "shear": 0.0,
+      "translate": 0.02
+    },
+    "base_model": "models/yolo11s.pt",
+    "base_model_sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+    "batch": 8,
+    "cache": false,
+    "classes": {
+      "0": "dense_long",
+      "1": "dense_short"
+    },
+    "deterministic": true,
+    "epochs": 40,
+    "gpu": "NVIDIA GeForce RTX 3060 12GB",
+    "imgsz": 1280,
+    "launcher": "scripts/train_15m_ma_launch_t3_on_3060.sh",
+    "launcher_sha256": "27f7037e4f9a8c66ddbb87e2534ff378b90c7baa506e49634a19b7f5f9c05475",
+    "lr0": 0.0001,
+    "lrf": 0.01,
+    "optimizer": "AdamW",
+    "patience": 0,
+    "rect": true,
+    "seed": 0,
+    "trainer": "src/detection/train.py",
+    "trainer_sha256": "71445a639996ef8d0199a164aa08c75efa9d037619b8647deb3d5fab366e0562",
+    "warmup_epochs": 0.5,
+    "workers": 2
+  },
+  "schema_version": 1,
+  "single_variable": "Replace eligible train-side rule-generated hard-negative events with Owner-confirmed mined hard-negative events; same count and matched event variants.",
+  "status": "prepared_pending_owner_labels_and_matching",
+  "training_eligible": false
+}

@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>形态盲审 · 18 根历史窗口</title>
+  <style>
+    :root{color-scheme:light;font-family:system-ui,-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;color:#172b39;background:#f4f6f8;font-size:14px;--accent:#15635c;--border:#dbe2e7;--muted:#62727d}
+    *{box-sizing:border-box}body{margin:0}button,input,select,textarea{font:inherit}button,select{cursor:pointer}button{border:1px solid var(--border);border-radius:7px;padding:9px 13px;background:#fff;color:inherit}button:hover:not(:disabled){border-color:#6e9792;background:#f0f7f5}button:disabled{cursor:default;opacity:.4}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #90bbb5;outline-offset:2px}.primary{background:var(--accent);color:white;border-color:var(--accent)}.primary:hover:not(:disabled){background:#114e49;color:white}.subtle{font-size:12px;color:var(--muted);line-height:1.65}.muted{color:var(--muted)}
+    header{padding:20px 28px 15px;background:#fff;border-bottom:1px solid var(--border)}.heading-row,.tools,.nav,.counter-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.heading-row{justify-content:space-between}h1{font-size:21px;line-height:1.4;margin:0 0 5px}header p{margin:3px 0}.privacy{margin-top:12px;padding:10px 12px;border:1px solid #bcd9d4;background:#f0f8f6;border-radius:7px;line-height:1.6}.warning{border-color:#dec496;background:#fff8e9;color:#79561b}.layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;max-width:1800px;margin:auto;padding:20px 28px}.image-pane,.review-pane{min-width:0;background:white;border:1px solid var(--border);border-radius:10px}.image-pane{align-self:start;overflow:hidden}.nav{padding:13px 16px;border-bottom:1px solid var(--border);justify-content:space-between}.nav-actions{display:flex;align-items:center;gap:8px}.counter-row{gap:6px;font-variant-numeric:tabular-nums}.pill{font-size:12px;padding:4px 8px;border-radius:15px;background:#eef2f4;color:var(--muted)}.pill.done{color:#10594d;background:#def0e8}.chart-wrap{padding:14px 12px 0}.stage{position:relative;touch-action:none;user-select:none;line-height:0;background:#fff;min-height:90px;cursor:crosshair}.stage img{display:block;width:100%;height:auto;user-select:none;pointer-events:none}.selection{position:absolute;border:2px solid #256dbe;background:rgba(44,113,185,.12);pointer-events:none;display:none;min-width:2px}.selection::before,.selection::after{content:"";width:7px;height:7px;background:#fff;border:2px solid #256dbe;position:absolute}.selection::before{top:-4px;left:-4px}.selection::after{bottom:-4px;right:-4px}.ruler{position:relative;height:29px;margin-top:4px}.ruler span{position:absolute;transform:translateX(-50%);font-size:11px;line-height:21px;color:#6b7780;font-variant-numeric:tabular-nums}.ruler span.active{color:#115294;font-weight:700}.ruler span::before{content:"";display:block;height:4px;width:1px;background:#b6c0c7;margin:auto}.image-help{padding:0 16px 14px;margin:0}.review-pane{padding:17px;align-self:start}fieldset{border:0;padding:0;margin:0 0 18px;min-width:0}legend{font-size:14px;font-weight:650;padding:0;margin-bottom:9px}.labels{display:grid;grid-template-columns:1fr 1fr;gap:7px}.label-button{padding:11px 7px;text-align:left}.label-button[aria-pressed=true]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:#eaf5f1;color:#114e49}.key{display:inline-block;font-size:11px;color:#7b898f;border:1px solid #cfd9dc;border-radius:3px;margin-right:5px;padding:0 4px}.grid-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field-label{display:block;font-size:12px;color:#52636f;margin:0 0 5px}select,input[type=number],textarea{width:100%;border:1px solid #cbd5dc;border-radius:6px;background:white;padding:8px;color:#172b39}textarea{resize:vertical;min-height:64px;line-height:1.5}input:disabled,select:disabled{background:#f3f5f6;color:#a2adb4}.field-space{margin-top:10px}.reasons{display:grid;gap:7px}.reasons label{display:flex;align-items:start;gap:6px;font-size:12px;line-height:1.5}.reasons input{margin-top:3px;accent-color:var(--accent)}.save-row{display:flex;gap:7px;align-items:center}.save-row .primary{flex:1}.notice{font-size:12px;line-height:1.6;min-height:20px;margin:8px 0 0;color:#82551a}.error{color:#a52b2b}.progress-track{height:4px;background:#e9eeee;margin-top:14px;border-radius:3px;overflow:hidden}.progress-track div{height:100%;background:var(--accent);width:0;transition:width .15s}#fatal{margin:25px;padding:20px;background:#fff5f3;border:1px solid #e7b9b0;border-radius:8px}#import-file{display:none}.footer{max-width:1800px;margin:auto;padding:0 28px 25px;font-size:12px;color:var(--muted);line-height:1.7}.draft-warning{color:#a56723}.geometry-hint{margin:8px 0 0}.image-error{padding:24px;line-height:1.6;color:#a52b2b}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(max-width:1000px){.layout{grid-template-columns:minmax(0,1fr) 290px;gap:12px;padding:14px}.review-pane{padding:14px}header{padding:16px}.footer{padding:0 16px 20px}.chart-wrap{padding:8px 5px 0}}
+    @media(max-width:760px){.layout{display:flex;flex-direction:column;padding:12px}.image-pane,.review-pane{width:100%}.review-pane{padding:16px}.heading-row{align-items:flex-start}.tools{margin-top:7px}h1{font-size:18px}.nav{padding:10px;gap:8px}.nav-actions button{padding:8px 10px}.labels{grid-template-columns:repeat(4,1fr)}.label-button{text-align:center;padding:10px 3px}.key{display:none}.reasons{grid-template-columns:1fr 1fr}.save-row{position:sticky;bottom:0;background:#fff;padding-top:8px;padding-bottom:8px}.ruler span{font-size:9px}.image-help{font-size:11px}.privacy{font-size:12px}}
+  </style>
+</head>
+<body>
+  <div id="fatal" role="alert" hidden></div>
+  <div id="app" hidden>
+    <header>
+      <div class="heading-row">
+        <div><h1 id="pack-title">形态盲审</h1><p class="subtle">已完成历史的 18 根窗口 · 类别与核心边界校准 · 含确认上下文</p></div>
+        <div class="tools"><span id="completion-count" class="muted"></span><button id="import-button" type="button">导入进度</button><button id="export-button" type="button">导出进度</button><input id="import-file" type="file" accept=".json,application/json" aria-label="选择同一审核包的进度文件"></div>
+      </div>
+      <div id="storage-notice" class="privacy">答案仅保存在本浏览器，刷新可恢复。请使用「导出」保存 JSON 文件，再交回审核结果。此页不会自动提交答案。</div>
+      <div id="global-notice" class="notice" role="status" aria-live="polite"></div>
+      <div class="progress-track" role="progressbar" id="progress" aria-label="已保存且完整的题目" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progress-fill"></div></div>
+    </header>
+    <main class="layout">
+      <section class="image-pane" aria-label="审核图像">
+        <nav class="nav" aria-label="题目导航"><div class="counter-row"><strong id="item-counter"></strong><span id="item-status" class="pill">未填写</span></div><div class="nav-actions"><button id="previous-button" type="button" aria-label="上一题">← 上一题</button><button id="next-button" type="button" aria-label="下一题">下一题 →</button><button id="incomplete-button" type="button">找未完成</button></div></nav>
+        <div class="chart-wrap"><div class="stage" id="image-stage" aria-label="图像框选区域；也可使用右侧数字控件标注"><img id="review-image" alt="待审核的 K 线与均线图" draggable="false"><div id="selection-box" class="selection" aria-hidden="true"></div></div><div id="bar-ruler" class="ruler" aria-label="K 线编号"></div></div>
+        <p class="image-help subtle">仅按图中已显示内容判断；本批用于形态校准，不看后续涨跌定正负。选择「多头」或「空头」后可拖绘核心框；左右边缘吸附 K 线中心。下方编号从 1 开始，可用数字控件微调。</p>
+        <div id="image-error" class="image-error" role="alert" hidden>图像加载失败。请保持审核页面与 images 文件夹在同一目录，再重新打开。</div>
+      </section>
+      <aside class="review-pane" aria-label="本题审核表单">
+        <fieldset><legend>1. 这是什么形态？</legend><div class="labels" id="label-controls">
+          <button type="button" class="label-button" data-label="LONG" id="label-long" aria-pressed="false"><span class="key">1</span>多头</button>
+          <button type="button" class="label-button" data-label="SHORT" id="label-short" aria-pressed="false"><span class="key">2</span>空头</button>
+          <button type="button" class="label-button" data-label="NO_SIGNAL" id="label-no-signal" aria-pressed="false"><span class="key">3</span>无信号</button>
+          <button type="button" class="label-button" data-label="UNCERTAIN" id="label-uncertain" aria-pressed="false"><span class="key">4</span>不确定</button>
+        </div></fieldset>
+        <fieldset id="geometry-controls" disabled><legend>2. 核心边界与框的含义</legend><div class="grid-two"><div><label class="field-label" for="core-start">核心首根</label><select id="core-start"><option value="">请选择</option></select></div><div><label class="field-label" for="core-end">核心末根</label><select id="core-end"><option value="">请选择</option></select></div></div>
+          <div class="grid-two field-space"><div><label class="field-label" for="box-top">上边界（0–1）</label><input type="number" id="box-top" min="0" max="1" step="0.001" placeholder="图像顶端为 0"></div><div><label class="field-label" for="box-bottom">下边界（0–1）</label><input type="number" id="box-bottom" min="0" max="1" step="0.001" placeholder="图像底端为 1"></div></div>
+          <div class="field-space"><label class="field-label" for="box-semantics">这个框应该包含什么？</label><select id="box-semantics"><option value="">请选择框的含义</option><option value="CORE_WICKS_MA">核心 K 线完整影线与均线</option><option value="MA_BUNDLE">只包均线束</option><option value="OTHER">其他（请在备注说明）</option><option value="UNCERTAIN">不确定框的含义</option></select></div><p class="subtle geometry-hint">多头 / 空头需填完全部边界和框义；核心根数由你判断。图像纵向坐标从上到下递增。</p>
+        </fieldset>
+        <fieldset><legend>3. 原因与备注 <span class="subtle">（可选）</span></legend><div id="reason-controls" class="reasons">
+          <label><input type="checkbox" value="non_dense">不够密集</label><label><input type="checkbox" value="far_from_ma">K 线离均线远</label><label><input type="checkbox" value="already_launched">已经启动走远</label><label><input type="checkbox" value="not_launch">没有启动形态</label><label><input type="checkbox" value="multiple_cores">有多个核心</label><label><input type="checkbox" value="insufficient_context">上下文不足</label><label><input type="checkbox" value="other">其他</label>
+        </div><label class="field-label field-space" for="note">备注</label><textarea id="note" maxlength="4000" placeholder="可记录边界疑问、多个候选核心或其他判断依据。"></textarea></fieldset>
+        <div class="save-row"><button class="primary" type="button" id="save-button">保存本题</button><button type="button" id="save-next-button">保存并下一题</button></div><p id="item-notice" class="notice" role="status" aria-live="polite"></p>
+      </aside>
+    </main>
+    <footer class="footer">快捷键：1 多头 · 2 空头 · 3 无信号 · 4 不确定 · ← / → 切题。输入框内不触发快捷键。修改答案后需再次保存才计为完成。<br>本轮用于历史形态语义与标注稳定性校准；这些窗口包含确认上下文，不代表新鲜盘口检测能力。</footer>
+  </div>
+  <script id="pack-data" type="application/json">__PACK_JSON__</script>
+  <script>
+  'use strict';
+  (() => {
+    const $ = (id) => document.getElementById(id);
+    const LABELS = ['LONG', 'SHORT', 'NO_SIGNAL', 'UNCERTAIN'];
+    const SEMANTICS = ['CORE_WICKS_MA', 'MA_BUNDLE', 'OTHER', 'UNCERTAIN'];
+    const REASONS = ['non_dense', 'far_from_ma', 'already_launched', 'not_launch', 'multiple_cores', 'insufficient_context', 'other'];
+    const ANSWER_KEYS = ['review_id', 'label', 'core_start', 'core_end', 'box_top_norm', 'box_bottom_norm', 'box_semantics', 'reasons', 'note', 'answered_at'];
+    const positive = (answer) => answer && ['LONG', 'SHORT'].includes(answer.label);
+    const finite = (value) => typeof value === 'number' && Number.isFinite(value);
+    function timestamp(value) {
+      if (typeof value !== 'string') return false;
+      const parts = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d{1,6})?(Z|([+-])(\d{2}):(\d{2}))$/.exec(value);
+      if (!parts || parts[0] !== value) return false;
+      const [year, month, day, hour, minute, second] = parts.slice(1,7).map(Number);
+      const offsetHour = Number(parts[9] || 0), offsetMinute = Number(parts[10] || 0);
+      if (year < 1 || month < 1 || month > 12 || hour > 23 || minute > 59 || second > 59 || offsetHour > 23 || offsetMinute > 59) return false;
+      const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+      const days = [31,leap ? 29 : 28,31,30,31,30,31,31,30,31,30,31];
+      if (day < 1 || day > days[month-1]) return false;
+      // Date.parse alone normalizes impossible dates and accepts timezone-free input.
+      const epoch = Date.parse(value);
+      if (!Number.isFinite(epoch)) return false;
+      const utcYear = new Date(epoch).getUTCFullYear();
+      return utcYear >= 1 && utcYear <= 9999;
+    }
+    let pack, index = 0, answers = new Map(), drag = null, imageReady = false;
+    try {
+      pack = JSON.parse($('pack-data').textContent);
+      if (!pack || pack.schema_version !== 1 || typeof pack.pack_id !== 'string' || !pack.pack_id || typeof pack.manifest_sha256 !== 'string' || !/^[a-fA-F0-9]{64}$/.test(pack.manifest_sha256) || !Array.isArray(pack.items) || !pack.items.length) throw new Error('审核包格式不完整。');
+      const seen = new Set();
+      for (const item of pack.items) {
+        if (!item || typeof item.review_id !== 'string' || !item.review_id || seen.has(item.review_id)) throw new Error('审核题号缺失或重复。');
+        if (typeof item.image !== 'string' || !/^images\/[a-zA-Z0-9_.-]+\.(png|jpg|jpeg|webp)$/.test(item.image)) throw new Error('图像路径必须位于本地 images 文件夹。');
+        if (!Number.isInteger(item.n_bars) || item.n_bars < 1 || item.n_bars > 300 || !Array.isArray(item.bar_centers_norm) || item.bar_centers_norm.length !== item.n_bars || item.bar_centers_norm.some((x, i, xs) => !finite(x) || x < 0 || x > 1 || (i > 0 && x <= xs[i - 1]))) throw new Error('K 线坐标无效。');
+        seen.add(item.review_id);
+      }
+    } catch (error) {
+      $('fatal').hidden = false;
+      $('fatal').textContent = '无法打开审核包：' + error.message;
+      return;
+    }
+    const byId = new Map(pack.items.map((item) => [item.review_id, item]));
+    const storageKey = 'grade-a-calibration:v1:' + pack.pack_id + ':' + pack.manifest_sha256;
+    const empty = (item) => ({review_id:item.review_id,label:null,core_start:null,core_end:null,box_top_norm:null,box_bottom_norm:null,box_semantics:null,reasons:[],note:'',answered_at:null});
+    const currentItem = () => pack.items[index];
+    const currentAnswer = () => answers.get(currentItem().review_id) || empty(currentItem());
+    function validationError(answer, item) {
+      if (!LABELS.includes(answer.label)) return '请先选择多头、空头、无信号或不确定。';
+      if (positive(answer)) {
+        if (!Number.isInteger(answer.core_start) || !Number.isInteger(answer.core_end) || answer.core_start < 1 || answer.core_end > item.n_bars || answer.core_start > answer.core_end) return '请选择有效核心首末根，首根不能晚于末根。';
+        if (!finite(answer.box_top_norm) || !finite(answer.box_bottom_norm) || answer.box_top_norm < 0 || answer.box_bottom_norm > 1 || answer.box_top_norm >= answer.box_bottom_norm) return '请填写 0–1 内的上下边界，且上边界必须小于下边界。';
+        if (!SEMANTICS.includes(answer.box_semantics)) return '请选择框的含义。';
+      } else if (['core_start','core_end','box_top_norm','box_bottom_norm','box_semantics'].some((key) => answer[key] !== null)) return '无信号或不确定答案不能带正例几何。';
+      return '';
+    }
+    const complete = (answer, item) => Boolean(answer && timestamp(answer.answered_at) && !validationError(answer, item));
+    function validateSnapshot(snapshot) {
+      if (!snapshot || snapshot.schema_version !== 1 || snapshot.pack_id !== pack.pack_id || snapshot.manifest_sha256 !== pack.manifest_sha256 || !timestamp(snapshot.exported_at) || !Array.isArray(snapshot.answers) || snapshot.answers.length > pack.items.length) throw new Error('文件不属于当前审核包，或审核包版本 / 导出格式有误。');
+      const result = new Map();
+      for (const raw of snapshot.answers) {
+        if (!raw || typeof raw !== 'object' || Array.isArray(raw) || !ANSWER_KEYS.every((key) => Object.prototype.hasOwnProperty.call(raw,key))) throw new Error('答案字段不完整。');
+        if (!byId.has(raw.review_id) || result.has(raw.review_id)) throw new Error('存在未知或重复的题号。');
+        const answer = Object.fromEntries(ANSWER_KEYS.map((key) => [key,raw[key]]));
+        const item = byId.get(answer.review_id);
+        if ((answer.label !== null && !LABELS.includes(answer.label)) || !Array.isArray(answer.reasons) || answer.reasons.some((reason) => !REASONS.includes(reason)) || new Set(answer.reasons).size !== answer.reasons.length || typeof answer.note !== 'string' || answer.note.length > 4000 || (answer.answered_at !== null && !timestamp(answer.answered_at))) throw new Error('答案类别、原因、备注或时间格式无效。');
+        for (const key of ['core_start','core_end']) if (answer[key] !== null && (!Number.isInteger(answer[key]) || answer[key] < 1 || answer[key] > item.n_bars)) throw new Error('核心编号超出图像范围。');
+        for (const key of ['box_top_norm','box_bottom_norm']) if (answer[key] !== null && (!finite(answer[key]) || answer[key] < 0 || answer[key] > 1)) throw new Error('框坐标超出图像范围。');
+        if (answer.box_semantics !== null && !SEMANTICS.includes(answer.box_semantics)) throw new Error('框义无效。');
+        if (!positive(answer) && ['core_start','core_end','box_top_norm','box_bottom_norm','box_semantics'].some((key) => answer[key] !== null)) throw new Error('非正例答案包含不适用的几何。');
+        if (answer.answered_at !== null && validationError(answer,item)) throw new Error('文件将未完成答案标为已完成。');
+        result.set(answer.review_id,answer);
+      }
+      return result;
+    }
+    function envelope() {
+      return {schema_version:1,pack_id:pack.pack_id,manifest_sha256:pack.manifest_sha256,exported_at:new Date().toISOString(),answers:pack.items.filter((item) => answers.has(item.review_id)).map((item) => answers.get(item.review_id))};
+    }
+    function showStorageFailure() {
+      $('storage-notice').classList.add('warning');
+      $('storage-notice').textContent = '本浏览器无法保存本地进度。答案目前仅在此页面内，关闭会丢失；请立即导出 JSON 保存。此页不会自动提交答案。';
+    }
+    function persist() {
+      try { localStorage.setItem(storageKey, JSON.stringify({...envelope(), current_index:index})); }
+      catch (_) { showStorageFailure(); }
+    }
+    function updateProgress() {
+      const count = pack.items.filter((item) => complete(answers.get(item.review_id),item)).length;
+      $('completion-count').textContent = '已完成 ' + count + ' / ' + pack.items.length;
+      $('export-button').textContent = count === pack.items.length ? '导出全部答案' : '导出进度';
+      $('progress-fill').style.width = (100 * count / pack.items.length) + '%';
+      $('progress').setAttribute('aria-valuenow',String(Math.round(100 * count / pack.items.length)));
+      const answer = currentAnswer();
+      const done = complete(answer,currentItem());
+      $('item-status').textContent = done ? '已保存' : answers.has(currentItem().review_id) ? '草稿 · 未完成' : '未填写';
+      $('item-status').className = 'pill' + (done ? ' done' : '');
+      $('save-button').textContent = done ? '已保存 · 再次保存' : '保存本题';
+    }
+    function updateGeometry() {
+      const item = currentItem(), answer = currentAnswer();
+      const box = $('selection-box');
+      const valid = positive(answer) && Number.isInteger(answer.core_start) && Number.isInteger(answer.core_end) && answer.core_start <= answer.core_end && finite(answer.box_top_norm) && finite(answer.box_bottom_norm) && answer.box_top_norm >= 0 && answer.box_bottom_norm <= 1 && answer.box_top_norm < answer.box_bottom_norm;
+      box.style.display = valid && imageReady ? 'block' : 'none';
+      if (valid) {
+        const left = item.bar_centers_norm[answer.core_start - 1], right = item.bar_centers_norm[answer.core_end - 1];
+        box.style.left = (100 * left) + '%'; box.style.width = (100 * (right-left)) + '%';
+        box.style.top = (100 * answer.box_top_norm) + '%'; box.style.height = (100 * (answer.box_bottom_norm-answer.box_top_norm)) + '%';
+      }
+      Array.from($('bar-ruler').children).forEach((span,i) => span.classList.toggle('active',positive(answer) && i+1 >= answer.core_start && i+1 <= answer.core_end));
+    }
+    function fillControls() {
+      const answer = currentAnswer();
+      document.querySelectorAll('[data-label]').forEach((button) => button.setAttribute('aria-pressed',String(button.dataset.label === answer.label)));
+      $('geometry-controls').disabled = !positive(answer);
+      for (const [id,key] of [['core-start','core_start'],['core-end','core_end'],['box-top','box_top_norm'],['box-bottom','box_bottom_norm'],['box-semantics','box_semantics']]) $(id).value = answer[key] === null ? '' : String(answer[key]);
+      document.querySelectorAll('#reason-controls input').forEach((input) => { input.checked = answer.reasons.includes(input.value); });
+      $('note').value = answer.note;
+      updateGeometry(); updateProgress();
+    }
+    function render() {
+      const item = currentItem();
+      drag = null; imageReady = false;
+      $('item-counter').textContent = '第 ' + (index + 1) + ' / ' + pack.items.length + ' 题';
+      $('previous-button').disabled = index === 0;
+      $('next-button').disabled = index === pack.items.length - 1;
+      $('save-next-button').textContent = index === pack.items.length - 1 ? '保存最后一题' : '保存并下一题';
+      $('item-notice').textContent = ''; $('item-notice').classList.remove('error');
+      $('image-error').hidden = true;
+      for (const id of ['core-start','core-end']) {
+        $(id).replaceChildren(new Option('请选择',''));
+        for (let i=1;i<=item.n_bars;i++) $(id).add(new Option(String(i),String(i)));
+      }
+      $('bar-ruler').replaceChildren();
+      item.bar_centers_norm.forEach((center,i) => {
+        const span = document.createElement('span'); span.textContent = String(i+1); span.style.left = (100*center)+'%'; $('bar-ruler').append(span);
+      });
+      $('review-image').src = item.image;
+      fillControls();
+    }
+    function mutate(changes, refill=false) {
+      const answer = {...currentAnswer(),...changes,answered_at:null};
+      answers.set(answer.review_id,answer); persist();
+      $('item-notice').textContent = '草稿已记录；完成后请保存本题。';
+      $('item-notice').classList.remove('error');
+      if (refill) fillControls(); else { updateGeometry(); updateProgress(); }
+    }
+    function chooseLabel(label) {
+      if (label === currentAnswer().label) return;
+      const changes = {label};
+      if (!['LONG','SHORT'].includes(label)) Object.assign(changes,{core_start:null,core_end:null,box_top_norm:null,box_bottom_norm:null,box_semantics:null});
+      mutate(changes,true);
+    }
+    function save() {
+      if (!imageReady) { $('item-notice').textContent = '图像尚未加载，不能保存裁决。'; $('item-notice').classList.add('error'); return false; }
+      const answer = currentAnswer();
+      const error = validationError(answer,currentItem());
+      $('item-notice').classList.toggle('error',Boolean(error));
+      if (error) { $('item-notice').textContent = error; return false; }
+      answers.set(answer.review_id,{...answer,answered_at:new Date().toISOString()}); persist(); updateProgress();
+      $('item-notice').textContent = '本题已保存。请记得导出文件保存全部进度。';
+      return true;
+    }
+    function move(next) { if (next < 0 || next >= pack.items.length || next === index) return; index=next; persist(); render(); }
+    document.querySelectorAll('[data-label]').forEach((button) => button.addEventListener('click',() => chooseLabel(button.dataset.label)));
+    for (const [id,key] of [['core-start','core_start'],['core-end','core_end'],['box-top','box_top_norm'],['box-bottom','box_bottom_norm']]) $(id).addEventListener('input',() => {
+      const value=$(id).value === '' ? null : Number($(id).value);
+      const valid=value !== null && finite(value) && (key.startsWith('core_') ? Number.isInteger(value) && value>=1 && value<=currentItem().n_bars : value>=0 && value<=1);
+      mutate({[key]:valid?value:null});
+    });
+    $('box-semantics').addEventListener('change',() => mutate({box_semantics:$('box-semantics').value || null}));
+    $('reason-controls').addEventListener('change',() => mutate({reasons:Array.from(document.querySelectorAll('#reason-controls input:checked')).map((input) => input.value)}));
+    $('note').addEventListener('input',() => mutate({note:$('note').value}));
+    $('save-button').addEventListener('click',save);
+    $('save-next-button').addEventListener('click',() => { if (save()) move(index+1); });
+    $('previous-button').addEventListener('click',() => move(index-1));
+    $('next-button').addEventListener('click',() => move(index+1));
+    $('incomplete-button').addEventListener('click',() => {
+      for (let step=1;step<=pack.items.length;step++) { const next=(index+step)%pack.items.length; if (!complete(answers.get(pack.items[next].review_id),pack.items[next])) { if(next===index) $('item-notice').textContent='当前题是唯一未完成题目。'; else move(next); return; } }
+      $('global-notice').textContent = '所有题目已完整保存。请导出全部答案。';
+    });
+    $('review-image').addEventListener('load',() => { imageReady=true; $('image-error').hidden=true; updateGeometry(); });
+    $('review-image').addEventListener('error',() => { imageReady=false; $('image-error').hidden=false; updateGeometry(); });
+    function point(event) {
+      const bounds=$('review-image').getBoundingClientRect();
+      return {x:Math.max(0,Math.min(1,(event.clientX-bounds.left)/bounds.width)),y:Math.max(0,Math.min(1,(event.clientY-bounds.top)/bounds.height))};
+    }
+    function closestBar(x) {
+      const centers=currentItem().bar_centers_norm;
+      let best=0; centers.forEach((center,i) => { if(Math.abs(center-x)<Math.abs(centers[best]-x)) best=i; });
+      return best+1;
+    }
+    function updateDrag(event) {
+      if (!drag || drag.pointerId !== event.pointerId) return;
+      const end=point(event), a=closestBar(drag.start.x), b=closestBar(end.x);
+      const rounded=(x) => Math.round(x*1000000)/1000000;
+      mutate({core_start:Math.min(a,b),core_end:Math.max(a,b),box_top_norm:rounded(Math.min(drag.start.y,end.y)),box_bottom_norm:rounded(Math.max(drag.start.y,end.y))},true);
+    }
+    $('image-stage').addEventListener('pointerdown',(event) => {
+      if(event.button !== 0 || !imageReady) return;
+      if(!positive(currentAnswer())) { $('item-notice').textContent='请先选择多头或空头，再绘制核心框。'; return; }
+      event.preventDefault(); drag={pointerId:event.pointerId,start:point(event)}; $('image-stage').setPointerCapture(event.pointerId);
+    });
+    $('image-stage').addEventListener('pointermove',updateDrag);
+    $('image-stage').addEventListener('pointerup',(event) => { if(drag && drag.pointerId===event.pointerId) { updateDrag(event); drag=null; $('image-stage').releasePointerCapture(event.pointerId); } });
+    $('image-stage').addEventListener('pointercancel',() => { drag=null; });
+    document.addEventListener('keydown',(event) => {
+      if(event.ctrlKey || event.metaKey || event.altKey || event.repeat || event.target.closest('input,textarea,select,[contenteditable=true]')) return;
+      if(['1','2','3','4'].includes(event.key)) { event.preventDefault(); chooseLabel(LABELS[Number(event.key)-1]); }
+      else if(event.key==='ArrowLeft') { event.preventDefault(); move(index-1); }
+      else if(event.key==='ArrowRight') { event.preventDefault(); move(index+1); }
+    });
+    $('export-button').addEventListener('click',() => {
+      const snapshot=envelope();
+      const count=pack.items.filter((item) => complete(answers.get(item.review_id),item)).length;
+      const safeId=pack.pack_id.replace(/[^a-zA-Z0-9_-]/g,'_');
+      const blob=new Blob([JSON.stringify(snapshot,null,2)+'\n'],{type:'application/json'});
+      const url=URL.createObjectURL(blob), anchor=document.createElement('a');
+      anchor.href=url; anchor.download=safeId+'_'+(count===pack.items.length?'answers':'progress')+'_'+new Date().toISOString().replace(/[:.]/g,'-')+'.json';
+      document.body.append(anchor); anchor.click(); anchor.remove(); setTimeout(() => URL.revokeObjectURL(url),1000);
+      $('global-notice').textContent='已生成'+(count===pack.items.length?'完整答案':'进度')+'文件（已完成 '+count+' / '+pack.items.length+'）。请确认下载文件已保存。';
+      $('global-notice').classList.remove('error');
+    });
+    $('import-button').addEventListener('click',() => { $('import-file').value=''; $('import-file').click(); });
+    $('import-file').addEventListener('change',async () => {
+      const file=$('import-file').files[0]; if(!file) return;
+      try {
+        if(file.size>Math.max(2000000,pack.items.length*12000)) throw new Error('文件过大。');
+        const snapshot=JSON.parse(await file.text()), imported=validateSnapshot(snapshot);
+        if(answers.size && !window.confirm('导入将用文件中的快照替换本浏览器的当前进度。建议先导出当前进度。继续导入？')) return;
+        answers=imported;
+        const next=pack.items.findIndex((item) => !complete(answers.get(item.review_id),item)); index=next<0?0:next;
+        persist(); render(); $('global-notice').textContent='同一审核包的进度已导入。'; $('global-notice').classList.remove('error');
+      } catch(error) { $('global-notice').textContent='导入失败，当前答案未被替换：'+error.message; $('global-notice').classList.add('error'); }
+    });
+    try {
+      const saved=localStorage.getItem(storageKey);
+      if(saved) { const snapshot=JSON.parse(saved); answers=validateSnapshot(snapshot); if(Number.isInteger(snapshot.current_index) && snapshot.current_index>=0 && snapshot.current_index<pack.items.length) index=snapshot.current_index; $('global-notice').textContent='已恢复本浏览器保存的进度。'; }
+    } catch(error) { if(error.name==='SecurityError') showStorageFailure(); $('global-notice').textContent='本地进度未能恢复：'+error.message+' 可尝试导入之前导出的 JSON。'; $('global-notice').classList.add('error'); }
+    $('pack-title').textContent=typeof pack.title==='string'?pack.title:'形态盲审 · 18 根历史窗口';
+    $('app').hidden=false; render();
+  })();
+  </script>
+</body>
+</html>
