@@ -1,0 +1,11 @@
+{
+  "status": "failed_not_additional_evidence",
+  "source_commit": "7799828",
+  "command": "python3 scripts/audit_hourly_impulse_classifier_economics_v30.py --check-only",
+  "error_type": "KeyError",
+  "message": "Supplementary extrema check used min/max; actual frozen summary schema uses minimum/maximum.",
+  "original_audit_changed": false,
+  "economic_results_changed": false,
+  "new_parameter_or_outcome_materialization": false,
+  "fix": "Use actual schema keys; add synthetic spread-schema regression test; commit fix before replay."
+}

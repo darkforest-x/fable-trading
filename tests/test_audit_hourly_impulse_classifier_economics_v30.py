@@ -27,3 +27,12 @@ def test_comparison_fails_closed():
         audit.equal(math.nan, 0)
     with pytest.raises(AssertionError):
         audit.equal(.002, .001)
+
+
+def test_spread_check_uses_actual_summary_schema():
+    saved = dict(n_total=2, n_known=2, n_unknown=0, mean=1.5, sum=3., median=1.5,
+        minimum=1., maximum=2., sd=math.sqrt(.5), q05=1.05, q25=1.25, q75=1.75,
+        q95=1.95, n_positive=2, n_negative=0, n_zero=0)
+    audit.check_description([1., 2.], saved)
+    with pytest.raises(AssertionError):
+        audit.check_description([1., 2.], dict(saved, sd=0.))

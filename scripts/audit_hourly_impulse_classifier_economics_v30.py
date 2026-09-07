@@ -75,8 +75,8 @@ def check_description(values, saved):
     equal(average(finite), saved["mean"])
     equal(math.fsum(finite) if finite else None, saved["sum"])
     equal(quantile(finite, .5), saved["median"])
-    equal(min(finite) if finite else None, saved["min"])
-    equal(max(finite) if finite else None, saved["max"])
+    equal(min(finite) if finite else None, saved["minimum"])
+    equal(max(finite) if finite else None, saved["maximum"])
     sd = math.sqrt(math.fsum((v-average(finite))**2 for v in finite)/(len(finite)-1)) if len(finite) > 1 else None
     equal(sd, saved["sd"])
     for field, q in (("q05", .05), ("q25", .25), ("q75", .75), ("q95", .95)):
