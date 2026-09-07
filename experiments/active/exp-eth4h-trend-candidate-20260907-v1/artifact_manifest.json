@@ -1,0 +1,567 @@
+{
+  "experiment_id": "exp-eth4h-trend-candidate-20260907-v1",
+  "builder_commit": "096dbc665fe8889313a3c87618950d840b7d2da7",
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "files": [
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S0_immediate_1x_controls.csv",
+      "sha256": "3567475a14c664dea77b9db802250556dbd22af58c3b1218f2f5a5ec7fcdaa9b",
+      "size_bytes": 23263,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S0_immediate_1x_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S0_immediate_1x_equity.csv",
+      "sha256": "9f35c7cd41618c0d8427fbe8aff757333f13a890b1a4ad6911c39c03dcd0658a",
+      "size_bytes": 744120,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S0_immediate_1x_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S0_immediate_1x_events.csv",
+      "sha256": "4509193ecf964dabcf48f9c6d10cafedbc78f7f5e2e2dcb04e65676e43c716ec",
+      "size_bytes": 2671,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S0_immediate_1x_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S0_immediate_1x_trades.csv",
+      "sha256": "f0b141935d0efdb689943e59a00ec7728e7ea5b3f9a2ea162f78bea69130ad01",
+      "size_bytes": 28662,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S0_immediate_1x_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S1_risk_half_pct_controls.csv",
+      "sha256": "40e93ae8b73c21bf8edb48da5b72a738625ea6e54276b0d27a65ac846235e952",
+      "size_bytes": 23233,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S1_risk_half_pct_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S1_risk_half_pct_equity.csv",
+      "sha256": "381904c442ffb360faa995e5936fc09e18ba367d29b8af24cefb6643d401857f",
+      "size_bytes": 747292,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S1_risk_half_pct_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S1_risk_half_pct_events.csv",
+      "sha256": "4509193ecf964dabcf48f9c6d10cafedbc78f7f5e2e2dcb04e65676e43c716ec",
+      "size_bytes": 2671,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S1_risk_half_pct_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S1_risk_half_pct_trades.csv",
+      "sha256": "b580ef7dfd2d38987c69d662ed99cc1b725b7a55fa61a353cba537c8ac4cbefb",
+      "size_bytes": 29424,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S1_risk_half_pct_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S2_stop_ratchet_controls.csv",
+      "sha256": "40e93ae8b73c21bf8edb48da5b72a738625ea6e54276b0d27a65ac846235e952",
+      "size_bytes": 23233,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S2_stop_ratchet_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S2_stop_ratchet_equity.csv",
+      "sha256": "381904c442ffb360faa995e5936fc09e18ba367d29b8af24cefb6643d401857f",
+      "size_bytes": 747292,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S2_stop_ratchet_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S2_stop_ratchet_events.csv",
+      "sha256": "4509193ecf964dabcf48f9c6d10cafedbc78f7f5e2e2dcb04e65676e43c716ec",
+      "size_bytes": 2671,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S2_stop_ratchet_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S2_stop_ratchet_trades.csv",
+      "sha256": "b580ef7dfd2d38987c69d662ed99cc1b725b7a55fa61a353cba537c8ac4cbefb",
+      "size_bytes": 29424,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S2_stop_ratchet_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S3_isolated_stops_controls.csv",
+      "sha256": "40e93ae8b73c21bf8edb48da5b72a738625ea6e54276b0d27a65ac846235e952",
+      "size_bytes": 23233,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S3_isolated_stops_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S3_isolated_stops_equity.csv",
+      "sha256": "381904c442ffb360faa995e5936fc09e18ba367d29b8af24cefb6643d401857f",
+      "size_bytes": 747292,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S3_isolated_stops_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S3_isolated_stops_events.csv",
+      "sha256": "4509193ecf964dabcf48f9c6d10cafedbc78f7f5e2e2dcb04e65676e43c716ec",
+      "size_bytes": 2671,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S3_isolated_stops_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S3_isolated_stops_trades.csv",
+      "sha256": "db01004286bd3ad5d2ec4377a08a4eccff587145cd94ebd83efab9eb93e1f657",
+      "size_bytes": 29436,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S3_isolated_stops_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S4_fresh_cooldown_controls.csv",
+      "sha256": "40e93ae8b73c21bf8edb48da5b72a738625ea6e54276b0d27a65ac846235e952",
+      "size_bytes": 23233,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S4_fresh_cooldown_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S4_fresh_cooldown_equity.csv",
+      "sha256": "381904c442ffb360faa995e5936fc09e18ba367d29b8af24cefb6643d401857f",
+      "size_bytes": 747292,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S4_fresh_cooldown_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S4_fresh_cooldown_events.csv",
+      "sha256": "4509193ecf964dabcf48f9c6d10cafedbc78f7f5e2e2dcb04e65676e43c716ec",
+      "size_bytes": 2671,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S4_fresh_cooldown_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S4_fresh_cooldown_trades.csv",
+      "sha256": "db01004286bd3ad5d2ec4377a08a4eccff587145cd94ebd83efab9eb93e1f657",
+      "size_bytes": 29436,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S4_fresh_cooldown_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S5_close_only_controls.csv",
+      "sha256": "2c5dbe1d9b373296e070695cfed67a7842ceb403d8a8c5db1710687d64fa7f54",
+      "size_bytes": 21953,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S5_close_only_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S5_close_only_equity.csv",
+      "sha256": "68d31eadb1f7c662a07b085a38f912feef0e29090e0bee1f9852511285486ab4",
+      "size_bytes": 744683,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S5_close_only_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S5_close_only_events.csv",
+      "sha256": "a95867e24af324e2157415ff44eaea841d3ce02fc6bd1a5c9efeac45c735a5b3",
+      "size_bytes": 2672,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S5_close_only_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S5_close_only_trades.csv",
+      "sha256": "e5d67c1aa0defd16fe4c0c4b9886e90f89a7f46716aef91cd2d2b2784584f12e",
+      "size_bytes": 27825,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_S5_close_only_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_SMA_comparator_controls.csv",
+      "sha256": "7e46ca7fbdff9289d54c79162e91c4b1f72b4aa261f899752e4753eec9177b60",
+      "size_bytes": 62988,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_SMA_comparator_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_SMA_comparator_equity.csv",
+      "sha256": "048deff43151088ae80bd12da7975ed092b62f1a74022dab3ec8d2185fb32250",
+      "size_bytes": 746116,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_SMA_comparator_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_SMA_comparator_events.csv",
+      "sha256": "28af4aa0a0f28fb738556a44187d5d96b60250ba9f19c6bf55e3e9aa94025772",
+      "size_bytes": 6726,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_SMA_comparator_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_SMA_comparator_trades.csv",
+      "sha256": "7b0e70c9a98c53f73a0d28cac15f56df9262b3bf253b848f54ff9ec17d9bde27",
+      "size_bytes": 79714,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/continuous_SMA_comparator_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S0_immediate_1x_controls.csv",
+      "sha256": "db805388be64d1f73b4941c7aaa875f45390409e1de71818721ab04f29dc70ea",
+      "size_bytes": 18008,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S0_immediate_1x_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S0_immediate_1x_equity.csv",
+      "sha256": "2dfe44124447d9e403f46e8c532fcc11812159b66459acab56fe69f1419e5a25",
+      "size_bytes": 558765,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S0_immediate_1x_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S0_immediate_1x_events.csv",
+      "sha256": "fdbc93195af7e255470de3e88148f887d8beb85f3f694cefed264eed0879f880",
+      "size_bytes": 1962,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S0_immediate_1x_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S0_immediate_1x_trades.csv",
+      "sha256": "8a0084d6a0a420443333c9b17ae50dab33bfe5c35a5d172028d1db5414242d6d",
+      "size_bytes": 22807,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S0_immediate_1x_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S1_risk_half_pct_controls.csv",
+      "sha256": "0cd3e391a839021a19ad63af3f657dd1ce1de78e2f5c436129ef1f1fa0ede1d0",
+      "size_bytes": 17997,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S1_risk_half_pct_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S1_risk_half_pct_equity.csv",
+      "sha256": "7c3de33423089d5837ad3d044e253cbb7c4676fc0dacf97c2b88b95f9926f7f9",
+      "size_bytes": 560889,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S1_risk_half_pct_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S1_risk_half_pct_events.csv",
+      "sha256": "fdbc93195af7e255470de3e88148f887d8beb85f3f694cefed264eed0879f880",
+      "size_bytes": 1962,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S1_risk_half_pct_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S1_risk_half_pct_trades.csv",
+      "sha256": "492abc5b288413971087d56d3882cf61190cee7b1c992ecd26035054c53c2066",
+      "size_bytes": 23442,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S1_risk_half_pct_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S2_stop_ratchet_controls.csv",
+      "sha256": "0cd3e391a839021a19ad63af3f657dd1ce1de78e2f5c436129ef1f1fa0ede1d0",
+      "size_bytes": 17997,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S2_stop_ratchet_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S2_stop_ratchet_equity.csv",
+      "sha256": "7c3de33423089d5837ad3d044e253cbb7c4676fc0dacf97c2b88b95f9926f7f9",
+      "size_bytes": 560889,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S2_stop_ratchet_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S2_stop_ratchet_events.csv",
+      "sha256": "fdbc93195af7e255470de3e88148f887d8beb85f3f694cefed264eed0879f880",
+      "size_bytes": 1962,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S2_stop_ratchet_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S2_stop_ratchet_trades.csv",
+      "sha256": "492abc5b288413971087d56d3882cf61190cee7b1c992ecd26035054c53c2066",
+      "size_bytes": 23442,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S2_stop_ratchet_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S3_isolated_stops_controls.csv",
+      "sha256": "0cd3e391a839021a19ad63af3f657dd1ce1de78e2f5c436129ef1f1fa0ede1d0",
+      "size_bytes": 17997,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S3_isolated_stops_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S3_isolated_stops_equity.csv",
+      "sha256": "7c3de33423089d5837ad3d044e253cbb7c4676fc0dacf97c2b88b95f9926f7f9",
+      "size_bytes": 560889,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S3_isolated_stops_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S3_isolated_stops_events.csv",
+      "sha256": "fdbc93195af7e255470de3e88148f887d8beb85f3f694cefed264eed0879f880",
+      "size_bytes": 1962,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S3_isolated_stops_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S3_isolated_stops_trades.csv",
+      "sha256": "424538ab4f3bb4ae656a1900429841602942d11dbda817bc514523359da715d4",
+      "size_bytes": 23442,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S3_isolated_stops_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S4_fresh_cooldown_controls.csv",
+      "sha256": "0cd3e391a839021a19ad63af3f657dd1ce1de78e2f5c436129ef1f1fa0ede1d0",
+      "size_bytes": 17997,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S4_fresh_cooldown_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S4_fresh_cooldown_equity.csv",
+      "sha256": "7c3de33423089d5837ad3d044e253cbb7c4676fc0dacf97c2b88b95f9926f7f9",
+      "size_bytes": 560889,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S4_fresh_cooldown_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S4_fresh_cooldown_events.csv",
+      "sha256": "fdbc93195af7e255470de3e88148f887d8beb85f3f694cefed264eed0879f880",
+      "size_bytes": 1962,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S4_fresh_cooldown_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S4_fresh_cooldown_trades.csv",
+      "sha256": "424538ab4f3bb4ae656a1900429841602942d11dbda817bc514523359da715d4",
+      "size_bytes": 23442,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S4_fresh_cooldown_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S5_close_only_controls.csv",
+      "sha256": "4baad6bc3e430d8fbd723f1fd27c686afb67399f76f18030036d7109bed69719",
+      "size_bytes": 17077,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S5_close_only_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S5_close_only_equity.csv",
+      "sha256": "720dd2fc7071ee34db9a5afbb1a32bafbddb91b9afaf6b8eb6ea22221dfea81b",
+      "size_bytes": 558288,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S5_close_only_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S5_close_only_events.csv",
+      "sha256": "d88aa36c8175134c6bee7f543e1d9216678113611a421b4d9043ac5afb09b7eb",
+      "size_bytes": 1963,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S5_close_only_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S5_close_only_trades.csv",
+      "sha256": "1ccbf05be438883aa6011ba3f024b3738e794da442ffdf00839a9233170358c9",
+      "size_bytes": 22222,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_S5_close_only_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_SMA_comparator_controls.csv",
+      "sha256": "7917a27632d30f25dc26fa9a5283b50e741c36fe24ac03e07c1f249ad51bc4da",
+      "size_bytes": 42746,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_SMA_comparator_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_SMA_comparator_equity.csv",
+      "sha256": "3a609616f8896d1fc088d63212af9aace2ab016e8cb6657769ad9b721cb09813",
+      "size_bytes": 559932,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_SMA_comparator_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_SMA_comparator_events.csv",
+      "sha256": "59b64157395c45a173b27fedd723eeead94e313ebbb96be560dc6ae7aa26153d",
+      "size_bytes": 4826,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_SMA_comparator_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_SMA_comparator_trades.csv",
+      "sha256": "455683b5da661aab0a617b2be16eea0981703cb102e3e31da55cf0bddab0d1f6",
+      "size_bytes": 55273,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/development_SMA_comparator_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/equity.png",
+      "sha256": "4529d45f753f36ec6c1853235b645439b07ee341fd66b5f82ffc70fc1132a90a",
+      "size_bytes": 115473,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/equity.png"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S0_immediate_1x_controls.csv",
+      "sha256": "588d40830964b5c57a5183c7eb53175281300a5129e1aabdb0fbde79da9bd954",
+      "size_bytes": 5438,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S0_immediate_1x_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S0_immediate_1x_equity.csv",
+      "sha256": "390df0177afadb26d2fed412c0ca13844c168f7f651f202502fa13921bc7797a",
+      "size_bytes": 183159,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S0_immediate_1x_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S0_immediate_1x_events.csv",
+      "sha256": "11ccc220729b1ff2adae45154c87ccad71c43b0f09749cd0401e1ed0d1e97599",
+      "size_bytes": 727,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S0_immediate_1x_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S0_immediate_1x_trades.csv",
+      "sha256": "94475c1c233418369f4f90830c6c44cb2f92128f04e293f1080628921b8ad914",
+      "size_bytes": 6095,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S0_immediate_1x_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S1_risk_half_pct_controls.csv",
+      "sha256": "1fcb46c902818b82ef9b7ee2e3237daca7977bdbbdd5b49deaa17f02478c5e9a",
+      "size_bytes": 5419,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S1_risk_half_pct_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S1_risk_half_pct_equity.csv",
+      "sha256": "3efec1ca63e0e964a8e6222e510398656f937429178a5d64acc26fb799e3ad20",
+      "size_bytes": 185935,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S1_risk_half_pct_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S1_risk_half_pct_events.csv",
+      "sha256": "11ccc220729b1ff2adae45154c87ccad71c43b0f09749cd0401e1ed0d1e97599",
+      "size_bytes": 727,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S1_risk_half_pct_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S1_risk_half_pct_trades.csv",
+      "sha256": "4934ddb2b03f92937109ee9f77318d0c360374432b93b159aeb7173421760adb",
+      "size_bytes": 6239,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S1_risk_half_pct_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S2_stop_ratchet_controls.csv",
+      "sha256": "1fcb46c902818b82ef9b7ee2e3237daca7977bdbbdd5b49deaa17f02478c5e9a",
+      "size_bytes": 5419,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S2_stop_ratchet_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S2_stop_ratchet_equity.csv",
+      "sha256": "3efec1ca63e0e964a8e6222e510398656f937429178a5d64acc26fb799e3ad20",
+      "size_bytes": 185935,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S2_stop_ratchet_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S2_stop_ratchet_events.csv",
+      "sha256": "11ccc220729b1ff2adae45154c87ccad71c43b0f09749cd0401e1ed0d1e97599",
+      "size_bytes": 727,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S2_stop_ratchet_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S2_stop_ratchet_trades.csv",
+      "sha256": "4934ddb2b03f92937109ee9f77318d0c360374432b93b159aeb7173421760adb",
+      "size_bytes": 6239,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S2_stop_ratchet_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S3_isolated_stops_controls.csv",
+      "sha256": "1fcb46c902818b82ef9b7ee2e3237daca7977bdbbdd5b49deaa17f02478c5e9a",
+      "size_bytes": 5419,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S3_isolated_stops_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S3_isolated_stops_equity.csv",
+      "sha256": "3efec1ca63e0e964a8e6222e510398656f937429178a5d64acc26fb799e3ad20",
+      "size_bytes": 185935,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S3_isolated_stops_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S3_isolated_stops_events.csv",
+      "sha256": "11ccc220729b1ff2adae45154c87ccad71c43b0f09749cd0401e1ed0d1e97599",
+      "size_bytes": 727,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S3_isolated_stops_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S3_isolated_stops_trades.csv",
+      "sha256": "4db520875f24037da034a47866ef60ad2f1c2015d40db3f09ad6c5a2dfb1710a",
+      "size_bytes": 6251,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S3_isolated_stops_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S4_fresh_cooldown_controls.csv",
+      "sha256": "1fcb46c902818b82ef9b7ee2e3237daca7977bdbbdd5b49deaa17f02478c5e9a",
+      "size_bytes": 5419,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S4_fresh_cooldown_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S4_fresh_cooldown_equity.csv",
+      "sha256": "3efec1ca63e0e964a8e6222e510398656f937429178a5d64acc26fb799e3ad20",
+      "size_bytes": 185935,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S4_fresh_cooldown_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S4_fresh_cooldown_events.csv",
+      "sha256": "11ccc220729b1ff2adae45154c87ccad71c43b0f09749cd0401e1ed0d1e97599",
+      "size_bytes": 727,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S4_fresh_cooldown_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S4_fresh_cooldown_trades.csv",
+      "sha256": "4db520875f24037da034a47866ef60ad2f1c2015d40db3f09ad6c5a2dfb1710a",
+      "size_bytes": 6251,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S4_fresh_cooldown_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S5_close_only_controls.csv",
+      "sha256": "103c6ef87e062dc22b1aa8150541d4e9a377ebf7017ff7ca7854db7bbcc977c4",
+      "size_bytes": 5059,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S5_close_only_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S5_close_only_equity.csv",
+      "sha256": "025295ac26a6572e563952d2d1e6397d1f715131acaef03111c91785f1ffb995",
+      "size_bytes": 186621,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S5_close_only_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S5_close_only_events.csv",
+      "sha256": "11ccc220729b1ff2adae45154c87ccad71c43b0f09749cd0401e1ed0d1e97599",
+      "size_bytes": 727,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S5_close_only_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S5_close_only_trades.csv",
+      "sha256": "bcd3eb04b04e3e1a46bf3bba9a63938bb268fedd35c3646fad4736f8295696ef",
+      "size_bytes": 5861,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_S5_close_only_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_SMA_comparator_controls.csv",
+      "sha256": "f4706a7dec98c17103b3427e0d0eb1b070d4723e8af01bcf3a20789d5049767b",
+      "size_bytes": 20253,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_SMA_comparator_controls.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_SMA_comparator_equity.csv",
+      "sha256": "48e27eeab0c879fc24e778e760950e082fc4953740110029cde701379a5c38b8",
+      "size_bytes": 188601,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_SMA_comparator_equity.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_SMA_comparator_events.csv",
+      "sha256": "89de994e7dcbafd0a03d57252e1a0c07f52bfee2f3bc0df20a62a550cf3f1899",
+      "size_bytes": 1918,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_SMA_comparator_events.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_SMA_comparator_trades.csv",
+      "sha256": "2a5be7dbfa19b3337a4dea99d29a732f230c29bca9246b1e4e90b22a466c48e6",
+      "size_bytes": 24727,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/exposed_replication_SMA_comparator_trades.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/independent_validation.json",
+      "sha256": "8d88302cf7f516ff573a2e1de59dc8ed28b0a731b5871aa2e7790e2ee755af43",
+      "size_bytes": 15273,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/independent_validation.json"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/pre_run_receipt.json",
+      "sha256": "6b5a36968e74081c2f317549962b7362a8a3624ef1bd4f336a2d56972268addb",
+      "size_bytes": 1529,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/pre_run_receipt.json"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/summary.csv",
+      "sha256": "722bbf93681fa75db8fb70d73e69a9b1df3b93102834d12dac0aba9ee1cddc05",
+      "size_bytes": 8239,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/summary.csv"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/summary.json",
+      "sha256": "00a5ac3b47c64780ea93f71a285ee05b552f4b46576e014d41937f66c8b343f3",
+      "size_bytes": 25002,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/summary.json"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/config.json",
+      "sha256": "61bcbce15d3e516416e838796a559f784ff5be8f77aa217e0934ea35aac6376b",
+      "size_bytes": 2058,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/config.json"
+    },
+    {
+      "path": "experiments/active/exp-eth4h-trend-candidate-20260907-v1/eth4h_trend_r1.pine",
+      "sha256": "9d93839e9bd3ac037d1f2e170688971520f8dd9133080f3e75eeb4094314d08e",
+      "size_bytes": 5862,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/experiments/active/exp-eth4h-trend-candidate-20260907-v1/eth4h_trend_r1.pine"
+    },
+    {
+      "path": "analysis/p0_eth4h_trend_candidate_20260907.md",
+      "sha256": "2f5910e8fb2a6e67fc000dc67067c1f00e58adec69172aaa183150afc41242f5",
+      "size_bytes": 10281,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/analysis/p0_eth4h_trend_candidate_20260907.md"
+    },
+    {
+      "path": "analysis/html/p0_eth4h_trend_candidate_20260907.html",
+      "sha256": "fbf571574b1c920a73b15660efc0f645241def6f1115a3a2c501951189664502",
+      "size_bytes": 169587,
+      "storage_uri": "file:///Users/zhangzc/fable-trading/analysis/html/p0_eth4h_trend_candidate_20260907.html"
+    }
+  ]
+}

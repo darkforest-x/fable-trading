@@ -166,6 +166,9 @@ S4：只改冷却更新时间；S5：只改反向信号只平仓。SMA comparato
 ```
 
 本轮只给出可复核的研究候选，training_eligible=false、production_eligible=false。
+**没有通过项目的收益排序验收门。** 已暴露后段前10%净收益为-10bp、排序p=0.4582，
+月簇匹配对照p=0.2284；不能用连续窗口的显著结果替代后段证据。69笔中只有9笔净盈利，
+最大5笔贡献约80%的正利润；当前证据支持继续验证，不能证明稳定赚钱。
 下一步应先完成同日期原生逐笔核对。若要改变成本/障碍参数或动用holdout，需要Owner另行明确决定。
 
 ## 资金曲线
@@ -178,10 +181,14 @@ S4：只改冷却更新时间；S5：只改反向信号只平仓。SMA comparato
 cd /Users/zhangzc/fable-trading
 .venv/bin/python -m pytest tests/test_pine_allin_eth4h.py tests/test_eth4h_trend_candidate.py -q
 .venv/bin/python -m yoyo.evaluation.eth4h_trend_candidate
+.venv/bin/python -m yoyo.evaluation.eth4h_trend_candidate_verify
 .venv/bin/python scripts/md_to_html.py analysis/p0_eth4h_trend_candidate_20260907.md --out-dir analysis/html
 ```
 
 前提：已有SHA256固定的只读Binance15m文件，见此前ETH4h回放source receipt。已有结果时拒绝覆盖。
+已有账本只重建报告：`.venv/bin/python -m yoyo.evaluation.eth4h_trend_candidate --report-only`。
+市场回放由096dbc6冻结的builder首次执行；全部账本和summary成功落盘后，NumPy布尔的报告序列化失败。
+54508d2加入统一类型转换、report-only与独立核验，仅从保存账本恢复报告，没有重跑或改写经济结果。
 来源：[TradingView策略执行](https://www.tradingview.com/pine-script-docs/v5/concepts/strategies/)、[策略属性](https://www.tradingview.com/support/solutions/43000628599-strategy-properties/)。
 """
     path = ROOT / "analysis/p0_eth4h_trend_candidate_20260907.md"

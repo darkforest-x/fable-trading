@@ -18,6 +18,76 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: eth4h-trend-r1-20260907-manifest
+    artifact_type: manifest
+    role: historical_candidate_research_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: 096dbc665fe8889313a3c87618950d840b7d2da7
+    source_path: experiments/active/exp-eth4h-trend-candidate-20260907-v1/artifact_manifest.json
+    sha256: 7121bf948f4122cf34cd22f74058cffbc92f71cd4691d253a176efbecd29766d
+    size_bytes: 38121
+    storage_uri: repo://experiments/active/exp-eth4h-trend-candidate-20260907-v1/artifact_manifest.json
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: S5 fixed before evaluation; reused history; no native parity. Full ledgers are local and hashed by manifest.
+  - artifact_id: eth4h-trend-r1-20260907-summary
+    artifact_type: manifest
+    role: historical_candidate_research_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: 096dbc665fe8889313a3c87618950d840b7d2da7
+    source_path: experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/summary.json
+    sha256: 00a5ac3b47c64780ea93f71a285ee05b552f4b46576e014d41937f66c8b343f3
+    size_bytes: 25002
+    storage_uri: repo://experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/summary.json
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: S5 fixed before evaluation; reused history; no native parity. Full ledgers are local and hashed by manifest.
+  - artifact_id: eth4h-trend-r1-20260907-qa
+    artifact_type: manifest
+    role: historical_candidate_research_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: 096dbc665fe8889313a3c87618950d840b7d2da7
+    source_path: experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/independent_validation.json
+    sha256: 8d88302cf7f516ff573a2e1de59dc8ed28b0a731b5871aa2e7790e2ee755af43
+    size_bytes: 15273
+    storage_uri: repo://experiments/active/exp-eth4h-trend-candidate-20260907-v1/results/independent_validation.json
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: S5 fixed before evaluation; reused history; no native parity. Full ledgers are local and hashed by manifest.
+  - artifact_id: eth4h-trend-r1-20260907-report
+    artifact_type: report
+    role: historical_candidate_research_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: 096dbc665fe8889313a3c87618950d840b7d2da7
+    source_path: analysis/html/p0_eth4h_trend_candidate_20260907.html
+    sha256: fbf571574b1c920a73b15660efc0f645241def6f1115a3a2c501951189664502
+    size_bytes: 169587
+    storage_uri: repo://analysis/html/p0_eth4h_trend_candidate_20260907.html
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: S5 fixed before evaluation; reused history; no native parity. Full ledgers are local and hashed by manifest.
+  - artifact_id: eth4h-trend-r1-20260907-pine
+    artifact_type: config
+    role: historical_candidate_research_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: 096dbc665fe8889313a3c87618950d840b7d2da7
+    source_path: experiments/active/exp-eth4h-trend-candidate-20260907-v1/eth4h_trend_r1.pine
+    sha256: 9d93839e9bd3ac037d1f2e170688971520f8dd9133080f3e75eeb4094314d08e
+    size_bytes: 5862
+    storage_uri: repo://experiments/active/exp-eth4h-trend-candidate-20260907-v1/eth4h_trend_r1.pine
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: S5 fixed before evaluation; reused history; no native parity. Full ledgers are local and hashed by manifest.
   - artifact_id: btcusdtp-owner-pending-v38-config
     artifact_type: config
     role: v38_entry_clock_non_economic_evidence
