@@ -37,6 +37,23 @@ experiments:
     notes: 2020 warmup; end2026-05-01 before holdout. 76tests and62ledger checks. Gross
       win71.01% becomes net14.49%;5winners89.73% of positive currency PnL. 2025-reset12trades;
       matched p.0939. QA and manifest retained; no raw replay rerun.
+  - experiment_id: exp-btcusdtp-owner-k1k2-delayed-entry-20260907-v39
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ab872f0"
+    status: active
+    question: Does confirmation before exposure within one original decision-hour improve original-request net returns and matched excess?
+    single_variable: Immediate versus delayed-confirmed entry; original absolute72h horizon, stop, native5transition exit and20bp cost unchanged.
+    result: Pending frozen economic replay; new research lifetime is not an optimal parameter or V38 audit expiry.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: null
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Same approved2023-2024 original63case108controls36three-control groups.
+      Entry strictly beforeE+60minutes; integerremainingminutespreserveabsoluteE+72h.
+      Plan experiments/active/exp-btcusdtp-owner-k1k2-delayed-entry-20260907-v39/PROJECT_PLAN.md.
   - experiment_id: exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38
     source_repo: darkforest-x/fable-trading
     source_commit: "3651944"

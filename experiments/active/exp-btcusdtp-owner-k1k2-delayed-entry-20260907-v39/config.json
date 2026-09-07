@@ -1,0 +1,28 @@
+{
+  "experiment_id":"exp-btcusdtp-owner-k1k2-delayed-entry-20260907-v39",
+  "output_dir":"data/owner_k1k2_delayed_entry_v39",
+  "baseline_summary":"experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/summary.json",
+  "baseline_summary_sha256":"ed8eecd0bcd6a715baf0a21d284f0c4ae8ac6a4626685d9daab224f76e4043ed",
+  "policy":{"management_minutes":5,"exit_mode":"transition_colour","confirmations":1,"max_hours":72,"cost_fraction":0.002},
+  "entry_lifetime_minutes":60,
+  "entry_end_inclusive":false,
+  "absolute_horizon_from_original_request":true,
+  "flow_gate":false,
+  "draws":9999,
+  "seed":20260906,
+  "builder_paths":[
+    "yoyo/evaluation/k1k2_delayed_entry.py",
+    "yoyo/evaluation/owner_k1k2_delayed_entry.py",
+    "tests/test_k1k2_delayed_entry.py",
+    "tests/test_owner_k1k2_delayed_entry.py",
+    "yoyo/data/k1k2_pending_entry.py",
+    "yoyo/evaluation/owner_k1k2_pending_entry_audit.py",
+    "yoyo/evaluation/owner_k1k2_genuine_flow.py",
+    "yoyo/evaluation/owner_k1k2_transition_exit.py",
+    "yoyo/layers/l3_backtest/hourly_impulse.py",
+    "yoyo/data/hourly_impulse.py"
+  ],
+  "holdout_evaluated":false,
+  "training_eligible":false,
+  "production_eligible":false
+}
