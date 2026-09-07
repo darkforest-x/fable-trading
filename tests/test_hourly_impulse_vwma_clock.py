@@ -149,6 +149,8 @@ def test_independent_auditor_decimal_labels_and_cost_tamper():
     request=pd.DataFrame([dict(event_id="x",decision_time=time[0],direction=1,fold="2023H1")])
     label=build_fixed_clock_labels(raw,request,{"2023H1":("2023-01-01T00:00Z","2023-07-01T00:00Z")})
     assert auditor().check_labels(raw,request,label)==4
+    damaged=label.copy();damaged.loc[:,["entry_open","endpoint_open"]]=-999
+    with pytest.raises(ValueError,match="Numeric"):auditor().check_labels(raw,request,damaged)
     label.loc[1,"cost_threshold_markout"]+=.002
     with pytest.raises(ValueError,match="Numeric"):auditor().check_labels(raw,request,label)
 

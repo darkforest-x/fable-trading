@@ -5,6 +5,7 @@ endpoints and full grid independently rebuild labels. NumPy PCG64 is the shared
 numeric primitive; neither sampling, label nor statistical builder is called.
 """
 from pathlib import Path
+import argparse
 from decimal import Decimal
 import hashlib
 import json
@@ -51,6 +52,10 @@ def check_labels(open_rows,requests,labels):
                     want=getattr(row,key);got=out[key]
                     if not ((pd.isna(want) and pd.isna(got)) or got==want):raise ValueError("Label metadata detached: "+key)
             if out.n_expected!=len(grid):raise ValueError("Expected inclusive5m grid changed")
+            for field,when in (("entry_open",t),("endpoint_open",endpoint)):
+                quote=prices.get(when)
+                expected=float(quote) if reason!="endpoint_outside_fold" and quote is not None and quote.is_finite() and quote>0 else np.nan
+                equal(out[field],expected)
             if reason!="endpoint_outside_fold":equal(out.n_observed,sum(x is not None for x in window))
             else:equal(out.n_observed,np.nan)
             if reason=="known":
@@ -124,13 +129,18 @@ def check_statistics(cases,controls,pairs,inference):
     evidence=all(a[n]["mean"]>0 and a[n]["monthly_cluster"]["ci95"][0]>0 and a[n]["monthly_cluster"]["one_sided_p"]<.01 for n in ("all_case","paired_excess"))
     d=inference["decision"]
     if (d["primary_coverage_passed"],d["four_fold_case_means_positive"],d["both_primary_evidence_gates_passed"],d["exploratory_continue"])!=(coverage,positive,evidence,coverage and positive and evidence):raise ValueError("Decision differs")
+    expected_status="inconclusive_coverage" if not coverage else "exploratory_support" if positive and evidence else "not_supported"
+    if d["status"]!=expected_status or d["profitability_accepted"] or d["production_eligible"]:raise ValueError("Decision status/scope mismatch")
     return len(pairs)
 
 
 def main():
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument("--out",type=Path,default=E/"audit.json");args=parser.parse_args()
+    if args.out.exists():raise FileExistsError("Preserve earlier audits")
     own=Path(__file__).resolve();commit=subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip()
     if subprocess.check_output(["git","show",commit+":"+str(own.relative_to(ROOT))],cwd=ROOT)!=own.read_bytes():raise ValueError("Commit auditor first")
     r=E/"results";summary=json.loads((r/"summary.json").read_text());before=sha(r/"summary.json")
+    if (r/"failure.json").exists():raise ValueError("Failed economic run is not evidence")
     config=json.loads((E/"config.json").read_text());frozen=json.loads((r/"sampling_frozen.json").read_text())
     hashes={r/name:expected for name,expected in summary["output_hashes"].items()}
     hashes.update({ROOT/path:expected for path,expected in config["inputs"].items()})
@@ -162,6 +172,10 @@ def main():
     cases,controls=read("case_labels"),read("control_labels")
     labels=check_labels(raw,case_requests,cases)+check_labels(raw,control_requests,controls)
     inference=json.loads((r/"statistics.json").read_text());pair_count=check_statistics(cases,controls,read("paired_labels"),inference)
+    if summary["decision"]!=inference["decision"] or summary["status"]!=inference["decision"]["status"]:raise ValueError("Summary detached from inferred decision")
+    diagnostic_path=r/"diagnostics_before_inference.json";diagnostics=json.loads(diagnostic_path.read_text())
+    if sha(diagnostic_path)!=inference["diagnostics_sha256"]:raise ValueError("Diagnostic hash changed")
+    if not pd.Timestamp(frozen["at"])<pd.Timestamp(diagnostics["at"])<pd.Timestamp(inference["generated_at"])<=pd.Timestamp(summary["generated_at"]):raise ValueError("Diagnostic/inference chronology failed")
     for path,expected in hashes.items():
         if sha(path)!=expected:raise ValueError("Evidence drift during audit")
     if sha(r/"summary.json")!=before:raise ValueError("Summary drift")
@@ -169,8 +183,9 @@ def main():
                 labels_rebuilt=labels,pairs_rebuilt=pair_count,seeded_controls_rebuilt=allocated,
                 saved_open_rows=len(raw),hashes_verified=len(hashes),builder_sources_verified=len(summary["sources"]),
                 raw_archive_read=False,post2024_prices_read=False,independent_of_strategy_helpers=True,
+                saved_endpoint_quotes_verified=True,summary_decision_verified=True,diagnostic_hash_and_order_verified=True,
                 limitation="Saved evidence audit,not raw exchange authenticity or stop-managed execution validation.")
-    with (E/"audit.json").open("x") as handle:json.dump(result,handle,indent=2)
+    with args.out.open("x") as handle:json.dump(result,handle,indent=2)
     print(json.dumps(result))
 
 
