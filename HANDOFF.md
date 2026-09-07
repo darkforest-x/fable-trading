@@ -2,32 +2,33 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## YOLO 当前进度（2026-09-07：先复用历史人工标签，再安排新增复标）
+## YOLO 当前进度（2026-09-07：2513个历史人工框细化建议已导入）
 
-Owner提醒曾审核一万多图后，完成只读谱系核查：历史canonical审计12565唯一人工图，
-当前方向表2525框（short1361/long1152/skip12），旧short正例1345；两份现存SHA与旧报告一致。
-Gold500对应方向表in_sample的500行（257/236/7）；另有176图⭐登记，不能混成同一批金标。
-当前Grade-A的1043正事件来自自动筛选，不能当作旧1345人工正例或逐事件Owner Gold。
-工作优先级调整：先联结原LS框/方向/⭐并计算与当前事件的覆盖及冲突，再补语义变化、
-派生核心和新事件；不要默认要求Owner把4172事件全部从空白重画。原框人工确认要保留，
-中央一半/4–7根派生核心不能冒领逐框确认；未入选正例不自动作为负例。
-本轮未改LS任务/数据/训练资格；原项目仍可用。报告：
-analysis/html/p1_yolo_historical_label_reuse_20260907.html。
+Owner确认复用历史标签，并要求细化框。先冻结f2d3acb再构建：2513原人工框
+（short1361/long1152），104精确⭐排前；12个skip另记，17组同范围别名保留。
+新Label Studio项目77：http://127.0.0.1:8081/projects/77/data 。点Label All Tasks，
+建议框已带入，可直接提交或拖动；右图完整未来40根，原人工框和编号对照可展开。
+本版只按既有中央4–7根规则细化蜡烛+六均线包络，未逐图重判启动首根。
+原人工确认/方向/⭐保留；新派生框sample_owner_geometry_confirmed=false，未写回训练。
+主画布、原参考、编号对照、future_only分开。2510原长图实际时钟通过；3张越holdout
+在打开前拦截，用安全画布替代。2513全部future40，10052图独立解码+SHA核对。
+121聚焦测试通过；真实Chrome页面选框出现调整手柄，4图加载；未伪造人工提交。
+重复导入新增0/复用2513，原项目76（4172事件）/74（276补充题）和历史答案保留。
 
-Owner改用Label Studio手工打标，并纠正只导入240抽样的范围。当前按事件组覆盖完整
-32000张训练/开发图：4172事件（1043旧正、3129旧负），另240候选+36重复=276补充题。
-主项目 http://127.0.0.1:8081/projects/76/data ；补充 http://127.0.0.1:8081/projects/74/data 。
-点Label All Tasks，左图选多头/空头拖框，右图看未来；无目标/拿不准可选，Submit保存。
-4172代表原PNG与前文PNG不变；4169完整未来40根，另外3件13/30/33根诚实截短。
-原32000图/标签SHA前后核对、4172像素重放、12516PNG独立解码、32000坐标映射全部通过。
-新项目预测0；重复导入新增0。原50历史LS项目未改；QA提交只在临时项目，已删除。
-当前pack datasets/grade_a_manual_events_20260907_v1/，future_only独立manifest、无labels。
-原240候选两版页面/草稿仍保留，新LS答案协议manual_from_blank_future40_v1，不能混充旧盲审。
-源码fea34e1先冻结，79聚焦测试通过；Label Studio native根是reports，专用软链已注册资源。
-实验 experiments/active/exp-15m-grade-a-labelstudio-manual-20260907-v1/；QA和导入收据在results。
-报告 analysis/html/p1_15m_grade_a_labelstudio_manual_20260907.html。
-完成上述旧标注覆盖核查后，读取真实Owner标注并报分歧；回写须经各图ChartTransform和包含关系检查；
-扩大未来后的split依赖需重审。无新训练/推理/holdout OHLCV，训练和生产资格仍false。
+覆盖审计源码d21980b先冻结，只读metadata：当前4172中OKX596/Binance3576，不跨venue
+硬联结；旧框与当前核心5同向正、0反向、1负例交集。全可见负图另发现2候选冲突事件：
+NIGHT的8张空标签图完整含旧7根核心；QTUM的7张与旧宽框交集，其中2张完整含旧4根核心。
+共3旧框/2负事件/15变体，QTUM两旧框不可当两独立事件。时间相交不等于语义同一，
+未自动翻标签。后续合并训练集前必须处理这些冲突，不能只查负例pseudo-core。
+
+Pack：datasets/owner_box_refinement_20260907_v1/；实验与收据：
+experiments/active/exp-owner-box-refinement-20260907-v1/（results含覆盖明细、物理/UI检查与导入收据）。
+交付报告：analysis/html/p1_yolo_owner_box_refinement_20260907.html。
+历史12565人工图、1345旧short正例、500方向批次/176图⭐口径与证据，仍见
+analysis/html/p1_yolo_historical_label_reuse_20260907.html，不与当前1043自动正事件混称。
+下一步先审项目77前104个原⭐及争议核心，读取真实Owner新答案，再逐图回写独立新数据版本。
+旧train/val只作来源标记，未来上下文与新旧合并需要重新审时间依赖。无新训练、模型推理、
+holdout OHLCV、promote；训练和生产资格仍false。
 
 ## K1/K2 当前会话进度（2026-09-07 — V39 等确认减少交易，但仍亏损）
 

@@ -6543,17 +6543,34 @@ experiments:
 
   - experiment_id: exp-owner-box-refinement-20260907-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 1edd0d989f5e78bc68cfb10d6eb11ed4ceacd6e4
+    source_commit: f2d3acbd6a8fb010265d3ed08ee5cec76837ffd5
     status: active
-    question: Can historical Owner boxes be reused as editable geometry suggestions while preserving source labels and separating future context?
-    single_variable: Same central-core bar interval with explicit candle and six-MA envelope geometry; source identities and directions unchanged.
-    result: Preregistered after Owner authorized box refinement; source freeze and full review-pack verification pending.
+    question: Can historical Owner boxes be reused as editable geometry suggestions while preserving source labels and separating future
+      context?
+    single_variable: Same central-core bar interval with explicit candle and six-MA envelope geometry; source identities and directions
+      unchanged.
+    result: 2513 editable suggestions imported to Label Studio project77; 104 exact-star first, all future40 complete. 10052 images verified;
+      idempotent reimport adds0. Two current negative events have visible overlap with historical boxes and await review.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts:
+    - owner-box-refinement-20260907-report
+    - owner-box-refinement-20260907-manifest
+    - owner-box-refinement-20260907-tasks
+    - owner-box-refinement-20260907-build-receipt
+    - owner-box-refinement-20260907-future-manifest
+    - owner-box-refinement-20260907-physical-qa
+    - owner-box-refinement-20260907-geometry-summary
+    - owner-box-refinement-20260907-browser-qa
+    - owner-box-refinement-20260907-import-receipt
+    - owner-box-refinement-20260907-reimport-check
+    - owner-box-refinement-20260907-current-event-coverage
     reuse_allowed: false
-    notes: Includes all 2513 LONG/SHORT source boxes with 104 exact-star references; 12 skipped rows retained separately. No automatic onset, semantic reclassification, training or promotion. New LS predictions remain distinct from human annotations and the prior blank projects.
+    notes: Owner authorized geometry refinement. No per-image onset relocation or new Gold; original directions and17 candidate alias
+      groups preserved. Three unsafe historical long images blocked before opening. Training/production remain false; source freeze f2d3acb
+      and metadata-audit freeze d21980b precede outputs.
+    canonical_report: analysis/html/p1_yolo_owner_box_refinement_20260907.html
 
   - experiment_id: exp-imacd-profit-mechanism-20260907-v2
     source_repo: darkforest-x/fable-trading

@@ -19261,3 +19261,169 @@ artifacts:
     production_eligible: false
     notes: Owner authorized OKX all dates; four configurations each use1. Fixed34/9 and20bp; no funding/margin model.
       No Holm-adjusted 2025 result passes p<.01.
+
+  - artifact_id: owner-box-refinement-20260907-report
+    artifact_type: report
+    role: historical_owner_geometry_review_not_training
+    source_repo: darkforest-x/fable-trading
+    source_commit: f2d3acbd6a8fb010265d3ed08ee5cec76837ffd5
+    source_path: analysis/html/p1_yolo_owner_box_refinement_20260907.html
+    sha256: bc1f3e49e0cb45a3728bd996ae1d114ada107119fc8cabbc314142256b4ae9b7
+    size_bytes: 15867
+    storage_uri: repo://analysis/html/p1_yolo_owner_box_refinement_20260907.html
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-04T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: 2513 original Owner identities retained; suggestions await human confirmation. Future40 is review-only. Existing training labels
+      and older LS projects unchanged.
+  - artifact_id: owner-box-refinement-20260907-manifest
+    artifact_type: manifest
+    role: historical_owner_geometry_review_not_training
+    source_repo: darkforest-x/fable-trading
+    source_commit: f2d3acbd6a8fb010265d3ed08ee5cec76837ffd5
+    source_path: datasets/owner_box_refinement_20260907_v1/manifest.jsonl
+    sha256: 7588f9c62f26a66986f747f9dd27dff8f6c216a6b26f307e705cba2880c3a641
+    size_bytes: 10957796
+    storage_uri: repo://datasets/owner_box_refinement_20260907_v1/manifest.jsonl
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-04T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: 2513 original Owner identities retained; suggestions await human confirmation. Future40 is review-only. Existing training labels
+      and older LS projects unchanged.
+  - artifact_id: owner-box-refinement-20260907-tasks
+    artifact_type: manifest
+    role: historical_owner_geometry_review_not_training
+    source_repo: darkforest-x/fable-trading
+    source_commit: f2d3acbd6a8fb010265d3ed08ee5cec76837ffd5
+    source_path: datasets/owner_box_refinement_20260907_v1/tasks.json
+    sha256: bc89a4d5e41003f1bf191013d60ba76d84fafbd67a28e17c2dfd3f0c6bc6697a
+    size_bytes: 4759474
+    storage_uri: repo://datasets/owner_box_refinement_20260907_v1/tasks.json
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-04T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: 2513 original Owner identities retained; suggestions await human confirmation. Future40 is review-only. Existing training labels
+      and older LS projects unchanged.
+  - artifact_id: owner-box-refinement-20260907-build-receipt
+    artifact_type: manifest
+    role: historical_owner_geometry_review_not_training
+    source_repo: darkforest-x/fable-trading
+    source_commit: f2d3acbd6a8fb010265d3ed08ee5cec76837ffd5
+    source_path: datasets/owner_box_refinement_20260907_v1/admin/build_receipt.json
+    sha256: 315d7eb5e5c0656a0c9d212e98ea0155bb20b95c4a975ca45b36d2a688a8b3f1
+    size_bytes: 2779
+    storage_uri: repo://datasets/owner_box_refinement_20260907_v1/admin/build_receipt.json
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-04T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: 2513 original Owner identities retained; suggestions await human confirmation. Future40 is review-only. Existing training labels
+      and older LS projects unchanged.
+  - artifact_id: owner-box-refinement-20260907-future-manifest
+    artifact_type: manifest
+    role: historical_owner_geometry_review_not_training
+    source_repo: darkforest-x/fable-trading
+    source_commit: f2d3acbd6a8fb010265d3ed08ee5cec76837ffd5
+    source_path: datasets/owner_box_refinement_20260907_v1/future_only/manifest.json
+    sha256: 32bf42105f3f7cf5ebb5877d81fb634799bb97d0e266f9d38d4faa8566779c8b
+    size_bytes: 2606357
+    storage_uri: repo://datasets/owner_box_refinement_20260907_v1/future_only/manifest.json
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-04T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: 2513 original Owner identities retained; suggestions await human confirmation. Future40 is review-only. Existing training labels
+      and older LS projects unchanged.
+  - artifact_id: owner-box-refinement-20260907-physical-qa
+    artifact_type: manifest
+    role: historical_owner_geometry_review_not_training
+    source_repo: darkforest-x/fable-trading
+    source_commit: f2d3acbd6a8fb010265d3ed08ee5cec76837ffd5
+    source_path: experiments/active/exp-owner-box-refinement-20260907-v1/results/physical_qa.json
+    sha256: 8162bc53d77ce70ef6305043e88502bc176281bc3797119a3ff810a171c8cac4
+    size_bytes: 765
+    storage_uri: repo://experiments/active/exp-owner-box-refinement-20260907-v1/results/physical_qa.json
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-04T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: 2513 original Owner identities retained; suggestions await human confirmation. Future40 is review-only. Existing training labels
+      and older LS projects unchanged.
+  - artifact_id: owner-box-refinement-20260907-geometry-summary
+    artifact_type: manifest
+    role: historical_owner_geometry_review_not_training
+    source_repo: darkforest-x/fable-trading
+    source_commit: f2d3acbd6a8fb010265d3ed08ee5cec76837ffd5
+    source_path: experiments/active/exp-owner-box-refinement-20260907-v1/results/geometry_summary.json
+    sha256: ace2ccd9b6d808af66e8d9f955e3dddcaf94247d783dbb5827a24b7d83d3843f
+    size_bytes: 716
+    storage_uri: repo://experiments/active/exp-owner-box-refinement-20260907-v1/results/geometry_summary.json
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-04T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: 2513 original Owner identities retained; suggestions await human confirmation. Future40 is review-only. Existing training labels
+      and older LS projects unchanged.
+  - artifact_id: owner-box-refinement-20260907-browser-qa
+    artifact_type: manifest
+    role: historical_owner_geometry_review_not_training
+    source_repo: darkforest-x/fable-trading
+    source_commit: f2d3acbd6a8fb010265d3ed08ee5cec76837ffd5
+    source_path: experiments/active/exp-owner-box-refinement-20260907-v1/results/browser_qa.json
+    sha256: ecdec0241542d0c0a207b58e39b8f0d8f73a8ea4fa2f984a139ca91cfda51efe
+    size_bytes: 909
+    storage_uri: repo://experiments/active/exp-owner-box-refinement-20260907-v1/results/browser_qa.json
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-04T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: 2513 original Owner identities retained; suggestions await human confirmation. Future40 is review-only. Existing training labels
+      and older LS projects unchanged.
+  - artifact_id: owner-box-refinement-20260907-import-receipt
+    artifact_type: manifest
+    role: historical_owner_geometry_review_not_training
+    source_repo: darkforest-x/fable-trading
+    source_commit: f2d3acbd6a8fb010265d3ed08ee5cec76837ffd5
+    source_path: experiments/active/exp-owner-box-refinement-20260907-v1/results/import_receipt.json
+    sha256: 6615e447613b9f6ddc221055232bf2442793895d8fb11a96b2f1b0a3a3f639d9
+    size_bytes: 100814
+    storage_uri: repo://experiments/active/exp-owner-box-refinement-20260907-v1/results/import_receipt.json
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-04T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: 2513 original Owner identities retained; suggestions await human confirmation. Future40 is review-only. Existing training labels
+      and older LS projects unchanged.
+  - artifact_id: owner-box-refinement-20260907-reimport-check
+    artifact_type: manifest
+    role: historical_owner_geometry_review_not_training
+    source_repo: darkforest-x/fable-trading
+    source_commit: f2d3acbd6a8fb010265d3ed08ee5cec76837ffd5
+    source_path: experiments/active/exp-owner-box-refinement-20260907-v1/results/reimport_check.json
+    sha256: fe55bb0f1519083a7b3a5f09459a54c559632f87256189976ddd8fbdff430416
+    size_bytes: 100814
+    storage_uri: repo://experiments/active/exp-owner-box-refinement-20260907-v1/results/reimport_check.json
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-04T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: 2513 original Owner identities retained; suggestions await human confirmation. Future40 is review-only. Existing training labels
+      and older LS projects unchanged.
+  - artifact_id: owner-box-refinement-20260907-current-event-coverage
+    artifact_type: manifest
+    role: historical_owner_geometry_review_not_training
+    source_repo: darkforest-x/fable-trading
+    source_commit: d21980b536a6755a2f5e894cdaa6c234881d0a6b
+    source_path: experiments/active/exp-owner-box-refinement-20260907-v1/results/current_event_coverage.json
+    sha256: cf4dab936de2a38612e830de5f1774de28ca1cceb24b95456b0ab21cbb0610cc
+    size_bytes: 15062444
+    storage_uri: repo://experiments/active/exp-owner-box-refinement-20260907-v1/results/current_event_coverage.json
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-04T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: 2513 original Owner identities retained; suggestions await human confirmation. Future40 is review-only. Existing training labels
+      and older LS projects unchanged.
