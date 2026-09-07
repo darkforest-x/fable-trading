@@ -231,7 +231,7 @@ def derived_tables(e,cache):
 
 
 def setup_charts():
-    plt.rcParams.update({'font.family':['Arial Unicode MS','PingFang SC','DejaVu Sans'],
+    plt.rcParams.update({'font.family':['Arial Unicode MS','DejaVu Sans'],
         'font.size':11,'axes.unicode_minus':False,'axes.spines.top':False,'axes.spines.right':False,
         'text.color':INK,'axes.labelcolor':INK,'xtick.color':INK,'ytick.color':INK,
         'figure.facecolor':'white','axes.facecolor':'white','savefig.facecolor':'white'})
@@ -244,9 +244,9 @@ def case_chart(e,cache,fcache,eid,filename,description):
     left=max(0,int(r.signal_i)-max(60,int(r.zero_before)+12));right=min(len(b)-1,int(q.exit_i.max())+12)
     g=b.iloc[left:right+1];ff=f.iloc[left:right+1];x=mdates.date2num(g.index.to_pydatetime());w=int(r.minutes)/1440*.67
     fig,(ax,ai)=plt.subplots(2,1,figsize=(13,7.8),height_ratios=[2.4,1],sharex=True)
-    fig.subplots_adjust(left=.085,right=.98,bottom=.15,top=.80,hspace=.08)
+    fig.subplots_adjust(left=.085,right=.98,bottom=.15,top=.78,hspace=.22)
     fig.text(.085,.955,description,fontsize=18,fontweight='bold')
-    fig.text(.085,.912,f'OKX {r.symbol}USDT 永续 · 4小时 · 零轴持续 {int(r.zero_before)} 根 · '+('做多' if r.side==1 else '做空')+' · 日期 UTC',fontsize=11)
+    fig.text(.085,.912,f'OKX {r.symbol}USDT 永续 · 4小时 · 零轴持续 {int(r.zero_before)} 根 · '+('做多' if r.side==1 else '做空')+f' · 信号 {r.signal_time[:10]}（UTC）',fontsize=11)
     labels=[]
     for key,letter in [('departure_signal','B'),('departure_neutral','C'),('departure_opposite','D')]:
         z=q.loc[key];labels.append(f'{letter} {dict(B="反向交叉",C="主线回零",D="主线反向")[letter]} {z.net_bp/100:+.2f}%')
@@ -270,8 +270,8 @@ def case_chart(e,cache,fcache,eid,filename,description):
     ai.bar(x,ff.md,width=w,color=colors,edgecolor=BLUE,linewidth=.55,label='md 主线')
     ai.plot(x,ff.sb,color=ORANGE,lw=1.2,label='sb 信号线')
     ai.axhline(0,color=INK,lw=.8);ai.set_ylabel('IMACD\nUSDT');ax.set_ylabel('价格 / USDT')
-    ax.legend(loc='upper left',ncol=4,fontsize=9,frameon=False)
-    ai.legend(loc='upper left',ncol=2,fontsize=9,frameon=False)
+    ax.legend(loc='lower left',bbox_to_anchor=(0,1.01),ncol=4,fontsize=9,frameon=False)
+    ai.legend(loc='lower left',bbox_to_anchor=(0,1.01),ncol=2,fontsize=9,frameon=False)
     ai.xaxis.set_major_locator(mdates.AutoDateLocator(minticks=5,maxticks=9))
     ai.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
     fig.text(.085,.06,f'灰带为入场前已知零轴状态；后续走势用于事后解释。C 持仓最大浮盈 {r.mfe_bp/100:.2f}%，最大逆行 {r.mae_bp/100:.2f}%。',fontsize=10)
@@ -335,15 +335,15 @@ def write_report(s,g,cohorts,pairs,qa,paths,cases,manifest,e):
     add('## 找到的两组候选形态\n\n两组来自预先声明的零带根数分组，报告看完全部周期与分组后重点展示，属于探索性选择。三段同号不等于三段都从未见过，更不等于独立终验。')
     rows=[]
     for r in cohorts.itertuples():
-        rows.append([f'{r.symbol}4h {r.rule}',FN[r.fold],r.n,pc(r.mean_net_bp),pc(r.median_net_bp),num(r.win_pct)+'%',num(r.pf),pc(r.controls_mean_net_bp),pc(r.excess_bp),num(r.p,4)])
-    add(table(['形态','时段','n','每次净均值','净中位数','胜率','PF','随机对照均值','超额均值','月聚类p（未校正）'],rows))
-    add('PF=全部正收益之和/全部负收益绝对值之和。这里随机对照与信号使用相同退出算法、同成本。完整匹配样本数见候选CSV；缺少3个对照的事件不参与超额推断。')
+        rows.append([f'{r.symbol}4h {r.rule}',FN[r.fold],r.n,pc(r.mean_net_bp),pc(r.median_net_bp),num(r.win_pct)+'%',num(r.pf),r.matched_n,pc(r.matched_case_mean_net_bp),pc(r.controls_mean_net_bp),pc(r.excess_bp),num(r.p,4)])
+    add(table(['形态','时段','全部n','全部净均值','净中位数','胜率','PF','匹配n','匹配信号均值','随机均值','超额均值','月聚类p（未校正）'],rows))
+    add('PF=全部正收益之和/全部负收益绝对值之和。随机对照与信号使用相同退出算法、同成本。**超额=匹配信号均值−随机均值，不一定等于全部信号均值−随机均值**；缺少3个对照的事件不参与超额推断。以下完整周期附表同理，全部与匹配分母明确区分。')
     rows=[]
     for symbol in ['BTC','ETH']:
         for name in ['2_to_8','9_plus']:
             q=g[(g.symbol==symbol)&(g.minutes==240)&(g.policy=='departure_neutral')&(g.feature=='zero_before')&(g['group']==name)].set_index('fold')
-            rows.append([symbol,'2–8根' if name=='2_to_8' else '≥9根']+[f'{pc(q.loc[f,"mean_net_bp"])} (n={int(q.loc[f,"n"])}) / 对照 {pc(q.loc[f,"controls_mean_net_bp"])}' for f in FN])
-    add(table(['币种4h','零带长度','2023–24 净均值/对照','2025 净均值/对照','2026H1 净均值/对照'],rows))
+            rows.append([symbol,'2–8根' if name=='2_to_8' else '≥9根']+[f'{pc(q.loc[f,"mean_net_bp"])} (n={int(q.loc[f,"n"])}) / 匹配 {pc(q.loc[f,"matched_case_mean_net_bp"])} / 随机 {pc(q.loc[f,"controls_mean_net_bp"])} (m={int(q.loc[f,"matched_n"])})' for f in FN])
+    add(table(['币种4h','零带长度','2023–24 全部/匹配/随机','2025 全部/匹配/随机','2026H1 全部/匹配/随机'],rows))
     add('**不能把“横得越久、爆发越强”一概而论。** ETH偏长零带，BTC偏短零带，是本次更值得继续追踪的差异。BTC长零带三段净均值都负。这个发现不证明币种有永恒属性，也没有排除少数历史行情驱动结果。')
     add('## 大钱来自少数大波段：这对执行意味着什么')
     rows=[]
@@ -369,13 +369,13 @@ def write_report(s,g,cohorts,pairs,qa,paths,cases,manifest,e):
     for symbol in ['BTC','ETH']:
         for minutes in [15,30,60,120,240,360,720,1440]:
             q=s[(s.symbol==symbol)&(s.minutes==minutes)&(s.policy=='departure_neutral')].set_index('fold')
-            rows.append([symbol,f'{minutes}m' if minutes<60 else f'{minutes//60}h']+[f'{pc(q.loc[f,"mean_net_bp"])} (n={int(q.loc[f,"n"])}) / {pc(q.loc[f,"controls_mean_net_bp"])}' for f in FN])
-    add(table(['币种','周期','2023–24 净/随机','2025 净/随机','2026H1 净/随机'],rows))
-    add('15m/30m的均值大多不足以覆盖20bp，频繁切换对这套持有逻辑不利。4h出现可解释的形态条件；BTC12h/1d全母群三段正均值，但信号少，而且BTC日线2025随机对照更好，不能据绝对盈利宣布优势。ETH日线2025只有3次信号，其大收益不能外推。6h/12h/1d可作为低频研究对象，尚无足够证据用来给4h信号加过滤；多周期共振本轮未回测。')
+            rows.append([symbol,f'{minutes}m' if minutes<60 else f'{minutes//60}h']+[f'{pc(q.loc[f,"mean_net_bp"])} (n={int(q.loc[f,"n"])}) / {pc(q.loc[f,"matched_case_mean_net_bp"])} / {pc(q.loc[f,"controls_mean_net_bp"])} (m={int(q.loc[f,"matched_n"])})' for f in FN])
+    add(table(['币种','周期','2023–24 全部/匹配/随机','2025 全部/匹配/随机','2026H1 全部/匹配/随机'],rows))
+    add('15m/30m多数净均值为负，20bp成本后难形成优势，频繁切换对这套持有逻辑不利。4h出现可解释的形态条件；BTC12h/1d全母群三段正均值，但信号少，而且BTC日线2025随机对照更好，不能据绝对盈利宣布优势。ETH日线2025只有3次信号，其大收益不能外推。6h/12h/1d可作为低频研究对象，尚无足够证据用来给4h信号加过滤；多周期共振本轮未回测。')
     rows=[]
     for r in s[(s.minutes<15)&(s.policy=='departure_neutral')].itertuples():
-        rows.append([r.symbol,f'{r.minutes}m',r.observed_start[:16],r.observed_end_close[:16],r.n,pc(r.mean_net_bp),pc(r.controls_mean_net_bp),pc(r.excess_bp)])
-    add(table(['币种','周期','开始UTC','结束UTC','n','每次净均值','随机均值','超额'],rows))
+        rows.append([r.symbol,f'{r.minutes}m',r.observed_start[:16],r.observed_end_close[:16],r.n,pc(r.mean_net_bp),r.matched_n,pc(r.matched_case_mean_net_bp),pc(r.controls_mean_net_bp),pc(r.excess_bp)])
+    add(table(['币种','周期','开始UTC','结束UTC','n','全部净均值','匹配n','匹配均值','随机均值','超额'],rows))
     add('小周期缓存范围较短。5m在2025仅有12月下旬，不能称2025全年验证。BTC1m缺失；周线可用总根数不够340根预热；没有伪造这些结果。当前覆盖1m（仅ETH）、3m、5m、15m、30m、1h、2h、4h、6h、12h、1d；未声称覆盖TradingView所有自定义周期。')
     add('''## 和你的Notion怎样连接\n\n最直接相关的是[交易系统-更新中](https://app.notion.com/p/2ac8856479af8063b17bc02256e564a9)里“回测Impulse MACD [LazyBear] + 均线密集”的待办。当前找出的零轴启动，是把这个想法中IMACD的一半写成了可执行规则；尚未把均线密集量化，因此没有把它称为对你完整系统的验证。
 
@@ -419,8 +419,8 @@ def write_report(s,g,cohorts,pairs,qa,paths,cases,manifest,e):
     add('## 完整结果附表：基线、全部周期与失败结果\n\n全部为每事件统计；D事件可重叠，不作账户收益累加。净均值单位%，AUC为固定强度单特征；Top10为强度最高10%的毛/净均值。p为同组匹配超额的月聚类单侧置换，p-H为2025全72单元Holm；其他段N/A。CSV还含区间、单仓统计及尾部依赖。')
     rows=[]
     for r in s.itertuples():
-        rows.append([r.symbol,str(r.minutes)+'m',FN[r.fold],{'cross_signal':'A','departure_signal':'B','departure_neutral':'C','departure_opposite':'D'}[r.policy],r.n,pc(r.mean_net_bp),num(r.win_pct),num(r.pf),pc(r.controls_mean_net_bp),pc(r.excess_bp),num(r.p,4),num(r.p_holm_replication,4),num(r.strength_auc,3),pc(r.score_top_decile_gross_bp)+' / '+pc(r.score_top_decile_net_bp),num(r.score_top_decile_win_pct),pc(r.score_top_decile_excess_bp)])
-    add(table(['币','周期','时段','规则','n','净均值','胜率%','PF','随机均值','超额','p','p-H','强度AUC','强度Top10毛/净','Top10胜率%','Top10超额'],rows))
+        rows.append([r.symbol,str(r.minutes)+'m',FN[r.fold],{'cross_signal':'A','departure_signal':'B','departure_neutral':'C','departure_opposite':'D'}[r.policy],r.n,pc(r.mean_net_bp),num(r.win_pct),num(r.pf),r.matched_n,pc(r.matched_case_mean_net_bp),pc(r.controls_mean_net_bp),pc(r.excess_bp),num(r.p,4),num(r.p_holm_replication,4),num(r.strength_auc,3),pc(r.score_top_decile_gross_bp)+' / '+pc(r.score_top_decile_net_bp),num(r.score_top_decile_win_pct),pc(r.score_top_decile_excess_bp)])
+    add(table(['币','周期','时段','规则','n','全部净均值','胜率%','PF','匹配n','匹配均值','随机均值','超额','p','p-H','强度AUC','强度Top10毛/净','Top10胜率%','Top10超额'],rows))
     add('''## 下一步应该沿什么线索研究\n\n1. 首选核验“均线密集＋零轴启动”是否能保留大赢家、减少假启动，分别在ETH4h长零带与BTC4h短零带上加同一个因果形态条件；先固定定义再回放。这直接承接Notion待办。新增阈值由Owner决定。
 2. 对照已经找到的大赢家与最大失败，验证“上一段趋势方向、回零后是否同向再启动”这一条单变量，避免把短零带和长零带误当同一种压缩。
 3. 再用同一批入场检查退出后的收益回吐与真实资金费率；若加入结构止损、分批兑现、ATR障碍或改变20bp，需Owner确定规则后单独登记，不能看到结果后回改。
@@ -442,7 +442,7 @@ python3 scripts/md_to_html.py analysis/p0_imacd_profit_mechanism_20260907.md --o
 严格重建应在允许的同一仓工作目录保存本次交付备份后执行，命令会重写同名研究产物；不需要更改原始缓存、分支、生产配置或依赖。''')
     rows=[]
     for name in ['summary.csv','groups.csv','candidate_cohorts.csv','paired_exits.csv','portfolio_solvency_audit.csv','manifest.json','audit_qa.json','statistics_refresh_qa.json']:
-        rows.append([name,f'[打开](../experiments/active/exp-imacd-profit-mechanism-20260907-v2/{name})'])
+        rows.append([name,f'[打开]({OUT/name})'])
     add(table(['交付','路径（仓内）'],rows))
     add('逐笔账本：`data/imacd_profit_mechanism_v2/events.csv`、`controls.csv`、`portfolio_trades.csv`。图表契约、配置计划与数据哈希保存在本实验目录。')
     REPORT.write_text('\n\n'.join(sections)+'\n')
@@ -456,8 +456,16 @@ def main():
     s=pd.read_csv(OUT/'summary.csv');g=pd.read_csv(OUT/'groups.csv')
     for f in manifest['output_files']:assert digest(ROOT/f['path'])==f['sha256']
     cache=load_bars(manifest,s)
-    qa,paths,fcache=audit(e,c,p,s,cache);print('All ledger/clock/control audits passed.',flush=True)
-    cohorts,pairs=derived_tables(e,cache)
+    import sys
+    if '--render-only' in sys.argv:
+        qa=json.loads((OUT/'audit_qa.json').read_text())
+        paths=pd.read_csv(OUT/'portfolio_solvency_audit.csv')
+        cohorts=pd.read_csv(OUT/'candidate_cohorts.csv');pairs=pd.read_csv(OUT/'paired_exits.csv')
+        fcache={k:features(b) for k,b in cache.items() if k[1]==240}
+    else:
+        qa,paths,fcache=audit(e,c,p,s,cache);print('All ledger/clock/control audits passed.',flush=True)
+        cohorts,pairs=derived_tables(e,cache)
+        qa['builder_commit']=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
     assert not cohorts.crossed_zero.any()
     setup_charts();exit_chart(s)
     choices=[('ETH_240_replication_departure_7232','eth4h_20250423.png','ETH：反向交叉时尚未走出主升段'),
@@ -465,7 +473,7 @@ def main():
              ('BTC_240_discovery_departure_4534','btc4h_20240129.png','BTC：短零带启动后的趋势延伸'),
              ('ETH_240_replication_departure_6718','eth4h_20250127_failure.png','失败对照：长时间贴零后也会假启动')]
     cases=[case_chart(e,cache,fcache,*choice) for choice in choices]
-    qa['builder_commit']=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+    qa['report_builder_commit']=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
     qa['cases']=cases;qa['all_candidate_equity_paths_positive']=True
     (OUT/'audit_qa.json').write_text(json.dumps(qa,ensure_ascii=False,indent=2)+'\n')
     write_report(s,g,cohorts,pairs,qa,paths,cases,manifest,e)
