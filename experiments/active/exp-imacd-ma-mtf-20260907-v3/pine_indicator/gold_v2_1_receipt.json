@@ -1,0 +1,256 @@
+{
+  "date": "2026-09-08",
+  "checked_at_utc": "2026-09-07T16:45:11Z",
+  "purpose": "Real TradingView cross-symbol/timeframe display and runtime acceptance; no PnL evaluation.",
+  "source_path": "yoyo/evaluation/pine/imacd_dense_mtf_v2_1.pine",
+  "source_commit": "dd37b0e9a91624e422146d1c8f46b545971f1469",
+  "source_sha256": "25b52565f01ace220bcf0b075ada88935e798386ab15b5c3464340bdb91c41d4",
+  "source_modified": false,
+  "cloud_script_name": "IMACD 零轴密集启动 · 多周期趋势 V1",
+  "cloud_revision": 6,
+  "cloud_saved_ui": "6 ∙ Today, 00:19",
+  "cloud_readback_characters": 30071,
+  "cloud_readback_fnv1a32": "e50157e3",
+  "cloud_readback_matches_previous_verified_final": true,
+  "runtime_matrix_combinations": 16,
+  "defaults": {
+    "mode": "密集启动",
+    "lengthMA": 34,
+    "lengthSignal": 9,
+    "focusMinBars": 12,
+    "focusAtrBand": 0.1,
+    "retest_ma": "SMA20(close)",
+    "retest_enabled": true,
+    "ordinary_marks": false,
+    "price_labels": true,
+    "touch_dots": false,
+    "lower_confirmation": false
+  },
+  "confluence_test_overrides": {
+    "mode": "密集＋共振",
+    "showPanelDetails": true,
+    "autoTf": true
+  },
+  "cases": [
+    {
+      "symbol": "OKX:XAUUSDT.P",
+      "timeframe": "15m",
+      "observed_window_approx": "2026-09-05 to 2026-09-08",
+      "default_mode_runtime_passed": true,
+      "confluence_mode_runtime_passed": true,
+      "zero_line_visible": true,
+      "lines_visible": true,
+      "histograms_present": false,
+      "visual_example": {
+        "near_zero_bars": 31,
+        "release_side": -1,
+        "release_close_label": "4436.4"
+      },
+      "no_visual_example_in_visible_window": false,
+      "latest_confirmed_htf_panel": {
+        "timeframe": "60",
+        "state": "空"
+      },
+      "note": "Panel is the latest confirmed snapshot, not the historical release-time HTF state."
+    },
+    {
+      "symbol": "OKX:XAUUSDT.P",
+      "timeframe": "1h",
+      "observed_window_approx": "2026-08-30 to 2026-09-08",
+      "default_mode_runtime_passed": true,
+      "confluence_mode_runtime_passed": true,
+      "zero_line_visible": true,
+      "lines_visible": true,
+      "histograms_present": false,
+      "visual_example": {
+        "near_zero_bars": 37,
+        "release_side": -1,
+        "release_close_label": "4427.9"
+      },
+      "no_visual_example_in_visible_window": false,
+      "latest_confirmed_htf_panel": {
+        "timeframe": "240",
+        "state": "空"
+      },
+      "note": "Panel is the latest confirmed snapshot, not the historical release-time HTF state."
+    },
+    {
+      "symbol": "OKX:XAUUSDT.P",
+      "timeframe": "4h",
+      "observed_window_approx": "2026-07-24 to 2026-08-27 (focused); also recent through 2026-09-08",
+      "default_mode_runtime_passed": true,
+      "confluence_mode_runtime_passed": true,
+      "zero_line_visible": true,
+      "lines_visible": true,
+      "histograms_present": false,
+      "visual_example": {
+        "near_zero_bars": 44,
+        "release_side": 1,
+        "release_close_label": "4173.8"
+      },
+      "no_visual_example_in_visible_window": false,
+      "latest_confirmed_htf_panel": {
+        "timeframe": "1D",
+        "state": "多"
+      },
+      "note": "Panel is the latest confirmed snapshot, not the historical release-time HTF state."
+    },
+    {
+      "symbol": "OKX:XAUUSDT.P",
+      "timeframe": "1D",
+      "observed_window_approx": "March to September 2026",
+      "default_mode_runtime_passed": true,
+      "confluence_mode_runtime_passed": true,
+      "zero_line_visible": true,
+      "lines_visible": true,
+      "histograms_present": false,
+      "visual_example": null,
+      "no_visual_example_in_visible_window": true,
+      "latest_confirmed_htf_panel": {
+        "timeframe": "1W",
+        "state": "数据不足"
+      },
+      "note": "Panel is the latest confirmed snapshot, not the historical release-time HTF state."
+    },
+    {
+      "symbol": "OANDA:XAUUSD",
+      "timeframe": "15m",
+      "observed_window_approx": "2026-09-03 to 2026-09-08",
+      "default_mode_runtime_passed": true,
+      "confluence_mode_runtime_passed": true,
+      "zero_line_visible": true,
+      "lines_visible": true,
+      "histograms_present": false,
+      "visual_example": null,
+      "no_visual_example_in_visible_window": true,
+      "latest_confirmed_htf_panel": {
+        "timeframe": "60",
+        "state": "空"
+      },
+      "note": "Panel is the latest confirmed snapshot, not the historical release-time HTF state."
+    },
+    {
+      "symbol": "OANDA:XAUUSD",
+      "timeframe": "1h",
+      "observed_window_approx": "2026-08-26 to 2026-09-08",
+      "default_mode_runtime_passed": true,
+      "confluence_mode_runtime_passed": true,
+      "zero_line_visible": true,
+      "lines_visible": true,
+      "histograms_present": false,
+      "visual_example": {
+        "near_zero_bars": 12,
+        "release_side": -1,
+        "release_close_label": "4598.340"
+      },
+      "no_visual_example_in_visible_window": false,
+      "latest_confirmed_htf_panel": {
+        "timeframe": "240",
+        "state": "空"
+      },
+      "note": "Panel is the latest confirmed snapshot, not the historical release-time HTF state."
+    },
+    {
+      "symbol": "OANDA:XAUUSD",
+      "timeframe": "4h",
+      "observed_window_approx": "2026-07-22 to 2026-09-08; focused 2026-07-23 to 2026-08-06",
+      "default_mode_runtime_passed": true,
+      "confluence_mode_runtime_passed": true,
+      "zero_line_visible": true,
+      "lines_visible": true,
+      "histograms_present": false,
+      "visual_example": {
+        "near_zero_bars": 53,
+        "release_side": 1,
+        "release_close_label": "4183.985"
+      },
+      "no_visual_example_in_visible_window": false,
+      "latest_confirmed_htf_panel": {
+        "timeframe": "1D",
+        "state": "多"
+      },
+      "note": "Panel is the latest confirmed snapshot, not the historical release-time HTF state."
+    },
+    {
+      "symbol": "OANDA:XAUUSD",
+      "timeframe": "1D",
+      "observed_window_approx": "December 2025 to September 2026",
+      "default_mode_runtime_passed": true,
+      "confluence_mode_runtime_passed": true,
+      "zero_line_visible": true,
+      "lines_visible": true,
+      "histograms_present": false,
+      "visual_example": {
+        "near_zero_bars": 21,
+        "release_side": -1,
+        "release_close_label": "4557.535"
+      },
+      "no_visual_example_in_visible_window": false,
+      "latest_confirmed_htf_panel": {
+        "timeframe": "1W",
+        "state": "多"
+      },
+      "note": "Panel is the latest confirmed snapshot, not the historical release-time HTF state."
+    }
+  ],
+  "retest_toggle_control": {
+    "symbol": "OANDA:XAUUSD",
+    "timeframe": "4h",
+    "range_entered_start": "2026-07-23 01:00",
+    "range_entered_end": "2026-08-06 21:00",
+    "chart_timezone": "UTC+8",
+    "sequence": [
+      "on",
+      "off",
+      "on"
+    ],
+    "observed": "Bright teal/coral qualifying candles reverted to native colors when disabled and returned when enabled. MA geometry, preparation box, 53-bar count and 4183.985 release label remained in the same positions.",
+    "final_enabled": true,
+    "exact_touch_timestamps_not_extracted": true
+  },
+  "confluence_finding": {
+    "okx_daily_local_ready": true,
+    "okx_daily_weekly_ready": false,
+    "oanda_daily_weekly_ready": true,
+    "threshold": "hIndex >= max(340, lengthMA * 10)",
+    "threshold_changed": false,
+    "default_mode_uses_htf_gate": false
+  },
+  "final_ui": {
+    "layout": "综合过滤",
+    "url": "https://www.tradingview.com/chart/AlGc61US/",
+    "symbol": "OKX:XAUUSDT.P",
+    "timeframe": "4h",
+    "theme": "dark",
+    "mode": "密集启动",
+    "showPanelDetails": false,
+    "visible_range_requested": [
+      "2026-07-24",
+      "2026-08-27"
+    ],
+    "layout_save_status": "All changes saved"
+  },
+  "screenshots_in_conversation_only": true,
+  "raw_candles_downloaded": false,
+  "all_candidate_count": null,
+  "positive_rate": null,
+  "trade_count": null,
+  "pnl_evaluation": false,
+  "owner_authorized_all_dates": true,
+  "visual_holdout_source_session_number": 2,
+  "gold_matrix_use_number": 1,
+  "training_eligible": false,
+  "production_eligible": false,
+  "source_links": [
+    "https://www.okx.com/en-ae/help/okx-will-rename-xautusdt-perpetual-to-xauusdt-perpetual",
+    "https://www.okx.com/en-gb/help/commodity-perpetuals"
+  ],
+  "limits": [
+    "Examples are visible chart observations, not an exhaustive event sample or a profitability estimate.",
+    "Visual release does not establish original MA/MTF entry permission.",
+    "Daily/weekly warmup is an existing gate; no shortened warmup was tested.",
+    "Different OHLC sources and bar boundaries prevent direct transfer of counts and trigger prices.",
+    "Weekend flattening has not been causally attributed to a single market mechanism.",
+    "No new alerts, trades, publishing or source revision were created."
+  ]
+}

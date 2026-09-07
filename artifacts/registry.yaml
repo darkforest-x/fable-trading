@@ -20301,3 +20301,36 @@ artifacts:
     notes: Clear zero axis, close-price labels and confirmed wick-only retests. Legacy Notion black line is SMA20(close).
       Original signal core/14 inputs/5 alerts unchanged. Initial cloud5 runtime66plots failed; consolidated labels,
       cloud6 compiler/runtime and ETH1h/4h dark/light/toggle checks passed. No PnL experiment.
+
+  - artifact_id: imacd-pine-gold-v2-1-20260908-receipt
+    artifact_type: manifest
+    role: research_indicator_gold_multitimeframe_qa
+    source_repo: darkforest-x/fable-trading
+    source_commit: dd37b0e9a91624e422146d1c8f46b545971f1469
+    source_path: experiments/active/exp-imacd-ma-mtf-20260907-v3/pine_indicator/gold_v2_1_receipt.json
+    sha256: 72ba4ef787b754be41b7cb4cd56af23a3cc25571e129b765c6c43c371a3c227e
+    size_bytes: 8946
+    storage_uri: repo://experiments/active/exp-imacd-ma-mtf-20260907-v3/pine_indicator/gold_v2_1_receipt.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Unchanged V2.1 cloud6 tested on OKX XAUUSDT.P and OANDA XAUUSD across15m/1h/4h/1D,
+      default and confluence modes,16 runtime combinations. OANDA4h wick display on/off/on passed.
+      OKX daily weekly warmup unavailable; OANDA weekly available. Source visual holdout session2,
+      gold matrix use1, all dates owner-authorized. No PnL or orders. Screenshots in conversation only.
+  - artifact_id: imacd-pine-gold-v2-1-20260908-report
+    artifact_type: report
+    role: research_indicator_gold_multitimeframe_qa
+    source_repo: darkforest-x/fable-trading
+    source_commit: dd37b0e9a91624e422146d1c8f46b545971f1469
+    source_path: analysis/html/p0_imacd_gold_multitimeframe_20260908.html
+    sha256: 005b3544287e3ccbde0edc2d22f5545b47e9910ff1c10d292e31181ff49b2686
+    size_bytes: 11564
+    storage_uri: repo://analysis/html/p0_imacd_gold_multitimeframe_20260908.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Unchanged V2.1 cloud6 tested on OKX XAUUSDT.P and OANDA XAUUSD across15m/1h/4h/1D,
+      default and confluence modes,16 runtime combinations. OANDA4h wick display on/off/on passed.
+      OKX daily weekly warmup unavailable; OANDA weekly available. Source visual holdout session2,
+      gold matrix use1, all dates owner-authorized. No PnL or orders. Screenshots in conversation only.
