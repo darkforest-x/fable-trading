@@ -20148,3 +20148,49 @@ artifacts:
     production_eligible: false
     notes: Display-only revision of owner-authorized research. Core, 14 nonvisual inputs and 5 alerts match V1. Official
       compiler and same-chart visual check passed. Cloud script revision2 saved. No new PnL evaluation.
+
+  - artifact_id: imacd-pine-style-v1-2-20260907-source
+    artifact_type: manifest
+    role: research_indicator_owner_style_match
+    source_repo: darkforest-x/fable-trading
+    source_commit: b84b631e96bed15be1ea6d46e3ceabf359694765
+    source_path: yoyo/evaluation/pine/imacd_dense_mtf_v1_2.pine
+    sha256: bac5fa4a846391a7acf58cc8c9c917ddf08fc11a0f95d9f33a1f67da16162e37
+    size_bytes: 16374
+    storage_uri: repo://yoyo/evaluation/pine/imacd_dense_mtf_v1_2.pine
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Matches actual owner saved blue/orange line styles; no histogram or columns. Core, 14 nonvisual inputs
+      and 5 alerts unchanged. Official compiler and same-chart style comparison passed. Original cloud script saved
+      as revision3; reference script unchanged. No PnL evaluation.
+  - artifact_id: imacd-pine-style-v1-2-20260907-receipt
+    artifact_type: manifest
+    role: research_indicator_owner_style_match
+    source_repo: darkforest-x/fable-trading
+    source_commit: b84b631e96bed15be1ea6d46e3ceabf359694765
+    source_path: experiments/active/exp-imacd-ma-mtf-20260907-v3/pine_indicator/style_v1_2_receipt.json
+    sha256: e61017113c310fdc7a500599d396915ddb3548fbb27153fe4eb36447df549851
+    size_bytes: 1431
+    storage_uri: repo://experiments/active/exp-imacd-ma-mtf-20260907-v3/pine_indicator/style_v1_2_receipt.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Matches actual owner saved blue/orange line styles; no histogram or columns. Core, 14 nonvisual inputs
+      and 5 alerts unchanged. Official compiler and same-chart style comparison passed. Original cloud script saved
+      as revision3; reference script unchanged. No PnL evaluation.
+  - artifact_id: imacd-pine-style-v1-2-20260907-guide
+    artifact_type: report
+    role: research_indicator_owner_style_match
+    source_repo: darkforest-x/fable-trading
+    source_commit: b84b631e96bed15be1ea6d46e3ceabf359694765
+    source_path: analysis/html/p0_imacd_pine_lines_20260907.html
+    sha256: 82d576b1224fa26ffc32d058ea501be8a78a086c66daac17e9d5303536a50307
+    size_bytes: 4464
+    storage_uri: repo://analysis/html/p0_imacd_pine_lines_20260907.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Matches actual owner saved blue/orange line styles; no histogram or columns. Core, 14 nonvisual inputs
+      and 5 alerts unchanged. Official compiler and same-chart style comparison passed. Original cloud script saved
+      as revision3; reference script unchanged. No PnL evaluation.
