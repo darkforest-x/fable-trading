@@ -1,0 +1,113 @@
+{
+  "status": "passed",
+  "at": "2026-09-07T02:19:08.152598+00:00",
+  "population": 34512,
+  "hourly_rows_per_arm": 18222,
+  "count_groups": 124,
+  "entries": {
+    "sma": 251,
+    "vwma": 288
+  },
+  "shape_qualified": 2827,
+  "overlap": {
+    "both_abstain": 34114,
+    "vwma_only": 115,
+    "both_accepted": 173,
+    "sma_only": 78,
+    "any_unknown": 32
+  },
+  "exclusive_entry_rejection_reasons": {
+    "sma_only": {
+      "body_strict_cross": 46,
+      "body_strict_cross+hl2_side+extension_0_to_99": 5,
+      "hl2_side": 27
+    },
+    "vwma_only": {
+      "hl2_side": 54,
+      "body_strict_cross": 58,
+      "body_strict_cross+hl2_side+extension_0_to_99": 3
+    }
+  },
+  "overlap_by_fold": {
+    "2023H1": {
+      "both_abstain": 8433,
+      "vwma_only": 24,
+      "both_accepted": 44,
+      "sma_only": 11,
+      "any_unknown": 32
+    },
+    "2023H2": {
+      "both_abstain": 8589,
+      "both_accepted": 41,
+      "sma_only": 25,
+      "vwma_only": 33
+    },
+    "2024H1": {
+      "both_abstain": 8511,
+      "both_accepted": 40,
+      "sma_only": 15,
+      "vwma_only": 26
+    },
+    "2024H2": {
+      "both_abstain": 8581,
+      "both_accepted": 48,
+      "vwma_only": 32,
+      "sma_only": 27
+    }
+  },
+  "overlap_by_direction": {
+    "1": {
+      "both_abstain": 17060,
+      "vwma_only": 50,
+      "both_accepted": 92,
+      "sma_only": 38,
+      "any_unknown": 16
+    },
+    "-1": {
+      "both_abstain": 17054,
+      "vwma_only": 65,
+      "both_accepted": 81,
+      "sma_only": 40,
+      "any_unknown": 16
+    }
+  },
+  "unknown_rows": 32,
+  "unknown_reason_combinations": {
+    "missing_signal_hour | missing_signal_hour": 2,
+    "shape_normalization_unavailable | shape_normalization_unavailable": 26,
+    "warmup | warmup": 4
+  },
+  "unknown_by_fold": {
+    "2023H1": 32
+  },
+  "unknown_by_direction": {
+    "1": 16,
+    "-1": 16
+  },
+  "output_hashes_verified": 7,
+  "input_hashes_verified": 10,
+  "source_receipts_verified": 12,
+  "parent_source_receipts_verified": [
+    18,
+    11
+  ],
+  "builder_commit": "374f003f3fb9b0812edb25636042654312b06f1e",
+  "audit_commit": "a3318dd3448ff194dbc4df86684e1c5e9b94c175",
+  "auditor_sha256": "d482641d596f1553a54d6c8c91068b07e869a169c579efa17133ed8ca9c8b4aa",
+  "summary_sha256": "a81a6e386de1b82ff093bd16a4ae1f6989b98feb5201f0290983f94bed66ef90",
+  "support_frozen_sha256": "3df6f7d89b5b9978e2fcc78023bdf8ab8b75d96da80c9dc5954e61c94d1df973",
+  "input_output_source_hashes_rechecked_after_computation": true,
+  "saved_chronology": {
+    "started": "2026-09-07 02:09:12.105068+00:00",
+    "baseline_reproduced": "2026-09-07 02:09:13.510010+00:00",
+    "support_frozen": "2026-09-07 02:09:16.697300+00:00",
+    "summary": "2026-09-07 02:09:16.697625+00:00"
+  },
+  "original_entry_fields_recomputed": true,
+  "independent_saved_hourly_formula_check": true,
+  "raw5_aggregation_verified": false,
+  "source_authenticity_verified": false,
+  "profitability_evaluated": false,
+  "tradingview_live_parity_verified": false,
+  "independent_execution_order_observation": false
+}

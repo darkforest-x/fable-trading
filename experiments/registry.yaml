@@ -16,18 +16,31 @@ schema_version: 1
 experiments:
   - experiment_id: exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: active
+    source_commit: "374f003"
+    status: accepted
     question: Does fixed40 HL2 volume weighting change entry opportunities with sufficient pre2025 support?
     single_variable: SMA40 to VWMA40 entry reference; frozen shape, cost and execution unchanged.
-    result: Source-first implementation and synthetic tests; actual support pending, no outcomes.
-    canonical_report: experiments/active/exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26/PROJECT_PLAN.md
+    result: >-
+      Support-only pass. Old251 full-entry/feature parity;VWMA288,173shared,
+      78removed115added.34512clock-directions,2827shapequalified,32unknown.
+      Fourhalves68/74/66/80,24active months;allfour support gates pass.
+      Independent18222hours/124counts/allentries audit passed,nooutcomes.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_vwma_reference_support_v26_20260907.html
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts:
+      - btcusdtp-hourly-vwma-v26-results
+      - btcusdtp-hourly-vwma-v26-audit
+      - btcusdtp-hourly-vwma-v26-report
+      - btcusdtp-hourly-vwma-v26-html
+      - btcusdtp-hourly-vwma-v26-artifact
     reuse_allowed: false
-    notes: Full decision-hour by direction ledger; original251 exact parity before VWMA; support only.
+    notes: >-
+      Accepted applies only to entry-support question,not profitable strategy.
+      Auditora3318dd,429jointtests;HTMLstructural_only,browserunverified.
+      Requires separatelyregistered new288mother background>=260complete
+      triples before economics;no inherited oldallocation,noTV/live/holdout.
 
   - experiment_id: exp-btcusdtp-1h-structure-event-support-preholdout-20260907-v25
     source_repo: darkforest-x/fable-trading

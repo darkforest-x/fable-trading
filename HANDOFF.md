@@ -2,6 +2,30 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-07 — V26量权参考支持通过，尚未计算新收益）
+
+374f003先提交SMA40→VWMA40(HL2)纯参考/全机会/runner/配置/计划/102新测试。
+固定V20保存小时OHLCV，旧251所有字段和全部共同特征先复现，写baseline检查点后
+才算VWMA；新入口288，交集173、删除78、新增115。四半年68/74/66/80，
+24活跃月、每半年6月，80/12/12/3支持四门通过。34512完整时钟×方向，
+shape合格2827，unknown32（缺根2、形态预热26、参考预热4），两臂分母一致。
+
+a3318dd独立stdlib审计先提交再跑：18222小时×两臂、全部入口字段、全机会与124计数
+独立重算通过；10inputs/7outputs/12sources+18/11父sources核验并计算后二次SHA。
+新增115的旧侧拒绝组合：58仅实体未贯穿、54仅HL2side、3贯穿+side+extension；
+删除78的新侧拒绝46/27/5。不能把颜色修正当作趋势质量或盈利证据。
+102新tests、429联合tests通过；16独立自检。reportbuilder37ade25。
+报告analysis/html/p1_btcusdtp_hourly_vwma_reference_support_v26_20260907.html，
+13sections14blocks1native月差图，official结构验证过；browser/mobile/source-dialog未验。
+E26目录保存全部结果/audit.json/QA/REPORT_NOTES/NEXT_EXPERIMENT；2条learning。
+
+V26 accepted仅指support，不是策略盈利验收。无收益/原始5m/2025+/holdout/TV/ACTIVE/
+训练/实盘修改。盈利目标未达成（本轮get_goal返回usageLimited，未使用reset）。
+下一步V27尚未登记运行：以全部288为母单另建三键背景，至少260完整三控组，
+不可继承旧248分配；旧V10表的SMA穿线和旧母排除要随新参考/288母重建。
+支持通过再另冻结随机分配与主4h/20bp标签，退出保持冻结；详见E26 NEXT_EXPERIMENT。
+V24入口负面结论和V25结构事件支持不足结论不改。保留其他会话ARB等dirty改动。
+
 ## ⚡ 当前真相（2026-09-07 — V25同根结构事件支持不足，未算该门收益）
 
 b1cca1e先提交V25事件公式/runner/config/plan/130新测试再真实运行。

@@ -1,0 +1,62 @@
+{
+  "population": 34512,
+  "shape_qualified": 2827,
+  "shape_unknown": 28,
+  "support": {
+    "sma": {
+      "values": {
+        "events": 251,
+        "minimum_per_fold": 55,
+        "active_months": 24,
+        "minimum_months_per_fold": 6
+      },
+      "gates": {
+        "events": true,
+        "minimum_per_fold": true,
+        "active_months": true,
+        "minimum_months_per_fold": true
+      },
+      "pass": true
+    },
+    "vwma": {
+      "values": {
+        "events": 288,
+        "minimum_per_fold": 66,
+        "active_months": 24,
+        "minimum_months_per_fold": 6
+      },
+      "gates": {
+        "events": true,
+        "minimum_per_fold": true,
+        "active_months": true,
+        "minimum_months_per_fold": true
+      },
+      "pass": true
+    }
+  },
+  "overlap": {
+    "both_accepted": 173,
+    "sma_only": 78,
+    "vwma_only": 115,
+    "both_abstain": 34114,
+    "any_unknown": 32
+  },
+  "accepted_identity_sets_differ": true,
+  "status": "support_pass_requires_new_background",
+  "outcomes_read_or_computed": false,
+  "economic_acceptance": false,
+  "random_controls_assigned": false,
+  "generated_at": "2026-09-07 02:09:16.697625+00:00",
+  "experiment_id": "exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26",
+  "builder_commit": "374f003f3fb9b0812edb25636042654312b06f1e",
+  "output_hashes": {
+    "opportunities.csv.gz": "bd3422d70a691c1625daa37aa19ef0f9b092ba3a5047d3d5b04a89fd6b38a2d2",
+    "shape_opportunities.csv.gz": "5de78388f3367937530f53b4ee5f7fe41e798c180451fc16c9641f06c58143f0",
+    "counts.csv.gz": "86c4f78393b84b046db530e92a5ff603f77720cbf52feb6fdda613dbda693c62",
+    "sma_entries.csv.gz": "db45b645781a777d48bf0aa8178b8d53e22f99f38f603035364956a3201e540c",
+    "vwma_entries.csv.gz": "32861afc658697d033f4ab756ef1d9f37d7cdd02267251b5c57221e77ac97572",
+    "hourly_sma.csv.gz": "ebf5ac403ac67a2563c562afc649994652132db2f5ce625f2859c2c863b11187",
+    "hourly_vwma.csv.gz": "5034cf4c6b9c85cfb3f48bfbf82420c0e00bbfb393cd0a4278b9d50f61f08370"
+  },
+  "support_frozen_sha256": "3df6f7d89b5b9978e2fcc78023bdf8ab8b75d96da80c9dc5954e61c94d1df973"
+}

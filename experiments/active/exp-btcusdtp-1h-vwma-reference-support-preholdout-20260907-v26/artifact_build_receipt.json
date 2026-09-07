@@ -1,0 +1,56 @@
+{
+  "generated_at": "2026-09-07T02:20:14.188890+00:00",
+  "source_commit": "a3318dd3448ff194dbc4df86684e1c5e9b94c175",
+  "report_sha256": "3bd4b7abd1315046efc917c992934ec6c0303ae167330b7919b546c30be5c481",
+  "support_summary_sha256": "a81a6e386de1b82ff093bd16a4ae1f6989b98feb5201f0290983f94bed66ef90",
+  "sources": [
+    {
+      "id": "report",
+      "label": "V26 · 定义、支持分母、验证与限制",
+      "path": "analysis/p1_btcusdtp_hourly_vwma_reference_support_v26_20260907.md"
+    },
+    {
+      "id": "monthly",
+      "label": "V26 · frozen counts中两臂全部月份，保留零月",
+      "path": "experiments/active/exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26/results/counts.csv.gz",
+      "query": {
+        "sql": "SELECT s.key, s.total, s.accepted AS sma_accepted,\nv.accepted AS vwma_accepted, v.accepted-s.accepted AS delta,\ns.abstain AS sma_abstain, v.abstain AS vwma_abstain,\ns.unknown AS sma_unknown, v.unknown AS vwma_unknown\nFROM counts s JOIN counts v ON s.key=v.key\nWHERE s.population='all_clock_directions' AND s.dimension='month' AND s.arm='sma'\nAND v.population='all_clock_directions' AND v.dimension='month' AND v.arm='vwma'\nORDER BY s.key",
+        "engine": "sqlite",
+        "language": "sql",
+        "tables_used": [
+          "counts"
+        ],
+        "executed_at": "2026-09-07T02:20:14.188890+00:00",
+        "description": "实际SQLite连接冻结124行计数中的两臂月份；24个月保留两参考、全时钟分母及未知",
+        "filters": [
+          "population=all_clock_directions; dimension=month; no outcome selection"
+        ]
+      }
+    },
+    {
+      "id": "summary",
+      "label": "V26 · 只审支持、不读取收益",
+      "path": "experiments/active/exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26/results/summary.json"
+    }
+  ],
+  "all_sections_preserved": true,
+  "sections": 13,
+  "blocks": 14,
+  "chart_map": [
+    {
+      "section": "月份支持",
+      "family": "comparison",
+      "type": "bar",
+      "rows": 24,
+      "palette": "single blue root",
+      "non_color": "month order, zero baseline and signed values",
+      "question": "两种参考的入口支持是否覆盖全部月份",
+      "dataset": "monthly"
+    }
+  ],
+  "table_rationale": "Exact threshold/denominator audit; no redundant charts for few threshold lookups",
+  "actual_sql_queries": [
+    "SELECT s.key, s.total, s.accepted AS sma_accepted,\nv.accepted AS vwma_accepted, v.accepted-s.accepted AS delta,\ns.abstain AS sma_abstain, v.abstain AS vwma_abstain,\ns.unknown AS sma_unknown, v.unknown AS vwma_unknown\nFROM counts s JOIN counts v ON s.key=v.key\nWHERE s.population='all_clock_directions' AND s.dimension='month' AND s.arm='sma'\nAND v.population='all_clock_directions' AND v.dimension='month' AND v.arm='vwma'\nORDER BY s.key"
+  ],
+  "new_prices_or_outcomes_read": false
+}
