@@ -1,0 +1,17 @@
+{
+  "experiment_id": "exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37",
+  "baseline_summary": "experiments/active/exp-btcusdtp-owner-k1k2-genuine-flow-20260907-v36/summary.json",
+  "baseline_summary_sha256": "bde65bb3cbae369e7e71f7d1d31b08eebaee25072b7408f62913422d9ddb7b27",
+  "clock_audit": "experiments/active/exp-btcusdtp-owner-k1k2-genuine-flow-20260907-v36/clock_audit.csv",
+  "clock_audit_sha256": "123d77f97df0305b92d0d0ce5fb85bb05737070b2ebda28f8ff8232309ee8a4c",
+  "output_dir": "data/owner_k1k2_transition_exit_v37",
+  "baseline_policy": {"management_minutes":5,"exit_mode":"colour","confirmations":1,"max_hours":72,"cost_fraction":0.002},
+  "candidate_policy": {"management_minutes":5,"exit_mode":"transition_colour","confirmations":1,"max_hours":72,"cost_fraction":0.002},
+  "flow_gate": false,
+  "draws":9999,
+  "seed":20260906,
+  "builder_paths":["yoyo/evaluation/owner_k1k2_transition_exit.py","yoyo/evaluation/owner_k1k2_genuine_flow.py","yoyo/data/hourly_impulse.py","yoyo/data/k1k2_genuine_flow_alignment.py","yoyo/layers/l3_backtest/hourly_impulse.py"],
+  "holdout_evaluated":false,
+  "training_eligible":false,
+  "production_eligible":false
+}
