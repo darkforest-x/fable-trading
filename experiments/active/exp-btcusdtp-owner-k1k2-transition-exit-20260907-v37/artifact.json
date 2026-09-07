@@ -1,0 +1,1126 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "K1/K2 Exit Timing Test · V37",
+    "generatedAt": "2026-09-07T10:08:24.824547+00:00",
+    "blocks": [
+      {
+        "id": "section_0",
+        "type": "markdown",
+        "layout": "full",
+        "body": "# K1/K2 Exit Timing Test · V37"
+      },
+      {
+        "id": "section_1",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## Executive Summary\n\n**结论：延后到小级别真正翻色，能救回少数趋势，但仍不是盈利策略。V37 拒绝晋级。** 同样 63 个小时 K1/K2 事件，平均每笔净收益由 −22.54bp 改善至 −12.81bp；中位数却由 −21.97bp 降至 −29.94bp。四个半年只有一个盈利，不能用总体均值改善宣布成功。\n\n最重要的反证来自原匹配对照：有完整三对照的 36 笔，病例自身平均收益反而下降 1.08bp。最大的两笔改善都未匹配。对病例和控制同时改变退出后，增量超额只有 +2.06bp，95% 区间 [−7.83, +10.61]，单侧 p=0.3697；新策略绝对超额仍为 −1.44bp。\n\n因此，下一步应审入场时是否已经具备小级别启动条件，而不是继续只放宽退出。17 笔止损从未等到小级别同向；但“后来能否同向”是结果标签，绝不能当作入场特征。未改 TradingView、生产配置或真实仓位。"
+      },
+      {
+        "id": "section_2",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 测试的规则与数据边界\n\n本轮是 **1h 原源码纯 K1/K2 形态 + 5m 研究退出**，不是当前手机上完整的 15m Pine 接受逻辑，也不是 ETH、黄金或山寨日线的结果。\n\n沿用 V36 的全部 63 个 K2、44 个不同 K1（不代表统计独立）、108 个原始控制；36 个病例各有 3 个控制，另外 27 个无完整控制的病例仍保留在全池，不重配、不删样。对照按原同币、时间块和波动匹配规则固定，是哈希顺序的匹配抽取，不是随机处理分派。不能把全 63 病例均值直接减全 108 控制均值冒充配对超额。\n\n数据为已批准的 Binance USD-M BTCUSDT、2023-01-01 至 2025-01-01 之前，共 210,528 根 5m；按四个半年切分，沿用每段末 72h 不新入场的隔离。没有 2022 预热，不借其他来源补齐。以下价格、收益均只来自这份已冻结来源；没有读入新的 holdout 价格。\n\n| 规则 | V36 状态退出基线 | V37 真翻转退出 |\n|---|---|---|\n| 入场 | 同一 K2 确认后、实际下一根 5m 开盘 | 完全相同 |\n| 初始止损 | 原 K2 极值 | 完全相同，不抬高、不放宽 |\n| 管理信号 | 原生 5m SMA40(HL2) 侧色 | 完全相同 |\n| 退出 | 完整 5m 为反向状态即退出 | 有效同向状态后，出现相邻有效反向状态才退出 |\n| 入场前已同向 | 最早入场后 5m 退出 | 入场即激活，最早入场后 5m 退出 |\n| 入场前已反向 | 首根继续反向也退出 | 先等有效同向，再等新反向；期间硬止损仍有效 |\n| 持仓期限、往返成本 | 72h、0.002 | 完全相同 |\n| 真实成交量共振 | 关闭 | 关闭 |\n\n颜色是 **HL2 相对 SMA40 的状态**，不是实体涨跌红绿。管理观察缺失重置当前翻转序列；原始价格缺失保留未知结果，不把未知当零收益。跳空硬止损优先于开盘颜色退出；开盘退出不能偷看新一根尚未发生的高低点。历史首次激活时间不等于缺失重置后仍处于激活状态。\n\n这是唯一经济变量 `exit_mode` 的比较。未加入新的止盈倍数、动态止损、分批止盈、保本、冷却或风险门。"
+      },
+      {
+        "id": "section_3",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 全量结果与同规则控制\n\n收益单位为 bp：**1bp=0.01%**，分母为初始名义本金。净收益=价格收益−20bp 固定往返成本。PF 为净盈利之和除以净亏损绝对值；不是杠杆账户收益。\n\n| 人口 / 退出 | 笔数 | 平均毛 bp | 平均净 bp | 中位净 bp | 标准差 bp | 净胜率 | 净 PF | 持仓中位分钟 |\n|---|---:|---:|---:|---:|---:|---:|---:|---:|\n| 病例 / 原状态 | 63 | −2.54 | −22.54 | −21.97 | 18.12 | 9.52% | 0.056 | 5 |\n| 病例 / 真翻转 | 63 | +7.19 | −12.81 | −29.94 | 74.21 | 15.87% | 0.545 | 35 |\n| 原控制 / 原状态 | 108 | +0.97 | −19.03 | −23.61 | 57.96 | 6.48% | 0.302 | 5 |\n| 原控制 / 真翻转 | 108 | −2.18 | −22.18 | −28.50 | 67.39 | 18.52% | 0.336 | 42.5 |\n\n两臂所有 171 个请求均成交、闭合、收益已知，合计 342 条结果；拒绝 0、未知 0，没有以删除亏损换改善。病例平均改善 +9.73bp 全来自价格路径，节省费用为 0；控制平均下降 3.15bp。即使控制胜率上升，其净收益仍更差，说明胜率不能替代盈亏规模。\n\n病例价格为正但被费用抹掉的交易由 21 减至 14 笔；净盈利由 6 增至 10 笔。成本仍高于新策略平均毛收益，不能据此擅自降低成本假设。"
+      },
+      {
+        "id": "section_4",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 四个半年：改善没有跨时期站稳\n\n下表为各人口全部事件的平均净 bp；控制未筛选。图只对照同 63 个病例的两种退出，不将四个离散时间段画成连续平滑趋势。\n\n| 时段 | 病例数 | 原净 bp | 新净 bp | 原控制数 | 原控制净 bp | 新控制净 bp |\n|---|---:|---:|---:|---:|---:|---:|\n| 2023H1 | 23 | −23.93 | −19.44 | 48 | −13.10 | −12.28 |\n| 2023H2 | 19 | −18.48 | +13.23 | 36 | −24.19 | −26.72 |\n| 2024H1 | 15 | −30.63 | −32.37 | 18 | −19.57 | −33.86 |\n| 2024H2 | 6 | −9.82 | −20.95 | 6 | −33.96 | −39.09 |\n\n2023 下半年贡献主要改善；2024 两个半年都恶化。最后半年仅 6 个病例、2 个完整匹配组，不能解释成稳定的市场适应能力。\n\n| 时段 | 原三对照组数 | 原绝对超额 bp | 新绝对超额 bp | 增量超额 bp |\n|---|---:|---:|---:|---:|\n| 2023H1 | 16 | −12.97 | −24.26 | −11.29 |\n| 2023H2 | 12 | +3.22 | +21.13 | +17.91 |\n| 2024H1 | 6 | −8.69 | −2.74 | +5.96 |\n| 2024H2 | 2 | +47.47 | +49.62 | +2.14 |\n\n正的增量可能只是控制亏得更多，不等于策略本身赚钱。例如 2024H1 病例新净 −32.37bp，虽然匹配增量为正，仍不能接受。"
+      },
+      {
+        "id": "fold_chart",
+        "type": "chart",
+        "layout": "full",
+        "chartId": "folds"
+      },
+      {
+        "id": "section_5",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 失败路径：等待同向不等于等来趋势\n\nV36 的 38 笔“首个 5m 反色延续退出”是回测前声明的诊断组，不是本轮挑出来的入场名单。63 笔全量比较后才连接这个标签。\n\n| 原诊断分组 | 笔数 | 改善 / 恶化 / 不变 | 平均变化 bp | 延长后仍亏损 |\n|---|---:|---|---:|---:|\n| 原反色延续早退病例 | 38 | 13 / 25 / 0 | +16.13 | 30 |\n| 其他病例 | 25 | 0 / 0 / 25 | 0.00 | 0 |\n| 早退病例所对应的原控制 | 66 | 23 / 32 / 11 | −6.56 | 45 |\n| 其他病例所对应的原控制 | 42 | 8 / 7 / 27 | +2.21 | 11 |\n\n控制按所属病例分组，66/42 的分母不能误写成病例的 38/25。全病例中救回 5 笔净赢家，同时损失 1 笔原净赢家；变化不是单向改进。\n\n| V37 实际退出机制 | 病例数 | 平均净 bp | 控制数 | 平均净 bp |\n|---|---:|---:|---:|---:|\n| 从未激活同向、硬止损 | 17 | −47.48 | 32 | −56.93 |\n| 曾激活同向、硬止损 | 3 | −48.52 | 8 | −53.76 |\n| 同向后新翻转退出 | 43 | +3.39 | 68 | −2.11 |\n\n病例硬止损由 5 增至 20 笔，其中 17 笔从未等到同向。43 笔最终颜色退出中只有 10 笔净盈利；“等到翻转退出”的平均微正不是一个可事前使用的筛选器。两臂无超时退出。\n\n能直接确认的入场前事实是：63 笔里 47 笔当时的小级别仍为反向，16 笔已同向。独立复核显示，16 笔同向事件两臂完全不变、平均净仍为 −21.65bp；47 笔反向事件平均净 −9.80bp，包含最大的两笔赢家。所以不是简单“反向全部禁入”就能解决。事后是否激活、是否先止损、未来最大浮盈都不能倒灌成入场共振。"
+      },
+      {
+        "id": "section_6",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 改善集中：最大的赢家缺少匹配支持\n\n逐笔散点保留全部 63 个事件；不删极值、不仅展示成功例子。全池总变化为 +613.02 event-bp，其中 27 个未匹配病例贡献 +652.01，36 个完整匹配病例贡献 −38.99。\n\n| 支持集合 | 笔数 | 原平均净 bp | 新平均净 bp | 平均变化 bp |\n|---|---:|---:|---:|---:|\n| 完整匹配病例 | 36 | −22.53 | −23.62 | −1.08 |\n| 缺完整匹配病例 | 27 | −22.55 | +1.60 | +24.15 |\n| 全病例 | 63 | −22.54 | −12.81 | +9.73 |\n\n最大改善来自 2023-11-15 15:00 UTC 的事件，增加 419.88bp；第二笔为 2023-06-23 14:00 UTC，增加 312.37bp。两笔都未匹配。最大单笔占所有正改善之和的 38.71%；去掉这一笔作敏感性核对，平均改善降到 +3.12bp；其余 61 笔不含最大两笔时，平均反而恶化 1.95bp。这里是诊断，不是重新定义业绩或删掉赢家；“缺匹配”也不是可用的获利过滤条件。\n\n| 分布诊断 | 原病例 | 新病例 | 原控制 | 新控制 |\n|---|---:|---:|---:|---:|\n| 最小净 bp | −73.58 | −95.38 | −119.16 | −173.56 |\n| 最大净 bp | +33.22 | +424.91 | +472.60 | +472.60 |\n| 偏度 | 0.49 | 4.51 | 6.30 | 4.04 |\n| 1.5 IQR 外点数 | 3 | 8 | 14 | 10 |\n\n所有外点保留。均值改善、中位数恶化、25 笔变差可以同时成立，因为新退出放大了右侧少数大赢家，也放大了多数失败的亏损。不能用这份小样本证明它能稳定抓大趋势。"
+      },
+      {
+        "id": "change_chart",
+        "type": "chart",
+        "layout": "full",
+        "chartId": "scatter"
+      },
+      {
+        "id": "section_7",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 匹配检验、单仓及固定单特征基线\n\n主估计量对原每组计算：病例的“新净−旧净”，减去其原 3 个控制的“新净−旧净”均值。全部 36 组已知，覆盖仅 57.14%。24 个日历月、17 个活跃月；按月保留整组，半年内簇 bootstrap，9,999 次、seed=20260906；单侧月簇符号翻转检验，不做独立交易 t 检验。\n\n| 配对量 | 均值 bp | 95% 区间 bp | 单侧 p |\n|---|---:|---|---:|\n| 原绝对超额 | −3.50 | [−15.27, +7.52] | 0.6374 |\n| 新绝对超额 | −1.44 | [−19.30, +14.51] | 0.5495 |\n| 主检验：增量超额 | +2.06 | [−7.83, +10.61] | 0.3697 |\n\n增量毛收益同为 +2.06bp，成本变化为 0。主量中位 0、标准差 31.53bp；月序列 lag-1 相关 0.074，最大月份占绝对月贡献的 21.78%。月对称、近似独立假设未获独立证明；重复 K1、重叠路径、跨月持仓和反复研究使这些推断只能探索性使用。未搜索其他 p 值或另选显著子组。\n\n独立事件之外，各臂分别按原候选重放单仓：原 63 笔全部接受，新 59 笔、因持仓占用跳过 4 笔。新单仓平均净 −13.29bp、PF 0.534、胜率 15.25%，仍失败。原/新净 event-bp 合计为 −1420.00 / −784.26；这不是复利账户收益，也没有冻结仓位模型可报告杠杆回撤。\n\n本轮没有训练模型，也没有独立 val，故 **val AUC、val 样本数不适用**。固定 K1 实体比例单特征排序仅作开发集描述：原 AUC 0.522、新 0.552；前 ceil(10%)=7 笔原毛/净 +6.11/−13.89bp、胜率 1/7，新 +67.05/+47.05bp、胜率 2/7。此小组不是独立验证，未证明相应匹配超额；不得据其事后选实体阈值或把它当获利版本。"
+      },
+      {
+        "id": "section_8",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 下一步与决策\n\n维持原先的样本、每段样本、PF、正收益、匹配覆盖及显著性要求，不降低门槛。总样本 63<80、末段 6<12、只有一段盈利、PF<1.1、匹配率<90%、p 未达 0.01、区间跨零、绝对超额为负；配置正式拒绝，不能晋级或部署。\n\n下一项允许动作是 **先确认启动、再决定是否入场的时钟审计**：保留全病例和原控制，审查 K2 后等待可观察同向确认时，何时能真正成交、原 K2 极值是否仍构成有效止损，以及未确认/失效请求如何保留。先冻结一个独立的入场假设再计算其经济结果，不先建仓等待方向变对，也不直接删掉全部初始反向信号。不能用“后来终于激活”或大赢家身份选样，更不能把反复使用的 2023–2024 数据称新验证集。\n\n新止损/止盈倍数、成本、阈值预设、holdout 评分、ACTIVE/部署仍需对应授权；本轮没有自动扩权。盈利目标继续 active，当前无通过版。旧 V6 和 V36 的负面结果保留，不因 V37 的均值改善被抹去。"
+      },
+      {
+        "id": "section_9",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 风险与诚实声明\n\n这 63 笔来自复用的开发样本，既不是全部市场机会，也不是前向新鲜 100 笔。仅一个品种、两个历史年；不支持外推至 ETH、XAU 或 15m。固定 20bp 是既定成本假设，不是逐笔真实费率证明；资金费率、真实到达延迟和额外盘口滑点未建模。\n\n源码/计划/测试在 457dc62 先提交，回测收据早于收益文件。两臂入场身份、开盘、止损一致，基线病例和控制的 18 项字段均对回 V36，数值容差 1e−12。100 项新增契约/核算/报告测试通过；原 V36 范围加本轮为 397 通过，另一组合为 351 通过，集合重叠不能相加。没有重跑并宣称全仓绿：V36 扩展检查的 4 个失败仍待其所属问题解决。\n\n报告脚本首次提交多了一个括号，解析失败时未执行报告数据读取、未重新回测；abd0396 修复并增加合成 SQL 测试，之后才生成报告数据。冻结配置没有把测试文件列入运行时 `builder_paths`：实际两份研究测试已在回测前提交，报告逐字节核实，但不能把事实核实说成已有自动守门。\n\nV36 曾发生两次旧 holdout 文本意外展示，详见其历史 QA；未用于 V37 计算，本轮未新增 holdout 读取。不能借本轮限定输入给整条研究历史背书为零暴露。网页最终结构验证见本轮 QA；未宣称已在手机、主题切换或来源弹窗上完成视觉实测。"
+      },
+      {
+        "id": "section_10",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 证据与复现\n\n摘要、原始请求收据、13 个输出的 SHA、报告 SQL 结果及独立复核均位于 `experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/`。原始逐笔 CSV 位于 `data/owner_k1k2_transition_exit_v37/`（按项目规则不入 git）。`report_data.json` 包含四半年/机制/配对的实际 SQLite 查询及其结果、全量散点、分布诊断和回测前测试证明。完整逐笔事件 ID 可在 CSV 查验。\n\n回测构建版本为 `457dc62a10ba592a12babae43417300f852c44e0`，报告复算为 `abd0396`。Python 3.9.6 / pandas 2.3.3 / numpy 2.0.2；未安装或修改依赖。来源与每月 SHA 由 V34 清单和 V36 检查器验证，缺少该已归档输入或原 V36 请求时应停止，不能静默换交易所或重新抽控制。\n\n以下是实际执行顺序。研究命令为一次性写入：**只在已还原上述冻结输入且 V37 输出尚不存在时执行回测**；当前交付目录已有证据，重复执行会拒绝覆盖，不应为重跑删除证据。不需要切分支或建新仓。\n\n```bash\ngit branch --show-current\n.venv/bin/python -m pytest -q tests/test_owner_k1k2_transition_exit.py tests/test_owner_k1k2_exit_transition_contract.py\n.venv/bin/python -m yoyo.evaluation.owner_k1k2_transition_exit\n.venv/bin/python -m pytest -q tests/test_owner_k1k2_transition_report.py\n.venv/bin/python -m yoyo.evaluation.owner_k1k2_transition_report prepare\npython3 scripts/md_to_html.py analysis/p1_btcusdtp_owner_k1k2_transition_exit_v37_20260907.md --out-dir analysis/html\n```\n\n研究构建器必须先提交；最终审核过的报告 MD 也先提交，再执行只读经济结果的 canonical 包装与便携 HTML 交付：\n\n```bash\n.venv/bin/python -m yoyo.evaluation.owner_k1k2_transition_report package\nnode /Users/zhangzc/.codex/plugins/cache/openai-curated-remote/data-analytics/0.2.10-13ceeea1f599/skills/build-report/scripts/deliver_portable_artifact.mjs --input experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/artifact.json --output analysis/html/p1_btcusdtp_owner_k1k2_transition_exit_v37_20260907.html\n```\n\n先 canonical 验证，再便携交付；若只有结构验证，不能声称浏览器 UI 验收。研究假设设计、统计核对与报告流程要求我们同时保留负面比较、匹配支持和尾部诊断，因此不将均值改善包装成赚钱结论。"
+      }
+    ],
+    "charts": [
+      {
+        "id": "folds",
+        "type": "bar",
+        "title": "四个半年每笔净收益",
+        "dataset": "case_folds",
+        "sourceId": "folds",
+        "description": "同一63个形态事件 · 单位bp · 1bp=0.01%",
+        "showDescription": true,
+        "palette": {
+          "kind": "categorical",
+          "name": "blueGold"
+        },
+        "encodings": {
+          "x": {
+            "field": "fold",
+            "type": "nominal"
+          },
+          "y": {
+            "field": "net_bp",
+            "type": "quantitative"
+          },
+          "color": {
+            "field": "arm",
+            "type": "nominal"
+          },
+          "tooltip": [
+            {
+              "field": "trades",
+              "type": "quantitative"
+            },
+            {
+              "field": "gross_bp",
+              "type": "quantitative"
+            }
+          ]
+        }
+      },
+      {
+        "id": "scatter",
+        "type": "scatter",
+        "title": "同一笔交易：状态退出与翻转退出",
+        "dataset": "scatter",
+        "sourceId": "report_data",
+        "description": "横轴原净bp，纵轴新净bp；63笔全部保留",
+        "showDescription": true,
+        "palette": {
+          "kind": "categorical",
+          "name": "blueGold"
+        },
+        "encodings": {
+          "x": {
+            "field": "state_bp",
+            "type": "quantitative"
+          },
+          "y": {
+            "field": "transition_bp",
+            "type": "quantitative"
+          },
+          "color": {
+            "field": "group",
+            "type": "nominal"
+          },
+          "tooltip": [
+            {
+              "field": "event_id",
+              "type": "nominal"
+            },
+            {
+              "field": "decision_time",
+              "type": "nominal"
+            },
+            {
+              "field": "delta_hold_minutes",
+              "type": "quantitative"
+            }
+          ]
+        }
+      }
+    ],
+    "cards": [],
+    "tables": [],
+    "filters": [],
+    "sources": [
+      {
+        "id": "summary",
+        "label": "V37 · 冻结回测摘要",
+        "path": "experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/summary.json"
+      },
+      {
+        "id": "report_data",
+        "label": "V37 · 逐笔变化、分布与集中度复算",
+        "path": "experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/report_data.json"
+      },
+      {
+        "id": "report",
+        "label": "V37 · 定义、结论与复现",
+        "path": "analysis/p1_btcusdtp_owner_k1k2_transition_exit_v37_20260907.md"
+      },
+      {
+        "id": "review",
+        "label": "V37 · 匹配支持与初态独立复核",
+        "path": "experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/REVIEW.md"
+      },
+      {
+        "id": "folds",
+        "label": "V37 · 同名单回测SQL核对",
+        "path": "experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/report_data.json",
+        "query": {
+          "sql": "SELECT cohort,arm,fold,COUNT(*) AS trades,AVG(net_return)*10000 AS net_bp,\n        AVG(gross_return)*10000 AS gross_bp,SUM(net_return>0) AS winners,\n        AVG(hold_minutes) AS hold_minutes FROM main.trades WHERE closed=1\n        GROUP BY cohort,arm,fold ORDER BY fold,cohort,arm",
+          "language": "sql",
+          "engine": "sqlite",
+          "executed_at": "2026-09-07T09:59:44.936704+00:00",
+          "tables_used": [
+            "main.trades"
+          ],
+          "filters": [
+            "same BinanceUSD-M BTCUSDT2023-2024 original63cases108controls; no flow gate; closed results"
+          ],
+          "description": "Original frozen independent-event replay, not a new policy selection",
+          "metric_definitions": {
+            "net_bp": "gross original-notional return minus0.002, times10000; not compounded account PnL"
+          }
+        }
+      },
+      {
+        "id": "mechanisms",
+        "label": "V37 · 同名单回测SQL核对",
+        "path": "experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/report_data.json",
+        "query": {
+          "sql": "SELECT cohort,outcome,CASE WHEN transition_first_armed_at IS NULL THEN 'never_armed'\n        ELSE 'armed' END AS arming,COUNT(*) AS trades,AVG(net_return)*10000 AS net_bp,\n        SUM(net_return>0) AS winners,AVG(hold_minutes) AS hold_minutes\n        FROM main.trades WHERE arm='transition' GROUP BY cohort,outcome,arming ORDER BY cohort,outcome,arming",
+          "language": "sql",
+          "engine": "sqlite",
+          "executed_at": "2026-09-07T09:59:44.936704+00:00",
+          "tables_used": [
+            "main.trades"
+          ],
+          "filters": [
+            "same BinanceUSD-M BTCUSDT2023-2024 original63cases108controls; no flow gate; closed results"
+          ],
+          "description": "Original frozen independent-event replay, not a new policy selection",
+          "metric_definitions": {
+            "net_bp": "gross original-notional return minus0.002, times10000; not compounded account PnL"
+          }
+        }
+      },
+      {
+        "id": "pairs",
+        "label": "V37 · 同名单回测SQL核对",
+        "path": "experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/report_data.json",
+        "query": {
+          "sql": "SELECT fold,COUNT(*) AS pairs,SUM(complete_pair) AS known_pairs,\n        AVG(state_excess_net)*10000 AS state_excess_bp,\n        AVG(transition_excess_net)*10000 AS transition_excess_bp,\n        AVG(delta_excess_net)*10000 AS delta_excess_bp\n        FROM main.pairs GROUP BY fold ORDER BY fold",
+          "language": "sql",
+          "engine": "sqlite",
+          "executed_at": "2026-09-07T09:59:44.936704+00:00",
+          "tables_used": [
+            "main.pairs"
+          ],
+          "filters": [
+            "same BinanceUSD-M BTCUSDT2023-2024 original63cases108controls; no flow gate; closed results"
+          ],
+          "description": "Original frozen independent-event replay, not a new policy selection",
+          "metric_definitions": {
+            "net_bp": "gross original-notional return minus0.002, times10000; not compounded account PnL"
+          }
+        }
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "status": "ready",
+    "generatedAt": "2026-09-07T10:08:24.824547+00:00",
+    "datasets": {
+      "case_folds": [
+        {
+          "cohort": "case",
+          "arm": "状态退出",
+          "fold": "2023H1",
+          "trades": 23,
+          "net_bp": -23.93448315193583,
+          "gross_bp": -3.9344831519358294,
+          "winners": 1,
+          "hold_minutes": 14.565217391304348
+        },
+        {
+          "cohort": "case",
+          "arm": "新翻色退出",
+          "fold": "2023H1",
+          "trades": 23,
+          "net_bp": -19.44267310840426,
+          "gross_bp": 0.5573268915957398,
+          "winners": 2,
+          "hold_minutes": 65.21739130434783
+        },
+        {
+          "cohort": "case",
+          "arm": "状态退出",
+          "fold": "2023H2",
+          "trades": 19,
+          "net_bp": -18.476976475683646,
+          "gross_bp": 1.5230235243163541,
+          "winners": 2,
+          "hold_minutes": 23.68421052631579
+        },
+        {
+          "cohort": "case",
+          "arm": "新翻色退出",
+          "fold": "2023H2",
+          "trades": 19,
+          "net_bp": 13.233032178312234,
+          "gross_bp": 33.233032178312236,
+          "winners": 5,
+          "hold_minutes": 128.68421052631578
+        },
+        {
+          "cohort": "case",
+          "arm": "状态退出",
+          "fold": "2024H1",
+          "trades": 15,
+          "net_bp": -30.634994171554226,
+          "gross_bp": -10.634994171554224,
+          "winners": 2,
+          "hold_minutes": 28.666666666666668
+        },
+        {
+          "cohort": "case",
+          "arm": "新翻色退出",
+          "fold": "2024H1",
+          "trades": 15,
+          "net_bp": -32.36689554689926,
+          "gross_bp": -12.366895546899256,
+          "winners": 2,
+          "hold_minutes": 59.0
+        },
+        {
+          "cohort": "case",
+          "arm": "状态退出",
+          "fold": "2024H2",
+          "trades": 6,
+          "net_bp": -9.820296110347348,
+          "gross_bp": 10.179703889652652,
+          "winners": 1,
+          "hold_minutes": 54.166666666666664
+        },
+        {
+          "cohort": "case",
+          "arm": "新翻色退出",
+          "fold": "2024H2",
+          "trades": 6,
+          "net_bp": -20.95497981021079,
+          "gross_bp": -0.9549798102107914,
+          "winners": 1,
+          "hold_minutes": 70.0
+        }
+      ],
+      "scatter": [
+        {
+          "event_id": "k1k2_3b34bbf7d00963a3298538ea6395de1b6968908c31f3bb08ce50db7cba271bf1",
+          "decision_time": "2023-01-15 12:00:00+00:00",
+          "state_net": -0.005428587961846863,
+          "transition_net": -0.005428587961846863,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -54.28587961846863,
+          "transition_bp": -54.28587961846863,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_0dcaea19598e9ca8c7d101af77f2247c95208a5e96aed2539158b6dc6910ea78",
+          "decision_time": "2023-01-16 11:00:00+00:00",
+          "state_net": -0.0010891571347759737,
+          "transition_net": -0.0010891571347759737,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -10.891571347759736,
+          "transition_bp": -10.891571347759736,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_d61b15795b97ed9ca4aeb82a8b6f083fc2517cf129b0b36c7b5acfd2f437eca0",
+          "decision_time": "2023-01-16 14:00:00+00:00",
+          "state_net": -0.0013808881615259266,
+          "transition_net": -0.0013808881615259266,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -13.808881615259265,
+          "transition_bp": -13.808881615259265,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_87849b97f44142cde183a18d1979231e9e1bfc3fe83a5293d68bfe9a01220f1c",
+          "decision_time": "2023-01-16 15:00:00+00:00",
+          "state_net": -0.0010221830243305457,
+          "transition_net": -0.003749525471173463,
+          "delta_hold_minutes": 20,
+          "color_exit_without_new_flip": true,
+          "state_bp": -10.221830243305456,
+          "transition_bp": -37.49525471173463,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_f8e834b61b4d084787b4626ea7aaf0cd8c6afe89129dafe07433ddf07ed992b5",
+          "decision_time": "2023-01-27 23:00:00+00:00",
+          "state_net": -0.0009304673336030227,
+          "transition_net": 0.0010607764111525437,
+          "delta_hold_minutes": 185,
+          "color_exit_without_new_flip": true,
+          "state_bp": -9.304673336030227,
+          "transition_bp": 10.607764111525437,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_ab06203b7ca39dbaeafb6435e30a868fbb1cdb6f6b73a964c9134ecf908f4e7a",
+          "decision_time": "2023-02-20 17:00:00+00:00",
+          "state_net": -0.0036030598756926473,
+          "transition_net": -0.0036030598756926473,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -36.03059875692647,
+          "transition_bp": -36.03059875692647,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_c13f3c761584651de27e794f8dad04c5024796918265e407fbf6aaf3e8ccbab4",
+          "decision_time": "2023-02-23 14:00:00+00:00",
+          "state_net": -0.0028457875198426557,
+          "transition_net": -0.0011167145112972437,
+          "delta_hold_minutes": 85,
+          "color_exit_without_new_flip": true,
+          "state_bp": -28.457875198426557,
+          "transition_bp": -11.167145112972436,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_f0b4ea35db1cc852f0e7c31ab847b3eaf5833022d88f087eb97d44f58daa1d62",
+          "decision_time": "2023-02-23 15:00:00+00:00",
+          "state_net": 0.0010336619800479525,
+          "transition_net": -0.00127908856792802,
+          "delta_hold_minutes": 25,
+          "color_exit_without_new_flip": true,
+          "state_bp": 10.336619800479525,
+          "transition_bp": -12.7908856792802,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_ba58f06e95509ba16ccf35bf1faa86718665d060bf7f0d2dfbb21f651dc7e42c",
+          "decision_time": "2023-03-07 07:00:00+00:00",
+          "state_net": -0.0021917408733573823,
+          "transition_net": -0.003052345258426457,
+          "delta_hold_minutes": 60,
+          "color_exit_without_new_flip": true,
+          "state_bp": -21.917408733573822,
+          "transition_bp": -30.52345258426457,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_ed07f3fc0cdc0489f33fd650aee65b0e1c170e1cdfbdfc22b3036e011be4cfdd",
+          "decision_time": "2023-03-11 05:00:00+00:00",
+          "state_net": -0.003096895735879233,
+          "transition_net": -0.002211509043241298,
+          "delta_hold_minutes": 80,
+          "color_exit_without_new_flip": true,
+          "state_bp": -30.96895735879233,
+          "transition_bp": -22.11509043241298,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_c7e0a84c703347ae5890f93d927c0b16324cb320f0f61b1c1a2079991b4a7457",
+          "decision_time": "2023-03-11 10:00:00+00:00",
+          "state_net": -0.0024730934334631343,
+          "transition_net": -0.004958078941864395,
+          "delta_hold_minutes": 25,
+          "color_exit_without_new_flip": true,
+          "state_bp": -24.730934334631343,
+          "transition_bp": -49.58078941864395,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_21eba5f69ff566382b9d2d575e2a830007bcf93779a77f0e15575c381ca77e46",
+          "decision_time": "2023-03-11 11:00:00+00:00",
+          "state_net": -0.0033284987963602113,
+          "transition_net": -0.0033284987963602113,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -33.28498796360211,
+          "transition_bp": -33.28498796360211,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_565108a0a390322e95400252e77480813b9f6cc748a3ad83c22161f3f5971e2f",
+          "decision_time": "2023-04-14 21:00:00+00:00",
+          "state_net": -0.0006132015327080503,
+          "transition_net": -0.0032389171141446998,
+          "delta_hold_minutes": 170,
+          "color_exit_without_new_flip": true,
+          "state_bp": -6.132015327080502,
+          "transition_bp": -32.389171141447,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_4d8e92db1233305d8f1ef38f6e436ca65529e2fd6922c89921044f463df64606",
+          "decision_time": "2023-04-14 22:00:00+00:00",
+          "state_net": -0.0019671396368272625,
+          "transition_net": -0.0031731149652667306,
+          "delta_hold_minutes": 110,
+          "color_exit_without_new_flip": true,
+          "state_bp": -19.671396368272624,
+          "transition_bp": -31.731149652667305,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_322a134786f33709d24359828c2adab25b4eb2dc8a268aa4d8cc2b36c2669672",
+          "decision_time": "2023-05-03 19:00:00+00:00",
+          "state_net": -0.002355267277069693,
+          "transition_net": -0.00953799776990638,
+          "delta_hold_minutes": 10,
+          "color_exit_without_new_flip": true,
+          "state_bp": -23.55267277069693,
+          "transition_bp": -95.3799776990638,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_bde72c783091266f2f577d51c67d2246d5718e410cd24c9c5e97c798dbcc42fb",
+          "decision_time": "2023-05-10 07:00:00+00:00",
+          "state_net": -0.003752772204799191,
+          "transition_net": -0.003752772204799191,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -37.527722047991915,
+          "transition_bp": -37.527722047991915,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_bdcd80fc6d3402ad63f427846a20c8ee889f1d8c5c8691043d879e3c98f421bc",
+          "decision_time": "2023-06-13 19:00:00+00:00",
+          "state_net": -0.0022125595649871137,
+          "transition_net": -0.00357680550026873,
+          "delta_hold_minutes": 90,
+          "color_exit_without_new_flip": true,
+          "state_bp": -22.125595649871137,
+          "transition_bp": -35.7680550026873,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_fe285febe4cbadec0e8a2bed1191abcd1c3ad82a2b73354fce5dd96a0d09f924",
+          "decision_time": "2023-06-13 21:00:00+00:00",
+          "state_net": -0.0032424620100790485,
+          "transition_net": -0.0032424620100790485,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -32.424620100790484,
+          "transition_bp": -32.424620100790484,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_8ed4b6689696ebf926793a5eecf67dd7bfc1418ee8d8b3e0c1a06eba5c0042ed",
+          "decision_time": "2023-06-23 12:00:00+00:00",
+          "state_net": -0.005379230677306722,
+          "transition_net": -0.005379230677306722,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -53.79230677306722,
+          "transition_bp": -53.79230677306722,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_98d6ec0bace7a2f2bb7b7e07cdffce2d0f374005ec330dccab3a7a0170c3fc16",
+          "decision_time": "2023-06-23 13:00:00+00:00",
+          "state_net": -0.001810569554206996,
+          "transition_net": -0.001810569554206996,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -18.10569554206996,
+          "transition_bp": -18.10569554206996,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_742e1137b8fcf017f4a4b21550d56a37fc119e6d750ed7caab236fb345bbbdb5",
+          "decision_time": "2023-06-23 14:00:00+00:00",
+          "state_net": -0.0024124630363265825,
+          "transition_net": 0.028824959335801426,
+          "delta_hold_minutes": 265,
+          "color_exit_without_new_flip": true,
+          "state_bp": -24.124630363265826,
+          "transition_bp": 288.24959335801424,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_20d0eb9e21b7f88fba7deb2668be95639493907ffdd609c2a0984e0c2886ce40",
+          "decision_time": "2023-06-25 09:00:00+00:00",
+          "state_net": -0.002989328916066512,
+          "transition_net": -0.004313858089879273,
+          "delta_hold_minutes": 20,
+          "color_exit_without_new_flip": true,
+          "state_bp": -29.89328916066512,
+          "transition_bp": -43.138580898792725,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_9be80c83ec8e4bf69d8647f2185f956dc16cd626ed111c848cdaf2cf8b8b52b6",
+          "decision_time": "2023-06-25 10:00:00+00:00",
+          "state_net": -0.001957618968445594,
+          "transition_net": -0.005380702286293502,
+          "delta_hold_minutes": 20,
+          "color_exit_without_new_flip": true,
+          "state_bp": -19.57618968445594,
+          "transition_bp": -53.80702286293502,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_b1dc251f7899b5c49522ec41980e92eba6ad7e164ac58984a47bd62713d58dcb",
+          "decision_time": "2023-07-18 02:00:00+00:00",
+          "state_net": -0.0021721945533537106,
+          "transition_net": 0.003145967998304579,
+          "delta_hold_minutes": 385,
+          "color_exit_without_new_flip": true,
+          "state_bp": -21.721945533537106,
+          "transition_bp": 31.459679983045792,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_55dcea882250e7b4afa1c8b074dce2773442dced9bd968a1434992028833c37e",
+          "decision_time": "2023-07-26 07:00:00+00:00",
+          "state_net": -0.001589021391436683,
+          "transition_net": -0.0021541169782113272,
+          "delta_hold_minutes": 15,
+          "color_exit_without_new_flip": true,
+          "state_bp": -15.890213914366829,
+          "transition_bp": -21.541169782113272,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_9f0e67a77ca9a3947b3978128122add945b1a69e8c2a3618a31c1f0e8c609437",
+          "decision_time": "2023-07-26 10:00:00+00:00",
+          "state_net": -0.002435244525172185,
+          "transition_net": -0.002993865451180631,
+          "delta_hold_minutes": 10,
+          "color_exit_without_new_flip": true,
+          "state_bp": -24.35244525172185,
+          "transition_bp": -29.938654511806313,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_a965d1d9ee10dabab8f19b92f6aaf82fa0b15c3ac2ed39b819d779ce0e6c4eaf",
+          "decision_time": "2023-07-26 11:00:00+00:00",
+          "state_net": -0.0016607276877049753,
+          "transition_net": -0.0019006172014488492,
+          "delta_hold_minutes": 25,
+          "color_exit_without_new_flip": true,
+          "state_bp": -16.607276877049753,
+          "transition_bp": -19.00617201448849,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_69dded56b1f504a23e1a8fcc266ae063f17bec5b67eaa80b2ffd8798e8704f33",
+          "decision_time": "2023-08-06 15:00:00+00:00",
+          "state_net": -0.0020482279667088914,
+          "transition_net": -0.0020482279667088914,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -20.482279667088914,
+          "transition_bp": -20.482279667088914,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_08364fa93227407acc994d23f6e872787a6f4491444b3e4a356b4a256fa5d661",
+          "decision_time": "2023-08-12 19:00:00+00:00",
+          "state_net": -0.0021971588726592533,
+          "transition_net": -0.002397717036226264,
+          "delta_hold_minutes": 15,
+          "color_exit_without_new_flip": true,
+          "state_bp": -21.971588726592532,
+          "transition_bp": -23.97717036226264,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_f7a0c7bd844a182c425313ae413cec272fd838de98a08d6c093c61fb5c34fb36",
+          "decision_time": "2023-08-12 22:00:00+00:00",
+          "state_net": -0.0013777944001496217,
+          "transition_net": -0.0013777944001496217,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -13.777944001496216,
+          "transition_bp": -13.777944001496216,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_fe5894bf350b8e1943be5adbe25a72c0ab7b65453e2e5ebfa6da3fdcff1a83e7",
+          "decision_time": "2023-09-17 03:00:00+00:00",
+          "state_net": -0.0017131231079335878,
+          "transition_net": -0.0017131231079335878,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -17.13123107933588,
+          "transition_bp": -17.13123107933588,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_11eabd7561f9c730269ccc3ce5607f4b62387435df200870212efc8f0cd40934",
+          "decision_time": "2023-10-18 18:00:00+00:00",
+          "state_net": -0.0015549621717845224,
+          "transition_net": 0.00016161230847478066,
+          "delta_hold_minutes": 225,
+          "color_exit_without_new_flip": true,
+          "state_bp": -15.549621717845223,
+          "transition_bp": 1.6161230847478065,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_935a2c2b0bef064c428a7558dbc725eea7ae9bea820019a07848bf122a055c55",
+          "decision_time": "2023-11-15 14:00:00+00:00",
+          "state_net": -0.0016954005482789896,
+          "transition_net": -0.0016954005482789896,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -16.954005482789896,
+          "transition_bp": -16.954005482789896,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_04b4020652275e33ebd9b040bace24a2d22b26f16b8d5c8eef8052e565b94bb2",
+          "decision_time": "2023-11-15 15:00:00+00:00",
+          "state_net": 0.0005026299761918835,
+          "transition_net": 0.04249089197718847,
+          "delta_hold_minutes": 575,
+          "color_exit_without_new_flip": true,
+          "state_bp": 5.026299761918835,
+          "transition_bp": 424.9089197718847,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_d9e32b0eff3f58804907edcd556bd83ac9b17b29ee295d1cfbb0a75ad3dd8c6f",
+          "decision_time": "2023-11-21 18:00:00+00:00",
+          "state_net": -0.0030809024316240646,
+          "transition_net": -0.0030809024316240646,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -30.809024316240645,
+          "transition_bp": -30.809024316240645,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_9d8574359bb915f972009d8e8bef2e20c425388b5c3f18d1b530ffb73a8869d4",
+          "decision_time": "2023-11-29 23:00:00+00:00",
+          "state_net": -0.0009570566762933091,
+          "transition_net": -0.002690883775349205,
+          "delta_hold_minutes": 10,
+          "color_exit_without_new_flip": true,
+          "state_bp": -9.57056676293309,
+          "transition_bp": -26.908837753492048,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_a1ab3fe7730814cc6728c76275c7aa6faddd65c191cfb9fffdc90debe6063f66",
+          "decision_time": "2023-12-07 16:00:00+00:00",
+          "state_net": -0.0031630036630037033,
+          "transition_net": 0.00605402930402932,
+          "delta_hold_minutes": 300,
+          "color_exit_without_new_flip": true,
+          "state_bp": -31.630036630037033,
+          "transition_bp": 60.5402930402932,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_bf8d1f1fbc4ccdeb9ac5fc7580fa0add363cad6ac677bd1fe54d2fd623532d3e",
+          "decision_time": "2023-12-07 17:00:00+00:00",
+          "state_net": 0.00026488129963009484,
+          "transition_net": 0.006755253266347851,
+          "delta_hold_minutes": 240,
+          "color_exit_without_new_flip": true,
+          "state_bp": 2.6488129963009484,
+          "transition_bp": 67.55253266347852,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_66955fe17ef9026a5b63a8e9a296f049e155d92d8fd4df2ef261392ce81b6862",
+          "decision_time": "2023-12-16 21:00:00+00:00",
+          "state_net": -0.0016718579215622125,
+          "transition_net": -0.004410309799172339,
+          "delta_hold_minutes": 45,
+          "color_exit_without_new_flip": true,
+          "state_bp": -16.718579215622125,
+          "transition_bp": -44.10309799172339,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_7c65202b9b8eb5ce8f0a3154c8e39f973ef2e6423410155b4abf2149fb6ff68c",
+          "decision_time": "2023-12-18 18:00:00+00:00",
+          "state_net": -0.004415289750234972,
+          "transition_net": -0.004415289750234972,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -44.152897502349724,
+          "transition_bp": -44.152897502349724,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_2af72034f7f1e4c0dddb21583ca7905278b0d090078cda67c1f90a644be2d65b",
+          "decision_time": "2023-12-22 12:00:00+00:00",
+          "state_net": -0.0019680242650150764,
+          "transition_net": -0.002157594693855234,
+          "delta_hold_minutes": 95,
+          "color_exit_without_new_flip": true,
+          "state_bp": -19.680242650150763,
+          "transition_bp": -21.57594693855234,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_6b32ec6ff2917155e4e127980fbb9e8f06803a4bfac231c22d6309ade0339b4d",
+          "decision_time": "2023-12-22 14:00:00+00:00",
+          "state_net": -0.0021737766467051483,
+          "transition_net": -0.0004291505751777818,
+          "delta_hold_minutes": 55,
+          "color_exit_without_new_flip": true,
+          "state_bp": -21.737766467051483,
+          "transition_bp": -4.291505751777818,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_50465178e8ba7308be5c3364a83608dda250752969bd44118c39f3e96197047e",
+          "decision_time": "2024-02-18 21:00:00+00:00",
+          "state_net": 0.0033224645442422335,
+          "transition_net": 0.0033224645442422335,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": 33.224645442422336,
+          "transition_bp": 33.224645442422336,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_36dc64465f9deb4df868cdc31606bd58eb0fdaeff23d9d45ea6618bc634dfa7a",
+          "decision_time": "2024-02-29 22:00:00+00:00",
+          "state_net": -0.004241364155752934,
+          "transition_net": -0.005784438389343059,
+          "delta_hold_minutes": 115,
+          "color_exit_without_new_flip": true,
+          "state_bp": -42.41364155752934,
+          "transition_bp": -57.84438389343059,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_3f69f4a91df368ccb3f42104e5407858faa91c517f85557b9f93c0e7c0c4f98a",
+          "decision_time": "2024-03-06 13:00:00+00:00",
+          "state_net": 6.060606060566756e-06,
+          "transition_net": 0.00137878787878787,
+          "delta_hold_minutes": 105,
+          "color_exit_without_new_flip": true,
+          "state_bp": 0.06060606060566756,
+          "transition_bp": 13.7878787878787,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_3103287c8b5bb5e04aadb6f38830127158c823ffb862315dbed0cedcd9e29ddf",
+          "decision_time": "2024-03-06 14:00:00+00:00",
+          "state_net": -0.004575533933789176,
+          "transition_net": -0.004575533933789176,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -45.75533933789176,
+          "transition_bp": -45.75533933789176,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_76ffac435ebabc105e45e47aca8efe23c8a911c9f954c2e97125e486e830c51c",
+          "decision_time": "2024-03-06 16:00:00+00:00",
+          "state_net": -0.00403783214334563,
+          "transition_net": -0.00403783214334563,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -40.37832143345631,
+          "transition_bp": -40.37832143345631,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_e2f73903d532b177db9f838667926d1e981aff03dedf83c5ccc53c56a146baf8",
+          "decision_time": "2024-03-24 03:00:00+00:00",
+          "state_net": -0.003487972610109134,
+          "transition_net": -0.004035272880494099,
+          "delta_hold_minutes": 5,
+          "color_exit_without_new_flip": true,
+          "state_bp": -34.87972610109134,
+          "transition_bp": -40.35272880494099,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_2c912df199b9c77f54607b8a419118a90270b24433ec2da3a294dedea287be04",
+          "decision_time": "2024-03-27 12:00:00+00:00",
+          "state_net": -0.0033273543111274045,
+          "transition_net": -0.0015049096460103533,
+          "delta_hold_minutes": 55,
+          "color_exit_without_new_flip": true,
+          "state_bp": -33.273543111274044,
+          "transition_bp": -15.049096460103533,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_838354693e9203fc9b5df8d702e355ac66da52ceefda5367d9f708ce6f361e0c",
+          "decision_time": "2024-03-27 13:00:00+00:00",
+          "state_net": -0.004485218218101437,
+          "transition_net": -0.004485218218101437,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -44.85218218101437,
+          "transition_bp": -44.85218218101437,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_2b7ae28a734398df1e84d03ef0cc362b1b65d9d313178ca2cbedfa772388b434",
+          "decision_time": "2024-03-29 12:00:00+00:00",
+          "state_net": -0.004162916945699145,
+          "transition_net": -0.0012120599005456239,
+          "delta_hold_minutes": 15,
+          "color_exit_without_new_flip": true,
+          "state_bp": -41.62916945699145,
+          "transition_bp": -12.120599005456238,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_f6b2806eb83ec261d3e5045bebc7e17c6330f97d83a269bb967a2a5c4c9cbec9",
+          "decision_time": "2024-03-29 13:00:00+00:00",
+          "state_net": -0.0010370384087771117,
+          "transition_net": -0.004232190552435176,
+          "delta_hold_minutes": 30,
+          "color_exit_without_new_flip": true,
+          "state_bp": -10.370384087771116,
+          "transition_bp": -42.32190552435176,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_93015ffb599bf6496f1d204466a9d5b1ac7ea6cfe45d4e25e2616481088c456f",
+          "decision_time": "2024-04-19 04:00:00+00:00",
+          "state_net": -0.007358088381740789,
+          "transition_net": -0.007358088381740789,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -73.5808838174079,
+          "transition_bp": -73.5808838174079,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_c5085ac6816f7829b4e511544e31ce1b39bb5db9b5884e92aa1e89c871c61153",
+          "decision_time": "2024-04-30 06:00:00+00:00",
+          "state_net": -0.002428147118301303,
+          "transition_net": -0.0058865015166835715,
+          "delta_hold_minutes": 130,
+          "color_exit_without_new_flip": true,
+          "state_bp": -24.281471183013032,
+          "transition_bp": -58.86501516683572,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_f7532a8607f1416eb3d57e16a4294f65aa9cbc9afb1d583bdcb07fc0286fc33b",
+          "decision_time": "2024-05-07 11:00:00+00:00",
+          "state_net": -0.0034422356525647384,
+          "transition_net": -0.0034422356525647384,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -34.42235652564739,
+          "transition_bp": -34.42235652564739,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_a1faf73ea5616dc192a22bcc0364538867aaed91910c788d08928829d59f6888",
+          "decision_time": "2024-05-20 09:00:00+00:00",
+          "state_net": -0.004482966133061204,
+          "transition_net": -0.004482966133061204,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -44.82966133061204,
+          "transition_bp": -44.82966133061204,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_f9d2781d5ab203bab911ba03a4a26ac905ec81d09fab3cef896100a01223044c",
+          "decision_time": "2024-06-09 15:00:00+00:00",
+          "state_net": -0.00221434839526413,
+          "transition_net": -0.00221434839526413,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -22.1434839526413,
+          "transition_bp": -22.1434839526413,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_2f92c7fc0655ba5d31fc7db35c34b3a7678ec4f4bd6cc3ec9ca8c9d4fe3bc851",
+          "decision_time": "2024-07-07 19:00:00+00:00",
+          "state_net": -0.0005912954307223366,
+          "transition_net": -0.0011880261861556534,
+          "delta_hold_minutes": 40,
+          "color_exit_without_new_flip": true,
+          "state_bp": -5.912954307223366,
+          "transition_bp": -11.880261861556534,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_93bfb274efcfa5403aa7f0fb2580ab562dbbc6b61883a7d584441776c9e6d69a",
+          "decision_time": "2024-08-20 19:00:00+00:00",
+          "state_net": -0.003259347911341857,
+          "transition_net": -0.006841305259172035,
+          "delta_hold_minutes": 40,
+          "color_exit_without_new_flip": true,
+          "state_bp": -32.593479113418574,
+          "transition_bp": -68.41305259172036,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_b0103fc521440ca2658d617dc60660e1e1a6778452b9bf4171f0e2e2fe833952",
+          "decision_time": "2024-09-23 01:00:00+00:00",
+          "state_net": 0.0032933364384217807,
+          "transition_net": 0.0032933364384217807,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": 32.9333643842178,
+          "transition_bp": 32.9333643842178,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_097aa4a6d902fa44aa8479c9f400816f5f759423be4ba1e168e5ba29771395f3",
+          "decision_time": "2024-09-24 07:00:00+00:00",
+          "state_net": -0.0029118824446034957,
+          "transition_net": -0.003648342096571165,
+          "delta_hold_minutes": 5,
+          "color_exit_without_new_flip": true,
+          "state_bp": -29.118824446034957,
+          "transition_bp": -36.48342096571165,
+          "group": "原反色延续38笔"
+        },
+        {
+          "event_id": "k1k2_4974f8dba93e0f7718dd81ab99bc984172a4b6e07f350e08beb8a61361d28f03",
+          "decision_time": "2024-12-01 11:00:00+00:00",
+          "state_net": -0.0007632616444903633,
+          "transition_net": -0.0007632616444903633,
+          "delta_hold_minutes": 0,
+          "color_exit_without_new_flip": false,
+          "state_bp": -7.632616444903633,
+          "transition_bp": -7.632616444903633,
+          "group": "其他25笔"
+        },
+        {
+          "event_id": "k1k2_a3d7234d53fb78a929b4c30676dda77a20b5e58556ab93eb88f87b400a132ad4",
+          "decision_time": "2024-12-14 23:00:00+00:00",
+          "state_net": -0.0016597266734721377,
+          "transition_net": -0.003425389138159039,
+          "delta_hold_minutes": 10,
+          "color_exit_without_new_flip": true,
+          "state_bp": -16.597266734721376,
+          "transition_bp": -34.25389138159039,
+          "group": "原反色延续38笔"
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "summary",
+      "label": "V37 · 冻结回测摘要",
+      "path": "experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/summary.json"
+    },
+    {
+      "id": "report_data",
+      "label": "V37 · 逐笔变化、分布与集中度复算",
+      "path": "experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/report_data.json"
+    },
+    {
+      "id": "report",
+      "label": "V37 · 定义、结论与复现",
+      "path": "analysis/p1_btcusdtp_owner_k1k2_transition_exit_v37_20260907.md"
+    },
+    {
+      "id": "review",
+      "label": "V37 · 匹配支持与初态独立复核",
+      "path": "experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/REVIEW.md"
+    },
+    {
+      "id": "folds",
+      "label": "V37 · 同名单回测SQL核对",
+      "path": "experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/report_data.json",
+      "query": {
+        "sql": "SELECT cohort,arm,fold,COUNT(*) AS trades,AVG(net_return)*10000 AS net_bp,\n        AVG(gross_return)*10000 AS gross_bp,SUM(net_return>0) AS winners,\n        AVG(hold_minutes) AS hold_minutes FROM main.trades WHERE closed=1\n        GROUP BY cohort,arm,fold ORDER BY fold,cohort,arm",
+        "language": "sql",
+        "engine": "sqlite",
+        "executed_at": "2026-09-07T09:59:44.936704+00:00",
+        "tables_used": [
+          "main.trades"
+        ],
+        "filters": [
+          "same BinanceUSD-M BTCUSDT2023-2024 original63cases108controls; no flow gate; closed results"
+        ],
+        "description": "Original frozen independent-event replay, not a new policy selection",
+        "metric_definitions": {
+          "net_bp": "gross original-notional return minus0.002, times10000; not compounded account PnL"
+        }
+      }
+    },
+    {
+      "id": "mechanisms",
+      "label": "V37 · 同名单回测SQL核对",
+      "path": "experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/report_data.json",
+      "query": {
+        "sql": "SELECT cohort,outcome,CASE WHEN transition_first_armed_at IS NULL THEN 'never_armed'\n        ELSE 'armed' END AS arming,COUNT(*) AS trades,AVG(net_return)*10000 AS net_bp,\n        SUM(net_return>0) AS winners,AVG(hold_minutes) AS hold_minutes\n        FROM main.trades WHERE arm='transition' GROUP BY cohort,outcome,arming ORDER BY cohort,outcome,arming",
+        "language": "sql",
+        "engine": "sqlite",
+        "executed_at": "2026-09-07T09:59:44.936704+00:00",
+        "tables_used": [
+          "main.trades"
+        ],
+        "filters": [
+          "same BinanceUSD-M BTCUSDT2023-2024 original63cases108controls; no flow gate; closed results"
+        ],
+        "description": "Original frozen independent-event replay, not a new policy selection",
+        "metric_definitions": {
+          "net_bp": "gross original-notional return minus0.002, times10000; not compounded account PnL"
+        }
+      }
+    },
+    {
+      "id": "pairs",
+      "label": "V37 · 同名单回测SQL核对",
+      "path": "experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/report_data.json",
+      "query": {
+        "sql": "SELECT fold,COUNT(*) AS pairs,SUM(complete_pair) AS known_pairs,\n        AVG(state_excess_net)*10000 AS state_excess_bp,\n        AVG(transition_excess_net)*10000 AS transition_excess_bp,\n        AVG(delta_excess_net)*10000 AS delta_excess_bp\n        FROM main.pairs GROUP BY fold ORDER BY fold",
+        "language": "sql",
+        "engine": "sqlite",
+        "executed_at": "2026-09-07T09:59:44.936704+00:00",
+        "tables_used": [
+          "main.pairs"
+        ],
+        "filters": [
+          "same BinanceUSD-M BTCUSDT2023-2024 original63cases108controls; no flow gate; closed results"
+        ],
+        "description": "Original frozen independent-event replay, not a new policy selection",
+        "metric_definitions": {
+          "net_bp": "gross original-notional return minus0.002, times10000; not compounded account PnL"
+        }
+      }
+    }
+  ]
+}

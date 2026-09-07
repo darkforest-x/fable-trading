@@ -72,14 +72,14 @@
 
 V36 的 38 笔“首个 5m 反色延续退出”是回测前声明的诊断组，不是本轮挑出来的入场名单。63 笔全量比较后才连接这个标签。
 
-| 原诊断分组 | 笔数 | 改善 / 恶化 / 不变 | 平均变化 bp | 延长后仍亏损 |
+| 原诊断分组 | 笔数 | 改善 / 恶化 / 不变 | 平均变化 bp | 持仓延长且新净亏笔数 |
 |---|---:|---|---:|---:|
 | 原反色延续早退病例 | 38 | 13 / 25 / 0 | +16.13 | 30 |
 | 其他病例 | 25 | 0 / 0 / 25 | 0.00 | 0 |
 | 早退病例所对应的原控制 | 66 | 23 / 32 / 11 | −6.56 | 45 |
 | 其他病例所对应的原控制 | 42 | 8 / 7 / 27 | +2.21 | 11 |
 
-控制按所属病例分组，66/42 的分母不能误写成病例的 38/25。全病例中救回 5 笔净赢家，同时损失 1 笔原净赢家；变化不是单向改进。
+最后一列同时要求持仓时间增加、新净收益为负；其他 25 笔中的 23 笔仍净亏，但均未延长，故该列为 0。控制按所属病例分组，66/42 的分母不能误写成病例的 38/25。全病例中救回 5 笔净赢家，同时损失 1 笔原净赢家；变化不是单向改进。
 
 | V37 实际退出机制 | 病例数 | 平均净 bp | 控制数 | 平均净 bp |
 |---|---:|---:|---:|---:|
@@ -110,7 +110,7 @@ V36 的 38 笔“首个 5m 反色延续退出”是回测前声明的诊断组�
 | 偏度 | 0.49 | 4.51 | 6.30 | 4.04 |
 | 1.5 IQR 外点数 | 3 | 8 | 14 | 10 |
 
-所有外点保留。均值改善、中位数恶化、25 笔变差可以同时成立，因为新退出放大了右侧少数大赢家，也放大了多数失败的亏损。不能用这份小样本证明它能稳定抓大趋势。
+所有外点保留。均值改善、中位数恶化可以同时成立：新退出放大右侧少数大赢家，但 38 个受影响事件中有 25 笔收益恶化。不能用这份小样本证明它能稳定抓大趋势。
 
 ## 匹配检验、单仓及固定单特征基线
 
@@ -140,7 +140,7 @@ V36 的 38 笔“首个 5m 反色延续退出”是回测前声明的诊断组�
 
 这 63 笔来自复用的开发样本，既不是全部市场机会，也不是前向新鲜 100 笔。仅一个品种、两个历史年；不支持外推至 ETH、XAU 或 15m。固定 20bp 是既定成本假设，不是逐笔真实费率证明；资金费率、真实到达延迟和额外盘口滑点未建模。
 
-源码/计划/测试在 457dc62 先提交，回测收据早于收益文件。两臂入场身份、开盘、止损一致，基线病例和控制的 18 项字段均对回 V36，数值容差 1e−12。100 项新增契约/核算/报告测试通过；原 V36 范围加本轮为 397 通过，另一组合为 351 通过，集合重叠不能相加。没有重跑并宣称全仓绿：V36 扩展检查的 4 个失败仍待其所属问题解决。
+源码/计划/测试在 457dc62 先提交，回测收据早于收益文件。两臂入场身份、开盘、止损一致，基线病例和控制的 18 项字段均对回 V36，数值容差 1e−12。新增契约/核算测试 98 项通过，最终报告测试 3 项通过；原 V36 范围加本轮最终为 398 通过，较早另一组合为 351 通过，集合重叠不能相加。没有重跑并宣称全仓绿：V36 扩展检查的 4 个失败仍待其所属问题解决。
 
 报告脚本首次提交多了一个括号，解析失败时未执行报告数据读取、未重新回测；abd0396 修复并增加合成 SQL 测试，之后才生成报告数据。冻结配置没有把测试文件列入运行时 `builder_paths`：实际两份研究测试已在回测前提交，报告逐字节核实，但不能把事实核实说成已有自动守门。
 
@@ -166,8 +166,8 @@ python3 scripts/md_to_html.py analysis/p1_btcusdtp_owner_k1k2_transition_exit_v3
 研究构建器必须先提交；最终审核过的报告 MD 也先提交，再执行只读经济结果的 canonical 包装与便携 HTML 交付：
 
 ```bash
-.venv/bin/python -m yoyo.evaluation.owner_k1k2_transition_report package
-node /Users/zhangzc/.codex/plugins/cache/openai-curated-remote/data-analytics/0.2.10-13ceeea1f599/skills/build-report/scripts/deliver_portable_artifact.mjs --input experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/artifact.json --output analysis/html/p1_btcusdtp_owner_k1k2_transition_exit_v37_20260907.html
+.venv/bin/python -m yoyo.evaluation.owner_k1k2_transition_report package --artifact-name artifact_reviewed.json
+node /Users/zhangzc/.codex/plugins/cache/openai-curated-remote/data-analytics/0.2.10-13ceeea1f599/skills/build-report/scripts/deliver_portable_artifact.mjs --input experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/artifact_reviewed.json --output analysis/html/p1_btcusdtp_owner_k1k2_transition_exit_v37_20260907.html
 ```
 
 先 canonical 验证，再便携交付；若只有结构验证，不能声称浏览器 UI 验收。研究假设设计、统计核对与报告流程要求我们同时保留负面比较、匹配支持和尾部诊断，因此不将均值改善包装成赚钱结论。

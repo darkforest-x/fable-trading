@@ -2,8 +2,14 @@
 import sqlite3
 
 import pandas as pd
+import pytest
 
-from yoyo.evaluation.owner_k1k2_transition_report import QUERIES
+from yoyo.evaluation.owner_k1k2_transition_report import QUERIES, package
+
+
+def test_package_rejects_uncontrolled_output_before_reading_files():
+    with pytest.raises(ValueError, match="named, one-shot"):
+        package("../other.json")
 
 
 def test_fold_and_mechanism_queries_preserve_population_and_null_arming():

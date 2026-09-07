@@ -100,7 +100,9 @@ def prepare():
     print(json.dumps(clean(dict(data={k:v for k,v in data.items() if k!="scatter"},diagnostics=diagnostics,concentration=concentration)),indent=2))
 
 
-def package():
+def package(artifact_name="artifact.json"):
+    if artifact_name not in {"artifact.json", "artifact_reviewed.json"}:
+        raise ValueError("Only named, one-shot report artifacts are allowed")
     commit,s=guard(); saved=json.loads((HERE/"report_data.json").read_text())
     if saved["summary_sha256"]!=sha(HERE/"summary.json"): raise ValueError("Summary drift")
     if subprocess.check_output(["git","show",commit+":"+REPORT],cwd=ROOT)!=(ROOT/REPORT).read_bytes():
@@ -136,12 +138,14 @@ def package():
     artifact=dict(surface="report",manifest=dict(version=1,surface="report",title=TITLE,generatedAt=stamp,
         blocks=blocks,charts=charts,cards=[],tables=[],filters=[],sources=sources),
         snapshot=dict(version=1,status="ready",generatedAt=stamp,datasets=dict(case_folds=folddata,scatter=saved["data"]["scatter"])),sources=sources)
-    write_json(HERE/"artifact.json",artifact)
-    write_json(HERE/"artifact_build_receipt.json",dict(source_commit=commit,generated_at=stamp,
+    write_json(HERE/artifact_name,artifact)
+    write_json(HERE/artifact_name.replace(".json", "_build_receipt.json"),dict(source_commit=commit,generated_at=stamp,
         summary_sha256=sha(HERE/"summary.json"),report_sha256=sha(ROOT/REPORT),report_data_sha256=sha(HERE/"report_data.json")))
     print(json.dumps(dict(sections=len(sections),charts=2)))
 
 
 if __name__=="__main__":
     p=argparse.ArgumentParser(); p.add_argument("phase",choices=["prepare","package"])
-    {"prepare":prepare,"package":package}[p.parse_args().phase]()
+    p.add_argument("--artifact-name",choices=["artifact.json","artifact_reviewed.json"],default="artifact.json")
+    args=p.parse_args()
+    prepare() if args.phase=="prepare" else package(args.artifact_name)
