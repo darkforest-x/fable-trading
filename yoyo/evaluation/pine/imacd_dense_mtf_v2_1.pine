@@ -334,12 +334,12 @@ color referenceMaColor = darkTheme ? #D6D9E0 : #3B414C
 bool visibleSystemLong = showMarks and longSignal and not (showFocus and focusRelease and focusReleaseSide == 1)
 bool visibleSystemShort = showMarks and shortSignal and not (showFocus and focusRelease and focusReleaseSide == -1)
 var array<label> systemPriceTags = array.new<label>()
-if barstate.isconfirmed and ready and showPriceText and (visibleSystemLong or visibleSystemShort)
+if barstate.isconfirmed and ready and (visibleSystemLong or visibleSystemShort)
     bool systemLong = visibleSystemLong
     color systemTagColor = systemLong ? bull : bear
-    string systemTagText = (systemLong ? "系统启动 ↑" : "系统启动 ↓") + "\n收盘 " + str.tostring(close, format.mintick)
-    string systemTagTip = "原系统" + (systemLong ? "多头" : "空头") + "启动，本K线已收盘确认。\n" + systemDetail + "\n" + candleDetail + "\n标签为信号K线收盘价。"
-    label systemPriceTag = label.new(time, systemLong ? low : high, systemTagText, xloc=xloc.bar_time, yloc=systemLong ? yloc.belowbar : yloc.abovebar, style=systemLong ? label.style_label_up : label.style_label_down, color=color.new(systemTagColor, darkTheme ? 87 : 90), textcolor=systemTagColor, size=size.small, tooltip=systemTagTip, force_overlay=true)
+    string systemTagText = showPriceText ? (systemLong ? "系统启动 ↑" : "系统启动 ↓") + "\n收盘 " + str.tostring(close, format.mintick) : showSignalText ? (systemLong ? "多" : "空") : ""
+    string systemTagTip = "原系统" + (systemLong ? "多头" : "空头") + "启动，本K线已收盘确认。\n" + systemDetail + "\n" + candleDetail + "\n价格为信号K线收盘价；最多保留最近80个普通系统标记。"
+    label systemPriceTag = label.new(time, systemLong ? low : high, systemTagText, xloc=xloc.bar_time, yloc=systemLong ? yloc.belowbar : yloc.abovebar, style=showPriceText ? (systemLong ? label.style_label_up : label.style_label_down) : (systemLong ? label.style_triangleup : label.style_triangledown), color=showPriceText ? color.new(systemTagColor, darkTheme ? 87 : 90) : systemTagColor, textcolor=systemTagColor, size=showPriceText ? size.small : size.tiny, tooltip=systemTagTip, force_overlay=true)
     array.push(systemPriceTags, systemPriceTag)
     if array.size(systemPriceTags) > 80
         label.delete(array.shift(systemPriceTags))
@@ -376,12 +376,8 @@ plot(showMa ? retestMa : na, "回踩参考 · 选中均线", color=color.new(ref
 // is na elsewhere, so the overlay never redraws the entire native chart.
 plotcandle(paintRetest ? open : na, paintRetest ? high : na, paintRetest ? low : na, paintRetest ? close : na, title="蓄势区 · 影线回踩K线", color=retestColor, wickcolor=retestColor, bordercolor=retestColor, force_overlay=true, display=display.pane)
 plotshape(showRetest and showRetestTouch and retestSide != 0 ? retestMa : na, title="蓄势区 · 影线触点", style=shape.circle, location=location.absolute, color=retestColor, size=size.tiny, force_overlay=true, display=display.pane)
-plotshape(visibleSystemLong and not showSignalText and not showPriceText, title="原系统多头启动", style=shape.triangleup, location=location.belowbar, color=bull, size=size.tiny, force_overlay=true, display=display.pane)
-plotshape(visibleSystemShort and not showSignalText and not showPriceText, title="原系统空头启动", style=shape.triangledown, location=location.abovebar, color=bear, size=size.tiny, force_overlay=true, display=display.pane)
 plotshape(showMarks and exitLong, title="原系统多头结束", style=shape.xcross, location=location.abovebar, color=color.new(ink, 55), size=size.tiny, force_overlay=true, display=display.pane)
 plotshape(showMarks and exitShort, title="原系统空头结束", style=shape.xcross, location=location.belowbar, color=color.new(ink, 55), size=size.tiny, force_overlay=true, display=display.pane)
-plotshape(visibleSystemLong and showSignalText and not showPriceText, title="原系统多头文字", text="多", style=shape.triangleup, location=location.belowbar, color=bull, textcolor=bull, size=size.tiny, force_overlay=true, display=display.pane)
-plotshape(visibleSystemShort and showSignalText and not showPriceText, title="原系统空头文字", text="空", style=shape.triangledown, location=location.abovebar, color=bear, textcolor=bear, size=size.tiny, force_overlay=true, display=display.pane)
 plot(priorWidth, "形成带宽/ATR", display=display.data_window)
 plot(priorCrosses, "形成交织次数", display=display.data_window)
 plot(trendSide, "原系统持有方向 1多 -1空 0等待", display=display.data_window)
