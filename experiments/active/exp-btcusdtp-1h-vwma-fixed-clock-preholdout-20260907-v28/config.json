@@ -1,0 +1,117 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28",
+  "inputs": {
+    "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/config.json": "6784ab472b225dee843d1ee132628e99b625e0bb5c5f10dda8000b5858d7fe64",
+    "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results/started.json": "b6f709c71297cca80f0f675126f185306ee13d8b26757b19782976d766abfdb8",
+    "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results/support_frozen.json": "d8128d90d9af4b349be6ea1ddfde991a6eed33902b956f275e04647856636b36",
+    "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results/reference_rebuilt.json": "8f5a9ea84281114ba242ec608258189015513bc752646aff3686f89e8571ea79",
+    "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results/summary.json": "ef5d56790c7cf1f564a1843fc4b42fb3a0072213de71fde723ac1757c45bb9bc",
+    "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/audit.json": "573e8dd09b475aba61cb9c3d4ff7c6835eca516fd225733424fff7cfdf4399b6",
+    "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results/original_mothers.csv.gz": "687e4e101d45d6b1a635839ca1869d5420af5c7cbac0871055f0bbe9e16ccda0",
+    "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results/matching_frame.csv.gz": "2347f3375f7bb40e5f9db8358ba8aba136c53ec3c5aabc62e04b27ad0c9430ae",
+    "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results/mother_support.csv.gz": "189895d96e414d5b0d22d27ba2e16de622bd2b098b25bdd4a8059e41f1b87e42",
+    "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results/stage_counts.csv.gz": "11cf8355e0113759a06cb1260131692db88dffb9c3ed16195bfd0e60f54f5693",
+    "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results/eligible_edges.csv.gz": "68c7cae123a27b26b6752e2bb8ff069c59f79f9dd4b2aa96ea18edfde811d9a0",
+    "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results/allocation.csv.gz": "5932e56b24a85c2be48ab83c0b4c732c967f1aa9758caf05506e70c0d33a16fd",
+    "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results/assignments.csv.gz": "feca61d16b24731f3e299ae828736001b11c4f31518beffab0f5a67531dcfbb6",
+    "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results/controls.csv.gz": "5185982b38abf8da27f11b69c6797aba8f93fa816aa682f578beee2d15d14c2c",
+    "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results/component_capacity.csv.gz": "f8addc5b4539ba208bfc6c4d5c2518bc3fa76bd882c3a9c09b9a5fbcfceb0965",
+    "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results/fold_coverage.csv.gz": "ec8ea6b779049b9d7cae6f4fdd74662555557f59fb50b310c086b2692ce51676",
+    "experiments/active/exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26/results/vwma_entries.csv.gz": "32861afc658697d033f4ab756ef1d9f37d7cdd02267251b5c57221e77ac97572",
+    "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a",
+    "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json": "c14aae71600d7f91b27068976656b9d4a8dc1bfb462df182a2e2a78ac85d5228"
+  },
+  "source": {
+    "path": "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+    "audit": "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json",
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "end_exclusive": "2026-02-28T16:00:00Z"
+  },
+  "folds": [
+    [
+      "2023H1",
+      "2023-01-01",
+      "2023-07-01"
+    ],
+    [
+      "2023H2",
+      "2023-07-01",
+      "2024-01-01"
+    ],
+    [
+      "2024H1",
+      "2024-01-01",
+      "2024-07-01"
+    ],
+    [
+      "2024H2",
+      "2024-07-01",
+      "2025-01-01"
+    ]
+  ],
+  "phase_end_exclusive": "2025-01-01 00:00:00+00:00",
+  "population": {
+    "mothers": 288,
+    "matched_mothers": 284,
+    "controls": 852,
+    "unmatched_mothers": 4
+  },
+  "sampling": {
+    "bit_generator": "PCG64",
+    "seed": 20260907,
+    "streams": 1,
+    "count": 3,
+    "component_order": "minimum_mother_id",
+    "mother_order": "sorted_id",
+    "candidate_order_before_permutation": "sorted_UTC_ISO_id",
+    "one_permutation_per_component": true,
+    "complete_bipartite_required": true,
+    "required_supply": "3*mother_count",
+    "fallback": false,
+    "resample_missing_labels": false
+  },
+  "embargo_hours": 72,
+  "primary_horizon_hours": 4,
+  "horizons_hours": [
+    1,
+    4,
+    12,
+    24
+  ],
+  "cost_threshold_fraction": 0.002,
+  "execution_pnl": false,
+  "old_exits_used": false,
+  "inference_executed_by_runner": true,
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "statistics_preregistration": {
+    "primary_metrics": [
+      "all_case_cost_threshold_markout",
+      "complete_triplet_excess"
+    ],
+    "calendar_months": 24,
+    "weighting": "event_sum_over_count",
+    "resamples": 9999,
+    "bit_generator": "PCG64",
+    "seed": 20260907,
+    "stream_independent_of_sampling": true,
+    "interval": "95_percent_percentile",
+    "p": "one_sided_monthly_sum_signflip_plus_one",
+    "shared_month_indices_and_signs_across_horizons": true,
+    "minimum_known_cases": 260,
+    "minimum_complete_pairs": 260,
+    "continue_requires": "both_means_positive_both_CI_lower_positive_both_p_lt_.01_and_four_fold_case_means_positive",
+    "continue_is_profitability_acceptance": false
+  },
+  "entry_reference": "VWMA40_HL2",
+  "cohort_source": "experiments/active/exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26/results/vwma_entries.csv.gz",
+  "support_source": "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27",
+  "primary_question": "4h own cost threshold and own matched background excess both positive",
+  "prior_data_reuse": "2023/24 development exploratory,not independent validation",
+  "runtime_versions": {
+    "numpy": "2.0.2",
+    "pandas": "2.3.3",
+    "scipy": "1.13.1"
+  }
+}

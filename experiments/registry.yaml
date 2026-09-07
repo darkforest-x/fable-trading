@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28
+    source_repo: darkforest-x/fable-trading
+    source_commit: "pending_source_first"
+    status: active
+    question: Does VWMA288 4h directional persistence cover20bp and outperform seeded matched background?
+    single_variable: New frozen VWMA40 entry cohort; unchanged V24 labels,seed,cost,inference except population counts.
+    result: Registered before raw label reading; requires independently audited V27 support.
+    canonical_report: null
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: All288 retained;284 seeded triples;4h primary;1/12/24h descriptive;not executable PnL.
+
   - experiment_id: exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27
     source_repo: darkforest-x/fable-trading
     source_commit: "pending_source_first"
