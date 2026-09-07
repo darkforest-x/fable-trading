@@ -1,0 +1,24 @@
+{
+  "tests_command": ".venv/bin/python -m pytest tests/test_imacd_ma_mtf.py tests/test_imacd_profit_mechanism.py tests/test_imacd_indicator_audit.py tests/contracts/test_registries.py -q",
+  "passed": 34,
+  "failed": 1,
+  "related_imacd_tests": 19,
+  "existing_failure": "test_holdout_consumption_is_declared_per_experiment_not_assumed",
+  "unrelated_experiment_id": "exp-btcusdtp-owner-k1k2-genuine-flow-20260907-v36",
+  "preexisting_evidence_commit": "e4204ed",
+  "preexisting_registry_id_present": true,
+  "preexisting_allowlist_id_absent": true,
+  "png_visuals_inspected": [
+    "eth_202601_neutral.png",
+    "eth_202504_trend.png",
+    "eth_202501_failure.png"
+  ],
+  "html_checks": [
+    "10 tables",
+    "1013 table rows",
+    "3 embedded PNG files decoded",
+    "all absolute local links exist"
+  ],
+  "browser_visual_verified": false,
+  "production_changes": false
+}

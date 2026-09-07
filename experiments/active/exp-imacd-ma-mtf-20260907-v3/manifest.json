@@ -1,0 +1,105 @@
+{
+  "builder_commit": "92a1a05993626842b45158cce5f6fa4340b70f72",
+  "sources": [
+    {
+      "path": "data/kline_deep/okx_BTC_USDT_SWAP_15m_158499.csv",
+      "sha256": "1d8ba1a07963743ca2e8d0acc21af102544dbe36125bda87793de29f5032a3b3"
+    },
+    {
+      "path": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+      "sha256": "f6d8c10a995ca328f2de33e3e1a2a74b06f1e621cc657ccd50a6e9b16565ebe4"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "data/imacd_ma_mtf_v3/events.csv",
+      "rows": 63715,
+      "sha256": "d5a4a67a5587466c5ee923fb8e23aa666051cffbc3943196d101e759ecb3e2ef",
+      "size_bytes": 35225313
+    },
+    {
+      "path": "data/imacd_ma_mtf_v3/controls.csv",
+      "rows": 187903,
+      "sha256": "33ac0cf084ca9bdc96a0fb293ebaa6ffe9718c4f2dc36836dce3103f38071abe",
+      "size_bytes": 36345492
+    },
+    {
+      "path": "data/imacd_ma_mtf_v3/portfolio.csv",
+      "rows": 63715,
+      "sha256": "d5a4a67a5587466c5ee923fb8e23aa666051cffbc3943196d101e759ecb3e2ef",
+      "size_bytes": 35225313
+    },
+    {
+      "path": "experiments/active/exp-imacd-ma-mtf-20260907-v3/summary.csv",
+      "rows": 546,
+      "sha256": "2321f048b007b74c83bf46b5404f11a7922cec8e28fb7261f303d02262549658",
+      "size_bytes": 412252
+    },
+    {
+      "path": "experiments/active/exp-imacd-ma-mtf-20260907-v3/nominations.csv",
+      "rows": 9,
+      "sha256": "38b8321632b5f7e180deb4282cda838c59be27da23a1f96ab28a637dc61114d3",
+      "size_bytes": 735
+    },
+    {
+      "path": "experiments/active/exp-imacd-ma-mtf-20260907-v3/coverage.csv",
+      "rows": 42,
+      "sha256": "e9157db7baa37f3b62253bd1b38e7b34f0e79bc35c068cd7c0b8c50c0ce5a789",
+      "size_bytes": 3481
+    }
+  ],
+  "policies": [
+    "P00_base",
+    "P01_width",
+    "P02_dense_now",
+    "P03_dense_recent",
+    "P04_release",
+    "P05_direction",
+    "P06_htf_md",
+    "P07_htf_sh",
+    "P08_htf_either",
+    "P09_htf_ma",
+    "P10_htf_ltf",
+    "P11_wait_htf",
+    "P12_wait_ltf"
+  ],
+  "parents": {
+    "P00_base": null,
+    "P01_width": "P00_base",
+    "P02_dense_now": "P01_width",
+    "P03_dense_recent": "P02_dense_now",
+    "P04_release": "P03_dense_recent",
+    "P05_direction": "P04_release",
+    "P06_htf_md": "P04_release",
+    "P07_htf_sh": "P04_release",
+    "P08_htf_either": "P04_release",
+    "P09_htf_ma": "P08_htf_either",
+    "P10_htf_ltf": "P08_htf_either",
+    "P11_wait_htf": "P08_htf_either",
+    "P12_wait_ltf": "P11_wait_htf"
+  },
+  "base_parity_rows": 7499,
+  "base_parity_columns": 7,
+  "seed": 20260908,
+  "round_trip_cost_bp": 20,
+  "holdout_uses": {
+    "P00_base_inherited_V2_C_total": 2,
+    "P01_width": 1,
+    "P02_dense_now": 1,
+    "P03_dense_recent": 1,
+    "P04_release": 1,
+    "P05_direction": 1,
+    "P06_htf_md": 1,
+    "P07_htf_sh": 1,
+    "P08_htf_either": 1,
+    "P09_htf_ma": 1,
+    "P10_htf_ltf": 1,
+    "P11_wait_htf": 1,
+    "P12_wait_ltf": 1
+  },
+  "owner_authorization": "OKX all periods/all dates; explicitly add usual MA density and multitimeframe confluence; explore independently.",
+  "higher_timeframe_clock": "source close timestamp <= decision close; eligible source warmup340",
+  "production_eligible": false,
+  "training_eligible": false,
+  "raw_kline_writes": false
+}
