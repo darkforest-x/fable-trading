@@ -211,13 +211,15 @@ def write_report(primary,ext,qa,paths):
     tails=[]
     for (symbol,fold,policy),q in e[(e.minutes==240)&e.policy.isin(['P00_base','P02_dense_now','P08_htf_either'])].groupby(['symbol','fold','policy']):
         x=q.net_bp.sort_values();tails.append(dict(symbol=symbol,fold=fold,policy=policy,n=len(q),mean_net_bp=x.mean(),
-            without_best_bp=x.iloc[:-1].mean(),median_bp=x.median(),best_bp=x.max(),worst_bp=x.min()))
+            without_best_bp=x.iloc[:-1].mean(),median_bp=x.median(),best_bp=x.max(),worst_bp=x.min(),
+            matched_case_bp=q.loc[q.excess_bp.notna(),'net_bp'].mean(),control_bp=q.control_mean_net_bp.mean()))
     tails=pd.DataFrame(tails);tails.to_csv(OUT/'tail_sensitivity.csv',index=False)
     focused=a[(a.symbol=='ETH')&(a.minutes==240)&a.policy.isin(['P00_base','P02_dense_now'])]
     riskrows=[]
     for r in focused.itertuples():
         riskrows.append([FN[r.fold],r.policy[:3],int(r.portfolio_trades),num(r.portfolio_fixed_notional_return_pct)+'%',
-            num(r.portfolio_close_marked_drawdown_pct)+'%',num(r.anchor_profit_retained_pct)+'%',num(r.baseline_loss_filtered_pct)+'%'])
+            num(r.portfolio_close_marked_drawdown_pct)+'%',num(r.anchor_profit_retained_pct)+'%',num(r.baseline_loss_filtered_pct)+'%',
+            pc(r.matched_case_mean_net_bp)+' / '+pc(r.controls_mean_net_bp)])
     nom=[]
     for stage,fr in [('主实验',primary),('追加探索',ext)]:
         for r in fr['nominations'].itertuples():
@@ -284,7 +286,7 @@ def write_report(primary,ext,qa,paths):
 
 匹配对照=同币、同周期、同月、同因果波动五桶、同本周期md区域、同已闭合高周期md区域的随机时点，相同side、退出和成本；每笔3个，不放回。只有完整匹配才计算超额；“全部均值”与“匹配信号均值”分母不同，不能拿全部均值直接减随机均值。
 
-{table(['时期','配置','单仓笔数','固定初始名义累计收益','收盘标记最大回撤','原赢家利润保留','原亏损金额过滤'],riskrows)}
+{table(['时期','配置','单仓笔数','固定初始名义累计收益','收盘标记最大回撤','原赢家利润保留','原亏损金额过滤','匹配信号/随机单次净均值'],riskrows)}
 
 2025从30笔减少到26笔，固定初始名义累计价格净收益从26.53%到58.34%，回撤从31.20%到23.74%；2026上半年从28.76%到36.49%。这是同额、不复利、单仓研究账本，不是收益率预测。密集的价值体现在少做了部分亏损，而不是大赢家入场价格被改得更漂亮。
 
@@ -338,7 +340,7 @@ BTC4h P07、BTC12h P04和ETH12h P09是主实验中三段总均值都为正的提
 
 {table(['时期','配置','密集分数AUC','top10 n','top10毛均值','top10净均值','top10胜率','top10匹配超额'],feature_rows)}
 
-{table(['币','时期','配置','n','全部净均值','删最大赢家后均值','中位数','最大赢家','最大亏损'],[[r.symbol,FN[r.fold],r.policy[:3],r.n,pc(r.mean_net_bp),pc(r.without_best_bp),pc(r.median_bp),pc(r.best_bp),pc(r.worst_bp)] for r in tails.itertuples()])}
+{table(['币','时期','配置','n','全部净均值','删最大赢家后均值','中位数','最大赢家','最大亏损','原匹配信号均值','原随机均值'],[[r.symbol,FN[r.fold],r.policy[:3],r.n,pc(r.mean_net_bp),pc(r.without_best_bp),pc(r.median_bp),pc(r.best_bp),pc(r.worst_bp),pc(r.matched_case_bp),pc(r.control_bp)] for r in tails.itertuples()])}
 
 一个比V2更积极的变化：ETH4h加入密集后，即使删掉最大赢家，2025和2026上半年的单次均值仍分别为+0.69%和+0.61%；原始P00删掉最大赢家则都转负。这说明本轮改善并非仅把一个偶然大赚留下。但2023–24删最大赢家后仍为负，稳定性还不够。
 
@@ -356,7 +358,7 @@ BTC4h P07、BTC12h P04和ETH12h P09是主实验中三段总均值都为正的提
 
 审计主实验{qa['primary']['events']:,}事件/{qa['primary']['controls']:,}对照、追加{qa['neutral_extension']['events']:,}事件/{qa['neutral_extension']['controls']:,}对照的全部入/出价、20bp成本、首个合法退出、匹配键、闭合周期时钟；P00每阶段与V2的7,499笔×7字段精确复核。共享配置两阶段价格/收益不变，随机对照池变化单独保留。两阶段共有{int(paths.crossed_zero.sum())}条固定名义路径穿零，这些行只是数学诊断，不能被解释成可执行账户曲线。
 
-数据统计：覆盖表见[主coverage]({OUT}/coverage.csv)；每周期各年候选数、正类率（净赢比例）和验证n见完整表。没有分类训练集；不虚构模型AUC。19个相关单元测试通过，最终登记检查另附交付记录。
+数据统计：覆盖表见[主coverage]({OUT}/coverage.csv)；每周期各年候选数、正类率（净赢比例）和验证n见完整表。没有分类训练集；不虚构模型AUC。19个相关单元测试全部通过；连同登记契约共34通过、1个既有失败：另一个exp-btcusdtp-owner-k1k2-genuine-flow-20260907-v36条目的holdout登记与固定集合不一致。该问题在本轮前已存在，没有替它补授权或绕过测试。见[交付检查]({OUT}/delivery_qa.json)。三张PNG已实际查看；HTML完成表格、图片嵌入及本地链接检查，未声称浏览器视觉验收。
 
 ## 9. Notion中与你这个方向直接对应的记录
 
