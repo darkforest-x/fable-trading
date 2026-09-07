@@ -53,7 +53,7 @@ def build(version):
     rel=Path("experiments/active")/EXPERIMENTS[version];e=ROOT/rel
     own=Path(__file__).resolve();commit=subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip()
     if subprocess.check_output(["git","show",commit+":"+str(own.relative_to(ROOT))],cwd=ROOT)!=own.read_bytes():raise ValueError("Commit report builder first")
-    summary=json.loads((e/"results/summary.json").read_text());audit=json.loads((e/"audit.json").read_text())
+    summary=json.loads((e/"results/summary.json").read_text());audit=json.loads((e/("audit.json" if version==27 else "audit_complete.json")).read_text())
     if audit["status"]!="passed" or audit["summary_sha256"]!=sha(e/"results/summary.json"):raise ValueError("Independent audit missing or changed")
     for name,expected in summary["output_hashes"].items():
         if Path(name).name!=name or sha(e/"results"/name)!=expected:raise ValueError("Report evidence drift")
