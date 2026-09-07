@@ -2,6 +2,28 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-07 — V23背景支持98.80%通过，未算新收益）
+
+b696015先提交三键背景支持合同再运行，0d7283a随后提交纯固定时钟标签与报告builder。
+仅读V10保存匹配特征和原V4母；251全保留，248完整组三控制=744不复用时钟，
+3未知均2023-06-25因当前小时段此前ATR比例仅39/47/50<168，缺波动桶。
+13192edges/8521候选/168组件，165非空均完整二部图；最小供给剩余8。
+独立保存审计未调用原builder/allocator/MILP，逐边资格与风险/止损一致，
+独立组件上界248=可行分配248。10CSV/6本轮源/5输入/14旧提交源已核。
+四段52/55,66/66,55/55,75/75。旧V10六键154/251不追认通过，新问题是
+整体K1相对同月/UTC6h/causalvol背景，不是独立形态因果效应。
+
+联合支持/容量/标签277tests过，registry/boundaries182过；纯标签另55独立合成检查。
+HTML analysis/html/p1_btcusdtp_hourly_background_support_v23_20260907.html已生成，
+12blocks1nativechart，官方validation/package过、structural_only，未做手机/浏览器QA。
+V23 accepted仅支持，不是随机经济样本或盈利。V19拒绝结论和纯退出微调停止不变。
+
+下一步V24 fixed-clock研究正在实现：另注册seed20260907的组件内不放回随机配对，
+必须在raw价格/标签前冻结；共享四时钟同一分配。全部251母自身label照算（含3未配对），
+1/4/12/24h仅4h主，任何control缺失导致该三组比较未知，不重抽。
+固定OPEN markout非K1stop可执行PnL；仅pre2025四fold，仍需独立时间/前向验证。
+未读新markout/2025+价格/holdout，无TV/训练/ACTIVE/实盘变动，goal active盈利未达成。
+
 ## ⚡ 当前真相（2026-09-07 — V19风险减半已拒绝，停止该队列纯退出微调）
 
 a776b5b先提交V19原单变量合同/engine/runner/verifier再真实回放。251原K1、

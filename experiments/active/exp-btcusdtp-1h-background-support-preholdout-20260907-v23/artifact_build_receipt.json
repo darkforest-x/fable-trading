@@ -1,0 +1,42 @@
+{
+  "generated_at": "2026-09-07T00:28:35.381845+00:00",
+  "report_sha256": "d27929a0c3c573c9ee446286c0fc2b40a9072c7d0c3c2ebb107b36c948ee7bc8",
+  "summary_sha256": "e5455a429e7664d25e4ab91df0df7ef1fdbb9298f5423309c89f88e36de46384",
+  "sections": 11,
+  "actual_query": "SELECT fold, COUNT(*) AS mothers,\n SUM(CASE WHEN assigned_controls=3 THEN 1 ELSE 0 END) AS matched_mothers,\n SUM(assigned_controls) AS controls,\n SUM(CASE WHEN assigned_controls=3 THEN 1.0 ELSE 0.0 END)/COUNT(*) AS coverage,\n SUM(CASE WHEN assigned_controls=0 THEN 1 ELSE 0 END) AS unmatched_mothers\n FROM assignments GROUP BY fold ORDER BY fold",
+  "rows": [
+    {
+      "fold": "2023H1",
+      "mothers": 55,
+      "matched_mothers": 52,
+      "controls": 156,
+      "coverage": 0.9454545454545454,
+      "unmatched_mothers": 3
+    },
+    {
+      "fold": "2023H2",
+      "mothers": 66,
+      "matched_mothers": 66,
+      "controls": 198,
+      "coverage": 1.0,
+      "unmatched_mothers": 0
+    },
+    {
+      "fold": "2024H1",
+      "mothers": 55,
+      "matched_mothers": 55,
+      "controls": 165,
+      "coverage": 1.0,
+      "unmatched_mothers": 0
+    },
+    {
+      "fold": "2024H2",
+      "mothers": 75,
+      "matched_mothers": 75,
+      "controls": 225,
+      "coverage": 1.0,
+      "unmatched_mothers": 0
+    }
+  ],
+  "all_sections_preserved": true
+}

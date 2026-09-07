@@ -19,6 +19,66 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: btcusdtp-hourly-background-support-v23-results
+    artifact_type: report
+    role: outcome_free_background_support
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b696015"
+    source_path: experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/summary.json
+    sha256: "e5455a429e7664d25e4ab91df0df7ef1fdbb9298f5423309c89f88e36de46384"
+    size_bytes: 230508
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "248/251 capacity accepted only;744 unique controls;3 unknown retained;not random allocation or new outcomes."
+
+  - artifact_id: btcusdtp-hourly-background-support-v23-report
+    artifact_type: report
+    role: background_comparison_support_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "0d7283a"
+    source_path: analysis/p1_btcusdtp_hourly_background_support_v23_20260907.md
+    sha256: "d27929a0c3c573c9ee446286c0fc2b40a9072c7d0c3c2ebb107b36c948ee7bc8"
+    size_bytes: 10787
+    storage_uri: "repo://analysis/p1_btcusdtp_hourly_background_support_v23_20260907.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Builder/evidence parent,not narrative creation commit. New estimand,unknown causes,independent saved graph proof and limits."
+
+  - artifact_id: btcusdtp-hourly-background-support-v23-html
+    artifact_type: report
+    role: portable_technical_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "0d7283a"
+    source_path: analysis/html/p1_btcusdtp_hourly_background_support_v23_20260907.html
+    sha256: "fb2c8e4698a95e8b095382cadc207204148e0f0e4c23ee8ba2406102a7afa4c0"
+    size_bytes: 456898
+    storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_background_support_v23_20260907.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "12blocks1nativechart;official validation/package pass;structural_only,no browser/mobile/source-dialog QA."
+
+  - artifact_id: btcusdtp-hourly-background-support-v23-artifact
+    artifact_type: report
+    role: canonical_support_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "0d7283a"
+    source_path: experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/artifact.json
+    sha256: "fd15eff54a05815d90970ff499beea89b54e7595e62d5429519fee5d91904424"
+    size_bytes: 18087
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/artifact.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "All11 narrative sections;actualSQLite counts all251;four discrete halfyear coverage bars,not return trend."
+
   - artifact_id: btcusdtp-hourly-failed-reduce-v19-results
     artifact_type: report
     role: fixed_entry_confirmed_risk_half_replay

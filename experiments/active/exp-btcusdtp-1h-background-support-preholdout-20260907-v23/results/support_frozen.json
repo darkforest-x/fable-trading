@@ -1,0 +1,62 @@
+{
+  "generated_at": "2026-09-07 00:20:16.779576+00:00",
+  "mothers": 251,
+  "matching_edges": 13192,
+  "capacity_attempted": false,
+  "outcomes_read_or_computed": false,
+  "source_receipt": {
+    "inputs": {
+      "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/matching_frame.csv.gz": "0a6a0c8461b33d13a9ca28346023033b56d7a00af1b39a6c827a774deb7a3009",
+      "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/summary.json": "6279ce97ac051e168e632291218a697ffc7558db611bcf5e007f23b51bb55440",
+      "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/support_frozen.json": "da1c2a5b4454fde29fc50385a056315f6f716989daa7b37db4c63ade9845e2c7",
+      "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/started.json": "07292f7c64235b0709e1e3b9479f287286eb197176e1baee1fa0b66ed60d7e72",
+      "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/original_mothers.csv.gz": "b3f442ad8b0959b19cb5ae58fd40bc6a3bf40b455b4be31f3758d53940eea3e6"
+    },
+    "upstream_builder_commit": "b6e9056144c092bc1fe82a5108ef619f8122da5f",
+    "upstream_source_receipt": {
+      "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+      "physical_rows": 341567,
+      "phase_rows": 219551,
+      "phase_price_last_open": "2024-12-31 23:55:00+00:00",
+      "physical_last_open": "2026-02-28 15:55:00+00:00",
+      "holdout_price_rows": 0,
+      "timestamp_preflight_before_price_hash": true
+    },
+    "upstream_sources_verified_at_commit": 14,
+    "raw_aggregation_independently_recomputed": false,
+    "saved_only": true
+  },
+  "output_hashes": {
+    "original_mothers.csv.gz": "743a32c6fb91c87d4acf30eca50289db64c92627f75e3676c9498b6085d5985c",
+    "matching_frame.csv.gz": "4745cd147d571b2cc47ef6801f6868912910eccecd4c9a1e8e23bda3e2ac9023",
+    "mother_support.csv.gz": "71886909385176088c2eec8f62ee2932ae4fc9d28f29a687aa08aa665f8dcd78",
+    "stage_counts.csv.gz": "aa6e00b19ad0806e7271997c01608a0424837a500f2c165fffbe19fc2222a2c8",
+    "eligible_edges.csv.gz": "d045d5a05e71d93bde0af5402496292669bfbd9a71cc18c98f5b097d7d5ea1a8"
+  },
+  "sources": [
+    {
+      "path": "yoyo/evaluation/hourly_impulse_background_support.py",
+      "sha256": "45b8da0f4f5c05bf1057e8fa38e7cfcd24109325689a1a0781347839bb539f60"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_matching_capacity.py",
+      "sha256": "715de053060b95c278336838fde7e5e4dbdd99466e8865e948c8580cc07293ee"
+    },
+    {
+      "path": "tests/test_hourly_impulse_background_support.py",
+      "sha256": "dba5e539eb999dab71ad60a077dd9d0d12f698cbebec29abb9d468d8036747fc"
+    },
+    {
+      "path": "tests/test_hourly_impulse_matching_capacity.py",
+      "sha256": "125d23c66e376b7c1f23becec4eeb2757934b2f40e2ca9c30ad74b4785962583"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/PROJECT_PLAN.md",
+      "sha256": "7ecd68d06f1e9a4adae2968cd035fad2080e87b27c99203151d5911b439cdfc4"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/config.json",
+      "sha256": "e1e8d4d1cfd0f915c1f6240fbe8aa96f0b6c257568d29136ea64eee85e729c4b"
+    }
+  ]
+}

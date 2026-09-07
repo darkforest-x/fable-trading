@@ -16,8 +16,8 @@ schema_version: 1
 experiments:
   - experiment_id: exp-btcusdtp-1h-background-support-preholdout-20260907-v23
     source_repo: darkforest-x/fable-trading
-    source_commit: "6c657c0"
-    status: active
+    source_commit: "b696015"
+    status: accepted
     question: >-
       Can original251 hourly K1 requests obtain at least226 complete triples
       under a separately defined whole-entry contemporaneous background?
@@ -26,16 +26,22 @@ experiments:
       direction,risk transfer,validity,cross exclusions,72h embargo,no reuse
       and three controls remain fixed. Outcome-free support audit only.
     result: >-
-      Prepared and synthetic-tested;not yet run on saved matching features.
-      Exact capacity witness is not a random sample or profitability evidence.
-    canonical_report: experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/PROJECT_PLAN.md
+      Saved-only actual support248/251 complete groups744controls,98.8048percent.
+      Independent13192edge qualification and168component upper248 equals
+      feasible248;3mothers retain unknown causal volatility buckets.
+      Accepted for support only,not random sampling or profitability evidence.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_background_support_v23_20260907.html
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts:
+      - btcusdtp-hourly-background-support-v23-results
+      - btcusdtp-hourly-background-support-v23-report
+      - btcusdtp-hourly-background-support-v23-html
+      - btcusdtp-hourly-background-support-v23-artifact
     reuse_allowed: false
     notes: >-
-      Preparation parent commit;actual builder commit must be in started receipt.
+      Builder committed before actual support;10CSV/source checkpoints verified.
       Old154/251 six-key capacity stays failed;no retrospective reinterpretation.
       Raw archives and new labels forbidden;future fixed-clock study separate.
 
