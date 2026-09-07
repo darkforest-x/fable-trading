@@ -67,6 +67,9 @@ E 时形成 seed 的极值不算等待期间触损；之后完整等待 bar 触�
 按全部 63 个原请求分母，净改善 +7.0445bp = 毛收益变化 −0.8920bp + 节省成本 7.9365bp。
 省费超过净改善的全部，说明“少做”有效地减小亏损，但不能据此称“更会捕捉趋势”。成本假设维持原 20bp；并未调低费用把结果做正。
 同向就入场的 16 笔也继续亏损，证明“同色”在这批请求中本身不足以区分趋势和盘整。
+38 笔成交中的 31 个净输家，26 个是毛价格亏损，5 个是小幅毛盈利被费用抹去；后 5 个全部来自那 16 个原同向、不变的入场。
+31 个输家中只有 9 个保存的有利波动下界超过 20bp。因此不能把问题一概说成“都有利润但没及时止盈”，更不能把事后 MFE 当可成交的止盈价格。
+最大两个赢家贡献了全部正贡献的 83.88%，而且都在未匹配的 27 个请求里；少数漂亮的大趋势不能代替普遍有效的证据。完整事件与复算公式见 FAILURE_ANALYSIS.md。
 
 ## 匹配对照与时间稳定性
 
@@ -113,6 +116,7 @@ E 时形成 seed 的极值不算等待期间触损；之后完整等待 bar 触�
 原 V37 结果只在新两臂回放完毕后用于基线 parity：63/108 原身份完全一致，18 个路径字段按 1e−12 容差复现。
 19 份新 CSV 有逐文件 SHA、行数和字段收据，所有原请求与配对保留。两组等待 trace 为 307 与 610 行，共 917 行。
 650 项聚焦合成、关联回归和层边界测试通过；测试正确不等于策略盈利，不宣称全仓无失败。独立保存输出复核见实验目录 REVIEW.md。
+独立审核完成 1,548 项保存输出一致性断言，并从原 36 组三控交易重建统计，均值、区间和 p 值一致；这些不是额外的 pytest 用例。
 另外 31 项报告合成测试通过；伴随 notebook 的三个代码单元已用标准库顺序执行，不是 Jupyter 内核认证。实际保存路径没有触发 72h 的 time_exit 分支，该分支证据来自合成测试，不能把未触发当作真实路径已覆盖。
 
 已知未成交的交易收益仍为 NaN，只有原请求贡献为 0；未知资格或无法确定退出的贡献仍是 NaN。本轮未出现未知，也保留并测试这些路径。
@@ -123,7 +127,8 @@ E 时形成 seed 的极值不算等待期间触损；之后完整等待 bar 触�
 ## 下一步
 
 不把这版等待确认设为默认，也不继续在同一 63 请求上搜索“最佳等待分钟数”。已定位的障碍是：同色不足以筛趋势，确认经常只让入场追价，且多数剩余交易仍然亏损。
-下一实验应从逐笔的持仓与退出分解选择一个假设，先验证“退出是否被低级别反复变色过早触发”，或“原始形态在盘整中根本没有方向优势”；不得把两个方向打包调参。
+下一优先假设是隔离已定位的追价损耗：确认后不马上按市价追入，而研究“确认后等回踩”的成交机制。先冻结挂价、有效期、触价及同 bar 触损的保守记账规则，再与原市价确认臂和原对照比较；本轮尚未实施，也不预设它会更赚钱。
+退出频率或盘整环境筛选应另作实验，不能与成交机制打包调参。现在只凭变色或事后波峰，就把所有亏损归因于退出太早，证据不够。
 只有保留原对照后显示稳定扣费优势，才值得扩大独立验证；不将未来 MFE、最终赢家身份或最终是否确认作为入场特征。
 
 ## 复现命令与证据
@@ -137,9 +142,11 @@ E 时形成 seed 的极值不算等待期间触损；之后完整等待 bar 触�
 .venv/bin/python -B -m yoyo.evaluation.owner_k1k2_delayed_entry_report prepare
 python3 scripts/md_to_html.py analysis/p1_btcusdtp_owner_k1k2_delayed_entry_v39_20260907.md --out-dir analysis/html
 .venv/bin/python -B -m yoyo.evaluation.owner_k1k2_delayed_entry_report package
-node /Users/zhangzc/.codex/plugins/cache/openai-curated-remote/data-analytics/0.2.10-13ceeea1f599/skills/build-report/scripts/deliver_portable_artifact.mjs --input experiments/active/exp-btcusdtp-owner-k1k2-delayed-entry-20260907-v39/artifact.json --output analysis/html/p1_btcusdtp_owner_k1k2_delayed_entry_v39_20260907.html
+.venv/bin/python -B -m yoyo.evaluation.owner_k1k2_delayed_entry_delivery
+node /Users/zhangzc/.codex/plugins/cache/openai-curated-remote/data-analytics/0.2.10-13ceeea1f599/skills/build-report/scripts/deliver_portable_artifact.mjs --input experiments/active/exp-btcusdtp-owner-k1k2-delayed-entry-20260907-v39/artifact_final.json --output analysis/html/p1_btcusdtp_owner_k1k2_delayed_entry_v39_20260907.html
 ```
 
 完整 650 项执行命令见 PREFLIGHT.md；报告 builder、测试与最终 MD 需先提交，canonical artifact 通过验证再交付 HTML。
 `experiments/active/exp-btcusdtp-owner-k1k2-delayed-entry-20260907-v39/` 保存 summary、pre_outcome_receipt、独立失败归因/审核及报告收据；逐请求路径在 `data/owner_k1k2_delayed_entry_v39/`。
 HTML 的结构可验证性与浏览器视觉/手机主题/来源交互验证分开记录，不互相替代。
+原 `artifact.json` 是保留的早期纯文字包，被交付契约要求“至少一张图”拒绝，不是回测失败。最终 delivery 从保存交易复核四个半年均值后添加对应图，并读取当前已提交 MD，输出新 `artifact_final.json`；旧包和拒绝收据不覆盖，经济结果不重跑。
