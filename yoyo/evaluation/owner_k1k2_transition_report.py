@@ -115,7 +115,7 @@ def package():
             tables_used=["main.pairs"] if key=="pairs" else ["main.trades"],
             filters=["same BinanceUSD-M BTCUSDT2023-2024 original63cases108controls; no flow gate; closed results"],
             description="Original frozen independent-event replay, not a new policy selection",
-            metric_definitions={"net_bp":"gross original-notional return minus0.002, times10000; not compounded account PnL"}))))
+            metric_definitions={"net_bp":"gross original-notional return minus0.002, times10000; not compounded account PnL"})))
     charts=[dict(id="folds",type="bar",title="四个半年每笔净收益",dataset="case_folds",sourceId="folds",
         description="同一63个形态事件 · 单位bp · 1bp=0.01%",showDescription=True,palette=dict(kind="categorical",name="blueGold"),
         encodings=dict(x=dict(field="fold",type="nominal"),y=dict(field="net_bp",type="quantitative"),
