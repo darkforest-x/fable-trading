@@ -328,8 +328,8 @@ def write_report(s,g,cohorts,pairs,qa,paths,cases,manifest,e):
     rows=[]
     for fold in FN:
         q=s[(s.symbol=='ETH')&(s.minutes==240)&(s.fold==fold)].set_index('policy')
-        rows.append([FN[fold],int(q.loc['departure_neutral','n'])]+[pc(q.loc[p,'mean_net_bp']) for p in POLICIES[1:]]+[pc(q.loc['departure_neutral','excess_bp'])])
-    add(table(['时段','启动数','B 交叉退出','C 回零退出','D 反向退出','C 相对匹配随机超额'],rows))
+        rows.append([FN[fold],int(q.loc['departure_neutral','n']),int(q.loc['departure_neutral','matched_n'])]+[f'{pc(q.loc[p,"mean_net_bp"])} / {pc(q.loc[p,"matched_case_mean_net_bp"])} / {pc(q.loc[p,"controls_mean_net_bp"])}' for p in POLICIES[1:]]+[pc(q.loc['departure_neutral','excess_bp'])])
+    add(table(['时段','启动数','匹配数','B 全部/匹配/随机','C 全部/匹配/随机','D 全部/匹配/随机','C 匹配超额'],rows))
     add('![同入场退出比较](figures/imacd_profit_20260907/eth4h_exit_comparison.png)')
     add('2025年C相对B每次增加2.44个百分点，2026上半年增加2.95个百分点；但2023–2024年减少0.93个百分点。因此“多拿总更好”不成立。D进一步等到反向，ETH4h三个时间段的事件均值都低于C：持有规则也需要结束边界。')
     add('## 找到的两组候选形态\n\n两组来自预先声明的零带根数分组，报告看完全部周期与分组后重点展示，属于探索性选择。三段同号不等于三段都从未见过，更不等于独立终验。')
@@ -360,10 +360,10 @@ def write_report(s,g,cohorts,pairs,qa,paths,cases,manifest,e):
         rows=[]
         for policy in POLICIES[1:]:
             r=q.loc[policy]
-            rows.append([PN[policy],r.entry_time[:16],num(r.entry_price),r.exit_bar_time[:16],num(r.exit_price),pc(r.net_bp)])
-        add(table(['规则','入场UTC','入场价','退出UTC','退出价','净收益'],rows))
+            rows.append([PN[policy],r.entry_time[:16],num(r.entry_price),r.exit_bar_time[:16],num(r.exit_price),pc(r.net_bp),pc(r.control_mean_net_bp),pc(r.excess_bp)])
+        add(table(['规则','入场UTC','入场价','退出UTC','退出价','净收益','同事件3随机控制均值','超额'],rows))
         add(f'![{case["description"]}](figures/imacd_profit_20260907/{Path(case["path"]).name})')
-    add('ETH 2025-01-27失败样本此前连续62根（约10.3天）md=0，向下启动后价格迅速反抽，等回零离场净亏约12.26%。它和赢家属于同一长零带候选，证明“贴零后启动”只是筛选条件，不能保证突破方向正确。')
+    add('ETH 2025-01-27失败样本此前连续62根（约10.3天）md=0，向下启动后价格迅速反抽，等回零离场净亏约12.26%；继续等到反向的D最终净赚8.00%。它和赢家属于同一长零带候选，证明“贴零后启动”不能保证第一段方向正确，C也不是每笔最优退出。不能因为这一个反例就忽略D在全母群的回吐代价。')
     add('## 各周期真正告诉了什么\n\n下表全部使用C：零轴启动→回零退出。括号n；每次净均值与匹配随机均值并列，避免把市场方向收益当指标优势。15m及以上使用同一长历史；不按全样本收益挑一个所谓最优周期。')
     rows=[]
     for symbol in ['BTC','ETH']:
