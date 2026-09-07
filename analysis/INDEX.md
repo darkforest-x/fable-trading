@@ -8,6 +8,11 @@
 
 ## 按日期倒序
 
+### 2026-09-07 — 完整YOLO数据转入Label Studio手标
+
+- [完整HTML](html/p1_15m_grade_a_labelstudio_manual_20260907.html) · [MD源](p1_15m_grade_a_labelstudio_manual_20260907.md)
+- 32000图按4172事件手标，另276候选；两个新项目均空白无预标，未来40单独显示，3件诚实截短。79测试、12516PNG及32000映射核对通过，原训练数据不变。
+
 ### 2026-09-07 — YOLO审核简化＋未来40根
 
 - [新版审核改进HTML](html/p1_15m_grade_a_assisted_future40_20260907.html) · [源报告](p1_15m_grade_a_assisted_future40_20260907.md)

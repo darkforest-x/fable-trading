@@ -18873,3 +18873,183 @@ artifacts:
     production_eligible: false
     generator_commit: "fb981e646e4843b4d25645f308d85d1f317dee05"
     notes: "Owner-requested simplified aided review with 40 future bars. Original W18 inputs unchanged; REJECT alone is not NO_SIGNAL; schema1 evidence preserved."
+
+  - artifact_id: grade-a-labelstudio-manual-20260907-protocol
+    artifact_type: "config"
+    role: "owner_manual_annotation_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    source_path: "experiments/active/exp-15m-grade-a-labelstudio-manual-20260907-v1/preregistration.json"
+    sha256: "4e98740fd3161143597e82e4d7848206bebf58a1ad57a77fd4fe182ee970b726"
+    size_bytes: 2240
+    storage_uri: "repo://experiments/active/exp-15m-grade-a-labelstudio-manual-20260907-v1/preregistration.json"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    notes: "4172 full training event groups plus 276 candidate tasks. Blank human annotation; isolated future context, original 32000 variants unchanged."
+
+  - artifact_id: grade-a-labelstudio-manual-20260907-config
+    artifact_type: "config"
+    role: "owner_manual_annotation_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    source_path: "configs/labelstudio/grade_a_manual_future40.xml"
+    sha256: "9a6394d87348504e7fad92f1b6c69eeedbe42fb9366e67030744250c32f1bd8a"
+    size_bytes: 1252
+    storage_uri: "repo://configs/labelstudio/grade_a_manual_future40.xml"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    notes: "4172 full training event groups plus 276 candidate tasks. Blank human annotation; isolated future context, original 32000 variants unchanged."
+
+  - artifact_id: grade-a-labelstudio-manual-20260907-tasks
+    artifact_type: "manifest"
+    role: "owner_manual_annotation_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    source_path: "datasets/grade_a_manual_events_20260907_v1/tasks.json"
+    sha256: "8155103a0408032714d780a0533921fbab0c0563efbc1ba7b05d8c162dae6ee1"
+    size_bytes: 4126225
+    storage_uri: "repo://datasets/grade_a_manual_events_20260907_v1/tasks.json"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    notes: "4172 full training event groups plus 276 candidate tasks. Blank human annotation; isolated future context, original 32000 variants unchanged."
+
+  - artifact_id: grade-a-labelstudio-manual-20260907-lineage
+    artifact_type: "manifest"
+    role: "owner_manual_annotation_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    source_path: "datasets/grade_a_manual_events_20260907_v1/admin/lineage.jsonl"
+    sha256: "97fc06478f109b43c7ed6d4a4c641a3ede6157006031aaa305c217c7cb4e1d17"
+    size_bytes: 29168006
+    storage_uri: "repo://datasets/grade_a_manual_events_20260907_v1/admin/lineage.jsonl"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    notes: "4172 full training event groups plus 276 candidate tasks. Blank human annotation; isolated future context, original 32000 variants unchanged."
+
+  - artifact_id: grade-a-labelstudio-manual-20260907-future
+    artifact_type: "manifest"
+    role: "owner_manual_annotation_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    source_path: "datasets/grade_a_manual_events_20260907_v1/future_only/manifest.json"
+    sha256: "9f1877db5b219f13fbab94de581464a03c475302e9712f24a97e53cb974f9a97"
+    size_bytes: 3917899
+    storage_uri: "repo://datasets/grade_a_manual_events_20260907_v1/future_only/manifest.json"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    notes: "4172 full training event groups plus 276 candidate tasks. Blank human annotation; isolated future context, original 32000 variants unchanged."
+
+  - artifact_id: grade-a-labelstudio-manual-20260907-build
+    artifact_type: "report"
+    role: "owner_manual_annotation_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    source_path: "datasets/grade_a_manual_events_20260907_v1/admin/build_receipt.json"
+    sha256: "efcafd622c13f55fcf2dcdf92b87a3e15f90a9d89a2a576881a191425869d9e4"
+    size_bytes: 1952
+    storage_uri: "repo://datasets/grade_a_manual_events_20260907_v1/admin/build_receipt.json"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    notes: "4172 full training event groups plus 276 candidate tasks. Blank human annotation; isolated future context, original 32000 variants unchanged."
+
+  - artifact_id: grade-a-labelstudio-manual-20260907-candidate-tasks
+    artifact_type: "manifest"
+    role: "owner_manual_annotation_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    source_path: "experiments/active/exp-15m-grade-a-labelstudio-manual-20260907-v1/results/candidate_tasks.json"
+    sha256: "275a66930319acd9d558d4dbe51896101600069db5b3e21a76ee69314bfae467"
+    size_bytes: 274347
+    storage_uri: "repo://experiments/active/exp-15m-grade-a-labelstudio-manual-20260907-v1/results/candidate_tasks.json"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    notes: "4172 full training event groups plus 276 candidate tasks. Blank human annotation; isolated future context, original 32000 variants unchanged."
+
+  - artifact_id: grade-a-labelstudio-manual-20260907-full-import
+    artifact_type: "report"
+    role: "owner_manual_annotation_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    source_path: "experiments/active/exp-15m-grade-a-labelstudio-manual-20260907-v1/results/full_import_receipt.json"
+    sha256: "76b721a97c7301fc7857b06a621e380d044b034571318867cb2f7683eda837d0"
+    size_bytes: 164864
+    storage_uri: "repo://experiments/active/exp-15m-grade-a-labelstudio-manual-20260907-v1/results/full_import_receipt.json"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    notes: "4172 full training event groups plus 276 candidate tasks. Blank human annotation; isolated future context, original 32000 variants unchanged."
+
+  - artifact_id: grade-a-labelstudio-manual-20260907-candidate-import
+    artifact_type: "report"
+    role: "owner_manual_annotation_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    source_path: "experiments/active/exp-15m-grade-a-labelstudio-manual-20260907-v1/results/candidates_import_receipt.json"
+    sha256: "f7c664d1f123a7e9dc840450a0d3b3cedbac507584e26399eaccc64902afbed1"
+    size_bytes: 12913
+    storage_uri: "repo://experiments/active/exp-15m-grade-a-labelstudio-manual-20260907-v1/results/candidates_import_receipt.json"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    notes: "4172 full training event groups plus 276 candidate tasks. Blank human annotation; isolated future context, original 32000 variants unchanged."
+
+  - artifact_id: grade-a-labelstudio-manual-20260907-physical-qa
+    artifact_type: "report"
+    role: "owner_manual_annotation_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    source_path: "experiments/active/exp-15m-grade-a-labelstudio-manual-20260907-v1/results/physical_qa.json"
+    sha256: "456d556c9452227286cb31213e0c6068f06d7573dfbc25ec45737af5bbffce97"
+    size_bytes: 2898
+    storage_uri: "repo://experiments/active/exp-15m-grade-a-labelstudio-manual-20260907-v1/results/physical_qa.json"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    notes: "4172 full training event groups plus 276 candidate tasks. Blank human annotation; isolated future context, original 32000 variants unchanged."
+
+  - artifact_id: grade-a-labelstudio-manual-20260907-browser-qa
+    artifact_type: "report"
+    role: "owner_manual_annotation_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    source_path: "experiments/active/exp-15m-grade-a-labelstudio-manual-20260907-v1/results/browser_qa.json"
+    sha256: "de8bdb59dfff0234e911c3cbf03988c4b57b63e97eb72a753beb401e2bc45a41"
+    size_bytes: 1217
+    storage_uri: "repo://experiments/active/exp-15m-grade-a-labelstudio-manual-20260907-v1/results/browser_qa.json"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    notes: "4172 full training event groups plus 276 candidate tasks. Blank human annotation; isolated future context, original 32000 variants unchanged."
+
+  - artifact_id: grade-a-labelstudio-manual-20260907-html
+    artifact_type: "report"
+    role: "owner_manual_annotation_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    source_path: "analysis/html/p1_15m_grade_a_labelstudio_manual_20260907.html"
+    sha256: "37d098142db22b36e79ba26c7e93b69cc54307de1623261cdc844e19c016b87f"
+    size_bytes: 10235
+    storage_uri: "repo://analysis/html/p1_15m_grade_a_labelstudio_manual_20260907.html"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
+    notes: "4172 full training event groups plus 276 candidate tasks. Blank human annotation; isolated future context, original 32000 variants unchanged."

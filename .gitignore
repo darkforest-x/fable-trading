@@ -238,3 +238,7 @@ experiments/active/exp-pine-eth-15m-v1/results-docker/**
 # hashes, validation, summary charts and the self-contained HTML remain tracked.
 /experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/source/
 /experiments/active/exp-btcusdtp-1h-pine-v8-sixmonth-backtest-20260904-v1/results/trade_pages/
+
+# Manual-label pack checkpoints duplicate the final lineage and image hashes.
+# Keep them local so a fresh clone rebuilds missing PNGs from the tracked recipe.
+/datasets/grade_a_manual_events_20260907_v1/admin/events/*.json

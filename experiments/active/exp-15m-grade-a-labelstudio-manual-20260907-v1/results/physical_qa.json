@@ -1,0 +1,98 @@
+{
+  "actual_future_bars_counts": {
+    "13": 1,
+    "30": 1,
+    "33": 1,
+    "40": 4169
+  },
+  "contexts_per_group": {
+    "1": 4172
+  },
+  "copied_context_sha_matched": 4172,
+  "copied_input_sha_matched": 4172,
+  "decoded_png_shapes": {
+    "(742, 1280, 3)": 12516
+  },
+  "decoded_pngs": 12516,
+  "errors": [],
+  "event_groups_by_source_key": 4172,
+  "future_directory_file_count": 4173,
+  "future_directory_label_files": [],
+  "future_directory_unexpected_files": [],
+  "future_missing_reasons": {
+    "complete": 4169,
+    "holdout_boundary": 2,
+    "source_end": 1
+  },
+  "future_png_sha_matched": 4172,
+  "future_window_clock_matches": 4172,
+  "generated_at": "2026-09-07T12:05:24.998296+00:00",
+  "holdout_ohlcv_read": false,
+  "legal_input_end_separator_positions": 4172,
+  "limitations": [
+    "This QA compared frozen source metadata, PNG bytes and decoded pixels; it did not replay raw OHLCV.",
+    "Full 32000 original image/label SHA verification and original representative rerender are additionally recorded by the builder.",
+    "Source-end truncation was checked against the bounded prefix audit; no raw source file was reopened."
+  ],
+  "lineage_rows": 32000,
+  "lineage_source_field_mappings_matched": 32000,
+  "lineage_split_counts": {
+    "train": 27200,
+    "val": 4800
+  },
+  "lineage_unique_sample_ids": 32000,
+  "lineage_variant_transforms_valid": 32000,
+  "owner_annotations_read_or_created": false,
+  "pack_id": "grade_a_manual_events_20260907_v1",
+  "public_field_leaks": 0,
+  "qa_kind": "independent_physical_artifact_audit",
+  "raw_ohlcv_read": false,
+  "receipt_hashes_matched": {
+    "future_manifest_sha256": true,
+    "lineage_sha256": true,
+    "tasks_sha256": true
+  },
+  "representative_decoded_pixel_hash_matches": 4172,
+  "representatives_per_group": {
+    "1": 4172
+  },
+  "review_window_bars_counts": {
+    "32": 1,
+    "48": 1,
+    "51": 1,
+    "58": 2266,
+    "59": 1903
+  },
+  "schema_version": 1,
+  "source_commit": "fea34e1100896e2e9b28e5c3cbb7f78f80670232",
+  "source_labels_read": false,
+  "status": "PASS",
+  "tasks": 4172,
+  "tasks_without_annotations_or_predictions": 4172,
+  "truncated_future_cases": [
+    {
+      "actual_future_bars": 30,
+      "reason": "holdout_boundary",
+      "review_available_at": "2026-05-04T00:00:00+00:00",
+      "review_bars": 48,
+      "review_id": "2a55d3a0b86676bade2be362"
+    },
+    {
+      "actual_future_bars": 33,
+      "reason": "source_end",
+      "review_available_at": "2026-05-01T00:00:00+00:00",
+      "review_bars": 51,
+      "review_id": "a4b7041eafe782324a114ee9"
+    },
+    {
+      "actual_future_bars": 13,
+      "reason": "holdout_boundary",
+      "review_available_at": "2026-05-04T00:00:00+00:00",
+      "review_bars": 32,
+      "review_id": "ea00bc5783d43e5451b2aa6b"
+    }
+  ],
+  "unique_context_pixel_hashes": 4172,
+  "unique_future_pixel_hashes": 4172,
+  "unique_input_pixel_hashes": 4172
+}

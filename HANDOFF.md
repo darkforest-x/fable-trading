@@ -2,20 +2,22 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## YOLO 当前进度（2026-09-07：简化审核＋未来40根，等Owner点选）
+## YOLO 当前进度（2026-09-07：完整数据已导入Label Studio，等Owner手标）
 
-Owner指出旧审核太复杂，并明确需要后续40根（10小时）。已改辅助审核schema2：
-显示原候选框/方向、原输入截止线及后续40根，主要点“是 / 不是 / 拿不准”后自动保存下一题。
-纠正框/方向/备注折叠可选；“不是”仅拒绝提案，不自动转整图负例。地址仍 http://127.0.0.1:8769/。
-原240事件+36重复/顺序不变；240原输入重放、276对图/时钟、36重复、286旧文件SHA全过。
-旧Chrome多头草稿已备份在旧pack answers，未计为完成。新包 datasets/grade_a_owner_assisted_20260907_v2/；
-未来独立review_future_only目录/manifest，无labels；新增40根依赖与既有150bar保护区重叠0。
-源码295a3b8，最终UI fb981e6；27新增/122联合测试过，真实点选/自动落盘/撤回/恢复/拖框/
-缺图禁用及手机横滚已验。完整QA在原实验results/assisted_v2/。未启动训练、推理或holdout读取。
-重启：`.venv/bin/python -m yoyo.datasets.grade_a_assisted_review serve --port 8769`。
-报告 analysis/html/p1_15m_grade_a_assisted_future40_20260907.html。
-新答案不能冒充旧盲审κ，也不能自动升级Gold；拿到真实答案后先报分歧，再审资格/匹配。
-assisted_v2_protocol.json为当前审核协议，旧PLAN与training_plan的盲审要求按此修订，训练仍需数据门。
+Owner改用Label Studio手工打标，并纠正只导入240抽样的范围。当前按事件组覆盖完整
+32000张训练/开发图：4172事件（1043旧正、3129旧负），另240候选+36重复=276补充题。
+主项目 http://127.0.0.1:8081/projects/76/data ；补充 http://127.0.0.1:8081/projects/74/data 。
+点Label All Tasks，左图选多头/空头拖框，右图看未来；无目标/拿不准可选，Submit保存。
+4172代表原PNG与前文PNG不变；4169完整未来40根，另外3件13/30/33根诚实截短。
+原32000图/标签SHA前后核对、4172像素重放、12516PNG独立解码、32000坐标映射全部通过。
+新项目预测0；重复导入新增0。原50历史LS项目未改；QA提交只在临时项目，已删除。
+当前pack datasets/grade_a_manual_events_20260907_v1/，future_only独立manifest、无labels。
+原240候选两版页面/草稿仍保留，新LS答案协议manual_from_blank_future40_v1，不能混充旧盲审。
+源码fea34e1先冻结，79聚焦测试通过；Label Studio native根是reports，专用软链已注册资源。
+实验 experiments/active/exp-15m-grade-a-labelstudio-manual-20260907-v1/；QA和导入收据在results。
+报告 analysis/html/p1_15m_grade_a_labelstudio_manual_20260907.html。
+下一步只读取真实Owner标注并报分歧，回写必须经各图ChartTransform和包含关系检查；
+扩大未来后的split依赖需重审。无新训练/推理/holdout OHLCV，训练和生产资格仍false。
 
 ## K1/K2 当前会话进度（2026-09-07 — V39 等确认减少交易，但仍亏损）
 
