@@ -1,0 +1,141 @@
+{
+  "annotation_role": "unconfirmed_geometry_proposal",
+  "cleanvision": {
+    "config": {
+      "exact_duplicates": {
+        "hash_type": "md5"
+      },
+      "near_duplicates": {
+        "hash_size": 8,
+        "hash_type": "phash"
+      },
+      "odd_aspect_ratio": {
+        "threshold": 0.35
+      },
+      "odd_size": {
+        "iqr_factor": 3.0
+      }
+    },
+    "duplicate_group_counts": {
+      "exact_duplicates": 1,
+      "near_duplicates": 0
+    },
+    "issue_summary": [
+      {
+        "issue_type": "exact_duplicates",
+        "num_images": 2
+      },
+      {
+        "issue_type": "near_duplicates",
+        "num_images": 0
+      },
+      {
+        "issue_type": "odd_size",
+        "num_images": 0
+      },
+      {
+        "issue_type": "odd_aspect_ratio",
+        "num_images": 0
+      }
+    ],
+    "n_jobs": 1,
+    "near_duplicate_semantics": "equal 64-bit pHash; exact-only groups omitted; no distance search",
+    "wall_seconds": 0.35568416700698435
+  },
+  "datumaro": {
+    "categories": [
+      "long",
+      "short"
+    ],
+    "config": {
+      "dominance_ratio_thr": 0.8,
+      "far_from_mean_thr": 5,
+      "few_samples_thr": 1,
+      "imbalance_ratio_thr": 50,
+      "topk_bins": 0.1
+    },
+    "format_roundtrip_count": 6,
+    "validation_summary": {
+      "errors": 0,
+      "infos": 26,
+      "warnings": 0
+    },
+    "wall_seconds": 0.015247959177941084
+  },
+  "deleted_count": 0,
+  "groups": {
+    "exact_duplicates": [
+      [
+        "000000000000000000000000",
+        "000000000000000000000001"
+      ]
+    ],
+    "near_duplicates": []
+  },
+  "labels_changed_count": 0,
+  "preserved_count": 6,
+  "python": "3.11.14",
+  "review_requested_count": 2,
+  "rows": [
+    {
+      "box_id": "owner-0__b0",
+      "issues": [
+        "exact_duplicates"
+      ],
+      "retained": true,
+      "review_id": "000000000000000000000000"
+    },
+    {
+      "box_id": "owner-1__b0",
+      "issues": [
+        "exact_duplicates"
+      ],
+      "retained": true,
+      "review_id": "000000000000000000000001"
+    },
+    {
+      "box_id": "owner-2__b0",
+      "issues": [],
+      "retained": true,
+      "review_id": "000000000000000000000002"
+    },
+    {
+      "box_id": "owner-3__b0",
+      "issues": [],
+      "retained": true,
+      "review_id": "000000000000000000000003"
+    },
+    {
+      "box_id": "owner-4__b0",
+      "issues": [],
+      "retained": true,
+      "review_id": "000000000000000000000004"
+    },
+    {
+      "box_id": "owner-5__b0",
+      "issues": [],
+      "retained": true,
+      "review_id": "000000000000000000000005"
+    }
+  ],
+  "sdk_source_sha256": {
+    "/Users/zhangzc/.local/share/fable-trading/venvs/dataset-audit/lib/python3.11/site-packages/cleanvision/imagelab.py": "66e73bcb72b932ab425108095d0a9c1f93f7446a3dfa4a4cca213c51a984d67f",
+    "/Users/zhangzc/.local/share/fable-trading/venvs/dataset-audit/lib/python3.11/site-packages/datumaro/plugins/validators.py": "6f34e73b65d951e01916f98e1d77e02ec8fb9fd3f8b233de9a4848e55b0e4598"
+  },
+  "synthetic_bad_box_validation": {
+    "errors": 1,
+    "infos": 8,
+    "warnings": 0
+  },
+  "versions": {
+    "ImageHash": "4.3.2",
+    "cleanvision": "0.3.7",
+    "datumaro": "1.12.0",
+    "numpy": "2.0.2",
+    "pandas": "2.3.3",
+    "pillow": "11.3.0"
+  },
+  "copied_from_test_artifact": "/var/folders/fr/fq9wwmwx3xn63_cdk_v8nvt00000gn/T/pytest-of-zhangzc/pytest-1237/test_actual_sdk_controls_and_n0/synthetic_control_result.json",
+  "test_artifact_sha256": "87fa66d6c21e59585343a826380b6212d53ba5cd501a6f24743db10abab2de45",
+  "scope": "six synthetic images only; test ran before formal source freeze; no market pixels"
+}

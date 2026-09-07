@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-09-07T14:48:58.547528+00:00",
+  "status": "pass",
+  "report_path": "analysis/p1_yolo_owner_box_curation_20260907.md",
+  "report_source_sha256": "bbe3610130889066e39a7793ca66d9a504d7718f06fca9605e046988222e12dd",
+  "review_method": "Read-only report-to-artifact concordance; no browser replay, image/OHLCV reads, submission, dataset changes, or index changes. Only this review receipt is written.",
+  "evidence_sha256": {
+    "experiments/active/exp-owner-box-curation-20260907-v1/results/label_studio_browser_qa.json": "f3603664e549d54731b2d1aeb85150aaebffcc8cf8f25579254e143f70d85b15",
+    "experiments/active/exp-owner-box-curation-20260907-v1/results/fiftyone_browser_qa.json": "a3744465ca02c1a91962c386d5b8f33ce8ceefaeaf5d4de9a8115a2e650802f3",
+    "experiments/active/exp-owner-box-curation-20260907-v1/results/label_studio_views_repair.json": "1110d9f6ff64498af8ec66e118d6fe3b5eb8e7e65a2cd89342eacc094e056d11",
+    "experiments/active/exp-owner-box-curation-20260907-v1/results/label_studio_views_repaired_reentry.json": "0f3d94b1dcc2bed97588f75af25c9e7edc2ebc7d6ec8d3d1b63bac80d6dace37",
+    "experiments/active/exp-owner-box-curation-20260907-v1/results/label_studio_before.json": "c14e257c2dd33ada081223368dde809b7c8900262b3d322e2df82bc2a2d637e6",
+    "experiments/active/exp-owner-box-curation-20260907-v1/results/label_studio_after_repair.json": "95d92689f0b2478a84f9c2bf862087f8be1a6df37df3cf6778b10d8672d49793",
+    "experiments/active/exp-owner-box-curation-20260907-v1/results/quality_tools.json": "6a4484b75832a1c79c3d24be653d40357b291041c2df30bf54cd821d44a6d5cd",
+    "experiments/active/exp-owner-box-curation-20260907-v1/results/review_queue.json": "bc41ecfd478af0dfd6019af42cf7a11537a8f00b4d405ae5c401f6581abb1e3e",
+    "experiments/active/exp-owner-box-curation-20260907-v1/results/datumaro_warning_interpretation.json": "766cee6c0bd32e3449f57a5c2f06ac4572f36bc8c08696cc59b46f99ff2fb895",
+    "experiments/active/exp-owner-box-curation-20260907-v1/results/focused_test_receipt.json": "7694bfd5b120fd713c371db0bacb97fb361178a77bcd4977ebacf49818ac44e3"
+  },
+  "checks": [
+    {
+      "id": "as_displayed_entry",
+      "pass": true,
+      "evidence": "Recommended mode matches recorded live Chrome entry into priority task 34777."
+    },
+    {
+      "id": "all_tasks_scope_disclosed",
+      "pass": true,
+      "evidence": "Report discloses unfiltered Label All mode and observed out-of-priority task 34763."
+    },
+    {
+      "id": "post_submit_validation_limit_disclosed",
+      "pass": true,
+      "evidence": "Post-submit filtering is explicitly source-inspection evidence, not an observed end-to-end submission; no fake Owner answer was submitted."
+    },
+    {
+      "id": "history_arrows_scope_disclosed",
+      "pass": true,
+      "evidence": "Report presents history navigation as a project-wide limitation, without claiming a live arrow-click test."
+    },
+    {
+      "id": "live_ui_extent",
+      "pass": true,
+      "evidence": "Receipts support the table count, proposal display, visible Submit button, and FiftyOne priority grid only."
+    },
+    {
+      "id": "future_pixels_separated",
+      "pass": true,
+      "evidence": "Future image was displayed during authorized human-review UI QA, while SDK input roles remain main-image-only. The report does not claim that no future pixels were ever viewed."
+    },
+    {
+      "id": "repair_scope_and_identity",
+      "pass": true,
+      "evidence": "Exactly the four created views were repaired; frozen task identity is unchanged; repaired reentry made no writes."
+    },
+    {
+      "id": "manual_answers_counts_preserved",
+      "pass": true,
+      "evidence": "Projects 74/76/77 aggregate task, annotation, and prediction counts match; existing four Owner annotations remain. Counts and task-identity receipts are not presented as new semantic confirmations."
+    },
+    {
+      "id": "priority_and_warning_counts",
+      "pass": true,
+      "evidence": {
+        "priority_composition": {
+          "conflict": 3,
+          "duplicate": 38,
+          "other": 9
+        },
+        "unique_warning_items": 14,
+        "warning_priority_overlap": 0
+      }
+    },
+    {
+      "id": "test_scope",
+      "pass": true,
+      "evidence": "Focused test receipt reports 59 passing tests; report does not claim a full repository run."
+    },
+    {
+      "id": "no_accuracy_or_gold_claim",
+      "pass": true,
+      "evidence": "Audit completion is kept separate from semantic correctness, new Gold, training, or measured accuracy improvement."
+    }
+  ],
+  "findings": [],
+  "clarification_verified": "The operations paragraph now explicitly prefixes submit-to-next filtering with installed-source evidence; the verification paragraph separately states that no fabricated submission or end-to-end submit test occurred."
+}

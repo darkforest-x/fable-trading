@@ -1,0 +1,279 @@
+{
+  "schema_version": 1,
+  "protocol_id": "owner_box_curation_v1",
+  "project_id": 77,
+  "view_id": 45,
+  "generated_at": "2026-09-07T14:46:55.515136+00:00",
+  "documentation_head": "c18a61fbc6d4345e1ebd944083bbbc68184e6360",
+  "label_studio_version": "1.13.1",
+  "service": "http://127.0.0.1:8081",
+  "source_manifest_sha256": "7588f9c62f26a66986f747f9dd27dff8f6c216a6b26f307e705cba2880c3a641",
+  "review_queue_sha256": "bc41ecfd478af0dfd6019af42cf7a11537a8f00b4d405ae5c401f6581abb1e3e",
+  "membership_receipt": {
+    "path": "experiments/active/exp-owner-box-curation-20260907-v1/results/label_studio_views_repair.json",
+    "sha256": "1110d9f6ff64498af8ec66e118d6fe3b5eb8e7e65a2cd89342eacc094e056d11",
+    "count": 50
+  },
+  "frontend_evidence": [
+    {
+      "path": ".venv_label_studio/lib/python3.9/site-packages/web/dist/libs/datamanager/main.js.map",
+      "sha256": "bcbd078e667d7a349e6cd1ae7992b8fe1b429d135d9f4e59e0d751d57d51a0a0",
+      "sources": [
+        {
+          "source_path": "webpack://labelstudio/./src/components/DataManager/Toolbar/LabelButton.jsx",
+          "line_number_basis": "1-based lines of sourcesContent in the hashed source map",
+          "excerpts": [
+            {
+              "start_line": 59,
+              "end_line": 66,
+              "source": "  const onLabelAll = () => {\n    localStorage.setItem(\"dm:labelstream:mode\", \"all\");\n    store.startLabelStream();\n  };\n\n  const onLabelVisible = () => {\n    localStorage.setItem(\"dm:labelstream:mode\", \"filtered\");\n    store.startLabelStream();"
+            },
+            {
+              "start_line": 102,
+              "end_line": 124,
+              "source": "          <Button\n            size={size}\n            disabled={disabled}\n            mod={{ size: size ?? \"medium\", look: \"primary\", disabled }}\n            style={primaryStyle}\n            onClick={onLabelAll}\n          >\n            Label {selectedCount ? selectedCount : \"All\"} Task{!selectedCount || selectedCount > 1 ? \"s\" : \"\"}\n          </Button>\n          <Button\n            ref={triggerRef}\n            size={size}\n            mod={{ size: size ?? \"medium\", look: \"primary\", disabled }}\n            style={triggerStyle}\n            onClick={toggleOpen}\n            aria-label={\"Toggle open\"}\n          >\n            <Arrow rotate={isOpen} />\n          </Button>\n        </div>\n        <Button size={size} style={secondStyle} mod={{ size: size ?? \"medium\", disabled }} onClick={onLabelVisible}>\n          Label Tasks As Displayed\n        </Button>"
+            }
+          ]
+        },
+        {
+          "source_path": "webpack://labelstudio/./src/stores/AppStore.js",
+          "line_number_basis": "1-based lines of sourcesContent in the hashed source map",
+          "excerpts": [
+            {
+              "start_line": 624,
+              "end_line": 647,
+              "source": "      const labelStreamMode = localStorage.getItem(\"dm:labelstream:mode\");\n\n      // @todo this is dirty way to sync across nested apps\n      // don't apply filters for \"all\" on \"next_task\"\n      const actionParams = {\n        ordering: view.ordering,\n        selectedItems: selected?.snapshot ?? { all: false, included: [] },\n        filters: {\n          conjunction: view.conjunction ?? \"and\",\n          items: view.serializedFilters ?? [],\n        },\n      };\n\n      if (actionId === \"next_task\") {\n        if (labelStreamMode === \"all\") {\n          delete actionParams.filters;\n\n          if (actionParams.selectedItems.all === false && actionParams.selectedItems.included.length === 0) {\n            delete actionParams.selectedItems;\n            delete actionParams.ordering;\n          }\n        } else if (labelStreamMode === \"filtered\") {\n          delete actionParams.selectedItems;\n        }"
+            }
+          ]
+        },
+        {
+          "source_path": "webpack://labelstudio/./src/stores/Tabs/tab_selected_items.js",
+          "line_number_basis": "1-based lines of sourcesContent in the hashed source map",
+          "excerpts": [
+            {
+              "start_line": 10,
+              "end_line": 19,
+              "source": "    get snapshot() {\n      return {\n        all: self.all,\n        [self.listName]: Array.from(self.list),\n      };\n    },\n\n    get listName() {\n      return self.all ? \"excluded\" : \"included\";\n    },"
+            },
+            {
+              "start_line": 58,
+              "end_line": 65,
+              "source": "    toggleSelectedAll() {\n      if (!self.all || !(self.all && self.isIndeterminate)) {\n        self.all = !self.all;\n      }\n\n      self.list = [];\n      self._invokeChangeEvent();\n    },"
+            }
+          ]
+        },
+        {
+          "source_path": "webpack://labelstudio/./src/sdk/lsf-sdk.js",
+          "line_number_basis": "1-based lines of sourcesContent in the hashed source map",
+          "excerpts": [
+            {
+              "start_line": 269,
+              "end_line": 277,
+              "source": "\n      const newTask = await this.withinLoadingState(async () => {\n        let nextTask;\n\n        if (!isDefined(taskID)) {\n          nextTask = await tasks.loadNextTask();\n        } else {\n          nextTask = await tasks.loadTask(taskID);\n        }"
+            },
+            {
+              "start_line": 513,
+              "end_line": 525,
+              "source": "    const _taskHistory = await this.datamanager.store.taskStore.loadTaskHistory({\n      projectId: this.datamanager.store.project.id,\n    });\n\n    this.lsf.setTaskHistory(_taskHistory);\n\n    await this.loadUserLabels();\n\n    if (this.canPreloadTask && isFF(FF_DEV_1752)) {\n      await this.preloadTask();\n    } else if (this.labelStream) {\n      await this.loadTask();\n    }"
+            },
+            {
+              "start_line": 565,
+              "end_line": 581,
+              "source": "  onSubmitAnnotation = async () => {\n    const exitStream = this.shouldExitStream();\n    const loadNext = exitStream ? false : this.shouldLoadNext();\n    const result = await this.submitCurrentAnnotation(\n      \"submitAnnotation\",\n      async (taskID, body) => {\n        return await this.datamanager.apiCall(\n          \"submitAnnotation\",\n          { taskID },\n          { body },\n          // don't react on duplicated annotations error\n          { errorHandler: (result) => result.status === 409 },\n        );\n      },\n      false,\n      loadNext,\n    );"
+            },
+            {
+              "start_line": 856,
+              "end_line": 862,
+              "source": "  onNextTask = async (nextTaskId, nextAnnotationId) => {\n    if (isFF(FF_OPTIC_2)) this.saveDraft();\n    this.loadTask(nextTaskId, nextAnnotationId, true);\n  };\n  onPrevTask = async (prevTaskId, prevAnnotationId) => {\n    if (isFF(FF_OPTIC_2)) this.saveDraft();\n    this.loadTask(prevTaskId, prevAnnotationId, true);"
+            },
+            {
+              "start_line": 902,
+              "end_line": 908,
+              "source": "    this.setLoading(false);\n\n    if (!loadNext || this.datamanager.isExplorer) {\n      await this.loadTask(taskID, currentAnnotation.pk, true);\n    } else {\n      await this.loadTask();\n    }"
+            }
+          ]
+        },
+        {
+          "source_path": "webpack://labelstudio/./src/sdk/api-config.js",
+          "line_number_basis": "1-based lines of sourcesContent in the hashed source map",
+          "excerpts": [
+            {
+              "start_line": 55,
+              "end_line": 56,
+              "source": "    /** List of task history */\n    taskHistory: \"/../projects/:projectId/label-stream-history\","
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": ".venv_label_studio/lib/python3.9/site-packages/web/dist/libs/editor/main.js.map",
+      "sha256": "2f6f927330ebbd4efc87b061dd4e50bf3b481e084718292a851595ab66f4440c",
+      "sources": [
+        {
+          "source_path": "webpack://labelstudio/./src/stores/AppStore.js",
+          "line_number_basis": "1-based lines of sourcesContent in the hashed source map",
+          "excerpts": [
+            {
+              "start_line": 891,
+              "end_line": 910,
+              "source": "    function nextTask() {\n      if (self.canGoNextTask) {\n        const { taskId, annotationId } =\n          self.taskHistory[self.taskHistory.findIndex((x) => x.taskId === self.task.id) + 1];\n\n        getEnv(self).events.invoke(\"nextTask\", taskId, annotationId);\n        self.incrementQueuePosition();\n      }\n    }\n\n    function prevTask(e, shouldGoBack = false) {\n      const length = shouldGoBack\n        ? self.taskHistory.length - 1\n        : self.taskHistory.findIndex((x) => x.taskId === self.task.id) - 1;\n\n      if (self.canGoPrevTask || shouldGoBack) {\n        const { taskId, annotationId } = self.taskHistory[length];\n\n        getEnv(self).events.invoke(\"prevTask\", taskId, annotationId);\n        self.incrementQueuePosition(-1);"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "backend_evidence": [
+    {
+      "path": ".venv_label_studio/lib/python3.9/site-packages/label_studio/data_manager/functions.py",
+      "sha256": "bd600711f7a7ee56ac1becc52339c1bfbe023e28d486aff82b187f3a799ffc93",
+      "line_number_basis": "1-based installed file lines",
+      "excerpts": [
+        {
+          "start_line": 275,
+          "end_line": 298,
+          "source": "def get_prepare_params(request, project):\n    \"\"\"This function extract prepare_params from\n    * view_id if it's inside of request data\n    * selectedItems, filters, ordering if they are in request and there is no view id\n    \"\"\"\n    # use filters and selected items from view\n    view_id = int_from_request(request.GET, 'view', 0) or int_from_request(request.data, 'view', 0)\n    if view_id > 0:\n        view = get_object_or_404(View, pk=view_id)\n        if view.project.pk != project.pk:\n            raise DataManagerException('Project and View mismatch')\n        prepare_params = view.get_prepare_tasks_params(add_selected_items=True)\n        prepare_params.request = request\n\n    # use filters and selected items from request if it's specified\n    else:\n        # query arguments from url\n        if 'query' in request.GET:\n            data = json.loads(unquote(request.GET['query']))\n        # data payload from body\n        else:\n            data = request.data\n\n        selected = data.get('selectedItems', {'all': True, 'excluded': []})"
+        },
+        {
+          "start_line": 316,
+          "end_line": 329,
+          "source": "                )\n        filters = data.get('filters', None)\n        ordering = data.get('ordering', [])\n        prepare_params = PrepareParams(\n            project=project.id, selectedItems=selected, data=data, filters=filters, ordering=ordering, request=request\n        )\n    return prepare_params\n\n\ndef get_prepared_queryset(request, project):\n    prepare_params = get_prepare_params(request, project)\n    queryset = Task.prepared.only_filtered(prepare_params=prepare_params)\n    return queryset\n"
+        },
+        {
+          "start_line": 348,
+          "end_line": 349,
+          "source": "def filters_ordering_selected_items_exist(data):\n    return data.get('filters') or data.get('ordering') or data.get('selectedItems')"
+        }
+      ]
+    },
+    {
+      "path": ".venv_label_studio/lib/python3.9/site-packages/label_studio/data_manager/actions/next_task.py",
+      "sha256": "0f1c979924c0ace9238b2d1a23111350442b5a500b9aefe184b596dfdcca2a23",
+      "line_number_basis": "1-based installed file lines",
+      "excerpts": [
+        {
+          "start_line": 14,
+          "end_line": 35,
+          "source": "def next_task(project, queryset, **kwargs):\n    \"\"\"Generate next task for labeling stream\n\n    :param project: project\n    :param queryset: task ids to sample from\n    :param kwargs: arguments from api request\n    \"\"\"\n\n    request = kwargs['request']\n    dm_queue = filters_ordering_selected_items_exist(request.data)\n    next_task, queue_info = get_next_task(request.user, queryset, project, dm_queue)\n\n    if next_task is None:\n        raise NotFound(\n            f'There are still some tasks to complete for the user={request.user}, '\n            f'but they seem to be locked by another user.'\n        )\n\n    # serialize task\n    context = {'request': request, 'project': project, 'resolve_uri': True, 'annotations': False}\n    serializer = NextTaskSerializer(next_task, context=context)\n    response = serializer.data"
+        }
+      ]
+    },
+    {
+      "path": ".venv_label_studio/lib/python3.9/site-packages/label_studio/projects/functions/next_task.py",
+      "sha256": "7b9837b522cdf4b25029ec1041164cf21c4eff8db97b551770478ff56bd2490b",
+      "line_number_basis": "1-based installed file lines",
+      "excerpts": [
+        {
+          "start_line": 247,
+          "end_line": 261,
+          "source": "            queue_info += (' & ' if queue_info else '') + 'Breadth first queue'\n\n    return next_task, use_task_lock, queue_info\n\n\ndef skipped_queue(next_task, prepared_tasks, project, user, queue_info):\n    if not next_task and project.skip_queue == project.SkipQueue.REQUEUE_FOR_ME:\n        q = Q(project=project, task__isnull=False, was_cancelled=True, task__is_labeled=False)\n        skipped_tasks = user.annotations.filter(q).order_by('updated_at').values_list('task__pk', flat=True)\n        if skipped_tasks.exists():\n            preserved_order = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(skipped_tasks)])\n            skipped_tasks = prepared_tasks.filter(pk__in=skipped_tasks).order_by(preserved_order)\n            next_task = _get_first_unlocked(skipped_tasks, user)\n            queue_info = 'Skipped queue'\n"
+        },
+        {
+          "start_line": 264,
+          "end_line": 281,
+          "source": "\ndef postponed_queue(next_task, prepared_tasks, project, user, queue_info):\n    if not next_task:\n        q = Q(task__project=project, task__isnull=False, was_postponed=True, task__is_labeled=False)\n        if flag_set('fflag_fix_back_lsdv_1044_check_annotations_24012023_short', user):\n            q &= ~Q(task__annotations__completed_by=user)\n\n        postponed_tasks = user.drafts.filter(q).order_by('updated_at').values_list('task__pk', flat=True)\n        if postponed_tasks.exists():\n            preserved_order = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(postponed_tasks)])\n            postponed_tasks = prepared_tasks.filter(pk__in=postponed_tasks).order_by(preserved_order)\n            next_task = _get_first_unlocked(postponed_tasks, user)\n            if next_task is not None:\n                next_task.allow_postpone = False\n            queue_info = 'Postponed draft queue'\n\n    return next_task, queue_info\n"
+        },
+        {
+          "start_line": 327,
+          "end_line": 360,
+          "source": "        not_solved_tasks, user_solved_tasks_array, queue_info, prioritized_low_agreement = get_not_solved_tasks_qs(\n            user, project, prepared_tasks, assigned_flag, queue_info\n        )\n\n        if not dm_queue:\n            next_task, use_task_lock, queue_info = get_next_task_without_dm_queue(\n                user, project, not_solved_tasks, assigned_flag, prioritized_low_agreement\n            )\n\n        if flag_set('fflag_fix_back_lsdv_4523_show_overlap_first_order_27022023_short'):\n            # show tasks with overlap > 1 first\n            if not next_task and project.show_overlap_first:\n                # don't output anything - just filter tasks with overlap\n                logger.debug(f'User={user} tries overlap first from prepared tasks')\n                _, tasks_with_overlap = _try_tasks_with_overlap(not_solved_tasks)\n                queue_info += 'Show overlap first'\n                next_task, queue_info = get_task_from_qs_with_sampling(\n                    tasks_with_overlap, user_solved_tasks_array, prepared_tasks, user, project, queue_info\n                )\n\n        if not next_task:\n            if dm_queue:\n                queue_info += (' & ' if queue_info else '') + 'Data manager queue'\n                logger.debug(f'User={user} tries sequence sampling from prepared tasks')\n                next_task = not_solved_tasks.first()\n\n            else:\n                next_task, queue_info = get_task_from_qs_with_sampling(\n                    not_solved_tasks, user_solved_tasks_array, prepared_tasks, user, project, queue_info\n                )\n\n        next_task, queue_info = postponed_queue(next_task, prepared_tasks, project, user, queue_info)\n\n        next_task, queue_info = skipped_queue(next_task, prepared_tasks, project, user, queue_info)"
+        }
+      ]
+    },
+    {
+      "path": ".venv_label_studio/lib/python3.9/site-packages/label_studio/projects/functions/stream_history.py",
+      "sha256": "de1427e39d3202a6b4de3934445b92c2fc91e76eed15a30b2a27031468e8dfeb",
+      "line_number_basis": "1-based installed file lines",
+      "excerpts": [
+        {
+          "start_line": 35,
+          "end_line": 57,
+          "source": "def get_label_stream_history(user, project):\n    result = []\n\n    with transaction.atomic():\n        history = user.histories.filter(project=project).first()\n        if history is None:\n            return result\n\n        data = history.data\n\n        task_ids = set([h[TASK_ID_KEY] for h in history.data])\n        annotation_ids = set([h[ANNOTATION_ID_KEY] for h in history.data])\n        existing_task_ids = set(Task.objects.filter(pk__in=task_ids).values_list('id', flat=True))\n        existing_annotation_ids = set(Annotation.objects.filter(pk__in=annotation_ids).values_list('id', flat=True))\n\n        result = []\n        for item in data:\n            if item[TASK_ID_KEY] not in existing_task_ids:\n                continue\n            if item[ANNOTATION_ID_KEY] not in existing_annotation_ids:\n                item[ANNOTATION_ID_KEY] = None\n            result.append(item)\n        history.data = result"
+        }
+      ]
+    }
+  ],
+  "contract": {
+    "label_all": {
+      "mode": "all",
+      "removes_filters": true,
+      "empty_explicit_selection_also_removes_ordering": true,
+      "scope": "Whole project when no closed included-ID selection is supplied; tab URL alone does not constrain the stream."
+    },
+    "label_tasks_as_displayed": {
+      "mode": "filtered",
+      "retains_filters": true,
+      "retains_ordering": true,
+      "removes_selected_items": true,
+      "scope": "Current filtered view; current priority set contains 50 task IDs."
+    },
+    "header_select_all": {
+      "snapshot": {
+        "all": true,
+        "excluded": []
+      },
+      "closed_id_set": false,
+      "safe_replacement_for_as_displayed": false
+    },
+    "explicit_individual_selection": {
+      "snapshot_shape": {
+        "all": false,
+        "included": [
+          "explicit integer task IDs"
+        ]
+      },
+      "closed_id_set": true,
+      "browser_verified_this_round": false
+    },
+    "history_arrows": {
+      "scope": "Project label-stream history, not current view membership",
+      "loads_explicit_task_id_without_filter_recheck": true,
+      "restricted_to_priority50": false
+    },
+    "normal_submit_next": {
+      "evidence_level": "Source inspection only; Submit was not clicked in this audit",
+      "behavior": "In labeling-stream mode with loadNext enabled, submitCurrentAnnotation calls loadTask() without an ID; this invokes next_task and retains current filters when mode remains filtered. Backend chooses within the prepared queryset; postponed/skipped queues also intersect it. No whole-project fallback was found on exhaustion.",
+      "browser_end_to_end_verified": false
+    },
+    "show_skip_button_and_sampling": {
+      "cause_of_reported_scope_expansion": false,
+      "settings_changed": false
+    }
+  },
+  "browser_observations": {
+    "reported_by": "Parent agent /root performing real Chrome UI acceptance; this documentation agent independently inspected installed source and receipt membership.",
+    "label_all": {
+      "task_id": 34763,
+      "review_id": "91c8d2e40d47f2be82279e9a",
+      "inside_priority50": false,
+      "url_kept_tab45": true
+    },
+    "as_displayed": {
+      "task_id": 34777,
+      "review_id": "d94b586fcc04caa4585e49d8",
+      "inside_priority50": true,
+      "proposal_box_loaded": true,
+      "future_bars_loaded": 40
+    },
+    "submit_clicked": false,
+    "skip_clicked": false,
+    "history_arrows_clicked": false
+  },
+  "safe_workflow": [
+    "Open tab45 and confirm Tasks 50 / 2513.",
+    "Use the right-side dropdown: Label Tasks As Displayed.",
+    "For inspection without submitting, return to the filtered table and open a specific row.",
+    "Treat history arrows as project history; do not use them as proof of membership in the 50-task set."
+  ],
+  "changes": {
+    "application_code_changed": false,
+    "service_changed": false,
+    "project_settings_changed": false,
+    "views_changed": false,
+    "task_data_changed": false,
+    "annotations_submitted": false,
+    "api_calls_by_documentation_audit": [],
+    "scope_note": "This audit only writes the requested learning and contract JSON. Ordinary browser label-stream navigation may maintain Label Studio locks/history; no claim of globally stateless navigation is made."
+  }
+}

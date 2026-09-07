@@ -6642,14 +6642,47 @@ experiments:
 
   - experiment_id: exp-owner-box-curation-20260907-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 3a07fb65180c535fc6b8a4935853f2a322a9c30a
+    source_commit: 301e1fe1670e3351528d5ceb47119a8fad325b6e
     status: active
-    question: Can installed dataset audit tools prioritize review of existing Owner box suggestions while retaining every source identity?
+    question: Can installed dataset audit tools prioritize review of existing Owner box suggestions while retaining
+      every source identity?
     single_variable: Workflow-only audit of the frozen 2513 primary review images; no model or label changes.
-    result: Preregistered; source freeze before Datumaro, CleanVision, FiftyOne catalog and existing-project review-view execution.
+    result: 'Datumaro: 2513 valid proposals,0 errors,28 statistical warnings/14 identities. CleanVision:17 exact groups/34
+      identities and2 pHash groups/4 identities. FiftyOne2513 retained; project77 views50/38/3/104 verified. Real
+      Chrome As Displayed opens filtered task34777 with proposal andfuture40.'
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts:
+    - owner-box-curation-20260907-cleanlab-eligibility
+    - owner-box-curation-20260907-datumaro-warning-interpretation
+    - owner-box-curation-20260907-delivery-qa
+    - owner-box-curation-20260907-fiftyone-browser-qa
+    - owner-box-curation-20260907-fiftyone-mcp-verification
+    - owner-box-curation-20260907-fiftyone-receipt
+    - owner-box-curation-20260907-fiftyone-reentry
+    - owner-box-curation-20260907-focused-test-receipt
+    - owner-box-curation-20260907-label-studio-after
+    - owner-box-curation-20260907-label-studio-after-repair
+    - owner-box-curation-20260907-label-studio-before
+    - owner-box-curation-20260907-label-studio-browser-qa
+    - owner-box-curation-20260907-label-studio-label-stream-contract
+    - owner-box-curation-20260907-label-studio-views-receipt
+    - owner-box-curation-20260907-label-studio-views-reentry
+    - owner-box-curation-20260907-label-studio-views-repair
+    - owner-box-curation-20260907-label-studio-views-repaired-reentry
+    - owner-box-curation-20260907-quality-tools
+    - owner-box-curation-20260907-quality-tools-details-datumaro-proposals-annotations-review
+    - owner-box-curation-20260907-quality-tools-details-datumaro-validation
+    - owner-box-curation-20260907-quality-tools-details-duplicate-groups
+    - owner-box-curation-20260907-quality-tools-details-per-image
+    - owner-box-curation-20260907-report-review
+    - owner-box-curation-20260907-review-queue
+    - owner-box-curation-20260907-synthetic-sdk-control
+    - owner-box-curation-20260907-report
     reuse_allowed: false
-    notes: Owner authorized backend curation. Only primary images enter audit; no fourth Label Studio project, new training, automatic deletion, new Gold or synthetic Cleanlab predictions.
+    notes: Initial in_list API filters broke frontend loading; c18a61f frozen before guarded repair of45–48 only.
+      No fourth Label Studio project. All/filtered/history distinction verified in source and UI.59 tests pass. Original4
+      Owner answers preserved; no fabricated submission. Cleanlab eligible OOS coverage0/2513, not run. Human confirmation
+      is next.
+    canonical_report: analysis/html/p1_yolo_owner_box_curation_20260907.html

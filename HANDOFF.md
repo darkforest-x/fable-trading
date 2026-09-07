@@ -2,11 +2,26 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## YOLO 当前进度（2026-09-07：2513个历史人工框细化建议已导入）
+## YOLO 当前进度（2026-09-07：2513个建议框已审计，先复核重点50张）
+
+已装工具本轮真正接入：source301e1fe冻结后，Datumaro检查2513框，0 error；
+28 warnings对应14张几何统计异常，不当错标。CleanVision确认17组完全重复/34身份，
+另2组pHash相同/4身份（跨币候选，不自动合并）；异常主图尺寸/比例0。全部2513保留。
+FiftyOne后台fable_owner_box_curation_20260907_v1持久化收录，仅主图+proposal_boxes，
+无ground_truth/predictions；重入新增0。Cleanlab已安装，但当前合格样本外检测预测
+覆盖0/2513，诚实未评分。人工仍只用项目77，不增加第四个Label Studio项目。
+项目77重点50入口：http://127.0.0.1:8081/projects/77/data?tab=45 ；
+重复38/负图冲突3/星标104分别tab46/47/48。页内按task ID，FO/JSON按风险排序。
+点按钮右侧下拉选择Label Tasks As Displayed，不能用Label All（会删掉筛选）。
+左右箭头是项目历史；只查看时回列表点具体行。实际Chrome已进正确34777，建议框/
+future40均加载；未伪造提交。初版in_list后端可查但前端卡加载，c18a61f冻结后仅修复
+45–48过滤编码为or/equal；旧收据保留，重入新增0，59联合tests通过。
+本轮实验experiments/active/exp-owner-box-curation-20260907-v1/，报告
+analysis/html/p1_yolo_owner_box_curation_20260907.html。源图、旧标签和原4个人工答案保留。
 
 Owner确认复用历史标签，并要求细化框。先冻结f2d3acb再构建：2513原人工框
 （short1361/long1152），104精确⭐排前；12个skip另记，17组同范围别名保留。
-新Label Studio项目77：http://127.0.0.1:8081/projects/77/data 。点Label All Tasks，
+Label Studio项目77：http://127.0.0.1:8081/projects/77/data 。用As Displayed进入当前筛选，
 建议框已带入，可直接提交或拖动；右图完整未来40根，原人工框和编号对照可展开。
 本版只按既有中央4–7根规则细化蜡烛+六均线包络，未逐图重判启动首根。
 原人工确认/方向/⭐保留；新派生框sample_owner_geometry_confirmed=false，未写回训练。
@@ -26,7 +41,8 @@ experiments/active/exp-owner-box-refinement-20260907-v1/（results含覆盖明�
 交付报告：analysis/html/p1_yolo_owner_box_refinement_20260907.html。
 历史12565人工图、1345旧short正例、500方向批次/176图⭐口径与证据，仍见
 analysis/html/p1_yolo_historical_label_reuse_20260907.html，不与当前1043自动正事件混称。
-下一步先审项目77前104个原⭐及争议核心，读取真实Owner新答案，再逐图回写独立新数据版本。
+下一步先审项目77重点50（3冲突+38重复候选+9其他，含3原⭐），再复核14张统计警告
+及剩余原⭐；读取真实Owner新答案，再逐图回写独立新数据版本。
 旧train/val只作来源标记，未来上下文与新旧合并需要重新审时间依赖。无新训练、模型推理、
 holdout OHLCV、promote；训练和生产资格仍false。
 

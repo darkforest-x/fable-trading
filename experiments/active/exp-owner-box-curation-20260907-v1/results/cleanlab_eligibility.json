@@ -1,0 +1,35 @@
+{
+  "verified_at": "2026-09-07T14:23:14.975283+00:00",
+  "population": 2513,
+  "tool": "cleanlab.object_detection",
+  "installed_version": "2.9.0",
+  "status": "not_run_missing_eligible_out_of_sample_detection_predictions",
+  "verified_eligible_prediction_coverage": 0,
+  "prediction_versions_in_current_pack": {
+    "owner_geometry_refinement_v1": 2513
+  },
+  "evidence": {
+    "pack_new_model_inference": false,
+    "pack_new_training": false,
+    "current_predictions_are": "deterministic central-core geometry suggestions from Owner boxes",
+    "not_model_predictions": true,
+    "proposal_and_ground_truth_must_not_be_reused_as_both_inputs": true,
+    "existing_classification_audit_is_compatible": false
+  },
+  "required_before_scoring": [
+    "Exact per-image prediction identity on the current primary canvases",
+    "Evidence each prediction was produced without training or model selection on that event and its dependent windows",
+    "Chronological isolation under the repository contract"
+  ],
+  "scope": "Current frozen review pack and available lineage; not a claim about every possible model on every machine",
+  "new_predictions_generated": false,
+  "new_training": false,
+  "holdout_read": false,
+  "source_sha256": {
+    "datasets/owner_box_refinement_20260907_v1/admin/build_receipt.json": "315d7eb5e5c0656a0c9d212e98ea0155bb20b95c4a975ca45b36d2a688a8b3f1",
+    "datasets/owner_box_refinement_20260907_v1/manifest.jsonl": "7588f9c62f26a66986f747f9dd27dff8f6c216a6b26f307e705cba2880c3a641",
+    "datasets/owner_box_refinement_20260907_v1/tasks.json": "bc89a4d5e41003f1bf191013d60ba76d84fafbd67a28e17c2dfd3f0c6bc6697a",
+    "yoyo/datasets/owner_box_refinement.py": "5773fd126e6e20e3a12b86988cdce5c0969419efd0314ea8afa66665b284ec75"
+  },
+  "source_documentation": "https://docs.cleanlab.ai/stable/tutorials/object_detection.html#format-data-labels-and-model-predictions"
+}
