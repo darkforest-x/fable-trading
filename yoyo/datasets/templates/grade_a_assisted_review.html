@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<title>形态确认 · 后续 40 根</title>
+<style>
+:root{font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#18312c;background:#f3f5f3;font-size:14px;--green:#176346;--line:#d8e1dc;--muted:#66796f}*{box-sizing:border-box}body{margin:0}button,select,textarea{font:inherit}button{cursor:pointer;background:white;color:inherit;border:1px solid var(--line);border-radius:8px;padding:9px 13px}button:hover:not(:disabled){background:#edf5f0;border-color:#789d88}button:disabled{opacity:.45;cursor:default}button:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid #81b899;outline-offset:2px}.primary{background:var(--green);color:white;border-color:var(--green)}.primary:hover:not(:disabled){background:#124d37;color:white}.muted{color:var(--muted);font-size:12px;line-height:1.6}.error{color:#a33b27!important}.success{color:#176346!important}header{max-width:1360px;margin:auto;padding:22px 24px 13px}.head,.toolbar,.row,.nav,.verdicts{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.head{justify-content:space-between}h1{font-size:23px;line-height:1.3;margin:0 0 5px}p{margin:5px 0}.toolbar button{font-size:12px;padding:8px 10px}.status{margin-top:10px;min-height:22px;font-size:13px;line-height:1.55}.progress{height:4px;background:#e1e9e3;border-radius:4px;margin-top:10px;overflow:hidden}.progress div{height:100%;width:0;background:#25865b}.wrap{max-width:1360px;margin:auto;padding:0 24px 24px}.card{border:1px solid var(--line);background:white;border-radius:12px;overflow:hidden}.nav{padding:12px 16px;justify-content:space-between;border-bottom:1px solid var(--line)}.badge{display:inline-block;padding:4px 9px;background:#e9f0ff;border-radius:5px;color:#305689;font-size:12px}.pill{color:#6d7a72;font-size:12px}.image-scroll{overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;background:white;padding:0 10px}.future-stage{position:relative;width:100%;min-width:1080px;min-height:180px;line-height:0}.future-stage img{display:block;width:100%;height:auto}.overlay{position:absolute;pointer-events:none;border:2px solid #2e6fc4;background:rgba(48,114,201,.06);display:none}.divider{position:absolute;top:0;bottom:0;border-left:2px dashed #a97427;pointer-events:none;display:none}.divider span{position:absolute;top:8px;left:6px;white-space:nowrap;background:#fff8e7;color:#855915;font-size:11px;line-height:1.5;padding:3px 6px;border-radius:4px}.chart-help{font-size:12px;color:var(--muted);line-height:1.6;padding:10px 16px}.image-error{padding:30px 16px;color:#a33b27}.actions{position:sticky;bottom:0;background:rgba(243,245,243,.97);padding:13px 0 10px;z-index:4}.verdicts{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}.verdicts button{font-size:17px;font-weight:650;padding:16px 10px;min-height:57px}.key{font-size:11px;font-weight:400;opacity:.65;padding-left:8px}.action-note{font-size:12px;line-height:1.6;color:var(--muted);margin:7px 2px 0}details{background:white;border:1px solid var(--line);border-radius:9px;margin:12px 0;overflow:hidden}summary{cursor:pointer;padding:15px 16px;font-weight:600}.details-body{padding:0 16px 16px}.details-grid{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:18px}.original-stage{position:relative;line-height:0;touch-action:none;user-select:none;background:white;min-height:100px;cursor:crosshair}.original-stage img{width:100%;height:auto;display:block;pointer-events:none}.correction{border-color:#d16a28;background:rgba(209,106,40,.10)}.field{margin-bottom:12px}label{display:block;font-size:12px;margin-bottom:6px;color:#496154}select,textarea{width:100%;padding:9px;border:1px solid #c5d3cb;border-radius:6px;background:white;color:inherit}textarea{min-height:75px;resize:vertical;line-height:1.5}.legend{font-size:12px;line-height:1.7;color:var(--muted)}.blue{color:#2e6fc4}.orange{color:#b36027}#import-file{display:none}.fatal{margin:24px;background:#fff0ec;padding:20px;border:1px solid #dfa99d;border-radius:8px}.notice{padding:10px 12px;background:#edf4ee;border-radius:7px;font-size:12px;line-height:1.6}.empty-state{padding:30px 16px;color:var(--muted)}footer{font-size:12px;color:var(--muted);line-height:1.6;padding-top:10px}
+@media(max-width:760px){header{padding:15px 12px 10px}h1{font-size:20px}.wrap{padding:0 10px 20px}.toolbar{gap:6px;margin-top:7px}.toolbar button{padding:7px 9px}.nav{padding:10px;gap:8px}.nav button{font-size:12px;padding:8px}.details-grid{display:flex;flex-direction:column;gap:10px}.verdicts{grid-template-columns:1.65fr .8fr 1fr;gap:7px}.verdicts button{font-size:14px;padding:14px 5px}.key{display:none}.future-stage{min-width:1080px}.image-scroll{padding:0}.actions{padding-top:9px}.details-body{padding:0 10px 12px}.chart-help{padding:9px 10px}}
+</style>
+</head>
+<body>
+<div id="fatal" class="fatal" role="alert" hidden></div>
+<div id="app" hidden>
+<header>
+ <div class="head"><div><h1>这个形态，是你要的吗？</h1><p class="muted">蓝框是待确认的核心提案 · 右侧展示后续 40 根（10 小时）</p></div>
+ <div class="toolbar"><button id="save-local-button" type="button">保存到本机</button><button id="restore-local-button" type="button">恢复本机进度</button><button id="export-button" type="button">导出 JSON</button><button id="import-button" type="button">导入 JSON</button><input id="import-file" type="file" accept=".json,application/json" aria-label="导入同一审核包的进度"></div></div>
+ <div id="save-status" class="status" role="status" aria-live="polite">浏览器自动保留进度；每次确认后自动备份到本机。</div>
+ <div id="global-notice" class="status" role="status" aria-live="polite"></div>
+ <div id="progress" class="progress" role="progressbar" aria-label="已确认题数" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progress-fill"></div></div>
+</header>
+<main class="wrap">
+ <section class="card" aria-label="含后续走势的形态图">
+  <nav class="nav"><div class="row"><strong id="item-counter"></strong><span id="proposal-direction" class="badge"></span><span id="item-status" class="pill"></span><span id="completion-count" class="muted"></span></div><div class="row"><button id="previous-button" type="button">← 上一题</button><button id="next-button" type="button">下一题 →</button><button id="undo-button" type="button">撤回上次修改</button></div></nav>
+  <div id="image-scroll" class="image-scroll"><div id="future-stage" class="future-stage"><img id="future-image" alt="原始形态及后续 40 根 K 线"><div id="future-proposal-box" class="overlay" aria-hidden="true"></div><div id="input-divider" class="divider" aria-hidden="true"><span>原输入到此 · 右侧为后续 40 根</span></div></div></div>
+  <div id="image-error" class="image-error" role="alert" hidden>后续走势图加载失败，本题尚未完成。<button id="retry-image-button" type="button">重新加载</button><button id="skip-image-button" type="button">先看下一题</button></div>
+  <p class="chart-help">先看蓝框是否为你要的形态，再参考后续走势。手机可左右滑动大图；核心看不清时，展开下面的「看原图细节」。</p>
+ </section>
+ <details id="details-panel"><summary id="details-toggle">看原图细节 / 补充、纠正（可选）</summary><div class="details-body"><div class="notice">直接选下面三个答案即可。选择「不是」只否决这个提案，不会自动把整张图当负例。</div><div class="details-grid" style="margin-top:12px">
+  <div><div id="original-stage" class="original-stage"><img id="original-image" alt="原始 18 根输入图，可在此拖绘纠正框" draggable="false"><div id="original-proposal-box" class="overlay" aria-hidden="true"></div><div id="corrected-box" class="overlay correction" aria-hidden="true"></div></div><p class="legend"><span class="blue">蓝框：原提案。</span><span class="orange">橙框：你的纠正。</span>如需改框，可直接在这张原图上拖绘；无需填写数值。</p><button id="clear-box-button" type="button">清除纠正框</button><p id="correction-status" class="muted" role="status"></p></div>
+  <div><div class="field"><label for="reason">为什么不是？（可选）</label><select id="reason"><option value="">不补充原因</option><option value="NO_TARGET">整个原始输入都没有目标形态</option><option value="WRONG_SIDE">方向不对</option><option value="WRONG_BOX">核心框不对</option><option value="OTHER">其他</option></select></div><div class="field"><label for="corrected-direction">纠正方向（可选）</label><select id="corrected-direction"><option value="">不纠正方向</option><option value="LONG">应为多头</option><option value="SHORT">应为空头</option></select></div><div class="field"><label for="note">备注（可选）</label><textarea id="note" maxlength="4000" placeholder="记下你希望我注意的地方。"></textarea></div><p class="muted">纠正项用于「不是」。点击「是」或「拿不准」时会清除纠正项，保留备注。</p></div>
+ </div></div></details>
+ <div class="actions"><div class="verdicts"><button id="accept-button" class="primary" type="button" disabled>是，我要的形态<span class="key">1</span></button><button id="reject-button" type="button" disabled>不是<span class="key">2</span></button><button id="uncertain-button" type="button" disabled>拿不准<span class="key">3</span></button></div><p id="action-note" class="action-note">图像加载成功后即可确认；点击答案会保存并进入下一题。</p></div>
+ <footer>这轮包含提案和后续走势，用于人工确认与纠正。后续图仅供审核，不进入训练输入。快捷键：1 是 · 2 不是 · 3 拿不准 · ← / → 切题。</footer>
+</main>
+</div>
+<script id="pack-data" type="application/json">__PACK_JSON__</script>
+<script>
+'use strict';
+(() => {
+ const $=id=>document.getElementById(id);
+ const VERDICTS=['ACCEPT','REJECT','UNCERTAIN'], REASONS=['NO_TARGET','WRONG_SIDE','WRONG_BOX','OTHER'];
+ const KEYS=['review_id','verdict','reason','note','corrected_direction','corrected_box','future_bars_seen','answered_at'];
+ const finite=x=>typeof x==='number'&&Number.isFinite(x);
+ const validBox=x=>Array.isArray(x)&&x.length===4&&x.every(v=>finite(v)&&v>=0&&v<=1)&&x[0]<x[2]&&x[1]<x[3];
+ function timestamp(value){
+  if(typeof value!=='string')return false;
+  const p=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d{1,6})?(Z|([+-])(\d{2}):(\d{2}))$/.exec(value);
+  if(!p||p[0]!==value)return false;
+  const [y,m,d,h,min,s]=p.slice(1,7).map(Number);
+  if(y<1||m<1||m>12||h>23||min>59||s>59||Number(p[9]||0)>23||Number(p[10]||0)>59)return false;
+  const days=[31,y%4===0&&(y%100!==0||y%400===0)?29:28,31,30,31,30,31,31,30,31,30,31];
+  const ms=Date.parse(value);return d>=1&&d<=days[m-1]&&Number.isFinite(ms)&&new Date(ms).getUTCFullYear()>=1&&new Date(ms).getUTCFullYear()<=9999;
+ }
+ let pack;
+ try{
+  pack=JSON.parse($('pack-data').textContent);
+  if(!pack||pack.schema_version!==2||typeof pack.pack_id!=='string'||!pack.pack_id||typeof pack.protocol_id!=='string'||!pack.protocol_id||typeof pack.manifest_sha256!=='string'||!/^[a-fA-F0-9]{64}$/.test(pack.manifest_sha256)||pack.default_future_bars!==40||!Array.isArray(pack.items)||!pack.items.length)throw Error('审核包格式不完整。');
+  const ids=new Set();
+  for(const item of pack.items){
+   if(!item||typeof item.review_id!=='string'||!item.review_id||ids.has(item.review_id)||!/^input_images\/[A-Za-z0-9_.-]+\.png$/.test(item.image)||!/^review_future_only\/images\/[A-Za-z0-9_.-]+\.png$/.test(item.future_image)||item.n_bars!==18||item.future_bars!==40||!['LONG','SHORT'].includes(item.proposal_direction)||!validBox(item.proposal_box)||!validBox(item.future_proposal_box)||!finite(item.input_end_norm)||item.input_end_norm<=0||item.input_end_norm>=1||!Array.isArray(item.proposal_core)||item.proposal_core.length!==2||!item.proposal_core.every(Number.isInteger)||item.proposal_core[0]<1||item.proposal_core[1]>18||item.proposal_core[0]>item.proposal_core[1])throw Error('图像、提案或未来窗口契约无效。');
+   ids.add(item.review_id);
+  }
+ }catch(error){$('fatal').hidden=false;$('fatal').textContent='无法打开审核包：'+error.message;return;}
+ const byId=new Map(pack.items.map(item=>[item.review_id,item]));
+ const storageKey='grade-a-assisted:v2:'+pack.pack_id+':'+pack.manifest_sha256;
+ let answers=new Map(),index=0,history=[],loadToken=0,futureReady=false,originalReady=false,drag=null;
+ let revision=0,wanted=false,saving=false,saveTimer=null,lastExportMs=0,localPersistent=true;
+ const currentItem=()=>pack.items[index];
+ const empty=item=>({review_id:item.review_id,verdict:null,reason:null,note:'',corrected_direction:null,corrected_box:null,future_bars_seen:item.future_bars,answered_at:null});
+ const currentAnswer=()=>answers.get(currentItem().review_id)||empty(currentItem());
+ function validAnswer(a,item){
+  if(!a||!KEYS.every(k=>Object.prototype.hasOwnProperty.call(a,k))||(a.verdict!==null&&!VERDICTS.includes(a.verdict))||(a.reason!==null&&!REASONS.includes(a.reason))||typeof a.note!=='string'||a.note.length>4000||(a.corrected_direction!==null&&!['LONG','SHORT'].includes(a.corrected_direction))||(a.corrected_box!==null&&!validBox(a.corrected_box))||a.future_bars_seen!==item.future_bars)return false;
+  if(a.verdict!=='REJECT'&&['reason','corrected_direction','corrected_box'].some(k=>a[k]!==null))return false;
+  if(a.reason==='NO_TARGET'&&(a.corrected_direction!==null||a.corrected_box!==null))return false;
+  return a.answered_at===null||(timestamp(a.answered_at)&&VERDICTS.includes(a.verdict));
+ }
+ const complete=(a,item)=>!!a&&a.answered_at!==null&&validAnswer(a,item);
+ const records=map=>pack.items.filter(item=>map.has(item.review_id)).map(item=>map.get(item.review_id));
+ function envelope(){lastExportMs=Math.max(Date.now(),lastExportMs+1);return {schema_version:2,pack_id:pack.pack_id,manifest_sha256:pack.manifest_sha256,protocol_id:pack.protocol_id,exported_at:new Date(lastExportMs).toISOString(),answers:records(answers)};}
+ function validateSnapshot(s){
+  if(!s||s.schema_version!==2||s.pack_id!==pack.pack_id||s.manifest_sha256!==pack.manifest_sha256||s.protocol_id!==pack.protocol_id||!timestamp(s.exported_at)||!Array.isArray(s.answers)||s.answers.length>pack.items.length)throw Error('文件不是当前版本的审核包。');
+  const imported=new Map();
+  for(const raw of s.answers){if(!raw||!byId.has(raw.review_id)||imported.has(raw.review_id)||!validAnswer(raw,byId.get(raw.review_id)))throw Error('答案中有未知题号、重复记录或不合法字段。');imported.set(raw.review_id,Object.fromEntries(KEYS.map(k=>[k,raw[k]])));}
+  return imported;
+ }
+ function notice(text,error=false){$('global-notice').textContent=text;$('global-notice').classList.toggle('error',error);}
+ function saveStatus(text,kind=''){$('save-status').textContent=text;$('save-status').className='status '+kind;}
+ function persist(){try{localStorage.setItem(storageKey,JSON.stringify({...envelope(),current_index:index}));}catch(_){localPersistent=false;saveStatus('浏览器无法保留进度；请确认本机备份成功，或导出 JSON。','error');}}
+ function progress(){
+  const count=pack.items.filter(item=>complete(answers.get(item.review_id),item)).length;
+  $('completion-count').textContent='已确认 '+count+' / '+pack.items.length;
+  $('progress-fill').style.width=100*count/pack.items.length+'%';$('progress').setAttribute('aria-valuenow',String(Math.round(100*count/pack.items.length)));
+  const a=currentAnswer();$('item-status').textContent=complete(a,currentItem())?({ACCEPT:'已确认：是',REJECT:'已确认：不是',UNCERTAIN:'已确认：拿不准'}[a.verdict]):answers.has(a.review_id)?'补充未确认':'待确认';
+  $('undo-button').disabled=!history.length;
+ }
+ function overlay(id,box,ready){const el=$(id);el.style.display=ready&&validBox(box)?'block':'none';if(validBox(box)){el.style.left=100*box[0]+'%';el.style.top=100*box[1]+'%';el.style.width=100*(box[2]-box[0])+'%';el.style.height=100*(box[3]-box[1])+'%';}}
+ function drawing(){overlay('original-proposal-box',currentItem().proposal_box,originalReady);overlay('corrected-box',currentAnswer().corrected_box,originalReady);$('correction-status').textContent=currentAnswer().corrected_box?'已画纠正框；点击「不是」确认即可。':'';}
+ function fields(){const a=currentAnswer();$('reason').value=a.reason||'';$('note').value=a.note;$('corrected-direction').value=a.corrected_direction||'';$('corrected-direction').disabled=a.reason==='NO_TARGET';$('clear-box-button').disabled=a.reason==='NO_TARGET'||a.corrected_box===null;drawing();progress();}
+ function enableVerdicts(){for(const id of ['accept-button','reject-button','uncertain-button'])$(id).disabled=!futureReady;}
+ function loadImages(){
+  const token=++loadToken,item=currentItem();futureReady=false;originalReady=false;drag=null;enableVerdicts();$('image-error').hidden=true;$('action-note').textContent='正在加载本题后续走势图…';
+  overlay('future-proposal-box',null,false);overlay('original-proposal-box',null,false);overlay('corrected-box',null,false);$('input-divider').style.display='none';
+  // Each navigation gets new image elements; a previous image cannot authorize this item.
+  const future=new Image();future.id='future-image';future.alt='原始形态及后续 40 根 K 线';
+  future.onload=()=>{if(token!==loadToken||item.review_id!==currentItem().review_id)return;futureReady=true;overlay('future-proposal-box',item.future_proposal_box,true);$('input-divider').style.left=100*item.input_end_norm+'%';$('input-divider').style.display='block';enableVerdicts();$('action-note').textContent='点击答案会保存并进入下一题；补充项都可不填。';};
+  future.onerror=()=>{if(token!==loadToken)return;futureReady=false;enableVerdicts();$('image-error').hidden=false;$('action-note').textContent='本题图像加载失败，尚未完成。可重试或先看下一题。';};
+  $('future-image').replaceWith(future);future.src=item.future_image;
+  const original=new Image();original.id='original-image';original.alt='原始 18 根输入图，可在此拖绘纠正框';original.draggable=false;
+  original.onload=()=>{if(token!==loadToken)return;originalReady=true;drawing();};original.onerror=()=>{if(token!==loadToken)return;originalReady=false;drawing();$('correction-status').textContent='原图加载失败，暂不能画纠正框。';};
+  $('original-image').replaceWith(original);original.src=item.image;
+ }
+ function render(){const item=currentItem();$('item-counter').textContent='第 '+(index+1)+' / '+pack.items.length+' 题';$('proposal-direction').textContent=(item.proposal_direction==='LONG'?'多头提案':'空头提案')+' · 核心 '+item.proposal_core[0]+'–'+item.proposal_core[1]+' 根';$('previous-button').disabled=index===0;$('next-button').disabled=index===pack.items.length-1;$('skip-image-button').disabled=index===pack.items.length-1;$('image-scroll').scrollLeft=0;$('details-panel').open=false;loadImages();fields();}
+ function move(next){if(next<0||next>=pack.items.length||next===index)return;index=next;persist();render();}
+ function remember(){history.push({review_id:currentItem().review_id,index,before:answers.has(currentItem().review_id)?structuredClone(currentAnswer()):null});if(history.length>150)history.shift();}
+ function change(changes,{record=true,fill=false,save=true}={}){if(record)remember();const a={...currentAnswer(),...changes,answered_at:null};answers.set(a.review_id,a);revision++;persist();if(fill)fields();else{drawing();progress();}if(save)scheduleSave(400);}
+ function decide(verdict){
+  if(!futureReady)return;
+  remember();const a={...currentAnswer(),verdict,future_bars_seen:40,answered_at:new Date().toISOString()};
+  if(verdict!=='REJECT'){a.reason=null;a.corrected_direction=null;a.corrected_box=null;}
+  if(a.reason==='NO_TARGET'){a.corrected_direction=null;a.corrected_box=null;}
+  if(!validAnswer(a,currentItem())){notice('补充内容格式有误，请检查后再确认。',true);history.pop();return;}
+  answers.set(a.review_id,a);revision++;persist();scheduleSave(0);progress();
+  if(index<pack.items.length-1)move(index+1);else{fields();$('action-note').textContent='已确认最后一题。请查看顶部本机保存状态；可返回前题修改。';}
+ }
+ const localAPI=()=>['http:','https:'].includes(location.protocol)&&['localhost','127.0.0.1','[::1]'].includes(location.hostname);
+ async function request(path,snapshot){
+  if(!localAPI())throw Error('当前是离线页面，未写入本机服务。请导出 JSON 备份。');
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),20000);
+  try{
+   const options={method:snapshot?'POST':'GET',cache:'no-store',credentials:'omit',redirect:'error',signal:controller.signal};if(snapshot){options.headers={'Content-Type':'application/json'};options.body=JSON.stringify(snapshot);}
+   const response=await fetch(path,options);
+   if(response.status===404&&!snapshot)throw Error('暂无本机保存进度；可导入之前导出的 JSON。');
+   if(response.status===409){const error=Error('本机已有更新的备份，请恢复核对，或再次点击「保存到本机」。');error.status=409;throw error;}
+   if(!response.ok)throw Error('本机服务未确认操作（HTTP '+response.status+'），请重试或导出 JSON。');
+   return await response.json();
+  }catch(error){if(error.name==='AbortError')throw Error('本机保存或恢复超时，结果未确认；请重试或导出 JSON。');if(error instanceof TypeError||error instanceof SyntaxError)throw Error('本机保存服务不可用，请重试或导出 JSON。');throw error;}finally{clearTimeout(timer);}
+ }
+ function scheduleSave(delay=0){wanted=true;clearTimeout(saveTimer);saveStatus(localAPI()?'有新修改，等待本机备份…':(localPersistent?'进度已留在浏览器；离线时请导出 JSON 备份。':'离线且浏览器不能保留进度，请立即导出 JSON。'));saveTimer=setTimeout(flushSave,delay);}
+ async function flushSave(){
+  if(saving)return;clearTimeout(saveTimer);saving=true;
+  try{while(wanted){wanted=false;const targetRevision=revision,snapshot=envelope();saveStatus('正在保存到本机，可继续下一题…');let result;
+    try{result=await request('/api/save',snapshot);if(!result||result.saved!==true||typeof result.filename!=='string'||!result.filename||typeof result.sha256!=='string'||!/^[a-fA-F0-9]{64}$/.test(result.sha256)||!Number.isInteger(result.saved_answers)||result.saved_answers<0||result.saved_answers>pack.items.length||result.total!==pack.items.length)throw Error('本机服务返回的保存确认不完整，尚不能确认备份。');}
+    catch(error){wanted=false;saveStatus('本机保存未确认：'+error.message,'error');break;}
+    if(targetRevision===revision&&!wanted)saveStatus('本机已保存 · 已确认 '+result.saved_answers+' / '+result.total+' 题','success');else{wanted=true;saveStatus('上一份已保存，正在备份最新修改…');}
+   }}finally{saving=false;}
+ }
+ function replaceProgress(imported){
+  // Inspect current answers after asynchronous I/O, including edits made while waiting.
+  if(answers.size&&JSON.stringify(records(answers))!==JSON.stringify(records(imported))&&!window.confirm('恢复将替换当前浏览器进度，未备份的新修改会被替换。取消可保留当前进度。继续？')){notice('已取消，当前浏览器进度已保留。');return false;}
+  answers=imported;history=[];revision++;const first=pack.items.findIndex(item=>!complete(answers.get(item.review_id),item));index=first<0?0:first;persist();render();scheduleSave(0);return true;
+ }
+ $('accept-button').addEventListener('click',()=>decide('ACCEPT'));$('reject-button').addEventListener('click',()=>decide('REJECT'));$('uncertain-button').addEventListener('click',()=>decide('UNCERTAIN'));
+ $('previous-button').addEventListener('click',()=>move(index-1));$('next-button').addEventListener('click',()=>move(index+1));$('skip-image-button').addEventListener('click',()=>move(index+1));$('retry-image-button').addEventListener('click',loadImages);
+ $('undo-button').addEventListener('click',()=>{const previous=history.pop();if(!previous)return;if(previous.before===null)answers.delete(previous.review_id);else answers.set(previous.review_id,previous.before);index=previous.index;revision++;persist();render();scheduleSave(0);notice('已撤回上次修改，正在备份撤回后的进度。');});
+ $('reason').addEventListener('change',()=>{const reason=$('reason').value||null,changes={verdict:'REJECT',reason};if(reason==='NO_TARGET'){changes.corrected_direction=null;changes.corrected_box=null;}change(changes,{fill:true});});
+ $('corrected-direction').addEventListener('change',()=>change({verdict:'REJECT',corrected_direction:$('corrected-direction').value||null},{fill:true}));
+ $('note').addEventListener('input',()=>change({note:$('note').value}));
+ $('clear-box-button').addEventListener('click',()=>change({corrected_box:null},{fill:true}));
+ function pointer(event){const r=$('original-image').getBoundingClientRect();return [Math.max(0,Math.min(1,(event.clientX-r.left)/r.width)),Math.max(0,Math.min(1,(event.clientY-r.top)/r.height))];}
+ $('original-stage').addEventListener('pointerdown',event=>{if(event.button!==0||!originalReady||currentAnswer().reason==='NO_TARGET')return;event.preventDefault();drag={id:event.pointerId,start:pointer(event),token:loadToken};$('original-stage').setPointerCapture(event.pointerId);});
+ $('original-stage').addEventListener('pointermove',event=>{if(!drag||event.pointerId!==drag.id||drag.token!==loadToken)return;const p=pointer(event),b=[Math.min(drag.start[0],p[0]),Math.min(drag.start[1],p[1]),Math.max(drag.start[0],p[0]),Math.max(drag.start[1],p[1])];overlay('corrected-box',b,true);});
+ $('original-stage').addEventListener('pointerup',event=>{if(!drag||event.pointerId!==drag.id||drag.token!==loadToken)return;const p=pointer(event),b=[Math.min(drag.start[0],p[0]),Math.min(drag.start[1],p[1]),Math.max(drag.start[0],p[0]),Math.max(drag.start[1],p[1])].map(v=>Math.round(v*1e6)/1e6);drag=null;$('original-stage').releasePointerCapture(event.pointerId);if(validBox(b))change({verdict:'REJECT',corrected_box:b},{fill:true});else drawing();});
+ $('original-stage').addEventListener('pointercancel',()=>{drag=null;drawing();});
+ document.addEventListener('keydown',event=>{if(event.ctrlKey||event.metaKey||event.altKey||event.repeat||event.target.closest('input,textarea,select,[contenteditable=true]'))return;if(['1','2','3'].includes(event.key)){event.preventDefault();decide(VERDICTS[Number(event.key)-1]);}else if(event.key==='ArrowLeft'){event.preventDefault();move(index-1);}else if(event.key==='ArrowRight'){event.preventDefault();move(index+1);}});
+ $('save-local-button').addEventListener('click',()=>scheduleSave(0));
+ $('restore-local-button').addEventListener('click',async()=>{const button=$('restore-local-button');button.disabled=true;notice('正在读取本机进度…');try{const imported=validateSnapshot(await request('/api/latest'));if(replaceProgress(imported))notice('本机进度已恢复。');}catch(error){notice('当前答案未被替换。'+error.message,true);}finally{button.disabled=false;}});
+ $('export-button').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(envelope(),null,2)+'\n'],{type:'application/json'})),anchor=document.createElement('a');anchor.href=url;anchor.download=pack.pack_id.replace(/[^A-Za-z0-9_-]/g,'_')+'_assisted_progress_'+Date.now()+'.json';document.body.append(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);notice('已请求浏览器导出，请确认 JSON 文件已下载；若无下载，请点击「保存到本机」。');});
+ $('import-button').addEventListener('click',()=>{$('import-file').value='';$('import-file').click();});
+ $('import-file').addEventListener('change',async()=>{const file=$('import-file').files[0];if(!file)return;try{if(file.size>Math.max(2000000,pack.items.length*12000))throw Error('文件过大。');const imported=validateSnapshot(JSON.parse(await file.text()));if(replaceProgress(imported))notice('同一审核包的进度已导入。');}catch(error){notice('导入失败，当前答案未被替换。'+error.message,true);}});
+ try{const raw=localStorage.getItem(storageKey);if(raw){const snapshot=JSON.parse(raw);answers=validateSnapshot(snapshot);if(Number.isInteger(snapshot.current_index)&&snapshot.current_index>=0&&snapshot.current_index<pack.items.length)index=snapshot.current_index;saveStatus('已恢复浏览器进度；请确认本机备份或点击「保存到本机」。');}}
+ catch(error){notice('浏览器进度未能恢复：'+error.message,true);if(error.name==='SecurityError')localPersistent=false;}
+ $('app').hidden=false;render();
+})();
+</script>
+</body>
+</html>
