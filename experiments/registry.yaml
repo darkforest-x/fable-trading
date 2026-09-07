@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-eth4h-trend-candidate-20260907-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: bc3012b
+    status: active
+    question: Can fixed S5 ETH4h bounded-risk execution retain positive net and paired excess with drawdown below20pct?
+    single_variable: Preregistered S0-S5 sequential sizing and execution changes; final S5 fixed before evaluation.
+    result: Preregistered; no candidate market outcomes evaluated yet.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/html/p0_eth4h_trend_candidate_20260907.html
+    artifacts: []
+    reuse_allowed: false
+    notes: Known-hash data end April2026; exposed replication is not unseen evidence.
   - experiment_id: exp-pine-allin-eth4h-20260907-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 3da1487

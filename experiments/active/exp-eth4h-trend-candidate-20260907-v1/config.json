@@ -1,0 +1,84 @@
+{
+  "chain": [
+    {
+      "name": "S0_immediate_1x",
+      "fee": 0.001,
+      "immediate_stop": true,
+      "unit_leverage": true,
+      "cross_only": false,
+      "risk_pct": null,
+      "ratchet_only": false,
+      "isolate_stops": false,
+      "fresh_cooldown": false,
+      "close_only": false
+    },
+    {
+      "name": "S1_risk_half_pct",
+      "fee": 0.001,
+      "immediate_stop": true,
+      "unit_leverage": true,
+      "cross_only": false,
+      "risk_pct": 0.5,
+      "ratchet_only": false,
+      "isolate_stops": false,
+      "fresh_cooldown": false,
+      "close_only": false
+    },
+    {
+      "name": "S2_stop_ratchet",
+      "fee": 0.001,
+      "immediate_stop": true,
+      "unit_leverage": true,
+      "cross_only": false,
+      "risk_pct": 0.5,
+      "ratchet_only": true,
+      "isolate_stops": false,
+      "fresh_cooldown": false,
+      "close_only": false
+    },
+    {
+      "name": "S3_isolated_stops",
+      "fee": 0.001,
+      "immediate_stop": true,
+      "unit_leverage": true,
+      "cross_only": false,
+      "risk_pct": 0.5,
+      "ratchet_only": true,
+      "isolate_stops": true,
+      "fresh_cooldown": false,
+      "close_only": false
+    },
+    {
+      "name": "S4_fresh_cooldown",
+      "fee": 0.001,
+      "immediate_stop": true,
+      "unit_leverage": true,
+      "cross_only": false,
+      "risk_pct": 0.5,
+      "ratchet_only": true,
+      "isolate_stops": true,
+      "fresh_cooldown": true,
+      "close_only": false
+    },
+    {
+      "name": "S5_close_only",
+      "fee": 0.001,
+      "immediate_stop": true,
+      "unit_leverage": true,
+      "cross_only": false,
+      "risk_pct": 0.5,
+      "ratchet_only": true,
+      "isolate_stops": true,
+      "fresh_cooldown": true,
+      "close_only": true
+    }
+  ],
+  "drawdown_target_pct": 20,
+  "risk_budget_pct": 0.5,
+  "window_end": "2026-05-01",
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "boundary_exit": "last_close_including_commission",
+  "selection": "S5 fixed before evaluation; no best-row selection"
+}

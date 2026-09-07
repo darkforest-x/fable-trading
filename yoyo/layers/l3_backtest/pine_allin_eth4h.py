@@ -92,6 +92,26 @@ class Replay:
         self.hk_dow = frame.hk_dayofweek.to_numpy(int)
         self.hk_hour = frame.hk_hour.to_numpy(int)
 
+    def target_leverage(self, i: int, original: float) -> float:
+        """Extension hook; the original replay preserves its sizing schedule."""
+        return original
+
+    def cooling_state(self, skip: int, original: bool) -> bool:
+        """Extension hook; the original source reads the pre-update boolean."""
+        return original
+
+    def reset_stop(self, current: float, proposed: float, position, direction: int) -> float:
+        """Extension hook; the original source overwrites its shared stop."""
+        return proposed
+
+    def entry_stop_state(self, current: float, initial: float) -> float:
+        """Extension hook; original shared state survives a reversal fill."""
+        return current
+
+    def pending_quantity(self, quantity: float, position, direction: int) -> float:
+        """Extension hook; original opposite entry reverses the position."""
+        return quantity
+
     def run(self, start: int, end: int, *, injected: tuple[int, int] | None = None) -> dict[str, Any]:
         """Run [start,end); injected controls stop after their first exit.
 
@@ -143,6 +163,7 @@ class Replay:
                 if pos is not None and pos["direction"] != direction:
                     close_trade(i, self.o[i], "reverse")
                 if pos is None and cash > 0 and qty > 0:
+                    sl = self.entry_stop_state(sl, initial_sl)
                     fee = qty * self.o[i] * p.fee
                     entry_equity = cash
                     cash -= fee
@@ -182,6 +203,7 @@ class Replay:
                     skip = 7
                 elif last > 2.0:
                     skip = 1
+            cooling = self.cooling_state(skip, cooling)
             direction = int(self.raw[i])
             if injected is not None and pos is None and not trades:
                 direction = injected[1] if i == injected[0] else 0
@@ -193,9 +215,11 @@ class Replay:
             if signal:
                 amount = min(4 * (1.5 if self.hk_hour[i] == 3 else 1) * (2 if self.hk_dow[i] == 3 else 1), 13)
                 amount = 1.0 if p.unit_leverage else amount
+                amount = self.target_leverage(i, amount)
                 qty = marked(self.c[i]) * amount / self.c[i]
                 distance = min(self.atr[i] * 4, self.c[i] * 0.03)
-                sl = self.c[i] - signal * distance
+                proposed_sl = self.c[i] - signal * distance
+                sl = self.reset_stop(sl, proposed_sl, pos, signal)
                 if pos is not None and pos["direction"] == signal:
                     events.append({"i": i, "event": "same_side_stop_reset", "direction": signal})
                 elif i + 1 < end and qty > 0:
@@ -203,7 +227,7 @@ class Replay:
                         # Only exit the matched event at next open.
                         pending = (signal, 0.0, i, sl)
                     else:
-                        pending = (signal, qty, i, sl)
+                        pending = (signal, self.pending_quantity(qty, pos, signal), i, proposed_sl)
                     events.append({"i": i, "event": "entry_signal", "direction": signal})
             if pos is not None:
                 ep = pos["entry_price"]
