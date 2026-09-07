@@ -1,0 +1,756 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "Classifier Economics · V30",
+    "generatedAt": "2026-09-07T04:26:46.609862+00:00",
+    "filters": [],
+    "cards": [],
+    "charts": [
+      {
+        "id": "monthly",
+        "type": "line",
+        "title": "逐月固定4h成本后均值",
+        "description": "2023–2024 UTC · 78个保留入口与原234控制，月内事件加权；不是净值曲线",
+        "dataset": "monthly",
+        "sourceId": "monthly",
+        "showDescription": true,
+        "palette": {
+          "kind": "categorical",
+          "name": "blueGold"
+        },
+        "encodings": {
+          "x": {
+            "field": "month",
+            "type": "temporal",
+            "label": "UTC月份"
+          },
+          "y": {
+            "field": "net_bp",
+            "type": "quantitative",
+            "label": "bp"
+          },
+          "color": {
+            "field": "series",
+            "type": "nominal",
+            "label": "组别"
+          },
+          "tooltip": [
+            {
+              "field": "events",
+              "type": "quantitative",
+              "label": "母事件数"
+            },
+            {
+              "field": "positive",
+              "type": "quantitative",
+              "label": "成本后正向母事件数"
+            }
+          ]
+        }
+      }
+    ],
+    "tables": [],
+    "blocks": [
+      {
+        "id": "section_0",
+        "type": "markdown",
+        "layout": "full",
+        "body": "# Classifier Economics · V30"
+      },
+      {
+        "id": "section_1",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 结论：信号少了，但没有得到能覆盖成本的入场优势\n\n本轮已执行你批准的独立经济诊断。原 BTCUSDT.P **1h SMA40 的 251 个入口**加上 ChartPrime Trend Classifier 源码默认 **10/100 同向状态门**，保留 78 个。它们在固定 4 小时后的平均毛收益为 **+5.23bp**，减去冻结的 **20bp（0.2%）往返成本阈值后为 −14.77bp**；35/78 个超过成本，40 个在终点毛方向已错，另 3 个小毛利不足成本。\n\n过滤相对原机会集合改善 +14.26bp，但其中 **13.71bp、约 96.13% 来自少交易少扣成本**，只有 0.55bp 来自避开负毛收益。留下的入口在四个半年里全部净负。**这是减少亏损暴露，不是已验证的盈利系统。** 冻结的四项主要继续条件未通过，本版本不进入执行验证、TradingView 发布或实盘。\n\n这里的“净”仅指固定时钟价格变化减成本阈值，不是含逐根止损、分批止盈、资金费、滑点和仓位约束的真实成交利润。数据是反复使用过的 2023–2024 开发样本，不是新的最终验收集。V29 的 **78<80、支持不足**原结论不回写；本轮是另获批准的 V30 探索，不能冒充 V29 通过。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_2",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 范围、单位和分母\n\n唯一变化是入口上增加冻结的分类器门。原 K1 入口、SMA40 参考、决策时钟、随机控制、1/4/12/24h 标签和 0.002 阈值全不变，不重新抽样、不调参数。\n\n- 原母事件 251 个，四半年分别 55/66/55/75，覆盖 2023-01-01 至 2025-01-01 之前的 UTC 开发期。K1 完成后，在自身下一小时开盘时钟 E 观察标签。\n- 原控制 744 个，248 个母事件各有 3 个自身时钟控制；3 个无完整控制的母事件不编造超额。沿用 V24 同币、同月份/时间块、同冻结波动桶与方向的匹配资格；本轮不重验原始抽样全过程。\n- 门控：母事件 accepted/abstain/unknown = **78/170/3**；控制 = **136/608/0**。78 个通过母事件的原条件对照是完整 **234 个控制**，其中 51 通过、183 不通过；条件比较不能只留下那 51 个。\n- 主指标只有 **4h**。方向标签 `gross = direction × (open[E+H] − open[E]) / open[E]`；`net = gross − 0.002`。1bp=0.01%，表中均值单位均为 bp。\n- 已知通过：策略记账使用保存标签；已知弃权：记零；未知门控：仍未知。弃权不是零收益的成交，未知也不是弃权。策略均值分母是 248 个已知门控机会，条件交易均值分母是 78 个通过事件，不能互换。\n\n全部 251 个原母事件仍在逐笔表。3 个 unknown 的结果标签存在，但门控未知，故不能用于证明当时选择了不交易。原有价格缺口、端点可用性等沿用冻结标签状态；没有读新的原始价格或 2025+、holdout 数据。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_3",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 与未过滤版本及原配对背景同表对照\n\n下表是 4h 固定时钟诊断。成本后正标签率不是实盘胜率。\n\n| 组别 | 母事件数 | 毛均值 | 成本后均值 | 成本后正标签 | 原三控成本后均值 | 配对超额 |\n|---|---:|---:|---:|---:|---:|---:|\n| 未过滤 V24 全部入口 | 251 | +1.01 | −18.99 | 93/251（37.05%） | −23.65（248组三控） | +4.74（248对） |\n| V30 保留 | 78 | +5.23 | −14.77 | 35/78（44.87%） | −19.42 | +4.65 |\n| V30 弃权的原标签 | 170 | −0.80 | −20.80 | 57/170（33.53%） | −25.59 | +4.78 |\n| 门控未知的原标签 | 3 | −6.19 | −26.19 | 1/3 | 无完整对照 | 未知 |\n\n第一行全部母均值使用 251 个，但超额只能用 248 个已配对母事件；那 248 个母事件自身成本后均值为 **−18.91bp**。因此不能直接用“−18.99 减背景 −23.65”重构配对超额。\n\n保留入口比弃权入口的成本后均值好约 6.03bp，这是描述差异，不是新的组间显著性结论。保留组与弃权组相对各自背景的超额却几乎相同：+4.65 对 +4.78bp。**颜色/距离/斜率筛选没有显示出清晰的新增超额能力。** 同时保留组背景自身也在亏，不能仅凭“比背景亏得少”就称能交易。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_4",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 四项预先冻结的主要检验全部没有满足共同继续条件\n\n四项都用 24 个整月为块，PCG64 seed=20260907，共享 9,999 组月块 bootstrap 和 9,999 组月符号翻转。区间是 95% percentile-linear；单侧 p 为大于方向、带 +1 修正；Holm 只调整本轮四个主检验。\n\n| 4h 主要问题 | 已知样本 | 均值 bp | 95% 月块区间 bp | 原始单侧 p | Holm p |\n|---|---:|---:|---:|---:|---:|\n| 保留入口自身成本后结果 | 78 | −14.77 | [−33.91, +3.94] | 0.9285 | 0.9285 |\n| 保留入口对原完整三控的超额 | 78 | +4.65 | [−16.14, +25.17] | 0.3339 | 0.6678 |\n| 双方在各自时钟应用门控的机会策略超额 | 248/251 | +3.25 | [−2.45, +9.01] | 0.1443 | 0.4329 |\n| 相同机会集合，过滤后减过滤前 | 248/251 | +14.26 | [+3.01, +25.58] | 0.0122 | 0.0488 |\n\n继续条件在计算前就要求：**四项均值>0、四项区间下界>0、四项 Holm p<0.01，且四半年保留入口均值全正。** 实际不通过。最后一项在常见 0.05 标准下有探索性证据，但本轮预注册的是 0.01，不能事后换门；而且它测试的是少亏，不是剩余入口净盈利。\n\n月块方法允许月内标签重叠，不意味着月与月一定独立；区间依赖较弱跨月依赖的近似，符号翻转还依赖零假设下月总和符号的可交换性。随机背景也不等于将 K1 处理随机分配给市场时钟。故这些不是严格随机试验的因果证明。样本不确定性很大，失败表示“不支持按冻结条件推进”，不证明所有可能的 K1/K2 系统永远无效。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_5",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 改善的 96.13% 来自少扣成本，策略自身仍为负\n\n为了可比，这里两边都只用同一批 **248 个门控已知机会**。\n\n| 原机会集合记账 | 均值 bp/机会 |\n|---|---:|\n| 未过滤：248 个原标签均值 | −18.9073 |\n| 过滤后：78 个通过标签 +170 个弃权零值 | −4.6459 |\n| 前后变化 | +14.2614 |\n| 其中：170 次不交易省下冻结 20bp，170×20/248 | +13.7097 |\n| 其中：不承担弃权组原毛收益，−Σ弃权毛标签/248 | +0.5517 |\n\n+13.7097 / +14.2614 = **96.13%**。这是固定成本记账的代数分解，不是费用模型优化，不能据此降低 20bp 来宣布过关。控制在其各自时钟应用同样门控后，按原母三控均值汇总为 **−7.9000bp/机会**，本策略 −4.6459bp；二者的 +3.2541bp 差异区间跨零。\n\n**机会策略均值 −4.65 与条件通过均值 −14.77 并不矛盾**：前者多了 170 个已知不交易零值。把它们说成收益提升三倍，或将标签和画成账户净值，都不成立。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_6",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 四个半年都负，月度结果也不稳定\n\n| 半年 | 原入口数 | 保留数 | 未过滤自身净均值 | 保留自身净均值 | 保留原三控净均值 |\n|---|---:|---:|---:|---:|---:|\n| 2023H1 | 55 | 20 | −12.75 | −5.49 | −5.35 |\n| 2023H2 | 66 | 17 | −24.85 | −3.15 | −1.68 |\n| 2024H1 | 55 | 19 | −16.33 | −18.26 | −7.80 |\n| 2024H2 | 75 | 22 | −20.37 | −29.19 | −55.97 |\n\n后两个半年中，保留入口甚至比未过滤的自身条件均值更差。这不是只由某一个半年拖累的净负结论。相对背景的优势又主要表现在背景非常差的 2024H2，不能当作跨行情稳定性。\n\n24 个月都有保留入口，但只有 **9/24** 个月的保留均值超过成本。某些月份只有 1 个样本，例如 2023-06 的 +200.96bp 就是 1 个入口，不是稳定月收益。下方图是“月内事件均值”，不是月收益率或累积资金曲线；每个通过母事件仍配原三个未过滤控制。",
+        "sourceId": "report"
+      },
+      {
+        "id": "monthly_chart",
+        "type": "chart",
+        "layout": "full",
+        "chartId": "monthly"
+      },
+      {
+        "id": "section_7",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 失败分解：多数保留亏损在终点方向上就错了\n\n| 保留的 78 个入口 | 数量 | 占比 | 能据此说明什么 |\n|---|---:|---:|---|\n| 4h 毛标签≤0 | 40 | 51.28% | 超过一半在该终点没有方向收益；本批这40个均严格负 |\n| 毛标签>0，但成本后≤0 | 3 | 3.85% | 走势有利，但不足覆盖固定成本阈值 |\n| 成本后>0 | 35 | 44.87% | 有正标签，不等于路径上没有先触发止损 |\n\n因此“全是手续费问题”不成立；平均毛收益太薄与大量终点方向失败同时存在。保留净标签中位数 **−30.67bp**，也不是仅一个极端值拉低均值。另一方面，弃权组 170 个里有 **57 个**成本后正标签、98 个毛方向错误、15 个被成本抹去的小毛利。不能把全部弃权都标注为盘整、假突破或错误交易。\n\n完整 251 行原因表保存在 `report_data.json → data.loss_ledger`；原始 1004 个母标签及对应政策结果在 `results/mother_ledger.csv.gz`。这里的 wrong_direction / cost_erased / above_cost 是**终点结果类型**，不是已经验证的市场结构原因，更不含任何逐根止损路径判断。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_8",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 哪个逻辑组件有问题：斜率不符组更差，但不足以反推新最优参数\n\n以下为计算前已知的互斥拒绝组件；只做描述，不新增显著性筛选。\n\n| K1 门控组件 | 数量 | 毛均值 bp | 成本后均值 bp | 正标签数 | 原三控净均值 bp | 超额 bp |\n|---|---:|---:|---:|---:|---:|---:|\n| 斜率和距离均通过 | 78 | +5.23 | −14.77 | 35 | −19.42 | +4.65 |\n| 仅价格距离不通过 | 67 | +1.34 | −18.66 | 24 | −21.28 | +2.62 |\n| 仅斜率不通过 | 33 | −9.66 | −29.66 | 8 | −12.30 | −17.35 |\n| 斜率和距离均不通过 | 70 | +1.31 | −18.69 | 25 | −35.97 | +17.28 |\n\n33 个“价格距离已够、但斜率不符”的入口是本表最差组，这与在局部反向趋势中追穿线的风险相容，但**不是已证实的因果归因**。同时两个条件都不通过的 70 个相对背景反而更好、净值仍负，说明这些条件没有呈现“满足越多、优势越高”的简单单调关系。\n\n因此不能从这张表跳到“删距离门、保斜率门就是最优”，也不能挑 70 个背景更差的组重新命名为盈利策略。这些分组结果已经看过，今后基于它们的设计必须标为探索性、另行冻结，不能回称未污染验证。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_9",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 延长固定观察时间也没有转正；这仍不能代替动态退出实验\n\n| 固定观察时间 | 原251自身成本后均值 bp | 保留78自身成本后均值 bp | 地位 |\n|---|---:|---:|---|\n| 1h | −16.55 | −17.88 | 描述 |\n| 4h | −18.99 | −14.77 | 唯一主要指标 |\n| 12h | −21.04 | −12.36 | 描述 |\n| 24h | −13.46 | −9.79 | 描述 |\n\n保留组在较长终点下亏损较轻，但四个终点都未覆盖成本；不能把 24h 较好就换成主指标。固定时钟标签不知道途中何时变色、先碰止损还是先达到止盈，也不知道趋势接管后的最佳退出。**本轮既没有验证动态止盈有效，也不能证明动态止盈无效。** 只是按事先约定，入口证据不过关，不直接进入可执行退出优化。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_10",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 分布诊断与独立复核\n\n主要序列保留全部尾部值，不因 Shapiro 或 IQR 结果切换检验。\n\n| 4h 序列 | 中位数 bp | Q25 / Q75 bp | SD bp | 最小 / 最大 bp | Shapiro p |\n|---|---:|---:|---:|---:|---:|\n| 保留自身 | −30.67 | −78.66 / +41.93 | 111.81 | −435.88 / +263.80 | 0.02531 |\n| 保留对原三控超额 | −4.09 | −80.51 / +85.78 | 133.64 | −458.43 / +388.58 | 0.22565 |\n| 机会策略超额 | 0.00 | −1.86 / +17.00 | 69.54 | −435.88 / +328.34 | 4.20e−17 |\n| 机会策略前后差 | 0.00 | 0.00 / +45.46 | 84.91 | −341.03 / +293.55 | 3.80e−15 |\n\n政策序列的零点质量很大，IQR 会将很多真实交易标成“离群”；这不是删除理由。全部离群值均保留。诊断调用的是源码哈希冻结的统计技能工具；它不是独立交易假设检验，也不证明时间样本独立。\n\n经济 builder **917f333** 在首次分组收益读取前提交。纯核心先以合成样本验证，runner 先检查诊断依赖及时间边界，再读取保存标签，输入和源码前后 SHA 一致。仅一次实际经济计算，无重跑配置。\n\nroot 编写的独立 stdlib 联表/聚合审计不导入策略模块，NumPy 仅复现随机索引：**3980 条保存标签、1004 母×时长结果、全部四时长组描述、四主要推断、24 月和 Holm**核对通过。首次 `audit.json` 保留；补审增加 SD/极值及输出唯一网格，最初使用错误极值字段名失败，修正和合成回归测试提交 **896db05** 后只读重算通过，保存失败及补审收据。没有改经济结果。\n\n核心作者另做了第二次结果检查并提供可复现 `REVIEW.md`，但这不冒充第三方审核。审计证明保存数值链条一致，不证明原始行情真实性、Pine 原生/实盘一致性、资金费、成交先后或策略盈利。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_11",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 风险与诚实声明\n\n1. 本配置 **holdout 消耗 0 次**，未读 2025+ 或 2026-05-04 之后的新价格；不因历史笼统批准而扩展本轮范围。反复使用的 2023–2024 数据仍有研究选择偏差。Holm4 不纠正以前几十次探索。\n2. 全部标签是同一币种、同一研究入口家族。不能外推 ETH、黄金、山寨、15m/5m 或当前市场。\n3. 78 个保留入口、24 月簇的推断有较大不确定性。没有冻结的独立外样本盈利验收，支持不足与盈利不足是不同结论。\n4. 不报模拟账户收益、利润因子或实盘胜率：没有可执行成交账本。AUC、top-decile 毛/净收益和排序置换检验**不适用**，因为本轮是固定二值门、不训练排序模型；替代提供完整组标签、正标签率、未过滤单信号基线、匹配随机背景、月符号检验与 CI。\n5. 系统 Python 满足核心 NumPy2.0.2/pandas2.3.3，诊断依赖也实际可用；对整仓环境契约测试时暴露系统 fastapi/opencv/PyYAML 与仓内固定版本不同，不隐瞒或自动改环境。项目虚拟环境另跑核心与边界检查；确切回执见 QA.md。\n6. HTML 官方打包器的验证与浏览器检查范围以交付收据为准。结构通过不等于手机或浏览器视觉通过，也不等于交易通过。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_12",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 复现与产物入口\n\n从本仓已保存、输入哈希一致且本轮 `results/` 尚不存在的 source-first 状态，完整经济计算命令为：\n\n```bash\ngit branch --show-current\ngit show --stat 917f333\npython3 -m pytest -q tests/test_hourly_impulse_classifier_economics.py tests/test_hourly_impulse_classifier_economic_research.py tests/test_audit_hourly_impulse_classifier_economics_v30.py tests/test_hourly_impulse_classifier_economic_report.py\npython3 -m yoyo.evaluation.hourly_impulse_classifier_economic_research\npython3 scripts/audit_hourly_impulse_classifier_economics_v30.py\npython3 experiments/active/exp-btcusdtp-1h-classifier-economics-preholdout-20260907-v30/build_report.py prepare\npython3 scripts/md_to_html.py analysis/p1_btcusdtp_hourly_classifier_economics_v30_20260907.md --out-dir analysis/html\npython3 experiments/active/exp-btcusdtp-1h-classifier-economics-preholdout-20260907-v30/build_report.py package\nnode /Users/zhangzc/.codex/plugins/cache/openai-curated-remote/data-analytics/0.2.10-13ceeea1f599/skills/build-report/scripts/deliver_portable_artifact.mjs --input experiments/active/exp-btcusdtp-1h-classifier-economics-preholdout-20260907-v30/artifact.json --output analysis/html/p1_btcusdtp_hourly_classifier_economics_v30_20260907.html\n```\n\n这不是删除既有产物的授权。实际仓内已经有本轮产物，create-only 命令会拒绝覆盖。日常核验应直接用下面的**只读重放**，不要重建、清理或覆盖结果目录：\n\n```bash\npython3 scripts/audit_hourly_impulse_classifier_economics_v30.py --check-only\n```\n\nE30 为 `experiments/active/exp-btcusdtp-1h-classifier-economics-preholdout-20260907-v30/`。`config.json/PROJECT_PLAN.md` 保存批准与冻结比较；`results/` 保存三类完整 ledger、全部组/月/半年描述、四序列月簇与分布；`report_data.json` 保存真实 SQLite 查询、完整 251 行结果类型；`audit*.json`、`REVIEW.md`、`QA.md` 保存验证范围。MD 是历史源文件，HTML 是阅读交付物。\n\n方法依据：[NumPy PCG64](https://numpy.org/doc/2.0/reference/random/bit_generators/pcg64.html)、[pandas merge 验证契约](https://pandas.pydata.org/pandas-docs/version/2.3/reference/api/pandas.DataFrame.merge.html)、[R 官方 Holm 多重检验说明](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html)。这些文档支持实现口径，不是本策略盈利证据。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_13",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 下一步：停止这个默认状态门的盈利推进，先换研究问题\n\n本轮已完成批准的经济诊断，结论是 **not_supported**；不自动转入 Freqtrade、动态止损、降低成本或 TradingView 覆盖。原 K1/K2 趋势理念可以继续研究，但**默认分类器同向只是当前状态，不自动等于新趋势正在启动**。\n\n如果继续，优先拟定一个不同的、入场前可知的**状态变化/启动事件**假设，而不是再给相似均线颜色投票或从本轮赢钱样本反推阈值。先对照既有实验清单排除重复，冻结定义、决策时钟与未读数据方案，再做无收益支持检查与独立经济验证。新参数、退出障碍、成本或新的验收数据都属于下一份独立方案，需要 owner 决策；本轮没有悄悄执行。\n\n仍未回答的问题：不同启动定义能否在未污染数据中覆盖成本？真正可执行的 K1 风险与小级别反转退出是否保留收益？这些必须另测，不能由本轮终点标签或截图代答。当前“做到赚钱”的总目标仍未达成。",
+        "sourceId": "report"
+      }
+    ],
+    "sources": [
+      {
+        "id": "report",
+        "label": "V30 · 完整指标、方法与风险",
+        "path": "analysis/p1_btcusdtp_hourly_classifier_economics_v30_20260907.md"
+      },
+      {
+        "id": "monthly",
+        "label": "V30 · 保存逐母标签的真实描述查询",
+        "path": "experiments/active/exp-btcusdtp-1h-classifier-economics-preholdout-20260907-v30/report_data.json",
+        "query": {
+          "sql": "SELECT mother_month AS month,COUNT(*) AS events,\n AVG(accepted_cost)*10000 AS accepted_bp,\n AVG(control_mean_cost_threshold_markout)*10000 AS controls_bp,\n AVG(accepted_excess)*10000 AS excess_bp,\n SUM(accepted_cost>0) AS positive\n FROM mothers WHERE horizon_hours=4 AND classifier_gate_state='accepted'\n GROUP BY mother_month ORDER BY mother_month",
+          "engine": "sqlite",
+          "language": "sql",
+          "tables_used": [
+            "cases",
+            "mothers"
+          ],
+          "executed_at": "2026-09-07T04:20:31.623339+00:00",
+          "description": "固定4h标签，非账户净值或执行收益",
+          "filters": [
+            "2023–2024 UTC; frozen original251 and own744 controls; no new selection"
+          ],
+          "metric_definitions": {
+            "net_bp": "(direction*(open[E+4h]-open[E])/open[E]-0.002)*10000; group arithmetic mean",
+            "controls_bp": "mean of each original three-control mean; no classifier filtering in conditional comparator"
+          }
+        }
+      },
+      {
+        "id": "groups",
+        "label": "V30 · 保存逐母标签的真实描述查询",
+        "path": "experiments/active/exp-btcusdtp-1h-classifier-economics-preholdout-20260907-v30/report_data.json",
+        "query": {
+          "sql": "SELECT c.classifier_gate_state AS state,COUNT(*) AS events,\n AVG(c.gross_markout)*10000 AS gross_bp,AVG(c.cost_threshold_markout)*10000 AS net_bp,\n AVG(c.policy_cost_threshold_markout)*10000 AS policy_bp,\n SUM(c.cost_threshold_markout>0) AS positive,\n SUM(c.gross_markout<=0) AS wrong_direction,\n SUM(c.gross_markout>0 AND c.cost_threshold_markout<=0) AS cost_erased,\n AVG(m.control_mean_cost_threshold_markout)*10000 AS controls_bp,\n AVG(m.cost_threshold_excess_markout)*10000 AS excess_bp,\n COUNT(m.cost_threshold_excess_markout) AS paired_n\n FROM cases c JOIN mothers m USING(event_id,horizon_hours)\n WHERE c.horizon_hours=4 GROUP BY c.classifier_gate_state ORDER BY state",
+          "engine": "sqlite",
+          "language": "sql",
+          "tables_used": [
+            "cases",
+            "mothers"
+          ],
+          "executed_at": "2026-09-07T04:20:31.623339+00:00",
+          "description": "固定4h标签，非账户净值或执行收益",
+          "filters": [
+            "2023–2024 UTC; frozen original251 and own744 controls; no new selection"
+          ],
+          "metric_definitions": {
+            "net_bp": "(direction*(open[E+4h]-open[E])/open[E]-0.002)*10000; group arithmetic mean",
+            "controls_bp": "mean of each original three-control mean; no classifier filtering in conditional comparator"
+          }
+        }
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-09-07T04:26:46.609862+00:00",
+    "status": "ready",
+    "datasets": {
+      "monthly": [
+        {
+          "month": "2023-01",
+          "events": 5,
+          "accepted_bp": 1.8497021165178016,
+          "controls_bp": -22.6050484910286,
+          "excess_bp": 24.4547506075466,
+          "positive": 3,
+          "series": "Accepted K1",
+          "net_bp": 1.8497021165178016
+        },
+        {
+          "month": "2023-01",
+          "events": 5,
+          "accepted_bp": 1.8497021165178016,
+          "controls_bp": -22.6050484910286,
+          "excess_bp": 24.4547506075466,
+          "positive": 3,
+          "series": "Original controls",
+          "net_bp": -22.6050484910286
+        },
+        {
+          "month": "2023-02",
+          "events": 4,
+          "accepted_bp": -87.36803639094451,
+          "controls_bp": -15.7555100920625,
+          "excess_bp": -71.61252629888175,
+          "positive": 0,
+          "series": "Accepted K1",
+          "net_bp": -87.36803639094451
+        },
+        {
+          "month": "2023-02",
+          "events": 4,
+          "accepted_bp": -87.36803639094451,
+          "controls_bp": -15.7555100920625,
+          "excess_bp": -71.61252629888175,
+          "positive": 0,
+          "series": "Original controls",
+          "net_bp": -15.7555100920625
+        },
+        {
+          "month": "2023-03",
+          "events": 1,
+          "accepted_bp": -112.759961127308,
+          "controls_bp": 6.778041280425,
+          "excess_bp": -119.53800240773299,
+          "positive": 0,
+          "series": "Accepted K1",
+          "net_bp": -112.759961127308
+        },
+        {
+          "month": "2023-03",
+          "events": 1,
+          "accepted_bp": -112.759961127308,
+          "controls_bp": 6.778041280425,
+          "excess_bp": -119.53800240773299,
+          "positive": 0,
+          "series": "Original controls",
+          "net_bp": 6.778041280425
+        },
+        {
+          "month": "2023-04",
+          "events": 5,
+          "accepted_bp": 36.7120608325692,
+          "controls_bp": -8.312839421866201,
+          "excess_bp": 45.0249002544358,
+          "positive": 2,
+          "series": "Accepted K1",
+          "net_bp": 36.7120608325692
+        },
+        {
+          "month": "2023-04",
+          "events": 5,
+          "accepted_bp": 36.7120608325692,
+          "controls_bp": -8.312839421866201,
+          "excess_bp": 45.0249002544358,
+          "positive": 2,
+          "series": "Original controls",
+          "net_bp": -8.312839421866201
+        },
+        {
+          "month": "2023-05",
+          "events": 4,
+          "accepted_bp": -10.309524989619,
+          "controls_bp": -13.3226647439185,
+          "excess_bp": 3.013139754299498,
+          "positive": 2,
+          "series": "Accepted K1",
+          "net_bp": -10.309524989619
+        },
+        {
+          "month": "2023-05",
+          "events": 4,
+          "accepted_bp": -10.309524989619,
+          "controls_bp": -13.3226647439185,
+          "excess_bp": 3.013139754299498,
+          "positive": 2,
+          "series": "Original controls",
+          "net_bp": -13.3226647439185
+        },
+        {
+          "month": "2023-06",
+          "events": 1,
+          "accepted_bp": 200.96136779106902,
+          "controls_bp": 157.050248989914,
+          "excess_bp": 43.911118801154004,
+          "positive": 1,
+          "series": "Accepted K1",
+          "net_bp": 200.96136779106902
+        },
+        {
+          "month": "2023-06",
+          "events": 1,
+          "accepted_bp": 200.96136779106902,
+          "controls_bp": 157.050248989914,
+          "excess_bp": 43.911118801154004,
+          "positive": 1,
+          "series": "Original controls",
+          "net_bp": 157.050248989914
+        },
+        {
+          "month": "2023-07",
+          "events": 4,
+          "accepted_bp": 13.988842097383754,
+          "controls_bp": 11.715130735886753,
+          "excess_bp": 2.2737113614970013,
+          "positive": 2,
+          "series": "Accepted K1",
+          "net_bp": 13.988842097383754
+        },
+        {
+          "month": "2023-07",
+          "events": 4,
+          "accepted_bp": 13.988842097383754,
+          "controls_bp": 11.715130735886753,
+          "excess_bp": 2.2737113614970013,
+          "positive": 2,
+          "series": "Original controls",
+          "net_bp": 11.715130735886753
+        },
+        {
+          "month": "2023-08",
+          "events": 2,
+          "accepted_bp": 86.561555012777,
+          "controls_bp": -41.489428324169005,
+          "excess_bp": 128.05098333694602,
+          "positive": 2,
+          "series": "Accepted K1",
+          "net_bp": 86.561555012777
+        },
+        {
+          "month": "2023-08",
+          "events": 2,
+          "accepted_bp": 86.561555012777,
+          "controls_bp": -41.489428324169005,
+          "excess_bp": 128.05098333694602,
+          "positive": 2,
+          "series": "Original controls",
+          "net_bp": -41.489428324169005
+        },
+        {
+          "month": "2023-09",
+          "events": 1,
+          "accepted_bp": -80.192817788348,
+          "controls_bp": 60.048467712124,
+          "excess_bp": -140.241285500472,
+          "positive": 0,
+          "series": "Accepted K1",
+          "net_bp": -80.192817788348
+        },
+        {
+          "month": "2023-09",
+          "events": 1,
+          "accepted_bp": -80.192817788348,
+          "controls_bp": 60.048467712124,
+          "excess_bp": -140.241285500472,
+          "positive": 0,
+          "series": "Original controls",
+          "net_bp": 60.048467712124
+        },
+        {
+          "month": "2023-10",
+          "events": 1,
+          "accepted_bp": -79.841097869266,
+          "controls_bp": -8.669270242665,
+          "excess_bp": -71.1718276266,
+          "positive": 0,
+          "series": "Accepted K1",
+          "net_bp": -79.841097869266
+        },
+        {
+          "month": "2023-10",
+          "events": 1,
+          "accepted_bp": -79.841097869266,
+          "controls_bp": -8.669270242665,
+          "excess_bp": -71.1718276266,
+          "positive": 0,
+          "series": "Original controls",
+          "net_bp": -8.669270242665
+        },
+        {
+          "month": "2023-11",
+          "events": 5,
+          "accepted_bp": -31.715022058750403,
+          "controls_bp": -9.178958572344,
+          "excess_bp": -22.5360634864064,
+          "positive": 3,
+          "series": "Accepted K1",
+          "net_bp": -31.715022058750403
+        },
+        {
+          "month": "2023-11",
+          "events": 5,
+          "accepted_bp": -31.715022058750403,
+          "controls_bp": -9.178958572344,
+          "excess_bp": -22.5360634864064,
+          "positive": 3,
+          "series": "Original controls",
+          "net_bp": -9.178958572344
+        },
+        {
+          "month": "2023-12",
+          "events": 4,
+          "accepted_bp": 9.008907886385751,
+          "controls_bp": 0.5295754309425004,
+          "excess_bp": 8.479332455443165,
+          "positive": 3,
+          "series": "Accepted K1",
+          "net_bp": 9.008907886385751
+        },
+        {
+          "month": "2023-12",
+          "events": 4,
+          "accepted_bp": 9.008907886385751,
+          "controls_bp": 0.5295754309425004,
+          "excess_bp": 8.479332455443165,
+          "positive": 3,
+          "series": "Original controls",
+          "net_bp": 0.5295754309425004
+        },
+        {
+          "month": "2024-01",
+          "events": 4,
+          "accepted_bp": 32.05647887478525,
+          "controls_bp": -12.62709084892375,
+          "excess_bp": 44.683569723709,
+          "positive": 3,
+          "series": "Accepted K1",
+          "net_bp": 32.05647887478525
+        },
+        {
+          "month": "2024-01",
+          "events": 4,
+          "accepted_bp": 32.05647887478525,
+          "controls_bp": -12.62709084892375,
+          "excess_bp": 44.683569723709,
+          "positive": 3,
+          "series": "Original controls",
+          "net_bp": -12.62709084892375
+        },
+        {
+          "month": "2024-02",
+          "events": 1,
+          "accepted_bp": -34.596711041503,
+          "controls_bp": 32.354651243826,
+          "excess_bp": -66.951362285329,
+          "positive": 0,
+          "series": "Accepted K1",
+          "net_bp": -34.596711041503
+        },
+        {
+          "month": "2024-02",
+          "events": 1,
+          "accepted_bp": -34.596711041503,
+          "controls_bp": 32.354651243826,
+          "excess_bp": -66.951362285329,
+          "positive": 0,
+          "series": "Original controls",
+          "net_bp": 32.354651243826
+        },
+        {
+          "month": "2024-03",
+          "events": 5,
+          "accepted_bp": 27.515393975832406,
+          "controls_bp": -12.0331823518716,
+          "excess_bp": 39.548576327704204,
+          "positive": 3,
+          "series": "Accepted K1",
+          "net_bp": 27.515393975832406
+        },
+        {
+          "month": "2024-03",
+          "events": 5,
+          "accepted_bp": 27.515393975832406,
+          "controls_bp": -12.0331823518716,
+          "excess_bp": 39.548576327704204,
+          "positive": 3,
+          "series": "Original controls",
+          "net_bp": -12.0331823518716
+        },
+        {
+          "month": "2024-04",
+          "events": 5,
+          "accepted_bp": -82.03994279211841,
+          "controls_bp": -46.449982060982,
+          "excess_bp": -35.589960731136195,
+          "positive": 1,
+          "series": "Accepted K1",
+          "net_bp": -82.03994279211841
+        },
+        {
+          "month": "2024-04",
+          "events": 5,
+          "accepted_bp": -82.03994279211841,
+          "controls_bp": -46.449982060982,
+          "excess_bp": -35.589960731136195,
+          "positive": 1,
+          "series": "Original controls",
+          "net_bp": -46.449982060982
+        },
+        {
+          "month": "2024-05",
+          "events": 2,
+          "accepted_bp": -34.8225020040925,
+          "controls_bp": 74.08817537784799,
+          "excess_bp": -108.910677381941,
+          "positive": 1,
+          "series": "Accepted K1",
+          "net_bp": -34.8225020040925
+        },
+        {
+          "month": "2024-05",
+          "events": 2,
+          "accepted_bp": -34.8225020040925,
+          "controls_bp": 74.08817537784799,
+          "excess_bp": -108.910677381941,
+          "positive": 1,
+          "series": "Original controls",
+          "net_bp": 74.08817537784799
+        },
+        {
+          "month": "2024-06",
+          "events": 2,
+          "accepted_bp": -49.103360456245,
+          "controls_bp": 7.088779880762501,
+          "excess_bp": -56.192140337007004,
+          "positive": 0,
+          "series": "Accepted K1",
+          "net_bp": -49.103360456245
+        },
+        {
+          "month": "2024-06",
+          "events": 2,
+          "accepted_bp": -49.103360456245,
+          "controls_bp": 7.088779880762501,
+          "excess_bp": -56.192140337007004,
+          "positive": 0,
+          "series": "Original controls",
+          "net_bp": 7.088779880762501
+        },
+        {
+          "month": "2024-07",
+          "events": 3,
+          "accepted_bp": 9.815612409241005,
+          "controls_bp": -93.86850559447767,
+          "excess_bp": 103.68411800371935,
+          "positive": 2,
+          "series": "Accepted K1",
+          "net_bp": 9.815612409241005
+        },
+        {
+          "month": "2024-07",
+          "events": 3,
+          "accepted_bp": 9.815612409241005,
+          "controls_bp": -93.86850559447767,
+          "excess_bp": 103.68411800371935,
+          "positive": 2,
+          "series": "Original controls",
+          "net_bp": -93.86850559447767
+        },
+        {
+          "month": "2024-08",
+          "events": 5,
+          "accepted_bp": -33.14276431901699,
+          "controls_bp": 8.4046144423084,
+          "excess_bp": -41.54737876132538,
+          "positive": 2,
+          "series": "Accepted K1",
+          "net_bp": -33.14276431901699
+        },
+        {
+          "month": "2024-08",
+          "events": 5,
+          "accepted_bp": -33.14276431901699,
+          "controls_bp": 8.4046144423084,
+          "excess_bp": -41.54737876132538,
+          "positive": 2,
+          "series": "Original controls",
+          "net_bp": 8.4046144423084
+        },
+        {
+          "month": "2024-09",
+          "events": 3,
+          "accepted_bp": -30.14696446540767,
+          "controls_bp": -73.76091730537466,
+          "excess_bp": 43.613952839967,
+          "positive": 0,
+          "series": "Accepted K1",
+          "net_bp": -30.14696446540767
+        },
+        {
+          "month": "2024-09",
+          "events": 3,
+          "accepted_bp": -30.14696446540767,
+          "controls_bp": -73.76091730537466,
+          "excess_bp": 43.613952839967,
+          "positive": 0,
+          "series": "Original controls",
+          "net_bp": -73.76091730537466
+        },
+        {
+          "month": "2024-10",
+          "events": 3,
+          "accepted_bp": -12.221458733458334,
+          "controls_bp": 3.067350769294999,
+          "excess_bp": -15.288809502753107,
+          "positive": 1,
+          "series": "Accepted K1",
+          "net_bp": -12.221458733458334
+        },
+        {
+          "month": "2024-10",
+          "events": 3,
+          "accepted_bp": -12.221458733458334,
+          "controls_bp": 3.067350769294999,
+          "excess_bp": -15.288809502753107,
+          "positive": 1,
+          "series": "Original controls",
+          "net_bp": 3.067350769294999
+        },
+        {
+          "month": "2024-11",
+          "events": 3,
+          "accepted_bp": -75.031953587902,
+          "controls_bp": -125.309939528192,
+          "excess_bp": 50.277985940290336,
+          "positive": 1,
+          "series": "Accepted K1",
+          "net_bp": -75.031953587902
+        },
+        {
+          "month": "2024-11",
+          "events": 3,
+          "accepted_bp": -75.031953587902,
+          "controls_bp": -125.309939528192,
+          "excess_bp": 50.277985940290336,
+          "positive": 1,
+          "series": "Original controls",
+          "net_bp": -125.309939528192
+        },
+        {
+          "month": "2024-12",
+          "events": 5,
+          "accepted_bp": -30.7360129727818,
+          "controls_bp": -80.73512484848821,
+          "excess_bp": 49.9991118757064,
+          "positive": 3,
+          "series": "Accepted K1",
+          "net_bp": -30.7360129727818
+        },
+        {
+          "month": "2024-12",
+          "events": 5,
+          "accepted_bp": -30.7360129727818,
+          "controls_bp": -80.73512484848821,
+          "excess_bp": 49.9991118757064,
+          "positive": 3,
+          "series": "Original controls",
+          "net_bp": -80.73512484848821
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "report",
+      "label": "V30 · 完整指标、方法与风险",
+      "path": "analysis/p1_btcusdtp_hourly_classifier_economics_v30_20260907.md"
+    },
+    {
+      "id": "monthly",
+      "label": "V30 · 保存逐母标签的真实描述查询",
+      "path": "experiments/active/exp-btcusdtp-1h-classifier-economics-preholdout-20260907-v30/report_data.json",
+      "query": {
+        "sql": "SELECT mother_month AS month,COUNT(*) AS events,\n AVG(accepted_cost)*10000 AS accepted_bp,\n AVG(control_mean_cost_threshold_markout)*10000 AS controls_bp,\n AVG(accepted_excess)*10000 AS excess_bp,\n SUM(accepted_cost>0) AS positive\n FROM mothers WHERE horizon_hours=4 AND classifier_gate_state='accepted'\n GROUP BY mother_month ORDER BY mother_month",
+        "engine": "sqlite",
+        "language": "sql",
+        "tables_used": [
+          "cases",
+          "mothers"
+        ],
+        "executed_at": "2026-09-07T04:20:31.623339+00:00",
+        "description": "固定4h标签，非账户净值或执行收益",
+        "filters": [
+          "2023–2024 UTC; frozen original251 and own744 controls; no new selection"
+        ],
+        "metric_definitions": {
+          "net_bp": "(direction*(open[E+4h]-open[E])/open[E]-0.002)*10000; group arithmetic mean",
+          "controls_bp": "mean of each original three-control mean; no classifier filtering in conditional comparator"
+        }
+      }
+    },
+    {
+      "id": "groups",
+      "label": "V30 · 保存逐母标签的真实描述查询",
+      "path": "experiments/active/exp-btcusdtp-1h-classifier-economics-preholdout-20260907-v30/report_data.json",
+      "query": {
+        "sql": "SELECT c.classifier_gate_state AS state,COUNT(*) AS events,\n AVG(c.gross_markout)*10000 AS gross_bp,AVG(c.cost_threshold_markout)*10000 AS net_bp,\n AVG(c.policy_cost_threshold_markout)*10000 AS policy_bp,\n SUM(c.cost_threshold_markout>0) AS positive,\n SUM(c.gross_markout<=0) AS wrong_direction,\n SUM(c.gross_markout>0 AND c.cost_threshold_markout<=0) AS cost_erased,\n AVG(m.control_mean_cost_threshold_markout)*10000 AS controls_bp,\n AVG(m.cost_threshold_excess_markout)*10000 AS excess_bp,\n COUNT(m.cost_threshold_excess_markout) AS paired_n\n FROM cases c JOIN mothers m USING(event_id,horizon_hours)\n WHERE c.horizon_hours=4 GROUP BY c.classifier_gate_state ORDER BY state",
+        "engine": "sqlite",
+        "language": "sql",
+        "tables_used": [
+          "cases",
+          "mothers"
+        ],
+        "executed_at": "2026-09-07T04:20:31.623339+00:00",
+        "description": "固定4h标签，非账户净值或执行收益",
+        "filters": [
+          "2023–2024 UTC; frozen original251 and own744 controls; no new selection"
+        ],
+        "metric_definitions": {
+          "net_bp": "(direction*(open[E+4h]-open[E])/open[E]-0.002)*10000; group arithmetic mean",
+          "controls_bp": "mean of each original three-control mean; no classifier filtering in conditional comparator"
+        }
+      }
+    }
+  ]
+}

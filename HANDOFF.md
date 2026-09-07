@@ -2,6 +2,36 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-07 — V30默认分类器经济诊断未通过，改善主要是少扣成本）
+
+Owner批准另做V30探索，明确不回写V29的78<80支持不足。917f333先提交再读取保存
+V24标签/V29上下文：原SMA40的251母、744原三控，default10/100、4h主、20bp冻结。
+78accepted/170abstain/3unknown；无新参数/抽样/原始价格/2025+/holdout读取。
+78个保留入口毛+5.2284bp、净−14.7716bp，35正/40毛方向错/3被成本抹去小毛利；
+条件对照原234控制净−19.4240bp，超额+4.6524bp，CI[−16.1421,+25.1684]跨零。
+政策均值在相同248已知门机会为−4.6459bp，背景−7.9000bp，超额+3.2541bp。
+政策改善+14.2614bp中13.7097bp即96.13%来自省170次20bp，毛贡献仅+0.5517bp。
+四主Holm p .9285/.6678/.4329/.0488均未达.01，四半年保留均值皆负，9/24月净正。
+1/12/24h仅描述且也负；not_supported，未进入执行/动态退出验证，不声称永远无效。
+
+初次root独立算术审计917f333通过3980保存label/1004母H/4主推断/24月；补审增加
+SD极值唯一网格，首次字段名错误失败收据保留，896db05修复提交后只读重算过。
+不导入策略模块，NumPy仅复现PCG64；非原始行情真实性/盘中路径/Pine或实盘审计。
+核心作者二次检查和可复现命令在E30 REVIEW.md，不冒充第三方独立审核。
+系统Python核心数值版本合规，但全仓测试239过3版本漂移失败2跳过；未改系统环境。
+项目.venv联合245测试通过13既有警告；真实诊断在系统Python跑（.venv缺seaborn）。
+
+交付analysis/html/p1_btcusdtp_hourly_classifier_economics_v30_20260907.html；14sections/
+15blocks/1native24月双系列均值图，非净值；表内完整组、分母、成本分解和风险。
+官方validation/package过，structural_only，browser/mobile/source-dialog未验。
+最终tooltip明确K1正标签计数非控制组；旧artifact/receipt可恢复保留，未重跑经济。
+E30存完整ledgers/audits/report_data/REVIEW/QA/portable_final收据，8artifacts登记。
+
+盈利总目标未达成，get_goal当前usageLimited；未consume reset，不承诺后台继续。
+本轮批准的经济诊断已完成，不自动继续相同门调参、不降成本、不上TV/ACTIVE/真金。
+下一步建议先审既有实验、拟定互补的入场前状态变化/启动事件及未污染验证方案；
+不是在已见赢家上找参数，新方案需owner决策。保留其他会话dirty改动。
+
 ## ⚡ 当前真相（2026-09-07 — V29源码默认分类器支持不足，未读该门收益）
 
 按 ChartPrime Trend Classifier 原源码 default10/100 加一个已完成 K1 的同向状态门，

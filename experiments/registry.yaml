@@ -16,18 +16,36 @@ schema_version: 1
 experiments:
   - experiment_id: exp-btcusdtp-1h-classifier-economics-preholdout-20260907-v30
     source_repo: darkforest-x/fable-trading
-    source_commit: "pending_source_first"
-    status: active
+    source_commit: "917f333"
+    status: rejected
     question: Does the frozen classifier gate improve conditional and own-clock opportunity markouts?
     single_variable: Add V29 default10/100 gate to originalSMA251; all other entries,controls,labels,cost fixed.
-    result: Owner approved separate exploratory economic diagnosis after V29 support failure; not yet run.
-    canonical_report: null
+    result: >-
+      Separate owner-approved exploration retains78/251. Primary4h accepted gross+5.2284bp,
+      net-14.7716bp;paired excess+4.6524bp CI[-16.1421,25.1684].
+      Own-clock policy excess+3.2541bp;delta+14.2614bp of which96.13pct avoidedcost.
+      All four half accepted net means negative;all four Holm p fail .01;
+      continuation not_supported,not executablePnL or proof all K1 systems fail.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_classifier_economics_v30_20260907.html
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts:
+      - btcusdtp-hourly-classifier-v30-results
+      - btcusdtp-hourly-classifier-v30-audit
+      - btcusdtp-hourly-classifier-v30-audit-supplement
+      - btcusdtp-hourly-classifier-v30-report-data
+      - btcusdtp-hourly-classifier-v30-report
+      - btcusdtp-hourly-classifier-v30-html
+      - btcusdtp-hourly-classifier-v30-artifact
+      - btcusdtp-hourly-classifier-v30-qa
     reuse_allowed: false
-    notes: V29 remains inconclusive; no parameter grid,new prices,holdout,TV or executablePnL claim.
+    notes: >-
+      V29 remains78<80 support-inconclusive. Root independent3980label/1004motherH/fourinference
+      reconstruction passed;896db05 supplement SD/extremes/uniquegrids passed after preserved
+      schema failure. 245 projectvenv tests pass;system3versiondrift failures disclosed.
+      HTML structural_only,browser/mobile/source-dialog unverified;tooltip fixdc8da94.
+      No new prices,parameters,controls,holdout,TV,ACTIVE or orders;reuseddevelopment,no live acceptance.
 
   - experiment_id: exp-btcusdtp-1h-classifier-support-preholdout-20260907-v29
     source_repo: darkforest-x/fable-trading
