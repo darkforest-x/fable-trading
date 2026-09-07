@@ -1,0 +1,45 @@
+{
+  "source_path": "yoyo/evaluation/pine/imacd_dense_mtf_v1.pine",
+  "source_commit": "ee6b3ee9bfc64b966cad53c491b78e905c12cf10",
+  "source_sha256": "90639febb6afedb087e80c0992efdf2ece487e60a4ec4121c3797fab68428387",
+  "observed_date": "2026-09-07",
+  "official_compiler_passed": true,
+  "compiler_surface": "TradingView web Pine Editor, Add to chart",
+  "compiler_evidence": [
+    "Undo insert IMACD 零轴密集启动 · 多周期趋势 V1 appeared after Add to chart",
+    "New IMACD MTF legend rendered finite md, sh, sb and six moving averages",
+    "Editor showed Update on chart disabled after insertion; no compilation error observed"
+  ],
+  "source_transfer": {
+    "mechanism": "Virtual clipboard paste into initially blank Untitled Pine editor, followed by select-all/copy/read-back",
+    "readback_equals_supplied_source": true,
+    "characters": 12154,
+    "split_newline_count": 210
+  },
+  "runtime_checks": [
+    {"symbol": "OKX:ETHUSDT.P", "timeframe": "15", "mode": "密集启动", "lower_filter": false, "finite_plots": true, "runtime_error_observed": false},
+    {"symbol": "OKX:ETHUSDT.P", "timeframe": "240", "mode": "密集启动", "lower_filter": false, "finite_plots": true, "runtime_error_observed": false},
+    {"symbol": "OKX:ETHUSDT.P", "timeframe": "240", "mode": "密集＋共振", "lower_filter": false, "finite_plots": true, "runtime_error_observed": false},
+    {"symbol": "OKX:ETHUSDT.P", "timeframe": "240", "mode": "密集＋共振等待", "lower_filter": true, "finite_plots": true, "runtime_error_observed": false, "status_panel": "高周期1D md多/sh多；低周期60 多；多头持有"}
+  ],
+  "six_ma_rounded_values_match_existing_double_ma_indicator": true,
+  "full_trade_parity_tested": false,
+  "live_bar_reload_repaint_tested": false,
+  "historical_pnl_replayed": false,
+  "holdout_note": "Owner explicitly authorized any dates. This is UI/compilation verification, not a new profitability evaluation. Each listed Pine symbol/timeframe/configuration had one visual validation session; no fresh blind performance claim.",
+  "cleanup": {
+    "original_15m_chart_restored": true,
+    "original_IMACD_V5_34_9_restored": true,
+    "original_double_ma_indicator_preserved": true,
+    "temporary_indicator_removed_via_undo": true,
+    "temporary_browser_tab_closed": true,
+    "manual_layout_save_clicked": false,
+    "platform_autosave_not_controlled": true,
+    "script_saved_to_account": false,
+    "script_published": false,
+    "alerts_created": false,
+    "orders_placed": false
+  },
+  "training_eligible": false,
+  "production_eligible": false
+}

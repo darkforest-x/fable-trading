@@ -19653,3 +19653,64 @@ artifacts:
     production_eligible: false
     notes: Owner authorized OKX every timeframe and any date; MA/MTF exploration. P00 cumulative use3; P04/P08/P10/P11/P12
       use2; other P01-P16 use1. No new blind validation or production approval.
+
+  - artifact_id: imacd-pine-v1-20260907-source
+    artifact_type: manifest
+    role: research_pine_indicator_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: ee6b3ee9bfc64b966cad53c491b78e905c12cf10
+    source_path: yoyo/evaluation/pine/imacd_dense_mtf_v1.pine
+    sha256: 90639febb6afedb087e80c0992efdf2ece487e60a4ec4121c3797fab68428387
+    size_bytes: 13529
+    storage_uri: repo://yoyo/evaluation/pine/imacd_dense_mtf_v1.pine
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Implements the owner-authorized IMACD/MA/MTF exploration. TradingView compiler and four UI configurations
+      checked; no new PnL evaluation or execution. Receipt records source identity, per-configuration visual use and
+      restored chart.
+  - artifact_id: imacd-pine-v1-20260907-compiler
+    artifact_type: manifest
+    role: research_pine_indicator_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: ee6b3ee9bfc64b966cad53c491b78e905c12cf10
+    source_path: experiments/active/exp-imacd-ma-mtf-20260907-v3/pine_indicator/compiler_receipt.json
+    sha256: fe427e4fa40090cbca30c2ebc3f9faf2acacd5de47c2aa0391ff009301fa2f5b
+    size_bytes: 2593
+    storage_uri: repo://experiments/active/exp-imacd-ma-mtf-20260907-v3/pine_indicator/compiler_receipt.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Implements the owner-authorized IMACD/MA/MTF exploration. TradingView compiler and four UI configurations
+      checked; no new PnL evaluation or execution. Receipt records source identity, per-configuration visual use and
+      restored chart.
+  - artifact_id: imacd-pine-v1-20260907-delivery
+    artifact_type: manifest
+    role: research_pine_indicator_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3a07fb65180c535fc6b8a4935853f2a322a9c30a
+    source_path: experiments/active/exp-imacd-ma-mtf-20260907-v3/pine_indicator/delivery_manifest.json
+    sha256: 1f5b69706ff0c49f3458e8093849ac2f71e3f1c39deafddfffade7bb6a0ba12a
+    size_bytes: 450
+    storage_uri: repo://experiments/active/exp-imacd-ma-mtf-20260907-v3/pine_indicator/delivery_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Implements the owner-authorized IMACD/MA/MTF exploration. TradingView compiler and four UI configurations
+      checked; no new PnL evaluation or execution. Receipt records source identity, per-configuration visual use and
+      restored chart.
+  - artifact_id: imacd-pine-v1-20260907-guide
+    artifact_type: report
+    role: research_pine_indicator_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3a07fb65180c535fc6b8a4935853f2a322a9c30a
+    source_path: analysis/html/p0_imacd_pine_indicator_20260907.html
+    sha256: fd65db9976fcc867f2b25b049e03717719d7e5d8e5c287a7e80acaaf76a3e95d
+    size_bytes: 22958
+    storage_uri: repo://analysis/html/p0_imacd_pine_indicator_20260907.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Implements the owner-authorized IMACD/MA/MTF exploration. TradingView compiler and four UI configurations
+      checked; no new PnL evaluation or execution. Receipt records source identity, per-configuration visual use and
+      restored chart.
