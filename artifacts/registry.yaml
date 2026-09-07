@@ -20334,3 +20334,49 @@ artifacts:
       default and confluence modes,16 runtime combinations. OANDA4h wick display on/off/on passed.
       OKX daily weekly warmup unavailable; OANDA weekly available. Source visual holdout session2,
       gold matrix use1, all dates owner-authorized. No PnL or orders. Screenshots in conversation only.
+
+  - artifact_id: imacd-pine-restore-v2-2-20260908-source
+    artifact_type: manifest
+    role: research_indicator_candle_only_style_restoration
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7e10fe290ec98e3eaea6f4310f1d58f931124faf
+    source_path: yoyo/evaluation/pine/imacd_dense_mtf_v2_2.pine
+    sha256: 9c3f60cf2a66d55f21e964d7a9b97971d07fdc90195ade8af1a7e9d78a89ffcb
+    size_bytes: 32780
+    storage_uri: repo://yoyo/evaluation/pine/imacd_dense_mtf_v2_2.pine
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner correction restores V2 six1px MA plots and pane panel/text. Candle-only wick highlights,
+      visible zero and main-chart close labels retained. Core14inputs/5alerts unchanged. Cloud7 readback,
+      runtime and OKX4h reference/toggle checks passed. Config visual holdout use1. No PnL or live orders.
+  - artifact_id: imacd-pine-restore-v2-2-20260908-receipt
+    artifact_type: manifest
+    role: research_indicator_candle_only_style_restoration
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7e10fe290ec98e3eaea6f4310f1d58f931124faf
+    source_path: experiments/active/exp-imacd-ma-mtf-20260907-v3/pine_indicator/restore_v2_2_receipt.json
+    sha256: c9a781519bb7b194feaafee2fe0df0843842a2e0c5f1059ff361983fc85f1162
+    size_bytes: 2128
+    storage_uri: repo://experiments/active/exp-imacd-ma-mtf-20260907-v3/pine_indicator/restore_v2_2_receipt.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner correction restores V2 six1px MA plots and pane panel/text. Candle-only wick highlights,
+      visible zero and main-chart close labels retained. Core14inputs/5alerts unchanged. Cloud7 readback,
+      runtime and OKX4h reference/toggle checks passed. Config visual holdout use1. No PnL or live orders.
+  - artifact_id: imacd-pine-restore-v2-2-20260908-guide
+    artifact_type: report
+    role: research_indicator_candle_only_style_restoration
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7e10fe290ec98e3eaea6f4310f1d58f931124faf
+    source_path: analysis/html/p0_imacd_style_restore_20260908.html
+    sha256: a7db30b52925dde421cfbf83566cf7bed8b437c5c761d689aa397817ba9384fd
+    size_bytes: 5266
+    storage_uri: repo://analysis/html/p0_imacd_style_restore_20260908.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner correction restores V2 six1px MA plots and pane panel/text. Candle-only wick highlights,
+      visible zero and main-chart close labels retained. Core14inputs/5alerts unchanged. Cloud7 readback,
+      runtime and OKX4h reference/toggle checks passed. Config visual holdout use1. No PnL or live orders.

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>IMACD 样式还原：只保留关键 K 线亮色</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>IMACD 样式还原：只保留关键 K 线亮色</h1>
+<p>Owner 指出回踩高亮不应连带改均线和副图。本轮恢复六条均线原色、原透明度、1px线宽，删除额外加粗参考线；副图恢复V2三行面板与原释放文字。此前明确要求的可见零轴、主图信号收盘价和关键K线亮色保留。</p>
+<table><thead><tr>
+<th>项目</th>
+<th>V2.1</th>
+<th>V2.2</th>
+</tr></thead><tbody>
+<tr><td>六均线</td><td>选中参考另画2px，其余线调淡</td><td>与V2六条plot逐字一致，均为1px</td></tr>
+<tr><td>副图</td><td>4行面板，释放标签重复收盘价</td><td>V2三行面板，释放标签无重复价格；蓝橙曲线／光晕本就未变</td></tr>
+<tr><td>关键K线</td><td>确认蓄势区内严格影线回踩</td><td>判据与条件plotcandle逐字不变</td></tr>
+<tr><td>原系统</td><td>14原输入与5警报</td><td>输入、核心与警报逐字不变；保留已修复的label队列</td></tr>
+</tbody></table>
+<p>源码先冻结于<code>7e10fe290ec98e3eaea6f4310f1d58f931124faf</code>，再在TradingView更新原脚本。云第7版（00:56）编译、图表运行通过；回读29354字符，FNV<code>ef0239ac</code>，与本地SHA256<code>9c3f60cf2a66d55f21e964d7a9b97971d07fdc90195ade8af1a7e9d78a89ffcb</code>对应源码一致。独立只读复核无阻断。</p>
+<p>实际检查OKX:XAUUSDT.P 4h，Go to请求2026-07-28～08-06，44根释放位置和主图收盘4173.8保留，副图不再重复价位。SMA20→EMA20→SMA20切换后六线外观不变；回踩开启→关闭→开启仅改变符合条件的K线颜色，均线、副图和释放位置不变。最终回踩开启、参考SMA20、密集启动。截图在对话中，未另存PNG。</p>
+<p>复现：核对以下源码哈希，在原脚本更新后使用普通时间K线打开上述案例，重复参考切换和回踩开关对照。关闭回踩若仍改变均线或副图，就不算通过；本轮对照未见这种情况。</p>
+<pre><code>
+shasum -a 256 yoyo/evaluation/pine/imacd_dense_mtf_v2_2.pine
+python3 scripts/md_to_html.py analysis/p0_imacd_style_restore_20260908.md --out-dir analysis/html
+</code></pre>
+<p><a href="/Users/zhangzc/fable-trading/experiments/active/exp-imacd-ma-mtf-20260907-v3/pine_indicator/restore_v2_2_receipt.json">运行回执</a>。本V2.2配置第1轮视觉holdout使用，沿用Owner所有日期授权。</p>
+<p>风险与诚实声明：这是局部样式恢复，未进行新收益实验。候选数、正类率、val样本数、AUC、收益置换p、top-decile毛／净收益、胜率和随机入场收益对照均不适用；替代验收为逐字样式／逻辑对照和现场开关反证。一个4h案例不证明全部行情与边界已穷尽；没有下单、发布、创建新警报、改阈值或改原交易规则。后续若调整关键K线颜色，只修改该对象，不扩展到均线和副图。</p>
+</body>
+</html>
