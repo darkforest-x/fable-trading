@@ -1,0 +1,595 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "Genuine Flow Coverage · V34",
+    "generatedAt": "2026-09-07T08:04:27.228266+00:00",
+    "sources": [
+      {
+        "id": "report",
+        "label": "V34 · 覆盖审计、定义与限制",
+        "path": "analysis/p1_btcusdtp_genuine_flow_coverage_v34_20260907.md"
+      },
+      {
+        "id": "reviewed_data",
+        "label": "V34 · 全量SQL复算与零量明细",
+        "path": "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/report_data.json"
+      },
+      {
+        "id": "summary",
+        "label": "V34 · 全量原始覆盖结果",
+        "path": "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/summary.json"
+      },
+      {
+        "id": "source_manifest",
+        "label": "V34 · 24份官方校验来源",
+        "path": "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/source_manifest.json"
+      },
+      {
+        "id": "verification",
+        "label": "V34 · 补强全量复验",
+        "path": "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/verification.json"
+      },
+      {
+        "id": "unit_audit",
+        "label": "V34 · 原始十进制单位审计",
+        "path": "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/unit_audit.json"
+      },
+      {
+        "id": "v33",
+        "label": "V33 · 合成接口阶段",
+        "path": "experiments/active/exp-btcusdtp-trend-research-reset-flow-input-20260907-v33/QA.md"
+      },
+      {
+        "id": "monthly",
+        "label": "V34 · 真实流量档案的描述性复算",
+        "path": "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/report_data.json",
+        "query": {
+          "sql": "SELECT b.month, c.expected_bars, COUNT(*) AS valid_bars,\n        c.expected_bars-COUNT(*) AS missing_bars, SUM(b.volume=0) AS zero_bars,\n        SUM(b.price_direction!=0 AND b.flow_direction!=0) AS nonzero_bars,\n        SUM(b.price_direction*b.flow_direction<0) AS opposite_bars,\n        1.0*SUM(b.price_direction*b.flow_direction<0)/\n          NULLIF(SUM(b.price_direction!=0 AND b.flow_direction!=0),0) AS opposite_rate\n        FROM bars b JOIN calendar c USING(month) GROUP BY b.month ORDER BY b.month",
+          "engine": "sqlite",
+          "language": "sql",
+          "tables_used": [
+            "main.bars",
+            "main.calendar"
+          ],
+          "executed_at": "2026-09-07T07:59:23.726460+00:00",
+          "description": "读取24份固定SHA的5m输出，逐根重算方向和完整性；没有未来价格或交易标签",
+          "filters": [
+            "BTCUSDT Binance USD-M; bar opens in [2023-01-01,2025-01-01) UTC; all bars, no sample"
+          ],
+          "metric_definitions": {
+            "opposite_rate": "count((close-open)*delta_quote<0)/count(close!=open AND delta_quote!=0); fraction",
+            "missing_bars": "calendar expected grid count minus unique validated monthly bars",
+            "zero_bars": "count(volume=0); preserved as known zero, not missing or a tradeable bar"
+          }
+        }
+      },
+      {
+        "id": "zero_bars",
+        "label": "V34 · 真实流量档案的描述性复算",
+        "path": "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/report_data.json",
+        "query": {
+          "sql": "SELECT open_time, month, volume, quote_volume, trade_count,\n        delta_quote_volume FROM bars WHERE volume=0 ORDER BY open_time",
+          "engine": "sqlite",
+          "language": "sql",
+          "tables_used": [
+            "main.bars"
+          ],
+          "executed_at": "2026-09-07T07:59:23.726460+00:00",
+          "description": "读取24份固定SHA的5m输出，逐根重算方向和完整性；没有未来价格或交易标签",
+          "filters": [
+            "BTCUSDT Binance USD-M; bar opens in [2023-01-01,2025-01-01) UTC; all bars, no sample"
+          ],
+          "metric_definitions": {
+            "opposite_rate": "count((close-open)*delta_quote<0)/count(close!=open AND delta_quote!=0); fraction",
+            "missing_bars": "calendar expected grid count minus unique validated monthly bars",
+            "zero_bars": "count(volume=0); preserved as known zero, not missing or a tradeable bar"
+          }
+        }
+      },
+      {
+        "id": "overview",
+        "label": "V34 · 真实流量档案的描述性复算",
+        "path": "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/report_data.json",
+        "query": {
+          "sql": "SELECT COUNT(*) AS valid_bars, COUNT(DISTINCT open_time) AS unique_bars,\n        COUNT(DISTINCT month) AS months, SUM(volume=0) AS zero_bars,\n        SUM(price_direction!=0 AND flow_direction!=0) AS nonzero_bars,\n        SUM(price_direction*flow_direction<0) AS opposite_bars,\n        1.0*SUM(price_direction*flow_direction<0)/\n          NULLIF(SUM(price_direction!=0 AND flow_direction!=0),0) AS opposite_rate\n        FROM bars",
+          "engine": "sqlite",
+          "language": "sql",
+          "tables_used": [
+            "main.bars"
+          ],
+          "executed_at": "2026-09-07T07:59:23.726460+00:00",
+          "description": "读取24份固定SHA的5m输出，逐根重算方向和完整性；没有未来价格或交易标签",
+          "filters": [
+            "BTCUSDT Binance USD-M; bar opens in [2023-01-01,2025-01-01) UTC; all bars, no sample"
+          ],
+          "metric_definitions": {
+            "opposite_rate": "count((close-open)*delta_quote<0)/count(close!=open AND delta_quote!=0); fraction",
+            "missing_bars": "calendar expected grid count minus unique validated monthly bars",
+            "zero_bars": "count(volume=0); preserved as known zero, not missing or a tradeable bar"
+          }
+        }
+      }
+    ],
+    "blocks": [
+      {
+        "id": "section_0",
+        "type": "markdown",
+        "layout": "full",
+        "body": "# Genuine Flow Coverage · V34"
+      },
+      {
+        "id": "section_1",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## Executive Summary\n\n- **真实买卖量输入已准备好，盈利尚未验证。** BTCUSDT Binance USD-M 的2023–2024年24个月原始档案均通过官方校验；210,528根5分钟K线齐全，可进入下一轮单独冻结的共振研究。\n- **它确实不同于按涨跌给成交量分正负。** 在209,923根价格方向与主动成交方向都非零的K线中，40,489根方向相反，占19.29%。这是同一根K线的字段差异，不是预测正确率，也不是与MA Shift染色的比较。\n- **异常已核实，不能混淆三种“可用”。** 时间记录完整；38根明确记录零成交，不能假装可成交；84根涉及91次浮点均价边界报警，原始十进制文本复算全部排除源数据越界。历史记录完整也不等于已证明实时及时到达。"
+      },
+      {
+        "id": "section_2",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 这轮只解决输入，不改交易规则\n\n审计单位是一根5分钟K线；范围按UTC开盘时间从2023年1月1日到2025年1月1日之前，包含闰年的2024年。理论分母为731天×288根/天，即210,528根，不是从读到的行数反推分母。\n\n原始主动买量来自Binance USD-M官方Kline字段。主动卖量=总量−主动买量；主动净成交方向=买量−卖量，币数量和USDT金额分别计算，不混单位。它不提供持仓量、开平仓方向、挂单深度或所谓“主力资金净流入”。\n\n本次只处理这一交易所的输入，**没有替换原OKX执行价格**，也没有改K1/K2、均线周期、进出场、止损、分批止盈、成本或仓位。5分钟是输入粒度，不代表已经发布了一个5分钟策略。"
+      },
+      {
+        "id": "section_3",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 相比上一版，完成的是从合成接口到真实输入\n\n| 检查 | V33 | V34 |\n|---|---|---|\n| 真实月份 | 未读 | 24/24 |\n| 真实有效K线 | 未读 | 210,528/210,528 |\n| 官方SHA及原始档案 | 接口合成测试 | 24份逐一核验，原缓存只读 |\n| 日历缺根 / 来源未知 | 未检验 | 0 / 0 |\n| 完整12根组成的小时桶 | 未检验 | 17,544/17,544 |\n| 原7列OHLCV、类型一致性 | 合成通过 | 全量通过 |\n| 新CSV导出后精确读回 | 未检验 | 全24个月通过 |\n| 新收益回测、训练、实盘资格 | 无 | 无 |\n\n“有可解析文件”与“完整日历覆盖”分开验收；这避免了旧下载器把部分成功也叫complete的歧义。对每个月首尾和内部逐根核对，没有去重、补零或补价格。小时桶完整仅说明12个时间记录存在，不保证每根发生过交易。"
+      },
+      {
+        "id": "section_4",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 真买卖量与烛身方向的区别不是偶发现象\n\n价格方向定义为收盘减开盘的符号；主动成交方向定义为USDT主动买金额减主动卖金额的符号。只有两者都非零才进入“方向相反”的分母。605根因其中至少一项为零而不参与该比率；不能把这605根全解释成38根零成交量。\n\n全期相反占比为40,489÷209,923=19.2875%；逐月在16.15%至21.84%之间。下图展示每月同一口径的比例，纵轴按0–1表示比例。它说明旧涨跌方向代理和真实流量不是同一变量，**不能据此推断新增流量能预测下一根、趋势更长或回测更赚钱**。\n\n这支持“值得验证真实成交方向”的输入选择，不支持直接把“净主动买入为正”当成多单过滤器。还需用入场前可知的量区分趋势延续与震荡假突破，保留没有优势的可能性。",
+        "sourceId": "reviewed_data"
+      },
+      {
+        "id": "opposite_chart",
+        "type": "chart",
+        "layout": "full",
+        "chartId": "opposite"
+      },
+      {
+        "id": "section_5",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 逐月明细：每个月都完整，零量集中在三个日期\n\n下表用于核查精确分母。所有月份缺失根数及未知来源根数均为0；有效根数和理论根数相等。零量根数是原始档案明确写出的0，不是缺失值填充。\n\n| UTC月份 | 理论/有效根数 | 零量根数 | 双方非零方向根数 | 方向相反根数 |\n|---|---:|---:|---:|---:|\n| 2023-01 | 8,928 | 0 | 8,851 | 1,602 |\n| 2023-02 | 8,064 | 0 | 8,048 | 1,490 |\n| 2023-03 | 8,928 | 0 | 8,912 | 1,633 |\n| 2023-04 | 8,640 | 0 | 8,613 | 1,489 |\n| 2023-05 | 8,928 | 0 | 8,912 | 1,543 |\n| 2023-06 | 8,640 | 0 | 8,625 | 1,529 |\n| 2023-07 | 8,928 | 0 | 8,887 | 1,748 |\n| 2023-08 | 8,928 | 0 | 8,809 | 1,423 |\n| 2023-09 | 8,640 | 3 | 8,586 | 1,565 |\n| 2023-10 | 8,928 | 0 | 8,897 | 1,651 |\n| 2023-11 | 8,640 | 19 | 8,597 | 1,535 |\n| 2023-12 | 8,928 | 0 | 8,912 | 1,696 |\n| 2024-01 | 8,928 | 0 | 8,916 | 1,772 |\n| 2024-02 | 8,352 | 0 | 8,340 | 1,645 |\n| 2024-03 | 8,928 | 0 | 8,927 | 1,700 |\n| 2024-04 | 8,640 | 0 | 8,637 | 1,710 |\n| 2024-05 | 8,928 | 0 | 8,920 | 1,822 |\n| 2024-06 | 8,640 | 0 | 8,620 | 1,760 |\n| 2024-07 | 8,928 | 0 | 8,920 | 1,866 |\n| 2024-08 | 8,928 | 0 | 8,914 | 1,798 |\n| 2024-09 | 8,640 | 0 | 8,630 | 1,876 |\n| 2024-10 | 8,928 | 16 | 8,901 | 1,832 |\n| 2024-11 | 8,640 | 0 | 8,633 | 1,857 |\n| 2024-12 | 8,928 | 0 | 8,916 | 1,947 |\n| 合计 | 210,528 | 38 | 209,923 | 40,489 |\n\n这38根分布在2023年9月12日08:35–08:45 UTC（3根）、2023年11月10日15:10–16:40 UTC（19根），以及2024年10月28日16:25–16:30（2根）和20:00–21:05 UTC（14根）。本次没有调查交易所停机公告，不能擅自归因为停机；下一轮特征计算必须保留“零成交”和“比例无定义”状态，不能把0/0变成有效共振。",
+        "sourceId": "reviewed_data"
+      },
+      {
+        "id": "section_6",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 单位报警已逐条追到原始文本\n\n最初用浮点均价检查时，总量侧0次越界、买方侧42次、卖方侧49次，共91条侧别报警，涉及84根不同K线。没有直接删掉这些样本，也没有凭经验把它们都当噪声。\n\n随后对全210,528根原始ZIP里的十进制字符串，用80位Decimal比较“金额是否位于数量×最低价和数量×最高价之间”。**精确源文本越界为0；91条全部是二进制浮点除法的边界表示误差。** 保留每条原始数值及判定账本，修改/排除K线为0。这里排除了这一类单位错配，并不证明源数据在所有可能维度都绝对正确。\n\n单位收据中的“Exact discrepancies remain unresolved”是固定的通用警示，并不表示本轮仍有精确越界；本轮实际计数明确为0。原收据保留，不事后改写。\n\n另一次delta二次校验曾因“大数相减、结果接近零”的容差选择误报。已用操作数尺度的机器误差界修正，并以合成的1亿+.01减1亿证明合法差值不应被拒绝。补强后全24个月逐字段及CSV字节与初轮一致；原summary和原源码提交身份没有倒改。"
+      },
+      {
+        "id": "section_7",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 下一步先做因果对齐，再验证共振\n\n1. **按K1/K2决策时刻对齐真实主动买卖量。** 只读取当时已经闭合的5分钟bar；跨交易所不得把同一时间标签误当同步到达。先做无收益的因果与缺值测试。\n2. **一次只检验一个入场前假设。** 候选是回踩期间逆向主动成交是否减弱；具体窗口和判据尚未选定，不根据这张同烛方向差异图倒推最优阈值。不要把它和均线、止损、仓位一起打包旋参数。\n3. **盈利判断仍需真实交易路径和完整对照。** 在后续单独冻结方案中比较原策略、加入因子的策略、同币同时间块同波动桶对照；同时报告交易数、净收益、回撤、震荡误入及放跑趋势的代价。动态退出沿用被冻结版本做公平对比，不能一边筛入口一边改退出来掩盖损失。\n\n这轮没有需要用好看的收益数字“交差”的理由。新增输入值得研究，但旧版本的亏损结论没有被推翻。"
+      },
+      {
+        "id": "section_8",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 仍未回答的问题\n\n真实流量在K2回踩期间是否有增量区分能力？入场后收益改善来自方向优势，还是仅仅少交手续费？不同市场状态是否稳定？Binance外部共振能否在OKX执行时及时获得？这些都尚未检验，不能因为字段更真实就默认答案为是。\n\n还未证明其适用于ETH、黄金或山寨币日线。本轮只覆盖BTC；不得把这一输入质量结论外推为跨品种盈利能力。"
+      },
+      {
+        "id": "section_9",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 风险与诚实声明\n\n这是非方向性数据质量实验，没有训练、预测或交易标签。因此val AUC、置换盈利p值、top-decile毛/净收益、胜率、单特征盈利基线及匹配随机交易收益均不适用，不编造数值。替代零假设检查为缺首/中/尾、重复、错时钟、缺校验、错SHA、篡改delta、真假单位越界等合成反例，以及对原始文本和全量保存输出的交叉复验。\n\n2023–2024年已经被历史研究反复使用，不是新的独立验收集。本轮没有读取2025年及之后的bar开盘，没有消耗holdout，没有调成本/TP-SL/ATR/阈值，没有改TradingView、ACTIVE、训练或真实订单。输入时间完整不意味着实时网络交付已验证：末根2024年12月31日23:55 UTC的理论完整边界为2025年1月1日00:00 UTC，应保留，但这一边界不是历史实测到达时间。"
+      },
+      {
+        "id": "section_10",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 复现与产物\n\n初轮构建源码49c0d8c，补强验证源码93b556c，精确源单位审计c90c6da，报告SQL准备54efb7c。原始ZIP只读，导出数据放在独立研究目录。报告初次构建时目标仍为usageLimited。交付前再次查询已无现有目标，按Owner本轮请求重新创建后，工具于2026年9月7日08:09 UTC返回active；目标模式现已开启，整体盈利目标仍未完成，未消费用量重置。\n\n从原始源码与空实验输出重建时，先确保相应提交在main且代码/config已提交，再执行：\n\n```bash\n.venv/bin/python -m pytest -q tests/test_binance_flow_coverage.py tests/test_binance_um_flow_archives.py tests/test_binance_um_archives.py tests/test_binance_flow_unit_audit.py tests/test_binance_flow_coverage_report.py\n.venv/bin/python -m yoyo.evaluation.binance_flow_coverage sources\n.venv/bin/python -m yoyo.evaluation.binance_flow_coverage audit\n.venv/bin/python -m yoyo.evaluation.binance_flow_coverage verify\n.venv/bin/python -m yoyo.evaluation.binance_flow_unit_audit\n.venv/bin/python -m yoyo.evaluation.binance_flow_coverage_report prepare\npython3 scripts/md_to_html.py analysis/p1_btcusdtp_genuine_flow_coverage_v34_20260907.md --out-dir analysis/html\n.venv/bin/python -m yoyo.evaluation.binance_flow_coverage_report package\n```\n\n已存在的源收据与summary不可覆写；本次已完成的目录保留原件，不能删文件制造“重跑”。`verify`按原提交核对lineage，并另存新验证收据。官方校验收据只取24个固定URL；新版网络源若发生历史修订，不会自动覆盖原缓存。\n\n完整source_manifest、summary、verification、unit_audit、真实SQL结果与复核笔记均在对应V34实验目录。笔记的Python代码按顺序实际执行；当前环境没有Jupyter kernel，不能称已完成Jupyter界面验证。HTML采用标准报告组件打包，浏览器兼容性验证状态另见QA收据。"
+      }
+    ],
+    "charts": [
+      {
+        "id": "opposite",
+        "type": "bar",
+        "title": "逐月价格方向与主动成交方向相反占比",
+        "description": "2023–2024 UTC · 仅双方方向均非零的5分钟K线；不是胜率或预测效果",
+        "showDescription": true,
+        "dataset": "monthly",
+        "sourceId": "monthly",
+        "palette": {
+          "kind": "categorical",
+          "name": "blueGold"
+        },
+        "encodings": {
+          "x": {
+            "field": "month",
+            "type": "nominal",
+            "label": "UTC月份"
+          },
+          "y": {
+            "field": "opposite_rate",
+            "type": "quantitative",
+            "label": "相反占比（0–1）"
+          },
+          "tooltip": [
+            {
+              "field": "nonzero_bars",
+              "type": "quantitative",
+              "label": "非零方向根数"
+            },
+            {
+              "field": "opposite_bars",
+              "type": "quantitative",
+              "label": "相反根数"
+            },
+            {
+              "field": "valid_bars",
+              "type": "quantitative",
+              "label": "全部有效根数"
+            }
+          ]
+        }
+      }
+    ],
+    "cards": [],
+    "tables": [],
+    "filters": []
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-09-07T08:04:27.228266+00:00",
+    "status": "ready",
+    "datasets": {
+      "monthly": [
+        {
+          "month": "2023-01",
+          "expected_bars": 8928,
+          "valid_bars": 8928,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8851,
+          "opposite_bars": 1602,
+          "opposite_rate": 0.18099649757089595
+        },
+        {
+          "month": "2023-02",
+          "expected_bars": 8064,
+          "valid_bars": 8064,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8048,
+          "opposite_bars": 1490,
+          "opposite_rate": 0.18513916500994035
+        },
+        {
+          "month": "2023-03",
+          "expected_bars": 8928,
+          "valid_bars": 8928,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8912,
+          "opposite_bars": 1633,
+          "opposite_rate": 0.18323608617594256
+        },
+        {
+          "month": "2023-04",
+          "expected_bars": 8640,
+          "valid_bars": 8640,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8613,
+          "opposite_bars": 1489,
+          "opposite_rate": 0.17287820736096599
+        },
+        {
+          "month": "2023-05",
+          "expected_bars": 8928,
+          "valid_bars": 8928,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8912,
+          "opposite_bars": 1543,
+          "opposite_rate": 0.17313734290843807
+        },
+        {
+          "month": "2023-06",
+          "expected_bars": 8640,
+          "valid_bars": 8640,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8625,
+          "opposite_bars": 1529,
+          "opposite_rate": 0.17727536231884058
+        },
+        {
+          "month": "2023-07",
+          "expected_bars": 8928,
+          "valid_bars": 8928,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8887,
+          "opposite_bars": 1748,
+          "opposite_rate": 0.19669179700686396
+        },
+        {
+          "month": "2023-08",
+          "expected_bars": 8928,
+          "valid_bars": 8928,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8809,
+          "opposite_bars": 1423,
+          "opposite_rate": 0.16153933477125668
+        },
+        {
+          "month": "2023-09",
+          "expected_bars": 8640,
+          "valid_bars": 8640,
+          "missing_bars": 0,
+          "zero_bars": 3,
+          "nonzero_bars": 8586,
+          "opposite_bars": 1565,
+          "opposite_rate": 0.18227346843699044
+        },
+        {
+          "month": "2023-10",
+          "expected_bars": 8928,
+          "valid_bars": 8928,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8897,
+          "opposite_bars": 1651,
+          "opposite_rate": 0.18556816904574575
+        },
+        {
+          "month": "2023-11",
+          "expected_bars": 8640,
+          "valid_bars": 8640,
+          "missing_bars": 0,
+          "zero_bars": 19,
+          "nonzero_bars": 8597,
+          "opposite_bars": 1535,
+          "opposite_rate": 0.1785506572060021
+        },
+        {
+          "month": "2023-12",
+          "expected_bars": 8928,
+          "valid_bars": 8928,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8912,
+          "opposite_bars": 1696,
+          "opposite_rate": 0.19030520646319568
+        },
+        {
+          "month": "2024-01",
+          "expected_bars": 8928,
+          "valid_bars": 8928,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8916,
+          "opposite_bars": 1772,
+          "opposite_rate": 0.1987438313144908
+        },
+        {
+          "month": "2024-02",
+          "expected_bars": 8352,
+          "valid_bars": 8352,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8340,
+          "opposite_bars": 1645,
+          "opposite_rate": 0.19724220623501199
+        },
+        {
+          "month": "2024-03",
+          "expected_bars": 8928,
+          "valid_bars": 8928,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8927,
+          "opposite_bars": 1700,
+          "opposite_rate": 0.1904335162988686
+        },
+        {
+          "month": "2024-04",
+          "expected_bars": 8640,
+          "valid_bars": 8640,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8637,
+          "opposite_bars": 1710,
+          "opposite_rate": 0.19798541160125044
+        },
+        {
+          "month": "2024-05",
+          "expected_bars": 8928,
+          "valid_bars": 8928,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8920,
+          "opposite_bars": 1822,
+          "opposite_rate": 0.20426008968609866
+        },
+        {
+          "month": "2024-06",
+          "expected_bars": 8640,
+          "valid_bars": 8640,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8620,
+          "opposite_bars": 1760,
+          "opposite_rate": 0.20417633410672853
+        },
+        {
+          "month": "2024-07",
+          "expected_bars": 8928,
+          "valid_bars": 8928,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8920,
+          "opposite_bars": 1866,
+          "opposite_rate": 0.20919282511210763
+        },
+        {
+          "month": "2024-08",
+          "expected_bars": 8928,
+          "valid_bars": 8928,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8914,
+          "opposite_bars": 1798,
+          "opposite_rate": 0.20170518285842495
+        },
+        {
+          "month": "2024-09",
+          "expected_bars": 8640,
+          "valid_bars": 8640,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8630,
+          "opposite_bars": 1876,
+          "opposite_rate": 0.21738122827346465
+        },
+        {
+          "month": "2024-10",
+          "expected_bars": 8928,
+          "valid_bars": 8928,
+          "missing_bars": 0,
+          "zero_bars": 16,
+          "nonzero_bars": 8901,
+          "opposite_bars": 1832,
+          "opposite_rate": 0.20581957083473768
+        },
+        {
+          "month": "2024-11",
+          "expected_bars": 8640,
+          "valid_bars": 8640,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8633,
+          "opposite_bars": 1857,
+          "opposite_rate": 0.21510483030232827
+        },
+        {
+          "month": "2024-12",
+          "expected_bars": 8928,
+          "valid_bars": 8928,
+          "missing_bars": 0,
+          "zero_bars": 0,
+          "nonzero_bars": 8916,
+          "opposite_bars": 1947,
+          "opposite_rate": 0.218371467025572
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "report",
+      "label": "V34 · 覆盖审计、定义与限制",
+      "path": "analysis/p1_btcusdtp_genuine_flow_coverage_v34_20260907.md"
+    },
+    {
+      "id": "reviewed_data",
+      "label": "V34 · 全量SQL复算与零量明细",
+      "path": "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/report_data.json"
+    },
+    {
+      "id": "summary",
+      "label": "V34 · 全量原始覆盖结果",
+      "path": "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/summary.json"
+    },
+    {
+      "id": "source_manifest",
+      "label": "V34 · 24份官方校验来源",
+      "path": "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/source_manifest.json"
+    },
+    {
+      "id": "verification",
+      "label": "V34 · 补强全量复验",
+      "path": "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/verification.json"
+    },
+    {
+      "id": "unit_audit",
+      "label": "V34 · 原始十进制单位审计",
+      "path": "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/unit_audit.json"
+    },
+    {
+      "id": "v33",
+      "label": "V33 · 合成接口阶段",
+      "path": "experiments/active/exp-btcusdtp-trend-research-reset-flow-input-20260907-v33/QA.md"
+    },
+    {
+      "id": "monthly",
+      "label": "V34 · 真实流量档案的描述性复算",
+      "path": "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/report_data.json",
+      "query": {
+        "sql": "SELECT b.month, c.expected_bars, COUNT(*) AS valid_bars,\n        c.expected_bars-COUNT(*) AS missing_bars, SUM(b.volume=0) AS zero_bars,\n        SUM(b.price_direction!=0 AND b.flow_direction!=0) AS nonzero_bars,\n        SUM(b.price_direction*b.flow_direction<0) AS opposite_bars,\n        1.0*SUM(b.price_direction*b.flow_direction<0)/\n          NULLIF(SUM(b.price_direction!=0 AND b.flow_direction!=0),0) AS opposite_rate\n        FROM bars b JOIN calendar c USING(month) GROUP BY b.month ORDER BY b.month",
+        "engine": "sqlite",
+        "language": "sql",
+        "tables_used": [
+          "main.bars",
+          "main.calendar"
+        ],
+        "executed_at": "2026-09-07T07:59:23.726460+00:00",
+        "description": "读取24份固定SHA的5m输出，逐根重算方向和完整性；没有未来价格或交易标签",
+        "filters": [
+          "BTCUSDT Binance USD-M; bar opens in [2023-01-01,2025-01-01) UTC; all bars, no sample"
+        ],
+        "metric_definitions": {
+          "opposite_rate": "count((close-open)*delta_quote<0)/count(close!=open AND delta_quote!=0); fraction",
+          "missing_bars": "calendar expected grid count minus unique validated monthly bars",
+          "zero_bars": "count(volume=0); preserved as known zero, not missing or a tradeable bar"
+        }
+      }
+    },
+    {
+      "id": "zero_bars",
+      "label": "V34 · 真实流量档案的描述性复算",
+      "path": "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/report_data.json",
+      "query": {
+        "sql": "SELECT open_time, month, volume, quote_volume, trade_count,\n        delta_quote_volume FROM bars WHERE volume=0 ORDER BY open_time",
+        "engine": "sqlite",
+        "language": "sql",
+        "tables_used": [
+          "main.bars"
+        ],
+        "executed_at": "2026-09-07T07:59:23.726460+00:00",
+        "description": "读取24份固定SHA的5m输出，逐根重算方向和完整性；没有未来价格或交易标签",
+        "filters": [
+          "BTCUSDT Binance USD-M; bar opens in [2023-01-01,2025-01-01) UTC; all bars, no sample"
+        ],
+        "metric_definitions": {
+          "opposite_rate": "count((close-open)*delta_quote<0)/count(close!=open AND delta_quote!=0); fraction",
+          "missing_bars": "calendar expected grid count minus unique validated monthly bars",
+          "zero_bars": "count(volume=0); preserved as known zero, not missing or a tradeable bar"
+        }
+      }
+    },
+    {
+      "id": "overview",
+      "label": "V34 · 真实流量档案的描述性复算",
+      "path": "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/report_data.json",
+      "query": {
+        "sql": "SELECT COUNT(*) AS valid_bars, COUNT(DISTINCT open_time) AS unique_bars,\n        COUNT(DISTINCT month) AS months, SUM(volume=0) AS zero_bars,\n        SUM(price_direction!=0 AND flow_direction!=0) AS nonzero_bars,\n        SUM(price_direction*flow_direction<0) AS opposite_bars,\n        1.0*SUM(price_direction*flow_direction<0)/\n          NULLIF(SUM(price_direction!=0 AND flow_direction!=0),0) AS opposite_rate\n        FROM bars",
+        "engine": "sqlite",
+        "language": "sql",
+        "tables_used": [
+          "main.bars"
+        ],
+        "executed_at": "2026-09-07T07:59:23.726460+00:00",
+        "description": "读取24份固定SHA的5m输出，逐根重算方向和完整性；没有未来价格或交易标签",
+        "filters": [
+          "BTCUSDT Binance USD-M; bar opens in [2023-01-01,2025-01-01) UTC; all bars, no sample"
+        ],
+        "metric_definitions": {
+          "opposite_rate": "count((close-open)*delta_quote<0)/count(close!=open AND delta_quote!=0); fraction",
+          "missing_bars": "calendar expected grid count minus unique validated monthly bars",
+          "zero_bars": "count(volume=0); preserved as known zero, not missing or a tradeable bar"
+        }
+      }
+    }
+  ]
+}

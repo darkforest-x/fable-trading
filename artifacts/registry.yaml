@@ -19,6 +19,169 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: btcusdtp-flow-v34-summary
+    artifact_type: manifest
+    role: flow_dataset_lineage_and_coverage
+    source_repo: darkforest-x/fable-trading
+    source_commit: "49c0d8c"
+    source_path: experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/summary.json
+    sha256: "02f37e22924dbae9e16b801811003f66288b048f0518e783ceb6b55b2caf7ddd"
+    size_bytes: 88125
+    storage_uri: "repo://experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/summary.json"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      V34 input audit only; no economic labels or strategy eligibility.
+      24monthly ZIP/CSV hashes in summary; original cache unchanged.
+      HTML structural_only; notebook3Python cells stdlib execution, not Jupyterkernel.
+
+  - artifact_id: btcusdtp-flow-v34-sources
+    artifact_type: manifest
+    role: official_checksum_receipts
+    source_repo: darkforest-x/fable-trading
+    source_commit: "49c0d8c"
+    source_path: experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/source_manifest.json
+    sha256: "244332b2bb49e6be9f4b9ba769c17fb6138d786998262b5c7525c90bd50d6d37"
+    size_bytes: 17205
+    storage_uri: "repo://experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/source_manifest.json"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      V34 input audit only; no economic labels or strategy eligibility.
+      24monthly ZIP/CSV hashes in summary; original cache unchanged.
+      HTML structural_only; notebook3Python cells stdlib execution, not Jupyterkernel.
+
+  - artifact_id: btcusdtp-flow-v34-verification
+    artifact_type: report
+    role: immutable_full_output_reverification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "93b556c"
+    source_path: experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/verification.json
+    sha256: "cfabdb58db16380df8156b0320b597b433606f98aba00fc32bae37e143c20088"
+    size_bytes: 1095
+    storage_uri: "repo://experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/verification.json"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      V34 input audit only; no economic labels or strategy eligibility.
+      24monthly ZIP/CSV hashes in summary; original cache unchanged.
+      HTML structural_only; notebook3Python cells stdlib execution, not Jupyterkernel.
+
+  - artifact_id: btcusdtp-flow-v34-units
+    artifact_type: report
+    role: exact_decimal_source_unit_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c90c6da"
+    source_path: experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/unit_audit.json
+    sha256: "00151b688c1e3edef9f964866ba5dce36c192ff46ebe0728ac79cdc268b63675"
+    size_bytes: 42580
+    storage_uri: "repo://experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/unit_audit.json"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      V34 input audit only; no economic labels or strategy eligibility.
+      24monthly ZIP/CSV hashes in summary; original cache unchanged.
+      HTML structural_only; notebook3Python cells stdlib execution, not Jupyterkernel.
+
+  - artifact_id: btcusdtp-flow-v34-query-data
+    artifact_type: dataset
+    role: same_bar_descriptive_sql_results
+    source_repo: darkforest-x/fable-trading
+    source_commit: "54efb7c"
+    source_path: experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/report_data.json
+    sha256: "eb7dc114551400b6fc3470946e273f876a5b1f0c827798be569a3c0334efcbb8"
+    size_bytes: 15934
+    storage_uri: "repo://experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/report_data.json"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      V34 input audit only; no economic labels or strategy eligibility.
+      24monthly ZIP/CSV hashes in summary; original cache unchanged.
+      HTML structural_only; notebook3Python cells stdlib execution, not Jupyterkernel.
+
+  - artifact_id: btcusdtp-flow-v34-artifact
+    artifact_type: report
+    role: canonical_report_artifact
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c06f458"
+    source_path: experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/artifact.json
+    sha256: "41703d093fe7c357ff3413576c44cfa8e915e4f5867b77179d84dca4944800f3"
+    size_bytes: 31806
+    storage_uri: "repo://experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/artifact.json"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      V34 input audit only; no economic labels or strategy eligibility.
+      24monthly ZIP/CSV hashes in summary; original cache unchanged.
+      HTML structural_only; notebook3Python cells stdlib execution, not Jupyterkernel.
+
+  - artifact_id: btcusdtp-flow-v34-html
+    artifact_type: report
+    role: portable_coverage_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c06f458"
+    source_path: analysis/html/p1_btcusdtp_genuine_flow_coverage_v34_20260907.html
+    sha256: "66fad5f9b61f4a0ade76c6863e6c2cf699a5e35919362de2be627ed1d6b9de7e"
+    size_bytes: 469541
+    storage_uri: "repo://analysis/html/p1_btcusdtp_genuine_flow_coverage_v34_20260907.html"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      V34 input audit only; no economic labels or strategy eligibility.
+      24monthly ZIP/CSV hashes in summary; original cache unchanged.
+      HTML structural_only; notebook3Python cells stdlib execution, not Jupyterkernel.
+
+  - artifact_id: btcusdtp-flow-v34-notebook
+    artifact_type: report
+    role: executed_python_companion_not_jupyter_kernel
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c06f458"
+    source_path: experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/verification.ipynb
+    sha256: "65b340acc1b233cad9aeead3b44c0b54053b15e15db5d38a747527359927a51c"
+    size_bytes: 5866
+    storage_uri: "repo://experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/verification.ipynb"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      V34 input audit only; no economic labels or strategy eligibility.
+      24monthly ZIP/CSV hashes in summary; original cache unchanged.
+      HTML structural_only; notebook3Python cells stdlib execution, not Jupyterkernel.
+
+  - artifact_id: btcusdtp-flow-v34-qa
+    artifact_type: report
+    role: validation_status_and_honesty_notes
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c06f458"
+    source_path: experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/QA.md
+    sha256: "52ff71b0fe3ea9e9ec85c7c0f2fc37f378fd638ff6ae7b4f93513d0bbad2c7a5"
+    size_bytes: 6223
+    storage_uri: "repo://experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/QA.md"
+    holdout_status: pre_holdout
+    data_cutoff: "2025-01-01T00:00:00Z"
+    training_eligible: false
+    production_eligible: false
+    notes: >-
+      V34 input audit only; no economic labels or strategy eligibility.
+      24monthly ZIP/CSV hashes in summary; original cache unchanged.
+      HTML structural_only; notebook3Python cells stdlib execution, not Jupyterkernel.
+
+
   - artifact_id: btcusdtp-research-reset-v33-plan-html
     artifact_type: report
     role: research_design_not_economic_results

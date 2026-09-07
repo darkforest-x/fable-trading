@@ -18,6 +18,30 @@
 未启动新训练；training_eligible/production_eligible=false，holdout未读。旧val是反复使用的
 开发集，挖掘队列不能估总体召回；exposure_review.json明确独立性尚未建立，未冻结连续窗roster。
 
+## ⚡ 当前真相（2026-09-07 — V34真实主动成交量覆盖完成，盈利未验证）
+
+Owner“那开始下一步啊，开始目标模式”：49c0d8c先冻结后只读Binance BTCUSDT5m
+2023–2024共24个月官方CHECKSUM与本机原ZIP。210528/210528完整、17544小时桶齐全；
+0缺根/未知/重复/null，38原始零成交。209923根普通烛身/quote delta非零者中40489相反
+（19.2875%），不是MA Shift颜色，不是胜率/未来预测，不据此挑参数。
+复核补强8aaaa00后发现delta浮点相消容差误报警，93b556c修正并保留原summary/manifest，
+verification逐月全字段/CSV字节一致。c90c6da原文本Decimal全量单位审计：买42/卖49
+共91侧flags、84独立bars，全为浮点边界；精确源越界0、删改0。
+
+E34：experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/；
+source_manifest/summary/verification/unit_audit/report_data/artifact/verification.ipynb/QA齐全。
+独立研究数据data/genuine_flow_coverage_v34，不改原缓存，不替代OKX执行源。
+报告analysis/html/p1_btcusdtp_genuine_flow_coverage_v34_20260907.html；canonical验证/打包过，
+structural_only（无Chromium，未做手机/主题/source-dialog实际UI验收）。3notebook codecells
+stdlib顺序执行，非Jupyterkernel；284联合tests过，13旧警告。报告准备的括号语法错误
+在产出前修复54efb7c并补SQL测试，失败过程见QA。源码/产物按版本分别留链。
+
+真实收益/标签读取0，2025+bar与holdout未读，成本/阈值/TP-SL/TV/ACTIVE/训练/下单未改。
+下一步先冻结真实flow与K1/K2决策时刻的因果对齐、零量状态处理，再定单一共振假设；
+回踩逆向主动成交减弱仅候选，窗口/阈值尚未选，不把输入通过当盈利通过。
+大目标仍未达。初始goal为usageLimited；交付前get_goal返回null，随后按本轮Owner请求
+重新create_goal成功，08:09UTC返回active，goal_activation.json已记录；未消费usage reset。
+
 ## ⚡ 当前真相（2026-09-07 — V33改换研究路线，真实量输入模块完成，未跑新收益）
 
 Owner追问为什么一直不行、能否多换思路。本轮源码/历史报告查重：既有动态退出、
