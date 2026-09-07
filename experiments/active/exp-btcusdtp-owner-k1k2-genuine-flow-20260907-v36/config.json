@@ -1,0 +1,19 @@
+{
+  "experiment_id": "exp-btcusdtp-owner-k1k2-genuine-flow-20260907-v36",
+  "flow_summary": "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/summary.json",
+  "flow_summary_sha256": "02f37e22924dbae9e16b801811003f66288b048f0518e783ceb6b55b2caf7ddd",
+  "output_dir": "data/owner_k1k2_genuine_flow_v36",
+  "start_inclusive": "2023-01-01T00:00:00Z",
+  "end_exclusive": "2025-01-01T00:00:00Z",
+  "venue": "binance_usdm",
+  "symbol": "BTCUSDT",
+  "gate": "directional_quote_imbalance_post_k1_through_k2_strictly_positive",
+  "policy": {"management_minutes": 5, "exit_mode": "colour", "confirmations": 1, "max_hours": 72, "cost_fraction": 0.002},
+  "seed": 20260906,
+  "draws": 9999,
+  "builder_paths": ["yoyo/data/k1k2_owner_source.py", "yoyo/data/k1k2_genuine_flow_alignment.py", "yoyo/data/hourly_impulse.py", "yoyo/evaluation/hourly_impulse_k2_matching.py", "yoyo/layers/l3_backtest/hourly_impulse.py", "yoyo/evaluation/owner_k1k2_genuine_flow.py"],
+  "training_eligible": false,
+  "production_eligible": false,
+  "holdout_evaluated": false,
+  "source_audit_incidental_out_of_scope_row": "Old owner anchor2026-09-03; not used in configuration,features or outcomes; see PROJECT_PLAN.md"
+}
