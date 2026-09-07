@@ -1,0 +1,188 @@
+{
+  "experiment_id": "exp-xauusd-system-search-20260908-v1",
+  "registered_at": "2026-09-08",
+  "instrument": "XAUUSD",
+  "source": "HistData Generic ASCII M1 BID",
+  "data_start": "2012-01-01T05:00:00Z",
+  "data_end_exclusive": "2026-09-01T00:00:00Z",
+  "development": [
+    "2020-01-01",
+    "2024-01-01"
+  ],
+  "selection": [
+    "2024-01-01",
+    "2026-01-01"
+  ],
+  "confirmation": [
+    "2026-01-01",
+    "2026-09-01"
+  ],
+  "timeframes": [
+    5,
+    15,
+    30,
+    60,
+    120,
+    240,
+    360,
+    720,
+    1440
+  ],
+  "higher_timeframes": {
+    "5": 60,
+    "15": 60,
+    "30": 120,
+    "60": 240,
+    "120": 360,
+    "240": 1440,
+    "360": 1440,
+    "720": 1440,
+    "1440": 10080
+  },
+  "candidates": {
+    "C00": {
+      "name": "原始金死叉",
+      "parent": null,
+      "exit": "cross"
+    },
+    "C01": {
+      "name": "离零即入场",
+      "parent": "C00",
+      "exit": "neutral"
+    },
+    "C02": {
+      "name": "现有密集启动",
+      "parent": "C01",
+      "exit": "neutral"
+    },
+    "C03": {
+      "name": "现有密集共振",
+      "parent": "C02",
+      "exit": "neutral"
+    },
+    "F00": {
+      "name": "精确零轴12根",
+      "parent": "C01",
+      "exit": "neutral"
+    },
+    "F01": {
+      "name": "零轴12根·反向才退",
+      "parent": "F00",
+      "exit": "opposite"
+    },
+    "F02": {
+      "name": "长零轴＋密集",
+      "parent": "F01",
+      "exit": "opposite"
+    },
+    "F03": {
+      "name": "长零轴＋密集＋高周期许可",
+      "parent": "F02",
+      "exit": "opposite"
+    },
+    "F04": {
+      "name": "长零轴＋严格高周期同向",
+      "parent": "F03",
+      "exit": "opposite"
+    },
+    "F05": {
+      "name": "长零轴共振·EMA60退出",
+      "parent": "F03",
+      "exit": "ema60"
+    },
+    "N00": {
+      "name": "近零12根释放",
+      "parent": null,
+      "exit": "opposite"
+    },
+    "N01": {
+      "name": "近零释放＋密集",
+      "parent": "N00",
+      "exit": "opposite"
+    },
+    "N02": {
+      "name": "近零释放＋密集＋高周期许可",
+      "parent": "N01",
+      "exit": "opposite"
+    },
+    "N03": {
+      "name": "近零共振＋离开均线带",
+      "parent": "N02",
+      "exit": "opposite"
+    },
+    "N04": {
+      "name": "近零共振＋蓄势内同向影线回踩",
+      "parent": "N03",
+      "exit": "opposite"
+    },
+    "W00": {
+      "name": "蓄势内影线提前入场",
+      "parent": "N02",
+      "exit": "opposite"
+    },
+    "T00": {
+      "name": "EMA20/60趋势交叉",
+      "parent": null,
+      "exit": "ema_cross"
+    },
+    "T01": {
+      "name": "Donchian20突破/10退出",
+      "parent": null,
+      "exit": "channel10"
+    },
+    "T02": {
+      "name": "Donchian55突破/20退出",
+      "parent": "T01",
+      "exit": "channel20"
+    },
+    "T03": {
+      "name": "EMA120趋势＋SMA20影线回踩",
+      "parent": null,
+      "exit": "ema60"
+    },
+    "R00": {
+      "name": "RSI14均值回归30/70",
+      "parent": null,
+      "exit": "rsi50"
+    }
+  },
+  "ranking": [
+    "selection net account return descending",
+    "minute close maximum drawdown ascending",
+    "trade count ascending",
+    "candidate id ascending",
+    "timeframe ascending"
+  ],
+  "initial_equity": 1,
+  "notional": "current equity / (1 + cost_bp / 20000) at each entry; no rebalancing while held",
+  "cost_bp_round_trip": 20,
+  "cost_basis": "initial position notional, half charged at entry and half at exit",
+  "execution": "first real minute OPEN at or after closed decision bucket; one position, exit before entry; administrative end mark",
+  "drawdown": "same observed 1m CLOSE equity grid across all timeframes; not intraminute high/low",
+  "calendar": "fixed EST UTC-5 midnight; week starts Monday; no synthetic minutes",
+  "warmup_bars": 340,
+  "mtf": "most recent higher bucket closed by LOCAL BAR OPEN, with independent 340-bar warmup",
+  "controls": "3 non-reused entry controls per actual trade, same direction/month/causal 240-bar ATR-percentile quintile; same exits and costs",
+  "inference": "monthly paired-mean sign flips; month bootstrap; Holm across all 189 validation candidates",
+  "score": "abs(md)/ATR, fixed causal single-feature diagnostic; no fitting",
+  "final_comparators": [
+    "frozen overall active validation winner",
+    "frozen best IMACD-family validation candidate",
+    "C02 at 240m fixed original dense system",
+    "buy and hold",
+    "cash"
+  ],
+  "holdout_authorization": "Owner explicitly authorized all dates in conversation: 任何时间段数据都可以使用不要有任何限制",
+  "holdout_uses": "2026 yields first economic confirmation for frozen winner and fixed C02/240; earlier 2026 chart QA was exposed, not a pristine blind sample",
+  "limits": [
+    "BID archive not tied to a verified execution broker",
+    "20bp is a common research cost scenario, not measured historical spread",
+    "overnight financing unavailable and excluded",
+    "no universal optimum or production acceptance",
+    "daily/multi-hour research buckets need not match OANDA/TradingView sessions"
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "passive_ranking": "Buy and hold and cash are ranked against the best active strategy; separately nominate best active and best IMACD-family policies before confirmation.",
+  "development_usage": "Pre-2024 data supplies fixed indicator warmup; nominated active winner alone gets a retrospective 2020-2023 replay, not used for selection."
+}

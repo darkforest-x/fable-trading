@@ -6704,3 +6704,17 @@ experiments:
       Owner answers preserved; no fabricated submission. Cleanlab eligible OOS coverage0/2513, not run. Human confirmation
       is next.
     canonical_report: analysis/html/p1_yolo_owner_box_curation_20260907.html
+
+  - experiment_id: exp-xauusd-system-search-20260908-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 492be93f91ff35a7863b1e8607a926e066fdca14
+    status: active
+    question: Which frozen XAUUSD rule and timeframe has highest chronological validation net equity return and survives later confirmation?
+    single_variable: Preregistered parent comparisons of zero dwell, exit persistence, MA density and closed higher-timeframe gates; fixed external system benchmarks.
+    result: Preregistered before economic evaluation; 21 rules by 9 timeframes, 20bp unchanged.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: Owner authorized all dates. 2024-2025 selects; frozen winner and fixed references alone enter 2026 economic confirmation. Raw quotes memory-only.
