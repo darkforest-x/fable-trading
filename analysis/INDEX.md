@@ -8,6 +8,10 @@
 
 ## 按日期倒序
 
+本轮增量入口（2026-09-07）：[VWMA Entry Persistence](html/p1_btcusdtp_hourly_vwma_fixed_clock_v28_20260907.html) · [源报告](p1_btcusdtp_hourly_vwma_fixed_clock_v28_20260907.md)。288入口主4h成本门−23.07bp，283配对超额−2.88bp，四半年皆负，V28拒绝；固定时钟不是执行PnL。
+
+本轮增量入口（2026-09-07）：[VWMA Background Support](html/p1_btcusdtp_hourly_vwma_background_v27_20260907.html) · [源报告](p1_btcusdtp_hourly_vwma_background_v27_20260907.md)。284/288完整三控支持通过，独立容量审计通过；V27不含经济结果。
+
 本轮增量入口（2026-09-06，保留上方生成快照及其他会话改动）：[Hourly Trend Exit Confirmation](html/p1_btcusdtp_hourly_failed_confirm_v18_20260906.html) · [源报告](p1_btcusdtp_hourly_failed_confirm_v18_20260906.md)。两根确认救回4笔但全251均净−16.77bp、四半年皆负，拒绝升级。
 
 | 日期 | 报告 | 标题 | 结论(原文摘录) |

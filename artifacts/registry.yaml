@@ -19,6 +19,186 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: btcusdtp-hourly-vwma-background-v27-results
+    artifact_type: report
+    role: background_support
+    source_repo: darkforest-x/fable-trading
+    source_commit: "36a315e"
+    source_path: experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results/summary.json
+    sha256: "ef5d56790c7cf1f564a1843fc4b42fb3a0072213de71fde723ac1757c45bb9bc"
+    size_bytes: 249099
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Support284/288;capacity only,no outcomes."
+
+  - artifact_id: btcusdtp-hourly-vwma-background-v27-audit
+    artifact_type: report
+    role: independent_support_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "ebbdb21"
+    source_path: experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/audit.json
+    sha256: "573e8dd09b475aba61cb9c3d4ff7c6835eca516fd225733424fff7cfdf4399b6"
+    size_bytes: 4347
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/audit.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Independent18222hours/15493edges/179components verified;not random sampling."
+
+  - artifact_id: btcusdtp-hourly-vwma-background-v27-report
+    artifact_type: report
+    role: background_support_diagnosis
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2c39bac"
+    source_path: analysis/p1_btcusdtp_hourly_vwma_background_v27_20260907.md
+    sha256: "58ed79856e0492d2b68a8446c3f46677eef6856e1e4a0f3ded6390320c882616"
+    size_bytes: 5796
+    storage_uri: "repo://analysis/p1_btcusdtp_hourly_vwma_background_v27_20260907.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Evidence/builder ancestor,not narrative creation commit;support only."
+
+  - artifact_id: btcusdtp-hourly-vwma-background-v27-html
+    artifact_type: report
+    role: portable_technical_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2c39bac"
+    source_path: analysis/html/p1_btcusdtp_hourly_vwma_background_v27_20260907.html
+    sha256: "0005ba61edf282c15334d0bac8a54cf7a2dd0ae4525c20703c812df82485a94e"
+    size_bytes: 418164
+    storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_vwma_background_v27_20260907.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Builder ancestor;official structural_only,browser/mobile unverified."
+
+  - artifact_id: btcusdtp-hourly-vwma-background-v27-artifact
+    artifact_type: report
+    role: canonical_report_manifest
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2c39bac"
+    source_path: experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/artifact.json
+    sha256: "7d2b32bf567272776c3b75b47d263e0f906412881e320192ffb0585409d26516"
+    size_bytes: 15030
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/artifact.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Builder ancestor;support only,not profitability."
+
+  - artifact_id: btcusdtp-hourly-vwma-clock-v28-results
+    artifact_type: report
+    role: fixed_clock_outcomes
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2c39bac"
+    source_path: experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/results/summary.json
+    sha256: "65342ee62b5b67c8044f999a6330ca800e12efd810bd387a08edf345de35288f"
+    size_bytes: 14406
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "All288 retained;4h mean cost-threshold-23.0715bp;not executablePnL."
+
+  - artifact_id: btcusdtp-hourly-vwma-clock-v28-statistics
+    artifact_type: report
+    role: monthly_block_inference
+    source_repo: darkforest-x/fable-trading
+    source_commit: "2c39bac"
+    source_path: experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/results/statistics.json
+    sha256: "e6b26ae82f1afb8a5f5758c05b1064c4b7bc334999eb4827fe66a12e84a9da39"
+    size_bytes: 58759
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/results/statistics.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Primary4h283paired excess-2.8794bp;economic continuation rejected."
+
+  - artifact_id: btcusdtp-hourly-vwma-clock-v28-audit
+    artifact_type: report
+    role: independent_saved_economic_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f308a82"
+    source_path: experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/audit_complete.json
+    sha256: "07ad9da3f7c5460b8a6be48dc2a78ce4b68a61484a87315300926f9d996f6753"
+    size_bytes: 775
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/audit_complete.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "4560labels/1152pairs/852controls,endpointquotes and inference/decision linkage verified."
+
+  - artifact_id: btcusdtp-hourly-vwma-clock-v28-source-audit
+    artifact_type: report
+    role: post_run_source_consistency
+    source_repo: darkforest-x/fable-trading
+    source_commit: "364f60c"
+    source_path: experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/source_prefix_audit.json
+    sha256: "4a342914fda3f4668d528571d6e69b2d5c4710a432efe5527bad616804a40862"
+    size_bytes: 793
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/source_prefix_audit.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "219551pre2025OPEN compared with bracketed hashes;not original atomic-snapshot proof."
+
+  - artifact_id: btcusdtp-hourly-vwma-clock-v28-report
+    artifact_type: report
+    role: entry_persistence_diagnosis
+    source_repo: darkforest-x/fable-trading
+    source_commit: "eec958a"
+    source_path: analysis/p1_btcusdtp_hourly_vwma_fixed_clock_v28_20260907.md
+    sha256: "7d845a8949bb59711e99274d5d884ef54df3d3f5f412b72f287ed644897d9760"
+    size_bytes: 10198
+    storage_uri: "repo://analysis/p1_btcusdtp_hourly_vwma_fixed_clock_v28_20260907.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Evidence/builder ancestor,not narrative creation commit;reused development,not OOS."
+
+  - artifact_id: btcusdtp-hourly-vwma-clock-v28-html
+    artifact_type: report
+    role: portable_technical_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "eec958a"
+    source_path: analysis/html/p1_btcusdtp_hourly_vwma_fixed_clock_v28_20260907.html
+    sha256: "295da12b7b77c162271d5170970f2a8b5415f6d266886f4a8ef7819ee9026ab1"
+    size_bytes: 482627
+    storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_vwma_fixed_clock_v28_20260907.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Builder ancestor;official structural_only,browser/mobile unverified."
+
+  - artifact_id: btcusdtp-hourly-vwma-clock-v28-artifact
+    artifact_type: report
+    role: canonical_report_manifest
+    source_repo: darkforest-x/fable-trading
+    source_commit: "eec958a"
+    source_path: experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/artifact.json
+    sha256: "8d3057b2cc3e0ce597b8a442b9fb048fe803216cecaadedb5dac6f6787562504"
+    size_bytes: 31876
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/artifact.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Builder ancestor;requires complete independent audit,not profitability."
+
   - artifact_id: btcusdtp-hourly-vwma-v26-results
     artifact_type: report
     role: entry_reference_support

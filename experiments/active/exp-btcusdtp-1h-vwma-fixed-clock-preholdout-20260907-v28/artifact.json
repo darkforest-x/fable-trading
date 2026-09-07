@@ -1,0 +1,684 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "VWMA Entry Persistence",
+    "generatedAt": "2026-09-07T03:05:53.537909+00:00",
+    "filters": [],
+    "cards": [],
+    "charts": [
+      {
+        "id": "monthly",
+        "type": "bar",
+        "title": "每月4h成本门结果",
+        "description": "2023–2024 · 单位bp；全部已知入口，OPEN变化减20bp，不是实际PnL",
+        "showDescription": true,
+        "dataset": "monthly",
+        "sourceId": "monthly",
+        "palette": {
+          "kind": "sequential",
+          "name": "blue"
+        },
+        "labels": {
+          "values": "all"
+        },
+        "settings": {
+          "sort": "none"
+        },
+        "encodings": {
+          "x": {
+            "field": "month",
+            "type": "nominal",
+            "label": "UTC月份"
+          },
+          "y": {
+            "field": "cost_threshold_bp",
+            "type": "quantitative",
+            "label": "平均成本门 (bp)"
+          },
+          "tooltip": [
+            {
+              "field": "mothers",
+              "type": "quantitative",
+              "label": "mothers"
+            },
+            {
+              "field": "known",
+              "type": "quantitative",
+              "label": "known"
+            },
+            {
+              "field": "gross_bp",
+              "type": "quantitative",
+              "label": "gross_bp"
+            },
+            {
+              "field": "paired",
+              "type": "quantitative",
+              "label": "paired"
+            },
+            {
+              "field": "background_bp",
+              "type": "quantitative",
+              "label": "background_bp"
+            },
+            {
+              "field": "excess_bp",
+              "type": "quantitative",
+              "label": "excess_bp"
+            }
+          ]
+        }
+      },
+      {
+        "id": "distribution",
+        "type": "bar",
+        "title": "4h成本门分布",
+        "description": "每档50bp；保留全部已知入口与两侧尾部，不模拟止损",
+        "showDescription": true,
+        "dataset": "distribution",
+        "sourceId": "distribution",
+        "palette": {
+          "kind": "sequential",
+          "name": "blue"
+        },
+        "labels": {
+          "values": "all"
+        },
+        "settings": {
+          "sort": "none"
+        },
+        "encodings": {
+          "x": {
+            "field": "bin",
+            "type": "nominal",
+            "label": "成本门区间 (bp)"
+          },
+          "y": {
+            "field": "events",
+            "type": "quantitative",
+            "label": "入口数"
+          },
+          "tooltip": [
+            {
+              "field": "lower_bp",
+              "type": "quantitative",
+              "label": "lower_bp"
+            },
+            {
+              "field": "upper_bp",
+              "type": "quantitative",
+              "label": "upper_bp"
+            }
+          ]
+        }
+      }
+    ],
+    "tables": [],
+    "blocks": [
+      {
+        "id": "section_0",
+        "type": "markdown",
+        "layout": "full",
+        "body": "# VWMA Entry Persistence"
+      },
+      {
+        "id": "section_1",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 技术摘要：换成VWMA没有解决入口优势不足\n\n本轮已经完成实际价格检验，不再只是统计信号数量。288个VWMA40入口的主检验\n固定持有4小时：平均毛方向变化−3.07bp，减20bp成本后−23.07bp，95%月块区间\n[−34.02,−12.23]bp。283个有效配对组的平均背景超额−2.88bp，区间[−13.90,+8.81]bp。\n预先冻结的继续门未通过，四个半年自身成本门均值全负；这版不能称为盈利优化。\n\n其中169个入口4小时后毛方向已经错误，18个小毛利被成本翻负，101个超过成本门。\n这首先暴露了入口的方向延续问题，不能仅靠“再放大TP”来解释本轮失败。\n但固定时钟不是止损约束模拟，不能据此证明任何动态退出都无效。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_2",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 范围与指标：价格方向检验，不是账户净收益\n\nBTCUSDT永续、OKX保存数据、1h信号，开发期2023–2024，决策时间覆盖\n2023年1月1日02:00至2024年12月27日12:00 UTC。所有288母单保留；V27的284个\n完整三控支持产生852个不复用随机控制。4h标签有1个控制窗口缺原生5m行，\n故有效配对283组，另4母缺匹配支持。没有根据收益补抽或删除原母。\n\n1bp=0.01%。毛方向变化=方向×(未来指定OPEN/入场OPEN−1)，成本门=毛变化−0.002。\n配对超额=母成本门−该母三控成本门平均值；两边相同成本抵消。\n它没有执行K1止损、分批TP、移动止损、资金费、滑点、单仓冲突或仓位计算，\n不是可实现净收益、胜率、PF或账户回撤。图表也不是收益曲线。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_3",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 与旧SMA对照：更多入口没有变成更好表现\n\n| 4h指标 | V24旧SMA40 | V28新VWMA40 |\n|---|---:|---:|\n| 全部原母 / 已知自身标签 |251 / 251|288 / 288|\n| 随机控制 / 有效配对 |744 / 248|852 / 283|\n| 全母平均毛变化 bp |+1.01|−3.07|\n| 全母平均成本门 bp |−18.99|−23.07|\n| 全母95%月块区间 bp |[−30.70,−7.11]|[−34.02,−12.23]|\n| 全母单侧p：大于零 |0.9984|0.9999|\n| 有效配对母成本门 bp |−18.91|−21.72|\n| 对应三控平均成本门 bp |−23.65|−18.84|\n| 有效配对超额 bp |+4.74|−2.88|\n| 超额95%月块区间 bp |[−12.36,+23.89]|[−13.90,+8.81]|\n| 超额单侧p：大于零 |0.3140|0.6868|\n\n两次入口集合和控制样本不同，因此不能把均值相减当作逐笔改进或因果MA效应。\n能支持的结论是：两种已测参考均未证明覆盖成本，新参考也未证明优于背景。\n单侧p是为“正优势”计算的，不是亏损概率；不把p不显著解释为严格等效。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_4",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 四个半年：不是单段亏损拖累全部结果\n\n| UTC半年 | 原母 / 有效配对 | 全母成本门 bp | 配对母成本门 bp | 对应背景 bp | 配对超额 bp |\n|---|---:|---:|---:|---:|---:|\n|2023上半年|68 / 63|−29.50|−23.95|−21.83|−2.12|\n|2023下半年|74 / 74|−21.99|−21.99|−15.57|−6.42|\n|2024上半年|66 / 66|−5.14|−5.14|−18.00|+12.86|\n|2024下半年|80 / 80|−33.40|−33.40|−20.21|−13.19|\n\n2024上半年相对背景较好，但自身仍未覆盖成本；不能挑这一段宣布策略有效。\n2023上半年全母与有效配对子集分母不同，必须分别列出，不能直接用全母减背景。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_5",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 月份表现：局部好月份不足以支撑整体趋势优势\n\n下图展示全部24个UTC自然月的4h平均成本门，按时间顺序、保留正负值。\n7个月为正、17个月为负；月均按各月自身入口计算，整体结果另按事件数加权，\n不是把24个月均值简单平均。悬停保留每月分母、毛变化、有效配对及背景超额。\n这用于看跨时间稳定性，不允许事后只交易这7个好月份。",
+        "sourceId": "report"
+      },
+      {
+        "id": "monthly_chart",
+        "type": "chart",
+        "layout": "full",
+        "chartId": "monthly"
+      },
+      {
+        "id": "section_6",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 失败拆分：方向错误多于手续费翻负\n\n| 全288个4h自身标签 | 数量 | 占全母 |\n|---|---:|---:|\n| 毛方向错误：毛变化<0 |169|58.68%|\n| 毛正但不足20bp：成本门≤0 |18|6.25%|\n| 超过20bp成本门 |101|35.07%|\n| 精确零毛变化 |0|0%|\n\n187个未覆盖成本的标签里169个毛方向就错了，不能把失败主要归于手续费。\n成本门为正的101个平均+79.98bp，负的187个平均−78.73bp，正负幅度接近而负例更多。\n这些是4h标签正负比例，不是实际执行胜率；没有止损轨迹就不能断言哪些是“扫损后反弹”。\n这次不对新增115/删除78样本事后挑收益子组，也没有据此优化参数。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_7",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 分布与统计：尾部全部保留，结果不是删异常值凑出来的\n\n下图以50bp分箱展示全288个4h成本门，保留两端及中间空档。\n中位数−30.90bp，标准差105.94bp，四分位区间[−75.26,+24.76]bp，\n范围[−435.88,+341.03]bp。24个自身IQR尾部样本和21个超额尾部样本都未删除。\n\nShapiro诊断：自身W=0.95452、p=8.22×10⁻⁸；配对超额W=0.97107、p=1.77×10⁻⁵。\n这只是分布诊断，不证明交易独立，也不改变预先选定的月块推断。\n超额标准差125.56bp、中位数−5.83bp；其区间跨零，未证实正背景优势。",
+        "sourceId": "report"
+      },
+      {
+        "id": "distribution_chart",
+        "type": "chart",
+        "layout": "full",
+        "chartId": "distribution"
+      },
+      {
+        "id": "section_8",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 其他时钟：均未覆盖自身成本，不改选最好窗口\n\n| 持有时钟 | 角色 | 全母毛 bp | 全母成本门 bp | 有效组 | 配对母成本门 bp | 对应背景 bp | 超额 bp |\n|---|---|---:|---:|---:|---:|---:|---:|\n|1h|描述|−2.72|−22.72|284|−22.27|−22.04|−0.22|\n|4h|主检验|−3.07|−23.07|283|−21.72|−18.84|−2.88|\n|12h|描述|+2.30|−17.70|283|−16.72|−24.29|+7.58|\n|24h|描述|−3.36|−23.36|283|−22.32|−23.37|+1.05|\n\n12h背景超额较高但自身仍负，且本来只是描述；不能升级为新主窗口。\n四个时钟是同一批母单的重复观察，不能把1152行当成1152个独立入口。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_9",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 未知案例：控制缺一根，配对整组保持未知\n\n一个随机控制的入场为2023年6月22日19:00 UTC，其4h窗口缺少原生5m行，\n只有48/49根；12h为144/145，24h为288/289。端点价格都存在也不能跳过内部断点。\n所属母为6月10日19:00 UTC的空头请求，其自身标签保持已知，只有配对超额未知。\n4h总未知配对为此1组加上V27的4组缺支持，没有重新抽一个“完整”控制代替。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_10",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 方法与冻结：规则、随机组、诊断都早于各自后续步骤\n\n入口沿用已冻结大实体或吞没贯穿规则：大实体占比至少0.65且范围至少1ATR，\n或吞没且范围至少0.65ATR；收盘位置至少0.7。唯一参考变化是SMA40/HL2→VWMA40/HL2。\n本轮不改入口阈值、成本、止损或小周期管理。\n\n先用同币×UTC月×UTC6h×因果ATR桶资格图，再用固定PCG64(20260907)一次置换抽取三控，\n保存RNG与抽样结果后才读取OPEN；不复用控制、不换seed。抽样随机不是随机治疗分配。\n主统计用24个月整块重采样9999次，事件sum/count权重，95%百分位区间；\n月总和单侧符号翻转9999次、带+1修正。两个主序列共享固定数组。\n固定种子的底层生成器契约见[NumPy官方说明](https://numpy.org/doc/2.0/reference/random/bit_generators/pcg64.html)。\n\n继续要求两主序列各≥260已知、均值正、区间下界正、p<0.01，且四半年自身均值都正。\n本次样本覆盖门通过，经济门失败。该门不是检验力计算，没有声称80%统计功效。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_11",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 验证与风险：计算已复核，盈利目标未达成\n\n经济源码2c39bac先于价格标签运行，数值环境Python3.9.6/NumPy2.0.2/pandas2.3.3/SciPy1.13.1。\n独立保存证据审计重建4560个case/control标签、1152个配对、852个随机控制和月统计。\n补审另核逐笔端点报价、摘要裁决、诊断哈希及其早于推断的顺序；初版和补版审计均保留。\n\n同行复核发现原读取器只在读OPEN前核archive哈希，因此额外逐值核对219,551个\npre2025 OPEN与当前固定SHA原档，并在该次核对前后再核哈希，结果一致。\n这是事后源一致性证据，不能倒称原run已证明原子快照；没有重选样本或改经济结果。\n\n这里只验证2023–2024已多轮复用开发数据。月间弱依赖与符号可交换是假设，不是保证；\n跨所有历史试验未做选择校正，不能声称独立样本外结论或因果MA优势。\nAUC、top-decile排序收益、排序置换p不适用：没有训练排名模型；旧SMA为单参考基线。\n实际执行胜率、PF、回撤也不适用，不能把固定时钟标签伪装成策略回测。\nholdout消耗0，未读2025+价格，未改TradingView或实盘。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_12",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 下一步：先定义可验证的趋势状态，再考虑退出\n\n这次替换未解决问题，停止将VWMA40当作改善版推进，也不继续在同群上试TP倍数。\n下一轮若继续，应先检查入场前可知的“趋势建立/波动扩张”状态能否减少错误方向，\n一次只验一个明确条件，先冻结定义、保留原母和随机对照，再做时间分段验证。\n不能从这次盈利101个倒推一个“必胜”过滤器，也不能只挑好月份。\n\n尚未解决：哪些因果趋势条件值得测、会损失多少真实趋势入口、是否能在新时段复现。\n当前没有可报告的稳定盈利策略，没有生产发布资格。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_13",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 复现命令\n\n原结果不可覆盖。重新完整构建需在保留原证据的复现副本使用2c39bac源与固定输入；\n当前补审源码/测试更新不回写为原builder。已保存结果可直接执行独立核验到新的输出名。\n\n```bash\n.venv/bin/python -m pytest -q tests/test_hourly_impulse_vwma_clock.py tests/test_hourly_impulse_fixed_clock.py tests/test_hourly_impulse_fixed_clock_research.py tests/test_hourly_impulse_fixed_clock_statistics.py tests/test_hourly_impulse_fixed_clock_analysis.py\npython3 -m yoyo.evaluation.hourly_impulse_vwma_clock_research\npython3 experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/audit_saved.py --out /tmp/v28-independent-audit-new.json\npython3 experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/audit_source_prefix.py\npython3 scripts/md_to_html.py analysis/p1_btcusdtp_hourly_vwma_fixed_clock_v28_20260907.md --out-dir analysis/html\npython3 scripts/build_hourly_impulse_vwma_reports.py --version 28\n```",
+        "sourceId": "report"
+      }
+    ],
+    "sources": [
+      {
+        "id": "report",
+        "label": "V28 · 完整定义、结果与风险",
+        "path": "analysis/p1_btcusdtp_hourly_vwma_fixed_clock_v28_20260907.md"
+      },
+      {
+        "id": "monthly",
+        "label": "V28 · 保存证据实际SQLite查询 · monthly",
+        "path": "experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/results",
+        "query": {
+          "sql": "WITH c AS (SELECT mother_month AS month,COUNT(*) AS mothers,\nCOUNT(cost_threshold_markout) AS known,AVG(gross_markout)*10000 AS gross_bp,\nAVG(cost_threshold_markout)*10000 AS cost_threshold_bp\nFROM cases WHERE horizon_hours=4 GROUP BY mother_month),\np AS (SELECT mother_month AS month,COUNT(cost_threshold_excess_markout) AS paired,\nAVG(control_mean_cost_threshold_markout)*10000 AS background_bp,\nAVG(cost_threshold_excess_markout)*10000 AS excess_bp\nFROM pairs WHERE horizon_hours=4 GROUP BY mother_month)\nSELECT * FROM c JOIN p USING(month) ORDER BY month",
+          "engine": "sqlite",
+          "language": "sql",
+          "executed_at": "2026-09-07T03:05:53.537909+00:00",
+          "tables_used": [
+            "cases",
+            "pairs"
+          ],
+          "description": "按原始母单时间聚合；保留未知分母和全部尾部，不用于调参",
+          "filters": [
+            "2023/24 development,288 original VWMA mothers"
+          ],
+          "metric_definitions": {
+            "case_labels": "experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/results/case_labels.csv.gz",
+            "paired_labels": "experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/results/paired_labels.csv.gz"
+          }
+        }
+      },
+      {
+        "id": "distribution",
+        "label": "V28 · 保存证据实际SQLite查询 · distribution",
+        "path": "experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/results",
+        "query": {
+          "sql": "WITH RECURSIVE binned AS (\nSELECT FLOOR(cost_threshold_markout*10000/50)*50 AS lower_bp FROM cases\nWHERE horizon_hours=4 AND status='known'),\nbins(lower_bp) AS (SELECT MIN(lower_bp) FROM binned UNION ALL\nSELECT lower_bp+50 FROM bins WHERE lower_bp<(SELECT MAX(lower_bp) FROM binned)),\ncounts AS (SELECT lower_bp,COUNT(*) AS events FROM binned GROUP BY lower_bp)\nSELECT CAST(bins.lower_bp AS INTEGER)||' to <'||CAST(bins.lower_bp+50 AS INTEGER) AS bin,\nbins.lower_bp,bins.lower_bp+50 AS upper_bp,COALESCE(counts.events,0) AS events\nFROM bins LEFT JOIN counts USING(lower_bp) ORDER BY bins.lower_bp",
+          "engine": "sqlite",
+          "language": "sql",
+          "executed_at": "2026-09-07T03:05:53.537909+00:00",
+          "tables_used": [
+            "cases",
+            "pairs"
+          ],
+          "description": "按原始母单时间聚合；保留未知分母和全部尾部，不用于调参",
+          "filters": [
+            "2023/24 development,288 original VWMA mothers"
+          ],
+          "metric_definitions": {
+            "case_labels": "experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/results/case_labels.csv.gz",
+            "paired_labels": "experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/results/paired_labels.csv.gz"
+          }
+        }
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-09-07T03:05:53.537909+00:00",
+    "status": "ready",
+    "datasets": {
+      "monthly": [
+        {
+          "month": "2023-01",
+          "mothers": 13,
+          "known": 13,
+          "gross_bp": 11.14471818189846,
+          "cost_threshold_bp": -8.855281818101538,
+          "paired": 13,
+          "background_bp": -20.112898993621386,
+          "excess_bp": 11.257617175520155
+        },
+        {
+          "month": "2023-02",
+          "mothers": 13,
+          "known": 13,
+          "gross_bp": -18.698852227797307,
+          "cost_threshold_bp": -38.698852227797225,
+          "paired": 13,
+          "background_bp": -17.371021235425694,
+          "excess_bp": -21.32783099237146
+        },
+        {
+          "month": "2023-03",
+          "mothers": 8,
+          "known": 8,
+          "gross_bp": 13.531375811048997,
+          "cost_threshold_bp": -6.468624188950996,
+          "paired": 8,
+          "background_bp": -34.607481804288874,
+          "excess_bp": 28.138857615337503
+        },
+        {
+          "month": "2023-04",
+          "mothers": 14,
+          "known": 14,
+          "gross_bp": -33.03549565049559,
+          "cost_threshold_bp": -53.03549565049558,
+          "paired": 14,
+          "background_bp": -28.128975655156573,
+          "excess_bp": -24.906519995338645
+        },
+        {
+          "month": "2023-05",
+          "mothers": 9,
+          "known": 9,
+          "gross_bp": 25.712365320288725,
+          "cost_threshold_bp": 5.712365320288778,
+          "paired": 9,
+          "background_bp": -9.327516380952332,
+          "excess_bp": 15.039881701241082
+        },
+        {
+          "month": "2023-06",
+          "mothers": 11,
+          "known": 11,
+          "gross_bp": -38.64214164267591,
+          "cost_threshold_bp": -58.64214164267591,
+          "paired": 6,
+          "background_bp": -22.26638322387767,
+          "excess_bp": -2.4028752475984985
+        },
+        {
+          "month": "2023-07",
+          "mothers": 12,
+          "known": 12,
+          "gross_bp": 2.660108255653168,
+          "cost_threshold_bp": -17.339891744346748,
+          "paired": 12,
+          "background_bp": 0.8352962892081662,
+          "excess_bp": -18.17518803355475
+        },
+        {
+          "month": "2023-08",
+          "mothers": 14,
+          "known": 14,
+          "gross_bp": -3.102300048025643,
+          "cost_threshold_bp": -23.102300048025498,
+          "paired": 14,
+          "background_bp": -22.653685289567502,
+          "excess_bp": -0.4486147584579998
+        },
+        {
+          "month": "2023-09",
+          "mothers": 12,
+          "known": 12,
+          "gross_bp": -12.441038125993582,
+          "cost_threshold_bp": -32.441038125993416,
+          "paired": 12,
+          "background_bp": -2.131336731749219,
+          "excess_bp": -30.309701394244126
+        },
+        {
+          "month": "2023-10",
+          "mothers": 12,
+          "known": 12,
+          "gross_bp": -30.431104030392927,
+          "cost_threshold_bp": -50.43110403039292,
+          "paired": 12,
+          "background_bp": -37.92527868913017,
+          "excess_bp": -12.5058253412625
+        },
+        {
+          "month": "2023-11",
+          "mothers": 11,
+          "known": 11,
+          "gross_bp": -1.0422729287648185,
+          "cost_threshold_bp": -21.04227292876482,
+          "paired": 11,
+          "background_bp": 1.9786714070635476,
+          "excess_bp": -23.020944335828183
+        },
+        {
+          "month": "2023-12",
+          "mothers": 13,
+          "known": 13,
+          "gross_bp": 30.008792051982688,
+          "cost_threshold_bp": 10.008792051982693,
+          "paired": 13,
+          "background_bp": -29.729075691088465,
+          "excess_bp": 39.737867743071384
+        },
+        {
+          "month": "2024-01",
+          "mothers": 8,
+          "known": 8,
+          "gross_bp": 67.867332417551,
+          "cost_threshold_bp": 47.86733241755112,
+          "paired": 8,
+          "background_bp": -1.6915584442594824,
+          "excess_bp": 49.55889086181112
+        },
+        {
+          "month": "2024-02",
+          "mothers": 10,
+          "known": 10,
+          "gross_bp": 3.830522244942899,
+          "cost_threshold_bp": -16.1694777550571,
+          "paired": 10,
+          "background_bp": -27.672699065976698,
+          "excess_bp": 11.503221310919626
+        },
+        {
+          "month": "2024-03",
+          "mothers": 12,
+          "known": 12,
+          "gross_bp": 29.211903472231587,
+          "cost_threshold_bp": 9.211903472231585,
+          "paired": 12,
+          "background_bp": -45.550960844197164,
+          "excess_bp": 54.76286431642933
+        },
+        {
+          "month": "2024-04",
+          "mothers": 11,
+          "known": 11,
+          "gross_bp": 27.43169168040809,
+          "cost_threshold_bp": 7.431691680408183,
+          "paired": 11,
+          "background_bp": 12.456560764570817,
+          "excess_bp": -5.024869084162545
+        },
+        {
+          "month": "2024-05",
+          "mothers": 15,
+          "known": 15,
+          "gross_bp": -9.756582588053869,
+          "cost_threshold_bp": -29.7565825880538,
+          "paired": 15,
+          "background_bp": -26.89302978235267,
+          "excess_bp": -2.8635528057013344
+        },
+        {
+          "month": "2024-06",
+          "mothers": 10,
+          "known": 10,
+          "gross_bp": -10.6214608148159,
+          "cost_threshold_bp": -30.621460814815897,
+          "paired": 10,
+          "background_bp": -8.466447457427398,
+          "excess_bp": -22.1550133573886
+        },
+        {
+          "month": "2024-07",
+          "mothers": 14,
+          "known": 14,
+          "gross_bp": 2.1531921693647864,
+          "cost_threshold_bp": -17.84680783063514,
+          "paired": 14,
+          "background_bp": -4.906810059003,
+          "excess_bp": -12.939997771632214
+        },
+        {
+          "month": "2024-08",
+          "mothers": 12,
+          "known": 12,
+          "gross_bp": -28.089323446987745,
+          "cost_threshold_bp": -48.0893234469875,
+          "paired": 12,
+          "background_bp": -10.072201102880252,
+          "excess_bp": -38.017122344107165
+        },
+        {
+          "month": "2024-09",
+          "mothers": 11,
+          "known": 11,
+          "gross_bp": 20.616934040182183,
+          "cost_threshold_bp": 0.6169340401822732,
+          "paired": 11,
+          "background_bp": -2.5130003632058195,
+          "excess_bp": 3.1299344033884093
+        },
+        {
+          "month": "2024-10",
+          "mothers": 13,
+          "known": 13,
+          "gross_bp": -45.47139821107674,
+          "cost_threshold_bp": -65.47139821107669,
+          "paired": 13,
+          "background_bp": -18.165531083653693,
+          "excess_bp": -47.30586712742261
+        },
+        {
+          "month": "2024-11",
+          "mothers": 17,
+          "known": 17,
+          "gross_bp": 21.08174694936535,
+          "cost_threshold_bp": 1.0817469493654113,
+          "paired": 17,
+          "background_bp": -37.31160941264264,
+          "excess_bp": 38.39335636200841
+        },
+        {
+          "month": "2024-12",
+          "mothers": 13,
+          "known": 13,
+          "gross_bp": -58.4035252620567,
+          "cost_threshold_bp": -78.4035252620566,
+          "paired": 13,
+          "background_bp": -40.697900094458305,
+          "excess_bp": -37.705625167598235
+        }
+      ],
+      "distribution": [
+        {
+          "bin": "-450 to <-400",
+          "lower_bp": -450,
+          "upper_bp": -400,
+          "events": 1
+        },
+        {
+          "bin": "-400 to <-350",
+          "lower_bp": -400,
+          "upper_bp": -350,
+          "events": 0
+        },
+        {
+          "bin": "-350 to <-300",
+          "lower_bp": -350,
+          "upper_bp": -300,
+          "events": 1
+        },
+        {
+          "bin": "-300 to <-250",
+          "lower_bp": -300,
+          "upper_bp": -250,
+          "events": 6
+        },
+        {
+          "bin": "-250 to <-200",
+          "lower_bp": -250,
+          "upper_bp": -200,
+          "events": 8
+        },
+        {
+          "bin": "-200 to <-150",
+          "lower_bp": -200,
+          "upper_bp": -150,
+          "events": 4
+        },
+        {
+          "bin": "-150 to <-100",
+          "lower_bp": -150,
+          "upper_bp": -100,
+          "events": 25
+        },
+        {
+          "bin": "-100 to <-50",
+          "lower_bp": -100,
+          "upper_bp": -50,
+          "events": 64
+        },
+        {
+          "bin": "-50 to <0",
+          "lower_bp": -50,
+          "upper_bp": 0,
+          "events": 78
+        },
+        {
+          "bin": "0 to <50",
+          "lower_bp": 0,
+          "upper_bp": 50,
+          "events": 50
+        },
+        {
+          "bin": "50 to <100",
+          "lower_bp": 50,
+          "upper_bp": 100,
+          "events": 22
+        },
+        {
+          "bin": "100 to <150",
+          "lower_bp": 100,
+          "upper_bp": 150,
+          "events": 12
+        },
+        {
+          "bin": "150 to <200",
+          "lower_bp": 150,
+          "upper_bp": 200,
+          "events": 8
+        },
+        {
+          "bin": "200 to <250",
+          "lower_bp": 200,
+          "upper_bp": 250,
+          "events": 4
+        },
+        {
+          "bin": "250 to <300",
+          "lower_bp": 250,
+          "upper_bp": 300,
+          "events": 1
+        },
+        {
+          "bin": "300 to <350",
+          "lower_bp": 300,
+          "upper_bp": 350,
+          "events": 4
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "report",
+      "label": "V28 · 完整定义、结果与风险",
+      "path": "analysis/p1_btcusdtp_hourly_vwma_fixed_clock_v28_20260907.md"
+    },
+    {
+      "id": "monthly",
+      "label": "V28 · 保存证据实际SQLite查询 · monthly",
+      "path": "experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/results",
+      "query": {
+        "sql": "WITH c AS (SELECT mother_month AS month,COUNT(*) AS mothers,\nCOUNT(cost_threshold_markout) AS known,AVG(gross_markout)*10000 AS gross_bp,\nAVG(cost_threshold_markout)*10000 AS cost_threshold_bp\nFROM cases WHERE horizon_hours=4 GROUP BY mother_month),\np AS (SELECT mother_month AS month,COUNT(cost_threshold_excess_markout) AS paired,\nAVG(control_mean_cost_threshold_markout)*10000 AS background_bp,\nAVG(cost_threshold_excess_markout)*10000 AS excess_bp\nFROM pairs WHERE horizon_hours=4 GROUP BY mother_month)\nSELECT * FROM c JOIN p USING(month) ORDER BY month",
+        "engine": "sqlite",
+        "language": "sql",
+        "executed_at": "2026-09-07T03:05:53.537909+00:00",
+        "tables_used": [
+          "cases",
+          "pairs"
+        ],
+        "description": "按原始母单时间聚合；保留未知分母和全部尾部，不用于调参",
+        "filters": [
+          "2023/24 development,288 original VWMA mothers"
+        ],
+        "metric_definitions": {
+          "case_labels": "experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/results/case_labels.csv.gz",
+          "paired_labels": "experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/results/paired_labels.csv.gz"
+        }
+      }
+    },
+    {
+      "id": "distribution",
+      "label": "V28 · 保存证据实际SQLite查询 · distribution",
+      "path": "experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/results",
+      "query": {
+        "sql": "WITH RECURSIVE binned AS (\nSELECT FLOOR(cost_threshold_markout*10000/50)*50 AS lower_bp FROM cases\nWHERE horizon_hours=4 AND status='known'),\nbins(lower_bp) AS (SELECT MIN(lower_bp) FROM binned UNION ALL\nSELECT lower_bp+50 FROM bins WHERE lower_bp<(SELECT MAX(lower_bp) FROM binned)),\ncounts AS (SELECT lower_bp,COUNT(*) AS events FROM binned GROUP BY lower_bp)\nSELECT CAST(bins.lower_bp AS INTEGER)||' to <'||CAST(bins.lower_bp+50 AS INTEGER) AS bin,\nbins.lower_bp,bins.lower_bp+50 AS upper_bp,COALESCE(counts.events,0) AS events\nFROM bins LEFT JOIN counts USING(lower_bp) ORDER BY bins.lower_bp",
+        "engine": "sqlite",
+        "language": "sql",
+        "executed_at": "2026-09-07T03:05:53.537909+00:00",
+        "tables_used": [
+          "cases",
+          "pairs"
+        ],
+        "description": "按原始母单时间聚合；保留未知分母和全部尾部，不用于调参",
+        "filters": [
+          "2023/24 development,288 original VWMA mothers"
+        ],
+        "metric_definitions": {
+          "case_labels": "experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/results/case_labels.csv.gz",
+          "paired_labels": "experiments/active/exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28/results/paired_labels.csv.gz"
+        }
+      }
+    }
+  ]
+}

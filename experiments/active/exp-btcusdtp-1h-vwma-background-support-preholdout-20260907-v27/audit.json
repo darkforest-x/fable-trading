@@ -1,0 +1,138 @@
+{
+  "status": "passed",
+  "at": "2026-09-07T02:57:49.456018+00:00",
+  "reference": {
+    "source_rows": 18222,
+    "old_right_tail_rows_excluded": 73,
+    "full_SMA_and_VWMA_features_recomputed": true,
+    "inherited_SMA5_source_parity": true,
+    "causal_ATR_buckets_recomputed": true,
+    "actual_mother_exclusion_recomputed": true
+  },
+  "mothers": 288,
+  "complete_mothers": 284,
+  "controls": 852,
+  "edges": 15493,
+  "unique_candidate_times": 9282,
+  "independent_component_count": 179,
+  "independent_capacity_upper_bound": 284,
+  "all_component_bounds_attained": true,
+  "folds": [
+    {
+      "fold": "2023H1",
+      "mothers": 68,
+      "matched_mothers": 64,
+      "controls": 192,
+      "coverage": 0.9411764705882353
+    },
+    {
+      "fold": "2023H2",
+      "mothers": 74,
+      "matched_mothers": 74,
+      "controls": 222,
+      "coverage": 1.0
+    },
+    {
+      "fold": "2024H1",
+      "mothers": 66,
+      "matched_mothers": 66,
+      "controls": 198,
+      "coverage": 1.0
+    },
+    {
+      "fold": "2024H2",
+      "mothers": 80,
+      "matched_mothers": 80,
+      "controls": 240,
+      "coverage": 1.0
+    }
+  ],
+  "status_counts": {
+    "matched": 284,
+    "missing_causal_matching_support": 4
+  },
+  "unmatched": [
+    {
+      "event_id": "2023-06-24T15:00:00+00:00_S",
+      "fold": "2023H1",
+      "decision_time": "2023-06-24T16:00:00+00:00",
+      "direction": -1,
+      "support_reason": "missing_causal_matching_support",
+      "mother_risk_atr": 1.5489126858353925,
+      "available_controls": null,
+      "month": "2023-06",
+      "utc_6h_bucket": "2",
+      "vol_bucket": "",
+      "assigned_controls": 0,
+      "match_status": "missing_causal_matching_support"
+    },
+    {
+      "event_id": "2023-06-25T11:00:00+00:00_L",
+      "fold": "2023H1",
+      "decision_time": "2023-06-25T12:00:00+00:00",
+      "direction": 1,
+      "support_reason": "missing_causal_matching_support",
+      "mother_risk_atr": 0.766124899503534,
+      "available_controls": null,
+      "month": "2023-06",
+      "utc_6h_bucket": "2",
+      "vol_bucket": "",
+      "assigned_controls": 0,
+      "match_status": "missing_causal_matching_support"
+    },
+    {
+      "event_id": "2023-06-25T14:00:00+00:00_S",
+      "fold": "2023H1",
+      "decision_time": "2023-06-25T15:00:00+00:00",
+      "direction": -1,
+      "support_reason": "missing_causal_matching_support",
+      "mother_risk_atr": 1.110443527225244,
+      "available_controls": null,
+      "month": "2023-06",
+      "utc_6h_bucket": "2",
+      "vol_bucket": "",
+      "assigned_controls": 0,
+      "match_status": "missing_causal_matching_support"
+    },
+    {
+      "event_id": "2023-06-26T13:00:00+00:00_L",
+      "fold": "2023H1",
+      "decision_time": "2023-06-26T14:00:00+00:00",
+      "direction": 1,
+      "support_reason": "missing_causal_matching_support",
+      "mother_risk_atr": 1.5980038412778117,
+      "available_controls": null,
+      "month": "2023-06",
+      "utc_6h_bucket": "2",
+      "vol_bucket": "",
+      "assigned_controls": 0,
+      "match_status": "missing_causal_matching_support"
+    }
+  ],
+  "builder_commit": "36a315eafb5df20ce1e3d4bd5c15f01b2aa287ee",
+  "audit_commit": "ebbdb215d921cffab036a0624bee25a0921ddd42",
+  "auditor_sha256": "694efefd1c50a6b318d0fc88d10d4e9fcc27c76844eb1f9aa9a7a218843dc1b9",
+  "formula_dependency_sha256": "d482641d596f1553a54d6c8c91068b07e869a169c579efa17133ed8ca9c8b4aa",
+  "summary_sha256": "ef5d56790c7cf1f564a1843fc4b42fb3a0072213de71fde723ac1757c45bb9bc",
+  "support_frozen_sha256": "d8128d90d9af4b349be6ea1ddfde991a6eed33902b956f275e04647856636b36",
+  "input_hashes_verified": 18,
+  "output_hashes_verified": 10,
+  "source_receipts_verified": 12,
+  "parent_source_receipts_verified": [
+    14,
+    12
+  ],
+  "input_output_source_hashes_rechecked_after_computation": true,
+  "saved_chronology": {
+    "started": "2026-09-07 02:37:37.023506+00:00",
+    "support_frozen": "2026-09-07 02:37:45.314836+00:00",
+    "summary": "2026-09-07 02:37:49.394234+00:00"
+  },
+  "raw5_aggregation_verified": false,
+  "source_authenticity_verified": false,
+  "native15m_exit_verified": false,
+  "profitability_evaluated": false,
+  "random_assignment_verified": false,
+  "tradingview_live_parity_verified": false,
+  "capacity_scope": "Total complete capacity only; unselected mothers are not proved individually impossible."
+}

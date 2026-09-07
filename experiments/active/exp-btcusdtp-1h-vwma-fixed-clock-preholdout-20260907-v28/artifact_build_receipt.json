@@ -1,0 +1,14 @@
+{
+  "source_commit": "eec958a6646fe834a00bfedccdaa7c6abdaea7c0",
+  "report_sha256": "7d845a8949bb59711e99274d5d884ef54df3d3f5f412b72f287ed644897d9760",
+  "summary_sha256": "65342ee62b5b67c8044f999a6330ca800e12efd810bd387a08edf345de35288f",
+  "actual_queries": {
+    "monthly": "WITH c AS (SELECT mother_month AS month,COUNT(*) AS mothers,\nCOUNT(cost_threshold_markout) AS known,AVG(gross_markout)*10000 AS gross_bp,\nAVG(cost_threshold_markout)*10000 AS cost_threshold_bp\nFROM cases WHERE horizon_hours=4 GROUP BY mother_month),\np AS (SELECT mother_month AS month,COUNT(cost_threshold_excess_markout) AS paired,\nAVG(control_mean_cost_threshold_markout)*10000 AS background_bp,\nAVG(cost_threshold_excess_markout)*10000 AS excess_bp\nFROM pairs WHERE horizon_hours=4 GROUP BY mother_month)\nSELECT * FROM c JOIN p USING(month) ORDER BY month",
+    "distribution": "WITH RECURSIVE binned AS (\nSELECT FLOOR(cost_threshold_markout*10000/50)*50 AS lower_bp FROM cases\nWHERE horizon_hours=4 AND status='known'),\nbins(lower_bp) AS (SELECT MIN(lower_bp) FROM binned UNION ALL\nSELECT lower_bp+50 FROM bins WHERE lower_bp<(SELECT MAX(lower_bp) FROM binned)),\ncounts AS (SELECT lower_bp,COUNT(*) AS events FROM binned GROUP BY lower_bp)\nSELECT CAST(bins.lower_bp AS INTEGER)||' to <'||CAST(bins.lower_bp+50 AS INTEGER) AS bin,\nbins.lower_bp,bins.lower_bp+50 AS upper_bp,COALESCE(counts.events,0) AS events\nFROM bins LEFT JOIN counts USING(lower_bp) ORDER BY bins.lower_bp"
+  },
+  "sections": 14,
+  "charts": 2,
+  "all_sections_preserved": true,
+  "raw_prices_read": false,
+  "generated_at": "2026-09-07T03:05:53.537909+00:00"
+}

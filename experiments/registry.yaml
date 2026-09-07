@@ -16,33 +16,63 @@ schema_version: 1
 experiments:
   - experiment_id: exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28
     source_repo: darkforest-x/fable-trading
-    source_commit: "pending_source_first"
-    status: active
+    source_commit: "2c39bac"
+    status: rejected
     question: Does VWMA288 4h directional persistence cover20bp and outperform seeded matched background?
     single_variable: New frozen VWMA40 entry cohort; unchanged V24 labels,seed,cost,inference except population counts.
-    result: Registered before raw label reading; requires independently audited V27 support.
-    canonical_report: null
+    result: >-
+      Actual288 own and852 seeded controls;4h283 complete pairs.
+      All-case gross-3.0715bp,cost-threshold-23.0715bp,
+      CI[-34.0168,-12.2284],p.9999;fourhalf own means negative.
+      Paired excess-2.8794bp,CI[-13.8960,8.8144],p.6868.
+      Coverage passed,economic gates failed;not_supported.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_vwma_fixed_clock_v28_20260907.html
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts:
+      - btcusdtp-hourly-vwma-clock-v28-results
+      - btcusdtp-hourly-vwma-clock-v28-statistics
+      - btcusdtp-hourly-vwma-clock-v28-audit
+      - btcusdtp-hourly-vwma-clock-v28-source-audit
+      - btcusdtp-hourly-vwma-clock-v28-report
+      - btcusdtp-hourly-vwma-clock-v28-html
+      - btcusdtp-hourly-vwma-clock-v28-artifact
     reuse_allowed: false
-    notes: All288 retained;284 seeded triples;4h primary;1/12/24h descriptive;not executable PnL.
+    notes: >-
+      All288 retained;284 seeded triples,one4h control missingbar,no redraw.
+      f308a82 independent4560labels/1152pairs/852controls audit passed.
+      Post-run219551OPEN source consistency passed,not original atomicity proof.
+      817 jointtests passed;HTML structural_only,browser unverified.
+      Reused2023-2024 development,fixed-clock not executablePnL;noTV/live/holdout.
 
   - experiment_id: exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27
     source_repo: darkforest-x/fable-trading
-    source_commit: "pending_source_first"
-    status: active
+    source_commit: "36a315e"
+    status: accepted
     question: Can frozen288 VWMA entry mothers obtain at least260 complete background triples?
     single_variable: Rebuild MA-dependent background eligibility for new VWMA40 cohort; three-key matching unchanged.
-    result: Source-first registered; no outcomes or raw prices permitted in this stage.
-    canonical_report: null
+    result: >-
+      Support-only284/288 complete triples,852controls,98.6111percent.
+      Independent15493edges/179components upper284 attained;all4unknown retained.
+      Frozen260complete-group gate passed without outcomes or raw prices.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_vwma_background_v27_20260907.html
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts:
+      - btcusdtp-hourly-vwma-background-v27-results
+      - btcusdtp-hourly-vwma-background-v27-audit
+      - btcusdtp-hourly-vwma-background-v27-report
+      - btcusdtp-hourly-vwma-background-v27-html
+      - btcusdtp-hourly-vwma-background-v27-artifact
     reuse_allowed: false
-    notes: All288 retained; exact UTC source parity; capacity witness is not a random economic sample.
+    notes: >-
+      Accepted only for support,not profitability or random sampling.
+      ebbdb21 independent18222savedhours and source/feature parity passed.
+      Capacity witness not reused as V28 economic sample;new seeded allocation.
+      817 jointtests passed;HTML structural_only,browser unverified.
+      No outcomes/raw prices/TV/live/holdout in V27;V28 economics separately rejected.
 
   - experiment_id: exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26
     source_repo: darkforest-x/fable-trading

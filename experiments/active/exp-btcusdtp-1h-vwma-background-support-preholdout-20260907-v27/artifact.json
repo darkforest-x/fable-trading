@@ -1,0 +1,354 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "VWMA Background Support",
+    "generatedAt": "2026-09-07T02:58:42.025178+00:00",
+    "filters": [],
+    "cards": [],
+    "charts": [
+      {
+        "id": "monthly",
+        "type": "bar",
+        "title": "每月匹配支持",
+        "description": "2023–2024 · 已配到完整三控的入口数；分母288，未知4",
+        "showDescription": true,
+        "dataset": "monthly",
+        "sourceId": "monthly",
+        "palette": {
+          "kind": "sequential",
+          "name": "blue"
+        },
+        "labels": {
+          "values": "all"
+        },
+        "settings": {
+          "sort": "none"
+        },
+        "encodings": {
+          "x": {
+            "field": "month",
+            "type": "nominal",
+            "label": "UTC月份"
+          },
+          "y": {
+            "field": "matched",
+            "type": "quantitative",
+            "label": "完整三控母单数"
+          },
+          "tooltip": [
+            {
+              "field": "mothers",
+              "type": "quantitative",
+              "label": "mothers"
+            },
+            {
+              "field": "controls",
+              "type": "quantitative",
+              "label": "controls"
+            }
+          ]
+        }
+      }
+    ],
+    "tables": [],
+    "blocks": [
+      {
+        "id": "section_0",
+        "type": "markdown",
+        "layout": "full",
+        "body": "# VWMA Background Support"
+      },
+      {
+        "id": "section_1",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 技术摘要：新入口的公平对照支持通过，尚未评价收益\n\n新VWMA40入口共288个，284个各能获得3个时间不重复的背景对照，覆盖率98.61%，\n超过预先冻结的260个完整组门槛。4个缺支持入口保留在分母，没有为了配对而删除。\n本轮只回答“能否公平比较”，没有读取收益、模拟退出或证明盈利。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_2",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 定义：288个母单不等于288笔执行交易\n\n母单指2023–2024开发期按固定1h大实体/吞没贯穿规则形成的VWMA40/HL2入口请求；\n决策在K1完成后的下一小时开盘。四半年入口数分别68、74、66、80。\n背景按同币BTC、决策UTC月、UTC六小时块、因果ATR/价格三分桶匹配。\n每母必须3个完整控制或0个，控制时间全局不复用；母方向和风险/ATR可以转移，\n控制自身价格、源连续性和已知性不能从母单借用。这里不是实盘开仓列表。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_3",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 与旧版对照：换参考后重新建立资格\n\n| 支持指标 | V23旧SMA40 | V27新VWMA40 |\n|---|---:|---:|\n| 原母总数 |251|288|\n| 完整三控母 |248|284|\n| 控制总数 |744|852|\n| 未配母数 |3|4|\n| 完整覆盖率 |98.80%|98.61%|\n| 资格边数 |13,192|15,493|\n| 必须达到的完整母数 |226|260|\n\n两列入口群不同；数字增加不是经济改进。旧候选表中的SMA贯穿排除和251母时钟排除\n已按新参考和288母重建。共同保存域的背景候选从15,146变15,002，不能因为新信号多\n就认为背景也应更多。新15,493条资格边来自9,282个独立候选时钟。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_4",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 四半年：缺支持只发生在最早半年\n\n| UTC半年 | 原母 | 完整母 | 控制数 | 完整覆盖率 |\n|---|---:|---:|---:|---:|\n|2023上半年|68|64|192|94.12%|\n|2023下半年|74|74|222|100%|\n|2024上半年|66|66|198|100%|\n|2024下半年|80|80|240|100%|\n\n179个匹配组件的分配结果全部保留。求解器最优性和完整性检查通过；没有降低匹配要求、\n重用控制或转用贪心以凑足数量。容量证据仍不是一次随机抽样，后续收益检验必须另行冻结随机组。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_5",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 月份支持：不从稀疏月份删掉母单\n\n下图按24个UTC自然月展示完整三控母数，悬停保留该月总母数与控制数。月度变化只反映\n机会和可用背景，不是利润曲线；四个缺支持样本集中在2023年6月，仍保留在全母分析中。\n这一步用于确认下一轮比较覆盖了整个开发期，而不是只保留容易匹配的月份。",
+        "sourceId": "report"
+      },
+      {
+        "id": "monthly_chart",
+        "type": "chart",
+        "layout": "full",
+        "chartId": "monthly"
+      },
+      {
+        "id": "section_6",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 四个未知：波动分桶尚未重新完成预热\n\n| 决策时间 UTC | 方向 | 未知项 |\n|---|---|---|\n|2023-06-24 16:00|空|ATR/价格三分桶及1h参考已知性|\n|2023-06-25 12:00|多|ATR/价格三分桶|\n|2023-06-25 15:00|空|ATR/价格三分桶|\n|2023-06-26 14:00|多|ATR/价格三分桶|\n\n四个入口的真实开盘、源连续性、5m颜色都通过；四个均缺分段后的历史波动桶，\n第一个还未满足1h参考已知性。这是源可用性问题，不是交易亏损。\n不能补成中性桶或借用断点前历史来“修复”支持率。\n后续仍可计算其自身标签，但与背景的配对超额必须未知。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_7",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 方法：分清新入口参考和旧退出可观察性\n\n先对齐18,222个原生小时，核旧SMA全部特征、两参考共同OHLCV/ATR和逐母入口字段；\n仅裁掉V10比V26多出的73个右尾小时，内部缺口不得通过inner join隐藏。\nATR比例桶逐字段重新核对前720小时、最少168、排除当前根的计算；入口换VWMA并不改变桶公式。\n\n新的1h MA、侧别、斜率、翻侧次数、当前/前一根贯穿和实际母时钟排除全部重算。\n原真实entry OPEN、raw源段、5m SMA颜色/可用性保持，旧1h参考另加前缀保存。\n这不是把5m退出也换成VWMA；也没有证明V18原生15m管理初态已验证。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_8",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 验证与风险：支持通过不是策略验收\n\n源码36a315e先于实际计算；输入18项SHA、V10/V26来源链、图冻结早于容量求解、\n输出哈希前后均核对。合成测试覆盖UTC、旧字段、原生缺口、未来扰动、三控完整性及259/260门。\n另有不调用策略/匹配builder的保存证据审计；实际结论以实验目录的audit.json为准。\n\n本轮没有分类模型或收益，AUC、排序置换p、top-decile毛/净收益、胜率和PF不适用。\n等参考的字段还原、未来扰动不改过去、损坏输入拒绝是严格实现对照，不替代经济随机对照。\n只核保存证据，未重新证明交易所原始数据真实性；开发区已多轮使用，不能当独立样本外。\nholdout消耗0，没有改TradingView、ACTIVE、执行器、成本或实盘仓位。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_9",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 下一步与未解问题\n\n另行注册V28，以固定seed从新资格图抽取三控，然后检验4h方向变化减20bp及匹配超额。\n必须同时覆盖成本并优于背景，才能称该入口值得继续研究；不以更多信号或更漂亮图形作裁决。\n即便固定时钟通过，还需另验K1止损和小周期退出，不能直接宣称系统赚钱。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_10",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 复现命令\n\n结果目录已存在时构建器会拒绝覆盖。完整重新构建需在保留原证据的复现副本中使用原输入。\n\n```bash\n.venv/bin/python -m pytest -q tests/test_hourly_impulse_vwma_background.py tests/test_hourly_impulse_vwma_background_research.py tests/test_hourly_impulse_background_support.py tests/test_hourly_impulse_matching_capacity.py\n.venv/bin/python -m yoyo.evaluation.hourly_impulse_vwma_background_research\npython3 experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/audit_saved.py\npython3 scripts/md_to_html.py analysis/p1_btcusdtp_hourly_vwma_background_v27_20260907.md --out-dir analysis/html\npython3 scripts/build_hourly_impulse_vwma_reports.py --version 27\n```",
+        "sourceId": "report"
+      }
+    ],
+    "sources": [
+      {
+        "id": "report",
+        "label": "V27 · 完整定义、结果与风险",
+        "path": "analysis/p1_btcusdtp_hourly_vwma_background_v27_20260907.md"
+      },
+      {
+        "id": "monthly",
+        "label": "V27 · 保存证据实际SQLite查询 · monthly",
+        "path": "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results",
+        "query": {
+          "sql": "SELECT substr(m.decision_time,1,7) AS month,COUNT(*) AS mothers,\nSUM(CASE WHEN a.match_status='matched' THEN 1 ELSE 0 END) AS matched,\nSUM(a.assigned_controls) AS controls\nFROM mothers m JOIN assignments a USING(event_id) GROUP BY month ORDER BY month",
+          "engine": "sqlite",
+          "language": "sql",
+          "executed_at": "2026-09-07T02:58:42.025178+00:00",
+          "tables_used": [
+            "mothers",
+            "assignments"
+          ],
+          "description": "按原始母单时间聚合；保留未知分母和全部尾部，不用于调参",
+          "filters": [
+            "2023/24 development,288 original VWMA mothers"
+          ],
+          "metric_definitions": {
+            "original_mothers": "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results/original_mothers.csv.gz",
+            "assignments": "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results/assignments.csv.gz"
+          }
+        }
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-09-07T02:58:42.025178+00:00",
+    "status": "ready",
+    "datasets": {
+      "monthly": [
+        {
+          "month": "2023-01",
+          "mothers": 13,
+          "matched": 13,
+          "controls": 39
+        },
+        {
+          "month": "2023-02",
+          "mothers": 13,
+          "matched": 13,
+          "controls": 39
+        },
+        {
+          "month": "2023-03",
+          "mothers": 8,
+          "matched": 8,
+          "controls": 24
+        },
+        {
+          "month": "2023-04",
+          "mothers": 14,
+          "matched": 14,
+          "controls": 42
+        },
+        {
+          "month": "2023-05",
+          "mothers": 9,
+          "matched": 9,
+          "controls": 27
+        },
+        {
+          "month": "2023-06",
+          "mothers": 11,
+          "matched": 7,
+          "controls": 21
+        },
+        {
+          "month": "2023-07",
+          "mothers": 12,
+          "matched": 12,
+          "controls": 36
+        },
+        {
+          "month": "2023-08",
+          "mothers": 14,
+          "matched": 14,
+          "controls": 42
+        },
+        {
+          "month": "2023-09",
+          "mothers": 12,
+          "matched": 12,
+          "controls": 36
+        },
+        {
+          "month": "2023-10",
+          "mothers": 12,
+          "matched": 12,
+          "controls": 36
+        },
+        {
+          "month": "2023-11",
+          "mothers": 11,
+          "matched": 11,
+          "controls": 33
+        },
+        {
+          "month": "2023-12",
+          "mothers": 13,
+          "matched": 13,
+          "controls": 39
+        },
+        {
+          "month": "2024-01",
+          "mothers": 8,
+          "matched": 8,
+          "controls": 24
+        },
+        {
+          "month": "2024-02",
+          "mothers": 10,
+          "matched": 10,
+          "controls": 30
+        },
+        {
+          "month": "2024-03",
+          "mothers": 12,
+          "matched": 12,
+          "controls": 36
+        },
+        {
+          "month": "2024-04",
+          "mothers": 11,
+          "matched": 11,
+          "controls": 33
+        },
+        {
+          "month": "2024-05",
+          "mothers": 15,
+          "matched": 15,
+          "controls": 45
+        },
+        {
+          "month": "2024-06",
+          "mothers": 10,
+          "matched": 10,
+          "controls": 30
+        },
+        {
+          "month": "2024-07",
+          "mothers": 14,
+          "matched": 14,
+          "controls": 42
+        },
+        {
+          "month": "2024-08",
+          "mothers": 12,
+          "matched": 12,
+          "controls": 36
+        },
+        {
+          "month": "2024-09",
+          "mothers": 11,
+          "matched": 11,
+          "controls": 33
+        },
+        {
+          "month": "2024-10",
+          "mothers": 13,
+          "matched": 13,
+          "controls": 39
+        },
+        {
+          "month": "2024-11",
+          "mothers": 17,
+          "matched": 17,
+          "controls": 51
+        },
+        {
+          "month": "2024-12",
+          "mothers": 13,
+          "matched": 13,
+          "controls": 39
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "report",
+      "label": "V27 · 完整定义、结果与风险",
+      "path": "analysis/p1_btcusdtp_hourly_vwma_background_v27_20260907.md"
+    },
+    {
+      "id": "monthly",
+      "label": "V27 · 保存证据实际SQLite查询 · monthly",
+      "path": "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results",
+      "query": {
+        "sql": "SELECT substr(m.decision_time,1,7) AS month,COUNT(*) AS mothers,\nSUM(CASE WHEN a.match_status='matched' THEN 1 ELSE 0 END) AS matched,\nSUM(a.assigned_controls) AS controls\nFROM mothers m JOIN assignments a USING(event_id) GROUP BY month ORDER BY month",
+        "engine": "sqlite",
+        "language": "sql",
+        "executed_at": "2026-09-07T02:58:42.025178+00:00",
+        "tables_used": [
+          "mothers",
+          "assignments"
+        ],
+        "description": "按原始母单时间聚合；保留未知分母和全部尾部，不用于调参",
+        "filters": [
+          "2023/24 development,288 original VWMA mothers"
+        ],
+        "metric_definitions": {
+          "original_mothers": "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results/original_mothers.csv.gz",
+          "assignments": "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/results/assignments.csv.gz"
+        }
+      }
+    }
+  ]
+}

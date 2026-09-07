@@ -1,0 +1,94 @@
+{
+  "generated_at": "2026-09-07 02:37:45.314836+00:00",
+  "builder_commit": "36a315eafb5df20ce1e3d4bd5c15f01b2aa287ee",
+  "mothers": 288,
+  "matching_edges": 15493,
+  "capacity_attempted": false,
+  "outcomes_read_or_computed": false,
+  "input_receipt": {
+    "v10": {
+      "inputs": {
+        "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/matching_frame.csv.gz": "0a6a0c8461b33d13a9ca28346023033b56d7a00af1b39a6c827a774deb7a3009",
+        "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/summary.json": "6279ce97ac051e168e632291218a697ffc7558db611bcf5e007f23b51bb55440",
+        "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/support_frozen.json": "da1c2a5b4454fde29fc50385a056315f6f716989daa7b37db4c63ade9845e2c7",
+        "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/started.json": "07292f7c64235b0709e1e3b9479f287286eb197176e1baee1fa0b66ed60d7e72",
+        "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/original_mothers.csv.gz": "b3f442ad8b0959b19cb5ae58fd40bc6a3bf40b455b4be31f3758d53940eea3e6"
+      },
+      "upstream_builder_commit": "b6e9056144c092bc1fe82a5108ef619f8122da5f",
+      "upstream_source_receipt": {
+        "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+        "physical_rows": 341567,
+        "phase_rows": 219551,
+        "phase_price_last_open": "2024-12-31 23:55:00+00:00",
+        "physical_last_open": "2026-02-28 15:55:00+00:00",
+        "holdout_price_rows": 0,
+        "timestamp_preflight_before_price_hash": true
+      },
+      "upstream_sources_verified_at_commit": 14,
+      "raw_aggregation_independently_recomputed": false,
+      "saved_only": true
+    },
+    "v26_builder_commit": "374f003f3fb9b0812edb25636042654312b06f1e",
+    "v26_source_count": 12,
+    "v26_independent_audit_sha256": "bfec39509d9983320569316de45aad633510fcb7da0e46cdbe4d33f9caaa6704",
+    "saved_only": true
+  },
+  "output_hashes": {
+    "original_mothers.csv.gz": "687e4e101d45d6b1a635839ca1869d5420af5c7cbac0871055f0bbe9e16ccda0",
+    "matching_frame.csv.gz": "2347f3375f7bb40e5f9db8358ba8aba136c53ec3c5aabc62e04b27ad0c9430ae",
+    "mother_support.csv.gz": "189895d96e414d5b0d22d27ba2e16de622bd2b098b25bdd4a8059e41f1b87e42",
+    "stage_counts.csv.gz": "11cf8355e0113759a06cb1260131692db88dffb9c3ed16195bfd0e60f54f5693",
+    "eligible_edges.csv.gz": "68c7cae123a27b26b6752e2bb8ff069c59f79f9dd4b2aa96ea18edfde811d9a0"
+  },
+  "sources": [
+    {
+      "path": "yoyo/evaluation/hourly_impulse_vwma_background_research.py",
+      "sha256": "a143d1b3dd83612b6e35daf68b7abc67a51e41b8af318cb1d6f181c53a3b5e46"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_vwma_background.py",
+      "sha256": "fdb7550e2ec76e34f2fb27071e7845f8c1562679a4651cc4b0d120c3ab14e574"
+    },
+    {
+      "path": "tests/test_hourly_impulse_vwma_background.py",
+      "sha256": "2c05c5cf67215cf5c159aa4b9523e308a7cbc984a947c0566c4ab44dc16426b9"
+    },
+    {
+      "path": "tests/test_hourly_impulse_vwma_background_research.py",
+      "sha256": "05502cd1f43441d2c8167228c0769c353e3f3394149440928d2d3ecdd6a413fa"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_background_support.py",
+      "sha256": "45b8da0f4f5c05bf1057e8fa38e7cfcd24109325689a1a0781347839bb539f60"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_matching_capacity.py",
+      "sha256": "715de053060b95c278336838fde7e5e4dbdd99466e8865e948c8580cc07293ee"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_k2_matching.py",
+      "sha256": "50af2aa6421b5aef83082213407f31877239b92b1bd3103adabee90f5476803b"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_vwma.py",
+      "sha256": "0fc38f068826fbdce0a423de6122ff9f30bc55bd56a4db6d39bee4cba434dda2"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_vwma_support.py",
+      "sha256": "ab619d9ede857d554319e7bbb516db7707c43b6461dee5af49e0ff30d9215d9d"
+    },
+    {
+      "path": "yoyo/data/hourly_impulse.py",
+      "sha256": "f1128f514456f0e1a7bf89b719b2333ebe3b12f66402d58c82764d355be97a3b"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/config.json",
+      "sha256": "6784ab472b225dee843d1ee132628e99b625e0bb5c5f10dda8000b5858d7fe64"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27/PROJECT_PLAN.md",
+      "sha256": "b9d954c9a63ea574d79efbd1be6be7902086b0d62d2af0fd38da91bbb58b56d8"
+    }
+  ],
+  "reference_rebuilt_sha256": "8f5a9ea84281114ba242ec608258189015513bc752646aff3686f89e8571ea79"
+}

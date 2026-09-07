@@ -1,0 +1,13 @@
+{
+  "source_commit": "2c39bac57023402ecb7051c7beee76d62fbad6b2",
+  "report_sha256": "58ed79856e0492d2b68a8446c3f46677eef6856e1e4a0f3ded6390320c882616",
+  "summary_sha256": "ef5d56790c7cf1f564a1843fc4b42fb3a0072213de71fde723ac1757c45bb9bc",
+  "actual_queries": {
+    "monthly": "SELECT substr(m.decision_time,1,7) AS month,COUNT(*) AS mothers,\nSUM(CASE WHEN a.match_status='matched' THEN 1 ELSE 0 END) AS matched,\nSUM(a.assigned_controls) AS controls\nFROM mothers m JOIN assignments a USING(event_id) GROUP BY month ORDER BY month"
+  },
+  "sections": 11,
+  "charts": 1,
+  "all_sections_preserved": true,
+  "raw_prices_read": false,
+  "generated_at": "2026-09-07T02:58:42.025178+00:00"
+}
