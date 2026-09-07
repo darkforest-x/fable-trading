@@ -33,9 +33,9 @@ def main():
     ranking = []
     for row in payload["summary"]:
         stem = f"{row['window']}_{row['arm']}"
-        t = pd.read_csv(OUT / f"{stem}_trades.csv", parse_dates=["entry_time", "exit_time", "signal_time"])
-        e = pd.read_csv(OUT / f"{stem}_equity.csv", parse_dates=["time"])
-        c = pd.read_csv(OUT / f"{stem}_controls.csv")
+        t = pd.read_csv(OUT / f"{stem}_trades.csv", float_precision="round_trip", parse_dates=["entry_time", "exit_time", "signal_time"])
+        e = pd.read_csv(OUT / f"{stem}_equity.csv", float_precision="round_trip", parse_dates=["time"])
+        c = pd.read_csv(OUT / f"{stem}_controls.csv", float_precision="round_trip")
         fee = 0 if row["arm"] == "original_zero_cost" else .001
         expected_fees = t.qty * (t.entry_price + t.exit_price) * fee
         expected_pnl = t.direction * t.qty * (t.exit_price - t.entry_price) - expected_fees
@@ -85,6 +85,8 @@ def main():
             old = next(x for x in payload["ranking"] if x["window"] == row["window"])
             checks[row["window"] + "_stable_sum_p_unchanged"] = bool(np.isclose(
                 old["matched_month_cluster_signflip_p"], new["matched_month_cluster_signflip_p"], rtol=0, atol=1e-12))
+            checks[row["window"] + "_ranking_roundtrip_unchanged"] = bool(
+                old["ranking_permutation_p"] == new["ranking_permutation_p"])
             ranking.append(new)
     verification = {"passed": all(checks.values()), "checks": checks, "firstbar": firstbar,
                     "concentration": concentration, "verification_commit": builder,
