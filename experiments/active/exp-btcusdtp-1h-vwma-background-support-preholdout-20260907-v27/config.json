@@ -1,0 +1,82 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27",
+  "inputs": {
+    "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/matching_frame.csv.gz": "0a6a0c8461b33d13a9ca28346023033b56d7a00af1b39a6c827a774deb7a3009",
+    "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/summary.json": "6279ce97ac051e168e632291218a697ffc7558db611bcf5e007f23b51bb55440",
+    "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/support_frozen.json": "da1c2a5b4454fde29fc50385a056315f6f716989daa7b37db4c63ade9845e2c7",
+    "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/started.json": "07292f7c64235b0709e1e3b9479f287286eb197176e1baee1fa0b66ed60d7e72",
+    "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/original_mothers.csv.gz": "b3f442ad8b0959b19cb5ae58fd40bc6a3bf40b455b4be31f3758d53940eea3e6",
+    "experiments/active/exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26/config.json": "c1046cb32d4c3567d2a436a33015cd9c67ec0ef6a492c052b3ac69d1862f9218",
+    "experiments/active/exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26/results/started.json": "43380998211304bdb0fe8821763d6e6337212f5846264b099b6e12613af6ee9c",
+    "experiments/active/exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26/results/baseline_reproduced.json": "ffd9857486cd61dae960ee6328aaf28fc7de819f638f9a823b6327f0b8f2527b",
+    "experiments/active/exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26/results/support_frozen.json": "3df6f7d89b5b9978e2fcc78023bdf8ab8b75d96da80c9dc5954e61c94d1df973",
+    "experiments/active/exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26/results/summary.json": "a81a6e386de1b82ff093bd16a4ae1f6989b98feb5201f0290983f94bed66ef90",
+    "experiments/active/exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26/audit.json": "bfec39509d9983320569316de45aad633510fcb7da0e46cdbe4d33f9caaa6704",
+    "experiments/active/exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26/results/opportunities.csv.gz": "bd3422d70a691c1625daa37aa19ef0f9b092ba3a5047d3d5b04a89fd6b38a2d2",
+    "experiments/active/exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26/results/shape_opportunities.csv.gz": "5de78388f3367937530f53b4ee5f7fe41e798c180451fc16c9641f06c58143f0",
+    "experiments/active/exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26/results/counts.csv.gz": "86c4f78393b84b046db530e92a5ff603f77720cbf52feb6fdda613dbda693c62",
+    "experiments/active/exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26/results/sma_entries.csv.gz": "db45b645781a777d48bf0aa8178b8d53e22f99f38f603035364956a3201e540c",
+    "experiments/active/exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26/results/vwma_entries.csv.gz": "32861afc658697d033f4ab756ef1d9f37d7cdd02267251b5c57221e77ac97572",
+    "experiments/active/exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26/results/hourly_sma.csv.gz": "ebf5ac403ac67a2563c562afc649994652132db2f5ce625f2859c2c863b11187",
+    "experiments/active/exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26/results/hourly_vwma.csv.gz": "5034cf4c6b9c85cfb3f48bfbf82420c0e00bbfb393cd0a4278b9d50f61f08370"
+  },
+  "frozen_helpers": {
+    "yoyo/evaluation/hourly_impulse_background_support.py": "45b8da0f4f5c05bf1057e8fa38e7cfcd24109325689a1a0781347839bb539f60",
+    "yoyo/evaluation/hourly_impulse_matching_capacity.py": "715de053060b95c278336838fde7e5e4dbdd99466e8865e948c8580cc07293ee",
+    "yoyo/evaluation/hourly_impulse_k2_matching.py": "50af2aa6421b5aef83082213407f31877239b92b1bd3103adabee90f5476803b",
+    "yoyo/evaluation/hourly_impulse_vwma.py": "0fc38f068826fbdce0a423de6122ff9f30bc55bd56a4db6d39bee4cba434dda2",
+    "yoyo/evaluation/hourly_impulse_vwma_support.py": "ab619d9ede857d554319e7bbb516db7707c43b6461dee5af49e0ff30d9215d9d",
+    "yoyo/data/hourly_impulse.py": "f1128f514456f0e1a7bf89b719b2333ebe3b12f66402d58c82764d355be97a3b"
+  },
+  "mothers": 288,
+  "fold_counts": {
+    "2023H1": 68,
+    "2023H2": 74,
+    "2024H1": 66,
+    "2024H2": 80
+  },
+  "required_complete_mothers": 260,
+  "count_per_mother": 3,
+  "matching_keys": [
+    "month",
+    "utc_6h_bucket",
+    "vol_bucket"
+  ],
+  "folds": [
+    [
+      "2023H1",
+      "2023-01-01",
+      "2023-07-01"
+    ],
+    [
+      "2023H2",
+      "2023-07-01",
+      "2024-01-01"
+    ],
+    [
+      "2024H1",
+      "2024-01-01",
+      "2024-07-01"
+    ],
+    [
+      "2024H2",
+      "2024-07-01",
+      "2025-01-01"
+    ]
+  ],
+  "embargo_hours": 72,
+  "component_time_limit_seconds": 30,
+  "entry_reference": "VWMA40_HL2",
+  "management_reference": "unchanged_SMA",
+  "new_hourly_support": "inherited_SMA_known_AND_VWMA_side_slope_MA_known",
+  "raw_support_preserved": true,
+  "control_time_reuse": false,
+  "fallback": false,
+  "allocation_role": "capacity_witness_not_random_sample",
+  "seed": null,
+  "outcomes_read_or_computed": false,
+  "raw_price_io": false,
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false
+}

@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btcusdtp-1h-vwma-background-support-preholdout-20260907-v27
+    source_repo: darkforest-x/fable-trading
+    source_commit: "pending_source_first"
+    status: active
+    question: Can frozen288 VWMA entry mothers obtain at least260 complete background triples?
+    single_variable: Rebuild MA-dependent background eligibility for new VWMA40 cohort; three-key matching unchanged.
+    result: Source-first registered; no outcomes or raw prices permitted in this stage.
+    canonical_report: null
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: All288 retained; exact UTC source parity; capacity witness is not a random economic sample.
+
   - experiment_id: exp-btcusdtp-1h-vwma-reference-support-preholdout-20260907-v26
     source_repo: darkforest-x/fable-trading
     source_commit: "374f003"
