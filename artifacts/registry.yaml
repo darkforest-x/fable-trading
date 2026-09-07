@@ -18,6 +18,81 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: eth4h-exit-r2-20260907-manifest
+    artifact_type: manifest
+    role: bounded_historical_research_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: c38098d2e22e6a1a1661b8622dd0989096026a8a
+    source_path: experiments/active/exp-eth4h-exit-exploration-20260907-v2/artifact_manifest.json
+    sha256: a485cc6264c86d7bc3f724fc860fd717cfd9e453bf964f1b785b60cd2bdc5715
+    size_bytes: 32319
+    storage_uri: repo://experiments/active/exp-eth4h-exit-exploration-20260907-v2/artifact_manifest.json
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: BE-off rejected by development rule; slope candidate inconclusive, reused history and sparse winners. Native
+      compilation blocked by existing disconnected UI.
+  - artifact_id: eth4h-exit-r2-20260907-summary
+    artifact_type: manifest
+    role: bounded_historical_research_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: c38098d2e22e6a1a1661b8622dd0989096026a8a
+    source_path: experiments/active/exp-eth4h-exit-exploration-20260907-v2/results/summary.json
+    sha256: 7a3c1799d3f9b31755193dcb152d9cfc655e0be3966491070df8a0e2ffd5ea32
+    size_bytes: 31836
+    storage_uri: repo://experiments/active/exp-eth4h-exit-exploration-20260907-v2/results/summary.json
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: BE-off rejected by development rule; slope candidate inconclusive, reused history and sparse winners. Native
+      compilation blocked by existing disconnected UI.
+  - artifact_id: eth4h-exit-r2-20260907-validation
+    artifact_type: manifest
+    role: bounded_historical_research_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: c38098d2e22e6a1a1661b8622dd0989096026a8a
+    source_path: experiments/active/exp-eth4h-exit-exploration-20260907-v2/results/independent_validation.json
+    sha256: 05f0b21bfa278781d954b0b7389469d81eb959cf342d174f287d893a20521611
+    size_bytes: 11824
+    storage_uri: repo://experiments/active/exp-eth4h-exit-exploration-20260907-v2/results/independent_validation.json
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: BE-off rejected by development rule; slope candidate inconclusive, reused history and sparse winners. Native
+      compilation blocked by existing disconnected UI.
+  - artifact_id: eth4h-exit-r2-20260907-report
+    artifact_type: report
+    role: bounded_historical_research_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: c38098d2e22e6a1a1661b8622dd0989096026a8a
+    source_path: analysis/html/p0_eth4h_exit_exploration_20260907.html
+    sha256: 2e2b15c001afd5ada56eb52f9dc5b8dfddd0947d8245ed096c6d35cf44595fc5
+    size_bytes: 234078
+    storage_uri: repo://analysis/html/p0_eth4h_exit_exploration_20260907.html
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: BE-off rejected by development rule; slope candidate inconclusive, reused history and sparse winners. Native
+      compilation blocked by existing disconnected UI.
+  - artifact_id: eth4h-exit-r2-20260907-pine
+    artifact_type: config
+    role: bounded_historical_research_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: c38098d2e22e6a1a1661b8622dd0989096026a8a
+    source_path: experiments/active/exp-eth4h-exit-exploration-20260907-v2/eth4h_trend_r2.pine
+    sha256: d1ba0245c2ec3312176eac434025b25211349f1aa85980e052e548ddf6f8bded
+    size_bytes: 6002
+    storage_uri: repo://experiments/active/exp-eth4h-exit-exploration-20260907-v2/eth4h_trend_r2.pine
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: BE-off rejected by development rule; slope candidate inconclusive, reused history and sparse winners. Native
+      compilation blocked by existing disconnected UI.
   - artifact_id: btcusdtp-owner-delayed-v39-config
     artifact_type: config
     role: v39_rejected_research_evidence

@@ -185,8 +185,7 @@ def report(payload):
             f"最终固定候选：**{selected}**。两项选择仅用2021–2024开发期；后段历史已经暴露，不是全新样本外。原生Pine撮合尚未核对，所有结果仅为历史研究。",
             '本轮结论：**保留保本，加入慢均线同向过滤作为研究候选。** 连续2021–2026年4月收益18.09%→22.39%，模拟回撤6.67%→5.07%。后段单独复核收益8.09%→7.97%，并非所有区间都更赚钱。',
             '[Pine 源码](eth4h_trend_r2.pine)。每边手续费0.1%，价格止损风险0.5%权益，名义仓位最多1倍；初始止损仍为4ATR和3%取小。没有增加资金费或滑点假设。',
-            '## 预先冻结的选择与结果',
-            '```json\n'+json.dumps(clean(payload['decisions']),ensure_ascii=False,indent=2)+'\n```']
+            '版本说明：R1_BE_on=原R1保本开启；BE_off=仅关闭保本；R1_BE_on_slope=保留保本并加慢均线方向门。选择先用开发期冻结，后段只复核。']
     for window in WINDOWS:
         rows=[r for r in payload['summary'] if r['window']==window]
         chunks += ['## '+window,table(rows,cols)]
@@ -197,7 +196,8 @@ def report(payload):
                    f"已保存账本独立核对{sum(qa['checks'].values())}/{len(qa['checks'])}项通过；入场定量、初始止损、因果方向门、匹配对照、手续费和账目均核对。没有重跑策略或改写收益。",
                    table(qa['concentration'],[('window','窗口'),('trades','笔数'),('net_winners','净盈利笔数'),('cagr_pct','年化%'),('largest5_positive_share_pct','最大5笔占正利润%'),('matched_coverage_pct','匹配覆盖%'),('net_bp_excluding_largest3','剔除最大3笔后净bp')]),
                    table(qa['filter_attribution'],[('window','窗口'),('shared_trades','共同入场'),('removed_trades','原有但不再入场'),('added_trades','新增入场'),('removed_net_pnl','被移除单原净USDT'),('added_net_pnl','新增单净USDT'),('shared_position_sizing_delta','共同单仓位差USDT'),('total_net_pnl_delta','账户净增USDT')]),
-                   '共同入场的退出时间与单位收益完全一致；净金额差异来自权益变化导致的仓位不同。移除和新增集合仅用于事后归因，不是提前识别赢家/输家的规则。剔除最大盈利单也仅为集中度诊断。']
+                   '共同入场的退出时间与单位收益完全一致；净金额差异来自权益变化导致的仓位不同。移除和新增集合仅用于事后归因，不是提前识别赢家/输家的规则。剔除最大盈利单也仅为集中度诊断。',
+                   '**连续期新增的一笔赚26.43USDT，超过全部改善21.49USDT。** 开发期过滤了亏损，但连续期的总优势仍依赖单笔替代交易，不能仅凭更好的资金曲线宣布优势稳定。']
     chunks += ['## 同一入场事件的保本反事实对照',
                table(payload['cohort']['rows'],[('arm','版本'),('trades','固定事件数'),('net_bp','净bp'),('matched_case_bp','匹配病例bp'),('random_control_bp','随机bp'),('excess_bp','配对超额bp')]),
                '```json\n'+json.dumps(clean({k:v for k,v in payload['cohort'].items() if k!='rows'}),ensure_ascii=False,indent=2)+'\n```',
@@ -215,10 +215,13 @@ def report(payload):
                '- 控制同币、月、HK6h、因果波动桶和方向；缺少匹配不补造。它们有独立状态，不是可交易随机组合。',
                '- 方向门改变控制候选集合；连续窗口匹配覆盖率从R1的97.10%降到88%。不能把两版配对超额之差直接当成过滤器因果效果；全体每笔净收益与共同入场归因需一起读。',
                '- 模拟没有额外滑点、资金费、交易所数量取整、保证金强平；尚无原生Pine编译或逐笔一致性证据。',
+               '- 已尝试检查现有TradingView网页，页面显示会话断开和连接数超限；未恢复连接、未上传源代码、未创建警报或订单。native_check.json保留状态。Pine只修正了两处入场标记以与方向门一致，经济逻辑未改，初稿及diff保留。',
                '## 验收边界与下一步',
                '经济初筛选中方向门，研究状态仍为inconclusive。连续期仅50笔、9笔净盈利；后段仅11笔、2笔盈利，月簇配对p=0.0597，前10%净收益-10bp、排序p=0.5329，**没有通过项目排序收益门，也不能证明稳定盈利**。',
                '本轮两项探索到此冻结。下一步是原生编译和相同历史区间逐笔对账；随后需要真正新鲜的前向证据。2026-05-04起holdout、成本/初始障碍修改以及实盘均未授权，不以继续旋参数替代这些证据。',
                '## 资金曲线','![资金曲线](../experiments/active/exp-eth4h-exit-exploration-20260907-v2/results/equity.png)',
+               '## 预先冻结的分支选择明细',
+               '```json\n'+json.dumps(clean(payload['decisions']),ensure_ascii=False,indent=2)+'\n```',
                '## 复现',
                '```bash\ncd /Users/zhangzc/fable-trading\n.venv/bin/python -m pytest tests/test_pine_allin_eth4h.py tests/test_eth4h_trend_candidate.py tests/test_eth4h_exit_exploration.py -q\n.venv/bin/python -m yoyo.evaluation.eth4h_exit_exploration\n.venv/bin/python -m yoyo.evaluation.eth4h_exit_exploration_verify\n```',
                '已有结果拒绝覆盖；仅重建报告用 --report-only。输入哈希、源码提交及选择见实验目录。',

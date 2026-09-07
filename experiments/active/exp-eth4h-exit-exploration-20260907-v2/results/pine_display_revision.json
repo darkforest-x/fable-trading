@@ -1,0 +1,15 @@
+{
+  "economic_logic_changed": false,
+  "changes": [
+    {
+      "line": 104,
+      "before": "plotshape(longSignal and not hasPosition, \"Long request\", shape.triangleup, location.belowbar, color.teal, size=size.tiny)",
+      "after": "plotshape(longSignal and not hasPosition and slowMa > slowMa[1], \"Long request\", shape.triangleup, location.belowbar, color.teal, size=size.tiny)"
+    },
+    {
+      "line": 105,
+      "before": "plotshape(shortSignal and not hasPosition, \"Short request\", shape.triangledown, location.abovebar, color.orange, size=size.tiny)",
+      "after": "plotshape(shortSignal and not hasPosition and slowMa < slowMa[1], \"Short request\", shape.triangledown, location.abovebar, color.orange, size=size.tiny)"
+    }
+  ]
+}

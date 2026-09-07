@@ -1,0 +1,917 @@
+{
+  "generated_at": "2026-09-07T11:52:02.094244+00:00",
+  "builder_commit": "c38098d2e22e6a1a1661b8622dd0989096026a8a",
+  "code_hashes": {
+    "yoyo/evaluation/eth4h_exit_exploration.py": "9dd8299d589602369121cbb21a16d883dc4d7553036bf4ac51ebc286c992feb7",
+    "yoyo/layers/l3_backtest/eth4h_exit_exploration.py": "cc15cfb838bba7e804b967c375e4a3662e7722538ce252ed65a62ba6433b237f",
+    "yoyo/layers/l3_backtest/pine_allin_eth4h.py": "61ef382a1e53a8164d7c9b7267b80fe25b8c30e2fd3b98ced31cddd2d70654d8",
+    "yoyo/layers/l3_backtest/eth4h_trend_candidate.py": "40dcbdecc301b4028b154e37998f79a24b3e21836b590fb0d6d0c83842a14484",
+    "experiments/active/exp-eth4h-exit-exploration-20260907-v2/config.json": "e491c0d8b105d06067a01ebf1da33b2cebe918c3ee0741bac7afe5699599da7e",
+    "experiments/active/exp-eth4h-exit-exploration-20260907-v2/PROJECT_PLAN.md": "58cfc2000c5cc5c774080c31be09f4b1e29aff9fec9fddf3ee40b6ddcab1debd",
+    "yoyo/evaluation/eth4h_trend_candidate.py": "698fc6fdee6c1b2594149b96e608c78a41dc73eab99dd7247f574d2fd7450205",
+    "yoyo/evaluation/pine_allin_eth4h_replay.py": "8f517d7a9da9aa2e31aae140809880abe8b3c3aad5ccbcfde83c071b488fd43b",
+    "yoyo/layers/l3_backtest/pine_allin_v7.py": "dd35630f53c91ac59079037b99980270a52751f8777e170c387fa29d6f89f2a9"
+  },
+  "data": {
+    "path": "data/kline_preholdout_binance_um15m/series/binance_um_ETHUSDT_15m_221952.csv",
+    "sha256": "07013f996a13a0b205f9df6df2af5deab5d601e7e34b42bfc308dc13aef400bd",
+    "venue": "Binance USD-M ETHUSDT perpetual",
+    "source_rows": 221952,
+    "four_hour_rows": 13872,
+    "first": "2020-01-01T00:00:00+00:00",
+    "end_exclusive": "2026-05-01T00:00:00+00:00",
+    "gaps": 0,
+    "all_groups_have_16_bars": true,
+    "holdout_consumed": false
+  },
+  "r1_golden_regression": {
+    "development_signal_i": true,
+    "development_entry_i": true,
+    "development_exit_i": true,
+    "development_qty": true,
+    "development_entry_price": true,
+    "development_exit_price": true,
+    "development_net_pnl": true,
+    "exposed_replication_signal_i": true,
+    "exposed_replication_entry_i": true,
+    "exposed_replication_exit_i": true,
+    "exposed_replication_qty": true,
+    "exposed_replication_entry_price": true,
+    "exposed_replication_exit_price": true,
+    "exposed_replication_net_pnl": true,
+    "continuous_signal_i": true,
+    "continuous_entry_i": true,
+    "continuous_exit_i": true,
+    "continuous_qty": true,
+    "continuous_entry_price": true,
+    "continuous_exit_price": true,
+    "continuous_net_pnl": true
+  },
+  "summary": [
+    {
+      "window": "development",
+      "arm": "R1_BE_on",
+      "trades": 55,
+      "win_rate_pct": 14.545454545454545,
+      "gross_bp": 136.70552137678652,
+      "net_bp": 116.66588114544415,
+      "pf_currency": 2.1338193373261616,
+      "pf_unit": 2.1882090419850173,
+      "matched_trades": 53,
+      "coverage_pct": 96.36363636363636,
+      "matched_case_bp": 127.28831002101708,
+      "random_control_bp": -95.31660304518567,
+      "excess_bp": 222.60491306620278,
+      "avg_hold_hours": 126.54545454545455,
+      "max_gross_trade_pct": 27.09388078061928,
+      "min_gross_trade_pct": -3.009530203540265,
+      "largest_5_share_of_positive_pnl_pct": 86.79734418128739,
+      "return_pct": 10.876235998632634,
+      "dd_pct": 6.672475138969455,
+      "close_dd_pct": 6.1912009236743675,
+      "final_equity": 554.3811799931632,
+      "fees": 9.728552184321872,
+      "yearly": [
+        {
+          "year": 2021,
+          "return_pct": 4.031671449208996,
+          "end_equity": 520.158357246045
+        },
+        {
+          "year": 2022,
+          "return_pct": 7.394653018051445,
+          "end_equity": 558.6222629087864
+        },
+        {
+          "year": 2023,
+          "return_pct": -4.246046896154743,
+          "end_equity": 534.9028996533185
+        },
+        {
+          "year": 2024,
+          "return_pct": 3.641460974032662,
+          "end_equity": 554.3811799931632
+        }
+      ],
+      "profitable_years": 3,
+      "nonpositive_equity_seen": false,
+      "exposure_pct": 20.454026922199407,
+      "ranking": {
+        "n": 55,
+        "auc_abs_osc_vs_net_positive": 0.5,
+        "top_decile_n": 6,
+        "top_decile_gross_bp": 467.4198131279004,
+        "top_decile_net_bp": 447.22801931153805,
+        "top_decile_control_bp": 76.16354662985962,
+        "top_decile_paired_excess_bp": 371.0644726816785,
+        "ranking_permutation_p": 0.10388961103889612,
+        "matched_month_cluster_signflip_p": 0.011998800119988001,
+        "matched_months": 31,
+        "permutations": 10000,
+        "interpretation": "diagnostic only; reused history, non-independent controls, not held-out acceptance"
+      },
+      "n_raw_signals": 87
+    },
+    {
+      "window": "development",
+      "arm": "BE_off",
+      "trades": 43,
+      "win_rate_pct": 25.581395348837212,
+      "gross_bp": 124.29930413110536,
+      "net_bp": 104.26185099532417,
+      "pf_currency": 1.4002530599120977,
+      "pf_unit": 1.44422212767633,
+      "matched_trades": 42,
+      "coverage_pct": 97.67441860465115,
+      "matched_case_bp": 114.38151049801712,
+      "random_control_bp": -141.51031143782038,
+      "excess_bp": 255.89182193583756,
+      "avg_hold_hours": 231.8139534883721,
+      "max_gross_trade_pct": 25.967417233103102,
+      "min_gross_trade_pct": -3.0095715682090427,
+      "largest_5_share_of_positive_pnl_pct": 80.06530921843445,
+      "return_pct": 7.276134597171224,
+      "dd_pct": 12.683350720788091,
+      "close_dd_pct": 12.345071451385447,
+      "final_equity": 536.3806729858561,
+      "fees": 7.7103168568206515,
+      "yearly": [
+        {
+          "year": 2021,
+          "return_pct": 3.434773673840952,
+          "end_equity": 517.1738683692048
+        },
+        {
+          "year": 2022,
+          "return_pct": 12.393374589627015,
+          "end_equity": 581.2691631558649
+        },
+        {
+          "year": 2023,
+          "return_pct": -7.699940469215205,
+          "end_equity": 536.5117836269579
+        },
+        {
+          "year": 2024,
+          "return_pct": -0.024437606983296334,
+          "end_equity": 536.3806729858561
+        }
+      ],
+      "profitable_years": 2,
+      "nonpositive_equity_seen": false,
+      "exposure_pct": 28.850102669404514,
+      "ranking": {
+        "n": 43,
+        "auc_abs_osc_vs_net_positive": 0.29829545454545453,
+        "top_decile_n": 5,
+        "top_decile_gross_bp": 279.33670217056874,
+        "top_decile_net_bp": 259.8560621577223,
+        "top_decile_control_bp": 246.5238963035943,
+        "top_decile_paired_excess_bp": 13.332165854127942,
+        "ranking_permutation_p": 0.29927007299270075,
+        "matched_month_cluster_signflip_p": 0.032896710328967106,
+        "matched_months": 25,
+        "permutations": 10000,
+        "interpretation": "diagnostic only; reused history, non-independent controls, not held-out acceptance"
+      },
+      "n_raw_signals": 87
+    },
+    {
+      "window": "development",
+      "arm": "R1_BE_on_slope",
+      "trades": 39,
+      "win_rate_pct": 20.51282051282051,
+      "gross_bp": 240.91602974159238,
+      "net_bp": 220.84020303568371,
+      "pf_currency": 3.605074386973312,
+      "pf_unit": 3.688042969892812,
+      "matched_trades": 33,
+      "coverage_pct": 84.61538461538461,
+      "matched_case_bp": 290.98257231836806,
+      "random_control_bp": -91.59676012515713,
+      "excess_bp": 382.5793324435252,
+      "avg_hold_hours": 156.51282051282053,
+      "max_gross_trade_pct": 27.09388078061928,
+      "min_gross_trade_pct": -3.009530203540265,
+      "largest_5_share_of_positive_pnl_pct": 86.77937292245772,
+      "return_pct": 15.044494023419652,
+      "dd_pct": 5.066013788454553,
+      "close_dd_pct": 4.723777594210744,
+      "final_equity": 575.2224701170983,
+      "fees": 7.068168415407533,
+      "yearly": [
+        {
+          "year": 2021,
+          "return_pct": 4.988917621982836,
+          "end_equity": 524.9445881099142
+        },
+        {
+          "year": 2022,
+          "return_pct": 7.412538314839701,
+          "end_equity": 563.856306835239
+        },
+        {
+          "year": 2023,
+          "return_pct": -2.1256604679529945,
+          "end_equity": 551.8706362247826
+        },
+        {
+          "year": 2024,
+          "return_pct": 4.23139633810925,
+          "end_equity": 575.2224701170983
+        }
+      ],
+      "profitable_years": 3,
+      "nonpositive_equity_seen": false,
+      "exposure_pct": 17.83025325119781,
+      "ranking": {
+        "n": 39,
+        "auc_abs_osc_vs_net_positive": 0.45161290322580644,
+        "top_decile_n": 4,
+        "top_decile_gross_bp": 696.1297196918509,
+        "top_decile_net_bp": 675.8420289673076,
+        "top_decile_control_bp": 211.11953594507418,
+        "top_decile_paired_excess_bp": 464.72249302223344,
+        "ranking_permutation_p": 0.0974902509749025,
+        "matched_month_cluster_signflip_p": 0.0057994200579942,
+        "matched_months": 23,
+        "permutations": 10000,
+        "interpretation": "diagnostic only; reused history, non-independent controls, not held-out acceptance"
+      },
+      "n_raw_signals": 87
+    },
+    {
+      "window": "development",
+      "arm": "SMA_comparator",
+      "trades": 87,
+      "win_rate_pct": 13.793103448275861,
+      "gross_bp": 91.28913485467322,
+      "net_bp": 71.28844139130172,
+      "pf_currency": 1.8229788779066394,
+      "pf_unit": 1.833546622154389,
+      "matched_trades": 76,
+      "coverage_pct": 87.35632183908046,
+      "matched_case_bp": 81.18320322835412,
+      "random_control_bp": -61.2443537456891,
+      "excess_bp": 142.4275569740432,
+      "avg_hold_hours": 72.45977011494253,
+      "max_gross_trade_pct": 24.35682746743372,
+      "min_gross_trade_pct": -3.0113991513365113,
+      "largest_5_share_of_positive_pnl_pct": 67.60941756673017,
+      "return_pct": 10.828128209784671,
+      "dd_pct": 6.520372804940568,
+      "close_dd_pct": 6.050934030039193,
+      "final_equity": 554.1406410489234,
+      "fees": 15.445393664244145,
+      "yearly": [
+        {
+          "year": 2021,
+          "return_pct": 2.3151374762103716,
+          "end_equity": 511.57568738105186
+        },
+        {
+          "year": 2022,
+          "return_pct": 8.40318239506399,
+          "end_equity": 554.5643254804841
+        },
+        {
+          "year": 2023,
+          "return_pct": -3.251393292313365,
+          "end_equity": 536.5332582002487
+        },
+        {
+          "year": 2024,
+          "return_pct": 3.281694578959926,
+          "end_equity": 554.1406410489234
+        }
+      ],
+      "profitable_years": 3,
+      "nonpositive_equity_seen": false,
+      "exposure_pct": 18.788501026694046,
+      "ranking": {
+        "n": 87,
+        "auc_abs_osc_vs_net_positive": 0.53,
+        "top_decile_n": 9,
+        "top_decile_gross_bp": 181.44789766045582,
+        "top_decile_net_bp": 161.18764758290064,
+        "top_decile_control_bp": -3.0879910294019397,
+        "top_decile_paired_excess_bp": 185.6728445601653,
+        "ranking_permutation_p": 0.27757224277572246,
+        "matched_month_cluster_signflip_p": 0.020097990200979902,
+        "matched_months": 39,
+        "permutations": 10000,
+        "interpretation": "diagnostic only; reused history, non-independent controls, not held-out acceptance"
+      },
+      "n_raw_signals": 196
+    },
+    {
+      "window": "exposed_replication",
+      "arm": "R1_BE_on",
+      "trades": 14,
+      "win_rate_pct": 14.285714285714285,
+      "gross_bp": 366.0212893397426,
+      "net_bp": 346.0741991645382,
+      "pf_currency": 3.8548918009920565,
+      "pf_unit": 3.901594690629401,
+      "matched_trades": 14,
+      "coverage_pct": 100.0,
+      "matched_case_bp": 346.0741991645382,
+      "random_control_bp": 15.268871007568697,
+      "excess_bp": 330.80532815696944,
+      "avg_hold_hours": 98.0,
+      "max_gross_trade_pct": 34.82585239741277,
+      "min_gross_trade_pct": -3.000473660566054,
+      "largest_5_share_of_positive_pnl_pct": 100.0,
+      "return_pct": 8.093185106647471,
+      "dd_pct": 4.14547738764834,
+      "close_dd_pct": 3.913124797227234,
+      "final_equity": 540.4659255332374,
+      "fees": 2.358787410691445,
+      "yearly": [
+        {
+          "year": 2025,
+          "return_pct": 2.206969073254683,
+          "end_equity": 511.03484536627343
+        },
+        {
+          "year": 2026,
+          "return_pct": 5.759114164880441,
+          "end_equity": 540.4659255332374
+        }
+      ],
+      "profitable_years": 2,
+      "nonpositive_equity_seen": false,
+      "exposure_pct": 12.233676975945016,
+      "ranking": {
+        "n": 14,
+        "auc_abs_osc_vs_net_positive": 0.3333333333333333,
+        "top_decile_n": 2,
+        "top_decile_gross_bp": 9.999999999999423,
+        "top_decile_net_bp": -10.000000000000577,
+        "top_decile_control_bp": -165.05831161381855,
+        "top_decile_paired_excess_bp": 155.05831161381795,
+        "ranking_permutation_p": 0.45815418458154183,
+        "matched_month_cluster_signflip_p": 0.2283771622837716,
+        "matched_months": 7,
+        "permutations": 10000,
+        "interpretation": "diagnostic only; reused history, non-independent controls, not held-out acceptance"
+      },
+      "n_raw_signals": 30
+    },
+    {
+      "window": "exposed_replication",
+      "arm": "BE_off",
+      "trades": 10,
+      "win_rate_pct": 40.0,
+      "gross_bp": 780.6852676344025,
+      "net_bp": 761.0315815891988,
+      "pf_currency": 4.899240468718202,
+      "pf_unit": 4.963631573899071,
+      "matched_trades": 10,
+      "coverage_pct": 100.0,
+      "matched_case_bp": 761.0315815891988,
+      "random_control_bp": -56.62793190327553,
+      "excess_bp": 817.6595134924743,
+      "avg_hold_hours": 263.6,
+      "max_gross_trade_pct": 34.82585239741277,
+      "min_gross_trade_pct": -3.000351357159683,
+      "largest_5_share_of_positive_pnl_pct": 100.0,
+      "return_pct": 13.1176433467189,
+      "dd_pct": 3.577653198950287,
+      "close_dd_pct": 2.7775381192404254,
+      "final_equity": 565.5882167335945,
+      "fees": 1.7106630115282695,
+      "yearly": [
+        {
+          "year": 2025,
+          "return_pct": 7.512786726712473,
+          "end_equity": 537.5639336335623
+        },
+        {
+          "year": 2026,
+          "return_pct": 5.213200020806341,
+          "end_equity": 565.5882167335945
+        }
+      ],
+      "profitable_years": 2,
+      "nonpositive_equity_seen": false,
+      "exposure_pct": 22.920962199312715,
+      "ranking": {
+        "n": 10,
+        "auc_abs_osc_vs_net_positive": 0.4583333333333333,
+        "top_decile_n": 1,
+        "top_decile_gross_bp": 1788.2462387322362,
+        "top_decile_net_bp": 1770.0344849709684,
+        "top_decile_control_bp": -320.31328989430284,
+        "top_decile_paired_excess_bp": 2090.3477748652713,
+        "ranking_permutation_p": 0.2940705929407059,
+        "matched_month_cluster_signflip_p": 0.06189381061893811,
+        "matched_months": 6,
+        "permutations": 10000,
+        "interpretation": "diagnostic only; reused history, non-independent controls, not held-out acceptance"
+      },
+      "n_raw_signals": 30
+    },
+    {
+      "window": "exposed_replication",
+      "arm": "R1_BE_on_slope",
+      "trades": 11,
+      "win_rate_pct": 18.181818181818183,
+      "gross_bp": 450.637666484289,
+      "net_bp": 430.58069912934286,
+      "pf_currency": 5.559187530851361,
+      "pf_unit": 5.641935862235079,
+      "matched_trades": 11,
+      "coverage_pct": 100.0,
+      "matched_case_bp": 430.58069912934286,
+      "random_control_bp": 27.306543183851154,
+      "excess_bp": 403.27415594549177,
+      "avg_hold_hours": 100.72727272727273,
+      "max_gross_trade_pct": 30.71827617866906,
+      "min_gross_trade_pct": -3.0003759714115557,
+      "largest_5_share_of_positive_pnl_pct": 100.0,
+      "return_pct": 7.967434775352067,
+      "dd_pct": 3.6319965425592717,
+      "close_dd_pct": 3.3983992679935384,
+      "final_equity": 539.8371738767603,
+      "fees": 1.8787335374693197,
+      "yearly": [
+        {
+          "year": 2025,
+          "return_pct": 3.322210008635529,
+          "end_equity": 516.6110500431777
+        },
+        {
+          "year": 2026,
+          "return_pct": 4.4958627639965165,
+          "end_equity": 539.8371738767603
+        }
+      ],
+      "profitable_years": 2,
+      "nonpositive_equity_seen": false,
+      "exposure_pct": 9.862542955326461,
+      "ranking": {
+        "n": 11,
+        "auc_abs_osc_vs_net_positive": 0.16666666666666666,
+        "top_decile_n": 2,
+        "top_decile_gross_bp": 9.999999999999423,
+        "top_decile_net_bp": -10.000000000000577,
+        "top_decile_control_bp": -216.77996742072753,
+        "top_decile_paired_excess_bp": 206.77996742072693,
+        "ranking_permutation_p": 0.5329467053294671,
+        "matched_month_cluster_signflip_p": 0.059694030596940305,
+        "matched_months": 6,
+        "permutations": 10000,
+        "interpretation": "diagnostic only; reused history, non-independent controls, not held-out acceptance"
+      },
+      "n_raw_signals": 30
+    },
+    {
+      "window": "exposed_replication",
+      "arm": "SMA_comparator",
+      "trades": 33,
+      "win_rate_pct": 12.121212121212121,
+      "gross_bp": 62.545901755082376,
+      "net_bp": 42.55401233129772,
+      "pf_currency": 1.3802675570752694,
+      "pf_unit": 1.3995666713410375,
+      "matched_trades": 32,
+      "coverage_pct": 96.96969696969697,
+      "matched_case_bp": 53.876290956023865,
+      "random_control_bp": -110.50842844361783,
+      "excess_bp": 164.3847193996417,
+      "avg_hold_hours": 51.39393939393939,
+      "max_gross_trade_pct": 25.360714885947957,
+      "min_gross_trade_pct": -3.0005896262256053,
+      "largest_5_share_of_positive_pnl_pct": 100.0,
+      "return_pct": 2.2288102560240386,
+      "dd_pct": 3.697814547728124,
+      "close_dd_pct": 3.595824126267392,
+      "final_equity": 511.14405128012015,
+      "fees": 5.483255911738493,
+      "yearly": [
+        {
+          "year": 2025,
+          "return_pct": -0.9581902918107454,
+          "end_equity": 495.2090485409463
+        },
+        {
+          "year": 2026,
+          "return_pct": 3.21783351619358,
+          "end_equity": 511.14405128012015
+        }
+      ],
+      "profitable_years": 1,
+      "nonpositive_equity_seen": false,
+      "exposure_pct": 15.532646048109966,
+      "ranking": {
+        "n": 33,
+        "auc_abs_osc_vs_net_positive": 0.39655172413793105,
+        "top_decile_n": 4,
+        "top_decile_gross_bp": -67.50939928528918,
+        "top_decile_net_bp": -87.58190868457446,
+        "top_decile_control_bp": -121.05464092229103,
+        "top_decile_paired_excess_bp": 33.47273223771654,
+        "ranking_permutation_p": 0.6239376062393761,
+        "matched_month_cluster_signflip_p": 0.051794820517948204,
+        "matched_months": 12,
+        "permutations": 10000,
+        "interpretation": "diagnostic only; reused history, non-independent controls, not held-out acceptance"
+      },
+      "n_raw_signals": 75
+    },
+    {
+      "window": "continuous",
+      "arm": "R1_BE_on",
+      "trades": 69,
+      "win_rate_pct": 13.043478260869565,
+      "gross_bp": 170.3132453138603,
+      "net_bp": 150.27946324173683,
+      "pf_currency": 2.4237618323885175,
+      "pf_unit": 2.4645832740832154,
+      "matched_trades": 67,
+      "coverage_pct": 97.10144927536231,
+      "matched_case_bp": 159.68567062379586,
+      "random_control_bp": -74.16911598634904,
+      "excess_bp": 233.85478661014483,
+      "avg_hold_hours": 122.02898550724638,
+      "max_gross_trade_pct": 34.825852397412774,
+      "min_gross_trade_pct": -3.009530203540265,
+      "largest_5_share_of_positive_pnl_pct": 80.06907721619152,
+      "return_pct": 18.09296722927911,
+      "dd_pct": 6.672475138969455,
+      "close_dd_pct": 6.191200923674364,
+      "final_equity": 590.4648361463956,
+      "fees": 12.313670483347849,
+      "yearly": [
+        {
+          "year": 2021,
+          "return_pct": 4.031671449208996,
+          "end_equity": 520.158357246045
+        },
+        {
+          "year": 2022,
+          "return_pct": 7.394653018051445,
+          "end_equity": 558.6222629087864
+        },
+        {
+          "year": 2023,
+          "return_pct": -4.246046896154743,
+          "end_equity": 534.9028996533185
+        },
+        {
+          "year": 2024,
+          "return_pct": 3.6569495760430337,
+          "end_equity": 554.4640289744324
+        },
+        {
+          "year": 2025,
+          "return_pct": 0.6938296027647617,
+          "end_equity": 558.3110645441392
+        },
+        {
+          "year": 2026,
+          "return_pct": 5.759114164880463,
+          "end_equity": 590.4648361463956
+        }
+      ],
+      "profitable_years": 5,
+      "nonpositive_equity_seen": false,
+      "exposure_pct": 18.593696471394313,
+      "ranking": {
+        "n": 69,
+        "auc_abs_osc_vs_net_positive": 0.4222222222222222,
+        "top_decile_n": 7,
+        "top_decile_gross_bp": 230.42764025756446,
+        "top_decile_net_bp": 210.09302764397333,
+        "top_decile_control_bp": 59.897364572842754,
+        "top_decile_paired_excess_bp": 150.19566307113053,
+        "ranking_permutation_p": 0.40835916408359163,
+        "matched_month_cluster_signflip_p": 0.008599140085991401,
+        "matched_months": 38,
+        "permutations": 10000,
+        "interpretation": "diagnostic only; reused history, non-independent controls, not held-out acceptance"
+      },
+      "n_raw_signals": 117
+    },
+    {
+      "window": "continuous",
+      "arm": "BE_off",
+      "trades": 53,
+      "win_rate_pct": 28.30188679245283,
+      "gross_bp": 248.1457123392746,
+      "net_bp": 228.18066808850807,
+      "pf_currency": 1.9798265659850844,
+      "pf_unit": 2.0067560799222255,
+      "matched_trades": 52,
+      "coverage_pct": 98.11320754716981,
+      "matched_case_bp": 238.73729340016746,
+      "random_control_bp": -125.18677691194638,
+      "excess_bp": 363.9240703121139,
+      "avg_hold_hours": 237.81132075471697,
+      "max_gross_trade_pct": 34.82585239741277,
+      "min_gross_trade_pct": -3.0095715682090427,
+      "largest_5_share_of_positive_pnl_pct": 58.297953817586645,
+      "return_pct": 21.3482353297743,
+      "dd_pct": 12.683350720788091,
+      "close_dd_pct": 12.345071451385447,
+      "final_equity": 606.7411766488715,
+      "fees": 9.545450011571742,
+      "yearly": [
+        {
+          "year": 2021,
+          "return_pct": 3.434773673840952,
+          "end_equity": 517.1738683692048
+        },
+        {
+          "year": 2022,
+          "return_pct": 12.393374589627015,
+          "end_equity": 581.2691631558649
+        },
+        {
+          "year": 2023,
+          "return_pct": -7.699940469215205,
+          "end_equity": 536.5117836269579
+        },
+        {
+          "year": 2024,
+          "return_pct": -0.024437606983296334,
+          "end_equity": 536.3806729858561
+        },
+        {
+          "year": 2025,
+          "return_pct": 7.512786726712473,
+          "end_equity": 576.6778089905886
+        },
+        {
+          "year": 2026,
+          "return_pct": 5.213200020806341,
+          "end_equity": 606.7411766488715
+        }
+      ],
+      "profitable_years": 4,
+      "nonpositive_equity_seen": false,
+      "exposure_pct": 27.372387804042482,
+      "ranking": {
+        "n": 53,
+        "auc_abs_osc_vs_net_positive": 0.3526315789473684,
+        "top_decile_n": 6,
+        "top_decile_gross_bp": 530.8216249308466,
+        "top_decile_net_bp": 511.45246595993,
+        "top_decile_control_bp": 120.14789036983996,
+        "top_decile_paired_excess_bp": 391.30457559009,
+        "ranking_permutation_p": 0.24297570242975702,
+        "matched_month_cluster_signflip_p": 0.006199380061993801,
+        "matched_months": 31,
+        "permutations": 10000,
+        "interpretation": "diagnostic only; reused history, non-independent controls, not held-out acceptance"
+      },
+      "n_raw_signals": 117
+    },
+    {
+      "window": "continuous",
+      "arm": "R1_BE_on_slope",
+      "trades": 50,
+      "win_rate_pct": 18.0,
+      "gross_bp": 269.2250338285197,
+      "net_bp": 249.13552642382638,
+      "pf_currency": 3.879759418029488,
+      "pf_unit": 3.9417758480245526,
+      "matched_trades": 44,
+      "coverage_pct": 88.0,
+      "matched_case_bp": 305.60075657513175,
+      "random_control_bp": -70.82423001130326,
+      "excess_bp": 376.42498658643507,
+      "avg_hold_hours": 146.0,
+      "max_gross_trade_pct": 30.71827617866906,
+      "min_gross_trade_pct": -3.009530203540265,
+      "largest_5_share_of_positive_pnl_pct": 79.07907027770109,
+      "return_pct": 22.38998117921085,
+      "dd_pct": 5.066013788454553,
+      "close_dd_pct": 4.723777594210744,
+      "final_equity": 611.9499058960542,
+      "fees": 9.206290501122423,
+      "yearly": [
+        {
+          "year": 2021,
+          "return_pct": 4.988917621982836,
+          "end_equity": 524.9445881099142
+        },
+        {
+          "year": 2022,
+          "return_pct": 7.412538314839701,
+          "end_equity": 563.856306835239
+        },
+        {
+          "year": 2023,
+          "return_pct": -2.1256604679529945,
+          "end_equity": 551.8706362247826
+        },
+        {
+          "year": 2024,
+          "return_pct": 4.2469731024629365,
+          "end_equity": 575.3084337056403
+        },
+        {
+          "year": 2025,
+          "return_pct": 1.792559774802105,
+          "end_equity": 585.6211812692916
+        },
+        {
+          "year": 2026,
+          "return_pct": 4.4958627639965165,
+          "end_equity": 611.9499058960542
+        }
+      ],
+      "profitable_years": 5,
+      "nonpositive_equity_seen": false,
+      "exposure_pct": 16.032887975334017,
+      "ranking": {
+        "n": 50,
+        "auc_abs_osc_vs_net_positive": 0.3224932249322493,
+        "top_decile_n": 5,
+        "top_decile_gross_bp": 382.2221335952318,
+        "top_decile_net_bp": 361.8140675378261,
+        "top_decile_control_bp": 19.91047991679297,
+        "top_decile_paired_excess_bp": 341.903587621033,
+        "ranking_permutation_p": 0.39916008399160086,
+        "matched_month_cluster_signflip_p": 0.0017998200179982,
+        "matched_months": 29,
+        "permutations": 10000,
+        "interpretation": "diagnostic only; reused history, non-independent controls, not held-out acceptance"
+      },
+      "n_raw_signals": 117
+    },
+    {
+      "window": "continuous",
+      "arm": "SMA_comparator",
+      "trades": 120,
+      "win_rate_pct": 13.333333333333334,
+      "gross_bp": 83.38474575228575,
+      "net_bp": 63.386473399800636,
+      "pf_currency": 1.6766519056006157,
+      "pf_unit": 1.6943214904770019,
+      "matched_trades": 108,
+      "coverage_pct": 90.0,
+      "matched_case_bp": 73.09226625877476,
+      "random_control_bp": -75.84111661914947,
+      "excess_bp": 148.93338287792426,
+      "avg_hold_hours": 66.66666666666667,
+      "max_gross_trade_pct": 25.360714885947957,
+      "min_gross_trade_pct": -3.0113991513365113,
+      "largest_5_share_of_positive_pnl_pct": 56.4111721502552,
+      "return_pct": 13.298276897883788,
+      "dd_pct": 6.520372804940568,
+      "close_dd_pct": 6.050934030039193,
+      "final_equity": 566.4913844894189,
+      "fees": 21.522383556176276,
+      "yearly": [
+        {
+          "year": 2021,
+          "return_pct": 2.3151374762103716,
+          "end_equity": 511.57568738105186
+        },
+        {
+          "year": 2022,
+          "return_pct": 8.40318239506399,
+          "end_equity": 554.5643254804841
+        },
+        {
+          "year": 2023,
+          "return_pct": -3.251393292313365,
+          "end_equity": 536.5332582002487
+        },
+        {
+          "year": 2024,
+          "return_pct": 3.281694578959926,
+          "end_equity": 554.1406410489234
+        },
+        {
+          "year": 2025,
+          "return_pct": -0.9581902918107454,
+          "end_equity": 548.8309192234148
+        },
+        {
+          "year": 2026,
+          "return_pct": 3.2178335161935356,
+          "end_equity": 566.4913844894189
+        }
+      ],
+      "profitable_years": 4,
+      "nonpositive_equity_seen": false,
+      "exposure_pct": 17.977046933881464,
+      "ranking": {
+        "n": 120,
+        "auc_abs_osc_vs_net_positive": 0.49158653846153844,
+        "top_decile_n": 12,
+        "top_decile_gross_bp": 112.74945681691226,
+        "top_decile_net_bp": 92.53093279231747,
+        "top_decile_control_bp": -45.35568108403447,
+        "top_decile_paired_excess_bp": 147.2066986756536,
+        "ranking_permutation_p": 0.39006099390060994,
+        "matched_month_cluster_signflip_p": 0.0038996100389961006,
+        "matched_months": 51,
+        "permutations": 10000,
+        "interpretation": "diagnostic only; reused history, non-independent controls, not held-out acceptance"
+      },
+      "n_raw_signals": 271
+    }
+  ],
+  "decisions": [
+    {
+      "parent": "R1_BE_on",
+      "candidate": "BE_off",
+      "criteria": {
+        "at_least20_trades": true,
+        "positive_better_account_return": false,
+        "better_unit_return": false,
+        "positive_nonworse_matched_excess": true,
+        "drawdown_at_most20pct": true,
+        "nonfewer_profitable_years": false,
+        "no_insolvency": true
+      },
+      "selected": "R1_BE_on",
+      "decision_window": "development_only",
+      "production_approval": false
+    },
+    {
+      "parent": "R1_BE_on",
+      "candidate": "R1_BE_on_slope",
+      "criteria": {
+        "at_least20_trades": true,
+        "positive_better_account_return": true,
+        "better_unit_return": true,
+        "positive_nonworse_matched_excess": true,
+        "drawdown_at_most20pct": true,
+        "nonfewer_profitable_years": true,
+        "no_insolvency": true
+      },
+      "selected": "R1_BE_on_slope",
+      "decision_window": "development_only",
+      "production_approval": false
+    }
+  ],
+  "holdout_consumed": false,
+  "production_eligible": false,
+  "training_eligible": false,
+  "selected_policy": {
+    "name": "R1_BE_on_slope",
+    "fee": 0.001,
+    "immediate_stop": true,
+    "unit_leverage": true,
+    "cross_only": false,
+    "risk_pct": 0.5,
+    "ratchet_only": true,
+    "isolate_stops": true,
+    "fresh_cooldown": true,
+    "close_only": true,
+    "breakeven": true,
+    "slope_gate": true
+  },
+  "cohort": {
+    "rows": [
+      {
+        "arm": "R1_BE_on",
+        "trades": 87,
+        "win_rate_pct": 11.494252873563218,
+        "gross_bp": 102.30998414258086,
+        "net_bp": 82.2329144220237,
+        "pf_currency": 1.7400801998321824,
+        "pf_unit": 1.742367984966445,
+        "matched_trades": 85,
+        "coverage_pct": 97.70114942528735,
+        "matched_case_bp": 88.04612379800635,
+        "random_control_bp": -39.214371162250075,
+        "excess_bp": 127.26049496025641,
+        "avg_hold_hours": 104.8735632183908,
+        "max_gross_trade_pct": 30.16296033760839,
+        "min_gross_trade_pct": -3.009530203540265,
+        "largest_5_share_of_positive_pnl_pct": 73.62519492964952
+      },
+      {
+        "arm": "BE_off",
+        "trades": 87,
+        "win_rate_pct": 19.54022988505747,
+        "gross_bp": 51.17058266734797,
+        "net_bp": 31.10962911426625,
+        "pf_currency": 1.1210427981850164,
+        "pf_unit": 1.121682664833046,
+        "matched_trades": 85,
+        "coverage_pct": 97.70114942528735,
+        "matched_case_bp": 39.37610057851084,
+        "random_control_bp": -8.296120658581334,
+        "excess_bp": 47.67222123709218,
+        "avg_hold_hours": 187.632183908046,
+        "max_gross_trade_pct": 30.16296033760839,
+        "min_gross_trade_pct": -3.020967106183308,
+        "largest_5_share_of_positive_pnl_pct": 52.96797140748023
+      }
+    ],
+    "n_common_events": 87,
+    "be_off_minus_on_net_bp": -51.12328530775743,
+    "paired_delta_bp": -79.5882737231642,
+    "paired_delta_month_signflip_p": 0.9115088491150884,
+    "overlapping_events_not_portfolio": true,
+    "control_ids_identical": true
+  }
+}

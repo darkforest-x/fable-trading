@@ -16,18 +16,25 @@ schema_version: 1
 experiments:
   - experiment_id: exp-eth4h-exit-exploration-20260907-v2
     source_repo: darkforest-x/fable-trading
-    source_commit: 6eed56f5a33286ad23cca04b531135d957dcb482
-    status: active
-    question: Does disabling BE improve ETH4h R1, followed by a single causal slow-MA entry-direction gate?
-    single_variable: BE switch then flat-entry slope gate, with preregistered development-only adaptive parent choice.
-    result: Preregistered before outcomes; two hypotheses only; no holdout or native parity claim.
+    source_commit: c38098d2e22e6a1a1661b8622dd0989096026a8a
+    status: inconclusive
+    question: Do BE removal then causal slow-MA flat-entry gating improve ETH4h R1?
+    single_variable: Two preregistered sequential hypotheses; parent and final chosen on2021-2024 only.
+    result: BE-off rejected on development. BE-on+slope candidate:2021-Apr2026+22.39%,DD5.07%,50trades/9winners vsR1+18.09%,DD6.67%.
+      Exposed replication+7.97% vs+8.09%; one added winner dominates improvement; not stable or production-accepted.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/html/p0_eth4h_exit_exploration_20260907.html
-    artifacts: []
-    reuse_allowed: false
-    notes: Owner explicitly authorized autonomous research in goal mode after proposed BE experiment.
+    artifacts:
+    - eth4h-exit-r2-20260907-manifest
+    - eth4h-exit-r2-20260907-summary
+    - eth4h-exit-r2-20260907-validation
+    - eth4h-exit-r2-20260907-report
+    - eth4h-exit-r2-20260907-pine
+    reuse_allowed: true
+    notes: Historical research evidence only.93 tests,21 golden field comparisons,188 independent ledger checks. No
+      holdout, live action or native compilation.
   - experiment_id: exp-eth4h-trend-candidate-20260907-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 096dbc665fe8889313a3c87618950d840b7d2da7
