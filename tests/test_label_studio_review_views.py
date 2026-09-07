@@ -1,6 +1,7 @@
 """View-only mutations, exact filtering and Owner-work preservation in memory."""
 from copy import deepcopy
 import json
+import re
 from types import SimpleNamespace
 from urllib.parse import parse_qs, urlsplit
 
@@ -46,6 +47,13 @@ def server(tmp_path, monkeypatch):
             return deepcopy(view)
         if method == "GET" and parsed.path.startswith("/api/dm/views/"):
             return deepcopy(next(v for v in state.stored if v["id"] == int(parsed.path.rstrip("/").rsplit("/", 1)[1])))
+        if method == "PATCH" and parsed.path.startswith("/api/dm/views/"):
+            assert set(payload) == {"data"}
+            view_id = int(parsed.path.rstrip("/").rsplit("/", 1)[1])
+            assert view_id in {45, 46, 47, 48}
+            view = next(v for v in state.stored if v["id"] == view_id)
+            view["data"] = deepcopy(payload["data"])
+            return deepcopy(view)
         if method == "GET" and parsed.path == "/api/tasks":
             assert query["project"] == ["77"] and query["fields"] == ["task_only"]
             assert query["include"][0] in ("id", "id,data")
@@ -58,10 +66,11 @@ def server(tmp_path, monkeypatch):
                 data = None
             if data is not None:
                 f = data["filters"]
-                assert f["conjunction"] == "and" and len(f["items"]) == 1
-                item = f["items"][0]
-                assert (item["filter"], item["operator"], item["type"]) == ("filter:tasks:id", "in_list", "Number")
-                ids = set(item["value"])
+                assert f["conjunction"] == "or" and len(f["items"]) >= 1
+                for item in f["items"]:
+                    assert (item["filter"], item["operator"], item["type"]) == ("filter:tasks:id", "equal", "Number")
+                    assert type(item["value"]) is int
+                ids = {item["value"] for item in f["items"]}
                 rows = [r for r in rows if r["id"] in ids]
                 if state.bad_filter or (state.extra_after_create and "view" in query):
                     rows.append({"id": 999, "data": {}})
@@ -74,7 +83,9 @@ def server(tmp_path, monkeypatch):
     monkeypatch.setattr(views.base, "api", api)
     monkeypatch.setattr(views.base, "session", lambda: object())
     monkeypatch.setattr(views, "source_identity", lambda: {"source_commit": "fixture", "code_sha256": {}})
-    state.run = lambda: views.create_review_views(queue_file, output, import_receipt=imported, tasks_file=tasks_file, source_manifest=manifest)
+    state.mapping = mapping
+    state.run = lambda **kw: views.create_review_views(queue_file, output, import_receipt=imported,
+        tasks_file=tasks_file, source_manifest=manifest, **kw)
     return state
 
 
@@ -129,3 +140,72 @@ def test_automatic_prediction_setting_blocks_task_reads(server):
     server.automatic_predictions = True
     with pytest.raises(ValueError, match="automatic predictions"): server.run()
     assert len(server.calls) == 1 and server.calls[0][1] == "/api/projects/77"
+
+
+def set_legacy_views(server):
+    server.run()
+    for requested, stored in zip(server.queue["views"], server.stored[1:]):
+        stored["data"] = views.legacy_view_data(requested, server.mapping)
+        stored["data"]["columnsWidth"] = {"tasks:id": 130}
+    server.calls.clear()
+
+
+def test_explicit_legacy_repair_preserves_ids_cosmetics_owner_work_and_reenters(server):
+    set_legacy_views(server)
+    untouched = deepcopy((server.rows, server.annotations, server.drafts, server.predictions, server.stored[0]))
+    before = deepcopy(server.stored[1:])
+    with pytest.raises(ValueError, match="drifted"):
+        server.run()
+    assert not any(method != "GET" for method, _, _ in server.calls)
+    result = server.run(repair_legacy=True)
+    assert (result["created"], result["repaired"], result["reused"]) == (0, 2, 0)
+    assert [(r["method"], r["path"]) for r in result["writes"]] == [
+        ("PATCH", "/api/dm/views/45/"), ("PATCH", "/api/dm/views/46/")]
+    assert [r["previous_view"] for r in result["writes"]] == before
+    for old, new in zip(before, server.stored[1:]):
+        expected = deepcopy(old)
+        expected["data"]["filters"] = new["data"]["filters"]
+        assert new == expected
+    again = server.run()
+    assert (again["created"], again["repaired"], again["reused"], again["writes"]) == (0, 0, 2, [])
+    assert (server.rows, server.annotations, server.drafts, server.predictions, server.stored[0]) == untouched
+
+
+@pytest.mark.parametrize("drift", ["scope", "protocol", "manifest", "id", "missing"])
+def test_legacy_repair_rejects_all_drift_before_any_patch(server, drift):
+    set_legacy_views(server)
+    target = server.stored[2]
+    if drift == "scope": target["data"]["filters"]["items"][0]["value"] = [104]
+    elif drift == "protocol": target["data"]["curation"]["protocol_id"] = "someone_else"
+    elif drift == "manifest": target["data"]["curation"]["source_manifest_sha256"] = "0"*64
+    elif drift == "id": target["id"] = 49
+    else: server.stored.pop()
+    with pytest.raises(ValueError): server.run(repair_legacy=True)
+    assert not any(method != "GET" for method, _, _ in server.calls)
+
+
+def test_filters_match_installed_frontend_contract():
+    """Read actual shipped JS sources without importing/installing LS in main venv."""
+    files = list((views.ROOT/".venv_label_studio/lib").glob("python*/site-packages/web/dist/libs/datamanager/main.js.map"))
+    if not files:
+        pytest.skip("Label Studio frontend is not installed on this host")
+    bundle = json.loads(files[0].read_text())
+    sources = dict(zip(bundle["sources"], bundle["sourcesContent"]))
+    source = lambda suffix: next(content for name, content in sources.items() if name.endswith(suffix))
+    number = source("/src/components/Filters/types/Number.jsx")
+    supported = dict(re.findall(r'key: "([^"]+)"[^}]*?valueType: "([^"]+)"', number))
+    assert supported["equal"] == "single" and "in_list" not in supported
+    global_operators = set()
+    for name, content in sources.items():
+        if "/src/components/Filters/types/" in name:
+            global_operators.update(re.findall(r'key: "([^"]+)"', content))
+    assert "in_list" not in global_operators
+    model = source("/src/stores/Tabs/tab_filter.js")
+    assert "types.enumeration(operatorNames)" in model and "types.maybeNull(Operators)" in model
+    assert 'types.enumeration(["and", "or"])' in source("/src/stores/Tabs/tab.js")
+    for review_ids in ([], ["a", "b"]):
+        data = views.view_data({"key": "test", "title": "test", "review_ids": review_ids}, {"a": 1, "b": 3})
+        assert data["filters"]["conjunction"] == "or"
+        for item in data["filters"]["items"]:
+            assert item["operator"] in global_operators
+            assert supported[item["operator"]] == "single" and type(item["value"]) is int

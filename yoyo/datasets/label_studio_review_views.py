@@ -1,10 +1,11 @@
 """Create exact task-ID review views in existing Label Studio project 77 only.
 
-Grounded in local LS 1.13.1 data_manager/api.py, serializers.py, models.py and
-managers.py: View.data contains filters; Number/in_list maps to Django __in.
-The running API was read-only probed with two IDs before implementation. Every
-write is POST /api/dm/views/; task data, predictions, annotations and drafts are
-never written. Source must be committed before executing this delivery.
+Grounded in local LS 1.13.1 backend and the packaged datamanager source map:
+Tabs/tab_filter.js restricts operators to the frontend enum. Backend in_list is
+unsupported there; Filters/types/Number.jsx supports scalar equal and Tab uses
+OR conjunction. Empty sets use impossible task ID -1. Writes are only view POST
+or explicit, guarded legacy-view PATCH; task data and Owner work are untouched.
+Source must be committed before executing this delivery.
 """
 from __future__ import annotations
 
@@ -85,9 +86,18 @@ def read_inputs(queue_file: Path, receipt_file: Path, tasks_file: Path, manifest
 
 def view_data(view: dict, mapping: dict) -> dict:
     return {"title": view["title"], "type": "list", "target": "tasks", "ordering": ["tasks:id"],
-        "filters": {"conjunction": "and", "items": [{"filter": "filter:tasks:id", "operator": "in_list",
-            "type": "Number", "value": sorted(mapping[rid] for rid in view["review_ids"])}]},
+        "filters": {"conjunction": "or", "items": [{"filter": "filter:tasks:id", "operator": "equal",
+            "type": "Number", "value": task_id}
+            for task_id in (sorted(mapping[rid] for rid in view["review_ids"]) or [-1])]},
         "curation": {"key": view["key"], "protocol_id": PROTOCOL, "source_manifest_sha256": MANIFEST_SHA}}
+
+
+def legacy_view_data(view: dict, mapping: dict) -> dict:
+    """The precise incompatible configuration emitted by the first delivery."""
+    data = view_data(view, mapping)
+    data["filters"] = {"conjunction": "and", "items": [{"filter": "filter:tasks:id",
+        "operator": "in_list", "type": "Number", "value": sorted(mapping[rid] for rid in view["review_ids"])}]}
+    return data
 
 
 def verify_view(view: dict, expected: dict) -> None:
@@ -123,10 +133,14 @@ def filtered_ids(sess, expected_ids: set[int], *, data: dict | None = None, view
 
 
 def create_review_views(queue_file: Path, output: Path, *, import_receipt: Path = PREVIOUS,
-                        tasks_file: Path = PACK/"tasks.json", source_manifest: Path = PACK/"manifest.jsonl") -> dict:
+                        tasks_file: Path = PACK/"tasks.json", source_manifest: Path = PACK/"manifest.jsonl",
+                        repair_legacy: bool = False) -> dict:
     if base.BASE != "http://127.0.0.1:8081":
         raise ValueError("Only the authorized local Label Studio instance is supported")
     queue_file, output = Path(queue_file), Path(output)
+    if repair_legacy and output.resolve() in {(RESULTS/name).resolve() for name in
+            ("label_studio_views_receipt.json", "label_studio_views_reentry.json")}:
+        raise ValueError("Legacy repair must preserve the original delivery receipts")
     queue, mapping, expected = read_inputs(queue_file, Path(import_receipt), Path(tasks_file), Path(source_manifest))
     frozen = {str(p): digest(p) for p in (queue_file, Path(import_receipt), Path(tasks_file), Path(source_manifest))}
     source = source_identity()
@@ -143,15 +157,24 @@ def create_review_views(queue_file: Path, output: Path, *, import_receipt: Path 
                 or v.get("data", {}).get("curation", {}).get("key") == requested["key"]]
         if len(hits) > 1:
             raise ValueError("Ambiguous existing review view")
+        repair = False
         if hits:
-            verify_view(hits[0], data)
-        ids = set(data["filters"]["items"][0]["value"])
+            try:
+                verify_view(hits[0], data)
+            except ValueError:
+                if not repair_legacy or hits[0].get("id") not in {45, 46, 47, 48}:
+                    raise
+                verify_view(hits[0], legacy_view_data(requested, mapping))
+                repair = True
+        elif repair_legacy:
+            raise ValueError("Legacy repair cannot create missing views")
+        ids = {mapping[rid] for rid in requested["review_ids"]}
         filtered_ids(sess, ids, data=data)
-        plans.append((requested, data, hits[0] if hits else None, ids))
+        plans.append((requested, data, hits[0] if hits else None, ids, repair))
     # Every queue/view/filter is validated before the first view-only mutation.
     next_order = max((v.get("order") or 0 for v in views), default=0)+1
     outcomes, writes = [], []
-    for requested, data, existing, ids in plans:
+    for requested, data, existing, ids, repair in plans:
         if existing is None:
             payload = {"project": PROJECT, "order": next_order, "data": deepcopy(data)}
             existing = base.api(sess, "POST", "/api/dm/views/", payload)
@@ -160,11 +183,21 @@ def create_review_views(queue_file: Path, output: Path, *, import_receipt: Path 
             created = True
         else:
             created = False
+            if repair:
+                path = f"/api/dm/views/{existing['id']}/"
+                # Re-read immediately before PATCH so edits after preflight stop us.
+                current = base.api(sess, "GET", path)
+                if current != existing:
+                    raise ValueError("Legacy view changed during repair; no overwrite is permitted")
+                repaired_data = deepcopy(current["data"])
+                repaired_data["filters"] = deepcopy(data["filters"])
+                base.api(sess, "PATCH", path, {"data": repaired_data})
+                writes.append({"method": "PATCH", "path": path, "view_id": existing["id"], "previous_view": current})
         actual = base.api(sess, "GET", f"/api/dm/views/{existing['id']}/")
         verify_view(actual, data)
         actual_ids = filtered_ids(sess, ids, view_id=actual["id"])
         outcomes.append({"key": requested["key"], "title": requested["title"], "view_id": actual["id"],
-            "created": created, "task_ids": actual_ids, "count": len(actual_ids),
+            "created": created, "repaired": repair, "task_ids": actual_ids, "count": len(actual_ids),
             "url": f"{base.BASE}/projects/{PROJECT}/data?tab={actual['id']}"})
     after_identity = task_identity(sess, expected, mapping)
     if any(digest(Path(p)) != value for p, value in frozen.items()):
@@ -172,7 +205,8 @@ def create_review_views(queue_file: Path, output: Path, *, import_receipt: Path 
     receipt = {"schema_version": 1, "protocol_id": PROTOCOL, "source_manifest_sha256": MANIFEST_SHA,
         "generated_at": datetime.now(timezone.utc).isoformat(), **source, "input_sha256": frozen,
         "project_id": PROJECT, "task_count": len(mapping), "views": outcomes,
-        "created": len(writes), "reused": len(outcomes)-len(writes), "writes": writes,
+        "created": sum(v["created"] for v in outcomes), "repaired": sum(v["repaired"] for v in outcomes),
+        "reused": sum(not v["created"] and not v["repaired"] for v in outcomes), "writes": writes,
         "task_data_identity_before": before_identity, "task_data_identity_after": after_identity,
         "task_data_predictions_annotations_drafts_written": False}
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -185,7 +219,9 @@ def create_review_views(queue_file: Path, output: Path, *, import_receipt: Path 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--queue", type=Path, default=RESULTS/"review_queue.json")
-    parser.add_argument("--output", type=Path, default=RESULTS/"label_studio_views_receipt.json")
+    parser.add_argument("--output", type=Path)
+    parser.add_argument("--repair-legacy", action="store_true", help="Repair only unchanged legacy views 45–48")
     args = parser.parse_args()
-    result = create_review_views(args.queue, args.output)
-    print(json.dumps({k: result[k] for k in ("project_id", "created", "reused", "views")}, ensure_ascii=False, indent=2))
+    output = args.output or RESULTS/("label_studio_views_repair.json" if args.repair_legacy else "label_studio_views_receipt.json")
+    result = create_review_views(args.queue, output, repair_legacy=args.repair_legacy)
+    print(json.dumps({k: result[k] for k in ("project_id", "created", "repaired", "reused", "views")}, ensure_ascii=False, indent=2))
