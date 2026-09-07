@@ -20105,3 +20105,46 @@ artifacts:
     notes: Frozen Owner proposal audit or delivery evidence; no new Gold. Original receipts retained. SDK uses primary
       images only; browser QA separately observes future context. See canonical report for actual per-artifact source
       and limitations.
+
+  - artifact_id: imacd-pine-style-v1-1-20260907-source
+    artifact_type: manifest
+    role: research_indicator_visual_revision
+    source_repo: darkforest-x/fable-trading
+    source_commit: 43ef63da91ee8bdc3947efdf4ff1b5277de49f09
+    source_path: yoyo/evaluation/pine/imacd_dense_mtf_v1_1.pine
+    sha256: f4d872ee778a2d947370fb38c9cfd1404de9f199dc2795f13256f5f7cca6298f
+    size_bytes: 16405
+    storage_uri: repo://yoyo/evaluation/pine/imacd_dense_mtf_v1_1.pine
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Display-only revision of owner-authorized research. Core, 14 nonvisual inputs and 5 alerts match V1. Official
+      compiler and same-chart visual check passed. Cloud script revision2 saved. No new PnL evaluation.
+  - artifact_id: imacd-pine-style-v1-1-20260907-receipt
+    artifact_type: manifest
+    role: research_indicator_visual_revision
+    source_repo: darkforest-x/fable-trading
+    source_commit: 43ef63da91ee8bdc3947efdf4ff1b5277de49f09
+    source_path: experiments/active/exp-imacd-ma-mtf-20260907-v3/pine_indicator/style_v1_1_receipt.json
+    sha256: 9d34f8103bf5af3c95d23f5111c7b1915f112cd003fefd3d26bf6e17de10333b
+    size_bytes: 1155
+    storage_uri: repo://experiments/active/exp-imacd-ma-mtf-20260907-v3/pine_indicator/style_v1_1_receipt.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Display-only revision of owner-authorized research. Core, 14 nonvisual inputs and 5 alerts match V1. Official
+      compiler and same-chart visual check passed. Cloud script revision2 saved. No new PnL evaluation.
+  - artifact_id: imacd-pine-style-v1-1-20260907-guide
+    artifact_type: report
+    role: research_indicator_visual_revision
+    source_repo: darkforest-x/fable-trading
+    source_commit: 43ef63da91ee8bdc3947efdf4ff1b5277de49f09
+    source_path: analysis/html/p0_imacd_pine_style_20260907.html
+    sha256: 1c0e2ccac1a0dea98b5b39a8690100f8d3ef7c9e27ef39f0918a6d396feb240f
+    size_bytes: 5591
+    storage_uri: repo://analysis/html/p0_imacd_pine_style_20260907.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Display-only revision of owner-authorized research. Core, 14 nonvisual inputs and 5 alerts match V1. Official
+      compiler and same-chart visual check passed. Cloud script revision2 saved. No new PnL evaluation.
