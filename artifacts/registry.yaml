@@ -18,6 +18,51 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: pine-allin-eth4h-20260907-manifest
+    artifact_type: manifest
+    role: independent_preholdout_research_replay
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3feef2f6a40a9d362985bcd789d7992a410c4adc
+    source_path: experiments/active/exp-pine-allin-eth4h-20260907-v1/artifact_manifest.json
+    sha256: 74e465784d79159cf58704c1a815b36f777324a072f9c880df13aa82fd8c2e03
+    size_bytes: 12919
+    storage_uri: repo://experiments/active/exp-pine-allin-eth4h-20260907-v1/artifact_manifest.json
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: Independent Python historical-close replay, no native TradingView parity;
+      source default cost plus separate single-variable diagnostics. Canonical summary_final.json.
+  - artifact_id: pine-allin-eth4h-20260907-summary
+    artifact_type: manifest
+    role: independent_preholdout_research_replay
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3feef2f6a40a9d362985bcd789d7992a410c4adc
+    source_path: experiments/active/exp-pine-allin-eth4h-20260907-v1/results/summary_final.json
+    sha256: fd5d0fc17c37be72d63392141ad0abcff129b2d061486ff886d5f11eec61f2d0
+    size_bytes: 29563
+    storage_uri: repo://experiments/active/exp-pine-allin-eth4h-20260907-v1/results/summary_final.json
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: Independent Python historical-close replay, no native TradingView parity;
+      source default cost plus separate single-variable diagnostics. Canonical summary_final.json.
+  - artifact_id: pine-allin-eth4h-20260907-report
+    artifact_type: report
+    role: independent_preholdout_research_replay
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3feef2f6a40a9d362985bcd789d7992a410c4adc
+    source_path: analysis/html/p0_pine_allin_eth4h_20260907.html
+    sha256: ae295073b593d03c2f38619b20ed6e2308c163489dc88e7b9d1f4801284c627b
+    size_bytes: 243026
+    storage_uri: repo://analysis/html/p0_pine_allin_eth4h_20260907.html
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: Independent Python historical-close replay, no native TradingView parity;
+      source default cost plus separate single-variable diagnostics. Canonical summary_final.json.
 
   - artifact_id: btcusdtp-owner-transition-v37-config
     artifact_type: config

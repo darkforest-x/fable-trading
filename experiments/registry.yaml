@@ -14,6 +14,29 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-pine-allin-eth4h-20260907-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3da1487
+    status: inconclusive
+    question: Does owner original ALLIN V7 ETHUSDT perpetual 4h profitability survive
+      explicit cost and execution checks?
+    single_variable: Separate commission, first-entry-bar stop activation, sizing-schedule
+      and entry-filter diagnostics; each versus declared parent.
+    result: Binance2021-Apr2026 original cost20 return+2050.94%, path DD91.66%,69trades,net
+      win14.49%; 1x+190.77% DD34.47%; immediate-stop+393.37% DD91.69%. Positive research
+      replay but no native parity or production acceptance.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/html/p0_pine_allin_eth4h_20260907.html
+    artifacts:
+    - pine-allin-eth4h-20260907-manifest
+    - pine-allin-eth4h-20260907-summary
+    - pine-allin-eth4h-20260907-report
+    reuse_allowed: false
+    notes: 2020 warmup; end2026-05-01 before holdout. 76tests and62ledger checks. Gross
+      win71.01% becomes net14.49%;5winners89.73% of positive currency PnL. 2025-reset12trades;
+      matched p.0939. QA and manifest retained; no raw replay rerun.
   - experiment_id: exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38
     source_repo: darkforest-x/fable-trading
     source_commit: "3651944"
