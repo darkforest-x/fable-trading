@@ -64,6 +64,14 @@ def test_k1_chosen_before_flow_and_clock_agreement():
     with pytest.raises(ValueError,match="disagreement"): windows_for(e)
 
 
+def test_replay_recomputes_own_gate_metadata_without_suffix_collision():
+    first,w=gate_events(flow(),events())
+    corrupted=first.copy(); corrupted.flow_defined=False; corrupted.directional_imbalance=-99
+    again,aw=gate_events(flow(),corrupted)
+    pd.testing.assert_frame_equal(first,again)
+    pd.testing.assert_frame_equal(w,aw)
+
+
 def trades():
     return events().assign(closed=True,outcome="colour_exit",gross_return=.001,net_return=-.001,
         flow_pass=False,flow_defined=True)
@@ -106,6 +114,20 @@ def test_gateoff_with_unknown_baseline_never_repairs_primary_pair():
     assert contribution(r,True).iloc[1]==0
     p=paired_contrasts(c,r,a).iloc[0]
     assert not p.complete_pair and pd.isna(p.incremental_excess_net)
+
+
+@pytest.mark.parametrize("status",["entry_missing","entry_invalid"])
+def test_missing_or_unknown_entry_is_not_known_cash(status):
+    c,r,a=paired_fixture()
+    r.loc[1,["closed","outcome","gross_return","net_return"]]=[False,status,np.nan,np.nan]
+    assert pd.isna(contribution(r).iloc[1])
+    p=paired_contrasts(c,r,a).iloc[0]
+    assert not p.complete_pair and pd.isna(p.incremental_excess_net)
+
+
+def test_observed_open_invalid_risk_is_known_no_fill():
+    t=trades().assign(closed=False,outcome="entry_invalid_risk",net_return=np.nan,gross_return=np.nan)
+    assert contribution(t).iloc[0]==0
 
 
 @pytest.mark.parametrize("scale",[.1,1,10])

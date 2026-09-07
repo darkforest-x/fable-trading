@@ -14,6 +14,24 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btcusdtp-owner-k1k2-genuine-flow-20260907-v36
+    source_repo: darkforest-x/fable-trading
+    source_commit: "c7d17b7"
+    status: active
+    question: Does genuine post-K1 directional quote flow improve complete owner-source K1K2 events under one fixed native5 exit?
+    single_variable: Strictly-positive genuine flow gate versus no gate on the same Binance2023-2024 source-defined1h cohort.
+    result: Frozen before economics; first prefix audit stopped before outputs on derived-column join collision, corrected with synthetic regression.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      No holdout economic evaluation. During source discovery a helper accidentally displayed
+      one old owner-anchor row2026-09-03; not authorized for this configuration and not used.
+      Conservatively mark inspection consumed, never call the investigation pristine.
+      Pure morphology plus existing V4 research exit, not full deployed Pine acceptance policy.
+      Plan experiments/active/exp-btcusdtp-owner-k1k2-genuine-flow-20260907-v36/PROJECT_PLAN.md.
   - experiment_id: exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35
     source_repo: darkforest-x/fable-trading
     source_commit: "372ed6a"

@@ -116,7 +116,11 @@ def gate_events(flow, events):
     selected = f[["event_id", "status", "flow_defined", "directional_imbalance",
         "quote_volume_sum", "delta_quote_volume_sum", "expected_bars", "available_bars",
         "zero_volume_bars", "max_source_available_at"]].rename(columns={"status": "flow_status"})
-    out = events.merge(selected, on="event_id", how="left", validate="one_to_one", sort=False)
+    # Prefix replay may receive a previously enriched request. Recompute only
+    # this gate's derived columns; never let stale metadata create _x/_y joins.
+    base = events.drop(columns=[c for c in list(selected.columns)+["flow_pass"]
+                               if c != "event_id" and c in events])
+    out = base.merge(selected, on="event_id", how="left", validate="one_to_one", sort=False)
     out["flow_pass"] = out.flow_defined & out.directional_imbalance.gt(0)
     return out, f
 
@@ -125,7 +129,9 @@ def contribution(trades, gated=False, gross=False):
     """Independent-event original-notional return; gate-off0, unknown path NaN."""
     col = "gross_return" if gross else "net_return"
     x = pd.to_numeric(trades[col], errors="coerce").where(trades.closed)
-    x = x.mask(trades.outcome.str.startswith("entry_"), 0.0)
+    # Missing executable price is unknown, not a known no-fill. Only an actual
+    # observed open on the wrong side of the fixed stop is a known rejection.
+    x = x.mask(trades.outcome.eq("entry_invalid_risk"), 0.0)
     if gated: x = x.mask(~trades.flow_pass, 0.0)
     return x
 
@@ -197,8 +203,8 @@ def describe(trades):
     finite = trades.loc[trades.closed & trades.net_return.notna()]
     x = finite.net_return.astype(float)
     pos, neg = x.loc[x > 0].sum(), -x.loc[x < 0].sum()
-    out = dict(requests=len(trades), closed=len(finite), rejected=int(trades.outcome.str.startswith("entry_").sum()),
-        unresolved=int((~trades.closed & ~trades.outcome.str.startswith("entry_")).sum()),
+    out = dict(requests=len(trades), closed=len(finite), rejected=int(trades.outcome.eq("entry_invalid_risk").sum()),
+        unresolved=int((~trades.closed & ~trades.outcome.eq("entry_invalid_risk")).sum()),
         mean_net_bp=x.mean()*1e4, mean_gross_bp=finite.gross_return.mean()*1e4,
         median_net_bp=x.median()*1e4, sd_net_bp=x.std()*1e4, win_rate=x.gt(0).mean(),
         profit_factor=pos/neg if neg>0 else None, sum_net_bp=x.sum()*1e4,
@@ -289,7 +295,11 @@ def run():
     pair = paired_contrasts(case_t, control_t, assignment); save("paired_contrasts",pair)
     foldrows, ledgers = [], {}
     for arm, kept in [("baseline",case_t),("flow_positive",case_t.loc[case_t.flow_pass])]:
-        ledger = single_position_ledger(kept); ledgers[arm] = ledger; save(arm+"_single_position",ledger)
+        ledger_input = kept.copy()
+        ledger_input.loc[ledger_input.outcome.isin(["entry_missing","entry_invalid"]), "outcome"] = "execution_unknown"
+        ledger = single_position_ledger(ledger_input)
+        ledger["outcome"] = ledger.event_id.map(kept.set_index("event_id").outcome)
+        ledgers[arm] = ledger; save(arm+"_single_position",ledger)
         for fold,_,_ in FOLDS:
             foldrows.append(dict(arm=arm,fold=fold, **describe(kept.loc[kept.fold.eq(fold)])))
     save("fold_metrics",pd.DataFrame(foldrows))
