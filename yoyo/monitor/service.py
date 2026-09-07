@@ -201,8 +201,8 @@ class Monitor:
             return dict(chart, state=state)
 
     def status(self):
-        rows = [r for r in self.store.list_markets() if r.get("active", True)]
-        counts = Counter(r.get("phase", "loading") for r in rows)
+        rows = self.markets()
+        counts = Counter("stale" if r.get("stale") and r.get("phase") != "loading" else r.get("phase", "loading") for r in rows)
         return dict(service="Fable Impulse Monitor", version=VERSION, protocol=PROTOCOL,
                     now_ms=self.client.clock(), started_at_ms=self.started,
                     scan=self.store.get_meta("scan", {"status": "starting", "completed": 0, "total": 0, "errors": 0}),
@@ -215,3 +215,12 @@ class Monitor:
                     "signal_mode": "密集启动（Pine V2.2 默认）", "higher_mode": "已确认高周期许可标注",
                     "source_commit": self.source_commit, "startup_source_sha256": self.source_hashes,
                     "warmup_bars": 340, "launch_agent": "com.fable.impulse-monitor"})
+
+    def markets(self):
+        rows = [r for r in self.store.list_markets() if r.get("active", True)]
+        now = self.client.clock()
+        for row in rows:
+            duration = TIMEFRAMES[row["timeframe"]]
+            if row.get("bar_close_ms") and row["bar_close_ms"] < now // duration * duration:
+                row.update(stale=True, error=row.get("error") or "awaiting_latest_confirmed_bar")
+        return rows

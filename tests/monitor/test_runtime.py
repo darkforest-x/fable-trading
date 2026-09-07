@@ -145,3 +145,13 @@ def test_chart_marks_old_close_stale_at_read_time(tmp_path):
     monitor.client.clock = lambda: 7200000
     monitor.charts[("BTC-USDT-SWAP", "1H")] = {"state": {"bar_close_ms": 3600000, "stale": False}, "candles": []}
     assert monitor.chart("BTC-USDT-SWAP", "1H")["state"]["stale"]
+
+
+def test_persisted_market_does_not_look_current_after_clock_advances(tmp_path):
+    from yoyo.monitor.service import Monitor
+    store = Store(tmp_path / "m.sqlite")
+    store.upsert_market(dict(symbol="BTC-USDT-SWAP", timeframe="1H", phase="ready", stale=False, bar_close_ms=3600000))
+    monitor = Monitor(store)
+    monitor.client.clock = lambda: 7200000
+    assert monitor.markets()[0]["stale"]
+    assert monitor.status()["counts"].get("ready", 0) == 0

@@ -81,7 +81,7 @@ def create_app(runtime=None, start_monitor=True):
 
     @app.get("/api/markets")
     def markets():
-        rows = [r for r in store.list_markets() if r.get("active", True)]
+        rows = monitor.markets()
         return {"items": rows, "total": len(rows)}
 
     @app.get("/api/chart")
