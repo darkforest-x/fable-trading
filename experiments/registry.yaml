@@ -14,6 +14,31 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btcusdtp-1h-background-support-preholdout-20260907-v23
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6c657c0"
+    status: active
+    question: >-
+      Can original251 hourly K1 requests obtain at least226 complete triples
+      under a separately defined whole-entry contemporaneous background?
+    single_variable: >-
+      Matching estimand changes from six exact keys to month/UTC6h/causalvol;
+      direction,risk transfer,validity,cross exclusions,72h embargo,no reuse
+      and three controls remain fixed. Outcome-free support audit only.
+    result: >-
+      Prepared and synthetic-tested;not yet run on saved matching features.
+      Exact capacity witness is not a random sample or profitability evidence.
+    canonical_report: experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/PROJECT_PLAN.md
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Preparation parent commit;actual builder commit must be in started receipt.
+      Old154/251 six-key capacity stays failed;no retrospective reinterpretation.
+      Raw archives and new labels forbidden;future fixed-clock study separate.
+
   - experiment_id: exp-btcusdtp-1h-failed-reduce-preholdout-20260906-v19
     source_repo: darkforest-x/fable-trading
     source_commit: "a776b5b"

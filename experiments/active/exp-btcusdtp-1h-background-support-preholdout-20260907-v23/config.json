@@ -1,0 +1,39 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-background-support-preholdout-20260907-v23",
+  "question": "whole_K1_background_support",
+  "symbol": "BTCUSDT.P",
+  "inputs": {
+    "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/matching_frame.csv.gz": "0a6a0c8461b33d13a9ca28346023033b56d7a00af1b39a6c827a774deb7a3009",
+    "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/summary.json": "6279ce97ac051e168e632291218a697ffc7558db611bcf5e007f23b51bb55440",
+    "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/support_frozen.json": "da1c2a5b4454fde29fc50385a056315f6f716989daa7b37db4c63ade9845e2c7",
+    "experiments/active/exp-btcusdtp-1h-matching-support-preholdout-20260906-v10/results/started.json": "07292f7c64235b0709e1e3b9479f287286eb197176e1baee1fa0b66ed60d7e72",
+    "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/original_mothers.csv.gz": "b3f442ad8b0959b19cb5ae58fd40bc6a3bf40b455b4be31f3758d53940eea3e6"
+  },
+  "folds": [
+    ["2023H1", "2023-01-01", "2023-07-01"],
+    ["2023H2", "2023-07-01", "2024-01-01"],
+    ["2024H1", "2024-01-01", "2024-07-01"],
+    ["2024H2", "2024-07-01", "2025-01-01"]
+  ],
+  "matching_keys": ["month", "utc_6h_bucket", "vol_bucket"],
+  "direction": "mother_direction",
+  "count_per_mother": 3,
+  "expected_mothers": 251,
+  "required_complete_mothers": 226,
+  "embargo_hours": 72,
+  "component_time_limit_seconds": 30.0,
+  "allocation": "maximum_complete_matching_per_connected_component",
+  "allocation_role": "capacity_witness_not_random_sample",
+  "seed": null,
+  "control_time_reuse": false,
+  "fallback": false,
+  "outcomes_read_or_computed": false,
+  "raw_price_io": false,
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "later_label_study": "separate_registration_required",
+  "later_primary_hours": 4,
+  "later_descriptive_hours": [1, 12, 24],
+  "old_v10_reinterpreted": false
+}
