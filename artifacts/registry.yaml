@@ -19,6 +19,112 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: btcusdtp-hourly-wave-v31-results
+    artifact_type: report
+    role: volume_wave_support
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f8e450b"
+    source_path: experiments/active/exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31/results/summary.json
+    sha256: "42aa57b1ebb222175f49df286d17bdfc1bb85ff45f43d3645a373e202c044767"
+    size_bytes: 2339
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Support only;100of251,not economics. HTML structural_only;full receipts in E31."
+
+  - artifact_id: btcusdtp-hourly-wave-v31-audit
+    artifact_type: report
+    role: independent_scalar_support_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f8e450b"
+    source_path: experiments/active/exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31/audit.json
+    sha256: "4a8621d259ea0bb816a810afdd6bf4c96d8a5db7c521e8c357ce9929939a0378"
+    size_bytes: 5647
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31/audit.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Support only;100of251,not economics. HTML structural_only;full receipts in E31."
+
+  - artifact_id: btcusdtp-hourly-wave-v31-counts
+    artifact_type: dataset
+    role: support_counts
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f8e450b"
+    source_path: experiments/active/exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31/results/counts.csv.gz
+    sha256: "55e6b1cbe00c233f7e7e847e801949b850623513c249ceda2e1901be029f7264"
+    size_bytes: 862
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31/results/counts.csv.gz"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Support only;100of251,not economics. HTML structural_only;full receipts in E31."
+
+  - artifact_id: btcusdtp-hourly-wave-v31-report
+    artifact_type: report
+    role: support_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6e156a8"
+    source_path: analysis/p1_btcusdtp_hourly_volume_wave_support_v31_20260907.md
+    sha256: "d96e705c66920bd90543a8553cb981bbfacedf8f6f71c2f7269262bfbc05dd9a"
+    size_bytes: 12416
+    storage_uri: "repo://analysis/p1_btcusdtp_hourly_volume_wave_support_v31_20260907.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Support only;100of251,not economics. HTML structural_only;full receipts in E31."
+
+  - artifact_id: btcusdtp-hourly-wave-v31-html
+    artifact_type: report
+    role: support_html
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f57f835"
+    source_path: analysis/html/p1_btcusdtp_hourly_volume_wave_support_v31_20260907.html
+    sha256: "cd850b8d06ed8b59a0f6e17c9d50e704e0ecaa1aec0eb31f9afaf29a1b41c2de"
+    size_bytes: 457515
+    storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_volume_wave_support_v31_20260907.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Support only;100of251,not economics. HTML structural_only;full receipts in E31."
+
+  - artifact_id: btcusdtp-hourly-wave-v31-artifact
+    artifact_type: report
+    role: canonical_support_artifact
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f57f835"
+    source_path: experiments/active/exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31/artifact.json
+    sha256: "efa94dfed23f7d44a91406426460c01ac9377c03f14150d176d72953edf0a422"
+    size_bytes: 33160
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31/artifact.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Support only;100of251,not economics. HTML structural_only;full receipts in E31."
+
+  - artifact_id: btcusdtp-hourly-wave-v31-qa
+    artifact_type: report
+    role: support_qa
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f57f835"
+    source_path: experiments/active/exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31/QA.md
+    sha256: "cf4c9c7ea0c2c5b5e4e019c47731f8e8c068bc7e4501f5bab95e7b279d2b1913"
+    size_bytes: 3438
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31/QA.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Support only;100of251,not economics. HTML structural_only;full receipts in E31."
+
+
   - artifact_id: btcusdtp-hourly-classifier-v30-results
     artifact_type: report
     role: classifier_economics

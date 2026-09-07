@@ -41,6 +41,8 @@ LABELS = {"LONG", "SHORT", "NO_SIGNAL", "UNCERTAIN"}
 SEMANTICS = {"CORE_WICKS_MA", "MA_BUNDLE", "OTHER", "UNCERTAIN"}
 REASONS = {"non_dense", "far_from_ma", "already_launched", "not_launch",
            "multiple_cores", "insufficient_context", "other"}
+ANSWER_KEYS = {"review_id", "label", "core_start", "core_end", "box_top_norm",
+               "box_bottom_norm", "box_semantics", "reasons", "note", "answered_at"}
 BAR = timedelta(minutes=15)
 
 
@@ -465,19 +467,28 @@ def score(export: dict, pack: Path = PACK) -> dict:
         "next_gate": "Owner interpretation of repeat/semantic results and matched-negative feasibility; no automatic Gold or training launch" if complete else "await_remaining_owner_answers"}
 
 
+def review_timestamp(value: str) -> datetime:
+    """Match the UI snapshot clock contract, including explicit valid UTC offset."""
+    if not isinstance(value,str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)",value):
+        raise ValueError("invalid review timestamp")
+    return instant(value)
+
+
 def storage_validate(export: dict, pack: Path) -> tuple[int, int]:
     """Validate a progress snapshot without fabricating answers for its drafts."""
     path = pack / "public/manifest.json"
     manifest = json.loads(path.read_text())
     if export.get("schema_version") != 1 or export.get("pack_id") != manifest["pack_id"] or export.get("manifest_sha256") != sha(path):
         raise ValueError("wrong pack identity")
-    instant(export["exported_at"])
+    review_timestamp(export["exported_at"])
     items = {r["review_id"]:r for r in manifest["items"]}
     answers = export.get("answers")
     if not isinstance(answers,list) or len(answers)>len(items):
         raise ValueError("invalid answers list")
     seen, complete = set(), 0
     for answer in answers:
+        if not isinstance(answer,dict) or not ANSWER_KEYS.issubset(answer):
+            raise ValueError("incomplete answer fields")
         rid = answer.get("review_id")
         if rid not in items or rid in seen:
             raise ValueError("duplicate or foreign review id")
@@ -494,12 +505,14 @@ def storage_validate(export: dict, pack: Path) -> tuple[int, int]:
                 raise ValueError("invalid draft vertical coordinate")
         if answer.get("box_semantics") is not None and answer["box_semantics"] not in SEMANTICS:
             raise ValueError("invalid draft box semantics")
-        if not isinstance(answer.get("reasons"),list) or any(r not in REASONS for r in answer["reasons"]):
+        if not isinstance(answer.get("reasons"),list) or any(r not in REASONS for r in answer["reasons"]) or len(set(answer["reasons"])) != len(answer["reasons"]):
             raise ValueError("invalid draft reasons")
         if not isinstance(answer.get("note"),str) or len(answer["note"])>4000:
             raise ValueError("invalid draft note")
         if answer.get("label") not in {"LONG","SHORT"} and any(answer.get(k) is not None for k in ("core_start","core_end","box_top_norm","box_bottom_norm","box_semantics")):
             raise ValueError("non-signal draft retains positive geometry")
+        if answer["answered_at"] is not None:
+            review_timestamp(answer["answered_at"])
         complete += int(validate_answer(answer,items[rid]["n_bars"]))
     return complete,len(items)
 

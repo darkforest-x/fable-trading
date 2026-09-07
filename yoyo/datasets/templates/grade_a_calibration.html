@@ -314,6 +314,13 @@
       try {
         const snapshot=await requestLocalAPI('/api/latest');
         const imported=validateSnapshot(snapshot);
+        // Compare after the response so edits made while waiting are protected too.
+        const currentRecords=envelope().answers;
+        const restoredRecords=pack.items.filter((item) => imported.has(item.review_id)).map((item) => imported.get(item.review_id));
+        if(currentRecords.length && JSON.stringify(currentRecords)!==JSON.stringify(restoredRecords) && !window.confirm('本机进度将替换当前浏览器进度，未备份的新修改会被替换。点击取消可保留当前进度。继续恢复？')) {
+          $('global-notice').textContent='已取消恢复，当前浏览器进度已保留。';
+          return;
+        }
         restoreAnswers(imported);
         const count=pack.items.filter((item) => complete(answers.get(item.review_id),item)).length;
         $('global-notice').textContent='本机进度已恢复并替换浏览器进度（已完成 '+count+' / '+pack.items.length+'）。';

@@ -1,0 +1,82 @@
+{
+  "population": {
+    "case": {
+      "total": 251,
+      "accepted": 100,
+      "abstain": 148,
+      "unknown": 3,
+      "known": 248
+    },
+    "control": {
+      "total": 744,
+      "accepted": 401,
+      "abstain": 343,
+      "unknown": 0,
+      "known": 744
+    }
+  },
+  "support_values": {
+    "events": 100,
+    "minimum_fold_events": 23,
+    "active_months": 24,
+    "minimum_fold_months": 6
+  },
+  "support_gates": {
+    "minimum_events": true,
+    "minimum_per_fold": true,
+    "minimum_active_months": true,
+    "minimum_months_per_fold": true
+  },
+  "support_pass": true,
+  "coverage": {
+    "case_known": {
+      "numerator": 248,
+      "denominator": 251,
+      "rate": 0.9880478087649402
+    },
+    "control_known": {
+      "numerator": 744,
+      "denominator": 744,
+      "rate": 1.0
+    },
+    "complete_known_triples_all_cases": {
+      "numerator": 248,
+      "denominator": 251,
+      "rate": 0.9880478087649402
+    },
+    "complete_known_triples_accepted_cases": {
+      "numerator": 100,
+      "denominator": 100,
+      "rate": 1.0
+    }
+  },
+  "accepted_case_control_states": {
+    "total": 300,
+    "accepted": 158,
+    "abstain": 142,
+    "unknown": 0,
+    "known": 300
+  },
+  "status": "support_pass_requires_separate_outcome_preregistration",
+  "outcomes_read_or_computed": false,
+  "economic_acceptance": false,
+  "trace_validation": {
+    "rows": 18222,
+    "segments": 2,
+    "prior_warmup": 100,
+    "current_count_minimum": 102,
+    "raw5_aggregation_verified": false,
+    "pine_builtin_parity": false
+  },
+  "experiment_id": "exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31",
+  "generated_at": "2026-09-07 04:53:02.641540+00:00",
+  "builder_commit": "f8e450bc65b37211af2372321948acc03e15ab2d",
+  "output_hashes": {
+    "hourly_trace.csv.gz": "c9ad766c5c0463f56df9dd290d08be6e64751c37f66809ea23e2003705fb111a",
+    "case_context.csv.gz": "f2245753c1da5f40ed86873f7aa39a8652762c71dd71735d6689d0e27f34e6d2",
+    "control_context.csv.gz": "731bdfbbc56c7c63e8bb3bb3724990ca634d39e49ede18e199d6abd4b81c6012",
+    "counts.csv.gz": "55e6b1cbe00c233f7e7e847e801949b850623513c249ceda2e1901be029f7264",
+    "matched_support.csv.gz": "47151942db25859b2cb3cc27e6a0c1ea8cc8d20d98c666d2e71876ee5db1bb57"
+  },
+  "support_frozen_sha256": "d6571cc93e98068e22c2d8e493c1365b3bb6cec3e0a250b6d42e2fac7b965fd1"
+}

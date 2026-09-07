@@ -145,3 +145,16 @@ def test_bad_import_dates_cannot_be_saved_as_completed(tmp_path,stamp):
     export["answers"][0]["answered_at"]=stamp
     with pytest.raises(ValueError):c.save_snapshot(export,tmp_path)
     assert not (tmp_path/"answers").exists()
+
+
+@pytest.mark.parametrize("kind",["missing_field","duplicate_reason","empty_timestamp","non_ui_timestamp"])
+def test_server_rejects_snapshots_the_ui_cannot_restore(tmp_path,kind):
+    export=make_pack(tmp_path)
+    export["exported_at"]="2026-09-07T12:00:00+08:00"
+    a=export["answers"][0]
+    if kind=="missing_field": a.pop("note")
+    elif kind=="duplicate_reason": a["reasons"]=["other","other"]
+    elif kind=="empty_timestamp": a["answered_at"]=""
+    else: a["answered_at"]="2026-09-07 12:00:00+08:00"
+    with pytest.raises(ValueError): c.save_snapshot(export,tmp_path)
+    assert not (tmp_path/"answers").exists()

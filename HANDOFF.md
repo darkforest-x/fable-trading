@@ -2,6 +2,31 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-07 — V31前置方向量改善覆盖通过，未读该门收益）
+
+Owner“下一步，继续”：f8e450b先冻结再只读V20保存小时OHLCV、V24原251/744身份。
+ChartPrime DeltaPulse源码20/5数值，派生门d*(wave[T-1]-wave[T-2])>0，
+较早T-2需100连续小时；非原生背离信号、非首次启动/真实订单流、不叠V29。
+100accepted/148abstain/3unknown；controls401/343/0。四半年25/27/23/25，
+24月全有、每月2–8，四支持门80/12/12月/3月全过，不是功效或盈利验证。
+100入口全有300原控制（158通过142不通过），未来条件比较不可只留158。
+3unknown仍是2023-06-25 UTC03/11/14，older count51/59/62预热不足。
+
+Root独立stdlib审计f8e450b重算18222小时主要EMA/lagwave/clock、995门、
+62counts、251groups和支持门通过；非所有debug字段、非raw5/Pine/经济审计。
+77新合成/guard tests；含父契约/边界联合299过11.48s，report另5过。
+报告11markdown sections/12blocks/1native24月两系列支持率图，非胜率或净值。
+初次缺查询来源验证失败保留；f57f835实际SQLite投影且与原Python投影相等后过。
+最终HTML structural_only，无Chromium，未验browser/mobile/source-dialog，无安装。
+交付analysis/html/p1_btcusdtp_hourly_volume_wave_support_v31_20260907.html，
+E31保存summary/audit/contexts/counts/源收据/QA/NEXT_EXPERIMENT及验证失败旧产物。
+
+V31仅support accepted、未读新分组收益/2025+/holdout、未改TV/退出/成本/ACTIVE。
+下一步是另行冻结固定4h/20bp经济诊断与省成本分解，再读保存V24labels；
+不是调EMA/阈值或换控制。2023–2024反复使用，必须标探索而非独立验收。
+V30经济拒绝不变，盈利目标未达，get_goal usageLimited，不consume reset，
+不承诺后台执行。保留其它会话dirty，仍main单仓。
+
 ## ⚡ 当前真相（2026-09-07 — V30默认分类器经济诊断未通过，改善主要是少扣成本）
 
 Owner批准另做V30探索，明确不回写V29的78<80支持不足。917f333先提交再读取保存

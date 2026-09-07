@@ -8,6 +8,11 @@
 
 ## 按日期倒序
 
+### 2026-09-07 — V31前置方向量改善支持通过，未读收益
+
+- [V31支持检查HTML](html/p1_btcusdtp_hourly_volume_wave_support_v31_20260907.html) · [Markdown源](p1_btcusdtp_hourly_volume_wave_support_v31_20260907.md)
+- 原251保留100、四半年25/27/23/25、24活跃月；四覆盖门过。148不符合、3未知，原控制401/744通过；100入口完整300控制。不是盈利/最优结论。独立标量审计过；联合299测试+报告5测试；HTML结构验证过，手机/浏览器未验。
+
 本轮增量入口（2026-09-07）：[Classifier Economics · V30](html/p1_btcusdtp_hourly_classifier_economics_v30_20260907.html) · [源报告](p1_btcusdtp_hourly_classifier_economics_v30_20260907.md)。保留78入口4h净−14.77bp，四半年皆负；政策改善96.13%来自少扣成本，未通过冻结继续门。V29原支持不足不回写。
 
 本轮增量入口（2026-09-07）：[Trend Classifier Support](html/p1_btcusdtp_hourly_classifier_support_v29_20260907.html) · [源报告](p1_btcusdtp_hourly_classifier_support_v29_20260907.md)。原251入口保留78，170过滤中168中性、2反向；支持80门未过，未读收益，不是盈利拒绝。
