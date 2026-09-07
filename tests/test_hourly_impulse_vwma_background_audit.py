@@ -252,6 +252,8 @@ def test_hour_clock_failclosed(bad):
 def test_csv_timestamp_and_certificate_json_are_distinct():
     v.equal('2024-01-01 00:00:00+00:00', '2024-01-01T00:00:00+00:00', 'Clock')
     v.equal('["2024-01-01T00:00:00+00:00_L"]', '["2024-01-01T00:00:00+00:00_L"]', 'JSON')
+    v.equal('2024-01-01T00:00:00+00:00_L', '2024-01-01T00:00:00+00:00_L', 'Event ID')
+    v.equal('2024-01-01T00:00:00+00:00_S::background_control0', '2024-01-01T00:00:00+00:00_S::background_control0', 'Control ID')
     with pytest.raises(ValueError): v.equal(0, None, 'Unknown')
 
 

@@ -79,7 +79,7 @@ def equal(got, want, label):
         require(flag(got) == want, label+': boolean')
     elif isinstance(want, str) and want in ('True', 'False'):
         require(flag(got) == flag(want), label+': boolean')
-    elif isinstance(want, str) and re.match(r'^\d{4}-\d{2}-\d{2}[T ]\d{2}:', want):
+    elif isinstance(want, str) and re.fullmatch(r'\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})', want):
         require(stamp(got) == stamp(want), label+': clock')
     else:
         try:
