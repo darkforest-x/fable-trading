@@ -112,6 +112,19 @@ class Replay:
         """Extension hook; original opposite entry reverses the position."""
         return quantity
 
+    def entry_signal_allowed(self, i: int, direction: int, position) -> bool:
+        """Extension hook; original signals have no additional entry gate."""
+        return True
+
+    def managed_stop(self, i: int, position, current: float) -> float:
+        """Original confirmed-bar BE update; submitted for subsequent fills."""
+        ep = position["entry_price"]
+        if position["direction"] > 0 and self.h[i] > ep * 1.015:
+            return max(current, ep * 1.001)
+        if position["direction"] < 0 and self.l[i] < ep * .985:
+            return min(current, ep * .999)
+        return current
+
     def run(self, start: int, end: int, *, injected: tuple[int, int] | None = None) -> dict[str, Any]:
         """Run [start,end); injected controls stop after their first exit.
 
@@ -207,7 +220,7 @@ class Replay:
             direction = int(self.raw[i])
             if injected is not None and pos is None and not trades:
                 direction = injected[1] if i == injected[0] else 0
-            allowed = bool(self.allowed[i] and not cooling)
+            allowed = bool(self.allowed[i] and not cooling and self.entry_signal_allowed(i, direction, pos))
             if direction and cooling:
                 skip -= 1
                 events.append({"i": i, "event": "cooldown_skip", "direction": direction})
@@ -230,11 +243,7 @@ class Replay:
                         pending = (signal, self.pending_quantity(qty, pos, signal), i, proposed_sl)
                     events.append({"i": i, "event": "entry_signal", "direction": signal})
             if pos is not None:
-                ep = pos["entry_price"]
-                if pos["direction"] > 0 and self.h[i] > ep * 1.015:
-                    sl = max(sl, ep * 1.001)
-                elif pos["direction"] < 0 and self.l[i] < ep * 0.985:
-                    sl = min(sl, ep * 0.999)
+                sl = self.managed_stop(i, pos, sl)
                 if signal and signal != pos["direction"]:
                     events.append({"i": i, "event": "shared_stop_on_reverse", "direction": signal})
                 pos["stop"] = sl

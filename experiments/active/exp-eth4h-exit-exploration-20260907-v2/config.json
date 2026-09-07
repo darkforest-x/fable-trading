@@ -1,0 +1,39 @@
+{
+  "baseline": {
+    "name": "R1_BE_on",
+    "fee": 0.001,
+    "immediate_stop": true,
+    "unit_leverage": true,
+    "cross_only": false,
+    "risk_pct": 0.5,
+    "ratchet_only": true,
+    "isolate_stops": true,
+    "fresh_cooldown": true,
+    "close_only": true,
+    "breakeven": true,
+    "slope_gate": false
+  },
+  "be_off": {
+    "name": "BE_off",
+    "fee": 0.001,
+    "immediate_stop": true,
+    "unit_leverage": true,
+    "cross_only": false,
+    "risk_pct": 0.5,
+    "ratchet_only": true,
+    "isolate_stops": true,
+    "fresh_cooldown": true,
+    "close_only": true,
+    "breakeven": false,
+    "slope_gate": false
+  },
+  "slope_rule": "side*(SMA60[t]-SMA60[t-1])>0, flat entries only",
+  "max_hypotheses": 2,
+  "selection_window": [
+    "2021-01-01",
+    "2025-01-01"
+  ],
+  "end_exclusive": "2026-05-01",
+  "production_eligible": false,
+  "training_eligible": false
+}

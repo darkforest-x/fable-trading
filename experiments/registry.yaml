@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-eth4h-exit-exploration-20260907-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6eed56f5a33286ad23cca04b531135d957dcb482
+    status: active
+    question: Does disabling BE improve ETH4h R1, followed by a single causal slow-MA entry-direction gate?
+    single_variable: BE switch then flat-entry slope gate, with preregistered development-only adaptive parent choice.
+    result: Preregistered before outcomes; two hypotheses only; no holdout or native parity claim.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/html/p0_eth4h_exit_exploration_20260907.html
+    artifacts: []
+    reuse_allowed: false
+    notes: Owner explicitly authorized autonomous research in goal mode after proposed BE experiment.
   - experiment_id: exp-eth4h-trend-candidate-20260907-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 096dbc665fe8889313a3c87618950d840b7d2da7
