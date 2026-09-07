@@ -1,0 +1,104 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24",
+  "inputs": {
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/allocation.csv.gz": "fba2f167a0cdd0e9fe8e99bdf90442fba5a92d73497dd74d8acc6215b872752a",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/assignments.csv.gz": "e97b433b51acb5386fe7a5d6afe63cc5bc893b675a7c172ec403ea7b36fbeec1",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/component_capacity.csv.gz": "95b5589c12631d0ced49a4d58f9fe2c0ef7dae04e8f59ba36a8d015d07b7eb0e",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/controls.csv.gz": "fae5176d36bd3882bf0fcd98487ef16e916fb5402387c0fa42345019df2974ba",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/eligible_edges.csv.gz": "d045d5a05e71d93bde0af5402496292669bfbd9a71cc18c98f5b097d7d5ea1a8",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/fold_coverage.csv.gz": "46f718f3320d491e7399cc1210cb0b4c847aff336a15bf821598fa39edc69210",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/matching_frame.csv.gz": "4745cd147d571b2cc47ef6801f6868912910eccecd4c9a1e8e23bda3e2ac9023",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/mother_support.csv.gz": "71886909385176088c2eec8f62ee2932ae4fc9d28f29a687aa08aa665f8dcd78",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/original_mothers.csv.gz": "743a32c6fb91c87d4acf30eca50289db64c92627f75e3676c9498b6085d5985c",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/stage_counts.csv.gz": "aa6e00b19ad0806e7271997c01608a0424837a500f2c165fffbe19fc2222a2c8",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/started.json": "cd2226ef1316816dcae422c23ae13107b82ada8f8e44d8b3e77c11c2e03c5b5a",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/summary.json": "e5455a429e7664d25e4ab91df0df7ef1fdbb9298f5423309c89f88e36de46384",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/support_frozen.json": "83e7cf528566eafc81ac1ea70a250e88c44c797b90d913741f6c2bb2646bd790",
+    "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/original_mothers.csv.gz": "b3f442ad8b0959b19cb5ae58fd40bc6a3bf40b455b4be31f3758d53940eea3e6",
+    "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a",
+    "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json": "c14aae71600d7f91b27068976656b9d4a8dc1bfb462df182a2e2a78ac85d5228"
+  },
+  "source": {
+    "path": "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+    "audit": "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json",
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "end_exclusive": "2026-02-28T16:00:00Z"
+  },
+  "folds": [
+    [
+      "2023H1",
+      "2023-01-01",
+      "2023-07-01"
+    ],
+    [
+      "2023H2",
+      "2023-07-01",
+      "2024-01-01"
+    ],
+    [
+      "2024H1",
+      "2024-01-01",
+      "2024-07-01"
+    ],
+    [
+      "2024H2",
+      "2024-07-01",
+      "2025-01-01"
+    ]
+  ],
+  "phase_end_exclusive": "2025-01-01 00:00:00+00:00",
+  "population": {
+    "mothers": 251,
+    "matched_mothers": 248,
+    "controls": 744,
+    "unmatched_mothers": 3
+  },
+  "sampling": {
+    "bit_generator": "PCG64",
+    "seed": 20260907,
+    "streams": 1,
+    "count": 3,
+    "component_order": "minimum_mother_id",
+    "mother_order": "sorted_id",
+    "candidate_order_before_permutation": "sorted_UTC_ISO_id",
+    "one_permutation_per_component": true,
+    "complete_bipartite_required": true,
+    "required_supply": "3*mother_count",
+    "fallback": false,
+    "resample_missing_labels": false
+  },
+  "embargo_hours": 72,
+  "primary_horizon_hours": 4,
+  "horizons_hours": [
+    1,
+    4,
+    12,
+    24
+  ],
+  "cost_threshold_fraction": 0.002,
+  "execution_pnl": false,
+  "old_exits_used": false,
+  "inference_executed_by_runner": false,
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "statistics_preregistration": {
+    "primary_metrics": [
+      "all_case_cost_threshold_markout",
+      "complete_triplet_excess"
+    ],
+    "calendar_months": 24,
+    "weighting": "event_sum_over_count",
+    "resamples": 9999,
+    "bit_generator": "PCG64",
+    "seed": 20260907,
+    "stream_independent_of_sampling": true,
+    "interval": "95_percent_percentile",
+    "p": "one_sided_monthly_sum_signflip_plus_one",
+    "shared_month_indices_and_signs_across_horizons": true,
+    "minimum_known_cases": 226,
+    "minimum_complete_pairs": 226,
+    "continue_requires": "both_means_positive_both_CI_lower_positive_both_p_lt_.01_and_four_fold_case_means_positive",
+    "continue_is_profitability_acceptance": false
+  }
+}
