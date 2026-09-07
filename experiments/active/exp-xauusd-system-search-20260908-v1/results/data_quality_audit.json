@@ -1,0 +1,3065 @@
+{
+  "experiment_id": "exp-xauusd-system-search-20260908-v1",
+  "audit_version": "gap-coverage-heuristic-v1",
+  "audit_revision": 2,
+  "generated_at": "2026-09-07T17:54:46.245726+00:00",
+  "builder": {
+    "path": "yoyo/evaluation/xauusd_gap_quality.py",
+    "source_commit": "53f83ccfd2f7e6337fa0e9b3e6ef7ee36f41f2f6",
+    "sha256": "02a3f0188629a414b37c1e7d62f1a66915dbbdfee4e9e3bdfa814018fa3ed8c1"
+  },
+  "training_eligible": false,
+  "production_eligible": false,
+  "audit_only": true,
+  "returns_calculated": false,
+  "raw_market_data_written": false,
+  "inputs": {
+    "source_metadata": "experiments/active/exp-xauusd-system-search-20260908-v1/results/source_metadata.json",
+    "source_metadata_sha256": "2c465db1d4117b1d85c55ae838372c593f630284c4fdf77b8def83e6a2409443",
+    "quote_gaps": "experiments/active/exp-xauusd-system-search-20260908-v1/results/quote_gaps.csv.gz",
+    "quote_gaps_sha256": "c8b1dc5234111fa966f1be391e8f85b11c1cf57c79af1bc052dcda264675dbdb",
+    "quote_gaps_decompressed_sha256": "79c9bdcbd9d44d9a74bb38d171e64bf01bd2287c6817cb8544755f753b082fd0"
+  },
+  "method": {
+    "input_scope": "Only source metadata and quote-gap timestamps/flags; no OHLC, positions, downloads or returns.",
+    "missing_interval": "[previous quote + 1 minute, next quote), clipped to each UTC period before summing.",
+    "large_gap": "Full missing_minutes >=120; period totals clip cross-boundary gaps.",
+    "usual_weekend_shape_hint": "Friday previous UTC hour 20/21, Sunday next hour 22/23, 2820-3010 missing minutes inclusive. Grouping only, not an approved session mask.",
+    "intraday_diagnostic": "Same UTC weekday; missing start hour >=1; next quote hour <=21; missing_minutes >=60.",
+    "holiday_candidates": "Unverified date-based hints for an unidentified source venue.",
+    "gap_formula_matches_all_rows": true
+  },
+  "periods": {
+    "selection_2024_2025": {
+      "start_utc": "2024-01-01T00:00:00+00:00",
+      "end_exclusive_utc": "2026-01-01T00:00:00+00:00",
+      "observed_rows": 709543,
+      "row_count_reconciles_with_source_metadata": true,
+      "coverage_completeness_proven": false,
+      "all_gap_count": 601,
+      "all_absent_calendar_minutes": 343097,
+      "large_gap_threshold_minutes": 120,
+      "large_gap_count": 123,
+      "large_gap_absent_calendar_minutes": 319023,
+      "usual_weekend_shape_large_count": 97,
+      "usual_weekend_shape_large_absent_calendar_minutes": 285129,
+      "other_large_count": 26,
+      "other_large_absent_calendar_minutes": 33894,
+      "same_day_01_to_21_utc_weekday_gaps_at_least_60_min_count": 0,
+      "same_day_01_to_21_utc_weekday_gaps_at_least_60_min_absent_minutes": 0,
+      "longest_elapsed_hours": 74.03333333333333,
+      "has_any_gap_elapsed_over_80_hours": false,
+      "all_large_gaps": [
+        {
+          "previous_quote_utc": "2023-12-29T21:57:00+00:00",
+          "next_quote_utc": "2024-01-01T23:00:00+00:00",
+          "missing_start_utc": "2023-12-29T21:58:00+00:00",
+          "missing_end_exclusive_utc": "2024-01-01T23:00:00+00:00",
+          "missing_minutes_full": 4382,
+          "missing_minutes_in_period": 1380,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "New Year extended weekend date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-01-05T21:59:00+00:00",
+          "next_quote_utc": "2024-01-07T23:00:00+00:00",
+          "missing_start_utc": "2024-01-05T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-01-07T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-01-12T17:59:00+00:00",
+          "next_quote_utc": "2024-01-14T23:00:00+00:00",
+          "missing_start_utc": "2024-01-12T18:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-01-14T23:00:00+00:00",
+          "missing_minutes_full": 3180,
+          "missing_minutes_in_period": 3180,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "unexplained_early_friday_end",
+          "note": "Friday endpoint precedes the common 21:59 UTC endpoint by several hours; the source weekend flag does not explain those preceding hours."
+        },
+        {
+          "previous_quote_utc": "2024-01-15T19:29:00+00:00",
+          "next_quote_utc": "2024-01-15T23:00:00+00:00",
+          "missing_start_utc": "2024-01-15T19:30:00+00:00",
+          "missing_end_exclusive_utc": "2024-01-15T23:00:00+00:00",
+          "missing_minutes_full": 210,
+          "missing_minutes_in_period": 210,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "January US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-01-19T21:59:00+00:00",
+          "next_quote_utc": "2024-01-21T23:00:00+00:00",
+          "missing_start_utc": "2024-01-19T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-01-21T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-01-26T21:59:00+00:00",
+          "next_quote_utc": "2024-01-28T23:00:00+00:00",
+          "missing_start_utc": "2024-01-26T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-01-28T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-02-02T21:59:00+00:00",
+          "next_quote_utc": "2024-02-04T23:00:00+00:00",
+          "missing_start_utc": "2024-02-02T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-02-04T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-02-09T21:59:00+00:00",
+          "next_quote_utc": "2024-02-11T23:00:00+00:00",
+          "missing_start_utc": "2024-02-09T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-02-11T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-02-16T21:59:00+00:00",
+          "next_quote_utc": "2024-02-18T23:00:00+00:00",
+          "missing_start_utc": "2024-02-16T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-02-18T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-02-19T19:29:00+00:00",
+          "next_quote_utc": "2024-02-19T23:00:00+00:00",
+          "missing_start_utc": "2024-02-19T19:30:00+00:00",
+          "missing_end_exclusive_utc": "2024-02-19T23:00:00+00:00",
+          "missing_minutes_full": 210,
+          "missing_minutes_in_period": 210,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "February US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-02-23T21:59:00+00:00",
+          "next_quote_utc": "2024-02-25T23:00:00+00:00",
+          "missing_start_utc": "2024-02-23T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-02-25T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-03-01T21:59:00+00:00",
+          "next_quote_utc": "2024-03-03T23:00:00+00:00",
+          "missing_start_utc": "2024-03-01T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-03-03T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-03-08T21:59:00+00:00",
+          "next_quote_utc": "2024-03-10T22:00:00+00:00",
+          "missing_start_utc": "2024-03-08T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-03-10T22:00:00+00:00",
+          "missing_minutes_full": 2880,
+          "missing_minutes_in_period": 2880,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-03-15T20:59:00+00:00",
+          "next_quote_utc": "2024-03-17T22:00:00+00:00",
+          "missing_start_utc": "2024-03-15T21:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-03-17T22:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-03-22T20:59:00+00:00",
+          "next_quote_utc": "2024-03-24T22:00:00+00:00",
+          "missing_start_utc": "2024-03-22T21:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-03-24T22:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-03-28T20:58:00+00:00",
+          "next_quote_utc": "2024-03-31T23:00:00+00:00",
+          "missing_start_utc": "2024-03-28T20:59:00+00:00",
+          "missing_end_exclusive_utc": "2024-03-31T23:00:00+00:00",
+          "missing_minutes_full": 4441,
+          "missing_minutes_in_period": 4441,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "Easter/Good Friday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-04-05T21:59:00+00:00",
+          "next_quote_utc": "2024-04-07T23:00:00+00:00",
+          "missing_start_utc": "2024-04-05T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-04-07T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-04-12T21:59:00+00:00",
+          "next_quote_utc": "2024-04-14T23:00:00+00:00",
+          "missing_start_utc": "2024-04-12T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-04-14T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-04-19T21:59:00+00:00",
+          "next_quote_utc": "2024-04-21T23:00:00+00:00",
+          "missing_start_utc": "2024-04-19T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-04-21T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-04-26T21:59:00+00:00",
+          "next_quote_utc": "2024-04-28T23:00:00+00:00",
+          "missing_start_utc": "2024-04-26T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-04-28T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-05-03T21:59:00+00:00",
+          "next_quote_utc": "2024-05-05T23:00:00+00:00",
+          "missing_start_utc": "2024-05-03T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-05-05T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-05-10T21:59:00+00:00",
+          "next_quote_utc": "2024-05-12T23:00:00+00:00",
+          "missing_start_utc": "2024-05-10T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-05-12T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-05-17T21:59:00+00:00",
+          "next_quote_utc": "2024-05-19T23:00:00+00:00",
+          "missing_start_utc": "2024-05-17T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-05-19T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-05-24T21:59:00+00:00",
+          "next_quote_utc": "2024-05-26T23:00:00+00:00",
+          "missing_start_utc": "2024-05-24T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-05-26T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-05-27T19:28:00+00:00",
+          "next_quote_utc": "2024-05-27T23:00:00+00:00",
+          "missing_start_utc": "2024-05-27T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2024-05-27T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "May US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-05-31T21:59:00+00:00",
+          "next_quote_utc": "2024-06-02T23:00:00+00:00",
+          "missing_start_utc": "2024-05-31T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-06-02T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-06-07T21:59:00+00:00",
+          "next_quote_utc": "2024-06-09T23:00:00+00:00",
+          "missing_start_utc": "2024-06-07T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-06-09T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-06-14T21:59:00+00:00",
+          "next_quote_utc": "2024-06-16T23:00:00+00:00",
+          "missing_start_utc": "2024-06-14T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-06-16T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-06-19T19:29:00+00:00",
+          "next_quote_utc": "2024-06-19T23:00:00+00:00",
+          "missing_start_utc": "2024-06-19T19:30:00+00:00",
+          "missing_end_exclusive_utc": "2024-06-19T23:00:00+00:00",
+          "missing_minutes_full": 210,
+          "missing_minutes_in_period": 210,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "June US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-06-21T21:59:00+00:00",
+          "next_quote_utc": "2024-06-23T23:00:00+00:00",
+          "missing_start_utc": "2024-06-21T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-06-23T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-06-28T21:59:00+00:00",
+          "next_quote_utc": "2024-06-30T23:00:00+00:00",
+          "missing_start_utc": "2024-06-28T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-06-30T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-07-04T19:29:00+00:00",
+          "next_quote_utc": "2024-07-04T23:00:00+00:00",
+          "missing_start_utc": "2024-07-04T19:30:00+00:00",
+          "missing_end_exclusive_utc": "2024-07-04T23:00:00+00:00",
+          "missing_minutes_full": 210,
+          "missing_minutes_in_period": 210,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "July US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-07-05T21:59:00+00:00",
+          "next_quote_utc": "2024-07-07T23:00:00+00:00",
+          "missing_start_utc": "2024-07-05T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-07-07T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-07-12T21:59:00+00:00",
+          "next_quote_utc": "2024-07-14T23:00:00+00:00",
+          "missing_start_utc": "2024-07-12T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-07-14T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-07-19T21:59:00+00:00",
+          "next_quote_utc": "2024-07-21T23:00:00+00:00",
+          "missing_start_utc": "2024-07-19T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-07-21T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-07-26T21:59:00+00:00",
+          "next_quote_utc": "2024-07-28T23:00:00+00:00",
+          "missing_start_utc": "2024-07-26T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-07-28T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-08-02T21:59:00+00:00",
+          "next_quote_utc": "2024-08-04T23:00:00+00:00",
+          "missing_start_utc": "2024-08-02T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-08-04T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-08-09T21:59:00+00:00",
+          "next_quote_utc": "2024-08-11T23:00:00+00:00",
+          "missing_start_utc": "2024-08-09T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-08-11T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-08-16T21:59:00+00:00",
+          "next_quote_utc": "2024-08-18T23:00:00+00:00",
+          "missing_start_utc": "2024-08-16T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-08-18T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-08-23T21:59:00+00:00",
+          "next_quote_utc": "2024-08-25T23:00:00+00:00",
+          "missing_start_utc": "2024-08-23T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-08-25T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-08-30T21:59:00+00:00",
+          "next_quote_utc": "2024-09-01T23:00:00+00:00",
+          "missing_start_utc": "2024-08-30T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-09-01T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-09-02T19:28:00+00:00",
+          "next_quote_utc": "2024-09-02T23:00:00+00:00",
+          "missing_start_utc": "2024-09-02T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2024-09-02T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "September US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-09-06T21:59:00+00:00",
+          "next_quote_utc": "2024-09-08T23:00:00+00:00",
+          "missing_start_utc": "2024-09-06T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-09-08T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-09-13T21:59:00+00:00",
+          "next_quote_utc": "2024-09-15T23:00:00+00:00",
+          "missing_start_utc": "2024-09-13T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-09-15T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-09-20T21:59:00+00:00",
+          "next_quote_utc": "2024-09-22T23:00:00+00:00",
+          "missing_start_utc": "2024-09-20T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-09-22T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-09-27T21:59:00+00:00",
+          "next_quote_utc": "2024-09-29T23:00:00+00:00",
+          "missing_start_utc": "2024-09-27T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-09-29T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-10-04T21:59:00+00:00",
+          "next_quote_utc": "2024-10-06T23:00:00+00:00",
+          "missing_start_utc": "2024-10-04T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-10-06T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-10-11T21:59:00+00:00",
+          "next_quote_utc": "2024-10-13T23:00:00+00:00",
+          "missing_start_utc": "2024-10-11T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-10-13T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-10-18T21:59:00+00:00",
+          "next_quote_utc": "2024-10-20T23:00:00+00:00",
+          "missing_start_utc": "2024-10-18T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-10-20T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-10-25T21:59:00+00:00",
+          "next_quote_utc": "2024-10-27T22:00:00+00:00",
+          "missing_start_utc": "2024-10-25T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-10-27T22:00:00+00:00",
+          "missing_minutes_full": 2880,
+          "missing_minutes_in_period": 2880,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-11-01T20:59:00+00:00",
+          "next_quote_utc": "2024-11-03T23:00:00+00:00",
+          "missing_start_utc": "2024-11-01T21:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-11-03T23:00:00+00:00",
+          "missing_minutes_full": 3000,
+          "missing_minutes_in_period": 3000,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-11-08T21:59:00+00:00",
+          "next_quote_utc": "2024-11-10T23:00:00+00:00",
+          "missing_start_utc": "2024-11-08T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-11-10T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-11-15T21:59:00+00:00",
+          "next_quote_utc": "2024-11-17T23:00:00+00:00",
+          "missing_start_utc": "2024-11-15T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-11-17T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-11-22T21:59:00+00:00",
+          "next_quote_utc": "2024-11-24T23:00:00+00:00",
+          "missing_start_utc": "2024-11-22T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-11-24T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-11-28T19:28:00+00:00",
+          "next_quote_utc": "2024-11-28T23:00:00+00:00",
+          "missing_start_utc": "2024-11-28T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2024-11-28T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "Thanksgiving date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-11-29T19:43:00+00:00",
+          "next_quote_utc": "2024-12-01T23:00:00+00:00",
+          "missing_start_utc": "2024-11-29T19:44:00+00:00",
+          "missing_end_exclusive_utc": "2024-12-01T23:00:00+00:00",
+          "missing_minutes_full": 3076,
+          "missing_minutes_in_period": 3076,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "post-Thanksgiving date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-12-06T21:59:00+00:00",
+          "next_quote_utc": "2024-12-08T23:00:00+00:00",
+          "missing_start_utc": "2024-12-06T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-12-08T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-12-13T21:59:00+00:00",
+          "next_quote_utc": "2024-12-15T23:00:00+00:00",
+          "missing_start_utc": "2024-12-13T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-12-15T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-12-20T21:59:00+00:00",
+          "next_quote_utc": "2024-12-22T23:01:00+00:00",
+          "missing_start_utc": "2024-12-20T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-12-22T23:01:00+00:00",
+          "missing_minutes_full": 2941,
+          "missing_minutes_in_period": 2941,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-12-24T18:43:00+00:00",
+          "next_quote_utc": "2024-12-25T23:00:00+00:00",
+          "missing_start_utc": "2024-12-24T18:44:00+00:00",
+          "missing_end_exclusive_utc": "2024-12-25T23:00:00+00:00",
+          "missing_minutes_full": 1696,
+          "missing_minutes_in_period": 1696,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "Christmas date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-12-27T21:59:00+00:00",
+          "next_quote_utc": "2024-12-29T23:00:00+00:00",
+          "missing_start_utc": "2024-12-27T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-12-29T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2024-12-31T21:57:00+00:00",
+          "next_quote_utc": "2025-01-01T23:00:00+00:00",
+          "missing_start_utc": "2024-12-31T21:58:00+00:00",
+          "missing_end_exclusive_utc": "2025-01-01T23:00:00+00:00",
+          "missing_minutes_full": 1502,
+          "missing_minutes_in_period": 1502,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "New Year date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-01-03T21:59:00+00:00",
+          "next_quote_utc": "2025-01-05T23:00:00+00:00",
+          "missing_start_utc": "2025-01-03T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-01-05T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-01-10T21:59:00+00:00",
+          "next_quote_utc": "2025-01-12T23:00:00+00:00",
+          "missing_start_utc": "2025-01-10T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-01-12T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-01-17T21:59:00+00:00",
+          "next_quote_utc": "2025-01-19T23:05:00+00:00",
+          "missing_start_utc": "2025-01-17T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-01-19T23:05:00+00:00",
+          "missing_minutes_full": 2945,
+          "missing_minutes_in_period": 2945,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-01-20T19:28:00+00:00",
+          "next_quote_utc": "2025-01-20T23:00:00+00:00",
+          "missing_start_utc": "2025-01-20T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2025-01-20T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "January US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-01-24T21:59:00+00:00",
+          "next_quote_utc": "2025-01-26T23:00:00+00:00",
+          "missing_start_utc": "2025-01-24T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-01-26T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-01-31T21:59:00+00:00",
+          "next_quote_utc": "2025-02-02T23:03:00+00:00",
+          "missing_start_utc": "2025-01-31T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-02-02T23:03:00+00:00",
+          "missing_minutes_full": 2943,
+          "missing_minutes_in_period": 2943,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-02-07T21:59:00+00:00",
+          "next_quote_utc": "2025-02-09T23:00:00+00:00",
+          "missing_start_utc": "2025-02-07T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-02-09T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-02-14T21:59:00+00:00",
+          "next_quote_utc": "2025-02-16T23:00:00+00:00",
+          "missing_start_utc": "2025-02-14T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-02-16T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-02-17T19:28:00+00:00",
+          "next_quote_utc": "2025-02-17T23:00:00+00:00",
+          "missing_start_utc": "2025-02-17T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2025-02-17T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "February US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-02-21T21:59:00+00:00",
+          "next_quote_utc": "2025-02-23T23:00:00+00:00",
+          "missing_start_utc": "2025-02-21T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-02-23T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-02-28T21:59:00+00:00",
+          "next_quote_utc": "2025-03-02T23:00:00+00:00",
+          "missing_start_utc": "2025-02-28T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-03-02T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-03-07T21:59:00+00:00",
+          "next_quote_utc": "2025-03-09T22:00:00+00:00",
+          "missing_start_utc": "2025-03-07T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-03-09T22:00:00+00:00",
+          "missing_minutes_full": 2880,
+          "missing_minutes_in_period": 2880,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-03-14T20:59:00+00:00",
+          "next_quote_utc": "2025-03-16T22:00:00+00:00",
+          "missing_start_utc": "2025-03-14T21:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-03-16T22:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-03-21T20:59:00+00:00",
+          "next_quote_utc": "2025-03-23T22:00:00+00:00",
+          "missing_start_utc": "2025-03-21T21:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-03-23T22:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-03-28T20:59:00+00:00",
+          "next_quote_utc": "2025-03-30T23:00:00+00:00",
+          "missing_start_utc": "2025-03-28T21:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-03-30T23:00:00+00:00",
+          "missing_minutes_full": 3000,
+          "missing_minutes_in_period": 3000,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-04-04T21:59:00+00:00",
+          "next_quote_utc": "2025-04-06T23:00:00+00:00",
+          "missing_start_utc": "2025-04-04T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-04-06T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-04-11T21:59:00+00:00",
+          "next_quote_utc": "2025-04-13T23:00:00+00:00",
+          "missing_start_utc": "2025-04-11T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-04-13T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-04-17T21:58:00+00:00",
+          "next_quote_utc": "2025-04-20T23:00:00+00:00",
+          "missing_start_utc": "2025-04-17T21:59:00+00:00",
+          "missing_end_exclusive_utc": "2025-04-20T23:00:00+00:00",
+          "missing_minutes_full": 4381,
+          "missing_minutes_in_period": 4381,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "Easter/Good Friday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-04-25T21:59:00+00:00",
+          "next_quote_utc": "2025-04-27T23:00:00+00:00",
+          "missing_start_utc": "2025-04-25T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-04-27T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-05-02T21:59:00+00:00",
+          "next_quote_utc": "2025-05-04T23:00:00+00:00",
+          "missing_start_utc": "2025-05-02T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-05-04T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-05-09T21:59:00+00:00",
+          "next_quote_utc": "2025-05-11T23:00:00+00:00",
+          "missing_start_utc": "2025-05-09T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-05-11T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-05-16T21:59:00+00:00",
+          "next_quote_utc": "2025-05-18T23:00:00+00:00",
+          "missing_start_utc": "2025-05-16T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-05-18T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-05-23T21:59:00+00:00",
+          "next_quote_utc": "2025-05-25T23:00:00+00:00",
+          "missing_start_utc": "2025-05-23T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-05-25T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-05-26T19:28:00+00:00",
+          "next_quote_utc": "2025-05-26T23:00:00+00:00",
+          "missing_start_utc": "2025-05-26T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2025-05-26T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "May US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-05-30T21:59:00+00:00",
+          "next_quote_utc": "2025-06-01T23:00:00+00:00",
+          "missing_start_utc": "2025-05-30T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-06-01T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-06-06T21:59:00+00:00",
+          "next_quote_utc": "2025-06-08T23:00:00+00:00",
+          "missing_start_utc": "2025-06-06T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-06-08T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-06-13T21:59:00+00:00",
+          "next_quote_utc": "2025-06-15T23:00:00+00:00",
+          "missing_start_utc": "2025-06-13T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-06-15T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-06-19T19:28:00+00:00",
+          "next_quote_utc": "2025-06-19T23:00:00+00:00",
+          "missing_start_utc": "2025-06-19T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2025-06-19T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "June US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-06-20T21:59:00+00:00",
+          "next_quote_utc": "2025-06-22T23:00:00+00:00",
+          "missing_start_utc": "2025-06-20T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-06-22T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-06-27T21:59:00+00:00",
+          "next_quote_utc": "2025-06-29T23:00:00+00:00",
+          "missing_start_utc": "2025-06-27T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-06-29T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-07-04T17:58:00+00:00",
+          "next_quote_utc": "2025-07-06T23:00:00+00:00",
+          "missing_start_utc": "2025-07-04T17:59:00+00:00",
+          "missing_end_exclusive_utc": "2025-07-06T23:00:00+00:00",
+          "missing_minutes_full": 3181,
+          "missing_minutes_in_period": 3181,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "July US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-07-11T21:59:00+00:00",
+          "next_quote_utc": "2025-07-13T23:00:00+00:00",
+          "missing_start_utc": "2025-07-11T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-07-13T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-07-18T21:59:00+00:00",
+          "next_quote_utc": "2025-07-20T23:00:00+00:00",
+          "missing_start_utc": "2025-07-18T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-07-20T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-07-25T21:59:00+00:00",
+          "next_quote_utc": "2025-07-27T23:00:00+00:00",
+          "missing_start_utc": "2025-07-25T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-07-27T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-08-01T21:59:00+00:00",
+          "next_quote_utc": "2025-08-03T23:00:00+00:00",
+          "missing_start_utc": "2025-08-01T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-08-03T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-08-08T21:59:00+00:00",
+          "next_quote_utc": "2025-08-10T23:00:00+00:00",
+          "missing_start_utc": "2025-08-08T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-08-10T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-08-15T21:59:00+00:00",
+          "next_quote_utc": "2025-08-17T23:00:00+00:00",
+          "missing_start_utc": "2025-08-15T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-08-17T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-08-22T21:59:00+00:00",
+          "next_quote_utc": "2025-08-24T23:00:00+00:00",
+          "missing_start_utc": "2025-08-22T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-08-24T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-08-29T21:59:00+00:00",
+          "next_quote_utc": "2025-08-31T23:00:00+00:00",
+          "missing_start_utc": "2025-08-29T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-08-31T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-09-01T19:28:00+00:00",
+          "next_quote_utc": "2025-09-01T23:00:00+00:00",
+          "missing_start_utc": "2025-09-01T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2025-09-01T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "September US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-09-05T21:59:00+00:00",
+          "next_quote_utc": "2025-09-07T23:00:00+00:00",
+          "missing_start_utc": "2025-09-05T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-09-07T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-09-12T21:59:00+00:00",
+          "next_quote_utc": "2025-09-14T23:00:00+00:00",
+          "missing_start_utc": "2025-09-12T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-09-14T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-09-19T21:59:00+00:00",
+          "next_quote_utc": "2025-09-21T23:00:00+00:00",
+          "missing_start_utc": "2025-09-19T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-09-21T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-09-26T21:59:00+00:00",
+          "next_quote_utc": "2025-09-28T23:00:00+00:00",
+          "missing_start_utc": "2025-09-26T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-09-28T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-10-03T21:59:00+00:00",
+          "next_quote_utc": "2025-10-05T23:00:00+00:00",
+          "missing_start_utc": "2025-10-03T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-10-05T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-10-10T21:59:00+00:00",
+          "next_quote_utc": "2025-10-12T23:00:00+00:00",
+          "missing_start_utc": "2025-10-10T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-10-12T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-10-17T21:59:00+00:00",
+          "next_quote_utc": "2025-10-19T23:00:00+00:00",
+          "missing_start_utc": "2025-10-17T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-10-19T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-10-21T21:59:00+00:00",
+          "next_quote_utc": "2025-10-22T00:00:00+00:00",
+          "missing_start_utc": "2025-10-21T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-10-22T00:00:00+00:00",
+          "missing_minutes_full": 120,
+          "missing_minutes_in_period": 120,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": true,
+            "unclassified": false
+          },
+          "classification": "unexplained_extended_daily_gap",
+          "note": "120 absent minutes versus the common 60-minute daily gap; source daily-closure flag is only a hint."
+        },
+        {
+          "previous_quote_utc": "2025-10-24T21:59:00+00:00",
+          "next_quote_utc": "2025-10-26T22:00:00+00:00",
+          "missing_start_utc": "2025-10-24T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-10-26T22:00:00+00:00",
+          "missing_minutes_full": 2880,
+          "missing_minutes_in_period": 2880,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-10-31T20:59:00+00:00",
+          "next_quote_utc": "2025-11-02T23:00:00+00:00",
+          "missing_start_utc": "2025-10-31T21:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-11-02T23:00:00+00:00",
+          "missing_minutes_full": 3000,
+          "missing_minutes_in_period": 3000,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-11-07T21:59:00+00:00",
+          "next_quote_utc": "2025-11-09T23:00:00+00:00",
+          "missing_start_utc": "2025-11-07T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-11-09T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-11-14T21:59:00+00:00",
+          "next_quote_utc": "2025-11-16T23:00:00+00:00",
+          "missing_start_utc": "2025-11-14T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-11-16T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-11-21T21:59:00+00:00",
+          "next_quote_utc": "2025-11-23T23:00:00+00:00",
+          "missing_start_utc": "2025-11-21T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-11-23T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-11-27T19:28:00+00:00",
+          "next_quote_utc": "2025-11-27T23:00:00+00:00",
+          "missing_start_utc": "2025-11-27T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2025-11-27T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "Thanksgiving date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-11-28T19:43:00+00:00",
+          "next_quote_utc": "2025-11-30T23:00:00+00:00",
+          "missing_start_utc": "2025-11-28T19:44:00+00:00",
+          "missing_end_exclusive_utc": "2025-11-30T23:00:00+00:00",
+          "missing_minutes_full": 3076,
+          "missing_minutes_in_period": 3076,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "post-Thanksgiving date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-12-05T15:59:00+00:00",
+          "next_quote_utc": "2025-12-07T23:00:00+00:00",
+          "missing_start_utc": "2025-12-05T16:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-12-07T23:00:00+00:00",
+          "missing_minutes_full": 3300,
+          "missing_minutes_in_period": 3300,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "unexplained_early_friday_end",
+          "note": "Friday endpoint precedes the common 21:59 UTC endpoint by several hours; the source weekend flag does not explain those preceding hours."
+        },
+        {
+          "previous_quote_utc": "2025-12-12T21:59:00+00:00",
+          "next_quote_utc": "2025-12-14T23:00:00+00:00",
+          "missing_start_utc": "2025-12-12T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-12-14T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-12-19T21:59:00+00:00",
+          "next_quote_utc": "2025-12-21T23:00:00+00:00",
+          "missing_start_utc": "2025-12-19T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-12-21T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-12-24T18:43:00+00:00",
+          "next_quote_utc": "2025-12-25T23:04:00+00:00",
+          "missing_start_utc": "2025-12-24T18:44:00+00:00",
+          "missing_end_exclusive_utc": "2025-12-25T23:04:00+00:00",
+          "missing_minutes_full": 1700,
+          "missing_minutes_in_period": 1700,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "Christmas date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-12-26T21:59:00+00:00",
+          "next_quote_utc": "2025-12-28T23:00:00+00:00",
+          "missing_start_utc": "2025-12-26T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-12-28T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2025-12-31T21:57:00+00:00",
+          "next_quote_utc": "2026-01-01T23:00:00+00:00",
+          "missing_start_utc": "2025-12-31T21:58:00+00:00",
+          "missing_end_exclusive_utc": "2026-01-01T23:00:00+00:00",
+          "missing_minutes_full": 1502,
+          "missing_minutes_in_period": 122,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "New Year date-based candidate; source execution venue is unverified."
+        }
+      ],
+      "large_gaps_other_than_usual_weekend_shape": [
+        {
+          "previous_quote_utc": "2023-12-29T21:57:00+00:00",
+          "next_quote_utc": "2024-01-01T23:00:00+00:00",
+          "missing_start_utc": "2023-12-29T21:58:00+00:00",
+          "missing_end_exclusive_utc": "2024-01-01T23:00:00+00:00",
+          "missing_minutes_full": 4382,
+          "missing_minutes_in_period": 1380,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "New Year extended weekend date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-01-12T17:59:00+00:00",
+          "next_quote_utc": "2024-01-14T23:00:00+00:00",
+          "missing_start_utc": "2024-01-12T18:00:00+00:00",
+          "missing_end_exclusive_utc": "2024-01-14T23:00:00+00:00",
+          "missing_minutes_full": 3180,
+          "missing_minutes_in_period": 3180,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "unexplained_early_friday_end",
+          "note": "Friday endpoint precedes the common 21:59 UTC endpoint by several hours; the source weekend flag does not explain those preceding hours."
+        },
+        {
+          "previous_quote_utc": "2024-01-15T19:29:00+00:00",
+          "next_quote_utc": "2024-01-15T23:00:00+00:00",
+          "missing_start_utc": "2024-01-15T19:30:00+00:00",
+          "missing_end_exclusive_utc": "2024-01-15T23:00:00+00:00",
+          "missing_minutes_full": 210,
+          "missing_minutes_in_period": 210,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "January US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-02-19T19:29:00+00:00",
+          "next_quote_utc": "2024-02-19T23:00:00+00:00",
+          "missing_start_utc": "2024-02-19T19:30:00+00:00",
+          "missing_end_exclusive_utc": "2024-02-19T23:00:00+00:00",
+          "missing_minutes_full": 210,
+          "missing_minutes_in_period": 210,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "February US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-03-28T20:58:00+00:00",
+          "next_quote_utc": "2024-03-31T23:00:00+00:00",
+          "missing_start_utc": "2024-03-28T20:59:00+00:00",
+          "missing_end_exclusive_utc": "2024-03-31T23:00:00+00:00",
+          "missing_minutes_full": 4441,
+          "missing_minutes_in_period": 4441,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "Easter/Good Friday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-05-27T19:28:00+00:00",
+          "next_quote_utc": "2024-05-27T23:00:00+00:00",
+          "missing_start_utc": "2024-05-27T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2024-05-27T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "May US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-06-19T19:29:00+00:00",
+          "next_quote_utc": "2024-06-19T23:00:00+00:00",
+          "missing_start_utc": "2024-06-19T19:30:00+00:00",
+          "missing_end_exclusive_utc": "2024-06-19T23:00:00+00:00",
+          "missing_minutes_full": 210,
+          "missing_minutes_in_period": 210,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "June US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-07-04T19:29:00+00:00",
+          "next_quote_utc": "2024-07-04T23:00:00+00:00",
+          "missing_start_utc": "2024-07-04T19:30:00+00:00",
+          "missing_end_exclusive_utc": "2024-07-04T23:00:00+00:00",
+          "missing_minutes_full": 210,
+          "missing_minutes_in_period": 210,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "July US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-09-02T19:28:00+00:00",
+          "next_quote_utc": "2024-09-02T23:00:00+00:00",
+          "missing_start_utc": "2024-09-02T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2024-09-02T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "September US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-11-28T19:28:00+00:00",
+          "next_quote_utc": "2024-11-28T23:00:00+00:00",
+          "missing_start_utc": "2024-11-28T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2024-11-28T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "Thanksgiving date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-11-29T19:43:00+00:00",
+          "next_quote_utc": "2024-12-01T23:00:00+00:00",
+          "missing_start_utc": "2024-11-29T19:44:00+00:00",
+          "missing_end_exclusive_utc": "2024-12-01T23:00:00+00:00",
+          "missing_minutes_full": 3076,
+          "missing_minutes_in_period": 3076,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "post-Thanksgiving date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-12-24T18:43:00+00:00",
+          "next_quote_utc": "2024-12-25T23:00:00+00:00",
+          "missing_start_utc": "2024-12-24T18:44:00+00:00",
+          "missing_end_exclusive_utc": "2024-12-25T23:00:00+00:00",
+          "missing_minutes_full": 1696,
+          "missing_minutes_in_period": 1696,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "Christmas date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2024-12-31T21:57:00+00:00",
+          "next_quote_utc": "2025-01-01T23:00:00+00:00",
+          "missing_start_utc": "2024-12-31T21:58:00+00:00",
+          "missing_end_exclusive_utc": "2025-01-01T23:00:00+00:00",
+          "missing_minutes_full": 1502,
+          "missing_minutes_in_period": 1502,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "New Year date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-01-20T19:28:00+00:00",
+          "next_quote_utc": "2025-01-20T23:00:00+00:00",
+          "missing_start_utc": "2025-01-20T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2025-01-20T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "January US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-02-17T19:28:00+00:00",
+          "next_quote_utc": "2025-02-17T23:00:00+00:00",
+          "missing_start_utc": "2025-02-17T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2025-02-17T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "February US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-04-17T21:58:00+00:00",
+          "next_quote_utc": "2025-04-20T23:00:00+00:00",
+          "missing_start_utc": "2025-04-17T21:59:00+00:00",
+          "missing_end_exclusive_utc": "2025-04-20T23:00:00+00:00",
+          "missing_minutes_full": 4381,
+          "missing_minutes_in_period": 4381,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "Easter/Good Friday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-05-26T19:28:00+00:00",
+          "next_quote_utc": "2025-05-26T23:00:00+00:00",
+          "missing_start_utc": "2025-05-26T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2025-05-26T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "May US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-06-19T19:28:00+00:00",
+          "next_quote_utc": "2025-06-19T23:00:00+00:00",
+          "missing_start_utc": "2025-06-19T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2025-06-19T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "June US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-07-04T17:58:00+00:00",
+          "next_quote_utc": "2025-07-06T23:00:00+00:00",
+          "missing_start_utc": "2025-07-04T17:59:00+00:00",
+          "missing_end_exclusive_utc": "2025-07-06T23:00:00+00:00",
+          "missing_minutes_full": 3181,
+          "missing_minutes_in_period": 3181,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "July US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-09-01T19:28:00+00:00",
+          "next_quote_utc": "2025-09-01T23:00:00+00:00",
+          "missing_start_utc": "2025-09-01T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2025-09-01T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "September US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-10-21T21:59:00+00:00",
+          "next_quote_utc": "2025-10-22T00:00:00+00:00",
+          "missing_start_utc": "2025-10-21T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-10-22T00:00:00+00:00",
+          "missing_minutes_full": 120,
+          "missing_minutes_in_period": 120,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": true,
+            "unclassified": false
+          },
+          "classification": "unexplained_extended_daily_gap",
+          "note": "120 absent minutes versus the common 60-minute daily gap; source daily-closure flag is only a hint."
+        },
+        {
+          "previous_quote_utc": "2025-11-27T19:28:00+00:00",
+          "next_quote_utc": "2025-11-27T23:00:00+00:00",
+          "missing_start_utc": "2025-11-27T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2025-11-27T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "Thanksgiving date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-11-28T19:43:00+00:00",
+          "next_quote_utc": "2025-11-30T23:00:00+00:00",
+          "missing_start_utc": "2025-11-28T19:44:00+00:00",
+          "missing_end_exclusive_utc": "2025-11-30T23:00:00+00:00",
+          "missing_minutes_full": 3076,
+          "missing_minutes_in_period": 3076,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "post-Thanksgiving date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-12-05T15:59:00+00:00",
+          "next_quote_utc": "2025-12-07T23:00:00+00:00",
+          "missing_start_utc": "2025-12-05T16:00:00+00:00",
+          "missing_end_exclusive_utc": "2025-12-07T23:00:00+00:00",
+          "missing_minutes_full": 3300,
+          "missing_minutes_in_period": 3300,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "unexplained_early_friday_end",
+          "note": "Friday endpoint precedes the common 21:59 UTC endpoint by several hours; the source weekend flag does not explain those preceding hours."
+        },
+        {
+          "previous_quote_utc": "2025-12-24T18:43:00+00:00",
+          "next_quote_utc": "2025-12-25T23:04:00+00:00",
+          "missing_start_utc": "2025-12-24T18:44:00+00:00",
+          "missing_end_exclusive_utc": "2025-12-25T23:04:00+00:00",
+          "missing_minutes_full": 1700,
+          "missing_minutes_in_period": 1700,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "Christmas date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2025-12-31T21:57:00+00:00",
+          "next_quote_utc": "2026-01-01T23:00:00+00:00",
+          "missing_start_utc": "2025-12-31T21:58:00+00:00",
+          "missing_end_exclusive_utc": "2026-01-01T23:00:00+00:00",
+          "missing_minutes_full": 1502,
+          "missing_minutes_in_period": 122,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "New Year date-based candidate; source execution venue is unverified."
+        }
+      ],
+      "additional_notable_smaller_gaps": [
+        {
+          "previous_quote_utc": "2024-02-18T23:13:00+00:00",
+          "next_quote_utc": "2024-02-18T23:25:00+00:00",
+          "missing_start_utc": "2024-02-18T23:14:00+00:00",
+          "missing_end_exclusive_utc": "2024-02-18T23:25:00+00:00",
+          "missing_minutes_full": 11,
+          "missing_minutes_in_period": 11,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "unexplained_or_unverified_gap",
+          "note": "No verified ordinary-calendar explanation."
+        },
+        {
+          "previous_quote_utc": "2024-10-10T00:05:00+00:00",
+          "next_quote_utc": "2024-10-10T01:11:00+00:00",
+          "missing_start_utc": "2024-10-10T00:06:00+00:00",
+          "missing_end_exclusive_utc": "2024-10-10T01:11:00+00:00",
+          "missing_minutes_full": 65,
+          "missing_minutes_in_period": 65,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "unexplained_or_unverified_gap",
+          "note": "No verified ordinary-calendar explanation."
+        },
+        {
+          "previous_quote_utc": "2025-04-24T23:00:00+00:00",
+          "next_quote_utc": "2025-04-24T23:14:00+00:00",
+          "missing_start_utc": "2025-04-24T23:01:00+00:00",
+          "missing_end_exclusive_utc": "2025-04-24T23:14:00+00:00",
+          "missing_minutes_full": 13,
+          "missing_minutes_in_period": 13,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "unexplained_or_unverified_gap",
+          "note": "No verified ordinary-calendar explanation."
+        },
+        {
+          "previous_quote_utc": "2025-12-07T23:15:00+00:00",
+          "next_quote_utc": "2025-12-07T23:36:00+00:00",
+          "missing_start_utc": "2025-12-07T23:16:00+00:00",
+          "missing_end_exclusive_utc": "2025-12-07T23:36:00+00:00",
+          "missing_minutes_full": 20,
+          "missing_minutes_in_period": 20,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "unexplained_or_unverified_gap",
+          "note": "No verified ordinary-calendar explanation."
+        }
+      ]
+    },
+    "confirmation_2026_jan_may": {
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_exclusive_utc": "2026-06-01T00:00:00+00:00",
+      "observed_rows": 144350,
+      "row_count_reconciles_with_source_metadata": true,
+      "coverage_completeness_proven": false,
+      "all_gap_count": 123,
+      "all_absent_calendar_minutes": 73090,
+      "large_gap_threshold_minutes": 120,
+      "large_gap_count": 26,
+      "large_gap_absent_calendar_minutes": 68142,
+      "usual_weekend_shape_large_count": 21,
+      "usual_weekend_shape_large_absent_calendar_minutes": 61748,
+      "other_large_count": 5,
+      "other_large_absent_calendar_minutes": 6394,
+      "same_day_01_to_21_utc_weekday_gaps_at_least_60_min_count": 0,
+      "same_day_01_to_21_utc_weekday_gaps_at_least_60_min_absent_minutes": 0,
+      "longest_elapsed_hours": 73.03333333333333,
+      "has_any_gap_elapsed_over_80_hours": false,
+      "all_large_gaps": [
+        {
+          "previous_quote_utc": "2025-12-31T21:57:00+00:00",
+          "next_quote_utc": "2026-01-01T23:00:00+00:00",
+          "missing_start_utc": "2025-12-31T21:58:00+00:00",
+          "missing_end_exclusive_utc": "2026-01-01T23:00:00+00:00",
+          "missing_minutes_full": 1502,
+          "missing_minutes_in_period": 1380,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "New Year date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2026-01-02T21:59:00+00:00",
+          "next_quote_utc": "2026-01-04T23:00:00+00:00",
+          "missing_start_utc": "2026-01-02T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2026-01-04T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2026-01-09T21:59:00+00:00",
+          "next_quote_utc": "2026-01-11T23:00:00+00:00",
+          "missing_start_utc": "2026-01-09T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2026-01-11T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2026-01-16T21:59:00+00:00",
+          "next_quote_utc": "2026-01-18T23:00:00+00:00",
+          "missing_start_utc": "2026-01-16T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2026-01-18T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2026-01-19T19:28:00+00:00",
+          "next_quote_utc": "2026-01-19T23:00:00+00:00",
+          "missing_start_utc": "2026-01-19T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2026-01-19T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "January US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2026-01-23T21:59:00+00:00",
+          "next_quote_utc": "2026-01-25T23:00:00+00:00",
+          "missing_start_utc": "2026-01-23T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2026-01-25T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2026-01-30T21:58:00+00:00",
+          "next_quote_utc": "2026-02-01T23:06:00+00:00",
+          "missing_start_utc": "2026-01-30T21:59:00+00:00",
+          "missing_end_exclusive_utc": "2026-02-01T23:06:00+00:00",
+          "missing_minutes_full": 2947,
+          "missing_minutes_in_period": 2947,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2026-02-06T21:59:00+00:00",
+          "next_quote_utc": "2026-02-08T23:00:00+00:00",
+          "missing_start_utc": "2026-02-06T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2026-02-08T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2026-02-13T21:59:00+00:00",
+          "next_quote_utc": "2026-02-15T23:00:00+00:00",
+          "missing_start_utc": "2026-02-13T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2026-02-15T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2026-02-16T19:28:00+00:00",
+          "next_quote_utc": "2026-02-16T23:00:00+00:00",
+          "missing_start_utc": "2026-02-16T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2026-02-16T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "February US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2026-02-20T21:59:00+00:00",
+          "next_quote_utc": "2026-02-22T23:00:00+00:00",
+          "missing_start_utc": "2026-02-20T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2026-02-22T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2026-02-27T21:58:00+00:00",
+          "next_quote_utc": "2026-03-01T23:00:00+00:00",
+          "missing_start_utc": "2026-02-27T21:59:00+00:00",
+          "missing_end_exclusive_utc": "2026-03-01T23:00:00+00:00",
+          "missing_minutes_full": 2941,
+          "missing_minutes_in_period": 2941,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2026-03-06T21:59:00+00:00",
+          "next_quote_utc": "2026-03-08T22:00:00+00:00",
+          "missing_start_utc": "2026-03-06T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2026-03-08T22:00:00+00:00",
+          "missing_minutes_full": 2880,
+          "missing_minutes_in_period": 2880,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2026-03-13T20:59:00+00:00",
+          "next_quote_utc": "2026-03-15T22:00:00+00:00",
+          "missing_start_utc": "2026-03-13T21:00:00+00:00",
+          "missing_end_exclusive_utc": "2026-03-15T22:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2026-03-20T20:59:00+00:00",
+          "next_quote_utc": "2026-03-22T22:00:00+00:00",
+          "missing_start_utc": "2026-03-20T21:00:00+00:00",
+          "missing_end_exclusive_utc": "2026-03-22T22:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2026-03-27T20:59:00+00:00",
+          "next_quote_utc": "2026-03-29T23:00:00+00:00",
+          "missing_start_utc": "2026-03-27T21:00:00+00:00",
+          "missing_end_exclusive_utc": "2026-03-29T23:00:00+00:00",
+          "missing_minutes_full": 3000,
+          "missing_minutes_in_period": 3000,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2026-04-02T21:58:00+00:00",
+          "next_quote_utc": "2026-04-05T23:00:00+00:00",
+          "missing_start_utc": "2026-04-02T21:59:00+00:00",
+          "missing_end_exclusive_utc": "2026-04-05T23:00:00+00:00",
+          "missing_minutes_full": 4381,
+          "missing_minutes_in_period": 4381,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "Easter/Good Friday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2026-04-10T21:59:00+00:00",
+          "next_quote_utc": "2026-04-12T23:00:00+00:00",
+          "missing_start_utc": "2026-04-10T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2026-04-12T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2026-04-17T21:59:00+00:00",
+          "next_quote_utc": "2026-04-19T23:00:00+00:00",
+          "missing_start_utc": "2026-04-17T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2026-04-19T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2026-04-24T21:59:00+00:00",
+          "next_quote_utc": "2026-04-26T23:00:00+00:00",
+          "missing_start_utc": "2026-04-24T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2026-04-26T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2026-05-01T21:59:00+00:00",
+          "next_quote_utc": "2026-05-03T23:00:00+00:00",
+          "missing_start_utc": "2026-05-01T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2026-05-03T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2026-05-08T21:59:00+00:00",
+          "next_quote_utc": "2026-05-10T23:00:00+00:00",
+          "missing_start_utc": "2026-05-08T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2026-05-10T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2026-05-15T21:59:00+00:00",
+          "next_quote_utc": "2026-05-17T23:00:00+00:00",
+          "missing_start_utc": "2026-05-15T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2026-05-17T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2026-05-22T21:59:00+00:00",
+          "next_quote_utc": "2026-05-24T23:00:00+00:00",
+          "missing_start_utc": "2026-05-22T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2026-05-24T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        },
+        {
+          "previous_quote_utc": "2026-05-25T19:28:00+00:00",
+          "next_quote_utc": "2026-05-25T23:00:00+00:00",
+          "missing_start_utc": "2026-05-25T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2026-05-25T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "May US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2026-05-29T21:59:00+00:00",
+          "next_quote_utc": "2026-05-31T23:00:00+00:00",
+          "missing_start_utc": "2026-05-29T22:00:00+00:00",
+          "missing_end_exclusive_utc": "2026-05-31T23:00:00+00:00",
+          "missing_minutes_full": 2940,
+          "missing_minutes_in_period": 2940,
+          "source_flags": {
+            "possible_weekend": true,
+            "possible_daily_closure": false,
+            "unclassified": false
+          },
+          "classification": "usual_weekend_shape_hint",
+          "note": "Common observed weekend shape; no venue-calendar verification."
+        }
+      ],
+      "large_gaps_other_than_usual_weekend_shape": [
+        {
+          "previous_quote_utc": "2025-12-31T21:57:00+00:00",
+          "next_quote_utc": "2026-01-01T23:00:00+00:00",
+          "missing_start_utc": "2025-12-31T21:58:00+00:00",
+          "missing_end_exclusive_utc": "2026-01-01T23:00:00+00:00",
+          "missing_minutes_full": 1502,
+          "missing_minutes_in_period": 1380,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "New Year date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2026-01-19T19:28:00+00:00",
+          "next_quote_utc": "2026-01-19T23:00:00+00:00",
+          "missing_start_utc": "2026-01-19T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2026-01-19T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "January US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2026-02-16T19:28:00+00:00",
+          "next_quote_utc": "2026-02-16T23:00:00+00:00",
+          "missing_start_utc": "2026-02-16T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2026-02-16T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "February US holiday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2026-04-02T21:58:00+00:00",
+          "next_quote_utc": "2026-04-05T23:00:00+00:00",
+          "missing_start_utc": "2026-04-02T21:59:00+00:00",
+          "missing_end_exclusive_utc": "2026-04-05T23:00:00+00:00",
+          "missing_minutes_full": 4381,
+          "missing_minutes_in_period": 4381,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "Easter/Good Friday date-based candidate; source execution venue is unverified."
+        },
+        {
+          "previous_quote_utc": "2026-05-25T19:28:00+00:00",
+          "next_quote_utc": "2026-05-25T23:00:00+00:00",
+          "missing_start_utc": "2026-05-25T19:29:00+00:00",
+          "missing_end_exclusive_utc": "2026-05-25T23:00:00+00:00",
+          "missing_minutes_full": 211,
+          "missing_minutes_in_period": 211,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "holiday_candidate_unverified",
+          "note": "May US holiday date-based candidate; source execution venue is unverified."
+        }
+      ],
+      "additional_notable_smaller_gaps": []
+    },
+    "development_2023": {
+      "start_utc": "2023-01-01T00:00:00+00:00",
+      "end_exclusive_utc": "2024-01-01T00:00:00+00:00",
+      "observed_rows": 308752,
+      "row_count_reconciles_with_source_metadata": true,
+      "coverage_completeness_proven": false,
+      "all_gap_count": 982,
+      "all_absent_calendar_minutes": 216848,
+      "large_gap_threshold_minutes": 120,
+      "large_gap_count": 176,
+      "large_gap_absent_calendar_minutes": 178944,
+      "usual_weekend_shape_large_count": 32,
+      "usual_weekend_shape_large_absent_calendar_minutes": 94200,
+      "other_large_count": 144,
+      "other_large_absent_calendar_minutes": 84744,
+      "same_day_01_to_21_utc_weekday_gaps_at_least_60_min_count": 499,
+      "same_day_01_to_21_utc_weekday_gaps_at_least_60_min_absent_minutes": 33848,
+      "longest_elapsed_hours": 74.03333333333333,
+      "has_any_gap_elapsed_over_80_hours": false,
+      "intraday_gap_monthly": {
+        "2023-01": {
+          "gap_count": 3,
+          "absent_minutes": 180
+        },
+        "2023-02": {
+          "gap_count": 36,
+          "absent_minutes": 2280
+        },
+        "2023-03": {
+          "gap_count": 94,
+          "absent_minutes": 7028
+        },
+        "2023-04": {
+          "gap_count": 80,
+          "absent_minutes": 5400
+        },
+        "2023-05": {
+          "gap_count": 103,
+          "absent_minutes": 6780
+        },
+        "2023-06": {
+          "gap_count": 98,
+          "absent_minutes": 6480
+        },
+        "2023-07": {
+          "gap_count": 85,
+          "absent_minutes": 5700
+        }
+      },
+      "intraday_gap_first_previous_utc": "2023-01-23T18:59:00+00:00",
+      "intraday_gap_last_next_utc": "2023-07-28T20:00:00+00:00",
+      "source_rows_2022_comparison": 354568,
+      "fewer_rows_than_2022": 45816,
+      "fewer_rows_than_2022_pct": 12.92163985469642,
+      "annual_comparison_limitation": "Different weekdays and holidays prevent this row difference from being an exact missing-trading-minute estimate.",
+      "intraday_examples": [
+        {
+          "previous_quote_utc": "2023-01-23T18:59:00+00:00",
+          "next_quote_utc": "2023-01-23T20:00:00+00:00",
+          "missing_start_utc": "2023-01-23T19:00:00+00:00",
+          "missing_end_exclusive_utc": "2023-01-23T20:00:00+00:00",
+          "missing_minutes_full": 60,
+          "missing_minutes_in_period": 60,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "unexplained_or_unverified_gap",
+          "note": "No verified ordinary-calendar explanation."
+        },
+        {
+          "previous_quote_utc": "2023-01-30T08:59:00+00:00",
+          "next_quote_utc": "2023-01-30T10:00:00+00:00",
+          "missing_start_utc": "2023-01-30T09:00:00+00:00",
+          "missing_end_exclusive_utc": "2023-01-30T10:00:00+00:00",
+          "missing_minutes_full": 60,
+          "missing_minutes_in_period": 60,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "unexplained_or_unverified_gap",
+          "note": "No verified ordinary-calendar explanation."
+        },
+        {
+          "previous_quote_utc": "2023-01-30T17:59:00+00:00",
+          "next_quote_utc": "2023-01-30T19:00:00+00:00",
+          "missing_start_utc": "2023-01-30T18:00:00+00:00",
+          "missing_end_exclusive_utc": "2023-01-30T19:00:00+00:00",
+          "missing_minutes_full": 60,
+          "missing_minutes_in_period": 60,
+          "source_flags": {
+            "possible_weekend": false,
+            "possible_daily_closure": false,
+            "unclassified": true
+          },
+          "classification": "unexplained_or_unverified_gap",
+          "note": "No verified ordinary-calendar explanation."
+        }
+      ]
+    }
+  },
+  "findings": [
+    "2023 diagnostic intraday gaps: 499 gaps, 33848 absent minutes; inspect the monthly table for concentration.",
+    "Inspect unexplained_early_friday_end, unexplained_extended_daily_gap and additional_notable_smaller_gaps; source weekend/daily flags do not resolve them.",
+    "Confirmation absence of a detected large unexplained pattern is not proof of complete coverage.",
+    "Potential signal/execution/stop-observation effects were not measured because no trade ledger or returns were read."
+  ],
+  "limitations": [
+    "Absent calendar minutes include legitimate closures and cannot be equated with missing tradeable minutes.",
+    "No authoritative historical session calendar for the source execution venue is available in these inputs.",
+    "Structural validity and absence of conflicting duplicates do not prove temporal completeness.",
+    "No gaps were filled, deleted, promoted to guaranteed valid, or used to change trading rules."
+  ],
+  "original_audit_verification": {
+    "input_hash_checks": {
+      "source_metadata_sha256": true,
+      "quote_gaps_sha256": true
+    },
+    "decompressed_csv_hash_matches_original": null,
+    "period_checks": {
+      "selection_2024_2025": {
+        "metrics_match": true,
+        "gap_lists_match": true,
+        "metric_checks": {
+          "start_utc": true,
+          "end_exclusive_utc": true,
+          "observed_rows": true,
+          "row_count_reconciles_with_source_metadata": true,
+          "coverage_completeness_proven": true,
+          "all_gap_count": true,
+          "all_absent_calendar_minutes": true,
+          "large_gap_threshold_minutes": true,
+          "large_gap_count": true,
+          "large_gap_absent_calendar_minutes": true,
+          "usual_weekend_shape_large_count": true,
+          "usual_weekend_shape_large_absent_calendar_minutes": true,
+          "other_large_count": true,
+          "other_large_absent_calendar_minutes": true,
+          "same_day_01_to_21_utc_weekday_gaps_at_least_60_min_count": true,
+          "same_day_01_to_21_utc_weekday_gaps_at_least_60_min_absent_minutes": true,
+          "longest_elapsed_hours": true,
+          "has_any_gap_elapsed_over_80_hours": true
+        },
+        "gap_list_checks": {
+          "all_large_gaps": true,
+          "large_gaps_other_than_usual_weekend_shape": true,
+          "additional_notable_smaller_gaps": true
+        }
+      },
+      "confirmation_2026_jan_may": {
+        "metrics_match": true,
+        "gap_lists_match": true,
+        "metric_checks": {
+          "start_utc": true,
+          "end_exclusive_utc": true,
+          "observed_rows": true,
+          "row_count_reconciles_with_source_metadata": true,
+          "coverage_completeness_proven": true,
+          "all_gap_count": true,
+          "all_absent_calendar_minutes": true,
+          "large_gap_threshold_minutes": true,
+          "large_gap_count": true,
+          "large_gap_absent_calendar_minutes": true,
+          "usual_weekend_shape_large_count": true,
+          "usual_weekend_shape_large_absent_calendar_minutes": true,
+          "other_large_count": true,
+          "other_large_absent_calendar_minutes": true,
+          "same_day_01_to_21_utc_weekday_gaps_at_least_60_min_count": true,
+          "same_day_01_to_21_utc_weekday_gaps_at_least_60_min_absent_minutes": true,
+          "longest_elapsed_hours": true,
+          "has_any_gap_elapsed_over_80_hours": true
+        },
+        "gap_list_checks": {
+          "all_large_gaps": true,
+          "large_gaps_other_than_usual_weekend_shape": true,
+          "additional_notable_smaller_gaps": true
+        }
+      },
+      "development_2023": {
+        "metrics_match": true,
+        "gap_lists_match": true,
+        "metric_checks": {
+          "start_utc": true,
+          "end_exclusive_utc": true,
+          "observed_rows": true,
+          "row_count_reconciles_with_source_metadata": true,
+          "coverage_completeness_proven": true,
+          "all_gap_count": true,
+          "all_absent_calendar_minutes": true,
+          "large_gap_threshold_minutes": true,
+          "large_gap_count": true,
+          "large_gap_absent_calendar_minutes": true,
+          "usual_weekend_shape_large_count": true,
+          "usual_weekend_shape_large_absent_calendar_minutes": true,
+          "other_large_count": true,
+          "other_large_absent_calendar_minutes": true,
+          "same_day_01_to_21_utc_weekday_gaps_at_least_60_min_count": true,
+          "same_day_01_to_21_utc_weekday_gaps_at_least_60_min_absent_minutes": true,
+          "longest_elapsed_hours": true,
+          "has_any_gap_elapsed_over_80_hours": true,
+          "intraday_gap_first_previous_utc": true,
+          "intraday_gap_last_next_utc": true,
+          "source_rows_2022_comparison": true,
+          "fewer_rows_than_2022": true,
+          "fewer_rows_than_2022_pct": true,
+          "intraday_gap_monthly": true
+        },
+        "gap_list_checks": {
+          "intraday_examples": true
+        }
+      }
+    },
+    "all_period_metrics_and_lists_match": true,
+    "interpretation": "Input artifact bytes match the original audit.",
+    "method": "All current periods were independently recomputed from the current CSV before comparison; hashes were not merely replaced.",
+    "original_path": "experiments/active/exp-xauusd-system-search-20260908-v1/results/data_quality_audit_original.json",
+    "original_sha256": "098be650d8db5319fb9d26c229175a2601c27055a0ebe4717e889309d258ad33"
+  }
+}

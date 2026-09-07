@@ -6707,14 +6707,35 @@ experiments:
 
   - experiment_id: exp-xauusd-system-search-20260908-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 492be93f91ff35a7863b1e8607a926e066fdca14
-    status: active
-    question: Which frozen XAUUSD rule and timeframe has highest chronological validation net equity return and survives later confirmation?
-    single_variable: Preregistered parent comparisons of zero dwell, exit persistence, MA density and closed higher-timeframe gates; fixed external system benchmarks.
-    result: Preregistered before economic evaluation; 21 rules by 9 timeframes, 20bp unchanged.
-    holdout_consumed: false
+    source_commit: b1204cb53930a6105d28cc96da96f5162ba85d33
+    status: inconclusive
+    question: Which frozen XAUUSD rule and timeframe maximizes chronological net equity return, and how does it behave
+      under later confirmation?
+    single_variable: 21 fixed rules by9 timeframes; parent contrasts for zero dwell, exits, MA density and closed
+      HTF. Fixed external baselines; no outcome-based parameter changes.
+    result: B&H selection+109.0569%,confirmation+4.6770%/DD26.6553%. Active best8tied day rules+107.2438%/DD11.2722%,one
+      trade; nominatedF01 fresh2026 zero trades. C02/4h+1.9902%/DD21.2731%,7trades. Post-hoc carriedF01+4.0579%/DD26.6553%.
+      No Holm p<.01; active edge unproven.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    artifacts: []
-    reuse_allowed: false
-    notes: Owner authorized all dates. 2024-2025 selects; frozen winner and fixed references alone enter 2026 economic confirmation. Raw quotes memory-only.
+    canonical_report: analysis/html/p0_xauusd_system_search_20260908.html
+    artifacts:
+    - xauusd-search-20260908-protocol
+    - xauusd-search-20260908-data-source
+    - xauusd-search-20260908-selection
+    - xauusd-search-20260908-nomination
+    - xauusd-search-20260908-summary
+    - xauusd-search-20260908-carry
+    - xauusd-search-20260908-data-quality
+    - xauusd-search-20260908-review
+    - xauusd-search-20260908-minute-review
+    - xauusd-search-20260908-inventory
+    - xauusd-search-20260908-report-source
+    - xauusd-search-20260908-report
+    reuse_allowed: true
+    notes: Owner explicitly authorized all dates. June quote conflicts stopped attempt1 before outcomes; confirmation
+      cutoffMay frozen before economic runs. Attempt2 metadata merge failed after1 selection simulation,0confirmation.
+      Final nominated configurations first economic confirmation; historical2026 chart/data QA exposed. Post-hoc carry
+      use1 and independent minute reconstruction disclosed.59tests;195ledgers54569trades,163581controls; minuteMDD
+      independently reconciled. No raw minute files, training, production, Pine/cloud changes or orders.

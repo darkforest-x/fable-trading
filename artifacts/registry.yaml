@@ -20380,3 +20380,172 @@ artifacts:
     notes: Owner correction restores V2 six1px MA plots and pane panel/text. Candle-only wick highlights,
       visible zero and main-chart close labels retained. Core14inputs/5alerts unchanged. Cloud7 readback,
       runtime and OKX4h reference/toggle checks passed. Config visual holdout use1. No PnL or live orders.
+
+  - artifact_id: xauusd-search-20260908-protocol
+    artifact_type: config
+    role: xauusd_system_search_protocol
+    source_repo: darkforest-x/fable-trading
+    source_commit: b1204cb53930a6105d28cc96da96f5162ba85d33
+    source_path: experiments/active/exp-xauusd-system-search-20260908-v1/preregistration.json
+    sha256: 25576c1e0a923b5746f7b10897298739ab18fd3a1d63f82950e5f138f31edc36
+    size_bytes: 5776
+    storage_uri: repo://experiments/active/exp-xauusd-system-search-20260908-v1/preregistration.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Historical research only. BID plus20bp cost; no financing. ConfirmationJan-May2026; carry diagnostic is
+      post-hoc, not fresh-account confirmation.
+  - artifact_id: xauusd-search-20260908-data-source
+    artifact_type: manifest
+    role: xauusd_system_search_data_source
+    source_repo: darkforest-x/fable-trading
+    source_commit: b1204cb53930a6105d28cc96da96f5162ba85d33
+    source_path: experiments/active/exp-xauusd-system-search-20260908-v1/results/source_metadata.json
+    sha256: 2c465db1d4117b1d85c55ae838372c593f630284c4fdf77b8def83e6a2409443
+    size_bytes: 38503
+    storage_uri: repo://experiments/active/exp-xauusd-system-search-20260908-v1/results/source_metadata.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Historical research only. BID plus20bp cost; no financing. ConfirmationJan-May2026; carry diagnostic is
+      post-hoc, not fresh-account confirmation.
+  - artifact_id: xauusd-search-20260908-selection
+    artifact_type: report
+    role: xauusd_system_search_selection
+    source_repo: darkforest-x/fable-trading
+    source_commit: b1204cb53930a6105d28cc96da96f5162ba85d33
+    source_path: experiments/active/exp-xauusd-system-search-20260908-v1/results/selection_all.csv
+    sha256: 0fd987a90ef9329b097d827a4ed45784c4d64e7bd3926ac272f25c7ac4cea7ad
+    size_bytes: 153004
+    storage_uri: repo://experiments/active/exp-xauusd-system-search-20260908-v1/results/selection_all.csv
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Historical research only. BID plus20bp cost; no financing. ConfirmationJan-May2026; carry diagnostic is
+      post-hoc, not fresh-account confirmation.
+  - artifact_id: xauusd-search-20260908-nomination
+    artifact_type: manifest
+    role: xauusd_system_search_nomination
+    source_repo: darkforest-x/fable-trading
+    source_commit: b1204cb53930a6105d28cc96da96f5162ba85d33
+    source_path: experiments/active/exp-xauusd-system-search-20260908-v1/results/nomination.json
+    sha256: cc57a973ca3c650f1ab27c9f1b1f203a2ad417cc30e8cfa5adb1d6b31cdd583d
+    size_bytes: 2533
+    storage_uri: repo://experiments/active/exp-xauusd-system-search-20260908-v1/results/nomination.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Historical research only. BID plus20bp cost; no financing. ConfirmationJan-May2026; carry diagnostic is
+      post-hoc, not fresh-account confirmation.
+  - artifact_id: xauusd-search-20260908-summary
+    artifact_type: report
+    role: xauusd_system_search_summary
+    source_repo: darkforest-x/fable-trading
+    source_commit: b1204cb53930a6105d28cc96da96f5162ba85d33
+    source_path: experiments/active/exp-xauusd-system-search-20260908-v1/results/final_summary.csv
+    sha256: 6ff3e64291883e66821781f139d06b8bbaf1b77850e328426fd67a6d3ea565b9
+    size_bytes: 3867
+    storage_uri: repo://experiments/active/exp-xauusd-system-search-20260908-v1/results/final_summary.csv
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Historical research only. BID plus20bp cost; no financing. ConfirmationJan-May2026; carry diagnostic is
+      post-hoc, not fresh-account confirmation.
+  - artifact_id: xauusd-search-20260908-carry
+    artifact_type: report
+    role: xauusd_system_search_carry
+    source_repo: darkforest-x/fable-trading
+    source_commit: 701c2967bb77d6e5354fe9bb2aabf46023d01f02
+    source_path: experiments/active/exp-xauusd-system-search-20260908-v1/results/carry_diagnostic.json
+    sha256: 949709405abf5deecb675ef2c00d71ad376f55c4dab5d197d5165d6f728b8f8f
+    size_bytes: 1641
+    storage_uri: repo://experiments/active/exp-xauusd-system-search-20260908-v1/results/carry_diagnostic.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Historical research only. BID plus20bp cost; no financing. ConfirmationJan-May2026; carry diagnostic is
+      post-hoc, not fresh-account confirmation.
+  - artifact_id: xauusd-search-20260908-data-quality
+    artifact_type: report
+    role: xauusd_system_search_data_quality
+    source_repo: darkforest-x/fable-trading
+    source_commit: 53f83cc
+    source_path: experiments/active/exp-xauusd-system-search-20260908-v1/results/data_quality_audit.json
+    sha256: 459b4f521369f4c461dea4e858281b49b4d0154ae9d151dc4b462f1a6a670bf6
+    size_bytes: 134033
+    storage_uri: repo://experiments/active/exp-xauusd-system-search-20260908-v1/results/data_quality_audit.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Historical research only. BID plus20bp cost; no financing. ConfirmationJan-May2026; carry diagnostic is
+      post-hoc, not fresh-account confirmation.
+  - artifact_id: xauusd-search-20260908-review
+    artifact_type: report
+    role: xauusd_system_search_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: ebcc801
+    source_path: experiments/active/exp-xauusd-system-search-20260908-v1/results/result_review.json
+    sha256: 1c237d0875fcb7b9abbf5974917728505fa65ae6bb59271ed45d8e008b1345b4
+    size_bytes: 123284
+    storage_uri: repo://experiments/active/exp-xauusd-system-search-20260908-v1/results/result_review.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Historical research only. BID plus20bp cost; no financing. ConfirmationJan-May2026; carry diagnostic is
+      post-hoc, not fresh-account confirmation.
+  - artifact_id: xauusd-search-20260908-minute-review
+    artifact_type: report
+    role: xauusd_system_search_minute_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: ab60f79
+    source_path: experiments/active/exp-xauusd-system-search-20260908-v1/results/minute_mdd_audit.json
+    sha256: 079a598a7d979d72cca8c42e490efb44537a921766a580188a47c33539be31cf
+    size_bytes: 56631
+    storage_uri: repo://experiments/active/exp-xauusd-system-search-20260908-v1/results/minute_mdd_audit.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Historical research only. BID plus20bp cost; no financing. ConfirmationJan-May2026; carry diagnostic is
+      post-hoc, not fresh-account confirmation.
+  - artifact_id: xauusd-search-20260908-inventory
+    artifact_type: manifest
+    role: xauusd_system_search_inventory
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4101db48814912f4b68efb4b99c9740bce91e1c2
+    source_path: experiments/active/exp-xauusd-system-search-20260908-v1/results/artifact_manifest.json
+    sha256: a1e8862b375c1059c7c6b8f544797340c02cda21ce0f701f881bf2256e9155aa
+    size_bytes: 101285
+    storage_uri: repo://experiments/active/exp-xauusd-system-search-20260908-v1/results/artifact_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Historical research only. BID plus20bp cost; no financing. ConfirmationJan-May2026; carry diagnostic is
+      post-hoc, not fresh-account confirmation.
+  - artifact_id: xauusd-search-20260908-report-source
+    artifact_type: report
+    role: xauusd_system_search_report_source
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4101db48814912f4b68efb4b99c9740bce91e1c2
+    source_path: analysis/p0_xauusd_system_search_20260908.md
+    sha256: 68836a1d50e0d6f123c5d839c247497c109935f67991d1caceeeb208fea8d044
+    size_bytes: 24167
+    storage_uri: repo://analysis/p0_xauusd_system_search_20260908.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Historical research only. BID plus20bp cost; no financing. ConfirmationJan-May2026; carry diagnostic is
+      post-hoc, not fresh-account confirmation.
+  - artifact_id: xauusd-search-20260908-report
+    artifact_type: report
+    role: xauusd_system_search_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4101db48814912f4b68efb4b99c9740bce91e1c2
+    source_path: analysis/html/p0_xauusd_system_search_20260908.html
+    sha256: 562b82235a4d4f0ba13970cafc65e9861781c51739d6a967a58c37ad4184af6d
+    size_bytes: 379860
+    storage_uri: repo://analysis/html/p0_xauusd_system_search_20260908.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Historical research only. BID plus20bp cost; no financing. ConfirmationJan-May2026; carry diagnostic is
+      post-hoc, not fresh-account confirmation.

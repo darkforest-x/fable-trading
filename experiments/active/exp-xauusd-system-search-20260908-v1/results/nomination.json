@@ -1,0 +1,64 @@
+{
+  "created_at": "2026-09-07T17:42:54.935588+00:00",
+  "candidate": "F01",
+  "timeframe": 1440,
+  "best_imacd": {
+    "candidate": "F01",
+    "timeframe": 1440
+  },
+  "best_including_passive": {
+    "candidate": "BUY_HOLD",
+    "timeframe": 0,
+    "return_pct": 109.05694651126385,
+    "max_drawdown_pct": 11.272219641289693,
+    "trades": 1,
+    "winrate": 1.0,
+    "winrate_pct": 100.0,
+    "PF": null,
+    "gross_trade_mean_bp": 10936.60034577751,
+    "net_trade_mean_bp": 10916.60034577751,
+    "exposure_time": 63068280.0,
+    "exposure_fraction": 0.9985731114151086,
+    "bankrupt": false,
+    "final_equity": 2.0905694651126385,
+    "observed_minutes": 709543,
+    "cost_bp": 20.0,
+    "price_model": "BID plus fixed round-trip cost; no swap"
+  },
+  "passive_selection_stats": {
+    "return_pct": 109.05694651126385,
+    "max_drawdown_pct": 11.272219641289693,
+    "trades": 1,
+    "winrate": 1.0,
+    "winrate_pct": 100.0,
+    "PF": null,
+    "gross_trade_mean_bp": 10936.60034577751,
+    "net_trade_mean_bp": 10916.60034577751,
+    "exposure_time": 63068280.0,
+    "exposure_fraction": 0.9985731114151086,
+    "bankrupt": false,
+    "final_equity": 2.0905694651126385,
+    "observed_minutes": 709543,
+    "cost_bp": 20.0,
+    "price_model": "BID plus fixed round-trip cost; no swap"
+  },
+  "ranking_window": [
+    "2024-01-01",
+    "2026-01-01"
+  ],
+  "selection_table_sha256": "0fd987a90ef9329b097d827a4ed45784c4d64e7bd3926ac272f25c7ac4cea7ad",
+  "source_freeze": {
+    "commit": "b1204cb53930a6105d28cc96da96f5162ba85d33",
+    "files": {
+      "yoyo/data/xauusd_histdata.py": "11cdc9fb334e8c94748a8ce3407f7238fcdb2a6989c98a728d4afbe561905964",
+      "yoyo/evaluation/xauusd_systems.py": "6a1076b83f1b6832977832f7764b0bebda8361da4afb0f912ec9ccd289a89887",
+      "yoyo/evaluation/xauusd_execution.py": "bc1485b480370a489bb325cd125d2d3e7675f4bed92c98b2d1899dea507cee6d",
+      "yoyo/evaluation/xauusd_controls.py": "6ce89a06d082757a00c6830a9d0b67aac688d39ab633470c7858fb7dba8db182",
+      "yoyo/evaluation/xauusd_search.py": "4c46758d291446d0396f7bb0003bebf72f9609f75b4e9cc591342c0f4bde0ba0",
+      "yoyo/evaluation/imacd_indicator_audit.py": "0276c97e5e6fb82429b73c7de751d91de0d7af1bb2b30c145c6343e04029402f",
+      "experiments/active/exp-xauusd-system-search-20260908-v1/preregistration.json": "25576c1e0a923b5746f7b10897298739ab18fd3a1d63f82950e5f138f31edc36"
+    }
+  },
+  "confirmation_economic_runs_before_nomination": 0,
+  "note": "2026 price charts previously exposed for visual QA; no 2026 outcome ranking used."
+}
