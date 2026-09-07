@@ -8,6 +8,7 @@ label arithmetic, not historical-price authenticity or executable trading PnL.
 from __future__ import annotations
 
 from collections import defaultdict
+import argparse
 import csv
 from datetime import datetime, timedelta
 import gzip
@@ -74,6 +75,10 @@ def check_description(values, saved):
     equal(average(finite), saved["mean"])
     equal(math.fsum(finite) if finite else None, saved["sum"])
     equal(quantile(finite, .5), saved["median"])
+    equal(min(finite) if finite else None, saved["min"])
+    equal(max(finite) if finite else None, saved["max"])
+    sd = math.sqrt(math.fsum((v-average(finite))**2 for v in finite)/(len(finite)-1)) if len(finite) > 1 else None
+    equal(sd, saved["sd"])
     for field, q in (("q05", .05), ("q25", .25), ("q75", .75), ("q95", .95)):
         equal(quantile(finite, q), saved[field])
     for field, fn in (("n_positive", lambda v: v > 0), ("n_negative", lambda v: v < 0), ("n_zero", lambda v: v == 0)):
@@ -93,7 +98,7 @@ def inference(values, months, indices, signs):
     return [quantile(draws, .025), quantile(draws, .975)], (extreme+1)/(len(signs)+1), sums, counts
 
 
-def run(root=ROOT):
+def run(root=ROOT, *, write_receipt=True):
     root = Path(root)
     config = json.loads((root/E/"config.json").read_text())
     result = json.loads((root/E/"results/summary.json").read_text())
@@ -141,6 +146,7 @@ def run(root=ROOT):
         populations[kind] = out
         emitted = rows(root/E/"results"/(kind+"_ledger.csv.gz"))
         assert len(emitted) == len(out)
+        assert {(r["event_id"], int(r["horizon_hours"])) for r in emitted} == set(out)
         for r in emitted:
             own = out[(r["event_id"], int(r["horizon_hours"]))]
             for field, value in (("gross_markout", own["gross"]), ("cost_threshold_markout", own["net"]), ("policy_cost_threshold_markout", own["policy_net"])):
@@ -163,7 +169,9 @@ def run(root=ROOT):
             control_policy=ctrl_policy, policy_excess=r["policy_net"]-ctrl_policy,
             policy_delta=r["policy_net"]-r["net"], accepted_cost=r["net"] if r["state"] == "accepted" else math.nan,
             accepted_excess=excess if r["state"] == "accepted" else math.nan)
-    for r in rows(root/E/"results/mother_ledger.csv.gz"):
+    emitted_mothers = rows(root/E/"results/mother_ledger.csv.gz")
+    assert len(emitted_mothers) == len(mother) and {(r["event_id"], int(r["horizon_hours"])) for r in emitted_mothers} == set(mother)
+    for r in emitted_mothers:
         own = mother[(r["event_id"], int(r["horizon_hours"]))]
         for field in SERIES:
             equal(r[field], own[field], field)
@@ -204,16 +212,21 @@ def run(root=ROOT):
     audit = dict(status="passed", auditor_commit=commit, auditor_sha256=sha(root/own_path),
         summary_sha256=hashes[str(E/"results/summary.json")], label_rows_recomputed=checks,
         mother_horizon_rows_recomputed=len(mother), horizon_group_descriptions_verified=True,
+        sd_extremes_and_output_unique_grids_verified=True,
         primary_inferences_recomputed=4, month_clusters=24, draws=9999, holm_verified=True,
         raw_prices_read=False, holdout_consumed=False, independent_code_path=True,
         separate_human_or_agent_reviewer=False, executable_pnl_verified=False,
         limitation="Saved endpoints/identities/decisions and independent arithmetic only; no raw-window authenticity or execution audit.")
-    target = root/E/"audit.json"
-    if target.exists():
-        raise FileExistsError("Refusing existing audit receipt")
-    target.write_text(json.dumps(audit, indent=2, allow_nan=False)+"\n")
+    if write_receipt:
+        target = root/E/"audit.json"
+        if target.exists():
+            raise FileExistsError("Refusing existing audit receipt")
+        target.write_text(json.dumps(audit, indent=2, allow_nan=False)+"\n")
     return audit
 
 
 if __name__ == "__main__":
-    print(json.dumps(run(), indent=2))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check-only", action="store_true", help="Recompute without overwriting any saved receipt")
+    args = parser.parse_args()
+    print(json.dumps(run(write_receipt=not args.check_only), indent=2))
