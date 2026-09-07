@@ -92,7 +92,14 @@ def audit_ledger(m,ledger,start,end):
     return checks
 
 
-def run():
+def merge_summary(name,duration,stats,control_summary):
+    """Merge shared cost metadata only after checking both ledgers agree."""
+    assert stats['cost_bp']==control_summary['cost_bp']
+    return {'candidate':name,'timeframe':duration,'name':CANDIDATES[name][0],**stats,**control_summary}
+
+
+def run(data=None):
+    global LAST_DATA
     out=OUT/'results';out.mkdir(exist_ok=True)
     if (out/'nomination.json').exists():
         raise RuntimeError('Existing nomination: do not silently consume confirmation again or overwrite evidence.')
@@ -106,8 +113,10 @@ def run():
         with (out/'archive_progress.jsonl').open('a') as stream:
             stream.write(json.dumps(clean(a),ensure_ascii=False,allow_nan=False)+'\n')
         print('ARCHIVE '+str(a['archive_token'])+' rows='+str(a['rows']),flush=True)
-    data=fetch_range(cfg['data_start'],cfg['data_end_exclusive'],
-                     as_of='2026-09-08',progress_callback=progress)
+    if data is None:
+        data=fetch_range(cfg['data_start'],cfg['data_end_exclusive'],
+                         as_of='2026-09-08',progress_callback=progress)
+    LAST_DATA=data  # Interactive recovery may retain validated quotes in RAM only.
     m=data.frame
     save_json(out/'source_metadata.json',data.metadata)
     gaps=gap_audit(m);gaps.to_csv(out/'quote_gaps.csv.gz',index=False,compression='gzip')
@@ -132,7 +141,7 @@ def run():
             r['stats']['ledger_checks']=audit_ledger(m,r['ledger'],*cfg['selection'])
             c=matched_controls(m,b,f,e,xl,xs,r['ledger'],*cfg['selection'])
             key=f'{name}_{duration}m'
-            summary.append(dict(candidate=name,timeframe=duration,name=CANDIDATES[name][0],**r['stats'],**c['summary']))
+            summary.append(merge_summary(name,duration,r['stats'],c['summary']))
             r['ledger'].to_csv(out/f'selection_{key}_trades.csv.gz',index=False,compression='gzip')
             c['pairs'].to_csv(out/f'selection_{key}_controls.csv.gz',index=False,compression='gzip')
             curves[key]=r['daily_equity']
@@ -172,7 +181,7 @@ def run():
             r['stats']['ledger_checks']=audit_ledger(m,r['ledger'],*cfg[stage])
             c=matched_controls(m,b,f,e,xl,xs,r['ledger'],*cfg[stage])
             key=f'{name}_{duration}m'
-            final.append(dict(stage=stage,candidate=name,timeframe=duration,**r['stats'],**c['summary']))
+            final.append({'stage':stage,**merge_summary(name,duration,r['stats'],c['summary'])})
             r['ledger'].to_csv(out/f'{stage}_{key}_trades.csv',index=False)
             c['pairs'].to_csv(out/f'{stage}_{key}_controls.csv',index=False)
             final_curves[f'{stage}_{key}']=r['daily_equity']
