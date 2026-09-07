@@ -6581,3 +6581,21 @@ experiments:
     notes: 'Owner: OKX, every timeframe and any date; zero-axis consolidation launch and hold big trends. Four configurations
       each holdout use1. All82463 event and246788 control prices/clocks audited;42 fixed-notional paths cross zero
       and are not executable account results. Raw K-lines read-only.'
+
+  - experiment_id: exp-imacd-ma-mtf-20260907-v3
+    source_repo: darkforest-x/fable-trading
+    source_commit: d21980b536a6755a2f5e894cdaa6c234881d0a6b
+    status: active
+    question: Does six-MA formation plus closed higher/lower timeframe confluence preserve IMACD trend winners while
+      removing false starts?
+    single_variable: Thirteen preregistered parent-child gates; user explicitly authorized MA-density and multitimeframe
+      exploration. Fixed34/9,20bp and neutral exit.
+    result: Builder and causal tests frozen before outcomes; pending execution.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/html/p0_imacd_ma_mtf_20260907.html
+    artifacts: []
+    reuse_allowed: false
+    notes: Owner explicitly allows OKX all dates and independently exploring usual MA density and multitimeframe confluence.
+      Original V2-C baseline next use2; new P01-P12 each use1 after execution. No production changes.
