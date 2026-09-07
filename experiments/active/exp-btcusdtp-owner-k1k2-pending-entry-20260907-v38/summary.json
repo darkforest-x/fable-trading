@@ -1,0 +1,407 @@
+{
+  "source_commit": "ab872f00685f85909d0311108dd4855a64262b11",
+  "generated_at": "2026-09-07T10:38:15.536637+00:00",
+  "status": "clock_audit_complete_not_economic",
+  "config_sha256": "dd39bcd558c2396a7ee72259743bc2c1f30289dc8759e5db45647d93c8cb5e41",
+  "source_bars": 210528,
+  "requests": 171,
+  "cases": 63,
+  "controls": 108,
+  "original_matched_cases": 36,
+  "original_unmatched_cases": 27,
+  "administrative_observation_minutes": 60,
+  "entry_expiry": null,
+  "counts": [
+    {
+      "cohort": "case",
+      "status": "eligible",
+      "events": 38,
+      "denominator": 63,
+      "share": 0.6031746031746031,
+      "immediately_eligible": 16,
+      "delayed_eligible": 22,
+      "observed_wait_minutes": 9.473684210526315
+    },
+    {
+      "cohort": "control",
+      "status": "eligible",
+      "events": 65,
+      "denominator": 108,
+      "share": 0.6018518518518519,
+      "immediately_eligible": 27,
+      "delayed_eligible": 38,
+      "observed_wait_minutes": 14.461538461538462
+    },
+    {
+      "cohort": "case",
+      "status": "invalidated_wait_bar",
+      "events": 15,
+      "denominator": 63,
+      "share": 0.23809523809523808,
+      "immediately_eligible": 0,
+      "delayed_eligible": 0,
+      "observed_wait_minutes": 20.666666666666668
+    },
+    {
+      "cohort": "control",
+      "status": "invalidated_wait_bar",
+      "events": 24,
+      "denominator": 108,
+      "share": 0.2222222222222222,
+      "immediately_eligible": 0,
+      "delayed_eligible": 0,
+      "observed_wait_minutes": 21.875
+    },
+    {
+      "cohort": "case",
+      "status": "pending_at_cutoff",
+      "events": 10,
+      "denominator": 63,
+      "share": 0.15873015873015872,
+      "immediately_eligible": 0,
+      "delayed_eligible": 0,
+      "observed_wait_minutes": 60.0
+    },
+    {
+      "cohort": "control",
+      "status": "pending_at_cutoff",
+      "events": 19,
+      "denominator": 108,
+      "share": 0.17592592592592593,
+      "immediately_eligible": 0,
+      "delayed_eligible": 0,
+      "observed_wait_minutes": 60.0
+    }
+  ],
+  "fold_counts": [
+    {
+      "fold": "2023H1",
+      "cohort": "case",
+      "status": "eligible",
+      "events": 12
+    },
+    {
+      "fold": "2023H1",
+      "cohort": "case",
+      "status": "invalidated_wait_bar",
+      "events": 5
+    },
+    {
+      "fold": "2023H1",
+      "cohort": "case",
+      "status": "pending_at_cutoff",
+      "events": 6
+    },
+    {
+      "fold": "2023H1",
+      "cohort": "control",
+      "status": "eligible",
+      "events": 33
+    },
+    {
+      "fold": "2023H1",
+      "cohort": "control",
+      "status": "invalidated_wait_bar",
+      "events": 8
+    },
+    {
+      "fold": "2023H1",
+      "cohort": "control",
+      "status": "pending_at_cutoff",
+      "events": 7
+    },
+    {
+      "fold": "2023H2",
+      "cohort": "case",
+      "status": "eligible",
+      "events": 15
+    },
+    {
+      "fold": "2023H2",
+      "cohort": "case",
+      "status": "invalidated_wait_bar",
+      "events": 3
+    },
+    {
+      "fold": "2023H2",
+      "cohort": "case",
+      "status": "pending_at_cutoff",
+      "events": 1
+    },
+    {
+      "fold": "2023H2",
+      "cohort": "control",
+      "status": "eligible",
+      "events": 16
+    },
+    {
+      "fold": "2023H2",
+      "cohort": "control",
+      "status": "invalidated_wait_bar",
+      "events": 12
+    },
+    {
+      "fold": "2023H2",
+      "cohort": "control",
+      "status": "pending_at_cutoff",
+      "events": 8
+    },
+    {
+      "fold": "2024H1",
+      "cohort": "case",
+      "status": "eligible",
+      "events": 8
+    },
+    {
+      "fold": "2024H1",
+      "cohort": "case",
+      "status": "invalidated_wait_bar",
+      "events": 4
+    },
+    {
+      "fold": "2024H1",
+      "cohort": "case",
+      "status": "pending_at_cutoff",
+      "events": 3
+    },
+    {
+      "fold": "2024H1",
+      "cohort": "control",
+      "status": "eligible",
+      "events": 13
+    },
+    {
+      "fold": "2024H1",
+      "cohort": "control",
+      "status": "invalidated_wait_bar",
+      "events": 3
+    },
+    {
+      "fold": "2024H1",
+      "cohort": "control",
+      "status": "pending_at_cutoff",
+      "events": 2
+    },
+    {
+      "fold": "2024H2",
+      "cohort": "case",
+      "status": "eligible",
+      "events": 3
+    },
+    {
+      "fold": "2024H2",
+      "cohort": "case",
+      "status": "invalidated_wait_bar",
+      "events": 3
+    },
+    {
+      "fold": "2024H2",
+      "cohort": "control",
+      "status": "eligible",
+      "events": 3
+    },
+    {
+      "fold": "2024H2",
+      "cohort": "control",
+      "status": "invalidated_wait_bar",
+      "events": 1
+    },
+    {
+      "fold": "2024H2",
+      "cohort": "control",
+      "status": "pending_at_cutoff",
+      "events": 2
+    }
+  ],
+  "seed_counts": [
+    {
+      "cohort": "case",
+      "seed_state": "aligned",
+      "status": "eligible",
+      "events": 16
+    },
+    {
+      "cohort": "case",
+      "seed_state": "opposite",
+      "status": "eligible",
+      "events": 22
+    },
+    {
+      "cohort": "case",
+      "seed_state": "opposite",
+      "status": "invalidated_wait_bar",
+      "events": 15
+    },
+    {
+      "cohort": "case",
+      "seed_state": "opposite",
+      "status": "pending_at_cutoff",
+      "events": 10
+    },
+    {
+      "cohort": "control",
+      "seed_state": "aligned",
+      "status": "eligible",
+      "events": 27
+    },
+    {
+      "cohort": "control",
+      "seed_state": "opposite",
+      "status": "eligible",
+      "events": 38
+    },
+    {
+      "cohort": "control",
+      "seed_state": "opposite",
+      "status": "invalidated_wait_bar",
+      "events": 24
+    },
+    {
+      "cohort": "control",
+      "seed_state": "opposite",
+      "status": "pending_at_cutoff",
+      "events": 19
+    }
+  ],
+  "prefix_checks": {
+    "events": 171,
+    "all_passed": true
+  },
+  "negative_control": {
+    "synthetic_cases": 1,
+    "correct_unchanged": true,
+    "deliberately_wrong_future_gate_changed": true
+  },
+  "trace_rows": 946,
+  "sql": "WITH totals AS (SELECT cohort,COUNT(*) AS denominator FROM main.audit_events GROUP BY cohort)\nSELECT a.cohort,a.status,COUNT(*) AS events,t.denominator,1.0*COUNT(*)/t.denominator AS share,\nSUM(a.status='eligible' AND a.waiting_bars=0) AS immediately_eligible,\nSUM(a.status='eligible' AND a.waiting_bars>0) AS delayed_eligible,\nAVG(a.waiting_bars*5.0) AS observed_wait_minutes\nFROM main.audit_events a JOIN totals t ON a.cohort=t.cohort\nGROUP BY a.cohort,a.status,t.denominator ORDER BY a.status,a.cohort",
+  "files": {
+    "data/owner_k1k2_pending_entry_v38/requests.csv": {
+      "sha256": "7fd7b48d15ab0a524644d2cbee2775d154b33153060ae63eceb30503110b64b8",
+      "rows": 171,
+      "columns": [
+        "event_id",
+        "direction",
+        "decision_time",
+        "gap_bars",
+        "initial_stop",
+        "signal_atr",
+        "ma",
+        "body_ratio",
+        "fold",
+        "audit_cutoff",
+        "cohort",
+        "parent_event_id"
+      ]
+    },
+    "data/owner_k1k2_pending_entry_v38/assignments.csv": {
+      "sha256": "5df1f0d7fdd79fde2b3e4d59eee93a273ab4a733dac81d8bffaccd8dfc763867",
+      "rows": 63,
+      "columns": [
+        "event_id",
+        "decision_time",
+        "fold",
+        "match_status"
+      ]
+    },
+    "data/owner_k1k2_pending_entry_v38/events.csv": {
+      "sha256": "9d80d63bbab10b4ca994e72c1a7ca0ace3c3ef0acbf416c66cf0240c9b47d2c8",
+      "rows": 171,
+      "columns": [
+        "event_id",
+        "direction",
+        "decision_time",
+        "gap_bars",
+        "initial_stop",
+        "signal_atr",
+        "ma",
+        "body_ratio",
+        "fold",
+        "audit_cutoff",
+        "cohort",
+        "parent_event_id",
+        "status",
+        "status_reason",
+        "status_known_at",
+        "eligible_at",
+        "reference_open",
+        "risk_pct",
+        "risk_atr",
+        "seed_state",
+        "waiting_bars",
+        "invalidated_interval_start"
+      ]
+    },
+    "data/owner_k1k2_pending_entry_v38/trace.csv": {
+      "sha256": "6bad7a209e43707f674c7bfb289dde097eed769da68f1cebcf0757a5e2bad357",
+      "rows": 946,
+      "columns": [
+        "event_id",
+        "observed_at",
+        "completed_bar_open",
+        "state",
+        "colour_known",
+        "side",
+        "wait_bar_stop_touched",
+        "boundary_open",
+        "raw_known",
+        "raw_reason",
+        "management_reason",
+        "management_segment_id",
+        "raw_segment_id"
+      ]
+    },
+    "data/owner_k1k2_pending_entry_v38/prefix_checks.csv": {
+      "sha256": "637ca1dd07b7e154d9f2e244ecf4085d080a5f30eb34398f03f921182fa6c65f",
+      "rows": 171,
+      "columns": [
+        "event_id",
+        "cohort",
+        "terminal",
+        "prefix_rows",
+        "events_equal",
+        "trace_equal",
+        "current_hlc_masked"
+      ]
+    },
+    "data/owner_k1k2_pending_entry_v38/status_counts.csv": {
+      "sha256": "50a795aacf850b01dc68afa511350bad718668e920ba3ee32a9a314276531bc1",
+      "rows": 6,
+      "columns": [
+        "cohort",
+        "status",
+        "events",
+        "denominator",
+        "share",
+        "immediately_eligible",
+        "delayed_eligible",
+        "observed_wait_minutes"
+      ]
+    },
+    "data/owner_k1k2_pending_entry_v38/fold_counts.csv": {
+      "sha256": "41b5eace104f535b2dc280963a841894b080230b3563bf20465dc07b0166d451",
+      "rows": 23,
+      "columns": [
+        "fold",
+        "cohort",
+        "status",
+        "events"
+      ]
+    },
+    "data/owner_k1k2_pending_entry_v38/seed_counts.csv": {
+      "sha256": "9fca1184e1be5ee1b8e5d7045159b681a72649872d70c3c6809c827e9b710daf",
+      "rows": 8,
+      "columns": [
+        "cohort",
+        "seed_state",
+        "status",
+        "events"
+      ]
+    }
+  },
+  "holdout_evaluated": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "economics_materialized": false,
+  "observed_live_delivery_verified": false,
+  "verification_commit": "ab872f00685f85909d0311108dd4855a64262b11"
+}
