@@ -19,6 +19,11 @@ from yoyo.evaluation.owner_k1k2_genuine_flow import sha, clean, write_json
 
 REPORT="analysis/p1_btcusdtp_owner_k1k2_transition_exit_v37_20260907.md"
 TITLE="K1/K2 Exit Timing Test · V37"
+ARTIFACT_NAMES={"artifact.json", "artifact_reviewed.json", "artifact_final.json"}
+SCATTER_SQL="""SELECT event_id,decision_time,state_net,transition_net,delta_hold_minutes,
+    color_exit_without_new_flip,state_net*10000 AS state_bp,transition_net*10000 AS transition_bp,
+    CASE WHEN color_exit_without_new_flip=1 THEN '原反色延续38笔' ELSE '其他25笔' END AS "group"
+    FROM main.case_changes ORDER BY decision_time,event_id"""
 QUERIES={
     "folds":"""SELECT cohort,arm,fold,COUNT(*) AS trades,AVG(net_return)*10000 AS net_bp,
         AVG(gross_return)*10000 AS gross_bp,SUM(net_return>0) AS winners,
@@ -101,10 +106,18 @@ def prepare():
 
 
 def package(artifact_name="artifact.json"):
-    if artifact_name not in {"artifact.json", "artifact_reviewed.json"}:
+    if artifact_name not in ARTIFACT_NAMES:
         raise ValueError("Only named, one-shot report artifacts are allowed")
     commit,s=guard(); saved=json.loads((HERE/"report_data.json").read_text())
     if saved["summary_sha256"]!=sha(HERE/"summary.json"): raise ValueError("Summary drift")
+    # Actually execute the chart source query, rather than attaching pretend SQL.
+    case=pd.read_csv(ROOT/"data/owner_k1k2_transition_exit_v37/case_changes.csv",float_precision="round_trip")
+    with sqlite3.connect(":memory:") as con:
+        case.to_sql("case_changes",con,index=False)
+        scatter=pd.read_sql_query(SCATTER_SQL,con)
+    pd.testing.assert_frame_equal(scatter.sort_values("event_id").reset_index(drop=True),
+        pd.DataFrame(saved["data"]["scatter"])[scatter.columns].sort_values("event_id").reset_index(drop=True),
+        check_dtype=False,check_exact=True)
     if subprocess.check_output(["git","show",commit+":"+REPORT],cwd=ROOT)!=(ROOT/REPORT).read_bytes():
         raise ValueError("Commit final reviewed narrative first")
     sections=[p.strip() for p in re.split(r"(?m)(?=^## )",(ROOT/REPORT).read_text().strip())]
@@ -112,6 +125,11 @@ def package(artifact_name="artifact.json"):
         dict(id="report_data",label="V37 · 逐笔变化、分布与集中度复算",path=str(REL/"report_data.json")),
         dict(id="report",label="V37 · 定义、结论与复现",path=REPORT),
         dict(id="review",label="V37 · 匹配支持与初态独立复核",path=str(REL/"REVIEW.md"))]
+    sources.append(dict(id="scatter_query",label="V37 · 全63事件退出变化SQL",path="data/owner_k1k2_transition_exit_v37/case_changes.csv",
+        query=dict(sql=SCATTER_SQL,language="sql",engine="sqlite",executed_at=pd.Timestamp.now(tz="UTC").isoformat(),
+            tables_used=["main.case_changes"],filters=["all63 original cases; no filtering"],
+            description="Original saved event comparisons; exact equality to report_data scatter verified",
+            metric_definitions={"state_bp":"state_net times10000, original notional", "transition_bp":"transition_net times10000, original notional"})))
     for key,q in QUERIES.items():
         sources.append(dict(id=key,label="V37 · 同名单回测SQL核对",path=str(REL/"report_data.json"),query=dict(
             sql=q,language="sql",engine="sqlite",executed_at=saved["generated_at"],
@@ -123,7 +141,7 @@ def package(artifact_name="artifact.json"):
         description="同一63个形态事件 · 单位bp · 1bp=0.01%",showDescription=True,palette=dict(kind="categorical",name="blueGold"),
         encodings=dict(x=dict(field="fold",type="nominal"),y=dict(field="net_bp",type="quantitative"),
             color=dict(field="arm",type="nominal"),tooltip=[dict(field="trades",type="quantitative"),dict(field="gross_bp",type="quantitative") ])),
-        dict(id="scatter",type="scatter",title="同一笔交易：状态退出与翻转退出",dataset="scatter",sourceId="report_data",
+        dict(id="scatter",type="scatter",title="同一笔交易：状态退出与翻转退出",dataset="scatter",sourceId="scatter_query",
             description="横轴原净bp，纵轴新净bp；63笔全部保留",showDescription=True,palette=dict(kind="categorical",name="blueGold"),
             encodings=dict(x=dict(field="state_bp",type="quantitative"),y=dict(field="transition_bp",type="quantitative"),
                 color=dict(field="group",type="nominal"),tooltip=[dict(field="event_id",type="nominal"),dict(field="decision_time",type="nominal"),dict(field="delta_hold_minutes",type="quantitative")]))]
@@ -137,7 +155,7 @@ def package(artifact_name="artifact.json"):
     folddata=[dict(r,arm="状态退出" if r["arm"]=="state" else "新翻色退出") for r in saved["data"]["folds"] if r["cohort"]=="case"]
     artifact=dict(surface="report",manifest=dict(version=1,surface="report",title=TITLE,generatedAt=stamp,
         blocks=blocks,charts=charts,cards=[],tables=[],filters=[],sources=sources),
-        snapshot=dict(version=1,status="ready",generatedAt=stamp,datasets=dict(case_folds=folddata,scatter=saved["data"]["scatter"])),sources=sources)
+        snapshot=dict(version=1,status="ready",generatedAt=stamp,datasets=dict(case_folds=folddata,scatter=scatter.to_dict("records"))),sources=sources)
     write_json(HERE/artifact_name,artifact)
     write_json(HERE/artifact_name.replace(".json", "_build_receipt.json"),dict(source_commit=commit,generated_at=stamp,
         summary_sha256=sha(HERE/"summary.json"),report_sha256=sha(ROOT/REPORT),report_data_sha256=sha(HERE/"report_data.json")))
@@ -146,6 +164,6 @@ def package(artifact_name="artifact.json"):
 
 if __name__=="__main__":
     p=argparse.ArgumentParser(); p.add_argument("phase",choices=["prepare","package"])
-    p.add_argument("--artifact-name",choices=["artifact.json","artifact_reviewed.json"],default="artifact.json")
+    p.add_argument("--artifact-name",choices=sorted(ARTIFACT_NAMES),default="artifact.json")
     args=p.parse_args()
     prepare() if args.phase=="prepare" else package(args.artifact_name)

@@ -166,8 +166,8 @@ python3 scripts/md_to_html.py analysis/p1_btcusdtp_owner_k1k2_transition_exit_v3
 研究构建器必须先提交；最终审核过的报告 MD 也先提交，再执行只读经济结果的 canonical 包装与便携 HTML 交付：
 
 ```bash
-.venv/bin/python -m yoyo.evaluation.owner_k1k2_transition_report package --artifact-name artifact_reviewed.json
-node /Users/zhangzc/.codex/plugins/cache/openai-curated-remote/data-analytics/0.2.10-13ceeea1f599/skills/build-report/scripts/deliver_portable_artifact.mjs --input experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/artifact_reviewed.json --output analysis/html/p1_btcusdtp_owner_k1k2_transition_exit_v37_20260907.html
+.venv/bin/python -m yoyo.evaluation.owner_k1k2_transition_report package --artifact-name artifact_final.json
+node /Users/zhangzc/.codex/plugins/cache/openai-curated-remote/data-analytics/0.2.10-13ceeea1f599/skills/build-report/scripts/deliver_portable_artifact.mjs --input experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/artifact_final.json --output analysis/html/p1_btcusdtp_owner_k1k2_transition_exit_v37_20260907.html
 ```
 
 先 canonical 验证，再便携交付；若只有结构验证，不能声称浏览器 UI 验收。研究假设设计、统计核对与报告流程要求我们同时保留负面比较、匹配支持和尾部诊断，因此不将均值改善包装成赚钱结论。
