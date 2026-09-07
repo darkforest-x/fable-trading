@@ -14,6 +14,24 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38
+    source_repo: darkforest-x/fable-trading
+    source_commit: "3651944"
+    status: active
+    question: At which causal boundary can an original K2 request first qualify after native5 colour confirmation without an earlier fixed-stop breach?
+    single_variable: Entry-clock feasibility audit only; same63case108control requests; one-hour administrative observation; no economic arm or expiry.
+    result: Pending one-shot non-economic audit; implementation frozen before source materialization.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: null
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Exact approved Binance USD-M BTCUSDT2023-2024 source and original pre-outcome receipt only.
+      Unknown and pending are not zero returns. Formation seed extrema cannot invalidate waiting.
+      Parent commit above; exact execution commit will be recorded in pre_audit_receipt.
+      Plan experiments/active/exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38/PROJECT_PLAN.md.
   - experiment_id: exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37
     source_repo: darkforest-x/fable-trading
     source_commit: "457dc62"

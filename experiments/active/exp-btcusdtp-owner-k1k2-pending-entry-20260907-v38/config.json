@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38",
+  "source_receipt": "experiments/active/exp-btcusdtp-owner-k1k2-transition-exit-20260907-v37/pre_outcome_receipt.json",
+  "source_receipt_sha256": "5c85f1a8e42bd1218f01b0355272534cd2bf43a7d8e675ae657168e2d0cca8b9",
+  "output_dir": "data/owner_k1k2_pending_entry_v38",
+  "audit_minutes": 60,
+  "audit_only": true,
+  "entry_expiry": null,
+  "economic_outcomes": false,
+  "builder_paths": [
+    "yoyo/data/k1k2_pending_entry.py",
+    "yoyo/evaluation/owner_k1k2_pending_entry_audit.py",
+    "tests/test_k1k2_pending_entry.py",
+    "tests/test_owner_k1k2_pending_entry_audit.py",
+    "yoyo/data/hourly_impulse.py",
+    "yoyo/evaluation/owner_k1k2_genuine_flow.py",
+    "yoyo/data/k1k2_genuine_flow_alignment.py"
+  ],
+  "holdout_evaluated": false,
+  "training_eligible": false,
+  "production_eligible": false
+}
