@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 
 from yoyo.evaluation.pine_allin_eth4h_replay import (
-    ROOT, controls, digest, inference, load_source, save_json, table, trade_stats,
+    ROOT, clean, controls, digest, inference, load_source, save_json, table, trade_stats,
 )
 from yoyo.layers.l3_backtest.eth4h_trend_candidate import CHAIN, CandidateReplay
 from yoyo.layers.l3_backtest.pine_allin_eth4h import Policy, Replay
@@ -87,6 +87,18 @@ def write_report(payload):
             ("matched_case_bp", "匹配病例净bp"), ("random_control_bp", "随机净bp"), ("excess_bp", "配对超额bp")]
     finalcols = [("window", "窗口"), *cols[1:]]
     screen = "通过预先设定的经济初筛" if payload["screen"]["passed"] else "未通过预先设定的经济初筛"
+    qa_path = OUT / 'independent_validation.json'
+    verification = ''
+    if qa_path.exists():
+        qa = json.loads(qa_path.read_text())
+        verification = '\n## 逐笔核验与收益集中度\n\n'
+        verification += f"独立核对已保存账本，{sum(qa['checks'].values())}/{len(qa['checks'])}项通过；未重跑信号，也不等于原生撮合验证。\n\n"
+        verification += table(qa['concentration'], [('window','窗口'),('positive_trades','净盈利笔数'),('trades','总笔数'),('cagr_pct','年化%'),('largest5_positive_share_pct','最大5笔占正利润%'),('net_bp_excluding_largest3','剔除最大3笔后净bp')])
+        verification += '\n\n剔除大盈利单仅诊断集中度，不是可以提前执行的策略；短区间年化不是预期收益。\n\n'
+        verification += table(qa['annual'], [('year','年份'),('return_pct','当年账户收益%'),('end_equity','年末权益USDT')])
+        verification += '\n\n2026仅至4月。跨年持仓按市值计入年份；每个独立窗口边界平仓会改变后续状态，因此不能机械拼接收益。\n\n'
+    pine = EXP / 'eth4h_trend_r1.pine'
+    (ROOT / 'analysis/html/eth4h_trend_r1.pine').write_bytes(pine.read_bytes())
     text = f"""# ETH 4H Trend R1：保守仓位候选策略
 
 本轮目标是开发扣费后盈利、回撤可控的策略。最终候选固定为 S5，没有按收益挑中间版本。
@@ -94,7 +106,7 @@ def write_report(payload):
 
 ## 可交付策略
 
-[Pine 源码](../experiments/active/exp-eth4h-trend-candidate-20260907-v1/eth4h_trend_r1.pine)。
+[Pine 源码](eth4h_trend_r1.pine)。
 普通 BINANCE:ETHUSDT.P、4 小时；初始500USDT；每边手续费0.1%，不另加滑点或资金费。
 默认仅研究截至2026-04-30，Pine 中有日期上限以保护 holdout。没有创建实盘警报或连接交易账户。
 
@@ -118,6 +130,11 @@ def write_report(payload):
 S0：首根保护+固定1倍；S1：只改0.5%风险仓位；S2：只改止损仅收紧；S3：只改止损状态隔离；
 S4：只改冷却更新时间；S5：只改反向信号只平仓。SMA comparator：S5只换成均线交叉入场，其余一样。
 所有参数和链条在结果前冻结；不能将最后版本失败改写成“最佳中间版本成功”。
+
+此次S1相对S0的回撤下降来自仓位缩小；单位净收益没有提高。S2–S4在这批数据没有改变收益，
+合成测试验证了保护行为，但不能把代码修复算成额外交易优势。S5改变交易集合后收益小幅增加。
+
+{verification}
 
 ## 开发期与已暴露后段的完整记录
 
@@ -144,7 +161,9 @@ S4：只改冷却更新时间；S5：只改反向信号只平仓。SMA comparato
 
 ## 验收目标及结论
 
-{json.dumps(payload['screen'],ensure_ascii=False,indent=2)}
+```json
+{json.dumps(clean(payload['screen']),ensure_ascii=False,indent=2)}
+```
 
 本轮只给出可复核的研究候选，training_eligible=false、production_eligible=false。
 下一步应先完成同日期原生逐笔核对。若要改变成本/障碍参数或动用holdout，需要Owner另行明确决定。
@@ -238,8 +257,14 @@ def main():
     save_json(OUT/'summary.json',payload)
     pd.DataFrame(payload['summary']).to_csv(OUT/'summary.csv',index=False)
     write_report(payload)
-    print(json.dumps(payload['screen'],indent=2),flush=True)
+    print(json.dumps(clean(payload['screen']),indent=2),flush=True)
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+    if sys.argv[1:] == ['--report-only']:
+        write_report(json.loads((OUT / 'summary.json').read_text()))
+    elif sys.argv[1:]:
+        raise SystemExit('Only --report-only is supported; existing results are never overwritten.')
+    else:
+        main()
