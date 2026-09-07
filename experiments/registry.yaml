@@ -6541,6 +6541,20 @@ experiments:
     notes: Owner explicitly authorized all periods; fixed configuration holdout use1.4tests,2000scalar bars,105ledger assertions.
       HTML structural check only; local-file browser policy denied visual check.
 
+  - experiment_id: exp-owner-box-refinement-20260907-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1edd0d989f5e78bc68cfb10d6eb11ed4ceacd6e4
+    status: active
+    question: Can historical Owner boxes be reused as editable geometry suggestions while preserving source labels and separating future context?
+    single_variable: Same central-core bar interval with explicit candle and six-MA envelope geometry; source identities and directions unchanged.
+    result: Preregistered after Owner authorized box refinement; source freeze and full review-pack verification pending.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: Includes all 2513 LONG/SHORT source boxes with 104 exact-star references; 12 skipped rows retained separately. No automatic onset, semantic reclassification, training or promotion. New LS predictions remain distinct from human annotations and the prior blank projects.
+
   - experiment_id: exp-imacd-profit-mechanism-20260907-v2
     source_repo: darkforest-x/fable-trading
     source_commit: 59137e5d11f0afb0669f79711be93dfb29f8039a

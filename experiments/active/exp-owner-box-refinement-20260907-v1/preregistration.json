@@ -1,0 +1,42 @@
+{
+  "protocol_id": "owner_geometry_refinement_v1",
+  "experiment_id": "exp-owner-box-refinement-20260907-v1",
+  "owner_authorization": "2026-09-07: 1 框应该需要你再优化调整一下细节吧；2 ok；3 ok；4 ok",
+  "scope": "Versioned refinement proposals for all 2513 existing Owner LONG/SHORT boxes; preserve 12 skipped rows and all original identities separately.",
+  "source_sha256": {
+    "analysis/output/owner_side_review/review_sheet.csv": "bb7081e7e1821c5f791486fae0f29caf18307b104bbb07156c35883781071c9a",
+    "datasets/owner_short_gold_center_v1/review/ma_rope_prefilter_v1/admin/owner_2525_scores.jsonl": "0752df544308e6c26f647fc1a520375a551ed003e234d12f3e50dd8a05deef0b",
+    "data/benchmark_exemplars.json": "5acc5d8f68d2671ecd9351bcfc417bc1d27fa7f201d8cd83ec1293b7b231a762"
+  },
+  "geometry": {
+    "baseline": "Original Owner span central half, ceil width/2 clamped to 4 through 7 bars; retain its start/end rather than infer new onset.",
+    "proposal": "Same core, full candle horizontal extent and joint high/low plus SMA/EMA20/60/120 vertical extent with existing 4% price padding.",
+    "source_owner_rectangle": "Keep exact original normalized rectangle and immutable historical reference image when its complete visible window is pre-holdout.",
+    "onset": "Unknown unless independently supplied by Owner. core_end+1 is not an onset annotation.",
+    "negative_policy": "No positive removal, class reassignment or automatic conversion to background.",
+    "future_used_for_geometry": false
+  },
+  "review": {
+    "canvas": "Original Owner bar span plus six earlier and three later bars, bounded before holdout. This is an annotation canvas, not a new training image.",
+    "future_bars": 40,
+    "future_storage": "future_only with separate manifest and no labels",
+    "unsafe_originals": "Do not open or copy full W200 originals whose visible-end close exceeds the fixed holdout boundary. Use a clearly identified safe canvas substitute.",
+    "ordering": "Exact-star boxes first, then chronological time and original box ID.",
+    "alias_policy": "Preserve all original IDs; equal bar spans are candidate aliases only, not proof of equal original rectangles.",
+    "label_studio": "New dedicated project with predictions, never forged human annotations. Existing projects 76/74 and old answers stay unchanged."
+  },
+  "validation": [
+    "Source hashes, every cut index/time identity, and used-window 15-minute continuity",
+    "2513 original direction IDs and 12 explicit skipped IDs accounted for",
+    "Future and all non-core changes cannot change the core price envelope",
+    "Valid finite normalized geometry and full candle/six-MA containment",
+    "No unauthorized original-image or OHLCV holdout read",
+    "Immutable original-reference copies and separate proposal/owner confirmation states",
+    "Label Studio idempotency, identical prediction contents, original human answers preserved",
+    "Actual browser check of editable suggestion and isolated future reference"
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "sample_owner_geometry_confirmed": false,
+  "new_training_authorized": false
+}

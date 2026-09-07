@@ -1,0 +1,30 @@
+<View>
+  <Header value="核对已有标注：框合适就提交，需要时拖动边缘调整" size="4"/>
+  <RectangleLabels name="pattern" toName="image" strokeWidth="2">
+    <Label value="多头" background="#16a34a" hotkey="1"/>
+    <Label value="空头" background="#dc2626" hotkey="2"/>
+  </RectangleLabels>
+  <Choices name="no_box_reason" toName="image" choice="single" showInline="true">
+    <Choice value="无目标形态"/>
+    <Choice value="拿不准"/>
+  </Choices>
+  <Header value="$caption" size="5"/>
+  <View style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+    <View style="flex:1;min-width:350px">
+      <Header value="调整这里的框（已带入细化建议）" size="5"/>
+      <Image name="image" value="$image" width="100%" maxWidth="100%" zoom="true" zoomControl="true" crosshair="true"/>
+    </View>
+    <View style="flex:1.2;min-width:400px">
+      <Header value="后续走势参考 · 最多40根" size="5"/>
+      <Image name="future" value="$future_image" width="100%" maxWidth="100%" zoom="true" zoomControl="true"/>
+    </View>
+  </View>
+  <Collapse>
+    <Panel value="查看原人工标注">
+      <Image name="original" value="$original_image" width="100%" maxWidth="1000px" zoom="true" zoomControl="true"/>
+    </Panel>
+    <Panel value="查看K线编号与边界对照">
+      <Image name="comparison" value="$comparison_image" width="100%" maxWidth="1280px" zoom="true" zoomControl="true"/>
+    </Panel>
+  </Collapse>
+</View>
