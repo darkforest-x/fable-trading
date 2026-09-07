@@ -1,0 +1,104 @@
+{
+  "configuration": "profit_mechanism_v2",
+  "builder_commit": "59137e5d11f0afb0669f79711be93dfb29f8039a",
+  "sources": [
+    {
+      "path": "data/kline_deep/okx_BTC_USDT_SWAP_15m_158499.csv",
+      "sha256": "1d8ba1a07963743ca2e8d0acc21af102544dbe36125bda87793de29f5032a3b3"
+    },
+    {
+      "path": "data/kline_fetched/okx_BTC_USDT_SWAP_3m_57705.csv",
+      "sha256": "272576659a9c6c1f53c2a222e981ed8f186b7284c36326847b50fef30290ce5d"
+    },
+    {
+      "path": "data/kline_fetched/okx_BTC_USDT_SWAP_5m_57699.csv",
+      "sha256": "533ccf5a78f6377e4f9d7ad6cb1ec3850a99f8188b7c9a67e5acd4edceaa1386"
+    },
+    {
+      "path": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+      "sha256": "f6d8c10a995ca328f2de33e3e1a2a74b06f1e621cc657ccd50a6e9b16565ebe4"
+    },
+    {
+      "path": "data/kline_fetched/okx_ETH_USDT_SWAP_3m_57705.csv",
+      "sha256": "a68fa1f08ac83d56f04a4358221ef034f5dd6509bcfaa400d5ed1230ba43c19f"
+    },
+    {
+      "path": "data/kline_fetched/okx_ETH_USDT_SWAP_5m_57699.csv",
+      "sha256": "0f164249ef356b2fc7118078b6d9379b0da4f507e0ef7cb6aef0ca0cc5e67d01"
+    },
+    {
+      "path": "data/kline_fetched/okx_ETH_USDT_SWAP_1m_127999.csv",
+      "sha256": "fc676927dd64ec1a6d957b2924308654e62404f86b4713fb47d139e02f74fa58"
+    }
+  ],
+  "owner_authorization": "Prior turn: OKX all periods and all dates allowed; current turn: discover profitable patterns.",
+  "holdout_consumptions": {
+    "cross_signal": 1,
+    "departure_signal": 1,
+    "departure_neutral": 1,
+    "departure_opposite": 1
+  },
+  "cost_bp": 20.0,
+  "seed": 20260907,
+  "folds": [
+    [
+      "discovery",
+      "2023-01-01",
+      "2025-01-01"
+    ],
+    [
+      "replication",
+      "2025-01-01",
+      "2026-01-01"
+    ],
+    [
+      "exposed",
+      "2026-01-01",
+      "2026-07-01"
+    ]
+  ],
+  "raw_data_written": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "summary_rows": 220,
+  "output_files": [
+    {
+      "path": "experiments/active/exp-imacd-profit-mechanism-20260907-v2/summary.csv",
+      "rows": 220,
+      "sha256": "ea2855a595114792dc031fe372d45953ea0eddc8020e9515139412e16ec47ff3",
+      "size_bytes": 164911
+    },
+    {
+      "path": "data/imacd_profit_mechanism_v2/events.csv",
+      "rows": 82463,
+      "sha256": "0fb21aef97da44eed38741f8f289e4aacdf11487a0f5f25c22148fb402ec0a50",
+      "size_bytes": 28319888
+    },
+    {
+      "path": "data/imacd_profit_mechanism_v2/controls.csv",
+      "rows": 246788,
+      "sha256": "5992b89f0cd7ddea8728b1fe22018eb0a40fb3fcc499da1b409d86f5f5890dba",
+      "size_bytes": 45482296
+    },
+    {
+      "path": "experiments/active/exp-imacd-profit-mechanism-20260907-v2/groups.csv",
+      "rows": 1887,
+      "sha256": "9b6273e7d7b233015594780c877d798599174429c7e80a53461f7c1adfed5e4c",
+      "size_bytes": 596654
+    },
+    {
+      "path": "data/imacd_profit_mechanism_v2/portfolio_trades.csv",
+      "rows": 74297,
+      "sha256": "c379a99e7d21726a805ab2449001e72851018ce831183eef8eaecc0de79bf2b9",
+      "size_bytes": 25499665
+    }
+  ],
+  "limitations": [
+    "No funding ledger",
+    "Fixed20bp cost proxy",
+    "No protective stop or margin/liquidation engine",
+    "Boundary marks include forced closes",
+    "Exploratory reused history",
+    "Monthly dependence assumption"
+  ]
+}

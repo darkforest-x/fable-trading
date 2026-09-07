@@ -19125,3 +19125,139 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Owner2026-09-07authorized all dates; fixed34/9 configuration use1; no economic backtest.
+
+  - artifact_id: imacd-profit-mechanism-20260907-manifest
+    artifact_type: manifest
+    role: exploratory_zero_band_profit_mechanism_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: 59137e5d11f0afb0669f79711be93dfb29f8039a
+    source_path: experiments/active/exp-imacd-profit-mechanism-20260907-v2/manifest.json
+    sha256: 0d996670a712798adfaf9408dc5bcc9a5b6f1247448b7124379d3294a9e9a5ea
+    size_bytes: 4155
+    storage_uri: repo://experiments/active/exp-imacd-profit-mechanism-20260907-v2/manifest.json
+    holdout_status: holdout_consumed
+    data_cutoff: '2026-07-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized OKX all dates; four configurations each use1. Fixed34/9 and20bp; no funding/margin model.
+      No Holm-adjusted 2025 result passes p<.01.
+  - artifact_id: imacd-profit-mechanism-20260907-summary
+    artifact_type: manifest
+    role: exploratory_zero_band_profit_mechanism_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: 59137e5d11f0afb0669f79711be93dfb29f8039a
+    source_path: experiments/active/exp-imacd-profit-mechanism-20260907-v2/summary.csv
+    sha256: 73bcd1e9f6771a6c91d09f487beb89a9acdfa3c47d424464a8c404a2c879653c
+    size_bytes: 168648
+    storage_uri: repo://experiments/active/exp-imacd-profit-mechanism-20260907-v2/summary.csv
+    holdout_status: holdout_consumed
+    data_cutoff: '2026-07-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized OKX all dates; four configurations each use1. Fixed34/9 and20bp; no funding/margin model.
+      No Holm-adjusted 2025 result passes p<.01.
+  - artifact_id: imacd-profit-mechanism-20260907-groups
+    artifact_type: manifest
+    role: exploratory_zero_band_profit_mechanism_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: 59137e5d11f0afb0669f79711be93dfb29f8039a
+    source_path: experiments/active/exp-imacd-profit-mechanism-20260907-v2/groups.csv
+    sha256: 8f3cad7dbd756c1555bbb8ff3374a09588bff26b22831b57252a0469de398e5e
+    size_bytes: 630961
+    storage_uri: repo://experiments/active/exp-imacd-profit-mechanism-20260907-v2/groups.csv
+    holdout_status: holdout_consumed
+    data_cutoff: '2026-07-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized OKX all dates; four configurations each use1. Fixed34/9 and20bp; no funding/margin model.
+      No Holm-adjusted 2025 result passes p<.01.
+  - artifact_id: imacd-profit-mechanism-20260907-cohorts
+    artifact_type: manifest
+    role: exploratory_zero_band_profit_mechanism_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1edd0d989f5e78bc68cfb10d6eb11ed4ceacd6e4
+    source_path: experiments/active/exp-imacd-profit-mechanism-20260907-v2/candidate_cohorts.csv
+    sha256: 4306bb3a921bcb59aa05042135b5ea22a6a2c18704108328680c24ca9f722ff0
+    size_bytes: 3584
+    storage_uri: repo://experiments/active/exp-imacd-profit-mechanism-20260907-v2/candidate_cohorts.csv
+    holdout_status: holdout_consumed
+    data_cutoff: '2026-07-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized OKX all dates; four configurations each use1. Fixed34/9 and20bp; no funding/margin model.
+      No Holm-adjusted 2025 result passes p<.01.
+  - artifact_id: imacd-profit-mechanism-20260907-paired-exits
+    artifact_type: manifest
+    role: exploratory_zero_band_profit_mechanism_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1edd0d989f5e78bc68cfb10d6eb11ed4ceacd6e4
+    source_path: experiments/active/exp-imacd-profit-mechanism-20260907-v2/paired_exits.csv
+    sha256: 7e8e7a08d586152e2007fa1868648470bab445767df1cc06e48e25beca3be61c
+    size_bytes: 1346
+    storage_uri: repo://experiments/active/exp-imacd-profit-mechanism-20260907-v2/paired_exits.csv
+    holdout_status: holdout_consumed
+    data_cutoff: '2026-07-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized OKX all dates; four configurations each use1. Fixed34/9 and20bp; no funding/margin model.
+      No Holm-adjusted 2025 result passes p<.01.
+  - artifact_id: imacd-profit-mechanism-20260907-solvency
+    artifact_type: manifest
+    role: exploratory_zero_band_profit_mechanism_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1edd0d989f5e78bc68cfb10d6eb11ed4ceacd6e4
+    source_path: experiments/active/exp-imacd-profit-mechanism-20260907-v2/portfolio_solvency_audit.csv
+    sha256: 45123e00807ba958f4d777cbac6c7bfed51d1eb1c6503a634da370d37fcbee15
+    size_bytes: 21287
+    storage_uri: repo://experiments/active/exp-imacd-profit-mechanism-20260907-v2/portfolio_solvency_audit.csv
+    holdout_status: holdout_consumed
+    data_cutoff: '2026-07-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized OKX all dates; four configurations each use1. Fixed34/9 and20bp; no funding/margin model.
+      No Holm-adjusted 2025 result passes p<.01.
+  - artifact_id: imacd-profit-mechanism-20260907-qa
+    artifact_type: manifest
+    role: exploratory_zero_band_profit_mechanism_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1edd0d989f5e78bc68cfb10d6eb11ed4ceacd6e4
+    source_path: experiments/active/exp-imacd-profit-mechanism-20260907-v2/audit_qa.json
+    sha256: 9c37c95125390821b72ca2b550fc0f5e2267cef2ce4281551158d5527e0a7233
+    size_bytes: 1680
+    storage_uri: repo://experiments/active/exp-imacd-profit-mechanism-20260907-v2/audit_qa.json
+    holdout_status: holdout_consumed
+    data_cutoff: '2026-07-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized OKX all dates; four configurations each use1. Fixed34/9 and20bp; no funding/margin model.
+      No Holm-adjusted 2025 result passes p<.01.
+  - artifact_id: imacd-profit-mechanism-20260907-statistics-qa
+    artifact_type: manifest
+    role: exploratory_zero_band_profit_mechanism_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1edd0d989f5e78bc68cfb10d6eb11ed4ceacd6e4
+    source_path: experiments/active/exp-imacd-profit-mechanism-20260907-v2/statistics_refresh_qa.json
+    sha256: b8dce26d04b26bba29032b7973de67f1e4dacb3f17743e4363701e801a1c19e3
+    size_bytes: 354
+    storage_uri: repo://experiments/active/exp-imacd-profit-mechanism-20260907-v2/statistics_refresh_qa.json
+    holdout_status: holdout_consumed
+    data_cutoff: '2026-07-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized OKX all dates; four configurations each use1. Fixed34/9 and20bp; no funding/margin model.
+      No Holm-adjusted 2025 result passes p<.01.
+  - artifact_id: imacd-profit-mechanism-20260907-report
+    artifact_type: report
+    role: exploratory_zero_band_profit_mechanism_not_production
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1edd0d989f5e78bc68cfb10d6eb11ed4ceacd6e4
+    source_path: analysis/html/p0_imacd_profit_mechanism_20260907.html
+    sha256: 504a5a16d75c25f5d4565a45e33bb1d8cf3cc41221c7d7cdb55e5a027ba65330
+    size_bytes: 1270308
+    storage_uri: repo://analysis/html/p0_imacd_profit_mechanism_20260907.html
+    holdout_status: holdout_consumed
+    data_cutoff: '2026-07-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized OKX all dates; four configurations each use1. Fixed34/9 and20bp; no funding/margin model.
+      No Holm-adjusted 2025 result passes p<.01.

@@ -1,0 +1,19 @@
+{
+  "html_sha256": "504a5a16d75c25f5d4565a45e33bb1d8cf3cc41221c7d7cdb55e5a027ba65330",
+  "tables": 14,
+  "embedded_images": 5,
+  "all_tables_rectangular": true,
+  "all_220_summary_rows_rendered": true,
+  "local_links_valid": 8,
+  "png_visual_inspection": "Five PNGs inspected: Chinese text, dates, legends, positive/negative signs, price/indicator alignment and noncolliding labels.",
+  "html_browser_visual_check": "Not performed: earlier browser file navigation was policy denied; no alternate-route workaround attempted.",
+  "test_status": {
+    "command": ".venv/bin/python -m pytest tests/test_imacd_indicator_audit.py tests/test_imacd_profit_mechanism.py tests/contracts/test_registries.py -q --tb=short",
+    "passed": 27,
+    "failed": 1,
+    "indicator_and_clock_tests_passed": 12,
+    "failure": "Existing global holdout allowlist mismatch: exp-btcusdtp-owner-k1k2-genuine-flow-20260907-v36. Present in HEAD registry before our additions and absent from HEAD allowlist. Not waived or edited.",
+    "our_v1_v2_authorized_ids_declared": true
+  },
+  "final_visual_check": "All five standalone PNG figures viewed. Case labels relocated outside plot areas; Chinese glyphs, UTC dates, signs and source captions readable."
+}

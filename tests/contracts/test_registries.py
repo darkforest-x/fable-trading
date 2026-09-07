@@ -173,6 +173,9 @@ def test_holdout_consumption_is_declared_per_experiment_not_assumed():
     registries = load_registries(root=REPO)
     consumers = {e.experiment_id for e in registries.experiments if e.holdout_consumed}
     assert consumers == {
+        # Owner explicitly authorized OKX, all timeframes and all dates in chat.
+        "exp-imacd-okx-descriptive-20260907-v1",
+        "exp-imacd-profit-mechanism-20260907-v2",
         "exp-ashare-grade-a-yolo-1h4h-long-sina-20260902-v2",
         "exp-btc-4h-ma-launch-similarity-top20-v2",
         "exp-btc-4h-ma-launch-similarity-v1",

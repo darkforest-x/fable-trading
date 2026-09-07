@@ -6540,3 +6540,30 @@ experiments:
     reuse_allowed: true
     notes: Owner explicitly authorized all periods; fixed configuration holdout use1.4tests,2000scalar bars,105ledger assertions.
       HTML structural check only; local-file browser policy denied visual check.
+
+  - experiment_id: exp-imacd-profit-mechanism-20260907-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 59137e5d11f0afb0669f79711be93dfb29f8039a
+    status: inconclusive
+    question: Which zero-band launch and holding mechanisms retain large BTC/ETH trend profits?
+    single_variable: A-to-B changes entry; B-to-C and C-to-D change exit only. Predeclared zero-run groups are exploratory.
+    result: 'ETH4h2025 same30 starts: signal exit mean-156.04bp, neutral exit+88.43bp; neutral worse in2023-24. ETH4h>=9zero
+      and BTC4h2-8zero positive all3 windows, tail-concentrated; minimum Holm p.28125.'
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/html/p0_imacd_profit_mechanism_20260907.html
+    artifacts:
+    - imacd-profit-mechanism-20260907-manifest
+    - imacd-profit-mechanism-20260907-summary
+    - imacd-profit-mechanism-20260907-groups
+    - imacd-profit-mechanism-20260907-cohorts
+    - imacd-profit-mechanism-20260907-paired-exits
+    - imacd-profit-mechanism-20260907-solvency
+    - imacd-profit-mechanism-20260907-qa
+    - imacd-profit-mechanism-20260907-statistics-qa
+    - imacd-profit-mechanism-20260907-report
+    reuse_allowed: true
+    notes: 'Owner: OKX, every timeframe and any date; zero-axis consolidation launch and hold big trends. Four configurations
+      each holdout use1. All82463 event and246788 control prices/clocks audited;42 fixed-notional paths cross zero
+      and are not executable account results. Raw K-lines read-only.'

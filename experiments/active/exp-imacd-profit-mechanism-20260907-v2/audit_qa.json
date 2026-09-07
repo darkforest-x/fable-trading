@@ -1,0 +1,46 @@
+{
+  "event_rows": 82463,
+  "control_rows": 246788,
+  "portfolio_rows": 74297,
+  "summary_rows": 220,
+  "fully_matched_events": 82174,
+  "unmatched_events": 289,
+  "source_hashes_verified": true,
+  "all_entry_exit_prices_verified": true,
+  "first_legal_exit_verified": true,
+  "all_matching_keys_verified": true,
+  "control_reuse_within_policy": false,
+  "same_departure_mother_group": true,
+  "independent_scalar_md_max_error": {
+    "BTC": 1.6007106751203537e-10,
+    "ETH": 7.275957614183426e-12
+  },
+  "mfe_mae_cases_checked": 1079,
+  "close_marked_paths_crossing_zero": 42,
+  "matching_inference_is_observational": true,
+  "builder_commit": "eaa22b566c719cf166d6996b1a77eb16c9150468",
+  "cases": [
+    {
+      "event_id": "ETH_240_replication_departure_7232",
+      "path": "analysis/figures/imacd_profit_20260907/eth4h_20250423.png",
+      "description": "ETH：反向交叉时尚未走出主升段"
+    },
+    {
+      "event_id": "ETH_240_replication_departure_7657",
+      "path": "analysis/figures/imacd_profit_20260907/eth4h_20250702.png",
+      "description": "ETH：启动后先回撤，随后走出大波段"
+    },
+    {
+      "event_id": "BTC_240_discovery_departure_4534",
+      "path": "analysis/figures/imacd_profit_20260907/btc4h_20240129.png",
+      "description": "BTC：短零带启动后的趋势延伸"
+    },
+    {
+      "event_id": "ETH_240_replication_departure_6718",
+      "path": "analysis/figures/imacd_profit_20260907/eth4h_20250127_failure.png",
+      "description": "失败对照：长时间贴零后也会假启动"
+    }
+  ],
+  "all_candidate_equity_paths_positive": true,
+  "report_builder_commit": "1edd0d989f5e78bc68cfb10d6eb11ed4ceacd6e4"
+}
