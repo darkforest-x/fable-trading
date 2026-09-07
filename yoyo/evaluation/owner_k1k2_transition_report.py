@@ -108,7 +108,8 @@ def package():
     sections=[p.strip() for p in re.split(r"(?m)(?=^## )",(ROOT/REPORT).read_text().strip())]
     sources=[dict(id="summary",label="V37 · 冻结回测摘要",path=str(REL/"summary.json")),
         dict(id="report_data",label="V37 · 逐笔变化、分布与集中度复算",path=str(REL/"report_data.json")),
-        dict(id="report",label="V37 · 定义、结论与复现",path=REPORT)]
+        dict(id="report",label="V37 · 定义、结论与复现",path=REPORT),
+        dict(id="review",label="V37 · 匹配支持与初态独立复核",path=str(REL/"REVIEW.md"))]
     for key,q in QUERIES.items():
         sources.append(dict(id=key,label="V37 · 同名单回测SQL核对",path=str(REL/"report_data.json"),query=dict(
             sql=q,language="sql",engine="sqlite",executed_at=saved["generated_at"],
