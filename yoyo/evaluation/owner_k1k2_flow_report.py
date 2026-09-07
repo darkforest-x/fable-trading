@@ -120,7 +120,39 @@ def package():
     print(json.dumps(dict(sections=len(sections),charts=1)))
 
 
+def clock():
+    """Post-result mechanism audit only; entry and subsequent clocks kept distinct."""
+    from yoyo.data.hourly_impulse import BAR_COLUMNS, add_features, resample_complete
+    from yoyo.evaluation.owner_k1k2_genuine_flow import checked, load_month
+    from yoyo.evaluation.owner_k1k2_exit_clock_audit import audit_clock
+    commit,s=guard()
+    audit_source="yoyo/evaluation/owner_k1k2_exit_clock_audit.py"
+    if subprocess.check_output(["git","show",commit+":"+audit_source],cwd=ROOT)!=(ROOT/audit_source).read_bytes():
+        raise ValueError("Commit diagnostic builder before price read")
+    if (HERE/"clock_audit.json").exists() or (HERE/"clock_audit.csv").exists():
+        raise ValueError("Do not overwrite mechanism evidence")
+    _,config,manifest=checked()
+    data=pd.concat([load_month(ROOT/r["output_path"],r) for r in manifest["monthly"]],ignore_index=True)
+    raw=resample_complete(data[BAR_COLUMNS],5)
+    featured=add_features(raw,"SMA",40)
+    case=pd.read_csv(ROOT/config["output_dir"]/"case_trades.csv",float_precision="round_trip")
+    audit=audit_clock(case,featured,raw)
+    audit.to_csv(HERE/"clock_audit.csv",index=False,float_format="%.17g")
+    flags=["entry_already_opposite","first_postentry_opposite","exited_first5m",
+        "color_exit_without_new_flip","first_postentry_new_flip","exact_known_clocks"]
+    results=[]
+    for arm,rows in [("baseline",audit),("flow_positive",audit.loc[audit.flow_pass])]:
+        results.append(dict(arm=arm,events=len(rows),flags={flag:dict(
+            true=int(rows[flag].fillna(False).sum()),unknown=int(rows[flag].isna().sum())) for flag in flags}))
+    write_json(HERE/"clock_audit.json",dict(source_commit=commit,generated_at=pd.Timestamp.now(tz="UTC"),
+        summary_sha256=sha(HERE/"summary.json"),audit_source_sha256=sha(ROOT/audit_source),
+        csv_sha256=sha(HERE/"clock_audit.csv"),rows=len(audit),results=results,
+        semantic="post-result descriptive mechanism labels; not new entry features or a changed exit policy",
+        source_start=config["start_inclusive"],source_end=config["end_exclusive"],holdout_evaluated=False))
+    print(json.dumps(clean(results),ensure_ascii=False,indent=2))
+
+
 if __name__=="__main__":
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("phase",choices=["prepare","package"])
-    prepare() if parser.parse_args().phase=="prepare" else package()
+    parser.add_argument("phase",choices=["prepare","package","clock"])
+    {"prepare":prepare,"package":package,"clock":clock}[parser.parse_args().phase]()
