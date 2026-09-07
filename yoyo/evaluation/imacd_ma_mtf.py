@@ -32,6 +32,12 @@ PARENTS=dict(zip(POLICIES,[None,'P00_base','P01_width','P02_dense_now','P03_dens
                             'P04_release','P04_release','P04_release','P08_htf_either','P08_htf_either','P08_htf_either','P11_wait_htf']))
 SEED=20260908
 END=pd.Timestamp('2026-07-01',tz='UTC')
+ZERO_POLICIES=['P00_base','P04_release','P08_htf_either','P10_htf_ltf','P11_wait_htf','P12_wait_ltf',
+               'P13_htf_zero','P14_zero_ltf','P15_wait_zero','P16_wait_zero_ltf']
+PARENTS.update(P13_htf_zero='P08_htf_either',P14_zero_ltf='P13_htf_zero',
+               P15_wait_zero='P13_htf_zero',P16_wait_zero_ltf='P15_wait_zero')
+WAIT_POLICIES=['P11_wait_htf','P12_wait_ltf','P15_wait_zero','P16_wait_zero_ltf']
+LOW_POLICIES=['P10_htf_ltf','P12_wait_ltf','P14_zero_ltf','P16_wait_zero_ltf']
 
 
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -106,7 +112,14 @@ def side_masks(f,side):
            recent&release&hm,recent&release&hs,recent&release&support,
            recent&release&support&(f.h_sma60_slope*side>0),recent&release&support&lm,
            release&support,release&support&lm]
-    return {p:m.fillna(False).to_numpy(bool) for p,m in zip(POLICIES,masks)}
+    out={p:m.fillna(False).to_numpy(bool) for p,m in zip(POLICIES,masks)}
+    zero_support=f.h_md.eq(0)|support
+    for p,m in [('P13_htf_zero',recent&release&zero_support),
+                ('P14_zero_ltf',recent&release&zero_support&lm),
+                ('P15_wait_zero',release&zero_support),
+                ('P16_wait_zero_ltf',release&zero_support&lm)]:
+        out[p]=m.fillna(False).to_numpy(bool)
+    return out
 
 
 def select_requests(f,anchors,last,policy,masks):
@@ -114,7 +127,7 @@ def select_requests(f,anchors,last,policy,masks):
     md=f.md.to_numpy();recent=f.dense_recent.to_numpy();chosen=[]
     for anchor in anchors:
         side=int(np.sign(md[anchor]))
-        if policy in ('P11_wait_htf','P12_wait_ltf'):
+        if policy in WAIT_POLICIES:
             if not recent[anchor]:continue
             for j in range(anchor,min(anchor+9,last-1)+1):
                 if md[j]*side<=0:break
@@ -173,8 +186,12 @@ def ledger_record(symbol,minutes,fold,policy,anchor,j,side,b,f,result):
         l_md=float(r.l_md),l_i=int(r.l_source_i),l_close_ns=int(r.l_source_close_ns),**result)
 
 
-def run():
-    OUT.mkdir(parents=True,exist_ok=True);DATA.mkdir(parents=True,exist_ok=True)
+def run(variant='primary'):
+    assert variant in ('primary','neutral_extension')
+    output=OUT if variant=='primary' else OUT/variant
+    data=DATA if variant=='primary' else DATA/variant
+    policies=POLICIES if variant=='primary' else ZERO_POLICIES
+    output.mkdir(parents=True,exist_ok=True);data.mkdir(parents=True,exist_ok=True)
     bars,fs,sources=all_frames();allrows=[];controls=[];summaries=[];portfolios=[];coverage=[]
     for symbol in ['BTC','ETH']:
         for minutes in TF:
@@ -183,7 +200,7 @@ def run():
                 valid=np.flatnonzero((b.index>=pd.Timestamp(start,tz='UTC'))&(b.index+pd.Timedelta(minutes=minutes)<=pd.Timestamp(end,tz='UTC')))
                 last=int(valid[-1]);idx=[int(i) for i in valid if i<last and f.eligible.iloc[i] and pd.notna(f.volbin.iloc[i])]
                 anchors=[i for i in idx if f.departure.iloc[i]!=0]
-                requests={p:select_requests(f,anchors,last,p,masks) if not (LOW[minutes] is None and p in ['P10_htf_ltf','P12_wait_ltf']) else [] for p in POLICIES}
+                requests={p:select_requests(f,anchors,last,p,masks) if not (LOW[minutes] is None and p in LOW_POLICIES) else [] for p in policies}
                 union=sorted({j for rows in requests.values() for _,j,_ in rows});matches=match_union(f,idx,union);cache={}
                 def resolved(i,side):
                     key=(i,side)
@@ -204,7 +221,7 @@ def run():
                         rows.append(r)
                     q=pd.DataFrame(rows);allrows.extend(rows)
                     common=dict(symbol=symbol,minutes=minutes,fold=fold,policy=policy,parent=PARENTS[policy],base_n=len(anchors),
-                                available=not(LOW[minutes] is None and policy in ['P10_htf_ltf','P12_wait_ltf']),higher_minutes=HIGH[minutes],lower_minutes=LOW[minutes])
+                                available=not(LOW[minutes] is None and policy in LOW_POLICIES),higher_minutes=HIGH[minutes],lower_minutes=LOW[minutes])
                     if not len(q):summaries.append(dict(**common,n=0,matched_n=0));continue
                     stats=distribution(q.net_bp);ranks=rank_baseline(q.assign(strength=q.ma_score));ranks={'ma_'+k:v for k,v in ranks.items()}
                     pm,accepted=single_position(b,q);portfolios.extend(accepted)
@@ -236,17 +253,21 @@ def run():
     for col in ['entry_i','exit_i','entry_price','exit_price','net_bp','mfe_bp','mae_bp']:
         assert np.allclose(old[col],new[col],rtol=0,atol=1e-7),col
     outputs=[]
-    for name,frame,folder in [('events',events,DATA),('controls',control,DATA),('portfolio',pd.DataFrame(portfolios),DATA),
-                              ('summary',summary,OUT),('nominations',nominations,OUT),('coverage',pd.DataFrame(coverage),OUT)]:
+    for name,frame,folder in [('events',events,data),('controls',control,data),('portfolio',pd.DataFrame(portfolios),data),
+                              ('summary',summary,output),('nominations',nominations,output),('coverage',pd.DataFrame(coverage),output)]:
         p=folder/(name+'.csv');frame.to_csv(p,index=False);outputs.append(dict(path=str(p.relative_to(ROOT)),rows=len(frame),sha256=sha(p),size_bytes=p.stat().st_size))
     manifest=dict(builder_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),sources=sources,outputs=outputs,
-                  policies=POLICIES,parents=PARENTS,base_parity_rows=len(new),base_parity_columns=7,
-                  seed=SEED,round_trip_cost_bp=20,holdout_uses={'P00_base_inherited_V2_C_total':2,**{p:1 for p in POLICIES[1:]}},
+                  variant=variant,policies=policies,parents={p:PARENTS[p] for p in policies},base_parity_rows=len(new),base_parity_columns=7,
+                  seed=SEED,round_trip_cost_bp=20,holdout_uses=({'P00_base_inherited_V2_C_total':2,**{p:1 for p in policies[1:]}} if variant=='primary'
+                      else {'P00_base_inherited_V2_C_total':3,**{p:(2 if p in POLICIES else 1) for p in policies[1:]}}),
                   owner_authorization='OKX all periods/all dates; explicitly add usual MA density and multitimeframe confluence; explore independently.',
                   higher_timeframe_clock='source close timestamp <= decision close; eligible source warmup340',
                   production_eligible=False,training_eligible=False,raw_kline_writes=False)
-    (OUT/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
+    (output/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
     print('V2 baseline parity passed;',len(new),'rows;',len(events),'V3 events; discovery nominations',len(nominations),flush=True)
 
 
-if __name__=='__main__':run()
+if __name__=='__main__':
+    import argparse
+    parser=argparse.ArgumentParser();parser.add_argument('--neutral-extension',action='store_true')
+    args=parser.parse_args();run('neutral_extension' if args.neutral_extension else 'primary')

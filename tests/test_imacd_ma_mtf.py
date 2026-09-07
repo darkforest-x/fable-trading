@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from yoyo.evaluation.imacd_ma_mtf import align_closed,formation_features,select_requests,nominate,POLICIES
+from yoyo.evaluation.imacd_ma_mtf import side_masks
 
 
 def test_higher_timeframe_is_unavailable_until_it_closes():
@@ -58,3 +59,16 @@ def test_formation_and_memory_are_prefix_invariant():
 def test_nomination_rejects_validation_rows():
     d=pd.DataFrame(dict(fold=['replication'],entry_time=['2025-01-01T00:00:00Z']))
     with pytest.raises(AssertionError):nominate(d)
+
+
+def test_neutral_extension_changes_only_known_zero_higher_state():
+    x=100+np.sin(np.arange(400)/14)*4
+    b=pd.DataFrame(dict(open=x,high=x+1,low=x-1,close=x),index=pd.date_range('2024-01-01',periods=400,freq='1h',tz='UTC'))
+    f=formation_features(b)
+    f['h_md']=-1.;f['h_sh']=-1.;f['h_sma60_slope']=1.;f['l_md']=1.
+    f['dense_recent']=True;f['dense_rope_upper']=f.close-.1
+    f.loc[f.index[-3:],'h_md']=[0.,1.,np.nan]
+    masks=side_masks(f,1)
+    assert masks['P08_htf_either'][-3:].tolist()==[False,True,False]
+    assert masks['P13_htf_zero'][-3:].tolist()==[True,True,False]
+    assert not masks['P13_htf_zero'][:-3].any()
