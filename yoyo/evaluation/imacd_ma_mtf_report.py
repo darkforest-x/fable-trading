@@ -44,6 +44,8 @@ def audit(m,frames,bars,fs):
     assert np.allclose(q.loc[exact,'control_mean_net_bp'],q.loc[exact,'mean'])
     assert q.loc[~exact,'control_mean_net_bp'].isna().all()
     assert np.allclose(q.loc[exact,'excess_bp'],q.loc[exact,'net_bp']-q.loc[exact,'mean'])
+    sides=c.merge(e[['event_id','policy','side']],on=['event_id','policy'],validate='many_to_one',suffixes=('','_event'))
+    assert sides.side.eq(sides.side_event).all()
     paths=[];mfe_checked=0;scalar={}
     for symbol in ['BTC','ETH']:
         for minutes in TF:
@@ -114,12 +116,21 @@ def audit(m,frames,bars,fs):
                 assert abs(z['fixed_notional_return_pct']-row.portfolio_fixed_notional_return_pct)<1e-7
                 assert abs(z['close_marked_drawdown_pct']-row.portfolio_close_marked_drawdown_pct)<1e-7
                 paths.append(dict(symbol=symbol,minutes=minutes,fold=fold,policy=policy,**z))
-    keyed=s.set_index(KEY)
+    keyed=s.set_index(KEY);auc_checked=0
     for key,g in e.groupby(KEY):
         r=keyed.loc[key];assert len(g)==r.n
         assert abs(g.net_bp.mean()-r.mean_net_bp)<1e-7
         assert abs(g.net_bp.gt(0).mean()*100-r.win_pct)<1e-7
         assert abs(g.loc[g.excess_bp.notna(),'net_bp'].mean()-r.matched_case_mean_net_bp)<1e-7 or g.excess_bp.notna().sum()==0
+        # Independent pairwise probability checks suspiciously high AUC values.
+        if key[1]==240:
+            positive=g.loc[g.net_bp>0,'ma_score'].to_numpy();negative=g.loc[g.net_bp<=0,'ma_score'].to_numpy()
+            if len(positive) and len(negative):
+                delta=positive[:,None]-negative[None,:]
+                auc=float(((delta>0)+.5*(delta==0)).mean())
+                assert abs(auc-r.ma_strength_auc)<1e-12;auc_checked+=1
+            ranked=g.sort_values(['ma_score','event_id'],ascending=[False,True]).head(max(1,int(np.ceil(len(g)/10))))
+            assert abs(ranked.net_bp.mean()-r.ma_score_top_decile_net_bp)<1e-7
     nominated=nominate(e[e.fold=='discovery'].copy())
     pd.testing.assert_frame_equal(nominated,frames['nominations'],check_dtype=False,atol=1e-7)
     paths=pd.DataFrame(paths)
@@ -127,7 +138,7 @@ def audit(m,frames,bars,fs):
         all_prices_clocks_first_legal_exits_verified=True,all_matching_keys_verified=True,
         controls_reused_across_distinct_decisions=False,causal_candidate_membership_verified=True,
         saved_discovery_nominations_reproduced=True,scalar_imacd_max_error=scalar,
-        mfe_mae_cases=mfe_checked,paths_crossing_zero=int(paths.crossed_zero.sum())),paths
+        independent_pairwise_auc_cells=auc_checked,mfe_mae_cases=mfe_checked,paths_crossing_zero=int(paths.crossed_zero.sum())),paths
 
 
 def result_table(s):
@@ -247,7 +258,7 @@ def write_report(primary,ext,qa,paths):
 
 2023–24用于规则内提名，2025作按时间复核，2026上半年为已暴露历史复核。V2看过这些历史，第二阶段又看过主实验后才提出，所以没有把任何一段包装成全新盲测。当前已授权任意日期；未访问实盘账户。
 
-| 信号周期 | 高周期背景 | 低周期确认 |
+| 信号周期（分钟） | 高周期背景（分钟） | 低周期确认（分钟） |
 |---|---|---|
 '''+table(['分钟','高周期分钟','低周期分钟'],[[t,HIGH[t],LOW[t] or '缺长样本，不做该门'] for t in TF]).split('\n',2)[2]+f'''
 
@@ -287,7 +298,7 @@ def write_report(primary,ext,qa,paths):
 
 2025高周期严格支持P08净均值3.42%，但2026上半年变成−0.80%，因为仅留下约28%的原始赢家利润。允许高周期零轴P13后，该窗口回到+1.22%；再允许最多9根等待P15为+2.60%。然而P15在2023–24为负，不存在“越共振越赚钱”的单调规律。2025/2026 ETH4h加低周期末根同向没有改变这两组交易；在其他周期仍有差异。
 
-这是两个不同功能：大周期判断背景是否许可，本周期决定启动，小周期决定执行时机。**功能分工是目前由案例支持的研究解释；尚未验证成一套可泛化的盈利规则。** 原有“至少md/sh一项同向”与“允许md=0”都应保留对照，不能只留下某年漂亮的一条。
+这是三个不同功能：大周期判断背景是否许可，本周期决定启动，小周期决定执行时机。**功能分工是目前由案例支持的研究解释；尚未验证成一套可泛化的盈利规则。** 原有“至少md/sh一项同向”与“允许md=0”都应保留对照，不能只留下某年漂亮的一条。
 
 ## 5. 六个真实案例：同样查看赢家与失败
 
@@ -307,7 +318,9 @@ ETH 2026-01-20 20:00 UTC信号，于2026-01-21 00:00开盘2938.29做空，主线
 
 2025年1月失败空头也画出来：零轴横盘很久并不保证启动成功。宽度、交织和日线状态在同一张轨迹表列出，失败退出也按原规则算，不能因为它不符合“赚大钱”的预期就删除。
 
-2026年5月另一大空头在anchor日线md仍小幅为正，允许零轴也不能即时放行；等待能否保留、延迟几根及收益变化见上表。这说明“中性门”只修正一种状态歧义，没有解决所有早启动问题。
+2026年5月另一大空头在anchor日线md仍小幅为正，允许零轴也不能即时放行；等2根4h确认后进入，价格净收益约19.15%，保住了该趋势。这说明等待有时有价值，但该例不能决定9根是最佳长度。
+
+BTC 2024年1月那笔约55.19%大赢家，启动前带宽/ATR为3.33，恰好不满足现成≤3的密集代理，被本轮过滤。没有为了保住这一笔临时放宽阈值。这也是为什么不能把ETH的改善直接搬给BTC：既要数过滤了多少亏损，也要数误删了多少趋势利润。
 
 ## 6. BTC/ETH各周期：发现段提名全部跟踪
 
@@ -327,7 +340,9 @@ BTC4h P07、BTC12h P04和ETH12h P09是主实验中三段总均值都为正的提
 
 {table(['币','时期','配置','n','全部净均值','删最大赢家后均值','中位数','最大赢家','最大亏损'],[[r.symbol,FN[r.fold],r.policy[:3],r.n,pc(r.mean_net_bp),pc(r.without_best_bp),pc(r.median_bp),pc(r.best_bp),pc(r.worst_bp)] for r in tails.itertuples()])}
 
-删最大赢家是脆弱性诊断，不是要求趋势策略不依赖趋势。应同时看到：趋势利润本就集中，而样本里独立大趋势太少，未来还能否重复并未证实。
+一个比V2更积极的变化：ETH4h加入密集后，即使删掉最大赢家，2025和2026上半年的单次均值仍分别为+0.69%和+0.61%；原始P00删掉最大赢家则都转负。这说明本轮改善并非仅把一个偶然大赚留下。但2023–24删最大赢家后仍为负，稳定性还不够。
+
+删最大赢家是脆弱性诊断，不是要求趋势策略不依赖趋势。应同时看到：趋势利润本就集中，而样本里独立大趋势太少，未来还能否重复并未证实。表中2025 AUC曾超过0.7，已用独立正负样本两两比较重算，并验证特征前缀不变性；高AUC与top10匹配超额为负可以同时存在，因此它不是成功标准。
 
 月聚类bootstrap与符号置换针对匹配超额；它是观察性基准，不是随机化交易试验。主实验2025全家族Holm最小值{num(a.p_holm_replication.min(),5)}；把两阶段全部{len(valid)}个非空2025检验更保守地合并校正后最小值{num(combined.p_holm_both_stages.min(),5)}，没有p<0.01的确认项。长持仓跨月、同币同周期反复规则仍有依赖；校正也不能消除研究者看过历史带来的选择偏差。
 
