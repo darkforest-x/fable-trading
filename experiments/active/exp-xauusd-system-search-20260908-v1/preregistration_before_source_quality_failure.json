@@ -4,7 +4,7 @@
   "instrument": "XAUUSD",
   "source": "HistData Generic ASCII M1 BID",
   "data_start": "2012-01-01T05:00:00Z",
-  "data_end_exclusive": "2026-06-01T00:00:00Z",
+  "data_end_exclusive": "2026-09-01T00:00:00Z",
   "development": [
     "2020-01-01",
     "2024-01-01"
@@ -15,7 +15,7 @@
   ],
   "confirmation": [
     "2026-01-01",
-    "2026-06-01"
+    "2026-09-01"
   ],
   "timeframes": [
     5,
@@ -184,7 +184,5 @@
   "training_eligible": false,
   "production_eligible": false,
   "passive_ranking": "Buy and hold and cash are ranked against the best active strategy; separately nominate best active and best IMACD-family policies before confirmation.",
-  "development_usage": "Pre-2024 data supplies fixed indicator warmup; nominated active winner alone gets a retrospective 2020-2023 replay, not used for selection.",
-  "protocol_revision": "v1b_data_quality_cutoff_before_any_economic_run",
-  "data_quality_revision": "June archive rejected for 26 conflicting minute timestamps; Jan-May2026 validated. Change only confirmation end based on quote quality, no strategy results calculated in attempt1."
+  "development_usage": "Pre-2024 data supplies fixed indicator warmup; nominated active winner alone gets a retrospective 2020-2023 replay, not used for selection."
 }

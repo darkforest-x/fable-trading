@@ -102,8 +102,12 @@ def run():
     assert cfg['timeframes']==list(TIMEFRAMES) and list(cfg['candidates'])==list(CANDIDATES)
     assert cfg['cost_bp_round_trip']==20 and len(CANDIDATES)*len(TIMEFRAMES)==189
     print('SOURCE_FROZEN '+receipt['commit'],flush=True)
+    def progress(a):
+        with (out/'archive_progress.jsonl').open('a') as stream:
+            stream.write(json.dumps(clean(a),ensure_ascii=False,allow_nan=False)+'\n')
+        print('ARCHIVE '+str(a['archive_token'])+' rows='+str(a['rows']),flush=True)
     data=fetch_range(cfg['data_start'],cfg['data_end_exclusive'],
-                     as_of='2026-09-08',progress_callback=lambda a:print('ARCHIVE '+str(a['archive_token'])+' rows='+str(a.get('rows',a.get('row_count','?'))),flush=True))
+                     as_of='2026-09-08',progress_callback=progress)
     m=data.frame
     save_json(out/'source_metadata.json',data.metadata)
     gaps=gap_audit(m);gaps.to_csv(out/'quote_gaps.csv.gz',index=False,compression='gzip')
