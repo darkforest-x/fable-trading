@@ -111,8 +111,12 @@ def coverage(frame: pd.DataFrame, month: str) -> dict:
         if not np.allclose(frame[f'taker_buy_{unit}_volume'] + frame[f'taker_sell_{unit}_volume'],
                            frame[total], rtol=1e-14, atol=1e-12):
             raise BinanceArchiveError('derived flow conservation failed')
-        if not np.allclose(frame[f'taker_buy_{unit}_volume'] - frame[f'taker_sell_{unit}_volume'],
-                           frame[f'delta_{unit}_volume'], rtol=1e-14, atol=1e-12):
+        buy, sell = frame[f'taker_buy_{unit}_volume'], frame[f'taker_sell_{unit}_volume']
+        delta = frame[f'delta_{unit}_volume']
+        # Independent float verification of a Decimal-derived result must scale
+        # roundoff to the operands, not the near-zero cancellation result.
+        tolerance = 8*np.finfo(float).eps*(abs(buy)+abs(sell)+abs(delta))
+        if not (abs((buy-sell)-delta) <= tolerance).all():
             raise BinanceArchiveError('derived delta conservation failed')
     # Diagnostic only: float/source decimal rounding may create boundary noise.
     # Do not reject, clip or filter bars using these exact-bound comparisons.
@@ -309,7 +313,9 @@ def verify() -> None:
             raise BinanceArchiveError('Verification cannot fetch new prices')
     rows = [audit_month(receipt, config, allow_network=False) for receipt in manifest['months']]
     if rows != summary['monthly'] or any(summary[k] != v for k,v in aggregate(rows).items()):
-        raise BinanceArchiveError('Corrected checks disagree with original saved result')
+        differences = [dict(month=a['month'], status=a['status'], reason=a.get('reason', 'monthly_field_difference'))
+                       for a,b in zip(rows, summary['monthly']) if a != b]
+        raise BinanceArchiveError('Corrected checks disagree: '+json.dumps(differences))
     if (HERE/'summary.json').read_bytes() != summary_raw or (HERE/'source_manifest.json').read_bytes() != manifest_raw:
         raise BinanceArchiveError('Original evidence changed during verification')
     result = dict(status='passed', original_source_commit=manifest['source_commit'],

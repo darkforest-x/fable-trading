@@ -161,3 +161,15 @@ def test_zip_network_error_retains_unknown_month(tmp_path, monkeypatch):
     assert result['status'] == 'unknown'
     assert result['unknown_bars'] == 8928 and result['missing_bars'] == 0
     assert result['reason'].startswith('zip_request_failed')
+
+
+def test_delta_roundoff_scales_to_operands_not_cancelled_result():
+    f = frame()
+    f['taker_buy_quote_volume'] = 100000000.01
+    f['taker_sell_quote_volume'] = 100000000.0
+    f['quote_volume'] = 200000000.01
+    f['delta_quote_volume'] = .01
+    assert audit.coverage(f, '2024-01')['valid_bars'] == 3
+    f.loc[0, 'delta_quote_volume'] = 1
+    with pytest.raises(BinanceArchiveError, match='delta'):
+        audit.coverage(f, '2024-01')
