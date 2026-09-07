@@ -1,0 +1,66 @@
+{
+  "checked_at": "2026-09-07T18:46:26.111365+00:00",
+  "method": "Root observed actual tests, HTTP requests, browser UI and bounded read-only receipt comparison; no market candles persisted.",
+  "pytest": {
+    "passed": 146,
+    "monitor": 59,
+    "boundaries": 87,
+    "command": ".venv/bin/python -m pytest -q tests/monitor tests/boundaries/test_layer_imports.py tests/boundaries/test_yoyo_package_is_local.py tests/boundaries/test_no_cross_repository_bridges.py tests/boundaries/test_execution_bundle_only.py tests/boundaries/test_experiment_isolation.py",
+    "warning": "Existing urllib3 LibreSSL compatibility warning; public requests succeeded.",
+    "elapsed_seconds": 16.48
+  },
+  "http": {
+    "/": 200,
+    "/static/app.js": 200,
+    "/static/styles.css": 200,
+    "/api/health": 200,
+    "/api/markets": 200,
+    "/api/signals?limit=5": 200,
+    "/api/chart?symbol=BTC-USDT-SWAP&timeframe=1H": 200,
+    "/api/chart?symbol=BTC-USDT-SWAP&timeframe=4H": 200,
+    "untrusted_host": 400
+  },
+  "startup_source_matches_at_post_restart_receipt": {
+    "store.py": true,
+    "okx.py": true,
+    "signals.py": true,
+    "service.py": true,
+    "server.py": true,
+    "telegram.py": true,
+    "acceptance.py": true,
+    "__init__.py": true,
+    "manage.py": true
+  },
+  "same_nine_telegram_receipts_after_restart": true,
+  "browser": {
+    "agent_checked_viewport_widths": [
+      1280,
+      390
+    ],
+    "root_final_check": "Real service in IAB; latest page reload; visible signal prices and receipts; prior BTC candlestick/MA and IMACD two-line zero-axis inspection. No histogram. Screenshot evidence embedded in task tool messages, no local PNG file claimed.",
+    "all_contract_search": "BTC shows USD/USDT x 1H/4H; agent verified",
+    "javascript_errors": 0
+  },
+  "scope": "Software acceptance; no economic result, orders or model deployment.",
+  "cli_status": {
+    "label": "com.fable.impulse-monitor",
+    "state": "running",
+    "pid": 38066,
+    "runs": 3,
+    "config_path": "/Users/zhangzc/Library/LaunchAgents/com.fable.impulse-monitor.plist",
+    "stdout_log": "/Users/zhangzc/Library/Logs/Fable/ImpulseMonitor/service.log",
+    "stderr_log": "/Users/zhangzc/Library/Logs/Fable/ImpulseMonitor/service-error.log"
+  },
+  "final_delivery_checked_at": "2026-09-07T18:51:40.128846+00:00",
+  "final_daemon_source_matches": {
+    "store.py": true,
+    "okx.py": true,
+    "signals.py": true,
+    "service.py": true,
+    "server.py": true,
+    "telegram.py": true,
+    "acceptance.py": true,
+    "__init__.py": true
+  },
+  "cli_source_note": "manage.py alone changed after daemon startup (e959b33), sanitizing status output. It is not imported by the daemon. All daemon Python files match startup hashes; no scanner restart needed."
+}

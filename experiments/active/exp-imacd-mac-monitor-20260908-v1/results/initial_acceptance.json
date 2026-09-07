@@ -1,0 +1,261 @@
+{
+  "label": "initial-full-scan-runtime-f17e9dc",
+  "captured_at": "2026-09-07T18:30:53.461074+00:00",
+  "source_commit": "e94a87019a40eaa352817839cf8bb81665034c6b",
+  "source_sha256": {
+    "yoyo/monitor/README.md": "aa8aedfcff384840d489ea9f8c13e19f4b67d88b245ad7754aabeca4e7af8a4a",
+    "yoyo/monitor/__init__.py": "20ef8a589c3def9535aa57606df552e4561a78c19316754b911c174718c0bf2f",
+    "yoyo/monitor/acceptance.py": "91ecd0027b7e5634b1fe221fae6a03dd889ae7703615dbbf500612ce4707800a",
+    "yoyo/monitor/manage.py": "dd893b8fea42e8dbfc602b4a25fcc43918d85f2a4eb8ec3b6a28b41f808e7cc7",
+    "yoyo/monitor/okx.py": "3c76a5ac26a44243d778c6e1ff04533fce1c5c0eaf1b17ebba1c7883009b53f6",
+    "yoyo/monitor/server.py": "bb52a3f8f6a7af2cbe6765f13cbf564bc2c9faeb21ce64afec0ae76cf18e8cb9",
+    "yoyo/monitor/service.py": "aec4d8b5de7b375f7e7b2454c5fda8a7fb576cb582f089e5c170a5ad04bdc0f9",
+    "yoyo/monitor/signals.py": "9970574c6695ba21e04852806c200ae4544eaa0906e0f5724b4718897ae6e879",
+    "yoyo/monitor/static/app.js": "e072b30d438abc73c9b71370e48e05f7c373f31f5bcf414bfdaf52f26436a068",
+    "yoyo/monitor/static/index.html": "2b62bc512ca426b442efe3709339ae64b50432f640a048847d5cf5a99e5f6f44",
+    "yoyo/monitor/static/styles.css": "6ed9a3148fc29137108627d41f207774aeaadda002f44cea92ebe1a92f472a72",
+    "yoyo/monitor/store.py": "2f2c4fa4f29eb2571b970a2ac445be30dd05809b1d9b36f2e7f6adf6e1929e84",
+    "yoyo/monitor/telegram.py": "11c00d064a069ee268ae4edc140d4885cfe4e48c2b778fcb537d011d427e8e8c"
+  },
+  "status": {
+    "service": "Fable Impulse Monitor",
+    "version": "1.0.0",
+    "protocol": "imacd-pine-v2.2-default-monitor-v1",
+    "now_ms": 1788805862385,
+    "started_at_ms": 1788805217483,
+    "scan": {
+      "status": "idle",
+      "started_at_ms": 1788805785034,
+      "finished_at_ms": 1788805800017,
+      "completed": 946,
+      "total": 946,
+      "errors": 0,
+      "next_scan_ms": 1788805920017,
+      "error_samples": [],
+      "duration_seconds": 14.98
+    },
+    "universe": {
+      "count": 473,
+      "scope": "OKX 全部在交易永续合约（USDT 与币本位）",
+      "updated_at_ms": 1788805217523,
+      "settlements": {
+        "USDT": 458,
+        "ADA": 1,
+        "BCH": 1,
+        "BTC": 1,
+        "DOGE": 1,
+        "DOT": 1,
+        "ETC": 1,
+        "ETH": 1,
+        "FIL": 1,
+        "HYPE": 1,
+        "LINK": 1,
+        "LTC": 1,
+        "SOL": 1,
+        "SUI": 1,
+        "UNI": 1,
+        "XRP": 1
+      }
+    },
+    "counts": {
+      "building": 77,
+      "long": 494,
+      "short": 105,
+      "neutral": 146,
+      "loading": 74,
+      "ready": 50,
+      "signals_24h": 150
+    },
+    "telegram": {
+      "sent": 9,
+      "pending": 0,
+      "failed": 0,
+      "unknown": 0,
+      "last_success_ms": 1788805666177,
+      "configured": true,
+      "enabled": true
+    },
+    "runtime": {
+      "host": "This Mac",
+      "notification_only": true,
+      "fresh_minutes": 30,
+      "interval_seconds": 120,
+      "timeframes": [
+        "1H",
+        "4H"
+      ],
+      "clock_offset_ms": 9044,
+      "public_requests": 3563,
+      "candle_storage": "memory_only",
+      "history_days": 7,
+      "signal_mode": "密集启动（Pine V2.2 默认）",
+      "higher_mode": "已确认高周期许可标注",
+      "warmup_bars": 340,
+      "launch_agent": "com.fable.impulse-monitor"
+    }
+  },
+  "health": {
+    "service": "Fable Impulse Monitor",
+    "version": "1.0.0",
+    "protocol": "imacd-pine-v2.2-default-monitor-v1",
+    "now_ms": 1788805862406,
+    "started_at_ms": 1788805217483,
+    "scan": {
+      "status": "idle",
+      "started_at_ms": 1788805785034,
+      "finished_at_ms": 1788805800017,
+      "completed": 946,
+      "total": 946,
+      "errors": 0,
+      "next_scan_ms": 1788805920017,
+      "error_samples": [],
+      "duration_seconds": 14.98
+    },
+    "universe": {
+      "count": 473,
+      "scope": "OKX 全部在交易永续合约（USDT 与币本位）",
+      "updated_at_ms": 1788805217523,
+      "settlements": {
+        "USDT": 458,
+        "ADA": 1,
+        "BCH": 1,
+        "BTC": 1,
+        "DOGE": 1,
+        "DOT": 1,
+        "ETC": 1,
+        "ETH": 1,
+        "FIL": 1,
+        "HYPE": 1,
+        "LINK": 1,
+        "LTC": 1,
+        "SOL": 1,
+        "SUI": 1,
+        "UNI": 1,
+        "XRP": 1
+      }
+    },
+    "counts": {
+      "building": 77,
+      "long": 494,
+      "short": 105,
+      "neutral": 146,
+      "loading": 74,
+      "ready": 50,
+      "signals_24h": 150
+    },
+    "telegram": {
+      "sent": 9,
+      "pending": 0,
+      "failed": 0,
+      "unknown": 0,
+      "last_success_ms": 1788805666177,
+      "configured": true,
+      "enabled": true
+    },
+    "runtime": {
+      "host": "This Mac",
+      "notification_only": true,
+      "fresh_minutes": 30,
+      "interval_seconds": 120,
+      "timeframes": [
+        "1H",
+        "4H"
+      ],
+      "clock_offset_ms": 9044,
+      "public_requests": 3563,
+      "candle_storage": "memory_only",
+      "history_days": 7,
+      "signal_mode": "密集启动（Pine V2.2 默认）",
+      "higher_mode": "已确认高周期许可标注",
+      "warmup_bars": 340,
+      "launch_agent": "com.fable.impulse-monitor"
+    },
+    "service_alive": true,
+    "market_ready": true,
+    "ok": true
+  },
+  "markets": {
+    "total": 946,
+    "warming_up": 74,
+    "errors": [],
+    "stale": 0
+  },
+  "journal": {
+    "event_count": 3855,
+    "duplicate_identity_groups": 0,
+    "telegram_receipts": [
+      {
+        "event_id": "5c9e7ec813173478e2919374",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805307147,
+        "message_id": 1786,
+        "error": null
+      },
+      {
+        "event_id": "feb7036fc1ee2cb335d1d5a7",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805326157,
+        "message_id": 1787,
+        "error": null
+      },
+      {
+        "event_id": "6151a4135197b859877ca650",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805376709,
+        "message_id": 1788,
+        "error": null
+      },
+      {
+        "event_id": "b27ed9eb05438acd4460ec4f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805389334,
+        "message_id": 1789,
+        "error": null
+      },
+      {
+        "event_id": "e66e25db324ff73eafa747a1",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805433268,
+        "message_id": 1790,
+        "error": null
+      },
+      {
+        "event_id": "c10ad93efa8c2c95d49525f6",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805486857,
+        "message_id": 1791,
+        "error": null
+      },
+      {
+        "event_id": "bed048807ea8951c42082363",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805615594,
+        "message_id": 1792,
+        "error": null
+      },
+      {
+        "event_id": "0fa648fb66161642d7be75a2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805653400,
+        "message_id": 1793,
+        "error": null
+      },
+      {
+        "event_id": "437503bc0a0cf4f7f91af058",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805666177,
+        "message_id": 1794,
+        "error": null
+      }
+    ]
+  }
+}
