@@ -1,6 +1,6 @@
 """Synthetic canonical monthly projection contract."""
 import pytest
-from yoyo.evaluation.hourly_impulse_volume_wave_report import monthly_dataset
+from yoyo.evaluation.hourly_impulse_volume_wave_report import monthly_dataset, query_monthly
 
 
 def fixture():
@@ -14,6 +14,7 @@ def test_full_grid_and_context_kept():
     assert len(out)==48
     assert out[0]["accepted_rate"]==.4 and out[0]["unknown"]==1
     assert out[24]["series"]=="原随机控制"
+    assert query_monthly(fixture())==out
 
 
 @pytest.mark.parametrize("change",["missing","duplicate","ratio","unknown"])

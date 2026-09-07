@@ -14,12 +14,20 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import sqlite3
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
 EID = "exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31"
 E = Path("experiments/active")/EID
 MD = Path("analysis/p1_btcusdtp_hourly_volume_wave_support_v31_20260907.md")
+MONTHLY_SQL = """SELECT key || '-01' AS month,
+ CASE population WHEN 'case' THEN 'K1入口' ELSE '原随机控制' END AS series,
+ population, CAST(accepted_rate AS REAL) AS accepted_rate,
+ CAST(total AS INTEGER) AS total, CAST(accepted AS INTEGER) AS accepted,
+ CAST(abstain AS INTEGER) AS abstain, CAST(unknown AS INTEGER) AS unknown,
+ CAST(known AS INTEGER) AS known
+ FROM counts WHERE dimension='month' ORDER BY population,key"""
 
 
 def digest(path):
@@ -46,6 +54,21 @@ def monthly_dataset(rows):
     return output
 
 
+def query_monthly(rows):
+    """Execute the literal source query; reconcile against reviewed projection."""
+    expected=monthly_dataset(rows)
+    con=sqlite3.connect(":memory:")
+    con.row_factory=sqlite3.Row
+    try:
+        con.execute("CREATE TABLE counts (population TEXT,dimension TEXT,key TEXT,total TEXT,accepted TEXT,abstain TEXT,unknown TEXT,known TEXT,accepted_rate TEXT)")
+        con.executemany("INSERT INTO counts VALUES (:population,:dimension,:key,:total,:accepted,:abstain,:unknown,:known,:accepted_rate)",rows)
+        actual=[dict(r) for r in con.execute(MONTHLY_SQL)]
+    finally:
+        con.close()
+    assert actual==expected
+    return actual
+
+
 def run(root=ROOT):
     root=Path(root)
     commit=subprocess.check_output(["git","rev-parse","HEAD"],cwd=root,text=True).strip()
@@ -58,13 +81,17 @@ def run(root=ROOT):
     for name,h in f["output_hashes"].items():
         assert digest(root/E/"results"/name)==h
     with gzip.open(root/E/"results/counts.csv.gz","rt") as h:
-        data=monthly_dataset(list(csv.DictReader(h)))
+        data=query_monthly(list(csv.DictReader(h)))
     text=(root/MD).read_text()
     sections=re.split(r"(?m)(?=^## )",text)
     title=sections[0].strip().removeprefix("# ").strip()
     sources=[
         dict(id="report",label="V31 · 完整支持检查、口径与限制",path=str(MD)),
-        dict(id="counts",label="V31 · 冻结全62行支持计数",path=str(E/"results/counts.csv.gz")),
+        dict(id="counts",label="V31 · 冻结全62行支持计数",path=str(E/"results/counts.csv.gz"),
+             query=dict(sql=MONTHLY_SQL,engine="sqlite",language="sql",tables_used=["counts"],
+                 description="counts由冻结counts.csv.gz原列无变换加载；查询只投影24月两组的原计数",
+                 filters=["dimension=month; case/control; 2023–2024 UTC; unknown included in total"],
+                 metric_definitions=dict(accepted_rate="accepted / total; original opportunity denominator including unknown"))),
         dict(id="audit",label="V31 · 独立标量审计",path=str(E/"audit.json")),
         dict(id="pine",label="ChartPrime · DeltaPulse 原始源码",path="experiments/active/exp-chartprime-public-confluence-audit-20260906-v1/sources/lfaZVLub.pine")]
     blocks=[]
