@@ -86,6 +86,9 @@ def package():
     clock_evidence=json.loads((HERE/"clock_audit.json").read_text())
     if clock_evidence["summary_sha256"]!=sha(HERE/"summary.json"): raise ValueError("Clock summary drift")
     if clock_evidence["csv_sha256"]!=sha(HERE/"clock_audit.csv"): raise ValueError("Clock rows drift")
+    clock_rows=pd.read_csv(HERE/"clock_audit.csv",float_precision="round_trip")
+    clock_crosscounts=clock_rows.groupby(["outcome","exited_first5m","first_postentry_new_flip",
+        "color_exit_without_new_flip"],dropna=False).size().reset_index(name="events").to_dict("records")
     if subprocess.check_output(["git","show",commit+":"+REPORT],cwd=ROOT)!=(ROOT/REPORT).read_bytes():
         raise ValueError("Commit narrative before packaging")
     sections=[p.strip() for p in re.split(r"(?m)(?=^## )",(ROOT/REPORT).read_text().strip())]
@@ -93,7 +96,8 @@ def package():
     sources=[dict(id="report",label="V36 · 结论、定义、风险及复现",path=REPORT),
         dict(id="summary",label="V36 · 原始研究摘要",path=str(REL/"summary.json")),
         dict(id="clock_summary",label="V36 · 入场与退出时钟核对",path=str(REL/"clock_audit.json")),
-        dict(id="clock_rows",label="V36 · 63笔颜色时钟逐笔证据",path=str(REL/"clock_audit.csv"))]
+        dict(id="clock_rows",label="V36 · 63笔颜色时钟逐笔证据",path=str(REL/"clock_audit.csv")),
+        dict(id="clock_crosscounts",label="V36 · 退出类型与新翻色交叉计数",path=str(REL/"artifact_reviewed_build_receipt.json"))]
     for key,query in QUERIES.items():
         sources.append(dict(id=key,label="V36 · 已保存逐笔结果复算",path=str(REL/"report_data.json"),
             query=dict(sql=query,language="sql",engine="sqlite",executed_at=saved["generated_at"],
@@ -119,10 +123,11 @@ def package():
     artifact=dict(surface="report",manifest=dict(version=1,surface="report",title=TITLE,generatedAt=stamp,
         sources=sources,blocks=blocks,charts=[chart],cards=[],tables=[],filters=[]),
         snapshot=dict(version=1,generatedAt=stamp,status="ready",datasets=dict(folds=saved["data"]["folds"])),sources=sources)
-    write_json(HERE/"artifact.json",artifact)
-    write_json(HERE/"artifact_build_receipt.json",dict(source_commit=commit,report_sha256=sha(ROOT/REPORT),
+    write_json(HERE/"artifact_reviewed.json",artifact)
+    write_json(HERE/"artifact_reviewed_build_receipt.json",dict(source_commit=commit,report_sha256=sha(ROOT/REPORT),
         summary_sha256=sha(HERE/"summary.json"),report_data_sha256=sha(HERE/"report_data.json"),
         clock_audit_sha256=sha(HERE/"clock_audit.json"),clock_rows_sha256=sha(HERE/"clock_audit.csv"),
+        clock_crosscounts=clock_crosscounts,
         sections=len(sections),charts=1,generated_at=stamp))
     print(json.dumps(dict(sections=len(sections),charts=1)))
 
