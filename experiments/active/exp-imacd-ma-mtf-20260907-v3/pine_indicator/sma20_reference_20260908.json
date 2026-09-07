@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "evidence_type": "notion_legacy_moving_average_color_identity",
+  "research_date": "2026-09-08",
+  "research_timezone": "Asia/Shanghai",
+  "scope": "Identify the darkest line in the owner's legacy six-moving-average indicator from already-read Notion source excerpts.",
+  "access_method": "Read-only Notion fetch of two pages linked from 交易系统-更新中 (2ac8856479af8063b17bc02256e564a9).",
+  "line_number_semantics": "One-based line positions in the enhanced Markdown text field returned by the Notion fetch tool in this research session. These are not local-file line numbers, Notion block IDs, or immutable source permalinks.",
+  "pages": [
+    {
+      "title": "指标优化迭代-20251122",
+      "url": "https://app.notion.com/p/2b38856479af8011a6bfe3dafe5ea06c?pvs=204",
+      "page_id": "2b38856479af8011a6bfe3dafe5ea06c",
+      "parent_path": "交易系统-更新中",
+      "page_last_edited_at": "2025-11-22T02:06:00.516Z",
+      "native_verification": {
+        "state": "unverified"
+      },
+      "excerpts": [
+        {
+          "returned_text_line": 304,
+          "text": "maPeriod1 = input.int(20, \"短期均线周期\")"
+        },
+        {
+          "returned_text_line": 316,
+          "text": "sma20 = ta.sma(close, maPeriod1)"
+        },
+        {
+          "returned_text_line": 319,
+          "text": "ema20 = ta.ema(close, 20)"
+        },
+        {
+          "returned_text_line": 397,
+          "text": "plot(ema20, color=color.new(color.black, 50), title=\"EMA20\", linewidth=1)"
+        },
+        {
+          "returned_text_line": 401,
+          "text": "plot(sma20, color=color.black, title=\"SMA20\", linewidth=2)"
+        },
+        {
+          "returned_text_line": 402,
+          "text": "plot(sma60, color=color.blue, title=\"SMA60\", linewidth=2)"
+        },
+        {
+          "returned_text_line": 403,
+          "text": "plot(sma120, color=color.purple, title=\"SMA120\", linewidth=2)"
+        }
+      ]
+    },
+    {
+      "title": "指标更新-20251203",
+      "url": "https://app.notion.com/p/2bd8856479af80f288e0e214548f705b?pvs=204",
+      "page_id": "2bd8856479af80f288e0e214548f705b",
+      "parent_path": "交易系统-更新中",
+      "page_last_edited_at": "2025-12-06T15:58:06.505Z",
+      "native_verification": {
+        "state": "unverified"
+      },
+      "excerpts": [
+        {
+          "returned_text_line": 373,
+          "text": "maPeriod1 = input.int(20, \"短期均线周期\")"
+        },
+        {
+          "returned_text_line": 385,
+          "text": "sma20 = ta.sma(close, maPeriod1)"
+        },
+        {
+          "returned_text_line": 388,
+          "text": "ema20 = ta.ema(close, 20)"
+        },
+        {
+          "returned_text_line": 466,
+          "text": "plot(ema20, color=color.new(color.black, 50), title=\"EMA20\", linewidth=1)"
+        },
+        {
+          "returned_text_line": 470,
+          "text": "plot(sma20, color=color.black, title=\"SMA20\", linewidth=2)"
+        },
+        {
+          "returned_text_line": 471,
+          "text": "plot(sma60, color=color.blue, title=\"SMA60\", linewidth=2)"
+        },
+        {
+          "returned_text_line": 472,
+          "text": "plot(sma120, color=color.purple, title=\"SMA120\", linewidth=2)"
+        }
+      ]
+    }
+  ],
+  "finding": {
+    "legacy_default_series": "SMA20(close)",
+    "mapping_confidence": "high",
+    "basis": "Both pages default maPeriod1 to 20 and compute sma20 from close. Both draw SMA20 with opaque color.black at width 2, while EMA20 is color.black at 50% transparency and width 1. SMA60 is blue and SMA120 is purple.",
+    "interpretation_limit": "The exact color-to-series mapping in these source defaults is established. Inferring that the owner's current phrase 'the darkest line before' refers to this legacy palette remains contextual; live chart input/style overrides were not inspected in this subtask.",
+    "retest_frequency_evidence": "No statistical evidence or explicit universal rule that dense formations usually or always retest SMA20 was found in the inspected pages. Color identity is not evidence of retest frequency or profitability."
+  },
+  "excluded_system": {
+    "series": "SMA40(hl2)",
+    "reason": "This belongs to the separately documented Moving Average Shift / two-key-candle system, whose line dynamically uses teal or orange. It is not the legacy six-moving-average black SMA20.",
+    "local_evidence": {
+      "path": "docs/learnings/overlaid-chart-styles-require-source-plot-ownership.md",
+      "line": 5,
+      "excerpt": "source=hl2; MA=SMA40; source >= MA ? #17A297 : color.orange"
+    }
+  },
+  "provenance_limits": {
+    "full_source_archived": false,
+    "full_source_hash_recorded": false,
+    "new_browser_inspection_performed": false,
+    "new_market_data_evaluation_performed": false,
+    "note": "Only actually read short excerpts and their returned-text positions are recorded. No full-source completeness claim or fabricated source hash is included."
+  },
+  "training_eligible": false,
+  "production_eligible": false
+}

@@ -1,0 +1,81 @@
+{
+  "date": "2026-09-08",
+  "source_path": "yoyo/evaluation/pine/imacd_dense_mtf_v2_1.pine",
+  "source_commit": "dd37b0e9a91624e422146d1c8f46b545971f1469",
+  "source_sha256": "25b52565f01ace220bcf0b075ada88935e798386ab15b5c3464340bdb91c41d4",
+  "source_characters": 30071,
+  "source_transfer_fnv1a32": "e50157e3",
+  "editor_readback_exact_after_newline_normalization": true,
+  "cloud_script_name": "IMACD 零轴密集启动 · 多周期趋势 V1",
+  "cloud_revision": 6,
+  "cloud_saved_ui": "6 ∙ Today, 00:19",
+  "compiler_passed": true,
+  "chart_runtime_passed": true,
+  "initial_failure": {
+    "source_commit": "3639050",
+    "cloud_revision": 5,
+    "error": "RE10140",
+    "actual_plot_count": 66,
+    "limit": 64,
+    "incorrect_static_estimate": 52,
+    "fix": "Four ordinary entry plotshape calls consolidated into the existing bounded label queue.",
+    "final_exact_plot_count": null
+  },
+  "original_signal_core_unchanged": true,
+  "signal_inputs_unchanged": 14,
+  "alerts_unchanged": 5,
+  "pane_histograms_or_columns": 0,
+  "defaults": {
+    "retest_ma": "SMA20(close)",
+    "retest_enabled": true,
+    "price_labels": true,
+    "ordinary_marks": false,
+    "touch_dots": false
+  },
+  "zero_axis": {
+    "width_px": 1,
+    "style": "solid",
+    "transparency_percent": 45
+  },
+  "case_checks": [
+    {
+      "symbol": "OKX:ETHUSDT.P",
+      "timeframe": "1h",
+      "period": "early September 2026",
+      "near_zero_count": 12,
+      "release_close_price_observed": "2488.00"
+    },
+    {
+      "symbol": "OKX:ETHUSDT.P",
+      "timeframe": "4h",
+      "period": "2026-08-12 to 2026-08-20",
+      "near_zero_count": 44,
+      "release_close_price_observed": "1922.23",
+      "retest_toggle_comparison": "A lower-wick SMA20-touch candle in the qualified zone changed from bright teal back to original red when the display was disabled; line and release locations unchanged."
+    }
+  ],
+  "other_ui_checks": {
+    "ordinary_marks_on_price_off_runs": true,
+    "dark_and_light_checked": true,
+    "settings_verified_in_ui": true,
+    "final_theme": "dark",
+    "final_timeframe": "1h",
+    "fixed_scale_reset": true,
+    "layout": "综合过滤",
+    "layout_url": "https://www.tradingview.com/chart/AlGc61US/",
+    "final_layout_status": "All changes saved",
+    "screenshots_in_conversation_only": true
+  },
+  "source_review": "Independent full source review before plot consolidation; parent inspected the consolidation diff and rechecked core/input/alert parity.",
+  "label_budget": {
+    "retained_max": 320,
+    "transient_max": 321,
+    "declared_limit": 350
+  },
+  "notion_reference": "experiments/active/exp-imacd-ma-mtf-20260907-v3/pine_indicator/sma20_reference_20260908.json",
+  "visual_holdout_case_use_number": 1,
+  "owner_authorized_all_dates": true,
+  "pnl_evaluation": false,
+  "training_eligible": false,
+  "production_eligible": false
+}

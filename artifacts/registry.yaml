@@ -20240,3 +20240,64 @@ artifacts:
     notes: Owner-requested near-zero visual emphasis. Core,14 signal inputs,5 alerts unchanged. Official compiler
       and parent dark/light screenshots passed; ETH4h August19 case shows44 near-zero bars. Cloud revision4 saved.
       Independent source review passed; independent final screenshot unavailable due tab lock. No PnL evaluation.
+
+  - artifact_id: imacd-pine-retest-v2-1-20260908-source
+    artifact_type: manifest
+    role: research_indicator_wick_retest_display
+    source_repo: darkforest-x/fable-trading
+    source_commit: dd37b0e9a91624e422146d1c8f46b545971f1469
+    source_path: yoyo/evaluation/pine/imacd_dense_mtf_v2_1.pine
+    sha256: 25b52565f01ace220bcf0b075ada88935e798386ab15b5c3464340bdb91c41d4
+    size_bytes: 33586
+    storage_uri: repo://yoyo/evaluation/pine/imacd_dense_mtf_v2_1.pine
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Clear zero axis, close-price labels and confirmed wick-only retests. Legacy Notion black line is SMA20(close).
+      Original signal core/14 inputs/5 alerts unchanged. Initial cloud5 runtime66plots failed; consolidated labels,
+      cloud6 compiler/runtime and ETH1h/4h dark/light/toggle checks passed. No PnL experiment.
+  - artifact_id: imacd-pine-retest-v2-1-20260908-receipt
+    artifact_type: manifest
+    role: research_indicator_wick_retest_display
+    source_repo: darkforest-x/fable-trading
+    source_commit: dd37b0e9a91624e422146d1c8f46b545971f1469
+    source_path: experiments/active/exp-imacd-ma-mtf-20260907-v3/pine_indicator/retest_v2_1_receipt.json
+    sha256: a70af3893598c0f22eb9f476065266fdeaf75c4834466408a0fc6b115f3cf610
+    size_bytes: 2868
+    storage_uri: repo://experiments/active/exp-imacd-ma-mtf-20260907-v3/pine_indicator/retest_v2_1_receipt.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Clear zero axis, close-price labels and confirmed wick-only retests. Legacy Notion black line is SMA20(close).
+      Original signal core/14 inputs/5 alerts unchanged. Initial cloud5 runtime66plots failed; consolidated labels,
+      cloud6 compiler/runtime and ETH1h/4h dark/light/toggle checks passed. No PnL experiment.
+  - artifact_id: imacd-pine-retest-v2-1-20260908-reference
+    artifact_type: manifest
+    role: research_indicator_wick_retest_display
+    source_repo: darkforest-x/fable-trading
+    source_commit: dd37b0e9a91624e422146d1c8f46b545971f1469
+    source_path: experiments/active/exp-imacd-ma-mtf-20260907-v3/pine_indicator/sma20_reference_20260908.json
+    sha256: 09af246a4bfc852366cae54f615fa9c98786689458b8d5132064e91a97788b58
+    size_bytes: 5068
+    storage_uri: repo://experiments/active/exp-imacd-ma-mtf-20260907-v3/pine_indicator/sma20_reference_20260908.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Clear zero axis, close-price labels and confirmed wick-only retests. Legacy Notion black line is SMA20(close).
+      Original signal core/14 inputs/5 alerts unchanged. Initial cloud5 runtime66plots failed; consolidated labels,
+      cloud6 compiler/runtime and ETH1h/4h dark/light/toggle checks passed. No PnL experiment.
+  - artifact_id: imacd-pine-retest-v2-1-20260908-guide
+    artifact_type: report
+    role: research_indicator_wick_retest_display
+    source_repo: darkforest-x/fable-trading
+    source_commit: dd37b0e9a91624e422146d1c8f46b545971f1469
+    source_path: analysis/html/p0_imacd_pine_retest_20260908.html
+    sha256: 097d8da1158b0c109f8f0571d89080c1cc12bbbbede4d010dfcb66f444c7a9c5
+    size_bytes: 9467
+    storage_uri: repo://analysis/html/p0_imacd_pine_retest_20260908.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Clear zero axis, close-price labels and confirmed wick-only retests. Legacy Notion black line is SMA20(close).
+      Original signal core/14 inputs/5 alerts unchanged. Initial cloud5 runtime66plots failed; consolidated labels,
+      cloud6 compiler/runtime and ETH1h/4h dark/light/toggle checks passed. No PnL experiment.
