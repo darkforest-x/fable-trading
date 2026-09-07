@@ -8,6 +8,12 @@
 
 ## 按日期倒序
 
+### 2026-09-07 — V32前置量波经济检验未通过
+
+[完整HTML](html/p1_btcusdtp_hourly_volume_wave_economics_v32_20260907.html) · [MD源](p1_btcusdtp_hourly_volume_wave_economics_v32_20260907.md)
+100入口4h净−18.45bp，55毛方向错/7成本抹去/38净正；同248机会改善104.06%来自省成本。
+四半年全负、原完整300控制保留；独立复算通过，非实盘盈利，无holdout/TV/ACTIVE变更。
+
 ### 2026-09-07 — YOLO 盲审校准包已交付
 
 - [校准与训练准备HTML](html/p1_15m_grade_a_owner_calibration_20260907.html) · [源报告](p1_15m_grade_a_owner_calibration_20260907.md)

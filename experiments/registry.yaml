@@ -14,6 +14,39 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4cbcc93"
+    status: rejected
+    question: Does frozen pre-K1 volume improvement produce conditional and opportunity economic advantage?
+    single_variable: Apply V31 frozen lag20/5 direction-volume improvement to originalSMA251 and744 controls;4h20bp unchanged.
+    result: >-
+      Retains100of251;4h gross+1.554979bp,net-18.445021bp,38above-cost55grosswrong7costerased.
+      Complete300control background net-20.777348bp;pairedexcess+2.332327bp CI[-26.626790,31.654459].
+      Same248opportunity delta+11.469797bp=avoidedcost11.935484-gross0.465687;104.060111pct cost.
+      Allfourhalf acceptednetnegative;Holm4 .9163/.8926/.6681/.1088;not_supported.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_volume_wave_economics_v32_20260907.html
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts:
+      - btcusdtp-hourly-wave-v32-results
+      - btcusdtp-hourly-wave-v32-audit
+      - btcusdtp-hourly-wave-v32-report-data
+      - btcusdtp-hourly-wave-v32-report
+      - btcusdtp-hourly-wave-v32-html
+      - btcusdtp-hourly-wave-v32-artifact
+      - btcusdtp-hourly-wave-v32-qa
+      - btcusdtp-hourly-wave-v32-notebook
+      - btcusdtp-hourly-wave-v32-delivery
+    reuse_allowed: false
+    notes: >-
+      V31supportpass unchanged;new economic assessment failed. Once source-first read savedlabels;
+      independent3980endpoint/1004motherH/fourinference audit andauthorsecondreview passed.
+      99newcore/runner/audit tests and245boundary/support/report tests passed.
+      No2025plus/holdout/rawprices/parametersearch/TV/ACTIVE/productionchanges.
+      HTML structural_only,no browser installed;verification4notebookcodecells sequentially executed without Jupyter.
+      Next is separately designed entry-structure diagnostic after deduplicating prior experiments,not automatic tuning.
   - experiment_id: exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31
     source_repo: darkforest-x/fable-trading
     source_commit: "f8e450b"

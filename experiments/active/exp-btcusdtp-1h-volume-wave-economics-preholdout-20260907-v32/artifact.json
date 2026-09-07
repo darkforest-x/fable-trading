@@ -1,0 +1,756 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "Volume Wave Economics · V32",
+    "generatedAt": "2026-09-07T05:31:31.650538+00:00",
+    "filters": [],
+    "cards": [],
+    "charts": [
+      {
+        "id": "monthly",
+        "type": "line",
+        "title": "逐月固定4h成本后均值",
+        "description": "2023–2024 UTC · 100个保留入口与原300控制，月内事件加权；不是净值曲线",
+        "dataset": "monthly",
+        "sourceId": "monthly",
+        "showDescription": true,
+        "palette": {
+          "kind": "categorical",
+          "name": "blueGold"
+        },
+        "encodings": {
+          "x": {
+            "field": "month",
+            "type": "temporal",
+            "label": "UTC月份"
+          },
+          "y": {
+            "field": "net_bp",
+            "type": "quantitative",
+            "label": "bp"
+          },
+          "color": {
+            "field": "series",
+            "type": "nominal",
+            "label": "组别"
+          },
+          "tooltip": [
+            {
+              "field": "events",
+              "type": "quantitative",
+              "label": "母事件数"
+            },
+            {
+              "field": "positive",
+              "type": "quantitative",
+              "label": "K1正标签母事件数（非控制组）"
+            }
+          ]
+        }
+      }
+    ],
+    "tables": [],
+    "blocks": [
+      {
+        "id": "section_0",
+        "type": "markdown",
+        "layout": "full",
+        "body": "# Volume Wave Economics · V32"
+      },
+      {
+        "id": "section_1",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## Executive Summary\n\n- **这次共振仍没有把入口变成赚钱信号。** BTCUSDT.P 的1h原251个入口，用冻结的前置方向量波门保留100个；4h平均毛变化 **+1.55bp**，扣20bp成本阈值后 **−18.45bp**，95%月块区间 **[−44.19,+6.60]bp**。四个半年入选均值全部为负。\n- **少亏来自少交易，不是方向预测更准。** 在相同248个已知机会中，过滤改善+11.47bp，其中省成本+11.94bp，毛变化贡献反为−0.47bp。55个入选事件毛方向错误、7个小毛利不足成本，38个超过成本。\n- **本配置停止盈利推进，不覆盖TradingView。** 完整300个原随机对照、独立算术复核都没有改变结论。V31“支持数量通过”仍有效，但它不是盈利验证；本轮V32经济检验不通过，整体赚钱目标未达成。\n\n这里“净”只是固定时钟价格变化减0.2%，不是带止损、分批止盈、资金费、滑点与仓位限制的账户收益。2023—2024数据已多次用于研究，本轮是探索，不是全新样本外验收。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_2",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 口径：只改一个入口筛选，原始对照和成本不变\n\n原SMA40 K1形态、开仓观察时钟、方向与原匹配资格不变。本轮只检验V31已冻结的派生量波门，不叠加V29分类器、不调EMA周期、不改40线或退出障碍。\n\nK1开盘时刻为T，完成时刻为E=T+1h。量波来自ChartPrime DeltaPulse源码默认EMA20/EMA5；只用K1之前两个完整小时的数值，要求方向乘前置量波变化为正。较早一根需100个连续小时预热。它是**方向成交量代理的改善**，不是交易所主动买卖量、原生背离信号、也不保证是首次趋势启动。\n\n- 保存开发范围为2023年1月1日至2025年1月1日之前，UTC；母事件决策实际从2023年1月2日03:00至2024年12月24日14:00。\n- 原251母事件全保留：通过100、弃权148、未知3；744原控制：通过401、弃权343、未知0。\n- 100个通过事件对应完整300个原控制，其中158通过、142弃权。评价入口超额用**全部300个**，不能只挑158个控制。\n- 原控制沿用同币、同母月份/时间块、同冻结波动桶与方向的抽样；248母事件各三控，另外3个没有完整控制，配对超额仍未知。\n- 主终点只有4h；1/12/24h仅描述。gross=方向×(open[E+H]−open[E])/open[E]；net=gross−0.002。1bp=0.01%。\n- 已知弃权记0但不是一笔0收益交易；未知门记缺失，不冒充弃权。原标签和政策账本分开。\n\n本配置第1次读取保存的分组经济标签；**holdout消耗0次**，没有读取原始新价格、2025+数据、重抽控制或搜索参数。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_3",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 与上一版、未过滤入口及随机背景的同表对照\n\n**通过组与弃权组几乎没有拉开足够大的毛收益差距。** 当前通过毛均值+1.55bp，弃权+0.78bp，差约0.77bp，远小于固定20bp门槛。下面是每个条件事件的4h均值，不是账户收益率。\n\n| 入口组 | 数量 | 毛均值bp | 成本后均值bp | 成本后正标签 | 对应原三控净均值bp | 配对超额bp |\n|---|---:|---:|---:|---:|---:|---:|\n| V24原未过滤 | 251 | +1.01 | −18.99 | 93/251（37.05%） | −23.65（248组） | +4.74（248对） |\n| V30默认分类器通过 | 78 | +5.23 | −14.77 | 35/78（44.87%） | −19.42 | +4.65 |\n| V32前置量波通过 | 100 | +1.55 | −18.45 | 38/100（38.00%） | −20.78 | +2.33 |\n| V32弃权的原标签 | 148 | +0.78 | −19.22 | 54/148（36.49%） | −25.59 | +6.37 |\n| V32未知门的原标签 | 3 | −6.19 | −26.19 | 1/3 | 无完整对照 | 未知 |\n\nV24全部均值分母251，而配对均值只有248；同248母事件自身净均值为−18.91bp，不能直接用−18.99减背景重构超额。V30与V32是不同冻结过滤器，不是独立随机分组的头对头显著性比较。\n\nV32保留组成本后正标签率只比弃权组高1.51个百分点；相对各自原控制的超额反而更低。**“量波朝交易方向改善”并未在这批数据中形成明显的可交易分离。** 不据此反转门、保留弃权组或自动选回V30。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_4",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 四项主要检验未满足共同继续条件\n\n所有问题事先冻结，用原24个月为块，共享9,999次月块bootstrap和9,999次月总和符号翻转；PCG64种子20260907，95%百分位线性插值区间，单侧greater、plus-one p修正，Holm仅校正本轮四项。\n\n| 4h问题 | 已知样本 | 均值bp | 95%月块区间bp | 原始单侧p | Holm p |\n|---|---:|---:|---:|---:|---:|\n| 保留入口自身成本后结果 | 100 | −18.45 | [−44.19,+6.60] | 0.9163 | 0.9163 |\n| 保留入口相对原完整三控超额 | 100 | +2.33 | [−26.63,+31.65] | 0.4463 | 0.8926 |\n| 双方各自在自身时钟应用门的策略超额 | 248/251 | +5.02 | [−6.46,+17.29] | 0.2227 | 0.6681 |\n| 相同机会过滤后减过滤前 | 248/251 | +11.47 | [+0.52,+21.21] | 0.0272 | 0.1088 |\n\n预先要求四项均值>0、四项区间下界>0、四项Holm p<0.01，并且四半年通过均值全正。实际不满足。最后一项区间虽为正，Holm p仍0.1088，而且它测试的是减少损失，不是剩下的交易有净利润。\n\n这些区间允许月内依赖，但依赖跨月较弱相关近似；符号检验依赖零假设下月总和符号可交换，不是严格随机交易试验。Holm4没有抹除此前多轮研究选择偏差。失败不是证明所有K1/K2系统永远无效。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_5",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 改善超过百分之百来自省成本，毛贡献反向\n\n为了避免分母偷换，下表固定同一批248个门控已知机会；148个明确弃权为零。\n\n| 机会口径分解 | bp/原机会 |\n|---|---:|\n| 未过滤原结果 | −18.9073 |\n| 过滤后100个通过标签+148个弃权零值 | −7.4375 |\n| 改善 | +11.4698 |\n| 148次不交易省20bp：148×20/248 | +11.9355 |\n| 避开弃权原负毛变化 | +20.3530 |\n| 错过弃权原正毛变化 | −20.8187 |\n| 两项毛贡献合计 | −0.4657 |\n\n省成本占改善 **104.06%**，不是算错百分比：因为避免费用的好处，部分被错过正毛收益抵消。原弃权组的合计毛收益是正的，所以不能说这个门整体剔除了负毛收益池。\n\n控制在各自时钟也应用门后，按原三控聚合为−12.4617bp/机会，本策略−7.4375bp；差+5.0242bp，但区间跨零。机会均值比交易均值接近零是加入了弃权零值，不能当作盈利能力提高。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_6",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 失败分布：不是全部由手续费导致\n\n| 100个入选事件的4h终点结果 | 数量 | 占比 | 解释边界 |\n|---|---:|---:|---|\n| 毛方向错误，gross<0 | 55 | 55% | 到固定终点价格方向不利 |\n| gross=0 | 0 | 0% | 单列，未混进毛亏 |\n| 有正毛变化，但不足20bp | 7 | 7% | 方向有利，幅度不足成本 |\n| 超过20bp成本 | 38 | 38% | 正标签，不证明途中未先触发止损 |\n\n62个成本后负标签中，55个本来就是毛亏，只有7个是手续费抹掉的小毛利。因此**主要短板是终点方向与幅度不足同时存在，不能用降手续费解决全部问题**。净标签中位数−29.74bp，比平均−18.45bp还差；不是只看均值漏掉了多数事件。\n\n弃权148个中83个毛亏、11个小毛利不足成本、54个净正。过滤确实避开了不少失败，也错过了不少收益。完整251行逐事件表保留时间、方向、门状态、毛/净变化、原三控和结果类型；没有删除未知或不利案例。\n\n这些分类是**结果类型，不是行情结构的因果归因**。保存终点标签无法判断盘整、假突破、扫损后上涨、过早止盈或浮盈回吐。那些原因要用入场前结构和逐根路径另做审计，不能从这张表虚构。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_7",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 半年和月份：四段都净负，不是只坏一个阶段\n\n每个半年都有23—27个入选事件，但没有一个半年覆盖成本。下表保留原入口基线和各自完整控制，避免只报告相对差背景的超额。\n\n| 半年 | 原入口 | 入选 | 原入口净均值bp | 入选净均值bp | 入选原三控净均值bp |\n|---|---:|---:|---:|---:|---:|\n| 2023H1 | 55 | 25 | −12.75 | −19.90 | −9.23 |\n| 2023H2 | 66 | 27 | −24.85 | −18.46 | −10.28 |\n| 2024H1 | 55 | 23 | −16.33 | −9.61 | −17.38 |\n| 2024H2 | 75 | 25 | −20.37 | −25.09 | −46.79 |\n\n2023年两个半年入选还差于各自随机背景；2024年相对背景较好，但自身仍负。尤其2024H2“比背景好”同时伴随自身−25.09bp，说明**超额与绝对可交易收益必须分开**。\n\n24个月只有10个月入选均值为正，每月仅2—8个事件。下方月图显示每月事件均值及对应原三控，**不是账户月收益或净值曲线**；读图时要同时看样本数。2024年12月均值−345.93bp只有2个事件，保留它们，不据此删月份。",
+        "sourceId": "report"
+      },
+      {
+        "id": "monthly_chart",
+        "type": "chart",
+        "layout": "full",
+        "chartId": "monthly"
+      },
+      {
+        "id": "section_8",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 多空不对称，但不足以事后宣布只做多\n\n| 方向与门状态 | 数量 | 毛均值bp | 净均值bp | 净正标签 | 原三控净均值bp | 超额bp |\n|---|---:|---:|---:|---:|---:|---:|\n| 做多，通过 | 49 | +21.40 | +1.40 | 21/49 | −16.92 | +18.32 |\n| 做多，弃权原标签 | 79 | +8.85 | −11.15 | 28/79 | −20.18 | +9.03 |\n| 做空，通过 | 51 | −17.51 | −37.51 | 17/51 | −24.48 | −13.02 |\n| 做空，弃权原标签 | 69 | −8.46 | −28.46 | 26/69 | −31.78 | +3.32 |\n\n**空头通过组是主要拖累，量波同向改善并没有把空头质量筛高。** 做多均值仅+1.40bp，幅度很薄；这里没有冻结“只做多”主检验或独立证据，因此不改策略方向、不称最优。\n\n这是后续检查多空对称假设的线索，不是已验证的修改方案。当前门只看方向量波的一步变化，没有证明横盘结束、突破有效或首次启动；它也不是独立于价格K线的真实订单流信息。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_9",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 换固定持有终点也没有把本组变正\n\n| 固定终点 | 原251净均值bp | 本组100净均值bp | 地位 |\n|---|---:|---:|---|\n| 1h | −16.55 | −17.21 | 描述 |\n| 4h | −18.99 | −18.45 | 唯一主检验 |\n| 12h | −21.04 | −22.10 | 描述 |\n| 24h | −13.46 | −14.66 | 描述 |\n\n四个终点全负，不能挑最不差的24h换成主结果。但这仍不是动态止盈止损回测：固定终点没有逐根成交先后，也不知道峰值浮盈及回吐。**本轮不支持直接将此过滤器进入执行优化，也不证明动态退出一定无效。**\n\nFreqtrade2026.8本机已核验可用；不是工具不能用。它的撮合、费用、止损与细周期假设需要单独对齐，不能把换框架当成入口优势。后续若有通过预先定义检验的候选，再做执行交叉验证。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_10",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 分布与复核：不删尾部，不改检验\n\n| 主序列 | 中位数bp | Q25/Q75 bp | SD bp | 最小/最大bp | Shapiro p |\n|---|---:|---:|---:|---:|---:|\n| 入选自身 | −29.74 | −75.46/+32.44 | 111.68 | −435.88/+326.42 | 0.000943 |\n| 入选对原三控超额 | −7.24 | −65.95/+48.91 | 124.33 | −458.43/+481.89 | 0.000791 |\n| 机会策略超额 | +5.06 | −29.84/+32.13 | 83.33 | −480.81/+351.95 | 1.91e−12 |\n| 机会策略前后差 | 0.00 | 0.00/+34.59 | 78.17 | −341.03/+293.55 | 4.68e−16 |\n\n全部有限观察保留；IQR提示分别8/7/31/50个尾部点，但没有删除。统计技能原始工具实际运行Shapiro诊断，诊断不更换检验或“修正”数据，正态性也不等于交易样本独立。\n\n经济代码 **4cbcc93** 在首次该配置分组收益读取前提交，99项新合成测试通过；真实运行先做依赖与时间来源检查，再读保存标签，仅一次实际经济计算。独立脚本不导入策略core，重新算3980条保存端点标签、1004母×H结果、四时长组描述、四项月推断和Holm，并独立检查量波时钟/分组；全部一致。另有作者补核四半年与最终门判断，不冒充第三方独立审查。\n\n初期来源校验误套相邻实验schema，在读取收益前修正；真实V31历史文件未改。来源证明能证明保存数值链条一致，不能证明原始行情真实性、Pine原生视觉/数值一致、盘中成交或实盘盈利。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_11",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 下一步：先审入口定义，不再堆相似共振\n\n1. **停止本20/5一步量波门的盈利推进。** 不换更小成本，不选反向门，不因多头微正就切成只做多；本轮没有这些授权或独立检验。\n2. **下一轮优先做入场前结构审计，并先与已有实验去重。** 重点区分首次有效穿越与反复来回穿越、真正突破与区间内部穿线，找到当前K1定义是否把启动和震荡混在一起。这里是研究方向，不是已经验证的新参数。\n3. 有独立、因果可实现的新假设后再冻结单变量方案和数据范围。若需改阈值、TP/SL、成本或读取新验收数据，按项目规则先取得明确决定；不在本轮偷偷扩实验。\n\n尚未回答：为什么做空同向量改善组更差？入场前结构能否解释而不是事后贴标签？同一入口在可执行的小周期变色/分批止盈规则下能否保留优势？这些必须另有证据。本轮没有把失败终点类别说成盘整或止损原因。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_12",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 风险与诚实声明\n\n- **holdout本配置消耗0次；无2025+、新价格、训练、promote、实盘或TradingView变更。** 只针对保存BTCUSDT.P 1h入口，不能外推ETH、黄金、山寨或15m。\n- 100个事件、24个月簇支持有限；本轮接受集不是独立样本外集合。p值与CI仍有重复开发集选择偏差，不是稳定盈利承诺。\n- AUC、top-decile及排序置换检验不适用：没有训练排序模型或连续打分筛选。对应提供未过滤单信号基线、完整匹配随机背景、正标签率、月块区间及符号置换检验。不存在可执行账本，故不报账户收益、利润因子或实盘胜率。\n- 未建仓位重叠、资金费、滑点、逐根止损或小周期退出撮合模型；“成本后”只是冻结阈值。截图中能吃趋势不等于这套门在所有机会中有效。\n- HTML由统一报告打包器生成，QA以交付回执为准。没有可用Chromium时只做结构检查，不冒充手机、浏览器交互或视觉检查。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_13",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 复现与证据入口\n\n从本仓保存的冻结输入和source-first提交开始，首次运行完整命令如下。已存在results时会拒绝覆盖；不删除历史目录，不建worktree或新分支。\n\n```bash\ngit branch --show-current\n.venv/bin/python -m pytest -q tests/test_hourly_impulse_volume_wave_economics.py tests/test_hourly_impulse_volume_wave_economic_research.py tests/test_audit_hourly_impulse_volume_wave_economics_v32.py tests/test_hourly_impulse_volume_wave_economic_report.py\npython3 -m yoyo.evaluation.hourly_impulse_volume_wave_economic_research\npython3 scripts/audit_hourly_impulse_volume_wave_economics_v32.py\npython3 -m yoyo.evaluation.hourly_impulse_volume_wave_economic_report prepare\npython3 scripts/md_to_html.py analysis/p1_btcusdtp_hourly_volume_wave_economics_v32_20260907.md --out-dir analysis/html\npython3 -m yoyo.evaluation.hourly_impulse_volume_wave_economic_report package\nnode /Users/zhangzc/.codex/plugins/cache/openai-curated-remote/data-analytics/0.2.10-13ceeea1f599/skills/build-report/scripts/deliver_portable_artifact.mjs --input experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/artifact.json --output analysis/html/p1_btcusdtp_hourly_volume_wave_economics_v32_20260907.html\n```\n\n当前结果已生成，日常核验使用：`python3 scripts/audit_hourly_impulse_volume_wave_economics_v32.py --check-only`，不会重写原回执。\n\n实验目录为`experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/`；config/PROJECT_PLAN保存冻结口径，results保存完整三类账本和分布，report_data.json保存实际SQLite查询及251行结果类型，audit/REVIEW/QA保存验证范围。MD为历史源，HTML为阅读交付物。\n\n方法来源：[NumPy分位数定义](https://numpy.org/doc/2.0/reference/generated/numpy.quantile.html)、[R官方Holm说明](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html)、[Freqtrade回测假设](https://www.freqtrade.io/en/stable/backtesting/)。文档只支持计算与工具边界，不是策略盈利证据。",
+        "sourceId": "report"
+      }
+    ],
+    "sources": [
+      {
+        "id": "report",
+        "label": "V32 · 完整指标、方法与风险",
+        "path": "analysis/p1_btcusdtp_hourly_volume_wave_economics_v32_20260907.md"
+      },
+      {
+        "id": "monthly",
+        "label": "V32 · 保存逐母标签的真实描述查询",
+        "path": "experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/report_data.json",
+        "query": {
+          "sql": "SELECT mother_month AS month,COUNT(*) AS events,\n AVG(accepted_cost)*10000 AS accepted_bp,\n AVG(control_mean_cost_threshold_markout)*10000 AS controls_bp,\n AVG(accepted_excess)*10000 AS excess_bp,\n SUM(accepted_cost>0) AS positive\n FROM mothers WHERE horizon_hours=4 AND wave_gate_state='accepted'\n GROUP BY mother_month ORDER BY mother_month",
+          "engine": "sqlite",
+          "language": "sql",
+          "tables_used": [
+            "cases",
+            "mothers"
+          ],
+          "executed_at": "2026-09-07T05:24:03.370745+00:00",
+          "description": "固定4h标签，非账户净值或执行收益",
+          "filters": [
+            "2023–2024 UTC; frozen original251 and own744 controls; no new selection"
+          ],
+          "metric_definitions": {
+            "net_bp": "(direction*(open[E+4h]-open[E])/open[E]-0.002)*10000; group arithmetic mean",
+            "controls_bp": "mean of each original three-control mean; no wave filtering in conditional comparator"
+          }
+        }
+      },
+      {
+        "id": "groups",
+        "label": "V32 · 保存逐母标签的真实描述查询",
+        "path": "experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/report_data.json",
+        "query": {
+          "sql": "SELECT c.wave_gate_state AS state,COUNT(*) AS events,\n AVG(c.gross_markout)*10000 AS gross_bp,AVG(c.cost_threshold_markout)*10000 AS net_bp,\n AVG(c.policy_cost_threshold_markout)*10000 AS policy_bp,\n SUM(c.cost_threshold_markout>0) AS positive,\n SUM(c.gross_markout<0) AS wrong_direction, SUM(c.gross_markout=0) AS flat_gross,\n SUM(c.gross_markout>0 AND c.cost_threshold_markout<=0) AS cost_erased,\n AVG(m.control_mean_cost_threshold_markout)*10000 AS controls_bp,\n AVG(m.cost_threshold_excess_markout)*10000 AS excess_bp,\n COUNT(m.cost_threshold_excess_markout) AS paired_n\n FROM cases c JOIN mothers m USING(event_id,horizon_hours)\n WHERE c.horizon_hours=4 GROUP BY c.wave_gate_state ORDER BY state",
+          "engine": "sqlite",
+          "language": "sql",
+          "tables_used": [
+            "cases",
+            "mothers"
+          ],
+          "executed_at": "2026-09-07T05:24:03.370745+00:00",
+          "description": "固定4h标签，非账户净值或执行收益",
+          "filters": [
+            "2023–2024 UTC; frozen original251 and own744 controls; no new selection"
+          ],
+          "metric_definitions": {
+            "net_bp": "(direction*(open[E+4h]-open[E])/open[E]-0.002)*10000; group arithmetic mean",
+            "controls_bp": "mean of each original three-control mean; no wave filtering in conditional comparator"
+          }
+        }
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-09-07T05:31:31.650538+00:00",
+    "status": "ready",
+    "datasets": {
+      "monthly": [
+        {
+          "month": "2023-01-01",
+          "events": 3,
+          "accepted_bp": 1.3613314305280029,
+          "controls_bp": 3.418296507095002,
+          "excess_bp": -2.056965076566666,
+          "positive": 2,
+          "series": "Accepted K1",
+          "net_bp": 1.3613314305280029
+        },
+        {
+          "month": "2023-01-01",
+          "events": 3,
+          "accepted_bp": 1.3613314305280029,
+          "controls_bp": 3.418296507095002,
+          "excess_bp": -2.056965076566666,
+          "positive": 2,
+          "series": "Original controls",
+          "net_bp": 3.418296507095002
+        },
+        {
+          "month": "2023-02-01",
+          "events": 6,
+          "accepted_bp": -71.22160707882082,
+          "controls_bp": -41.90730313805916,
+          "excess_bp": -29.314303940761334,
+          "positive": 1,
+          "series": "Accepted K1",
+          "net_bp": -71.22160707882082
+        },
+        {
+          "month": "2023-02-01",
+          "events": 6,
+          "accepted_bp": -71.22160707882082,
+          "controls_bp": -41.90730313805916,
+          "excess_bp": -29.314303940761334,
+          "positive": 1,
+          "series": "Original controls",
+          "net_bp": -41.90730313805916
+        },
+        {
+          "month": "2023-03-01",
+          "events": 3,
+          "accepted_bp": -93.83551161161932,
+          "controls_bp": 14.742192671318668,
+          "excess_bp": -108.57770428293799,
+          "positive": 0,
+          "series": "Accepted K1",
+          "net_bp": -93.83551161161932
+        },
+        {
+          "month": "2023-03-01",
+          "events": 3,
+          "accepted_bp": -93.83551161161932,
+          "controls_bp": 14.742192671318668,
+          "excess_bp": -108.57770428293799,
+          "positive": 0,
+          "series": "Original controls",
+          "net_bp": 14.742192671318668
+        },
+        {
+          "month": "2023-04-01",
+          "events": 8,
+          "accepted_bp": 18.06433902875075,
+          "controls_bp": -16.831178672965624,
+          "excess_bp": 34.895517701716706,
+          "positive": 3,
+          "series": "Accepted K1",
+          "net_bp": 18.06433902875075
+        },
+        {
+          "month": "2023-04-01",
+          "events": 8,
+          "accepted_bp": 18.06433902875075,
+          "controls_bp": -16.831178672965624,
+          "excess_bp": 34.895517701716706,
+          "positive": 3,
+          "series": "Original controls",
+          "net_bp": -16.831178672965624
+        },
+        {
+          "month": "2023-05-01",
+          "events": 2,
+          "accepted_bp": 3.839500814928501,
+          "controls_bp": 35.995717013318,
+          "excess_bp": -32.15621619839,
+          "positive": 1,
+          "series": "Accepted K1",
+          "net_bp": 3.839500814928501
+        },
+        {
+          "month": "2023-05-01",
+          "events": 2,
+          "accepted_bp": 3.839500814928501,
+          "controls_bp": 35.995717013318,
+          "excess_bp": -32.15621619839,
+          "positive": 1,
+          "series": "Original controls",
+          "net_bp": 35.995717013318
+        },
+        {
+          "month": "2023-06-01",
+          "events": 3,
+          "accepted_bp": 18.336276679450336,
+          "controls_bp": 9.640625013752668,
+          "excess_bp": 8.695651665697335,
+          "positive": 1,
+          "series": "Accepted K1",
+          "net_bp": 18.336276679450336
+        },
+        {
+          "month": "2023-06-01",
+          "events": 3,
+          "accepted_bp": 18.336276679450336,
+          "controls_bp": 9.640625013752668,
+          "excess_bp": 8.695651665697335,
+          "positive": 1,
+          "series": "Original controls",
+          "net_bp": 9.640625013752668
+        },
+        {
+          "month": "2023-07-01",
+          "events": 4,
+          "accepted_bp": 30.10463011646675,
+          "controls_bp": -21.947946742357,
+          "excess_bp": 52.05257685882375,
+          "positive": 2,
+          "series": "Accepted K1",
+          "net_bp": 30.10463011646675
+        },
+        {
+          "month": "2023-07-01",
+          "events": 4,
+          "accepted_bp": 30.10463011646675,
+          "controls_bp": -21.947946742357,
+          "excess_bp": 52.05257685882375,
+          "positive": 2,
+          "series": "Original controls",
+          "net_bp": -21.947946742357
+        },
+        {
+          "month": "2023-08-01",
+          "events": 4,
+          "accepted_bp": 20.040278005263,
+          "controls_bp": -28.295004983587752,
+          "excess_bp": 48.3352829888515,
+          "positive": 2,
+          "series": "Accepted K1",
+          "net_bp": 20.040278005263
+        },
+        {
+          "month": "2023-08-01",
+          "events": 4,
+          "accepted_bp": 20.040278005263,
+          "controls_bp": -28.295004983587752,
+          "excess_bp": 48.3352829888515,
+          "positive": 2,
+          "series": "Original controls",
+          "net_bp": -28.295004983587752
+        },
+        {
+          "month": "2023-09-01",
+          "events": 6,
+          "accepted_bp": -49.1927052655475,
+          "controls_bp": 0.7226647530889994,
+          "excess_bp": -49.91537001863633,
+          "positive": 1,
+          "series": "Accepted K1",
+          "net_bp": -49.1927052655475
+        },
+        {
+          "month": "2023-09-01",
+          "events": 6,
+          "accepted_bp": -49.1927052655475,
+          "controls_bp": 0.7226647530889994,
+          "excess_bp": -49.91537001863633,
+          "positive": 1,
+          "series": "Original controls",
+          "net_bp": 0.7226647530889994
+        },
+        {
+          "month": "2023-10-01",
+          "events": 2,
+          "accepted_bp": -39.4006545906625,
+          "controls_bp": -24.603379174491998,
+          "excess_bp": -14.7972754161695,
+          "positive": 0,
+          "series": "Accepted K1",
+          "net_bp": -39.4006545906625
+        },
+        {
+          "month": "2023-10-01",
+          "events": 2,
+          "accepted_bp": -39.4006545906625,
+          "controls_bp": -24.603379174491998,
+          "excess_bp": -14.7972754161695,
+          "positive": 0,
+          "series": "Original controls",
+          "net_bp": -24.603379174491998
+        },
+        {
+          "month": "2023-11-01",
+          "events": 6,
+          "accepted_bp": -50.60931628680217,
+          "controls_bp": 5.4993904868199985,
+          "excess_bp": -56.108706773622,
+          "positive": 2,
+          "series": "Accepted K1",
+          "net_bp": -50.60931628680217
+        },
+        {
+          "month": "2023-11-01",
+          "events": 6,
+          "accepted_bp": -50.60931628680217,
+          "controls_bp": 5.4993904868199985,
+          "excess_bp": -56.108706773622,
+          "positive": 2,
+          "series": "Original controls",
+          "net_bp": 5.4993904868199985
+        },
+        {
+          "month": "2023-12-01",
+          "events": 5,
+          "accepted_bp": -4.301579627839,
+          "controls_bp": -12.9345913818306,
+          "excess_bp": 8.633011753991532,
+          "positive": 3,
+          "series": "Accepted K1",
+          "net_bp": -4.301579627839
+        },
+        {
+          "month": "2023-12-01",
+          "events": 5,
+          "accepted_bp": -4.301579627839,
+          "controls_bp": -12.9345913818306,
+          "excess_bp": 8.633011753991532,
+          "positive": 3,
+          "series": "Original controls",
+          "net_bp": -12.9345913818306
+        },
+        {
+          "month": "2024-01-01",
+          "events": 2,
+          "accepted_bp": 5.11204040384,
+          "controls_bp": -33.1538057271765,
+          "excess_bp": 38.265846131016495,
+          "positive": 1,
+          "series": "Accepted K1",
+          "net_bp": 5.11204040384
+        },
+        {
+          "month": "2024-01-01",
+          "events": 2,
+          "accepted_bp": 5.11204040384,
+          "controls_bp": -33.1538057271765,
+          "excess_bp": 38.265846131016495,
+          "positive": 1,
+          "series": "Original controls",
+          "net_bp": -33.1538057271765
+        },
+        {
+          "month": "2024-02-01",
+          "events": 3,
+          "accepted_bp": -70.43564609537167,
+          "controls_bp": -32.64377452526,
+          "excess_bp": -37.791871570110665,
+          "positive": 0,
+          "series": "Accepted K1",
+          "net_bp": -70.43564609537167
+        },
+        {
+          "month": "2024-02-01",
+          "events": 3,
+          "accepted_bp": -70.43564609537167,
+          "controls_bp": -32.64377452526,
+          "excess_bp": -37.791871570110665,
+          "positive": 0,
+          "series": "Original controls",
+          "net_bp": -32.64377452526
+        },
+        {
+          "month": "2024-03-01",
+          "events": 5,
+          "accepted_bp": 106.13582949973161,
+          "controls_bp": -46.031253961573,
+          "excess_bp": 152.16708346130457,
+          "positive": 4,
+          "series": "Accepted K1",
+          "net_bp": 106.13582949973161
+        },
+        {
+          "month": "2024-03-01",
+          "events": 5,
+          "accepted_bp": 106.13582949973161,
+          "controls_bp": -46.031253961573,
+          "excess_bp": 152.16708346130457,
+          "positive": 4,
+          "series": "Original controls",
+          "net_bp": -46.031253961573
+        },
+        {
+          "month": "2024-04-01",
+          "events": 4,
+          "accepted_bp": -52.7710562924195,
+          "controls_bp": -27.993713159241004,
+          "excess_bp": -24.77734313317825,
+          "positive": 1,
+          "series": "Accepted K1",
+          "net_bp": -52.7710562924195
+        },
+        {
+          "month": "2024-04-01",
+          "events": 4,
+          "accepted_bp": -52.7710562924195,
+          "controls_bp": -27.993713159241004,
+          "excess_bp": -24.77734313317825,
+          "positive": 1,
+          "series": "Original controls",
+          "net_bp": -27.993713159241004
+        },
+        {
+          "month": "2024-05-01",
+          "events": 6,
+          "accepted_bp": -48.06065925510383,
+          "controls_bp": 9.831865767630331,
+          "excess_bp": -57.892525022733835,
+          "positive": 2,
+          "series": "Accepted K1",
+          "net_bp": -48.06065925510383
+        },
+        {
+          "month": "2024-05-01",
+          "events": 6,
+          "accepted_bp": -48.06065925510383,
+          "controls_bp": 9.831865767630331,
+          "excess_bp": -57.892525022733835,
+          "positive": 2,
+          "series": "Original controls",
+          "net_bp": 9.831865767630331
+        },
+        {
+          "month": "2024-06-01",
+          "events": 3,
+          "accepted_bp": -17.077806559559335,
+          "controls_bp": 15.864454314916,
+          "excess_bp": -32.94226087447534,
+          "positive": 2,
+          "series": "Accepted K1",
+          "net_bp": -17.077806559559335
+        },
+        {
+          "month": "2024-06-01",
+          "events": 3,
+          "accepted_bp": -17.077806559559335,
+          "controls_bp": 15.864454314916,
+          "excess_bp": -32.94226087447534,
+          "positive": 2,
+          "series": "Original controls",
+          "net_bp": 15.864454314916
+        },
+        {
+          "month": "2024-07-01",
+          "events": 4,
+          "accepted_bp": -9.920362214793247,
+          "controls_bp": -105.12095839821,
+          "excess_bp": 95.20059618341726,
+          "positive": 2,
+          "series": "Accepted K1",
+          "net_bp": -9.920362214793247
+        },
+        {
+          "month": "2024-07-01",
+          "events": 4,
+          "accepted_bp": -9.920362214793247,
+          "controls_bp": -105.12095839821,
+          "excess_bp": 95.20059618341726,
+          "positive": 2,
+          "series": "Original controls",
+          "net_bp": -105.12095839821
+        },
+        {
+          "month": "2024-08-01",
+          "events": 5,
+          "accepted_bp": 70.09661389943881,
+          "controls_bp": -5.0144734621025995,
+          "excess_bp": 75.11108736154141,
+          "positive": 3,
+          "series": "Accepted K1",
+          "net_bp": 70.09661389943881
+        },
+        {
+          "month": "2024-08-01",
+          "events": 5,
+          "accepted_bp": 70.09661389943881,
+          "controls_bp": -5.0144734621025995,
+          "excess_bp": 75.11108736154141,
+          "positive": 3,
+          "series": "Original controls",
+          "net_bp": -5.0144734621025995
+        },
+        {
+          "month": "2024-09-01",
+          "events": 3,
+          "accepted_bp": -16.448314347315332,
+          "controls_bp": 21.926777200927003,
+          "excess_bp": -38.37509154824234,
+          "positive": 1,
+          "series": "Accepted K1",
+          "net_bp": -16.448314347315332
+        },
+        {
+          "month": "2024-09-01",
+          "events": 3,
+          "accepted_bp": -16.448314347315332,
+          "controls_bp": 21.926777200927003,
+          "excess_bp": -38.37509154824234,
+          "positive": 1,
+          "series": "Original controls",
+          "net_bp": 21.926777200927003
+        },
+        {
+          "month": "2024-10-01",
+          "events": 5,
+          "accepted_bp": -75.562294687882,
+          "controls_bp": -45.906815273404,
+          "excess_bp": -29.655479414478066,
+          "positive": 1,
+          "series": "Accepted K1",
+          "net_bp": -75.562294687882
+        },
+        {
+          "month": "2024-10-01",
+          "events": 5,
+          "accepted_bp": -75.562294687882,
+          "controls_bp": -45.906815273404,
+          "excess_bp": -29.655479414478066,
+          "positive": 1,
+          "series": "Original controls",
+          "net_bp": -45.906815273404
+        },
+        {
+          "month": "2024-11-01",
+          "events": 6,
+          "accepted_bp": 30.146757177213,
+          "controls_bp": -69.0114718217625,
+          "excess_bp": 99.15822899897566,
+          "positive": 3,
+          "series": "Accepted K1",
+          "net_bp": 30.146757177213
+        },
+        {
+          "month": "2024-11-01",
+          "events": 6,
+          "accepted_bp": 30.146757177213,
+          "controls_bp": -69.0114718217625,
+          "excess_bp": 99.15822899897566,
+          "positive": 3,
+          "series": "Original controls",
+          "net_bp": -69.0114718217625
+        },
+        {
+          "month": "2024-12-01",
+          "events": 2,
+          "accepted_bp": -345.92559477392956,
+          "controls_bp": -73.17642305385799,
+          "excess_bp": -272.7491717200715,
+          "positive": 0,
+          "series": "Accepted K1",
+          "net_bp": -345.92559477392956
+        },
+        {
+          "month": "2024-12-01",
+          "events": 2,
+          "accepted_bp": -345.92559477392956,
+          "controls_bp": -73.17642305385799,
+          "excess_bp": -272.7491717200715,
+          "positive": 0,
+          "series": "Original controls",
+          "net_bp": -73.17642305385799
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "report",
+      "label": "V32 · 完整指标、方法与风险",
+      "path": "analysis/p1_btcusdtp_hourly_volume_wave_economics_v32_20260907.md"
+    },
+    {
+      "id": "monthly",
+      "label": "V32 · 保存逐母标签的真实描述查询",
+      "path": "experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/report_data.json",
+      "query": {
+        "sql": "SELECT mother_month AS month,COUNT(*) AS events,\n AVG(accepted_cost)*10000 AS accepted_bp,\n AVG(control_mean_cost_threshold_markout)*10000 AS controls_bp,\n AVG(accepted_excess)*10000 AS excess_bp,\n SUM(accepted_cost>0) AS positive\n FROM mothers WHERE horizon_hours=4 AND wave_gate_state='accepted'\n GROUP BY mother_month ORDER BY mother_month",
+        "engine": "sqlite",
+        "language": "sql",
+        "tables_used": [
+          "cases",
+          "mothers"
+        ],
+        "executed_at": "2026-09-07T05:24:03.370745+00:00",
+        "description": "固定4h标签，非账户净值或执行收益",
+        "filters": [
+          "2023–2024 UTC; frozen original251 and own744 controls; no new selection"
+        ],
+        "metric_definitions": {
+          "net_bp": "(direction*(open[E+4h]-open[E])/open[E]-0.002)*10000; group arithmetic mean",
+          "controls_bp": "mean of each original three-control mean; no wave filtering in conditional comparator"
+        }
+      }
+    },
+    {
+      "id": "groups",
+      "label": "V32 · 保存逐母标签的真实描述查询",
+      "path": "experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/report_data.json",
+      "query": {
+        "sql": "SELECT c.wave_gate_state AS state,COUNT(*) AS events,\n AVG(c.gross_markout)*10000 AS gross_bp,AVG(c.cost_threshold_markout)*10000 AS net_bp,\n AVG(c.policy_cost_threshold_markout)*10000 AS policy_bp,\n SUM(c.cost_threshold_markout>0) AS positive,\n SUM(c.gross_markout<0) AS wrong_direction, SUM(c.gross_markout=0) AS flat_gross,\n SUM(c.gross_markout>0 AND c.cost_threshold_markout<=0) AS cost_erased,\n AVG(m.control_mean_cost_threshold_markout)*10000 AS controls_bp,\n AVG(m.cost_threshold_excess_markout)*10000 AS excess_bp,\n COUNT(m.cost_threshold_excess_markout) AS paired_n\n FROM cases c JOIN mothers m USING(event_id,horizon_hours)\n WHERE c.horizon_hours=4 GROUP BY c.wave_gate_state ORDER BY state",
+        "engine": "sqlite",
+        "language": "sql",
+        "tables_used": [
+          "cases",
+          "mothers"
+        ],
+        "executed_at": "2026-09-07T05:24:03.370745+00:00",
+        "description": "固定4h标签，非账户净值或执行收益",
+        "filters": [
+          "2023–2024 UTC; frozen original251 and own744 controls; no new selection"
+        ],
+        "metric_definitions": {
+          "net_bp": "(direction*(open[E+4h]-open[E])/open[E]-0.002)*10000; group arithmetic mean",
+          "controls_bp": "mean of each original three-control mean; no wave filtering in conditional comparator"
+        }
+      }
+    }
+  ]
+}

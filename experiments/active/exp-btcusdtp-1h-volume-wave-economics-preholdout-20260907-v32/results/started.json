@@ -1,0 +1,83 @@
+{
+  "at": "2026-09-07T05:21:55.543950+00:00",
+  "builder_commit": "4cbcc93853993d85b056ecff8b718499b2fbe6de",
+  "sources": [
+    {
+      "path": "yoyo/evaluation/hourly_impulse_volume_wave_economics.py",
+      "sha256": "3bc9d203da092f73208a87efd4ae6bf82e4eb85acee96879732f19a6a0c8bfd0"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_volume_wave_economic_research.py",
+      "sha256": "407282286c4803b8cf0f1a5a2901a19f534067fab6d90304cb7a3f14cf891767"
+    },
+    {
+      "path": "tests/test_hourly_impulse_volume_wave_economics.py",
+      "sha256": "3e5e0c52489c04bc1d7418ebf18bfc580dfbdfab7fed5cfc02305d9050b3aaeb"
+    },
+    {
+      "path": "tests/test_hourly_impulse_volume_wave_economic_research.py",
+      "sha256": "f8dc94f059521295674e2eb6949198cf657321416d2b3cf83670abb4664659d9"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_structure_event_support.py",
+      "sha256": "2d62af2f4b837bf714754d5dce13242b9a1e8a53a31014d23818417d11796024"
+    },
+    {
+      "path": "scripts/audit_hourly_impulse_volume_wave_economics_v32.py",
+      "sha256": "b4a44ebde90ab5bdc3ef25e1b56ce48b93c975e8cc4518e19b1adf3ef176ede8"
+    },
+    {
+      "path": "tests/test_audit_hourly_impulse_volume_wave_economics_v32.py",
+      "sha256": "86f891aefac31110b4a4795de8b7cedd3d99f9624e492af6d4f3c53cc525ebbf"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/config.json",
+      "sha256": "a4684fa36f16f86a468c951fc574e29c6f4feab4f9c28d7f7ee0b3097259ba5c"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/PROJECT_PLAN.md",
+      "sha256": "8e28766b903a77041ff4ec4fab4bcc3db1c21f3af46aa0976aa82a1f808da3b3"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_fixed_clock_statistics.py",
+      "sha256": "0a24edb3680a8c8e4cb7a9215a14b7eda21c0ba18fb70ed0a90ea244a263f4d7"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_fixed_clock_research.py",
+      "sha256": "dec74db7cd6db2518001acbeb76b50283baf138f3aecefd442feef709a325123"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_fixed_clock_analysis.py",
+      "sha256": "3697f69478691ed06797547713552e64ef4b18efa6e7bb1bfa71eb27d2f98e29"
+    },
+    {
+      "path": "scripts/diagnose_hourly_impulse_failed_confirm_v18.py",
+      "sha256": "5bdb0ad504ade6ba42b3fcf602587f794ecbac4a1f08f3e9211167cd9c4e6e44"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_volume_wave_support.py",
+      "sha256": "1395a14f7d5abb3cba4533123bd7ee5efd1b76285bcb5accbe12bbe3fa6b39c4"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_volume_wave_audit.py",
+      "sha256": "216c38c66f214dc4e0c8fc9e18ec39c392275db07d7a0b7acb1e665cb1abb695"
+    }
+  ],
+  "inputs": {
+    "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/results/case_labels.csv.gz": "bb28b5974651d2fdac1c9d75eaa59b216a860f4d1525ac7b2e14e15ae01e82d8",
+    "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/results/control_labels.csv.gz": "32f8ac91aec9c092bd466d1ce6f9a74000f806b147f761ebcb4f7fad358e6e12",
+    "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/results/paired_labels.csv.gz": "0a6724e71110a2e05ccbcaa62b77e5e76f6f7f73a61be9c1d9d06c6e0e1427e6",
+    "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/results/summary.json": "d3bbaebde040c519231611fd42833119c4eca6ecccc51c559762ef67ad936926",
+    "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/results/started.json": "bc501918b0c87647b5bdb53d9e5a3eb2096a3b1c4ea2fd4504a18a807a9293ab",
+    "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/results/sampling_frozen.json": "22d5a3c91dbaed277a68a5fab6cf54df17b04663b80244f5e5da4d90f591dc64",
+    "experiments/active/exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31/config.json": "b1096838ce8ee5db26dd76c8a7f7980d24f9e613356aa7ebdf3302462079e91c",
+    "experiments/active/exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31/audit.json": "4a8621d259ea0bb816a810afdd6bf4c96d8a5db7c521e8c357ce9929939a0378",
+    "experiments/active/exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31/results/started.json": "2c861a550abd29b2b01cca03215561bf427368233266169b703ad9e3583e142b",
+    "experiments/active/exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31/results/summary.json": "42aa57b1ebb222175f49df286d17bdfc1bb85ff45f43d3645a373e202c044767",
+    "experiments/active/exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31/results/support_frozen.json": "d6571cc93e98068e22c2d8e493c1365b3bb6cec3e0a250b6d42e2fac7b965fd1",
+    "experiments/active/exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31/results/case_context.csv.gz": "f2245753c1da5f40ed86873f7aa39a8652762c71dd71735d6689d0e27f34e6d2",
+    "experiments/active/exp-btcusdtp-1h-volume-wave-support-preholdout-20260907-v31/results/control_context.csv.gz": "731bdfbbc56c7c63e8bb3bb3724990ca634d39e49ede18e199d6abd4b81c6012"
+  },
+  "config_sha256": "a4684fa36f16f86a468c951fc574e29c6f4feab4f9c28d7f7ee0b3097259ba5c",
+  "before_subgroup_outcome_read": true
+}

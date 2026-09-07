@@ -18,6 +18,30 @@
 未启动新训练；training_eligible/production_eligible=false，holdout未读。旧val是反复使用的
 开发集，挖掘队列不能估总体召回；exposure_review.json明确独立性尚未建立，未冻结连续窗roster。
 
+## ⚡ 当前真相（2026-09-07 — V32前置量波经济失败，改善完全由少扣成本）
+
+Owner“继续下一步”：4cbcc93先冻结 V31门的4h/20bp经济检验，再读取保存V24标签。
+原251母/744控制不变；通过100弃权148未知3，对照全300（158通过142弃权）不裁剪。
+100入口毛+1.554979bp、净−18.445021bp，CI[−44.1894,+6.5951]；
+55毛方向错、7小毛利不足成本、38净正。配对超额+2.332327bp，CI[−26.6268,+31.6545]。
+同248机会改善+11.469797bp=省成本+11.935484bp−毛贡献0.465687bp，
+成本贡献104.06%，不是方向过滤盈利。四半年25/27/23/25，净均值全负；10/24月份正。
+四主Holm p .9163/.8926/.6681/.1088，not_supported，不进入执行/TV/动态退出优化。
+L49均值+1.397648bp、S51−37.509546bp只是描述，不事后转成只做多。
+
+Root独立算术audit核对3980标签/1004母H/四推断，另作者完整政策/半年终门补核通过。
+99新合成测试+245边界/父支持/report测试通过（13既有警告）；report查询builder3ea0bb2。
+V31来源summary没有sources字段：按真实started/frozen/audit链修复，收益读取前发现且有回归tests。
+HTML analysis/html/p1_btcusdtp_hourly_volume_wave_economics_v32_20260907.html，14sections/15blocks/1native24月双系列图。
+canonical validate/package通过，structural_only，无Chromium，无browser/mobile/source-dialog验证。
+E32有完整三账本/summary/audit/report_data251行/REVIEW/QA/4已执行notebookcodecells；
+notebook用stdlib顺序回放，非Jupyterkernel验证；不安装依赖。
+
+V31仅支持通过的旧结论不回写。新收益仅这一次配置；无raw/2025+/holdout（0次）、
+TV/成本/障碍/参数/ACTIVE/训练/下单改动。总盈利目标未达，goal usageLimited，不宣称后台继续。
+下一步先与历史实验去重，再设计入场前结构诊断（首次突破vs区间反复穿越），
+不要继续堆相似颜色/量波门，也不要从微正多头倒推新最佳参数。新阈值/障碍/数据需要独立方案。
+
 ## ⚡ 当前真相（2026-09-07 — V31前置方向量改善覆盖通过，未读该门收益）
 
 Owner“下一步，继续”：f8e450b先冻结再只读V20保存小时OHLCV、V24原251/744身份。

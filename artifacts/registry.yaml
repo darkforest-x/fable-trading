@@ -19,6 +19,141 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: btcusdtp-hourly-wave-v32-results
+    artifact_type: report
+    role: volume_wave_economic_results
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4cbcc93"
+    source_path: experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/results/summary.json
+    sha256: "4efa653ecd4d1da79544c4574dd510ed9705784df8bdb7923811433c8b90d76e"
+    size_bytes: 180868
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "V32 rejected;4h20bp frozen;reuseddevelopment,no executablePnL. HTML structural_only;notebook codecells stdlib replay,not Jupyterkernel QA."
+
+  - artifact_id: btcusdtp-hourly-wave-v32-audit
+    artifact_type: report
+    role: independent_saved_number_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "4cbcc93"
+    source_path: experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/audit.json
+    sha256: "ada87bd139ec2d50f0c35e8f7bcab9a6427816caf329a9caabde7e2afdd5fff6"
+    size_bytes: 916
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/audit.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "V32 rejected;4h20bp frozen;reuseddevelopment,no executablePnL. HTML structural_only;notebook codecells stdlib replay,not Jupyterkernel QA."
+
+  - artifact_id: btcusdtp-hourly-wave-v32-report-data
+    artifact_type: dataset
+    role: descriptive_queries_and_251_event_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: "3ea0bb2"
+    source_path: experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/report_data.json
+    sha256: "4573082ab01e0c3b34f4a00568a194080ebe28a2670cc39dba5f64ecb87bd774"
+    size_bytes: 115691
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/report_data.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "V32 rejected;4h20bp frozen;reuseddevelopment,no executablePnL. HTML structural_only;notebook codecells stdlib replay,not Jupyterkernel QA."
+
+  - artifact_id: btcusdtp-hourly-wave-v32-report
+    artifact_type: report
+    role: source_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bc93cfa"
+    source_path: analysis/p1_btcusdtp_hourly_volume_wave_economics_v32_20260907.md
+    sha256: "b84788eaf9b94f0b2567b028756a5f6efa73ced4a1699c10c5b9812e4f356327"
+    size_bytes: 16207
+    storage_uri: "repo://analysis/p1_btcusdtp_hourly_volume_wave_economics_v32_20260907.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "V32 rejected;4h20bp frozen;reuseddevelopment,no executablePnL. HTML structural_only;notebook codecells stdlib replay,not Jupyterkernel QA."
+
+  - artifact_id: btcusdtp-hourly-wave-v32-html
+    artifact_type: report
+    role: portable_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bc93cfa"
+    source_path: analysis/html/p1_btcusdtp_hourly_volume_wave_economics_v32_20260907.html
+    sha256: "21b73312851ec5f00a700359f34d42e0ab89f4781052efdeeb0346e24cad033c"
+    size_bytes: 508933
+    storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_volume_wave_economics_v32_20260907.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "V32 rejected;4h20bp frozen;reuseddevelopment,no executablePnL. HTML structural_only;notebook codecells stdlib replay,not Jupyterkernel QA."
+
+  - artifact_id: btcusdtp-hourly-wave-v32-artifact
+    artifact_type: report
+    role: canonical_report_payload
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bc93cfa"
+    source_path: experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/artifact.json
+    sha256: "820cd9e2d23d2d47a4dca66a5840f2f5e8877ac4b4a3a26e08ba3d4d00d92819"
+    size_bytes: 41148
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/artifact.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "V32 rejected;4h20bp frozen;reuseddevelopment,no executablePnL. HTML structural_only;notebook codecells stdlib replay,not Jupyterkernel QA."
+
+  - artifact_id: btcusdtp-hourly-wave-v32-qa
+    artifact_type: report
+    role: validation_scope
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bc93cfa"
+    source_path: experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/QA.md
+    sha256: "92a81393b702d96965d181a126b7daf532741a0e7c4a5e719c1f1e1b72ece8fa"
+    size_bytes: 3944
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/QA.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "V32 rejected;4h20bp frozen;reuseddevelopment,no executablePnL. HTML structural_only;notebook codecells stdlib replay,not Jupyterkernel QA."
+
+  - artifact_id: btcusdtp-hourly-wave-v32-notebook
+    artifact_type: report
+    role: executed_verification_companion
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bc93cfa"
+    source_path: experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/verification.ipynb
+    sha256: "c74a7fa15416211eb78b64d3c7555c9e6301cdbe4152aaac336a223ed87ea4ba"
+    size_bytes: 8744
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/verification.ipynb"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "V32 rejected;4h20bp frozen;reuseddevelopment,no executablePnL. HTML structural_only;notebook codecells stdlib replay,not Jupyterkernel QA."
+
+  - artifact_id: btcusdtp-hourly-wave-v32-delivery
+    artifact_type: report
+    role: portable_delivery_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: "bc93cfa"
+    source_path: experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/delivery.json
+    sha256: "5cd4b84bc6dba9c527d1157fe68678b4e56bc4987f5ba2f2ae55a38f622790a1"
+    size_bytes: 543
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-volume-wave-economics-preholdout-20260907-v32/delivery.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "V32 rejected;4h20bp frozen;reuseddevelopment,no executablePnL. HTML structural_only;notebook codecells stdlib replay,not Jupyterkernel QA."
+
   - artifact_id: btcusdtp-hourly-wave-v31-results
     artifact_type: report
     role: volume_wave_support
