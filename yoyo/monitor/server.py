@@ -12,7 +12,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from yoyo.monitor import FRESH_MS
+from yoyo.monitor import FRESH_MS, SIGNAL_KIND, SIGNAL_PROTOCOL
 from yoyo.monitor.service import Monitor
 from yoyo.monitor.store import Store
 
@@ -73,11 +73,14 @@ def create_app(runtime=None, start_monitor=True):
 
     @app.get("/api/signals")
     def signals(limit: int = Query(200, ge=1, le=2000), symbol: str = None, timeframe: str = None,
-                kind: str = None, side: str = None):
-        rows = store.list_events(limit, symbol, timeframe, kind, side)
+                kind: str = SIGNAL_KIND, side: str = None):
+        if kind != SIGNAL_KIND:
+            raise HTTPException(400, "信号台仅显示主线从零轴首次离开的启动信号。")
+        rows = store.list_events(limit, symbol, timeframe, SIGNAL_KIND, side, protocol=SIGNAL_PROTOCOL)
         for row in rows:
             row["is_fresh"] = 0 <= monitor.client.clock() - row["bar_close_ms"] <= FRESH_MS
-        return {"items": rows, "total": store.event_count()}
+        return {"items": rows, "total": store.event_count(SIGNAL_KIND, SIGNAL_PROTOCOL), "kind": SIGNAL_KIND,
+                "protocol": SIGNAL_PROTOCOL}
 
     @app.get("/api/markets")
     def markets():

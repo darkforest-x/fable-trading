@@ -80,6 +80,11 @@ def test_real_long_flat_release_is_not_an_entry_or_backpaint():
     assert not any(e["kind"] == "entry" for e in r["events"])
     assert not r["chart"][352]["focus"]
     assert r["chart"][352]["glow_side"] == "long"
+    zero_events = [e for e in r["events"] if e["kind"] == "zero_breakout"]
+    assert len(zero_events) == 1
+    assert zero_events[0]["side"] == "long" and zero_events[0]["previous_md"] == 0
+    assert zero_events[0]["near_zero_bars"] == 12
+    assert r["chart"][352]["zero_breakout_side"] == "long"
 
 
 def test_qualification_freezes_band_when_atr_shrinks(monkeypatch):
@@ -211,6 +216,9 @@ def test_unsupported_timeframe_is_rejected():
 
 def test_protocol_and_output_are_json_safe():
     r = signals.analyze(candles(480, oscillate=True), [], "1H")
+    assert r["protocol"]["mode"] == "zero_departure"
+    assert r["protocol"]["notification_event"] == "zero_breakout"
+    assert r["protocol"]["notification_filters"] == []
     assert r["protocol"]["htf_filters_default_entries"] is False
     assert r["protocol"]["orders_enabled"] is False
     assert r["state"]["protocol_version"] == signals.PROTOCOL_VERSION
@@ -224,3 +232,92 @@ def test_breakout_candle_does_not_rewrite_formation():
     after = signals.analyze(b, [], "1H")
     for field in ("dense", "prior_width_atr", "prior_crosses"):
         assert after["state"][field] == before["state"][field]
+
+
+@pytest.mark.parametrize("value,side", [(2., "long"), (-2., "short"),
+                                      (1e-14, "long"), (-1e-14, "short")])
+def test_zero_breakout_fires_on_first_nonzero_even_below_atr_band(monkeypatch, value, side):
+    patch_features(monkeypatch, {"md": {342: value, 343: value, 344: value * 2}})
+    b = candles(345)
+    result = signals.analyze(b, [], "1H")
+    events = [e for e in result["events"] if e["kind"] == "zero_breakout"]
+    assert len(events) == 1
+    event = events[0]
+    assert event["bar_open_ms"] == b[342]["t"]
+    assert event["bar_close_ms"] == b[342]["t"] + 3_600_000
+    assert event["side"] == side and event["md"] == value
+    assert event["previous_md"] == 0
+    assert event["zero_bars"] == 309  # Valid SMMA bars 33..341, before departure.
+    assert event["near_zero_bars"] == 2  # Focus run before updating bar 342.
+    assert event["dense"] is False and event["htf_allowed"] is None
+    assert event["price"] == b[342]["c"] and event["price_basis"] == "signal_candle_close"
+    assert event["confirmed"] and event["is_monitor_signal"]
+    assert not event["is_system_entry"]
+    assert result["chart"][342]["zero_breakout_side"] == side
+    assert result["chart"][342]["zero_bars"] == 0
+    assert result["chart"][342]["entry_side"] is None
+    assert all(row["zero_breakout_side"] is None for row in result["chart"][343:])
+    if abs(value) < .2:
+        assert not any(e["kind"] == "release" for e in result["events"])
+    json.dumps(result, allow_nan=False)
+
+
+def test_zero_breakout_ignores_htf_denial_and_signal_line_position(monkeypatch):
+    patch_features(monkeypatch, {"md": {342: .01}, "sb": {342: 10.}, "dense": {342: False}})
+    denied = dict(htf_known=True, htf_side="short", htf_md=-1., htf_sh=-1.,
+                  htf_bar_close_ms=0, htf_long_allowed=False, htf_short_allowed=True)
+    monkeypatch.setattr(signals, "_higher_at", lambda *args: dict(denied))
+    result = signals.analyze(candles(343), [], "1H")
+    events = [e for e in result["events"] if e["kind"] == "zero_breakout"]
+    assert len(events) == 1 and events[0]["side"] == "long"
+    assert events[0]["htf_allowed"] is False
+    assert events[0]["dense"] is False
+    assert events[0]["md"] < events[0]["sb"]
+    assert result["state"]["zero_breakout_side"] == "long"
+
+
+def test_continuation_and_direct_sign_reversal_do_not_repeat_zero_breakout(monkeypatch):
+    patch_features(monkeypatch, {"md": {340: 1., 341: 2., 342: -1., 343: -2.,
+                                        344: 0., 345: -.01, 346: -.02}})
+    result = signals.analyze(candles(347), [], "1H")
+    events = [e for e in result["events"] if e["kind"] == "zero_breakout"]
+    assert [(e["bar_open_ms"], e["side"]) for e in events] == [
+        (340 * 3_600_000, "long"), (345 * 3_600_000, "short")]
+    assert events[-1]["zero_bars"] == 1
+    assert result["chart"][342]["zero_breakout_side"] is None  # Direct + -> -.
+    assert result["chart"][346]["zero_breakout_side"] is None  # Continued negative.
+
+
+def test_signal_line_crossing_without_md_departure_is_not_a_monitor_signal(monkeypatch):
+    patch_features(monkeypatch, {"sb": {340: -1., 341: 1., 342: -1.}})
+    result = signals.analyze(candles(343), [], "1H")
+    assert all(row["md"] == 0 for row in result["chart"])
+    assert not any(e["kind"] == "zero_breakout" for e in result["events"])
+    assert not any(row["zero_breakout_side"] for row in result["chart"])
+
+
+def test_warmup_does_not_turn_an_existing_nonzero_run_into_a_new_breakout(monkeypatch):
+    patch_features(monkeypatch, {"md": {339: 1., 340: 2., 341: 0., 342: 1.}})
+    result = signals.analyze(candles(343), [], "1H")
+    events = [e for e in result["events"] if e["kind"] == "zero_breakout"]
+    assert [e["bar_open_ms"] for e in events] == [342 * 3_600_000]
+    assert not result["chart"][339]["ready"]
+    assert result["chart"][340]["ready"]
+    assert result["chart"][340]["zero_breakout_side"] is None
+
+
+def test_real_zero_breakout_history_survives_future_quote_mutation():
+    b = candles(410)
+    b[352].update(o=100, h=141, l=99, c=140)
+    original = signals.analyze(b, [], "1H")
+    changed = deepcopy(b)
+    for row in changed[370:]:
+        row.update(o=100, h=2001, l=1, c=2000)
+    altered = signals.analyze(changed, [], "1H")
+    prefix = signals.analyze(b[:370], [], "1H")
+    expected = [e for e in prefix["events"] if e["kind"] == "zero_breakout"]
+    assert expected and expected[0]["bar_open_ms"] == b[352]["t"]
+    for result in (original, altered):
+        assert [e for e in result["events"] if e["kind"] == "zero_breakout"
+                and e["bar_open_ms"] < b[370]["t"]] == expected
+        assert result["chart"][:370] == prefix["chart"]

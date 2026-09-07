@@ -16,7 +16,8 @@ import subprocess
 import threading
 import time
 
-from yoyo.monitor import FRESH_MS, TIMEFRAMES, VERSION, SIGNAL_PROTOCOL
+from yoyo.monitor import FRESH_MS, TIMEFRAMES, VERSION, SIGNAL_PROTOCOL, SIGNAL_KIND
+from yoyo.monitor.policy import is_zero_breakout
 from yoyo.monitor.okx import OKX
 from yoyo.monitor.store import now_ms
 from yoyo.monitor.telegram import TelegramWorker
@@ -31,6 +32,8 @@ class Monitor:
         self.client = client or OKX()
         self.interval = interval
         self.started = now_ms()
+        self.notification_since = store.get_meta("notification_policy:" + PROTOCOL, {}).get("activated_ms", self.started)
+        self.notification_ready = threading.Event()
         module_dir = Path(__file__).resolve().parent
         self.source_hashes = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in module_dir.glob("*.py")}
         try:
@@ -61,6 +64,9 @@ class Monitor:
 
     def deliver(self):
         while not self.stop_event.is_set():
+            if not self.notification_ready.is_set():
+                self.stop_event.wait(3)
+                continue
             try:
                 worked = self.telegram.deliver_once(self.client.clock())
             except Exception as exc:
@@ -82,6 +88,11 @@ class Monitor:
     def scan(self):
         start = now_ms()
         self.client.synchronize()
+        if not self.notification_ready.is_set():
+            # Use the same calibrated clock as candle closes and freshness.
+            # A slow Mac clock must not turn a pre-upgrade close into a new bar.
+            self.notification_since = self.store.activate_notification_policy(self.client.clock())
+            self.notification_ready.set()
         if not self.instruments or start - self.universe_at >= 3600000:
             self.instruments = self.client.instruments()
             self.universe_at = start
@@ -178,9 +189,11 @@ class Monitor:
                     continue
                 event = dict(raw, symbol=symbol, timeframe=timeframe, protocol=PROTOCOL, detected_at_ms=now)
                 event["is_fresh"] = 0 <= now - event["bar_close_ms"] <= FRESH_MS
-                # Historical events are displayed but never notified. Default
-                # alerts cover releases, original system entries and exits.
-                eligible = event["is_fresh"] and not stale and event["kind"] in ("release", "entry", "exit")
+                # Only the first exact-zero departure is a monitored signal.
+                # Recomputed history predating this protocol's activation stays
+                # historical even if a new identity would otherwise be fresh.
+                eligible = (event["is_fresh"] and not stale and is_zero_breakout(event)
+                            and event["bar_close_ms"] > self.notification_since)
                 self.store.upsert_event(event, notify=eligible)
                 kept.append(event)
             with self.lock:
@@ -212,7 +225,9 @@ class Monitor:
                     "fresh_minutes": FRESH_MS // 60000, "interval_seconds": self.interval, "timeframes": ["1H", "4H"],
                     "clock_offset_ms": self.client.offset_ms, "public_requests": self.client.requests,
                     "candle_storage": "memory_only", "history_days": 7,
-                    "signal_mode": "密集启动（Pine V2.2 默认）", "higher_mode": "已确认高周期许可标注",
+                    "signal_mode": "零轴启动（主线从0首次离轴）", "signal_kind": SIGNAL_KIND,
+                    "notification_since_ms": self.notification_since,
+                    "higher_mode": "已确认高周期背景标注，不过滤启动",
                     "source_commit": self.source_commit, "startup_source_sha256": self.source_hashes,
                     "warmup_bars": 340, "launch_agent": "com.fable.impulse-monitor"})
 

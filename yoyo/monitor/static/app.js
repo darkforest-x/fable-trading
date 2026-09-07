@@ -6,16 +6,16 @@
   const state = {
     view: "signals", signals: [], markets: [], status: null, health: null,
     signalsLoaded: false, marketsLoaded: false, signalTotal: 0, rowLimit: 200, search: "", watchSearch: "", watchScope: "building",
-    timeframe: "all", side: "all", kind: "all", selected: null,
+    timeframe: "all", side: "all", selected: null,
     chartKey: null, chart: null, chartRequest: 0, chartController: null,
     syncing: false, lastSync: null, errors: {}, chartHover: null,
   };
   const titles = {
-    signals: ["信号台", "等待充分蓄势，关注趋势启动。"],
+    signals: ["信号台", "主线由 0 向上或向下离开的首根，收盘确认。"],
     watch: ["蓄势观察", "跟踪零轴停留，等待均线从收拢走向展开。"],
     system: ["运行状态", "行情、扫描与通知，每个环节都清晰可见。"],
   };
-  const eventNames = { release: "蓄势释放", entry: "系统启动", retest: "影线回踩", exit: "趋势结束" };
+  const eventNames = { zero_breakout: "零轴启动", release: "近零释放参考", entry: "原系统观察", retest: "影线回踩参考", exit: "趋势结束参考" };
   const phaseNames = {
     building: "蓄势中", accumulating: "蓄势中", accumulation: "蓄势中", compression: "密集蓄势",
     ready: "等待启动", armed: "等待启动", flat: "零轴横盘", neutral: "观察中",
@@ -31,6 +31,8 @@
   const sideName = (side) => side === "long" ? "多头" : side === "short" ? "空头" : side === "unknown" || side == null ? "未就绪" : "中性";
   const sideArrow = (side) => side === "short" ? "↓" : side === "long" ? "↑" : "·";
   const shortSymbol = (symbol) => String(symbol || "—").replace(/-(USDT|USD)-SWAP$/, "").replace(/USDT\.P$/, "");
+  const zeroRun = (item) => item.zero_bars_before ?? item.prior_zero_bars ?? item.zero_run_bars ?? item.zero_bars;
+  const zeroProtocol = () => state.status?.runtime?.signal_kind === "zero_breakout" || /zero[-_](?:breakout|axis)/.test(String(state.status?.protocol || ""));
   const quoteSymbol = (symbol) => /-USD-SWAP$/.test(String(symbol)) ? "USD" : "USDT";
   const normalSearch = (value) => String(value).toUpperCase().replace(/[^A-Z0-9]/g, "");
   const displayPhase = (phase) => phaseNames[phase] || String(phase || "观察中");
@@ -101,8 +103,7 @@
     const q = normalSearch(state.search);
     return state.signals.filter((item) => (!q || normalSearch(item.symbol).includes(q)) &&
       (state.timeframe === "all" || item.timeframe === state.timeframe) &&
-      (state.side === "all" || item.side === state.side) &&
-      (state.kind === "all" || item.kind === state.kind));
+      (state.side === "all" || item.side === state.side) && item.kind === "zero_breakout");
   }
   function notification(item) {
     const value = String(item.notification_status || "").toLowerCase();
@@ -124,7 +125,7 @@
     $("load-more-signals").textContent = `显示更多（${Math.min(state.rowLimit, items.length)} / ${items.length}）`;
     $("signal-empty").classList.toggle("hidden", items.length > 0);
     if (!items.length) {
-      const hasFilters = state.search || state.timeframe !== "all" || state.side !== "all" || state.kind !== "all";
+      const hasFilters = state.search || state.timeframe !== "all" || state.side !== "all";
       if (state.errors.signals && !state.signalsLoaded) {
         $("signal-empty-title").textContent = "信号服务暂时不可用";
         $("signal-empty-description").textContent = "正在自动重试。连接恢复后会展示真实信号。";
@@ -132,8 +133,8 @@
         $("signal-empty-title").textContent = "正在连接行情服务";
         $("signal-empty-description").textContent = "真实信号会在这里出现。";
       } else {
-        $("signal-empty-title").textContent = hasFilters ? "没有符合筛选的信号" : "市场在酝酿，等待下一次启动";
-        $("signal-empty-description").textContent = hasFilters ? "试试其他合约、周期或信号类型。" : "信号会在 K 线收盘确认后出现；可先到蓄势观察查看当前结构。";
+        $("signal-empty-title").textContent = hasFilters ? "没有符合筛选的信号" : "等待主线离开精确零轴";
+        $("signal-empty-description").textContent = hasFilters ? "试试其他合约、周期或方向。" : "仅记录主线由 0 转正或转负的第一根已收盘 K 线。均线密集和高周期不限制触发。";
       }
     }
     const focusedId = document.activeElement?.dataset?.signalId;
@@ -141,8 +142,8 @@
       const selected = state.selected && String(state.selected.id) === String(item.id) && state.selected.symbol === item.symbol && state.selected.timeframe === item.timeframe;
       const [notifyLabel, notifyClass] = notification(item);
       const name = eventNames[item.kind] || item.kind || "信号";
-      const tag = item.dense ? "均线密集" : finite(item.zero_bars) && Number(item.zero_bars) > 0 ? `零轴 ${number(item.zero_bars)} 根` : "收盘确认";
-      return `<tr class="signal-row${selected ? " selected" : ""}" data-signal-id="${escapeHTML(item.id)}" tabindex="0" aria-label="${escapeHTML(`${shortSymbol(item.symbol)} ${item.timeframe} ${sideName(item.side)} ${name}，确认点位 ${price(item.price)}`)}" aria-selected="${Boolean(selected)}"><td><div class="symbol-label">${escapeHTML(shortSymbol(item.symbol))}<span class="symbol-quote">${escapeHTML(quoteSymbol(item.symbol))}</span>${item.is_fresh === true ? '<span class="fresh-label">新</span>' : ""}</div><div class="row-subtext"><span class="timeframe-tag">${escapeHTML(item.timeframe)}</span><time title="${escapeHTML(fullDate(item.bar_close_ms))}">${escapeHTML(shortDate(item.bar_close_ms))}</time></div></td><td><div class="event-label ${item.side === "short" ? "short" : item.side === "long" ? "long" : ""}"><span class="direction-icon" aria-hidden="true">${sideArrow(item.side)}</span>${escapeHTML(name)}</div><div class="event-sub">${escapeHTML(tag)}</div></td><td class="price-cell">${escapeHTML(price(item.price))}</td><td><span class="row-status ${notifyClass}" title="${escapeHTML(notifyLabel)}">${notifyLabel}</span></td></tr>`;
+      const tag = `连续零轴 ${number(zeroRun(item))} 根`;
+      return `<tr class="signal-row${selected ? " selected" : ""}" data-signal-id="${escapeHTML(item.id)}" tabindex="0" aria-label="${escapeHTML(`${shortSymbol(item.symbol)} ${item.timeframe} ${sideName(item.side)} ${name}，确认点位 ${price(item.price)}`)}" aria-selected="${Boolean(selected)}"><td><div class="symbol-label">${escapeHTML(shortSymbol(item.symbol))}<span class="symbol-quote">${escapeHTML(quoteSymbol(item.symbol))}</span>${item.is_fresh === true ? '<span class="fresh-label">新</span>' : ""}</div><div class="row-subtext"><span class="timeframe-tag">${escapeHTML(item.timeframe)}</span><time title="${escapeHTML(fullDate(item.bar_close_ms))}">${escapeHTML(shortDate(item.bar_close_ms))}</time></div></td><td><div class="event-label ${item.side === "short" ? "short" : item.side === "long" ? "long" : ""}"><span class="direction-icon" aria-hidden="true">${sideArrow(item.side)}</span>${escapeHTML(sideName(item.side))} · ${escapeHTML(name)}</div><div class="event-sub">${escapeHTML(tag)}</div></td><td class="price-cell">${escapeHTML(price(item.price))}</td><td><span class="row-status ${notifyClass}" title="${escapeHTML(notifyLabel)}">${notifyLabel}</span></td></tr>`;
     }).join("");
     if (focusedId) Array.from($("signal-rows").children).find((row) => row.dataset.signalId === focusedId)?.focus({ preventScroll: true });
   }
@@ -177,12 +178,12 @@
     const counts = status.counts || {};
     const telegram = status.telegram || {};
     const runtime = status.runtime || {};
-    $("metric-signals").textContent = number(counts.signals_24h ?? 0);
-    $("nav-signal-count").textContent = number(counts.signals_24h ?? 0);
+    $("metric-signals").textContent = zeroProtocol() ? number(counts.signals_24h ?? 0) : "—";
+    $("nav-signal-count").textContent = zeroProtocol() ? number(counts.signals_24h ?? 0) : "—";
     $("metric-building").textContent = number(counts.building ?? 0);
     $("metric-universe").textContent = number(status.universe?.count);
     $("metric-building-detail").textContent = finite(counts.ready) ? `${number(counts.ready)} 个窗口已就绪` : "零轴横盘与均线密集";
-    $("metric-signals-detail").textContent = "收盘确认 · 避免盘中闪烁";
+    $("metric-signals-detail").textContent = zeroProtocol() ? "精确离零 · 仅首根确认" : "规则升级中 · 等待新口径";
     const scanning = ["running", "scanning", "in_progress", "starting", "bootstrap"].includes(scan.status);
     const scanErrorCount = Array.isArray(scan.errors) ? scan.errors.length : numeric(scan.errors);
     const complete = numeric(scan.completed);
@@ -248,12 +249,12 @@
     $("tradingview-link").href = `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(`OKX:${tvSymbol}`)}&interval=${item.timeframe === "4H" ? "240" : "60"}`;
     const facts = [
       ["信号收盘时间", shortDate(item.bar_close_ms), ""],
-      ["零轴 / 近零轴", `${number(item.zero_bars)} / ${number(item.near_zero_bars)} 根`, ""],
-      ["均线密集", item.dense === true ? "已确认" : item.dense === false ? "未满足" : "—", item.dense ? "mint" : ""],
-      ["高周期共振", `${sideName(item.htf_side)}${item.htf_allowed === true ? " · 允许" : item.htf_allowed === false ? " · 未通过" : ""}`, item.htf_allowed ? "mint" : ""],
+      [item.kind === "zero_breakout" ? "启动前连续零轴" : "当前连续零轴", `${number(item.kind === "zero_breakout" ? zeroRun(item) : item.zero_bars)} 根`, ""],
+      ["均线密集 · 背景参考", item.dense === true ? "已密集" : item.dense === false ? "未密集" : "—", item.dense ? "mint" : ""],
+      ["高周期方向 · 背景参考", sideName(item.htf_side), ""],
     ];
     $("detail-facts").innerHTML = facts.map(([label, value, color]) => `<div><div class="fact-label">${escapeHTML(label)}</div><div class="fact-value ${color}">${escapeHTML(value)}</div></div>`).join("");
-    $("detail-reason").textContent = item.reason ? String(item.reason).replace(/冻结阈值/g, "启动阈值").replace(/视觉释放/g, "动量释放提示") : (item.kind === "retest" ? "蓄势区内出现符合规则的影线回踩，图中以亮色标出关键 K 线。" : item.kind ? "信号在 K 线收盘后确认。图示为指标结构，确认点位不代表可获得的实际成交价。" : "当前为观察窗口；等待收盘后满足启动规则，再形成信号。");
+    $("detail-reason").textContent = item.kind === "zero_breakout" ? `主线前一根为精确 0，本根首次${item.side === "short" ? "转负" : "转正"}，已收盘确认。均线密集与高周期仅作背景参考，不影响触发；点位为该根收盘价。` : item.error ? `行情读取异常：${String(item.error)}。当前结构仅供查看。` : item.stale ? "当前行情已过期，等待重新同步；不会将缓存结构当作新信号。" : "当前为行情观察。只有主线从精确 0 首次转正或转负并收盘，才列入零轴启动；亮色回踩 K 线仅作参考。";
     const market = state.markets.find((row) => row.symbol === item.symbol && row.timeframe === item.timeframe);
     const key = `${item.symbol}|${item.timeframe}|${item.bar_close_ms || ""}|${market?.bar_close_ms || ""}|${market?.stale || false}|${market?.error || ""}`;
     if (state.chartKey !== key) loadChart(item, key);
@@ -344,14 +345,19 @@
       const bodyHeight = Math.max(.7, Math.abs(py(bar.o) - py(bar.c)));
       parts.push(`<line x1="${x(i)}" x2="${x(i)}" y1="${py(bar.h)}" y2="${py(bar.l)}" stroke="${color}" stroke-width="${bright ? 1.2 : .85}"/><rect x="${x(i) - bodyWidth / 2}" y="${bodyY}" width="${bodyWidth}" height="${bodyHeight}" fill="${color}" stroke="none"/>`);
     });
+    const breakouts = new Map();
+    candles.forEach((bar) => {
+      if (["long", "short"].includes(bar.zero_breakout_side)) breakouts.set(`${bar.t}|${bar.zero_breakout_side}`, { bar_open_ms: bar.t, side: bar.zero_breakout_side, price: bar.c });
+    });
     const eventList = [...(Array.isArray(state.chart.events) ? state.chart.events : [])];
-    if (state.selected?.kind && !eventList.some((event) => String(event.id) === String(state.selected.id))) eventList.push(state.selected);
-    eventList.slice(-35).forEach((event) => {
-      const index = candles.findIndex((bar) => Number(bar.t) === Number(event.bar_open_ms) || Number(bar.t) === Number(event.t));
+    if (state.selected?.kind === "zero_breakout") eventList.push(state.selected);
+    eventList.filter((event) => event.kind === "zero_breakout").forEach((event) => breakouts.set(`${event.bar_open_ms ?? event.t}|${event.side}`, event));
+    Array.from(breakouts.values()).slice(-50).forEach((event) => {
+      const index = candles.findIndex((bar) => Number(bar.t) === Number(event.bar_open_ms ?? event.t));
       if (index < 0 || !["long", "short"].includes(event.side)) return;
       const long = event.side === "long", cy = long ? py(candles[index].l) + 6 : py(candles[index].h) - 6;
       const cx = x(index), direction = long ? 1 : -1;
-      parts.push(`<path d="M${cx},${cy}l-3,${direction * 4}h6Z" fill="${long ? "#a4ecc9" : "#f0a2a8"}" stroke="none"/>`);
+      parts.push(`<g data-event-kind="zero_breakout" data-side="${event.side}"><title>零轴启动 · ${sideName(event.side)} · ${escapeHTML(price(event.price ?? candles[index].c))}</title><path d="M${cx},${cy}l-3.5,${direction * 5}h7Z" fill="${long ? "#a4ecc9" : "#f0a2a8"}" stroke="#0e161f" stroke-width=".55"/></g>`);
     });
     parts.push("</g>");
     parts.push(`<line x1="${left}" x2="${width - 12}" y1="180" y2="180" stroke="#263640" stroke-width=".7"/><text x="${left}" y="191" style="font-size:7px;fill:#728797">IMACD</text><line x1="65" x2="76" y1="188.5" y2="188.5" stroke="#799ed5" stroke-width="1.2"/><text x="80" y="191" style="font-size:7px">主线</text><line x1="109" x2="120" y1="188.5" y2="188.5" stroke="#d8b17b" stroke-width="1.2"/><text x="124" y="191" style="font-size:7px">信号线</text>`);
@@ -375,7 +381,7 @@
     parts.push(`<g class="chart-crosshair" visibility="hidden"><line class="crosshair-line" x1="0" x2="0" y1="${priceTop}" y2="${impulseBottom}" stroke="#789187" stroke-width=".8" stroke-dasharray="3 3"/><circle class="crosshair-dot" r="2.5" fill="#afe5c8" stroke="#0e161f" stroke-width="1.2"/></g><rect class="chart-hit-area" x="${left}" y="${priceTop}" width="${plotWidth}" height="${impulseBottom - priceTop}" fill="transparent" stroke="none"/></svg>`);
     $("chart-container").innerHTML = parts.join("");
     $("chart-container").setAttribute("aria-label", `${shortSymbol(state.selected?.symbol)} ${state.selected?.timeframe}，${candles.length} 根真实 K 线，上图六条细均线，下图 IMACD 双线与零轴，无柱状图`);
-    $("chart-hint").textContent = state.chart.state?.stale ? "行情缓存已过期 · 等待重新同步" : state.chart.state?.error ? "行情存在读取异常 · 当前为缓存" : "移动光标查看 K 线 · 亮色标记影线回踩";
+    $("chart-hint").textContent = state.chart.state?.stale ? "行情缓存已过期 · 等待重新同步" : state.chart.state?.error ? "行情存在读取异常 · 当前为缓存" : "箭头：零轴启动 · 亮色回踩仅作参考";
     const svg = $("chart-container").querySelector("svg");
     const crosshair = svg.querySelector(".chart-crosshair");
     const move = (event) => {
@@ -390,7 +396,7 @@
       $("chart-hint").textContent = `${shortDate(bar.t)}  O ${price(bar.o)}  H ${price(bar.h)}  L ${price(bar.l)}  C ${price(bar.c)}  MD ${price(bar.md)}`;
     };
     svg.addEventListener("pointermove", move);
-    svg.addEventListener("pointerleave", () => { crosshair.setAttribute("visibility", "hidden"); $("chart-hint").textContent = state.chart.state?.stale ? "行情缓存已过期 · 等待重新同步" : state.chart.state?.error ? "行情存在读取异常 · 当前为缓存" : "移动光标查看 K 线 · 亮色标记影线回踩"; });
+    svg.addEventListener("pointerleave", () => { crosshair.setAttribute("visibility", "hidden"); $("chart-hint").textContent = state.chart.state?.stale ? "行情缓存已过期 · 等待重新同步" : state.chart.state?.error ? "行情存在读取异常 · 当前为缓存" : "箭头：零轴启动 · 亮色回踩仅作参考"; });
   }
   async function refresh() {
     if (state.syncing) return;
@@ -398,7 +404,7 @@
     $("refresh-button").disabled = true;
     $("refresh-button").classList.add("loading");
     try {
-      const results = await Promise.allSettled([api("/api/status"), api("/api/signals?limit=2000"), api("/api/markets")]);
+      const results = await Promise.allSettled([api("/api/status"), api("/api/signals?limit=2000&kind=zero_breakout"), api("/api/markets")]);
       const keys = ["status", "signals", "markets"];
       let anySuccess = false;
       results.forEach((result, index) => {
@@ -409,9 +415,9 @@
         anySuccess = true;
         if (key === "status") state.status = result.value;
         else {
-          state[key] = result.value.items.filter((item) => item && typeof item === "object" && item.symbol);
+          state[key] = result.value.items.filter((item) => item && typeof item === "object" && item.symbol && (key !== "signals" || item.kind === "zero_breakout"));
           state[`${key}Loaded`] = true;
-          if (key === "signals") state.signalTotal = numeric(result.value.total, state.signals.length);
+          if (key === "signals") state.signalTotal = zeroProtocol() ? numeric(result.value.total, state.signals.length) : state.signals.length;
           if (key === "signals") state.signals.sort((a, b) => numeric(b.bar_close_ms) - numeric(a.bar_close_ms) || numeric(b.detected_at_ms) - numeric(a.detected_at_ms));
         }
       });
@@ -455,7 +461,6 @@
     renderWatch();
   }));
   $("side-filter").addEventListener("change", (event) => { state.side = event.target.value; state.rowLimit = 200; renderSignals(); });
-  $("kind-filter").addEventListener("change", (event) => { state.kind = event.target.value; state.rowLimit = 200; renderSignals(); });
   $("refresh-button").addEventListener("click", refresh);
   $("load-more-signals").addEventListener("click", () => { state.rowLimit += 200; renderSignals(); });
   function activateRow(event, type) {
@@ -467,8 +472,8 @@
     else {
       const item = state.markets.find((candidate) => candidate.symbol === row.dataset.marketSymbol && candidate.timeframe === row.dataset.marketTimeframe);
       if (item) {
-        state.search = shortSymbol(item.symbol); state.timeframe = item.timeframe; state.side = "all"; state.kind = "all"; state.rowLimit = 200;
-        $("symbol-search").value = state.search; $("side-filter").value = "all"; $("kind-filter").value = "all";
+        state.search = shortSymbol(item.symbol); state.timeframe = item.timeframe; state.side = "all"; state.rowLimit = 200;
+        $("symbol-search").value = state.search; $("side-filter").value = "all";
         document.querySelectorAll("[data-timeframe]").forEach((button) => { const selected = button.dataset.timeframe === item.timeframe; button.classList.toggle("selected", selected); button.setAttribute("aria-pressed", String(selected)); });
         setView("signals"); chooseSignal(item, true);
       }

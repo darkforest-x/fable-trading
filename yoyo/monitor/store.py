@@ -13,6 +13,8 @@ import sqlite3
 import time
 from pathlib import Path
 
+from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL
+
 
 def now_ms():
     return int(time.time() * 1000)
@@ -80,12 +82,15 @@ class Store:
         with self.connect() as db:
             return [json.loads(r[0]) for r in db.execute("SELECT payload FROM markets ORDER BY symbol,timeframe")]
 
-    def list_events(self, limit=200, symbol=None, timeframe=None, kind=None, side=None):
+    def list_events(self, limit=200, symbol=None, timeframe=None, kind=None, side=None, protocol=None):
         filters, values = [], []
         for field, value in (("symbol", symbol), ("timeframe", timeframe), ("kind", kind), ("side", side)):
             if value:
                 filters.append("e." + field + "=?")
                 values.append(value)
+        if protocol:
+            filters.append("json_extract(e.payload,'$.protocol')=?")
+            values.append(protocol)
         where = " WHERE " + " AND ".join(filters) if filters else ""
         sql = "SELECT e.payload,o.status FROM events e LEFT JOIN outbox o ON e.id=o.event_id" + where
         sql += " ORDER BY e.close_ms DESC,e.symbol,e.kind LIMIT ?"
@@ -93,13 +98,40 @@ class Store:
         with self.connect() as db:
             return [dict(json.loads(r[0]), notification_status=r[1] or "history") for r in db.execute(sql, values)]
 
-    def event_count(self):
+    def event_count(self, kind=None, protocol=None):
+        filters, values = [], []
+        if kind:
+            filters.append("kind=?")
+            values.append(kind)
+        if protocol:
+            filters.append("json_extract(payload,'$.protocol')=?")
+            values.append(protocol)
+        where = " WHERE " + " AND ".join(filters) if filters else ""
         with self.connect() as db:
-            return db.execute("SELECT COUNT(*) FROM events").fetchone()[0]
+            return db.execute("SELECT COUNT(*) FROM events" + where, values).fetchone()[0]
 
     def count_since(self, since):
         with self.connect() as db:
-            return db.execute("SELECT COUNT(*) FROM events WHERE close_ms>=? AND kind IN ('entry','release')", (since,)).fetchone()[0]
+            return db.execute("SELECT COUNT(*) FROM events WHERE close_ms>=? AND kind=? AND json_extract(payload,'$.protocol')=?",
+                              (since, SIGNAL_KIND, SIGNAL_PROTOCOL)).fetchone()[0]
+
+    def activate_notification_policy(self, activated_ms):
+        """Once per protocol, set a forward-only cutover; preserve old receipts.
+
+        Called only while the service owns its process lock. Historical
+        reconstruction under a new identity must not resend pre-cutover bars.
+        Old pending messages are retired, never deleted or reclassified sent.
+        """
+        key = "notification_policy:" + SIGNAL_PROTOCOL
+        with self.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            db.execute("INSERT OR IGNORE INTO meta VALUES (?,?)",
+                       (key, encode({"activated_ms": activated_ms, "kind": SIGNAL_KIND})))
+            db.execute("""UPDATE outbox SET status='skipped',error='notification_policy_replaced',updated_ms=?
+                WHERE status='pending' AND event_id IN (
+                    SELECT id FROM events WHERE kind!=? OR COALESCE(json_extract(payload,'$.protocol'),'')!=?)""",
+                       (activated_ms, SIGNAL_KIND, SIGNAL_PROTOCOL))
+            return json.loads(db.execute("SELECT payload FROM meta WHERE key=?", (key,)).fetchone()[0])["activated_ms"]
 
     def set_meta(self, key, value):
         with self.connect() as db:
@@ -128,9 +160,11 @@ class Store:
             db.execute("UPDATE outbox SET status=?,error=?,message_id=?,due_ms=?,updated_ms=? WHERE event_id=?",
                        (status, error, message_id, due_ms, now_ms(), event_id))
 
-    def telegram_status(self):
+    def telegram_status(self, protocol=None):
+        where = " WHERE json_extract(e.payload,'$.protocol')=?" if protocol else ""
+        values = (protocol,) if protocol else ()
         with self.connect() as db:
-            counts = {r[0]: r[1] for r in db.execute("SELECT status,COUNT(*) FROM outbox GROUP BY status")}
-            sent = db.execute("SELECT MAX(updated_ms) FROM outbox WHERE status='sent'").fetchone()[0]
+            counts = {r[0]: r[1] for r in db.execute("SELECT o.status,COUNT(*) FROM outbox o JOIN events e ON e.id=o.event_id" + where + " GROUP BY o.status", values)}
+            sent = db.execute("SELECT MAX(o.updated_ms) FROM outbox o JOIN events e ON e.id=o.event_id" + where + (" AND" if where else " WHERE") + " o.status='sent'", values).fetchone()[0]
         return dict(counts, pending=counts.get("pending", 0), failed=counts.get("failed", 0),
                     unknown=counts.get("unknown", 0), last_success_ms=sent)

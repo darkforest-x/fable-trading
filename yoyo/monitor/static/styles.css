@@ -2008,3 +2008,19 @@ h2 {
   .watch-filter .watch-scope { height: 34px; }
   .watch-explanation { margin-top: 0; }
 }
+
+.signal-rule-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 35px;
+  padding: 0 11px;
+  color: #92b4a4;
+  background: #12231c;
+  border: 1px solid #294132;
+  border-radius: 7px;
+  font-size: 9px;
+  white-space: nowrap;
+}
+.signal-rule-pill i { width: 4px; height: 4px; border-radius: 50%; background: #83c5a2; }
+@media (max-width: 600px) { .signal-rule-pill { height: 32px; font-size: 8px; } }

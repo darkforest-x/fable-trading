@@ -9,7 +9,8 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 import requests
 
-from yoyo.monitor import FRESH_MS
+from yoyo.monitor import FRESH_MS, SIGNAL_PROTOCOL
+from yoyo.monitor.policy import is_zero_breakout
 from yoyo.monitor.store import now_ms
 from yoyo.notify import _load
 
@@ -23,7 +24,7 @@ def credentials():
 
 def message(event):
     side = "向上 ↑" if event["side"] == "long" else "向下 ↓"
-    labels = {"release": "蓄势释放", "entry": "系统启动", "exit": "趋势结束", "retest": "蓄势影线回踩"}
+    labels = {"zero_breakout": "零轴启动", "release": "近零释放观察", "entry": "原密集条件观察", "exit": "趋势结束观察", "retest": "蓄势影线回踩"}
     time = datetime.fromtimestamp(event["bar_close_ms"] / 1000, timezone(timedelta(hours=8))).strftime("%m-%d %H:%M")
     htf = "许可" if event.get("htf_allowed") is True else "未许可" if event.get("htf_allowed") is False else "数据不足"
     symbol = event["symbol"]
@@ -32,12 +33,9 @@ def message(event):
     lines = ["FABLE · " + labels.get(event["kind"], event["kind"]),
              f"{symbol} · {event['timeframe']} · {side}",
              f"信号收盘价 {event['price']:.10g}", f"确认时间 {time} 北京时间",
-             f"近零蓄势 {event.get('near_zero_bars', 0)} 根 · 精确零轴 {event.get('zero_bars', 0)} 根",
-             f"均线密集 {'满足' if event.get('dense') else '未满足'} · 高周期 {htf}"]
-    if event["kind"] == "release":
-        lines.append("近零蓄势释放观察；是否系统入场请看独立启动信号。")
-    elif event["kind"] == "exit":
-        lines.append("指标趋势结束；并非账户平仓回执。")
+             f"连续零轴 {event.get('zero_bars', 0)} 根后，主线首次{('向上' if event['side'] == 'long' else '向下')}离轴",
+             f"主线 0 → {event.get('md', 0):.10g}",
+             f"背景参考：均线密集 {'满足' if event.get('dense') else '未满足'} · 高周期 {htf}"]
     lines.extend([f"https://www.tradingview.com/chart/?symbol=OKX%3A{tv_symbol}&interval={interval}",
                   "Mac 监控 · 已收盘确认 · 点位为信号收盘价"])
     return "\n".join(lines)
@@ -53,10 +51,19 @@ class TelegramWorker:
         now = now if now is not None else now_ms()
         if not self.creds:
             return False
+        policy = self.store.get_meta("notification_policy:" + SIGNAL_PROTOCOL)
+        if not policy or type(policy.get("activated_ms")) is not int:
+            return False
         row = self.store.claim(now)
         if not row:
             return False
         event, eid = row["event"], row["event_id"]
+        if not is_zero_breakout(event):
+            self.store.finish(eid, "skipped", error="not_current_zero_axis_signal")
+            return True
+        if event["bar_close_ms"] <= policy["activated_ms"]:
+            self.store.finish(eid, "skipped", error="before_notification_policy_activation")
+            return True
         if not 0 <= now - event["bar_close_ms"] <= FRESH_MS:
             self.store.finish(eid, "skipped", error="signal_expired")
             return True
@@ -93,7 +100,9 @@ class TelegramWorker:
         return True
 
     def status(self):
-        result = self.store.telegram_status()
+        result = self.store.telegram_status(protocol=SIGNAL_PROTOCOL)
+        result["sent"] = result.get("sent", 0)
+        result["historical_sent"] = self.store.telegram_status().get("sent", 0) - result["sent"]
         result["last_signal_success_ms"] = result.get("last_success_ms")
         probe = self.store.get_meta("notification_probe", {})
         result["probe_status"] = probe.get("status", "not_tested")
@@ -116,7 +125,7 @@ def send_startup_probe(store):
     try:
         response = requests.post("https://api.telegram.org/bot" + token + "/sendMessage", json={
             "chat_id": chat, "disable_notification": True, "disable_web_page_preview": True,
-            "text": "FABLE · 监控服务启动测试\n\n这台 Mac 已启动 OKX 全部在交易永续合约监控：1H / 4H。\n蓄势释放、系统启动与趋势结束会推送确认收盘价；影线回踩在前端查看。\n\n本机页面：http://127.0.0.1:8766\n此地址在这台 Mac 打开。\n\n这是一条通知链路测试，不是交易信号。仅已收盘确认，历史回填不补发。"
+            "text": "FABLE · 监控服务启动测试\n\n这台 Mac 已启动 OKX 全部在交易永续合约监控：1H / 4H。\n只推送 IMACD 主线从0首次向上或向下离轴的收盘确认信号及点位。\n\n本机页面：http://127.0.0.1:8766\n此地址在这台 Mac 打开。\n\n这是一条通知链路测试，不是交易信号。历史回填不补发。"
         }, timeout=(6, 15))
         payload = response.json()
         result = payload.get("result") if isinstance(payload, dict) else None

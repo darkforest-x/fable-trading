@@ -34,17 +34,26 @@ pandas and NumPy. This delivery did not install or change dependencies.
 
 ## What the signals mean
 
-- **Release**: V2.2 visual focus event. Both IMACD lines stay near zero for at
-  least 12 closed bars, then the main line leaves the frozen ATR band. It is
-  independent of the original system entry.
-- **Entry**: V2.2 default dense-start event, with IMACD 34/9, minimum one exact
-  zero bar, preceding 12-bar six-MA width/cross formation. Default HTF permission
-  is annotated, not a mandatory filter.
-- **Exit**: the default indicator-side trend ends when md returns to zero or
-  reverses. This is not the gold-study F01 opposite-only exit or a broker fill.
-- **Retest**: a confirmed focus-zone wick touches SMA20 while the candle body
-  remains outside it. This observation appears on the page; it does not send TG
-  by default or change the entry rules.
+The owner corrected the monitoring definition on 2026-09-08: **a signal is
+only the first confirmed bar where IMACD md leaves exactly zero**.
+
+- **Zero-axis start (`zero_breakout`)**: previous md is exactly 0; current md is
+  positive (upward start) or negative (downward start), after calculation warmup.
+  Tiny nonzero values qualify immediately without waiting for an ATR band.
+- Continuing on the same side, returning to zero, crossing the signal line, or
+  directly switching signs with no preceding zero bar does not trigger it.
+- Six-MA density and the confirmed higher timeframe are background annotations,
+  not gates. The message includes the preceding exact-zero run and signal price.
+- Legacy dense entries, near-zero releases, trend ends and wick retests remain
+  chart observations, but are not primary signals and never send Telegram.
+
+The signal API, 24-hour count and Telegram queue use only the current
+`imacd-zero-axis-monitor-v2` protocol and `zero_breakout` kind. Previous event
+journals and sent-message receipts are retained, not reclassified as new starts.
+The first calibrated exchange-time activation is persisted. Reconstructed bars
+at or before that cutover are historical and cannot be sent after an upgrade;
+restarts preserve the same cutover. Old pending notifications are marked skipped.
+The delivery worker independently checks the event contract before sending.
 
 All displayed signal prices are confirmed candle **closing prices**, not fills.
 1H receives 4H context; 4H receives UTC daily context. Higher-timeframe values

@@ -5,16 +5,16 @@ import json
 import pytest
 import requests
 
-from yoyo.monitor import FRESH_MS
+from yoyo.monitor import FRESH_MS, SIGNAL_PROTOCOL, SIGNAL_KIND
 from yoyo.monitor.okx import MarketError, merge_rows, parse_rows
 from yoyo.monitor.store import Store
 from yoyo.monitor.telegram import TelegramWorker
 
 
 def event(now=3600000):
-    return dict(protocol="test-v1", symbol="BTC-USDT-SWAP", timeframe="1H", kind="entry",
+    return dict(protocol=SIGNAL_PROTOCOL, symbol="BTC-USDT-SWAP", timeframe="1H", kind=SIGNAL_KIND,
                 side="long", price=100.5, bar_close_ms=now, detected_at_ms=now + 1000,
-                near_zero_bars=12, dense=True, htf_allowed=True)
+                near_zero_bars=12, zero_bars=12, md=.01, previous_md=0., confirmed=True, dense=True, htf_allowed=True)
 
 
 def response(code=200, payload=None):
@@ -46,6 +46,7 @@ def test_success_receipt_and_no_resend(tmp_path):
     store = Store(tmp_path / "m.sqlite")
     store.upsert_event(event(), True)
     calls = []
+    store.activate_notification_policy(0)
     worker = TelegramWorker(store, ("secret", "private"), lambda *a, **k: (calls.append(k) or response()))
     assert worker.deliver_once(3602000)
     assert not worker.deliver_once(3603000)
@@ -59,6 +60,7 @@ def test_timeout_is_unknown_not_retried(tmp_path):
     store.upsert_event(event(), True)
     def timeout(*args, **kwargs):
         raise requests.Timeout("url containing secret must not leak")
+    store.activate_notification_policy(0)
     worker = TelegramWorker(store, ("secret", "private"), timeout)
     assert worker.deliver_once(3602000)
     assert not worker.deliver_once(3603000)
@@ -69,6 +71,7 @@ def test_timeout_is_unknown_not_retried(tmp_path):
 def test_429_obeys_retry_after(tmp_path):
     store = Store(tmp_path / "m.sqlite")
     store.upsert_event(event(), True)
+    store.activate_notification_policy(0)
     worker = TelegramWorker(store, ("x", "y"), lambda *a, **k: response(429, {"ok": False, "error_code": 429, "parameters": {"retry_after": 90}}))
     worker.deliver_once(3602000)
     assert not worker.deliver_once(3603000)
@@ -80,6 +83,7 @@ def test_stale_outbox_is_skipped_without_network(tmp_path):
     store.upsert_event(event(), True)
     def forbidden(*args, **kwargs):
         pytest.fail("expired event sent")
+    store.activate_notification_policy(0)
     worker = TelegramWorker(store, ("x", "y"), forbidden)
     worker.deliver_once(3600000 + FRESH_MS + 1)
     assert store.list_events()[0]["notification_status"] == "skipped"
@@ -132,6 +136,7 @@ def test_nonfinite_data_rejected():
 def test_malformed_receipt_never_strands_sending(tmp_path, payload):
     store = Store(tmp_path / "m.sqlite")
     store.upsert_event(event(), True)
+    store.activate_notification_policy(0)
     worker = TelegramWorker(store, ("x", "y"), lambda *a, **k: response(200, payload))
     worker.deliver_once(3602000)
     assert store.telegram_status()["unknown"] == 1
@@ -155,3 +160,77 @@ def test_persisted_market_does_not_look_current_after_clock_advances(tmp_path):
     monitor.client.clock = lambda: 7200000
     assert monitor.markets()[0]["stale"]
     assert monitor.status()["counts"].get("ready", 0) == 0
+
+
+@pytest.mark.parametrize('changes', [
+    {'kind': 'entry'}, {'kind': 'exit'}, {'kind': 'release'}, {'kind': 'retest'},
+    {'protocol': 'imacd-pine-v2.2-default-monitor-v1'}, {'previous_md': .001},
+    {'md': 0}, {'confirmed': False}, {'side': 'short'}, {'zero_bars': 0},
+])
+def test_noncanonical_queue_items_cannot_reach_telegram(tmp_path, changes):
+    store = Store(tmp_path / 'm.sqlite')
+    bad = dict(event(), **changes)
+    store.upsert_event(bad, True)
+    store.activate_notification_policy(0)
+    worker = TelegramWorker(store, ('fake', 'fake'), lambda *a, **k: pytest.fail('noncanonical signal sent'))
+    worker.deliver_once(3602000)
+    assert store.list_events()[0]['notification_status'] == 'skipped'
+
+
+def test_policy_cutover_is_persistent_and_preserves_old_receipts(tmp_path):
+    store = Store(tmp_path / 'm.sqlite')
+    old = dict(event(), protocol='old', kind='exit')
+    store.upsert_event(old, True)
+    newer = event(7200000)
+    store.upsert_event(newer, True)
+    cutoff = store.activate_notification_policy(4000000)
+    assert cutoff == 4000000
+    assert Store(store.path).activate_notification_policy(8000000) == cutoff
+    assert store.event_count() == 2
+    assert store.telegram_status()['skipped'] == 1
+    assert store.telegram_status()['pending'] == 1
+    store.activate_notification_policy(0)
+    worker = TelegramWorker(store, ('fake', 'fake'), lambda *a, **k: response())
+    assert worker.deliver_once(7202000)
+    assert store.telegram_status(protocol=SIGNAL_PROTOCOL)['sent'] == 1
+    store.activate_notification_policy(9000000)
+    assert store.telegram_status(protocol=SIGNAL_PROTOCOL)['sent'] == 1
+
+
+def test_pre_cutover_fresh_event_is_not_replayed_as_new_notification(tmp_path):
+    store = Store(tmp_path / 'm.sqlite')
+    store.activate_notification_policy(3601000)
+    store.upsert_event(event(), True)
+    store.activate_notification_policy(0)
+    worker = TelegramWorker(store, ('fake', 'fake'), lambda *a, **k: pytest.fail('history replayed'))
+    worker.deliver_once(3602000)
+    assert store.list_events()[0]['notification_status'] == 'skipped'
+
+
+def test_default_signal_api_and_counts_do_not_relabel_old_events(tmp_path, monkeypatch):
+    from yoyo.monitor.server import create_app
+    from yoyo.monitor import telegram
+    from fastapi import HTTPException
+    monkeypatch.setattr(telegram, 'credentials', lambda: None)
+    app = create_app(runtime=tmp_path, start_monitor=False)
+    store = app.state.monitor.store
+    store.upsert_event(event(), False)
+    store.upsert_event(dict(event(), protocol='old', kind='entry'), False)
+    store.upsert_event(dict(event(), kind='release'), False)
+    store.upsert_event(dict(event(), protocol='old'), False)
+    assert store.count_since(0) == 1
+    endpoint = next(r.endpoint for r in app.routes if getattr(r, 'path', '') == '/api/signals')
+    result = endpoint(limit=200)
+    assert result['total'] == 1 and len(result['items']) == 1
+    assert result['items'][0]['kind'] == SIGNAL_KIND and result['items'][0]['protocol'] == SIGNAL_PROTOCOL
+    with pytest.raises(HTTPException):
+        endpoint(limit=200, kind='exit')
+
+
+def test_delivery_waits_for_explicit_policy_activation(tmp_path):
+    store = Store(tmp_path / 'm.sqlite')
+    store.upsert_event(event(), True)
+    worker = TelegramWorker(store, ('fake', 'fake'), lambda *a, **k: pytest.fail('unactivated policy sent'))
+    assert not worker.deliver_once(3602000)
+    assert store.telegram_status()['pending'] == 1
+    assert store.telegram_status().get('sending', 0) == 0

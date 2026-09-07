@@ -1,4 +1,4 @@
-"""Causal, notification-only port of the owner's IMACD Pine V2.2 defaults.
+"""Causal IMACD zero-departure monitor with Pine V2.2 diagnostic overlays.
 
 Source: yoyo/evaluation/pine/imacd_dense_mtf_v2_2.pine. OHLC through the
 confirmed local bar supplies IMACD 34/9, SMA/EMA 20/60/120 and SMA-seeded
@@ -8,11 +8,13 @@ on the twelfth consecutive near-zero bar. Wick retests use current/prior
 SMA20 and current OHLC/prior close only. HTF uses the most recent expected
 closed higher bar at or before the local OPEN, with independent warmup.
 
-The default system is dense departure (minimum one exact-zero bar), exiting
-on md returning to zero or reversing. Focus release is an independent
-display/notification event, never a synonym for an entry. HTF permission is
-annotation only in this default mode. This module places no orders, trains
-no model, consumes no outcomes, and imports no production execution layer.
+The owner's corrected monitor signal is the first confirmed nonzero md bar
+immediately after exactly zero md: no density, ATR band, signal-line cross,
+HTF or trend gate. The earlier dense system remains an observation, exiting
+on md returning to zero or reversing; focus release and retest are separate
+observations. Only zero_breakout is the canonical notification event. HTF
+permission is annotation only. This module places no orders, trains no
+model, consumes no outcomes, and imports no production execution layer.
 
 Recurrences start at the supplied history's first bar. 340 bars are required
 before events; this reduces seed sensitivity but does not promise equality
@@ -36,7 +38,12 @@ HIGHER_TIMEFRAME = {"1H": "4H", "4H": "1Dutc"}
 PROTOCOL = {
     "version": PROTOCOL_VERSION,
     "source": "yoyo/evaluation/pine/imacd_dense_mtf_v2_2.pine",
-    "mode": "dense",
+    "mode": "zero_departure",
+    "notification_event": "zero_breakout",
+    "notification_rule": "confirmed and ready and previous_md == 0 and md != 0; first departure bar only",
+    "notification_filters": [],
+    "diagnostic_events": ["entry", "release", "exit", "retest"],
+    "diagnostic_system_mode": "dense",
     "length_ma": 34,
     "length_signal": 9,
     "min_zero_bars": 1,
@@ -180,9 +187,10 @@ def analyze(candles: list[dict], higher: list[dict], timeframe: str) -> dict:
 
     Return full event/chart history without freshness filtering or side
     effects. The caller owns quote confirmation, persistence, historical
-    replay labeling, deduplication and delivery freshness. Entry/release
-    zero_bars describes the run before the event; chart/state zero_bars is
-    the current run. Release near_zero_bars preserves its completed segment.
+    replay labeling, deduplication and delivery freshness. Zero-breakout,
+    entry and release zero_bars describe the run before the event;
+    chart/state zero_bars is the current run. Zero-breakout/release
+    near_zero_bars preserve the preceding focus run, before this update.
     """
     if timeframe not in HIGHER_TIMEFRAME:
         raise ValueError("timeframe must be 1H or 4H")
@@ -194,7 +202,7 @@ def analyze(candles: list[dict], higher: list[dict], timeframe: str) -> dict:
     empty = {"phase": "loading", "near_zero_bars": 0, "zero_bars": 0, "dense": False,
              "htf_side": "unknown", "htf_allowed": None, "price": None,
              "bar_open_ms": None, "bar_close_ms": None, "bars": 0, "ready": False,
-             "focus": False, "trend_side": "flat", "timeframe": timeframe,
+             "focus": False, "trend_side": "flat", "zero_breakout_side": None, "timeframe": timeframe,
              "higher_timeframe": higher_timeframe, "protocol_version": PROTOCOL_VERSION}
     if not len(b["t"]):
         return {"events": [], "state": empty, "chart": [], "protocol": dict(PROTOCOL)}
@@ -213,6 +221,9 @@ def analyze(candles: list[dict], higher: list[dict], timeframe: str) -> dict:
         ready, dense = bool(f["ready"][i]), bool(f["dense"][i])
         htf = _higher_at(t, hb, hf, higher_duration)
         prior_zero = zero_run
+        # The canonical monitor event is independent of all overlay states.
+        previous_md = f["md"][i - 1] if i else np.nan
+        zero_breakout_side = (1 if md > 0 else -1 if md < 0 else 0) if ready and previous_md == 0 else 0
         entry_side = exit_side = release_side = retest_side = 0
         prior_focus = focus_run
         release_band = release_high = release_low = None
@@ -269,8 +280,8 @@ def analyze(candles: list[dict], higher: list[dict], timeframe: str) -> dict:
         def event(kind: str, side: int, reason: str) -> dict:
             return {"bar_open_ms": t, "bar_close_ms": close_ms, "kind": kind,
                     "side": _side(side), "price": float(b["c"][i]),
-                    "zero_bars": int(prior_zero if kind in ("entry", "release") else zero_run),
-                    "near_zero_bars": int(prior_focus if kind == "release" else focus_run),
+                    "zero_bars": int(prior_zero if kind in ("zero_breakout", "entry", "release") else zero_run),
+                    "near_zero_bars": int(prior_focus if kind in ("zero_breakout", "release") else focus_run),
                     "dense": dense, "dense_recent": bool(f["dense_recent"][i]),
                     "htf_allowed": _permission(htf, side), **htf,
                     "timeframe": timeframe, "higher_timeframe": higher_timeframe,
@@ -279,8 +290,14 @@ def analyze(candles: list[dict], higher: list[dict], timeframe: str) -> dict:
                     "prior_crosses": _number(f["prior_crosses"][i]),
                     "reason": reason, "protocol_version": PROTOCOL_VERSION,
                     "confirmed": True, "price_basis": "signal_candle_close",
+                    "is_monitor_signal": kind == "zero_breakout",
                     "is_system_entry": kind == "entry"}
 
+        if zero_breakout_side:
+            breakout = event("zero_breakout", zero_breakout_side,
+                             "IMACD 主线由精确零轴首次转正或转负，本根收盘确认；均线密集、近零区和高周期仅作背景。")
+            breakout["previous_md"] = _number(previous_md)
+            events.append(breakout)
         if exit_side:
             events.append(event("exit", exit_side, "IMACD 主线回到零轴或反向，原系统趋势结束。"))
         if entry_side:
@@ -307,6 +324,7 @@ def analyze(candles: list[dict], higher: list[dict], timeframe: str) -> dict:
                    dense=dense, dense_recent=bool(f["dense_recent"][i]),
                    retest_side=_side(retest_side) if retest_side else None,
                    release_side=_side(release_side) if release_side else None,
+                   zero_breakout_side=_side(zero_breakout_side) if zero_breakout_side else None,
                    entry_side=_side(entry_side) if entry_side else None,
                    exit_side=_side(exit_side) if exit_side else None,
                    trend_side=_side(trend),
@@ -328,6 +346,7 @@ def analyze(candles: list[dict], higher: list[dict], timeframe: str) -> dict:
                  "prior_width_atr": _number(f["prior_width_atr"][i]),
                  "prior_crosses": _number(f["prior_crosses"][i]),
                  "retest_side": row["retest_side"], "release_side": row["release_side"],
+                 "zero_breakout_side": row["zero_breakout_side"],
                  "timeframe": timeframe, "higher_timeframe": higher_timeframe,
                  "protocol_version": PROTOCOL_VERSION}
     return {"events": events, "state": state, "chart": chart, "protocol": dict(PROTOCOL)}

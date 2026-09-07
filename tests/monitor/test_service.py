@@ -197,3 +197,45 @@ def test_accepted_clock_offset_uses_request_midpoint(monkeypatch):
     monkeypatch.setattr(client, "get", lambda *args, **kwargs: [{"ts": "1000600"}])
     assert client.synchronize() == 500
     assert client.offset_ms == 500
+
+
+def test_scan_notifies_only_exact_zero_departure_without_density_filter(tmp_path):
+    from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL
+    store = Store(tmp_path / 'monitor.sqlite3')
+    client = FakeMarket()
+    client.history['1H'][-1].update(o=120., h=121., l=119., c=120.)
+    monitor = Monitor(store, client=client)
+    monitor.notification_since = NOW - 120_000
+    assert monitor.scan_symbol(INSTRUMENT) == []
+    events = store.list_events()
+    canonical = [e for e in events if e['kind'] == SIGNAL_KIND]
+    assert len(canonical) == 1
+    signal = canonical[0]
+    assert signal['previous_md'] == 0 and signal['md'] > 0
+    assert signal['dense'] is False and signal['zero_bars'] >= 1
+    assert signal['notification_status'] == 'pending'
+    assert all(e['notification_status'] == 'history' for e in events if e['kind'] != SIGNAL_KIND)
+    assert store.telegram_status(protocol=SIGNAL_PROTOCOL)['pending'] == 1
+    # A repeated scan does not create a second identity or notification.
+    assert monitor.scan_symbol(INSTRUMENT) == []
+    assert store.telegram_status(protocol=SIGNAL_PROTOCOL)['pending'] == 1
+
+
+def test_policy_activation_uses_exchange_clock_before_delivery(tmp_path, monkeypatch):
+    from yoyo.monitor import SIGNAL_PROTOCOL
+    client = FakeMarket()
+    monkeypatch.setattr(service, 'now_ms', lambda: NOW - 120_000)
+    client.synchronize = lambda: None
+    client.instruments = lambda: []
+    store = Store(tmp_path / 'monitor.sqlite3')
+    monitor = Monitor(store, client=client)
+    assert not monitor.notification_ready.is_set()
+    monitor.scan()
+    assert monitor.notification_ready.is_set()
+    assert monitor.notification_since == NOW
+    assert store.get_meta('notification_policy:' + SIGNAL_PROTOCOL)['activated_ms'] == NOW
+    # The latest already-closed bar is older than activation, even if the Mac
+    # started timestamp was still before that bar's close.
+    client.history['1H'][-1].update(o=120., h=121., l=119., c=120.)
+    monitor.scan_symbol(INSTRUMENT)
+    assert store.telegram_status()['pending'] == 0
