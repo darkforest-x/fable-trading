@@ -1,0 +1,457 @@
+//@version=5
+// ═══════════════════════════════════════════════════════════════════════════════
+// 策略名称: ALLIN-V7-Opt3-保本损-高杠杆
+// 版本: 7.2 (Thursday Boost)
+// 描述: 基于 V3.3 经典参数 (Slow=60, ATR=4.0) 的增强版，集成了“大赚冷静期”风控机制。
+// ═══════════════════════════════════════════════════════════════════════════════
+strategy("release-20260201-回放样式", overlay=true, initial_capital=500, default_qty_type=strategy.percent_of_equity, default_qty_value=100, calc_on_every_tick=true, alert_message="{{strategy.order.alert_message}}")
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════════
+// 1. 策略参数 (Parameters - Hardcoded)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// --- 风控参数 (Risk Management) ---
+max_sl_percent  = 3.0    // 最大硬止损 (%)
+trade_on_sunday = false  // 是否允许周日交易
+
+// --- 冷静期逻辑 (Skip Logic) ---
+// 核心逻辑：盈利后跳过部分交易以避免回撤
+use_skip_logic      = true  // 启用冷静期
+skip_threshold      = 2.0   // 普通跳过触发：单笔盈利 > 2%
+skip_count          = 1     // 普通跳过次数
+big_skip_threshold  = 20.0  // 大赚跳过触发：单笔盈利 > 20%
+big_skip_count      = 7     // 大赚跳过次数
+
+// --- 预测参考 (Forecast) ---
+avg_hold_hours = 44  // 预计平均持仓时间 (小时)
+
+// --- 战神加成 (Time-based Boosts) ---
+morning_boost_mult  = 1.5  // 凌晨3点加成倍数 (固定)
+morning_hour        = 3    // 凌晨战神时间 (小时)
+thursday_boost_mult = 2.0  // 周四加成倍数
+
+// --- 仓位管理 (Money Management) ---
+// 模式: "Fixed Ratio (Aggressive)" 或 "Risk Based (Conservative)"
+pos_sizing_type = "Fixed Ratio (Aggressive)" 
+risk_per_trade  = 2.0    // Risk Based 模式下的每笔风险 (%)
+
+// --- 利润保卫 (Profit Protection) ---
+use_be          = true   // 启用保本损 (Break Even)
+be_trigger_pct  = 1.5    // 保本触发阈值 (%)
+be_offset_pct   = 0.1    // 保本偏移量 (锁定利润 %)
+
+use_ts          = false  // 启用移动止盈 (Trailing Stop)
+ts_trigger_pct  = 2.5    // 移动止盈激活 (%)
+ts_trail_pct    = 1.0    // 回撤止盈幅度 (%)
+
+// --- 时间过滤 (Time Filter HK/UTC+8) ---
+use_time_filter = true   // 启用入场时间限制
+start_hour      = 21     // 开始入场小时
+end_hour        = 23     // 结束入场小时
+
+// --- 波动率护栏 (Volatility Guardrails) ---
+// 过滤条件：0.1% <= ATR% <= 10.0%
+filter_vol  = true   // 启用波动率过滤
+min_atr_pct = 0.1    // 最小波动率阈值 (%)
+max_atr_pct = 10.0   // 最大波动率阈值 (%)
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 2. 核心指标计算 (Core Calculations - V3.3 Standard)
+// ═══════════════════════════════════════════════════════════════════════════════
+// 此部分参数已固化，无需外部调整
+int fast_len = 10 
+int slow_len = 60  // 趋势线周期
+int regime_len = 100 // 大趋势判断周期
+int atr_len = 14
+float atr_mult = 4.0 // ATR止损倍数
+
+// 计算基础指标
+src = hl2 // 使用 (High+Low)/2 作为价格源，比 Close 更平滑
+fast_ma = ta.sma(src, fast_len)
+slow_ma = ta.sma(src, slow_len)
+regime_ma = ta.ema(close, regime_len)
+atr = ta.atr(atr_len)
+
+// 计算振荡器 (Oscillator) - 用于精准择时
+ma_basis = ta.sma(src, 40)
+diff = src - ma_basis
+perc_r = ta.percentile_linear_interpolation(diff, 200, 99)
+ratio = perc_r != 0 ? diff / perc_r : 0
+change_ratio = ratio - ratio[10]
+osc = ta.hma(change_ratio, 10) // Hull MA 平滑振荡值
+
+// 信号阈值
+cross_up = ta.crossover(fast_ma, slow_ma)
+cross_down = ta.crossunder(fast_ma, slow_ma)
+osc_rising = osc > 0.2 and osc > osc[1]
+osc_falling = osc < -0.2 and osc < osc[1]
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 3. 逻辑控制 (Logic Control)
+// ═══════════════════════════════════════════════════════════════════════════════
+// --- 3.1 状态管理 ---
+// 获取当前时间 (UTC+8)
+current_hour = hour
+current_minute = minute
+is_sunday = dayofweek == dayofweek.sunday
+
+// 判断是否允许入场
+is_no_entry_time = use_time_filter and (current_hour >= start_hour and current_hour < end_hour)
+is_excluded_day = (not trade_on_sunday) and is_sunday
+
+// 波动率检查
+float current_atr_pct = (atr / close) * 100
+is_vol_safe = not filter_vol or (current_atr_pct >= min_atr_pct and current_atr_pct <= max_atr_pct)
+
+// --- 3.2 冷却期逻辑 (Cool-down) ---
+var int trades_to_skip = 0 // 剩余需要跳过的交易数
+is_cooling_down = trades_to_skip > 0
+
+// 检查上一笔交易盈亏，更新跳过计数
+if strategy.closedtrades > strategy.closedtrades[1] and use_skip_logic
+    // 获取最近一笔交易数据
+    int idx = strategy.closedtrades - 1
+    float p_profit = strategy.closedtrades.profit(idx)
+    float p_cost = math.abs(strategy.closedtrades.entry_price(idx) * strategy.closedtrades.size(idx))
+    float last_pnl = (p_cost > 0) ? (p_profit / p_cost) * 100 : 0.0 // 转换为百分比
+    
+    // 逻辑分支
+    if last_pnl > big_skip_threshold
+        trades_to_skip := big_skip_count // 大赚 -> 大休
+    else if last_pnl > skip_threshold
+        trades_to_skip := skip_count     // 小赚 -> 小休
+
+// 入场总开关
+entry_allowed = not is_no_entry_time and not is_excluded_day and not is_cooling_down and is_vol_safe
+
+// --- 3.3 信号生成 ---
+// 宽松过滤 (Relaxed Filter): 只要价格在趋势线的一侧即可
+filter_long = (close > slow_ma) and (close > regime_ma)
+filter_short = (close < slow_ma) and (close < regime_ma)
+
+// 原始信号
+raw_long = cross_up and filter_long and osc_rising
+raw_short = cross_down and filter_short and osc_falling
+
+// 如处于冷却期，消耗一次计数并忽略信号
+if (raw_long or raw_short) and is_cooling_down
+    trades_to_skip := trades_to_skip - 1
+
+// 最终信号
+long_signal = raw_long and entry_allowed
+short_signal = raw_short and entry_allowed
+
+// --- 4.0 警报消息模板 (Alert Templates) ---
+// 🚀 信号触发
+// 策略: 趋势策略
+// 品种: {{ticker}}
+// 动作: {{strategy.order.action}}
+// 价格: {{close}}
+// 备注: {{strategy.order.comment}}
+string alert_txt_entry_long  = "🚀 信号触发\n策略: 趋势策略\n品种: {{ticker}}\n动作: 开多 (OPEN LONG) 🟢\n价格: {{close}}\n备注: 趋势共振入场"
+string alert_txt_entry_short = "🚀 信号触发\n策略: 趋势策略\n品种: {{ticker}}\n动作: 开空 (OPEN SHORT) 🔴\n价格: {{close}}\n备注: 趋势共振入场"
+string alert_txt_exit_long   = "🚀 信号触发\n策略: 趋势策略\n品种: {{ticker}}\n动作: 平多 (CLOSE LONG) ⚠️\n价格: {{close}}\n备注: {{strategy.order.comment}}"
+string alert_txt_exit_short  = "🚀 信号触发\n策略: 趋势策略\n品种: {{ticker}}\n动作: 平空 (CLOSE SHORT) ⚠️\n价格: {{close}}\n备注: {{strategy.order.comment}}"
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 4. 执行交易 (Execution)
+// ═══════════════════════════════════════════════════════════════════════════════
+// 止损距离计算
+float dynamic_sl_dist = atr * atr_mult
+float max_sl_dist_p = close * (max_sl_percent / 100.0)
+float final_sl_dist = math.min(dynamic_sl_dist, max_sl_dist_p)
+var float sl_price = na // 用于存储固定的开仓时止损价
+
+// --- 仓位管理 (Position Sizing) ---
+// 特殊加成逻辑
+int h_hk = hour(time, "UTC+8")
+int dow_hk = dayofweek(time, "UTC+8")
+bool is_morning_warrior = (h_hk == morning_hour) // 凌晨3点战神加成
+bool is_thursday = (dow_hk == dayofweek.thursday) // 周四加成
+
+// 基础仓位提升 - 追求极限
+float pos_qty = 400 // 基础仓位 400% (4x)
+if is_morning_warrior
+    pos_qty := pos_qty * morning_boost_mult
+if is_thursday
+    pos_qty := pos_qty * thursday_boost_mult
+    
+float target_qty = math.min(pos_qty, 1300) // 封顶 1300% (13x)
+float final_qty = strategy.equity * (target_qty / 100) / close
+
+// --- 开仓 (隐藏默认标签) ---
+// --- 开仓 (隐藏默认标签) ---
+if long_signal
+    strategy.entry("Long", strategy.long, qty=final_qty, comment="Entry", alert_message=alert_txt_entry_long)
+    sl_price := close - final_sl_dist // 初始化硬止损
+    // strategy.exit 移至下方统一管理
+
+if short_signal
+    strategy.entry("Short", strategy.short, qty=final_qty, comment="Entry", alert_message=alert_txt_entry_short)
+    sl_price := close + final_sl_dist // 初始化硬止损
+    // strategy.exit 移至下方统一管理
+
+// --- 动态止损/止盈逻辑 (Dynamic SL/TP) ---
+if strategy.position_size != 0
+    float entry_price = strategy.position_avg_price
+    
+    // 1. 多头逻辑
+    if strategy.position_size > 0
+        // A. 保本损 (Break Even)
+        if use_be
+            // 如果最高价超过触发价
+            if high > entry_price * (1 + be_trigger_pct / 100.0)
+                float be_limit = entry_price * (1 + be_offset_pct / 100.0)
+                if sl_price < be_limit
+                    sl_price := be_limit
+        
+        // B. 移动止盈 (Trailing Stop)
+        if use_ts
+            // 如果价格达到激活线
+            if high > entry_price * (1 + ts_trigger_pct / 100.0)
+                // 目标止损价 = 当前最高价 - 回撤幅
+                // 注意：这里简单用 high 计算。更严谨可以用 var 追踪最高价，但 high 已足够近似。
+                float new_ts = high * (1 - ts_trail_pct / 100.0)
+                if new_ts > sl_price
+                    sl_price := new_ts
+
+        // 执行退出
+        strategy.exit("Exit Long", "Long", stop=sl_price, comment="Stop/TP", alert_message=alert_txt_exit_long)
+        
+    // 2. 空头逻辑
+    if strategy.position_size < 0
+        // A. 保本损 (Break Even)
+        if use_be
+            // 如果最低价低于触发价 (下跌是赚)
+            if low < entry_price * (1 - be_trigger_pct / 100.0)
+                float be_limit = entry_price * (1 - be_offset_pct / 100.0)
+                if sl_price > be_limit
+                    sl_price := be_limit // 空头止损要下移
+        
+        // B. 移动止盈 (Trailing Stop)
+        if use_ts
+            if low < entry_price * (1 - ts_trigger_pct / 100.0)
+                float new_ts = low * (1 + ts_trail_pct / 100.0)
+                if new_ts < sl_price
+                    sl_price := new_ts // 空头止损向下移动
+
+        // 执行退出
+        strategy.exit("Exit Short", "Short", stop=sl_price, comment="Stop/TP", alert_message=alert_txt_exit_short)
+
+// --- 反转平仓 ---
+if strategy.position_size > 0 and short_signal
+    strategy.close("Long", comment="Close")
+
+if strategy.position_size < 0 and long_signal
+    strategy.close("Short", comment="Close")
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 5. 可视化 (Visuals - Enhanced for Replay)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// --- Palette (Neon / Dark Mode) ---
+c_long      = color.rgb(6, 248, 10, 1)  // Neon Green
+c_short     = #FF2E51  // Neon Red
+c_win       = color.rgb(6, 245, 6, 5)  // 盈利颜色
+c_lose      = #FF2E51  // 亏损颜色
+c_text      = #E1ECEF  // Off White
+c_bg        = #101419  // Dark Navy/Black for Dashboard
+c_grid      = #1E242B  // Lighter Dark
+c_gray      = #787B86
+
+// --- 0. 交易结果追踪 (Trade Result Tracking) ---
+// 检测平仓事件并记录盈亏
+var float last_trade_pnl = na
+var float last_trade_pnl_pct = na
+var bool show_pnl_label = false
+var int pnl_label_bar = na
+
+// 检测新的已平仓交易
+if strategy.closedtrades > strategy.closedtrades[1]
+    int idx = strategy.closedtrades - 1
+    last_trade_pnl := strategy.closedtrades.profit(idx)
+    float entry_val = math.abs(strategy.closedtrades.entry_price(idx) * strategy.closedtrades.size(idx))
+    last_trade_pnl_pct := entry_val > 0 ? (last_trade_pnl / entry_val) * 100 : 0
+    show_pnl_label := true
+    pnl_label_bar := bar_index
+
+// 3根K线后隐藏标签（避免标签堆积）
+if bar_index > pnl_label_bar + 3
+    show_pnl_label := false
+
+// --- 1. 持仓背景高亮 (Position Background) ---
+// 多头持仓期间：浅绿色背景 | 空头持仓期间：浅红色背景
+color pos_bg = strategy.position_size > 0 ? color.new(c_long, 92) : 
+               strategy.position_size < 0 ? color.new(c_short, 92) : na
+// bgcolor(pos_bg, title="持仓背景") // 已移除全屏背景，改为 Entry-SL 区域填充
+
+// --- 2. 趋势系统 (Trend System) ---
+// 均线 - 仅高亮，平时低调
+plot(fast_ma, color=color.new(c_long, 70), title="Fast MA", display=display.none)
+plot(slow_ma, color=color.new(c_short, 70), title="Slow MA", display=display.none)
+
+// 云带 - 使用渐变透明度，视觉柔和
+bool trend_bull = fast_ma > slow_ma
+color cloud_col = trend_bull ? c_long : c_short
+fill(plot(fast_ma, display=display.none), plot(slow_ma, display=display.none), color=color.new(cloud_col, 85), title="Trend Cloud")
+
+// 核心过滤线
+plot(regime_ma, color=color.new(c_gray, 50), title="Regime Filter", linewidth=1, style=plot.style_line)
+
+// --- 3. 交易辅助 (Trade Helper) ---
+// 入场价格线（醒目蓝色虚线）
+p_entry = plot(strategy.position_size != 0 ? strategy.position_avg_price : na, color=color.new(#2196F3, 0), title="Entry Price", style=plot.style_linebr, linewidth=2)
+// 止损价格线（红色虚线）
+p_sl = plot(strategy.position_size != 0 ? sl_price : na, color=color.new(c_short, 0), title="Stop Loss", style=plot.style_linebr, linewidth=1)
+
+// --- 3.1 风险/收益区域填充 (Risk & Profit Range Fill) ---
+// 计算填充边界：
+// 1. 亏损时：填充 SL 到 Entry (覆盖整个风险区)
+// 2. 盈利时：填充 SL 到 Close (覆盖风险区 + 盈利区)
+// 逻辑：取 Entry 和 Close 中"离 SL 最远"的那个作为边界 (即 Short 取 min, Long 取 max)
+// 这样确保了 "红框" (Entry 到 Close) 的缝隙被填满，同时保留了正向背景
+float fill_boundary = na
+if strategy.position_size > 0
+    fill_boundary := math.max(strategy.position_avg_price, close)
+else if strategy.position_size < 0
+    fill_boundary := math.min(strategy.position_avg_price, close)
+
+p_boundary = plot(fill_boundary, title="Fill Boundary", display=display.none, editable=false)
+
+// 填充 止损价 到 边界
+fill(p_sl, p_boundary, color=pos_bg, title="Position Range Fill")
+
+// --- 4. 入场信号标记 (Entry Signals) ---
+// 开多：细长箭头 + 文字
+plotshape(long_signal, title="Long Entry", style=shape.arrowup, location=location.belowbar, color=c_long, text="多", textcolor=c_long, size=size.small)
+// 开空：细长箭头 + 文字  
+plotshape(short_signal, title="Short Entry", style=shape.arrowdown, location=location.abovebar, color=c_short, text="空", textcolor=c_short, size=size.small)
+
+// --- 4.1 被跳过的信号标记 (Skipped Signals) ---
+// 冷静期跳过的信号：橙色"跳"箭头
+bool skipped_long = raw_long and is_cooling_down
+bool skipped_short = raw_short and is_cooling_down
+plotshape(skipped_long, title="Skipped Long", style=shape.arrowup, location=location.belowbar, color=color.orange, text="跳", textcolor=color.orange, size=size.tiny)
+plotshape(skipped_short, title="Skipped Short", style=shape.arrowdown, location=location.abovebar, color=color.orange, text="跳", textcolor=color.orange, size=size.tiny)
+
+// --- 5. 平仓盈亏标签 (Exit P&L Labels) ---
+// 在平仓K线上显示盈亏金额和百分比
+bool just_closed = strategy.closedtrades > strategy.closedtrades[1]
+bool is_win = last_trade_pnl > 0
+
+// 盈利平仓标记
+plotshape(just_closed and is_win, title="Win Exit", style=shape.circle, location=location.abovebar, color=c_win, size=size.tiny)
+// 亏损平仓标记  
+plotshape(just_closed and not is_win, title="Lose Exit", style=shape.circle, location=location.abovebar, color=c_lose, size=size.tiny)
+
+// 动态标签显示盈亏详情（无背景，纯文字）
+if just_closed
+    string pnl_text = (last_trade_pnl >= 0 ? "+" : "") + str.tostring(last_trade_pnl, "#.##") + "\n" + (last_trade_pnl_pct >= 0 ? "+" : "") + str.tostring(last_trade_pnl_pct, "#.#") + "%"
+    color lbl_color = last_trade_pnl >= 0 ? c_win : c_lose
+    label.new(bar_index, high * 1.002, pnl_text, style=label.style_none, color=color.new(color.white, 100), textcolor=lbl_color, size=size.normal)
+
+// --- 6. 实时浮盈浮亏显示 (Floating P&L) ---
+// 在持仓时，在当前K线旁边显示浮盈浮亏
+var label floating_pnl_label = na
+label.delete(floating_pnl_label)
+
+if strategy.position_size != 0 and barstate.islast
+    float f_pnl = (close - strategy.position_avg_price) * strategy.position_size
+    float f_pnl_pct = (close - strategy.position_avg_price) / strategy.position_avg_price * 100 * (strategy.position_size > 0 ? 1 : -1)
+    string f_text = "浮盈: " + (f_pnl >= 0 ? "+" : "") + str.tostring(f_pnl, "#.##") + " (" + (f_pnl_pct >= 0 ? "+" : "") + str.tostring(f_pnl_pct, "#.#") + "%)"
+    color f_color = f_pnl >= 0 ? c_win : c_lose
+    floating_pnl_label := label.new(bar_index + 3, close, f_text, style=label.style_none, color=color.new(color.white, 100), textcolor=f_color, size=size.normal)
+
+// --- 4. HUD 仪表盘 (Heads-Up Display) ---
+// 放置在右下角，背景半透明
+var table hud = table.new(position.bottom_right, 2, 4, bgcolor=color.new(c_bg, 30), border_width=0, frame_color=c_grid, frame_width=0)
+
+if barstate.islast
+    // 动态计算数据
+    float u_pnl_pct = 0.0
+    float u_pnl_pts = 0.0
+    if strategy.position_size != 0
+        u_pnl_pct := (close - strategy.position_avg_price) / strategy.position_avg_price * 100 * (strategy.position_size > 0 ? 1 : -1)
+        u_pnl_pts := (close - strategy.position_avg_price) * (strategy.position_size > 0 ? 1 : -1)
+
+    // 状态构建
+    string pnl_str = "---"
+    string price_str = str.tostring(close, format.mintick)
+    string sl_str = "---"
+    
+    if strategy.position_size != 0
+        // PnL: "+1.5% (+20.5)"
+        pnl_str := str.tostring(u_pnl_pct, "#.2") + "% (" + str.tostring(u_pnl_pts, format.mintick) + ")"
+        // Price: "2000 → 2020"
+        price_str := str.tostring(strategy.position_avg_price, format.mintick) + " → " + str.tostring(close, format.mintick)
+        sl_str := str.tostring(sl_price, format.mintick)
+    
+    // 渲染 (Compact Mode)
+    // Row 0: Status (Top Left) | PnL (Top Right)
+    string st_txt = "空仓"
+    color st_col = c_gray
+    if strategy.position_size > 0
+        st_txt := "多单持仓"
+        st_col := c_long
+    else if strategy.position_size < 0
+        st_txt := "空单持仓"
+        st_col := c_short
+    else if is_cooling_down
+        st_txt := "冷静期"
+        st_col := color.orange
+        
+    table.cell(hud, 0, 0, st_txt, text_color=st_col, text_size=size.small, text_halign=text.align_left, text_font_family=font.family_default)
+    table.cell(hud, 1, 0, strategy.position_size != 0 ? pnl_str : "", text_color=u_pnl_pct >= 0 ? c_long : c_short, text_size=size.small, text_halign=text.align_right, text_font_family=font.family_monospace)
+
+    // Row 1: Prices
+    table.cell(hud, 0, 1, "价格   ", text_color=c_gray, text_size=size.small, text_halign=text.align_left, text_font_family=font.family_default)
+    table.cell(hud, 1, 1, price_str, text_color=c_text, text_size=size.small, text_halign=text.align_right, text_font_family=font.family_monospace)
+    
+    // Row 2: SL (Only if active)
+    if strategy.position_size != 0
+        table.cell(hud, 0, 2, "止损   ", text_color=c_gray, text_size=size.small, text_halign=text.align_left, text_font_family=font.family_default)
+        table.cell(hud, 1, 2, sl_str, text_color=c_short, text_size=size.small, text_halign=text.align_right, text_font_family=font.family_monospace)
+    else 
+        // Clear if no pos
+        table.cell(hud, 0, 2, "", bgcolor=na)
+        table.cell(hud, 1, 2, "", bgcolor=na)
+
+    // Row 3: Info/Warning OR Est Exit
+    string info_txt = ""
+    color info_col = c_gray
+    string info_label = ""
+    
+    if strategy.position_size != 0
+        // 持仓时显示预计离场时间
+        int target_time = strategy.opentrades.entry_time(strategy.opentrades - 1) + (avg_hold_hours * 60 * 60 * 1000)
+        info_txt := str.format("{0,date,MM-dd HH:mm}", target_time)
+        info_col := color.teal
+        info_label := "离场   "
+    else
+        // 空仓时显示过滤状态
+        if not is_vol_safe
+            info_txt := "波动过低"
+            info_col := c_short
+            info_label := "提示   "
+        else if is_cooling_down
+            info_txt := "跳过: " + str.tostring(trades_to_skip)
+            info_col := color.orange
+            info_label := "提示   "
+            
+    table.cell(hud, 0, 3, info_txt != "" ? info_label : "", text_color=c_gray, text_size=size.small, text_halign=text.align_left, text_font_family=font.family_default)
+    table.cell(hud, 1, 3, info_txt, text_color=info_col, text_size=size.small, text_halign=text.align_right, text_font_family=font.family_monospace)
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 6. BOTTOM STATUS STRIP (底部致态条)
+// ═══════════════════════════════════════════════════════════════════════════════
+// 极简设计：底部一条细线。
+// 空仓：不显示 (na)
+// 持仓：高亮的霓虹色 (透明度 0)
+
+color strip_col = strategy.position_size != 0 ? (strategy.position_size > 0 ? c_long : c_short) : na
+
+
+// 使用 shape.square + size.tiny 打造类似边框的细条效果
+plotshape(true, title="Status Strip", style=shape.square, location=location.bottom, color=strip_col, size=size.tiny)

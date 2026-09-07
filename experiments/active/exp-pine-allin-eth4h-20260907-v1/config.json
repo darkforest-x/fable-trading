@@ -1,0 +1,73 @@
+{
+  "venue": "Binance USD-M ETHUSDT perpetual",
+  "timeframe": "4h",
+  "warmup_start": "2020-01-01",
+  "trade_start": "2021-01-01",
+  "end_exclusive": "2026-05-01",
+  "holdout_start": "2026-05-04",
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "parameters": {
+    "fast_len": 10,
+    "slow_len": 60,
+    "regime_len": 100,
+    "atr_len": 14,
+    "atr_mult": 4.0,
+    "max_sl_percent": 3.0,
+    "osc_basis_len": 40,
+    "osc_percentile_len": 200,
+    "osc_percentile": 99.0,
+    "osc_change_lag": 10,
+    "osc_hma_len": 10,
+    "osc_threshold": 0.2,
+    "min_atr_percent": 0.1,
+    "max_atr_percent": 10.0,
+    "break_even_trigger_percent": 1.5,
+    "break_even_offset_percent": 0.1,
+    "trailing_trigger_percent": 2.5,
+    "trailing_distance_percent": 1.0
+  },
+  "policies": [
+    {
+      "name": "original_zero_cost",
+      "fee": 0.0,
+      "immediate_stop": false,
+      "unit_leverage": false,
+      "cross_only": false
+    },
+    {
+      "name": "original_cost20",
+      "fee": 0.001,
+      "immediate_stop": false,
+      "unit_leverage": false,
+      "cross_only": false
+    },
+    {
+      "name": "entry_stop_cost20",
+      "fee": 0.001,
+      "immediate_stop": true,
+      "unit_leverage": false,
+      "cross_only": false
+    },
+    {
+      "name": "one_x_cost20",
+      "fee": 0.001,
+      "immediate_stop": false,
+      "unit_leverage": true,
+      "cross_only": false
+    },
+    {
+      "name": "sma_only_cost20",
+      "fee": 0.001,
+      "immediate_stop": false,
+      "unit_leverage": false,
+      "cross_only": true
+    }
+  ],
+  "permutations": 10000,
+  "control_exclusion_bars": 12,
+  "control_bin_window": 252,
+  "control_count": 3,
+  "seed": 20260907
+}
