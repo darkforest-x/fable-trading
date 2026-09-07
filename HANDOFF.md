@@ -18,6 +18,28 @@
 未启动新训练；training_eligible/production_eligible=false，holdout未读。旧val是反复使用的
 开发集，挖掘队列不能估总体召回；exposure_review.json明确独立性尚未建立，未冻结连续窗roster。
 
+## ⚡ 当前真相（2026-09-07 — V36真实量门失败，已定位反色延续早退）
+
+目标active，盈利目标未达。4e57139冻结后回测BinanceUSD-M BTCUSDT2023–2024；
+完整1h源码纯形态63K2/44K1，非当前15m完整Pine接受逻辑。真实量同向保留23笔，
+平均净−21.53bp（成本20bp），四半年均未给出正收益证据；36三对照覆盖57.14%。
+主配对改善+3.195bp＝毛−.508bp＋省费3.704bp，p=.1768、CI跨零，拒绝，不调正值门。
+退出时钟d8920c3核实：47/63入场前5m已反色；38首5m颜色退出只是反色延续，
+不是新翻转。这是原colour状态规则的行为，不是程序实现错误；未证明延后就盈利。
+
+E36 experiments/active/exp-btcusdtp-owner-k1k2-genuine-flow-20260907-v36/；原始交易
+data/owner_k1k2_genuine_flow_v36，summary/pre_outcome/clock/SQL/QA/REVIEW完整。
+交付analysis/html/p1_btcusdtp_owner_k1k2_genuine_flow_v36_20260907.html；最终canonical
+artifact_reviewed2.json由3f1ddd7构建，早期两artifact保留；structural_only，无手机UI实测。
+相关297tests通过；扩展852过4败（2旧迁移hash、2holdout名单，含本轮意外暴露记录）。
+本轮两次意外旧holdout文本展示，详见QA；未用于任何经济计算，不能声称全调查零暴露。
+不改守门授权名单使其变绿，未改成本/障碍/TV/ACTIVE/训练/实盘。
+
+下一步已冻结但未跑：NEXT_EXPERIMENT.md，同63病例/108原控，共振关闭，仅colour→
+transition_colour，先审实际arming语义、保留K2硬止损/72h/.002费用。比较全部母群、
+38早退组与其他25组、原三对照及各自单仓占用；不只挑赢家。63样本/匹配不足，
+即使改善仍只能机制研究，不能部署。禁止调用会读2025+的旧宽加载器；不重跑覆盖V36。
+
 ## ⚡ 当前真相（2026-09-07 — V35因果对齐完成，K2请求/对照供给不足）
 
 目标模式active继续；372ed6a先冻结后只读V4纯身份/时钟/终态投影和V34真实quote flow。

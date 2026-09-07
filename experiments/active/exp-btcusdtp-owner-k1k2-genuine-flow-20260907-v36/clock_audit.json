@@ -1,0 +1,74 @@
+{
+  "source_commit": "d8920c3038533e11a41942ca305b22140373e769",
+  "generated_at": "2026-09-07T09:22:33.874967+00:00",
+  "summary_sha256": "bde65bb3cbae369e7e71f7d1d31b08eebaee25072b7408f62913422d9ddb7b27",
+  "audit_source_sha256": "8b42a5e07e8fd2fdf9dc4728da1ffe17cb44563aa917cc2672448bce404800ba",
+  "csv_sha256": "123d77f97df0305b92d0d0ce5fb85bb05737070b2ebda28f8ff8232309ee8a4c",
+  "rows": 63,
+  "results": [
+    {
+      "arm": "baseline",
+      "events": 63,
+      "flags": {
+        "entry_already_opposite": {
+          "true": 47,
+          "unknown": 0
+        },
+        "first_postentry_opposite": {
+          "true": 46,
+          "unknown": 0
+        },
+        "exited_first5m": {
+          "true": 46,
+          "unknown": 0
+        },
+        "color_exit_without_new_flip": {
+          "true": 38,
+          "unknown": 0
+        },
+        "first_postentry_new_flip": {
+          "true": 5,
+          "unknown": 0
+        },
+        "exact_known_clocks": {
+          "true": 63,
+          "unknown": 0
+        }
+      }
+    },
+    {
+      "arm": "flow_positive",
+      "events": 23,
+      "flags": {
+        "entry_already_opposite": {
+          "true": 20,
+          "unknown": 0
+        },
+        "first_postentry_opposite": {
+          "true": 21,
+          "unknown": 0
+        },
+        "exited_first5m": {
+          "true": 21,
+          "unknown": 0
+        },
+        "color_exit_without_new_flip": {
+          "true": 17,
+          "unknown": 0
+        },
+        "first_postentry_new_flip": {
+          "true": 3,
+          "unknown": 0
+        },
+        "exact_known_clocks": {
+          "true": 23,
+          "unknown": 0
+        }
+      }
+    }
+  ],
+  "semantic": "post-result descriptive mechanism labels; not new entry features or a changed exit policy",
+  "source_start": "2023-01-01T00:00:00Z",
+  "source_end": "2025-01-01T00:00:00Z",
+  "holdout_evaluated": false
+}

@@ -16,21 +16,37 @@ schema_version: 1
 experiments:
   - experiment_id: exp-btcusdtp-owner-k1k2-genuine-flow-20260907-v36
     source_repo: darkforest-x/fable-trading
-    source_commit: "c7d17b7"
-    status: active
+    source_commit: "4e57139"
+    status: rejected
     question: Does genuine post-K1 directional quote flow improve complete owner-source K1K2 events under one fixed native5 exit?
     single_variable: Strictly-positive genuine flow gate versus no gate on the same Binance2023-2024 source-defined1h cohort.
-    result: Frozen before economics; first prefix audit stopped before outputs on derived-column join collision, corrected with synthetic regression.
+    result: >-
+      Failed:63cases/44K1;gate23mean net-21.5293bp;36matchedgroups57.14%coverage;
+      incremental excess3.1952bp,p=.1768,CI[-2.3610,9.5744],gross increment-.5085bp.
+      Clock audit38first5m colour exits continued existing opposite state without a new flip.
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    canonical_report: analysis/html/p1_btcusdtp_owner_k1k2_genuine_flow_v36_20260907.html
+    artifacts:
+      - btcusdtp-owner-flow-v36-config
+      - btcusdtp-owner-flow-v36-summary
+      - btcusdtp-owner-flow-v36-pre-outcome
+      - btcusdtp-owner-flow-v36-report-data
+      - btcusdtp-owner-flow-v36-clock-summary
+      - btcusdtp-owner-flow-v36-clock-rows
+      - btcusdtp-owner-flow-v36-artifact
+      - btcusdtp-owner-flow-v36-html
+      - btcusdtp-owner-flow-v36-qa
     reuse_allowed: false
     notes: >-
       No holdout economic evaluation. During source discovery a helper accidentally displayed
-      one old owner-anchor row2026-09-03; not authorized for this configuration and not used.
-      Conservatively mark inspection consumed, never call the investigation pristine.
+      one old owner-anchor row2026-09-03; later shared-registry diff displayed another task's
+      old2026-09-01 ARB result. Two incidental inspections, not authorized for this configuration,
+      neither used. Conservatively mark consumed; never call investigation pristine or authorized.
       Pure morphology plus existing V4 research exit, not full deployed Pine acceptance policy.
+      Actual economic/clock input2023-2024;297focused tests pass;expanded852pass4fail incl
+      V36 incidental-consumer gate. HTML structural_only,no browser UI. Next exit-only plan not run.
       Plan experiments/active/exp-btcusdtp-owner-k1k2-genuine-flow-20260907-v36/PROJECT_PLAN.md.
   - experiment_id: exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35
     source_repo: darkforest-x/fable-trading

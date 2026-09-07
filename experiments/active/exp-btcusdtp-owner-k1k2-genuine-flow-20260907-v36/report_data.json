@@ -1,0 +1,328 @@
+{
+  "data": {
+    "folds": [
+      {
+        "fold": "2023H1",
+        "arm": "不过滤",
+        "trades": 23,
+        "net_bp": -23.93448315193583,
+        "gross_bp": -3.9344831519358294,
+        "winners": 1.0
+      },
+      {
+        "fold": "2023H1",
+        "arm": "真实量同向",
+        "trades": 10,
+        "net_bp": -17.25039210453803,
+        "gross_bp": 2.7496078954619696,
+        "winners": 1.0
+      },
+      {
+        "fold": "2023H2",
+        "arm": "不过滤",
+        "trades": 19,
+        "net_bp": -18.476976475683646,
+        "gross_bp": 1.5230235243163541,
+        "winners": 2.0
+      },
+      {
+        "fold": "2023H2",
+        "arm": "真实量同向",
+        "trades": 9,
+        "net_bp": -21.393914675431844,
+        "gross_bp": -1.3939146754318423,
+        "winners": 1.0
+      },
+      {
+        "fold": "2024H1",
+        "arm": "不过滤",
+        "trades": 15,
+        "net_bp": -30.634994171554226,
+        "gross_bp": -10.634994171554224,
+        "winners": 2.0
+      },
+      {
+        "fold": "2024H1",
+        "arm": "真实量同向",
+        "trades": 4,
+        "net_bp": -32.531319709262746,
+        "gross_bp": -12.531319709262744,
+        "winners": 0.0
+      },
+      {
+        "fold": "2024H2",
+        "arm": "不过滤",
+        "trades": 6,
+        "net_bp": -9.820296110347348,
+        "gross_bp": 10.179703889652652,
+        "winners": 1.0
+      },
+      {
+        "fold": "2024H2",
+        "arm": "真实量同向",
+        "trades": 0,
+        "net_bp": null,
+        "gross_bp": null,
+        "winners": null
+      }
+    ],
+    "failures": [
+      {
+        "flow_pass": 0,
+        "failure_class": "price_loss",
+        "outcome": "colour_exit",
+        "trades": 20,
+        "mean_net_bp": -30.42197094988573,
+        "mean_hold_minutes": 17.25,
+        "gave_back_peak": 2
+      },
+      {
+        "flow_pass": 0,
+        "failure_class": "fee_erased_gross_gain",
+        "outcome": "colour_exit",
+        "trades": 12,
+        "mean_net_bp": -14.037218933425615,
+        "mean_hold_minutes": 40.416666666666664,
+        "gave_back_peak": 4
+      },
+      {
+        "flow_pass": 0,
+        "failure_class": "net_winner",
+        "outcome": "colour_exit",
+        "trades": 4,
+        "mean_net_bp": 17.81122891229116,
+        "mean_hold_minutes": 116.25,
+        "gave_back_peak": 0
+      },
+      {
+        "flow_pass": 0,
+        "failure_class": "price_loss",
+        "outcome": "hard_stop",
+        "trades": 4,
+        "mean_net_bp": -54.79669806423391,
+        "mean_hold_minutes": 21.25,
+        "gave_back_peak": 1
+      },
+      {
+        "flow_pass": 1,
+        "failure_class": "price_loss",
+        "outcome": "colour_exit",
+        "trades": 11,
+        "mean_net_bp": -31.05901391252258,
+        "mean_hold_minutes": 9.090909090909092,
+        "gave_back_peak": 3
+      },
+      {
+        "flow_pass": 1,
+        "failure_class": "fee_erased_gross_gain",
+        "outcome": "colour_exit",
+        "trades": 9,
+        "mean_net_bp": -13.517614393259512,
+        "mean_hold_minutes": 5.0,
+        "gave_back_peak": 0
+      },
+      {
+        "flow_pass": 1,
+        "failure_class": "net_winner",
+        "outcome": "colour_exit",
+        "trades": 2,
+        "mean_net_bp": 6.492716398390237,
+        "mean_hold_minutes": 5.0,
+        "gave_back_peak": 0
+      },
+      {
+        "flow_pass": 1,
+        "failure_class": "price_loss",
+        "outcome": "hard_stop",
+        "trades": 1,
+        "mean_net_bp": -44.85218218101437,
+        "mean_hold_minutes": 5.0,
+        "gave_back_peak": 0
+      }
+    ],
+    "geometry": [
+      {
+        "direction": -1,
+        "gap_group": "2-4",
+        "flow_pass": 0,
+        "trades": 9,
+        "winners": 0,
+        "mean_gross_bp": -11.150702869506812,
+        "mean_net_bp": -31.150702869506812,
+        "k1_body": 0.7953533649215395,
+        "touch_atr": 0.20028403872339054
+      },
+      {
+        "direction": -1,
+        "gap_group": "2-4",
+        "flow_pass": 1,
+        "trades": 9,
+        "winners": 1,
+        "mean_gross_bp": -2.6712428475634327,
+        "mean_net_bp": -22.671242847563438,
+        "k1_body": 0.7616494578270943,
+        "touch_atr": 0.203426267066154
+      },
+      {
+        "direction": -1,
+        "gap_group": "5-8",
+        "flow_pass": 0,
+        "trades": 5,
+        "winners": 0,
+        "mean_gross_bp": 0.6370195625693409,
+        "mean_net_bp": -19.36298043743066,
+        "k1_body": 0.7615003353977868,
+        "touch_atr": 0.13111119055658377
+      },
+      {
+        "direction": -1,
+        "gap_group": "5-8",
+        "flow_pass": 1,
+        "trades": 9,
+        "winners": 1,
+        "mean_gross_bp": 0.8026863750586354,
+        "mean_net_bp": -19.19731362494137,
+        "k1_body": 0.7545113871323349,
+        "touch_atr": 0.264486687203598
+      },
+      {
+        "direction": 1,
+        "gap_group": "2-4",
+        "flow_pass": 0,
+        "trades": 15,
+        "winners": 2,
+        "mean_gross_bp": -2.641695881005971,
+        "mean_net_bp": -22.641695881005973,
+        "k1_body": 0.7783304868399301,
+        "touch_atr": 0.3699733415347281
+      },
+      {
+        "direction": 1,
+        "gap_group": "2-4",
+        "flow_pass": 1,
+        "trades": 1,
+        "winners": 0,
+        "mean_gross_bp": -3.5526727706969297,
+        "mean_net_bp": -23.55267277069693,
+        "k1_body": 0.68867547018808,
+        "touch_atr": 0.6985468715789619
+      },
+      {
+        "direction": 1,
+        "gap_group": "5-8",
+        "flow_pass": 0,
+        "trades": 11,
+        "winners": 2,
+        "mean_gross_bp": 1.088067583746476,
+        "mean_net_bp": -18.911932416253524,
+        "k1_body": 0.8050448203701887,
+        "touch_atr": 0.35026935011208343
+      },
+      {
+        "direction": 1,
+        "gap_group": "5-8",
+        "flow_pass": 1,
+        "trades": 4,
+        "winners": 0,
+        "mean_gross_bp": -3.70118773451944,
+        "mean_net_bp": -23.70118773451944,
+        "k1_body": 0.7895506214423185,
+        "touch_atr": 0.24219212146011207
+      }
+    ],
+    "pairs": [
+      {
+        "fold": "2023H1",
+        "matched_cases": 16,
+        "complete_pairs": 16,
+        "baseline_excess_bp": -12.965449318135974,
+        "gated_excess_bp": -6.961571464096028,
+        "increment_bp": 6.0038778540399464,
+        "gross_increment_bp": 3.503877854039949,
+        "saved_cost_increment_bp": 2.499999999999998
+      },
+      {
+        "fold": "2023H2",
+        "matched_cases": 12,
+        "complete_pairs": 12,
+        "baseline_excess_bp": 3.2194536559410682,
+        "gated_excess_bp": 0.5290508635730218,
+        "increment_bp": -2.6904027923680465,
+        "gross_increment_bp": -2.690402792368047,
+        "saved_cost_increment_bp": 4.969259957225228e-16
+      },
+      {
+        "fold": "2024H1",
+        "matched_cases": 6,
+        "complete_pairs": 6,
+        "baseline_excess_bp": -8.69162359780197,
+        "gated_excess_bp": 10.63419277530748,
+        "increment_bp": 19.325816373109447,
+        "gross_increment_bp": 5.992483039776113,
+        "saved_cost_increment_bp": 13.333333333333332
+      },
+      {
+        "fold": "2024H2",
+        "matched_cases": 2,
+        "complete_pairs": 2,
+        "baseline_excess_bp": 47.47425922051962,
+        "gated_excess_bp": 15.122106795756498,
+        "increment_bp": -32.35215242476312,
+        "gross_increment_bp": -39.01881909142979,
+        "saved_cost_increment_bp": 6.66666666666667
+      }
+    ],
+    "distribution": [
+      {
+        "flow_pass": 0,
+        "net_bp_bucket": "-20 to 0",
+        "trades": 12
+      },
+      {
+        "flow_pass": 0,
+        "net_bp_bucket": "-50 to -20",
+        "trades": 21
+      },
+      {
+        "flow_pass": 0,
+        "net_bp_bucket": "0 to 20",
+        "trades": 2
+      },
+      {
+        "flow_pass": 0,
+        "net_bp_bucket": "20 to 50",
+        "trades": 2
+      },
+      {
+        "flow_pass": 0,
+        "net_bp_bucket": "<-50",
+        "trades": 3
+      },
+      {
+        "flow_pass": 1,
+        "net_bp_bucket": "-20 to 0",
+        "trades": 9
+      },
+      {
+        "flow_pass": 1,
+        "net_bp_bucket": "-50 to -20",
+        "trades": 12
+      },
+      {
+        "flow_pass": 1,
+        "net_bp_bucket": "0 to 20",
+        "trades": 2
+      }
+    ]
+  },
+  "queries": {
+    "folds": "WITH halves(fold) AS (VALUES('2023H1'),('2023H2'),('2024H1'),('2024H2')),\n        arms(arm,gated) AS (VALUES('不过滤',0),('真实量同向',1))\n        SELECT h.fold,a.arm,COUNT(t.event_id) AS trades,AVG(t.net_return)*10000 AS net_bp,\n        AVG(t.gross_return)*10000 AS gross_bp,SUM(t.net_return>0) AS winners\n        FROM halves h CROSS JOIN arms a LEFT JOIN main.case_trades t\n        ON t.fold=h.fold AND t.closed=1 AND (a.gated=0 OR t.flow_pass=1)\n        GROUP BY h.fold,a.arm ORDER BY h.fold,a.arm",
+    "failures": "SELECT flow_pass,failure_class,outcome,COUNT(*) AS trades,\n        AVG(net_return)*10000 AS mean_net_bp,AVG(hold_minutes) AS mean_hold_minutes,\n        SUM(gave_back_fee_covering_peak) AS gave_back_peak\n        FROM main.case_trades GROUP BY flow_pass,failure_class,outcome ORDER BY flow_pass,trades DESC",
+    "geometry": "SELECT direction,CASE WHEN gap_bars<=4 THEN '2-4' ELSE '5-8' END AS gap_group,\n        flow_pass,COUNT(*) AS trades,SUM(net_return>0) AS winners,\n        AVG(gross_return)*10000 AS mean_gross_bp,AVG(net_return)*10000 AS mean_net_bp,\n        AVG(body_ratio) AS k1_body,AVG(k2_touch_depth) AS touch_atr\n        FROM main.case_trades WHERE closed=1 GROUP BY direction,gap_group,flow_pass\n        ORDER BY direction,gap_group,flow_pass",
+    "pairs": "SELECT fold,COUNT(*) AS matched_cases,SUM(complete_pair) AS complete_pairs,\n        AVG(baseline_excess_net)*10000 AS baseline_excess_bp,\n        AVG(gated_excess_net)*10000 AS gated_excess_bp,\n        AVG(incremental_excess_net)*10000 AS increment_bp,\n        AVG(incremental_excess_gross)*10000 AS gross_increment_bp,\n        AVG(incremental_excess_saved_cost)*10000 AS saved_cost_increment_bp\n        FROM main.paired_contrasts GROUP BY fold ORDER BY fold",
+    "distribution": "SELECT flow_pass,CASE WHEN net_return<-.005 THEN '<-50'\n        WHEN net_return<-.002 THEN '-50 to -20' WHEN net_return<0 THEN '-20 to 0'\n        WHEN net_return<.002 THEN '0 to 20' WHEN net_return<.005 THEN '20 to 50' ELSE '>=50' END AS net_bp_bucket,\n        COUNT(*) AS trades FROM main.case_trades WHERE closed=1 GROUP BY flow_pass,net_bp_bucket"
+  },
+  "source_commit": "f098154bb6f5681af51fbe4db08da229aa8a1f8c",
+  "summary_sha256": "bde65bb3cbae369e7e71f7d1d31b08eebaee25072b7408f62913422d9ddb7b27",
+  "generated_at": "2026-09-07T09:15:41.049640+00:00"
+}
