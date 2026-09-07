@@ -74,7 +74,29 @@ def test_parse_checksum_and_month_zip() -> None:
     assert list(frame.columns) == ["ts", "open", "high", "low", "close", "volume", "open_time"]
     assert len(frame) == 2
     assert audit["epoch_unit"] == "milliseconds"
-    assert audit["non_15m_gaps"] == 0
+    assert audit["non_bar_gaps"] == 0
+
+
+def test_parse_month_zip_counts_a_missing_native_bar() -> None:
+    """The generic gap field must count gaps using the requested duration."""
+    for interval, duration_ms in (("5m", 300_000), ("15m", 900_000)):
+        start = 1_775_001_600_000
+        rows = [
+            f"{start + offset * duration_ms},100,102,99,101,12,"
+            f"{start + (offset + 1) * duration_ms - 1},0,1,0,0,0"
+            for offset in (0, 2)
+        ]
+        payload = _zip(rows, name=f"BTCUSDT-{interval}-2026-04.csv")
+        frame, audit = parse_month_zip(
+            payload,
+            symbol="BTCUSDT",
+            month="2026-04",
+            expected_sha256=hashlib.sha256(payload).hexdigest(),
+            interval=interval,
+        )
+        assert len(frame) == 2
+        assert audit["non_bar_gaps"] == 1
+        assert frame["open_time"].diff().iloc[1] == pd.Timedelta(milliseconds=2 * duration_ms)
 
 
 def test_parse_month_zip_accepts_header_and_microseconds() -> None:
