@@ -1,0 +1,72 @@
+{
+  "report_sha256": "e565eea75a88512f0e4dfe059be33b7b25f558b4d39e9429faabb66865199abc",
+  "sections": 17,
+  "actual_query": "WITH binned AS (SELECT *, CASE\n WHEN difference IS NULL THEN 99 WHEN difference < -0.01 THEN 0\n WHEN difference < -0.005 THEN 1 WHEN difference < -0.002 THEN 2\n WHEN difference < 0 THEN 3 WHEN difference = 0 THEN 4\n WHEN difference < 0.002 THEN 5 WHEN difference < 0.005 THEN 6\n WHEN difference < 0.01 THEN 7 ELSE 8 END AS bin_order FROM case_delta)\n SELECT bin_order, COUNT(*) AS opportunities, AVG(difference)*10000 AS mean_delta_bp,\n AVG(before)*10000 AS mean_before_bp, AVG(after)*10000 AS mean_after_bp\n FROM binned GROUP BY bin_order ORDER BY bin_order",
+  "rows": [
+    {
+      "bin_order": 1,
+      "opportunities": 3,
+      "mean_delta_bp": -58.11584648239333,
+      "mean_before_bp": -112.25035702079064,
+      "mean_after_bp": -170.36620350318432,
+      "range_bp": "−100 to < −50"
+    },
+    {
+      "bin_order": 2,
+      "opportunities": 20,
+      "mean_delta_bp": -30.44119986943815,
+      "mean_before_bp": -50.0020522805497,
+      "mean_after_bp": -80.4432521499883,
+      "range_bp": "−50 to < −20"
+    },
+    {
+      "bin_order": 3,
+      "opportunities": 77,
+      "mean_delta_bp": -7.2847256637722895,
+      "mean_before_bp": -45.49303436263289,
+      "mean_after_bp": -52.777760026405694,
+      "range_bp": "−20 to < 0"
+    },
+    {
+      "bin_order": 4,
+      "opportunities": 113,
+      "mean_delta_bp": 0.0,
+      "mean_before_bp": 24.659344017663166,
+      "mean_after_bp": 24.659344017663166,
+      "range_bp": "0"
+    },
+    {
+      "bin_order": 5,
+      "opportunities": 20,
+      "mean_delta_bp": 7.141988500418714,
+      "mean_before_bp": -60.985222260925255,
+      "mean_after_bp": -53.84323376050623,
+      "range_bp": "> 0 to < 20"
+    },
+    {
+      "bin_order": 6,
+      "opportunities": 10,
+      "mean_delta_bp": 35.185922490423096,
+      "mean_before_bp": -66.7134583862967,
+      "mean_after_bp": -31.527535895873502,
+      "range_bp": "20 to < 50"
+    },
+    {
+      "bin_order": 7,
+      "opportunities": 4,
+      "mean_delta_bp": 69.155653016397,
+      "mean_before_bp": -17.981026595259,
+      "mean_after_bp": 51.174626421137496,
+      "range_bp": "50 to < 100"
+    },
+    {
+      "bin_order": 8,
+      "opportunities": 4,
+      "mean_delta_bp": 170.04390331134525,
+      "mean_before_bp": -49.25180594932676,
+      "mean_after_bp": 120.79209736201825,
+      "range_bp": "≥ 100"
+    }
+  ],
+  "all_sections_preserved": true
+}

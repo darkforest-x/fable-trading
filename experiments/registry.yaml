@@ -16,8 +16,8 @@ schema_version: 1
 experiments:
   - experiment_id: exp-btcusdtp-1h-failed-reduce-preholdout-20260906-v19
     source_repo: darkforest-x/fable-trading
-    source_commit: "a0c2433"
-    status: active
+    source_commit: "a776b5b"
+    status: rejected
     question: >-
       Does reducing50percent instead of closing100percent at the existing
       confirmed losing fast exit preserve profitable slow-trend remainders?
@@ -25,13 +25,22 @@ experiments:
       Confirmed failure execution fraction1.0to0.5;original251K1/462controls,
       two5minute confirmation,15minute slow exit,K1stop,72h and20bp unchanged.
     result: >-
-      Prepared before ChartPrime audit,now resumed without V20--V22 entry
-      filters. Preregistered before raw replay;713fast1426slow contexts freeze
-      before V18 anchors. Two case serial masks,154triples97unmatched retained.
-    canonical_report: experiments/active/exp-btcusdtp-1h-failed-reduce-preholdout-20260906-v19/PROJECT_PLAN.md
+      Actual251case net-16.7690to-16.3411bp,PF.5918to.6272;all4halvesnegative.
+      Riskhalf138:38improved100hurt,16loss-to-win;113pathsunchanged.
+      D+.4279bp,p.3921;I154+2.9824bp,p.1307;97unmatched not dropped.
+      Independent weighted accounting and56outputs33sources pass,not raw
+      replay or independent inference. Pure exit microtuning stop triggered.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_failed_reduce_v19_20260906.html
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
+    artifacts:
+      - btcusdtp-hourly-failed-reduce-v19-results
+      - btcusdtp-hourly-failed-reduce-v19-report
+      - btcusdtp-hourly-failed-reduce-v19-html
+      - btcusdtp-hourly-failed-reduce-v19-artifact
+      - btcusdtp-hourly-failed-reduce-v19-verification
+      - btcusdtp-hourly-failed-reduce-v19-statistical-diagnostics
     reuse_allowed: false
     notes: >-
       Risk reduction is not TP;unknown remainder keeps whole trade unknown.

@@ -1,0 +1,28 @@
+{
+  "reference": "experiments/active/exp-btcusdtp-1h-dual-partial-preholdout-20260906-v16/results/candidate",
+  "inputs": {
+    "case_trades.csv.gz": "9a43891b81bf50c281db3a26d1e53188f6b7876c746b75509ae78a570826bc47",
+    "control_trades.csv.gz": "6fc2975228852fe8afbbd62148cec64354f0cfd025c29d7cc49be0ef7e842c91"
+  },
+  "columns": [
+    "event_id",
+    "exit_time",
+    "exit_price",
+    "outcome",
+    "closed",
+    "hold_minutes",
+    "max_favourable_r",
+    "max_adverse_r"
+  ],
+  "checks": {
+    "case": {
+      "rows": 251,
+      "columns": 8
+    },
+    "control": {
+      "rows": 462,
+      "columns": 8
+    }
+  },
+  "pnl_borrowed": false
+}

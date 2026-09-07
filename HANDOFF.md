@@ -2,7 +2,35 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## ⚡ 当前真相（2026-09-07 — V22跨币变化门已拒绝，goal active但盈利目标未达成）
+## ⚡ 当前真相（2026-09-07 — V19风险减半已拒绝，停止该队列纯退出微调）
+
+a776b5b先提交V19原单变量合同/engine/runner/verifier再真实回放。251原K1、
+462controls/154triples/97unmatched不变；713fast1426slow上下文先冻结再读V18锚。
+确认失败全平100%改同点减半50%，余仓走原slow15/K1stop/72h，20bp不变。
+不是TP、不是V16/V18整笔收益平均；V16仅8项最终结构锚，实算两腿。
+
+V19均净−16.3411bp（基准−16.7690），PF.6272（.5918），71赢180亏，四半年全负。
+138riskhalf：38改善100恶化，16亏转赢；113不变。D251+.4279bp,p.3921,
+CI[−2.5680,3.3036]；I154+2.9824bp,p.1307,CI[−1.8871,7.6416]，97未知保留。
+138中99slow退出38改善61恶化；39hardstop全部恶化。26风险半仓取代V16晚盈利半仓
+是未来事后标签，严禁作门。2case单仓各250且mask相同，均净−16.5407仍负。
+
+独立账本verifier实际passed：33sources56outputs，原身份/两腿/费用/154triples/
+2case单仓/48月会计/V16结构。非rawMA、独立pCI或live证明。另只读审计逐笔/极值/
+26替代组；联合1064tests过2跳，系统统计工具27tests过。诊断全尾保留。
+报告analysis/html/p1_btcusdtp_hourly_failed_reduce_v19_20260906.html已生成，18块1图，
+官方validation/package过，structural_only；浏览器/手机/来源弹窗未验。
+1e7019b只修reportbuilder收据路径，验证收据在E根不在frozen results内。
+
+V19原停止条件已触发：不再3/4根确认或更多半仓比例。下一步单独注册V23背景支持
+审计，详见V19/NEXT_EXPERIMENT.md。旧V10六键完整三配对容量最大154已证明，不是
+种子/solver故障。新对照测整体K1相对month/UTC6h/causalvol背景，颜色/斜率只描述；
+其余有效性/穿线排除/风险合法/72h禁入/3control/no reuse不改，先支持>=226才准
+另注册固定时钟标签。不是修复旧合同，不得追认V19的90%匹配门通过。
+V23目前实现中未读新收益；无2025+价格/holdout/TV/训练/ACTIVE/实盘/依赖改动。
+goal active，盈利未达成；保留所有并行ARB等工作树改动。
+
+### V22跨币变化门背景（已完成并拒绝，以下为当时记录）
 
 f5a0e50先提交V22公式/config/plan，再唯一读取SHA锁定的V21保存小时trace，
 没有新raw5/2025+价格。四币rank50相邻完整小时变化，仅direction*raw整数差>0
