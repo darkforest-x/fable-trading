@@ -10,16 +10,19 @@ from __future__ import annotations
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
+import hashlib
+from pathlib import Path
+import subprocess
 import threading
 import time
 
-from yoyo.monitor import FRESH_MS, TIMEFRAMES, VERSION
+from yoyo.monitor import FRESH_MS, TIMEFRAMES, VERSION, SIGNAL_PROTOCOL
 from yoyo.monitor.okx import OKX
 from yoyo.monitor.store import now_ms
 from yoyo.monitor.telegram import TelegramWorker
 
 LOG = logging.getLogger("fable.monitor")
-PROTOCOL = "imacd-pine-v2.2-default-monitor-v1"
+PROTOCOL = SIGNAL_PROTOCOL
 
 
 class Monitor:
@@ -28,6 +31,12 @@ class Monitor:
         self.client = client or OKX()
         self.interval = interval
         self.started = now_ms()
+        module_dir = Path(__file__).resolve().parent
+        self.source_hashes = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in module_dir.glob("*.py")}
+        try:
+            self.source_commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=module_dir.parents[1], text=True).strip()
+        except (OSError, subprocess.CalledProcessError):
+            self.source_commit = None
         self.stop_event = threading.Event()
         self.candles = {}
         self.charts = {}
@@ -143,7 +152,7 @@ class Monitor:
                 cached = self.charts.get((symbol, timeframe))
             higher_last = loaded[higher][-1]["t"] if loaded[higher] else None
             if (cached and cached["candles"] and cached["candles"][-1]["t"] == lower[-1]["t"]
-                    and cached.get("higher_last_ms") == higher_last):
+                    and cached.get("higher_last_ms") == higher_last and not cached["state"].get("error")):
                 state = dict(cached["state"], last_scan_ms=now, stale=stale)
                 if stale:
                     state["error"] = "awaiting_latest_confirmed_bar"
@@ -204,4 +213,5 @@ class Monitor:
                     "clock_offset_ms": self.client.offset_ms, "public_requests": self.client.requests,
                     "candle_storage": "memory_only", "history_days": 7,
                     "signal_mode": "密集启动（Pine V2.2 默认）", "higher_mode": "已确认高周期许可标注",
+                    "source_commit": self.source_commit, "startup_source_sha256": self.source_hashes,
                     "warmup_bars": 340, "launch_agent": "com.fable.impulse-monitor"})

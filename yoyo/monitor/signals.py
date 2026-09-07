@@ -27,8 +27,9 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+from yoyo.monitor import SIGNAL_PROTOCOL
 
-PROTOCOL_VERSION = "imacd-v2.2-dense-monitor-1"
+PROTOCOL_VERSION = SIGNAL_PROTOCOL
 WARMUP = 340
 TIMEFRAMES = {"1H": 3_600_000, "4H": 14_400_000, "1Dutc": 86_400_000}
 HIGHER_TIMEFRAME = {"1H": "4H", "4H": "1Dutc"}

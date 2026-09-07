@@ -93,4 +93,38 @@ class TelegramWorker:
         return True
 
     def status(self):
-        return dict(self.store.telegram_status(), configured=bool(self.creds), enabled=bool(self.creds))
+        result = self.store.telegram_status()
+        result["last_signal_success_ms"] = result.get("last_success_ms")
+        probe = self.store.get_meta("notification_probe", {})
+        result["probe_status"] = probe.get("status", "not_tested")
+        if probe.get("status") == "sent":
+            result["last_success_ms"] = max(result.get("last_success_ms") or 0, probe["at_ms"])
+        return dict(result, configured=bool(self.creds), enabled=bool(self.creds))
+
+
+def send_startup_probe(store):
+    """One quiet, explicitly labelled service test, separate from signal events."""
+    previous = store.get_meta("notification_probe")
+    if previous:
+        return previous
+    creds = credentials()
+    if not creds:
+        return {"status": "not_configured"}
+    receipt = {"status": "unknown", "at_ms": now_ms(), "kind": "service_startup_test"}
+    store.set_meta("notification_probe", receipt)
+    token, chat = creds
+    try:
+        response = requests.post("https://api.telegram.org/bot" + token + "/sendMessage", json={
+            "chat_id": chat, "disable_notification": True, "disable_web_page_preview": True,
+            "text": "FABLE · 监控服务启动测试\n\n这台 Mac 已启动 OKX 全部在交易永续合约监控：1H / 4H。\n蓄势释放、系统启动与趋势结束会推送确认收盘价；影线回踩在前端查看。\n\n本机页面：http://127.0.0.1:8766\n此地址在这台 Mac 打开。\n\n这是一条通知链路测试，不是交易信号。仅已收盘确认，历史回填不补发。"
+        }, timeout=(6, 15))
+        payload = response.json()
+        result = payload.get("result") if isinstance(payload, dict) else None
+        if isinstance(result, dict) and payload.get("ok") is True and type(result.get("message_id")) is int:
+            receipt.update(status="sent", message_id=result["message_id"])
+        elif isinstance(payload, dict) and payload.get("ok") is False:
+            receipt.update(status="failed", error="telegram_rejected")
+    except Exception:
+        pass
+    store.set_meta("notification_probe", receipt)
+    return receipt

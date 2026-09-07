@@ -113,9 +113,10 @@ class OKX:
         before = int(time.time() * 1000)
         rows = self.get("/api/v5/public/time")
         after = int(time.time() * 1000)
-        self.offset_ms = int(rows[0]["ts"]) - (before + after) // 2
-        if abs(self.offset_ms) > 120000:
+        candidate = int(rows[0]["ts"]) - (before + after) // 2
+        if abs(candidate) > 120000:
             raise MarketError("local_clock_out_of_sync")
+        self.offset_ms = candidate
         return self.offset_ms
 
     def instruments(self):

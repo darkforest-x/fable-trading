@@ -6739,3 +6739,17 @@ experiments:
       Final nominated configurations first economic confirmation; historical2026 chart/data QA exposed. Post-hoc carry
       use1 and independent minute reconstruction disclosed.59tests;195ledgers54569trades,163581controls; minuteMDD
       independently reconciled. No raw minute files, training, production, Pine/cloud changes or orders.
+
+  - experiment_id: exp-imacd-mac-monitor-20260908-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f17e9dc
+    status: active
+    question: Deliver the owner-authorized Mac-hosted OKX all-live-SWAP IMACD monitor for 1H and 4H with a working frontend and Telegram receipts.
+    single_variable: Software delivery using frozen Pine V2.2 default semantics; no strategy optimization or economic evaluation.
+    result: Independent local scanner and LaunchAgent running; full-universe bootstrap and frontend acceptance in progress.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: Owner explicitly authorized Mac monitoring, Telegram signal notifications and all dates. Notification-only indicator; no ML promote, orders, production execution or VPS cache writes. Live observation use1, not a holdout economic test.

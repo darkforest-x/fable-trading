@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1016">
+  <title>Fable · OKX 信号台</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230e191e'/%3E%3Cpath d='M8 23V10h5v9h5V7h6v16' fill='none' stroke='%2370e2bc' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <a href="#main" class="skip-link">跳到主要内容</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="主导航">
+      <a class="brand" href="#signals" aria-label="Fable 信号台">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 28 28"><path d="M4 22V9h6v9h6V5h8v17"/></svg></span>
+        <span class="brand-word">fable<span>MARKET OBSERVATORY</span></span>
+      </a>
+      <div class="sidebar-label">工作空间</div>
+      <nav class="nav-list">
+        <button class="nav-item active" data-view="signals" aria-current="page"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 11h4l3-7 3 12 3-6h3"/></svg><span>信号台</span><span class="nav-count" id="nav-signal-count">—</span></button>
+        <button class="nav-item" data-view="watch"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5Z"/><circle cx="10" cy="10" r="2"/></svg><span>蓄势观察</span></button>
+        <button class="nav-item" data-view="system"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="5" rx="1.5"/><rect x="3" y="12" width="14" height="5" rx="1.5"/><path d="M6 5.5h.1M6 14.5h.1M10 5.5h4M10 14.5h4"/></svg><span>运行状态</span></button>
+      </nav>
+      <div class="sidebar-strategy"><span class="strategy-orbit" aria-hidden="true"></span><div>IMACD IMPULSE<small>零轴蓄势 · 密集启动</small></div></div>
+      <div class="sidebar-bottom"><span class="local-light" id="local-light"></span><div>本机监控<small id="sidebar-runtime">正在连接服务</small></div><span class="tiny-tag">MAC</span></div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div class="breadcrumb"><span>工作空间</span><span class="crumb-slash">/</span><strong id="breadcrumb-current">信号台</strong></div>
+        <div class="topbar-meta"><span class="exchange-mark">OKX</span><span class="market-scope">全市场永续</span><span class="topbar-divider"></span><span class="live-indicator" id="connection-label"><i></i>连接中</span><span class="telegram-header" id="telegram-header">TG · —</span><time id="local-clock">—</time></div>
+      </header>
+
+      <main id="main" tabindex="-1">
+        <div class="page-heading"><div><div class="eyebrow">IMPULSE / LIVE MONITOR</div><h1 id="page-title">信号台</h1><p id="page-description">等待充分蓄势，关注趋势启动。</p></div><button class="refresh-button" id="refresh-button" aria-label="立即刷新监控数据"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 7a6.5 6.5 0 1 0 .5 5M16 3v4h-4"/></svg><span>刷新</span></button></div>
+        <div class="notice hidden" id="error-notice" role="status"></div>
+
+        <section class="metrics" aria-label="监控概览">
+          <article class="metric-card"><div class="metric-top"><span>24 小时信号</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m11 2-7 10h6l-1 6 7-10h-6l1-6Z"/></svg></div><div class="metric-value" id="metric-signals">—</div><div class="metric-bottom"><span class="mint-dot"></span><span id="metric-signals-detail">收盘确认 · 避免盘中闪烁</span></div></article>
+          <article class="metric-card"><div class="metric-top"><span>正在蓄势</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h14M3 10h14M3 14h14M7 3v14M13 3v14"/></svg></div><div class="metric-value"><span id="metric-building">—</span><span class="metric-unit">个观察窗口</span></div><div class="metric-bottom"><span class="amber-dot"></span><span id="metric-building-detail">零轴横盘与均线密集</span></div></article>
+          <article class="metric-card"><div class="metric-top"><span>全市场覆盖</span><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"/><ellipse cx="10" cy="10" rx="3" ry="7"/><path d="M3 10h14"/></svg></div><div class="metric-value"><span id="metric-universe">—</span><span class="metric-unit">个合约</span></div><div class="metric-bottom"><span class="period-dot"></span><span>1H + 4H</span><span class="metric-separator">/</span><span id="metric-scan-detail">等待扫描</span></div></article>
+        </section>
+
+        <section id="signals-view" class="view-panel">
+          <div class="section-toolbar"><div class="section-title"><h2>最新信号</h2><span class="subtle-count" id="filtered-count">—</span></div><span class="quiet-text" id="signal-window-note">最近 2,000 条 · 每 15 秒同步</span></div>
+          <div class="filters"><label class="search-field"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg><input id="symbol-search" type="search" placeholder="搜索合约，例如 BTC" aria-label="搜索合约" autocomplete="off" spellcheck="false"><kbd>/</kbd></label><div class="segmented" aria-label="信号周期"><button data-timeframe="all" class="selected" aria-pressed="true">全部</button><button data-timeframe="1H" aria-pressed="false">1H</button><button data-timeframe="4H" aria-pressed="false">4H</button></div><label class="select-wrap"><select id="side-filter" aria-label="筛选信号方向"><option value="all">全部方向</option><option value="long">做多</option><option value="short">做空</option></select></label><label class="select-wrap kind-select"><select id="kind-filter" aria-label="筛选信号类型"><option value="all">全部类型</option><option value="release">蓄势释放</option><option value="entry">系统启动</option><option value="retest">影线回踩</option><option value="exit">趋势结束</option></select></label></div>
+          <div class="signal-workbench">
+            <section class="feed-panel panel" aria-label="信号列表"><div class="table-scroll"><table class="signal-table"><thead><tr><th>合约 / 时间</th><th>信号</th><th>确认点位</th><th>状态</th></tr></thead><tbody id="signal-rows"></tbody></table><div id="signal-empty" class="empty-state"><div class="empty-signal" aria-hidden="true"><svg viewBox="0 0 60 40"><path d="M0 23h17l6-10 8 18 7-8h22"/></svg></div><h3 id="signal-empty-title">正在连接行情服务</h3><p id="signal-empty-description">真实信号会在这里出现。</p></div></div><div class="panel-foot"><span><i class="tiny-live-dot"></i>仅已收盘 K 线</span><button id="load-more-signals" class="load-more hidden">显示更多</button><span id="last-sync">尚未同步</span></div></section>
+            <aside class="detail-panel panel" aria-label="所选信号详情"><div id="detail-empty" class="detail-placeholder"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 36V25m8 6V12m8 26V21m8 6V8m8 21V16"/><path d="M5 42h38"/></svg><h3>每次启动，都有迹可循</h3><p>选择一条信号，查看价格、蓄势结构与 IMACD 动量。</p></div><div id="detail-content" class="hidden"><div class="detail-heading"><div><div class="detail-symbol-line"><h2 id="detail-symbol">—</h2><span class="timeframe-tag" id="detail-timeframe">—</span></div><span class="detail-market-label" id="detail-market-label">OKX · 永续合约</span></div><a id="tradingview-link" class="icon-link" target="_blank" rel="noopener noreferrer" aria-label="在 TradingView 查看此合约" title="在 TradingView 查看"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11 3h6v6M17 3l-9 9M7 4H3v13h13v-4"/></svg></a></div><div class="detail-price-row"><div class="detail-price" id="detail-price">—</div><div id="detail-event-badge"></div></div><div class="chart-legend"><span><i class="legend-candle"></i>价格</span><span><i class="legend-ma"></i>MA 20 / 60 / 120</span><span class="chart-bars-note">最近 120 根</span></div><div class="chart-container" id="chart-container" role="img" aria-label="价格 K 线和 IMACD 双线图"><div class="chart-placeholder">正在加载图表…</div></div><div class="chart-hint" id="chart-hint">移动光标查看 K 线</div><div class="detail-facts" id="detail-facts"></div><div class="detail-reason" id="detail-reason"></div></div></aside>
+          </div>
+        </section>
+
+        <section id="watch-view" class="view-panel hidden"><div class="section-toolbar"><div class="section-title"><h2>蓄势中的合约</h2><span class="subtle-count" id="watch-count">—</span></div><span class="quiet-text">观察状态 ≠ 入场信号</span></div><div class="watch-filter"><label class="search-field"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg><input type="search" id="watch-search" placeholder="搜索蓄势合约" aria-label="搜索蓄势合约" autocomplete="off"></label><span class="watch-explanation">零轴停留越久，越值得关注后续释放。</span></div><div class="panel"><div class="watch-table-scroll"><table class="watch-table"><thead><tr><th>合约</th><th>周期</th><th>结构</th><th>零轴根数</th><th>均线密集</th><th>高周期</th><th>最新收盘</th></tr></thead><tbody id="watch-rows"></tbody></table></div><div id="watch-empty" class="empty-state"><div class="empty-signal" aria-hidden="true"><svg viewBox="0 0 60 40"><path d="M0 20h60"/></svg></div><h3>等待蓄势结构出现</h3><p>扫描完成后，符合条件的观察窗口会列在这里。</p></div><div class="panel-foot"><span>点击合约查看结构图</span><span>1H / 4H</span></div></div></section>
+
+        <section id="system-view" class="view-panel hidden"><div class="section-toolbar"><div class="section-title"><h2>运行状态</h2></div><span class="quiet-text">本机执行 · 公开行情 · Telegram 通知</span></div><div class="system-grid"><article class="panel system-card"><div class="system-card-heading"><h3>行情扫描</h3><span id="scan-state-badge" class="neutral-badge">等待连接</span></div><div class="scan-progress"><div id="scan-progress-fill"></div></div><dl class="system-facts" id="scan-facts"></dl></article><article class="panel system-card"><div class="system-card-heading"><h3>Telegram 通知</h3><span id="telegram-state-badge" class="neutral-badge">等待连接</span></div><p class="system-card-description" id="telegram-description">读取通知通道状态…</p><dl class="system-facts" id="telegram-facts"></dl></article><article class="panel system-card runtime-card"><div class="system-card-heading"><h3>本机服务</h3><span class="neutral-badge" id="service-version">—</span></div><dl class="system-facts" id="runtime-facts"></dl><p class="system-footnote">本页面展示指标事件与运行状态，不执行交易。监控需要 Mac 保持开机并联网。</p></article></div><details class="health-details panel"><summary>查看诊断信息<span>仅运行数据</span></summary><pre id="health-json">尚未读取诊断信息。</pre></details></section>
+
+        <footer class="page-footer"><span>FABLE <span class="footer-separator">/</span> 让趋势自己走出来。</span><span>收盘确认 · 信号价格不等于成交价格</span></footer>
+      </main>
+    </div>
+  </div>
+</body>
+</html>
