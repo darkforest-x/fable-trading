@@ -14,6 +14,22 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35
+    source_repo: darkforest-x/fable-trading
+    source_commit: "9aeebd9"
+    status: active
+    question: Can verified genuine quote flow be joined causally to original hourly K1/K2 clocks without outcome selection?
+    single_variable: Clock alignment only; V4 original mothers/statuses/requests and V34 2023-2024 external flow; no gate or economics.
+    result: Frozen no-outcome projection and temporal/zero-state contract; real alignment not run yet.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      source_commit is prior V34 baseline; exact builder commit will be recorded before run.
+      Plan experiments/active/exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35/PROJECT_PLAN.md.
+      Original251K1 mother subcohort, not whole-market K1K2; historical close boundary is not observed delivery.
   - experiment_id: exp-btcusdtp-genuine-flow-coverage-20260907-v34
     source_repo: darkforest-x/fable-trading
     source_commit: "49c0d8c"

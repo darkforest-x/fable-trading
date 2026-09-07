@@ -1,0 +1,50 @@
+{
+  "experiment_id": "exp-btcusdtp-k1k2-genuine-flow-alignment-20260907-v35",
+  "scope": "2023-2024 development, original fixed V4 hourly K1 mothers and first K2 requests only",
+  "builder_paths": [
+    "yoyo/data/k1k2_genuine_flow_alignment.py",
+    "yoyo/evaluation/k1k2_genuine_flow_audit.py"
+  ],
+  "flow_summary": "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/summary.json",
+  "input_hashes": {
+    "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/original_mothers.csv.gz": "b3f442ad8b0959b19cb5ae58fd40bc6a3bf40b455b4be31f3758d53940eea3e6",
+    "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/control_mothers.csv.gz": "01050c7a9602f469406df515edcc73ef2f4c9db2d46529e25030934012eebd5a",
+    "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/case_wait_status.csv.gz": "c8a41ebe3b4812de1dd5e4a6ad37257c545c7da516c837ecdf4d31d5dc3c297c",
+    "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/control_wait_status.csv.gz": "581035a17d0ee8db6cf5671aa0ecd79c733e4873a2a3957a43937f6ff9f4989e",
+    "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/wait_k2_k2_stop_case_requests.csv.gz": "e692322c9a818174218bf870e7fe4539777c4999c83fa19107fd8f10dd598854",
+    "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/wait_k2_k2_stop_control_requests.csv.gz": "68b8d1010f8dc6e16b1b33f0bbf7ebb3bebf165edea87fb86f1a303475362aeb",
+    "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/summary.json": "02f37e22924dbae9e16b801811003f66288b048f0518e783ceb6b55b2caf7ddd",
+    "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/source_manifest.json": "244332b2bb49e6be9f4b9ba769c17fb6138d786998262b5c7525c90bd50d6d37",
+    "experiments/active/exp-btcusdtp-genuine-flow-coverage-20260907-v34/verification.json": "cfabdb58db16380df8156b0320b597b433606f98aba00fc32bae37e143c20088",
+    "yoyo/data/hourly_impulse_k2.py": "9728ddd19210946f2389feffb990cfc526a0b8d323f97770478906ed4bf0f20c",
+    "yoyo/evaluation/hourly_impulse_k2_research.py": "3ce431bf8c96fc2828dd4405db7012b57b13295a169f0d67d5e95a86b1659c67",
+    "yoyo/evaluation/hourly_impulse_research.py": "804e62f5dfa537302a6cf1f0223549cdf3b3a3e42966ef59a33b6c975fd79ad4",
+    "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/config.json": "a5ab44feb152afc8a89dd659d7ef4d4af198e9120cb7e012597207df3495c3c7"
+  },
+  "rosters": {
+    "case": {
+      "mothers": "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/original_mothers.csv.gz",
+      "requests": "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/wait_k2_k2_stop_case_requests.csv.gz",
+      "statuses": "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/case_wait_status.csv.gz"
+    },
+    "control": {
+      "mothers": "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/control_mothers.csv.gz",
+      "requests": "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/wait_k2_k2_stop_control_requests.csv.gz",
+      "statuses": "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/control_wait_status.csv.gz"
+    }
+  },
+  "output_dir": "data/k1k2_genuine_flow_alignment_v35",
+  "windows": [
+    "K1 open to close at K1 close, all mothers",
+    "K2 open to close at K2 close, emitted requests only",
+    "K1 close through K2 close at K2 close, emitted requests only"
+  ],
+  "flow_feature": "same-unit sum quote delta / sum total quote, plus direction-adjusted value; no gate selected",
+  "missing_policy": "no fill; missing/unavailable/zero separate; undefined imbalance not zero",
+  "availability": "historical_boundary plus fail-closed observed_delivery contrast",
+  "economic_labels_read": false,
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "threshold_or_exit_changes": []
+}
