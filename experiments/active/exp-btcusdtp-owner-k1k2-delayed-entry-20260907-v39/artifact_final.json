@@ -1,0 +1,319 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "K1/K2 Delayed Entry · V39",
+    "generatedAt": "2026-09-07T11:44:29.173155+00:00",
+    "blocks": [
+      {
+        "id": "section_0",
+        "type": "markdown",
+        "layout": "full",
+        "body": "# K1/K2 Delayed Entry · V39\n\n"
+      },
+      {
+        "id": "section_1",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## Executive Summary\n\n**等待小级别同色确认能减少交易，但本轮没有把系统变成盈利策略。**\n原 63 个 1h K1/K2 请求，立即入场平均净收益 −12.81bp；等待确认后保留 38 笔实际成交，其平均净收益仍为 −9.56bp、胜率 18.42%、PF 0.684。\n按全部 63 个原请求计算（25 个已知未成交贡献为零），平均净收益为 −5.76bp。\n\n本轮的核心机制不是“确认后选得更准”：22 笔实际延迟成交的退出时间、退出价格、退出原因均与原臂一致，19 笔只是顺着方向追到了更差的入场价。\n总改善 +7.04bp/原请求，由毛收益 −0.89bp 与省费 +7.94bp 组成。原 36 组三控比较的增量只有 +2.33bp，95% 区间 [−8.29, +13.76]bp，单侧 p=0.3796，不支持已建立稳定优势。\n\n1bp=0.01%；表中不是杠杆收益或复利账户收益。结果为研究拒绝，不替换 TradingView、不部署、不降低验收门。\n\n"
+      },
+      {
+        "id": "section_2",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 这次到底改了什么\n\n数据仍是已批准的 Binance USD-M BTCUSDT 2023–2024，24 个月、210,528 根原生 5m bar。\n请求仍是冻结的 63 个 1h K1/K2 形态、108 个匹配对照、36 组三控与 27 个未匹配请求；仅 44 个不同 K1，不能视为 63 个独立形态。\n这不是手机上完整的 15m Pine 接受逻辑，也不是 ETH、黄金或山寨日线策略的结果。\n\n| 项目 | 立即入场（V37 原臂） | 等待确认（V39 新臂） |\n|---|---|---|\n| 原请求时点 | E=原 K2 收盘边界 | 同一 E，不重新选 K1/K2 |\n| 入场 | E 的 OPEN | E、E+5…E+55 分钟内首次已闭合同向颜色后的 OPEN |\n| 确认指标 | 不作为入场门 | 原生 5m SMA40(HL2)，一次同向 |\n| 初始止损/ATR | 原请求固定值 | 原值不动；等待期间先触损则取消 |\n| 退出 | 5m 真正同向→反向颜色翻转，一次确认；原硬止损兜底 | 完全相同 |\n| 最迟退出 | 原 E+72h | 仍是原 E+72h，不随入场延后 |\n| 成本 | 每笔实际交易 0.2% 往返 | 同成本；真正未成交不收费 |\n\nE+60 分钟排除在允许入场窗口外。这是事先声明的一小时请求有效期研究假设，不是优化出来的最佳参数，也不是把 V38 行政观察截止冒充原策略有效期。\n没有同时改变 MA、数量门、成本、止损、退出确认次数或匹配名单。两臂均关闭量共振门。\nE 时形成 seed 的极值不算等待期间触损；之后完整等待 bar 触损优先于颜色确认。只看边界 OPEN 和已闭合 bar，不用当前 bar 的未来 HLC 决定入场。\n\n"
+      },
+      {
+        "id": "section_3",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 完整结果：少做单不等于剩下的单盈利\n\n| 口径 | 形态立即 | 形态等待 | 对照立即 | 对照等待 |\n|---|---:|---:|---:|---:|\n| 原请求数 | 63 | 63 | 108 | 108 |\n| 实际成交且已退出 | 63 | 38 | 108 | 65 |\n| 已知未成交 | 0 | 25 | 0 | 43 |\n| 未知结果 | 0 | 0 | 0 | 0 |\n| 全请求平均毛收益 bp | 7.19 | 6.30 | −2.18 | 1.29 |\n| 全请求平均净收益 bp | −12.81 | −5.76 | −22.18 | −10.75 |\n| 成交平均净收益 bp | −12.81 | −9.56 | −22.18 | −17.86 |\n| 成交中位净收益 bp | −29.94 | −28.68 | −28.50 | −31.41 |\n| 成交净胜率 | 15.87% | 18.42% | 18.52% | 15.38% |\n| 成交 PF | 0.545 | 0.684 | 0.336 | 0.473 |\n\n形态全请求净收益标准差从 74.21bp 降到 68.03bp；等待臂实际 38 笔的标准差仍为 87.86bp。\n实际成交与全部原请求必须分开，不能把 25 个零贡献未成交当成 25 笔保本交易来抬高胜率。\n上表全部形态与全部对照的均值不是配对效应；真正的 36 组比较见后文。\n\n"
+      },
+      {
+        "id": "section_4",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 失败原因：追价成本吃掉了等待的好处\n\n| 原形态请求分组 | n | 立即平均净 bp | 等待平均净 bp | 每组变化 bp |\n|---|---:|---:|---:|---:|\n| E 已同向，照常入场 | 16 | −21.65 | −21.65 | 0.00 |\n| 等待后实际入场 | 22 | 19.56 | −0.77 | −20.33 |\n| 已知取消/过期，最终不入场 | 25 | −35.64 | 0.00 | +35.64 |\n\n22 笔等待成交平均等待 16.36 分钟：19 笔更差入价、3 笔更好入价；22/22 的退出时间、退出价格、退出原因完全相同，持仓时长恰好缩短等待分钟数。\n这组仍是 5 个净赢家、17 个净输家，变化来自入场价格，而非退出机制变聪明。不能把这组将来确认成功的身份拿回 E 时当过滤器。\n\n25 个未成交由 15 个等待期触及原止损与 10 个到期未确认组成。\n跳过了 22 个原亏损，也错过 3 个原盈利。因此整体 25 改善/22 变差/16 不变：改善是 22 个避亏加 3 个更好入价；变差是 3 个遗漏赢家加 19 个追价。\n\n按全部 63 个原请求分母，净改善 +7.0445bp = 毛收益变化 −0.8920bp + 节省成本 7.9365bp。\n省费超过净改善的全部，说明“少做”有效地减小亏损，但不能据此称“更会捕捉趋势”。成本假设维持原 20bp；并未调低费用把结果做正。\n同向就入场的 16 笔也继续亏损，证明“同色”在这批请求中本身不足以区分趋势和盘整。\n38 笔成交中的 31 个净输家，26 个是毛价格亏损，5 个是小幅毛盈利被费用抹去；后 5 个全部来自那 16 个原同向、不变的入场。\n31 个输家中只有 9 个保存的有利波动下界超过 20bp。因此不能把问题一概说成“都有利润但没及时止盈”，更不能把事后 MFE 当可成交的止盈价格。\n最大两个赢家贡献了全部正贡献的 83.88%，而且都在未匹配的 27 个请求里；少数漂亮的大趋势不能代替普遍有效的证据。完整事件与复算公式见 FAILURE_ANALYSIS.md。\n\n"
+      },
+      {
+        "id": "section_5",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 匹配对照与时间稳定性\n\n原 36 个形态各配原 3 个同币、方向、时间块及波动桶对照，成员不变，不按最终是否成交重新匹配。\n27 个未匹配请求保留在全体结果中，但不伪造控制组。匹配覆盖率仍只有 57.14%，未达到 90% 门。\n36 组全部结果已知；不是只挑 V38 中四成员均确认的 9 组来报告。\n\n| 原 36 组配对指标 | bp |\n|---|---:|\n| 立即臂绝对净超额 | −1.44 |\n| 等待臂绝对净超额 | +0.89 |\n| 净超额增量（主指标） | +2.33 |\n| 其中毛超额增量 | +0.85 |\n| 其中相对省费 | +1.48 |\n\n主配对增量标准差 36.37bp、中位数 0bp；9999 次固定月份聚类随机符号检验单侧 p=0.3796，分层月份 bootstrap 95% CI [−8.29, +13.76]bp。\n先对固定 24 个月的组内增量总和使用固定随机种子 20260906 生成 9999×24 个符号，再在各半年内独立有放回抽 6 个月，拼成 24 个月，按重抽总收益/总请求数求区间。不是先 bootstrap 后符号，也不是把 24 个月任意混抽。\n24 个历月中 17 个有配对；月总和 lag-1 相关 0.325，最大单月绝对贡献占 15.24%。不满足已证明的独立同分布假设，聚类只能缓解、不能消除依赖；这些都是重复开发数据上的探索统计，不是随机试验或新的盲测。\n\n| 半年 | 原形态数 | 等待成交数 | 立即全请求净 bp | 等待全请求净 bp | 配对增量 bp |\n|---|---:|---:|---:|---:|---:|\n| 2023H1 | 23 | 12 | −19.44 | −6.50 | +20.64 |\n| 2023H2 | 19 | 15 | +13.23 | +5.85 | −20.77 |\n| 2024H1 | 15 | 8 | −32.37 | −20.82 | +8.57 |\n| 2024H2 | 6 | 3 | −20.95 | −2.08 | −24.28 |\n\n仍只有一个半年赚钱，且原本赚钱的 2023H2 反而更差。2024H2 只有 3 笔新成交，不能把少量偶然改善外推。\n单仓诊断各自按实际入场时间重排：立即形态 59 笔入选、4 笔被已有仓位挡住，均净 −13.29bp；等待形态 38 笔全入选、25 个未成交，成交均净 −9.56bp。对照为 106→65 笔，均净 −22.29→−17.86bp。\n这是各自单仓的成交统计，不是用旧仓位掩码筛新交易，也不是完整资金、杠杆、爆仓回测。\n\n"
+      },
+      {
+        "id": "fold_comparison",
+        "type": "chart",
+        "layout": "full",
+        "chartId": "fold_net"
+      },
+      {
+        "id": "section_6",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 单特征参考与验收结果\n\n继承 K1 body_ratio 作为单特征排序参考，不新增过滤条件。原 63 请求上描述性 AUC=0.4949，最高十分位 7 请求平均毛 +57.74bp、净 +46.31bp，但净胜率仅 1/7=14.29%。这不是一个稳定高胜率池，不能只引用正均值。\n没有训练分类器、没有独立 val，因此 val AUC、val 正类率与 val 样本数不适用；上述 AUC 不是 val 指标。全请求净正比例 7/63，实际成交净正比例 7/38。\n本轮只有预声明的一个主配对检验，没有在切片里挑最小 p；body_ratio、分组和半年表均为描述，不作额外显著性宣称。\n\n失败门包括：总体净收益、PF≥1.1、四半年均正、每半年至少 12 笔、总成交至少 80 笔、匹配覆盖率、主 p<0.01、区间下界为正。\n固定 63 请求本就不能通过 80 笔支持门，本轮用来检验机制，不能因此降低门槛。\n通过的月份支持和全部配对已知，不能抵消上述失败。结论 `research_gate_failed`。\n\n"
+      },
+      {
+        "id": "section_7",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 数据质量、风险与诚实声明\n\n经济源码先冻结于 `1682629dc2c1ae1147b69b37db120c971f221027`，配置 SHA 在 pre-outcome 收据和 summary 中一致；先保存原请求，再计算新结果。\n原 V37 结果只在新两臂回放完毕后用于基线 parity：63/108 原身份完全一致，18 个路径字段按 1e−12 容差复现。\n19 份新 CSV 有逐文件 SHA、行数和字段收据，所有原请求与配对保留。两组等待 trace 为 307 与 610 行，共 917 行。\n650 项聚焦合成、关联回归和层边界测试通过；测试正确不等于策略盈利，不宣称全仓无失败。独立保存输出复核见实验目录 REVIEW.md。\n独立审核完成 1,548 项保存输出一致性断言，并从原 36 组三控交易重建统计，均值、区间和 p 值一致；这些不是额外的 pytest 用例。\n另外 31 项报告合成测试通过；伴随 notebook 的三个代码单元已用标准库顺序执行，不是 Jupyter 内核认证。实际保存路径没有触发 72h 的 time_exit 分支，该分支证据来自合成测试，不能把未触发当作真实路径已覆盖。\n\n已知未成交的交易收益仍为 NaN，只有原请求贡献为 0；未知资格或无法确定退出的贡献仍是 NaN。本轮未出现未知，也保留并测试这些路径。\n原始小 K 线内触发顺序受 OHLC 分辨率限制，按原引擎规则处理；未模拟真实深度、排队、延迟，也未单独计入资金费。使用冻结 20bp 往返成本，不能据此承诺实盘收益。\n没有新 holdout 读取/评分；只使用反复开发的 2023–2024，不能称独立样本外。历史旧文本暴露及旧失败保留在原报告，不用于本轮选择。\n没有安装依赖、改止损倍数、改价格源、训练、promote、ACTIVE、TradingView 或下单。\n\n"
+      },
+      {
+        "id": "section_8",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 下一步\n\n不把这版等待确认设为默认，也不继续在同一 63 请求上搜索“最佳等待分钟数”。已定位的障碍是：同色不足以筛趋势，确认经常只让入场追价，且多数剩余交易仍然亏损。\n下一优先假设是隔离已定位的追价损耗：确认后不马上按市价追入，而研究“确认后等回踩”的成交机制。先冻结挂价、有效期、触价及同 bar 触损的保守记账规则，再与原市价确认臂和原对照比较；本轮尚未实施，也不预设它会更赚钱。\n退出频率或盘整环境筛选应另作实验，不能与成交机制打包调参。现在只凭变色或事后波峰，就把所有亏损归因于退出太早，证据不够。\n只有保留原对照后显示稳定扣费优势，才值得扩大独立验证；不将未来 MFE、最终赢家身份或最终是否确认作为入场特征。\n\n"
+      },
+      {
+        "id": "section_9",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 复现命令与证据\n\n既有 `.venv`：Python 3.9.6、pandas 2.3.3、numpy 2.0.2。先恢复冻结 V34 原始源及 V37 pre-outcome 请求文件，精确路径/SHA 由前置配置递归收据验证；`data/` 不入 Git，不能只靠代码仓从零伪造同一输入。\n在尚无 V39 输出的恢复副本运行；当前工作区产物已存在，一次性写入保护会拒绝覆盖：\n\n```bash\n.venv/bin/python -B -m pytest -q -p no:cacheprovider tests/test_k1k2_delayed_entry.py tests/test_owner_k1k2_delayed_entry.py\n.venv/bin/python -B -m yoyo.evaluation.owner_k1k2_delayed_entry\n.venv/bin/python -B -m yoyo.evaluation.owner_k1k2_delayed_entry_report prepare\npython3 scripts/md_to_html.py analysis/p1_btcusdtp_owner_k1k2_delayed_entry_v39_20260907.md --out-dir analysis/html\n.venv/bin/python -B -m yoyo.evaluation.owner_k1k2_delayed_entry_report package\n.venv/bin/python -B -m yoyo.evaluation.owner_k1k2_delayed_entry_delivery\nnode /Users/zhangzc/.codex/plugins/cache/openai-curated-remote/data-analytics/0.2.10-13ceeea1f599/skills/build-report/scripts/deliver_portable_artifact.mjs --input experiments/active/exp-btcusdtp-owner-k1k2-delayed-entry-20260907-v39/artifact_final.json --output analysis/html/p1_btcusdtp_owner_k1k2_delayed_entry_v39_20260907.html\n```\n\n完整 650 项执行命令见 PREFLIGHT.md；报告 builder、测试与最终 MD 需先提交，canonical artifact 通过验证再交付 HTML。\n`experiments/active/exp-btcusdtp-owner-k1k2-delayed-entry-20260907-v39/` 保存 summary、pre_outcome_receipt、独立失败归因/审核及报告收据；逐请求路径在 `data/owner_k1k2_delayed_entry_v39/`。\nHTML 的结构可验证性与浏览器视觉/手机主题/来源交互验证分开记录，不互相替代。\n原 `artifact.json` 是保留的早期纯文字包，被交付契约要求“至少一张图”拒绝，不是回测失败。最终 delivery 从保存交易复核四个半年均值后添加对应图，并读取当前已提交 MD，输出新 `artifact_final.json`；旧包和拒绝收据不覆盖，经济结果不重跑。\n"
+      }
+    ],
+    "charts": [
+      {
+        "id": "fold_net",
+        "type": "bar",
+        "title": "四半年原请求净均值 · 两种入场方式",
+        "dataset": "fold_net",
+        "sourceId": "fold_net_source",
+        "description": "2023–2024；每臂63个原请求，分半年；bp/请求，未成交已知为0。不是账户累计收益；未知均值不填0。",
+        "showDescription": true,
+        "palette": {
+          "kind": "categorical",
+          "name": "blueGold"
+        },
+        "legend": {
+          "position": "bottom",
+          "title": "Entry policy"
+        },
+        "settings": {
+          "groupMode": "grouped",
+          "sort": "none"
+        },
+        "referenceLines": [
+          {
+            "axis": "y",
+            "value": 0,
+            "color": "neutral",
+            "label": "0 bp"
+          }
+        ],
+        "encodings": {
+          "x": {
+            "field": "fold",
+            "type": "ordinal"
+          },
+          "y": {
+            "field": "mean_request_net_bp",
+            "type": "quantitative",
+            "unit": "bp"
+          },
+          "color": {
+            "field": "arm",
+            "type": "nominal"
+          },
+          "tooltip": [
+            {
+              "field": "mean_request_net_bp",
+              "type": "quantitative"
+            },
+            {
+              "field": "requests",
+              "type": "quantitative"
+            },
+            {
+              "field": "known",
+              "type": "quantitative"
+            },
+            {
+              "field": "unknown",
+              "type": "quantitative"
+            },
+            {
+              "field": "executed_closed",
+              "type": "quantitative"
+            }
+          ]
+        }
+      }
+    ],
+    "cards": [],
+    "tables": [],
+    "filters": [],
+    "sources": [
+      {
+        "id": "summary",
+        "label": "V39 saved economic summary",
+        "path": "experiments/active/exp-btcusdtp-owner-k1k2-delayed-entry-20260907-v39/summary.json"
+      },
+      {
+        "id": "review_data",
+        "label": "Saved accounting and exact input hashes",
+        "path": "experiments/active/exp-btcusdtp-owner-k1k2-delayed-entry-20260907-v39/report_data.json"
+      },
+      {
+        "id": "notebook",
+        "label": "Sequential Python review; not raw replay",
+        "path": "experiments/active/exp-btcusdtp-owner-k1k2-delayed-entry-20260907-v39/review.ipynb"
+      },
+      {
+        "id": "report",
+        "label": "Reviewed definitions and narrative",
+        "path": "analysis/p1_btcusdtp_owner_k1k2_delayed_entry_v39_20260907.md"
+      },
+      {
+        "id": "fold_net_source",
+        "label": "V39 · 四半年原请求净均值",
+        "path": "data/owner_k1k2_delayed_entry_v39/fold_metrics.csv",
+        "query": {
+          "sql": "SELECT fold, arm, CASE WHEN SUM(request_known)=COUNT(*)\nTHEN SUM(request_net)*10000.0/COUNT(*) ELSE NULL END AS mean_request_net_bp,\nCOUNT(*) AS requests, SUM(request_known) AS known, COUNT(*)-SUM(request_known) AS unknown,\nSUM(closed) AS executed_closed FROM saved_case_requests GROUP BY fold, arm\nORDER BY fold, CASE arm WHEN 'immediate' THEN 0 ELSE 1 END",
+          "language": "sql",
+          "engine": "sqlite",
+          "id": "yoyo/evaluation/owner_k1k2_delayed_entry_delivery.py:rows_from_saved",
+          "executed_at": "2026-09-07T11:44:29.173155+00:00",
+          "tables_used": [
+            "main.saved_case_requests"
+          ],
+          "description": "Actual in-memory SQLite aggregation of saved data/owner_k1k2_delayed_entry_v39/immediate_case_trades.csv and data/owner_k1k2_delayed_entry_v39/delayed_case_trades.csv; independently reconciled in Python to data/owner_k1k2_delayed_entry_v39/fold_metrics.csv. SQL did not perform the original economic replay.",
+          "filters": [
+            "Cases only, all original63 requests in each arm, four fixed2023–2024 half-years; unknowns retained"
+          ],
+          "metric_definitions": {
+            "mean_request_net_bp": "Original-request mean in bp; known no-fill contributes0; any unknown makes full-fold mean null",
+            "requests": "All original case requests in this half-year"
+          }
+        }
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "status": "ready",
+    "generatedAt": "2026-09-07T11:44:29.173155+00:00",
+    "datasets": {
+      "fold_net": [
+        {
+          "fold": "2023H1",
+          "arm": "immediate",
+          "mean_request_net_bp": -19.442673108404257,
+          "requests": 23,
+          "known": 23,
+          "unknown": 0,
+          "executed_closed": 23
+        },
+        {
+          "fold": "2023H1",
+          "arm": "delayed",
+          "mean_request_net_bp": -6.5045152224319835,
+          "requests": 23,
+          "known": 23,
+          "unknown": 0,
+          "executed_closed": 12
+        },
+        {
+          "fold": "2023H2",
+          "arm": "immediate",
+          "mean_request_net_bp": 13.233032178312234,
+          "requests": 19,
+          "known": 19,
+          "unknown": 0,
+          "executed_closed": 19
+        },
+        {
+          "fold": "2023H2",
+          "arm": "delayed",
+          "mean_request_net_bp": 5.852332178447035,
+          "requests": 19,
+          "known": 19,
+          "unknown": 0,
+          "executed_closed": 15
+        },
+        {
+          "fold": "2024H1",
+          "arm": "immediate",
+          "mean_request_net_bp": -32.36689554689926,
+          "requests": 15,
+          "known": 15,
+          "unknown": 0,
+          "executed_closed": 15
+        },
+        {
+          "fold": "2024H1",
+          "arm": "delayed",
+          "mean_request_net_bp": -20.821753960654103,
+          "requests": 15,
+          "known": 15,
+          "unknown": 0,
+          "executed_closed": 8
+        },
+        {
+          "fold": "2024H2",
+          "arm": "immediate",
+          "mean_request_net_bp": -20.95497981021079,
+          "requests": 6,
+          "known": 6,
+          "unknown": 0,
+          "executed_closed": 6
+        },
+        {
+          "fold": "2024H2",
+          "arm": "delayed",
+          "mean_request_net_bp": -2.0750290433542804,
+          "requests": 6,
+          "known": 6,
+          "unknown": 0,
+          "executed_closed": 3
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "summary",
+      "label": "V39 saved economic summary",
+      "path": "experiments/active/exp-btcusdtp-owner-k1k2-delayed-entry-20260907-v39/summary.json"
+    },
+    {
+      "id": "review_data",
+      "label": "Saved accounting and exact input hashes",
+      "path": "experiments/active/exp-btcusdtp-owner-k1k2-delayed-entry-20260907-v39/report_data.json"
+    },
+    {
+      "id": "notebook",
+      "label": "Sequential Python review; not raw replay",
+      "path": "experiments/active/exp-btcusdtp-owner-k1k2-delayed-entry-20260907-v39/review.ipynb"
+    },
+    {
+      "id": "report",
+      "label": "Reviewed definitions and narrative",
+      "path": "analysis/p1_btcusdtp_owner_k1k2_delayed_entry_v39_20260907.md"
+    },
+    {
+      "id": "fold_net_source",
+      "label": "V39 · 四半年原请求净均值",
+      "path": "data/owner_k1k2_delayed_entry_v39/fold_metrics.csv",
+      "query": {
+        "sql": "SELECT fold, arm, CASE WHEN SUM(request_known)=COUNT(*)\nTHEN SUM(request_net)*10000.0/COUNT(*) ELSE NULL END AS mean_request_net_bp,\nCOUNT(*) AS requests, SUM(request_known) AS known, COUNT(*)-SUM(request_known) AS unknown,\nSUM(closed) AS executed_closed FROM saved_case_requests GROUP BY fold, arm\nORDER BY fold, CASE arm WHEN 'immediate' THEN 0 ELSE 1 END",
+        "language": "sql",
+        "engine": "sqlite",
+        "id": "yoyo/evaluation/owner_k1k2_delayed_entry_delivery.py:rows_from_saved",
+        "executed_at": "2026-09-07T11:44:29.173155+00:00",
+        "tables_used": [
+          "main.saved_case_requests"
+        ],
+        "description": "Actual in-memory SQLite aggregation of saved data/owner_k1k2_delayed_entry_v39/immediate_case_trades.csv and data/owner_k1k2_delayed_entry_v39/delayed_case_trades.csv; independently reconciled in Python to data/owner_k1k2_delayed_entry_v39/fold_metrics.csv. SQL did not perform the original economic replay.",
+        "filters": [
+          "Cases only, all original63 requests in each arm, four fixed2023–2024 half-years; unknowns retained"
+        ],
+        "metric_definitions": {
+          "mean_request_net_bp": "Original-request mean in bp; known no-fill contributes0; any unknown makes full-fold mean null",
+          "requests": "All original case requests in this half-year"
+        }
+      }
+    }
+  ]
+}

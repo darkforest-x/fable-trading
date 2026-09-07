@@ -59,20 +59,34 @@ experiments:
       matched p.0939. QA and manifest retained; no raw replay rerun.
   - experiment_id: exp-btcusdtp-owner-k1k2-delayed-entry-20260907-v39
     source_repo: darkforest-x/fable-trading
-    source_commit: "ab872f0"
-    status: active
+    source_commit: "1682629dc2c1ae1147b69b37db120c971f221027"
+    status: rejected
     question: Does confirmation before exposure within one original decision-hour improve original-request net returns and matched excess?
     single_variable: Immediate versus delayed-confirmed entry; original absolute72h horizon, stop, native5transition exit and20bp cost unchanged.
-    result: Pending frozen economic replay; new research lifetime is not an optimal parameter or V38 audit expiry.
+    result: >-
+      Original63 mean net-12.8093to-5.7649bp,but38actualfillsmean-9.5575bp/PF.6843.
+      Netchange7.0445bp=gross-.8920+savedcost7.9365;22delayedfills sameexit19worseentry.
+      Original36triple excessincrement2.3301bp,CI[-8.2927,13.7565],p=.3796;onlyonepositivecasefold.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: null
-    artifacts: []
+    canonical_report: analysis/html/p1_btcusdtp_owner_k1k2_delayed_entry_v39_20260907.html
+    artifacts:
+      - btcusdtp-owner-delayed-v39-config
+      - btcusdtp-owner-delayed-v39-summary
+      - btcusdtp-owner-delayed-v39-pre-outcome
+      - btcusdtp-owner-delayed-v39-report-data
+      - btcusdtp-owner-delayed-v39-artifact-final
+      - btcusdtp-owner-delayed-v39-notebook
+      - btcusdtp-owner-delayed-v39-review
+      - btcusdtp-owner-delayed-v39-failure-analysis
+      - btcusdtp-owner-delayed-v39-html
+      - btcusdtp-owner-delayed-v39-qa
     reuse_allowed: false
     notes: >-
       Same approved2023-2024 original63case108controls36three-control groups.
       Entry strictly beforeE+60minutes; integerremainingminutespreserveabsoluteE+72h.
+      All171known,25case43control nofill.Requestcash0nottrade0.650focused+31report tests;1548savedreviewassertions.
       Plan experiments/active/exp-btcusdtp-owner-k1k2-delayed-entry-20260907-v39/PROJECT_PLAN.md.
   - experiment_id: exp-btcusdtp-owner-k1k2-pending-entry-20260907-v38
     source_repo: darkforest-x/fable-trading
