@@ -125,3 +125,23 @@ def test_public_template_has_no_model_proposal_fields():
     assert template.count("__PACK_JSON__") == 1
     for field in ("source_direction","repeat_of_review_id","daily_return","event_peak_confidence","source_proposal_bucket"):
         assert field not in template
+
+
+def test_local_snapshots_are_append_only_and_restore_actual_answers(tmp_path):
+    export=make_pack(tmp_path)
+    export["exported_at"]="2026-09-07T12:00:00+08:00"
+    a=c.save_snapshot(export,tmp_path)
+    b=c.save_snapshot(export,tmp_path)
+    assert a["saved_answers"]==2 and a["total"]==2
+    assert a["filename"]!=b["filename"]
+    assert json.loads((tmp_path/"answers"/a["filename"]).read_text())==export
+    assert len(list((tmp_path/"answers").glob("answers_*.json")))==2
+
+
+@pytest.mark.parametrize("stamp",["2026-09-07T12:00:00","2026-02-30T12:00:00Z"])
+def test_bad_import_dates_cannot_be_saved_as_completed(tmp_path,stamp):
+    export=make_pack(tmp_path)
+    export["exported_at"]="2026-09-07T12:00:00+08:00"
+    export["answers"][0]["answered_at"]=stamp
+    with pytest.raises(ValueError):c.save_snapshot(export,tmp_path)
+    assert not (tmp_path/"answers").exists()

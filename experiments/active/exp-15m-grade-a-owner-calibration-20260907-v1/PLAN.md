@@ -57,8 +57,7 @@ git branch --show-current
 # 必须先提交 builder、template 与 preregistration，再运行：
 .venv/bin/python -m yoyo.datasets.grade_a_calibration build
 # 仅服务 public 目录，不公开 admin 来源与重复对应表：
-.venv/bin/python -m http.server 8769 --bind 127.0.0.1 \
-  --directory datasets/grade_a_owner_calibration_20260907_v1/public
+.venv/bin/python -m yoyo.datasets.grade_a_calibration serve --port 8769
 # Owner 导出答案后（当前无答案，不运行）：
 .venv/bin/python -m yoyo.datasets.grade_a_calibration score \
   --answers /path/to/owner_export.json \
@@ -73,3 +72,11 @@ git branch --show-current
 - 币名只做明确的字面 venue 归一化；1000 倍合约、代币改名等未确认别名不擅自合并。
 - 240 是本轮审核工作量，不是统计功效保证；类别比例和市场真实发生率不同。
 - 无新增模型推理、阈值调参、训练、promote、部署、ACTIVE/frozen/forward 或真金改动。
+
+## 浏览器 QA 后补充的本机保存
+
+IAB 中 Blob 下载提示出现，但 download 事件未返回且没有确认文件落盘，因此不能据按钮提示
+声称交付链路完成。增加显式「保存到本机」及「恢复本机进度」，仅向绑定 127.0.0.1 的
+同源服务发送当前审核快照，写入本包 `answers/answers_<UTC>_<SHA>.json`，每次追加，
+保留历史答案，不覆写 labels 或训练数据。离线 JSON 导入导出仍保留作外部浏览器备用。
+这一补充不改变样本、顺序、图片、manifest 或评估协议；旧 HTML 与收据留在 ui_history。

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; form-action 'none'">
   <title>形态盲审 · 18 根历史窗口</title>
   <style>
     :root{color-scheme:light;font-family:system-ui,-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;color:#172b39;background:#f4f6f8;font-size:14px;--accent:#15635c;--border:#dbe2e7;--muted:#62727d}
@@ -19,9 +19,9 @@
     <header>
       <div class="heading-row">
         <div><h1 id="pack-title">形态盲审</h1><p class="subtle">已完成历史的 18 根窗口 · 类别与核心边界校准 · 含确认上下文</p></div>
-        <div class="tools"><span id="completion-count" class="muted"></span><button id="import-button" type="button">导入进度</button><button id="export-button" type="button">导出进度</button><input id="import-file" type="file" accept=".json,application/json" aria-label="选择同一审核包的进度文件"></div>
+        <div class="tools"><span id="completion-count" class="muted"></span><button id="save-local-button" class="primary" type="button">保存到本机</button><button id="restore-local-button" type="button">恢复本机进度</button><button id="import-button" type="button">导入进度</button><button id="export-button" type="button">导出进度</button><input id="import-file" type="file" accept=".json,application/json" aria-label="选择同一审核包的进度文件"></div>
       </div>
-      <div id="storage-notice" class="privacy">答案仅保存在本浏览器，刷新可恢复。请使用「导出」保存 JSON 文件，再交回审核结果。此页不会自动提交答案。</div>
+      <div id="storage-notice" class="privacy">本浏览器自动保留进度；请点「保存到本机」备份，或导出 JSON。本机保存只在你点击按钮时执行，不会自动提交答案。</div>
       <div id="global-notice" class="notice" role="status" aria-live="polite"></div>
       <div class="progress-track" role="progressbar" id="progress" aria-label="已保存且完整的题目" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progress-fill"></div></div>
     </header>
@@ -132,7 +132,7 @@
     }
     function showStorageFailure() {
       $('storage-notice').classList.add('warning');
-      $('storage-notice').textContent = '本浏览器无法保存本地进度。答案目前仅在此页面内，关闭会丢失；请立即导出 JSON 保存。此页不会自动提交答案。';
+      $('storage-notice').textContent = '本浏览器无法自动保留进度。答案目前仅在此页面内，关闭会丢失；请点「保存到本机」备份，或导出 JSON。此页不会自动提交答案。';
     }
     function persist() {
       try { localStorage.setItem(storageKey, JSON.stringify({...envelope(), current_index:index})); }
@@ -211,7 +211,7 @@
       $('item-notice').classList.toggle('error',Boolean(error));
       if (error) { $('item-notice').textContent = error; return false; }
       answers.set(answer.review_id,{...answer,answered_at:new Date().toISOString()}); persist(); updateProgress();
-      $('item-notice').textContent = '本题已保存。请记得导出文件保存全部进度。';
+      $('item-notice').textContent = '本题已保存在浏览器。请点「保存到本机」备份，或导出 JSON。';
       return true;
     }
     function move(next) { if (next < 0 || next >= pack.items.length || next === index) return; index=next; persist(); render(); }
@@ -230,7 +230,7 @@
     $('next-button').addEventListener('click',() => move(index+1));
     $('incomplete-button').addEventListener('click',() => {
       for (let step=1;step<=pack.items.length;step++) { const next=(index+step)%pack.items.length; if (!complete(answers.get(pack.items[next].review_id),pack.items[next])) { if(next===index) $('item-notice').textContent='当前题是唯一未完成题目。'; else move(next); return; } }
-      $('global-notice').textContent = '所有题目已完整保存。请导出全部答案。';
+      $('global-notice').textContent = '所有题目已完整保存在浏览器。请点「保存到本机」备份，或导出全部答案。';
     });
     $('review-image').addEventListener('load',() => { imageReady=true; $('image-error').hidden=true; updateGeometry(); });
     $('review-image').addEventListener('error',() => { imageReady=false; $('image-error').hidden=false; updateGeometry(); });
@@ -271,8 +271,54 @@
       const url=URL.createObjectURL(blob), anchor=document.createElement('a');
       anchor.href=url; anchor.download=safeId+'_'+(count===pack.items.length?'answers':'progress')+'_'+new Date().toISOString().replace(/[:.]/g,'-')+'.json';
       document.body.append(anchor); anchor.click(); anchor.remove(); setTimeout(() => URL.revokeObjectURL(url),1000);
-      $('global-notice').textContent='已生成'+(count===pack.items.length?'完整答案':'进度')+'文件（已完成 '+count+' / '+pack.items.length+'）。请确认下载文件已保存。';
+      $('global-notice').textContent='已请求浏览器导出'+(count===pack.items.length?'完整答案':'进度')+'（已完成 '+count+' / '+pack.items.length+'）。请确认下载文件存在；若未出现下载，请使用「保存到本机」。';
       $('global-notice').classList.remove('error');
+    });
+    function restoreAnswers(imported) {
+      answers=imported;
+      const next=pack.items.findIndex((item) => !complete(answers.get(item.review_id),item)); index=next<0?0:next;
+      persist(); render();
+    }
+    function setLocalBusy(busy) {
+      $('save-local-button').disabled=busy;
+      $('restore-local-button').disabled=busy;
+    }
+    async function requestLocalAPI(path, snapshot) {
+      if (!['http:','https:'].includes(window.location.protocol) || !['localhost','127.0.0.1','[::1]'].includes(window.location.hostname)) throw new Error('当前页面没有本机保存服务。请使用「导出进度」保存 JSON。');
+      const controller=new AbortController(), timeout=setTimeout(() => controller.abort(),15000);
+      try {
+        const options={method:snapshot?'POST':'GET',cache:'no-store',credentials:'omit',redirect:'error',signal:controller.signal};
+        if(snapshot) { options.headers={'Content-Type':'application/json'}; options.body=JSON.stringify(snapshot); }
+        const response=await fetch(path,options);
+        if(response.status===404 && !snapshot) throw new Error('暂无本机保存进度。如果本页没有保存服务，请使用「导入进度」恢复之前导出的 JSON。');
+        if(!response.ok) throw new Error('本机服务未确认本次操作（HTTP '+response.status+'）。请使用导入 / 导出 JSON。');
+        return await response.json();
+      } catch(error) {
+        if(error.name==='AbortError') throw new Error('等待本机服务超时，尚未确认保存或恢复。请重试，或使用导入 / 导出 JSON。');
+        if(error instanceof TypeError || error instanceof SyntaxError) throw new Error('本机保存服务不可用，尚未确认保存或恢复。请使用导入 / 导出 JSON。');
+        throw error;
+      } finally { clearTimeout(timeout); }
+    }
+    $('save-local-button').addEventListener('click',async () => {
+      const snapshot=envelope();
+      setLocalBusy(true); $('global-notice').textContent='正在将进度保存到本机…'; $('global-notice').classList.remove('error');
+      try {
+        const result=await requestLocalAPI('/api/save',snapshot);
+        if(!result || result.saved!==true || typeof result.filename!=='string' || !result.filename || !Number.isInteger(result.saved_answers) || result.saved_answers<0 || result.saved_answers>pack.items.length || result.total!==pack.items.length) throw new Error('本机服务返回的保存确认不完整，尚不能确认备份成功。请重试或导出 JSON。');
+        $('global-notice').textContent='本机已保存 '+result.saved_answers+' / '+result.total+' 题记录，文件：'+result.filename+'。此后修改请再次保存到本机。';
+      } catch(error) { $('global-notice').textContent=error.message; $('global-notice').classList.add('error'); }
+      finally { setLocalBusy(false); }
+    });
+    $('restore-local-button').addEventListener('click',async () => {
+      setLocalBusy(true); $('global-notice').textContent='正在读取本机保存的进度…'; $('global-notice').classList.remove('error');
+      try {
+        const snapshot=await requestLocalAPI('/api/latest');
+        const imported=validateSnapshot(snapshot);
+        restoreAnswers(imported);
+        const count=pack.items.filter((item) => complete(answers.get(item.review_id),item)).length;
+        $('global-notice').textContent='本机进度已恢复并替换浏览器进度（已完成 '+count+' / '+pack.items.length+'）。';
+      } catch(error) { $('global-notice').textContent='当前浏览器答案未被替换。'+error.message; $('global-notice').classList.add('error'); }
+      finally { setLocalBusy(false); }
     });
     $('import-button').addEventListener('click',() => { $('import-file').value=''; $('import-file').click(); });
     $('import-file').addEventListener('change',async () => {
@@ -281,9 +327,7 @@
         if(file.size>Math.max(2000000,pack.items.length*12000)) throw new Error('文件过大。');
         const snapshot=JSON.parse(await file.text()), imported=validateSnapshot(snapshot);
         if(answers.size && !window.confirm('导入将用文件中的快照替换本浏览器的当前进度。建议先导出当前进度。继续导入？')) return;
-        answers=imported;
-        const next=pack.items.findIndex((item) => !complete(answers.get(item.review_id),item)); index=next<0?0:next;
-        persist(); render(); $('global-notice').textContent='同一审核包的进度已导入。'; $('global-notice').classList.remove('error');
+        restoreAnswers(imported); $('global-notice').textContent='同一审核包的进度已导入。'; $('global-notice').classList.remove('error');
       } catch(error) { $('global-notice').textContent='导入失败，当前答案未被替换：'+error.message; $('global-notice').classList.add('error'); }
     });
     try {

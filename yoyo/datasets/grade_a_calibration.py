@@ -23,6 +23,8 @@ import json
 import math
 import shutil
 import subprocess
+import re
+import tempfile
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -463,10 +465,155 @@ def score(export: dict, pack: Path = PACK) -> dict:
         "next_gate": "Owner interpretation of repeat/semantic results and matched-negative feasibility; no automatic Gold or training launch" if complete else "await_remaining_owner_answers"}
 
 
+def storage_validate(export: dict, pack: Path) -> tuple[int, int]:
+    """Validate a progress snapshot without fabricating answers for its drafts."""
+    path = pack / "public/manifest.json"
+    manifest = json.loads(path.read_text())
+    if export.get("schema_version") != 1 or export.get("pack_id") != manifest["pack_id"] or export.get("manifest_sha256") != sha(path):
+        raise ValueError("wrong pack identity")
+    instant(export["exported_at"])
+    items = {r["review_id"]:r for r in manifest["items"]}
+    answers = export.get("answers")
+    if not isinstance(answers,list) or len(answers)>len(items):
+        raise ValueError("invalid answers list")
+    seen, complete = set(), 0
+    for answer in answers:
+        rid = answer.get("review_id")
+        if rid not in items or rid in seen:
+            raise ValueError("duplicate or foreign review id")
+        seen.add(rid)
+        if answer.get("label") is not None and answer["label"] not in LABELS:
+            raise ValueError("invalid draft label")
+        for key in ("core_start","core_end"):
+            value=answer.get(key)
+            if value is not None and (type(value) is not int or not 1<=value<=items[rid]["n_bars"]):
+                raise ValueError("invalid draft bar coordinate")
+        for key in ("box_top_norm","box_bottom_norm"):
+            value=answer.get(key)
+            if value is not None and (type(value) not in (float,int) or not math.isfinite(value) or not 0<=value<=1):
+                raise ValueError("invalid draft vertical coordinate")
+        if answer.get("box_semantics") is not None and answer["box_semantics"] not in SEMANTICS:
+            raise ValueError("invalid draft box semantics")
+        if not isinstance(answer.get("reasons"),list) or any(r not in REASONS for r in answer["reasons"]):
+            raise ValueError("invalid draft reasons")
+        if not isinstance(answer.get("note"),str) or len(answer["note"])>4000:
+            raise ValueError("invalid draft note")
+        if answer.get("label") not in {"LONG","SHORT"} and any(answer.get(k) is not None for k in ("core_start","core_end","box_top_norm","box_bottom_norm","box_semantics")):
+            raise ValueError("non-signal draft retains positive geometry")
+        complete += int(validate_answer(answer,items[rid]["n_bars"]))
+    return complete,len(items)
+
+
+def save_snapshot(export: dict, pack: Path) -> dict:
+    complete,total = storage_validate(export,pack)
+    content = json.dumps(export,ensure_ascii=False,sort_keys=True,indent=2)+"\n"
+    digest = hashlib.sha256(content.encode()).hexdigest()
+    now=datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    directory=pack/"answers"
+    directory.mkdir(exist_ok=True)
+    name=f"answers_{now}_{digest[:12]}.json"
+    with tempfile.NamedTemporaryFile(mode="w",encoding="utf-8",dir=directory,delete=False,prefix=".pending_") as handle:
+        handle.write(content)
+        temporary=Path(handle.name)
+    temporary.rename(directory/name)
+    return {"saved":True,"filename":name,"sha256":digest,"saved_answers":complete,"total":total}
+
+
+def serve(pack: Path, port: int) -> None:
+    """Serve only public review assets and explicit loopback progress backup APIs."""
+    from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+    from urllib.parse import urlparse
+
+    class Handler(SimpleHTTPRequestHandler):
+        def __init__(self,*args,**kwargs):
+            super().__init__(*args,directory=str(pack/"public"),**kwargs)
+
+        def json_response(self,status,payload):
+            body=json.dumps(payload,ensure_ascii=False).encode()
+            self.send_response(status)
+            self.send_header("Content-Type","application/json; charset=utf-8")
+            self.send_header("Cache-Control","no-store")
+            self.send_header("Content-Length",str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def do_GET(self):
+            path=urlparse(self.path).path
+            if path=="/api/latest":
+                files=sorted((pack/"answers").glob("answers_*.json"))
+                if not files:
+                    self.json_response(404,{"error":"no saved progress"})
+                else:
+                    export=json.loads(files[-1].read_text())
+                    storage_validate(export,pack)
+                    self.json_response(200,export)
+            elif path in {"/","/index.html","/manifest.json"} or re.fullmatch(r"/images/[a-f0-9]{24}\.png",path):
+                super().do_GET()
+            else:
+                self.send_error(404)
+
+        def do_HEAD(self):
+            if urlparse(self.path).path in {"/","/index.html","/manifest.json"} or re.fullmatch(r"/images/[a-f0-9]{24}\.png",urlparse(self.path).path):
+                super().do_HEAD()
+            else:
+                self.send_error(404)
+
+        def do_POST(self):
+            if self.path!="/api/save":
+                self.send_error(404)
+                return
+            origin=self.headers.get("Origin")
+            allowed={f"http://127.0.0.1:{self.server.server_port}",f"http://localhost:{self.server.server_port}"}
+            if origin not in allowed:
+                self.json_response(403,{"error":"same-origin local review only"})
+                return
+            try:
+                length=int(self.headers.get("Content-Length","0"))
+                if not 0<length<=2_000_000:
+                    raise ValueError("invalid snapshot size")
+                export=json.loads(self.rfile.read(length))
+                result=save_snapshot(export,pack)
+            except (ValueError,KeyError,TypeError,AttributeError) as exc:
+                self.json_response(400,{"error":str(exc)})
+                return
+            self.json_response(200,result)
+
+    print(f"Review http://127.0.0.1:{port}; explicit snapshots saved under {pack/'answers'}",flush=True)
+    ThreadingHTTPServer(("127.0.0.1",port),Handler).serve_forever()
+
+
+def refresh_ui(pack: Path = PACK) -> None:
+    """Update only a committed review UI; preserve the previous HTML and receipt."""
+    template=ROOT/"yoyo/datasets/templates/grade_a_calibration.html"
+    head=assert_source_first([Path(__file__).resolve(),template])
+    receipt_path=EXPERIMENT/"results/build_receipt.json"
+    receipt=json.loads(receipt_path.read_text())
+    manifest_path=pack/"public/manifest.json"
+    assert_digest(manifest_path,receipt["manifest_sha256"])
+    page=pack/"public/index.html"
+    assert_digest(page,receipt["public_html_sha256"])
+    previous=EXPERIMENT/"results/ui_history"/receipt["public_html_sha256"]
+    previous.mkdir(parents=True,exist_ok=True)
+    shutil.copyfile(page,previous/"index.html")
+    shutil.copyfile(receipt_path,previous/"build_receipt.json")
+    payload={**json.loads(manifest_path.read_text()),"manifest_sha256":receipt["manifest_sha256"]}
+    safe=json.dumps(payload,ensure_ascii=False).replace("<","\\u003c").replace("\u2028","\\u2028").replace("\u2029","\\u2029")
+    page.write_text(template.read_text().replace("__PACK_JSON__",safe))
+    receipt["ui_revision_commit"]=head
+    receipt["previous_public_html_sha256"]=receipt["public_html_sha256"]
+    receipt["public_html_sha256"]=sha(page)
+    dump(receipt_path,receipt)
+    print("UI refreshed; image pixels, manifest and all review IDs remain fixed")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("build")
+    commands.add_parser("refresh-ui")
+    s=commands.add_parser("serve")
+    s.add_argument("--port",type=int,default=8769)
+    s.add_argument("--pack",type=Path,default=PACK)
     p = commands.add_parser("score")
     p.add_argument("--answers", required=True, type=Path)
     p.add_argument("--output", required=True, type=Path)
@@ -474,6 +621,10 @@ def main() -> None:
     if args.command == "build":
         result = build()
         print(json.dumps({k:v for k,v in result.items() if k != "strata"}, ensure_ascii=False, indent=2))
+    elif args.command=="serve":
+        serve(args.pack,args.port)
+    elif args.command=="refresh-ui":
+        refresh_ui()
     else:
         if args.output.exists():
             raise ValueError("refusing to overwrite scored Owner evidence")
