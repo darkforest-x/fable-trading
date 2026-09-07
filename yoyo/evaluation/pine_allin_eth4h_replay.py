@@ -201,6 +201,17 @@ def report(payload, all_results):
     zero = next(x for x in main if x["arm"] == "original_zero_cost")
     fixed = next(x for x in main if x["arm"] == "entry_stop_cost20")
     one = next(x for x in main if x["arm"] == "one_x_cost20")
+    verification_text = "独立复核尚未执行。"
+    if "independent_validation" in payload:
+        qa = payload["independent_validation"]
+        first = qa["firstbar"]["continuous_2021_2026apr"]
+        verification_text = (
+            f"独立复核 {sum(qa['checks'].values())}/{len(qa['checks'])} 项通过，包含两边手续费、"
+            f"总账权益、信号时仓位、下一根开盘价格及精确对照分层。原版计成本有 "
+            f"{first['unprotected_firstbar_stop_touches']} 笔交易在未挂止损的入场首根已经触及原定止损，"
+            f"其中 {first['later_winners']} 笔后来盈利。首轮矩阵乘法出现浮点警告，"
+            "改用逐项求和核对后 p 值不变；原始交易、账户和费用结果均未重跑。"
+        )
     text = f"""# ALLIN V7：ETHUSDT 永续 4H 原码回放
 
 生成时间：{payload['generated_at']}。这是独立 Python 历史回放，尚未与 TradingView 原生交易清单逐笔对齐。
@@ -260,6 +271,8 @@ bp 为万分之一。随机对照每个事件独立入场，不能把这些重�
 
 ## 执行语义核对
 
+{verification_text}
+
 - 历史信号在收盘计算、下一根开盘成交；初始止损价格锚定信号 close，并按原码延后提交。修正分支只改变初始止损生效时点。
 - 保本门槛严格 >1.5%，锁定价格变化 0.1%；收盘更新只能影响后续价格，不能在同根历史 K 线上追溯成交。
 - 保留原码先求 is_cooling_down 再更新计数的顺序；同向信号虽不加仓仍重置共享 sl_price；反向信号先修改共享止损再翻仓。
@@ -287,6 +300,7 @@ bp 为万分之一。随机对照每个事件独立入场，不能把这些重�
 cd /Users/zhangzc/fable-trading
 .venv/bin/python -m pytest tests/test_pine_allin_eth4h.py -q
 .venv/bin/python -m yoyo.evaluation.pine_allin_eth4h_replay
+.venv/bin/python -m yoyo.evaluation.pine_allin_eth4h_verify
 .venv/bin/python scripts/md_to_html.py analysis/p0_pine_allin_eth4h_20260907.md --out-dir analysis/html
 ```
 
@@ -310,6 +324,9 @@ def main():
     if (OUT / "summary.json").exists():
         raise RuntimeError("Results already exist; no silent overwrite")
     OUT.mkdir(parents=True, exist_ok=True)
+    config = json.loads((EXP / "config.json").read_text())
+    if config["policies"] != [asdict(p) for p in POLICIES] or config["parameters"] != asdict(SignalParameters()):
+        raise ValueError("Frozen JSON configuration and executed policies disagree")
     code = [Path(__file__), ROOT / "yoyo/layers/l3_backtest/pine_allin_eth4h.py",
             ROOT / "yoyo/layers/l3_backtest/pine_allin_v7.py", EXP / "source.pine", EXP / "config.json"]
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
