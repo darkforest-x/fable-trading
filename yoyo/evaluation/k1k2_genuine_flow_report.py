@@ -131,7 +131,7 @@ def package():
             tooltip=[dict(field="total_mothers",type="quantitative",label="原母群总数"),
                      dict(field="share",type="quantitative",label="占比（0–1）")]))
     labels = {"expired_no_k2": "等待超时", "invalidated_wrong_close": "回到错误一侧",
-              "request_emitted": "有效 K2 请求", "invalidated_ma_colour": "均线颜色失效"}
+              "request_emitted": "有效 K2 请求", "invalidated_ma_colour": "HL2侧颜色失效"}
     chart_rows = [dict(r, label=labels[r["status"]]) for r in saved["data"]["case_status"]]
     blocks = []
     for i, section in enumerate(sections):
