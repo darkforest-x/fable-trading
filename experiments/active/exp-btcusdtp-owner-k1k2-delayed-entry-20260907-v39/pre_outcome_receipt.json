@@ -1,0 +1,51 @@
+{
+  "source_commit": "1682629dc2c1ae1147b69b37db120c971f221027",
+  "generated_at": "2026-09-07T11:22:23.485014+00:00",
+  "config_sha256": "28d9057e78499a7ab8a2ca609b7a77b88310d981fb1374dcd940dc65a9f3063a",
+  "files": {
+    "data/owner_k1k2_delayed_entry_v39/case_requests.csv": {
+      "sha256": "fb4ba09a9005e57bcf5ed888f04b6022b38cbe552745c590f354f5952be27b3c",
+      "rows": 63,
+      "columns": [
+        "event_id",
+        "direction",
+        "decision_time",
+        "gap_bars",
+        "initial_stop",
+        "signal_atr",
+        "ma",
+        "body_ratio",
+        "fold",
+        "cohort"
+      ]
+    },
+    "data/owner_k1k2_delayed_entry_v39/control_requests.csv": {
+      "sha256": "92ca2224d9d0a6b7f40086b5f3a7efb243cee6a5eb002baf4545d1538cdf3c62",
+      "rows": 108,
+      "columns": [
+        "event_id",
+        "parent_event_id",
+        "decision_time",
+        "direction",
+        "initial_stop",
+        "signal_atr",
+        "fold",
+        "ma",
+        "body_ratio",
+        "gap_bars",
+        "cohort"
+      ]
+    },
+    "data/owner_k1k2_delayed_entry_v39/assignments.csv": {
+      "sha256": "5df1f0d7fdd79fde2b3e4d59eee93a273ab4a733dac81d8bffaccd8dfc763867",
+      "rows": 63,
+      "columns": [
+        "event_id",
+        "decision_time",
+        "fold",
+        "match_status"
+      ]
+    }
+  },
+  "outcomes_materialized": false
+}
