@@ -73,3 +73,13 @@ def test_zero_and_positive_cluster_nulls():
     assert z['p']==1 and z['excess_bp']==0
     p=inference([1]*6,list(range(6)))
     assert p['p']==1/64 and p['ci_low']==p['ci_high']==1
+
+
+def test_finite_large_monthly_values_without_blas_warnings():
+    import warnings
+    x=np.random.default_rng(2).normal(200,5000,24)
+    with warnings.catch_warnings():
+        warnings.simplefilter('error',RuntimeWarning)
+        r=inference(x,list(range(24)))
+    assert 0<=r['p']<=1 and np.isfinite(r['excess_bp'])
+    with pytest.raises(ValueError):inference([np.inf],[1])

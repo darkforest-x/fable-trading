@@ -100,14 +100,16 @@ def inference(values, months):
     """Month-cluster bootstrap and one-sided sign randomization; not an RCT."""
     a=pd.DataFrame({'v':values,'m':months}).dropna()
     if not len(a):return dict(excess_bp=None,p=None,ci_low=None,ci_high=None,months=0)
+    if not np.isfinite(a.v.to_numpy()).all():raise ValueError('nonfinite inference input')
     g=a.groupby('m').v.agg(['sum','count']);s=g['sum'].to_numpy();n=g['count'].to_numpy();k=len(g)
     rng=np.random.default_rng(SEED)
     ix=rng.integers(0,k,size=(3999,k));boot=s[ix].sum(1)/n[ix].sum(1)
     if k<=12:
         signs=np.array(list(itertools.product([-1,1],repeat=k)))
-        p=float(np.mean((signs@s)>=s.sum()-1e-10))
+        # Elementwise reduction avoids this host BLAS's spurious FP warnings.
+        p=float(np.mean(np.sum(signs*s[None,:],axis=1)>=s.sum()-1e-10))
     else:
-        signs=rng.choice([-1,1],size=(3999,k));p=float((1+np.sum((signs@s)>=s.sum()-1e-10))/4000)
+        signs=rng.choice([-1,1],size=(3999,k));p=float((1+np.sum(np.sum(signs*s[None,:],axis=1)>=s.sum()-1e-10))/4000)
     return dict(excess_bp=float(a.v.mean()),p=p,ci_low=float(np.quantile(boot,.025)),ci_high=float(np.quantile(boot,.975)),months=k)
 
 
@@ -239,4 +241,47 @@ def main():
                   limitations=['No funding ledger','Fixed20bp cost proxy','No protective stop or margin/liquidation engine','Boundary marks include forced closes','Exploratory reused history','Monthly dependence assumption'])
     (OUT/'manifest.json').write_text(json.dumps(manifest,indent=2,ensure_ascii=False)+'\n')
 
-if __name__=='__main__':main()
+def refresh_statistics():
+    """Recompute inference from saved ledgers; retain original warned outputs."""
+    events=pd.read_csv(DATA_OUT/'events.csv')
+    summary=pd.read_csv(OUT/'summary.csv');groups=pd.read_csv(OUT/'groups.csv')
+    keyed=dict(tuple(events.groupby(['symbol','minutes','fold','policy'])))
+    before={name:hashlib.sha256((DATA_OUT/name).read_bytes()).hexdigest() for name in ('events.csv','controls.csv','portfolio_trades.csv')}
+    for frame in (summary,groups):
+        for i,r in frame.iterrows():
+            g=keyed[(r.symbol,r.minutes,r.fold,r.policy)]
+            if frame is groups:
+                name=r['group'];feature=r.feature
+                if feature=='side':g=g.loc[g.side==(1 if name=='long' else -1)]
+                elif feature=='zero_before':
+                    mask=g.zero_before>=9 if name=='9_plus' else g.zero_before.between(2,8) if name=='2_to_8' else g.zero_before==int(name)
+                    g=g.loc[mask]
+                else:g=g.loc[g[feature]==(name=='yes')]
+            for key,value in inference(g.excess_bp,g.month).items():frame.loc[i,key]=value
+            frame.loc[i,'matched_case_mean_net_bp']=g.loc[g.excess_bp.notna(),'net_bp'].mean()
+    sel=summary.loc[(summary.fold=='replication')&summary.p.notna()].sort_values('p')
+    summary.loc[sel.index,'p_holm_replication']=np.maximum.accumulate(np.minimum(1,sel.p.to_numpy()*(len(sel)-np.arange(len(sel)))))
+    original={}
+    for name in ('summary','groups','manifest'):
+        path=OUT/(name+('.json' if name=='manifest' else '.csv'))
+        target=path.with_name(path.stem+'_first_run'+path.suffix)
+        if target.exists():raise ValueError('first-run evidence already archived')
+        original[name]=dict(path=str(target.relative_to(ROOT)),sha256=hashlib.sha256(path.read_bytes()).hexdigest())
+        target.write_bytes(path.read_bytes())
+    summary.to_csv(OUT/'summary.csv',index=False);groups.to_csv(OUT/'groups.csv',index=False)
+    m=json.loads((OUT/'manifest.json').read_text());m['first_run_outputs']=original
+    m['statistics_refreshed_commit']=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+    m['statistics_refresh_reason']='Host BLAS emitted spurious FP warnings on finite input; explicit product-and-sum kernel independently checked. No price replay.'
+    for file in m['output_files']:
+        path=ROOT/file['path'];file['sha256']=hashlib.sha256(path.read_bytes()).hexdigest();file['size_bytes']=path.stat().st_size
+    (OUT/'manifest.json').write_text(json.dumps(m,ensure_ascii=False,indent=2)+'\n')
+    after={name:hashlib.sha256((DATA_OUT/name).read_bytes()).hexdigest() for name in before}
+    assert before==after
+    (OUT/'statistics_refresh_qa.json').write_text(json.dumps(dict(ledgers_unchanged=before==after,ledger_hashes=after,
+        max_p_difference=float((summary.p-pd.read_csv(OUT/'summary_first_run.csv').p).abs().max())),indent=2)+'\n')
+    print('Inference refreshed; every saved trade/control byte unchanged.')
+
+
+if __name__=='__main__':
+    import sys
+    refresh_statistics() if '--refresh-statistics' in sys.argv else main()
