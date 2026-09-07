@@ -152,7 +152,10 @@ def inference(t):
     grouped = matched.groupby(matched.signal_time.dt.strftime("%Y-%m")).paired_excess.sum().to_numpy()
     rng = np.random.default_rng(20260907)
     obs = float(matched.paired_excess.mean()) if len(matched) else np.nan
-    null = rng.choice([-1, 1], (10000, len(grouped))) @ grouped / max(1, len(matched))
+    # Explicit summation avoids spurious Accelerate matmul floating warnings
+    # observed on this Mac; independent recomputation agreed within 1.4e-17.
+    signs = rng.choice([-1, 1], (10000, len(grouped)))
+    null = (signs * grouped[None, :]).sum(axis=1) / max(1, len(matched))
     pair_p = (1 + (null >= obs).sum()) / 10001 if len(matched) else np.nan
     return {"n": len(t), "auc_abs_osc_vs_net_positive": auc_from_scores(scores, net > 0),
             "top_decile_n": len(rank), "top_decile_gross_bp": gross[rank].mean() * 1e4,
@@ -172,7 +175,12 @@ def table(rows, columns):
         return f"{x:.2f}" if isinstance(x, (float, np.floating)) else str(x)
     lines = ["| " + " | ".join(label for _, label in columns) + " |",
              "| " + " | ".join("---" for _ in columns) + " |"]
-    lines.extend("| " + " | ".join(fmt(row.get(key)) for key, _ in columns) + " |" for row in rows)
+    def cell(row, key):
+        value = row.get(key)
+        if key.endswith("_p") and value is not None and np.isfinite(value):
+            return f"{value:.4f}"
+        return fmt(value)
+    lines.extend("| " + " | ".join(cell(row, key) for key, _ in columns) + " |" for row in rows)
     return "\n".join(lines)
 
 
@@ -204,6 +212,8 @@ def report(payload, all_results):
 原版计成本资金曲线路径回撤 {primary['max_drawdown_path_pct']:.2f}%，已平仓 {primary['trades']} 笔。
 仅让初始止损从成交首根生效，权益收益变为 {fixed['return_pct']:.2f}%；仅改固定 1 倍则为 {one['return_pct']:.2f}%。
 这些是预先冻结的单变量检查，没有调参择优。
+原版计成本的净盈利交易只有 {primary['win_rate_pct']:.2f}%；最大 5 笔盈利占全部正盈利金额 {primary['largest_5_share_of_positive_pnl_pct']:.2f}%。
+2023 年权益亏损约 80.17%，所以累计盈利不能解释成各年稳定。2026 年只含 1–4 月。
 
 ## 数据与复现范围
 
@@ -242,7 +252,7 @@ bp 为万分之一。随机对照每个事件独立入场，不能把这些重�
 {table(payload['ranking'], rankcols)}
 
 上表仅针对原版计成本。原策略交易全部合格交叉，没有前 10% 选单规则；不能用该诊断倒推重新筛选交易。
-详细 p 值保留在 summary.json，表中仅保留两位小数，显示 0.00 不代表概率为零。
+详细 p 值保留在 summary.json，表中 p 值保留四位小数，其他指标保留两位。全程匹配病例 67/69，后段 12/12；各版本覆盖率另见 summary.csv。
 匹配同币、UTC 月份、香港 6 小时时间块、因果 ATR% 五分位、同方向，排除距病例信号 12 根以内；候选按固定哈希顺序选最多 3 个。
 对照用自己的入场价和 ATR、相同止损/保本/原始信号退出规则和成本，独立空仓状态启动；没有复制病例实现后的持有期限。
 冷却路径依赖于各自账户历史，独立事件对照不复制主账户先前盈利造成的计数；这是解释边界。
