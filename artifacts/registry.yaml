@@ -19,6 +19,97 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: btcusdtp-hourly-classifier-v29-results
+    artifact_type: report
+    role: classifier_support
+    source_repo: darkforest-x/fable-trading
+    source_commit: "d305c2c"
+    source_path: experiments/active/exp-btcusdtp-1h-classifier-support-preholdout-20260907-v29/results/summary.json
+    sha256: "3dd9cfd1a05d58ee9b901c57504cdd720bd7910912ca7181d7bbc3f5bf5b68ad"
+    size_bytes: 2254
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-classifier-support-preholdout-20260907-v29/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Support78/251 below frozen80;five output tables hashed in summary,no outcomes."
+
+  - artifact_id: btcusdtp-hourly-classifier-v29-audit
+    artifact_type: report
+    role: independent_support_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f549dd4"
+    source_path: experiments/active/exp-btcusdtp-1h-classifier-support-preholdout-20260907-v29/audit.json
+    sha256: "cd079ad6f8a9b553c121eea2d314f975effe05c6a2083ff8e45cf90b32122b69"
+    size_bytes: 1825
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-classifier-support-preholdout-20260907-v29/audit.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Independent18222hours/995contexts/62counts/251groups passed;not raw5/Pine/economics."
+
+  - artifact_id: btcusdtp-hourly-classifier-v29-report-data
+    artifact_type: report
+    role: saved_support_diagnostics
+    source_repo: darkforest-x/fable-trading
+    source_commit: "92a6e57"
+    source_path: experiments/active/exp-btcusdtp-1h-classifier-support-preholdout-20260907-v29/report_data.json
+    sha256: "7f1bb50e05cdc45deaa3750b8e212b0f3b525fb621b99378f19200ec5bae0f92"
+    size_bytes: 17465
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-classifier-support-preholdout-20260907-v29/report_data.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "ActualSQLite query receipt;67distance-only33slope-only70both3unknown,no labels."
+
+  - artifact_id: btcusdtp-hourly-classifier-v29-report
+    artifact_type: report
+    role: classifier_support_diagnosis
+    source_repo: darkforest-x/fable-trading
+    source_commit: "92a6e57"
+    source_path: analysis/p1_btcusdtp_hourly_classifier_support_v29_20260907.md
+    sha256: "0c9ebbcf7cd757fde8b5ead9576a318c010305281059d9a2a03f7e08b24270ff"
+    size_bytes: 15868
+    storage_uri: "repo://analysis/p1_btcusdtp_hourly_classifier_support_v29_20260907.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Evidence/builder ancestor,not narrative creation commit;support insufficient,profit unknown."
+
+  - artifact_id: btcusdtp-hourly-classifier-v29-html
+    artifact_type: report
+    role: portable_technical_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "92a6e57"
+    source_path: analysis/html/p1_btcusdtp_hourly_classifier_support_v29_20260907.html
+    sha256: "805056866c439647098dc365f4ac0f1286f22e3181487effc19815ed07cdac37"
+    size_bytes: 512446
+    storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_classifier_support_v29_20260907.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Builder ancestor;official structural_only,browser/mobile/source-dialog unverified."
+
+  - artifact_id: btcusdtp-hourly-classifier-v29-artifact
+    artifact_type: report
+    role: canonical_report_manifest
+    source_repo: darkforest-x/fable-trading
+    source_commit: "92a6e57"
+    source_path: experiments/active/exp-btcusdtp-1h-classifier-support-preholdout-20260907-v29/artifact.json
+    sha256: "ca951d36315dd4549deabab2f83dabff8c8c06227dcf028cccd1c1fdf79fae4b"
+    size_bytes: 27874
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-classifier-support-preholdout-20260907-v29/artifact.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Builder ancestor;13sections14blocks1native24monthcountchart,support only."
+
+
   - artifact_id: btcusdtp-hourly-vwma-background-v27-results
     artifact_type: report
     role: background_support

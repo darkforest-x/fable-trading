@@ -46,4 +46,3 @@ def test_full_trace_schema_and_mutually_exclusive_rejection_reasons(direction):
         reasons = {r['reason']: r['events'] for r in actual if r['population'] == population}
         assert reasons == dict(accepted=1, distance_only=1, slope_only=1, slope_and_distance=1, unknown=2)
         assert sum(reasons.values()) == len(rows)
-

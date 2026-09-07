@@ -1,0 +1,68 @@
+{
+  "status": "passed",
+  "summary_sha256": "3dd9cfd1a05d58ee9b901c57504cdd720bd7910912ca7181d7bbc3f5bf5b68ad",
+  "auditor_commit": "f549dd49b5db2700b4dcdd20707ec6ab70c3318c",
+  "auditor_sha256": "531ce610e21cd01a970b6f7daf28854ec073c830f8cef2d3d815ef1a26fe3531",
+  "builder_commit": "d305c2c06b5a7b9737a44a2abca1484b64aa9df0",
+  "sources_verified": 10,
+  "parent_sources_verified": [
+    18,
+    12
+  ],
+  "input_hashes_verified": 13,
+  "output_hashes_verified": 5,
+  "trace_rows_recomputed": 18222,
+  "contexts_recomputed": 995,
+  "count_rows": 62,
+  "mother_rows": 251,
+  "population": {
+    "case": {
+      "total": 251,
+      "accepted": 78,
+      "abstain": 170,
+      "unknown": 3,
+      "known": 248
+    },
+    "control": {
+      "total": 744,
+      "accepted": 136,
+      "abstain": 608,
+      "unknown": 0,
+      "known": 744
+    }
+  },
+  "support_values": {
+    "events": 78,
+    "minimum_fold_events": 17,
+    "active_months": 24,
+    "minimum_fold_months": 6
+  },
+  "coverage": {
+    "case_known": {
+      "numerator": 248,
+      "denominator": 251,
+      "rate": 0.9880478087649402
+    },
+    "control_known": {
+      "numerator": 744,
+      "denominator": 744,
+      "rate": 1.0
+    },
+    "complete_known_triples_all_cases": {
+      "numerator": 248,
+      "denominator": 251,
+      "rate": 0.9880478087649402
+    },
+    "complete_known_triples_accepted_cases": {
+      "numerator": 78,
+      "denominator": 78,
+      "rate": 1.0
+    }
+  },
+  "raw5_aggregation_recomputed": false,
+  "pine_live_parity_verified": false,
+  "randomization_replayed": false,
+  "outcomes_read_or_computed": false,
+  "inference_recomputed": false,
+  "limitation": "Independent saved-hour formula/support audit, not raw5 aggregation, historical source authenticity, Pine/live execution, randomization replay or economic evidence."
+}

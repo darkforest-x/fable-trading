@@ -2,6 +2,36 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-07 — V29源码默认分类器支持不足，未读该门收益）
+
+按 ChartPrime Trend Classifier 原源码 default10/100 加一个已完成 K1 的同向状态门，
+原 SMA251 及 V24 已冻结744自身时钟controls不变，不采用VWMA288。源码d305c2c
+先提交再计算：78accepted/170abstain/3unknown；control136/608/0。四半年20/17/19/22，
+24活跃月，每半年6月；78低于预注册80，另三门通过。80不是统计功效或盈利裁决。
+状态已知248/251；78通过入口均完整三控，234controls中51通过183不通过。
+
+原因互斥拆解：67仅价格距离不符，33仅斜率不符，70两者不符。170中168是分类器
+中性，仅2明确反向；不可说删掉170亏损或盘整交易。3unknown为2023-06-25 UTC
+03/11/14时K1，断点后连续53/61/64根未完成100预热。源码offset=-1仅绘图，不倒移
+决策时钟；短分支允许flat slope，不能自行对称化。默认参数不等于最优参数。
+
+独立stdlib审计f549dd4先提交再跑：18222小时/995上下文/62计数/251母组重算通过，
+13inputs/5outputs/10sources+18/12父sources核验，初末SHA一致。非raw5聚合、抽样重放、
+原始来源真实性、Pine原生/实盘一致性或经济审计。报告SQL首次重名错误保留失败收据，
+2合成tests复现后限定c.上下文、92a6e57先提交再成功查询；未动上游结果。
+451联合tests过、13既有Pyparsing警告；139为V29三测试文件数量，不重复累加旧子集。
+
+报告analysis/html/p1_btcusdtp_hourly_classifier_support_v29_20260907.html；E29保存
+完整结果/audit/report_data/QA/NEXT/portable收据。13sections/14blocks/1native24月图；
+官方validation/package通过，structural_only，browser/mobile/source-dialog未验。
+新增源码backplot时钟、真实schema联表测试、中性不等于盘整三条learning。
+
+V29登记inconclusive仅支持不足，不读78子集收益、不降80、不改2025+/holdout、TV、
+ACTIVE、训练、部署或真金。V28负面经济结论不变，盈利目标未达成。
+下一步V30尚未登记/运行：先审查与原启动互补且不重复旧实验的状态变化定义及因果钟；
+不得从168中性或V28赢家倒推参数。见E29 NEXT_EXPERIMENT；不继续堆同义MA票。
+get_goal为usageLimited，未消费reset，不承诺后台运行。保留其他会话dirty改动。
+
 ## ⚡ 当前真相（2026-09-07 — V27支持通过，V28量权入口经济检验拒绝）
 
 V27 builder36a315e先提交再重建新VWMA288母的背景资格。284完整组三控=852，

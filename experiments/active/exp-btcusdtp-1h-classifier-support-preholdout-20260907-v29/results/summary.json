@@ -1,0 +1,80 @@
+{
+  "population": {
+    "case": {
+      "total": 251,
+      "accepted": 78,
+      "abstain": 170,
+      "unknown": 3,
+      "known": 248
+    },
+    "control": {
+      "total": 744,
+      "accepted": 136,
+      "abstain": 608,
+      "unknown": 0,
+      "known": 744
+    }
+  },
+  "support_values": {
+    "events": 78,
+    "minimum_fold_events": 17,
+    "active_months": 24,
+    "minimum_fold_months": 6
+  },
+  "support_gates": {
+    "minimum_events": false,
+    "minimum_per_fold": true,
+    "minimum_active_months": true,
+    "minimum_months_per_fold": true
+  },
+  "support_pass": false,
+  "coverage": {
+    "case_known": {
+      "numerator": 248,
+      "denominator": 251,
+      "rate": 0.9880478087649402
+    },
+    "control_known": {
+      "numerator": 744,
+      "denominator": 744,
+      "rate": 1.0
+    },
+    "complete_known_triples_all_cases": {
+      "numerator": 248,
+      "denominator": 251,
+      "rate": 0.9880478087649402
+    },
+    "complete_known_triples_accepted_cases": {
+      "numerator": 78,
+      "denominator": 78,
+      "rate": 1.0
+    }
+  },
+  "accepted_case_control_states": {
+    "total": 234,
+    "accepted": 51,
+    "abstain": 183,
+    "unknown": 0,
+    "known": 234
+  },
+  "status": "insufficient_support_no_outcomes",
+  "outcomes_read_or_computed": false,
+  "economic_acceptance": false,
+  "trace_validation": {
+    "rows": 18222,
+    "segments": 2,
+    "raw5_aggregation_verified": false,
+    "pine_builtin_parity": false
+  },
+  "experiment_id": "exp-btcusdtp-1h-classifier-support-preholdout-20260907-v29",
+  "generated_at": "2026-09-07 03:29:00.380111+00:00",
+  "builder_commit": "d305c2c06b5a7b9737a44a2abca1484b64aa9df0",
+  "output_hashes": {
+    "hourly_trace.csv.gz": "b8a378678f0ed1ae673f77a3fcc394d44d8df49a770e6009ff2a7ed9fce478cf",
+    "case_context.csv.gz": "46964298fa84001ae74584e27a5caceed8fb21bfd5fc50461fa829aef6c4f4d1",
+    "control_context.csv.gz": "a46c8146c6ba9bdcb68d958012245ee20f15a33bfc0b6f8170008c9dbfc3242a",
+    "counts.csv.gz": "58763977acc1853b078c4878419d66439a0dc097cc0cbaa3a306dd3884d94882",
+    "matched_support.csv.gz": "cf8d7e55a867ce170277cc9619358f3cdcc2165ac563fd8f44c9100e4f4bd4d9"
+  },
+  "support_frozen_sha256": "3fb5220b928e417c90b5151591c9fe371960dbbf77153eb7e446a1f32c0fee38"
+}

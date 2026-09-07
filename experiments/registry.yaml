@@ -16,18 +16,35 @@ schema_version: 1
 experiments:
   - experiment_id: exp-btcusdtp-1h-classifier-support-preholdout-20260907-v29
     source_repo: darkforest-x/fable-trading
-    source_commit: "pending_source_first"
-    status: active
+    source_commit: "d305c2c"
+    status: inconclusive
     question: Does source-default Trend Classifier direction retain enough original hourly K1 and own-clock control support?
     single_variable: Add one completed-K1 source-default10/100 directional state gate;originalSMA251 and744 controls fixed.
-    result: Preregistered support-only;no labels or outcomes read.
-    canonical_report: null
+    result: >-
+      Support-only original251 cases retain78,abstain170,unknown3;
+      frozen744 own-clock controls136/608/0. Fourhalf20/17/19/22,
+      all24months;78 below frozen80,other three coverage gates pass.
+      Rejection67distance-only,33slope-only,70both;168neutral and2opposite.
+      Insufficient support,no outcomes or profitability inference.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_classifier_support_v29_20260907.html
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts:
+      - btcusdtp-hourly-classifier-v29-results
+      - btcusdtp-hourly-classifier-v29-audit
+      - btcusdtp-hourly-classifier-v29-report-data
+      - btcusdtp-hourly-classifier-v29-report
+      - btcusdtp-hourly-classifier-v29-html
+      - btcusdtp-hourly-classifier-v29-artifact
     reuse_allowed: false
-    notes: No backplotted diamonds,parameter grid,new allocation or economic claims;80/12/12/3 feasibility gates frozen.
+    notes: >-
+      f549dd4 independent18222hour/995context/62count/251group audit passed;
+      13inputs/5outputs/10sources verified. 451jointtests passed.
+      Report SQL initial failure preserved;qualified-source fix92a6e57 before rerun.
+      Pine formula port not native startup/live parity;neutral is not verified chop.
+      80feasibility gate is not power or efficacy test;not relaxed after78.
+      HTML structural_only,browser/mobile unverified;no outcomes/holdout/TV/live.
 
   - experiment_id: exp-btcusdtp-1h-vwma-fixed-clock-preholdout-20260907-v28
     source_repo: darkforest-x/fable-trading
