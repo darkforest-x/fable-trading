@@ -20194,3 +20194,49 @@ artifacts:
     notes: Matches actual owner saved blue/orange line styles; no histogram or columns. Core, 14 nonvisual inputs
       and 5 alerts unchanged. Official compiler and same-chart style comparison passed. Original cloud script saved
       as revision3; reference script unchanged. No PnL evaluation.
+
+  - artifact_id: imacd-pine-focus-v2-20260907-source
+    artifact_type: manifest
+    role: research_indicator_near_zero_visual_focus
+    source_repo: darkforest-x/fable-trading
+    source_commit: d9b629dcdf72c66d0b9a98f2af83236fda57f162
+    source_path: yoyo/evaluation/pine/imacd_dense_mtf_v2.pine
+    sha256: ee5059a64781b44d0c00c48ab645622ca694b97b37a2b6436c8fc8681f26c5f8
+    size_bytes: 27644
+    storage_uri: repo://yoyo/evaluation/pine/imacd_dense_mtf_v2.pine
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-requested near-zero visual emphasis. Core,14 signal inputs,5 alerts unchanged. Official compiler
+      and parent dark/light screenshots passed; ETH4h August19 case shows44 near-zero bars. Cloud revision4 saved.
+      Independent source review passed; independent final screenshot unavailable due tab lock. No PnL evaluation.
+  - artifact_id: imacd-pine-focus-v2-20260907-receipt
+    artifact_type: manifest
+    role: research_indicator_near_zero_visual_focus
+    source_repo: darkforest-x/fable-trading
+    source_commit: d9b629dcdf72c66d0b9a98f2af83236fda57f162
+    source_path: experiments/active/exp-imacd-ma-mtf-20260907-v3/pine_indicator/focus_v2_receipt.json
+    sha256: 30c0daa89f3905b64af5d82b844943383c530d1a461f56af46c6b0a03bf62b7b
+    size_bytes: 1852
+    storage_uri: repo://experiments/active/exp-imacd-ma-mtf-20260907-v3/pine_indicator/focus_v2_receipt.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-requested near-zero visual emphasis. Core,14 signal inputs,5 alerts unchanged. Official compiler
+      and parent dark/light screenshots passed; ETH4h August19 case shows44 near-zero bars. Cloud revision4 saved.
+      Independent source review passed; independent final screenshot unavailable due tab lock. No PnL evaluation.
+  - artifact_id: imacd-pine-focus-v2-20260907-guide
+    artifact_type: report
+    role: research_indicator_near_zero_visual_focus
+    source_repo: darkforest-x/fable-trading
+    source_commit: d9b629dcdf72c66d0b9a98f2af83236fda57f162
+    source_path: analysis/html/p0_imacd_pine_focus_20260907.html
+    sha256: 3c5ac38e7cb6372190f2401e37a951bd11a7ba4957fe0ad5a318ce6cb42bd422
+    size_bytes: 8243
+    storage_uri: repo://analysis/html/p0_imacd_pine_focus_20260907.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-requested near-zero visual emphasis. Core,14 signal inputs,5 alerts unchanged. Official compiler
+      and parent dark/light screenshots passed; ETH4h August19 case shows44 near-zero bars. Cloud revision4 saved.
+      Independent source review passed; independent final screenshot unavailable due tab lock. No PnL evaluation.

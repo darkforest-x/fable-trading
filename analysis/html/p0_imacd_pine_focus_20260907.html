@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>IMACD 蓄势释放：长横盘与首次扩张的视觉重点</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>IMACD 蓄势释放：长横盘与首次扩张的视觉重点</h1>
+<p>新版已保存到 TradingView 原脚本 <code>IMACD 零轴密集启动 · 多周期趋势 V1</code> 第 <strong>4</strong> 版（2026-09-07 23:48），图表名称为 <strong>IMACD · 蓄势释放</strong>。“综合过滤”布局已更新。用户提供的 OKX ETHUSDT.P 4 小时、8 月 19 日启动案例，实际显示 <strong>44 根近零蓄势</strong>及向上释放标记。</p>
+<h2>视觉变化与上一版对照</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>V1.2</th>
+<th>V2</th>
+</tr></thead><tbody>
+<tr><td>副图</td><td>蓝橙双线</td><td>双线保留，无柱子</td></tr>
+<tr><td>长横盘</td><td>没有专门的连续阶段标识</td><td>金色零轴轨迹、连续根数、主图中性浅框</td></tr>
+<tr><td>长横盘后的扩张</td><td>与普通走势等权显示</td><td>青绿／珊瑚菱形、释放标签、初段轻微光晕</td></tr>
+<tr><td>普通系统标记</td><td>默认显示</td><td>默认隐藏，设置可开启</td></tr>
+<tr><td>原交易核心／交易输入／警报</td><td>原版本</td><td>核心逐字一致；14 项输入和 5 条警报逐字一致</td></tr>
+</tbody></table>
+<p>参考 ChartPrime 官方公开图表的视觉层级：<a href="https://www.tradingview.com/script/6yyxS28p-Breakout-Boxes-ChartPrime/">Breakout Boxes</a> 的淡区间与突破事件、<a href="https://www.tradingview.com/script/qe0D9HM1-Trending-RSI-ChartPrime/">Trending RSI</a> 的线条层级、<a href="https://www.tradingview.com/script/pP2FhzAX-Zero-Lag-MA-Trend-Levels-ChartPrime/">Zero-Lag MA Trend Levels</a> 的克制浅填充。实现为原创 Pine 显示代码，没有复制其算法。</p>
+<h2>显示定义</h2>
+<p>两线幅度 <code>max(abs(md), abs(sb)) ≤ 0.10 × ATR[1]</code> 连续满 12 根，才成为突出显示的“近零蓄势”。这两个值是显示默认值，不是收益优化结果。达到资格后冻结容差，避免 ATR 缩小把原本没有扩张的线误判为释放。</p>
+<p>第 12 根收盘开始画金轨和中性框，之前 11 根不事后补画，根数仍包含完整连续段。因此用户案例的标签写 44 根，金轨实际覆盖资格成立后的部分。主线越过冻结带才给方向释放；信号线单独离带只结束蓄势，不给方向强标。新状态只在收盘且数据充分时更新。</p>
+<p>整理框不包含释放 K 线，历史框不按后来涨跌重新染色。每段最多一个释放事件，保留最近 80 个完整绘图段。默认只强调释放当根起的 12 根初段；不是持仓期限。<strong>“蓄势释放”是形态提示，原系统是否入场仍由原均线／多周期规则决定。</strong></p>
+<h2>实际验证与证据边界</h2>
+<ul>
+<li>冻结源码：<code>d9b629dcdf72c66d0b9a98f2af83236fda57f162</code>，先提交，再编译及验收。</li>
+<li>TradingView 官方编辑器实际编译成功，图表运行成功；保存版本按钮为 <code>4 ∙ Today, 23:48</code>。</li>
+<li>编辑器复制回读规范化换行后，与本地源码一致：24,957 字符，FNV1a32 <code>a1d62997</code>。本地 SHA256 <code>ee5059a64781b44d0c00c48ab645622ca694b97b37a2b6436c8fc8681f26c5f8</code>。</li>
+<li>父任务直接截图检查深／浅主题：44 根标签、金轨、主图浅框、释放菱形和双图标签可见；普通交叉及退出叉未抢占重点；副图没有柱子。最终恢复深色并保存布局。截图由工具在会话中显示，未另存成图像文件。</li>
+<li>独立代码审查通过：冻结边界、收盘限制、不提前画资格、突破 K 线排除、信号线单独离带不标方向、同步清理绘图队列。审查提出一处计数说明不严谨，已修正。</li>
+<li>独立最终视觉复核因浏览器会话占用未完成；以上视觉结论来自父任务实际观察，不能冒充双人截图验收。</li>
+</ul>
+<p>本轮为一个用户指定案例的显示验收，无训练／验证集和收益样本；候选数、正类率、val 样本数、AUC、胜率、净收益、收益置换检验及匹配随机入场对照不适用。对应的严格对照是原信号核心／输入／警报逐字一致，检查显示层不反向赋值原状态，并核对实际显示与相同案例。边界条件为源码审查，不声称已经逐项进行 Pine 回放测试。</p>
+<p>本显示配置第 <strong>1</strong> 次使用该 holdout 案例进行 UI 验收；同次验收检查两种主题。所有者已在对话明确授权任意日期。未据此评分、训练或调优交易参数，未重算收益。</p>
+<h2>复现</h2>
+<pre><code>
+git show d9b629dcdf72c66d0b9a98f2af83236fda57f162:yoyo/evaluation/pine/imacd_dense_mtf_v2.pine &gt; /tmp/imacd_focus_v2.pine
+shasum -a 256 /tmp/imacd_focus_v2.pine
+python3 scripts/md_to_html.py analysis/p0_imacd_pine_focus_20260907.md --out-dir analysis/html
+</code></pre>
+<p>在 TradingView 打开原账户脚本，粘贴该源文件，执行“更新到图表”。使用 OKX ETHUSDT.P 普通 4 小时 K 线，查看 2026-08-08 至 2026-08-23；保持显示默认值，观察 8 月 19 日附近的 44 根近零段与释放。也可查看 <a href="https://www.tradingview.com/chart/AlGc61US/">已更新的综合过滤布局</a>。</p>
+<h2>风险与诚实声明</h2>
+<p>一个事先选定的大涨案例仅验证重点是否画对，不能证明形态能赚大钱。近零允许微小离轴，和原系统的精确零轴入场条件不同；显示释放可能晚于原系统入场。原高周期确认的保守延迟契约保留。未改变成本、退出、警报条件、订单或生产配置；没有新增真实警报。</p>
+<p>下一步可由所有者直接使用现有显示设置调整视觉密度。若要让近零释放改变入场或新增其专用警报，属于另一项行为改动，需要明确需求后单独实现与验证。</p>
+</body>
+</html>
