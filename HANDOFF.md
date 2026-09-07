@@ -2,7 +2,13 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## YOLO 当前进度（2026-09-07：2513个建议框已审计，先复核重点50张）
+## YOLO 当前进度（2026-09-07：2513个建议框已审计，统一入口逐张调整）
+
+最新操作口径：Owner质疑先50分组增加人工负担。人工默认回到完整2513张的Default44：
+http://127.0.0.1:8081/projects/77/data?tab=44 ，直接Label All Tasks连续审核。
+已只读核实44无过滤、2513唯一任务；浏览器切回该入口，预框和future40继续沿用。
+“先50”是后台校准建议，不是人工必须完成的阶段门；Owner不必切分组或管理审计标签。
+既有重点/重复/冲突/星标视图留作后台排查，原数据和人工答案不变。下述为上一轮审计记录。
 
 已装工具本轮真正接入：source301e1fe冻结后，Datumaro检查2513框，0 error；
 28 warnings对应14张几何统计异常，不当错标。CleanVision确认17组完全重复/34身份，
@@ -41,8 +47,8 @@ experiments/active/exp-owner-box-refinement-20260907-v1/（results含覆盖明�
 交付报告：analysis/html/p1_yolo_owner_box_refinement_20260907.html。
 历史12565人工图、1345旧short正例、500方向批次/176图⭐口径与证据，仍见
 analysis/html/p1_yolo_historical_label_reuse_20260907.html，不与当前1043自动正事件混称。
-下一步先审项目77重点50（3冲突+38重复候选+9其他，含3原⭐），再复核14张统计警告
-及剩余原⭐；读取真实Owner新答案，再逐图回写独立新数据版本。
+下一步Owner在项目77完整列表逐张调整；后台保留重点50与14张几何警告供诊断，
+不再要求Owner切组或先完成50张。读取真实Owner新答案，再逐图回写独立新数据版本。
 旧train/val只作来源标记，未来上下文与新旧合并需要重新审时间依赖。无新训练、模型推理、
 holdout OHLCV、promote；训练和生产资格仍false。
 
