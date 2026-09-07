@@ -1,0 +1,89 @@
+{
+  "population": {
+    "case": {
+      "total": 251,
+      "accepted": 9,
+      "abstain": 241,
+      "unknown": 1,
+      "known": 250
+    },
+    "control": {
+      "total": 744,
+      "accepted": 3,
+      "abstain": 741,
+      "unknown": 0,
+      "known": 744
+    }
+  },
+  "support_values": {
+    "events": 9,
+    "minimum_fold_events": 1,
+    "active_months": 8,
+    "minimum_fold_months": 1
+  },
+  "support_gates": {
+    "minimum_events": false,
+    "minimum_per_fold": false,
+    "minimum_active_months": false,
+    "minimum_months_per_fold": false
+  },
+  "support_pass": false,
+  "status": "insufficient_support_no_outcomes",
+  "coverage": {
+    "case_known": {
+      "numerator": 250,
+      "denominator": 251,
+      "rate": 0.9960159362549801
+    },
+    "control_known": {
+      "numerator": 744,
+      "denominator": 744,
+      "rate": 1.0
+    },
+    "complete_known_triples_all_cases": {
+      "numerator": 248,
+      "denominator": 251,
+      "rate": 0.9880478087649402
+    },
+    "complete_known_triples_matched_cases": {
+      "numerator": 248,
+      "denominator": 248,
+      "rate": 1.0
+    },
+    "complete_known_triples_accepted_cases": {
+      "numerator": 9,
+      "denominator": 9,
+      "rate": 1.0
+    },
+    "accepted_cases_with_matched_support": {
+      "numerator": 9,
+      "denominator": 9,
+      "rate": 1.0
+    }
+  },
+  "accepted_case_control_states": {
+    "total": 27,
+    "accepted": 1,
+    "abstain": 26,
+    "unknown": 0,
+    "known": 27
+  },
+  "trace_validation": {
+    "rows": 18222,
+    "frozen_reference_recomputed": true,
+    "raw5_aggregation_verified": false,
+    "pine_builtin_parity": false
+  },
+  "outcomes_read_or_computed": false,
+  "economic_acceptance": false,
+  "generated_at": "2026-09-07 01:31:12.588375+00:00",
+  "experiment_id": "exp-btcusdtp-1h-structure-event-support-preholdout-20260907-v25",
+  "builder_commit": "b1cca1eaebdf563544e0f3a59210fe78831e414a",
+  "output_hashes": {
+    "case_context.csv.gz": "133f9c8571419e8b65f1ac2c00c2ff7367102520a1563b4796ed6809e852d319",
+    "control_context.csv.gz": "16c8d8aa15a1ce1ce91a44fd87d4b73e5548fad3b91e83f36cd3bbf68188021f",
+    "counts.csv.gz": "329c49fb5ac8b9f666c04a10c78734ae9cf4284035f92b0d46b1d8df8765672e",
+    "matched_support.csv.gz": "09b3d1e775a6623db8351bd181c89c3547faef61b422fc9dd78a7e5567868c39"
+  },
+  "support_frozen_sha256": "16bceb5081e66f039651566046fd251f8b8d4bb3cb21acf42f03144c60f0d9c7"
+}

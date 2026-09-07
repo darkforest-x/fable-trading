@@ -1,0 +1,56 @@
+{
+  "generated_at": "2026-09-07T01:41:19.264821+00:00",
+  "source_commit": "48511b49b6db329d330db1953fa31f0c6f9df81d",
+  "report_sha256": "142e4188d3dc01003de091fd9cc44993721a4eaa22e16ba54bfe5b9dd012a06a",
+  "support_summary_sha256": "f305012a212dbcadd152c198288a74f78393868c19711b6b5add0e83e7da3d61",
+  "sources": [
+    {
+      "id": "report",
+      "label": "V25 · 定义、支持分母、验证与限制",
+      "path": "analysis/p1_btcusdtp_hourly_structure_event_support_v25_20260907.md"
+    },
+    {
+      "id": "monthly",
+      "label": "V25 · frozen counts中全部case月份，保留零月",
+      "path": "experiments/active/exp-btcusdtp-1h-structure-event-support-preholdout-20260907-v25/results/counts.csv.gz",
+      "query": {
+        "sql": "SELECT * FROM counts WHERE population='case' AND dimension='month' ORDER BY key",
+        "engine": "sqlite",
+        "language": "sql",
+        "tables_used": [
+          "counts"
+        ],
+        "executed_at": "2026-09-07T01:41:19.264821+00:00",
+        "description": "实际SQLite查询冻结62行计数；输出全部24个UTC月份与原251分母",
+        "filters": [
+          "population=case; dimension=month; no outcome selection"
+        ]
+      }
+    },
+    {
+      "id": "summary",
+      "label": "V25 · 只审支持、不读取收益",
+      "path": "experiments/active/exp-btcusdtp-1h-structure-event-support-preholdout-20260907-v25/results/summary.json"
+    }
+  ],
+  "all_sections_preserved": true,
+  "sections": 13,
+  "blocks": 14,
+  "chart_map": [
+    {
+      "section": "月份支持",
+      "family": "comparison",
+      "type": "bar",
+      "rows": 24,
+      "palette": "single blue root",
+      "non_color": "month labels and exact values",
+      "question": "是否有足够月份观察当前K1方向事件",
+      "dataset": "monthly"
+    }
+  ],
+  "table_rationale": "Exact threshold/denominator audit; no redundant charts for few threshold lookups",
+  "actual_sql_queries": [
+    "SELECT * FROM counts WHERE population='case' AND dimension='month' ORDER BY key"
+  ],
+  "new_prices_or_outcomes_read": false
+}

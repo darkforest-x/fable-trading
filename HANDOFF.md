@@ -2,6 +2,36 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-07 — V25同根结构事件支持不足，未算该门收益）
+
+b1cca1e先提交V25事件公式/runner/config/plan/130新测试再真实运行。
+V20冻结18222保存小时trace，V24原251case/744随机control与248组三控/3无控保持。
+只将持久同向结构改为K1本根首次建立/反转方向事件；10/10与unknown不变。
+实际case9accepted/241abstain/1unknown，control3/741/0。四半年1/2/4/2，
+8活跃月、各半年活跃月1/2/3/2；80/12perhalf/12months/3monthsperhalf四门全部失败。
+250caseknown，原248三控全known，9accepted全matched；其27controls为1accepted/26abstain。
+旧同向137中128不是本根方向事件，9均为反向state翻转；唯一unknown是2023-06-25
+03:00UTC K1的no_confirmed_break（原unmatched）。不改unknown为abstain或删分母。
+
+48511b4先提交独立stdlib auditor再真实执行：18222小时结构、995上下文、62计数、
+251母配对全重建通过；8本轮+18/12历史sources、13inputs/4outputs核过。
+V20历史失败在featurefreeze之后，首次/恢复标记同一个SHA；只验特征链，不读旧收益。
+runner初末双验SHA；447联合tests通过。独立保存审计不等于raw5/Pine/live或收益验证。
+项目.venv下182registry/boundary和130新测试通过；system Python扩展检查3项非数值
+依赖版本不匹配已记QA，未改依赖；两环境numpy2.0.2/pandas2.3.3一致。
+HTML analysis/html/p1_btcusdtp_hourly_structure_event_support_v25_20260907.html，
+13sections14blocks1native月图；官方validation/package通过，structural_only，
+browser/mobile/source-dialog未验证。首打包缺实际SQL失败已记录QA，修为真实SQLite
+投影后打包，未动策略或结果。3条learning和audit/QA收据保存。
+
+V25登记inconclusive仅指支持不足，不能说已证明亏损；不再读9笔收益或放松该门。
+V24固定入口持续性not_supported、V19纯退出微调停止结论均保持。
+下一步候选V26（未登记/未计算）：只把入口SMA40(HL2)改为VWMA40(HL2)，先重建
+全机会与原SMA251 parity再审新支持；退出SMA/形态/20bp均冻结。详见V25目录
+NEXT_EXPERIMENT.md；新增入口不能继承旧248三控。不是再扫MA20/30、EMA、
+普通放量或prior20突破（V1等已测过）。未读取新配置/2025+价格/holdout，
+无TV/训练/ACTIVE/实盘改动。goal active盈利未达成；保留并行ARB等未提交改动。
+
 ## ⚡ 当前真相（2026-09-07 — V24固定入口持续性已检验，拒绝）
 
 6088258先提交label/随机抽样/统计/诊断/config/plan，再唯一真实运行两CLI。

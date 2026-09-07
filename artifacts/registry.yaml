@@ -19,6 +19,82 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: btcusdtp-hourly-structure-event-v25-results
+    artifact_type: report
+    role: support_only_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: "b1cca1e"
+    source_path: experiments/active/exp-btcusdtp-1h-structure-event-support-preholdout-20260907-v25/results/summary.json
+    sha256: "f305012a212dbcadd152c198288a74f78393868c19711b6b5add0e83e7da3d61"
+    size_bytes: 2414
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-structure-event-support-preholdout-20260907-v25/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "9of251 current events;allfour support gates failed;no outcomes read."
+
+  - artifact_id: btcusdtp-hourly-structure-event-v25-audit
+    artifact_type: report
+    role: independent_saved_hour_support_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: "48511b4"
+    source_path: experiments/active/exp-btcusdtp-1h-structure-event-support-preholdout-20260907-v25/independent_audit.json
+    sha256: "015226e7313eb22e8e48b7a120efa1725a3d767f409104e748f127f0a68a0e7a"
+    size_bytes: 2048
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-structure-event-support-preholdout-20260907-v25/independent_audit.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Independent18222hours995contexts62counts251mothers verified;not raw5 or Pine."
+
+  - artifact_id: btcusdtp-hourly-structure-event-v25-report
+    artifact_type: report
+    role: structure_event_support_diagnosis
+    source_repo: darkforest-x/fable-trading
+    source_commit: "48511b4"
+    source_path: analysis/p1_btcusdtp_hourly_structure_event_support_v25_20260907.md
+    sha256: "142e4188d3dc01003de091fd9cc44993721a4eaa22e16ba54bfe5b9dd012a06a"
+    size_bytes: 12509
+    storage_uri: "repo://analysis/p1_btcusdtp_hourly_structure_event_support_v25_20260907.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Evidence/report-builder parent,not narrative creation commit;support insufficient not proven unprofitable."
+
+  - artifact_id: btcusdtp-hourly-structure-event-v25-html
+    artifact_type: report
+    role: portable_technical_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "48511b4"
+    source_path: analysis/html/p1_btcusdtp_hourly_structure_event_support_v25_20260907.html
+    sha256: "4b76f0a6a11491a4b2b7b6177c5a909e6c149d8b70bdb16d69d74e80b6418532"
+    size_bytes: 491312
+    storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_structure_event_support_v25_20260907.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Report-builder parent;13sections14blocks1nativechart;official structural_only;browser/mobile unverified."
+
+  - artifact_id: btcusdtp-hourly-structure-event-v25-artifact
+    artifact_type: report
+    role: canonical_report_manifest
+    source_repo: darkforest-x/fable-trading
+    source_commit: "48511b4"
+    source_path: experiments/active/exp-btcusdtp-1h-structure-event-support-preholdout-20260907-v25/artifact.json
+    sha256: "dab5d677c20e8d32248e4da6708f3c151e41a5c5c314640a83ef647f7885674a"
+    size_bytes: 25292
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-structure-event-support-preholdout-20260907-v25/artifact.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Report-builder parent;actual SQLite projection;24 months including zeros;all251 original cases."
+
+
   - artifact_id: btcusdtp-hourly-fixed-clock-v24-results
     artifact_type: report
     role: fixed_clock_label_run

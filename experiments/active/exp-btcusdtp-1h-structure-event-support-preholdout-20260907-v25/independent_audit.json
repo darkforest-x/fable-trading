@@ -1,0 +1,81 @@
+{
+  "status": "passed",
+  "auditor_commit": "48511b49b6db329d330db1953fa31f0c6f9df81d",
+  "auditor_sha256": "35987e06c50b9a66f3e8b060b5de8e5f8c0f0d8c374ee295ee143cf87ab96f95",
+  "builder_commit": "b1cca1eaebdf563544e0f3a59210fe78831e414a",
+  "strategy_sources_verified": 8,
+  "parent_sources_verified": [
+    18,
+    12
+  ],
+  "input_hashes_verified": 13,
+  "output_hashes_verified": 4,
+  "trace_rows_recomputed": 18222,
+  "contexts_recomputed": 995,
+  "count_rows": 62,
+  "mother_rows": 251,
+  "population": {
+    "case": {
+      "total": 251,
+      "accepted": 9,
+      "abstain": 241,
+      "unknown": 1,
+      "known": 250
+    },
+    "control": {
+      "total": 744,
+      "accepted": 3,
+      "abstain": 741,
+      "unknown": 0,
+      "known": 744
+    }
+  },
+  "support_values": {
+    "events": 9,
+    "minimum_fold_events": 1,
+    "active_months": 8,
+    "minimum_fold_months": 1
+  },
+  "support_gates": {
+    "minimum_events": false,
+    "minimum_per_fold": false,
+    "minimum_active_months": false,
+    "minimum_months_per_fold": false
+  },
+  "coverage": {
+    "case_known": {
+      "numerator": 250,
+      "denominator": 251,
+      "rate": 0.9960159362549801
+    },
+    "control_known": {
+      "numerator": 744,
+      "denominator": 744,
+      "rate": 1.0
+    },
+    "complete_known_triples_all_cases": {
+      "numerator": 248,
+      "denominator": 251,
+      "rate": 0.9880478087649402
+    },
+    "complete_known_triples_matched_cases": {
+      "numerator": 248,
+      "denominator": 248,
+      "rate": 1.0
+    },
+    "complete_known_triples_accepted_cases": {
+      "numerator": 9,
+      "denominator": 9,
+      "rate": 1.0
+    },
+    "accepted_cases_with_matched_support": {
+      "numerator": 9,
+      "denominator": 9,
+      "rate": 1.0
+    }
+  },
+  "raw5_aggregation_recomputed": false,
+  "pine_builtin_parity_verified": false,
+  "outcomes_read_or_computed": false,
+  "limitation": "Independent saved-hour state and support accounting only; not raw5 aggregation, vendor tie parity, randomization replay or economic validation."
+}

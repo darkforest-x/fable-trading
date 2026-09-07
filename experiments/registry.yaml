@@ -16,8 +16,8 @@ schema_version: 1
 experiments:
   - experiment_id: exp-btcusdtp-1h-structure-event-support-preholdout-20260907-v25
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: active
+    source_commit: "b1cca1e"
+    status: inconclusive
     question: >-
       Does current K1 first-establishing/reversing confirmed structure have
       sufficient pre2025 own-event and original randomized triple support?
@@ -26,17 +26,26 @@ experiments:
       Frozen10/10 saved-hour trace and251cases/744own-clockcontrols preserved;
       support-only, no outcomes, no same-direction repeated BOS reinterpretation.
     result: >-
-      Source-first implementation; not yet run. Continue only if80cases,
-      minimum12perhalf,12active months and3months perhalf. Not a profit gate.
-    canonical_report: null
+      Actual9accepted/241abstain/1unknown among251cases;3/741/0controls.
+      Fourhalves1/2/4/2,eightactive months;allfourpreregistered support gates
+      fail.250/251case known,744/744control known;248complete originaltriples,
+      all9accepted fullymatched.Independent18222savedhours/995contexts/
+      62counts/251mothers audit passed.No newgate outcomes read or computed.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_structure_event_support_v25_20260907.html
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts:
+      - btcusdtp-hourly-structure-event-v25-results
+      - btcusdtp-hourly-structure-event-v25-audit
+      - btcusdtp-hourly-structure-event-v25-report
+      - btcusdtp-hourly-structure-event-v25-html
+      - btcusdtp-hourly-structure-event-v25-artifact
     reuse_allowed: false
     notes: >-
-      Original248triples and3unmatched retained. Unknown is not abstain;
-      complete-known does not require controls accepted. No automatic economics.
+      Support-insufficient,not evidence of losses or profitability.447joint
+      tests pass;auditor/reportbuilder48511b4beforeexecution.OfficialHTML
+      structural_only;browser/mobile/source-dialognotverified.Goalunmet.
 
   - experiment_id: exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24
     source_repo: darkforest-x/fable-trading

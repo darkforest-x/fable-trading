@@ -1,0 +1,77 @@
+{
+  "at": "2026-09-07 01:31:12.588174+00:00",
+  "builder_commit": "b1cca1eaebdf563544e0f3a59210fe78831e414a",
+  "sources": [
+    {
+      "path": "yoyo/evaluation/hourly_impulse_structure_event_research.py",
+      "sha256": "d605300c116af22778e3d6a6f1402d16b0249701f18baf64fc7324ef9f765f64"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_structure_event_support.py",
+      "sha256": "2d62af2f4b837bf714754d5dce13242b9a1e8a53a31014d23818417d11796024"
+    },
+    {
+      "path": "tests/test_hourly_impulse_structure_event_research.py",
+      "sha256": "2e2b5cce77367f6cfa424ab5778791bd5a59d08490ea832ba31ed0f8a66aa28a"
+    },
+    {
+      "path": "tests/test_hourly_impulse_structure_event_support.py",
+      "sha256": "574861548f636f4486cf4512630892164bf3745dc66d130f54dd93755dd7b077"
+    },
+    {
+      "path": "yoyo/data/hourly_impulse.py",
+      "sha256": "f1128f514456f0e1a7bf89b719b2333ebe3b12f66402d58c82764d355be97a3b"
+    },
+    {
+      "path": "yoyo/data/hourly_impulse_structure.py",
+      "sha256": "84124cbecc1d31c00e22aa4c80b41741461f2f1fc2f17ccab5b0b838e9743128"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-structure-event-support-preholdout-20260907-v25/PROJECT_PLAN.md",
+      "sha256": "eb2dcd963ac80bfff0bb9b4bbe60f7df49386662d3f88c3ce68c7470e66f3824"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-structure-event-support-preholdout-20260907-v25/config.json",
+      "sha256": "4f149615f01c56674513b91b553c73a7111c6a31ad6f364d78dbb0f93cf0f65a"
+    }
+  ],
+  "input_receipt": {
+    "inputs": {
+      "experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/results/started.json": "143ccd389bad92fa3c77cf61488d26e963965094593eba34d44aa7703dbeee5f",
+      "experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/results/context_frozen.json": "6fc551bd388c0ea44bbe675227e1f3bd105177e577027d245fd4f45594b42504",
+      "experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/results/hourly_trace.csv.gz": "be9b9e73108047ada00ffac0ed0c4d5b2a3c137000435872c2d33c4ec1cbf7dd",
+      "experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/results/failure.json": "0170fb54b1d9e08ff49f9d2728d18ee43437c86a875ba5eb5a8efd33d6898cb5",
+      "experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/results/outcomes_started.json": "fbfebd064cea51c872b3b6cbdc81173e51b2d9b41c5f7aa6b136866ff1fb2dfc",
+      "experiments/active/exp-btcusdtp-1h-confirmed-structure-preholdout-20260906-v20/results/outcomes_resumed_1.json": "a275e4cb883c33ed0e8a90133c4a3ffa56143eaed4932bbeb3132a5126d8302a",
+      "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/results/started.json": "bc501918b0c87647b5bdb53d9e5a3eb2096a3b1c4ea2fd4504a18a807a9293ab",
+      "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/results/sampling_frozen.json": "22d5a3c91dbaed277a68a5fab6cf54df17b04663b80244f5e5da4d90f591dc64",
+      "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/results/case_requests.csv.gz": "0444142d5d99f6013bcbf9ff160d307818316130177e3e2d48fad7abf38cbe27",
+      "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/results/control_requests.csv.gz": "327c655fb1f989467d4ccc5ea4c9f6293a7a976e594ad853e7ebb2cbc8ef2a71",
+      "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/results/random_assignments.csv.gz": "2d308c1bfc59b1c4364269acfd3fee9a86b6b6609c69bc803fa0a495b7aebdc7",
+      "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/results/random_allocation.csv.gz": "0d7a6dc560a9193b792796025a69405af055a1b1d1aa51aa59223fc16e491629",
+      "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/original_mothers.csv.gz": "b3f442ad8b0959b19cb5ae58fd40bc6a3bf40b455b4be31f3758d53940eea3e6"
+    },
+    "parent_commits": [
+      "a70fb35dcf8e336c5708ff03fd9da58196cc29ff",
+      "60882580fec7ff2e9962d7675304cdafd21b5490"
+    ],
+    "parent_sources_verified": [
+      18,
+      12
+    ],
+    "v20_failure_after_feature_freeze": true,
+    "v20_recovery_same_feature_sha": true,
+    "raw5_read": false,
+    "outcomes_read": false
+  },
+  "output_hashes": {
+    "case_context.csv.gz": "133f9c8571419e8b65f1ac2c00c2ff7367102520a1563b4796ed6809e852d319",
+    "control_context.csv.gz": "16c8d8aa15a1ce1ce91a44fd87d4b73e5548fad3b91e83f36cd3bbf68188021f",
+    "counts.csv.gz": "329c49fb5ac8b9f666c04a10c78734ae9cf4284035f92b0d46b1d8df8765672e",
+    "matched_support.csv.gz": "09b3d1e775a6623db8351bd181c89c3547faef61b422fc9dd78a7e5567868c39"
+  },
+  "timestamp_preflight_before_prices": true,
+  "outcomes_read_or_computed": false,
+  "raw5_read": false,
+  "holdout_consumed": false
+}
