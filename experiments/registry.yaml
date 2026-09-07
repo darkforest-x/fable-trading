@@ -6496,7 +6496,7 @@ experiments:
     source_repo: darkforest-x/fable-trading
     source_commit: fea34e1100896e2e9b28e5c3cbb7f78f80670232
     status: active
-    question: Can Owner redraw all 4172 current training event groups from blank with isolated future40 context?
+    question: Can event-level Label Studio review with isolated future40 context improve labels while preserving reusable historical Owner annotations?
     single_variable: Annotation workflow and human labels only; original 32000 training variants unchanged.
     result: Delivered Label Studio projects 76 and 74 with 4172 and 276 blank tasks; all original input hashes and replay passed; repeated import added zero tasks.
     canonical_report: analysis/p1_15m_grade_a_labelstudio_manual_20260907.md
@@ -6516,8 +6516,9 @@ experiments:
       - grade-a-labelstudio-manual-20260907-physical-qa
       - grade-a-labelstudio-manual-20260907-browser-qa
       - grade-a-labelstudio-manual-20260907-html
+      - yolo-historical-label-reuse-20260907-html
     reuse_allowed: false
-    notes: 32000 images represent 4172 event groups; the 240 candidate sample plus36 repeats is a separate project. Future clipped before holdout, no automatic propagation or new training.
+    notes: 32000 images represent 4172 event groups; the 240 candidate sample plus36 repeats is a separate project. Owner follow-up prioritizes recovering historical human labels before exhaustive blank relabeling; see analysis/p1_yolo_historical_label_reuse_20260907.md. Existing projects and protocols unchanged. Future clipped before holdout, no automatic propagation or new training.
 
   - experiment_id: exp-imacd-okx-descriptive-20260907-v1
     source_repo: darkforest-x/fable-trading

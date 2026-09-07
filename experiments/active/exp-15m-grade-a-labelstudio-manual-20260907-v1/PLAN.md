@@ -39,3 +39,20 @@ Validation: representative replay; source/input hashes; one event per main task;
 240+36 candidate identity; all variants accounted for; 40-bar/boundary/gap checks;
 blank task payloads; idempotent import; each image field fetch; UI inspection.
 This is annotation workflow work: no return, AUC or economic metric is claimed.
+
+## Historical-label reuse priority (2026-09-07 follow-up)
+
+The Owner reminded us of the earlier 10k-plus human-reviewed pool, the 1,345
+short training positives and several hundred Gold/reference items. A read-only
+lineage audit confirms those are distinct from the current 1,043 automatically
+mined positive events. First restore original annotation geometry, Owner side,
+reference status and current-event coverage. Preserve usable original labels;
+prioritize changed semantics, derived core boundaries, conflicts and new events.
+Do not assume exhaustive blank relabeling is the next required Owner action.
+
+The delivered projects, blank-task protocol and all prior answers remain intact.
+No automatic preannotation, label propagation or training was performed by this
+audit. A future reused-label workflow must record its separate protocol instead
+of silently changing the meaning of existing manual-from-blank answers.
+
+Audit: `analysis/p1_yolo_historical_label_reuse_20260907.md` (HTML delivered).

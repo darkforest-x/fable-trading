@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>P1 · 历史人工标注库存与复用顺序（2026-09-07）</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>P1 · 历史人工标注库存与复用顺序（2026-09-07）</h1>
+<h2>结论</h2>
+<p>旧人工标注仍有用，应先恢复其来源和确认状态，再决定需要补标多少。当前 4,172 个事件的 Label Studio 空白项目已经交付，但不应要求 Owner 把它作为第一步全部重画。 本轮只做来源核查与工作顺序修正，没有更改 Label Studio 任务、训练标签或模型。</p>
+<p>两条来源链必须区分：旧人工工作收窄成 <strong>1,345 张 short 训练正例</strong>；当前 Grade-A 则由 规则与参考图自动筛出 <strong>1,043 个正事件</strong>，裁出 8,000 张正图，再配 24,000 张负图。 这不是同一批“一千多”，也不能把自动扩充样本冒充 Owner 逐张金标。</p>
+<h2>库存与证据强度</h2>
+<table><thead><tr>
+<th>资产</th>
+<th>数量</th>
+<th>确认到哪一步</th>
+<th>本轮依据</th>
+</tr></thead><tbody>
+<tr><td>canonical LS 历史人工审核</td><td>12,565 张唯一图 / 6,291 矩形框</td><td>5,946 图有框，6,619 图为背景</td><td>引用已有 canonical export 审计，未重读全部原始标注</td></tr>
+<tr><td>旧训练主源 dense_owner_v11</td><td>11,730 图 / 5,831 框</td><td>曾用于旧检测训练</td><td>历史报告</td></tr>
+<tr><td>Owner 方向复核池</td><td>2,525 框 / 2,391 图</td><td>short 1,361、long 1,152、skip 12</td><td>本轮重算 CSV 数量、时间和 SHA</td></tr>
+<tr><td>旧 short 正例</td><td>1,345 张</td><td>1,361 short 去 15 别名，再 purge 1；原框和方向有人工依据</td><td>本轮重算 manifest 行数和 SHA；历史 split 为 1,143 train / 202 val</td></tr>
+<tr><td>Gold500 对应批次</td><td>500 条方向复核</td><td>short 257、long 236、skip 7；不等于 500 个精选正框</td><td>本轮核对 in_sample=1 与 257 个 short 引用集合相等</td></tr>
+<tr><td>原 ⭐ 标杆登记</td><td>176 图</td><td>独立的标杆登记；不是上述 500 的同义词</td><td>本轮读取登记数量与来源引用；归档清单记 161 原图 / 15 缺失</td></tr>
+<tr><td>旧 short 的 A 档</td><td>385 张</td><td>机器排序，不是新增逐图确认</td><td>预筛报告与摘要</td></tr>
+<tr><td>当前 Grade-A 正例</td><td>1,043 事件 / 8,000 图</td><td>自动筛选和裁剪扩充，非逐事件 Owner Gold</td><td>当前 builder、冻结协议及构建摘要</td></tr>
+</tbody></table>
+<p>历史 golden_pool 的另一库存口径是 12,567 stems / 6,229 框，与 canonical exports 相差 2 stems、62 框。本轮未重做两个上游的完整集合联结，因此不将它们强行合并，也不把 12,567 误写成框数。各行有重叠且计量单位不同，不应相加。</p>
+<p>方向表 cut_time 范围为 <strong>2025-06-05 16:45～2026-05-03 11:30 UTC</strong>。本轮没有打开原图、 行情或未知时间的原始 LS 标注，没有运行模型或新评估；引用历史总量不代表全部历史样本 都已重新验证时间资格。</p>
+<p>主要来源：<a href="../p1_ma_rope_prefilter_20260821.md">旧人工谱系审计</a>、 <a href="../p1_owner_short_gold_center_dataset_20260811.md">旧 short 数据集</a>、 <a href="../p1_owner_short_positive_refilter_20260821.md">原图精筛包</a>、 <a href="../p1_owner_gold_center_crop_review_20260811.md">原始星标交集</a>。 Gold500 元数据位于 <code>datasets/fixed_w10_gold500_short_ownerhn_v1/</code>。</p>
+<h2>为什么旧人工标签没有等价地进入当前配方</h2>
+<p>当前自动 10,000 样本来自 Owner 接受过的 v7 50 张参考族，再按形态规则与距离检索。 严格二筛的 perfect/good 锚点只有 #44/#42，50 张参考族并非 50 个 perfect 锚点。 Grade-A 扩充沿用这套合同，加入新 Binance 历史候选，再按事件裁出 7–8 个变体。 增加裁剪数量能改变图上位置和上下文，不能增加独立的人工判断。</p>
+<p><code>yoyo/datasets/ma_launch_owner_grade_a8000.py</code> 读取参考模板和自动候选，并按核心范围生成框； 它没有直接导入旧 1,345 张的原 LS 逐框标签。当前训练记录使用官方 <code>yolo11s.pt</code> 初始化， 也不能声称通过旧权重完整继承了旧人工训练。当前事件与旧事件可能重合，<strong>本轮没有完成 跨来源逐事件交集</strong>，不能声称交集为零。</p>
+<p>因此旧人工资产的价值是补上独立的人类形态判断、更多形态种类，以及有明确语义的反例。 现有证据支持改变数据整理顺序，尚未证明这样做能提高多少准确率。</p>
+<p>来源：<a href="../p0_15m_ma_launch_owner_autofill10000_20260827.md">自动 10k</a>、 <a href="../p0_15m_ma_launch_owner_perfect_filter10000_20260828.md">严格二筛</a>、 <a href="../p1_15m_ma_launch_owner_grade_a8000_20260828.md">Grade-A 扩充</a>。</p>
+<h2>建议的复用顺序</h2>
+<ol>
+<li><strong>先恢复人工主索引。</strong> 以原 export、图身份、原框坐标和 Owner 方向裁决联结。保留 原框、⭐身份和历史确认，不让 Owner 从空白重画已有框。当前 <code>owner_annotation_ids</code> 是 stem__bN 别名，不能冒充 Label Studio 原生 task/annotation/region ID。</li>
+<li><strong>先整理 ⭐，再覆盖完整多空方向池。</strong> 1,345 张只是旧空头子集，另有 1,152 个已确认 long 框值得核对当前协议。按时间和事件去重，并记录哪些已用于训练、选模板或调参。 已用过的标杆可作训练候选、规范参考或回归检查，不得再冒充未见过的独立测试集。</li>
+<li><strong>只把变化和分歧放进人工队列。</strong> 原框取中央一半并限制 4–7 根，是规则派生； 当前 4/5 根核心的类别和边界不能自动继承逐框 Gold 身份。已有正确原框可保留； 需要改变核心位置或当前语义不一致的，显示原标注并让 Owner 保留、调整或暂不确定。 再审核新增事件、人工与机器不一致，以及模型明显漏检/误检的例子。</li>
+<li><strong>保留有用反例，分清“不完美”和“无目标”。</strong> 旧背景和 Owner 否决记录值得复用， 但拒绝一个框可能只是边界错误、等级不够或方向错误，不能自动把整图当背景。 明确无目标、近似但不合格、有合格目标、暂不确定分别保留，避免制造互相矛盾的标签。</li>
+<li><strong>最后才形成下一版训练候选。</strong> 人工确认与自动弱标签分开统计，按独立事件计算样本量， 不让同一事件的 7–8 张裁剪被误当成 7–8 份独立证据。保留正常合格形态和困难反例， 不只收事后走势最漂亮的图。训练/验证按时间与依赖块隔离，不自动变更资格。</li>
+</ol>
+<p>审核继续允许右侧未来 40 根，未来图独立存储。形态类别、边界与事后走势评价要分开； 未来看起来赚钱不能单独决定正例。要用于即时识别的输入只能看到对应决策时刻，完成态 研究样本不自动转成实盘 tip 样本。</p>
+<table><thead><tr>
+<th>工作顺序</th>
+<th>上一轮交付后的默认路线</th>
+<th>本轮建议</th>
+</tr></thead><tbody>
+<tr><td>第一优先</td><td>4,172 个事件从空白重画</td><td>找回已有人工框和确认状态，先对齐旧标注</td></tr>
+<tr><td>人工精力</td><td>对全部事件重复给出完整框</td><td>先修语义变化、派生核心、冲突和缺失</td></tr>
+<tr><td>当前 LS 76/74</td><td>全量项目与候选项目</td><td>保留为可用任务池；本轮不删除、改名或回填</td></tr>
+<tr><td>质量判断</td><td>自动 Grade-A 容易被当作人工精选</td><td>人工确认、规则派生和机器候选明确区分</td></tr>
+</tbody></table>
+<h2>本轮验证与复现</h2>
+<p>方向 CSV 与旧正例 manifest 的现存 SHA 均与 2026-08-21 谱系报告完全相同。这证明这两份 关键资产没有在此后悄悄换成别的内容；不单凭 SHA 宣称所有图像、split 与新语义已合格。</p>
+<table><thead><tr>
+<th>文件</th>
+<th>SHA-256</th>
+</tr></thead><tbody>
+<tr><td>review_sheet.csv</td><td>bb7081e7e1821c5f791486fae0f29caf18307b104bbb07156c35883781071c9a</td></tr>
+<tr><td>positive_manifest.jsonl</td><td>8f4119fbf634ec976077e8eb50b36e57ae3aa0471759cad04f2eaeaeacd6d21b</td></tr>
+<tr><td>benchmark_exemplars.json</td><td>5acc5d8f68d2671ecd9351bcfc417bc1d27fa7f201d8cd83ec1293b7b231a762</td></tr>
+<tr><td>gold500_short_box_ids.json</td><td>67324c39d7c6259dd655f71b9c7114e0143eb8421c2b3aa7f50da293c32f077f</td></tr>
+</tbody></table>
+<p>本轮是库存与谱系核对，未产生收益或预测。因此 val AUC、收益置换 p、top-decile 毛净收益、 胜率、单特征与匹配随机入场对照不适用。谱系零假设是“名称相近的池可以互换”：用旧报告 冻结 SHA 与精确来源 ID 集合对照，而不是按名字或总数认定同一资产；当前 1,043 与旧 1,345 来源合同不同，不能互代。已有 A385 预筛的独立反证 AUC=0.4887、p=0.6352 也明确不支持 自动筛成 Gold，本轮没有重跑该实验。</p>
+<p>以下为只读库存核对和报告转换命令；不调用历史训练或宽范围行情加载器：</p>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+python3 - &lt;&lt;&#x27;PY&#x27;
+import csv, hashlib, json
+from collections import Counter
+from pathlib import Path
+p = Path(&#x27;analysis/output/owner_side_review/review_sheet.csv&#x27;)
+rows = list(csv.DictReader(p.open()))
+print(len(rows), dict(Counter(r[&#x27;owner_side&#x27;] for r in rows)))
+print(min(r[&#x27;cut_time&#x27;] for r in rows), max(r[&#x27;cut_time&#x27;] for r in rows))
+sample = [r for r in rows if r[&#x27;in_sample&#x27;] == &#x27;1&#x27;]
+print(len(sample), dict(Counter(r[&#x27;owner_side&#x27;] for r in sample)))
+q = Path(&#x27;datasets/owner_short_gold_center_v1/positive_manifest.jsonl&#x27;)
+print(&#x27;short positive rows&#x27;, sum(bool(line.strip()) for line in q.open()))
+z = Path(&#x27;data/benchmark_exemplars.json&#x27;)
+print(&#x27;star registry count&#x27;, json.loads(z.read_text())[&#x27;count&#x27;])
+g = Path(&#x27;datasets/fixed_w10_gold500_short_ownerhn_v1/lineage/gold500_short_box_ids.json&#x27;)
+for path in (p, q, z, g):
+    print(path, hashlib.sha256(path.read_bytes()).hexdigest())
+PY
+python3 scripts/md_to_html.py analysis/p1_yolo_historical_label_reuse_20260907.md --out-dir analysis/html
+</code></pre>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>12,565 / 6,291 来自已有完整导出审计，本轮没有重新打开全量原始 LS 标注。旧 golden_pool 与 canonical exports 的差额仍需后续精确解释。</li>
+<li>176 是登记图数量，不是 176 个已重验当前语义的核心框；原图归档存在缺失。旧 short 精确 ⭐ 交集、原图恢复与去重训练的 71 / 69 / 70 是不同口径，不强行相加。</li>
+<li>Gold500 确实存在，但其 500 条方向优先样本不能称作 500 个精选正例；后来生成的固定 W10 分类数据也不能直接复制成当前 YOLO 框。</li>
+<li>旧 1,345 原人工框有价值，但派生核心仍有未逐框确认的部分。当前数据与历史数据的 市场事件重叠、当前渲染映射和新增复标的最小数量尚未完成计算。</li>
+<li>本轮没有改数据、回填 LS、训练或评估新配置；训练/生产资格仍为 false。</li>
+</ul>
+<h2>下一条允许的动作</h2>
+<p>先完成旧人工标注与当前事件的覆盖/冲突清单，给出可直接复用、仅需调整和必须新增标注 各有多少。完成清单后再安排 Label Studio 中的实际复核次序。具体保留/重分类/新核心 边界由真实 Owner 标注确认；不是以本报告自动修改标签。现有 76/74 项目和历史答案保留。</p>
+</body>
+</html>

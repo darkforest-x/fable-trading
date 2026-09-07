@@ -2,7 +2,17 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
-## YOLO 当前进度（2026-09-07：完整数据已导入Label Studio，等Owner手标）
+## YOLO 当前进度（2026-09-07：先复用历史人工标签，再安排新增复标）
+
+Owner提醒曾审核一万多图后，完成只读谱系核查：历史canonical审计12565唯一人工图，
+当前方向表2525框（short1361/long1152/skip12），旧short正例1345；两份现存SHA与旧报告一致。
+Gold500对应方向表in_sample的500行（257/236/7）；另有176图⭐登记，不能混成同一批金标。
+当前Grade-A的1043正事件来自自动筛选，不能当作旧1345人工正例或逐事件Owner Gold。
+工作优先级调整：先联结原LS框/方向/⭐并计算与当前事件的覆盖及冲突，再补语义变化、
+派生核心和新事件；不要默认要求Owner把4172事件全部从空白重画。原框人工确认要保留，
+中央一半/4–7根派生核心不能冒领逐框确认；未入选正例不自动作为负例。
+本轮未改LS任务/数据/训练资格；原项目仍可用。报告：
+analysis/html/p1_yolo_historical_label_reuse_20260907.html。
 
 Owner改用Label Studio手工打标，并纠正只导入240抽样的范围。当前按事件组覆盖完整
 32000张训练/开发图：4172事件（1043旧正、3129旧负），另240候选+36重复=276补充题。
@@ -16,7 +26,7 @@ Owner改用Label Studio手工打标，并纠正只导入240抽样的范围。当
 源码fea34e1先冻结，79聚焦测试通过；Label Studio native根是reports，专用软链已注册资源。
 实验 experiments/active/exp-15m-grade-a-labelstudio-manual-20260907-v1/；QA和导入收据在results。
 报告 analysis/html/p1_15m_grade_a_labelstudio_manual_20260907.html。
-下一步只读取真实Owner标注并报分歧，回写必须经各图ChartTransform和包含关系检查；
+完成上述旧标注覆盖核查后，读取真实Owner标注并报分歧；回写须经各图ChartTransform和包含关系检查；
 扩大未来后的split依赖需重审。无新训练/推理/holdout OHLCV，训练和生产资格仍false。
 
 ## K1/K2 当前会话进度（2026-09-07 — V39 等确认减少交易，但仍亏损）

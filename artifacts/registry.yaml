@@ -19054,6 +19054,21 @@ artifacts:
     generator_commit: "fea34e1100896e2e9b28e5c3cbb7f78f80670232"
     notes: "4172 full training event groups plus 276 candidate tasks. Blank human annotation; isolated future context, original 32000 variants unchanged."
 
+  - artifact_id: yolo-historical-label-reuse-20260907-html
+    artifact_type: "report"
+    role: "historical_annotation_lineage_audit"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "2672bb56bd9927d6f22828f5efc7d1b87ab2080b"
+    source_path: "analysis/html/p1_yolo_historical_label_reuse_20260907.html"
+    sha256: "887929351032ce5598bd861ac7349826be0f074a245ed314a7b5fc8681e54cf6"
+    size_bytes: 14154
+    storage_uri: "repo://analysis/html/p1_yolo_historical_label_reuse_20260907.html"
+    holdout_status: "unknown"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "2672bb56bd9927d6f22828f5efc7d1b87ab2080b"
+    notes: "Existing Markdown converter; manually authored read-only inventory and reuse recommendation. Metadata only; full historical-pool time eligibility was not revalidated. Historical 12565 human-reviewed images, current 2525 direction rows and 1345 old short positives are distinct from 1043 automatic Grade-A events. No sample scoring, LS mutation or training."
+
   - artifact_id: imacd-okx-descriptive-20260907-summary
     artifact_type: manifest
     role: descriptive_indicator_audit_not_economic_validation
