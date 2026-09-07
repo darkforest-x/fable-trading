@@ -2,6 +2,35 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## ⚡ 当前真相（2026-09-07 — V24固定入口持续性已检验，拒绝）
+
+6088258先提交label/随机抽样/统计/诊断/config/plan，再唯一真实运行两CLI。
+V23支持通过后，单PCG64 seed20260907在完整二部组件内另抽744控制，先于raw读取。
+251原母全部保留，219551行pre2025 OPEN前缀，3980labels/1004pairs。
+1/4/12/24h原母各251known；配对248/248/247/247，3无支持保留自身标签。
+唯一control缺2023-06-22 22:15UTC使12/24h unknown，不补抽、不两控均值。
+
+主4h全母毛+1.0056bp，成本阈值−18.9944bp，95%CI[−30.7010,−7.1072]，p.9984。
+248配对case−18.9073/control−23.6476/超额+4.7403bp，CI[−12.3611,23.8876]，p.314。
+四半年均−12.7528/−24.8499/−16.3283/−20.3738，全部负；24monthsum/n推断not_supported。
+1/12/24h全母成本阈值也负，不选24h当新主结果。固定时钟不是stop-managed可执行PnL。
+4h140毛亏18费翻负93成本正；4h→24h52负转正但34正转负，未来组不能作入场门。
+
+独立保存OPEN Decimal3980labels最大差0、1004pairs、744随机allocation/RNGstates验过；
+10outputs6frozen12source16inputs哈希与时序过。另独立24月CI/p/2976control聚合过，
+非原始源真实性或执行验证。408联合测试过；全部IQR尾部保留。
+报告analysis/html/p1_btcusdtp_hourly_fixed_clock_v24_20260907.html；14章节+2原生图，
+官方validation/package过，structural_only，浏览器/手机/来源弹窗未验。
+report builder e0e0724先提交后构建；QA/NEXT_EXPERIMENT和learnings已记录。
+
+下一步V25尚未登记或运行：只做“K1本根首次建立/翻转已确认结构”的保存特征支持审计，
+不是V20持久同向状态；10/10定义和旧known/unknown不变。V24 NEXT_EXPERIMENT.md有
+输入SHA与支持合同：先>=80accepted、每半年>=12、>=12months及每半年>=3months；
+支持不足不读该门结果、不放松门。V20全hourly_trace范围能覆盖新744controls外边界，
+仅查schema/time未评分事件门；要审V20历史resume来源链并逐请求因果字段再用。
+V19纯退出微调停止不变；无TV/2025+价格/holdout/训练/ACTIVE/实盘变动。
+goal active，盈利未达成，不得将V24负结果标成待优化或已稳定赚钱。
+
 ## ⚡ 当前真相（2026-09-07 — V23背景支持98.80%通过，未算新收益）
 
 b696015先提交三键背景支持合同再运行，0d7283a随后提交纯固定时钟标签与报告builder。

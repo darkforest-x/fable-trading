@@ -1,0 +1,73 @@
+{
+  "at": "2026-09-07 00:42:36.213714+00:00",
+  "builder_commit": "60882580fec7ff2e9962d7675304cdafd21b5490",
+  "sources": [
+    {
+      "path": "yoyo/evaluation/hourly_impulse_fixed_clock_research.py",
+      "sha256": "dec74db7cd6db2518001acbeb76b50283baf138f3aecefd442feef709a325123"
+    },
+    {
+      "path": "tests/test_hourly_impulse_fixed_clock_research.py",
+      "sha256": "586309192af2eae841a430517405c09fb6bccd3b9e13ce705949d32e707b8775"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_fixed_clock_analysis.py",
+      "sha256": "3697f69478691ed06797547713552e64ef4b18efa6e7bb1bfa71eb27d2f98e29"
+    },
+    {
+      "path": "tests/test_hourly_impulse_fixed_clock_analysis.py",
+      "sha256": "5f83ca2b45a3ebfcdcabf0373d96de1cfb79b5d40999042c8657c182cd0fd1e4"
+    },
+    {
+      "path": "scripts/diagnose_hourly_impulse_failed_confirm_v18.py",
+      "sha256": "5bdb0ad504ade6ba42b3fcf602587f794ecbac4a1f08f3e9211167cd9c4e6e44"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_fixed_clock.py",
+      "sha256": "c2cb34535b6d65593fa1876fb4754e8f60e39880a79fc820a374c9ce73ce95f5"
+    },
+    {
+      "path": "tests/test_hourly_impulse_fixed_clock.py",
+      "sha256": "25d6b2d020cec5e50e1c7567444567ea827ba0ef403838e998a9c40e710fa297"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_fixed_clock_statistics.py",
+      "sha256": "0a24edb3680a8c8e4cb7a9215a14b7eda21c0ba18fb70ed0a90ea244a263f4d7"
+    },
+    {
+      "path": "tests/test_hourly_impulse_fixed_clock_statistics.py",
+      "sha256": "deeae0e842a197afa170bddef1f9e4661ba0580701dc658e46e6c17db7db526e"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/PROJECT_PLAN.md",
+      "sha256": "05a3db299cbc736b4b9f9c73a04d5ea374b5f9ed0abb8f5502ed10eeebb25ecb"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/config.json",
+      "sha256": "841a669bb3d8f28e92f56fba71f8becb48410e7e988a77e66579d8928d7a0de7"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json",
+      "sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
+    }
+  ],
+  "inputs": {
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/allocation.csv.gz": "fba2f167a0cdd0e9fe8e99bdf90442fba5a92d73497dd74d8acc6215b872752a",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/assignments.csv.gz": "e97b433b51acb5386fe7a5d6afe63cc5bc893b675a7c172ec403ea7b36fbeec1",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/component_capacity.csv.gz": "95b5589c12631d0ced49a4d58f9fe2c0ef7dae04e8f59ba36a8d015d07b7eb0e",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/controls.csv.gz": "fae5176d36bd3882bf0fcd98487ef16e916fb5402387c0fa42345019df2974ba",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/eligible_edges.csv.gz": "d045d5a05e71d93bde0af5402496292669bfbd9a71cc18c98f5b097d7d5ea1a8",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/fold_coverage.csv.gz": "46f718f3320d491e7399cc1210cb0b4c847aff336a15bf821598fa39edc69210",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/matching_frame.csv.gz": "4745cd147d571b2cc47ef6801f6868912910eccecd4c9a1e8e23bda3e2ac9023",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/mother_support.csv.gz": "71886909385176088c2eec8f62ee2932ae4fc9d28f29a687aa08aa665f8dcd78",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/original_mothers.csv.gz": "743a32c6fb91c87d4acf30eca50289db64c92627f75e3676c9498b6085d5985c",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/stage_counts.csv.gz": "aa6e00b19ad0806e7271997c01608a0424837a500f2c165fffbe19fc2222a2c8",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/started.json": "cd2226ef1316816dcae422c23ae13107b82ada8f8e44d8b3e77c11c2e03c5b5a",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/summary.json": "e5455a429e7664d25e4ab91df0df7ef1fdbb9298f5423309c89f88e36de46384",
+    "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/support_frozen.json": "83e7cf528566eafc81ac1ea70a250e88c44c797b90d913741f6c2bb2646bd790",
+    "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/original_mothers.csv.gz": "b3f442ad8b0959b19cb5ae58fd40bc6a3bf40b455b4be31f3758d53940eea3e6",
+    "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a",
+    "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json": "c14aae71600d7f91b27068976656b9d4a8dc1bfb462df182a2e2a78ac85d5228"
+  },
+  "config_sha256": "841a669bb3d8f28e92f56fba71f8becb48410e7e988a77e66579d8928d7a0de7"
+}

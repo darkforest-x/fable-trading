@@ -16,8 +16,8 @@ schema_version: 1
 experiments:
   - experiment_id: exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24
     source_repo: darkforest-x/fable-trading
-    source_commit: "8cdc926"
-    status: active
+    source_commit: "6088258"
+    status: rejected
     question: >-
       Do fixed251 hourly K1 entries show4h directional persistence above20bp
       and contemporaneous randomized background independently of old exits?
@@ -26,19 +26,28 @@ experiments:
       original entries;V23 three-key support;onePCG64 seed20260907 allocates
       three controls per248mother before raw reading;4h primary,1/12/24h descriptive.
     result: >-
-      Prepared and synthetic-tested;real sampling and markout run not yet executed.
-      Cost-threshold markouts are not realizable K1-stop trading PnL.
-    canonical_report: experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/PROJECT_PLAN.md
+      Actual251 cases,744 seeded controls;4h all-case gross+1.0056bp and
+      cost-threshold-18.9944bp,CI[-30.7010,-7.1072],p.9984;fourhalfmeansnegative.
+      Paired248 excess+4.7403bp,CI[-12.3611,23.8876],p.314;not_supported.
+      Saved3980labels/1004pairs/randomallocation and monthlyinference audited
+      independently.1/12/24h descriptive own cost means also negative.
+      Fixed-clock markouts are not realizable K1-stop trading PnL.
+    canonical_report: analysis/html/p1_btcusdtp_hourly_fixed_clock_v24_20260907.html
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts:
+      - btcusdtp-hourly-fixed-clock-v24-results
+      - btcusdtp-hourly-fixed-clock-v24-statistics
+      - btcusdtp-hourly-fixed-clock-v24-report
+      - btcusdtp-hourly-fixed-clock-v24-html
+      - btcusdtp-hourly-fixed-clock-v24-artifact
     reuse_allowed: false
     notes: >-
-      Preparation parent commit;actual builder pinned in started receipt.
-      Only original pre2025 OPEN prefix,no HLC filtering or old-exit censoring.
-      Keep3unmatched own labels and all unknown comparisons,no label-based redraw.
-      Preregistered24month event-weighted inference cannot establish profitability.
+      Sources committed before sampling/quotes/inference;219551pre2025 OPEN rows.
+      All3unmatched own labels retained;onecontrol missingbar at12/24h,no redraw.
+      408joint tests pass;independent saved evidence audits not raw authenticity.
+      Reuseddevelopment,24month event-weighted inference exploratory,goal unmet.
 
   - experiment_id: exp-btcusdtp-1h-background-support-preholdout-20260907-v23
     source_repo: darkforest-x/fable-trading

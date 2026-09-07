@@ -1,0 +1,442 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "Entry Persistence Audit",
+    "generatedAt": "2026-09-07T00:58:33.072272+00:00",
+    "filters": [],
+    "cards": [],
+    "charts": [
+      {
+        "id": "folds",
+        "type": "bar",
+        "title": "四个半年均未覆盖成本",
+        "description": "全部原始入口；固定4h OPEN变化减20bp，不是策略净收益",
+        "showDescription": true,
+        "dataset": "folds",
+        "sourceId": "folds",
+        "palette": {
+          "kind": "sequential",
+          "name": "blue"
+        },
+        "labels": {
+          "values": "all"
+        },
+        "settings": {
+          "sort": "none"
+        },
+        "encodings": {
+          "x": {
+            "field": "fold",
+            "type": "nominal",
+            "label": "半年"
+          },
+          "y": {
+            "field": "cost_threshold_bp",
+            "type": "quantitative",
+            "label": "平均成本阈值 markout (bp)"
+          },
+          "tooltip": [
+            {
+              "field": "total",
+              "type": "quantitative",
+              "label": "原始入口数"
+            },
+            {
+              "field": "gross_bp",
+              "type": "quantitative",
+              "label": "平均毛 markout (bp)"
+            }
+          ]
+        }
+      },
+      {
+        "id": "distribution",
+        "type": "bar",
+        "title": "4h结果分布：保留全部尾部",
+        "description": "每档50bp；251入口，零左侧未覆盖20bp成本；未模拟止损",
+        "showDescription": true,
+        "dataset": "distribution",
+        "sourceId": "distribution",
+        "palette": {
+          "kind": "sequential",
+          "name": "blue"
+        },
+        "labels": {
+          "values": "all"
+        },
+        "settings": {
+          "sort": "none"
+        },
+        "encodings": {
+          "x": {
+            "field": "bin",
+            "type": "nominal",
+            "label": "成本阈值 markout 区间 (bp)"
+          },
+          "y": {
+            "field": "events",
+            "type": "quantitative",
+            "label": "入口数"
+          },
+          "tooltip": [
+            {
+              "field": "lower_bp",
+              "type": "quantitative",
+              "label": "含下界 (bp)"
+            },
+            {
+              "field": "upper_bp",
+              "type": "quantitative",
+              "label": "不含上界 (bp)"
+            }
+          ]
+        }
+      }
+    ],
+    "tables": [],
+    "blocks": [
+      {
+        "id": "section_0",
+        "type": "markdown",
+        "layout": "full",
+        "body": "# Entry Persistence Audit\n\nBTCUSDT.P · 1h K1 入场持续性 · V24 · 2026-09-07"
+      },
+      {
+        "id": "section_1",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 结论先行\n\n**当前这批入口的优势仍未获支持，不能把平均亏损全解释成“止盈太早”。** 保留2023–2024年全部251个原始K1入口，脱离原来的止损、小周期颜色退出，在预先指定的4h时钟观察：平均毛markout仅+1.0056bp，减固定20bp成本后为−18.9944bp，95%月簇区间[−30.7010,−7.1072]bp。四个半年全部为负。\n\n248个入口各配三个事前抽取的背景时钟。配对入口成本阈值均值−18.9073bp，对照−23.6476bp，超额+4.7403bp，95%区间[−12.3611,+23.8876]bp，正优势单侧p=.3140：**比背景少亏的点估计，不等于已经证明有可交易优势。** 3个无对照入口的自身标签仍保留。\n\n1/12/24h只作描述，全部全母成本阈值均值仍负。24h不能因为比其他时钟好看就改成主检验。V24最终判定`not_supported`；目标继续，盈利未达成，未更新TradingView、生产配置或任何实盘仓位。\n\n这里的markout是“指定时钟开盘价变化”，**不是带止损的策略净收益**。它隔离入口持续性这个问题，不模拟K1止损、移动止损、仓位占用、资金费、实际滑点或可成交性。因此既不能当成实盘回测收益，也不能据此断言任何状态依赖退出都无效。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_2",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 当前入口规则与本轮唯一问题\n\n固定原BTCUSDT.P 1h入口：SMA40以HL2为输入，K1实体严格穿过均线，方向与实体一致；实体占比至少0.65；普通大实体分支要求振幅至少1ATR，吞没分支至少0.65ATR；收盘处于方向端至少70%位置。K1收盘后，下一个5m OPEN作为入场时钟E。这是之前已冻结的直接K1队列，**本轮不等K2、不新增K1、不调40或实体阈值**。\n\n原执行版本另有K1极值止损、小周期颜色退出、减半/确认退出和72h上限。V24不重用这些退出时刻截断标签，也不筛选曾盈利或曾触发趋势接管的交易。唯一问题是：固定入口之后的方向性变化能否覆盖20bp，并优于同期背景？\n\n主标签：`direction × (OPEN[E+4h] − OPEN[E]) / OPEN[E]`。先按原始报价字符串进行Decimal运算，再减`.002`，最后转float；恰好20bp应为零，不用epsilon把负值洗成零。1bp=0.01个百分点。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_3",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 数据范围与版本对照\n\n原始入口251个，四半年55/66/55/75；实际E从2023-01-02 03:00UTC至2024-12-24 14:00UTC。固定观察1/4/12/24h，共1004个case标签，但只有251个原始入口，不是1004个独立样本。744个不重复控制时钟产生2976个control标签。\n\n使用既有OKX BTC-USDT-SWAP 5m归档，未换源、未下载新行情。物理档案341567行、末条2026-02-28 15:55UTC；先仅读取时间列核验，随后只materialize严格早于2025-01-01的219551行OPEN前缀，末条2024-12-31 23:55UTC。不读取2025+价格或2026-05-04起holdout价格。**这是该配置第0次消耗holdout。** 2023–2024已反复开发使用，不是未见过的样本外期间。\n\n| 阶段 | 原始入口 | 完整三控制配对 | 对照时钟 | 经济结果的含义 |\n|---|---:|---:|---:|---|\n| V23上一版本 | 251 | 248 | 744容量见证 | 无收益标签；仅证明供给足够 |\n| V24本轮4h | 251 | 248 | 744随机时钟 | 入口−18.9073bp，对照−23.6476bp；固定成本阈值markout |\n\nV23容量见证不能直接当随机样本。V24另用固定seed20260907、组件内无放回抽样，先保存分配收据，再读取raw时间/OPEN。它没有提高旧V10六键匹配154/251的通过率，也没有改写旧V19退出实验的失败结论。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_4",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 四个观察时钟：主结果不按大小挑选\n\n以下均为bp。全入口一列包含全部251个；配对入口、三控制均值和超额使用同一完整配对分母。\n\n| H | 全入口毛均值 | 全入口减20bp | 完整配对数 | 配对入口减20bp | 三控制减20bp均值 | 配对超额 |\n|---|---:|---:|---:|---:|---:|---:|\n| 1h，描述 | +3.4520 | −16.5480 | 248 | −16.5943 | −19.8912 | +3.2969 |\n| **4h，主检验** | **+1.0056** | **−18.9944** | **248** | **−18.9073** | **−23.6476** | **+4.7403** |\n| 12h，描述 | −1.0384 | −21.0384 | 247 | −21.8128 | −28.4172 | +6.6045 |\n| 24h，描述 | +6.5406 | −13.4594 | 247 | −12.3919 | −30.3540 | +17.9621 |\n\n每个H的251个case标签全部已知。12/24h各有同一个control标签因缺一根5m而未知，整组三控制比较随之未知，不能拿其余两个平均补位，也没有重抽。没有为1/12/24h计算p或CI，更没有把24h升级为胜出的交易参数。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_5",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 四个半年：亏损不是只集中在一个切片\n\n只展示预定4h，单位bp。第一段有3个无对照入口，所以全入口均值与配对入口均值不同；其他三段完全配对。\n\n| 半年 | 全入口n | 全入口减20bp | 配对n | 配对入口减20bp | 对照减20bp | 超额 |\n|---|---:|---:|---:|---:|---:|---:|\n| 2023H1 | 55 | −12.7528 | 52 | −11.9774 | −15.3877 | +3.4103 |\n| 2023H2 | 66 | −24.8499 | 66 | −24.8499 | −8.8201 | −16.0298 |\n| 2024H1 | 55 | −16.3283 | 55 | −16.3283 | −21.9865 | +5.6582 |\n| 2024H2 | 75 | −20.3738 | 75 | −20.3738 | −43.6409 | +23.2671 |\n\n2024H2相对背景的点估计更高，但自身仍亏；2023H2连背景都跑不赢。不能只保留最好的一段，也不能把四个已反复观察的半年叫四个独立验证集。",
+        "sourceId": "report"
+      },
+      {
+        "id": "folds_chart",
+        "type": "chart",
+        "layout": "full",
+        "chartId": "folds"
+      },
+      {
+        "id": "section_6",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 失败到底在哪里\n\n4h全251个入口的互斥分解：**140个毛markout已负、0个毛零、18个毛正但不超过20bp、93个超过20bp。** 恰好20bp为0个。因此158个成本阈值负标签中，140个方向本身不利，18个才是微小毛利被费用翻负。注意全部251个都付20bp，不能说只有这18个受到成本拖累。93/251=37.05%是4h正成本阈值标签比例，不是实际止损策略胜率。\n\n140个方向亏损标签对全251均值贡献−47.0823bp；18个费用翻负贡献−0.7840bp；93个成本后正标签贡献+28.8719bp，合计−18.9944bp。对应组内成本阈值均值为−84.4118、−10.9329、+77.9231bp。总和单位是event-bp，不是账户复利收益。这是事后会计分解，不是可直接使用的入场筛选器。\n\n延长持有的两面都必须看。1h毛正但4h成本负有42/251个，其中33个到4h已毛亏、9个不足成本。4h成本负→24h成本正有52/251个，但4h正→24h负也有34/251个；剩余59个两端正、106个两端负，合计251。24h全母仍−13.4594bp。只挑52个“后来走出来的”会遗漏等待的代价，且实盘在4h时不知道它属于哪一组。\n\n合理推断：当前入口“穿均线＋大实体/吞没”没有展示足够的平均方向持续性，**单纯统一延持不能解决已观察的平均问题**。尚不能区分所有潜在机制，例如盘整内往返、消息冲击衰竭与延迟启动；需要另行定义只依赖入场前信息的结构条件。固定端点也不告诉我们中间最大浮盈，不可把端点转移称为逐分钟止损原因。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_7",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 分布与统计：全部尾部保留\n\n4h全入口成本阈值markout：均值−18.9944bp，SD104.4044bp，中位数−28.9330bp，Q1−71.4196bp、Q3+25.6123bp，最小−435.8754bp、最大+341.0345bp。配对超额均值+4.7403bp，SD123.9143bp，中位数−5.2624bp，Q1−64.8986bp、Q3+60.2753bp。\n\n在推断前实际调用已锁定的statistical-analysis正态诊断工具：全入口Shapiro–Wilk W=.9474，p=7.37e−8；配对超额W=.9554，p=6.33e−7。IQR规则标出21个全入口尾部、12个超额尾部，**全部保留，没有删极端亏单或赢家**。诊断不触发换检验、换主时钟、变换标签或重抽控制。图中每档50bp只用于显示，空档保留，不改变分析。\n\n预定推断按2023-01至2024-12共24个月整簇重采样，独立PCG64(seed20260907)流先生成9999套月索引，再生成符号矩阵。各指标沿用同一矩阵，保持事件加权sum/n，不能平均各月均值而改变目标分母。95%CI为percentile线性插值；正优势单侧p基于月总和符号翻转，含+1修正。\n\n两项必要主指标：全母减20bp的A为−18.9944bp，CI[−30.7010,−7.1072]bp，p=.9984；配对超额I为+4.7403bp，CI[−12.3611,+23.8876]bp，p=.3140。A/I均未达到mean>0、下界>0及p<.01的共同要求；四半年A均>0也失败。已知覆盖251/248均≥226通过，最终`not_supported`。\n\np=.9984是检验“正优势”的结果，不是“亏损概率99.84%”。月份间弱依赖和月总和符号交换性只是统计假设；月份间仍可能相关，24簇有限，反复开发使这些CI/p仅具探索意义。没有对事后时钟比较提出族错误率控制或盈利确认声明。",
+        "sourceId": "report"
+      },
+      {
+        "id": "distribution_chart",
+        "type": "chart",
+        "layout": "full",
+        "chartId": "distribution"
+      },
+      {
+        "id": "section_8",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 对照、未知与因果时钟\n\n冻结的候选按同月、UTC六小时块、因果波动桶匹配，并继承有效性、当前/前一穿线排除、真实母时钟排除、原风险转移合法性和72h切点禁入。控制方向随母，每个控制使用自己的入场时间和报价，不复用时钟。颜色/斜率不再精确配对，所以研究整体入口相对背景，而非排除了所有混杂的“纯形态因果效应”。背景抽样随机，不等于K1发生与否经过随机分派。\n\nV23有168个连通组件，其中165非空且均为完整二部图；V24按组件最小mother ID、母ID及候选UTC ID排序，一条PCG64流在每个非空组件随机排列候选，连续每三个分给一个母。固定744个控制被四个H共享；不按标签改变分配，无备用种子。\n\n原三无对照母为2023-06-25 03:00UTC多、11:00UTC多、14:00UTC空的K1（入场各晚1h）。它们缺足够因果波动历史，自身四标签全部照算，配对超额unknown。另一缺失来自`2023-06-06T16:00:00+00:00_L::fixed_clock_control1`，实际控制E=2023-06-22 14:00UTC，缺2023-06-22 22:15UTC：12h应145根仅144，24h应289根仅288，均`missing_bar`；1/4h不受影响。不能根据端点仍存在就假设中途路径完整。\n\n所有标签检查inclusive `[E,E+H]`完整5m网格与finite positive OPEN；端点严格早于fold.end。无前值填充、邻近价或旧退出截断。未知不当零收益，原请求不删除。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_9",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 复现命令与源码收据\n\n源码/计划/config/测试在`6088258`先提交，随后首次标签运行和统计运行；报告builder在`e0e0724`先提交，再构建。不是先看收益再补写主检验合同。冻结输入来自V23与V4、原V1配置和本机历史归档；归档不入git，复现需保有相同SHA输入，不能只凭代码重造行情。\n\n原始首次运行完整命令如下。label和analysis入口均拒绝覆盖已有输出；当前目录已完成，**不要删除证据或重复运行标签**。从相同冻结输入且对应输出尚不存在的状态执行前两条；已有结果可用后面的测试及纯统计只读复核。\n\n```bash\n.venv/bin/python -m yoyo.evaluation.hourly_impulse_fixed_clock_research\nMPLBACKEND=Agg python3 -m yoyo.evaluation.hourly_impulse_fixed_clock_analysis\n.venv/bin/python -m pytest -q tests/test_hourly_impulse_fixed_clock_research.py tests/test_hourly_impulse_fixed_clock.py tests/test_hourly_impulse_fixed_clock_statistics.py tests/test_hourly_impulse_fixed_clock_analysis.py tests/contracts/test_registries.py tests/boundaries\npython3 scripts/md_to_html.py analysis/p1_btcusdtp_hourly_fixed_clock_v24_20260907.md --out-dir analysis/html\npython3 experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/build_artifact.py\nnode /Users/zhangzc/.codex/plugins/cache/openai-curated-remote/data-analytics/0.2.10-13ceeea1f599/skills/build-report/scripts/deliver_portable_artifact.mjs --input experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/artifact.json --output analysis/html/p1_btcusdtp_hourly_fixed_clock_v24_20260907.html\n```\n\n只读重算统计，不写入`analysis_results`、不读价格、不调用runner：\n\n```bash\npython3 - <<'PY'\nfrom pathlib import Path\nimport pandas as pd\nfrom yoyo.evaluation.hourly_impulse_fixed_clock_statistics import analyze_fixed_clock_statistics, FOLD_BOUNDS\np = Path('experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/results')\nr = analyze_fixed_clock_statistics(pd.read_csv(p/'case_labels.csv.gz'), pd.read_csv(p/'paired_labels.csv.gz'), FOLD_BOUNDS)\nprint(r['decision'])\nPY\n```\n\n主标签summary SHA `d3bbaebde040c519231611fd42833119c4eca6ecccc51c559762ef67ad936926`；统计SHA `84e238e336f39494e36c1c45c11e872e856cdbe9691031d29ddcd1bea6670173`。原档案SHA `767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac`。所有10个CSV输出、12份label源和5份analysis源哈希见保存收据。环境NumPy2.0.2/pandas2.3.3/SciPy1.13.1，未安装新依赖。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_10",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 验证与不适用指标\n\n联合408项测试通过，覆盖标签、抽样、严格完整三控制配对、时钟/切点、Decimal成本边界、月簇sum/n、诊断和仓库registry/boundaries；13条既有Pyparsing警告。纯标签还经过独立55项合成检查。错误SHA、未提交源、缺报价、越界、随机分配改变等失败情形不能静默降级成有收益结果。\n\n独立只读统计审计未调用原统计函数：重建24个月sum/n、PCG64索引与符号、CI/p、四半年和判断；CI最大差1.39e−17。另从2976个控制标签重建三控制均值，超额最大浮点差2.00e−16。全体计数/贡献/时钟转移另经保存标签独立核算。它们不是独立市场行情或实盘执行验证。\n\n保存OPEN独立审计未调用原builder、label或statistics函数，也未读原始归档：995请求×4H的3980标签全部用Decimal与inclusive网格重算，最大误差0；1004配对重算一致（990已知、12无支持、2控制未知）。从V23边图重建744随机分配与初末RNG状态完全一致；10输出/6抽样冻结/12源码/16输入SHA及commit→started→sampling→summary时序通过。这是保存证据的独立审计，不是对外部源真实性的证明。详细范围见实验目录`QA.md`。\n\n报告用原生图表与真实SQLite查询，保留14个技术章节块和2张图。官方validation/package通过；验证为structural_only，因为兼容的headless Chromium不可用，未完成手机、浏览器、来源弹窗或浅深主题视觉验收，不伪称已验。没有另写重复notebook，因为已有冻结CLI、纯函数测试和逐笔CSV/JSON作为可复核路径。\n\n本轮不是L2训练或排序，val AUC、top-decile收益和排序置换检验不适用，也没有可执行止损策略PF。替代证据是全251固定标签、同背景三控制、两项预定月簇检验、四时间切片及未知/尾部完整会计；不编造分类指标。实现层负对照为故意破坏因果时钟/数据/配对契约的合成测试，不能替代经济对照。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_11",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 风险与诚实声明\n\n这一轮拒绝的是“当前固定入口已展示足以继续当作有效入口的证据”，不是证明所有K1/K2、所有MA长度、所有品种和状态依赖退出都无法盈利。当前结论仅来自BTC、指定参数、已反复使用的2023–2024开发样本。小时窗口可重叠，251标签不是251个互不影响的账户交易；没有单仓执行、资金容量或账户回撤估计。\n\n固定20bp是原合同成本假设，不是对任一账户实际费率的保证。未调低成本救结果；未评估资金费、随状态变化的滑点或极端流动性。固定时钟可跨原K1止损，既可能包含原策略早已离场后的反弹，也可能包含本应止损避免的亏损。\n\n随机背景不等于随机处理，换三键也换了比较问题；三无支持及一个长时钟缺控制的未知不能当盈利/零。数据完整性审计不能确认所有外部行情都真实；来源失真仍是风险。没有重新查看用户的未来截图作为阈值选择标签，没有holdout或前向新鲜验证，因此**没有赚钱保证，也没有生产资格**。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_12",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 下一步：换入场问题，不继续扫纯退出参数\n\nV19失败后停止同一队列的纯退出比例/确认根数微调，V24没有推翻这一停止条件。下一轮只提出一个有明确定义的事前条件：**K1本根首次建立或翻转已确认的同向结构**，而不是V20的“过去某根突破后，当前仍处于同向结构状态”。\n\n沿用已审查的10左/10右确认pivot与完整小时重置规则，拟定`structure_break_on_k1 && structure_break_direction == direction`；不同时扫pivot长度、MA长度、量能阈值、止损或时钟。它属于已尝试过的结构家族，不是新的独立发现。只在确认时刻使用pivot，不把中心bar回画当可见信息。\n\n先单独登记并提交支持审计合同，使用各入口及各控制自己的确认时钟；先看完整覆盖、每半年及每月的可用数，不能为了凑信号放宽门槛。支持不足就报告不足，不读取该门新收益；支持足够才冻结下一轮经济检验。**本报告尚未评分该条件，也不预言它会成功。** 如果后续仍失败，再基于证据决定新入口或数据扩展；不能从事后52个延持赢家训练“完美筛选器”。\n\n研究继续无需改动生产资格；任何最终独立holdout验收按届时明确授权与消费记录执行，实盘资金动作不在本轮范围。详细下一轮草案见实验目录`NEXT_EXPERIMENT.md`。",
+        "sourceId": "report"
+      },
+      {
+        "id": "section_13",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 文件索引\n\n- 预注册合同与配置：`experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/PROJECT_PLAN.md`、`config.json`。\n- 逐笔：同目录`results/case_labels.csv.gz`、`control_labels.csv.gz`、`paired_labels.csv.gz`；可沿event_id回查原251母，不删未配对行。\n- 原样OPEN与随机抽样：`results/open_prefix.csv.gz`、`sampling_frozen.json`、`random_allocation.csv.gz`、`source_receipt.json`。\n- 推断：`analysis_results/diagnostics_before_inference.json`先于`statistics.json`。\n- 独立审计范围、HTML验收与限制：`QA.md`；源HTML交付由canonical Data Analytics report reader负责。\n- 学习记录：`docs/learnings/weak-entry-markouts-cannot-be-blamed-only-on-exits.md`。实验设计与统计技能固定主时钟/分母/检验；报告技能保证完整负结果和来源可交付，未用技能结论代替行情证据。",
+        "sourceId": "report"
+      }
+    ],
+    "sources": [
+      {
+        "id": "report",
+        "label": "V24 · 完整方法、失败分析与限制",
+        "path": "analysis/p1_btcusdtp_hourly_fixed_clock_v24_20260907.md"
+      },
+      {
+        "id": "inference",
+        "label": "V24 · 冻结的月簇区间与检验",
+        "path": "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/analysis_results/statistics.json"
+      },
+      {
+        "id": "folds",
+        "label": "V24 · 4h全251入口 · folds",
+        "path": "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/results/case_labels.csv.gz",
+        "query": {
+          "sql": "SELECT fold, COUNT(*) AS total, COUNT(cost_threshold_markout) AS known,\n        AVG(gross_markout)*10000 AS gross_bp,\n        AVG(cost_threshold_markout)*10000 AS cost_threshold_bp\n        FROM cases WHERE horizon_hours=4 GROUP BY fold ORDER BY fold",
+          "engine": "sqlite",
+          "language": "sql",
+          "tables_used": [
+            "cases"
+          ],
+          "executed_at": "2026-09-07T00:58:33.072272+00:00",
+          "description": "实际查询全部4h标签；50bp分箱仅用于显示，不删尾部",
+          "filters": [
+            "horizon_hours=4; all251 known cases; reused2023--2024 development"
+          ]
+        }
+      },
+      {
+        "id": "distribution",
+        "label": "V24 · 4h全251入口 · distribution",
+        "path": "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/results/case_labels.csv.gz",
+        "query": {
+          "sql": "WITH RECURSIVE binned AS (\n        SELECT FLOOR(cost_threshold_markout*10000/50)*50 AS lower_bp FROM cases\n        WHERE horizon_hours=4 AND status='known'),\n        bins(lower_bp) AS (SELECT MIN(lower_bp) FROM binned UNION ALL\n        SELECT lower_bp+50 FROM bins WHERE lower_bp < (SELECT MAX(lower_bp) FROM binned)),\n        counts AS (SELECT lower_bp, COUNT(*) AS events FROM binned GROUP BY lower_bp)\n        SELECT CAST(bins.lower_bp AS INTEGER)||' to <'||CAST(bins.lower_bp+50 AS INTEGER) AS bin,\n        bins.lower_bp, bins.lower_bp+50 AS upper_bp, COALESCE(counts.events,0) AS events\n        FROM bins LEFT JOIN counts USING(lower_bp) ORDER BY bins.lower_bp",
+          "engine": "sqlite",
+          "language": "sql",
+          "tables_used": [
+            "cases"
+          ],
+          "executed_at": "2026-09-07T00:58:33.072272+00:00",
+          "description": "实际查询全部4h标签；50bp分箱仅用于显示，不删尾部",
+          "filters": [
+            "horizon_hours=4; all251 known cases; reused2023--2024 development"
+          ]
+        }
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-09-07T00:58:33.072272+00:00",
+    "status": "ready",
+    "datasets": {
+      "folds": [
+        {
+          "fold": "2023H1",
+          "total": 55,
+          "known": 55,
+          "gross_bp": 7.24720943083834,
+          "cost_threshold_bp": -12.752790569161636
+        },
+        {
+          "fold": "2023H2",
+          "total": 66,
+          "known": 66,
+          "gross_bp": -4.849889550793953,
+          "cost_threshold_bp": -24.84988955079385
+        },
+        {
+          "fold": "2024H1",
+          "total": 55,
+          "known": 55,
+          "gross_bp": 3.671726311566576,
+          "cost_threshold_bp": -16.32827368843338
+        },
+        {
+          "fold": "2024H2",
+          "total": 75,
+          "known": 75,
+          "gross_bp": -0.3738230966256666,
+          "cost_threshold_bp": -20.3738230966256
+        }
+      ],
+      "distribution": [
+        {
+          "bin": "-450 to <-400",
+          "lower_bp": -450,
+          "upper_bp": -400,
+          "events": 1
+        },
+        {
+          "bin": "-400 to <-350",
+          "lower_bp": -400,
+          "upper_bp": -350,
+          "events": 0
+        },
+        {
+          "bin": "-350 to <-300",
+          "lower_bp": -350,
+          "upper_bp": -300,
+          "events": 0
+        },
+        {
+          "bin": "-300 to <-250",
+          "lower_bp": -300,
+          "upper_bp": -250,
+          "events": 5
+        },
+        {
+          "bin": "-250 to <-200",
+          "lower_bp": -250,
+          "upper_bp": -200,
+          "events": 6
+        },
+        {
+          "bin": "-200 to <-150",
+          "lower_bp": -200,
+          "upper_bp": -150,
+          "events": 5
+        },
+        {
+          "bin": "-150 to <-100",
+          "lower_bp": -150,
+          "upper_bp": -100,
+          "events": 15
+        },
+        {
+          "bin": "-100 to <-50",
+          "lower_bp": -100,
+          "upper_bp": -50,
+          "events": 59
+        },
+        {
+          "bin": "-50 to <0",
+          "lower_bp": -50,
+          "upper_bp": 0,
+          "events": 67
+        },
+        {
+          "bin": "0 to <50",
+          "lower_bp": 0,
+          "upper_bp": 50,
+          "events": 48
+        },
+        {
+          "bin": "50 to <100",
+          "lower_bp": 50,
+          "upper_bp": 100,
+          "events": 20
+        },
+        {
+          "bin": "100 to <150",
+          "lower_bp": 100,
+          "upper_bp": 150,
+          "events": 9
+        },
+        {
+          "bin": "150 to <200",
+          "lower_bp": 150,
+          "upper_bp": 200,
+          "events": 9
+        },
+        {
+          "bin": "200 to <250",
+          "lower_bp": 200,
+          "upper_bp": 250,
+          "events": 2
+        },
+        {
+          "bin": "250 to <300",
+          "lower_bp": 250,
+          "upper_bp": 300,
+          "events": 1
+        },
+        {
+          "bin": "300 to <350",
+          "lower_bp": 300,
+          "upper_bp": 350,
+          "events": 4
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "report",
+      "label": "V24 · 完整方法、失败分析与限制",
+      "path": "analysis/p1_btcusdtp_hourly_fixed_clock_v24_20260907.md"
+    },
+    {
+      "id": "inference",
+      "label": "V24 · 冻结的月簇区间与检验",
+      "path": "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/analysis_results/statistics.json"
+    },
+    {
+      "id": "folds",
+      "label": "V24 · 4h全251入口 · folds",
+      "path": "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/results/case_labels.csv.gz",
+      "query": {
+        "sql": "SELECT fold, COUNT(*) AS total, COUNT(cost_threshold_markout) AS known,\n        AVG(gross_markout)*10000 AS gross_bp,\n        AVG(cost_threshold_markout)*10000 AS cost_threshold_bp\n        FROM cases WHERE horizon_hours=4 GROUP BY fold ORDER BY fold",
+        "engine": "sqlite",
+        "language": "sql",
+        "tables_used": [
+          "cases"
+        ],
+        "executed_at": "2026-09-07T00:58:33.072272+00:00",
+        "description": "实际查询全部4h标签；50bp分箱仅用于显示，不删尾部",
+        "filters": [
+          "horizon_hours=4; all251 known cases; reused2023--2024 development"
+        ]
+      }
+    },
+    {
+      "id": "distribution",
+      "label": "V24 · 4h全251入口 · distribution",
+      "path": "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/results/case_labels.csv.gz",
+      "query": {
+        "sql": "WITH RECURSIVE binned AS (\n        SELECT FLOOR(cost_threshold_markout*10000/50)*50 AS lower_bp FROM cases\n        WHERE horizon_hours=4 AND status='known'),\n        bins(lower_bp) AS (SELECT MIN(lower_bp) FROM binned UNION ALL\n        SELECT lower_bp+50 FROM bins WHERE lower_bp < (SELECT MAX(lower_bp) FROM binned)),\n        counts AS (SELECT lower_bp, COUNT(*) AS events FROM binned GROUP BY lower_bp)\n        SELECT CAST(bins.lower_bp AS INTEGER)||' to <'||CAST(bins.lower_bp+50 AS INTEGER) AS bin,\n        bins.lower_bp, bins.lower_bp+50 AS upper_bp, COALESCE(counts.events,0) AS events\n        FROM bins LEFT JOIN counts USING(lower_bp) ORDER BY bins.lower_bp",
+        "engine": "sqlite",
+        "language": "sql",
+        "tables_used": [
+          "cases"
+        ],
+        "executed_at": "2026-09-07T00:58:33.072272+00:00",
+        "description": "实际查询全部4h标签；50bp分箱仅用于显示，不删尾部",
+        "filters": [
+          "horizon_hours=4; all251 known cases; reused2023--2024 development"
+        ]
+      }
+    }
+  ]
+}

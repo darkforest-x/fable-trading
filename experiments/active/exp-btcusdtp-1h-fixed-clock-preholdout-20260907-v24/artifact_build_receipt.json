@@ -1,0 +1,147 @@
+{
+  "generated_at": "2026-09-07T00:58:33.072272+00:00",
+  "source_commit": "e0e0724df0da78e0eb7f1987dfa76f0a13c58300",
+  "report_sha256": "00530ba638dc9d8f7fa4a71b00989e20eaaf9c2e1578ee83ff30b936e7748bda",
+  "input_hashes": {
+    "results/summary.json": "d3bbaebde040c519231611fd42833119c4eca6ecccc51c559762ef67ad936926",
+    "analysis_results/statistics.json": "84e238e336f39494e36c1c45c11e872e856cdbe9691031d29ddcd1bea6670173",
+    "analysis_results/diagnostics_before_inference.json": "fd36fd9680a307330f4ee39bc4543d39bbccde902c11a05372e541333e400311"
+  },
+  "actual_queries": {
+    "folds": "SELECT fold, COUNT(*) AS total, COUNT(cost_threshold_markout) AS known,\n        AVG(gross_markout)*10000 AS gross_bp,\n        AVG(cost_threshold_markout)*10000 AS cost_threshold_bp\n        FROM cases WHERE horizon_hours=4 GROUP BY fold ORDER BY fold",
+    "distribution": "WITH RECURSIVE binned AS (\n        SELECT FLOOR(cost_threshold_markout*10000/50)*50 AS lower_bp FROM cases\n        WHERE horizon_hours=4 AND status='known'),\n        bins(lower_bp) AS (SELECT MIN(lower_bp) FROM binned UNION ALL\n        SELECT lower_bp+50 FROM bins WHERE lower_bp < (SELECT MAX(lower_bp) FROM binned)),\n        counts AS (SELECT lower_bp, COUNT(*) AS events FROM binned GROUP BY lower_bp)\n        SELECT CAST(bins.lower_bp AS INTEGER)||' to <'||CAST(bins.lower_bp+50 AS INTEGER) AS bin,\n        bins.lower_bp, bins.lower_bp+50 AS upper_bp, COALESCE(counts.events,0) AS events\n        FROM bins LEFT JOIN counts USING(lower_bp) ORDER BY bins.lower_bp"
+  },
+  "datasets": {
+    "folds": [
+      {
+        "fold": "2023H1",
+        "total": 55,
+        "known": 55,
+        "gross_bp": 7.24720943083834,
+        "cost_threshold_bp": -12.752790569161636
+      },
+      {
+        "fold": "2023H2",
+        "total": 66,
+        "known": 66,
+        "gross_bp": -4.849889550793953,
+        "cost_threshold_bp": -24.84988955079385
+      },
+      {
+        "fold": "2024H1",
+        "total": 55,
+        "known": 55,
+        "gross_bp": 3.671726311566576,
+        "cost_threshold_bp": -16.32827368843338
+      },
+      {
+        "fold": "2024H2",
+        "total": 75,
+        "known": 75,
+        "gross_bp": -0.3738230966256666,
+        "cost_threshold_bp": -20.3738230966256
+      }
+    ],
+    "distribution": [
+      {
+        "bin": "-450 to <-400",
+        "lower_bp": -450,
+        "upper_bp": -400,
+        "events": 1
+      },
+      {
+        "bin": "-400 to <-350",
+        "lower_bp": -400,
+        "upper_bp": -350,
+        "events": 0
+      },
+      {
+        "bin": "-350 to <-300",
+        "lower_bp": -350,
+        "upper_bp": -300,
+        "events": 0
+      },
+      {
+        "bin": "-300 to <-250",
+        "lower_bp": -300,
+        "upper_bp": -250,
+        "events": 5
+      },
+      {
+        "bin": "-250 to <-200",
+        "lower_bp": -250,
+        "upper_bp": -200,
+        "events": 6
+      },
+      {
+        "bin": "-200 to <-150",
+        "lower_bp": -200,
+        "upper_bp": -150,
+        "events": 5
+      },
+      {
+        "bin": "-150 to <-100",
+        "lower_bp": -150,
+        "upper_bp": -100,
+        "events": 15
+      },
+      {
+        "bin": "-100 to <-50",
+        "lower_bp": -100,
+        "upper_bp": -50,
+        "events": 59
+      },
+      {
+        "bin": "-50 to <0",
+        "lower_bp": -50,
+        "upper_bp": 0,
+        "events": 67
+      },
+      {
+        "bin": "0 to <50",
+        "lower_bp": 0,
+        "upper_bp": 50,
+        "events": 48
+      },
+      {
+        "bin": "50 to <100",
+        "lower_bp": 50,
+        "upper_bp": 100,
+        "events": 20
+      },
+      {
+        "bin": "100 to <150",
+        "lower_bp": 100,
+        "upper_bp": 150,
+        "events": 9
+      },
+      {
+        "bin": "150 to <200",
+        "lower_bp": 150,
+        "upper_bp": 200,
+        "events": 9
+      },
+      {
+        "bin": "200 to <250",
+        "lower_bp": 200,
+        "upper_bp": 250,
+        "events": 2
+      },
+      {
+        "bin": "250 to <300",
+        "lower_bp": 250,
+        "upper_bp": 300,
+        "events": 1
+      },
+      {
+        "bin": "300 to <350",
+        "lower_bp": 300,
+        "upper_bp": 350,
+        "events": 4
+      }
+    ]
+  },
+  "sections": 14,
+  "all_sections_preserved": true,
+  "raw_prices_read": false
+}

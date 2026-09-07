@@ -19,6 +19,81 @@ schema_version: 1
 
 artifacts:
 
+  - artifact_id: btcusdtp-hourly-fixed-clock-v24-results
+    artifact_type: report
+    role: fixed_clock_label_run
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6088258"
+    source_path: experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/results/summary.json
+    sha256: "d3bbaebde040c519231611fd42833119c4eca6ecccc51c559762ef67ad936926"
+    size_bytes: 11179
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/results/summary.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Source commit before actual run;251 mothers and744 random controls;3980 labels;not executable PnL."
+
+  - artifact_id: btcusdtp-hourly-fixed-clock-v24-statistics
+    artifact_type: report
+    role: exploratory_month_cluster_inference
+    source_repo: darkforest-x/fable-trading
+    source_commit: "6088258"
+    source_path: experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/analysis_results/statistics.json
+    sha256: "84e238e336f39494e36c1c45c11e872e856cdbe9691031d29ddcd1bea6670173"
+    size_bytes: 59080
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/analysis_results/statistics.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Primary4h cost-threshold-18.9944bp andexcess4.7403bp;not_supported;all tails retained."
+
+  - artifact_id: btcusdtp-hourly-fixed-clock-v24-report
+    artifact_type: report
+    role: fixed_clock_entry_diagnosis
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e0e0724"
+    source_path: analysis/p1_btcusdtp_hourly_fixed_clock_v24_20260907.md
+    sha256: "00530ba638dc9d8f7fa4a71b00989e20eaaf9c2e1578ee83ff30b936e7748bda"
+    size_bytes: 18236
+    storage_uri: "repo://analysis/p1_btcusdtp_hourly_fixed_clock_v24_20260907.md"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Evidence/report-builder parent,not narrative creation commit;whole population and negative findings retained."
+
+  - artifact_id: btcusdtp-hourly-fixed-clock-v24-html
+    artifact_type: report
+    role: portable_technical_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e0e0724"
+    source_path: analysis/html/p1_btcusdtp_hourly_fixed_clock_v24_20260907.html
+    sha256: "940ffcf3aeee04fc5d313732bf9564652413290a801e9fe604af146161a9aafb"
+    size_bytes: 467758
+    storage_uri: "repo://analysis/html/p1_btcusdtp_hourly_fixed_clock_v24_20260907.html"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Report-builder parent;16blocks2nativecharts;official structural_only;browser/mobile/source dialog unverified."
+
+  - artifact_id: btcusdtp-hourly-fixed-clock-v24-artifact
+    artifact_type: report
+    role: canonical_report_manifest
+    source_repo: darkforest-x/fable-trading
+    source_commit: "e0e0724"
+    source_path: experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/artifact.json
+    sha256: "6959c46f6889611768037711f8177bb346107f1d84528bd593c26348526acd94"
+    size_bytes: 31494
+    storage_uri: "repo://experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/artifact.json"
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: "2025-01-01T00:00:00Z"
+    notes: "Report-builder parent;actualSQLite queries;251 primary observations;all distribution bins includingempty."
+
   - artifact_id: btcusdtp-hourly-background-support-v23-results
     artifact_type: report
     role: outcome_free_background_support

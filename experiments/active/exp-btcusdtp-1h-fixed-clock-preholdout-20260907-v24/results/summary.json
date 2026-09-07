@@ -1,0 +1,239 @@
+{
+  "experiment_id": "exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24",
+  "status": "labels_materialized_not_economic_acceptance",
+  "mothers": 251,
+  "matched_mothers": 248,
+  "controls": 744,
+  "unmatched_mothers": 3,
+  "primary_horizon_hours": 4,
+  "horizons_hours": [
+    1,
+    4,
+    12,
+    24
+  ],
+  "labels": {
+    "case": 1004,
+    "control": 2976,
+    "paired": 1004
+  },
+  "descriptive": [
+    {
+      "horizon_hours": 1,
+      "role": "descriptive",
+      "all_cases": 251,
+      "known_cases": 251,
+      "unknown_cases": 0,
+      "case_mean_gross_bp": 3.4520206538564397,
+      "case_mean_cost_threshold_bp": -16.54797934614356,
+      "matched_support_cases": 248,
+      "complete_pairs": 248,
+      "paired_case_mean_cost_threshold_bp": -16.594278005570686,
+      "control_triplet_mean_cost_threshold_bp": -19.8911957134813,
+      "mean_excess_bp": 3.2969177079106142,
+      "all_controls": 744,
+      "known_controls": 744,
+      "unknown_controls": 0
+    },
+    {
+      "horizon_hours": 4,
+      "role": "primary",
+      "all_cases": 251,
+      "known_cases": 251,
+      "unknown_cases": 0,
+      "case_mean_gross_bp": 1.0056255905694385,
+      "case_mean_cost_threshold_bp": -18.99437440943056,
+      "matched_support_cases": 248,
+      "complete_pairs": 248,
+      "paired_case_mean_cost_threshold_bp": -18.907305809892108,
+      "control_triplet_mean_cost_threshold_bp": -23.647645034909534,
+      "mean_excess_bp": 4.740339225017425,
+      "all_controls": 744,
+      "known_controls": 744,
+      "unknown_controls": 0
+    },
+    {
+      "horizon_hours": 12,
+      "role": "descriptive",
+      "all_cases": 251,
+      "known_cases": 251,
+      "unknown_cases": 0,
+      "case_mean_gross_bp": -1.0383502708700638,
+      "case_mean_cost_threshold_bp": -21.038350270870062,
+      "matched_support_cases": 248,
+      "complete_pairs": 247,
+      "paired_case_mean_cost_threshold_bp": -21.81277415304109,
+      "control_triplet_mean_cost_threshold_bp": -28.417229353741764,
+      "mean_excess_bp": 6.604455200700672,
+      "all_controls": 744,
+      "known_controls": 743,
+      "unknown_controls": 1
+    },
+    {
+      "horizon_hours": 24,
+      "role": "descriptive",
+      "all_cases": 251,
+      "known_cases": 251,
+      "unknown_cases": 0,
+      "case_mean_gross_bp": 6.540594580836014,
+      "case_mean_cost_threshold_bp": -13.459405419163984,
+      "matched_support_cases": 248,
+      "complete_pairs": 247,
+      "paired_case_mean_cost_threshold_bp": -12.391875750743944,
+      "control_triplet_mean_cost_threshold_bp": -30.354006925505573,
+      "mean_excess_bp": 17.962131174761627,
+      "all_controls": 744,
+      "known_controls": 743,
+      "unknown_controls": 1
+    }
+  ],
+  "sampling": {
+    "seed": 20260907,
+    "bit_generator": "PCG64",
+    "streams": 1,
+    "initial_rng_state": {
+      "bit_generator": "PCG64",
+      "state": {
+        "state": 175587427759456559827728201579777733003,
+        "inc": 104325743844774820430948754790888466891
+      },
+      "has_uint32": 0,
+      "uinteger": 0
+    },
+    "final_rng_state": {
+      "bit_generator": "PCG64",
+      "state": {
+        "state": 67335747845475083659907339096631644088,
+        "inc": 104325743844774820430948754790888466891
+      },
+      "has_uint32": 0,
+      "uinteger": 1265802396
+    },
+    "mothers": 251,
+    "matched_mothers": 248,
+    "controls": 744,
+    "unmatched_mothers": 3,
+    "no_reuse": true,
+    "fallback_used": false,
+    "outcomes_used": false,
+    "selection_frozen_before_labels": true,
+    "random_sampling_is_random_treatment_assignment": false
+  },
+  "output_hashes": {
+    "original_mothers.csv.gz": "743a32c6fb91c87d4acf30eca50289db64c92627f75e3676c9498b6085d5985c",
+    "case_requests.csv.gz": "0444142d5d99f6013bcbf9ff160d307818316130177e3e2d48fad7abf38cbe27",
+    "control_requests.csv.gz": "327c655fb1f989467d4ccc5ea4c9f6293a7a976e594ad853e7ebb2cbc8ef2a71",
+    "random_allocation.csv.gz": "0d7a6dc560a9193b792796025a69405af055a1b1d1aa51aa59223fc16e491629",
+    "random_assignments.csv.gz": "2d308c1bfc59b1c4364269acfd3fee9a86b6b6609c69bc803fa0a495b7aebdc7",
+    "sampling_components.csv.gz": "246da799b5b5983ee668624990c198d83c964b47e8e408cb7d9230ab5461867e",
+    "open_prefix.csv.gz": "7b277088fcff6234102069c88d61812715dae264cb77ceb5204cdc532c120082",
+    "case_labels.csv.gz": "bb28b5974651d2fdac1c9d75eaa59b216a860f4d1525ac7b2e14e15ae01e82d8",
+    "control_labels.csv.gz": "32f8ac91aec9c092bd466d1ce6f9a74000f806b147f761ebcb4f7fad358e6e12",
+    "paired_labels.csv.gz": "0a6724e71110a2e05ccbcaa62b77e5e76f6f7f73a61be9c1d9d06c6e0e1427e6"
+  },
+  "input_receipt": {
+    "inputs": {
+      "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/allocation.csv.gz": "fba2f167a0cdd0e9fe8e99bdf90442fba5a92d73497dd74d8acc6215b872752a",
+      "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/assignments.csv.gz": "e97b433b51acb5386fe7a5d6afe63cc5bc893b675a7c172ec403ea7b36fbeec1",
+      "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/component_capacity.csv.gz": "95b5589c12631d0ced49a4d58f9fe2c0ef7dae04e8f59ba36a8d015d07b7eb0e",
+      "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/controls.csv.gz": "fae5176d36bd3882bf0fcd98487ef16e916fb5402387c0fa42345019df2974ba",
+      "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/eligible_edges.csv.gz": "d045d5a05e71d93bde0af5402496292669bfbd9a71cc18c98f5b097d7d5ea1a8",
+      "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/fold_coverage.csv.gz": "46f718f3320d491e7399cc1210cb0b4c847aff336a15bf821598fa39edc69210",
+      "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/matching_frame.csv.gz": "4745cd147d571b2cc47ef6801f6868912910eccecd4c9a1e8e23bda3e2ac9023",
+      "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/mother_support.csv.gz": "71886909385176088c2eec8f62ee2932ae4fc9d28f29a687aa08aa665f8dcd78",
+      "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/original_mothers.csv.gz": "743a32c6fb91c87d4acf30eca50289db64c92627f75e3676c9498b6085d5985c",
+      "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/stage_counts.csv.gz": "aa6e00b19ad0806e7271997c01608a0424837a500f2c165fffbe19fc2222a2c8",
+      "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/started.json": "cd2226ef1316816dcae422c23ae13107b82ada8f8e44d8b3e77c11c2e03c5b5a",
+      "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/summary.json": "e5455a429e7664d25e4ab91df0df7ef1fdbb9298f5423309c89f88e36de46384",
+      "experiments/active/exp-btcusdtp-1h-background-support-preholdout-20260907-v23/results/support_frozen.json": "83e7cf528566eafc81ac1ea70a250e88c44c797b90d913741f6c2bb2646bd790",
+      "experiments/active/exp-btcusdtp-1h-first-k2-preholdout-20260906-v4/results/original_mothers.csv.gz": "b3f442ad8b0959b19cb5ae58fd40bc6a3bf40b455b4be31f3758d53940eea3e6",
+      "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a",
+      "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json": "c14aae71600d7f91b27068976656b9d4a8dc1bfb462df182a2e2a78ac85d5228"
+    },
+    "parent_builder_commit": "b696015c71d27b27d41134f35a5a88640f06a5c1",
+    "parent_source_pins_verified": 6,
+    "support_only_parent": true
+  },
+  "source_receipt": {
+    "source": {
+      "path": "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+      "audit": "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json",
+      "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+      "end_exclusive": "2026-02-28T16:00:00Z"
+    },
+    "audit_sha256": "c14aae71600d7f91b27068976656b9d4a8dc1bfb462df182a2e2a78ac85d5228",
+    "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+    "physical_rows": 341567,
+    "phase_rows": 219551,
+    "phase_price_last_open": "2024-12-31 23:55:00+00:00",
+    "physical_last_open": "2026-02-28 15:55:00+00:00",
+    "price_columns_materialized": [
+      "open"
+    ],
+    "holdout_price_rows": 0,
+    "post2024_price_rows": 0,
+    "rows_dropped_for_hlc_or_open_validity": 0,
+    "timestamp_preflight_before_price_hash": true,
+    "resampling_performed": false
+  },
+  "sources": [
+    {
+      "path": "yoyo/evaluation/hourly_impulse_fixed_clock_research.py",
+      "sha256": "dec74db7cd6db2518001acbeb76b50283baf138f3aecefd442feef709a325123"
+    },
+    {
+      "path": "tests/test_hourly_impulse_fixed_clock_research.py",
+      "sha256": "586309192af2eae841a430517405c09fb6bccd3b9e13ce705949d32e707b8775"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_fixed_clock_analysis.py",
+      "sha256": "3697f69478691ed06797547713552e64ef4b18efa6e7bb1bfa71eb27d2f98e29"
+    },
+    {
+      "path": "tests/test_hourly_impulse_fixed_clock_analysis.py",
+      "sha256": "5f83ca2b45a3ebfcdcabf0373d96de1cfb79b5d40999042c8657c182cd0fd1e4"
+    },
+    {
+      "path": "scripts/diagnose_hourly_impulse_failed_confirm_v18.py",
+      "sha256": "5bdb0ad504ade6ba42b3fcf602587f794ecbac4a1f08f3e9211167cd9c4e6e44"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_fixed_clock.py",
+      "sha256": "c2cb34535b6d65593fa1876fb4754e8f60e39880a79fc820a374c9ce73ce95f5"
+    },
+    {
+      "path": "tests/test_hourly_impulse_fixed_clock.py",
+      "sha256": "25d6b2d020cec5e50e1c7567444567ea827ba0ef403838e998a9c40e710fa297"
+    },
+    {
+      "path": "yoyo/evaluation/hourly_impulse_fixed_clock_statistics.py",
+      "sha256": "0a24edb3680a8c8e4cb7a9215a14b7eda21c0ba18fb70ed0a90ea244a263f4d7"
+    },
+    {
+      "path": "tests/test_hourly_impulse_fixed_clock_statistics.py",
+      "sha256": "deeae0e842a197afa170bddef1f9e4661ba0580701dc658e46e6c17db7db526e"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/PROJECT_PLAN.md",
+      "sha256": "05a3db299cbc736b4b9f9c73a04d5ea374b5f9ed0abb8f5502ed10eeebb25ecb"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-fixed-clock-preholdout-20260907-v24/config.json",
+      "sha256": "841a669bb3d8f28e92f56fba71f8becb48410e7e988a77e66579d8928d7a0de7"
+    },
+    {
+      "path": "experiments/active/exp-btcusdtp-1h-impulse-ltf-exit-preholdout-20260906-v1/config.json",
+      "sha256": "95e82bd2c57d1c2aa5c8c972a07635d1d9960de4a47aa6197bd6d3cf8473733a"
+    }
+  ],
+  "builder_commit": "60882580fec7ff2e9962d7675304cdafd21b5490",
+  "generated_at": "2026-09-07 00:42:42.087700+00:00",
+  "inference_executed": false,
+  "independent_sample_count_is_label_rows": false,
+  "executable_pnl": false,
+  "production_eligible": false,
+  "training_eligible": false,
+  "holdout_consumed": false,
+  "old_exit_paths_read": false,
+  "limitation": "Random background sampling is not randomized K1 treatment; repeated horizons and overlapping labels are dependent. Cost-threshold markouts ignore stops, funding and execution."
+}
