@@ -87,10 +87,11 @@ def features(b: pd.DataFrame) -> pd.DataFrame:
     f.loc[mas.isna().any(axis=1), 'width'] = np.nan
     flips = sum((_cross(mas[a], mas[c]) != 0).astype(int)
                 for a, c in combinations(mas.columns, 2))
-    f['dense'] = (f.width.shift().rolling(12).mean() <= 3) & (
+    f['prior_width'] = f.width.shift().rolling(12).mean()
+    f['dense'] = (f.prior_width <= 3) & (
         pd.Series(flips, index=b.index).shift().rolling(12).sum() >= 2)
     f['dense_recent'] = f.dense.astype(int).rolling(34, min_periods=1).max().eq(1)
-    f['ready'] = np.arange(len(b)) >= 340
+    f['ready'] = (np.arange(len(b)) >= 340) & f.prior_width.notna() & f.sb.notna()
     md = f.md.to_numpy()
     zero = np.zeros(len(b), dtype=int)
     for i in range(len(b)):
@@ -116,7 +117,7 @@ def features(b: pd.DataFrame) -> pd.DataFrame:
     release_wick = np.zeros(len(b), dtype=bool)
     w = f.wick.to_numpy()
     for i in range(340, len(b)):
-        if not np.isfinite(bands[i]):
+        if not bool(f.ready.iloc[i]) or not np.isfinite(bands[i]):
             continue
         if qualified:
             if magnitude[i] <= band:

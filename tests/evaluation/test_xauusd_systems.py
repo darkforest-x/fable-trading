@@ -46,3 +46,12 @@ def test_high_source_closes_by_local_open_not_future_close():
     assert f.h_md.iloc[0] == hf.md.iloc[341]
     # The current high candle is not yet available, even at this bar's close.
     assert f.h_source_close.iloc[0] == hb.time_close.iloc[341]
+
+
+def test_zero_atr_never_qualifies_flat_focus_or_entries():
+    b=bars(370)
+    b[['open','high','low','close']]=100.
+    f=features(b)
+    assert not f.ready.any()
+    assert not f.focus_qualified.any()
+    assert not f.focus_release.any()

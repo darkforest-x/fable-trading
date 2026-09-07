@@ -1,0 +1,62 @@
+{
+  "experiment_id": "exp-xauusd-system-search-20260908-v1",
+  "probe": "2012 annual XAUUSD HistData archive quality only",
+  "source_commit": "5a8e762a3ad16aeb0204e21bc336fdec203dd359",
+  "source_reader": "yoyo/data/xauusd_histdata.py",
+  "source_reader_sha256": "11cdc9fb334e8c94748a8ce3407f7238fcdb2a6989c98a728d4afbe561905964",
+  "generated_at": "2026-09-07T17:24:43.904595+00:00",
+  "training_eligible": false,
+  "production_eligible": false,
+  "returns_calculated": false,
+  "raw_market_data_written": false,
+  "requested_archives": [
+    [
+      "2012",
+      "annual"
+    ]
+  ],
+  "page_url": "https://www.histdata.com/download-free-forex-historical-data/?/ascii/1-minute-bar-quotes/xauusd/2012",
+  "price_side": "BID",
+  "source_timezone": "fixed EST UTC-05:00, no DST; +5 hours to UTC",
+  "audit_only": true,
+  "status": "passed_strict_reader",
+  "metadata": {
+    "provider": "HistData.com",
+    "symbol": "XAUUSD",
+    "product": "XAU/USD historical quote data",
+    "execution_venue": "unspecified_by_source",
+    "price_side": "BID",
+    "source_timezone": "fixed EST (UTC-05:00), no DST",
+    "utc_conversion": "source timestamp + 5 hours",
+    "timestamp_semantics": "UTC minute bar open; time_close exclusive +1 minute",
+    "synthetic_fills": false,
+    "zero_volume_policy": "retain; volume is not an executable-volume estimate",
+    "duplicate_policy": "remove exact UTC+OHLCV duplicates with audit counts; reject conflicting duplicates",
+    "checksum_semantics": "locally computed ZIP SHA256, not a publisher checksum",
+    "year": 2012,
+    "month": null,
+    "archive_token": "2012",
+    "raw_rows": 354797,
+    "duplicate_exact_removed": 0,
+    "unique_rows": 354797,
+    "sha256": "66954b906552f053b9815d38f69f9405b5f61da17ad75c297394ab30fdfd1cc0",
+    "bytes": 3999995,
+    "csv_bytes": 23416602,
+    "csv_member": "DAT_ASCII_XAUUSD_M1_2012.csv",
+    "zip_members": [
+      "DAT_ASCII_XAUUSD_M1_2012.csv",
+      "DAT_ASCII_XAUUSD_M1_2012.txt"
+    ],
+    "rows": 354797,
+    "time_min": "2012-01-02T23:03:00+00:00",
+    "time_max": "2012-12-31T21:58:00+00:00",
+    "time_close_max": "2012-12-31T21:59:00+00:00",
+    "zero_volume_rows": 354797,
+    "nonconsecutive_minute_gaps": 1527,
+    "page_url": "https://www.histdata.com/download-free-forex-historical-data/?/ascii/1-minute-bar-quotes/xauusd/2012",
+    "download_url": "https://www.histdata.com/get.php",
+    "download_method": "POST",
+    "fetched_at": "2026-09-07T17:24:53.140747+00:00"
+  },
+  "completed_at": "2026-09-07T17:24:53.140869+00:00"
+}
