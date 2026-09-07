@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "scope": "QA_ONLY; no Owner answers submitted",
+  "unit_and_contract_tests": {
+    "command": ".venv/bin/python -m pytest tests/test_grade_a_calibration.py tests/boundaries/test_layer_imports.py tests/causality/test_holdout_boundary_is_single_valued.py -q",
+    "passed": 111
+  },
+  "physical_audit": {
+    "images": 276,
+    "unique_primary_pixels": 240,
+    "all_decoded_shapes": [
+      742,
+      1280,
+      3
+    ],
+    "pixel_hashes_match": 276,
+    "correct_available_clocks": 276,
+    "minimum_repeat_gap": 81
+  },
+  "browser": {
+    "qa_origin": "http://127.0.0.1:8770",
+    "owner_origin": "http://127.0.0.1:8769",
+    "owner_completed_at_delivery_check": 0,
+    "positive_geometry_save": true,
+    "edit_invalidates_completion": true,
+    "reload_persists": true,
+    "non_signal_clears_geometry": true,
+    "explicit_local_save_file_verified": "/tmp/grade-a-review-ui-qa-v2/answers/answers_20260907T050312852320Z_8fda0443bfcb.json",
+    "local_restore_note_verified": "QA_ONLY edited draft",
+    "json_filechooser_import": true,
+    "restore_overwrite_confirmation_observed": true,
+    "restore_cancel_browser_action": "Playwright selector could not target native dialog; do not claim browser cancellation passed",
+    "restore_cancel_unit_scenarios": "4 actual JS handler synthetic scenarios passed, including in-flight edit cancellation",
+    "mobile_viewport": [
+      390,
+      844
+    ],
+    "mobile_scroll_width": 390,
+    "desktop_screenshot_reviewed": true,
+    "mobile_screenshot_reviewed": true,
+    "blob_download": "requested but actual file not confirmed; use verified local snapshot route",
+    "drag_geometry_browser_test": "not separately exercised; numeric controls verified"
+  },
+  "http_checks": {
+    "/manifest.json": 200,
+    "/api/latest": 404,
+    "/admin/truth.jsonl": 404,
+    "/../admin/truth.jsonl": 404,
+    "foreign_origin_write": 403
+  },
+  "holdout_read": false,
+  "new_model_inference": false,
+  "training_launched": false,
+  "known_limitations": [
+    "Repeated development data does not establish independent model accuracy.",
+    "UI QA synthetic answers are isolated in /tmp and origin 8770.",
+    "Shared-index c6ddb71 included another thread staged V31 files unchanged; other thread verified contents and pushed; no history rewrite."
+  ],
+  "exposure_evidence_root_hash_checks": 18,
+  "registry_tests": {
+    "passed": 16,
+    "initial_failure": "An unrelated pending V31 status enum caused four failures earlier; final registry tests pass after the other thread finalized its entry."
+  }
+}

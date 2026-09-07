@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>YOLO 提准第一步：盲审校准包与单变量训练准备</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>YOLO 提准第一步：盲审校准包与单变量训练准备</h1>
+<p>日期：2026-09-07。实验：<code>exp-15m-grade-a-owner-calibration-20260907-v1</code>。</p>
+<p><strong>结论：人工审核已可开始，模型准确率尚未改善或重新验收。</strong> 已生成 240 个去重候选事件、加入 36 次盲重复，共 276 题；审核页支持类别、核心边界与框义裁决，并能保存到本机、恢复与导入。下一轮训练只改变经 Owner 确认的难负例来源，等待真实答案和可行匹配后继续。</p>
+<p><a href="http://127.0.0.1:8769/">打开本机审核页</a>；服务未运行时使用下文命令启动。选择多头或空头后，拖框或填写核心首末根、上下边界及框义；每题保存，每完成一段点“保存到本机”。无信号或不确定不需要框。浏览器自动保存与本机快照是两份进度，恢复旧快照前会提示替换较新的浏览器答案。</p>
+<h2>当前问题与本轮选择</h2>
+<p>32,000 图是 8,000 正图与 24,000 负图；8,000 正图仅来自 1,043 个事件（train 888 / val 155），裁剪位置增加了图数，未同比增加独立形态。close 1280 full40 是当前研究比较基线，权重 SHA 为 <code>862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838</code>。</p>
+<table><thead><tr>
+<th>已有开发集比较</th>
+<th>close 1280 full40</th>
+<th>HL2 1280 full40</th>
+</tr></thead><tbody>
+<tr><td>最早可用事件检出</td><td>126 / 155，81.29%</td><td>135 / 155，87.10%</td></tr>
+<tr><td>3,600 张负图触发数</td><td>41</td><td>51</td></tr>
+<tr><td>每千负图触发</td><td>11.39</td><td>14.17</td></tr>
+<tr><td>最早检出改善的 Holm 校正 p</td><td>对照</td><td>0.1471</td></tr>
+<tr><td>当前结论</td><td>保留研究基线</td><td>未证实净改善</td></tr>
+</tbody></table>
+<p>这些是已有产物的重读，不是本轮新增推理。close 训练 CSV 有 40 轮，最佳 mAP50–95 在第 4 轮为 0.78649，最后一轮为 0.68339；继续延长轮数没有现成的收益证据。HL2 也增加了负图触发，因此先处理标注语义与困难背景，比继续同时换模型、改图和加轮数更容易解释。</p>
+<p>来源：<a href="p1_15m_ma_launch_owner_grade_a8000_neg24000_20260829.md">原训练数据报告</a>、<a href="p1_15m_ma_launch_owner_grade_a8000_neg24000_hl2_train1280_20260903.md">HL2 对照报告</a>、本实验 <code>training_plan.json</code> 中冻结的路径与 SHA。</p>
+<h2>本轮数据与排重结果</h2>
+<p>原队列的“new”仅按当时的 Binance 同方向正核心匹配规则定义。新增审计统一检查 OKX / Binance 字面同币、双方向、正负成员、完整已知窗口依赖，并在两侧保留现行 150 根缓冲。</p>
+<table><thead><tr>
+<th>审计项目</th>
+<th>旧队列口径</th>
+<th>本轮结果</th>
+</tr></thead><tbody>
+<tr><td>原始候选事件</td><td>5,083</td><td>同一冻结队列</td></tr>
+<tr><td>排除与已有成员接近的事件</td><td>30</td><td>145，包含原 30 个</td></tr>
+<tr><td>可供本轮抽样的事件</td><td>5,053</td><td>4,938</td></tr>
+<tr><td>需人工审核的唯一事件</td><td>尚未形成此校准包</td><td>240</td></tr>
+<tr><td>盲重复 / 总题数</td><td>无</td><td>36 / 276</td></tr>
+<tr><td>覆盖币种 / 半年×提案类别×方向层数</td><td>—</td><td>163 / 36</td></tr>
+<tr><td>原输入像素重放</td><td>—</td><td>240 / 240 通过</td></tr>
+</tbody></table>
+<p>样本可见 K 线时间范围为 <strong>2021-07-17 01:45 UTC 至 2025-10-24 07:30 UTC</strong>。本包没有另切 val：val 样本数为 0；已有训练开发集的 val 是 4,800 图。候选正 / 候选难负 × 多 / 空各 60 项只是抽样层，<strong>Owner 确认正类率当前未知</strong>，不能把提案类别当金标。</p>
+<p>240 个原项像素各异，加入重复后 276 张全部与冻结裸输入像素相符，尺寸 1280×742。重复最短间隔 81 题。公开页面不含币名、日期、模型类别、置信度、模型框、榜单或重复映射。完整依赖与映射留在不对浏览器开放的 <code>admin/</code>。</p>
+<p>这些 W18 代表窗本来就包含核心之后的确认上下文，本轮保留原像素；可用时间明确记为该代表窗口最后一根收盘，未误用可能更早的 episode 首次检出时钟。</p>
+<h2>独立评估仍未建立</h2>
+<p>2025-12 至 2026-05-03 的既有 val 已参与选轮、分辨率、语义门和 HL2 等开发判断。候选队列又经过事后涨跌榜、规则与模型出框筛选，没有未检出正例的完整分母。两者均不能充当独立的市场召回 / 精确率验收。</p>
+<p>本轮保留 <code>independence_status=not_established</code>。连续窗口评估设计已写入 PLAN：先冻结不依赖模型或未来结果的币种时间块，对整块所有合法端点标注并评估，包含无框端点，按事件和币种时间块计算不确定性。来源使用历史不完整时记录 unknown，不能追认 never_seen。尚未冻结合格的独立 roster，也未动用 holdout。</p>
+<h2>下一轮训练的唯一变量</h2>
+<p><code>training_plan.json</code> 已冻结：仅等量替换 <strong>Owner 对整个输入确认 NO_SIGNAL 的训练难负事件</strong>。按同币、同交易所、同半年、核心长度、完整 7/8 位置变体组匹配；不安全或找不到的配对保留原样，若零个可行替换则不启动训练。</p>
+<p>固定所有 6,800 张训练正图、easy negatives、4,800 张开发 val、27,200 张训练总数、1:3 比例、close 渲染、YOLO11s 初始化、imgsz1280、seed0 与 full40 配方。镜像、mosaic、mixup、HSV 等保持关闭，不顺手调整阈值。人工校准得到的正例不能在同一实验臂中一起扩入。</p>
+<p>拿到答案后先计算四分类重复一致率、Cohen κ、同方向正例核心和纵框差异；模糊项及矛盾项隔离。当前没有擅自设置 κ 通过阈值，也没有把“同意协议”升级为逐样本确认。若框义本身需要改变，先处理协议稳定性，不能借难负例实验顺手重标全部正框。</p>
+<h2>验证与可复现性</h2>
+<ul>
+<li>构建器先提交 <code>708ffe21b05253bb70609cb92a3699aa5d876ad1</code>，后构建原包；本机保存与格式修复分别在 <code>8cb9adf</code>、<code>c6ddb71</code> 入库后刷新 UI。旧页面与旧收据留存 <code>results/ui_history/</code>。</li>
+<li>manifest SHA：<code>c6dc9566c62ae6b5357a461cc70fa7846866eaa2f5718c94fe4b477619b4c399</code>。最终 UI 的 SHA 和源码提交见 <code>results/build_receipt.json</code>；UI 更新没有改变样本、顺序或像素。</li>
+<li>111 项构建、答案校验、层间边界及 holdout 契约测试通过。实际浏览器验证了数字框输入、保存本题、修改回到草稿、刷新恢复、正例切无信号清框、本机落盘 / 恢复和文件导入。</li>
+<li>390×844 手机尺寸检查页面 scrollWidth=390，无横向溢出；桌面和手机截图已看。正式 Owner 页面交付检查为 0/276，合成 QA 答案仅在端口 8770 与 <code>/tmp/grade-a-review-ui-qa-v2/</code>。</li>
+<li>API 实测：公开 manifest 200，未保存时 latest 404，admin 与路径越界请求 404，外源写入 403。浏览器服务只绑定 127.0.0.1。</li>
+</ul>
+<pre><code>
+# 在 fable-trading 根目录执行；使用已有、版本锁定的 .venv，不安装依赖。
+git branch --show-current
+.venv/bin/python -m pytest tests/test_grade_a_calibration.py tests/boundaries/test_layer_imports.py tests/causality/test_holdout_boundary_is_single_valued.py -q
+
+# 首次构建：冻结的队列、训练 manifest 和 preregistration 内列出的本地月度源归档必须存在。
+# builder/template/preregistration 必须已提交且当前工作文件与 HEAD 一致。
+# 已有包会拒绝覆盖；不要删除已有 Owner 进度来重建。
+.venv/bin/python -m yoyo.datasets.grade_a_calibration build
+
+# 查看已有包，只需要本地 public 文件：
+.venv/bin/python -m yoyo.datasets.grade_a_calibration serve --port 8769
+
+# Owner 完成本机保存后，用实际快照路径替换占位符；当前不运行此评分。
+.venv/bin/python -m yoyo.datasets.grade_a_calibration score \
+  --answers datasets/grade_a_owner_calibration_20260907_v1/answers/answers_&lt;UTC&gt;_&lt;SHA&gt;.json \
+  --output experiments/active/exp-15m-grade-a-owner-calibration-20260907-v1/results/owner_score_v1.json
+
+python3 scripts/md_to_html.py analysis/p1_15m_grade_a_owner_calibration_20260907.md --out-dir analysis/html
+</code></pre>
+<p>原始源归档、训练图与 PNG 不随 git 分发，因此仅有源码不足以从空机器重建；source receipts 记录了实际归档路径与哈希。本轮执行了 678 次来源归档校验，次数不冒称唯一归档数量。</p>
+<h2>风险与诚实声明</h2>
+<p>本轮无收益序列，所以 val AUC、收益排序置换 p、top-decile 毛 / 净收益、交易胜率、单特征收益基线及匹配随机入场对照不适用。工程零假设是“重放不应改变原输入像素”，逐张身份检查全部通过；这只验证构建，不证明人工标签质量。人工质量的机会一致性校正待真实答案后计算，当前 κ、正类率与重复一致率均未知。</p>
+<p>本轮没有新模型推理、训练、holdout 读取、生产资格升级或实盘修改。重复图不是独立样本，240 是审核工作量而非功效保证；排重不等于历史决策独立，未确认的币种别名没有猜测合并。</p>
+<p>浏览器 Blob 导出出现请求提示但未确认下载文件，因此改用已验证落盘的本机快照。恢复覆盖保护的提示实测出现；原生弹窗“取消”未被 Playwright 成功定位，取消与在途修改保护由四个实际 JS handler 合成场景验证，不冒称该浏览器点击成功。拖框手势未单独做浏览器实测，数字边界控件已验证。完整细节见 <code>results/qa.json</code>。</p>
+<p>本轮提交 <code>c6ddb71</code> 误纳入另一并行线程已经暂存的 V31 文件；文件原样保留，对方已核对完整并推送。保留共享历史，后续提交限定明确路径；这次提交范围检查失误不能隐去，也不代表本轮执行过 V31 研究。</p>
+<h2>下一步</h2>
+<ol>
+<li>Owner 在审核页逐图裁决并保存本机快照；可以分段完成。</li>
+<li>读取真实答案，报告类别 / 框义分歧与重复稳定性；需要 Owner 决策的是实际模糊样本及协议分歧。</li>
+<li>条件成立后生成逐事件匹配替换账本与新数据集，完成版本、数据与 3060 预检，再进行已授权范围内的单变量训练。</li>
+<li>原 / 新模型先做同条件开发比较；独立数据使用证据和完整连续标签建立前，不宣称市场准确率提升或实盘验收。</li>
+</ol>
+</body>
+</html>

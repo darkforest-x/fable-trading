@@ -2,6 +2,22 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## YOLO 当前进度（2026-09-07：盲审包已交付，等 Owner 逐样本答案）
+
+已按 Owner“按照你的想法来做，去吧”准备提准第一步：240 去重候选 +36 盲重复，
+共276题、163币，2021-07～2025-10。跨venue/双方向/正负完整成员区间+150bar
+排除145个（含旧30个）；240原项像素重放全过。正式页 http://127.0.0.1:8769/，
+每题保存后点“保存到本机”，快照在 datasets/grade_a_owner_calibration_20260907_v1/answers/。
+服务重启：`.venv/bin/python -m yoyo.datasets.grade_a_calibration serve --port 8769`。
+构建源码708ffe2；最终UI修复c6ddb71。111项相关测试+16项registry测试通过；
+本机保存/恢复/导入、桌面与手机实测，QA在8770与/tmp隔离，交付检查Owner0/276。
+报告：analysis/html/p1_15m_grade_a_owner_calibration_20260907.html。
+实验：experiments/active/exp-15m-grade-a-owner-calibration-20260907-v1/。
+下一步读取真实答案、报重复一致性与框义分歧，再按training_plan.json冻结同币/venue/
+半年/核心长度/完整变体组的等量难负替换。其余数据和1280 close full40配方不变。
+未启动新训练；training_eligible/production_eligible=false，holdout未读。旧val是反复使用的
+开发集，挖掘队列不能估总体召回；exposure_review.json明确独立性尚未建立，未冻结连续窗roster。
+
 ## ⚡ 当前真相（2026-09-07 — V31前置方向量改善覆盖通过，未读该门收益）
 
 Owner“下一步，继续”：f8e450b先冻结再只读V20保存小时OHLCV、V24原251/744身份。

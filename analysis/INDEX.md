@@ -8,6 +8,11 @@
 
 ## 按日期倒序
 
+### 2026-09-07 — YOLO 盲审校准包已交付
+
+- [校准与训练准备HTML](html/p1_15m_grade_a_owner_calibration_20260907.html) · [源报告](p1_15m_grade_a_owner_calibration_20260907.md)
+- 240去重候选+36盲重复；跨venue排除145项，240像素重放通过。审核支持本机保存/恢复。等Owner逐样本答案，下一轮仅等量匹配替换难负例；无新训练、无holdout，独立评估未建立。
+
 ### 2026-09-07 — V31前置方向量改善支持通过，未读收益
 
 - [V31支持检查HTML](html/p1_btcusdtp_hourly_volume_wave_support_v31_20260907.html) · [Markdown源](p1_btcusdtp_hourly_volume_wave_support_v31_20260907.md)

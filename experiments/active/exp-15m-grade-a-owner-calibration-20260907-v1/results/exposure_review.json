@@ -1,0 +1,415 @@
+{
+  "continuous_evaluation": {
+    "evaluation_ready": false,
+    "if_independence_cannot_be_established": "Retain development-diagnostic wording and evaluation_ready=false; do not certify unknown exposure or automatically access holdout.",
+    "independence_status": "not_established",
+    "loader_requirement": "Reject an unauthorized calendar range before opening an archive; the existing loader checks the loaded last timestamp after full-month parsing, so a new bounded route needs a pre-open month guard.",
+    "owner_annotation_complete": false,
+    "planned_requirements": [
+      "Freeze sources, chronological blocks, symbol universe, code, model and thresholds before scanning or inspecting performance.",
+      "Select complete continuous blocks without same-day return ranking, semantic prefilter, model score or detection membership.",
+      "Audit chronological separation and full same-asset dependency intervals across train, development, mining and review uses.",
+      "Enumerate every eligible W18/W19 endpoint, including no-prediction windows; preserve missing-history and unknown denominators.",
+      "Obtain blinded exhaustive human event labels before revealing candidate model outputs.",
+      "Use the same inputs and inference environment for both arms; retain event-level recall, false events per 1000 eligible windows, boundaries and first available detection time.",
+      "Cluster uncertainty over complete time blocks rather than image variants.",
+      "Keep completed-history detection distinct from production tip acceptance."
+    ],
+    "reuse_code_evidence_ids": [
+      "prior_mining_source",
+      "mining_source",
+      "baseline_evaluator_source"
+    ],
+    "roster_frozen": false,
+    "roster_path": null,
+    "roster_sha256": null,
+    "roster_status": "not_frozen",
+    "source_blocks_selected": false
+  },
+  "evaluation_ready": false,
+  "evidence": {
+    "baseline_dataset_prereg": {
+      "content_kind": "code_or_metadata_or_existing_report_only",
+      "path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/preregistration.json",
+      "sha256": "6aed7e9b13a224e23724354e0d7e20b18ec543779a3824adbe5eb6aaa6513462",
+      "size_bytes": 6134,
+      "verification": "local_file_bytes_hashed_this_review"
+    },
+    "baseline_evaluation_prereg": {
+      "content_kind": "code_or_metadata_or_existing_report_only",
+      "path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1/evaluation_preregistration.json",
+      "sha256": "cef9ea3b74ae5efd27e44ca202d775cfc1f74b28726393736248d989615fe7e3",
+      "size_bytes": 2788,
+      "verification": "local_file_bytes_hashed_this_review"
+    },
+    "baseline_evaluator_source": {
+      "content_kind": "code_or_metadata_or_existing_report_only",
+      "path": "scripts/evaluate_15m_ma_launch_owner_grade_a8000_val.py",
+      "sha256": "12f022f9eac3accc0a036f1ae60ac0aa6a9392414c281c219663820023edece4",
+      "size_bytes": 26178,
+      "verification": "local_file_bytes_hashed_this_review"
+    },
+    "baseline_manifest": {
+      "content_kind": "code_or_metadata_or_existing_report_only",
+      "path": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+      "sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+      "size_bytes": 110877283,
+      "verification": "local_file_bytes_hashed_this_review"
+    },
+    "baseline_source_scan_receipt": {
+      "content_kind": "code_or_metadata_or_existing_report_only",
+      "path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/results/scan_receipt.json",
+      "sha256": "52e14edfbb58c1f54e7466fcdbc98d3aa8b4cfc1a2355b152860aaade2c6a662",
+      "size_bytes": 514,
+      "verification": "local_file_bytes_hashed_this_review"
+    },
+    "baseline_training_prereg": {
+      "content_kind": "code_or_metadata_or_existing_report_only",
+      "path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1/preregistration.json",
+      "sha256": "5adc6d4fa1eb5bc4c459f59b0b94a7b71c64dcd49de191ee9f77e01895427090",
+      "size_bytes": 5358,
+      "verification": "local_file_bytes_hashed_this_review"
+    },
+    "dataset_builder_source": {
+      "content_kind": "code_or_metadata_or_existing_report_only",
+      "path": "yoyo/datasets/ma_launch_owner_grade_a8000.py",
+      "sha256": "21dead675a8fd5ad8cd7108fa57dea23095078a103f0eac80d3516c31ddfb60f",
+      "size_bytes": 49047,
+      "verification": "local_file_bytes_hashed_this_review"
+    },
+    "hl2_report": {
+      "content_kind": "code_or_metadata_or_existing_report_only",
+      "path": "analysis/p1_15m_ma_launch_owner_grade_a8000_neg24000_hl2_train1280_20260903.md",
+      "sha256": "90bbe1d88542c36b16813a0ec1f4cf0d1a38b4a0e190481484a774ea01a47b03",
+      "size_bytes": 17277,
+      "verification": "local_file_bytes_hashed_this_review"
+    },
+    "hl2_training_prereg": {
+      "content_kind": "code_or_metadata_or_existing_report_only",
+      "path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1/preregistration.json",
+      "sha256": "0277ecb7949280740ae58c6c3adb3b02f6b2d5d579e59a9179fe841a19af02ba",
+      "size_bytes": 9077,
+      "verification": "local_file_bytes_hashed_this_review"
+    },
+    "mining_october_source_manifest": {
+      "content_kind": "code_or_metadata_or_existing_report_only",
+      "path": "experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/results/shards/2025-10/source_manifest.json",
+      "sha256": "35a03bf22343eb332764cd40b5337233f5a67df523b4ac128b2348d76a5a56ad",
+      "size_bytes": 358287,
+      "verification": "local_file_bytes_hashed_this_review"
+    },
+    "mining_prereg": {
+      "content_kind": "code_or_metadata_or_existing_report_only",
+      "path": "experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/preregistration.json",
+      "sha256": "4776dcec982f9677dc47431a0f659ba3d6bd4bccb62996aee76a8b77f68f1294",
+      "size_bytes": 11113,
+      "verification": "local_file_bytes_hashed_this_review"
+    },
+    "mining_report": {
+      "content_kind": "code_or_metadata_or_existing_report_only",
+      "path": "analysis/p1_15m_ma_launch_grade_a_daily_movers_5000_20260903.md",
+      "sha256": "8032d042e492b3ca7d1194f2f6643fcde4c4d52de29ce0bb8b76d9edf54b11d5",
+      "size_bytes": 17710,
+      "verification": "local_file_bytes_hashed_this_review"
+    },
+    "mining_review_queue": {
+      "content_kind": "code_or_metadata_or_existing_report_only",
+      "path": "experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/results/review_queue.jsonl",
+      "sha256": "333d22dcf79fab69a755488cda060a6b59ec0d89c1e3bc85aa08ca9fa8de3610",
+      "size_bytes": 21459974,
+      "verification": "local_file_bytes_hashed_this_review"
+    },
+    "mining_source": {
+      "content_kind": "code_or_metadata_or_existing_report_only",
+      "path": "scripts/mine_15m_ma_launch_grade_a_daily_movers_5000.py",
+      "sha256": "d685f6540e4e3a4460c4434fb79b646befab5d95dc12e8712367b52aa9cf7983",
+      "size_bytes": 84851,
+      "verification": "local_file_bytes_hashed_this_review"
+    },
+    "mining_summary": {
+      "content_kind": "code_or_metadata_or_existing_report_only",
+      "path": "experiments/active/exp-15m-ma-launch-grade-a-daily-movers-5000-v1/results/summary.json",
+      "sha256": "aab1216b6f478b5007bf41e6a57ebeee4b1cf4ca409df734c62c837547b72b0b",
+      "size_bytes": 36922,
+      "verification": "local_file_bytes_hashed_this_review"
+    },
+    "prior_mining_source": {
+      "content_kind": "code_or_metadata_or_existing_report_only",
+      "path": "scripts/scan_15m_ma_launch_grade_a_daily_movers.py",
+      "sha256": "f514ec888018c6ca142b5f4bdf0684919fd0d90f269a821f956f8e74a7a6ee7b",
+      "size_bytes": 57317,
+      "verification": "local_file_bytes_hashed_this_review"
+    },
+    "semantic_gate_prereg": {
+      "content_kind": "code_or_metadata_or_existing_report_only",
+      "path": "experiments/active/exp-15m-ma-launch-owner-yolo-causal-semantic-gate-v1/preregistration.json",
+      "sha256": "55e13144b0dae5e41a54d3a8c413eb094a54a4db87e6a963f1c8269165d085a4",
+      "size_bytes": 7664,
+      "verification": "local_file_bytes_hashed_this_review"
+    },
+    "semantic_gate_report": {
+      "content_kind": "code_or_metadata_or_existing_report_only",
+      "path": "analysis/p1_15m_ma_launch_owner_yolo_causal_semantic_gate_20260902.md",
+      "sha256": "ccbe9279f02143722feead8907eec10740dd0d95b50ad28580857457f44489e1",
+      "size_bytes": 11131,
+      "verification": "local_file_bytes_hashed_this_review"
+    }
+  },
+  "experiment_id": "exp-15m-grade-a-owner-calibration-20260907-v1",
+  "generated_at": "2026-09-07T05:10:03.773335+00:00",
+  "identity_checks": {
+    "baseline_manifest_matches_training_and_mining_prereg_sha256": true,
+    "image_or_label_bytes_rehashed": false,
+    "manifest_and_queue_window_end_metadata_before_holdout": true,
+    "review_queue_matches_mining_summary_sha256": true,
+    "source_archive_bytes_rehashed": false
+  },
+  "independence_status": "not_established",
+  "known_uses": [
+    {
+      "evidence_ids": [
+        "baseline_source_scan_receipt",
+        "baseline_dataset_prereg",
+        "dataset_builder_source"
+      ],
+      "holdout_rows_materialized_reported": 0,
+      "limit": "Source-level scanning is documented; this does not prove that every source bar was manually reviewed or scored by YOLO. Samples absent from the final training manifest are not automatically historically unseen.",
+      "purpose": "numeric_candidate_scan_and_dataset_selection",
+      "source_rows_materialized_reported": 49162351,
+      "sources": 638,
+      "status": "documented",
+      "use_id": "grade_a_source_candidate_selection"
+    },
+    {
+      "evidence_ids": [
+        "baseline_manifest",
+        "baseline_training_prereg"
+      ],
+      "limit": "This review does not inspect weights, gradients, remote runtime, or replay training.",
+      "purpose": "gradient_training_on_train_split",
+      "status": "documented",
+      "train_images": 27200,
+      "train_negative_events": 2664,
+      "train_positive_events": 888,
+      "use_id": "close_training"
+    },
+    {
+      "consequence": "The chronological validation set is a development/selection set, not an independent final acceptance set.",
+      "epochs": 40,
+      "evidence_ids": [
+        "baseline_training_prereg",
+        "baseline_evaluation_prereg"
+      ],
+      "purpose": "select_best_checkpoint_on_chronological_validation_fitness",
+      "selection_rule": "Ultralytics best.pt over the same chronological validation fitness; no manual epoch selection",
+      "status": "documented",
+      "use_id": "close_checkpoint_selection"
+    },
+    {
+      "consequence": "The same validation period has informed detector repair decisions.",
+      "evidence_ids": [
+        "semantic_gate_prereg",
+        "semantic_gate_report"
+      ],
+      "purpose": "compare_numeric_semantic_filter_against_raw_detector_on_frozen_validation",
+      "status": "documented",
+      "use_id": "semantic_gate_comparison"
+    },
+    {
+      "consequence": "Paired frozen validation preserves comparability but does not restore independence after model/configuration comparison.",
+      "evidence_ids": [
+        "hl2_training_prereg",
+        "hl2_report"
+      ],
+      "purpose": "select_HL2_checkpoint_on_chronological_validation_and_compare_paired_treatment_against_close",
+      "selection_rule": "Ultralytics best.pt selected only by chronological validation fitness over exactly 40 completed epochs; no manual epoch selection",
+      "status": "documented",
+      "use_id": "hl2_training_and_comparison"
+    },
+    {
+      "actual_month_end": "2025-10",
+      "actual_month_start": "2021-07",
+      "consequence": "This proposal queue cannot supply an unbiased population recall denominator or independent accuracy estimate.",
+      "evidence_ids": [
+        "mining_prereg",
+        "mining_summary",
+        "mining_review_queue",
+        "mining_report"
+      ],
+      "novel_events_reported": 5053,
+      "novel_hard_negative_events_reported": 3401,
+      "novel_semantic_events_reported": 1652,
+      "purpose": "model_selected_candidate_discovery_for_human_review",
+      "review_events": 5083,
+      "selection": "completed-day Top5 gainers and Top5 losers; W18; visible six-MA envelope prefilter; frozen YOLO and morphology thresholds",
+      "status": "documented",
+      "use_id": "daily_mover_mining",
+      "windows_scored_reported": 407748
+    }
+  ],
+  "novelty_contract_limits": {
+    "code_anchors": [
+      "load_training_index skips venue != binance_um",
+      "annotate_training_overlap uses same-direction positive index and exact pixel matches"
+    ],
+    "evidence_ids": [
+      "prior_mining_source",
+      "mining_prereg"
+    ],
+    "existing_checks": [
+      "same Binance symbol and exact window coordinates followed by decoded-image pixel identity",
+      "same Binance symbol and direction positive-event core end distance below five bars"
+    ],
+    "existing_status_preserved": "new_event_review",
+    "unproven_by_existing_index": [
+      "cross-venue OKX/Binance same-asset event overlap",
+      "opposite-direction nearby-event overlap",
+      "full dependency-interval overlap with existing negative samples",
+      "historical rule-selection or human-review exposure outside the final training manifest"
+    ],
+    "upgraded_to_independent_or_training_eligible": false
+  },
+  "observed_baseline": {
+    "bar_minutes": 15,
+    "metadata_only": true,
+    "purge_bars_each_side": 150,
+    "split_cutoff_utc": "2025-12-01T00:00:00Z",
+    "splits": {
+      "train": {
+        "image_kinds": {
+          "negative": 20400,
+          "positive": 6800
+        },
+        "images": 27200,
+        "negative_events": 2664,
+        "positive_events": 888,
+        "visible_bar_open_time_ranges": {
+          "window_end_time": {
+            "maximum": "2025-11-29T08:45:00+00:00",
+            "minimum": "2020-02-07T14:15:00+00:00"
+          },
+          "window_start_time": {
+            "maximum": "2025-11-29T04:30:00+00:00",
+            "minimum": "2020-02-07T09:45:00+00:00"
+          }
+        }
+      },
+      "val": {
+        "image_kinds": {
+          "negative": 3600,
+          "positive": 1200
+        },
+        "images": 4800,
+        "negative_events": 465,
+        "positive_events": 155,
+        "visible_bar_open_time_ranges": {
+          "window_end_time": {
+            "maximum": "2026-05-03T20:30:00+00:00",
+            "minimum": "2025-12-03T02:30:00+00:00"
+          },
+          "window_start_time": {
+            "maximum": "2026-05-03T16:00:00+00:00",
+            "minimum": "2025-12-02T22:00:00+00:00"
+          }
+        }
+      }
+    }
+  },
+  "production_eligible": false,
+  "proposed_ledger_schema": {
+    "absence_rule": "No matching record means unknown unless operation coverage is independently demonstrated complete.",
+    "fields": [
+      "source_path",
+      "source_sha256",
+      "venue",
+      "canonical_symbol",
+      "interval_start_utc",
+      "interval_end_utc",
+      "dependency_interval",
+      "purpose",
+      "experiment_id",
+      "code_commit",
+      "model_sha256",
+      "human_label_or_metric_seen",
+      "resulting_decision",
+      "evidence_path",
+      "coverage_status"
+    ],
+    "purpose_values": [
+      "raw_ingestion",
+      "rule_candidate_selection",
+      "gradient_training",
+      "checkpoint_selection",
+      "model_mining",
+      "human_review",
+      "model_comparison",
+      "reserved_evaluation"
+    ],
+    "unit": "source bytes plus canonical-asset time/dependency interval; retain exact-image and event identities where available"
+  },
+  "review_limitations": [
+    "This is retrospective code and metadata evidence, not a complete historical access-log audit.",
+    "Source file hashes establish current evidence identity, not historical atomic snapshots.",
+    "Reported source and inference counts are identified as prior receipt claims; they were not rerun.",
+    "No new independent evaluation set, training eligibility decision, or model improvement claim is produced."
+  ],
+  "review_type": "bounded_retrospective_metadata_and_code_exposure_review",
+  "safety": {
+    "holdout_consumptions_this_review": 0,
+    "holdout_read": false,
+    "images_opened_this_review": 0,
+    "labels_changed": false,
+    "new_inference": false,
+    "only_output_path": "experiments/active/exp-15m-grade-a-owner-calibration-20260907-v1/results/exposure_review.json",
+    "raw_ohlcv_rows_read_this_review": 0,
+    "remote_access": false,
+    "runtime_state_changed": false,
+    "training_started": false
+  },
+  "schema_version": 1,
+  "scope": {
+    "excluded": [
+      "Pine V29/V30 and other strategy experiments",
+      "raw OHLCV inspection",
+      "image or label inspection",
+      "new inference",
+      "remote systems",
+      "holdout samples"
+    ],
+    "included": [
+      "Grade-A close 8000 positive plus 24000 negative baseline",
+      "chronological validation checkpoint selection",
+      "semantic gate development comparison",
+      "paired HL2 comparison",
+      "5053 daily-mover mining queue"
+    ]
+  },
+  "training_eligible": false,
+  "unknowns": [
+    {
+      "id": "complete_decision_exposure_ledger",
+      "reason": "No comprehensive Grade-A data-use ledger was established in this bounded review; existing per-experiment receipts cover only their stated operations.",
+      "status": "unknown"
+    },
+    {
+      "id": "untouched_preholdout_evaluation_period",
+      "reason": "No complete chronological block was demonstrated free of prior selection, comparison, mining, and human-review exposure.",
+      "status": "unknown"
+    },
+    {
+      "id": "cross_venue_and_full_interval_exclusions",
+      "reason": "The original novelty index has a narrower contract than independent-event eligibility.",
+      "status": "not_yet_audited"
+    },
+    {
+      "id": "owner_gold_and_blind_repeat_stability",
+      "reason": "Model/semantic proposals are not per-sample Owner labels; this review does not assign labels.",
+      "status": "pending_owner_review"
+    },
+    {
+      "id": "historical_exposure_completeness",
+      "reason": "Retrospective absence of a ledger hit is not proof that a sample, period, or metric was unseen.",
+      "status": "unknown"
+    }
+  ]
+}

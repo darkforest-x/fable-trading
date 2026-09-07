@@ -17332,3 +17332,138 @@ artifacts:
     config_hash: "8e7d638f16e75bdb3ef6a5c56b5de20601832b22ca4cd4050bb0a11598c06ffe"
     data_cutoff: "2025-01-01T00:00:00Z"
     notes: "11cells,4code cells plain-Python top-down passed;251pairs,127timeouts,502cost checks. No Jupyter kernel/full nbformat schema,controls,inference or raw path verification."
+
+  - artifact_id: grade-a-owner-calibration-20260907-manifest
+    artifact_type: "manifest"
+    role: "blinded_owner_calibration_development_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "708ffe21b05253bb70609cb92a3699aa5d876ad1"
+    source_path: "datasets/grade_a_owner_calibration_20260907_v1/public/manifest.json"
+    sha256: "c6dc9566c62ae6b5357a461cc70fa7846866eaa2f5718c94fe4b477619b4c399"
+    size_bytes: 140641
+    storage_uri: "repo://datasets/grade_a_owner_calibration_20260907_v1/public/manifest.json"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "708ffe21b05253bb70609cb92a3699aa5d876ad1"
+    notes: "240 unique candidate events plus 36 blind repeats; Owner answers pending, no independent accuracy certification."
+
+  - artifact_id: grade-a-owner-calibration-20260907-review-ui
+    artifact_type: "report"
+    role: "blinded_owner_calibration_development_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "c6ddb71eba85f055d32f6f1d927a91403a5a09b1"
+    source_path: "datasets/grade_a_owner_calibration_20260907_v1/public/index.html"
+    sha256: "9f9ae2b423420f78688a17bc1440e985ae5f3eab0443fbbf79d46feeacac1dec"
+    size_bytes: 126330
+    storage_uri: "repo://datasets/grade_a_owner_calibration_20260907_v1/public/index.html"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c6ddb71eba85f055d32f6f1d927a91403a5a09b1"
+    notes: "240 unique candidate events plus 36 blind repeats; Owner answers pending, no independent accuracy certification."
+
+  - artifact_id: grade-a-owner-calibration-20260907-private-lineage
+    artifact_type: "manifest"
+    role: "blinded_owner_calibration_development_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "708ffe21b05253bb70609cb92a3699aa5d876ad1"
+    source_path: "datasets/grade_a_owner_calibration_20260907_v1/admin/truth.jsonl"
+    sha256: "4e779a5d82bb80754d70e6b477d9b17f65b11a464d2565285e2186e4dcf47bbe"
+    size_bytes: 185099
+    storage_uri: "repo://datasets/grade_a_owner_calibration_20260907_v1/admin/truth.jsonl"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "708ffe21b05253bb70609cb92a3699aa5d876ad1"
+    notes: "240 unique candidate events plus 36 blind repeats; Owner answers pending, no independent accuracy certification."
+
+  - artifact_id: grade-a-owner-calibration-20260907-build-receipt
+    artifact_type: "report"
+    role: "blinded_owner_calibration_development_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "c6ddb71eba85f055d32f6f1d927a91403a5a09b1"
+    source_path: "experiments/active/exp-15m-grade-a-owner-calibration-20260907-v1/results/build_receipt.json"
+    sha256: "ea69bd4fba23581f3186e6b5e1921ced46fdbb47710ce37a4ef51757d651f85d"
+    size_bytes: 7979
+    storage_uri: "repo://experiments/active/exp-15m-grade-a-owner-calibration-20260907-v1/results/build_receipt.json"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c6ddb71eba85f055d32f6f1d927a91403a5a09b1"
+    notes: "240 unique candidate events plus 36 blind repeats; Owner answers pending, no independent accuracy certification."
+
+  - artifact_id: grade-a-owner-calibration-20260907-training-plan
+    artifact_type: "config"
+    role: "blinded_owner_calibration_development_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "708ffe21b05253bb70609cb92a3699aa5d876ad1"
+    source_path: "experiments/active/exp-15m-grade-a-owner-calibration-20260907-v1/training_plan.json"
+    sha256: "7543f040675733e0c34485455ad3abc31c856fbf0971932ca1fef48e08d98051"
+    size_bytes: 4234
+    storage_uri: "repo://experiments/active/exp-15m-grade-a-owner-calibration-20260907-v1/training_plan.json"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "708ffe21b05253bb70609cb92a3699aa5d876ad1"
+    notes: "240 unique candidate events plus 36 blind repeats; Owner answers pending, no independent accuracy certification."
+
+  - artifact_id: grade-a-owner-calibration-20260907-exposure-review
+    artifact_type: "report"
+    role: "blinded_owner_calibration_development_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "c6ddb71eba85f055d32f6f1d927a91403a5a09b1"
+    source_path: "experiments/active/exp-15m-grade-a-owner-calibration-20260907-v1/results/exposure_review.json"
+    sha256: "ba12d8fb4a7dab2be146d51072d13dc450983f47256ecdc507a2c414d06dd64e"
+    size_bytes: 18343
+    storage_uri: "repo://experiments/active/exp-15m-grade-a-owner-calibration-20260907-v1/results/exposure_review.json"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c6ddb71eba85f055d32f6f1d927a91403a5a09b1"
+    notes: "240 unique candidate events plus 36 blind repeats; Owner answers pending, no independent accuracy certification."
+
+  - artifact_id: grade-a-owner-calibration-20260907-qa
+    artifact_type: "report"
+    role: "blinded_owner_calibration_development_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "c6ddb71eba85f055d32f6f1d927a91403a5a09b1"
+    source_path: "experiments/active/exp-15m-grade-a-owner-calibration-20260907-v1/results/qa.json"
+    sha256: "0623dee0a6ebe49c9056becd1de0984d1cf7c11c5854b252032cb1584a1b269e"
+    size_bytes: 2571
+    storage_uri: "repo://experiments/active/exp-15m-grade-a-owner-calibration-20260907-v1/results/qa.json"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c6ddb71eba85f055d32f6f1d927a91403a5a09b1"
+    notes: "240 unique candidate events plus 36 blind repeats; Owner answers pending, no independent accuracy certification."
+
+  - artifact_id: grade-a-owner-calibration-20260907-report
+    artifact_type: "report"
+    role: "blinded_owner_calibration_development_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "c6ddb71eba85f055d32f6f1d927a91403a5a09b1"
+    source_path: "analysis/p1_15m_grade_a_owner_calibration_20260907.md"
+    sha256: "0159e366194a5e1d2c9a7846b4e38be3811e1c0aa264fe4ee9018c2c07e6acc3"
+    size_bytes: 9942
+    storage_uri: "repo://analysis/p1_15m_grade_a_owner_calibration_20260907.md"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c6ddb71eba85f055d32f6f1d927a91403a5a09b1"
+    notes: "240 unique candidate events plus 36 blind repeats; Owner answers pending, no independent accuracy certification."
+
+  - artifact_id: grade-a-owner-calibration-20260907-html
+    artifact_type: "report"
+    role: "blinded_owner_calibration_development_only"
+    source_repo: "darkforest-x/fable-trading"
+    source_commit: "c6ddb71eba85f055d32f6f1d927a91403a5a09b1"
+    source_path: "analysis/html/p1_15m_grade_a_owner_calibration_20260907.html"
+    sha256: "c521d269dfc02df22c0696fdd608c5bc223d36dae731df1f861bd3985b4da4c4"
+    size_bytes: 13260
+    storage_uri: "repo://analysis/html/p1_15m_grade_a_owner_calibration_20260907.html"
+    holdout_status: "pre_holdout"
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "c6ddb71eba85f055d32f6f1d927a91403a5a09b1"
+    notes: "240 unique candidate events plus 36 blind repeats; Owner answers pending, no independent accuracy certification."
