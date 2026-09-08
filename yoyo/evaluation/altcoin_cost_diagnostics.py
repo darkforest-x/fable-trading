@@ -324,7 +324,8 @@ def run(results, history, derivatives, out_dir):
                    funding_price_basis=PROXY_LABEL, assessment_window_seconds=60, funding_coverage_complete=False,
                    candidate_reselection=False, portfolio_recomputed=False, training_eligible=False, production_eligible=False,
                    case_count=len(cases), control_count=len(controls), skipped_files=skipped, input_sha256=inputs,
-                   builder_sha256=sha(Path(__file__)))
+                   builder_sha256=sha(Path(__file__)),
+                   output_sha256={name:sha(out_dir/name) for name in ("cost_events.csv.gz","cost_controls.csv.gz","summary.csv")})
     (out_dir/"manifest.json").write_text(json.dumps(receipt, indent=2, ensure_ascii=False, allow_nan=False)+"\n")
     return receipt
 
