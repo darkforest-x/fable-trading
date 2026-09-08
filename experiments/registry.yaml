@@ -7186,3 +7186,19 @@ experiments:
     - imacd-yolo-tf-20260908-v1-33
     notes: Owner request1H/4H plus persistent unrestricted-date authorization. Holdout consumption1 for1H and1for4H;15m
       notrerun. Reuse engineering evidence only, not feature-selection or training data. No liveconfiguration changed.
+  - experiment_id: exp-imacd-yolo-expanded-20260908-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending-source-freeze
+    status: active
+    question: Does the same IMACD/Grade-A native1H/4H gate retain signals consistently across54cachedOKXsymbols and2026H1?
+    single_variable: Evaluation coverage expansion only:existing54pool andJan1-Jul1; unchanged weight,thresholds,per-bar
+      gate.
+    result: Preregistered; evaluation pending.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    canonical_report: analysis/html/p1_imacd_yolo_expanded_20260908.html
+    artifacts: []
+    notes: Owner asks more data; explicit all-dates authorization persists. This expansion is second holdout evaluation
+      for each unchanged1H/4Hconfiguration, not a new blind test; no live changes.
