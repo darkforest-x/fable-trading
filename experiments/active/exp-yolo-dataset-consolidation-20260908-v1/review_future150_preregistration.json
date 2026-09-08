@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-yolo-dataset-consolidation-20260908-v1",
+  "protocol_id": "owner_review_future150_v1",
+  "requested_future_bars": 150,
+  "owner_authorization": "2026-09-08: 后续走势参考k线起码要100-150根k。Current active queue:1043 actual HL2 event reviews; use150 future15m bars.",
+  "output_pack": "datasets/owner_review_future150_20260908_v1",
+  "source_sha256": {
+    "datasets/grade_a_hl2_review_20260908_v1/manifest.jsonl": "fb0be11739339fd5d5016eee24a51081fd3ed44cffd1c1774c963a7365bf5fde",
+    "datasets/grade_a_hl2_review_20260908_v1/tasks.json": "2262199e081132bfc891014944345720fbcc37ad2a800c8a6c8e38422fab35b2",
+    "datasets/grade_a_hl2_review_20260908_v1/admin/build_receipt.json": "baacdb74902504988f4f23db73716516e238b948c146dba4af248f81984beebd",
+    "datasets/owner_box_refinement_20260907_v1/manifest.jsonl": "7588f9c62f26a66986f747f9dd27dff8f6c216a6b26f307e705cba2880c3a641",
+    "datasets/owner_box_refinement_20260907_v1/tasks.json": "bc89a4d5e41003f1bf191013d60ba76d84fafbd67a28e17c2dfd3f0c6bc6697a",
+    "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_hl2_v1/manifest.jsonl": "ec93d6bfd04cc84a24a34cd745af2c74943f9a75e664831060619511ba60f6d7"
+  },
+  "expected_new_events": 1043,
+  "expected_legacy_events": 2513,
+  "expected_positive_variants": 8000,
+  "holdout_close_boundary": "2026-05-04T00:00:00Z",
+  "source_reads": "Bounded original prefixes only; no full raw CSV hashes. Stop at first gap, source end or exclusive holdout boundary.",
+  "render": "New future-only1280x742 chart, full input+150future,32px count banner. Full safe prefix HL2 SMA/EMA20/60/120; honest actual count and separator. Legacy references link unchanged original40-bar bytes.",
+  "label_studio": "No task.data, prediction, annotation or draft writes. Config points only future Image at per-review-id lookup. Original40-bar caption retained only as historic import information.",
+  "checks": [
+    "All metadata passes before media/ohlcv reads",
+    "Original8000 positive images andlabels unchanged before-after",
+    "All review primary/future digests unchanged",
+    "Future holdout/gap/source-end synthetic controls",
+    "Each lookup path/hash matches its sole review identity",
+    "Future-only directory has no labels"
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "new_training": false,
+  "new_model_inference": false,
+  "new_gold": false,
+  "holdout_read": false,
+  "label_studio_mutation_in_builder": false
+}
