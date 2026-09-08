@@ -1,0 +1,217 @@
+{
+  "schema_version": 1,
+  "study": "exposed_owner_screenshot_cases_v1",
+  "generated_at_utc": "2026-09-08T05:06:34.763986+00:00",
+  "builder_commit": "b358b6f83631ad8b13a93bb49903df3002b67c37",
+  "source_files": [
+    {
+      "path": "yoyo/evaluation/imacd_startup_cases.py",
+      "sha256": "0d33b471c7bae40d3ea01589724baa4b8b2eab2df70cc4a668e640d0a3a70e27"
+    },
+    {
+      "path": "yoyo/evaluation/imacd_startup_quality.py",
+      "sha256": "187349a5afc5d91a9f7095aea4718d6747f0e36263161cc23c1ce31c80623034"
+    },
+    {
+      "path": "yoyo/monitor/__init__.py",
+      "sha256": "d04fdba33df915203e2896809d759f97a64277fe679ecaeaec5e55c31f87fe47"
+    },
+    {
+      "path": "yoyo/monitor/signals.py",
+      "sha256": "0f8e8bb06821430e4abc45fa59588f65815b23483efecef3a6b047d222c14b9f"
+    },
+    {
+      "path": "yoyo/monitor/okx.py",
+      "sha256": "6b878a2b296e6402d6839df8375a9e89ac6474656ecb5fc9790d7fb130f3c796"
+    },
+    {
+      "path": "experiments/active/exp-imacd-startup-quality-20260908-v1/PROJECT_PLAN.md",
+      "sha256": "1207c8271895f3a595324290d44281f760e69a3d9e344370d19418395c727390"
+    }
+  ],
+  "source": "OKX public history-candles",
+  "endpoint": "/api/v5/market/history-candles",
+  "rate_requests_per_second": 2.0,
+  "target_bars_per_case": 1200,
+  "evaluation_role": "previously exposed semantic cases; no held-out selection evidence",
+  "history_seed_limit": "Recurrences start at these 1,200 bars; TradingView's longer history may change marginal states.",
+  "holdout_case_review_number": 1,
+  "training_eligible": false,
+  "production_eligible": false,
+  "monitor_mutations": false,
+  "cases": [
+    {
+      "symbol": "ETH-USDT-SWAP",
+      "timeframe": "4H",
+      "window_start_utc": "2026-08-18T00:00:00+00:00",
+      "window_end_exclusive_utc": "2026-08-21T00:00:00+00:00",
+      "window_basis": "bar_open_utc; bar_close_utc <= window_end",
+      "reference_price": 1922.23,
+      "screenshot_timestamp_verified": false,
+      "same_timestamp_claim": "Not verified; all releases in the predeclared window are listed.",
+      "bars": 1200,
+      "releases": [
+        {
+          "bar_open_utc": "2026-08-19T08:00:00+00:00",
+          "bar_close_utc": "2026-08-19T12:00:00+00:00",
+          "side": "long",
+          "close": 1922.23,
+          "near_zero_bars": 44,
+          "keep_contraction": true,
+          "keep_proximity": true,
+          "keep_separation": true,
+          "dense": true,
+          "reference_price_delta": 0.0,
+          "reference_price_delta_pct": 0.0,
+          "contraction_ratio": 0.9861876466659321,
+          "proximity_atr": 0.8470842160851249,
+          "separation_delta": 0.24951533882468507,
+          "release_band": 1.98633229739913
+        }
+      ],
+      "release_count": 1,
+      "status": "ok",
+      "history": {
+        "pages": 12,
+        "requested_bars": 1200,
+        "received_bars": 1200,
+        "history_complete": true,
+        "source_exhausted": false,
+        "start_open_utc": "2026-02-02T00:00:00+00:00",
+        "end_close_utc": "2026-08-21T00:00:00+00:00"
+      },
+      "source_path": "data/imacd_startup_quality_20260908_v1/cases/ETH-USDT-SWAP_4H.csv",
+      "source_sha256": "f85634959471d8bdda1e960a25284f834b6553a8cda86a6441fb8e6d7f20f7e8"
+    },
+    {
+      "symbol": "ZEC-USDT-SWAP",
+      "timeframe": "4H",
+      "window_start_utc": "2026-08-17T00:00:00+00:00",
+      "window_end_exclusive_utc": "2026-08-21T00:00:00+00:00",
+      "window_basis": "bar_open_utc; bar_close_utc <= window_end",
+      "reference_price": 506.26,
+      "screenshot_timestamp_verified": false,
+      "same_timestamp_claim": "Not verified; all releases in the predeclared window are listed.",
+      "bars": 1200,
+      "releases": [
+        {
+          "bar_open_utc": "2026-08-18T04:00:00+00:00",
+          "bar_close_utc": "2026-08-18T08:00:00+00:00",
+          "side": "long",
+          "close": 506.26,
+          "near_zero_bars": 34,
+          "keep_contraction": true,
+          "keep_proximity": true,
+          "keep_separation": true,
+          "dense": true,
+          "reference_price_delta": 0.0,
+          "reference_price_delta_pct": 0.0,
+          "contraction_ratio": 0.7000339114136128,
+          "proximity_atr": 0.6583907793183651,
+          "separation_delta": 0.23449926792190914,
+          "release_band": 0.9487551612309115
+        }
+      ],
+      "release_count": 1,
+      "status": "ok",
+      "history": {
+        "pages": 12,
+        "requested_bars": 1200,
+        "received_bars": 1200,
+        "history_complete": true,
+        "source_exhausted": false,
+        "start_open_utc": "2026-02-02T00:00:00+00:00",
+        "end_close_utc": "2026-08-21T00:00:00+00:00"
+      },
+      "source_path": "data/imacd_startup_quality_20260908_v1/cases/ZEC-USDT-SWAP_4H.csv",
+      "source_sha256": "a3d66e1da45a8050f9807b85ed711a75ed69b34c26622a2f69dcf0f4e2d05216"
+    },
+    {
+      "symbol": "XAU-USDT-SWAP",
+      "timeframe": "4H",
+      "window_start_utc": "2026-08-04T00:00:00+00:00",
+      "window_end_exclusive_utc": "2026-08-08T00:00:00+00:00",
+      "window_basis": "bar_open_utc; bar_close_utc <= window_end",
+      "reference_price": 4173.8,
+      "screenshot_timestamp_verified": false,
+      "same_timestamp_claim": "Not verified; all releases in the predeclared window are listed.",
+      "bars": 1200,
+      "releases": [
+        {
+          "bar_open_utc": "2026-08-05T04:00:00+00:00",
+          "bar_close_utc": "2026-08-05T08:00:00+00:00",
+          "side": "long",
+          "close": 4173.8,
+          "near_zero_bars": 44,
+          "keep_contraction": true,
+          "keep_proximity": true,
+          "keep_separation": true,
+          "dense": true,
+          "reference_price_delta": 0.0,
+          "reference_price_delta_pct": 0.0,
+          "contraction_ratio": 0.7884561359052726,
+          "proximity_atr": 0.1711236552183328,
+          "separation_delta": 0.40534844420388405,
+          "release_band": 3.325578264614891
+        }
+      ],
+      "release_count": 1,
+      "status": "ok",
+      "history": {
+        "pages": 12,
+        "requested_bars": 1200,
+        "received_bars": 1200,
+        "history_complete": true,
+        "source_exhausted": false,
+        "start_open_utc": "2026-01-20T00:00:00+00:00",
+        "end_close_utc": "2026-08-08T00:00:00+00:00"
+      },
+      "source_path": "data/imacd_startup_quality_20260908_v1/cases/XAU-USDT-SWAP_4H.csv",
+      "source_sha256": "fc21b46798e160151153bf34f38440884af50137e8a54152e91fd9a356f55105"
+    },
+    {
+      "symbol": "SOPH-USDT-SWAP",
+      "timeframe": "30m",
+      "window_start_utc": "2026-09-06T00:00:00+00:00",
+      "window_end_exclusive_utc": "2026-09-08T00:00:00+00:00",
+      "window_basis": "bar_open_utc; bar_close_utc <= window_end",
+      "reference_price": 0.004524,
+      "screenshot_timestamp_verified": false,
+      "same_timestamp_claim": "Not verified; all releases in the predeclared window are listed.",
+      "bars": 1200,
+      "releases": [
+        {
+          "bar_open_utc": "2026-09-07T04:00:00+00:00",
+          "bar_close_utc": "2026-09-07T04:30:00+00:00",
+          "side": "long",
+          "close": 0.004524,
+          "near_zero_bars": 54,
+          "keep_contraction": true,
+          "keep_proximity": true,
+          "keep_separation": true,
+          "dense": true,
+          "reference_price_delta": 0.0,
+          "reference_price_delta_pct": 0.0,
+          "contraction_ratio": 0.26211800120884016,
+          "proximity_atr": 0.025655613244892572,
+          "separation_delta": 0.5041188172293336,
+          "release_band": 7.708656903553175e-06
+        }
+      ],
+      "release_count": 1,
+      "status": "ok",
+      "history": {
+        "pages": 12,
+        "requested_bars": 1200,
+        "received_bars": 1200,
+        "history_complete": true,
+        "source_exhausted": false,
+        "start_open_utc": "2026-08-14T00:00:00+00:00",
+        "end_close_utc": "2026-09-08T00:00:00+00:00"
+      },
+      "source_path": "data/imacd_startup_quality_20260908_v1/cases/SOPH-USDT-SWAP_30m.csv",
+      "source_sha256": "22b77e9deec9c82dd4f23a607ccdcff1f2b2d6959f537a6b924cf287f88b48a9"
+    }
+  ],
+  "request_attempts": 48
+}

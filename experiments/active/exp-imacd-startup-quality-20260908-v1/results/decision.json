@@ -1,0 +1,48 @@
+{
+  "candidate": "P02",
+  "decisions": [
+    {
+      "minutes": 15,
+      "policy": "P02",
+      "arithmetic_gates_pass": false,
+      "failed_checks": [
+        "validation:matched_excess_improves",
+        "validation:right_tail_retained",
+        "validation:increment_significant_after_holm",
+        "holdout_review:matched_excess_improves",
+        "holdout_review:right_tail_retained"
+      ],
+      "deployment_approved": false
+    },
+    {
+      "minutes": 60,
+      "policy": "P02",
+      "arithmetic_gates_pass": false,
+      "failed_checks": [
+        "validation:right_tail_retained",
+        "validation:increment_significant_after_holm",
+        "holdout_review:portfolio_improves",
+        "holdout_review:matched_excess_improves",
+        "holdout_review:right_tail_retained"
+      ],
+      "deployment_approved": false
+    },
+    {
+      "minutes": 240,
+      "policy": "P02",
+      "arithmetic_gates_pass": false,
+      "failed_checks": [
+        "validation:portfolio_improves",
+        "validation:matched_excess_improves",
+        "validation:right_tail_retained",
+        "validation:increment_significant_after_holm",
+        "holdout_review:portfolio_improves",
+        "holdout_review:matched_excess_improves",
+        "holdout_review:right_tail_retained"
+      ],
+      "deployment_approved": false
+    }
+  ],
+  "live_changes": false,
+  "threshold_search": false
+}

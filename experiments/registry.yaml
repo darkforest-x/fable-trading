@@ -6957,15 +6957,50 @@ experiments:
 
   - experiment_id: exp-imacd-startup-quality-20260908-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 44a004c26285dc0169f5d8e0f430532e4f0991dd
-    status: active
-    question: Can prior MA formation and price proximity improve visible IMACD startup signals while retaining large winners?
-    single_variable: Fixed sequential gates P01 contraction, P02 proximity, P03 directional separation; P04 old density comparator.
-    result: Preregistered; P02 is the sole deployment candidate. No market outcomes evaluated yet.
-    holdout_consumed: false
+    source_commit: 2471ff3e80d770093a54a592441f80c127e8479a
+    status: rejected
+    question: Can prior MA formation and price proximity improve visible IMACD startup signals while retaining large
+      winners?
+    single_variable: Fixed sequential gates P01 contraction,P02 proximity,P03 directional separation;P04 old density
+      comparator.
+    result: 32779 events and98209 controls across54 symbols/3TF. P02 retains all4 exposed screenshot price/count matches
+      but fails every timeframe.2025 4H net16.11%->3.12%,tail58.11%;holdout1H2.54%->0.65%.70 synthetic tests and16
+      ledger invariants passed.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    canonical_report: null
-    artifacts: []
+    canonical_report: analysis/html/p1_imacd_startup_quality_20260908.html
+    artifacts:
+    - imacd-startup-quality-v1-case-eth-usdt-swap-4h-1190-png
+    - imacd-startup-quality-v1-case-soph-usdt-swap-30m-1160-png
+    - imacd-startup-quality-v1-case-xau-usdt-swap-4h-1183-png
+    - imacd-startup-quality-v1-case-zec-usdt-swap-4h-1183-png
+    - imacd-startup-quality-v1-cases-manifest-json
+    - imacd-startup-quality-v1-coverage-csv
+    - imacd-startup-quality-v1-decision-json
+    - imacd-startup-quality-v1-equity-daily-csv
+    - imacd-startup-quality-v1-equity-holdout-review-png
+    - imacd-startup-quality-v1-equity-validation-png
+    - imacd-startup-quality-v1-ledger-verification-json
+    - imacd-startup-quality-v1-manifest-json
+    - imacd-startup-quality-v1-portfolios-csv
+    - imacd-startup-quality-v1-rankings-csv
+    - imacd-startup-quality-v1-rejected-cfx-240-1752091200-png
+    - imacd-startup-quality-v1-rejected-pengu-240-1751068800-png
+    - imacd-startup-quality-v1-right-tail-csv
+    - imacd-startup-quality-v1-started-json
+    - imacd-startup-quality-v1-summary-csv
+    - imacd-startup-quality-v1-data-accepted-csv-gz
+    - imacd-startup-quality-v1-data-controls-csv-gz
+    - imacd-startup-quality-v1-data-events-csv-gz
+    - imacd-startup-quality-v1-data-cases-eth-usdt-swap-4h-csv
+    - imacd-startup-quality-v1-data-cases-soph-usdt-swap-30m-csv
+    - imacd-startup-quality-v1-data-cases-xau-usdt-swap-4h-csv
+    - imacd-startup-quality-v1-data-cases-zec-usdt-swap-4h-csv
+    - imacd-startup-quality-v1-md-p1-imacd-startup-quality-20260908-md
+    - imacd-startup-quality-v1-html-p1-imacd-startup-quality-20260908-html
     reuse_allowed: false
-    notes: Owner authorized all dates and this research on 2026-09-08. Existing 54 deep OKX perpetual datasets,15m/1H/4H; no production changes.
+    notes: P02 predeclared sole candidate; no switching to diagnostic arms. Each fixed arm holdout use1 under owner
+      all-dates authorization. Equity is54 equal initial sleeves,1x entry notional,20bp cost proxy,neutral exit,close-marked
+      pool MDD;no funding/margin model. HTML has8 verified embedded plots,5 local links; browser file URL blocked,workspace
+      file delivery only. No Pine/spike/TG/Bark changes.
