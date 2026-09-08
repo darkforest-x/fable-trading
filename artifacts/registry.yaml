@@ -18,6 +18,104 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: yolo-review-future150-20260908-prereg
+    artifact_type: manifest
+    role: isolated_human_future_context_extension
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2bee44e2cf38e340f18c373b34c05f9d6a51b63f
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/review_future150_preregistration.json
+    sha256: c5bf6b01d3ab7851225e1a992511f0d42d21ddcf6097a3a587167f45c8d9cda8
+    size_bytes: 2492
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/review_future150_preregistration.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 1041 complete150-bar previews, one132-bar source gap, one13-bar holdout boundary; legacy2513 byte-exact
+      links.1043 main replays and29181 immutable files verified; no task data, prediction or answer writes.
+  - artifact_id: yolo-review-future150-20260908-manifest
+    artifact_type: manifest
+    role: isolated_human_future_context_extension
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2bee44e2cf38e340f18c373b34c05f9d6a51b63f
+    source_path: datasets/owner_review_future150_20260908_v1/manifest.jsonl
+    sha256: 7f7a6c430bd43b46c2b52be593af2574e9212cf5d3ae65c79c876d97cce94696
+    size_bytes: 4930403
+    storage_uri: local://datasets/owner_review_future150_20260908_v1/manifest.jsonl
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 1041 complete150-bar previews, one132-bar source gap, one13-bar holdout boundary; legacy2513 byte-exact
+      links.1043 main replays and29181 immutable files verified; no task data, prediction or answer writes.
+  - artifact_id: yolo-review-future150-20260908-build-receipt
+    artifact_type: manifest
+    role: isolated_human_future_context_extension
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3d226604d042dd2aadc67c1363fc1807c6a1a3d4
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/future150_build_receipt.json
+    sha256: 20b4398cd64720895f4fc208d5e088f840d7cb2e5ddac5231ebb920330658437
+    size_bytes: 64208
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/future150_build_receipt.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 1041 complete150-bar previews, one132-bar source gap, one13-bar holdout boundary; legacy2513 byte-exact
+      links.1043 main replays and29181 immutable files verified; no task data, prediction or answer writes.
+  - artifact_id: yolo-review-future150-20260908-publish-receipt
+    artifact_type: manifest
+    role: isolated_human_future_context_extension
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3d226604d042dd2aadc67c1363fc1807c6a1a3d4
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/future150_publish_receipt.json
+    sha256: 0bd07a0414dbca25fc6c44f9b446cd5aad4e76f2d8c461c11da7773f88f7b065
+    size_bytes: 1481
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/future150_publish_receipt.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 1041 complete150-bar previews, one132-bar source gap, one13-bar holdout boundary; legacy2513 byte-exact
+      links.1043 main replays and29181 immutable files verified; no task data, prediction or answer writes.
+  - artifact_id: yolo-review-future150-20260908-browser-qa
+    artifact_type: manifest
+    role: isolated_human_future_context_extension
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3d226604d042dd2aadc67c1363fc1807c6a1a3d4
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/future150_browser_qa.json
+    sha256: 438a9a1f1d03feace99869b33fd6eb7a9172592e10ed03a9da282a2e33591dd8
+    size_bytes: 1012
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/future150_browser_qa.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 1041 complete150-bar previews, one132-bar source gap, one13-bar holdout boundary; legacy2513 byte-exact
+      links.1043 main replays and29181 immutable files verified; no task data, prediction or answer writes.
+  - artifact_id: yolo-review-future150-20260908-report-source
+    artifact_type: report
+    role: isolated_human_future_context_extension
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3d226604d042dd2aadc67c1363fc1807c6a1a3d4
+    source_path: analysis/p1_yolo_review_future150_20260908.md
+    sha256: 1d07fc53a6e3781e17679cdaf1c74771224f7d7944c0770f66885b0294f9b2ab
+    size_bytes: 5430
+    storage_uri: repo://analysis/p1_yolo_review_future150_20260908.md
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 1041 complete150-bar previews, one132-bar source gap, one13-bar holdout boundary; legacy2513 byte-exact
+      links.1043 main replays and29181 immutable files verified; no task data, prediction or answer writes.
+  - artifact_id: yolo-review-future150-20260908-report-html
+    artifact_type: report
+    role: isolated_human_future_context_extension
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3d226604d042dd2aadc67c1363fc1807c6a1a3d4
+    source_path: analysis/html/p1_yolo_review_future150_20260908.html
+    sha256: f889e338b3bf0ff82e980d3974f8282cf2f3de49c8cec160915cac55d014d1a4
+    size_bytes: 8266
+    storage_uri: repo://analysis/html/p1_yolo_review_future150_20260908.html
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 1041 complete150-bar previews, one132-bar source gap, one13-bar holdout boundary; legacy2513 byte-exact
+      links.1043 main replays and29181 immutable files verified; no task data, prediction or answer writes.
   - artifact_id: yolo-review-entry-fix-20260908-report-source
     artifact_type: report
     role: visible_filtered_review_entry_verification
@@ -371,10 +469,10 @@ artifacts:
     artifact_type: report
     role: actual_hl2_labels_owner_review_preparation
     source_repo: darkforest-x/fable-trading
-    source_commit: 656f3184b31525a68ce1fceac8431bd66542f399
+    source_commit: 3d226604d042dd2aadc67c1363fc1807c6a1a3d4
     source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/PLAN.md
-    sha256: 229b3c7d97fa5ea16f692ac222b342def8531a704d162d9409021e059edc4391
-    size_bytes: 3966
+    sha256: 5e4872321ecf735af2da6e0bb6108e6d5a5b1fd4a2429249fa76a1a6b8028b9b
+    size_bytes: 4306
     storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/PLAN.md
     holdout_status: pre_holdout
     training_eligible: false
