@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: altcoin-rotation-20260909-prereg
+    artifact_type: manifest
+    role: engineering_observer_preregistration
+    source_repo: darkforest-x/fable-trading
+    source_commit: cbe97b49b89b14614d1689d0e78e8580eaf69136
+    source_path: experiments/active/exp-altcoin-rotation-system-20260909-v1/PROJECT_PLAN.md
+    sha256: 5106449d8a6f96700094bb68e021ae93a77967ba05aee3023d343c54e3f23fbe
+    size_bytes: 3380
+    storage_uri: repo://experiments/active/exp-altcoin-rotation-system-20260909-v1/PROJECT_PLAN.md
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Engineering only; no market outcome evaluated; current scoring requires separate owner receipt.
   - artifact_id: yolo-owner-annotation-audit-20260908-prereg
     artifact_type: manifest
     role: human_annotation_geometry_and_separate_future_review

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="本地选择性山寨研究雷达：市场环境、相对强度、价格结构与观察日志。">
+  <title>Rotation · 选择性山寨研究雷达</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script defer src="/static/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#candidates">跳到候选池</a>
+  <header class="topbar">
+    <a class="brand" href="#overview" aria-label="Rotation 研究雷达首页">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span>ROTATION<span class="brand-sub">研究雷达</span></span>
+    </a>
+    <nav aria-label="主导航">
+      <a href="#overview">市场概览</a><a href="#candidates">候选池</a><a href="#journal">观察日志</a>
+    </nav>
+    <span class="connection" id="connection"><span class="status-dot"></span><span id="connection-text">正在连接</span></span>
+  </header>
+
+  <main id="overview">
+    <section class="page-heading" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">SELECTIVE ALTCOIN RESEARCH</p>
+        <h1 id="page-title">找到正在变强的少数。</h1>
+        <p class="subtitle">市场环境 → 日线强度 → 4 小时结构 → 15 分钟观察</p>
+      </div>
+      <div class="heading-actions">
+        <button class="button secondary" id="config-button" type="button">研究配置</button>
+        <button class="button primary" id="scan-button" type="button" disabled><span aria-hidden="true">↻</span> <span id="scan-label">扫描一次</span></button>
+      </div>
+    </section>
+
+    <section class="mode-banner" id="mode-banner" aria-labelledby="mode-title">
+      <div class="mode-main"><span class="mode-tag" id="mode-tag">等待配置</span><h2 id="mode-title">正在读取研究环境</h2><p id="mode-description">数据和安全策略由本地服务提供。</p></div>
+      <div class="snapshot-time"><span id="asof-label">观察截止时间 · UTC</span><strong id="asof-time">—</strong><small id="generated-time">尚无扫描快照</small></div>
+    </section>
+
+    <div class="notice error-notice" id="request-error" role="alert" hidden></div>
+    <div class="notice warning-notice" id="partial-notice" role="status" hidden></div>
+    <div id="activity" class="activity" role="status" aria-live="polite">正在加载本地服务状态…</div>
+
+    <section class="metric-grid" aria-label="市场环境指标">
+      <article class="metric-card regime-card"><div class="metric-label">市场环境<span class="tiny-label">REGIME</span></div><div class="metric-value" id="regime-state">—</div><p id="regime-caption">等待扫描结果</p></article>
+      <article class="metric-card"><div class="metric-label">BTC · 30 日<span class="tiny-label">趋势</span></div><div class="metric-value numeric" id="btc-return">—</div><p>已完成日线的区间收益</p></article>
+      <article class="metric-card"><div class="metric-label">ETH / BTC · 30 日<span class="tiny-label">轮动</span></div><div class="metric-value numeric" id="eth-btc-return">—</div><p>以 BTC 计价的相对表现</p></article>
+      <article class="metric-card"><div class="metric-label">站上 20 日均线<span class="tiny-label">广度</span></div><div class="metric-value numeric" id="breadth">—</div><p id="breadth-caption">样本池内的上涨覆盖度</p></article>
+    </section>
+    <div class="regime-reasons" id="regime-reasons"></div>
+
+    <section class="sector-section" aria-labelledby="sector-title">
+      <div class="section-label"><h2 id="sector-title">板块温度</h2><span title="相对 BTC 收益 = (1 + 币种收益) / (1 + BTC 收益) − 1，以百分比（%）显示">池内 30 日相对收益中位数</span></div>
+      <div class="sector-strip" id="sector-strip"><p class="subtle">扫描后显示板块分布。</p></div>
+    </section>
+
+    <section class="panel candidates-panel" id="candidates" aria-labelledby="candidates-title">
+      <div class="panel-heading"><div><div class="title-row"><h2 id="candidates-title">观察候选池</h2><span class="count-badge" id="candidate-count">0</span></div><p>排序反映观察优先级，不代表胜率。点击币种查看依据。</p></div><button class="button quiet" id="export-button" type="button" disabled>导出 CSV <span aria-hidden="true">↗</span></button></div>
+      <div class="filterbar">
+        <div class="filter-tabs" role="group" aria-label="候选状态筛选">
+          <button type="button" data-filter="all" aria-pressed="true">全部</button>
+          <button type="button" data-filter="watch" aria-pressed="false">待突破</button>
+          <button type="button" data-filter="breakout" aria-pressed="false">突破</button>
+          <button type="button" data-filter="pullback" aria-pressed="false">回踩</button>
+          <button type="button" data-filter="risk" aria-pressed="false">风险隔离</button>
+        </div>
+        <div class="filter-inputs"><label class="visually-hidden" for="sector-filter">筛选板块</label><select id="sector-filter"><option value="all">全部板块</option></select><label class="search-wrap"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="搜索币种 / 板块" aria-label="搜索币种或板块" autocomplete="off"></label></div>
+      </div>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="候选列表，可横向滚动">
+        <table><thead><tr><th scope="col">币种 / 板块</th><th scope="col">观察状态</th><th scope="col" class="number-col">7 日涨幅</th><th scope="col" class="number-col">30 日涨幅</th><th scope="col" class="number-col" title="相对 BTC 收益 = (1 + 币种收益) / (1 + BTC 收益) − 1，以百分比（%）显示">30 日 RS</th><th scope="col" class="number-col">4h 量比</th><th scope="col" class="number-col">观察分</th><th scope="col">日线走势</th><th scope="col"><span class="visually-hidden">查看详情</span></th></tr></thead><tbody id="candidate-rows"></tbody></table>
+      </div>
+      <div class="empty-state" id="empty-state"><div class="empty-icon" aria-hidden="true">◎</div><h3 id="empty-title">你的观察从这里开始</h3><p id="empty-description">读取配置后，点击“扫描一次”生成研究快照。</p></div>
+      <div class="table-footer"><span id="coverage-caption">尚未扫描</span><span id="result-caption">仅观察 · 无自动交易</span></div>
+    </section>
+
+    <div class="bottom-grid">
+      <section class="panel journal-panel" id="journal" aria-labelledby="journal-title">
+        <div class="panel-heading"><div><h2 id="journal-title">本地观察日志</h2><p>每次扫描记录候选状态变化。</p></div><span class="count-badge" id="journal-count">0</span></div>
+        <ol class="journal-list" id="journal-list"></ol><p class="panel-empty" id="journal-empty">还没有状态变化记录。</p><p class="panel-footnote" id="journal-note"></p>
+      </section>
+      <section class="panel evidence-panel" aria-labelledby="evidence-title">
+        <div class="panel-heading"><div><h2 id="evidence-title">数据与研究边界</h2><p>每个判断都应能追溯到数据。</p></div><span class="outline-badge">RESEARCH</span></div>
+        <ul class="policy-list" id="policy-list"><li><span>实盘执行</span><strong>不接入</strong></li><li><span>训练 / 模型评分</span><strong>不启用</strong></li><li><span>Holdout 消耗</span><strong>等待服务确认</strong></li></ul>
+        <details id="sources-details"><summary>来源与覆盖说明 <span id="source-count">0</span></summary><div id="source-list" class="detail-content"></div></details>
+        <details id="errors-details"><summary>未纳入与数据错误 <span id="error-count">0</span></summary><div id="error-list" class="detail-content"></div></details>
+      </section>
+    </div>
+    <footer class="page-footer"><span>ROTATION / FABLE RESEARCH</span><p>固定观察池 · 因果窗口 · 证据可追溯</p><span id="scan-id">无快照</span></footer>
+  </main>
+
+  <dialog id="candidate-dialog" class="candidate-dialog" aria-labelledby="detail-title">
+    <div class="dialog-header"><div><p class="eyebrow">CANDIDATE RESEARCH</p><h2 id="detail-title">候选详情</h2></div><button type="button" class="icon-button" data-close="candidate-dialog" aria-label="关闭候选详情">×</button></div>
+    <div id="candidate-detail" class="dialog-body"></div>
+  </dialog>
+  <dialog id="config-dialog" class="config-dialog" aria-labelledby="config-title">
+    <div class="dialog-header"><div><p class="eyebrow">READ-ONLY CONFIGURATION</p><h2 id="config-title">研究配置</h2></div><button type="button" class="icon-button" data-close="config-dialog" aria-label="关闭研究配置">×</button></div>
+    <div class="dialog-body"><p class="config-intro">本页展示当前服务配置。扫描沿用服务端的数据源、截止时间与研究边界。</p><pre id="config-content">正在读取…</pre></div>
+  </dialog>
+  <noscript><div class="noscript">此研究界面需要启用 JavaScript 才能读取本地 API。</div></noscript>
+</body>
+</html>

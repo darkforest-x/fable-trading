@@ -14,6 +14,19 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-altcoin-rotation-system-20260909-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: cbe97b49b89b14614d1689d0e78e8580eaf69136
+    status: active
+    question: Can a causal selective-altcoin observer expose market, structure, event and data risks without execution
+      access?
+    single_variable: Engineering implementation only; no strategy experiment, training or parameter evaluation.
+    result: Preregistered before real historical acquisition. Synthetic, API and causal verification in progress.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts:
+    - altcoin-rotation-20260909-prereg
   - experiment_id: exp-yolo-dataset-consolidation-20260908-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 656f3184b31525a68ce1fceac8431bd66542f399
