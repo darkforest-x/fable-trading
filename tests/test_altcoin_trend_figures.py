@@ -76,6 +76,17 @@ def test_sparse_all_negative_groups_are_deduplicated_without_fabricated_zero():
     assert select_examples(rows, phase="validation") == []
 
 
+def test_gallery_includes_largest_winner_omitted_by_prior_week_volatility():
+    rows=[selection_row(40,symbol='ALT',cohort='all_core',i=400),
+          selection_row(10,symbol='ALT',cohort='all_core',i=500),
+          selection_row(10,symbol='ALT',cohort='high_vol',i=500),
+          selection_row(-2,symbol='ALT',cohort='all_core',i=600)]
+    result=select_examples(pd.DataFrame(rows))
+    omitted=[x for x in result if any('高波动筛选遗漏' in role for role in x['roles'])]
+    assert len(omitted)==1 and omitted[0]['event']['signal_i']==400
+    assert omitted[0]['selected_with_outcome'] is True
+
+
 def test_high_vol_selection_and_missed_anchor_require_actual_comparison_metadata():
     base = [selection_row(net, symbol="ZEC", i=i, cohort="high_vol")
             for i, net in ((380, 12), (381, 8), (382, -4))]
@@ -85,12 +96,14 @@ def test_high_vol_selection_and_missed_anchor_require_actual_comparison_metadata
                   selection_row(300, symbol="ZEC", cohort="all_core", i=399)]
     lock = {"selections": [{"minutes": 60, "selected_arm": "gate_rvol2"}]}
     result = select_examples(pd.DataFrame(base + [comparison] + misleading), selection=lock)
-    assert len(result) == 3
+    assert len(result) == 4
+    omitted = [item for item in result if any("高波动筛选遗漏" in role for role in item["roles"])]
+    assert len(omitted) == 1 and omitted[0]["event"]["signal_i"] == 399
     missed = [item for item in result if any("未保留" in role for role in item["roles"])]
     assert len(missed) == 1 and missed[0]["event"]["signal_i"] == 381
     assert "不等于漏掉整段行情" in missed[0]["roles"][0]
     absent_arm = select_examples(pd.DataFrame(base + misleading), selection=lock)
-    assert len(absent_arm) == 2
+    assert len(absent_arm) == 3
     assert not any("未保留" in role for item in absent_arm for role in item["roles"])
 
 

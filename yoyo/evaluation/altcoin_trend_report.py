@@ -20,7 +20,7 @@ import pandas as pd
 
 ROOT=Path(__file__).resolve().parents[2]
 EXP=ROOT/'experiments/active/exp-imacd-altcoin-trends-20260909-v1'
-LABELS={'base':'默认 · md退出','exit_chandelier':'3ATR移动保护','exit_fixed3r':'固定3R','exit_sma60':'SMA60退出',
+LABELS={'base':'34/9基准 · 主线失向退出','exit_chandelier':'3ATR移动保护','exit_fixed3r':'固定3R','exit_sma60':'SMA60退出',
  'signal5':'信号线5','signal13':'信号线13','ma21':'MA21','ma55':'MA55','focus6':'蓄势6根','focus24':'蓄势24根','focus36':'蓄势36根',
  'band005':'近零带0.05ATR','band020':'近零带0.20ATR','band030':'近零带0.30ATR',
  'gate_box_break':'收盘突破原箱体','gate_rvol2':'相对量能≥2','gate_tr15':'振幅扩张≥1.5','gate_close70':'方向收盘位置≥70%','gate_bb20':'BB压缩前20%',
@@ -111,6 +111,7 @@ def volatility_retention(events):
         tail=all_rows.net_r.ge(5)
         rows.append(dict(fold=fold,minutes=minutes,n_all=len(all_rows),n_kept=len(kept),
                          tail_n=int(tail.sum()),tail_kept=int(kept.net_r.ge(5).sum()),
+                         tail_censored=int((tail & all_rows.censored.eq(True)).sum()),
                          mean_all_bp=all_rows.net_bp.mean(),mean_kept_bp=kept.net_bp.mean(),
                          largest_omitted_r=all_rows.loc[~all_rows.index.isin(kept.index),'net_r'].max()))
     return friendly(pd.DataFrame(rows))
@@ -276,8 +277,8 @@ def generate(args):
            table(major_symbol_rows(results,selections),{'symbol':'币种','时期':'时期','周期':'周期','方案':'方案','n':'事件','selected_n':'单仓选中','mean_net_bp':'事件均净bp','portfolio_net_pct':'单币净%','mdd_pct':'收盘回撤%'}),
            '主高波动组每周一按此前完整7日ATR/close均值选出可用山寨前25%，BTC/ETH单列，SOPH/USELESS不参与排名或选参。全部名单依然来自便利/近期存续池，不能宣称历史全市场无偏。',
            '### 过去已经很波动，是否反而漏掉刚启动的币',
-           '这里只比较原研究池中52个山寨的同一基准事件，BTC/ETH与用户展示币剔除。每周前25%名单在交易前已固定；事后净R≥5只用于描述大赢家保留率，不用于选参。它与“这根K线波动正在放大”是两个不同问题。',
-           table(volatility_retention(e),{'时期':'时期','周期':'周期','n_all':'全池事件','n_kept':'高波动保留','tail_n':'事后≥5R事件','tail_kept':'其中保留','mean_all_bp':'全池事件均净bp','mean_kept_bp':'保留均净bp','largest_omitted_r':'遗漏最大净R'}),
+           '这里只比较原研究池中52个山寨的同一基准事件，BTC/ETH与用户展示币剔除。每周前25%名单在交易前已固定；事后净R≥5只用于描述大赢家保留率，不用于选参。它与“这根K线波动正在放大”是两个不同问题。≥5R统计包含边界盯市，不能全部当作自然退出已兑现利润；近期4H四笔中有三笔属于这一情况。',
+           table(volatility_retention(e),{'时期':'时期','周期':'周期','n_all':'全池事件','n_kept':'高波动保留','tail_n':'事后≥5R事件','tail_censored':'其中边界盯市','tail_kept':'其中保留','mean_all_bp':'全池事件均净bp','mean_kept_bp':'保留均净bp','largest_omitted_r':'遗漏最大净R'}),
            '## SOPH / USELESS：成功、失败都看',
            table(summary.loc[(summary.cohort=='owner_illustration')&focus_mask(summary)&summary.fold.eq('recent_test')],columns),
            '这两币是用户事后提供的案例组，不能用它们反推参数再称样本外。全景图按事后收益确定性选择最好、最差和中位案例，供解释形态；不是成功率抽样。前文100根，之后至少目标72根并尽量延伸到实际退出；遇500根上限会显式标记退出是否在图外。',

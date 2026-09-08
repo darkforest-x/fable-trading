@@ -55,11 +55,12 @@ def test_completed_report_inputs_reject_stale_summary_and_selection(tmp_path):
 
 
 def test_tail_retention_is_same_event_subset_and_excludes_owner_examples():
-    rows=[event('base',symbol='ALT',cohort='all_core',net_r=8.),
+    rows=[event('base',symbol='ALT',cohort='all_core',net_r=8.,censored=True),
           event('base',symbol='ALT',cohort='all_core',signal_i=900,net_r=-1.),
           event('base',symbol='ALT',cohort='high_vol',signal_i=900,net_r=-1.),
           event('base',symbol='SOPH',net_r=99.)]
     r=volatility_retention(pd.DataFrame(rows)).iloc[0]
     assert (r.n_all,r.n_kept,r.tail_n,r.tail_kept,r.largest_omitted_r)==(2,1,1,0,8.)
+    assert r.tail_censored == 1
     rows[2]['net_r']=2.
     with pytest.raises(ValueError,match='different outcomes'):volatility_retention(pd.DataFrame(rows))

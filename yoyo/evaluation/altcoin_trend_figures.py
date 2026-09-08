@@ -6,6 +6,8 @@ deduplicated by event identity; high-volatility baseline groups show max/min.
 A locked arm may add a baseline positive winner absent at the exact same
 symbol/timeframe/signal/side. This is not evidence that the arm missed the
 whole trend; it may enter at another time. Nonfinite returns are never filled.
+An explicit diagnostic also shows the largest baseline altcoin winner absent
+from the prior-week high-volatility cohort, using the already-frozen ledger.
 
 Every selection explicitly uses outcomes and is unsuitable for estimating
 success rates. These figures are not YOLO inputs, model confirmations, training
@@ -99,6 +101,12 @@ def select_examples(events: pd.DataFrame, phase: str | None = "recent_test", sel
                 retained = {identity(row) for row in comparison.itertuples()}
                 missed = group.loc[[identity(row) not in retained for row in group.itertuples()]]
                 choose(missed.loc[missed.net_r > 0], f"{arm} 未保留同一启动时点 · 不等于漏掉整段行情", -1)
+    all_alts=base.loc[base.cohort.eq('all_core') & ~base.symbol.isin(['BTC','ETH','SOPH','USELESS'])]
+    for minutes,group in all_alts.groupby('minutes',sort=True):
+        identity=lambda r:(r.symbol,r.fold,int(r.signal_i),int(r.side))
+        retained={identity(r) for r in highvol.loc[highvol.minutes.eq(minutes)].itertuples()}
+        omitted=group.loc[[identity(r) not in retained for r in group.itertuples()]]
+        choose(omitted.loc[omitted.net_r>0],f'前一周高波动筛选遗漏 · 原全池 {minutes}m 最大净R',-1)
     return list(selected.values())
 
 
@@ -250,7 +258,7 @@ def render_event(event: dict, bars: pd.DataFrame, path: Path, roles: list[str], 
         path.parent.mkdir(parents=True,exist_ok=True)
         fig.savefig(path,dpi=150)
         plt.close(fig)
-    return dict(event_id=str(event["event_id"]),symbol=str(event["symbol"]),minutes=minutes,fold=str(event["fold"]),
+    return dict(event_id=str(event["event_id"]),symbol=str(event["symbol"]),minutes=minutes,fold=str(event["fold"]),cohort=str(event.get('cohort','unspecified')),
         roles=roles,side=side,arm="base",signal_i=signal,entry_i=entry,exit_i=exit_i,
         decision_close_time=decision.isoformat(),future_first_open=decision.isoformat(),exit_time=exit_time.isoformat(),
         first_open=view.index[0].isoformat(),last_close=(view.index[-1]+step).isoformat(),
