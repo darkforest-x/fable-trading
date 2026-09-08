@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "parent_experiment_id": "exp-yolo-dataset-consolidation-20260908-v1",
+  "owner_decision": "Preserve old 2513 tasks and submitted answers, audit old/new overlaps and conflicts, pre-screen historical candidates before requesting selective review. Current 1043 HL2 queue stays first.",
+  "stage": "metadata_inventory_and_conflict_triage_before_visual_shape_screen",
+  "source_pools": ["owner_box_refinement_20260907_v1", "grade_a_hl2_review_20260908_v1"],
+  "snapshot": "output/offline_tasks/owner_review_exports/20260908T132141627124Z",
+  "rules": [
+    "All historical tasks and every raw answer are retained; statuses come only from non-cancelled submitted annotations.",
+    "No target with unchanged inherited proposal is an explicit no-target answer; no target with modified geometry remains a conflict.",
+    "Core identity, core overlap, visible-window dependence and image similarity are distinct; cross-venue symbol/time collisions never justify label transfer or deduplication.",
+    "Exact duplicate review canvases do not erase original box or answer identities.",
+    "Known background overlaps are review holds for the next dataset; do not mutate historical negatives or infer a positive label.",
+    "Unanswered historical records await shape screening; neither an old star nor a geometric audit passes current semantic or training gates."
+  ],
+  "validation": ["Frozen source SHA and snapshot reconstruction", "All 2513 identities have exactly one disposition", "Synthetic missing/conflicting/cross-identity answers", "Interval adjacency and cross-venue negative controls", "No service mutations, media/OHLCV reads or training"],
+  "shape_screen_complete": false,
+  "holdout_read": false,
+  "training_eligible": false,
+  "production_eligible": false
+}
