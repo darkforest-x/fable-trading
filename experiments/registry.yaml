@@ -7241,3 +7241,17 @@ experiments:
       2 for each timeframe. Summary inventories all 1084 saved data files by SHA. No training, promotion, live notification
       or execution changes. No profitability or true-launch validation. Engineering reuse only. Four conditional direction
       controls are not economic tests.
+  - experiment_id: exp-imacd-yolo-followthrough-20260908-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending-source-freeze
+    status: active
+    question: Do fixed IMACD plus YOLO confirmations precede favorable future paths, especially same-close confluence?
+    single_variable: Add frozen future-path labels to unchanged saved decisions; no gate or model changes.
+    result: Preregistered; complete future-path evaluation and global charts pending.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    canonical_report: analysis/html/p1_imacd_yolo_followthrough_20260908.html
+    artifacts: []
+    notes: Owner explicitly requests future paths and global charts under persistent unrestricted-date authorization. Same 1H and 4H configurations each consume holdout for the third time. Fixed 24-bar primary, 6/72 descriptive; no live changes.
