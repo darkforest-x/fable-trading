@@ -21205,3 +21205,130 @@ artifacts:
     production_eligible: false
     notes: Owner-authorized notification presentation update; live-observation use1. Derived image/receipts only,
       no raw OHLC or secrets. No test messages. Runtime84c8636, renderer041d2a3, verification59f572e.
+
+  - artifact_id: imacd-tv-risk-box-20260908-source
+    artifact_type: manifest
+    role: indicator_visual_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5c1c75ea3fb3968e7a8b70a82657ce015d493411
+    source_path: yoyo/evaluation/pine/imacd_dense_mtf_v2_4.pine
+    sha256: 087f569040e8c95adae6b2b852aa4cb6dc128fc2fda8a991d75a8676bef141ec
+    size_bytes: 40166
+    storage_uri: repo://yoyo/evaluation/pine/imacd_dense_mtf_v2_4.pine
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized TV display and all dates; live-observation use1. Cloud v9 verified. Display assumptions
+      only; no performance evaluation, notification change or orders.
+  - artifact_id: imacd-tv-risk-box-20260908-ui-verification
+    artifact_type: report
+    role: indicator_visual_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5c1c75ea3fb3968e7a8b70a82657ce015d493411
+    source_path: experiments/active/exp-imacd-tv-risk-box-20260908-v1/results/ui-verification.json
+    sha256: 470fc8fce5a94a5c97f084b68e581078d57c56d59cba45e7668b6ab9089f0906
+    size_bytes: 1882
+    storage_uri: repo://experiments/active/exp-imacd-tv-risk-box-20260908-v1/results/ui-verification.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized TV display and all dates; live-observation use1. Cloud v9 verified. Display assumptions
+      only; no performance evaluation, notification change or orders.
+  - artifact_id: imacd-tv-risk-box-20260908-arithmetic-cases
+    artifact_type: report
+    role: indicator_visual_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5c1c75ea3fb3968e7a8b70a82657ce015d493411
+    source_path: experiments/active/exp-imacd-tv-risk-box-20260908-v1/results/arithmetic-cases.json
+    sha256: e5eb43e7cfaefe1099f726a73ebebe1dbc36c5d9bbbe842b4865ab75baec9866
+    size_bytes: 2206
+    storage_uri: repo://experiments/active/exp-imacd-tv-risk-box-20260908-v1/results/arithmetic-cases.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized TV display and all dates; live-observation use1. Cloud v9 verified. Display assumptions
+      only; no performance evaluation, notification change or orders.
+  - artifact_id: imacd-tv-risk-box-20260908-tv-inputs
+    artifact_type: report
+    role: indicator_visual_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5c1c75ea3fb3968e7a8b70a82657ce015d493411
+    source_path: experiments/active/exp-imacd-tv-risk-box-20260908-v1/results/tv-inputs.txt
+    sha256: fa01bf9f3d57a65a80f94103242b533644d29084184c5d8afaa808ac0fd0b63f
+    size_bytes: 6497
+    storage_uri: repo://experiments/active/exp-imacd-tv-risk-box-20260908-v1/results/tv-inputs.txt
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized TV display and all dates; live-observation use1. Cloud v9 verified. Display assumptions
+      only; no performance evaluation, notification change or orders.
+  - artifact_id: imacd-tv-risk-box-20260908-long-lit-1h
+    artifact_type: report
+    role: indicator_visual_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5c1c75ea3fb3968e7a8b70a82657ce015d493411
+    source_path: experiments/active/exp-imacd-tv-risk-box-20260908-v1/results/tv-long-lit-1h.png
+    sha256: 1998531b403854d978e0397839c097e93a405752250a26871d27fe7acd5a2d56
+    size_bytes: 132458
+    storage_uri: repo://experiments/active/exp-imacd-tv-risk-box-20260908-v1/results/tv-long-lit-1h.png
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized TV display and all dates; live-observation use1. Cloud v9 verified. Display assumptions
+      only; no performance evaluation, notification change or orders.
+  - artifact_id: imacd-tv-risk-box-20260908-short-btc-1h
+    artifact_type: report
+    role: indicator_visual_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5c1c75ea3fb3968e7a8b70a82657ce015d493411
+    source_path: experiments/active/exp-imacd-tv-risk-box-20260908-v1/results/tv-short-btc-1h.png
+    sha256: 20c8dda8474d627bb306dc38f252a488b7c0a6bb9c01fe6bb119e738de38a5c7
+    size_bytes: 136959
+    storage_uri: repo://experiments/active/exp-imacd-tv-risk-box-20260908-v1/results/tv-short-btc-1h.png
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized TV display and all dates; live-observation use1. Cloud v9 verified. Display assumptions
+      only; no performance evaluation, notification change or orders.
+  - artifact_id: imacd-tv-risk-box-20260908-desktop-eth-4h
+    artifact_type: report
+    role: indicator_visual_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5c1c75ea3fb3968e7a8b70a82657ce015d493411
+    source_path: experiments/active/exp-imacd-tv-risk-box-20260908-v1/results/tv-desktop-eth-4h.png
+    sha256: 8e746db28b12b591df96dfcfdc0223ae32c2a5b90db27a672451d5cfdfb721b6
+    size_bytes: 159523
+    storage_uri: repo://experiments/active/exp-imacd-tv-risk-box-20260908-v1/results/tv-desktop-eth-4h.png
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized TV display and all dates; live-observation use1. Cloud v9 verified. Display assumptions
+      only; no performance evaluation, notification change or orders.
+  - artifact_id: imacd-tv-risk-box-20260908-report-source
+    artifact_type: report
+    role: indicator_visual_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5c1c75ea3fb3968e7a8b70a82657ce015d493411
+    source_path: analysis/p0_imacd_tv_risk_box_20260908.md
+    sha256: a184a8a87fd7156eaf651d8c3a77902255a304dfa7efc1ae969162ee66559186
+    size_bytes: 10932
+    storage_uri: repo://analysis/p0_imacd_tv_risk_box_20260908.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized TV display and all dates; live-observation use1. Cloud v9 verified. Display assumptions
+      only; no performance evaluation, notification change or orders.
+  - artifact_id: imacd-tv-risk-box-20260908-report
+    artifact_type: report
+    role: indicator_visual_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5c1c75ea3fb3968e7a8b70a82657ce015d493411
+    source_path: analysis/html/p0_imacd_tv_risk_box_20260908.html
+    sha256: b949b8e57f432cf471e9e195701d4a1faabf07d51881fa9e39253f6223351bb5
+    size_bytes: 14794
+    storage_uri: repo://analysis/html/p0_imacd_tv_risk_box_20260908.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized TV display and all dates; live-observation use1. Cloud v9 verified. Display assumptions
+      only; no performance evaluation, notification change or orders.

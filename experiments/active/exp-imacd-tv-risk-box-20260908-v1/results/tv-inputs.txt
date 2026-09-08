@@ -1,0 +1,124 @@
+
+  - generic: IMACD
+  - button "关闭菜单":
+    - generic: 关闭菜单
+  - tablist:
+    - tab "输入" [selected]
+    - tab "样式"
+    - tab "可见范围"
+  - generic: 01 · 信号模式
+  - generic: 模式
+  - combobox:
+    - generic: 密集启动
+  - generic "密集启动：零轴整理与均线密集后离开零轴。共振模式：再要求价格离开均线带、已收盘高周期允许；等待模式可等待后续确认。":
+  - generic: IMACD 长度
+  - textbox: "34"
+  - generic: 信号线长度
+  - textbox: "9"
+  - generic: 启动前至少连续零轴根数
+  - textbox: "1"
+  - generic "默认1，不强制长横盘。调高会减少信号，也可能错过大趋势。":
+  - generic: 最多等待根数
+  - textbox: "9"
+  - generic: 02 · 六均线密集
+  - generic: 形成窗口（不含启动当根）
+  - textbox: "12"
+  - generic: 平均均线带宽 / ATR 上限
+  - textbox: "3"
+  - generic: 窗口内至少交织次数
+  - textbox: "2"
+  - generic: 共振模式：密集记忆根数
+  - textbox: "34"
+  - generic: 03 · 多周期（仅共振模式参与过滤）
+  - checkbox "自动匹配高 / 低周期" [checked]
+  - generic: 自动匹配高 / 低周期
+  - generic: 手动高周期
+  - combobox:
+    - generic: 1 日
+  - generic: 手动低周期
+  - combobox:
+    - generic: 1 小时
+  - generic: 高周期许可
+  - combobox:
+    - generic: 同向或零轴
+  - generic "同向或零轴：高周期md或sh同向，或者md精确为0。仅使用已确认高周期，不使用正在形成的大K线。":
+  - checkbox "再要求低周期主线同向"
+  - generic: 再要求低周期主线同向
+  - generic "启用时，缺少低周期数据就不发新信号；不会把缺数据当共振。":
+  - generic: 04 · 视觉重点 · 近零蓄势
+  - checkbox "突出近零蓄势与释放" [checked]
+  - generic: 突出近零蓄势与释放
+  - generic "视觉提示：IMACD主线和信号线在零轴附近持续停留，再由主线离开。独立于原系统入场条件，不能当作均线/多周期已确认。":
+  - generic: 至少连续近零根数
+  - textbox: "12"
+  - generic "默认12根。第12根收盘才开始高亮，前11根不会事后补画；计数仍包含完整连续段。只控制显示，不改交易信号。":
+  - generic: 近零容差 / 前一根 ATR
+  - textbox: "0.1"
+  - generic "要求 max(abs(md),abs(sb)) ≤ 此值 × ATR[1]；设0即两线精确归零。达到连续根数后冻结该段阈值，防止ATR收缩被误画为释放。只控制显示。":
+  - checkbox "主图显示浅色整理框" [checked]
+  - generic: 主图显示浅色整理框
+  - generic "从蓄势资格收盘开始绘制，边界使用该段全部近零K线高低点；释放K线不并入，框色始终中性。":
+  - generic: 释放光晕保留根数
+  - textbox: "12"
+  - generic "含释放当根；仅突出初段，随后恢复普通蓝橙双线。不是持仓周期或退出规则。":
+  - generic: 05 · 视觉重点 · 影线回踩
+  - checkbox "高亮蓄势区影线回踩 K 线" [checked]
+  - generic: 高亮蓄势区影线回踩 K 线
+  - generic "仅在已经确认的近零蓄势段内检查；释放当根不高亮。前根收盘在参考均线同侧，本根只有影线触线、实体守在线外，且收盘回到同侧才亮色。无ATR容差，不改原系统信号。":
+  - generic: 回踩参考均线
+  - combobox:
+    - generic: SMA20
+  - generic "默认SMA20(close)。选择用于确认影线回踩的均线，只控制关键K线判断。":
+  - checkbox "显示影线触点"
+  - generic: 显示影线触点
+  - generic "在回踩参考均线处补一个小圆点；默认关闭以减少噪音。":
+  - generic: 06 · 显示
+  - checkbox "主图显示 SMA / EMA 20、60、120" [checked]
+  - generic: 主图显示 SMA / EMA 20、60、120
+  - checkbox "显示原系统普通启动 / 退出"
+  - generic: 显示原系统普通启动 / 退出
+  - generic "小三角和退出叉使用原系统确认时点。默认隐藏，让长时间蓄势后的释放成为重点。":
+  - checkbox "副图显示原零轴密集点"
+  - generic: 副图显示原零轴密集点
+  - checkbox "副图显示原系统持有背景"
+  - generic: 副图显示原系统持有背景
+  - checkbox "显示紧凑状态面板" [checked]
+  - generic: 显示紧凑状态面板
+  - checkbox "按 IMACD 给 K 线染色"
+  - generic: 按 IMACD 给 K 线染色
+  - checkbox "显示辅助动量 sh（细线）"
+  - generic: 显示辅助动量 sh（细线）
+  - checkbox "面板显示周期状态"
+  - generic: 面板显示周期状态
+  - checkbox "原系统标记附加文字"
+  - generic: 原系统标记附加文字
+  - checkbox "启动 / 释放标记显示收盘价" [checked]
+  - generic: 启动 / 释放标记显示收盘价
+  - generic "显示信号K线的真实收盘价，按品种最小跳动精度格式化。关闭可减少标签高度，悬停提示仍保留完整OHLC。":
+  - generic: 08 · 主图 · 盈亏比参考
+  - checkbox "显示释放信号盈亏比框" [checked]
+  - generic: 显示释放信号盈亏比框
+  - generic "只跟随主图可见的蓄势释放标记；普通启动、退出和影线回踩不画框。框内价格是可配置的风险收益参考，不是实际成交或自动止盈止损。":
+  - generic: 入场参考
+  - combobox:
+    - generic: 信号收盘
+  - generic "信号收盘：释放K线确认时用收盘价。下一根开盘：等下一根K线出现后使用其开盘价，框从该根开始。两种模式均用释放信号K线的低点（多）或高点（空）作止损参考。":
+  - generic: 目标 R 倍数
+  - textbox: "3"
+  - generic "R为入场参考价到信号K线止损参考价的距离；多头目标=入场+R×倍数，空头目标=入场−R×倍数。不是经过收益验证的最优参数。":
+  - generic: 向右延伸根数
+  - textbox: "12"
+  - generic: 最多保留组数
+  - textbox: "8"
+  - generic "每组包含绿色收益框、红色风险框及灰色入场线；仅按保留数量删除，不根据未来价格判定成交、止盈或止损。":
+  - checkbox "显示入场 / 止损 / 目标价格" [checked]
+  - generic: 显示入场 / 止损 / 目标价格
+  - generic "紧凑标签显示三档价格；悬停查看R倍数、风险和收益百分比及信号确认时间。零风险、方向无效或目标价不为正时不画整组。":
+  - button "系统预设":
+    - generic: 系统预设
+  - button "取消":
+    - generic: 取消
+  - button "确认":
+    - generic: 确认
+- alert
+- alert

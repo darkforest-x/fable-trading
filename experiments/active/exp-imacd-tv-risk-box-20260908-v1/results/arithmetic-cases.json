@@ -1,0 +1,119 @@
+{
+  "origin": "monitor_signals executed Python stdin assertions before delivery; reported inputs/results transcribed by root. Not a Pine execution test.",
+  "multiple": 3,
+  "cases": [
+    {
+      "name": "close-long",
+      "side": 1,
+      "entry": 100,
+      "signal_low": 98,
+      "signal_high": 101,
+      "expected": [
+        100,
+        98,
+        106
+      ],
+      "reported_actual": [
+        100,
+        98,
+        106
+      ]
+    },
+    {
+      "name": "close-short",
+      "side": -1,
+      "entry": 100,
+      "signal_low": 99,
+      "signal_high": 102,
+      "expected": [
+        100,
+        102,
+        94
+      ],
+      "reported_actual": [
+        100,
+        102,
+        94
+      ]
+    },
+    {
+      "name": "next-open-long",
+      "side": 1,
+      "entry": 101,
+      "signal_low": 98,
+      "signal_high": 102,
+      "expected": [
+        101,
+        98,
+        110
+      ],
+      "reported_actual": [
+        101,
+        98,
+        110
+      ]
+    },
+    {
+      "name": "next-open-short",
+      "side": -1,
+      "entry": 99,
+      "signal_low": 98,
+      "signal_high": 102,
+      "expected": [
+        99,
+        102,
+        90
+      ],
+      "reported_actual": [
+        99,
+        102,
+        90
+      ]
+    },
+    {
+      "name": "zero-risk-long",
+      "side": 1,
+      "entry": 100,
+      "signal_low": 100,
+      "signal_high": 101,
+      "expected": null,
+      "reported_actual": null
+    },
+    {
+      "name": "zero-risk-short",
+      "side": -1,
+      "entry": 100,
+      "signal_low": 99,
+      "signal_high": 100,
+      "expected": null,
+      "reported_actual": null
+    },
+    {
+      "name": "gap-past-long-stop",
+      "side": 1,
+      "entry": 97,
+      "signal_low": 98,
+      "signal_high": 102,
+      "expected": null,
+      "reported_actual": null
+    },
+    {
+      "name": "negative-short-target",
+      "side": -1,
+      "entry": 10,
+      "signal_low": 9,
+      "signal_high": 14,
+      "expected": null,
+      "reported_actual": null
+    },
+    {
+      "name": "zero-short-target",
+      "side": -1,
+      "entry": 12,
+      "signal_low": 11,
+      "signal_high": 16,
+      "expected": null,
+      "reported_actual": null
+    }
+  ]
+}

@@ -6926,3 +6926,31 @@ experiments:
     notes: Owner all-dates authorization; no economic evaluation or orders. Old TG/Bark receipts and all activation
       cutovers unchanged. Snapshot is bounded to target bar; uploads are not phone/read receipts. PNUT preview was
       not sent; RE PNG is the exact sent-media copy. Mac service1.5.0; AI heartbeat remains paused.
+
+  - experiment_id: exp-imacd-tv-risk-box-20260908-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5c1c75ea3fb3968e7a8b70a82657ce015d493411
+    status: accepted
+    question: Add long/short risk-reward reference boxes at visible IMACD startup candles in TradingView.
+    single_variable: Display layer only; core signals, MA plots and pane logic retained.
+    result: TradingView compiled and saved cloud v9. Full editor source matches local after CRLF normalization. Long
+      LIT1H/ETH4H and short BTC1H UI verified; desktop saved state and inputs verified. Nine reported Python arithmetic
+      assertions passed; no tick integration test.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/html/p0_imacd_tv_risk_box_20260908.html
+    artifacts:
+    - imacd-tv-risk-box-20260908-source
+    - imacd-tv-risk-box-20260908-ui-verification
+    - imacd-tv-risk-box-20260908-arithmetic-cases
+    - imacd-tv-risk-box-20260908-tv-inputs
+    - imacd-tv-risk-box-20260908-long-lit-1h
+    - imacd-tv-risk-box-20260908-short-btc-1h
+    - imacd-tv-risk-box-20260908-desktop-eth-4h
+    - imacd-tv-risk-box-20260908-report-source
+    - imacd-tv-risk-box-20260908-report
+    reuse_allowed: false
+    notes: Default close entry, signal extreme stop,3R,12bar width,8groups are disclosed editable drawing assumptions,
+      not owner-approved trading parameters. No Mac monitor/TG/Bark/execution change. Failed native buffer discarded;
+      desktop instance reloaded from cloud v9.

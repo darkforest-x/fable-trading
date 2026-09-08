@@ -1,0 +1,56 @@
+{
+  "source_commit": "5c1c75e",
+  "source_sha256": "087f569040e8c95adae6b2b852aa4cb6dc128fc2fda8a991d75a8676bef141ec",
+  "web_editor_copy_sha256_lf": "087f569040e8c95adae6b2b852aa4cb6dc128fc2fda8a991d75a8676bef141ec",
+  "editor_exact_match_after_crlf_normalization": true,
+  "cloud_script": "IMACD 零轴密集启动 · 多周期趋势 V1",
+  "cloud_version": 9,
+  "cloud_saved_at": "2026-09-08T10:43:00+08:00",
+  "desktop_saved_ui_observed_at": "2026-09-08T11:00:57+08:00",
+  "desktop_save_label": "所有更改已保存 (disabled)",
+  "desktop_symbol": "OKX:ETHUSDT.P",
+  "desktop_interval": "240",
+  "scope": "Display only; no monitor/notification/trade mutation",
+  "defaults": {
+    "showRr": true,
+    "entry": "信号收盘",
+    "stop": "signal low for long / high for short",
+    "target_R": 3,
+    "right_bars": 12,
+    "keep_groups": 8,
+    "show_prices": true
+  },
+  "verified_examples": [
+    {
+      "symbol": "LITUSDT.P",
+      "interval": "60",
+      "side": "long",
+      "screenshot": "tv-long-lit-1h.png"
+    },
+    {
+      "symbol": "BTCUSDT.P",
+      "interval": "60",
+      "side": "short",
+      "entry": 77124.9,
+      "stop": 77296,
+      "target": 76611.6,
+      "screenshot": "tv-short-btc-1h.png"
+    },
+    {
+      "symbol": "ETHUSDT.P",
+      "interval": "240",
+      "side": "long",
+      "signal_open_utc": "2026-08-19T08:00:00Z",
+      "signal_close_utc": "2026-08-19T12:00:00Z",
+      "entry": 1922.23,
+      "stop": 1914.33,
+      "target": 1945.93,
+      "screenshot": "tv-desktop-eth-4h.png"
+    }
+  ],
+  "limitations": [
+    "Next-open realtime behavior inspected against official rollback semantics; not a separately observed tick-replay test.",
+    "Compact labels can overlap at wide price ranges; zoomed chart verified readable.",
+    "Defaults are disclosed configurable display assumptions, not owner-confirmed trading parameters."
+  ]
+}
