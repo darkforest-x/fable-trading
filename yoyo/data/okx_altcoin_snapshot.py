@@ -334,7 +334,10 @@ def collect_stream(client: PublicClient, kind: str, inst_id: str, period: str,
                 break
             if oldest >= cursor:
                 raise SnapshotError("Pagination made no backward progress")
-            cursor = oldest
+            # Native Rubik ``end`` is inclusive. Subtract a millisecond or
+            # the oldest retained row repeats forever at the retention edge.
+            # Funding ``after`` is exclusive and keeps its original cursor.
+            cursor = oldest - 1 if kind in ("oi", "taker") else oldest
         except SnapshotError as exc:
             error = str(exc)
             stop_reason = "error"
