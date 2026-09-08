@@ -18,6 +18,58 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: yolo-week-plan-20260908-source
+    artifact_type: report
+    role: weekly_yolo_planning_not_training_authorization
+    source_repo: darkforest-x/fable-trading
+    source_commit: 342fe6a9c24eade95089539fa38104d6d74f6954
+    source_path: analysis/week_plan_yolo_20260908.md
+    sha256: dd3cbe3341c9f86afda3ebd5f2dadae62f8873f7d76e410040b7a5e23c35b18a
+    size_bytes: 19429
+    storage_uri: repo://analysis/week_plan_yolo_20260908.md
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Planning only. Read-only pre-holdout metadata and LS progress; no new training or performance claim.
+  - artifact_id: yolo-week-plan-20260908-html
+    artifact_type: report
+    role: weekly_yolo_planning_not_training_authorization
+    source_repo: darkforest-x/fable-trading
+    source_commit: 342fe6a9c24eade95089539fa38104d6d74f6954
+    source_path: analysis/html/week_plan_yolo_20260908.html
+    sha256: 1e5e4c8dede4b298d088bc0e941d009cb8002bdf1dc5ac10563c1a5c42c5bbde
+    size_bytes: 23368
+    storage_uri: repo://analysis/html/week_plan_yolo_20260908.html
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Planning only. Read-only pre-holdout metadata and LS progress; no new training or performance claim.
+  - artifact_id: yolo-week-plan-20260908-evidence
+    artifact_type: manifest
+    role: weekly_yolo_planning_not_training_authorization
+    source_repo: darkforest-x/fable-trading
+    source_commit: 342fe6a9c24eade95089539fa38104d6d74f6954
+    source_path: experiments/active/exp-yolo-owner-label-optimization-20260908-v1/planning_evidence.json
+    sha256: 6aa47e01ddf7ed4e4d7568c0e1ce1cf7387e2a954b3ed057705141ce95baf7d7
+    size_bytes: 3514
+    storage_uri: repo://experiments/active/exp-yolo-owner-label-optimization-20260908-v1/planning_evidence.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Planning only. Read-only pre-holdout metadata and LS progress; no new training or performance claim.
+  - artifact_id: yolo-week-plan-20260908-entry
+    artifact_type: report
+    role: weekly_yolo_planning_not_training_authorization
+    source_repo: darkforest-x/fable-trading
+    source_commit: 342fe6a9c24eade95089539fa38104d6d74f6954
+    source_path: experiments/active/exp-yolo-owner-label-optimization-20260908-v1/PLAN.md
+    sha256: acc884e85497a1d89acd76aa0effae0d32c52deb3eb1a5d95c6de197d1572b05
+    size_bytes: 738
+    storage_uri: repo://experiments/active/exp-yolo-owner-label-optimization-20260908-v1/PLAN.md
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Planning only. Read-only pre-holdout metadata and LS progress; no new training or performance claim.
   - artifact_id: eth4h-exit-r2-20260907-manifest
     artifact_type: manifest
     role: bounded_historical_research_not_production

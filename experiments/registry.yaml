@@ -14,6 +14,28 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-yolo-owner-label-optimization-20260908-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 342fe6a9c24eade95089539fa38104d6d74f6954
+    status: active
+    question: Can human correction of proposals improve short-delay YOLO detection on a frozen chronological pre-holdout
+      challenge set by September13?
+    single_variable: Corrected versus original proposal labels on identical newly rendered inputs, membership, initialization
+      and training recipe.
+    result: Planning only:20 submitted answers verified;300 unique-event target subject to actual throughput. P0/P1,
+      second annotator and GPU availability unresolved. No training run or measured improvement.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/html/week_plan_yolo_20260908.html
+    artifacts:
+    - yolo-week-plan-20260908-source
+    - yolo-week-plan-20260908-html
+    - yolo-week-plan-20260908-evidence
+    - yolo-week-plan-20260908-entry
+    reuse_allowed: false
+    notes: Owner requested a weekly plan on2026-09-08. Deadline2026-09-13T20:00+08:00. Same LS project with one pending
+      queue; no first50 gate. Research only, existing training exceptions not inherited.
   - experiment_id: exp-eth4h-exit-exploration-20260907-v2
     source_repo: darkforest-x/fable-trading
     source_commit: c38098d2e22e6a1a1661b8622dd0989096026a8a

@@ -2,6 +2,22 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## YOLO 本周计划（2026-09-08：周日 9/13 20:00 交付研究候选与固定对照）
+
+Owner要求“这周必须把yolo模型优化一版，做计划”。计划已落盘：
+analysis/html/week_plan_yolo_20260908.html；源文analysis/week_plan_yolo_20260908.md。
+实验exp-yolo-owner-label-optimization-20260908-v1，当前只到planning，未开始本轮训练。
+只读实测项目77仍2513任务/2513预框，20份真实提交（多9/空11）；不是2513新金标。
+目前Default44完整列表不变；计划同项目统一待审队列由Codex准备并验连续出题，As Displayed进入，
+不能用会清筛选的Label All。Owner只调整预框，future40只供审核，不要求先50分组或跨项目。
+暂按每日1h，周四冻结前约3h排300独立事件目标（160train/40dev/100accept），另30盲重复；
+数量待完整会话耗时校准，第二人复标资源和当前3060状态尚待落实，不能冒称已就绪。
+下一步：20真实答案的human-only导出→保留人工几何并回算→受限训练窗→时间/重复隔离。
+当前审核主图1859/2513在建议core后>5根，不能直接训练；A/B须共用合法重建图。
+周四18:00 P0/P1证据卡，过门后周五固定YOLO11s960×40两臂；周日一次pre-holdout验收。
+主目标背景误报相对-20%、召回最多-3pp、方向错不增加；小样本必须报告区间。
+不继承8月训练豁免，不读全项目holdout、不promote；training/production资格仍false。
+
 ## YOLO 当前进度（2026-09-07：2513个建议框已审计，统一入口逐张调整）
 
 最新操作口径：Owner质疑先50分组增加人工负担。人工默认回到完整2513张的Default44：
