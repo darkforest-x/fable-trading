@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "stage": "planning_only",
+  "observation_date": "2026-09-08",
+  "timezone": "Asia/Shanghai",
+  "source_head_at_recording": "42700dc1bdd540fd8aef79c0cf64174e5d222636",
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "ls_observation": {
+    "method": "Read-only project API and submitted-annotation inspection during this conversation; aggregate observation, not a frozen training export.",
+    "project_77": {
+      "tasks": 2513,
+      "predictions": 2513,
+      "completed_tasks": 20,
+      "annotations": 20,
+      "long": 9,
+      "short": 11,
+      "no_target": 0,
+      "unsure": 0
+    },
+    "project_76": {
+      "tasks": 4172,
+      "completed_tasks": 0
+    },
+    "project_74": {
+      "tasks": 276,
+      "completed_tasks": 4
+    },
+    "frozen_raw_annotation_export": "not yet created; first execution milestone"
+  },
+  "refinement_manifest": {
+    "path": "datasets/owner_box_refinement_20260907_v1/manifest.jsonl",
+    "sha256": "7588f9c62f26a66986f747f9dd27dff8f6c216a6b26f307e705cba2880c3a641",
+    "rows": 2513,
+    "directions": {
+      "long": 1152,
+      "short": 1361
+    },
+    "original_split_provenance_only": {
+      "train": 1884,
+      "val": 629
+    },
+    "main_end_minus_proposed_core_end_counts": {
+      "4": 33,
+      "5": 621,
+      "6": 1083,
+      "7": 642,
+      "8": 89,
+      "9": 20,
+      "10": 18,
+      "11": 4,
+      "13": 2,
+      "15": 1
+    },
+    "main_windows_over_5_post_core_bars": 1859,
+    "sample_owner_geometry_confirmed_count": 0,
+    "immutable_manifest_not_live_annotation_status": true
+  },
+  "initial_weights": {
+    "path": "models/yolo11s.pt",
+    "sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5"
+  },
+  "historical_training_runtime": {
+    "ft960_full40": {
+      "path": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft960_full40/results.csv",
+      "sha256": "b47c37f1fc3403619d10e29029bafd73296e17bc1d835abd213f2467ccc90ee0",
+      "epochs": 40,
+      "cumulative_seconds": 21957.5,
+      "hours": 6.0993,
+      "scope": "Historical runtime reference only; accuracy metrics not used for planning."
+    },
+    "ft1280_full40": {
+      "path": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/results.csv",
+      "sha256": "371848011fe8d186e9f969f4f9adb2ddd2c2426b56f2771ef5bbd1defc7b7f5b",
+      "epochs": 40,
+      "cumulative_seconds": 33950.5,
+      "hours": 9.4307,
+      "scope": "Historical runtime reference only; accuracy metrics not used for planning."
+    }
+  },
+  "recipe_reference": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1/preregistration.json",
+  "new_training_authorization_inherited": false,
+  "unresolved": [
+    "owner daily time budget",
+    "human second annotator",
+    "current 3060 availability and version parity",
+    "final chronological cohorts and class support",
+    "human-only exporter",
+    "P0/P1 evidence",
+    "new training eligibility"
+  ],
+  "planned_workload": {
+    "initial_unique_events": 300,
+    "train": 160,
+    "dev": 40,
+    "accept": 100,
+    "accept_long": 30,
+    "accept_short": 30,
+    "accept_background": 40,
+    "blind_repeat_reviews_extra": 30,
+    "owner_hours_before_thursday_freeze": 3,
+    "stretch_unique_events": 450,
+    "all_counts_are_targets_not_existing_assets": true
+  },
+  "deadline": "2026-09-13T20:00:00+08:00"
+}

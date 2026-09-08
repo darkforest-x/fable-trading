@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>YOLO 本周优化计划｜2026-09-08—09-13</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>YOLO 本周优化计划｜2026-09-08—09-13</h1>
+<p><strong>交付时间：9 月 13 日（周日）20:00，中国时间。目标：交付一版经过人工修正标签训练的 YOLO 研究候选、可复现数据版本、固定对照结果和错误图集。只有达到下面的验收标准，才称为“本周优化通过”。</strong></p>
+<p>本周集中解决标签质量和训练数据回流。模型仍用 YOLO11s、960 输入；架构、分辨率和超参数不同时搜索。范围是现有 15 分钟形态的短延迟研究识别，模型可见窗口结束在核心后 3 根，无法完整表达的样本允许到第 5 根并单独记录；不把它称为盘口 tip 检测器。右侧未来 40 根仅供人工审核。</p>
+<p>状态：<strong>计划已制定，未开始本轮训练，P0/P1 未宣告通过，training_eligible=false，production_eligible=false。</strong> 本周新模型尚无测量结果，不能提前保证准确率一定上升。</p>
+<h2>一、当前真正的卡点</h2>
+<table><thead><tr>
+<th>事实（9 月 8 日只读核对）</th>
+<th>对本周的影响</th>
+</tr></thead><tbody>
+<tr><td>Label Studio 项目 77 有 2,513 个任务、2,513 个预框、20 个已完成人工提交</td><td>新派生框大多数仍是建议；不能称为 2,513 张已确认金标。原人工标签及方向证据仍有价值，完整保留。</td></tr>
+<tr><td>20 份新答案为 9 多、11 空，尚无“无目标”或“不确定”答案</td><td>可以先验证回流，但不足以训练或估计背景误报。必须补充真实背景审核。</td></tr>
+<tr><td>项目 76 有 4,172 个事件任务；项目 74 有 276 个补充任务、4 份答案</td><td>不要求 Owner 切项目；可用内容由后台联结，旧答案不能无条件混入。</td></tr>
+<tr><td>旧训练包 32,000 张图来自 4,172 个事件，其中 1,043 个正事件、3,129 个负事件</td><td>多种裁剪不是独立样本，不能把图片数当成证据量。</td></tr>
+<tr><td>当前 2,513 张审核主图中，1,859 张在建议核心后超过 5 根 K 线</td><td>即使去掉未来 40 根，主图也不能直接作为短延迟训练图。必须重新按已确认边界构建。</td></tr>
+<tr><td>17 组完全重复涉及 34 个身份；已有 3 个旧框与 2 个当前负事件冲突</td><td>去重、冲突裁决和时间隔离优先于扩量；不能自动翻标签。</td></tr>
+<tr><td>现有通用 LS 回写脚本可能在没有人工框时回退到 predictions</td><td>人工删除框可能又被写成正例。项目 77 需要专用的 human-only 导出适配。</td></tr>
+<tr><td>历史 32,000 图、960×40 epoch 单次约 6.10 小时；1280×40 约 9.43 小时</td><td>本周给两次 960 对照运行预留 14 小时以上；这不是新数据耗时保证。3060 当前在线、空闲和版本状态尚待核对。</td></tr>
+</tbody></table>
+<p>结论：现在最值得投入的是“你调整的答案能可靠进入训练，并能在独立样本上验收”。继续安装框架、扩大预框数量或直接重跑旧数据，不能解决这条缺口。</p>
+<h2>二、你的操作与时间预算</h2>
+<p>继续使用同一个项目：<a href="http://127.0.0.1:8081/projects/77/data?tab=44">项目 77</a>。目前 Default44 仍是完整列表，可以 Label All Tasks；周二我会在同项目准备一个统一的本周待审入口并设为默认，让冻结候选和背景题能实际出现。该队列进入时选择一次 <strong>Label Tasks As Displayed</strong>，随后连续 Submit；不能使用会清除筛选的 Label All Tasks。入口准备好后由我直接打开并验证连续出题。框由我预先准备，你判断形态、方向和核心起止，必要时拖动后提交；未来 40 根继续可见。无需切换训练集、验证集，也不要求先完成某个 50 张分组。</p>
+<p><strong>暂按每天 1 小时排，周二至周五共 4 小时，周六预留 30 分钟处理重复题与疑难，周日 20 分钟看结果。</strong> 时间预算问题尚待 Owner 回复。第一天用真实完整会话耗时校准产能，不拿 Label Studio 的几秒 lead_time 推算人工速度。</p>
+<p>计划目标是 <strong>约 300 个去重后的审核事件</strong>，初排训练 160、开发验证 40、锁定验收 100（多头 30、空头 30、背景 40）；另安排 30 次盲重复审核。周四冻结前按周二至周四约 3 小时预算，抽检与疑难裁决也计入其中，不能把周五的时间提前算进去。只有实测吞吐有余量才扩大到 450 个。数字是工作量预算，不是已具备的数据，也不是统计功效保证。第一天若预计做不完，优先保护验收与重复审核，把训练队列缩小并如实说明；周四不得为了凑数降低质量门槛。</p>
+<p>后台按已冻结的时间段，在上述统一队列呈现待审任务；队列及过滤编码须通过真实前端出题检查，不能仅凭 API 计数称为可用。原完整列表保留，不改变 Owner 已提交答案，不创建第四个项目。需要补充的背景题也由后台预筛并放在同一入口，预框只表示建议，Owner 可确认无目标。背景须满足金标禁入区，禁止跨币、复用或靠近正例凑配额。</p>
+<p>像素级贴边不作为人工效率考核。你优先判断方向、核心首尾是否正确；原人工矩形完整保存，不在提交后偷偷按最高最低价重新覆盖。框到 bar 的坐标转换由程序验证。</p>
+<h2>三、逐日安排与交付物</h2>
+<table><thead><tr>
+<th>日期 / 截止</th>
+<th>Codex 的工作</th>
+<th>Owner 的工作</th>
+<th>当天完成的证据</th>
+</tr></thead><tbody>
+<tr><td>周二 9/8 18:00</td><td>用现有 20 份答案打通只读导出、坐标回算和独立标签预览；写一页判定规则；核实 3060 主机、空闲时间及依赖。按元数据冻结时间段和验收候选名单，验证同项目统一队列连续出题。</td><td>在同项目唯一待审入口审核约 1 小时；确认规则中的少量歧义。</td><td>原始答案快照、回流样例、产能估算、切分草案、出题检查、机器检查收据。</td></tr>
+<tr><td>周三 9/9 20:00</td><td>实现受限窗口构建、冲突隔离、同源背景筛选；将盲重复题嵌入同一队列；请第二位标注者按一页规则独立复标边界。</td><td>审核约 1 小时，不必管理分组。</td><td>图像/标签往返校验、重复审核记录、边界复现记录、背景来源统计。</td></tr>
+<tr><td>周四 9/10 18:00</td><td>冻结训练/开发/验收集合及 SHA；完成 DIRECT 抽检、P0/P1 证据卡、A/B 训练预注册与启动检查。</td><td>审核约 1 小时，优先裁决冲突；查看具体门槛证据。</td><td>可复现数据清单、两臂输入差异、数值质量报告。达不到门槛当日即报告，不能拖到周日。</td></tr>
+<tr><td>周五 9/11</td><td>门槛通过后依次跑 A、B 两臂；完整保存参数、曲线、权重和机器收据。冻结后新增的人工答案进入下一版。</td><td>约 1 小时继续积累下一版标签，无需等待训练。</td><td>两个完整运行；GPU 时间预算至少 14 小时，含传输和检查余量。</td></tr>
+<tr><td>周六 9/12 18:00</td><td>仅看开发验证结果与错误图；检查两臂训练是否完成、标签分布和推理协议是否一致；冻结待验收权重。</td><td>最多 30 分钟补充重复审核或解释规则，不能修改本轮锁定验收答案。</td><td>权重 SHA、验证结果、错误类别统计、验收执行清单。</td></tr>
+<tr><td>周日 9/13 20:00</td><td>对锁定验收集运行一次正式 A/B 评估，按独立事件和时间块报告差异、区间与失败案例，交付 HTML 和模型包。</td><td>约 20 分钟看新旧对照图及结论。</td><td>候选模型、数据版本、复现命令、同表对照、错误图集；明确通过 / 未通过 / 证据不足。</td></tr>
+</tbody></table>
+<p>第二位人类标注者当前尚未落实。周二就确认这项资源；Codex 的独立复核可帮助发现规则歧义，但不能伪称第二个人的复标结果。若这项 P0 证据缺失，需把具体缺口交给 Owner 裁决，不能自动继承 8 月某次训练的特殊许可。本计划不创建提醒或无人值守的定时任务。</p>
+<h2>四、数据回流的实现范围</h2>
+<p>建议新增 <code>yoyo/datasets/owner_review_training.py</code> 及对应聚焦测试；沿用 <code>owner_box_refinement.py</code> 的源坐标和谱系信息，新增内容先提交源码，再正式构建数据。以下路径属于待实现工作，不表示文件已经存在。</p>
+<ol>
+<li><strong>真实答案唯一入口。</strong> 只取非取消、已提交的 annotations，绝不使用 predictions 或 drafts 补齐。保留 task/review ID、标注者、时间、原始 JSON 和 SHA；原建议框与人工框分字段存档。多个答案冲突、未知类别、不确定一律隔离；人工“无目标”导出空标签，不重新捡回建议框。</li>
+<li><strong>显式两类与几何。</strong> <code>dense_long=0</code>、<code>dense_short=1</code>；不能套用旧 helper 的单类 0 输出。用每图真实 transform 恢复 bar 区间，区分蜡烛中心和边缘，生成编号叠加预览。程序坐标往返误差目标 ≤1 像素；这不是要求人工精确到 1 像素。人工上下边界保留，派生标准框若日后需要必须另存版本。</li>
+<li><strong>重建训练输入。</strong> 正例 A/B 共用由已裁决核心生成的同一短窗及像素；默认核心后 3 根、最多 5 根，窗口总长度按协议尽量精简。<strong>无目标/删框事件没有人工核心：周二在人工答案与模型评分之前，为每个候选冻结来源事件的合法 anchor_i、窗口长度和右端（anchor_i+3）。长度由该来源预定的 14–22 根方案及稳定 review_id 哈希确定，不根据未来涨跌、最终答案或模型分数挑选。</strong> 此处 anchor 仅决定观察窗，绝不是负例的目标框或因果 onset。B 的背景标签始终为空，A 只保留冻结原建议映射后真实存在的框。没有来源锚点、依赖越界或无法合法映射的事件成对隔离，不恢复被删框。按窗口长度/来源另报正负表现，防止长度成为类别捷径。若两个标签版本无法同时完整落入合法窗口，隔离该事件，不剪掉框或扩大未来窗硬塞。记录原标注、主图、训练图、未来参考各自身份与转换。</li>
+<li><strong>隔离未来和时间。</strong> 未来 40 根、原宽图与对照图不能进入训练目录；训练图 SHA 在审核辅助图生成前后必须一致。检测输出时间记录实际完整训练窗右端；onset 若用于延迟评价需独立人工 warrant，禁止把框右端当作因果启动时间。</li>
+<li><strong>独立事件切分。</strong> 先按 venue/symbol/重叠时间依赖、原始事件、精确重复及确认后的近重复建立组，再按时间切分。旧 train/val 仅是来源信息。所有变体留在同组；warmup、标签未来与审核未来的依赖也进入隔离检查，不允许未来审核依赖跨进下一分区。</li>
+</ol>
+<p>周二仅根据可用元数据选切点并冻结：优先训练在 2025-12-01 前结束、开发区从 2025-12-04 到 2026-01-31、验收区从 2026-02-04 到 holdout 前。间隔至少 72 小时，若实际依赖更长则扩大隔离区。<strong>这组日期是候选，不是已通过的切分</strong>；类别/背景支持不足时，仅在任何模型评分前调整并记录最终 UTC 切点，之后不得按成绩挪样本。</p>
+<p>全体使用数据必须严格早于 <code>2026-05-04T00:00:00Z</code>，包括审核未来所需数据；越界样本在读取前排除。本周锁定验收集是 pre-holdout 集合，不动全项目 holdout。历史模型可能见过其中训练数据或用相邻数据选过权重，因此不能直接把历史 best.pt 在该集合的分数叫做“独立泛化成绩”。</p>
+<h2>五、周四训练启动门</h2>
+<p>以下是本周建议的数值工作门槛，<strong>不是已经通过，也不自动改写 ROADMAP 的全项目门槛</strong>。启动前提交一张含原始记录和结论的 P0/P1 证据卡；涉及新训练资格的必要 Owner 裁决在证据齐备后处理。</p>
+<table><thead><tr>
+<th>检查</th>
+<th>本周建议 / 必须证据</th>
+</tr></thead><tbody>
+<tr><td>Owner 自身一致性</td><td>至少 30 次盲重复、跨天混入同一队列；报告类别 κ、原始一致率及核心起止误差分布。工作目标 κ≥0.75、一致率≥90%；类别单一导致 κ 不可算时诚实缺项。</td></tr>
+<tr><td>边界可复现</td><td>第二位标注者按规则复标至少 20 个覆盖多空与边界案例的事件；报告起止差≤1 根的比例及全部分歧，目标≥90%。不允许把机器贴边当人工一致性。</td></tr>
+<tr><td>DIRECT 人工抽检</td><td>从拟训练事件中按多空/背景及来源覆盖抽取至少 40 个，报告语义错标率及区间，工作目标≤5%；所有发现的错误修复并复查，不能用自动几何 0 error 代替。</td></tr>
+<tr><td>完整性</td><td>100% 可追溯到实际人工裁决；训练候选 B 不使用未审核派生框冒充金标。A 的旧建议仅用于明示的弱标签对照，不获得金标身份。</td></tr>
+<tr><td>因果与泄漏</td><td>跨分区依赖/重复为 0；未来参考进入训练为 0；<code>visible_end_at &lt;= decision_at</code> 全通过，decision_at 明确指实际研究检测时刻，不能据此声称是核心时刻的实时信号。</td></tr>
+<tr><td>背景与冲突</td><td>安全背景不足就缺样；已知 3 框/2 负事件冲突全部有裁决或隔离记录。正负按来源分层报告，额外报告图尺寸、窗口位置等差异。</td></tr>
+<tr><td>数量与机器</td><td>按独立事件列明实际 train/dev/accept 数和各类支持；300 是初始目标。3060 CUDA、空闲、磁盘及跨机版本检查通过，源码已提交，输入 SHA 一致。</td></tr>
+</tbody></table>
+<p>若周四未通过：周五继续补标签/修回流，给出准确缺口和对交付日期的影响，<strong>不以截止日期代替训练授权或质量证据</strong>。本周也不默认把旧 32,000 张全部混入；未经本轮谱系、时间与标签审计的旧数据不能为凑规模进训练。历史原始金标符合相同条件时可复用，但集合必须在训练前冻结。</p>
+<h2>六、只改变标签的固定 A/B</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>固定方案</th>
+</tr></thead><tbody>
+<tr><td>A 对照</td><td>同一批训练事件的原建议标签，保留其错误；对照身份显式记录。</td></tr>
+<tr><td>B 候选</td><td>同事件的 Owner 最终修正标签，包含删除假框和方向纠正；这一个变量代表“人工修正标签”。</td></tr>
+<tr><td>两臂共同条件</td><td>相同事件、背景、裁剪像素、时间分区、初始化、训练参数、种子；开发与验收统一使用最终人工答案。共同裁剪可能受裁决后的核心影响，因此结论只归因于<strong>同一新渲染上的标签修正</strong>，不能声称等价于旧完整流程对比。</td></tr>
+<tr><td>初始化</td><td>均从本仓 <code>models/yolo11s.pt</code> 开始；SHA <code>85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5</code>。不沿用可能见过新验收样本的历史 best.pt。</td></tr>
+<tr><td>训练</td><td>imgsz=960、batch=8、epochs=40、patience=0、AdamW、lr0=0.0001、lrf=0.01、warmup=0.5、seed=0、deterministic=true、rect=true、workers=2。一对运行；本周不按成绩追加种子或调参。</td></tr>
+<tr><td>增强</td><td>fliplr/flipud/mosaic/mixup/hsv/copy_paste/erasing 全关；沿用历史微量 translate=0.02、scale=0.1，两臂完全相同。完整有效参数保存，不依赖新版库默认值。</td></tr>
+<tr><td>权重选择</td><td>两臂同样按开发验证的既定 Ultralytics best.pt 规则选权重，先冻结 SHA 后开验收；不看验收挑 epoch。</td></tr>
+<tr><td>推理</td><td>confidence=0.25、NMS IoU=0.7、正确类别且匹配 IoU≥0.5；不搜索阈值。</td></tr>
+</tbody></table>
+<p>源配方为 <code>experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train960-full40-v1/preregistration.json</code>。实际训练器为 <code>src/detection/train.py</code>，启动器为 <code>scripts/train_15m_ma_launch_t3_on_3060.sh</code>；新数据适配不能伪装已有命令能直接运行。旧配方的 2026-08-29 特殊训练许可不继承。</p>
+<p>验证集用于选择 checkpoint，最终验收在权重确定后进行；验证指标需要真实标签，不能把推理框当作真值。参见 <a href="https://docs.ultralytics.com/guides/model-testing/">Ultralytics 模型测试说明</a> 与 <a href="https://docs.ultralytics.com/modes/train/">训练参数说明</a>。版本契约以本仓和两台机器实测为准，不在本周升级依赖。</p>
+<h2>七、验收标准与能承诺的结论</h2>
+<p><strong>主目标：背景事件误报率相对 A 下降至少 20%，正例事件召回下降不超过 3 个百分点，方向错误数不增加。</strong> 三个条件全部满足才记为本周“观察到改进”；例如 A 在 40 个背景中误报 10 个，B 需≤8 个，同时满足召回与方向条件。如果 A 背景误报为 0，主目标不可评价，不临时换主指标宣布胜利。</p>
+<p>正式表必须含 A/B 的原始 TP、FP、FN、方向错判数、背景数、正例数、precision/recall/F1、mAP50/50–95；多空分别报告。背景误报定义为一个确认无目标的事件上至少出现一个超过固定阈值的框；每个验收事件只取一个预先指定窗口，避免多裁剪夸大样本量。若同事件有多个真框，使用一对一匹配并记录多余框。</p>
+<p>按独立事件配对、以同币时间依赖块重采样给出差异的 95% 区间；做块级 A/B 交换的零假设对照。验收集多空/背景人为配额并非实际扫描发生率，精确率只能解释为该固定集合上的表现，不能外推为实盘精确率。</p>
+<p>100 个事件是小型验收，可能不足以证明 20% 的下降；60 个正例时，每个漏检就占约 1.67 个百分点。<strong>点估计达标但区间仍兼容无改善时，结论必须是“观察到改善，证据有限”；只有区间也支持改善时才能称为确认改善。</strong> 不得把同一次训练的随机波动称为多种子稳定性。未达标就交付候选和失败分析，不给旧版贴新名字当升级。</p>
+<p>历史旧权重可在严格标注“已暴露数据风险”的附表作参考，不能替代上述 A/B 或用于验收门。本周交付的是标签改进后的研究候选，是否胜过历史所有版本需要另一个合格共同测试集，不能从本实验自动推出。</p>
+<h2>八、交付清单、复现与风险</h2>
+<p>本轮计划与后续运行目录：<code>experiments/active/exp-yolo-owner-label-optimization-20260908-v1/</code>。计划证据在 <code>planning_evidence.json</code>。后续需要冻结：人工答案快照清单、样本/分区/转换 manifest、P0/P1 证据卡、A/B 有效训练参数、GPU 收据、best.pt 及 SHA、一次验收原始预测与汇总、同图错误对照 HTML。大文件保存在被忽略的数据/模型目录，注册身份，不把图包加入 git。</p>
+<p>当前计划 HTML 的复现命令：</p>
+<pre><code>
+python3 scripts/md_to_html.py analysis/week_plan_yolo_20260908.md --out-dir analysis/html
+</code></pre>
+<p>后续训练的完整命令必须在适配实现、机器和输入冻结后写入正式预注册；现在不提供依赖不存在数据目录的假运行命令。机器检查先确认 <code>FABLE_3060_HOST</code>，再按现有 launcher 的 <code>--check</code> 流程核对，不能猜旧 DHCP 地址、终止别人的 GPU 任务或悄悄换云机器。</p>
+<p><strong>风险与诚实声明：</strong> 本文件是执行计划，不是训练报告。当前 20 份提交不是 20 个已验收训练事件；300 目标、第二位标注者、GPU 时段、最终时间切点都尚未落实。每项有周二/周四明确检查点。人工未来参考可帮助形成事后标签，但这种标签不自动证明形态在核心时刻可识别。没有读取全项目 holdout、没有运行本轮模型、没有更改 ACTIVE。</p>
+<p>收益、val AUC、top-decile 毛/净收益、胜率及交易随机对照在本次标签质量/检测研究中不适用，不填造数据。正式检测验收使用上文配对 A/B 与块级零假设对照；当前计划没有实验统计结果。</p>
+<p>下一步已经明确：先用真实 20 份答案完成回流最小闭环，同时核定 Owner 审核产能、第二位标注者和 GPU。Owner 需要参与的是形态裁决及具体训练资格证据，不需要维护三套项目或学习新的标注软件。</p>
+</body>
+</html>
