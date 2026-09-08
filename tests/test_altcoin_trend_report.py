@@ -2,7 +2,7 @@
 import pandas as pd
 import pytest
 import json
-from yoyo.evaluation.altcoin_trend_report import case_exit_rows, side_rows, verify_phase, digest
+from yoyo.evaluation.altcoin_trend_report import case_exit_rows, side_rows, volatility_retention, verify_phase, digest
 
 
 def event(arm,**extra):
@@ -52,3 +52,14 @@ def test_completed_report_inputs_reject_stale_summary_and_selection(tmp_path):
     with pytest.raises(ValueError,match='another selection'):verify_phase(tmp_path,lock)
     summary.write_text('n\n4\n')
     with pytest.raises(ValueError,match='summary changed'):verify_phase(tmp_path)
+
+
+def test_tail_retention_is_same_event_subset_and_excludes_owner_examples():
+    rows=[event('base',symbol='ALT',cohort='all_core',net_r=8.),
+          event('base',symbol='ALT',cohort='all_core',signal_i=900,net_r=-1.),
+          event('base',symbol='ALT',cohort='high_vol',signal_i=900,net_r=-1.),
+          event('base',symbol='SOPH',net_r=99.)]
+    r=volatility_retention(pd.DataFrame(rows)).iloc[0]
+    assert (r.n_all,r.n_kept,r.tail_n,r.tail_kept,r.largest_omitted_r)==(2,1,1,0,8.)
+    rows[2]['net_r']=2.
+    with pytest.raises(ValueError,match='different outcomes'):volatility_retention(pd.DataFrame(rows))

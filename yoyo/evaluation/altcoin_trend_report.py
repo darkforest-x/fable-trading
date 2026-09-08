@@ -92,6 +92,54 @@ def side_rows(events):
     return friendly(pd.DataFrame(rows))
 
 
+def volatility_retention(events):
+    """Outcome-labelled diagnostic of the predeclared prior-week top quartile.
+
+    Excludes BTC/ETH and Owner examples. The 5R cutoff is a descriptive tail
+    label only; it never selects a parameter or changes live membership.
+    """
+    identity=['symbol','minutes','fold','signal_i','side']
+    f=events.loc[events.arm.eq('base')&~events.symbol.isin(['BTC','ETH','SOPH','USELESS'])]
+    rows=[]
+    for (fold,minutes),g in f.groupby(['fold','minutes']):
+        all_rows=g.loc[g.cohort.eq('all_core')].set_index(identity)
+        kept=g.loc[g.cohort.eq('high_vol')].set_index(identity)
+        if all_rows.index.has_duplicates or kept.index.has_duplicates or not kept.index.isin(all_rows.index).all():
+            raise ValueError('Volatility cohort is not a unique subset of the altcoin candidates')
+        if len(kept) and not np.allclose(all_rows.loc[kept.index,'net_r'],kept.net_r,rtol=1e-10,atol=1e-10):
+            raise ValueError('Same candidate has different outcomes across cohorts')
+        tail=all_rows.net_r.ge(5)
+        rows.append(dict(fold=fold,minutes=minutes,n_all=len(all_rows),n_kept=len(kept),
+                         tail_n=int(tail.sum()),tail_kept=int(kept.net_r.ge(5).sum()),
+                         mean_all_bp=all_rows.net_bp.mean(),mean_kept_bp=kept.net_bp.mean(),
+                         largest_omitted_r=all_rows.loc[~all_rows.index.isin(kept.index),'net_r'].max()))
+    return friendly(pd.DataFrame(rows))
+
+
+def major_symbol_rows(results,selections):
+    """Keep BTC and ETH separate; transfer altcoin nominations without refitting."""
+    rows=[]
+    for phase,fold in [('development','validation'),('audit','recent_test')]:
+        for choice in selections:
+            minutes=int(choice['minutes'])
+            folder=results/(phase+'15' if minutes==15 else phase)
+            for symbol in ('BTC','ETH'):
+                source=folder/f'{symbol}_{minutes}'
+                events=pd.read_csv(source/'events.csv.gz')
+                curves=pd.read_pickle(source/'curves.pkl.gz',compression='gzip')
+                for arm in dict.fromkeys(['base',choice['selected_arm']]):
+                    if arm is None:continue
+                    key=f'{fold}|majors|{arm}'
+                    equity=curves[key].dropna()
+                    if equity.empty:raise ValueError('Missing major-symbol equity')
+                    g=events.loc[events.fold.eq(fold)&events.cohort.eq('majors')&events.arm.eq(arm)]
+                    rows.append(dict(symbol=symbol,fold=fold,minutes=minutes,arm=arm,n=len(g),
+                                     selected_n=int(g.portfolio_selected.sum()),mean_net_bp=g.net_bp.mean(),
+                                     portfolio_net_pct=(equity.iloc[-1]-1)*100,
+                                     mdd_pct=(equity/equity.cummax().clip(lower=1)-1).min()*100))
+    return friendly(pd.DataFrame(rows))
+
+
 def adverse_summary(results,summary):
     """Aggregate stored adverse envelopes, never call them a realized path."""
     rows=[]
@@ -224,8 +272,12 @@ def generate(args):
            '下表仅为原组合实际选中事件的描述均值，未重新生成多空资金曲线。高波动不代表只能做多；价格上涨且OI下降也不等于已确认空头回补。',
            table(side_rows(e),{'时期':'时期','周期':'周期','方向':'方向','n':'选中事件','mean_net_bp':'每笔净bp','win_pct':'胜率%','censored_n':'边界盯市数'}),
            '## BTC / ETH 与山寨不能混成一个结论',
-           table(summary.loc[(summary.cohort=='majors')&focus_mask(summary)&summary.fold.isin(['validation','recent_test'])],columns),
+           '逐币列出默认值与山寨旧年提名候选，未在BTC/ETH上重新选参。此处净收益、回撤是该币单独一个资本袖套，不是54币组合；不能与主高波动组合绝对收益直接比较。',
+           table(major_symbol_rows(results,selections),{'symbol':'币种','时期':'时期','周期':'周期','方案':'方案','n':'事件','selected_n':'单仓选中','mean_net_bp':'事件均净bp','portfolio_net_pct':'单币净%','mdd_pct':'收盘回撤%'}),
            '主高波动组每周一按此前完整7日ATR/close均值选出可用山寨前25%，BTC/ETH单列，SOPH/USELESS不参与排名或选参。全部名单依然来自便利/近期存续池，不能宣称历史全市场无偏。',
+           '### 过去已经很波动，是否反而漏掉刚启动的币',
+           '这里只比较原研究池中52个山寨的同一基准事件，BTC/ETH与用户展示币剔除。每周前25%名单在交易前已固定；事后净R≥5只用于描述大赢家保留率，不用于选参。它与“这根K线波动正在放大”是两个不同问题。',
+           table(volatility_retention(e),{'时期':'时期','周期':'周期','n_all':'全池事件','n_kept':'高波动保留','tail_n':'事后≥5R事件','tail_kept':'其中保留','mean_all_bp':'全池事件均净bp','mean_kept_bp':'保留均净bp','largest_omitted_r':'遗漏最大净R'}),
            '## SOPH / USELESS：成功、失败都看',
            table(summary.loc[(summary.cohort=='owner_illustration')&focus_mask(summary)&summary.fold.eq('recent_test')],columns),
            '这两币是用户事后提供的案例组，不能用它们反推参数再称样本外。全景图按事后收益确定性选择最好、最差和中位案例，供解释形态；不是成功率抽样。前文100根，之后至少目标72根并尽量延伸到实际退出；遇500根上限会显式标记退出是否在图外。',
@@ -305,6 +357,12 @@ def generate(args):
               f'[开发/选择完整表]({(dev/"summary.csv").resolve()}) · [2026完整表]({(audit/"summary.csv").resolve()}) · [排序/AUC/top-decile诊断]({(audit/"rank_diagnostics.csv").resolve()})',
               '```bash\n'+(EXP/'REPRODUCE.sh').read_text()+'\n```' if (EXP/'REPRODUCE.sh').exists() else '完整复现命令见各阶段run_manifest；构建器必须先提交。',
               '公开指标监控思路参照[CoinAnk官方工具说明](https://www.coinank.com/zh/tool)、[Coinalyze提醒](https://coinalyze.net/alerts/)；数据语义来自[OKX官方API](https://www.okx.com/docs-v5/en/)。这些来源提供定义，不构成收益证据。']
+    native=EXP/'NATIVE_1H_FEASIBILITY.md'
+    if native.exists():
+        source_hashes[str(native)]=digest(native)
+        lines += ['## 已保留的更及时数据入口',
+                  '除本轮4H背景外，已检查原生1H OI/taker接口，并另行冻结滚动保留的近期历史。它与4H聚合不保证逐字节等价，历史首次发布时间仍未知；1H数据采集不是收益验收，也没有被悄悄替换进上述4H背景结果。',
+                  f'[原生1H接口、首尾探针和聚合差异记录]({native.resolve()})']
     target=Path(args.report)
     target.write_text('\n\n'.join(lines)+'\n')
     subprocess.run(['python3',str(ROOT/'scripts/md_to_html.py'),str(target),'--out-dir',str(ROOT/'analysis/html')],check=True,cwd=ROOT)
