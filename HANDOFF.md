@@ -2,6 +2,18 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## YOLO 当前入口已修正（2026-09-08晚：1043题明确命名，默认按钮保留筛选）
+
+源码94fdc657先提交后安装。项目77现名“YOLO 本周审核 · 1043题 · 未来40根”，
+tab44“本周审核 · 1043题”；总3556保留旧2513。此段覆盖下方仅能用AsDisplayed的旧操作口径。
+Owner保留未提交修改后回列表Ctrl+F5一次；此标签直接点蓝色Label All按钮，补丁转交原生filtered入口。
+入口仍为http://192.168.1.4:8081/projects/77/data?tab=44；不改变其他标签或已打开的编辑页。
+首次真实验收因浏览器缓存旧包失败；ignoreCache重新加载后默认按钮进入HL2题37277，预框和future40可见。
+32 Node+28 Python聚焦测试通过；原3556预测与368人工答案保留，本轮答案/草稿/任务/预测写入0。
+没有新训练/holdout读取或金标放行。右键补丁仍在；恢复必须先队列入口、再右键，不能直接重跑旧右键安装器。
+报告analysis/html/p1_yolo_review_entry_fix_20260908.html；父实验results/review_entry_fix.json。
+Windows浏览器本轮未远程点击验收，需Owner强刷加载；旧有未提交修改的浏览器页未刷新。
+
 ## YOLO 旧2513处置清单已冻结（2026-09-08晚，Owner同意旧池先筛、新1043优先）
 
 aa7a0ec初版库存，dfce4bb修复一致多答案拼成重复框并完成跨池元数据审计。
