@@ -1,0 +1,199 @@
+{
+  "schema": "imacd-bark-monitor-frontend-qa-v1",
+  "generated_at_utc": "2026-09-08T00:46:04.072753+00:00",
+  "result": "PASS_WITH_DELIVERY_LIMITATION",
+  "scope": "Read-only real Chrome QA of TG + Bark presentation, public field privacy, and unchanged tv_start signal/chart interactions. No notification sends, source edits, service restarts, private configuration reads, or new AI monitors.",
+  "environment": {
+    "url": "http://127.0.0.1:8766",
+    "browser": "Chrome",
+    "browser_id": "2",
+    "tab_id": "977878413",
+    "session_name": "🔎 Bark 通道验收",
+    "control": "mcp__cua_repl",
+    "runtime_source_commit": "d95fb449ac6aafe5d63589324ca563cecc29b755",
+    "repository_head": "d95fb449ac6aafe5d63589324ca563cecc29b755",
+    "static_sha256": {
+      "app.js": "de07a1a391be5cafea4394c27988fd0885db36c99dd94db5e56a2bbe35e15caa",
+      "index.html": "d0d4656262a7fe2557dde09283ae553fbbf368944695ddedcefb94f5d6493f0c",
+      "styles.css": "8f54a71bdc3a9d0cb1005d5d570d21ffc14946b835982fa831b0150338b15208"
+    }
+  },
+  "checks": [
+    {
+      "id": "channel_enablement",
+      "result": "PASS",
+      "evidence": "Actual header shows TG · 已启用 and Bark · 已启用. Both runtime cards show 通知已启用. Matches public configured=true, enabled=true for each channel."
+    },
+    {
+      "id": "independent_runtime_counters",
+      "result": "PASS",
+      "evidence": "Separate Telegram/Bark cards. TG latest success — and pending/failed/unknown 0. Bark current server accepts 0, latest accept —, pending/failed/unknown 0, historical accepts 0. API old TG historical_sent=70 is not reused as Bark or current success."
+    },
+    {
+      "id": "server_acceptance_semantics",
+      "result": "PASS",
+      "evidence": "Visible Bark description: 与 TG 分别记录推送结果。服务已接受不代表手机已收到或已读。 Public acceptance=bark_server_accepted_not_device_receipt. No actual sent row exists at this QA snapshot; sent-label mapping was validated by the prior static checks."
+    },
+    {
+      "id": "historical_per_signal_channels",
+      "result": "PASS",
+      "evidence": "Initial 200 rendered rows each showed TG · 历史记录 and Bark · 历史记录. All 420 API records had history for both channels and kind tv_start. Selected ACU and BCH rows retained separate labels without false sent state."
+    },
+    {
+      "id": "timeframe_search_and_chart",
+      "result": "PASS",
+      "evidence": "Clicked 1H and searched ACU: one row, selected 0.14384, near-zero 24, exact-zero 0. Clicked 4H and searched BCH: four USD/USDT rows, selected BCH-USDT 260.80, near-zero 16. Charts loaded actual candles, six thin MAs, two IMACD lines and visible zero axis. Main arrows only tv_start; ACU one backend-focus group, BCH two."
+    },
+    {
+      "id": "public_frontend_fields",
+      "result": "PASS",
+      "evidence": "Public /api/status, /api/health, /api/signals recursively checked for sensitive key/address fields and URL values: none. Bark object contains only counters, timestamps, configured/enabled and acceptance. Opened actual diagnostic panel; parsed JSON had no sensitive field paths or HTTP URL strings. No private configuration read."
+    },
+    {
+      "id": "honest_warmup",
+      "result": "PASS",
+      "evidence": "On initial connection, previously recorded MEGA signal chart returned HTTP 404 before fresh in-memory warmup reached it. UI clearly displayed 图表暂时不可用 / 服务返回 HTTP 404 and kept signal history. ACU and BCH charts loaded after selecting already warmed contracts."
+    },
+    {
+      "id": "browser_console",
+      "result": "PASS",
+      "evidence": "Chrome dev.logs for error/warn returned [] after interactions. Initial chart HTTP 404 is separately recorded as an expected warmup observation, not concealed as zero network failures."
+    }
+  ],
+  "ui_observations": {
+    "headers": [
+      "TG · 已启用",
+      "Bark · 已启用"
+    ],
+    "initial_rendered_rows": 200,
+    "initial_loaded_records": 420,
+    "initial_unique_notification_aria_labels": [
+      "TG · 历史记录",
+      "Bark · 历史记录"
+    ],
+    "telegram_runtime_text": "最近成功—待发送0发送失败0发送结果未知0配置状态已配置（敏感信息不展示）",
+    "bark_runtime_text": "本次服务接受0最近服务接受—待发送0发送失败0发送结果未知0历史服务接受0配置状态已配置（敏感信息不展示）",
+    "acu_1h": {
+      "id": "032a879d2b417ec12b3378f8",
+      "price_text": "0.14384",
+      "near_zero_bars": 24,
+      "zero_bars": 0,
+      "rows_after_search": 1,
+      "focus_groups": 1,
+      "zero_label": "0.00",
+      "arrow_titles": [
+        "主图启动 · 蓄势释放↑ · 24 根 · 收盘 0.14384"
+      ]
+    },
+    "bch_4h": {
+      "id": "0ca9c9436a8103377a22bb5f",
+      "price_text": "260.80",
+      "near_zero_bars": 16,
+      "rows_after_search": 4,
+      "focus_groups": 2,
+      "zero_label": "0.00",
+      "arrow_titles": [
+        "主图启动 · 蓄势释放↓ · 14 根 · 收盘 242.70",
+        "主图启动 · 蓄势释放↑ · 16 根 · 收盘 260.80"
+      ]
+    }
+  },
+  "api_snapshot": {
+    "now_ms": 1788828366406,
+    "protocol": "imacd-tv-visible-start-monitor-v3",
+    "scan": {
+      "status": "scanning",
+      "started_at_ms": 1788828164259,
+      "finished_at_ms": null,
+      "completed": 390,
+      "total": 946,
+      "errors": 0,
+      "next_scan_ms": null,
+      "error_samples": []
+    },
+    "universe": {
+      "count": 473,
+      "scope": "OKX 全部在交易永续合约（USDT 与币本位）",
+      "updated_at_ms": 1788828164259,
+      "settlements": {
+        "USDT": 458,
+        "ADA": 1,
+        "BCH": 1,
+        "BTC": 1,
+        "DOGE": 1,
+        "DOT": 1,
+        "ETC": 1,
+        "ETH": 1,
+        "FIL": 1,
+        "HYPE": 1,
+        "LINK": 1,
+        "LTC": 1,
+        "SOL": 1,
+        "SUI": 1,
+        "UNI": 1,
+        "XRP": 1
+      }
+    },
+    "telegram": {
+      "configured": true,
+      "enabled": true,
+      "sent": 0,
+      "historical_sent": 70,
+      "pending": 0,
+      "failed": 0,
+      "unknown": 0,
+      "last_success_ms": null
+    },
+    "bark": {
+      "configured": true,
+      "enabled": true,
+      "sent": 0,
+      "historical_sent": 0,
+      "pending": 0,
+      "failed": 0,
+      "unknown": 0,
+      "last_success_ms": null,
+      "acceptance": "bark_server_accepted_not_device_receipt"
+    },
+    "bark_field_names": [
+      "pending",
+      "failed",
+      "unknown",
+      "last_success_ms",
+      "sent",
+      "historical_sent",
+      "configured",
+      "enabled",
+      "acceptance"
+    ],
+    "signals": {
+      "total": 420,
+      "returned": 420,
+      "kind_counts": {
+        "tv_start": 420
+      },
+      "telegram_status_counts": {
+        "history": 420
+      },
+      "bark_status_counts": {
+        "history": 420
+      }
+    },
+    "sensitive_field_paths": [],
+    "http_url_value_paths": []
+  },
+  "visual_evidence": {
+    "storage": "Inline CUA tool screenshots, no image files saved",
+    "tool_titles": [
+      "核对启用状态、历史双通道标签与独立统计",
+      "验收 4H 原点位图表与双通道历史状态"
+    ]
+  },
+  "issues": [],
+  "limitations": [
+    "This QA did not send Bark or TG notifications. Both current send/accept counts were zero, so actual new notification acceptance and phone delivery are not proven here.",
+    "Full-market warmup was still running; completed chart checks used already warmed symbols.",
+    "No mobile layout or failure injection rerun in this scoped integration QA.",
+    "No HTML report file:// preview was attempted."
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "source_commit": "d95fb449ac6aafe5d63589324ca563cecc29b755",
+  "tests": {
+    "passed": 234,
+    "failed": 0,
+    "seconds": 21.15,
+    "command": ".venv/bin/python -m pytest -q tests/monitor tests/boundaries/test_layer_imports.py tests/boundaries/test_yoyo_package_is_local.py tests/boundaries/test_no_cross_repository_bridges.py tests/boundaries/test_execution_bundle_only.py tests/boundaries/test_experiment_isolation.py",
+    "existing_warning": "urllib3/LibreSSL; dependencies unchanged",
+    "first_attempt": "232 pass,1 synthetic future-close fixture failed because queue due time was also future; fixture corrected to exercise negative-age rejection. Independent review then separated both cutover gates and added a reversed-cutover regression; final234pass."
+  },
+  "private_configuration": {
+    "configured": true,
+    "mode": "0o600",
+    "outside_repository": true,
+    "source_key_leaks": [],
+    "api_key_leaks": []
+  },
+  "public_connectivity": {
+    "endpoint": "https://api.day.app/ping",
+    "http_status": 200,
+    "code": 200,
+    "message": "pong",
+    "device_key_sent": false,
+    "push_sent": false
+  },
+  "signal_formula_sha256": "22089ba02600338644d7a6e234c5c46740df18c2023cda4a964eb2368f54aefa",
+  "pine_sha256": "9c3f60cf2a66d55f21e964d7a9b97971d07fdc90195ade8af1a7e9d78a89ffcb",
+  "ai_heartbeat": "PAUSED",
+  "real_bark_push_verification": "No test/startup/history push; awaiting eligible post-cutover signal. Ping does not validate device acceptance.",
+  "full_scan_acceptance": {
+    "artifact": "after.json",
+    "health_ok": true,
+    "contracts": 473,
+    "windows": 946,
+    "errors": 0,
+    "duration_seconds": 470.14,
+    "stale": 0,
+    "history_limited_windows": 74,
+    "signals_total": 420,
+    "bark_pre_activation_outbox": [],
+    "bark_invalid_outbox": [],
+    "TG_old_receipts_unchanged": true,
+    "TG_cutover_unchanged": true,
+    "Bark_cutover_ms": 1788828167791,
+    "bark": {
+      "pending": 0,
+      "failed": 0,
+      "unknown": 0,
+      "last_success_ms": null,
+      "sent": 0,
+      "historical_sent": 0,
+      "configured": true,
+      "enabled": true,
+      "acceptance": "bark_server_accepted_not_device_receipt"
+    },
+    "startup_source_sha_mismatches": []
+  },
+  "frontend": {
+    "artifact": "frontend_qa.json",
+    "browser": "Chrome",
+    "checks_passed": 8,
+    "findings": [],
+    "real_push_not_claimed": true
+  },
+  "signal_semantics_unchanged_from_visible_v3": {
+    "yoyo/monitor/signals.py": true,
+    "yoyo/monitor/policy.py": true,
+    "yoyo/evaluation/pine/imacd_dense_mtf_v2_2.pine": true
+  },
+  "independent_review": {
+    "finding": "Bark eligibility originally inherited Telegram cutover; now base eligibility is shared and each channel adds only its own cutover. Reversed-cutover regression passes.",
+    "remaining_findings": [],
+    "review_scope": "Bark worker, private configuration, service eligibility and Store interface; no real key or send"
+  },
+  "report_validation": {
+    "html_structural_check": "passed",
+    "required_tokens_present": true,
+    "browser_validation_scope": "HTTP monitor page; no local report visual claim"
+  }
+}

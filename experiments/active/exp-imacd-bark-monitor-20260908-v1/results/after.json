@@ -1,0 +1,879 @@
+{
+  "label": "after-bark-full-market",
+  "captured_at": "2026-09-08T00:51:24.588645+00:00",
+  "source_commit": "d95fb449ac6aafe5d63589324ca563cecc29b755",
+  "source_sha256": {
+    "yoyo/monitor/README.md": "df46d4f5dcf55a269ce133b18b1e47988ec05040b9fba16e5a6830bddd5a3d8f",
+    "yoyo/monitor/__init__.py": "ea39e7bb13909687200ea56402349894b304a16b7ed99b0d0fa6aba564ad1630",
+    "yoyo/monitor/acceptance.py": "c58a0726113d03db69d8dcd295305a191088325bff38ddd768c9c176e0b0ade1",
+    "yoyo/monitor/bark.py": "44c5ce8d1ad07848f89c125fe9df8d243f35e4a265b9699e540c109889124823",
+    "yoyo/monitor/manage.py": "f0ba128f4a202eac6935797a944641e21716ce2bb2f8aa231eee12f716e2aed2",
+    "yoyo/monitor/okx.py": "3c76a5ac26a44243d778c6e1ff04533fce1c5c0eaf1b17ebba1c7883009b53f6",
+    "yoyo/monitor/policy.py": "98fdb9331224d29af46ea04dd4af2a17f6b7a4400d60d80050b1f3a0fc689468",
+    "yoyo/monitor/server.py": "10c35395e084c953aec28afb011a467134febb47937ad3beb5ef44f35d5a4c0a",
+    "yoyo/monitor/service.py": "9150a09807da0f37d4d3c4c3350e216ffe2580f485d3fe0bf680e44a0b7b073a",
+    "yoyo/monitor/signals.py": "22089ba02600338644d7a6e234c5c46740df18c2023cda4a964eb2368f54aefa",
+    "yoyo/monitor/static/app.js": "de07a1a391be5cafea4394c27988fd0885db36c99dd94db5e56a2bbe35e15caa",
+    "yoyo/monitor/static/index.html": "d0d4656262a7fe2557dde09283ae553fbbf368944695ddedcefb94f5d6493f0c",
+    "yoyo/monitor/static/styles.css": "8f54a71bdc3a9d0cb1005d5d570d21ffc14946b835982fa831b0150338b15208",
+    "yoyo/monitor/store.py": "e978f2d421e1bfc08973c1c94b050d2e29ef8c40bbab0d02cf267a4c1e85b392",
+    "yoyo/monitor/telegram.py": "91c42c554ad2e1c67d2ff34319a5b81d2a4901cafd22045a816ed0c58fd42581"
+  },
+  "status": {
+    "service": "Fable Impulse Monitor",
+    "version": "1.3.0",
+    "protocol": "imacd-tv-visible-start-monitor-v3",
+    "now_ms": 1788828686860,
+    "started_at_ms": 1788828164190,
+    "scan": {
+      "status": "idle",
+      "started_at_ms": 1788828164259,
+      "finished_at_ms": 1788828634400,
+      "completed": 946,
+      "total": 946,
+      "errors": 0,
+      "next_scan_ms": 1788828754400,
+      "error_samples": [],
+      "duration_seconds": 470.14
+    },
+    "universe": {
+      "count": 473,
+      "scope": "OKX 全部在交易永续合约（USDT 与币本位）",
+      "updated_at_ms": 1788828164259,
+      "settlements": {
+        "USDT": 458,
+        "ADA": 1,
+        "BCH": 1,
+        "BTC": 1,
+        "DOGE": 1,
+        "DOT": 1,
+        "ETC": 1,
+        "ETH": 1,
+        "FIL": 1,
+        "HYPE": 1,
+        "LINK": 1,
+        "LTC": 1,
+        "SOL": 1,
+        "SUI": 1,
+        "UNI": 1,
+        "XRP": 1
+      }
+    },
+    "counts": {
+      "ready": 56,
+      "long": 475,
+      "short": 114,
+      "neutral": 146,
+      "building": 81,
+      "loading": 74,
+      "signals_24h": 44
+    },
+    "telegram": {
+      "pending": 0,
+      "failed": 0,
+      "unknown": 0,
+      "last_success_ms": null,
+      "sent": 0,
+      "historical_sent": 70,
+      "last_signal_success_ms": null,
+      "probe_status": "not_tested",
+      "configured": true,
+      "enabled": true
+    },
+    "bark": {
+      "pending": 0,
+      "failed": 0,
+      "unknown": 0,
+      "last_success_ms": null,
+      "sent": 0,
+      "historical_sent": 0,
+      "configured": true,
+      "enabled": true,
+      "acceptance": "bark_server_accepted_not_device_receipt"
+    },
+    "runtime": {
+      "host": "This Mac",
+      "notification_only": true,
+      "fresh_minutes": 30,
+      "interval_seconds": 120,
+      "timeframes": [
+        "1H",
+        "4H"
+      ],
+      "clock_offset_ms": 2558,
+      "public_requests": 3712,
+      "candle_storage": "memory_only",
+      "history_days": 7,
+      "signal_mode": "TradingView 主图启动（蓄势释放标记）",
+      "signal_kind": "tv_start",
+      "tv_profile": {
+        "id": "imacd-v2.2-focus12-band0.10-marks-off",
+        "show_focus": true,
+        "show_marks": false,
+        "focus_min_bars": 12,
+        "focus_atr_band": 0.1,
+        "verified_on": "2026-09-08",
+        "sync_mode": "observed_settings_snapshot"
+      },
+      "notification_since_ms": 1788826012027,
+      "bark_notification_since_ms": 1788828167791,
+      "higher_mode": "已确认高周期背景标注，不过滤启动",
+      "source_commit": "d95fb449ac6aafe5d63589324ca563cecc29b755",
+      "startup_source_sha256": {
+        "store.py": "e978f2d421e1bfc08973c1c94b050d2e29ef8c40bbab0d02cf267a4c1e85b392",
+        "okx.py": "3c76a5ac26a44243d778c6e1ff04533fce1c5c0eaf1b17ebba1c7883009b53f6",
+        "signals.py": "22089ba02600338644d7a6e234c5c46740df18c2023cda4a964eb2368f54aefa",
+        "service.py": "9150a09807da0f37d4d3c4c3350e216ffe2580f485d3fe0bf680e44a0b7b073a",
+        "server.py": "10c35395e084c953aec28afb011a467134febb47937ad3beb5ef44f35d5a4c0a",
+        "telegram.py": "91c42c554ad2e1c67d2ff34319a5b81d2a4901cafd22045a816ed0c58fd42581",
+        "acceptance.py": "c58a0726113d03db69d8dcd295305a191088325bff38ddd768c9c176e0b0ade1",
+        "policy.py": "98fdb9331224d29af46ea04dd4af2a17f6b7a4400d60d80050b1f3a0fc689468",
+        "__init__.py": "ea39e7bb13909687200ea56402349894b304a16b7ed99b0d0fa6aba564ad1630",
+        "bark.py": "44c5ce8d1ad07848f89c125fe9df8d243f35e4a265b9699e540c109889124823",
+        "manage.py": "f0ba128f4a202eac6935797a944641e21716ce2bb2f8aa231eee12f716e2aed2"
+      },
+      "warmup_bars": 340,
+      "launch_agent": "com.fable.impulse-monitor"
+    }
+  },
+  "health": {
+    "service": "Fable Impulse Monitor",
+    "version": "1.3.0",
+    "protocol": "imacd-tv-visible-start-monitor-v3",
+    "now_ms": 1788828686951,
+    "started_at_ms": 1788828164190,
+    "scan": {
+      "status": "idle",
+      "started_at_ms": 1788828164259,
+      "finished_at_ms": 1788828634400,
+      "completed": 946,
+      "total": 946,
+      "errors": 0,
+      "next_scan_ms": 1788828754400,
+      "error_samples": [],
+      "duration_seconds": 470.14
+    },
+    "universe": {
+      "count": 473,
+      "scope": "OKX 全部在交易永续合约（USDT 与币本位）",
+      "updated_at_ms": 1788828164259,
+      "settlements": {
+        "USDT": 458,
+        "ADA": 1,
+        "BCH": 1,
+        "BTC": 1,
+        "DOGE": 1,
+        "DOT": 1,
+        "ETC": 1,
+        "ETH": 1,
+        "FIL": 1,
+        "HYPE": 1,
+        "LINK": 1,
+        "LTC": 1,
+        "SOL": 1,
+        "SUI": 1,
+        "UNI": 1,
+        "XRP": 1
+      }
+    },
+    "counts": {
+      "ready": 56,
+      "long": 475,
+      "short": 114,
+      "neutral": 146,
+      "building": 81,
+      "loading": 74,
+      "signals_24h": 44
+    },
+    "telegram": {
+      "pending": 0,
+      "failed": 0,
+      "unknown": 0,
+      "last_success_ms": null,
+      "sent": 0,
+      "historical_sent": 70,
+      "last_signal_success_ms": null,
+      "probe_status": "not_tested",
+      "configured": true,
+      "enabled": true
+    },
+    "bark": {
+      "pending": 0,
+      "failed": 0,
+      "unknown": 0,
+      "last_success_ms": null,
+      "sent": 0,
+      "historical_sent": 0,
+      "configured": true,
+      "enabled": true,
+      "acceptance": "bark_server_accepted_not_device_receipt"
+    },
+    "runtime": {
+      "host": "This Mac",
+      "notification_only": true,
+      "fresh_minutes": 30,
+      "interval_seconds": 120,
+      "timeframes": [
+        "1H",
+        "4H"
+      ],
+      "clock_offset_ms": 2558,
+      "public_requests": 3712,
+      "candle_storage": "memory_only",
+      "history_days": 7,
+      "signal_mode": "TradingView 主图启动（蓄势释放标记）",
+      "signal_kind": "tv_start",
+      "tv_profile": {
+        "id": "imacd-v2.2-focus12-band0.10-marks-off",
+        "show_focus": true,
+        "show_marks": false,
+        "focus_min_bars": 12,
+        "focus_atr_band": 0.1,
+        "verified_on": "2026-09-08",
+        "sync_mode": "observed_settings_snapshot"
+      },
+      "notification_since_ms": 1788826012027,
+      "bark_notification_since_ms": 1788828167791,
+      "higher_mode": "已确认高周期背景标注，不过滤启动",
+      "source_commit": "d95fb449ac6aafe5d63589324ca563cecc29b755",
+      "startup_source_sha256": {
+        "store.py": "e978f2d421e1bfc08973c1c94b050d2e29ef8c40bbab0d02cf267a4c1e85b392",
+        "okx.py": "3c76a5ac26a44243d778c6e1ff04533fce1c5c0eaf1b17ebba1c7883009b53f6",
+        "signals.py": "22089ba02600338644d7a6e234c5c46740df18c2023cda4a964eb2368f54aefa",
+        "service.py": "9150a09807da0f37d4d3c4c3350e216ffe2580f485d3fe0bf680e44a0b7b073a",
+        "server.py": "10c35395e084c953aec28afb011a467134febb47937ad3beb5ef44f35d5a4c0a",
+        "telegram.py": "91c42c554ad2e1c67d2ff34319a5b81d2a4901cafd22045a816ed0c58fd42581",
+        "acceptance.py": "c58a0726113d03db69d8dcd295305a191088325bff38ddd768c9c176e0b0ade1",
+        "policy.py": "98fdb9331224d29af46ea04dd4af2a17f6b7a4400d60d80050b1f3a0fc689468",
+        "__init__.py": "ea39e7bb13909687200ea56402349894b304a16b7ed99b0d0fa6aba564ad1630",
+        "bark.py": "44c5ce8d1ad07848f89c125fe9df8d243f35e4a265b9699e540c109889124823",
+        "manage.py": "f0ba128f4a202eac6935797a944641e21716ce2bb2f8aa231eee12f716e2aed2"
+      },
+      "warmup_bars": 340,
+      "launch_agent": "com.fable.impulse-monitor"
+    },
+    "service_alive": true,
+    "market_ready": true,
+    "ok": true
+  },
+  "markets": {
+    "total": 946,
+    "warming_up": 74,
+    "errors": [],
+    "stale": 0
+  },
+  "journal": {
+    "event_count": 14775,
+    "duplicate_identity_groups": 0,
+    "telegram_receipts": [
+      {
+        "event_id": "5c9e7ec813173478e2919374",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805307147,
+        "message_id": 1786,
+        "error": null
+      },
+      {
+        "event_id": "feb7036fc1ee2cb335d1d5a7",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805326157,
+        "message_id": 1787,
+        "error": null
+      },
+      {
+        "event_id": "6151a4135197b859877ca650",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805376709,
+        "message_id": 1788,
+        "error": null
+      },
+      {
+        "event_id": "b27ed9eb05438acd4460ec4f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805389334,
+        "message_id": 1789,
+        "error": null
+      },
+      {
+        "event_id": "e66e25db324ff73eafa747a1",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805433268,
+        "message_id": 1790,
+        "error": null
+      },
+      {
+        "event_id": "c10ad93efa8c2c95d49525f6",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805486857,
+        "message_id": 1791,
+        "error": null
+      },
+      {
+        "event_id": "bed048807ea8951c42082363",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805615594,
+        "message_id": 1792,
+        "error": null
+      },
+      {
+        "event_id": "0fa648fb66161642d7be75a2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805653400,
+        "message_id": 1793,
+        "error": null
+      },
+      {
+        "event_id": "437503bc0a0cf4f7f91af058",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805666177,
+        "message_id": 1794,
+        "error": null
+      },
+      {
+        "event_id": "e350ea989c2960fb090952e9",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807653338,
+        "message_id": 1795,
+        "error": null
+      },
+      {
+        "event_id": "26b57a080aeaf1f13b294c84",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807659917,
+        "message_id": 1796,
+        "error": null
+      },
+      {
+        "event_id": "4cb0406fe80fce8740cfe86c",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807666348,
+        "message_id": 1797,
+        "error": null
+      },
+      {
+        "event_id": "ddd9e84365c34accd40ae03c",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807669559,
+        "message_id": 1798,
+        "error": null
+      },
+      {
+        "event_id": "aecafc547e023f094875c0ed",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807679190,
+        "message_id": 1799,
+        "error": null
+      },
+      {
+        "event_id": "57d3beaada67c638f3671a93",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807682652,
+        "message_id": 1800,
+        "error": null
+      },
+      {
+        "event_id": "df84ff33c73cebd78a5638ec",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807685880,
+        "message_id": 1801,
+        "error": null
+      },
+      {
+        "event_id": "d90c1c788a267bcca594df13",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807689181,
+        "message_id": 1802,
+        "error": null
+      },
+      {
+        "event_id": "3c85f8e163d82261d1e5b177",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807692564,
+        "message_id": 1803,
+        "error": null
+      },
+      {
+        "event_id": "80b855f92ddeb1a7a5b1f0df",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807696073,
+        "message_id": 1804,
+        "error": null
+      },
+      {
+        "event_id": "338f99256143d0fc6f3f2b89",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807699472,
+        "message_id": 1805,
+        "error": null
+      },
+      {
+        "event_id": "1b443f0f3ee242b294f5bde8",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811259945,
+        "message_id": 1806,
+        "error": null
+      },
+      {
+        "event_id": "59887f81bcdebba006d58036",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811269527,
+        "message_id": 1807,
+        "error": null
+      },
+      {
+        "event_id": "e1b0de8e3a97955e713a52fb",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811279068,
+        "message_id": 1808,
+        "error": null
+      },
+      {
+        "event_id": "34a28b0d2481cb3a437609a2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811282406,
+        "message_id": 1809,
+        "error": null
+      },
+      {
+        "event_id": "5eb593270733f89fae9ffed3",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811285676,
+        "message_id": 1810,
+        "error": null
+      },
+      {
+        "event_id": "7dc3704452d8a8928c0c65b6",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811289125,
+        "message_id": 1811,
+        "error": null
+      },
+      {
+        "event_id": "b9347e4c9a65a818491d6f6f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811292605,
+        "message_id": 1812,
+        "error": null
+      },
+      {
+        "event_id": "355fd11984f6f9002a0d617f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811296027,
+        "message_id": 1813,
+        "error": null
+      },
+      {
+        "event_id": "81537f08141e6b971ba32301",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811299336,
+        "message_id": 1814,
+        "error": null
+      },
+      {
+        "event_id": "7b3bae3988a1b7c4642ec059",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811305889,
+        "message_id": 1815,
+        "error": null
+      },
+      {
+        "event_id": "81173ab17a6451b60942a7bf",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811315476,
+        "message_id": 1816,
+        "error": null
+      },
+      {
+        "event_id": "764a7c18f08203f262825a21",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811319022,
+        "message_id": 1817,
+        "error": null
+      },
+      {
+        "event_id": "10d851d3efe0c075c0e32159",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811322346,
+        "message_id": 1818,
+        "error": null
+      },
+      {
+        "event_id": "46a2f374f502f00591b2cec7",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811325813,
+        "message_id": 1819,
+        "error": null
+      },
+      {
+        "event_id": "dc35709e88e27ef90c38dda5",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811329063,
+        "message_id": 1820,
+        "error": null
+      },
+      {
+        "event_id": "2398157defb00a83c22fb1e2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811332435,
+        "message_id": 1821,
+        "error": null
+      },
+      {
+        "event_id": "14dd5320b3dce810efa3b03d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811335786,
+        "message_id": 1822,
+        "error": null
+      },
+      {
+        "event_id": "e17d2a74831702585194532a",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811348534,
+        "message_id": 1823,
+        "error": null
+      },
+      {
+        "event_id": "9c16b15a80589b680c1bcba7",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811352007,
+        "message_id": 1824,
+        "error": null
+      },
+      {
+        "event_id": "d749278eccc583fbfe59b6c6",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811355514,
+        "message_id": 1825,
+        "error": null
+      },
+      {
+        "event_id": "51c301ca246d97a8203b6739",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814932450,
+        "message_id": 1826,
+        "error": null
+      },
+      {
+        "event_id": "f9ab44a277cb0f7e9c6980e2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814942149,
+        "message_id": 1827,
+        "error": null
+      },
+      {
+        "event_id": "81939b5047c149e411fbba7d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814945556,
+        "message_id": 1828,
+        "error": null
+      },
+      {
+        "event_id": "7873253754aa125552f2eafe",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814948883,
+        "message_id": 1829,
+        "error": null
+      },
+      {
+        "event_id": "7506c95fe71645b3524245e8",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814952186,
+        "message_id": 1830,
+        "error": null
+      },
+      {
+        "event_id": "2780e12fe0da86a485ecf48d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814955469,
+        "message_id": 1831,
+        "error": null
+      },
+      {
+        "event_id": "9f090e02861234cbae4fb5e0",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814958750,
+        "message_id": 1832,
+        "error": null
+      },
+      {
+        "event_id": "e6cf7b0071eed38ed965175b",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814962096,
+        "message_id": 1833,
+        "error": null
+      },
+      {
+        "event_id": "31fc4b118d240bf6fe29f705",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818478897,
+        "message_id": 1834,
+        "error": null
+      },
+      {
+        "event_id": "9e2bfa4f81c31d2ec14e89c2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818488320,
+        "message_id": 1835,
+        "error": null
+      },
+      {
+        "event_id": "51f0265ffe701c7276735357",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818491790,
+        "message_id": 1836,
+        "error": null
+      },
+      {
+        "event_id": "a17a989b3c6deee97800ffc0",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818495178,
+        "message_id": 1837,
+        "error": null
+      },
+      {
+        "event_id": "73e0395a0a24fc241b9055c1",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818511100,
+        "message_id": 1838,
+        "error": null
+      },
+      {
+        "event_id": "9206760c6aa1feb90aef14fb",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818517606,
+        "message_id": 1839,
+        "error": null
+      },
+      {
+        "event_id": "6271b43e82c4bd449040425a",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818524133,
+        "message_id": 1840,
+        "error": null
+      },
+      {
+        "event_id": "bfacd442a43c23c845558add",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818527575,
+        "message_id": 1841,
+        "error": null
+      },
+      {
+        "event_id": "8d997d230c404a52a1d4ef25",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818536994,
+        "message_id": 1842,
+        "error": null
+      },
+      {
+        "event_id": "72cea8ecd0f3eae762b69b07",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822077010,
+        "message_id": 1843,
+        "error": null
+      },
+      {
+        "event_id": "252949db1d6c996e0e981696",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822083461,
+        "message_id": 1844,
+        "error": null
+      },
+      {
+        "event_id": "f77e8d89557e5de69aecd8d0",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822086820,
+        "message_id": 1845,
+        "error": null
+      },
+      {
+        "event_id": "809c98bd61de26d0e5afadbd",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822090193,
+        "message_id": 1846,
+        "error": null
+      },
+      {
+        "event_id": "79d8ecb8409be7a8982d4145",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822099781,
+        "message_id": 1847,
+        "error": null
+      },
+      {
+        "event_id": "3cf315a324ac7437ac0e02e8",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822103094,
+        "message_id": 1848,
+        "error": null
+      },
+      {
+        "event_id": "839803986f26bf662f4981e6",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822106290,
+        "message_id": 1849,
+        "error": null
+      },
+      {
+        "event_id": "ec3e5d5bce40cb29b79522c2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822109670,
+        "message_id": 1850,
+        "error": null
+      },
+      {
+        "event_id": "079b8ed7c81ccbd1cdd2140d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822113017,
+        "message_id": 1851,
+        "error": null
+      },
+      {
+        "event_id": "20c39ce94d2c90ef3443a70f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822116420,
+        "message_id": 1852,
+        "error": null
+      },
+      {
+        "event_id": "de8b37dac5a87cb639a42000",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822119817,
+        "message_id": 1853,
+        "error": null
+      },
+      {
+        "event_id": "ac05a54ca824e8d630578691",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822126313,
+        "message_id": 1854,
+        "error": null
+      },
+      {
+        "event_id": "39c4e76ae63a4825f0d3b35b",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822129701,
+        "message_id": 1855,
+        "error": null
+      }
+    ],
+    "bark_receipts": [],
+    "by_kind": [
+      {
+        "kind": "entry",
+        "count": 3705
+      },
+      {
+        "kind": "exit",
+        "count": 3532
+      },
+      {
+        "kind": "release",
+        "count": 1274
+      },
+      {
+        "kind": "retest",
+        "count": 3024
+      },
+      {
+        "kind": "tv_start",
+        "count": 420
+      },
+      {
+        "kind": "zero_breakout",
+        "count": 2820
+      }
+    ]
+  },
+  "bark_audit": {
+    "policy": {
+      "activated_ms": 1788828167791,
+      "kind": "tv_start"
+    },
+    "current_outbox_count": 0,
+    "invalid_outbox_ids": [],
+    "pre_activation_outbox_ids": []
+  },
+  "signal_contract_audit": {
+    "protocol": "imacd-tv-visible-start-monitor-v3",
+    "policy": {
+      "activated_ms": 1788826012027,
+      "kind": "tv_start"
+    },
+    "signal_count": 420,
+    "invalid_signal_ids": [],
+    "current_outbox_count": 0,
+    "invalid_outbox_ids": [],
+    "pre_activation_outbox_ids": []
+  }
+}
