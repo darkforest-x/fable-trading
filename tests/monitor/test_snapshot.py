@@ -10,6 +10,7 @@ import pytest
 from yoyo.monitor import TIMEFRAMES
 from yoyo.monitor.signals import analyze
 from yoyo.monitor.snapshot import MAX_CANDLES, SIZE, render_signal
+from model_fixture import model_event
 
 
 def sample(side="long"):
@@ -163,3 +164,69 @@ def test_real_analyze_chart_contract_without_recalculating_indicators():
     result = analyze(quotes, [], "1H")
     event = dict(next(e for e in result["events"] if e["kind"] == "tv_start"), symbol="TEST-USDT-SWAP")
     assert render_signal(event, result["chart"]).startswith(b"\x89PNG")
+
+
+def confirmed_sample(side="long"):
+    old, rows = sample(side)
+    event = model_event(close=old["bar_close_ms"], timeframe="15m", side=side,
+                        price=rows[139]["c"], arrow_price=rows[137]["c"], near_zero_bars=29)
+    return event, rows
+
+
+@pytest.mark.parametrize("side", ["long", "short"])
+def test_model_image_ends_at_confirmation_and_preserves_inputs(side):
+    event, rows = confirmed_sample(side)
+    before = deepcopy((event, rows))
+    prefix = rows[:140]
+    result = render_signal(event, rows)
+    assert result == render_signal(event, prefix)
+    assert (event, rows) == before
+    for row in rows[140:]:
+        row.update(o=float("nan"), c=1e12, md=1e12)
+    assert render_signal(event, rows) == result
+    with Image.open(BytesIO(result)) as image:
+        assert image.size == SIZE
+        image.verify()
+
+
+def test_model_image_draws_purple_core_and_both_clocks(monkeypatch):
+    from yoyo.monitor import snapshot
+    event, rows = confirmed_sample()
+    drawn = {"texts": [], "boxes": [], "lines": []}
+    original_text = snapshot._Painter.text
+    original_box = snapshot._Painter.rectangle
+    original_line = snapshot._Painter.line
+    def text(self, xy, value, *args, **kwargs):
+        drawn["texts"].append(value)
+        return original_text(self, xy, value, *args, **kwargs)
+    def box(self, coords, fill, outline=None, width=1):
+        drawn["boxes"].append((coords, outline))
+        return original_box(self, coords, fill, outline, width)
+    def line(self, points, fill, width=1):
+        drawn["lines"].append((points, fill))
+        return original_line(self, points, fill, width)
+    monkeypatch.setattr(snapshot._Painter, "text", text)
+    monkeypatch.setattr(snapshot._Painter, "rectangle", box)
+    monkeypatch.setattr(snapshot._Painter, "line", line)
+    render_signal(event, rows)
+    texts = " ".join(drawn["texts"])
+    assert "YOLO" in texts
+    assert "模型核心区" in texts or "MODEL CORE" in texts
+    assert "原箭头" in texts or "ARROW" in texts
+    assert "模型确认" in texts or "MODEL CONFIRMED" in texts
+    assert any(outline == "#ad8bde" for _, outline in drawn["boxes"])
+    assert any(color == "#e5b76b" and points[0][0] == points[1][0]
+               for points, color in drawn["lines"])
+    assert any(color == "#ad8bde" and points[0][0] == points[1][0]
+               for points, color in drawn["lines"])
+
+
+def test_model_snapshot_rejects_original_price_mismatch_and_unproven_event():
+    event, rows = confirmed_sample()
+    event["indicator"]["price"] += 1
+    with pytest.raises(ValueError, match="original_arrow_price_mismatch"):
+        render_signal(event, rows)
+    event, rows = confirmed_sample()
+    event["model"]["model_sha256"] = "unapproved-model"
+    with pytest.raises(ValueError, match="invalid_model_confirmation"):
+        render_signal(event, rows)

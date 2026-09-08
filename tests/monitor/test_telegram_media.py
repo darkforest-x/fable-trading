@@ -9,18 +9,14 @@ from PIL import Image
 import pytest
 import requests
 
-from yoyo.monitor import SIGNAL_PROTOCOL, TV_PROFILE_ID
+from yoyo.monitor import MODEL_PROTOCOL
+from model_fixture import CONFIRM, model_event
 from yoyo.monitor.store import Store
 from yoyo.monitor.telegram import TelegramWorker, message, markup
 
 
 def event():
-    return dict(protocol=SIGNAL_PROTOCOL, symbol='TEST-USDT-SWAP', timeframe='15m', kind='tv_start',
-                side='short', price=100.5, bar_open_ms=2_700_000, bar_close_ms=3_600_000,
-                detected_at_ms=3_601_000, near_zero_bars=13, md=-.2, sb=-.02,
-                previous_md=.05, previous_sb=.08, focus_band=.1, confirmed=True, ready=True,
-                focus_qualified_before=True, tv_marker_visible=True, tv_show_focus=True,
-                tv_show_marks=False, source_kind='release', tv_marker='focus_release', tv_profile=TV_PROFILE_ID)
+    return model_event(timeframe="15m", side="short", near_zero_bars=13)
 
 
 def png(color='black'):
@@ -40,17 +36,18 @@ def response(code=200, payload=None):
 
 def queued(path, photo=True):
     store = Store(path / 'm.sqlite')
-    store.activate_notification_policy(0)
-    store.activate_bark_policy(0)
-    store.activate_timeframe_policy('15m', 0)
+    store.activate_notification_policy(0, protocol=MODEL_PROTOCOL)
+    store.activate_bark_policy(0, protocol=MODEL_PROTOCOL)
+    store.activate_timeframe_policy('15m', 0, protocol=MODEL_PROTOCOL)
     store.upsert_event(event(), notify=True, bark_notify=True, telegram_photo=png() if photo else None)
     return store
 
 
-def test_caption_is_three_lines_and_button_owns_url():
+def test_caption_keeps_confirmation_and_original_arrow_separate():
     text = message(event())
-    assert len(text.splitlines()) == 3 and len(text) < 200
-    assert '100.5' in text and '13 根' in text and '15m' in text and '向下启动' in text
+    assert len(text.splitlines()) == 4 and len(text) < 200
+    assert '100.5' in text and '等待 2 根' in text and '15m' in text and '空头' in text
+    assert '指标 + YOLO确认' in text and '原箭头 99.5' in text
     assert 'https' not in text and '高周期' not in text and '精确零轴' not in text
     assert markup(event())['inline_keyboard'][0][0]['url'].endswith('interval=15')
 
@@ -60,8 +57,8 @@ def test_photo_survives_restart_and_sends_once_with_caption(tmp_path):
     store = Store(tmp_path / 'm.sqlite')
     calls = []
     worker = TelegramWorker(store, ('fake-token', 'fake-chat'), lambda *a, **k: (calls.append((a, k)) or response()))
-    assert worker.deliver_once(3_602_000)
-    assert not worker.deliver_once(3_603_000)
+    assert worker.deliver_once(CONFIRM + 2_000)
+    assert not worker.deliver_once(CONFIRM + 3_000)
     args, kwargs = calls[0]
     assert args[0].endswith('/sendPhoto') and 'json' not in kwargs
     assert kwargs['files']['photo'] == ('imacd-signal.png', png(), 'image/png')
@@ -79,9 +76,9 @@ def test_photo_429_retry_uses_exact_same_bytes_and_no_duplicate_text(tmp_path):
         calls.append((args, kwargs))
         return response(429, {'ok': False, 'error_code': 429, 'parameters': {'retry_after': 5}}) if len(calls) == 1 else response()
     worker = TelegramWorker(store, ('fake', 'fake'), sender)
-    worker.deliver_once(3_602_000)
-    assert not worker.deliver_once(3_606_999)
-    assert worker.deliver_once(3_607_000)
+    worker.deliver_once(CONFIRM + 2_000)
+    assert not worker.deliver_once(CONFIRM + 6_999)
+    assert worker.deliver_once(CONFIRM + 7_000)
     assert calls[0][1]['files']['photo'][1] == calls[1][1]['files']['photo'][1] == png()
     assert all(call[0][0].endswith('/sendPhoto') for call in calls)
     assert store.telegram_status()['sent'] == 1
@@ -99,8 +96,8 @@ def test_uncertain_upload_never_falls_back_to_another_send(tmp_path, failure):
             return response(503)
         return response(payload={'ok': True, 'result': {'message_id': 123}})
     worker = TelegramWorker(store, ('fake', 'fake'), sender)
-    assert worker.deliver_once(3_602_000)
-    assert not worker.deliver_once(3_603_000)
+    assert worker.deliver_once(CONFIRM + 2_000)
+    assert not worker.deliver_once(CONFIRM + 3_000)
     assert len(calls) == 1 and calls[0].endswith('/sendPhoto')
     assert store.telegram_status()['unknown'] == 1
     assert store.bark_status()['pending'] == 1
@@ -114,7 +111,7 @@ def test_missing_or_corrupt_local_image_falls_back_before_first_request(tmp_path
             db.execute("UPDATE telegram_media SET png=?", (b'corrupt',))
     calls = []
     worker = TelegramWorker(store, ('fake', 'fake'), lambda *a, **k: (calls.append((a, k)) or response()))
-    assert worker.deliver_once(3_602_000)
+    assert worker.deliver_once(CONFIRM + 2_000)
     assert len(calls) == 1 and calls[0][0][0].endswith('/sendMessage')
     assert calls[0][1]['json']['text'] == message(event())
     assert store.telegram_status()['sent'] == 1
@@ -124,7 +121,7 @@ def test_concurrent_duplicates_cannot_replace_frozen_photo_or_history(tmp_path):
     store = queued(tmp_path)
     with ThreadPoolExecutor(max_workers=4) as pool:
         assert not any(pool.map(lambda _: store.upsert_event(event(), notify=True, telegram_photo=png('red')), range(10)))
-    row = store.claim(3_602_000)
+    row = store.claim(CONFIRM + 2_000)
     assert row['png'] == png() and row['photo_sha256'] == hashlib.sha256(png()).hexdigest()
     other = Store(tmp_path / 'history.sqlite')
     other.upsert_event(event())
@@ -148,5 +145,5 @@ def test_legacy_database_pending_without_media_remains_deliverable(tmp_path):
         db.execute('DROP TABLE telegram_media')
     restored = Store(store.path)
     worker = TelegramWorker(restored, ('fake', 'fake'), lambda *a, **k: response())
-    assert worker.deliver_once(3_602_000)
+    assert worker.deliver_once(CONFIRM + 2_000)
     assert restored.telegram_status()['sent'] == 1

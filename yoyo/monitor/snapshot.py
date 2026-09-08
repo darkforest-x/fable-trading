@@ -1,4 +1,4 @@
-"""Render a causal, local PNG for one visible IMACD startup notification.
+"""Render a causal PNG for an IMACD arrow followed by model confirmation.
 
 Uses only the event and its supplied analyze()['chart'] prefix ending at
 bar_open_ms (at most 120 candles). OHLC and indicator values are never
@@ -17,7 +17,8 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-from yoyo.monitor import MONITORED_TIMEFRAMES, SIGNAL_KIND, TIMEFRAMES
+from yoyo.monitor import MODEL_KIND, MONITORED_TIMEFRAMES, SIGNAL_KIND, TIMEFRAMES
+from yoyo.monitor.policy import is_model_signal
 
 SIZE = (1080, 1080)
 MAX_CANDLES = 120
@@ -58,8 +59,11 @@ def _prepare(event, candles):
     if not isinstance(event, dict) or not isinstance(candles, list):
         raise ValueError("snapshot_invalid_input")
     period = event.get("timeframe")
-    if period not in MONITORED_TIMEFRAMES or event.get("kind") != SIGNAL_KIND:
+    if period not in MONITORED_TIMEFRAMES or event.get("kind") not in (SIGNAL_KIND, MODEL_KIND):
         raise ValueError("snapshot_invalid_event")
+    model_signal = event.get("kind") == MODEL_KIND
+    if model_signal and not is_model_signal(event):
+        raise ValueError("snapshot_invalid_model_confirmation")
     if event.get("side") not in ("long", "short"):
         raise ValueError("snapshot_invalid_side")
     if not isinstance(event.get("symbol"), str) or not event["symbol"].strip():
@@ -104,6 +108,13 @@ def _prepare(event, candles):
         result.append(row)
     if Decimal(str(selected[-1][1]["c"])) != Decimal(str(event["price"])):
         raise ValueError("snapshot_signal_price_mismatch")
+    if model_signal:
+        visible = {row["t"]: row for row in result}
+        indicator, model = event["indicator"], event["model"]
+        if any(t not in visible for t in (indicator["bar_open_ms"], model["core_start_ms"], model["core_end_ms"])):
+            raise ValueError("snapshot_model_context_missing")
+        if Decimal(str(visible[indicator["bar_open_ms"]]["c"])) != Decimal(str(indicator["price"])):
+            raise ValueError("snapshot_original_arrow_price_mismatch")
     for key in ("md", "sb"):
         if key in event:
             _number(event[key], f"event_{key}")
@@ -155,7 +166,7 @@ class _Painter:
 
 
 def render_signal(event: dict, candles: list[dict]) -> bytes:
-    """Return a 1080×1080 PNG ending exactly at one confirmed startup bar.
+    """Return a PNG ending at model confirmation, never its future outcome.
 
     Raises ValueError for invalid event identity/time, missing or duplicate
     target, non-contiguous visible bars, invalid OHLC/indicator values, or any
@@ -164,21 +175,24 @@ def render_signal(event: dict, candles: list[dict]) -> bytes:
     the delivery layer can choose an explicit text fallback. Inputs unchanged.
     """
     bars = _prepare(event, candles)
+    model = event.get("model") if event.get("kind") == MODEL_KIND else None
     p = _Painter()
     chinese = p.cjk
     accent = "#8fe3be" if event["side"] == "long" else "#f299a4"
     up = event["side"] == "long"
     close_time = datetime.fromtimestamp(event["bar_close_ms"] / 1000, _TZ)
     title = f"{event['symbol'].removesuffix('-SWAP').replace('-', ' / ')}  ·  {event['timeframe']}"
-    p.text((54, 34), "FABLE  /  IMACD", 19, "#788d9c")
-    p.text((1026, 34), "收盘确认" if chinese else "CONFIRMED CLOSE", 19, "#9caeac", "rt")
+    p.text((54, 34), "SPIKE  /  IMACD" + (" + YOLO" if model else ""), 19, "#788d9c")
+    p.text((1026, 34), ("指标 + 模型确认" if model else "收盘确认") if chinese else "CONFIRMED CLOSE", 19, "#9caeac", "rt")
     p.text((54, 83), title, 39, "#e5edf1", limit=965)
     p.text((54, 141), _price(event["price"]), 56, "#e5edf1", limit=720)
-    p.text((1026, 163), ("向上启动" if up else "向下启动") if chinese else ("LONG RELEASE" if up else "SHORT RELEASE"),
+    p.text((1026, 163), (("多头确认" if up else "空头确认") if model else ("向上启动" if up else "向下启动"))
+           if chinese else (("LONG CONFIRMED" if up else "SHORT CONFIRMED") if model else ("LONG RELEASE" if up else "SHORT RELEASE")),
            25, accent, "rt", limit=250)
     p.text((54, 217), close_time.strftime("%m-%d %H:%M") + ("  北京时间" if chinese else "  UTC+8"), 22)
     run = int(event["near_zero_bars"])
-    p.text((1026, 217), f"蓄势 {run} 根" if chinese else f"{run} bars of buildup", 22, "#c9b575", "rt")
+    p.text((1026, 217), (f"等待 {model['wait_bars']} 根 · 蓄势 {run} 根" if chinese else f"Wait {model['wait_bars']} bars / buildup {run}")
+           if model else (f"蓄势 {run} 根" if chinese else f"{run} bars of buildup"), 22, "#c9b575", "rt")
     p.line([(54, 262), (1026, 262)], "#26333e")
     p.text((54, 282), "价格" if chinese else "PRICE", 18, "#8ca2b1")
     for x0, label, color in [(178, "MA 20", _MA[0][2]), (335, "MA 60", _MA[2][2]), (492, "MA 120", _MA[4][2])]:
@@ -214,6 +228,19 @@ def render_signal(event: dict, candles: list[dict]) -> bytes:
 
     target_x = x(count - 1)
     p.rectangle((target_x - max(6, step * .6), top, target_x + max(6, step * .6), bottom), "#182725" if up else "#291d24")
+    arrow_index = count - 1
+    if model:
+        indexes = {bar["t"]: i for i, bar in enumerate(bars)}
+        core_first, core_last = indexes[model["core_start_ms"]], indexes[model["core_end_ms"]]
+        core = bars[core_first:core_last + 1]
+        p.rectangle((x(core_first) - step / 2, py(max(bar["h"] for bar in core)),
+                     x(core_last) + step / 2, py(min(bar["l"] for bar in core))),
+                    "#201b30", "#ad8bde", 1.4)
+        p.text((x(core_first) - step / 2, top - 25), "模型核心区" if chinese else "MODEL CORE", 16, "#ad8bde")
+        arrow_index = indexes[event["indicator"]["bar_open_ms"]]
+        for index, color in ((arrow_index, "#e5b76b"), (count - 1, "#ad8bde")):
+            for y0 in range(top, bottom, 10):
+                p.line([(x(index), y0), (x(index), min(y0 + 5, bottom))], color, 1.2)
     for key, _, color in _MA:
         series(key, py, color, 1)
     for i, bar in enumerate(bars):
@@ -222,9 +249,13 @@ def render_signal(event: dict, candles: list[dict]) -> bytes:
         p.line([(x(i), py(bar["h"])), (x(i), py(bar["l"]))], color, 1.8 if i == count - 1 else 1)
         y0, y1 = sorted((py(bar["o"]), py(bar["c"])))
         p.rectangle((x(i) - half, y0, x(i) + half, max(y0 + 1.5, y1)), color)
-    tip_y = py(bars[-1]["l"]) + 9 if up else py(bars[-1]["h"]) - 9
-    p.polygon([(target_x, tip_y), (target_x - 7, tip_y + (12 if up else -12)),
-               (target_x + 7, tip_y + (12 if up else -12))], accent)
+    arrow_x = x(arrow_index)
+    tip_y = py(bars[arrow_index]["l"]) + 9 if up else py(bars[arrow_index]["h"]) - 9
+    p.polygon([(arrow_x, tip_y), (arrow_x - 7, tip_y + (12 if up else -12)),
+               (arrow_x + 7, tip_y + (12 if up else -12))], "#e5b76b" if model else accent)
+    if model:
+        p.text((54, 700), f"原箭头 {event['indicator']['price']:.10g}" if chinese else f"ARROW {event['indicator']['price']:.10g}", 17, "#e5b76b")
+        p.text((1026, 700), f"模型确认 {event['price']:.10g}" if chinese else f"MODEL CONFIRMED {event['price']:.10g}", 17, "#ad8bde", "rt")
     target_y = py(bars[-1]["c"])
     p.line([(target_x + 6, target_y), (923, target_y)], accent, 1.2)
     p.rectangle((917, target_y - 18, 1037, target_y + 18), "#16362c" if up else "#3b242d", accent)
@@ -257,11 +288,16 @@ def render_signal(event: dict, candles: list[dict]) -> bytes:
     p.text((941, zero - 9), "0.00", 18, "#a2b0b9")
     series("md", my, "#7fa5ed", 2)
     series("sb", my, "#e5b76b", 2)
+    if model:
+        for index, color in ((arrow_index, "#e5b76b"), (count - 1, "#ad8bde")):
+            for y0 in range(mt, mb, 10):
+                p.line([(x(index), y0), (x(index), min(y0 + 5, mb))], color, 1.2)
     p.rectangle((target_x - 3, my(bars[-1]["md"]) - 3, target_x + 3, my(bars[-1]["md"]) + 3), accent)
     for i in sorted({0, (count - 1) // 2, count - 1}):
         label = datetime.fromtimestamp(bars[i]["t"] / 1000, _TZ).strftime("%m-%d %H:%M")
         p.text((x(i), 990), label, 17, "#6f8696", "lt" if i == 0 else "rt" if i == count - 1 else "mt")
-    p.text((54, 1042), "只展示信号当根及之前行情" if chinese else "History ends at the signal candle", 18, "#6d8391")
+    p.text((54, 1042), ("行情截至模型确认 · 不含后续走势" if model else "只展示信号当根及之前行情")
+           if chinese else ("History ends at model confirmation" if model else "History ends at the signal candle"), 18, "#6d8391")
     p.text((1026, 1042), f"{count} 根 K 线" if chinese else f"{count} candles", 18, "#6d8391", "rt")
     image = p.image.resize(SIZE, Image.Resampling.LANCZOS)
     output = BytesIO()

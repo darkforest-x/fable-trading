@@ -131,6 +131,9 @@
   --chart-focus-fill:#c8ad7119;
   --chart-focus-border:#bda576;
   --chart-focus-text:#a18e69;
+  --chart-model:#c9a4f1;
+  --chart-model-fill:#a875d91c;
+  --model-soft:#31233e;
   --chart-retest-up:#c5ec95;
   --chart-retest-down:#ffcc8d;
   --radius:14px;
@@ -268,6 +271,9 @@ html[data-theme="light"] {
   --chart-focus-fill:#bc963a18;
   --chart-focus-border:#b58b37;
   --chart-focus-text:#856523;
+  --chart-model:#7946a7;
+  --chart-model-fill:#8854b316;
+  --model-soft:#f0e6f7;
   --chart-retest-up:#51a21e;
   --chart-retest-down:#bf771c;
 }
@@ -2003,4 +2009,23 @@ html:has(#chart-dialog[open]) { overflow:hidden; }
 }
 @media(prefers-reduced-motion:reduce) {
   *, *::before, *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
+}
+
+/* Candidate stages remain separate from confirmed events in both themes. */
+.signal-mode-bar { display:flex; align-items:center; flex-wrap:wrap; gap:12px 20px; margin:0 0 16px; }
+.signal-scope { flex-shrink:0; }
+.scope-count { margin-left:5px; font-size:11px; opacity:.8; font-variant-numeric:tabular-nums; }
+.model-card-status { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:7px; color:var(--dim); font-size:11px; }
+.model-badge { padding:4px 7px; border-radius:5px; font-size:11px; line-height:1.3; color:var(--muted); background:var(--surface-2); }
+.model-badge.confirmed { background:var(--model-soft); color:var(--chart-model); }
+.model-badge.error { color:var(--red); background:var(--red-soft); }
+.candidate-card::before { opacity:.18; }
+.candidate-notice, .card-origin { color:var(--dim); font-size:11px; line-height:1.5; }
+.card-origin { margin-top:-3px; font-variant-numeric:tabular-nums; }
+.model-color { color:var(--chart-model); }
+@media(max-width:640px) {
+  .signal-mode-bar { gap:10px; }
+  .signal-scope { max-width:100%; }
+  .signal-scope button { padding-left:10px; padding-right:10px; }
+  .signal-mode-bar>.quiet-text { font-size:11px; line-height:1.6; }
 }

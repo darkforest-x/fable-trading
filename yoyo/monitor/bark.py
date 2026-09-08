@@ -4,7 +4,7 @@ Sources: https://github.com/Finb/bark-server/blob/master/docs/API_V2.md
 and router.go / route_push.go in that official repository. POST /push keeps
 the device key out of URLs. HTTP 200, code 200 and a server timestamp mean
 server acceptance, not an iPhone display/read receipt. Only the current
-confirmed visible marker, channel cutover and shared freshness gate apply.
+indicator plus model confirmation, channel cutover and shared freshness gate apply.
 No connectivity/startup messages are generated. Errors never include keys.
 """
 from __future__ import annotations
@@ -19,12 +19,12 @@ from urllib.parse import urlsplit
 
 import requests
 
-from yoyo.monitor import FRESH_MS, SIGNAL_PROTOCOL, TV_INTERVALS
-from yoyo.monitor.policy import is_tv_start
+from yoyo.monitor import FRESH_MS, MODEL_PROTOCOL, TV_INTERVALS
+from yoyo.monitor.policy import is_model_signal
 from yoyo.monitor.store import now_ms
 
 SERVER = "https://api.day.app"
-POLICY_KEY = "notification_policy:bark:" + SIGNAL_PROTOCOL
+POLICY_KEY = "notification_policy:bark:" + MODEL_PROTOCOL
 KEY_PATTERN = re.compile(r"[A-Za-z0-9_-]{8,128}")
 
 
@@ -69,10 +69,11 @@ def message(event):
     symbol = event["symbol"]
     tv_symbol = symbol.removesuffix("-SWAP").replace("-", "") + ".P"
     interval = TV_INTERVALS[event["timeframe"]]
+    indicator, model = event["indicator"], event["model"]
     return {"title": f"{symbol} · {event['timeframe']} · {side}",
-            "subtitle": f"蓄势释放 · {event['near_zero_bars']} 根",
-            "body": f"启动收盘价 {event['price']:.10g}\n标记K线 {time(event['bar_open_ms'])}\n收盘确认 {time(event['bar_close_ms'])} 北京时间\n按当前主图启动标记条件确认",
-            "group": "Fable IMACD", "level": "active", "isArchive": "1",
+            "subtitle": f"指标 + YOLO确认 · 等待 {model['wait_bars']} 根",
+            "body": f"确认 {event['price']:.10g} · {time(event['bar_close_ms'])}\n原箭头 {indicator['price']:.10g} · {time(indicator['bar_close_ms'])} 北京时间",
+            "group": "spike IMACD", "level": "active", "isArchive": "1",
             "url": f"https://www.tradingview.com/chart/?symbol=OKX%3A{tv_symbol}&interval={interval}"}
 
 
@@ -93,14 +94,16 @@ class BarkWorker:
         if not row:
             return False
         event, eid = row["event"], row["event_id"]
-        if not is_tv_start(event):
-            self.store.finish_bark(eid, "skipped", error="not_visible_tv_start_signal")
+        if not is_model_signal(event):
+            self.store.finish_bark(eid, "skipped", error="not_model_confirmed_signal")
             return True
-        if event["bar_close_ms"] <= policy["activated_ms"]:
+        if (event["bar_close_ms"] <= policy["activated_ms"]
+                or event["indicator"]["bar_close_ms"] <= policy["activated_ms"]):
             self.store.finish_bark(eid, "skipped", error="before_bark_activation")
             return True
-        timeframe_since = self.store.timeframe_activation(event.get("timeframe"))
-        if timeframe_since is None or event["bar_close_ms"] <= timeframe_since:
+        timeframe_since = self.store.timeframe_activation(event.get("timeframe"), protocol=MODEL_PROTOCOL)
+        if (timeframe_since is None or event["bar_close_ms"] <= timeframe_since
+                or event["indicator"]["bar_close_ms"] <= timeframe_since):
             self.store.finish_bark(eid, "skipped", error="before_timeframe_activation")
             return True
         if not 0 <= now - event["bar_close_ms"] <= FRESH_MS:
@@ -133,7 +136,7 @@ class BarkWorker:
         return True
 
     def status(self):
-        result = self.store.bark_status(protocol=SIGNAL_PROTOCOL)
+        result = self.store.bark_status(protocol=MODEL_PROTOCOL)
         result["sent"] = result.get("sent", 0)
         result["historical_sent"] = self.store.bark_status().get("sent", 0) - result["sent"]
         return dict(result, configured=bool(self.creds), enabled=bool(self.creds),

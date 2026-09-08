@@ -11,8 +11,8 @@ import hashlib
 import json
 import requests
 
-from yoyo.monitor import FRESH_MS, SIGNAL_PROTOCOL, TV_INTERVALS
-from yoyo.monitor.policy import is_tv_start
+from yoyo.monitor import FRESH_MS, MODEL_PROTOCOL, TV_INTERVALS
+from yoyo.monitor.policy import is_model_signal
 from yoyo.monitor.store import now_ms
 from yoyo.notify import _load
 
@@ -25,13 +25,16 @@ def credentials():
 
 
 def message(event):
-    """A short caption shared by photo delivery and local-render fallback."""
-    side = "🟢 向上启动" if event["side"] == "long" else "🔴 向下启动"
-    time = datetime.fromtimestamp(event["bar_close_ms"] / 1000, timezone(timedelta(hours=8))).strftime("%m-%d %H:%M")
+    """Keep the original arrow and later model-confirmation clocks explicit."""
+    def clock(value):
+        return datetime.fromtimestamp(value / 1000, timezone(timedelta(hours=8))).strftime("%m-%d %H:%M")
+    side = "🟢 多头" if event["side"] == "long" else "🔴 空头"
     symbol = event["symbol"].removesuffix("-SWAP")
+    indicator, model = event["indicator"], event["model"]
     return (f"{symbol} · {event['timeframe']} · {side}\n"
-            f"收盘 {event['price']:.10g} · 蓄势 {event.get('near_zero_bars', 0)} 根\n"
-            f"{time} 北京时间 · 已确认")
+            f"指标 + YOLO确认 · 等待 {model['wait_bars']} 根\n"
+            f"确认 {event['price']:.10g} · {clock(event['bar_close_ms'])}\n"
+            f"原箭头 {indicator['price']:.10g} · {clock(indicator['bar_close_ms'])} 北京时间")
 
 
 def markup(event):
@@ -52,21 +55,23 @@ class TelegramWorker:
         now = now if now is not None else now_ms()
         if not self.creds:
             return False
-        policy = self.store.get_meta("notification_policy:" + SIGNAL_PROTOCOL)
+        policy = self.store.get_meta("notification_policy:" + MODEL_PROTOCOL)
         if not policy or type(policy.get("activated_ms")) is not int:
             return False
         row = self.store.claim(now)
         if not row:
             return False
         event, eid = row["event"], row["event_id"]
-        if not is_tv_start(event):
-            self.store.finish(eid, "skipped", error="not_visible_tv_start_signal")
+        if not is_model_signal(event):
+            self.store.finish(eid, "skipped", error="not_model_confirmed_signal")
             return True
-        if event["bar_close_ms"] <= policy["activated_ms"]:
+        if (event["bar_close_ms"] <= policy["activated_ms"]
+                or event["indicator"]["bar_close_ms"] <= policy["activated_ms"]):
             self.store.finish(eid, "skipped", error="before_notification_policy_activation")
             return True
-        timeframe_since = self.store.timeframe_activation(event.get("timeframe"))
-        if timeframe_since is None or event["bar_close_ms"] <= timeframe_since:
+        timeframe_since = self.store.timeframe_activation(event.get("timeframe"), protocol=MODEL_PROTOCOL)
+        if (timeframe_since is None or event["bar_close_ms"] <= timeframe_since
+                or event["indicator"]["bar_close_ms"] <= timeframe_since):
             self.store.finish(eid, "skipped", error="before_timeframe_activation")
             return True
         if not 0 <= now - event["bar_close_ms"] <= FRESH_MS:
@@ -128,7 +133,7 @@ class TelegramWorker:
         return True
 
     def status(self):
-        result = self.store.telegram_status(protocol=SIGNAL_PROTOCOL)
+        result = self.store.telegram_status(protocol=MODEL_PROTOCOL)
         result["sent"] = result.get("sent", 0)
         result["historical_sent"] = self.store.telegram_status().get("sent", 0) - result["sent"]
         result["last_signal_success_ms"] = result.get("last_success_ms")
@@ -137,7 +142,7 @@ class TelegramWorker:
         if probe.get("status") == "sent":
             result["last_success_ms"] = max(result.get("last_success_ms") or 0, probe["at_ms"])
         return dict(result, configured=bool(self.creds), enabled=bool(self.creds),
-                    delivery_format="chart_with_compact_caption", **self.store.telegram_media_status(SIGNAL_PROTOCOL))
+                    delivery_format="chart_with_compact_caption", **self.store.telegram_media_status(MODEL_PROTOCOL))
 
 
 def send_startup_probe(store):

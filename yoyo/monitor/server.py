@@ -13,7 +13,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from yoyo.monitor import FRESH_MS, SIGNAL_KIND, SIGNAL_PROTOCOL, MONITORED_TIMEFRAMES
+from yoyo.monitor import FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, MONITORED_TIMEFRAMES
 from yoyo.monitor.service import Monitor
 from yoyo.monitor.store import Store
 from yoyo.monitor.tradingview import DesktopOpenError, open_chart
@@ -75,19 +75,26 @@ def create_app(runtime=None, start_monitor=True):
         state["market_ready"] = bool(last and state["now_ms"] - last < 20 * 60000
                                      and scan.get("total", 0) > scan.get("errors", 0)
                                      and scan.get("status") not in ("error", "starting"))
-        state["ok"] = state["market_ready"] and scan.get("errors", 0) == 0
+        state["model_ready"] = state["runtime"]["model_gate"]["status"] == "ready"
+        state["ok"] = state["market_ready"] and state["model_ready"] and scan.get("errors", 0) == 0
         return state
 
     @app.get("/api/signals")
     def signals(limit: int = Query(200, ge=1, le=2000), symbol: str = None, timeframe: str = None,
-                kind: str = SIGNAL_KIND, side: str = None):
-        if kind != SIGNAL_KIND:
-            raise HTTPException(400, "信号台仅显示当前 TradingView 设置下的可见主图启动标记。")
-        rows = store.list_events(limit, symbol, timeframe, SIGNAL_KIND, side, protocol=SIGNAL_PROTOCOL)
+                kind: str = MODEL_KIND, side: str = None):
+        if kind != MODEL_KIND:
+            raise HTTPException(400, "信号台仅显示指标启动后经过 YOLO 同方向确认的信号。")
+        rows = store.list_events(limit, symbol, timeframe, MODEL_KIND, side, protocol=MODEL_PROTOCOL)
         for row in rows:
             row["is_fresh"] = 0 <= monitor.client.clock() - row["bar_close_ms"] <= FRESH_MS
-        return {"items": rows, "total": store.event_count(SIGNAL_KIND, SIGNAL_PROTOCOL), "kind": SIGNAL_KIND,
-                "protocol": SIGNAL_PROTOCOL}
+        return {"items": rows, "total": store.event_count(MODEL_KIND, MODEL_PROTOCOL), "kind": MODEL_KIND,
+                "protocol": MODEL_PROTOCOL}
+
+    @app.get("/api/candidates")
+    def candidates(limit: int = Query(200, ge=1, le=2000), symbol: str = None, timeframe: str = None):
+        rows = store.list_candidates(limit, symbol, timeframe)
+        return {"items": rows, "total": sum(store.candidate_counts().values()),
+                "counts": store.candidate_counts()}
 
     @app.get("/api/markets")
     def markets():

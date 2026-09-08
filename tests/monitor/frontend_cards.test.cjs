@@ -14,7 +14,8 @@ const root = path.resolve(__dirname, "../..");
 const clientPath = path.join(root, "yoyo/monitor/static/app.js");
 const indexPath = path.join(root, "yoyo/monitor/static/index.html");
 const NOW = 1_789_000_000_000;
-const PROTOCOL = "imacd-tv-visible-start-monitor-v3";
+const PROTOCOL = "imacd-yolo-confirmation-monitor-v1";
+const TV_PROTOCOL = "imacd-tv-visible-start-monitor-v3";
 
 function decode(value) {
   return String(value).replace(/&(amp|lt|gt|quot|#39);/g, (_, name) =>
@@ -27,7 +28,7 @@ function attributes(text) {
   return result;
 }
 
-function harness({ allowChartFixture = false, nowStep = 0, bridgeReply = null } = {}) {
+function harness({ allowChartFixture = false, nowStep = 0, bridgeReply = null, apiReplies = {} } = {}) {
   let now = NOW;
   const elements = new Map();
   const document = { activeElement: null, hidden: false, listeners: new Map() };
@@ -131,6 +132,11 @@ function harness({ allowChartFixture = false, nowStep = 0, bridgeReply = null } 
     fetch: (url, options = {}) => {
       networkCalls.push(url);
       networkRequests.push({ url, ...options });
+      if (Object.hasOwn(apiReplies, url)) {
+        const reply = apiReplies[url];
+        if (reply instanceof Error) return Promise.reject(reply);
+        return Promise.resolve({ ok: true, headers: { get: () => "application/json" }, json: async () => reply });
+      }
       if (url === "/api/tradingview/open" && bridgeReply) {
         return typeof bridgeReply === "function" ? bridgeReply(options) : Promise.resolve(bridgeReply);
       }
@@ -143,21 +149,24 @@ function harness({ allowChartFixture = false, nowStep = 0, bridgeReply = null } 
   const source = fs.readFileSync(clientPath, "utf8");
   const bootstrap = '  setView(location.hash.slice(1) || "signals", false);';
   assert.equal(source.split(bootstrap).length, 2, "client bootstrap must be uniquely identified");
-  const exposed = ["state", "isFresh", "filteredSignals", "notification", "notificationHTML", "renderSignals", "isBuilding", "renderWatch", "renderDetail", "refresh"];
+  const exposed = ["state", "isFresh", "filteredSignals", "notification", "notificationHTML", "renderSignals", "isBuilding", "renderWatch", "renderDetail", "refresh", "modelOverlayHTML", "isConfirmed"];
   vm.runInContext(source.slice(0, source.indexOf(bootstrap)) + `\n  globalThis.client = { ${exposed.join(", ")} };\n})();`, context, { filename: clientPath });
   const client = context.client;
-  client.state.status = { protocol: PROTOCOL, now_ms: NOW, runtime: { signal_kind: "tv_start", fresh_minutes: 30 } };
+  client.state.status = { protocol: PROTOCOL, now_ms: NOW, runtime: { signal_kind: "yolo_confirmed", fresh_minutes: 30 } };
   client.state.statusReceivedAt = NOW;
   client.state.signalsLoaded = true;
+  client.state.candidatesLoaded = true;
   client.state.marketsLoaded = true;
   return { client, document, get: (id) => elements.get(id), advance: (ms) => { now += ms; }, networkCalls, networkRequests };
 }
 
 function signal(id, ageMinutes = 1, extra = {}) {
   return {
-    id: String(id), symbol: "BTC-USDT-SWAP", timeframe: "1H", kind: "tv_start", protocol: PROTOCOL,
+    id: String(id), symbol: "BTC-USDT-SWAP", timeframe: "1H", kind: "yolo_confirmed", protocol: PROTOCOL,
     side: "long", price: 105.25, bar_close_ms: NOW - ageMinutes * 60_000,
     near_zero_bars: 44, zero_bars: 9, is_fresh: true,
+    indicator: { kind: "tv_start", protocol: TV_PROTOCOL, price: 102.5, bar_close_ms: NOW - 180 * 60_000, bar_open_ms: NOW - 240 * 60_000 },
+    model: { status: "confirmed", wait_bars: 3, max_wait_bars: 9, confidence: .79 },
     notification_status: "sent", bark_notification_status: "unknown", ...extra,
   };
 }
@@ -182,7 +191,7 @@ test("freshness requires API approval and a known matching runtime protocol", ()
   assert.equal(client.isFresh(signal("x")), false);
   client.state.status = { ...status, runtime: { ...status.runtime, signal_kind: "zero_breakout" } };
   assert.equal(client.isFresh(signal("x")), false);
-  client.state.status = { ...status, runtime: { signal_kind: "tv_start" } };
+  client.state.status = { ...status, runtime: { signal_kind: "yolo_confirmed" } };
   assert.equal(client.isFresh(signal("x")), false);
 });
 
@@ -221,11 +230,11 @@ test("one render crossing the freshness boundary never duplicates or inconsisten
   assert.deepEqual(ids(get("signal-rows")), ["boundary"]);
   assert.match(get("signal-rows").innerHTML, /fresh-heading/);
   assert.match(get("signal-rows").innerHTML, /class="signal-card[^\"]*\bis-fresh\b/);
-  assert.doesNotMatch(get("signal-rows").innerHTML, /更早启动|已记录启动/);
+  assert.doesNotMatch(get("signal-rows").innerHTML, /更早确认|已记录确认/);
   client.renderSignals();
   assert.deepEqual(ids(get("signal-rows")), ["boundary"]);
   assert.doesNotMatch(get("signal-rows").innerHTML, /fresh-heading|class="signal-card[^\"]*\bis-fresh\b/);
-  assert.match(get("signal-rows").innerHTML, /已记录启动/);
+  assert.match(get("signal-rows").innerHTML, /已记录确认/);
 });
 
 test("status or signal fetch failure demotes cached cards; an unrelated watch failure does not", () => {
@@ -351,7 +360,7 @@ test("watch cards paginate separately, keep real counters and show unknown value
 });
 
 test("unknown freshness metadata is labelled pending rather than inventing a minute budget", () => {
-  for (const change of [{ runtime: { signal_kind: "tv_start" } }, { now_ms: null }, { protocol: "old" }]) {
+  for (const change of [{ runtime: { signal_kind: "yolo_confirmed" } }, { now_ms: null }, { protocol: "old" }]) {
     const { client, get } = harness();
     client.state.status = { ...client.state.status, ...change };
     client.state.signals = [signal("cached")];
@@ -637,4 +646,117 @@ test("unsupported periods and malformed symbols cannot launch the app", () => {
   assert.equal(networkRequests.length, 0);
   assert.doesNotMatch(get("watch-rows").innerHTML, /<script>/);
   assert.match(get("tradingview-status").textContent, /不支持/);
+});
+
+
+function candidate(id, status = "pending", extra = {}) {
+  return { ...signal(id), kind: "tv_start", protocol: TV_PROTOCOL, indicator: undefined,
+    model: { status, wait_bars: 2, max_wait_bars: 9, last_checked_close_ms: NOW - 60_000, expires_at_ms: NOW + 7 * 3_600_000 }, ...extra };
+}
+
+test("the confirmed feed rejects raw arrows, wrong protocols and nonconfirmed model states", () => {
+  const { client, get } = harness();
+  const raw = candidate("arrow");
+  const error = signal("error", 1, { model: { status: "error" } });
+  const legacy = signal("legacy", 1, { protocol: TV_PROTOCOL });
+  client.state.signals = [raw, error, legacy, signal("confirmed")];
+  client.renderSignals();
+  assert.deepEqual(ids(get("signal-rows")), ["confirmed"]);
+  for (const item of [raw, error, legacy]) assert.equal(client.isFresh(item), false);
+  assert.match(get("signal-rows").innerHTML, /模型确认收盘价/);
+  assert.match(get("signal-rows").innerHTML, /原箭头 102.5/);
+  assert.equal(client.state.signalScope, "confirmed");
+});
+
+test("candidate stages remain separate, errors stay visible and notification receipts cannot leak", () => {
+  const { client, get } = harness();
+  client.state.candidates = [candidate("pending"), candidate("error", "error"), candidate("expired", "expired"), candidate("invalid", "invalidated"), candidate("passed", "confirmed")];
+  client.state.signals = [signal("confirmed")];
+  client.state.signalTotal = 100;
+  client.state.candidateTotal = 200;
+  client.state.signalScope = "pending";
+  client.renderSignals();
+  assert.deepEqual(ids(get("signal-rows")), ["pending", "error"]);
+  assert.equal(get("candidate-count").textContent, "2");
+  assert.match(get("signal-rows").innerHTML, /检测异常/);
+  assert.match(get("signal-rows").innerHTML, /原箭头收盘价/);
+  assert.match(get("signal-rows").innerHTML, /候选记录 · 不触发通知/);
+  assert.doesNotMatch(get("signal-rows").innerHTML, /新鲜确认|is-fresh|data-notification-channel/);
+  assert.equal(client.state.signalTotal, 100);
+  assert.match(get("signal-window-note").textContent, /共 200/);
+  client.state.signalScope = "all";
+  client.renderSignals();
+  assert.deepEqual(ids(get("signal-rows")), ["pending", "error", "expired", "invalid", "passed"]);
+  assert.match(get("signal-rows").innerHTML, /等待已到期|结构失效|模型已通过/);
+});
+
+test("scope controls select only their own collection and preserve both event clocks", async () => {
+  const { client, get, document, networkRequests } = harness({ allowChartFixture: true });
+  client.state.signals = [signal("same-id")];
+  client.state.candidates = [candidate("same-id")];
+  client.state.selected = { ...client.state.signals[0] };
+  document.querySelectorAll("[data-signal-scope]").find((button) => button.dataset.signalScope === "pending").dispatch("click");
+  await new Promise(setImmediate);
+  assert.equal(client.state.selected.kind, "tv_start");
+  assert.equal(get("detail-price-caption").textContent, "原箭头收盘价");
+  assert.match(get("detail-facts").innerHTML, /等待截止|最近检测收盘/);
+  document.querySelectorAll("[data-signal-scope]").find((button) => button.dataset.signalScope === "confirmed").dispatch("click");
+  await new Promise(setImmediate);
+  assert.equal(client.state.selected.kind, "yolo_confirmed");
+  assert.match(get("detail-facts").innerHTML, /原箭头收盘价/);
+  assert.match(get("detail-facts").innerHTML, /模型确认收盘价/);
+  assert.match(get("detail-facts").innerHTML, /检测分数 · 非胜率/);
+  assert.match(get("detail-facts").innerHTML, /102.5|105.25/);
+  assert.equal(networkRequests.filter((request) => request.method === "POST").length, 0);
+});
+
+test("freshness starts at model confirmation, never at an older original arrow", () => {
+  const { client } = harness();
+  const item = signal("late", 1);
+  item.indicator.bar_close_ms = NOW - 24 * 3_600_000;
+  assert.equal(client.isFresh(item), true);
+  item.bar_close_ms = NOW - 31 * 60_000;
+  item.indicator.bar_close_ms = NOW - 60_000;
+  assert.equal(client.isFresh(item), false);
+});
+
+test("model overlay anchors original core and confirmation without using subsequent extrema", () => {
+  const { client } = harness();
+  const item = signal("draw", 0, { bar_open_ms: 300, bar_close_ms: 400, price: 12,
+    model: { status: "confirmed", core_start_ms: 100, core_end_ms: 200, window_end_ms: 300, wait_bars: 2 } });
+  const candles = [{ t: 100, h: 11, l: 9 }, { t: 200, h: 12, l: 8 }, { t: 300, h: 15, l: 10 }, { t: 400, h: 90, l: 1 }];
+  const bounds = { step: 10, top: 0, bottom: 80 };
+  const before = client.modelOverlayHTML(item, candles, (i) => i * 10 + 5, (price) => 100 - price, bounds);
+  assert.match(before.core, /x="0" y="88" width="20" height="4"/);
+  assert.match(before.confirmation, /x1="25" x2="25"/);
+  candles[3].h = 900;
+  const after = client.modelOverlayHTML(item, candles, (i) => i * 10 + 5, (price) => 100 - price, bounds);
+  assert.equal(before.core, after.core);
+  assert.equal(client.modelOverlayHTML(candidate("raw"), candles, () => 0, () => 0, bounds).core, "");
+  item.model.core_end_ms = 500;
+  assert.equal(client.modelOverlayHTML(item, candles, () => 0, () => 0, bounds).confirmation, "");
+});
+
+
+test("polling requests separate APIs, rejects mixed event payloads and keeps independent totals", async () => {
+  const replies = {
+    "/api/status": { protocol: PROTOCOL, now_ms: NOW, runtime: { signal_kind: "yolo_confirmed", fresh_minutes: 30, model_gate: { loaded: true } } },
+    "/api/signals?limit=2000&kind=yolo_confirmed": { items: [candidate("raw"), signal("model")], total: 17 },
+    "/api/candidates?limit=2000": { items: [candidate("pending"), signal("not-a-candidate")], total: 43 },
+    "/api/markets": { items: [] },
+  };
+  const { client, get, networkRequests } = harness({ allowChartFixture: true, apiReplies: replies });
+  await client.refresh();
+  await new Promise(setImmediate);
+  assert.deepEqual(Array.from(client.state.signals, (item) => item.id), ["model"]);
+  assert.deepEqual(Array.from(client.state.candidates, (item) => item.id), ["pending"]);
+  assert.equal(client.state.signalTotal, 17);
+  assert.equal(client.state.candidateTotal, 43);
+  assert.equal(get("model-gate-notice").classList.contains("hidden"), true);
+  assert.equal(networkRequests.filter((request) => request.method === "POST").length, 0);
+  replies["/api/candidates?limit=2000"] = new Error("temporarily offline");
+  await client.refresh();
+  assert.equal(client.state.candidates[0].id, "pending", "candidate error preserves its cache");
+  assert.equal(client.isFresh(client.state.signals[0]), true, "unrelated candidate API failure cannot invalidate a confirmed timestamp");
+  assert.match(get("error-notice").textContent, /指标候选/);
 });

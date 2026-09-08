@@ -8,7 +8,7 @@ from copy import deepcopy
 import pytest
 import requests
 
-from yoyo.monitor import TIMEFRAMES
+from yoyo.monitor import TIMEFRAMES, FRESH_MS, MODEL_PROTOCOL, MODEL_KIND, MODEL_SHA256, MODEL_MAX_WAIT
 from yoyo.monitor import okx, service
 from yoyo.monitor.okx import MarketError, OKX
 from yoyo.monitor.service import Monitor
@@ -51,6 +51,53 @@ class FakeMarket:
         if timeframe in self.fail:
             raise MarketError("synthetic_endpoint_failure")
         return self.history[timeframe], 0
+
+
+class FakeDetector:
+    """Return a deterministic same-setup proof; never load real weights."""
+    def __init__(self):
+        self.calls = []
+        self.fail_once = False
+
+    def status(self):
+        return {"ready": True}
+
+    def predict(self, candles, symbol, timeframe, endpoint_ms):
+        assert candles[-1]["t"] == endpoint_ms
+        assert all(row["t"] <= endpoint_ms for row in candles)
+        self.calls.append(endpoint_ms)
+        if self.fail_once:
+            self.fail_once = False
+            raise ValueError("synthetic_model_failure")
+        step = TIMEFRAMES[timeframe]
+        return [dict(model_sha256=MODEL_SHA256, confidence=.65,
+                     detection_id="synthetic-service-detection", input_pixel_sha256="0" * 64,
+                     side="long" if candles[-1]["md"] > 0 else "short", structural_pass=True,
+                     window_len=18, window_start_ms=endpoint_ms - 17 * step,
+                     window_end_ms=endpoint_ms, core_start_ms=endpoint_ms - 5 * step,
+                     core_end_ms=endpoint_ms - 2 * step, core_length_bars=4, post_bars=2)]
+
+
+def configured_monitor(store, client, tg=NOW - 120_000, bark=NOW - 120_000, *,
+                       timeframe_policy=None):
+    """Channel/stream cutovers precede registration; model processing stays explicit."""
+    store.activate_notification_policy(tg, protocol=MODEL_PROTOCOL)
+    store.activate_bark_policy(bark, protocol=MODEL_PROTOCOL)
+    policy = ({tf: NOW - 120_000 for tf in ("15m", "1H", "4H")}
+              if timeframe_policy is None else timeframe_policy)
+    for timeframe, activation in policy.items():
+        if activation is not None:
+            store.activate_timeframe_policy(timeframe, activation, protocol=MODEL_PROTOCOL)
+    monitor = Monitor(store, client=client)
+    monitor.bark_since = bark
+    monitor.model_gate.detector = FakeDetector()
+    return monitor
+
+
+def process_model(monitor, timeframe):
+    chart = monitor.chart(SYMBOL, timeframe)
+    assert not chart["state"]["stale"]
+    monitor.model_gate.process(SYMBOL, timeframe, chart["candles"])
 
 
 @pytest.fixture(autouse=True)
@@ -149,7 +196,8 @@ def test_outbox_recovery_waits_until_start_and_precedes_worker_launch(tmp_path, 
 
     monkeypatch.setattr(service.threading, "Thread", InertThread)
     monitor.start()
-    assert len(starts) == 3
+    assert len(starts) == 4
+    assert {name for name, _ in starts} == {"impulse-scan", "impulse-model", "impulse-telegram", "impulse-bark"}
     assert all(status.get("unknown") == 1 and status.get("sending", 0) == 0
                for _, status in starts)
     assert store.claim(NOW) is None  # An uncertain old send must not be resent.
@@ -170,13 +218,27 @@ def test_health_distinguishes_all_failed_partial_and_current_scan(tmp_path, monk
     app = create_app(runtime=tmp_path, start_monitor=False)
     monitor = app.state.monitor
     scan = dict(status=status, total=2, errors=errors, finished_at_ms=NOW - age_ms)
-    monkeypatch.setattr(monitor, "status", lambda: dict(now_ms=NOW, scan=dict(scan)))
+    monkeypatch.setattr(monitor, "status", lambda: dict(now_ms=NOW, scan=dict(scan),
+                       runtime={"model_gate": {"status": "ready"}}))
     # Invoke the installed route itself; no optional HTTP test-client dependency.
     endpoint = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/healthz")
     result = endpoint()
     assert result["service_alive"] is True
     assert result["market_ready"] is ready
     assert result["ok"] is ok
+
+
+@pytest.mark.parametrize("model_status", ["loading", "error"])
+def test_health_is_not_ok_until_model_gate_is_ready(tmp_path, monkeypatch, model_status):
+    from yoyo.monitor.server import create_app
+    app = create_app(runtime=tmp_path, start_monitor=False)
+    monkeypatch.setattr(app.state.monitor, "status", lambda: dict(
+        now_ms=NOW, scan=dict(status="idle", total=3, errors=0, finished_at_ms=NOW - 1000),
+        runtime={"model_gate": {"status": model_status}}))
+    endpoint = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/healthz")
+    result = endpoint()
+    assert result["service_alive"] is True and result["market_ready"] is True
+    assert result["ok"] is False
 
 
 def test_rejected_clock_offset_does_not_replace_last_trusted_clock(monkeypatch):
@@ -199,13 +261,12 @@ def test_accepted_clock_offset_uses_request_midpoint(monkeypatch):
     assert client.offset_ms == 500
 
 
-def test_scan_notifies_only_visible_focus_release_without_density_filter(tmp_path):
+def test_scan_registers_visible_release_without_notifying_or_filtering_density(tmp_path):
     from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL
     store = Store(tmp_path / 'monitor.sqlite3')
     client = FakeMarket()
     client.history['1H'][-1].update(o=120., h=121., l=119., c=120.)
-    monitor = Monitor(store, client=client)
-    monitor.notification_since = NOW - 120_000
+    monitor = configured_monitor(store, client)
     assert monitor.scan_symbol(INSTRUMENT) == []
     events = store.list_events()
     canonical = [e for e in events if e['kind'] == SIGNAL_KIND]
@@ -214,16 +275,18 @@ def test_scan_notifies_only_visible_focus_release_without_density_filter(tmp_pat
     assert signal['source_kind'] == 'release' and signal['tv_marker_visible']
     assert abs(signal['previous_md']) <= signal['focus_band'] < signal['md']
     assert signal['dense'] is False and signal['near_zero_bars'] >= 12
-    assert signal['notification_status'] == 'pending'
+    assert signal['notification_status'] == 'history'
+    assert store.candidate_counts()['pending'] == 1
+    assert store.event_count(kind=MODEL_KIND) == 0
+    assert store.telegram_media_status() == dict(snapshots=0, render_fallbacks=0)
     assert all(e['notification_status'] == 'history' for e in events if e['kind'] != SIGNAL_KIND)
-    assert store.telegram_status(protocol=SIGNAL_PROTOCOL)['pending'] == 1
+    assert store.telegram_status(protocol=SIGNAL_PROTOCOL)['pending'] == 0
     # A repeated scan does not create a second identity or notification.
     assert monitor.scan_symbol(INSTRUMENT) == []
-    assert store.telegram_status(protocol=SIGNAL_PROTOCOL)['pending'] == 1
+    assert store.telegram_status(protocol=SIGNAL_PROTOCOL)['pending'] == 0
 
 
 def test_policy_activation_uses_exchange_clock_before_delivery(tmp_path, monkeypatch):
-    from yoyo.monitor import SIGNAL_PROTOCOL
     client = FakeMarket()
     monkeypatch.setattr(service, 'now_ms', lambda: NOW - 120_000)
     client.synchronize = lambda: None
@@ -235,9 +298,9 @@ def test_policy_activation_uses_exchange_clock_before_delivery(tmp_path, monkeyp
     monitor.scan()
     assert monitor.notification_ready.is_set()
     assert monitor.notification_since == NOW
-    assert store.get_meta('notification_policy:' + SIGNAL_PROTOCOL)['activated_ms'] == NOW
+    assert store.get_meta('notification_policy:' + MODEL_PROTOCOL)['activated_ms'] == NOW
     assert monitor.bark_since == NOW
-    assert store.get_meta('notification_policy:bark:' + SIGNAL_PROTOCOL)['activated_ms'] == NOW
+    assert store.get_meta('notification_policy:bark:' + MODEL_PROTOCOL)['activated_ms'] == NOW
     # The latest already-closed bar is older than activation, even if the Mac
     # started timestamp was still before that bar's close.
     client.history['1H'][-1].update(o=120., h=121., l=119., c=120.)
@@ -251,8 +314,7 @@ def test_raw_zero_departure_inside_focus_band_does_not_notify(tmp_path):
     store = Store(tmp_path / 'monitor.sqlite3')
     client = FakeMarket()
     client.history['1H'][-1].update(o=113., h=114., l=112., c=113.)
-    monitor = Monitor(store, client=client)
-    monitor.notification_since = NOW - 120_000
+    monitor = configured_monitor(store, client)
     assert monitor.scan_symbol(INSTRUMENT) == []
     events = store.list_events()
     assert any(e['kind'] == 'zero_breakout' for e in events)
@@ -264,10 +326,9 @@ def test_bark_new_channel_does_not_replay_pre_activation_signal(tmp_path):
     store = Store(tmp_path / 'monitor.sqlite3')
     client = FakeMarket()
     client.history['1H'][-1].update(o=120., h=121., l=119., c=120.)
-    monitor = Monitor(store, client=client)
-    monitor.notification_since = NOW - 120_000
-    monitor.bark_since = NOW
+    monitor = configured_monitor(store, client, bark=NOW)
     monitor.scan_symbol(INSTRUMENT)
+    process_model(monitor, '1H')
     assert store.telegram_status()['pending'] == 1
     assert store.bark_status()['pending'] == 0
 
@@ -276,10 +337,11 @@ def test_eligible_new_signal_enters_both_independent_channels_once(tmp_path):
     store = Store(tmp_path / 'monitor.sqlite3')
     client = FakeMarket()
     client.history['1H'][-1].update(o=120., h=121., l=119., c=120.)
-    monitor = Monitor(store, client=client)
-    monitor.notification_since = monitor.bark_since = NOW - 120_000
+    monitor = configured_monitor(store, client)
     monitor.scan_symbol(INSTRUMENT)
+    process_model(monitor, '1H')
     monitor.scan_symbol(INSTRUMENT)
+    process_model(monitor, '1H')
     assert store.telegram_status()['pending'] == 1
     assert store.bark_status()['pending'] == 1
 
@@ -287,14 +349,13 @@ def test_eligible_new_signal_enters_both_independent_channels_once(tmp_path):
 def test_signal_snapshot_ends_at_earlier_signal_and_renders_once(tmp_path, monkeypatch):
     from yoyo.monitor import snapshot
     store = Store(tmp_path / 'monitor.sqlite3')
-    store.activate_timeframe_policy('15m', NOW - 120_000)
+    store.activate_timeframe_policy('15m', NOW - 120_000, protocol=MODEL_PROTOCOL)
     client = FakeMarket()
     client.history['15m'][-1].update(o=120., h=121., l=119., c=120.)
     target = client.history['15m'][-1]['t']
     client.history['15m'].append(dict(client.history['15m'][-1], t=target + 900_000))
     client.clock = lambda: NOW + 900_000
-    monitor = Monitor(store, client=client)
-    monitor.notification_since = monitor.bark_since = NOW - 120_000
+    monitor = configured_monitor(store, client)
     calls = []
     original = snapshot.render_signal
 
@@ -306,7 +367,9 @@ def test_signal_snapshot_ends_at_earlier_signal_and_renders_once(tmp_path, monke
 
     monkeypatch.setattr(snapshot, 'render_signal', render)
     assert monitor.scan_symbol(INSTRUMENT) == []
+    process_model(monitor, '15m')
     assert monitor.scan_symbol(INSTRUMENT) == []
+    process_model(monitor, '15m')
     assert len(calls) == 1
     row = store.claim(client.clock())
     assert row['png'].startswith(b'\x89PNG\r\n\x1a\n')
@@ -320,14 +383,14 @@ def test_snapshot_failure_preserves_signal_and_both_channels(tmp_path, monkeypat
     store = Store(tmp_path / 'monitor.sqlite3')
     client = FakeMarket()
     client.history['1H'][-1].update(o=120., h=121., l=119., c=120.)
-    monitor = Monitor(store, client=client)
-    monitor.notification_since = monitor.bark_since = NOW - 120_000
+    monitor = configured_monitor(store, client)
 
     def broken(*args):
         raise ValueError('synthetic_private_detail_must_not_be_stored')
 
     monkeypatch.setattr(snapshot, 'render_signal', broken)
     assert monitor.scan_symbol(INSTRUMENT) == []
+    process_model(monitor, '1H')
     row = store.claim(NOW)
     assert row['event']['price'] == 120. and row['png'] is None
     assert store.bark_status()['pending'] == 1
@@ -340,10 +403,9 @@ def test_later_telegram_cutover_does_not_block_eligible_bark_signal(tmp_path):
     store = Store(tmp_path / 'monitor.sqlite3')
     client = FakeMarket()
     client.history['1H'][-1].update(o=120., h=121., l=119., c=120.)
-    monitor = Monitor(store, client=client)
-    monitor.notification_since = NOW
-    monitor.bark_since = NOW - 120_000
+    monitor = configured_monitor(store, client, tg=NOW)
     monitor.scan_symbol(INSTRUMENT)
+    process_model(monitor, '1H')
     assert store.telegram_status()['pending'] == 0
     assert store.bark_status()['pending'] == 1
 
@@ -354,15 +416,16 @@ def test_15m_notification_requires_its_own_forward_cutover(tmp_path, activation,
     client = FakeMarket()
     client.history['15m'][-1].update(o=120., h=121., l=119., c=120.)
     if activation is not None:
-        store.activate_timeframe_policy('15m', activation)
-    monitor = Monitor(store, client=client)
-    monitor.notification_since = monitor.bark_since = NOW - 120_000
+        store.activate_timeframe_policy('15m', activation, protocol=MODEL_PROTOCOL)
+    monitor = configured_monitor(store, client, timeframe_policy={"15m": activation})
     assert monitor.scan_symbol(INSTRUMENT) == []
+    process_model(monitor, '15m')
     assert monitor.chart(SYMBOL, '15m')['state']['higher_timeframe'] == '1H'
     assert any(e['kind'] == 'tv_start' and e['timeframe'] == '15m' for e in store.list_events())
     assert store.telegram_status()['pending'] == expected
     assert store.bark_status()['pending'] == expected
     monitor.scan_symbol(INSTRUMENT)
+    process_model(monitor, '15m')
     assert store.telegram_status()['pending'] == expected
     assert store.bark_status()['pending'] == expected
 
@@ -378,10 +441,10 @@ def test_scan_covers_three_periods_and_persists_cutover_before_workers(tmp_path)
     assert status['scan']['completed'] == status['scan']['total'] == 3
     assert status['scan']['errors'] == 0
     assert status['runtime']['timeframes'] == ['15m', '1H', '4H']
-    assert status['runtime']['timeframe_notification_since_ms'] == {'15m': NOW, '1H': 0, '4H': 0}
+    assert status['runtime']['timeframe_notification_since_ms'] == {'15m': NOW, '1H': NOW, '4H': NOW}
     assert monitor.notification_ready.is_set()
     # Restart retains first activation, without resetting the old channels.
-    assert Store(store.path).activate_timeframe_policy('15m', NOW + 900_000) == NOW
+    assert Store(store.path).activate_timeframe_policy('15m', NOW + 900_000, protocol=MODEL_PROTOCOL) == NOW
 
 
 def test_chart_api_accepts_15m_and_rejects_unmonitored_period(tmp_path):
@@ -401,21 +464,66 @@ def test_chart_api_accepts_15m_and_rejects_unmonitored_period(tmp_path):
 @pytest.mark.parametrize('recovery_delay,expected', [(16 * 60_000, 1), (31 * 60_000, 0)])
 def test_15m_stale_market_does_not_consume_fresh_signal_before_recovery(tmp_path, recovery_delay, expected):
     store = Store(tmp_path / 'monitor.sqlite3')
-    store.activate_timeframe_policy('15m', NOW - 120_000)
+    store.activate_timeframe_policy('15m', NOW - 120_000, protocol=MODEL_PROTOCOL)
     client = FakeMarket()
     client.history['15m'][-1].update(o=120., h=121., l=119., c=120.)
     client.clock = lambda: NOW + 15 * 60_000
-    monitor = Monitor(store, client=client)
-    monitor.notification_since = monitor.bark_since = NOW - 120_000
+    monitor = configured_monitor(store, client)
     monitor.scan_symbol(INSTRUMENT)
     assert monitor.chart(SYMBOL, '15m')['state']['stale']
     assert store.telegram_status()['pending'] == store.bark_status()['pending'] == 0
-    assert not any(e['kind'] == 'tv_start' and e['timeframe'] == '15m' for e in store.list_events())
+    # A confirmed old arrow may be retained as raw history, but no inference
+    # or notification is consumed while the latest market candle is missing.
+    assert all(e['notification_status'] == 'history' for e in store.list_events())
+    assert monitor.model_gate.detector.calls == []
     client.clock = lambda: NOW + recovery_delay
     while client.history['15m'][-1]['t'] + 900_000 < client.clock() // 900_000 * 900_000:
         client.history['15m'].append(dict(client.history['15m'][-1], t=client.history['15m'][-1]['t'] + 900_000))
     monitor.scan_symbol(INSTRUMENT)
     assert not monitor.chart(SYMBOL, '15m')['state']['stale']
+    process_model(monitor, '15m')
     assert store.telegram_status()['pending'] == store.bark_status()['pending'] == expected
     monitor.scan_symbol(INSTRUMENT)
+    process_model(monitor, '15m')
     assert store.telegram_status()['pending'] == store.bark_status()['pending'] == expected
+
+
+def test_cached_same_bar_resubmits_pending_model_after_inference_failure(tmp_path):
+    store = Store(tmp_path / "monitor.sqlite3")
+    client = FakeMarket()
+    client.history["1H"][-1].update(o=120., h=121., l=119., c=120.)
+    monitor = configured_monitor(store, client)
+    monitor.scan_symbol(INSTRUMENT)
+    key = (SYMBOL, "1H")
+    assert key in monitor.model_gate._queue
+    monitor.model_gate._queue.clear()
+    detector = monitor.model_gate.detector
+    detector.fail_once = True
+    process_model(monitor, "1H")
+    assert store.candidate_counts()["error"] == 1
+    assert store.telegram_status()["pending"] == 0
+    cached = deepcopy(monitor.chart(*key))
+    monitor.scan_symbol(INSTRUMENT)
+    assert monitor.chart(*key)["candles"] == cached["candles"]
+    assert key in monitor.model_gate._queue
+    process_model(monitor, "1H")
+    assert detector.calls == [client.history["1H"][-1]["t"]] * 2
+    assert store.candidate_counts()["confirmed"] == 1
+    assert store.telegram_status()["pending"] == store.bark_status()["pending"] == 1
+
+
+@pytest.mark.parametrize("lag_ms,eligible", [(MODEL_MAX_WAIT * TIMEFRAMES["1H"] + FRESH_MS, True),
+                                           (MODEL_MAX_WAIT * TIMEFRAMES["1H"] + FRESH_MS + 1, False)])
+def test_archival_arrow_outside_confirmation_budget_is_not_registered(tmp_path, lag_ms, eligible):
+    store = Store(tmp_path / "monitor.sqlite3")
+    client = FakeMarket()
+    client.history["1H"][-1].update(o=120., h=121., l=119., c=120.)
+    original_close = client.history["1H"][-1]["t"] + TIMEFRAMES["1H"]
+    client.clock = lambda: original_close + lag_ms
+    monitor = configured_monitor(store, client)
+    monitor.scan_symbol(INSTRUMENT)
+    assert any(event["kind"] == "tv_start" for event in store.list_events())
+    candidates = store.list_candidates(symbol=SYMBOL, timeframe="1H")
+    assert len(candidates) == int(eligible)
+    assert monitor.model_gate.detector.calls == []
+    assert store.telegram_status()["pending"] == store.bark_status()["pending"] == 0

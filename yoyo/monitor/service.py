@@ -17,15 +17,16 @@ import threading
 import time
 
 from yoyo.monitor import (FRESH_MS, TIMEFRAMES, VERSION, SIGNAL_PROTOCOL, SIGNAL_KIND,
-                          TV_PROFILE_ID, HIGHER_TIMEFRAME, MONITORED_TIMEFRAMES)
+                          TV_PROFILE_ID, HIGHER_TIMEFRAME, MONITORED_TIMEFRAMES, MODEL_KIND, MODEL_PROTOCOL, MODEL_MAX_WAIT)
 from yoyo.monitor.policy import is_tv_start
+from yoyo.monitor.model_gate import ModelGate
 from yoyo.monitor.okx import OKX
 from yoyo.monitor.store import now_ms
 from yoyo.monitor.telegram import TelegramWorker
 from yoyo.monitor.bark import BarkWorker
 
 LOG = logging.getLogger("fable.monitor")
-PROTOCOL = SIGNAL_PROTOCOL
+PROTOCOL = MODEL_PROTOCOL
 
 
 class Monitor:
@@ -51,13 +52,14 @@ class Monitor:
         self.telegram = TelegramWorker(store)
         self.bark = BarkWorker(store)
         self.bark_since = None
-        self.timeframe_since = {tf: store.timeframe_activation(tf) for tf in MONITORED_TIMEFRAMES}
+        self.timeframe_since = {tf: store.timeframe_activation(tf, protocol=PROTOCOL) for tf in MONITORED_TIMEFRAMES}
+        self.model_gate = ModelGate(store, lambda: self.client.clock(), self.stop_event)
         self.threads = []
 
     def start(self):
         # Called only after server lifespan owns the singleton process lock.
         self.store.recover_outbox()
-        for name, target in (("scan", self.run), ("telegram", self.deliver), ("bark", self.deliver_bark)):
+        for name, target in (("scan", self.run), ("model", self.model_gate.run), ("telegram", self.deliver), ("bark", self.deliver_bark)):
             thread = threading.Thread(target=target, name="impulse-" + name, daemon=True)
             self.threads.append(thread)
             thread.start()
@@ -108,10 +110,10 @@ class Monitor:
         if not self.notification_ready.is_set():
             # Use the same calibrated clock as candle closes and freshness.
             # A slow Mac clock must not turn a pre-upgrade close into a new bar.
-            self.notification_since = self.store.activate_notification_policy(self.client.clock())
+            self.notification_since = self.store.activate_notification_policy(self.client.clock(), protocol=PROTOCOL)
             if self.bark.creds:
-                self.bark_since = self.store.activate_bark_policy(self.client.clock())
-            self.timeframe_since = {tf: self.store.activate_timeframe_policy(tf, self.client.clock())
+                self.bark_since = self.store.activate_bark_policy(self.client.clock(), protocol=PROTOCOL)
+            self.timeframe_since = {tf: self.store.activate_timeframe_policy(tf, self.client.clock(), protocol=PROTOCOL)
                                     for tf in MONITORED_TIMEFRAMES}
             self.notification_ready.set()
         if not self.instruments or start - self.universe_at >= 3600000:
@@ -192,13 +194,15 @@ class Monitor:
                 self.store.upsert_market(state)
                 with self.lock:
                     self.charts[(symbol, timeframe)]["state"] = state
+                if not stale:
+                    self.model_gate.submit(symbol, timeframe, cached["candles"])
                 continue
             result = analyze(lower, loaded[higher], timeframe)
             state = dict(result["state"], symbol=symbol, timeframe=timeframe, active=True,
                          last_scan_ms=now, stale=stale, gap_count=gaps.get(timeframe, 0),
                          available_bars=len(lower), higher_bars=len(loaded[higher]),
                          higher_timeframe=higher, tick_size=instrument.get("tickSz"),
-                         settlement=instrument.get("settleCcy"), protocol=PROTOCOL)
+                         settlement=instrument.get("settleCcy"), protocol=SIGNAL_PROTOCOL)
             if stale:
                 state["error"] = "awaiting_latest_confirmed_bar"
                 errors.append((timeframe, state["error"]))
@@ -208,42 +212,23 @@ class Monitor:
             for raw in result["events"]:
                 if raw["bar_close_ms"] < history_since:
                     continue
-                event = dict(raw, symbol=symbol, timeframe=timeframe, protocol=PROTOCOL, detected_at_ms=now)
+                event = dict(raw, symbol=symbol, timeframe=timeframe, protocol=SIGNAL_PROTOCOL, detected_at_ms=now)
                 event["is_fresh"] = 0 <= now - event["bar_close_ms"] <= FRESH_MS
-                # Only the actual visible Pine focus-release marker is a signal.
-                # Recomputed history predating this protocol's activation stays
-                # historical even if a new identity would otherwise be fresh.
+                # Raw Pine arrows are immutable candidates, never notifications.
+                self.store.upsert_event(event)
                 timeframe_since = self.timeframe_since.get(timeframe)
-                base_eligible = (event["is_fresh"] and is_tv_start(event)
-                                 and timeframe_since is not None
-                                 and event["bar_close_ms"] > timeframe_since)
-                eligible = base_eligible and event["bar_close_ms"] > self.notification_since
-                bark_eligible = (base_eligible and self.bark_since is not None
-                                 and event["bar_close_ms"] > self.bark_since)
-                # Do not permanently consume a new signal as history only
-                # because the latest market candle is temporarily unavailable.
-                # On recovery it can be inserted once, if still fresh. Existing
-                # historical identities are never promoted or requeued.
-                if not stale or not (eligible or bark_eligible):
-                    photo, photo_error = None, None
-                    if eligible and not stale and not self.store.has_event(event):
-                        try:
-                            from yoyo.monitor.snapshot import render_signal
-                            snapshot_bars = [bar for bar in result["chart"] if bar["t"] <= event["bar_open_ms"]]
-                            photo = render_signal(event, snapshot_bars)
-                        except Exception as exc:
-                            # Rendering is presentation only; both channels
-                            # retain the valid signal if local drawing fails.
-                            photo_error = "snapshot_unavailable"
-                            LOG.warning("signal snapshot unavailable: %s", type(exc).__name__)
-                    self.store.upsert_event(event, notify=eligible and not stale,
-                                            bark_notify=bark_eligible and not stale,
-                                            telegram_photo=photo, photo_error=photo_error)
+                first_channel = min(self.notification_since, self.bark_since) if self.bark_since is not None else self.notification_since
+                if (is_tv_start(event) and timeframe_since is not None
+                        and event["bar_close_ms"] > max(first_channel, timeframe_since)
+                        and now <= event["bar_close_ms"] + MODEL_MAX_WAIT * TIMEFRAMES[timeframe] + FRESH_MS):
+                    self.model_gate.register(event)
                 kept.append(event)
             with self.lock:
                 self.charts[(symbol, timeframe)] = dict(symbol=symbol, timeframe=timeframe,
                                                        candles=result["chart"][-240:], events=kept, state=state,
                                                        higher_last_ms=higher_last)
+            if not stale:
+                self.model_gate.submit(symbol, timeframe, result["chart"])
         return errors
 
     def chart(self, symbol, timeframe):
@@ -260,16 +245,17 @@ class Monitor:
     def status(self):
         rows = self.markets()
         counts = Counter("stale" if r.get("stale") and r.get("phase") != "loading" else r.get("phase", "loading") for r in rows)
-        return dict(service="Fable Impulse Monitor", version=VERSION, protocol=PROTOCOL,
+        return dict(service="spike Impulse Monitor", version=VERSION, protocol=PROTOCOL,
                     now_ms=self.client.clock(), started_at_ms=self.started,
                     scan=self.store.get_meta("scan", {"status": "starting", "completed": 0, "total": 0, "errors": 0}),
                     universe=self.store.get_meta("universe", {"count": 0, "scope": "OKX 全部在交易永续合约"}),
-                    counts=dict(counts, signals_24h=self.store.count_since(self.client.clock() - 86400000)),
+                    counts=dict(counts, signals_24h=self.store.count_since(self.client.clock() - 86400000, MODEL_KIND, PROTOCOL)),
                     telegram=self.telegram.status(), bark=self.bark.status(), runtime={"host": "This Mac", "notification_only": True,
                     "fresh_minutes": FRESH_MS // 60000, "interval_seconds": self.interval, "timeframes": list(MONITORED_TIMEFRAMES),
                     "clock_offset_ms": self.client.offset_ms, "public_requests": self.client.requests,
                     "candle_storage": "memory_only", "history_days": 7,
-                    "signal_mode": "TradingView 主图启动（蓄势释放标记）", "signal_kind": SIGNAL_KIND,
+                    "signal_mode": "主图启动 → YOLO 同方向确认", "signal_kind": MODEL_KIND,
+                    "model_gate": self.model_gate.status(),
                     "tv_profile": {"id": TV_PROFILE_ID, "show_focus": True, "show_marks": False,
                                    "focus_min_bars": 12, "focus_atr_band": .10, "verified_on": "2026-09-08",
                                    "sync_mode": "observed_settings_snapshot"},

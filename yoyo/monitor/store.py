@@ -16,7 +16,7 @@ import sqlite3
 import time
 from pathlib import Path
 
-from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL, MONITORED_TIMEFRAMES
+from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL, MONITORED_TIMEFRAMES, MODEL_PROTOCOL, MODEL_KIND
 
 
 def now_ms():
@@ -39,6 +39,11 @@ class Store:
                 kind TEXT NOT NULL, side TEXT NOT NULL, close_ms INTEGER NOT NULL,
                 detected_ms INTEGER NOT NULL, payload TEXT NOT NULL);
             CREATE INDEX IF NOT EXISTS event_time ON events(close_ms DESC);
+            CREATE TABLE IF NOT EXISTS model_candidates (
+                id TEXT PRIMARY KEY REFERENCES events(id), symbol TEXT NOT NULL,
+                timeframe TEXT NOT NULL, close_ms INTEGER NOT NULL,
+                status TEXT NOT NULL, model TEXT NOT NULL);
+            CREATE INDEX IF NOT EXISTS candidate_state ON model_candidates(status,symbol,timeframe);
             CREATE TABLE IF NOT EXISTS markets (
                 symbol TEXT NOT NULL, timeframe TEXT NOT NULL, payload TEXT NOT NULL,
                 PRIMARY KEY(symbol,timeframe));
@@ -71,6 +76,8 @@ class Store:
     @staticmethod
     def event_id(event):
         key = "|".join(str(event[k]) for k in ("protocol", "symbol", "timeframe", "bar_close_ms", "kind", "side"))
+        if event.get("kind") == MODEL_KIND:
+            key += "|" + str(event.get("source_event_id", Store.event_id(event["indicator"])))
         return hashlib.sha256(key.encode()).hexdigest()[:24]
 
     def has_event(self, event):
@@ -85,22 +92,77 @@ class Store:
             raise ValueError("invalid_telegram_photo")
         e.setdefault("detected_at_ms", now_ms())
         with self.connect() as db:
-            cur = db.execute("INSERT OR IGNORE INTO events VALUES (?,?,?,?,?,?,?,?)", (
-                e["id"], e["symbol"], e["timeframe"], e["kind"], e["side"],
-                e["bar_close_ms"], e["detected_at_ms"], encode(e)))
-            inserted = cur.rowcount == 1
-            if inserted and notify:
-                db.execute("INSERT INTO outbox(event_id,status,due_ms,updated_ms) VALUES (?,?,?,?)",
-                           (e["id"], "pending", e["detected_at_ms"], e["detected_at_ms"]))
-                if telegram_photo is not None or photo_error:
-                    db.execute("INSERT INTO telegram_media VALUES (?,?,?,?)",
-                               (e["id"], telegram_photo,
-                                hashlib.sha256(telegram_photo).hexdigest() if telegram_photo else None,
-                                "snapshot_unavailable" if photo_error else None))
-            if inserted and bark_notify:
-                db.execute("INSERT INTO bark_outbox(event_id,status,due_ms,updated_ms) VALUES (?,?,?,?)",
-                           (e["id"], "pending", e["detected_at_ms"], e["detected_at_ms"]))
+            return self._insert_event(db, e, notify, bark_notify, telegram_photo, photo_error)
+
+    @staticmethod
+    def _insert_event(db, e, notify, bark_notify, telegram_photo=None, photo_error=None):
+        cur = db.execute("INSERT OR IGNORE INTO events VALUES (?,?,?,?,?,?,?,?)", (
+            e["id"], e["symbol"], e["timeframe"], e["kind"], e["side"],
+            e["bar_close_ms"], e["detected_at_ms"], encode(e)))
+        inserted = cur.rowcount == 1
+        if inserted and notify:
+            db.execute("INSERT INTO outbox(event_id,status,due_ms,updated_ms) VALUES (?,?,?,?)",
+                       (e["id"], "pending", e["detected_at_ms"], e["detected_at_ms"]))
+            if telegram_photo is not None or photo_error:
+                db.execute("INSERT INTO telegram_media VALUES (?,?,?,?)",
+                           (e["id"], telegram_photo,
+                            hashlib.sha256(telegram_photo).hexdigest() if telegram_photo else None,
+                            "snapshot_unavailable" if photo_error else None))
+        if inserted and bark_notify:
+            db.execute("INSERT INTO bark_outbox(event_id,status,due_ms,updated_ms) VALUES (?,?,?,?)",
+                       (e["id"], "pending", e["detected_at_ms"], e["detected_at_ms"]))
         return inserted
+
+    def register_candidate(self, event, model):
+        """Journal the immutable original arrow; registration never sends it."""
+        self.upsert_event(event)
+        with self.connect() as db:
+            return db.execute("INSERT OR IGNORE INTO model_candidates VALUES (?,?,?,?,?,?)",
+                              (self.event_id(event), event["symbol"], event["timeframe"],
+                               event["bar_close_ms"], "pending", encode(model))).rowcount == 1
+
+    def list_candidates(self, limit=2000, symbol=None, timeframe=None, pending_only=False):
+        filters, values = [], []
+        for field, value in (("symbol", symbol), ("timeframe", timeframe)):
+            if value:
+                filters.append("c." + field + "=?")
+                values.append(value)
+        if pending_only:
+            filters.append("c.status IN ('pending','error')")
+        where = " WHERE " + " AND ".join(filters) if filters else ""
+        with self.connect() as db:
+            rows = db.execute("SELECT e.payload,c.model FROM model_candidates c JOIN events e ON e.id=c.id" +
+                              where + " ORDER BY c.close_ms DESC,c.id LIMIT ?",
+                              values + [min(2000, max(1, int(limit)))]).fetchall()
+        return [dict(json.loads(r[0]), model=json.loads(r[1])) for r in rows]
+
+    def candidate_counts(self):
+        with self.connect() as db:
+            return {r[0]: r[1] for r in db.execute("SELECT status,COUNT(*) FROM model_candidates GROUP BY status")}
+
+    def update_candidate(self, candidate_id, model):
+        with self.connect() as db:
+            return db.execute("UPDATE model_candidates SET status=?,model=? WHERE id=? AND status IN ('pending','error')",
+                              (model["status"], encode(model), candidate_id)).rowcount == 1
+
+    def confirm_candidate(self, candidate_id, event, notify=False, bark_notify=False,
+                          telegram_photo=None, photo_error=None):
+        """Commit the terminal candidate, derived event and both outboxes atomically."""
+        from yoyo.monitor.policy import is_model_signal
+        if (not is_model_signal(event) or self.event_id(event["indicator"]) != candidate_id
+                or event.get("source_event_id", candidate_id) != candidate_id):
+            raise ValueError("invalid_model_confirmation")
+        if telegram_photo is not None and (not isinstance(telegram_photo, bytes)
+                or not telegram_photo.startswith(b'\x89PNG\r\n\x1a\n') or len(telegram_photo) > 9_000_000):
+            raise ValueError("invalid_telegram_photo")
+        e = dict(event, id=self.event_id(event))
+        with self.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            changed = db.execute("UPDATE model_candidates SET status='confirmed',model=? WHERE id=? AND status IN ('pending','error')",
+                                 (encode(e["model"]), candidate_id)).rowcount
+            if not changed:
+                return False
+            return self._insert_event(db, e, notify, bark_notify, telegram_photo, photo_error)
 
     def upsert_market(self, row):
         with self.connect() as db:
@@ -142,58 +204,60 @@ class Store:
         with self.connect() as db:
             return db.execute("SELECT COUNT(*) FROM events" + where, values).fetchone()[0]
 
-    def count_since(self, since):
+    def count_since(self, since, kind=SIGNAL_KIND, protocol=SIGNAL_PROTOCOL):
         with self.connect() as db:
             return db.execute("SELECT COUNT(*) FROM events WHERE close_ms>=? AND kind=? AND json_extract(payload,'$.protocol')=?",
-                              (since, SIGNAL_KIND, SIGNAL_PROTOCOL)).fetchone()[0]
+                              (since, kind, protocol)).fetchone()[0]
 
-    def activate_notification_policy(self, activated_ms):
+    def activate_notification_policy(self, activated_ms, protocol=SIGNAL_PROTOCOL, kind=None):
         """Once per protocol, set a forward-only cutover; preserve old receipts.
 
         Called only while the service owns its process lock. Historical
         reconstruction under a new identity must not resend pre-cutover bars.
         Old pending messages are retired, never deleted or reclassified sent.
         """
-        key = "notification_policy:" + SIGNAL_PROTOCOL
+        kind = kind or (MODEL_KIND if protocol == MODEL_PROTOCOL else SIGNAL_KIND)
+        key = "notification_policy:" + protocol
         with self.connect() as db:
             db.execute("BEGIN IMMEDIATE")
             db.execute("INSERT OR IGNORE INTO meta VALUES (?,?)",
-                       (key, encode({"activated_ms": activated_ms, "kind": SIGNAL_KIND})))
+                       (key, encode({"activated_ms": activated_ms, "kind": kind})))
             db.execute("""UPDATE outbox SET status='skipped',error='notification_policy_replaced',updated_ms=?
                 WHERE status='pending' AND event_id IN (
                     SELECT id FROM events WHERE kind!=? OR COALESCE(json_extract(payload,'$.protocol'),'')!=?)""",
-                       (activated_ms, SIGNAL_KIND, SIGNAL_PROTOCOL))
+                       (activated_ms, kind, protocol))
             return json.loads(db.execute("SELECT payload FROM meta WHERE key=?", (key,)).fetchone()[0])["activated_ms"]
 
-    def activate_bark_policy(self, activated_ms):
+    def activate_bark_policy(self, activated_ms, protocol=SIGNAL_PROTOCOL, kind=None):
         """Persist Bark's first cutover independently of Telegram's activation.
 
         As with the Telegram policy, callers enforce this cutover before
         delivery. Retire only obsolete pending Bark items, preserving all
         receipts and every Telegram queue state.
         """
-        key = "notification_policy:bark:" + SIGNAL_PROTOCOL
+        kind = kind or (MODEL_KIND if protocol == MODEL_PROTOCOL else SIGNAL_KIND)
+        key = "notification_policy:bark:" + protocol
         with self.connect() as db:
             db.execute("BEGIN IMMEDIATE")
             db.execute("INSERT OR IGNORE INTO meta VALUES (?,?)",
-                       (key, encode({"activated_ms": activated_ms, "kind": SIGNAL_KIND})))
+                       (key, encode({"activated_ms": activated_ms, "kind": kind})))
             db.execute("""UPDATE bark_outbox SET status='skipped',error='notification_policy_replaced',updated_ms=?
                 WHERE status='pending' AND event_id IN (
                     SELECT id FROM events WHERE kind!=? OR COALESCE(json_extract(payload,'$.protocol'),'')!=?)""",
-                       (activated_ms, SIGNAL_KIND, SIGNAL_PROTOCOL))
+                       (activated_ms, kind, protocol))
             return json.loads(db.execute("SELECT payload FROM meta WHERE key=?", (key,)).fetchone()[0])["activated_ms"]
 
-    def timeframe_activation(self, timeframe):
+    def timeframe_activation(self, timeframe, protocol=SIGNAL_PROTOCOL):
         """Legacy streams retain channel cutovers; new streams fail closed."""
         if timeframe not in MONITORED_TIMEFRAMES:
             return None
-        policy = self.get_meta("notification_timeframe:" + SIGNAL_PROTOCOL + ":" + timeframe)
+        policy = self.get_meta("notification_timeframe:" + protocol + ":" + timeframe)
         if policy is None:
-            return 0 if timeframe in ("1H", "4H") else None
+            return 0 if protocol == SIGNAL_PROTOCOL and timeframe in ("1H", "4H") else None
         value = policy.get("activated_ms")
         return value if type(value) is int and value >= 0 else None
 
-    def activate_timeframe_policy(self, timeframe, activated_ms):
+    def activate_timeframe_policy(self, timeframe, activated_ms, protocol=SIGNAL_PROTOCOL):
         """Persist a new stream's cutover once, independent of each channel.
 
         Old 1H/4H queues keep their existing per-channel policy. A newly
@@ -201,12 +265,12 @@ class Store:
         """
         if timeframe not in MONITORED_TIMEFRAMES:
             raise ValueError("unsupported timeframe")
-        key = "notification_timeframe:" + SIGNAL_PROTOCOL + ":" + timeframe
-        baseline = 0 if timeframe in ("1H", "4H") else activated_ms
+        key = "notification_timeframe:" + protocol + ":" + timeframe
+        baseline = 0 if protocol == SIGNAL_PROTOCOL and timeframe in ("1H", "4H") else activated_ms
         with self.connect() as db:
             db.execute("INSERT OR IGNORE INTO meta VALUES (?,?)",
                        (key, encode({"activated_ms": baseline})))
-        return self.timeframe_activation(timeframe)
+        return self.timeframe_activation(timeframe, protocol=protocol)
 
     def set_meta(self, key, value):
         with self.connect() as db:

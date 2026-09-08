@@ -4,19 +4,21 @@
 
   const $ = (id) => document.getElementById(id);
   const state = {
-    view: "signals", signals: [], markets: [], status: null, health: null,
-    signalsLoaded: false, marketsLoaded: false, signalTotal: 0, rowLimit: 24, watchLimit: 24, search: "", watchSearch: "", watchScope: "building",
+    view: "signals", signals: [], candidates: [], signalScope: "confirmed", markets: [], status: null, health: null,
+    signalsLoaded: false, candidatesLoaded: false, candidateTotal: 0, candidateCounts: null, marketsLoaded: false, signalTotal: 0, rowLimit: 24, watchLimit: 24, search: "", watchSearch: "", watchScope: "building",
     timeframe: "all", watchTimeframe: "all", side: "all", selected: null,
     chartKey: null, chart: null, chartRequest: 0, chartController: null, chartExpanded: false,
     syncing: false, lastSync: null, statusReceivedAt: null, errors: {}, chartHover: null, detailOrigin: "signals",
     tradingViewPending: false,
   };
   const titles = {
-    signals: ["主图启动", "从长时间近零蓄势，到主图确认启动。先看新信号，再看结构。"],
+    signals: ["模型确认", "先出现指标启动箭头，再由模型确认同一段结构。确认通过后，才进入信号通知。"],
     watch: ["蓄势观察", "还在横盘的，单独观察。这里的结构尚不是启动信号。"],
     system: ["运行状态", "行情、扫描与通知，每个环节都清晰可见。"],
   };
-  const eventNames = { tv_start: "蓄势释放" };
+  const eventNames = { tv_start: "原始启动箭头", yolo_confirmed: "模型确认" };
+  const MODEL_PROTOCOL = "imacd-yolo-confirmation-monitor-v1";
+  const modelStates = { pending: "等待确认", confirmed: "模型已通过", invalidated: "结构失效", expired: "等待已到期", error: "检测异常" };
   const TV_PROTOCOL = "imacd-tv-visible-start-monitor-v3";
   const TV_PROFILE = "imacd-v2.2-focus12-band0.10-marks-off";
   const TV_SETTINGS = "近零至少 12 根 · 0.1 ATR · 普通系统标记关闭";
@@ -36,7 +38,19 @@
   const sideArrow = (side) => side === "short" ? "↓" : side === "long" ? "↑" : "·";
   const shortSymbol = (symbol) => String(symbol || "—").replace(/-(USDT|USD)-SWAP$/, "").replace(/USDT\.P$/, "");
   const focusRun = (item) => item.near_zero_bars;
-  const tvProtocol = () => state.status?.runtime?.signal_kind === "tv_start" && state.status?.protocol === TV_PROTOCOL;
+  const modelProtocol = () => state.status?.runtime?.signal_kind === "yolo_confirmed" && state.status?.protocol === MODEL_PROTOCOL;
+  const isConfirmed = (item) => item?.kind === "yolo_confirmed" && item.protocol === MODEL_PROTOCOL && item.model?.status === "confirmed";
+  const isCandidate = (item) => item?.kind === "tv_start" && item.protocol === TV_PROTOCOL;
+  const originalSignal = (item) => isConfirmed(item) ? item.indicator || {} : item;
+  const sourceItems = () => state.signalScope === "confirmed" ? state.signals : state.candidates;
+  const modelState = (item) => modelStates[item.model?.status] || "等待模型状态";
+  function modelReason(item) {
+    const reason = String(item.model?.reason || "");
+    const known = { md_zero_or_reversal: "动量已回到零轴或反转", no_match_within_wait: "等待窗口内未检测到匹配结构", missing_causal_candles: "检测所需行情缺失，等待数据补齐", confirmation_history_unavailable: "确认窗口行情未补齐，已结束等待" };
+    return known[reason] || (reason.startsWith("inference_unavailable:") ? "模型检测暂时不可用，等待重试" : reason);
+  }
+  const modelScore = (item) => finite(item.model?.confidence) && Number(item.model.confidence) >= 0 && Number(item.model.confidence) <= 1 ? Number(item.model.confidence).toFixed(2) : "—";
+  const sameEvent = (a, b) => a && b && a.kind === b.kind && String(a.id) === String(b.id) && a.symbol === b.symbol && a.timeframe === b.timeframe;
   const quoteSymbol = (symbol) => /-USD-SWAP$/.test(String(symbol)) ? "USD" : "USDT";
   const normalSearch = (value) => String(value).toUpperCase().replace(/[^A-Z0-9]/g, "");
   const displayPhase = (phase) => phaseNames[phase] || String(phase || "观察中");
@@ -49,7 +63,7 @@
   function isFresh(item, now = signalClock()) {
     const minutes = state.status?.runtime?.fresh_minutes;
     const age = now - Number(item.bar_close_ms);
-    return item.is_fresh === true && tvProtocol() && !state.errors.signals && !state.errors.status &&
+    return item.is_fresh === true && isConfirmed(item) && modelProtocol() && !state.errors.signals && !state.errors.status &&
       finite(state.status?.now_ms) && finite(state.statusReceivedAt) && finite(minutes) && Number(minutes) > 0 && finite(item.bar_close_ms) && age >= 0 && age <= Number(minutes) * 60000;
   }
   function price(value) {
@@ -162,9 +176,9 @@
   }
   function filteredSignals() {
     const q = normalSearch(state.search);
-    return state.signals.filter((item) => (!q || normalSearch(item.symbol).includes(q)) &&
+    return sourceItems().filter((item) => (!q || normalSearch(item.symbol).includes(q)) &&
       (state.timeframe === "all" || item.timeframe === state.timeframe) &&
-      (state.side === "all" || item.side === state.side) && item.kind === "tv_start");
+      (state.side === "all" || item.side === state.side) && (state.signalScope === "confirmed" ? isConfirmed(item) : isCandidate(item) && (state.signalScope === "all" || ["pending", "error"].includes(item.model?.status))));
   }
   function notification(item, channel = "telegram") {
     const value = String(item[channel === "bark" ? "bark_notification_status" : "notification_status"] || "").toLowerCase();
@@ -189,56 +203,70 @@
   }
   function renderSignals() {
     const items = filteredSignals();
+    const confirmed = state.signalScope === "confirmed";
+    const loaded = confirmed ? state.signalsLoaded : state.candidatesLoaded;
+    const fetchError = state.errors[confirmed ? "signals" : "candidates"];
+    const source = sourceItems(), total = confirmed ? state.signalTotal : state.candidateTotal;
     $("filtered-count").textContent = `${items.length} 条`;
-    $("filtered-count").title = `共 ${number(state.signalTotal)} 条记录；筛选最近 ${state.signals.length} 条`;
-    $("signal-window-note").textContent = state.signalsLoaded ? `最近 ${number(state.signals.length)} / 共 ${number(state.signalTotal)} 条` : "最近 2,000 条 · 每 15 秒同步";
+    $("filtered-count").title = `共 ${number(total)} 条记录；筛选最近 ${source.length} 条`;
+    $("signal-section-title").textContent = confirmed ? "确认信号" : state.signalScope === "pending" ? "等待模型的候选" : "全部指标候选";
+    $("signal-scope-note").textContent = confirmed ? "仅双重确认会通知 · 新鲜度从模型确认收盘起算" : "原箭头先进入候选；未通过模型，不发送信号通知";
+    $("signal-window-note").textContent = loaded ? `最近 ${number(source.length)} / 共 ${number(total)} 条` : "最近 2,000 条 · 每 15 秒同步";
+    $("candidate-count").textContent = state.candidatesLoaded ? number(state.candidateCounts ? numeric(state.candidateCounts.pending) + numeric(state.candidateCounts.error) : state.candidates.filter((item) => ["pending", "error"].includes(item.model?.status)).length) : "—";
+    $("candidate-count").title = state.candidateCounts ? "全部候选中，等待确认与检测异常的数量" : "最近获取的候选中，等待确认与检测异常的数量";
     $("load-more-signals").classList.toggle("hidden", items.length <= state.rowLimit);
     $("load-more-signals").textContent = `显示更多（${Math.min(state.rowLimit, items.length)} / ${items.length}）`;
     $("signal-empty").classList.toggle("hidden", items.length > 0);
     if (!items.length) {
       const hasFilters = state.search || state.timeframe !== "all" || state.side !== "all";
-      if (state.errors.signals && !state.signalsLoaded) {
-        $("signal-empty-title").textContent = "信号服务暂时不可用";
-        $("signal-empty-description").textContent = "正在自动重试。连接恢复后会展示真实信号。";
-      } else if (!state.signalsLoaded) {
+      if (fetchError && !loaded) {
+        $("signal-empty-title").textContent = confirmed ? "信号服务暂时不可用" : "候选服务暂时不可用";
+        $("signal-empty-description").textContent = "正在自动重试。连接恢复后会展示真实记录。";
+      } else if (!loaded) {
         $("signal-empty-title").textContent = "正在连接行情服务";
-        $("signal-empty-description").textContent = "真实信号会在这里出现。";
+        $("signal-empty-description").textContent = "真实记录会在这里出现。";
       } else {
-        $("signal-empty-title").textContent = hasFilters ? "没有符合筛选的信号" : "等待主图蓄势释放";
-        $("signal-empty-description").textContent = hasFilters ? "试试其他合约、周期或方向。" : "近零蓄势满足当前设置后，主图可见的释放标记会在收盘确认后列出。";
+        $("signal-empty-title").textContent = hasFilters ? "没有符合筛选的记录" : confirmed ? "等待指标与模型共同确认" : "当前暂无候选";
+        $("signal-empty-description").textContent = hasFilters ? "试试其他合约、周期或方向。" : confirmed ? "原始箭头可在等待确认中查看。只有模型检测通过，才进入本页和通知队列。" : "新启动箭头出现后，会进入模型等待窗口。";
       }
     }
-    const focusedId = document.activeElement?.dataset?.signalId;
-    const now = signalClock(); // One timestamp keeps both groups consistent at the expiry boundary.
-    const fresh = items.filter((item) => isFresh(item, now));
-    const earlier = items.filter((item) => !isFresh(item, now));
+    const focused = document.activeElement?.dataset;
+    const focusedId = focused?.signalId, focusedKind = focused?.signalKind;
+    const now = signalClock();
+    const fresh = confirmed ? items.filter((item) => isFresh(item, now)) : [];
+    const earlier = items.filter((item) => !confirmed || !isFresh(item, now));
     const visible = [...fresh, ...earlier].slice(0, state.rowLimit);
-    const freshVisible = visible.filter((item) => isFresh(item, now));
-    const earlierVisible = visible.filter((item) => !isFresh(item, now));
+    const freshVisible = visible.filter((item) => confirmed && isFresh(item, now));
+    const earlierVisible = visible.filter((item) => !confirmed || !isFresh(item, now));
     const minutes = state.status?.runtime?.fresh_minutes;
-    const group = (heading, list, recent) => list.length ? `<div class="signal-group-heading${recent ? " fresh-heading" : ""}"><h3>${heading}<span class="group-count">${list.length}</span></h3><span>${recent ? `收盘后 ${escapeHTML(number(minutes))} 分钟内` : "按确认时间排列"}</span></div><div class="signal-card-grid">${list.map((item) => signalCardHTML(item, now)).join("")}</div>` : "";
-    const freshnessKnown = tvProtocol() && finite(minutes) && Number(minutes) > 0 && finite(state.status?.now_ms) && finite(state.statusReceivedAt);
+    const group = (heading, list, recent) => list.length ? `<div class="signal-group-heading${recent ? " fresh-heading" : ""}"><h3>${heading}<span class="group-count">${list.length}</span></h3><span>${recent ? `模型确认后 ${escapeHTML(number(minutes))} 分钟内` : confirmed ? "按模型确认时间排列" : "按原箭头时间排列"}</span></div><div class="signal-card-grid">${list.map((item) => signalCardHTML(item, now)).join("")}</div>` : "";
+    const freshnessKnown = modelProtocol() && finite(minutes) && Number(minutes) > 0 && finite(state.status?.now_ms) && finite(state.statusReceivedAt);
     const pendingFreshness = state.errors.signals || state.errors.status || !freshnessKnown;
-    const noFresh = !fresh.length && items.length ? `<div id="fresh-empty" class="fresh-empty"><strong>${pendingFreshness ? "新鲜状态待同步" : "当前筛选下暂无新鲜启动"}</strong><span>${pendingFreshness ? "保留已获取的记录，状态同步后重新确认时效。" : `收盘 ${escapeHTML(number(minutes))} 分钟内的信号会优先出现在这里。下方可回看此前启动。`}</span></div>` : "";
-    $("signal-rows").innerHTML = noFresh + group("新鲜启动", freshVisible, true) + group(fresh.length ? "更早启动" : "已记录启动", earlierVisible, false);
-    if (focusedId) Array.from($("signal-rows").querySelectorAll("[data-signal-id]")).find((card) => card.dataset.signalId === focusedId)?.focus({ preventScroll: true });
+    const noFresh = confirmed && !fresh.length && items.length ? `<div id="fresh-empty" class="fresh-empty"><strong>${pendingFreshness ? "新鲜状态待同步" : "当前筛选下暂无新鲜确认"}</strong><span>${pendingFreshness ? "保留已获取的记录，状态同步后重新确认时效。" : `模型确认 ${escapeHTML(number(minutes))} 分钟内的信号会优先出现在这里。下方可回看此前记录。`}</span></div>` : "";
+    $("signal-rows").innerHTML = noFresh + group("新鲜确认", freshVisible, true) + group(confirmed ? fresh.length ? "更早确认" : "已记录确认" : "指标候选 · 独立于确认信号", earlierVisible, false);
+    if (focusedId) Array.from($("signal-rows").querySelectorAll("[data-signal-id]")).find((card) => card.dataset.signalId === focusedId && card.dataset.signalKind === focusedKind)?.focus({ preventScroll: true });
   }
   function signalCardHTML(item, now = signalClock()) {
-    const selected = state.selected && String(state.selected.id) === String(item.id) && state.selected.symbol === item.symbol && state.selected.timeframe === item.timeframe;
+    const selected = sameEvent(state.selected, item);
+    const confirmed = isConfirmed(item), original = originalSignal(item);
     const side = item.side === "short" ? "short" : item.side === "long" ? "long" : "neutral";
     const fresh = isFresh(item, now);
-    return `<button type="button" class="signal-card ${side}${selected ? " selected" : ""}${fresh ? " is-fresh" : ""}" data-signal-id="${escapeHTML(item.id)}" aria-pressed="${Boolean(selected)}" aria-label="${escapeHTML(`${shortSymbol(item.symbol)} ${quoteSymbol(item.symbol)} ${item.timeframe} ${sideName(item.side)}，信号收盘价 ${price(item.price)}，${shortDate(item.bar_close_ms)} 确认，查看图表`)}">
+    const status = modelState(item), caption = confirmed ? "模型确认收盘价" : "原箭头收盘价";
+    const waiting = `${number(item.model?.wait_bars)} / ${number(item.model?.max_wait_bars)} 根`;
+    return `<button type="button" class="signal-card ${side}${confirmed ? "" : " candidate-card"}${selected ? " selected" : ""}${fresh ? " is-fresh" : ""}" data-signal-id="${escapeHTML(item.id)}" data-signal-kind="${escapeHTML(item.kind)}" aria-pressed="${Boolean(selected)}" aria-label="${escapeHTML(`${shortSymbol(item.symbol)} ${quoteSymbol(item.symbol)} ${item.timeframe} ${sideName(item.side)}，${status}，${caption} ${price(item.price)}，${shortDate(item.bar_close_ms)}，查看图表`)}">
       <span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(item.timeframe)}</span></span>
-      <span class="signal-card-direction"><span class="card-direction">${sideArrow(item.side)} ${escapeHTML(sideName(item.side))}启动</span><span class="card-recency">${fresh ? "新 · " : ""}${escapeHTML(ageLabel(item.bar_close_ms))}</span></span>
-      <span class="card-price-label">信号收盘价</span><span class="card-price">${escapeHTML(price(item.price))}</span>
+      <span class="signal-card-direction"><span class="card-direction">${sideArrow(item.side)} ${escapeHTML(sideName(item.side))}${confirmed ? "确认" : "候选"}</span><span class="card-recency">${fresh ? "新 · " : ""}${escapeHTML(ageLabel(item.bar_close_ms))}</span></span>
+      <span class="model-card-status"><span class="model-badge ${confirmed ? "confirmed" : item.model?.status === "error" ? "error" : "pending"}">${escapeHTML(status)}</span><span>${confirmed ? `检测分数 ${escapeHTML(modelScore(item))}` : `等待 ${escapeHTML(waiting)}`}</span></span>
+      <span class="card-price-label">${caption}</span><span class="card-price">${escapeHTML(price(item.price))}</span>
+      ${confirmed ? `<span class="card-origin">原箭头 ${escapeHTML(price(original.price))} · ${escapeHTML(shortDate(original.bar_close_ms))}</span>` : ""}
       <span class="card-context"><span>启动前近零蓄势</span><strong>${escapeHTML(number(focusRun(item)))} <small>根</small></strong></span>
-      <span class="card-confirmed"><span>收盘确认</span><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))}</time></span>
-      <span class="card-footer"><span class="notification-stack">${notificationHTML(item)}</span><span class="card-open">${selected ? "正在查看" : "看图"} ↗</span></span>
+      <span class="card-confirmed"><span>${confirmed ? `模型确认 · 等待 ${escapeHTML(number(item.model?.wait_bars))} 根` : "原箭头收盘"}</span><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))}</time></span>
+      <span class="card-footer"><span class="notification-stack">${confirmed ? notificationHTML(item) : '<span class="candidate-notice">候选记录 · 不触发通知</span>'}</span><span class="card-open">${selected ? "正在查看" : "看图"} ↗</span></span>
     </button>`;
   }
   function applySignalFilters() {
     const items = filteredSignals();
-    if (!items.some((item) => state.selected?.id !== undefined && String(item.id) === String(state.selected.id))) {
+    if (!items.some((item) => sameEvent(state.selected, item))) {
       if (items.length) chooseSignal(items[0]);
       else {
         state.selected = null;
@@ -315,12 +343,12 @@
     const timeframes = Array.isArray(runtime.timeframes) ? runtime.timeframes : [];
     $("metric-timeframes").textContent = timeframes.length ? timeframes.join(" + ") : "—";
     $("watch-timeframes").textContent = timeframes.length ? timeframes.join(" / ") : "—";
-    $("metric-signals").textContent = tvProtocol() ? number(counts.signals_24h ?? 0) : "—";
-    $("nav-signal-count").textContent = tvProtocol() ? number(counts.signals_24h ?? 0) : "—";
+    $("metric-signals").textContent = modelProtocol() ? number(counts.signals_24h ?? 0) : "—";
+    $("nav-signal-count").textContent = modelProtocol() ? number(counts.signals_24h ?? 0) : "—";
     $("metric-building").textContent = number(counts.building ?? 0);
     $("metric-universe").textContent = number(status.universe?.count);
     $("metric-building-detail").textContent = finite(counts.ready) ? `${number(counts.ready)} 个窗口已就绪` : "零轴横盘与均线密集";
-    $("metric-signals-detail").textContent = tvProtocol() ? "蓄势释放 · 收盘确认" : "规则升级中 · 等待新口径";
+    $("metric-signals-detail").textContent = modelProtocol() ? "指标箭头 + 模型确认" : "模型口径待同步";
     const scanning = ["running", "scanning", "in_progress", "starting", "bootstrap"].includes(scan.status);
     const scanErrorCount = Array.isArray(scan.errors) ? scan.errors.length : numeric(scan.errors);
     const complete = numeric(scan.completed);
@@ -342,7 +370,7 @@
     $("telegram-header").classList.toggle("good", Boolean(tgReady && !tgProblem));
     $("telegram-state-badge").textContent = tgReady ? tgProblem ? "需检查发送结果" : "通知已启用" : telegram.configured ? "通知已关闭" : "尚未配置";
     $("telegram-state-badge").className = `neutral-badge ${tgReady && !tgProblem ? "good" : "warn"}`;
-    $("telegram-description").textContent = tgReady ? numeric(telegram.unknown) > 0 ? "部分发送未收到确定回执，为避免重复通知不自动重发，请核对 Telegram。" : "新鲜信号进入通知队列；发送结果与行情记录分开显示。" : telegram.configured ? "通道已配置，当前发送开关关闭。前端继续记录信号。" : "尚未读取到可用的通知配置，当前仅在前端记录信号。";
+    $("telegram-description").textContent = tgReady ? numeric(telegram.unknown) > 0 ? "部分发送未收到确定回执，为避免重复通知不自动重发，请核对 Telegram。" : "仅新鲜的模型确认信号进入通知队列；原箭头候选不会通知。" : telegram.configured ? "通道已配置，当前发送开关关闭。前端继续记录信号。" : "尚未读取到可用的通知配置，当前仅在前端记录信号。";
     $("telegram-facts").innerHTML = factsHTML([["最近成功", fullDate(telegram.last_success_ms)], ["待发送", number(telegram.pending)], ["发送失败", number(telegram.failed)], ["发送结果未知", number(telegram.unknown ?? 0)], ["配置状态", telegram.configured ? "已配置（敏感信息不展示）" : "未配置"]]);
     const barkReady = Boolean(bark?.configured && bark?.enabled);
     const barkProblem = numeric(bark?.failed) > 0 || numeric(bark?.unknown) > 0;
@@ -360,6 +388,15 @@
     if (runtime.data_dir) runtimeFacts.push(["数据位置", runtime.data_dir]);
     if (runtime.signal_mode || runtime.strategy || status.strategy) runtimeFacts.push(["信号规则", runtime.signal_mode || runtime.strategy || status.strategy]);
     if (runtime.higher_mode) runtimeFacts.push(["高周期规则", runtime.higher_mode]);
+    const gate = runtime.model_gate || {};
+    const gateNotice = !modelProtocol() ? "服务正在切换至模型确认口径，原始箭头不会显示为确认信号。" : gate.last_error ? `模型检测异常：${String(gate.last_error)}。未通过检测的候选不会通知。` : gate.status === "error" ? "部分候选检测异常，可在等待确认中查看；未通过检测的候选不会通知。" : gate.loaded !== true ? "模型尚未就绪，候选保留等待，暂不放行通知。" : "";
+    $("model-gate-notice").textContent = gateNotice;
+    $("model-gate-notice").classList.toggle("hidden", !gateNotice);
+    runtimeFacts.push(["模型检测", gate.last_error ? "检测异常 · 不放行通知" : gate.loaded === true ? "已加载" : "等待加载"]);
+    if (gate.profile_id || gate.profile) runtimeFacts.push(["模型配置", gate.profile_id || gate.profile]);
+    if (gate.last_error) runtimeFacts.push(["模型异常", String(gate.last_error)]);
+    if (finite(gate.queue_depth ?? gate.queue)) runtimeFacts.push(["模型待检测", number(gate.queue_depth ?? gate.queue)]);
+    runtimeFacts.push(["确认方式", "原箭头出现后，在等待窗口内检测同一段结构"]);
     runtimeFacts.push(["主图设置快照", TV_SETTINGS]);
     runtimeFacts.push(["参数同步", "固定快照；TradingView 参数修改后，需同步更新监控配置"]);
     if (finite(runtime.fresh_minutes)) runtimeFacts.push(["新鲜信号时限", `${runtime.fresh_minutes} 分钟`]);
@@ -371,7 +408,7 @@
     const errors = Object.entries(state.errors);
     $("error-notice").classList.toggle("hidden", !errors.length);
     if (errors.length) {
-      const names = { status: "运行状态", signals: "信号列表", markets: "蓄势观察" };
+      const names = { status: "运行状态", signals: "信号列表", candidates: "指标候选", markets: "蓄势观察" };
       $("error-notice").textContent = `${errors.map(([key, error]) => `${names[key] || key}：${error}`).join("；")}。${state.lastSync ? "当前保留上次成功获取的数据，" : ""}15 秒后自动重试。`;
     }
   }
@@ -393,13 +430,13 @@
     $("back-to-signals").classList.toggle("hidden", !item);
     if (!item) { setChartExpanded(false, false); return; }
     $("back-to-signals").textContent = state.detailOrigin === "watch" ? "← 返回蓄势观察" : "← 返回信号卡片";
-    $("detail-price-caption").textContent = item.kind === "tv_start" ? "信号收盘价" : "最新已收盘价 · 观察结构";
+    $("detail-price-caption").textContent = isConfirmed(item) ? "模型确认收盘价" : item.kind === "tv_start" ? "原箭头收盘价" : "最新已收盘价 · 观察结构";
     $("detail-symbol").textContent = shortSymbol(item.symbol);
     $("detail-market-label").textContent = `OKX · ${quoteSymbol(item.symbol)} 永续${quoteSymbol(item.symbol) === "USD" ? " · 币本位" : ""}`;
     $("detail-timeframe").textContent = item.timeframe || "—";
     $("chart-title").textContent = `${shortSymbol(item.symbol)} · ${item.timeframe || "—"} · K 线 / IMACD`;
     $("detail-price").textContent = price(item.price);
-    const name = item.kind ? eventNames[item.kind] || item.kind : marketPhase(item);
+    const name = item.kind === "tv_start" ? modelState(item) : item.kind ? eventNames[item.kind] || item.kind : marketPhase(item);
     $("detail-event-badge").innerHTML = `<span class="signal-badge ${item.side === "short" ? "short" : item.side === "long" ? "" : "neutral"}">${sideArrow(item.side)} ${escapeHTML(name)}</span>`;
     const tvSymbol = String(item.symbol || "").replace(/-/g, "").replace(/SWAP$/, ".P");
     const tvInterval = TV_INTERVALS.get(item.timeframe);
@@ -413,18 +450,20 @@
       $("tradingview-web").removeAttribute("href");
       $("tradingview-web").setAttribute("aria-disabled", "true");
     }
+    const original = originalSignal(item), confirmed = isConfirmed(item), candidate = isCandidate(item);
     const facts = [
-      [item.kind === "tv_start" ? "信号收盘 · 北京时间" : "最近收盘 · 北京时间", shortDate(item.bar_close_ms), ""],
-      [item.kind === "tv_start" ? "启动前近零蓄势" : "当前近零蓄势", `${number(focusRun(item))} 根`, ""],
-      ["精确零轴 · 仅作背景", `${number(item.zero_bars)} 根`, ""],
-      ["均线密集 · 背景参考", item.dense === true ? "已密集" : item.dense === false ? "未密集" : "—", item.dense ? "mint" : ""],
-      ["高周期方向 · 背景参考", sideName(item.htf_side), ""],
-      ["主图标记", item.kind === "tv_start" ? "蓄势释放" : "观察结构", ""],
+      [confirmed || candidate ? "原箭头收盘 · 北京时间" : "最近收盘 · 北京时间", shortDate(original.bar_close_ms), ""],
+      ...(confirmed || candidate ? [["原箭头收盘价", price(original.price), ""]] : []),
+      ...(confirmed ? [["模型确认 · 北京时间", shortDate(item.bar_close_ms), "model-color"], ["模型确认收盘价", price(item.price), "model-color"]] : []),
+      ...(item.model ? [["模型状态", modelState(item), item.model.status === "error" ? "red" : ""], ["等待 / 最大窗口", `${number(item.model.wait_bars)} / ${number(item.model.max_wait_bars)} 根`, ""], ...(confirmed ? [["检测分数 · 非胜率", modelScore(item), ""], ["核心区间", `${shortDate(item.model.core_start_ms)} → ${shortDate(item.model.core_end_ms)}`, ""]] : [["最近检测收盘", shortDate(item.model.last_checked_close_ms), ""], ["等待截止", shortDate(item.model.expires_at_ms), ""]])] : []),
+      [confirmed || candidate ? "启动前近零蓄势" : "当前近零蓄势", `${number(focusRun(item))} 根`, ""],
+      ["均线密集 · 背景参考", original.dense === true ? "已密集" : original.dense === false ? "未密集" : "—", original.dense ? "mint" : ""],
+      ["高周期方向 · 背景参考", sideName(original.htf_side), ""],
     ];
     $("detail-facts").innerHTML = facts.map(([label, value, color]) => `<div><div class="fact-label">${escapeHTML(label)}</div><div class="fact-value ${color}">${escapeHTML(value)}</div></div>`).join("");
-    $("detail-reason").textContent = item.kind === "tv_start" ? `启动前近零蓄势 ${number(focusRun(item))} 根，主图${item.side === "short" ? "向下" : "向上"}出现蓄势释放标记，已收盘确认。点位为该根原收盘价；精确零轴根数、均线与高周期仅作背景。${item.tv_profile && item.tv_profile !== TV_PROFILE ? " 此记录的设置快照不同，请核对监控配置。" : ""}` : item.error ? `行情读取异常：${String(item.error)}。当前结构仅供查看。` : item.stale ? "当前行情已过期，等待重新同步；不会将缓存结构当作新信号。" : "当前为行情观察。按固定主图设置记录蓄势释放；普通系统标记已关闭，亮色回踩 K 线仅作参考。";
+    $("detail-reason").textContent = confirmed ? `原始启动箭头后等待 ${number(item.model.wait_bars)} 根，模型确认同一段结构。紫框标出模型核心时间区间，紫色竖线为模型确认收盘所在 K 线；其后的行情不参与当次检测。检测分数用于形态匹配，不代表胜率。` : candidate ? `主图已出现启动箭头，${modelState(item)}。${modelReason(item) ? modelReason(item) + "。" : ""}原箭头保留原时间与原点位，未双重确认不会发送信号通知。${item.tv_profile && item.tv_profile !== TV_PROFILE ? " 此记录设置快照不同，请核对监控配置。" : ""}` : item.error ? `行情读取异常：${String(item.error)}。当前结构仅供查看。` : item.stale ? "当前行情已过期，等待重新同步；不会将缓存结构当作新信号。" : "当前为行情观察。启动箭头出现后才进入模型等待窗口，蓄势状态不等于确认信号。";
     const market = state.markets.find((row) => row.symbol === item.symbol && row.timeframe === item.timeframe);
-    const key = `${item.symbol}|${item.timeframe}|${item.bar_close_ms || ""}|${market?.bar_close_ms || ""}|${market?.stale || false}|${market?.error || ""}`;
+    const key = `${item.kind || "market"}|${item.id || ""}|${item.model?.status || ""}|${item.model?.core_start_ms || ""}|${item.model?.core_end_ms || ""}|${item.symbol}|${item.timeframe}|${item.bar_close_ms || ""}|${market?.bar_close_ms || ""}|${market?.stale || false}|${market?.error || ""}`;
     if (state.chartKey !== key) loadChart(item, key);
   }
   async function loadChart(item, key) {
@@ -470,6 +509,28 @@
     button.setAttribute("title", expanded ? "收起 K 线图（Esc）" : "放大 K 线图");
     $("chart-expand-label").textContent = expanded ? "收起 · Esc" : "放大";
     if (expanded || (restoreFocus && state.selected && state.view === "signals")) button.focus({ preventScroll: true });
+  }
+  // The core is a time interval; its vertical envelope uses only core candles,
+  // never the following move. Backend confirmation timestamps remain authoritative.
+  function modelOverlayHTML(item, candles, x, py, bounds) {
+    const model = item?.model;
+    if (!isConfirmed(item) || ![model.core_start_ms, model.core_end_ms, model.window_end_ms, item.bar_open_ms, item.bar_close_ms, item.price].every(finite) ||
+      Number(model.core_start_ms) > Number(model.core_end_ms) || Number(model.core_end_ms) > Number(model.window_end_ms) ||
+      Number(model.window_end_ms) > Number(item.bar_close_ms)) return { core: "", confirmation: "" };
+    const indices = candles.flatMap((bar, i) => Number(bar.t) >= Number(model.core_start_ms) && Number(bar.t) <= Number(model.core_end_ms) ? [i] : []);
+    let core = "";
+    if (indices.length) {
+      const coreBars = indices.map((i) => candles[i]);
+      const top = Math.min(...coreBars.map((bar) => py(bar.h))), bottom = Math.max(...coreBars.map((bar) => py(bar.l)));
+      const left = x(indices[0]) - bounds.step / 2, right = x(indices[indices.length - 1]) + bounds.step / 2;
+      core = `<g class="model-core" data-source="model-core-interval"><title>模型核心区间 · ${escapeHTML(shortDate(model.core_start_ms))} 至 ${escapeHTML(shortDate(model.core_end_ms))}；纵向为区间 K 线高低包络</title><rect x="${left}" y="${top}" width="${right - left}" height="${Math.max(bottom - top, 1)}" fill="var(--chart-model-fill)" stroke="var(--chart-model)" stroke-width=".8" stroke-dasharray="3 2"/></g>`;
+    }
+    const index = candles.findIndex((bar) => Number(bar.t) === Number(item.bar_open_ms));
+    const confirmation = index < 0 ? "" : `<g class="model-confirmation" data-event-kind="yolo_confirmed"><title>模型确认 · 收盘 ${escapeHTML(shortDate(item.bar_close_ms))} · ${escapeHTML(price(item.price))} · 等待 ${escapeHTML(number(model.wait_bars))} 根</title><line x1="${x(index)}" x2="${x(index)}" y1="${bounds.top}" y2="${bounds.bottom}" stroke="var(--chart-model)" stroke-width="1" stroke-dasharray="4 3"/><circle cx="${x(index)}" cy="${py(item.price)}" r="2.4" fill="var(--chart-model)" stroke="var(--chart-marker-bg)" stroke-width="1"/><text x="${x(index) + (index > candles.length * .8 ? -4 : 4)}" y="${bounds.top + 8}" text-anchor="${index > candles.length * .8 ? "end" : "start"}" style="font-size:7px;fill:var(--chart-model)">模型确认</text></g>`;
+    return { core, confirmation };
+  }
+  function chartHint() {
+    return state.chart?.state?.stale ? "行情缓存已过期 · 等待重新同步" : state.chart?.state?.error ? "行情存在读取异常 · 当前为缓存" : isConfirmed(state.selected) ? "箭头：原指标 · 紫框：模型核心区间 · 紫线：模型确认" : "箭头：原指标候选 · 金色：合格近零区";
   }
   function renderChart() {
     if (!state.chart) return;
@@ -520,7 +581,9 @@
       const label = `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
       parts.push(`<text x="${x(i)}" y="${height - 13}" text-anchor="${i === 0 ? "start" : i === candles.length - 1 ? "end" : "middle"}">${label}</text>`);
     });
+    const modelOverlay = modelOverlayHTML(state.selected, candles, x, py, { step, top: priceTop, bottom: impulseBottom });
     parts.push('<g clip-path="url(#price-clip)">');
+    parts.push(modelOverlay.core);
     const maColors = ["var(--chart-ma20)", "var(--chart-ma20-muted)", "var(--chart-ma60)", "var(--chart-ma60-muted)", "var(--chart-ma120)", "var(--chart-ma120-muted)"];
     maKeys.forEach((key, i) => parts.push(`<path d="${path(key, py)}" fill="none" stroke="${maColors[i]}" stroke-width=".8" opacity=".95"/>`));
     candles.forEach((bar, i) => {
@@ -537,7 +600,8 @@
       if (["long", "short"].includes(bar.tv_start_side)) breakouts.set(`${bar.t}|${bar.tv_start_side}`, { bar_open_ms: bar.t, side: bar.tv_start_side, price: bar.c, near_zero_bars: numeric(bar.near_zero_bars) > 0 ? bar.near_zero_bars : candles[i - 1]?.near_zero_bars });
     });
     const eventList = [...(Array.isArray(state.chart.events) ? state.chart.events : [])];
-    if (state.selected?.kind === "tv_start") eventList.push(state.selected);
+    if (isCandidate(state.selected)) eventList.push(state.selected);
+    if (isConfirmed(state.selected) && state.selected.indicator) eventList.push({ ...state.selected.indicator, kind: "tv_start" });
     eventList.filter((event) => event.kind === "tv_start").forEach((event) => breakouts.set(`${event.bar_open_ms ?? event.t}|${event.side}`, event));
     Array.from(breakouts.values()).slice(-50).forEach((event) => {
       const index = candles.findIndex((bar) => Number(bar.t) === Number(event.bar_open_ms ?? event.t));
@@ -573,10 +637,11 @@
     const zeroY = my(0);
     parts.push(`<line x1="${left}" x2="${width - right + 3}" y1="${zeroY}" y2="${zeroY}" stroke="var(--chart-zero)" stroke-width=".8" stroke-dasharray="3 3"/><text x="${width - right + 9}" y="${zeroY + 3}" style="fill:var(--chart-zero)">0.00</text>`);
     parts.push(`<path d="${path("md", my)}" stroke="var(--chart-md)" stroke-width="1.35" fill="none"/><path d="${path("sb", my)}" stroke="var(--chart-signal)" stroke-width="1.2" fill="none"/>`);
+    parts.push(modelOverlay.confirmation);
     parts.push(`<g class="chart-crosshair" visibility="hidden"><line class="crosshair-line" x1="0" x2="0" y1="${priceTop}" y2="${impulseBottom}" stroke="var(--chart-crosshair)" stroke-width=".8" stroke-dasharray="3 3"/><circle class="crosshair-dot" r="2.5" fill="var(--chart-marker-up)" stroke="var(--chart-marker-bg)" stroke-width="1.2"/></g><rect class="chart-hit-area" x="${left}" y="${priceTop}" width="${plotWidth}" height="${impulseBottom - priceTop}" fill="transparent" stroke="none"/></svg>`);
     $("chart-container").innerHTML = parts.join("");
     $("chart-container").setAttribute("aria-label", `${shortSymbol(state.selected?.symbol)} ${state.selected?.timeframe}，${candles.length} 根真实 K 线，上图六条细均线，下图 IMACD 双线与零轴，无柱状图`);
-    $("chart-hint").textContent = state.chart.state?.stale ? "行情缓存已过期 · 等待重新同步" : state.chart.state?.error ? "行情存在读取异常 · 当前为缓存" : "箭头：主图蓄势释放 · 金色：合格近零区";
+    $("chart-hint").textContent = chartHint();
     const svg = $("chart-container").querySelector("svg");
     const crosshair = svg.querySelector(".chart-crosshair");
     const move = (event) => {
@@ -592,7 +657,7 @@
       $("chart-hint").textContent = marker ? `${shortDate(bar.t)} · 蓄势释放${sideArrow(marker.side)} · ${number(marker.near_zero_bars)} 根 · 收盘 ${price(marker.price ?? bar.c)}` : `${shortDate(bar.t)}  O ${price(bar.o)}  H ${price(bar.h)}  L ${price(bar.l)}  C ${price(bar.c)}  MD ${price(bar.md)}`;
     };
     svg.addEventListener("pointermove", move);
-    svg.addEventListener("pointerleave", () => { crosshair.setAttribute("visibility", "hidden"); $("chart-hint").textContent = state.chart.state?.stale ? "行情缓存已过期 · 等待重新同步" : state.chart.state?.error ? "行情存在读取异常 · 当前为缓存" : "箭头：主图蓄势释放 · 金色：合格近零区"; });
+    svg.addEventListener("pointerleave", () => { crosshair.setAttribute("visibility", "hidden"); $("chart-hint").textContent = chartHint(); });
   }
   async function refresh() {
     if (state.syncing) return;
@@ -600,8 +665,8 @@
     $("refresh-button").disabled = true;
     $("refresh-button").classList.add("loading");
     try {
-      const results = await Promise.allSettled([api("/api/status"), api("/api/signals?limit=2000&kind=tv_start"), api("/api/markets")]);
-      const keys = ["status", "signals", "markets"];
+      const results = await Promise.allSettled([api("/api/status"), api("/api/signals?limit=2000&kind=yolo_confirmed"), api("/api/markets"), api("/api/candidates?limit=2000")]);
+      const keys = ["status", "signals", "markets", "candidates"];
       let anySuccess = false;
       results.forEach((result, index) => {
         const key = keys[index];
@@ -611,10 +676,11 @@
         anySuccess = true;
         if (key === "status") { state.status = result.value; state.statusReceivedAt = Date.now(); }
         else {
-          state[key] = result.value.items.filter((item) => item && typeof item === "object" && item.symbol && (key !== "signals" || item.kind === "tv_start"));
+          state[key] = result.value.items.filter((item) => item && typeof item === "object" && item.symbol && (key === "signals" ? isConfirmed(item) : key === "candidates" ? isCandidate(item) : true));
           state[`${key}Loaded`] = true;
-          if (key === "signals") state.signalTotal = tvProtocol() ? numeric(result.value.total, state.signals.length) : state.signals.length;
-          if (key === "signals") state.signals.sort((a, b) => numeric(b.bar_close_ms) - numeric(a.bar_close_ms) || numeric(b.detected_at_ms) - numeric(a.detected_at_ms));
+          if (key === "signals") state.signalTotal = modelProtocol() ? numeric(result.value.total, state.signals.length) : state.signals.length;
+          if (key === "candidates") { state.candidateTotal = numeric(result.value.total, state.candidates.length); state.candidateCounts = result.value.counts && typeof result.value.counts === "object" ? result.value.counts : null; }
+          if (key === "signals" || key === "candidates") state[key].sort((a, b) => numeric(b.bar_close_ms) - numeric(a.bar_close_ms) || numeric(b.detected_at_ms) - numeric(a.detected_at_ms));
         }
       });
       if (anySuccess) state.lastSync = Date.now();
@@ -622,7 +688,7 @@
       $("last-sync").textContent = state.errors.signals ? "同步失败 · 保留缓存" : `同步 ${clockTime(state.lastSync)}`;
       if (!state.selected && filteredSignals().length) chooseSignal(filteredSignals()[0]);
       else if (state.selected) {
-        const updated = state.selected.id !== undefined ? state.signals.find((item) => String(item.id) === String(state.selected.id)) : state.markets.find((item) => item.symbol === state.selected.symbol && item.timeframe === state.selected.timeframe);
+        const updated = state.selected.id !== undefined ? [...state.signals, ...state.candidates].find((item) => sameEvent(item, state.selected)) : state.markets.find((item) => item.symbol === state.selected.symbol && item.timeframe === state.selected.timeframe);
         if (updated) state.selected = { ...updated };
         renderDetail();
       }
@@ -647,6 +713,11 @@
     state.timeframe = button.dataset.timeframe;
     state.rowLimit = 24;
     document.querySelectorAll("[data-timeframe]").forEach((other) => { const selected = other === button; other.classList.toggle("selected", selected); other.setAttribute("aria-pressed", String(selected)); });
+    applySignalFilters();
+  }));
+  document.querySelectorAll("[data-signal-scope]").forEach((button) => button.addEventListener("click", () => {
+    state.signalScope = button.dataset.signalScope; state.rowLimit = 24;
+    document.querySelectorAll("[data-signal-scope]").forEach((other) => { const selected = other === button; other.classList.toggle("selected", selected); other.setAttribute("aria-pressed", String(selected)); });
     applySignalFilters();
   }));
   $("symbol-search").addEventListener("input", (event) => { state.search = event.target.value; state.rowLimit = 24; applySignalFilters(); });
@@ -676,7 +747,7 @@
     const row = event.target.closest(type === "signal" ? "[data-signal-id]" : "[data-market-symbol]");
     if (!row) return;
     event.preventDefault();
-    if (type === "signal") chooseSignal(state.signals.find((item) => String(item.id) === row.dataset.signalId), true);
+    if (type === "signal") chooseSignal(sourceItems().find((item) => String(item.id) === row.dataset.signalId && item.kind === row.dataset.signalKind), true);
     else {
       const item = state.markets.find((candidate) => candidate.symbol === row.dataset.marketSymbol && candidate.timeframe === row.dataset.marketTimeframe);
       if (item) {
@@ -702,7 +773,7 @@
     const watch = state.detailOrigin === "watch";
     if (watch) setView("watch");
     const cards = document.querySelectorAll(watch ? "[data-market-symbol]" : "[data-signal-id]");
-    const card = Array.from(cards).find((node) => watch ? node.dataset.marketSymbol === state.selected?.symbol && node.dataset.marketTimeframe === state.selected?.timeframe : node.dataset.signalId === String(state.selected?.id));
+    const card = Array.from(cards).find((node) => watch ? node.dataset.marketSymbol === state.selected?.symbol && node.dataset.marketTimeframe === state.selected?.timeframe : node.dataset.signalId === String(state.selected?.id) && node.dataset.signalKind === state.selected?.kind);
     const target = card || $(watch ? "watch-search" : "symbol-search");
     target.scrollIntoView({ behavior: "instant", block: "center" });
     target.focus({ preventScroll: true });
