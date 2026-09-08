@@ -572,3 +572,5 @@
 - [启动突破／高周期独立对照 V3](html/p1_imacd_launch_context_20260908.html)：1H突破有改善迹象但尾部损失大、Holm未通过；高周期同向伤害早启动，0/6通过。
 
 - [IMACD→YOLO 延迟确认工程试验（49箭头→12确认；未评收益）](html/p1_imacd_yolo_confirmation_20260908.html) · 2026-09-08
+
+- [IMACD→YOLO 1H／4H迁移（1H12→5；4H仅2候选未确认）](html/p1_imacd_yolo_timeframes_20260908.html) · 2026-09-08

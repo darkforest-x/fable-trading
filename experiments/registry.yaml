@@ -7137,16 +7137,52 @@ experiments:
       only, not parameter-selection or training data.
   - experiment_id: exp-imacd-yolo-timeframes-20260908-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 849cf11e5579f75416601043cce5a066756e0e68
-    status: active
-    question: Can the frozen IMACD/Grade-A delayed confirmation gate transfer to UTC1H and4H charts?
+    source_commit: 53a6d7c611a53b0619c0f0875279b36c43eb02a2
+    status: inconclusive
+    question: Can the frozen15m-trained IMACD/Grade-A confirmation gate transfer to UTC1H and4H charts?
     single_variable: Chart timeframe only; same BTCETH, dates, weight and per-bar rules as prior15m.
-    result: Source and protocol frozen; pending one engineering evaluation per new timeframe.
-    holdout_consumed: false
+    result: Engineering run completed:1H12arrows to5confirmations(allshort;4immediate,1late5h);4H BTC0arrows,ETH2arrows
+      and0modelboxes in40windows.104tests and79independent ledger checks pass. HigherTF launch accuracy/profitability
+      unproven;4H sample inadequate.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    reuse_allowed: false
+    reuse_allowed: true
     canonical_report: analysis/html/p1_imacd_yolo_timeframes_20260908.html
-    artifacts: []
-    notes: Owner explicitly requests1H/4H; previous unrestricted-date authorization persists. Record holdout consumption1
-      per newTF. No training, economic claim or live changes.
+    artifacts:
+    - imacd-yolo-tf-20260908-v1-00
+    - imacd-yolo-tf-20260908-v1-01
+    - imacd-yolo-tf-20260908-v1-02
+    - imacd-yolo-tf-20260908-v1-03
+    - imacd-yolo-tf-20260908-v1-04
+    - imacd-yolo-tf-20260908-v1-05
+    - imacd-yolo-tf-20260908-v1-06
+    - imacd-yolo-tf-20260908-v1-07
+    - imacd-yolo-tf-20260908-v1-08
+    - imacd-yolo-tf-20260908-v1-09
+    - imacd-yolo-tf-20260908-v1-10
+    - imacd-yolo-tf-20260908-v1-11
+    - imacd-yolo-tf-20260908-v1-12
+    - imacd-yolo-tf-20260908-v1-13
+    - imacd-yolo-tf-20260908-v1-14
+    - imacd-yolo-tf-20260908-v1-15
+    - imacd-yolo-tf-20260908-v1-16
+    - imacd-yolo-tf-20260908-v1-17
+    - imacd-yolo-tf-20260908-v1-18
+    - imacd-yolo-tf-20260908-v1-19
+    - imacd-yolo-tf-20260908-v1-20
+    - imacd-yolo-tf-20260908-v1-21
+    - imacd-yolo-tf-20260908-v1-22
+    - imacd-yolo-tf-20260908-v1-23
+    - imacd-yolo-tf-20260908-v1-24
+    - imacd-yolo-tf-20260908-v1-25
+    - imacd-yolo-tf-20260908-v1-26
+    - imacd-yolo-tf-20260908-v1-27
+    - imacd-yolo-tf-20260908-v1-28
+    - imacd-yolo-tf-20260908-v1-29
+    - imacd-yolo-tf-20260908-v1-30
+    - imacd-yolo-tf-20260908-v1-31
+    - imacd-yolo-tf-20260908-v1-32
+    - imacd-yolo-tf-20260908-v1-33
+    notes: Owner request1H/4H plus persistent unrestricted-date authorization. Holdout consumption1 for1H and1for4H;15m
+      notrerun. Reuse engineering evidence only, not feature-selection or training data. No liveconfiguration changed.

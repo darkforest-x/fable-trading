@@ -1,0 +1,227 @@
+{
+  "source_commit": "53a6d7c611a53b0619c0f0875279b36c43eb02a2",
+  "model_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+  "start": "2026-05-04T00:00:00+00:00",
+  "end_exclusive": "2026-07-01T00:00:00+00:00",
+  "max_wait_bars": 9,
+  "inputs": {
+    "BTC_60": {
+      "raw_path": "data/kline_deep/okx_BTC_USDT_SWAP_15m_158499.csv",
+      "minutes": 60,
+      "raw_rows": 157381,
+      "raw_bounded_ohlcv_sha256": "d4a877143d58bcb5d256db15f0ac73d645a6754d5df4c97b3f6e1f720c5041cf",
+      "parsed_rows": 39345,
+      "parsed_first": "2022-01-03T15:00:00+00:00",
+      "parsed_last": "2026-06-30T23:00:00+00:00",
+      "bounded_ohlcv_sha256": "1be855dbc8f2b0246c90d31900c4ca7051f8390b548cad419488b66ad06a39ff",
+      "discarded_partial_source_rows": 1,
+      "candidate_endpoints": 60,
+      "events": 6,
+      "windows_scored": 120,
+      "windows_with_boxes": 18,
+      "raw_boxes": 18,
+      "structural_boxes": 16,
+      "elapsed_seconds": 9.648
+    },
+    "BTC_240": {
+      "raw_path": "data/kline_deep/okx_BTC_USDT_SWAP_15m_158499.csv",
+      "minutes": 240,
+      "raw_rows": 157381,
+      "raw_bounded_ohlcv_sha256": "d4a877143d58bcb5d256db15f0ac73d645a6754d5df4c97b3f6e1f720c5041cf",
+      "parsed_rows": 9836,
+      "parsed_first": "2022-01-03T16:00:00+00:00",
+      "parsed_last": "2026-06-30T20:00:00+00:00",
+      "bounded_ohlcv_sha256": "98e0a21866fd7971056faffe806faa89473c6f9c0b72b36991aab50a647fd1d1",
+      "discarded_partial_source_rows": 5,
+      "candidate_endpoints": 0,
+      "events": 0,
+      "elapsed_seconds": 0.0,
+      "windows_scored": 0,
+      "windows_with_boxes": 0,
+      "raw_boxes": 0,
+      "structural_boxes": 0
+    },
+    "ETH_60": {
+      "raw_path": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+      "minutes": 60,
+      "raw_rows": 157378,
+      "raw_bounded_ohlcv_sha256": "bdeb7ba5dfdc233af4bcc519a049f05e03c9a18898fa2b3047cbaf8eed40401a",
+      "parsed_rows": 39344,
+      "parsed_first": "2022-01-03T16:00:00+00:00",
+      "parsed_last": "2026-06-30T23:00:00+00:00",
+      "bounded_ohlcv_sha256": "e591be3a8849c9beff139318843ec2e39d36552a932519c7749aeeff0e5ba287",
+      "discarded_partial_source_rows": 2,
+      "candidate_endpoints": 60,
+      "events": 6,
+      "windows_scored": 120,
+      "windows_with_boxes": 11,
+      "raw_boxes": 11,
+      "structural_boxes": 11,
+      "elapsed_seconds": 7.757
+    },
+    "ETH_240": {
+      "raw_path": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+      "minutes": 240,
+      "raw_rows": 157378,
+      "raw_bounded_ohlcv_sha256": "bdeb7ba5dfdc233af4bcc519a049f05e03c9a18898fa2b3047cbaf8eed40401a",
+      "parsed_rows": 9836,
+      "parsed_first": "2022-01-03T16:00:00+00:00",
+      "parsed_last": "2026-06-30T20:00:00+00:00",
+      "bounded_ohlcv_sha256": "c22559388ff008c985a8b555f30cc33bf1d5fdb143c98c87df5a118c212d091f",
+      "discarded_partial_source_rows": 2,
+      "candidate_endpoints": 20,
+      "events": 2,
+      "windows_scored": 40,
+      "elapsed_seconds": 2.348,
+      "windows_with_boxes": 0,
+      "raw_boxes": 0,
+      "structural_boxes": 0
+    }
+  },
+  "table": [
+    {
+      "symbol": "BTC",
+      "timeframe_min": 60,
+      "max_wait_hours": 9.0,
+      "arrows": 6,
+      "complete": 6,
+      "confirmed": 3,
+      "invalidated": 0,
+      "expired": 3,
+      "censored": 0,
+      "pass_rate_pct": 50.0,
+      "delay_median_minutes": 0.0,
+      "displacement_median_bp": 0.0,
+      "displacement_max_bp": 89.60593087034563
+    },
+    {
+      "symbol": "BTC",
+      "timeframe_min": 240,
+      "max_wait_hours": 36.0,
+      "arrows": 0,
+      "complete": 0,
+      "confirmed": 0,
+      "invalidated": 0,
+      "expired": 0,
+      "censored": 0,
+      "pass_rate_pct": null,
+      "delay_median_minutes": null,
+      "displacement_median_bp": null,
+      "displacement_max_bp": null
+    },
+    {
+      "symbol": "ETH",
+      "timeframe_min": 60,
+      "max_wait_hours": 9.0,
+      "arrows": 6,
+      "complete": 6,
+      "confirmed": 2,
+      "invalidated": 0,
+      "expired": 4,
+      "censored": 0,
+      "pass_rate_pct": 33.333333333333336,
+      "delay_median_minutes": 0.0,
+      "displacement_median_bp": 0.0,
+      "displacement_max_bp": -0.0
+    },
+    {
+      "symbol": "ETH",
+      "timeframe_min": 240,
+      "max_wait_hours": 36.0,
+      "arrows": 2,
+      "complete": 2,
+      "confirmed": 0,
+      "invalidated": 0,
+      "expired": 2,
+      "censored": 0,
+      "pass_rate_pct": 0.0,
+      "delay_median_minutes": null,
+      "displacement_median_bp": null,
+      "displacement_max_bp": null
+    }
+  ],
+  "validation": {
+    "BTC_60": {
+      "passed": true,
+      "confirmed_events_checked": 3,
+      "identities_unique": true,
+      "clock_geometry_price_invariants": true
+    },
+    "BTC_240": {
+      "passed": true,
+      "confirmed_events_checked": 0,
+      "identities_unique": true,
+      "clock_geometry_price_invariants": true
+    },
+    "ETH_60": {
+      "passed": true,
+      "confirmed_events_checked": 2,
+      "identities_unique": true,
+      "clock_geometry_price_invariants": true
+    },
+    "ETH_240": {
+      "passed": true,
+      "confirmed_events_checked": 0,
+      "identities_unique": true,
+      "clock_geometry_price_invariants": true
+    }
+  },
+  "direction_null": {
+    "60": {
+      "observed": 5,
+      "permutations": 10000,
+      "seed": 20260908,
+      "null_mean": 3.5981,
+      "null_sd": 0.7587993081177657,
+      "p_one_sided": 0.10008999100089991,
+      "scope": "conditional direction agreement only; not profitability",
+      "p_holm": 0.20017998200179982
+    },
+    "240": {
+      "observed": 0,
+      "permutations": 10000,
+      "seed": 20260908,
+      "null_mean": 0.0,
+      "null_sd": 0.0,
+      "p_one_sided": 1.0,
+      "scope": "conditional direction agreement only; not profitability",
+      "p_holm": 1.0
+    }
+  },
+  "holdout_consumptions": {
+    "60": 1,
+    "240": 1
+  },
+  "versions": {
+    "torch": "2.8.0",
+    "ultralytics": "8.4.89",
+    "numpy": "2.0.2",
+    "pandas": "2.3.3"
+  },
+  "files": {
+    "data/imacd_yolo_timeframes_20260908_v1/BTC_240_candidates.csv": "519337fec0cc32f1fdff2b3792b6f2ccc716efbc91edea81881e9f6df3ce4fec",
+    "data/imacd_yolo_timeframes_20260908_v1/BTC_240_decisions.csv": "63be514d0558274f578ca3fc1286208c76ea7fe7195b46303b8edbbf3ae7adb4",
+    "data/imacd_yolo_timeframes_20260908_v1/BTC_240_proposals.csv.gz": "3569c150662c1ba3813f1af3126660baa7d32b89dbd11e45c2612d4871061755",
+    "data/imacd_yolo_timeframes_20260908_v1/BTC_240_trace.csv.gz": "900e628e04acaf281e252e46ebc99c92736e9eb22f5e33d25bb20ada31a0b7f9",
+    "data/imacd_yolo_timeframes_20260908_v1/BTC_60_candidates.csv": "00962454316e09d1a5316ae3da8189d0eb3043215ea7897e1dfa90e2ad4fa26a",
+    "data/imacd_yolo_timeframes_20260908_v1/BTC_60_decisions.csv": "1089862f61a066992b2e986c601e98819674b0e66e785236f03ad49d2a868be6",
+    "data/imacd_yolo_timeframes_20260908_v1/BTC_60_proposals.csv.gz": "cdcb56f81ce8489e0cebd1503738e7f9500ccb8c5c4287c248347041cdd6afdd",
+    "data/imacd_yolo_timeframes_20260908_v1/BTC_60_trace.csv.gz": "7840ef117b88842275a92503936c4ea865a70f18fc24209e38189a0594d6611a",
+    "data/imacd_yolo_timeframes_20260908_v1/ETH_240_candidates.csv": "a9513adbb8ffa26bbf7743ae6cc77ce8c80231aa00d8a8e8c7b87b5d9465bd7a",
+    "data/imacd_yolo_timeframes_20260908_v1/ETH_240_decisions.csv": "ec19d304f4d564a25f384809b6c3ecee7410aaaafcbe63addf8b4fbeaaf3f975",
+    "data/imacd_yolo_timeframes_20260908_v1/ETH_240_proposals.csv.gz": "78c16fcaa8d5b58b33f2ebca7965faf38159c442727ad882c041f2ea29a006dc",
+    "data/imacd_yolo_timeframes_20260908_v1/ETH_240_trace.csv.gz": "4bc8d831c895f1c09f76dc376054d1739db9f156435427eaedc9e025bf4c3e8d",
+    "data/imacd_yolo_timeframes_20260908_v1/ETH_60_candidates.csv": "98fb54f27be3b9c403dc1b223846a8f9defa8ce15bfd2db61439b87f6ee701fe",
+    "data/imacd_yolo_timeframes_20260908_v1/ETH_60_decisions.csv": "db982a52bee405b46e87343077057a20e2ae236d48301609a86ff0bb88d69c62",
+    "data/imacd_yolo_timeframes_20260908_v1/ETH_60_proposals.csv.gz": "4e43a3fbc10b4a2855dbbb47f9b14084acc3e6c1e0d5c8eadb1c1f0120e6cd61",
+    "data/imacd_yolo_timeframes_20260908_v1/ETH_60_trace.csv.gz": "5655f399a4a80dd78a90fbfc55f45267cfef499b3ecdc9fb7df7314c1c94f41d",
+    "data/imacd_yolo_timeframes_20260908_v1/candidates.csv": "ab18ff8cce0176178c3c5589a59b94744e7d18f34bf8e7a227b50efa3dd65859",
+    "data/imacd_yolo_timeframes_20260908_v1/decisions.csv": "ca23bd9f86dde7b347061e7a6bb0ad097b912619c283e4cb44134c58a4005df8",
+    "data/imacd_yolo_timeframes_20260908_v1/traces.csv.gz": "de7bc28bc93d9f640c9dedd9d0a8728fd86ab909abb3260cf7b428934a606525"
+  },
+  "economic_evaluation": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "prior_15m_summary_sha256": "1e93a4b8cb4d667806dd694ce0f3067169b79f13fa8b3e619948947ae885c521",
+  "completed_at": "2026-09-08T09:21:58.754723+00:00"
+}
