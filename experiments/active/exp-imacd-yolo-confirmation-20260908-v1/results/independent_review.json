@@ -1,0 +1,176 @@
+{
+  "checks": {
+    "saved_sha": true,
+    "unique_ids": true,
+    "candidate_ledger_identical": true,
+    "per_symbol_decisions_same": true,
+    "all_complete": true,
+    "candidate_calendar": true,
+    "setup_length": true,
+    "signal_close_clock": true,
+    "proposal_geometry": true,
+    "structural_flag": true,
+    "model_values": true,
+    "BTC_proposal_clock": true,
+    "BTC_candidate_clock": true,
+    "BTC_endpoints_stats": true,
+    "ETH_proposal_clock": true,
+    "ETH_candidate_clock": true,
+    "ETH_endpoints_stats": true,
+    "first_direction_match": true,
+    "confirmed_clock_overlap_displacement": true,
+    "expired_pool_flags": true,
+    "same_close_prices_equal": true,
+    "BTC_table": true,
+    "ETH_table": true,
+    "null_arithmetic": true,
+    "core_reuse": true
+  },
+  "n_checks": 25,
+  "all_passed": true,
+  "n_events": 49,
+  "n_proposals": 128,
+  "statuses": {
+    "expired": 28,
+    "confirmed": 12,
+    "invalidated": 9
+  },
+  "delays": {
+    "0.0": 7,
+    "1.0": 3,
+    "2.0": 1,
+    "4.0": 1
+  },
+  "confirmed_overlap": {
+    "min_bars": 3.0,
+    "min_fraction": 0.75,
+    "offset_min": -6.0,
+    "offset_max": 1.0
+  },
+  "null_recomputed": {
+    "observed": 12,
+    "null_mean": 6.1271,
+    "null_sd": 1.693914280593915,
+    "p_one_sided": 0.00039996000399960006
+  },
+  "first_fail": [],
+  "other_fail": [],
+  "expiry_fail": [],
+  "confirmed": [
+    {
+      "event_id": "BTC_15_1779422400",
+      "side": 1,
+      "signal_available_at": "2026-05-22 04:15:00+00:00",
+      "delay_bars": 0.0,
+      "displacement_bp": 0.0,
+      "overlap_bars": 5.0,
+      "core_overlap_fraction": 1.0
+    },
+    {
+      "event_id": "BTC_15_1781339400",
+      "side": 1,
+      "signal_available_at": "2026-06-13 08:45:00+00:00",
+      "delay_bars": 0.0,
+      "displacement_bp": 0.0,
+      "overlap_bars": 4.0,
+      "core_overlap_fraction": 1.0
+    },
+    {
+      "event_id": "BTC_15_1782127800",
+      "side": 1,
+      "signal_available_at": "2026-06-22 11:45:00+00:00",
+      "delay_bars": 1.0,
+      "displacement_bp": 5.496249390379848,
+      "overlap_bars": 5.0,
+      "core_overlap_fraction": 1.0
+    },
+    {
+      "event_id": "ETH_15_1778058900",
+      "side": 1,
+      "signal_available_at": "2026-05-06 09:30:00+00:00",
+      "delay_bars": 0.0,
+      "displacement_bp": 0.0,
+      "overlap_bars": 5.0,
+      "core_overlap_fraction": 1.0
+    },
+    {
+      "event_id": "ETH_15_1778263200",
+      "side": 1,
+      "signal_available_at": "2026-05-08 18:15:00+00:00",
+      "delay_bars": 1.0,
+      "displacement_bp": 25.350845316582937,
+      "overlap_bars": 4.0,
+      "core_overlap_fraction": 1.0
+    },
+    {
+      "event_id": "ETH_15_1778426100",
+      "side": 1,
+      "signal_available_at": "2026-05-10 15:30:00+00:00",
+      "delay_bars": 2.0,
+      "displacement_bp": 57.34220180340755,
+      "overlap_bars": 4.0,
+      "core_overlap_fraction": 1.0
+    },
+    {
+      "event_id": "ETH_15_1778551200",
+      "side": -1,
+      "signal_available_at": "2026-05-12 02:15:00+00:00",
+      "delay_bars": 0.0,
+      "displacement_bp": -0.0,
+      "overlap_bars": 4.0,
+      "core_overlap_fraction": 1.0
+    },
+    {
+      "event_id": "ETH_15_1779060600",
+      "side": -1,
+      "signal_available_at": "2026-05-17 23:45:00+00:00",
+      "delay_bars": 1.0,
+      "displacement_bp": -45.28301886792319,
+      "overlap_bars": 5.0,
+      "core_overlap_fraction": 1.0
+    },
+    {
+      "event_id": "ETH_15_1779696000",
+      "side": 1,
+      "signal_available_at": "2026-05-25 08:15:00+00:00",
+      "delay_bars": 4.0,
+      "displacement_bp": 30.40938996490272,
+      "overlap_bars": 3.0,
+      "core_overlap_fraction": 0.75
+    },
+    {
+      "event_id": "ETH_15_1780150500",
+      "side": 1,
+      "signal_available_at": "2026-05-30 14:30:00+00:00",
+      "delay_bars": 0.0,
+      "displacement_bp": 0.0,
+      "overlap_bars": 5.0,
+      "core_overlap_fraction": 1.0
+    },
+    {
+      "event_id": "ETH_15_1781685000",
+      "side": -1,
+      "signal_available_at": "2026-06-17 08:45:00+00:00",
+      "delay_bars": 0.0,
+      "displacement_bp": -0.0,
+      "overlap_bars": 5.0,
+      "core_overlap_fraction": 1.0
+    },
+    {
+      "event_id": "ETH_15_1782753300",
+      "side": 1,
+      "signal_available_at": "2026-06-29 17:30:00+00:00",
+      "delay_bars": 0.0,
+      "displacement_bp": 0.0,
+      "overlap_bars": 4.0,
+      "core_overlap_fraction": 1.0
+    }
+  ],
+  "limitations": [
+    "No raw OHLCV, model inference, or independent indicator replay. Prices are checked arithmetically from saved next-open values only.",
+    "Bar clocks use saved parsed_first plus 15m offsets; raw continuity is not independently re-read.",
+    "No per-bar md or first_invalid_i is persisted. The nine reported invalidations and direction-pool clipping cannot be independently replayed from these ledgers; code and synthetic tests support them.",
+    "Direction permutation is conditional on saved original md-valid pools. It is an engineering-only association check, not a test of profitability, launch accuracy, or reduced false alerts.",
+    "All 49 candidates in this fixed run have complete follow-up. The incomplete-follow-up censoring policy is not exercised here."
+  ]
+}

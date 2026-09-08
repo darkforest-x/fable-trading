@@ -1,0 +1,100 @@
+{
+  "source_commit": "d0f4c65afddb38915f9da35db6cc50a124fc9b7d",
+  "model_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+  "start": "2026-05-04T00:00:00+00:00",
+  "end_exclusive": "2026-07-01T00:00:00+00:00",
+  "max_wait_bars": 9,
+  "inputs": {
+    "BTC": {
+      "path": "data/kline_deep/okx_BTC_USDT_SWAP_15m_158499.csv",
+      "parsed_rows": 157381,
+      "parsed_first": "2022-01-03T14:45:00+00:00",
+      "parsed_last": "2026-06-30T23:45:00+00:00",
+      "bounded_ohlcv_sha256": "d4a877143d58bcb5d256db15f0ac73d645a6754d5df4c97b3f6e1f720c5041cf",
+      "candidate_endpoints": 230,
+      "events": 23,
+      "windows_scored": 460,
+      "windows_with_boxes": 31,
+      "raw_boxes": 36,
+      "structural_boxes": 33,
+      "elapsed_seconds": 30.403
+    },
+    "ETH": {
+      "path": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+      "parsed_rows": 157378,
+      "parsed_first": "2022-01-03T15:30:00+00:00",
+      "parsed_last": "2026-06-30T23:45:00+00:00",
+      "bounded_ohlcv_sha256": "bdeb7ba5dfdc233af4bcc519a049f05e03c9a18898fa2b3047cbaf8eed40401a",
+      "candidate_endpoints": 260,
+      "events": 26,
+      "windows_scored": 520,
+      "windows_with_boxes": 90,
+      "raw_boxes": 92,
+      "structural_boxes": 88,
+      "elapsed_seconds": 34.607
+    }
+  },
+  "table": [
+    {
+      "symbol": "BTC",
+      "arrows": 23,
+      "complete": 23,
+      "confirmed": 3,
+      "invalidated": 5,
+      "expired": 15,
+      "censored": 0,
+      "pass_rate_pct": 13.043478260869565,
+      "delay_median_minutes": 0.0,
+      "displacement_median_bp": 0.0,
+      "displacement_max_bp": 5.496249390379848
+    },
+    {
+      "symbol": "ETH",
+      "arrows": 26,
+      "complete": 26,
+      "confirmed": 9,
+      "invalidated": 4,
+      "expired": 13,
+      "censored": 0,
+      "pass_rate_pct": 34.61538461538461,
+      "delay_median_minutes": 0.0,
+      "displacement_median_bp": 0.0,
+      "displacement_max_bp": 57.34220180340755
+    }
+  ],
+  "validation": {
+    "passed": true,
+    "confirmed_events_checked": 12,
+    "identities_unique": true,
+    "clock_geometry_price_invariants": true
+  },
+  "direction_null": {
+    "observed": 12,
+    "permutations": 10000,
+    "seed": 20260908,
+    "null_mean": 6.1271,
+    "null_sd": 1.693914280593915,
+    "p_one_sided": 0.00039996000399960006,
+    "scope": "conditional direction agreement only; not profitability"
+  },
+  "versions": {
+    "torch": "2.8.0",
+    "ultralytics": "8.4.89",
+    "numpy": "2.0.2",
+    "pandas": "2.3.3"
+  },
+  "reused_core_confirmations": 0,
+  "files": {
+    "data/imacd_yolo_confirmation_20260908_v1/BTC_decisions.csv": "c588d9c4145b45932f8bbf72de4983da88de4546ff0ed340361aa754e5950a69",
+    "data/imacd_yolo_confirmation_20260908_v1/BTC_proposals.csv.gz": "e42f8111cd2c9ab0235615d72b2961828d5d99f69a086ffec6a6fa41823bb697",
+    "data/imacd_yolo_confirmation_20260908_v1/ETH_decisions.csv": "9d117dce7ec43f91f735867bc40fc34ba990b33f4573b60d9144ee0086f126a2",
+    "data/imacd_yolo_confirmation_20260908_v1/ETH_proposals.csv.gz": "335c7a93e803d495590cf84cf27fd9dfcd70aed7b3f0ffcb25bf2bee195d7a9c",
+    "data/imacd_yolo_confirmation_20260908_v1/candidates.csv": "2c1cccf3aa3022ee99584d37f11e1452626cfc8b1692f3ee3b65ac96b57f7ce8",
+    "data/imacd_yolo_confirmation_20260908_v1/decisions.csv": "684db9df7352436c9b4a4c95433bb7b43127b65e701b2e595263f708de80e206"
+  },
+  "holdout_consumption_this_configuration": 1,
+  "economic_evaluation": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "completed_at": "2026-09-08T08:55:01.981227+00:00"
+}

@@ -1,0 +1,26 @@
+{
+  "selected_model": "grade_a8k_neg24k_full40_1280",
+  "weight_path": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/weights/best.pt",
+  "sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+  "selection_basis": "Existing console-bound close-source native1280 Grade-A research baseline; not proven globally best or most profitable. No current-run performance used for selection.",
+  "contract_paths": [
+    "yoyo/console/replay.py",
+    "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1/preregistration.json"
+  ],
+  "training_manifest": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+  "manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+  "read_only_inventory": {
+    "train_images": 27200,
+    "train_events": 3552,
+    "train_visible_end_max_utc": "2025-11-29T08:45:00Z",
+    "val_images": 4800,
+    "val_events": 620,
+    "val_visible_end_max_utc": "2026-05-03T20:30:00Z",
+    "native_timeframe": "15m",
+    "old_owner_best_alias": "owner_short_star_v10.pt",
+    "hl2_paired_gate": "not passed"
+  },
+  "production_eligible": false,
+  "training_eligible": false,
+  "note": "Inventory metadata and actual weight-byte SHA were independently checked by formation_memory_features_v2 before this pilot. No market inference used to choose weight."
+}
