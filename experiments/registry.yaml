@@ -7390,3 +7390,22 @@ experiments:
     reuse_allowed: false
     notes: One authorized UI exposure of this configuration; no return score. Probe covers pure helpers, not exhaustive
       realtime-tick lifecycle. Light theme visually checked. Latest episode is dated explicitly.
+
+  - experiment_id: exp-imacd-pane-readability-20260908-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 662922bb369ee7e3e659620917eec6cb28002493
+    status: accepted
+    question: Make overlapping pane release annotations readable at a compressed zero axis.
+    single_variable: Display-only annotation composition; six drawing statements, no signal changes.
+    result: Cloud v12 saved; exact editor parity; six-statement exclusion parity; light and dark long/short UI checks.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/html/p0_imacd_pane_readability_20260908.html
+    artifacts:
+    - imacd-pane-readability-v26-20260908-source
+    - imacd-pane-readability-v26-20260908-verification
+    - imacd-pane-readability-v26-20260908-report-source
+    - imacd-pane-readability-v26-20260908-report
+    reuse_allowed: false
+    notes: First owner-authorized UI-only exposure round; no scoring or training. White background restored.

@@ -24728,3 +24728,56 @@ artifacts:
     production_eligible: false
     notes: Display-only engineering acceptance. Cloud v11; pure Pine probe24/24; no performance evaluation, model, notification
       or execution change.
+
+  - artifact_id: imacd-pane-readability-v26-20260908-source
+    artifact_type: config
+    role: pine_display_engineering
+    source_repo: darkforest-x/fable-trading
+    source_commit: 662922bb369ee7e3e659620917eec6cb28002493
+    source_path: yoyo/evaluation/pine/imacd_dense_mtf_v2_6.pine
+    sha256: dcc51503e32152c560b969560a171c9167c1ace981cda6cc188fbb55c7524741
+    size_bytes: 61104
+    storage_uri: repo://yoyo/evaluation/pine/imacd_dense_mtf_v2_6.pine
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: UI-only readability patch, cloud v12; no return evaluation, model or notification changes.
+  - artifact_id: imacd-pane-readability-v26-20260908-verification
+    artifact_type: manifest
+    role: pine_display_engineering
+    source_repo: darkforest-x/fable-trading
+    source_commit: 662922bb369ee7e3e659620917eec6cb28002493
+    source_path: experiments/active/exp-imacd-pane-readability-20260908-v1/results/verification.json
+    sha256: 66ed6e039a386df7c1d54abaf8323f3de3422685f7769a2edddccd89f3979b18
+    size_bytes: 5128
+    storage_uri: repo://experiments/active/exp-imacd-pane-readability-20260908-v1/results/verification.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: UI-only readability patch, cloud v12; no return evaluation, model or notification changes.
+  - artifact_id: imacd-pane-readability-v26-20260908-report-source
+    artifact_type: report
+    role: pine_display_engineering
+    source_repo: darkforest-x/fable-trading
+    source_commit: 662922bb369ee7e3e659620917eec6cb28002493
+    source_path: analysis/p0_imacd_pane_readability_20260908.md
+    sha256: d12bd8c4f3e7c73fda5441e4ffc62a99128bc6b0524ea1d92c5249de4ea9372e
+    size_bytes: 6310
+    storage_uri: repo://analysis/p0_imacd_pane_readability_20260908.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: UI-only readability patch, cloud v12; no return evaluation, model or notification changes.
+  - artifact_id: imacd-pane-readability-v26-20260908-report
+    artifact_type: report
+    role: pine_display_engineering
+    source_repo: darkforest-x/fable-trading
+    source_commit: 662922bb369ee7e3e659620917eec6cb28002493
+    source_path: analysis/html/p0_imacd_pane_readability_20260908.html
+    sha256: 2c0e058acb1acc65faa102108cd6947ad18ae11bbf9829e3bd7263b00c6fc53a
+    size_bytes: 9524
+    storage_uri: repo://analysis/html/p0_imacd_pane_readability_20260908.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: UI-only readability patch, cloud v12; no return evaluation, model or notification changes.

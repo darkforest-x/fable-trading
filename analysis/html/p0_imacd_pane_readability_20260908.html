@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>IMACD V2.6：让副图启动点与文字分开</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>IMACD V2.6：让副图启动点与文字分开</h1>
+<p><strong>已保存至原 TradingView 云脚本，版本 12，09/08 23:56；浅色、黑色背景及多空启动点均完成实图验收。</strong> 用户指出的 USELESS 1H 副图启动处，现在使用小圆点、留有间距的文字和更细的光晕。源码先于实图验证提交：<code>662922bb369ee7e3e659620917eec6cb28002493</code>，09/08 23:54:32。实验编号 <code>exp-imacd-pane-readability-20260908-v1</code>；本轮界面检查跨日至 09/09 00:06（北京时间）。</p>
+<h2>改了什么</h2>
+<table><thead><tr>
+<th>显示项</th>
+<th>V2.5</th>
+<th>V2.6</th>
+</tr></thead><tbody>
+<tr><td>启动锚点</td><td>小菱形，与标签尖头重叠</td><td>更小的实心圆点，仍位于原释放 K 线的 md 值</td></tr>
+<tr><td>副图文字</td><td>半透明带尖头标签，紧贴曲线</td><td>背景全透明，多头文字向下留一行、空头向上留一行；显示“↑ / ↓ 启动 · N 根”</td></tr>
+<tr><td>光晕线宽</td><td>外光 / 柔光 / 主线 10 / 6 / 3 px</td><td>6 / 4 / 2 px，外光和柔光更淡</td></tr>
+<tr><td>信号、主图与坐标</td><td>V2.5 原值</td><td>完全一致，未移动释放时间或 md 锚点</td></tr>
+</tbody></table>
+<p>只变更六条副图显示语句及一行版本注释。零轴、蓝橙双线、六条主图均线、主图标签与盈亏比参考、参数、生命周期和警报条件保持。没有增加标签或 plot 调用，也没有修改 YOLO、前端、TG、Bark、监控服务或执行器。</p>
+<p>透明标签保留 <code>label_up/down</code> 的相对定位，用文本行高分开圆点和文字；没有用 ATR 偏移纵坐标，避免后续大行情扩大副图量程后间距又被压扁。标签定位及换行机制参考 <a href="https://www.tradingview.com/pine-script-docs/visuals/text-and-shapes/">TradingView 官方文字与形状文档</a>。</p>
+<h2>工程验收</h2>
+<table><thead><tr>
+<th>检查</th>
+<th>结果</th>
+<th>证据与范围</th>
+</tr></thead><tbody>
+<tr><td>完整源码对照</td><td>通过</td><td>精确排除六条显示语句及一行版本注释后，V2.5 / V2.6 剩余源码逐字节一致</td></tr>
+<tr><td>标签预算与主图</td><td>通过</td><td><code>label.new</code> 调用 13 → 13；80 段队列、驱逐规则、<code>max_labels_count</code> 及主图代码未变</td></tr>
+<tr><td>V2.5 保护测试</td><td>4 项通过</td><td><code>tests/test_imacd_pine_v25_contract.py</code>，未修改原测试或基线</td></tr>
+<tr><td>原云脚本编译及保存</td><td>通过</td><td>“IMACD 零轴密集启动 · 多周期趋势 V1”，保存版本 12</td></tr>
+<tr><td>编辑器全文回读</td><td>一致</td><td>归一化 CRLF 后 SHA256 与本地 V2.6 一致</td></tr>
+<tr><td>OKX XAUUSDT.P 1H 浅色</td><td>通过</td><td>黄金 USDT 永续，原生 TradingView 实看 30 根蓄势后的多头启动，圆点、文字与光晕分离</td></tr>
+<tr><td>USELESS 1H 浅色</td><td>通过</td><td>8 月 27 日至 9 月 4 日窗口，复查用户标出的 16 根蓄势启动处</td></tr>
+<tr><td>OKX KAITOUSDT.P 1H 浅色</td><td>通过</td><td>实际可见 8 月 28 日至 9 月 8 日；8 月 30 日空头 23 根、9 月 5 日多头 33 根均可辨认</td></tr>
+<tr><td>OKX KAITOUSDT.P 1H 黑色背景</td><td>通过</td><td>同一窗口临时从白色切换黑色背景；空头文字在圆点上方，与左侧蓄势标签分离，多头文字在下方；双线与零轴清晰</td></tr>
+</tbody></table>
+<p>以上是原生 TradingView 工具输出中的截图观察记录，没有另存为本地 PNG。周期范围仅为本轮 1H 样式验收，不将其他周期写为已验证。</p>
+<p>检查完成后已通过撤销恢复白色背景并截图确认，最终返回 USELESSUSDT.P 1H、8 月 27 日至 9 月 4 日窗口。</p>
+<p>V2.6 全文 SHA256：<code>dcc51503e32152c560b969560a171c9167c1ace981cda6cc188fbb55c7524741</code>。</p>
+<p>排除六条显示语句及一行注释后的共同源码 SHA256：<code>404ee7162ebbe8922c7abcc344b6667b2a3b9cdff72a704c6ff2b9f1dd136b34</code>。</p>
+<h2>复现</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+.venv/bin/python -m pytest -q tests/test_imacd_pine_v25_contract.py
+shasum -a 256 yoyo/evaluation/pine/imacd_dense_mtf_v2_6.pine
+.venv/bin/python - &lt;&lt;&#x27;PY&#x27;
+from pathlib import Path
+import hashlib
+p = Path(&#x27;yoyo/evaluation/pine&#x27;)
+a = (p / &#x27;imacd_dense_mtf_v2_5.pine&#x27;).read_text()
+b = (p / &#x27;imacd_dense_mtf_v2_6.pine&#x27;).read_text()
+keys = [&#x27;string paneText =&#x27;, &#x27;label paneTag =&#x27;,
+        &#x27;plot(glowMd, &quot;释放 · 外光&quot;&#x27;, &#x27;plot(glowMd, &quot;释放 · 柔光&quot;&#x27;,
+        &#x27;glowMain = plot(glowMd&#x27;,
+        &#x27;plotshape(showFocus and focusRelease ? md : na,&#x27;]
+for key in keys:
+    assert sum(line.lstrip().startswith(key) for line in a.splitlines()) == 1
+    assert sum(line.lstrip().startswith(key) for line in b.splitlines()) == 1
+note = &#x27;// V2.6 changes only pane release typography, the marker and glow widths.\n&#x27;
+assert b.count(note) == 1
+b = b.replace(note, &#x27;&#x27;, 1)
+def frozen(source):
+    return &#x27;&#x27;.join(line for line in source.splitlines(True)
+                   if not any(line.lstrip().startswith(key) for key in keys))
+assert frozen(a) == frozen(b)
+print(hashlib.sha256(frozen(a).encode()).hexdigest())
+PY
+python3 scripts/md_to_html.py analysis/p0_imacd_pane_readability_20260908.md --out-dir analysis/html
+</code></pre>
+<p>在原 TradingView 云脚本中粘贴 V2.6 全文、更新图表并保存；检查浅色 / 深色及多头 / 空头释放处，确认圆点仍对应原 K 线、文字没有与计数标签重叠。完整读回后只归一化 CRLF，再核对上述全文哈希。原 V2.5 文件和云端版本 11 保留为对照。</p>
+<h2>风险与诚实声明</h2>
+<p>这是显示层工程修复，没有候选池、正类率、训练 / val 样本或收益统计。因此 val AUC、置换检验 p、top-decile 毛 / 净收益、胜率、单特征收益基线及匹配随机交易对照均不适用。工程零假设是“显示改动之外代码不变”，对照为冻结 V2.5 全文的精确字节比较，并结合 TradingView 实编和真实图表视觉检查；没有用图例推断收益改善。</p>
+<p>Owner 在当前对话已允许任意日期数据。<strong>这是该配置第 1 次暴露 / 使用 holdout 时段</strong>，仅为同一轮界面检查，没有评分、训练或调参。已核对的 USELESS 图窗覆盖 2026 年 8 月至 9 月；KAITO 日期范围输入为 8 月 27 日至 9 月 8 日，实际可见 8 月 28 日至 9 月 8 日。初始 XAUUSDT.P 历史窗口未完整记录精确边界，不编造统一的起止时间或样本数量。结构化验收记录位于 <code>experiments/active/exp-imacd-pane-readability-20260908-v1/results/verification.json</code>。</p>
+<p>浅色与黑色背景、多头与空头都已实际查看；有限的窗口不能覆盖所有缩放和字体组合。后续如果要改变哪些 K 线出信号，应单独做规则与效果评估，本轮不涉及该决策。</p>
+</body>
+</html>

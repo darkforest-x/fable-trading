@@ -2,6 +2,15 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## IMACD V2.6 副图启动点已修正（2026-09-09 00:08）
+
+针对Owner所指零轴菱形/尖角/光晕重叠：改tiny圆点、透明标签+方向空行、光晕6/4/2。
+仅6显示语句变化，余下源代码逐字相同；六MA/主图/R/信号条件/输入/队列预算保持。
+源码 yoyo/evaluation/pine/imacd_dense_mtf_v2_6.pine，先提交662922b，原云脚本保存版本12（09-08 23:56）。
+编辑器全文SHA一致；V2.5保护测试4通过；USELESS1H用户16根段、XAUUSDT.P1H与KAITO1H多空在浅色/黑色已看图。
+临时黑色背景已撤回白色，最终USELESS1H Aug27–Sep4。无本地新PNG，工具原生截图作观察证据。
+报告 analysis/html/p0_imacd_pane_readability_20260908.html；此次无通知、模型、前端或执行改动。
+
 ## IMACD V2.5 已保存到 TradingView（2026-09-08 23:40）
 
 Owner 授权后实现最新释放持续阶段、冻结初始 R、3/5/10R 已达标记与首次箱沿/固定均线回踩。

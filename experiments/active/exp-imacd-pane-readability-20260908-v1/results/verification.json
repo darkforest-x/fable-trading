@@ -1,0 +1,117 @@
+{
+  "experiment_id": "exp-imacd-pane-readability-20260908-v1",
+  "verification_kind": "pane_display_engineering",
+  "status": "accepted",
+  "visual_checks_completed_at_local": "2026-09-09T00:06:00+08:00",
+  "visual_check_completion_precision": "minute",
+  "source_commit": "662922bb369ee7e3e659620917eec6cb28002493",
+  "source_commit_time": "2026-09-08T23:54:32+08:00",
+  "source_path": "yoyo/evaluation/pine/imacd_dense_mtf_v2_6.pine",
+  "baseline_path": "yoyo/evaluation/pine/imacd_dense_mtf_v2_5.pine",
+  "source_sha256": "dcc51503e32152c560b969560a171c9167c1ace981cda6cc188fbb55c7524741",
+  "frozen_remainder_sha256": "404ee7162ebbe8922c7abcc344b6667b2a3b9cdff72a704c6ff2b9f1dd136b34",
+  "parity": {
+    "exact_excluded_display_statements": 6,
+    "exact_excluded_version_comments": 1,
+    "all_other_source_bytes_equal": true,
+    "label_new_calls_before": 13,
+    "label_new_calls_after": 13,
+    "queue_budget_changed": false,
+    "plot_call_count_changed": false,
+    "main_chart_changed": false,
+    "inputs_changed": false,
+    "signal_conditions_changed": false,
+    "reviewed_by": "pane_marker_review"
+  },
+  "protected_baseline_tests": {
+    "path": "tests/test_imacd_pine_v25_contract.py",
+    "passed": 4,
+    "reported_by": "root"
+  },
+  "tradingview": {
+    "application": "Mac TradingView native",
+    "cloud_script_title": "IMACD 零轴密集启动 · 多周期趋势 V1",
+    "cloud_version": 12,
+    "saved_at_local": "2026-09-08T23:56:00+08:00",
+    "saved_time_precision": "minute",
+    "compiled": true,
+    "editor_readback_matches_source": true,
+    "readback_normalization": "CRLF to LF only",
+    "reported_by": "root",
+    "visual_checks": [
+      {
+        "symbol": "XAUUSDT.P",
+        "exchange": "OKX",
+        "instrument_type": "USDT perpetual swap",
+        "timeframe": "1H",
+        "theme": "light",
+        "side": "long",
+        "focus_bars": 30,
+        "history_range": "not fully recorded",
+        "status": "passed",
+        "observation": "Native chart shows separated release dot, text and thinner glow."
+      },
+      {
+        "symbol": "USELESSUSDT.P",
+        "timeframe": "1H",
+        "theme": "light",
+        "side": "long",
+        "focus_bars": 16,
+        "history_range": "2026-08-27 through 2026-09-04 visible window",
+        "status": "passed",
+        "observation": "Rechecked the user's marked episode; dot, text and glow are visibly separated."
+      },
+      {
+        "symbol": "KAITOUSDT.P",
+        "exchange": "OKX",
+        "timeframe": "1H",
+        "theme": "light",
+        "requested_history_range": "2026-08-27 through 2026-09-08",
+        "visible_history_range": "2026-08-28 through 2026-09-08",
+        "episodes": [
+          {"side": "short", "focus_bars": 23, "date": "2026-08-30"},
+          {"side": "long", "focus_bars": 33, "date": "2026-09-05"}
+        ],
+        "status": "passed",
+        "observation": "Short text is above the release dot and separate from the left-hand accumulation tag; long text has a blank-line gap below the dot. The original md anchor, two traces and zero line remain clear."
+      },
+      {
+        "symbol": "KAITOUSDT.P",
+        "exchange": "OKX",
+        "timeframe": "1H",
+        "theme": "black chart background",
+        "theme_check_method": "Temporarily changed chart background from white to black.",
+        "requested_history_range": "2026-08-27 through 2026-09-08",
+        "visible_history_range": "2026-08-28 through 2026-09-08",
+        "episodes": [
+          {"side": "short", "focus_bars": 23, "date": "2026-08-30"},
+          {"side": "long", "focus_bars": 33, "date": "2026-09-05"}
+        ],
+        "status": "passed",
+        "observation": "Both short and long annotations are separated from their release dots and accumulation tags; two traces and zero line are readable."
+      }
+    ],
+    "visual_evidence_medium": "Native TradingView screenshots observed in tool outputs; no persistent local PNG files are claimed.",
+    "timeframe_scope": "1H only for this visual acceptance round.",
+    "final_chart_state": {
+      "white_background_restored": true,
+      "restoration_method": "Undo; native screenshot confirmed restoration.",
+      "symbol": "USELESSUSDT.P",
+      "timeframe": "1H",
+      "history_range": "2026-08-27 through 2026-09-04",
+      "reported_by": "root"
+    }
+  },
+  "holdout": {
+    "owner_authorized_any_date_in_conversation": true,
+    "configuration_consumption_count": 1,
+    "purpose": "One UI-only exposure round; no outcome scoring, training or tuning.",
+    "range_precision": "USELESS and KAITO visible windows are recorded; initial XAUUSDT.P exact historical boundaries were not fully recorded."
+  },
+  "performance_evaluation": {
+    "performed": false,
+    "metrics_applicability": "AUC, permutation p, gross/net returns, win rate, top-decile metrics and matched random entry controls are not applicable to this display-only engineering change.",
+    "engineering_control": "Exact frozen-source parity after the six allowlisted display statements and one version comment are removed."
+  },
+  "model_notification_or_execution_changes": false
+}
