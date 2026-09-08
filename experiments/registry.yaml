@@ -7135,3 +7135,18 @@ experiments:
     notes: Configuration holdout consumption1 under prior explicit unrestricted-date authorization; no new blind-data
       claim. BTC/ETH native15m May4-Jul1 2026. No live rule or notification change. Reuse is engineering evidence
       only, not parameter-selection or training data.
+  - experiment_id: exp-imacd-yolo-timeframes-20260908-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 849cf11e5579f75416601043cce5a066756e0e68
+    status: active
+    question: Can the frozen IMACD/Grade-A delayed confirmation gate transfer to UTC1H and4H charts?
+    single_variable: Chart timeframe only; same BTCETH, dates, weight and per-bar rules as prior15m.
+    result: Source and protocol frozen; pending one engineering evaluation per new timeframe.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    canonical_report: analysis/html/p1_imacd_yolo_timeframes_20260908.html
+    artifacts: []
+    notes: Owner explicitly requests1H/4H; previous unrestricted-date authorization persists. Record holdout consumption1
+      per newTF. No training, economic claim or live changes.
