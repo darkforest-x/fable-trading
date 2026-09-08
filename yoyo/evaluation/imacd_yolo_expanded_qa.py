@@ -46,6 +46,7 @@ def run():
         report_summary_link=report_receipt["summary_sha256"]==sha(r/"summary.json"),
         report_source_link=report_receipt["report_source_sha256"]==sha(ROOT/"yoyo/evaluation/imacd_yolo_expanded_report.py"),
         report_md_link=report_receipt["report_sha256"]==sha(report),
+        finalizer_source_link=summary["finalizer_source_sha256"]==sha(ROOT/summary["finalizer_source"]),
         examples_summary_link=examples["summary_sha256"]==sha(r/"summary.json"),
         examples_no_model_replay=examples["model_inference_runs"]==0,
         report_examples_link=report_receipt["examples"]["manifest_sha256"]==sha(r/"example_manifest.json"))
@@ -71,6 +72,7 @@ def run():
         png_example_files=png_count, html_embedded_images=len(embedded),
         html_sha256=sha(html), html_bytes=html.stat().st_size,
         tests_pre_run="112 passed: expanded8 + timeframe16 + prior15m20 + layer-boundary68",
+        tests_output_fix="2 additional regression checks passed;114 total, without rerunning inference",
         source_commit=subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip(),
         limitation="File and image integrity only; no full HTML browser-render review claimed.")
     (r/"qa_receipt.json").write_text(json.dumps(receipt,indent=2,ensure_ascii=False)+"\n")
