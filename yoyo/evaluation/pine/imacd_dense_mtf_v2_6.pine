@@ -1,0 +1,804 @@
+//@version=6
+// IMACD formula credited to LazyBear; the trade-signal core is frozen from V1.2.
+// Original visual composition: confirmed near-zero preparation and its release.
+// Visual V2.3 increases only six MA opacities; pane and signal logic stay frozen.
+// Visual V2.4 adds configurable main-chart risk/reward references for visible focus releases.
+// BEGIN V2.5 VERSION NOTE
+// V2.5 adds a latest-release lifecycle, frozen R references and first retests.
+// Original signals, alerts, six moving-average plots and pane plots are frozen.
+// END V2.5 VERSION NOTE
+// V2.6 changes only pane release typography, the marker and glow widths.
+// Entry/stop/target levels are drawing references, not orders, fills or trading rules.
+// Focus is a display event, independent of the system's MA/MTF entry decisions.
+// No orders, strategy fills, normalization or performance claims.
+// Confirmed HTF values use expression[1] + lookahead_on; source timing is unchanged.
+indicator("IMACD · 蓄势释放", shorttitle="IMACD", overlay=false, max_bars_back=1500, max_lines_count=300, max_boxes_count=150, max_labels_count=420, explicit_plot_zorder=true)
+
+string gSignal = "01 · 信号模式"
+string mode = input.string("密集启动", "模式", options=["密集启动", "密集＋共振", "密集＋共振等待"], group=gSignal, tooltip="密集启动：零轴整理与均线密集后离开零轴。共振模式：再要求价格离开均线带、已收盘高周期允许；等待模式可等待后续确认。", display=display.none)
+int lengthMA = input.int(34, "IMACD 长度", minval=2, maxval=200, group=gSignal, display=display.none)
+int lengthSignal = input.int(9, "信号线长度", minval=1, maxval=100, group=gSignal, display=display.none)
+int minZero = input.int(1, "启动前至少连续零轴根数", minval=1, maxval=200, group=gSignal, tooltip="默认1，不强制长横盘。调高会减少信号，也可能错过大趋势。", display=display.none)
+int waitBars = input.int(9, "最多等待根数", minval=0, maxval=50, group=gSignal, display=display.none)
+
+string gDense = "02 · 六均线密集"
+int denseWindow = input.int(12, "形成窗口（不含启动当根）", minval=2, maxval=100, group=gDense, display=display.none)
+float maxWidth = input.float(3.0, "平均均线带宽 / ATR 上限", minval=0.1, step=0.1, group=gDense, display=display.none)
+int minCrosses = input.int(2, "窗口内至少交织次数", minval=0, maxval=100, group=gDense, display=display.none)
+int denseMemory = input.int(34, "共振模式：密集记忆根数", minval=1, maxval=200, group=gDense, display=display.none)
+
+string gMtf = "03 · 多周期（仅共振模式参与过滤）"
+bool autoTf = input.bool(true, "自动匹配高 / 低周期", group=gMtf, display=display.none)
+string manualHtf = input.timeframe("1D", "手动高周期", group=gMtf, display=display.none)
+string manualLtf = input.timeframe("60", "手动低周期", group=gMtf, display=display.none)
+string htfMode = input.string("同向或零轴", "高周期许可", options=["主线同向", "主线或动量同向", "同向或零轴"], group=gMtf, tooltip="同向或零轴：高周期md或sh同向，或者md精确为0。仅使用已确认高周期，不使用正在形成的大K线。", display=display.none)
+bool useLower = input.bool(false, "再要求低周期主线同向", group=gMtf, tooltip="启用时，缺少低周期数据就不发新信号；不会把缺数据当共振。", display=display.none)
+
+string gFocus = "04 · 视觉重点 · 近零蓄势"
+bool showFocus = input.bool(true, "突出近零蓄势与释放", group=gFocus, tooltip="视觉提示：IMACD主线和信号线在零轴附近持续停留，再由主线离开。独立于原系统入场条件，不能当作均线/多周期已确认。", display=display.none)
+int focusMinBars = input.int(12, "至少连续近零根数", minval=2, maxval=200, group=gFocus, tooltip="默认12根。第12根收盘才开始高亮，前11根不会事后补画；计数仍包含完整连续段。只控制显示，不改交易信号。", display=display.none)
+float focusAtrBand = input.float(0.10, "近零容差 / 前一根 ATR", minval=0.0, maxval=1.0, step=0.01, group=gFocus, tooltip="要求 max(abs(md),abs(sb)) ≤ 此值 × ATR[1]；设0即两线精确归零。达到连续根数后冻结该段阈值，防止ATR收缩被误画为释放。只控制显示。", display=display.none)
+bool showPriceZone = input.bool(true, "主图显示浅色整理框", group=gFocus, tooltip="从蓄势资格收盘开始绘制，边界使用该段全部近零K线高低点；释放K线不并入，框色始终中性。", display=display.none)
+int focusGlowBars = input.int(12, "释放光晕保留根数", minval=1, maxval=50, group=gFocus, tooltip="含释放当根；仅突出初段，随后恢复普通蓝橙双线。不是持仓周期或退出规则。", display=display.none)
+
+string gRetest = "05 · 视觉重点 · 影线回踩"
+bool showRetest = input.bool(true, "高亮蓄势区影线回踩 K 线", group=gRetest, tooltip="仅在已经确认的近零蓄势段内检查；释放当根不高亮。前根收盘在参考均线同侧，本根只有影线触线、实体守在线外，且收盘回到同侧才亮色。无ATR容差，不改原系统信号。", display=display.none)
+string retestMaChoice = input.string("SMA20", "回踩参考均线", options=["SMA20", "EMA20", "SMA60", "EMA60", "SMA120", "EMA120"], group=gRetest, tooltip="默认SMA20(close)。选择用于确认影线回踩的均线，只控制关键K线判断。", display=display.none)
+bool showRetestTouch = input.bool(false, "显示影线触点", group=gRetest, tooltip="在回踩参考均线处补一个小圆点；默认关闭以减少噪音。", display=display.none)
+
+string gView = "06 · 显示"
+bool showMa = input.bool(true, "主图显示 SMA / EMA 20、60、120", group=gView, display=display.none)
+bool showMarks = input.bool(false, "显示原系统普通启动 / 退出", group=gView, tooltip="小三角和退出叉使用原系统确认时点。默认隐藏，让长时间蓄势后的释放成为重点。", display=display.none)
+bool showDense = input.bool(false, "副图显示原零轴密集点", group=gView, display=display.none)
+bool showState = input.bool(false, "副图显示原系统持有背景", group=gView, display=display.none)
+bool showPanel = input.bool(true, "显示紧凑状态面板", group=gView, display=display.none)
+bool colorBars = input.bool(false, "按 IMACD 给 K 线染色", group=gView, display=display.none)
+bool showMomentum = input.bool(false, "显示辅助动量 sh（细线）", group=gView, display=display.none)
+bool showPanelDetails = input.bool(false, "面板显示周期状态", group=gView, display=display.none)
+bool showSignalText = input.bool(false, "原系统标记附加文字", group=gView, display=display.none)
+bool showPriceText = input.bool(true, "启动 / 释放标记显示收盘价", group=gView, tooltip="显示信号K线的真实收盘价，按品种最小跳动精度格式化。关闭可减少标签高度，悬停提示仍保留完整OHLC。", display=display.none)
+
+// BEGIN V2.4 DISPLAY INPUTS
+string gRr = "08 · 主图 · 盈亏比参考"
+bool showRr = input.bool(true, "显示释放信号盈亏比框", group=gRr, tooltip="只跟随主图可见的蓄势释放标记；普通启动、退出和影线回踩不画框。框内价格是可配置的风险收益参考，不是实际成交或自动止盈止损。", display=display.none)
+string rrEntryMode = input.string("信号收盘", "入场参考", options=["信号收盘", "下一根开盘"], group=gRr, tooltip="信号收盘：释放K线确认时用收盘价。下一根开盘：等下一根K线出现后使用其开盘价，框从该根开始。两种模式均用释放信号K线的低点（多）或高点（空）作止损参考。", display=display.none)
+float rrMultiple = input.float(3.0, "初始观察 R 倍数", minval=0.25, maxval=20.0, step=0.25, group=gRr, tooltip="初始R固定为入场参考到信号K线极值的距离。该价位只是观察位，不是固定止盈；最新收益框可随已达最大R延展。", display=display.none)
+int rrProjectionBars = input.int(12, "向右延伸根数", minval=1, maxval=100, group=gRr, display=display.none)
+int rrKeep = input.int(8, "最多保留组数", minval=1, maxval=20, group=gRr, tooltip="每组包含收益参考框、风险参考框及入场线。最新一组按已确认价格路径跟踪；触初始止损或结构结束后冻结，历史组只按数量删除。", display=display.none)
+bool showRrPrices = input.bool(true, "显示入场 / 止损 / 观察位价格", group=gRr, tooltip="紧凑标签显示三个参考价格；悬停查看冻结R与统计口径。零风险、方向无效或观察价不为正时不画整组，不把参考价当作真实成交。", display=display.none)
+// END V2.4 DISPLAY INPUTS
+
+// BEGIN V2.5 TRACKING INPUTS
+string gTrack = "09 · 释放后的结构跟踪"
+bool showTrack = input.bool(true, "显示最新释放的趋势跟踪", group=gTrack, tooltip="只跟踪主图可见的最新蓄势释放；阶段、R参考和回踩不会改变原系统信号、外部模型或通知规则。", display=display.none)
+string trackMaChoice = input.string("SMA20", "延续回踩 / 保护参考均线", options=["SMA20", "EMA20", "SMA60", "EMA60", "SMA120", "EMA120"], group=gTrack, tooltip="固定选择一条均线，不事后切换。首次影线回踩要求前根收盘在均线同侧且本根实体守住；保护参考多只升、空只降。", display=display.none)
+bool showTrackRetest = input.bool(true, "高亮释放后的首次影线回踩", group=gTrack, tooltip="箱沿回踩要求前根已收盘突破；均线回踩使用固定参考。若同时触及则合并一次。结构结束、重回整理、保护失守优先。", display=display.none)
+bool showTrackLevels = input.bool(true, "显示最新结构 / 保护参考", group=gTrack, tooltip="只显示最新一段的两条细水平参考线；结构边界冻结，保护参考单向移动，不回画历史移动轨迹。", display=display.none)
+bool showMilestones = input.bool(true, "到达后标记 3R / 5R / 10R", group=gTrack, tooltip="只在已确认K线真正达到后标记，未到达的远目标不画。初始R被冻结；初始止损已触及时不继续统计。", display=display.none)
+// END V2.5 TRACKING INPUTS
+
+// BEGIN V2.5 PURE HELPERS
+// Causal inputs only: current OHLC, previous close and the fixed/current
+// reference level plus its previous value. No future candles or ATR tolerance.
+f_wickReclaim(int side, float o, float h, float l, float c, float previousClose, float level, float previousLevel) =>
+    bool known = not na(level) and not na(previousLevel) and not na(previousClose)
+    bool longReclaim = known and side == 1 and previousClose > previousLevel and l <= level and math.min(o, c) >= level and c > level and l < math.min(o, c)
+    bool shortReclaim = known and side == -1 and previousClose < previousLevel and h >= level and math.max(o, c) <= level and c < level and h > math.max(o, c)
+    longReclaim or shortReclaim
+
+// Current OHLC after entry only. Stop dominates ambiguous same-bar milestones;
+// a stop bar never increases peak R. A gap uses the less favorable open as a
+// price-path reference, never as an assertion about executable fill quality.
+f_rStep(int side, float entry, float stop, float risk, bool wasLive, float currentR, float peakR, float o, float h, float l, float c) =>
+    bool valid = (side == 1 or side == -1) and not na(entry) and not na(stop) and not na(risk) and risk > 0
+    bool live = wasLive and valid
+    float newCurrent = currentR
+    float newPeak = peakR
+    bool stopHit = false
+    bool hit3 = false
+    bool hit5 = false
+    bool hit10 = false
+    if live
+        stopHit := side == 1 ? l <= stop : h >= stop
+        if stopHit
+            float stoppedReference = side == 1 ? math.min(stop, o) : math.max(stop, o)
+            newCurrent := side * (stoppedReference - entry) / risk
+            live := false
+        else
+            newCurrent := side * (c - entry) / risk
+            float barPeak = side * ((side == 1 ? h : l) - entry) / risk
+            newPeak := math.max(nz(peakR, 0.0), barPeak)
+            hit3 := nz(peakR, 0.0) < 3.0 and newPeak >= 3.0
+            hit5 := nz(peakR, 0.0) < 5.0 and newPeak >= 5.0
+            hit10 := nz(peakR, 0.0) < 10.0 and newPeak >= 10.0
+    float giveback = not na(newCurrent) and not na(newPeak) ? math.max(0.0, newPeak - newCurrent) : na
+    [live, newCurrent, newPeak, giveback, stopHit, hit3, hit5, hit10]
+
+// Current MA/close only. Initialize on the favorable side; an existing level
+// ratchets favorably and never loosens. Caller tests the previous level first.
+f_trailStep(int side, float prior, float ma, float c) =>
+    float next = prior
+    bool sameSide = not na(ma) and (side == 1 ? c > ma : side == -1 ? c < ma : false)
+    if sameSide
+        next := na(prior) ? ma : side == 1 ? math.max(prior, ma) : math.min(prior, ma)
+    next
+// END V2.5 PURE HELPERS
+
+// Every call has its own history; the SMA seed is evaluated on every bar.
+f_smma(float source, int length) =>
+    float seed = ta.sma(source, length)
+    var float value = na
+    value := na(value[1]) ? seed : (value[1] * (length - 1) + source) / length
+    value
+
+f_imacd() =>
+    float hi = f_smma(high, lengthMA)
+    float lo = f_smma(low, lengthMA)
+    float e1 = ta.ema(hlc3, lengthMA)
+    float e2 = ta.ema(e1, lengthMA)
+    float mi = 2.0 * e1 - e2
+    float md = mi > hi ? mi - hi : mi < lo ? mi - lo : 0.0
+    float sb = ta.sma(md, lengthSignal)
+    [md, sb, md - sb, mi, hi, lo]
+
+f_higher() =>
+    [x, y, z, mi, hi, lo] = f_imacd()
+    [x[1], z[1], time_close[1], bar_index[1]]
+
+f_lower() =>
+    [x, y, z, mi, hi, lo] = f_imacd()
+    [x, time_close, bar_index]
+
+f_flip(float a, float b) =>
+    float d = a - b
+    (d > 0 and d[1] <= 0) or (d < 0 and d[1] >= 0) ? 1.0 : 0.0
+
+f_zone(float value) =>
+    na(value) ? "数据不足" : value > 0 ? "多" : value < 0 ? "空" : "零轴"
+
+[md, sb, sh, mi, hi, lo] = f_imacd()
+float s20 = ta.sma(close, 20)
+float e20 = ta.ema(close, 20)
+float s60 = ta.sma(close, 60)
+float e60 = ta.ema(close, 60)
+float s120 = ta.sma(close, 120)
+float e120 = ta.ema(close, 120)
+float ropeHigh = math.max(s20, e20, s60, e60, s120, e120)
+float ropeLow = math.min(s20, e20, s60, e60, s120, e120)
+float atr = f_smma(ta.tr(true), 14)
+float width = atr > 0 ? (ropeHigh - ropeLow) / atr : na
+float flips = (f_flip(s20, e20) + f_flip(s20, s60) + f_flip(s20, e60) + f_flip(s20, s120) + f_flip(s20, e120) +
+    f_flip(e20, s60) + f_flip(e20, e60) + f_flip(e20, s120) + f_flip(e20, e120) +
+    f_flip(s60, e60) + f_flip(s60, s120) + f_flip(s60, e120) + f_flip(e60, s120) + f_flip(e60, e120) + f_flip(s120, e120))
+// shift(1) is essential: the breakout candle cannot rewrite its formation.
+float priorWidth = ta.sma(width[1], denseWindow)
+float priorCrosses = math.sum(flips[1], denseWindow)
+bool fullWindow = math.sum(not na(width[1]) ? 1.0 : 0.0, denseWindow) == denseWindow
+bool denseNow = fullWindow and not na(priorWidth) and priorWidth <= maxWidth and priorCrosses >= minCrosses
+bool denseRecent = ta.highest(denseNow ? 1.0 : 0.0, denseMemory) == 1.0
+int warmup = math.max(340, lengthMA * 10)
+bool ready = bar_index >= warmup and not na(priorWidth) and not na(sb)
+
+float seconds = timeframe.isticks ? na : timeframe.in_seconds()
+string autoHtf = seconds <= 900 ? "60" : seconds <= 1800 ? "120" : seconds <= 3600 ? "240" : seconds <= 7200 ? "360" : seconds <= 43200 ? "1D" : seconds <= 86400 ? "1W" : seconds <= 604800 ? "1M" : "12M"
+string autoLtf = seconds <= 15 ? "1S" : seconds <= 60 ? "15S" : seconds <= 300 ? "1" : seconds <= 900 ? "5" : seconds <= 3600 ? "15" : seconds <= 7200 ? "30" : seconds <= 21600 ? "60" : seconds <= 43200 ? "240" : seconds <= 86400 ? "360" : "1D"
+string htf = autoTf ? autoHtf : manualHtf
+string ltf = autoTf ? autoLtf : manualLtf
+bool confluence = mode != "密集启动"
+bool waiting = mode == "密集＋共振等待"
+if barstate.isfirst
+    if na(seconds) or not chart.is_standard
+        runtime.error("请使用普通时间 K 线。")
+    if confluence and timeframe.in_seconds(htf) <= seconds
+        runtime.error("高周期必须大于当前图表周期，请调整多周期设置。")
+    if confluence and useLower and timeframe.in_seconds(ltf) >= seconds
+        runtime.error("低周期必须小于当前图表周期，请调整多周期设置。")
+
+[hMdRaw, hShRaw, hClose, hIndex] = request.security(syminfo.tickerid, htf, f_higher(), gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on)
+bool hKnown = hIndex >= warmup and not na(hMdRaw) and not na(hShRaw) and hClose <= time
+float hMd = hKnown ? hMdRaw : na
+float hSh = hKnown ? hShRaw : na
+bool hLong = hKnown and (htfMode == "主线同向" ? hMd > 0 : hMd > 0 or hSh > 0 or (htfMode == "同向或零轴" and hMd == 0))
+bool hShort = hKnown and (htfMode == "主线同向" ? hMd < 0 : hMd < 0 or hSh < 0 or (htfMode == "同向或零轴" and hMd == 0))
+
+float lMd = na
+if confluence and useLower
+    [values, closes, indexes] = request.security_lower_tf(syminfo.tickerid, ltf, f_lower())
+    int count = array.size(values)
+    if count > 0
+        int last = count - 1
+        if array.get(closes, last) <= time_close and array.get(indexes, last) >= warmup
+            lMd := array.get(values, last)
+bool lowerLong = not useLower or (not na(lMd) and lMd > 0)
+bool lowerShort = not useLower or (not na(lMd) and lMd < 0)
+bool releaseLong = close > ropeHigh
+bool releaseShort = close < ropeLow
+
+// State means indicator-side trend tracking, not a broker position.
+var int zeroRun = 0
+var int trendSide = 0
+var int pendingSide = 0
+var int anchorBar = na
+bool longSignal = false
+bool shortSignal = false
+bool exitLong = false
+bool exitShort = false
+bool armed = false
+if barstate.isconfirmed
+    int anchorSide = ready and md[1] == 0 and zeroRun >= minZero ? (md > 0 ? 1 : md < 0 ? -1 : 0) : 0
+    // Exit is independent of all formation and timeframe gates.
+    if trendSide != 0 and md * trendSide <= 0
+        exitLong := trendSide == 1
+        exitShort := trendSide == -1
+        trendSide := 0
+    if pendingSide != 0 and (md * pendingSide <= 0 or bar_index - anchorBar > waitBars)
+        pendingSide := 0
+        anchorBar := na
+    if trendSide == 0 and anchorSide != 0
+        pendingSide := 0
+        anchorBar := na
+        bool formed = confluence ? denseRecent : denseNow
+        if formed
+            pendingSide := anchorSide
+            anchorBar := bar_index
+            armed := true
+    if trendSide == 0 and pendingSide != 0
+        bool allowed = not confluence or (pendingSide == 1 ? releaseLong and hLong and lowerLong : releaseShort and hShort and lowerShort)
+        if allowed
+            longSignal := pendingSide == 1
+            shortSignal := pendingSide == -1
+            trendSide := pendingSide
+            pendingSide := 0
+            anchorBar := na
+        else if not waiting or bar_index - anchorBar >= waitBars
+            pendingSide := 0
+            anchorBar := na
+    zeroRun := not na(hi) and not na(lo) and md == 0 ? zeroRun + 1 : 0
+
+color mdColor = hlc3 > mi ? (hlc3 > hi ? color.lime : color.green) : (hlc3 < lo ? color.red : color.orange)
+
+// All focus inputs below are display-only. The original signal state is read,
+// never written. Pre-qualification uses the prior bar's ATR; after qualification
+// the band is frozen until the segment ends. Qualification never backpaints.
+color ink = chart.fg_color
+color paper = chart.bg_color
+bool darkTheme = (0.2126 * color.r(paper) + 0.7152 * color.g(paper) + 0.0722 * color.b(paper)) < 128
+color bull = darkTheme ? #31D7BB : #007F71
+color bear = darkTheme ? #FF777F : #CE4557
+color amber = darkTheme ? #DDB16B : #A16A20
+color blue = darkTheme ? #709BFA : #3564B9
+color orange = darkTheme ? #E7AA54 : #C37A1F
+string systemText = trendSide == 1 ? "多头持有" : trendSide == -1 ? "空头持有" : pendingSide != 0 ? "等待共振" : "等待启动"
+string systemDetail = "原系统：" + systemText + "；模式：" + mode + "。"
+string timingDetail = "只在当前K线收盘后确认；视觉释放不等于原系统入场。"
+string candleDetail = "币种 " + syminfo.tickerid + " · 周期 " + timeframe.period + (timeframe.isminutes ? "分钟" : "") + "\n开 " + str.tostring(open, format.mintick) + "  高 " + str.tostring(high, format.mintick) + "\n低 " + str.tostring(low, format.mintick) + "  收 " + str.tostring(close, format.mintick) + "\n信号收盘 " + str.format_time(time_close, "yyyy-MM-dd HH:mm:ss", syminfo.timezone) + " (" + syminfo.timezone + ")"
+
+var int focusRun = 0
+var bool focusQualified = false
+var float focusBand = na
+var float focusHigh = na
+var float focusLow = na
+var int focusLastClose = na
+var line activeRail = na
+var line activeSoftRail = na
+var line activeOuterRail = na
+var label activeCountTag = na
+var box activePriceBox = na
+var int lastFocusRelease = na
+var int lastFocusSide = 0
+var int lastFocusCount = 0
+bool focusRelease = false
+int focusReleaseSide = 0
+int focusReleaseCount = 0
+// BEGIN V2.5 RELEASE SNAPSHOT DECLARATIONS
+float releasedFocusHigh = na
+float releasedFocusLow = na
+// END V2.5 RELEASE SNAPSHOT DECLARATIONS
+// One row in each queue represents the same qualified segment. Exactly 80
+// segments can survive; removing a row deletes every drawing in that segment.
+var array<line> rails = array.new<line>()
+var array<line> softRails = array.new<line>()
+var array<line> outerRails = array.new<line>()
+var array<label> countTags = array.new<label>()
+var array<box> priceBoxes = array.new<box>()
+var array<label> releaseTags = array.new<label>()
+var array<label> priceReleaseTags = array.new<label>()
+
+float candidateBand = focusAtrBand * atr[1]
+float focusMagnitude = math.max(math.abs(md), math.abs(sb))
+if barstate.isconfirmed and ready and not na(candidateBand)
+    if focusQualified
+        if focusMagnitude <= focusBand
+            focusRun += 1
+            focusHigh := math.max(focusHigh, high)
+            focusLow := math.min(focusLow, low)
+            focusLastClose := time_close
+            if not na(activeRail)
+                line.set_x2(activeRail, focusLastClose)
+                line.set_x2(activeSoftRail, focusLastClose)
+                line.set_x2(activeOuterRail, focusLastClose)
+                label.set_x(activeCountTag, focusLastClose)
+                label.set_text(activeCountTag, "蓄势 " + str.tostring(focusRun) + "根")
+                label.set_tooltip(activeCountTag, "本近零段已持续 " + str.tostring(focusRun) + " 根；达到资格后按冻结容差延续。\n本段阈值 ±" + str.tostring(focusBand, "#.########") + "。\n高亮从资格达成当根开始，不补画之前K线。\n" + systemDetail)
+            if not na(activePriceBox)
+                box.set_right(activePriceBox, focusLastClose)
+                box.set_top(activePriceBox, focusHigh)
+                box.set_bottom(activePriceBox, focusLow)
+        else
+            // A signal-line-only departure ends the segment without inventing
+            // a direction. This bar is never reused to seed the next segment.
+            focusReleaseSide := md > focusBand ? 1 : md < -focusBand ? -1 : 0
+            focusRelease := focusReleaseSide != 0
+            focusReleaseCount := focusRun
+            if focusRelease
+                // BEGIN V2.5 RELEASE SNAPSHOT
+                releasedFocusHigh := focusHigh
+                releasedFocusLow := focusLow
+                // END V2.5 RELEASE SNAPSHOT
+                lastFocusRelease := bar_index
+                lastFocusSide := focusReleaseSide
+                lastFocusCount := focusRun
+                if showFocus
+                    color eventColor = focusReleaseSide == 1 ? bull : bear
+                    string arrow = focusReleaseSide == 1 ? "↑" : "↓"
+                    string eventText = "蓄势释放 " + arrow + " · " + str.tostring(focusRun) + "根" + (showPriceText ? "\n收盘 " + str.tostring(close, format.mintick) : "")
+                    string eventTip = "近零蓄势后的主线释放：" + str.tostring(focusRun) + " 根。\n主线收盘越过本段冻结阈值 ±" + str.tostring(focusBand, "#.########") + "。\n整理框截止于上一根近零K线，不包含这根释放K线。\n" + systemDetail + "\n" + timingDetail + ((focusReleaseSide == 1 and longSignal) or (focusReleaseSide == -1 and shortSignal) ? "\n原系统同向启动：本根同时确认。" : "") + "\n" + candleDetail
+                    string paneText = (focusReleaseSide == 1 ? "\n" : "") + arrow + " 启动 · " + str.tostring(focusRun) + "根" + (focusReleaseSide == -1 ? "\n" : "")
+                    string paneTip = "近零蓄势后的主线释放：" + str.tostring(focusRun) + " 根。\n主线收盘越过本段冻结阈值 ±" + str.tostring(focusBand, "#.########") + "。\n整理框截止于上一根近零K线，不包含这根释放K线。\n" + systemDetail + "\n" + timingDetail
+                    label paneTag = label.new(time, md, paneText, xloc=xloc.bar_time, yloc=yloc.price, style=focusReleaseSide == 1 ? label.style_label_up : label.style_label_down, color=color.new(paper, 100), textcolor=eventColor, size=size.small, tooltip=paneTip)
+                    label priceTag = label.new(time, focusReleaseSide == 1 ? low : high, eventText, xloc=xloc.bar_time, yloc=focusReleaseSide == 1 ? yloc.belowbar : yloc.abovebar, style=focusReleaseSide == 1 ? label.style_label_up : label.style_label_down, color=color.new(eventColor, darkTheme ? 83 : 88), textcolor=eventColor, size=size.small, tooltip=eventTip, force_overlay=true)
+                    array.set(releaseTags, array.size(releaseTags) - 1, paneTag)
+                    array.set(priceReleaseTags, array.size(priceReleaseTags) - 1, priceTag)
+            focusQualified := false
+            focusRun := 0
+            focusBand := na
+            focusHigh := na
+            focusLow := na
+            focusLastClose := na
+            activeRail := na
+            activeSoftRail := na
+            activeOuterRail := na
+            activeCountTag := na
+            activePriceBox := na
+    else if focusMagnitude <= candidateBand
+        focusRun += 1
+        focusHigh := focusRun == 1 ? high : math.max(focusHigh, high)
+        focusLow := focusRun == 1 ? low : math.min(focusLow, low)
+        focusLastClose := time_close
+        if focusRun >= focusMinBars
+            focusQualified := true
+            focusBand := candidateBand
+            // The left edge is NOW, never the beginning of the counted run.
+            // Pixel-width rails remain visible even when a later trend expands
+            // the oscillator's numeric scale. Time coordinates avoid bar caps.
+            if showFocus
+                activeOuterRail := line.new(time, 0.0, time_close, 0.0, xloc=xloc.bar_time, color=color.new(amber, 94), width=12)
+                activeSoftRail := line.new(time, 0.0, time_close, 0.0, xloc=xloc.bar_time, color=color.new(amber, 81), width=8)
+                activeRail := line.new(time, 0.0, time_close, 0.0, xloc=xloc.bar_time, color=color.new(amber, 7), width=4)
+                activeCountTag := label.new(time_close, 0.0, "蓄势 " + str.tostring(focusRun) + "根", xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_lower_right, color=color.new(paper, 15), textcolor=amber, size=size.small, tooltip="近零蓄势：连续 " + str.tostring(focusRun) + " 根，刚达到显示资格。\n本段阈值冻结为 ±" + str.tostring(focusBand, "#.########") + "。\n高亮从当前资格K线开始，不补画之前K线。\n" + systemDetail)
+            if showPriceZone
+                activePriceBox := box.new(left=time, top=focusHigh, right=time_close, bottom=focusLow, xloc=xloc.bar_time, border_color=color.new(amber, 75), border_width=1, border_style=line.style_dotted, bgcolor=color.new(amber, darkTheme ? 94 : 95), force_overlay=true)
+            array.push(rails, activeRail)
+            array.push(softRails, activeSoftRail)
+            array.push(outerRails, activeOuterRail)
+            array.push(countTags, activeCountTag)
+            array.push(priceBoxes, activePriceBox)
+            array.push(releaseTags, na)
+            array.push(priceReleaseTags, na)
+            if array.size(rails) > 80
+                line.delete(array.shift(rails))
+                line.delete(array.shift(softRails))
+                line.delete(array.shift(outerRails))
+                label.delete(array.shift(countTags))
+                box.delete(array.shift(priceBoxes))
+                label.delete(array.shift(releaseTags))
+                label.delete(array.shift(priceReleaseTags))
+    else
+        focusRun := 0
+        focusHigh := na
+        focusLow := na
+        focusLastClose := na
+
+// BEGIN V2.5 LIFECYCLE AND R REFERENCES
+// Display-only latest episode; all decisions use confirmed OHLC, md, the frozen
+// pre-release zone and SMA/EMA 20/60/120 at [0]/[1]. This never writes signal state.
+// Initial entry/stop/R are immutable. R tracking may stop before the independent
+// structure does; no subsequent price is credited to a stopped reference.
+float trackMa = trackMaChoice == "SMA20" ? s20 : trackMaChoice == "EMA20" ? e20 : trackMaChoice == "SMA60" ? s60 : trackMaChoice == "EMA60" ? e60 : trackMaChoice == "SMA120" ? s120 : e120
+var int episodeSide = 0
+var int episodeBar = na
+var int episodeTime = na
+var int episodeConfirmedTime = na
+var int episodeCount = 0
+var float episodeHigh = na
+var float episodeLow = na
+var float episodeStop = na
+var bool episodeActive = false
+var bool episodeBrokeBoundary = false
+var string episodePhase = "等待蓄势"
+var string episodeReason = "等待主图释放标记"
+var bool episodeRetested = false
+var string episodeRetestReason = ""
+var float episodeTrail = na
+var bool episodeTrailBroken = false
+var int episodeLastTime = na
+var int episodeLastBarTime = na
+var float trackEntry = na
+var float trackRisk = na
+var int trackEntryBar = na
+var bool trackPending = false
+var bool trackValid = false
+var bool trackLive = false
+var bool trackStopped = false
+var float trackCurrentR = na
+var float trackPeakR = na
+var float trackGivebackR = na
+var bool trackReached3 = false
+var bool trackReached5 = false
+var bool trackReached10 = false
+var box latestRiskBox = na
+var box latestRewardBox = na
+var line latestEntryLine = na
+var label latestEntryTag = na
+var label latestStopTag = na
+var label latestTargetTag = na
+var float latestObservation = na
+var int latestRTime = na
+var line structureLine = na
+var line protectionLine = na
+var label structureTag = na
+var label protectionTag = na
+var label firstRetestTag = na
+var array<label> milestoneTags = array.new<label>()
+var array<box> rrRiskBoxes = array.new<box>()
+var array<box> rrRewardBoxes = array.new<box>()
+var array<line> rrEntryLines = array.new<line>()
+var array<label> rrEntryTags = array.new<label>()
+var array<label> rrStopTags = array.new<label>()
+var array<label> rrTargetTags = array.new<label>()
+bool firstTrackRetest = false
+bool trackStopThisBar = false
+bool trackHit3 = false
+bool trackHit5 = false
+bool trackHit10 = false
+bool visibleRelease = showFocus and barstate.isconfirmed and focusRelease
+int trackBarMs = int(seconds * 1000)
+
+if visibleRelease
+    // Settle the preceding live reference through this newly confirmed bar
+    // BEFORE replacement. A prior stop is permanent and never reactivated.
+    if trackValid and trackLive and not na(trackEntryBar) and bar_index >= trackEntryBar
+        [oldLive, oldNow, oldPeak, oldBack, oldStop, old3, old5, old10] = f_rStep(episodeSide, trackEntry, episodeStop, trackRisk, trackLive, trackCurrentR, trackPeakR, open, high, low, close)
+        trackCurrentR := oldNow
+        trackPeakR := oldPeak
+        trackGivebackR := oldBack
+        trackStopped := trackStopped or oldStop
+        trackLive := false
+        latestRTime := time_close
+        if not na(latestRewardBox)
+            float oldRewardEdge = trackEntry + episodeSide * trackRisk * math.max(rrMultiple, nz(trackPeakR, 0.0))
+            box.set_top(latestRewardBox, math.max(trackEntry, oldRewardEdge))
+            box.set_bottom(latestRewardBox, math.min(trackEntry, oldRewardEdge))
+        if not na(latestStopTag)
+            label.set_text(latestStopTag, (trackStopped ? "已触初始止损 · " : "初始止损 · ") + str.tostring(episodeStop, format.mintick))
+    // A newer episode replaces only the latest tracker. Finalize the previous
+    // drawing at its last evaluated bar; projection is never left as history.
+    if not na(latestRiskBox) and not na(latestRTime)
+        box.set_right(latestRiskBox, latestRTime)
+        box.set_right(latestRewardBox, latestRTime)
+        line.set_x2(latestEntryLine, latestRTime)
+        if not na(latestEntryTag)
+            label.set_x(latestEntryTag, latestRTime)
+            label.set_x(latestStopTag, latestRTime)
+            label.set_x(latestTargetTag, latestRTime)
+    line.delete(structureLine)
+    line.delete(protectionLine)
+    label.delete(structureTag)
+    label.delete(protectionTag)
+    label.delete(firstRetestTag)
+    structureLine := na
+    protectionLine := na
+    structureTag := na
+    protectionTag := na
+    firstRetestTag := na
+    while array.size(milestoneTags) > 0
+        label.delete(array.pop(milestoneTags))
+    episodeSide := focusReleaseSide
+    episodeBar := bar_index
+    episodeTime := time
+    episodeConfirmedTime := time_close
+    episodeCount := focusReleaseCount
+    episodeHigh := releasedFocusHigh
+    episodeLow := releasedFocusLow
+    episodeStop := episodeSide == 1 ? low : high
+    episodeActive := true
+    episodeBrokeBoundary := episodeSide == 1 ? close > episodeHigh : close < episodeLow
+    episodePhase := "初次释放"
+    episodeReason := "主线离开冻结近零带 · 价格边界仍需观察"
+    episodeRetested := false
+    episodeRetestReason := ""
+    episodeTrail := f_trailStep(episodeSide, na, trackMa, close)
+    episodeTrailBroken := false
+    episodeLastTime := time_close
+    episodeLastBarTime := time
+    trackEntry := na
+    trackRisk := na
+    trackEntryBar := na
+    trackPending := rrEntryMode == "下一根开盘"
+    trackValid := false
+    trackLive := false
+    trackStopped := false
+    trackCurrentR := na
+    trackPeakR := na
+    trackGivebackR := na
+    trackReached3 := false
+    trackReached5 := false
+    trackReached10 := false
+    latestRiskBox := na
+    latestRewardBox := na
+    latestEntryLine := na
+    latestEntryTag := na
+    latestStopTag := na
+    latestTargetTag := na
+    latestObservation := na
+    latestRTime := na
+
+bool initializeClose = visibleRelease and rrEntryMode == "信号收盘"
+// Rebuild from the same fixed open on every realtime tick. Rollback restores
+// pending state until close; only a confirmed bar commits the R outcome.
+bool initializeOpen = showFocus and rrEntryMode == "下一根开盘" and focusRelease[1] and episodeBar == bar_index - 1
+if initializeClose or initializeOpen
+    trackEntry := initializeClose ? close : open
+    trackRisk := episodeSide * (trackEntry - episodeStop)
+    trackEntryBar := bar_index
+    trackPending := false
+    trackValid := not na(trackEntry) and trackEntry > 0 and not na(episodeStop) and trackRisk > 0
+    trackLive := trackValid
+    trackCurrentR := trackValid ? 0.0 : na
+    trackPeakR := trackValid ? 0.0 : na
+    trackGivebackR := trackValid ? 0.0 : na
+    latestRTime := time_close
+    latestObservation := trackEntry + episodeSide * trackRisk * rrMultiple
+    bool drawableRisk = showRr and trackValid and latestObservation > 0
+    if drawableRisk
+        // Maximum: 20 risk groups = 40 boxes, 20 lines, 60 labels; original
+        // focus/system <= 80 boxes, 240 lines, 320 labels. New latest-only
+        // objects <= 2 lines + 6 labels. Transient originals fit 150/300/420.
+        if array.size(rrRiskBoxes) >= rrKeep
+            box.delete(array.shift(rrRiskBoxes))
+            box.delete(array.shift(rrRewardBoxes))
+            line.delete(array.shift(rrEntryLines))
+            label.delete(array.shift(rrEntryTags))
+            label.delete(array.shift(rrStopTags))
+            label.delete(array.shift(rrTargetTags))
+        int rrRight = time_close + trackBarMs * rrProjectionBars
+        color rrEntryColor = color.new(ink, 24)
+        string rrTip = (episodeSide == 1 ? "多头" : "空头") + " · " + rrEntryMode + "参考\n初始入场 " + str.tostring(trackEntry, format.mintick) + "\n初始止损 " + str.tostring(episodeStop, format.mintick) + "\n初始 R " + str.tostring(trackRisk, format.mintick) + " · 冻结不重算\n" + str.tostring(rrMultiple, "#.##") + "R 仅为观察位，不是固定止盈。\n仅按收盘确认后的 OHLC 跟踪。信号收盘模式不计入入场前的本根影线。\n同根触止损与观察位时先计止损，不增加最大 R；跳空使用更不利开盘参考。\n不是实际成交或实盘收益。"
+        latestRiskBox := box.new(time, math.max(trackEntry, episodeStop), rrRight, math.min(trackEntry, episodeStop), xloc=xloc.bar_time, border_color=color.new(bear, 55), border_width=1, bgcolor=color.new(bear, darkTheme ? 88 : 91), force_overlay=true)
+        latestRewardBox := box.new(time, math.max(trackEntry, latestObservation), rrRight, math.min(trackEntry, latestObservation), xloc=xloc.bar_time, border_color=color.new(bull, 55), border_width=1, bgcolor=color.new(bull, darkTheme ? 89 : 92), force_overlay=true)
+        latestEntryLine := line.new(time, trackEntry, rrRight, trackEntry, xloc=xloc.bar_time, color=rrEntryColor, width=1, force_overlay=true)
+        if showRrPrices
+            latestEntryTag := label.new(rrRight, trackEntry, "入场参考 · " + str.tostring(trackEntry, format.mintick), xloc=xloc.bar_time, style=label.style_label_left, color=color.new(paper, 100), textcolor=rrEntryColor, size=size.tiny, tooltip=rrTip, force_overlay=true)
+            latestStopTag := label.new(rrRight, episodeStop, "初始止损 · " + str.tostring(episodeStop, format.mintick), xloc=xloc.bar_time, style=label.style_label_left, color=color.new(paper, 100), textcolor=bear, size=size.tiny, tooltip=rrTip, force_overlay=true)
+            latestTargetTag := label.new(rrRight, latestObservation, str.tostring(rrMultiple, "#.##") + "R 观察位 · " + str.tostring(latestObservation, format.mintick), xloc=xloc.bar_time, style=label.style_label_left, color=color.new(paper, 100), textcolor=bull, size=size.tiny, tooltip=rrTip, force_overlay=true)
+        array.push(rrRiskBoxes, latestRiskBox)
+        array.push(rrRewardBoxes, latestRewardBox)
+        array.push(rrEntryLines, latestEntryLine)
+        array.push(rrEntryTags, latestEntryTag)
+        array.push(rrStopTags, latestStopTag)
+        array.push(rrTargetTags, latestTargetTag)
+
+if barstate.isconfirmed and episodeSide != 0 and not visibleRelease
+    if trackValid and trackLive and not na(trackEntryBar) and bar_index >= trackEntryBar
+        [rLive, rNow, rPeak, rBack, rStop, r3, r5, r10] = f_rStep(episodeSide, trackEntry, episodeStop, trackRisk, trackLive, trackCurrentR, trackPeakR, open, high, low, close)
+        trackLive := rLive
+        trackCurrentR := rNow
+        trackPeakR := rPeak
+        trackGivebackR := rBack
+        trackStopped := trackStopped or rStop
+        trackStopThisBar := rStop
+        trackHit3 := r3
+        trackHit5 := r5
+        trackHit10 := r10
+        latestRTime := time_close
+    if episodeActive and bar_index > episodeBar
+        episodeLastTime := time_close
+        episodeLastBarTime := time
+        bool mdEnded = md * episodeSide <= 0
+        bool farBroken = episodeSide == 1 ? close < episodeLow : close > episodeHigh
+        bool inZone = close >= episodeLow and close <= episodeHigh
+        bool trailBrokenNow = not na(episodeTrail) and (episodeSide == 1 ? close < episodeTrail : close > episodeTrail)
+        bool reclaimedTrail = not na(episodeTrail) and (episodeSide == 1 ? close > episodeTrail : close < episodeTrail)
+        bool boxRetest = f_wickReclaim(episodeSide, open, high, low, close, close[1], episodeSide == 1 ? episodeHigh : episodeLow, episodeSide == 1 ? episodeHigh : episodeLow)
+        bool maRetest = f_wickReclaim(episodeSide, open, high, low, close, close[1], trackMa, trackMa[1])
+        // Structure termination has priority over any tempting same-bar wick.
+        if mdEnded or farBroken
+            episodeActive := false
+            episodePhase := "结束"
+            episodeReason := farBroken ? "收盘越过蓄势反侧边界" : "主线回零或反向"
+            trackLive := false
+        else
+            if trailBrokenNow
+                episodeTrailBroken := true
+            else if reclaimedTrail
+                episodeTrailBroken := false
+            if inZone
+                episodePhase := episodeBrokeBoundary ? "重回整理" : "释放观察"
+                episodeReason := episodeBrokeBoundary ? "收盘重新进入原蓄势区" : "尚未收盘突破原蓄势边界"
+            else if episodeTrailBroken
+                episodePhase := "保护失守"
+                episodeReason := "收盘失守上一根已生效保护参考"
+            else if not episodeRetested and not trackStopThisBar and (boxRetest or maRetest)
+                episodeRetested := true
+                firstTrackRetest := true
+                episodeRetestReason := boxRetest and maRetest ? "箱沿 + " + trackMaChoice : boxRetest ? "突破箱沿" : trackMaChoice
+                episodePhase := "首次回踩"
+                episodeReason := episodeRetestReason + " · 影线触及、实体守住"
+            else
+                bool pastBoundary = episodeSide == 1 ? close > episodeHigh : close < episodeLow
+                episodePhase := pastBoundary ? "趋势延续" : "释放观察"
+                episodeReason := pastBoundary ? "收盘维持在原蓄势区外" : "尚未收盘突破原蓄势边界"
+            episodeBrokeBoundary := episodeBrokeBoundary or (episodeSide == 1 ? close > episodeHigh : close < episodeLow)
+            // Test the PRIOR effective level first, then ratchet a same-side MA.
+            episodeTrail := f_trailStep(episodeSide, episodeTrail, trackMa, close)
+    if not na(latestRiskBox) and not na(latestRTime)
+        int rrRight = trackLive ? time_close + trackBarMs * rrProjectionBars : latestRTime
+        float rewardR = math.max(rrMultiple, nz(trackPeakR, 0.0))
+        float rewardEdge = trackEntry + episodeSide * trackRisk * rewardR
+        box.set_right(latestRiskBox, rrRight)
+        box.set_right(latestRewardBox, rrRight)
+        box.set_top(latestRewardBox, math.max(trackEntry, rewardEdge))
+        box.set_bottom(latestRewardBox, math.min(trackEntry, rewardEdge))
+        line.set_x2(latestEntryLine, rrRight)
+        if not na(latestEntryTag)
+            label.set_x(latestEntryTag, rrRight)
+            label.set_x(latestStopTag, rrRight)
+            label.set_x(latestTargetTag, rrRight)
+            label.set_text(latestStopTag, (trackStopped ? "已触初始止损 · " : "初始止损 · ") + str.tostring(episodeStop, format.mintick))
+
+if barstate.isconfirmed and showTrack and showMilestones
+    // Only achieved thresholds are drawn. At most three labels per latest
+    // episode; threshold flags are committed once, never regenerated each bar.
+    if trackHit3 and not trackReached3
+        array.push(milestoneTags, label.new(time, trackEntry + episodeSide * trackRisk * 3.0, "3R 已达", xloc=xloc.bar_time, style=label.style_label_left, color=color.new(bull, 90), textcolor=bull, size=size.tiny, tooltip="初始 R 冻结；收盘后确认本根触及 3R，仅为价格路径参考。", force_overlay=true))
+    if trackHit5 and not trackReached5
+        array.push(milestoneTags, label.new(time, trackEntry + episodeSide * trackRisk * 5.0, "5R 已达", xloc=xloc.bar_time, style=label.style_label_left, color=color.new(bull, 90), textcolor=bull, size=size.tiny, tooltip="初始 R 冻结；收盘后确认本根触及 5R，仅为价格路径参考。", force_overlay=true))
+    if trackHit10 and not trackReached10
+        array.push(milestoneTags, label.new(time, trackEntry + episodeSide * trackRisk * 10.0, "10R 已达", xloc=xloc.bar_time, style=label.style_label_left, color=color.new(bull, 90), textcolor=bull, size=size.tiny, tooltip="初始 R 冻结；收盘后确认本根触及 10R，仅为价格路径参考。", force_overlay=true))
+if barstate.isconfirmed
+    trackReached3 := trackReached3 or trackHit3
+    trackReached5 := trackReached5 or trackHit5
+    trackReached10 := trackReached10 or trackHit10
+    if showTrack and showTrackRetest and firstTrackRetest
+        firstRetestTag := label.new(time, episodeSide == 1 ? low : high, "首次回踩 · " + episodeRetestReason, xloc=xloc.bar_time, yloc=episodeSide == 1 ? yloc.belowbar : yloc.abovebar, style=episodeSide == 1 ? label.style_label_up : label.style_label_down, color=color.new(episodeSide == 1 ? bull : bear, 90), textcolor=episodeSide == 1 ? bull : bear, size=size.tiny, tooltip="释放之后的第一次合格回踩；参考均线固定为 " + trackMaChoice + "，不事后更换。\n" + candleDetail, force_overlay=true)
+
+if barstate.isconfirmed and showTrack and showTrackLevels and episodeSide != 0
+    float farLevel = episodeSide == 1 ? episodeLow : episodeHigh
+    string farTip = "释放前蓄势区的反侧边界，释放当根不并入。按收盘越过判断结构结束，与信号K线初始止损独立。"
+    string protectionTip = "当前保护参考来自固定 " + trackMaChoice + "。多头只升、空头只降；先检查前根生效价格，再更新。短水平线仅展示最近确认K线生效的当前参考，不回画历史保护价格，也不代表实际成交。"
+    if na(structureLine)
+        structureLine := line.new(episodeTime, farLevel, episodeLastTime, farLevel, xloc=xloc.bar_time, color=color.new(amber, 42), style=line.style_dotted, width=1, force_overlay=true)
+        structureTag := label.new(episodeLastTime, farLevel, "结构边界 · " + str.tostring(farLevel, format.mintick), xloc=xloc.bar_time, style=label.style_label_left, color=color.new(paper, 100), textcolor=color.new(amber, 15), size=size.tiny, tooltip=farTip, force_overlay=true)
+    line.set_x2(structureLine, episodeLastTime)
+    label.set_x(structureTag, episodeLastTime)
+    if not na(episodeTrail)
+        int protectionRight = episodeActive ? episodeLastTime + trackBarMs * math.min(3, rrProjectionBars) : episodeLastTime
+        if na(protectionLine)
+            protectionLine := line.new(episodeLastBarTime, episodeTrail, protectionRight, episodeTrail, xloc=xloc.bar_time, color=color.new(episodeSide == 1 ? bull : bear, 45), style=line.style_dashed, width=1, force_overlay=true)
+            protectionTag := label.new(protectionRight, episodeTrail, "", xloc=xloc.bar_time, style=label.style_label_left, color=color.new(paper, 100), textcolor=color.new(episodeSide == 1 ? bull : bear, 15), size=size.tiny, tooltip=protectionTip, force_overlay=true)
+        line.set_xy1(protectionLine, episodeLastBarTime, episodeTrail)
+        line.set_xy2(protectionLine, protectionRight, episodeTrail)
+        label.set_xy(protectionTag, protectionRight, episodeTrail)
+        label.set_text(protectionTag, "保护参考 · " + trackMaChoice + " · " + str.tostring(episodeTrail, format.mintick))
+// END V2.5 LIFECYCLE AND R REFERENCES
+
+// Display-only retests use the confirmed focus state AFTER its update above.
+// Columns/windows: current OHLC, close[1], the selected SMA/EMA (20/60/120)
+// at this bar and [1]. Only the wick may cross/touch the current MA; no ATR
+// tolerance, body crossing, unconfirmed candle or new denseNow gate is used.
+float retestMa = retestMaChoice == "SMA20" ? s20 : retestMaChoice == "EMA20" ? e20 : retestMaChoice == "SMA60" ? s60 : retestMaChoice == "EMA60" ? e60 : retestMaChoice == "SMA120" ? s120 : e120
+bool retestReady = barstate.isconfirmed and ready and focusQualified and not na(retestMa) and not na(retestMa[1])
+bool lowerWickRetest = retestReady and close[1] > retestMa[1] and low <= retestMa and math.min(open, close) >= retestMa and close > retestMa and low < math.min(open, close)
+bool upperWickRetest = retestReady and close[1] < retestMa[1] and high >= retestMa and math.max(open, close) <= retestMa and close < retestMa and high > math.max(open, close)
+int retestSide = lowerWickRetest ? 1 : upperWickRetest ? -1 : 0
+bool paintRetest = showRetest and retestSide != 0
+color retestColor = retestSide == 1 ? bull : bear
+// BEGIN V2.5 COMBINED KEY CANDLES
+bool paintTrackRetest = showTrack and showTrackRetest and firstTrackRetest
+bool paintKeyCandle = paintRetest or paintTrackRetest
+color keyCandleColor = paintTrackRetest ? (episodeSide == 1 ? bull : bear) : retestColor
+// END V2.5 COMBINED KEY CANDLES
+
+// A same-direction focus tag already contains the price and confirmation note.
+// When that focus tag is hidden, normal system markers remain available.
+bool visibleSystemLong = showMarks and longSignal and not (showFocus and focusRelease and focusReleaseSide == 1)
+bool visibleSystemShort = showMarks and shortSignal and not (showFocus and focusRelease and focusReleaseSide == -1)
+var array<label> systemPriceTags = array.new<label>()
+if barstate.isconfirmed and ready and (visibleSystemLong or visibleSystemShort)
+    bool systemLong = visibleSystemLong
+    color systemTagColor = systemLong ? bull : bear
+    string systemTagText = showPriceText ? (systemLong ? "系统启动 ↑" : "系统启动 ↓") + "\n收盘 " + str.tostring(close, format.mintick) : showSignalText ? (systemLong ? "多" : "空") : ""
+    string systemTagTip = "原系统" + (systemLong ? "多头" : "空头") + "启动，本K线已收盘确认。\n" + systemDetail + "\n" + candleDetail + "\n价格为信号K线收盘价；最多保留最近80个普通系统标记。"
+    label systemPriceTag = label.new(time, systemLong ? low : high, systemTagText, xloc=xloc.bar_time, yloc=systemLong ? yloc.belowbar : yloc.abovebar, style=showPriceText ? (systemLong ? label.style_label_up : label.style_label_down) : (systemLong ? label.style_triangleup : label.style_triangledown), color=showPriceText ? color.new(systemTagColor, darkTheme ? 87 : 90) : systemTagColor, textcolor=systemTagColor, size=showPriceText ? size.small : size.tiny, tooltip=systemTagTip, force_overlay=true)
+    array.push(systemPriceTags, systemPriceTag)
+    if array.size(systemPriceTags) > 80
+        label.delete(array.shift(systemPriceTags))
+
+bool focusGlowing = showFocus and barstate.isconfirmed and ready and not na(lastFocusRelease) and bar_index - lastFocusRelease < focusGlowBars and md * lastFocusSide > 0 and not focusQualified
+color focusColor = lastFocusSide == 1 ? bull : bear
+float glowMd = focusGlowing ? md : na
+float glowSb = focusGlowing ? sb : na
+// Subtle light surrounds the original values. No histogram and no rescaling.
+hline(0, "零轴 · 0 基准线", color=color.new(ink, 45), linestyle=hline.style_solid, linewidth=1)
+plot(glowMd, "释放 · 外光", color=color.new(focusColor, 97), linewidth=6, style=plot.style_linebr, display=display.pane)
+plot(glowMd, "释放 · 柔光", color=color.new(focusColor, 91), linewidth=4, style=plot.style_linebr, display=display.pane)
+glowMain = plot(glowMd, "释放 · 主线", color=color.new(focusColor, 5), linewidth=2, style=plot.style_linebr, display=display.pane)
+glowSignal = plot(glowSb, "释放 · 填充边界", color=na, style=plot.style_linebr, display=display.pane)
+fill(glowMain, glowSignal, color=focusGlowing ? color.new(focusColor, darkTheme ? 95 : 96) : na, title="释放 · 微光", fillgaps=false)
+plot(md, "IMACD", color=focusGlowing ? color.new(blue, 100) : color.new(blue, 8), style=plot.style_line, linewidth=2, display=display.pane + display.data_window)
+plot(sb, "信号线", color=color.new(orange, 8), style=plot.style_line, linewidth=2, display=display.pane + display.data_window)
+plot(showMomentum ? sh : na, "辅助动量", color=color.new(blue, 65), linewidth=1, display=display.pane + display.data_window)
+plotshape(showFocus and focusRelease ? md : na, title="近零蓄势释放 · 启动点", style=shape.circle, location=location.absolute, color=focusReleaseSide == 1 ? bull : bear, size=size.tiny, display=display.pane)
+plot(showDense and ready and barstate.isconfirmed and md == 0 and denseNow ? 0 : na, "原系统零轴密集点", color=color.new(amber, 35), style=plot.style_circles, linewidth=2, display=display.pane)
+bgcolor(showState ? (trendSide == 1 ? color.new(bull, 96) : trendSide == -1 ? color.new(bear, 96) : na) : na, title="原系统持有底色")
+// BEGIN V2.5 COMBINED KEY BAR COLOR
+barcolor(paintKeyCandle ? keyCandleColor : colorBars ? mdColor : na, title="回踩优先 · K线颜色")
+// END V2.5 COMBINED KEY BAR COLOR
+
+// Balanced main-chart context. Neither scale labels nor header values.
+plot(showMa ? s20 : na, "SMA20", color=color.new(#71AFA5, 35), linewidth=1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMa ? e20 : na, "EMA20", color=color.new(#71AFA5, 60), linewidth=1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMa ? s60 : na, "SMA60", color=color.new(#7795BD, 42), linewidth=1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMa ? e60 : na, "EMA60", color=color.new(#7795BD, 65), linewidth=1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMa ? s120 : na, "SMA120", color=color.new(ink, 58), linewidth=1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMa ? e120 : na, "EMA120", color=color.new(ink, 72), linewidth=1, force_overlay=true, display=display.pane + display.data_window)
+// Draw only qualifying candles, including their wicks and borders. Every OHLC
+// is na elsewhere, so the overlay never redraws the entire native chart.
+// BEGIN V2.5 COMBINED KEY CANDLE PLOT
+plotcandle(paintKeyCandle ? open : na, paintKeyCandle ? high : na, paintKeyCandle ? low : na, paintKeyCandle ? close : na, title="关键K线 · 蓄势及首次回踩", color=keyCandleColor, wickcolor=keyCandleColor, bordercolor=keyCandleColor, force_overlay=true, display=display.pane)
+// END V2.5 COMBINED KEY CANDLE PLOT
+plotshape(showRetest and showRetestTouch and retestSide != 0 ? retestMa : na, title="蓄势区 · 影线触点", style=shape.circle, location=location.absolute, color=retestColor, size=size.tiny, force_overlay=true, display=display.pane)
+plotshape(showMarks and exitLong, title="原系统多头结束", style=shape.xcross, location=location.abovebar, color=color.new(ink, 55), size=size.tiny, force_overlay=true, display=display.pane)
+plotshape(showMarks and exitShort, title="原系统空头结束", style=shape.xcross, location=location.belowbar, color=color.new(ink, 55), size=size.tiny, force_overlay=true, display=display.pane)
+plot(priorWidth, "形成带宽/ATR", display=display.data_window)
+plot(priorCrosses, "形成交织次数", display=display.data_window)
+plot(trendSide, "原系统持有方向 1多 -1空 0等待", display=display.data_window)
+plot(focusQualified ? focusRun : na, "近零蓄势连续根数", display=display.data_window)
+plot(focusQualified ? focusBand : na, "近零蓄势冻结容差", display=display.data_window)
+plot(focusRelease ? focusReleaseSide : 0, "近零释放方向（视觉）", display=display.data_window)
+plot(ready ? retestSide : na, "影线回踩方向 1下影 -1上影 0无", display=display.data_window)
+plot(retestMa, "回踩参考均线价", display=display.data_window)
+
+// BEGIN V2.5 LATEST EPISODE PANEL
+// Phase and R snapshots persist beyond the visual glow. A separate new setup
+// may coexist with the latest episode; the original system lives in tooltips.
+var table panel = table.new(position.top_right, 2, 4, border_width=0, frame_width=0)
+if (barstate.islast or barstate.islastconfirmedhistory) and barstate.isconfirmed and ready and showPanel
+    bool hasEpisode = showTrack and episodeSide != 0
+    string phaseText = hasEpisode ? (episodeSide == 1 ? "↑ " : "↓ ") + episodePhase : focusQualified ? "蓄势 " + str.tostring(focusRun) + "根" : "观察近零整理"
+    color phaseColor = hasEpisode ? (episodePhase == "结束" ? color.new(ink, 45) : episodePhase == "重回整理" or episodePhase == "保护失守" ? amber : episodeSide == 1 ? bull : bear) : focusQualified ? amber : color.new(ink, 45)
+    string newSetup = focusQualified ? "另有蓄势 " + str.tostring(focusRun) + "根" : ""
+    string reasonText = hasEpisode ? episodeReason : focusQualified ? "两线持续位于冻结近零带" : "等待两线连续近零"
+    string rText = not hasEpisode ? "—" : trackPending ? "等待下一根开盘" : not trackValid ? "入场参考无效 · R ≤ 0" : "当前 " + str.tostring(trackCurrentR, "#.##") + "R  ·  最大 " + str.tostring(trackPeakR, "#.##") + "R  ·  回吐 " + str.tostring(trackGivebackR, "#.##") + "R"
+    string rLabel = hasEpisode and trackStopped ? "已触初始止损" : hasEpisode and trackValid and not trackLive ? "已冻结参考" : "路径参考"
+    float farLevel = episodeSide == 1 ? episodeLow : episodeHigh
+    string levelsText = hasEpisode ? "结构 " + str.tostring(farLevel, format.mintick) + "  ·  保护 " + (na(episodeTrail) ? "未启用" : str.tostring(episodeTrail, format.mintick)) : "收盘确认"
+    string phaseTip = "最新一次主图可见释放独立跟踪，光晕结束不会清空趋势阶段。\n" + (hasEpisode ? "释放前近零 " + str.tostring(episodeCount) + " 根；目前第 " + str.tostring(bar_index - episodeBar) + " 根。\n" + (episodeRetested ? "首次回踩参考：" + episodeRetestReason + "。\n" : "") : "") + systemDetail + "\n高 " + htf + " " + f_zone(hMd) + (confluence and useLower ? " · 低 " + ltf + " " + f_zone(lMd) : "") + "\nPine 不包含外部模型检测状态。"
+    string rTip = "初始 R = 入场参考与信号K线极值的距离，固定不变。最大 R 取参考存续期间已确认K线的有利极值；回吐 = 最大 R − 当前 R。\n已触初始止损后永久冻结 R，即使结构仍延续也不统计后续涨跌。同根触止损和里程碑时止损优先；跳空按更不利开盘参考。\n这是价格路径参考，未扣手续费/滑点/资金费，不代表实际成交或策略收益。"
+    string episodeCaption = hasEpisode ? "最新释放 " + str.format_time(episodeConfirmedTime, "MM/dd", "Asia/Shanghai") : "近零蓄势"
+    string datedPhaseTip = (hasEpisode ? "释放确认：" + str.format_time(episodeConfirmedTime, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间。\n面板跟踪最新释放，不随十字光标或可视历史区间切换。\n" : "") + phaseTip
+    table.cell(panel, 0, 0, episodeCaption, bgcolor=color.new(paper, 12), text_color=color.new(ink, 35), text_size=size.small, text_halign=text.align_left, tooltip=datedPhaseTip)
+    table.cell(panel, 1, 0, phaseText, bgcolor=color.new(phaseColor, 92), text_color=phaseColor, text_size=size.small, tooltip=phaseTip)
+    table.cell(panel, 0, 1, newSetup != "" and hasEpisode ? newSetup : "阶段依据", bgcolor=color.new(paper, 12), text_color=newSetup != "" and hasEpisode ? amber : color.new(ink, 56), text_size=size.tiny, text_halign=text.align_left, tooltip=phaseTip)
+    table.cell(panel, 1, 1, reasonText, bgcolor=color.new(paper, 12), text_color=color.new(ink, 40), text_size=size.tiny, tooltip=phaseTip)
+    table.cell(panel, 0, 2, rLabel, bgcolor=color.new(paper, 12), text_color=hasEpisode and trackStopped ? bear : color.new(ink, 56), text_size=size.tiny, text_halign=text.align_left, tooltip=rTip)
+    table.cell(panel, 1, 2, rText, bgcolor=color.new(paper, 12), text_color=hasEpisode and trackStopped ? bear : color.new(ink, 30), text_size=size.tiny, tooltip=rTip)
+    table.cell(panel, 0, 3, "结构 / " + trackMaChoice, bgcolor=color.new(paper, 12), text_color=color.new(ink, 56), text_size=size.tiny, text_halign=text.align_left, tooltip="保护线来自固定参考均线，收盘在均线顺侧才启用；多只升、空只降。结构参考为冻结蓄势反侧边界。" + "\n" + systemDetail)
+    table.cell(panel, 1, 3, levelsText, bgcolor=color.new(paper, 12), text_color=color.new(ink, 40), text_size=size.tiny, tooltip="保护失守只是参考提醒；结构结束只由主线回零/反向或收盘越过蓄势反侧边界确认。两者都不是下单指令。")
+// END V2.5 LATEST EPISODE PANEL
+
+alertcondition(longSignal, "IMACD 多头启动", "{{exchange}}:{{ticker}} {{interval}} IMACD密集多头启动；本K线已收盘。")
+alertcondition(shortSignal, "IMACD 空头启动", "{{exchange}}:{{ticker}} {{interval}} IMACD密集空头启动；本K线已收盘。")
+alertcondition(exitLong, "IMACD 多头趋势结束", "{{exchange}}:{{ticker}} {{interval}} IMACD主线回零或转负，多头趋势结束。")
+alertcondition(exitShort, "IMACD 空头趋势结束", "{{exchange}}:{{ticker}} {{interval}} IMACD主线回零或转正，空头趋势结束。")
+alertcondition(armed and pendingSide != 0, "IMACD 等待共振", "{{exchange}}:{{ticker}} {{interval}} 密集零轴启动已出现，等待周期确认。")
