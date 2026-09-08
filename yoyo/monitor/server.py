@@ -7,7 +7,8 @@ import logging
 import os
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
+from pydantic import BaseModel, Field
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
@@ -15,9 +16,15 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from yoyo.monitor import FRESH_MS, SIGNAL_KIND, SIGNAL_PROTOCOL, MONITORED_TIMEFRAMES
 from yoyo.monitor.service import Monitor
 from yoyo.monitor.store import Store
+from yoyo.monitor.tradingview import DesktopOpenError, open_chart
 
 STATIC = Path(__file__).parent / "static"
 DEFAULT_RUNTIME = Path.home() / "Library/Application Support/Fable/ImpulseMonitor"
+
+
+class DesktopChartRequest(BaseModel):
+    symbol: str = Field(min_length=1, max_length=48)
+    timeframe: str = Field(min_length=1, max_length=3)
 
 
 def create_app(runtime=None, start_monitor=True):
@@ -95,6 +102,20 @@ def create_app(runtime=None, start_monitor=True):
         if result is None:
             raise HTTPException(404, "该交易对正在初始化，请稍后刷新。")
         return result
+
+    @app.post("/api/tradingview/open")
+    def tradingview_open(payload: DesktopChartRequest, request: Request):
+        # UI activation is a same-origin POST, never a side effect of a GET,
+        # chart render, scanner tick, or an unrelated website's request.
+        expected_origin = f"{request.url.scheme}://{request.url.netloc}"
+        if (request.headers.get("origin") != expected_origin
+                or request.headers.get("x-spike-action") != "open-tradingview"
+                or request.headers.get("sec-fetch-site", "same-origin") != "same-origin"):
+            raise HTTPException(403, "请从本机 spike 页面点击查看结构。")
+        try:
+            return open_chart(payload.symbol, payload.timeframe)
+        except DesktopOpenError as error:
+            raise HTTPException(error.status_code, str(error)) from error
 
     app.mount("/static", StaticFiles(directory=str(STATIC), check_dir=False), name="static")
     return app

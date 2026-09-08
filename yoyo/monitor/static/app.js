@@ -1,4 +1,4 @@
-/* Local, read-only monitor client. All displayed market values come from the API. */
+/* Local monitor client. Market data is read-only; app opening requires a click. */
 (() => {
   "use strict";
 
@@ -9,6 +9,7 @@
     timeframe: "all", watchTimeframe: "all", side: "all", selected: null,
     chartKey: null, chart: null, chartRequest: 0, chartController: null, chartExpanded: false,
     syncing: false, lastSync: null, statusReceivedAt: null, errors: {}, chartHover: null, detailOrigin: "signals",
+    tradingViewPending: false,
   };
   const titles = {
     signals: ["主图启动", "从长时间近零蓄势，到主图确认启动。先看新信号，再看结构。"],
@@ -19,6 +20,7 @@
   const TV_PROTOCOL = "imacd-tv-visible-start-monitor-v3";
   const TV_PROFILE = "imacd-v2.2-focus12-band0.10-marks-off";
   const TV_SETTINGS = "近零至少 12 根 · 0.1 ATR · 普通系统标记关闭";
+  const TV_INTERVALS = new Map([["15m", "15"], ["1H", "60"], ["4H", "240"]]);
   const phaseNames = {
     building: "蓄势中", accumulating: "蓄势中", accumulation: "蓄势中", compression: "密集蓄势",
     ready: "等待启动", armed: "等待启动", flat: "零轴横盘", neutral: "观察中",
@@ -92,6 +94,54 @@
       throw error;
     } finally {
       if (timer) clearTimeout(timer);
+    }
+  }
+  function canOpenTradingView(item) {
+    return typeof item?.symbol === "string" && /^[A-Z0-9]{1,30}-[A-Z0-9]{2,10}-SWAP$/.test(item.symbol) && TV_INTERVALS.has(item.timeframe);
+  }
+  function renderTradingViewButtons() {
+    document.querySelectorAll("[data-tradingview-action]").forEach((button) => {
+      button.disabled = state.tradingViewPending || !canOpenTradingView({ symbol: button.dataset.tvSymbol, timeframe: button.dataset.tvTimeframe });
+      button.setAttribute("aria-busy", String(state.tradingViewPending));
+    });
+  }
+  function tradingViewStatus(message, kind) {
+    const status = $("tradingview-status");
+    status.textContent = message;
+    status.classList.remove("hidden", "error", "pending");
+    if (kind) status.classList.add(kind);
+  }
+  // Only explicit click handlers call this bridge; rendering never launches apps.
+  async function openTradingView(item) {
+    if (state.tradingViewPending) return;
+    if (!canOpenTradingView(item)) {
+      tradingViewStatus("当前合约或周期不支持在 TradingView 打开。", "error");
+      return;
+    }
+    const request = { symbol: item.symbol, timeframe: item.timeframe };
+    const label = `${shortSymbol(request.symbol)} ${quoteSymbol(request.symbol)} · ${request.timeframe}`;
+    state.tradingViewPending = true;
+    renderTradingViewButtons();
+    tradingViewStatus(`正在请求 Mac TradingView 打开 ${label}…`, "pending");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    try {
+      const response = await fetch("/api/tradingview/open", {
+        method: "POST", cache: "no-store", signal: controller.signal,
+        headers: { "Content-Type": "application/json", Accept: "application/json", "X-Spike-Action": "open-tradingview" },
+        body: JSON.stringify(request),
+      });
+      const isJSON = (response.headers.get("content-type") || "").includes("json");
+      const result = isJSON ? await response.json() : null;
+      if (!response.ok) throw new Error(typeof result?.detail === "string" ? result.detail : `服务返回 HTTP ${response.status}`);
+      if (result?.requested !== true || result.symbol !== request.symbol || result.timeframe !== request.timeframe) throw new Error("服务未返回有效的打开请求回执。");
+      tradingViewStatus(`已请求 TradingView 打开 ${label}。`, "");
+    } catch (error) {
+      tradingViewStatus(error.name === "AbortError" ? "打开请求超时，尚无法确认结果；请先查看 TradingView。" : `无法请求 TradingView：${error.message || "连接失败"}`, "error");
+    } finally {
+      clearTimeout(timeout);
+      state.tradingViewPending = false;
+      renderTradingViewButtons();
     }
   }
   function setView(view, updateHash = true) {
@@ -227,21 +277,25 @@
       emptyDescription.textContent = hasFilters ? "试试其他合约、周期，或切换全部合约。" : state.watchScope === "all" ? "全市场合约会在扫描后列出，当前状态不等于入场信号。" : "可切换全部合约查看其他交易对；蓄势状态不代表已经启动。";
     }
     const focused = document.activeElement?.dataset;
-    const focusedSymbol = focused?.marketSymbol, focusedTimeframe = focused?.marketTimeframe;
+    const focusedAction = focused?.tradingviewAction ? "tradingview" : "preview";
+    const focusedSymbol = focused?.marketSymbol || focused?.tvSymbol, focusedTimeframe = focused?.marketTimeframe || focused?.tvTimeframe;
     $("load-more-watch").classList.toggle("hidden", items.length <= state.watchLimit);
     $("load-more-watch").textContent = `显示更多（${Math.min(state.watchLimit, items.length)} / ${items.length}）`;
     $("watch-rows").innerHTML = items.slice(0, state.watchLimit).map((item) => {
       const valid = !state.errors.markets && !item.error && !item.stale && item.ready !== false;
       const phaseClass = state.errors.markets ? "stale" : item.error ? "error" : item.stale ? "stale" : item.ready === false ? "loading" : item.focus === true ? "ready" : "";
-      return `<button type="button" class="watch-card" data-market-symbol="${escapeHTML(item.symbol)}" data-market-timeframe="${escapeHTML(item.timeframe)}" aria-label="查看 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(quoteSymbol(item.symbol))} ${escapeHTML(item.timeframe)} ${escapeHTML(marketPhase(item))}图表">
+      return `<article class="watch-card"><button type="button" class="watch-preview" data-market-symbol="${escapeHTML(item.symbol)}" data-market-timeframe="${escapeHTML(item.timeframe)}" aria-label="在 spike 预览 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(quoteSymbol(item.symbol))} ${escapeHTML(item.timeframe)} ${escapeHTML(marketPhase(item))}图表">
         <span class="watch-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(item.timeframe)}</span></span>
         <span class="watch-card-phase"><span class="phase-badge ${phaseClass}" title="${escapeHTML(item.error || (item.stale ? "当前保留过期行情，等待更新" : "当前结构尚不是启动信号"))}">${escapeHTML(state.errors.markets ? "缓存 · 待同步" : marketPhase(item))}</span><span class="card-status">${!valid ? "等待更新" : item.focus ? "已达蓄势门槛" : "观察中"}</span></span>
         <span class="watch-card-run"><strong>${valid ? escapeHTML(number(item.near_zero_bars)) : "—"}<small> 根</small></strong><span>当前近零蓄势</span></span>
         <span class="watch-card-background"><span>均线密集<strong>${valid ? item.dense === true ? "已密集" : item.dense === false ? "未密集" : "—" : "—"}</strong></span><span>高周期背景<strong>${valid ? escapeHTML(sideName(item.htf_side)) : "—"}</strong></span></span>
-        <span class="watch-card-foot"><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">收盘 ${escapeHTML(shortDate(item.bar_close_ms))}</time><span>查看结构 ↗</span></span>
-      </button>`;
+        <span class="watch-preview-label">站内预览</span></button>
+        <div class="watch-card-foot"><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">收盘 ${escapeHTML(shortDate(item.bar_close_ms))}</time><button type="button" class="watch-open-app" data-tradingview-action="watch" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="在 Mac TradingView 打开" aria-label="在 Mac TradingView 打开 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(quoteSymbol(item.symbol))} ${escapeHTML(item.timeframe)}">查看结构 ↗</button></div>
+      </article>`;
     }).join("");
-    if (focusedSymbol) Array.from($("watch-rows").querySelectorAll("[data-market-symbol]")).find((card) => card.dataset.marketSymbol === focusedSymbol && card.dataset.marketTimeframe === focusedTimeframe)?.focus({ preventScroll: true });
+    renderTradingViewButtons();
+    if (focusedSymbol) Array.from($("watch-rows").querySelectorAll(focusedAction === "tradingview" ? "[data-tradingview-action]" : "[data-market-symbol]"))
+      .find((card) => (card.dataset.marketSymbol || card.dataset.tvSymbol) === focusedSymbol && (card.dataset.marketTimeframe || card.dataset.tvTimeframe) === focusedTimeframe)?.focus({ preventScroll: true });
   }
   function factsHTML(entries) {
     return entries.map(([key, value]) => `<dt>${escapeHTML(key)}</dt><dd>${escapeHTML(value)}</dd>`).join("");
@@ -348,13 +402,16 @@
     const name = item.kind ? eventNames[item.kind] || item.kind : marketPhase(item);
     $("detail-event-badge").innerHTML = `<span class="signal-badge ${item.side === "short" ? "short" : item.side === "long" ? "" : "neutral"}">${sideArrow(item.side)} ${escapeHTML(name)}</span>`;
     const tvSymbol = String(item.symbol || "").replace(/-/g, "").replace(/SWAP$/, ".P");
-    const tvInterval = new Map([["15m", "15"], ["1H", "60"], ["4H", "240"]]).get(item.timeframe);
-    if (tvInterval) {
-      $("tradingview-link").href = `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(`OKX:${tvSymbol}`)}&interval=${tvInterval}`;
-      $("tradingview-link").removeAttribute("aria-disabled");
+    const tvInterval = TV_INTERVALS.get(item.timeframe);
+    $("tradingview-open").dataset.tvSymbol = item.symbol;
+    $("tradingview-open").dataset.tvTimeframe = item.timeframe;
+    renderTradingViewButtons();
+    if (canOpenTradingView(item)) {
+      $("tradingview-web").href = `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(`OKX:${tvSymbol}`)}&interval=${tvInterval}`;
+      $("tradingview-web").removeAttribute("aria-disabled");
     } else {
-      $("tradingview-link").removeAttribute("href");
-      $("tradingview-link").setAttribute("aria-disabled", "true");
+      $("tradingview-web").removeAttribute("href");
+      $("tradingview-web").setAttribute("aria-disabled", "true");
     }
     const facts = [
       [item.kind === "tv_start" ? "信号收盘 · 北京时间" : "最近收盘 · 北京时间", shortDate(item.bar_close_ms), ""],
@@ -606,6 +663,7 @@
   }));
   $("side-filter").addEventListener("change", (event) => { state.side = event.target.value; state.rowLimit = 24; applySignalFilters(); });
   $("refresh-button").addEventListener("click", refresh);
+  $("tradingview-open").addEventListener("click", () => openTradingView(state.selected));
   $("chart-expand").addEventListener("click", () => setChartExpanded(!state.chartExpanded));
   $("chart-dialog").addEventListener("close", () => {
     if (!$("chart-dialog").open) setChartExpanded(false);
@@ -630,7 +688,15 @@
     }
   }
   $("signal-rows").addEventListener("click", (event) => activateRow(event, "signal"));
-  $("watch-rows").addEventListener("click", (event) => activateRow(event, "market"));
+  $("watch-rows").addEventListener("click", (event) => {
+    const opener = event.target.closest("[data-tradingview-action]");
+    if (opener) {
+      event.preventDefault();
+      openTradingView({ symbol: opener.dataset.tvSymbol, timeframe: opener.dataset.tvTimeframe });
+      return;
+    }
+    activateRow(event, "market");
+  });
   $("load-more-watch").addEventListener("click", () => { state.watchLimit += 24; renderWatch(); });
   $("back-to-signals").addEventListener("click", () => {
     const watch = state.detailOrigin === "watch";

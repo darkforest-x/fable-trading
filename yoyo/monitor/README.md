@@ -224,3 +224,47 @@ Tests include future perturbation, HTF availability, frozen focus bands, wick
 semantics, failure/recovery at unchanged timestamps, concurrent SQLite insertion,
 uncertain delivery, restart recovery, old-message suppression and clock rejection.
 No economic performance metric is implied by passing these software tests.
+
+### Open a structure in Mac TradingView
+
+The watch card's **查看结构** button and the detail pane's **Mac TradingView**
+button send the selected card's exact OKX swap and `15m` / `1H` / `4H` interval
+to `POST /api/tradingview/open`. Clicking the card body still opens spike's
+preview. The detail pane retains an explicit web fallback. Rendering, scanner
+updates and refresh never activate the desktop app.
+
+The owner authorized an AppleScript bridge on 2026-09-08. Mac Desktop 3.4.0
+supports the [clipboard menu workflow](https://www.tradingview.com/support/solutions/43000673907-how-to-open-a-tradingview-chart-link-in-desktop-app/),
+not a chart deep link through its registered login URL scheme. The bridge uses
+the desktop window's internal menu: the macOS menu dispatch returned without
+navigating in local tests. It reads live accessibility bounds for the title-bar
+button; it does not assume absolute screen coordinates or modify a saved layout.
+The generic chart URL reused the owner's current `综合过滤` layout in direct
+Mac tests (BTC-USDT 4H and TRUTH-USDT 15m).
+
+The service must run in this Mac's unlocked GUI session with TradingView
+installed and signed in. In **System Settings → Privacy & Security → Automation**,
+the installed caffeinate-wrapped LaunchAgent requires **caffeinate → System
+Events** enabled. Accessibility permission must also be allowed for the process
+macOS identifies. Shell/Codex authorization does not imply LaunchAgent
+authorization. On 2026-09-08, the live page correctly showed failure because
+this Automation switch was observed off; direct-script success is not a passed
+end-to-end LaunchAgent test. Enable the switch, click a card, and verify the
+actual chart symbol and interval before calling deployment acceptance complete.
+
+Only same-origin POSTs carrying `X-Spike-Action: open-tradingview` are accepted;
+the service remains loopback-only. Inputs are restricted swap/interval values,
+and the URL is argv data, never shell or AppleScript source. One action runs at
+a time. The script checks a 15-second deadline with 3-second per-event timeouts;
+Python has a 25-second outer timeout. The clipboard is restored on ordinary
+success/error unless the user copied something else. Hard process/OS failures
+cannot guarantee restoration. The response says **requested**, not that market
+data loaded. Errors are sanitized and surfaced; no automatic retries occur.
+
+Validation:
+
+```bash
+.venv/bin/python -m pytest tests/monitor/test_tradingview.py -q
+node --test tests/monitor/frontend_cards.test.cjs
+osacompile -o /tmp/spike-tradingview-bridge.scpt yoyo/monitor/tradingview.applescript
+```

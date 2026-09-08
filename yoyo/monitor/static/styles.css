@@ -932,6 +932,7 @@ h2 {
 }
 
 .icon-link {
+  background:transparent;
   color:#a1c1b0;
   flex:0 0 32px;
   height:32px;
@@ -951,6 +952,14 @@ h2 {
   height:16px;
   stroke-width:1.3;
 }
+
+.tradingview-actions { display:flex; align-items:center; gap:9px; flex-shrink:0; }
+.tradingview-web { color:var(--dim); font-size:11px; white-space:nowrap; }
+.tradingview-web:hover { color:var(--mint); }
+.tradingview-web[aria-disabled="true"] { opacity:.5; cursor:default; }
+.action-status { position:fixed; right:24px; bottom:24px; z-index:100; max-width:min(460px,calc(100vw - 32px)); padding:13px 17px; border:1px solid #496957; border-radius:10px; background:#183125; color:#d2e6d8; box-shadow:0 8px 30px #0005; font-size:13px; line-height:1.7; overflow-wrap:anywhere; }
+.action-status.pending { background:#1b2935; border-color:#465d70; color:#c8d8e7; }
+.action-status.error { background:#382427; border-color:#765055; color:#f0c8cc; }
 
 .detail-price-row {
   display:flex;
@@ -1583,6 +1592,11 @@ html:has(#chart-dialog[open]) { overflow:hidden; }
 .watch-card-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
 .watch-card { min-width:0; width:100%; padding:19px; border:1px solid var(--line); border-radius:13px; background:var(--surface); color:var(--muted); text-align:left; transition:border-color .16s,background .16s; }
 .watch-card:hover { background:#16232c; border-color:#526757; }
+.watch-card:focus-within { border-color:#779883; }
+.watch-preview { display:block; width:100%; padding:0; background:transparent; text-align:left; }
+.watch-preview-label { display:block; margin-top:12px; color:var(--dim); font-size:11px; }
+.watch-open-app { padding:7px 9px; margin:-7px -9px -7px 0; border-radius:5px; background:transparent; color:#b0c9bc; font-size:12px; white-space:nowrap; }
+.watch-open-app:hover:not(:disabled) { background:#233b30; color:#d1e7d9; }
 .watch-card.selected { border-color:#87b39c; background:#172820; }
 .watch-card-phase { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-top:14px; color:var(--amber); font-size:12px; }
 .watch-card-run { display:flex; align-items:baseline; flex-wrap:wrap; gap:8px; margin:17px 0; color:var(--muted); font-size:13px; }
@@ -1643,6 +1657,7 @@ html:has(#chart-dialog[open]) { overflow:hidden; }
   .watch-explanation { width:100%; }
 }
 @media(max-width:600px) {
+  .action-status { right:16px; bottom:calc(82px + env(safe-area-inset-bottom)); }
   .sidebar { inset:auto 0 0; width:100%; height:calc(68px + env(safe-area-inset-bottom)); flex-direction:row; padding:0 12px env(safe-area-inset-bottom); border-top:1px solid var(--line); border-right:0; background:#0c151af5; backdrop-filter:blur(14px); }
   .brand, .sidebar-strategy, .sidebar-bottom { display:none; }
   .nav-list { height:100%; display:flex; flex-direction:row; align-items:center; justify-content:space-around; gap:4px; }

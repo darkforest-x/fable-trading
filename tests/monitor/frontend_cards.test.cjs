@@ -27,7 +27,7 @@ function attributes(text) {
   return result;
 }
 
-function harness({ allowChartFixture = false, nowStep = 0 } = {}) {
+function harness({ allowChartFixture = false, nowStep = 0, bridgeReply = null } = {}) {
   let now = NOW;
   const elements = new Map();
   const document = { activeElement: null, hidden: false, listeners: new Map() };
@@ -79,8 +79,9 @@ function harness({ allowChartFixture = false, nowStep = 0 } = {}) {
       this.listeners.get(name).push(callback);
     }
     dispatch(name, extra = {}) {
-      const event = { type: name, target: this, preventDefault() {}, ...extra };
+      const event = { type: name, target: this, defaultPrevented: false, preventDefault() { this.defaultPrevented = true; }, ...extra };
       for (const listener of this.listeners.get(name) || []) listener(event);
+      return event;
     }
     matches(selector) {
       if (selector.startsWith("[")) return selector.slice(1, -1).split("=")[0] in this.attrs;
@@ -122,12 +123,17 @@ function harness({ allowChartFixture = false, nowStep = 0 } = {}) {
     }
   }
   const networkCalls = [];
+  const networkRequests = [];
   const context = vm.createContext({
     document, Date: ClockDate, Intl, console, AbortController, setTimeout, clearTimeout,
     window: { innerWidth: 1280, addEventListener() {}, matchMedia: () => ({ matches: true }) },
     location: { hash: "#signals" }, history: { replaceState() {} },
-    fetch: (url) => {
+    fetch: (url, options = {}) => {
       networkCalls.push(url);
+      networkRequests.push({ url, ...options });
+      if (url === "/api/tradingview/open" && bridgeReply) {
+        return typeof bridgeReply === "function" ? bridgeReply(options) : Promise.resolve(bridgeReply);
+      }
       if (allowChartFixture && url.startsWith("/api/chart?")) {
         return Promise.resolve({ ok: true, headers: { get: () => "application/json" }, json: async () => ({ candles: [] }) });
       }
@@ -137,14 +143,14 @@ function harness({ allowChartFixture = false, nowStep = 0 } = {}) {
   const source = fs.readFileSync(clientPath, "utf8");
   const bootstrap = '  setView(location.hash.slice(1) || "signals", false);';
   assert.equal(source.split(bootstrap).length, 2, "client bootstrap must be uniquely identified");
-  const exposed = ["state", "isFresh", "filteredSignals", "notification", "notificationHTML", "renderSignals", "isBuilding", "renderWatch"];
+  const exposed = ["state", "isFresh", "filteredSignals", "notification", "notificationHTML", "renderSignals", "isBuilding", "renderWatch", "renderDetail", "refresh"];
   vm.runInContext(source.slice(0, source.indexOf(bootstrap)) + `\n  globalThis.client = { ${exposed.join(", ")} };\n})();`, context, { filename: clientPath });
   const client = context.client;
   client.state.status = { protocol: PROTOCOL, now_ms: NOW, runtime: { signal_kind: "tv_start", fresh_minutes: 30 } };
   client.state.statusReceivedAt = NOW;
   client.state.signalsLoaded = true;
   client.state.marketsLoaded = true;
-  return { client, document, get: (id) => elements.get(id), advance: (ms) => { now += ms; }, networkCalls };
+  return { client, document, get: (id) => elements.get(id), advance: (ms) => { now += ms; }, networkCalls, networkRequests };
 }
 
 function signal(id, ageMinutes = 1, extra = {}) {
@@ -464,4 +470,171 @@ test("opening a watch card and returning keeps observation provenance and restor
   assert.equal(client.state.view, "watch");
   assert.equal(document.activeElement, card);
   assert.equal(document.activeElement.focusOptions.preventScroll, true);
+});
+
+function bridgeResponse(body, status = 200) {
+  return { ok: status >= 200 && status < 300, status, headers: { get: () => "application/json" }, json: async () => body };
+}
+
+function market(symbol = "ETH-USDT-SWAP", timeframe = "4H") {
+  return { symbol, timeframe, near_zero_bars: 44, focus: true, ready: true, phase: "ready", price: 100 };
+}
+
+test("watch app actions transmit their own symbol and period without selecting the card", async () => {
+  for (const [symbol, timeframe] of [["BTC-USDT-SWAP", "15m"], ["ETH-USDT-SWAP", "1H"], ["BTC-USD-SWAP", "4H"],
+    ["ETH-USDC-SWAP", "1H"], ["A-BC-SWAP", "15m"], [`${"A".repeat(30)}-${"B".repeat(10)}-SWAP`, "4H"]]) {
+    const { client, get, networkRequests } = harness({ bridgeReply: bridgeResponse({ requested: true, symbol, timeframe }) });
+    client.state.view = "watch";
+    client.state.selected = signal("unrelated", 1, { symbol: "OTHER-USDT-SWAP" });
+    client.state.watchSearch = symbol.split("-")[0];
+    client.state.watchTimeframe = timeframe;
+    client.state.watchLimit = 48;
+    client.state.markets = [market(symbol, timeframe)];
+    client.renderWatch();
+    const before = JSON.stringify({ selected: client.state.selected, search: client.state.search, timeframe: client.state.timeframe, watchLimit: client.state.watchLimit });
+    const opener = get("watch-rows").querySelectorAll("[data-tradingview-action]")[0];
+    const event = get("watch-rows").dispatch("click", { target: opener });
+    assert.equal(event.defaultPrevented, true);
+    assert.equal(client.state.tradingViewPending, true);
+    assert.equal(client.state.syncing, false, "app opening must not block market refresh");
+    assert.equal(opener.disabled, true);
+    await new Promise(setImmediate);
+    assert.equal(networkRequests.length, 1);
+    const request = networkRequests[0];
+    assert.equal(request.url, "/api/tradingview/open");
+    assert.equal(request.method, "POST");
+    assert.equal(request.headers["Content-Type"], "application/json");
+    assert.equal(request.headers["X-Spike-Action"], "open-tradingview");
+    assert.deepEqual(JSON.parse(request.body), { symbol, timeframe });
+    assert.equal(client.state.view, "watch");
+    assert.equal(JSON.stringify({ selected: client.state.selected, search: client.state.search, timeframe: client.state.timeframe, watchLimit: client.state.watchLimit }), before);
+    assert.equal(client.state.tradingViewPending, false);
+    assert.equal(opener.disabled, false);
+    assert.match(get("tradingview-status").textContent, /已请求 TradingView 打开/);
+    assert.doesNotMatch(get("tradingview-status").textContent, /已成功|已经打开|已切换/);
+    assert.equal(get("tradingview-status").getAttribute("role"), "status");
+  }
+});
+
+test("an app request prevents double clicks across cards and keeps refreshed actions busy", async () => {
+  let resolve;
+  const pending = new Promise((done) => { resolve = done; });
+  const { client, get, networkRequests } = harness({ bridgeReply: () => pending });
+  client.state.markets = [market(), market("BTC-USDT-SWAP", "15m")];
+  client.renderWatch();
+  get("watch-rows").dispatch("click", { target: get("watch-rows").querySelectorAll("[data-tradingview-action]")[0] });
+  const request = JSON.parse(networkRequests[0].body);
+  client.renderWatch();
+  const buttons = get("watch-rows").querySelectorAll("[data-tradingview-action]");
+  assert.equal(buttons.length, 2);
+  assert.ok(buttons.every((button) => button.disabled));
+  get("watch-rows").dispatch("click", { target: buttons[1] });
+  get("tradingview-open").dispatch("click");
+  assert.equal(networkRequests.length, 1);
+  resolve(bridgeResponse({ requested: true, ...request }));
+  await new Promise(setImmediate);
+  assert.ok(buttons.every((button) => !button.disabled));
+});
+
+test("bridge errors remain visible verbatim as text and permit a later manual retry", async () => {
+  for (const status of [400, 403, 409, 503]) {
+    const detail = `本机打开失败 ${status} <script>not markup</script>`;
+    const { client, get, networkRequests } = harness({ bridgeReply: bridgeResponse({ detail }, status) });
+    client.state.markets = [market()];
+    client.renderWatch();
+    const button = get("watch-rows").querySelectorAll("[data-tradingview-action]")[0];
+    get("watch-rows").dispatch("click", { target: button });
+    await new Promise(setImmediate);
+    assert.equal(get("tradingview-status").textContent, `无法请求 TradingView：${detail}`);
+    assert.equal(get("tradingview-status").innerHTML, "", "error detail must never be assigned as HTML");
+    assert.equal(get("tradingview-status").classList.contains("error"), true);
+    assert.equal(get("tradingview-status").classList.contains("hidden"), false);
+    assert.equal(button.disabled, false);
+    get("watch-rows").dispatch("click", { target: button });
+    await new Promise(setImmediate);
+    assert.equal(networkRequests.length, 2);
+  }
+});
+
+test("a mismatched success receipt does not claim the requested chart was opened", async () => {
+  const { client, get } = harness({ bridgeReply: bridgeResponse({ requested: true, symbol: "WRONG-USDT-SWAP", timeframe: "4H" }) });
+  client.state.markets = [market()];
+  client.renderWatch();
+  get("watch-rows").dispatch("click", { target: get("watch-rows").querySelectorAll("[data-tradingview-action]")[0] });
+  await new Promise(setImmediate);
+  assert.match(get("tradingview-status").textContent, /未返回有效/);
+  assert.equal(get("tradingview-status").classList.contains("error"), true);
+});
+
+test("detail app action shares the bridge and retains an explicit web fallback", async () => {
+  const { client, get, networkRequests } = harness({ allowChartFixture: true, bridgeReply: bridgeResponse({ requested: true, symbol: "ETH-USDT-SWAP", timeframe: "15m" }) });
+  client.state.selected = signal("detail", 1, { symbol: "ETH-USDT-SWAP", timeframe: "15m" });
+  client.renderDetail();
+  await new Promise(setImmediate);
+  assert.equal(get("tradingview-open").tagName, "BUTTON");
+  assert.equal(get("tradingview-web").tagName, "A");
+  assert.match(get("tradingview-web").href, /symbol=OKX%3AETHUSDT.P&interval=15$/);
+  assert.equal(get("tradingview-web").getAttribute("target"), "_blank");
+  assert.equal(networkRequests.filter((request) => request.method === "POST").length, 0);
+  get("tradingview-open").dispatch("click");
+  await new Promise(setImmediate);
+  const posts = networkRequests.filter((request) => request.method === "POST");
+  assert.equal(posts.length, 1);
+  assert.deepEqual(JSON.parse(posts[0].body), { symbol: "ETH-USDT-SWAP", timeframe: "15m" });
+});
+
+test("rendering, polling and filter changes never send automatic app or notification posts", async () => {
+  const { client, get, document, networkRequests } = harness({ allowChartFixture: true });
+  client.state.markets = [market()];
+  client.state.signals = [signal("passive")];
+  client.renderWatch();
+  client.renderSignals();
+  get("watch-search").value = "ETH";
+  get("watch-search").dispatch("input");
+  document.querySelectorAll("[data-watch-timeframe]").find((button) => button.dataset.watchTimeframe === "4H").dispatch("click");
+  await client.refresh();
+  await new Promise(setImmediate);
+  assert.ok(networkRequests.length > 0);
+  assert.equal(networkRequests.filter((request) => request.method === "POST").length, 0);
+  assert.ok(networkRequests.every((request) => !/tradingview\/open|notification|telegram|bark/.test(request.url)));
+});
+
+test("watch preview and app buttons are siblings, preserve one window count and action-specific focus", () => {
+  const { client, document, get, networkRequests } = harness();
+  client.state.markets = Array.from({ length: 27 }, (_, i) => market(`COIN${i}-USDT-SWAP`, i % 2 ? "1H" : "4H"));
+  client.renderWatch();
+  let previews = get("watch-rows").querySelectorAll("[data-market-symbol]");
+  let apps = get("watch-rows").querySelectorAll("[data-tradingview-action]");
+  assert.equal(previews.length, 24);
+  assert.equal(apps.length, 24);
+  assert.match(get("watch-count").textContent, /27 个窗口/);
+  const html = get("watch-rows").innerHTML;
+  assert.equal((html.match(/<article class="watch-card">/g) || []).length, 24);
+  for (const match of html.matchAll(/<button\b[^>]*>([\s\S]*?)<\/button>/g)) assert.doesNotMatch(match[1], /<(?:button|a)\b/);
+  apps[3].focus();
+  const focused = { symbol: apps[3].dataset.tvSymbol, timeframe: apps[3].dataset.tvTimeframe };
+  client.renderWatch();
+  assert.equal(document.activeElement.dataset.tradingviewAction, "watch");
+  assert.equal(document.activeElement.dataset.tvSymbol, focused.symbol);
+  assert.equal(document.activeElement.dataset.tvTimeframe, focused.timeframe);
+  get("load-more-watch").dispatch("click");
+  previews = get("watch-rows").querySelectorAll("[data-market-symbol]");
+  apps = get("watch-rows").querySelectorAll("[data-tradingview-action]");
+  assert.equal(previews.length, 27);
+  assert.equal(apps.length, 27);
+  assert.equal(networkRequests.length, 0);
+});
+
+test("unsupported periods and malformed symbols cannot launch the app", () => {
+  const { client, get, networkRequests } = harness();
+  client.state.markets = [market("ETH-USDT-SWAP", "1Dutc"), market('BAD\"><script>', "1H"),
+    ...["-USDC-SWAP", `${"A".repeat(31)}-USDC-SWAP`, "ETH-U-SWAP", `ETH-${"B".repeat(11)}-SWAP`, "eth-USDC-SWAP", "ETH-usdc-SWAP"]
+      .map((symbol) => market(symbol, "1H"))];
+  client.renderWatch();
+  const buttons = get("watch-rows").querySelectorAll("[data-tradingview-action]");
+  assert.ok(buttons.every((button) => button.disabled));
+  for (const button of buttons) get("watch-rows").dispatch("click", { target: button });
+  assert.equal(networkRequests.length, 0);
+  assert.doesNotMatch(get("watch-rows").innerHTML, /<script>/);
+  assert.match(get("tradingview-status").textContent, /不支持/);
 });
