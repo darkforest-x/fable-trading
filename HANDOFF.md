@@ -2,6 +2,24 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## YOLO 旧2513处置清单已冻结（2026-09-08晚，Owner同意旧池先筛、新1043优先）
+
+aa7a0ec初版库存，dfce4bb修复一致多答案拼成重复框并完成跨池元数据审计。
+最新库存 output/offline_tasks/historical_inventory_20260908_v2/：2513全部保留，
+323有人工框、33明确无目标、12矛盾、2145未审待形态筛选；来自UTC13:21:41—13:21:50快照。
+原答案/任务/图片/预测/split和当前1043入口均未修改；没有完成2145逐图形态筛选。
+元数据关系37对，核心重叠25对（同venue5、跨venue20），同源+核心完全一致0；
+同OKX核心相交ENS36586→37642、PNUT35623→37708、FIL36002→37354、RVN36732→37775、ICP37104→37629。
+后两对旧train/新val，合并前需统一时间依赖/分组；不能直接继承标签或按两个旧split相加。
+旧17组精确审核图重复=17组alias（34身份），原框身份保留；两组pHash跨币不合并。
+最新HL2全部24000背景变体/3129事件与close逐20字段相同；NIGHT/QTUM旧2背景冲突仍存在，
+只记下一版成员复核hold，不改历史负例。旧覆盖只审447个OKX背景，其余2682Binance不能称干净。
+147聚焦测试通过，无媒体/OHLCV/holdout读取或新训练；均线初始化前缀未纳入此次可见区间统计。
+报告 analysis/html/p1_yolo_historical_inventory_20260908.html；父实验results下historical_inventory_summary、
+historical_hl2_overlap、historical_background_parity三个JSON。源码/产物逐项注册，raw库存不进git。
+下一步继续基于Owner提交标准做旧形态预筛，核对5跨池对、12答案矛盾和2背景冲突；
+Owner当前只继续1043 AsDisplayed预框审核，不要求重审整个旧2513。
+
 ## YOLO 最新训练数据已可审核（2026-09-08晚：1043事件带实际HL2标签）
 
 Owner要求把最新8000正图对应的1000多事件放LS调整，并在本周彻底整理数据集。

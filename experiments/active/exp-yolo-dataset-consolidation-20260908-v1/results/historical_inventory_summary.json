@@ -1,0 +1,63 @@
+{
+  "answer_status_counts": {
+    "conflict_needs_review": 12,
+    "owner_boxes": 323,
+    "owner_no_target_with_inherited_proposal": 33,
+    "unanswered": 2145
+  },
+  "collection_finished_at": "2026-09-08T13:21:50.117608+00:00",
+  "collection_started_at": "2026-09-08T13:21:41.627124+00:00",
+  "current_hl2_queue_count": 1043,
+  "disposition_counts": {
+    "archive_pending_shape_screen": 2145,
+    "quarantine_conflicting_answer": 12,
+    "retain_no_target_pending_background_checks": 33,
+    "retain_owner_boxes_pending_quality": 323
+  },
+  "full_inventory_path": "output/offline_tasks/historical_inventory_20260908_v2/historical_inventory.jsonl",
+  "generated_at": "2026-09-08T13:30:45.435343+00:00",
+  "holdout_read": false,
+  "inventory_sha256": "986fab9e90a652b086a7cf5ccc8a8c156ef990edb52423e71cde2eb148b72b53",
+  "media_read": false,
+  "negative_event_review_holds": [
+    "negative:1f096c88a11b75c095922034",
+    "negative:946ab4ce435d96b30d5c17a9"
+  ],
+  "new_gold": false,
+  "ohlcv_read": false,
+  "original_export": "output/offline_tasks/owner_review_exports/20260908T132141627124Z",
+  "policy": {
+    "automatic_deletions": false,
+    "automatic_label_transfer": false,
+    "label_studio_mutations": false,
+    "negative_holds_apply_to": "next_dataset_membership_not_historical_training_files",
+    "old_whole_pool_owner_rereview_required": false,
+    "raw_owner_annotations_edited": false,
+    "shape_screen_complete": false,
+    "unanswered_is_background": false
+  },
+  "population": 2513,
+  "production_eligible": false,
+  "snapshot_is_atomic": false,
+  "source_commit": "dfce4bb8edc35551a45c056a3592caa181f04046",
+  "source_files_sha256": {
+    "/Users/zhangzc/fable-trading/datasets/grade_a_hl2_review_20260908_v1/admin/build_receipt.json": "baacdb74902504988f4f23db73716516e238b948c146dba4af248f81984beebd",
+    "/Users/zhangzc/fable-trading/datasets/grade_a_hl2_review_20260908_v1/manifest.jsonl": "fb0be11739339fd5d5016eee24a51081fd3ed44cffd1c1774c963a7365bf5fde",
+    "/Users/zhangzc/fable-trading/datasets/grade_a_hl2_review_20260908_v1/tasks.json": "2262199e081132bfc891014944345720fbcc37ad2a800c8a6c8e38422fab35b2",
+    "/Users/zhangzc/fable-trading/datasets/owner_box_refinement_20260907_v1/manifest.jsonl": "7588f9c62f26a66986f747f9dd27dff8f6c216a6b26f307e705cba2880c3a641",
+    "/Users/zhangzc/fable-trading/datasets/owner_box_refinement_20260907_v1/tasks.json": "bc89a4d5e41003f1bf191013d60ba76d84fafbd67a28e17c2dfd3f0c6bc6697a",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-owner-box-curation-20260907-v1/results/review_queue.json": "bc41ecfd478af0dfd6019af42cf7a11537a8f00b4d405ae5c401f6581abb1e3e",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-owner-box-refinement-20260907-v1/results/import_receipt.json": "6615e447613b9f6ddc221055232bf2442793895d8fb11a96b2f1b0a3a3f639d9",
+    "/Users/zhangzc/fable-trading/output/offline_tasks/owner_review_exports/20260908T132141627124Z/answers.jsonl": "d926bfa10157c0e95ccf3612e69a1d413c2f8989e279d391b62fe0dbb3daf9cc",
+    "/Users/zhangzc/fable-trading/output/offline_tasks/owner_review_exports/20260908T132141627124Z/predictions.json": "80cab8504fd445d3fbd43dc0f2ff0c43c712b6bea6f4b584d717c9fef2b8e99f",
+    "/Users/zhangzc/fable-trading/output/offline_tasks/owner_review_exports/20260908T132141627124Z/raw.json": "2d35d3262ffe4d6c27c94d1b83096ac542d8520259e25541346ff98beacd5505",
+    "/Users/zhangzc/fable-trading/output/offline_tasks/owner_review_exports/20260908T132141627124Z/summary.json": "7c83c55b13a92338b2f6fcc9742d2dd54f331ce81b46a87366c4c673a4ef4b97"
+  },
+  "source_sha256": {
+    "tests/test_historical_review_inventory.py": "1ac70fc76ca95501aecb1aed62ec242b80a72aec8105e9c02f036d1e160b8dfd",
+    "yoyo/contracts/holdout.py": "63cb6b73b3c8f419108744a75d29a03487e4857b4ee5b056c578c0213877de0a",
+    "yoyo/datasets/historical_review_inventory.py": "362cba14471288f330bdafc8b85775ba24e99cf5f2ee6b0dc7d20f3a8a62e278",
+    "yoyo/datasets/owner_review_export.py": "c43b65bc0b034cdbd6fd75d0ad754253d63f65ebd8ef4eb294878977f6bc9f72"
+  },
+  "training_eligible": false
+}
