@@ -6954,3 +6954,18 @@ experiments:
     notes: Default close entry, signal extreme stop,3R,12bar width,8groups are disclosed editable drawing assumptions,
       not owner-approved trading parameters. No Mac monitor/TG/Bark/execution change. Failed native buffer discarded;
       desktop instance reloaded from cloud v9.
+
+  - experiment_id: exp-imacd-startup-quality-20260908-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 44a004c26285dc0169f5d8e0f430532e4f0991dd
+    status: active
+    question: Can prior MA formation and price proximity improve visible IMACD startup signals while retaining large winners?
+    single_variable: Fixed sequential gates P01 contraction, P02 proximity, P03 directional separation; P04 old density comparator.
+    result: Preregistered; P02 is the sole deployment candidate. No market outcomes evaluated yet.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: null
+    artifacts: []
+    reuse_allowed: false
+    notes: Owner authorized all dates and this research on 2026-09-08. Existing 54 deep OKX perpetual datasets,15m/1H/4H; no production changes.
