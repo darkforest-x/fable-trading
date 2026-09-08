@@ -1,5 +1,9 @@
 <View>
-  <View style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+  <Style>
+    .owner-review-controls .lsf-labels,
+    .owner-review-controls .lsf-choices { margin: 0; }
+  </Style>
+  <View className="owner-review-controls" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
     <RectangleLabels name="pattern" toName="image" strokeWidth="2">
       <Label value="多头" background="#16a34a" hotkey="1"/>
       <Label value="空头" background="#dc2626" hotkey="2"/>
