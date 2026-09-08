@@ -22,13 +22,14 @@ experiments:
       review workflow this week?
     single_variable: Review and data-lineage preparation only; no model experiment. Actual HL2 training labels copied
       unchanged into predictions.
-    result: 'Delivered 1043 actual HL2 image/label proposals from 8000 variants into project 77; 3556 total tasks
-      and predictions, 368 existing answers preserved. Export: 323 box answers, 33 explicit no-target with inherited
-      proposals, 12 conflicts; 142 tests passed. Manual curation remains pending.'
+    result: 'Delivered 1043 actual HL2 proposals; all 2513 historical tasks and 368 Owner answers retained. Historical
+      inventory: 323 box answers, 33 explicit no-target, 12 conflicts, 2145 pending shape screen. Five same-venue
+      core overlap pairs include two old-train/new-val risks. Two existing background conflicts persist in HL2; 147
+      focused tests passed. No new Gold or training.'
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: analysis/html/p1_yolo_dataset_consolidation_20260908.html
+    canonical_report: analysis/html/p1_yolo_historical_inventory_20260908.html
     artifacts:
     - yolo-dataset-consolidation-20260908-prereg
     - yolo-dataset-consolidation-20260908-plan
@@ -45,10 +46,18 @@ experiments:
     - yolo-dataset-consolidation-20260908-browser-qa
     - yolo-dataset-consolidation-20260908-windows-asset-qa
     - yolo-dataset-consolidation-20260908-owner-export-summary
+    - yolo-historical-inventory-20260908-prereg
+    - yolo-historical-inventory-20260908-report-source
+    - yolo-historical-inventory-20260908-report-html
+    - yolo-historical-inventory-20260908-inventory-summary
+    - yolo-historical-inventory-20260908-overlap
+    - yolo-historical-inventory-20260908-background-parity
+    - yolo-historical-inventory-20260908-inventory
+    - yolo-historical-inventory-20260908-owner-snapshot
     reuse_allowed: false
-    notes: Same project 77 and view 44; use Label Tasks As Displayed. Old tasks and Owner raw answers preserved. 1042
-      future40 plus one future13 before holdout. Deadline September 13 20:00 Asia/Shanghai for versioned curated subset
-      and unresolved inventory; no new training or Gold claim.
+    notes: Owner continues project 77 view 44 AsDisplayed 1043 queue. Metadata inventory and conflict audit completed;
+      visual screening of 2145 historical unanswered candidates, full temporal grouping and final dataset membership
+      remain pending. Do not transfer labels from overlap or image equality; preserve every raw answer.
   - experiment_id: exp-yolo-owner-label-optimization-20260908-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 342fe6a9c24eade95089539fa38104d6d74f6954

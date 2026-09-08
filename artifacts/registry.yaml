@@ -18,6 +18,118 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: yolo-historical-inventory-20260908-prereg
+    artifact_type: manifest
+    role: historical_owner_work_retention_and_cross_pool_review_candidates
+    source_repo: darkforest-x/fable-trading
+    source_commit: aa7a0ec3fd2aa7d44010cc870c2568c0193e67c8
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/historical_triage_preregistration.json
+    sha256: 3389d91a7f8dd6e16936811af94f75feda5d8f4198035cd1a1a271d49a2603bd
+    size_bytes: 1793
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/historical_triage_preregistration.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 2513 historical records retained; 323 boxes, 33 no-target, 12 conflicting, 2145 pending shape screen. Five
+      same-venue core review pairs; no label transfer, deletions, LS mutation or new training.
+  - artifact_id: yolo-historical-inventory-20260908-report-source
+    artifact_type: report
+    role: historical_owner_work_retention_and_cross_pool_review_candidates
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9da9f3d59ca4d871c8ebb3aaff085ee9e865e4b3
+    source_path: analysis/p1_yolo_historical_inventory_20260908.md
+    sha256: 08f178dac87e969ca3fc92e87035b40bec4d882bfc14af41b7979f5c0573e763
+    size_bytes: 8597
+    storage_uri: repo://analysis/p1_yolo_historical_inventory_20260908.md
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 2513 historical records retained; 323 boxes, 33 no-target, 12 conflicting, 2145 pending shape screen. Five
+      same-venue core review pairs; no label transfer, deletions, LS mutation or new training.
+  - artifact_id: yolo-historical-inventory-20260908-report-html
+    artifact_type: report
+    role: historical_owner_work_retention_and_cross_pool_review_candidates
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9da9f3d59ca4d871c8ebb3aaff085ee9e865e4b3
+    source_path: analysis/html/p1_yolo_historical_inventory_20260908.html
+    sha256: 48347bcbd613c6ba7529c086a11bde4e0714b59d16328fbcc377f5de83c0868f
+    size_bytes: 12313
+    storage_uri: repo://analysis/html/p1_yolo_historical_inventory_20260908.html
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 2513 historical records retained; 323 boxes, 33 no-target, 12 conflicting, 2145 pending shape screen. Five
+      same-venue core review pairs; no label transfer, deletions, LS mutation or new training.
+  - artifact_id: yolo-historical-inventory-20260908-inventory-summary
+    artifact_type: manifest
+    role: historical_owner_work_retention_and_cross_pool_review_candidates
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9da9f3d59ca4d871c8ebb3aaff085ee9e865e4b3
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/historical_inventory_summary.json
+    sha256: 9a8b084e5df8dcc2329dfaf3c09655802aec310a270590418c4690e3fc169715
+    size_bytes: 4071
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/historical_inventory_summary.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 2513 historical records retained; 323 boxes, 33 no-target, 12 conflicting, 2145 pending shape screen. Five
+      same-venue core review pairs; no label transfer, deletions, LS mutation or new training.
+  - artifact_id: yolo-historical-inventory-20260908-overlap
+    artifact_type: manifest
+    role: historical_owner_work_retention_and_cross_pool_review_candidates
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9da9f3d59ca4d871c8ebb3aaff085ee9e865e4b3
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/historical_hl2_overlap.json
+    sha256: 2dde0a2387191a940f9c870340af60d62caf61461d45a92f73a7e931059d49d0
+    size_bytes: 192706
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/historical_hl2_overlap.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 2513 historical records retained; 323 boxes, 33 no-target, 12 conflicting, 2145 pending shape screen. Five
+      same-venue core review pairs; no label transfer, deletions, LS mutation or new training.
+  - artifact_id: yolo-historical-inventory-20260908-background-parity
+    artifact_type: manifest
+    role: historical_owner_work_retention_and_cross_pool_review_candidates
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9da9f3d59ca4d871c8ebb3aaff085ee9e865e4b3
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/historical_background_parity.json
+    sha256: 92bda2acb1f461aae0c44b25520116d8dffaf56ea4f71652fc690c2a0551948d
+    size_bytes: 18322
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/historical_background_parity.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 2513 historical records retained; 323 boxes, 33 no-target, 12 conflicting, 2145 pending shape screen. Five
+      same-venue core review pairs; no label transfer, deletions, LS mutation or new training.
+  - artifact_id: yolo-historical-inventory-20260908-inventory
+    artifact_type: manifest
+    role: historical_owner_work_retention_and_cross_pool_review_candidates
+    source_repo: darkforest-x/fable-trading
+    source_commit: dfce4bb8edc35551a45c056a3592caa181f04046
+    source_path: output/offline_tasks/historical_inventory_20260908_v2/historical_inventory.jsonl
+    sha256: 986fab9e90a652b086a7cf5ccc8a8c156ef990edb52423e71cde2eb148b72b53
+    size_bytes: 2208926
+    storage_uri: file:///Users/zhangzc/fable-trading/output/offline_tasks/historical_inventory_20260908_v2/historical_inventory.jsonl
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 2513 historical records retained; 323 boxes, 33 no-target, 12 conflicting, 2145 pending shape screen. Five
+      same-venue core review pairs; no label transfer, deletions, LS mutation or new training.
+  - artifact_id: yolo-historical-inventory-20260908-owner-snapshot
+    artifact_type: manifest
+    role: historical_owner_work_retention_and_cross_pool_review_candidates
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8f0c1dcd53d4d6dca63ccdeb5a3d87f4fc706e21
+    source_path: output/offline_tasks/owner_review_exports/20260908T132141627124Z/summary.json
+    sha256: 7c83c55b13a92338b2f6fcc9742d2dd54f331ce81b46a87366c4c673a4ef4b97
+    size_bytes: 1174823
+    storage_uri: file:///Users/zhangzc/fable-trading/output/offline_tasks/owner_review_exports/20260908T132141627124Z/summary.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 2513 historical records retained; 323 boxes, 33 no-target, 12 conflicting, 2145 pending shape screen. Five
+      same-venue core review pairs; no label transfer, deletions, LS mutation or new training.
   - artifact_id: yolo-dataset-consolidation-20260908-report-source
     artifact_type: report
     role: actual_hl2_labels_owner_review_delivery
