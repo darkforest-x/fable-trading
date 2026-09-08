@@ -1,0 +1,3589 @@
+{
+  "label": "cold-telegram-chart",
+  "captured_at": "2026-09-08T02:05:50.508677+00:00",
+  "source_commit": "59f572ead9b24edd06f942d2f7b575c1b07b0ba4",
+  "source_sha256": {
+    "yoyo/monitor/README.md": "27d4bf2540f5d3c971149c8dfde96f191b530b055ef5f362ace72039aa577288",
+    "yoyo/monitor/__init__.py": "d04fdba33df915203e2896809d759f97a64277fe679ecaeaec5e55c31f87fe47",
+    "yoyo/monitor/acceptance.py": "10cda4a9bd251be72da46611cbcea7956aa5e5b965939cf293d5b623cae449f7",
+    "yoyo/monitor/bark.py": "e4630fee4699018ea937a283b6ac64d2b8e556868f477601aafcd71e3cfdb249",
+    "yoyo/monitor/manage.py": "f0ba128f4a202eac6935797a944641e21716ce2bb2f8aa231eee12f716e2aed2",
+    "yoyo/monitor/okx.py": "6b878a2b296e6402d6839df8375a9e89ac6474656ecb5fc9790d7fb130f3c796",
+    "yoyo/monitor/policy.py": "98fdb9331224d29af46ea04dd4af2a17f6b7a4400d60d80050b1f3a0fc689468",
+    "yoyo/monitor/server.py": "bdfa23af96bdcfb81f380c7d634c729709a3d1b9cc6315ea783cedb1b0763a68",
+    "yoyo/monitor/service.py": "983ea045092ebdfba4ee229c0ad35bc590bb89afe4eeffefe6f638ad0603fffe",
+    "yoyo/monitor/signals.py": "0f8e8bb06821430e4abc45fa59588f65815b23483efecef3a6b047d222c14b9f",
+    "yoyo/monitor/snapshot.py": "74460f99083560ad31a9371a258f6b42aae4bef11b1a08eebbb27c5bf22cb0d9",
+    "yoyo/monitor/static/app.js": "f7e3d4d14f8c5f85001ebcb0ea48f6589e5cc2d6a58ddf6c601609a92cc9f249",
+    "yoyo/monitor/static/index.html": "26534aa72f3187e26d885fc1eef2ec608924d78c3d2da7093baff235ef8de6c5",
+    "yoyo/monitor/static/styles.css": "5a2f68bb8d25028a95875e5bbc67e54fa4d54d01096bb0af5c5b4e13776cc9ca",
+    "yoyo/monitor/store.py": "356b551a2164e44fb8bd5b7f76f53d30f2f74ad5fccc1e63276df79f8caf86cd",
+    "yoyo/monitor/telegram.py": "fd19bd08e9ce60a8e596c7866be3dc972fd41ff72bb1ff288bc52780031573c4"
+  },
+  "status": {
+    "service": "Fable Impulse Monitor",
+    "version": "1.5.0",
+    "protocol": "imacd-tv-visible-start-monitor-v3",
+    "now_ms": 1788833152575,
+    "started_at_ms": 1788832477400,
+    "scan": {
+      "status": "degraded",
+      "started_at_ms": 1788832477468,
+      "finished_at_ms": 1788833107913,
+      "completed": 1419,
+      "total": 1419,
+      "errors": 16,
+      "next_scan_ms": 1788833227913,
+      "error_samples": [
+        {
+          "symbol": "MARA-USDT-SWAP",
+          "timeframe": "15m",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "MARA-USDT-SWAP",
+          "timeframe": "1H",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "MAGIC-USDT-SWAP",
+          "timeframe": "15m",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "MAGIC-USDT-SWAP",
+          "timeframe": "1H",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "MANA-USDT-SWAP",
+          "timeframe": "15m",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "MANA-USDT-SWAP",
+          "timeframe": "1H",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "ME-USDT-SWAP",
+          "timeframe": "15m",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "ME-USDT-SWAP",
+          "timeframe": "1H",
+          "error": "awaiting_latest_confirmed_bar"
+        }
+      ],
+      "duration_seconds": 630.45
+    },
+    "universe": {
+      "count": 473,
+      "scope": "OKX 全部在交易永续合约（USDT 与币本位）",
+      "updated_at_ms": 1788832477468,
+      "settlements": {
+        "USDT": 458,
+        "ADA": 1,
+        "BCH": 1,
+        "BTC": 1,
+        "DOGE": 1,
+        "DOT": 1,
+        "ETC": 1,
+        "ETH": 1,
+        "FIL": 1,
+        "HYPE": 1,
+        "LINK": 1,
+        "LTC": 1,
+        "SOL": 1,
+        "SUI": 1,
+        "UNI": 1,
+        "XRP": 1
+      }
+    },
+    "counts": {
+      "stale": 473,
+      "long": 426,
+      "short": 152,
+      "neutral": 150,
+      "loading": 78,
+      "building": 80,
+      "ready": 60,
+      "signals_24h": 271
+    },
+    "telegram": {
+      "sent": 7,
+      "pending": 0,
+      "failed": 0,
+      "unknown": 0,
+      "last_success_ms": 1788833085015,
+      "historical_sent": 70,
+      "last_signal_success_ms": 1788833085015,
+      "probe_status": "not_tested",
+      "configured": true,
+      "enabled": true,
+      "delivery_format": "chart_with_compact_caption",
+      "snapshots": 3,
+      "render_fallbacks": 0
+    },
+    "bark": {
+      "sent": 7,
+      "pending": 0,
+      "failed": 0,
+      "unknown": 0,
+      "last_success_ms": 1788833082486,
+      "historical_sent": 0,
+      "configured": true,
+      "enabled": true,
+      "acceptance": "bark_server_accepted_not_device_receipt"
+    },
+    "runtime": {
+      "host": "This Mac",
+      "notification_only": true,
+      "fresh_minutes": 30,
+      "interval_seconds": 120,
+      "timeframes": [
+        "15m",
+        "1H",
+        "4H"
+      ],
+      "clock_offset_ms": 2500,
+      "public_requests": 5007,
+      "candle_storage": "memory_only",
+      "history_days": 7,
+      "signal_mode": "TradingView 主图启动（蓄势释放标记）",
+      "signal_kind": "tv_start",
+      "tv_profile": {
+        "id": "imacd-v2.2-focus12-band0.10-marks-off",
+        "show_focus": true,
+        "show_marks": false,
+        "focus_min_bars": 12,
+        "focus_atr_band": 0.1,
+        "verified_on": "2026-09-08",
+        "sync_mode": "observed_settings_snapshot"
+      },
+      "notification_since_ms": 1788826012027,
+      "bark_notification_since_ms": 1788828167791,
+      "timeframe_notification_since_ms": {
+        "15m": 1788830095850,
+        "1H": 0,
+        "4H": 0
+      },
+      "higher_mode": "已确认高周期背景标注，不过滤启动",
+      "source_commit": "84c86365f438e5c8b0a773d5a502141d2281f540",
+      "startup_source_sha256": {
+        "store.py": "356b551a2164e44fb8bd5b7f76f53d30f2f74ad5fccc1e63276df79f8caf86cd",
+        "okx.py": "6b878a2b296e6402d6839df8375a9e89ac6474656ecb5fc9790d7fb130f3c796",
+        "signals.py": "0f8e8bb06821430e4abc45fa59588f65815b23483efecef3a6b047d222c14b9f",
+        "service.py": "983ea045092ebdfba4ee229c0ad35bc590bb89afe4eeffefe6f638ad0603fffe",
+        "server.py": "bdfa23af96bdcfb81f380c7d634c729709a3d1b9cc6315ea783cedb1b0763a68",
+        "telegram.py": "fd19bd08e9ce60a8e596c7866be3dc972fd41ff72bb1ff288bc52780031573c4",
+        "acceptance.py": "10cda4a9bd251be72da46611cbcea7956aa5e5b965939cf293d5b623cae449f7",
+        "policy.py": "98fdb9331224d29af46ea04dd4af2a17f6b7a4400d60d80050b1f3a0fc689468",
+        "__init__.py": "d04fdba33df915203e2896809d759f97a64277fe679ecaeaec5e55c31f87fe47",
+        "bark.py": "e4630fee4699018ea937a283b6ac64d2b8e556868f477601aafcd71e3cfdb249",
+        "manage.py": "f0ba128f4a202eac6935797a944641e21716ce2bb2f8aa231eee12f716e2aed2",
+        "snapshot.py": "74460f99083560ad31a9371a258f6b42aae4bef11b1a08eebbb27c5bf22cb0d9"
+      },
+      "warmup_bars": 340,
+      "launch_agent": "com.fable.impulse-monitor"
+    }
+  },
+  "health": {
+    "service": "Fable Impulse Monitor",
+    "version": "1.5.0",
+    "protocol": "imacd-tv-visible-start-monitor-v3",
+    "now_ms": 1788833152695,
+    "started_at_ms": 1788832477400,
+    "scan": {
+      "status": "degraded",
+      "started_at_ms": 1788832477468,
+      "finished_at_ms": 1788833107913,
+      "completed": 1419,
+      "total": 1419,
+      "errors": 16,
+      "next_scan_ms": 1788833227913,
+      "error_samples": [
+        {
+          "symbol": "MARA-USDT-SWAP",
+          "timeframe": "15m",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "MARA-USDT-SWAP",
+          "timeframe": "1H",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "MAGIC-USDT-SWAP",
+          "timeframe": "15m",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "MAGIC-USDT-SWAP",
+          "timeframe": "1H",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "MANA-USDT-SWAP",
+          "timeframe": "15m",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "MANA-USDT-SWAP",
+          "timeframe": "1H",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "ME-USDT-SWAP",
+          "timeframe": "15m",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "ME-USDT-SWAP",
+          "timeframe": "1H",
+          "error": "awaiting_latest_confirmed_bar"
+        }
+      ],
+      "duration_seconds": 630.45
+    },
+    "universe": {
+      "count": 473,
+      "scope": "OKX 全部在交易永续合约（USDT 与币本位）",
+      "updated_at_ms": 1788832477468,
+      "settlements": {
+        "USDT": 458,
+        "ADA": 1,
+        "BCH": 1,
+        "BTC": 1,
+        "DOGE": 1,
+        "DOT": 1,
+        "ETC": 1,
+        "ETH": 1,
+        "FIL": 1,
+        "HYPE": 1,
+        "LINK": 1,
+        "LTC": 1,
+        "SOL": 1,
+        "SUI": 1,
+        "UNI": 1,
+        "XRP": 1
+      }
+    },
+    "counts": {
+      "stale": 473,
+      "long": 426,
+      "short": 152,
+      "neutral": 150,
+      "loading": 78,
+      "building": 80,
+      "ready": 60,
+      "signals_24h": 271
+    },
+    "telegram": {
+      "sent": 7,
+      "pending": 0,
+      "failed": 0,
+      "unknown": 0,
+      "last_success_ms": 1788833085015,
+      "historical_sent": 70,
+      "last_signal_success_ms": 1788833085015,
+      "probe_status": "not_tested",
+      "configured": true,
+      "enabled": true,
+      "delivery_format": "chart_with_compact_caption",
+      "snapshots": 3,
+      "render_fallbacks": 0
+    },
+    "bark": {
+      "sent": 7,
+      "pending": 0,
+      "failed": 0,
+      "unknown": 0,
+      "last_success_ms": 1788833082486,
+      "historical_sent": 0,
+      "configured": true,
+      "enabled": true,
+      "acceptance": "bark_server_accepted_not_device_receipt"
+    },
+    "runtime": {
+      "host": "This Mac",
+      "notification_only": true,
+      "fresh_minutes": 30,
+      "interval_seconds": 120,
+      "timeframes": [
+        "15m",
+        "1H",
+        "4H"
+      ],
+      "clock_offset_ms": 2500,
+      "public_requests": 5007,
+      "candle_storage": "memory_only",
+      "history_days": 7,
+      "signal_mode": "TradingView 主图启动（蓄势释放标记）",
+      "signal_kind": "tv_start",
+      "tv_profile": {
+        "id": "imacd-v2.2-focus12-band0.10-marks-off",
+        "show_focus": true,
+        "show_marks": false,
+        "focus_min_bars": 12,
+        "focus_atr_band": 0.1,
+        "verified_on": "2026-09-08",
+        "sync_mode": "observed_settings_snapshot"
+      },
+      "notification_since_ms": 1788826012027,
+      "bark_notification_since_ms": 1788828167791,
+      "timeframe_notification_since_ms": {
+        "15m": 1788830095850,
+        "1H": 0,
+        "4H": 0
+      },
+      "higher_mode": "已确认高周期背景标注，不过滤启动",
+      "source_commit": "84c86365f438e5c8b0a773d5a502141d2281f540",
+      "startup_source_sha256": {
+        "store.py": "356b551a2164e44fb8bd5b7f76f53d30f2f74ad5fccc1e63276df79f8caf86cd",
+        "okx.py": "6b878a2b296e6402d6839df8375a9e89ac6474656ecb5fc9790d7fb130f3c796",
+        "signals.py": "0f8e8bb06821430e4abc45fa59588f65815b23483efecef3a6b047d222c14b9f",
+        "service.py": "983ea045092ebdfba4ee229c0ad35bc590bb89afe4eeffefe6f638ad0603fffe",
+        "server.py": "bdfa23af96bdcfb81f380c7d634c729709a3d1b9cc6315ea783cedb1b0763a68",
+        "telegram.py": "fd19bd08e9ce60a8e596c7866be3dc972fd41ff72bb1ff288bc52780031573c4",
+        "acceptance.py": "10cda4a9bd251be72da46611cbcea7956aa5e5b965939cf293d5b623cae449f7",
+        "policy.py": "98fdb9331224d29af46ea04dd4af2a17f6b7a4400d60d80050b1f3a0fc689468",
+        "__init__.py": "d04fdba33df915203e2896809d759f97a64277fe679ecaeaec5e55c31f87fe47",
+        "bark.py": "e4630fee4699018ea937a283b6ac64d2b8e556868f477601aafcd71e3cfdb249",
+        "manage.py": "f0ba128f4a202eac6935797a944641e21716ce2bb2f8aa231eee12f716e2aed2",
+        "snapshot.py": "74460f99083560ad31a9371a258f6b42aae4bef11b1a08eebbb27c5bf22cb0d9"
+      },
+      "warmup_bars": 340,
+      "launch_agent": "com.fable.impulse-monitor"
+    },
+    "service_alive": true,
+    "market_ready": true,
+    "ok": false
+  },
+  "markets": {
+    "total": 1419,
+    "warming_up": 78,
+    "by_timeframe": {
+      "15m": 473,
+      "1H": 473,
+      "4H": 473
+    },
+    "errors": [
+      {
+        "symbol": "0G-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "0G-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "1INCH-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "1INCH-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "2Z-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "2Z-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "A-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "A-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AAOI-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AAOI-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AAPL-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AAPL-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AAVE-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AAVE-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ACH-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ACH-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ACT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ACT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ACU-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ACU-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ADA-USD-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ADA-USD-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ADA-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ADA-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ADBE-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ADBE-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AEHR-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AEHR-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AEON-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AEON-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AERO-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AERO-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AEVO-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AEVO-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AGLD-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AGLD-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AI-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AI-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AIXBT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AIXBT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ALAB-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ALAB-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ALGO-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ALGO-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ALLO-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ALLO-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AMAT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AMAT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AMC-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AMC-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AMD-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AMD-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AMZN-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AMZN-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ANIME-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ANIME-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ANTHROPIC-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ANTHROPIC-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "APE-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "APE-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "API3-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "API3-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "APLD-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "APLD-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "APP-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "APP-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "APR-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "APR-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "APT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "APT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AR-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AR-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ARB-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ARB-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ARKM-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ARKM-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ARM-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ARM-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ARX-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ARX-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ASML-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ASML-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ASTER-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ASTER-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ASTS-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ASTS-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ATH-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ATH-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ATOM-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ATOM-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AUCTION-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AUCTION-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AVAX-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AVAX-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AVGO-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AVGO-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AVNT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AVNT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AXS-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AXS-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AXTI-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AXTI-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AZTEC-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "AZTEC-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BABY-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BABY-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BAND-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BAND-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BARD-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BARD-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BASED-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BASED-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BAT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BAT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BB-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BB-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BCH-USD-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BCH-USD-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BCH-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BCH-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BE-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BE-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BEAT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BEAT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BERA-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BERA-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BICO-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BICO-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BIGTIME-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BIGTIME-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BILL-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BILL-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BIO-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BIO-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BLEND-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BLEND-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BLUR-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BLUR-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BMNR-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BMNR-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BNB-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BNB-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BOME-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BOME-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BONK-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BONK-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BOT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BOT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BRETT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BRETT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BREV-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BREV-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BRKB-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BRKB-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BSB-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BSB-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BSP-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BSP-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BTC-USD-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BTC-USD-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BTC-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BTC-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BX-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BX-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BZ-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "BZ-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CAP-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CAP-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CASHCAT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CASHCAT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CBRS-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CBRS-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CC-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CC-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CELO-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CELO-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CFX-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CFX-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CGNX-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CGNX-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CHIP-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CHIP-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CHZ-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CHZ-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CIEN-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CIEN-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CL-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CL-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CNPY-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CNPY-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "COAI-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "COAI-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "COHR-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "COHR-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "COIN-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "COIN-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "COMP-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "COMP-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CORE-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CORE-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "COST-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "COST-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CP-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CP-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CRCL-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CRCL-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CRDO-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CRDO-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CRM-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CRM-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CRO-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CRO-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CRV-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CRV-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CRWD-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CRWD-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CRWV-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CRWV-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CSCO-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CSCO-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CSOPSAMSUNG2L-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CSOPSAMSUNG2L-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CSOPSKHYNIX2L-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CSOPSKHYNIX2L-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CVX-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CVX-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CXMT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "CXMT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DASH-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DASH-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DATA-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DATA-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DDOG-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DDOG-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DELL-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DELL-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DGAI-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DGAI-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DKNG-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DKNG-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DOGE-USD-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DOGE-USD-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DOGE-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DOGE-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DOOD-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DOOD-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DOS-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DOS-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DOT-USD-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DOT-USD-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DOT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DOT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DRAM-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DRAM-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DYDX-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "DYDX-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "EDEN-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "EDEN-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "EDGE-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "EDGE-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "EGLD-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "EGLD-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "EIGEN-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "EIGEN-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ENA-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ENA-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ENJ-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ENJ-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ENS-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ENS-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ENSO-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ENSO-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ESP-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ESP-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ETC-USD-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ETC-USD-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ETC-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ETC-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ETH-USD-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ETH-USD-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ETH-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ETH-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ETHFI-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ETHFI-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ETHW-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ETHW-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "EWJ-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "EWJ-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "EWT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "EWT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "EWY-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "EWY-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "EWZ-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "EWZ-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "F-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "F-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "FARTCOIN-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "FARTCOIN-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "FET-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "FET-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "FIL-USD-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "FIL-USD-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "FIL-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "FIL-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "FLNC-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "FLNC-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "FLOKI-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "FLOKI-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "FLOW-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "FLOW-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "FLY-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "FLY-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "FOGO-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "FOGO-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "FWDI-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "FWDI-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GALA-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GALA-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GAS-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GAS-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GEV-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GEV-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GIGGLE-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GIGGLE-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GLM-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GLM-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GLW-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GLW-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GME-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GME-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GMT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GMT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GMX-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GMX-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GOOGL-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GOOGL-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GPRO-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GPRO-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GPS-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GPS-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GRAM-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GRAM-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GRASS-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GRASS-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GRT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GRT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GRVT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "GRVT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "H-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "H-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "HBAR-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "HBAR-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "HIMS-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "HIMS-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "HMSTR-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "HMSTR-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "HOME-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "HOME-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "HOOD-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "HOOD-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "HPE-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "HPE-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "HUMA-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "HUMA-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "HYPE-USD-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "HYPE-USD-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "HYPE-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "HYPE-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "HYUNDAI-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "HYUNDAI-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "IBM-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "IBM-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ICP-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ICP-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ICX-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ICX-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "IMX-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "IMX-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "INFQ-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "INFQ-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "INIT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "INIT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "INJ-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "INJ-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "INTC-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "INTC-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "INTW-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "INTW-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "IONQ-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "IONQ-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "IOST-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "IOST-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "IOTA-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "IOTA-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "IREN-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "IREN-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "IRYS-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "IRYS-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ISRG-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ISRG-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "IWM-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "IWM-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "JELLYJELLY-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "JELLYJELLY-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "JNJ-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "JNJ-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "JTO-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "JTO-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "JUP-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "JUP-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KAITO-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KAITO-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KAT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KAT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KGEN-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KGEN-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KIOXIA-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KIOXIA-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KITE-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KITE-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KLAC-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KLAC-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KMNO-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KMNO-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KO-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KO-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KORU-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KORU-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KR200-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KR200-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KSM-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "KSM-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LA-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LA-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LAB-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LAB-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LAYER-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LAYER-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LDO-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LDO-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LIGHT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LIGHT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LINEA-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LINEA-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LINK-USD-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LINK-USD-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LINK-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LINK-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LIT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LIT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LITE-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LITE-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LLY-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LLY-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LPT-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LPT-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LQTY-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LQTY-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LRCX-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LRCX-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LTC-USD-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LTC-USD-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LTC-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LTC-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LUNA-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LUNA-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LUNR-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LUNR-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LYTE-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "LYTE-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "MAGIC-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "MAGIC-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "MANA-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "MANA-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "MARA-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "MARA-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "MASK-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "MASK-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ME-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "ME-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "MEGA-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "MEGA-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "MEME-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "MERL-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "MERL-USDT-SWAP",
+        "timeframe": "1H",
+        "error": "awaiting_latest_confirmed_bar"
+      },
+      {
+        "symbol": "META-USDT-SWAP",
+        "timeframe": "15m",
+        "error": "awaiting_latest_confirmed_bar"
+      }
+    ],
+    "stale": 488
+  },
+  "journal": {
+    "event_count": 24703,
+    "duplicate_identity_groups": 0,
+    "telegram_receipts": [
+      {
+        "event_id": "5c9e7ec813173478e2919374",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805307147,
+        "message_id": 1786,
+        "error": null
+      },
+      {
+        "event_id": "feb7036fc1ee2cb335d1d5a7",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805326157,
+        "message_id": 1787,
+        "error": null
+      },
+      {
+        "event_id": "6151a4135197b859877ca650",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805376709,
+        "message_id": 1788,
+        "error": null
+      },
+      {
+        "event_id": "b27ed9eb05438acd4460ec4f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805389334,
+        "message_id": 1789,
+        "error": null
+      },
+      {
+        "event_id": "e66e25db324ff73eafa747a1",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805433268,
+        "message_id": 1790,
+        "error": null
+      },
+      {
+        "event_id": "c10ad93efa8c2c95d49525f6",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805486857,
+        "message_id": 1791,
+        "error": null
+      },
+      {
+        "event_id": "bed048807ea8951c42082363",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805615594,
+        "message_id": 1792,
+        "error": null
+      },
+      {
+        "event_id": "0fa648fb66161642d7be75a2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805653400,
+        "message_id": 1793,
+        "error": null
+      },
+      {
+        "event_id": "437503bc0a0cf4f7f91af058",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805666177,
+        "message_id": 1794,
+        "error": null
+      },
+      {
+        "event_id": "e350ea989c2960fb090952e9",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807653338,
+        "message_id": 1795,
+        "error": null
+      },
+      {
+        "event_id": "26b57a080aeaf1f13b294c84",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807659917,
+        "message_id": 1796,
+        "error": null
+      },
+      {
+        "event_id": "4cb0406fe80fce8740cfe86c",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807666348,
+        "message_id": 1797,
+        "error": null
+      },
+      {
+        "event_id": "ddd9e84365c34accd40ae03c",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807669559,
+        "message_id": 1798,
+        "error": null
+      },
+      {
+        "event_id": "aecafc547e023f094875c0ed",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807679190,
+        "message_id": 1799,
+        "error": null
+      },
+      {
+        "event_id": "57d3beaada67c638f3671a93",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807682652,
+        "message_id": 1800,
+        "error": null
+      },
+      {
+        "event_id": "df84ff33c73cebd78a5638ec",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807685880,
+        "message_id": 1801,
+        "error": null
+      },
+      {
+        "event_id": "d90c1c788a267bcca594df13",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807689181,
+        "message_id": 1802,
+        "error": null
+      },
+      {
+        "event_id": "3c85f8e163d82261d1e5b177",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807692564,
+        "message_id": 1803,
+        "error": null
+      },
+      {
+        "event_id": "80b855f92ddeb1a7a5b1f0df",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807696073,
+        "message_id": 1804,
+        "error": null
+      },
+      {
+        "event_id": "338f99256143d0fc6f3f2b89",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807699472,
+        "message_id": 1805,
+        "error": null
+      },
+      {
+        "event_id": "1b443f0f3ee242b294f5bde8",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811259945,
+        "message_id": 1806,
+        "error": null
+      },
+      {
+        "event_id": "59887f81bcdebba006d58036",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811269527,
+        "message_id": 1807,
+        "error": null
+      },
+      {
+        "event_id": "e1b0de8e3a97955e713a52fb",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811279068,
+        "message_id": 1808,
+        "error": null
+      },
+      {
+        "event_id": "34a28b0d2481cb3a437609a2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811282406,
+        "message_id": 1809,
+        "error": null
+      },
+      {
+        "event_id": "5eb593270733f89fae9ffed3",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811285676,
+        "message_id": 1810,
+        "error": null
+      },
+      {
+        "event_id": "7dc3704452d8a8928c0c65b6",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811289125,
+        "message_id": 1811,
+        "error": null
+      },
+      {
+        "event_id": "b9347e4c9a65a818491d6f6f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811292605,
+        "message_id": 1812,
+        "error": null
+      },
+      {
+        "event_id": "355fd11984f6f9002a0d617f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811296027,
+        "message_id": 1813,
+        "error": null
+      },
+      {
+        "event_id": "81537f08141e6b971ba32301",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811299336,
+        "message_id": 1814,
+        "error": null
+      },
+      {
+        "event_id": "7b3bae3988a1b7c4642ec059",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811305889,
+        "message_id": 1815,
+        "error": null
+      },
+      {
+        "event_id": "81173ab17a6451b60942a7bf",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811315476,
+        "message_id": 1816,
+        "error": null
+      },
+      {
+        "event_id": "764a7c18f08203f262825a21",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811319022,
+        "message_id": 1817,
+        "error": null
+      },
+      {
+        "event_id": "10d851d3efe0c075c0e32159",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811322346,
+        "message_id": 1818,
+        "error": null
+      },
+      {
+        "event_id": "46a2f374f502f00591b2cec7",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811325813,
+        "message_id": 1819,
+        "error": null
+      },
+      {
+        "event_id": "dc35709e88e27ef90c38dda5",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811329063,
+        "message_id": 1820,
+        "error": null
+      },
+      {
+        "event_id": "2398157defb00a83c22fb1e2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811332435,
+        "message_id": 1821,
+        "error": null
+      },
+      {
+        "event_id": "14dd5320b3dce810efa3b03d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811335786,
+        "message_id": 1822,
+        "error": null
+      },
+      {
+        "event_id": "e17d2a74831702585194532a",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811348534,
+        "message_id": 1823,
+        "error": null
+      },
+      {
+        "event_id": "9c16b15a80589b680c1bcba7",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811352007,
+        "message_id": 1824,
+        "error": null
+      },
+      {
+        "event_id": "d749278eccc583fbfe59b6c6",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811355514,
+        "message_id": 1825,
+        "error": null
+      },
+      {
+        "event_id": "51c301ca246d97a8203b6739",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814932450,
+        "message_id": 1826,
+        "error": null
+      },
+      {
+        "event_id": "f9ab44a277cb0f7e9c6980e2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814942149,
+        "message_id": 1827,
+        "error": null
+      },
+      {
+        "event_id": "81939b5047c149e411fbba7d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814945556,
+        "message_id": 1828,
+        "error": null
+      },
+      {
+        "event_id": "7873253754aa125552f2eafe",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814948883,
+        "message_id": 1829,
+        "error": null
+      },
+      {
+        "event_id": "7506c95fe71645b3524245e8",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814952186,
+        "message_id": 1830,
+        "error": null
+      },
+      {
+        "event_id": "2780e12fe0da86a485ecf48d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814955469,
+        "message_id": 1831,
+        "error": null
+      },
+      {
+        "event_id": "9f090e02861234cbae4fb5e0",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814958750,
+        "message_id": 1832,
+        "error": null
+      },
+      {
+        "event_id": "e6cf7b0071eed38ed965175b",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814962096,
+        "message_id": 1833,
+        "error": null
+      },
+      {
+        "event_id": "31fc4b118d240bf6fe29f705",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818478897,
+        "message_id": 1834,
+        "error": null
+      },
+      {
+        "event_id": "9e2bfa4f81c31d2ec14e89c2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818488320,
+        "message_id": 1835,
+        "error": null
+      },
+      {
+        "event_id": "51f0265ffe701c7276735357",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818491790,
+        "message_id": 1836,
+        "error": null
+      },
+      {
+        "event_id": "a17a989b3c6deee97800ffc0",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818495178,
+        "message_id": 1837,
+        "error": null
+      },
+      {
+        "event_id": "73e0395a0a24fc241b9055c1",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818511100,
+        "message_id": 1838,
+        "error": null
+      },
+      {
+        "event_id": "9206760c6aa1feb90aef14fb",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818517606,
+        "message_id": 1839,
+        "error": null
+      },
+      {
+        "event_id": "6271b43e82c4bd449040425a",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818524133,
+        "message_id": 1840,
+        "error": null
+      },
+      {
+        "event_id": "bfacd442a43c23c845558add",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818527575,
+        "message_id": 1841,
+        "error": null
+      },
+      {
+        "event_id": "8d997d230c404a52a1d4ef25",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818536994,
+        "message_id": 1842,
+        "error": null
+      },
+      {
+        "event_id": "72cea8ecd0f3eae762b69b07",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822077010,
+        "message_id": 1843,
+        "error": null
+      },
+      {
+        "event_id": "252949db1d6c996e0e981696",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822083461,
+        "message_id": 1844,
+        "error": null
+      },
+      {
+        "event_id": "f77e8d89557e5de69aecd8d0",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822086820,
+        "message_id": 1845,
+        "error": null
+      },
+      {
+        "event_id": "809c98bd61de26d0e5afadbd",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822090193,
+        "message_id": 1846,
+        "error": null
+      },
+      {
+        "event_id": "79d8ecb8409be7a8982d4145",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822099781,
+        "message_id": 1847,
+        "error": null
+      },
+      {
+        "event_id": "3cf315a324ac7437ac0e02e8",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822103094,
+        "message_id": 1848,
+        "error": null
+      },
+      {
+        "event_id": "839803986f26bf662f4981e6",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822106290,
+        "message_id": 1849,
+        "error": null
+      },
+      {
+        "event_id": "ec3e5d5bce40cb29b79522c2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822109670,
+        "message_id": 1850,
+        "error": null
+      },
+      {
+        "event_id": "079b8ed7c81ccbd1cdd2140d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822113017,
+        "message_id": 1851,
+        "error": null
+      },
+      {
+        "event_id": "20c39ce94d2c90ef3443a70f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822116420,
+        "message_id": 1852,
+        "error": null
+      },
+      {
+        "event_id": "de8b37dac5a87cb639a42000",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822119817,
+        "message_id": 1853,
+        "error": null
+      },
+      {
+        "event_id": "ac05a54ca824e8d630578691",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822126313,
+        "message_id": 1854,
+        "error": null
+      },
+      {
+        "event_id": "39c4e76ae63a4825f0d3b35b",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822129701,
+        "message_id": 1855,
+        "error": null
+      },
+      {
+        "event_id": "98bc782c6e2c68c35b6df207",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788830554394,
+        "message_id": 1856,
+        "error": null
+      },
+      {
+        "event_id": "956b5ae03aee5c01eae964d1",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788831150026,
+        "message_id": 1857,
+        "error": null
+      },
+      {
+        "event_id": "5e9910d556e08f54e0ed4d12",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788832013472,
+        "message_id": 1858,
+        "error": null
+      },
+      {
+        "event_id": "10f8f3c5fd138819d2050d32",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788832047752,
+        "message_id": 1859,
+        "error": null
+      },
+      {
+        "event_id": "ae0428ee9123591d79c288fa",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788832924964,
+        "message_id": 1860,
+        "error": null
+      },
+      {
+        "event_id": "fba1c0816eae9f371859cb5d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788832933116,
+        "message_id": 1861,
+        "error": null
+      },
+      {
+        "event_id": "aa97e8f517ac73a0ceb52463",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788833085015,
+        "message_id": 1862,
+        "error": null
+      }
+    ],
+    "bark_receipts": [
+      {
+        "event_id": "98bc782c6e2c68c35b6df207",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788830553750,
+        "server_timestamp": 1788830555,
+        "error": null
+      },
+      {
+        "event_id": "956b5ae03aee5c01eae964d1",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788831148047,
+        "server_timestamp": 1788831150,
+        "error": null
+      },
+      {
+        "event_id": "5e9910d556e08f54e0ed4d12",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788832013262,
+        "server_timestamp": 1788832015,
+        "error": null
+      },
+      {
+        "event_id": "10f8f3c5fd138819d2050d32",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788832047231,
+        "server_timestamp": 1788832049,
+        "error": null
+      },
+      {
+        "event_id": "ae0428ee9123591d79c288fa",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788832923725,
+        "server_timestamp": 1788832925,
+        "error": null
+      },
+      {
+        "event_id": "fba1c0816eae9f371859cb5d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788832932773,
+        "server_timestamp": 1788832934,
+        "error": null
+      },
+      {
+        "event_id": "aa97e8f517ac73a0ceb52463",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788833082486,
+        "server_timestamp": 1788833084,
+        "error": null
+      }
+    ],
+    "by_kind": [
+      {
+        "kind": "entry",
+        "count": 6023
+      },
+      {
+        "kind": "exit",
+        "count": 5544
+      },
+      {
+        "kind": "release",
+        "count": 1988
+      },
+      {
+        "kind": "retest",
+        "count": 4266
+      },
+      {
+        "kind": "tv_start",
+        "count": 1134
+      },
+      {
+        "kind": "zero_breakout",
+        "count": 5748
+      }
+    ],
+    "telegram_media": [
+      {
+        "event_id": "aa97e8f517ac73a0ceb52463",
+        "bytes": 167375,
+        "sha256": "af71460e3732dac802eade99c9558e68374d5a9344b0bf9f05449d2a05f60c3a",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "ae0428ee9123591d79c288fa",
+        "bytes": 193968,
+        "sha256": "23f566ed4a1117f87f8bb2d77f78ef876f09f7647f65c65928f48cb620f4c5b9",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "fba1c0816eae9f371859cb5d",
+        "bytes": 175620,
+        "sha256": "a8a1d2519b4f28e86bc41b9699c4fa2666fc66cdf08c431d6b1d5529ac71e1cf",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      }
+    ]
+  },
+  "timeframe_audit": {
+    "policies": {
+      "15m": {
+        "activated_ms": 1788830095850
+      },
+      "1H": {
+        "activated_ms": 0
+      },
+      "4H": {
+        "activated_ms": 0
+      }
+    },
+    "signals_by_timeframe": {
+      "1H": 285,
+      "4H": 138,
+      "15m": 711
+    },
+    "invalid_telegram_ids": [],
+    "invalid_bark_ids": []
+  },
+  "bark_audit": {
+    "policy": {
+      "activated_ms": 1788828167791,
+      "kind": "tv_start"
+    },
+    "current_outbox_count": 7,
+    "invalid_outbox_ids": [],
+    "pre_activation_outbox_ids": []
+  },
+  "signal_contract_audit": {
+    "protocol": "imacd-tv-visible-start-monitor-v3",
+    "policy": {
+      "activated_ms": 1788826012027,
+      "kind": "tv_start"
+    },
+    "signal_count": 1134,
+    "invalid_signal_ids": [],
+    "current_outbox_count": 7,
+    "invalid_outbox_ids": [],
+    "pre_activation_outbox_ids": []
+  }
+}

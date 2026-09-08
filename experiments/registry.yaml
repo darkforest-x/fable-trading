@@ -6898,3 +6898,31 @@ experiments:
     notes: Owner requested15m in addition to1H/4H.15m cutover2026-09-08T09:14:55.850+08:00; channel cutovers unchanged.78windows
       lack sufficient warmup; no invented readiness. Signals remain observed TradingView settings snapshot, no automatic
       parameter sync. No test/startup sends or AI heartbeat changes. Verification builderbb4f781; runtime137c672.
+
+  - experiment_id: exp-imacd-telegram-chart-20260908-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 84c86365f438e5c8b0a773d5a502141d2281f540
+    status: accepted
+    question: Simplify TG startup notifications and add a causal signal chart.
+    single_variable: 'Notification presentation: short caption, button and frozen chart; trading rules unchanged.'
+    result: 300 software tests and35 live receipt checks passed.7 real photo signals accepted; no fallback/failed/unknown/replayed
+      history.473 contracts/1419 windows healthy after630.45s cold load with16 boundary-stale windows and77.14s recovery
+      scan.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/html/p0_imacd_telegram_chart_20260908.html
+    artifacts:
+    - imacd-telegram-chart-20260908-after-json
+    - imacd-telegram-chart-20260908-before-json
+    - imacd-telegram-chart-20260908-cold-start-json
+    - imacd-telegram-chart-20260908-pnut-preview-json
+    - imacd-telegram-chart-20260908-pnut-preview-png
+    - imacd-telegram-chart-20260908-re-1h-sent-png
+    - imacd-telegram-chart-20260908-verification-json
+    - imacd-telegram-chart-20260908-report-source
+    - imacd-telegram-chart-20260908-report
+    reuse_allowed: false
+    notes: Owner all-dates authorization; no economic evaluation or orders. Old TG/Bark receipts and all activation
+      cutovers unchanged. Snapshot is bounded to target bar; uploads are not phone/read receipts. PNUT preview was
+      not sent; RE PNG is the exact sent-media copy. Mac service1.5.0; AI heartbeat remains paused.
