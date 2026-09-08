@@ -39,7 +39,7 @@ def frozen_source():
 
 def title_changes(project, view):
     """Validate the actual queue, then return title-only mutations."""
-    if (project.get('id') != 77 or project.get('title') not in {union.TITLE, union.PREVIOUS_TITLE}
+    if (project.get('id') != 77 or project.get('title') not in {union.TITLE, union.PREVIOUS_TITLE, union.PREVIOUS_REVIEW_TITLE}
             or project.get('model_version') != union.PROTOCOL
             or project.get('show_collab_predictions') is not True
             or project.get('evaluate_predictions_automatically') is not False):

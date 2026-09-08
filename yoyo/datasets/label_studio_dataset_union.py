@@ -32,7 +32,8 @@ PROTOCOL = 'grade_a_hl2_training_label_review_v1'
 PACK = ROOT / 'datasets/grade_a_hl2_review_20260908_v1'
 OLD_PACK = ROOT / 'datasets/owner_box_refinement_20260907_v1'
 CONFIG = ROOT / 'configs/labelstudio/owner_unified_future40.xml'
-TITLE = 'YOLO 本周审核 · 1043题 · 未来40根'
+TITLE = 'YOLO 本周审核 · 1043题 · 未来150根'
+PREVIOUS_REVIEW_TITLE = 'YOLO 本周审核 · 1043题 · 未来40根'
 PREVIOUS_TITLE = 'YOLO 人工审核 · 历史标注与模型训练数据 · 未来40根'
 VIEW_TITLE = '本周审核 · 1043题'
 STATE = ROOT / 'output/offline_tasks/grade_a_hl2_union_20260908'
@@ -163,7 +164,7 @@ def deliver() -> dict:
     project = base.api(sess, 'GET', f'/api/projects/{PROJECT}/')
     config = CONFIG.read_text()
     previous_config = historical.CONFIG.read_text()
-    if (project.get('title') not in {historical.TITLE, PREVIOUS_TITLE, TITLE}
+    if (project.get('title') not in {historical.TITLE, PREVIOUS_TITLE, PREVIOUS_REVIEW_TITLE, TITLE}
             or project.get('model_version') not in {historical.PROTOCOL, PROTOCOL}
             or project.get('show_collab_predictions') is not True
             or project.get('evaluate_predictions_automatically') is not False
