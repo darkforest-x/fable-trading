@@ -284,6 +284,58 @@ def test_eligible_new_signal_enters_both_independent_channels_once(tmp_path):
     assert store.bark_status()['pending'] == 1
 
 
+def test_signal_snapshot_ends_at_earlier_signal_and_renders_once(tmp_path, monkeypatch):
+    from yoyo.monitor import snapshot
+    store = Store(tmp_path / 'monitor.sqlite3')
+    store.activate_timeframe_policy('15m', NOW - 120_000)
+    client = FakeMarket()
+    client.history['15m'][-1].update(o=120., h=121., l=119., c=120.)
+    target = client.history['15m'][-1]['t']
+    client.history['15m'].append(dict(client.history['15m'][-1], t=target + 900_000))
+    client.clock = lambda: NOW + 900_000
+    monitor = Monitor(store, client=client)
+    monitor.notification_since = monitor.bark_since = NOW - 120_000
+    calls = []
+    original = snapshot.render_signal
+
+    def render(event, bars):
+        calls.append(event)
+        assert bars[-1]['t'] == target == event['bar_open_ms']
+        assert all(b['t'] <= target for b in bars)
+        return original(event, bars)
+
+    monkeypatch.setattr(snapshot, 'render_signal', render)
+    assert monitor.scan_symbol(INSTRUMENT) == []
+    assert monitor.scan_symbol(INSTRUMENT) == []
+    assert len(calls) == 1
+    row = store.claim(client.clock())
+    assert row['png'].startswith(b'\x89PNG\r\n\x1a\n')
+    assert row['event']['bar_open_ms'] == target
+    assert store.bark_status()['pending'] == 1
+    assert store.telegram_media_status() == dict(snapshots=1, render_fallbacks=0)
+
+
+def test_snapshot_failure_preserves_signal_and_both_channels(tmp_path, monkeypatch):
+    from yoyo.monitor import snapshot
+    store = Store(tmp_path / 'monitor.sqlite3')
+    client = FakeMarket()
+    client.history['1H'][-1].update(o=120., h=121., l=119., c=120.)
+    monitor = Monitor(store, client=client)
+    monitor.notification_since = monitor.bark_since = NOW - 120_000
+
+    def broken(*args):
+        raise ValueError('synthetic_private_detail_must_not_be_stored')
+
+    monkeypatch.setattr(snapshot, 'render_signal', broken)
+    assert monitor.scan_symbol(INSTRUMENT) == []
+    row = store.claim(NOW)
+    assert row['event']['price'] == 120. and row['png'] is None
+    assert store.bark_status()['pending'] == 1
+    assert store.telegram_media_status() == dict(snapshots=0, render_fallbacks=1)
+    with store.connect() as db:
+        assert db.execute('SELECT error FROM telegram_media').fetchone()[0] == 'snapshot_unavailable'
+
+
 def test_later_telegram_cutover_does_not_block_eligible_bark_signal(tmp_path):
     store = Store(tmp_path / 'monitor.sqlite3')
     client = FakeMarket()

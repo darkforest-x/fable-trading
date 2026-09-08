@@ -31,7 +31,8 @@ For foreground development, stop the managed instance first:
 ```
 
 The existing repository `.venv` supplies Python 3.9, FastAPI, Uvicorn, requests,
-pandas and NumPy. This delivery did not install or change dependencies.
+pandas and NumPy. Pillow renders notification snapshots. This delivery did not
+install or change dependencies.
 
 ## What the signals mean
 
@@ -62,8 +63,8 @@ on correspondence. The current settings were read and left unchanged.
 A concrete chart comparison is ETH 4H on 2026-08-19: the visible label is
 44 near-zero bars / close 1922.23, on the 08:00 UTC opening candle (12:00 UTC
 close). Raw zero departure at price 1911.20 occurs two 4H candles earlier
-and is correctly excluded. The notification includes both candle open and
-confirmation time so the user can locate the actual label on the chart.
+and is correctly excluded. The notification caption shows confirmation time;
+the image's time axis labels candle opens.
 
 The first calibrated exchange-time activation is persisted. Reconstructed
 bars at or before that cutover are historical and cannot be sent after an
@@ -128,15 +129,31 @@ The existing `yoyo.notify._load()` reads the owner's gitignored config or
 `TG_BOT_TOKEN` / `TG_CHAT_ID` environment. No credentials enter frontend JSON,
 source, logs, SQLite or acceptance artifacts. Exchange API keys are unnecessary.
 
-SQLite atomically inserts an immutable event and its outbox row. Repeated scans,
+Telegram uses a compact three-line caption: symbol/period/direction,
+confirmed close/preparation bars, and Beijing confirmation time. A single
+TradingView button replaces the raw URL. Each new eligible event includes a
+1080-square PNG with up to 120 actual candles, six thin moving averages,
+the startup marker and price, and IMACD blue/orange lines with a visible zero
+axis. The chart ends at the signal candle; no future candles are included.
+
+The renderer validates the target timestamp, close, and indicator values before
+delivery. Rendering failure falls back to the compact text before HTTP. There
+is never a second text send after an uncertain photo upload. New PNG bytes and
+their SHA-256 are persisted with the event/outbox transaction so a 429 retry
+uses the same picture. Existing historical/sent events are not backfilled or
+replayed; an old pending event without media can use text. Snapshot counters
+measure generated media, not photo-delivery receipts. Derived PNG storage grows
+with notified events; raw candle arrays remain in RAM.
+
+SQLite atomically inserts an immutable event, PNG and its outbox row. Repeated scans,
 concurrent jobs and restarts do not requeue the same identity. Telegram 429s
 honor `retry_after`; definite rejection is failed. Timeout, malformed response,
 5xx or interrupted sending is **unknown**, not automatically resent. This
 avoids blind duplicates but can lose a notification when delivery cannot be
 confirmed; the signal and uncertain status remain visible. A successful delivery
-requires an actual Telegram `message_id` receipt.
+requires an actual Telegram `message_id` receipt, plus photo metadata for images.
 
-Public contract: [Telegram Bot API](https://core.telegram.org/bots/api#sendmessage).
+Public contract: [Telegram Bot API](https://core.telegram.org/bots/api#sendphoto).
 
 Bark is an additional independent channel. Its owner-provided device key lives
 only in `~/Library/Application Support/Fable/ImpulseMonitor/bark.json` with

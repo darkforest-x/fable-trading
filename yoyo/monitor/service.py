@@ -225,8 +225,20 @@ class Monitor:
                 # On recovery it can be inserted once, if still fresh. Existing
                 # historical identities are never promoted or requeued.
                 if not stale or not (eligible or bark_eligible):
+                    photo, photo_error = None, None
+                    if eligible and not stale and not self.store.has_event(event):
+                        try:
+                            from yoyo.monitor.snapshot import render_signal
+                            snapshot_bars = [bar for bar in result["chart"] if bar["t"] <= event["bar_open_ms"]]
+                            photo = render_signal(event, snapshot_bars)
+                        except Exception as exc:
+                            # Rendering is presentation only; both channels
+                            # retain the valid signal if local drawing fails.
+                            photo_error = "snapshot_unavailable"
+                            LOG.warning("signal snapshot unavailable: %s", type(exc).__name__)
                     self.store.upsert_event(event, notify=eligible and not stale,
-                                            bark_notify=bark_eligible and not stale)
+                                            bark_notify=bark_eligible and not stale,
+                                            telegram_photo=photo, photo_error=photo_error)
                 kept.append(event)
             with self.lock:
                 self.charts[(symbol, timeframe)] = dict(symbol=symbol, timeframe=timeframe,

@@ -1,12 +1,14 @@
 """Telegram Bot API delivery with explicit receipts and conservative retries.
 
-Source: https://core.telegram.org/bots/api#sendmessage and #responseparameters.
+Source: https://core.telegram.org/bots/api#sendphoto, #sendmessage and #responseparameters.
 Credentials are loaded only in process from the existing owner configuration.
 They never enter API responses, logs, SQLite or exception strings.
 """
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+import hashlib
+import json
 import requests
 
 from yoyo.monitor import FRESH_MS, SIGNAL_PROTOCOL, TV_INTERVALS
@@ -23,22 +25,21 @@ def credentials():
 
 
 def message(event):
-    side = "向上 ↑" if event["side"] == "long" else "向下 ↓"
-    labels = {"tv_start": "主图启动 · 蓄势释放", "zero_breakout": "零轴离开观察", "release": "近零释放观察", "entry": "原密集条件观察", "exit": "趋势结束观察", "retest": "蓄势影线回踩"}
+    """A short caption shared by photo delivery and local-render fallback."""
+    side = "🟢 向上启动" if event["side"] == "long" else "🔴 向下启动"
     time = datetime.fromtimestamp(event["bar_close_ms"] / 1000, timezone(timedelta(hours=8))).strftime("%m-%d %H:%M")
-    opened = datetime.fromtimestamp(event["bar_open_ms"] / 1000, timezone(timedelta(hours=8))).strftime("%m-%d %H:%M")
-    htf = "许可" if event.get("htf_allowed") is True else "未许可" if event.get("htf_allowed") is False else "数据不足"
-    symbol = event["symbol"]
-    tv_symbol = symbol.removesuffix("-SWAP").replace("-", "") + ".P"
+    symbol = event["symbol"].removesuffix("-SWAP")
+    return (f"{symbol} · {event['timeframe']} · {side}\n"
+            f"收盘 {event['price']:.10g} · 蓄势 {event.get('near_zero_bars', 0)} 根\n"
+            f"{time} 北京时间 · 已确认")
+
+
+def markup(event):
+    """Keep the chart URL behind a single explicit button."""
+    tv_symbol = event["symbol"].removesuffix("-SWAP").replace("-", "") + ".P"
     interval = TV_INTERVALS[event["timeframe"]]
-    lines = ["FABLE · " + labels.get(event["kind"], event["kind"]),
-             f"{symbol} · {event['timeframe']} · {side}",
-             f"标记收盘价 {event['price']:.10g}", f"标记K线 {opened} · 收盘确认 {time} 北京时间",
-             f"主图标记：蓄势释放 {'↑' if event['side'] == 'long' else '↓'} · {event.get('near_zero_bars', 0)} 根",
-             f"背景参考：均线密集 {'满足' if event.get('dense') else '未满足'} · 高周期 {htf}"]
-    lines.extend([f"https://www.tradingview.com/chart/?symbol=OKX%3A{tv_symbol}&interval={interval}",
-                  "Mac 监控 · 按当前主图标记条件 · 点位为信号收盘价"])
-    return "\n".join(lines)
+    return {"inline_keyboard": [[{"text": "打开 TradingView ↗",
+                                  "url": f"https://www.tradingview.com/chart/?symbol=OKX%3A{tv_symbol}&interval={interval}"}]]}
 
 
 class TelegramWorker:
@@ -72,17 +73,40 @@ class TelegramWorker:
             self.store.finish(eid, "skipped", error="signal_expired")
             return True
         token, chat = self.creds
+        photo = row.get("png")
+        # Corrupt or unavailable local media must not consume a valid signal.
+        # Fall back before any HTTP attempt; never after an uncertain upload.
+        if photo and hashlib.sha256(photo).hexdigest() != row.get("photo_sha256"):
+            photo = None
         try:
-            response = self.sender("https://api.telegram.org/bot" + token + "/sendMessage",
-                                   json={"chat_id": chat, "text": message(event), "disable_web_page_preview": True},
-                                   timeout=(6, 15))
+            url = "https://api.telegram.org/bot" + token
+            if photo:
+                response = self.sender(url + "/sendPhoto",
+                                       data={"chat_id": chat, "caption": message(event),
+                                             "show_caption_above_media": "true",
+                                             "reply_markup": json.dumps(markup(event), ensure_ascii=False)},
+                                       files={"photo": ("imacd-signal.png", photo, "image/png")},
+                                       timeout=(6, 20), allow_redirects=False)
+            else:
+                response = self.sender(url + "/sendMessage",
+                                       json={"chat_id": chat, "text": message(event),
+                                             "reply_markup": markup(event), "disable_web_page_preview": True},
+                                       timeout=(6, 15), allow_redirects=False)
             payload = response.json()
             if not isinstance(payload, dict):
                 raise ValueError("invalid_response_object")
+            if response.status_code >= 500 or (payload.get("ok") is True and response.status_code != 200):
+                raise ValueError("telegram_http_delivery_uncertain")
             if payload.get("ok") is True:
                 result = payload.get("result")
                 if not isinstance(result, dict) or type(result.get("message_id")) is not int or result["message_id"] <= 0:
                     raise ValueError("missing_delivery_receipt")
+                if photo and not (isinstance(result.get("photo"), list) and any(
+                        isinstance(size, dict) and isinstance(size.get("file_id"), str)
+                        and type(size.get("width")) is int and size["width"] > 0
+                        and type(size.get("height")) is int and size["height"] > 0
+                        for size in result["photo"])):
+                    raise ValueError("missing_photo_receipt")
             else:
                 code = int(payload.get("error_code", response.status_code))
                 params = payload.get("parameters") or {}
@@ -112,7 +136,8 @@ class TelegramWorker:
         result["probe_status"] = probe.get("status", "not_tested")
         if probe.get("status") == "sent":
             result["last_success_ms"] = max(result.get("last_success_ms") or 0, probe["at_ms"])
-        return dict(result, configured=bool(self.creds), enabled=bool(self.creds))
+        return dict(result, configured=bool(self.creds), enabled=bool(self.creds),
+                    delivery_format="chart_with_compact_caption", **self.store.telegram_media_status(SIGNAL_PROTOCOL))
 
 
 def send_startup_probe(store):

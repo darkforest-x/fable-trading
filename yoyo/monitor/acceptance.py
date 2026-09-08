@@ -28,6 +28,14 @@ def collect(label, output):
         receipts = [dict(r) for r in db.execute("SELECT event_id,status,attempts,updated_ms,message_id,error FROM outbox ORDER BY updated_ms")]
         bark_exists = db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='bark_outbox'").fetchone()
         bark_receipts = [dict(r) for r in db.execute("SELECT event_id,status,attempts,updated_ms,server_timestamp,error FROM bark_outbox ORDER BY updated_ms")] if bark_exists else []
+        media_exists = db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='telegram_media'").fetchone()
+        media = []
+        if media_exists:
+            for row in db.execute("SELECT m.*,o.status FROM telegram_media m LEFT JOIN outbox o ON o.event_id=m.event_id ORDER BY m.event_id"):
+                photo = row['png']
+                media.append(dict(event_id=row['event_id'], bytes=len(photo) if photo else 0,
+                                  sha256=row['sha256'], error=row['error'], notification_status=row['status'],
+                                  hash_valid=hashlib.sha256(photo).hexdigest() == row['sha256'] if photo else None))
         duplicate_groups = db.execute("SELECT COUNT(*) FROM (SELECT COUNT(*) n FROM events GROUP BY json_extract(payload,'$.protocol'),symbol,timeframe,kind,side,close_ms HAVING n>1)").fetchone()[0]
         event_count = db.execute("SELECT COUNT(*) FROM events").fetchone()[0]
         by_kind = [dict(r) for r in db.execute("SELECT kind,COUNT(*) count FROM events GROUP BY kind")]
@@ -56,7 +64,8 @@ def collect(label, output):
                             "errors": [{"symbol": r["symbol"], "timeframe": r["timeframe"], "error": r["error"]} for r in markets["items"] if r.get("error")],
                             "stale": sum(bool(r.get("stale")) for r in markets["items"])},
                    journal={"event_count": event_count, "duplicate_identity_groups": duplicate_groups,
-                            "telegram_receipts": receipts, "bark_receipts": bark_receipts, "by_kind": by_kind},
+                            "telegram_receipts": receipts, "bark_receipts": bark_receipts, "by_kind": by_kind,
+                            "telegram_media": media},
                    timeframe_audit={"policies": timeframe_policies,
                                     "signals_by_timeframe": dict(Counter(e['timeframe'] for e in current)),
                                     "invalid_telegram_ids": [e['id'] for e in current_outbox

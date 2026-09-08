@@ -53,7 +53,9 @@ def test_15m_worker_rechecks_stream_activation_and_links_correct_interval(tmp_pa
     assert status[expected] == 1
     assert len(calls) == int(expected == 'sent')
     if calls:
-        assert 'interval=15' in calls[0].get('text', calls[0].get('url', ''))
+        link = (calls[0]['reply_markup']['inline_keyboard'][0][0]['url'] if channel == 'telegram'
+                else calls[0]['url'])
+        assert 'interval=15' in link
     untouched = store.bark_status() if channel == 'telegram' else store.telegram_status()
     assert untouched['pending'] == 1
 

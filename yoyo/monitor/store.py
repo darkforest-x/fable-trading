@@ -51,6 +51,9 @@ class Store:
                 event_id TEXT PRIMARY KEY REFERENCES events(id), status TEXT NOT NULL,
                 attempts INTEGER NOT NULL DEFAULT 0, due_ms INTEGER NOT NULL,
                 updated_ms INTEGER NOT NULL, error TEXT, server_timestamp INTEGER);
+            CREATE TABLE IF NOT EXISTS telegram_media (
+                event_id TEXT PRIMARY KEY REFERENCES events(id), png BLOB,
+                sha256 TEXT, error TEXT);
             """)
         self.path.chmod(0o600)
 
@@ -65,10 +68,21 @@ class Store:
         finally:
             db.close()
 
-    def upsert_event(self, event, notify=False, bark_notify=False):
+    @staticmethod
+    def event_id(event):
+        key = "|".join(str(event[k]) for k in ("protocol", "symbol", "timeframe", "bar_close_ms", "kind", "side"))
+        return hashlib.sha256(key.encode()).hexdigest()[:24]
+
+    def has_event(self, event):
+        with self.connect() as db:
+            return db.execute("SELECT 1 FROM events WHERE id=?", (self.event_id(event),)).fetchone() is not None
+
+    def upsert_event(self, event, notify=False, bark_notify=False, telegram_photo=None, photo_error=None):
         e = dict(event)
-        key = "|".join(str(e[k]) for k in ("protocol", "symbol", "timeframe", "bar_close_ms", "kind", "side"))
-        e["id"] = hashlib.sha256(key.encode()).hexdigest()[:24]
+        e["id"] = self.event_id(e)
+        if telegram_photo is not None and (not isinstance(telegram_photo, bytes)
+                or not telegram_photo.startswith(b'\x89PNG\r\n\x1a\n') or len(telegram_photo) > 9_000_000):
+            raise ValueError("invalid_telegram_photo")
         e.setdefault("detected_at_ms", now_ms())
         with self.connect() as db:
             cur = db.execute("INSERT OR IGNORE INTO events VALUES (?,?,?,?,?,?,?,?)", (
@@ -78,6 +92,11 @@ class Store:
             if inserted and notify:
                 db.execute("INSERT INTO outbox(event_id,status,due_ms,updated_ms) VALUES (?,?,?,?)",
                            (e["id"], "pending", e["detected_at_ms"], e["detected_at_ms"]))
+                if telegram_photo is not None or photo_error:
+                    db.execute("INSERT INTO telegram_media VALUES (?,?,?,?)",
+                               (e["id"], telegram_photo,
+                                hashlib.sha256(telegram_photo).hexdigest() if telegram_photo else None,
+                                "snapshot_unavailable" if photo_error else None))
             if inserted and bark_notify:
                 db.execute("INSERT INTO bark_outbox(event_id,status,due_ms,updated_ms) VALUES (?,?,?,?)",
                            (e["id"], "pending", e["detected_at_ms"], e["detected_at_ms"]))
@@ -206,7 +225,7 @@ class Store:
     def claim(self, now):
         with self.connect() as db:
             db.execute("BEGIN IMMEDIATE")
-            row = db.execute("SELECT o.*,e.payload FROM outbox o JOIN events e ON e.id=o.event_id WHERE o.status='pending' AND o.due_ms<=? ORDER BY o.due_ms LIMIT 1", (now,)).fetchone()
+            row = db.execute("SELECT o.*,e.payload,m.png,m.sha256 AS photo_sha256 FROM outbox o JOIN events e ON e.id=o.event_id LEFT JOIN telegram_media m ON m.event_id=e.id WHERE o.status='pending' AND o.due_ms<=? ORDER BY o.due_ms LIMIT 1", (now,)).fetchone()
             if not row:
                 return None
             db.execute("UPDATE outbox SET status='sending',attempts=attempts+1,updated_ms=? WHERE event_id=?", (now, row["event_id"]))
@@ -225,6 +244,13 @@ class Store:
             sent = db.execute("SELECT MAX(o.updated_ms) FROM outbox o JOIN events e ON e.id=o.event_id" + where + (" AND" if where else " WHERE") + " o.status='sent'", values).fetchone()[0]
         return dict(counts, pending=counts.get("pending", 0), failed=counts.get("failed", 0),
                     unknown=counts.get("unknown", 0), last_success_ms=sent)
+
+    def telegram_media_status(self, protocol=None):
+        where = " WHERE json_extract(e.payload,'$.protocol')=?" if protocol else ""
+        with self.connect() as db:
+            row = db.execute("SELECT COUNT(m.png),SUM(CASE WHEN m.error IS NOT NULL THEN 1 ELSE 0 END) FROM telegram_media m JOIN events e ON e.id=m.event_id" + where,
+                             (protocol,) if protocol else ()).fetchone()
+        return {"snapshots": row[0], "render_fallbacks": row[1] or 0}
 
     def claim_bark(self, now):
         with self.connect() as db:
