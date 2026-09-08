@@ -18,6 +18,32 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: yolo-dataset-consolidation-20260908-prereg
+    artifact_type: manifest
+    role: actual_hl2_labels_owner_review_preparation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 656f3184b31525a68ce1fceac8431bd66542f399
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/preregistration.json
+    sha256: 3e8d133e30980ba096bf0f7690762330aeb322c7fde68737f18e87a2de6b5257
+    size_bytes: 3906
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/preregistration.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Source contract and weekly data cleanup only; no new labels confirmed or training run.
+  - artifact_id: yolo-dataset-consolidation-20260908-plan
+    artifact_type: report
+    role: actual_hl2_labels_owner_review_preparation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 656f3184b31525a68ce1fceac8431bd66542f399
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/PLAN.md
+    sha256: 229b3c7d97fa5ea16f692ac222b342def8531a704d162d9409021e059edc4391
+    size_bytes: 3966
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/PLAN.md
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Source contract and weekly data cleanup only; no new labels confirmed or training run.
   - artifact_id: yolo-week-plan-20260908-source
     artifact_type: report
     role: weekly_yolo_planning_not_training_authorization
