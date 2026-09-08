@@ -105,7 +105,7 @@
     $("page-title").textContent = titles[state.view][0];
     $("breadcrumb-current").textContent = titles[state.view][0];
     $("page-description").textContent = titles[state.view][1];
-    document.title = `Fable · ${titles[state.view][0]}`;
+    document.title = `spike · ${titles[state.view][0]}`;
     if (updateHash) history.replaceState(null, "", `#${state.view}`);
     if (state.view === "system") loadHealth();
   }
@@ -288,7 +288,7 @@
     $("bark-description").textContent = !bark ? "服务尚未提供 Bark 通道状态，等待下一次同步。" : barkReady ? numeric(bark.unknown) > 0 ? "部分发送结果未知，为避免重复通知不自动重发。服务接受不代表手机已收到或已读。" : "与 TG 分别记录推送结果。服务已接受不代表手机已收到或已读。" : bark.configured ? "Bark 已配置，当前发送开关关闭；TG 与前端记录独立运行。" : "Bark 尚未配置；TG 与前端记录独立运行。";
     $("bark-facts").innerHTML = factsHTML([["本次服务接受", number(bark?.sent)], ["最近服务接受", fullDate(bark?.last_success_ms)], ["待发送", number(bark?.pending)], ["发送失败", number(bark?.failed)], ["发送结果未知", number(bark?.unknown)], ["历史服务接受", number(bark?.historical_sent)], ["配置状态", !bark ? "等待状态" : bark.configured ? "已配置（敏感信息不展示）" : "未配置"]]);
     $("service-version").textContent = status.version ? `v${String(status.version).replace(/^v/, "")}` : "本机服务";
-    const runtimeFacts = [["服务", status.service || "Fable OKX Monitor"], ["启动时间", fullDate(status.started_at_ms)], ["服务时间", fullDate(status.now_ms)], ["运行时长", duration(Date.now() - numeric(status.started_at_ms, Date.now()))]];
+    const runtimeFacts = [["监控台", "spike"], ["启动时间", fullDate(status.started_at_ms)], ["服务时间", fullDate(status.now_ms)], ["运行时长", duration(Date.now() - numeric(status.started_at_ms, Date.now()))]];
     if (timeframes.length) runtimeFacts.push(["监控周期", timeframes.join(" / ")]);
     if (runtime.host) runtimeFacts.push(["主机", runtime.host]);
     if (runtime.pid) runtimeFacts.push(["进程", runtime.pid]);
