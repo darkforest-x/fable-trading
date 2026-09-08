@@ -180,6 +180,8 @@ def test_holdout_consumption_is_declared_per_experiment_not_assumed():
         "exp-imacd-profit-mechanism-20260907-v2",
         "exp-imacd-ma-mtf-20260907-v3",
         "exp-imacd-tv-risk-box-20260908-v1",
+        # Owner allowed all dates; V2.5 used charts only for display engineering QA.
+        "exp-imacd-pine-lifecycle-20260908-v1",
         "exp-ashare-grade-a-yolo-1h4h-long-sina-20260902-v2",
         "exp-btc-4h-ma-launch-similarity-top20-v2",
         "exp-btc-4h-ma-launch-similarity-v1",

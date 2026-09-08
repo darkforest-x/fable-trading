@@ -582,3 +582,5 @@
 - [IMACD→YOLO 延迟确认工程试验（49箭头→12确认；未评收益）](html/p1_imacd_yolo_confirmation_20260908.html) · 2026-09-08
 
 - [IMACD→YOLO 1H／4H迁移（1H12→5；4H仅2候选未确认）](html/p1_imacd_yolo_timeframes_20260908.html) · 2026-09-08
+
+- [IMACD V2.5：持续阶段、冻结风险与首次回踩](html/p0_imacd_pine_lifecycle_20260908.html) · 工程验收；云端v11，24个实际Pine断言通过，原信号/通知不变。

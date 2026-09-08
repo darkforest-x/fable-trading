@@ -1,0 +1,95 @@
+{
+  "verified_at": "2026-09-08T23:40:45+08:00",
+  "source_commit": "190a47a164448da1be8c9f2a1e24eaf29adcaa1e",
+  "builder_commit": "be037e8d0c76bfb84c37f85851e8d9a9562a00a0",
+  "source_sha256": "2177aff0e1d81d44f843ff88a31a58a29edd40ed6a312309a94dfa735311f170",
+  "baseline_cloud_version": 9,
+  "saved_cloud_version": 11,
+  "saved_cloud_time_bjt": "2026-09-08 23:36",
+  "cloud_script_name": "IMACD 零轴密集启动 · 多周期趋势 V1",
+  "editor_full_readback_equal_after_crlf_normalization": true,
+  "final_chart_symbol": "OKX:PEPEUSDT.P",
+  "final_chart_interval": "30",
+  "final_layout_state": "所有更改已保存",
+  "final_entry_mode": "信号收盘",
+  "final_inputs": {
+    "showFocus": true,
+    "focusMinBars": 12,
+    "focusAtrBand": 0.1,
+    "focusGlowBars": 12,
+    "showMarks": false,
+    "rrMultiple": 3,
+    "rrKeep": 8,
+    "rrProjectionBars": 12,
+    "showTrack": true,
+    "trackMaChoice": "SMA20",
+    "showTrackRetest": true,
+    "showTrackLevels": true,
+    "showMilestones": true
+  },
+  "preservation_pytest": {
+    "passed": 4,
+    "path": "tests/test_imacd_pine_v25_contract.py"
+  },
+  "actual_pine_probe": {
+    "assertions_passed": 24,
+    "sha256": "c0aef8413278484b26e55944dd247651ee0fe6c0f407dbff70bafc581e7ef0ca",
+    "ui_result": "V2.5 · 24 Pine contracts PASS",
+    "saved_to_cloud": false,
+    "removed_from_chart": true,
+    "source_helpers_unchanged_in_final": true
+  },
+  "native_chart_observations": [
+    {
+      "symbol": "ETHUSDT.P",
+      "interval": "30",
+      "observed": "Short reference stopped at -1R; peak 0.29R frozen while structure re-entered range."
+    },
+    {
+      "symbol": "ETHUSDT.P",
+      "interval": "15",
+      "observed": "Short first breakout-edge retest; 3R/5R reached then stop, peak7.42R/current-1R frozen; later price excursion excluded.",
+      "screenshot": "eth_15m_ended_peak_frozen.png",
+      "screenshot_version": "cloud v10, before date-caption-only fix"
+    },
+    {
+      "symbol": "ETHUSDT.P",
+      "interval": "60",
+      "observed": "Long first retest box edge+SMA20 merged; old episode ended while new15-bar near-zero setup remained separate.",
+      "evidence": "CUA native screenshot in conversation; full-desktop capture rejected as it captured another foreground app."
+    },
+    {
+      "symbol": "ETHUSDT.P",
+      "interval": "240",
+      "observed": "Aug19 release continued through Sep8 beyond12 glow bars; 3/5/10R displayed; current69.8R peak81.52R giveback11.73R, protection warning. These are uncosted reference-distance units, not returns.",
+      "evidence": "CUA native screenshot in conversation; later desktop screenshot of another historical window excluded."
+    },
+    {
+      "symbol": "PEPEUSDT.P",
+      "interval": "30",
+      "observed": "Finalv11 latest09/07 caption, ended episode/current-1R and independent76-bar setup rendered."
+    }
+  ],
+  "next_open_mode": "Native UI setting applied and compiled; restored to signal-close. No dedicated first-live-tick integration test.",
+  "limitations": [
+    "Engineering validation, not strategy/backtest profitability evidence.",
+    "Synthetic probe executes pure helpers, not the whole realtime rollback lifecycle.",
+    "Dark theme source adaptation retained; final round visually checked light chart only.",
+    "Latest-only stage/milestone references; peak values are not fillable performance."
+  ],
+  "live_services_changed": false,
+  "notifications_sent_by_this_task": 0,
+  "orders": 0,
+  "holdout": {
+    "owner_authorized_all_dates_in_conversation": true,
+    "configuration_exposure_count": 1,
+    "scope": "Historical/current chart UI inspection only; no training, parameter search, portfolio evaluation or score."
+  },
+  "registry_suite": {
+    "passed": 15,
+    "failed": 1,
+    "preexisting_allowlist_missing": 13,
+    "this_experiment_authorization_added": true
+  },
+  "browser_report_open": "file URL blocked by in-app browser security policy; no workaround attempted; local HTML and Markdown kept."
+}

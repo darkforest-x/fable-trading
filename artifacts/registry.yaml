@@ -24643,3 +24643,88 @@ artifacts:
     production_eligible: false
     notes: Owner-authorized local notification integration only. Three previously evaluated positives reused for compatibility,
       not return estimation; no orders, training or ACTIVE promotion.
+
+  - artifact_id: imacd-pine-lifecycle-v25-20260908-source
+    artifact_type: config
+    role: pine_display_engineering
+    source_repo: darkforest-x/fable-trading
+    source_commit: 190a47a164448da1be8c9f2a1e24eaf29adcaa1e
+    source_path: yoyo/evaluation/pine/imacd_dense_mtf_v2_5.pine
+    sha256: 2177aff0e1d81d44f843ff88a31a58a29edd40ed6a312309a94dfa735311f170
+    size_bytes: 60985
+    storage_uri: repo://yoyo/evaluation/pine/imacd_dense_mtf_v2_5.pine
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Display-only engineering acceptance. Cloud v11; pure Pine probe24/24; no performance evaluation, model, notification
+      or execution change.
+  - artifact_id: imacd-pine-lifecycle-v25-20260908-probe
+    artifact_type: config
+    role: pine_display_engineering
+    source_repo: darkforest-x/fable-trading
+    source_commit: 190a47a164448da1be8c9f2a1e24eaf29adcaa1e
+    source_path: experiments/active/exp-imacd-pine-lifecycle-20260908-v1/results/contract_probe.pine
+    sha256: c0aef8413278484b26e55944dd247651ee0fe6c0f407dbff70bafc581e7ef0ca
+    size_bytes: 6189
+    storage_uri: repo://experiments/active/exp-imacd-pine-lifecycle-20260908-v1/results/contract_probe.pine
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Display-only engineering acceptance. Cloud v11; pure Pine probe24/24; no performance evaluation, model, notification
+      or execution change.
+  - artifact_id: imacd-pine-lifecycle-v25-20260908-verification
+    artifact_type: manifest
+    role: pine_display_engineering
+    source_repo: darkforest-x/fable-trading
+    source_commit: 190a47a164448da1be8c9f2a1e24eaf29adcaa1e
+    source_path: experiments/active/exp-imacd-pine-lifecycle-20260908-v1/results/ui-verification.json
+    sha256: a37f201877ac10404631539e31afdab2079fdd8b64ed21283932b9ccfc3770e7
+    size_bytes: 3982
+    storage_uri: repo://experiments/active/exp-imacd-pine-lifecycle-20260908-v1/results/ui-verification.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Display-only engineering acceptance. Cloud v11; pure Pine probe24/24; no performance evaluation, model, notification
+      or execution change.
+  - artifact_id: imacd-pine-lifecycle-v25-20260908-screenshot
+    artifact_type: report
+    role: pine_display_engineering
+    source_repo: darkforest-x/fable-trading
+    source_commit: 190a47a164448da1be8c9f2a1e24eaf29adcaa1e
+    source_path: experiments/active/exp-imacd-pine-lifecycle-20260908-v1/results/eth_15m_ended_peak_frozen.png
+    sha256: 659ccd8b6efbf3b7f805d69d2caeb1aa95d0bc369cd90573b362b27bf4dadac3
+    size_bytes: 1388678
+    storage_uri: repo://experiments/active/exp-imacd-pine-lifecycle-20260908-v1/results/eth_15m_ended_peak_frozen.png
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Display-only engineering acceptance. Cloud v11; pure Pine probe24/24; no performance evaluation, model, notification
+      or execution change.
+  - artifact_id: imacd-pine-lifecycle-v25-20260908-report-source
+    artifact_type: report
+    role: pine_display_engineering
+    source_repo: darkforest-x/fable-trading
+    source_commit: 190a47a164448da1be8c9f2a1e24eaf29adcaa1e
+    source_path: analysis/p0_imacd_pine_lifecycle_20260908.md
+    sha256: 52aa3390c3d52776bc46df6f605cc57ec4b13e6ff1130b5411ba893737614297
+    size_bytes: 8524
+    storage_uri: repo://analysis/p0_imacd_pine_lifecycle_20260908.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Display-only engineering acceptance. Cloud v11; pure Pine probe24/24; no performance evaluation, model, notification
+      or execution change.
+  - artifact_id: imacd-pine-lifecycle-v25-20260908-report
+    artifact_type: report
+    role: pine_display_engineering
+    source_repo: darkforest-x/fable-trading
+    source_commit: 190a47a164448da1be8c9f2a1e24eaf29adcaa1e
+    source_path: analysis/html/p0_imacd_pine_lifecycle_20260908.html
+    sha256: 3e3a1fa9da55115cdfd559c3f582efed6251350a9853a94aee6d7253067d695c
+    size_bytes: 11802
+    storage_uri: repo://analysis/html/p0_imacd_pine_lifecycle_20260908.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Display-only engineering acceptance. Cloud v11; pure Pine probe24/24; no performance evaluation, model, notification
+      or execution change.

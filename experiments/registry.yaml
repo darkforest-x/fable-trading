@@ -7367,3 +7367,26 @@ experiments:
       engineering reuse1, owner broadly allowed all dates. Local notifications only; no live execution or return claim.
       Original/confirmation clocks distinct, pending terminal state and outboxes atomic. Old receipts preserved; existing
       heartbeat remains PAUSED.
+
+  - experiment_id: exp-imacd-pine-lifecycle-20260908-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 190a47a164448da1be8c9f2a1e24eaf29adcaa1e
+    status: accepted
+    question: Persist visible release stages, frozen-risk references and first retest in TradingView.
+    single_variable: Owner-authorized display bundle; original signal calculation, alerts and MA/pane drawings unchanged.
+    result: Saved cloud v11 and exact editor readback. Four preservation pytest checks, actual Pine24-case helper probe,
+      native15m/1H/4H/PEPE30m UI checks. Final signal-close mode restored.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/html/p0_imacd_pine_lifecycle_20260908.html
+    artifacts:
+    - imacd-pine-lifecycle-v25-20260908-source
+    - imacd-pine-lifecycle-v25-20260908-probe
+    - imacd-pine-lifecycle-v25-20260908-verification
+    - imacd-pine-lifecycle-v25-20260908-screenshot
+    - imacd-pine-lifecycle-v25-20260908-report-source
+    - imacd-pine-lifecycle-v25-20260908-report
+    reuse_allowed: false
+    notes: One authorized UI exposure of this configuration; no return score. Probe covers pure helpers, not exhaustive
+      realtime-tick lifecycle. Light theme visually checked. Latest episode is dated explicitly.
