@@ -1,4 +1,4 @@
-"""Causal IMACD zero-departure monitor with Pine V2.2 diagnostic overlays.
+"""Causal monitor of the owner's visible Pine V2.2 main-chart release label.
 
 Source: yoyo/evaluation/pine/imacd_dense_mtf_v2_2.pine. OHLC through the
 confirmed local bar supplies IMACD 34/9, SMA/EMA 20/60/120 and SMA-seeded
@@ -8,13 +8,14 @@ on the twelfth consecutive near-zero bar. Wick retests use current/prior
 SMA20 and current OHLC/prior close only. HTF uses the most recent expected
 closed higher bar at or before the local OPEN, with independent warmup.
 
-The owner's corrected monitor signal is the first confirmed nonzero md bar
-immediately after exactly zero md: no density, ATR band, signal-line cross,
-HTF or trend gate. The earlier dense system remains an observation, exiting
-on md returning to zero or reversing; focus release and retest are separate
-observations. Only zero_breakout is the canonical notification event. HTF
-permission is annotation only. This module places no orders, trains no
-model, consumes no outcomes, and imports no production execution layer.
+The owner clarified that a visible TradingView main-chart startup arrow,
+not an internal zero departure, is the notification. The verified profile
+has showFocus=true, showMarks=false, focusMinBars=12 and focusAtrBand=.10.
+Thus only the visible focusRelease priceTag becomes canonical tv_start.
+Earlier zero departures, hidden dense entries, exits, raw focus releases
+and retests remain observations. HTF permission and density do not filter
+this visible label. This module places no orders, trains no model, consumes
+no outcomes, and imports no production execution layer.
 
 Recurrences start at the supplied history's first bar. 340 bars are required
 before events; this reduces seed sensitivity but does not promise equality
@@ -32,21 +33,28 @@ import pandas as pd
 from yoyo.monitor import SIGNAL_PROTOCOL
 
 PROTOCOL_VERSION = SIGNAL_PROTOCOL
+TV_PROFILE = "imacd-v2.2-focus12-band0.10-marks-off"
 WARMUP = 340
 TIMEFRAMES = {"1H": 3_600_000, "4H": 14_400_000, "1Dutc": 86_400_000}
 HIGHER_TIMEFRAME = {"1H": "4H", "4H": "1Dutc"}
 PROTOCOL = {
     "version": PROTOCOL_VERSION,
     "source": "yoyo/evaluation/pine/imacd_dense_mtf_v2_2.pine",
-    "mode": "zero_departure",
-    "notification_event": "zero_breakout",
-    "notification_rule": "confirmed and ready and previous_md == 0 and md != 0; first departure bar only",
-    "notification_filters": [],
-    "diagnostic_events": ["entry", "release", "exit", "retest"],
+    "mode": "visible_tv_focus_release",
+    "tv_profile": TV_PROFILE,
+    "tv_marker": "focus_release",
+    "show_focus": True,
+    "show_marks": False,
+    "show_price_text": True,
+    "focus_glow_bars": 12,
+    "notification_event": "tv_start",
+    "notification_rule": "confirmed and ready and showFocus and prior focusQualified and abs(md) > frozen focusBand",
+    "notification_filters": ["confirmed_closed_bar", "ready", "qualified_focus_segment", "visible_focus_release_price_tag"],
+    "diagnostic_events": ["zero_breakout", "entry", "release", "exit", "retest"],
     "diagnostic_system_mode": "dense",
     "length_ma": 34,
     "length_signal": 9,
-    "min_zero_bars": 1,
+    "diagnostic_min_zero_bars": 1,
     "dense_window": 12,
     "dense_max_width_atr": 3.0,
     "dense_min_pair_crosses": 2,
@@ -58,6 +66,8 @@ PROTOCOL = {
     "higher_timeframes": dict(HIGHER_TIMEFRAME),
     "htf_permission": "same md or same sh or exactly zero md",
     "htf_filters_default_entries": False,
+    "htf_filters_notifications": False,
+    "dense_filters_notifications": False,
     "htf_available_by": "local_bar_open",
     "event_price": "confirmed_signal_candle_close_not_fill",
     "system_exit": "md_returns_to_zero_or_reverses",
@@ -191,6 +201,8 @@ def analyze(candles: list[dict], higher: list[dict], timeframe: str) -> dict:
     entry and release zero_bars describe the run before the event;
     chart/state zero_bars is the current run. Zero-breakout/release
     near_zero_bars preserve the preceding focus run, before this update.
+    Canonical tv_start copies the visible release's prior segment evidence;
+    it may occur after md has already been nonzero for several bars.
     """
     if timeframe not in HIGHER_TIMEFRAME:
         raise ValueError("timeframe must be 1H or 4H")
@@ -202,7 +214,8 @@ def analyze(candles: list[dict], higher: list[dict], timeframe: str) -> dict:
     empty = {"phase": "loading", "near_zero_bars": 0, "zero_bars": 0, "dense": False,
              "htf_side": "unknown", "htf_allowed": None, "price": None,
              "bar_open_ms": None, "bar_close_ms": None, "bars": 0, "ready": False,
-             "focus": False, "trend_side": "flat", "zero_breakout_side": None, "timeframe": timeframe,
+             "focus": False, "trend_side": "flat", "zero_breakout_side": None,
+             "tv_start_side": None, "timeframe": timeframe,
              "higher_timeframe": higher_timeframe, "protocol_version": PROTOCOL_VERSION}
     if not len(b["t"]):
         return {"events": [], "state": empty, "chart": [], "protocol": dict(PROTOCOL)}
@@ -221,8 +234,9 @@ def analyze(candles: list[dict], higher: list[dict], timeframe: str) -> dict:
         ready, dense = bool(f["ready"][i]), bool(f["dense"][i])
         htf = _higher_at(t, hb, hf, higher_duration)
         prior_zero = zero_run
-        # The canonical monitor event is independent of all overlay states.
+        # Raw zero departure remains a diagnostic, not a visible-label signal.
         previous_md = f["md"][i - 1] if i else np.nan
+        previous_sb = f["sb"][i - 1] if i else np.nan
         zero_breakout_side = (1 if md > 0 else -1 if md < 0 else 0) if ready and previous_md == 0 else 0
         entry_side = exit_side = release_side = retest_side = 0
         prior_focus = focus_run
@@ -290,7 +304,7 @@ def analyze(candles: list[dict], higher: list[dict], timeframe: str) -> dict:
                     "prior_crosses": _number(f["prior_crosses"][i]),
                     "reason": reason, "protocol_version": PROTOCOL_VERSION,
                     "confirmed": True, "price_basis": "signal_candle_close",
-                    "is_monitor_signal": kind == "zero_breakout",
+                    "is_monitor_signal": kind == "tv_start",
                     "is_system_entry": kind == "entry"}
 
         if zero_breakout_side:
@@ -309,6 +323,17 @@ def analyze(candles: list[dict], higher: list[dict], timeframe: str) -> dict:
                            focus_qualified_ms=release_qualified,
                            zone_end_ms=t, system_entry_same_bar=entry_side == release_side)
             events.append(release)
+            # Pine line 268 draws priceTag iff showFocus and focusRelease.
+            # The verified profile fixes showFocus=true / showMarks=false;
+            # hidden system entries and later glow bars cannot create tv_start.
+            tv_start = dict(release, kind="tv_start", source_kind="release",
+                            tv_marker="focus_release", tv_profile=TV_PROFILE,
+                            tv_marker_visible=True, tv_show_focus=True, tv_show_marks=False,
+                            ready=True, focus_qualified_before=True,
+                            previous_md=_number(previous_md), previous_sb=_number(previous_sb),
+                            is_monitor_signal=True,
+                            reason="TradingView 当前主图‘蓄势释放’启动箭头：已合格近零段后，主线收盘越过冻结阈值。")
+            events.append(tv_start)
         if retest_side:
             retest = event("retest", retest_side, "已确认蓄势区内影线触及 SMA20，实体守在线外，收盘回到原侧。")
             retest.update(retest_ma="SMA20", retest_price=_number(ma), focus_band=_number(frozen_band))
@@ -324,6 +349,7 @@ def analyze(candles: list[dict], higher: list[dict], timeframe: str) -> dict:
                    dense=dense, dense_recent=bool(f["dense_recent"][i]),
                    retest_side=_side(retest_side) if retest_side else None,
                    release_side=_side(release_side) if release_side else None,
+                   tv_start_side=_side(release_side) if release_side else None,
                    zero_breakout_side=_side(zero_breakout_side) if zero_breakout_side else None,
                    entry_side=_side(entry_side) if entry_side else None,
                    exit_side=_side(exit_side) if exit_side else None,
@@ -347,6 +373,7 @@ def analyze(candles: list[dict], higher: list[dict], timeframe: str) -> dict:
                  "prior_crosses": _number(f["prior_crosses"][i]),
                  "retest_side": row["retest_side"], "release_side": row["release_side"],
                  "zero_breakout_side": row["zero_breakout_side"],
+                 "tv_start_side": row["tv_start_side"],
                  "timeframe": timeframe, "higher_timeframe": higher_timeframe,
                  "protocol_version": PROTOCOL_VERSION}
     return {"events": events, "state": state, "chart": chart, "protocol": dict(PROTOCOL)}

@@ -11,7 +11,7 @@ import subprocess
 import urllib.request
 
 from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL
-from yoyo.monitor.policy import is_zero_breakout
+from yoyo.monitor.policy import is_tv_start
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -47,11 +47,11 @@ def collect(label, output):
                             "stale": sum(bool(r.get("stale")) for r in markets["items"])},
                    journal={"event_count": event_count, "duplicate_identity_groups": duplicate_groups,
                             "telegram_receipts": receipts, "by_kind": by_kind},
-                   zero_axis_audit={"protocol": SIGNAL_PROTOCOL, "policy": policy,
+                   signal_contract_audit={"protocol": SIGNAL_PROTOCOL, "policy": policy,
                                     "signal_count": len(current),
-                                    "invalid_signal_ids": [e["id"] for e in current if not is_zero_breakout(e)],
+                                    "invalid_signal_ids": [e["id"] for e in current if not is_tv_start(e)],
                                     "current_outbox_count": len(current_outbox),
-                                    "invalid_outbox_ids": [e["id"] for e in current_outbox if not is_zero_breakout(e)],
+                                    "invalid_outbox_ids": [e["id"] for e in current_outbox if not is_tv_start(e)],
                                     "pre_activation_outbox_ids": [e["id"] for e in current_outbox if policy and e["bar_close_ms"] <= policy["activated_ms"]]})
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)

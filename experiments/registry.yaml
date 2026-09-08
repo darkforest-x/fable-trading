@@ -6794,3 +6794,19 @@ experiments:
       all-date authorization continues. Configuration live-observation use1, no returns, orders, model changes or
       production execution. Old journals remain historical.
     canonical_report: analysis/html/p0_imacd_zero_axis_monitor_fix_20260908.html
+
+  - experiment_id: exp-imacd-tv-visible-monitor-20260908-v3
+    source_repo: darkforest-x/fable-trading
+    source_commit: b22e599
+    status: active
+    question: Notify only the actual visible TradingView main-chart startup label under the owner's observed settings.
+    single_variable: Replace inferred raw zero departure with the observed focusRelease drawing contract; no tuning.
+    result: Source and 190 checks passed; fixed ETH chart reference and full live service acceptance pending.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: Owner explicitly chose the actual visible main-chart arrow. Observed showFocus=true, showMarks=false,
+      focusMinBars12 and focusAtrBand0.10. Settings left unchanged. Prior all-date and TG authorization persists;
+      configuration live-observation use1. No returns, model changes, orders or VPS cache writes.

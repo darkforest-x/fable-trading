@@ -34,26 +34,40 @@ pandas and NumPy. This delivery did not install or change dependencies.
 
 ## What the signals mean
 
-The owner corrected the monitoring definition on 2026-09-08: **a signal is
-only the first confirmed bar where IMACD md leaves exactly zero**.
+The owner explicitly requires a **visible startup marker on the actual
+TradingView price chart** before Telegram. The observed chart on 2026-09-08
+uses IMACD V2.2 with `showFocus=true`, `focusMinBars=12`, `focusAtrBand=.10`,
+`showMarks=false`. Its visible marker is **focus release**, not raw zero
+axis departure or a hidden original-system entry.
 
-- **Zero-axis start (`zero_breakout`)**: previous md is exactly 0; current md is
-  positive (upward start) or negative (downward start), after calculation warmup.
-  Tiny nonzero values qualify immediately without waiting for an ATR band.
-- Continuing on the same side, returning to zero, crossing the signal line, or
-  directly switching signs with no preceding zero bar does not trigger it.
-- Six-MA density and the confirmed higher timeframe are background annotations,
-  not gates. The message includes the preceding exact-zero run and signal price.
-- Legacy dense entries, near-zero releases, trend ends and wick retests remain
-  chart observations, but are not primary signals and never send Telegram.
+- **Visible chart start (`tv_start`)** clones the confirmed `focusRelease`
+  price label. At least 12 near-zero bars qualified the zone, its ATR band is
+  frozen, both previous IMACD lines were still inside that band, and current
+  md strictly leaves it in the marked direction.
+- Previous md can already be nonzero. A raw `zero_breakout` inside the band
+  does not show this marker and never sends Telegram. A signal-line-only exit,
+  an unqualified zone, and subsequent glow bars do not trigger the marker.
+- Density and HTF remain background because the observed visible-marker
+  branch is independent of the hidden ordinary system entries and exits.
+- The signal API, main arrows, counts and notifications all use `tv_start`
+  under `imacd-tv-visible-start-monitor-v3`. Original observations and old
+  receipts remain historical and are never relabelled as current signals.
 
-The signal API, 24-hour count and Telegram queue use only the current
-`imacd-zero-axis-monitor-v2` protocol and `zero_breakout` kind. Previous event
-journals and sent-message receipts are retained, not reclassified as new starts.
-The first calibrated exchange-time activation is persisted. Reconstructed bars
-at or before that cutover are historical and cannot be sent after an upgrade;
-restarts preserve the same cutover. Old pending notifications are marked skipped.
-The delivery worker independently checks the event contract before sending.
+The profile ID is `imacd-v2.2-focus12-band0.10-marks-off`. This is an observed
+settings snapshot, **not automatic synchronization of future TradingView
+setting edits**. Match any future settings change explicitly before relying
+on correspondence. The current settings were read and left unchanged.
+
+A concrete chart comparison is ETH 4H on 2026-08-19: the visible label is
+44 near-zero bars / close 1922.23, on the 08:00 UTC opening candle (12:00 UTC
+close). Raw zero departure at price 1911.20 occurs two 4H candles earlier
+and is correctly excluded. The notification includes both candle open and
+confirmation time so the user can locate the actual label on the chart.
+
+The first calibrated exchange-time activation is persisted. Reconstructed
+bars at or before that cutover are historical and cannot be sent after an
+upgrade; restarts preserve the same cutover. Old pending notifications are
+marked skipped. The delivery worker independently checks the marker contract.
 
 All displayed signal prices are confirmed candle **closing prices**, not fills.
 1H receives 4H context; 4H receives UTC daily context. Higher-timeframe values

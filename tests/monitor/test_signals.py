@@ -85,6 +85,14 @@ def test_real_long_flat_release_is_not_an_entry_or_backpaint():
     assert zero_events[0]["side"] == "long" and zero_events[0]["previous_md"] == 0
     assert zero_events[0]["near_zero_bars"] == 12
     assert r["chart"][352]["zero_breakout_side"] == "long"
+    visible = [e for e in r["events"] if e["kind"] == "tv_start"]
+    assert len(visible) == 1 and visible[0]["price"] == 140
+    assert visible[0]["near_zero_bars"] == 12
+    assert visible[0]["source_kind"] == "release"
+    assert visible[0]["tv_marker"] == "focus_release"
+    assert visible[0]["tv_profile"] == signals.TV_PROFILE
+    assert visible[0]["is_monitor_signal"] is True
+    assert r["chart"][352]["tv_start_side"] == "long"
 
 
 def test_qualification_freezes_band_when_atr_shrinks(monkeypatch):
@@ -216,9 +224,13 @@ def test_unsupported_timeframe_is_rejected():
 
 def test_protocol_and_output_are_json_safe():
     r = signals.analyze(candles(480, oscillate=True), [], "1H")
-    assert r["protocol"]["mode"] == "zero_departure"
-    assert r["protocol"]["notification_event"] == "zero_breakout"
-    assert r["protocol"]["notification_filters"] == []
+    assert r["protocol"]["mode"] == "visible_tv_focus_release"
+    assert r["protocol"]["notification_event"] == "tv_start"
+    assert r["protocol"]["tv_profile"] == "imacd-v2.2-focus12-band0.10-marks-off"
+    assert r["protocol"]["show_focus"] is True
+    assert r["protocol"]["show_marks"] is False
+    assert r["protocol"]["focus_min_bars"] == 12
+    assert r["protocol"]["focus_atr_band"] == .10
     assert r["protocol"]["htf_filters_default_entries"] is False
     assert r["protocol"]["orders_enabled"] is False
     assert r["state"]["protocol_version"] == signals.PROTOCOL_VERSION
@@ -251,7 +263,7 @@ def test_zero_breakout_fires_on_first_nonzero_even_below_atr_band(monkeypatch, v
     assert event["near_zero_bars"] == 2  # Focus run before updating bar 342.
     assert event["dense"] is False and event["htf_allowed"] is None
     assert event["price"] == b[342]["c"] and event["price_basis"] == "signal_candle_close"
-    assert event["confirmed"] and event["is_monitor_signal"]
+    assert event["confirmed"] and not event["is_monitor_signal"]
     assert not event["is_system_entry"]
     assert result["chart"][342]["zero_breakout_side"] == side
     assert result["chart"][342]["zero_bars"] == 0
@@ -321,3 +333,79 @@ def test_real_zero_breakout_history_survives_future_quote_mutation():
         assert [e for e in result["events"] if e["kind"] == "zero_breakout"
                 and e["bar_open_ms"] < b[370]["t"]] == expected
         assert result["chart"][:370] == prefix["chart"]
+
+
+def test_visible_start_waits_for_frozen_band_after_raw_zero_departure(monkeypatch):
+    patch_features(monkeypatch, {"md": {352: .10, 353: .19, 354: .21, 355: .25},
+                                "sb": {352: .02, 353: .04, 354: .06, 355: .08}})
+    result = signals.analyze(candles(356), [], "1H")
+    observed_zero = [e for e in result["events"] if e["kind"] == "zero_breakout"]
+    visible = [e for e in result["events"] if e["kind"] == "tv_start"]
+    assert [e["bar_open_ms"] for e in observed_zero] == [352 * 3_600_000]
+    assert [e["bar_open_ms"] for e in visible] == [354 * 3_600_000]
+    event = visible[0]
+    assert event["previous_md"] == .19 and event["previous_sb"] == .04
+    assert event["zero_bars"] == 0  # A visible arrow does not require previous md == 0.
+    assert event["near_zero_bars"] == 14
+    assert event["focus_band"] == pytest.approx(.2)
+    assert event["focus_start_ms"] == 340 * 3_600_000
+    assert event["focus_qualified_ms"] == 351 * 3_600_000
+    assert event["zone_end_ms"] == 354 * 3_600_000
+    assert event["confirmed"] and event["ready"] and event["focus_qualified_before"]
+    assert event["tv_marker_visible"] and event["tv_show_focus"]
+    assert event["tv_show_marks"] is False
+    assert event["source_kind"] == "release" and not event["is_system_entry"]
+    assert all(not e["is_monitor_signal"] for e in result["events"] if e["kind"] != "tv_start")
+    assert [result["chart"][i]["tv_start_side"] for i in (352, 353, 354, 355)] == [None, None, "long", None]
+
+
+@pytest.mark.parametrize("value,side", [(.3, "long"), (-.3, "short")])
+def test_visible_start_is_directionally_symmetric_and_ignores_hidden_filters(monkeypatch, value, side):
+    patch_features(monkeypatch, {"md": {352: value}, "dense": {352: False}})
+    opposite = -1. if value > 0 else 1.
+    info = dict(htf_known=True, htf_side="short" if value > 0 else "long", htf_md=opposite,
+                htf_sh=opposite, htf_bar_close_ms=0, htf_long_allowed=opposite > 0,
+                htf_short_allowed=opposite < 0)
+    monkeypatch.setattr(signals, "_higher_at", lambda *args: dict(info))
+    result = signals.analyze(candles(353), [], "1H")
+    visible = [e for e in result["events"] if e["kind"] == "tv_start"]
+    assert len(visible) == 1 and visible[0]["side"] == side
+    assert visible[0]["dense"] is False and visible[0]["htf_allowed"] is False
+    assert result["state"]["tv_start_side"] == side
+    assert not any(e["kind"] == "entry" for e in result["events"])
+
+
+def test_signal_line_alone_ends_segment_without_a_visible_start(monkeypatch):
+    patch_features(monkeypatch, {"md": {352: .1, 353: .4}, "sb": {352: .3, 353: .35}})
+    result = signals.analyze(candles(354), [], "1H")
+    assert result["chart"][351]["focus"] is True
+    assert result["chart"][352]["focus"] is False
+    assert not any(e["kind"] == "tv_start" for e in result["events"])
+    assert not result["chart"][353]["tv_start_side"]  # Outside band next bar, but prior segment ended.
+
+
+def test_glow_continuation_never_repeats_the_visible_label(monkeypatch):
+    patch_features(monkeypatch, {"md": {i: .3 for i in range(352, 368)}})
+    result = signals.analyze(candles(368), [], "1H")
+    visible = [e for e in result["events"] if e["kind"] == "tv_start"]
+    assert len(visible) == 1 and visible[0]["bar_open_ms"] == 352 * 3_600_000
+    assert all(row["glow_side"] == "long" for row in result["chart"][352:364])
+    assert result["chart"][364]["glow_side"] is None
+    assert all(row["tv_start_side"] is None for row in result["chart"][353:])
+
+
+def test_no_visible_start_without_twelve_qualified_preparation_bars(monkeypatch):
+    patch_features(monkeypatch, {"md": {351: .3, 352: .4}})
+    result = signals.analyze(candles(353), [], "1H")
+    assert result["chart"][350]["near_zero_bars"] == 11
+    assert any(e["kind"] == "zero_breakout" for e in result["events"])
+    assert not any(e["kind"] == "tv_start" for e in result["events"])
+    assert not any(row["tv_start_side"] for row in result["chart"])
+
+
+def test_exact_frozen_threshold_does_not_draw_visible_start(monkeypatch):
+    patch_features(monkeypatch, {"md": {352: .2, 353: .20000000001}})
+    result = signals.analyze(candles(354), [], "1H")
+    assert result["chart"][352]["tv_start_side"] is None
+    visible = [e for e in result["events"] if e["kind"] == "tv_start"]
+    assert len(visible) == 1 and visible[0]["bar_open_ms"] == 353 * 3_600_000

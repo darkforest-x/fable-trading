@@ -199,7 +199,7 @@ def test_accepted_clock_offset_uses_request_midpoint(monkeypatch):
     assert client.offset_ms == 500
 
 
-def test_scan_notifies_only_exact_zero_departure_without_density_filter(tmp_path):
+def test_scan_notifies_only_visible_focus_release_without_density_filter(tmp_path):
     from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL
     store = Store(tmp_path / 'monitor.sqlite3')
     client = FakeMarket()
@@ -211,8 +211,9 @@ def test_scan_notifies_only_exact_zero_departure_without_density_filter(tmp_path
     canonical = [e for e in events if e['kind'] == SIGNAL_KIND]
     assert len(canonical) == 1
     signal = canonical[0]
-    assert signal['previous_md'] == 0 and signal['md'] > 0
-    assert signal['dense'] is False and signal['zero_bars'] >= 1
+    assert signal['source_kind'] == 'release' and signal['tv_marker_visible']
+    assert abs(signal['previous_md']) <= signal['focus_band'] < signal['md']
+    assert signal['dense'] is False and signal['near_zero_bars'] >= 12
     assert signal['notification_status'] == 'pending'
     assert all(e['notification_status'] == 'history' for e in events if e['kind'] != SIGNAL_KIND)
     assert store.telegram_status(protocol=SIGNAL_PROTOCOL)['pending'] == 1
@@ -239,3 +240,17 @@ def test_policy_activation_uses_exchange_clock_before_delivery(tmp_path, monkeyp
     client.history['1H'][-1].update(o=120., h=121., l=119., c=120.)
     monitor.scan_symbol(INSTRUMENT)
     assert store.telegram_status()['pending'] == 0
+
+
+def test_raw_zero_departure_inside_focus_band_does_not_notify(tmp_path):
+    from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL
+    store = Store(tmp_path / 'monitor.sqlite3')
+    client = FakeMarket()
+    client.history['1H'][-1].update(o=113., h=114., l=112., c=113.)
+    monitor = Monitor(store, client=client)
+    monitor.notification_since = NOW - 120_000
+    assert monitor.scan_symbol(INSTRUMENT) == []
+    events = store.list_events()
+    assert any(e['kind'] == 'zero_breakout' for e in events)
+    assert not any(e['kind'] == SIGNAL_KIND for e in events)
+    assert store.telegram_status(protocol=SIGNAL_PROTOCOL)['pending'] == 0

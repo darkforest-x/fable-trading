@@ -5,7 +5,7 @@ import json
 import pytest
 import requests
 
-from yoyo.monitor import FRESH_MS, SIGNAL_PROTOCOL, SIGNAL_KIND
+from yoyo.monitor import FRESH_MS, SIGNAL_PROTOCOL, SIGNAL_KIND, TV_PROFILE_ID
 from yoyo.monitor.okx import MarketError, merge_rows, parse_rows
 from yoyo.monitor.store import Store
 from yoyo.monitor.telegram import TelegramWorker
@@ -14,7 +14,12 @@ from yoyo.monitor.telegram import TelegramWorker
 def event(now=3600000):
     return dict(protocol=SIGNAL_PROTOCOL, symbol="BTC-USDT-SWAP", timeframe="1H", kind=SIGNAL_KIND,
                 side="long", price=100.5, bar_close_ms=now, detected_at_ms=now + 1000,
-                near_zero_bars=12, zero_bars=12, md=.01, previous_md=0., confirmed=True, dense=True, htf_allowed=True)
+                bar_open_ms=now - 3600000, near_zero_bars=12, zero_bars=0,
+                md=.2, previous_md=.05, previous_sb=.08, focus_band=.1,
+                confirmed=True, ready=True, focus_qualified_before=True,
+                tv_marker_visible=True, tv_show_focus=True, tv_show_marks=False,
+                source_kind='release', tv_marker='focus_release', tv_profile=TV_PROFILE_ID,
+                dense=True, htf_allowed=True)
 
 
 def response(code=200, payload=None):
@@ -164,8 +169,12 @@ def test_persisted_market_does_not_look_current_after_clock_advances(tmp_path):
 
 @pytest.mark.parametrize('changes', [
     {'kind': 'entry'}, {'kind': 'exit'}, {'kind': 'release'}, {'kind': 'retest'},
-    {'protocol': 'imacd-pine-v2.2-default-monitor-v1'}, {'previous_md': .001},
-    {'md': 0}, {'confirmed': False}, {'side': 'short'}, {'zero_bars': 0},
+    {'protocol': 'imacd-zero-axis-monitor-v2'}, {'kind': 'zero_breakout'},
+    {'previous_md': .11}, {'previous_sb': .11}, {'md': .1}, {'md': 0},
+    {'confirmed': False}, {'side': 'short'}, {'near_zero_bars': 11},
+    {'focus_qualified_before': False}, {'tv_marker_visible': False},
+    {'tv_show_focus': False}, {'tv_show_marks': True}, {'tv_profile': 'unknown'},
+    {'source_kind': 'entry'}, {'tv_marker': 'system_start'},
 ])
 def test_noncanonical_queue_items_cannot_reach_telegram(tmp_path, changes):
     store = Store(tmp_path / 'm.sqlite')
@@ -234,3 +243,15 @@ def test_delivery_waits_for_explicit_policy_activation(tmp_path):
     assert not worker.deliver_once(3602000)
     assert store.telegram_status()['pending'] == 1
     assert store.telegram_status().get('sending', 0) == 0
+
+
+def test_visible_release_can_notify_after_md_already_left_zero(tmp_path):
+    store = Store(tmp_path / 'm.sqlite')
+    store.activate_notification_policy(0)
+    visible = dict(event(), zero_bars=0, previous_md=.05, dense=False, htf_allowed=False)
+    store.upsert_event(visible, True)
+    calls = []
+    worker = TelegramWorker(store, ('fake', 'fake'), lambda *a, **k: (calls.append(k) or response()))
+    assert worker.deliver_once(3602000)
+    assert len(calls) == 1 and store.telegram_status()['sent'] == 1
+    assert '0 →' not in calls[0]['json']['text']

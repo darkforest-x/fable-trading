@@ -75,7 +75,7 @@ def create_app(runtime=None, start_monitor=True):
     def signals(limit: int = Query(200, ge=1, le=2000), symbol: str = None, timeframe: str = None,
                 kind: str = SIGNAL_KIND, side: str = None):
         if kind != SIGNAL_KIND:
-            raise HTTPException(400, "信号台仅显示主线从零轴首次离开的启动信号。")
+            raise HTTPException(400, "信号台仅显示当前 TradingView 设置下的可见主图启动标记。")
         rows = store.list_events(limit, symbol, timeframe, SIGNAL_KIND, side, protocol=SIGNAL_PROTOCOL)
         for row in rows:
             row["is_fresh"] = 0 <= monitor.client.clock() - row["bar_close_ms"] <= FRESH_MS

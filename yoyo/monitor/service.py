@@ -16,8 +16,8 @@ import subprocess
 import threading
 import time
 
-from yoyo.monitor import FRESH_MS, TIMEFRAMES, VERSION, SIGNAL_PROTOCOL, SIGNAL_KIND
-from yoyo.monitor.policy import is_zero_breakout
+from yoyo.monitor import FRESH_MS, TIMEFRAMES, VERSION, SIGNAL_PROTOCOL, SIGNAL_KIND, TV_PROFILE_ID
+from yoyo.monitor.policy import is_tv_start
 from yoyo.monitor.okx import OKX
 from yoyo.monitor.store import now_ms
 from yoyo.monitor.telegram import TelegramWorker
@@ -189,10 +189,10 @@ class Monitor:
                     continue
                 event = dict(raw, symbol=symbol, timeframe=timeframe, protocol=PROTOCOL, detected_at_ms=now)
                 event["is_fresh"] = 0 <= now - event["bar_close_ms"] <= FRESH_MS
-                # Only the first exact-zero departure is a monitored signal.
+                # Only the actual visible Pine focus-release marker is a signal.
                 # Recomputed history predating this protocol's activation stays
                 # historical even if a new identity would otherwise be fresh.
-                eligible = (event["is_fresh"] and not stale and is_zero_breakout(event)
+                eligible = (event["is_fresh"] and not stale and is_tv_start(event)
                             and event["bar_close_ms"] > self.notification_since)
                 self.store.upsert_event(event, notify=eligible)
                 kept.append(event)
@@ -225,7 +225,10 @@ class Monitor:
                     "fresh_minutes": FRESH_MS // 60000, "interval_seconds": self.interval, "timeframes": ["1H", "4H"],
                     "clock_offset_ms": self.client.offset_ms, "public_requests": self.client.requests,
                     "candle_storage": "memory_only", "history_days": 7,
-                    "signal_mode": "零轴启动（主线从0首次离轴）", "signal_kind": SIGNAL_KIND,
+                    "signal_mode": "TradingView 主图启动（蓄势释放标记）", "signal_kind": SIGNAL_KIND,
+                    "tv_profile": {"id": TV_PROFILE_ID, "show_focus": True, "show_marks": False,
+                                   "focus_min_bars": 12, "focus_atr_band": .10, "verified_on": "2026-09-08",
+                                   "sync_mode": "observed_settings_snapshot"},
                     "notification_since_ms": self.notification_since,
                     "higher_mode": "已确认高周期背景标注，不过滤启动",
                     "source_commit": self.source_commit, "startup_source_sha256": self.source_hashes,
