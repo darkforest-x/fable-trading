@@ -7419,3 +7419,17 @@ experiments:
     - imacd-pane-readability-v26-20260908-report
     reuse_allowed: false
     notes: First owner-authorized UI-only exposure round; no scoring or training. White background restored.
+
+  - experiment_id: exp-imacd-altcoin-trends-20260909-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: df75f781ed89f419dfc527477c232eb749617d00
+    status: active
+    question: Which causal volatility selection, IMACD parameters and exit rules preserve net altcoin trend returns?
+    single_variable: Preregistered one-factor parameter, context and exit arms; Owner authorized isolated broad research.
+    result: Preregistered; parameter provenance and pure feature/snapshot tests completed. No new outcomes yet.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    artifacts: []
+    notes: Owner permits all dates for this research; formal May4 holdout definition preserved and exposure rounds will be logged. SOPH and USELESS are post-hoc illustrations excluded from parameter choice. No live mutations.
