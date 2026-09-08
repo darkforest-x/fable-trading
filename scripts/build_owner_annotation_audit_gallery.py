@@ -30,8 +30,8 @@ body{font:16px/1.6 system-ui,sans-serif;margin:0;background:#f3f5f7;color:#17202
 <p>灰框＝原始弱标签；蓝框＝提交时保存的框。蓝框仍出现不代表用户保留了它，最终选择见下方状态。</p>
 <p class="muted">左图下方为 K 线编号。右图 +1 从主图末根之后计数；形态后的 3–5 根确认通常已在左图中。全部结论是复核建议，尚未修改你的答案。</p>
 <nav><button id="prev">上一张</button><select id="task" aria-label="选择任务"></select><button id="next">下一张</button><label>直接找任务 <input id="find" type="number" min="37277" max="37348" placeholder="37315" style="width:100px"></label><button id="go">查看</button><label><input id="zoom" type="checkbox">原尺寸放大</label><span id="count"></span></nav>
-<section><div id="status"></div><p id="finding"></p><p><strong>边界建议：</strong><span id="span"></span></p><p><strong>150 根观察：</strong><span id="future"></span></p><p id="pct" class="muted"></p></section>
 <div id="canvas" class="scroll"><img id="card" alt="编号 K 线、原框、提交框与后续150根对照"></div>
+<section><div id="status"></div><p id="finding"></p><p><strong>边界建议：</strong><span id="span"></span></p><p><strong>150 根观察：</strong><span id="future"></span></p><p id="pct" class="muted"></p></section>
 <p class="muted">这里是分析报告，不是新的标注项目；不会提交答案。左右方向键切换任务。几像素误差与圈错市场阶段不同；找不到清楚平台时不要为了保留正例硬凑框。</p>
 </main><script>const data=__DATA__; const el=id=>document.getElementById(id);let index=0;
 const states={owner_boxes:'提交：保留框',owner_no_target_with_inherited_proposal:'提交：无目标（图中框只是继承预框）',conflict_needs_review:'提交冲突：无目标 + 改动过的框，需核对最终意思'};
