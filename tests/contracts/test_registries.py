@@ -174,6 +174,8 @@ def test_holdout_consumption_is_declared_per_experiment_not_assumed():
     consumers = {e.experiment_id for e in registries.experiments if e.holdout_consumed}
     assert consumers == {
         # Owner explicitly authorized OKX, all timeframes and all dates in chat.
+        # 2026-09-08: owner requested local IMACD -> YOLO notifications; known-example compatibility reuse.
+        "exp-spike-yolo-monitor-20260908-v1",
         "exp-imacd-okx-descriptive-20260907-v1",
         "exp-imacd-profit-mechanism-20260907-v2",
         "exp-imacd-ma-mtf-20260907-v3",

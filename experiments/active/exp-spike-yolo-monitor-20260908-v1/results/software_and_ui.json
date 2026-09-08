@@ -1,0 +1,72 @@
+{
+  "runtime_source": "8f0c1dcd53d4d6dca63ccdeb5a3d87f4fc706e21",
+  "audit_source": "fe36064",
+  "python_core_and_boundaries": {
+    "passed": 514,
+    "failed": 0
+  },
+  "python_acceptance_audit": {
+    "passed": 26,
+    "failed": 0
+  },
+  "frontend_and_theme": {
+    "passed": 38,
+    "failed": 0
+  },
+  "browser": {
+    "surface": "Chrome existing spike tab",
+    "version": "1.6.0",
+    "time_local": "2026-09-08 21:19–21:23 +08:00",
+    "checked": [
+      "confirmed/pending/all true zero state",
+      "15m/1H/4H filtering",
+      "real BICO 4H candles and six MAs and zero axis",
+      "expand then Escape",
+      "dark/light/system themes",
+      "390x844 viewport scrollWidth390",
+      "error and warn logs empty"
+    ],
+    "restored": [
+      "system theme",
+      "viewport reset",
+      "all timeframes",
+      "empty searches",
+      "model-confirmed page"
+    ],
+    "confirmation_card_live_evidence": false,
+    "reason": "no new live model confirmations at browser QA time",
+    "no_live_injection": true
+  },
+  "browser_live_candidate": {
+    "checked_at_local": "2026-09-08 21:33 Chrome and 21:39 IAB",
+    "symbol": "SUI-USD-SWAP",
+    "timeframe": "15m",
+    "side": "short",
+    "arrow_close": "21:30 +08:00",
+    "price": 0.8097,
+    "near_zero_bars": 29,
+    "model_status": "pending",
+    "wait_bars": 0,
+    "max_wait_bars": 9,
+    "expires": "23:45 +08:00",
+    "pending_cards": 1,
+    "confirmed_cards": 0,
+    "original_arrow_visible": true,
+    "purple_confirmation_lines": 0,
+    "purple_core_boxes": 0,
+    "notification_receipts_on_candidate": 0,
+    "fresh_badges_on_candidate": 0,
+    "in_app_browser_reloaded_to_new_version": true
+  },
+  "additional_repository_gates": {
+    "causality_and_parity_passed": 301,
+    "preexisting_migration_hash_failures": [
+      "yoyo/layers/l1_detection/candidates.py",
+      "yoyo/layers/l1_detection/render.py"
+    ],
+    "registry_schema_load_passed": true,
+    "registry_consumption_whitelist_preexisting_omissions": 13,
+    "new_configuration_explicitly_added_to_whitelist": true,
+    "all_repository_checks_passed": false
+  }
+}

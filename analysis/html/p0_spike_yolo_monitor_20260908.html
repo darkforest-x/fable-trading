@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>spike：指标启动后 YOLO 确认已接入</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>spike：指标启动后 YOLO 确认已接入</h1>
+<p><strong>已按 Owner 授权接入 Mac 的 15m / 1H / 4H 前端与 TG、Bark。</strong> 指标箭头先登记候选，模型在原箭头至之后9根收盘内同方向确认，才产生通知信号。 运行页面：<a href="http://127.0.0.1:8766/#signals">spike</a>。详细规则见 <code>docs/ops/SPIKE_MODEL_CONFIRMATION.md</code>。</p>
+<h2>与上一版对照</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>上一版</th>
+<th>当前1.6.0</th>
+</tr></thead><tbody>
+<tr><td>通知条件</td><td>IMACD可见启动箭头</td><td>启动箭头＋固定YOLO确认</td></tr>
+<tr><td>等待期间</td><td>没有模型候选状态</td><td>待确认、检测异常、结构失效、超时</td></tr>
+<tr><td>信号时间与点位</td><td>原箭头收盘</td><td>保留原箭头，并另列模型确认收盘</td></tr>
+<tr><td>前端</td><td>主图启动列表</td><td>模型确认、等待确认、全部候选</td></tr>
+<tr><td>TG图片</td><td>指标与六均线</td><td>另有紫色模型核心、原箭头及确认竖线</td></tr>
+<tr><td>模型异常</td><td>不适用</td><td>不放行原始箭头，保留异常重试</td></tr>
+<tr><td>通知新鲜度</td><td>原箭头收盘后30分钟</td><td>确认收盘后30分钟</td></tr>
+</tbody></table>
+<p>同根主线回零/反向优先取消；没有额外改变密集、高周期过滤或阈值。 模型与参数沿用已展示报告：18/19根原白底输入，核心4/5根，核心后2–9根，与原蓄势段至少重叠1根；置信门槛0.25。 原始事件和派生事件分别保存，确认与两路通知入队是一个事务；重启不重新推送。</p>
+<h2>验证与数据统计</h2>
+<p>运行实现源码 <code>8f0c1dc</code>：<strong>514项Python监控与边界检查、38项前端/主题检查通过</strong>。 独立运维审计工具另有26项检查通过（<code>fe36064</code>）。 真实权重兼容runner <code>4779754</code>先提交后运行：只选择三个已发布正例，没有重新筛选币种或收益样本。</p>
+<table><thead><tr>
+<th>已知样例</th>
+<th>原箭头到模型确认</th>
+<th>真实模型输入与旧记录</th>
+<th>临时TG/Bark</th>
+</tr></thead><tbody>
+<tr><td>ETH 15m · 1778263200</td><td>先pending，下一根confirmed</td><td>像素SHA、核心、时钟完全一致</td><td>各1次，重跑0次</td></tr>
+<tr><td>ETH 1H · 1778572800</td><td>同根空头确认</td><td>同上</td><td>同上</td></tr>
+<tr><td>ETC 4H · 1777910400</td><td>同根多头确认</td><td>同上</td><td>同上</td></tr>
+</tbody></table>
+<p>共8张真实MPS模型输入。各端点只解析当时及之前的OHLC；未向真实TG/Bark发送这些历史验证样例。 三例是已知正例，3/3只表示接线兼容性，不是模型真实准确率或信号胜率。 原决策日期在2026-05-04至05-12内；这是本在线接入配置第1次复用已消费holdout的工程复核。 Owner已在本对话明确允许任意时间段数据。无新训练、调参或收益评分，val样本数不适用。</p>
+<p>浏览器实测：模型/候选三页签、三个周期、真实BICO 4H站内120根K线、六均线、零轴、放大/Esc、深浅主题通过。 390×844窄屏scrollWidth=390，无横向溢出；浏览器error/warn日志为空；恢复系统主题。 上线初检页面如实为0个新确认，并未伪造已确认卡片的实盘图。紫框、双时钟及确认卡片由软件负控和真实样例后端复核覆盖。</p>
+<h2>本机运行验收</h2>
+<p>21:28:54首轮预热完成：473个合约、1419个周期窗口，耗时628.33秒，0扫描错误。 健康检查ok=true，模型就绪于MPS，固定SHA一致；77个新/短历史窗口尚不足指标预热，未伪造信号。 本协议初检0个新确认、TG/Bark各0发送、0失败、0未知；旧TG201笔、Bark143笔回执仍是历史。 源码/启用时间/回执/身份检查保存在实验results目录，重复身份组0。 21:32:10首轮增量扫描完成，75.52秒，1419/1419、0错误。真实SUI-USD-SWAP 15m空头原箭头收盘21:30，0.8097，已检查2张模型输入但未通过，状态pending；没有TG/Bark推送。 这证明实机原箭头→候选→模型检查链路运行，尚未观察到本新协议的自然确认推送；真实正例通知路径通过临时数据库及模拟发送验收。</p>
+<p>实际pending页面在Chrome及IAB均复核：SUI原箭头、29根蓄势、0/9等待、23:45截止与API一致；不显示模型确认线、紫框、通知回执或新鲜徽章。IAB旧页面已刷新至新版。</p>
+<h2>仓库既有校验差异</h2>
+<p>额外执行因果/迁移校验：301项通过，2项旧迁移哈希校验失败，分别是<code>yoyo/layers/l1_detection/candidates.py</code>和<code>render.py</code>；本次未修改这两个文件。 <code>render.py</code>在本次实现之前的提交与当前文件SHA均为<code>def5b7317c13e37fc43657243a7cc900bc3fafee71bdf2e405e0336a1a3c0eea</code>；本次三例模型输入另已逐像素核对。 登记schema/引用加载通过；固定holdout消费白名单在HEAD基线已漏13个旧实验，本次只明确增加自己这一个已授权配置，未把其它缺项自动放行。 因此不能声称整仓所有测试全绿；上述是已有台账差异，未更改它们的守门标准或隐藏失败。</p>
+<h2>对照与因果校验</h2>
+<p>本轮为非方向性工程验收：AUC、置换p值、top-decile毛/净收益、胜率、单特征收益基线及匹配随机入场不适用。 等价的严格反例控制是固定输入逐项破坏：反方向、错误权重/像素证明、缺检测ID、时间整体偏移1ms、非同一蓄势段、同根md取消、未收盘输入、超时、切换前旧箭头，均不得进入通知。 未来OHLC扰动不能改变此前模型输入；推理失败不推进检查游标；缓存同一根重试可恢复；同一端点多个原箭头不被误合并。</p>
+<h2>复现</h2>
+<p>需保留原仓已安装依赖、固定权重及既有<code>data/kline_deep</code>和三份报告决策/提案文件；不安装或替换库。</p>
+<pre><code>
+.venv/bin/python -m pytest tests/monitor tests/boundaries -q
+node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.test.cjs
+.venv/bin/python tests/monitor/replay_model_known_examples.py
+.venv/bin/python -m yoyo.monitor.acceptance --label spike-yolo-live --output experiments/active/exp-spike-yolo-monitor-20260908-v1/results/live_acceptance.json
+python3 scripts/md_to_html.py analysis/p0_spike_yolo_monitor_20260908.md --out-dir analysis/html
+</code></pre>
+<p>部署用既有LaunchAgent重启一次，启动约21:18:26北京时间。原指标、ACTIVE、VPS、实盘执行和凭据均未修改。 原自动巡检仍是暂停状态，只更新了旧巡检说明里的协议，防止未来启用时按旧规则误判。</p>
+<h2>风险与诚实声明</h2>
+<p>三例不能证明去噪率或收益提高；此前后续走势报告中匹配超额未证明为正，本轮不改写该结论。 15m权重复用于1H/4H沿用已授权冻结方案，不等于证明跨周期盈利。 未来72根只属于旧报告的事后观察，当前模型和通知图不会读取它们。 重启会从新720根起点重新播种递归指标，边界像素可能轻微变化；持久化原箭头、进度和回执不等于重新计算结果逐字节相同。 Mac必须开机联网；扫描或模型队列过久会使真实确认超出30分钟，从而跳过推送，不会伪装成刚发生。</p>
+<h2>下一步</h2>
+<p>继续按此固定配置积累真实模型确认、等待时间与后续走势；盈利、假启动率需另行设计固定样本外评估，不能用这三个已知正例代替。 涉及模型、确认阈值或实盘执行的改动需Owner另行决定。</p>
+</body>
+</html>

@@ -7325,3 +7325,33 @@ experiments:
       is not portfolio PnL. Same-clock anchor kinds have independently sampled controls; sampling differences are
       not waiting effects. Summary hashes all 110 label/context files. All future_only figures contain hindsight and
       are prohibited as training inputs. No model rerun or live changes. Diagnostic reuse only.'
+
+  - experiment_id: exp-spike-yolo-monitor-20260908-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8f0c1dcd53d4d6dca63ccdeb5a3d87f4fc706e21
+    status: accepted
+    question: Wire the fixed IMACD then YOLO confirmation rule into the local 15m/1H/4H frontend and TG/Bark notifications.
+    single_variable: Replace direct raw-arrow notification with the previously frozen model-confirmation gate; unchanged
+      detector weights and thresholds.
+    result: 514 core/boundary +26 audit +38 frontend checks passed. Three known real positives reproduce exact old
+      pixels and clocks, including one-bar delay. 473 contracts/1419 windows, cold628.33s and incremental75.52s, zero
+      errors. First real SUI-USD-SWAP15m candidate remains pending after2 image checks; no model-confirmation push
+      observed yet.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    canonical_report: analysis/html/p0_spike_yolo_monitor_20260908.html
+    artifacts:
+    - spike-yolo-monitor-20260908-report-source
+    - spike-yolo-monitor-20260908-report
+    - spike-yolo-monitor-20260908-project-plan
+    - spike-yolo-monitor-20260908-cold-ready
+    - spike-yolo-monitor-20260908-cold-start
+    - spike-yolo-monitor-20260908-known-positive-replay
+    - spike-yolo-monitor-20260908-live-acceptance
+    - spike-yolo-monitor-20260908-software-and-ui
+    notes: Runtime8f0c1dc; known-example runner4779754; acceptance builderfe36064. Online wiring configuration holdout
+      engineering reuse1, owner broadly allowed all dates. Local notifications only; no live execution or return claim.
+      Original/confirmation clocks distinct, pending terminal state and outboxes atomic. Old receipts preserved; existing
+      heartbeat remains PAUSED.

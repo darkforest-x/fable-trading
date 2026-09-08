@@ -24390,3 +24390,116 @@ artifacts:
       is not portfolio PnL. Same-clock anchor kinds have independently sampled controls; sampling differences are
       not waiting effects. Summary hashes all 110 label/context files. All future_only figures contain hindsight and
       are prohibited as training inputs. No model rerun or live changes.'
+
+  - artifact_id: spike-yolo-monitor-20260908-report-source
+    artifact_type: report
+    role: notification_only_engineering_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: dfce4bb8edc35551a45c056a3592caa181f04046
+    source_path: analysis/p0_spike_yolo_monitor_20260908.md
+    sha256: f6c8f32bf01cbda79b2badd900c89194b1b07fd5d23dd08a56a0e2b57da3496c
+    size_bytes: 7018
+    storage_uri: repo://analysis/p0_spike_yolo_monitor_20260908.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-authorized local notification integration only. Three previously evaluated positives reused for compatibility,
+      not return estimation; no orders, training or ACTIVE promotion.
+  - artifact_id: spike-yolo-monitor-20260908-report
+    artifact_type: report
+    role: notification_only_engineering_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: dfce4bb8edc35551a45c056a3592caa181f04046
+    source_path: analysis/html/p0_spike_yolo_monitor_20260908.html
+    sha256: fdb048d40436fab65ca6ef28195576dd03bf01132dc54e2c802b83bd6542b21a
+    size_bytes: 10141
+    storage_uri: repo://analysis/html/p0_spike_yolo_monitor_20260908.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-authorized local notification integration only. Three previously evaluated positives reused for compatibility,
+      not return estimation; no orders, training or ACTIVE promotion.
+  - artifact_id: spike-yolo-monitor-20260908-project-plan
+    artifact_type: report
+    role: notification_only_engineering_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: dfce4bb8edc35551a45c056a3592caa181f04046
+    source_path: experiments/active/exp-spike-yolo-monitor-20260908-v1/PROJECT_PLAN.md
+    sha256: fc1b17dad80837c609159087c8b94e6e2ffc20114c4f9dad89d3196f0923b435
+    size_bytes: 1375
+    storage_uri: repo://experiments/active/exp-spike-yolo-monitor-20260908-v1/PROJECT_PLAN.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-authorized local notification integration only. Three previously evaluated positives reused for compatibility,
+      not return estimation; no orders, training or ACTIVE promotion.
+  - artifact_id: spike-yolo-monitor-20260908-cold-ready
+    artifact_type: report
+    role: notification_only_engineering_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: dfce4bb8edc35551a45c056a3592caa181f04046
+    source_path: experiments/active/exp-spike-yolo-monitor-20260908-v1/results/cold_ready.json
+    sha256: 0dc6b0f8520204f3f69ee865164b91815aada03e82bb86bb1f535a9387aea006
+    size_bytes: 186507
+    storage_uri: repo://experiments/active/exp-spike-yolo-monitor-20260908-v1/results/cold_ready.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-authorized local notification integration only. Three previously evaluated positives reused for compatibility,
+      not return estimation; no orders, training or ACTIVE promotion.
+  - artifact_id: spike-yolo-monitor-20260908-cold-start
+    artifact_type: report
+    role: notification_only_engineering_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: dfce4bb8edc35551a45c056a3592caa181f04046
+    source_path: experiments/active/exp-spike-yolo-monitor-20260908-v1/results/cold_start.json
+    sha256: 0789996ebdb903c304cb0a5a54f30bda6fe7fe5147f898c2d06b363df00032f0
+    size_bytes: 124975
+    storage_uri: repo://experiments/active/exp-spike-yolo-monitor-20260908-v1/results/cold_start.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-authorized local notification integration only. Three previously evaluated positives reused for compatibility,
+      not return estimation; no orders, training or ACTIVE promotion.
+  - artifact_id: spike-yolo-monitor-20260908-known-positive-replay
+    artifact_type: report
+    role: notification_only_engineering_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: dfce4bb8edc35551a45c056a3592caa181f04046
+    source_path: experiments/active/exp-spike-yolo-monitor-20260908-v1/results/known_positive_replay.json
+    sha256: 8f160da28f710083baafca6f3fcdc1aa9d5e5ccc8e81940937cdd0e488cfc6b2
+    size_bytes: 18058
+    storage_uri: repo://experiments/active/exp-spike-yolo-monitor-20260908-v1/results/known_positive_replay.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-authorized local notification integration only. Three previously evaluated positives reused for compatibility,
+      not return estimation; no orders, training or ACTIVE promotion.
+  - artifact_id: spike-yolo-monitor-20260908-live-acceptance
+    artifact_type: report
+    role: notification_only_engineering_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: dfce4bb8edc35551a45c056a3592caa181f04046
+    source_path: experiments/active/exp-spike-yolo-monitor-20260908-v1/results/live_acceptance.json
+    sha256: cd9839270903a086f8281781da192e90c14a67e706b24a7f0a560c8e7923fc07
+    size_bytes: 125197
+    storage_uri: repo://experiments/active/exp-spike-yolo-monitor-20260908-v1/results/live_acceptance.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-authorized local notification integration only. Three previously evaluated positives reused for compatibility,
+      not return estimation; no orders, training or ACTIVE promotion.
+  - artifact_id: spike-yolo-monitor-20260908-software-and-ui
+    artifact_type: report
+    role: notification_only_engineering_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: dfce4bb8edc35551a45c056a3592caa181f04046
+    source_path: experiments/active/exp-spike-yolo-monitor-20260908-v1/results/software_and_ui.json
+    sha256: 7630615e0196c426bcce56608b7fdbcc3296826661a57a5e6eb67d65969826aa
+    size_bytes: 2107
+    storage_uri: repo://experiments/active/exp-spike-yolo-monitor-20260908-v1/results/software_and_ui.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-authorized local notification integration only. Three previously evaluated positives reused for compatibility,
+      not return estimation; no orders, training or ACTIVE promotion.

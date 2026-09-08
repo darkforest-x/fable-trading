@@ -1,0 +1,4390 @@
+{
+  "label": "spike-yolo-live",
+  "captured_at": "2026-09-08T13:28:05.669919+00:00",
+  "source_commit": "fe3606439a898d88b488d865da52497e86afc0bc",
+  "source_sha256": {
+    "yoyo/monitor/README.md": "4ce674f605aece02021f5ab46c3ce5825edd49939751da2db046249b6b84e5a3",
+    "yoyo/monitor/__init__.py": "6510b42a732bbb01847de311bab0a0dd06a1ba00efeb155a48f2e91b926ae1a1",
+    "yoyo/monitor/acceptance.py": "3f8e71503ffff3318ecda3d0d3074e2f89702f398792e54dc33d279e93e461fe",
+    "yoyo/monitor/bark.py": "bfd0ef03aab07358b0f52c8cbb07a8453e4e0a91f8f558453f13fef15b405514",
+    "yoyo/monitor/manage.py": "f0ba128f4a202eac6935797a944641e21716ce2bb2f8aa231eee12f716e2aed2",
+    "yoyo/monitor/model_gate.py": "c6575ba03a9b9f3444ea9832a2cfee4e50e6da69a1c4753dca5322dc2a2c13a8",
+    "yoyo/monitor/okx.py": "6b878a2b296e6402d6839df8375a9e89ac6474656ecb5fc9790d7fb130f3c796",
+    "yoyo/monitor/policy.py": "4e205fa278b2572cfc7de995196098d6cc382d5c0c53baa4643ecf808abe5164",
+    "yoyo/monitor/server.py": "4feb4a298bd131921953a37a0bacc8c0809bf45c18dcfd470c1372b23417473b",
+    "yoyo/monitor/service.py": "3a951653190f910110a84ff6c4cf7f147242129b1c2b4c148f87ad29d6f9d9c5",
+    "yoyo/monitor/signals.py": "0f8e8bb06821430e4abc45fa59588f65815b23483efecef3a6b047d222c14b9f",
+    "yoyo/monitor/snapshot.py": "64fe9fc9a03cd12934cebfc56436f7bfc1ba12990973a95c934a930d03f59311",
+    "yoyo/monitor/static/app.js": "a2bb1bc47d480332702e137dc49c982195e91329d0c847787bd276a68e03f558",
+    "yoyo/monitor/static/index.html": "a58a7aeb66cbb132577e4abe87e8813021059e13d2286ac35de55a822729a258",
+    "yoyo/monitor/static/styles.css": "b15bcd991756d35d3dc0d01b52a8b36fec9584e70c076e79adc8ec75a4212b63",
+    "yoyo/monitor/static/theme.js": "961cb3e014d9df9e263ebc12701fa9333ca55aa36b64cee3260e507142d8c39c",
+    "yoyo/monitor/store.py": "79fd96c15d56a5ad592b597c27f3c18ab64344ee55c2b563a694cfcea1a23b83",
+    "yoyo/monitor/telegram.py": "80d2de584d4f5f1d84f182f1c396e507d635397872bf8219e5623ac998f13721",
+    "yoyo/monitor/tradingview.py": "cc71d61ac5eadf537e6c6ef21111eadf422b03dbe03b5814deadcd2c86226e9c",
+    "yoyo/monitor/yolo_detector.py": "212f5f49a5a5cf363e1b78f25145b4cf2f72745a18bf887df50e74a2eee13f01"
+  },
+  "status": {
+    "service": "spike Impulse Monitor",
+    "version": "1.6.0",
+    "protocol": "imacd-yolo-confirmation-monitor-v1",
+    "now_ms": 1788874087556,
+    "started_at_ms": 1788873506456,
+    "scan": {
+      "status": "scanning",
+      "started_at_ms": 1788873506522,
+      "finished_at_ms": null,
+      "completed": 1302,
+      "total": 1419,
+      "errors": 0,
+      "next_scan_ms": null,
+      "error_samples": []
+    },
+    "universe": {
+      "count": 473,
+      "scope": "OKX 全部在交易永续合约（USDT 与币本位）",
+      "updated_at_ms": 1788873506522,
+      "settlements": {
+        "USDT": 458,
+        "ADA": 1,
+        "BCH": 1,
+        "BTC": 1,
+        "DOGE": 1,
+        "DOT": 1,
+        "ETC": 1,
+        "ETH": 1,
+        "FIL": 1,
+        "HYPE": 1,
+        "LINK": 1,
+        "LTC": 1,
+        "SOL": 1,
+        "SUI": 1,
+        "UNI": 1,
+        "XRP": 1
+      }
+    },
+    "counts": {
+      "long": 573,
+      "ready": 104,
+      "short": 306,
+      "building": 125,
+      "neutral": 234,
+      "loading": 77,
+      "signals_24h": 0
+    },
+    "telegram": {
+      "pending": 0,
+      "failed": 0,
+      "unknown": 0,
+      "last_success_ms": null,
+      "sent": 0,
+      "historical_sent": 201,
+      "last_signal_success_ms": null,
+      "probe_status": "not_tested",
+      "configured": true,
+      "enabled": true,
+      "delivery_format": "chart_with_compact_caption",
+      "snapshots": 0,
+      "render_fallbacks": 0
+    },
+    "bark": {
+      "pending": 0,
+      "failed": 0,
+      "unknown": 0,
+      "last_success_ms": null,
+      "sent": 0,
+      "historical_sent": 143,
+      "configured": true,
+      "enabled": true,
+      "acceptance": "bark_server_accepted_not_device_receipt"
+    },
+    "runtime": {
+      "host": "This Mac",
+      "notification_only": true,
+      "fresh_minutes": 30,
+      "interval_seconds": 120,
+      "timeframes": [
+        "15m",
+        "1H",
+        "4H"
+      ],
+      "clock_offset_ms": 2473,
+      "public_requests": 4603,
+      "candle_storage": "memory_only",
+      "history_days": 7,
+      "signal_mode": "主图启动 → YOLO 同方向确认",
+      "signal_kind": "yolo_confirmed",
+      "model_gate": {
+        "status": "ready",
+        "loaded": true,
+        "last_error": null,
+        "queue_depth": 0,
+        "active": null,
+        "processed_endpoints": 0,
+        "last_checked_at_ms": null,
+        "model_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+        "profile_id": "owner-grade-v1-w18w19-post2to9-wait9",
+        "max_wait_bars": 9,
+        "candidates": {},
+        "detector": {
+          "ready": true,
+          "device": "mps",
+          "model_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+          "error": null,
+          "windows_scored": 0,
+          "last_duration_seconds": null
+        }
+      },
+      "tv_profile": {
+        "id": "imacd-v2.2-focus12-band0.10-marks-off",
+        "show_focus": true,
+        "show_marks": false,
+        "focus_min_bars": 12,
+        "focus_atr_band": 0.1,
+        "verified_on": "2026-09-08",
+        "sync_mode": "observed_settings_snapshot"
+      },
+      "notification_since_ms": 1788873509905,
+      "bark_notification_since_ms": 1788873509992,
+      "timeframe_notification_since_ms": {
+        "15m": 1788873510047,
+        "1H": 1788873510051,
+        "4H": 1788873510055
+      },
+      "higher_mode": "已确认高周期背景标注，不过滤启动",
+      "source_commit": "8f0c1dcd53d4d6dca63ccdeb5a3d87f4fc706e21",
+      "startup_source_sha256": {
+        "store.py": "79fd96c15d56a5ad592b597c27f3c18ab64344ee55c2b563a694cfcea1a23b83",
+        "okx.py": "6b878a2b296e6402d6839df8375a9e89ac6474656ecb5fc9790d7fb130f3c796",
+        "signals.py": "0f8e8bb06821430e4abc45fa59588f65815b23483efecef3a6b047d222c14b9f",
+        "service.py": "3a951653190f910110a84ff6c4cf7f147242129b1c2b4c148f87ad29d6f9d9c5",
+        "server.py": "4feb4a298bd131921953a37a0bacc8c0809bf45c18dcfd470c1372b23417473b",
+        "telegram.py": "80d2de584d4f5f1d84f182f1c396e507d635397872bf8219e5623ac998f13721",
+        "acceptance.py": "10cda4a9bd251be72da46611cbcea7956aa5e5b965939cf293d5b623cae449f7",
+        "policy.py": "4e205fa278b2572cfc7de995196098d6cc382d5c0c53baa4643ecf808abe5164",
+        "__init__.py": "6510b42a732bbb01847de311bab0a0dd06a1ba00efeb155a48f2e91b926ae1a1",
+        "bark.py": "bfd0ef03aab07358b0f52c8cbb07a8453e4e0a91f8f558453f13fef15b405514",
+        "model_gate.py": "c6575ba03a9b9f3444ea9832a2cfee4e50e6da69a1c4753dca5322dc2a2c13a8",
+        "manage.py": "f0ba128f4a202eac6935797a944641e21716ce2bb2f8aa231eee12f716e2aed2",
+        "yolo_detector.py": "212f5f49a5a5cf363e1b78f25145b4cf2f72745a18bf887df50e74a2eee13f01",
+        "snapshot.py": "64fe9fc9a03cd12934cebfc56436f7bfc1ba12990973a95c934a930d03f59311",
+        "tradingview.py": "cc71d61ac5eadf537e6c6ef21111eadf422b03dbe03b5814deadcd2c86226e9c"
+      },
+      "warmup_bars": 340,
+      "launch_agent": "com.fable.impulse-monitor"
+    }
+  },
+  "health": {
+    "service": "spike Impulse Monitor",
+    "version": "1.6.0",
+    "protocol": "imacd-yolo-confirmation-monitor-v1",
+    "now_ms": 1788874087711,
+    "started_at_ms": 1788873506456,
+    "scan": {
+      "status": "scanning",
+      "started_at_ms": 1788873506522,
+      "finished_at_ms": null,
+      "completed": 1302,
+      "total": 1419,
+      "errors": 0,
+      "next_scan_ms": null,
+      "error_samples": []
+    },
+    "universe": {
+      "count": 473,
+      "scope": "OKX 全部在交易永续合约（USDT 与币本位）",
+      "updated_at_ms": 1788873506522,
+      "settlements": {
+        "USDT": 458,
+        "ADA": 1,
+        "BCH": 1,
+        "BTC": 1,
+        "DOGE": 1,
+        "DOT": 1,
+        "ETC": 1,
+        "ETH": 1,
+        "FIL": 1,
+        "HYPE": 1,
+        "LINK": 1,
+        "LTC": 1,
+        "SOL": 1,
+        "SUI": 1,
+        "UNI": 1,
+        "XRP": 1
+      }
+    },
+    "counts": {
+      "long": 573,
+      "ready": 104,
+      "short": 306,
+      "building": 125,
+      "neutral": 234,
+      "loading": 77,
+      "signals_24h": 0
+    },
+    "telegram": {
+      "pending": 0,
+      "failed": 0,
+      "unknown": 0,
+      "last_success_ms": null,
+      "sent": 0,
+      "historical_sent": 201,
+      "last_signal_success_ms": null,
+      "probe_status": "not_tested",
+      "configured": true,
+      "enabled": true,
+      "delivery_format": "chart_with_compact_caption",
+      "snapshots": 0,
+      "render_fallbacks": 0
+    },
+    "bark": {
+      "pending": 0,
+      "failed": 0,
+      "unknown": 0,
+      "last_success_ms": null,
+      "sent": 0,
+      "historical_sent": 143,
+      "configured": true,
+      "enabled": true,
+      "acceptance": "bark_server_accepted_not_device_receipt"
+    },
+    "runtime": {
+      "host": "This Mac",
+      "notification_only": true,
+      "fresh_minutes": 30,
+      "interval_seconds": 120,
+      "timeframes": [
+        "15m",
+        "1H",
+        "4H"
+      ],
+      "clock_offset_ms": 2473,
+      "public_requests": 4603,
+      "candle_storage": "memory_only",
+      "history_days": 7,
+      "signal_mode": "主图启动 → YOLO 同方向确认",
+      "signal_kind": "yolo_confirmed",
+      "model_gate": {
+        "status": "ready",
+        "loaded": true,
+        "last_error": null,
+        "queue_depth": 0,
+        "active": null,
+        "processed_endpoints": 0,
+        "last_checked_at_ms": null,
+        "model_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+        "profile_id": "owner-grade-v1-w18w19-post2to9-wait9",
+        "max_wait_bars": 9,
+        "candidates": {},
+        "detector": {
+          "ready": true,
+          "device": "mps",
+          "model_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+          "error": null,
+          "windows_scored": 0,
+          "last_duration_seconds": null
+        }
+      },
+      "tv_profile": {
+        "id": "imacd-v2.2-focus12-band0.10-marks-off",
+        "show_focus": true,
+        "show_marks": false,
+        "focus_min_bars": 12,
+        "focus_atr_band": 0.1,
+        "verified_on": "2026-09-08",
+        "sync_mode": "observed_settings_snapshot"
+      },
+      "notification_since_ms": 1788873509905,
+      "bark_notification_since_ms": 1788873509992,
+      "timeframe_notification_since_ms": {
+        "15m": 1788873510047,
+        "1H": 1788873510051,
+        "4H": 1788873510055
+      },
+      "higher_mode": "已确认高周期背景标注，不过滤启动",
+      "source_commit": "8f0c1dcd53d4d6dca63ccdeb5a3d87f4fc706e21",
+      "startup_source_sha256": {
+        "store.py": "79fd96c15d56a5ad592b597c27f3c18ab64344ee55c2b563a694cfcea1a23b83",
+        "okx.py": "6b878a2b296e6402d6839df8375a9e89ac6474656ecb5fc9790d7fb130f3c796",
+        "signals.py": "0f8e8bb06821430e4abc45fa59588f65815b23483efecef3a6b047d222c14b9f",
+        "service.py": "3a951653190f910110a84ff6c4cf7f147242129b1c2b4c148f87ad29d6f9d9c5",
+        "server.py": "4feb4a298bd131921953a37a0bacc8c0809bf45c18dcfd470c1372b23417473b",
+        "telegram.py": "80d2de584d4f5f1d84f182f1c396e507d635397872bf8219e5623ac998f13721",
+        "acceptance.py": "10cda4a9bd251be72da46611cbcea7956aa5e5b965939cf293d5b623cae449f7",
+        "policy.py": "4e205fa278b2572cfc7de995196098d6cc382d5c0c53baa4643ecf808abe5164",
+        "__init__.py": "6510b42a732bbb01847de311bab0a0dd06a1ba00efeb155a48f2e91b926ae1a1",
+        "bark.py": "bfd0ef03aab07358b0f52c8cbb07a8453e4e0a91f8f558453f13fef15b405514",
+        "model_gate.py": "c6575ba03a9b9f3444ea9832a2cfee4e50e6da69a1c4753dca5322dc2a2c13a8",
+        "manage.py": "f0ba128f4a202eac6935797a944641e21716ce2bb2f8aa231eee12f716e2aed2",
+        "yolo_detector.py": "212f5f49a5a5cf363e1b78f25145b4cf2f72745a18bf887df50e74a2eee13f01",
+        "snapshot.py": "64fe9fc9a03cd12934cebfc56436f7bfc1ba12990973a95c934a930d03f59311",
+        "tradingview.py": "cc71d61ac5eadf537e6c6ef21111eadf422b03dbe03b5814deadcd2c86226e9c"
+      },
+      "warmup_bars": 340,
+      "launch_agent": "com.fable.impulse-monitor"
+    },
+    "service_alive": true,
+    "market_ready": false,
+    "model_ready": true,
+    "ok": false
+  },
+  "markets": {
+    "total": 1419,
+    "warming_up": 77,
+    "by_timeframe": {
+      "15m": 473,
+      "1H": 473,
+      "4H": 473
+    },
+    "errors": [],
+    "stale": 0
+  },
+  "journal": {
+    "event_count": 26808,
+    "duplicate_identity_groups": 0,
+    "telegram_receipts": [
+      {
+        "event_id": "5c9e7ec813173478e2919374",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805307147,
+        "message_id": 1786,
+        "error": null
+      },
+      {
+        "event_id": "feb7036fc1ee2cb335d1d5a7",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805326157,
+        "message_id": 1787,
+        "error": null
+      },
+      {
+        "event_id": "6151a4135197b859877ca650",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805376709,
+        "message_id": 1788,
+        "error": null
+      },
+      {
+        "event_id": "b27ed9eb05438acd4460ec4f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805389334,
+        "message_id": 1789,
+        "error": null
+      },
+      {
+        "event_id": "e66e25db324ff73eafa747a1",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805433268,
+        "message_id": 1790,
+        "error": null
+      },
+      {
+        "event_id": "c10ad93efa8c2c95d49525f6",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805486857,
+        "message_id": 1791,
+        "error": null
+      },
+      {
+        "event_id": "bed048807ea8951c42082363",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805615594,
+        "message_id": 1792,
+        "error": null
+      },
+      {
+        "event_id": "0fa648fb66161642d7be75a2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805653400,
+        "message_id": 1793,
+        "error": null
+      },
+      {
+        "event_id": "437503bc0a0cf4f7f91af058",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788805666177,
+        "message_id": 1794,
+        "error": null
+      },
+      {
+        "event_id": "e350ea989c2960fb090952e9",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807653338,
+        "message_id": 1795,
+        "error": null
+      },
+      {
+        "event_id": "26b57a080aeaf1f13b294c84",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807659917,
+        "message_id": 1796,
+        "error": null
+      },
+      {
+        "event_id": "4cb0406fe80fce8740cfe86c",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807666348,
+        "message_id": 1797,
+        "error": null
+      },
+      {
+        "event_id": "ddd9e84365c34accd40ae03c",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807669559,
+        "message_id": 1798,
+        "error": null
+      },
+      {
+        "event_id": "aecafc547e023f094875c0ed",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807679190,
+        "message_id": 1799,
+        "error": null
+      },
+      {
+        "event_id": "57d3beaada67c638f3671a93",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807682652,
+        "message_id": 1800,
+        "error": null
+      },
+      {
+        "event_id": "df84ff33c73cebd78a5638ec",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807685880,
+        "message_id": 1801,
+        "error": null
+      },
+      {
+        "event_id": "d90c1c788a267bcca594df13",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807689181,
+        "message_id": 1802,
+        "error": null
+      },
+      {
+        "event_id": "3c85f8e163d82261d1e5b177",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807692564,
+        "message_id": 1803,
+        "error": null
+      },
+      {
+        "event_id": "80b855f92ddeb1a7a5b1f0df",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807696073,
+        "message_id": 1804,
+        "error": null
+      },
+      {
+        "event_id": "338f99256143d0fc6f3f2b89",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788807699472,
+        "message_id": 1805,
+        "error": null
+      },
+      {
+        "event_id": "1b443f0f3ee242b294f5bde8",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811259945,
+        "message_id": 1806,
+        "error": null
+      },
+      {
+        "event_id": "59887f81bcdebba006d58036",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811269527,
+        "message_id": 1807,
+        "error": null
+      },
+      {
+        "event_id": "e1b0de8e3a97955e713a52fb",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811279068,
+        "message_id": 1808,
+        "error": null
+      },
+      {
+        "event_id": "34a28b0d2481cb3a437609a2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811282406,
+        "message_id": 1809,
+        "error": null
+      },
+      {
+        "event_id": "5eb593270733f89fae9ffed3",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811285676,
+        "message_id": 1810,
+        "error": null
+      },
+      {
+        "event_id": "7dc3704452d8a8928c0c65b6",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811289125,
+        "message_id": 1811,
+        "error": null
+      },
+      {
+        "event_id": "b9347e4c9a65a818491d6f6f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811292605,
+        "message_id": 1812,
+        "error": null
+      },
+      {
+        "event_id": "355fd11984f6f9002a0d617f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811296027,
+        "message_id": 1813,
+        "error": null
+      },
+      {
+        "event_id": "81537f08141e6b971ba32301",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811299336,
+        "message_id": 1814,
+        "error": null
+      },
+      {
+        "event_id": "7b3bae3988a1b7c4642ec059",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811305889,
+        "message_id": 1815,
+        "error": null
+      },
+      {
+        "event_id": "81173ab17a6451b60942a7bf",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811315476,
+        "message_id": 1816,
+        "error": null
+      },
+      {
+        "event_id": "764a7c18f08203f262825a21",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811319022,
+        "message_id": 1817,
+        "error": null
+      },
+      {
+        "event_id": "10d851d3efe0c075c0e32159",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811322346,
+        "message_id": 1818,
+        "error": null
+      },
+      {
+        "event_id": "46a2f374f502f00591b2cec7",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811325813,
+        "message_id": 1819,
+        "error": null
+      },
+      {
+        "event_id": "dc35709e88e27ef90c38dda5",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811329063,
+        "message_id": 1820,
+        "error": null
+      },
+      {
+        "event_id": "2398157defb00a83c22fb1e2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811332435,
+        "message_id": 1821,
+        "error": null
+      },
+      {
+        "event_id": "14dd5320b3dce810efa3b03d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811335786,
+        "message_id": 1822,
+        "error": null
+      },
+      {
+        "event_id": "e17d2a74831702585194532a",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811348534,
+        "message_id": 1823,
+        "error": null
+      },
+      {
+        "event_id": "9c16b15a80589b680c1bcba7",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811352007,
+        "message_id": 1824,
+        "error": null
+      },
+      {
+        "event_id": "d749278eccc583fbfe59b6c6",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788811355514,
+        "message_id": 1825,
+        "error": null
+      },
+      {
+        "event_id": "51c301ca246d97a8203b6739",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814932450,
+        "message_id": 1826,
+        "error": null
+      },
+      {
+        "event_id": "f9ab44a277cb0f7e9c6980e2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814942149,
+        "message_id": 1827,
+        "error": null
+      },
+      {
+        "event_id": "81939b5047c149e411fbba7d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814945556,
+        "message_id": 1828,
+        "error": null
+      },
+      {
+        "event_id": "7873253754aa125552f2eafe",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814948883,
+        "message_id": 1829,
+        "error": null
+      },
+      {
+        "event_id": "7506c95fe71645b3524245e8",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814952186,
+        "message_id": 1830,
+        "error": null
+      },
+      {
+        "event_id": "2780e12fe0da86a485ecf48d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814955469,
+        "message_id": 1831,
+        "error": null
+      },
+      {
+        "event_id": "9f090e02861234cbae4fb5e0",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814958750,
+        "message_id": 1832,
+        "error": null
+      },
+      {
+        "event_id": "e6cf7b0071eed38ed965175b",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788814962096,
+        "message_id": 1833,
+        "error": null
+      },
+      {
+        "event_id": "31fc4b118d240bf6fe29f705",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818478897,
+        "message_id": 1834,
+        "error": null
+      },
+      {
+        "event_id": "9e2bfa4f81c31d2ec14e89c2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818488320,
+        "message_id": 1835,
+        "error": null
+      },
+      {
+        "event_id": "51f0265ffe701c7276735357",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818491790,
+        "message_id": 1836,
+        "error": null
+      },
+      {
+        "event_id": "a17a989b3c6deee97800ffc0",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818495178,
+        "message_id": 1837,
+        "error": null
+      },
+      {
+        "event_id": "73e0395a0a24fc241b9055c1",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818511100,
+        "message_id": 1838,
+        "error": null
+      },
+      {
+        "event_id": "9206760c6aa1feb90aef14fb",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818517606,
+        "message_id": 1839,
+        "error": null
+      },
+      {
+        "event_id": "6271b43e82c4bd449040425a",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818524133,
+        "message_id": 1840,
+        "error": null
+      },
+      {
+        "event_id": "bfacd442a43c23c845558add",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818527575,
+        "message_id": 1841,
+        "error": null
+      },
+      {
+        "event_id": "8d997d230c404a52a1d4ef25",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788818536994,
+        "message_id": 1842,
+        "error": null
+      },
+      {
+        "event_id": "72cea8ecd0f3eae762b69b07",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822077010,
+        "message_id": 1843,
+        "error": null
+      },
+      {
+        "event_id": "252949db1d6c996e0e981696",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822083461,
+        "message_id": 1844,
+        "error": null
+      },
+      {
+        "event_id": "f77e8d89557e5de69aecd8d0",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822086820,
+        "message_id": 1845,
+        "error": null
+      },
+      {
+        "event_id": "809c98bd61de26d0e5afadbd",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822090193,
+        "message_id": 1846,
+        "error": null
+      },
+      {
+        "event_id": "79d8ecb8409be7a8982d4145",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822099781,
+        "message_id": 1847,
+        "error": null
+      },
+      {
+        "event_id": "3cf315a324ac7437ac0e02e8",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822103094,
+        "message_id": 1848,
+        "error": null
+      },
+      {
+        "event_id": "839803986f26bf662f4981e6",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822106290,
+        "message_id": 1849,
+        "error": null
+      },
+      {
+        "event_id": "ec3e5d5bce40cb29b79522c2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822109670,
+        "message_id": 1850,
+        "error": null
+      },
+      {
+        "event_id": "079b8ed7c81ccbd1cdd2140d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822113017,
+        "message_id": 1851,
+        "error": null
+      },
+      {
+        "event_id": "20c39ce94d2c90ef3443a70f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822116420,
+        "message_id": 1852,
+        "error": null
+      },
+      {
+        "event_id": "de8b37dac5a87cb639a42000",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822119817,
+        "message_id": 1853,
+        "error": null
+      },
+      {
+        "event_id": "ac05a54ca824e8d630578691",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822126313,
+        "message_id": 1854,
+        "error": null
+      },
+      {
+        "event_id": "39c4e76ae63a4825f0d3b35b",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788822129701,
+        "message_id": 1855,
+        "error": null
+      },
+      {
+        "event_id": "98bc782c6e2c68c35b6df207",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788830554394,
+        "message_id": 1856,
+        "error": null
+      },
+      {
+        "event_id": "956b5ae03aee5c01eae964d1",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788831150026,
+        "message_id": 1857,
+        "error": null
+      },
+      {
+        "event_id": "5e9910d556e08f54e0ed4d12",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788832013472,
+        "message_id": 1858,
+        "error": null
+      },
+      {
+        "event_id": "10f8f3c5fd138819d2050d32",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788832047752,
+        "message_id": 1859,
+        "error": null
+      },
+      {
+        "event_id": "ae0428ee9123591d79c288fa",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788832924964,
+        "message_id": 1860,
+        "error": null
+      },
+      {
+        "event_id": "fba1c0816eae9f371859cb5d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788832933116,
+        "message_id": 1861,
+        "error": null
+      },
+      {
+        "event_id": "aa97e8f517ac73a0ceb52463",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788833085015,
+        "message_id": 1862,
+        "error": null
+      },
+      {
+        "event_id": "de77cef99ba3b82314ebf362",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788833259695,
+        "message_id": 1863,
+        "error": null
+      },
+      {
+        "event_id": "a13094ed696da5889b7fa625",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788833283846,
+        "message_id": 1864,
+        "error": null
+      },
+      {
+        "event_id": "2f7672bb39138b5470fa4131",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788833292175,
+        "message_id": 1865,
+        "error": null
+      },
+      {
+        "event_id": "3d9f91e79f4daecfed86d8dd",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788833306288,
+        "message_id": 1866,
+        "error": null
+      },
+      {
+        "event_id": "2354bfccf52eb804c13cb335",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788833809114,
+        "message_id": 1867,
+        "error": null
+      },
+      {
+        "event_id": "e30418e077ab6c78f907af49",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788833845857,
+        "message_id": 1868,
+        "error": null
+      },
+      {
+        "event_id": "080e42f3689ee600ca909602",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788833850876,
+        "message_id": 1869,
+        "error": null
+      },
+      {
+        "event_id": "2980081933ea4a9b75bf01c5",
+        "status": "unknown",
+        "attempts": 1,
+        "updated_ms": 1788834739467,
+        "message_id": null,
+        "error": "delivery_uncertain_no_automatic_resend"
+      },
+      {
+        "event_id": "e43298b02e8bdf69eca43820",
+        "status": "unknown",
+        "attempts": 1,
+        "updated_ms": 1788834777307,
+        "message_id": null,
+        "error": "delivery_uncertain_no_automatic_resend"
+      },
+      {
+        "event_id": "f432cf2528e9ab746a452e48",
+        "status": "unknown",
+        "attempts": 1,
+        "updated_ms": 1788835567237,
+        "message_id": null,
+        "error": "delivery_uncertain_no_automatic_resend"
+      },
+      {
+        "event_id": "b798c5ba09a78f7ac81101e8",
+        "status": "unknown",
+        "attempts": 1,
+        "updated_ms": 1788835589961,
+        "message_id": null,
+        "error": "delivery_uncertain_no_automatic_resend"
+      },
+      {
+        "event_id": "3980acb48e6a8c137f15b86e",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788836424708,
+        "message_id": 1872,
+        "error": null
+      },
+      {
+        "event_id": "bdc4cc19bb7953d12647b159",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788836460707,
+        "message_id": 1873,
+        "error": null
+      },
+      {
+        "event_id": "7b6cc6e9efc103aa769b9ce7",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788836487237,
+        "message_id": 1874,
+        "error": null
+      },
+      {
+        "event_id": "c7a9451f3480e9279da7bc1a",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788836494897,
+        "message_id": 1875,
+        "error": null
+      },
+      {
+        "event_id": "28deca2ef1db9b22cb19272c",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788836527948,
+        "message_id": 1876,
+        "error": null
+      },
+      {
+        "event_id": "924305367f54549b1b05c174",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788837406451,
+        "message_id": 1877,
+        "error": null
+      },
+      {
+        "event_id": "7c41b3e3410f55b1fca52aca",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788837411438,
+        "message_id": 1878,
+        "error": null
+      },
+      {
+        "event_id": "817907b05caead65aaa3bba1",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788838330886,
+        "message_id": 1879,
+        "error": null
+      },
+      {
+        "event_id": "73a022f621a618a3f1d21d0b",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788838357256,
+        "message_id": 1880,
+        "error": null
+      },
+      {
+        "event_id": "611e8d25bef5d4fabf90bd24",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788838361886,
+        "message_id": 1881,
+        "error": null
+      },
+      {
+        "event_id": "6fd958a91dc4f4dbe2cbebbf",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788839254300,
+        "message_id": 1882,
+        "error": null
+      },
+      {
+        "event_id": "e14b57eaba1b23402b591718",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788840034276,
+        "message_id": 1883,
+        "error": null
+      },
+      {
+        "event_id": "91b4c0dc79442da2d9345467",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788840054527,
+        "message_id": 1884,
+        "error": null
+      },
+      {
+        "event_id": "51cc91b185a11f2d291bb70c",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788840102448,
+        "message_id": 1885,
+        "error": null
+      },
+      {
+        "event_id": "ef3f18e65c4d0c097f7070cf",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788840138327,
+        "message_id": 1886,
+        "error": null
+      },
+      {
+        "event_id": "15901c4980990b72a4847ed7",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788840149642,
+        "message_id": 1887,
+        "error": null
+      },
+      {
+        "event_id": "0ebfd0db3e81d66aebbf1235",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788840157629,
+        "message_id": 1888,
+        "error": null
+      },
+      {
+        "event_id": "bc45d21aabf9b3daa4751b99",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788840171740,
+        "message_id": 1889,
+        "error": null
+      },
+      {
+        "event_id": "6d99a10dc531107ecddda206",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788840176325,
+        "message_id": 1890,
+        "error": null
+      },
+      {
+        "event_id": "c5555fefb4145bd56e32d1e5",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788840969577,
+        "message_id": 1891,
+        "error": null
+      },
+      {
+        "event_id": "3d6c216f20b8bb54fa7a71fc",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788841872567,
+        "message_id": 1892,
+        "error": null
+      },
+      {
+        "event_id": "9dc78344b6479765609235d3",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788841892857,
+        "message_id": 1893,
+        "error": null
+      },
+      {
+        "event_id": "cbb95679847c0a7c148908e9",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788842758564,
+        "message_id": 1894,
+        "error": null
+      },
+      {
+        "event_id": "d1c2751744c48e5d571d8763",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788842769067,
+        "message_id": 1895,
+        "error": null
+      },
+      {
+        "event_id": "aa32f9ad05d6a6800a8c8600",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788842779423,
+        "message_id": 1896,
+        "error": null
+      },
+      {
+        "event_id": "62bc833e15677f5abfa58650",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788843747737,
+        "message_id": 1897,
+        "error": null
+      },
+      {
+        "event_id": "044f560317460a40662d5a3d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788843761965,
+        "message_id": 1898,
+        "error": null
+      },
+      {
+        "event_id": "3d190fe228aeef5e2be106bf",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788843775197,
+        "message_id": 1899,
+        "error": null
+      },
+      {
+        "event_id": "a3a20be9d016f7bf109b6bdf",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788843791728,
+        "message_id": 1900,
+        "error": null
+      },
+      {
+        "event_id": "382682cea5882c002368e565",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788844525810,
+        "message_id": 1901,
+        "error": null
+      },
+      {
+        "event_id": "d5f129f2f6dddc13278e266b",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788844540398,
+        "message_id": 1902,
+        "error": null
+      },
+      {
+        "event_id": "badcedacdb0195f0e036a5ea",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788844569008,
+        "message_id": 1903,
+        "error": null
+      },
+      {
+        "event_id": "00d63571a1e6cba1056d15da",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788845433451,
+        "message_id": 1904,
+        "error": null
+      },
+      {
+        "event_id": "930607b06632164044401fee",
+        "status": "failed",
+        "attempts": 1,
+        "updated_ms": 1788846376677,
+        "message_id": null,
+        "error": "telegram_rejected_400"
+      },
+      {
+        "event_id": "0a2cfd051466fe15b97dfff7",
+        "status": "failed",
+        "attempts": 1,
+        "updated_ms": 1788846414853,
+        "message_id": null,
+        "error": "telegram_rejected_400"
+      },
+      {
+        "event_id": "d6f418e094d244b4606e6ce9",
+        "status": "failed",
+        "attempts": 1,
+        "updated_ms": 1788847305261,
+        "message_id": null,
+        "error": "telegram_rejected_400"
+      },
+      {
+        "event_id": "a0c9382ab465a9761a71d71c",
+        "status": "failed",
+        "attempts": 1,
+        "updated_ms": 1788847325142,
+        "message_id": null,
+        "error": "telegram_rejected_400"
+      },
+      {
+        "event_id": "c79c0e1c5914e8ef25205d10",
+        "status": "failed",
+        "attempts": 1,
+        "updated_ms": 1788847360441,
+        "message_id": null,
+        "error": "telegram_rejected_400"
+      },
+      {
+        "event_id": "00b48a2ff532b2a82c7def05",
+        "status": "failed",
+        "attempts": 1,
+        "updated_ms": 1788847383364,
+        "message_id": null,
+        "error": "telegram_rejected_400"
+      },
+      {
+        "event_id": "5d01483c45c03ce09e83ec6e",
+        "status": "failed",
+        "attempts": 1,
+        "updated_ms": 1788847405873,
+        "message_id": null,
+        "error": "telegram_rejected_400"
+      },
+      {
+        "event_id": "9344c5fc0c5a37375909d834",
+        "status": "failed",
+        "attempts": 1,
+        "updated_ms": 1788847409922,
+        "message_id": null,
+        "error": "telegram_rejected_400"
+      },
+      {
+        "event_id": "30c401ac902222773e3e4e54",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788848167864,
+        "message_id": 1905,
+        "error": null
+      },
+      {
+        "event_id": "809a7b4f3b8263ea66a8206b",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788848188346,
+        "message_id": 1906,
+        "error": null
+      },
+      {
+        "event_id": "9331dacf4ef6fda8ef302c07",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788848193358,
+        "message_id": 1907,
+        "error": null
+      },
+      {
+        "event_id": "2b990ae12153f0b12a7d059f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788848198294,
+        "message_id": 1908,
+        "error": null
+      },
+      {
+        "event_id": "5b986e36845af4f144d5dd1e",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788848212013,
+        "message_id": 1909,
+        "error": null
+      },
+      {
+        "event_id": "70a8e17b6842b83e1315d825",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788849097609,
+        "message_id": 1910,
+        "error": null
+      },
+      {
+        "event_id": "5b3e3b411fa93a29ae0fd346",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788849108150,
+        "message_id": 1911,
+        "error": null
+      },
+      {
+        "event_id": "13e485a58f2bb205b93cc511",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788849985495,
+        "message_id": 1912,
+        "error": null
+      },
+      {
+        "event_id": "a7c19e0d0f71d244b74a203c",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788849990708,
+        "message_id": 1913,
+        "error": null
+      },
+      {
+        "event_id": "c49d2f5460c92f8a81c85c83",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788849995553,
+        "message_id": 1914,
+        "error": null
+      },
+      {
+        "event_id": "0f559e320b6af561c029fe84",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788850000775,
+        "message_id": 1915,
+        "error": null
+      },
+      {
+        "event_id": "286e54f95de06ba54c861b59",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788850005324,
+        "message_id": 1916,
+        "error": null
+      },
+      {
+        "event_id": "062d8120440a1a7efbb7259a",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788850010347,
+        "message_id": 1917,
+        "error": null
+      },
+      {
+        "event_id": "dd20a9f22ce166169cf54ca3",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788850021263,
+        "message_id": 1918,
+        "error": null
+      },
+      {
+        "event_id": "416516846774bf86fc5b5d77",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788850029313,
+        "message_id": 1919,
+        "error": null
+      },
+      {
+        "event_id": "a1dd4ca1521b3d07a2e71125",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788850900578,
+        "message_id": 1920,
+        "error": null
+      },
+      {
+        "event_id": "487ca06ed7d1c18fa9d3ba41",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788850924033,
+        "message_id": 1921,
+        "error": null
+      },
+      {
+        "event_id": "1a7e7ad3829cb6912682dc2b",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788850975678,
+        "message_id": 1922,
+        "error": null
+      },
+      {
+        "event_id": "51922bcefba509c4b749d593",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788851754005,
+        "message_id": 1923,
+        "error": null
+      },
+      {
+        "event_id": "a19a0be6047a76fbf4b0b2d4",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788851759787,
+        "message_id": 1924,
+        "error": null
+      },
+      {
+        "event_id": "f9efe6537c3febf71c84bb0f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788852708925,
+        "message_id": 1925,
+        "error": null
+      },
+      {
+        "event_id": "abf4b32e55bb5900eb3dc4cc",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788853571151,
+        "message_id": 1926,
+        "error": null
+      },
+      {
+        "event_id": "3966558ddaffd02d8455f108",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788853582538,
+        "message_id": 1927,
+        "error": null
+      },
+      {
+        "event_id": "0b2d8c2d66148af55a7bafd4",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788853587461,
+        "message_id": 1928,
+        "error": null
+      },
+      {
+        "event_id": "073ecc89af489aed429c43e0",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788853596230,
+        "message_id": 1929,
+        "error": null
+      },
+      {
+        "event_id": "ed4b74c7a236961f7c6aef71",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788854478524,
+        "message_id": 1930,
+        "error": null
+      },
+      {
+        "event_id": "de479dff70d22901c4eb67e0",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788854504934,
+        "message_id": 1931,
+        "error": null
+      },
+      {
+        "event_id": "90c48059df3834433f7d8a09",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788854594165,
+        "message_id": 1932,
+        "error": null
+      },
+      {
+        "event_id": "889b91e48da4a16a2f4f1041",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788854618177,
+        "message_id": 1933,
+        "error": null
+      },
+      {
+        "event_id": "04e5e3a5a17c74633994384d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788854641264,
+        "message_id": 1934,
+        "error": null
+      },
+      {
+        "event_id": "1f992e0524e559ae1bfb82cc",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788854645786,
+        "message_id": 1935,
+        "error": null
+      },
+      {
+        "event_id": "87471c5e6eaaa326751cc7bd",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788855416708,
+        "message_id": 1936,
+        "error": null
+      },
+      {
+        "event_id": "a21dc7640a96c0a0325e9d60",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788856308356,
+        "message_id": 1937,
+        "error": null
+      },
+      {
+        "event_id": "7707dbb51ddf92924fc552e6",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788856313510,
+        "message_id": 1938,
+        "error": null
+      },
+      {
+        "event_id": "5b8818b39cd4b511aa075d9c",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788856334414,
+        "message_id": 1939,
+        "error": null
+      },
+      {
+        "event_id": "02fab4eb21031f6ac5df10c2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788858164711,
+        "message_id": 1940,
+        "error": null
+      },
+      {
+        "event_id": "b479321f091789ae8c93a433",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788858169878,
+        "message_id": 1941,
+        "error": null
+      },
+      {
+        "event_id": "bf0e54f83142585b5db1e54d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788858197081,
+        "message_id": 1942,
+        "error": null
+      },
+      {
+        "event_id": "5ef1e9ecc3ab1ae1588d6688",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788858204949,
+        "message_id": 1943,
+        "error": null
+      },
+      {
+        "event_id": "e587b76514b33f46f75af7a2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788859009815,
+        "message_id": 1944,
+        "error": null
+      },
+      {
+        "event_id": "a879dd24e33c3f585cb83cae",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788859030459,
+        "message_id": 1945,
+        "error": null
+      },
+      {
+        "event_id": "bb27fa060b0be659347c8fea",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788859913597,
+        "message_id": 1946,
+        "error": null
+      },
+      {
+        "event_id": "2a90e0b636308a80811e91e3",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788859961725,
+        "message_id": 1947,
+        "error": null
+      },
+      {
+        "event_id": "1c440f5d9644e20a5e12c692",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788860861287,
+        "message_id": 1948,
+        "error": null
+      },
+      {
+        "event_id": "2edf66cca924417b81e4f763",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788860875527,
+        "message_id": 1949,
+        "error": null
+      },
+      {
+        "event_id": "b3368beacd6c5feff1ba8d80",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788860880692,
+        "message_id": 1950,
+        "error": null
+      },
+      {
+        "event_id": "40d0db68339b6c63ee61a136",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788861746806,
+        "message_id": 1951,
+        "error": null
+      },
+      {
+        "event_id": "4e47237411499be9bee69d34",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788861758366,
+        "message_id": 1952,
+        "error": null
+      },
+      {
+        "event_id": "c91cd0acff9d4dadfdf587cd",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788861788393,
+        "message_id": 1953,
+        "error": null
+      },
+      {
+        "event_id": "39e9d4c08a37a70d15d67b32",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788861805315,
+        "message_id": 1954,
+        "error": null
+      },
+      {
+        "event_id": "e4697e8e8bd95ef86c232caf",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788861810346,
+        "message_id": 1955,
+        "error": null
+      },
+      {
+        "event_id": "e015a3d62226a1cfa9374f62",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788861814736,
+        "message_id": 1956,
+        "error": null
+      },
+      {
+        "event_id": "9623b1fa4e6667e2ef9fe88e",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788862636294,
+        "message_id": 1957,
+        "error": null
+      },
+      {
+        "event_id": "c6776e0f0c44ad3fe847f235",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788863442055,
+        "message_id": 1958,
+        "error": null
+      },
+      {
+        "event_id": "12550c89afb48acd7524c792",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788863496711,
+        "message_id": 1959,
+        "error": null
+      },
+      {
+        "event_id": "0267a5629f5c4b7f6f0dc680",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788864420400,
+        "message_id": 1960,
+        "error": null
+      },
+      {
+        "event_id": "65c3bb3c1e70fcca744eb5f6",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788864437312,
+        "message_id": 1961,
+        "error": null
+      },
+      {
+        "event_id": "6022734d418c3757a90c612b",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788864445697,
+        "message_id": 1962,
+        "error": null
+      },
+      {
+        "event_id": "c24f92fa9cb74c94bf732f83",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788864488087,
+        "message_id": 1963,
+        "error": null
+      },
+      {
+        "event_id": "72ab635d51de70706c92e8e5",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788864504885,
+        "message_id": 1964,
+        "error": null
+      },
+      {
+        "event_id": "ee2a5b7a2ca02576a66db90d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788865268049,
+        "message_id": 1965,
+        "error": null
+      },
+      {
+        "event_id": "037995268c1f8c3350fc3aed",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788865279541,
+        "message_id": 1966,
+        "error": null
+      },
+      {
+        "event_id": "79401ab282b39cda441b3439",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788865284485,
+        "message_id": 1967,
+        "error": null
+      },
+      {
+        "event_id": "1e55ea61bd3af28b6a3b0d35",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788865321480,
+        "message_id": 1968,
+        "error": null
+      },
+      {
+        "event_id": "c90c25829638335415198cfd",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788865345888,
+        "message_id": 1969,
+        "error": null
+      },
+      {
+        "event_id": "b39d8bfc3aea5ce0aa88979d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788865350575,
+        "message_id": 1970,
+        "error": null
+      },
+      {
+        "event_id": "3d9d97e3edc5f66eb610d1c7",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788865390777,
+        "message_id": 1971,
+        "error": null
+      },
+      {
+        "event_id": "8ca4315d123a742d8624d9fd",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788867075498,
+        "message_id": 1972,
+        "error": null
+      },
+      {
+        "event_id": "dbb9c2fc5c2b4cc52290df7f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788867972080,
+        "message_id": 1973,
+        "error": null
+      },
+      {
+        "event_id": "f7edbda4a7ceb4f9325bf5a4",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788867977294,
+        "message_id": 1974,
+        "error": null
+      },
+      {
+        "event_id": "a2c3e81e916f34e700e406ac",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788867982410,
+        "message_id": 1975,
+        "error": null
+      },
+      {
+        "event_id": "a259821c149acc7d1207878a",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788868924378,
+        "message_id": 1976,
+        "error": null
+      },
+      {
+        "event_id": "93236acd42ff831d405ded4e",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788868938705,
+        "message_id": 1977,
+        "error": null
+      },
+      {
+        "event_id": "b88678f43455905322fa185f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788868992855,
+        "message_id": 1978,
+        "error": null
+      },
+      {
+        "event_id": "ac1c4232e79559595396181b",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788869040306,
+        "message_id": 1979,
+        "error": null
+      },
+      {
+        "event_id": "7c2a97542cb0d7c71305620c",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788869786361,
+        "message_id": 1980,
+        "error": null
+      },
+      {
+        "event_id": "aacc8ead1126e59ecbcb4039",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788869807161,
+        "message_id": 1981,
+        "error": null
+      },
+      {
+        "event_id": "d1746566aa8739954750f606",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788870719304,
+        "message_id": 1982,
+        "error": null
+      },
+      {
+        "event_id": "f01908499f333c5ef857ee55",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788870733667,
+        "message_id": 1983,
+        "error": null
+      },
+      {
+        "event_id": "8fdb5a1bfb0c46b678705441",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788871607554,
+        "message_id": 1984,
+        "error": null
+      },
+      {
+        "event_id": "c3d21283e6bffdbc4f229540",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788872535428,
+        "message_id": 1985,
+        "error": null
+      },
+      {
+        "event_id": "ee7c00f657cbbf9a56799220",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788872589890,
+        "message_id": 1986,
+        "error": null
+      },
+      {
+        "event_id": "f45abe68fe5c02223e738d98",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788872601185,
+        "message_id": 1987,
+        "error": null
+      },
+      {
+        "event_id": "689bda0edeb200b732dbd908",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788873385200,
+        "message_id": 1988,
+        "error": null
+      }
+    ],
+    "bark_receipts": [
+      {
+        "event_id": "98bc782c6e2c68c35b6df207",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788830553750,
+        "server_timestamp": 1788830555,
+        "error": null
+      },
+      {
+        "event_id": "956b5ae03aee5c01eae964d1",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788831148047,
+        "server_timestamp": 1788831150,
+        "error": null
+      },
+      {
+        "event_id": "5e9910d556e08f54e0ed4d12",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788832013262,
+        "server_timestamp": 1788832015,
+        "error": null
+      },
+      {
+        "event_id": "10f8f3c5fd138819d2050d32",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788832047231,
+        "server_timestamp": 1788832049,
+        "error": null
+      },
+      {
+        "event_id": "ae0428ee9123591d79c288fa",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788832923725,
+        "server_timestamp": 1788832925,
+        "error": null
+      },
+      {
+        "event_id": "fba1c0816eae9f371859cb5d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788832932773,
+        "server_timestamp": 1788832934,
+        "error": null
+      },
+      {
+        "event_id": "aa97e8f517ac73a0ceb52463",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788833082486,
+        "server_timestamp": 1788833084,
+        "error": null
+      },
+      {
+        "event_id": "de77cef99ba3b82314ebf362",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788833257354,
+        "server_timestamp": 1788833259,
+        "error": null
+      },
+      {
+        "event_id": "a13094ed696da5889b7fa625",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788833281625,
+        "server_timestamp": 1788833283,
+        "error": null
+      },
+      {
+        "event_id": "2f7672bb39138b5470fa4131",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788833290517,
+        "server_timestamp": 1788833292,
+        "error": null
+      },
+      {
+        "event_id": "3d9f91e79f4daecfed86d8dd",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788833305676,
+        "server_timestamp": 1788833307,
+        "error": null
+      },
+      {
+        "event_id": "2354bfccf52eb804c13cb335",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788833804376,
+        "server_timestamp": 1788833806,
+        "error": null
+      },
+      {
+        "event_id": "e30418e077ab6c78f907af49",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788833841387,
+        "server_timestamp": 1788833843,
+        "error": null
+      },
+      {
+        "event_id": "080e42f3689ee600ca909602",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788833844105,
+        "server_timestamp": 1788833846,
+        "error": null
+      },
+      {
+        "event_id": "2980081933ea4a9b75bf01c5",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788834719284,
+        "server_timestamp": 1788834721,
+        "error": null
+      },
+      {
+        "event_id": "e43298b02e8bdf69eca43820",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788834755523,
+        "server_timestamp": 1788834757,
+        "error": null
+      },
+      {
+        "event_id": "f432cf2528e9ab746a452e48",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788835550232,
+        "server_timestamp": 1788835552,
+        "error": null
+      },
+      {
+        "event_id": "b798c5ba09a78f7ac81101e8",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788835562481,
+        "server_timestamp": 1788835564,
+        "error": null
+      },
+      {
+        "event_id": "3980acb48e6a8c137f15b86e",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788836420875,
+        "server_timestamp": 1788836422,
+        "error": null
+      },
+      {
+        "event_id": "bdc4cc19bb7953d12647b159",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788836457101,
+        "server_timestamp": 1788836459,
+        "error": null
+      },
+      {
+        "event_id": "7b6cc6e9efc103aa769b9ce7",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788836484277,
+        "server_timestamp": 1788836486,
+        "error": null
+      },
+      {
+        "event_id": "c7a9451f3480e9279da7bc1a",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788836490618,
+        "server_timestamp": 1788836492,
+        "error": null
+      },
+      {
+        "event_id": "28deca2ef1db9b22cb19272c",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788836520694,
+        "server_timestamp": 1788836522,
+        "error": null
+      },
+      {
+        "event_id": "924305367f54549b1b05c174",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788837405737,
+        "server_timestamp": 1788837407,
+        "error": null
+      },
+      {
+        "event_id": "7c41b3e3410f55b1fca52aca",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788837408574,
+        "server_timestamp": 1788837410,
+        "error": null
+      },
+      {
+        "event_id": "817907b05caead65aaa3bba1",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788838329017,
+        "server_timestamp": 1788838331,
+        "error": null
+      },
+      {
+        "event_id": "73a022f621a618a3f1d21d0b",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788838356333,
+        "server_timestamp": 1788838358,
+        "error": null
+      },
+      {
+        "event_id": "611e8d25bef5d4fabf90bd24",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788838359106,
+        "server_timestamp": 1788838361,
+        "error": null
+      },
+      {
+        "event_id": "6fd958a91dc4f4dbe2cbebbf",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788839253059,
+        "server_timestamp": 1788839255,
+        "error": null
+      },
+      {
+        "event_id": "e14b57eaba1b23402b591718",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788840032964,
+        "server_timestamp": 1788840034,
+        "error": null
+      },
+      {
+        "event_id": "91b4c0dc79442da2d9345467",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788840050853,
+        "server_timestamp": 1788840052,
+        "error": null
+      },
+      {
+        "event_id": "51cc91b185a11f2d291bb70c",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788840099034,
+        "server_timestamp": 1788840101,
+        "error": null
+      },
+      {
+        "event_id": "ef3f18e65c4d0c097f7070cf",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788840138317,
+        "server_timestamp": 1788840140,
+        "error": null
+      },
+      {
+        "event_id": "15901c4980990b72a4847ed7",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788840147320,
+        "server_timestamp": 1788840149,
+        "error": null
+      },
+      {
+        "event_id": "0ebfd0db3e81d66aebbf1235",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788840156343,
+        "server_timestamp": 1788840158,
+        "error": null
+      },
+      {
+        "event_id": "bc45d21aabf9b3daa4751b99",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788840171336,
+        "server_timestamp": 1788840173,
+        "error": null
+      },
+      {
+        "event_id": "6d99a10dc531107ecddda206",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788840174152,
+        "server_timestamp": 1788840176,
+        "error": null
+      },
+      {
+        "event_id": "c5555fefb4145bd56e32d1e5",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788840963025,
+        "server_timestamp": 1788840965,
+        "error": null
+      },
+      {
+        "event_id": "3d6c216f20b8bb54fa7a71fc",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788841870007,
+        "server_timestamp": 1788841871,
+        "error": null
+      },
+      {
+        "event_id": "9dc78344b6479765609235d3",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788841891127,
+        "server_timestamp": 1788841893,
+        "error": null
+      },
+      {
+        "event_id": "cbb95679847c0a7c148908e9",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788842749433,
+        "server_timestamp": 1788842751,
+        "error": null
+      },
+      {
+        "event_id": "d1c2751744c48e5d571d8763",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788842752668,
+        "server_timestamp": 1788842754,
+        "error": null
+      },
+      {
+        "event_id": "aa32f9ad05d6a6800a8c8600",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788842762179,
+        "server_timestamp": 1788842764,
+        "error": null
+      },
+      {
+        "event_id": "62bc833e15677f5abfa58650",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788843736885,
+        "server_timestamp": 1788843738,
+        "error": null
+      },
+      {
+        "event_id": "044f560317460a40662d5a3d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788843739574,
+        "server_timestamp": 1788843741,
+        "error": null
+      },
+      {
+        "event_id": "3d190fe228aeef5e2be106bf",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788843748255,
+        "server_timestamp": 1788843750,
+        "error": null
+      },
+      {
+        "event_id": "a3a20be9d016f7bf109b6bdf",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788843753915,
+        "server_timestamp": 1788843755,
+        "error": null
+      },
+      {
+        "event_id": "382682cea5882c002368e565",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788844519964,
+        "server_timestamp": 1788844521,
+        "error": null
+      },
+      {
+        "event_id": "d5f129f2f6dddc13278e266b",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788844534868,
+        "server_timestamp": 1788844536,
+        "error": null
+      },
+      {
+        "event_id": "badcedacdb0195f0e036a5ea",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788844562047,
+        "server_timestamp": 1788844564,
+        "error": null
+      },
+      {
+        "event_id": "00d63571a1e6cba1056d15da",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788845426844,
+        "server_timestamp": 1788845428,
+        "error": null
+      },
+      {
+        "event_id": "930607b06632164044401fee",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788846375423,
+        "server_timestamp": 1788846377,
+        "error": null
+      },
+      {
+        "event_id": "0a2cfd051466fe15b97dfff7",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788846413873,
+        "server_timestamp": 1788846415,
+        "error": null
+      },
+      {
+        "event_id": "d6f418e094d244b4606e6ce9",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788847301871,
+        "server_timestamp": 1788847303,
+        "error": null
+      },
+      {
+        "event_id": "a0c9382ab465a9761a71d71c",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788847322712,
+        "server_timestamp": 1788847324,
+        "error": null
+      },
+      {
+        "event_id": "c79c0e1c5914e8ef25205d10",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788847359611,
+        "server_timestamp": 1788847361,
+        "error": null
+      },
+      {
+        "event_id": "00b48a2ff532b2a82c7def05",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788847381051,
+        "server_timestamp": 1788847383,
+        "error": null
+      },
+      {
+        "event_id": "5d01483c45c03ce09e83ec6e",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788847402562,
+        "server_timestamp": 1788847404,
+        "error": null
+      },
+      {
+        "event_id": "9344c5fc0c5a37375909d834",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788847408352,
+        "server_timestamp": 1788847410,
+        "error": null
+      },
+      {
+        "event_id": "30c401ac902222773e3e4e54",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788848164516,
+        "server_timestamp": 1788848166,
+        "error": null
+      },
+      {
+        "event_id": "809a7b4f3b8263ea66a8206b",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788848185981,
+        "server_timestamp": 1788848187,
+        "error": null
+      },
+      {
+        "event_id": "9331dacf4ef6fda8ef302c07",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788848188776,
+        "server_timestamp": 1788848190,
+        "error": null
+      },
+      {
+        "event_id": "2b990ae12153f0b12a7d059f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788848194532,
+        "server_timestamp": 1788848196,
+        "error": null
+      },
+      {
+        "event_id": "5b986e36845af4f144d5dd1e",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788848212595,
+        "server_timestamp": 1788848214,
+        "error": null
+      },
+      {
+        "event_id": "70a8e17b6842b83e1315d825",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788849098269,
+        "server_timestamp": 1788849100,
+        "error": null
+      },
+      {
+        "event_id": "5b3e3b411fa93a29ae0fd346",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788849103959,
+        "server_timestamp": 1788849105,
+        "error": null
+      },
+      {
+        "event_id": "13e485a58f2bb205b93cc511",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788849982808,
+        "server_timestamp": 1788849984,
+        "error": null
+      },
+      {
+        "event_id": "a7c19e0d0f71d244b74a203c",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788849985434,
+        "server_timestamp": 1788849987,
+        "error": null
+      },
+      {
+        "event_id": "c49d2f5460c92f8a81c85c83",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788849988174,
+        "server_timestamp": 1788849990,
+        "error": null
+      },
+      {
+        "event_id": "0f559e320b6af561c029fe84",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788849994038,
+        "server_timestamp": 1788849996,
+        "error": null
+      },
+      {
+        "event_id": "286e54f95de06ba54c861b59",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788849996757,
+        "server_timestamp": 1788849998,
+        "error": null
+      },
+      {
+        "event_id": "062d8120440a1a7efbb7259a",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788850002493,
+        "server_timestamp": 1788850004,
+        "error": null
+      },
+      {
+        "event_id": "dd20a9f22ce166169cf54ca3",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788850020374,
+        "server_timestamp": 1788850022,
+        "error": null
+      },
+      {
+        "event_id": "416516846774bf86fc5b5d77",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788850026107,
+        "server_timestamp": 1788850028,
+        "error": null
+      },
+      {
+        "event_id": "a1dd4ca1521b3d07a2e71125",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788850898238,
+        "server_timestamp": 1788850900,
+        "error": null
+      },
+      {
+        "event_id": "487ca06ed7d1c18fa9d3ba41",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788850919351,
+        "server_timestamp": 1788850921,
+        "error": null
+      },
+      {
+        "event_id": "1a7e7ad3829cb6912682dc2b",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788850974400,
+        "server_timestamp": 1788850976,
+        "error": null
+      },
+      {
+        "event_id": "51922bcefba509c4b749d593",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788851753169,
+        "server_timestamp": 1788851755,
+        "error": null
+      },
+      {
+        "event_id": "a19a0be6047a76fbf4b0b2d4",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788851755769,
+        "server_timestamp": 1788851757,
+        "error": null
+      },
+      {
+        "event_id": "f9efe6537c3febf71c84bb0f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788852705632,
+        "server_timestamp": 1788852707,
+        "error": null
+      },
+      {
+        "event_id": "abf4b32e55bb5900eb3dc4cc",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788853569576,
+        "server_timestamp": 1788853571,
+        "error": null
+      },
+      {
+        "event_id": "3966558ddaffd02d8455f108",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788853578508,
+        "server_timestamp": 1788853580,
+        "error": null
+      },
+      {
+        "event_id": "0b2d8c2d66148af55a7bafd4",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788853581261,
+        "server_timestamp": 1788853583,
+        "error": null
+      },
+      {
+        "event_id": "073ecc89af489aed429c43e0",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788853595918,
+        "server_timestamp": 1788853597,
+        "error": null
+      },
+      {
+        "event_id": "ed4b74c7a236961f7c6aef71",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788854475925,
+        "server_timestamp": 1788854477,
+        "error": null
+      },
+      {
+        "event_id": "de479dff70d22901c4eb67e0",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788854500714,
+        "server_timestamp": 1788854502,
+        "error": null
+      },
+      {
+        "event_id": "90c48059df3834433f7d8a09",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788854593585,
+        "server_timestamp": 1788854595,
+        "error": null
+      },
+      {
+        "event_id": "889b91e48da4a16a2f4f1041",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788854618206,
+        "server_timestamp": 1788854620,
+        "error": null
+      },
+      {
+        "event_id": "04e5e3a5a17c74633994384d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788854639185,
+        "server_timestamp": 1788854641,
+        "error": null
+      },
+      {
+        "event_id": "1f992e0524e559ae1bfb82cc",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788854641835,
+        "server_timestamp": 1788854643,
+        "error": null
+      },
+      {
+        "event_id": "87471c5e6eaaa326751cc7bd",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788855414053,
+        "server_timestamp": 1788855416,
+        "error": null
+      },
+      {
+        "event_id": "a21dc7640a96c0a0325e9d60",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788856306055,
+        "server_timestamp": 1788856308,
+        "error": null
+      },
+      {
+        "event_id": "7707dbb51ddf92924fc552e6",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788856311620,
+        "server_timestamp": 1788856313,
+        "error": null
+      },
+      {
+        "event_id": "5b8818b39cd4b511aa075d9c",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788856332563,
+        "server_timestamp": 1788856334,
+        "error": null
+      },
+      {
+        "event_id": "02fab4eb21031f6ac5df10c2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788858162341,
+        "server_timestamp": 1788858164,
+        "error": null
+      },
+      {
+        "event_id": "b479321f091789ae8c93a433",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788858168023,
+        "server_timestamp": 1788858170,
+        "error": null
+      },
+      {
+        "event_id": "bf0e54f83142585b5db1e54d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788858195409,
+        "server_timestamp": 1788858197,
+        "error": null
+      },
+      {
+        "event_id": "5ef1e9ecc3ab1ae1588d6688",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788858201301,
+        "server_timestamp": 1788858203,
+        "error": null
+      },
+      {
+        "event_id": "e587b76514b33f46f75af7a2",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788859007222,
+        "server_timestamp": 1788859009,
+        "error": null
+      },
+      {
+        "event_id": "a879dd24e33c3f585cb83cae",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788859025383,
+        "server_timestamp": 1788859027,
+        "error": null
+      },
+      {
+        "event_id": "bb27fa060b0be659347c8fea",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788859911913,
+        "server_timestamp": 1788859913,
+        "error": null
+      },
+      {
+        "event_id": "2a90e0b636308a80811e91e3",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788859960373,
+        "server_timestamp": 1788859962,
+        "error": null
+      },
+      {
+        "event_id": "1c440f5d9644e20a5e12c692",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788860858365,
+        "server_timestamp": 1788860860,
+        "error": null
+      },
+      {
+        "event_id": "2edf66cca924417b81e4f763",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788860873426,
+        "server_timestamp": 1788860875,
+        "error": null
+      },
+      {
+        "event_id": "b3368beacd6c5feff1ba8d80",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788860876136,
+        "server_timestamp": 1788860878,
+        "error": null
+      },
+      {
+        "event_id": "40d0db68339b6c63ee61a136",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788861744867,
+        "server_timestamp": 1788861746,
+        "error": null
+      },
+      {
+        "event_id": "4e47237411499be9bee69d34",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788861754138,
+        "server_timestamp": 1788861756,
+        "error": null
+      },
+      {
+        "event_id": "c91cd0acff9d4dadfdf587cd",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788861781546,
+        "server_timestamp": 1788861783,
+        "error": null
+      },
+      {
+        "event_id": "39e9d4c08a37a70d15d67b32",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788861802953,
+        "server_timestamp": 1788861804,
+        "error": null
+      },
+      {
+        "event_id": "e4697e8e8bd95ef86c232caf",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788861808735,
+        "server_timestamp": 1788861810,
+        "error": null
+      },
+      {
+        "event_id": "e015a3d62226a1cfa9374f62",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788861811307,
+        "server_timestamp": 1788861813,
+        "error": null
+      },
+      {
+        "event_id": "9623b1fa4e6667e2ef9fe88e",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788862633915,
+        "server_timestamp": 1788862635,
+        "error": null
+      },
+      {
+        "event_id": "c6776e0f0c44ad3fe847f235",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788863439905,
+        "server_timestamp": 1788863441,
+        "error": null
+      },
+      {
+        "event_id": "12550c89afb48acd7524c792",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788863495480,
+        "server_timestamp": 1788863497,
+        "error": null
+      },
+      {
+        "event_id": "0267a5629f5c4b7f6f0dc680",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788864418521,
+        "server_timestamp": 1788864420,
+        "error": null
+      },
+      {
+        "event_id": "65c3bb3c1e70fcca744eb5f6",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788864434239,
+        "server_timestamp": 1788864436,
+        "error": null
+      },
+      {
+        "event_id": "6022734d418c3757a90c612b",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788864443512,
+        "server_timestamp": 1788864445,
+        "error": null
+      },
+      {
+        "event_id": "c24f92fa9cb74c94bf732f83",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788864486638,
+        "server_timestamp": 1788864488,
+        "error": null
+      },
+      {
+        "event_id": "72ab635d51de70706c92e8e5",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788864501907,
+        "server_timestamp": 1788864503,
+        "error": null
+      },
+      {
+        "event_id": "ee2a5b7a2ca02576a66db90d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788865266690,
+        "server_timestamp": 1788865268,
+        "error": null
+      },
+      {
+        "event_id": "037995268c1f8c3350fc3aed",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788865276164,
+        "server_timestamp": 1788865278,
+        "error": null
+      },
+      {
+        "event_id": "79401ab282b39cda441b3439",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788865279092,
+        "server_timestamp": 1788865281,
+        "error": null
+      },
+      {
+        "event_id": "1e55ea61bd3af28b6a3b0d35",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788865320314,
+        "server_timestamp": 1788865322,
+        "error": null
+      },
+      {
+        "event_id": "c90c25829638335415198cfd",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788865344973,
+        "server_timestamp": 1788865346,
+        "error": null
+      },
+      {
+        "event_id": "b39d8bfc3aea5ce0aa88979d",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788865347606,
+        "server_timestamp": 1788865349,
+        "error": null
+      },
+      {
+        "event_id": "3d9d97e3edc5f66eb610d1c7",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788865388376,
+        "server_timestamp": 1788865390,
+        "error": null
+      },
+      {
+        "event_id": "8ca4315d123a742d8624d9fd",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788867075214,
+        "server_timestamp": 1788867077,
+        "error": null
+      },
+      {
+        "event_id": "dbb9c2fc5c2b4cc52290df7f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788867970273,
+        "server_timestamp": 1788867972,
+        "error": null
+      },
+      {
+        "event_id": "f7edbda4a7ceb4f9325bf5a4",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788867973856,
+        "server_timestamp": 1788867975,
+        "error": null
+      },
+      {
+        "event_id": "a2c3e81e916f34e700e406ac",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788867980007,
+        "server_timestamp": 1788867982,
+        "error": null
+      },
+      {
+        "event_id": "a259821c149acc7d1207878a",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788868922806,
+        "server_timestamp": 1788868924,
+        "error": null
+      },
+      {
+        "event_id": "93236acd42ff831d405ded4e",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788868937644,
+        "server_timestamp": 1788868939,
+        "error": null
+      },
+      {
+        "event_id": "b88678f43455905322fa185f",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788868989806,
+        "server_timestamp": 1788868991,
+        "error": null
+      },
+      {
+        "event_id": "ac1c4232e79559595396181b",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788869038495,
+        "server_timestamp": 1788869040,
+        "error": null
+      },
+      {
+        "event_id": "7c2a97542cb0d7c71305620c",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788869782310,
+        "server_timestamp": 1788869784,
+        "error": null
+      },
+      {
+        "event_id": "aacc8ead1126e59ecbcb4039",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788869803211,
+        "server_timestamp": 1788869805,
+        "error": null
+      },
+      {
+        "event_id": "d1746566aa8739954750f606",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788870714527,
+        "server_timestamp": 1788870716,
+        "error": null
+      },
+      {
+        "event_id": "f01908499f333c5ef857ee55",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788870729293,
+        "server_timestamp": 1788870731,
+        "error": null
+      },
+      {
+        "event_id": "8fdb5a1bfb0c46b678705441",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788871607555,
+        "server_timestamp": 1788871609,
+        "error": null
+      },
+      {
+        "event_id": "c3d21283e6bffdbc4f229540",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788872532204,
+        "server_timestamp": 1788872534,
+        "error": null
+      },
+      {
+        "event_id": "ee7c00f657cbbf9a56799220",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788872587142,
+        "server_timestamp": 1788872589,
+        "error": null
+      },
+      {
+        "event_id": "f45abe68fe5c02223e738d98",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788872598952,
+        "server_timestamp": 1788872600,
+        "error": null
+      },
+      {
+        "event_id": "689bda0edeb200b732dbd908",
+        "status": "sent",
+        "attempts": 1,
+        "updated_ms": 1788873383521,
+        "server_timestamp": 1788873385,
+        "error": null
+      }
+    ],
+    "by_kind": [
+      {
+        "kind": "entry",
+        "count": 6500
+      },
+      {
+        "kind": "exit",
+        "count": 6021
+      },
+      {
+        "kind": "release",
+        "count": 2126
+      },
+      {
+        "kind": "retest",
+        "count": 4596
+      },
+      {
+        "kind": "tv_start",
+        "count": 1272
+      },
+      {
+        "kind": "zero_breakout",
+        "count": 6293
+      }
+    ],
+    "telegram_media": [
+      {
+        "event_id": "00b48a2ff532b2a82c7def05",
+        "bytes": 176156,
+        "sha256": "d1bb0232e2a6d02e79932660f2dc83cc8a505a2ff5ffdda385bc1f2115c0dcba",
+        "error": null,
+        "notification_status": "failed",
+        "hash_valid": true
+      },
+      {
+        "event_id": "00d63571a1e6cba1056d15da",
+        "bytes": 179995,
+        "sha256": "af07ea051452ed60eb15a6dcbe5d6813a5f49a2952cdf7dcfb95ba159da942d6",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "0267a5629f5c4b7f6f0dc680",
+        "bytes": 187231,
+        "sha256": "61deb2e28946b258004f3b68a6890f3fca93371d73ba73be8685c7613309c396",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "02fab4eb21031f6ac5df10c2",
+        "bytes": 190902,
+        "sha256": "f4b5515d48b505a55216bf3e1eb132be29981d4a0b47acc813ed516bc0d7d88e",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "037995268c1f8c3350fc3aed",
+        "bytes": 191880,
+        "sha256": "52736371acb6a6067701bbb1962020efbb791edc781b32e896449c26efa89499",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "044f560317460a40662d5a3d",
+        "bytes": 190033,
+        "sha256": "5fbff1886d6524c6251cc7dd92d60f5d0eeb66c9ebc33f6532bbe43d5e3c7acb",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "04e5e3a5a17c74633994384d",
+        "bytes": 188702,
+        "sha256": "791223fb95e7d02e995cb78b69c410feecc3d77430bb6379ef5b5e638504b41a",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "062d8120440a1a7efbb7259a",
+        "bytes": 190145,
+        "sha256": "afa3ce7815ba5bd21684ccd6b7e8c6d940664b08283d62641a9d4fe7bce72b1f",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "073ecc89af489aed429c43e0",
+        "bytes": 185140,
+        "sha256": "af50dcc93bf7af53f49d46246f70f08b5710fdb14b0ae274621fca9fc4e14ba5",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "080e42f3689ee600ca909602",
+        "bytes": 187609,
+        "sha256": "447bcde32dafb6beccd8b892f1becdd41ea7376fc374ab8923b9448ce913c640",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "0a2cfd051466fe15b97dfff7",
+        "bytes": 182410,
+        "sha256": "96ec042202f8b4af02fde45584b7a3dcdd44a4ffc3bc9f66689e1cf2a66061e0",
+        "error": null,
+        "notification_status": "failed",
+        "hash_valid": true
+      },
+      {
+        "event_id": "0b2d8c2d66148af55a7bafd4",
+        "bytes": 188550,
+        "sha256": "dd6bef7e58dc4862a0a49a1a4dde3861eb47002711d551666ac500089dc07ed3",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "0ebfd0db3e81d66aebbf1235",
+        "bytes": 193308,
+        "sha256": "d18a32696add7bda1a464c0af2b067460a4ad2f30d38601dceda6a87b6a76db9",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "0f559e320b6af561c029fe84",
+        "bytes": 198381,
+        "sha256": "b73f585e766623dba8964af29941404a376749f4f1b02bedc9795423bd4711b9",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "12550c89afb48acd7524c792",
+        "bytes": 177100,
+        "sha256": "56de05483f4b1b917a7938d3bb7d7a42e3a462ecbbca416039d564f7854fc87e",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "13e485a58f2bb205b93cc511",
+        "bytes": 172386,
+        "sha256": "414dc196e70d7c3bea6f8f3c6f5bff3fc91d44fc51c4c4faa129205df5fc03f2",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "15901c4980990b72a4847ed7",
+        "bytes": 181173,
+        "sha256": "8a5590542240c91dc4c9ccf2dd778c6e10bb627779de57420be86c480a9669df",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "1a7e7ad3829cb6912682dc2b",
+        "bytes": 193685,
+        "sha256": "ddaa9ee080890b491a20ac1c78637d43e0eb2e9580716968891db1069da9a852",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "1c440f5d9644e20a5e12c692",
+        "bytes": 188541,
+        "sha256": "4d8ddf7201f7e60895d64c04eed73a43b96abf8e7ae7871a2544b6e32bc5693c",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "1e55ea61bd3af28b6a3b0d35",
+        "bytes": 198616,
+        "sha256": "63787bbfe4892aa4a3537c0252d3e99fbce48305e2285ac6ccfd9a74bead53bc",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "1f992e0524e559ae1bfb82cc",
+        "bytes": 155288,
+        "sha256": "515dd84e8ffb9a2e58819797269a16151266b8af2fa8f8144b6fa66d02b6971b",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "2354bfccf52eb804c13cb335",
+        "bytes": 180894,
+        "sha256": "39624e555a648d4626a6648f16429ab1cd88bc061107588e0557212fcf033e85",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "286e54f95de06ba54c861b59",
+        "bytes": 168236,
+        "sha256": "d55f5f8f9056b8a8b18c8dc39a901e277e6d3f1b3e9e0e6d7314d57bc4407a65",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "28deca2ef1db9b22cb19272c",
+        "bytes": 158133,
+        "sha256": "4ae69608229924c6ecd7a0dd80f16b0fa7ea5aed231f5c7e51d26326c6528a0a",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "2980081933ea4a9b75bf01c5",
+        "bytes": 171420,
+        "sha256": "10ca4695dd2b1b4798f2982192ba7f42d564906b0211e49ea90a2005b401cc2f",
+        "error": null,
+        "notification_status": "unknown",
+        "hash_valid": true
+      },
+      {
+        "event_id": "2a90e0b636308a80811e91e3",
+        "bytes": 177710,
+        "sha256": "563fff9c2a78af1bf5244a107e2b2b8b8b20d78011d54761ad80c25a8faf10c4",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "2b990ae12153f0b12a7d059f",
+        "bytes": 202472,
+        "sha256": "edb00c478c9e8f9d61d785d7670ba51ed08ae31e26074b31c9112d898c41874e",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "2edf66cca924417b81e4f763",
+        "bytes": 187812,
+        "sha256": "cc3db1779c5c0dc6ed576f02a94976e18d24c9258f79229a4325f5377febbfd5",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "2f7672bb39138b5470fa4131",
+        "bytes": 180253,
+        "sha256": "8d317d09e762e9fd6e472a58aaabd781d62c2e43f57baa16cc7fd2cf41b9b0c9",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "30c401ac902222773e3e4e54",
+        "bytes": 180651,
+        "sha256": "dad4fc3925a99b210cb2ff58923103446216ff6fb96b3118054ba89223fd1795",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "382682cea5882c002368e565",
+        "bytes": 172477,
+        "sha256": "6060b71924ef24e2fe9bf0f0d3f5d8988deeb1b26a905f82078fbe077bd4a2cd",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "3966558ddaffd02d8455f108",
+        "bytes": 172317,
+        "sha256": "a16825044328fbd910c559fba3c0d277f164fc0b9db1e8c3321d78b34b02502b",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "3980acb48e6a8c137f15b86e",
+        "bytes": 171121,
+        "sha256": "9719094d4acd8ec1ef60e127570e76ef146acab5fd883d7fa45e6c1a0299c935",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "39e9d4c08a37a70d15d67b32",
+        "bytes": 187635,
+        "sha256": "4df98f94c88aaaba0c126516da504400b53831f236f2fbce010a7caf67fd0512",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "3d190fe228aeef5e2be106bf",
+        "bytes": 165258,
+        "sha256": "fe346cf35dfc1b3ce8c1a673c32ad59815022de8d79c52244dce61afd5444440",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "3d6c216f20b8bb54fa7a71fc",
+        "bytes": 198848,
+        "sha256": "566ff4b6814f1cf093ea4053dd9f768178bba84c8393b04d9777c9d3644dddc7",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "3d9d97e3edc5f66eb610d1c7",
+        "bytes": 187533,
+        "sha256": "2014f27d234750e3753c3835612e0f63bddf7f305dab6c553c3a108195c6f21d",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "3d9f91e79f4daecfed86d8dd",
+        "bytes": 177598,
+        "sha256": "df891a12a7dfae1821718cb8b1e04129cb4c6410f3aa249e9f9566fb0bd33b33",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "40d0db68339b6c63ee61a136",
+        "bytes": 179182,
+        "sha256": "3b166b9c08b5f1554f6ac7667d52f3bfbf0215641dd2d07aaadb5758151a0edc",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "416516846774bf86fc5b5d77",
+        "bytes": 159249,
+        "sha256": "9e79811fc8b04b92269716bfeb7a715bd78190efb8e069e232659851495928c3",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "487ca06ed7d1c18fa9d3ba41",
+        "bytes": 183257,
+        "sha256": "511182ab7afb8d9cb46dbbc0aec8673d96174f817aba0a130c3f4ec4e493b328",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "4e47237411499be9bee69d34",
+        "bytes": 180361,
+        "sha256": "09c60f6562f92e9d45c17695f91eb5127f0efb4a2fafffee20760338bde35f3c",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "51922bcefba509c4b749d593",
+        "bytes": 169308,
+        "sha256": "00488470919e9169194c4c408a4ed0e2fd4da67809e699a9a4095bdc65463fd2",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "51cc91b185a11f2d291bb70c",
+        "bytes": 196261,
+        "sha256": "6ab0fa3768a022057e010a494c36718a3299e17f70c934256ba978fe1d933e76",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "5b3e3b411fa93a29ae0fd346",
+        "bytes": 184994,
+        "sha256": "fd6dc35c3ee6a2461b43d5e72ee7ade38ef3fc0f9a941d5a713153de3a583221",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "5b8818b39cd4b511aa075d9c",
+        "bytes": 189979,
+        "sha256": "fb4b91d7d87293d0a8c8bbc720e67e4e1933ab2240e27d778764c52e7e01f0fd",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "5b986e36845af4f144d5dd1e",
+        "bytes": 178779,
+        "sha256": "64dc8082c7d762142d51d0d18dcd05fcd74eca60fb9c347210f96115656217ed",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "5d01483c45c03ce09e83ec6e",
+        "bytes": 180914,
+        "sha256": "b39e0ca669166f2db036e6b65cd24439e74a9d75cc8291d333b0bb2a2261e689",
+        "error": null,
+        "notification_status": "failed",
+        "hash_valid": true
+      },
+      {
+        "event_id": "5ef1e9ecc3ab1ae1588d6688",
+        "bytes": 151452,
+        "sha256": "7d1e5c65b28a615b510372d9bd3571446aeb9b82b9d94c38c8bfabfad36dd7b0",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "6022734d418c3757a90c612b",
+        "bytes": 182120,
+        "sha256": "4428c99cb6fd97a470f76a3d072d3b1ed5cbb533955075998cdd581e3d16dd88",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "611e8d25bef5d4fabf90bd24",
+        "bytes": 191157,
+        "sha256": "7961eebd07a838b2953cd8e56ac1d47e2d4bc2e970d7536b7df8c289ff94c67a",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "62bc833e15677f5abfa58650",
+        "bytes": 198607,
+        "sha256": "88850f6af07f9b0a818be1040c644d87137227e5adf92c1f9214e2f9db76e654",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "65c3bb3c1e70fcca744eb5f6",
+        "bytes": 188019,
+        "sha256": "a4f841b869f1072aa50fe10589999b53706425bb81e6cdb3d9f3843454d93fbb",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "689bda0edeb200b732dbd908",
+        "bytes": 189079,
+        "sha256": "163d69b65cd8e148f1fe05246cf14334b7ccdd85b801a4088a77e786c60a60ea",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "6d99a10dc531107ecddda206",
+        "bytes": 188054,
+        "sha256": "c9ab72e48a7318dd58dc4bdd439d3ff029732a9990cbdcfe99bcfcb7b3c68675",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "6fd958a91dc4f4dbe2cbebbf",
+        "bytes": 192661,
+        "sha256": "b309cdd077e65b73631a36907786bc6dd9dbe675a406f99433e66f877372a347",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "70a8e17b6842b83e1315d825",
+        "bytes": 167272,
+        "sha256": "3e7f349e12021f08fc5bbfb762d3026f9e82d3709008917f13137987a7bb55bd",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "72ab635d51de70706c92e8e5",
+        "bytes": 179217,
+        "sha256": "02d6a4fba9c3f6672ec5a0bc0e46db8337ca8c1d37c58db966f3bbf256fbbfd4",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "73a022f621a618a3f1d21d0b",
+        "bytes": 180448,
+        "sha256": "a60f99793903fd0f88ced5219ce8ba71959c4af4d731b7c61280ab4c099ee732",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "7707dbb51ddf92924fc552e6",
+        "bytes": 183393,
+        "sha256": "98e8a18239015bfb4abc9c21c7fd94c8bf28fc371c51130e50b55b73a41fc10a",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "79401ab282b39cda441b3439",
+        "bytes": 154422,
+        "sha256": "a9c37c4abf15114d1a9bc24ae7e8368808243f545222432ef8aa02da7566f6b7",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "7b6cc6e9efc103aa769b9ce7",
+        "bytes": 176483,
+        "sha256": "61a67dd2a432104d40bb4b227f8434b980832af171c071914396d83c42ecc6ff",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "7c2a97542cb0d7c71305620c",
+        "bytes": 185839,
+        "sha256": "3d6541cb5ddaba23c4ed16947877e88a96c30c02deae25a494f127db002b2e5d",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "7c41b3e3410f55b1fca52aca",
+        "bytes": 167410,
+        "sha256": "e641257aac6a14a0553034c6e7a79f8d3ad9e7642be6d156b78965c79e56495f",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "809a7b4f3b8263ea66a8206b",
+        "bytes": 167100,
+        "sha256": "95618b8bad50e0267fdeac54c02174884e3d0b1016a5f27f7e0edd3800488bcf",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "817907b05caead65aaa3bba1",
+        "bytes": 198069,
+        "sha256": "6f3cc752670bb3669216e7225bee94a7a14cb29eceaa74f71c80fef16529739c",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "87471c5e6eaaa326751cc7bd",
+        "bytes": 196015,
+        "sha256": "ffb040f87740a3769923e0aa1c95762209d9e40d36ba2b8b0c24cd3268fd2b1a",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "889b91e48da4a16a2f4f1041",
+        "bytes": 186918,
+        "sha256": "015a438687d4a4ee66efa0e8c47a0d0c7062759a70857c9a624be82d2220453a",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "8ca4315d123a742d8624d9fd",
+        "bytes": 178137,
+        "sha256": "cc180671dc9127859d5237ccfa8a86d12d752acbcc8f4634d614873a497fd7b7",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "8fdb5a1bfb0c46b678705441",
+        "bytes": 191252,
+        "sha256": "f8e3cf6004863f8b8c6498e3b4596644d51ab232c734f987cc6b258bd68f761e",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "90c48059df3834433f7d8a09",
+        "bytes": 191945,
+        "sha256": "7af1a97642c914f017641fd29b4cbd18d0eb50d843e2507356a9c62105db1d1c",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "91b4c0dc79442da2d9345467",
+        "bytes": 153471,
+        "sha256": "10c23e99ce65ed045aebaddcfc400905f7a2b9dea283af9e60e6aa72a63bb53d",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "924305367f54549b1b05c174",
+        "bytes": 187096,
+        "sha256": "d4b2a5fbe7807bf234bbad3538cc5b57b8e3104cbad0729334d0841216a54764",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "930607b06632164044401fee",
+        "bytes": 185944,
+        "sha256": "e3af752a3f4a85d073d89d688d73b795cc8a54882606ef448227d25c300ce6df",
+        "error": null,
+        "notification_status": "failed",
+        "hash_valid": true
+      },
+      {
+        "event_id": "93236acd42ff831d405ded4e",
+        "bytes": 184814,
+        "sha256": "e4fd9cc6aefca70a9b3951f5b488125cb3a7e75fb981421e924718abb5d6e6f8",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "9331dacf4ef6fda8ef302c07",
+        "bytes": 166189,
+        "sha256": "0c09710fe62cca16a51a347c9cd8f7009128e171f6febfc8a0b856e355ad398e",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "9344c5fc0c5a37375909d834",
+        "bytes": 165223,
+        "sha256": "c282214c5c7d6ce51b1643a75dd9ac6745c28d0bef65696c9924cf61e3f2c0aa",
+        "error": null,
+        "notification_status": "failed",
+        "hash_valid": true
+      },
+      {
+        "event_id": "9623b1fa4e6667e2ef9fe88e",
+        "bytes": 187572,
+        "sha256": "618a57b7f7fdd17b376b5af08aa992ec2b2568810434a2e74a745f50e75b92f0",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "9dc78344b6479765609235d3",
+        "bytes": 150100,
+        "sha256": "80d6e47c3f769fd181d9111fe5c1725dfa9617094648d80360c6b42c492acaca",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "a0c9382ab465a9761a71d71c",
+        "bytes": 169995,
+        "sha256": "3486af91bcec83a9afaccd32d1f9a8389d3abff1205209421e0f8363cd0d4a89",
+        "error": null,
+        "notification_status": "failed",
+        "hash_valid": true
+      },
+      {
+        "event_id": "a13094ed696da5889b7fa625",
+        "bytes": 179888,
+        "sha256": "fca87a5921cda90f6454b86edea59a950484ea1ba28ccf7d85d02c0c9413c835",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "a19a0be6047a76fbf4b0b2d4",
+        "bytes": 196348,
+        "sha256": "588490035425a8bf4db88a486879509165dd829de680533da256c4d70ef79e22",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "a1dd4ca1521b3d07a2e71125",
+        "bytes": 194581,
+        "sha256": "5c2a01b0549bd16f5d7f4be5953af7bb9aed2c1e53ba7ca49929261b7dc14730",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "a21dc7640a96c0a0325e9d60",
+        "bytes": 178211,
+        "sha256": "74b709f23c47605a94c1277b58fe7e94bcbbb851b651b7f0e84672b9b29d4bf4",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "a259821c149acc7d1207878a",
+        "bytes": 172813,
+        "sha256": "cb069d2348f67f43b0187304a81d618753ba348463f0244174acd14d5a14e6f4",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "a2c3e81e916f34e700e406ac",
+        "bytes": 203086,
+        "sha256": "1ec3d1a4d245e6246bb6d5b634a4bcb4f966d5d5e99cf4a7bdf47bf97daf118f",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "a3a20be9d016f7bf109b6bdf",
+        "bytes": 169783,
+        "sha256": "36ffacdfc5a133eaa9bce36381e572f35e64de9b1ff00ac4539530d5f6fdae2f",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "a7c19e0d0f71d244b74a203c",
+        "bytes": 188635,
+        "sha256": "48b8ae69bc22dc4e77a3de24430da3237bb860dfa5013ce95102ebc6135cbf25",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "a879dd24e33c3f585cb83cae",
+        "bytes": 190859,
+        "sha256": "cd210db0b341bacefa34ad585da758dd4f43088a90c2ca7092aa21caa1033386",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "aa32f9ad05d6a6800a8c8600",
+        "bytes": 178611,
+        "sha256": "e8ddb549abb9a2b672d2a161f4b466a193554e942cb8d07b397f22e554247214",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "aa97e8f517ac73a0ceb52463",
+        "bytes": 167375,
+        "sha256": "af71460e3732dac802eade99c9558e68374d5a9344b0bf9f05449d2a05f60c3a",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "aacc8ead1126e59ecbcb4039",
+        "bytes": 180985,
+        "sha256": "b70cc95b3b14d5f2f6dede78b3a27bab560513d5e343134112a182ca5fa073f0",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "abf4b32e55bb5900eb3dc4cc",
+        "bytes": 187962,
+        "sha256": "9b19682f6df85c1ee97eb41d2c2c10beaab6614b694ebe2cdcb46c953cd50bfb",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "ac1c4232e79559595396181b",
+        "bytes": 173579,
+        "sha256": "0e5aebd2fd58a61676eca99b3abb24a33bfca9c829e8e41995c0fee4fea80dca",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "ae0428ee9123591d79c288fa",
+        "bytes": 193968,
+        "sha256": "23f566ed4a1117f87f8bb2d77f78ef876f09f7647f65c65928f48cb620f4c5b9",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "b3368beacd6c5feff1ba8d80",
+        "bytes": 189462,
+        "sha256": "82b799da6cf470f5e4fba267f13501bc033401894183cdf486134ccd1fd76885",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "b39d8bfc3aea5ce0aa88979d",
+        "bytes": 188216,
+        "sha256": "c24ded25d1e9da0174006c9c063b5acfb9532391c465b7249814e12390b313a2",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "b479321f091789ae8c93a433",
+        "bytes": 170730,
+        "sha256": "cb7af8d74086e4ce64f38bc1661e54ee36a8c89f8fe170aa8a51a13b68f1aa8a",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "b798c5ba09a78f7ac81101e8",
+        "bytes": 184346,
+        "sha256": "a4a29e963368b675cf9aeafb1078d059e7c481ba4b3cf0ba23f0ad48020b5feb",
+        "error": null,
+        "notification_status": "unknown",
+        "hash_valid": true
+      },
+      {
+        "event_id": "b88678f43455905322fa185f",
+        "bytes": 163317,
+        "sha256": "7a1f7c52502574839330ab889f0fae7a3fb829167a05f07002a01327eff91e4c",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "badcedacdb0195f0e036a5ea",
+        "bytes": 187453,
+        "sha256": "c998943647576b7556550134cb104ea7ca93949709b42bcab20fbbdd21632136",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "bb27fa060b0be659347c8fea",
+        "bytes": 188556,
+        "sha256": "c0c185db60b2692c7edf480387b5b382f1ba81070bb0e4c774f3b69cc7834c0d",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "bc45d21aabf9b3daa4751b99",
+        "bytes": 181664,
+        "sha256": "77c4505a470aa4300cbc9cb46716b2b8a6717882beba2e61cddfdc86eeeef2de",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "bdc4cc19bb7953d12647b159",
+        "bytes": 169251,
+        "sha256": "357674924d6499fa5024b5ebbf17a9b3c74e40f85a4d7122940a2e643cd13122",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "bf0e54f83142585b5db1e54d",
+        "bytes": 191637,
+        "sha256": "02056915be970913803b45b38d225d3f66b6819a7d963b1879740cb23c90b98f",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "c24f92fa9cb74c94bf732f83",
+        "bytes": 198388,
+        "sha256": "9447b2670bdc02d67020d77ecd2214a4e7e1740ce6b52593da5764f3fb7cccba",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "c3d21283e6bffdbc4f229540",
+        "bytes": 184557,
+        "sha256": "cb5940d4d2f61e7ffd1e404bfd4281c0da63ba15e22d738796aeb735abd4c0b6",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "c49d2f5460c92f8a81c85c83",
+        "bytes": 193998,
+        "sha256": "e1707fb25512d3f74932433a2b361480de18006ee29f88c3945fb7f4d953ac68",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "c5555fefb4145bd56e32d1e5",
+        "bytes": 189763,
+        "sha256": "546aae32dba946705e10822d9f01f3efc362ec5c12a164be8474c875344b4a25",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "c6776e0f0c44ad3fe847f235",
+        "bytes": 189250,
+        "sha256": "a0b934f3dba40ba1aa39538ff9b81822d5213ac1e66b496f7e64c1613ff1b73c",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "c79c0e1c5914e8ef25205d10",
+        "bytes": 192038,
+        "sha256": "29ab951bcf602f0f92f0cdaed7a26b2f728df238aba758bca56a5fa931d52053",
+        "error": null,
+        "notification_status": "failed",
+        "hash_valid": true
+      },
+      {
+        "event_id": "c7a9451f3480e9279da7bc1a",
+        "bytes": 167953,
+        "sha256": "5019c1f6f7c82877854ddbaa3e04d13278ee912ea1edbae486ac8e936bfae1b0",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "c90c25829638335415198cfd",
+        "bytes": 192228,
+        "sha256": "2796276bd4bf2e413618ddd1d48e4888ab2f042656ef949b3a10e6fc70e2f129",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "c91cd0acff9d4dadfdf587cd",
+        "bytes": 194412,
+        "sha256": "21011963d987bf2045604e3d85a1abf01f784b86ca25460968528dacc633a493",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "cbb95679847c0a7c148908e9",
+        "bytes": 190277,
+        "sha256": "090e6339d539a2f0c12a17edd6a5187d6d63cf55571e4490cf588990af3255c5",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "d1746566aa8739954750f606",
+        "bytes": 177349,
+        "sha256": "f9bd681722ef3dc2272327b32c00b60d611ad73ade3ff225fe797695b972d424",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "d1c2751744c48e5d571d8763",
+        "bytes": 183879,
+        "sha256": "a1fd8ed0c09e0ab1c378545c8881755050d90aee20d5dfe7002eb396c4603350",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "d5f129f2f6dddc13278e266b",
+        "bytes": 181113,
+        "sha256": "89822b7afda31a2d7e1ec2607dd2938979f4a7bbf5034b608310c66d0d024bd0",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "d6f418e094d244b4606e6ce9",
+        "bytes": 187011,
+        "sha256": "2e3ffc35deaca3faed1b2620a6724c122d864e5703dedc30e988d71a2a6a5377",
+        "error": null,
+        "notification_status": "failed",
+        "hash_valid": true
+      },
+      {
+        "event_id": "dbb9c2fc5c2b4cc52290df7f",
+        "bytes": 168471,
+        "sha256": "4a2804c47bbe834ca536f74e69612d51675973e44fd766491514222065b6e936",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "dd20a9f22ce166169cf54ca3",
+        "bytes": 185988,
+        "sha256": "d6b98ecf90c8a3180000904adb48adca3f9f953b8c3ab9fc9051504b32765b8b",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "de479dff70d22901c4eb67e0",
+        "bytes": 170950,
+        "sha256": "41d9da50e3a6debaf355bc464027ad33213583cbfbb024ba0f0d1f801d5297e2",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "de77cef99ba3b82314ebf362",
+        "bytes": 188206,
+        "sha256": "787c36349c342a402bd53855702d3c614c24ee43f7395eac865e8d727eef8249",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "e015a3d62226a1cfa9374f62",
+        "bytes": 188786,
+        "sha256": "abb5a94036c88b56e68344ebf682c4abf54395ffc41414e1055578c1f6caa201",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "e14b57eaba1b23402b591718",
+        "bytes": 191896,
+        "sha256": "f0d05e8ccfb7219563b5b17ad6578c348b7611257b1ef133c3173af5a4733744",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "e30418e077ab6c78f907af49",
+        "bytes": 186775,
+        "sha256": "ae1682830cc182bb40471c8331d11ad03e0a0a53bace6a571d1fab8930797035",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "e43298b02e8bdf69eca43820",
+        "bytes": 186465,
+        "sha256": "51d74b976e05ce48420b69caae9f66b03f842b80fa6788fe01a34a6f069f0a1c",
+        "error": null,
+        "notification_status": "unknown",
+        "hash_valid": true
+      },
+      {
+        "event_id": "e4697e8e8bd95ef86c232caf",
+        "bytes": 190218,
+        "sha256": "0f3583d000a1868cce60acbb687cf2bcbba2c0e0e6ed05ae6f1c8faba41ea7ae",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "e587b76514b33f46f75af7a2",
+        "bytes": 185724,
+        "sha256": "d32db1038b45e495d4da6b8197a0975a2e364a375f3053a9907982a073b8198f",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "ed4b74c7a236961f7c6aef71",
+        "bytes": 188818,
+        "sha256": "0735168b375b6a73da5d9b59b7ddfc7fa084b9915eb9666da23a80470baf9e0b",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "ee2a5b7a2ca02576a66db90d",
+        "bytes": 183773,
+        "sha256": "a852069576e4742f4de03460ace246d19ef3bf0276f6199ce43e2961dc8e9694",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "ee7c00f657cbbf9a56799220",
+        "bytes": 197075,
+        "sha256": "6cbeea8e57c9a0d9467d17763c0b7cef0d5afa368836a2a2ed578469a8e2521e",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "ef3f18e65c4d0c097f7070cf",
+        "bytes": 189481,
+        "sha256": "5648bbcf99547bd455157cbcae84f2995ca085543afe50ec80140b43c8807436",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "f01908499f333c5ef857ee55",
+        "bytes": 186546,
+        "sha256": "8515a914f5f40f936c46f4116b6900ab3127558d41f881b7f6321474598d0d0d",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "f432cf2528e9ab746a452e48",
+        "bytes": 184045,
+        "sha256": "c2f38e4538ed8e0e80b0707a70f2ede5654f1a4f44ac52e2ba2a39224cd3490e",
+        "error": null,
+        "notification_status": "unknown",
+        "hash_valid": true
+      },
+      {
+        "event_id": "f45abe68fe5c02223e738d98",
+        "bytes": 174881,
+        "sha256": "4f6318aebae0be8a0e218c91a284fdfa15f7e177678f26d5adfae1b797dbcc57",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "f7edbda4a7ceb4f9325bf5a4",
+        "bytes": 183947,
+        "sha256": "ae33348bca5792e25f912c563c651c754708e83bea4e4eafa45e2631049470a1",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "f9efe6537c3febf71c84bb0f",
+        "bytes": 172047,
+        "sha256": "f5a729c69bb094b45b574d03b41b9eb5f1b815a28a4e61bd5bfb16c564c47c01",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      },
+      {
+        "event_id": "fba1c0816eae9f371859cb5d",
+        "bytes": 175620,
+        "sha256": "a8a1d2519b4f28e86bc41b9699c4fa2666fc66cdf08c431d6b1d5529ac71e1cf",
+        "error": null,
+        "notification_status": "sent",
+        "hash_valid": true
+      }
+    ]
+  },
+  "model_audit": {
+    "protocol": "imacd-yolo-confirmation-monitor-v1",
+    "profile_id": "owner-grade-v1-w18w19-post2to9-wait9",
+    "candidate_status_counts": {},
+    "operational": {
+      "status": "ready",
+      "loaded": true,
+      "queue_depth": 0,
+      "processed_endpoints": 0,
+      "last_checked_at_ms": null,
+      "model_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+      "profile_id": "owner-grade-v1-w18w19-post2to9-wait9",
+      "ready_for_confirmation": true
+    }
+  },
+  "timeframe_audit": {
+    "policies": {
+      "15m": {
+        "activated_ms": 1788873510047
+      },
+      "1H": {
+        "activated_ms": 1788873510051
+      },
+      "4H": {
+        "activated_ms": 1788873510055
+      }
+    },
+    "signals_by_timeframe": {},
+    "invalid_telegram_ids": [],
+    "invalid_bark_ids": []
+  },
+  "bark_audit": {
+    "policy": {
+      "activated_ms": 1788873509992,
+      "kind": "yolo_confirmed"
+    },
+    "current_outbox_count": 0,
+    "invalid_outbox_ids": [],
+    "pre_activation_outbox_ids": []
+  },
+  "signal_contract_audit": {
+    "protocol": "imacd-yolo-confirmation-monitor-v1",
+    "policy": {
+      "activated_ms": 1788873509905,
+      "kind": "yolo_confirmed"
+    },
+    "signal_count": 0,
+    "invalid_signal_ids": [],
+    "current_outbox_count": 0,
+    "invalid_outbox_ids": [],
+    "pre_activation_outbox_ids": []
+  }
+}
