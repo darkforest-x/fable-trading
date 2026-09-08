@@ -265,6 +265,22 @@ Verify the completed chart's symbol and selected interval, not just the tab
 title or a successful `open` command. No privacy database reset, helper app
 installation or monitor restart was required for this fix.
 
+Cold-start correction later on 2026-09-08 (installed Desktop 3.4.1, Electron
+41.7.1): UI inspection had initialized Electron's accessibility tree before
+the earlier acceptance checks. A clean process without pre-inspection could
+instead expire in `window_ready`; another cold start returned a stale window
+index (-1719). The bridge now sets `AXManualAccessibility` once, then polls
+inside its existing deadline. Electron debounces that request, so the setter
+must not be repeated inside the polling loop. Stale window references are
+retried only during observation, never after dispatch. This does not grant or
+reset macOS permissions. See [Electron's contract](https://www.electronjs.org/docs/latest/tutorial/accessibility#macos).
+
+Failures include a bounded stage/code/reason contract. The Python handler logs
+only those controlled fields and returns distinct layout, menu, clipboard,
+readiness and timeout messages. -1719/-1728 are stale UI references;
+-1712 is a timeout, not proof that the user must change Automation permissions.
+-1743/-25211 retain permission guidance. No clipboard or raw UI text is logged.
+
 Only same-origin POSTs carrying `X-Spike-Action: open-tradingview` are accepted;
 the service remains loopback-only. Inputs are restricted swap/interval values,
 and the URL is argv data, never shell or AppleScript source. One action runs at
@@ -285,6 +301,12 @@ visually checked in the in-app browser; browser error/warning logs were empty.
 The focused Python suite passed 31 tests, and card/theme JavaScript suites
 passed 42 tests. These checks do not claim automatic desktop-load validation
 on every future click or permissions persistence across macOS upgrades.
+
+Cold-start retest: quit TradingView before each request and do not inspect its
+UI until the request finishes. The live service opened BICO-USDT 4H and a
+whole-card frontend click opened POET-USDT 15m; both completed chart identities
+and intervals were verified afterward. The expanded focused Python suite
+passed 85 tests. The previous warm-only check was insufficient for cold start.
 
 ```bash
 .venv/bin/python -m pytest tests/monitor/test_tradingview.py tests/monitor/test_tradingview_layout.py -q

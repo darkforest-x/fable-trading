@@ -1,5 +1,6 @@
 """Chart identity, same-origin navigation gate and failure recovery; no real UI."""
 from types import SimpleNamespace
+import traceback
 from urllib.parse import parse_qs, urlparse
 
 import pytest
@@ -80,13 +81,16 @@ def test_same_origin_post_gate_and_error_contract(tmp_path, monkeypatch):
     assert error.value.status_code == 409 and error.value.detail == "busy"
 
 
-def test_automation_timeout_guides_service_permission_without_raw_output(monkeypatch):
+def test_automation_timeout_does_not_misdiagnose_permissions(monkeypatch):
     monkeypatch.setattr(tradingview.sys, "platform", "darwin")
     monkeypatch.setattr(tradingview.subprocess, "run", lambda *a, **k:
         SimpleNamespace(returncode=1, stdout="", stderr="private UI context (-1712)"))
-    with pytest.raises(tradingview.DesktopOpenError, match="caffeinate") as error:
+    with pytest.raises(tradingview.DesktopOpenError, match="调用 TradingView 超时") as error:
         tradingview.open_chart("BTC-USDT-SWAP", "1H")
     assert "private UI" not in str(error.value)
+    assert "caffeinate" not in str(error.value)
+    assert "权限" not in str(error.value)
+    assert "系统设置" not in str(error.value)
     assert not tradingview._OPEN_LOCK.locked()
 
 
@@ -98,3 +102,131 @@ def test_process_timeout_releases_click_lock(monkeypatch):
     with pytest.raises(tradingview.DesktopOpenError, match="超时"):
         tradingview.open_chart("BTC-USDT-SWAP", "1H")
     assert not tradingview._OPEN_LOCK.locked()
+
+
+@pytest.mark.parametrize("stage,expected", [
+    ("activate", "界面尚未就绪"),
+    ("accessibility", "界面尚未就绪"),
+    ("window_ready", "界面尚未就绪"),
+    ("menu_button", "无法读取 TradingView 的打开链接菜单"),
+    ("menu_items", "无法读取 TradingView 的打开链接菜单"),
+    ("dispatch", "界面尚未就绪"),
+    ("clipboard", "无法读取或临时设置剪贴板"),
+    ("layout", "图表布局配置不可用"),
+])
+def test_stage_diagnostics_are_precise_and_log_only_controlled_metadata(stage, expected, monkeypatch, caplog):
+    monkeypatch.setattr(tradingview.sys, "platform", "darwin")
+    stderr = ("/private/secret-file:123: execution error: private window title; "
+              f"SPIKE_STAGE={stage};SPIKE_CODE=-2700;SPIKE_REASON=SPIKE_AX_UNAVAILABLE "
+              "(-2700)\nprivate clipboard text")
+    monkeypatch.setattr(tradingview.subprocess, "run", lambda *a, **k:
+                        SimpleNamespace(returncode=1, stdout="private stdout", stderr=stderr))
+    with pytest.raises(tradingview.DesktopOpenError, match=expected) as error:
+        tradingview.open_chart("BTC-USDT-SWAP", "1H")
+    assert error.value.status_code == 503
+    assert not tradingview._OPEN_LOCK.locked()
+    assert len(caplog.records) == 1
+    assert caplog.records[0].getMessage() == (
+        f"TradingView open failed: stage={stage} code=-2700 reason=SPIKE_AX_UNAVAILABLE")
+    assert "private" not in str(error.value) + caplog.text
+
+
+@pytest.mark.parametrize("stage,reason,expected", [
+    ("layout", "SPIKE_LAYOUT_UNAVAILABLE", "图表布局配置不可用"),
+    ("layout", "SPIKE_INVALID_URL", "图表布局配置不可用"),
+    ("dispatch", "SPIKE_CLIPBOARD_CHANGED", "剪贴板内容已被其他操作更改"),
+    ("window_ready", "SPIKE_DEADLINE", "调用 TradingView 超时"),
+    ("menu_button", "SPIKE_MENU_UNAVAILABLE", "无法读取 TradingView 的打开链接菜单"),
+    ("menu_items", "SPIKE_MENU_UNAVAILABLE", "无法读取 TradingView 的打开链接菜单"),
+])
+def test_allowlisted_script_reasons_have_distinct_recovery_messages(stage, reason, expected, monkeypatch):
+    monkeypatch.setattr(tradingview.sys, "platform", "darwin")
+    monkeypatch.setattr(tradingview.subprocess, "run", lambda *a, **k:
+        SimpleNamespace(returncode=1, stdout="", stderr=f"SPIKE_STAGE={stage};SPIKE_CODE=-2700;SPIKE_REASON={reason}"))
+    with pytest.raises(tradingview.DesktopOpenError, match=expected) as error:
+        tradingview.open_chart("BTC-USDT-SWAP", "1H")
+    assert "系统设置" not in str(error.value)
+    assert "caffeinate" not in str(error.value)
+    assert not tradingview._OPEN_LOCK.locked()
+
+
+@pytest.mark.parametrize("code", [-1719, -1728])
+@pytest.mark.parametrize("stage", ["window_ready", "menu_button", "menu_items", "dispatch"])
+def test_invalid_window_or_element_index_is_not_a_permission_denial(code, stage, monkeypatch):
+    monkeypatch.setattr(tradingview.sys, "platform", "darwin")
+    monkeypatch.setattr(tradingview.subprocess, "run", lambda *a, **k:
+        SimpleNamespace(returncode=1, stdout="", stderr=f"private window index SPIKE_STAGE={stage};SPIKE_CODE={code};SPIKE_REASON=SPIKE_AX_UNAVAILABLE ({code})"))
+    with pytest.raises(tradingview.DesktopOpenError, match="界面尚未就绪或窗口已发生变化") as error:
+        tradingview.open_chart("BTC-USDT-SWAP", "1H")
+    assert "系统设置" not in str(error.value)
+    assert "自动化" not in str(error.value)
+    assert not tradingview._OPEN_LOCK.locked()
+
+
+@pytest.mark.parametrize("code", [-1743, -25211])
+@pytest.mark.parametrize("stage", sorted(tradingview._STAGES))
+def test_actual_macos_permission_codes_remain_permission_errors(code, stage, monkeypatch):
+    monkeypatch.setattr(tradingview.sys, "platform", "darwin")
+    monkeypatch.setattr(tradingview.subprocess, "run", lambda *a, **k:
+        SimpleNamespace(returncode=1, stdout="", stderr=f"SPIKE_STAGE={stage};SPIKE_CODE={code};SPIKE_REASON=SPIKE_AX_UNAVAILABLE"))
+    with pytest.raises(tradingview.DesktopOpenError, match="辅助功能／自动化"):
+        tradingview.open_chart("BTC-USDT-SWAP", "1H")
+    assert not tradingview._OPEN_LOCK.locked()
+
+
+@pytest.mark.parametrize("stage", sorted(tradingview._STAGES))
+def test_call_timeout_at_every_stage_never_requests_permission_changes(stage, monkeypatch):
+    monkeypatch.setattr(tradingview.sys, "platform", "darwin")
+    monkeypatch.setattr(tradingview.subprocess, "run", lambda *a, **k:
+        SimpleNamespace(returncode=1, stdout="", stderr=f"SPIKE_STAGE={stage};SPIKE_CODE=-1712;SPIKE_REASON=SPIKE_AX_UNAVAILABLE"))
+    with pytest.raises(tradingview.DesktopOpenError, match="调用 TradingView 超时") as error:
+        tradingview.open_chart("BTC-USDT-SWAP", "1H")
+    assert "caffeinate" not in str(error.value)
+    assert "系统设置" not in str(error.value)
+    assert not tradingview._OPEN_LOCK.locked()
+
+
+@pytest.mark.parametrize("stderr,expected_code", [
+    ("private invalid index (-1719)", -1719),
+    ("private denied (-25211)", -25211),
+    ("private SPIKE_STAGE=private_stage;SPIKE_CODE=-2700;SPIKE_REASON=PRIVATE_SECRET", -2700),
+    ("private SPIKE_STAGE=private_stage;SPIKE_CODE=secret;SPIKE_REASON=PRIVATE_SECRET", None),
+    ("private quote -17430", None),
+    ("private window title -1743 followed by actual error (-2700)", None),
+])
+def test_unstructured_or_unknown_diagnostics_never_leak_private_values(stderr, expected_code, monkeypatch, caplog):
+    monkeypatch.setattr(tradingview.sys, "platform", "darwin")
+    monkeypatch.setattr(tradingview.subprocess, "run", lambda *a, **k:
+        SimpleNamespace(returncode=1, stdout="private stdout", stderr=stderr))
+    with pytest.raises(tradingview.DesktopOpenError) as error:
+        tradingview.open_chart("BTC-USDT-SWAP", "1H")
+    assert caplog.records[0].getMessage() == (
+        f"TradingView open failed: stage=unknown code={expected_code if expected_code is not None else 'unknown'} reason=unknown")
+    assert "private" not in caplog.text + str(error.value)
+    assert "PRIVATE_SECRET" not in caplog.text + str(error.value)
+    if expected_code != -25211:
+        assert "系统设置" not in str(error.value)
+
+
+@pytest.mark.parametrize("failure,expected", [
+    (tradingview.subprocess.TimeoutExpired("private invocation", 25,
+                                        output="private stdout", stderr="private clipboard"), "调用 TradingView 超时"),
+    (OSError("private OS failure"), "界面尚未就绪"),
+])
+def test_process_failures_hide_exception_data_and_release_the_lock(failure, expected, monkeypatch, caplog):
+    monkeypatch.setattr(tradingview.sys, "platform", "darwin")
+    def fail(*args, **kwargs):
+        raise failure
+    monkeypatch.setattr(tradingview.subprocess, "run", fail)
+    with pytest.raises(tradingview.DesktopOpenError, match=expected) as error:
+        tradingview.open_chart("BTC-USDT-SWAP", "1H")
+    assert not tradingview._OPEN_LOCK.locked()
+    assert "private" not in str(error.value) + caplog.text
+    assert error.value.__suppress_context__ is True
+    formatted = "".join(traceback.format_exception(type(error.value), error.value, error.value.__traceback__))
+    assert "private invocation" not in formatted
+    assert "private OS failure" not in formatted
+    monkeypatch.setattr(tradingview.subprocess, "run", lambda *a, **k:
+                        SimpleNamespace(returncode=0, stdout="requested\n", stderr=""))
+    assert tradingview.open_chart("BTC-USDT-SWAP", "1H") == {
+        "requested": True, "symbol": "BTC-USDT-SWAP", "timeframe": "1H"}
