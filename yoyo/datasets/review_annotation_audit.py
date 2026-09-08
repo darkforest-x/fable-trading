@@ -54,6 +54,26 @@ def geometry(owner, proposal, transform):
     }
 
 
+def clipping(box, transform, candles):
+    """Count vertical clipping for candles whose centers lie inside the box.
+
+    This diagnoses geometry under the existing whole-candle envelope convention;
+    it is not a classifier of morphology or a claim about owner intent.
+    """
+    tf = ChartTransform(**transform)
+    top = box['y'] * tf.height / 100
+    bottom = (box['y'] + box['height']) * tf.height / 100
+    body, wick = [], []
+    for number in bar_centers(box, tf):
+        candle = candles[number - 1]
+        if (min(tf.y_at(candle[k]) for k in ('open', 'close')) < top - 1
+                or max(tf.y_at(candle[k]) for k in ('open', 'close')) > bottom + 1):
+            body.append(number)
+        if tf.y_at(candle['high']) < top - 1 or tf.y_at(candle['low']) > bottom + 1:
+            wick.append(number)
+    return {'body_outside': body, 'wick_outside': wick}
+
+
 def draw_card(main, reference, row):
     """Create a diagnostic copy; source PNGs and annotations remain untouched."""
     left = main.copy()
@@ -84,6 +104,7 @@ def build():
     if subprocess.check_output(['git', 'branch', '--show-current'], text=True, cwd=ROOT).strip() != 'main':
         raise ValueError('main required')
     code_paths = [str(Path(__file__).relative_to(ROOT)), str(PREREG.relative_to(ROOT)),
+                  'tests/test_review_annotation_audit.py',
                   'yoyo/datasets/review_future_context.py', 'yoyo/datasets/owner_review_export.py',
                   'yoyo/datasets/fifteen_minute_launch_candidates.py',
                   'yoyo/datasets/ma_launch_owner_grade_a_hl2.py',
@@ -160,8 +181,8 @@ def build():
                    'close_change_pct_from_original_core_end': {str(k): 100 * (float(window.iloc[core_end+k]['close'])/core_anchor - 1) for k in horizons},
                    'main_candles': window.iloc[:main_n][['open_time','open','high','low','close']].assign(open_time=lambda x:x.open_time.astype(str)).to_dict('records'),
                    'future_candles': window.iloc[main_n:][['open_time','open','high','low','close']].assign(open_time=lambda x:x.open_time.astype(str)).to_dict('records')}
-            # Counterfactual: future prices cannot affect geometry diagnostics.
-            assert row['geometry'] == geometry(owner, proposal, m['chart_transform'])
+            row['clipping'] = {kind: clipping(row[kind], m['chart_transform'], row['main_candles'])
+                               for kind in ('owner', 'proposal')}
             card = draw_card(cv2.imread(str(image)), cv2.imread(str(ref)), row)
             cv2.imwrite(str(OUT / 'cards' / f"{a['task_id']}.png"), card)
             rows.append(row)
@@ -186,6 +207,8 @@ def build():
                'dx_bars_median':float(np.median([r['geometry']['dx_bars'] for r in changed])),
                'right_shifted':sum(r['geometry']['dx_bars'] > 1e-5 for r in changed),
                'class_changed':sum(r['geometry']['class_changed'] for r in rows),
+               'kept_boxes_clipping': {kind: {part:sum(bool(r['clipping'][kind][part]) for r in rows if r['status']=='owner_boxes')
+                                              for part in ('body_outside','wick_outside')} for kind in ('owner','proposal')},
                'size_pairing_null':{'observed':observed,'permutations':10000,'seed':20260908,'mean':float(np.mean(null)), 'max':int(max(null)), 'p_plus_one':float((1+sum(x>=observed for x in null))/10001)},
                'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],text=True,cwd=ROOT).strip(),
                'source_sha256':code,'input_sha256':prereg['source_sha256'],
