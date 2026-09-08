@@ -7089,3 +7089,17 @@ experiments:
     notes: 54 historical symbols,15m/1H/4H;2023-24 development and already-observed2025 review.Each arm holdout use0.20bp
       neutral-exit proxy,no hard stop.181 focused/boundary tests passed.6 embedded plots decoded;representative PNG
       visual QA,workspace HTML delivery,browser render not verified. No Pine/spike/TG/Bark changes.
+  - experiment_id: exp-imacd-yolo-confirmation-20260908-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: cc1504e
+    status: active
+    question: Can current IMACD focus releases receive causal same-direction Grade-A YOLO confirmation within a fixed nine-bar budget?
+    single_variable: Original arrow versus one frozen delayed-model confirmation contract; no model or threshold selection.
+    result: Source frozen before one engineering evaluation; no economic or production conclusion.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    canonical_report: analysis/html/p1_imacd_yolo_confirmation_20260908.html
+    artifacts: []
+    notes: Owner unrestricted-date authorization persists. Record this configuration holdout consumption 1 at run start. BTC/ETH native15m only.
