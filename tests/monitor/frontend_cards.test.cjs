@@ -61,15 +61,19 @@ function harness({ allowChartFixture = false, nowStep = 0, bridgeReply = null, a
     }
     set innerHTML(value) {
       this._html = String(value);
-      this.descendants = Array.from(this._html.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/g), (match) => {
-        const child = new Element("BUTTON", attributes(match[1]));
-        child.parent = this;
-        child._html = match[2];
-        return child;
-      });
-      // Group wrappers mean cards are descendants, not direct children. This
-      // catches the old table-row focus-restoration approach after regrouping.
-      this.children = /^\s*<button\b/.test(this._html) ? this.descendants : this._html ? [new Element("DIV")] : [];
+      this.children = [];
+      this.descendants = [];
+      // Preserve ancestors so delegated clicks on card content and inside the
+      // independent preview button exercise actual closest() boundaries.
+      const stack = [this];
+      for (const match of this._html.matchAll(/<(\/)?([a-z][a-z0-9]*)\b([^>]*)>/gi)) {
+        if (match[1]) { if (stack.length > 1) stack.pop(); continue; }
+        const child = new Element(match[2], attributes(match[3]));
+        child.parent = stack.at(-1);
+        child.parent.children.push(child);
+        for (const ancestor of stack) ancestor.descendants.push(child);
+        if (!/\/\s*$/.test(match[3]) && !/^(br|hr|img|input|meta|link)$/i.test(match[2])) stack.push(child);
+      }
     }
     get innerHTML() { return this._html; }
     setAttribute(name, value) { this.attrs[name] = String(value); }
@@ -291,14 +295,18 @@ test("signal cards preserve selection and restore keyboard focus through nested 
   client.renderSignals();
   const first = get("signal-rows").querySelectorAll("[data-signal-id]")[0];
   assert.equal(first.tagName, "BUTTON");
-  assert.equal(first.getAttribute("aria-pressed"), "true");
+  assert.equal(first.closest(".signal-card").classList.contains("selected"), true);
   first.focus();
   client.renderSignals();
   const replacement = get("signal-rows").querySelectorAll("[data-signal-id]")[0];
   assert.notEqual(first, replacement);
   assert.equal(document.activeElement, replacement);
   assert.equal(document.activeElement.focusOptions.preventScroll, true);
-  assert.equal(get("signal-rows").listeners.has("keydown"), false, "native button activation should not be duplicated by a keydown handler");
+  const preview = get("signal-rows").querySelectorAll("[data-preview-signal-id]")[0];
+  assert.equal(preview.getAttribute("aria-pressed"), "true");
+  preview.focus();
+  client.renderSignals();
+  assert.equal(document.activeElement.dataset.previewSignalId, "chosen", "refresh preserves the secondary action's focus");
 });
 
 test("TG and Bark retain independent outcomes and do not imply device delivery from Bark acceptance", () => {
@@ -404,7 +412,7 @@ test("an empty filter clears stale detail and aborts its request; clearing the f
   await new Promise(setImmediate);
   assert.equal(client.state.selected.id, "first");
   assert.equal(get("detail-content").classList.contains("hidden"), false);
-  assert.equal(get("signal-rows").querySelectorAll("[data-signal-id]")[0].getAttribute("aria-pressed"), "true");
+  assert.equal(get("signal-rows").querySelectorAll("[data-preview-signal-id]")[0].getAttribute("aria-pressed"), "true");
   assert.equal(networkCalls.length, 1);
   assert.match(networkCalls[0], /symbol=BTC-USDT-SWAP&timeframe=1H/);
 });
@@ -461,7 +469,7 @@ test("watch rerender restores focus by both symbol and timeframe and search rese
   assert.equal(get("watch-rows").querySelectorAll("[data-market-symbol]").length, 2);
 });
 
-test("opening a watch card and returning keeps observation provenance and restores its card focus", async () => {
+test("previewing a watch card and returning keeps observation provenance and restores preview focus", async () => {
   const { client, document, get, networkCalls } = harness({ allowChartFixture: true });
   client.state.view = "watch";
   client.state.markets = [{ symbol: "ETH-USDT-SWAP", timeframe: "4H", near_zero_bars: 44, phase: "ready", focus: true, ready: true, price: 100 }];
@@ -477,7 +485,8 @@ test("opening a watch card and returning keeps observation provenance and restor
   assert.equal(networkCalls.length, 1);
   get("back-to-signals").dispatch("click");
   assert.equal(client.state.view, "watch");
-  assert.equal(document.activeElement, card);
+  assert.equal(document.activeElement.dataset.marketSymbol, card.dataset.marketSymbol);
+  assert.equal(document.activeElement.dataset.marketTimeframe, card.dataset.marketTimeframe);
   assert.equal(document.activeElement.focusOptions.preventScroll, true);
 });
 
@@ -489,10 +498,92 @@ function market(symbol = "ETH-USDT-SWAP", timeframe = "4H") {
   return { symbol, timeframe, near_zero_bars: 44, focus: true, ready: true, phase: "ready", price: 100 };
 }
 
-test("watch app actions transmit their own symbol and period without selecting the card", async () => {
+test("signal card primary clicks select the exact record and send one matching app request", async () => {
+  for (const kind of ["confirmed", "pending"]) {
+    const symbol = "BTC-USD-SWAP", timeframe = "15m";
+    const { client, get, networkRequests } = harness({ allowChartFixture: true, bridgeReply: bridgeResponse({ requested: true, symbol, timeframe }) });
+    client.state.signals = [signal("same-id", 1, { symbol, timeframe })];
+    client.state.candidates = [candidate("same-id", "pending", { symbol, timeframe })];
+    client.state.signalScope = kind;
+    client.renderSignals();
+    const primary = get("signal-rows").querySelectorAll("[data-signal-id]")[0];
+    get("signal-rows").dispatch("click", { target: primary });
+    await new Promise(setImmediate);
+    assert.equal(client.state.selected.kind, kind === "confirmed" ? "yolo_confirmed" : "tv_start");
+    assert.equal(client.state.selected.id, "same-id");
+    const posts = networkRequests.filter((request) => request.method === "POST");
+    assert.equal(posts.length, 1);
+    assert.deepEqual(JSON.parse(posts[0].body), { symbol, timeframe });
+    assert.equal(client.state.view, "signals");
+    assert.match(get("detail-timeframe").textContent, /15m/);
+  }
+});
+
+test("card body content and blank card surface use the same primary action in both feeds", async () => {
+  for (const feed of ["signal", "watch"]) for (const surface of ["content", "blank"]) {
+    const symbol = "ETH-USDT-SWAP", timeframe = "4H";
+    const { client, get, networkRequests } = harness({ allowChartFixture: true, bridgeReply: bridgeResponse({ requested: true, symbol, timeframe }) });
+    client.state.signals = [signal("body", 1, { symbol, timeframe })];
+    client.state.markets = [market(symbol, timeframe)];
+    client.renderSignals(); client.renderWatch();
+    const rows = get(`${feed}-rows`);
+    const target = surface === "blank" ? rows.querySelector(`.${feed}-card`) : rows.querySelector(".card-symbol").querySelector("strong");
+    rows.dispatch("click", { target });
+    await new Promise(setImmediate);
+    const posts = networkRequests.filter((request) => request.method === "POST");
+    assert.equal(posts.length, 1, `${feed} ${surface}`);
+    assert.deepEqual(JSON.parse(posts[0].body), { symbol, timeframe });
+  }
+});
+
+test("Enter and Space activate each primary card once and cancel native duplicate clicks", async () => {
+  for (const feed of ["signal", "watch"]) for (const key of ["Enter", " "]) {
+    const symbol = "ETH-USDT-SWAP", timeframe = "1H";
+    const { client, get, networkRequests } = harness({ allowChartFixture: true, bridgeReply: bridgeResponse({ requested: true, symbol, timeframe }) });
+    client.state.signals = [signal("keyboard", 1, { symbol, timeframe })];
+    client.state.markets = [market(symbol, timeframe)];
+    client.renderSignals(); client.renderWatch();
+    const rows = get(`${feed}-rows`);
+    let primary = rows.querySelector("[data-tradingview-action]");
+    primary.focus();
+    const unrelated = rows.dispatch("keydown", { target: primary, key: "ArrowDown" });
+    assert.equal(unrelated.defaultPrevented, false);
+    const activation = rows.dispatch("keydown", { target: primary, key });
+    assert.equal(activation.defaultPrevented, true, "native button click and Space scrolling must be cancelled");
+    await new Promise(setImmediate);
+    primary = rows.querySelector("[data-tradingview-action]");
+    const repeat = rows.dispatch("keydown", { target: primary, key, repeat: true });
+    assert.equal(repeat.defaultPrevented, true);
+    assert.equal(networkRequests.filter((request) => request.method === "POST").length, 1, `${feed}: ${key}`);
+    assert.equal(client.state.selected.symbol, symbol);
+  }
+});
+
+test("nested preview clicks and native preview keyboard activation never launch TradingView", async () => {
+  for (const feed of ["signal", "watch"]) {
+    const { client, get, networkRequests } = harness({ allowChartFixture: true });
+    client.state.signals = [signal("preview")];
+    client.state.markets = [market()];
+    client.renderSignals(); client.renderWatch();
+    const rows = get(`${feed}-rows`);
+    const preview = rows.querySelector(".card-preview");
+    assert.equal(preview.tagName, "BUTTON");
+    assert.equal(preview.parent.closest("button"), null, "preview must not be nested inside a primary button");
+    const keyboard = rows.dispatch("keydown", { target: preview, key: " " });
+    assert.equal(keyboard.defaultPrevented, false, "preview keeps native keyboard activation");
+    rows.dispatch("click", { target: preview.querySelector("span") });
+    await new Promise(setImmediate);
+    assert.equal(client.state.selected.symbol, feed === "signal" ? "BTC-USDT-SWAP" : "ETH-USDT-SWAP");
+    assert.equal(client.state.view, "signals");
+    assert.equal(networkRequests.filter((request) => request.method === "POST").length, 0);
+    assert.equal(networkRequests.filter((request) => request.url.startsWith("/api/chart?")).length, 1);
+  }
+});
+
+test("whole watch cards select and open their own symbol and period, preserving watch filters", async () => {
   for (const [symbol, timeframe] of [["BTC-USDT-SWAP", "15m"], ["ETH-USDT-SWAP", "1H"], ["BTC-USD-SWAP", "4H"],
     ["ETH-USDC-SWAP", "1H"], ["A-BC-SWAP", "15m"], [`${"A".repeat(30)}-${"B".repeat(10)}-SWAP`, "4H"]]) {
-    const { client, get, networkRequests } = harness({ bridgeReply: bridgeResponse({ requested: true, symbol, timeframe }) });
+    const { client, get, networkRequests } = harness({ allowChartFixture: true, bridgeReply: bridgeResponse({ requested: true, symbol, timeframe }) });
     client.state.view = "watch";
     client.state.selected = signal("unrelated", 1, { symbol: "OTHER-USDT-SWAP" });
     client.state.watchSearch = symbol.split("-")[0];
@@ -500,25 +591,29 @@ test("watch app actions transmit their own symbol and period without selecting t
     client.state.watchLimit = 48;
     client.state.markets = [market(symbol, timeframe)];
     client.renderWatch();
-    const before = JSON.stringify({ selected: client.state.selected, search: client.state.search, timeframe: client.state.timeframe, watchLimit: client.state.watchLimit });
+    const before = JSON.stringify({ search: client.state.search, timeframe: client.state.timeframe, watchLimit: client.state.watchLimit, watchSearch: client.state.watchSearch, watchTimeframe: client.state.watchTimeframe });
     const opener = get("watch-rows").querySelectorAll("[data-tradingview-action]")[0];
     const event = get("watch-rows").dispatch("click", { target: opener });
     assert.equal(event.defaultPrevented, true);
     assert.equal(client.state.tradingViewPending, true);
     assert.equal(client.state.syncing, false, "app opening must not block market refresh");
-    assert.equal(opener.disabled, true);
+    assert.equal(get("watch-rows").querySelectorAll("[data-tradingview-action]")[0].disabled, true);
     await new Promise(setImmediate);
-    assert.equal(networkRequests.length, 1);
-    const request = networkRequests[0];
+    const posts = networkRequests.filter((request) => request.method === "POST");
+    assert.equal(posts.length, 1);
+    const request = posts[0];
     assert.equal(request.url, "/api/tradingview/open");
     assert.equal(request.method, "POST");
     assert.equal(request.headers["Content-Type"], "application/json");
     assert.equal(request.headers["X-Spike-Action"], "open-tradingview");
     assert.deepEqual(JSON.parse(request.body), { symbol, timeframe });
     assert.equal(client.state.view, "watch");
-    assert.equal(JSON.stringify({ selected: client.state.selected, search: client.state.search, timeframe: client.state.timeframe, watchLimit: client.state.watchLimit }), before);
+    assert.equal(client.state.selected.symbol, symbol);
+    assert.equal(client.state.selected.timeframe, timeframe);
+    assert.equal(client.state.detailOrigin, "watch");
+    assert.equal(JSON.stringify({ search: client.state.search, timeframe: client.state.timeframe, watchLimit: client.state.watchLimit, watchSearch: client.state.watchSearch, watchTimeframe: client.state.watchTimeframe }), before);
     assert.equal(client.state.tradingViewPending, false);
-    assert.equal(opener.disabled, false);
+    assert.equal(get("watch-rows").querySelectorAll("[data-tradingview-action]")[0].disabled, false);
     assert.match(get("tradingview-status").textContent, /已请求 TradingView 打开/);
     assert.doesNotMatch(get("tradingview-status").textContent, /已成功|已经打开|已切换/);
     assert.equal(get("tradingview-status").getAttribute("role"), "status");
@@ -528,18 +623,24 @@ test("watch app actions transmit their own symbol and period without selecting t
 test("an app request prevents double clicks across cards and keeps refreshed actions busy", async () => {
   let resolve;
   const pending = new Promise((done) => { resolve = done; });
-  const { client, get, networkRequests } = harness({ bridgeReply: () => pending });
+  const { client, get, networkRequests } = harness({ allowChartFixture: true, bridgeReply: () => pending });
   client.state.markets = [market(), market("BTC-USDT-SWAP", "15m")];
+  client.state.signals = [signal("busy-signal")];
+  client.renderSignals();
   client.renderWatch();
   get("watch-rows").dispatch("click", { target: get("watch-rows").querySelectorAll("[data-tradingview-action]")[0] });
-  const request = JSON.parse(networkRequests[0].body);
+  const request = JSON.parse(networkRequests.find((request) => request.method === "POST").body);
   client.renderWatch();
   const buttons = get("watch-rows").querySelectorAll("[data-tradingview-action]");
   assert.equal(buttons.length, 2);
   assert.ok(buttons.every((button) => button.disabled));
   get("watch-rows").dispatch("click", { target: buttons[1] });
+  get("signal-rows").dispatch("keydown", { target: get("signal-rows").querySelectorAll("[data-signal-id]")[0], key: "Enter" });
   get("tradingview-open").dispatch("click");
-  assert.equal(networkRequests.length, 1);
+  assert.equal(client.state.selected.symbol, request.symbol, "ignored concurrent activation must not replace the selected card");
+  assert.equal(networkRequests.filter((request) => request.method === "POST").length, 1);
+  assert.ok(get("signal-rows").querySelectorAll("[data-tradingview-action]").every((button) => button.disabled));
+  assert.ok(get("watch-rows").querySelectorAll("[data-tradingview-label]").every((label) => label.textContent === "正在打开…"));
   resolve(bridgeResponse({ requested: true, ...request }));
   await new Promise(setImmediate);
   assert.ok(buttons.every((button) => !button.disabled));
@@ -561,7 +662,7 @@ test("bridge errors remain visible verbatim as text and permit a later manual re
     assert.equal(button.disabled, false);
     get("watch-rows").dispatch("click", { target: button });
     await new Promise(setImmediate);
-    assert.equal(networkRequests.length, 2);
+    assert.equal(networkRequests.filter((request) => request.method === "POST").length, 2);
   }
 });
 
@@ -581,6 +682,7 @@ test("detail app action shares the bridge and retains an explicit web fallback",
   client.renderDetail();
   await new Promise(setImmediate);
   assert.equal(get("tradingview-open").tagName, "BUTTON");
+  assert.match(fs.readFileSync(indexPath, "utf8"), /data-tradingview-label="在 TradingView 打开">在 TradingView 打开<\/span>/);
   assert.equal(get("tradingview-web").tagName, "A");
   assert.match(get("tradingview-web").href, /symbol=OKX%3AETHUSDT.P&interval=15$/);
   assert.equal(get("tradingview-web").getAttribute("target"), "_blank");
@@ -753,6 +855,7 @@ test("polling requests separate APIs, rejects mixed event payloads and keeps ind
   assert.equal(client.state.signalTotal, 17);
   assert.equal(client.state.candidateTotal, 43);
   assert.equal(get("model-gate-notice").classList.contains("hidden"), true);
+  assert.equal(client.state.selected.id, "model", "initial refresh may select a preview without opening the app");
   assert.equal(networkRequests.filter((request) => request.method === "POST").length, 0);
   replies["/api/candidates?limit=2000"] = new Error("temporarily offline");
   await client.refresh();

@@ -118,6 +118,9 @@
       button.disabled = state.tradingViewPending || !canOpenTradingView({ symbol: button.dataset.tvSymbol, timeframe: button.dataset.tvTimeframe });
       button.setAttribute("aria-busy", String(state.tradingViewPending));
     });
+    document.querySelectorAll("[data-tradingview-label]").forEach((label) => {
+      label.textContent = state.tradingViewPending ? "正在打开…" : label.dataset.tradingviewLabel;
+    });
   }
   function tradingViewStatus(message, kind) {
     const status = $("tradingview-status");
@@ -125,7 +128,7 @@
     status.classList.remove("hidden", "error", "pending");
     if (kind) status.classList.add(kind);
   }
-  // Only explicit click handlers call this bridge; rendering never launches apps.
+  // Only explicit user action handlers call this bridge; rendering never launches apps.
   async function openTradingView(item) {
     if (state.tradingViewPending) return;
     if (!canOpenTradingView(item)) {
@@ -231,7 +234,8 @@
       }
     }
     const focused = document.activeElement?.dataset;
-    const focusedId = focused?.signalId, focusedKind = focused?.signalKind;
+    const focusedPreview = Boolean(focused?.previewSignalId);
+    const focusedId = focused?.signalId || focused?.previewSignalId, focusedKind = focused?.signalKind;
     const now = signalClock();
     const fresh = confirmed ? items.filter((item) => isFresh(item, now)) : [];
     const earlier = items.filter((item) => !confirmed || !isFresh(item, now));
@@ -244,7 +248,8 @@
     const pendingFreshness = state.errors.signals || state.errors.status || !freshnessKnown;
     const noFresh = confirmed && !fresh.length && items.length ? `<div id="fresh-empty" class="fresh-empty"><strong>${pendingFreshness ? "新鲜状态待同步" : "当前筛选下暂无新鲜确认"}</strong><span>${pendingFreshness ? "保留已获取的记录，状态同步后重新确认时效。" : `模型确认 ${escapeHTML(number(minutes))} 分钟内的信号会优先出现在这里。下方可回看此前记录。`}</span></div>` : "";
     $("signal-rows").innerHTML = noFresh + group("新鲜确认", freshVisible, true) + group(confirmed ? fresh.length ? "更早确认" : "已记录确认" : "指标候选 · 独立于确认信号", earlierVisible, false);
-    if (focusedId) Array.from($("signal-rows").querySelectorAll("[data-signal-id]")).find((card) => card.dataset.signalId === focusedId && card.dataset.signalKind === focusedKind)?.focus({ preventScroll: true });
+    renderTradingViewButtons();
+    if (focusedId) Array.from($("signal-rows").querySelectorAll(focusedPreview ? "[data-preview-signal-id]" : "[data-signal-id]")).find((card) => (card.dataset.signalId || card.dataset.previewSignalId) === focusedId && card.dataset.signalKind === focusedKind)?.focus({ preventScroll: true });
   }
   function signalCardHTML(item, now = signalClock()) {
     const selected = sameEvent(state.selected, item);
@@ -253,7 +258,7 @@
     const fresh = isFresh(item, now);
     const status = modelState(item), caption = confirmed ? "模型确认收盘价" : "原箭头收盘价";
     const waiting = `${number(item.model?.wait_bars)} / ${number(item.model?.max_wait_bars)} 根`;
-    return `<button type="button" class="signal-card ${side}${confirmed ? "" : " candidate-card"}${selected ? " selected" : ""}${fresh ? " is-fresh" : ""}" data-signal-id="${escapeHTML(item.id)}" data-signal-kind="${escapeHTML(item.kind)}" aria-pressed="${Boolean(selected)}" aria-label="${escapeHTML(`${shortSymbol(item.symbol)} ${quoteSymbol(item.symbol)} ${item.timeframe} ${sideName(item.side)}，${status}，${caption} ${price(item.price)}，${shortDate(item.bar_close_ms)}，查看图表`)}">
+    return `<article class="signal-card ${side}${confirmed ? "" : " candidate-card"}${selected ? " selected" : ""}${fresh ? " is-fresh" : ""}"><button type="button" class="card-primary-action" data-signal-id="${escapeHTML(item.id)}" data-signal-kind="${escapeHTML(item.kind)}" data-tradingview-action="signal" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击卡片，在 Mac TradingView 打开" aria-label="${escapeHTML(`${shortSymbol(item.symbol)} ${quoteSymbol(item.symbol)} ${item.timeframe} ${sideName(item.side)}，${status}，${caption} ${price(item.price)}，${shortDate(item.bar_close_ms)}，在 Mac TradingView 打开`)}"></button>
       <span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(item.timeframe)}</span></span>
       <span class="signal-card-direction"><span class="card-direction">${sideArrow(item.side)} ${escapeHTML(sideName(item.side))}${confirmed ? "确认" : "候选"}</span><span class="card-recency">${fresh ? "新 · " : ""}${escapeHTML(ageLabel(item.bar_close_ms))}</span></span>
       <span class="model-card-status"><span class="model-badge ${confirmed ? "confirmed" : item.model?.status === "error" ? "error" : "pending"}">${escapeHTML(status)}</span><span>${confirmed ? `检测分数 ${escapeHTML(modelScore(item))}` : `等待 ${escapeHTML(waiting)}`}</span></span>
@@ -261,8 +266,8 @@
       ${confirmed ? `<span class="card-origin">原箭头 ${escapeHTML(price(original.price))} · ${escapeHTML(shortDate(original.bar_close_ms))}</span>` : ""}
       <span class="card-context"><span>启动前近零蓄势</span><strong>${escapeHTML(number(focusRun(item)))} <small>根</small></strong></span>
       <span class="card-confirmed"><span>${confirmed ? `模型确认 · 等待 ${escapeHTML(number(item.model?.wait_bars))} 根` : "原箭头收盘"}</span><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))}</time></span>
-      <span class="card-footer"><span class="notification-stack">${confirmed ? notificationHTML(item) : '<span class="candidate-notice">候选记录 · 不触发通知</span>'}</span><span class="card-open">${selected ? "正在查看" : "看图"} ↗</span></span>
-    </button>`;
+      <span class="card-footer"><span class="notification-stack">${confirmed ? notificationHTML(item) : '<span class="candidate-notice">候选记录 · 不触发通知</span>'}</span><span class="card-actions"><button type="button" class="card-preview" data-preview-signal-id="${escapeHTML(item.id)}" data-signal-kind="${escapeHTML(item.kind)}" aria-pressed="${Boolean(selected)}" aria-label="${escapeHTML(`页内预览 ${shortSymbol(item.symbol)} ${quoteSymbol(item.symbol)} ${item.timeframe}`)}"><span>页内预览</span></button><span class="card-open" data-tradingview-label="TradingView ↗" aria-hidden="true">TradingView ↗</span></span></span>
+    </article>`;
   }
   function applySignalFilters() {
     const items = filteredSignals();
@@ -312,13 +317,13 @@
     $("watch-rows").innerHTML = items.slice(0, state.watchLimit).map((item) => {
       const valid = !state.errors.markets && !item.error && !item.stale && item.ready !== false;
       const phaseClass = state.errors.markets ? "stale" : item.error ? "error" : item.stale ? "stale" : item.ready === false ? "loading" : item.focus === true ? "ready" : "";
-      return `<article class="watch-card"><button type="button" class="watch-preview" data-market-symbol="${escapeHTML(item.symbol)}" data-market-timeframe="${escapeHTML(item.timeframe)}" aria-label="在 spike 预览 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(quoteSymbol(item.symbol))} ${escapeHTML(item.timeframe)} ${escapeHTML(marketPhase(item))}图表">
+      const selected = state.detailOrigin === "watch" && state.selected?.symbol === item.symbol && state.selected?.timeframe === item.timeframe;
+      return `<article class="watch-card${selected ? " selected" : ""}"><button type="button" class="card-primary-action" data-tradingview-action="watch" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击卡片，在 Mac TradingView 打开" aria-label="在 Mac TradingView 打开 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(quoteSymbol(item.symbol))} ${escapeHTML(item.timeframe)}，${escapeHTML(marketPhase(item))}"></button>
         <span class="watch-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(item.timeframe)}</span></span>
         <span class="watch-card-phase"><span class="phase-badge ${phaseClass}" title="${escapeHTML(item.error || (item.stale ? "当前保留过期行情，等待更新" : "当前结构尚不是启动信号"))}">${escapeHTML(state.errors.markets ? "缓存 · 待同步" : marketPhase(item))}</span><span class="card-status">${!valid ? "等待更新" : item.focus ? "已达蓄势门槛" : "观察中"}</span></span>
         <span class="watch-card-run"><strong>${valid ? escapeHTML(number(item.near_zero_bars)) : "—"}<small> 根</small></strong><span>当前近零蓄势</span></span>
         <span class="watch-card-background"><span>均线密集<strong>${valid ? item.dense === true ? "已密集" : item.dense === false ? "未密集" : "—" : "—"}</strong></span><span>高周期背景<strong>${valid ? escapeHTML(sideName(item.htf_side)) : "—"}</strong></span></span>
-        <span class="watch-preview-label">站内预览</span></button>
-        <div class="watch-card-foot"><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">收盘 ${escapeHTML(shortDate(item.bar_close_ms))}</time><button type="button" class="watch-open-app" data-tradingview-action="watch" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="在 Mac TradingView 打开" aria-label="在 Mac TradingView 打开 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(quoteSymbol(item.symbol))} ${escapeHTML(item.timeframe)}">查看结构 ↗</button></div>
+        <div class="watch-card-foot"><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">收盘 ${escapeHTML(shortDate(item.bar_close_ms))}</time><span class="card-actions"><button type="button" class="card-preview" data-market-symbol="${escapeHTML(item.symbol)}" data-market-timeframe="${escapeHTML(item.timeframe)}" aria-pressed="${Boolean(selected)}" aria-label="页内预览 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(quoteSymbol(item.symbol))} ${escapeHTML(item.timeframe)} ${escapeHTML(marketPhase(item))}图表"><span>页内预览</span></button><span class="card-open" data-tradingview-label="TradingView ↗" aria-hidden="true">TradingView ↗</span></span></div>
       </article>`;
     }).join("");
     renderTradingViewButtons();
@@ -744,29 +749,36 @@
   });
   $("load-more-signals").addEventListener("click", () => { state.rowLimit += 24; renderSignals(); });
   function activateRow(event, type) {
-    const row = event.target.closest(type === "signal" ? "[data-signal-id]" : "[data-market-symbol]");
+    const preview = event.target.closest(type === "signal" ? "[data-preview-signal-id]" : "[data-market-symbol]");
+    const row = preview || event.target.closest("[data-tradingview-action]") || event.target.closest(type === "signal" ? ".signal-card" : ".watch-card")?.querySelector("[data-tradingview-action]");
     if (!row) return;
-    event.preventDefault();
-    if (type === "signal") chooseSignal(sourceItems().find((item) => String(item.id) === row.dataset.signalId && item.kind === row.dataset.signalKind), true);
-    else {
-      const item = state.markets.find((candidate) => candidate.symbol === row.dataset.marketSymbol && candidate.timeframe === row.dataset.marketTimeframe);
-      if (item) {
-        state.search = shortSymbol(item.symbol); state.timeframe = item.timeframe; state.side = "all"; state.rowLimit = 24;
-        $("symbol-search").value = state.search; $("side-filter").value = "all";
-        document.querySelectorAll("[data-timeframe]").forEach((button) => { const selected = button.dataset.timeframe === item.timeframe; button.classList.toggle("selected", selected); button.setAttribute("aria-pressed", String(selected)); });
-        setView("signals"); chooseSignal(item, true, "watch");
-      }
-    }
-  }
-  $("signal-rows").addEventListener("click", (event) => activateRow(event, "signal"));
-  $("watch-rows").addEventListener("click", (event) => {
-    const opener = event.target.closest("[data-tradingview-action]");
-    if (opener) {
+    if (event.type === "keydown") {
+      // Preview buttons keep native keyboard clicks. Primary actions handle both
+      // keys here and cancel the synthesized click so the bridge runs once.
+      if (preview || !["Enter", " "].includes(event.key)) return;
       event.preventDefault();
-      openTradingView({ symbol: opener.dataset.tvSymbol, timeframe: opener.dataset.tvTimeframe });
-      return;
+      if (event.repeat) return;
     }
-    activateRow(event, "market");
+    event.preventDefault();
+    if (!preview && state.tradingViewPending) return;
+    const item = type === "signal"
+      ? sourceItems().find((candidate) => String(candidate.id) === (row.dataset.signalId || row.dataset.previewSignalId) && candidate.kind === row.dataset.signalKind)
+      : state.markets.find((candidate) => candidate.symbol === (row.dataset.marketSymbol || row.dataset.tvSymbol) && candidate.timeframe === (row.dataset.marketTimeframe || row.dataset.tvTimeframe));
+    if (!item) return;
+    if (!preview && !canOpenTradingView(item)) { openTradingView(item); return; }
+    if (preview && type === "market") {
+      state.search = shortSymbol(item.symbol); state.timeframe = item.timeframe; state.side = "all"; state.rowLimit = 24;
+      $("symbol-search").value = state.search; $("side-filter").value = "all";
+      document.querySelectorAll("[data-timeframe]").forEach((button) => { const selected = button.dataset.timeframe === item.timeframe; button.classList.toggle("selected", selected); button.setAttribute("aria-pressed", String(selected)); });
+      setView("signals");
+    }
+    chooseSignal(item, Boolean(preview), type === "market" ? "watch" : "signals");
+    if (type === "market") renderWatch();
+    if (!preview) openTradingView(item);
+  }
+  ["click", "keydown"].forEach((eventType) => {
+    $("signal-rows").addEventListener(eventType, (event) => activateRow(event, "signal"));
+    $("watch-rows").addEventListener(eventType, (event) => activateRow(event, "market"));
   });
   $("load-more-watch").addEventListener("click", () => { state.watchLimit += 24; renderWatch(); });
   $("back-to-signals").addEventListener("click", () => {

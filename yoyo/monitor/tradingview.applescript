@@ -1,6 +1,40 @@
 -- Owner-authorized UI navigation. URL is data supplied via argv.
 property actionDeadline : missing value
 
+-- A generic /chart/ link can lose symbol/interval while restoring the saved
+-- layout. Keep the owner's verified regional host and concrete layout path.
+on savedChartBase(urlText)
+    if urlText is missing value then return missing value
+    set urlText to urlText as text
+    repeat with basePrefix in {"https://cn.tradingview.com/chart/", "https://www.tradingview.com/chart/", "https://tradingview.com/chart/"}
+        set prefixText to contents of basePrefix
+        if urlText starts with prefixText and (length of urlText) > (length of prefixText) then
+            set layoutID to ""
+            repeat with c in characters ((length of prefixText) + 1) thru -1 of urlText
+                if (contents of c) is in {"/", "?", "#"} then exit repeat
+                if (contents of c) is not in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789" then return missing value
+                set layoutID to layoutID & (contents of c)
+            end repeat
+            if (length of layoutID) > 0 and (length of layoutID) <= 64 then return prefixText & layoutID & "/"
+        end if
+    end repeat
+    return missing value
+end savedChartBase
+
+on bindToLayout(chartURL, layoutBase)
+    set savedDelimiters to AppleScript's text item delimiters
+    try
+        set AppleScript's text item delimiters to "?"
+        set urlParts to text items of chartURL
+        set AppleScript's text item delimiters to savedDelimiters
+        if (count of urlParts) is not 2 then error "SPIKE_INVALID_URL"
+        return layoutBase & "?" & item 2 of urlParts
+    on error errorMessage number errorNumber
+        set AppleScript's text item delimiters to savedDelimiters
+        error errorMessage number errorNumber
+    end try
+end bindToLayout
+
 on checkDeadline()
     if (current date) > actionDeadline then error "SPIKE_DEADLINE"
 end checkDeadline
@@ -31,29 +65,54 @@ end firstWebArea
 on run argv
     set actionDeadline to (current date) + 15
     set chartURL to item 1 of argv
+    -- This owner preference is outside source code. The generic URL cannot
+    -- safely stand in for it because desktop layout restoration drops query.
+    set layoutFile to (POSIX path of (path to home folder)) & "Library/Application Support/Fable/ImpulseMonitor/tradingview-layout.txt"
+    try
+        set layoutBase to my savedChartBase(read (POSIX file layoutFile) as «class utf8»)
+    on error
+        error "SPIKE_LAYOUT_UNAVAILABLE"
+    end try
+    if layoutBase is missing value then error "SPIKE_LAYOUT_UNAVAILABLE"
+    set chartURL to my bindToLayout(chartURL, layoutBase)
     set previousClipboard to the clipboard as record
     try
         -- Per-event timeout allows cleanup before the Python process deadline.
         with timeout of 3 seconds
             tell application id "com.tradingview.tradingviewapp.desktop" to activate
-            set the clipboard to chartURL
             tell application "System Events" to tell application process "TradingView"
                 my checkDeadline()
                 set frontmost to true
                 set chartWindow to missing value
-                my checkDeadline()
-                repeat with w in windows
+                set chrome to missing value
+                -- A cold launch first exposes a small splash window. Wait for
+                -- the desktop tab strip instead of failing immediately after
+                -- activate. All retries remain inside the operation deadline.
+                repeat
                     my checkDeadline()
-                    my checkDeadline()
-                    set s to size of w
-                    if (item 1 of s) > 600 and (item 2 of s) > 300 then
-                        set chartWindow to contents of w
-                        exit repeat
-                    end if
+                    repeat with w in windows
+                        my checkDeadline()
+                        try
+                            set s to size of w
+                            if (item 1 of s) > 600 and (item 2 of s) > 300 then
+                                set candidateChrome to my firstWebArea(contents of w, 14)
+                                if candidateChrome is not missing value then
+                                    set chartWindow to contents of w
+                                    set chrome to candidateChrome
+                                    exit repeat
+                                end if
+                            end if
+                        on error errorMessage number errorNumber
+                            -- The splash may disappear during AX traversal.
+                            -- Permission and timeout errors must still surface.
+                            if errorNumber is not -1728 then error errorMessage number errorNumber
+                        end try
+                    end repeat
+                    if chrome is not missing value then exit repeat
+                    delay 0.2
                 end repeat
-                if chartWindow is missing value then error "SPIKE_WINDOW_UNAVAILABLE"
-                set chrome to my firstWebArea(chartWindow, 14)
-                if chrome is missing value then error "SPIKE_CHROME_UNAVAILABLE"
+                -- Do not touch the clipboard while merely waiting for launch.
+                set the clipboard to chartURL
                 -- Desktop 3.4.0 exposes the title-bar menu as its rightmost button.
                 -- The name changes when an update is available. Use live AX bounds.
                 set menuButton to missing value

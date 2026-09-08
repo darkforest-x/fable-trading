@@ -227,11 +227,13 @@ No economic performance metric is implied by passing these software tests.
 
 ### Open a structure in Mac TradingView
 
-The watch card's **查看结构** button and the detail pane's **Mac TradingView**
-button send the selected card's exact OKX swap and `15m` / `1H` / `4H` interval
-to `POST /api/tradingview/open`. Clicking the card body still opens spike's
-preview. The detail pane retains an explicit web fallback. Rendering, scanner
-updates and refresh never activate the desktop app.
+Clicking a signal, candidate or watch card sends that card's exact OKX swap
+and `15m` / `1H` / `4H` interval to `POST /api/tradingview/open`. The whole card
+is a keyboard-accessible native button, with a separate **页内预览** button
+that only opens spike's chart. The detail pane has a full-text **在 TradingView
+打开** button and an explicit web fallback. Rendering, scanner updates and
+refresh never activate the desktop app. Pending requests disable desktop-open
+actions; preview remains available.
 
 The owner authorized an AppleScript bridge on 2026-09-08. Mac Desktop 3.4.0
 supports the [clipboard menu workflow](https://www.tradingview.com/support/solutions/43000673907-how-to-open-a-tradingview-chart-link-in-desktop-app/),
@@ -239,18 +241,29 @@ not a chart deep link through its registered login URL scheme. The bridge uses
 the desktop window's internal menu: the macOS menu dispatch returned without
 navigating in local tests. It reads live accessibility bounds for the title-bar
 button; it does not assume absolute screen coordinates or modify a saved layout.
-The generic chart URL reused the owner's current `综合过滤` layout in direct
-Mac tests (BTC-USDT 4H and TRUTH-USDT 15m).
+The generic `/chart/` URL is insufficient: it initially showed the requested
+symbol in the desktop tab title, then restored a different symbol and interval
+from the saved layout. Bind the query to the owner's verified concrete layout
+and regional host instead. The local preference is a single HTTPS layout URL
+in `~/Library/Application Support/Fable/ImpulseMonitor/tradingview-layout.txt`,
+for example `https://cn.tradingview.com/chart/Ab12Cd34/` (example ID only).
+Only concrete alphanumeric layout IDs on the `cn`, `www` or bare TradingView
+host are accepted. Missing/invalid preferences fail before UI or clipboard
+changes. This is an explicit local preference, not automatic synchronization
+with future layout changes. The owner's existing `综合过滤` layout was verified
+and configured on 2026-09-08; no Pine code or indicator settings were edited.
 
 The service must run in this Mac's unlocked GUI session with TradingView
-installed and signed in. In **System Settings → Privacy & Security → Automation**,
-the installed caffeinate-wrapped LaunchAgent requires **caffeinate → System
-Events** enabled. Accessibility permission must also be allowed for the process
-macOS identifies. Shell/Codex authorization does not imply LaunchAgent
-authorization. On 2026-09-08, the live page correctly showed failure because
-this Automation switch was observed off; direct-script success is not a passed
-end-to-end LaunchAgent test. Enable the switch, click a card, and verify the
-actual chart symbol and interval before calling deployment acceptance complete.
+installed and signed in. Apple Events and Accessibility authorization are
+evaluated for the process macOS identifies; shell/Codex authorization does
+not prove LaunchAgent authorization. On 2026-09-08 the Automation switch
+remained off after authentication, while focused TCC logs later showed the
+owner's Accessibility grant for caffeinate. After the layout fix, actual
+frontend clicks through the unchanged running LaunchAgent opened the correct
+loaded chart. The switch's displayed state alone did not diagnose navigation.
+Verify the completed chart's symbol and selected interval, not just the tab
+title or a successful `open` command. No privacy database reset, helper app
+installation or monitor restart was required for this fix.
 
 Only same-origin POSTs carrying `X-Spike-Action: open-tradingview` are accepted;
 the service remains loopback-only. Inputs are restricted swap/interval values,
@@ -263,8 +276,18 @@ data loaded. Errors are sanitized and surfaced; no automatic retries occur.
 
 Validation:
 
+Live frontend acceptance on 2026-09-08: whole-card click opened TRUTH-USDT
+15m, Enter opened TRUTH-USDT 1H, and Space opened BICO-USDT 4H. Each completed
+desktop chart exposed the corresponding symbol and selected interval, with
+IMACD present. Selecting POET's **页内预览** updated spike's detail while the
+desktop stayed on TRUTH. The enlarged detail button and card actions were
+visually checked in the in-app browser; browser error/warning logs were empty.
+The focused Python suite passed 31 tests, and card/theme JavaScript suites
+passed 42 tests. These checks do not claim automatic desktop-load validation
+on every future click or permissions persistence across macOS upgrades.
+
 ```bash
-.venv/bin/python -m pytest tests/monitor/test_tradingview.py -q
+.venv/bin/python -m pytest tests/monitor/test_tradingview.py tests/monitor/test_tradingview_layout.py -q
 node --test tests/monitor/frontend_cards.test.cjs
 osacompile -o /tmp/spike-tradingview-bridge.scpt yoyo/monitor/tradingview.applescript
 ```
