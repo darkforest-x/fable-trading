@@ -2,6 +2,17 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## YOLO 改在 3060 电脑审核（2026-09-08）
+
+Owner要求用3060电脑操作审核。已严格SSH验证WIN-ZZC/RTX3060，目前192.168.1.2；
+Windows桌面已创建并读回核对“YOLO 人工审核.url”，指向Mac192.168.1.4:8081/projects/77/data?tab=44。
+从Windows用原账号实际认证读取项目77：2513任务/2513预框/20答案；安全样本主图与future40
+实际GET200且SHA与原图一致。首次浏览器登录仍由Owner完成，没有代填/提交人工答案。
+同一Mac native服务和数据库继续保存进度，没有安装新LS、迁移或创建项目；目前Default44不变。
+Mac须开机、两机同LAN；不要重跑旧start_label_studio_review.sh（含旧包准备和Docker重启）。
+操作与证据见docs/ops/YOLO_REVIEW_FROM_3060.md；收据output/offline_tasks/yolo_3060_review_access_20260908.json。
+只确认审核链路和机器身份；训练空闲时段/版本契约/P0P1资格仍待周计划检查，未训练、未读holdout。
+
 ## YOLO 本周计划（2026-09-08：周日 9/13 20:00 交付研究候选与固定对照）
 
 Owner要求“这周必须把yolo模型优化一版，做计划”。计划已落盘：
