@@ -18,6 +18,132 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: yolo-owner-annotation-audit-20260908-prereg
+    artifact_type: manifest
+    role: human_annotation_geometry_and_separate_future_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2b7bb5149a9532877801d6a01102e47e1b385756
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/annotation_audit_preregistration.json
+    sha256: 771334336f7d72b3c1eebd460b646d1294496944adbc103f19567d6a38017e4d
+    size_bytes: 2000
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/annotation_audit_preregistration.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen72 submitted HL2 answers:51 boxes,15 no-target,6 conflicts.57 translations preserve dimensions;49/51
+      kept boxes clip a body, not a semantic error rate.72 main and150-future replays. No answer writes or new Gold.
+  - artifact_id: yolo-owner-annotation-audit-20260908-report-source
+    artifact_type: report
+    role: human_annotation_geometry_and_separate_future_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6f6d5fa34c9fe8de1cfbdbe55bda25af6b68ec59
+    source_path: analysis/p1_yolo_owner_annotation_audit_20260908.md
+    sha256: f1f2c9f9d48fd880fcd21d2215e75e1262d315755536fec24fa61d286628959c
+    size_bytes: 36749
+    storage_uri: repo://analysis/p1_yolo_owner_annotation_audit_20260908.md
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen72 submitted HL2 answers:51 boxes,15 no-target,6 conflicts.57 translations preserve dimensions;49/51
+      kept boxes clip a body, not a semantic error rate.72 main and150-future replays. No answer writes or new Gold.
+  - artifact_id: yolo-owner-annotation-audit-20260908-report-html
+    artifact_type: report
+    role: human_annotation_geometry_and_separate_future_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6f6d5fa34c9fe8de1cfbdbe55bda25af6b68ec59
+    source_path: analysis/html/p1_yolo_owner_annotation_audit_20260908.html
+    sha256: b80f0470a6577755b2149292f65b999c122fcf307587daa01ad1edc967558dc0
+    size_bytes: 3085402
+    storage_uri: repo://analysis/html/p1_yolo_owner_annotation_audit_20260908.html
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen72 submitted HL2 answers:51 boxes,15 no-target,6 conflicts.57 translations preserve dimensions;49/51
+      kept boxes clip a body, not a semantic error rate.72 main and150-future replays. No answer writes or new Gold.
+  - artifact_id: yolo-owner-annotation-audit-20260908-summary
+    artifact_type: manifest
+    role: human_annotation_geometry_and_separate_future_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6f6d5fa34c9fe8de1cfbdbe55bda25af6b68ec59
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/annotation_audit_summary.json
+    sha256: 37f1258f00162d0798d037cb1ac6c9a4f12e272ceedf1a8639aa4cd63668bc20
+    size_bytes: 2877
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/annotation_audit_summary.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen72 submitted HL2 answers:51 boxes,15 no-target,6 conflicts.57 translations preserve dimensions;49/51
+      kept boxes clip a body, not a semantic error rate.72 main and150-future replays. No answer writes or new Gold.
+  - artifact_id: yolo-owner-annotation-audit-20260908-visual-findings
+    artifact_type: manifest
+    role: human_annotation_geometry_and_separate_future_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6f6d5fa34c9fe8de1cfbdbe55bda25af6b68ec59
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/annotation_audit_visual_findings.json
+    sha256: d0dc7a702b11ea3c9255a2e9ba13f5ff36959fafcd35dae40c9ce780c53c35e8
+    size_bytes: 23629
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/annotation_audit_visual_findings.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen72 submitted HL2 answers:51 boxes,15 no-target,6 conflicts.57 translations preserve dimensions;49/51
+      kept boxes clip a body, not a semantic error rate.72 main and150-future replays. No answer writes or new Gold.
+  - artifact_id: yolo-owner-annotation-audit-20260908-gallery-receipt
+    artifact_type: manifest
+    role: human_annotation_geometry_and_separate_future_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6f6d5fa34c9fe8de1cfbdbe55bda25af6b68ec59
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/annotation_audit_gallery_receipt.json
+    sha256: 523d7c0607a484ff3a6131514b52bc30e1bc3ea6e07d8d3bf19fa06b21fd6091
+    size_bytes: 7093
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/annotation_audit_gallery_receipt.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen72 submitted HL2 answers:51 boxes,15 no-target,6 conflicts.57 translations preserve dimensions;49/51
+      kept boxes clip a body, not a semantic error rate.72 main and150-future replays. No answer writes or new Gold.
+  - artifact_id: yolo-owner-annotation-audit-20260908-browser-qa
+    artifact_type: manifest
+    role: human_annotation_geometry_and_separate_future_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6f6d5fa34c9fe8de1cfbdbe55bda25af6b68ec59
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/annotation_audit_browser_qa.json
+    sha256: e6c665b801244df89860d22a958c3e80c7def23fbf2cc53d458d3762dce2f6ed
+    size_bytes: 672
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/annotation_audit_browser_qa.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen72 submitted HL2 answers:51 boxes,15 no-target,6 conflicts.57 translations preserve dimensions;49/51
+      kept boxes clip a body, not a semantic error rate.72 main and150-future replays. No answer writes or new Gold.
+  - artifact_id: yolo-owner-annotation-audit-20260908-rows
+    artifact_type: manifest
+    role: human_annotation_geometry_and_separate_future_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: eabc3d3a0ab74cae9a640cf66b616f376d42054c
+    source_path: output/offline_tasks/owner_annotation_audit_20260908/rows.json
+    sha256: e1ef3d4a8c6fb2cd520d23d5f805fbf53f1681b7d93c9aac86fbd2762545b6a2
+    size_bytes: 2185806
+    storage_uri: local://output/offline_tasks/owner_annotation_audit_20260908/rows.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen72 submitted HL2 answers:51 boxes,15 no-target,6 conflicts.57 translations preserve dimensions;49/51
+      kept boxes clip a body, not a semantic error rate.72 main and150-future replays. No answer writes or new Gold.
+  - artifact_id: yolo-owner-annotation-audit-20260908-gallery
+    artifact_type: report
+    role: human_annotation_geometry_and_separate_future_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: a8b4e2a5747e16ec33ec26077a77a6af67ec77e3
+    source_path: output/offline_tasks/owner_annotation_audit_20260908/gallery.html
+    sha256: a741e89631a023801fce190003eb360964673b226abcaa0901cd9271b0019267
+    size_bytes: 33898
+    storage_uri: local://output/offline_tasks/owner_annotation_audit_20260908/gallery.html
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen72 submitted HL2 answers:51 boxes,15 no-target,6 conflicts.57 translations preserve dimensions;49/51
+      kept boxes clip a body, not a semantic error rate.72 main and150-future replays. No answer writes or new Gold.
   - artifact_id: yolo-review-future150-20260908-prereg
     artifact_type: manifest
     role: isolated_human_future_context_extension
