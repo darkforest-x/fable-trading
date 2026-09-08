@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>Right-click submission fixture</title>
+<style>body{font:16px sans-serif;padding:24px}.lsf-editor{border:2px solid #999;padding:24px;margin-top:18px}#canvas{padding:40px;background:#eef}button,input{margin:8px;padding:10px}[role=dialog]{position:fixed;inset:20%;background:white;border:3px solid red;padding:30px}</style>
+<h1>Synthetic shortcut test — no Label Studio data or writes</h1>
+<p id="result">Native button clicks: 0</p>
+<button onclick="setMode('normal')">Normal</button>
+<button onclick="setMode('disabled')">Disabled</button>
+<button onclick="setMode('other')">Other project</button>
+<button onclick="setMode('list')">List page</button>
+<button onclick="setMode('update')">Update mode</button>
+<button onclick="setMode('ambiguous')">Two submit buttons</button>
+<button onclick="setMode('missing')">Missing task id</button>
+<button onclick="document.getElementById('modal').hidden=false">Open dialog</button>
+<div class="lsf-editor">
+  <div class="lsf-current-task__task-id">900001</div>
+  <div id="canvas" role="region" aria-label="Review canvas">Right-click review canvas</div>
+  <input aria-label="Review note" placeholder="Typing keeps the native context menu">
+  <label><input type="checkbox" aria-label="No target">No target</label>
+  <div class="lsf-controls"><button aria-label="submit">Submit</button></div>
+</div>
+<div role="dialog" id="modal" hidden><p>Open dialog blocks submission</p><button onclick="this.parentElement.hidden=true">Close dialog</button></div>
+<script>
+  let count=0;
+  const button=document.querySelector('button[aria-label="submit"]');
+  button.onclick=()=>{count++;document.getElementById('result').textContent='Native button clicks: '+count;document.querySelector('.lsf-current-task__task-id').textContent=String(900001+count)};
+  function setMode(mode){
+    history.replaceState(null,'',mode==='other'?'/projects/74/data?labeling=1':mode==='list'?'/projects/77/data':'/projects/77/data?labeling=1');
+    button.disabled=mode==='disabled';button.textContent=mode==='update'?'Update':'Submit';
+    document.querySelector('.lsf-current-task__task-id').textContent=mode==='missing'?'':String(900001+count);
+    document.querySelectorAll('[data-duplicate]').forEach(el=>el.remove());
+    if(mode==='ambiguous'){const duplicate=button.cloneNode(true);duplicate.dataset.duplicate='true';button.parentElement.appendChild(duplicate)}
+    document.activeElement.blur();
+  }
+  setMode('normal');
+</script>
+<script src="/react-app/fable-right-click-submit-qa.js"></script>
+</html>

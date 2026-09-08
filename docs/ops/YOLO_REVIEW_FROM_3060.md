@@ -12,6 +12,29 @@
 
 桌面文件：`C:\Users\Administrator\Desktop\YOLO 人工审核.url`。首次浏览器登录仍由 Owner 完成；远端验收的临时登录会话没有复制进浏览器。账号沿用现有配置，未创建新用户或更改密码，凭据没有写入快捷方式或本文。
 
+## 右键提交 / 更新（2026-09-08）
+
+Owner要求“右键就是提交”。项目77实际审核页支持在图片或审核区域单击鼠标右键，等同点击原Submit/Update按钮；连续审核是否进入下一题继续由原模式决定。在原有页面保存未提交改动后，Ctrl+F5强制刷新一次以加载脚本。
+
+- Shift+右键保留浏览器菜单；在输入框、菜单、弹窗里不触发提交。
+- 列表、设置和其他项目不触发；按钮禁用、正在加载或保存时不额外提交。
+- 900ms内重复右键忽略，切到下一题也保留该间隔。普通左键和原快捷键保持原行为。
+- 原生控件负责空标注检查、权限、验证、评论保存和Update/Submit分流。脚本不直接调用标注API，也不自动重试或提前宣称保存成功。
+
+受控源码位于`yoyo/review/`。安装器向已装LS的React主脚本末尾追加有标记的自执行代码，保持原始字节前缀，不重启服务。未来升级Label Studio后需重新检查适配，不把这当作上游软件内置功能。[官方键盘快捷键说明](https://labelstud.io/guide/hotkeys)仍适用于原Ctrl+Enter等操作。
+
+安装 / 核对命令（重入不重复追加）：
+
+```bash
+PYTHONPATH=. .venv/bin/python -m yoyo.review.install_label_studio_shortcut \
+  --bundle .venv_label_studio/lib/python3.9/site-packages/web/dist/apps/labelstudio/main.js \
+  --state-dir output/offline_tasks/label_studio_right_click_20260908
+```
+
+恢复同一原包：在上述命令末尾加`--restore`，再强制刷新浏览器。原包、SHA与事务恢复收据保存在该state-dir；安装器拒绝覆盖未知外部改动。收据先落盘，恢复不依赖当前JS源码仍然存在。
+
+验收：7个安装/恢复测试通过；模拟页12个真实浏览器场景通过，包括无目标复选后提交、Submit/Update、防连点、禁用、缺失task、多个按钮、其他项目、列表、Shift、输入框、弹窗和左键。模拟计数不是真实标注；没有为测试提交Owner答案。定位到真实审核页的按钮为`.lsf-editor button[aria-label="submit"]`，实际任务标识为`.lsf-current-task__task-id`。仅检查真实页加载及可见提示，真实保存由Owner操作。
+
 ## 实测证据与边界
 
 | 项目 | 2026-09-08 结果 |
