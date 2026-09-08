@@ -7019,3 +7019,18 @@ experiments:
     artifacts: []
     reuse_allowed: false
     notes: Same54 historical OKX symbols,15m/1H/4H,neutral exits,20bp cost; no live changes or parameter search.
+
+  - experiment_id: exp-imacd-launch-context-20260908-v3
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending-source-freeze
+    status: active
+    question: Do confirmed range breakout or separately confirmed higher-direction gates improve startup quality?
+    single_variable: S01 prior12 high-low breakout; H01 closed-at-local-open HTF md sign; never combined.
+    result: Frozen pre2026 study; same54 symbols, two separate candidates and H00 data-coverage control.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/html/p1_imacd_launch_context_20260908.html
+    artifacts: []
+    reuse_allowed: false
+    notes: Independent340-bar higher warmup,6-candidate Holm,neutral exits,20bp proxy; no live changes.
