@@ -332,13 +332,17 @@ def collect_stream(client: PublicClient, kind: str, inst_id: str, period: str,
             if oldest <= start_ms:
                 stop_reason = "reached_start"
                 break
-            if oldest >= cursor:
+            # An inclusive end may return one NEW bucket exactly at cursor:
+            # the preceding request already stepped below its oldest row.
+            # A repeated page is newer than that bound and must still fail.
+            inclusive_end = kind in ("oi", "taker")
+            if oldest > cursor or (not inclusive_end and oldest == cursor):
                 raise SnapshotError("Pagination made no backward progress")
             # Rubik end is inclusive and observed sub-second cursors round
             # back to the boundary. Move to the prior exact bucket; accepted
             # rows are grid-aligned so this cannot skip an intervening row.
             # Funding after is exclusive and keeps its original cursor.
-            cursor = oldest - PERIOD_MS[period] if kind in ("oi", "taker") else oldest
+            cursor = oldest - PERIOD_MS[period] if inclusive_end else oldest
         except SnapshotError as exc:
             error = str(exc)
             stop_reason = "error"

@@ -49,6 +49,15 @@
       "selection_sha256": "7a7ffa82959a9258c76ee4a9d735dd27b9f483c08766c4e8d72167c6e636319e",
       "kind": "First 15m 2026 chronological return audit; no OI/taker scoring",
       "parameters_retuned_after_audit": false
+    },
+    {
+      "configuration": "native1h-OI-taker-acquisition-and-price-corroboration",
+      "access_round": 1,
+      "kind": "data engineering/archived-event arithmetic verification only, no new ranking or return experiment",
+      "return_scoring": false,
+      "collection_manifest_sha256": "a27e5725f517d0505602becd32f19f507d7573d3031c9d6e05f650279d261b1c",
+      "coverage_sha256": "4c84ff791af4b9d8060052e22a202829b3435bc404e3e57f21d921c555937084",
+      "notes": "112 native1H streams; original2terminal pagination errors retained; recent coverage checked, not traded or feature-evaluated. Five external public price anchors corroborated existing extreme events."
     }
   ]
 }

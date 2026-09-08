@@ -225,3 +225,42 @@ def test_inclusive_retention_edge_advances_below_last_row(tmp_path):
     assert session.calls[1][1]["params"]["end"] == str(START)
     assert report["stop_reason"] == "empty_page"
     assert report["acquisition_complete"] and report["missing_periods"] == 2
+
+
+@pytest.mark.parametrize("kind", ["oi", "taker"])
+@pytest.mark.parametrize("period", ["1H", "4H"])
+def test_single_new_bucket_equal_to_inclusive_end_is_progress(tmp_path, kind, period):
+    step = PERIOD_MS[period]
+    row = oi if kind == "oi" else lambda t: [str(t), "3", "7"]
+    responses = [Response({"code": "0", "data": [row(START + 2 * step)]}),
+                 Response({"code": "0", "data": [row(START + step)]}),
+                 Response({"code": "0", "data": []})]
+    api, session, _ = client(tmp_path, responses)
+    rows, report = collect_stream(api, kind, SYMBOL, period, START, START + 4 * step)
+    assert [r["event_time"] for r in rows] == [START + step, START + 2 * step]
+    assert [call[1]["params"]["end"] for call in session.calls] == [
+        str(START + 4 * step), str(START + step), str(START)]
+    assert report["stop_reason"] == "empty_page" and report["error"] is None
+    assert report["acquisition_complete"] and not report["full_period_coverage"]
+    assert report["missing_periods"] == 2
+
+
+@pytest.mark.parametrize("kind", ["oi", "taker", "funding"])
+def test_repeated_page_still_rejects_nonprogress_for_inclusive_and_exclusive_cursors(tmp_path, kind):
+    timestamp = START + 2 * HOUR
+    if kind == "oi":
+        row = oi(timestamp)
+    elif kind == "taker":
+        row = [str(timestamp), "3", "7"]
+    else:
+        row = {"instId": SYMBOL, "fundingTime": str(timestamp), "realizedRate": "0.001"}
+    response = Response({"code": "0", "data": [row]})
+    api, session, _ = client(tmp_path, [response, response])
+    rows, report = collect_stream(api, kind, SYMBOL, "1H", START, START + 4 * HOUR)
+    assert len(session.calls) == 2 and len(rows) == 1
+    assert report["error"] == "Pagination made no backward progress"
+    assert report["stop_reason"] == "error" and not report["acquisition_complete"]
+    assert report["duplicate_count"] == 1
+    key = "after" if kind == "funding" else "end"
+    expected = timestamp if kind == "funding" else timestamp - HOUR
+    assert session.calls[1][1]["params"][key] == str(expected)

@@ -1,0 +1,41 @@
+{
+  "checked_at": "2026-09-08T18:25:11.568563+00:00",
+  "tests": {
+    "command": ".venv/bin/python -m pytest -q tests/test_altcoin_features.py tests/test_okx_altcoin_snapshot.py tests/test_altcoin_history.py tests/test_altcoin_derivatives.py tests/test_altcoin_accounting.py tests/test_altcoin_trend_research.py tests/test_altcoin_trend_figures.py tests/test_altcoin_cost_diagnostics.py tests/test_altcoin_trend_report.py tests/test_altcoin_transfer_research.py",
+    "passed": 280,
+    "warnings": 15,
+    "wall_seconds": 5.83
+  },
+  "tested_sources": {
+    "yoyo/data/altcoin_features.py": "bde8784bd58e72a1cd39de83ee3210b2262541d55dd9346773cf3db12c567d9c",
+    "yoyo/data/okx_altcoin_snapshot.py": "72acdf27f783b2a65c96b2c9106329c5c74a921f6ecb622adb7d6d2a85bb1190",
+    "yoyo/data/altcoin_history.py": "e58f468ab144d223fc1d87af4f3e7d050faf35cf8e31d49e52d9adbbe7e3cb61",
+    "yoyo/data/altcoin_derivatives.py": "2176f3e95d8000662d67e631566764fb9ea6fd5f9940b4362630d735bed96c4b",
+    "yoyo/evaluation/altcoin_accounting.py": "f33d0c5b55ec88bd2b4c6e5aa97eb476f5a04a27a871779beb082b6759f5975b",
+    "yoyo/evaluation/altcoin_trend_research.py": "12da5bf276a4a87e185c6fef074eb27a124ca518dc9c2175b1bacb03af5f791e",
+    "yoyo/evaluation/altcoin_cost_diagnostics.py": "709ceaf2c3310e3a3a7e9aad5ba9bded2c23feb628b09467eac8aeb28267a0ad",
+    "yoyo/evaluation/altcoin_trend_figures.py": "ff9b773e9d14fbba9bb19432cb9e02e8bcf669640abe9938081a581da0545a16",
+    "yoyo/evaluation/altcoin_trend_report.py": "2dbcffd177bdb5b5c05512a6a95dc2412fb90b3b7627a6e12b6369ca6597c4c3",
+    "yoyo/evaluation/altcoin_transfer_research.py": "117eb29d9b12008712b3e54adbba69cf073b9d2b316c3d7fa48eb6f09fa4927a"
+  },
+  "render_checks": {
+    "html_tables": 19,
+    "html_images": 4,
+    "embedded_images": 4,
+    "broken_absolute_links": 0,
+    "report_receipt_inputs_checked": 33,
+    "changed_inputs": 0,
+    "gallery_cases": 14,
+    "visual_inspections": [
+      "SOPH 1H failure",
+      "USELESS 1H natural exit",
+      "XRP 1H omitted natural exit",
+      "ZEC 4H boundary mark"
+    ],
+    "html_browser_layout_verified": false
+  },
+  "limitations": [
+    "HTML structure and embedded assets verified; browser report navigation was not available, so no browser layout acceptance claim.",
+    "No live signal/protocol changes; no training, orders, credentials or notifications."
+  ]
+}
