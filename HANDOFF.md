@@ -4,6 +4,14 @@
 
 ## YOLO 改在 3060 电脑审核（2026-09-08）
 
+Owner追加“右键就是提交”：171b833源码冻结后，已向native LS的React main.js尾部安装限定项目77
+审核页的右键handler；原包备份与事务收据在output/offline_tasks/label_studio_right_click_20260908/。
+不重启、不改标注；原Submit/Update按钮负责验证保存，900ms跨题防连点，Shift+右键保留菜单。
+输入框/菜单/弹窗/列表/其他项目不触发。7安装测试+12浏览器模拟场景通过，未提交真实答案。
+实际任务34777刷新后原按钮title显示右键提示、console error0；3060实取新bundle SHA一致。
+Owner先保存当前未提交改动，再Ctrl+F5强刷；后续图片/审核区右键即原提交/更新。
+复现和恢复命令见docs/ops/YOLO_REVIEW_FROM_3060.md；未来LS升级需重新核对补丁。
+
 Owner要求用3060电脑操作审核。已严格SSH验证WIN-ZZC/RTX3060，目前192.168.1.2；
 Windows桌面已创建并读回核对“YOLO 人工审核.url”，指向Mac192.168.1.4:8081/projects/77/data?tab=44。
 从Windows用原账号实际认证读取项目77：2513任务/2513预框/20答案；安全样本主图与future40
