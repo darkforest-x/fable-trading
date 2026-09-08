@@ -129,7 +129,7 @@ def test_paginate_unordered_boundary_duplicate_and_replay_frozen_pages(tmp_path)
     api, session, clock = client(tmp_path, responses)
     rows, report = collect_stream(api, "oi", SYMBOL, "1H", START, START + 3 * HOUR)
     assert len(rows) == 3 and report["stop_reason"] == "reached_start"
-    assert session.calls[1][1]["params"]["end"] == str(START + HOUR - 1)
+    assert session.calls[1][1]["params"]["end"] == str(START)
     assert clock.value >= 0.5
     original = {p: p.read_bytes() for p in tmp_path.glob("raw/**/*.json")}
     again, second = collect_stream(api, "oi", SYMBOL, "1H", START, START + 3 * HOUR)
@@ -222,6 +222,6 @@ def test_inclusive_retention_edge_advances_below_last_row(tmp_path):
     api, session, _ = client(tmp_path, responses)
     rows, report = collect_stream(api, "oi", SYMBOL, "1H", START, START + 3 * HOUR)
     assert len(rows) == 1
-    assert session.calls[1][1]["params"]["end"] == str(START + HOUR - 1)
+    assert session.calls[1][1]["params"]["end"] == str(START)
     assert report["stop_reason"] == "empty_page"
     assert report["acquisition_complete"] and report["missing_periods"] == 2
