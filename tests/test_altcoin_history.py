@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -196,3 +197,169 @@ def test_cli_refuses_uncommitted_builder_before_reading_sources_or_writing(tmp_p
     result = history.main(["--universe", str(tmp_path / "unread.json"), "--out-dir", str(tmp_path / "out"), "--end", END])
     assert result == 1
     assert not (tmp_path / "out").exists()
+
+
+def volume_conflict_fixture(tmp_path):
+    old = write(tmp_path / "old.csv", bars())
+    changed = bars(4, 8)
+    changed.loc[0, "volume"] = 11
+    recent = write(tmp_path / "recent.csv", changed)
+    receipt = bars(4, 5)
+    receipt.loc[0, "volume"] = 11
+    receipt["confirm"] = "1"
+    verification = write(tmp_path / "verification.csv", receipt)
+    return old, recent, verification
+
+
+@pytest.mark.parametrize("chosen_volume", [10, 11])
+def test_explicit_verification_resolves_only_volume_and_preserves_all_evidence(tmp_path, chosen_volume):
+    old, recent, verification = volume_conflict_fixture(tmp_path)
+    receipt = pd.read_csv(verification); receipt.loc[0, "volume"] = chosen_volume
+    write(verification, receipt)
+    before = {path: sha(path) for path in (old, recent, verification)}
+    for paths in ([old, recent], [recent, old]):
+        result, audit = history.merge_symbol("AAA", paths, end=END, verification_paths=[verification])
+        assert result.volume.tolist() == [10, 10, 10, 10, chosen_volume, 10, 10, 10]
+        pd.testing.assert_frame_equal(result[history.OHLCV[:-1]], bars()[history.OHLCV[:-1]])
+        assert audit["conflict_timestamps"] == audit["resolved_conflict_timestamps"] == 1
+        assert audit["unresolved_conflict_timestamps"] == 0
+        resolved = audit["resolved_conflicts"][0]
+        assert resolved["chosen_values"]["volume"] == chosen_volume
+        assert {row["values"]["volume"] for row in resolved["observations"]} == {10, 11}
+        assert {row["path"]: row["sha256"] for row in resolved["observations"]} == {
+            str(old): before[old], str(recent): before[recent]}
+        assert resolved["verification"][0]["sha256"] == before[verification]
+        assert resolved["verification"][0]["confirmation"] == "explicit_confirm_column"
+        assert not resolved["historical_first_seen_known"]
+        assert not resolved["canonical_market_data_written"]
+    assert before == {path: sha(path) for path in before}
+
+
+@pytest.mark.parametrize("problem", ["third_volume", "tiny_volume_difference", "price", "missing_row", "unconfirmed", "bad_clock", "duplicate"])
+def test_false_or_missing_verification_cannot_resolve_conflicts(tmp_path, problem):
+    old, recent, verification = volume_conflict_fixture(tmp_path)
+    receipt = bars(4, 5)
+    receipt["confirm"] = "1"
+    receipt["volume"] = 11.0
+    if problem == "third_volume":
+        receipt.loc[0, "volume"] = 12
+    elif problem == "tiny_volume_difference":
+        receipt.loc[0, "volume"] *= 1 + 2e-13
+    elif problem == "price":
+        receipt.loc[0, "close"] = 101.01
+    elif problem == "missing_row":
+        receipt = bars(5, 6)
+    elif problem == "unconfirmed":
+        receipt.loc[0, "confirm"] = "0"
+    elif problem == "bad_clock":
+        receipt.loc[0, "open_time"] += pd.Timedelta(minutes=15)
+    elif problem == "duplicate":
+        receipt = pd.concat([receipt, receipt], ignore_index=True)
+    write(verification, receipt)
+    with pytest.raises(history.HistoryValidationError, match="overlapping_quotes_disagree") as caught:
+        history.merge_symbol("AAA", [old, recent], end=END, verification_paths=[verification])
+    assert caught.value.audit["resolved_conflict_timestamps"] == 0
+    assert caught.value.audit["unresolved_conflict_timestamps"] == 1
+
+
+@pytest.mark.parametrize("problem", ["same_path", "hardlink", "copy"])
+def test_verification_must_be_independent_of_merge_sources(tmp_path, problem):
+    old, recent, verification = volume_conflict_fixture(tmp_path)
+    if problem == "same_path":
+        verification = old
+    elif problem == "hardlink":
+        verification.unlink()
+        os.link(old, verification)
+    else:
+        verification.write_bytes(old.read_bytes())
+    with pytest.raises(history.HistoryValidationError) as caught:
+        history.merge_symbol("AAA", [old, recent], end=END, verification_paths=[verification])
+    assert caught.value.audit["conflicts"][0]["resolution_reason"] == "invalid_verification_source"
+
+
+def test_two_verifications_must_corroborate_the_same_observation(tmp_path):
+    old, recent, verification = volume_conflict_fixture(tmp_path)
+    other = bars(4, 5); other["confirm"] = "1"
+    opposite = write(tmp_path / "opposite.csv", other)
+    with pytest.raises(history.HistoryValidationError) as caught:
+        history.merge_symbol("AAA", [old, recent], end=END,
+                             verification_paths=[verification, opposite])
+    assert caught.value.audit["conflicts"][0]["resolution_reason"] == "verification_does_not_corroborate_one_observation"
+
+
+@pytest.mark.parametrize("price_change", [.1, 1e-11])
+def test_price_disagreement_remains_rejected_even_if_verification_matches_one_source(tmp_path, price_change):
+    old, recent, verification = volume_conflict_fixture(tmp_path)
+    altered = pd.read_csv(recent); altered.loc[0, "close"] += price_change
+    write(recent, altered)
+    receipt = altered.iloc[:1].copy(); receipt["confirm"] = "1"
+    write(verification, receipt)
+    with pytest.raises(history.HistoryValidationError) as caught:
+        history.merge_symbol("AAA", [old, recent], end=END, verification_paths=[verification])
+    assert caught.value.audit["conflicts"][0]["resolution_reason"] == "not_an_exact_volume_only_conflict"
+
+
+def test_verification_never_fills_gaps_or_is_used_without_explicit_request(tmp_path):
+    old, recent, verification = volume_conflict_fixture(tmp_path)
+    with pytest.raises(history.HistoryValidationError) as caught:
+        history.merge_symbol("AAA", [old, recent], end=END)
+    assert caught.value.audit["conflicts"][0]["resolution_reason"] == "verification_not_requested"
+    write(old, bars().drop(index=1))
+    receipt = pd.read_csv(verification)
+    receipt = pd.concat([receipt, bars(1, 2).assign(confirm="1")], ignore_index=True)
+    write(verification, receipt)
+    with pytest.raises(history.HistoryValidationError, match="missing_intervals") as caught:
+        history.merge_symbol("AAA", [old, recent], end=END, verification_paths=[verification])
+    assert caught.value.audit["resolved_conflict_timestamps"] == 1
+    assert caught.value.audit["missing_bars"] == 1
+
+
+def test_verification_reads_only_conflict_values_and_records_legacy_confirmation_limit(tmp_path):
+    old, recent, verification = volume_conflict_fixture(tmp_path)
+    receipt = bars(4, 6).astype({"close": object})
+    receipt.loc[0, "volume"] = 11
+    receipt.loc[1, "close"] = "not-relevant-to-the-receipt"
+    write(verification, receipt)
+    result, audit = history.merge_symbol("AAA", [old, recent], end=END, verification_paths=[verification])
+    assert len(result) == 8
+    source = audit["verification_sources"][0]
+    assert source["matched_rows"] == 1
+    assert source["confirmation"] == "legacy_csv_confirmation_not_retained"
+    assert source["independent_fetch"] == "caller_attested_not_proven_by_csv"
+
+
+def test_prepare_resolves_only_explicit_matching_symbol_verification_files(tmp_path):
+    root, universe, _ = universe_fixture(tmp_path)
+    fetched = root / "data/kline_fetched/okx_AAA_USDT_SWAP_15m_4.csv"
+    changed = bars(4, 8); changed.loc[0, "volume"] = 11
+    write(fetched, changed)
+    verification_dir = tmp_path / "verification"
+    receipt = bars(4, 5); receipt.loc[0, "volume"] = 11; receipt["confirm"] = "1"
+    write(verification_dir / "okx_WRONG_USDT_SWAP_15m_1.csv", receipt)
+    missing = history.prepare_history(universe, tmp_path / "missing", end=END,
+        verification_dir=verification_dir, repo_root=root, expected_pool_size=1)
+    assert missing["complete_pool_symbols"] == 0
+    write(verification_dir / "okx_AAA_USDT_SWAP_15m_1.csv", receipt)
+    resolved = history.prepare_history(universe, tmp_path / "resolved", end=END,
+        verification_dir=verification_dir, repo_root=root, expected_pool_size=1)
+    assert resolved["status"] == "complete" and resolved["schema_version"] == 2
+    assert resolved["symbols"][0]["resolved_conflict_timestamps"] == 1
+    assert resolved["verification_dir"] == str(verification_dir)
+    assert json.loads((tmp_path / "resolved/manifest.json").read_text()) == resolved
+    with pytest.raises(ValueError, match="independent"):
+        history.prepare_history(universe, tmp_path / "bad-dir", end=END,
+            verification_dir=root / "data/kline_fetched", repo_root=root, expected_pool_size=1)
+
+
+def test_cli_forwards_explicit_verification_dir_after_source_guard(tmp_path, monkeypatch):
+    monkeypatch.setattr(history.subprocess, "check_output", lambda args, **kwargs:
+                        "a" * 40 if args[1] == "rev-parse" else Path(history.__file__).read_bytes())
+    calls = []
+    def prepare(*args, **kwargs):
+        calls.append(kwargs)
+        return dict(status="complete", complete_pool_symbols=54, complete_illustrations=2)
+    monkeypatch.setattr(history, "prepare_history", prepare)
+    result = history.main(["--universe", str(tmp_path / "universe"), "--out-dir", str(tmp_path / "out"),
+                           "--end", END, "--verification-dir", str(tmp_path / "verification")])
+    assert result == 0
+    assert calls[0]["verification_dir"] == tmp_path / "verification"

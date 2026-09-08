@@ -1,0 +1,26 @@
+{
+  "experiment_id": "exp-imacd-altcoin-trends-20260909-v1",
+  "owner_authorization": "Any time data allowed, followed by explicit broad altcoin goal authorization",
+  "formal_holdout_start": "2026-05-04T00:00:00Z",
+  "entries": [
+    {
+      "configuration": "history-and-derivative-acquisition-v1",
+      "access_round": 1,
+      "kind": "data engineering only, no returns",
+      "attempts": [
+        "Rubik original inclusive cursor halted after retention duplicates",
+        "Rubik -1ms attempt halted after observed timestamp resolution",
+        "Rubik previous-period cursor (current run)",
+        "history_development all54 pass at2026Jan1, excludesholdout",
+        "history_full52pass2volumeconflicts, pendingindependentcorroboration"
+      ],
+      "notes": "Attempts retained, same frozen endpoint. No alternate parameter fit from these data."
+    },
+    {
+      "configuration": "11one-factor+5context+4exit arms 1H/4H/15m",
+      "access_round": 0,
+      "kind": "development2023-2024 and selection2025 running only",
+      "return_holdout_consumptions": 0
+    }
+  ]
+}
