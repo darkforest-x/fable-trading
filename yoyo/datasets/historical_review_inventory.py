@@ -65,6 +65,11 @@ def inventory(old_rows: list, events: list, answers: list, quality_rows: list) -
             raise ValueError('Historical answer uses another protocol')
         if quality[rid]['task_id'] != event['task_id']:
             raise ValueError('Quality evidence belongs to another task')
+        canonical_boxes = []
+        if event['status'] == 'owner_boxes' and not event['event_conflict']:
+            canonical_boxes = effective[0]['effective_boxes']
+            if any(not export.boxes_equal(canonical_boxes, a['effective_boxes']) for a in effective[1:]):
+                raise ValueError('Owner box answers disagree despite an equivalent event status')
         rows.append({
             'review_id': rid, 'task_id': event['task_id'], 'box_id': original['box_id'],
             'symbol': original['symbol'], 'source_path': original['source_path'],
@@ -74,8 +79,8 @@ def inventory(old_rows: list, events: list, answers: list, quality_rows: list) -
             'annotation_ids': [a['annotation_id'] for a in records if a['record_kind'] == 'annotation'],
             'draft_ids': [a['draft_id'] for a in records if a['record_kind'] == 'draft'],
             'effective_answer_count': len(effective),
-            'effective_boxes': [dict(box) for a in effective if not event['event_conflict']
-                                for box in a['effective_boxes']],
+            'effective_boxes': [dict(box) for box in canonical_boxes],
+            'canonical_geometry_policy': 'one_complete_equivalent_answer_all_answer_ids_retained',
             'conflict_answer_boxes_are_training_labels': False,
             'audit_flags': quality[rid]['audit_flags'],
             'negative_event_conflicts': quality[rid]['negative_event_conflicts'],

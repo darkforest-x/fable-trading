@@ -104,3 +104,21 @@ def test_hl2_statuses_are_not_adopted_by_historical_candidates():
     result = inventory.inventory(*args)
     assert result['population'] == 1
     assert result['rows'][0]['answer_status'] == 'unanswered'
+
+
+def test_equivalent_repeated_answers_are_one_event_box_set_not_two_targets():
+    args = example('owner_boxes')
+    args[2][0]['effective_boxes'] = [{'label': '多头', 'x': 35, 'y': 20, 'width': 30, 'height': 10}]
+    args[2].append({**deepcopy(args[2][0]), 'annotation_id': 9})
+    row = inventory.inventory(*args)['rows'][0]
+    assert row['annotation_ids'] == [8, 9] and row['effective_answer_count'] == 2
+    assert row['effective_boxes'] == args[2][0]['effective_boxes']
+    assert len(row['effective_boxes']) == 1
+
+
+def test_disagreeing_boxes_cannot_claim_equivalent_event_status():
+    args = example('owner_boxes')
+    args[2][0]['effective_boxes'] = [{'label': '多头', 'x': 35}]
+    args[2].append({**deepcopy(args[2][0]), 'annotation_id': 9, 'effective_boxes': [{'label': '空头', 'x': 35}]})
+    with pytest.raises(ValueError, match='disagree'):
+        inventory.inventory(*args)
