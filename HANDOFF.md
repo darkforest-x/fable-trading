@@ -2,6 +2,16 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## YOLO 后续走势参考已扩到150根（2026-09-08晚）
+
+Owner要求100–150根，当前1043题默认150：1041完整、STORJ一题132因行情缺口、USELESS一题13因保留集边界。
+2bee44e先冻结builder/prereg再构建，1043主图pixel replay、8000正图label对、29181原文件前后SHA通过。
+独立包datasets/owner_review_future150_20260908_v1映射新1043图+旧2513原40图软链；任务data/预框/答案均不改。
+7369d7b发布器核对来源、XML语义与全部任务/预测后，只改future Image绑定和项目标题为“YOLO 本周审核 · 1043题 · 未来150根”。
+Owner提交当前题后刷新；默认筛选/右键和上移布局保留。Chrome37322实际150/150可见，图底610<提交栏624，无测试提交。
+原40说明在折叠区；75聚焦检查通过，发布前后413人工答案保留，无holdout OHLCV读取/训练/金标资格变化。
+报告analysis/html/p1_yolo_review_future150_20260908.html；父实验results/future150_*三个JSON。此前future40长度口径由本节覆盖。
+
 ## YOLO 当前入口已修正（2026-09-08晚：1043题明确命名，默认按钮保留筛选）
 
 源码94fdc657先提交后安装。项目77现名“YOLO 本周审核 · 1043题 · 未来40根”，
