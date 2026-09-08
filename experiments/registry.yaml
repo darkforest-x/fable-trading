@@ -7243,15 +7243,41 @@ experiments:
       controls are not economic tests.
   - experiment_id: exp-imacd-yolo-followthrough-20260908-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending-source-freeze
-    status: active
+    source_commit: 8a9f93895c1d669db5b1733bb36d8a5de5ff085a
+    status: inconclusive
     question: Do fixed IMACD plus YOLO confirmations precede favorable future paths, especially same-close confluence?
     single_variable: Add frozen future-path labels to unchanged saved decisions; no gate or model changes.
-    result: Preregistered; complete future-path evaluation and global charts pending.
-    holdout_consumed: false
+    result: 'Future paths verified for all 5298 event/anchor/horizon labels and 15356 controls; 279/279 independent
+      checks. Revisited holdout 24-bar confirmation-anchor static mean net change: 1H immediate +0.196%, delayed -0.419%;
+      4H immediate +2.238%, delayed -0.193%. All four predeclared matched excess means negative, Holm p=1; small control-draw
+      instability disclosed. 10 wide hindsight charts. No fresh-blind alpha, human true-launch precision, or portfolio
+      profit claim.'
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    reuse_allowed: false
+    reuse_allowed: true
     canonical_report: analysis/html/p1_imacd_yolo_followthrough_20260908.html
-    artifacts: []
-    notes: Owner explicitly requests future paths and global charts under persistent unrestricted-date authorization. Same 1H and 4H configurations each consume holdout for the third time. Fixed 24-bar primary, 6/72 descriptive; no live changes.
+    artifacts:
+    - imacd-yolo-followthrough-20260908-v1-00
+    - imacd-yolo-followthrough-20260908-v1-01
+    - imacd-yolo-followthrough-20260908-v1-02
+    - imacd-yolo-followthrough-20260908-v1-03
+    - imacd-yolo-followthrough-20260908-v1-04
+    - imacd-yolo-followthrough-20260908-v1-05
+    - imacd-yolo-followthrough-20260908-v1-06
+    - imacd-yolo-followthrough-20260908-v1-07
+    - imacd-yolo-followthrough-20260908-v1-08
+    - imacd-yolo-followthrough-20260908-v1-09
+    - imacd-yolo-followthrough-20260908-v1-10
+    - imacd-yolo-followthrough-20260908-v1-11
+    - imacd-yolo-followthrough-20260908-v1-12
+    - imacd-yolo-followthrough-20260908-v1-13
+    - imacd-yolo-followthrough-20260908-v1-14
+    - imacd-yolo-followthrough-20260908-v1-15
+    - imacd-yolo-followthrough-20260908-v1-16
+    - imacd-yolo-followthrough-20260908-v1-17
+    notes: 'Frozen 54-symbol Jan1-Jul1 1H/4H post-confirmation path audit: 1341 arrows, 425 confirmations; unchanged
+      configuration, holdout consumption 3 per timeframe. 24 bars primary; 6/72 descriptive. Static 20bp sensitivity
+      is not portfolio PnL. Same-clock anchor kinds have independently sampled controls; sampling differences are
+      not waiting effects. Summary hashes all 110 label/context files. All future_only figures contain hindsight and
+      are prohibited as training inputs. No model rerun or live changes. Diagnostic reuse only.'
