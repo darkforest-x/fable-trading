@@ -44,6 +44,10 @@ def number(value, decimals=2):
     return f"{float(value):,.{decimals}f}" if value is not None and pd.notna(value) else "N/A"
 
 
+def bp_percent(value):
+    return number(None if value is None else value/100, 5) + "%"
+
+
 def tf(minutes):
     return "1H" if int(minutes) == 60 else "4H"
 
@@ -65,10 +69,37 @@ def describe(frame):
         confirmed_symbols=int(kept.symbol.nunique()),
         pass_rate_pct=100*len(kept)/len(full) if len(full) else None,
         delay_median_hours=float((kept.delay_bars*kept.timeframe_min/60).median()) if len(kept) else None,
+        delayed_delay_median_hours=float((delayed.delay_bars*delayed.timeframe_min/60).median()) if len(delayed) else None,
         displacement_median_bp=float(kept.displacement_bp.median()) if len(kept) else None,
         delayed_displacement_median_bp=float(delayed.displacement_bp.median()) if len(delayed) else None,
         adverse_delays=int(delayed.displacement_bp.gt(0).sum()),
         favorable_delays=int(delayed.displacement_bp.lt(0).sum()))
+
+
+def direction_variability(decisions):
+    """Describe exchangeability in the saved conditional null, without rerunning it.
+
+    Use complete events only, grouped by symbol and original signal UTC month,
+    exactly as the frozen null. Mixed directions are necessary but insufficient:
+    for a fixed number of long labels, the confirmation count can vary only if
+    can_long - can_short also varies within the group. These are descriptive
+    group sizes, not independent sample counts or an additional significance test.
+    """
+    results = {}
+    for fold in FOLDS:
+        for minutes in PERIODS:
+            q = decisions.loc[decisions.complete_followup.eq(True) & decisions.fold.eq(fold)
+                              & decisions.timeframe_min.eq(minutes)].copy()
+            q["month"] = pd.to_datetime(q.signal_available_at, utc=True).dt.strftime("%Y-%m")
+            q["pool_delta"] = q.can_long.astype(int) - q.can_short.astype(int)
+            grouped = q.groupby(["symbol", "month"]).agg(
+                n=("side", "size"), directions=("side", "nunique"), pool_variants=("pool_delta", "nunique"))
+            mixed = grouped.directions.gt(1)
+            variable = mixed & grouped.pool_variants.gt(1)
+            results[f"{minutes}_{fold}"] = dict(groups=len(grouped), complete_events=len(q),
+                mixed_direction_groups=int(mixed.sum()), mixed_direction_events=int(grouped.loc[mixed, "n"].sum()),
+                count_variable_groups=int(variable.sum()), count_variable_events=int(grouped.loc[variable, "n"].sum()))
+    return results
 
 
 def validate_saved(summary, decisions):
@@ -369,6 +400,7 @@ def run():
             raise ValueError(f"saved evaluation artifact changed: {relative}")
     d = pd.read_csv(DATA / "decisions.csv")
     validation = validate_saved(summary, d)
+    variability = direction_variability(d)
     comparison, comparison_rows = compare_prior(d)
     examples_section, examples_receipt = examples_markdown(summary_path, summary, d)
     paths = make_charts(d, summary["symbols"], EXP / "results/report_figures")
@@ -404,6 +436,7 @@ def run():
         for fold in FOLDS:
             stats = describe(part.loc[part.fold.eq(fold)])
             price_rows.append([FOLD_LABEL[fold], tf(minutes), stats["confirmed"], stats["immediate"], stats["delayed"],
+                number(stats["delayed_delay_median_hours"]),
                 number(stats["displacement_median_bp"]), number(stats["delayed_displacement_median_bp"]),
                 stats["adverse_delays"], stats["favorable_delays"]])
             confirmed = part.loc[part.fold.eq(fold) & part.status.eq("confirmed")]
@@ -430,11 +463,16 @@ def run():
             row += [f"{stats['confirmed']}/{stats['complete']}/{stats['arrows']}", number(stats["pass_rate_pct"])+"%"]
         symbol_rows.append(row)
     null_rows = []
+    variability_rows = []
     for fold in FOLDS:
         for minutes in PERIODS:
             null = summary["direction_null"][f"{minutes}_{fold}"]
             null_rows.append([FOLD_LABEL[fold], tf(minutes), null["observed"], null["permutations"],
                 number(null["null_mean"], 3), number(null["p_one_sided"], 6), number(null["p_holm"], 6)])
+            group = variability[f"{minutes}_{fold}"]
+            variability_rows.append([FOLD_LABEL[fold], tf(minutes), group["groups"], group["complete_events"],
+                group["mixed_direction_groups"], group["mixed_direction_events"],
+                group["count_variable_groups"], group["count_variable_events"]])
     validations = summary.get("validation", {})
     passed = sum(info.get("passed") is True for info in validations.values())
     checked = sum(int(info.get("confirmed_events_checked", 0)) for info in validations.values())
@@ -442,6 +480,21 @@ def run():
     review_path = EXP / "results/independent_review.json"
     review = (json.loads(review_path.read_text()) if review_path.exists() else {"status": "not yet available"})
     totals = describe(d)
+    period_totals = {minutes: describe(d.loc[d.timeframe_min.eq(minutes)]) for minutes in PERIODS}
+    headline_rows = [[tf(minutes), stats["arrows"], stats["complete"], stats["confirmed"],
+        number(stats["pass_rate_pct"])+"%", stats["delayed"], number(stats["delayed_delay_median_hours"]),
+        bp_percent(stats["delayed_displacement_median_bp"])]
+        for minutes, stats in period_totals.items()]
+    one_bar = d.loc[d.status.eq("confirmed") & d.overlap_bars.eq(1)].sort_values(["signal_available_at", "event_id"])
+    one_rows = []
+    for event in one_bar.itertuples(index=False):
+        one_rows.append([event.symbol, tf(event.timeframe_min), "多" if event.side == 1 else "空",
+            event.signal_available_at, number(event.delay_bars*event.timeframe_min/60, 0),
+            f"p{int(event.core_start_i-event.signal_i):+d} 至 p{int(event.core_end_i-event.signal_i):+d}",
+            number(100*event.core_overlap_fraction, 0)+"%"])
+    starts_on_arrow = int(one_bar.core_start_i.eq(one_bar.signal_i).sum())
+    ends_after_arrow = int(one_bar.core_end_from_arrow_bars.gt(0).sum())
+    weak_null = variability["240_holdout_review"]
     windows = sum(info.get("windows_scored", 0) for info in summary["inputs"].values())
     confirmed_symbols = d.loc[d.status.eq("confirmed"), "symbol"].nunique()
     comparison_text = (f"旧台账{comparison['prior_events']}条，扩大评估中BTC/ETH同日期{comparison['current_events']}条；"
@@ -455,9 +508,15 @@ def run():
         ["修复范围原文", summary.get("output_fix", "未记录")],
     ])
     relative = {key: "../" + str(path.relative_to(ROOT)) for key, path in paths.items()}
-    md = f"""# IMACD → YOLO 扩大检查：54币、半年、1H与4H
+    md = f"""# IMACD → YOLO 扩大检查：筛选生效，等待与形态身份仍需检验
 
-这轮把固定模型与同一确认规则扩展到既有54币池，按1H/4H和两段日期完成{len(summary['inputs'])}个分组，实际推理{windows:,}张条件化窗口。共{totals['arrows']:,}个原箭头，其中{totals['complete']:,}个有完整随访、{totals['censored']:,}个被分段边界截断；模型确认{totals['confirmed']:,}个，分布于{confirmed_symbols}个品种。**确认/完整随访为{number(totals['pass_rate_pct'])}%，这是候选保留率，不是真实去噪率或成功概率。**
+**1H确认{period_totals[60]['confirmed']}/{period_totals[60]['complete']}个完整随访候选，4H确认{period_totals[240]['confirmed']}/{period_totals[240]['complete']}个。** 扩展到54币半年后，程序确实筛掉了多数候选；是否筛掉了假启动、是否保留真正大行情，仍没有真假标签或收益评价支持。
+
+{md_table(['周期', '全部箭头', '完整随访', '确认', '确认/完整', '仅延迟确认数', '仅延迟等待中位h', '仅延迟方向位移中位'], headline_rows)}
+
+对实际需要等待的组，1H中位等{number(period_totals[60]['delayed_delay_median_hours'], 0)}小时，4H中位等{number(period_totals[240]['delayed_delay_median_hours'], 0)}小时；沿方向下一开盘位移中位分别为{bp_percent(period_totals[60]['delayed_displacement_median_bp'])}和{bp_percent(period_totals[240]['delayed_displacement_median_bp'])}。这反映等待后的报价位置，**不是收益、实际滑点或真实成交成本**。还发现仅1根交集也能放行的{len(one_bar)}条案例，以及4H后段方向置换只有很少可变组；后文分别核对这两项限制。
+
+这轮按1H/4H和两段日期完成{len(summary['inputs'])}个分组，实际推理{windows:,}张条件化窗口。共{totals['arrows']:,}个原箭头，其中{totals['complete']:,}个有完整随访、{totals['censored']:,}个被分段边界截断；模型确认{totals['confirmed']:,}个，分布于{confirmed_symbols}个品种。合并确认/完整随访为{number(totals['pass_rate_pct'])}%，是候选保留率，不是真实去噪率或成功概率。
 
 本轮只扩大数据覆盖；模型、图像、阈值和9根等待预算没有按新结果调整。前段2026-01-01至05-04属于模型验证已暴露时段，后段05-04至07-01属于既有holdout再次复核。同一配置的holdout评估次数：1H第{summary['holdout_consumptions']['60']}次，4H第{summary['holdout_consumptions']['240']}次；不能因另起实验名重新记作首次，更不能称新盲测。
 
@@ -493,7 +552,7 @@ def run():
 
 左侧0小时单列即时确认；右侧为全部确认的经验累计分布，包括即时确认的零位移。沿方向位移定义为 `side × (确认后次开盘 / 原箭头后次开盘 − 1)`，正数表示等待后沿信号方向更贵，负数表示更便宜。它不是收益、实际滑点或成交保证。为免大量即时确认掩盖等待代价，另列仅延迟确认的中位数。
 
-{md_table(['时段', '周期', '确认', '即时', '延迟', '全部位移中位bp', '仅延迟位移中位bp', '延迟更贵', '延迟更便宜'], price_rows)}
+{md_table(['时段', '周期', '确认', '即时', '延迟', '仅延迟等待中位h', '全部位移中位bp', '仅延迟位移中位bp', '延迟更贵', '延迟更便宜'], price_rows)}
 
 ## 模型确认的还是原蓄势结构吗
 
@@ -504,6 +563,10 @@ def run():
 {md_table(['周期', '确认数', '重合1根', '2根', '3根', '4根', '5根', '核心末端早于p', '等于p', '晚于p'], overlap_rows)}
 
 仅重合1根时，几何条件通过对原蓄势身份的支持很弱；核心末端晚于p表示核心延伸到了原箭头之后，可能包含启动后的新结构。这些是审核优先级描述，并未新增过滤门，也不能单凭表格判定形态正确或错误。需要逐图人工审核才能确认是否仍是用户要求的“原蓄势释放”。
+
+全部{len(one_bar)}条仅重合1根案例列在下面；其中{starts_on_arrow}条核心从原箭头p开始，{ends_after_arrow}条核心延伸到p之后。这揭示了当前宽松交集门的具体问题：即使核心主体出现在启动以后，只要碰到箭头这一根，也能获得确认。不能把这种确认直接当成模型认可了此前整段均线密集。
+
+{md_table(['币种', '周期', '方向', '原箭头收盘UTC', '等待h', '核心相对箭头区间', '核心重合率'], one_rows)}
 
 {examples_section}
 
@@ -526,6 +589,12 @@ def run():
 {md_table(['时段', '周期', '真实同向确认', '置换次数', '打乱均值', '单侧p', '四项Holm p'], null_rows)}
 
 固定原箭头方向下的md有效窗口与模型几何候选，在同币同月内打乱箭头方向；两段×两周期共四项检验使用同一家族Holm校正。这只检验条件化方向关联，不检验未来趋势、真假噪音、盈利或新增过滤器的独立价值。模型与IMACD共享价格和均线，存在机械相关；同月同币缺少方向变化时，置换本身也可能退化。
+
+{md_table(['时段', '周期', '币×月组数', '完整事件', '混合方向组', '组内事件', '确认总数可变组', '组内事件'], variability_rows)}
+
+上表从保存decisions独立重算，没有重跑模型或改变原p值。只有同时出现多、空的组才可能交换方向；进一步要求组内`can_long−can_short`不恒定，置换才可能改变确认总数。所列事件数表示这些组包含多少事件，不能当作独立样本数。
+
+**4H后段p={number(summary['direction_null']['240_holdout_review']['p_one_sided'], 3)}不能直接判模型无效。** 该段{weak_null['groups']}个币×月组、{weak_null['complete_events']}个完整事件中，混合方向仅{weak_null['mixed_direction_groups']}组/{weak_null['mixed_direction_events']}个事件；真正能改变确认总数的只有{weak_null['count_variable_groups']}组/{weak_null['count_variable_events']}个事件，其余对照贡献不变。这使当前检验的辨别能力很有限；结论应是这项条件化方向检验证据不足，既不能凭此确认有效，也不能凭不显著否定模型。相对地，1H的小p支持的是本定义下方向关联，并没有越过真假信号与盈利验证的缺口。
 
 本轮没有新增金标或监督训练，正类率和val样本数不适用；确认率不是正类率。AUC、accuracy、precision/recall均为N/A。未规定经济退出和仓位合同，因此成本、TP/SL、胜率、净收益、最大回撤、top-decile毛净收益和经济匹配随机入场均为N/A，不以确认数减少代替这些指标。工程对照是全IMACD箭头及上述条件化方向打乱。
 
@@ -596,6 +665,7 @@ cat experiments/active/exp-imacd-yolo-expanded-20260908-v1/results/progress.json
                     "--out-dir", "analysis/html"], cwd=ROOT, check=True)
     receipt = dict(summary_sha256=digest(summary_path), report_source_sha256=digest(Path(__file__)),
         report_sha256=digest(report), validation=validation, comparison=comparison,
+        direction_variability=variability,
         examples=examples_receipt,
         finalizer_source_sha256=summary.get("finalizer_source_sha256"),
         figures={str(path.relative_to(ROOT)): digest(path) for path in paths.values()})
