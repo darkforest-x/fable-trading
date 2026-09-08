@@ -359,7 +359,7 @@
     });
     parts.push('<g clip-path="url(#price-clip)">');
     const maColors = ["#82aaa0", "#48695e", "#7194b0", "#405c72", "#909eae", "#556576"];
-    maKeys.forEach((key, i) => parts.push(`<path d="${path(key, py)}" fill="none" stroke="${maColors[i]}" stroke-width=".8" opacity=".8"/>`));
+    maKeys.forEach((key, i) => parts.push(`<path d="${path(key, py)}" fill="none" stroke="${maColors[i]}" stroke-width=".8" opacity=".95"/>`));
     candles.forEach((bar, i) => {
       const bright = bar.retest_side === "long" || bar.retest_side === "short";
       const rising = Number(bar.c) >= Number(bar.o);
