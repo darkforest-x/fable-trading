@@ -407,6 +407,7 @@ float trackMa = trackMaChoice == "SMA20" ? s20 : trackMaChoice == "EMA20" ? e20 
 var int episodeSide = 0
 var int episodeBar = na
 var int episodeTime = na
+var int episodeConfirmedTime = na
 var int episodeCount = 0
 var float episodeHigh = na
 var float episodeLow = na
@@ -504,6 +505,7 @@ if visibleRelease
     episodeSide := focusReleaseSide
     episodeBar := bar_index
     episodeTime := time
+    episodeConfirmedTime := time_close
     episodeCount := focusReleaseCount
     episodeHigh := releasedFocusHigh
     episodeLow := releasedFocusLow
@@ -782,7 +784,9 @@ if (barstate.islast or barstate.islastconfirmedhistory) and barstate.isconfirmed
     string levelsText = hasEpisode ? "结构 " + str.tostring(farLevel, format.mintick) + "  ·  保护 " + (na(episodeTrail) ? "未启用" : str.tostring(episodeTrail, format.mintick)) : "收盘确认"
     string phaseTip = "最新一次主图可见释放独立跟踪，光晕结束不会清空趋势阶段。\n" + (hasEpisode ? "释放前近零 " + str.tostring(episodeCount) + " 根；目前第 " + str.tostring(bar_index - episodeBar) + " 根。\n" + (episodeRetested ? "首次回踩参考：" + episodeRetestReason + "。\n" : "") : "") + systemDetail + "\n高 " + htf + " " + f_zone(hMd) + (confluence and useLower ? " · 低 " + ltf + " " + f_zone(lMd) : "") + "\nPine 不包含外部模型检测状态。"
     string rTip = "初始 R = 入场参考与信号K线极值的距离，固定不变。最大 R 取参考存续期间已确认K线的有利极值；回吐 = 最大 R − 当前 R。\n已触初始止损后永久冻结 R，即使结构仍延续也不统计后续涨跌。同根触止损和里程碑时止损优先；跳空按更不利开盘参考。\n这是价格路径参考，未扣手续费/滑点/资金费，不代表实际成交或策略收益。"
-    table.cell(panel, 0, 0, "蓄势 · 趋势", bgcolor=color.new(paper, 12), text_color=color.new(ink, 35), text_size=size.small, text_halign=text.align_left, tooltip=phaseTip)
+    string episodeCaption = hasEpisode ? "最新释放 " + str.format_time(episodeConfirmedTime, "MM/dd", "Asia/Shanghai") : "近零蓄势"
+    string datedPhaseTip = (hasEpisode ? "释放确认：" + str.format_time(episodeConfirmedTime, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间。\n面板跟踪最新释放，不随十字光标或可视历史区间切换。\n" : "") + phaseTip
+    table.cell(panel, 0, 0, episodeCaption, bgcolor=color.new(paper, 12), text_color=color.new(ink, 35), text_size=size.small, text_halign=text.align_left, tooltip=datedPhaseTip)
     table.cell(panel, 1, 0, phaseText, bgcolor=color.new(phaseColor, 92), text_color=phaseColor, text_size=size.small, tooltip=phaseTip)
     table.cell(panel, 0, 1, newSetup != "" and hasEpisode ? newSetup : "阶段依据", bgcolor=color.new(paper, 12), text_color=newSetup != "" and hasEpisode ? amber : color.new(ink, 56), text_size=size.tiny, text_halign=text.align_left, tooltip=phaseTip)
     table.cell(panel, 1, 1, reasonText, bgcolor=color.new(paper, 12), text_color=color.new(ink, 40), text_size=size.tiny, tooltip=phaseTip)
