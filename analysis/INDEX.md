@@ -8,6 +8,8 @@
 
 ## 按日期倒序
 
+本轮增量入口（2026-09-08，保留既有索引快照）：[IMACD → YOLO · 54币半年扩大评估](html/p1_imacd_yolo_expanded_20260908.html) · [MD源](p1_imacd_yolo_expanded_20260908.md)。1341箭头、1325完整随访；1H确认335/1076，4H90/249。延迟组中位追价1.01%/2.32%；4例核心仅重叠1根。3750项独立核验通过；工程筛选证据，不是盈利或去噪率验证。
+
 ### 2026-09-07 — 完整YOLO数据转入Label Studio手标
 
 - [完整HTML](html/p1_15m_grade_a_labelstudio_manual_20260907.html) · [MD源](p1_15m_grade_a_labelstudio_manual_20260907.md)

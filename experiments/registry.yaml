@@ -7188,17 +7188,56 @@ experiments:
       notrerun. Reuse engineering evidence only, not feature-selection or training data. No liveconfiguration changed.
   - experiment_id: exp-imacd-yolo-expanded-20260908-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending-source-freeze
-    status: active
+    source_commit: b3640dbec4001d7f755453a1217a8cb5a98bf401
+    status: inconclusive
     question: Does the same IMACD/Grade-A native1H/4H gate retain signals consistently across54cachedOKXsymbols and2026H1?
     single_variable: Evaluation coverage expansion only:existing54pool andJan1-Jul1; unchanged weight,thresholds,per-bar
       gate.
-    result: Preregistered; evaluation pending.
-    holdout_consumed: false
+    result: 'Engineering evaluation complete: 54 symbols, 1341 arrows, 1325 complete follow-ups; 1H confirms 335/1076
+      and 4H 90/249. Delayed-only median directional next-open displacement +1.00897%/+2.31849%, not PnL. Four one-bar
+      core overlaps. Independent review 3750/3750; delivery QA 38/38; 114 tests. Profitability and true-launch noise
+      reduction untested.'
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    reuse_allowed: false
+    reuse_allowed: true
     canonical_report: analysis/html/p1_imacd_yolo_expanded_20260908.html
-    artifacts: []
-    notes: Owner asks more data; explicit all-dates authorization persists. This expansion is second holdout evaluation
-      for each unchanged1H/4Hconfiguration, not a new blind test; no live changes.
+    artifacts:
+    - imacd-yolo-expanded-20260908-v1-00
+    - imacd-yolo-expanded-20260908-v1-01
+    - imacd-yolo-expanded-20260908-v1-02
+    - imacd-yolo-expanded-20260908-v1-03
+    - imacd-yolo-expanded-20260908-v1-04
+    - imacd-yolo-expanded-20260908-v1-05
+    - imacd-yolo-expanded-20260908-v1-06
+    - imacd-yolo-expanded-20260908-v1-07
+    - imacd-yolo-expanded-20260908-v1-08
+    - imacd-yolo-expanded-20260908-v1-09
+    - imacd-yolo-expanded-20260908-v1-10
+    - imacd-yolo-expanded-20260908-v1-11
+    - imacd-yolo-expanded-20260908-v1-12
+    - imacd-yolo-expanded-20260908-v1-13
+    - imacd-yolo-expanded-20260908-v1-14
+    - imacd-yolo-expanded-20260908-v1-15
+    - imacd-yolo-expanded-20260908-v1-16
+    - imacd-yolo-expanded-20260908-v1-17
+    - imacd-yolo-expanded-20260908-v1-18
+    - imacd-yolo-expanded-20260908-v1-19
+    - imacd-yolo-expanded-20260908-v1-20
+    - imacd-yolo-expanded-20260908-v1-21
+    - imacd-yolo-expanded-20260908-v1-22
+    - imacd-yolo-expanded-20260908-v1-23
+    - imacd-yolo-expanded-20260908-v1-24
+    - imacd-yolo-expanded-20260908-v1-25
+    - imacd-yolo-expanded-20260908-v1-26
+    - imacd-yolo-expanded-20260908-v1-27
+    - imacd-yolo-expanded-20260908-v1-28
+    - imacd-yolo-expanded-20260908-v1-29
+    - imacd-yolo-expanded-20260908-v1-30
+    - imacd-yolo-expanded-20260908-v1-31
+    - imacd-yolo-expanded-20260908-v1-32
+    - imacd-yolo-expanded-20260908-v1-33
+    notes: Fixed 54-symbol Jan1-Jul1 native 1H/4H engineering evaluation; unchanged configuration, holdout consumption
+      2 for each timeframe. Summary inventories all 1084 saved data files by SHA. No training, promotion, live notification
+      or execution changes. No profitability or true-launch validation. Engineering reuse only. Four conditional direction
+      controls are not economic tests.

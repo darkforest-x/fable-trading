@@ -1,0 +1,122 @@
+{
+  "selection": "Earliest signal per timeframe/side, plus earliest one-bar core overlap; deduplicated, no outcomes.",
+  "summary_sha256": "ff86b706624484a2af416dc6a73ee9f8b665c49ea2963896d6dc7d5df375a779",
+  "examples": [
+    {
+      "event_id": "ORDI_60_1767258000",
+      "symbol": "ORDI",
+      "timeframe_min": 60,
+      "side": 1,
+      "fold": "pre_holdout",
+      "overlap_bars": 5,
+      "signal_available_at": "2026-01-01 10:00:00+00:00",
+      "model_available_at": "2026-01-01 12:00:00+00:00",
+      "context_last_open_at": "2026-01-01 11:00:00+00:00",
+      "aggregate_sha256_verified": "c990ba626dd62449fc640439b44905cd6300b8b3521ac624d0fcda03f9346b1d",
+      "pixel_sha256_verified": "9994fbbfa1774f6b2074406de719c712a461f7def5cf7ed29cff3ce6e04aae3d",
+      "paths": {
+        "input": "experiments/active/exp-imacd-yolo-expanded-20260908-v1/results/examples/ORDI_60_1767258000_input.png",
+        "audit": "experiments/active/exp-imacd-yolo-expanded-20260908-v1/results/examples/ORDI_60_1767258000_audit.png",
+        "context": "experiments/active/exp-imacd-yolo-expanded-20260908-v1/results/examples/ORDI_60_1767258000_context.png"
+      },
+      "file_sha256": {
+        "input": "5b9a5ee57f5a64658f9df3c0fe2e050368de4d0102bf9102f82fb7a2ab15db09",
+        "audit": "5804aab72cb2e9ca782bf22618c20d2d5645c4088fadf4f57ca26adebbd6b71c",
+        "context": "4e4ba3a175ddf34b8f376872bb06e8aec7fafb073b3cc7222e4f697c38e9aa3e"
+      }
+    },
+    {
+      "event_id": "HYPE_60_1767279600",
+      "symbol": "HYPE",
+      "timeframe_min": 60,
+      "side": -1,
+      "fold": "pre_holdout",
+      "overlap_bars": 4,
+      "signal_available_at": "2026-01-01 16:00:00+00:00",
+      "model_available_at": "2026-01-01 16:00:00+00:00",
+      "context_last_open_at": "2026-01-01 15:00:00+00:00",
+      "aggregate_sha256_verified": "beab28580c754675ab813ca3b982ebc59e7f6d8898203108d8d8e54f5cb39e0d",
+      "pixel_sha256_verified": "d8562b2347735edd93e1eff59619bdd44196febb2fe46e961b0c07b4221d73d3",
+      "paths": {
+        "input": "experiments/active/exp-imacd-yolo-expanded-20260908-v1/results/examples/HYPE_60_1767279600_input.png",
+        "audit": "experiments/active/exp-imacd-yolo-expanded-20260908-v1/results/examples/HYPE_60_1767279600_audit.png",
+        "context": "experiments/active/exp-imacd-yolo-expanded-20260908-v1/results/examples/HYPE_60_1767279600_context.png"
+      },
+      "file_sha256": {
+        "input": "8bfa45eeb8a02943acfb9f8473776c6e4910c9ce0d2ee9e54f9ce1b85fec999b",
+        "audit": "ef9f7713ba5e623fa966bc44df042210871378dde75ef31e1cb67241e81681b2",
+        "context": "4b8710248b633f800daaca652384ea40a275dbd0e01505ad6ec09ba3a2e72c3e"
+      }
+    },
+    {
+      "event_id": "PEPE_240_1767283200",
+      "symbol": "PEPE",
+      "timeframe_min": 240,
+      "side": 1,
+      "fold": "pre_holdout",
+      "overlap_bars": 4,
+      "signal_available_at": "2026-01-01 20:00:00+00:00",
+      "model_available_at": "2026-01-02 00:00:00+00:00",
+      "context_last_open_at": "2026-01-01 20:00:00+00:00",
+      "aggregate_sha256_verified": "93e5670fcf99a8e72fc99d71b3f32d4177c1ca2ffad9572d46a5d3886c4293af",
+      "pixel_sha256_verified": "02fbfd05eaca4ac242de926a041b75e14b48d10fd36e0563e801522c1d26edc3",
+      "paths": {
+        "input": "experiments/active/exp-imacd-yolo-expanded-20260908-v1/results/examples/PEPE_240_1767283200_input.png",
+        "audit": "experiments/active/exp-imacd-yolo-expanded-20260908-v1/results/examples/PEPE_240_1767283200_audit.png",
+        "context": "experiments/active/exp-imacd-yolo-expanded-20260908-v1/results/examples/PEPE_240_1767283200_context.png"
+      },
+      "file_sha256": {
+        "input": "fcaa8e897aa050cd953f682aa530fc0c765750e747abe501bf6928cfd9bbc4d0",
+        "audit": "71eb8850ff1bb9dfca8764fa446016bdb97cdcfbaadcba63c0eecb2eb55ac3b1",
+        "context": "b2e14a06475db76ab8e2397c009531fc7fffd8323cbe37a738f34fde9a32eb1e"
+      }
+    },
+    {
+      "event_id": "UNI_240_1767888000",
+      "symbol": "UNI",
+      "timeframe_min": 240,
+      "side": -1,
+      "fold": "pre_holdout",
+      "overlap_bars": 4,
+      "signal_available_at": "2026-01-08 20:00:00+00:00",
+      "model_available_at": "2026-01-08 20:00:00+00:00",
+      "context_last_open_at": "2026-01-08 16:00:00+00:00",
+      "aggregate_sha256_verified": "c452578f14936aac5c0a5e8e51cab358bd7211804cae42b690d864ab5ef3ab85",
+      "pixel_sha256_verified": "e7da41f0a88aa80ee6544dbcc07ea5f421910c8cf3a763410ec042d9d223a47d",
+      "paths": {
+        "input": "experiments/active/exp-imacd-yolo-expanded-20260908-v1/results/examples/UNI_240_1767888000_input.png",
+        "audit": "experiments/active/exp-imacd-yolo-expanded-20260908-v1/results/examples/UNI_240_1767888000_audit.png",
+        "context": "experiments/active/exp-imacd-yolo-expanded-20260908-v1/results/examples/UNI_240_1767888000_context.png"
+      },
+      "file_sha256": {
+        "input": "3e9d8b462e7ea6c9d65f9975f1494d77c2b22e211277fddbd775770ea491dee6",
+        "audit": "57d4f8762108cf33d9a43b3c4a21bbd66bd51cc2df50d58ff69d8f97612c3e8d",
+        "context": "9eb956966242e9038c9d6c511e7ba6930e89406c33f65724495e18997b570f28"
+      }
+    },
+    {
+      "event_id": "ETHFI_60_1770292800",
+      "symbol": "ETHFI",
+      "timeframe_min": 60,
+      "side": -1,
+      "fold": "pre_holdout",
+      "overlap_bars": 1,
+      "signal_available_at": "2026-02-05 13:00:00+00:00",
+      "model_available_at": "2026-02-05 20:00:00+00:00",
+      "context_last_open_at": "2026-02-05 19:00:00+00:00",
+      "aggregate_sha256_verified": "8d569ca0b19593cb999c280a7c215a96586417964ff946c3edcc6bbed5480f60",
+      "pixel_sha256_verified": "3f2ec083792027cea72f2f6e456d180f765ca76f2877c299886e9e650913356e",
+      "paths": {
+        "input": "experiments/active/exp-imacd-yolo-expanded-20260908-v1/results/examples/ETHFI_60_1770292800_input.png",
+        "audit": "experiments/active/exp-imacd-yolo-expanded-20260908-v1/results/examples/ETHFI_60_1770292800_audit.png",
+        "context": "experiments/active/exp-imacd-yolo-expanded-20260908-v1/results/examples/ETHFI_60_1770292800_context.png"
+      },
+      "file_sha256": {
+        "input": "b08f146e7283f376ac13d907bf45ec2bf7cb1fb1d33587fda97f11e7a06dbcd5",
+        "audit": "273a816b5452c03f46dfd9e9c0c3bea86df60e63bf8897efa531c37a80c0bb58",
+        "context": "0de5a73d921f3e042c619e37c9fbf42cbdd340013d1eea4f39a3e7af1af8bc21"
+      }
+    }
+  ],
+  "model_inference_runs": 0
+}
