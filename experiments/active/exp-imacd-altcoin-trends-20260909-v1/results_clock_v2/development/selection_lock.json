@@ -1,0 +1,98 @@
+{
+  "generated_at": "2026-09-08T17:35:49.593632+00:00",
+  "selection_only": "development2023-24 plus validation2025",
+  "summary_sha256": "393a9679b0b6ba0624384d7af5e878eb985adf224cdd5d9793f3b8f90ac6d49e",
+  "selections": [
+    {
+      "minutes": 60,
+      "eligible_count": 5,
+      "selected_arm": "exit_chandelier",
+      "family_nominations": {
+        "parameter": null,
+        "context": "gate_box_break",
+        "exit": "exit_chandelier"
+      },
+      "allowed_audit_arms": [
+        "base",
+        "exit_chandelier",
+        "exit_fixed3r",
+        "exit_sma60",
+        "gate_box_break"
+      ],
+      "eligible_validation_ranking": [
+        {
+          "arm": "exit_chandelier",
+          "net_pct": 2.1190794147996517,
+          "mdd_pct": -2.3595210128102173
+        },
+        {
+          "arm": "gate_box_break",
+          "net_pct": 1.6790812369205765,
+          "mdd_pct": -2.0763363799869317
+        },
+        {
+          "arm": "gate_tr15",
+          "net_pct": 0.739728695869557,
+          "mdd_pct": -2.735803704955253
+        },
+        {
+          "arm": "gate_close70",
+          "net_pct": 0.5921306333531051,
+          "mdd_pct": -2.9001215545850667
+        },
+        {
+          "arm": "gate_rvol2",
+          "net_pct": 0.5388826653346834,
+          "mdd_pct": -2.685545947432033
+        }
+      ]
+    },
+    {
+      "minutes": 240,
+      "eligible_count": 5,
+      "selected_arm": "signal5",
+      "family_nominations": {
+        "parameter": "signal5",
+        "context": null,
+        "exit": "exit_fixed3r"
+      },
+      "allowed_audit_arms": [
+        "base",
+        "exit_chandelier",
+        "exit_fixed3r",
+        "exit_sma60",
+        "signal5"
+      ],
+      "eligible_validation_ranking": [
+        {
+          "arm": "signal5",
+          "net_pct": 10.49655837856589,
+          "mdd_pct": -7.275672179456483
+        },
+        {
+          "arm": "focus6",
+          "net_pct": 10.041924296118076,
+          "mdd_pct": -9.147736057706368
+        },
+        {
+          "arm": "exit_fixed3r",
+          "net_pct": 3.0464288498820213,
+          "mdd_pct": -4.043941334076539
+        },
+        {
+          "arm": "signal13",
+          "net_pct": 2.9537120696079278,
+          "mdd_pct": -2.938335506566969
+        },
+        {
+          "arm": "exit_chandelier",
+          "net_pct": 1.3179670171306723,
+          "mdd_pct": -2.027512510446461
+        }
+      ]
+    }
+  ],
+  "nomination_is_not_validation_or_deployment": true,
+  "no_gate_pass_means_no_approved_parameter": true,
+  "production_eligible": false
+}

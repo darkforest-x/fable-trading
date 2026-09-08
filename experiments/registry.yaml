@@ -7447,28 +7447,47 @@ experiments:
 
   - experiment_id: exp-imacd-altcoin-trends-20260909-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: df75f781ed89f419dfc527477c232eb749617d00
-    status: active
+    source_commit: c9721f38508115e1a499a8af8dca1d32573d295b
+    status: rejected
     question: Which causal volatility selection, IMACD parameters and exit rules preserve net altcoin trend returns?
     single_variable: Preregistered one-factor parameter, context and exit arms; Owner authorized isolated broad research.
-    result: Preregistered; parameter provenance and pure feature/snapshot tests completed. No new outcomes yet.
-    holdout_consumed: false
+    result: "Completed271-instrument study (54core+215external+2illustrations); no locked parameter/exit configuration passed stable cross-period transfer. 15m no old-year nomination. Quiet-launch omission and exit-tail tradeoffs documented;280synthetic checks passed."
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
-    artifacts: []
-    notes: Owner permits all dates for this research; formal May4 holdout definition preserved and exposure rounds will be logged. SOPH and USELESS are post-hoc illustrations excluded from parameter choice. No live mutations.
+    canonical_report: analysis/p1_imacd_altcoin_trends_20260909.md
+    artifacts:
+      - imacd-altcoin-trends-20260909-report-source
+      - imacd-altcoin-trends-20260909-report-html
+      - imacd-altcoin-trends-20260909-report-receipt
+      - imacd-altcoin-trends-20260909-gallery
+      - imacd-altcoin-trends-20260909-costs
+      - imacd-altcoin-trends-20260909-external-results
+      - imacd-altcoin-trends-20260909-history
+      - imacd-altcoin-trends-20260909-external-history
+      - imacd-altcoin-trends-20260909-derivatives-4h
+      - imacd-altcoin-trends-20260909-derivatives-1h
+      - imacd-altcoin-trends-20260909-derivatives-1h-audit
+      - imacd-altcoin-trends-20260909-extreme-case-audit
+      - imacd-altcoin-trends-20260909-validation
+    notes: "Completed research, not proof that every future strategy is unprofitable. Formal May4 holdout remains; corrected1H/4H audit round2,15m round1,external round1. Original clock-v1 results retained and superseded. No parameter retuning from2026outcomes, no live mutation; current IMACD-to-YOLO notifications unchanged."
 
   - experiment_id: exp-imacd-altcoin-transfer-20260909-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: e8d71aa61b34628932c9684452839f0925863a0d
-    status: active
+    source_commit: c9721f38508115e1a499a8af8dca1d32573d295b
+    status: rejected
     question: Do old-year locked altcoin trend rules transfer outside the original54 and owner examples?
     single_variable: No new selection; apply the corrected fixed arms to an identity-frozen external crypto pool.
-    result: Preregistered; corrected selection c306749e locked; no external outcomes computed.
-    holdout_consumed: false
+    result: "Completed215external-crypto transfer without reselection. Recent locked1H Chandelier -0.402% and4H signal5 -0.697% static-cost portfolio return; no stable winner. Extreme RAVE/BEAT anchors corroborated, with concentration and execution limits."
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
-    artifacts: []
-    notes: Owner authorized all-date altcoin research. Identity snapshot precedes price validation; unavailable members retain cash sleeves. Contemporary survivor pool, not unseen holdout. No training or live changes.
+    canonical_report: analysis/p1_imacd_altcoin_trends_20260909.md
+    artifacts:
+      - imacd-altcoin-trends-20260909-report-html
+      - imacd-altcoin-trends-20260909-external-results
+      - imacd-altcoin-trends-20260909-external-history
+      - imacd-altcoin-trends-20260909-extreme-case-audit
+    notes: "Completed research, not proof that every future strategy is unprofitable. Formal May4 holdout remains; corrected1H/4H audit round2,15m round1,external round1. Original clock-v1 results retained and superseded. No parameter retuning from2026outcomes, no live mutation; current IMACD-to-YOLO notifications unchanged."

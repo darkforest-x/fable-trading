@@ -2,6 +2,16 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## Spike 高波动山寨趋势研究已交付（2026-09-09凌晨）
+
+Owner授权全时段目标研究；271不同币=54原池+215外部+SOPH/USELESS，原池15m/1H/4H、外部1H/4H。
+34/9为继承默认，focus12/.10为显示默认；没有找到跨期跨币稳定的参数冠军。旧年1H主提名Chandelier、4H signal5近期原池/外部均负；15m无旧年入围项，近期四退出均负。
+真实长尾与兑现需分开：USELESS1H同风险md35.33R、SMA6038.56R，固定3R2.97R；SOPH4H13.21R、ZEC4H37.14R属截止盯市。高波动上周前25%会漏静转动，XRP1H48.05R自然退出未被保留；不能因此直接宣称取消过滤有稳定收益。
+报告 analysis/html/p1_imacd_altcoin_trends_20260909.html；14全景 experiments/active/exp-imacd-altcoin-trends-20260909-v1/results_clock_v2/gallery_final/index.html。
+280定向测试通过；图/附件SHA与结果锁复核。修正周一名单按确认收盘切换；clock-v1保留但被v2取代，1H4H正式holdout本配置第2次、15m第1次、外部第1次，未重选参数。
+原生1H OI/taker112流161036行留存；原2终端分页错误保留，近期覆盖完整，collector已修等值inclusive边界且32测试通过；未评收益或接入线上。
+无Pine/YOLO/通知/ACTIVE/执行/凭据变更；大事件账本/曲线/PNG与数据留本机，关键清单和HTML入库。两研究注册为rejected指未通过稳定性，不代表所有趋势系统都不可能盈利。
+
 ## YOLO 已提交72题的框义与未来150复核（2026-09-09凌晨）
 
 冻结9月8日晚导出：新HL2已提交72题（37277–37348），51保留框、15无目标继承原框、6无目标+改框冲突。

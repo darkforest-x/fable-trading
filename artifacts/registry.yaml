@@ -25025,3 +25025,199 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: UI-only readability patch, cloud v12; no return evaluation, model or notification changes.
+
+  - artifact_id: imacd-altcoin-trends-20260909-report-source
+    artifact_type: report
+    role: isolated_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 08a87bb37045500ab042631caee030ff4d557738
+    source_path: analysis/p1_imacd_altcoin_trends_20260909.md
+    sha256: 639d2982cd506ca3c7845da27bf9ed2b89f98f4706c1aa3121fa2a57b735339c
+    size_bytes: 63189
+    storage_uri: repo://analysis/p1_imacd_altcoin_trends_20260909.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized all dates. Research only; no live/YOLO stack performance
+      claim. Gallery PNGs and large event/curve ledgers remain local and are identified
+      by the linked manifests. Native1H coverage preserves2original pagination errors.
+  - artifact_id: imacd-altcoin-trends-20260909-report-html
+    artifact_type: report
+    role: isolated_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 08a87bb37045500ab042631caee030ff4d557738
+    source_path: analysis/html/p1_imacd_altcoin_trends_20260909.html
+    sha256: 54c13ac02ae81a5aac500d39aaa7395ce20a7798f0c38eb1662b4e67fa29f07b
+    size_bytes: 1428727
+    storage_uri: repo://analysis/html/p1_imacd_altcoin_trends_20260909.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized all dates. Research only; no live/YOLO stack performance
+      claim. Gallery PNGs and large event/curve ledgers remain local and are identified
+      by the linked manifests. Native1H coverage preserves2original pagination errors.
+  - artifact_id: imacd-altcoin-trends-20260909-report-receipt
+    artifact_type: manifest
+    role: isolated_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 08a87bb37045500ab042631caee030ff4d557738
+    source_path: experiments/active/exp-imacd-altcoin-trends-20260909-v1/report_receipt.json
+    sha256: b5c6233e6135c8b162141db2b6b471512143dc5c9870a0ede252b70d6f437849
+    size_bytes: 6799
+    storage_uri: repo://experiments/active/exp-imacd-altcoin-trends-20260909-v1/report_receipt.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized all dates. Research only; no live/YOLO stack performance
+      claim. Gallery PNGs and large event/curve ledgers remain local and are identified
+      by the linked manifests. Native1H coverage preserves2original pagination errors.
+  - artifact_id: imacd-altcoin-trends-20260909-gallery
+    artifact_type: manifest
+    role: isolated_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: c9721f38508115e1a499a8af8dca1d32573d295b
+    source_path: experiments/active/exp-imacd-altcoin-trends-20260909-v1/results_clock_v2/gallery_final/manifest.json
+    sha256: dfa8e90295eb43f05dfba5999866fc8cd169330f172e5dbbda385e943a7905da
+    size_bytes: 23189
+    storage_uri: repo://experiments/active/exp-imacd-altcoin-trends-20260909-v1/results_clock_v2/gallery_final/manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized all dates. Research only; no live/YOLO stack performance
+      claim. Gallery PNGs and large event/curve ledgers remain local and are identified
+      by the linked manifests. Native1H coverage preserves2original pagination errors.
+  - artifact_id: imacd-altcoin-trends-20260909-costs
+    artifact_type: manifest
+    role: isolated_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: c9721f38508115e1a499a8af8dca1d32573d295b
+    source_path: experiments/active/exp-imacd-altcoin-trends-20260909-v1/results_clock_v2/cost_diagnostics/manifest.json
+    sha256: 2c7067a232d69af8c7a7fc291e778c71215e5bd9df76b1a07e98a2563160773b
+    size_bytes: 60789
+    storage_uri: repo://experiments/active/exp-imacd-altcoin-trends-20260909-v1/results_clock_v2/cost_diagnostics/manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized all dates. Research only; no live/YOLO stack performance
+      claim. Gallery PNGs and large event/curve ledgers remain local and are identified
+      by the linked manifests. Native1H coverage preserves2original pagination errors.
+  - artifact_id: imacd-altcoin-trends-20260909-external-results
+    artifact_type: manifest
+    role: isolated_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: c9721f38508115e1a499a8af8dca1d32573d295b
+    source_path: experiments/active/exp-imacd-altcoin-transfer-20260909-v1/results/completion.json
+    sha256: bcd9a19ae09d5a7a978f00af39bfd74fdefb50de8e3784652cbfb00d3987e6c5
+    size_bytes: 3032
+    storage_uri: repo://experiments/active/exp-imacd-altcoin-transfer-20260909-v1/results/completion.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized all dates. Research only; no live/YOLO stack performance
+      claim. Gallery PNGs and large event/curve ledgers remain local and are identified
+      by the linked manifests. Native1H coverage preserves2original pagination errors.
+  - artifact_id: imacd-altcoin-trends-20260909-history
+    artifact_type: manifest
+    role: isolated_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: c9721f38508115e1a499a8af8dca1d32573d295b
+    source_path: data/altcoin_trends_20260909_v1/history_full_verified/manifest.json
+    sha256: 0d16cf8ae8132f42554564f6341fc8a18e3b602e4362e897765dea6c5dcbf303
+    size_bytes: 154576
+    storage_uri: local://data/altcoin_trends_20260909_v1/history_full_verified/manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized all dates. Research only; no live/YOLO stack performance
+      claim. Gallery PNGs and large event/curve ledgers remain local and are identified
+      by the linked manifests. Native1H coverage preserves2original pagination errors.
+  - artifact_id: imacd-altcoin-trends-20260909-external-history
+    artifact_type: manifest
+    role: isolated_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: c9721f38508115e1a499a8af8dca1d32573d295b
+    source_path: data/altcoin_transfer_20260909_v1/manifest.json
+    sha256: 2fcca26f29c7908191e0fcb9650ff951e8c8a097f1ad0a1a019dbcbc44dbe146
+    size_bytes: 347486
+    storage_uri: local://data/altcoin_transfer_20260909_v1/manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized all dates. Research only; no live/YOLO stack performance
+      claim. Gallery PNGs and large event/curve ledgers remain local and are identified
+      by the linked manifests. Native1H coverage preserves2original pagination errors.
+  - artifact_id: imacd-altcoin-trends-20260909-derivatives-4h
+    artifact_type: manifest
+    role: isolated_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: c9721f38508115e1a499a8af8dca1d32573d295b
+    source_path: data/altcoin_trends_20260909_v1/derivatives4h/coverage.json
+    sha256: 227cc77ef1610e6d6866806670c3e0aada557c1491f0aa6efdebaa342e21d435
+    size_bytes: 393429
+    storage_uri: local://data/altcoin_trends_20260909_v1/derivatives4h/coverage.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized all dates. Research only; no live/YOLO stack performance
+      claim. Gallery PNGs and large event/curve ledgers remain local and are identified
+      by the linked manifests. Native1H coverage preserves2original pagination errors.
+  - artifact_id: imacd-altcoin-trends-20260909-derivatives-1h
+    artifact_type: manifest
+    role: isolated_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: c9721f38508115e1a499a8af8dca1d32573d295b
+    source_path: data/altcoin_trends_20260909_v1/native1h_snapshot/coverage.json
+    sha256: 4c84ff791af4b9d8060052e22a202829b3435bc404e3e57f21d921c555937084
+    size_bytes: 282761
+    storage_uri: local://data/altcoin_trends_20260909_v1/native1h_snapshot/coverage.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized all dates. Research only; no live/YOLO stack performance
+      claim. Gallery PNGs and large event/curve ledgers remain local and are identified
+      by the linked manifests. Native1H coverage preserves2original pagination errors.
+  - artifact_id: imacd-altcoin-trends-20260909-derivatives-1h-audit
+    artifact_type: report
+    role: isolated_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: c9721f38508115e1a499a8af8dca1d32573d295b
+    source_path: experiments/active/exp-imacd-altcoin-trends-20260909-v1/NATIVE_1H_COLLECTION.md
+    sha256: d3d459981a3d046c34c5fec2b3e11fc86e2722b2ad9bdcbda2a98898385283cf
+    size_bytes: 4621
+    storage_uri: repo://experiments/active/exp-imacd-altcoin-trends-20260909-v1/NATIVE_1H_COLLECTION.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized all dates. Research only; no live/YOLO stack performance
+      claim. Gallery PNGs and large event/curve ledgers remain local and are identified
+      by the linked manifests. Native1H coverage preserves2original pagination errors.
+  - artifact_id: imacd-altcoin-trends-20260909-extreme-case-audit
+    artifact_type: report
+    role: isolated_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: c9721f38508115e1a499a8af8dca1d32573d295b
+    source_path: experiments/active/exp-imacd-altcoin-transfer-20260909-v1/EXTREME_CASE_AUDIT.md
+    sha256: eb700739e58614c17e300eec8544d5200253a414a3ed8eab19ebf76c3627ad16
+    size_bytes: 13074
+    storage_uri: repo://experiments/active/exp-imacd-altcoin-transfer-20260909-v1/EXTREME_CASE_AUDIT.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized all dates. Research only; no live/YOLO stack performance
+      claim. Gallery PNGs and large event/curve ledgers remain local and are identified
+      by the linked manifests. Native1H coverage preserves2original pagination errors.
+  - artifact_id: imacd-altcoin-trends-20260909-validation
+    artifact_type: manifest
+    role: isolated_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: c9721f38508115e1a499a8af8dca1d32573d295b
+    source_path: experiments/active/exp-imacd-altcoin-trends-20260909-v1/VALIDATION.json
+    sha256: e1aefdf47e5b7fd3fe42c111fbb54a1730c7d0f2ad07d1de44f2147bab2fa903
+    size_bytes: 2358
+    storage_uri: repo://experiments/active/exp-imacd-altcoin-trends-20260909-v1/VALIDATION.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized all dates. Research only; no live/YOLO stack performance
+      claim. Gallery PNGs and large event/curve ledgers remain local and are identified
+      by the linked manifests. Native1H coverage preserves2original pagination errors.
