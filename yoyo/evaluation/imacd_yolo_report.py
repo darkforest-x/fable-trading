@@ -183,7 +183,7 @@ def run():
     md += f"""
 ## 验证与复现
 
-源冻结commit `{summary['source_commit']}`；台账验证全部{len(kept)}个确认的身份、方向、core/post、真实交集、等待、时钟与价格位移。20个合成测试（含未来扰动后像素一致和模拟批量模型接口）及68个层间守门测试通过。独立复核结果另见本目录results/independent_review.json（交付时登记）。
+源冻结commit `{summary['source_commit']}`；台账验证全部{len(kept)}个确认的身份、方向、core/post、真实交集、等待、时钟与价格位移。20个合成测试（含未来扰动后像素一致和模拟批量模型接口）及68个层间守门测试通过。独立复核结果见实验目录results/independent_review.json。台账未保存逐根md或首个失效位置，因此9条失效时钟不能只凭台账完整独立重放；这部分由冻结代码与合成测试支持，没有冒充独立复证。
 
 从源码与相同本地权重、缓存复现首次运行：
 
@@ -191,6 +191,7 @@ def run():
 cd /Users/zhangzc/fable-trading
 .venv/bin/python -m pytest -q tests/test_imacd_yolo_confirmation.py tests/boundaries/test_layer_imports.py
 .venv/bin/python -m yoyo.evaluation.imacd_yolo_confirmation
+.venv/bin/python -m yoyo.evaluation.imacd_yolo_verify
 .venv/bin/python -m yoyo.evaluation.imacd_yolo_report
 ```
 
@@ -216,7 +217,7 @@ cd /Users/zhangzc/fable-trading
     subprocess.run([str(ROOT/".venv/bin/python"), "scripts/md_to_html.py", str(report),
                     "--out-dir", "analysis/html"], cwd=ROOT, check=True)
     (EXP/"results/example_manifest.json").write_text(json.dumps(images, indent=2))
-    print(report.with_suffix(".html"))
+    print(ROOT/"analysis/html"/report.with_suffix(".html").name)
 
 
 if __name__ == "__main__":
