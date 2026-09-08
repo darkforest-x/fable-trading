@@ -1,0 +1,63 @@
+[
+  {
+    "minutes": 15,
+    "checks": {
+      "net_positive": false,
+      "net_improves": false,
+      "drawdown_not_worse": false,
+      "matched_excess_improves": false,
+      "tail_profit_retained": true,
+      "increment_holm_under_001": false
+    },
+    "passed": false,
+    "failed": [
+      "net_positive",
+      "net_improves",
+      "drawdown_not_worse",
+      "matched_excess_improves",
+      "increment_holm_under_001"
+    ],
+    "holdout_consumptions": 0,
+    "production_eligible": false
+  },
+  {
+    "minutes": 60,
+    "checks": {
+      "net_positive": false,
+      "net_improves": false,
+      "drawdown_not_worse": true,
+      "matched_excess_improves": false,
+      "tail_profit_retained": true,
+      "increment_holm_under_001": false
+    },
+    "passed": false,
+    "failed": [
+      "net_positive",
+      "net_improves",
+      "matched_excess_improves",
+      "increment_holm_under_001"
+    ],
+    "holdout_consumptions": 0,
+    "production_eligible": false
+  },
+  {
+    "minutes": 240,
+    "checks": {
+      "net_positive": true,
+      "net_improves": false,
+      "drawdown_not_worse": false,
+      "matched_excess_improves": false,
+      "tail_profit_retained": true,
+      "increment_holm_under_001": false
+    },
+    "passed": false,
+    "failed": [
+      "net_improves",
+      "drawdown_not_worse",
+      "matched_excess_improves",
+      "increment_holm_under_001"
+    ],
+    "holdout_consumptions": 0,
+    "production_eligible": false
+  }
+]

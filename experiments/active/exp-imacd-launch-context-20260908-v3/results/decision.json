@@ -1,0 +1,145 @@
+[
+  {
+    "minutes": 15,
+    "policy": "S01",
+    "passed": false,
+    "checks": {
+      "net_positive": false,
+      "net_improves": false,
+      "drawdown_not_worse": true,
+      "matched_excess_improves": false,
+      "tail_profit_retained": false,
+      "increment_holm_under_001": false
+    },
+    "failed": [
+      "net_positive",
+      "net_improves",
+      "matched_excess_improves",
+      "tail_profit_retained",
+      "increment_holm_under_001"
+    ],
+    "holdout_consumptions": 0,
+    "production_eligible": false
+  },
+  {
+    "minutes": 15,
+    "policy": "H01",
+    "passed": false,
+    "checks": {
+      "net_positive": false,
+      "net_improves": false,
+      "drawdown_not_worse": false,
+      "matched_excess_improves": false,
+      "tail_profit_retained": false,
+      "increment_holm_under_001": false,
+      "net_improves_over_same_coverage": false,
+      "drawdown_not_worse_than_same_coverage": true,
+      "excess_not_worse_than_same_coverage": false
+    },
+    "failed": [
+      "net_positive",
+      "net_improves",
+      "drawdown_not_worse",
+      "matched_excess_improves",
+      "tail_profit_retained",
+      "increment_holm_under_001",
+      "net_improves_over_same_coverage",
+      "excess_not_worse_than_same_coverage"
+    ],
+    "holdout_consumptions": 0,
+    "production_eligible": false
+  },
+  {
+    "minutes": 60,
+    "policy": "S01",
+    "passed": false,
+    "checks": {
+      "net_positive": true,
+      "net_improves": true,
+      "drawdown_not_worse": true,
+      "matched_excess_improves": true,
+      "tail_profit_retained": false,
+      "increment_holm_under_001": false
+    },
+    "failed": [
+      "tail_profit_retained",
+      "increment_holm_under_001"
+    ],
+    "holdout_consumptions": 0,
+    "production_eligible": false
+  },
+  {
+    "minutes": 60,
+    "policy": "H01",
+    "passed": false,
+    "checks": {
+      "net_positive": false,
+      "net_improves": false,
+      "drawdown_not_worse": true,
+      "matched_excess_improves": false,
+      "tail_profit_retained": false,
+      "increment_holm_under_001": false,
+      "net_improves_over_same_coverage": false,
+      "drawdown_not_worse_than_same_coverage": true,
+      "excess_not_worse_than_same_coverage": false
+    },
+    "failed": [
+      "net_positive",
+      "net_improves",
+      "matched_excess_improves",
+      "tail_profit_retained",
+      "increment_holm_under_001",
+      "net_improves_over_same_coverage",
+      "excess_not_worse_than_same_coverage"
+    ],
+    "holdout_consumptions": 0,
+    "production_eligible": false
+  },
+  {
+    "minutes": 240,
+    "policy": "S01",
+    "passed": false,
+    "checks": {
+      "net_positive": true,
+      "net_improves": false,
+      "drawdown_not_worse": true,
+      "matched_excess_improves": true,
+      "tail_profit_retained": false,
+      "increment_holm_under_001": false
+    },
+    "failed": [
+      "net_improves",
+      "tail_profit_retained",
+      "increment_holm_under_001"
+    ],
+    "holdout_consumptions": 0,
+    "production_eligible": false
+  },
+  {
+    "minutes": 240,
+    "policy": "H01",
+    "passed": false,
+    "checks": {
+      "net_positive": false,
+      "net_improves": false,
+      "drawdown_not_worse": true,
+      "matched_excess_improves": false,
+      "tail_profit_retained": false,
+      "increment_holm_under_001": false,
+      "net_improves_over_same_coverage": false,
+      "drawdown_not_worse_than_same_coverage": true,
+      "excess_not_worse_than_same_coverage": false
+    },
+    "failed": [
+      "net_positive",
+      "net_improves",
+      "matched_excess_improves",
+      "tail_profit_retained",
+      "increment_holm_under_001",
+      "net_improves_over_same_coverage",
+      "excess_not_worse_than_same_coverage"
+    ],
+    "holdout_consumptions": 0,
+    "production_eligible": false
+  }
+]

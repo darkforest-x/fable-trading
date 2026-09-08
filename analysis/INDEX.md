@@ -565,3 +565,8 @@
 - [`p1_btcusdtp_k1k2_15m_two_stage_k2_freqtrade_preholdout_20260904.md`](p1_btcusdtp_k1k2_15m_two_stage_k2_freqtrade_preholdout_20260904.md) — 15m 触线→延迟确认 K2；Freqtrade 100/100 入场对齐且无前视，但四个开发半年全负，候选拒绝。
 - [`p1_btcusdtp_k1k2_15m_dynamic_stop_preholdout_20260904.md`](p1_btcusdtp_k1k2_15m_dynamic_stop_preholdout_20260904.md) — 15m 六种动态/自动止损因果对照；最好仅改善 0.66bp 且 p=0.829，根因是触发前早败与右尾截断，全部拒绝。
 - [`p1_btcusdtp_1h_owner_causal_v2_preholdout_20260904_erratum.md`](p1_btcusdtp_1h_owner_causal_v2_preholdout_20260904_erratum.md) — 旧 1h 报告的 holdout 读取声明勘误。
+
+## 2026-09-08 · IMACD 启动降噪逐项验证
+
+- [形成记忆＋价格位置 V2](html/p1_imacd_formation_memory_20260908.html)：保留大赢家但几乎不降噪，0/3候选周期通过。
+- [启动突破／高周期独立对照 V3](html/p1_imacd_launch_context_20260908.html)：1H突破有改善迹象但尾部损失大、Holm未通过；高周期同向伤害早启动，0/6通过。

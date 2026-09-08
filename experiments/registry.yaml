@@ -7007,30 +7007,85 @@ experiments:
 
   - experiment_id: exp-imacd-formation-memory-20260908-v2
     source_repo: darkforest-x/fable-trading
-    source_commit: pending-source-freeze
-    status: active
+    source_commit: 8bc0681bcae3097a717de730abf52fe8e206e92e
+    status: rejected
     question: Does prior-context MA compression plus unchanged price proximity improve visible startup quality?
-    single_variable: Replace focus-segment contraction with prior12 versus preceding120 MA width; Q02 sole candidate.
-    result: Frozen pre2026 comparison; no outcomes computed yet.
+    single_variable: Replace focus-segment contraction with prior12 versus preceding120 MA width;Q02 sole candidate.
+    result: 26773 events/80232 controls. Q02 retains97-99% arrows and right tails but no economic improvement;0/3
+      pass.42 ledger checks.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/html/p1_imacd_formation_memory_20260908.html
-    artifacts: []
+    artifacts:
+    - imacd-formation-memory-v2-case-lost-winner-png
+    - imacd-formation-memory-v2-case-removed-loss-png
+    - imacd-formation-memory-v2-case-rescued-winner-png
+    - imacd-formation-memory-v2-case-retained-loss-png
+    - imacd-formation-memory-v2-cases-json
+    - imacd-formation-memory-v2-coverage-csv
+    - imacd-formation-memory-v2-decision-json
+    - imacd-formation-memory-v2-delivery-verification-json
+    - imacd-formation-memory-v2-equity-daily-csv
+    - imacd-formation-memory-v2-equity-validation-png
+    - imacd-formation-memory-v2-ledger-verification-json
+    - imacd-formation-memory-v2-manifest-json
+    - imacd-formation-memory-v2-portfolios-csv
+    - imacd-formation-memory-v2-rankings-csv
+    - imacd-formation-memory-v2-report-receipt-json
+    - imacd-formation-memory-v2-right-tail-csv
+    - imacd-formation-memory-v2-signal-tradeoff-png
+    - imacd-formation-memory-v2-started-json
+    - imacd-formation-memory-v2-summary-csv
+    - imacd-formation-memory-v2-accepted-csv-gz
+    - imacd-formation-memory-v2-controls-csv-gz
+    - imacd-formation-memory-v2-events-csv-gz
+    - imacd-formation-memory-v2-md-p1-imacd-formation-memory-20260908-md
+    - imacd-formation-memory-v2-html-p1-imacd-formation-memory-20260908-html
     reuse_allowed: false
-    notes: Same54 historical OKX symbols,15m/1H/4H,neutral exits,20bp cost; no live changes or parameter search.
+    notes: 54 historical symbols,15m/1H/4H;2023-24 development and already-observed2025 review.Each arm holdout use0.20bp
+      neutral-exit proxy,no hard stop.181 focused/boundary tests passed.6 embedded plots decoded;representative PNG
+      visual QA,workspace HTML delivery,browser render not verified. No Pine/spike/TG/Bark changes.
 
   - experiment_id: exp-imacd-launch-context-20260908-v3
     source_repo: darkforest-x/fable-trading
-    source_commit: pending-source-freeze
-    status: active
+    source_commit: 28ef337193ee455bc2274e54e956a7f396f3a7a7
+    status: rejected
     question: Do confirmed range breakout or separately confirmed higher-direction gates improve startup quality?
-    single_variable: S01 prior12 high-low breakout; H01 closed-at-local-open HTF md sign; never combined.
-    result: Frozen pre2026 study; same54 symbols, two separate candidates and H00 data-coverage control.
+    single_variable: S01 prior12 high-low breakout;H01 closed-at-local-open higher md sign;never combined;H00 coverage
+      control.
+    result: Same26773 events/80232 controls.1H S01 net-5.79%->2.56%,MDD14.80%->8.67%,tail45.40%,Holmp.265.0/6 pass.46
+      ledger checks.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/html/p1_imacd_launch_context_20260908.html
-    artifacts: []
+    artifacts:
+    - imacd-launch-context-v3-case-breakout-lost-winner-png
+    - imacd-launch-context-v3-case-breakout-removed-loss-png
+    - imacd-launch-context-v3-case-higher-lost-winner-png
+    - imacd-launch-context-v3-case-higher-removed-loss-png
+    - imacd-launch-context-v3-cases-json
+    - imacd-launch-context-v3-coverage-csv
+    - imacd-launch-context-v3-decision-json
+    - imacd-launch-context-v3-delivery-verification-json
+    - imacd-launch-context-v3-equity-daily-csv
+    - imacd-launch-context-v3-equity-validation-png
+    - imacd-launch-context-v3-ledger-verification-json
+    - imacd-launch-context-v3-manifest-json
+    - imacd-launch-context-v3-portfolios-csv
+    - imacd-launch-context-v3-rankings-csv
+    - imacd-launch-context-v3-report-receipt-json
+    - imacd-launch-context-v3-right-tail-csv
+    - imacd-launch-context-v3-started-json
+    - imacd-launch-context-v3-summary-csv
+    - imacd-launch-context-v3-tradeoff-png
+    - imacd-launch-context-v3-accepted-csv-gz
+    - imacd-launch-context-v3-controls-csv-gz
+    - imacd-launch-context-v3-events-csv-gz
+    - imacd-launch-context-v3-md-p1-imacd-launch-context-20260908-md
+    - imacd-launch-context-v3-html-p1-imacd-launch-context-20260908-html
     reuse_allowed: false
-    notes: Independent340-bar higher warmup,6-candidate Holm,neutral exits,20bp proxy; no live changes.
+    notes: 54 historical symbols,15m/1H/4H;2023-24 development and already-observed2025 review.Each arm holdout use0.20bp
+      neutral-exit proxy,no hard stop.181 focused/boundary tests passed.6 embedded plots decoded;representative PNG
+      visual QA,workspace HTML delivery,browser render not verified. No Pine/spike/TG/Bark changes.
