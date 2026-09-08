@@ -1,0 +1,72 @@
+{
+  "annotation_or_draft_writes": 0,
+  "annotation_status_counts": {
+    "conflict_needs_review": 12,
+    "owner_boxes": 323,
+    "owner_no_target_with_inherited_proposal": 33
+  },
+  "collection_finished_at": "2026-09-08T13:06:06.770798+00:00",
+  "collection_started_at": "2026-09-08T13:05:56.806730+00:00",
+  "counts": {
+    "annotations": 368,
+    "cancelled": 0,
+    "drafts": 0,
+    "effective_annotations": 368,
+    "event_conflicts": 0,
+    "predictions": 3556,
+    "tasks": 3556
+  },
+  "draft_status_counts": {},
+  "effective_answer_definition": "non_cancelled_annotation_record_not_training_eligibility",
+  "event_status_counts": {
+    "conflict_needs_review": 12,
+    "owner_boxes": 323,
+    "owner_no_target_with_inherited_proposal": 33,
+    "unanswered": 3188
+  },
+  "files_sha256": {
+    "answers.jsonl": "e997b7aca59e6074aba4eb3212c65d6b8a1258ec5d62e44abfec2cd95c70ea0d",
+    "predictions.json": "5aede84fcfc471300ca442bf2f10e52bc5cc37c5bb08f1a03ca3d4c0e943bdd9",
+    "raw.json": "94fb1219787deceb151c04a02f478b60b7f2a2d20ebf095d8fce56eaaeb14e99"
+  },
+  "holdout_read": false,
+  "media_read": false,
+  "new_gold": false,
+  "new_training": false,
+  "ohlcv_read": false,
+  "output": "/Users/zhangzc/fable-trading/output/offline_tasks/owner_review_exports/20260908T130556806730Z",
+  "prediction_fallback_count": 0,
+  "production_eligible": false,
+  "project_id": 77,
+  "server_mutations": 0,
+  "snapshot_is_atomic": false,
+  "source_commit": "061eed5c4c39b9bb902ba76ec8431cb73698e8a2",
+  "source_sha256": {
+    "scripts/export_owner_labels.py": "b195720c3e7cd1074f6e8ee446c7e65c42ce288f2776c1f82ef2b9bbfc99b35f",
+    "scripts/ls_auto_import.py": "e1c1db7fcb3c22c44c7b09ee3bfe4be38093107d636e8ffb55953b1d828c5443",
+    "tests/test_owner_review_export.py": "cd38357409f7ba6ebaaa162327b7c0cb777159bcc8373ae6394c787a47d0e34c",
+    "yoyo/contracts/holdout.py": "63cb6b73b3c8f419108744a75d29a03487e4857b4ee5b056c578c0213877de0a",
+    "yoyo/datasets/label_studio_import.py": "212bd947a361721690d4d6a7a6dad912d2cf2039b47af5d2298c66a711208873",
+    "yoyo/datasets/owner_review_export.py": "c43b65bc0b034cdbd6fd75d0ad754253d63f65ebd8ef4eb294878977f6bc9f72"
+  },
+  "source_task_counts": {
+    "grade_a_hl2_training_label_review_v1": 1043,
+    "owner_geometry_refinement_v1": 2513
+  },
+  "sources": {
+    "files_sha256": {
+      "/Users/zhangzc/fable-trading/datasets/grade_a_hl2_review_20260908_v1/admin/build_receipt.json": "baacdb74902504988f4f23db73716516e238b948c146dba4af248f81984beebd",
+      "/Users/zhangzc/fable-trading/datasets/grade_a_hl2_review_20260908_v1/manifest.jsonl": "fb0be11739339fd5d5016eee24a51081fd3ed44cffd1c1774c963a7365bf5fde",
+      "/Users/zhangzc/fable-trading/datasets/grade_a_hl2_review_20260908_v1/tasks.json": "2262199e081132bfc891014944345720fbcc37ad2a800c8a6c8e38422fab35b2",
+      "/Users/zhangzc/fable-trading/datasets/owner_box_refinement_20260907_v1/manifest.jsonl": "7588f9c62f26a66986f747f9dd27dff8f6c216a6b26f307e705cba2880c3a641",
+      "/Users/zhangzc/fable-trading/datasets/owner_box_refinement_20260907_v1/tasks.json": "bc89a4d5e41003f1bf191013d60ba76d84fafbd67a28e17c2dfd3f0c6bc6697a",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-owner-box-refinement-20260907-v1/results/import_receipt.json": "6615e447613b9f6ddc221055232bf2442793895d8fb11a96b2f1b0a3a3f639d9"
+    },
+    "new_pack_status": "completed"
+  },
+  "status": "exported_for_review_not_training",
+  "tolerance": 1e-06,
+  "training_eligible": false,
+  "full_summary_path": "output/offline_tasks/owner_review_exports/20260908T130556806730Z/summary.json",
+  "full_summary_sha256": "34405efc566f533796657b1cb99d445899b99411d78c31ebb060645cb79b6509"
+}

@@ -8,7 +8,11 @@
 2. Windows 桌面双击 **YOLO 人工审核**。
 3. 首次使用原 Label Studio 账号登录，打开项目 77；继续调整预框并提交，右侧未来 40 根可见。
 
-入口：[项目 77 完整列表](http://192.168.1.4:8081/projects/77/data?tab=44)。当前 Default44 是完整列表，可用 Label All Tasks。若之后按周计划切到有过滤的统一待审队列，需使用 Label Tasks As Displayed；本次没有改队列或导入数据。
+入口：[项目 77 本周审核](http://192.168.1.4:8081/projects/77/data?tab=44)。9月8日晚已将同一tab44切到最新HL2的1043事件，每题带实际训练预框；旧2513任务和人工答案仍在项目内，因此项目总数3556。本周不用切其他分组。
+
+进入列表后，点击 **Label All Tasks右侧的小箭头 → Label Tasks As Displayed**，再逐题调整、右键提交。Label All会忽略过滤；当前项目选择HL2预框版本，直接审旧未标题可能不带旧预框。不要把快捷方式直接改为`labeling=1`当成强制过滤方案：该URL依赖当前浏览器/域名曾保存的模式，不能保证限定本批。
+
+1042题有完整未来40根；1题到保留集边界只有13根，页内明确提示。最新主图是原HL2训练图，未来图独立；不要把审核未来或所有变体直接当新训练数据。旧project76仍是close版空白任务，不作为本批入口。
 
 桌面文件：`C:\Users\Administrator\Desktop\YOLO 人工审核.url`。首次浏览器登录仍由 Owner 完成；远端验收的临时登录会话没有复制进浏览器。账号沿用现有配置，未创建新用户或更改密码，凭据没有写入快捷方式或本文。
 
@@ -36,6 +40,8 @@ PYTHONPATH=. .venv/bin/python -m yoyo.review.install_label_studio_shortcut \
 验收：7个安装/恢复测试通过；模拟页12个真实浏览器场景通过，包括无目标复选后提交、Submit/Update、防连点、禁用、缺失task、多个按钮、其他项目、列表、Shift、输入框、弹窗和左键。模拟计数不是真实标注；没有为测试提交Owner答案。定位到真实审核页的按钮为`.lsf-editor button[aria-label="submit"]`，实际任务标识为`.lsf-current-task__task-id`。仅检查真实页加载及可见提示，真实保存由Owner操作。
 
 ## 实测证据与边界
+
+以下表格为初次3060连接验收记录。9月8日晚新增批次的Mac浏览器及Windows图片访问检查见`experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/`；本周数据交付见`analysis/html/p1_yolo_dataset_consolidation_20260908.html`。
 
 | 项目 | 2026-09-08 结果 |
 | --- | --- |

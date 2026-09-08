@@ -2,6 +2,40 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## YOLO 最新训练数据已可审核（2026-09-08晚：1043事件带实际HL2标签）
+
+Owner要求把最新8000正图对应的1000多事件放LS调整，并在本周彻底整理数据集。
+本节覆盖下方旧tab44完整历史列表的操作口径；原历史报告与计划不改写。
+最新HL2是1043正事件/8000变体（699×8+344×7），另3129背景事件/24000图；
+正事件888train/155val、488LONG/555SHORT，仅旧split来源。本轮没有新训练或金标放行。
+656f318源码/prereg冻结、fa61a5a注册后构建：主图复制实际HL2训练PNG，预框直接来自
+实际YOLO文本；8000图标签SHA前后通过，1043主图像素重放、3129独立图解码/SHA通过。
+1042题有future40，task37821到holdout边界只有13根；future独立HL2目录且无labels。
+
+bb7c01d交付到原项目77，新增1043、重入0；旧2513任务、预测、368答案保留，总3556题。
+同一Windows桌面入口http://192.168.1.4:8081/projects/77/data?tab=44，tab44现名“本周审核”，
+只显示1043个新protocol；从按钮右侧下拉“Label Tasks As Displayed”进入，右键提交不变。
+Label All清筛选，不能用；project.model_version明确选grade_a_hl2_training_label_review_v1。
+LS1.13.1空版本无法连审混用新旧预框；旧未审预框仍存，但恢复旧队列前须切回历史版本。
+旧76是close版4172空白任务，原样保留；没有第四项目或新的必审50阶段。
+真实Mac Chrome AsDisplayed进入37276，框及调整手柄、future和右键提示可见；未改框/提交。
+WIN-ZZC严格SSH身份下认证GET新主图与future图SHA一致；没有调整Windows浏览器模式或快捷方式。
+
+061eed5先冻结再运行human-only导出，采集3556任务/3556原预测/368真实答案/0返回草稿：
+323 owner_boxes、33无目标且仍带未改原预框、12无目标却带修改框冲突；没有自动当金标。
+冲突task34866/34879/34882/34889/34892/34933/34938/35018/35020/35024/35121/35125。
+raw/预测/逐条答案分开保存于output/offline_tasks/owner_review_exports/20260908T130556806730Z/；
+只读分页采集，非原子快照；原API答案未改写。下次用python -m yoyo.datasets.owner_review_export export
+重新导出，不能把预测当人答，也不能直接从有框推断正例。含12冲突的原工作全部保留。
+
+报告analysis/html/p1_yolo_dataset_consolidation_20260908.html；实验exp-yolo-dataset-consolidation-20260908-v1，
+PLAN补充本周日程，results含导入/重入/物理/浏览器/Windows/人工导出摘要，pack为datasets/grade_a_hl2_review_20260908_v1。
+142聚焦tests通过，非全仓绿。未完成1043人工审核、全部历史重筛、跨池消重、几何回算与新训练。
+下一步Owner审核新1043，Codex按原始答案处理12矛盾、NIGHT/QTUM冲突/别名/背景保护及时间隔离，
+用各variant坐标变换生成独立新版本。P0/P1过门才可训练；周日20:00交付有效子集与未确认库存。
+当前代表训练图core后997题9根、46题8根，不得直接当符合新短延迟合同的训练图。
+没有新holdout行情读取、模型推理、训练、promote或实盘动作；新资格继续false。
+
 ## YOLO 审核路线更正（2026-09-08：先筛形态，不再要求审完整2513）
 
 Owner反馈“这2513张图是怎么来的，感觉很多图都不是我想要的标准的图”。
