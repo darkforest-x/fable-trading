@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "scope": "engineering_and_browser_validation_not_financial_performance",
+  "generator_commit": "694d0dcb01916b0dd421a14e90cba67c727421dd",
+  "scan_id": "5ea57698211df2a4c5d5528f7d295163a9e26e7497ea531e5b734fcf03d53ffd",
+  "tests": {
+    "passed": 334,
+    "command": ".venv/bin/python -m pytest tests/test_rotation_system.py tests/test_rotation_logic.py tests/test_rotation_derivatives.py tests/test_rotation_okx_provider.py tests/test_rotation_web_static.py tests/boundaries/test_layer_imports.py tests/causality/test_holdout_boundary_is_single_valued.py -q",
+    "baseline_unrelated_failure": "test_holdout_consumption_is_declared_per_experiment_not_assumed (observed before this work)"
+  },
+  "browser": {
+    "url": "http://127.0.0.1:18766/",
+    "health_service": "fable-rotation-research",
+    "empty_state_verified": true,
+    "historical_cutoff_visibly_distinct_from_generated_at": true,
+    "candidate_count": 6,
+    "search_INJ_rows": 1,
+    "desktop_client_width": 1280,
+    "desktop_scroll_width": 1280,
+    "mobile_client_width": 390,
+    "mobile_scroll_width_before_fix": 695,
+    "mobile_scroll_width_after_fix": 390,
+    "mobile_table_container_width": 352,
+    "detail_dialog_and_chart_inspected": true,
+    "viewport_reset": true,
+    "report_file_navigation": "blocked_by_browser_local_file_URL_policy; no workaround attempted"
+  },
+  "data": {
+    "venue": "binance",
+    "as_of": "2026-04-30T00:00:00Z",
+    "observed": 8,
+    "requested": 8,
+    "timeframe_windows": 24,
+    "source_receipts": 24,
+    "errors": [],
+    "duration_seconds": 9.449,
+    "raw_candles_persisted": false,
+    "holdout_consumed": false
+  },
+  "financial_validation": "not_performed",
+  "production_eligible": false,
+  "training_eligible": false,
+  "second_real_scan": {
+    "same_candidate_values": true,
+    "same_24_input_hashes": true,
+    "first_scan_id": "526b4d0598b61ba0680b1a55e50282199d8176970192677452c5ab968f811243",
+    "first_generator_commit": "e8d71aa61b34628932c9684452839f0925863a0d",
+    "first_duration_seconds": 9.296,
+    "reason": "Validate loaded-source guard after source commit; no score or strategy change."
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "scope": "Two anonymous public endpoint connectivity probes, not CLI, scanner or model evaluation.",
+  "results": [
+    {
+      "name": "ticker",
+      "url": "https://www.okx.com/api/v5/market/ticker?instId=BTC-USDT",
+      "method": "GET",
+      "requested_at": "2026-09-08T17:16:43.499830+00:00",
+      "credentials_used": false,
+      "http_status": 200,
+      "summary": {
+        "instId": "BTC-USDT",
+        "last": "78681",
+        "bidPx": "78680.9",
+        "askPx": "78681",
+        "ts": "1788887806163"
+      },
+      "code": "0",
+      "completed_at": "2026-09-08T17:16:44.424854+00:00"
+    },
+    {
+      "name": "instruments",
+      "url": "https://www.okx.com/api/v5/public/instruments?instType=SPOT&instId=BTC-USDT",
+      "method": "GET",
+      "requested_at": "2026-09-08T17:16:44.424869+00:00",
+      "credentials_used": false,
+      "http_status": 200,
+      "summary": {
+        "instId": "BTC-USDT",
+        "instType": "SPOT",
+        "state": "live",
+        "baseCcy": "BTC",
+        "quoteCcy": "USDT",
+        "tickSz": "0.1",
+        "lotSz": "0.00000001",
+        "minSz": "0.00001"
+      },
+      "code": "0",
+      "completed_at": "2026-09-08T17:16:45.320125+00:00"
+    }
+  ]
+}

@@ -18,6 +18,111 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: altcoin-rotation-20260909-tool-connectivity
+    artifact_type: manifest
+    role: engineering_observer_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: manual-public-api-probe-20260908T171643Z
+    source_path: experiments/active/exp-altcoin-rotation-system-20260909-v1/tool_connectivity_receipt.json
+    sha256: 1359969825beb092234fbe9e6fc6d80e2c962f57c0e8b527e46ba8adc5146367
+    size_bytes: 1215
+    storage_uri: repo://experiments/active/exp-altcoin-rotation-system-20260909-v1/tool_connectivity_receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Manual anonymous public endpoint smoke before scanner implementation; no committed probe generator claimed.
+      This is connectivity evidence only, not CLI, model or profitability validation. Current unscored values remain
+      in unknown holdout status.
+  - artifact_id: altcoin-rotation-20260909-live-proposal
+    artifact_type: config
+    role: engineering_observer_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
+    generator_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
+    source_path: experiments/active/exp-altcoin-rotation-system-20260909-v1/approval_request.json
+    sha256: fb7bed7e7d5d3b0a10a123fcf7885b61a08f6e369a85484b280c6f2a1e16c0a7
+    size_bytes: 2934
+    storage_uri: repo://experiments/active/exp-altcoin-rotation-system-20260909-v1/approval_request.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Engineering only. Historical snapshot cutoff 2026-04-30. Report includes contemporary public tool documentation/connectivity,
+      not a scored holdout result; unknown entries are not performance clearance.
+  - artifact_id: altcoin-rotation-20260909-validation
+    artifact_type: manifest
+    role: engineering_observer_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
+    generator_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
+    source_path: experiments/active/exp-altcoin-rotation-system-20260909-v1/validation_receipt.json
+    sha256: e5eb6a346093524ef2b682f728ce5b26c969437e3a3f391da1f3f7d513b05ba5
+    size_bytes: 2166
+    storage_uri: repo://experiments/active/exp-altcoin-rotation-system-20260909-v1/validation_receipt.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Engineering only. Historical snapshot cutoff 2026-04-30. Report includes contemporary public tool documentation/connectivity,
+      not a scored holdout result; unknown entries are not performance clearance.
+  - artifact_id: altcoin-rotation-20260909-historical-csv
+    artifact_type: report
+    role: engineering_observer_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
+    generator_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
+    source_path: experiments/active/exp-altcoin-rotation-system-20260909-v1/historical_candidates.csv
+    sha256: d9d50c5c31ae280a846c4fb78866dbfc472165debd5542a1cbccf2abbb3b28f3
+    size_bytes: 3137
+    storage_uri: repo://experiments/active/exp-altcoin-rotation-system-20260909-v1/historical_candidates.csv
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Engineering only. Historical snapshot cutoff 2026-04-30. Report includes contemporary public tool documentation/connectivity,
+      not a scored holdout result; unknown entries are not performance clearance.
+  - artifact_id: altcoin-rotation-20260909-historical-snapshot
+    artifact_type: manifest
+    role: engineering_observer_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
+    generator_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
+    source_path: experiments/active/exp-altcoin-rotation-system-20260909-v1/historical_snapshot.json
+    sha256: 9b0dc2a5ba8f4f61552bc8909e0837d6286ab8b6429195d5e09985626f04b4d9
+    size_bytes: 130388
+    storage_uri: repo://experiments/active/exp-altcoin-rotation-system-20260909-v1/historical_snapshot.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Engineering only. Historical snapshot cutoff 2026-04-30. Report includes contemporary public tool documentation/connectivity,
+      not a scored holdout result; unknown entries are not performance clearance.
+  - artifact_id: altcoin-rotation-20260909-report-html
+    artifact_type: report
+    role: engineering_observer_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
+    generator_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
+    source_path: analysis/html/p0_altcoin_rotation_system_20260909.html
+    sha256: 23879ab9725a0dcb5ede61a9e43daab041017433c73f922e5392ab78f33e3405
+    size_bytes: 16381
+    storage_uri: repo://analysis/html/p0_altcoin_rotation_system_20260909.html
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Engineering only. Historical snapshot cutoff 2026-04-30. Report includes contemporary public tool documentation/connectivity,
+      not a scored holdout result; unknown entries are not performance clearance.
+  - artifact_id: altcoin-rotation-20260909-report-source
+    artifact_type: report
+    role: engineering_observer_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
+    generator_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
+    source_path: analysis/p0_altcoin_rotation_system_20260909.md
+    sha256: 92bb324fc67324afe8fba82e760de554df21bea4169ec09100a95c8c3002cc0c
+    size_bytes: 12247
+    storage_uri: repo://analysis/p0_altcoin_rotation_system_20260909.md
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Engineering only. Historical snapshot cutoff 2026-04-30. Report includes contemporary public tool documentation/connectivity,
+      not a scored holdout result; unknown entries are not performance clearance.
   - artifact_id: altcoin-rotation-20260909-prereg
     artifact_type: manifest
     role: engineering_observer_preregistration

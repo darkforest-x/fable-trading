@@ -1,0 +1,63 @@
+{
+  "status": "not_approved",
+  "experiment_id": "exp-altcoin-rotation-system-20260909-v1",
+  "scope": "bounded_live_observation",
+  "proposed_config": {
+    "mode": "live_observation",
+    "venue": "binance",
+    "as_of": "live",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "SOLUSDT",
+      "LINKUSDT",
+      "AVAXUSDT",
+      "INJUSDT",
+      "ETCUSDT",
+      "DOGEUSDT"
+    ],
+    "universe_mode": "exchange_spot",
+    "max_symbols": 80,
+    "daily_bars": 95,
+    "setup_bars": 100,
+    "trigger_bars": 100,
+    "lookback": 20,
+    "volume_multiple": 2.0,
+    "minimum_daily_quote_volume": 1000000,
+    "illustrative_risk_fraction": 0.005,
+    "maximum_illustrative_allocation": 0.1,
+    "observation_interval_seconds": 900,
+    "derivative_context_limit": 6
+  },
+  "config_hash": "cd3924d4f0f46f6657dfad6b95593f4e0bd40c93f84e0f93ec338b82d4e6fa84",
+  "source_hash": "5bc5c2554d8051da3782904ce2cf0ce18b5c02381f362da55cde2cba70205951",
+  "files": {
+    "yoyo/contracts/rotation.py": "f0bcee3eb199aeddf8264c8e6c80c58ab5551f958c81425603d4f2157c985469",
+    "yoyo/contracts/holdout.py": "63cb6b73b3c8f419108744a75d29a03487e4857b4ee5b056c578c0213877de0a",
+    "yoyo/contracts/costs.py": "2e6c0071e07b98404ad4f761b1abac99b7c745019ff227c0780f544bfaab103c",
+    "yoyo/data/rotation_features.py": "ff6398b43043eb7ae5b8325df85be724e34716701cc2e3d93c609b18bb477754",
+    "yoyo/layers/l1_detection/rotation_setups.py": "2a8d9a692d68086ccf44b4190a9510a597cd4193137eed1baba09fd3b9421fae",
+    "yoyo/layers/l2_judgment/rotation_judgment.py": "e20f3062491e0838b2e8ab46542ea936eed2f433be665f6ef2e5f4a065012370",
+    "yoyo/rotation/__init__.py": "eb8518ac5e1377de4750a0152a2490dfe7f0ac45b914e881c67f8943b764449e",
+    "yoyo/rotation/__main__.py": "071e29bee71921c71d1277961cf8b6b9c67f89400f190a00220c0c2ec9be4f3a",
+    "yoyo/rotation/derivatives.py": "4c643a998b2d6e26904db03fa4b8e475a80cbbea72a337a796e26fc431be7d35",
+    "yoyo/rotation/journal.py": "2045b96373a95186765d6f65d9f3c79d9d9f27a7f9f5232218a9ed52379a28a9",
+    "yoyo/rotation/metadata.py": "08dd7a57d7863acbc8ac781d292981c2b73ad1837adc05c46d38afa7db3bbd9a",
+    "yoyo/rotation/okx_provider.py": "a06ddff9918080bab5e1a019c444e37df5e27d8b4729cf38d5fe06c42c480d2f",
+    "yoyo/rotation/pipeline.py": "f4e11291e1aac6f5efa4f1ad56ced1859b662f11784ff65a218d88dbeaf2370a",
+    "yoyo/rotation/providers.py": "0e39e20603b031b9bc0c25ab12b1e88c72f17dbb844d55f88ac677ec87177a66",
+    "yoyo/rotation/server.py": "fa70c61fecd9f517545fd24d267c316a710837526b21b3ed71bf3a26627f21b0"
+  },
+  "requested_authorization": "Approve this unchanged configuration's current-market observations with a stated expiry and holdout consumption number; no trading, training, deployment or messages.",
+  "receipt_required_fields": [
+    "experiment_id",
+    "scope",
+    "config_hash",
+    "source_hash",
+    "owner_quote",
+    "reference",
+    "approved_at",
+    "valid_until",
+    "consumption_number"
+  ]
+}
