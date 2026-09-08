@@ -2,7 +2,13 @@
 import pandas as pd
 import pytest
 import json
-from yoyo.evaluation.altcoin_trend_report import case_exit_rows, side_rows, volatility_retention, verify_phase, digest
+from yoyo.evaluation.altcoin_trend_report import case_exit_rows, side_rows, volatility_retention, verify_phase, digest, table
+
+
+def test_report_tables_need_no_optional_package_and_escape_cells():
+    result=table(pd.DataFrame({'name':['a|b\n<c>'],'net':[1.234]}),{'name':'名称','net':'净bp'})
+    assert '| 名称 | 净bp |' in result
+    assert 'a&#124;b<br>&lt;c&gt;' in result and '1.234' in result
 
 
 def event(arm,**extra):

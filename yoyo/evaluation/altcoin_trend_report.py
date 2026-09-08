@@ -7,6 +7,7 @@ claims remain the fixed 20bp research convention, not live executable PnL.
 """
 from __future__ import annotations
 import argparse
+from html import escape
 import hashlib
 import json
 from pathlib import Path
@@ -51,7 +52,14 @@ def table(frame,columns):
         if pd.api.types.is_numeric_dtype(f[c]):
             f[c]=f[c].map(lambda v:'—' if pd.isna(v) else f'{v:.3f}' if ('p' in c or '超额' in c) else f'{v:.2f}')
         else:f[c]=f[c].fillna('—').astype(str)
-    return f.to_markdown(index=False)
+    # Keep the existing environment contract: pandas Markdown needs optional
+    # tabulate, whereas this small escaped pipe table needs no extra package.
+    def cell(value):
+        return escape(str(value)).replace('|','&#124;').replace('\n','<br>')
+    rows=['| '+' | '.join(cell(c) for c in f.columns)+' |',
+          '| '+' | '.join('---' for _ in f.columns)+' |']
+    rows += ['| '+' | '.join(cell(v) for v in row)+' |' for row in f.itertuples(index=False,name=None)]
+    return '\n'.join(rows)
 
 
 def friendly(frame):
