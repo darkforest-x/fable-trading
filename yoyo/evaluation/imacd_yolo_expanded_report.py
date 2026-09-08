@@ -361,6 +361,9 @@ def run():
         raise ValueError("commit report source before generating artifacts")
     summary_path = EXP / "results/summary.json"
     summary = json.loads(summary_path.read_text())
+    finalizer_source = summary.get("finalizer_source")
+    if finalizer_source and digest(ROOT / finalizer_source) != summary["finalizer_source_sha256"]:
+        raise ValueError("saved output finalizer source differs from its receipt")
     for relative, expected in summary["files"].items():
         if digest(ROOT / relative) != expected:
             raise ValueError(f"saved evaluation artifact changed: {relative}")
@@ -445,6 +448,12 @@ def run():
         f"按event_id对齐{comparison['common_events']}条，其中{comparison['unchanged_events']}条指定字段一致。"
         "核对方向、原箭头与确认时钟、等待、模型框身份及两次开盘价格位移；差异与缺失清单见下方回执。"
         if comparison.get("available") else "旧台账不可用，未编造共同样本比较。")
+    output_fix_table = md_table(["输出修复来源", "保存值"], [
+        ["源码", f"[{finalizer_source}]({ROOT / finalizer_source})" if finalizer_source else "未记录"],
+        ["源码SHA", f"`{summary.get('finalizer_source_sha256', '未记录')}`"],
+        ["生成commit", f"`{summary.get('finalizer_commit', '未记录')}`"],
+        ["修复范围原文", summary.get("output_fix", "未记录")],
+    ])
     relative = {key: "../" + str(path.relative_to(ROOT)) for key, path in paths.items()}
     md = f"""# IMACD → YOLO 扩大检查：54币、半年、1H与4H
 
@@ -522,6 +531,18 @@ def run():
 
 ## 验证、来源和复现
 
+### 输出层JSON格式修复
+
+原冻结runner的多列grouped_stats分组键包含NumPy int64标量，Python JSON在最后写summary时拒绝该类型。这个错误发生在汇总输出层，216个模型分片及候选、框、决策、轨迹已经保存；没有改动其冻结源码、来源manifest、模型输入或决策规则。
+
+单独提交的finalizer先验证216份完整分片收据、文件SHA和四份combined台账与分片一致，再从保存决策重算同规则描述与四项固定方向置换，只用`np.generic.item()`将NumPy标量显式转换为Python标量后写JSON。不静默字符串化未知对象，不允许非有限指标。这个过程没有读取原始行情、加载模型或重跑推理；重新生成同一套统计不是新的模型/市场评价。
+
+{output_fix_table}
+
+修复有两条独立回归覆盖：复现多列分组的int64写出错误并核对转换后数字保持一致；拒绝未知对象与NaN，防止“能写JSON”掩盖坏数据。测试源码见[输出修复回归测试]({ROOT / 'tests/test_imacd_yolo_expanded_finalize.py'})。本报告不因测试文件存在而自行填报整套测试通过数量。
+
+### 保存台账的复核
+
 报告逐一核对{len(summary['files'])}份保存产物的SHA，并将216组计数与combined decisions重新对账。冻结程序保存{len(validations)}组内置验证收据，其中{passed}组passed=true，共记录{checked}次确认事件检查；未通过或缺少passed的分组：`{failed_groups}`。这是内置回执，不冒充外部审核通过数量。以下仅列独立审核的检查总数、结果、失效覆盖与旧样本对齐摘要，窗口数明确取自运行summary。失败列表最多展示20项，完整逐项检查见[独立审核JSON]({review_path})。
 
 ```json
@@ -540,6 +561,11 @@ def run():
 cd /Users/zhangzc/fable-trading
 # 首次/中断续跑：仅接受来源与SHA一致的已完成分片
 .venv/bin/python -m yoyo.evaluation.imacd_yolo_expanded
+# 当前冻结版本在最后summary JSON写出报int64 TypeError；不因此重跑模型
+# 确认completed_groups=total_groups=216，且四份combined台账已经存在
+cat experiments/active/exp-imacd-yolo-expanded-20260908-v1/results/progress.json
+# 只校验216分片/combined并修复输出格式；不足216或summary已存在均拒绝执行
+.venv/bin/python -m yoyo.evaluation.imacd_yolo_expanded_finalize
 # 独立核对保存台账，不重复推理
 .venv/bin/python -m yoyo.evaluation.imacd_yolo_expanded_verify
 # 可选：复现按时间选定的历史模型输入/审核图，不重跑YOLO
@@ -550,7 +576,7 @@ cd /Users/zhangzc/fable-trading
 .venv/bin/python scripts/md_to_html.py analysis/p1_imacd_yolo_expanded_20260908.md --out-dir analysis/html
 ```
 
-报告源码提交后生成MD，随后立即用scripts/md_to_html.py转换HTML。模型、原始缓存、大型台账不入git，完整路径、来源与摘要保存在实验source_manifest、universe及summary中。
+原runner的最后序列化错误不是缺失分片的豁免：必须先核对216组完成与四份combined台账存在，finalizer会再次严格校验，不能对部分结果生成完整总结。已有summary时只执行verify、可选examples和report；不重复run或finalize。报告源码提交后生成MD，随后立即用scripts/md_to_html.py转换HTML。模型、原始缓存、大型台账不入git，完整路径、来源与摘要保存在实验source_manifest、universe及summary中。
 
 ## 风险与诚实声明
 
@@ -571,6 +597,7 @@ cd /Users/zhangzc/fable-trading
     receipt = dict(summary_sha256=digest(summary_path), report_source_sha256=digest(Path(__file__)),
         report_sha256=digest(report), validation=validation, comparison=comparison,
         examples=examples_receipt,
+        finalizer_source_sha256=summary.get("finalizer_source_sha256"),
         figures={str(path.relative_to(ROOT)): digest(path) for path in paths.values()})
     (EXP / "results/report_receipt.json").write_text(json.dumps(receipt, indent=2, ensure_ascii=False))
     print(ROOT / "analysis/html" / report.with_suffix(".html").name)
