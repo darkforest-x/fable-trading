@@ -107,16 +107,26 @@
       (state.timeframe === "all" || item.timeframe === state.timeframe) &&
       (state.side === "all" || item.side === state.side) && item.kind === "tv_start");
   }
-  function notification(item) {
-    const value = String(item.notification_status || "").toLowerCase();
-    if (["sent", "delivered", "success"].includes(value)) return ["TG 已送达", "sent"];
+  function notification(item, channel = "telegram") {
+    const value = String(item[channel === "bark" ? "bark_notification_status" : "notification_status"] || "").toLowerCase();
+    if (["sent", "delivered", "success"].includes(value)) return [channel === "bark" ? "服务已接受" : "已送达", "sent"];
     if (["failed", "error", "dead"].includes(value)) return ["发送失败", "failed"];
     if (value === "unknown") return ["回执未知", "pending"];
     if (["pending", "queued", "retry", "sending"].includes(value)) return ["等待发送", "pending"];
     if (["disabled", "not_configured"].includes(value)) return ["通知未启用", "muted"];
+    if (channel === "bark" && value === "skipped") return ["已跳过", "muted"];
+    if (channel === "bark" && !value) return ["暂无状态", "muted"];
     if (item.is_fresh === false || ["history", "historical", "stale", "expired", "skipped"].includes(value)) return ["历史记录", "muted"];
     if (["suppressed", "duplicate"].includes(value)) return ["已去重", "muted"];
     return ["已记录", "muted"];
+  }
+  function notificationHTML(item) {
+    return ["telegram", "bark"].map((channel) => {
+      const [label, className] = notification(item, channel);
+      const name = channel === "bark" ? "Bark" : "TG";
+      const description = channel === "bark" && className === "sent" ? "Bark 服务已接受推送，不代表手机已收到或已读" : `${name} · ${label}`;
+      return `<span class="row-status ${className}" data-notification-channel="${channel}" title="${escapeHTML(description)}" aria-label="${escapeHTML(description)}"><span class="notification-channel">${name}</span><span>${escapeHTML(label)}</span></span>`;
+    }).join("");
   }
   function renderSignals() {
     const items = filteredSignals();
@@ -142,10 +152,9 @@
     const focusedId = document.activeElement?.dataset?.signalId;
     $("signal-rows").innerHTML = items.slice(0, state.rowLimit).map((item) => {
       const selected = state.selected && String(state.selected.id) === String(item.id) && state.selected.symbol === item.symbol && state.selected.timeframe === item.timeframe;
-      const [notifyLabel, notifyClass] = notification(item);
       const name = eventNames[item.kind] || item.kind || "信号";
       const tag = `启动前蓄势 ${number(focusRun(item))} 根`;
-      return `<tr class="signal-row${selected ? " selected" : ""}" data-signal-id="${escapeHTML(item.id)}" tabindex="0" aria-label="${escapeHTML(`${shortSymbol(item.symbol)} ${item.timeframe} ${sideName(item.side)} ${name}，确认点位 ${price(item.price)}`)}" aria-selected="${Boolean(selected)}"><td><div class="symbol-label">${escapeHTML(shortSymbol(item.symbol))}<span class="symbol-quote">${escapeHTML(quoteSymbol(item.symbol))}</span>${item.is_fresh === true ? '<span class="fresh-label">新</span>' : ""}</div><div class="row-subtext"><span class="timeframe-tag">${escapeHTML(item.timeframe)}</span><time title="${escapeHTML(fullDate(item.bar_close_ms))}">${escapeHTML(shortDate(item.bar_close_ms))}</time></div></td><td><div class="event-label ${item.side === "short" ? "short" : item.side === "long" ? "long" : ""}"><span class="direction-icon" aria-hidden="true">${sideArrow(item.side)}</span>${escapeHTML(sideName(item.side))} · ${escapeHTML(name)}</div><div class="event-sub">${escapeHTML(tag)}</div></td><td class="price-cell">${escapeHTML(price(item.price))}</td><td><span class="row-status ${notifyClass}" title="${escapeHTML(notifyLabel)}">${notifyLabel}</span></td></tr>`;
+      return `<tr class="signal-row${selected ? " selected" : ""}" data-signal-id="${escapeHTML(item.id)}" tabindex="0" aria-label="${escapeHTML(`${shortSymbol(item.symbol)} ${item.timeframe} ${sideName(item.side)} ${name}，确认点位 ${price(item.price)}`)}" aria-selected="${Boolean(selected)}"><td><div class="symbol-label">${escapeHTML(shortSymbol(item.symbol))}<span class="symbol-quote">${escapeHTML(quoteSymbol(item.symbol))}</span>${item.is_fresh === true ? '<span class="fresh-label">新</span>' : ""}</div><div class="row-subtext"><span class="timeframe-tag">${escapeHTML(item.timeframe)}</span><time title="${escapeHTML(fullDate(item.bar_close_ms))}">${escapeHTML(shortDate(item.bar_close_ms))}</time></div></td><td><div class="event-label ${item.side === "short" ? "short" : item.side === "long" ? "long" : ""}"><span class="direction-icon" aria-hidden="true">${sideArrow(item.side)}</span>${escapeHTML(sideName(item.side))} · ${escapeHTML(name)}</div><div class="event-sub">${escapeHTML(tag)}</div></td><td class="price-cell">${escapeHTML(price(item.price))}</td><td><div class="notification-stack">${notificationHTML(item)}</div></td></tr>`;
     }).join("");
     if (focusedId) Array.from($("signal-rows").children).find((row) => row.dataset.signalId === focusedId)?.focus({ preventScroll: true });
   }
@@ -179,6 +188,7 @@
     const scan = status.scan || {};
     const counts = status.counts || {};
     const telegram = status.telegram || {};
+    const bark = status.bark;
     const runtime = status.runtime || {};
     $("metric-signals").textContent = tvProtocol() ? number(counts.signals_24h ?? 0) : "—";
     $("nav-signal-count").textContent = tvProtocol() ? number(counts.signals_24h ?? 0) : "—";
@@ -209,6 +219,14 @@
     $("telegram-state-badge").className = `neutral-badge ${tgReady && !tgProblem ? "good" : "warn"}`;
     $("telegram-description").textContent = tgReady ? numeric(telegram.unknown) > 0 ? "部分发送未收到确定回执，为避免重复通知不自动重发，请核对 Telegram。" : "新鲜信号进入通知队列；发送结果与行情记录分开显示。" : telegram.configured ? "通道已配置，当前发送开关关闭。前端继续记录信号。" : "尚未读取到可用的通知配置，当前仅在前端记录信号。";
     $("telegram-facts").innerHTML = factsHTML([["最近成功", fullDate(telegram.last_success_ms)], ["待发送", number(telegram.pending)], ["发送失败", number(telegram.failed)], ["发送结果未知", number(telegram.unknown ?? 0)], ["配置状态", telegram.configured ? "已配置（敏感信息不展示）" : "未配置"]]);
+    const barkReady = Boolean(bark?.configured && bark?.enabled);
+    const barkProblem = numeric(bark?.failed) > 0 || numeric(bark?.unknown) > 0;
+    $("bark-header").textContent = !bark ? "Bark · 待接入" : barkReady ? barkProblem ? "Bark · 异常" : "Bark · 已启用" : "Bark · 未启用";
+    $("bark-header").classList.toggle("good", barkReady && !barkProblem);
+    $("bark-state-badge").textContent = !bark ? "状态待接入" : barkReady ? barkProblem ? "需检查发送结果" : "通知已启用" : bark.configured ? "通知已关闭" : "尚未配置";
+    $("bark-state-badge").className = `neutral-badge ${barkReady && !barkProblem ? "good" : "warn"}`;
+    $("bark-description").textContent = !bark ? "服务尚未提供 Bark 通道状态，等待下一次同步。" : barkReady ? numeric(bark.unknown) > 0 ? "部分发送结果未知，为避免重复通知不自动重发。服务接受不代表手机已收到或已读。" : "与 TG 分别记录推送结果。服务已接受不代表手机已收到或已读。" : bark.configured ? "Bark 已配置，当前发送开关关闭；TG 与前端记录独立运行。" : "Bark 尚未配置；TG 与前端记录独立运行。";
+    $("bark-facts").innerHTML = factsHTML([["本次服务接受", number(bark?.sent)], ["最近服务接受", fullDate(bark?.last_success_ms)], ["待发送", number(bark?.pending)], ["发送失败", number(bark?.failed)], ["发送结果未知", number(bark?.unknown)], ["历史服务接受", number(bark?.historical_sent)], ["配置状态", !bark ? "等待状态" : bark.configured ? "已配置（敏感信息不展示）" : "未配置"]]);
     $("service-version").textContent = status.version ? `v${String(status.version).replace(/^v/, "")}` : "本机服务";
     const runtimeFacts = [["服务", status.service || "Fable OKX Monitor"], ["启动时间", fullDate(status.started_at_ms)], ["服务时间", fullDate(status.now_ms)], ["运行时长", duration(Date.now() - numeric(status.started_at_ms, Date.now()))]];
     if (runtime.host) runtimeFacts.push(["主机", runtime.host]);
@@ -454,7 +472,7 @@
   }
   function redact(value) {
     if (Array.isArray(value)) return value.map(redact);
-    if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, /token|secret|password|api.?key|chat.?id|authorization/i.test(key) ? "[已隐藏]" : redact(item)]));
+    if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, /token|secret|password|api.?key|chat.?id|authorization|device.?key|(?:bark|push|server).?(?:url|address)|endpoint|^url$/i.test(key) ? "[已隐藏]" : redact(item)]));
     return value;
   }
   async function loadHealth() {

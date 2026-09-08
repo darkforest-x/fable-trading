@@ -100,7 +100,7 @@ are exposed independently from HTTP service availability.
 
 Public contract: [OKX market data](https://www.okx.com/docs-v5/en/#order-book-trading-market-data).
 
-## Telegram and privacy
+## Telegram, Bark and privacy
 
 The existing `yoyo.notify._load()` reads the owner's gitignored config or
 `TG_BOT_TOKEN` / `TG_CHAT_ID` environment. No credentials enter frontend JSON,
@@ -116,6 +116,27 @@ requires an actual Telegram `message_id` receipt.
 
 Public contract: [Telegram Bot API](https://core.telegram.org/bots/api#sendmessage).
 
+Bark is an additional independent channel. Its owner-provided device key lives
+only in `~/Library/Application Support/Fable/ImpulseMonitor/bark.json` with
+mode 0600, separately from other project notification configurations. Restart
+this service to load a changed configuration. The frontend exposes configured
+state and counts, never the key or the private endpoint.
+
+Only a new eligible `tv_start` after Bark's first calibrated-clock activation
+can enter `bark_outbox`. Existing observations and Telegram receipts are not
+replayed. Both channel rows are created atomically with a new event, then
+handled by independent workers. Telegram remains enabled. No startup/test
+notifications are generated. Failure or uncertainty in one channel cannot
+consume the other's queue or success receipt.
+
+Bark uses JSON POST to the official `/push` endpoint, with redirects disabled.
+Its HTTP 200 / code 200 / server timestamp confirms server acceptance; it is
+not a device display or read receipt. Definite client rejection is failed,
+429 retries respect a bounded Retry-After, and uncertain delivery is not
+automatically resent. Notifications contain the symbol, timeframe, direction,
+close price, preparation count, candle times and the TradingView link.
+Public contract: [Bark API V2](https://github.com/Finb/bark-server/blob/master/docs/API_V2.md).
+
 ## Runtime locations
 
 - SQLite: `~/Library/Application Support/Fable/ImpulseMonitor/monitor.sqlite3`
@@ -126,9 +147,9 @@ Public contract: [Telegram Bot API](https://core.telegram.org/bots/api#sendmessa
 
 The VPS-owned OHLCV cache, forward log and production executor are not written.
 No raw K-line files are persisted. Event rows contain derived state and the
-signal price. The independent hourly Codex heartbeat `imacd-mac` checks health
-and reports only a meaningful change; routine market scanning itself does not
-depend on an active Codex conversation.
+signal price. The extra Codex heartbeat `imacd-mac` is paused following the
+owner's question about unnecessary recurring AI checks. Market scanning,
+Telegram and Bark run in the local service without an active Codex conversation.
 
 `caffeinate -is` prevents idle sleep (system-sleep assertion while on AC power).
 Leave this Mac plugged in and connected. Closing its lid, shutting it down,

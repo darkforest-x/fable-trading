@@ -6821,3 +6821,19 @@ experiments:
       Prior all-date and TG authorization persists; live-observation use1. Backend a8974b7; static history label45ec14f.
       Chrome monitor UI9checks passed; HTML structural check passed, file URL visual preview blocked by browser policy.
       New live TG awaits a qualifying post-cutover close. No returns, models, orders or VPS cache writes.
+
+  - experiment_id: exp-imacd-bark-monitor-20260908-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5df5906
+    status: active
+    question: Add the owner's Bark device as an independent notification channel for the existing visible IMACD start.
+    single_variable: Notification destination fanout only; frozen signal protocol and thresholds unchanged.
+    result: Independent Bark queue, cutover, worker and frontend implemented; final verification pending.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: Owner explicitly authorized Bark signal delivery and supplied a device endpoint. Existing Telegram retained,
+      historical signals not replayed, AI heartbeat remains paused. Key stays in private monitor configuration.
+      No orders, model changes, strategy tuning or raw OHLC persistence. Notification configuration live-observation use1.

@@ -21,6 +21,7 @@ from yoyo.monitor.policy import is_tv_start
 from yoyo.monitor.okx import OKX
 from yoyo.monitor.store import now_ms
 from yoyo.monitor.telegram import TelegramWorker
+from yoyo.monitor.bark import BarkWorker
 
 LOG = logging.getLogger("fable.monitor")
 PROTOCOL = SIGNAL_PROTOCOL
@@ -47,12 +48,14 @@ class Monitor:
         self.instruments = []
         self.universe_at = 0
         self.telegram = TelegramWorker(store)
+        self.bark = BarkWorker(store)
+        self.bark_since = None
         self.threads = []
 
     def start(self):
         # Called only after server lifespan owns the singleton process lock.
         self.store.recover_outbox()
-        for name, target in (("scan", self.run), ("telegram", self.deliver)):
+        for name, target in (("scan", self.run), ("telegram", self.deliver), ("bark", self.deliver_bark)):
             thread = threading.Thread(target=target, name="impulse-" + name, daemon=True)
             self.threads.append(thread)
             thread.start()
@@ -85,6 +88,18 @@ class Monitor:
                 self.store.set_meta("scan", scan)
             self.stop_event.wait(self.interval)
 
+    def deliver_bark(self):
+        while not self.stop_event.is_set():
+            if not self.notification_ready.is_set():
+                self.stop_event.wait(3)
+                continue
+            try:
+                worked = self.bark.deliver_once(self.client.clock())
+            except Exception as exc:
+                LOG.error("bark worker failure: %s", type(exc).__name__)
+                worked = False
+            self.stop_event.wait(1.1 if worked else 3)
+
     def scan(self):
         start = now_ms()
         self.client.synchronize()
@@ -92,6 +107,8 @@ class Monitor:
             # Use the same calibrated clock as candle closes and freshness.
             # A slow Mac clock must not turn a pre-upgrade close into a new bar.
             self.notification_since = self.store.activate_notification_policy(self.client.clock())
+            if self.bark.creds:
+                self.bark_since = self.store.activate_bark_policy(self.client.clock())
             self.notification_ready.set()
         if not self.instruments or start - self.universe_at >= 3600000:
             self.instruments = self.client.instruments()
@@ -192,9 +209,11 @@ class Monitor:
                 # Only the actual visible Pine focus-release marker is a signal.
                 # Recomputed history predating this protocol's activation stays
                 # historical even if a new identity would otherwise be fresh.
-                eligible = (event["is_fresh"] and not stale and is_tv_start(event)
-                            and event["bar_close_ms"] > self.notification_since)
-                self.store.upsert_event(event, notify=eligible)
+                base_eligible = event["is_fresh"] and not stale and is_tv_start(event)
+                eligible = base_eligible and event["bar_close_ms"] > self.notification_since
+                bark_eligible = (base_eligible and self.bark_since is not None
+                                 and event["bar_close_ms"] > self.bark_since)
+                self.store.upsert_event(event, notify=eligible, bark_notify=bark_eligible)
                 kept.append(event)
             with self.lock:
                 self.charts[(symbol, timeframe)] = dict(symbol=symbol, timeframe=timeframe,
@@ -221,7 +240,7 @@ class Monitor:
                     scan=self.store.get_meta("scan", {"status": "starting", "completed": 0, "total": 0, "errors": 0}),
                     universe=self.store.get_meta("universe", {"count": 0, "scope": "OKX 全部在交易永续合约"}),
                     counts=dict(counts, signals_24h=self.store.count_since(self.client.clock() - 86400000)),
-                    telegram=self.telegram.status(), runtime={"host": "This Mac", "notification_only": True,
+                    telegram=self.telegram.status(), bark=self.bark.status(), runtime={"host": "This Mac", "notification_only": True,
                     "fresh_minutes": FRESH_MS // 60000, "interval_seconds": self.interval, "timeframes": ["1H", "4H"],
                     "clock_offset_ms": self.client.offset_ms, "public_requests": self.client.requests,
                     "candle_storage": "memory_only", "history_days": 7,
@@ -230,6 +249,7 @@ class Monitor:
                                    "focus_min_bars": 12, "focus_atr_band": .10, "verified_on": "2026-09-08",
                                    "sync_mode": "observed_settings_snapshot"},
                     "notification_since_ms": self.notification_since,
+                    "bark_notification_since_ms": self.bark_since,
                     "higher_mode": "已确认高周期背景标注，不过滤启动",
                     "source_commit": self.source_commit, "startup_source_sha256": self.source_hashes,
                     "warmup_bars": 340, "launch_agent": "com.fable.impulse-monitor"})

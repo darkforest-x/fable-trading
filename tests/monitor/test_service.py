@@ -149,7 +149,7 @@ def test_outbox_recovery_waits_until_start_and_precedes_worker_launch(tmp_path, 
 
     monkeypatch.setattr(service.threading, "Thread", InertThread)
     monitor.start()
-    assert len(starts) == 2
+    assert len(starts) == 3
     assert all(status.get("unknown") == 1 and status.get("sending", 0) == 0
                for _, status in starts)
     assert store.claim(NOW) is None  # An uncertain old send must not be resent.
@@ -231,15 +231,19 @@ def test_policy_activation_uses_exchange_clock_before_delivery(tmp_path, monkeyp
     store = Store(tmp_path / 'monitor.sqlite3')
     monitor = Monitor(store, client=client)
     assert not monitor.notification_ready.is_set()
+    monitor.bark.creds = 'synthetic-device-key'
     monitor.scan()
     assert monitor.notification_ready.is_set()
     assert monitor.notification_since == NOW
     assert store.get_meta('notification_policy:' + SIGNAL_PROTOCOL)['activated_ms'] == NOW
+    assert monitor.bark_since == NOW
+    assert store.get_meta('notification_policy:bark:' + SIGNAL_PROTOCOL)['activated_ms'] == NOW
     # The latest already-closed bar is older than activation, even if the Mac
     # started timestamp was still before that bar's close.
     client.history['1H'][-1].update(o=120., h=121., l=119., c=120.)
     monitor.scan_symbol(INSTRUMENT)
     assert store.telegram_status()['pending'] == 0
+    assert store.bark_status()['pending'] == 0
 
 
 def test_raw_zero_departure_inside_focus_band_does_not_notify(tmp_path):
@@ -254,3 +258,39 @@ def test_raw_zero_departure_inside_focus_band_does_not_notify(tmp_path):
     assert any(e['kind'] == 'zero_breakout' for e in events)
     assert not any(e['kind'] == SIGNAL_KIND for e in events)
     assert store.telegram_status(protocol=SIGNAL_PROTOCOL)['pending'] == 0
+
+
+def test_bark_new_channel_does_not_replay_pre_activation_signal(tmp_path):
+    store = Store(tmp_path / 'monitor.sqlite3')
+    client = FakeMarket()
+    client.history['1H'][-1].update(o=120., h=121., l=119., c=120.)
+    monitor = Monitor(store, client=client)
+    monitor.notification_since = NOW - 120_000
+    monitor.bark_since = NOW
+    monitor.scan_symbol(INSTRUMENT)
+    assert store.telegram_status()['pending'] == 1
+    assert store.bark_status()['pending'] == 0
+
+
+def test_eligible_new_signal_enters_both_independent_channels_once(tmp_path):
+    store = Store(tmp_path / 'monitor.sqlite3')
+    client = FakeMarket()
+    client.history['1H'][-1].update(o=120., h=121., l=119., c=120.)
+    monitor = Monitor(store, client=client)
+    monitor.notification_since = monitor.bark_since = NOW - 120_000
+    monitor.scan_symbol(INSTRUMENT)
+    monitor.scan_symbol(INSTRUMENT)
+    assert store.telegram_status()['pending'] == 1
+    assert store.bark_status()['pending'] == 1
+
+
+def test_later_telegram_cutover_does_not_block_eligible_bark_signal(tmp_path):
+    store = Store(tmp_path / 'monitor.sqlite3')
+    client = FakeMarket()
+    client.history['1H'][-1].update(o=120., h=121., l=119., c=120.)
+    monitor = Monitor(store, client=client)
+    monitor.notification_since = NOW
+    monitor.bark_since = NOW - 120_000
+    monitor.scan_symbol(INSTRUMENT)
+    assert store.telegram_status()['pending'] == 0
+    assert store.bark_status()['pending'] == 1

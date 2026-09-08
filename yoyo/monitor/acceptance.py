@@ -25,6 +25,8 @@ def collect(label, output):
     with sqlite3.connect("file:" + str(runtime) + "?mode=ro", uri=True) as db:
         db.row_factory = sqlite3.Row
         receipts = [dict(r) for r in db.execute("SELECT event_id,status,attempts,updated_ms,message_id,error FROM outbox ORDER BY updated_ms")]
+        bark_exists = db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='bark_outbox'").fetchone()
+        bark_receipts = [dict(r) for r in db.execute("SELECT event_id,status,attempts,updated_ms,server_timestamp,error FROM bark_outbox ORDER BY updated_ms")] if bark_exists else []
         duplicate_groups = db.execute("SELECT COUNT(*) FROM (SELECT COUNT(*) n FROM events GROUP BY json_extract(payload,'$.protocol'),symbol,timeframe,kind,side,close_ms HAVING n>1)").fetchone()[0]
         event_count = db.execute("SELECT COUNT(*) FROM events").fetchone()[0]
         by_kind = [dict(r) for r in db.execute("SELECT kind,COUNT(*) count FROM events GROUP BY kind")]
@@ -35,6 +37,10 @@ def collect(label, output):
         policy = json.loads(policy_row[0]) if policy_row else None
         current_outbox = [dict(json.loads(r["payload"]), notification_status=r["status"])
                           for r in db.execute("SELECT e.payload,o.status FROM outbox o JOIN events e ON e.id=o.event_id WHERE json_extract(e.payload,'$.protocol')=?", (SIGNAL_PROTOCOL,))]
+        bark_policy_row = db.execute("SELECT payload FROM meta WHERE key=?", ("notification_policy:bark:" + SIGNAL_PROTOCOL,)).fetchone()
+        bark_policy = json.loads(bark_policy_row[0]) if bark_policy_row else None
+        bark_outbox = [dict(json.loads(r["payload"]), notification_status=r["status"])
+                       for r in db.execute("SELECT e.payload,o.status FROM bark_outbox o JOIN events e ON e.id=o.event_id WHERE json_extract(e.payload,'$.protocol')=?", (SIGNAL_PROTOCOL,))] if bark_exists else []
     source = {}
     for file in sorted((ROOT / "yoyo/monitor").rglob("*")):
         if file.suffix in (".py", ".js", ".css", ".html", ".md"):
@@ -46,7 +52,10 @@ def collect(label, output):
                             "errors": [{"symbol": r["symbol"], "timeframe": r["timeframe"], "error": r["error"]} for r in markets["items"] if r.get("error")],
                             "stale": sum(bool(r.get("stale")) for r in markets["items"])},
                    journal={"event_count": event_count, "duplicate_identity_groups": duplicate_groups,
-                            "telegram_receipts": receipts, "by_kind": by_kind},
+                            "telegram_receipts": receipts, "bark_receipts": bark_receipts, "by_kind": by_kind},
+                   bark_audit={"policy": bark_policy, "current_outbox_count": len(bark_outbox),
+                               "invalid_outbox_ids": [e["id"] for e in bark_outbox if not is_tv_start(e)],
+                               "pre_activation_outbox_ids": [e["id"] for e in bark_outbox if not bark_policy or e["bar_close_ms"] <= bark_policy["activated_ms"]]},
                    signal_contract_audit={"protocol": SIGNAL_PROTOCOL, "policy": policy,
                                     "signal_count": len(current),
                                     "invalid_signal_ids": [e["id"] for e in current if not is_tv_start(e)],

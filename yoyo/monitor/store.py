@@ -1,8 +1,11 @@
-"""SQLite event journal and transactional Telegram outbox for the local monitor.
+"""SQLite event journal and independent notification outboxes for the monitor.
 
 Only derived observations are persisted; public OHLCV stays in memory. Signal
 identity is the immutable protocol/instrument/timeframe/close/kind/direction.
-An uncertain Telegram delivery is never silently retried as a new message.
+Telegram and Bark receipts, retries and policy cutovers never consume each
+other. Outboxes are seeded only in the transaction inserting a new event;
+enabling a channel cannot silently replay an existing observation. An uncertain
+delivery is never silently retried as a new message.
 """
 from __future__ import annotations
 
@@ -44,6 +47,10 @@ class Store:
                 event_id TEXT PRIMARY KEY REFERENCES events(id), status TEXT NOT NULL,
                 attempts INTEGER NOT NULL DEFAULT 0, due_ms INTEGER NOT NULL,
                 updated_ms INTEGER NOT NULL, message_id INTEGER, error TEXT);
+            CREATE TABLE IF NOT EXISTS bark_outbox (
+                event_id TEXT PRIMARY KEY REFERENCES events(id), status TEXT NOT NULL,
+                attempts INTEGER NOT NULL DEFAULT 0, due_ms INTEGER NOT NULL,
+                updated_ms INTEGER NOT NULL, error TEXT, server_timestamp INTEGER);
             """)
         self.path.chmod(0o600)
 
@@ -58,7 +65,7 @@ class Store:
         finally:
             db.close()
 
-    def upsert_event(self, event, notify=False):
+    def upsert_event(self, event, notify=False, bark_notify=False):
         e = dict(event)
         key = "|".join(str(e[k]) for k in ("protocol", "symbol", "timeframe", "bar_close_ms", "kind", "side"))
         e["id"] = hashlib.sha256(key.encode()).hexdigest()[:24]
@@ -70,6 +77,9 @@ class Store:
             inserted = cur.rowcount == 1
             if inserted and notify:
                 db.execute("INSERT INTO outbox(event_id,status,due_ms,updated_ms) VALUES (?,?,?,?)",
+                           (e["id"], "pending", e["detected_at_ms"], e["detected_at_ms"]))
+            if inserted and bark_notify:
+                db.execute("INSERT INTO bark_outbox(event_id,status,due_ms,updated_ms) VALUES (?,?,?,?)",
                            (e["id"], "pending", e["detected_at_ms"], e["detected_at_ms"]))
         return inserted
 
@@ -92,11 +102,14 @@ class Store:
             filters.append("json_extract(e.payload,'$.protocol')=?")
             values.append(protocol)
         where = " WHERE " + " AND ".join(filters) if filters else ""
-        sql = "SELECT e.payload,o.status FROM events e LEFT JOIN outbox o ON e.id=o.event_id" + where
+        sql = ("SELECT e.payload,o.status,b.status FROM events e "
+               "LEFT JOIN outbox o ON e.id=o.event_id "
+               "LEFT JOIN bark_outbox b ON e.id=b.event_id") + where
         sql += " ORDER BY e.close_ms DESC,e.symbol,e.kind LIMIT ?"
         values.append(min(2000, max(1, int(limit))))
         with self.connect() as db:
-            return [dict(json.loads(r[0]), notification_status=r[1] or "history") for r in db.execute(sql, values)]
+            return [dict(json.loads(r[0]), notification_status=r[1] or "history",
+                         bark_notification_status=r[2] or "history") for r in db.execute(sql, values)]
 
     def event_count(self, kind=None, protocol=None):
         filters, values = [], []
@@ -133,6 +146,24 @@ class Store:
                        (activated_ms, SIGNAL_KIND, SIGNAL_PROTOCOL))
             return json.loads(db.execute("SELECT payload FROM meta WHERE key=?", (key,)).fetchone()[0])["activated_ms"]
 
+    def activate_bark_policy(self, activated_ms):
+        """Persist Bark's first cutover independently of Telegram's activation.
+
+        As with the Telegram policy, callers enforce this cutover before
+        delivery. Retire only obsolete pending Bark items, preserving all
+        receipts and every Telegram queue state.
+        """
+        key = "notification_policy:bark:" + SIGNAL_PROTOCOL
+        with self.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            db.execute("INSERT OR IGNORE INTO meta VALUES (?,?)",
+                       (key, encode({"activated_ms": activated_ms, "kind": SIGNAL_KIND})))
+            db.execute("""UPDATE bark_outbox SET status='skipped',error='notification_policy_replaced',updated_ms=?
+                WHERE status='pending' AND event_id IN (
+                    SELECT id FROM events WHERE kind!=? OR COALESCE(json_extract(payload,'$.protocol'),'')!=?)""",
+                       (activated_ms, SIGNAL_KIND, SIGNAL_PROTOCOL))
+            return json.loads(db.execute("SELECT payload FROM meta WHERE key=?", (key,)).fetchone()[0])["activated_ms"]
+
     def set_meta(self, key, value):
         with self.connect() as db:
             db.execute("INSERT OR REPLACE INTO meta VALUES (?,?)", (key, encode(value)))
@@ -145,6 +176,7 @@ class Store:
     def recover_outbox(self):
         with self.connect() as db:
             db.execute("UPDATE outbox SET status='unknown',error='process_interrupted_during_delivery' WHERE status='sending'")
+            db.execute("UPDATE bark_outbox SET status='unknown',error='process_interrupted_during_delivery' WHERE status='sending'")
 
     def claim(self, now):
         with self.connect() as db:
@@ -166,5 +198,28 @@ class Store:
         with self.connect() as db:
             counts = {r[0]: r[1] for r in db.execute("SELECT o.status,COUNT(*) FROM outbox o JOIN events e ON e.id=o.event_id" + where + " GROUP BY o.status", values)}
             sent = db.execute("SELECT MAX(o.updated_ms) FROM outbox o JOIN events e ON e.id=o.event_id" + where + (" AND" if where else " WHERE") + " o.status='sent'", values).fetchone()[0]
+        return dict(counts, pending=counts.get("pending", 0), failed=counts.get("failed", 0),
+                    unknown=counts.get("unknown", 0), last_success_ms=sent)
+
+    def claim_bark(self, now):
+        with self.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute("SELECT b.*,e.payload FROM bark_outbox b JOIN events e ON e.id=b.event_id WHERE b.status='pending' AND b.due_ms<=? ORDER BY b.due_ms LIMIT 1", (now,)).fetchone()
+            if not row:
+                return None
+            db.execute("UPDATE bark_outbox SET status='sending',attempts=attempts+1,updated_ms=? WHERE event_id=?", (now, row["event_id"]))
+            return dict(row, event=json.loads(row["payload"]), attempts=row["attempts"] + 1)
+
+    def finish_bark(self, event_id, status, *, error=None, server_timestamp=None, due_ms=0):
+        with self.connect() as db:
+            db.execute("UPDATE bark_outbox SET status=?,error=?,server_timestamp=?,due_ms=?,updated_ms=? WHERE event_id=?",
+                       (status, error, server_timestamp, due_ms, now_ms(), event_id))
+
+    def bark_status(self, protocol=None):
+        where = " WHERE json_extract(e.payload,'$.protocol')=?" if protocol else ""
+        values = (protocol,) if protocol else ()
+        with self.connect() as db:
+            counts = {r[0]: r[1] for r in db.execute("SELECT b.status,COUNT(*) FROM bark_outbox b JOIN events e ON e.id=b.event_id" + where + " GROUP BY b.status", values)}
+            sent = db.execute("SELECT MAX(b.updated_ms) FROM bark_outbox b JOIN events e ON e.id=b.event_id" + where + (" AND" if where else " WHERE") + " b.status='sent'", values).fetchone()[0]
         return dict(counts, pending=counts.get("pending", 0), failed=counts.get("failed", 0),
                     unknown=counts.get("unknown", 0), last_success_ms=sent)
