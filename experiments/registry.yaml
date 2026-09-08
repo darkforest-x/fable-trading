@@ -22,22 +22,37 @@ experiments:
       review workflow this week?
     single_variable: Review and data-lineage preparation only; no model experiment. Actual HL2 training labels copied
       unchanged into predictions.
-    result: Source frozen;1043 positive events represent8000 variants. Preparing one task per event, independent future40
-      and protected Owner answers. No new Gold or model improvement claimed.
+    result: 'Delivered 1043 actual HL2 image/label proposals from 8000 variants into project 77; 3556 total tasks
+      and predictions, 368 existing answers preserved. Export: 323 box answers, 33 explicit no-target with inherited
+      proposals, 12 conflicts; 142 tests passed. Manual curation remains pending.'
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/PLAN.md
+    canonical_report: analysis/html/p1_yolo_dataset_consolidation_20260908.html
     artifacts:
     - yolo-dataset-consolidation-20260908-prereg
     - yolo-dataset-consolidation-20260908-plan
+    - yolo-dataset-consolidation-20260908-report-source
+    - yolo-dataset-consolidation-20260908-report-html
+    - yolo-dataset-consolidation-20260908-build-receipt
+    - yolo-dataset-consolidation-20260908-manifest
+    - yolo-dataset-consolidation-20260908-lineage
+    - yolo-dataset-consolidation-20260908-tasks
+    - yolo-dataset-consolidation-20260908-future-manifest
+    - yolo-dataset-consolidation-20260908-physical-qa
+    - yolo-dataset-consolidation-20260908-import-receipt
+    - yolo-dataset-consolidation-20260908-reentry-receipt
+    - yolo-dataset-consolidation-20260908-browser-qa
+    - yolo-dataset-consolidation-20260908-windows-asset-qa
+    - yolo-dataset-consolidation-20260908-owner-export-summary
     reuse_allowed: false
-    notes: Owner requested current8000-label manual correction and complete weekly dataset organization. Same project77;
-      old tasks and raw annotations preserved. No new training authorization.
+    notes: Same project 77 and view 44; use Label Tasks As Displayed. Old tasks and Owner raw answers preserved. 1042
+      future40 plus one future13 before holdout. Deadline September 13 20:00 Asia/Shanghai for versioned curated subset
+      and unresolved inventory; no new training or Gold claim.
   - experiment_id: exp-yolo-owner-label-optimization-20260908-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 342fe6a9c24eade95089539fa38104d6d74f6954
-    status: active
+    status: superseded
     question: Can human correction of proposals improve short-delay YOLO detection on a frozen chronological pre-holdout
       challenge set by September13?
     single_variable: Corrected versus original proposal labels on identical newly rendered inputs, membership, initialization
@@ -54,8 +69,8 @@ experiments:
     - yolo-week-plan-20260908-evidence
     - yolo-week-plan-20260908-entry
     reuse_allowed: false
-    notes: Owner requested a weekly plan on2026-09-08. Deadline2026-09-13T20:00+08:00. Same LS project with one pending
-      queue; no first50 gate. Research only, existing training exceptions not inherited.
+    notes: Superseded on 2026-09-08 by exp-yolo-dataset-consolidation-20260908-v1 after Owner requested complete dataset
+      organization. Original planning evidence retained; no experiment or new training was executed under this plan.
   - experiment_id: exp-eth4h-exit-exploration-20260907-v2
     source_repo: darkforest-x/fable-trading
     source_commit: c38098d2e22e6a1a1661b8622dd0989096026a8a

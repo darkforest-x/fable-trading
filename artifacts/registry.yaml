@@ -18,6 +18,188 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: yolo-dataset-consolidation-20260908-report-source
+    artifact_type: report
+    role: actual_hl2_labels_owner_review_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: c61123c71677ed58020cca9d5a55d6f611635ec2
+    source_path: analysis/p1_yolo_dataset_consolidation_20260908.md
+    sha256: 3830a1c08163a22979c0a26323eb4490ce040ac45cd6dd26e56b67c76af54525
+    size_bytes: 11496
+    storage_uri: repo://analysis/p1_yolo_dataset_consolidation_20260908.md
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 1043 actual HL2 event proposals delivered; future context isolated; manual confirmation and training remain
+      pending. Raw Owner answers preserved separately.
+  - artifact_id: yolo-dataset-consolidation-20260908-report-html
+    artifact_type: report
+    role: actual_hl2_labels_owner_review_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: c61123c71677ed58020cca9d5a55d6f611635ec2
+    source_path: analysis/html/p1_yolo_dataset_consolidation_20260908.html
+    sha256: 1d709c9356a7d2db4e84ed4bf7bfd0bd8a41a01a0bc84d63bc068b1777b47b27
+    size_bytes: 15169
+    storage_uri: repo://analysis/html/p1_yolo_dataset_consolidation_20260908.html
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 1043 actual HL2 event proposals delivered; future context isolated; manual confirmation and training remain
+      pending. Raw Owner answers preserved separately.
+  - artifact_id: yolo-dataset-consolidation-20260908-build-receipt
+    artifact_type: manifest
+    role: actual_hl2_labels_owner_review_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: fa61a5a86e56b9166dd6d5d26b238c4a9f87e439
+    source_path: datasets/grade_a_hl2_review_20260908_v1/admin/build_receipt.json
+    sha256: baacdb74902504988f4f23db73716516e238b948c146dba4af248f81984beebd
+    size_bytes: 63540
+    storage_uri: file:///Users/zhangzc/fable-trading/datasets/grade_a_hl2_review_20260908_v1/admin/build_receipt.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 1043 actual HL2 event proposals delivered; future context isolated; manual confirmation and training remain
+      pending. Raw Owner answers preserved separately.
+  - artifact_id: yolo-dataset-consolidation-20260908-manifest
+    artifact_type: manifest
+    role: actual_hl2_labels_owner_review_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: fa61a5a86e56b9166dd6d5d26b238c4a9f87e439
+    source_path: datasets/grade_a_hl2_review_20260908_v1/manifest.jsonl
+    sha256: fb0be11739339fd5d5016eee24a51081fd3ed44cffd1c1774c963a7365bf5fde
+    size_bytes: 17263210
+    storage_uri: file:///Users/zhangzc/fable-trading/datasets/grade_a_hl2_review_20260908_v1/manifest.jsonl
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 1043 actual HL2 event proposals delivered; future context isolated; manual confirmation and training remain
+      pending. Raw Owner answers preserved separately.
+  - artifact_id: yolo-dataset-consolidation-20260908-lineage
+    artifact_type: manifest
+    role: actual_hl2_labels_owner_review_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: fa61a5a86e56b9166dd6d5d26b238c4a9f87e439
+    source_path: datasets/grade_a_hl2_review_20260908_v1/admin/lineage.jsonl
+    sha256: 25f2bdf6610c9909dc75f64348aa7bbf0baaf5729ae902efe3f71a47b461cbcd
+    size_bytes: 13992786
+    storage_uri: file:///Users/zhangzc/fable-trading/datasets/grade_a_hl2_review_20260908_v1/admin/lineage.jsonl
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 1043 actual HL2 event proposals delivered; future context isolated; manual confirmation and training remain
+      pending. Raw Owner answers preserved separately.
+  - artifact_id: yolo-dataset-consolidation-20260908-tasks
+    artifact_type: annotation_set
+    role: actual_hl2_labels_owner_review_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: fa61a5a86e56b9166dd6d5d26b238c4a9f87e439
+    source_path: datasets/grade_a_hl2_review_20260908_v1/tasks.json
+    sha256: 2262199e081132bfc891014944345720fbcc37ad2a800c8a6c8e38422fab35b2
+    size_bytes: 2049096
+    storage_uri: file:///Users/zhangzc/fable-trading/datasets/grade_a_hl2_review_20260908_v1/tasks.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 1043 actual HL2 event proposals delivered; future context isolated; manual confirmation and training remain
+      pending. Raw Owner answers preserved separately.
+  - artifact_id: yolo-dataset-consolidation-20260908-future-manifest
+    artifact_type: manifest
+    role: actual_hl2_labels_owner_review_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: fa61a5a86e56b9166dd6d5d26b238c4a9f87e439
+    source_path: datasets/grade_a_hl2_review_20260908_v1/future_only/manifest.json
+    sha256: 0a51dc66a73baca55bfdd68eb59d2828210bff48aad574987573c674a0f6857f
+    size_bytes: 1265611
+    storage_uri: file:///Users/zhangzc/fable-trading/datasets/grade_a_hl2_review_20260908_v1/future_only/manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 1043 actual HL2 event proposals delivered; future context isolated; manual confirmation and training remain
+      pending. Raw Owner answers preserved separately.
+  - artifact_id: yolo-dataset-consolidation-20260908-physical-qa
+    artifact_type: manifest
+    role: actual_hl2_labels_owner_review_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: c61123c71677ed58020cca9d5a55d6f611635ec2
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/physical_qa.json
+    sha256: d34a38e14d0082b8e83992741e407bae79a94accdbd2e1b75c2cfc314fb6d782
+    size_bytes: 309
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/physical_qa.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 1043 actual HL2 event proposals delivered; future context isolated; manual confirmation and training remain
+      pending. Raw Owner answers preserved separately.
+  - artifact_id: yolo-dataset-consolidation-20260908-import-receipt
+    artifact_type: manifest
+    role: actual_hl2_labels_owner_review_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: c61123c71677ed58020cca9d5a55d6f611635ec2
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/import_receipt.json
+    sha256: cf5a2d47946cb8ac4eac21a964de2e0ac94aaec583e402108824fc2761945f1c
+    size_bytes: 44587
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/import_receipt.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 1043 actual HL2 event proposals delivered; future context isolated; manual confirmation and training remain
+      pending. Raw Owner answers preserved separately.
+  - artifact_id: yolo-dataset-consolidation-20260908-reentry-receipt
+    artifact_type: manifest
+    role: actual_hl2_labels_owner_review_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: c61123c71677ed58020cca9d5a55d6f611635ec2
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/reentry_receipt.json
+    sha256: 695cef1fd6bfb0babc05946dd5b85c9db4de50913ed0c9cd55d8e00712e31923
+    size_bytes: 44587
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/reentry_receipt.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 1043 actual HL2 event proposals delivered; future context isolated; manual confirmation and training remain
+      pending. Raw Owner answers preserved separately.
+  - artifact_id: yolo-dataset-consolidation-20260908-browser-qa
+    artifact_type: manifest
+    role: actual_hl2_labels_owner_review_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: c61123c71677ed58020cca9d5a55d6f611635ec2
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/browser_qa.json
+    sha256: d80cc36c807dcb27e3d99595779ac6dfbedfa677c77ddf0a0ae4b1a5629575c9
+    size_bytes: 913
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/browser_qa.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 1043 actual HL2 event proposals delivered; future context isolated; manual confirmation and training remain
+      pending. Raw Owner answers preserved separately.
+  - artifact_id: yolo-dataset-consolidation-20260908-windows-asset-qa
+    artifact_type: manifest
+    role: actual_hl2_labels_owner_review_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: c61123c71677ed58020cca9d5a55d6f611635ec2
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/windows_asset_qa.json
+    sha256: b9868ec299a00bb6a1e73e8b348d5dff9518c96437e9a8377ab371520ebec6b6
+    size_bytes: 441
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/windows_asset_qa.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 1043 actual HL2 event proposals delivered; future context isolated; manual confirmation and training remain
+      pending. Raw Owner answers preserved separately.
+  - artifact_id: yolo-dataset-consolidation-20260908-owner-export-summary
+    artifact_type: manifest
+    role: actual_hl2_labels_owner_review_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: c61123c71677ed58020cca9d5a55d6f611635ec2
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/owner_export_summary.json
+    sha256: bd0fddda8b4875c1d898079fd67c3922552e88ff2d4bfeff27387626ff77ff04
+    size_bytes: 3666
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/owner_export_summary.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 1043 actual HL2 event proposals delivered; future context isolated; manual confirmation and training remain
+      pending. Raw Owner answers preserved separately.
   - artifact_id: yolo-dataset-consolidation-20260908-prereg
     artifact_type: manifest
     role: actual_hl2_labels_owner_review_preparation
@@ -48,28 +230,30 @@ artifacts:
     artifact_type: report
     role: weekly_yolo_planning_not_training_authorization
     source_repo: darkforest-x/fable-trading
-    source_commit: 342fe6a9c24eade95089539fa38104d6d74f6954
+    source_commit: c61123c71677ed58020cca9d5a55d6f611635ec2
     source_path: analysis/week_plan_yolo_20260908.md
-    sha256: dd3cbe3341c9f86afda3ebd5f2dadae62f8873f7d76e410040b7a5e23c35b18a
-    size_bytes: 19429
+    sha256: a4b262ef1557b7ba4bc2370cba321d5caf511abed14f00089205a07ccadbbc89
+    size_bytes: 20017
     storage_uri: repo://analysis/week_plan_yolo_20260908.md
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
-    notes: Planning only. Read-only pre-holdout metadata and LS progress; no new training or performance claim.
+    notes: Original weekly plan retained with dated supersession notice; current data cleanup plan and AsDisplayed1043
+      entry supersede old count/UI/training schedule. No training authorization.
   - artifact_id: yolo-week-plan-20260908-html
     artifact_type: report
     role: weekly_yolo_planning_not_training_authorization
     source_repo: darkforest-x/fable-trading
-    source_commit: 342fe6a9c24eade95089539fa38104d6d74f6954
+    source_commit: c61123c71677ed58020cca9d5a55d6f611635ec2
     source_path: analysis/html/week_plan_yolo_20260908.html
-    sha256: 1e5e4c8dede4b298d088bc0e941d009cb8002bdf1dc5ac10563c1a5c42c5bbde
-    size_bytes: 23368
+    sha256: 868123501ae7576d7df1942b6f68624d34d8ef8fdcd550400d839f467a257607
+    size_bytes: 24026
     storage_uri: repo://analysis/html/week_plan_yolo_20260908.html
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
-    notes: Planning only. Read-only pre-holdout metadata and LS progress; no new training or performance claim.
+    notes: Original weekly plan retained with dated supersession notice; current data cleanup plan and AsDisplayed1043
+      entry supersede old count/UI/training schedule. No training authorization.
   - artifact_id: yolo-week-plan-20260908-evidence
     artifact_type: manifest
     role: weekly_yolo_planning_not_training_authorization
