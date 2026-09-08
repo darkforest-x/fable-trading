@@ -1,0 +1,7 @@
+# Chart colors must share the interface theme palette
+
+- **Problem**: spike used CSS variables for some surfaces but hardcoded dark colors in other components and the SVG chart. Changing the page background alone would leave light-mode labels, status badges and chart lines unreadable.
+- **Dead end avoided**: inverting the screen changes the meaning of red/green candles, and recreating the chart on every theme change needlessly disturbs its current state and pointer interaction.
+- **Effective path**: make dark/light palettes define semantic UI and chart colors. SVG stroke/fill references inherit the same variables, including inside the expanded dialog, so appearance changes without fetching data or recreating chart geometry. Run the small preference controller before the stylesheet paints; keep explicit light/dark separate from follow-system preference. Catch storage failures so restricted storage cannot prevent monitoring UI startup.
+- **General rule**: a chart is part of the theme contract. Audit fills, strokes, inline text colors, interaction states, overlays and first-paint initialization together. Persist only the appearance preference and do not couple it to market filters or data loading.
+- **Affected paths**: `yoyo/monitor/static/theme.js`, `styles.css`, `app.js`, `index.html`; `tests/monitor/frontend_theme.test.cjs` covers reload, system changes, explicit preference, cross-tab changes and storage failures. No signal, notification, desktop-bridge or monitoring-service configuration changed.

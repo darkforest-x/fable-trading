@@ -268,3 +268,18 @@ Validation:
 node --test tests/monitor/frontend_cards.test.cjs
 osacompile -o /tmp/spike-tradingview-bridge.scpt yoyo/monitor/tradingview.applescript
 ```
+
+### Appearance
+
+The header's **外观主题** picker supports **深色**, **浅色**, and **跟随系统**
+(default). An explicit choice is stored only in this browser's `spike.theme`
+localStorage key and synchronized to other spike tabs on the same origin.
+Restricted storage falls back to a working, nonpersistent selection. The theme
+controller runs before CSS first paint to avoid flashing the wrong appearance.
+Cards, status states, chart lines/candles/zero axis and the expanded chart dialog
+share semantic CSS color tokens; switching does not reload chart data or reset
+filters/selection. The Mac TradingView app's own theme remains independent.
+
+```bash
+node --test tests/monitor/frontend_theme.test.cjs tests/monitor/frontend_cards.test.cjs
+```

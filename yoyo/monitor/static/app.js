@@ -511,22 +511,22 @@
     for (let i = 0; i < 4; i++) {
       const y = priceTop + i / 3 * (priceBottom - priceTop);
       const value = pMax - i / 3 * (pMax - pMin);
-      parts.push(`<line x1="${left}" x2="${width - right + 3}" y1="${y}" y2="${y}" stroke="#21313e" stroke-width=".65" stroke-dasharray="2 4"/><text x="${width - right + 9}" y="${y + 3}">${escapeHTML(axisPrice(value))}</text>`);
+      parts.push(`<line x1="${left}" x2="${width - right + 3}" y1="${y}" y2="${y}" stroke="var(--chart-grid)" stroke-width=".65" stroke-dasharray="2 4"/><text x="${width - right + 9}" y="${y + 3}">${escapeHTML(axisPrice(value))}</text>`);
     }
     const labelIndices = [...new Set([0, Math.round((candles.length - 1) / 3), Math.round((candles.length - 1) * 2 / 3), candles.length - 1])];
     labelIndices.forEach((i) => {
-      parts.push(`<line x1="${x(i)}" x2="${x(i)}" y1="${priceTop}" y2="${impulseBottom}" stroke="#1c2b36" stroke-width=".6" stroke-dasharray="2 5"/>`);
+      parts.push(`<line x1="${x(i)}" x2="${x(i)}" y1="${priceTop}" y2="${impulseBottom}" stroke="var(--chart-grid)" stroke-width=".6" stroke-dasharray="2 5"/>`);
       const date = new Date(Number(candles[i].t));
       const label = `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
       parts.push(`<text x="${x(i)}" y="${height - 13}" text-anchor="${i === 0 ? "start" : i === candles.length - 1 ? "end" : "middle"}">${label}</text>`);
     });
     parts.push('<g clip-path="url(#price-clip)">');
-    const maColors = ["#82aaa0", "#48695e", "#7194b0", "#405c72", "#909eae", "#556576"];
+    const maColors = ["var(--chart-ma20)", "var(--chart-ma20-muted)", "var(--chart-ma60)", "var(--chart-ma60-muted)", "var(--chart-ma120)", "var(--chart-ma120-muted)"];
     maKeys.forEach((key, i) => parts.push(`<path d="${path(key, py)}" fill="none" stroke="${maColors[i]}" stroke-width=".8" opacity=".95"/>`));
     candles.forEach((bar, i) => {
       const bright = bar.retest_side === "long" || bar.retest_side === "short";
       const rising = Number(bar.c) >= Number(bar.o);
-      const color = bright ? bar.retest_side === "short" ? "#ffcc8d" : "#c5ec95" : rising ? "#65b697" : "#b7737e";
+      const color = bright ? bar.retest_side === "short" ? "var(--chart-retest-down)" : "var(--chart-retest-up)" : rising ? "var(--chart-up)" : "var(--chart-down)";
       const bodyWidth = Math.max(1, Math.min(6.4, step * .62));
       const bodyY = Math.min(py(bar.o), py(bar.c));
       const bodyHeight = Math.max(.7, Math.abs(py(bar.o) - py(bar.c)));
@@ -544,10 +544,10 @@
       if (index < 0 || !["long", "short"].includes(event.side)) return;
       const long = event.side === "long", cy = long ? py(candles[index].l) + 6 : py(candles[index].h) - 6;
       const cx = x(index), direction = long ? 1 : -1;
-      parts.push(`<g data-event-kind="tv_start" data-side="${event.side}"><title>主图启动 · 蓄势释放${sideArrow(event.side)} · ${escapeHTML(number(event.near_zero_bars))} 根 · 收盘 ${escapeHTML(price(event.price ?? candles[index].c))}</title><path d="M${cx},${cy}l-3.5,${direction * 5}h7Z" fill="${long ? "#a4ecc9" : "#f0a2a8"}" stroke="#0e161f" stroke-width=".55"/></g>`);
+      parts.push(`<g data-event-kind="tv_start" data-side="${event.side}"><title>主图启动 · 蓄势释放${sideArrow(event.side)} · ${escapeHTML(number(event.near_zero_bars))} 根 · 收盘 ${escapeHTML(price(event.price ?? candles[index].c))}</title><path d="M${cx},${cy}l-3.5,${direction * 5}h7Z" fill="${long ? "var(--chart-marker-up)" : "var(--chart-marker-down)"}" stroke="var(--chart-marker-bg)" stroke-width=".55"/></g>`);
     });
     parts.push("</g>");
-    parts.push(`<line x1="${left}" x2="${width - 12}" y1="180" y2="180" stroke="#263640" stroke-width=".7"/><text x="${left}" y="191" style="font-size:7px;fill:#728797">IMACD</text><line x1="65" x2="76" y1="188.5" y2="188.5" stroke="#799ed5" stroke-width="1.2"/><text x="80" y="191" style="font-size:7px">主线</text><line x1="109" x2="120" y1="188.5" y2="188.5" stroke="#d8b17b" stroke-width="1.2"/><text x="124" y="191" style="font-size:7px">信号线</text>`);
+    parts.push(`<line x1="${left}" x2="${width - 12}" y1="180" y2="180" stroke="var(--line)" stroke-width=".7"/><text x="${left}" y="191" style="font-size:7px;fill:var(--chart-text)">IMACD</text><line x1="65" x2="76" y1="188.5" y2="188.5" stroke="var(--chart-md)" stroke-width="1.2"/><text x="80" y="191" style="font-size:7px">主线</text><line x1="109" x2="120" y1="188.5" y2="188.5" stroke="var(--chart-signal)" stroke-width="1.2"/><text x="124" y="191" style="font-size:7px">信号线</text>`);
     // Qualified accumulation bands come exclusively from backend focus state.
     // Exact md == 0 runs must not stand in for the TradingView near-zero area.
     let focusStart = null;
@@ -561,19 +561,19 @@
         const points = [...upper, ...lower.slice().reverse()].map(([px, yy]) => `${px.toFixed(2)},${yy.toFixed(2)}`).join(" ");
         const startX = left + focusStart * step, focusWidth = segment.length * step;
         const accumulationBars = Math.max(...segment.map((bar) => numeric(bar.near_zero_bars)));
-        parts.push(`<g class="focus-zone" data-source="backend-focus"><polygon points="${points}" fill="#c8ad7119" stroke="#bda576" stroke-width=".65"/><title>合格近零蓄势 · ${accumulationBars} 根</title></g>`);
+        parts.push(`<g class="focus-zone" data-source="backend-focus"><polygon points="${points}" fill="var(--chart-focus-fill)" stroke="var(--chart-focus-border)" stroke-width=".65"/><title>合格近零蓄势 · ${accumulationBars} 根</title></g>`);
         if (focusWidth > 58) {
           const bottom = Math.max(...lower.map((point) => point[1]));
-          parts.push(`<text x="${startX + focusWidth / 2}" y="${Math.min(impulseBottom - 1, bottom + 13)}" text-anchor="middle" style="font-size:7px;fill:#a18e69">近零蓄势 ${accumulationBars} 根</text>`);
+          parts.push(`<text x="${startX + focusWidth / 2}" y="${Math.min(impulseBottom - 1, bottom + 13)}" text-anchor="middle" style="font-size:7px;fill:var(--chart-focus-text)">近零蓄势 ${accumulationBars} 根</text>`);
         }
         focusStart = null;
       }
     }
     // Keep the zero axis distinct from the qualified near-zero band.
     const zeroY = my(0);
-    parts.push(`<line x1="${left}" x2="${width - right + 3}" y1="${zeroY}" y2="${zeroY}" stroke="#71818d" stroke-width=".8" stroke-dasharray="3 3"/><text x="${width - right + 9}" y="${zeroY + 3}" style="fill:#95a3ad">0.00</text>`);
-    parts.push(`<path d="${path("md", my)}" stroke="#799ed5" stroke-width="1.35" fill="none"/><path d="${path("sb", my)}" stroke="#d8b17b" stroke-width="1.2" fill="none"/>`);
-    parts.push(`<g class="chart-crosshair" visibility="hidden"><line class="crosshair-line" x1="0" x2="0" y1="${priceTop}" y2="${impulseBottom}" stroke="#789187" stroke-width=".8" stroke-dasharray="3 3"/><circle class="crosshair-dot" r="2.5" fill="#afe5c8" stroke="#0e161f" stroke-width="1.2"/></g><rect class="chart-hit-area" x="${left}" y="${priceTop}" width="${plotWidth}" height="${impulseBottom - priceTop}" fill="transparent" stroke="none"/></svg>`);
+    parts.push(`<line x1="${left}" x2="${width - right + 3}" y1="${zeroY}" y2="${zeroY}" stroke="var(--chart-zero)" stroke-width=".8" stroke-dasharray="3 3"/><text x="${width - right + 9}" y="${zeroY + 3}" style="fill:var(--chart-zero)">0.00</text>`);
+    parts.push(`<path d="${path("md", my)}" stroke="var(--chart-md)" stroke-width="1.35" fill="none"/><path d="${path("sb", my)}" stroke="var(--chart-signal)" stroke-width="1.2" fill="none"/>`);
+    parts.push(`<g class="chart-crosshair" visibility="hidden"><line class="crosshair-line" x1="0" x2="0" y1="${priceTop}" y2="${impulseBottom}" stroke="var(--chart-crosshair)" stroke-width=".8" stroke-dasharray="3 3"/><circle class="crosshair-dot" r="2.5" fill="var(--chart-marker-up)" stroke="var(--chart-marker-bg)" stroke-width="1.2"/></g><rect class="chart-hit-area" x="${left}" y="${priceTop}" width="${plotWidth}" height="${impulseBottom - priceTop}" fill="transparent" stroke="none"/></svg>`);
     $("chart-container").innerHTML = parts.join("");
     $("chart-container").setAttribute("aria-label", `${shortSymbol(state.selected?.symbol)} ${state.selected?.timeframe}，${candles.length} 根真实 K 线，上图六条细均线，下图 IMACD 双线与零轴，无柱状图`);
     $("chart-hint").textContent = state.chart.state?.stale ? "行情缓存已过期 · 等待重新同步" : state.chart.state?.error ? "行情存在读取异常 · 当前为缓存" : "箭头：主图蓄势释放 · 金色：合格近零区";
