@@ -210,7 +210,7 @@ def run():
         '下表为2026-05-04至2026-07-12，期末不跨段持仓。净收益和回撤来自同一个54袖套组合；其余指标来自原始事件账本，不把重叠箭头的收益相加当成组合收益。\n',
     ]
     q = summary.loc[(summary.fold=='holdout_review') & summary.policy.isin(['P00','P02'])]
-    text.append(table(['周期','规则','箭头数','每笔净bp','组合净收益','最大回撤','大赢家正收益保留'],
+    text.append(table(['周期','规则','箭头数','每笔净bp','组合净收益','收盘最大回撤','大赢家正收益保留'],
                      [[f'{int(r.minutes)}m',NAMES[r.policy],int(r.n),fmt(r.mean_net_bp),fmt(r.portfolio_net_pct)+'%',fmt(r.portfolio_mdd_pct)+'%',fmt(r.tail_profit_pct)+'%'] for r in q.itertuples()]))
     text += ['\n![最终复核净值](../experiments/active/exp-imacd-startup-quality-20260908-v1/results/equity_holdout_review.png)\n',
              '“大赢家”是同周期同时间段基线真实净收益最高10%，数量取ceil、并列按event_id；保留率是其中原有正收益的保留份额，是事后诊断，不是选股规则。\n',
@@ -252,11 +252,18 @@ def run():
                      fmt(summary.loc[(summary.fold=='holdout_review')&(summary.minutes==m)&(summary.policy==p),'matched_pct'].iloc[0])+'%',
                      fmt(summary.loc[(summary.fold=='validation')&(summary.minutes==m)&(summary.policy==p),'incremental_p'].iloc[0],4),
                      fmt(summary.loc[(summary.fold=='validation')&(summary.minutes==m)&(summary.policy==p),'incremental_p_holm_validation'].iloc[0],4)] for m in PERIODS for p in POLICIES]),
-             '\n## 单特征基线与事前排名\n',
-             '下表只使用原始箭头，展示2025验证段。AUC标签是该笔扣成本后是否盈利；得分最高10%按事前特征排序，不按已知收益选。没有训练模型，没有因为AUC高就宣告成功。\n']
+             '\n## 单特征基线：事前特征的事后排序诊断\n',
+             '下表只使用原始箭头，展示2025验证段。AUC标签是该笔扣成本后是否盈利；分数在信号收盘可知，但最高10%的数量和分位是在整段事件收齐后确定。这是离线诊断，不是可在线直接执行的top10%门槛。没有训练模型，没有因为AUC高就宣告成功。\n']
     q = ranks.loc[(ranks.fold=='validation')&ranks.policy.eq('P00')]
     text.append(table(['周期','事前分数','AUC','最高10%毛bp','最高10%净bp','胜率%','匹配超额bp'],
                       [[int(r.minutes),r.score,fmt(r.auc,3),fmt(r.top_gross_bp),fmt(r.top_net_bp),fmt(r.top_win_pct),fmt(r.top_excess_bp)] for r in q.itertuples()]))
+    text.append('\n### 多空分别看（补充描述，不作新选优）\n')
+    side_rows = []
+    for (minutes,side),g in events.loc[events.fold.eq('holdout_review')].groupby(['minutes','side']):
+        kept = g.loc[g.P02]
+        side_rows.append([minutes,'多' if side==1 else '空',len(g),len(kept),fmt(g.net_bp.mean()),fmt(kept.net_bp.mean())])
+    text.append(table(['周期','方向','原箭头数','保留数','原净bp/笔','P02净bp/笔'],side_rows))
+    text.append('\n四张参考图都是上涨案例；多空结果不得用一个合并均值互相代替，也不根据这个补充分组改成只做某方向。\n')
     text += ['\n## 被删掉的大赢家\n',
              '以下按最终复核原有净收益排序，仅作失败解释。不能把它们的后续结果再用于本轮调阈值。\n']
     q = tails.loc[(tails.fold=='holdout_review') & tails.policy.eq('P02') & ~tails.kept].sort_values('net_bp',ascending=False).head(12)
@@ -315,9 +322,15 @@ def run():
             raise ValueError('example identity mismatch')
         name = f'rejected_{event.event_id}.png'
         render_case(b,f,i,f'被P02过滤：{event.symbol} 4H · 后续净收益{event.net_bp/100:.2f}%（固定规则、事后）',result/name)
-        text.append(f'\n**{event.symbol} 4H**：末/首均线宽度比{event.contraction_ratio:.3f}，近零{event.near_zero_bars}根，因此首尾收拢门拒绝。下面同时画出带宽过程，以检查是否存在中间收拢再展开，或原本就是窄而平行；未自动判成其中一种。\n')
+        start_i = int(event.focus_start_i)
+        widths = f.rope_high-f.rope_low
+        pre = widths.iloc[max(0,start_i-12):start_i].median()
+        early = f.formation_early_width.iloc[i]
+        late = f.formation_late_width.iloc[i]
+        text.append(f'\n**{event.symbol} 4H**：末/首均线宽度比{event.contraction_ratio:.3f}，近零{event.near_zero_bars}根，因此首尾收拢门拒绝。近零段开始前12根带宽中位数{pre:.8g}，段首6根{early:.8g}，释放前6根{late:.8g}。这是已保存失败案例的解释量，不是本轮新增筛选条件。\n')
         text.append(f'![被过滤的{event.symbol}](../experiments/active/exp-imacd-startup-quality-20260908-v1/results/{name})\n')
     insolvent = portfolios.loc[portfolios.insolvent.eq(True)]
+    text.append('\n这里需要区分“均线此前已经收拢”和“在IMACD近零段内还必须继续收拢”。首尾比较只检验后者。PENGU图显示进入近零段前带宽已下降，随后维持较窄却略有波动，机械首尾门仍会拒绝它。本轮结果否定的是该机械定义足以改进通知，不是否定Owner的视觉形态。\n')
     text += ['\n## 数据统计与风险、诚实声明\n',
              f'- 54个固定历史品种，{len(events):,}个原始箭头，{len(events.loc[events.fold.eq("validation")]):,}个2025验证箭头；净正类率{events.net_bp.gt(0).mean()*100:.2f}%。各币上市/数据起点不同，覆盖表完整记录。',
              f'- 可评估范围缺失或预热不足的品种×周期×时间段：{int(coverage.status.ne("ok").sum())}。缺数据时对应初始资本留在现金，不用后来的行情回填。',
