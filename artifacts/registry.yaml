@@ -18,6 +18,48 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: yolo-review-entry-fix-20260908-report-source
+    artifact_type: report
+    role: visible_filtered_review_entry_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1751fea0a2f973676d733871a5ab744003152444
+    source_path: analysis/p1_yolo_review_entry_fix_20260908.md
+    sha256: 3649b6ff6888f2ffccb38af17f8eaea29ad00a46deb3e8a465ce88fce03c05b5
+    size_bytes: 4849
+    storage_uri: repo://analysis/p1_yolo_review_entry_fix_20260908.md
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Project77/view44 explicitly names1043; default button verified on task37277 after cache bypass. Original3556
+      predictions and368 answers preserved. No annotation writes or model experiment.
+  - artifact_id: yolo-review-entry-fix-20260908-report-html
+    artifact_type: report
+    role: visible_filtered_review_entry_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1751fea0a2f973676d733871a5ab744003152444
+    source_path: analysis/html/p1_yolo_review_entry_fix_20260908.html
+    sha256: 1febf2f47841456d267410a9e67fec0fd7a94363c51ea0a9b997642033ee9a66
+    size_bytes: 7569
+    storage_uri: repo://analysis/html/p1_yolo_review_entry_fix_20260908.html
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Project77/view44 explicitly names1043; default button verified on task37277 after cache bypass. Original3556
+      predictions and368 answers preserved. No annotation writes or model experiment.
+  - artifact_id: yolo-review-entry-fix-20260908-receipt
+    artifact_type: manifest
+    role: visible_filtered_review_entry_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1751fea0a2f973676d733871a5ab744003152444
+    source_path: experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/review_entry_fix.json
+    sha256: 666e70b48a492bf48652a82bd1f80ecd5f2fb56b6704dc7f8b34d2231700b2e8
+    size_bytes: 3477
+    storage_uri: repo://experiments/active/exp-yolo-dataset-consolidation-20260908-v1/results/review_entry_fix.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Project77/view44 explicitly names1043; default button verified on task37277 after cache bypass. Original3556
+      predictions and368 answers preserved. No annotation writes or model experiment.
   - artifact_id: yolo-historical-inventory-20260908-prereg
     artifact_type: manifest
     role: historical_owner_work_retention_and_cross_pool_review_candidates
