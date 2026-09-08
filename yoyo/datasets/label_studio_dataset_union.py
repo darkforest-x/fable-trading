@@ -23,6 +23,7 @@ import xml.etree.ElementTree as ET
 
 from yoyo.datasets import label_studio_import as base
 from yoyo.datasets import label_studio_proposal_import as historical
+from yoyo.datasets.grade_a_label_studio import link_pack
 
 ROOT = Path(__file__).resolve().parents[2]
 PROJECT = 77
@@ -136,7 +137,7 @@ def source_identity() -> dict:
     head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     names = ['yoyo/datasets/label_studio_dataset_union.py', 'yoyo/datasets/label_studio_import.py',
         'yoyo/datasets/label_studio_proposal_import.py', 'configs/labelstudio/owner_unified_future40.xml',
-        'tests/test_label_studio_dataset_union.py']
+        'tests/test_label_studio_dataset_union.py', 'yoyo/datasets/grade_a_label_studio.py']
     for name in names:
         if subprocess.check_output(['git', 'show', head + ':' + name], cwd=ROOT) != (ROOT / name).read_bytes():
             raise ValueError('Commit delivery source before running: ' + name)
@@ -168,6 +169,7 @@ def deliver() -> dict:
                 {ET.canonicalize(c, strip_text=True) for c in (config, previous_config)}):
         raise ValueError('Project configuration changed beyond the authorized transition')
     root = base.document_root(sess, PROJECT)
+    link_pack(PACK)
     resources = image_resources(new, Path(root))
     base.api(sess, 'POST', '/api/projects/validate/', {'label_config': config})
 

@@ -38,6 +38,7 @@ def server(tmp_path, monkeypatch):
     monkeypatch.setattr(mod.historical, 'CONFIG', config)
     monkeypatch.setattr(mod, 'source_identity', lambda: {'source_commit':'test'})
     monkeypatch.setattr(mod, 'image_resources', lambda *_: [])
+    monkeypatch.setattr(mod, 'link_pack', lambda *_: None)
     monkeypatch.setattr(mod.base, 'session', lambda: ('opener', 'token'))
     monkeypatch.setattr(mod.base, 'document_root', lambda *_: tmp_path)
     state = SimpleNamespace(project={'id':77, 'title':mod.historical.TITLE, 'label_config':'<View/>',
