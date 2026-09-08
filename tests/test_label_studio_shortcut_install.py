@@ -105,3 +105,24 @@ def test_prepared_receipt_recovers_without_handler_source(tmp_path, monkeypatch)
     monkeypatch.setattr(shortcut, "SOURCE", tmp_path / "missing-source.js")
     assert shortcut.install(bundle, state, restore=True)["restored"]
     assert bundle.read_bytes() == b"vendor();"
+
+
+def test_second_hook_preserves_right_click_and_restores_in_reverse_order(tmp_path):
+    bundle = tmp_path / 'main.js'
+    bundle.write_bytes(b'vendor();')
+    first_state = tmp_path / 'right'
+    shortcut.install(bundle, first_state)
+    with_right = bundle.read_bytes()
+    source = tmp_path / 'queue.js'
+    source.write_bytes(b'queue();')
+    second_state = tmp_path / 'queue'
+    kwargs = dict(source_path=source, marker=b'\n/* QUEUE_ENTRY_V1 */\n', marker_prefix=b'QUEUE_ENTRY_')
+    installed = shortcut.install(bundle, second_state, **kwargs)
+    assert bundle.read_bytes().startswith(with_right)
+    assert shortcut.install(bundle, second_state, **kwargs) == installed
+    with pytest.raises(ValueError, match='drift'):
+        shortcut.install(bundle, first_state, restore=True)
+    shortcut.install(bundle, second_state, restore=True, **kwargs)
+    assert bundle.read_bytes() == with_right
+    shortcut.install(bundle, first_state, restore=True)
+    assert bundle.read_bytes() == b'vendor();'

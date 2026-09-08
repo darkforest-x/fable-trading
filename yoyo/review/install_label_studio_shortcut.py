@@ -35,7 +35,9 @@ def atomic_write(path: Path, content: bytes) -> None:
             os.unlink(name)
 
 
-def install(bundle: Path, state_dir: Path, restore: bool = False) -> dict:
+def install(bundle: Path, state_dir: Path, restore: bool = False, *,
+            source_path: Path | None = None, marker: bytes = MARKER,
+            marker_prefix: bytes = MARKER_PREFIX) -> dict:
     bundle = bundle.resolve(strict=True)
     current = bundle.read_bytes()
     receipt_path = state_dir / "installation.json"
@@ -53,7 +55,7 @@ def install(bundle: Path, state_dir: Path, restore: bool = False) -> dict:
     else:
         if restore:
             raise ValueError("No installation receipt to restore")
-        if MARKER_PREFIX in current:
+        if marker_prefix in current:
             raise ValueError("Existing hook has no matching receipt")
         original = current
         backup = state_dir / ("main.original." + sha(original) + ".js")
@@ -65,8 +67,8 @@ def install(bundle: Path, state_dir: Path, restore: bool = False) -> dict:
         installed_sha = previous["installed_sha256"]
         source_sha = previous["source_sha256"]
     else:
-        source = SOURCE.read_bytes()
-        target = original + MARKER + source + b"\n"
+        source = (source_path or SOURCE).read_bytes()
+        target = original + marker + source + b"\n"
         installed_sha, source_sha = sha(target), sha(source)
         if previous and not previous["restored"] and installed_sha != previous["installed_sha256"]:
             raise ValueError("Handler source changed; restore old installation before upgrading")

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>Label Studio 当前列表入口 · 合成测试</title>
+<style>
+  body { max-width: 880px; margin: 32px auto; padding: 0 16px; font: 16px system-ui; color: #172033; }
+  button, select { padding: 9px 14px; margin: 6px 2px; font: inherit; }
+  .dm-tab-panel { margin: 24px 0; border: 1px solid #cad2df; padding: 18px; }
+  #event-log { white-space: pre-wrap; background: #f2f5fa; padding: 16px; }
+</style>
+<h1>当前列表入口 · 合成测试</h1>
+<p>此页只计数。没有 Label Studio 连接，不保存任务、标注或草稿。</p>
+<label>模拟入口 <select id="fixture-scope">
+  <option value="http://192.168.1.4:8081/projects/77/data?tab=44">项目77 / 列表44</option>
+  <option value="http://192.168.1.4:8081/projects/77/data?tab=44&amp;labeling=1">已在审核页</option>
+  <option value="http://192.168.1.4:8081/projects/77/data?tab=45">其他列表</option>
+  <option value="http://192.168.1.4:8081/projects/76/data?tab=44">其他项目</option>
+</select></label>
+<div class="dm-tab-panel">
+  <div id="native-label-button-group">
+    <div style="display:flex">
+      <button id="native-main-button" title="Native fixture entry">Label All Tasks</button>
+      <button id="native-menu-button" aria-label="Toggle open">▾</button>
+    </div>
+    <button id="native-as-displayed-button" style="display:none">Label Tasks As Displayed</button>
+  </div>
+</div>
+<button id="fixture-toggle-disabled">切换原生目标禁用</button>
+<button id="fixture-toggle-modal">切换模拟弹窗</button>
+<div id="fixture-modal" role="dialog" style="display:none">模拟弹窗正在显示</div>
+<pre id="event-log"></pre>
+<script>window.module = { exports: {} };</script>
+<script src="../../yoyo/review/label_studio_queue_entry.js"></script>
+<script>
+  window.__fableQueueEntryV1.dispose();
+  const fixtureWindow = {
+    document, location: { href: document.getElementById("fixture-scope").value },
+    getComputedStyle: window.getComputedStyle.bind(window), MutationObserver,
+    addEventListener: window.addEventListener.bind(window),
+    removeEventListener: window.removeEventListener.bind(window),
+  };
+  const queueEntry = window.module.exports(fixtureWindow);
+  delete window.module;
+  const counts = { all: 0, filtered: 0 };
+  const log = () => document.getElementById("event-log").textContent = JSON.stringify(counts, null, 2);
+  const displayed = document.getElementById("native-as-displayed-button");
+  document.getElementById("native-main-button").onclick = () => { counts.all++; log(); };
+  displayed.onclick = () => { counts.filtered++; log(); };
+  document.getElementById("native-menu-button").onclick = () => {
+    displayed.style.display = displayed.style.display === "none" ? "block" : "none";
+  };
+  document.getElementById("fixture-scope").onchange = event => {
+    fixtureWindow.location.href = event.target.value;
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  };
+  document.getElementById("fixture-toggle-disabled").onclick = () => { displayed.disabled = !displayed.disabled; };
+  document.getElementById("fixture-toggle-modal").onclick = () => {
+    const modal = document.getElementById("fixture-modal");
+    modal.style.display = modal.style.display === "none" ? "block" : "none";
+  };
+  log();
+</script>
+</html>
