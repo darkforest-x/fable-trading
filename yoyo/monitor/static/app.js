@@ -5,14 +5,14 @@
   const $ = (id) => document.getElementById(id);
   const state = {
     view: "signals", signals: [], markets: [], status: null, health: null,
-    signalsLoaded: false, marketsLoaded: false, signalTotal: 0, rowLimit: 200, search: "", watchSearch: "", watchScope: "building",
+    signalsLoaded: false, marketsLoaded: false, signalTotal: 0, rowLimit: 24, watchLimit: 24, search: "", watchSearch: "", watchScope: "building",
     timeframe: "all", side: "all", selected: null,
     chartKey: null, chart: null, chartRequest: 0, chartController: null,
-    syncing: false, lastSync: null, errors: {}, chartHover: null,
+    syncing: false, lastSync: null, statusReceivedAt: null, errors: {}, chartHover: null, detailOrigin: "signals",
   };
   const titles = {
-    signals: ["主图启动", "仅同步当前 TradingView 可见的蓄势释放标记，收盘确认。"],
-    watch: ["蓄势观察", "跟踪近零蓄势，查看当前主图设置下的释放结构。"],
+    signals: ["主图启动", "从长时间近零蓄势，到主图确认启动。先看新信号，再看结构。"],
+    watch: ["蓄势观察", "还在横盘的，单独观察。这里的结构尚不是启动信号。"],
     system: ["运行状态", "行情、扫描与通知，每个环节都清晰可见。"],
   };
   const eventNames = { tv_start: "蓄势释放" };
@@ -39,9 +39,17 @@
   const normalSearch = (value) => String(value).toUpperCase().replace(/[^A-Z0-9]/g, "");
   const displayPhase = (phase) => phaseNames[phase] || String(phase || "观察中");
   const marketPhase = (item) => item.error ? "读取异常" : item.stale ? "行情过期" : item.ready === false ? "数据预热" : displayPhase(item.phase);
-  const shortDate = (ms) => finite(ms) && Number(ms) > 0 ? new Intl.DateTimeFormat("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }).format(Number(ms)) : "—";
-  const fullDate = (ms) => finite(ms) && Number(ms) > 0 ? new Intl.DateTimeFormat("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(Number(ms)) : "—";
-  const clockTime = (ms) => finite(ms) && Number(ms) > 0 ? new Intl.DateTimeFormat("zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(Number(ms)) : "—";
+  const shortDate = (ms) => finite(ms) && Number(ms) > 0 ? new Intl.DateTimeFormat("zh-CN", { timeZone: "Asia/Shanghai", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }).format(Number(ms)) : "—";
+  const fullDate = (ms) => finite(ms) && Number(ms) > 0 ? new Intl.DateTimeFormat("zh-CN", { timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(Number(ms)) : "—";
+  const clockTime = (ms) => finite(ms) && Number(ms) > 0 ? new Intl.DateTimeFormat("zh-CN", { timeZone: "Asia/Shanghai", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(Number(ms)) : "—";
+  const signalClock = () => finite(state.status?.now_ms) && finite(state.statusReceivedAt) ? Number(state.status.now_ms) + Math.max(0, Date.now() - state.statusReceivedAt) : Date.now();
+  // API freshness is authoritative; only expire cached badges using the same time budget.
+  function isFresh(item, now = signalClock()) {
+    const minutes = state.status?.runtime?.fresh_minutes;
+    const age = now - Number(item.bar_close_ms);
+    return item.is_fresh === true && tvProtocol() && !state.errors.signals && !state.errors.status &&
+      finite(state.status?.now_ms) && finite(state.statusReceivedAt) && finite(minutes) && Number(minutes) > 0 && finite(item.bar_close_ms) && age >= 0 && age <= Number(minutes) * 60000;
+  }
   function price(value) {
     if (!finite(value)) return "—";
     const n = Number(value);
@@ -55,7 +63,7 @@
   }
   function ageLabel(ms) {
     if (!finite(ms) || Number(ms) <= 0) return "尚无记录";
-    const seconds = Math.max(0, Math.floor((Date.now() - Number(ms)) / 1000));
+    const seconds = Math.max(0, Math.floor((signalClock() - Number(ms)) / 1000));
     if (seconds < 60) return `${seconds} 秒前`;
     if (seconds < 3600) return `${Math.floor(seconds / 60)} 分钟前`;
     if (seconds < 86400) return `${Math.floor(seconds / 3600)} 小时前`;
@@ -109,7 +117,7 @@
   }
   function notification(item, channel = "telegram") {
     const value = String(item[channel === "bark" ? "bark_notification_status" : "notification_status"] || "").toLowerCase();
-    if (["sent", "delivered", "success"].includes(value)) return [channel === "bark" ? "服务已接受" : "已送达", "sent"];
+    if (["sent", "delivered", "success"].includes(value)) return [channel === "bark" ? "服务已接受" : "已发送", "sent"];
     if (["failed", "error", "dead"].includes(value)) return ["发送失败", "failed"];
     if (value === "unknown") return ["回执未知", "pending"];
     if (["pending", "queued", "retry", "sending"].includes(value)) return ["等待发送", "pending"];
@@ -150,13 +158,47 @@
       }
     }
     const focusedId = document.activeElement?.dataset?.signalId;
-    $("signal-rows").innerHTML = items.slice(0, state.rowLimit).map((item) => {
-      const selected = state.selected && String(state.selected.id) === String(item.id) && state.selected.symbol === item.symbol && state.selected.timeframe === item.timeframe;
-      const name = eventNames[item.kind] || item.kind || "信号";
-      const tag = `启动前蓄势 ${number(focusRun(item))} 根`;
-      return `<tr class="signal-row${selected ? " selected" : ""}" data-signal-id="${escapeHTML(item.id)}" tabindex="0" aria-label="${escapeHTML(`${shortSymbol(item.symbol)} ${item.timeframe} ${sideName(item.side)} ${name}，确认点位 ${price(item.price)}`)}" aria-selected="${Boolean(selected)}"><td><div class="symbol-label">${escapeHTML(shortSymbol(item.symbol))}<span class="symbol-quote">${escapeHTML(quoteSymbol(item.symbol))}</span>${item.is_fresh === true ? '<span class="fresh-label">新</span>' : ""}</div><div class="row-subtext"><span class="timeframe-tag">${escapeHTML(item.timeframe)}</span><time title="${escapeHTML(fullDate(item.bar_close_ms))}">${escapeHTML(shortDate(item.bar_close_ms))}</time></div></td><td><div class="event-label ${item.side === "short" ? "short" : item.side === "long" ? "long" : ""}"><span class="direction-icon" aria-hidden="true">${sideArrow(item.side)}</span>${escapeHTML(sideName(item.side))} · ${escapeHTML(name)}</div><div class="event-sub">${escapeHTML(tag)}</div></td><td class="price-cell">${escapeHTML(price(item.price))}</td><td><div class="notification-stack">${notificationHTML(item)}</div></td></tr>`;
-    }).join("");
-    if (focusedId) Array.from($("signal-rows").children).find((row) => row.dataset.signalId === focusedId)?.focus({ preventScroll: true });
+    const now = signalClock(); // One timestamp keeps both groups consistent at the expiry boundary.
+    const fresh = items.filter((item) => isFresh(item, now));
+    const earlier = items.filter((item) => !isFresh(item, now));
+    const visible = [...fresh, ...earlier].slice(0, state.rowLimit);
+    const freshVisible = visible.filter((item) => isFresh(item, now));
+    const earlierVisible = visible.filter((item) => !isFresh(item, now));
+    const minutes = state.status?.runtime?.fresh_minutes;
+    const group = (heading, list, recent) => list.length ? `<div class="signal-group-heading${recent ? " fresh-heading" : ""}"><h3>${heading}<span class="group-count">${list.length}</span></h3><span>${recent ? `收盘后 ${escapeHTML(number(minutes))} 分钟内` : "按确认时间排列"}</span></div><div class="signal-card-grid">${list.map((item) => signalCardHTML(item, now)).join("")}</div>` : "";
+    const freshnessKnown = tvProtocol() && finite(minutes) && Number(minutes) > 0 && finite(state.status?.now_ms) && finite(state.statusReceivedAt);
+    const pendingFreshness = state.errors.signals || state.errors.status || !freshnessKnown;
+    const noFresh = !fresh.length && items.length ? `<div id="fresh-empty" class="fresh-empty"><strong>${pendingFreshness ? "新鲜状态待同步" : "当前筛选下暂无新鲜启动"}</strong><span>${pendingFreshness ? "保留已获取的记录，状态同步后重新确认时效。" : `收盘 ${escapeHTML(number(minutes))} 分钟内的信号会优先出现在这里。下方可回看此前启动。`}</span></div>` : "";
+    $("signal-rows").innerHTML = noFresh + group("新鲜启动", freshVisible, true) + group(fresh.length ? "更早启动" : "已记录启动", earlierVisible, false);
+    if (focusedId) Array.from($("signal-rows").querySelectorAll("[data-signal-id]")).find((card) => card.dataset.signalId === focusedId)?.focus({ preventScroll: true });
+  }
+  function signalCardHTML(item, now = signalClock()) {
+    const selected = state.selected && String(state.selected.id) === String(item.id) && state.selected.symbol === item.symbol && state.selected.timeframe === item.timeframe;
+    const side = item.side === "short" ? "short" : item.side === "long" ? "long" : "neutral";
+    const fresh = isFresh(item, now);
+    return `<button type="button" class="signal-card ${side}${selected ? " selected" : ""}${fresh ? " is-fresh" : ""}" data-signal-id="${escapeHTML(item.id)}" aria-pressed="${Boolean(selected)}" aria-label="${escapeHTML(`${shortSymbol(item.symbol)} ${quoteSymbol(item.symbol)} ${item.timeframe} ${sideName(item.side)}，信号收盘价 ${price(item.price)}，${shortDate(item.bar_close_ms)} 确认，查看图表`)}">
+      <span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(item.timeframe)}</span></span>
+      <span class="signal-card-direction"><span class="card-direction">${sideArrow(item.side)} ${escapeHTML(sideName(item.side))}启动</span><span class="card-recency">${fresh ? "新 · " : ""}${escapeHTML(ageLabel(item.bar_close_ms))}</span></span>
+      <span class="card-price-label">信号收盘价</span><span class="card-price">${escapeHTML(price(item.price))}</span>
+      <span class="card-context"><span>启动前近零蓄势</span><strong>${escapeHTML(number(focusRun(item)))} <small>根</small></strong></span>
+      <span class="card-confirmed"><span>收盘确认</span><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))}</time></span>
+      <span class="card-footer"><span class="notification-stack">${notificationHTML(item)}</span><span class="card-open">${selected ? "正在查看" : "看图"} ↗</span></span>
+    </button>`;
+  }
+  function applySignalFilters() {
+    const items = filteredSignals();
+    if (!items.some((item) => state.selected?.id !== undefined && String(item.id) === String(state.selected.id))) {
+      if (items.length) chooseSignal(items[0]);
+      else {
+        state.selected = null;
+        state.chartController?.abort();
+        state.chartRequest++;
+        state.chartKey = null;
+        state.chart = null;
+        renderDetail();
+      }
+    }
+    renderSignals();
   }
   function isBuilding(item) {
     return !item.error && !item.stale && item.ready !== false && (item.focus === true || numeric(item.near_zero_bars) > 0);
@@ -173,7 +215,22 @@
     const emptyDescription = $("watch-empty").querySelector("p");
     emptyTitle.textContent = state.errors.markets && !state.marketsLoaded ? "观察数据暂时不可用" : state.watchSearch ? state.watchScope === "all" ? "没有匹配的合约" : "当前没有匹配的蓄势合约" : state.marketsLoaded ? state.watchScope === "all" ? "等待全市场扫描" : "等待蓄势结构出现" : "正在读取观察窗口";
     emptyDescription.textContent = state.errors.markets && !state.marketsLoaded ? "正在自动重试，连接恢复后会显示真实状态。" : state.watchScope === "all" ? "全市场合约会在扫描后列出，当前状态不等于入场信号。" : "可切换全部合约查看其他交易对；蓄势状态不代表已经启动。";
-    $("watch-rows").innerHTML = items.map((item) => `<tr class="watch-row" tabindex="0" data-market-symbol="${escapeHTML(item.symbol)}" data-market-timeframe="${escapeHTML(item.timeframe)}" aria-label="查看 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(item.timeframe)} ${escapeHTML(marketPhase(item))}图表"><td><div class="symbol-label">${escapeHTML(shortSymbol(item.symbol))}<span class="symbol-quote">${escapeHTML(quoteSymbol(item.symbol))}</span></div></td><td><span class="timeframe-tag">${escapeHTML(item.timeframe)}</span></td><td><span title="${escapeHTML(item.error || (item.stale ? "当前保留过期行情，等待更新" : ""))}" class="phase-badge ${item.error ? "error" : item.stale ? "stale" : item.ready === false ? "loading" : ["ready", "armed"].includes(item.phase) ? "ready" : ""}">${escapeHTML(marketPhase(item))}</span></td><td><span class="axis-duration">${escapeHTML(number(item.near_zero_bars))}<small>根</small></span><span class="mini-bar" aria-hidden="true"><i style="width:${Math.max(0, Math.min(100, numeric(item.near_zero_bars) / 34 * 100))}%"></i></span></td><td><span class="${item.dense ? "dense-tag" : "muted-text"}">${item.dense ? "已密集" : "—"}</span></td><td><span class="${item.htf_side === "long" ? "side-long" : item.htf_side === "short" ? "side-short" : "muted-text"}">${escapeHTML(sideName(item.htf_side))}</span></td><td class="price-cell">${escapeHTML(price(item.price))}</td></tr>`).join("");
+    const focused = document.activeElement?.dataset;
+    const focusedSymbol = focused?.marketSymbol, focusedTimeframe = focused?.marketTimeframe;
+    $("load-more-watch").classList.toggle("hidden", items.length <= state.watchLimit);
+    $("load-more-watch").textContent = `显示更多（${Math.min(state.watchLimit, items.length)} / ${items.length}）`;
+    $("watch-rows").innerHTML = items.slice(0, state.watchLimit).map((item) => {
+      const valid = !state.errors.markets && !item.error && !item.stale && item.ready !== false;
+      const phaseClass = state.errors.markets ? "stale" : item.error ? "error" : item.stale ? "stale" : item.ready === false ? "loading" : item.focus === true ? "ready" : "";
+      return `<button type="button" class="watch-card" data-market-symbol="${escapeHTML(item.symbol)}" data-market-timeframe="${escapeHTML(item.timeframe)}" aria-label="查看 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(quoteSymbol(item.symbol))} ${escapeHTML(item.timeframe)} ${escapeHTML(marketPhase(item))}图表">
+        <span class="watch-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(item.timeframe)}</span></span>
+        <span class="watch-card-phase"><span class="phase-badge ${phaseClass}" title="${escapeHTML(item.error || (item.stale ? "当前保留过期行情，等待更新" : "当前结构尚不是启动信号"))}">${escapeHTML(state.errors.markets ? "缓存 · 待同步" : marketPhase(item))}</span><span class="card-status">${!valid ? "等待更新" : item.focus ? "已达蓄势门槛" : "观察中"}</span></span>
+        <span class="watch-card-run"><strong>${valid ? escapeHTML(number(item.near_zero_bars)) : "—"}<small> 根</small></strong><span>当前近零蓄势</span></span>
+        <span class="watch-card-background"><span>均线密集<strong>${valid ? item.dense === true ? "已密集" : item.dense === false ? "未密集" : "—" : "—"}</strong></span><span>高周期背景<strong>${valid ? escapeHTML(sideName(item.htf_side)) : "—"}</strong></span></span>
+        <span class="watch-card-foot"><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">收盘 ${escapeHTML(shortDate(item.bar_close_ms))}</time><span>查看结构 ↗</span></span>
+      </button>`;
+    }).join("");
+    if (focusedSymbol) Array.from($("watch-rows").querySelectorAll("[data-market-symbol]")).find((card) => card.dataset.marketSymbol === focusedSymbol && card.dataset.marketTimeframe === focusedTimeframe)?.focus({ preventScroll: true });
   }
   function factsHTML(entries) {
     return entries.map(([key, value]) => `<dt>${escapeHTML(key)}</dt><dd>${escapeHTML(value)}</dd>`).join("");
@@ -253,18 +310,25 @@
       $("error-notice").textContent = `${errors.map(([key, error]) => `${names[key] || key}：${error}`).join("；")}。${state.lastSync ? "当前保留上次成功获取的数据，" : ""}15 秒后自动重试。`;
     }
   }
-  function chooseSignal(item, scroll = false) {
+  function chooseSignal(item, scroll = false, origin = "signals") {
     if (!item) return;
     state.selected = { ...item };
+    state.detailOrigin = origin;
     renderSignals();
     renderDetail();
-    if (scroll && window.innerWidth < 831) $("detail-content").scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    if (scroll && window.innerWidth <= 1100) {
+      $("detail-content").closest("aside").scrollIntoView({ behavior: "instant", block: "start" });
+      $("detail-symbol").focus({ preventScroll: true });
+    }
   }
   function renderDetail() {
     const item = state.selected;
     $("detail-empty").classList.toggle("hidden", Boolean(item));
     $("detail-content").classList.toggle("hidden", !item);
+    $("back-to-signals").classList.toggle("hidden", !item);
     if (!item) return;
+    $("back-to-signals").textContent = state.detailOrigin === "watch" ? "← 返回蓄势观察" : "← 返回信号卡片";
+    $("detail-price-caption").textContent = item.kind === "tv_start" ? "信号收盘价" : "最新已收盘价 · 观察结构";
     $("detail-symbol").textContent = shortSymbol(item.symbol);
     $("detail-market-label").textContent = `OKX · ${quoteSymbol(item.symbol)} 永续${quoteSymbol(item.symbol) === "USD" ? " · 币本位" : ""}`;
     $("detail-timeframe").textContent = item.timeframe || "—";
@@ -281,7 +345,7 @@
       $("tradingview-link").setAttribute("aria-disabled", "true");
     }
     const facts = [
-      ["信号收盘时间", shortDate(item.bar_close_ms), ""],
+      [item.kind === "tv_start" ? "信号收盘 · 北京时间" : "最近收盘 · 北京时间", shortDate(item.bar_close_ms), ""],
       [item.kind === "tv_start" ? "启动前近零蓄势" : "当前近零蓄势", `${number(focusRun(item))} 根`, ""],
       ["精确零轴 · 仅作背景", `${number(item.zero_bars)} 根`, ""],
       ["均线密集 · 背景参考", item.dense === true ? "已密集" : item.dense === false ? "未密集" : "—", item.dense ? "mint" : ""],
@@ -457,7 +521,7 @@
         if (key !== "status" && !Array.isArray(result.value.items)) { state.errors[key] = "服务返回的数据格式有误"; return; }
         delete state.errors[key];
         anySuccess = true;
-        if (key === "status") state.status = result.value;
+        if (key === "status") { state.status = result.value; state.statusReceivedAt = Date.now(); }
         else {
           state[key] = result.value.items.filter((item) => item && typeof item === "object" && item.symbol && (key !== "signals" || item.kind === "tv_start"));
           state[`${key}Loaded`] = true;
@@ -468,7 +532,7 @@
       if (anySuccess) state.lastSync = Date.now();
       renderErrors(); renderStatus(); renderSignals(); renderWatch();
       $("last-sync").textContent = state.errors.signals ? "同步失败 · 保留缓存" : `同步 ${clockTime(state.lastSync)}`;
-      if (!state.selected && state.signals.length) chooseSignal(state.signals[0]);
+      if (!state.selected && filteredSignals().length) chooseSignal(filteredSignals()[0]);
       else if (state.selected) {
         const updated = state.selected.id !== undefined ? state.signals.find((item) => String(item.id) === String(state.selected.id)) : state.markets.find((item) => item.symbol === state.selected.symbol && item.timeframe === state.selected.timeframe);
         if (updated) state.selected = { ...updated };
@@ -493,22 +557,21 @@
   document.querySelectorAll("[data-view]").forEach((button) => button.addEventListener("click", () => setView(button.dataset.view)));
   document.querySelectorAll("[data-timeframe]").forEach((button) => button.addEventListener("click", () => {
     state.timeframe = button.dataset.timeframe;
-    state.rowLimit = 200;
+    state.rowLimit = 24;
     document.querySelectorAll("[data-timeframe]").forEach((other) => { const selected = other === button; other.classList.toggle("selected", selected); other.setAttribute("aria-pressed", String(selected)); });
-    renderSignals();
+    applySignalFilters();
   }));
-  $("symbol-search").addEventListener("input", (event) => { state.search = event.target.value; state.rowLimit = 200; renderSignals(); });
-  $("watch-search").addEventListener("input", (event) => { state.watchSearch = event.target.value; renderWatch(); });
+  $("symbol-search").addEventListener("input", (event) => { state.search = event.target.value; state.rowLimit = 24; applySignalFilters(); });
+  $("watch-search").addEventListener("input", (event) => { state.watchSearch = event.target.value; state.watchLimit = 24; renderWatch(); });
   document.querySelectorAll("[data-watch-scope]").forEach((button) => button.addEventListener("click", () => {
-    state.watchScope = button.dataset.watchScope;
+    state.watchScope = button.dataset.watchScope; state.watchLimit = 24;
     document.querySelectorAll("[data-watch-scope]").forEach((other) => { const selected = other === button; other.classList.toggle("selected", selected); other.setAttribute("aria-pressed", String(selected)); });
     renderWatch();
   }));
-  $("side-filter").addEventListener("change", (event) => { state.side = event.target.value; state.rowLimit = 200; renderSignals(); });
+  $("side-filter").addEventListener("change", (event) => { state.side = event.target.value; state.rowLimit = 24; applySignalFilters(); });
   $("refresh-button").addEventListener("click", refresh);
-  $("load-more-signals").addEventListener("click", () => { state.rowLimit += 200; renderSignals(); });
+  $("load-more-signals").addEventListener("click", () => { state.rowLimit += 24; renderSignals(); });
   function activateRow(event, type) {
-    if (event.type === "keydown" && !["Enter", " "].includes(event.key)) return;
     const row = event.target.closest(type === "signal" ? "[data-signal-id]" : "[data-market-symbol]");
     if (!row) return;
     event.preventDefault();
@@ -516,14 +579,25 @@
     else {
       const item = state.markets.find((candidate) => candidate.symbol === row.dataset.marketSymbol && candidate.timeframe === row.dataset.marketTimeframe);
       if (item) {
-        state.search = shortSymbol(item.symbol); state.timeframe = item.timeframe; state.side = "all"; state.rowLimit = 200;
+        state.search = shortSymbol(item.symbol); state.timeframe = item.timeframe; state.side = "all"; state.rowLimit = 24;
         $("symbol-search").value = state.search; $("side-filter").value = "all";
         document.querySelectorAll("[data-timeframe]").forEach((button) => { const selected = button.dataset.timeframe === item.timeframe; button.classList.toggle("selected", selected); button.setAttribute("aria-pressed", String(selected)); });
-        setView("signals"); chooseSignal(item, true);
+        setView("signals"); chooseSignal(item, true, "watch");
       }
     }
   }
-  ["click", "keydown"].forEach((event) => { $("signal-rows").addEventListener(event, (e) => activateRow(e, "signal")); $("watch-rows").addEventListener(event, (e) => activateRow(e, "market")); });
+  $("signal-rows").addEventListener("click", (event) => activateRow(event, "signal"));
+  $("watch-rows").addEventListener("click", (event) => activateRow(event, "market"));
+  $("load-more-watch").addEventListener("click", () => { state.watchLimit += 24; renderWatch(); });
+  $("back-to-signals").addEventListener("click", () => {
+    const watch = state.detailOrigin === "watch";
+    if (watch) setView("watch");
+    const cards = document.querySelectorAll(watch ? "[data-market-symbol]" : "[data-signal-id]");
+    const card = Array.from(cards).find((node) => watch ? node.dataset.marketSymbol === state.selected?.symbol && node.dataset.marketTimeframe === state.selected?.timeframe : node.dataset.signalId === String(state.selected?.id));
+    const target = card || $(watch ? "watch-search" : "symbol-search");
+    target.scrollIntoView({ behavior: "instant", block: "center" });
+    target.focus({ preventScroll: true });
+  });
   $("health-json").closest("details").addEventListener("toggle", (event) => { if (event.target.open) loadHealth(); });
   document.addEventListener("keydown", (event) => {
     if (event.key === "/" && !event.metaKey && !event.ctrlKey && !event.altKey && !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName)) {

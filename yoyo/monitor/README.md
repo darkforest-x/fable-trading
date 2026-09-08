@@ -9,6 +9,23 @@ has no exchange credentials or order endpoints.
 Open **http://127.0.0.1:8766** on this Mac. The backend serves the frontend and
 read-only API from the same loopback origin. There is no separate frontend build.
 
+The startup page presents confirmed signals as selectable cards: contract and
+period, direction, original close, preparation bars, and Beijing confirmation
+time. Fresh cards precede older records. Freshness requires the API flag and the
+runtime's existing time limit, with elapsed time measured from the calibrated
+status clock. Failed synchronization leaves cached records visible but removes
+fresh emphasis. Notification receipts remain independent for TG and Bark.
+
+Search, period and direction filters apply to the latest 2,000 loaded records;
+cards load in batches of 24. The observation page has its own paginated cards
+and is explicitly separate from confirmed startups. Only the selected contract
+loads a structure chart. On narrow screens, selecting a card jumps to that
+chart; the return button restores focus to the originating card. Static edits
+take effect on a browser page reload without restarting the monitor.
+
+Client behavior checks: `node --test tests/monitor/frontend_cards.test.cjs`.
+These DOM-stub tests do not replace real browser layout and keyboard checks.
+
 From `/Users/zhangzc/fable-trading`:
 
 ```bash
