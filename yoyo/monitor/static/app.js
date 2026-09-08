@@ -6,7 +6,7 @@
   const state = {
     view: "signals", signals: [], markets: [], status: null, health: null,
     signalsLoaded: false, marketsLoaded: false, signalTotal: 0, rowLimit: 24, watchLimit: 24, search: "", watchSearch: "", watchScope: "building",
-    timeframe: "all", side: "all", selected: null,
+    timeframe: "all", watchTimeframe: "all", side: "all", selected: null,
     chartKey: null, chart: null, chartRequest: 0, chartController: null,
     syncing: false, lastSync: null, statusReceivedAt: null, errors: {}, chartHover: null, detailOrigin: "signals",
   };
@@ -205,7 +205,8 @@
   }
   function renderWatch() {
     const q = normalSearch(state.watchSearch);
-    const items = state.markets.filter((item) => (state.watchScope === "all" || isBuilding(item)) && (!q || normalSearch(item.symbol).includes(q)))
+    const items = state.markets.filter((item) => (state.watchScope === "all" || isBuilding(item)) &&
+      (state.watchTimeframe === "all" || item.timeframe === state.watchTimeframe) && (!q || normalSearch(item.symbol).includes(q)))
       .sort((a, b) => numeric(b.near_zero_bars) - numeric(a.near_zero_bars) || numeric(b.zero_bars) - numeric(a.zero_bars) || String(a.symbol).localeCompare(String(b.symbol)));
     $("watch-count").textContent = `${items.length} 个窗口`;
     $("watch-section-title").textContent = state.watchScope === "all" ? "全市场合约" : "蓄势中的合约";
@@ -213,8 +214,17 @@
     $("watch-empty").classList.toggle("hidden", items.length > 0);
     const emptyTitle = $("watch-empty").querySelector("h3");
     const emptyDescription = $("watch-empty").querySelector("p");
-    emptyTitle.textContent = state.errors.markets && !state.marketsLoaded ? "观察数据暂时不可用" : state.watchSearch ? state.watchScope === "all" ? "没有匹配的合约" : "当前没有匹配的蓄势合约" : state.marketsLoaded ? state.watchScope === "all" ? "等待全市场扫描" : "等待蓄势结构出现" : "正在读取观察窗口";
-    emptyDescription.textContent = state.errors.markets && !state.marketsLoaded ? "正在自动重试，连接恢复后会显示真实状态。" : state.watchScope === "all" ? "全市场合约会在扫描后列出，当前状态不等于入场信号。" : "可切换全部合约查看其他交易对；蓄势状态不代表已经启动。";
+    const hasFilters = Boolean(q) || state.watchTimeframe !== "all";
+    if (state.errors.markets && !state.marketsLoaded) {
+      emptyTitle.textContent = "观察数据暂时不可用";
+      emptyDescription.textContent = "正在自动重试，连接恢复后会显示真实状态。";
+    } else if (!state.marketsLoaded) {
+      emptyTitle.textContent = "正在读取观察窗口";
+      emptyDescription.textContent = "扫描完成后，符合条件的观察窗口会列在这里。";
+    } else {
+      emptyTitle.textContent = hasFilters ? "没有符合筛选的观察窗口" : state.watchScope === "all" ? "等待全市场扫描" : "等待蓄势结构出现";
+      emptyDescription.textContent = hasFilters ? "试试其他合约、周期，或切换全部合约。" : state.watchScope === "all" ? "全市场合约会在扫描后列出，当前状态不等于入场信号。" : "可切换全部合约查看其他交易对；蓄势状态不代表已经启动。";
+    }
     const focused = document.activeElement?.dataset;
     const focusedSymbol = focused?.marketSymbol, focusedTimeframe = focused?.marketTimeframe;
     $("load-more-watch").classList.toggle("hidden", items.length <= state.watchLimit);
@@ -566,6 +576,11 @@
   document.querySelectorAll("[data-watch-scope]").forEach((button) => button.addEventListener("click", () => {
     state.watchScope = button.dataset.watchScope; state.watchLimit = 24;
     document.querySelectorAll("[data-watch-scope]").forEach((other) => { const selected = other === button; other.classList.toggle("selected", selected); other.setAttribute("aria-pressed", String(selected)); });
+    renderWatch();
+  }));
+  document.querySelectorAll("[data-watch-timeframe]").forEach((button) => button.addEventListener("click", () => {
+    state.watchTimeframe = button.dataset.watchTimeframe; state.watchLimit = 24;
+    document.querySelectorAll("[data-watch-timeframe]").forEach((other) => { const selected = other === button; other.classList.toggle("selected", selected); other.setAttribute("aria-pressed", String(selected)); });
     renderWatch();
   }));
   $("side-filter").addEventListener("change", (event) => { state.side = event.target.value; state.rowLimit = 24; applySignalFilters(); });
