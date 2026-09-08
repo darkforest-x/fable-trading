@@ -1002,6 +1002,63 @@ h2 {
   color:#9aafbd;
 }
 
+.chart-toolbar {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:0 18px;
+  margin-bottom:12px;
+}
+
+.chart-toolbar h3 {
+  margin:0;
+  font-size:12px;
+  font-weight:500;
+  color:var(--muted);
+  overflow-wrap:anywhere;
+}
+
+.chart-expand-button {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  gap:6px;
+  min-height:34px;
+  padding:6px 10px;
+  border:1px solid var(--line);
+  border-radius:7px;
+  background:var(--surface);
+  color:var(--text);
+  font-size:12px;
+  cursor:pointer;
+}
+
+.chart-expand-button:hover { background:#23372f; border-color:#537c68; }
+.chart-expand-button svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.5; }
+.chart-expand-button .collapse-icon, .is-expanded .expand-icon { display:none; }
+.is-expanded .collapse-icon { display:block; }
+
+.chart-dialog {
+  width:min(1600px, calc(100vw - 32px));
+  max-width:none;
+  max-height:calc(100dvh - 32px);
+  margin:auto;
+  padding:22px 6px 8px;
+  border:1px solid #354a55;
+  border-radius:16px;
+  background:var(--surface);
+  color:var(--text);
+  box-shadow:0 24px 90px #0009;
+  overflow:auto;
+}
+
+.chart-dialog::backdrop { background:#02070dd9; }
+.chart-dialog .chart-container { height:clamp(260px, 65dvh, 850px); }
+.chart-dialog .chart-toolbar h3 { font-size:18px; font-weight:600; color:var(--text); }
+html:has(#chart-dialog[open]) { overflow:hidden; }
+
 .chart-legend span {
   display:flex;
   align-items:center;

@@ -7,7 +7,7 @@
     view: "signals", signals: [], markets: [], status: null, health: null,
     signalsLoaded: false, marketsLoaded: false, signalTotal: 0, rowLimit: 24, watchLimit: 24, search: "", watchSearch: "", watchScope: "building",
     timeframe: "all", watchTimeframe: "all", side: "all", selected: null,
-    chartKey: null, chart: null, chartRequest: 0, chartController: null,
+    chartKey: null, chart: null, chartRequest: 0, chartController: null, chartExpanded: false,
     syncing: false, lastSync: null, statusReceivedAt: null, errors: {}, chartHover: null, detailOrigin: "signals",
   };
   const titles = {
@@ -95,6 +95,7 @@
     }
   }
   function setView(view, updateHash = true) {
+    if (state.chartExpanded && view !== state.view) setChartExpanded(false, false);
     state.view = titles[view] ? view : "signals";
     Object.keys(titles).forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== state.view));
     document.querySelectorAll("[data-view]").forEach((button) => {
@@ -336,12 +337,13 @@
     $("detail-empty").classList.toggle("hidden", Boolean(item));
     $("detail-content").classList.toggle("hidden", !item);
     $("back-to-signals").classList.toggle("hidden", !item);
-    if (!item) return;
+    if (!item) { setChartExpanded(false, false); return; }
     $("back-to-signals").textContent = state.detailOrigin === "watch" ? "← 返回蓄势观察" : "← 返回信号卡片";
     $("detail-price-caption").textContent = item.kind === "tv_start" ? "信号收盘价" : "最新已收盘价 · 观察结构";
     $("detail-symbol").textContent = shortSymbol(item.symbol);
     $("detail-market-label").textContent = `OKX · ${quoteSymbol(item.symbol)} 永续${quoteSymbol(item.symbol) === "USD" ? " · 币本位" : ""}`;
     $("detail-timeframe").textContent = item.timeframe || "—";
+    $("chart-title").textContent = `${shortSymbol(item.symbol)} · ${item.timeframe || "—"} · K 线 / IMACD`;
     $("detail-price").textContent = price(item.price);
     const name = item.kind ? eventNames[item.kind] || item.kind : marketPhase(item);
     $("detail-event-badge").innerHTML = `<span class="signal-badge ${item.side === "short" ? "short" : item.side === "long" ? "" : "neutral"}">${sideArrow(item.side)} ${escapeHTML(name)}</span>`;
@@ -392,6 +394,25 @@
     } finally {
       clearTimeout(timeout);
     }
+  }
+  function setChartExpanded(expanded, restoreFocus = true) {
+    if (expanded === state.chartExpanded || (expanded && !state.selected)) return;
+    const dialog = $("chart-dialog"), frame = $("chart-frame"), button = $("chart-expand");
+    state.chartExpanded = expanded;
+    // Move the one live chart, preserving its data, crosshair and refresh target.
+    if (expanded) {
+      dialog.appendChild(frame);
+      dialog.showModal();
+    } else {
+      if (dialog.open) dialog.close();
+      $("chart-slot").appendChild(frame);
+    }
+    frame.classList.toggle("is-expanded", expanded);
+    button.setAttribute("aria-expanded", String(expanded));
+    button.setAttribute("aria-label", expanded ? "收起 K 线图" : "放大 K 线图");
+    button.setAttribute("title", expanded ? "收起 K 线图（Esc）" : "放大 K 线图");
+    $("chart-expand-label").textContent = expanded ? "收起 · Esc" : "放大";
+    if (expanded || (restoreFocus && state.selected && state.view === "signals")) button.focus({ preventScroll: true });
   }
   function renderChart() {
     if (!state.chart) return;
@@ -585,6 +606,13 @@
   }));
   $("side-filter").addEventListener("change", (event) => { state.side = event.target.value; state.rowLimit = 24; applySignalFilters(); });
   $("refresh-button").addEventListener("click", refresh);
+  $("chart-expand").addEventListener("click", () => setChartExpanded(!state.chartExpanded));
+  $("chart-dialog").addEventListener("close", () => {
+    if (!$("chart-dialog").open) setChartExpanded(false);
+  });
+  $("chart-dialog").addEventListener("click", (event) => {
+    if (event.target === $("chart-dialog")) setChartExpanded(false);
+  });
   $("load-more-signals").addEventListener("click", () => { state.rowLimit += 24; renderSignals(); });
   function activateRow(event, type) {
     const row = event.target.closest(type === "signal" ? "[data-signal-id]" : "[data-market-symbol]");
@@ -615,6 +643,7 @@
   });
   $("health-json").closest("details").addEventListener("toggle", (event) => { if (event.target.open) loadHealth(); });
   document.addEventListener("keydown", (event) => {
+    if (state.chartExpanded) return; // Native dialog handles Escape and focus containment.
     if (event.key === "/" && !event.metaKey && !event.ctrlKey && !event.altKey && !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName)) {
       event.preventDefault();
       if (state.view === "system") setView("signals");
