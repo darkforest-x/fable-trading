@@ -44,6 +44,7 @@ def main():
         check(channel + '_old_receipts_preserved', all(indexed.get(row['event_id']) == row
               for row in before['journal'][receipts]))
         check(channel + '_no_pending_or_new_failures', new[channel]['pending'] == 0
+              and new[channel].get('sending', 0) == 0
               and all(new[channel][key] <= old[channel][key] for key in ('failed', 'unknown')))
     old_ids = {r['event_id'] for r in before['journal']['telegram_receipts']}
     media = after['journal']['telegram_media']
