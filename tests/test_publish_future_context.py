@@ -22,6 +22,11 @@ def test_read_only_future_url_and_presentation_are_allowed():
     mod.validate_config(after, after)
 
 
+def test_server_xml_whitespace_normalization_is_allowed_but_binding_changes_are_not():
+    assert mod.same_config(xml(), '\n' + xml().replace('><', '>\n  <') + '\n')
+    assert not mod.same_config(xml(), xml(primary='$future_image'))
+
+
 @pytest.mark.parametrize('change', ['primary', 'label', 'name', 'choice', 'unsafe_future', 'missing_future'])
 def test_annotation_primary_image_or_foreign_url_changes_are_rejected(change):
     after = xml(mod.URL)

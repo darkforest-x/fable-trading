@@ -36,6 +36,11 @@ def digest(content):
     return hashlib.sha256(content).hexdigest()
 
 
+def same_config(left, right):
+    """LS may normalize XML whitespace when it persists the project."""
+    return ET.canonicalize(left, strip_text=True) == ET.canonicalize(right, strip_text=True)
+
+
 def validate_config(before, after):
     """Only the read-only future object's URL and presentation may differ."""
     names = {'RectangleLabels', 'Label', 'Choices', 'Choice', 'Image'}
@@ -175,7 +180,8 @@ def publish():
     if (project['title'] not in (union.TITLE, union.PREVIOUS_REVIEW_TITLE)
             or project['model_version'] != union.PROTOCOL or not project['show_collab_predictions']
             or project['evaluate_predictions_automatically'] is not False
-            or project['label_config'] not in (previous, config) or view['data']['filters'] != union.default_filters()):
+            or not any(same_config(project['label_config'], item) for item in (previous, config))
+            or view['data']['filters'] != union.default_filters()):
         raise ValueError('Current project or queue differs from the authorized transition')
     tasks_url = '/api/tasks?project=77&fields=task_only&include=id,data&resolve_uri=false'
     tasks = ls._pages(s, tasks_url)
@@ -211,12 +217,13 @@ def publish():
         checks.append({'review_id': row['review_id'], 'status': 200, 'image_sha256': row['image_sha256']})
     ls.api(s, 'POST', '/api/projects/validate/', {'label_config': config})
     current = ls.api(s, 'GET', '/api/projects/77/')
-    if any(current[k] != project[k] for k in ('title', 'label_config', 'model_version')):
+    if (any(current[k] != project[k] for k in ('title', 'model_version'))
+            or not same_config(current['label_config'], project['label_config'])):
         raise ValueError('Project settings changed during preflight')
-    if current['label_config'] != config or current['title'] != union.TITLE:
+    if not same_config(current['label_config'], config) or current['title'] != union.TITLE:
         ls.api(s, 'PATCH', '/api/projects/77/', {'label_config': config, 'title': union.TITLE})
     after = ls.api(s, 'GET', '/api/projects/77/')
-    if after['label_config'] != config or after['title'] != union.TITLE or after['model_version'] != union.PROTOCOL:
+    if not same_config(after['label_config'], config) or after['title'] != union.TITLE or after['model_version'] != union.PROTOCOL:
         raise ValueError('Config readback differs')
     if ls.api(s, 'GET', '/api/dm/views/44/')['data'] != view['data']:
         raise ValueError('Review filter changed during delivery')
@@ -225,7 +232,8 @@ def publish():
     audit.verify_predictions(ls._pages(s, '/api/predictions?task__project=77'), expected, mapping)
     result = {'source_commit': head, 'project_id': 77, 'view_id': 44, 'project_title': union.TITLE,
               'preview_protocol': PROTOCOL, 'manifest_sha256': digest(manifest), 'lookup_counts': counts,
-              'config_sha256': digest(config.encode()), 'http_checks': checks,
+              'config_sha256': digest(config.encode()), 'served_config_sha256': digest(after['label_config'].encode()),
+              'http_checks': checks,
               'annotation_writes': 0, 'draft_writes': 0, 'task_writes': 0, 'prediction_writes': 0,
               'answers_before': project.get('total_annotations_number'),
               'answers_after': after.get('total_annotations_number'),
