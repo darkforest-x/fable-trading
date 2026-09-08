@@ -231,7 +231,8 @@ def render_event(event: dict, bars: pd.DataFrame, path: Path, roles: list[str], 
             xx = exit_i-start + (-.5 if at_open else 0 if timing == "intrabar_unknown" else .5)
             price_ax.scatter([xx], [exit_price], marker="X", s=55, color="#6d478d", zorder=6)
             suffix = " · 本K内时刻未知" if timing == "intrabar_unknown" else ""
-            price_ax.annotate(f"账本退出 {exit_price:.7g}{suffix}", (xx,exit_price), xytext=(12,-32), textcoords="offset points",
+            exit_label = "截止盯市（未自然退出）" if _flag(event.get("censored",False)) else "规则退出"
+            price_ax.annotate(f"{exit_label} {exit_price:.7g}{suffix}", (xx,exit_price), xytext=(12,-32), textcoords="offset points",
                 color="#6d478d", fontsize=9, arrowprops={"arrowstyle":"-", "color":"#6d478d"},
                 bbox={"boxstyle":"round,pad=.3", "fc":"white", "ec":"#ddd1e5", "alpha":.95})
         else:
@@ -248,7 +249,7 @@ def render_event(event: dict, bars: pd.DataFrame, path: Path, roles: list[str], 
         ticks = np.unique(np.linspace(0,len(view)-1,9).astype(int))
         osc.set_xticks(ticks,[view.index[i].strftime("%m-%d\n%H:%M") for i in ticks])
         osc.set_xlim(-1,len(view))
-        osc.set_xlabel(f"UTC K线开盘时间 · 前文 {signal-start} 根 / 后续 {end-signal} 根 · " + ("含完整退出" if exit_visible else "窗口截断，未展示完整退出"))
+        osc.set_xlabel(f"UTC K线开盘时间 · 前文 {signal-start} 根 / 后续 {end-signal} 根 · " + (("含截止盯市，未自然退出" if _flag(event.get("censored",False)) else "含完整规则退出") if exit_visible else "窗口截断，未展示账本终点"))
         side_text = "多头" if side == 1 else "空头"
         settled = "边界强制标记" if _flag(event.get("censored",False)) else "按规则已退出"
         fig.suptitle(f"{event['symbol']} · {minutes//60}H · {side_text} · {decision:%Y-%m-%d %H:%M} UTC\n"
@@ -317,7 +318,7 @@ def build_gallery(events_path: Path, history_path: Path, out_dir: Path, *, phase
           f'<p>{escape("；".join(r["roles"]))}</p><a href="{r["path"]}" target="_blank" rel="noopener">'
           f'<img src="{r["path"]}" loading="lazy" alt="{escape(r["symbol"])} 基准启动与后续走势"></a>'
           f'<p class="meta">确认 {escape(r["decision_close_time"])} · 后续 {r["future_bars"]} 根 · '
-          +('含完整退出' if r['exit_visible'] else '实际退出在图外，图示窗口截断')+'</p></article>')
+          +(('含截止盯市，未自然退出' if r['censored'] else '含完整规则退出') if r['exit_visible'] else '账本终点在图外，图示窗口截断')+'</p></article>')
     html='''<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SPIKE · 山寨趋势全景复盘</title><style>
 :root{color-scheme:light dark;--bg:#f4f7fa;--surface:#fff;--ink:#243646;--muted:#637487;--line:#dbe3eb;--accent:#087f71}
