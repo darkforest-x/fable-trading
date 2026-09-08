@@ -198,6 +198,72 @@ def compact_review(review, windows_scored):
     return result
 
 
+def examples_markdown(summary_path, summary, decisions):
+    """Verify an optional saved example manifest without rereading market data."""
+    path = EXP / "results/example_manifest.json"
+    heading = "## 看实际模型识别的形态\n\n"
+    if not path.exists():
+        return heading + "案例尚未生成，本报告不补画替代成功案例。\n", {"status": "not generated"}
+    manifest = json.loads(path.read_text())
+    if manifest["summary_sha256"] != digest(summary_path) or manifest["model_inference_runs"] != 0:
+        raise ValueError("example manifest does not match this saved evaluation")
+    kept = decisions.loc[decisions.status.eq("confirmed")].copy()
+    kept["signal_available_at"] = pd.to_datetime(kept.signal_available_at, utc=True)
+    kept = kept.sort_values(["signal_available_at", "event_id"])
+    first = kept.groupby(["timeframe_min", "side"], sort=True).head(1)
+    expected = pd.concat([first, kept.loc[kept.overlap_bars.eq(1)].head(1)]).drop_duplicates("event_id")
+    expected = expected.sort_values(["signal_available_at", "event_id"])
+    records = manifest["examples"]
+    if [item["event_id"] for item in records] != expected.event_id.tolist():
+        raise ValueError("saved example selection differs from frozen chronological rule")
+    indexed = decisions.set_index("event_id", verify_integrity=True)
+    section = heading + (
+        "固定选例规则是1H/4H×多/空各取按原箭头时间最早的确认，另加最早一条仅重合1根的确认，去重后最多5例。"
+        "不是按未来涨跌或收益挑赢家；缺少某组确认时不补选。\n\n"
+        "上下文保留原参数六均线、IMACD双线和零轴；浅橙底为冻结蓄势段，橙线为原箭头，青色虚线为模型确认端点，"
+        "青色区域为模型核心。每幅图只显示截至模型实际确认端点的K线，没有确认之后的走势。"
+        "模型输入原图不加注释，框和箭头只画在独立audit副本。案例生成器复现原输入像素SHA，不重跑YOLO；"
+        "本报告核对summary SHA、案例身份/时钟和三张PNG的文件SHA后展示。\n"
+    )
+    verified_files = {}
+    for item in records:
+        row = indexed.loc[item["event_id"]]
+        minutes = int(row.timeframe_min)
+        key = f"{row.symbol}_{minutes}_{row.fold}"
+        if (item["symbol"] != row.symbol or int(item["timeframe_min"]) != minutes
+                or int(item["side"]) != int(row.side) or item["fold"] != row.fold
+                or int(item["overlap_bars"]) != int(row.overlap_bars)
+                or pd.Timestamp(item["signal_available_at"]) != pd.Timestamp(row.signal_available_at)
+                or pd.Timestamp(item["model_available_at"]) != pd.Timestamp(row.confirmation_available_at)
+                or pd.Timestamp(item["context_last_open_at"]) + pd.Timedelta(minutes=minutes)
+                    != pd.Timestamp(item["model_available_at"])
+                or item["aggregate_sha256_verified"] != summary["inputs"][key]["bounded_ohlcv_sha256"]):
+            raise ValueError(f"example identity or temporal receipt differs: {item['event_id']}")
+        if set(item["paths"]) != {"input", "audit", "context"} or set(item["file_sha256"]) != set(item["paths"]):
+            raise ValueError("example must contain exactly three hashed PNG files")
+        for kind, relative in item["paths"].items():
+            png = (ROOT / relative).resolve()
+            if not png.is_relative_to(ROOT.resolve()) or png.suffix.lower() != ".png":
+                raise ValueError("example path must be a repository-local PNG")
+            if digest(png) != item["file_sha256"][kind]:
+                raise ValueError(f"example PNG changed: {relative}")
+            verified_files[relative] = item["file_sha256"][kind]
+        section += (f"\n### {row.symbol} · {tf(minutes)} · {'多' if row.side == 1 else '空'}"
+            f" · 核心重合{int(row.overlap_bars)}根\n\n"
+            f"原箭头收盘UTC：{item['signal_available_at']}；模型确认UTC：{item['model_available_at']}。"
+            f"此图最后一根开盘UTC：{item['context_last_open_at']}。\n\n"
+            f"![截至模型确认端点的六均线与IMACD上下文](../{item['paths']['context']})\n\n"
+            f"![独立模型核心审核副本](../{item['paths']['audit']})\n\n"
+            f"[查看无注释模型原始输入]({ROOT / item['paths']['input']})；"
+            f"生成器核对的输入像素SHA：`{item['pixel_sha256_verified']}`。\n")
+    if not records:
+        section += "\n本轮没有确认事件，未生成案例图片。\n"
+    receipt = dict(manifest_sha256=digest(path), summary_sha256=manifest["summary_sha256"],
+                   event_ids=[item["event_id"] for item in records], verified_png_files=verified_files,
+                   model_inference_runs=0)
+    return section, receipt
+
+
 def make_charts(decisions, symbols, output_dir):
     """Three descriptive figures, selected with no success labels or returns."""
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -301,6 +367,7 @@ def run():
     d = pd.read_csv(DATA / "decisions.csv")
     validation = validate_saved(summary, d)
     comparison, comparison_rows = compare_prior(d)
+    examples_section, examples_receipt = examples_markdown(summary_path, summary, d)
     paths = make_charts(d, summary["symbols"], EXP / "results/report_figures")
     tables, coverage = [], []
     for fold, (start, end) in FOLDS.items():
@@ -429,6 +496,8 @@ def run():
 
 仅重合1根时，几何条件通过对原蓄势身份的支持很弱；核心末端晚于p表示核心延伸到了原箭头之后，可能包含启动后的新结构。这些是审核优先级描述，并未新增过滤门，也不能单凭表格判定形态正确或错误。需要逐图人工审核才能确认是否仍是用户要求的“原蓄势释放”。
 
+{examples_section}
+
 ## 与之前BTC/ETH小样本核对
 
 {comparison_text}
@@ -473,6 +542,8 @@ cd /Users/zhangzc/fable-trading
 .venv/bin/python -m yoyo.evaluation.imacd_yolo_expanded
 # 独立核对保存台账，不重复推理
 .venv/bin/python -m yoyo.evaluation.imacd_yolo_expanded_verify
+# 可选：复现按时间选定的历史模型输入/审核图，不重跑YOLO
+.venv/bin/python -m yoyo.evaluation.imacd_yolo_expanded_examples
 # 重新生成展示，不再推理
 .venv/bin/python -m yoyo.evaluation.imacd_yolo_expanded_report
 # HTML也可从保存MD独立转换（report命令已自动执行此步）
@@ -499,6 +570,7 @@ cd /Users/zhangzc/fable-trading
                     "--out-dir", "analysis/html"], cwd=ROOT, check=True)
     receipt = dict(summary_sha256=digest(summary_path), report_source_sha256=digest(Path(__file__)),
         report_sha256=digest(report), validation=validation, comparison=comparison,
+        examples=examples_receipt,
         figures={str(path.relative_to(ROOT)): digest(path) for path in paths.values()})
     (EXP / "results/report_receipt.json").write_text(json.dumps(receipt, indent=2, ensure_ascii=False))
     print(ROOT / "analysis/html" / report.with_suffix(".html").name)
