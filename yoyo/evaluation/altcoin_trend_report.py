@@ -301,8 +301,8 @@ def generate(args):
             lines += ['### 同一启动、不同退出的对照',
                       '只选上面事后案例，同一入场与同一2ATR初始风险。逐事件反事实未必被每种退出组合实际选中；边界盯市收益必须和规则实际退出分开看。',
                       table(case_table,{'symbol':'币种','周期':'周期','启动UTC':'启动UTC','方案':'退出','net_r':'净R','mfe_r':'MFE R','状态':'状态'})]
-            for symbol in ('USELESS','SOPH'):
-                ex=next((x for x in examples if x['symbol']==symbol and any('本组净R最高' in r for r in x['roles'])),None)
+            for symbol,minutes in (('USELESS',60),('SOPH',240)):
+                ex=next((x for x in examples if x['symbol']==symbol and x['minutes']==minutes and any('本组净R最高' in r for r in x['roles'])),None)
                 if ex:lines.append(f'![{symbol}事后选例，含决策当时看不到的后续行情]({(gallery.parent/ex["path"]).resolve()})')
     lines += ['## 大赢家依赖与统计强度',
               table(primary.loc[focus_mask(primary)&primary.fold.isin(['validation','recent_test'])],
@@ -323,6 +323,12 @@ def generate(args):
             lines += ['## 原54币之外的跨币迁移诊断',
                       '使用此前冻结的加密品种身份清单与已有本地文件交集，剔除原54及SOPH/USELESS；参数直接继承旧年锁定结果，没有在外部池重新挑选。仍有近期存续与数据覆盖偏差，近期右端早于主研究，不混称同一段测试。',
                       table(x.loc[(x.cohort=='high_vol')&focus_mask(x)],{k:v for k,v in columns.items() if k in x.columns})]
+            extreme=ROOT/'experiments/active/exp-imacd-altcoin-transfer-20260909-v1/EXTREME_CASE_AUDIT.md'
+            if extreme.exists():
+                source_hashes[str(extreme)]=digest(extreme)
+                lines += ['### 外部池极端收益逐笔核验',
+                          '年初外部池的漂亮结果主要依赖极少数行情。RAVE单个资本袖套对1H基准与SMA60组合分别贡献约10.786和18.238个百分点；其价格锚点得到OKX独立公共请求复核，但这不证明费用、资金费和容量可实现。去掉前三后每笔均值变负，不等于已经重新计算了删除前三后的组合净收益。',
+                          f'[九行事件账本、信号前缀与五个公开价格锚点审计]({extreme.resolve()})']
     if args.costs:
         path=Path(args.costs)/'summary.csv'
         if path.exists():
@@ -364,6 +370,11 @@ def generate(args):
         lines += ['## 已保留的更及时数据入口',
                   '除本轮4H背景外，已检查原生1H OI/taker接口，并另行冻结滚动保留的近期历史。它与4H聚合不保证逐字节等价，历史首次发布时间仍未知；1H数据采集不是收益验收，也没有被悄悄替换进上述4H背景结果。',
                   f'[原生1H接口、首尾探针和聚合差异记录]({native.resolve()})']
+        collection=EXP/'NATIVE_1H_COLLECTION.md'
+        if collection.exists():
+            source_hashes[str(collection)]=digest(collection)
+            lines += [f'[112条OI/taker数据流的覆盖与原始错误验收]({collection.resolve()})',
+                      '原始采集回执保留2条终端分页错误；其CSV含所需近期数据，经逐页重放与覆盖验收后单列记录。没有把错误数改成零，也没有用这批1H历史重算上述收益。']
     target=Path(args.report)
     target.write_text('\n\n'.join(lines)+'\n')
     subprocess.run(['python3',str(ROOT/'scripts/md_to_html.py'),str(target),'--out-dir',str(ROOT/'analysis/html')],check=True,cwd=ROOT)
