@@ -23,6 +23,10 @@ from yoyo.rotation.metadata import asset_context
 from yoyo.rotation.providers import BinanceProvider, SyntheticProvider
 from yoyo.rotation.derivatives import fetch_context
 
+# Imported Python functions remain cached in a long-running server. A later
+# disk commit must not let old in-memory functions claim the new source hash.
+LOADED_SOURCE_HASH = source_identity()["source_hash"]
+
 
 def risk_example(candidate: dict, config: RotationConfig, regime: dict) -> dict:
     """Every 10,000 notional-account units, structure distance plus spot cost.
@@ -86,6 +90,8 @@ def run_scan(config: RotationConfig, *, catalog: Optional[dict] = None,
     started = time.monotonic()
     cutoff = utc(as_of if as_of is not None else wall_clock() if config.mode == "live_observation" else config.as_of)
     identity = source_identity()
+    if identity["source_hash"] != LOADED_SOURCE_HASH:
+        raise RotationError("observer source changed since process startup; restart required")
     policy = authorize(config, cutoff, source_hash=identity["source_hash"], receipt=receipt, now=wall_clock())
     catalog = catalog or {"schema_version": 1, "assets": [], "events": [], "reviews": []}
 

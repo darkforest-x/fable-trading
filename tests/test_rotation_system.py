@@ -265,6 +265,13 @@ def test_explicit_okx_factory_is_used_without_fallback(monkeypatch):
     assert all(c["derivatives"]["status"] == "not_collected" for c in value["candidates"])
 
 
+def test_running_process_cannot_claim_a_new_disk_source_identity(monkeypatch):
+    import yoyo.rotation.pipeline as module
+    monkeypatch.setattr(module, "source_identity", lambda: {"source_hash": "new_disk_version"})
+    with pytest.raises(RotationError, match="restart required"):
+        run_scan(CONFIG)
+
+
 def test_auxiliary_derivatives_never_change_candidate_scores(monkeypatch):
     import yoyo.rotation.pipeline as module
     calls = []
