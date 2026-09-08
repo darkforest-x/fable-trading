@@ -114,7 +114,7 @@
     if (value === "unknown") return ["回执未知", "pending"];
     if (["pending", "queued", "retry", "sending"].includes(value)) return ["等待发送", "pending"];
     if (["disabled", "not_configured"].includes(value)) return ["通知未启用", "muted"];
-    if (item.is_fresh === false || ["historical", "stale", "expired", "skipped"].includes(value)) return ["历史记录", "muted"];
+    if (item.is_fresh === false || ["history", "historical", "stale", "expired", "skipped"].includes(value)) return ["历史记录", "muted"];
     if (["suppressed", "duplicate"].includes(value)) return ["已去重", "muted"];
     return ["已记录", "muted"];
   }
