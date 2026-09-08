@@ -1,0 +1,355 @@
+{
+  "schema": "imacd-monitor-frontend-qa-v1",
+  "generated_at_utc": "2026-09-08T00:14:56.614013+00:00",
+  "result": "PASS_WITH_RUNTIME_LIMITATIONS",
+  "scope": "Read-only real-browser QA of TradingView-visible main-chart focus release monitor v3. No source edits, service restarts, or Telegram messages by this QA agent.",
+  "environment": {
+    "base_url": "http://127.0.0.1:8766",
+    "browser": "Chrome",
+    "browser_id": "2",
+    "tab_id": "977878393",
+    "session_name": "🔎 IMACD 验收",
+    "browser_control": "mcp__cua_repl",
+    "iab_attempt": "Unavailable: Browser is not available: iab. Parent explicitly authorized available Chrome as fallback.",
+    "runtime_source_commit": "a8974b7fd55d7fef5cc7e2124877c0546fbe332b",
+    "repository_head_at_capture": "45ec14f78f23ea38734beb1375f41247fc20fd81",
+    "static_sha256": {
+      "yoyo/monitor/static/index.html": "a500ac29c749e5fb91a3a494654afe58e50ee3067555a1b216984160b2b4939b",
+      "yoyo/monitor/static/app.js": "e7520153b5cb89802e48757a0f2bb86eae52ed1d7c73f9273010d2c9ca12cf20",
+      "yoyo/monitor/static/styles.css": "ff00ad45ac59e97df7e38555abc03cde7e3ab68b506c9a0fae6ac8b6a1330c9c"
+    }
+  },
+  "checks": [
+    {
+      "id": "canonical_signal_list",
+      "result": "PASS",
+      "evidence": "Live page labels were only 多头/空头 · 蓄势释放. Main title 主图启动. API main endpoint returned exclusively tv_start/source release under v3. Chart API contains legacy events but SVG draws only tv_start."
+    },
+    {
+      "id": "timeframe_search_direction",
+      "result": "PASS",
+      "evidence": "Clicked 1H then searched ACU: 1 row. Selected short: 0 rows with 没有符合筛选的信号. Restored all, clicked 4H then searched BCH: 4 rows spanning USD/USDT. Selected BCH-USDT row loaded 4H chart."
+    },
+    {
+      "id": "primary_signal_not_exact_zero",
+      "result": "PASS",
+      "evidence": "ACU 1H shows near-zero 24, exact-zero 0, price 0.14384. BCH-USDT 4H shows near-zero 16, exact-zero 0, price 260.80. Both retain tv_start arrows. CHZ 4H also shows near-zero 20, exact-zero 0, price 0.01418 with long release despite HTF short background."
+    },
+    {
+      "id": "exact_price_nearzero_profile",
+      "result": "PASS",
+      "evidence": "Detail and arrow labels preserve actual signal closes and near_zero_bars. Visible snapshot is 近零至少 12 根 · 0.1 ATR · 普通系统标记关闭; manual sync notice states TradingView parameter changes require monitoring config update."
+    },
+    {
+      "id": "chart_focus_zero_lines",
+      "result": "PASS",
+      "evidence": "Real ACU and BCH charts visually inspected: six thin price MAs, two IMACD lines, visible 0.00 zero axis, no histogram. ACU rendered 1 and BCH 2 backend-focus groups. SVG event kind set was only tv_start; BCH arrow titles were 14 根/242.70 short and 16 根/260.80 long. API focus includes nonzero-md candles, so focus is not exact-zero-only."
+    },
+    {
+      "id": "notification_protocol_isolation",
+      "result": "PASS",
+      "evidence": "After refreshing parent history-enum correction, DATA 1H 09/08 08:00 row showed 新 plus 历史记录. Runtime page showed 最近成功 — and pending/failed/unknown all 0. API independently showed current sent=0 vs historical_sent=70. UI does not display historical_sent=70; isolation was verified against API, not asserted as visible text."
+    },
+    {
+      "id": "runtime_truthfulness",
+      "result": "PASS",
+      "evidence": "Runtime shows TradingView 主图启动（蓄势释放标记）, confirmed HTF background 不过滤启动, fixed settings snapshot/manual parameter sync, current partial warmup progress and zero scan errors at capture."
+    },
+    {
+      "id": "all_contract_watch",
+      "result": "PASS",
+      "evidence": "Clicked 蓄势观察 then 全部合约, searched BTC: four windows BTC/USD 1H/4H and BTC/USDT 1H/4H. Quote denominations are distinguished."
+    },
+    {
+      "id": "browser_errors",
+      "result": "PASS",
+      "evidence": "Chrome dev.logs queried after interactions returned [] for levels error/warn."
+    }
+  ],
+  "ui_observations": {
+    "acu": {
+      "symbol": "ACU",
+      "timeframe": "1H",
+      "display_price": "0.14384",
+      "near_zero_bars": 24,
+      "zero_bars": 0,
+      "arrow_kinds": [
+        "tv_start"
+      ],
+      "arrow_titles": [
+        "主图启动 · 蓄势释放↑ · 24 根 · 收盘 0.14384"
+      ],
+      "backend_focus_groups": 1,
+      "zero_label": "0.00"
+    },
+    "bch": {
+      "symbol": "BCH",
+      "timeframe": "4H",
+      "display_price": "260.80",
+      "near_zero_bars": 16,
+      "zero_bars": 0,
+      "arrow_kinds": [
+        "tv_start"
+      ],
+      "arrow_titles": [
+        "主图启动 · 蓄势释放↓ · 14 根 · 收盘 242.70",
+        "主图启动 · 蓄势释放↑ · 16 根 · 收盘 260.80"
+      ],
+      "backend_focus_groups": 2,
+      "zero_label": "0.00"
+    },
+    "recent_historical_row": "DATAUSDT新1H09/08 08:00↑多头 · 蓄势释放启动前蓄势 12 根0.1942历史记录",
+    "telegram_visible": "最近成功—待发送0发送失败0发送结果未知0配置状态已配置（敏感信息不展示）"
+  },
+  "api_snapshot": {
+    "now_ms": 1788826498938,
+    "protocol": "imacd-tv-visible-start-monitor-v3",
+    "scan": {
+      "status": "idle",
+      "started_at_ms": 1788826008696,
+      "finished_at_ms": 1788826464795,
+      "completed": 946,
+      "total": 946,
+      "errors": 0,
+      "next_scan_ms": 1788826584795,
+      "error_samples": [],
+      "duration_seconds": 456.1
+    },
+    "universe": {
+      "count": 473,
+      "scope": "OKX 全部在交易永续合约（USDT 与币本位）",
+      "updated_at_ms": 1788826008696,
+      "settlements": {
+        "USDT": 458,
+        "ADA": 1,
+        "BCH": 1,
+        "BTC": 1,
+        "DOGE": 1,
+        "DOT": 1,
+        "ETC": 1,
+        "ETH": 1,
+        "FIL": 1,
+        "HYPE": 1,
+        "LINK": 1,
+        "LTC": 1,
+        "SOL": 1,
+        "SUI": 1,
+        "UNI": 1,
+        "XRP": 1
+      }
+    },
+    "counts": {
+      "ready": 56,
+      "long": 475,
+      "short": 114,
+      "neutral": 146,
+      "building": 81,
+      "loading": 74,
+      "signals_24h": 44
+    },
+    "runtime": {
+      "signal_mode": "TradingView 主图启动（蓄势释放标记）",
+      "signal_kind": "tv_start",
+      "tv_profile": {
+        "id": "imacd-v2.2-focus12-band0.10-marks-off",
+        "show_focus": true,
+        "show_marks": false,
+        "focus_min_bars": 12,
+        "focus_atr_band": 0.1,
+        "verified_on": "2026-09-08",
+        "sync_mode": "observed_settings_snapshot"
+      },
+      "higher_mode": "已确认高周期背景标注，不过滤启动",
+      "notification_since_ms": 1788826012027,
+      "source_commit": "a8974b7fd55d7fef5cc7e2124877c0546fbe332b"
+    },
+    "telegram": {
+      "sent": 0,
+      "historical_sent": 70,
+      "last_success_ms": null,
+      "last_signal_success_ms": null,
+      "pending": 0,
+      "failed": 0,
+      "unknown": 0,
+      "probe_status": "not_tested",
+      "configured": true,
+      "enabled": true
+    },
+    "signals": {
+      "total": 420,
+      "returned": 420,
+      "kind_counts": {
+        "tv_start": 420
+      },
+      "source_kind_counts": {
+        "release": 420
+      },
+      "protocol_counts": {
+        "imacd-tv-visible-start-monitor-v3": 420
+      },
+      "samples": [
+        {
+          "id": "854ad1c8dd4d9c5722015b81",
+          "symbol": "DATA-USDT-SWAP",
+          "timeframe": "1H",
+          "kind": "tv_start",
+          "source_kind": "release",
+          "tv_marker": "focus_release",
+          "tv_profile": "imacd-v2.2-focus12-band0.10-marks-off",
+          "price": 0.1942,
+          "bar_close_ms": 1788825600000,
+          "near_zero_bars": 12,
+          "zero_bars": 0,
+          "dense": true,
+          "htf_side": "long",
+          "htf_allowed": true,
+          "previous_md": 5.9599504070806386e-05,
+          "focus_band": 0.00013793894751629106,
+          "notification_status": "history",
+          "is_fresh": true
+        },
+        {
+          "id": "032a879d2b417ec12b3378f8",
+          "symbol": "ACU-USDT-SWAP",
+          "timeframe": "1H",
+          "kind": "tv_start",
+          "source_kind": "release",
+          "tv_marker": "focus_release",
+          "tv_profile": "imacd-v2.2-focus12-band0.10-marks-off",
+          "price": 0.14384,
+          "bar_close_ms": 1788775200000,
+          "near_zero_bars": 24,
+          "zero_bars": 0,
+          "dense": true,
+          "htf_side": "long",
+          "htf_allowed": true,
+          "previous_md": 0.0002243391184022503,
+          "focus_band": 0.0002692686107383979,
+          "notification_status": "history",
+          "is_fresh": false
+        },
+        {
+          "id": "0ca9c9436a8103377a22bb5f",
+          "symbol": "BCH-USDT-SWAP",
+          "timeframe": "4H",
+          "kind": "tv_start",
+          "source_kind": "release",
+          "tv_marker": "focus_release",
+          "tv_profile": "imacd-v2.2-focus12-band0.10-marks-off",
+          "price": 260.8,
+          "bar_close_ms": 1788739200000,
+          "near_zero_bars": 16,
+          "zero_bars": 0,
+          "dense": true,
+          "htf_side": "long",
+          "htf_allowed": true,
+          "previous_md": 0.4485719690639769,
+          "focus_band": 0.5494528123694719,
+          "notification_status": "history",
+          "is_fresh": false
+        }
+      ]
+    },
+    "charts": [
+      {
+        "symbol": "ACU-USDT-SWAP",
+        "timeframe": "1H",
+        "api_candle_count": 240,
+        "event_kinds": {
+          "exit": 2,
+          "zero_breakout": 2,
+          "entry": 2,
+          "retest": 1,
+          "release": 1,
+          "tv_start": 1
+        },
+        "tv_start_candles": 2,
+        "legacy_zero_breakout_candles": 3,
+        "focus_candles": 16,
+        "focus_candles_with_nonzero_md": 2,
+        "state": {
+          "stale": false,
+          "error": null,
+          "ready": true,
+          "phase": "long",
+          "protocol": "imacd-tv-visible-start-monitor-v3"
+        }
+      },
+      {
+        "symbol": "BCH-USDT-SWAP",
+        "timeframe": "4H",
+        "api_candle_count": 240,
+        "event_kinds": {
+          "zero_breakout": 2,
+          "retest": 2,
+          "release": 2,
+          "tv_start": 2,
+          "entry": 1
+        },
+        "tv_start_candles": 4,
+        "legacy_zero_breakout_candles": 5,
+        "focus_candles": 27,
+        "focus_candles_with_nonzero_md": 12,
+        "state": {
+          "stale": false,
+          "error": null,
+          "ready": true,
+          "phase": "long",
+          "protocol": "imacd-tv-visible-start-monitor-v3"
+        }
+      }
+    ]
+  },
+  "visual_evidence": {
+    "storage": "Inline CUA tool image messages; no screenshot files saved.",
+    "screenshots": [
+      {
+        "surface": "ACU 1H live signal table + price chart + IMACD zero axis",
+        "tool_title": "保存真实 ACU 主图启动的视觉验收截图"
+      },
+      {
+        "surface": "Runtime live scan and Telegram current-session panel",
+        "tool_title": "验收运行状态与当前协议通知统计"
+      }
+    ]
+  },
+  "issues": [],
+  "limitations": [
+    "Full-market first scan was still progressing during interactive checks; final scan completion belongs to runtime acceptance.",
+    "New protocol Telegram sent count was zero at this QA snapshot. No new TG delivery was claimed or triggered; existing 70 historical receipts were not reused as current evidence.",
+    "TradingView settings are an observed fixed snapshot; this QA does not imply live automatic parameter synchronization.",
+    "Legacy events remain in chart API as background history; inspected SVG explicitly excluded their main arrows.",
+    "Mobile layout and failure injection were not rerun in this narrowly scoped semantic release QA."
+  ],
+  "report_rendering_qa": {
+    "checked_at_utc": "2026-09-08T00:17:41.868997+00:00",
+    "path": "/Users/zhangzc/fable-trading/analysis/html/p0_imacd_tv_visible_monitor_20260908.html",
+    "sha256": "d74b25c9f038273d59ac366bd25b3f656dc7a93c29c6c171611676fb8c83fa07",
+    "browser": "Chrome",
+    "attempted_url": "file:///Users/zhangzc/fable-trading/analysis/html/p0_imacd_tv_visible_monitor_20260908.html",
+    "visual_result": "BLOCKED_BY_BROWSER_URL_POLICY",
+    "browser_error": "Browser Use rejected this action due to browser security policy. Browser use cannot visit the requested page because its URL is blocked by the Browser use URL policy.",
+    "action_taken": "Stopped browser attempt. No HTTP proxy, alternate browser surface, raw CDP, or indirect execution workaround. Read-only local HTML parsing performed instead; this is not visual rendering evidence.",
+    "static_result": "PASS",
+    "static_evidence": {
+      "title": "IMACD 监控纠正：以 TradingView 实际可见的启动标记为准",
+      "tables": 3,
+      "unicode_replacement_characters": 0,
+      "contains_expected_terms": {
+        "1922.23": true,
+        "44根": true,
+        "提前8小时": true,
+        "946/946完成": true,
+        "420条": true,
+        "全部tv_start": true
+      },
+      "reference_table": [
+        "收盘点位:1911.20 / 1922.23",
+        "启动前近零蓄势:42根 / 44根"
+      ],
+      "final_scan_row": "946/946完成，0错误，456.1秒；08:14:24完成",
+      "final_signal_row": "420条，契约违规0；默认API返回420条，全部tv_start"
+    },
+    "limitation": "HTML visual rendering has not been verified because the browser URL policy refused the local file. The local dashboard browser QA above remains valid and separate."
+  }
+}

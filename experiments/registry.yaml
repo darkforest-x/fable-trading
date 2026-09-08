@@ -6772,7 +6772,7 @@ experiments:
   - experiment_id: exp-imacd-zero-axis-monitor-20260908-v2
     source_repo: darkforest-x/fable-trading
     source_commit: 7786f77a72bba508458d5306ac0a089e75d64ed6
-    status: accepted
+    status: superseded
     question: Correct the owner-defined monitor signal to the first confirmed exact-zero IMACD departure only.
     single_variable: Canonical signal definition; shared queue/API/UI contract and migration are required consequences,
       no economic optimization.
@@ -6794,19 +6794,30 @@ experiments:
       all-date authorization continues. Configuration live-observation use1, no returns, orders, model changes or
       production execution. Old journals remain historical.
     canonical_report: analysis/html/p0_imacd_zero_axis_monitor_fix_20260908.html
-
+    # Superseded by v3: owner clarified the actual visible focusRelease label; raw exact-zero was an inferred meaning.
   - experiment_id: exp-imacd-tv-visible-monitor-20260908-v3
     source_repo: darkforest-x/fable-trading
-    source_commit: b22e599
-    status: active
+    source_commit: a8974b7fd55d7fef5cc7e2124877c0546fbe332b
+    status: accepted
     question: Notify only the actual visible TradingView main-chart startup label under the owner's observed settings.
     single_variable: Replace inferred raw zero departure with the observed focusRelease drawing contract; no tuning.
-    result: Source and 190 checks passed; fixed ETH chart reference and full live service acceptance pending.
+    result: 190 tests passed; ETH4H visible label44bars/1922.23 matched and8h-premature rawzero excluded.473contracts/946windows,0errors;420canonical
+      markers,0violations.70old receipts unchanged,0new TG pending or sent.
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    canonical_report: analysis/html/p0_imacd_tv_visible_monitor_20260908.html
+    artifacts:
+    - imacd-tv-visible-20260908-tradingview-settings
+    - imacd-tv-visible-20260908-eth4h-reference
+    - imacd-tv-visible-20260908-after
+    - imacd-tv-visible-20260908-verification
+    - imacd-tv-visible-20260908-frontend-qa
+    - imacd-tv-visible-20260908-report-source
+    - imacd-tv-visible-20260908-report
     reuse_allowed: false
-    notes: Owner explicitly chose the actual visible main-chart arrow. Observed showFocus=true, showMarks=false,
-      focusMinBars12 and focusAtrBand0.10. Settings left unchanged. Prior all-date and TG authorization persists;
-      configuration live-observation use1. No returns, model changes, orders or VPS cache writes.
+    notes: Owner explicitly chose the actual visible main-chart arrow. Observed showFocus=true, showMarks=false, focusMinBars12
+      and focusAtrBand0.10; settings unchanged. Observed settings snapshot, not automatic TV sync or global parity.
+      Prior all-date and TG authorization persists; live-observation use1. Backend a8974b7; static history label45ec14f.
+      Chrome monitor UI9checks passed; HTML structural check passed, file URL visual preview blocked by browser policy.
+      New live TG awaits a qualifying post-cutover close. No returns, models, orders or VPS cache writes.

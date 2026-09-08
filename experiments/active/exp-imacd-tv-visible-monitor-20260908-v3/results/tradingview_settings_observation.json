@@ -1,0 +1,59 @@
+{
+  "evidence_type": "manual_transcription_of_native_TradingView_UI_read_with_CUA",
+  "observed_at": "2026-09-08T07:51:00+08:00",
+  "timestamp_precision": "minute",
+  "chart": {
+    "layout": "综合过滤",
+    "symbol": "OKX:ETHUSDT.P",
+    "timeframe": "4H",
+    "indicator_title": "IMACD · 蓄势释放"
+  },
+  "inputs": {
+    "mode": "密集启动",
+    "lengthMA": 34,
+    "lengthSignal": 9,
+    "minZeroBars": 1,
+    "launchWindow": 9,
+    "denseWindow": 12,
+    "denseMaxWidthATR": 3,
+    "denseMinCrosses": 2,
+    "denseMemory": 34,
+    "autoTimeframe": true,
+    "htfPermission": "同向或零轴",
+    "useLower": false,
+    "showFocus": true,
+    "focusMinBars": 12,
+    "focusAtrBand": 0.1,
+    "focusGlowBars": 12,
+    "showPriceZone": true,
+    "showRetest": true,
+    "retestMA": "SMA20",
+    "touchCountsAsRetest": false,
+    "showMarks": false,
+    "showMa": true,
+    "showDense": false,
+    "showState": false,
+    "showPanel": true,
+    "colorBars": false,
+    "showMomentum": false,
+    "showPanelDetails": false,
+    "showSignalText": false,
+    "showPriceText": true
+  },
+  "visible_reference": {
+    "label": "蓄势释放 ↑ · 44根",
+    "price_label": "收盘1922.23"
+  },
+  "display_branch": "showFocus and focusRelease; ordinary longSignal/shortSignal hidden because showMarks=false",
+  "settings_changed": false,
+  "settings_dialog_exit": "Cancel",
+  "source_mapping": {
+    "path": "yoyo/evaluation/pine/imacd_dense_mtf_v2_2.pine",
+    "sha256": "9c3f60cf2a66d55f21e964d7a9b97971d07fdc90195ade8af1a7e9d78a89ffcb",
+    "limitation": "Mapped local V2.2 drawing branch plus actual UI values and visible reference. The Pine Editor briefly opened an unrelated older script, so its text is not treated as the current chart source."
+  },
+  "sync_mode": "observed_settings_snapshot_not_automatic",
+  "evidence_location": "Native app accessibility/screenshot tool outputs in the current Codex conversation; no separately saved screenshot is asserted.",
+  "source_commit": "a8974b7fd55d7fef5cc7e2124877c0546fbe332b",
+  "recorded_at": "2026-09-08T00:08:35.960027+00:00"
+}

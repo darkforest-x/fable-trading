@@ -1,0 +1,77 @@
+{
+  "captured_at": "2026-09-08T00:10:07.418995+00:00",
+  "source_commit": "a8974b7fd55d7fef5cc7e2124877c0546fbe332b",
+  "automated_tests": {
+    "command": ".venv/bin/python -m pytest -q tests/monitor tests/boundaries/test_layer_imports.py tests/boundaries/test_yoyo_package_is_local.py tests/boundaries/test_no_cross_repository_bridges.py tests/boundaries/test_execution_bundle_only.py tests/boundaries/test_experiment_isolation.py",
+    "passed": 190,
+    "failed": 0,
+    "duration_seconds": 19.45,
+    "warnings": [
+      "Existing urllib3 v2 / system LibreSSL warning; no dependency changed."
+    ],
+    "evidence": "exec session32750 terminal completion in current Codex conversation"
+  },
+  "independent_review": {
+    "agent": "monitor_signals",
+    "read_only": true,
+    "findings": [],
+    "positive_case": "44 near-zero bars; previous md positive and zero_bars=0 still accepted",
+    "negative_cases_rejected": 15,
+    "reviewed_paths": [
+      "signals.py",
+      "policy.py",
+      "service.py",
+      "telegram.py",
+      "acceptance.py"
+    ],
+    "no_telegram_sent": true
+  },
+  "fixed_reference": {
+    "verified": true,
+    "bars": 720,
+    "gaps": 0,
+    "price": 1922.23,
+    "near_zero_bars": 44,
+    "early_raw_zero_price": 1911.2,
+    "early_raw_zero_hours": 8,
+    "artifact": "eth4h_tv_reference.json"
+  },
+  "launchagent": {
+    "label": "com.fable.impulse-monitor",
+    "state": "running",
+    "pid_at_check": 56889,
+    "source_commit": "a8974b7fd55d7fef5cc7e2124877c0546fbe332b"
+  },
+  "settings_snapshot_only": true,
+  "tradingview_modified": false,
+  "orders_placed": false,
+  "credentials_changed": false,
+  "full_market_acceptance": {
+    "artifact": "after.json",
+    "passed": true,
+    "contracts": 473,
+    "timeframe_windows": 946,
+    "errors": 0,
+    "history_limited": 74,
+    "stale": 0,
+    "scan_seconds": 456.1,
+    "canonical_signals": 420,
+    "invalid_canonical_ids": [],
+    "invalid_outbox_ids": [],
+    "pre_activation_outbox_ids": [],
+    "old_70_receipts_unchanged": true,
+    "duplicate_identity_groups": 0,
+    "startup_python_sha_mismatches": [],
+    "default_api_items": 420,
+    "default_api_invalid_ids": [],
+    "legacy_kind_http_status": 400,
+    "new_telegram_sent": 0
+  },
+  "frontend_acceptance": {
+    "artifact": "frontend_qa.json",
+    "monitor_http_ui": "passed_9_Chrome_checks",
+    "report_static_check": "passed",
+    "report_visual_check": "blocked_by_file_URL_policy"
+  },
+  "economic_metrics": "Not applicable to a notification semantics repair; no returns, tuning or model evaluation performed."
+}
