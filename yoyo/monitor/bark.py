@@ -19,7 +19,7 @@ from urllib.parse import urlsplit
 
 import requests
 
-from yoyo.monitor import FRESH_MS, SIGNAL_PROTOCOL
+from yoyo.monitor import FRESH_MS, SIGNAL_PROTOCOL, TV_INTERVALS
 from yoyo.monitor.policy import is_tv_start
 from yoyo.monitor.store import now_ms
 
@@ -68,7 +68,7 @@ def message(event):
     side = "向上 ↑" if event["side"] == "long" else "向下 ↓"
     symbol = event["symbol"]
     tv_symbol = symbol.removesuffix("-SWAP").replace("-", "") + ".P"
-    interval = "60" if event["timeframe"] == "1H" else "240"
+    interval = TV_INTERVALS[event["timeframe"]]
     return {"title": f"{symbol} · {event['timeframe']} · {side}",
             "subtitle": f"蓄势释放 · {event['near_zero_bars']} 根",
             "body": f"启动收盘价 {event['price']:.10g}\n标记K线 {time(event['bar_open_ms'])}\n收盘确认 {time(event['bar_close_ms'])} 北京时间\n按当前主图启动标记条件确认",
@@ -98,6 +98,10 @@ class BarkWorker:
             return True
         if event["bar_close_ms"] <= policy["activated_ms"]:
             self.store.finish_bark(eid, "skipped", error="before_bark_activation")
+            return True
+        timeframe_since = self.store.timeframe_activation(event.get("timeframe"))
+        if timeframe_since is None or event["bar_close_ms"] <= timeframe_since:
+            self.store.finish_bark(eid, "skipped", error="before_timeframe_activation")
             return True
         if not 0 <= now - event["bar_close_ms"] <= FRESH_MS:
             self.store.finish_bark(eid, "skipped", error="signal_expired")

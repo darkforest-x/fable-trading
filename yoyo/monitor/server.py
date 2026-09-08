@@ -12,7 +12,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from yoyo.monitor import FRESH_MS, SIGNAL_KIND, SIGNAL_PROTOCOL
+from yoyo.monitor import FRESH_MS, SIGNAL_KIND, SIGNAL_PROTOCOL, MONITORED_TIMEFRAMES
 from yoyo.monitor.service import Monitor
 from yoyo.monitor.store import Store
 
@@ -89,7 +89,7 @@ def create_app(runtime=None, start_monitor=True):
 
     @app.get("/api/chart")
     def chart(symbol: str, timeframe: str = "1H"):
-        if timeframe not in ("1H", "4H"):
+        if timeframe not in MONITORED_TIMEFRAMES:
             raise HTTPException(400, "unsupported timeframe")
         result = monitor.chart(symbol, timeframe)
         if result is None:

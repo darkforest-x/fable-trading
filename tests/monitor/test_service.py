@@ -67,7 +67,7 @@ def market(store, timeframe):
                 if row["symbol"] == SYMBOL and row["timeframe"] == timeframe)
 
 
-@pytest.mark.parametrize("timeframe", ["1H", "4H"])
+@pytest.mark.parametrize("timeframe", ["15m", "1H", "4H"])
 def test_fetch_failure_then_same_timestamp_recovery_restores_chart_and_market(tmp_path, timeframe):
     store = Store(tmp_path / "monitor.sqlite3")
     client = FakeMarket()
@@ -98,7 +98,7 @@ def test_fetch_failure_then_same_timestamp_recovery_restores_chart_and_market(tm
         assert not restored.get("error")
 
 
-@pytest.mark.parametrize("timeframe,higher", [("1H", "4H"), ("4H", "1Dutc")])
+@pytest.mark.parametrize("timeframe,higher", [("15m", "1H"), ("1H", "4H"), ("4H", "1Dutc")])
 def test_missing_htf_then_recovery_recomputes_same_local_candle(tmp_path, timeframe, higher):
     store = Store(tmp_path / "monitor.sqlite3")
     client = FakeMarket()
@@ -294,3 +294,76 @@ def test_later_telegram_cutover_does_not_block_eligible_bark_signal(tmp_path):
     monitor.scan_symbol(INSTRUMENT)
     assert store.telegram_status()['pending'] == 0
     assert store.bark_status()['pending'] == 1
+
+
+@pytest.mark.parametrize('activation,expected', [(None, 0), (NOW, 0), (NOW - 60_000, 0), (NOW - 120_000, 1)])
+def test_15m_notification_requires_its_own_forward_cutover(tmp_path, activation, expected):
+    store = Store(tmp_path / 'monitor.sqlite3')
+    client = FakeMarket()
+    client.history['15m'][-1].update(o=120., h=121., l=119., c=120.)
+    if activation is not None:
+        store.activate_timeframe_policy('15m', activation)
+    monitor = Monitor(store, client=client)
+    monitor.notification_since = monitor.bark_since = NOW - 120_000
+    assert monitor.scan_symbol(INSTRUMENT) == []
+    assert monitor.chart(SYMBOL, '15m')['state']['higher_timeframe'] == '1H'
+    assert any(e['kind'] == 'tv_start' and e['timeframe'] == '15m' for e in store.list_events())
+    assert store.telegram_status()['pending'] == expected
+    assert store.bark_status()['pending'] == expected
+    monitor.scan_symbol(INSTRUMENT)
+    assert store.telegram_status()['pending'] == expected
+    assert store.bark_status()['pending'] == expected
+
+
+def test_scan_covers_three_periods_and_persists_cutover_before_workers(tmp_path):
+    store = Store(tmp_path / 'monitor.sqlite3')
+    client = FakeMarket()
+    client.synchronize = lambda: None
+    client.instruments = lambda: [INSTRUMENT]
+    monitor = Monitor(store, client=client)
+    monitor.scan()
+    status = monitor.status()
+    assert status['scan']['completed'] == status['scan']['total'] == 3
+    assert status['scan']['errors'] == 0
+    assert status['runtime']['timeframes'] == ['15m', '1H', '4H']
+    assert status['runtime']['timeframe_notification_since_ms'] == {'15m': NOW, '1H': 0, '4H': 0}
+    assert monitor.notification_ready.is_set()
+    # Restart retains first activation, without resetting the old channels.
+    assert Store(store.path).activate_timeframe_policy('15m', NOW + 900_000) == NOW
+
+
+def test_chart_api_accepts_15m_and_rejects_unmonitored_period(tmp_path):
+    from fastapi import HTTPException
+    from yoyo.monitor.server import create_app
+    app = create_app(runtime=tmp_path, start_monitor=False)
+    monitor = app.state.monitor
+    monitor.client = FakeMarket()
+    monitor.scan_symbol(INSTRUMENT)
+    endpoint = next(r.endpoint for r in app.routes if getattr(r, 'path', None) == '/api/chart')
+    assert endpoint(SYMBOL, '15m')['timeframe'] == '15m'
+    with pytest.raises(HTTPException) as exc:
+        endpoint(SYMBOL, '5m')
+    assert exc.value.status_code == 400
+
+
+@pytest.mark.parametrize('recovery_delay,expected', [(16 * 60_000, 1), (31 * 60_000, 0)])
+def test_15m_stale_market_does_not_consume_fresh_signal_before_recovery(tmp_path, recovery_delay, expected):
+    store = Store(tmp_path / 'monitor.sqlite3')
+    store.activate_timeframe_policy('15m', NOW - 120_000)
+    client = FakeMarket()
+    client.history['15m'][-1].update(o=120., h=121., l=119., c=120.)
+    client.clock = lambda: NOW + 15 * 60_000
+    monitor = Monitor(store, client=client)
+    monitor.notification_since = monitor.bark_since = NOW - 120_000
+    monitor.scan_symbol(INSTRUMENT)
+    assert monitor.chart(SYMBOL, '15m')['state']['stale']
+    assert store.telegram_status()['pending'] == store.bark_status()['pending'] == 0
+    assert not any(e['kind'] == 'tv_start' and e['timeframe'] == '15m' for e in store.list_events())
+    client.clock = lambda: NOW + recovery_delay
+    while client.history['15m'][-1]['t'] + 900_000 < client.clock() // 900_000 * 900_000:
+        client.history['15m'].append(dict(client.history['15m'][-1], t=client.history['15m'][-1]['t'] + 900_000))
+    monitor.scan_symbol(INSTRUMENT)
+    assert not monitor.chart(SYMBOL, '15m')['state']['stale']
+    assert store.telegram_status()['pending'] == store.bark_status()['pending'] == expected
+    monitor.scan_symbol(INSTRUMENT)
+    assert store.telegram_status()['pending'] == store.bark_status()['pending'] == expected

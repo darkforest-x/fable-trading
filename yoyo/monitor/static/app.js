@@ -190,6 +190,9 @@
     const telegram = status.telegram || {};
     const bark = status.bark;
     const runtime = status.runtime || {};
+    const timeframes = Array.isArray(runtime.timeframes) ? runtime.timeframes : [];
+    $("metric-timeframes").textContent = timeframes.length ? timeframes.join(" + ") : "—";
+    $("watch-timeframes").textContent = timeframes.length ? timeframes.join(" / ") : "—";
     $("metric-signals").textContent = tvProtocol() ? number(counts.signals_24h ?? 0) : "—";
     $("nav-signal-count").textContent = tvProtocol() ? number(counts.signals_24h ?? 0) : "—";
     $("metric-building").textContent = number(counts.building ?? 0);
@@ -209,7 +212,7 @@
     $("scan-facts").innerHTML = factsHTML([
       ["扫描进度", `${number(complete)} / ${number(total)}`],
       ["上轮完成", fullDate(scan.finished_at_ms)], ["下轮扫描", fullDate(scan.next_scan_ms)],
-      ["本轮错误", number(scanErrorCount)], ["监控范围", status.universe?.scope || "OKX 全市场永续 · 1H / 4H"],
+      ["本轮错误", number(scanErrorCount)], ["监控范围", status.universe?.scope || "OKX 全市场永续"],
     ]);
     const tgReady = telegram.configured && telegram.enabled;
     const tgProblem = numeric(telegram.failed) > 0 || numeric(telegram.unknown) > 0;
@@ -229,6 +232,7 @@
     $("bark-facts").innerHTML = factsHTML([["本次服务接受", number(bark?.sent)], ["最近服务接受", fullDate(bark?.last_success_ms)], ["待发送", number(bark?.pending)], ["发送失败", number(bark?.failed)], ["发送结果未知", number(bark?.unknown)], ["历史服务接受", number(bark?.historical_sent)], ["配置状态", !bark ? "等待状态" : bark.configured ? "已配置（敏感信息不展示）" : "未配置"]]);
     $("service-version").textContent = status.version ? `v${String(status.version).replace(/^v/, "")}` : "本机服务";
     const runtimeFacts = [["服务", status.service || "Fable OKX Monitor"], ["启动时间", fullDate(status.started_at_ms)], ["服务时间", fullDate(status.now_ms)], ["运行时长", duration(Date.now() - numeric(status.started_at_ms, Date.now()))]];
+    if (timeframes.length) runtimeFacts.push(["监控周期", timeframes.join(" / ")]);
     if (runtime.host) runtimeFacts.push(["主机", runtime.host]);
     if (runtime.pid) runtimeFacts.push(["进程", runtime.pid]);
     if (runtime.data_dir) runtimeFacts.push(["数据位置", runtime.data_dir]);
@@ -268,7 +272,14 @@
     const name = item.kind ? eventNames[item.kind] || item.kind : marketPhase(item);
     $("detail-event-badge").innerHTML = `<span class="signal-badge ${item.side === "short" ? "short" : item.side === "long" ? "" : "neutral"}">${sideArrow(item.side)} ${escapeHTML(name)}</span>`;
     const tvSymbol = String(item.symbol || "").replace(/-/g, "").replace(/SWAP$/, ".P");
-    $("tradingview-link").href = `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(`OKX:${tvSymbol}`)}&interval=${item.timeframe === "4H" ? "240" : "60"}`;
+    const tvInterval = new Map([["15m", "15"], ["1H", "60"], ["4H", "240"]]).get(item.timeframe);
+    if (tvInterval) {
+      $("tradingview-link").href = `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(`OKX:${tvSymbol}`)}&interval=${tvInterval}`;
+      $("tradingview-link").removeAttribute("aria-disabled");
+    } else {
+      $("tradingview-link").removeAttribute("href");
+      $("tradingview-link").setAttribute("aria-disabled", "true");
+    }
     const facts = [
       ["信号收盘时间", shortDate(item.bar_close_ms), ""],
       [item.kind === "tv_start" ? "启动前近零蓄势" : "当前近零蓄势", `${number(focusRun(item))} 根`, ""],
@@ -354,7 +365,7 @@
     labelIndices.forEach((i) => {
       parts.push(`<line x1="${x(i)}" x2="${x(i)}" y1="${priceTop}" y2="${impulseBottom}" stroke="#1c2b36" stroke-width=".6" stroke-dasharray="2 5"/>`);
       const date = new Date(Number(candles[i].t));
-      const label = `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, "0")}:00`;
+      const label = `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
       parts.push(`<text x="${x(i)}" y="${height - 13}" text-anchor="${i === 0 ? "start" : i === candles.length - 1 ? "end" : "middle"}">${label}</text>`);
     });
     parts.push('<g clip-path="url(#price-clip)">');

@@ -30,6 +30,39 @@ def response(code=200, payload=None):
     return Response()
 
 
+@pytest.mark.parametrize('channel', ['telegram', 'bark'])
+@pytest.mark.parametrize('activation,expected', [(None, 'skipped'), (3600000, 'skipped'), (3600001, 'skipped'), (3599999, 'sent')])
+def test_15m_worker_rechecks_stream_activation_and_links_correct_interval(tmp_path, channel, activation, expected):
+    from yoyo.monitor.bark import BarkWorker
+    store = Store(tmp_path / 'm.sqlite')
+    store.activate_notification_policy(0)
+    store.activate_bark_policy(0)
+    if activation is not None:
+        store.activate_timeframe_policy('15m', activation)
+    signal = dict(event(), timeframe='15m', bar_open_ms=2700000)
+    store.upsert_event(signal, notify=True, bark_notify=True)
+    calls = []
+    def sender(*args, **kwargs):
+        calls.append(kwargs['json'])
+        return response(payload={'ok': True, 'result': {'message_id': 123}, 'code': 200, 'timestamp': 3602})
+    worker = (TelegramWorker(store, ('fake-token', 'fake-chat'), sender) if channel == 'telegram'
+              else BarkWorker(store, 'fake-device', sender))
+    assert worker.deliver_once(3602000)
+    assert not worker.deliver_once(3603000)
+    status = store.telegram_status() if channel == 'telegram' else store.bark_status()
+    assert status[expected] == 1
+    assert len(calls) == int(expected == 'sent')
+    if calls:
+        assert 'interval=15' in calls[0].get('text', calls[0].get('url', ''))
+    untouched = store.bark_status() if channel == 'telegram' else store.telegram_status()
+    assert untouched['pending'] == 1
+
+
+def test_15m_parser_excludes_incomplete_and_future_closes():
+    rows = [candle(0), candle(900000, '0'), candle(1800000)]
+    assert [r['t'] for r in parse_rows(rows, '15m', 1800000)] == [0]
+
+
 def test_concurrent_insert_is_one_event_and_one_outbox(tmp_path):
     store = Store(tmp_path / "m.sqlite")
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:

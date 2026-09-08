@@ -1,6 +1,6 @@
 """Independent Mac scan loop: public OHLCV -> Pine-equivalent events -> outbox.
 
-The owner explicitly requested local all-market 1H/4H monitoring and Telegram
+The owner explicitly requested local all-market 15m/1H/4H monitoring and Telegram
 notifications on 2026-09-08. This is an indicator monitor, not an ACTIVE/model
 promotion, broker position tracker, execution path or backtest. Existing VPS
 cadence, cache and freshness settings remain untouched.
@@ -16,7 +16,8 @@ import subprocess
 import threading
 import time
 
-from yoyo.monitor import FRESH_MS, TIMEFRAMES, VERSION, SIGNAL_PROTOCOL, SIGNAL_KIND, TV_PROFILE_ID
+from yoyo.monitor import (FRESH_MS, TIMEFRAMES, VERSION, SIGNAL_PROTOCOL, SIGNAL_KIND,
+                          TV_PROFILE_ID, HIGHER_TIMEFRAME, MONITORED_TIMEFRAMES)
 from yoyo.monitor.policy import is_tv_start
 from yoyo.monitor.okx import OKX
 from yoyo.monitor.store import now_ms
@@ -50,6 +51,7 @@ class Monitor:
         self.telegram = TelegramWorker(store)
         self.bark = BarkWorker(store)
         self.bark_since = None
+        self.timeframe_since = {tf: store.timeframe_activation(tf) for tf in MONITORED_TIMEFRAMES}
         self.threads = []
 
     def start(self):
@@ -109,6 +111,8 @@ class Monitor:
             self.notification_since = self.store.activate_notification_policy(self.client.clock())
             if self.bark.creds:
                 self.bark_since = self.store.activate_bark_policy(self.client.clock())
+            self.timeframe_since = {tf: self.store.activate_timeframe_policy(tf, self.client.clock())
+                                    for tf in MONITORED_TIMEFRAMES}
             self.notification_ready.set()
         if not self.instruments or start - self.universe_at >= 3600000:
             self.instruments = self.client.instruments()
@@ -121,7 +125,7 @@ class Monitor:
                     row.update(active=False, error="instrument_not_live")
                     self.store.upsert_market(row)
         scan = dict(status="scanning", started_at_ms=start, finished_at_ms=None,
-                    completed=0, total=len(self.instruments) * 2, errors=0, next_scan_ms=None,
+                    completed=0, total=len(self.instruments) * len(MONITORED_TIMEFRAMES), errors=0, next_scan_ms=None,
                     error_samples=[])
         self.store.set_meta("scan", scan)
         with ThreadPoolExecutor(max_workers=8, thread_name_prefix="okx-public") as executor:
@@ -131,11 +135,11 @@ class Monitor:
                 try:
                     errors = future.result()
                 except Exception as exc:
-                    errors = [(tf, type(exc).__name__) for tf in ("1H", "4H")]
+                    errors = [(tf, type(exc).__name__) for tf in MONITORED_TIMEFRAMES]
                     for tf, error in errors:
                         self.store.upsert_market(dict(symbol=symbol, timeframe=tf, phase="loading", error=error,
                                                       active=True, last_scan_ms=now_ms()))
-                scan["completed"] += 2
+                scan["completed"] += len(MONITORED_TIMEFRAMES)
                 scan["errors"] += len(errors)
                 if len(scan["error_samples"]) < 8:
                     scan["error_samples"].extend([dict(symbol=symbol, timeframe=tf, error=e) for tf, e in errors])
@@ -151,16 +155,16 @@ class Monitor:
 
         symbol = instrument["instId"]
         errors, loaded, gaps = [], {}, {}
-        for timeframe in ("1H", "4H", "1Dutc"):
+        for timeframe in TIMEFRAMES:
             try:
                 previous = self.candles.get((symbol, timeframe), [])
                 loaded[timeframe], gaps[timeframe] = self.client.candles(symbol, timeframe, previous)
                 self.candles[(symbol, timeframe)] = loaded[timeframe]
             except Exception as exc:
                 loaded[timeframe] = []
-                if timeframe != "1Dutc":
+                if timeframe in MONITORED_TIMEFRAMES:
                     errors.append((timeframe, str(exc) if type(exc).__name__ == "MarketError" else type(exc).__name__))
-        for timeframe, higher in (("1H", "4H"), ("4H", "1Dutc")):
+        for timeframe, higher in HIGHER_TIMEFRAME.items():
             now = self.client.clock()
             lower = loaded[timeframe]
             if not lower:
@@ -209,11 +213,20 @@ class Monitor:
                 # Only the actual visible Pine focus-release marker is a signal.
                 # Recomputed history predating this protocol's activation stays
                 # historical even if a new identity would otherwise be fresh.
-                base_eligible = event["is_fresh"] and not stale and is_tv_start(event)
+                timeframe_since = self.timeframe_since.get(timeframe)
+                base_eligible = (event["is_fresh"] and is_tv_start(event)
+                                 and timeframe_since is not None
+                                 and event["bar_close_ms"] > timeframe_since)
                 eligible = base_eligible and event["bar_close_ms"] > self.notification_since
                 bark_eligible = (base_eligible and self.bark_since is not None
                                  and event["bar_close_ms"] > self.bark_since)
-                self.store.upsert_event(event, notify=eligible, bark_notify=bark_eligible)
+                # Do not permanently consume a new signal as history only
+                # because the latest market candle is temporarily unavailable.
+                # On recovery it can be inserted once, if still fresh. Existing
+                # historical identities are never promoted or requeued.
+                if not stale or not (eligible or bark_eligible):
+                    self.store.upsert_event(event, notify=eligible and not stale,
+                                            bark_notify=bark_eligible and not stale)
                 kept.append(event)
             with self.lock:
                 self.charts[(symbol, timeframe)] = dict(symbol=symbol, timeframe=timeframe,
@@ -241,7 +254,7 @@ class Monitor:
                     universe=self.store.get_meta("universe", {"count": 0, "scope": "OKX 全部在交易永续合约"}),
                     counts=dict(counts, signals_24h=self.store.count_since(self.client.clock() - 86400000)),
                     telegram=self.telegram.status(), bark=self.bark.status(), runtime={"host": "This Mac", "notification_only": True,
-                    "fresh_minutes": FRESH_MS // 60000, "interval_seconds": self.interval, "timeframes": ["1H", "4H"],
+                    "fresh_minutes": FRESH_MS // 60000, "interval_seconds": self.interval, "timeframes": list(MONITORED_TIMEFRAMES),
                     "clock_offset_ms": self.client.offset_ms, "public_requests": self.client.requests,
                     "candle_storage": "memory_only", "history_days": 7,
                     "signal_mode": "TradingView 主图启动（蓄势释放标记）", "signal_kind": SIGNAL_KIND,
@@ -250,6 +263,7 @@ class Monitor:
                                    "sync_mode": "observed_settings_snapshot"},
                     "notification_since_ms": self.notification_since,
                     "bark_notification_since_ms": self.bark_since,
+                    "timeframe_notification_since_ms": dict(self.timeframe_since),
                     "higher_mode": "已确认高周期背景标注，不过滤启动",
                     "source_commit": self.source_commit, "startup_source_sha256": self.source_hashes,
                     "warmup_bars": 340, "launch_agent": "com.fable.impulse-monitor"})

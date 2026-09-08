@@ -519,6 +519,9 @@ h2 {
   gap:9px;
   margin-bottom:16px;
 }
+.filters .segmented {
+  flex-shrink:0;
+}
 .search-field {
   display:flex;
   align-items:center;
@@ -2039,6 +2042,12 @@ h2 {
 }
 .signal-rule-pill i { width: 4px; height: 4px; border-radius: 50%; background: #83c5a2; }
 @media (max-width: 600px) { .signal-rule-pill { height: 32px; font-size: 8px; } }
+@media (max-width: 830px) {
+  .filters .search-field { flex-basis:calc(100% - 200px); }
+}
+@media (max-width: 600px) {
+  .filters .search-field { flex-basis:calc(100% - 170px); }
+}
 
 .detail-profile {
   margin: 0 16px 17px;

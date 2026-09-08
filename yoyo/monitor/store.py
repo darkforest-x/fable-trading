@@ -16,7 +16,7 @@ import sqlite3
 import time
 from pathlib import Path
 
-from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL
+from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL, MONITORED_TIMEFRAMES
 
 
 def now_ms():
@@ -163,6 +163,31 @@ class Store:
                     SELECT id FROM events WHERE kind!=? OR COALESCE(json_extract(payload,'$.protocol'),'')!=?)""",
                        (activated_ms, SIGNAL_KIND, SIGNAL_PROTOCOL))
             return json.loads(db.execute("SELECT payload FROM meta WHERE key=?", (key,)).fetchone()[0])["activated_ms"]
+
+    def timeframe_activation(self, timeframe):
+        """Legacy streams retain channel cutovers; new streams fail closed."""
+        if timeframe not in MONITORED_TIMEFRAMES:
+            return None
+        policy = self.get_meta("notification_timeframe:" + SIGNAL_PROTOCOL + ":" + timeframe)
+        if policy is None:
+            return 0 if timeframe in ("1H", "4H") else None
+        value = policy.get("activated_ms")
+        return value if type(value) is int and value >= 0 else None
+
+    def activate_timeframe_policy(self, timeframe, activated_ms):
+        """Persist a new stream's cutover once, independent of each channel.
+
+        Old 1H/4H queues keep their existing per-channel policy. A newly
+        enabled timeframe must not replay recent pre-enablement candles.
+        """
+        if timeframe not in MONITORED_TIMEFRAMES:
+            raise ValueError("unsupported timeframe")
+        key = "notification_timeframe:" + SIGNAL_PROTOCOL + ":" + timeframe
+        baseline = 0 if timeframe in ("1H", "4H") else activated_ms
+        with self.connect() as db:
+            db.execute("INSERT OR IGNORE INTO meta VALUES (?,?)",
+                       (key, encode({"activated_ms": baseline})))
+        return self.timeframe_activation(timeframe)
 
     def set_meta(self, key, value):
         with self.connect() as db:

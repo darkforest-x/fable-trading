@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 import requests
 
-from yoyo.monitor import FRESH_MS, SIGNAL_PROTOCOL
+from yoyo.monitor import FRESH_MS, SIGNAL_PROTOCOL, TV_INTERVALS
 from yoyo.monitor.policy import is_tv_start
 from yoyo.monitor.store import now_ms
 from yoyo.notify import _load
@@ -30,7 +30,7 @@ def message(event):
     htf = "许可" if event.get("htf_allowed") is True else "未许可" if event.get("htf_allowed") is False else "数据不足"
     symbol = event["symbol"]
     tv_symbol = symbol.removesuffix("-SWAP").replace("-", "") + ".P"
-    interval = "60" if event["timeframe"] == "1H" else "240"
+    interval = TV_INTERVALS[event["timeframe"]]
     lines = ["FABLE · " + labels.get(event["kind"], event["kind"]),
              f"{symbol} · {event['timeframe']} · {side}",
              f"标记收盘价 {event['price']:.10g}", f"标记K线 {opened} · 收盘确认 {time} 北京时间",
@@ -63,6 +63,10 @@ class TelegramWorker:
             return True
         if event["bar_close_ms"] <= policy["activated_ms"]:
             self.store.finish(eid, "skipped", error="before_notification_policy_activation")
+            return True
+        timeframe_since = self.store.timeframe_activation(event.get("timeframe"))
+        if timeframe_since is None or event["bar_close_ms"] <= timeframe_since:
+            self.store.finish(eid, "skipped", error="before_timeframe_activation")
             return True
         if not 0 <= now - event["bar_close_ms"] <= FRESH_MS:
             self.store.finish(eid, "skipped", error="signal_expired")

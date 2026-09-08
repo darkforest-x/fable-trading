@@ -30,13 +30,11 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-from yoyo.monitor import SIGNAL_PROTOCOL
+from yoyo.monitor import SIGNAL_PROTOCOL, TIMEFRAMES, HIGHER_TIMEFRAME
 
 PROTOCOL_VERSION = SIGNAL_PROTOCOL
 TV_PROFILE = "imacd-v2.2-focus12-band0.10-marks-off"
 WARMUP = 340
-TIMEFRAMES = {"1H": 3_600_000, "4H": 14_400_000, "1Dutc": 86_400_000}
-HIGHER_TIMEFRAME = {"1H": "4H", "4H": "1Dutc"}
 PROTOCOL = {
     "version": PROTOCOL_VERSION,
     "source": "yoyo/evaluation/pine/imacd_dense_mtf_v2_2.pine",
@@ -205,7 +203,7 @@ def analyze(candles: list[dict], higher: list[dict], timeframe: str) -> dict:
     it may occur after md has already been nonzero for several bars.
     """
     if timeframe not in HIGHER_TIMEFRAME:
-        raise ValueError("timeframe must be 1H or 4H")
+        raise ValueError("timeframe must be 15m, 1H or 4H")
     duration = TIMEFRAMES[timeframe]
     higher_timeframe = HIGHER_TIMEFRAME[timeframe]
     higher_duration = TIMEFRAMES[higher_timeframe]

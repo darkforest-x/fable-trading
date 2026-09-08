@@ -1,7 +1,8 @@
 # Fable · Impulse Monitor
 
 Local, notification-only OKX all-live-perpetual monitoring, authorized by the
-owner on 2026-09-08. This service has no exchange credentials or order endpoints.
+owner on 2026-09-08. Active signal periods are **15m / 1H / 4H**. This service
+has no exchange credentials or order endpoints.
 
 ## Open and operate
 
@@ -70,7 +71,7 @@ upgrade; restarts preserve the same cutover. Old pending notifications are
 marked skipped. The delivery worker independently checks the marker contract.
 
 All displayed signal prices are confirmed candle **closing prices**, not fills.
-1H receives 4H context; 4H receives UTC daily context. Higher-timeframe values
+15m receives 1H context; 1H receives 4H context; 4H receives UTC daily context. Higher-timeframe values
 must already have been available at the local candle's **open**. Missing higher
 history is unknown. Daily boundaries can differ from a manually selected Pine
 chart/session; finite startup history can also cause marginal state differences.
@@ -81,16 +82,37 @@ signals. It does not modify the saved Pine indicator.
 
 The universe refreshes hourly from public `SWAP` instruments in `live` state,
 including USDT and coin-margined contracts. Symbols are not ranked or excluded
-by recent returns or volume. An initial 720 closed bars per 1H/4H/1Dutc stream
+by recent returns or volume. An initial 720 closed bars per 15m/1H/4H/1Dutc stream
 are fetched into RAM. The engine needs bar index 340 before readiness; very new
 contracts remain explicitly warming up. A gap resets warmup instead of creating
-a fake candle; conflicting confirmed quotes fail closed.
+a fake candle; conflicting confirmed quotes fail closed. The same 12-bar focus
+rule applies on every period: on 15m that is three hours. This does not change
+the indicator thresholds. Seven days is the journal retention window, not a
+guarantee of seven days of initialized signals: 720 bars minus 340 warmup bars
+initially covers about four days of eligible 15m observations.
+
+Each newly added signal period has its own persisted exchange-clock activation.
+Both queue insertion and TG/Bark delivery reject 15m closes at or before that
+activation, including the most recent historical bar. Restart preserves this
+cutover. Existing 1H/4H channel activations and receipts are unchanged.
 
 Each completed scan is followed by a 120-second wait. At most eight public GET
 requests per second are made across eight workers. Fully unchanged candles use
 the in-memory result. During one process lifetime the original recurrence seed
 is retained. On restart the finite history is fetched again; the UI explicitly
 shows initialization and preserves past signals.
+
+With N live contracts, a fully cold initialization needs about 12N candle
+requests (four streams, three pages each), versus the previous 9N. At the
+unchanged 8 requests/second, 473 contracts imply a request-budget floor near
+710 seconds; parsing/calculation/network latency add to this. The usual 15m
+boundary refresh needs about N requests (59 seconds at 473 contracts); the
+daily aligned boundary can need 4N (237 seconds). Add the 120-second scan wait
+and notification queue delay. The 30-minute freshness gates remain identical
+in the scanner, delivery workers and frontend. Initial warming can take over
+12 minutes; inspect progress before restarting. This service is independent
+of the VPS forward pulse. In-memory history retains its original seed, so RAM
+and recalculation cost grow over time and are visible through scan duration.
 
 Only signals no more than **30 minutes** past close can enter the TG queue;
 delivery rechecks the same limit. The frontend uses that same freshness limit.

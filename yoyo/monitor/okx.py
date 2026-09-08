@@ -3,7 +3,7 @@
 API contract: https://www.okx.com/docs-v5/en/#order-book-trading-market-data
 Only public GETs are used, at <=8 requests/sec across scanner threads. The
 monitor deliberately does not write to the VPS-owned OHLCV cache/forward log.
-1H/4H bars use exchange boundaries; the confirming daily bar is 1Dutc.
+15m/1H/4H bars use exchange boundaries; the confirming daily bar is 1Dutc.
 """
 from __future__ import annotations
 

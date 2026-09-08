@@ -171,7 +171,7 @@ def test_prefix_is_unchanged_by_arbitrary_future_ohlc_or_htf_mutation():
     assert prefix["state"]["bar_close_ms"] == cutoff
 
 
-@pytest.mark.parametrize("timeframe,high_tf", [("1H", "4H"), ("4H", "1Dutc")])
+@pytest.mark.parametrize("timeframe,high_tf", [("15m", "1H"), ("1H", "4H"), ("4H", "1Dutc")])
 def test_htf_uses_local_open_not_local_close_and_warms_independently(timeframe, high_tf):
     duration = signals.TIMEFRAMES[timeframe]
     high_duration = signals.TIMEFRAMES[high_tf]
@@ -219,7 +219,7 @@ def test_invalid_input_fails_closed(defect):
 
 def test_unsupported_timeframe_is_rejected():
     with pytest.raises(ValueError):
-        signals.analyze([], [], "15m")
+        signals.analyze([], [], "5m")
 
 
 def test_protocol_and_output_are_json_safe():
@@ -335,22 +335,24 @@ def test_real_zero_breakout_history_survives_future_quote_mutation():
         assert result["chart"][:370] == prefix["chart"]
 
 
-def test_visible_start_waits_for_frozen_band_after_raw_zero_departure(monkeypatch):
+@pytest.mark.parametrize("timeframe", ["15m", "1H", "4H"])
+def test_visible_start_waits_for_frozen_band_after_raw_zero_departure(monkeypatch, timeframe):
+    duration = signals.TIMEFRAMES[timeframe]
     patch_features(monkeypatch, {"md": {352: .10, 353: .19, 354: .21, 355: .25},
                                 "sb": {352: .02, 353: .04, 354: .06, 355: .08}})
-    result = signals.analyze(candles(356), [], "1H")
+    result = signals.analyze(candles(356, duration=duration), [], timeframe)
     observed_zero = [e for e in result["events"] if e["kind"] == "zero_breakout"]
     visible = [e for e in result["events"] if e["kind"] == "tv_start"]
-    assert [e["bar_open_ms"] for e in observed_zero] == [352 * 3_600_000]
-    assert [e["bar_open_ms"] for e in visible] == [354 * 3_600_000]
+    assert [e["bar_open_ms"] for e in observed_zero] == [352 * duration]
+    assert [e["bar_open_ms"] for e in visible] == [354 * duration]
     event = visible[0]
     assert event["previous_md"] == .19 and event["previous_sb"] == .04
     assert event["zero_bars"] == 0  # A visible arrow does not require previous md == 0.
     assert event["near_zero_bars"] == 14
     assert event["focus_band"] == pytest.approx(.2)
-    assert event["focus_start_ms"] == 340 * 3_600_000
-    assert event["focus_qualified_ms"] == 351 * 3_600_000
-    assert event["zone_end_ms"] == 354 * 3_600_000
+    assert event["focus_start_ms"] == 340 * duration
+    assert event["focus_qualified_ms"] == 351 * duration
+    assert event["zone_end_ms"] == 354 * duration
     assert event["confirmed"] and event["ready"] and event["focus_qualified_before"]
     assert event["tv_marker_visible"] and event["tv_show_focus"]
     assert event["tv_show_marks"] is False

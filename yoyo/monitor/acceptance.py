@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -39,6 +40,8 @@ def collect(label, output):
                           for r in db.execute("SELECT e.payload,o.status FROM outbox o JOIN events e ON e.id=o.event_id WHERE json_extract(e.payload,'$.protocol')=?", (SIGNAL_PROTOCOL,))]
         bark_policy_row = db.execute("SELECT payload FROM meta WHERE key=?", ("notification_policy:bark:" + SIGNAL_PROTOCOL,)).fetchone()
         bark_policy = json.loads(bark_policy_row[0]) if bark_policy_row else None
+        timeframe_policies = {r[0].rsplit(':', 1)[-1]: json.loads(r[1]) for r in db.execute(
+            "SELECT key,payload FROM meta WHERE key LIKE ?", ('notification_timeframe:' + SIGNAL_PROTOCOL + ':%',))}
         bark_outbox = [dict(json.loads(r["payload"]), notification_status=r["status"])
                        for r in db.execute("SELECT e.payload,o.status FROM bark_outbox o JOIN events e ON e.id=o.event_id WHERE json_extract(e.payload,'$.protocol')=?", (SIGNAL_PROTOCOL,))] if bark_exists else []
     source = {}
@@ -49,10 +52,21 @@ def collect(label, output):
                    source_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
                    source_sha256=source, status=status, health=health,
                    markets={"total": markets["total"], "warming_up": sum(r.get("phase") == "loading" for r in markets["items"]),
+                            "by_timeframe": dict(Counter(r['timeframe'] for r in markets['items'])),
                             "errors": [{"symbol": r["symbol"], "timeframe": r["timeframe"], "error": r["error"]} for r in markets["items"] if r.get("error")],
                             "stale": sum(bool(r.get("stale")) for r in markets["items"])},
                    journal={"event_count": event_count, "duplicate_identity_groups": duplicate_groups,
                             "telegram_receipts": receipts, "bark_receipts": bark_receipts, "by_kind": by_kind},
+                   timeframe_audit={"policies": timeframe_policies,
+                                    "signals_by_timeframe": dict(Counter(e['timeframe'] for e in current)),
+                                    "invalid_telegram_ids": [e['id'] for e in current_outbox
+                                        if e['timeframe'] not in ('1H', '4H') and (
+                                            e['timeframe'] not in timeframe_policies or
+                                            e['bar_close_ms'] <= timeframe_policies[e['timeframe']]['activated_ms'])],
+                                    "invalid_bark_ids": [e['id'] for e in bark_outbox
+                                        if e['timeframe'] not in ('1H', '4H') and (
+                                            e['timeframe'] not in timeframe_policies or
+                                            e['bar_close_ms'] <= timeframe_policies[e['timeframe']]['activated_ms'])]},
                    bark_audit={"policy": bark_policy, "current_outbox_count": len(bark_outbox),
                                "invalid_outbox_ids": [e["id"] for e in bark_outbox if not is_tv_start(e)],
                                "pre_activation_outbox_ids": [e["id"] for e in bark_outbox if not bark_policy or e["bar_close_ms"] <= bark_policy["activated_ms"]]},
