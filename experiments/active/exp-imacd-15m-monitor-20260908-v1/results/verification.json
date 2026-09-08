@@ -1,0 +1,48 @@
+{
+  "checks": {
+    "three_periods": true,
+    "all_contract_periods": true,
+    "full_scan": true,
+    "healthy_current_markets": true,
+    "no_duplicates": true,
+    "telegram_old_receipts_unchanged": true,
+    "telegram_cutover_unchanged": true,
+    "telegram_healthy": true,
+    "telegram_no_pre_15m_activation": true,
+    "bark_old_receipts_unchanged": true,
+    "bark_cutover_unchanged": true,
+    "bark_healthy": true,
+    "bark_no_pre_15m_activation": true,
+    "new_15m_cutover": true,
+    "marker_contract": true,
+    "outbox_contract": true,
+    "running_source_matches_disk": true
+  },
+  "passed": true,
+  "source_commit": "137c672b0a054fac971cd56dd80592f4a6e5a113",
+  "receipt_sha256": {
+    "before.json": "e76faf202d078bab5aef6ded1d75dc8895e091009cf2035d82680966ff6836bd",
+    "after.json": "c41c996610347bf69ae50924f738eee8cadb8811649de691aa0eaddd47fab788"
+  },
+  "scan": {
+    "status": "idle",
+    "started_at_ms": 1788830840159,
+    "finished_at_ms": 1788830856459,
+    "completed": 1419,
+    "total": 1419,
+    "errors": 0,
+    "next_scan_ms": 1788830976459,
+    "error_samples": [],
+    "duration_seconds": 16.3
+  },
+  "coverage": {
+    "15m": 473,
+    "1H": 473,
+    "4H": 473
+  },
+  "timeframe_activation": {
+    "15m": 1788830095850,
+    "1H": 0,
+    "4H": 0
+  }
+}

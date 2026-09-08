@@ -1,0 +1,220 @@
+{
+  "schema": "imacd-15m-monitor-frontend-qa-v1",
+  "generated_at_utc": "2026-09-08T01:19:18.005586+00:00",
+  "result": "PASS_WITH_KNOWN_WARMUP_LIMITATION",
+  "scope": "Read-only Chrome integration QA for 15m/1H/4H. No source changes, restarts, notification sends, private configuration reads, or raw OHLC stored in this artifact.",
+  "environment": {
+    "base_url": "http://127.0.0.1:8766",
+    "browser": "Chrome",
+    "browser_id": "2",
+    "tab_id": "977878421",
+    "session_name": "🔎 三周期验收",
+    "control": "mcp__cua_repl",
+    "version": "1.4.0",
+    "runtime_source_commit": "137c672b0a054fac971cd56dd80592f4a6e5a113",
+    "static_sha256": {
+      "app.js": "f7e3d4d14f8c5f85001ebcb0ea48f6589e5cc2d6a58ddf6c601609a92cc9f249",
+      "index.html": "26534aa72f3187e26d885fc1eef2ec608924d78c3d2da7093baff235ef8de6c5",
+      "styles.css": "5a2f68bb8d25028a95875e5bbc67e54fa4d54d01096bb0af5c5b4e13776cc9ca"
+    }
+  },
+  "checks": [
+    {
+      "id": "three_period_scope",
+      "result": "PASS",
+      "evidence": "Actual overview shows 15m + 1H + 4H; watch footer and runtime show 15m / 1H / 4H. Scan denominator 1,419 = 473 contracts × 3 periods."
+    },
+    {
+      "id": "fifteen_minute_filter",
+      "result": "PASS",
+      "evidence": "Clicked BTC-USDT 15m from 全部合约 watch; returned to signal view with 15m selected. BTC search showed four USD/USDT historical 15m releases after those instruments warmed. Short filter yielded two short releases and was restored to all."
+    },
+    {
+      "id": "real_fifteen_chart_and_minutes",
+      "result": "PASS",
+      "evidence": "Selected actual BTC-USDT 15m market and historical signal. SVG aria label identified 120 real candles at 15m. Market x-axis labels included 9/7 22:45 and 9/8 08:45; selected signal axes included 9/6 08:45 and 9/7 04:30. Signal close display was 09/07 07:30, not rounded to the hour."
+    },
+    {
+      "id": "tradingview_links",
+      "result": "PASS",
+      "evidence": "Actual BTC-USDT selections yielded interval=15 for 15m, interval=60 for 1H and interval=240 for 4H. Links were read from DOM, not opened. Unknown period fail-closed handling was separately statically verified before deployment."
+    },
+    {
+      "id": "one_hour_four_hour_regression",
+      "result": "PASS",
+      "evidence": "Selected actual BTC-USDT 1H and 4H from watch. Correct filter selected, corresponding 120-candle chart loaded, and visible 0.00 zero axis remained in both."
+    },
+    {
+      "id": "chart_style_and_semantics",
+      "result": "PASS",
+      "evidence": "All six MA paths retain original colors and width .8 with opacity .95. IMACD remains two lines with visible zero axis and no histogram. Selected 15m history renders only tv_start main arrows; long release near-zero 13 bars and short release 28 bars."
+    },
+    {
+      "id": "truthful_warmup",
+      "result": "PASS",
+      "evidence": "During first scan, eight early 15m windows including BTC/ETH reported awaiting_latest_confirmed_bar. System badge showed 部分异常 and count 8. BTC 15m watch showed 读取异常; detail explicitly stated awaiting_latest_confirmed_bar and chart hint 行情缓存已过期 · 等待重新同步. Cached real chart was presented as stale, not fresh."
+    },
+    {
+      "id": "historical_notification_labels",
+      "result": "PASS",
+      "evidence": "Real 15m signal rows showed TG 历史记录 and Bark 历史记录. All fetched 15m records had history in both notification fields at artifact capture. No QA notification was sent."
+    },
+    {
+      "id": "browser_console",
+      "result": "PASS",
+      "evidence": "Chrome error/warn log query returned [] after period switching and chart checks."
+    }
+  ],
+  "ui_observations": {
+    "overview_periods": "15m + 1H + 4H",
+    "runtime_periods": "15m / 1H / 4H",
+    "watch_periods": "15m / 1H / 4H",
+    "initial_scan_display": "132 / 1,419",
+    "initial_scan_badge": "部分异常",
+    "initial_scan_errors": 8,
+    "selected_15m_signal_id": "3812995704b77b5f57c7f8c4",
+    "selected_15m_signal_close_display": "09/07 07:30",
+    "fifteen_minute_axis_labels": [
+      "9/6 08:45",
+      "9/6 18:45",
+      "9/7 04:30",
+      "9/7 14:30"
+    ],
+    "tv_intervals": {
+      "15m": "15",
+      "1H": "60",
+      "4H": "240"
+    },
+    "ma_colors": [
+      "#82aaa0",
+      "#48695e",
+      "#7194b0",
+      "#405c72",
+      "#909eae",
+      "#556576"
+    ],
+    "ma_opacity": ".95",
+    "ma_stroke_width": ".8",
+    "zero_axis_label": "0.00",
+    "fifteen_minute_arrow_kinds": [
+      "tv_start"
+    ],
+    "stale_hint": "行情缓存已过期 · 等待重新同步"
+  },
+  "api_snapshot": {
+    "now_ms": 1788830360301,
+    "protocol": "imacd-tv-visible-start-monitor-v3",
+    "version": "1.4.0",
+    "timeframes": [
+      "15m",
+      "1H",
+      "4H"
+    ],
+    "universe_count": 473,
+    "scan": {
+      "status": "scanning",
+      "started_at_ms": 1788830092336,
+      "finished_at_ms": null,
+      "completed": 582,
+      "total": 1419,
+      "errors": 8,
+      "next_scan_ms": null,
+      "error_samples": [
+        {
+          "symbol": "0G-USDT-SWAP",
+          "timeframe": "15m",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "AAPL-USDT-SWAP",
+          "timeframe": "15m",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "2Z-USDT-SWAP",
+          "timeframe": "15m",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "AAOI-USDT-SWAP",
+          "timeframe": "15m",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "A-USDT-SWAP",
+          "timeframe": "15m",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "BTC-USDT-SWAP",
+          "timeframe": "15m",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "ETH-USDT-SWAP",
+          "timeframe": "15m",
+          "error": "awaiting_latest_confirmed_bar"
+        },
+        {
+          "symbol": "1INCH-USDT-SWAP",
+          "timeframe": "15m",
+          "error": "awaiting_latest_confirmed_bar"
+        }
+      ]
+    },
+    "signals": {
+      "total": 709,
+      "returned": 709,
+      "timeframe_counts": {
+        "15m": 289,
+        "1H": 282,
+        "4H": 138
+      },
+      "kind_counts": {
+        "tv_start": 709
+      },
+      "fifteen_minute_telegram_counts": {
+        "history": 289
+      },
+      "fifteen_minute_bark_counts": {
+        "history": 289
+      }
+    },
+    "btc_states": [
+      {
+        "symbol": "BTC-USDT-SWAP",
+        "timeframe": "15m",
+        "ready": true,
+        "stale": true,
+        "error": "awaiting_latest_confirmed_bar",
+        "higher_timeframe": "1H"
+      },
+      {
+        "symbol": "BTC-USDT-SWAP",
+        "timeframe": "1H",
+        "ready": true,
+        "stale": false,
+        "error": null,
+        "higher_timeframe": "4H"
+      },
+      {
+        "symbol": "BTC-USDT-SWAP",
+        "timeframe": "4H",
+        "ready": true,
+        "stale": false,
+        "error": null,
+        "higher_timeframe": "1Dutc"
+      }
+    ]
+  },
+  "visual_evidence": {
+    "storage": "Inline CUA screenshot; no image files or raw candles saved",
+    "tool_title": "验收真实 BTC 15m 图表、分钟轴和跳转"
+  },
+  "issues": [],
+  "known_runtime_limitations": [
+    "First scan was still running at capture. Eight earlier 15m windows awaited latest confirmed candle and remained stale, including BTC/ETH. This QA does not claim those windows recovered; parent owns next-scan runtime acceptance.",
+    "15m historical notifications were not replayed. This QA did not establish a newly delivered 15m TG/Bark receipt.",
+    "Mobile viewport and unsupported-timeframe UI injection were not part of this real data QA."
+  ]
+}

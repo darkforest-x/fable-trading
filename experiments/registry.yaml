@@ -6870,3 +6870,31 @@ experiments:
       replay or startup/test message. HTTP200ping validates host only, not device acceptance. AI heartbeat remainsPAUSED.
       Signal/Pine/policy unchanged from visible v3. No orders, model changes, strategy tuning or raw OHLC persistence.
       Notification configuration live-observation use1.
+
+  - experiment_id: exp-imacd-15m-monitor-20260908-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 137c672b0a054fac971cd56dd80592f4a6e5a113
+    status: accepted
+    question: Add 15m to the existing all-live-OKX visible IMACD startup monitor and both notification channels.
+    single_variable: Add monitoring period; thresholds and marker protocol unchanged. Preserve scope cutovers and defer
+      temporarily stale eligible identities.
+    result: 256 software checks plus17 receipt checks passed.473contracts/1419windows; cold627.8s with8boundary-stale windows;
+      incremental16.3s recovered all,0errors/stale.1126canonical events (70615m). First real15m ROK433.99/13bars accepted
+      byTG andBark;70oldTG receipts unchanged. Chrome9initial+7recovery checks passed.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/html/p0_imacd_15m_monitor_20260908.html
+    artifacts:
+    - imacd-15m-20260908-after
+    - imacd-15m-20260908-before
+    - imacd-15m-20260908-cold-start
+    - imacd-15m-20260908-frontend-qa
+    - imacd-15m-20260908-frontend-recovery-qa
+    - imacd-15m-20260908-verification
+    - imacd-15m-20260908-report-source
+    - imacd-15m-20260908-report
+    reuse_allowed: false
+    notes: Owner requested15m in addition to1H/4H.15m cutover2026-09-08T09:14:55.850+08:00; channel cutovers unchanged.78windows
+      lack sufficient warmup; no invented readiness. Signals remain observed TradingView settings snapshot, no automatic
+      parameter sync. No test/startup sends or AI heartbeat changes. Verification builderbb4f781; runtime137c672.

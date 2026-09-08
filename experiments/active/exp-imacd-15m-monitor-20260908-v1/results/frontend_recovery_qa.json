@@ -1,0 +1,135 @@
+{
+  "schema": "imacd-15m-frontend-recovery-qa-v1",
+  "generated_at_utc": "2026-09-08T01:32:52.010882+00:00",
+  "result": "PASS_AT_RECOVERY_OBSERVATION",
+  "scope": "Read-only real Chrome recovery observations after automatic follow-up scan. No source edits, restarts, notifications, private configuration reads, or raw OHLC storage.",
+  "environment": {
+    "url": "http://127.0.0.1:8766/",
+    "browser": "Chrome",
+    "browser_id": "2",
+    "tab_id": "977878425",
+    "session_name": "🔎 15m 恢复验收",
+    "version": "1.4.0",
+    "runtime_source_commit": "137c672b0a054fac971cd56dd80592f4a6e5a113",
+    "browser_observation_started_local": "2026-09-08T09:28:22+08:00"
+  },
+  "preserved_prior_qa": {
+    "path": "/Users/zhangzc/fable-trading/experiments/active/exp-imacd-15m-monitor-20260908-v1/results/frontend_qa.json",
+    "sha256": "fe8e828d54062be0d7edc3cfe5ea680212020e6ef2bf1181a6ecb05f2f5ec0dd"
+  },
+  "checks": [
+    {
+      "id": "eight_stale_windows_recovered",
+      "result": "PASS",
+      "evidence": "Read and verified parent after.json captured 09:28:11: all 1419 windows present (473 each period), stale=0 and errors=[]. Thus all eight previously named stale 15m windows were clear at that capture. This aggregate API artifact is separate from the real Chrome BTC confirmation."
+    },
+    {
+      "id": "scan_recovery_in_chrome",
+      "result": "PASS",
+      "evidence": "Actual Chrome system page displayed 扫描完成, 1,419 / 1,419, 本轮错误0, last finish 2026/09/08 09:27:36. Read-only API check at now_ms=1788830895463 independently returned the same completed 16.3-second follow-up scan."
+    },
+    {
+      "id": "btc_fifteen_latest_close",
+      "result": "PASS",
+      "evidence": "Actual BTC-USDT 15m watch row displayed 空头趋势, replacing earlier 读取异常. Selected detail showed 09/08 09:15 latest confirmed close; 120 real candles loaded with visible zero axis and no stale warning. Last axis open09:00 corresponds to close09:15."
+    },
+    {
+      "id": "rok_real_dual_channel_success",
+      "result": "PASS",
+      "evidence": "Actual ROK-USDT 15m 09:15 long event id98bc782c6e2c68c35b6df207 showed price433.99, near-zero13, TG 已送达 and Bark 服务已接受. SVG main arrow was tv_start and matched this event. Runtime latest times were TG09:22:34 and Bark09:22:33. QA did not trigger any send."
+    },
+    {
+      "id": "bark_receipt_scope",
+      "result": "PASS",
+      "evidence": "Actual Bark tooltip says 服务已接受推送，不代表手机已收到或已读. Runtime showed current accepts1, historical accepts0, pending/failed/unknown0. No phone receipt/read claim."
+    },
+    {
+      "id": "history_isolation",
+      "result": "PASS",
+      "evidence": "ROK search showed the new successful row and two older 15m rows. Both older rows retained TG 历史记录 / Bark 历史记录."
+    },
+    {
+      "id": "browser_console",
+      "result": "PASS",
+      "evidence": "Chrome error/warn query returned [] after BTC and ROK interactions."
+    }
+  ],
+  "recovery_snapshot_source": {
+    "path": "/Users/zhangzc/fable-trading/experiments/active/exp-imacd-15m-monitor-20260908-v1/results/after.json",
+    "sha256": "c41c996610347bf69ae50924f738eee8cadb8811649de691aa0eaddd47fab788",
+    "captured_at_utc": "2026-09-08T01:28:11.181849+00:00",
+    "market_summary": {
+      "total": 1419,
+      "warming_up": 78,
+      "by_timeframe": {
+        "15m": 473,
+        "1H": 473,
+        "4H": 473
+      },
+      "errors": [],
+      "stale": 0
+    },
+    "scan": {
+      "status": "idle",
+      "started_at_ms": 1788830840159,
+      "finished_at_ms": 1788830856459,
+      "completed": 1419,
+      "total": 1419,
+      "errors": 0,
+      "next_scan_ms": 1788830976459,
+      "error_samples": [],
+      "duration_seconds": 16.3
+    },
+    "health_ok": true
+  },
+  "previously_stale_15m_symbols": [
+    "0G-USDT-SWAP",
+    "AAPL-USDT-SWAP",
+    "2Z-USDT-SWAP",
+    "AAOI-USDT-SWAP",
+    "A-USDT-SWAP",
+    "BTC-USDT-SWAP",
+    "ETH-USDT-SWAP",
+    "1INCH-USDT-SWAP"
+  ],
+  "ui_observations": {
+    "scan_badge": "扫描完成",
+    "scan_progress": "1,419 / 1,419",
+    "scan_errors": 0,
+    "btc_period": "15m",
+    "btc_latest_confirmed_close": "09/08 09:15",
+    "btc_phase": "空头趋势",
+    "btc_chart_candles": 120,
+    "btc_axis_labels": [
+      "9/7 03:15",
+      "9/7 13:15",
+      "9/7 23:00",
+      "9/8 09:00"
+    ],
+    "btc_hint": "箭头：主图蓄势释放 · 金色：合格近零区",
+    "btc_stale_warning_present": false,
+    "rok_event_id": "98bc782c6e2c68c35b6df207",
+    "rok_close_time": "09/08 09:15",
+    "rok_signal_price": "433.99",
+    "rok_near_zero_bars": 13,
+    "rok_labels": {
+      "telegram": "TG 已送达",
+      "bark": "Bark 服务已接受"
+    },
+    "rok_arrow_title": "主图启动 · 蓄势释放↑ · 13 根 · 收盘 433.99",
+    "telegram_latest_success_display": "2026/09/08 09:22:34",
+    "bark_latest_accept_display": "2026/09/08 09:22:33",
+    "bark_current_accepts": 1,
+    "bark_history_accepts": 0
+  },
+  "visual_evidence": {
+    "storage": "Inline CUA tool screenshot, no image files saved",
+    "tool_title": "保存 ROK 15m 双通道成功的实际页面证据"
+  },
+  "sampling_boundary_note": "The recovery was established at 09:28 after the 09:27:36 scan. During later artifact assembly after the 09:30 candle boundary, the eight windows again reported awaiting_latest_confirmed_bar with stored close09:15. That later boundary requires the new09:30 candle and does not negate recovery of the previous09:15 wait. No claim is made that every later boundary was already refreshed. No further polling was performed to extend this QA.",
+  "issues": [],
+  "limitations": [
+    "Bark success means server acceptance, not device receipt or read state.",
+    "This is timestamped recovery evidence, not a guarantee of continuously fresh state across later candle boundaries."
+  ]
+}
