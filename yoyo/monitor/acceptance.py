@@ -11,10 +11,26 @@ import sqlite3
 import subprocess
 import urllib.request
 
-from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL
-from yoyo.monitor.policy import is_tv_start
+from yoyo.monitor import (MODEL_KIND, MODEL_PROTOCOL, MODEL_PROFILE_ID,
+                          MODEL_SHA256, MONITORED_TIMEFRAMES)
+from yoyo.monitor.policy import is_model_signal
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def _after_activation(event, policy):
+    """Both original arrow and later confirmation must follow an explicit cutover."""
+    original = event.get("indicator")
+    activation = policy.get("activated_ms") if isinstance(policy, dict) else None
+    return (type(activation) is int and activation >= 0 and isinstance(original, dict)
+            and type(original.get("bar_close_ms")) is int
+            and type(event.get("bar_close_ms")) is int
+            and original["bar_close_ms"] > activation and event["bar_close_ms"] > activation)
+
+
+def _stream_eligible(event, policies):
+    timeframe = event.get("timeframe")
+    return timeframe in MONITORED_TIMEFRAMES and _after_activation(event, policies.get(timeframe))
 
 
 def collect(label, output):
@@ -36,22 +52,34 @@ def collect(label, output):
                 media.append(dict(event_id=row['event_id'], bytes=len(photo) if photo else 0,
                                   sha256=row['sha256'], error=row['error'], notification_status=row['status'],
                                   hash_valid=hashlib.sha256(photo).hexdigest() == row['sha256'] if photo else None))
-        duplicate_groups = db.execute("SELECT COUNT(*) FROM (SELECT COUNT(*) n FROM events GROUP BY json_extract(payload,'$.protocol'),symbol,timeframe,kind,side,close_ms HAVING n>1)").fetchone()[0]
+        duplicate_groups = db.execute("""SELECT COUNT(*) FROM (
+            SELECT COUNT(*) n FROM events GROUP BY json_extract(payload,'$.protocol'),symbol,timeframe,kind,side,close_ms,
+            CASE WHEN kind=? THEN json_extract(payload,'$.source_event_id') ELSE '' END HAVING n>1)""",
+                                      (MODEL_KIND,)).fetchone()[0]
         event_count = db.execute("SELECT COUNT(*) FROM events").fetchone()[0]
         by_kind = [dict(r) for r in db.execute("SELECT kind,COUNT(*) count FROM events GROUP BY kind")]
         current = [json.loads(r[0]) for r in db.execute(
             "SELECT payload FROM events WHERE kind=? AND json_extract(payload,'$.protocol')=?",
-            (SIGNAL_KIND, SIGNAL_PROTOCOL))]
-        policy_row = db.execute("SELECT payload FROM meta WHERE key=?", ("notification_policy:" + SIGNAL_PROTOCOL,)).fetchone()
+            (MODEL_KIND, MODEL_PROTOCOL))]
+        candidates_exist = db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='model_candidates'").fetchone()
+        candidate_counts = {r[0]: r[1] for r in db.execute("SELECT status,COUNT(*) FROM model_candidates GROUP BY status")} if candidates_exist else {}
+        policy_row = db.execute("SELECT payload FROM meta WHERE key=?", ("notification_policy:" + MODEL_PROTOCOL,)).fetchone()
         policy = json.loads(policy_row[0]) if policy_row else None
         current_outbox = [dict(json.loads(r["payload"]), notification_status=r["status"])
-                          for r in db.execute("SELECT e.payload,o.status FROM outbox o JOIN events e ON e.id=o.event_id WHERE json_extract(e.payload,'$.protocol')=?", (SIGNAL_PROTOCOL,))]
-        bark_policy_row = db.execute("SELECT payload FROM meta WHERE key=?", ("notification_policy:bark:" + SIGNAL_PROTOCOL,)).fetchone()
+                          for r in db.execute("SELECT e.payload,o.status FROM outbox o JOIN events e ON e.id=o.event_id WHERE json_extract(e.payload,'$.protocol')=?", (MODEL_PROTOCOL,))]
+        bark_policy_row = db.execute("SELECT payload FROM meta WHERE key=?", ("notification_policy:bark:" + MODEL_PROTOCOL,)).fetchone()
         bark_policy = json.loads(bark_policy_row[0]) if bark_policy_row else None
         timeframe_policies = {r[0].rsplit(':', 1)[-1]: json.loads(r[1]) for r in db.execute(
-            "SELECT key,payload FROM meta WHERE key LIKE ?", ('notification_timeframe:' + SIGNAL_PROTOCOL + ':%',))}
+            "SELECT key,payload FROM meta WHERE key LIKE ?", ('notification_timeframe:' + MODEL_PROTOCOL + ':%',))}
         bark_outbox = [dict(json.loads(r["payload"]), notification_status=r["status"])
-                       for r in db.execute("SELECT e.payload,o.status FROM bark_outbox o JOIN events e ON e.id=o.event_id WHERE json_extract(e.payload,'$.protocol')=?", (SIGNAL_PROTOCOL,))] if bark_exists else []
+                       for r in db.execute("SELECT e.payload,o.status FROM bark_outbox o JOIN events e ON e.id=o.event_id WHERE json_extract(e.payload,'$.protocol')=?", (MODEL_PROTOCOL,))] if bark_exists else []
+    gate = status.get("runtime", {}).get("model_gate", {})
+    operational = {key: gate.get(key) for key in ("status", "loaded", "queue_depth", "processed_endpoints",
+                                                "last_checked_at_ms", "model_sha256", "profile_id")}
+    operational["ready_for_confirmation"] = (gate.get("status") == "ready" and gate.get("loaded") is True
+                                            and gate.get("model_sha256") == MODEL_SHA256
+                                            and gate.get("profile_id") == MODEL_PROFILE_ID
+                                            and candidate_counts.get("error", 0) == 0)
     source = {}
     for file in sorted((ROOT / "yoyo/monitor").rglob("*")):
         if file.suffix in (".py", ".js", ".css", ".html", ".md"):
@@ -66,25 +94,23 @@ def collect(label, output):
                    journal={"event_count": event_count, "duplicate_identity_groups": duplicate_groups,
                             "telegram_receipts": receipts, "bark_receipts": bark_receipts, "by_kind": by_kind,
                             "telegram_media": media},
+                   model_audit={"protocol": MODEL_PROTOCOL, "profile_id": MODEL_PROFILE_ID,
+                                "candidate_status_counts": candidate_counts, "operational": operational},
                    timeframe_audit={"policies": timeframe_policies,
                                     "signals_by_timeframe": dict(Counter(e['timeframe'] for e in current)),
                                     "invalid_telegram_ids": [e['id'] for e in current_outbox
-                                        if e['timeframe'] not in ('1H', '4H') and (
-                                            e['timeframe'] not in timeframe_policies or
-                                            e['bar_close_ms'] <= timeframe_policies[e['timeframe']]['activated_ms'])],
+                                        if not _stream_eligible(e, timeframe_policies)],
                                     "invalid_bark_ids": [e['id'] for e in bark_outbox
-                                        if e['timeframe'] not in ('1H', '4H') and (
-                                            e['timeframe'] not in timeframe_policies or
-                                            e['bar_close_ms'] <= timeframe_policies[e['timeframe']]['activated_ms'])]},
+                                        if not _stream_eligible(e, timeframe_policies)]},
                    bark_audit={"policy": bark_policy, "current_outbox_count": len(bark_outbox),
-                               "invalid_outbox_ids": [e["id"] for e in bark_outbox if not is_tv_start(e)],
-                               "pre_activation_outbox_ids": [e["id"] for e in bark_outbox if not bark_policy or e["bar_close_ms"] <= bark_policy["activated_ms"]]},
-                   signal_contract_audit={"protocol": SIGNAL_PROTOCOL, "policy": policy,
+                               "invalid_outbox_ids": [e["id"] for e in bark_outbox if not is_model_signal(e)],
+                               "pre_activation_outbox_ids": [e["id"] for e in bark_outbox if not _after_activation(e, bark_policy)]},
+                   signal_contract_audit={"protocol": MODEL_PROTOCOL, "policy": policy,
                                     "signal_count": len(current),
-                                    "invalid_signal_ids": [e["id"] for e in current if not is_tv_start(e)],
+                                    "invalid_signal_ids": [e["id"] for e in current if not is_model_signal(e)],
                                     "current_outbox_count": len(current_outbox),
-                                    "invalid_outbox_ids": [e["id"] for e in current_outbox if not is_tv_start(e)],
-                                    "pre_activation_outbox_ids": [e["id"] for e in current_outbox if policy and e["bar_close_ms"] <= policy["activated_ms"]]})
+                                    "invalid_outbox_ids": [e["id"] for e in current_outbox if not is_model_signal(e)],
+                                    "pre_activation_outbox_ids": [e["id"] for e in current_outbox if not _after_activation(e, policy)]})
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False) + "\n")
