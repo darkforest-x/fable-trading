@@ -39,6 +39,18 @@ def test_ties_are_symbol_stable_and_unwarmed_coins_do_not_rank():
     assert not r.weekly_membership({'X':f}).high_vol.any()
 
 
+@pytest.mark.parametrize('minutes',[15,60,240])
+def test_last_sunday_candle_uses_monday_membership_at_decision(minutes):
+    monday=pd.Timestamp('2025-01-13',tz='UTC')
+    step=pd.Timedelta(minutes=minutes)
+    idx=pd.DatetimeIndex([monday-2*step,monday-step,monday,monday+step])
+    members=pd.DataFrame(dict(week=[monday-pd.Timedelta(days=7),monday],
+                              symbol=['NEW','NEW'],high_vol=[False,True]))
+    assert r.membership_mask(idx,'NEW',members,minutes=minutes).tolist()==[False,True,True,True]
+    members['high_vol']=[True,False]
+    assert r.membership_mask(idx,'NEW',members,minutes=minutes).tolist()==[True,False,False,False]
+
+
 def test_matching_is_same_clock_cohort_side_and_reproducible():
     idx=pd.date_range('2025-01-01',periods=1400,freq='1h',tz='UTC')
     f=pd.DataFrame(dict(atr_pct=.01,md=1.,release_side=0),index=idx)

@@ -146,9 +146,16 @@ def weekly_membership(feature_by_symbol: dict[str, pd.DataFrame], *, fraction=.2
     return pd.concat(output, ignore_index=True)
 
 
-def membership_mask(index, symbol, members):
+def membership_mask(index, symbol, members, *, minutes):
+    """Use the week of the close-confirmed decision / next-open entry.
+
+    The Sunday final candle closes at Monday 00:00. Its completed data is
+    already included in Monday's prior-week ranking, so that new membership
+    governs this decision, not the week of the signal candle's open.
+    """
+    decision_closes = index + pd.Timedelta(minutes=minutes)
     selected = set(pd.to_datetime(members.loc[(members.symbol == symbol) & members.high_vol, 'week'], utc=True))
-    return np.asarray([x in selected for x in week_start(index)], dtype=bool)
+    return np.asarray([x in selected for x in week_start(decision_closes)], dtype=bool)
 
 
 def gate_mask(f: pd.DataFrame, gate: str) -> np.ndarray:
@@ -232,7 +239,7 @@ def evaluate_symbol(symbol, record, minutes, feature_paths, members, folds, outd
         b.attrs['period_seconds'] = minutes * 60
         if parameter == 'base' and derivative_dir is not None:
             f = add_derivatives(f,symbol,minutes,derivative_dir)
-        highvol = membership_mask(f.index,symbol,members)
+        highvol = membership_mask(f.index,symbol,members,minutes=minutes)
         for fold,start,end in folds:
             start,end = pd.Timestamp(start,tz='UTC'), pd.Timestamp(end) if str(end).endswith('Z') else pd.Timestamp(end,tz='UTC')
             locs = np.flatnonzero((b.index >= start) & (b.index+pd.Timedelta(minutes=minutes) <= end))
@@ -431,11 +438,14 @@ def run(args):
         coverage=json.loads(cp.read_text())
         if coverage['errors']: raise ValueError('Derivatives acquisition has unresolved errors')
         derivative_hashes['coverage.json']=sha(cp)
-    identity=dict(phase=args.phase,history_sha256=sha(Path(args.history)),periods=periods,sources=sources,derivatives=derivative_hashes,selection_sha256=selection_hash,folds=folds)
+    exposure_round = args.exposure_round if args.phase == 'audit' else 0
+    if args.phase == 'audit' and exposure_round < 1:
+        raise ValueError('Audit exposure round must be positive')
+    identity=dict(phase=args.phase,history_sha256=sha(Path(args.history)),periods=periods,sources=sources,derivatives=derivative_hashes,selection_sha256=selection_hash,folds=folds,exposure_round=exposure_round)
     state=out/'run_manifest.json'
     if state.exists():
         if json.loads(state.read_text())['identity']!=identity: raise ValueError('Output identity changed: use a new directory')
-    else: dump_json(state,dict(identity=identity,created_at=pd.Timestamp.now(tz='UTC').isoformat(),formal_holdout_consumption=1 if args.phase=='audit' else 0,owner_authorized_all_dates=True))
+    else: dump_json(state,dict(identity=identity,created_at=pd.Timestamp.now(tz='UTC').isoformat(),formal_holdout_consumption=exposure_round,owner_authorized_all_dates=True))
     code_hash=sha(Path(__file__))[:12]
     cache=ROOT/'data/altcoin_trends_20260909_v1/feature_cache'/f'{args.phase}_{code_hash}'
     cache.mkdir(parents=True,exist_ok=True)
@@ -489,6 +499,7 @@ def main():
     p.add_argument('--periods',default='60,240')
     p.add_argument('--selection',default=str(EXPERIMENT/'results/development'))
     p.add_argument('--derivatives')
+    p.add_argument('--exposure-round',type=int,default=1,help='Logged access round for audit; development records zero')
     run(p.parse_args())
 
 
