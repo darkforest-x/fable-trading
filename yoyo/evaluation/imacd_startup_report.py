@@ -320,6 +320,16 @@ def run():
         i = int(event.signal_i)
         if b.index[i] != pd.Timestamp(event.signal_open_time) or f.release_side.iloc[i] != event.side:
             raise ValueError('example identity mismatch')
+        neutral = np.flatnonzero((f.md.to_numpy()[i+1:]*event.side) <= 0)
+        if event.exit_kind == 'natural':
+            expected_exit = i+2+int(neutral[0])
+            if expected_exit != event.exit_i:
+                raise ValueError('large-winner neutral-exit clock mismatch')
+            entry_price = b.open.iloc[i+1]
+            exit_price = b.open.iloc[expected_exit]
+            reproduced_net = event.side*(exit_price/entry_price-1)*10000-20
+            if not np.isclose(reproduced_net,event.net_bp):
+                raise ValueError('large-winner raw-price arithmetic mismatch')
         name = f'rejected_{event.event_id}.png'
         render_case(b,f,i,f'被P02过滤：{event.symbol} 4H · 后续净收益{event.net_bp/100:.2f}%（固定规则、事后）',result/name)
         start_i = int(event.focus_start_i)
@@ -327,7 +337,7 @@ def run():
         pre = widths.iloc[max(0,start_i-12):start_i].median()
         early = f.formation_early_width.iloc[i]
         late = f.formation_late_width.iloc[i]
-        text.append(f'\n**{event.symbol} 4H**：末/首均线宽度比{event.contraction_ratio:.3f}，近零{event.near_zero_bars}根，因此首尾收拢门拒绝。近零段开始前12根带宽中位数{pre:.8g}，段首6根{early:.8g}，释放前6根{late:.8g}。这是已保存失败案例的解释量，不是本轮新增筛选条件。\n')
+        text.append(f'\n**{event.symbol} 4H**：末/首均线宽度比{event.contraction_ratio:.3f}，近零{event.near_zero_bars}根，因此首尾收拢门拒绝。近零段开始前12根带宽中位数{pre:.8g}，段首6根{early:.8g}，释放前6根{late:.8g}。这是已保存失败案例的解释量，不是本轮新增筛选条件。大收益已从原始价格与首次neutral退出时钟复算核对；图片只展示启动初段，标题收益来自完整持仓账本（{event.hold_bars}根），不是图内这36根的收益。\n')
         text.append(f'![被过滤的{event.symbol}](../experiments/active/exp-imacd-startup-quality-20260908-v1/results/{name})\n')
     insolvent = portfolios.loc[portfolios.insolvent.eq(True)]
     text.append('\n这里需要区分“均线此前已经收拢”和“在IMACD近零段内还必须继续收拢”。首尾比较只检验后者。PENGU图显示进入近零段前带宽已下降，随后维持较窄却略有波动，机械首尾门仍会拒绝它。本轮结果否定的是该机械定义足以改进通知，不是否定Owner的视觉形态。\n')
