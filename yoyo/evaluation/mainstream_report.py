@@ -435,6 +435,29 @@ def _link(label: str, path: Path) -> str:
     return f"[{label}]({quote(str(path.resolve()), safe='/')})"
 
 
+def _takeaways(summary: pd.DataFrame) -> str:
+    """Explain predeclared comparisons without naming a fitted best strategy."""
+    rows = summary.set_index(["fold", "minutes", "arm"])
+    recent = rows.loc[("recent", 60, "baseline")]
+    fixed = rows.loc[("recent", 60, "baseline_3r")]
+    base25 = rows.loc[("validation", 60, "baseline")]
+    seq25 = rows.loc[("validation", 60, "sequence")]
+    waited25 = rows.loc[("validation", 60, "higher_wait")]
+    waited26 = rows.loc[("audit_pre", 60, "higher_wait")]
+    selected = summary.loc[summary.arm.eq("baseline"), ["fold", "minutes", "trades", "net_pct", "mdd_pct", "win_pct"]].copy()
+    selected["fold"] = selected.fold.map(FOLD_LABELS)
+    selected["minutes"] = selected.minutes.map({60: "1H", 240: "4H"})
+    return (f"**本轮抓到了大趋势，但完整条件组合尚未显示稳定优势。**原始信号共有{int(selected.trades.sum())}笔模拟成交，"
+        "下表都是八币等额初始资金组合，未按涨幅事后挑币。\n\n"
+        + _table(selected, ["fold", "minutes", "trades", "net_pct", "mdd_pct", "win_pct"])
+        + f"\n\n1. **退出方式很关键。**近期1H趋势退出净收益{recent.net_pct:+.2f}%，固定3R为{fixed.net_pct:+.2f}%；"
+        f"但2025年原始趋势退出仍为{base25.net_pct:+.2f}%，不能把近期正收益外推到所有行情。"
+        + f"\n2. **完整叠加会漏掉利润尾部。**2025年1H原始信号有{int(base25.win_5r)}笔净收益≥5R的赢家，"
+        f"sequence只保留其中{int(seq25.baseline_5r_retained)}笔，全年成交{int(seq25.trades)}笔，净收益{seq25.net_pct:+.2f}%。"
+        + f"\n3. **分阶段确认值得继续检验。**只等待高周期许可的1H分支，2025年净收益{waited25.net_pct:+.2f}%，"
+        f"MDD {waited25.mdd_pct:.2f}%；2026年前段仍为{waited26.net_pct:+.2f}%。它尚未证明跨时期稳定，等待还会改变入场价格和初始风险。")
+
+
 def _reproduction(manifest: dict, input_dir: Path, report_path: Path, html_dir: Path) -> str:
     commands = manifest.get("reproduction_commands", manifest.get("run_command"))
     lines = []
@@ -460,7 +483,8 @@ def render_markdown(results: dict, input_dir: Path, report_path: Path, figure_pa
     lines = ["# 主流币超级趋势：固定规则迁移回测", "",
              "本报告检验从 USELESS 复盘提出的固定启动候选能否迁移到八个主流币。"
              "下面的收益均为静态交易成本后净收益，不能等同包含实际资金费、点差与冲击的可执行实盘收益。",
-             "## 先看实际结果", _headline(summary),
+             "## 先看实际结果", _takeaways(summary),
+             "## 组合候选逐项判断", _headline(summary),
              "这些比较来自事先冻结的规则，没有按回测结果修改参数或选出新组合。"
              "正收益、低回撤、AUC 或单个显著 p 值均不能单独证明生产可用；零成交也不代表有效捕获趋势。"
              "大R可能部分来自很小的初始风险分母，不能等同账户收益；等待确认的追价成本见等待价格变化列。",
