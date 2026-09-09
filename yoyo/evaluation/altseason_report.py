@@ -557,6 +557,18 @@ def _plot_curves(folder: Path, data: dict) -> list[Path]:
             fig.savefig(destination, dpi=145)
             paths.append(destination)
         plt.close(fig)
+    fig, ax = plt.subplots(figsize=(13, 4.8), constrained_layout=True)
+    for arm, label, color in (("focus_md", "IMACD returns to zero", "#207baf"),
+            ("focus_sma60", "SMA60 ratchet", "#159c87"), ("focus_3r", "Fixed 3R", "#c26d78")):
+        curve = pd.read_csv(folder/"portfolios"/f"combined_60_{arm}.csv.gz")
+        ax.plot(pd.to_datetime(curve.time, utc=True), (curve.equity/100000-1)*100,
+                label=label, color=color, linewidth=1.4)
+    ax.set_title("1H focus launch | identical entry rule, different exits",loc="left")
+    ax.set_ylabel("Account return (%)")
+    ax.axhline(0,color="#9ba9b5",linewidth=.7)
+    ax.grid(alpha=.3,linestyle=":");ax.legend(frameon=False,fontsize=9)
+    destination=folder/"gallery"/"exit_comparison_60.png"
+    fig.savefig(destination,dpi=145);plt.close(fig);paths.append(destination)
     regime = data["regime"]
     if {"time", "breadth", "md_positive", "n_assets"}.issubset(regime) and not regime.empty:
         t = pd.to_datetime(regime.time, utc=True)
