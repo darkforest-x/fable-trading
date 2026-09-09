@@ -1,13 +1,14 @@
 """Offline source integrity and past-universe selection checks."""
 import hashlib
 import json
+import signal
 
 import pandas as pd
 import pytest
 
 from yoyo.evaluation.ashare_data import (
     AShareDataError, DAILY_FIELDS, board_for_code, cached_query,
-    merge_adjusted, result_frame, select_universe, validate_daily,
+    merge_adjusted, query_timeout, result_frame, select_universe, validate_daily,
 )
 
 
@@ -130,3 +131,23 @@ def test_adjusted_source_dates_must_match_raw_even_if_prices_are_valid():
     adjusted.loc[1, "date"] = "2020-01-06"
     with pytest.raises(AShareDataError, match="do not align"):
         merge_adjusted(raw, adjusted)
+
+
+def test_sdk_silent_full_page_failure_is_not_success():
+    result = Result(daily())
+    result.data = result.rows
+    result.per_page_count = str(len(result.rows))
+    with pytest.raises(AShareDataError, match="full page"):
+        result_frame(result)
+
+
+def test_wall_timeout_escapes_sdk_exception_handler_without_partial_cache(tmp_path):
+    def swallowed_exception_query():
+        try:
+            signal.getsignal(signal.SIGALRM)(signal.SIGALRM, None)
+        except Exception:
+            return Result(daily())
+    with pytest.raises(AShareDataError, match="wall-clock timeout"):
+        with query_timeout():
+            cached_query(tmp_path / "partial.csv", {}, swallowed_exception_query)
+    assert not (tmp_path / "partial.csv").exists()
