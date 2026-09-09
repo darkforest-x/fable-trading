@@ -8,7 +8,7 @@ from copy import deepcopy
 import pytest
 import requests
 
-from yoyo.monitor import TIMEFRAMES, FRESH_MS, MODEL_PROTOCOL, MODEL_KIND, MODEL_SHA256, MODEL_MAX_WAIT
+from yoyo.monitor import TIMEFRAMES, MONITORED_TIMEFRAMES, candle_open_ms, FRESH_MS, MODEL_PROTOCOL, MODEL_KIND, MODEL_SHA256, MODEL_MAX_WAIT
 from yoyo.monitor import okx, service
 from yoyo.monitor.okx import MarketError, OKX
 from yoyo.monitor.service import Monitor
@@ -17,7 +17,7 @@ from yoyo.monitor.store import Store
 
 SYMBOL = "TEST-USDT-SWAP"
 INSTRUMENT = dict(instId=SYMBOL, settleCcy="USDT", tickSz="0.01")
-NOW = 400 * TIMEFRAMES["1Dutc"] + 60_000
+NOW = 400 * TIMEFRAMES["1Wutc"] + 4 * TIMEFRAMES["1Dutc"] + 60_000
 
 
 class NoTelegram:
@@ -40,7 +40,7 @@ class FakeMarket:
         self.requests = 0
         self.history = {}
         for timeframe, period in TIMEFRAMES.items():
-            end = NOW // period * period
+            end = candle_open_ms(NOW, timeframe)
             self.history[timeframe] = [
                 dict(t=end - (400 - i) * period, o=100., h=101., l=99., c=100., v=1.)
                 for i in range(400)
@@ -88,7 +88,7 @@ def configured_monitor(store, client, tg=None, bark=NOW - 120_000, *,
         # Historical Telegram metadata must not re-enable the disabled channel.
         store.activate_notification_policy(tg, protocol=MODEL_PROTOCOL)
     store.activate_bark_policy(bark, protocol=MODEL_PROTOCOL)
-    policy = ({tf: NOW - 120_000 for tf in ("15m", "30m", "1H", "4H")}
+    policy = ({tf: NOW - 120_000 for tf in MONITORED_TIMEFRAMES}
               if timeframe_policy is None else timeframe_policy)
     for timeframe, activation in policy.items():
         if activation is not None:
@@ -484,10 +484,10 @@ def test_scan_covers_four_periods_and_persists_cutover_before_workers(tmp_path):
     monitor = Monitor(store, client=client)
     monitor.scan()
     status = monitor.status()
-    assert status['scan']['completed'] == status['scan']['total'] == 4
+    assert status['scan']['completed'] == status['scan']['total'] == 5
     assert status['scan']['errors'] == 0
-    assert status['runtime']['timeframes'] == ['15m', '30m', '1H', '4H']
-    assert status['runtime']['timeframe_notification_since_ms'] == {'15m': NOW, '30m': NOW, '1H': NOW, '4H': NOW}
+    assert status['runtime']['timeframes'] == ['15m', '30m', '1H', '4H', '1Dutc']
+    assert status['runtime']['timeframe_notification_since_ms'] == {tf: NOW for tf in MONITORED_TIMEFRAMES}
     assert monitor.notification_ready.is_set()
     # Restart retains first activation, without resetting the old channels.
     assert Store(store.path).activate_timeframe_policy('15m', NOW + 900_000, protocol=MODEL_PROTOCOL) == NOW
@@ -503,6 +503,7 @@ def test_chart_api_accepts_30m_and_15m_and_rejects_withdrawn_5m(tmp_path):
     endpoint = next(r.endpoint for r in app.routes if getattr(r, 'path', None) == '/api/chart')
     assert endpoint(SYMBOL, '30m')['timeframe'] == '30m'
     assert endpoint(SYMBOL, '15m')['timeframe'] == '15m'
+    assert endpoint(SYMBOL, '1Dutc')['timeframe'] == '1Dutc'
     with pytest.raises(HTTPException) as exc:
         endpoint(SYMBOL, '5m')
     assert exc.value.status_code == 400

@@ -24,7 +24,7 @@ DEFAULT_RUNTIME = Path.home() / "Library/Application Support/Fable/ImpulseMonito
 
 class DesktopChartRequest(BaseModel):
     symbol: str = Field(min_length=1, max_length=48)
-    timeframe: str = Field(min_length=1, max_length=3)
+    timeframe: str = Field(min_length=1, max_length=5)
 
 
 def create_app(runtime=None, start_monitor=True):

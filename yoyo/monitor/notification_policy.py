@@ -1,10 +1,10 @@
-"""Owner's 2026-09-09 additive 15m/30m/1H/4H start and model-confirmation delivery.
+"""Owner's 2026-09-09 additive 15m/30m/1H/4H/daily start and model-confirmation delivery.
 
 Only the immutable arrow bar (OHLC/IMACD at or before close) is used for a
 direct start. Model confirmation keeps its original causal proof and cutoff.
 Each channel and stage has its own persisted cutover. No historical signal is
 authorized by an older raw-arrow policy. Each newly enabled period needs its
-own cutover; enabling 30m cannot inherit any earlier period’s cutover.
+own cutover; enabling a daily stream cannot inherit any earlier period’s cutover.
 """
 import re
 

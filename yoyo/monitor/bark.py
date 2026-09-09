@@ -24,7 +24,7 @@ from urllib.parse import urlsplit
 
 import requests
 
-from yoyo.monitor import SIGNAL_KIND, MODEL_PROTOCOL, TV_INTERVALS
+from yoyo.monitor import SIGNAL_KIND, MODEL_PROTOCOL, TV_INTERVALS, timeframe_label
 from yoyo.monitor.notification_policy import channel_enabled, delivery_error
 from yoyo.monitor.store import now_ms
 
@@ -84,7 +84,7 @@ def message(event):
         subtitle = f"YOLO 确认 · 等待 {model['wait_bars']} 根"
         body = (f"确认 {event['price']:.10g} · {time(event['bar_close_ms'])}\n"
                 f"原箭头 {indicator['price']:.10g} · {time(indicator['bar_close_ms'])} 北京时间")
-    return {"title": f"{symbol} · {event['timeframe']} · {side}",
+    return {"title": f"{symbol} · {timeframe_label(event['timeframe'])} · {side}",
             "subtitle": subtitle,
             "body": body + f"\n\n网页备用：{web_url}",
             "group": "spike IMACD", "level": "active", "isArchive": "1",

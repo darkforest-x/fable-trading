@@ -95,7 +95,7 @@ def chart_url(symbol: str, timeframe: str) -> str:
     """Only accept an OKX swap identity and one of the monitored timeframes."""
     match = re.fullmatch(r"([A-Z0-9]{1,30})-([A-Z0-9]{2,10})-SWAP", symbol)
     if not match or timeframe not in INTERVALS:
-        raise DesktopOpenError("合约或周期无效；支持 OKX 永续的 15m、30m、1H、4H。", 400)
+        raise DesktopOpenError("合约或周期无效；支持 OKX 永续的 15m、30m、1H、4H、日线。", 400)
     query = urlencode({"symbol": f"OKX:{match[1]}{match[2]}.P", "interval": INTERVALS[timeframe]})
     return "https://www.tradingview.com/chart/?" + query
 

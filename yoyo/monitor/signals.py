@@ -30,7 +30,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-from yoyo.monitor import SIGNAL_PROTOCOL, TIMEFRAMES, HIGHER_TIMEFRAME
+from yoyo.monitor import SIGNAL_PROTOCOL, TIMEFRAMES, HIGHER_TIMEFRAME, TIMEFRAME_OFFSETS
 
 PROTOCOL_VERSION = SIGNAL_PROTOCOL
 TV_PROFILE = "imacd-v2.2-focus12-band0.10-marks-off"
@@ -73,7 +73,7 @@ PROTOCOL = {
 }
 
 
-def _validated(candles: list[dict], duration: int) -> dict[str, np.ndarray]:
+def _validated(candles: list[dict], duration: int, offset: int = 0) -> dict[str, np.ndarray]:
     """Require finite ordinary OHLCV and exact continuous, aligned open times."""
     values: dict[str, list] = {k: [] for k in ("t", "o", "h", "l", "c", "v")}
     previous = None
@@ -86,7 +86,7 @@ def _validated(candles: list[dict], duration: int) -> dict[str, np.ndarray]:
             row = {k: float(candle[k]) for k in ("o", "h", "l", "c", "v")}
         except (KeyError, TypeError, ValueError, OverflowError) as exc:
             raise ValueError(f"invalid candle at index {i}: {exc}") from exc
-        if t < 0 or t % duration or (previous is not None and t - previous != duration):
+        if t < 0 or (t - offset) % duration or (previous is not None and t - previous != duration):
             raise ValueError(f"candles must be aligned, unique and gap-free at index {i}")
         if not all(np.isfinite(x) for x in row.values()):
             raise ValueError(f"nonfinite OHLCV at index {i}")
@@ -166,7 +166,7 @@ def _permission(info: dict, side: int) -> bool | None:
 
 
 def _higher_at(open_ms: int, high: dict[str, np.ndarray], hf: dict[str, np.ndarray] | None,
-               higher_duration: int) -> dict:
+               higher_duration: int, offset: int = 0) -> dict:
     """Use a closed HTF at local OPEN, never the HTF closing with this bar.
 
     An absent expected HTF bar is marked unknown instead of silently using
@@ -178,7 +178,8 @@ def _higher_at(open_ms: int, high: dict[str, np.ndarray], hf: dict[str, np.ndarr
         return info
     closes = high["t"] + higher_duration
     j = int(np.searchsorted(closes, open_ms, side="right") - 1)
-    if j < WARMUP or closes[j] != (open_ms // higher_duration) * higher_duration:
+    expected_close = (open_ms - offset) // higher_duration * higher_duration + offset
+    if j < WARMUP or closes[j] != expected_close:
         return info
     hm, hs = hf["md"][j], hf["sh"][j]
     if not np.isfinite(hm) or not np.isfinite(hs):
@@ -203,12 +204,12 @@ def analyze(candles: list[dict], higher: list[dict], timeframe: str) -> dict:
     it may occur after md has already been nonzero for several bars.
     """
     if timeframe not in HIGHER_TIMEFRAME:
-        raise ValueError("timeframe must be 15m, 30m, 1H or 4H")
+        raise ValueError("unsupported monitored timeframe")
     duration = TIMEFRAMES[timeframe]
     higher_timeframe = HIGHER_TIMEFRAME[timeframe]
     higher_duration = TIMEFRAMES[higher_timeframe]
-    b = _validated(candles, duration)
-    hb = _validated(higher, higher_duration)
+    b = _validated(candles, duration, TIMEFRAME_OFFSETS.get(timeframe, 0))
+    hb = _validated(higher, higher_duration, TIMEFRAME_OFFSETS.get(higher_timeframe, 0))
     empty = {"phase": "loading", "near_zero_bars": 0, "zero_bars": 0, "dense": False,
              "htf_side": "unknown", "htf_allowed": None, "price": None,
              "bar_open_ms": None, "bar_close_ms": None, "bars": 0, "ready": False,
@@ -230,7 +231,7 @@ def analyze(candles: list[dict], higher: list[dict], timeframe: str) -> dict:
         t, close_ms = int(raw_t), int(raw_t) + duration
         md, sb = f["md"][i], f["sb"][i]
         ready, dense = bool(f["ready"][i]), bool(f["dense"][i])
-        htf = _higher_at(t, hb, hf, higher_duration)
+        htf = _higher_at(t, hb, hf, higher_duration, TIMEFRAME_OFFSETS.get(higher_timeframe, 0))
         prior_zero = zero_run
         # Raw zero departure remains a diagnostic, not a visible-label signal.
         previous_md = f["md"][i - 1] if i else np.nan

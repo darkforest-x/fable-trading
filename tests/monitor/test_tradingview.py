@@ -12,7 +12,7 @@ from yoyo.monitor import tradingview
 
 @pytest.mark.parametrize("symbol,expected", [("BTC-USDT-SWAP", "OKX:BTCUSDT.P"),
     ("ETH-USD-SWAP", "OKX:ETHUSD.P"), ("BTC-USDC-SWAP", "OKX:BTCUSDC.P")])
-@pytest.mark.parametrize("timeframe,interval", [("15m", "15"), ("30m", "30"), ("1H", "60"), ("4H", "240")])
+@pytest.mark.parametrize("timeframe,interval", [("15m", "15"), ("30m", "30"), ("1H", "60"), ("4H", "240"), ("1Dutc", "1D")])
 def test_exact_chart_identity(symbol, expected, timeframe, interval):
     url = urlparse(tradingview.chart_url(symbol, timeframe))
     assert url.scheme == "https" and url.netloc == "www.tradingview.com" and url.path == "/chart/"

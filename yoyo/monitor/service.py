@@ -1,7 +1,7 @@
 """Independent Mac scan loop: public OHLCV -> Pine-equivalent events -> outbox.
 
-The owner requested local all-market 15m/30m/1H/4H monitoring. On 2026-09-09,
-all four periods send direct starts and extra model confirmations via Bark;
+The owner requested local all-market 15m/30m/1H/4H/daily monitoring. On 2026-09-09,
+all five periods send direct starts and extra model confirmations via Bark;
 Telegram is disabled. This is an indicator monitor, not an ACTIVE/model
 promotion, broker position tracker, execution path or backtest. Existing VPS
 cadence, cache and freshness settings remain untouched.
@@ -262,7 +262,7 @@ class Monitor:
                     "fresh_minutes": FRESH_MS // 60000, "interval_seconds": self.interval, "timeframes": list(MONITORED_TIMEFRAMES),
                     "clock_offset_ms": self.client.offset_ms, "public_requests": self.client.requests,
                     "candle_storage": "memory_only", "history_days": 7,
-                    "signal_mode": "15m/30m/1H/4H 启动先发 Bark · YOLO 通过追加确认", "signal_kind": MODEL_KIND,
+                    "signal_mode": "15m/30m/1H/4H/日线 启动先发 Bark · YOLO 通过追加确认", "signal_kind": MODEL_KIND,
                     "notification_mode": "two_stage", "direct_timeframes": list(DIRECT_TIMEFRAMES),
                     "notification_channels": ["bark"],
                     "direct_notification_policy": DIRECT_POLICY,

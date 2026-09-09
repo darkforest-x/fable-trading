@@ -3,7 +3,8 @@
 API contract: https://www.okx.com/docs-v5/en/#order-book-trading-market-data
 Only public GETs are used, at <=8 requests/sec across scanner threads. The
 monitor deliberately does not write to the VPS-owned OHLCV cache/forward log.
-15m/30m/1H/4H bars use exchange boundaries; the confirming daily bar is 1Dutc.
+15m/30m/1H/4H/1Dutc bars use exchange boundaries. Daily monitoring uses
+the already fetched UTC daily series; its background is Monday-open 1Wutc.
 """
 from __future__ import annotations
 
@@ -12,7 +13,7 @@ import threading
 import time
 import requests
 
-from yoyo.monitor import TIMEFRAMES
+from yoyo.monitor import TIMEFRAMES, candle_open_ms
 
 
 class MarketError(RuntimeError):
@@ -39,7 +40,7 @@ def parse_rows(rows, timeframe, server_ms):
         o, h, l, c, v = values
         if not all(math.isfinite(x) for x in values) or min(o, h, l, c) <= 0 or v < 0:
             raise MarketError("invalid_candle_value")
-        if h < max(o, l, c) or l > min(o, h, c) or stamp % period:
+        if h < max(o, l, c) or l > min(o, h, c) or stamp != candle_open_ms(stamp, timeframe):
             raise MarketError("invalid_candle_bounds_or_alignment")
         if stamp + period > server_ms:
             continue
@@ -128,7 +129,7 @@ class OKX:
 
     def candles(self, symbol, timeframe, previous=None, limit=720):
         previous = previous or []
-        expected = self.clock() // TIMEFRAMES[timeframe] * TIMEFRAMES[timeframe] - TIMEFRAMES[timeframe]
+        expected = candle_open_ms(self.clock(), timeframe) - TIMEFRAMES[timeframe]
         if previous and previous[-1]["t"] >= expected:
             return previous, 0
         if previous:

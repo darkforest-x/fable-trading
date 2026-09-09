@@ -20,7 +20,7 @@ from yoyo.monitor.store import Store
 def test_thirty_minute_adapters_share_the_same_timeframe_contract():
     assert TIMEFRAMES["30m"] == 1_800_000
     assert HIGHER_TIMEFRAME["30m"] == "2H"  # Pine's <= 30 minute auto-HTF branch.
-    assert MONITORED_TIMEFRAMES == DIRECT_TIMEFRAMES == ("15m", "30m", "1H", "4H")
+    assert MONITORED_TIMEFRAMES == DIRECT_TIMEFRAMES == ("15m", "30m", "1H", "4H", "1Dutc")
     assert set(yolo_detector.TIMEFRAME_MS) == set(TV_INTERVALS) == set(MONITORED_TIMEFRAMES)
     assert yolo_detector.TIMEFRAME_MS["30m"] == 1_800_000
     assert tradingview.INTERVALS["30m"] == TV_INTERVALS["30m"] == "30"
@@ -58,7 +58,7 @@ def test_thirty_minute_rollout_preserves_every_existing_stage_and_does_not_repla
     monkeypatch.setattr(service, "TelegramWorker", lambda store: SimpleNamespace(creds=None, status=lambda: {}))
     monkeypatch.setattr(service, "BarkWorker", worker)
     store = Store(tmp_path / "monitor.sqlite")
-    existing = ("15m", "1H", "4H")
+    existing = ("15m", "1H", "4H", "1Dutc")
     cutovers = {}
     for number, protocol in enumerate((DIRECT_POLICY, MODEL_PROTOCOL)):
         store.activate_bark_policy(NOW - 240_000 + number, protocol=protocol, retire_obsolete=False)
@@ -76,7 +76,7 @@ def test_thirty_minute_rollout_preserves_every_existing_stage_and_does_not_repla
         client.history[timeframe][-1].update(o=120., h=121., l=119., c=120.)
     monitor = service.Monitor(store, client=client)
     monitor.scan()
-    assert store.get_meta("scan")["completed"] == 4
+    assert store.get_meta("scan")["completed"] == 5
     assert store.get_meta("scan")["errors"] == 0
     assert monitor.chart(INSTRUMENT["instId"], "30m")["state"]["higher_timeframe"] == "2H"
     for protocol in (DIRECT_POLICY, MODEL_PROTOCOL):
@@ -88,7 +88,7 @@ def test_thirty_minute_rollout_preserves_every_existing_stage_and_does_not_repla
         after_meta = {row["key"]: row["payload"] for row in db.execute("SELECT * FROM meta")}
     assert all(after_meta[key] == value for key, value in before_meta.items())
     assert store.telegram_status()["pending"] == 0
-    assert store.bark_status()["pending"] == 3
+    assert store.bark_status()["pending"] == 4
     old = next(e for e in store.list_events() if e["timeframe"] == "30m")
     assert old["bar_close_ms"] < NOW and old["bark_notification_status"] == "history"
     assert store.list_candidates(timeframe="30m") == []
@@ -98,11 +98,11 @@ def test_thirty_minute_rollout_preserves_every_existing_stage_and_does_not_repla
     assert delivery_error(store, later, later["bar_close_ms"], "bark") is None
     assert monitor.record_arrow(later["indicator"], [], later["bar_close_ms"])
     assert store.upsert_event(later, bark_notify=True)
-    assert store.bark_status()["pending"] == 5
+    assert store.bark_status()["pending"] == 6
     # A restart neither swallows the two pending legs nor advances any cutover.
     restarted = service.Monitor(Store(store.path), client=client)
     restarted.scan()
-    assert store.bark_status()["pending"] == 5
+    assert store.bark_status()["pending"] == 6
     assert store.telegram_status()["pending"] == 0
     for protocol in (DIRECT_POLICY, MODEL_PROTOCOL):
         assert store.timeframe_activation("30m", protocol=protocol) == NOW

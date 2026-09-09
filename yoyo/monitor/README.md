@@ -1,7 +1,7 @@
 # Fable · Impulse Monitor
 
 Local, notification-only OKX all-live-perpetual monitoring, authorized by the
-owner on 2026-09-08. Active signal periods are **15m / 30m / 1H / 4H**. This service
+owner on 2026-09-08. Active signal periods are **15m / 30m / 1H / 4H / daily**. This service
 has no exchange credentials or order endpoints.
 
 ## Open and operate
@@ -89,7 +89,7 @@ upgrade; restarts preserve the same cutover. Old pending notifications are
 marked skipped. The delivery worker independently checks the marker contract.
 
 All displayed signal prices are confirmed candle **closing prices**, not fills.
-15m receives 1H context; 30m receives 2H context; 1H receives 4H context; 4H receives UTC daily context. Higher-timeframe values
+15m receives 1H context; 30m receives 2H context; 1H receives 4H context; 4H receives UTC daily context; daily receives Monday-open UTC weekly context. Higher-timeframe values
 must already have been available at the local candle's **open**. Missing higher
 history is unknown. Daily boundaries can differ from a manually selected Pine
 chart/session; finite startup history can also cause marginal state differences.
@@ -100,17 +100,17 @@ signals. It does not modify the saved Pine indicator.
 
 The universe refreshes hourly from public `SWAP` instruments in `live` state,
 including USDT and coin-margined contracts. Symbols are not ranked or excluded
-by recent returns or volume. An initial 720 closed bars per 15m/30m/1H/2H/4H/1Dutc stream
+by recent returns or volume. An initial 720 closed bars per 15m/30m/1H/2H/4H/1Dutc/1Wutc stream
 are fetched into RAM. The engine needs bar index 340 before readiness; very new
 contracts remain explicitly warming up. A gap resets warmup instead of creating
 a fake candle; conflicting confirmed quotes fail closed. The same 12-bar focus
-rule applies on every period: on 15m that is three hours, and on 30m six hours. This does not change
+rule applies on every period: on 15m that is three hours, on 30m six hours, and on daily twelve days. Daily needs at least 341 closed daily bars; weekly background needs 341 weeks. Missing or insufficient weekly history stays unknown and never blocks a visible daily start. This does not change
 the indicator thresholds. Seven days is the journal retention window, not a
 guarantee of seven days of initialized signals: 720 bars minus 340 warmup bars
 initially covers about four days of eligible 15m observations.
 
 Each newly added signal period has its own persisted exchange-clock activation.
-Both queue insertion and TG/Bark delivery reject 15m closes at or before that
+Both queue insertion and TG/Bark delivery reject new-period closes at or before that
 activation, including the most recent historical bar. Restart preserves this
 cutover. Existing 1H/4H channel activations and receipts are unchanged.
 
@@ -120,12 +120,12 @@ the in-memory result. During one process lifetime the original recurrence seed
 is retained. On restart the finite history is fetched again; the UI explicitly
 shows initialization and preserves past signals.
 
-With N live contracts, a fully cold initialization needs about 18N candle
-requests (six streams, three pages each). At the unchanged 8 requests/second,
-475 contracts imply a request-budget floor near 1,069 seconds. Parsing,
+With N live contracts, a fully cold initialization needs up to about 21N candle
+requests when all seven streams have three pages (short weekly histories need fewer). At the unchanged 8 requests/second,
+475 contracts imply roughly 1,247 seconds for that full-page request budget. Parsing,
 calculation and network overhead add to this. An ordinary 15m boundary needs
 about N requests (59 seconds at 475 contracts), and fully aligned boundaries
-can need 6N (356 seconds). Add the unchanged 120-second post-scan wait and
+can need 7N (416 seconds, only when the weekly close aligns too). Add the unchanged 120-second post-scan wait and
 notification queue delay. Delivery may therefore lag beyond one shortest-period candle.
 The scanner, sender and frontend still use the same 30-minute freshness gate.
 Cold warming may exceed 15 minutes; inspect progress before restarting.
@@ -236,7 +236,7 @@ No economic performance metric is implied by passing these software tests.
 ### Open a structure in Mac TradingView
 
 Clicking a signal, candidate or watch card sends that card's exact OKX swap
-and `15m` / `30m` / `1H` / `4H` interval to `POST /api/tradingview/open`. The whole card
+and `15m` / `30m` / `1H` / `4H` / `1Dutc` interval to `POST /api/tradingview/open`. The whole card
 is a keyboard-accessible native button, with a separate **页内预览** button
 that only opens spike's chart. The detail pane has a full-text **在 TradingView
 打开** button and an explicit web fallback. Rendering, scanner updates and
@@ -336,3 +336,16 @@ filters/selection. The Mac TradingView app's own theme remains independent.
 ```bash
 node --test tests/monitor/frontend_theme.test.cjs tests/monitor/frontend_cards.test.cjs
 ```
+
+## Daily stream rollout (2026-09-09)
+
+The owner enabled daily starts and additive YOLO confirmations. Native `1Dutc`
+closes at 00:00 UTC / 08:00 Beijing; native `1Wutc` starts Monday at that time.
+The frontend and Bark label this period 日线; chart links use `interval=1D`.
+Only events after the independent daily direct/model cutovers can notify. Existing
+period cutovers and terminal receipts remain intact, with Telegram disabled.
+Daily reuses the prior 4H background feed; only weekly context adds a data feed.
+Signal thresholds, model weights, nine-bar confirmation budget and the 30-minute
+freshness gate do not change. Daily model generalization/profitability is not
+established by the engineering tests. Official bar contract:
+https://www.okx.com/docs-v5/en/#order-book-trading-market-data-get-candlesticks
