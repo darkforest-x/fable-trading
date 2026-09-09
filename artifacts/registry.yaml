@@ -18,6 +18,62 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: mainstream-super-trend-20260910-report-source
+    artifact_type: report
+    role: frozen_mainstream_long_transfer_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7c5b33b
+    generator_commit: 7c5b33b
+    source_path: analysis/p1_mainstream_super_trend_20260910.md
+    sha256: 9fd99caf79f92df5bcf92e23e15a084d845296c2d1319f26868694ed4456ba59
+    size_bytes: 92111
+    storage_uri: repo://analysis/p1_mainstream_super_trend_20260910.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-authorized historical transfer; same-rule accounting audit consumes holdout twice; no fitting or live change.
+  - artifact_id: mainstream-super-trend-20260910-report-html
+    artifact_type: report
+    role: frozen_mainstream_long_transfer_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7c5b33b
+    generator_commit: 7c5b33b
+    source_path: analysis/html/p1_mainstream_super_trend_20260910.html
+    sha256: 968f24d55db1db3db980b03fd169bf28d9e9ffa14fae8015d2ba233c34869d0d
+    size_bytes: 2373880
+    storage_uri: repo://analysis/html/p1_mainstream_super_trend_20260910.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-authorized historical transfer; same-rule accounting audit consumes holdout twice; no fitting or live change.
+  - artifact_id: mainstream-super-trend-20260910-manifest
+    artifact_type: manifest
+    role: frozen_mainstream_long_transfer_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7c5b33b
+    generator_commit: 3e3c409
+    source_path: analysis/output/mainstream_super_trend_20260910/verified/manifest.json
+    sha256: 9063deca84cc9871aeb2bcb786cd7aafbf9fb126d0ad287513be84a81674719b
+    size_bytes: 4468
+    storage_uri: file:///Users/zhangzc/fable-trading/analysis/output/mainstream_super_trend_20260910/verified/manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-authorized historical transfer; same-rule accounting audit consumes holdout twice; no fitting or live change.
+  - artifact_id: mainstream-super-trend-20260910-verification
+    artifact_type: report
+    role: frozen_mainstream_long_transfer_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7c5b33b
+    generator_commit: a2b53c8
+    source_path: analysis/output/mainstream_super_trend_20260910/verified/verification.json
+    sha256: 3adc3fcca05ece95491e5841263764518f663632b2587031359c6a7805096efe
+    size_bytes: 628
+    storage_uri: file:///Users/zhangzc/fable-trading/analysis/output/mainstream_super_trend_20260910/verified/verification.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-authorized historical transfer; same-rule accounting audit consumes holdout twice; no fitting or live change.
   - artifact_id: imacd-ashare-daily-20260909-plan
     artifact_type: config
     role: independent_mainboard_daily_long_research

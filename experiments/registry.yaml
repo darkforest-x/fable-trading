@@ -16,17 +16,17 @@ schema_version: 1
 experiments:
   - experiment_id: exp-mainstream-super-trend-20260910-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 2d421d4
-    status: active
+    source_commit: 3e3c409
+    status: inconclusive
     question: Do fixed USELESS-derived long launch contexts transfer to eight mainstream OKX perpetuals on 1H and 4H?
     single_variable: Predeclared one-factor arms and Owner-requested fixed sequential combinations; no parameter search.
-    result: Frozen before outcome calculation; full chronological comparison pending.
+    result: Trend exits preserve large winners; complete sequential filters miss profit tails and have no stable cross-period improvement. Recent positive returns do not establish robust profitability.
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    canonical_report: experiments/active/exp-mainstream-super-trend-20260910-v1/PROJECT_PLAN.md
-    artifacts: []
-    notes: Owner authorizes historical periods. First new-configuration holdout consumption; historical transfer, not untouched blind OOS. No live changes.
+    canonical_report: analysis/p1_mainstream_super_trend_20260910.md
+    artifacts: [mainstream-super-trend-20260910-report-source, mainstream-super-trend-20260910-report-html, mainstream-super-trend-20260910-manifest, mainstream-super-trend-20260910-verification]
+    notes: Owner authorizes historical periods. First frozen run preserved; second consumption is same-rule accounting audit. Eight coins, 1H/4H, 730 baseline fills, 3738 shared-arm candidates. Static 0.2% cost excludes complete funding. No live changes or inter-thread actions.
   - experiment_id: exp-useless-multiscale-case-20260909-v1
     source_repo: darkforest-x/fable-trading
     source_commit: be7b463
