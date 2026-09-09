@@ -14,6 +14,19 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-altseason-multivenue-20260910-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3d3ab25
+    status: active
+    question: Which fixed causal launch and continuation rules capture recent altcoin trends across OKX, Binance and Gate?
+    single_variable: Entry families with shared exit; exit-only arms with shared focus entry. No parameter optimization or live change.
+    result: Frozen 61-day historical research pending.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/active/exp-altseason-multivenue-20260910-v1/PROJECT_PLAN.md
+    artifacts: []
+    notes: Owner authorizes recent history and goal mode. Survivorship and overlapping assets must remain explicit.
   - experiment_id: exp-bico-exit-case-20260910-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 4a75746
