@@ -1,16 +1,20 @@
 //@version=6
-// SPIKE A-share daily long-only research indicator, 2026-09-09.
+// SPIKE main-board A-share daily long-only research indicator, 2026-09-09.
 // IMACD formula: LazyBear. Frozen near-zero formation: IMACD V2.7.
 // Signal features use confirmed daily OHLC only; no external/MTF requests.
+// Use adjusted daily prices and keep adjustment settings fixed. The Python
+// study uses HFQ signals with raw-price execution constraints; TradingView ADJ
+// is not asserted to be the same feed/adjustment or an equivalent fill replay.
+// Unadjusted ex-rights/ex-dividend gaps can change indicator signals.
 // API reference: tradingview.com/pine-script-docs/concepts/chart-information/
 // Regex empty-match contract: tradingview.com/pine-script-docs/concepts/strings/
 // Initial defaults are the research baseline until chronological validation.
 // Price-path references are not orders, fills, portfolio returns or profit targets.
 // Daily OHLC cannot resolve the exchange's price-limit queue or intraday sequence.
-indicator("SPIKE A股 · 日线趋势", shorttitle="SPIKE A股", overlay=false, max_bars_back=2500, max_lines_count=160, max_boxes_count=120, max_labels_count=300, explicit_plot_zorder=true)
+indicator("SPIKE A股主板 · 日线趋势", shorttitle="SPIKE 主板", overlay=false, max_bars_back=2500, max_lines_count=160, max_boxes_count=120, max_labels_count=300, explicit_plot_zorder=true)
 
 string gCore = "01 · 日线蓄势启动"
-int lengthMA = input.int(34, "IMACD 长度", minval=10, maxval=100, group=gCore, display=display.none)
+int lengthMA = input.int(34, "IMACD 长度", minval=10, maxval=100, group=gCore, tooltip="使用复权日线并保持复权设置固定；未复权除权跳空可能改变信号，与Python成交回测不等价。研究使用后复权信号与真实价格成交约束；TradingView的ADJ数据及复权口径仍可能不同。", display=display.none)
 int lengthSignal = input.int(9, "信号线长度", minval=2, maxval=30, group=gCore, display=display.none)
 int focusMinBars = input.int(12, "连续近零交易日", minval=3, maxval=60, group=gCore, display=display.none)
 float focusAtrBand = input.float(0.10, "近零容差 / 前日 ATR", minval=0.0, maxval=0.50, step=0.01, group=gCore, tooltip="达到连续日数时冻结本段容差。之后只在主线收盘向上离开冻结带时检查启动；信号线单独离开不会产生启动。", display=display.none)
@@ -29,13 +33,19 @@ bool showLevels = input.bool(true, "入场与保护价格", group=gView, display
 bool showPanel = input.bool(true, "紧凑状态面板", group=gView, display=display.none)
 bool showKeyBars = input.bool(true, "高亮启动及下影回踩", group=gView, display=display.none)
 
-// Only mainland Shanghai/Shenzhen A shares. Exclude B shares, ETFs and indices.
-bool shCode = str.match(syminfo.ticker, "^(600|601|603|605|688|689)[0-9]{3}$") != ""
-bool szCode = str.match(syminfo.ticker, "^(000|001|002|003|300|301)[0-9]{3}$") != ""
+// Only Shanghai/Shenzhen main-board A shares. Exclude ChiNext, STAR, BSE,
+// B shares, ETFs and indices. Current name-based ST identification cannot
+// reproduce Python's date-specific ST flags; absent markers prove nothing.
+bool shCode = str.match(syminfo.ticker, "^(600|601|603|605)[0-9]{3}$") != ""
+bool szCode = str.match(syminfo.ticker, "^(000|001|002|003)[0-9]{3}$") != ""
 bool ashare = syminfo.type == "stock" and (((syminfo.prefix == "SSE" or syminfo.prefix == "SSE_DLY") and shCode) or ((syminfo.prefix == "SZSE" or syminfo.prefix == "SZSE_DLY") and szCode))
+string currentName = str.upper(str.trim(syminfo.description))
+bool currentStMarked = str.match(currentName, "^([*＊]ST|ST($|[ 一-龥]))") != ""
 bool dailyChart = timeframe.isdaily and timeframe.multiplier == 1 and chart.is_standard
 if barstate.isfirst and not (ashare and dailyChart)
-    runtime.error("本版仅用于沪深 A 股的标准 1 日 K 线，请切换 SSE / SZSE A 股与日线周期。")
+    runtime.error("本版仅用于沪深主板 A 股标准日线；不支持创业板、科创板、北交所、B股、基金或指数。")
+if barstate.isfirst and currentStMarked
+    runtime.error("当前证券名称以 ST / *ST 风险标识开头，本主板版不生成信号。名称字段不是历史风险警示数据库，仍须在交易软件核对当前风险状态。")
 
 // SMA seed is evaluated on every bar; each call has independent history.
 f_smma(float source, int length) =>
@@ -339,14 +349,14 @@ if (barstate.islast or barstate.islastconfirmedhistory) and showPanel
     string phaseText = not ready ? "数据预热 · 至少 " + str.tostring(warmupBars) + " 日" : focusQualified and not holding and not entryPending ? "蓄势 " + str.tostring(focusRun) + " 日" : phase
     string riskText = holding ? "初始 " + str.tostring(initialStop, format.mintick) + (trailArmed and not na(protection) ? " · 保护 " + str.tostring(protection, format.mintick) : " · 启用价 " + str.tostring(entryPrice + 1.5 * initialRisk, format.mintick)) : "风险下限 " + str.tostring(stopAtrFloor, "#.##") + " ATR · 无固定止盈"
     string pathText = not na(currentR) ? "参考 " + str.tostring(currentR, "#.##") + "R · 最大已走 " + str.tostring(peakR, "#.##") + "R" : "日线收盘确认 · 次日开盘参考"
-    table.cell(panel, 0, 0, "SPIKE · A 股日线", text_color=color.new(ink, 18), bgcolor=color.new(paper, 7), text_size=size.small)
+    table.cell(panel, 0, 0, "SPIKE · 主板日线", text_color=color.new(ink, 18), bgcolor=color.new(paper, 7), text_size=size.small)
     table.cell(panel, 1, 0, phaseText, text_color=holding and not exitPending ? bull : amber, bgcolor=color.new(paper, 7), text_size=size.small)
     table.cell(panel, 0, 1, "风险与保护", text_color=color.new(ink, 43), bgcolor=color.new(paper, 7), text_size=size.tiny)
     table.cell(panel, 1, 1, riskText, text_color=color.new(ink, 18), bgcolor=color.new(paper, 7), text_size=size.tiny, tooltip="启用价=入场参考+1.5倍实际初始风险；需要日线收盘达到。它是开始收紧保护的门槛，不是止盈目标。结构止损越宽，启用越晚；启用前只有冻结初始止损。")
     table.cell(panel, 0, 2, "价格路径参考", text_color=color.new(ink, 43), bgcolor=color.new(paper, 7), text_size=size.tiny)
     table.cell(panel, 1, 2, pathText, text_color=color.new(ink, 18), bgcolor=color.new(paper, 7), text_size=size.tiny, tooltip="未扣佣金、滑点、税费；不代表策略或账户收益。日线不能证明涨跌停排队可成交。绿色框只显示已走出的空间，会随后续确认最高价扩大；它不是信号当日就已知道的收益范围。")
     table.cell(panel, 0, 3, "A 股执行口径", text_color=color.new(ink, 43), bgcolor=color.new(paper, 7), text_size=size.tiny)
-    table.cell(panel, 1, 3, "T+1 · 单一价格日保守跳过", text_color=color.new(ink, 35), bgcolor=color.new(paper, 7), text_size=size.tiny)
+    table.cell(panel, 1, 3, "T+1 · 请核对当日ST状态", text_color=color.new(ink, 35), bgcolor=color.new(paper, 7), text_size=size.tiny, tooltip="只支持沪深主板。当前名称明确以ST / *ST风险标识开头时会被拒绝；名称中没有风险标识不证明当前或历史非ST，缺失名称时也无法确认。请在交易软件核对风险警示、停牌和涨跌停状态。买入参考跳过单一价格日。")
 
-alertcondition(longStart, "SPIKE A股 · 多头启动", "{{exchange}}:{{ticker}} 日线多头启动；信号收盘 {{close}}。次日开盘参考，注意T+1及涨跌停执行限制。")
-alertcondition(longExit, "SPIKE A股 · 持仓退出", "{{exchange}}:{{ticker}} 日线已有多头仓位退出提示。检查初始止损或趋势保护及T+1可卖数量，价格参考不保证成交。")
+alertcondition(longStart, "SPIKE 主板 · 多头启动", "{{exchange}}:{{ticker}} 日线多头启动；信号收盘 {{close}}。次日开盘参考，注意T+1及涨跌停执行限制。")
+alertcondition(longExit, "SPIKE 主板 · 持仓退出", "{{exchange}}:{{ticker}} 日线已有多头仓位退出提示。检查初始止损或趋势保护及T+1可卖数量，价格参考不保证成交。")

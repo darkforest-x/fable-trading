@@ -68,7 +68,7 @@ def evaluate(name, **arguments):
 
 def test_independent_indicator_has_no_short_orders_signals_or_fixed_targets():
     assert TEXT.startswith("//@version=6")
-    assert 'indicator("SPIKE A股' in TEXT
+    assert 'indicator("SPIKE A股主板' in TEXT
     code = "\n".join(line for line in TEXT.splitlines() if not line.lstrip().startswith("//"))
     assert "strategy(" not in code
     assert "strategy." not in code
@@ -76,8 +76,8 @@ def test_independent_indicator_has_no_short_orders_signals_or_fixed_targets():
     assert not any(token in code for token in ("空头", "做空", "卖空", "固定R参考", "止盈价", "takeProfit"))
     alerts = [line for line in code.splitlines() if line.startswith("alertcondition(")]
     assert len(alerts) == 2
-    assert alerts[0].startswith('alertcondition(longStart, "SPIKE A股 · 多头启动"')
-    assert alerts[1].startswith('alertcondition(longExit, "SPIKE A股 · 持仓退出"')
+    assert alerts[0].startswith('alertcondition(longStart, "SPIKE 主板 · 多头启动"')
+    assert alerts[1].startswith('alertcondition(longExit, "SPIKE 主板 · 持仓退出"')
 
 
 def test_market_and_standard_daily_scope_is_enforced():
@@ -90,9 +90,9 @@ def test_market_and_standard_daily_scope_is_enforced():
     assert "if barstate.isfirst and not (ashare and dailyChart)\n    runtime.error(" in TEXT
     patterns = re.findall(r'str.match\(syminfo.ticker, "([^"]+)"\) != ""', TEXT)
     assert len(patterns) == 2
-    for code in ("600519", "601138", "603501", "605499", "688981", "689009", "000001", "001979", "002594", "003816", "300750", "301308"):
+    for code in ("600519", "601138", "603501", "605499", "000001", "001979", "002594", "003816"):
         assert any(re.fullmatch(pattern, code) for pattern in patterns)
-    for code in ("900901", "200002", "510300", "159915", "BTCUSDT.P", "600519X"):
+    for code in ("900901", "200002", "510300", "159915", "BTCUSDT.P", "600519X", "300750", "301308", "688981", "689009", "920002", "830001"):
         assert not any(re.fullmatch(pattern, code) for pattern in patterns)
 
 
@@ -183,12 +183,15 @@ def test_visuals_keep_zero_double_lines_six_ma_and_achieved_only_reward():
 @pytest.mark.parametrize("exchange,ticker,kind,expected", [
     ("SSE", "600519", "stock", True),
     ("SSE_DLY", "600519", "stock", True),
-    ("SZSE", "300750", "stock", True),
-    ("SZSE_DLY", "300750", "stock", True),
+    ("SZSE", "000001", "stock", True),
+    ("SZSE_DLY", "002594", "stock", True),
     ("SSE_DLY", "510300", "stock", False),
     ("SZSE_DLY", "200002", "stock", False),
     ("SSE_DLY", "600519", "index", False),
     ("OTHER", "600519", "stock", False),
+    ("SZSE_DLY", "300750", "stock", False),
+    ("SSE_DLY", "688981", "stock", False),
+    ("BSE", "920002", "stock", False),
 ])
 def test_delayed_feeds_keep_stock_and_numeric_a_share_checks(exchange, ticker, kind, expected):
     patterns = re.findall(r'str.match\(syminfo.ticker, "([^"]+)"\) != ""', TEXT)
@@ -196,3 +199,26 @@ def test_delayed_feeds_keep_stock_and_numeric_a_share_checks(exchange, ticker, k
     line = next(line for line in TEXT.splitlines() if line.startswith("bool ashare ="))
     expression = line.split(" = ", 1)[1].replace("syminfo.type", "kind").replace("syminfo.prefix", "exchange")
     assert eval(expression, {"__builtins__": {}}, dict(kind=kind, exchange=exchange, shCode=sh_code, szCode=sz_code)) is expected
+
+
+@pytest.mark.parametrize("description,expected", [
+    ("ST曙光", True),
+    ("*ST鹏博", True),
+    ("＊ST景峰", True),
+    ("ST PANGDA", True),
+    ("COMPANY (*ST)", False),
+    ("KWEICHOW MOUTAI CO., LTD.", False),
+    ("FIRST CAPITAL SECURITIES", False),
+    ("BEST CORPORATION", False),
+    ("STOCK EXAMPLE", False),
+    ("STEEL INDUSTRY", False),
+    ("INDUSTRY", False),
+    ("  *ST TEST  ", True),
+    ("", False),
+])
+def test_current_st_name_rejection_does_not_match_st_inside_ordinary_words(description, expected):
+    pattern = re.search(r'str.match\(currentName, "([^"]+)"\)', TEXT).group(1)
+    assert bool(re.search(pattern, description.strip().upper())) is expected
+    assert 'if barstate.isfirst and currentStMarked\n    runtime.error(' in TEXT
+    assert "名称中没有风险标识不证明当前或历史非ST" in TEXT
+    assert "请核对当日ST状态" in TEXT
