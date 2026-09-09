@@ -1,0 +1,352 @@
+//@version=6
+// SPIKE A-share daily long-only research indicator, 2026-09-09.
+// IMACD formula: LazyBear. Frozen near-zero formation: IMACD V2.7.
+// Signal features use confirmed daily OHLC only; no external/MTF requests.
+// API reference: tradingview.com/pine-script-docs/concepts/chart-information/
+// Regex empty-match contract: tradingview.com/pine-script-docs/concepts/strings/
+// Initial defaults are the research baseline until chronological validation.
+// Price-path references are not orders, fills, portfolio returns or profit targets.
+// Daily OHLC cannot resolve the exchange's price-limit queue or intraday sequence.
+indicator("SPIKE A股 · 日线趋势", shorttitle="SPIKE A股", overlay=false, max_bars_back=2500, max_lines_count=160, max_boxes_count=120, max_labels_count=300, explicit_plot_zorder=true)
+
+string gCore = "01 · 日线蓄势启动"
+int lengthMA = input.int(34, "IMACD 长度", minval=10, maxval=100, group=gCore, display=display.none)
+int lengthSignal = input.int(9, "信号线长度", minval=2, maxval=30, group=gCore, display=display.none)
+int focusMinBars = input.int(12, "连续近零交易日", minval=3, maxval=60, group=gCore, display=display.none)
+float focusAtrBand = input.float(0.10, "近零容差 / 前日 ATR", minval=0.0, maxval=0.50, step=0.01, group=gCore, tooltip="达到连续日数时冻结本段容差。之后只在主线收盘向上离开冻结带时检查启动；信号线单独离开不会产生启动。", display=display.none)
+int entryQuality = input.int(0, "启动确认：0 蓄势 / 1 均线 / 2 箱体", minval=0, maxval=2, group=gCore, tooltip="0：近零蓄势释放。1：另需收盘站上六均线，前12日均线平均带宽不超过3 ATR。2：另需收盘突破释放前蓄势区最高价。三个选项都只产生多头启动。", display=display.none)
+
+string gRisk = "02 · 宽止损与趋势退出"
+int structureBars = input.int(10, "初始结构回看交易日", minval=5, maxval=60, group=gRisk, tooltip="信号收盘时冻结本窗口最低价，再减0.5倍信号ATR作为结构边界；包含信号当日，入场后不重新选取窗口。", display=display.none)
+float stopAtrFloor = input.float(3.0, "初始风险下限（非固定宽度）/ ATR", minval=1.0, maxval=8.0, step=0.5, group=gRisk, tooltip="这里设置的是最小风险距离，不是固定宽度止损。信号日冻结结构回看窗口最低价减0.5 ATR；实际初始风险=结构距离与本设置×信号ATR中较大者，再按最小跳动向外取整。结构较远时风险会更宽；请看图上的实际百分比与ATR倍数。次日开盘低于冻结结构时跳过入场，初始止损及R建立后不再放宽。", display=display.none)
+float trailAtr = input.float(4.0, "趋势保护距离 / 当前 ATR", minval=1.0, maxval=10.0, step=0.5, group=gRisk, tooltip="最高已确认收盘达到入场参考+1.5R后启用，R是实际初始风险。例如风险下限设为3 ATR，对应至少上涨4.5个信号ATR才启用；结构止损更远时会更晚。启用前只由初始止损保护。候选线=最高收盘−本设置×当前ATR，只上移；先检查前日保护线再更新。收盘失守提示下个可交易日退出，无固定止盈。", display=display.none)
+
+string gView = "03 · 显示"
+bool showMa = input.bool(true, "六均线：SMA / EMA 20、60、120", group=gView, display=display.none)
+bool showZones = input.bool(true, "主图蓄势区", group=gView, display=display.none)
+bool showRisk = input.bool(true, "初始风险与已走趋势区", group=gView, display=display.none)
+bool showLevels = input.bool(true, "入场与保护价格", group=gView, display=display.none)
+bool showPanel = input.bool(true, "紧凑状态面板", group=gView, display=display.none)
+bool showKeyBars = input.bool(true, "高亮启动及下影回踩", group=gView, display=display.none)
+
+// Only mainland Shanghai/Shenzhen A shares. Exclude B shares, ETFs and indices.
+bool shCode = str.match(syminfo.ticker, "^(600|601|603|605|688|689)[0-9]{3}$") != ""
+bool szCode = str.match(syminfo.ticker, "^(000|001|002|003|300|301)[0-9]{3}$") != ""
+bool ashare = syminfo.type == "stock" and (((syminfo.prefix == "SSE" or syminfo.prefix == "SSE_DLY") and shCode) or ((syminfo.prefix == "SZSE" or syminfo.prefix == "SZSE_DLY") and szCode))
+bool dailyChart = timeframe.isdaily and timeframe.multiplier == 1 and chart.is_standard
+if barstate.isfirst and not (ashare and dailyChart)
+    runtime.error("本版仅用于沪深 A 股的标准 1 日 K 线，请切换 SSE / SZSE A 股与日线周期。")
+
+// SMA seed is evaluated on every bar; each call has independent history.
+f_smma(float source, int length) =>
+    float seed = ta.sma(source, length)
+    var float value = na
+    value := na(value[1]) ? seed : (value[1] * (length - 1) + source) / length
+    value
+
+// Inputs: frozen signal-day structure/ATR and the following daily open only.
+// Reject a gap through frozen structure before applying a wider ATR floor.
+f_initialStop(float entry, float structureStop, float signalAtr, float floorAtr, float tick) =>
+    bool valid = not na(entry) and entry > 0 and not na(structureStop) and structureStop > 0 and entry > structureStop and not na(signalAtr) and signalAtr > 0 and tick > 0
+    float candidate = valid ? math.min(structureStop, entry - floorAtr * signalAtr) : na
+    float stop = valid ? math.floor(candidate / tick) * tick : na
+    valid := valid and not na(stop) and stop > 0 and entry > stop
+    valid ? stop : na
+
+// Inputs: previous effective line, immutable initial stop, highest confirmed
+// close since entry, current confirmed ATR and close. Never loosen protection.
+f_trail(float previous, float initialStop, float highestClose, float currentAtr, float distance, float currentClose) =>
+    float candidate = highestClose - distance * currentAtr
+    float result = previous
+    if not na(candidate) and candidate < currentClose
+        result := math.max(nz(previous, initialStop), initialStop, candidate)
+    result
+
+float hi = f_smma(high, lengthMA)
+float lo = f_smma(low, lengthMA)
+float ema1 = ta.ema(hlc3, lengthMA)
+float ema2 = ta.ema(ema1, lengthMA)
+float mi = 2.0 * ema1 - ema2
+float md = mi > hi ? mi - hi : mi < lo ? mi - lo : 0.0
+float sb = ta.sma(md, lengthSignal)
+float atr = f_smma(ta.tr(true), 14)
+float s20 = ta.sma(close, 20)
+float e20 = ta.ema(close, 20)
+float s60 = ta.sma(close, 60)
+float e60 = ta.ema(close, 60)
+float s120 = ta.sma(close, 120)
+float e120 = ta.ema(close, 120)
+float ropeHigh = math.max(s20, e20, s60, e60, s120, e120)
+float ropeLow = math.min(s20, e20, s60, e60, s120, e120)
+float width = atr > 0 ? (ropeHigh - ropeLow) / atr : na
+float priorWidth = ta.sma(width[1], 12)
+bool fullWidthWindow = math.sum(not na(width[1]) ? 1.0 : 0.0, 12) == 12
+float recentLow = ta.lowest(low, structureBars)
+float structureCandidate = recentLow - 0.5 * atr
+int warmupBars = math.max(340, lengthMA * 10)
+bool ready = bar_index >= warmupBars and not na(sb) and not na(atr[1]) and not na(s120)
+bool onePrice = open == high and high == low and low == close
+
+color ink = chart.fg_color
+color paper = chart.bg_color
+color blue = #527CC3
+color orange = #CC9239
+color bull = #138D80
+color amber = #B9812F
+color riskInk = #C26F7A
+
+var int focusRun = 0
+var bool focusQualified = false
+var float focusBand = na
+var float focusHigh = na
+var float focusLow = na
+var line focusRail = na
+var label focusTag = na
+var box focusBox = na
+var array<line> rails = array.new<line>()
+var array<label> counts = array.new<label>()
+var array<box> zones = array.new<box>()
+bool releaseUp = false
+int releaseCount = 0
+float releaseHigh = na
+float releaseLow = na
+float candidateBand = focusAtrBand * atr[1]
+float magnitude = math.max(math.abs(md), math.abs(sb))
+
+// Frozen-band formation is independent of position lifecycle. A departure
+// cancels this segment and is never reused to seed another on the same bar.
+if barstate.isconfirmed and ready
+    if focusQualified
+        if magnitude <= focusBand
+            focusRun += 1
+            focusHigh := math.max(focusHigh, high)
+            focusLow := math.min(focusLow, low)
+            line.set_x2(focusRail, time_close)
+            label.set_x(focusTag, time_close)
+            label.set_text(focusTag, "蓄势 " + str.tostring(focusRun) + " 日")
+            if not na(focusBox)
+                box.set_right(focusBox, time_close)
+                box.set_top(focusBox, focusHigh)
+                box.set_bottom(focusBox, focusLow)
+        else
+            releaseUp := md > focusBand
+            releaseCount := focusRun
+            releaseHigh := focusHigh
+            releaseLow := focusLow
+            focusQualified := false
+            focusRun := 0
+            focusBand := na
+            focusHigh := na
+            focusLow := na
+            focusRail := na
+            focusTag := na
+            focusBox := na
+    else if magnitude <= candidateBand
+        focusRun += 1
+        focusHigh := focusRun == 1 ? high : math.max(focusHigh, high)
+        focusLow := focusRun == 1 ? low : math.min(focusLow, low)
+        if focusRun >= focusMinBars
+            focusQualified := true
+            focusBand := candidateBand
+            // Start drawing only when qualification is known, never backfill.
+            focusRail := line.new(time, 0.0, time_close, 0.0, xloc=xloc.bar_time, color=color.new(amber, 12), width=3)
+            focusTag := label.new(time_close, 0.0, "蓄势 " + str.tostring(focusRun) + " 日", xloc=xloc.bar_time, style=label.style_label_lower_right, color=color.new(paper, 8), textcolor=amber, size=size.small, tooltip="从本根收盘确认资格开始高亮；计数包含完整近零段，不补画早期启动信号。")
+            if showZones
+                focusBox := box.new(time, focusHigh, time_close, focusLow, xloc=xloc.bar_time, border_color=color.new(amber, 72), border_style=line.style_dotted, bgcolor=color.new(amber, 95), force_overlay=true)
+            array.push(rails, focusRail)
+            array.push(counts, focusTag)
+            array.push(zones, focusBox)
+            if array.size(rails) > 50
+                line.delete(array.shift(rails))
+                label.delete(array.shift(counts))
+                box.delete(array.shift(zones))
+    else
+        focusRun := 0
+        focusHigh := na
+        focusLow := na
+
+bool maQuality = fullWidthWindow and priorWidth <= 3.0 and close > ropeHigh
+bool entryQualityPass = entryQuality == 0 or (maQuality and (entryQuality == 1 or close > releaseHigh))
+var bool entryPending = false
+var bool holding = false
+var bool exitPending = false
+var bool trailArmed = false
+var float frozenStructure = na
+var float frozenAtr = na
+var int signalBar = na
+var int signalCount = 0
+var int entryBar = na
+var float entryPrice = na
+var float initialStop = na
+var float initialRisk = na
+var float highestClose = na
+var float highestPrice = na
+var float protection = na
+var float currentR = na
+var float peakR = na
+var string phase = "等待蓄势"
+var string exitReason = ""
+var int lastStartBar = na
+var box riskBox = na
+var box rewardBox = na
+var array<box> riskBoxes = array.new<box>()
+var array<box> rewardBoxes = array.new<box>()
+var array<label> eventTags = array.new<label>()
+bool longStart = false
+bool longExit = false
+bool entryReference = false
+bool exitReference = false
+float exitPrice = na
+
+if barstate.isconfirmed and ready
+    // Queued close decisions execute as next-session open references. A fully
+    // one-price day is conservatively treated as unavailable on either side.
+    if holding
+        if exitPending
+            if not onePrice and volume > 0
+                exitPrice := open
+                exitReference := true
+                holding := false
+                exitPending := false
+                phase := "退出参考已确认"
+            else
+                phase := "退出待成交 · 单一价格日"
+        else if bar_index > entryBar and low <= initialStop
+            longExit := true
+            exitReason := "初始止损"
+            if not onePrice and volume > 0
+                exitPrice := math.min(open, initialStop)
+                exitReference := true
+                holding := false
+                phase := "已触初始止损"
+            else
+                exitPending := true
+                phase := "止损待卖出 · 单一价格日"
+        else if trailArmed and not na(protection) and close <= protection
+            longExit := true
+            exitReason := "收盘失守趋势保护"
+            exitPending := true
+            phase := "趋势退出 · 等待次日"
+        if holding and not exitPending
+            highestClose := math.max(highestClose, close)
+            highestPrice := math.max(highestPrice, high)
+            if highestClose >= entryPrice + 1.5 * initialRisk
+                trailArmed := true
+            if trailArmed
+                protection := f_trail(protection, initialStop, highestClose, atr, trailAtr, close)
+            currentR := (close - entryPrice) / initialRisk
+            peakR := (highestPrice - entryPrice) / initialRisk
+            phase := trailArmed ? "趋势持有 · 保护只上移" : "趋势持有 · 初始止损保护"
+
+    if entryPending and bar_index > signalBar
+        entryPending := false
+        float candidateStop = f_initialStop(open, frozenStructure, frozenAtr, stopAtrFloor, syminfo.mintick)
+        if not onePrice and volume > 0 and not na(candidateStop)
+            holding := true
+            entryReference := true
+            entryBar := bar_index
+            entryPrice := open
+            initialStop := candidateStop
+            initialRisk := entryPrice - initialStop
+            highestClose := close
+            highestPrice := math.max(entryPrice, high)
+            currentR := (close - entryPrice) / initialRisk
+            peakR := (highestPrice - entryPrice) / initialRisk
+            protection := na
+            trailArmed := highestClose >= entryPrice + 1.5 * initialRisk
+            if trailArmed
+                protection := f_trail(protection, initialStop, highestClose, atr, trailAtr, close)
+            // A-share T+1: entry-day stop contact schedules the next session;
+            // it never creates a fictitious same-day sale at the stop price.
+            if low <= initialStop
+                exitPending := true
+                longExit := true
+                exitReason := "买入当日触及止损 · T+1"
+                phase := "T+1 风险退出 · 等待次日"
+            else
+                exitPending := false
+                phase := trailArmed ? "趋势持有 · 保护只上移" : "趋势持有 · 初始止损保护"
+            if showRisk
+                riskBox := box.new(time, entryPrice, time_close, initialStop, xloc=xloc.bar_time, border_color=color.new(riskInk, 42), bgcolor=color.new(riskInk, 94), force_overlay=true)
+                rewardBox := box.new(time, highestPrice, time_close, entryPrice, xloc=xloc.bar_time, border_color=color.new(bull, 46), bgcolor=color.new(bull, 94), force_overlay=true)
+                array.push(riskBoxes, riskBox)
+                array.push(rewardBoxes, rewardBox)
+                if array.size(riskBoxes) > 20
+                    box.delete(array.shift(riskBoxes))
+                    box.delete(array.shift(rewardBoxes))
+        else
+            phase := onePrice ? "跳过入场 · 单一价格日" : "跳过入场 · 结构失效或数据不足"
+
+    if exitReference
+        currentR := (exitPrice - entryPrice) / initialRisk
+        trailArmed := false
+        protection := na
+    if (holding or exitReference) and not na(riskBox)
+        box.set_right(riskBox, time_close)
+        box.set_right(rewardBox, time_close)
+        box.set_top(rewardBox, highestPrice)
+
+    if releaseUp and entryQualityPass and not holding and not entryPending and not exitPending and structureCandidate > 0
+        longStart := true
+        entryPending := true
+        frozenStructure := structureCandidate
+        frozenAtr := atr
+        signalBar := bar_index
+        signalCount := releaseCount
+        lastStartBar := bar_index
+        phase := "多头启动 · 等待次日开盘"
+        label tag = label.new(time, low, "启动 ↑ · 蓄势 " + str.tostring(releaseCount) + " 日\n信号收盘 " + str.tostring(close, format.mintick), xloc=xloc.bar_time, yloc=yloc.belowbar, style=label.style_label_up, color=color.new(bull, 89), textcolor=bull, size=size.small, tooltip="日线收盘确认。价格为信号收盘，并非实际买入成交；次日开盘跳空、涨停、停牌及费用会影响执行。副图双线和均线盘中会随价格变化，启动与退出只在日K收盘定稿；修改参数、复权方式或历史数据会重算标记。", force_overlay=true)
+        array.push(eventTags, tag)
+        label paneTag = label.new(time, md, "\n↑ 启动 · " + str.tostring(releaseCount) + " 日", xloc=xloc.bar_time, style=label.style_label_up, color=color.new(paper, 100), textcolor=bull, size=size.small)
+        array.push(eventTags, paneTag)
+    if longExit
+        label tag = label.new(time, high, "退出提示\n" + exitReason, xloc=xloc.bar_time, yloc=yloc.abovebar, style=label.style_label_down, color=color.new(amber, 90), textcolor=amber, size=size.small, tooltip="这是已有多头仓位的退出提示，不建立反向仓位。初始止损价及次日开盘仅为日线价格路径参考，无法保证成交。", force_overlay=true)
+        array.push(eventTags, tag)
+    if entryReference and showLevels
+        label tag = label.new(time, entryPrice, "入场参考 " + str.tostring(entryPrice, format.mintick) + "\n初始止损 " + str.tostring(initialStop, format.mintick) + " · " + str.tostring(100.0 * initialRisk / entryPrice, "#.##") + "% · " + str.tostring(initialRisk / frozenAtr, "#.##") + " ATR", xloc=xloc.bar_time, style=label.style_label_left, color=color.new(paper, 100), textcolor=color.new(ink, 18), size=size.tiny, tooltip="用信号后第一根日K开盘作为参考，至该日收盘才更新显示。实际风险取结构距离与ATR下限中较大者，不是固定宽度；宽止损会推迟1.5R趋势保护启用。日线不能证明该开盘价可成交，跳空和费用也可能令实际损失超过1R。已确认初始风险距离不再放宽。", force_overlay=true)
+        array.push(eventTags, tag)
+    if exitReference and showLevels
+        label tag = label.new(time, exitPrice, "退出参考 " + str.tostring(exitPrice, format.mintick), xloc=xloc.bar_time, style=label.style_label_left, color=color.new(paper, 100), textcolor=amber, size=size.tiny, force_overlay=true)
+        array.push(eventTags, tag)
+    while array.size(eventTags) > 160
+        label.delete(array.shift(eventTags))
+
+// Pane stays in original IMACD units, with a permanent visible zero baseline.
+bool glow = barstate.isconfirmed and not na(lastStartBar) and bar_index - lastStartBar < 12 and md > 0
+hline(0, "零轴", color=color.new(ink, 38), linestyle=hline.style_solid, linewidth=1)
+plot(glow ? md : na, "启动轻光", color=color.new(bull, 87), linewidth=4, style=plot.style_linebr, display=display.pane)
+plot(md, "IMACD", color=glow ? bull : blue, linewidth=2, display=display.pane + display.data_window)
+plot(sb, "信号线", color=orange, linewidth=2, display=display.pane + display.data_window)
+plotshape(longStart ? md : na, "日线启动点", style=shape.circle, location=location.absolute, color=bull, size=size.tiny, display=display.pane)
+
+plot(showMa ? s20 : na, "SMA20", color=color.new(#71AFA5, 30), linewidth=1, force_overlay=true, display=display.pane)
+plot(showMa ? e20 : na, "EMA20", color=color.new(#71AFA5, 55), linewidth=1, force_overlay=true, display=display.pane)
+plot(showMa ? s60 : na, "SMA60", color=color.new(#7795BD, 37), linewidth=1, force_overlay=true, display=display.pane)
+plot(showMa ? e60 : na, "EMA60", color=color.new(#7795BD, 60), linewidth=1, force_overlay=true, display=display.pane)
+plot(showMa ? s120 : na, "SMA120", color=color.new(ink, 53), linewidth=1, force_overlay=true, display=display.pane)
+plot(showMa ? e120 : na, "EMA120", color=color.new(ink, 67), linewidth=1, force_overlay=true, display=display.pane)
+plot(showLevels and holding ? initialStop : na, "冻结初始止损", color=color.new(riskInk, 25), linewidth=1, style=plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
+plot(showLevels and holding and trailArmed ? protection : na, "次日趋势保护", color=color.new(bull, 18), linewidth=2, style=plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
+bool wickReclaim = barstate.isconfirmed and ready and (focusQualified or holding) and close[1] > s20[1] and low <= s20 and math.min(open, close) >= s20 and close > s20 and low < math.min(open, close)
+bool paint = showKeyBars and (longStart or wickReclaim)
+plotcandle(paint ? open : na, paint ? high : na, paint ? low : na, paint ? close : na, "关键日K", color=bull, wickcolor=bull, bordercolor=bull, force_overlay=true, display=display.pane)
+plot(focusQualified ? focusRun : na, "蓄势连续交易日", display=display.data_window)
+plot(priorWidth, "前12日平均均线带宽 / ATR", display=display.data_window)
+plot(holding ? 1 : 0, "多头参考持有 1 / 0", display=display.data_window)
+
+var table panel = table.new(position.top_right, 2, 4, border_width=0)
+if (barstate.islast or barstate.islastconfirmedhistory) and showPanel
+    string phaseText = not ready ? "数据预热 · 至少 " + str.tostring(warmupBars) + " 日" : focusQualified and not holding and not entryPending ? "蓄势 " + str.tostring(focusRun) + " 日" : phase
+    string riskText = holding ? "初始 " + str.tostring(initialStop, format.mintick) + (trailArmed and not na(protection) ? " · 保护 " + str.tostring(protection, format.mintick) : " · 启用价 " + str.tostring(entryPrice + 1.5 * initialRisk, format.mintick)) : "风险下限 " + str.tostring(stopAtrFloor, "#.##") + " ATR · 无固定止盈"
+    string pathText = not na(currentR) ? "参考 " + str.tostring(currentR, "#.##") + "R · 最大已走 " + str.tostring(peakR, "#.##") + "R" : "日线收盘确认 · 次日开盘参考"
+    table.cell(panel, 0, 0, "SPIKE · A 股日线", text_color=color.new(ink, 18), bgcolor=color.new(paper, 7), text_size=size.small)
+    table.cell(panel, 1, 0, phaseText, text_color=holding and not exitPending ? bull : amber, bgcolor=color.new(paper, 7), text_size=size.small)
+    table.cell(panel, 0, 1, "风险与保护", text_color=color.new(ink, 43), bgcolor=color.new(paper, 7), text_size=size.tiny)
+    table.cell(panel, 1, 1, riskText, text_color=color.new(ink, 18), bgcolor=color.new(paper, 7), text_size=size.tiny, tooltip="启用价=入场参考+1.5倍实际初始风险；需要日线收盘达到。它是开始收紧保护的门槛，不是止盈目标。结构止损越宽，启用越晚；启用前只有冻结初始止损。")
+    table.cell(panel, 0, 2, "价格路径参考", text_color=color.new(ink, 43), bgcolor=color.new(paper, 7), text_size=size.tiny)
+    table.cell(panel, 1, 2, pathText, text_color=color.new(ink, 18), bgcolor=color.new(paper, 7), text_size=size.tiny, tooltip="未扣佣金、滑点、税费；不代表策略或账户收益。日线不能证明涨跌停排队可成交。绿色框只显示已走出的空间，会随后续确认最高价扩大；它不是信号当日就已知道的收益范围。")
+    table.cell(panel, 0, 3, "A 股执行口径", text_color=color.new(ink, 43), bgcolor=color.new(paper, 7), text_size=size.tiny)
+    table.cell(panel, 1, 3, "T+1 · 单一价格日保守跳过", text_color=color.new(ink, 35), bgcolor=color.new(paper, 7), text_size=size.tiny)
+
+alertcondition(longStart, "SPIKE A股 · 多头启动", "{{exchange}}:{{ticker}} 日线多头启动；信号收盘 {{close}}。次日开盘参考，注意T+1及涨跌停执行限制。")
+alertcondition(longExit, "SPIKE A股 · 持仓退出", "{{exchange}}:{{ticker}} 日线已有多头仓位退出提示。检查初始止损或趋势保护及T+1可卖数量，价格参考不保证成交。")
