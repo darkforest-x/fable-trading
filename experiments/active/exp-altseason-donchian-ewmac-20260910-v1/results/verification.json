@@ -1,0 +1,59 @@
+{
+  "audit": "independent_saved_output_verification",
+  "auditor": "trend_final_preflight",
+  "verified_at": "2026-09-09T18:01:45.369077+00:00",
+  "status": "pass",
+  "generator_commit": "8082e988083d8f702e37403fecd9ec0ccde991b7",
+  "manifest_sha256": "caede8061e09c70cf125125d06aa37a8012739871b307ccd439a757580516955",
+  "scope": {
+    "saved_outputs_only": true,
+    "raw_market_data_read": false,
+    "holdout_data_read": false,
+    "source_hashes_checked_against_original_generator_commit": true
+  },
+  "counts": {
+    "artifact_hashes_and_sizes": 12,
+    "original_source_hashes": 8,
+    "accepted_nonoverlapping_trades": 24105,
+    "events": 38120,
+    "portfolio_fold_combinations": 14,
+    "strategy_and_random_portfolios": 12,
+    "matched_mapping_rows": 25564,
+    "unmatched_mapping_rows": 1150,
+    "same_entry_exit_pairs": 11406,
+    "summary_rows": 24,
+    "state_contribution_rows": 42,
+    "altcoins_ever_ready": 49
+  },
+  "checks_passed": [
+    "Gross return, fixed entry-notional fees, next-open and fold chronology",
+    "Position sizing, cash cap and nonoverlap",
+    "Accepted trade PnL sum/52 reconciles to final cash-account equity",
+    "No self or reused matching control; same month/hour/regime/volatility",
+    "Matched control returns and risk-sized excess",
+    "D and D_E identical entry prices, risk and matching",
+    "Independent monthly inference, bootstrap, sign flips, top ties, Holm",
+    "Independent previous-close state attribution and complete gate recalculation"
+  ],
+  "maximum_final_return_error_percentage_points": 9.50350909079134e-14,
+  "policies_passing_gate": 0,
+  "blocking_findings": [],
+  "statistical_caveats": [
+    "Convenience/survivorship pool; 49 ever-ready coins are not 49 in every fold.",
+    "Previously inspected 2023-2025 history is not blind out-of-sample.",
+    "Monthly inference assumes approximate independent exchangeable blocks; cross-month holds remain.",
+    "Confidence intervals condition on one fixed matching draw.",
+    "Natural-exit top group excludes censored events.",
+    "Causal strong classification can lag reversals.",
+    "No complete funding/impact; exit cost uses entry notional.",
+    "Raw and risk/month-weighted exit effects can differ in sign; neither shows robust improvement."
+  ],
+  "root_verification": {
+    "all_12_saved_artifact_hashes_rechecked": true,
+    "synthetic_and_boundary_checks_passed": 167,
+    "report_integration_rechecks_passed": 5,
+    "html_browser_title_and_tables_verified": true,
+    "equity_and_state_charts_visually_verified": true
+  },
+  "report_only_changes_after_run": "Narrative, capture-ratio presentation and table layout; data, features, trades, matching and inference have not been rerun."
+}

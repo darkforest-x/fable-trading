@@ -18,6 +18,286 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: altseason-donchian-ewmac-20260910-coverage
+    artifact_type: dataset
+    role: fixed_pre_2026_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    generator_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    source_path: experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/coverage.csv
+    sha256: 5e059a63c7c5422dd383928481d10f6635d34a0c8e41bdff2857846be9669507
+    size_bytes: 50982
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/coverage.csv
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three fixed policies rejected. Historical simulation only; fixed 0.2% entry-notional round-trip cost excludes funding. Bulk datasets remain local and hash-addressed.
+  - artifact_id: altseason-donchian-ewmac-20260910-event-summary
+    artifact_type: dataset
+    role: fixed_pre_2026_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    generator_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    source_path: experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/event_summary.csv
+    sha256: fed194947317bf1e1befcdd1010c544256e859aa911e45d7e2bcb7e0ca3b8b47
+    size_bytes: 15726
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/event_summary.csv
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three fixed policies rejected. Historical simulation only; fixed 0.2% entry-notional round-trip cost excludes funding. Bulk datasets remain local and hash-addressed.
+  - artifact_id: altseason-donchian-ewmac-20260910-events
+    artifact_type: dataset
+    role: fixed_pre_2026_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    generator_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    source_path: experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/events.csv.gz
+    sha256: 29ce301269f696e7ef6a8a27c3773c0600262a37bbeb7e634e9c7979729835a7
+    size_bytes: 5877634
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/events.csv.gz
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three fixed policies rejected. Historical simulation only; fixed 0.2% entry-notional round-trip cost excludes funding. Bulk datasets remain local and hash-addressed.
+  - artifact_id: altseason-donchian-ewmac-20260910-manifest
+    artifact_type: manifest
+    role: fixed_pre_2026_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    generator_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    source_path: experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/manifest.json
+    sha256: caede8061e09c70cf125125d06aa37a8012739871b307ccd439a757580516955
+    size_bytes: 92573
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three fixed policies rejected. Historical simulation only; fixed 0.2% entry-notional round-trip cost excludes funding. Bulk datasets remain local and hash-addressed.
+  - artifact_id: altseason-donchian-ewmac-20260910-market-regime
+    artifact_type: dataset
+    role: fixed_pre_2026_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    generator_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    source_path: experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/market_regime.csv.gz
+    sha256: 8350753694696c6fdf7b53e7463ae0679b8df273ffe6726d049cfd286badbd72
+    size_bytes: 28183
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/market_regime.csv.gz
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three fixed policies rejected. Historical simulation only; fixed 0.2% entry-notional round-trip cost excludes funding. Bulk datasets remain local and hash-addressed.
+  - artifact_id: altseason-donchian-ewmac-20260910-matched-mapping
+    artifact_type: dataset
+    role: fixed_pre_2026_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    generator_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    source_path: experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/matched_mapping.csv.gz
+    sha256: 2278328e42e49a60061b06bd86a9be9df26179b0de21a3cad69ebb990b9e1c4a
+    size_bytes: 296492
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/matched_mapping.csv.gz
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three fixed policies rejected. Historical simulation only; fixed 0.2% entry-notional round-trip cost excludes funding. Bulk datasets remain local and hash-addressed.
+  - artifact_id: altseason-donchian-ewmac-20260910-portfolio-equity
+    artifact_type: dataset
+    role: fixed_pre_2026_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    generator_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    source_path: experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/portfolio_equity.csv.gz
+    sha256: 540183e37acc46579eda6af851b4f5bd5fad8aaa8ca15e410603b64d444267e7
+    size_bytes: 1561391
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/portfolio_equity.csv.gz
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three fixed policies rejected. Historical simulation only; fixed 0.2% entry-notional round-trip cost excludes funding. Bulk datasets remain local and hash-addressed.
+  - artifact_id: altseason-donchian-ewmac-20260910-portfolio-ledger
+    artifact_type: dataset
+    role: fixed_pre_2026_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    generator_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    source_path: experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/portfolio_ledger.csv.gz
+    sha256: 5d9c4ea81bfc638df39aa96008d8852cb1f7a719b2d8a86d3c0600d81d2b7ff5
+    size_bytes: 12226154
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/portfolio_ledger.csv.gz
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three fixed policies rejected. Historical simulation only; fixed 0.2% entry-notional round-trip cost excludes funding. Bulk datasets remain local and hash-addressed.
+  - artifact_id: altseason-donchian-ewmac-20260910-portfolios
+    artifact_type: dataset
+    role: fixed_pre_2026_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    generator_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    source_path: experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/portfolios.csv
+    sha256: 2e21018b6337a6005882c8ceb0ae9d9a4eb98b198e1368490e5a31420f43c1fe
+    size_bytes: 1394
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/portfolios.csv
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three fixed policies rejected. Historical simulation only; fixed 0.2% entry-notional round-trip cost excludes funding. Bulk datasets remain local and hash-addressed.
+  - artifact_id: altseason-donchian-ewmac-20260910-report-receipt
+    artifact_type: manifest
+    role: fixed_pre_2026_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    generator_commit: bacbccbe231a2c491736cccdbed41115ea4fe9a1
+    source_path: experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/report_receipt.json
+    sha256: 7c14b41aac2e91d5c28024da50cc42cdf7c4b6ec5c1a25aeaf99cc5ef98aad9f
+    size_bytes: 867
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/report_receipt.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three fixed policies rejected. Historical simulation only; fixed 0.2% entry-notional round-trip cost excludes funding. Bulk datasets remain local and hash-addressed.
+  - artifact_id: altseason-donchian-ewmac-20260910-run-started
+    artifact_type: manifest
+    role: fixed_pre_2026_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    generator_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    source_path: experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/run_started.json
+    sha256: 3895011564974f83e0811e64d6d3f097df13cef290c985da52f3a9c38929156b
+    size_bytes: 1115
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/run_started.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three fixed policies rejected. Historical simulation only; fixed 0.2% entry-notional round-trip cost excludes funding. Bulk datasets remain local and hash-addressed.
+  - artifact_id: altseason-donchian-ewmac-20260910-same-entry-exit-pairs
+    artifact_type: dataset
+    role: fixed_pre_2026_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    generator_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    source_path: experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/same_entry_exit_pairs.csv.gz
+    sha256: 235f95b39238af0fa8369a09b01c022f80908dd589a186f85763291e4663b4b9
+    size_bytes: 815257
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/same_entry_exit_pairs.csv.gz
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three fixed policies rejected. Historical simulation only; fixed 0.2% entry-notional round-trip cost excludes funding. Bulk datasets remain local and hash-addressed.
+  - artifact_id: altseason-donchian-ewmac-20260910-same-entry-exit-summary
+    artifact_type: dataset
+    role: fixed_pre_2026_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    generator_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    source_path: experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/same_entry_exit_summary.csv
+    sha256: 381fbca9507b72b7eff17282d5c0ad47b11c01b923c23ab883d0bf1984761bd3
+    size_bytes: 731
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/same_entry_exit_summary.csv
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three fixed policies rejected. Historical simulation only; fixed 0.2% entry-notional round-trip cost excludes funding. Bulk datasets remain local and hash-addressed.
+  - artifact_id: altseason-donchian-ewmac-20260910-state-contributions
+    artifact_type: dataset
+    role: fixed_pre_2026_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    generator_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    source_path: experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/state_contributions.csv
+    sha256: f7066953c86ffddb1e916d282a07a49860200c84b549b3a0af8af9d2df56d418
+    size_bytes: 1847
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/state_contributions.csv
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three fixed policies rejected. Historical simulation only; fixed 0.2% entry-notional round-trip cost excludes funding. Bulk datasets remain local and hash-addressed.
+  - artifact_id: altseason-donchian-ewmac-20260910-verification
+    artifact_type: report
+    role: fixed_pre_2026_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    generator_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    source_path: experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/verification.json
+    sha256: 5f26c58744b2d45de5127bf56d20568908af413c74ef82392d36a4472161c011
+    size_bytes: 2722
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/verification.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three fixed policies rejected. Historical simulation only; fixed 0.2% entry-notional round-trip cost excludes funding. Bulk datasets remain local and hash-addressed.
+  - artifact_id: altseason-donchian-ewmac-20260910-report-source
+    artifact_type: report
+    role: fixed_pre_2026_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    generator_commit: bacbccbe231a2c491736cccdbed41115ea4fe9a1
+    source_path: analysis/p1_altseason_donchian_ewmac_20260910.md
+    sha256: 5e446bc78ff8a662975f1e101b8aac1199806a5a2ff7866f3afe913809b3b480
+    size_bytes: 19658
+    storage_uri: file:///Users/zhangzc/fable-trading/analysis/p1_altseason_donchian_ewmac_20260910.md
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three fixed policies rejected. Historical simulation only; fixed 0.2% entry-notional round-trip cost excludes funding. Bulk datasets remain local and hash-addressed.
+  - artifact_id: altseason-donchian-ewmac-20260910-report-html
+    artifact_type: report
+    role: fixed_pre_2026_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    generator_commit: bacbccbe231a2c491736cccdbed41115ea4fe9a1
+    source_path: analysis/html/p1_altseason_donchian_ewmac_20260910.html
+    sha256: 8da356b6d4e354893ab9074bce45b8ec71e556d396b787fd632b779981f7a61c
+    size_bytes: 637245
+    storage_uri: file:///Users/zhangzc/fable-trading/analysis/html/p1_altseason_donchian_ewmac_20260910.html
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three fixed policies rejected. Historical simulation only; fixed 0.2% entry-notional round-trip cost excludes funding. Bulk datasets remain local and hash-addressed.
+  - artifact_id: altseason-donchian-ewmac-20260910-chart-equity-drawdown
+    artifact_type: report
+    role: fixed_pre_2026_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    generator_commit: bacbccbe231a2c491736cccdbed41115ea4fe9a1
+    source_path: experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/charts/equity_drawdown.png
+    sha256: 6edfec1066b36a3ac004bbbba8cb7e4c2092e4d86cce39666e11f5e8b11d6547
+    size_bytes: 346711
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/charts/equity_drawdown.png
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three fixed policies rejected. Historical simulation only; fixed 0.2% entry-notional round-trip cost excludes funding. Bulk datasets remain local and hash-addressed.
+  - artifact_id: altseason-donchian-ewmac-20260910-chart-event-distribution
+    artifact_type: report
+    role: fixed_pre_2026_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    generator_commit: bacbccbe231a2c491736cccdbed41115ea4fe9a1
+    source_path: experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/charts/event_distribution.png
+    sha256: e9859f63cb2cdb8913ce3eac10ae84611c97b40b9275609afbcd7e7c89a342fc
+    size_bytes: 58507
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/charts/event_distribution.png
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three fixed policies rejected. Historical simulation only; fixed 0.2% entry-notional round-trip cost excludes funding. Bulk datasets remain local and hash-addressed.
+  - artifact_id: altseason-donchian-ewmac-20260910-chart-state-contributions
+    artifact_type: report
+    role: fixed_pre_2026_altcoin_trend_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    generator_commit: bacbccbe231a2c491736cccdbed41115ea4fe9a1
+    source_path: experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/charts/state_contributions.png
+    sha256: 7e6e88935bfd4fa283edd415c71de212f5c8679dc32125f696503f0ba7cdd725
+    size_bytes: 50352
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-altseason-donchian-ewmac-20260910-v1/results/charts/state_contributions.png
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three fixed policies rejected. Historical simulation only; fixed 0.2% entry-notional round-trip cost excludes funding. Bulk datasets remain local and hash-addressed.
   - artifact_id: bico-exit-case-20260910-verification
     artifact_type: report
     role: owner_selected_exit_path_explanation

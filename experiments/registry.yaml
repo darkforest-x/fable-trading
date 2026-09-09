@@ -14,6 +14,41 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-altseason-donchian-ewmac-20260910-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
+    status: rejected
+    question: Do fixed Donchian and daily EWMAC-direction policies add value beyond matched entry times during historically strong altcoin markets?
+    single_variable: Three preregistered policies; D versus D_E changes only the exit rule, while E is a separate full-policy comparator. No parameter search.
+    result: All three fixed policies failed the preregistered gate. Development D/E/D_E returns +19.20/+14.75/+10.12%; validation -2.87/-6.15/-3.71%. Matched random
+      D +23.55/+3.01%. Validation top-decile Holm p=1 for all. Independent accounting and statistical audit passed; no real-data rerun or parameter search.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_altseason_donchian_ewmac_20260910.md
+    artifacts:
+    - altseason-donchian-ewmac-20260910-coverage
+    - altseason-donchian-ewmac-20260910-event-summary
+    - altseason-donchian-ewmac-20260910-events
+    - altseason-donchian-ewmac-20260910-manifest
+    - altseason-donchian-ewmac-20260910-market-regime
+    - altseason-donchian-ewmac-20260910-matched-mapping
+    - altseason-donchian-ewmac-20260910-portfolio-equity
+    - altseason-donchian-ewmac-20260910-portfolio-ledger
+    - altseason-donchian-ewmac-20260910-portfolios
+    - altseason-donchian-ewmac-20260910-report-receipt
+    - altseason-donchian-ewmac-20260910-run-started
+    - altseason-donchian-ewmac-20260910-same-entry-exit-pairs
+    - altseason-donchian-ewmac-20260910-same-entry-exit-summary
+    - altseason-donchian-ewmac-20260910-state-contributions
+    - altseason-donchian-ewmac-20260910-verification
+    - altseason-donchian-ewmac-20260910-report-source
+    - altseason-donchian-ewmac-20260910-report-html
+    - altseason-donchian-ewmac-20260910-chart-equity-drawdown
+    - altseason-donchian-ewmac-20260910-chart-event-distribution
+    - altseason-donchian-ewmac-20260910-chart-state-contributions
+    notes: Uses physically frozen 54-symbol pre-2026 data; 52 altcoin sleeves, fixed 0.2% entry-notional round-trip cost without complete funding. No live change. EWMAC
+      direction simplification is not the complete Carver system.
   - experiment_id: exp-altseason-multivenue-20260910-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 3d3ab25
