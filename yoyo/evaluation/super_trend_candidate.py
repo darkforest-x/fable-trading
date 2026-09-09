@@ -71,9 +71,11 @@ def evidence_at(one: pd.DataFrame, lower: pd.DataFrame, higher: pd.DataFrame,
               "15m_release_in_last_60min": bool(age is not None and 0 <= age <= 60)}
     # Formation starts before the arrow. Keep strong momentum observed during
     # that formation, instead of pretending it occurred on the release candle.
-    start_i = int(row.focus_start_i) if pd.notna(row.focus_start_i) else -1
     prefix = one.loc[one.index <= opened]
-    formation = prefix.iloc[start_i:] if start_i >= 0 else prefix.iloc[0:0]
+    required = int(row.near_zero_bars) + 1
+    formation = prefix.iloc[-required:]
+    if len(formation) != required or not (formation.index.to_series().diff().dropna() == pd.Timedelta(hours=1)).all():
+        raise ValueError("Full contiguous 1H formation history is required")
     strong = formation.loc[formation.momentum10.ge(90)]
     return {"type": "indicator_start", "observed_at": decision,
             "bar_open": opened, "reference_price": row.close,

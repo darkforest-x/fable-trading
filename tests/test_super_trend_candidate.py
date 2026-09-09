@@ -1,5 +1,6 @@
 """Observation time, episode invalidation and no retrospective confirmation."""
 import pandas as pd
+import pytest
 
 from yoyo.evaluation.super_trend_candidate import active_lower_episode, evidence_at, replay
 
@@ -10,7 +11,7 @@ def fixtures():
         "md": 1.0, "sb": .5, "release_zone_low": 9., "dense_recent": True,
         "relative_volume_median20": 3., "relative_volume_mean20": 2.,
         "momentum10": [100., 59., 60., 60., 60., 60., 60., 60.],
-        "close_above_all6": True, "focus_start_i": 0}, index=times)
+        "close_above_all6": True, "focus_start_i": 0, "near_zero_bars": 1}, index=times)
     low_times = pd.date_range("2026-08-30T20:00Z", periods=48, freq="15min")
     low = pd.DataFrame({"release_side": 0, "close": 10., "md": 1.,
                        "release_zone_low": 9., "release_zone_high": 9.5,
@@ -50,3 +51,12 @@ def test_prefix_replay_preserves_every_existing_observation():
     full = replay(one, low, high, one.index[0])
     part = replay(one.iloc[:3], low.iloc[:28], high.iloc[:1], one.index[0])
     assert part == [x for x in full if pd.Timestamp(x["observed_at"]) <= pd.Timestamp("2026-08-31T03:00Z")]
+
+
+def test_absolute_feature_row_numbers_do_not_drop_setup_after_slicing():
+    one, low, high = fixtures()
+    one["focus_start_i"] = 9621
+    result = evidence_at(one, low, high, one.index[1])
+    assert result["momentum_strong_observed_during_setup"] == [one.index[1]]
+    with pytest.raises(ValueError, match="formation history"):
+        evidence_at(one.iloc[1:], low, high, one.index[1])

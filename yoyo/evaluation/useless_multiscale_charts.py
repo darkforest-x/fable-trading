@@ -187,6 +187,13 @@ def detail_chart(frame, name, minutes, out, order):
     releases = selected.loc[selected.release_side.eq(1)]
     axes[0].scatter(num(releases.closed_at), releases.close, color="#8052b7", marker="^", s=70, zorder=6)
     for _, row in releases.iterrows():
+        # Connect the actual signal candle at its open to its later close
+        # marker, so the confirmation marker cannot be mistaken for that
+        # next candle being the source of the signal.
+        axes[0].plot([num(row.name), num(row.closed_at)], [row.close, row.close],
+                     color="#8052b7", linestyle=":", linewidth=1.2, zorder=6)
+        axes[0].scatter([num(row.name)], [row.close], s=28, facecolors="none",
+                        edgecolors="#8052b7", linewidths=1.2, zorder=6)
         axes[0].annotate(f"启动确认 {row.closed_at.tz_convert(TZ):%d日 %H:%M}",
                         xy=(num(row.closed_at), row.close), xytext=(5, 22), textcoords="offset points",
                         fontsize=9, color="#8052b7", arrowprops={"arrowstyle": "-", "color": "#8052b7"})
@@ -214,14 +221,15 @@ def detail_chart(frame, name, minutes, out, order):
     for ax in axes[1:]:
         ax.axvline(num(DECISION), color="#8b5ec5", linewidth=1.15, linestyle="--")
     axes[-1].set_xlim(num(left)-minutes/1440*.7, num(right)+minutes/1440*.3)
-    axes[-1].xaxis.set_major_locator(mdates.HourLocator(interval=4, tz=TZ))
+    axes[-1].xaxis.set_major_locator(mdates.HourLocator(byhour=range(0, 24, 4), tz=TZ))
     axes[-1].xaxis.set_major_formatter(mdates.DateFormatter("%m/%d\n%H:%M", tz=TZ))
     fig.suptitle(f"USELESS · {name} 启动前后：只把已收盘证据放在 08:00 决策线上", x=.06, ha="left", fontsize=18, fontweight="bold")
     text = (f"08:00 可用的最后收盘：{available.closed_at.tz_convert(TZ):%m/%d %H:%M}  ·  "
             f"量比 {available.relative_volume_mean20:.2f}×  ·  动能 {available.momentum10:.1f}  ·  "
             f"价格高于 {int(available.above6_count)}/6 根均线")
     fig.text(.06, .929, text, color=MUTED, fontsize=11)
-    fig.text(.06, .025, "动能默认 SMA50：相对其最近50根最大绝对偏差归一化；90 为源码强区阈值。量基准不含当前K。不同周期嵌套，不能视作独立证据票。", color=MUTED, fontsize=10)
+    fig.text(.06, .043, "蜡烛按开盘位置；均线、指标和三角标记按收盘可用时间。紫色空心点是信号K，虚线连接到确认时刻；08:00开盘K仍属后续数据。", color=MUTED, fontsize=9.5)
+    fig.text(.06, .024, "动能默认 SMA50：相对最近50根最大绝对偏差归一化，90 为源码强区。量基准不含当前K；不同周期嵌套，不能视作独立证据票。", color=MUTED, fontsize=9.5)
     fig.subplots_adjust(top=.895, bottom=.085, left=.06, right=.94)
     path_out = out / f"{order:02d}_useless_{name.lower()}_detail.png"
     fig.savefig(path_out, dpi=160)
