@@ -210,13 +210,14 @@ def make_portfolios(events,controls,out,price_map):
 def opportunity_audit(calendar,events):
     """Only labels use future high prices; signal/cash selection is unchanged."""
     rows=[]
+    if calendar.empty:return pd.DataFrame(columns=['venue','symbol','asset','kind','window_start','window_end','peak_time','peak_return','close_return','arm','result','overlapping_events','examples','note'])
     # >=50% fixed-calendar excursions, including the separately flagged 100%.
     big=calendar.loc[calendar.peak_return.ge(.5)].copy()
     for _,event in big.iterrows():
         same=events.loc[events.instrument.eq(event.instrument)&events.valid&events.minutes.eq(60)]
         for arm in ('focus_sma60','dense_sma60','pullback_sma60','young_breakout_sma20'):
             g=same.loc[same.arm.eq(arm)]
-            active=g.loc[g.entry_time.le(event.peak_time)&g.exit_time.ge(event.window_start)]
+            active=g.loc[g.entry_time.le(event.peak_time)&g.exit_time_upper.gt(event.window_start)]
             # A trade entered before the calendar week can capture the rally;
             # a new signal after the peak cannot be retroactively counted.
             held_peak=active.loc[active.exit_time_lower.ge(event.peak_time+pd.Timedelta(hours=1))]
@@ -232,6 +233,7 @@ def opportunity_audit(calendar,events):
 
 def load_products(results):
     coverage=[];batches={k:[] for k in ('events','controls','calendar_events','daily_context')}
+    schemas={}
     filenames={'events':'events.csv.gz','controls':'controls.csv.gz','calendar_events':'calendar.csv.gz','daily_context':'daily_context.csv'}
     for meta in sorted((results/'markets').glob('*/*/coverage.json')):
         item=json.loads(meta.read_text());coverage.append(item)
@@ -245,8 +247,9 @@ def load_products(results):
             if path.exists() and path.stat().st_size:
                 try:f=read_events(path)
                 except pd.errors.EmptyDataError:continue
+                schemas[kind]=f.iloc[:0]
                 if not f.empty:batches[kind].append(f)
-    combined={kind:pd.concat(frames,ignore_index=True) if frames else pd.DataFrame() for kind,frames in batches.items()}
+    combined={kind:pd.concat(frames,ignore_index=True) if frames else schemas.get(kind,pd.DataFrame()) for kind,frames in batches.items()}
     return pd.DataFrame(coverage),combined
 
 

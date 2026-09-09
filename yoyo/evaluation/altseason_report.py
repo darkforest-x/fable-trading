@@ -436,7 +436,7 @@ def select_gallery(data: dict) -> list[tuple[str, dict]]:
             if asset in seen_assets or pd.isna(row["peak_time"]):
                 continue
             existing = e.loc[e.valid & e.instrument.eq(row["instrument"]) & e.arm.eq("focus_sma60")
-                             & e.minutes.eq(60) & e.entry_time.le(row["peak_time"]) & e.exit_time.ge(row["window_start"])]
+                             & e.minutes.eq(60) & e.entry_time.le(row["peak_time"]) & e.exit_time_upper.gt(row["window_start"])]
             if not existing.empty:
                 continue
             row.update(minutes=60, features_path=row.get("features_path_60"))

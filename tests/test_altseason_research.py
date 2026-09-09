@@ -34,3 +34,8 @@ def test_scaled_symbol_not_silently_merged_in_combined_account():
     f=pd.DataFrame({'venue':['binance','gate'],'asset':['1000PEPE','PEPE']})
     assert len(scope_rows(f,'binance'))==1
     assert scope_rows(f,'combined').asset.tolist()==['PEPE']
+
+
+def test_empty_calendar_has_explicit_schema():
+    got=opportunity_audit(pd.DataFrame(),pd.DataFrame())
+    assert got.empty and 'result' in got and 'venue' in got
