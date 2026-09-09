@@ -1,7 +1,7 @@
 """Independent Mac scan loop: public OHLCV -> Pine-equivalent events -> outbox.
 
-The owner requested local all-market 15m/30m/1H/4H/daily monitoring. On 2026-09-09,
-all five periods send direct starts and extra model confirmations via Bark;
+The owner requested all-market 5m/15m/30m/1H/4H/daily monitoring. 5m, 15m and 30m
+are display-only; 1H/4H/daily send starts and extra confirmations via Bark;
 Telegram is disabled. This is an indicator monitor, not an ACTIVE/model
 promotion, broker position tracker, execution path or backtest. Existing VPS
 cadence, cache and freshness settings remain untouched.
@@ -19,7 +19,7 @@ import time
 
 from yoyo.monitor import (FRESH_MS, TIMEFRAMES, VERSION, SIGNAL_PROTOCOL, SIGNAL_KIND,
                           TV_PROFILE_ID, HIGHER_TIMEFRAME, MONITORED_TIMEFRAMES, MODEL_KIND, MODEL_PROTOCOL, MODEL_MAX_WAIT,
-                          DIRECT_POLICY, DIRECT_TIMEFRAMES)
+                          DIRECT_POLICY, DIRECT_TIMEFRAMES, BARK_TIMEFRAMES)
 from yoyo.monitor.policy import is_tv_start
 from yoyo.monitor.notification_policy import delivery_error, activation
 from yoyo.monitor.model_gate import ModelGate
@@ -64,6 +64,7 @@ class Monitor:
         self.store.recover_outbox()
         self.store.retire_telegram_pending()
         self.store.retire_disabled_timeframes()
+        self.store.retire_muted_bark_timeframes()
         for name, target in (("scan", self.run), ("model", self.model_gate.run), ("bark", self.deliver_bark)):
             thread = threading.Thread(target=target, name="impulse-" + name, daemon=True)
             self.threads.append(thread)
@@ -262,9 +263,11 @@ class Monitor:
                     "fresh_minutes": FRESH_MS // 60000, "interval_seconds": self.interval, "timeframes": list(MONITORED_TIMEFRAMES),
                     "clock_offset_ms": self.client.offset_ms, "public_requests": self.client.requests,
                     "candle_storage": "memory_only", "history_days": 7,
-                    "signal_mode": "15m/30m/1H/4H/日线 启动先发 Bark · YOLO 通过追加确认", "signal_kind": MODEL_KIND,
+                    "signal_mode": "5m/15m/30m 仅前端 · 1H/4H/日线 启动发 Bark，YOLO 通过追加确认", "signal_kind": MODEL_KIND,
                     "notification_mode": "two_stage", "direct_timeframes": list(DIRECT_TIMEFRAMES),
                     "notification_channels": ["bark"],
+                    "bark_timeframes": list(BARK_TIMEFRAMES),
+                    "display_only_timeframes": [tf for tf in MONITORED_TIMEFRAMES if tf not in BARK_TIMEFRAMES],
                     "direct_notification_policy": DIRECT_POLICY,
                     "direct_notification_since_ms": {c: activation(self.store, c, DIRECT_POLICY) for c in ("telegram", "bark")},
                     "direct_timeframe_since_ms": {tf: self.store.timeframe_activation(tf, protocol=DIRECT_POLICY) for tf in DIRECT_TIMEFRAMES},

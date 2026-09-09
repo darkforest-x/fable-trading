@@ -158,7 +158,7 @@ def test_pythonw_without_stderr_can_serve_success_and_method_errors(gateway, mon
 
 
 @pytest.mark.parametrize("symbol", ["BTC-USDT-SWAP", "ETH-USD-SWAP", "BTC-USDC-SWAP"])
-@pytest.mark.parametrize("timeframe", ["15m", "30m", "1H", "4H", "1Dutc"])
+@pytest.mark.parametrize("timeframe", ["5m", "15m", "30m", "1H", "4H", "1Dutc"])
 def test_every_action_identity_reaches_only_local_opener(gateway, symbol, timeframe):
     status, _, body = post(gateway, {"symbol": symbol, "timeframe": timeframe})
     assert status == 200
@@ -232,7 +232,7 @@ def test_non_post_action_method_has_no_side_effect_and_no_cors(gateway, method):
     {"symbol": 12, "timeframe": "1H"}, {"symbol": "BTC-USDT-SWAP", "timeframe": False},
     {"symbol": "https://evil.invalid", "timeframe": "1H"},
     {"symbol": "BTC-USDT-SWAP&symbol=BAD", "timeframe": "1H"},
-    {"symbol": "BTC-USDT-SWAP", "timeframe": "5m"},
+    {"symbol": "BTC-USDT-SWAP", "timeframe": "10m"},
     {"symbol": "BTC-USDT-SWAP", "timeframe": "1D"},
     {"symbol": "btc-usdt-swap", "timeframe": "1H"}])
 def test_invalid_payload_or_identity_never_calls_injected_opener(gateway, payload):

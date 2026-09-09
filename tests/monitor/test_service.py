@@ -405,22 +405,29 @@ def test_eligible_model_confirmation_enters_bark_once_with_telegram_disabled(tmp
 def test_bark_confirmation_keeps_earlier_signal_without_snapshot_dependency(tmp_path, monkeypatch):
     import sys
     store = Store(tmp_path / 'monitor.sqlite3')
-    store.activate_timeframe_policy('15m', NOW - 120_000, protocol=MODEL_PROTOCOL)
+    store.activate_timeframe_policy('1H', NOW - 120_000, protocol=MODEL_PROTOCOL)
     client = FakeMarket()
-    client.history['15m'][-1].update(o=120., h=121., l=119., c=120.)
-    target = client.history['15m'][-1]['t']
-    client.history['15m'].append(dict(client.history['15m'][-1], t=target + 900_000))
-    client.clock = lambda: NOW + 900_000
+    client.history['1H'][-1].update(o=120., h=121., l=119., c=120.)
+    target = client.history['1H'][-1]['t']
+    client.history['1H'].append(dict(client.history['1H'][-1], t=target + 3_600_000))
+    client.clock = lambda: NOW + 3_600_000
+    for tf, step in TIMEFRAMES.items():
+        while client.history[tf][-1]["t"] + step < candle_open_ms(client.clock(), tf):
+            last = client.history[tf][-1]
+            client.history[tf].append(dict(last, t=last["t"] + step))
     monitor = configured_monitor(store, client)
+    predict = monitor.model_gate.detector.predict
+    # First endpoint is not confirmed; the next hourly close is a fresh proof.
+    monitor.model_gate.detector.predict = lambda *args: [] if args[-1] == target else predict(*args)
     monkeypatch.setitem(sys.modules, 'yoyo.monitor.snapshot', None)
     assert monitor.scan_symbol(INSTRUMENT) == []
-    process_model(monitor, '15m')
+    process_model(monitor, '1H')
     assert monitor.scan_symbol(INSTRUMENT) == []
-    process_model(monitor, '15m')
+    process_model(monitor, '1H')
     assert store.claim(client.clock()) is None
     assert store.bark_status()['pending'] == 1
     row = store.claim_bark(client.clock())
-    assert row['event']['bar_open_ms'] == target
+    assert row['event']['bar_open_ms'] == target + TIMEFRAMES['1H']
     assert row['event']['indicator']['bar_open_ms'] == target
     assert store.telegram_media_status() == dict(snapshots=0, render_fallbacks=0)
 
@@ -457,7 +464,7 @@ def test_later_telegram_cutover_does_not_block_eligible_bark_signal(tmp_path):
 
 
 @pytest.mark.parametrize('activation,expected', [(None, 0), (NOW, 0), (NOW - 60_000, 0), (NOW - 120_000, 1)])
-def test_15m_notification_requires_its_own_forward_cutover(tmp_path, activation, expected):
+def test_15m_model_display_requires_its_own_forward_cutover(tmp_path, activation, expected):
     store = Store(tmp_path / 'monitor.sqlite3')
     client = FakeMarket()
     client.history['15m'][-1].update(o=120., h=121., l=119., c=120.)
@@ -469,14 +476,16 @@ def test_15m_notification_requires_its_own_forward_cutover(tmp_path, activation,
     assert monitor.chart(SYMBOL, '15m')['state']['higher_timeframe'] == '1H'
     assert any(e['kind'] == 'tv_start' and e['timeframe'] == '15m' for e in store.list_events())
     assert store.telegram_status()['pending'] == 0
-    assert store.bark_status()['pending'] == expected
+    assert store.bark_status()['pending'] == 0
+    assert len(store.list_events(kind=MODEL_KIND, timeframe='15m')) == expected
     monitor.scan_symbol(INSTRUMENT)
     process_model(monitor, '15m')
     assert store.telegram_status()['pending'] == 0
-    assert store.bark_status()['pending'] == expected
+    assert store.bark_status()['pending'] == 0
+    assert len(store.list_events(kind=MODEL_KIND, timeframe='15m')) == expected
 
 
-def test_scan_covers_four_periods_and_persists_cutover_before_workers(tmp_path):
+def test_scan_covers_six_periods_and_persists_cutover_before_workers(tmp_path):
     store = Store(tmp_path / 'monitor.sqlite3')
     client = FakeMarket()
     client.synchronize = lambda: None
@@ -484,16 +493,18 @@ def test_scan_covers_four_periods_and_persists_cutover_before_workers(tmp_path):
     monitor = Monitor(store, client=client)
     monitor.scan()
     status = monitor.status()
-    assert status['scan']['completed'] == status['scan']['total'] == 5
+    assert status['scan']['completed'] == status['scan']['total'] == 6
     assert status['scan']['errors'] == 0
-    assert status['runtime']['timeframes'] == ['15m', '30m', '1H', '4H', '1Dutc']
+    assert status['runtime']['timeframes'] == ['5m', '15m', '30m', '1H', '4H', '1Dutc']
+    assert status['runtime']['bark_timeframes'] == ['1H', '4H', '1Dutc']
+    assert status['runtime']['display_only_timeframes'] == ['5m', '15m', '30m']
     assert status['runtime']['timeframe_notification_since_ms'] == {tf: NOW for tf in MONITORED_TIMEFRAMES}
     assert monitor.notification_ready.is_set()
     # Restart retains first activation, without resetting the old channels.
     assert Store(store.path).activate_timeframe_policy('15m', NOW + 900_000, protocol=MODEL_PROTOCOL) == NOW
 
 
-def test_chart_api_accepts_30m_and_15m_and_rejects_withdrawn_5m(tmp_path):
+def test_chart_api_accepts_short_periods_and_rejects_unsupported_period(tmp_path):
     from fastapi import HTTPException
     from yoyo.monitor.server import create_app
     app = create_app(runtime=tmp_path, start_monitor=False)
@@ -501,39 +512,40 @@ def test_chart_api_accepts_30m_and_15m_and_rejects_withdrawn_5m(tmp_path):
     monitor.client = FakeMarket()
     monitor.scan_symbol(INSTRUMENT)
     endpoint = next(r.endpoint for r in app.routes if getattr(r, 'path', None) == '/api/chart')
+    assert endpoint(SYMBOL, '5m')['timeframe'] == '5m'
     assert endpoint(SYMBOL, '30m')['timeframe'] == '30m'
     assert endpoint(SYMBOL, '15m')['timeframe'] == '15m'
     assert endpoint(SYMBOL, '1Dutc')['timeframe'] == '1Dutc'
     with pytest.raises(HTTPException) as exc:
-        endpoint(SYMBOL, '5m')
+        endpoint(SYMBOL, '10m')
     assert exc.value.status_code == 400
 
 
 @pytest.mark.parametrize('recovery_delay,expected', [(16 * 60_000, 1), (31 * 60_000, 0)])
-def test_15m_stale_market_does_not_consume_fresh_signal_before_recovery(tmp_path, recovery_delay, expected):
+def test_1h_stale_market_does_not_consume_fresh_signal_before_recovery(tmp_path, recovery_delay, expected):
     store = Store(tmp_path / 'monitor.sqlite3')
-    store.activate_timeframe_policy('15m', NOW - 120_000, protocol=MODEL_PROTOCOL)
+    store.activate_timeframe_policy('1H', NOW - 120_000, protocol=MODEL_PROTOCOL)
     client = FakeMarket()
-    client.history['15m'][-1].update(o=120., h=121., l=119., c=120.)
-    client.clock = lambda: NOW + 15 * 60_000
+    client.history['1H'][-1].update(o=120., h=121., l=119., c=120.)
+    client.clock = lambda: NOW + 60 * 60_000
     monitor = configured_monitor(store, client)
     monitor.scan_symbol(INSTRUMENT)
-    assert monitor.chart(SYMBOL, '15m')['state']['stale']
+    assert monitor.chart(SYMBOL, '1H')['state']['stale']
     assert store.telegram_status()['pending'] == store.bark_status()['pending'] == 0
     # A confirmed old arrow may be retained as raw history, but no inference
     # or notification is consumed while the latest market candle is missing.
     assert all(e['notification_status'] == 'history' for e in store.list_events())
     assert monitor.model_gate.detector.calls == []
     client.clock = lambda: NOW + recovery_delay
-    while client.history['15m'][-1]['t'] + 900_000 < client.clock() // 900_000 * 900_000:
-        client.history['15m'].append(dict(client.history['15m'][-1], t=client.history['15m'][-1]['t'] + 900_000))
+    while client.history['1H'][-1]['t'] + 3_600_000 < client.clock() // 3_600_000 * 3_600_000:
+        client.history['1H'].append(dict(client.history['1H'][-1], t=client.history['1H'][-1]['t'] + 3_600_000))
     monitor.scan_symbol(INSTRUMENT)
-    assert not monitor.chart(SYMBOL, '15m')['state']['stale']
-    process_model(monitor, '15m')
+    assert not monitor.chart(SYMBOL, '1H')['state']['stale']
+    process_model(monitor, '1H')
     assert store.telegram_status()['pending'] == 0
     assert store.bark_status()['pending'] == expected
     monitor.scan_symbol(INSTRUMENT)
-    process_model(monitor, '15m')
+    process_model(monitor, '1H')
     assert store.telegram_status()['pending'] == 0
     assert store.bark_status()['pending'] == expected
 

@@ -87,18 +87,18 @@ def response(code=200, payload=None):
     return Response()
 
 
-@pytest.mark.parametrize('channel', ['telegram', 'bark'])
+@pytest.mark.parametrize('channel,timeframe,interval', [('telegram', '15m', '15'), ('bark', '1H', '60')])
 @pytest.mark.parametrize('activation,expected', [(None, 'skipped'), (CONFIRM, 'skipped'),
                                                (CONFIRM + 1, 'skipped'), (CONFIRM - 1, 'skipped'),
-                                               (CONFIRM - 1_800_001, 'sent')])
-def test_15m_worker_rechecks_stream_activation_and_links_correct_interval(tmp_path, channel, activation, expected):
+                                               (CONFIRM - 7_200_001, 'sent')])
+def test_worker_rechecks_stream_activation_and_links_correct_interval(tmp_path, channel, timeframe, interval, activation, expected):
     from yoyo.monitor.bark import BarkWorker
     store = Store(tmp_path / 'm.sqlite')
-    activate(store, 0)
+    store.activate_notification_policy(0, protocol=MODEL_PROTOCOL)
     store.activate_bark_policy(0, protocol=MODEL_PROTOCOL)
     if activation is not None:
-        store.activate_timeframe_policy('15m', activation, protocol=MODEL_PROTOCOL)
-    signal = model_event(timeframe='15m', close=CONFIRM)
+        store.activate_timeframe_policy(timeframe, activation, protocol=MODEL_PROTOCOL)
+    signal = model_event(timeframe=timeframe, close=CONFIRM)
     store.upsert_event(signal, notify=True, bark_notify=True)
     calls = []
     def sender(*args, **kwargs):
@@ -116,7 +116,7 @@ def test_15m_worker_rechecks_stream_activation_and_links_correct_interval(tmp_pa
                 else calls[0]['body'].split('网页备用：', 1)[1])
         if channel == 'bark':
             assert calls[0]['url'] == 'https://www.tradingview.com/chart/'
-        assert 'interval=15' in link
+        assert 'interval=' + interval in link
     untouched = store.bark_status() if channel == 'telegram' else store.telegram_status()
     assert untouched['pending'] == 1
 

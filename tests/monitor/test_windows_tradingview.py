@@ -23,7 +23,7 @@ def setup(tmp_path, monkeypatch):
     return layout
 
 
-@pytest.mark.parametrize("period,interval", [("15m", "15"), ("30m", "30"), ("1H", "60"), ("4H", "240"), ("1Dutc", "1D")])
+@pytest.mark.parametrize("period,interval", [("5m", "5"), ("15m", "15"), ("30m", "30"), ("1H", "60"), ("4H", "240"), ("1Dutc", "1D")])
 @pytest.mark.parametrize("symbol,tv", [("BTC-USDT-SWAP", "BTCUSDT.P"), ("ETH-USD-SWAP", "ETHUSD.P"), ("ETH-USDC-SWAP", "ETHUSDC.P")])
 def test_identity_survives_layout_binding(setup, period, interval, symbol, tv):
     url = urlsplit(win.bound_chart_url(symbol, period, setup))
@@ -46,7 +46,7 @@ def test_missing_layout_is_actionable(setup):
         win.open_chart("BTC-USDT-SWAP", "1H")
 
 
-@pytest.mark.parametrize("symbol,period", [("BTC-USDT-SWAP;calc", "1H"), ("BTC-USDT-SWAP", "5m"), ("BTC-USDT-SWAP", "60&x=1")])
+@pytest.mark.parametrize("symbol,period", [("BTC-USDT-SWAP;calc", "1H"), ("BTC-USDT-SWAP", "10m"), ("BTC-USDT-SWAP", "60&x=1")])
 def test_invalid_request_cannot_launch(setup, monkeypatch, symbol, period):
     monkeypatch.setattr(win.subprocess, "run", lambda *a, **k: pytest.fail("must not launch"))
     with pytest.raises(DesktopOpenError) as caught:

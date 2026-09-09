@@ -5,7 +5,8 @@ from copy import deepcopy
 import pytest
 
 from model_fixture import model_event
-from yoyo.monitor import MODEL_KIND, MODEL_PROTOCOL, TIMEFRAMES, FRESH_MS, MODEL_SHA256
+from yoyo.monitor import (BARK_TIMEFRAMES, MODEL_KIND, MODEL_PROTOCOL, MONITORED_TIMEFRAMES,
+                          TIMEFRAMES, FRESH_MS, MODEL_SHA256)
 from yoyo.monitor.model_gate import ModelGate, pending_proof
 from yoyo.monitor.store import Store
 from yoyo.monitor.policy import is_model_signal
@@ -53,7 +54,7 @@ def scenario(tmp_path, tf='1H', side='long', wait=2):
     return gate, store, detector, raw, candles, proposal, clock
 
 
-@pytest.mark.parametrize('tf', ['15m','30m','1H','4H','1Dutc'])
+@pytest.mark.parametrize('tf', MONITORED_TIMEFRAMES)
 @pytest.mark.parametrize('side', ['long','short'])
 @pytest.mark.parametrize('wait', [0,2,9])
 def test_exact_frozen_wait_both_sides_all_timeframes(tmp_path, tf, side, wait):
@@ -65,7 +66,8 @@ def test_exact_frozen_wait_both_sides_all_timeframes(tmp_path, tf, side, wait):
     assert events[0]['indicator']['bar_close_ms']==raw['bar_close_ms']
     assert events[0]['bar_close_ms']==clock[0]-1000
     assert events[0]['notification_status']=='pending'
-    assert events[0]['bark_notification_status']=='pending'
+    assert events[0]['bark_notification_status'] == ('pending' if tf in BARK_TIMEFRAMES else 'history')
+    assert store.bark_status()['pending'] == int(tf in BARK_TIMEFRAMES)
     assert store.list_candidates()[0]['model']['status']=='confirmed'
     assert len(detector.calls)==wait+1
     gate.process(raw['symbol'],tf,bars)
@@ -73,8 +75,8 @@ def test_exact_frozen_wait_both_sides_all_timeframes(tmp_path, tf, side, wait):
     assert len(detector.calls)==wait+1
 
 
-@pytest.mark.parametrize('tf', ['15m', '30m', '1H', '4H', '1Dutc'])
-def test_default_gate_confirms_bark_without_telegram_queue_or_photo(tmp_path, monkeypatch, tf):
+@pytest.mark.parametrize('tf', MONITORED_TIMEFRAMES)
+def test_default_gate_records_confirmation_and_only_queues_permitted_bark(tmp_path, monkeypatch, tf):
     from yoyo.monitor import snapshot
     _, store, detector, raw, bars, prop, clock = scenario(tmp_path, tf=tf, wait=2)
     renders = []
@@ -88,14 +90,14 @@ def test_default_gate_confirms_bark_without_telegram_queue_or_photo(tmp_path, mo
     events = store.list_events(kind=MODEL_KIND, protocol=MODEL_PROTOCOL)
     assert len(events) == 1 and is_model_signal(events[0])
     assert events[0]['notification_status'] == 'history'
-    assert events[0]['bark_notification_status'] == 'pending'
+    assert events[0]['bark_notification_status'] == ('pending' if tf in BARK_TIMEFRAMES else 'history')
     assert store.telegram_status()['pending'] == 0
-    assert store.bark_status()['pending'] == 1
+    assert store.bark_status()['pending'] == int(tf in BARK_TIMEFRAMES)
     assert not renders
     assert store.telegram_media_status() == {'snapshots': 0, 'render_fallbacks': 0}
     gate.process(raw['symbol'], tf, bars)
     assert store.event_count(MODEL_KIND, MODEL_PROTOCOL) == 1
-    assert store.bark_status()['pending'] == 1
+    assert store.bark_status()['pending'] == int(tf in BARK_TIMEFRAMES)
 
 
 @pytest.mark.parametrize('md',[0,-.1,None,float('nan')])

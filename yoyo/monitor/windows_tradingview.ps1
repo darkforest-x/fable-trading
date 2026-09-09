@@ -3,7 +3,7 @@ param([Parameter(Mandatory=$true)][string]$ChartUrl)
 $ErrorActionPreference = 'Stop'
 $stage = 'validate'
 try {
-    if ($ChartUrl -cnotmatch '\Ahttps://(cn\.|www\.)?tradingview\.com/chart/[A-Za-z0-9]{1,64}/\?symbol=OKX%3A[A-Z0-9]{3,40}\.P&interval=(15|30|60|240|1D)\z') {
+    if ($ChartUrl -cnotmatch '\Ahttps://(cn\.|www\.)?tradingview\.com/chart/[A-Za-z0-9]{1,64}/\?symbol=OKX%3A[A-Z0-9]{3,40}\.P&interval=(5|15|30|60|240|1D)\z') {
         throw 'SPIKE_INVALID_URL'
     }
     $session = (Get-Process -Id $PID).SessionId

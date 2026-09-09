@@ -6,10 +6,13 @@ from copy import deepcopy
 import pytest
 
 from model_fixture import CONFIRM, model_event
-from yoyo.monitor import FRESH_MS, MODEL_PROTOCOL, SIGNAL_PROTOCOL, TIMEFRAMES
+from yoyo.monitor import BARK_TIMEFRAMES, FRESH_MS, MODEL_PROTOCOL, MONITORED_TIMEFRAMES, SIGNAL_PROTOCOL, TIMEFRAMES
 from yoyo.monitor.bark import BarkWorker
 from yoyo.monitor.store import Store
 from yoyo.monitor.telegram import TelegramWorker
+
+NOTIFICATION_STREAMS = ([('telegram', timeframe) for timeframe in MONITORED_TIMEFRAMES]
+                        + [('bark', timeframe) for timeframe in BARK_TIMEFRAMES])
 
 
 def worker_and_store(tmp_path, channel, event, *, model_policy=True, timeframe_policy=True):
@@ -33,8 +36,7 @@ def worker_and_store(tmp_path, channel, event, *, model_policy=True, timeframe_p
     return worker, store, calls
 
 
-@pytest.mark.parametrize("channel", ["telegram", "bark"])
-@pytest.mark.parametrize("timeframe", ["15m", "30m", "1H", "4H"])
+@pytest.mark.parametrize("channel,timeframe", NOTIFICATION_STREAMS)
 def test_confirmed_endpoint_clock_can_be_fresh_after_original_arrow_expired(tmp_path, channel, timeframe):
     step = TIMEFRAMES[timeframe]
     event = model_event(timeframe=timeframe, close=100 * step, wait=max(3, FRESH_MS // step + 1))
@@ -89,8 +91,7 @@ def test_old_channel_policy_does_not_authorize_new_model_protocol(tmp_path, chan
     assert not calls
 
 
-@pytest.mark.parametrize("channel", ["telegram", "bark"])
-@pytest.mark.parametrize("timeframe", ["15m", "30m", "1H", "4H"])
+@pytest.mark.parametrize("channel,timeframe", NOTIFICATION_STREAMS)
 def test_model_timeframe_needs_its_own_cutover_even_on_legacy_hourly_stream(tmp_path, channel, timeframe):
     event = model_event(timeframe=timeframe)
     worker, store, calls = worker_and_store(tmp_path, channel, event, timeframe_policy=False)

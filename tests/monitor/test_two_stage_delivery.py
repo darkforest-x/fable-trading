@@ -13,10 +13,14 @@ import pytest
 import requests
 
 from model_fixture import model_event
-from yoyo.monitor import DIRECT_POLICY, FRESH_MS, MODEL_PROTOCOL, SIGNAL_PROTOCOL, TIMEFRAMES
+from yoyo.monitor import (BARK_TIMEFRAMES, DIRECT_POLICY, FRESH_MS, MODEL_PROTOCOL,
+                          MONITORED_TIMEFRAMES, SIGNAL_PROTOCOL, TIMEFRAMES)
 from yoyo.monitor.bark import BarkWorker
 from yoyo.monitor.store import Store
 from yoyo.monitor.telegram import TelegramWorker
+
+NOTIFICATION_STREAMS = ([('telegram', timeframe) for timeframe in MONITORED_TIMEFRAMES]
+                        + [('bark', timeframe) for timeframe in BARK_TIMEFRAMES])
 
 
 def image_bytes():
@@ -72,8 +76,7 @@ def content(call, channel):
     return "\n".join(payload[key] for key in ("title", "subtitle", "body"))
 
 
-@pytest.mark.parametrize("channel", ["telegram", "bark"])
-@pytest.mark.parametrize("timeframe", ["15m", "30m", "1H", "4H"])
+@pytest.mark.parametrize("channel,timeframe", NOTIFICATION_STREAMS)
 @pytest.mark.parametrize("wait", [0, 2])
 def test_raw_then_model_are_distinct_once_only_notifications(tmp_path, channel, timeframe, wait):
     store = Store(tmp_path / "monitor.sqlite")
@@ -108,7 +111,7 @@ def test_raw_then_model_are_distinct_once_only_notifications(tmp_path, channel, 
     assert receipt(store, other, raw)["status"] == receipt(store, other, event)["status"] == "pending"
 
 
-@pytest.mark.parametrize("timeframe", ["15m", "30m", "1H", "4H"])
+@pytest.mark.parametrize("timeframe", BARK_TIMEFRAMES)
 def test_bark_sends_raw_then_model_while_default_telegram_stays_off(tmp_path, timeframe):
     store = Store(tmp_path / "monitor.sqlite")
     for channel in ("telegram", "bark"):

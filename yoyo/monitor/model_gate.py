@@ -12,6 +12,7 @@ from collections import OrderedDict
 import logging
 import threading
 
+from yoyo.monitor.notification_policy import delivery_error
 from yoyo.monitor import (FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, MODEL_PROFILE_ID,
                           MODEL_SHA256, MODEL_MAX_WAIT, MONITORED_TIMEFRAMES, TIMEFRAMES)
 from yoyo.monitor.policy import finite, is_tv_start, is_model_signal
@@ -203,7 +204,8 @@ class ModelGate:
               if self.telegram_enabled else None)
         bark = self.store.get_meta("notification_policy:bark:" + MODEL_PROTOCOL, {}).get("activated_ms")
         notify = self.telegram_enabled and common and tg is not None and original["bar_close_ms"] > tg
-        bark_notify = common and bark is not None and original["bar_close_ms"] > bark
+        bark_notify = (common and bark is not None and original["bar_close_ms"] > bark
+                       and delivery_error(self.store, event, now, "bark") is None)
         photo, error = None, None
         if notify:
             try:

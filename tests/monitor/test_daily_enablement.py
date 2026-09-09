@@ -31,7 +31,7 @@ def raw(t, confirmed="1"):
 
 
 def test_daily_contract_reuses_native_daily_and_accepts_exact_desktop_interval():
-    assert MONITORED_TIMEFRAMES == DIRECT_TIMEFRAMES == ("15m", "30m", "1H", "4H", "1Dutc")
+    assert MONITORED_TIMEFRAMES == DIRECT_TIMEFRAMES == ("5m", "15m", "30m", "1H", "4H", "1Dutc")
     assert HIGHER_TIMEFRAME["4H"] == "1Dutc"
     assert HIGHER_TIMEFRAME["1Dutc"] == "1Wutc"
     assert TIMEFRAMES["1Dutc"] == DAY and TIMEFRAMES["1Wutc"] == WEEK
@@ -107,7 +107,7 @@ def test_daily_cutover_preserves_old_periods_and_two_stage_bark_does_not_replay(
     activation = 400 * DAY + 60_000
     for protocol in (DIRECT_POLICY, MODEL_PROTOCOL):
         store.activate_bark_policy(0, protocol=protocol, retire_obsolete=False)
-        for tf in ("15m", "30m", "1H", "4H"):
+        for tf in ("5m", "15m", "30m", "1H", "4H"):
             store.activate_timeframe_policy(tf, activation - DAY, protocol=protocol)
     with store.connect() as db:
         before = {r[0]: r[1] for r in db.execute("SELECT key,payload FROM meta")}

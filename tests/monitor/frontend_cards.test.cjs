@@ -583,7 +583,7 @@ test("nested preview clicks and native preview keyboard activation never launch 
 });
 
 test("whole watch cards select and open their own symbol and period, preserving watch filters", async () => {
-  for (const [symbol, timeframe] of [["SOPH-USDT-SWAP", "30m"], ["BTC-USDT-SWAP", "15m"], ["ETH-USDT-SWAP", "1H"], ["BTC-USD-SWAP", "4H"],
+  for (const [symbol, timeframe] of [["SOPH-USDT-SWAP", "5m"], ["SOPH-USDT-SWAP", "30m"], ["BTC-USDT-SWAP", "15m"], ["ETH-USDT-SWAP", "1H"], ["BTC-USD-SWAP", "4H"],
     ["ETH-USDC-SWAP", "1H"], ["A-BC-SWAP", "15m"], [`${"A".repeat(30)}-${"B".repeat(10)}-SWAP`, "4H"]]) {
     const { client, get, networkRequests } = harness({ allowChartFixture: true, bridgeReply: bridgeResponse({ requested: true, symbol, timeframe }) });
     client.state.view = "watch";
@@ -869,17 +869,22 @@ test("polling requests separate APIs, rejects mixed event payloads and keeps ind
 });
 
 function enableTwoStage(client) {
-  Object.assign(client.state.status.runtime, { notification_mode: "two_stage", direct_timeframes: ["15m", "30m", "1H", "4H", "1Dutc"], notification_channels: ["bark"] });
+  Object.assign(client.state.status.runtime, {
+    notification_mode: "two_stage", timeframes: ["5m", "15m", "30m", "1H", "4H", "1Dutc"],
+    direct_timeframes: ["5m", "15m", "30m", "1H", "4H", "1Dutc"],
+    bark_timeframes: ["1H", "4H", "1Dutc"], display_only_timeframes: ["5m", "15m", "30m"],
+    notification_channels: ["bark"],
+  });
 }
 
-test("direct feed shows all five periods with Bark receipts, excluding unsupported periods and model events", () => {
+test("direct feed shows all six periods with separate display and delivery policies", () => {
   const { client, get } = harness();
   enableTwoStage(client);
   client.state.signalScope = "direct";
-  client.state.directSignals = [candidate("start-1h", "pending", { price: 102.5 }), candidate("start-4h", "pending", { timeframe: "4H", bark_notification_status: "sent" }), candidate("start-15m", "pending", { timeframe: "15m" }), candidate("start-30m", "pending", { timeframe: "30m" }), candidate("start-daily", "pending", { timeframe: "1Dutc" }), candidate("disabled-5m", "pending", { timeframe: "5m" }), candidate("unsupported", "pending", { timeframe: "1m" }), signal("model"), candidate("wrong-protocol", "pending", { protocol: "legacy" })];
+  client.state.directSignals = [candidate("start-1h", "pending", { price: 102.5 }), candidate("start-4h", "pending", { timeframe: "4H", bark_notification_status: "sent" }), candidate("start-15m", "pending", { timeframe: "15m" }), candidate("start-30m", "pending", { timeframe: "30m" }), candidate("start-daily", "pending", { timeframe: "1Dutc" }), candidate("start-5m", "pending", { timeframe: "5m" }), candidate("unsupported", "pending", { timeframe: "1m" }), signal("model"), candidate("wrong-protocol", "pending", { protocol: "legacy" })];
   client.state.directSignalTotal = 19;
   client.renderSignals();
-  assert.deepEqual(ids(get("signal-rows")), ["start-1h", "start-4h", "start-15m", "start-30m", "start-daily"]);
+  assert.deepEqual(ids(get("signal-rows")), ["start-1h", "start-4h", "start-15m", "start-30m", "start-daily", "start-5m"]);
   assert.match(get("signal-rows").innerHTML, /新鲜启动|原箭头收盘价|102.5|启动时未经 YOLO 确认/);
   assert.match(get("signal-rows").innerHTML, /Bark<\/span><span>服务已接受/);
   assert.doesNotMatch(get("signal-rows").innerHTML, /TG|data-notification-channel="telegram"/);
@@ -936,7 +941,7 @@ test("candidate histories cannot borrow unrelated or legacy direct receipts", ()
   assert.doesNotMatch(get("signal-rows").innerHTML, /已发送|服务已接受/);
   client.state.candidates = [candidate("fifteen", "pending", { timeframe: "15m" })];
   client.renderSignals();
-  assert.match(get("signal-rows").innerHTML, /未关联新规则启动回执/);
+  assert.match(get("signal-rows").innerHTML, /仅前端 · Bark 已关闭/);
   assert.doesNotMatch(get("signal-rows").innerHTML, /data-notification-channel/);
 });
 
@@ -994,16 +999,16 @@ test("two-stage polling keeps distinct clocks, totals and cached direct receipts
   assert.equal(networkRequests.filter((request) => request.method === "POST").length, 0);
 });
 
-test("model error messaging preserves starts on all five periods and blocks only model additions", () => {
+test("model error messaging preserves all six feeds and explains the three notifying periods", () => {
   const { client, get } = harness();
   enableTwoStage(client);
   client.state.status.runtime.model_gate = { loaded: false, last_error: "test failure" };
   client.state.status.telegram = { configured: true, enabled: false, disabled_by_owner: true, unknown: 99 };
   client.state.status.bark = { configured: true, enabled: true };
   client.renderStatus();
-  assert.match(get("model-gate-notice").textContent, /15m \/ 30m \/ 1H \/ 4H \/ 日线 指标启动推送独立运行/);
+  assert.match(get("model-gate-notice").textContent, /指标启动记录独立运行/);
   assert.match(get("model-gate-notice").textContent, /仅 YOLO 追加确认需要模型通过/);
-  assert.match(get("bark-description").textContent, /15m \/ 30m \/ 1H \/ 4H \/ 日线 收盘启动先推送 Bark/);
+  assert.match(get("bark-description").textContent, /1H \/ 4H \/ 日线 收盘启动先推送 Bark/);
   assert.equal(get("telegram-description"), undefined);
   assert.doesNotMatch(get("bark-description").textContent, /TG|Telegram/);
   assert.doesNotMatch(get("model-gate-notice").textContent, /未通过检测的候选不会通知/);
@@ -1046,7 +1051,7 @@ test("Bark-only policy ignores historical Telegram successes and failures in car
   assert.doesNotMatch(get("signal-rows").innerHTML, /TG|data-notification-channel="telegram"/);
 });
 
-for (const timeframe of ["1Dutc", "30m", "15m"]) test(`${timeframe} starts use their own close and open the exact chart`, async () => {
+for (const timeframe of ["1Dutc", "30m", "15m", "5m"]) test(`${timeframe} starts use their own close and open the exact chart`, async () => {
   const { client, get, networkRequests, advance } = harness({
     initialScope: null, notificationChannels: ["bark"], allowChartFixture: true,
     bridgeReply: bridgeResponse({ requested: true, symbol: "SOPH-USDT-SWAP", timeframe }),
@@ -1111,10 +1116,135 @@ test("daily filters preserve canonical identity while cards and details use a re
 
 test("runtime coverage displays daily without leaking its API spelling", () => {
   const { client, get } = harness();
-  client.state.status.runtime.timeframes = ["15m", "30m", "1H", "4H", "1Dutc"];
+  client.state.status.runtime.timeframes = ["5m", "15m", "30m", "1H", "4H", "1Dutc"];
   client.renderStatus();
-  assert.equal(get("metric-timeframes").textContent, "15m + 30m + 1H + 4H + 日线");
-  assert.equal(get("watch-timeframes").textContent, "15m / 30m / 1H / 4H / 日线");
+  assert.equal(get("metric-timeframes").textContent, "5m + 15m + 30m + 1H + 4H + 日线");
+  assert.equal(get("watch-timeframes").textContent, "5m / 15m / 30m / 1H / 4H / 日线");
   assert.match(get("runtime-facts").innerHTML, /4H \/ 日线/);
   assert.doesNotMatch(get("runtime-facts").innerHTML, /1Dutc/);
+});
+
+for (const timeframe of ["5m", "15m", "30m"]) test(`${timeframe} starts, confirmations and candidates show frontend-only policy without losing freshness`, async () => {
+  const { client, get, networkRequests } = harness({ initialScope: "direct", allowChartFixture: true });
+  enableTwoStage(client);
+  for (const barkStatus of ["historical", "pending", "skipped", "disabled", ""]) {
+    const raw = candidate("muted-start", "pending", { timeframe, bark_notification_status: barkStatus });
+    const confirmed = signal("muted-confirmation", 1, { timeframe, bark_notification_status: barkStatus });
+    client.state.directSignals = [raw]; client.state.signals = [confirmed];
+    for (const [scope, item] of [["direct", raw], ["confirmed", confirmed]]) {
+      client.state.signalScope = scope; client.state.selected = item;
+      client.renderSignals(); client.renderDetail();
+      assert.equal(client.isFresh(item), true, "delivery mute must not invalidate frontend freshness");
+      assert.match(get("signal-rows").innerHTML, /仅前端 · Bark 已关闭/);
+      assert.doesNotMatch(get("signal-rows").innerHTML, /等待发送|历史记录|发送失败/);
+      assert.match(get("detail-facts").innerHTML, /当前通知方式|仅前端 · Bark 已关闭/);
+      assert.match(get("detail-reason").textContent, /仅前端 · Bark 已关闭/);
+      assert.doesNotMatch(get("detail-reason").textContent, /YOLO 通过后追加通知|首次 Bark 推送/);
+    }
+  }
+  client.state.directSignals = [];
+  client.state.candidates = [candidate("candidate-only", "pending", { timeframe })];
+  client.state.signalScope = "pending"; client.renderSignals();
+  assert.match(get("signal-rows").innerHTML, /仅前端 · Bark 已关闭/);
+  assert.doesNotMatch(get("signal-rows").innerHTML, /未关联新规则启动回执|data-notification-channel/);
+  client.state.selected = market("BTC-USDT-SWAP", timeframe); client.renderDetail();
+  assert.match(get("detail-reason").textContent, /仅前端 · Bark 已关闭/);
+  await new Promise(setImmediate);
+  assert.equal(networkRequests.filter((request) => request.method === "POST").length, 0);
+});
+
+for (const timeframe of ["1H", "4H", "1Dutc"]) test(`${timeframe} retains both Bark stages and actual delivery outcomes`, () => {
+  const { client, get } = harness();
+  enableTwoStage(client);
+  for (const barkStatus of ["pending", "sent", "failed"]) {
+    const raw = candidate("start", "pending", { timeframe, bark_notification_status: barkStatus });
+    const confirmed = signal("model", 1, { timeframe, bark_notification_status: barkStatus });
+    client.state.directSignals = [raw]; client.state.signals = [confirmed];
+    for (const scope of ["direct", "confirmed"]) {
+      client.state.signalScope = scope; client.renderSignals();
+      const expected = { pending: /等待发送/, sent: /服务已接受/, failed: /发送失败/ }[barkStatus];
+      assert.match(get("signal-rows").innerHTML, expected);
+      assert.doesNotMatch(get("signal-rows").innerHTML, /仅前端|Bark 已关闭/);
+    }
+  }
+});
+
+test("muting short periods preserves historical outcomes and separates them from the current policy", async () => {
+  const { client, get } = harness({ allowChartFixture: true });
+  enableTwoStage(client);
+  for (const timeframe of ["5m", "15m", "30m"]) {
+    for (const barkStatus of ["sent", "failed", "unknown"]) {
+      const raw = candidate("old-start", "expired", { timeframe, bark_notification_status: barkStatus, is_fresh: false, bar_close_ms: NOW - 86_400_000 });
+      const model = signal("old-confirmation", 1440, { timeframe, bark_notification_status: barkStatus, is_fresh: false });
+      client.state.directSignals = [raw]; client.state.signals = [model];
+      for (const [scope, item] of [["direct", raw], ["confirmed", model]]) {
+        client.state.signalScope = scope; client.state.selected = item;
+        client.renderSignals(); client.renderDetail();
+        assert.equal(client.notification(item, "bark")[0], { sent: "服务已接受", failed: "发送失败", unknown: "回执未知" }[barkStatus]);
+        assert.match(get("signal-rows").innerHTML, /当前仅前端 · Bark 已关闭/);
+        assert.match(get("detail-facts").innerHTML, /当前通知方式/);
+        assert.equal(item.bark_notification_status, barkStatus, "rendering cannot rewrite a historical receipt");
+      }
+    }
+  }
+  await new Promise(setImmediate);
+});
+
+test("missing or malformed Bark scope metadata cannot imply that all displayed periods notify or are muted", () => {
+  const { client, get } = harness();
+  enableTwoStage(client);
+  delete client.state.status.runtime.display_only_timeframes;
+  delete client.state.status.runtime.bark_timeframes;
+  client.state.status.bark = { configured: true, enabled: true };
+  for (const unknown of [undefined, "30m", ["unsupported"]]) {
+    client.state.status.runtime.bark_timeframes = unknown;
+    client.renderStatus();
+    assert.match(get("bark-description").textContent, /Bark 通知周期尚未同步/);
+    assert.doesNotMatch(get("bark-description").textContent, /先推送 Bark|所有周期.*关闭|仅前端/);
+    assert.equal(client.notification(candidate("old", "pending", { timeframe: "15m", bark_notification_status: "sent" }), "bark")[0], "服务已接受");
+  }
+  client.state.status.runtime.bark_timeframes = ["1H", "4H", "1Dutc"];
+  client.renderStatus();
+  assert.match(get("bark-description").textContent, /5m \/ 15m \/ 30m 仅前端 · Bark 已关闭/);
+  assert.equal(get("direct-scope-timeframes").textContent, "5m / 15m / 30m / 1H / 4H / 日线");
+});
+
+test("5m filters, previews, focus and chart opening preserve the full event identity across reused ids", async () => {
+  const { client, document, get, networkRequests } = harness({ initialScope: "direct", allowChartFixture: true, bridgeReply: bridgeResponse({ requested: true, symbol: "SOPH-USDT-SWAP", timeframe: "5m" }) });
+  enableTwoStage(client);
+  const five = candidate("shared", "pending", { symbol: "SOPH-USDT-SWAP", timeframe: "5m", bark_notification_status: "historical" });
+  client.state.directSignals = [candidate("shared", "pending", { symbol: "SOPH-USDT-SWAP", timeframe: "15m" }), candidate("shared", "pending", { symbol: "OTHER-USDT-SWAP", timeframe: "5m" }), five];
+  client.state.markets = [market("SOPH-USDT-SWAP", "5m"), market("SOPH-USDT-SWAP", "15m")];
+  client.renderSignals();
+  const preview = get("signal-rows").querySelectorAll("[data-preview-signal-id]").find((card) => card.dataset.tvTimeframe === "5m" && card.dataset.tvSymbol === five.symbol);
+  get("signal-rows").dispatch("click", { target: preview });
+  await new Promise(setImmediate);
+  assert.equal(client.state.selected.id, five.id);
+  assert.equal(client.state.selected.symbol, five.symbol);
+  assert.equal(client.state.selected.timeframe, five.timeframe);
+  const selectedPreview = get("signal-rows").querySelectorAll("[data-preview-signal-id]").find((card) => card.dataset.tvTimeframe === "5m" && card.dataset.tvSymbol === five.symbol);
+  selectedPreview.focus(); client.renderSignals();
+  assert.equal(document.activeElement.dataset.tvTimeframe, "5m");
+  assert.equal(document.activeElement.dataset.tvSymbol, five.symbol);
+  assert.equal(get("detail-timeframe").textContent, "5m");
+  assert.match(get("chart-title").textContent, /SOPH · 5m/);
+  assert.match(get("tradingview-web").href, /interval=5$/);
+  assert.ok(networkRequests.some((request) => request.url === "/api/chart?symbol=SOPH-USDT-SWAP&timeframe=5m"));
+  document.querySelectorAll("[data-timeframe]").find((button) => button.dataset.timeframe === "5m").dispatch("click");
+  assert.equal(client.filteredSignals().length, 2);
+  assert.ok(client.filteredSignals().every((item) => item.timeframe === "5m"));
+  document.querySelectorAll("[data-watch-timeframe]").find((button) => button.dataset.watchTimeframe === "5m").dispatch("click");
+  assert.equal(get("watch-rows").querySelectorAll("[data-tradingview-action]").length, 1);
+  assert.equal(get("watch-rows").querySelector("[data-tradingview-action]").dataset.tvTimeframe, "5m");
+  assert.equal(networkRequests.filter((request) => request.method === "POST").length, 0);
+  get("back-to-signals").dispatch("click");
+  assert.equal(document.activeElement.dataset.tvSymbol, five.symbol);
+  assert.equal(document.activeElement.dataset.tvTimeframe, "5m");
+  const opener = get("signal-rows").querySelectorAll("[data-signal-id]").find((card) => card.dataset.tvSymbol === five.symbol);
+  assert.match(opener.getAttribute("aria-label"), /SOPH USDT 5m/);
+  get("signal-rows").dispatch("click", { target: opener });
+  await new Promise(setImmediate);
+  const posts = networkRequests.filter((request) => request.method === "POST");
+  assert.equal(posts.length, 1);
+  assert.deepEqual(JSON.parse(posts[0].body), { symbol: five.symbol, timeframe: "5m" });
 });

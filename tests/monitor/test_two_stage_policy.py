@@ -4,7 +4,7 @@ from types import SimpleNamespace
 import pytest
 
 from model_fixture import model_event
-from yoyo.monitor import DIRECT_POLICY, DIRECT_TIMEFRAMES, FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, SIGNAL_KIND, TIMEFRAMES
+from yoyo.monitor import BARK_TIMEFRAMES, DIRECT_POLICY, DIRECT_TIMEFRAMES, FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, SIGNAL_KIND, TIMEFRAMES
 from yoyo.monitor import service, snapshot
 from yoyo.monitor.notification_policy import delivery_error, is_direct_start
 from yoyo.monitor.store import Store
@@ -14,11 +14,11 @@ def activate(store, since):
     for protocol in (MODEL_PROTOCOL, DIRECT_POLICY):
         store.activate_notification_policy(since, protocol=protocol, retire_obsolete=False)
         store.activate_bark_policy(since, protocol=protocol, retire_obsolete=False)
-        for tf in (DIRECT_TIMEFRAMES if protocol == DIRECT_POLICY else ("15m", "30m", "1H", "4H")):
+        for tf in DIRECT_TIMEFRAMES:
             store.activate_timeframe_policy(tf, since, protocol=protocol)
 
 
-@pytest.mark.parametrize("timeframe", ["15m", "30m", "1H", "4H"])
+@pytest.mark.parametrize("timeframe", BARK_TIMEFRAMES)
 @pytest.mark.parametrize("channel", ["telegram", "bark"])
 def test_new_cutover_and_freshness_boundaries(tmp_path, timeframe, channel):
     e = model_event(timeframe=timeframe, wait=0)["indicator"]
@@ -41,7 +41,7 @@ def test_new_cutover_and_freshness_boundaries(tmp_path, timeframe, channel):
     {"price": 0}, {"price": float("nan")}, {"price": True}, {"symbol": "TEST\n-SWAP"},
     {"bar_close_ms": True}, {"bar_open_ms": -1}, {"focus_start_ms": 0},
     {"confirmed": False}, {"tv_marker_visible": False}, {"previous_md": .2},
-    {"md": .1}, {"near_zero_bars": 11}, {"timeframe": "5m"},
+    {"md": .1}, {"near_zero_bars": 11}, {"timeframe": "10m"},
 ])
 def test_direct_stage_rejects_incomplete_or_wrong_arrow(changes):
     e = model_event(wait=0)["indicator"]
@@ -59,7 +59,7 @@ def monitor(tmp_path, monkeypatch):
     return service.Monitor(store, client=SimpleNamespace(clock=lambda: 0))
 
 
-@pytest.mark.parametrize("timeframe", ["15m", "30m", "1H", "4H"])
+@pytest.mark.parametrize("timeframe", BARK_TIMEFRAMES)
 def test_scan_records_direct_bark_before_registration_without_telegram_snapshot(monitor, monkeypatch, timeframe):
     e = model_event(timeframe=timeframe, wait=0)["indicator"]
     activate(monitor.store, e["bar_close_ms"] - 1)
@@ -188,7 +188,7 @@ def test_full_scan_model_unavailable_still_queues_direct_and_restart_preserves_b
     monitor.scan()
     assert monitor.notification_ready.is_set()
     assert monitor.store.telegram_status()["pending"] == 0
-    assert monitor.store.bark_status()["pending"] == 3
+    assert monitor.store.bark_status()["pending"] == 2
     assert {e["timeframe"] for e in monitor.store.list_events(direct_only=True)} == {"15m", "1H", "4H"}
     assert monitor.store.event_count(MODEL_KIND, MODEL_PROTOCOL) == 0
     for timeframe in ("15m", "1H", "4H"):
@@ -196,18 +196,18 @@ def test_full_scan_model_unavailable_still_queues_direct_and_restart_preserves_b
                                    monitor.chart(INSTRUMENT["instId"], timeframe)["candles"])
     assert monitor.store.candidate_counts()["error"] == 3
     assert monitor.store.telegram_status()["pending"] == 0
-    assert monitor.store.bark_status()["pending"] == 3
+    assert monitor.store.bark_status()["pending"] == 2
     # Both delivery legs survive startup policy activation, without new warmup sends.
     confirmation = model_event(close=NOW - 60_000, wait=0)
     monitor.store.upsert_event(confirmation, bark_notify=True)
     restarted = service.Monitor(monitor.store, client=client)
     restarted.scan()
     assert monitor.store.telegram_status()["pending"] == 0
-    assert monitor.store.bark_status()["pending"] == 4
+    assert monitor.store.bark_status()["pending"] == 3
     assert monitor.store.timeframe_activation("1H", protocol=DIRECT_POLICY) == NOW - 120_000
 
 
-def test_new_15m_cutover_does_not_replay_or_reset_existing_hourly_bark_streams(monitor):
+def test_new_15m_display_cutover_does_not_replay_or_reset_existing_hourly_bark_streams(monitor):
     from test_service import FakeMarket, NOW, INSTRUMENT
 
     store = monitor.store
@@ -235,16 +235,17 @@ def test_new_15m_cutover_does_not_replay_or_reset_existing_hourly_bark_streams(m
     assert old_15m["bark_notification_status"] == "history"
     assert not monitor.record_arrow(old_15m, [], NOW + 1)
     assert store.bark_status()["pending"] == 2
-    # A genuinely later aligned close enters the new 15m direct leg once.
+    # A later aligned close appears once in the display feed, without Bark.
     later_close = old_15m["bar_close_ms"] + TIMEFRAMES["15m"]
     later = model_event(timeframe="15m", wait=0, close=later_close)["indicator"]
     assert monitor.record_arrow(later, [], later_close + 1)
     assert not monitor.record_arrow(later, [], later_close + 2)
-    assert store.bark_status()["pending"] == 3
+    assert len(store.list_events(direct_only=True, timeframe="15m")) == 1
+    assert store.bark_status()["pending"] == 2
     client.clock = lambda: NOW + TIMEFRAMES["15m"]
     restarted = service.Monitor(store, client=client)
     restarted.scan()
     assert store.timeframe_activation("15m", protocol=DIRECT_POLICY) == NOW
     for timeframe in ("1H", "4H"):
         assert store.timeframe_activation(timeframe, protocol=DIRECT_POLICY) == old_cutover
-    assert store.bark_status()["pending"] == 3
+    assert store.bark_status()["pending"] == 2

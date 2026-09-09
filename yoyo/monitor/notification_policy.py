@@ -1,4 +1,4 @@
-"""Owner's 2026-09-09 additive 15m/30m/1H/4H/daily start and model-confirmation delivery.
+"""Owner's separate display and Bark delivery scopes for both signal stages.
 
 Only the immutable arrow bar (OHLC/IMACD at or before close) is used for a
 direct start. Model confirmation keeps its original causal proof and cutoff.
@@ -9,7 +9,7 @@ own cutover; enabling a daily stream cannot inherit any earlier period’s cutov
 import re
 
 from yoyo.monitor import (DIRECT_POLICY, DIRECT_TIMEFRAMES, FRESH_MS, MODEL_PROTOCOL,
-                          MONITORED_TIMEFRAMES, TIMEFRAMES)
+                          MONITORED_TIMEFRAMES, TIMEFRAMES, BARK_TIMEFRAMES)
 from yoyo.monitor.policy import finite, is_model_signal, is_tv_start
 
 
@@ -45,6 +45,8 @@ def delivery_error(store, event, now, channel):
     # Recheck at the sender boundary: a durable queue may predate withdrawal.
     if event.get("timeframe") not in MONITORED_TIMEFRAMES:
         return "timeframe_disabled_by_owner"
+    if channel == "bark" and event.get("timeframe") not in BARK_TIMEFRAMES:
+        return "bark_timeframe_muted_by_owner"
     if is_model_signal(event):
         protocol = MODEL_PROTOCOL
         closes = (event["bar_close_ms"], event["indicator"]["bar_close_ms"])

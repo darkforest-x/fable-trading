@@ -171,7 +171,7 @@ def test_prefix_is_unchanged_by_arbitrary_future_ohlc_or_htf_mutation():
     assert prefix["state"]["bar_close_ms"] == cutoff
 
 
-@pytest.mark.parametrize("timeframe,high_tf", [("15m", "1H"), ("30m", "2H"), ("1H", "4H"), ("4H", "1Dutc")])
+@pytest.mark.parametrize("timeframe,high_tf", [("5m", "1H"), ("15m", "1H"), ("30m", "2H"), ("1H", "4H"), ("4H", "1Dutc")])
 def test_htf_uses_local_open_not_local_close_and_warms_independently(timeframe, high_tf):
     duration = signals.TIMEFRAMES[timeframe]
     high_duration = signals.TIMEFRAMES[high_tf]
@@ -219,7 +219,7 @@ def test_invalid_input_fails_closed(defect):
 
 def test_unsupported_timeframe_is_rejected():
     with pytest.raises(ValueError):
-        signals.analyze([], [], "5m")
+        signals.analyze([], [], "10m")
 
 
 def test_protocol_and_output_are_json_safe():

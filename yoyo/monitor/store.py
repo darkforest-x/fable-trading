@@ -17,7 +17,7 @@ import time
 from pathlib import Path
 
 from yoyo.monitor import (SIGNAL_KIND, SIGNAL_PROTOCOL, MONITORED_TIMEFRAMES, MODEL_PROTOCOL, MODEL_KIND, FRESH_MS,
-                          DIRECT_POLICY, DIRECT_TIMEFRAMES)
+                          DIRECT_POLICY, DIRECT_TIMEFRAMES, BARK_TIMEFRAMES)
 
 
 def now_ms():
@@ -326,6 +326,20 @@ class Store:
                 db.execute("UPDATE model_candidates SET status='disabled',model=? WHERE id=?",
                            (encode(proof), row["id"]))
         return {"bark_pending": retired, "model_candidates": len(candidates)}
+
+    def retire_muted_bark_timeframes(self):
+        """Retire pending Bark only; display events, model work and receipts stay.
+
+        Called under the monitor process lock before delivery workers start.
+        Recovery changes interrupted sending to unknown first; unknown and all
+        terminal receipts are never rewritten as skipped or automatically retried.
+        """
+        placeholders = ",".join("?" for _ in BARK_TIMEFRAMES)
+        with self.connect() as db:
+            return db.execute(
+                "UPDATE bark_outbox SET status='skipped',error='bark_timeframe_muted_by_owner',updated_ms=? "
+                "WHERE status='pending' AND event_id IN (SELECT id FROM events WHERE timeframe NOT IN ("
+                + placeholders + "))", (now_ms(), *BARK_TIMEFRAMES)).rowcount
 
     def claim(self, now):
         with self.connect() as db:
