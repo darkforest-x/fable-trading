@@ -2,6 +2,22 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## Spike 短周期仅前端、Bark 只保留长周期（2026-09-09 22:00:54）
+
+Owner 连续明确要求：5m 前端显示，5m/15m/30m 不通知 Bark。v1.12.0 / dd81924 已部署，
+当前六周期5m/15m/30m/1H/4H/1Dutc都扫描并记录指标启动/YOLO确认；Bark仅1H/4H/日线两阶段，
+Telegram继续全部关闭。独立BARK_TIMEFRAMES不能替换DIRECT_TIMEFRAMES，后者控制API展示。
+原始入队/模型入队/发送出口共用禁推校验；启动仅清退短周期pending，sending先变unknown，
+保留终态回执、模型工作和全部启用时间。过去10个disabled5m候选不复活。
+实机重启后短周期pending/sending及新sent均0；266份TG、384份旧Bark终态、22项启用元数据逐条保持，
+运行源码SHA完全一致。旧Bark unknown=1仍保留，不把它冒充本次发送失败或已送达。
+前端已实点5m/30m筛选、30m两个阶段静音说明、5m观察卡片及0G5m真实120根K线预览。
+Windows3060同步5m白名单并重启显示客户端，网关读取相同新规则；BTC5m保存布局URL及文件SHA已核，
+本轮没有实际打开WindowsTV图表或发送测试通知。1H/4H/日线信号规则/权重/新鲜度/订单路径不变。
+1021项监控/边界测试、66项前端/主题测试通过，源代码已推main。证据output/qa/spike_short_period_display_20260909/。
+验收时475×6=2850窗口正在重新加载，进度持续增加、错误0，未声称全市场首轮已完成。
+8行情流冷启动完整分页预算约24分钟，结合completed/errors判断，不要重复重启。
+
 ## Spike 3060 Windows 入口已接通（2026-09-09 21:05）
 
 Owner要求3060也能访问前端并打开3060自己的TV。已在WIN-ZZC/Administrator部署
