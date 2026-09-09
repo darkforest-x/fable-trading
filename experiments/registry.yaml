@@ -29,17 +29,34 @@ experiments:
     notes: Explicit Owner request authorizes 2026-08-31 case. Fixed scan first descriptive holdout read; expanded formation scan second exploratory read, original negative retained. Owner-selected winner, no independent acceptance or live change.
   - experiment_id: exp-imacd-ashare-daily-long-20260909-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 3349c5a
-    status: active
-    question: Which independently selected IMACD daily long-only parameters retain A-share trends after realistic costs and trading restrictions?
-    single_variable: Sequential one-field coordinate comparisons; fixed historical universe, execution model and temporal splits preregistered in PROJECT_PLAN.md.
-    result: Preregistered; data source connectivity verified, no bulk parameter evaluation yet.
+    source_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    status: rejected
+    question: Which independently selected IMACD daily long-only parameters retain A-share trends after realistic costs and
+      trading restrictions?
+    single_variable: Sequential one-field coordinate comparisons; fixed historical universe, execution model and temporal splits
+      preregistered in PROJECT_PLAN.md.
+    result: Finite temporal search selected the unchanged baseline. First 2024-2025 OOS net -2.2874%, maximum drawdown 12.1290%,
+      45 natural exits; all 49 matched random controls outperformed. No verified profitability edge.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: null
-    artifacts: []
-    notes: Owner explicitly authorized a separate A-share daily long-only variant, wider stops and parameter backtests. No changes to crypto monitor, production bundles or orders.
+    canonical_report: analysis/html/p0_imacd_ashare_daily_long_20260909.html
+    artifacts:
+    - imacd-ashare-daily-20260909-plan
+    - imacd-ashare-daily-20260909-pine
+    - imacd-ashare-daily-20260909-report-source
+    - imacd-ashare-daily-20260909-report-html
+    - imacd-ashare-daily-20260909-freeze
+    - imacd-ashare-daily-20260909-final
+    - imacd-ashare-daily-20260909-data-audit
+    - imacd-ashare-daily-20260909-evidence
+    - imacd-ashare-daily-20260909-validation
+    - imacd-ashare-daily-20260909-charts
+    - imacd-ashare-daily-20260909-trades
+    notes: Owner narrowed scope to ordinary-account Shanghai/Shenzhen main boards before selection. 200 frozen, 197 usable;
+      no replacement. First development/validation run invalidated by synthetic precision bug before OOS; corrected fixed grid
+      rerun. One final OOS evaluation, no 2026 performance evaluation. Independent Pine saved; no live orders or crypto monitor
+      changes.
   - experiment_id: exp-altcoin-rotation-system-20260909-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd

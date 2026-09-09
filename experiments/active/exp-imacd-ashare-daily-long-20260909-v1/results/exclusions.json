@@ -1,0 +1,9 @@
+{
+  "codes": {
+    "sz.001914": "Requested backward-adjusted history is incomplete: 1077 sessions 2015-01-05 through 2019-06-05 are raw adjustflag=3 and 1597 later sessions are adjustflag=1. Entire security unavailable for this research; no tail-only repair or replacement.",
+    "sh.600321": "Non-ordinary corporate-action discontinuity 2022-10-24: raw_preclose multiplied by current factor differs from previous traded HFQ close by +29.999758379834173%; rights/cash flows cannot be reliably reconstructed. Entire security excluded before parameter selection.",
+    "sh.600313": "Non-ordinary corporate-action discontinuity 2021-01-18: raw_preclose multiplied by current factor differs from previous traded HFQ close by +1.291244939521774%; rights/cash flows cannot be reliably reconstructed. Entire security excluded before parameter selection."
+  },
+  "rule": "Keep the frozen 2020-01-02 mainboard pool unchanged. Exclude the entire security if adjusted history is incomplete, or any corporate-action reference discontinuity abs(raw_preclose * current_factor / previous_traded_HFQ_close - 1) exceeds 0.005 and reliable rights/cash-flow reconstruction is unavailable. No return-based filtering, no replacement stocks, no original source deletion.",
+  "created_before_parameter_selection": true
+}

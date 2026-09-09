@@ -1,0 +1,74 @@
+{
+  "created_at": "2026-09-09T15:33:24.326260+00:00",
+  "source_commit": "46d2709256241bba5dd52e5d09ab365543368a82",
+  "selection_rule": "development coordinate endpoints; validation net return then drawdown; >=30 natural exits",
+  "chosen": {
+    "label": "baseline",
+    "fold": "validation",
+    "config_id": "6bd5db72099e",
+    "parameters": {
+      "ma_length": 34,
+      "signal_length": 9,
+      "focus_bars": 12,
+      "band_atr": 0.1,
+      "quality": 1,
+      "structure_bars": 10,
+      "buffer_atr": 0.5,
+      "stop_atr": 3.0,
+      "trail_atr": 4.0,
+      "trail_activation_r": 1.5
+    },
+    "net_return": -0.15235117544605725,
+    "cagr": -0.08000440676132536,
+    "max_drawdown": 0.2523475552411161,
+    "trades": 61,
+    "win_rate": 0.16393442622950818,
+    "profit_factor": 0.28313047015453424,
+    "mean_holding_days": 42.540983606557376,
+    "unpriceable": 0,
+    "terminal_uncertain": 0,
+    "terminal_stale_days_max": 0,
+    "fees": 4931.640941022351,
+    "slippage": 3516.727596545755,
+    "exposure": 0.4414010746064071,
+    "zero_recovery_net_return": -0.15235117544605725,
+    "zero_recovery_max_drawdown": 0.2523475552411161,
+    "terminal_uncertain_value": 0.0,
+    "open_at_end": 9,
+    "signal_count": 177,
+    "skips": {
+      "entry_day_stop_waits_T1": 1,
+      "position_capacity": 102,
+      "lot_or_cash": 1
+    },
+    "seconds": 2.3
+  },
+  "baseline": {
+    "ma_length": 34,
+    "signal_length": 9,
+    "focus_bars": 12,
+    "band_atr": 0.1,
+    "quality": 1,
+    "structure_bars": 10,
+    "buffer_atr": 0.5,
+    "stop_atr": 3.0,
+    "trail_atr": 4.0,
+    "trail_activation_r": 1.5
+  },
+  "universe_sha256": "6fd58ec6bf04516e47879a1d8e4101ad8b42bf98f81b29b3d067c23ef86b4318",
+  "development_results_sha256": "eab6a0320d8642a2f12c8b6e6db2bff962232c5e11cc9d5bd7337dd8ef861ed7",
+  "validation_results_sha256": "f17da26923d0829f8dfd31290e909042bf1bbd34287319ea90c13bef459ca4e8",
+  "selection_inputs_sha256": "02addd95afa041e0866e057541360e579b5414c50b07291975178012a19f1276",
+  "missing_development": [
+    "sh.600313",
+    "sh.600321",
+    "sz.001914"
+  ],
+  "missing_validation": [
+    "sh.600313",
+    "sh.600321",
+    "sz.001914"
+  ],
+  "final_period_not_evaluated": true,
+  "holdout_consumed": false
+}

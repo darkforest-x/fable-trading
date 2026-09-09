@@ -18,6 +18,171 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: imacd-ashare-daily-20260909-plan
+    artifact_type: config
+    role: independent_mainboard_daily_long_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    generator_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    source_path: experiments/active/exp-imacd-ashare-daily-long-20260909-v1/PROJECT_PLAN.md
+    sha256: 934f5019bbeac516c61920370ad0557c76c06d15a94aa9fb13e4a58e0e20694f
+    size_bytes: 9937
+    storage_uri: repo://experiments/active/exp-imacd-ashare-daily-long-20260909-v1/PROJECT_PLAN.md
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 197 usable stocks from frozen 200 main-board cohort; quantitative dates end 2025-12-31. Technical TV preview is separate
+      and not performance evidence.
+  - artifact_id: imacd-ashare-daily-20260909-pine
+    artifact_type: config
+    role: independent_mainboard_daily_long_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    generator_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    source_path: yoyo/evaluation/pine/imacd_ashare_daily_long_v1.pine
+    sha256: d59535fee9b536ce0c037696a9c370683b04864b5935f6a6553f27e3aabdfb7c
+    size_bytes: 26210
+    storage_uri: repo://yoyo/evaluation/pine/imacd_ashare_daily_long_v1.pine
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 197 usable stocks from frozen 200 main-board cohort; quantitative dates end 2025-12-31. Technical TV preview is separate
+      and not performance evidence.
+  - artifact_id: imacd-ashare-daily-20260909-report-source
+    artifact_type: report
+    role: independent_mainboard_daily_long_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    generator_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    source_path: analysis/p0_imacd_ashare_daily_long_20260909.md
+    sha256: 5c61c53a00aa537b6ff904fa7241eb49ef8b87aa6bdba2eead7d5fe898218369
+    size_bytes: 32919
+    storage_uri: repo://analysis/p0_imacd_ashare_daily_long_20260909.md
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 197 usable stocks from frozen 200 main-board cohort; quantitative dates end 2025-12-31. Technical TV preview is separate
+      and not performance evidence.
+  - artifact_id: imacd-ashare-daily-20260909-report-html
+    artifact_type: report
+    role: independent_mainboard_daily_long_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    generator_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    source_path: analysis/html/p0_imacd_ashare_daily_long_20260909.html
+    sha256: 9d2eec79c90f69a47d8dc271b8341cdf9113855e7867ce57d1d4e84ec7e2ac7a
+    size_bytes: 2549650
+    storage_uri: repo://analysis/html/p0_imacd_ashare_daily_long_20260909.html
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 197 usable stocks from frozen 200 main-board cohort; quantitative dates end 2025-12-31. Technical TV preview is separate
+      and not performance evidence.
+  - artifact_id: imacd-ashare-daily-20260909-freeze
+    artifact_type: config
+    role: independent_mainboard_daily_long_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    generator_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    source_path: experiments/active/exp-imacd-ashare-daily-long-20260909-v1/results/frozen_selection.json
+    sha256: 580cda1e7c2ed4eb72e5c925cf3f1a7c733fd2fd3c697393685c945868bb5f04
+    size_bytes: 2240
+    storage_uri: repo://experiments/active/exp-imacd-ashare-daily-long-20260909-v1/results/frozen_selection.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 197 usable stocks from frozen 200 main-board cohort; quantitative dates end 2025-12-31. Technical TV preview is separate
+      and not performance evidence.
+  - artifact_id: imacd-ashare-daily-20260909-final
+    artifact_type: manifest
+    role: independent_mainboard_daily_long_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    generator_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    source_path: experiments/active/exp-imacd-ashare-daily-long-20260909-v1/results/final_complete.json
+    sha256: 4f381b99b64c7c721440323a19e4b2ccbf3949c789ff5eb14f20a878cebe6fee
+    size_bytes: 8083
+    storage_uri: repo://experiments/active/exp-imacd-ashare-daily-long-20260909-v1/results/final_complete.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 197 usable stocks from frozen 200 main-board cohort; quantitative dates end 2025-12-31. Technical TV preview is separate
+      and not performance evidence.
+  - artifact_id: imacd-ashare-daily-20260909-data-audit
+    artifact_type: manifest
+    role: independent_mainboard_daily_long_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    generator_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    source_path: experiments/active/exp-imacd-ashare-daily-long-20260909-v1/results/data_audit.json
+    sha256: 0927225a495dbc2f4ddd76328abded95af5c5a8606cc29d35616fd3674a0db2b
+    size_bytes: 645882
+    storage_uri: repo://experiments/active/exp-imacd-ashare-daily-long-20260909-v1/results/data_audit.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 197 usable stocks from frozen 200 main-board cohort; quantitative dates end 2025-12-31. Technical TV preview is separate
+      and not performance evidence.
+  - artifact_id: imacd-ashare-daily-20260909-evidence
+    artifact_type: manifest
+    role: independent_mainboard_daily_long_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    generator_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    source_path: experiments/active/exp-imacd-ashare-daily-long-20260909-v1/results/evidence_manifest.json
+    sha256: de604edd3084dde755287c5ece46813f655d9a70000229909936a47a5661b41e
+    size_bytes: 3266
+    storage_uri: repo://experiments/active/exp-imacd-ashare-daily-long-20260909-v1/results/evidence_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 197 usable stocks from frozen 200 main-board cohort; quantitative dates end 2025-12-31. Technical TV preview is separate
+      and not performance evidence.
+  - artifact_id: imacd-ashare-daily-20260909-validation
+    artifact_type: manifest
+    role: independent_mainboard_daily_long_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    generator_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    source_path: experiments/active/exp-imacd-ashare-daily-long-20260909-v1/results/engineering_validation.json
+    sha256: 8d749893c64a43ba3b1a42c5484e1becc5fb606e8554afa0ab5fab8e2f216069
+    size_bytes: 228209
+    storage_uri: repo://experiments/active/exp-imacd-ashare-daily-long-20260909-v1/results/engineering_validation.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 197 usable stocks from frozen 200 main-board cohort; quantitative dates end 2025-12-31. Technical TV preview is separate
+      and not performance evidence.
+  - artifact_id: imacd-ashare-daily-20260909-charts
+    artifact_type: manifest
+    role: independent_mainboard_daily_long_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    generator_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    source_path: analysis/output/imacd_ashare_daily_20260909/figures/manifest.json
+    sha256: 88170cd3c6dea5ac447b2734c296e64de728f0f56985b14fac6c6d1f6b33a28b
+    size_bytes: 7427
+    storage_uri: file://analysis/output/imacd_ashare_daily_20260909/figures/manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 197 usable stocks from frozen 200 main-board cohort; quantitative dates end 2025-12-31. Technical TV preview is separate
+      and not performance evidence.
+  - artifact_id: imacd-ashare-daily-20260909-trades
+    artifact_type: dataset
+    role: independent_mainboard_daily_long_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    generator_commit: a2c33e09b751b40ad57a8ef0a6490ed85645d388
+    source_path: analysis/output/imacd_ashare_daily_20260909/results/final/selected/trades.csv
+    sha256: 6ed7d187de7cc04b41fb673a4a6c05479808a1c17ec7f164cf849061fecfd9f1
+    size_bytes: 22101
+    storage_uri: file://analysis/output/imacd_ashare_daily_20260909/results/final/selected/trades.csv
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 197 usable stocks from frozen 200 main-board cohort; quantitative dates end 2025-12-31. Technical TV preview is separate
+      and not performance evidence.
   - artifact_id: useless-multiscale-20260909-report-source
     artifact_type: report
     role: descriptive_case_evidence
