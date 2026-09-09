@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Spike 涨幅榜信号核对 · 2026-09-09</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>Spike 涨幅榜信号核对 · 2026-09-09</h1>
+<p>交付主报告：<a href="/Users/zhangzc/fable-trading/output/qa/spike_gainers_audit_20260909/report.html">打开完整便携 HTML</a>。本文件是核对来源与复现记录；没有修改监控或推送规则。</p>
+<h2>核心结论</h2>
+<p>截图指定的11个币，在今天当前四周期的多头“蓄势释放”口径下分成三类：<strong>9个没有新释放、GRASS已触发且Bark服务器接受、ZEC的30m释放早于该周期启用</strong>。不能将上涨名单中的每个币都视为一次通知漏发。</p>
+<p>现行提醒对应<code>focusRelease</code>：主线和信号线同时近零，<code>max(abs(md),abs(sb)) &lt;= 0.10 * ATR[1]</code>，连续至少12根取得资格；资格成立后带宽冻结，主线离开该带才生成释放。主线精确零轴根数与双线近零根数不相等。<code>showMarks=false</code>隐藏的内部密集启动，不是现行通知事件。</p>
+<h2>范围与统计</h2>
+<ul>
+<li>币种：IOST、GRASS、MINA、USELESS、TRUTH、GPS、ZRX、MET、RAY、ENA、ZEC，均为OKX USDT永续。</li>
+<li>当前周期：15m、30m、1H、4H，共44个无缺口的图表窗口；截止截图后，42窗各240根、2窗各239根已就绪K线。</li>
+<li>今天定义：北京时间2026年9月9日00:00至16:29:59.999；15m最新纳入16:15收盘，其他周期16:00收盘。</li>
+<li>独立近零状态重放比较10,396个可比较状态，差异0；今天多头释放的图表时点与SQLite账本一致。</li>
+<li>价格对照：IOST、GRASS、GPS、MINA各66个15m收盘点，共264行；北京时间00:00收盘价=100，到16:15。它们是事后选出的描述性路径，不是策略收益。</li>
+<li>本轮没有训练/验证集、收益标签或随机入场实验；“2个今天有释放”是事件计数，不是正类率或胜率。</li>
+</ul>
+<h2>11币明细</h2>
+<p>时间均为北京时间。“无”只限今天、当前四周期、当前多头释放定义；不表示没有上涨机会。</p>
+<table><thead><tr>
+<th>币种</th>
+<th>今天可见多头释放</th>
+<th>关键证据</th>
+<th>通知核对</th>
+</tr></thead><tbody>
+<tr><td>IOST</td><td>无</td><td>15m 13:45：主线零轴3根、双线近零0根；1H从9月4日00:00旧启动后主线持续为正</td><td>今天无释放推送；早期标签为历史重放，不能当作当时已通知</td></tr>
+<tr><td>GRASS</td><td>15m 13:15，0.3475</td><td>双线近零39根后释放；14:45 YOLO追加确认</td><td>原箭头13:16:14、模型14:46:27获Bark服务器接受</td></tr>
+<tr><td>MINA</td><td>无</td><td>15m 13:15：零轴11根、双线近零6根；02:00另有内部启动</td><td>内部识别未纳入可见释放通知</td></tr>
+<tr><td>USELESS</td><td>无</td><td>1H昨天21:00启动，0.25691，主线此后持续为正</td><td>昨天15m、1H原箭头已有Bark接受回执</td></tr>
+<tr><td>TRUTH</td><td>无</td><td>1H昨天23:00启动，0.012757，今天主线持续为正</td><td>昨天15m 22:00 YOLO接受；1H 23:00同根YOLO的Bark回执未知</td></tr>
+<tr><td>GPS</td><td>无</td><td>15m 11:00：零轴13根、双线近零9根；4H昨天20:00已启动</td><td>昨天4H原箭头有Bark接受回执</td></tr>
+<tr><td>ZRX</td><td>无</td><td>15m 11:45：零轴5根、双线近零0根，当前密集诊断未满足</td><td>今天无对应释放推送</td></tr>
+<tr><td>MET</td><td>无</td><td>15m 14:45：零轴2根、双线近零0根，当前密集诊断未满足</td><td>今天无对应释放推送</td></tr>
+<tr><td>RAY</td><td>无</td><td>15m 03:15：零轴4根、双线近零0根；1H 05:00双线近零1根</td><td>今天无对应释放推送</td></tr>
+<tr><td>ENA</td><td>无</td><td>15m 14:15：零轴5根、双线近零0根，内部密集启动成立</td><td>今天无对应释放推送</td></tr>
+<tr><td>ZEC</td><td>30m 08:30，1185.09</td><td>30m直到今天15:24:16才启用</td><td>历史信号不补发；更早4H标签不证明当时已通知</td></tr>
+</tbody></table>
+<p>IOST、MINA、GPS、ENA的内部启动不只是后来图表重放：本机账本首次记录分别为IOST 13:46:38、MINA 13:16:21（02:00另一次于02:01:43记录）、GPS 11:01:57、ENA 14:15:52。它们当时已被内部逻辑识别，但未达到现行可见释放通知合同。见<code>internal_entry_receipts.json</code>。</p>
+<h2>验证与零假设对照</h2>
+<p>采用独立状态机从可确认清空的状态开始重放，避免从240根显示尾部重新播种均线。44个窗口检查K线连续性、就绪状态、开盘/收盘时间和图表/账本释放时点。</p>
+<p>除真实数据0差异外，在内存中将GRASS一根近零K线的<code>sb</code>改为<code>3 * ATR</code>，独立检查器捕获12个后续状态差异；原始快照未修改。这是本次非方向性事件审计的负对照。详见<a href="/Users/zhangzc/fable-trading/output/qa/spike_gainers_audit_20260909/validation_checks.json">validation_checks.json</a>。</p>
+<p><strong>AUC、置换p、top-decile毛/净收益、胜率、随机入场和TP/SL对照不适用</strong>：本轮不预测交易结果，只核对事件条件、时钟与回执。用收益数字评价这次运行审计会改变问题；等价严格对照为独立重放、图表/账本逐时点匹配和注入错误负对照。未改变20bp成本、障碍、模型、仓位、实盘配置或通知规则。</p>
+<p>便携HTML使用规范<code>artifact.json</code>和插件统一打包器。规范校验、打包与精确载荷结构校验通过。自动工具未找到兼容headless-shell；指定已安装Chrome的唯一追加尝试超时，因此最终QA为<code>structural_only</code>，未声称桌面/窄屏浏览器交互验收通过。HTML仍包含统一阅读器及语义图表数据表回退。</p>
+<h2>风险与诚实声明</h2>
+<ol>
+<li>11个币由事后上涨截图选择，不能据此计算漏掉机会比例或证明放宽参数更赚钱。需加入同期失败候选，固定规则后另行比较。</li>
+<li>本机固定参数快照不自动同步TradingView图表；若Owner改过TV输入，本次并不证明与当前TV画面完全相同。</li>
+<li>Bark服务器接受不证明手机显示、响铃或阅读；<code>unknown</code>必须保留未知。不同钟源的小差异不应被解释为负传输耗时。</li>
+<li>通知账本含历史重建，图表仅有限显示窗口；历史标签不能追认当时曾检测或发送。</li>
+<li>今日价格指数口径为北京时间00:00收盘价=100；TradingView自选列表通常相对前一根日线收盘计算，交易所日线时区可能不同。未重现截图涨幅。参见<a href="https://www.tradingview.com/support/solutions/43000653369-how-are-change-and-change-calculated-in-the-watchlist/">官方定义</a>。</li>
+</ol>
+<h2>下一步</h2>
+<p>先将已有内部密集启动作为独立研究候选，与现行释放在同币、同时段、同成本下对照；同时在观察视图保留持续趋势、原始启动时间和回踩再启动候选。不要仅为覆盖这11个赢家降低12根阈值，也不要将新增候选直接视为更好的正式信号。新增正式推送规则或部署由Owner决定，本次未实施。</p>
+<h2>来源与复现</h2>
+<p>源代码：<code>yoyo/evaluation/spike_gainers_audit.py</code>（当前已提交的时钟与分类修正）；冻结原始输入：<code>chart_snapshot.json</code>、<code>notification_audit.json</code>。主结果：<code>evidence_summary.json</code>。源SHA随主结果保存。</p>
+<p>报告的SQLite语句仅在隔离内存数据库读取冻结JSON，满足插件图表/表格SQL契约；原Python核对仍是分析来源。四币264行价格指数与原Python输出逐值校验，没有读取在线服务或重新获取价格。</p>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+.venv/bin/python -m yoyo.evaluation.spike_gainers_audit --snapshot-dir output/qa/spike_gainers_audit_20260909
+python3 output/qa/spike_gainers_audit_20260909/report_build.py
+npm --prefix /Users/zhangzc/.codex/plugins/cache/openai-curated-remote/data-analytics/0.2.10-13ceeea1f599 run report:deliver -- --input /Users/zhangzc/fable-trading/output/qa/spike_gainers_audit_20260909/artifact.json --output /Users/zhangzc/fable-trading/output/qa/spike_gainers_audit_20260909/report.html
+python3 scripts/md_to_html.py analysis/p0_spike_gainers_audit_20260909.md --out-dir analysis/html
+</code></pre>
+<p>从冻结JSON可复现本次核对；它不是对当时账户、真实设备显示或历史HTTP状态的重建。没有重新推送，也没有下单。</p>
+</body>
+</html>
