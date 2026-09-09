@@ -78,6 +78,7 @@ def features(bars: pd.DataFrame) -> pd.DataFrame:
     out["golden_cross"] = out.md.gt(out.sb) & out.md.shift(1).le(out.sb.shift(1))
     out["dead_cross"] = out.md.lt(out.sb) & out.md.shift(1).ge(out.sb.shift(1))
     out["close_above_all6"] = bars.close.gt(out.loc[:, MA_COLUMNS].max(axis=1))
+    out["bar_return_pct"] = (bars.close / bars.open - 1) * 100
     out["above6_count"] = out.loc[:, MA_COLUMNS].lt(bars.close, axis=0).sum(axis=1)
     out["price_rope_gap_atr"] = (bars.close - out.rope_high) / out.atr
     out["rope_width_atr"] = (out.rope_high - out.rope_low) / out.atr
@@ -183,7 +184,7 @@ def audit_paths(frame: pd.DataFrame, entry_open: pd.Timestamp, minutes=60) -> di
               "highest_close": float(future.close.max()), "lowest_after_entry": float(future.low.min()),
               "maximum_favorable_pct": float((future.high.max()/entry-1)*100),
               "last_return_pct": float((future.close.iloc[-1]/entry-1)*100)}
-    for key in ("pine_initial_stop_v27", "research_stop_2atr", "release_zone_low"):
+    for key in ("pine_initial_stop_v27", "legacy_signal_bar_stop", "research_stop_2atr", "release_zone_low"):
         stop = float(signal[key])
         hits = future.loc[future.low.le(stop)]
         first = None if hits.empty else hits.index[0]
@@ -243,10 +244,13 @@ def run_analysis(source: Path, out: Path) -> dict:
                                     for name, frame in frames.items()}
     event_start, event_end = pd.Timestamp("2026-08-28T00:00Z"), pd.Timestamp("2026-09-03T00:00Z")
     for name, frame in frames.items():
+        global_view = frame.loc[(frame.index >= pd.Timestamp("2026-08-25T00:00Z"))].copy()
+        global_view["close_time"] = global_view.index + pd.Timedelta(minutes=INTERVALS[name])
+        global_view["open_beijing"] = global_view.index.tz_convert(TZ)
+        global_view.to_csv(out / f"features_{name}.csv", index_label="open_time")
         selected = frame.loc[(frame.index >= event_start) & (frame.index < event_end)].copy()
         selected["close_time"] = selected.index + pd.Timedelta(minutes=INTERVALS[name])
         selected["open_beijing"] = selected.index.tz_convert(TZ)
-        selected.to_csv(out / f"features_{name}.csv", index_label="open_time")
         events = selected.loc[selected.release_side.ne(0) | selected.golden_cross | selected.dead_cross]
         report["events"][name] = [{"open_time": t, **row.to_dict()} for t, row in events.iterrows()]
         if name == "1H":
