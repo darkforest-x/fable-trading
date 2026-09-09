@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.fable.rotation-observer</string>
+	<key>WorkingDirectory</key>
+	<string>/Users/zhangzc/fable-trading</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/bin/env</string>
+		<string>-i</string>
+		<string>PATH=/usr/bin:/bin</string>
+		<string>LANG=en_US.UTF-8</string>
+		<string>PYTHONUNBUFFERED=1</string>
+		<string>/Users/zhangzc/fable-trading/.venv/bin/python</string>
+		<string>-m</string>
+		<string>yoyo.rotation</string>
+		<string>serve</string>
+		<string>--port</string>
+		<string>18766</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>ThrottleInterval</key>
+	<integer>10</integer>
+	<key>ProcessType</key>
+	<string>Background</string>
+	<key>StandardOutPath</key>
+	<string>/Users/zhangzc/fable-trading/experiments/active/exp-altcoin-rotation-system-20260909-v1/runtime/server.stdout.log</string>
+	<key>StandardErrorPath</key>
+	<string>/Users/zhangzc/fable-trading/experiments/active/exp-altcoin-rotation-system-20260909-v1/runtime/server.stderr.log</string>
+</dict>
+</plist>

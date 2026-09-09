@@ -5,6 +5,30 @@
 
 ## 启动
 
+2026-09-09修复：原临时进程退出会使18766无法访问。现由本机LaunchAgent
+`com.fable.rotation-observer`托管网页服务，登录时启动，异常退出后拉起；不会自动扫描。
+配置保存在本目录`com.fable.rotation-observer.plist`，安装于当前用户的
+`~/Library/LaunchAgents/`。日志在`runtime/server.stdout.log`与`server.stderr.log`。
+以下命令只控制本观察台，其他监控服务使用各自独立的label。
+
+```bash
+launchctl list | rg 'com.fable.rotation-observer'
+curl --max-time 5 http://127.0.0.1:18766/healthz
+# Restart this web service after observer source changes:
+launchctl kickstart -k gui/$(id -u)/com.fable.rotation-observer
+# Stop this web service for the current login session:
+launchctl bootout gui/$(id -u)/com.fable.rotation-observer
+# Start it again after bootout has finished:
+launchctl bootstrap gui/$(id -u) "$HOME/Library/LaunchAgents/com.fable.rotation-observer.plist"
+```
+
+托管服务已运行时，无需再手动执行下面的`serve`命令。观察台仅限这台Mac本机访问。
+
+修复验收：已安装配置与本目录文件逐字节一致，`plutil -lint`通过；独立调用确认
+服务进程由PID 1托管，`/healthz`与`/api/snapshot`均返回200。浏览器新标签页实际
+加载“本地服务已连接”和6个候选，仍为2026-04-30截止的原历史快照。本轮没有重新扫描。
+登录启动已配置，未通过实际注销或重启电脑测试。
+
 从fable-trading根目录使用已存在的.venv，无新增依赖。默认端口18766，仅本机可访问。
 
 ```bash
