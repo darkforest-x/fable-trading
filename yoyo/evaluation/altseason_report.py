@@ -705,6 +705,7 @@ def build_markdown(data: dict, folder: Path, figures: list[Path], gallery: str, 
         "图像重绘只读取已保存事件与对应图表，不新增策略评分。",
         "```bash\n"+shlex.quote(str(ROOT/".venv/bin/python"))+" -m yoyo.evaluation.altseason_report --results "
         +shlex.quote(str(folder))+" --report "+shlex.quote(str(DEFAULT_REPORT))+"\n```",
+        (EXPERIMENT/"RUNBOOK.md").read_text(),
         "完整市场获取/研究运行命令与输入SHA应以同目录manifest及已提交PROJECT_PLAN为准；"
         "本报告生成器不隐式重新下载可修订数据。",
         f"[冻结研究计划]({EXPERIMENT/'PROJECT_PLAN.md'}) · [候选账本]({folder/'events.csv.gz'}) · "
