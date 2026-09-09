@@ -65,6 +65,7 @@ LABELS = {
     "win_rate": "胜率%", "profit_factor": "PF", "mean_net_bp": "候选平均净bp",
     "mean_net_r": "平均净R", "mean_control_bp": "匹配随机净bp", "mean_excess_bp": "匹配超额bp",
     "permutation_p": "置换p", "holm_p": "Holm p", "top1_positive_profit_share": "最大赢家/正利润%",
+    "asset_balanced_excess_bp": "资产均衡超额bp", "permutation_assets": "置换资产数",
     "top5_positive_profit_share": "前5赢家/正利润%", "return_minus_top1_contribution_pct": "扣最大赢家贡献后%",
     "return_minus_top5_contribution_pct": "扣前5赢家贡献后%", "boundary_marks": "段末盯市笔数",
     "peak_positions": "最多同时资产", "feature": "入场时特征", "bucket": "事先分桶", "n": "样本数",
@@ -604,9 +605,10 @@ def build_markdown(data: dict, folder: Path, figures: list[Path], gallery: str, 
         "B独立观察均线密集后价格站上六线并突破前高；C观察已建立趋势中的回踩恢复。三者解决不同入口，"
         "是否互补要看完整候选与账户结果，不能只拿各自最漂亮的截图。D是短历史60—339根的独立规则，不能冒称与IMACD完全兼容。",
         _table(_subset(summary, scope="combined", period="full"),
-               ("minutes", "arm", "events", "mean_net_bp", "mean_net_r", "win_rate", "mean_control_bp", "mean_excess_bp", "permutation_p", "holm_p")),
+               ("minutes", "arm", "events", "mean_net_bp", "mean_net_r", "win_rate", "mean_control_bp", "mean_excess_bp", "asset_balanced_excess_bp", "permutation_assets", "permutation_p", "holm_p")),
         "匹配随机要求同币同所同周期、同自然周、因果波动桶；最多3个且不放宽缺样。不同退出共用同一决策的控制索引。"
-        "置换按资产×自然周聚合，Holm校正多重比较。低p只支持这份固定检验，不能把因果关系或未来收益一并证明。",
+        "置换先按资产×自然周聚合，再按资产均衡；p对应资产均衡超额，不能与事件等权的平均超额混为一谈。"
+        "Holm校正多重比较，但资产间仍可能有共同市场冲击；低p不能证明因果关系或未来收益。",
         "### 大涨标签中的参与与提前退出",
         "以下针对固定日历窗口内最高影线较窗口开盘上涨≥50%的事件，描述1H独立候选路径是否参与。"
         "日与周分别列，不能相加为独立行情数；同资产跨所同一次上涨也不是独立证据。"
@@ -664,7 +666,7 @@ def build_markdown(data: dict, folder: Path, figures: list[Path], gallery: str, 
             "known_cohort_after_observed_funding_pct", "proxy_settlements", "ambiguous_settlements",
             "uncertain_funding_range_pct")))
         lines.append("上述保持同一组成交与数量，仅改变成本贡献；费用改变后的可用现金并未重新驱动后续配仓，"
-            "所以不是重算后的复利账户。资金费只覆盖已取得的历史记录，缺失未知；时间边界±5秒及盘中退出先后不明按区间处理。"
+            "所以不是重算后的复利账户。资金费只覆盖已取得的历史记录，缺失未知；原生时间观察到0–8秒偏移，保守将开平仓边界±1分钟及盘中退出先后不明按区间处理。"
             "OKX/Gate若用1H成交K线开盘价作结算价格代理，不等于真实结算标记价；不能把可观测子集称为完整资金费覆盖。")
         lines.append(f"[完整跨所成本账本]({folder/'cost_diagnostics.csv'})。")
     else:

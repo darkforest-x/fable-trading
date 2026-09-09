@@ -3,7 +3,7 @@
 Uses only completed trade ledgers and public realized funding for accounting.
 It does not recompute sizes or signals. Binance supplies settlement mark prices;
 other venues use the matching native1H bar open, explicitly a price proxy.
-Unknown exit intrabar order and funding records within five seconds of a
+Unknown exit intrabar order and funding records within one minute of a
 boundary trade clock are bracketed, not credited as exact held settlements.
 Missing rates/files remain unknown. A traversed API does not prove the full
 historical settlement schedule. Price impact and actual execution remain out.
@@ -32,7 +32,10 @@ def trade_funding(row, funding, hourly):
     if funding is None or funding.empty:return output
     start=pd.Timestamp(row.entry_time);lower=pd.Timestamp(row.exit_time_lower);upper=pd.Timestamp(row.exit_time_upper)
     times=pd.to_datetime(funding.funding_time,unit='ms',utc=True)
-    margin=pd.Timedelta(seconds=5)
+    # Native Gate history has observed offsets up to8 seconds. One-minute
+    # boundary uncertainty conservatively encloses those offsets; the native
+    # timestamp is preserved and never shifted to manufacture an exact fill.
+    margin=pd.Timedelta(minutes=1)
     inside=(times>=start-margin)&(times<=upper+margin)
     f=funding.loc[inside].copy();t=times.loc[inside]
     # A nonempty fetched history can contain zero settlements during a short
@@ -68,6 +71,8 @@ def diagnose(selected, load_funding, load_hourly):
         x['observed_funding_pnl']=float(row.notional)*x['observed_funding_return']
         rows.append(x)
     details=pd.DataFrame(rows);out=[]
+    if details.empty:
+        return pd.DataFrame(columns=['event_id','scope','minutes','arm','portfolio_selected','funding_known']),pd.DataFrame(columns=['scope','minutes','arm','trades','frozen_base_return_pct','frozen_actual_turnover_return_pct','funding_known_fraction'])
     for (scope,minutes,arm),g in details.groupby(['scope','minutes','arm']):
         known=g.loc[g.funding_known]
         base=g.realized_net_pnl.sum()
