@@ -114,10 +114,21 @@ def build(outdir: Path, report: Path = REPORT):
     rel = "../" + str(assets.relative_to(ROOT))
     passed = [r["arm"] for r in manifest["verdicts"] if r["research_gate_pass"]]
     verdict = "、".join(passed) + "通过本轮有限研究门；仍非上线验收。" if passed else "没有策略通过预先规定的完整研究门，不能宣称已找到可应对未来山寨季的盈利系统。"
+    portfolio_lookup = portfolios.set_index(["fold", "portfolio"])
+    state_lookup = states.set_index(["fold", "portfolio", "state"])
+    observations = []
+    for fold, label in (("development", "2023—2024"), ("validation", "2025")):
+        d = portfolio_lookup.loc[(fold, "D")]
+        control = portfolio_lookup.loc[(fold, "random_D")]
+        strong_d = state_lookup.loc[(fold, "D", "strong"), "pnl_contribution_pp"]
+        strong_control = state_lookup.loc[(fold, "random_D", "strong"), "pnl_contribution_pp"]
+        observations.append(f"- {label}：D组合{fmt(d.net_pct)}%，同风险规则的匹配随机组合{fmt(control.net_pct)}%；强势时段利润贡献分别{fmt(strong_d)}和{fmt(strong_control)}个百分点。")
     lines = ["# 山寨强势行情：Donchian 与 EWMAC 固定规则回测", "", "> " + verdict, "",
              "研究日期：2026-09-10。结果覆盖2023—2025，只研究已冻结的52山寨便利池；正式holdout消耗0次。未来是否发生山寨季没有在本报告中作预测。", "",
+             *observations, "",
+             "解读：上涨阶段有利润，还必须检验相同市场条件的其他入场能否做得更好；低回撤也包含低资金占用的作用，不能全部归功于预测。下面完整列出开发、验证、匹配超额及每月账户。", "",
              "## 结论与实际账户表现", "",
-             "下表为52个等初始资本袖套、同币单仓、每次1%袖套风险预算且现金封顶的真实持仓路径。现金买持采用全额资本，风险水平不同；随机组合使用相同策略风险与退出。所有数字只扣固定0.2%入场名义往返成本，未含完整资金费。", ""]
+             "下表为52个等初始资本分账户、同币单仓、每次1%分账户风险预算且现金封顶的历史模拟持仓路径。未上市或预热不足的份额保持现金。现金买持采用全额资本，风险水平不同；随机组合使用相同策略风险与退出。所有数字只扣固定0.2%入场名义往返成本，未含完整资金费。", ""]
     for fold in ("development", "validation"):
         lines += ["### " + ("开发：2023—2024" if fold == "development" else "验证：2025"), ""]
         rows = []
@@ -151,10 +162,10 @@ def build(outdir: Path, report: Path = REPORT):
     for _, row in summary.loc[summary.cohort.eq("all")].iterrows():
         diagnostic_rows.append([row.fold, row.arm, int(row.n), fmt(row.n_positive / row.n_scored * 100 if row.n_scored else None),
                                 fmt(row.mean_gross_bp), fmt(row.median_net_bp), fmt(row.win_rate * 100), fmt(row.profit_factor),
-                                fmt(row.median_hold_hours / 24), fmt(row.mean_mfe_bp), fmt(row.mean_capture_ratio * 100)])
+                                fmt(row.median_hold_hours / 24), fmt(row.mean_mfe_bp), fmt(row.median_capture_ratio * 100)])
     lines += ["### 事件分布补充", "",
-              table(["折", "政策", "候选", "自然正类率%", "毛均bp", "净中位bp", "自然胜率%", "自然PF", "持有中位天", "平均MFE bp", "平均捕获%"], diagnostic_rows), "",
-              "MFE为持仓期间事后最大有利位移，不是可以事前兑现的利润；完整均值/中位数与逐笔数据保留在CSV。", ""]
+              table(["折", "政策", "候选", "自然正类率%", "毛均bp", "净中位bp", "自然胜率%", "自然PF", "持有中位天", "平均MFE bp", "捕获中位%"], diagnostic_rows), "",
+              "MFE为持仓期间事后最大有利位移，不是可以事前兑现的利润。捕获=净收益/MFE，MFE为0时不适用；亏损时可低于-100%，接近0的分母会放大均值，因此表中显示中位数，完整均值仍保留在CSV。", ""]
     exit_rows = []
     for _, row in exit_summary.iterrows():
         exit_rows.append([row.fold, row.cohort, int(row.paired_n), int(row.censored_either), fmt(row.mean_delta_net_bp),
@@ -186,7 +197,7 @@ def build(outdir: Path, report: Path = REPORT):
               "## 风险与诚实声明", "",
               "- 52币是现成便利/幸存者池，未完整覆盖历史退市币；结果不是历史全市场无偏估计。",
               "- 2023—2025已被其他实验研究过；本轮固定策略并无参数搜索，但2025不应称为研究者从未见过的盲测。",
-              "- 静态0.2%成本未含完整资金费率和实际执行延迟/冲击，不能按这些曲线直接推算永续实盘收益。",
+              "- 静态0.2%成本未含完整资金费率和实际执行延迟/冲击；退出也按入场名义计费，上涨时未随退出名义金额增加。不能按这些曲线直接推算永续实盘收益。",
               "- 跨币高度相关、交易重叠、月份块较少，置信区间与p的解释依赖月份近似独立及符号可交换性。更少于6个月不作显著性结论。",
               "- 自然退出胜率/PF排除折末删失，可能偏向较短持仓；组合净收益包含边界清算。最大回撤是4H收盘盯市，不能代表完整盘中最大风险。",
               "- 未来是否出现山寨季、是否重复历史幅度、哪些币领涨都没有被本实验验证。本轮不产生交易指令或上线授权。", "",
