@@ -8,7 +8,9 @@
 // Unadjusted ex-rights/ex-dividend gaps can change indicator signals.
 // API reference: tradingview.com/pine-script-docs/concepts/chart-information/
 // Regex empty-match contract: tradingview.com/pine-script-docs/concepts/strings/
-// Initial defaults are the research baseline until chronological validation.
+// Frozen config_id: 6bd5db72099e. Development: 2020-2021; validation: 2022-2023.
+// Defaults were frozen after finite-candidate chronological selection.
+// This is not a global optimum or a claim of profitability.
 // Price-path references are not orders, fills, portfolio returns or profit targets.
 // Daily OHLC cannot resolve the exchange's price-limit queue or intraday sequence.
 indicator("SPIKE A股主板 · 日线趋势", shorttitle="SPIKE 主板", overlay=false, max_bars_back=2500, max_lines_count=160, max_boxes_count=120, max_labels_count=300, explicit_plot_zorder=true)

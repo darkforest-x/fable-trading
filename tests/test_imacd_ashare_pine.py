@@ -242,3 +242,27 @@ def test_tick_snapping_does_not_round_up_a_meaningfully_subtick_stop():
     stop = evaluate("f_initialStop", entry=100., structureStop=95.0099999, signalAtr=1., floorAtr=3., tick=.01)
     assert stop == pytest.approx(95.)
     assert not evaluate("f_lte", a=95.0000001, b=95.)
+
+
+def test_frozen_defaults_match_the_chronological_selection_config_id():
+    from dataclasses import asdict
+    import hashlib
+    import json
+    from yoyo.evaluation.ashare_imacd import Parameters
+
+    names = {"ma_length": "lengthMA", "signal_length": "lengthSignal",
+             "focus_bars": "focusMinBars", "band_atr": "focusAtrBand",
+             "quality": "entryQuality", "structure_bars": "structureBars",
+             "stop_atr": "stopAtrFloor", "trail_atr": "trailAtr"}
+    defaults = {}
+    for field, variable in names.items():
+        match = re.search(r"(?:int|float) " + variable + r" = input\.(int|float)\(([^,]+),", TEXT)
+        defaults[field] = (int if match.group(1) == "int" else float)(match.group(2))
+    defaults["buffer_atr"] = float(re.search(r"structureCandidate = recentLow - ([0-9.]+) \* atr", TEXT).group(1))
+    defaults["trail_activation_r"] = float(re.search(r"highestClose >= entryPrice \+ ([0-9.]+) \* initialRisk", TEXT).group(1))
+    assert defaults == asdict(Parameters())
+    selected_id = hashlib.sha256(json.dumps(defaults, sort_keys=True).encode()).hexdigest()[:12]
+    assert selected_id == "6bd5db72099e"
+    assert "Frozen config_id: " + selected_id in TEXT
+    assert "Development: 2020-2021; validation: 2022-2023" in TEXT
+    assert "not a global optimum or a claim of profitability" in TEXT
