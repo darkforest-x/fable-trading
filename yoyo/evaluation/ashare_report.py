@@ -618,7 +618,7 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
         '2015–2019 仅初始化指标；2020–2021 按固定顺序进行单变量比较；2022–2023 只比较初始配置和 7 个阶段端点；'
         '冻结 JSON 后才运行 2024–2025。各段从 100 万元现金重新开始，跨段持仓不继承。'
         f"本实验最终配置评估编号为 {summary['final_evaluation_number']}，程序调用／恢复次数为 {summary.get('invocation_attempts',1)}。"
-        '**未读取或评分项目 2026-05-04 及之后的 holdout，消耗为 0。**',
+        '**量化评估没有读取 2026 年价格行，项目 holdout 的收益评估消耗为 0。** TradingView 当前图仅用于编译和样式检查，另行记录，不属于收益验收。',
         '### 作废结果与重跑边界',
         '首轮开发期及验证期结果因合成测试发现“止损对后复权整体尺度不保持不变”的实现错误而作废，'
         '原始结果完整保留在 `invalid_selection_01`。修复后采用相同时间切分与候选参数池重跑，未据作废收益调整参数范围。'
@@ -775,12 +775,17 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
     ])
     root=Path(__file__).resolve().parents[2]
     q=lambda path:shlex.quote(str(path))
-    text.append('以下从空结果目录复现原流程；已有冻结或最终结果会拒绝覆盖，不应删除保护文件来事后调参。')
+    text.append('精确复现依赖本机冻结数据快照及 selection_inputs.json 的哈希；重新向供应商抓取若返回修订数据，应作为新数据版本。'
+                '以下记录原流程：数据质量排除清单必须随快照恢复，不能漏掉后直接评分。已有冻结或最终结果会拒绝覆盖，不应删除保护文件来事后调参。'
+                '仅重建本报告时运行最后两条命令即可，不必再次运行选参和最终评分。')
+    snapshot=root/'experiments/active/exp-imacd-ashare-daily-long-20260909-v1/results'
     text.append('```bash\n'+f'cd {q(root)}\n'+
                 '.venv/bin/python -m pip install --dry-run --report /tmp/spike-ashare-bs093-report.json --target /tmp/spike-ashare-bs093 --no-deps baostock==0.9.3\n'+
                 '.venv/bin/python -m pip install --target /tmp/spike-ashare-bs093 --no-deps baostock==0.9.3\n'+
                 f'PYTHONPATH=/tmp/spike-ashare-bs093:. .venv/bin/python -m yoyo.evaluation.ashare_data --destination {q(data)} --universe-date 2020-01-02 --start 2015-01-01 --end 2025-12-31 --workers 4 --quotas '+
                 shlex.quote(json.dumps({'main_sh':100,'main_sz':100},separators=(',',':')))+'\n'+
+                f'cp {q(snapshot/"exclusions.json")} {q(data/"exclusions.json")}\n'+
+                f'.venv/bin/python -m yoyo.evaluation.ashare_audit --data {q(data)} --output {q(data.parent/"mainboard_data_audit.json")}\n'+
                 f'.venv/bin/python -m yoyo.evaluation.ashare_research select --data {q(data)} --out {q(results)}\n'+
                 f'.venv/bin/python -m yoyo.evaluation.ashare_research final --data {q(data)} --out {q(results)} --controls {rand["n"]}\n'+
                 f'.venv/bin/python -m yoyo.evaluation.ashare_report --data {q(data)} --results {q(results)} --report {q(report)}\n'+
@@ -796,10 +801,14 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
                  '[上交所交易规则](https://www.sse.com.cn/lawandrules/sselawsrules2025/stocks/exchange/c/c_20260424_10816482.shtml)；'
                  '[印花税减半公告](https://www.mof.gov.cn/jrttts/202308/t20230828_3904235.htm)；'
                  '[上交所费用说明](https://one.sse.com.cn/onething/gptz/)。'])
-    runtime=figures/'pine_baseline_runtime.png'
+    text.insert(text.index('## 复现与文件'),
+                f'[独立主板 Pine 源码]({(root/"yoyo/evaluation/pine/imacd_ashare_daily_long_v1.pine").resolve()})。'
+                '已保存到 TradingView 私有脚本“SPIKE A股主板 · 日线趋势”；仅标准日线、主板股票、多头启动和多头持仓退出。'
+                '同图其他旧脚本仍会生成自己的标记，使用本版时注意区分。')
+    runtime=figures/'pine_mainboard_compiled.png'
     if runtime.exists():
         text.insert(text.index('## 复现与文件'),
-                    f'[独立 A 股 Pine 初始版运行验收截图]({runtime.resolve()}) 仅用于 TradingView 编译与视觉验收；'
+                    f'[独立主板 Pine 冻结版运行验收截图]({runtime.resolve()}) 仅用于 TradingView 编译与视觉验收；'
                     '界面打开的是 2026 年当前图，不是 2024–2025 样本外案例，不参与本报告选参或收益统计。')
     report.parent.mkdir(parents=True,exist_ok=True)
     report.write_text('\n\n'.join(text)+'\n')
