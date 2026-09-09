@@ -2,6 +2,21 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## Spike 已增加日线监控（2026-09-09 19:45，覆盖下方四周期口径）
+
+Owner要求日线也出信号。v1.11.0 / c787e90已部署；当前15m/30m/1H/4H/日线
+收盘启动先发Bark，YOLO通过追加，TG继续关闭。日线使用已有1Dutc流，每日08:00北京时间
+收盘；新增1Wutc作背景，周一UTC开盘，校验/缓存/_higher_at均修正周一偏移，旧四周期不变。
+日线direct/model首次启用19:45:04.769 / 19:45:04.736；旧20项启用元数据、347份Bark终态、
+266份TG队列逐条保持，新增日线队列0，无测试或历史补发，运行源码SHA匹配。
+前端信号/观察页可筛日线，BTC真实120根日线预览及interval=1D已验。日线需341根历史，
+周背景需341周；后者不足只显示未知，不能挡可见启动。日线YOLO未做收益/泛化验收。
+1077项监控/边界/因果/parity通过、2项旧migration哈希失败（candidates.py是本轮前已有
+未提交改动，render.py的HEAD自身已与ledger不符），未绕过或重写ledger；56前端测试通过。
+上线时475合约×5周期2375窗口正在预热、已推进且错误0，不能说已全市场就绪。
+七数据流冷启动完整分页请求预算约21分钟，短周历史会少些，勿反复重启。
+证据output/qa/spike_daily_20260909/；学习笔记daily-rollouts-need-calendar-alignment-and-independent-cutovers.md。
+
 ## IMACD V2.7 结构止损与趋势框（2026-09-09，覆盖下方旧Pine止损默认值）
 
 Owner反馈NEAR30m等止损太紧、3R框误导。源码`yoyo/evaluation/pine/imacd_dense_mtf_v2_7.pine`，
