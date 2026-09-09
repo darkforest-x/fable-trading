@@ -18,6 +18,48 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: useless-multiscale-20260909-report-source
+    artifact_type: report
+    role: descriptive_case_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: e2fbeb8
+    generator_commit: e2fbeb8
+    source_path: analysis/p1_useless_multiscale_launch_20260909.md
+    sha256: 232c3e2be5d3f9bb585cc2206d4f61da9dfb5ac9124af53607f657b001bd81b6
+    size_bytes: 21050
+    storage_uri: repo://analysis/p1_useless_multiscale_launch_20260909.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-selected case; fixed scan then expanded exploratory scan, no independent profitability validation or live change.
+  - artifact_id: useless-multiscale-20260909-report-html
+    artifact_type: report
+    role: descriptive_case_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: e2fbeb8
+    generator_commit: e2fbeb8
+    source_path: analysis/html/p1_useless_multiscale_launch_20260909.html
+    sha256: d3e0c170e37758852c0b712e561dd1545309da3011492f748c849ced0b15ba4a
+    size_bytes: 2143503
+    storage_uri: repo://analysis/html/p1_useless_multiscale_launch_20260909.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-selected case; fixed scan then expanded exploratory scan, no independent profitability validation or live change.
+  - artifact_id: useless-multiscale-20260909-manifest
+    artifact_type: manifest
+    role: descriptive_case_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: e2fbeb8
+    generator_commit: e2fbeb8
+    source_path: analysis/output/useless_multiscale_20260909/delivery_manifest.json
+    sha256: fd157c909e81fb00c09349cdb82497569c5899646c64e68854bddc58dcdaeb1c
+    size_bytes: 3527
+    storage_uri: local:///Users/zhangzc/fable-trading/analysis/output/useless_multiscale_20260909/delivery_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-selected case; fixed scan then expanded exploratory scan, no independent profitability validation or live change.
   - artifact_id: altcoin-rotation-20260909-tool-connectivity
     artifact_type: manifest
     role: engineering_observer_evidence
