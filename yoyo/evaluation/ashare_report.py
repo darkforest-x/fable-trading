@@ -315,6 +315,9 @@ def case_chart(data: Path, trade: pd.Series, p: Parameters, destination: Path, l
     osc.legend(loc='upper left',ncol=2,frameon=False,fontsize=9)
     ticks=np.unique(np.linspace(0,len(window)-1,min(9,len(window))).astype(int))
     osc.set_xticks(ticks);osc.set_xticklabels(window.date.iloc[ticks].tolist(),rotation=0,fontsize=9)
+    labels=osc.get_xticklabels()
+    if labels:
+        labels[0].set_ha('left');labels[-1].set_ha('right')
     osc.set_xlim(-1,len(window))
     fig.text(.085,.040,'红涨绿跌 · 价格为 HFQ 后复权坐标；箭头价不是当时人民币报价。阴影为持有期，退出后的灰区仅供复盘。',fontsize=9,color='#64748b')
     fig.text(.085,.017,'案例按全体自然平仓净收益两端选取；初始 R 固定，跟踪线只使用此前收盘信息。原始人民币价可查 source CSV。',fontsize=9,color='#64748b')
@@ -520,6 +523,10 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
         trades=pd.DataFrame()
     natural=natural_trades(trades)
     risk_rows=risk_distribution(trades)
+    terminal=trades.loc[~trades.index.isin(natural.index)] if not trades.empty else trades
+    below_activation=int((natural.peak_r<p.trail_activation_r).sum()) if len(natural) else 0
+    terminal_below_activation=int((terminal.peak_r<p.trail_activation_r).sum()) if len(terminal) else 0
+    activation_fraction_median=float((p.trail_activation_r*trades.risk/trades.entry).median()) if len(trades) else None
     random_trade_path=results/'final'/'random_00_trades.csv'
     random_risks=[]
     if random_trade_path.exists():
@@ -556,6 +563,15 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
         f"初始止损保留结构空间，盈利后沿趋势跟踪，不设置固定 3R 止盈上限。"
         f"验证期选中的配置在 2024–2025 年样本外净收益为 **{percent(selected['net_return'])}**，最大回撤 **{percent(selected['max_drawdown'])}**。"
         f"相对初始参数净收益差 **{number(delta*100)} 个百分点**，相对匹配随机对照均值差 **{number(edge*100)} 个百分点**。",
+        '**本轮没有找到样本外盈利且优于匹配随机入场的参数，不支持把这一版当成已经验证能赚钱的 A 股交易系统。**'
+          if selected['net_return']<=0 or edge<=0 else
+          '样本外结果仅属于这一组冻结规则与样本，仍不能保证未来收益或全市场最优。',
+        f"验证期 {len(validation)} 个端点全部亏损；“选中”是相对亏损最小，验证期净收益为 {percent(frozen['chosen']['net_return'])}。"
+          if all(row['net_return']<0 for row in validation) else
+          '验证期端点完整结果见后文，不以样本外收益重新挑选方案。',
+        '最终选中参数与初始参数完全相同，本次搜索没有提供优于初始值的样本外改进。'
+          if selected['parameters']==frozen['baseline'] else
+          '参数选择已在样本外评估之前冻结；不得根据本轮结果再更换默认值。',
         '这里的“选中”仅指预先限定候选在验证期获胜，不能视为全 A 股、每只股票或未来行情的全局最优；已有数字资产指标与 Spike 扫描/通知均未修改。',
         '## 交付参数与交易方式',
         table(['参数','初始值','验证期选中值'],[[PARAM_NAMES.get(name,name),frozen['baseline'][name],value]
@@ -613,9 +629,13 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
         '主动策略与随机入场组合使用同一历史股票池、100 万元资金、最多 10 笔持仓、每笔初始价格风险 0.75%、单股资金上限 15%。'
         '同日按证券代码排序分配资金。持有基线以冻结原始池等额分槽，首日无法买入及数据质量排除的槽位留现金；'
         f"质量排除所占 {len(audit['quality_exclusions'])}/{audit['selected']} 的基线资金不重新分配。"
-        '沪深300为含模拟成本的非可投资指数参考。'
+        '沪深300为含模拟成本的非可投资价格指数参考，不含现金分红再投资，与个股 HFQ 总回报坐标并非完全相同口径。'
         '“紧止损参考”使用质量模式 0 和最小 1ATR 距离，仍保留结构外止损；它是整体方案参考，不能把差异单独归因于止损。'
+        '它没有在验证阶段作为最终候选获胜，不能因为它在样本外较好就改用它并宣称新的样本外结论。'
         '“随机逐项均值/中位数”分别统计每项指标，不代表一条真实组合路径。',
+        f"同池等权持有实际投资 {summary['equal_weight_hold']['stocks_invested']} 只；"
+        f"其中 {summary['equal_weight_hold']['stale_terminal']} 只末端行情陈旧，以最后已知价格预留退出费用估值。"
+        '其净值可能受陈旧估值影响，本轮未为该基准单独提供零回收压力路径；不能把选中策略“末端无陈旧持仓”的结论套到基准。',
         f"![样本外净值与回撤]({chart_manifest['global']['path']})",
         f"选中方案双倍滑点后的净收益 {percent(summary['double_slippage']['net_return'])}，"
         f"最大回撤 {percent(summary['double_slippage']['max_drawdown'])}。"
@@ -649,6 +669,15 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
         table(['首轮随机对照（seed 91000）','笔数','P25','中位数','P75'],risk_table_rows(random_risks))
           if random_risks else '首轮随机逐交易账本无可用记录，风险距离分布不能计算。',
         '逐交易随机分布仅来自保存明细的第 1 轮 seed 91000，不外推为全部 49 轮；49 轮整体的成交数与资金暴露分布见前表。',
+        '### 宽止损与跟踪启动门槛的叠加',
+        f"规则要在最高持有收盘达到 {number(p.trail_activation_r)}R 后才启动趋势跟踪。"
+        f"用全部 {len(trades)} 笔实际入场的冻结风险计算，需要的复权价格涨幅中位数为 **{percent(activation_fraction_median)}**。"
+        f"自然平仓中，{below_activation}/{len(natural)} 笔"
+        f"（{percent(below_activation/len(natural)) if len(natural) else '不适用'}）最高持有收盘从未达到该门槛；"
+        f"期末 {len(terminal)} 笔未自然平仓中也有 {terminal_below_activation} 笔未达到。",
+        '初始止损始终存在，未启动的是随趋势收紧的跟踪退出机制。宽初始 R 同时抬高了跟踪激活所需涨幅，'
+        '可能让一部分持仓长时间沿用初始止损。这里是规则与已记录价格路径的描述，没有单独变更激活门槛作消融试验，'
+        '不能因此宣称“降低门槛就能赚钱”。同理，紧止损参考同时改了质量模式和止损倍数，不能用它证明止损单变量的因果效果。',
         '## 固定形成质量评分与单特征对照',
         '评分固定为“启动前 12 根六均线带宽/ATR 均值的负数”，没有根据结果重新选特征。'
         '该评分只诊断已进入组合且自然平仓的交易；不是买入概率，也不是整池分类效果。'
@@ -661,6 +690,11 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
             f"固定评分 AUC={number(diag.get('auc'),4)}，前十分位净收益置换 p={number(diag['permutation_p'],4)}。"
             '这是已被组合准入的交易间的诊断；单笔等权毛/净收益不同于组合收益，未平仓长趋势不进入该表。'
             '此处交易收益置换不保持时间簇相关，显著性应作为探索诊断；月度块检验另列。'])
+        text.append(f"前十分位的 {percent(diag['top_decile_net'])} 是 {diag['top_decile_n']} 笔交易的平均净收益，"
+                    f"不是组合赚了 {percent(diag['top_decile_net'])}。该分组没有独立的资金组合或匹配随机回放，"
+                    '不能据此在已看过样本外后追加筛选并声称验证成功。'+
+                    ('本次置换 p 未达到仓库要求的 0.01，不能据此认定评分具有可靠盈利区分力。'
+                     if diag['permutation_p']>=.01 else '置换诊断也不能替代组合收益与匹配随机入场对照。'))
     else:
         text.append('该项不适用：'+diag.get('reason','无可用自然平仓评分')+'。不生成虚构 AUC 或分位收益。')
     text.extend(['## 板块拆分',table(['板块','股票数','净收益','最大回撤','自然平仓','胜率','资金暴露'],[
