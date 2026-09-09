@@ -14,11 +14,11 @@ def activate(store, since):
     for protocol in (MODEL_PROTOCOL, DIRECT_POLICY):
         store.activate_notification_policy(since, protocol=protocol, retire_obsolete=False)
         store.activate_bark_policy(since, protocol=protocol, retire_obsolete=False)
-        for tf in (DIRECT_TIMEFRAMES if protocol == DIRECT_POLICY else ("15m", "1H", "4H")):
+        for tf in (DIRECT_TIMEFRAMES if protocol == DIRECT_POLICY else ("5m", "15m", "1H", "4H")):
             store.activate_timeframe_policy(tf, since, protocol=protocol)
 
 
-@pytest.mark.parametrize("timeframe", ["15m", "1H", "4H"])
+@pytest.mark.parametrize("timeframe", ["5m", "15m", "1H", "4H"])
 @pytest.mark.parametrize("channel", ["telegram", "bark"])
 def test_new_cutover_and_freshness_boundaries(tmp_path, timeframe, channel):
     e = model_event(timeframe=timeframe, wait=0)["indicator"]
@@ -41,7 +41,7 @@ def test_new_cutover_and_freshness_boundaries(tmp_path, timeframe, channel):
     {"price": 0}, {"price": float("nan")}, {"price": True}, {"symbol": "TEST\n-SWAP"},
     {"bar_close_ms": True}, {"bar_open_ms": -1}, {"focus_start_ms": 0},
     {"confirmed": False}, {"tv_marker_visible": False}, {"previous_md": .2},
-    {"md": .1}, {"near_zero_bars": 11}, {"timeframe": "5m"},
+    {"md": .1}, {"near_zero_bars": 11}, {"timeframe": "30m"},
 ])
 def test_direct_stage_rejects_incomplete_or_wrong_arrow(changes):
     e = model_event(wait=0)["indicator"]
@@ -59,7 +59,7 @@ def monitor(tmp_path, monkeypatch):
     return service.Monitor(store, client=SimpleNamespace(clock=lambda: 0))
 
 
-@pytest.mark.parametrize("timeframe", ["15m", "1H", "4H"])
+@pytest.mark.parametrize("timeframe", ["5m", "15m", "1H", "4H"])
 def test_scan_records_direct_bark_before_registration_without_telegram_snapshot(monitor, monkeypatch, timeframe):
     e = model_event(timeframe=timeframe, wait=0)["indicator"]
     activate(monitor.store, e["bar_close_ms"] - 1)

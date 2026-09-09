@@ -88,7 +88,7 @@ def configured_monitor(store, client, tg=None, bark=NOW - 120_000, *,
         # Historical Telegram metadata must not re-enable the disabled channel.
         store.activate_notification_policy(tg, protocol=MODEL_PROTOCOL)
     store.activate_bark_policy(bark, protocol=MODEL_PROTOCOL)
-    policy = ({tf: NOW - 120_000 for tf in ("15m", "1H", "4H")}
+    policy = ({tf: NOW - 120_000 for tf in ("5m", "15m", "1H", "4H")}
               if timeframe_policy is None else timeframe_policy)
     for timeframe, activation in policy.items():
         if activation is not None:
@@ -120,7 +120,7 @@ def market(store, timeframe):
                 if row["symbol"] == SYMBOL and row["timeframe"] == timeframe)
 
 
-@pytest.mark.parametrize("timeframe", ["15m", "1H", "4H"])
+@pytest.mark.parametrize("timeframe", ["5m", "15m", "1H", "4H"])
 def test_fetch_failure_then_same_timestamp_recovery_restores_chart_and_market(tmp_path, timeframe):
     store = Store(tmp_path / "monitor.sqlite3")
     client = FakeMarket()
@@ -151,7 +151,7 @@ def test_fetch_failure_then_same_timestamp_recovery_restores_chart_and_market(tm
         assert not restored.get("error")
 
 
-@pytest.mark.parametrize("timeframe,higher", [("15m", "1H"), ("1H", "4H"), ("4H", "1Dutc")])
+@pytest.mark.parametrize("timeframe,higher", [("5m", "1H"), ("15m", "1H"), ("1H", "4H"), ("4H", "1Dutc")])
 def test_missing_htf_then_recovery_recomputes_same_local_candle(tmp_path, timeframe, higher):
     store = Store(tmp_path / "monitor.sqlite3")
     client = FakeMarket()
@@ -410,6 +410,8 @@ def test_bark_confirmation_keeps_earlier_signal_without_snapshot_dependency(tmp_
     client.history['15m'][-1].update(o=120., h=121., l=119., c=120.)
     target = client.history['15m'][-1]['t']
     client.history['15m'].append(dict(client.history['15m'][-1], t=target + 900_000))
+    for _ in range(3):
+        client.history['5m'].append(dict(client.history['5m'][-1], t=client.history['5m'][-1]['t'] + 300_000))
     client.clock = lambda: NOW + 900_000
     monitor = configured_monitor(store, client)
     monkeypatch.setitem(sys.modules, 'yoyo.monitor.snapshot', None)
@@ -476,7 +478,7 @@ def test_15m_notification_requires_its_own_forward_cutover(tmp_path, activation,
     assert store.bark_status()['pending'] == expected
 
 
-def test_scan_covers_three_periods_and_persists_cutover_before_workers(tmp_path):
+def test_scan_covers_four_periods_and_persists_cutover_before_workers(tmp_path):
     store = Store(tmp_path / 'monitor.sqlite3')
     client = FakeMarket()
     client.synchronize = lambda: None
@@ -484,16 +486,16 @@ def test_scan_covers_three_periods_and_persists_cutover_before_workers(tmp_path)
     monitor = Monitor(store, client=client)
     monitor.scan()
     status = monitor.status()
-    assert status['scan']['completed'] == status['scan']['total'] == 3
+    assert status['scan']['completed'] == status['scan']['total'] == 4
     assert status['scan']['errors'] == 0
-    assert status['runtime']['timeframes'] == ['15m', '1H', '4H']
-    assert status['runtime']['timeframe_notification_since_ms'] == {'15m': NOW, '1H': NOW, '4H': NOW}
+    assert status['runtime']['timeframes'] == ['5m', '15m', '1H', '4H']
+    assert status['runtime']['timeframe_notification_since_ms'] == {'5m': NOW, '15m': NOW, '1H': NOW, '4H': NOW}
     assert monitor.notification_ready.is_set()
     # Restart retains first activation, without resetting the old channels.
     assert Store(store.path).activate_timeframe_policy('15m', NOW + 900_000, protocol=MODEL_PROTOCOL) == NOW
 
 
-def test_chart_api_accepts_15m_and_rejects_unmonitored_period(tmp_path):
+def test_chart_api_accepts_5m_and_15m_and_rejects_unmonitored_period(tmp_path):
     from fastapi import HTTPException
     from yoyo.monitor.server import create_app
     app = create_app(runtime=tmp_path, start_monitor=False)
@@ -501,9 +503,10 @@ def test_chart_api_accepts_15m_and_rejects_unmonitored_period(tmp_path):
     monitor.client = FakeMarket()
     monitor.scan_symbol(INSTRUMENT)
     endpoint = next(r.endpoint for r in app.routes if getattr(r, 'path', None) == '/api/chart')
+    assert endpoint(SYMBOL, '5m')['timeframe'] == '5m'
     assert endpoint(SYMBOL, '15m')['timeframe'] == '15m'
     with pytest.raises(HTTPException) as exc:
-        endpoint(SYMBOL, '5m')
+        endpoint(SYMBOL, '30m')
     assert exc.value.status_code == 400
 
 

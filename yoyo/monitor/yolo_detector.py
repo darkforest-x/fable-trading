@@ -24,6 +24,8 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from yoyo.monitor import MONITORED_TIMEFRAMES, TIMEFRAMES
+
 
 ROOT = Path(__file__).resolve().parents[2]
 MODEL_PATH = ROOT / (
@@ -32,7 +34,7 @@ MODEL_PATH = ROOT / (
 )
 MODEL_SHA256 = "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838"
 MODEL_CLASSES = {0: "dense_long", 1: "dense_short"}
-TIMEFRAME_MS = {"15m": 900_000, "1H": 3_600_000, "4H": 14_400_000}
+TIMEFRAME_MS = {period: TIMEFRAMES[period] for period in MONITORED_TIMEFRAMES}
 MA_COLUMNS = ("sma20", "sma60", "sma120", "ema20", "ema60", "ema120")
 PREDICT_PARAMETERS = dict(imgsz=1280, conf=.25, iou=.70, verbose=False,
                           rect=True, half=False, agnostic_nms=False,

@@ -53,7 +53,7 @@ def scenario(tmp_path, tf='1H', side='long', wait=2):
     return gate, store, detector, raw, candles, proposal, clock
 
 
-@pytest.mark.parametrize('tf', ['15m','1H','4H'])
+@pytest.mark.parametrize('tf', ['5m','15m','1H','4H'])
 @pytest.mark.parametrize('side', ['long','short'])
 @pytest.mark.parametrize('wait', [0,2,9])
 def test_exact_frozen_wait_both_sides_all_timeframes(tmp_path, tf, side, wait):
@@ -73,7 +73,7 @@ def test_exact_frozen_wait_both_sides_all_timeframes(tmp_path, tf, side, wait):
     assert len(detector.calls)==wait+1
 
 
-@pytest.mark.parametrize('tf', ['15m', '1H', '4H'])
+@pytest.mark.parametrize('tf', ['5m', '15m', '1H', '4H'])
 def test_default_gate_confirms_bark_without_telegram_queue_or_photo(tmp_path, monkeypatch, tf):
     from yoyo.monitor import snapshot
     _, store, detector, raw, bars, prop, clock = scenario(tmp_path, tf=tf, wait=2)
