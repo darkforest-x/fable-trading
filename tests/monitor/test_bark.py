@@ -1,11 +1,12 @@
 """Bark channel delivery and privacy scenarios; all pushes are synthetic."""
 import json
 import stat
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 import requests
 
-from yoyo.monitor import FRESH_MS, MODEL_PROTOCOL
+from yoyo.monitor import FRESH_MS, MODEL_PROTOCOL, SIGNAL_KIND
 from model_fixture import CONFIRM, model_event
 from yoyo.monitor.bark import BarkWorker, credentials, message, save_configuration
 from yoyo.monitor.store import Store
@@ -46,7 +47,8 @@ def test_success_uses_private_post_and_does_not_consume_telegram(tmp_path):
     assert kwargs["json"]["device_key"] == "fake-private-device"
     assert kwargs["allow_redirects"] is False
     assert "100.5" in kwargs["json"]["body"] and "等待 2 根" in kwargs["json"]["subtitle"]
-    assert kwargs["json"]["url"].endswith("interval=60")
+    assert kwargs["json"]["url"] == "https://www.tradingview.com/chart/"
+    assert kwargs["json"]["body"].endswith("interval=60")
     assert "原箭头 99.5" in kwargs["json"]["body"]
     assert "YOLO 确认" in kwargs["json"]["subtitle"]
     assert store.list_events()[0]["bark_notification_status"] == "sent"
@@ -54,6 +56,26 @@ def test_success_uses_private_post_and_does_not_consume_telegram(tmp_path):
     assert "fake-private-device" not in json.dumps(worker.status())
     assert "fake-private-device" not in json.dumps(store.list_events())
     assert worker.status()["acceptance"] == "bark_server_accepted_not_device_receipt"
+
+
+@pytest.mark.parametrize("timeframe,interval", [("15m", "15"), ("1H", "60"), ("4H", "240")])
+@pytest.mark.parametrize("direct", [True, False])
+def test_mobile_app_link_keeps_exact_web_chart_and_copy_symbol(timeframe, interval, direct):
+    signal = event(timeframe=timeframe, symbol="ZK-USDT-SWAP")
+    if direct:
+        signal["kind"] = SIGNAL_KIND
+    payload = message(signal)
+    # TradingView's AASA excludes nonempty symbol queries from /chart/.
+    assert payload["url"] == "https://www.tradingview.com/chart/"
+    assert payload["copy"] == "OKX:ZKUSDT.P"
+    assert "autoCopy" not in payload
+    assert "action" not in payload  # action=none would disable tap navigation.
+    fallback = urlsplit(payload["body"].split("网页备用：", 1)[1])
+    assert (fallback.scheme, fallback.netloc, fallback.path) == (
+        "https", "www.tradingview.com", "/chart/")
+    assert parse_qs(fallback.query) == {"symbol": ["OKX:ZKUSDT.P"], "interval": [interval]}
+    assert timeframe in payload["title"]
+    assert ("未经 YOLO 确认" in payload["subtitle"]) == direct
 
 
 @pytest.mark.parametrize("changes,now,activation", [

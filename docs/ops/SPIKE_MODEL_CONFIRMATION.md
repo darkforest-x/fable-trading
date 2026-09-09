@@ -53,6 +53,22 @@ Telegram sender 与 model gate 的 Telegram 支路默认关闭，监控不启动
 旧 Telegram 凭据不删除或修改；历史发送机制仅保留用于兼容和显式假发送测试，当前监控没有重新开启入口。
 原始OHLC仍只保存在内存；模型队列单线程，按合约×周期合并等待输入，不阻塞公开行情扫描。
 
+### Bark 手机打开方式（v1.8.1，2026-09-09）
+
+新发送消息的 `url` 使用 `https://www.tradingview.com/chart/`，按 TradingView 官方
+Universal Link 声明优先打开 iPhone App；精确到 OKX 币种及15m/1H/4H的原网页链接放在正文“网页备用”。
+官方 AASA 明确排除带非空 `symbol` 的 `/chart/` 和8字符布局ID链接，不能仅把网页地址换成未经验证的 scheme。
+这里仅请求打开 App，不声称自动切换币种、周期或加载特定指标。实际手机及已安装版本尚待 Owner 点击核对；
+系统关联或用户默认打开偏好仍可能让链接进入浏览器。点击“网页备用”仍是打开对应网页图表。
+
+`copy` 字段为完整 `OKX:币种.P`，供系统通知长按展开后的“复制”按钮使用；
+没有设置 `autoCopy`，普通点击不会自动复制。Bark 历史记录不保留该独立复制字段，历史菜单复制的是全文。
+已收到的旧历史消息不会被更新；只影响新发出的指标启动与 YOLO 确认，未改事件身份、启用边界或重推历史。
+
+依据：[TradingView AASA](https://www.tradingview.com/apple-app-site-association)、
+[Bark 打开逻辑](https://github.com/Finb/Bark/blob/8c7973fa7a7791c766f70bfe044d6044e16a3045/Common/Client.swift#L88-L98)、
+[通知复制按钮](https://github.com/Finb/Bark/blob/8c7973fa7a7791c766f70bfe044d6044e16a3045/notificationContentExtension/NotificationViewController.swift#L75-L95)。
+
 API：`/api/signals` 默认仅本协议的 `yolo_confirmed`；`/api/signals?kind=tv_start` 按各周期直接通知启用边界返回15m/1H/4H箭头；
 `/api/candidates` 是原箭头及模型状态；
 `/api/status` 的 `runtime.model_gate` 显示模型加载、错误、队列与候选计数。

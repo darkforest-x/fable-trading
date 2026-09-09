@@ -113,7 +113,9 @@ def test_15m_worker_rechecks_stream_activation_and_links_correct_interval(tmp_pa
     assert len(calls) == int(expected == 'sent')
     if calls:
         link = (calls[0]['reply_markup']['inline_keyboard'][0][0]['url'] if channel == 'telegram'
-                else calls[0]['url'])
+                else calls[0]['body'].split('网页备用：', 1)[1])
+        if channel == 'bark':
+            assert calls[0]['url'] == 'https://www.tradingview.com/chart/'
         assert 'interval=15' in link
     untouched = store.bark_status() if channel == 'telegram' else store.telegram_status()
     assert untouched['pending'] == 1

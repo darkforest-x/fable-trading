@@ -1,6 +1,6 @@
 """Owner-authorized, notification-only IMACD monitor, separate from execution."""
 
-VERSION = "1.8.0"
+VERSION = "1.8.1"
 SIGNAL_PROTOCOL = "imacd-tv-visible-start-monitor-v3"
 SIGNAL_KIND = "tv_start"
 MODEL_PROTOCOL = "imacd-yolo-confirmation-monitor-v1"

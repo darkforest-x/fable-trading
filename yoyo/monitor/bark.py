@@ -6,6 +6,11 @@ the device key out of URLs. HTTP 200, code 200 and a server timestamp mean
 server acceptance, not an iPhone display/read receipt. Current direct-start or
 model-confirmation eligibility, channel cutover and shared freshness gate apply.
 No connectivity/startup messages are generated. Errors never include keys.
+
+Mobile navigation uses TradingView's declared /chart/ Universal Link. Its
+apple-app-site-association explicitly excludes /chart/?symbol=... from iOS
+app routing (checked 2026-09-09); the exact symbol/timeframe URL stays in the
+body as a web fallback. App launch does not imply symbol/timeframe navigation.
 """
 from __future__ import annotations
 
@@ -24,6 +29,7 @@ from yoyo.monitor.notification_policy import channel_enabled, delivery_error
 from yoyo.monitor.store import now_ms
 
 SERVER = "https://api.day.app"
+TV_APP_URL = "https://www.tradingview.com/chart/"
 POLICY_KEY = "notification_policy:bark:" + MODEL_PROTOCOL
 KEY_PATTERN = re.compile(r"[A-Za-z0-9_-]{8,128}")
 
@@ -69,6 +75,7 @@ def message(event):
     symbol = event["symbol"]
     tv_symbol = symbol.removesuffix("-SWAP").replace("-", "") + ".P"
     interval = TV_INTERVALS[event["timeframe"]]
+    web_url = f"https://www.tradingview.com/chart/?symbol=OKX%3A{tv_symbol}&interval={interval}"
     if event["kind"] == SIGNAL_KIND:
         subtitle = "指标启动 · 未经 YOLO 确认"
         body = f"收盘价 {event['price']:.10g} · {time(event['bar_close_ms'])} 北京时间"
@@ -79,9 +86,12 @@ def message(event):
                 f"原箭头 {indicator['price']:.10g} · {time(indicator['bar_close_ms'])} 北京时间")
     return {"title": f"{symbol} · {event['timeframe']} · {side}",
             "subtitle": subtitle,
-            "body": body,
+            "body": body + f"\n\n网页备用：{web_url}",
             "group": "spike IMACD", "level": "active", "isArchive": "1",
-            "url": f"https://www.tradingview.com/chart/?symbol=OKX%3A{tv_symbol}&interval={interval}"}
+            # Bark's long-press Copy action uses this value. Ordinary taps
+            # only open the URL; do not promise clipboard changes on iOS.
+            "copy": f"OKX:{tv_symbol}",
+            "url": TV_APP_URL}
 
 
 class BarkWorker:
