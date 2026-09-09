@@ -11,11 +11,29 @@ assume reinvestment, not a literal dividend/share-delivery cash ledger.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from decimal import Decimal, ROUND_FLOOR, ROUND_HALF_UP
+from decimal import Decimal, ROUND_HALF_UP
 from typing import Optional
 
 import numpy as np
 import pandas as pd
+
+
+def price_le(left: float, right: float) -> bool:
+    """Inclusive price boundary with arithmetic epsilon, not a tradable tick.
+
+    Adjusted OHLC and a raw-tick stop follow different multiplication paths.
+    Relative 1e-12 tolerance keeps economically identical exact touches equal.
+    """
+    return left <= right + max(abs(left),abs(right),1.)*1e-12
+
+
+def floor_raw_tick(value: float) -> float:
+    """Round a raw CNY stop outward after snapping numerical integer noise."""
+    ticks=value/.01
+    nearest=round(ticks)
+    if abs(ticks-nearest)<=max(abs(ticks),1.)*1e-12:
+        ticks=float(nearest)
+    return float(np.floor(ticks))*.01
 
 
 @dataclass(frozen=True)
@@ -232,7 +250,7 @@ def simulate(frames: dict[str,pd.DataFrame], p: Parameters, start: str, end: str
                 if blocked:
                     skip('exit_open_limit_down'); continue
                 sell(code,row,row['open'],pos['exit_pending'],session)
-            elif session > pos['session'] and row['open'] <= pos['initial_stop']:
+            elif session > pos['session'] and price_le(row['open'],pos['initial_stop']):
                 if blocked:
                     pos['exit_pending'] = 'stop_delayed_limit_down'; skip('stop_open_limit_down')
                 else:
@@ -249,19 +267,19 @@ def simulate(frames: dict[str,pd.DataFrame], p: Parameters, start: str, end: str
             if str(row['isST']) != '0' or row['raw_open'] >= upper-.005:
                 skip('entry_st_or_limit_up'); continue
             base_stop = signal['structure_stop']
-            if not np.isfinite(base_stop) or base_stop <= 0 or row['open'] <= base_stop:
+            if not np.isfinite(base_stop) or base_stop <= 0 or price_le(row['open'],base_stop):
                 skip('entry_gap_invalidates_structure'); continue
             fill = row['open']
             factor = row['raw_open']/row['open']
-            raw_stop = Decimal(str(min(base_stop,fill-p.stop_atr*signal['atr'])*factor))
-            stop = float(raw_stop.quantize(Decimal('.01'),rounding=ROUND_FLOOR))/factor
+            raw_stop = floor_raw_tick(min(base_stop,fill-p.stop_atr*signal['atr'])*factor)
+            stop = raw_stop/factor
             risk = fill-stop
             if stop <= 0 or risk <= 0:
                 skip('invalid_risk'); continue
             wealth = mark_equity()
             amount = min(cash,wealth*allocation_fraction)
-            raw_fill = fill*factor
-            quantity = buy_quantity(amount/raw_fill,risk*factor,wealth*risk_fraction,row['board'])
+            raw_fill = row['raw_open']
+            quantity = buy_quantity(amount/raw_fill,raw_fill-raw_stop,wealth*risk_fraction,row['board'])
             decrement = 1 if row['board'].lower()=='star' else 100
             minimum = 200 if row['board'].lower()=='star' else 100
             while quantity >= minimum and (quantity*raw_fill*(1+costs.slippage)
@@ -280,7 +298,7 @@ def simulate(frames: dict[str,pd.DataFrame], p: Parameters, start: str, end: str
                                    trail_active=False,exit_pending='',session=session,entry_date=date,
                                    signal_date=signal['date'],board=row['board'].lower(),score=signal['score'],
                                    atr_pct=signal['atr_pct'],vol_bucket=int(signal['vol_bucket']))
-            if row['low'] <= stop:
+            if price_le(row['low'],stop):
                 positions[code]['exit_pending'] = 'entry_day_stop_T1'
                 skip('entry_day_stop_waits_T1')
         pending = {}
@@ -291,7 +309,7 @@ def simulate(frames: dict[str,pd.DataFrame], p: Parameters, start: str, end: str
             pos = positions[code]; row = today.get(code)
             if row is None or session <= pos['session'] or pos['exit_pending']:
                 continue
-            if row['low'] <= pos['initial_stop']:
+            if price_le(row['low'],pos['initial_stop']):
                 lower,_ = price_limits(row)
                 raw_stop = pos['initial_stop'] * row['raw_open']/row['open']
                 if row['raw_open'] <= lower+.005 or raw_stop <= lower+.005:
@@ -304,7 +322,7 @@ def simulate(frames: dict[str,pd.DataFrame], p: Parameters, start: str, end: str
             row = today.get(code)
             if row is None:
                 continue
-            if not pos['exit_pending'] and pos['trail_active'] and row['close'] <= pos['trail']:
+            if not pos['exit_pending'] and pos['trail_active'] and price_le(row['close'],pos['trail']):
                 pos['exit_pending'] = 'trend_close_exit'
             pos['best_close'] = max(pos['best_close'],row['close'])
             if not pos['exit_pending'] and pos['best_close'] >= pos['entry']+p.trail_activation_r*pos['risk']:

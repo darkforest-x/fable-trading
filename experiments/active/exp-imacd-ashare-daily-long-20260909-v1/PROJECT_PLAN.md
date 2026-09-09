@@ -104,6 +104,13 @@ stopFloor3ATR；trail4ATR。只做多，止盈无固定R倍数上限。
 
 ## 官方资料链接
 
+### 数值回放修正记录（最终样本外读取之前）
+
+首轮开发/验证运行完成后，合成尺度不变性测试发现止损取整及相等边界的浮点尾差。
+原结果完整保留在 `analysis/output/imacd_ashare_daily_20260909/invalid_selection_01/`，不用于交付结论。
+修复仅去除1e-12量级算术尾差；证券池、参数候选及选择顺序、成本与时间切分不变。
+修复后重跑相同开发/验证选择，再进行首次最终样本外检验。修复决定未读取任何2024–2025策略结果。
+
 - https://pypi.org/project/baostock/
 - https://www.tradingview.com/pine-script-docs/concepts/strategies/
 - https://www.sse.com.cn/lawandrules/sselawsrules2025/stocks/exchange/c/c_20260424_10816482.shtml

@@ -9,7 +9,7 @@ import pytest
 
 from yoyo.evaluation.ashare_imacd import (
     Costs, Parameters, buy_quantity, indicators, limit_fraction, prepare_books,
-    price_limits, randomized_signals, simulate,
+    price_limits, randomized_signals, simulate, floor_raw_tick, price_le,
 )
 
 
@@ -26,6 +26,28 @@ def row(day, *, open=100., high=None, low=None, close=None, preclose=100.,
 
 
 DAYS = ['2024-01-02','2024-01-03','2024-01-04','2024-01-05','2024-01-08']
+
+
+@pytest.mark.parametrize('factor',[1.,1.1,1.7,3.7,8.,123.4567])
+@pytest.mark.parametrize('low,expected_reason',[(10.20,'initial_stop'),(10.200001,'period_end_valuation'),(10.199999,'initial_stop')])
+def test_stop_touch_is_invariant_to_adjusted_coordinate_scale(factor,low,expected_reason):
+    def example(scale):
+        return [row(DAYS[0],open=10.5,signal=True,stop=10.3,atr=.1,preclose=10.5,factor=scale),
+                row(DAYS[1],open=10.5,low=10.21,high=10.6,close=10.5,preclose=10.5,factor=scale),
+                row(DAYS[2],open=10.3,low=low,high=10.4,close=10.3,preclose=10.5,factor=scale)]
+    actual=replay(example(factor))['trades'].iloc[0]
+    reference=replay(example(1.))['trades'].iloc[0]
+    assert actual.stop/factor==pytest.approx(10.20)
+    assert actual.reason==reference.reason==expected_reason
+    assert actual.pnl==pytest.approx(reference.pnl)
+
+
+def test_tick_snap_only_removes_arithmetic_noise_not_real_price_distance():
+    assert floor_raw_tick(10.199999999999998)==pytest.approx(10.20)
+    assert floor_raw_tick(10.199999)==pytest.approx(10.19)
+    assert floor_raw_tick(10.209999)==pytest.approx(10.20)
+    assert price_le(10.20+1e-14,10.20)
+    assert not price_le(10.20+1e-6,10.20)
 
 
 def replay(a, b=None, **kwargs):
