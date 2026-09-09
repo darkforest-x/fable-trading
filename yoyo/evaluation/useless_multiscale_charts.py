@@ -127,12 +127,14 @@ def global_chart(frame, summary, out):
     entry, stop = path["entry_reference"], path["pine_initial_stop_v27"]["stop"]
     target = entry + 3 * (entry-stop)
     right = selected.closed_at.iloc[-1]
+    episode = path.get("pine_episode_end_ignoring_initial_stop")
+    episode_close = (pd.Timestamp(episode["open_time"]) + pd.Timedelta(hours=1)) if episode else right
     fig, axes = plt.subplots(3, 1, figsize=(16, 10), sharex=True,
                              gridspec_kw={"height_ratios": [4.0, 1.2, 1.0], "hspace": .10})
     ax = axes[0]
     candles(ax, selected, 60)
     legend(ax)
-    ax.hlines([entry, stop, target], num(DECISION), num(right),
+    ax.hlines([entry, stop, target], num(DECISION), num(episode_close),
               colors=["#5b7383", DOWN, "#50a48f"], linestyles=[":", "--", ":"], linewidths=.9)
     ax.annotate(f"08/31 08:00 启动确认\n收盘 {entry:.5f}", xy=(num(DECISION), entry),
                 xytext=(-42, 65), textcoords="offset points", ha="right", color="#7855ac",
@@ -147,6 +149,11 @@ def global_chart(frame, summary, out):
     ax.annotate(f"后续最高 {path['highest_high']:.5f}\n最大有利幅度 +{path['maximum_favorable_pct']:.1f}%\n不等于可兑现收益",
                 xy=(num(peak), path["highest_high"]), xytext=(-145, -30), textcoords="offset points",
                 color=INK, fontsize=10, arrowprops={"arrowstyle": "->", "color": MUTED})
+    if episode:
+        ax.annotate(f"本段主线归零\n{episode_close.tz_convert(TZ):%m/%d %H:%M} · {episode['close']:.5f}\n其后走势不计为本段收益",
+                    xy=(num(episode_close), episode["close"]), xytext=(12, -82),
+                    textcoords="offset points", color=MUTED, fontsize=10,
+                    arrowprops={"arrowstyle": "->", "color": MUTED})
     ax.text(.012, .035, f"V2.7 追溯参考  初始止损 {stop:.5f}（{path['pine_initial_stop_v27']['risk_pct']:.2f}%）  ·  3R {target:.5f}（非固定止盈）",
             transform=ax.transAxes, fontsize=10, color=MUTED,
             bbox={"facecolor": "white", "edgecolor": "none", "alpha": .9, "pad": 4})
@@ -159,6 +166,8 @@ def global_chart(frame, summary, out):
     axes[2].set_ylabel("量 / 前20均量")
     for a in axes:
         phase(a, right, a is ax)
+        if episode:
+            a.axvline(num(episode_close), color="#8a969d", linewidth=.9, linestyle=":")
     axes[-1].xaxis.set_major_locator(mdates.DayLocator(interval=2, tz=TZ))
     axes[-1].xaxis.set_major_formatter(mdates.DateFormatter("%m/%d", tz=TZ))
     axes[-1].set_xlim(num(selected.index[0])-1/24, num(right)+2/24)
@@ -230,7 +239,7 @@ def detail_chart(frame, name, minutes, out, order):
     fig.text(.06, .929, text, color=MUTED, fontsize=11)
     fig.text(.06, .043, "蜡烛按开盘位置；均线、指标和三角标记按收盘可用时间。紫色空心点是信号K，虚线连接到确认时刻；08:00开盘K仍属后续数据。", color=MUTED, fontsize=9.5)
     fig.text(.06, .024, "动能默认 SMA50：相对最近50根最大绝对偏差归一化，90 为源码强区。量基准不含当前K；不同周期嵌套，不能视作独立证据票。", color=MUTED, fontsize=9.5)
-    fig.subplots_adjust(top=.895, bottom=.085, left=.06, right=.94)
+    fig.subplots_adjust(top=.895, bottom=.12, left=.06, right=.94)
     path_out = out / f"{order:02d}_useless_{name.lower()}_detail.png"
     fig.savefig(path_out, dpi=160)
     plt.close(fig)
