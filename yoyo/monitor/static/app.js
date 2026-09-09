@@ -161,7 +161,7 @@
     const label = `${shortSymbol(request.symbol)} ${quoteSymbol(request.symbol)} · ${timeframeLabel(request.timeframe)}`;
     state.tradingViewPending = true;
     renderTradingViewButtons();
-    tradingViewStatus(`正在请求 Mac TradingView 打开 ${label}…`, "pending");
+    tradingViewStatus(`正在请求 本机 TradingView 打开 ${label}…`, "pending");
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 30000);
     try {
@@ -281,7 +281,7 @@
     const fresh = isFresh(item, now);
     const status = confirmed ? "YOLO 追加确认" : state.signalScope === "direct" ? "启动时未经 YOLO 确认" : modelState(item), caption = confirmed ? "模型确认收盘价" : "原箭头收盘价";
     const waiting = `${number(item.model?.wait_bars)} / ${number(item.model?.max_wait_bars)} 根`;
-    return `<article class="signal-card ${side}${confirmed || direct ? "" : " candidate-card"}${selected ? " selected" : ""}${fresh ? " is-fresh" : ""}"><button type="button" class="card-primary-action" data-signal-id="${escapeHTML(item.id)}" data-signal-kind="${escapeHTML(item.kind)}" data-tradingview-action="signal" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击卡片，在 Mac TradingView 打开" aria-label="${escapeHTML(`${shortSymbol(item.symbol)} ${quoteSymbol(item.symbol)} ${timeframeLabel(item.timeframe)} ${sideName(item.side)}，${status}，${caption} ${price(item.price)}，${shortDate(item.bar_close_ms)}，在 Mac TradingView 打开`)}"></button>
+    return `<article class="signal-card ${side}${confirmed || direct ? "" : " candidate-card"}${selected ? " selected" : ""}${fresh ? " is-fresh" : ""}"><button type="button" class="card-primary-action" data-signal-id="${escapeHTML(item.id)}" data-signal-kind="${escapeHTML(item.kind)}" data-tradingview-action="signal" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击卡片，在 本机 TradingView 打开" aria-label="${escapeHTML(`${shortSymbol(item.symbol)} ${quoteSymbol(item.symbol)} ${timeframeLabel(item.timeframe)} ${sideName(item.side)}，${status}，${caption} ${price(item.price)}，${shortDate(item.bar_close_ms)}，在 本机 TradingView 打开`)}"></button>
       <span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(timeframeLabel(item.timeframe))}</span></span>
       <span class="signal-card-direction"><span class="card-direction">${sideArrow(item.side)} ${escapeHTML(sideName(item.side))}${confirmed ? "确认" : direct ? "启动" : "候选"}</span><span class="card-recency">${fresh ? "新 · " : ""}${escapeHTML(ageLabel(item.bar_close_ms))}</span></span>
       <span class="model-card-status"><span class="model-badge ${confirmed ? "confirmed" : item.model?.status === "error" ? "error" : "pending"}">${escapeHTML(status)}</span><span>${confirmed ? `检测分数 ${escapeHTML(modelScore(item))}` : state.signalScope === "direct" ? "第一阶段 · 收盘启动" : `等待 ${escapeHTML(waiting)}`}</span></span>
@@ -341,7 +341,7 @@
       const valid = !state.errors.markets && !item.error && !item.stale && item.ready !== false;
       const phaseClass = state.errors.markets ? "stale" : item.error ? "error" : item.stale ? "stale" : item.ready === false ? "loading" : item.focus === true ? "ready" : "";
       const selected = state.detailOrigin === "watch" && state.selected?.symbol === item.symbol && state.selected?.timeframe === item.timeframe;
-      return `<article class="watch-card${selected ? " selected" : ""}"><button type="button" class="card-primary-action" data-tradingview-action="watch" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击卡片，在 Mac TradingView 打开" aria-label="在 Mac TradingView 打开 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(quoteSymbol(item.symbol))} ${escapeHTML(timeframeLabel(item.timeframe))}，${escapeHTML(marketPhase(item))}"></button>
+      return `<article class="watch-card${selected ? " selected" : ""}"><button type="button" class="card-primary-action" data-tradingview-action="watch" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击卡片，在 本机 TradingView 打开" aria-label="在 本机 TradingView 打开 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(quoteSymbol(item.symbol))} ${escapeHTML(timeframeLabel(item.timeframe))}，${escapeHTML(marketPhase(item))}"></button>
         <span class="watch-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(timeframeLabel(item.timeframe))}</span></span>
         <span class="watch-card-phase"><span class="phase-badge ${phaseClass}" title="${escapeHTML(item.error || (item.stale ? "当前保留过期行情，等待更新" : "当前结构尚不是启动信号"))}">${escapeHTML(state.errors.markets ? "缓存 · 待同步" : marketPhase(item))}</span><span class="card-status">${!valid ? "等待更新" : item.focus ? "已达蓄势门槛" : "观察中"}</span></span>
         <span class="watch-card-run"><strong>${valid ? escapeHTML(number(item.near_zero_bars)) : "—"}<small> 根</small></strong><span>当前近零蓄势</span></span>
@@ -402,7 +402,7 @@
     $("service-version").textContent = status.version ? `v${String(status.version).replace(/^v/, "")}` : "本机服务";
     const runtimeFacts = [["监控台", "spike"], ["启动时间", fullDate(status.started_at_ms)], ["服务时间", fullDate(status.now_ms)], ["运行时长", duration(Date.now() - numeric(status.started_at_ms, Date.now()))]];
     if (timeframes.length) runtimeFacts.push(["监控周期", timeframes.map(timeframeLabel).join(" / ")]);
-    if (runtime.host) runtimeFacts.push(["主机", runtime.host]);
+    if (runtime.host) runtimeFacts.push(["主机", runtime.host === "This Mac" ? "Mac（扫描与推送）" : runtime.host]);
     if (runtime.pid) runtimeFacts.push(["进程", runtime.pid]);
     if (runtime.data_dir) runtimeFacts.push(["数据位置", runtime.data_dir]);
     if (runtime.signal_mode || runtime.strategy || status.strategy) runtimeFacts.push(["信号规则", runtime.signal_mode || runtime.strategy || status.strategy]);

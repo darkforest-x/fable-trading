@@ -2,6 +2,20 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## Spike 3060 Windows 入口已接通（2026-09-09 21:05）
+
+Owner要求3060也能访问前端并打开3060自己的TV。已在WIN-ZZC/Administrator部署
+`C:\fable\spike-client`，桌面Spike快捷方式指向本机`http://127.0.0.1:8766/#signals`。
+Mac仍是扫描/Bark唯一进程，未重启监控（started_at_ms=1788954302965）；Windows无模型或推送。
+Mac独立LaunchAgent `com.spike.3060-tunnel` 将Mac8766经SSH反向转发至Windows loopback8767；
+Windows登录任务`SpikeDesktopClient`在Session2监听loopback8766，白名单GET读Mac，开图POST本机处理。
+Windows真实API→TV正文已验BTC30m、ETH4H、SOL日线，具体布局综合过滤/AlGc61US，TV3.4.1.8194。
+WindowsGUI子进程曾把Initializing LoggerService写入回执，已用ShellExecute隔离标准流；不放宽requested校验。
+283项Python定向、56项前端回归通过；客户端安装器等待自身ready，登录启动，隧道KeepAlive。
+3060当前IP是192.168.1.2（旧.3拒绝，已核对主机密钥和WIN-ZZC）；DHCP若改需重核对隧道地址。
+源文件/重装/故障排查见docs/ops/SPIKE_WINDOWS_CLIENT.md；证据output/qa/spike_3060_20260909/。
+卡片提示改为本机TradingView，Mac仍用原AppleScript；没有改信号/阈值/Pine/YOLO/通知/订单。
+
 ## Spike 已增加日线监控（2026-09-09 19:45，覆盖下方四周期口径）
 
 Owner要求日线也出信号。v1.11.0 / c787e90已部署；当前15m/30m/1H/4H/日线
