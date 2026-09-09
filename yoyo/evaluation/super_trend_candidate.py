@@ -121,10 +121,51 @@ def replay(one: pd.DataFrame, lower: pd.DataFrame, higher: pd.DataFrame,
     return clean(events)
 
 
+def attach_model_history(events: list[dict], ledger: list[dict], one: pd.DataFrame) -> list[dict]:
+    """Attach past geometry evidence, never a future box or profitability claim.
+
+    A proposal must have been observed by the 1H decision and its entire core
+    must lie in that frozen 1H formation interval. Temporal association does
+    not prove continuing validity, and does not turn model scores into odds.
+    This additional memory diagnostic was proposed after the full-case scan.
+    """
+    result = []
+    for original in events:
+        event = dict(original)
+        if event["type"] == "indicator_start":
+            opened, decision = pd.Timestamp(event["bar_open"]), pd.Timestamp(event["observed_at"])
+            start = opened - pd.Timedelta(hours=int(one.loc[opened].near_zero_bars))
+            selected = {}
+            for endpoint in ledger:
+                observed = pd.Timestamp(endpoint["available_at_bj"])
+                if not start <= observed <= decision:
+                    continue
+                duration = pd.Timedelta(minutes={"3m": 3, "5m": 5}[endpoint["timeframe"]])
+                for proposal in endpoint["proposals"]:
+                    core_start, core_end = pd.Timestamp(proposal["core_start_bj"]), pd.Timestamp(proposal["core_end_bj"]) + duration
+                    if proposal["side"] != "long" or not proposal["structural_pass"] or core_start < start or core_end > opened or core_end > observed:
+                        continue
+                    key = (endpoint["timeframe"], core_start.isoformat())
+                    if key not in selected:
+                        selected[key] = {"timeframe": key[0], "core_start": key[1],
+                            "first_observed_at": observed.isoformat(), "last_observed_at": observed.isoformat(),
+                            "core_end_exclusive_latest": core_end.isoformat(), "max_score": float(proposal["confidence"])}
+                    record = selected[key]
+                    record["first_observed_at"] = min(record["first_observed_at"], observed.isoformat())
+                    record["last_observed_at"] = max(record["last_observed_at"], observed.isoformat())
+                    record["core_end_exclusive_latest"] = max(record["core_end_exclusive_latest"], core_end.isoformat())
+                    record["max_score"] = max(record["max_score"], float(proposal["confidence"]))
+            event["prior_model_structure_groups"] = list(selected.values())
+            event["model_memory_status"] = "post_case_temporal_association_only_not_validated_gate"
+        result.append(event)
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--yolo-ledger", type=Path)
     args = parser.parse_args()
     if args.out.exists():
         raise ValueError("Do not overwrite an earlier evidence ledger")
@@ -134,6 +175,10 @@ def main():
         "source_sha256": hashlib.sha256(args.source.read_bytes()).hexdigest(),
         "notes": "No profitability test; strict early hypothesis plus post-case memory diagnostics.",
         "events": replay(frames[60], frames[15], frames[240], pd.Timestamp("2026-08-01T00:00Z"))}
+    if args.yolo_ledger:
+        result["events"] = attach_model_history(result["events"], json.loads(args.yolo_ledger.read_text()), frames[60])
+        result["model_ledger_sha256"] = hashlib.sha256(args.yolo_ledger.read_bytes()).hexdigest()
+        result["model_ledger_coverage_warning"] = "Only the supplied case windows were scanned; missing groups outside coverage are unknown, not negative detections."
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, ensure_ascii=False, indent=2))
 

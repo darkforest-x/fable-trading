@@ -2,7 +2,7 @@
 import pandas as pd
 import pytest
 
-from yoyo.evaluation.super_trend_candidate import active_lower_episode, evidence_at, replay
+from yoyo.evaluation.super_trend_candidate import active_lower_episode, attach_model_history, evidence_at, replay
 
 
 def fixtures():
@@ -60,3 +60,17 @@ def test_absolute_feature_row_numbers_do_not_drop_setup_after_slicing():
     assert result["momentum_strong_observed_during_setup"] == [one.index[1]]
     with pytest.raises(ValueError, match="formation history"):
         evidence_at(one.iloc[1:], low, high, one.index[1])
+
+
+def test_model_evidence_uses_observation_not_core_left_edge():
+    one, low, high = fixtures()
+    events = replay(one, low, high, one.index[0])
+    proposal = {"side": "long", "structural_pass": True, "core_start_bj": "2026-08-31T00:00Z",
+                "core_end_bj": "2026-08-31T00:12Z", "confidence": .7}
+    future = [{"timeframe": "3m", "available_at_bj": "2026-08-31T02:03Z", "proposals": [proposal]}]
+    original = attach_model_history(events, future, one)
+    assert original[0]["prior_model_structure_groups"] == []
+    past = [{**future[0], "available_at_bj": "2026-08-31T00:21Z"}]
+    known = attach_model_history(events, past + future, one)
+    assert len(known[0]["prior_model_structure_groups"]) == 1
+    assert known[0]["prior_model_structure_groups"][0]["last_observed_at"] == "2026-08-31T00:21:00+00:00"
