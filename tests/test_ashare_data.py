@@ -9,7 +9,7 @@ import pytest
 
 from yoyo.evaluation.ashare_data import (
     AShareDataError, DAILY_FIELDS, board_for_code, cached_query,
-    merge_adjusted, query_timeout, result_frame, select_universe, validate_daily,
+    fetch_daily, merge_adjusted, query_timeout, result_frame, select_universe, validate_daily,
 )
 
 
@@ -198,3 +198,18 @@ def test_failed_worker_connection_is_discarded_without_logout(monkeypatch):
     assert "timeout" in result["error"]
     assert source._PROCESS_CLIENT is None
     assert calls == ["close"]
+
+
+def test_csi300_benchmark_uses_native_price_index_without_fake_hfq(tmp_path):
+    calls = []
+    def query(code, fields, **kwargs):
+        calls.append(kwargs["adjustflag"])
+        frame = daily()
+        frame["code"] = "sh.000300"
+        return Result(frame)
+    result = fetch_daily(SimpleNamespace(query_history_k_data_plus=query), tmp_path,
+                         code="sh.000300", start="2020-01-01", end="2020-01-10")
+    assert calls == ["3"]
+    assert result.factor.tolist() == [1, 1]
+    assert result.close.tolist() == result.raw_close.tolist()
+    assert result.adjustflag.tolist() == ["3", "3"]

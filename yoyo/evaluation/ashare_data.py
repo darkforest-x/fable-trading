@@ -256,7 +256,11 @@ def fetch_daily(client: Any, destination: Path, *, code: str, start: str, end: s
     if not re.fullmatch(r"(?:sh|sz)\.\d{6}", code) or start > end:
         raise AShareDataError("invalid daily request")
     frames = []
-    for adjustment in ("3", "1"):
+    # CSI 300 is a price index, not an equity with stock corporate actions.
+    # BaoStock returns adjustflag=3 even when HFQ is requested; request only its
+    # native raw index level and explicitly use factor 1 for the benchmark.
+    adjustments = ("3",) if code == "sh.000300" else ("3", "1")
+    for adjustment in adjustments:
         request = {"provider": "baostock", "version": BAOSTOCK_VERSION,
                    "method": "query_history_k_data_plus", "code": code, "fields": DAILY_FIELDS,
                    "start_date": start, "end_date": end, "frequency": "d", "adjustflag": adjustment}
@@ -265,6 +269,8 @@ def fetch_daily(client: Any, destination: Path, *, code: str, start: str, end: s
             frame = cached_query(path, request, lambda: client.query_history_k_data_plus(
                 code, DAILY_FIELDS, start_date=start, end_date=end, frequency="d", adjustflag=adjustment))
         frames.append(validate_daily(frame, code=code, start=start, end=end, adjustment=adjustment))
+    if len(frames) == 1:
+        frames.append(frames[0].copy())
     result = merge_adjusted(*frames)
     output = destination / "daily" / f"{code}.csv"
     output.parent.mkdir(parents=True, exist_ok=True)
