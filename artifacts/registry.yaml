@@ -18,6 +18,62 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: bico-exit-case-20260910-verification
+    artifact_type: report
+    role: owner_selected_exit_path_explanation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4a75746
+    generator_commit: ef44638d487ea18b527059cca31eadf3722ab86e
+    source_path: analysis/output/bico_exit_case_20260910/verification.json
+    sha256: 642a16148759cfe505e6d86ed31f8d4f6db4e9428b01dab41c855ad508f98976
+    size_bytes: 961
+    storage_uri: file:///Users/zhangzc/fable-trading/analysis/output/bico_exit_case_20260910/verification.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-selected hindsight winner; one matched adjacent reference is not statistical evidence; same fixed configuration consumed three times for replay and accounting QA. No live change.
+  - artifact_id: bico-exit-case-20260910-manifest
+    artifact_type: manifest
+    role: owner_selected_exit_path_explanation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4a75746
+    generator_commit: ef44638d487ea18b527059cca31eadf3722ab86e
+    source_path: analysis/output/bico_exit_case_20260910/manifest.json
+    sha256: 295203f42c0592caea4e6e4d093ffd3d8630c0d730017bb7ca9ff4e046991459
+    size_bytes: 640
+    storage_uri: file:///Users/zhangzc/fable-trading/analysis/output/bico_exit_case_20260910/manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-selected hindsight winner; one matched adjacent reference is not statistical evidence; same fixed configuration consumed three times for replay and accounting QA. No live change.
+  - artifact_id: bico-exit-case-20260910-report-html
+    artifact_type: report
+    role: owner_selected_exit_path_explanation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4a75746
+    generator_commit: ef44638d487ea18b527059cca31eadf3722ab86e
+    source_path: analysis/html/p1_bico_194r_exit_case_20260910.html
+    sha256: 0581807823772a95ea29f1eff709e36d8b0cfe15340cc6956fda9d656f2ee61f
+    size_bytes: 378962
+    storage_uri: repo://analysis/html/p1_bico_194r_exit_case_20260910.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-selected hindsight winner; one matched adjacent reference is not statistical evidence; same fixed configuration consumed three times for replay and accounting QA. No live change.
+  - artifact_id: bico-exit-case-20260910-report-source
+    artifact_type: report
+    role: owner_selected_exit_path_explanation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4a75746
+    generator_commit: ef44638d487ea18b527059cca31eadf3722ab86e
+    source_path: analysis/p1_bico_194r_exit_case_20260910.md
+    sha256: 251225a85ffa4fe29aaf931891aec901f96178b085bd8e396309669d3aba8c47
+    size_bytes: 6235
+    storage_uri: repo://analysis/p1_bico_194r_exit_case_20260910.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-selected hindsight winner; one matched adjacent reference is not statistical evidence; same fixed configuration consumed three times for replay and accounting QA. No live change.
   - artifact_id: mainstream-super-trend-20260910-report-source
     artifact_type: report
     role: frozen_mainstream_long_transfer_research

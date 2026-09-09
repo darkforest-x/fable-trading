@@ -16,17 +16,22 @@ schema_version: 1
 experiments:
   - experiment_id: exp-bico-exit-case-20260910-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 5093b50
-    status: active
+    source_commit: 4a75746
+    status: inconclusive
     question: How does the Owner-selected BICO 194R maximum excursion differ from six causal exit conventions?
     single_variable: Fixed exit rule only; same screenshot entry reference and frozen initial stop, no parameter fitting.
-    result: Descriptive case execution audit pending; not a profitability validation.
+    result: Six exits independently verified; 194.475R is peak excursion, SMA60 next-open reference nets 98.714R and md return 80.314R. This selected winner cannot establish optimal exit or profitability.
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    canonical_report: experiments/active/exp-bico-exit-case-20260910-v1/PROJECT_PLAN.md
-    artifacts: []
-    notes: Owner-selected winner; authorized historical read, configuration consumption one. No live changes.
+    canonical_report: analysis/p1_bico_194r_exit_case_20260910.md
+    artifacts:
+    - bico-exit-case-20260910-report-source
+    - bico-exit-case-20260910-report-html
+    - bico-exit-case-20260910-manifest
+    - bico-exit-case-20260910-verification
+    notes: 'Owner-authorized historical read. Configuration consumed three times: frozen replay, independent audit, same-rule reporting QA; all case prices and returns unchanged. One matched reference is adjacent in same trend,
+      not independent support. No live changes.'
   - experiment_id: exp-mainstream-super-trend-20260910-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 3e3c409
