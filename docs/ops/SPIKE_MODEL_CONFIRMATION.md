@@ -60,7 +60,12 @@ Universal Link 声明优先打开 iPhone App；精确到 OKX 币种及15m/1H/4H�
 官方 AASA 明确排除带非空 `symbol` 的 `/chart/` 和8字符布局ID链接，不能仅把网页地址换成未经验证的 scheme。
 这里仅请求打开 App，不声称自动切换币种、周期或加载特定指标。Owner 随后实点确认 App 能打开，
 但币种与周期未切换：当前 `url` 本来就未携带两者，不是已验证的参数丢失或转码错误。
-尚未找到官方证实能同时定位币种和周期的 iOS 外部入口；已请求 Owner 提供手机 App 自己生成的分享链接继续核对。
+尚未找到官方证实能同时定位币种和周期的 iOS 外部入口。Owner 提供的手机分享链接
+`https://cn.tradingview.com/x/GpAAywbJ`、`https://cn.tradingview.com/x/wXnIZOgm` 已实读：
+分别是 ETHUSDT.P 4H、LITUSDT.P 4H 的 PNG 快照页面。cn 与 www 的 AASA 规则相同，没有 `/x/*`。
+页面源码只显示对应 `s3.tradingview.com/snapshots/...png`；官方 snapshot JS 的看图按钮
+另建网页 `chart?symbol=...`，不传周期，未发现 iOS 精确定位入口。因此不能把截图ID改成chart/layout ID。
+本次核对没有修改生产点击地址或重启服务；精确币种/周期的入口仍为通知正文“网页备用”。
 不能把 AASA 排除某类 Universal Link 扩大成所有自定义 scheme / Siri 路径必然不支持的结论。
 系统关联或用户默认打开偏好仍可能影响其他设备。点击“网页备用”仍是打开对应网页图表。
 
