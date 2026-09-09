@@ -2,6 +2,16 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## Spike 1H/4H 两阶段通知已上线（2026-09-09 09:30）
+
+Owner要求1H/4H原收盘启动不等YOLO，TG/Bark先发“指标启动 · 未经 YOLO 确认”，通过后独立追加“YOLO 确认”；15m仍model only。
+源码5e67b5d，运行v1.7.0；新direct政策imacd-direct-start-notifications-v1于北京时间09:30:04启用，原TV/model事件协议、权重、阈值、wait9与30min新鲜度未变。
+旧raw启用时间不能授权新通知，旧箭头不补发；双阶段单独去重，重启不互吞pending，首阶段限流先等待、终态或过期不阻断新的确认。
+前端新增“指标启动 1H/4H”，原模型列表保留；卡片、主题、周期、Mac TV入口保持。模型故障不阻断1H/4H direct路径。
+监控回归、边界测试和48项前端测试通过；实际页面已点验；运行源码SHA全部一致，旧TG249/Bark179份回执及旧启用时间保持。
+本次无启动/测试通知、无订单；上线检查正在正常全市场预热（1419窗口，暂未完成一轮），模型ready、已扫描部分0报错。勿因正常预热反复重启。
+运行协议详见docs/ops/SPIKE_MODEL_CONFIRMATION.md；本机只读上线证据output/qa/spike_two_stage_20260909/{before,after}.json。
+
 ## Spike 高波动山寨趋势研究已交付（2026-09-09凌晨）
 
 Owner授权全时段目标研究；271不同币=54原池+215外部+SOPH/USELESS，原池15m/1H/4H、外部1H/4H。
