@@ -1,0 +1,243 @@
+{
+  "kind": "public_source_schema_probe_not_strategy_evaluation",
+  "asof": "2026-09-09T17:32:42.788380+00:00",
+  "schema_version": "altseason-public-1h-v1",
+  "runtime": {
+    "requests": "2.32.5",
+    "ccxt": "not installed",
+    "pandas": "2.3.3",
+    "numpy": "2.0.2",
+    "dependencies_changed": false
+  },
+  "frozen_requested_window": {
+    "source_start": "2026-05-01T00:00:00Z",
+    "evaluation_start": "2026-07-10T00:00:00Z",
+    "exclusive_end": "2026-09-09T00:00:00Z",
+    "source_hours": 3144
+  },
+  "venues": {
+    "binance": {
+      "available": true,
+      "catalog_total": 897,
+      "eligible": 655,
+      "catalog_status_counts": {
+        "TRADING": 766,
+        "SETTLING": 130,
+        "PENDING_TRADING": 1
+      },
+      "eligible_status_counts": {
+        "TRADING": 526,
+        "SETTLING": 128,
+        "PENDING_TRADING": 1
+      },
+      "category_counts": {
+        "COIN": 703,
+        "EQUITY": 156,
+        "INDEX": 3,
+        "PREMARKET": 2,
+        "HK_EQUITY": 15,
+        "COMMODITY": 8,
+        "CN_EQUITY": 2,
+        "KR_EQUITY": 8
+      },
+      "selection_reason_counts": {
+        "crypto_usdt_perpetual": 655,
+        "not_coin_usdt_perpetual": 242
+      },
+      "catalog_probe": {
+        "url": "https://fapi.binance.com/fapi/v1/exchangeInfo",
+        "asof": "2026-09-09T17:21:43.547938+00:00",
+        "status": 200,
+        "sha256": "968498880fb52c86fcae826fab6d5da66e2d0a40ddb258e9e26246bd27e38e2e",
+        "headers": {
+          "Date": "Wed, 09 Sep 2026 17:21:46 GMT",
+          "x-mbx-used-weight-1m": "1"
+        }
+      },
+      "first_page_probe": {
+        "url": "https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=1h&startTime=1777593600000&endTime=1782993599999&limit=1500",
+        "asof": "2026-09-09T17:29:37.437629+00:00",
+        "http_status": 200,
+        "sha256": "a00d16fd267e9d9285b5c12f76574608635282cf0a038fb4b158922d672bf018"
+      },
+      "first_page_validation": {
+        "expected_rows": 1500,
+        "actual_rows": 1500,
+        "first_ms": 1777593600000,
+        "last_ms": 1782990000000,
+        "gaps": 0
+      },
+      "inactive_catalog_retained": true,
+      "survivorship_warning": "As-of catalog, not exhaustive historical listings ledger; removed absent contracts remain unavailable."
+    },
+    "gate": {
+      "available": true,
+      "catalog_total": 973,
+      "eligible": 561,
+      "catalog_status_counts": {
+        "trading": 973
+      },
+      "eligible_status_counts": {
+        "trading": 561
+      },
+      "category_counts": {
+        "": 562,
+        "stocks": 375,
+        "indices": 18,
+        "commodities": 3,
+        "forex": 3,
+        "metals": 12
+      },
+      "selection_reason_counts": {
+        "unclassified_crypto_direct_usdt": 561,
+        "tradfi_premarket_or_unknown": 412
+      },
+      "catalog_probe": {
+        "url": "https://api.gateio.ws/api/v4/futures/usdt/contracts",
+        "asof": "2026-09-09T17:21:43.547938+00:00",
+        "status": 200,
+        "sha256": "c894a83f141c2f1bce0f31a6fb6a7079951afb2e4417122a52be10262b97269c",
+        "headers": {
+          "Date": "Wed, 09 Sep 2026 17:21:48 GMT",
+          "X-Gate-RateLimit-Requests-Remain": "199",
+          "X-Gate-RateLimit-Limit": "200",
+          "X-Gate-RateLimit-Reset-Timestamp": "1788974508"
+        }
+      },
+      "first_page_probe": {
+        "url": "https://api.gateio.ws/api/v4/futures/usdt/candlesticks?contract=BTC_USDT&interval=1h&from=1777593600&to=1784793599",
+        "asof": "2026-09-09T17:29:38.690371+00:00",
+        "http_status": 200,
+        "sha256": "33dee208bb7023e4175c04f5ff7ae64b957c93c04e97743db517fe28cf315103"
+      },
+      "first_page_validation": {
+        "expected_rows": 2000,
+        "actual_rows": 2000,
+        "first_ms": 1777593600000,
+        "last_ms": 1784790000000,
+        "gaps": 0
+      },
+      "inactive_catalog_retained": true,
+      "survivorship_warning": "As-of catalog, not exhaustive historical listings ledger; removed absent contracts remain unavailable."
+    },
+    "okx": {
+      "available": true,
+      "catalog_total": 475,
+      "eligible": 281,
+      "catalog_status_counts": {
+        "live": 475
+      },
+      "eligible_status_counts": {
+        "live": 281
+      },
+      "category_counts": {
+        "1": 296,
+        "3": 171,
+        "4": 8
+      },
+      "selection_reason_counts": {
+        "crypto_linear_usdt_swap": 281,
+        "noncrypto_inverse_or_premarket": 194
+      },
+      "catalog_probe": {
+        "url": "https://www.okx.com/api/v5/public/instruments?instType=SWAP",
+        "asof": "2026-09-09T17:23:44.968417+00:00",
+        "status": 200,
+        "sha256": "38ebaf44bc72f17e8856057b13b4729334623c478fdcdc10c6bb9b978fac34be"
+      },
+      "first_page_probe": {
+        "url": "https://www.okx.com/api/v5/market/history-candles?instId=BTC-USDT-SWAP&bar=1H&after=1778673600000&before=1777593599999&limit=300",
+        "asof": "2026-09-09T17:29:39.637900+00:00",
+        "http_status": 200,
+        "sha256": "4fd92226415b0cbb0b936bc181c58058d8fb0e487d4fc1b1afdfe7c4915bff7b"
+      },
+      "first_page_validation": {
+        "expected_rows": 300,
+        "actual_rows": 300,
+        "first_ms": 1777593600000,
+        "last_ms": 1778670000000,
+        "gaps": 0
+      },
+      "inactive_catalog_retained": true,
+      "survivorship_warning": "As-of catalog, not exhaustive historical listings ledger; removed absent contracts remain unavailable."
+    }
+  },
+  "official_documentation_receipts": [
+    {
+      "url": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/market-data",
+      "resolved_url": "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/market-data",
+      "asof": "2026-09-09T17:28:43.398388+00:00",
+      "http_status": 202,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "note": "HTTP body SHA is response receipt, not document content hash if blocked/empty. Content independently read with official web tool."
+    },
+    {
+      "url": "https://www.gate.com/docs/developers/apiv4/en/futures/",
+      "resolved_url": "https://www.gate.com/docs/developers/apiv4/en/futures/",
+      "asof": "2026-09-09T17:28:44.487883+00:00",
+      "http_status": 403,
+      "sha256": "d26eae87829adde551bf4b852f9da6b8c3c2db9b65b8b68870632a2db5f53e00",
+      "note": "HTTP body SHA is response receipt, not document content hash if blocked/empty. Content independently read with official web tool."
+    },
+    {
+      "url": "https://www.okx.com/docs-v5/en/",
+      "resolved_url": "https://www.okx.com/docs-v5/en/",
+      "asof": "2026-09-09T17:28:46.062914+00:00",
+      "http_status": 200,
+      "sha256": "489fda7d418ceda9d28fade6c25ad2c28a60c6a325a0437f0a7cb606bea39b80",
+      "note": "HTTP body SHA is response receipt, not document content hash if blocked/empty. Content independently read with official web tool."
+    }
+  ],
+  "verified_official_source_urls": [
+    "https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/market-data",
+    "https://www.gate.com/docs/developers/apiv4/en/futures/",
+    "https://raw.githubusercontent.com/gateio/gateapi-python/master/docs/FuturesCandlestick.md",
+    "https://www.okx.com/docs-v5/en/"
+  ],
+  "units": {
+    "binance": {
+      "volume": "base units kline[5]",
+      "quote_volume": "USDT kline[7]"
+    },
+    "gate": {
+      "volume": "contracts v",
+      "quote_volume": "USDT sum",
+      "base_volume": "v * current quanto_multiplier, diagnostic only"
+    },
+    "okx": {
+      "volume": "contracts row[5]",
+      "quote_volume": "USDT volCcyQuote row[7]",
+      "base_volume": "base units row[6]",
+      "confirmed": "row[8] == 1"
+    }
+  },
+  "pagination": {
+    "binance": "Disjoint max1500-hour windows, startTime inclusive/endTime last millisecond, ascending response",
+    "gate": "Disjoint max2000-hour windows, from/to Unix seconds, never combine limit with from/to; catalog limit1000+offset",
+    "okx": "Disjoint max300-hour windows; after=exclusive window end, before=window start-1; descending response sorted on normalization"
+  },
+  "rate_policy": {
+    "binance": "shared minimum0.40s/request, 10weight limit1500; maximum1500weight/min below catalog2400/min",
+    "gate": "shared minimum0.20s/request; observedlimit200 remaining199",
+    "okx": "shared minimum0.55s/request below2/s requested by root"
+  },
+  "historical_survival_probe": {
+    "binance_settling_HFT": {
+      "url": "https://fapi.binance.com/fapi/v1/klines?symbol=HFTUSDT&interval=1h&startTime=1783641600000&endTime=1783659599999&limit=10",
+      "asof": "2026-09-09T17:28:46.988883+00:00",
+      "http_status": 200,
+      "sha256": "2abf5ad804eae4cae933abb1a4813a6d266f93aa803f58268e74f53692aeed8d"
+    },
+    "rows": 5,
+    "result": "Current SETTLING HFTUSDT returned historical July1h candles; currentstatus is not grounds for discarding history."
+  },
+  "tests": "11 synthetic unit tests passing; actual BTC full-page temporal continuity passes all three venues",
+  "scope_limits": [
+    "No strategy signals or returns evaluated here.",
+    "No authenticated endpoints, orders, live changes, shared cache writes or dependency changes.",
+    "Gate explicit empty contract_type treated crypto; absent metadata fails closed.",
+    "Listing date is approximate metadata; actual completebars define available history.",
+    "Current catalog does not reconstruct all historical delisted symbols.",
+    "No historical orderbook/slippage/funding reconstruction."
+  ]
+}
