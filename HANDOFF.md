@@ -2,6 +2,18 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## Spike 今日涨幅名单已核对（2026-09-09，截止16:29:59）
+
+截图11币×当前四周期44窗：今天有2个可见多头释放，GRASS15m13:15已获Bark13:16:14接受，
+YOLO14:45确认于14:46:27接受；ZEC30m08:30早于15:24启用，不补发。其余9币今天无可见新释放。
+关键覆盖缺口：IOST/MINA/GPS/ENA今天15m已有内部dense entry，但双线近零分别0/6/9/0根，
+不足focus12，showMarks=false下不是当前通知事件；GPS主线零轴13根不等于双线近零13根。
+USELESS/TRUTH/GPS昨天已有Bark成功回执，今天部分周期md持续为正；TRUTH1H23:00同根YOLO的
+Bark仍unknown，不能冒称手机送达。IOST9月4日高周期箭头属后来的历史重建，不是当时实时抓到。
+只读快照output/qa/spike_gainers_audit_20260909/，复核器yoyo/evaluation/spike_gainers_audit.py；
+10,396根focus状态独立重放一致，人工破坏sb的负对照检出12处差异。未改Pine/阈值/模型/服务/通知。
+下一步应在完整同期样本单独验证内部密集启动及持续趋势观察，不凭事后赢家榜直接放宽通知或宣称收益。
+
 ## Spike 已关闭5m、开启30m（2026-09-09 15:24，覆盖下方旧5m口径）
 
 Owner最新要求5min通知关闭、30min打开。v1.10.0 / 177bc89已部署；当前15m/30m/1H/4H
