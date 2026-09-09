@@ -152,12 +152,15 @@ def build(outdir: Path, report: Path = REPORT):
               "等风险超额：各事件都以相同初始权益、1%风险预算、同现金上限计算；先每月跨币聚合，再做月份块置换和bootstrap。表内p为三个固定政策的Holm校正值；强势切片属于单独探索族。", ""]
     for cohort in ("all", "strong"):
         rows = []
+        counts = []
         for _, row in summary.loc[summary.cohort.eq(cohort)].iterrows():
-            rows.append([row.fold, row.arm, int(row.n_valid), int(row.n_natural), int(row.n_censored), int(row.matched_n),
-                         fmt(row.mean_net_bp), fmt(row.matched_strategy_mean_net_bp), fmt(row.control_mean_net_bp), fmt(row.block_risk_excess_bp),
+            label = "开发" if row.fold == "development" else "验证"
+            counts.append([label, row.arm, int(row.n), int(row.n_valid), int(row.n_natural), int(row.n_censored), int(row.matched_n), fmt(row.mean_net_bp)])
+            rows.append([label, row.arm, fmt(row.matched_strategy_mean_net_bp), fmt(row.control_mean_net_bp), fmt(row.block_risk_excess_bp),
                          f"[{fmt(row.block_ci_low_bp)}, {fmt(row.block_ci_high_bp)}]", int(row.n_blocks), fmt(row.p_holm, 4)])
         lines += ["### " + ("全部入场" if cohort == "all" else "入场时为强势：完整交易结果"), "",
-                  table(["折", "政策", "有效", "自然", "边界", "匹配", "全部事件净bp", "匹配策略净bp", "匹配对照净bp", "月均等风险超额bp", "95%CI", "月份块", "校正p"], rows), ""]
+                  table(["折", "政策", "候选", "有效", "自然", "边界", "匹配", "全部事件净bp"], counts), "",
+                  table(["折", "政策", "匹配策略净bp", "匹配对照净bp", "月均风险超额bp", "95%CI", "月块", "校正p"], rows), ""]
     diagnostic_rows = []
     for _, row in summary.loc[summary.cohort.eq("all")].iterrows():
         diagnostic_rows.append([row.fold, row.arm, int(row.n), fmt(row.n_positive / row.n_scored * 100 if row.n_scored else None),
@@ -199,6 +202,7 @@ def build(outdir: Path, report: Path = REPORT):
               "- 2023—2025已被其他实验研究过；本轮固定策略并无参数搜索，但2025不应称为研究者从未见过的盲测。",
               "- 静态0.2%成本未含完整资金费率和实际执行延迟/冲击；退出也按入场名义计费，上涨时未随退出名义金额增加。不能按这些曲线直接推算永续实盘收益。",
               "- 跨币高度相关、交易重叠、月份块较少，置信区间与p的解释依赖月份近似独立及符号可交换性。更少于6个月不作显著性结论。",
+              "- 本轮只使用预定seed的一套匹配映射；CI和p条件于该映射，没有包含重新抽取对照时点的额外不确定性。",
               "- 自然退出胜率/PF排除折末删失，可能偏向较短持仓；组合净收益包含边界清算。最大回撤是4H收盘盯市，不能代表完整盘中最大风险。",
               "- 未来是否出现山寨季、是否重复历史幅度、哪些币领涨都没有被本实验验证。本轮不产生交易指令或上线授权。", "",
               "## 下一步选项", "",
