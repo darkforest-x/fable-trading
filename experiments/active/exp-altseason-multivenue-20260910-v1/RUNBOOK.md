@@ -22,7 +22,10 @@ Gate正式采集前需按上列命令用已提交bootstrap建立冻结目录。�
 .venv/bin/python -m yoyo.evaluation.altseason_dataset --data experiments/active/exp-altseason-multivenue-20260910-v1/data --results experiments/active/exp-altseason-multivenue-20260910-v1/results --venue gate --workers 2
 .venv/bin/python -m yoyo.evaluation.altseason_dataset --data experiments/active/exp-altseason-multivenue-20260910-v1/data --results experiments/active/exp-altseason-multivenue-20260910-v1/results --venue okx --workers 2
 .venv/bin/python -m yoyo.evaluation.altseason_research
+.venv/bin/python -m yoyo.evaluation.altseason_paired_portfolio
 .venv/bin/python -m yoyo.evaluation.altseason_costs
+PYTHONPATH=/Users/zhangzc/fable-trading .venv/bin/python experiments/active/exp-altseason-multivenue-20260910-v1/audit_real.py
+PYTHONPATH=/Users/zhangzc/fable-trading .venv/bin/python experiments/active/exp-altseason-multivenue-20260910-v1/audit_prefix.py
 .venv/bin/python -m yoyo.evaluation.altseason_report
 ```
 

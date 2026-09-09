@@ -66,6 +66,9 @@ LABELS = {
     "mean_net_r": "平均净R", "mean_control_bp": "匹配随机净bp", "mean_excess_bp": "匹配超额bp",
     "permutation_p": "置换p", "holm_p": "Holm p", "top1_positive_profit_share": "最大赢家/正利润%",
     "asset_balanced_excess_bp": "资产均衡超额bp", "permutation_assets": "置换资产数",
+    "matched_fraction": "匹配覆盖%", "paired_candidates": "配对候选数",
+    "paired_actual_return_pct": "同集合策略收益%", "paired_random_return_pct": "同集合随机收益%",
+    "paired_actual_mdd_pct": "策略收盘回撤%", "paired_random_mdd_pct": "随机收盘回撤%",
     "top5_positive_profit_share": "前5赢家/正利润%", "return_minus_top1_contribution_pct": "扣最大赢家贡献后%",
     "return_minus_top5_contribution_pct": "扣前5赢家贡献后%", "boundary_marks": "段末盯市笔数",
     "peak_positions": "最多同时资产", "feature": "入场时特征", "bucket": "事先分桶", "n": "样本数",
@@ -94,7 +97,7 @@ LABELS = {
     "uncertain_funding_range_pct": "不确定资金费区间%",
 }
 PERCENT_FRACTIONS = {"win_rate", "top1_positive_profit_share", "top5_positive_profit_share",
-                     "actual_matching_fraction", "top_decile_win_rate", "funding_known_fraction"}
+                     "actual_matching_fraction", "top_decile_win_rate", "funding_known_fraction", "matched_fraction"}
 INTEGER_COLUMNS = {"events", "trades", "boundary_marks", "peak_positions", "n", "contracts", "assets",
                    "signals", "new_assets", "positive_assets", "fifty_assets", "coverage_hours", "top_n",
                    "random_schedules", "opportunity_count", "funding_known_trades", "funding_unknown_trades",
@@ -111,7 +114,7 @@ def _sha(path: Path) -> str:
 
 def _committed() -> str:
     """Rendering is disallowed until the exact source and plan are committed."""
-    for path in (BUILDER, EXPERIMENT / "PROJECT_PLAN.md"):
+    for path in (BUILDER, EXPERIMENT / "PROJECT_PLAN.md", EXPERIMENT/"RUNBOOK.md", EXPERIMENT/"FINDINGS.md"):
         relative = path.relative_to(ROOT).as_posix()
         saved = subprocess.check_output(["git", "show", "HEAD:"+relative], cwd=ROOT)
         if saved != path.read_bytes():
@@ -204,6 +207,7 @@ def load_results(folder: Path) -> dict:
         ("events", "events.csv.gz"), ("calendar", "calendar_events.csv.gz"),
         ("diagnostics", "feature_diagnostics.csv"), ("coverage", "coverage.csv"))}
     result["costs"] = _csv(folder, "cost_diagnostics.csv", required=False)
+    result["paired"] = _csv(folder, "paired_portfolio_summary.csv", required=False)
     result["regime"] = _csv(folder, "regime.csv", required=False)
     result["scores"] = _csv(folder, "score_diagnostics.csv", required=False)
     result["opportunities"] = _csv(folder, "opportunity_audit.csv.gz", required=False)
@@ -258,7 +262,7 @@ def _plot_setup():
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    plt.rcParams.update({"font.family": "DejaVu Sans", "axes.spines.top": False,
+    plt.rcParams.update({"font.family": ["DejaVu Sans","Arial Unicode MS"], "axes.spines.top": False,
         "axes.spines.right": False, "axes.labelcolor": "#3d5261", "xtick.color": "#536876",
         "ytick.color": "#536876", "axes.edgecolor": "#d0dce4", "grid.color": "#dce5eb",
         "figure.facecolor": "#f6f9fc", "axes.facecolor": "#ffffff", "savefig.facecolor": "#f6f9fc"})
@@ -580,10 +584,16 @@ def build_markdown(data: dict, folder: Path, figures: list[Path], gallery: str, 
         "哪些启动方式更容易兑现，失败发生在哪里。未来几个月可能进入山寨活跃期，是待验证的使用情境；本报告不把它当作已经确定的市场事实。",
         "**研究区间：2026-07-10 00:00 至 2026-09-09 00:00 UTC。全部结果为回顾性研究，"
         "没有根据本轮收益调参，也没有修改线上指标、通知或交易账户。**",
+        (EXPERIMENT/"FINDINGS.md").read_text(),
         "## 先看能真正分配资金的结果",
         "下表是独立模拟账户；不是把所有相互重叠的信号收益相加。各账户起始100,000 USDT，最多10个不同资产，"
         "同资产跨交易所互斥，名义/初损风险/现金/成交额容量共同约束仓位。A、B、C使用同一SMA60退出，只比较入场方式。",
         _table(main, ("minutes", "arm", "return_pct", "max_drawdown_pct", "trades", "win_rate", "profit_factor", "random_return_pct_mean", "random_schedules", "boundary_marks")),
+        "主表三组随机排程来自可匹配部分，候选覆盖不齐，只作上下文参考。真正同一批候选的账户比较见下表；尤其4H匹配较少，不能把全策略与较小随机集合的差直接说成alpha。",
+        "### 同一批可匹配候选的现金账户对照",
+        _table(_subset(data.get("paired",pd.DataFrame()),scope="combined",period="full"),
+            ("minutes","arm","paired_candidates","matched_fraction","paired_actual_return_pct","paired_random_return_pct","paired_actual_mdd_pct","paired_random_mdd_pct")),
+        "固定使用每笔的第一个有效随机对照，与其原始策略候选严格一对一。双方独立执行相同现金和仓位规则，满仓/同币冲突后的实际成交数可以不同；这是条件子集，不代表缺对照样本。配对发生在同一自然周，月内触发时刻可能落在分界两侧。",
         "比较时同时看收益、回撤、成交数与尾部依赖。单次高收益或一个翻倍币，不足以证明下一阶段也有同样结果。",
         "## 扩大市场，实际多了哪些机会",
         _table(expansion, ("scope", "contracts", "assets", "signals", "new_assets", "positive_assets", "fifty_assets")),
@@ -605,7 +615,7 @@ def build_markdown(data: dict, folder: Path, figures: list[Path], gallery: str, 
         "B独立观察均线密集后价格站上六线并突破前高；C观察已建立趋势中的回踩恢复。三者解决不同入口，"
         "是否互补要看完整候选与账户结果，不能只拿各自最漂亮的截图。D是短历史60—339根的独立规则，不能冒称与IMACD完全兼容。",
         _table(_subset(summary, scope="combined", period="full"),
-               ("minutes", "arm", "events", "mean_net_bp", "mean_net_r", "win_rate", "mean_control_bp", "mean_excess_bp", "asset_balanced_excess_bp", "permutation_assets", "permutation_p", "holm_p")),
+               ("minutes", "arm", "events", "matched_fraction", "mean_net_bp", "mean_net_r", "win_rate", "mean_control_bp", "mean_excess_bp", "asset_balanced_excess_bp", "permutation_assets", "permutation_p", "holm_p")),
         "匹配随机要求同币同所同周期、同自然周、因果波动桶；最多3个且不放宽缺样。不同退出共用同一决策的控制索引。"
         "置换先按资产×自然周聚合，再按资产均衡；p对应资产均衡超额，不能与事件等权的平均超额混为一谈。"
         "Holm校正多重比较，但资产间仍可能有共同市场冲击；低p不能证明因果关系或未来收益。",
@@ -686,6 +696,7 @@ def build_markdown(data: dict, folder: Path, figures: list[Path], gallery: str, 
         "无训练分类模型，因此训练/验证AUC不适用。本轮的基线与匹配随机直接检验价格净收益；"
         "若未另提供事先定义分数的Top10%诊断，则Top10%收益/排序AUC不可估，不能从事后赢家排名伪造。",
         "### 数据覆盖明细",
+        "公开接口说明：[Binance USDⓈ-M市场数据](https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-usd-s-m-futures/api/rest-api/market-data)、[Gate永续接口](https://www.gate.com/docs/developers/apiv4/en/futures/)、[OKX API](https://www.okx.com/docs-v5/en/)。数据单位、请求参数、原生响应、时间戳与SHA见source_audit和采集manifest。Binance资金费中途HTTP403后停止，只完成71个币的文件，其余不补零。",
     ]
     coverage = data["coverage"]
     coverage_cols = [c for c in ("venue", "symbol", "asset", "instrument", "raw", "eligible", "segments", "warmup", "gaps", "reason") if c in coverage]
@@ -732,7 +743,7 @@ def render(folder: Path, report: Path) -> dict:
     html_path = ROOT/"analysis/html"/(report.stem+".html")
     source_files = ("summary.csv", "portfolio_summary.csv", "events.csv.gz", "calendar_events.csv.gz",
                     "feature_diagnostics.csv", "coverage.csv", "manifest.json", "cost_diagnostics.csv", "regime.csv",
-                    "score_diagnostics.csv", "opportunity_audit.csv.gz")
+                    "score_diagnostics.csv", "opportunity_audit.csv.gz", "paired_portfolio_summary.csv", "paired_portfolio_manifest.json", "audit_real.json", "audit_prefix.json")
     result = dict(builder_commit=commit, report=str(report), html=str(html_path),
         input_sha256={name: _sha(folder/name) for name in source_files if (folder/name).exists()},
         report_sha256=_sha(report), html_sha256=_sha(html_path), figures=list(map(str, figures)),
