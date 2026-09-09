@@ -304,6 +304,29 @@ class Store:
             return db.execute("UPDATE outbox SET status='skipped',error='telegram_disabled_by_owner',updated_ms=? "
                               "WHERE status='pending'", (now_ms(),)).rowcount
 
+    def retire_disabled_timeframes(self):
+        """Withdraw unsent Bark legs and pending inference under the process lock.
+
+        Preserve events, cutovers, sent/unknown receipts and terminal model
+        proofs. Only pending delivery and pending/error candidate work on
+        withdrawn periods is retired; sender guards also reject stale claims.
+        """
+        placeholders = ",".join("?" for _ in MONITORED_TIMEFRAMES)
+        with self.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            retired = db.execute(
+                "UPDATE bark_outbox SET status='skipped',error='timeframe_disabled_by_owner',updated_ms=? "
+                "WHERE status='pending' AND event_id IN (SELECT id FROM events WHERE timeframe NOT IN ("
+                + placeholders + "))", (now_ms(), *MONITORED_TIMEFRAMES)).rowcount
+            candidates = db.execute(
+                "SELECT id,model FROM model_candidates WHERE status IN ('pending','error') "
+                "AND timeframe NOT IN (" + placeholders + ")", MONITORED_TIMEFRAMES).fetchall()
+            for row in candidates:
+                proof = dict(json.loads(row["model"]), status="disabled", reason="timeframe_disabled_by_owner")
+                db.execute("UPDATE model_candidates SET status='disabled',model=? WHERE id=?",
+                           (encode(proof), row["id"]))
+        return {"bark_pending": retired, "model_candidates": len(candidates)}
+
     def claim(self, now):
         with self.connect() as db:
             db.execute("BEGIN IMMEDIATE")

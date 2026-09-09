@@ -171,7 +171,7 @@ def test_prefix_is_unchanged_by_arbitrary_future_ohlc_or_htf_mutation():
     assert prefix["state"]["bar_close_ms"] == cutoff
 
 
-@pytest.mark.parametrize("timeframe,high_tf", [("5m", "1H"), ("15m", "1H"), ("1H", "4H"), ("4H", "1Dutc")])
+@pytest.mark.parametrize("timeframe,high_tf", [("15m", "1H"), ("30m", "2H"), ("1H", "4H"), ("4H", "1Dutc")])
 def test_htf_uses_local_open_not_local_close_and_warms_independently(timeframe, high_tf):
     duration = signals.TIMEFRAMES[timeframe]
     high_duration = signals.TIMEFRAMES[high_tf]
@@ -219,7 +219,7 @@ def test_invalid_input_fails_closed(defect):
 
 def test_unsupported_timeframe_is_rejected():
     with pytest.raises(ValueError):
-        signals.analyze([], [], "30m")
+        signals.analyze([], [], "5m")
 
 
 def test_protocol_and_output_are_json_safe():
@@ -335,7 +335,7 @@ def test_real_zero_breakout_history_survives_future_quote_mutation():
         assert result["chart"][:370] == prefix["chart"]
 
 
-@pytest.mark.parametrize("timeframe", ["5m", "15m", "1H", "4H"])
+@pytest.mark.parametrize("timeframe", ["15m", "30m", "1H", "4H"])
 def test_visible_start_waits_for_frozen_band_after_raw_zero_departure(monkeypatch, timeframe):
     duration = signals.TIMEFRAMES[timeframe]
     patch_features(monkeypatch, {"md": {352: .10, 353: .19, 354: .21, 355: .25},

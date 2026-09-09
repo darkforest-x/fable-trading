@@ -1,14 +1,15 @@
-"""Owner's 2026-09-09 additive 5m/15m/1H/4H start and model-confirmation delivery.
+"""Owner's 2026-09-09 additive 15m/30m/1H/4H start and model-confirmation delivery.
 
 Only the immutable arrow bar (OHLC/IMACD at or before close) is used for a
 direct start. Model confirmation keeps its original causal proof and cutoff.
 Each channel and stage has its own persisted cutover. No historical signal is
 authorized by an older raw-arrow policy. Each newly enabled period needs its
-own cutover; enabling 5m cannot inherit any earlier period’s cutover.
+own cutover; enabling 30m cannot inherit any earlier period’s cutover.
 """
 import re
 
-from yoyo.monitor import DIRECT_POLICY, DIRECT_TIMEFRAMES, FRESH_MS, MODEL_PROTOCOL, TIMEFRAMES
+from yoyo.monitor import (DIRECT_POLICY, DIRECT_TIMEFRAMES, FRESH_MS, MODEL_PROTOCOL,
+                          MONITORED_TIMEFRAMES, TIMEFRAMES)
 from yoyo.monitor.policy import finite, is_model_signal, is_tv_start
 
 
@@ -41,6 +42,9 @@ def is_direct_start(event):
 
 def delivery_error(store, event, now, channel):
     """Return a stable rejection code, or None for a currently deliverable leg."""
+    # Recheck at the sender boundary: a durable queue may predate withdrawal.
+    if event.get("timeframe") not in MONITORED_TIMEFRAMES:
+        return "timeframe_disabled_by_owner"
     if is_model_signal(event):
         protocol = MODEL_PROTOCOL
         closes = (event["bar_close_ms"], event["indicator"]["bar_close_ms"])

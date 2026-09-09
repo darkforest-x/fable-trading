@@ -1,6 +1,6 @@
 """Independent Mac scan loop: public OHLCV -> Pine-equivalent events -> outbox.
 
-The owner requested local all-market 5m/15m/1H/4H monitoring. On 2026-09-09,
+The owner requested local all-market 15m/30m/1H/4H monitoring. On 2026-09-09,
 all four periods send direct starts and extra model confirmations via Bark;
 Telegram is disabled. This is an indicator monitor, not an ACTIVE/model
 promotion, broker position tracker, execution path or backtest. Existing VPS
@@ -63,6 +63,7 @@ class Monitor:
         # Called only after server lifespan owns the singleton process lock.
         self.store.recover_outbox()
         self.store.retire_telegram_pending()
+        self.store.retire_disabled_timeframes()
         for name, target in (("scan", self.run), ("model", self.model_gate.run), ("bark", self.deliver_bark)):
             thread = threading.Thread(target=target, name="impulse-" + name, daemon=True)
             self.threads.append(thread)
@@ -261,7 +262,7 @@ class Monitor:
                     "fresh_minutes": FRESH_MS // 60000, "interval_seconds": self.interval, "timeframes": list(MONITORED_TIMEFRAMES),
                     "clock_offset_ms": self.client.offset_ms, "public_requests": self.client.requests,
                     "candle_storage": "memory_only", "history_days": 7,
-                    "signal_mode": "5m/15m/1H/4H 启动先发 Bark · YOLO 通过追加确认", "signal_kind": MODEL_KIND,
+                    "signal_mode": "15m/30m/1H/4H 启动先发 Bark · YOLO 通过追加确认", "signal_kind": MODEL_KIND,
                     "notification_mode": "two_stage", "direct_timeframes": list(DIRECT_TIMEFRAMES),
                     "notification_channels": ["bark"],
                     "direct_notification_policy": DIRECT_POLICY,
@@ -279,7 +280,8 @@ class Monitor:
                     "warmup_bars": 340, "launch_agent": "com.fable.impulse-monitor"})
 
     def markets(self):
-        rows = [r for r in self.store.list_markets() if r.get("active", True)]
+        rows = [r for r in self.store.list_markets()
+                if r.get("active", True) and r.get("timeframe") in MONITORED_TIMEFRAMES]
         now = self.client.clock()
         for row in rows:
             duration = TIMEFRAMES[row["timeframe"]]

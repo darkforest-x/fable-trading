@@ -13,7 +13,7 @@ import logging
 import threading
 
 from yoyo.monitor import (FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, MODEL_PROFILE_ID,
-                          MODEL_SHA256, MODEL_MAX_WAIT, TIMEFRAMES)
+                          MODEL_SHA256, MODEL_MAX_WAIT, MONITORED_TIMEFRAMES, TIMEFRAMES)
 from yoyo.monitor.policy import finite, is_tv_start, is_model_signal
 
 LOG = logging.getLogger("spike.model")
@@ -72,11 +72,13 @@ class ModelGate:
         self._last_checked = None
 
     def register(self, event):
-        if not is_tv_start(event):
+        if event.get("timeframe") not in MONITORED_TIMEFRAMES or not is_tv_start(event):
             return False
         return self.store.register_candidate(event, pending_proof(event))
 
     def submit(self, symbol, timeframe, candles):
+        if timeframe not in MONITORED_TIMEFRAMES:
+            return
         if not self.store.list_candidates(1, symbol, timeframe, pending_only=True):
             return
         with self._condition:
@@ -131,6 +133,8 @@ class ModelGate:
         persisted only after a complete inference; errors retry the endpoint.
         Once md invalidates a candidate it cannot be revived by a later match.
         """
+        if timeframe not in MONITORED_TIMEFRAMES:
+            return
         step, now = TIMEFRAMES[timeframe], self.clock()
         closed = [r for r in candles if r["t"] + step <= now]
         if not closed:

@@ -203,7 +203,7 @@ def analyze(candles: list[dict], higher: list[dict], timeframe: str) -> dict:
     it may occur after md has already been nonzero for several bars.
     """
     if timeframe not in HIGHER_TIMEFRAME:
-        raise ValueError("timeframe must be 5m, 15m, 1H or 4H")
+        raise ValueError("timeframe must be 15m, 30m, 1H or 4H")
     duration = TIMEFRAMES[timeframe]
     higher_timeframe = HIGHER_TIMEFRAME[timeframe]
     higher_duration = TIMEFRAMES[higher_timeframe]

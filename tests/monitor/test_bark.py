@@ -58,7 +58,7 @@ def test_success_uses_private_post_and_does_not_consume_telegram(tmp_path):
     assert worker.status()["acceptance"] == "bark_server_accepted_not_device_receipt"
 
 
-@pytest.mark.parametrize("timeframe,interval", [("5m", "5"), ("15m", "15"), ("1H", "60"), ("4H", "240")])
+@pytest.mark.parametrize("timeframe,interval", [("15m", "15"), ("30m", "30"), ("1H", "60"), ("4H", "240")])
 @pytest.mark.parametrize("direct", [True, False])
 def test_mobile_app_link_keeps_exact_web_chart_and_copy_symbol(timeframe, interval, direct):
     signal = event(timeframe=timeframe, symbol="ZK-USDT-SWAP")

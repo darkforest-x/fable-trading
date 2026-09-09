@@ -81,7 +81,7 @@ def test_endpoint_must_exist_and_both_windows_must_be_complete():
         with pytest.raises(detector.YoloDetectorError, match="incomplete"):
             detector.prepare_windows(candles, "1H", endpoint)
     with pytest.raises(detector.YoloDetectorError, match="unsupported"):
-        detector.prepare_windows(rows, "30m", rows[-1]["t"])
+        detector.prepare_windows(rows, "5m", rows[-1]["t"])
 
 
 @pytest.mark.parametrize("core,post,expected", [(4, 2, True), (5, 9, True),

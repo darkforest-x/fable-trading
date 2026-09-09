@@ -73,7 +73,7 @@ def content(call, channel):
 
 
 @pytest.mark.parametrize("channel", ["telegram", "bark"])
-@pytest.mark.parametrize("timeframe", ["5m", "15m", "1H", "4H"])
+@pytest.mark.parametrize("timeframe", ["15m", "30m", "1H", "4H"])
 @pytest.mark.parametrize("wait", [0, 2])
 def test_raw_then_model_are_distinct_once_only_notifications(tmp_path, channel, timeframe, wait):
     store = Store(tmp_path / "monitor.sqlite")
@@ -108,7 +108,7 @@ def test_raw_then_model_are_distinct_once_only_notifications(tmp_path, channel, 
     assert receipt(store, other, raw)["status"] == receipt(store, other, event)["status"] == "pending"
 
 
-@pytest.mark.parametrize("timeframe", ["5m", "15m", "1H", "4H"])
+@pytest.mark.parametrize("timeframe", ["15m", "30m", "1H", "4H"])
 def test_bark_sends_raw_then_model_while_default_telegram_stays_off(tmp_path, timeframe):
     store = Store(tmp_path / "monitor.sqlite")
     for channel in ("telegram", "bark"):

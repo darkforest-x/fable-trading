@@ -12,17 +12,17 @@
     tradingViewPending: false,
   };
   const titles = {
-    signals: ["信号中心", "5m / 15m / 1H / 4H 收盘启动先推送 Bark，YOLO 通过后追加确认。两个阶段分别展示。"],
+    signals: ["信号中心", "15m / 30m / 1H / 4H 收盘启动先推送 Bark，YOLO 通过后追加确认。两个阶段分别展示。"],
     watch: ["蓄势观察", "还在横盘的，单独观察。这里的结构尚不是启动信号。"],
     system: ["运行状态", "行情、扫描与通知，每个环节都清晰可见。"],
   };
   const eventNames = { tv_start: "原始启动箭头", yolo_confirmed: "模型确认" };
   const MODEL_PROTOCOL = "imacd-yolo-confirmation-monitor-v1";
-  const modelStates = { pending: "等待确认", confirmed: "模型已通过", invalidated: "结构失效", expired: "等待已到期", error: "检测异常" };
+  const modelStates = { pending: "等待确认", confirmed: "模型已通过", invalidated: "结构失效", expired: "等待已到期", error: "检测异常", disabled: "周期已关闭" };
   const TV_PROTOCOL = "imacd-tv-visible-start-monitor-v3";
   const TV_PROFILE = "imacd-v2.2-focus12-band0.10-marks-off";
   const TV_SETTINGS = "近零至少 12 根 · 0.1 ATR · 普通系统标记关闭";
-  const TV_INTERVALS = new Map([["5m", "5"], ["15m", "15"], ["1H", "60"], ["4H", "240"]]);
+  const TV_INTERVALS = new Map([["15m", "15"], ["30m", "30"], ["1H", "60"], ["4H", "240"]]);
   const phaseNames = {
     building: "蓄势中", accumulating: "蓄势中", accumulation: "蓄势中", compression: "密集蓄势",
     ready: "等待启动", armed: "等待启动", flat: "零轴横盘", neutral: "观察中",
@@ -55,14 +55,15 @@
   const sourceItems = () => state.signalScope === "confirmed" ? state.signals : state.signalScope === "direct" ? state.directSignals : state.candidates;
   const sourceKey = () => state.signalScope === "confirmed" ? "signals" : state.signalScope === "direct" ? "directSignals" : "candidates";
   const modelState = (item) => modelStates[item.model?.status] || "等待模型状态";
-  const notificationPolicy = () => twoStage() ? "5m / 15m / 1H / 4H 收盘启动先推送 Bark，YOLO 通过后追加推送；历史箭头不补发。" : "当前服务仍按模型确认通知，分阶段通知规则尚未启用。";
+  const notificationPolicy = () => twoStage() ? "15m / 30m / 1H / 4H 收盘启动先推送 Bark，YOLO 通过后追加推送；历史箭头不补发。" : "当前服务仍按模型确认通知，分阶段通知规则尚未启用。";
   function candidateNotificationNote(item) {
+    if (item.model?.status === "disabled") return "该周期已关闭 · 不再推送";
     if (directReceipt(item)) return "启动通知见通道回执；YOLO 通过后追加通知";
     return twoStage() ? "未关联新规则启动回执 · 不推断已发送" : "候选记录 · 当前等待模型后通知";
   }
   function modelReason(item) {
     const reason = String(item.model?.reason || "");
-    const known = { md_zero_or_reversal: "动量已回到零轴或反转", no_match_within_wait: "等待窗口内未检测到匹配结构", missing_causal_candles: "检测所需行情缺失，等待数据补齐", confirmation_history_unavailable: "确认窗口行情未补齐，已结束等待" };
+    const known = { md_zero_or_reversal: "动量已回到零轴或反转", no_match_within_wait: "等待窗口内未检测到匹配结构", missing_causal_candles: "检测所需行情缺失，等待数据补齐", confirmation_history_unavailable: "确认窗口行情未补齐，已结束等待", timeframe_disabled_by_owner: "该周期已关闭，停止检测与通知" };
     return known[reason] || (reason.startsWith("inference_unavailable:") ? "模型检测暂时不可用，等待重试" : reason);
   }
   const modelScore = (item) => finite(item.model?.confidence) && Number(item.model.confidence) >= 0 && Number(item.model.confidence) <= 1 ? Number(item.model.confidence).toFixed(2) : "—";
@@ -406,7 +407,7 @@
     if (runtime.signal_mode || runtime.strategy || status.strategy) runtimeFacts.push(["信号规则", runtime.signal_mode || runtime.strategy || status.strategy]);
     if (runtime.higher_mode) runtimeFacts.push(["高周期规则", runtime.higher_mode]);
     const gate = runtime.model_gate || {};
-    const gateImpact = twoStage() ? "5m / 15m / 1H / 4H 指标启动推送独立运行；仅 YOLO 追加确认需要模型通过。" : "模型确认通知暂不可用，候选保留等待。";
+    const gateImpact = twoStage() ? "15m / 30m / 1H / 4H 指标启动推送独立运行；仅 YOLO 追加确认需要模型通过。" : "模型确认通知暂不可用，候选保留等待。";
     const gateNotice = !modelProtocol() ? "模型确认口径尚未同步，原始箭头不会显示为模型确认。" : gate.last_error ? `模型检测异常：${String(gate.last_error)}。${gateImpact}` : gate.status === "error" ? `部分候选检测异常，可在等待确认中查看。${gateImpact}` : gate.loaded !== true ? `模型尚未就绪。${gateImpact}` : "";
     $("model-gate-notice").textContent = gateNotice;
     $("model-gate-notice").classList.toggle("hidden", !gateNotice);
