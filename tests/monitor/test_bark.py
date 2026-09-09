@@ -48,7 +48,7 @@ def test_success_uses_private_post_and_does_not_consume_telegram(tmp_path):
     assert "100.5" in kwargs["json"]["body"] and "等待 2 根" in kwargs["json"]["subtitle"]
     assert kwargs["json"]["url"].endswith("interval=60")
     assert "原箭头 99.5" in kwargs["json"]["body"]
-    assert "指标 + YOLO确认" in kwargs["json"]["subtitle"]
+    assert "YOLO 确认" in kwargs["json"]["subtitle"]
     assert store.list_events()[0]["bark_notification_status"] == "sent"
     assert store.list_events()[0]["notification_status"] == "pending"
     assert "fake-private-device" not in json.dumps(worker.status())

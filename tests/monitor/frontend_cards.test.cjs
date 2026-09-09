@@ -153,13 +153,14 @@ function harness({ allowChartFixture = false, nowStep = 0, bridgeReply = null, a
   const source = fs.readFileSync(clientPath, "utf8");
   const bootstrap = '  setView(location.hash.slice(1) || "signals", false);';
   assert.equal(source.split(bootstrap).length, 2, "client bootstrap must be uniquely identified");
-  const exposed = ["state", "isFresh", "filteredSignals", "notification", "notificationHTML", "renderSignals", "isBuilding", "renderWatch", "renderDetail", "refresh", "modelOverlayHTML", "isConfirmed"];
+  const exposed = ["state", "isFresh", "filteredSignals", "notification", "notificationHTML", "renderSignals", "isBuilding", "renderWatch", "renderDetail", "refresh", "modelOverlayHTML", "isConfirmed", "renderStatus"];
   vm.runInContext(source.slice(0, source.indexOf(bootstrap)) + `\n  globalThis.client = { ${exposed.join(", ")} };\n})();`, context, { filename: clientPath });
   const client = context.client;
   client.state.status = { protocol: PROTOCOL, now_ms: NOW, runtime: { signal_kind: "yolo_confirmed", fresh_minutes: 30 } };
   client.state.statusReceivedAt = NOW;
   client.state.signalsLoaded = true;
   client.state.candidatesLoaded = true;
+  client.state.directSignalsLoaded = true;
   client.state.marketsLoaded = true;
   return { client, document, get: (id) => elements.get(id), advance: (ms) => { now += ms; }, networkCalls, networkRequests };
 }
@@ -782,7 +783,7 @@ test("candidate stages remain separate, errors stay visible and notification rec
   assert.equal(get("candidate-count").textContent, "2");
   assert.match(get("signal-rows").innerHTML, /检测异常/);
   assert.match(get("signal-rows").innerHTML, /原箭头收盘价/);
-  assert.match(get("signal-rows").innerHTML, /候选记录 · 不触发通知/);
+  assert.match(get("signal-rows").innerHTML, /候选记录 · 当前等待模型后通知/);
   assert.doesNotMatch(get("signal-rows").innerHTML, /新鲜确认|is-fresh|data-notification-channel/);
   assert.equal(client.state.signalTotal, 100);
   assert.match(get("signal-window-note").textContent, /共 200/);
@@ -862,4 +863,140 @@ test("polling requests separate APIs, rejects mixed event payloads and keeps ind
   assert.equal(client.state.candidates[0].id, "pending", "candidate error preserves its cache");
   assert.equal(client.isFresh(client.state.signals[0]), true, "unrelated candidate API failure cannot invalidate a confirmed timestamp");
   assert.match(get("error-notice").textContent, /指标候选/);
+});
+
+function enableTwoStage(client) {
+  Object.assign(client.state.status.runtime, { notification_mode: "two_stage", direct_timeframes: ["1H", "4H"] });
+}
+
+test("direct feed shows 1H and 4H start prices and separate receipts, excluding 15m and model events", () => {
+  const { client, get } = harness();
+  enableTwoStage(client);
+  client.state.signalScope = "direct";
+  client.state.directSignals = [candidate("start-1h", "pending", { price: 102.5 }), candidate("start-4h", "pending", { timeframe: "4H", bark_notification_status: "sent" }), candidate("not-direct-15m", "pending", { timeframe: "15m" }), signal("model"), candidate("wrong-protocol", "pending", { protocol: "legacy" })];
+  client.state.directSignalTotal = 19;
+  client.renderSignals();
+  assert.deepEqual(ids(get("signal-rows")), ["start-1h", "start-4h"]);
+  assert.match(get("signal-rows").innerHTML, /新鲜启动|原箭头收盘价|102.5|启动时未经 YOLO 确认/);
+  assert.match(get("signal-rows").innerHTML, /TG<\/span><span>已发送|Bark<\/span><span>服务已接受/);
+  assert.doesNotMatch(get("signal-rows").innerHTML, /模型确认收盘价|YOLO 追加确认/);
+  assert.match(get("signal-window-note").textContent, /共 19/);
+  client.state.timeframe = "4H";
+  client.renderSignals();
+  assert.deepEqual(ids(get("signal-rows")), ["start-4h"]);
+  client.state.timeframe = "15m";
+  client.renderSignals();
+  assert.deepEqual(ids(get("signal-rows")), []);
+  assert.match(get("signal-empty-description").textContent, /15m 不直接推送启动/);
+});
+
+test("first-stage freshness needs direct API approval and its own healthy policy clock", () => {
+  const { client, advance } = harness();
+  enableTwoStage(client);
+  const item = candidate("start", "pending", { bar_close_ms: NOW - 30 * 60_000 });
+  assert.equal(client.isFresh(item), false, "a candidate fresh flag is not direct API approval");
+  client.state.directSignals = [{ ...item }];
+  assert.equal(client.isFresh(item), true);
+  client.state.errors.signals = "model feed offline";
+  client.state.status.runtime.model_gate = { loaded: false, last_error: "unavailable" };
+  assert.equal(client.isFresh(item), true, "model failure does not suppress a direct start");
+  client.state.errors.directSignals = "direct feed offline";
+  assert.equal(client.isFresh(item), false);
+  delete client.state.errors.directSignals;
+  client.state.status.runtime.direct_timeframes = "1H";
+  assert.equal(client.isFresh(item), false, "malformed runtime metadata cannot allow freshness");
+  client.state.status.runtime.direct_timeframes = ["1H", "4H"];
+  client.state.directSignals[0].is_fresh = false;
+  assert.equal(client.isFresh(item), false, "candidate flag cannot override direct endpoint flag");
+  client.state.directSignals[0].is_fresh = true;
+  client.state.status.runtime.notification_mode = "model_only";
+  assert.equal(client.isFresh(item), false);
+  enableTwoStage(client);
+  advance(1);
+  assert.equal(client.isFresh(item), false, "direct freshness expires from arrow close, not model confirmation");
+});
+
+test("candidate histories cannot borrow unrelated or legacy direct receipts", () => {
+  const { client, get } = harness();
+  enableTwoStage(client);
+  const pending = candidate("shared-id", "pending", { notification_status: "sent", bark_notification_status: "sent" });
+  client.state.candidates = [pending];
+  client.state.signalScope = "pending";
+  client.state.directSignals = [candidate("shared-id", "pending", { symbol: "ETH-USDT-SWAP" }), candidate("shared-id", "pending", { timeframe: "4H" })];
+  client.renderSignals();
+  assert.match(get("signal-rows").innerHTML, /未关联新规则启动回执/);
+  assert.doesNotMatch(get("signal-rows").innerHTML, /data-notification-channel/);
+  client.state.directSignals = [{ ...pending, notification_status: "failed", bark_notification_status: "unknown" }];
+  client.renderSignals();
+  assert.match(get("signal-rows").innerHTML, /发送失败|回执未知/);
+  assert.doesNotMatch(get("signal-rows").innerHTML, /已发送|服务已接受/);
+  client.state.candidates = [candidate("fifteen", "pending", { timeframe: "15m" })];
+  client.renderSignals();
+  assert.match(get("signal-rows").innerHTML, /15m · 模型确认后才通知/);
+  assert.doesNotMatch(get("signal-rows").innerHTML, /data-notification-channel/);
+});
+
+test("the direct scope preserves whole-card app opening and independent in-page preview", async () => {
+  const bridgeReply = { ok: true, headers: { get: () => "application/json" }, json: async () => ({ requested: true, symbol: "ETH-USDT-SWAP", timeframe: "4H" }) };
+  const { client, get, document, networkRequests } = harness({ allowChartFixture: true, bridgeReply });
+  enableTwoStage(client);
+  client.state.directSignals = [candidate("eth-start", "pending", { symbol: "ETH-USDT-SWAP", timeframe: "4H", price: 2050.125 })];
+  document.querySelectorAll("[data-signal-scope]").find((button) => button.dataset.signalScope === "direct").dispatch("click");
+  await new Promise(setImmediate);
+  assert.equal(client.state.selected.id, "eth-start");
+  assert.equal(get("detail-price-caption").textContent, "原箭头收盘价");
+  assert.match(get("detail-facts").innerHTML, /TG 启动回执|未经 YOLO 确认/);
+  assert.equal(networkRequests.filter((request) => request.method === "POST").length, 0);
+  const preview = get("signal-rows").querySelector("[data-preview-signal-id]");
+  get("signal-rows").dispatch("click", { target: preview });
+  await new Promise(setImmediate);
+  assert.equal(networkRequests.filter((request) => request.method === "POST").length, 0);
+  get("signal-rows").dispatch("click", { target: get("signal-rows").querySelector("[data-signal-id]") });
+  await new Promise(setImmediate);
+  const posts = networkRequests.filter((request) => request.method === "POST");
+  assert.equal(posts.length, 1);
+  assert.equal(posts[0].url, "/api/tradingview/open");
+  assert.deepEqual(JSON.parse(posts[0].body), { symbol: "ETH-USDT-SWAP", timeframe: "4H" });
+});
+
+test("two-stage polling keeps distinct clocks, totals and cached direct receipts on API failure", async () => {
+  const replies = {
+    "/api/status": { protocol: PROTOCOL, now_ms: NOW, counts: { signals_24h: 2, indicator_starts_24h: 7 }, runtime: { signal_kind: "yolo_confirmed", notification_mode: "two_stage", direct_timeframes: ["1H", "4H"], fresh_minutes: 30, model_gate: { loaded: true } } },
+    "/api/signals?limit=2000&kind=yolo_confirmed": { items: [signal("model")], total: 17 },
+    "/api/signals?limit=2000&kind=tv_start": { items: [candidate("start"), candidate("not-direct", "pending", { timeframe: "15m" }), signal("wrong-kind")], total: 7 },
+    "/api/candidates?limit=2000": { items: [candidate("start"), candidate("old")], total: 43 },
+    "/api/markets": { items: [] },
+  };
+  const { client, get, networkRequests } = harness({ allowChartFixture: true, apiReplies: replies });
+  client.state.signalScope = "direct";
+  await client.refresh();
+  await new Promise(setImmediate);
+  assert.deepEqual(Array.from(client.state.directSignals, (item) => item.id), ["start"]);
+  assert.equal(client.state.signalTotal, 17);
+  assert.equal(client.state.directSignalTotal, 7);
+  assert.equal(client.state.candidateTotal, 43);
+  assert.equal(client.state.selected.id, "start");
+  assert.equal(client.isFresh(client.state.directSignals[0]), true);
+  assert.match(get("metric-signals-detail").textContent, /7 条指标启动/);
+  replies["/api/signals?limit=2000&kind=tv_start"] = new Error("direct unavailable");
+  await client.refresh();
+  assert.equal(client.state.directSignals[0].id, "start");
+  assert.equal(client.isFresh(client.state.directSignals[0]), false);
+  assert.equal(client.isFresh(client.state.signals[0]), true);
+  assert.match(get("error-notice").textContent, /指标启动/);
+  assert.match(get("last-sync").textContent, /同步失败/);
+  assert.equal(networkRequests.filter((request) => request.method === "POST").length, 0);
+});
+
+test("model error messaging preserves independent 1H and 4H starts while 15m still waits", () => {
+  const { client, get } = harness();
+  enableTwoStage(client);
+  client.state.status.runtime.model_gate = { loaded: false, last_error: "test failure" };
+  client.state.status.telegram = { configured: true, enabled: true };
+  client.renderStatus();
+  assert.match(get("model-gate-notice").textContent, /1H \/ 4H 指标启动通知独立运行/);
+  assert.match(get("model-gate-notice").textContent, /15m 通知仍需模型通过/);
+  assert.match(get("telegram-description").textContent, /1H \/ 4H 收盘启动先通知/);
+  assert.match(get("telegram-description").textContent, /15m 仅模型确认后通知/);
+  assert.doesNotMatch(get("model-gate-notice").textContent, /未通过检测的候选不会通知/);
 });

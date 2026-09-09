@@ -16,7 +16,8 @@ import sqlite3
 import time
 from pathlib import Path
 
-from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL, MONITORED_TIMEFRAMES, MODEL_PROTOCOL, MODEL_KIND
+from yoyo.monitor import (SIGNAL_KIND, SIGNAL_PROTOCOL, MONITORED_TIMEFRAMES, MODEL_PROTOCOL, MODEL_KIND, FRESH_MS,
+                          DIRECT_POLICY, DIRECT_TIMEFRAMES)
 
 
 def now_ms():
@@ -173,7 +174,8 @@ class Store:
         with self.connect() as db:
             return [json.loads(r[0]) for r in db.execute("SELECT payload FROM markets ORDER BY symbol,timeframe")]
 
-    def list_events(self, limit=200, symbol=None, timeframe=None, kind=None, side=None, protocol=None):
+    def list_events(self, limit=200, symbol=None, timeframe=None, kind=None, side=None, protocol=None,
+                    *, direct_only=False):
         filters, values = [], []
         for field, value in (("symbol", symbol), ("timeframe", timeframe), ("kind", kind), ("side", side)):
             if value:
@@ -182,6 +184,10 @@ class Store:
         if protocol:
             filters.append("json_extract(e.payload,'$.protocol')=?")
             values.append(protocol)
+        if direct_only:
+            clause, args = self._direct_filter()
+            filters.append(clause)
+            values.extend(args)
         where = " WHERE " + " AND ".join(filters) if filters else ""
         sql = ("SELECT e.payload,o.status,b.status FROM events e "
                "LEFT JOIN outbox o ON e.id=o.event_id "
@@ -209,7 +215,7 @@ class Store:
             return db.execute("SELECT COUNT(*) FROM events WHERE close_ms>=? AND kind=? AND json_extract(payload,'$.protocol')=?",
                               (since, kind, protocol)).fetchone()[0]
 
-    def activate_notification_policy(self, activated_ms, protocol=SIGNAL_PROTOCOL, kind=None):
+    def activate_notification_policy(self, activated_ms, protocol=SIGNAL_PROTOCOL, kind=None, *, retire_obsolete=True):
         """Once per protocol, set a forward-only cutover; preserve old receipts.
 
         Called only while the service owns its process lock. Historical
@@ -222,13 +228,14 @@ class Store:
             db.execute("BEGIN IMMEDIATE")
             db.execute("INSERT OR IGNORE INTO meta VALUES (?,?)",
                        (key, encode({"activated_ms": activated_ms, "kind": kind})))
-            db.execute("""UPDATE outbox SET status='skipped',error='notification_policy_replaced',updated_ms=?
-                WHERE status='pending' AND event_id IN (
-                    SELECT id FROM events WHERE kind!=? OR COALESCE(json_extract(payload,'$.protocol'),'')!=?)""",
-                       (activated_ms, kind, protocol))
+            if retire_obsolete:
+                db.execute("""UPDATE outbox SET status='skipped',error='notification_policy_replaced',updated_ms=?
+                    WHERE status='pending' AND event_id IN (
+                        SELECT id FROM events WHERE kind!=? OR COALESCE(json_extract(payload,'$.protocol'),'')!=?)""",
+                           (activated_ms, kind, protocol))
             return json.loads(db.execute("SELECT payload FROM meta WHERE key=?", (key,)).fetchone()[0])["activated_ms"]
 
-    def activate_bark_policy(self, activated_ms, protocol=SIGNAL_PROTOCOL, kind=None):
+    def activate_bark_policy(self, activated_ms, protocol=SIGNAL_PROTOCOL, kind=None, *, retire_obsolete=True):
         """Persist Bark's first cutover independently of Telegram's activation.
 
         As with the Telegram policy, callers enforce this cutover before
@@ -241,10 +248,11 @@ class Store:
             db.execute("BEGIN IMMEDIATE")
             db.execute("INSERT OR IGNORE INTO meta VALUES (?,?)",
                        (key, encode({"activated_ms": activated_ms, "kind": kind})))
-            db.execute("""UPDATE bark_outbox SET status='skipped',error='notification_policy_replaced',updated_ms=?
-                WHERE status='pending' AND event_id IN (
-                    SELECT id FROM events WHERE kind!=? OR COALESCE(json_extract(payload,'$.protocol'),'')!=?)""",
-                       (activated_ms, kind, protocol))
+            if retire_obsolete:
+                db.execute("""UPDATE bark_outbox SET status='skipped',error='notification_policy_replaced',updated_ms=?
+                    WHERE status='pending' AND event_id IN (
+                        SELECT id FROM events WHERE kind!=? OR COALESCE(json_extract(payload,'$.protocol'),'')!=?)""",
+                           (activated_ms, kind, protocol))
             return json.loads(db.execute("SELECT payload FROM meta WHERE key=?", (key,)).fetchone()[0])["activated_ms"]
 
     def timeframe_activation(self, timeframe, protocol=SIGNAL_PROTOCOL):
@@ -289,7 +297,13 @@ class Store:
     def claim(self, now):
         with self.connect() as db:
             db.execute("BEGIN IMMEDIATE")
-            row = db.execute("SELECT o.*,e.payload,m.png,m.sha256 AS photo_sha256 FROM outbox o JOIN events e ON e.id=o.event_id LEFT JOIN telegram_media m ON m.event_id=e.id WHERE o.status='pending' AND o.due_ms<=? ORDER BY o.due_ms LIMIT 1", (now,)).fetchone()
+            row = db.execute("""SELECT o.*,e.payload,m.png,m.sha256 AS photo_sha256
+                FROM outbox o JOIN events e ON e.id=o.event_id LEFT JOIN telegram_media m ON m.event_id=e.id
+                WHERE o.status='pending' AND o.due_ms<=? AND NOT EXISTS (
+                    SELECT 1 FROM outbox first JOIN events original ON original.id=first.event_id
+                    WHERE first.event_id=json_extract(e.payload,'$.source_event_id')
+                    AND (first.status='sending' OR (first.status='pending' AND original.close_ms>=?)))
+                ORDER BY o.due_ms,e.close_ms LIMIT 1""", (now, now - FRESH_MS)).fetchone()
             if not row:
                 return None
             db.execute("UPDATE outbox SET status='sending',attempts=attempts+1,updated_ms=? WHERE event_id=?", (now, row["event_id"]))
@@ -319,7 +333,12 @@ class Store:
     def claim_bark(self, now):
         with self.connect() as db:
             db.execute("BEGIN IMMEDIATE")
-            row = db.execute("SELECT b.*,e.payload FROM bark_outbox b JOIN events e ON e.id=b.event_id WHERE b.status='pending' AND b.due_ms<=? ORDER BY b.due_ms LIMIT 1", (now,)).fetchone()
+            row = db.execute("""SELECT b.*,e.payload FROM bark_outbox b JOIN events e ON e.id=b.event_id
+                WHERE b.status='pending' AND b.due_ms<=? AND NOT EXISTS (
+                    SELECT 1 FROM bark_outbox first JOIN events original ON original.id=first.event_id
+                    WHERE first.event_id=json_extract(e.payload,'$.source_event_id')
+                    AND (first.status='sending' OR (first.status='pending' AND original.close_ms>=?)))
+                ORDER BY b.due_ms,e.close_ms LIMIT 1""", (now, now - FRESH_MS)).fetchone()
             if not row:
                 return None
             db.execute("UPDATE bark_outbox SET status='sending',attempts=attempts+1,updated_ms=? WHERE event_id=?", (now, row["event_id"]))
@@ -338,3 +357,53 @@ class Store:
             sent = db.execute("SELECT MAX(b.updated_ms) FROM bark_outbox b JOIN events e ON e.id=b.event_id" + where + (" AND" if where else " WHERE") + " b.status='sent'", values).fetchone()[0]
         return dict(counts, pending=counts.get("pending", 0), failed=counts.get("failed", 0),
                     unknown=counts.get("unknown", 0), last_success_ms=sent)
+
+    def _direct_filter(self, channel=None):
+        """SQL predicate for the new direct stage, never the legacy raw receipts."""
+        from yoyo.monitor.notification_policy import activation
+        channels = (channel,) if channel else ("telegram", "bark")
+        cutovers = [activation(self, c, DIRECT_POLICY) for c in channels]
+        cutovers = [t for t in cutovers if t is not None]
+        if not cutovers:
+            return "0", []
+        streams, values = [], [SIGNAL_KIND, SIGNAL_PROTOCOL]
+        for tf in DIRECT_TIMEFRAMES:
+            since = self.timeframe_activation(tf, protocol=DIRECT_POLICY)
+            if since is not None:
+                streams.append("(e.timeframe=? AND e.close_ms>?)")
+                values.extend((tf, max(since, min(cutovers))))
+        if not streams:
+            return "0", []
+        return ("(e.kind=? AND json_extract(e.payload,'$.protocol')=? AND ("
+                + " OR ".join(streams) + "))"), values
+
+    def direct_event_count(self, since=0):
+        clause, args = self._direct_filter()
+        with self.connect() as db:
+            return db.execute("SELECT COUNT(*) FROM events e WHERE " + clause + " AND e.close_ms>=?",
+                              args + [since]).fetchone()[0]
+
+    def _notification_filter(self, channel):
+        clause, args = self._direct_filter(channel)
+        return ("((e.kind=? AND json_extract(e.payload,'$.protocol')=?) OR " + clause + ")",
+                [MODEL_KIND, MODEL_PROTOCOL] + args)
+
+    def notification_status(self, channel):
+        """Current two-stage receipts; retain old raw receipts as historical only."""
+        if channel not in ("telegram", "bark"):
+            raise ValueError("unsupported notification channel")
+        table = "outbox" if channel == "telegram" else "bark_outbox"
+        clause, args = self._notification_filter(channel)
+        base = " FROM " + table + " o JOIN events e ON e.id=o.event_id WHERE " + clause
+        with self.connect() as db:
+            counts = {r[0]: r[1] for r in db.execute("SELECT o.status,COUNT(*)" + base + " GROUP BY o.status", args)}
+            sent = db.execute("SELECT MAX(o.updated_ms)" + base + " AND o.status='sent'", args).fetchone()[0]
+        return dict(counts, pending=counts.get("pending", 0), failed=counts.get("failed", 0),
+                    unknown=counts.get("unknown", 0), last_success_ms=sent)
+
+    def notification_media_status(self):
+        clause, args = self._notification_filter("telegram")
+        with self.connect() as db:
+            row = db.execute("SELECT COUNT(m.png),SUM(CASE WHEN m.error IS NOT NULL THEN 1 ELSE 0 END) "
+                             "FROM telegram_media m JOIN events e ON e.id=m.event_id WHERE " + clause, args).fetchone()
+        return {"snapshots": row[0], "render_fallbacks": row[1] or 0}

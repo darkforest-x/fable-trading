@@ -17,8 +17,10 @@ import threading
 import time
 
 from yoyo.monitor import (FRESH_MS, TIMEFRAMES, VERSION, SIGNAL_PROTOCOL, SIGNAL_KIND,
-                          TV_PROFILE_ID, HIGHER_TIMEFRAME, MONITORED_TIMEFRAMES, MODEL_KIND, MODEL_PROTOCOL, MODEL_MAX_WAIT)
+                          TV_PROFILE_ID, HIGHER_TIMEFRAME, MONITORED_TIMEFRAMES, MODEL_KIND, MODEL_PROTOCOL, MODEL_MAX_WAIT,
+                          DIRECT_POLICY, DIRECT_TIMEFRAMES)
 from yoyo.monitor.policy import is_tv_start
+from yoyo.monitor.notification_policy import delivery_error, activation
 from yoyo.monitor.model_gate import ModelGate
 from yoyo.monitor.okx import OKX
 from yoyo.monitor.store import now_ms
@@ -110,11 +112,19 @@ class Monitor:
         if not self.notification_ready.is_set():
             # Use the same calibrated clock as candle closes and freshness.
             # A slow Mac clock must not turn a pre-upgrade close into a new bar.
-            self.notification_since = self.store.activate_notification_policy(self.client.clock(), protocol=PROTOCOL)
+            self.notification_since = self.store.activate_notification_policy(self.client.clock(), protocol=PROTOCOL, retire_obsolete=False)
             if self.bark.creds:
-                self.bark_since = self.store.activate_bark_policy(self.client.clock(), protocol=PROTOCOL)
+                self.bark_since = self.store.activate_bark_policy(self.client.clock(), protocol=PROTOCOL, retire_obsolete=False)
             self.timeframe_since = {tf: self.store.activate_timeframe_policy(tf, self.client.clock(), protocol=PROTOCOL)
                                     for tf in MONITORED_TIMEFRAMES}
+            # This is an additive delivery policy, not a new signal definition.
+            # Persist fresh cutovers; the pre-YOLO raw-arrow cutovers cannot grant it.
+            if getattr(self.telegram, "creds", None):
+                self.store.activate_notification_policy(self.client.clock(), protocol=DIRECT_POLICY, retire_obsolete=False)
+            if self.bark.creds:
+                self.store.activate_bark_policy(self.client.clock(), protocol=DIRECT_POLICY, retire_obsolete=False)
+            for tf in DIRECT_TIMEFRAMES:
+                self.store.activate_timeframe_policy(tf, self.client.clock(), protocol=DIRECT_POLICY)
             self.notification_ready.set()
         if not self.instruments or start - self.universe_at >= 3600000:
             self.instruments = self.client.instruments()
@@ -214,8 +224,9 @@ class Monitor:
                     continue
                 event = dict(raw, symbol=symbol, timeframe=timeframe, protocol=SIGNAL_PROTOCOL, detected_at_ms=now)
                 event["is_fresh"] = 0 <= now - event["bar_close_ms"] <= FRESH_MS
-                # Raw Pine arrows are immutable candidates, never notifications.
-                self.store.upsert_event(event)
+                # Queue the original first; candidate registration also journals it.
+                # Reinserted history must never acquire a new delivery receipt.
+                self.record_arrow(event, result["chart"], now, stale=stale)
                 timeframe_since = self.timeframe_since.get(timeframe)
                 first_channel = min(self.notification_since, self.bark_since) if self.bark_since is not None else self.notification_since
                 if (is_tv_start(event) and timeframe_since is not None
@@ -230,6 +241,23 @@ class Monitor:
             if not stale:
                 self.model_gate.submit(symbol, timeframe, result["chart"])
         return errors
+
+    def record_arrow(self, event, chart, now, *, stale=False):
+        """Journal one closed arrow and, on 1H/4H, its independent direct leg."""
+        notify = (not stale and bool(getattr(self.telegram, "creds", None))
+                  and delivery_error(self.store, event, now, "telegram") is None)
+        bark_notify = (not stale and bool(self.bark.creds)
+                       and delivery_error(self.store, event, now, "bark") is None)
+        photo = photo_error = None
+        if notify and not self.store.has_event(event):
+            try:
+                from yoyo.monitor.snapshot import render_signal
+                photo = render_signal(event, chart)
+            except Exception as exc:
+                photo_error = type(exc).__name__
+                LOG.warning("direct snapshot unavailable: %s", photo_error)
+        return self.store.upsert_event(event, notify=notify, bark_notify=bark_notify,
+                                       telegram_photo=photo, photo_error=photo_error)
 
     def chart(self, symbol, timeframe):
         with self.lock:
@@ -249,12 +277,17 @@ class Monitor:
                     now_ms=self.client.clock(), started_at_ms=self.started,
                     scan=self.store.get_meta("scan", {"status": "starting", "completed": 0, "total": 0, "errors": 0}),
                     universe=self.store.get_meta("universe", {"count": 0, "scope": "OKX 全部在交易永续合约"}),
-                    counts=dict(counts, signals_24h=self.store.count_since(self.client.clock() - 86400000, MODEL_KIND, PROTOCOL)),
+                    counts=dict(counts, signals_24h=self.store.count_since(self.client.clock() - 86400000, MODEL_KIND, PROTOCOL),
+                                indicator_starts_24h=self.store.direct_event_count(self.client.clock() - 86400000)),
                     telegram=self.telegram.status(), bark=self.bark.status(), runtime={"host": "This Mac", "notification_only": True,
                     "fresh_minutes": FRESH_MS // 60000, "interval_seconds": self.interval, "timeframes": list(MONITORED_TIMEFRAMES),
                     "clock_offset_ms": self.client.offset_ms, "public_requests": self.client.requests,
                     "candle_storage": "memory_only", "history_days": 7,
-                    "signal_mode": "主图启动 → YOLO 同方向确认", "signal_kind": MODEL_KIND,
+                    "signal_mode": "1H/4H 启动先通知 · YOLO 通过追加确认；15m 仅模型确认", "signal_kind": MODEL_KIND,
+                    "notification_mode": "two_stage", "direct_timeframes": list(DIRECT_TIMEFRAMES),
+                    "direct_notification_policy": DIRECT_POLICY,
+                    "direct_notification_since_ms": {c: activation(self.store, c, DIRECT_POLICY) for c in ("telegram", "bark")},
+                    "direct_timeframe_since_ms": {tf: self.store.timeframe_activation(tf, protocol=DIRECT_POLICY) for tf in DIRECT_TIMEFRAMES},
                     "model_gate": self.model_gate.status(),
                     "tv_profile": {"id": TV_PROFILE_ID, "show_focus": True, "show_marks": False,
                                    "focus_min_bars": 12, "focus_atr_band": .10, "verified_on": "2026-09-08",

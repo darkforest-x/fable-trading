@@ -13,7 +13,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from yoyo.monitor import FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, MONITORED_TIMEFRAMES
+from yoyo.monitor import FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, MONITORED_TIMEFRAMES, SIGNAL_KIND, SIGNAL_PROTOCOL
 from yoyo.monitor.service import Monitor
 from yoyo.monitor.store import Store
 from yoyo.monitor.tradingview import DesktopOpenError, open_chart
@@ -82,13 +82,15 @@ def create_app(runtime=None, start_monitor=True):
     @app.get("/api/signals")
     def signals(limit: int = Query(200, ge=1, le=2000), symbol: str = None, timeframe: str = None,
                 kind: str = MODEL_KIND, side: str = None):
-        if kind != MODEL_KIND:
-            raise HTTPException(400, "信号台仅显示指标启动后经过 YOLO 同方向确认的信号。")
-        rows = store.list_events(limit, symbol, timeframe, MODEL_KIND, side, protocol=MODEL_PROTOCOL)
+        if kind not in (MODEL_KIND, SIGNAL_KIND):
+            raise HTTPException(400, "支持指标启动或 YOLO 确认信号。")
+        direct = kind == SIGNAL_KIND
+        protocol = SIGNAL_PROTOCOL if direct else MODEL_PROTOCOL
+        rows = store.list_events(limit, symbol, timeframe, kind, side, protocol=protocol, direct_only=direct)
         for row in rows:
             row["is_fresh"] = 0 <= monitor.client.clock() - row["bar_close_ms"] <= FRESH_MS
-        return {"items": rows, "total": store.event_count(MODEL_KIND, MODEL_PROTOCOL), "kind": MODEL_KIND,
-                "protocol": MODEL_PROTOCOL}
+        return {"items": rows, "total": store.direct_event_count() if direct else store.event_count(MODEL_KIND, MODEL_PROTOCOL),
+                "kind": kind, "protocol": protocol}
 
     @app.get("/api/candidates")
     def candidates(limit: int = Query(200, ge=1, le=2000), symbol: str = None, timeframe: str = None):

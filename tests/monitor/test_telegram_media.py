@@ -47,7 +47,7 @@ def test_caption_keeps_confirmation_and_original_arrow_separate():
     text = message(event())
     assert len(text.splitlines()) == 4 and len(text) < 200
     assert '100.5' in text and '等待 2 根' in text and '15m' in text and '空头' in text
-    assert '指标 + YOLO确认' in text and '原箭头 99.5' in text
+    assert 'YOLO 确认' in text and '原箭头 99.5' in text
     assert 'https' not in text and '高周期' not in text and '精确零轴' not in text
     assert markup(event())['inline_keyboard'][0][0]['url'].endswith('interval=15')
 

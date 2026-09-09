@@ -3,8 +3,8 @@
 Sources: https://github.com/Finb/bark-server/blob/master/docs/API_V2.md
 and router.go / route_push.go in that official repository. POST /push keeps
 the device key out of URLs. HTTP 200, code 200 and a server timestamp mean
-server acceptance, not an iPhone display/read receipt. Only the current
-indicator plus model confirmation, channel cutover and shared freshness gate apply.
+server acceptance, not an iPhone display/read receipt. Current direct-start or
+model-confirmation eligibility, channel cutover and shared freshness gate apply.
 No connectivity/startup messages are generated. Errors never include keys.
 """
 from __future__ import annotations
@@ -19,8 +19,8 @@ from urllib.parse import urlsplit
 
 import requests
 
-from yoyo.monitor import FRESH_MS, MODEL_PROTOCOL, TV_INTERVALS
-from yoyo.monitor.policy import is_model_signal
+from yoyo.monitor import SIGNAL_KIND, MODEL_PROTOCOL, TV_INTERVALS
+from yoyo.monitor.notification_policy import channel_enabled, delivery_error
 from yoyo.monitor.store import now_ms
 
 SERVER = "https://api.day.app"
@@ -69,10 +69,17 @@ def message(event):
     symbol = event["symbol"]
     tv_symbol = symbol.removesuffix("-SWAP").replace("-", "") + ".P"
     interval = TV_INTERVALS[event["timeframe"]]
-    indicator, model = event["indicator"], event["model"]
+    if event["kind"] == SIGNAL_KIND:
+        subtitle = "指标启动 · 未经 YOLO 确认"
+        body = f"收盘价 {event['price']:.10g} · {time(event['bar_close_ms'])} 北京时间"
+    else:
+        indicator, model = event["indicator"], event["model"]
+        subtitle = f"YOLO 确认 · 等待 {model['wait_bars']} 根"
+        body = (f"确认 {event['price']:.10g} · {time(event['bar_close_ms'])}\n"
+                f"原箭头 {indicator['price']:.10g} · {time(indicator['bar_close_ms'])} 北京时间")
     return {"title": f"{symbol} · {event['timeframe']} · {side}",
-            "subtitle": f"指标 + YOLO确认 · 等待 {model['wait_bars']} 根",
-            "body": f"确认 {event['price']:.10g} · {time(event['bar_close_ms'])}\n原箭头 {indicator['price']:.10g} · {time(indicator['bar_close_ms'])} 北京时间",
+            "subtitle": subtitle,
+            "body": body,
             "group": "spike IMACD", "level": "active", "isArchive": "1",
             "url": f"https://www.tradingview.com/chart/?symbol=OKX%3A{tv_symbol}&interval={interval}"}
 
@@ -87,27 +94,15 @@ class BarkWorker:
         now = now if now is not None else now_ms()
         if not self.creds:
             return False
-        policy = self.store.get_meta(POLICY_KEY)
-        if not policy or type(policy.get("activated_ms")) is not int:
+        if not channel_enabled(self.store, "bark"):
             return False
         row = self.store.claim_bark(now)
         if not row:
             return False
         event, eid = row["event"], row["event_id"]
-        if not is_model_signal(event):
-            self.store.finish_bark(eid, "skipped", error="not_model_confirmed_signal")
-            return True
-        if (event["bar_close_ms"] <= policy["activated_ms"]
-                or event["indicator"]["bar_close_ms"] <= policy["activated_ms"]):
-            self.store.finish_bark(eid, "skipped", error="before_bark_activation")
-            return True
-        timeframe_since = self.store.timeframe_activation(event.get("timeframe"), protocol=MODEL_PROTOCOL)
-        if (timeframe_since is None or event["bar_close_ms"] <= timeframe_since
-                or event["indicator"]["bar_close_ms"] <= timeframe_since):
-            self.store.finish_bark(eid, "skipped", error="before_timeframe_activation")
-            return True
-        if not 0 <= now - event["bar_close_ms"] <= FRESH_MS:
-            self.store.finish_bark(eid, "skipped", error="signal_expired")
+        error = delivery_error(self.store, event, now, "bark")
+        if error is not None:
+            self.store.finish_bark(eid, "skipped", error=error)
             return True
         try:
             response = self.sender(SERVER + "/push", json=dict(message(event), device_key=self.creds),
@@ -136,7 +131,7 @@ class BarkWorker:
         return True
 
     def status(self):
-        result = self.store.bark_status(protocol=MODEL_PROTOCOL)
+        result = self.store.notification_status("bark")
         result["sent"] = result.get("sent", 0)
         result["historical_sent"] = self.store.bark_status().get("sent", 0) - result["sent"]
         return dict(result, configured=bool(self.creds), enabled=bool(self.creds),

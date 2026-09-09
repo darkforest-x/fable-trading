@@ -11,8 +11,8 @@ import hashlib
 import json
 import requests
 
-from yoyo.monitor import FRESH_MS, MODEL_PROTOCOL, TV_INTERVALS
-from yoyo.monitor.policy import is_model_signal
+from yoyo.monitor import SIGNAL_KIND, TV_INTERVALS
+from yoyo.monitor.notification_policy import channel_enabled, delivery_error
 from yoyo.monitor.store import now_ms
 from yoyo.notify import _load
 
@@ -25,14 +25,18 @@ def credentials():
 
 
 def message(event):
-    """Keep the original arrow and later model-confirmation clocks explicit."""
+    """Name each stage and keep original-arrow/confirmation clocks explicit."""
     def clock(value):
         return datetime.fromtimestamp(value / 1000, timezone(timedelta(hours=8))).strftime("%m-%d %H:%M")
     side = "🟢 多头" if event["side"] == "long" else "🔴 空头"
     symbol = event["symbol"].removesuffix("-SWAP")
+    if event["kind"] == SIGNAL_KIND:
+        return (f"{symbol} · {event['timeframe']} · {side}\n"
+                "指标启动 · 未经 YOLO 确认\n"
+                f"收盘价 {event['price']:.10g} · {clock(event['bar_close_ms'])} 北京时间")
     indicator, model = event["indicator"], event["model"]
     return (f"{symbol} · {event['timeframe']} · {side}\n"
-            f"指标 + YOLO确认 · 等待 {model['wait_bars']} 根\n"
+            f"YOLO 确认 · 等待 {model['wait_bars']} 根\n"
             f"确认 {event['price']:.10g} · {clock(event['bar_close_ms'])}\n"
             f"原箭头 {indicator['price']:.10g} · {clock(indicator['bar_close_ms'])} 北京时间")
 
@@ -55,27 +59,15 @@ class TelegramWorker:
         now = now if now is not None else now_ms()
         if not self.creds:
             return False
-        policy = self.store.get_meta("notification_policy:" + MODEL_PROTOCOL)
-        if not policy or type(policy.get("activated_ms")) is not int:
+        if not channel_enabled(self.store, "telegram"):
             return False
         row = self.store.claim(now)
         if not row:
             return False
         event, eid = row["event"], row["event_id"]
-        if not is_model_signal(event):
-            self.store.finish(eid, "skipped", error="not_model_confirmed_signal")
-            return True
-        if (event["bar_close_ms"] <= policy["activated_ms"]
-                or event["indicator"]["bar_close_ms"] <= policy["activated_ms"]):
-            self.store.finish(eid, "skipped", error="before_notification_policy_activation")
-            return True
-        timeframe_since = self.store.timeframe_activation(event.get("timeframe"), protocol=MODEL_PROTOCOL)
-        if (timeframe_since is None or event["bar_close_ms"] <= timeframe_since
-                or event["indicator"]["bar_close_ms"] <= timeframe_since):
-            self.store.finish(eid, "skipped", error="before_timeframe_activation")
-            return True
-        if not 0 <= now - event["bar_close_ms"] <= FRESH_MS:
-            self.store.finish(eid, "skipped", error="signal_expired")
+        error = delivery_error(self.store, event, now, "telegram")
+        if error is not None:
+            self.store.finish(eid, "skipped", error=error)
             return True
         token, chat = self.creds
         photo = row.get("png")
@@ -133,7 +125,7 @@ class TelegramWorker:
         return True
 
     def status(self):
-        result = self.store.telegram_status(protocol=MODEL_PROTOCOL)
+        result = self.store.notification_status("telegram")
         result["sent"] = result.get("sent", 0)
         result["historical_sent"] = self.store.telegram_status().get("sent", 0) - result["sent"]
         result["last_signal_success_ms"] = result.get("last_success_ms")
@@ -142,7 +134,7 @@ class TelegramWorker:
         if probe.get("status") == "sent":
             result["last_success_ms"] = max(result.get("last_success_ms") or 0, probe["at_ms"])
         return dict(result, configured=bool(self.creds), enabled=bool(self.creds),
-                    delivery_format="chart_with_compact_caption", **self.store.telegram_media_status(MODEL_PROTOCOL))
+                    delivery_format="chart_with_compact_caption", **self.store.notification_media_status())
 
 
 def send_startup_probe(store):
