@@ -2,6 +2,16 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## Spike Bark 优先打开 iPhone TV（2026-09-09 12:22）
+
+v1.8.1 / 0f809a7 已上线；新 Bark 的 url 改为官方声明支持的 https://www.tradingview.com/chart/。
+正文保留原带 OKX 币种及周期的“网页备用”；长按系统通知的复制按钮提供 OKX:币种.P，不开启 autoCopy。
+TradingView AASA 显式排除带非空 symbol 的 chart Universal Link；当前只请求打开 App，不保证切币种、周期或指标。
+手机实际点击仍待 Owner 验证；历史旧消息保持旧链接。没有发测试/启动通知，也没有猜测未文档化 scheme。
+536监控测试通过；模型ready，1422窗口重启预热中，已扫0错误；源码SHA一致、全部启用边界和原TG266/Bark199终态回执保留，TG无新行。
+只改Bark消息展示/点击字段与版本，没有改信号、YOLO、队列身份或TG关闭口径；证据 output/qa/spike_bark_ios_20260909/。
+详见 docs/ops/SPIKE_MODEL_CONFIRMATION.md 的手机打开方式及对应 learning。
+
 ## Spike 全周期直接 Bark、Telegram 已关闭（2026-09-09 12:02）
 
 Owner最新要求15m也不等YOLO，且移除全部TG；此节覆盖下方09:30的15m model-only与双渠道口径。
