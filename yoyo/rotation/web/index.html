@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark">
+  <meta name="color-scheme" content="light dark">
   <meta name="description" content="本地选择性山寨研究雷达：市场环境、相对强度、价格结构与观察日志。">
   <title>Rotation · 选择性山寨研究雷达</title>
+  <script src="/static/theme.js"></script>
   <link rel="stylesheet" href="/static/styles.css">
   <script defer src="/static/app.js"></script>
 </head>
@@ -19,7 +20,10 @@
     <nav aria-label="主导航">
       <a href="#overview">市场概览</a><a href="#candidates">候选池</a><a href="#journal">观察日志</a>
     </nav>
-    <span class="connection" id="connection"><span class="status-dot"></span><span id="connection-text">正在连接</span></span>
+    <div class="topbar-actions">
+      <label class="theme-control"><span class="visually-hidden">外观模式</span><select id="theme-select" aria-label="外观模式"><option value="system">跟随系统</option><option value="light">浅色模式</option><option value="dark">深色模式</option></select></label>
+      <span class="connection" id="connection"><span class="status-dot"></span><span id="connection-text">正在连接</span></span>
+    </div>
   </header>
 
   <main id="overview">

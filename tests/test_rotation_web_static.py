@@ -39,7 +39,7 @@ def test_dashboard_assets_are_local_and_dom_references_exist() -> None:
     parser = _AssetParser()
     parser.feed((WEB / "index.html").read_text())
     assert len(parser.ids) == len(set(parser.ids)), "Duplicate DOM ids are ambiguous"
-    assert parser.assets == ["/static/styles.css", "/static/app.js"]
+    assert parser.assets == ["/static/theme.js", "/static/styles.css", "/static/app.js"]
     for asset in parser.assets:
         assert (WEB / Path(asset).name).is_file()
     referenced = set(re.findall(r'\$\("([\w-]+)"\)', (WEB / "app.js").read_text()))

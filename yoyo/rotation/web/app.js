@@ -286,8 +286,8 @@
     if (detail) {
       for (let step = 0; step < 4; step += 1) {
         const value = min + (max - min) * step / 3;
-        svg.append(svgNode("line", { x1: padding, x2: width - 5, y1: y(value), y2: y(value), stroke: "#25303c", "stroke-width": 1 }));
-        svg.append(svgNode("text", { x: width - 5, y: y(value) - 5, "text-anchor": "end", fill: "#6b7c90", "font-family": "monospace", "font-size": 9 }, number(value, 1)));
+        svg.append(svgNode("line", { x1: padding, x2: width - 5, y1: y(value), y2: y(value), stroke: "var(--line)", "stroke-width": 1 }));
+        svg.append(svgNode("text", { x: width - 5, y: y(value) - 5, "text-anchor": "end", fill: "var(--dim)", "font-family": "monospace", "font-size": 9 }, number(value, 1)));
       }
       visibleLevels.forEach((line) => {
         svg.append(svgNode("line", { x1: padding, x2: padding + graphWidth, y1: y(line.normalized), y2: y(line.normalized), stroke: line.color, "stroke-width": 1, "stroke-dasharray": "4 4", opacity: 0.7, "data-reference-price": line.value, "data-normalized-level": line.normalized }));
@@ -295,7 +295,7 @@
       });
     }
     const path = values.map((value, index) => `${index === 0 ? "M" : "L"}${x(index).toFixed(2)},${y(value).toFixed(2)}`).join(" ");
-    const color = values[values.length - 1] >= values[0] ? "#8fd5b0" : "#f2959c";
+    const color = values[values.length - 1] >= values[0] ? "var(--green)" : "var(--red)";
     if (detail) svg.append(svgNode("path", { d: `${path} L${x(values.length - 1)},${height - padding} L${x(0)},${height - padding} Z`, fill: color, opacity: 0.04 }));
     svg.append(svgNode("path", { d: path, fill: "none", stroke: color, "stroke-width": detail ? 1.9 : 1.5, "stroke-linecap": "round", "stroke-linejoin": "round" }));
     return svg;
@@ -412,8 +412,8 @@
     const chartSection = section("日线收盘相对走势");
     const chart = node("div", "detail-chart");
     chart.append(sparkline(candidate.daily?.sparkline, { width: 640, height: 190, detail: true, lastClose: candidate.daily?.close, levels: [
-      { title: "平台上沿", value: candidate.setup?.range_high, color: "#edc28a" },
-      { title: "平台下沿", value: candidate.setup?.range_low, color: "#a0c1e6" },
+      { title: "平台上沿", value: candidate.setup?.range_high, color: "var(--amber)" },
+      { title: "平台下沿", value: candidate.setup?.range_low, color: "var(--blue)" },
     ] }));
     const dates = arrays(candidate.daily?.sparkline).filter((point) => finite(point?.value) && point.value > 0);
     const dateLabels = node("div", "chart-dates"); dateLabels.append(node("span", "", time(dates[0]?.time, true)), node("span", "", time(dates[dates.length - 1]?.time, true))); chart.append(dateLabels); chartSection.append(chart);
