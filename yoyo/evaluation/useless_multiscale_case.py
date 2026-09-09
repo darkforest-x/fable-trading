@@ -218,8 +218,15 @@ def audit_paths(frame: pd.DataFrame, entry_open: pd.Timestamp, minutes=60) -> di
             if reason:
                 episode_end = {"open_time": when, "reason": reason, "close": float(row.close),
                                "close_return_pct": (float(row.close)/entry-1)*100}
-    result["sma20_ratchet_first_breach"] = trail_breaches[0] if trail_breaches else None
-    result["sma20_ratchet_breach_bars"] = len(trail_breaches)
+    # Pine gives structure termination/new-release replacement priority over
+    # protection status. The terminating bar and subsequent episodes therefore
+    # cannot contribute to this episode's protection-breach count.
+    episode_breaches = (trail_breaches if episode_end is None else
+                        [item for item in trail_breaches if item["open_time"] < episode_end["open_time"]])
+    result["sma20_ratchet_first_breach"] = episode_breaches[0] if episode_breaches else None
+    result["sma20_ratchet_breach_bars"] = len(episode_breaches)
+    result["all_followup_breach_bars"] = len(trail_breaches)
+    result["all_followup_breach_scope"] = "SMA20 ratchet replay through the entire supplied follow-up, including after the original episode ended"
     result["pine_episode_end_ignoring_initial_stop"] = episode_end
     result["pine_tick_assumption"] = 0.00001
     result["path_is_not_trade_pnl"] = True
@@ -255,6 +262,14 @@ def run_analysis(source: Path, out: Path) -> dict:
         report["events"][name] = [{"open_time": t, **row.to_dict()} for t, row in events.iterrows()]
         if name == "1H":
             all_events = frame.loc[(frame.index >= pd.Timestamp("2026-08-01T00:00Z")) & frame.release_side.ne(0)].copy()
+            # These reference levels were derived for longs only. The export
+            # contains both release directions; never present a long-side low
+            # or downward ATR offset as a valid short stop. Global chart feature
+            # names stay stable and are not used as short execution levels.
+            long_stop_columns = ["pine_structure_stop_v27", "pine_initial_stop_v27",
+                                 "pine_initial_stop_v27_unrounded", "legacy_signal_bar_stop",
+                                 "research_stop_2atr"]
+            all_events.loc[all_events.release_side.lt(0), long_stop_columns] = np.nan
             # Labels are attached only to this separate descriptive event export.
             for horizon in (6, 24, 72):
                 all_events[f"future_close_return_{horizon}h_pct"] = ((frame.close.shift(-horizon)/frame.close-1)*100).reindex(all_events.index)
