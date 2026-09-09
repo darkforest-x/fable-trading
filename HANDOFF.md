@@ -2,6 +2,16 @@
 
 > 文档地图：`docs/DOC_MAP.md` · 本周计划：`analysis/week_plan_20260720.md` · 纪律：`CLAUDE.md`
 
+## Spike 全周期直接 Bark、Telegram 已关闭（2026-09-09 12:02）
+
+Owner最新要求15m也不等YOLO，且移除全部TG；此节覆盖下方09:30的15m model-only与双渠道口径。
+运行v1.8.0/源码9c55366：15m/1H/4H指标收盘启动先发Bark，YOLO通过后追加；runtime.notification_channels=['bark']。
+15m direct首次cutover北京时间12:02:35，旧1H4与Bark cutover保持；不补发启用前15m箭头。前端默认指标启动，三周期可筛，TG控件/回执入口已移除。
+TG worker/model分支默认关闭、不读凭据、不入队/配图、无TG线程，startup probe也关闭。旧pending退休，历史sent/unknown保留；没有删除共享凭据或修改其他服务。
+530监控测试+51前端测试通过；实际页面15m筛选已验，运行源码SHA全部一致、TG无新队列/无pending、旧TG266/Bark196份终态回执及旧cutover保留。
+上线时模型ready、Bark enabled，474合约×3周期正在正常预热，已扫描部分无报错；此次无真实启动/测试通知，无Pine/模型/新鲜度/执行更改。
+说明docs/ops/SPIKE_MODEL_CONFIRMATION.md；本机证据output/qa/spike_bark_only_20260909/{before,after}.json。Bark历史未知回执原样保留，不自动补发。
+
 ## Spike 1H/4H 两阶段通知已上线（2026-09-09 09:30）
 
 Owner要求1H/4H原收盘启动不等YOLO，TG/Bark先发“指标启动 · 未经 YOLO 确认”，通过后独立追加“YOLO 确认”；15m仍model only。
