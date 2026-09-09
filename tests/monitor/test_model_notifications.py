@@ -1,4 +1,6 @@
-"""Notification cutover and two-clock eligibility; every sender is synthetic."""
+"""Notification cutover and two-clock eligibility; every sender is synthetic.
+Explicit enabled=True below exercises legacy delivery with fake senders only.
+"""
 from copy import deepcopy
 
 import pytest
@@ -26,7 +28,7 @@ def worker_and_store(tmp_path, channel, event, *, model_policy=True, timeframe_p
     def sender(*args, **kwargs):
         calls.append((args, kwargs))
         return Response()
-    worker = (TelegramWorker(store, ("synthetic-token", "synthetic-chat"), sender) if channel == "telegram"
+    worker = (TelegramWorker(store, ("synthetic-token", "synthetic-chat"), sender, enabled=True) if channel == "telegram"
               else BarkWorker(store, "synthetic-device", sender))
     return worker, store, calls
 

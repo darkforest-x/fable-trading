@@ -1,4 +1,6 @@
-"""Synthetic image delivery checks, with no network, credentials or market data."""
+"""Synthetic image delivery checks, with no network, credentials or market data.
+Explicit enabled=True below exercises legacy delivery with fake senders only.
+"""
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
 from io import BytesIO
@@ -56,7 +58,7 @@ def test_photo_survives_restart_and_sends_once_with_caption(tmp_path):
     queued(tmp_path)
     store = Store(tmp_path / 'm.sqlite')
     calls = []
-    worker = TelegramWorker(store, ('fake-token', 'fake-chat'), lambda *a, **k: (calls.append((a, k)) or response()))
+    worker = TelegramWorker(store, ('fake-token', 'fake-chat'), lambda *a, **k: (calls.append((a, k)) or response()), enabled=True)
     assert worker.deliver_once(CONFIRM + 2_000)
     assert not worker.deliver_once(CONFIRM + 3_000)
     args, kwargs = calls[0]
@@ -75,7 +77,7 @@ def test_photo_429_retry_uses_exact_same_bytes_and_no_duplicate_text(tmp_path):
     def sender(*args, **kwargs):
         calls.append((args, kwargs))
         return response(429, {'ok': False, 'error_code': 429, 'parameters': {'retry_after': 5}}) if len(calls) == 1 else response()
-    worker = TelegramWorker(store, ('fake', 'fake'), sender)
+    worker = TelegramWorker(store, ('fake', 'fake'), sender, enabled=True)
     worker.deliver_once(CONFIRM + 2_000)
     assert not worker.deliver_once(CONFIRM + 6_999)
     assert worker.deliver_once(CONFIRM + 7_000)
@@ -95,7 +97,7 @@ def test_uncertain_upload_never_falls_back_to_another_send(tmp_path, failure):
         if failure == 'server_error_success_body':
             return response(503)
         return response(payload={'ok': True, 'result': {'message_id': 123}})
-    worker = TelegramWorker(store, ('fake', 'fake'), sender)
+    worker = TelegramWorker(store, ('fake', 'fake'), sender, enabled=True)
     assert worker.deliver_once(CONFIRM + 2_000)
     assert not worker.deliver_once(CONFIRM + 3_000)
     assert len(calls) == 1 and calls[0].endswith('/sendPhoto')
@@ -110,7 +112,7 @@ def test_missing_or_corrupt_local_image_falls_back_before_first_request(tmp_path
         with store.connect() as db:
             db.execute("UPDATE telegram_media SET png=?", (b'corrupt',))
     calls = []
-    worker = TelegramWorker(store, ('fake', 'fake'), lambda *a, **k: (calls.append((a, k)) or response()))
+    worker = TelegramWorker(store, ('fake', 'fake'), lambda *a, **k: (calls.append((a, k)) or response()), enabled=True)
     assert worker.deliver_once(CONFIRM + 2_000)
     assert len(calls) == 1 and calls[0][0][0].endswith('/sendMessage')
     assert calls[0][1]['json']['text'] == message(event())
@@ -144,6 +146,6 @@ def test_legacy_database_pending_without_media_remains_deliverable(tmp_path):
     with store.connect() as db:
         db.execute('DROP TABLE telegram_media')
     restored = Store(store.path)
-    worker = TelegramWorker(restored, ('fake', 'fake'), lambda *a, **k: response())
+    worker = TelegramWorker(restored, ('fake', 'fake'), lambda *a, **k: response(), enabled=True)
     assert worker.deliver_once(CONFIRM + 2_000)
     assert restored.telegram_status()['sent'] == 1

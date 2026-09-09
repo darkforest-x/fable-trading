@@ -294,6 +294,16 @@ class Store:
             db.execute("UPDATE outbox SET status='unknown',error='process_interrupted_during_delivery' WHERE status='sending'")
             db.execute("UPDATE bark_outbox SET status='unknown',error='process_interrupted_during_delivery' WHERE status='sending'")
 
+    def retire_telegram_pending(self):
+        """Stop unattempted/retry TG work; retain sent and uncertain receipts.
+
+        Called under the monitor process lock before starting any workers.
+        Bark queues, event identities and both channels' cutovers are unchanged.
+        """
+        with self.connect() as db:
+            return db.execute("UPDATE outbox SET status='skipped',error='telegram_disabled_by_owner',updated_ms=? "
+                              "WHERE status='pending'", (now_ms(),)).rowcount
+
     def claim(self, now):
         with self.connect() as db:
             db.execute("BEGIN IMMEDIATE")

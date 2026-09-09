@@ -2,6 +2,8 @@
 
 No network, credentials, market data or model inference is used. Stage clocks
 come from synthetic confirmed bars; no later model price enters raw captions.
+
+Explicit enabled=True below exercises legacy delivery with fake senders only.
 """
 from copy import deepcopy
 from io import BytesIO
@@ -51,7 +53,7 @@ def worker(store, channel, calls, sender=None):
         calls.append((args, kwargs))
         return response(channel)
     if channel == "telegram":
-        return TelegramWorker(store, ("synthetic-token", "synthetic-chat"), sender or send)
+        return TelegramWorker(store, ("synthetic-token", "synthetic-chat"), sender or send, enabled=True)
     return BarkWorker(store, "synthetic-device", sender or send)
 
 
@@ -71,7 +73,7 @@ def content(call, channel):
 
 
 @pytest.mark.parametrize("channel", ["telegram", "bark"])
-@pytest.mark.parametrize("timeframe", ["1H", "4H"])
+@pytest.mark.parametrize("timeframe", ["15m", "1H", "4H"])
 @pytest.mark.parametrize("wait", [0, 2])
 def test_raw_then_model_are_distinct_once_only_notifications(tmp_path, channel, timeframe, wait):
     store = Store(tmp_path / "monitor.sqlite")
@@ -106,22 +108,29 @@ def test_raw_then_model_are_distinct_once_only_notifications(tmp_path, channel, 
     assert receipt(store, other, raw)["status"] == receipt(store, other, event)["status"] == "pending"
 
 
-@pytest.mark.parametrize("channel", ["telegram", "bark"])
-def test_15m_still_sends_model_only_with_direct_channel_enabled(tmp_path, channel):
+def test_15m_bark_sends_raw_then_model_while_default_telegram_stays_off(tmp_path):
     store = Store(tmp_path / "monitor.sqlite")
-    activate(store, channel)
-    activate(store, channel, direct=False, timeframe="15m")
+    for channel in ("telegram", "bark"):
+        activate(store, channel, timeframe="15m")
+        activate(store, channel, direct=False, timeframe="15m")
     event = model_event(timeframe="15m")
     raw = event["indicator"]
     calls = []
-    sender = worker(store, channel, calls)
+    sender = worker(store, "bark", calls)
+    telegram = TelegramWorker(store, ("synthetic-token", "synthetic-chat"),
+                              lambda *a, **k: pytest.fail("owner-disabled Telegram sent"))
     store.upsert_event(raw, notify=True, bark_notify=True)
     assert sender.deliver_once(raw["bar_close_ms"] + 1000)
-    assert receipt(store, channel, raw)["error"] == "not_model_confirmed_signal"
-    assert not calls
+    assert not telegram.deliver_once(raw["bar_close_ms"] + 1000)
+    assert len(calls) == 1 and "未经 YOLO 确认" in content(calls[0], "bark")
     store.upsert_event(event, notify=True, bark_notify=True)
     assert sender.deliver_once(event["bar_close_ms"] + 1000)
-    assert len(calls) == 1 and "YOLO 确认" in content(calls[0], channel)
+    assert not telegram.deliver_once(event["bar_close_ms"] + 1000)
+    assert len(calls) == 2 and "YOLO 确认 · 等待 2 根" in content(calls[1], "bark")
+    assert receipt(store, "telegram", raw)["status"] == "pending"
+    assert receipt(store, "telegram", event)["status"] == "pending"
+    assert sender.status()["sent"] == 2
+    assert telegram.status()["enabled"] is False
 
 
 @pytest.mark.parametrize("channel", ["telegram", "bark"])

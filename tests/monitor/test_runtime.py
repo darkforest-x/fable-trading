@@ -1,4 +1,6 @@
-"""Runtime failure scenarios: public data integrity and durable notification identity."""
+"""Runtime failure scenarios: public data integrity and durable notification identity.
+Explicit enabled=True below exercises legacy delivery with fake senders only.
+"""
 import concurrent.futures
 import json
 
@@ -10,6 +12,61 @@ from model_fixture import CONFIRM, model_event
 from yoyo.monitor.okx import MarketError, merge_rows, parse_rows
 from yoyo.monitor.store import Store
 from yoyo.monitor.telegram import TelegramWorker
+
+
+@pytest.mark.parametrize("supplied_creds", [None, ("synthetic-token", "synthetic-chat")])
+@pytest.mark.parametrize("stage", ["raw", "model"])
+def test_telegram_defaults_off_without_credentials_claim_or_network(tmp_path, monkeypatch, supplied_creds, stage):
+    from yoyo.monitor import telegram
+    store = Store(tmp_path / "disabled.sqlite")
+    activate(store)
+    signal = event()["indicator"] if stage == "raw" else event()
+    store.upsert_event(signal, notify=True)
+    def forbidden(*args, **kwargs):
+        pytest.fail("disabled Telegram accessed credentials, claimed an event, or sent HTTP")
+    monkeypatch.setattr(telegram, "credentials", forbidden)
+    monkeypatch.setattr(telegram.requests, "post", forbidden)
+    monkeypatch.setattr(store, "claim", forbidden)
+    worker = TelegramWorker(store, creds=supplied_creds, sender=forbidden)
+    assert worker.creds is None
+    assert not worker.deliver_once()
+    assert not worker.deliver_once(CONFIRM + 1000)
+    status = worker.status()
+    assert status["enabled"] is False and status["configured"] is False
+    assert status["disabled_by_owner"] is True
+    assert store.telegram_status()["pending"] == 1
+    with store.connect() as db:
+        assert db.execute("SELECT attempts FROM outbox").fetchone()[0] == 0
+
+
+def test_disabled_telegram_preserves_previous_receipts(tmp_path):
+    store = Store(tmp_path / "disabled.sqlite")
+    activate(store)
+    signal = event()
+    store.upsert_event(signal, notify=True)
+    store.finish(store.event_id(signal), "sent", message_id=42)
+    worker = TelegramWorker(store)
+    assert worker.status()["sent"] == 1
+    assert worker.status()["disabled_by_owner"] is True
+    assert not worker.deliver_once(CONFIRM + 1000)
+    with store.connect() as db:
+        receipt = dict(db.execute("SELECT * FROM outbox").fetchone())
+    assert receipt["status"] == "sent" and receipt["message_id"] == 42
+
+
+def test_startup_probe_is_permanently_inert_and_preserves_history(tmp_path, monkeypatch):
+    from yoyo.monitor import telegram
+    store = Store(tmp_path / "disabled.sqlite")
+    previous = {"status": "sent", "message_id": 42, "at_ms": 1}
+    store.set_meta("notification_probe", previous)
+    def forbidden(*args, **kwargs):
+        pytest.fail("disabled startup probe accessed credentials or HTTP")
+    monkeypatch.setattr(telegram, "credentials", forbidden)
+    monkeypatch.setattr(telegram.requests, "post", forbidden)
+    assert telegram.send_startup_probe(store) == {"status": "disabled", "disabled_by_owner": True}
+    assert store.get_meta("notification_probe") == previous
+    # No storage access is necessary even on the first startup.
+    assert telegram.send_startup_probe(None) == {"status": "disabled", "disabled_by_owner": True}
 
 
 def event(now=CONFIRM):
@@ -47,7 +104,7 @@ def test_15m_worker_rechecks_stream_activation_and_links_correct_interval(tmp_pa
     def sender(*args, **kwargs):
         calls.append(kwargs['json'])
         return response(payload={'ok': True, 'result': {'message_id': 123}, 'code': 200, 'timestamp': 3602})
-    worker = (TelegramWorker(store, ('fake-token', 'fake-chat'), sender) if channel == 'telegram'
+    worker = (TelegramWorker(store, ('fake-token', 'fake-chat'), sender, enabled=True) if channel == 'telegram'
               else BarkWorker(store, 'fake-device', sender))
     assert worker.deliver_once(CONFIRM + 2_000)
     assert not worker.deliver_once(CONFIRM + 3_000)
@@ -89,7 +146,7 @@ def test_success_receipt_and_no_resend(tmp_path):
     store.upsert_event(event(), True)
     calls = []
     activate(store, 0)
-    worker = TelegramWorker(store, ("secret", "private"), lambda *a, **k: (calls.append(k) or response()))
+    worker = TelegramWorker(store, ("secret", "private"), lambda *a, **k: (calls.append(k) or response()), enabled=True)
     assert worker.deliver_once(CONFIRM + 2_000)
     assert not worker.deliver_once(CONFIRM + 3_000)
     assert len(calls) == 1
@@ -103,7 +160,7 @@ def test_timeout_is_unknown_not_retried(tmp_path):
     def timeout(*args, **kwargs):
         raise requests.Timeout("url containing secret must not leak")
     activate(store, 0)
-    worker = TelegramWorker(store, ("secret", "private"), timeout)
+    worker = TelegramWorker(store, ("secret", "private"), timeout, enabled=True)
     assert worker.deliver_once(CONFIRM + 2_000)
     assert not worker.deliver_once(CONFIRM + 3_000)
     assert store.telegram_status()["unknown"] == 1
@@ -114,7 +171,7 @@ def test_429_obeys_retry_after(tmp_path):
     store = Store(tmp_path / "m.sqlite")
     store.upsert_event(event(), True)
     activate(store, 0)
-    worker = TelegramWorker(store, ("x", "y"), lambda *a, **k: response(429, {"ok": False, "error_code": 429, "parameters": {"retry_after": 90}}))
+    worker = TelegramWorker(store, ("x", "y"), lambda *a, **k: response(429, {"ok": False, "error_code": 429, "parameters": {"retry_after": 90}}), enabled=True)
     worker.deliver_once(CONFIRM + 2_000)
     assert not worker.deliver_once(CONFIRM + 3_000)
     assert store.telegram_status()["pending"] == 1
@@ -126,7 +183,7 @@ def test_stale_outbox_is_skipped_without_network(tmp_path):
     def forbidden(*args, **kwargs):
         pytest.fail("expired event sent")
     activate(store, 0)
-    worker = TelegramWorker(store, ("x", "y"), forbidden)
+    worker = TelegramWorker(store, ("x", "y"), forbidden, enabled=True)
     worker.deliver_once(CONFIRM + FRESH_MS + 1)
     assert store.list_events()[0]["notification_status"] == "skipped"
 
@@ -179,7 +236,7 @@ def test_malformed_receipt_never_strands_sending(tmp_path, payload):
     store = Store(tmp_path / "m.sqlite")
     store.upsert_event(event(), True)
     activate(store, 0)
-    worker = TelegramWorker(store, ("x", "y"), lambda *a, **k: response(200, payload))
+    worker = TelegramWorker(store, ("x", "y"), lambda *a, **k: response(200, payload), enabled=True)
     worker.deliver_once(CONFIRM + 2_000)
     assert store.telegram_status()["unknown"] == 1
     assert store.telegram_status().get("sending", 0) == 0
@@ -219,7 +276,7 @@ def test_noncanonical_queue_items_cannot_reach_telegram(tmp_path, changes):
     bad["indicator"].update(changes)
     store.upsert_event(bad, True)
     activate(store, 0)
-    worker = TelegramWorker(store, ('fake', 'fake'), lambda *a, **k: pytest.fail('noncanonical signal sent'))
+    worker = TelegramWorker(store, ('fake', 'fake'), lambda *a, **k: pytest.fail('noncanonical signal sent'), enabled=True)
     worker.deliver_once(CONFIRM + 2_000)
     assert store.list_events()[0]['notification_status'] == 'skipped'
 
@@ -238,7 +295,7 @@ def test_policy_cutover_is_persistent_and_preserves_old_receipts(tmp_path):
     assert store.telegram_status()['skipped'] == 1
     assert store.telegram_status()['pending'] == 1
     activate(store, 0)
-    worker = TelegramWorker(store, ('fake', 'fake'), lambda *a, **k: response())
+    worker = TelegramWorker(store, ('fake', 'fake'), lambda *a, **k: response(), enabled=True)
     assert worker.deliver_once(CONFIRM + 10_802_000)
     assert store.telegram_status(protocol=MODEL_PROTOCOL)['sent'] == 1
     activate(store, CONFIRM + 5_400_000)
@@ -250,7 +307,7 @@ def test_pre_cutover_fresh_event_is_not_replayed_as_new_notification(tmp_path):
     activate(store, CONFIRM + 1_000)
     store.upsert_event(event(), True)
     activate(store, 0)
-    worker = TelegramWorker(store, ('fake', 'fake'), lambda *a, **k: pytest.fail('history replayed'))
+    worker = TelegramWorker(store, ('fake', 'fake'), lambda *a, **k: pytest.fail('history replayed'), enabled=True)
     worker.deliver_once(CONFIRM + 2_000)
     assert store.list_events()[0]['notification_status'] == 'skipped'
 
@@ -280,7 +337,7 @@ def test_default_signal_api_and_counts_do_not_relabel_old_events(tmp_path, monke
 def test_delivery_waits_for_explicit_policy_activation(tmp_path):
     store = Store(tmp_path / 'm.sqlite')
     store.upsert_event(event(), True)
-    worker = TelegramWorker(store, ('fake', 'fake'), lambda *a, **k: pytest.fail('unactivated policy sent'))
+    worker = TelegramWorker(store, ('fake', 'fake'), lambda *a, **k: pytest.fail('unactivated policy sent'), enabled=True)
     assert not worker.deliver_once(CONFIRM + 2_000)
     assert store.telegram_status()['pending'] == 1
     assert store.telegram_status().get('sending', 0) == 0
@@ -293,7 +350,7 @@ def test_model_confirmation_can_notify_after_original_md_already_left_zero(tmp_p
     visible["indicator"].update(zero_bars=0, previous_md=.05, dense=False, htf_allowed=False)
     store.upsert_event(visible, True)
     calls = []
-    worker = TelegramWorker(store, ('fake', 'fake'), lambda *a, **k: (calls.append(k) or response()))
+    worker = TelegramWorker(store, ('fake', 'fake'), lambda *a, **k: (calls.append(k) or response()), enabled=True)
     assert worker.deliver_once(CONFIRM + 2_000)
     assert len(calls) == 1 and store.telegram_status()['sent'] == 1
     assert '0 →' not in calls[0]['json']['text']
@@ -303,7 +360,7 @@ def test_raw_visible_release_alone_cannot_notify(tmp_path):
     store = Store(tmp_path / "m.sqlite")
     activate(store)
     store.upsert_event(event()["indicator"], True)
-    worker = TelegramWorker(store, ("fake", "fake"), lambda *a, **k: pytest.fail("raw arrow sent"))
+    worker = TelegramWorker(store, ("fake", "fake"), lambda *a, **k: pytest.fail("raw arrow sent"), enabled=True)
     assert worker.deliver_once(CONFIRM + 1000)
     assert store.telegram_status()["skipped"] == 1
     with store.connect() as db:

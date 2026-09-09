@@ -1,7 +1,8 @@
 """Independent Mac scan loop: public OHLCV -> Pine-equivalent events -> outbox.
 
-The owner explicitly requested local all-market 15m/1H/4H monitoring and Telegram
-notifications on 2026-09-08. This is an indicator monitor, not an ACTIVE/model
+The owner requested local all-market 15m/1H/4H monitoring. On 2026-09-09,
+all three periods send direct starts and extra model confirmations via Bark;
+Telegram is disabled. This is an indicator monitor, not an ACTIVE/model
 promotion, broker position tracker, execution path or backtest. Existing VPS
 cadence, cache and freshness settings remain untouched.
 """
@@ -61,7 +62,8 @@ class Monitor:
     def start(self):
         # Called only after server lifespan owns the singleton process lock.
         self.store.recover_outbox()
-        for name, target in (("scan", self.run), ("model", self.model_gate.run), ("telegram", self.deliver), ("bark", self.deliver_bark)):
+        self.store.retire_telegram_pending()
+        for name, target in (("scan", self.run), ("model", self.model_gate.run), ("bark", self.deliver_bark)):
             thread = threading.Thread(target=target, name="impulse-" + name, daemon=True)
             self.threads.append(thread)
             thread.start()
@@ -70,18 +72,6 @@ class Monitor:
         self.stop_event.set()
         for thread in self.threads:
             thread.join(timeout=2)
-
-    def deliver(self):
-        while not self.stop_event.is_set():
-            if not self.notification_ready.is_set():
-                self.stop_event.wait(3)
-                continue
-            try:
-                worked = self.telegram.deliver_once(self.client.clock())
-            except Exception as exc:
-                LOG.error("outbox worker failure: %s", type(exc).__name__)
-                worked = False
-            self.stop_event.wait(1.1 if worked else 3)
 
     def run(self):
         while not self.stop_event.is_set():
@@ -112,15 +102,14 @@ class Monitor:
         if not self.notification_ready.is_set():
             # Use the same calibrated clock as candle closes and freshness.
             # A slow Mac clock must not turn a pre-upgrade close into a new bar.
-            self.notification_since = self.store.activate_notification_policy(self.client.clock(), protocol=PROTOCOL, retire_obsolete=False)
+            # Retain the model-candidate history baseline without re-enabling TG.
+            self.notification_since = self.store.get_meta("notification_policy:" + PROTOCOL, {}).get("activated_ms", self.client.clock())
             if self.bark.creds:
                 self.bark_since = self.store.activate_bark_policy(self.client.clock(), protocol=PROTOCOL, retire_obsolete=False)
             self.timeframe_since = {tf: self.store.activate_timeframe_policy(tf, self.client.clock(), protocol=PROTOCOL)
                                     for tf in MONITORED_TIMEFRAMES}
             # This is an additive delivery policy, not a new signal definition.
             # Persist fresh cutovers; the pre-YOLO raw-arrow cutovers cannot grant it.
-            if getattr(self.telegram, "creds", None):
-                self.store.activate_notification_policy(self.client.clock(), protocol=DIRECT_POLICY, retire_obsolete=False)
             if self.bark.creds:
                 self.store.activate_bark_policy(self.client.clock(), protocol=DIRECT_POLICY, retire_obsolete=False)
             for tf in DIRECT_TIMEFRAMES:
@@ -243,21 +232,10 @@ class Monitor:
         return errors
 
     def record_arrow(self, event, chart, now, *, stale=False):
-        """Journal one closed arrow and, on 1H/4H, its independent direct leg."""
-        notify = (not stale and bool(getattr(self.telegram, "creds", None))
-                  and delivery_error(self.store, event, now, "telegram") is None)
+        """Journal one closed arrow and its independent Bark-only direct leg."""
         bark_notify = (not stale and bool(self.bark.creds)
                        and delivery_error(self.store, event, now, "bark") is None)
-        photo = photo_error = None
-        if notify and not self.store.has_event(event):
-            try:
-                from yoyo.monitor.snapshot import render_signal
-                photo = render_signal(event, chart)
-            except Exception as exc:
-                photo_error = type(exc).__name__
-                LOG.warning("direct snapshot unavailable: %s", photo_error)
-        return self.store.upsert_event(event, notify=notify, bark_notify=bark_notify,
-                                       telegram_photo=photo, photo_error=photo_error)
+        return self.store.upsert_event(event, notify=False, bark_notify=bark_notify)
 
     def chart(self, symbol, timeframe):
         with self.lock:
@@ -283,8 +261,9 @@ class Monitor:
                     "fresh_minutes": FRESH_MS // 60000, "interval_seconds": self.interval, "timeframes": list(MONITORED_TIMEFRAMES),
                     "clock_offset_ms": self.client.offset_ms, "public_requests": self.client.requests,
                     "candle_storage": "memory_only", "history_days": 7,
-                    "signal_mode": "1H/4H 启动先通知 · YOLO 通过追加确认；15m 仅模型确认", "signal_kind": MODEL_KIND,
+                    "signal_mode": "15m/1H/4H 启动先发 Bark · YOLO 通过追加确认", "signal_kind": MODEL_KIND,
                     "notification_mode": "two_stage", "direct_timeframes": list(DIRECT_TIMEFRAMES),
+                    "notification_channels": ["bark"],
                     "direct_notification_policy": DIRECT_POLICY,
                     "direct_notification_since_ms": {c: activation(self.store, c, DIRECT_POLICY) for c in ("telegram", "bark")},
                     "direct_timeframe_since_ms": {tf: self.store.timeframe_activation(tf, protocol=DIRECT_POLICY) for tf in DIRECT_TIMEFRAMES},

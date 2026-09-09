@@ -4,7 +4,7 @@
 
   const $ = (id) => document.getElementById(id);
   const state = {
-    view: "signals", signals: [], directSignals: [], candidates: [], signalScope: "confirmed", markets: [], status: null, health: null,
+    view: "signals", signals: [], directSignals: [], candidates: [], signalScope: "direct", markets: [], status: null, health: null,
     signalsLoaded: false, directSignalsLoaded: false, directSignalTotal: 0, candidatesLoaded: false, candidateTotal: 0, candidateCounts: null, marketsLoaded: false, signalTotal: 0, rowLimit: 24, watchLimit: 24, search: "", watchSearch: "", watchScope: "building",
     timeframe: "all", watchTimeframe: "all", side: "all", selected: null,
     chartKey: null, chart: null, chartRequest: 0, chartController: null, chartExpanded: false,
@@ -12,7 +12,7 @@
     tradingViewPending: false,
   };
   const titles = {
-    signals: ["信号中心", "1H / 4H 指标启动先通知，YOLO 通过后追加确认；15m 仍需模型确认。新规则启用后的记录分别展示。"],
+    signals: ["信号中心", "15m / 1H / 4H 收盘启动先推送 Bark，YOLO 通过后追加确认。两个阶段分别展示。"],
     watch: ["蓄势观察", "还在横盘的，单独观察。这里的结构尚不是启动信号。"],
     system: ["运行状态", "行情、扫描与通知，每个环节都清晰可见。"],
   };
@@ -41,8 +41,13 @@
   const modelProtocol = () => state.status?.runtime?.signal_kind === "yolo_confirmed" && state.status?.protocol === MODEL_PROTOCOL;
   const isConfirmed = (item) => item?.kind === "yolo_confirmed" && item.protocol === MODEL_PROTOCOL && item.model?.status === "confirmed";
   const isCandidate = (item) => item?.kind === "tv_start" && item.protocol === TV_PROTOCOL;
-  const isDirectRecord = (item) => isCandidate(item) && ["1H", "4H"].includes(item.timeframe);
+  const isDirectRecord = (item) => isCandidate(item) && TV_INTERVALS.has(item.timeframe);
   const twoStage = () => state.status?.runtime?.notification_mode === "two_stage";
+  const notificationChannels = () => {
+    const configured = state.status?.runtime?.notification_channels;
+    const channels = Array.isArray(configured) ? configured : ["bark"];
+    return ["telegram", "bark"].filter((channel) => channels.includes(channel) && (channel !== "telegram" || state.status?.telegram?.disabled_by_owner !== true));
+  };
   // Only the policy-filtered direct endpoint supplies first-stage receipts.
   // Candidate history is deliberately not a receipt source.
   const directReceipt = (item) => isDirectRecord(item) ? state.directSignals.find((row) => sameEvent(row, item)) : null;
@@ -50,9 +55,8 @@
   const sourceItems = () => state.signalScope === "confirmed" ? state.signals : state.signalScope === "direct" ? state.directSignals : state.candidates;
   const sourceKey = () => state.signalScope === "confirmed" ? "signals" : state.signalScope === "direct" ? "directSignals" : "candidates";
   const modelState = (item) => modelStates[item.model?.status] || "等待模型状态";
-  const notificationPolicy = () => twoStage() ? "新规则启用后，1H / 4H 收盘启动先通知，YOLO 通过后追加通知；15m 仅模型确认后通知。" : "当前服务仍按模型确认通知，分阶段通知规则尚未启用。";
+  const notificationPolicy = () => twoStage() ? "15m / 1H / 4H 收盘启动先推送 Bark，YOLO 通过后追加推送；历史箭头不补发。" : "当前服务仍按模型确认通知，分阶段通知规则尚未启用。";
   function candidateNotificationNote(item) {
-    if (item.timeframe === "15m") return "15m · 模型确认后才通知";
     if (directReceipt(item)) return "启动通知见通道回执；YOLO 通过后追加通知";
     return twoStage() ? "未关联新规则启动回执 · 不推断已发送" : "候选记录 · 当前等待模型后通知";
   }
@@ -213,7 +217,7 @@
     return ["已记录", "muted"];
   }
   function notificationHTML(item) {
-    return ["telegram", "bark"].map((channel) => {
+    return notificationChannels().map((channel) => {
       const [label, className] = notification(item, channel);
       const name = channel === "bark" ? "Bark" : "TG";
       const description = channel === "bark" && className === "sent" ? "Bark 服务已接受推送，不代表手机已收到或已读" : `${name} · ${label}`;
@@ -228,8 +232,8 @@
     const source = sourceItems(), total = confirmed ? state.signalTotal : direct ? state.directSignalTotal : state.candidateTotal;
     $("filtered-count").textContent = `${items.length} 条`;
     $("filtered-count").title = `共 ${number(total)} 条记录；筛选最近 ${source.length} 条`;
-    $("signal-section-title").textContent = confirmed ? "模型确认" : direct ? "指标启动 · 1H / 4H" : state.signalScope === "pending" ? "等待模型确认" : "全部指标候选";
-    $("signal-scope-note").textContent = confirmed ? "1H / 4H 追加确认通知 · 15m 首次通知 · 新鲜度从模型确认收盘起算" : direct ? "新规则启用后的收盘启动 · 原箭头点位 · 启动时未经 YOLO 确认" : "1H / 4H 启动回执在指标启动页；15m 仍需 YOLO 通过后才通知";
+    $("signal-section-title").textContent = confirmed ? "模型确认" : direct ? "指标启动 · 全部周期" : state.signalScope === "pending" ? "等待模型确认" : "全部指标候选";
+    $("signal-scope-note").textContent = confirmed ? "YOLO 通过后追加 Bark 推送 · 新鲜度从模型确认收盘起算" : direct ? "新规则启用后的收盘启动 · 原箭头点位 · 启动时未经 YOLO 确认" : "各周期收盘启动先推送 Bark；这里跟踪后续 YOLO 确认";
     $("signal-window-note").textContent = loaded ? `最近 ${number(source.length)} / 共 ${number(total)} 条` : "最近 2,000 条 · 每 15 秒同步";
     $("candidate-count").textContent = state.candidatesLoaded ? number(state.candidateCounts ? numeric(state.candidateCounts.pending) + numeric(state.candidateCounts.error) : state.candidates.filter((item) => ["pending", "error"].includes(item.model?.status)).length) : "—";
     $("candidate-count").title = state.candidateCounts ? "全部候选中，等待确认与检测异常的数量" : "最近获取的候选中，等待确认与检测异常的数量";
@@ -245,8 +249,8 @@
         $("signal-empty-title").textContent = "正在连接行情服务";
         $("signal-empty-description").textContent = "真实记录会在这里出现。";
       } else {
-        $("signal-empty-title").textContent = hasFilters ? "没有符合筛选的记录" : confirmed ? "等待指标与模型共同确认" : direct ? "等待新的 1H / 4H 启动" : "当前暂无候选";
-        $("signal-empty-description").textContent = hasFilters ? direct && state.timeframe === "15m" ? "15m 不直接推送启动，请到模型确认或等待确认中查看。" : "试试其他合约、周期或方向。" : confirmed ? "YOLO 确认同一段结构后出现在这里；1H / 4H 的首次通知可在指标启动中查看。" : direct ? "仅展示新规则启用后的收盘启动，历史箭头不会补成新通知。" : "新启动箭头出现后，会进入模型等待窗口。";
+        $("signal-empty-title").textContent = hasFilters ? "没有符合筛选的记录" : confirmed ? "等待指标与模型共同确认" : direct ? "等待新的收盘启动" : "当前暂无候选";
+        $("signal-empty-description").textContent = hasFilters ? "试试其他合约、周期或方向。" : confirmed ? "YOLO 确认同一段结构后出现在这里；首次启动推送可在指标启动中查看。" : direct ? "仅展示新规则启用后的收盘启动，历史箭头不会补成新通知。" : "新启动箭头出现后，会进入模型等待窗口。";
       }
     }
     const focused = document.activeElement?.dataset;
@@ -273,7 +277,7 @@
     const confirmed = isConfirmed(item), original = originalSignal(item), direct = directReceipt(item);
     const side = item.side === "short" ? "short" : item.side === "long" ? "long" : "neutral";
     const fresh = isFresh(item, now);
-    const status = confirmed ? item.timeframe === "15m" ? "YOLO 已确认" : "YOLO 追加确认" : state.signalScope === "direct" ? "启动时未经 YOLO 确认" : modelState(item), caption = confirmed ? "模型确认收盘价" : "原箭头收盘价";
+    const status = confirmed ? "YOLO 追加确认" : state.signalScope === "direct" ? "启动时未经 YOLO 确认" : modelState(item), caption = confirmed ? "模型确认收盘价" : "原箭头收盘价";
     const waiting = `${number(item.model?.wait_bars)} / ${number(item.model?.max_wait_bars)} 根`;
     return `<article class="signal-card ${side}${confirmed || direct ? "" : " candidate-card"}${selected ? " selected" : ""}${fresh ? " is-fresh" : ""}"><button type="button" class="card-primary-action" data-signal-id="${escapeHTML(item.id)}" data-signal-kind="${escapeHTML(item.kind)}" data-tradingview-action="signal" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击卡片，在 Mac TradingView 打开" aria-label="${escapeHTML(`${shortSymbol(item.symbol)} ${quoteSymbol(item.symbol)} ${item.timeframe} ${sideName(item.side)}，${status}，${caption} ${price(item.price)}，${shortDate(item.bar_close_ms)}，在 Mac TradingView 打开`)}"></button>
       <span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(item.timeframe)}</span></span>
@@ -359,18 +363,17 @@
     if (!status) return;
     const scan = status.scan || {};
     const counts = status.counts || {};
-    const telegram = status.telegram || {};
     const bark = status.bark;
     const runtime = status.runtime || {};
     const timeframes = Array.isArray(runtime.timeframes) ? runtime.timeframes : [];
     $("metric-timeframes").textContent = timeframes.length ? timeframes.join(" + ") : "—";
     $("watch-timeframes").textContent = timeframes.length ? timeframes.join(" / ") : "—";
-    $("metric-signals").textContent = modelProtocol() ? number(counts.signals_24h ?? 0) : "—";
-    $("nav-signal-count").textContent = modelProtocol() ? number(counts.signals_24h ?? 0) : "—";
+    $("metric-signals").textContent = twoStage() ? number(counts.indicator_starts_24h) : "—";
+    $("nav-signal-count").textContent = twoStage() ? number(counts.indicator_starts_24h) : "—";
     $("metric-building").textContent = number(counts.building ?? 0);
     $("metric-universe").textContent = number(status.universe?.count);
     $("metric-building-detail").textContent = finite(counts.ready) ? `${number(counts.ready)} 个窗口已就绪` : "零轴横盘与均线密集";
-    $("metric-signals-detail").textContent = modelProtocol() ? twoStage() ? `另有 ${number(counts.indicator_starts_24h)} 条指标启动 · 1H / 4H` : "指标箭头 + 模型确认" : "模型口径待同步";
+    $("metric-signals-detail").textContent = modelProtocol() ? `另有 ${number(counts.signals_24h)} 条 YOLO 追加确认` : "模型口径待同步";
     const scanning = ["running", "scanning", "in_progress", "starting", "bootstrap"].includes(scan.status);
     const scanErrorCount = Array.isArray(scan.errors) ? scan.errors.length : numeric(scan.errors);
     const complete = numeric(scan.completed);
@@ -386,21 +389,13 @@
       ["上轮完成", fullDate(scan.finished_at_ms)], ["下轮扫描", fullDate(scan.next_scan_ms)],
       ["本轮错误", number(scanErrorCount)], ["监控范围", status.universe?.scope || "OKX 全市场永续"],
     ]);
-    const tgReady = telegram.configured && telegram.enabled;
-    const tgProblem = numeric(telegram.failed) > 0 || numeric(telegram.unknown) > 0;
-    $("telegram-header").textContent = tgReady ? tgProblem ? "TG · 异常" : "TG · 已启用" : "TG · 未启用";
-    $("telegram-header").classList.toggle("good", Boolean(tgReady && !tgProblem));
-    $("telegram-state-badge").textContent = tgReady ? tgProblem ? "需检查发送结果" : "通知已启用" : telegram.configured ? "通知已关闭" : "尚未配置";
-    $("telegram-state-badge").className = `neutral-badge ${tgReady && !tgProblem ? "good" : "warn"}`;
-    $("telegram-description").textContent = tgReady ? numeric(telegram.unknown) > 0 ? "部分发送未收到确定回执，为避免重复通知不自动重发，请核对 Telegram。" : notificationPolicy() : telegram.configured ? "通道已配置，当前发送开关关闭。前端继续记录信号。" : "尚未读取到可用的通知配置，当前仅在前端记录信号。";
-    $("telegram-facts").innerHTML = factsHTML([["最近成功", fullDate(telegram.last_success_ms)], ["待发送", number(telegram.pending)], ["发送失败", number(telegram.failed)], ["发送结果未知", number(telegram.unknown ?? 0)], ["配置状态", telegram.configured ? "已配置（敏感信息不展示）" : "未配置"]]);
     const barkReady = Boolean(bark?.configured && bark?.enabled);
     const barkProblem = numeric(bark?.failed) > 0 || numeric(bark?.unknown) > 0;
     $("bark-header").textContent = !bark ? "Bark · 待接入" : barkReady ? barkProblem ? "Bark · 异常" : "Bark · 已启用" : "Bark · 未启用";
     $("bark-header").classList.toggle("good", barkReady && !barkProblem);
     $("bark-state-badge").textContent = !bark ? "状态待接入" : barkReady ? barkProblem ? "需检查发送结果" : "通知已启用" : bark.configured ? "通知已关闭" : "尚未配置";
     $("bark-state-badge").className = `neutral-badge ${barkReady && !barkProblem ? "good" : "warn"}`;
-    $("bark-description").textContent = !bark ? "服务尚未提供 Bark 通道状态，等待下一次同步。" : barkReady ? numeric(bark.unknown) > 0 ? "部分发送结果未知，为避免重复通知不自动重发。服务接受不代表手机已收到或已读。" : "与 TG 分别记录推送结果。服务已接受不代表手机已收到或已读。" : bark.configured ? "Bark 已配置，当前发送开关关闭；TG 与前端记录独立运行。" : "Bark 尚未配置；TG 与前端记录独立运行。";
+    $("bark-description").textContent = !bark ? "服务尚未提供 Bark 通道状态，等待下一次同步。" : barkReady ? numeric(bark.unknown) > 0 ? "部分发送结果未知，为避免重复通知不自动重发。服务接受不代表手机已收到或已读。" : `${notificationPolicy()}服务已接受不代表手机已收到或已读。` : bark.configured ? "Bark 已配置，当前发送开关关闭；前端继续记录信号。" : "Bark 尚未配置；前端继续记录信号。";
     $("bark-facts").innerHTML = factsHTML([["本次服务接受", number(bark?.sent)], ["最近服务接受", fullDate(bark?.last_success_ms)], ["待发送", number(bark?.pending)], ["发送失败", number(bark?.failed)], ["发送结果未知", number(bark?.unknown)], ["历史服务接受", number(bark?.historical_sent)], ["配置状态", !bark ? "等待状态" : bark.configured ? "已配置（敏感信息不展示）" : "未配置"]]);
     $("service-version").textContent = status.version ? `v${String(status.version).replace(/^v/, "")}` : "本机服务";
     const runtimeFacts = [["监控台", "spike"], ["启动时间", fullDate(status.started_at_ms)], ["服务时间", fullDate(status.now_ms)], ["运行时长", duration(Date.now() - numeric(status.started_at_ms, Date.now()))]];
@@ -411,7 +406,7 @@
     if (runtime.signal_mode || runtime.strategy || status.strategy) runtimeFacts.push(["信号规则", runtime.signal_mode || runtime.strategy || status.strategy]);
     if (runtime.higher_mode) runtimeFacts.push(["高周期规则", runtime.higher_mode]);
     const gate = runtime.model_gate || {};
-    const gateImpact = twoStage() ? "1H / 4H 指标启动通知独立运行；YOLO 追加确认与 15m 通知仍需模型通过。" : "模型确认通知暂不可用，候选保留等待。";
+    const gateImpact = twoStage() ? "15m / 1H / 4H 指标启动推送独立运行；仅 YOLO 追加确认需要模型通过。" : "模型确认通知暂不可用，候选保留等待。";
     const gateNotice = !modelProtocol() ? "模型确认口径尚未同步，原始箭头不会显示为模型确认。" : gate.last_error ? `模型检测异常：${String(gate.last_error)}。${gateImpact}` : gate.status === "error" ? `部分候选检测异常，可在等待确认中查看。${gateImpact}` : gate.loaded !== true ? `模型尚未就绪。${gateImpact}` : "";
     $("model-gate-notice").textContent = gateNotice;
     $("model-gate-notice").classList.toggle("hidden", !gateNotice);
@@ -479,14 +474,14 @@
       [confirmed || candidate ? "原箭头收盘 · 北京时间" : "最近收盘 · 北京时间", shortDate(original.bar_close_ms), ""],
       ...(confirmed || candidate ? [["原箭头收盘价", price(original.price), ""]] : []),
       ...(confirmed ? [["模型确认 · 北京时间", shortDate(item.bar_close_ms), "model-color"], ["模型确认收盘价", price(item.price), "model-color"]] : []),
-      ...(direct ? [["事件阶段", "指标启动 · 未经 YOLO 确认", ""], ["TG 启动回执", notification(direct)[0], ""], ["Bark 启动回执", notification(direct, "bark")[0], ""]] : []),
+      ...(direct ? [["事件阶段", "指标启动 · 未经 YOLO 确认", ""], ["Bark 启动回执", notification(direct, "bark")[0], ""]] : []),
       ...(item.model ? [["模型状态", modelState(item), item.model.status === "error" ? "red" : ""], ["等待 / 最大窗口", `${number(item.model.wait_bars)} / ${number(item.model.max_wait_bars)} 根`, ""], ...(confirmed ? [["检测分数 · 非胜率", modelScore(item), ""], ["核心区间", `${shortDate(item.model.core_start_ms)} → ${shortDate(item.model.core_end_ms)}`, ""]] : [["最近检测收盘", shortDate(item.model.last_checked_close_ms), ""], ["等待截止", shortDate(item.model.expires_at_ms), ""]])] : []),
       [confirmed || candidate ? "启动前近零蓄势" : "当前近零蓄势", `${number(focusRun(item))} 根`, ""],
       ["均线密集 · 背景参考", original.dense === true ? "已密集" : original.dense === false ? "未密集" : "—", original.dense ? "mint" : ""],
       ["高周期方向 · 背景参考", sideName(original.htf_side), ""],
     ];
     $("detail-facts").innerHTML = facts.map(([label, value, color]) => `<div><div class="fact-label">${escapeHTML(label)}</div><div class="fact-value ${color}">${escapeHTML(value)}</div></div>`).join("");
-    $("detail-reason").textContent = confirmed ? `原始启动箭头后等待 ${number(item.model.wait_bars)} 根，YOLO 确认同一段结构。紫框标出模型核心时间区间，紫色竖线为模型确认收盘所在 K 线；其后的行情不参与当次检测。1H / 4H 的启动回执以指标启动页为准；15m 仅在模型确认后通知。检测分数用于形态匹配，不代表胜率。` : candidate ? `主图已出现收盘启动箭头。${direct ? "这条记录是未经 YOLO 确认的第一阶段启动；后续模型结果请查看模型确认页。" : `${modelState(item)}。`}${modelReason(item) ? modelReason(item) + "。" : ""}原箭头保留原时间与原点位。${candidateNotificationNote(item)}。${item.tv_profile && item.tv_profile !== TV_PROFILE ? " 此记录设置快照不同，请核对监控配置。" : ""}` : item.error ? `行情读取异常：${String(item.error)}。当前结构仅供查看。` : item.stale ? "当前行情已过期，等待重新同步；不会将缓存结构当作新信号。" : "当前为行情观察。启动箭头出现后才进入信号阶段，蓄势状态不等于启动或模型确认。";
+    $("detail-reason").textContent = confirmed ? `原始启动箭头后等待 ${number(item.model.wait_bars)} 根，YOLO 确认同一段结构。紫框标出模型核心时间区间，紫色竖线为模型确认收盘所在 K 线；其后的行情不参与当次检测。各周期的首次 Bark 推送以指标启动页回执为准；本次为 YOLO 追加确认。检测分数用于形态匹配，不代表胜率。` : candidate ? `主图已出现收盘启动箭头。${direct ? "这条记录是未经 YOLO 确认的第一阶段启动；后续模型结果请查看模型确认页。" : `${modelState(item)}。`}${modelReason(item) ? modelReason(item) + "。" : ""}原箭头保留原时间与原点位。${candidateNotificationNote(item)}。${item.tv_profile && item.tv_profile !== TV_PROFILE ? " 此记录设置快照不同，请核对监控配置。" : ""}` : item.error ? `行情读取异常：${String(item.error)}。当前结构仅供查看。` : item.stale ? "当前行情已过期，等待重新同步；不会将缓存结构当作新信号。" : "当前为行情观察。启动箭头出现后才进入信号阶段，蓄势状态不等于启动或模型确认。";
     const market = state.markets.find((row) => row.symbol === item.symbol && row.timeframe === item.timeframe);
     const key = `${item.kind || "market"}|${item.id || ""}|${item.model?.status || ""}|${item.model?.core_start_ms || ""}|${item.model?.core_end_ms || ""}|${item.symbol}|${item.timeframe}|${item.bar_close_ms || ""}|${market?.bar_close_ms || ""}|${market?.stale || false}|${market?.error || ""}`;
     if (state.chartKey !== key) loadChart(item, key);

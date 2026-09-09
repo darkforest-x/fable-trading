@@ -28,7 +28,7 @@ function attributes(text) {
   return result;
 }
 
-function harness({ allowChartFixture = false, nowStep = 0, bridgeReply = null, apiReplies = {} } = {}) {
+function harness({ allowChartFixture = false, nowStep = 0, bridgeReply = null, apiReplies = {}, initialScope = "confirmed", notificationChannels = ["telegram", "bark"] } = {}) {
   let now = NOW;
   const elements = new Map();
   const document = { activeElement: null, hidden: false, listeners: new Map() };
@@ -156,7 +156,8 @@ function harness({ allowChartFixture = false, nowStep = 0, bridgeReply = null, a
   const exposed = ["state", "isFresh", "filteredSignals", "notification", "notificationHTML", "renderSignals", "isBuilding", "renderWatch", "renderDetail", "refresh", "modelOverlayHTML", "isConfirmed", "renderStatus"];
   vm.runInContext(source.slice(0, source.indexOf(bootstrap)) + `\n  globalThis.client = { ${exposed.join(", ")} };\n})();`, context, { filename: clientPath });
   const client = context.client;
-  client.state.status = { protocol: PROTOCOL, now_ms: NOW, runtime: { signal_kind: "yolo_confirmed", fresh_minutes: 30 } };
+  client.state.status = { protocol: PROTOCOL, now_ms: NOW, runtime: { signal_kind: "yolo_confirmed", fresh_minutes: 30, notification_channels: notificationChannels } };
+  if (initialScope !== null) client.state.signalScope = initialScope;
   client.state.statusReceivedAt = NOW;
   client.state.signalsLoaded = true;
   client.state.candidatesLoaded = true;
@@ -866,19 +867,20 @@ test("polling requests separate APIs, rejects mixed event payloads and keeps ind
 });
 
 function enableTwoStage(client) {
-  Object.assign(client.state.status.runtime, { notification_mode: "two_stage", direct_timeframes: ["1H", "4H"] });
+  Object.assign(client.state.status.runtime, { notification_mode: "two_stage", direct_timeframes: ["15m", "1H", "4H"], notification_channels: ["bark"] });
 }
 
-test("direct feed shows 1H and 4H start prices and separate receipts, excluding 15m and model events", () => {
+test("direct feed shows all three periods with Bark receipts, excluding unsupported periods and model events", () => {
   const { client, get } = harness();
   enableTwoStage(client);
   client.state.signalScope = "direct";
-  client.state.directSignals = [candidate("start-1h", "pending", { price: 102.5 }), candidate("start-4h", "pending", { timeframe: "4H", bark_notification_status: "sent" }), candidate("not-direct-15m", "pending", { timeframe: "15m" }), signal("model"), candidate("wrong-protocol", "pending", { protocol: "legacy" })];
+  client.state.directSignals = [candidate("start-1h", "pending", { price: 102.5 }), candidate("start-4h", "pending", { timeframe: "4H", bark_notification_status: "sent" }), candidate("start-15m", "pending", { timeframe: "15m" }), candidate("unsupported", "pending", { timeframe: "5m" }), signal("model"), candidate("wrong-protocol", "pending", { protocol: "legacy" })];
   client.state.directSignalTotal = 19;
   client.renderSignals();
-  assert.deepEqual(ids(get("signal-rows")), ["start-1h", "start-4h"]);
+  assert.deepEqual(ids(get("signal-rows")), ["start-1h", "start-4h", "start-15m"]);
   assert.match(get("signal-rows").innerHTML, /新鲜启动|原箭头收盘价|102.5|启动时未经 YOLO 确认/);
-  assert.match(get("signal-rows").innerHTML, /TG<\/span><span>已发送|Bark<\/span><span>服务已接受/);
+  assert.match(get("signal-rows").innerHTML, /Bark<\/span><span>服务已接受/);
+  assert.doesNotMatch(get("signal-rows").innerHTML, /TG|data-notification-channel="telegram"/);
   assert.doesNotMatch(get("signal-rows").innerHTML, /模型确认收盘价|YOLO 追加确认/);
   assert.match(get("signal-window-note").textContent, /共 19/);
   client.state.timeframe = "4H";
@@ -886,8 +888,8 @@ test("direct feed shows 1H and 4H start prices and separate receipts, excluding 
   assert.deepEqual(ids(get("signal-rows")), ["start-4h"]);
   client.state.timeframe = "15m";
   client.renderSignals();
-  assert.deepEqual(ids(get("signal-rows")), []);
-  assert.match(get("signal-empty-description").textContent, /15m 不直接推送启动/);
+  assert.deepEqual(ids(get("signal-rows")), ["start-15m"]);
+  assert.match(get("signal-rows").innerHTML, /新鲜启动/);
 });
 
 test("first-stage freshness needs direct API approval and its own healthy policy clock", () => {
@@ -928,11 +930,11 @@ test("candidate histories cannot borrow unrelated or legacy direct receipts", ()
   assert.doesNotMatch(get("signal-rows").innerHTML, /data-notification-channel/);
   client.state.directSignals = [{ ...pending, notification_status: "failed", bark_notification_status: "unknown" }];
   client.renderSignals();
-  assert.match(get("signal-rows").innerHTML, /发送失败|回执未知/);
+  assert.match(get("signal-rows").innerHTML, /回执未知/);
   assert.doesNotMatch(get("signal-rows").innerHTML, /已发送|服务已接受/);
   client.state.candidates = [candidate("fifteen", "pending", { timeframe: "15m" })];
   client.renderSignals();
-  assert.match(get("signal-rows").innerHTML, /15m · 模型确认后才通知/);
+  assert.match(get("signal-rows").innerHTML, /未关联新规则启动回执/);
   assert.doesNotMatch(get("signal-rows").innerHTML, /data-notification-channel/);
 });
 
@@ -945,7 +947,8 @@ test("the direct scope preserves whole-card app opening and independent in-page 
   await new Promise(setImmediate);
   assert.equal(client.state.selected.id, "eth-start");
   assert.equal(get("detail-price-caption").textContent, "原箭头收盘价");
-  assert.match(get("detail-facts").innerHTML, /TG 启动回执|未经 YOLO 确认/);
+  assert.match(get("detail-facts").innerHTML, /Bark 启动回执|未经 YOLO 确认/);
+  assert.doesNotMatch(get("detail-facts").innerHTML, /TG/);
   assert.equal(networkRequests.filter((request) => request.method === "POST").length, 0);
   const preview = get("signal-rows").querySelector("[data-preview-signal-id]");
   get("signal-rows").dispatch("click", { target: preview });
@@ -961,9 +964,9 @@ test("the direct scope preserves whole-card app opening and independent in-page 
 
 test("two-stage polling keeps distinct clocks, totals and cached direct receipts on API failure", async () => {
   const replies = {
-    "/api/status": { protocol: PROTOCOL, now_ms: NOW, counts: { signals_24h: 2, indicator_starts_24h: 7 }, runtime: { signal_kind: "yolo_confirmed", notification_mode: "two_stage", direct_timeframes: ["1H", "4H"], fresh_minutes: 30, model_gate: { loaded: true } } },
+    "/api/status": { protocol: PROTOCOL, now_ms: NOW, counts: { signals_24h: 2, indicator_starts_24h: 7 }, runtime: { signal_kind: "yolo_confirmed", notification_mode: "two_stage", direct_timeframes: ["15m", "1H", "4H"], notification_channels: ["bark"], fresh_minutes: 30, model_gate: { loaded: true } } },
     "/api/signals?limit=2000&kind=yolo_confirmed": { items: [signal("model")], total: 17 },
-    "/api/signals?limit=2000&kind=tv_start": { items: [candidate("start"), candidate("not-direct", "pending", { timeframe: "15m" }), signal("wrong-kind")], total: 7 },
+    "/api/signals?limit=2000&kind=tv_start": { items: [candidate("start"), candidate("quarter-start", "pending", { timeframe: "15m" }), signal("wrong-kind")], total: 7 },
     "/api/candidates?limit=2000": { items: [candidate("start"), candidate("old")], total: 43 },
     "/api/markets": { items: [] },
   };
@@ -971,13 +974,14 @@ test("two-stage polling keeps distinct clocks, totals and cached direct receipts
   client.state.signalScope = "direct";
   await client.refresh();
   await new Promise(setImmediate);
-  assert.deepEqual(Array.from(client.state.directSignals, (item) => item.id), ["start"]);
+  assert.deepEqual(Array.from(client.state.directSignals, (item) => item.id), ["start", "quarter-start"]);
   assert.equal(client.state.signalTotal, 17);
   assert.equal(client.state.directSignalTotal, 7);
   assert.equal(client.state.candidateTotal, 43);
   assert.equal(client.state.selected.id, "start");
   assert.equal(client.isFresh(client.state.directSignals[0]), true);
-  assert.match(get("metric-signals-detail").textContent, /7 条指标启动/);
+  assert.equal(get("metric-signals").textContent, "7");
+  assert.match(get("metric-signals-detail").textContent, /2 条 YOLO 追加确认/);
   replies["/api/signals?limit=2000&kind=tv_start"] = new Error("direct unavailable");
   await client.refresh();
   assert.equal(client.state.directSignals[0].id, "start");
@@ -988,15 +992,75 @@ test("two-stage polling keeps distinct clocks, totals and cached direct receipts
   assert.equal(networkRequests.filter((request) => request.method === "POST").length, 0);
 });
 
-test("model error messaging preserves independent 1H and 4H starts while 15m still waits", () => {
+test("model error messaging preserves starts on all three periods and blocks only model additions", () => {
   const { client, get } = harness();
   enableTwoStage(client);
   client.state.status.runtime.model_gate = { loaded: false, last_error: "test failure" };
-  client.state.status.telegram = { configured: true, enabled: true };
+  client.state.status.telegram = { configured: true, enabled: false, disabled_by_owner: true, unknown: 99 };
+  client.state.status.bark = { configured: true, enabled: true };
   client.renderStatus();
-  assert.match(get("model-gate-notice").textContent, /1H \/ 4H 指标启动通知独立运行/);
-  assert.match(get("model-gate-notice").textContent, /15m 通知仍需模型通过/);
-  assert.match(get("telegram-description").textContent, /1H \/ 4H 收盘启动先通知/);
-  assert.match(get("telegram-description").textContent, /15m 仅模型确认后通知/);
+  assert.match(get("model-gate-notice").textContent, /15m \/ 1H \/ 4H 指标启动推送独立运行/);
+  assert.match(get("model-gate-notice").textContent, /仅 YOLO 追加确认需要模型通过/);
+  assert.match(get("bark-description").textContent, /15m \/ 1H \/ 4H 收盘启动先推送 Bark/);
+  assert.equal(get("telegram-description"), undefined);
+  assert.doesNotMatch(get("bark-description").textContent, /TG|Telegram/);
   assert.doesNotMatch(get("model-gate-notice").textContent, /未通过检测的候选不会通知/);
+});
+
+test("the actual initial scope prioritizes indicator starts and the static page has no Telegram controls", () => {
+  const { client, document, get } = harness({ initialScope: null, notificationChannels: ["bark"] });
+  assert.equal(client.state.signalScope, "direct");
+  const buttons = document.querySelectorAll("[data-signal-scope]");
+  const active = buttons.filter((button) => button.classList.contains("selected"));
+  assert.equal(active.length, 1);
+  assert.equal(active[0].dataset.signalScope, "direct");
+  assert.equal(active[0].getAttribute("aria-pressed"), "true");
+  assert.equal(get("telegram-header"), undefined);
+  assert.equal(get("telegram-state-badge"), undefined);
+  assert.doesNotMatch(fs.readFileSync(indexPath, "utf8"), /TG|Telegram|telegram-header|15m 仍需模型确认/);
+});
+
+test("Bark-only policy ignores historical Telegram successes and failures in cards, details and status", async () => {
+  const { client, get } = harness({ allowChartFixture: true, notificationChannels: ["bark"] });
+  enableTwoStage(client);
+  client.state.status.telegram = { configured: true, enabled: false, disabled_by_owner: true, sent: 99, failed: 17, unknown: 23 };
+  client.state.status.bark = { configured: true, enabled: true, sent: 2, failed: 0, unknown: 0 };
+  const raw = candidate("quarter-only-bark", "pending", { timeframe: "15m", notification_status: "failed", bark_notification_status: "sent" });
+  client.state.directSignals = [raw];
+  client.state.selected = raw;
+  client.state.signalScope = "direct";
+  client.renderStatus(); client.renderSignals(); client.renderDetail();
+  await new Promise(setImmediate);
+  assert.match(get("signal-rows").innerHTML, /Bark<\/span><span>服务已接受/);
+  for (const markup of [get("signal-rows").innerHTML, get("detail-facts").innerHTML, get("runtime-facts").innerHTML]) assert.doesNotMatch(markup, /TG|Telegram|data-notification-channel="telegram"/);
+  assert.equal(get("bark-header").textContent, "Bark · 已启用");
+  assert.equal(get("bark-state-badge").textContent, "通知已启用");
+  // Explicit owner disable also overrides stale channel metadata.
+  client.state.status.runtime.notification_channels = ["telegram", "bark"];
+  assert.doesNotMatch(client.notificationHTML(raw), /TG|telegram/);
+  const model = signal("quarter-model", 1, { timeframe: "15m", notification_status: "sent", bark_notification_status: "failed" });
+  client.state.signals = [model]; client.state.signalScope = "confirmed"; client.renderSignals();
+  assert.match(get("signal-rows").innerHTML, /YOLO 追加确认|Bark<\/span><span>发送失败/);
+  assert.doesNotMatch(get("signal-rows").innerHTML, /TG|data-notification-channel="telegram"/);
+});
+
+test("15m starts are fresh at their own close and a whole-card click opens the exact 15m chart", async () => {
+  const { client, get, networkRequests, advance } = harness({
+    initialScope: null, notificationChannels: ["bark"], allowChartFixture: true,
+    bridgeReply: bridgeResponse({ requested: true, symbol: "SOPH-USDT-SWAP", timeframe: "15m" }),
+  });
+  enableTwoStage(client);
+  const raw = candidate("soph-quarter", "pending", { symbol: "SOPH-USDT-SWAP", timeframe: "15m", bar_close_ms: NOW - 29 * 60_000, model: { status: "error" }, bark_notification_status: "sent" });
+  client.state.directSignals = [raw];
+  client.state.status.runtime.model_gate = { loaded: false };
+  assert.equal(client.isFresh(raw), true);
+  client.renderSignals();
+  get("signal-rows").dispatch("click", { target: get("signal-rows").querySelector("[data-signal-id]") });
+  await new Promise(setImmediate);
+  const posts = networkRequests.filter((request) => request.method === "POST");
+  assert.equal(posts.length, 1);
+  assert.equal(posts[0].url, "/api/tradingview/open");
+  assert.deepEqual(JSON.parse(posts[0].body), { symbol: "SOPH-USDT-SWAP", timeframe: "15m" });
+  advance(60_001);
+  assert.equal(client.isFresh(raw), false);
 });

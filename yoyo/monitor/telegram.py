@@ -1,8 +1,9 @@
 """Telegram Bot API delivery with explicit receipts and conservative retries.
 
 Source: https://core.telegram.org/bots/api#sendphoto, #sendmessage and #responseparameters.
-Credentials are loaded only in process from the existing owner configuration.
-They never enter API responses, logs, SQLite or exception strings.
+The owner has disabled this channel: workers default off and never load
+credentials or claim outboxes while disabled. Explicit test opt-in retains
+delivery/receipt coverage. Credentials never enter API responses or logs.
 """
 from __future__ import annotations
 
@@ -50,12 +51,15 @@ def markup(event):
 
 
 class TelegramWorker:
-    def __init__(self, store, creds=None, sender=None):
+    def __init__(self, store, creds=None, sender=None, *, enabled=False):
         self.store = store
-        self.creds = creds if creds is not None else credentials()
+        self.enabled = enabled is True
+        self.creds = (creds if creds is not None else credentials()) if self.enabled else None
         self.sender = sender or requests.post
 
     def deliver_once(self, now=None):
+        if not self.enabled:
+            return False
         now = now if now is not None else now_ms()
         if not self.creds:
             return False
@@ -133,33 +137,11 @@ class TelegramWorker:
         result["probe_status"] = probe.get("status", "not_tested")
         if probe.get("status") == "sent":
             result["last_success_ms"] = max(result.get("last_success_ms") or 0, probe["at_ms"])
-        return dict(result, configured=bool(self.creds), enabled=bool(self.creds),
+        return dict(result, configured=bool(self.creds), enabled=self.enabled and bool(self.creds),
+                    disabled_by_owner=not self.enabled,
                     delivery_format="chart_with_compact_caption", **self.store.notification_media_status())
 
 
 def send_startup_probe(store):
-    """One quiet, explicitly labelled service test, separate from signal events."""
-    previous = store.get_meta("notification_probe")
-    if previous:
-        return previous
-    creds = credentials()
-    if not creds:
-        return {"status": "not_configured"}
-    receipt = {"status": "unknown", "at_ms": now_ms(), "kind": "service_startup_test"}
-    store.set_meta("notification_probe", receipt)
-    token, chat = creds
-    try:
-        response = requests.post("https://api.telegram.org/bot" + token + "/sendMessage", json={
-            "chat_id": chat, "disable_notification": True, "disable_web_page_preview": True,
-            "text": "FABLE · 监控服务启动测试\n\n这台 Mac 已启动 OKX 全部在交易永续合约监控：1H / 4H。\n只按当前 TradingView 主图可见蓄势释放标记推送收盘确认信号及点位。\n\n本机页面：http://127.0.0.1:8766\n此地址在这台 Mac 打开。\n\n这是一条通知链路测试，不是交易信号。历史回填不补发。"
-        }, timeout=(6, 15))
-        payload = response.json()
-        result = payload.get("result") if isinstance(payload, dict) else None
-        if isinstance(result, dict) and payload.get("ok") is True and type(result.get("message_id")) is int:
-            receipt.update(status="sent", message_id=result["message_id"])
-        elif isinstance(payload, dict) and payload.get("ok") is False:
-            receipt.update(status="failed", error="telegram_rejected")
-    except Exception:
-        pass
-    store.set_meta("notification_probe", receipt)
-    return receipt
+    """Keep the legacy entry point inert; never read keys or send a probe."""
+    return {"status": "disabled", "disabled_by_owner": True}

@@ -1701,7 +1701,7 @@ html:has(#chart-dialog[open]) { overflow:hidden; }
   background:var(--action-hover-bg);
 }
 
-.telegram-header {
+.notification-header {
   font-size:12px;
   border:1px solid var(--notice-border);
   color:var(--amber);
@@ -1710,7 +1710,7 @@ html:has(#chart-dialog[open]) { overflow:hidden; }
   white-space:nowrap;
 }
 
-.telegram-header.good {
+.notification-header.good {
   border-color:var(--positive-border);
   color:var(--status-positive);
   background:var(--positive-subtle-bg);
@@ -1967,7 +1967,7 @@ html:has(#chart-dialog[open]) { overflow:hidden; }
   .theme-picker { margin-left:auto; }
   .theme-picker>svg { display:none; }
   .exchange-mark { margin-right:auto; }
-  .telegram-header { padding:3px 5px; }
+  .notification-header { padding:3px 5px; }
   main { padding:20px 16px calc(94px + env(safe-area-inset-bottom)); }
   h1 { font-size:27px; }
   .eyebrow { margin-bottom:8px; font-size:12px; letter-spacing:.8px; }

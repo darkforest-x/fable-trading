@@ -47,7 +47,8 @@ def scenario(tmp_path, tf='1H', side='long', wait=2):
     store.activate_timeframe_policy(tf, 0, protocol=MODEL_PROTOCOL)
     detector = Detector({end: [proposal]})
     clock = [end+step+1000]
-    gate = ModelGate(store, lambda: clock[0], threading.Event(), detector)
+    # Synthetic legacy-enabled mode preserves existing dual-channel coverage.
+    gate = ModelGate(store, lambda: clock[0], threading.Event(), detector, telegram_enabled=True)
     assert gate.register(raw)
     return gate, store, detector, raw, candles, proposal, clock
 
@@ -70,6 +71,31 @@ def test_exact_frozen_wait_both_sides_all_timeframes(tmp_path, tf, side, wait):
     gate.process(raw['symbol'],tf,bars)
     assert store.event_count(MODEL_KIND, MODEL_PROTOCOL)==1
     assert len(detector.calls)==wait+1
+
+
+@pytest.mark.parametrize('tf', ['15m', '1H', '4H'])
+def test_default_gate_confirms_bark_without_telegram_queue_or_photo(tmp_path, monkeypatch, tf):
+    from yoyo.monitor import snapshot
+    _, store, detector, raw, bars, prop, clock = scenario(tmp_path, tf=tf, wait=2)
+    renders = []
+    def forbidden_render(*args, **kwargs):
+        renders.append(args)
+        raise AssertionError('disabled Telegram must not render its photo')
+    monkeypatch.setattr(snapshot, 'render_signal', forbidden_render)
+    gate = ModelGate(store, lambda: clock[0], threading.Event(), detector)
+    assert gate.telegram_enabled is False
+    gate.process(raw['symbol'], tf, bars)
+    events = store.list_events(kind=MODEL_KIND, protocol=MODEL_PROTOCOL)
+    assert len(events) == 1 and is_model_signal(events[0])
+    assert events[0]['notification_status'] == 'history'
+    assert events[0]['bark_notification_status'] == 'pending'
+    assert store.telegram_status()['pending'] == 0
+    assert store.bark_status()['pending'] == 1
+    assert not renders
+    assert store.telegram_media_status() == {'snapshots': 0, 'render_fallbacks': 0}
+    gate.process(raw['symbol'], tf, bars)
+    assert store.event_count(MODEL_KIND, MODEL_PROTOCOL) == 1
+    assert store.bark_status()['pending'] == 1
 
 
 @pytest.mark.parametrize('md',[0,-.1,None,float('nan')])
@@ -125,7 +151,7 @@ def test_model_error_retries_exact_endpoint_across_restart(tmp_path):
     gate.process(raw['symbol'],'1H',bars)
     assert store.list_candidates()[0]['model']['status']=='error'
     assert store.list_candidates()[0]['model']['last_checked_close_ms'] is None
-    again=ModelGate(Store(store.path),lambda:clock[0],threading.Event(),detector)
+    again=ModelGate(Store(store.path),lambda:clock[0],threading.Event(),detector,telegram_enabled=True)
     again.process(raw['symbol'],'1H',bars)
     assert detector.calls==[raw['bar_open_ms']]*2
     assert store.event_count(MODEL_KIND)==1
@@ -137,7 +163,7 @@ def test_restart_resumes_next_unchecked_endpoint_and_no_old_notifications(tmp_pa
     gate.process(raw['symbol'],'1H',bars[:-1])
     assert len(detector.calls)==2
     clock[0]+=FRESH_MS
-    again=ModelGate(Store(store.path),lambda:clock[0],threading.Event(),detector)
+    again=ModelGate(Store(store.path),lambda:clock[0],threading.Event(),detector,telegram_enabled=True)
     again.process(raw['symbol'],'1H',bars)
     assert len(detector.calls)==3
     assert store.event_count(MODEL_KIND)==1

@@ -60,9 +60,10 @@ class ModelGate:
     images per eligible endpoint are shared across same-market candidates.
     A restart resumes the last unexamined endpoint, never replays receipts.
     """
-    def __init__(self, store, clock, stop_event, detector=None):
+    def __init__(self, store, clock, stop_event, detector=None, *, telegram_enabled=False):
         self.store, self.clock, self.stop_event = store, clock, stop_event
         self.detector = detector
+        self.telegram_enabled = telegram_enabled is True
         self._condition = threading.Condition()
         self._queue = OrderedDict()
         self._active = None
@@ -194,9 +195,10 @@ class ModelGate:
         stream = self.store.timeframe_activation(event["timeframe"], protocol=MODEL_PROTOCOL)
         common = (stream is not None and original["bar_close_ms"] > stream
                   and 0 <= now - event["bar_close_ms"] <= FRESH_MS)
-        tg = self.store.get_meta("notification_policy:" + MODEL_PROTOCOL, {}).get("activated_ms")
+        tg = (self.store.get_meta("notification_policy:" + MODEL_PROTOCOL, {}).get("activated_ms")
+              if self.telegram_enabled else None)
         bark = self.store.get_meta("notification_policy:bark:" + MODEL_PROTOCOL, {}).get("activated_ms")
-        notify = common and tg is not None and original["bar_close_ms"] > tg
+        notify = self.telegram_enabled and common and tg is not None and original["bar_close_ms"] > tg
         bark_notify = common and bark is not None and original["bar_close_ms"] > bark
         photo, error = None, None
         if notify:

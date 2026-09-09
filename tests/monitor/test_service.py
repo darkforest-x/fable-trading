@@ -21,8 +21,11 @@ NOW = 400 * TIMEFRAMES["1Dutc"] + 60_000
 
 
 class NoTelegram:
-    def __init__(self, store):
+    def __init__(self, store, *, enabled=False):
         self.store = store
+        self.enabled = enabled
+        self.creds = None
+        assert enabled is False
 
     def status(self):
         return dict(configured=False, enabled=False)
@@ -78,10 +81,12 @@ class FakeDetector:
                      core_end_ms=endpoint_ms - 2 * step, core_length_bars=4, post_bars=2)]
 
 
-def configured_monitor(store, client, tg=NOW - 120_000, bark=NOW - 120_000, *,
+def configured_monitor(store, client, tg=None, bark=NOW - 120_000, *,
                        timeframe_policy=None):
     """Channel/stream cutovers precede registration; model processing stays explicit."""
-    store.activate_notification_policy(tg, protocol=MODEL_PROTOCOL)
+    if tg is not None:
+        # Historical Telegram metadata must not re-enable the disabled channel.
+        store.activate_notification_policy(tg, protocol=MODEL_PROTOCOL)
     store.activate_bark_policy(bark, protocol=MODEL_PROTOCOL)
     policy = ({tf: NOW - 120_000 for tf in ("15m", "1H", "4H")}
               if timeframe_policy is None else timeframe_policy)
@@ -89,6 +94,7 @@ def configured_monitor(store, client, tg=NOW - 120_000, bark=NOW - 120_000, *,
         if activation is not None:
             store.activate_timeframe_policy(timeframe, activation, protocol=MODEL_PROTOCOL)
     monitor = Monitor(store, client=client)
+    monitor.bark.creds = "synthetic-device"
     monitor.bark_since = bark
     monitor.model_gate.detector = FakeDetector()
     return monitor
@@ -196,11 +202,62 @@ def test_outbox_recovery_waits_until_start_and_precedes_worker_launch(tmp_path, 
 
     monkeypatch.setattr(service.threading, "Thread", InertThread)
     monitor.start()
-    assert len(starts) == 4
-    assert {name for name, _ in starts} == {"impulse-scan", "impulse-model", "impulse-telegram", "impulse-bark"}
+    assert len(starts) == 3
+    assert {name for name, _ in starts} == {"impulse-scan", "impulse-model", "impulse-bark"}
     assert all(status.get("unknown") == 1 and status.get("sending", 0) == 0
                for _, status in starts)
     assert store.claim(NOW) is None  # An uncertain old send must not be resent.
+    monitor.close()
+
+
+def test_monitor_defaults_disable_telegram_without_loading_credentials(tmp_path, monkeypatch):
+    from yoyo.monitor import telegram
+
+    monkeypatch.setattr(service, "TelegramWorker", telegram.TelegramWorker)
+    monkeypatch.setattr(telegram, "credentials", lambda: pytest.fail("disabled Telegram loaded credentials"))
+    monitor = Monitor(Store(tmp_path / "monitor.sqlite3"), client=FakeMarket())
+    assert monitor.telegram.enabled is False
+    assert monitor.telegram.creds is None
+    assert monitor.telegram.status()["enabled"] is False
+    assert monitor.model_gate.telegram_enabled is False
+
+
+def test_start_retires_only_pending_telegram_and_preserves_bark_and_history(tmp_path, monkeypatch):
+    from model_fixture import model_event
+
+    store = Store(tmp_path / "monitor.sqlite3")
+    events = {}
+    for offset, status in enumerate(("pending", "sent", "unknown")):
+        event = model_event(wait=0, close=(30 + offset) * TIMEFRAMES["1H"])
+        events[status] = store.event_id(event)
+        store.upsert_event(event, notify=True, bark_notify=True)
+        if status != "pending":
+            store.finish(events[status], status, message_id=42 if status == "sent" else None,
+                         error="historic_uncertainty" if status == "unknown" else None)
+    with store.connect() as db:
+        before = {r["event_id"]: dict(r) for r in db.execute("SELECT * FROM outbox")}
+        bark_before = [dict(r) for r in db.execute("SELECT * FROM bark_outbox ORDER BY event_id")]
+    starts = []
+    class InertThread:
+        def __init__(self, **kwargs):
+            self.name = kwargs["name"]
+        def start(self):
+            starts.append((self.name, store.telegram_status()["pending"]))
+        def join(self, timeout=None):
+            pass
+    monkeypatch.setattr(service.threading, "Thread", InertThread)
+    monitor = Monitor(store, client=FakeMarket())
+    assert store.telegram_status()["pending"] == 1  # Construction is read-only.
+    monitor.start()
+    assert {name for name, _ in starts} == {"impulse-scan", "impulse-model", "impulse-bark"}
+    assert all(pending == 0 for _, pending in starts)
+    with store.connect() as db:
+        after = {r["event_id"]: dict(r) for r in db.execute("SELECT * FROM outbox")}
+        bark_after = [dict(r) for r in db.execute("SELECT * FROM bark_outbox ORDER BY event_id")]
+    assert after[events["pending"]]["status"] == "skipped"
+    for state in ("sent", "unknown"):
+        assert after[events[state]] == before[events[state]]
+    assert bark_after == bark_before
     monitor.close()
 
 
@@ -297,8 +354,7 @@ def test_policy_activation_uses_exchange_clock_before_delivery(tmp_path, monkeyp
     monitor.bark.creds = 'synthetic-device-key'
     monitor.scan()
     assert monitor.notification_ready.is_set()
-    assert monitor.notification_since == NOW
-    assert store.get_meta('notification_policy:' + MODEL_PROTOCOL)['activated_ms'] == NOW
+    assert store.get_meta('notification_policy:' + MODEL_PROTOCOL) is None
     assert monitor.bark_since == NOW
     assert store.get_meta('notification_policy:bark:' + MODEL_PROTOCOL)['activated_ms'] == NOW
     # The latest already-closed bar is older than activation, even if the Mac
@@ -329,11 +385,11 @@ def test_bark_new_channel_does_not_replay_pre_activation_signal(tmp_path):
     monitor = configured_monitor(store, client, bark=NOW)
     monitor.scan_symbol(INSTRUMENT)
     process_model(monitor, '1H')
-    assert store.telegram_status()['pending'] == 1
+    assert store.telegram_status()['pending'] == 0
     assert store.bark_status()['pending'] == 0
 
 
-def test_eligible_new_signal_enters_both_independent_channels_once(tmp_path):
+def test_eligible_model_confirmation_enters_bark_once_with_telegram_disabled(tmp_path):
     store = Store(tmp_path / 'monitor.sqlite3')
     client = FakeMarket()
     client.history['1H'][-1].update(o=120., h=121., l=119., c=120.)
@@ -342,12 +398,12 @@ def test_eligible_new_signal_enters_both_independent_channels_once(tmp_path):
     process_model(monitor, '1H')
     monitor.scan_symbol(INSTRUMENT)
     process_model(monitor, '1H')
-    assert store.telegram_status()['pending'] == 1
+    assert store.telegram_status()['pending'] == 0
     assert store.bark_status()['pending'] == 1
 
 
-def test_signal_snapshot_ends_at_earlier_signal_and_renders_once(tmp_path, monkeypatch):
-    from yoyo.monitor import snapshot
+def test_bark_confirmation_keeps_earlier_signal_without_snapshot_dependency(tmp_path, monkeypatch):
+    import sys
     store = Store(tmp_path / 'monitor.sqlite3')
     store.activate_timeframe_policy('15m', NOW - 120_000, protocol=MODEL_PROTOCOL)
     client = FakeMarket()
@@ -356,29 +412,20 @@ def test_signal_snapshot_ends_at_earlier_signal_and_renders_once(tmp_path, monke
     client.history['15m'].append(dict(client.history['15m'][-1], t=target + 900_000))
     client.clock = lambda: NOW + 900_000
     monitor = configured_monitor(store, client)
-    calls = []
-    original = snapshot.render_signal
-
-    def render(event, bars):
-        calls.append(event)
-        assert bars[-1]['t'] == target == event['bar_open_ms']
-        assert all(b['t'] <= target for b in bars)
-        return original(event, bars)
-
-    monkeypatch.setattr(snapshot, 'render_signal', render)
+    monkeypatch.setitem(sys.modules, 'yoyo.monitor.snapshot', None)
     assert monitor.scan_symbol(INSTRUMENT) == []
     process_model(monitor, '15m')
     assert monitor.scan_symbol(INSTRUMENT) == []
     process_model(monitor, '15m')
-    assert len(calls) == 1
-    row = store.claim(client.clock())
-    assert row['png'].startswith(b'\x89PNG\r\n\x1a\n')
-    assert row['event']['bar_open_ms'] == target
+    assert store.claim(client.clock()) is None
     assert store.bark_status()['pending'] == 1
-    assert store.telegram_media_status() == dict(snapshots=1, render_fallbacks=0)
+    row = store.claim_bark(client.clock())
+    assert row['event']['bar_open_ms'] == target
+    assert row['event']['indicator']['bar_open_ms'] == target
+    assert store.telegram_media_status() == dict(snapshots=0, render_fallbacks=0)
 
 
-def test_snapshot_failure_preserves_signal_and_both_channels(tmp_path, monkeypatch):
+def test_disabled_telegram_never_renders_confirmation_snapshot(tmp_path, monkeypatch):
     from yoyo.monitor import snapshot
     store = Store(tmp_path / 'monitor.sqlite3')
     client = FakeMarket()
@@ -386,17 +433,16 @@ def test_snapshot_failure_preserves_signal_and_both_channels(tmp_path, monkeypat
     monitor = configured_monitor(store, client)
 
     def broken(*args):
-        raise ValueError('synthetic_private_detail_must_not_be_stored')
+        pytest.fail('disabled Telegram must not render a snapshot')
 
     monkeypatch.setattr(snapshot, 'render_signal', broken)
     assert monitor.scan_symbol(INSTRUMENT) == []
     process_model(monitor, '1H')
-    row = store.claim(NOW)
-    assert row['event']['price'] == 120. and row['png'] is None
+    assert store.claim(NOW) is None
     assert store.bark_status()['pending'] == 1
-    assert store.telegram_media_status() == dict(snapshots=0, render_fallbacks=1)
-    with store.connect() as db:
-        assert db.execute('SELECT error FROM telegram_media').fetchone()[0] == 'snapshot_unavailable'
+    row = store.claim_bark(NOW)
+    assert row['event']['price'] == 120.
+    assert store.telegram_media_status() == dict(snapshots=0, render_fallbacks=0)
 
 
 def test_later_telegram_cutover_does_not_block_eligible_bark_signal(tmp_path):
@@ -422,11 +468,11 @@ def test_15m_notification_requires_its_own_forward_cutover(tmp_path, activation,
     process_model(monitor, '15m')
     assert monitor.chart(SYMBOL, '15m')['state']['higher_timeframe'] == '1H'
     assert any(e['kind'] == 'tv_start' and e['timeframe'] == '15m' for e in store.list_events())
-    assert store.telegram_status()['pending'] == expected
+    assert store.telegram_status()['pending'] == 0
     assert store.bark_status()['pending'] == expected
     monitor.scan_symbol(INSTRUMENT)
     process_model(monitor, '15m')
-    assert store.telegram_status()['pending'] == expected
+    assert store.telegram_status()['pending'] == 0
     assert store.bark_status()['pending'] == expected
 
 
@@ -482,10 +528,12 @@ def test_15m_stale_market_does_not_consume_fresh_signal_before_recovery(tmp_path
     monitor.scan_symbol(INSTRUMENT)
     assert not monitor.chart(SYMBOL, '15m')['state']['stale']
     process_model(monitor, '15m')
-    assert store.telegram_status()['pending'] == store.bark_status()['pending'] == expected
+    assert store.telegram_status()['pending'] == 0
+    assert store.bark_status()['pending'] == expected
     monitor.scan_symbol(INSTRUMENT)
     process_model(monitor, '15m')
-    assert store.telegram_status()['pending'] == store.bark_status()['pending'] == expected
+    assert store.telegram_status()['pending'] == 0
+    assert store.bark_status()['pending'] == expected
 
 
 def test_cached_same_bar_resubmits_pending_model_after_inference_failure(tmp_path):
@@ -509,7 +557,8 @@ def test_cached_same_bar_resubmits_pending_model_after_inference_failure(tmp_pat
     process_model(monitor, "1H")
     assert detector.calls == [client.history["1H"][-1]["t"]] * 2
     assert store.candidate_counts()["confirmed"] == 1
-    assert store.telegram_status()["pending"] == store.bark_status()["pending"] == 1
+    assert store.telegram_status()["pending"] == 0
+    assert store.bark_status()["pending"] == 1
 
 
 @pytest.mark.parametrize("lag_ms,eligible", [(MODEL_MAX_WAIT * TIMEFRAMES["1H"] + FRESH_MS, True),
