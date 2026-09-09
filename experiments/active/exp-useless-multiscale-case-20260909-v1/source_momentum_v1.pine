@@ -1,0 +1,209 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © ChartPrime
+
+//@version=6
+indicator("动能指标1.0", overlay=true)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+src = input(close, title="源数据")
+GRP = "移动平均线设置"
+maTypeInput = input.string("SMA", "类型", options = ["SMA", "EMA", "SMMA (RMA)", "WMA", "VWMA"], group = GRP, display = display.data_window)
+maLengthInput = input.int(50, "长度", group = GRP, display = display.data_window, active = maTypeInput != "None")
+
+colUp = input.color(color.rgb(26, 144, 223), "", inline = "c", group = GRP)
+colDn = input.color(color.rgb(219, 20, 20), "", inline = "c", group = GRP)
+
+var upper = float(na)
+var lower = float(na)
+var startUp = 0
+var startDn = 0
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// --------------------------------------------------------------------------------------------------------------------{
+
+// Smoothing MA Calculation
+ma(source, length, MAtype) =>
+    switch MAtype
+        "SMA"                   => ta.sma(source, length)
+        "SMA + Bollinger Bands" => ta.sma(source, length)
+        "EMA"                   => ta.ema(source, length)
+        "SMMA (RMA)"            => ta.rma(source, length)
+        "WMA"                   => ta.wma(source, length)
+        "VWMA"                  => ta.vwma(source, length)
+
+// MA
+MA = ma(close, maLengthInput, maTypeInput)
+
+diff   = src - MA
+maxVal = ta.highest(math.abs(diff), 50)
+osc    = diff / maxVal * 100
+TColor = color.from_gradient(osc, -100, 100, colDn, colUp)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 信号逻辑
+// --------------------------------------------------------------------------------------------------------------------{
+if osc[1] == 100 and osc < 100
+    upper  := high[1]
+    startUp := bar_index
+if osc[1] == -100 and osc > -100
+    startDn := bar_index
+    lower  := low[1]
+
+if high > upper and bar_index - startUp > 10
+    upper := float(na)
+if low < lower and bar_index - startDn > 10
+    lower := float(na)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 动能报警逻辑（新增）
+// --------------------------------------------------------------------------------------------------------------------{
+
+// 动能达到 90%（强动能）
+bool oscUp90  = osc >= 90
+bool oscDn90  = osc <= -90
+
+// 图表上画出提示（可选）
+//plotshape(oscUp90,  title="Osc > 90%", location=location.top,   style=shape.labelup,   color=color.new(colUp, 0), text="↑90%")
+//plotshape(oscDn90,  title="Osc < -90%", location=location.bottom, style=shape.labeldown, color=color.new(colDn, 0), text="↓-90%")
+
+// 设置报警条件（TradingView 报警中心可使用）
+alertcondition(oscUp90, title="动能超过 +90%", message="【动能指标】上涨动能达到 90%！")
+alertcondition(oscDn90, title="动能低于 -90%", message="【动能指标】下跌动能达到 -90%！")
+
+// 实时触发脚本内部报警（可选：配合策略用）
+if oscUp90
+    alert("动能超过 90%", alert.freq_once_per_bar_close)
+
+if oscDn90
+    alert("动能低于 -90%", alert.freq_once_per_bar_close)
+
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 表格显示（保留原功能）
+// --------------------------------------------------------------------------------------------------------------------{
+var tbl = table.new(position.middle_right, 100, 100, force_overlay = true, frame_color = chart.fg_color, frame_width = 1)
+
+if barstate.islast
+    for i = 0 to 20
+        tbl.cell(1, i, i == 10 ? "x" : "", bgcolor = chart.bg_color, text_color = chart.fg_color, height = 3)
+
+    for i = 0 to int(math.abs(osc/10))
+        val = int(osc/10) > 0
+        index = val ? 10 - i : 10 + i
+        BGColor = color.from_gradient(index, 0, 20, colUp, colDn)
+
+        tbl.cell(1, index,  i == 0 ? "0%" : (i == int(math.abs(osc/10)) ? str.tostring(osc/100, "##.#%") : ""), bgcolor = BGColor, text_color = chart.fg_color, height = 3)
+
+// --------------------------------------------------------------------------------------------------------------------}
+// 📌 主图显示元素
+// --------------------------------------------------------------------------------------------------------------------{
+
+// 1. 绘制移动平均线
+plot(MA, "MA", color=color.rgb(7, 7, 6), linewidth=1, force_overlay = true)
+
+// 2. K线颜色根据振荡器值变化
+barcolor(TColor)
+plotcandle(open, high, low, close, title='Candles Color', color = TColor, wickcolor=TColor, bordercolor = TColor, force_overlay = true)
+
+// 3. 绘制极值信号
+plotshape(osc[1] == 100 and osc < 100 ? high[1] : float(na), "Upper Signals Chart",
+         shape.diamond, force_overlay = true, location = location.absolute,
+         size = size.small, color = colDn)
+
+plotshape(osc[1] == -100 and osc > -100 ? low[1] : float(na), "Lower Signals Chart",
+         shape.diamond, force_overlay = true, location = location.absolute,
+         size = size.small, color = colUp)
+
+// 4. 绘制支撑阻力线
+plot(upper[1] != upper ? float(na) : upper, "Upper Level",
+     force_overlay = true, style = plot.style_linebr, offset = 0,
+     color = colDn, linewidth=1)
+
+plot(lower[1] != lower ? float(na) : lower, "Lower Level",
+     force_overlay = true, style = plot.style_linebr, offset = 0,
+     color = colUp, linewidth=1)
+
+// 5. 在图表上显示振荡器数值（可选）
+var OscLabel = label.new(bar_index, na, "", style=label.style_label_left, color=color.rgb(0,0,0,50), textcolor=color.white, size=size.small)
+if barstate.islast
+    label.set_xy(OscLabel, bar_index, close)
+    label.set_text(OscLabel, "Osc: " + str.tostring(osc, "#.##") + "%")
+    label.set_color(OscLabel, TColor)
+
+// ===== 新增参数 =====
+useOscAlert     = input.bool(true, "开启动能异常报警")
+alertOscBars    = input.int(6, "动能异常检测窗口（根K）")
+alertOscCount   = input.int(3, "动能异常触发阈值（根K）")
+alertOscThreshold = input.float(90, "动能异常阈值(%)")
+
+// ===== 计算窗口内动能超过阈值的数量 =====
+countOscUpInWindow() =>
+    int cnt = 0
+    for i = 0 to alertOscBars - 1
+        if osc[i] >= alertOscThreshold
+            cnt += 1
+    cnt
+
+countOscDnInWindow() =>
+    int cnt = 0
+    for i = 0 to alertOscBars - 1
+        if osc[i] <= -alertOscThreshold
+            cnt += 1
+    cnt
+
+// ===== 判断是否触发报警 =====
+oscUpAlert   = useOscAlert and countOscUpInWindow() >= alertOscCount
+oscDnAlert   = useOscAlert and countOscDnInWindow() >= alertOscCount
+
+// ===== 绘制动能异常信号（用 label.new 替代 plotshape） =====
+upOffset   = ta.atr(14) * 0.5
+downOffset = ta.atr(14) * 0.5
+
+// if oscUpAlert
+//     label.new(bar_index, high + upOffset, "↑",
+//               style=label.style_label_down, color=color.lime, textcolor=color.white, size=size.small)
+
+// if oscDnAlert
+//     label.new(bar_index, low - downOffset, "↓",
+//               style=label.style_label_up, color=color.red, textcolor=color.white, size=size.small)
+
+
+// // ===== 设置报警条件 =====
+// alertcondition(oscUpAlert, title="动能异常↑", message="动能异常：窗口内多根K线动能>阈值！")
+// alertcondition(oscDnAlert, title="动能异常↓", message="动能异常：窗口内多根K线动能<-阈值！")
+
+// ===== 参数：是否启用动能异常报警，以及最小间隔 =====
+
+oscAlertMinBars = input.int(1, "最小间隔 K 线数", minval=1)
+
+// ===== 记录上一次触发的 bar_index =====
+var int lastOscUpBar = na
+var int lastOscDnBar = na
+
+// ===== 首次触发逻辑 =====
+if useOscAlert and oscUpAlert and (na(lastOscUpBar) or bar_index - lastOscUpBar > oscAlertMinBars)
+    label.new(bar_index, high + ta.atr(14)*0.5, "动能↑",
+              style=label.style_label_down, color=color.rgb(0, 0, 0), textcolor=color.white, size=size.small)
+    lastOscUpBar := bar_index  // 更新上一次触发
+
+if useOscAlert and oscDnAlert and (na(lastOscDnBar) or bar_index - lastOscDnBar > oscAlertMinBars)
+    label.new(bar_index, low - ta.atr(14)*0.5, "动能↓",
+              style=label.style_label_up, color=color.red, textcolor=color.white, size=size.small)
+    lastOscDnBar := bar_index  // 更新上一次触发
+
+finalOscUpSignal = useOscAlert and oscUpAlert and (na(lastOscUpBar) or bar_index - lastOscUpBar > oscAlertMinBars)
+finalOscDnSignal = useOscAlert and oscDnAlert and (na(lastOscDnBar) or bar_index - lastOscDnBar > oscAlertMinBars)
+alertcondition(
+    finalOscUpSignal,
+    title   = "动能↑",
+    message = "【动能指标】动能↑首次触发"
+)
+
+alertcondition(
+    finalOscDnSignal,
+    title   = "动能↓",
+    message = "【动能指标】动能↓首次触发"
+)
