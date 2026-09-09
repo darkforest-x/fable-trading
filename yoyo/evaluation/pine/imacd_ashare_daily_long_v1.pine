@@ -18,7 +18,7 @@ int lengthMA = input.int(34, "IMACD 长度", minval=10, maxval=100, group=gCore,
 int lengthSignal = input.int(9, "信号线长度", minval=2, maxval=30, group=gCore, display=display.none)
 int focusMinBars = input.int(12, "连续近零交易日", minval=3, maxval=60, group=gCore, display=display.none)
 float focusAtrBand = input.float(0.10, "近零容差 / 前日 ATR", minval=0.0, maxval=0.50, step=0.01, group=gCore, tooltip="达到连续日数时冻结本段容差。之后只在主线收盘向上离开冻结带时检查启动；信号线单独离开不会产生启动。", display=display.none)
-int entryQuality = input.int(0, "启动确认：0 蓄势 / 1 均线 / 2 箱体", minval=0, maxval=2, group=gCore, tooltip="0：近零蓄势释放。1：另需收盘站上六均线，前12日均线平均带宽不超过3 ATR。2：另需收盘突破释放前蓄势区最高价。三个选项都只产生多头启动。", display=display.none)
+int entryQuality = input.int(1, "启动确认：0 蓄势 / 1 均线 / 2 箱体", minval=0, maxval=2, group=gCore, tooltip="0：近零蓄势释放。1：另需收盘站上六均线，前12日均线平均带宽不超过3 ATR。2：另需收盘突破释放前蓄势区最高价。三个选项都只产生多头启动。", display=display.none)
 
 string gRisk = "02 · 宽止损与趋势退出"
 int structureBars = input.int(10, "初始结构回看交易日", minval=5, maxval=60, group=gRisk, tooltip="信号收盘时冻结本窗口最低价，再减0.5倍信号ATR作为结构边界；包含信号当日，入场后不重新选取窗口。", display=display.none)
@@ -54,13 +54,23 @@ f_smma(float source, int length) =>
     value := na(value[1]) ? seed : (value[1] * (length - 1) + source) / length
     value
 
+// Ignore only scale-relative floating-point residue, never a full price tick.
+f_lte(float a, float b) =>
+    bool known = not na(a) and not na(b)
+    float tolerance = known ? math.max(math.abs(a), math.abs(b), 1.0) * 1e-12 : na
+    known and a <= b + tolerance
+
 // Inputs: frozen signal-day structure/ATR and the following daily open only.
 // Reject a gap through frozen structure before applying a wider ATR floor.
 f_initialStop(float entry, float structureStop, float signalAtr, float floorAtr, float tick) =>
-    bool valid = not na(entry) and entry > 0 and not na(structureStop) and structureStop > 0 and entry > structureStop and not na(signalAtr) and signalAtr > 0 and tick > 0
+    bool valid = not na(entry) and entry > 0 and not na(structureStop) and structureStop > 0 and not f_lte(entry, structureStop) and not na(signalAtr) and signalAtr > 0 and tick > 0
     float candidate = valid ? math.min(structureStop, entry - floorAtr * signalAtr) : na
-    float stop = valid ? math.floor(candidate / tick) * tick : na
-    valid := valid and not na(stop) and stop > 0 and entry > stop
+    float scaledTicks = valid ? candidate / tick : na
+    float nearestTick = valid ? math.round(scaledTicks) : na
+    float tickTolerance = valid ? math.max(math.abs(scaledTicks), 1.0) * 1e-12 : na
+    float snappedTicks = valid and math.abs(scaledTicks - nearestTick) <= tickTolerance ? nearestTick : scaledTicks
+    float stop = valid ? math.floor(snappedTicks) * tick : na
+    valid := valid and not na(stop) and stop > 0 and not f_lte(entry, stop)
     valid ? stop : na
 
 // Inputs: previous effective line, immutable initial stop, highest confirmed
@@ -221,7 +231,7 @@ if barstate.isconfirmed and ready
                 phase := "退出参考已确认"
             else
                 phase := "退出待成交 · 单一价格日"
-        else if bar_index > entryBar and low <= initialStop
+        else if bar_index > entryBar and f_lte(low, initialStop)
             longExit := true
             exitReason := "初始止损"
             if not onePrice and volume > 0
@@ -232,7 +242,7 @@ if barstate.isconfirmed and ready
             else
                 exitPending := true
                 phase := "止损待卖出 · 单一价格日"
-        else if trailArmed and not na(protection) and close <= protection
+        else if trailArmed and not na(protection) and f_lte(close, protection)
             longExit := true
             exitReason := "收盘失守趋势保护"
             exitPending := true
@@ -268,7 +278,7 @@ if barstate.isconfirmed and ready
                 protection := f_trail(protection, initialStop, highestClose, atr, trailAtr, close)
             // A-share T+1: entry-day stop contact schedules the next session;
             // it never creates a fictitious same-day sale at the stop price.
-            if low <= initialStop
+            if f_lte(low, initialStop)
                 exitPending := true
                 longExit := true
                 exitReason := "买入当日触及止损 · T+1"

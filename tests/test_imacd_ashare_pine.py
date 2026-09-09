@@ -32,9 +32,10 @@ def helper(name):
 
 def evaluate(name, **arguments):
     """Execute only simple scalar statements actually present in Pine helpers."""
-    env = dict(arguments, math=SimpleNamespace(min=min, max=max, floor=math.floor), PINE_NA=None)
+    env = dict(arguments, math=SimpleNamespace(min=min, max=max, abs=abs, floor=math.floor, round=lambda value: None if value is None else math.floor(value + .5)), PINE_NA=None)
     env["na"] = lambda value: value is None
     env["nz"] = lambda value, replacement=0.0: replacement if value is None else value
+    env["f_lte"] = lambda a, b: evaluate("f_lte", a=a, b=b)
 
     def expression(value):
         value = re.sub(r"\bna\b(?!\s*\()", "PINE_NA", value)
@@ -153,13 +154,13 @@ def test_actual_trail_expression_only_ratchets_and_rejects_line_above_close(prev
 def test_frozen_r_t_plus_one_and_prior_protection_order():
     assert TEXT.count("initialStop :=") == 1
     assert TEXT.count("initialRisk :=") == 1
-    assert "else if bar_index > entryBar and low <= initialStop" in TEXT
+    assert "else if bar_index > entryBar and f_lte(low, initialStop)" in TEXT
     assert "exitPrice := math.min(open, initialStop)" in TEXT
     state = TEXT.split("if barstate.isconfirmed and ready\n    // Queued close decisions", 1)[1]
-    assert state.index("if exitPending") < state.index("low <= initialStop") < state.index("close <= protection") < state.index("protection := f_trail")
+    assert state.index("if exitPending") < state.index("f_lte(low, initialStop)") < state.index("f_lte(close, protection)") < state.index("protection := f_trail")
     entry = state.split("if entryPending and bar_index > signalBar", 1)[1].split("if exitReference", 1)[0]
     assert entry.index("entryPending := false") < entry.index("if not onePrice")
-    assert "if low <= initialStop\n                exitPending := true" in entry
+    assert "if f_lte(low, initialStop)\n                exitPending := true" in entry
     assert "holding := false" not in entry
     assert "highestClose >= entryPrice + 1.5 * initialRisk" in state
     assert "structureCandidate = recentLow - 0.5 * atr" in TEXT
@@ -222,3 +223,22 @@ def test_current_st_name_rejection_does_not_match_st_inside_ordinary_words(descr
     assert 'if barstate.isfirst and currentStMarked\n    runtime.error(' in TEXT
     assert "名称中没有风险标识不证明当前或历史非ST" in TEXT
     assert "请核对当日ST状态" in TEXT
+
+
+@pytest.mark.parametrize("factor", [0.01, 1.0, 1.1, 1.7, 3.7, 100.11])
+def test_risk_helpers_are_invariant_to_price_coordinate_scale_at_exact_touch(factor):
+    stop = evaluate("f_initialStop", entry=10.5*factor, structureStop=10.3*factor, signalAtr=.1*factor, floorAtr=3., tick=.01*factor)
+    assert stop/factor == pytest.approx(10.2, abs=1e-10)
+    assert evaluate("f_lte", a=10.2*factor, b=stop)
+    assert evaluate("f_lte", a=(10.2-1e-7)*factor, b=stop)
+    assert not evaluate("f_lte", a=(10.2+1e-7)*factor, b=stop)
+    # The same comparator protects a close exactly on the prior trail.
+    prior = evaluate("f_trail", previous=10.2*factor, initialStop=9.*factor, highestClose=11.*factor, currentAtr=.2*factor, distance=4., currentClose=11.*factor)
+    assert evaluate("f_lte", a=10.2*factor, b=prior)
+    assert not evaluate("f_lte", a=(10.2+1e-7)*factor, b=prior)
+
+
+def test_tick_snapping_does_not_round_up_a_meaningfully_subtick_stop():
+    stop = evaluate("f_initialStop", entry=100., structureStop=95.0099999, signalAtr=1., floorAtr=3., tick=.01)
+    assert stop == pytest.approx(95.)
+    assert not evaluate("f_lte", a=95.0000001, b=95.)
