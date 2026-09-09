@@ -106,7 +106,7 @@ def summarize(root):
                 "latest_md_atr": candles[-1]["md"] / candles[-1]["atr"],
                 "last_closed": bjt(candles[-1]["bar_close_ms"]), "bars_checked": len(candles)})
             if tf == "15m" and symbol in ("IOST", "GRASS", "GPS", "MINA"):
-                baseline = today[0]["o"]
+                baseline = today[0]["c"]
                 for c in today:
                     trends.append({"symbol": symbol, "time": bjt(c["bar_close_ms"]),
                         "close_ms": c["bar_close_ms"], "close": c["c"],
