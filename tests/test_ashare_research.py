@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from yoyo.evaluation.ashare_research import read_through, winner, ranking_metrics, monthly_excess_test
+from yoyo.evaluation.ashare_research import read_through, winner, ranking_metrics, monthly_excess_test, load_frames, buy_hold
 
 
 def test_selection_reader_stops_before_future_outcome_rows(tmp_path):
@@ -40,3 +40,31 @@ def test_zero_monthly_excess_does_not_claim_significance():
     assert result['months']==24
     assert result['mean_monthly_excess']==0
     assert result['p_one_sided']==1
+
+
+def test_excluded_source_is_never_parsed_even_when_csv_exists(tmp_path):
+    import json
+    (tmp_path/'daily').mkdir()
+    (tmp_path/'universe.json').write_text(json.dumps({'codes':['sh.600001','sh.600002']}))
+    (tmp_path/'exclusions.json').write_text(json.dumps({'codes':{'sh.600002':'unreconciled corporate action'}}))
+    (tmp_path/'daily'/'sh.600001.csv').write_text('date,code,close,isST,tradestatus\n2021-12-31,sh.600001,10,0,1\n')
+    (tmp_path/'daily'/'sh.600002.csv').write_text('invalid source must not be parsed')
+    frames, missing=load_frames(tmp_path,'2021-12-31')
+    assert list(frames)==['sh.600001']
+    assert missing==['sh.600002']
+
+
+def test_missing_frozen_universe_slots_stay_cash_in_benchmark():
+    from yoyo.evaluation.ashare_imacd import Costs
+    class ZeroCosts(Costs):
+        def fee(self,*args):
+            return 0.
+    costs=ZeroCosts(commission=0,slippage=0)
+    raw={'sh.600001':pd.DataFrame(dict(date=['2024-01-02','2024-01-03'],
+        open=[10.,20.],close=[10.,20.],raw_open=[10.,20.],raw_preclose=[10.,10.],
+        tradestatus=['1','1'],volume=[10000,10000],isST=['0','0'],board=['main_sh','main_sh']))}
+    full,_=buy_hold(raw,'2024-01-02','2024-01-03',costs,universe_size=1)
+    half,_=buy_hold(raw,'2024-01-02','2024-01-03',costs,universe_size=2)
+    # One unavailable stock's original half is not redistributed to the survivor.
+    assert half['net_return']==pytest.approx(.499)
+    assert half['net_return'] < full['net_return']*.501

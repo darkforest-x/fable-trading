@@ -52,7 +52,8 @@ def input_fingerprint(data):
     source=Path(__file__).parent
     return dict(code={name:digest(source/name) for name in ('ashare_data.py','ashare_imacd.py','ashare_research.py')},
                 daily={p.name:digest(p) for p in sorted((data/'daily').glob('*.csv'))},
-                universe=digest(data/'universe.json'))
+                universe=digest(data/'universe.json'),
+                exclusions=digest(data/'exclusions.json') if (data/'exclusions.json').exists() else None)
 
 
 def read_through(path, end):
@@ -77,10 +78,12 @@ def read_through(path, end):
 
 def load_frames(data, end):
     manifest = json.loads((data/'universe.json').read_text())
+    exclusion_path = data/'exclusions.json'
+    excluded = json.loads(exclusion_path.read_text())['codes'] if exclusion_path.exists() else {}
     frames, failures = {}, []
     for code in manifest['codes']:
         path = data/'daily'/f'{code}.csv'
-        if not path.exists():
+        if code in excluded or not path.exists():
             failures.append(code); continue
         f = read_through(path,end)
         if len(f):
@@ -177,7 +180,7 @@ def select(data,out):
     print(json.dumps({'FROZEN':chosen},ensure_ascii=False),flush=True)
 
 
-def buy_hold(raw,start,end,costs=Costs(),initial=1_000_000.,index=False):
+def buy_hold(raw,start,end,costs=Costs(),initial=1_000_000.,index=False,universe_size=None):
     """Equal initial cash weights; raw lot/limit eligibility; adjusted returns.
 
     Purchase only at the common first market open, keeping unavailable slots
@@ -185,7 +188,10 @@ def buy_hold(raw,start,end,costs=Costs(),initial=1_000_000.,index=False):
     exchange fills. CSI300 is a notional non-investable index reference.
     """
     dates=sorted({d for f in raw.values() for d in f.date if start<=d<=end})
-    slot=initial/len(raw); values=pd.Series(initial,index=dates,dtype=float)
+    slots = len(raw) if universe_size is None else universe_size
+    if slots < len(raw) or slots <= 0 or not dates:
+        raise ValueError('invalid frozen universe size or empty benchmark dates')
+    slot=initial/slots; values=pd.Series(initial,index=dates,dtype=float)
     invested=0;stale=0
     for code,f in raw.items():
         f=f.loc[f.date.between(start,end)&(f.tradestatus.astype(str)=='1')&(f.volume>0)].set_index('date')
@@ -297,7 +303,8 @@ def final(data,out,controls=49):
     tight,_,_=run_one(raw,replace(Parameters(),quality=0,stop_atr=1.),'final',out,'tight_reference')
     stress,_,_=run_one(raw,p,'final',out,'double_slippage',Costs(slippage=.001))
     start,end=FOLDS['final']
-    hold,hold_e=buy_hold(raw,start,end);hold_e.to_csv(out/'final'/'equal_weight_hold.csv',index=False)
+    universe_size=len(json.loads((data/'universe.json').read_text())['codes'])
+    hold,hold_e=buy_hold(raw,start,end,universe_size=universe_size);hold_e.to_csv(out/'final'/'equal_weight_hold.csv',index=False)
     index_raw={'sh.000300':read_through(data/'daily'/'sh.000300.csv',end)}
     index_hold,index_e=buy_hold(index_raw,start,end,index=True);index_e.to_csv(out/'final'/'csi300.csv',index=False)
     random_rows=[];random_equities=[]
