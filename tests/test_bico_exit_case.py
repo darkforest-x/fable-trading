@@ -15,12 +15,20 @@ def frames():
 def test_previous_protection_not_current_ma_and_next_open_fill():
     b,f=frames();r=simulate(b,f,0,90.,'sma20',80.)
     assert r['trigger_i']==3 and r['exit_i']==4 and r['exit_price']==97.
+    assert r['held_hours_lower']==r['held_hours_upper']==3
 
 
 def test_initial_stop_wins_over_same_bar_target():
     b,f=frames();b.iloc[1]=[100.,150.,89.,101.]
     r=simulate(b,f,0,90.,'fixed3r',80.)
     assert r['exit_i']==1 and r['exit_price']==90 and r['known_peak_r']==0
+    assert r['held_hours_lower']==0 and r['held_hours_upper']==1
+
+
+def test_known_open_beyond_target_precedes_later_bar_stop_touch():
+    b,f=frames();b.iloc[2]=[140.,150.,89.,101.]
+    r=simulate(b,f,0,90.,'fixed3r',80.)
+    assert r['exit_i']==2 and r['exit_price']==130 and r['exit_timing']=='open'
 
 
 def test_md_close_exits_next_open_even_after_large_intrabar_high():
