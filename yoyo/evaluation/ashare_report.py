@@ -1,4 +1,4 @@
-"""Render the completed A-share daily experiment without rerunning research.
+"""Render the completed mainboard A-share experiment without rerunning research.
 
 Source contracts: ashare_research.py JSON/CSV artifacts and ashare_imacd.py.
 This module refuses incomplete final evaluation, reads no prices after 2025,
@@ -77,6 +77,47 @@ def natural_trades(trades: pd.DataFrame) -> pd.DataFrame:
     return trades.loc[mask].copy()
 
 
+def risk_distribution(trades: pd.DataFrame) -> list[dict]:
+    """Summarize saved ledger risks, without treating extrema as profits.
+
+    Initial distance includes all actual entries, including terminal marks.
+    Holding sessions and R outcomes use natural exits only. peak_r is the
+    maximum held CLOSE relative to frozen R, with entry as its zero floor;
+    it is neither an intraday MFE nor an achieved trade return.
+    """
+    if trades.empty:
+        return []
+    natural = natural_trades(trades)
+    choices = [
+        ('全部实际入场：初始风险距离 / 入场价',trades.risk/trades.entry,'percent'),
+        ('自然平仓：持有市场交易日',natural.holding_days,'days'),
+        ('自然平仓：最高持有收盘收益 / 初始 R',natural.peak_r,'r'),
+        ('自然平仓：扣成本实际损益 / 初始风险金额',natural.pnl/natural.risk_cash,'r'),
+        ('自然平仓：最高收盘 R 减最终净 R',natural.peak_r-natural.pnl/natural.risk_cash,'r'),
+    ]
+    rows=[]
+    for label,values,unit in choices:
+        finite=pd.to_numeric(values,errors='coerce')
+        finite=finite[np.isfinite(finite)]
+        if not len(finite):
+            rows.append(dict(label=label,unit=unit,n=0,p25=None,median=None,p75=None))
+            continue
+        q=finite.quantile([.25,.5,.75]).tolist()
+        rows.append(dict(label=label,unit=unit,n=len(finite),p25=q[0],median=q[1],p75=q[2]))
+    return rows
+
+
+def risk_table_rows(rows: list[dict]) -> list[list]:
+    output=[]
+    for row in rows:
+        formatter=percent if row['unit']=='percent' else lambda value:number(value,2)
+        suffix=' R' if row['unit']=='r' else ' 日' if row['unit']=='days' else ''
+        output.append([row['label'],row['n']]+[
+            formatter(row[name])+suffix if row[name] is not None else '不适用'
+            for name in ('p25','median','p75')])
+    return output
+
+
 def configure_plotting():
     import matplotlib
     matplotlib.use('Agg')
@@ -123,8 +164,8 @@ def global_chart(results: Path, destination: Path, plt) -> dict:
     ]
     fig,(ax,dd) = plt.subplots(2,1,figsize=(14,9),sharex=True,gridspec_kw={'height_ratios':[2.2,1]})
     fig.subplots_adjust(left=.08,right=.985,top=.84,bottom=.11,hspace=.10)
-    fig.suptitle('A 股日线多头：样本外净值与回撤',x=.08,y=.965,ha='left',fontsize=20,weight='bold')
-    fig.text(.08,.918,'2024–2025 · 初始资金 100 万元 · 真实手数与交易约束 · 含税费与滑点',fontsize=11,color='#64748b')
+    fig.suptitle('沪深主板日线多头：样本外净值与回撤',x=.08,y=.965,ha='left',fontsize=20,weight='bold')
+    fig.text(.08,.918,'2024–2025 · 初始资金 100 万元 · 按手数与交易限制模拟 · 含税费与滑点',fontsize=11,color='#64748b')
     datasets = {}
     for label,name,color,style,width in specs:
         frame = read_equity(results/'final'/name)
@@ -263,6 +304,8 @@ def case_chart(data: Path, trade: pd.Series, p: Parameters, destination: Path, l
                 ha='left',fontsize=9,color='#2563eb',arrowprops={'arrowstyle':'-','color':'#2563eb','lw':.7})
     ax.annotate(f'退出 {trade.exit:.4g}',(exit_x,trade.exit),xytext=(exit_x,max(window.high.max(),trade.entry)+offset*2.0),
                 ha='right',fontsize=9,color='#334155',arrowprops={'arrowstyle':'-','color':'#64748b','lw':.7})
+    ax.set_ylim(min(float(window.low.min()),float(trade.stop))-span*.04,
+                max(float(window.high.max()),float(trade.entry),float(trade.exit))+span*.18)
     ax.set_ylabel('后复权连续价格（非真实每股元）')
     ax.legend(loc='upper left',bbox_to_anchor=(0,1.10),ncol=4,frameon=False,fontsize=9)
     osc.plot(x,window.md,color='#3569b4',lw=1.6,label='IMACD 主线')
@@ -282,6 +325,8 @@ def case_chart(data: Path, trade: pd.Series, p: Parameters, destination: Path, l
     window[keep].to_csv(trace,index=False)
     return {'label':label,'code':str(trade.code),'entry_date':str(trade.entry_date),'exit_date':str(trade.exit_date),
             'return_net':float(trade.return_net),'return_gross':float(trade.return_gross),'reason':str(trade.reason),
+            'initial_risk_fraction':float(trade.risk/trade.entry),
+            'peak_close_r':float(trade.peak_r),'net_realized_r':float(trade.pnl/trade.risk_cash),
             'holding_days':int(trade.holding_days),'prior_bars':entry_x,'future_bars':len(window)-exit_x-1,
             'path':str(destination.resolve()),'trace':str(trace.resolve()),'source_sha256':digest(source)}
 
@@ -367,9 +412,17 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
     if summary['selected']['parameters']!=frozen['chosen']['parameters']:
         raise ValueError('Selected final parameters differ from frozen validation winner')
     universe=read_json(data/'universe.json')
+    if set(universe['by_board'])-{'main_sh','main_sz'}:
+        raise ValueError('Owner scope is ordinary-investor mainboard only; other boards cannot be reported here')
     if summary['data_manifest_sha256']!=digest(data/'universe.json'):
         raise ValueError('Historical universe changed since final evaluation')
     development=read_json(results/'development_results.json');validation=read_json(results/'validation_results.json')
+    if not development or len(validation)!=8:
+        raise ValueError('Expected all development trials and exactly eight validation endpoints')
+    for filename,key_name in [('development_results.json','development_results_sha256'),
+                              ('validation_results.json','validation_results_sha256')]:
+        if digest(results/filename)!=frozen[key_name]:
+            raise ValueError(f'Frozen selection table changed: {filename}')
     random_rows=read_json(results/'random_control_results.json')
     if len(random_rows)!=summary['matched_random']['n'] or len(random_rows)<49:
         raise ValueError('Incomplete matched random controls')
@@ -380,12 +433,21 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
     except pd.errors.EmptyDataError:
         trades=pd.DataFrame()
     natural=natural_trades(trades)
+    risk_rows=risk_distribution(trades)
+    random_trade_path=results/'final'/'random_00_trades.csv'
+    random_risks=[]
+    if random_trade_path.exists():
+        try:
+            random_risks=risk_distribution(pd.read_csv(random_trade_path))
+        except pd.errors.EmptyDataError:
+            pass
     audit=data_audit(data,universe)
     figures=results.parent/'figures';figures.mkdir(parents=True,exist_ok=True)
     plt=configure_plotting()
     chart_manifest={'generated_at':datetime.now(timezone.utc).isoformat(),'source_final_sha256':digest(complete),
                     'global':global_chart(results,figures/'equity_drawdown.png',plt),
-                    'distribution':distribution_chart(trades,figures/'trade_distribution.png',plt),'cases':[]}
+                    'distribution':distribution_chart(trades,figures/'trade_distribution.png',plt),'cases':[],
+                    'risk_distribution':risk_rows,'random_seed_91000_risk_distribution':random_risks}
     for i,(label,trade) in enumerate(choose_cases(trades),1):
         chart_manifest['cases'].append(case_chart(data,trade,p,figures/f'case_{i:02d}_{trade.code}.png',label,plt))
     (figures/'manifest.json').write_text(json.dumps(chart_manifest,ensure_ascii=False,indent=2)+'\n')
@@ -403,8 +465,9 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
     delta=selected['net_return']-summary['baseline']['net_return']
     edge=selected['net_return']-rand['mean_net']
     text=[
-        '# Spike A 股日线多头：冻结参数与样本外检验',
-        f"本版只做多头、只计算日线，初始止损保留结构空间，盈利后沿趋势跟踪，不设置固定 3R 止盈上限。"
+        '# Spike 沪深主板日线多头：冻结参数与样本外检验',
+        f"本版面向普通股民的沪深主板，只做多头、只计算日线；排除创业板、科创板、北交所及信号/买入日的 ST 股票。"
+        f"初始止损保留结构空间，盈利后沿趋势跟踪，不设置固定 3R 止盈上限。"
         f"验证期选中的配置在 2024–2025 年样本外净收益为 **{percent(selected['net_return'])}**，最大回撤 **{percent(selected['max_drawdown'])}**。"
         f"相对初始参数净收益差 **{number(delta*100)} 个百分点**，相对匹配随机对照均值差 **{number(edge*100)} 个百分点**。",
         '这里的“选中”仅指预先限定候选在验证期获胜，不能视为全 A 股、每只股票或未来行情的全局最优；已有数字资产指标与 Spike 扫描/通知均未修改。',
@@ -418,7 +481,9 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
         '买入日不能卖出，跌停/停牌会延后退出。止损较宽时按照相同风险预算减少股数。',
         '## 数据范围与切分',
         f"历史证券池固定在 **{universe['date']}**，原始选择 **{audit['selected']} 只**；有日线文件 **{audit['loaded']} 只**。"
-        f"这是一组当时已上市的沪深股票，不代表今天的全部 A 股；未补换后来退市、无数据或表现差的股票。",
+        f"这是一组当时已上市的沪深主板股票，预注册抽样为沪市主板 100 只、深市主板 100 只。"
+        f"它不代表今天的全部 A 股；未补换后来退市、无数据或表现差的股票。"
+        '原计划的跨板块取数在任何参数比较之前，按 Owner“排除需要门槛的票”的要求停止；本轮使用独立主板数据快照。',
         table(['项目','数量／范围'],[
             ['原始日线范围',f"{audit['first_date']}～{audit['last_date']}"],['总源记录',number(audit['rows'],0)],
             ['有成交源记录',number(audit['traded_rows'],0)],['停牌／无成交记录',number(audit['suspended_rows'],0)],
@@ -426,6 +491,9 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
             ['验证期记录（2022–2023）',number(audit['fold_rows']['validation'],0)],['样本外记录（2024–2025）',number(audit['fold_rows']['final'],0)],
             ['样本外选中配置启动候选',number(selected['signal_count'],0)],['样本外自然平仓',number(selected['trades'],0)],
             ['自然平仓正收益比例',percent(selected.get('win_rate'))],['期末仍持仓／估值笔数',number(selected['open_at_end'],0)],
+            ['自然平仓平均持有交易日',number(selected.get('mean_holding_days'))],
+            ['全账本佣金、过户费与印花税',number(selected.get('fees'))+' 元'],
+            ['全账本模拟滑点成本',number(selected.get('slippage'))+' 元'],
             ['期末行情陈旧持仓',number(selected['terminal_uncertain'],0)],
             ['截至2025年末有退市日期记录的样本',number(len(audit['delisted_by_end']),0)],
             ['缺失文件',', '.join(audit['missing']) or '无'],['空文件',', '.join(audit['empty']) or '无']]),
@@ -436,8 +504,9 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
         '**未读取或评分项目 2026-05-04 及之后的 holdout，消耗为 0。**',
         '## 样本外完整对照',
         table(['方案','净收益','最大回撤','自然平仓笔数','胜率','PF','平均资金暴露'],compare),
-        '所有策略组合使用同一历史股票池、100 万元资金、最多 10 笔持仓、每笔初始价格风险 0.75%、单股资金上限 15%。'
+        '主动策略与随机入场组合使用同一历史股票池、100 万元资金、最多 10 笔持仓、每笔初始价格风险 0.75%、单股资金上限 15%。'
         '同日按证券代码排序分配资金。持有基线以同一股票池等额分槽，首日无法买入的槽位留现金；沪深300为含模拟成本的非可投资指数参考。'
+        '“紧止损参考”使用质量模式 0 和最小 1ATR 距离，仍保留结构外止损；它是整体方案参考，不能把差异单独归因于止损。'
         '“随机逐项均值/中位数”分别统计每项指标，不代表一条真实组合路径。',
         f"![样本外净值与回撤]({chart_manifest['global']['path']})",
         f"选中方案双倍滑点后的净收益 {percent(summary['double_slippage']['net_return'])}，"
@@ -463,6 +532,15 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
                                           ('trades','自然平仓数',lambda v:number(v,1)),
                                           ('exposure','平均资金暴露',percent),
                                           ('open_at_end','期末未自然平仓',lambda v:number(v,1))]]),
+        '## 止损实际有多宽、趋势最终留下多少',
+        table(['账本统计口径','笔数','P25','中位数','P75'],risk_table_rows(risk_rows)),
+        '初始风险距离使用所有实际入场，包含期末仍持有的交易；持有时长和收益 R 只使用自然平仓。'
+        '持有天数是组合日历中的市场交易日，不是自然日。初始 R 在买入后冻结，不会随着跟踪线移动而缩小。'
+        '最高收盘 R 是持仓阶段最高已知收盘价相对入场的距离，以入场为零下限；它不是盘中最高价，也不是可以保证兑现的利润。'
+        '净 R 使用实际扣佣金、税费和滑点后的损益除以初始价格风险金额。两者差包含趋势回吐、开盘跳空与成本，不能只展示曾经达到的高倍数。',
+        table(['首轮随机对照（seed 91000）','笔数','P25','中位数','P75'],risk_table_rows(random_risks))
+          if random_risks else '首轮随机逐交易账本无可用记录，风险距离分布不能计算。',
+        '逐交易随机分布仅来自保存明细的第 1 轮 seed 91000，不外推为全部 49 轮；49 轮整体的成交数与资金暴露分布见前表。',
         '## 固定形成质量评分与单特征对照',
         '评分固定为“启动前 12 根六均线带宽/ATR 均值的负数”，没有根据结果重新选特征。'
         '该评分只诊断已进入组合且自然平仓的交易；不是买入概率，也不是整池分类效果。'
@@ -493,7 +571,9 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
         text.extend([f"### {case['label']}：{case['code']}",
                      f"{case['entry_date']} → {case['exit_date']}，持有 {case['holding_days']} 个交易日；"
                      f"毛收益 {percent(case['return_gross'])}，净收益 {percent(case['return_net'])}；"
-                     f"{REASONS.get(case['reason'],case['reason'])}。可展示退出后 {case['future_bars']} 根。",
+                     f"{REASONS.get(case['reason'],case['reason'])}。初始风险距离 {percent(case['initial_risk_fraction'])}，"
+                     f"最高持有收盘 {number(case['peak_close_r'])}R，最终扣成本 {number(case['net_realized_r'])}R。"
+                     f"可展示退出后 {case['future_bars']} 根。",
                      f"![{case['label']}全局K线与IMACD]({case['path']})",
                      f"[逐日价格与因果跟踪线数据]({case['trace']})"])
     if len(chart_manifest['cases'])<4:
@@ -514,7 +594,8 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
         '验证集 AUC 不作为选参指标：参数是交易规则而非预测概率，端点仅以验证组合净收益、回撤、自然平仓门槛排序。'
         '样本外固定形成评分的 AUC、毛/净收益与置换检验已单列，不把它当策略成功标准。',
         '## 风险与诚实声明',
-        '1. 2020 年已上市历史样本并非全市场，后上市新股和北交所不在本轮范围；仅观察两年样本外，不证明未来持续有效。',
+        '1. 2020 年已上市的沪深主板历史样本并非全市场；后上市新股、创业板、科创板、北交所不在本轮范围。'
+        '信号日及买入日 ST 禁入，持有之后才变为 ST 的股票不会被事后从账本删除；仅观察两年样本外，不证明未来持续有效。',
         '2. 宽止损降低容易被普通波动触发的程度，同时增加价格回撤容忍范围；现金风险通过股数约束，跳空和连续跌停仍可能超过计划风险。',
         '3. A 股 T+1、停牌和涨跌停按日线保守近似；没有订单队列和盘口，触价不等于保证成交。盘中止损收入不能资助更早的开盘买入。',
         '4. 后复权收益隐含分红再投资；未逐项模拟现金红利税、配股选择、股权到账和碎股处理。HFQ价格图不能当人民币报价图。',
@@ -533,6 +614,13 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
           if audit['delisted_by_end'] else '历史证券资料中无截至2025年末的退市日期记录；这不等于证明源数据没有遗漏。',
         '退市日期来自当前检索的基本资料，仅作审计解释，不参与历史股票选择、入场特征或参数评分。',
         table(['执行跳过／延后原因','次数'],[[reason,count] for reason,count in sorted(selected.get('skips',{}).items())]),
+        '## 工程验证及已知基线失败',
+        '截至主板范围调整前的校验记录，专用检查为 76 项通过：17 项数据、30 项回放、4 项研究流程、25 项 Pine 检查；此处不是最终版本全量验收计数。'
+        '边界与注册表检查为 85 项通过、1 项失败；失败项 `test_holdout_consumption_is_declared_per_experiment_not_assumed` '
+        '是原有消费名单与旧 macmonitor/barkmonitor 等实验记录不一致，不包含本次 A 股实验。'
+        '相关测试文件与注册表在本轮开始前已有未提交修改，本轮未改写它们来消除失败，因此不宣称全仓测试全绿。',
+        '真实历史前缀因果检查：sh.600182 的 2015–2021 共 1705 根日线，完整特征表与删除末尾 80 根后重算的共有前缀逐列一致。'
+        '这项检查没有计算收益或参与选参，也不等于 Python 与 TradingView 跨平台数值已逐根一致。',
         '## 复现与文件',
     ])
     root=Path(__file__).resolve().parents[2]
@@ -541,7 +629,8 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
     text.append('```bash\n'+f'cd {q(root)}\n'+
                 '.venv/bin/python -m pip install --dry-run --report /tmp/spike-ashare-bs093-report.json --target /tmp/spike-ashare-bs093 --no-deps baostock==0.9.3\n'+
                 '.venv/bin/python -m pip install --target /tmp/spike-ashare-bs093 --no-deps baostock==0.9.3\n'+
-                f'PYTHONPATH=/tmp/spike-ashare-bs093:. .venv/bin/python -m yoyo.evaluation.ashare_data --destination {q(data)} --universe-date 2020-01-02 --start 2015-01-01 --end 2025-12-31 --workers 4\n'+
+                f'PYTHONPATH=/tmp/spike-ashare-bs093:. .venv/bin/python -m yoyo.evaluation.ashare_data --destination {q(data)} --universe-date 2020-01-02 --start 2015-01-01 --end 2025-12-31 --workers 4 --quotas '+
+                shlex.quote(json.dumps({'main_sh':100,'main_sz':100},separators=(',',':')))+'\n'+
                 f'.venv/bin/python -m yoyo.evaluation.ashare_research select --data {q(data)} --out {q(results)}\n'+
                 f'.venv/bin/python -m yoyo.evaluation.ashare_research final --data {q(data)} --out {q(results)} --controls {rand["n"]}\n'+
                 f'.venv/bin/python -m yoyo.evaluation.ashare_report --data {q(data)} --results {q(results)} --report {q(report)}\n'+
@@ -551,14 +640,17 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
                  f"[图表与数据索引]({(figures/'manifest.json').resolve()}) · [完整自然与终端交易账本]({path.resolve()})",
                  '## 下一步',
                  '保留本次冻结参数做日线观察与纸面交易，记录每个启动、实际可成交性和退出；不使用这轮样本外结果继续反复调参。'
-                 '若要扩展到较晚上市股票、北交所、其他成本或不同止损范围，应建立新的预注册实验，并由 Owner 确认范围与新验收期。',
+                 '若要扩展到较晚上市股票、需要另外开户条件的板块、其他成本或不同止损范围，应建立新的预注册实验，并由 Owner 确认范围与新验收期。',
                  '## 官方依据',
                  '[BaoStock官方数据接口](https://pypi.org/project/baostock/)；'
                  '[上交所交易规则](https://www.sse.com.cn/lawandrules/sselawsrules2025/stocks/exchange/c/c_20260424_10816482.shtml)；'
-                 '[创业板2020年规则变更](https://www.szse.cn/aboutus/trends/conference/t20200821_580925.html)；'
-                 '[科创板交易问答](https://edu.sse.com.cn/tib/qa/)；'
                  '[印花税减半公告](https://www.mof.gov.cn/jrttts/202308/t20230828_3904235.htm)；'
                  '[上交所费用说明](https://one.sse.com.cn/onething/gptz/)。'])
+    runtime=figures/'pine_baseline_runtime.png'
+    if runtime.exists():
+        text.insert(text.index('## 复现与文件'),
+                    f'[独立 A 股 Pine 初始版运行验收截图]({runtime.resolve()}) 仅用于 TradingView 编译与视觉验收；'
+                    '界面打开的是 2026 年当前图，不是 2024–2025 样本外案例，不参与本报告选参或收益统计。')
     report.parent.mkdir(parents=True,exist_ok=True)
     report.write_text('\n\n'.join(text)+'\n')
     return {'report':str(report.resolve()),'figures':str(figures.resolve()),'cases':len(chart_manifest['cases']),
