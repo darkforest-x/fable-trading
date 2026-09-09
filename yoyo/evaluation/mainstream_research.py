@@ -81,19 +81,40 @@ def curve_metrics(curve):
 def trade_metrics(g):
     selected = g.loc[g.portfolio_selected.eq(True)]
     natural = selected.loc[selected.natural_exit.eq(True)]
-    positive = natural.net_return.clip(lower=0).sum()
-    negative = -natural.net_return.clip(upper=0).sum()
+    positive = natural.portfolio_net_pnl.clip(lower=0).sum()
+    negative = -natural.portfolio_net_pnl.clip(upper=0).sum()
     return dict(candidates=len(g), trades=len(selected), natural_trades=len(natural),
         censored=int(selected.censored.eq(True).sum()),
         win_pct=100*natural.net_return.gt(0).mean(),
         pf=positive/negative if negative else (np.inf if positive else np.nan),
         mean_net_r=natural.net_r.mean(), win_3r=int(natural.net_r.ge(3).sum()),
         win_5r=int(natural.net_r.ge(5).sum()),
-        top3_profit_share_pct=100*natural.net_return.nlargest(3).clip(lower=0).sum()/positive if positive else np.nan)
+        top3_profit_share_pct=100*natural.portfolio_net_pnl.nlargest(3).clip(lower=0).sum()/positive if positive else np.nan)
+
+
+def verify_cached_books(out):
+    """Validate cached bytes against the exact committed generator contract."""
+    manifest = json.loads((out/"manifest.json").read_text())
+    current = committed_sources()
+    if manifest["builders"] != current:
+        raise ValueError("Cached builders differ from the current committed contract")
+    fingerprint = hashlib.sha256(json.dumps(current, sort_keys=True).encode()).hexdigest()
+    for record in manifest["data"]:
+        if digest(ROOT/record["path"]) != record["sha256"]:
+            raise ValueError("Cached source changed")
+        folder = out/record["symbol"]
+        marker = json.loads((folder/"completion.json").read_text())
+        if marker["fingerprint"] != fingerprint or marker["source_sha256"] != record["sha256"]:
+            raise ValueError("Cached contract changed")
+        for name, sha in marker["files"].items():
+            if digest(folder/name) != sha:
+                raise ValueError("Cached artifact changed: " + name)
+    return manifest
 
 
 def summarize(out):
     """Complete all frozen arms, including empty sleeves and adverse results."""
+    verify_cached_books(out)
     evs, controls, diagnostics, all_curves = [], [], [], {}
     for symbol in SYMBOLS:
         p = out/symbol
@@ -117,11 +138,13 @@ def summarize(out):
                 curve = combine_sleeves(sleeves, sleeves[SYMBOLS[0]].index, len(SYMBOLS))
                 portfolios[key] = curve
                 q = g.loc[g.arm.eq(arm)]
-                selected = q.loc[q.portfolio_selected.eq(True) & q.natural_exit.eq(True)]
+                selected = q.loc[q.portfolio_selected.eq(True) & q.valid.eq(True)]
                 match = selected.loc[selected.excess_bp.notna()]
+                natural_match = match.loc[match.natural_exit.eq(True)]
                 captures = set(zip(q.loc[q.portfolio_selected.eq(True), "symbol"], q.loc[q.portfolio_selected.eq(True), "anchor_i"]))
                 row = dict(fold=fold, minutes=minutes, arm=arm, **curve_metrics(curve),
                     **trade_metrics(q), matched_n=len(match), **inference(match.excess_bp, match.month),
+                    **{"natural_only_"+k:v for k,v in inference(natural_match.excess_bp, natural_match.month).items()},
                     positive_coins=sum(c.iloc[-1] > 1 for c in sleeves.values()),
                     baseline_5r_retained=len(winners & captures), baseline_5r_count=len(winners),
                     median_wait_bars=selected.wait_bars.median(), median_wait_price_bp=selected.wait_price_change_bp.median())
@@ -159,7 +182,7 @@ def run(out):
         code_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         builders=provenance, symbols=list(SYMBOLS), folds=FOLDS, arms=ARMS,
         end=END, starting_capital=100000, sleeves=8, roundtrip_cost=.002, initial_stop_atr=2,
-        holdout_consumption=1, holdout_status="authorized historical transfer; not untouched out-of-sample",
+        holdout_consumption=2, holdout_status="authorized historical transfer; accounting audit replay, no rule/parameter change; not untouched out-of-sample",
         funding="Not included: full historical actual funding coverage unavailable", data=[])
     # Verify all identities before reading any outcomes. Cached books may be
     # resumed only if both source and frozen builder fingerprints match.
@@ -177,6 +200,8 @@ def run(out):
             old = json.loads(marker.read_text())
             if old["fingerprint"] != fingerprint or old["source_sha256"] != source_meta["sha256"]:
                 raise ValueError("Stale book; use a new output directory")
+            for name, sha in old["files"].items():
+                if digest(folder/name) != sha: raise ValueError("Cached bytes changed: " + name)
             print(symbol + " verified existing book", flush=True)
             continue
         print(symbol + " preparing closed features", flush=True)
@@ -213,7 +238,8 @@ def run(out):
         pd.concat(control_frames, ignore_index=True).to_pickle(folder/"controls.pkl.gz", compression="gzip")
         pd.to_pickle(curves, folder/"curves.pkl.gz", compression="gzip")
         dump(diagnostics, folder/"diagnostics.json")
-        dump(dict(fingerprint=fingerprint, source_sha256=source_meta["sha256"]), marker)
+        files = {p.name: digest(p) for p in sorted(folder.iterdir()) if p.is_file() and p != marker}
+        dump(dict(fingerprint=fingerprint, source_sha256=source_meta["sha256"], files=files), marker)
     summarize(out)
 
 

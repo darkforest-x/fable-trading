@@ -197,6 +197,8 @@ def evaluate_book(
 
     columns = list(dict.fromkeys([*empty_events.columns, *METADATA_COLUMNS]))
     events = pd.DataFrame(event_rows, columns=columns)
+    for col in ("portfolio_entry_equity", "portfolio_exit_equity", "portfolio_net_pnl"):
+        events[col] = np.nan
     controls = pd.DataFrame(control_rows,
                             columns=list(dict.fromkeys([*empty_events.columns, *CONTROL_METADATA_COLUMNS])))
     curves, diagnostics = {}, []
@@ -206,6 +208,13 @@ def evaluate_book(
         detail.pop("adverse_equity")
         selected_ids = set(selected.event_id)
         events.loc[events.arm.eq(arm), "portfolio_selected"] = arm_events.event_id.isin(selected_ids).to_numpy()
+        if len(selected):
+            for col in ("portfolio_entry_equity", "portfolio_exit_equity"):
+                values = selected.set_index("event_id")[col]
+                mask = events.event_id.isin(selected_ids)
+                events.loc[mask, col] = events.loc[mask, "event_id"].map(values)
+            events.loc[mask, "portfolio_net_pnl"] = (events.loc[mask, "portfolio_exit_equity"]
+                - events.loc[mask, "portfolio_entry_equity"])
         curves[arm] = equity
         related_controls = controls.loc[controls.exit_rule.eq(_exit_rule(arm))
             & controls.matched_decision_i.isin(arm_events.decision_i)]

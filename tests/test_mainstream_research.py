@@ -13,8 +13,9 @@ def test_drawdown_includes_initial_cash_peak():
 def test_trade_stats_exclude_unfilled_and_censored_winners():
     g = pd.DataFrame(dict(portfolio_selected=[True, True, True, False],
         natural_exit=[True, True, False, True], censored=[False, False, True, False],
-        net_return=[.1, -.05, 1., 2.], net_r=[5., -1., 10., 20.]))
+        net_return=[.1, -.05, 1., 2.], net_r=[5., -1., 10., 20.],
+        portfolio_net_pnl=[.1, -.1, 1., np.nan]))
     actual = trade_metrics(g)
     assert actual["trades"] == 3 and actual["censored"] == 1
-    assert actual["natural_trades"] == 2 and actual["pf"] == 2
+    assert actual["natural_trades"] == 2 and actual["pf"] == 1
     assert actual["win_5r"] == 1 and actual["win_pct"] == 50
