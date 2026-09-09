@@ -67,8 +67,8 @@ def board_for_code(code: str) -> str | None:
 def select_universe(frame: pd.DataFrame, *, day: str, quotas: Mapping[str, int], seed: str) -> pd.DataFrame:
     """Choose only from the supplied historical universe, without outcome data."""
     iso_date(day)
-    if not seed or set(quotas) != set(DEFAULT_QUOTAS) or any(v <= 0 for v in quotas.values()):
-        raise AShareDataError("explicit seed and positive quotas for all boards required")
+    if not seed or not quotas or not set(quotas).issubset(DEFAULT_QUOTAS) or any(v <= 0 for v in quotas.values()):
+        raise AShareDataError("explicit seed and positive quotas for recognized boards required")
     if not {"code", "tradeStatus", "code_name"}.issubset(frame.columns):
         raise AShareDataError("universe fields missing")
     if frame["code"].duplicated().any():
@@ -280,6 +280,15 @@ def _close_worker_socket() -> None:
         connection.close()
 
 
+def _reset_worker_client() -> None:
+    """Discard a failed transport before another symbol can read stale pages."""
+    global _PROCESS_CLIENT
+    try:
+        _close_worker_socket()
+    finally:
+        _PROCESS_CLIENT = None
+
+
 def _worker_client() -> Any:
     """Reuse one client session per process; no per-stock login/logout churn."""
     global _PROCESS_CLIENT
@@ -313,9 +322,11 @@ def _fetch_worker(arguments: tuple[str, str, str, str]) -> dict[str, Any]:
                 raise AShareDataError("stock basic code/IPO/delisting metadata invalid")
             metadata = basic[["code", "ipoDate", "outDate"]].iloc[0].to_dict()
         except Exception as exc:
+            _reset_worker_client()
             metadata = {"code": code, "error": f"{type(exc).__name__}: {exc}"}
         return {"code": code, "rows": len(frame), "metadata": metadata}
     except Exception as exc:
+        _reset_worker_client()
         return {"code": code, "error": f"{type(exc).__name__}: {exc}"}
 
 

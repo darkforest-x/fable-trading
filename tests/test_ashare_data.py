@@ -174,3 +174,27 @@ def test_worker_finalizer_closes_only_its_socket(monkeypatch):
     monkeypatch.setattr(source.importlib, "import_module", lambda _: SimpleNamespace(default_socket=connection))
     source._close_worker_socket()
     assert calls == ["close"]
+
+
+def test_mainboard_only_subset_preserves_same_past_code_selection():
+    frame = pd.DataFrame({"code": ["sh.600000", "sh.600001", "sz.000001", "sz.000002", "sz.300001", "sh.688001"],
+                          "tradeStatus": "1", "code_name": "name"})
+    kwargs = dict(day="2020-01-02", seed="spike-ashare-v1")
+    broad = select_universe(frame, quotas=dict(main_sh=1, main_sz=1, chinext=1, star=1), **kwargs)
+    main = select_universe(frame, quotas=dict(main_sh=1, main_sz=1), **kwargs)
+    assert main.code.tolist() == broad[broad.board.isin(["main_sh", "main_sz"])].code.tolist()
+    assert len(main) == 2
+    with pytest.raises(AShareDataError): select_universe(frame, quotas={}, **kwargs)
+    with pytest.raises(AShareDataError): select_universe(frame, quotas={"unknown": 1}, **kwargs)
+
+
+def test_failed_worker_connection_is_discarded_without_logout(monkeypatch):
+    import yoyo.evaluation.ashare_data as source
+    client, calls = object(), []
+    monkeypatch.setattr(source, "_PROCESS_CLIENT", client)
+    monkeypatch.setattr(source, "_close_worker_socket", lambda: calls.append("close"))
+    monkeypatch.setattr(source, "fetch_daily", lambda *args, **kwargs: (_ for _ in ()).throw(AShareDataError("timeout")))
+    result = source._fetch_worker(("/tmp", "sh.600000", "2020-01-01", "2025-12-31"))
+    assert "timeout" in result["error"]
+    assert source._PROCESS_CLIENT is None
+    assert calls == ["close"]
