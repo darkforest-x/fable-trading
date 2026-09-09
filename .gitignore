@@ -244,3 +244,9 @@ experiments/active/exp-pine-eth-15m-v1/results-docker/**
 # Manual-label pack checkpoints duplicate the final lineage and image hashes.
 # Keep them local so a fresh clone rebuilds missing PNGs from the tracked recipe.
 /datasets/grade_a_manual_events_20260907_v1/admin/events/*.json
+
+# A-share daily research caches and rendered evidence (source stays tracked)
+/analysis/output/imacd_ashare_daily_20260909/**/*.csv
+/analysis/output/imacd_ashare_daily_20260909/**/*.json
+/analysis/output/imacd_ashare_daily_20260909/**/*.png
+/analysis/output/imacd_ashare_daily_20260909/**/*.npz
