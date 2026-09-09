@@ -348,10 +348,48 @@ def choose_cases(trades: pd.DataFrame) -> list[tuple[str,pd.Series]]:
     return chosen
 
 
+def read_exclusions(data: Path, universe: dict) -> dict:
+    """Read quality exclusions without reclassifying the frozen stock pool."""
+    path=data/'exclusions.json'
+    if not path.exists():
+        return {}
+    record=read_json(path)
+    codes=record.get('codes')
+    if not isinstance(codes,dict) or set(codes)-set(universe['codes']):
+        raise ValueError('Quality exclusions must map frozen-universe codes to recorded reasons')
+    if any(not isinstance(reason,str) or not reason.strip() for reason in codes.values()):
+        raise ValueError('Every quality exclusion requires a nonempty recorded reason')
+    return codes
+
+
+def engineering_validation(results: Path) -> str:
+    """Render recorded checks; this report does not execute or assume tests."""
+    path=results/'engineering_validation.json'
+    if not path.exists():
+        return '最终工程验收记录文件未提供；本报告不沿用早期测试计数来宣称当前版本全部通过。'
+    record=read_json(path)
+    checks=record.get('checks')
+    if not isinstance(checks,list) or not checks:
+        raise ValueError('Engineering validation requires a nonempty checks list')
+    rows=[]
+    for check in checks:
+        counts=[check.get(name,0) for name in ('passed','failed','skipped')]
+        if not check.get('name') or any(type(value) is not int or value<0 for value in counts):
+            raise ValueError('Engineering validation counts must be nonnegative integers')
+        rows.append([check['name'],*counts,check.get('command','未记录命令'),check.get('notes','')])
+    return (f"验收记录时间：{record.get('generated_at','未记录')}；验收来源提交：`{record.get('source_commit','未记录')}`。\n\n"+
+            table(['检查','通过','失败','跳过','命令','说明'],rows)+
+            f'\n\n[完整验收记录]({path.resolve()})。报告生成器只呈现该记录，不将记录之后的代码改动自动视为已验证。')
+
+
 def data_audit(data: Path, universe: dict) -> dict:
+    excluded=read_exclusions(data,universe)
     stats={'selected':len(universe['codes']),'loaded':0,'missing':[],'empty':[],
            'rows':0,'traded_rows':0,'suspended_rows':0,'st_rows':0,'first_date':None,'last_date':None,
-           'fold_rows':{'development':0,'validation':0,'final':0},'delisted_by_end':[]}
+           'fold_rows':{'development':0,'validation':0,'final':0},'delisted_by_end':[],
+           'quality_exclusions':excluded,'research_available':0,'research_rows':0,
+           'research_traded_rows':0,'research_st_rows':0,'research_suspended_rows':0,
+           'research_fold_rows':{'development':0,'validation':0,'final':0}}
     for code in universe['codes']:
         source=data/'daily'/f'{code}.csv'
         if not source.exists():
@@ -365,28 +403,69 @@ def data_audit(data: Path, universe: dict) -> dict:
         traded=(f.tradestatus=='1')&(f.volume>0)
         stats['traded_rows']+=int(traded.sum());stats['suspended_rows']+=int((~traded).sum())
         stats['st_rows']+=int((f.isST=='1').sum())
+        usable=code not in excluded
+        if usable:
+            stats['research_available']+=1;stats['research_rows']+=len(f)
+            stats['research_traded_rows']+=int(traded.sum());stats['research_st_rows']+=int((f.isST=='1').sum())
+            stats['research_suspended_rows']+=int((~traded).sum())
         stats['first_date']=min(stats['first_date'] or f.date.iloc[0],f.date.iloc[0])
         stats['last_date']=max(stats['last_date'] or f.date.iloc[-1],f.date.iloc[-1])
         for fold,start,end in [('development','2020-01-01','2021-12-31'),('validation','2022-01-01','2023-12-31'),('final','2024-01-01',END)]:
             stats['fold_rows'][fold]+=int((f.date.between(start,end)&traded).sum())
+            if usable:
+                stats['research_fold_rows'][fold]+=int((f.date.between(start,end)&traded).sum())
     # Listing metadata is an audit-only sidecar, deliberately not part of the
     # historical selection contract. Never infer survival from absent fields.
     metadata_path=data/'listing_metadata.json'
-    if not metadata_path.is_file():
-        raise ValueError('Separate listing metadata audit is required')
-    metadata=read_json(metadata_path).get('records',[])
+    historical=read_json(metadata_path).get('records',[]) if metadata_path.is_file() else []
+    stats['listing_metadata_historical_errors']=[row for row in historical
+                                                  if row.get('error') and row.get('code') in universe['codes']]
+    final_audit_path=data.parent/'mainboard_data_audit.json'
+    if final_audit_path.is_file():
+        finalized=read_json(final_audit_path)
+        if finalized.get('complete') is not True or Path(finalized['data_directory']).resolve()!=data.resolve():
+            raise ValueError('Final data audit is incomplete or belongs to a different snapshot')
+        if finalized['universe_sha256']!=digest(data/'universe.json'):
+            raise ValueError('Final data audit universe hash differs')
+        exclusion_path=data/'exclusions.json'
+        if finalized.get('exclusions_sha256')!=(digest(exclusion_path) if exclusion_path.exists() else None):
+            raise ValueError('Final data audit exclusion hash differs')
+        metadata=finalized['listing_metadata']
+        root=Path(__file__).resolve().parents[2]
+        for row in metadata:
+            if row.get('metadata_complete'):
+                source=Path(row['source'])
+                if not source.is_absolute():
+                    source=root/source
+                if not source.is_file() or digest(source)!=row['source_sha256']:
+                    raise ValueError(f"Final listing source is missing or changed: {row['code']}")
+        stats['final_data_audit']=str(final_audit_path.resolve())
+        stats['source_receipt_count']=finalized['source_receipt_count']
+        stats['all_source_hashes_verified']=finalized['all_source_hashes_verified']
+        for field,key in [('research_available','research_usable_stock_count'),('research_rows','research_usable_rows'),
+                          ('research_traded_rows','research_traded_rows')]:
+            if stats[field]!=finalized[key]:
+                raise ValueError(f'Final data audit and current rows differ: {field}')
+    else:
+        if not metadata_path.is_file():
+            raise ValueError('Separate listing metadata audit is required')
+        metadata=historical
+        stats['final_data_audit']=None
     selected=set(universe['codes'])
     relevant=[row for row in metadata if row.get('code') in selected]
     codes=[row['code'] for row in relevant]
     if len(codes)!=len(set(codes)):
         raise ValueError('Duplicate listing metadata rows')
-    stats['listing_metadata_missing']=sorted(selected-set(codes))
-    stats['listing_metadata_errors']=[row for row in relevant if row.get('error')]
+    incomplete={row['code'] for row in relevant if row.get('error') or row.get('metadata_complete') is False}
+    stats['listing_metadata_missing']=sorted((selected-set(codes))|incomplete)
+    stats['listing_metadata_errors']=[row for row in relevant if row['code'] in incomplete]
     for row in relevant:
-        if not row.get('error') and row.get('outDate') and str(row['outDate'])<=END:
+        if row['code'] not in incomplete and row.get('outDate') and str(row['outDate'])<=END:
             stats['delisted_by_end'].append({'code':row['code'],'outDate':row['outDate']})
+    stats['research_delisted_by_end']=[row for row in stats['delisted_by_end'] if row['code'] not in excluded]
     errors=data/'fetch_errors.json'
     stats['fetch_errors']=read_json(errors) if errors.exists() else None
+    stats['unexplained_missing']=sorted(set(stats['missing'])-set(excluded))
     return stats
 
 
@@ -416,6 +495,13 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
         raise ValueError('Owner scope is ordinary-investor mainboard only; other boards cannot be reported here')
     if summary['data_manifest_sha256']!=digest(data/'universe.json'):
         raise ValueError('Historical universe changed since final evaluation')
+    inputs_path=results/'selection_inputs.json'
+    if digest(inputs_path)!=frozen['selection_inputs_sha256']:
+        raise ValueError('Frozen selection input fingerprint changed')
+    inputs=read_json(inputs_path)
+    exclusions_path=data/'exclusions.json'
+    if inputs.get('exclusions')!=(digest(exclusions_path) if exclusions_path.exists() else None):
+        raise ValueError('Data-quality exclusion snapshot changed after selection')
     development=read_json(results/'development_results.json');validation=read_json(results/'validation_results.json')
     if not development or len(validation)!=8:
         raise ValueError('Expected all development trials and exactly eight validation endpoints')
@@ -480,15 +566,21 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
         '最高收盘达到 1.5R 后开启 ATR 跟踪，跟踪线只收紧；收盘跌破此前已生效的跟踪线，次日开盘尝试退出。'
         '买入日不能卖出，跌停/停牌会延后退出。止损较宽时按照相同风险预算减少股数。',
         '## 数据范围与切分',
-        f"历史证券池固定在 **{universe['date']}**，原始选择 **{audit['selected']} 只**；有日线文件 **{audit['loaded']} 只**。"
+        f"历史证券池固定在 **{universe['date']}**，原始选择 **{audit['selected']} 只**；有日线文件 **{audit['loaded']} 只**，"
+        f"数据质量冻结排除 **{len(audit['quality_exclusions'])} 只**，实际可研究 **{audit['research_available']} 只**。"
         f"这是一组当时已上市的沪深主板股票，预注册抽样为沪市主板 100 只、深市主板 100 只。"
         f"它不代表今天的全部 A 股；未补换后来退市、无数据或表现差的股票。"
         '原计划的跨板块取数在任何参数比较之前，按 Owner“排除需要门槛的票”的要求停止；本轮使用独立主板数据快照。',
         table(['项目','数量／范围'],[
-            ['原始日线范围',f"{audit['first_date']}～{audit['last_date']}"],['总源记录',number(audit['rows'],0)],
-            ['有成交源记录',number(audit['traded_rows'],0)],['停牌／无成交记录',number(audit['suspended_rows'],0)],
-            ['历史 ST 记录',number(audit['st_rows'],0)],['开发期记录（2020–2021）',number(audit['fold_rows']['development'],0)],
-            ['验证期记录（2022–2023）',number(audit['fold_rows']['validation'],0)],['样本外记录（2024–2025）',number(audit['fold_rows']['final'],0)],
+            ['原始日线范围',f"{audit['first_date']}～{audit['last_date']}"],['全部已存在源文件记录',number(audit['rows'],0)],
+            ['冻结原始股票数',audit['selected']],['因数据质量排除（不补换）',len(audit['quality_exclusions'])],
+            ['实际可研究股票数',audit['research_available']],['可研究股票源记录',number(audit['research_rows'],0)],
+            ['可研究股票有成交记录',number(audit['research_traded_rows'],0)],
+            ['可研究股票停牌／无成交记录',number(audit['research_suspended_rows'],0)],
+            ['可研究股票历史 ST 记录',number(audit['research_st_rows'],0)],
+            ['可研究开发期记录（2020–2021）',number(audit['research_fold_rows']['development'],0)],
+            ['可研究验证期记录（2022–2023）',number(audit['research_fold_rows']['validation'],0)],
+            ['可研究样本外记录（2024–2025）',number(audit['research_fold_rows']['final'],0)],
             ['样本外选中配置启动候选',number(selected['signal_count'],0)],['样本外自然平仓',number(selected['trades'],0)],
             ['自然平仓正收益比例',percent(selected.get('win_rate'))],['期末仍持仓／估值笔数',number(selected['open_at_end'],0)],
             ['自然平仓平均持有交易日',number(selected.get('mean_holding_days'))],
@@ -496,8 +588,17 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
             ['全账本模拟滑点成本',number(selected.get('slippage'))+' 元'],
             ['期末行情陈旧持仓',number(selected['terminal_uncertain'],0)],
             ['截至2025年末有退市日期记录的样本',number(len(audit['delisted_by_end']),0)],
-            ['缺失文件',', '.join(audit['missing']) or '无'],['空文件',', '.join(audit['empty']) or '无']]),
+            ['其中仍纳入研究的退市样本',number(len(audit['research_delisted_by_end']),0)],
+            ['缺失文件（含质量排除）',', '.join(audit['missing']) or '无'],
+            ['未由质量排除解释的缺失文件',', '.join(audit['unexplained_missing']) or '无'],
+            ['空文件',', '.join(audit['empty']) or '无']]),
         table(['板块','原始历史样本数'],[[BOARD_NAMES.get(board,board),count] for board,count in universe['by_board'].items()]),
+        table(['冻结质量排除','记录原因'],[[code,reason] for code,reason in sorted(audit['quality_exclusions'].items())])
+          if audit['quality_exclusions'] else '质量排除文件未列出股票。',
+        '数据质量排除先于第一次策略收益比较：sz.001914 的同一后复权请求中混有原始价格标记；'
+        'sh.600321 与 sh.600313 的复权变化和 raw_preclose 除权参考价之间的相对连续性误差超过 0.5%，权益变化无法可靠解释。'
+        '排除没有使用策略收益，也没有补入其他股票。但审计查看了整个 2015–2025 数据段的元数据与连续性，'
+        '因此可用性筛选并非完美前瞻可得；这项限制独立于入场特征的因果性，不能被“没有看收益”抹去。',
         '2015–2019 仅初始化指标；2020–2021 按固定顺序进行单变量比较；2022–2023 只比较初始配置和 7 个阶段端点；'
         '冻结 JSON 后才运行 2024–2025。各段从 100 万元现金重新开始，跨段持仓不继承。'
         f"本实验最终配置评估编号为 {summary['final_evaluation_number']}，程序调用／恢复次数为 {summary.get('invocation_attempts',1)}。"
@@ -505,7 +606,9 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
         '## 样本外完整对照',
         table(['方案','净收益','最大回撤','自然平仓笔数','胜率','PF','平均资金暴露'],compare),
         '主动策略与随机入场组合使用同一历史股票池、100 万元资金、最多 10 笔持仓、每笔初始价格风险 0.75%、单股资金上限 15%。'
-        '同日按证券代码排序分配资金。持有基线以同一股票池等额分槽，首日无法买入的槽位留现金；沪深300为含模拟成本的非可投资指数参考。'
+        '同日按证券代码排序分配资金。持有基线以冻结原始池等额分槽，首日无法买入及数据质量排除的槽位留现金；'
+        f"质量排除所占 {len(audit['quality_exclusions'])}/{audit['selected']} 的基线资金不重新分配。"
+        '沪深300为含模拟成本的非可投资指数参考。'
         '“紧止损参考”使用质量模式 0 和最小 1ATR 距离，仍保留结构外止损；它是整体方案参考，不能把差异单独归因于止损。'
         '“随机逐项均值/中位数”分别统计每项指标，不代表一条真实组合路径。',
         f"![样本外净值与回撤]({chart_manifest['global']['path']})",
@@ -596,6 +699,9 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
         '## 风险与诚实声明',
         '1. 2020 年已上市的沪深主板历史样本并非全市场；后上市新股、创业板、科创板、北交所不在本轮范围。'
         '信号日及买入日 ST 禁入，持有之后才变为 ST 的股票不会被事后从账本删除；仅观察两年样本外，不证明未来持续有效。',
+        '数据可用性另有筛选偏差：虽然三只质量排除不依赖策略收益，决定排除时看了整段价格元数据和复权连续性，'
+        f"历史某一天并不知道后续多年数据会不会异常。原始 {audit['selected']} 只与研究可用 {audit['research_available']} 只必须区分，"
+        '不能把本轮视为完全前瞻可得的无偏全市场检验。',
         '2. 宽止损降低容易被普通波动触发的程度，同时增加价格回撤容忍范围；现金风险通过股数约束，跳空和连续跌停仍可能超过计划风险。',
         '3. A 股 T+1、停牌和涨跌停按日线保守近似；没有订单队列和盘口，触价不等于保证成交。盘中止损收入不能资助更早的开盘买入。',
         '4. 后复权收益隐含分红再投资；未逐项模拟现金红利税、配股选择、股权到账和碎股处理。HFQ价格图不能当人民币报价图。',
@@ -608,15 +714,20 @@ def write_report(data: Path, results: Path, report: Path) -> dict:
         f"读取器报告：{json.dumps(audit['fetch_errors'],ensure_ascii=False)}。"
         f"最终评估缺失文件：{', '.join(summary.get('missing',[])) or '无'}。"
         f"末端最大行情陈旧 {selected['terminal_stale_days_max']} 个自然日。"
-        f"独立上市资料缺失：{', '.join(audit['listing_metadata_missing']) or '无'}；"
-        f"上市资料错误：{json.dumps(audit['listing_metadata_errors'],ensure_ascii=False)}。",
+        f"最终上市资料未完整：{', '.join(audit['listing_metadata_missing']) or '无'}；"
+        f"未完整资料说明：{json.dumps(audit['listing_metadata_errors'],ensure_ascii=False)}。",
+        f"[最终数据核验]({audit['final_data_audit']})：{audit.get('source_receipt_count',0)} 份来源回执，"
+        f"全量来源哈希核验{'通过' if audit.get('all_source_hashes_verified') else '未全部通过'}。"
+          if audit['final_data_audit'] else '没有最终数据核验文件，上市资料仅依据独立检索侧录。',
+        f"历史上市资料失败日志：{json.dumps(audit['listing_metadata_historical_errors'],ensure_ascii=False)}。"
+        '这部分保留最初请求失败，不等同于最终仍缺失；已有完整原始 basic 文件且哈希通过的证券，按最终核验记录报告。',
         table(['截至2025年末退市日期记录','日期'],[[row['code'],row['outDate']] for row in audit['delisted_by_end']])
           if audit['delisted_by_end'] else '历史证券资料中无截至2025年末的退市日期记录；这不等于证明源数据没有遗漏。',
         '退市日期来自当前检索的基本资料，仅作审计解释，不参与历史股票选择、入场特征或参数评分。',
         table(['执行跳过／延后原因','次数'],[[reason,count] for reason,count in sorted(selected.get('skips',{}).items())]),
         '## 工程验证及已知基线失败',
-        '截至主板范围调整前的校验记录，专用检查为 76 项通过：17 项数据、30 项回放、4 项研究流程、25 项 Pine 检查；此处不是最终版本全量验收计数。'
-        '边界与注册表检查为 85 项通过、1 项失败；失败项 `test_holdout_consumption_is_declared_per_experiment_not_assumed` '
+        engineering_validation(results),
+        '先前边界与注册表检查曾记录 85 项通过、1 项失败；失败项 `test_holdout_consumption_is_declared_per_experiment_not_assumed` '
         '是原有消费名单与旧 macmonitor/barkmonitor 等实验记录不一致，不包含本次 A 股实验。'
         '相关测试文件与注册表在本轮开始前已有未提交修改，本轮未改写它们来消除失败，因此不宣称全仓测试全绿。',
         '真实历史前缀因果检查：sh.600182 的 2015–2021 共 1705 根日线，完整特征表与删除末尾 80 根后重算的共有前缀逐列一致。'
