@@ -2,6 +2,7 @@
 import hashlib
 import json
 import signal
+from types import SimpleNamespace
 
 import pandas as pd
 import pytest
@@ -151,3 +152,25 @@ def test_wall_timeout_escapes_sdk_exception_handler_without_partial_cache(tmp_pa
         with query_timeout():
             cached_query(tmp_path / "partial.csv", {}, swallowed_exception_query)
     assert not (tmp_path / "partial.csv").exists()
+
+
+def test_worker_reuses_one_session_without_per_stock_logout(monkeypatch):
+    import yoyo.evaluation.ashare_data as source
+    calls = []
+    client = SimpleNamespace(login=lambda: (calls.append("login") or SimpleNamespace(error_code="0")))
+    monkeypatch.setattr(source, "_PROCESS_CLIENT", None)
+    monkeypatch.setattr(source.importlib.metadata, "version", lambda _: source.BAOSTOCK_VERSION)
+    monkeypatch.setattr(source.importlib, "import_module", lambda _: client)
+    monkeypatch.setattr(source.atexit, "register", lambda callback: calls.append("register_socket_close"))
+    assert source._worker_client() is client
+    assert source._worker_client() is client
+    assert calls == ["login", "register_socket_close"]
+
+
+def test_worker_finalizer_closes_only_its_socket(monkeypatch):
+    import yoyo.evaluation.ashare_data as source
+    calls = []
+    connection = SimpleNamespace(close=lambda: calls.append("close"))
+    monkeypatch.setattr(source.importlib, "import_module", lambda _: SimpleNamespace(default_socket=connection))
+    source._close_worker_socket()
+    assert calls == ["close"]

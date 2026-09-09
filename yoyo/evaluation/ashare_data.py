@@ -12,6 +12,7 @@ Install the pinned client into an isolated target, never the model environment.
 from __future__ import annotations
 
 import argparse
+import atexit
 from concurrent.futures import ProcessPoolExecutor
 from contextlib import contextmanager
 from datetime import date, datetime, timezone
@@ -32,6 +33,7 @@ BAOSTOCK_VERSION = "0.9.3"
 DAILY_FIELDS = "date,code,open,high,low,close,preclose,volume,amount,adjustflag,turn,tradestatus,pctChg,isST"
 DEFAULT_QUOTAS = {"main_sh": 100, "main_sz": 100, "chinext": 80, "star": 80}
 PRICE_FIELDS = ("open", "high", "low", "close", "preclose")
+_PROCESS_CLIENT: Any = None
 
 
 class AShareDataError(ValueError):
@@ -270,24 +272,48 @@ def fetch_daily(client: Any, destination: Path, *, code: str, start: str, end: s
     return result
 
 
+def _close_worker_socket() -> None:
+    """Close this connection without sending shared-anonymous logout."""
+    context = importlib.import_module("baostock.common.context")
+    connection = getattr(context, "default_socket", None)
+    if connection is not None:
+        connection.close()
+
+
+def _worker_client() -> Any:
+    """Reuse one client session per process; no per-stock login/logout churn."""
+    global _PROCESS_CLIENT
+    if _PROCESS_CLIENT is None:
+        if importlib.metadata.version("baostock") != BAOSTOCK_VERSION:
+            raise AShareDataError(f"isolated BaoStock {BAOSTOCK_VERSION} required")
+        client = importlib.import_module("baostock")
+        with query_timeout():
+            login = client.login()
+        if str(login.error_code) != "0":
+            raise AShareDataError(f"BaoStock worker login failed: {login.error_code}")
+        _PROCESS_CLIENT = client
+        atexit.register(_close_worker_socket)
+    return _PROCESS_CLIENT
+
+
 def _fetch_worker(arguments: tuple[str, str, str, str]) -> dict[str, Any]:
     """Each process owns its BaoStock session; SDK globals are never threaded."""
     destination, code, start, end = arguments
     try:
-        with baostock_session() as bs:
-            frame = fetch_daily(bs, Path(destination), code=code, start=start, end=end)
-            request = {"provider": "baostock", "version": BAOSTOCK_VERSION,
-                       "method": "query_stock_basic", "code": code, "metadata_only": True}
-            try:
-                with query_timeout():
-                    basic = cached_query(Path(destination) / "basic" / f"{code}.csv", request,
-                                         lambda: bs.query_stock_basic(code))
-                if (not {"code", "ipoDate", "outDate"}.issubset(basic.columns)
-                        or len(basic) != 1 or basic.iloc[0]["code"] != code):
-                    raise AShareDataError("stock basic code/IPO/delisting metadata invalid")
-                metadata = basic[["code", "ipoDate", "outDate"]].iloc[0].to_dict()
-            except Exception as exc:
-                metadata = {"code": code, "error": f"{type(exc).__name__}: {exc}"}
+        bs = _worker_client()
+        frame = fetch_daily(bs, Path(destination), code=code, start=start, end=end)
+        request = {"provider": "baostock", "version": BAOSTOCK_VERSION,
+                   "method": "query_stock_basic", "code": code, "metadata_only": True}
+        try:
+            with query_timeout():
+                basic = cached_query(Path(destination) / "basic" / f"{code}.csv", request,
+                                     lambda: bs.query_stock_basic(code))
+            if (not {"code", "ipoDate", "outDate"}.issubset(basic.columns)
+                    or len(basic) != 1 or basic.iloc[0]["code"] != code):
+                raise AShareDataError("stock basic code/IPO/delisting metadata invalid")
+            metadata = basic[["code", "ipoDate", "outDate"]].iloc[0].to_dict()
+        except Exception as exc:
+            metadata = {"code": code, "error": f"{type(exc).__name__}: {exc}"}
         return {"code": code, "rows": len(frame), "metadata": metadata}
     except Exception as exc:
         return {"code": code, "error": f"{type(exc).__name__}: {exc}"}
