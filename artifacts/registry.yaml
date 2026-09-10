@@ -26841,3 +26841,74 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Single episode gate reduces signals2.33%, no quality advantage; rejected as noise solution. No live changes.
+
+  - artifact_id: spike-v3-gate-diagnostic-20260910-report-source
+    artifact_type: report
+    role: original_v1_to_v3_noise_diagnostic
+    source_repo: darkforest-x/fable-trading
+    source_commit: d5b3e9f0f4dd67c4df5fea42a2054f9b4c48fa8f
+    source_path: analysis/p1_spike_v3_gate_diagnostic_20260910.md
+    sha256: 989086b9ddd28acb3f5235e7dcfa2e545551356b17037fee2d8fde2ccd826ae5
+    size_bytes: 19429
+    storage_uri: repo://analysis/p1_spike_v3_gate_diagnostic_20260910.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Original SPIKE V1 versus V3; 13 frozen-event single-gate diagnostics, no validated deployable filter or
+      live change.
+  - artifact_id: spike-v3-gate-diagnostic-20260910-report-html
+    artifact_type: report
+    role: original_v1_to_v3_noise_diagnostic
+    source_repo: darkforest-x/fable-trading
+    source_commit: d5b3e9f0f4dd67c4df5fea42a2054f9b4c48fa8f
+    source_path: analysis/html/p1_spike_v3_gate_diagnostic_20260910.html
+    sha256: 1701ccf35b7ca1f291c35e97f70989315de0adf7521b1ac6868e94a3eedf91cf
+    size_bytes: 29908
+    storage_uri: repo://analysis/html/p1_spike_v3_gate_diagnostic_20260910.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Original SPIKE V1 versus V3; 13 frozen-event single-gate diagnostics, no validated deployable filter or
+      live change.
+  - artifact_id: spike-v3-gate-diagnostic-20260910-manifest
+    artifact_type: manifest
+    role: original_v1_to_v3_noise_diagnostic
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3cfb009ea3c5282fa26889d2b6535e9c1353f0de
+    source_path: experiments/active/exp-spike-v3-gate-diagnostic-20260910-v1/results/manifest.json
+    sha256: acdc43ba5e2bd36d88e15d3d7addee1903558dc0ea034210c1259a9c362e993f
+    size_bytes: 66532
+    storage_uri: repo://experiments/active/exp-spike-v3-gate-diagnostic-20260910-v1/results/manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Original SPIKE V1 versus V3; 13 frozen-event single-gate diagnostics, no validated deployable filter or
+      live change.
+  - artifact_id: spike-v3-gate-diagnostic-20260910-report-manifest
+    artifact_type: manifest
+    role: original_v1_to_v3_noise_diagnostic
+    source_repo: darkforest-x/fable-trading
+    source_commit: d5b3e9f0f4dd67c4df5fea42a2054f9b4c48fa8f
+    source_path: experiments/active/exp-spike-v3-gate-diagnostic-20260910-v1/results/report_manifest.json
+    sha256: 4f96649fee593033f542cb80c4d4ce99b82275fae0ad406227de319f1eed75af
+    size_bytes: 1052
+    storage_uri: repo://experiments/active/exp-spike-v3-gate-diagnostic-20260910-v1/results/report_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Original SPIKE V1 versus V3; 13 frozen-event single-gate diagnostics, no validated deployable filter or
+      live change.
+  - artifact_id: spike-v3-gate-diagnostic-20260910-independent-review
+    artifact_type: manifest
+    role: original_v1_to_v3_noise_diagnostic
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3cfb009ea3c5282fa26889d2b6535e9c1353f0de
+    source_path: experiments/active/exp-spike-v3-gate-diagnostic-20260910-v1/qa/independent_review.json
+    sha256: 1e6fc2290c2cd443787e57662abc42eb11988bffd06858e940ab2d035f7482e0
+    size_bytes: 1630
+    storage_uri: repo://experiments/active/exp-spike-v3-gate-diagnostic-20260910-v1/qa/independent_review.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Original SPIKE V1 versus V3; 13 frozen-event single-gate diagnostics, no validated deployable filter or
+      live change.

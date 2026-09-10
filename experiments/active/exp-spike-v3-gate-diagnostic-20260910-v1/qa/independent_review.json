@@ -1,0 +1,38 @@
+{
+  "status": "passed",
+  "generated_at": "2026-09-10T08:29:23.031282+00:00",
+  "manifest_sha256": "acdc43ba5e2bd36d88e15d3d7addee1903558dc0ea034210c1259a9c362e993f",
+  "source_and_artifact_hashes_checked": 307,
+  "feature_jobs_independently_reconstructed": 278,
+  "frozen_event_rows": 14195,
+  "frozen_control_rows": 41526,
+  "independent_tag_event_checks": 99365,
+  "retained_sets_exact": 15,
+  "summary_rows": 60,
+  "independent_summary_value_checks": 1860,
+  "baseline": {
+    "early": {
+      "count": 10386,
+      "hits_1": 1463
+    },
+    "confirmed": {
+      "count": 3809,
+      "hits_1": 488
+    }
+  },
+  "checks": [
+    "Every gate independently reconstructed from authenticated features at current/past bar",
+    "Exact single-gate retained event sets; no gate conjunctions",
+    "Fixed 1660 positive denominator and actual decision indexes; no outcome-driven filtering",
+    "Original event outcomes and controls reused; fees 20bp and next-open indexes checked",
+    "All 60 period summaries reconcile counts/recall/net outcomes/matched mean/peak retention",
+    "13 exploratory p values Holm adjustment independently reconstructed"
+  ],
+  "limitations": [
+    "Did not independently rerun full trade intrabar simulation, whose cached source remains pinned",
+    "Did not rerun permutation RNG or all top-decile and AUC statistics",
+    "No state regeneration; rejected parent still consumes original cooldown and no later replacement child is searched",
+    "Retrospective seen-history diagnostics, not an optimized deployable new detector",
+    "No combined-gate evidence or claimed validated best parameter"
+  ]
+}

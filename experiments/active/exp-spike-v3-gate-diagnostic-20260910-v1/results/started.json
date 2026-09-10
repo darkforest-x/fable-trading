@@ -1,0 +1,36 @@
+{
+  "config": {
+    "schema": "v3-single-gate-diagnostic",
+    "filters": {
+      "early": [
+        "tag_recent_density",
+        "tag_above_six",
+        "tag_original_volume",
+        "tag_original_expansion",
+        "tag_original_body",
+        "tag_original_close_position",
+        "tag_nonnegative_md"
+      ],
+      "confirmed": [
+        "tag_above_six",
+        "tag_original_volume",
+        "tag_original_expansion",
+        "tag_original_body",
+        "tag_original_close_position",
+        "tag_nonnegative_md"
+      ]
+    },
+    "new_hypotheses": 13,
+    "selection": "frozen events; no parent/cooldown regeneration",
+    "period": "same278OKX1H61days",
+    "holdout_consumption_per_config": 1,
+    "control": "original event-matched controls, not refitted",
+    "live_changes": false
+  },
+  "source_pins": {
+    "yoyo/evaluation/spike_v3_gate_diagnostic.py": "a5dd2c574158815361949b5a53a5a3211e8369a5099a188bc190cb12326bb1b9",
+    "experiments/active/exp-spike-v3-gate-diagnostic-20260910-v1/PROJECT_PLAN.md": "460b84179f3d6bdba2b8ae084fd3ca5124f6303eeda0b3b4bf7f1e7ebada5c8b",
+    "yoyo/evaluation/spike_burst_recall_study.py": "a9e532861cad640b5dcf6dbf8d465b3ad381cb7ef2b02d65cad153b8c849dbbb",
+    "yoyo/evaluation/altseason_research.py": "35d6e171a8a7b25516871ae119c2780dcc1130d2beaaffdd270d2b2f99742075"
+  }
+}

@@ -7843,16 +7843,25 @@ experiments:
 
   - experiment_id: exp-spike-v3-gate-diagnostic-20260910-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: b14654b0703000e2c4bc3383ed7fa4243c912534
-    status: active
+    source_commit: 3cfb009ea3c5282fa26889d2b6535e9c1353f0de
+    status: inconclusive
     question: Why V3 is noisy versus ORIGINAL SPIKE V1, and what do individual original gates remove?
     single_variable: 13 independent one-gate filters of frozen V3 events; no stacked changes.
-    result: Preregistered; V2 explicitly excluded from comparison per owner.
-    holdout_consumed: false
+    result: '278 OKX 1H contracts / 61 days: original V1 86 signals; V3 early 10386 and confirmed 3809. Thirteen independent
+      original-gate filters failed to establish positive matched excess (all Holm p=1). Confirmed TR>=3 reduces alerts80.3%,
+      natural net win29.50% to35.35%, but retains26.9% of prior10R peak events. Full structural rearming not evaluated;
+      no deployable noise solution.'
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
     canonical_report: analysis/html/p1_spike_v3_gate_diagnostic_20260910.html
-    artifacts: []
-    notes: Original=SPIKE强劲爆发V1; existing V3 tags and authenticated original features only. Seen historical diagnosis,
-      no live changes.
+    artifacts:
+    - spike-v3-gate-diagnostic-20260910-report-source
+    - spike-v3-gate-diagnostic-20260910-report-html
+    - spike-v3-gate-diagnostic-20260910-manifest
+    - spike-v3-gate-diagnostic-20260910-report-manifest
+    - spike-v3-gate-diagnostic-20260910-independent-review
+    notes: First use per fixed diagnostic configuration on owner-authorized already-seen history. Source hashes307;
+      independently checked99365 tags and1860 summary values. Frozen parents/cooldowns, not a rebuilt detector. TV
+      and notification rules unchanged.

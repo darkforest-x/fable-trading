@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>V3 为什么信号太多，以及如何降噪</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>V3 为什么信号太多，以及如何降噪</h1>
+<h2>结论</h2>
+<p><strong>比较基准是原版「SPIKE强劲爆发V1」，本报告忽略中间版本。</strong>V3早预警把“近零蓄势后强劲爆发”放宽成“突破前12根高点并站上两条快均线”；确认阶段也未恢复近零蓄势、整段箱体边界和原来的K线质量门槛。为了补漏，候选层被放宽过多，而且候选层默认带盈亏参考框，与Owner要的开仓级启动形态不一致。</p>
+<p>单项实测显示：恢复原单根3ATR扩张最能减少确认提示（约80%），净胜率有所提高，但丢失约73%的原10R峰值事件，且仍未证明优于匹配随机。恢复密集、六线、量比或实体中的任意一条，也没有独立建立盈利优势。不能把历史某一项数字较好叫“最优参数”。</p>
+<h2>原版约每天1.4次，V3预警约170次</h2>
+<p>同一278个历史OKX合约、1H多头、UTC2026年7月10日至9月9日前，共61天。BTC/ETH沿用原排除。这是全池负担，不是单币每天170次。原目标分母固定1660个正例，定义见方法；高覆盖并非胜率。</p>
+<table><thead><tr>
+<th>版本</th>
+<th>信号数</th>
+<th>全池平均/日</th>
+<th>原目标+1根覆盖</th>
+</tr></thead><tbody>
+<tr><td>原版SPIKE强劲爆发V1</td><td>86</td><td>1.41</td><td>0.84%</td></tr>
+<tr><td>V3预警</td><td>10,386</td><td>170.26</td><td>88.13%</td></tr>
+<tr><td>V3确认</td><td>3,809</td><td>62.44</td><td>29.40%</td></tr>
+</tbody></table>
+<p>V3两阶段不是可直接相加的独立机会：3809个子确认都来自已有预警，其中2153个同根合并展示、1656个延迟另画标签。因此主图有12042个不同信号bar，而不是14195个主图启动标签。在样本窗口内6577个预警没有后续确认；这个数包含期末可能尚未等满窗口的预警，不能全部称过期或亏损。</p>
+<h2>放宽了哪些条件</h2>
+<table><thead><tr>
+<th>条件</th>
+<th>原版V1</th>
+<th>V3预警</th>
+<th>V3确认</th>
+</tr></thead><tbody>
+<tr><td>近零蓄势</td><td>MD和信号线同时近零至少12根；第12根冻结带宽</td><td>不要求</td><td>不要求</td></tr>
+<tr><td>六均线密集</td><td>发起启动时，前12根平均宽度≤3ATR且交织≥2次</td><td>不要求</td><td>前12根至少出现过一次密集状态</td></tr>
+<tr><td>突破位置</td><td>整段蓄势箱体的冻结上沿</td><td>最近12根最高价</td><td>父预警时冻结的前12根高点</td></tr>
+<tr><td>价格与均线</td><td>全部六线上方</td><td>仅SMA20、EMA20上方</td><td>不强制六线之上</td></tr>
+<tr><td>成交量</td><td>当前单根量比≥4</td><td>不要求</td><td>三根平均量比≥1.5，基准窗口也不同</td></tr>
+<tr><td>波动扩张</td><td>当前TR/前根ATR≥3</td><td>不要求</td><td>三根净涨幅/三根前ATR≥1.5</td></tr>
+<tr><td>K线质量</td><td>阳线，实体≥55%，收盘在当根振幅上方25%</td><td>均不要求</td><td>均不要求</td></tr>
+<tr><td>IMACD方向</td><td>价格先行要求MD≥0；释放确认要求MD&gt;0，另有主线/信号约束</td><td>不要求</td><td>仅MD≥SB、ZLEMA上升，MD可以仍在零下</td></tr>
+<tr><td>正在趋势参考中</td><td>不再触发新启动</td><td>仍可预警，只有12根冷却</td><td>仍可确认，一个父预警最多一次</td></tr>
+<tr><td>未确认时的盈亏框</td><td>对应已通过硬爆发条件的启动</td><td>空闲时第一条预警就开始画</td><td>确认不是创建参考框的必要条件</td></tr>
+</tbody></table>
+<p>近零带是max(abs(MD),abs(SB))≤0.1×前根ATR，第12根后冻结。原版两条路径略有不同：价格先行须MD≥0、MD≥SB且ZLEMA上升；先释放后确认则须MD&gt;0、MD&gt;SB且MD较前根上升，并在释放当根至后5根的有效窗口内完成突破。不能把两个路径的所有门混成一个。</p>
+<p>普通反弹、趋势中途创新高、长上影的弱突破都可能满足V3预警。12根价格新高不等于长期蓄势区突破；1H里只是突破前12小时。冷却12根也不等于出现了新的蓄势结构。上述是代码机制；各因素的贡献会重叠，不能把下面的过滤比例相加。</p>
+<h2>在V3预警上，分别恢复原版一条条件</h2>
+<p>每一行只加一条，均对照V3原预警。单根4倍量、3ATR扩张会大幅减少提示，但会同时损失大量早期目标。原版“完整近零蓄势→箱体释放”需要状态机，不能用某一根tag假装完整恢复。</p>
+<table><thead><tr>
+<th>单独加回的条件</th>
+<th>保留信号</th>
+<th>全池/日</th>
+<th>提示减少</th>
+<th>原目标+1根覆盖</th>
+<th>自然平仓净胜率</th>
+<th>保留原10R峰值信号</th>
+<th>相对匹配随机/bp</th>
+</tr></thead><tbody>
+<tr><td>V3不加过滤</td><td>10,386</td><td>170.3</td><td>0.0%</td><td>88.1%</td><td>27.6%</td><td>100.0%</td><td>-98.2</td></tr>
+<tr><td>近期密集</td><td>7,034</td><td>115.3</td><td>32.3%</td><td>56.9%</td><td>26.8%</td><td>70.7%</td><td>-83.9</td></tr>
+<tr><td>六线全上</td><td>6,528</td><td>107.0</td><td>37.1%</td><td>52.0%</td><td>28.1%</td><td>57.5%</td><td>-142.8</td></tr>
+<tr><td>单根量比≥4</td><td>2,027</td><td>33.2</td><td>80.5%</td><td>16.5%</td><td>29.0%</td><td>19.8%</td><td>-59.1</td></tr>
+<tr><td>单根TR/前ATR≥3</td><td>1,148</td><td>18.8</td><td>88.9%</td><td>11.1%</td><td>31.6%</td><td>12.6%</td><td>-30.8</td></tr>
+<tr><td>阳线实体≥55%</td><td>7,806</td><td>128.0</td><td>24.8%</td><td>66.7%</td><td>27.6%</td><td>73.6%</td><td>-99.9</td></tr>
+<tr><td>收盘位置≥75%</td><td>7,100</td><td>116.4</td><td>31.6%</td><td>61.1%</td><td>27.6%</td><td>66.5%</td><td>-105.6</td></tr>
+<tr><td>MD≥0</td><td>6,197</td><td>101.6</td><td>40.3%</td><td>48.4%</td><td>28.0%</td><td>52.6%</td><td>-153.6</td></tr>
+</tbody></table>
+<p>净胜率是自然结束的独立事件扣20bp成本后为正的比例；未平仓的期末标记另列。低胜率本身不否定趋势策略，但需要足够的大盈利补偿；这里所有新单项的匹配随机超额仍为负。</p>
+<h2>在V3确认上，分别恢复原版一条条件</h2>
+<p>3ATR过滤把确认提示从62.4/日降到12.3/日，自然净胜率29.5%→35.4%；但原10R峰值信号只保留26.9%，且配对超额仍为−23.4bp。这个取舍说明仅追求大阳线可能变成“等涨起来才筛中”，不能作为无代价降噪。</p>
+<table><thead><tr>
+<th>单独加回的条件</th>
+<th>保留信号</th>
+<th>全池/日</th>
+<th>提示减少</th>
+<th>原目标+1根覆盖</th>
+<th>自然平仓净胜率</th>
+<th>保留原10R峰值信号</th>
+<th>相对匹配随机/bp</th>
+</tr></thead><tbody>
+<tr><td>V3不加过滤</td><td>3,809</td><td>62.4</td><td>0.0%</td><td>29.4%</td><td>29.5%</td><td>100.0%</td><td>-78.6</td></tr>
+<tr><td>六线全上</td><td>3,168</td><td>51.9</td><td>16.8%</td><td>23.7%</td><td>29.8%</td><td>81.9%</td><td>-89.0</td></tr>
+<tr><td>单根量比≥4</td><td>1,479</td><td>24.2</td><td>61.2%</td><td>12.9%</td><td>29.3%</td><td>39.2%</td><td>-66.1</td></tr>
+<tr><td>单根TR/前ATR≥3</td><td>752</td><td>12.3</td><td>80.3%</td><td>8.6%</td><td>35.4%</td><td>26.9%</td><td>-23.4</td></tr>
+<tr><td>阳线实体≥55%</td><td>2,404</td><td>39.4</td><td>36.9%</td><td>20.5%</td><td>31.2%</td><td>62.6%</td><td>-67.9</td></tr>
+<tr><td>收盘位置≥75%</td><td>2,185</td><td>35.8</td><td>42.6%</td><td>18.4%</td><td>30.9%</td><td>55.0%</td><td>-76.5</td></tr>
+<tr><td>MD≥0</td><td>2,720</td><td>44.6</td><td>28.6%</td><td>18.7%</td><td>30.1%</td><td>70.2%</td><td>-102.1</td></tr>
+</tbody></table>
+<p>“原10R峰值信号保留率”指在相同止损/跟踪模拟下曾达到10R峰值的事件保留比例，不是兑现10R，也不等于不同币种/独立大行情数量。3ATR条件没有检测隐藏资金或庄家行为，只描述当前相对历史波幅。</p>
+<h2>截图中的好行情也会被简单加严挡掉</h2>
+<p>HYPE 8月19日21:00预警不满足原单根4倍量或3ATR，到次日00:00确认才满足。PEPE 21:00同根确认不满足六线全上、原4倍量、3ATR或75%收盘位置；盲目恢复任何一条都会丢掉这个早信号。NEAR较早弱预警导致冷却问题，单项显示过滤不会释放这段冷却，本轮不能声称修复。</p>
+<p>因此不把所有原版门槛一次性加回。需要恢复的是“完整蓄势的资格”，并区分点火与后续趋势，而不是要求每个启动都长成巨量巨阳。</p>
+<h2>优先怎样降低噪音</h2>
+<ol>
+<li><strong>结构资格优先</strong>：重建持续压缩/近零的完整区间，用其冻结边界判断第一次启动。密集形成的过程和持续性，与单次密集命中分开验证。</li>
+<li><strong>趋势阶段分开</strong>：蓄势、点火、持有、失效各有状态；趋势内普通新高更新跟踪，只有新的整理结构形成才重新允许启动。不能只延长时间冷却。</li>
+<li><strong>确认K线质量作独立检验</strong>：实体、收盘位置和相对扩张可减少弱突破，但本轮表明它们各自都不足以证明赚钱；高周期/全市场共振也是新假设，目前V3未用它们过滤。</li>
+<li><strong>先修复“预警像开仓”的表达</strong>：预警只观察，不默认生成入场/止损框；通过确认才建立自己的当根价格参考。这是显示语义修复，不等于提高胜率或已完成策略降噪。</li>
+</ol>
+<p>本轮没有替换Pine、线上扫描、Bark、Telegram或订单规则；没有据已见结果直接选择一个单项部署。</p>
+<h2>分期和对照：不能只挑启动当晚</h2>
+<p>下表保留所有固定单项和四个时期。手选8月19日启动夜高度共振，只作描述；前31日和后30日也已见过，不是盲测。随机对照来自原V3每条事件，同币×UTC周×因果ATR桶，费用和障碍相同，不为本次过滤重新寻找更差对照。比较不同版本历史匹配随机均值不是相同随机日程的因果实验。</p>
+<table><thead><tr>
+<th>阶段</th>
+<th>条件</th>
+<th>区间</th>
+<th>事件数</th>
+<th>事件毛均值/bp</th>
+<th>事件净均值/bp</th>
+<th>匹配随机/bp</th>
+<th>配对超额/bp</th>
+<th>置换p</th>
+<th>13项校正p</th>
+</tr></thead><tbody>
+<tr><td>预警</td><td>V3不加过滤</td><td>完整61日</td><td>10,386</td><td>45.0</td><td>25.0</td><td>122.4</td><td>-98.2</td><td>1.0000</td><td>—</td></tr>
+<tr><td>预警</td><td>V3不加过滤</td><td>前31日</td><td>4,981</td><td>-86.1</td><td>-106.1</td><td>0.6</td><td>-107.7</td><td>1.0000</td><td>—</td></tr>
+<tr><td>预警</td><td>V3不加过滤</td><td>后30日</td><td>5,405</td><td>165.8</td><td>145.8</td><td>234.8</td><td>-89.5</td><td>1.0000</td><td>—</td></tr>
+<tr><td>预警</td><td>V3不加过滤</td><td>手选启动夜</td><td>224</td><td>1748.1</td><td>1728.1</td><td>976.4</td><td>764.1</td><td>0.0001</td><td>—</td></tr>
+<tr><td>预警</td><td>近期密集</td><td>完整61日</td><td>7,034</td><td>52.1</td><td>32.1</td><td>115.9</td><td>-83.9</td><td>1.0000</td><td>1.0000</td></tr>
+<tr><td>预警</td><td>近期密集</td><td>前31日</td><td>3,545</td><td>-85.8</td><td>-105.8</td><td>3.1</td><td>-109.3</td><td>1.0000</td><td>—</td></tr>
+<tr><td>预警</td><td>近期密集</td><td>后30日</td><td>3,489</td><td>192.3</td><td>172.3</td><td>230.7</td><td>-58.0</td><td>0.9198</td><td>—</td></tr>
+<tr><td>预警</td><td>近期密集</td><td>手选启动夜</td><td>152</td><td>1844.8</td><td>1824.8</td><td>1016.0</td><td>830.4</td><td>0.0001</td><td>—</td></tr>
+<tr><td>预警</td><td>六线全上</td><td>完整61日</td><td>6,528</td><td>40.8</td><td>20.8</td><td>162.5</td><td>-142.8</td><td>1.0000</td><td>1.0000</td></tr>
+<tr><td>预警</td><td>六线全上</td><td>前31日</td><td>2,871</td><td>-89.5</td><td>-109.5</td><td>32.9</td><td>-143.5</td><td>1.0000</td><td>—</td></tr>
+<tr><td>预警</td><td>六线全上</td><td>后30日</td><td>3,657</td><td>143.0</td><td>123.0</td><td>264.1</td><td>-142.3</td><td>1.0000</td><td>—</td></tr>
+<tr><td>预警</td><td>六线全上</td><td>手选启动夜</td><td>133</td><td>1710.7</td><td>1690.7</td><td>969.5</td><td>741.0</td><td>0.0001</td><td>—</td></tr>
+<tr><td>预警</td><td>单根量比≥4</td><td>完整61日</td><td>2,027</td><td>72.1</td><td>52.1</td><td>108.0</td><td>-59.1</td><td>0.8483</td><td>1.0000</td></tr>
+<tr><td>预警</td><td>单根量比≥4</td><td>前31日</td><td>1,074</td><td>-86.3</td><td>-106.3</td><td>8.4</td><td>-120.3</td><td>1.0000</td><td>—</td></tr>
+<tr><td>预警</td><td>单根量比≥4</td><td>后30日</td><td>953</td><td>250.6</td><td>230.6</td><td>220.8</td><td>10.0</td><td>0.0706</td><td>—</td></tr>
+<tr><td>预警</td><td>单根量比≥4</td><td>手选启动夜</td><td>81</td><td>1671.3</td><td>1651.3</td><td>717.4</td><td>942.6</td><td>0.0001</td><td>—</td></tr>
+<tr><td>预警</td><td>单根TR/前ATR≥3</td><td>完整61日</td><td>1,148</td><td>127.9</td><td>107.9</td><td>142.9</td><td>-30.8</td><td>0.4862</td><td>1.0000</td></tr>
+<tr><td>预警</td><td>单根TR/前ATR≥3</td><td>前31日</td><td>551</td><td>-75.7</td><td>-95.7</td><td>11.4</td><td>-101.6</td><td>0.9952</td><td>—</td></tr>
+<tr><td>预警</td><td>单根TR/前ATR≥3</td><td>后30日</td><td>597</td><td>315.8</td><td>295.8</td><td>263.3</td><td>33.9</td><td>0.0427</td><td>—</td></tr>
+<tr><td>预警</td><td>单根TR/前ATR≥3</td><td>手选启动夜</td><td>78</td><td>1840.4</td><td>1820.4</td><td>878.8</td><td>955.2</td><td>0.0001</td><td>—</td></tr>
+<tr><td>预警</td><td>阳线实体≥55%</td><td>完整61日</td><td>7,806</td><td>44.0</td><td>24.0</td><td>123.3</td><td>-99.9</td><td>1.0000</td><td>1.0000</td></tr>
+<tr><td>预警</td><td>阳线实体≥55%</td><td>前31日</td><td>3,723</td><td>-81.9</td><td>-101.9</td><td>2.7</td><td>-105.5</td><td>1.0000</td><td>—</td></tr>
+<tr><td>预警</td><td>阳线实体≥55%</td><td>后30日</td><td>4,083</td><td>158.9</td><td>138.9</td><td>233.4</td><td>-94.8</td><td>1.0000</td><td>—</td></tr>
+<tr><td>预警</td><td>阳线实体≥55%</td><td>手选启动夜</td><td>174</td><td>1779.8</td><td>1759.8</td><td>1027.3</td><td>749.8</td><td>0.0001</td><td>—</td></tr>
+<tr><td>预警</td><td>收盘位置≥75%</td><td>完整61日</td><td>7,100</td><td>35.6</td><td>15.6</td><td>120.6</td><td>-105.6</td><td>1.0000</td><td>1.0000</td></tr>
+<tr><td>预警</td><td>收盘位置≥75%</td><td>前31日</td><td>3,326</td><td>-92.4</td><td>-112.4</td><td>1.1</td><td>-114.3</td><td>1.0000</td><td>—</td></tr>
+<tr><td>预警</td><td>收盘位置≥75%</td><td>后30日</td><td>3,774</td><td>148.4</td><td>128.4</td><td>226.0</td><td>-97.9</td><td>1.0000</td><td>—</td></tr>
+<tr><td>预警</td><td>收盘位置≥75%</td><td>手选启动夜</td><td>149</td><td>1792.1</td><td>1772.1</td><td>1014.2</td><td>776.5</td><td>0.0001</td><td>—</td></tr>
+<tr><td>预警</td><td>MD≥0</td><td>完整61日</td><td>6,197</td><td>36.4</td><td>16.4</td><td>168.7</td><td>-153.6</td><td>1.0000</td><td>1.0000</td></tr>
+<tr><td>预警</td><td>MD≥0</td><td>前31日</td><td>2,665</td><td>-96.5</td><td>-116.5</td><td>35.6</td><td>-153.5</td><td>1.0000</td><td>—</td></tr>
+<tr><td>预警</td><td>MD≥0</td><td>后30日</td><td>3,532</td><td>136.6</td><td>116.6</td><td>268.9</td><td>-153.7</td><td>1.0000</td><td>—</td></tr>
+<tr><td>预警</td><td>MD≥0</td><td>手选启动夜</td><td>111</td><td>1666.8</td><td>1646.8</td><td>965.3</td><td>691.9</td><td>0.0001</td><td>—</td></tr>
+<tr><td>确认</td><td>V3不加过滤</td><td>完整61日</td><td>3,809</td><td>86.9</td><td>66.9</td><td>142.7</td><td>-78.6</td><td>0.9999</td><td>—</td></tr>
+<tr><td>确认</td><td>V3不加过滤</td><td>前31日</td><td>1,943</td><td>-97.2</td><td>-117.2</td><td>23.1</td><td>-141.3</td><td>1.0000</td><td>—</td></tr>
+<tr><td>确认</td><td>V3不加过滤</td><td>后30日</td><td>1,866</td><td>278.7</td><td>258.7</td><td>266.9</td><td>-13.5</td><td>0.5279</td><td>—</td></tr>
+<tr><td>确认</td><td>V3不加过滤</td><td>手选启动夜</td><td>130</td><td>1933.1</td><td>1913.1</td><td>1006.9</td><td>956.8</td><td>0.0001</td><td>—</td></tr>
+<tr><td>确认</td><td>六线全上</td><td>完整61日</td><td>3,168</td><td>86.6</td><td>66.6</td><td>152.5</td><td>-89.0</td><td>1.0000</td><td>1.0000</td></tr>
+<tr><td>确认</td><td>六线全上</td><td>前31日</td><td>1,576</td><td>-93.0</td><td>-113.0</td><td>38.3</td><td>-151.4</td><td>1.0000</td><td>—</td></tr>
+<tr><td>确认</td><td>六线全上</td><td>后30日</td><td>1,592</td><td>264.4</td><td>244.4</td><td>264.8</td><td>-27.7</td><td>0.8121</td><td>—</td></tr>
+<tr><td>确认</td><td>六线全上</td><td>手选启动夜</td><td>112</td><td>1905.1</td><td>1885.1</td><td>1043.5</td><td>899.0</td><td>0.0001</td><td>—</td></tr>
+<tr><td>确认</td><td>单根量比≥4</td><td>完整61日</td><td>1,479</td><td>86.8</td><td>66.8</td><td>123.5</td><td>-66.1</td><td>0.9577</td><td>1.0000</td></tr>
+<tr><td>确认</td><td>单根量比≥4</td><td>前31日</td><td>785</td><td>-92.9</td><td>-112.9</td><td>29.9</td><td>-151.2</td><td>1.0000</td><td>—</td></tr>
+<tr><td>确认</td><td>单根量比≥4</td><td>后30日</td><td>694</td><td>290.0</td><td>270.0</td><td>229.3</td><td>30.0</td><td>0.1895</td><td>—</td></tr>
+<tr><td>确认</td><td>单根量比≥4</td><td>手选启动夜</td><td>67</td><td>1835.3</td><td>1815.3</td><td>753.3</td><td>1074.7</td><td>0.0001</td><td>—</td></tr>
+<tr><td>确认</td><td>单根TR/前ATR≥3</td><td>完整61日</td><td>752</td><td>179.6</td><td>159.6</td><td>182.7</td><td>-23.4</td><td>0.5530</td><td>1.0000</td></tr>
+<tr><td>确认</td><td>单根TR/前ATR≥3</td><td>前31日</td><td>356</td><td>-84.3</td><td>-104.3</td><td>10.4</td><td>-104.1</td><td>1.0000</td><td>—</td></tr>
+<tr><td>确认</td><td>单根TR/前ATR≥3</td><td>后30日</td><td>396</td><td>416.8</td><td>396.8</td><td>334.4</td><td>47.7</td><td>0.1588</td><td>—</td></tr>
+<tr><td>确认</td><td>单根TR/前ATR≥3</td><td>手选启动夜</td><td>68</td><td>2017.2</td><td>1997.2</td><td>1064.5</td><td>953.5</td><td>0.0001</td><td>—</td></tr>
+<tr><td>确认</td><td>阳线实体≥55%</td><td>完整61日</td><td>2,404</td><td>106.6</td><td>86.6</td><td>152.1</td><td>-67.9</td><td>0.9909</td><td>1.0000</td></tr>
+<tr><td>确认</td><td>阳线实体≥55%</td><td>前31日</td><td>1,205</td><td>-76.6</td><td>-96.6</td><td>34.0</td><td>-127.1</td><td>1.0000</td><td>—</td></tr>
+<tr><td>确认</td><td>阳线实体≥55%</td><td>后30日</td><td>1,199</td><td>290.8</td><td>270.8</td><td>270.1</td><td>-8.8</td><td>0.3830</td><td>—</td></tr>
+<tr><td>确认</td><td>阳线实体≥55%</td><td>手选启动夜</td><td>83</td><td>2029.8</td><td>2009.8</td><td>1147.2</td><td>948.7</td><td>0.0001</td><td>—</td></tr>
+<tr><td>确认</td><td>收盘位置≥75%</td><td>完整61日</td><td>2,185</td><td>89.9</td><td>69.9</td><td>143.0</td><td>-76.5</td><td>0.9857</td><td>1.0000</td></tr>
+<tr><td>确认</td><td>收盘位置≥75%</td><td>前31日</td><td>1,080</td><td>-87.9</td><td>-107.9</td><td>39.3</td><td>-145.3</td><td>1.0000</td><td>—</td></tr>
+<tr><td>确认</td><td>收盘位置≥75%</td><td>后30日</td><td>1,105</td><td>263.6</td><td>243.6</td><td>243.9</td><td>-9.5</td><td>0.3579</td><td>—</td></tr>
+<tr><td>确认</td><td>收盘位置≥75%</td><td>手选启动夜</td><td>73</td><td>2011.2</td><td>1991.2</td><td>1139.8</td><td>940.5</td><td>0.0001</td><td>—</td></tr>
+<tr><td>确认</td><td>MD≥0</td><td>完整61日</td><td>2,720</td><td>81.4</td><td>61.4</td><td>159.8</td><td>-102.1</td><td>0.9999</td><td>1.0000</td></tr>
+<tr><td>确认</td><td>MD≥0</td><td>前31日</td><td>1,318</td><td>-112.9</td><td>-132.9</td><td>47.4</td><td>-181.3</td><td>1.0000</td><td>—</td></tr>
+<tr><td>确认</td><td>MD≥0</td><td>后30日</td><td>1,402</td><td>264.2</td><td>244.2</td><td>264.4</td><td>-28.4</td><td>0.7789</td><td>—</td></tr>
+<tr><td>确认</td><td>MD≥0</td><td>手选启动夜</td><td>88</td><td>1874.3</td><td>1854.3</td><td>1074.3</td><td>846.5</td><td>0.0001</td><td>—</td></tr>
+</tbody></table>
+<h2>方法、复现与风险和诚实声明</h2>
+<p>这是各固定过滤配置第1次消耗holdout（边界≥2026-05-04），沿用Owner所有日期研究授权。13项过滤统一Holm校正，全期校正p均为1；未建立相对匹配随机的正超额。没有训练，训练val样本/val AUC不适用。原8046个事件锚点中1660正例、6240负例、146未知；正例只定义为未来24根收盘先达+4ATR而非−2ATR，并不要求均线密集。+1覆盖分母不改，不能改分母制造达标。</p>
+<p>筛选只用事件当根/之前的特征。原父子信号、冷却、出现时间和已计算交易结果冻结；移除一条预警后不会自动生成原来被冷却压住的信号，移除一个确认后不会向后补找新确认。因此是事件过滤诊断，不是完整新检测器回放。各单项效果可重叠，不能据此精确拆分全部新增信号因果贡献。</p>
+<p>交易沿用实际次根开盘、原结构/ATR初始止损、2R激活4ATR跟踪、无固定止盈、20bp入场名义往返费用。资金费、冲击与完整滑点未建模。独立事件会重叠；没有账户最大回撤、杠杆收益或可交易容量结论。只评估1H多头，不外推其他周期/空头。低胜率可接受的前提仍是组合层面的盈亏补偿得到验证。</p>
+<pre><code>
+.venv/bin/python -m pytest -q tests/test_spike_v3_gate_diagnostic.py
+.venv/bin/python -m yoyo.evaluation.spike_v3_gate_diagnostic
+.venv/bin/python -m yoyo.evaluation.spike_v3_gate_report
+</code></pre>
+<p>先提交准确builder再运行。诊断拒绝覆盖已存在产物，已完成研究只核对结果，不能删除重刷。原数据/交易CSV只读并核验哈希。源码、计划、结果CSV、保留事件ID与证据清单在本实验目录。</p>
+<h2>单特征描述基线</h2>
+<p>下列AUC仅为当前保留事件量比/TR与净盈利的描述关系，不是训练val指标；最高10%按特征排序，不按未来盈利挑选。均列出匹配随机，不能只读绝对收益。</p>
+<table><thead><tr>
+<th>阶段</th>
+<th>过滤</th>
+<th>单特征</th>
+<th>样本数</th>
+<th>描述AUC</th>
+<th>前10%毛/bp</th>
+<th>前10%净/bp</th>
+<th>前10%净胜率</th>
+<th>匹配随机/bp</th>
+<th>超额/bp</th>
+</tr></thead><tbody>
+<tr><td>预警</td><td>V3不加过滤</td><td>relative_volume</td><td>10,386</td><td>0.508</td><td>14.6</td><td>-5.4</td><td>30.8%</td><td>85.5</td><td>-90.3</td></tr>
+<tr><td>预警</td><td>V3不加过滤</td><td>tr_expansion</td><td>10,386</td><td>0.519</td><td>140.6</td><td>120.6</td><td>34.4%</td><td>143.2</td><td>-17.6</td></tr>
+<tr><td>预警</td><td>近期密集</td><td>relative_volume</td><td>7,034</td><td>0.513</td><td>-8.8</td><td>-28.8</td><td>29.8%</td><td>82.0</td><td>-109.6</td></tr>
+<tr><td>预警</td><td>近期密集</td><td>tr_expansion</td><td>7,034</td><td>0.518</td><td>134.4</td><td>114.4</td><td>33.1%</td><td>159.9</td><td>-38.1</td></tr>
+<tr><td>预警</td><td>六线全上</td><td>relative_volume</td><td>6,528</td><td>0.499</td><td>-8.9</td><td>-28.9</td><td>31.4%</td><td>107.7</td><td>-138.0</td></tr>
+<tr><td>预警</td><td>六线全上</td><td>tr_expansion</td><td>6,528</td><td>0.518</td><td>145.5</td><td>125.5</td><td>34.5%</td><td>158.3</td><td>-31.1</td></tr>
+<tr><td>预警</td><td>单根量比≥4</td><td>relative_volume</td><td>2,027</td><td>0.491</td><td>-117.1</td><td>-137.1</td><td>28.6%</td><td>60.9</td><td>-198.7</td></tr>
+<tr><td>预警</td><td>单根量比≥4</td><td>tr_expansion</td><td>2,027</td><td>0.521</td><td>18.0</td><td>-2.0</td><td>31.5%</td><td>64.7</td><td>-82.4</td></tr>
+<tr><td>预警</td><td>单根TR/前ATR≥3</td><td>relative_volume</td><td>1,148</td><td>0.477</td><td>-124.4</td><td>-144.4</td><td>27.0%</td><td>62.6</td><td>-215.3</td></tr>
+<tr><td>预警</td><td>单根TR/前ATR≥3</td><td>tr_expansion</td><td>1,148</td><td>0.527</td><td>101.8</td><td>81.8</td><td>32.2%</td><td>39.0</td><td>7.7</td></tr>
+<tr><td>预警</td><td>阳线实体≥55%</td><td>relative_volume</td><td>7,806</td><td>0.510</td><td>-5.8</td><td>-25.8</td><td>29.7%</td><td>85.3</td><td>-105.7</td></tr>
+<tr><td>预警</td><td>阳线实体≥55%</td><td>tr_expansion</td><td>7,806</td><td>0.524</td><td>137.9</td><td>117.9</td><td>35.0%</td><td>157.7</td><td>-31.6</td></tr>
+<tr><td>预警</td><td>收盘位置≥75%</td><td>relative_volume</td><td>7,100</td><td>0.503</td><td>-12.1</td><td>-32.1</td><td>29.9%</td><td>96.3</td><td>-123.5</td></tr>
+<tr><td>预警</td><td>收盘位置≥75%</td><td>tr_expansion</td><td>7,100</td><td>0.519</td><td>144.8</td><td>124.8</td><td>35.1%</td><td>168.1</td><td>-33.8</td></tr>
+<tr><td>预警</td><td>MD≥0</td><td>relative_volume</td><td>6,197</td><td>0.501</td><td>-52.1</td><td>-72.1</td><td>29.8%</td><td>107.0</td><td>-178.7</td></tr>
+<tr><td>预警</td><td>MD≥0</td><td>tr_expansion</td><td>6,197</td><td>0.518</td><td>125.7</td><td>105.7</td><td>34.7%</td><td>198.0</td><td>-85.2</td></tr>
+<tr><td>确认</td><td>V3不加过滤</td><td>relative_volume</td><td>3,809</td><td>0.499</td><td>-8.7</td><td>-28.7</td><td>31.5%</td><td>68.3</td><td>-117.5</td></tr>
+<tr><td>确认</td><td>V3不加过滤</td><td>tr_expansion</td><td>3,809</td><td>0.523</td><td>208.9</td><td>188.9</td><td>38.6%</td><td>159.1</td><td>10.5</td></tr>
+<tr><td>确认</td><td>六线全上</td><td>relative_volume</td><td>3,168</td><td>0.497</td><td>-43.9</td><td>-63.9</td><td>30.3%</td><td>67.3</td><td>-157.7</td></tr>
+<tr><td>确认</td><td>六线全上</td><td>tr_expansion</td><td>3,168</td><td>0.524</td><td>212.9</td><td>192.9</td><td>38.2%</td><td>185.5</td><td>-17.8</td></tr>
+<tr><td>确认</td><td>单根量比≥4</td><td>relative_volume</td><td>1,479</td><td>0.481</td><td>-300.1</td><td>-320.1</td><td>24.3%</td><td>13.5</td><td>-331.1</td></tr>
+<tr><td>确认</td><td>单根量比≥4</td><td>tr_expansion</td><td>1,479</td><td>0.541</td><td>11.8</td><td>-8.2</td><td>33.1%</td><td>117.3</td><td>-130.1</td></tr>
+<tr><td>确认</td><td>单根TR/前ATR≥3</td><td>relative_volume</td><td>752</td><td>0.459</td><td>-361.0</td><td>-381.0</td><td>23.7%</td><td>56.4</td><td>-438.6</td></tr>
+<tr><td>确认</td><td>单根TR/前ATR≥3</td><td>tr_expansion</td><td>752</td><td>0.506</td><td>-44.2</td><td>-64.2</td><td>28.9%</td><td>23.3</td><td>-79.0</td></tr>
+<tr><td>确认</td><td>阳线实体≥55%</td><td>relative_volume</td><td>2,404</td><td>0.474</td><td>-62.3</td><td>-82.3</td><td>29.0%</td><td>69.8</td><td>-175.0</td></tr>
+<tr><td>确认</td><td>阳线实体≥55%</td><td>tr_expansion</td><td>2,404</td><td>0.515</td><td>134.1</td><td>114.1</td><td>35.7%</td><td>171.0</td><td>-47.4</td></tr>
+<tr><td>确认</td><td>收盘位置≥75%</td><td>relative_volume</td><td>2,185</td><td>0.487</td><td>-38.2</td><td>-58.2</td><td>30.6%</td><td>67.4</td><td>-151.6</td></tr>
+<tr><td>确认</td><td>收盘位置≥75%</td><td>tr_expansion</td><td>2,185</td><td>0.531</td><td>263.2</td><td>243.2</td><td>39.7%</td><td>197.3</td><td>29.5</td></tr>
+<tr><td>确认</td><td>MD≥0</td><td>relative_volume</td><td>2,720</td><td>0.499</td><td>-72.7</td><td>-92.7</td><td>32.7%</td><td>81.8</td><td>-207.7</td></tr>
+<tr><td>确认</td><td>MD≥0</td><td>tr_expansion</td><td>2,720</td><td>0.519</td><td>141.8</td><td>121.8</td><td>37.9%</td><td>195.0</td><td>-99.0</td></tr>
+</tbody></table>
+</body>
+</html>
