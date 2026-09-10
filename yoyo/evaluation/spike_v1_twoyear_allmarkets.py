@@ -315,13 +315,141 @@ def evaluate() -> None:
     atomic_json(RESULTS / "evaluation_manifest.json", {"config": CONFIG, "completed_at": stamp(), "trade_count": len(ledger), "ledger": str(RESULTS / "trade_ledger.csv.gz"), "funding": "unmodelled"})
 
 
+def _continuous(frame: pd.DataFrame, minutes: int) -> list[pd.DataFrame]:
+    """Split rather than bridge gaps; every returned frame is UTC continuous."""
+    if frame.empty:
+        return []
+    step = pd.Timedelta(minutes=minutes).value
+    cuts = np.flatnonzero(np.diff(frame.index.asi8) != step) + 1
+    return [part for part in np.split(frame, cuts) if len(part)]
+
+
+def _trade_rows(item: dict[str, Any], bars: pd.DataFrame, minutes: int) -> list[dict[str, Any]]:
+    """Run frozen long V1 on one continuous source segment, incrementally.
+
+    The Pine signal's risk is a signal-close reference.  Trading begins only at
+    the following open; stop checks use that fixed protection before a close
+    ratchet becomes active.  On a stop candle the high is not counted as MFE,
+    because the conservative intrabar ordering already selected the stop.
+    """
+    if len(bars) < 341 or not np.isfinite(float(item["tick"])) or float(item["tick"]) <= 0:
+        return []
+    replayed = replay(features(bars), float(item["tick"]))
+    step, rows = pd.Timedelta(minutes=minutes), []
+    for signal_time, signal in replayed.loc[replayed.burst].iterrows():
+        position = bars.index.get_loc(signal_time)
+        if position + 1 >= len(bars):
+            continue
+        entry_time, entry = bars.index[position + 1], float(bars.open.iloc[position + 1])
+        if not (START <= entry_time < END) or not np.isfinite(float(signal.risk)) or float(signal.risk) <= 0:
+            continue
+        protection, exit_position, exit_price, reason = float(signal.initial_stop), None, np.nan, "censored"
+        if entry <= protection:
+            exit_position, exit_price, reason = position + 1, entry, "entry_gap_through_stop"
+        else:
+            for j in range(position + 1, len(bars)):
+                bar = bars.iloc[j]
+                if float(bar.low) <= protection:
+                    exit_position, exit_price, reason = j, min(float(bar.open), protection), "protective_stop"
+                    break
+                if bool(replayed.trend_side.iloc[j]) and np.isfinite(float(replayed.protection.iloc[j])):
+                    protection = float(replayed.protection.iloc[j])
+        if exit_position is None:
+            exit_position, exit_price = len(bars) - 1, float(bars.close.iloc[-1])
+            exit_time = min(END, bars.index[-1] + step)
+        else:
+            exit_time = entry_time if reason == "entry_gap_through_stop" else bars.index[exit_position] + step
+        # Stop-bar extrema are after an unknown stop touch and excluded from MFE.
+        held_end = exit_position if reason == "protective_stop" else exit_position + 1
+        held = bars.iloc[position + 1:held_end]
+        highs = held.high.to_numpy(float) if len(held) else np.array([entry])
+        lows = held.low.to_numpy(float) if len(held) else np.array([entry])
+        mfe = float(highs.max() / entry - 1); mae = float(lows.min() / entry - 1)
+        gross, net, risk_fraction = exit_price / entry - 1, exit_price / entry - 1 - .002, float(signal.risk) / entry
+        row = {"event_id": digest(f"{item['venue']}|{item['symbol']}|{minutes}|{signal_time.isoformat()}".encode()),
+               "venue":item["venue"], "symbol":item["symbol"], "asset":item["asset"], "timeframe_min":minutes,
+               "direction":"long", "signal_bar_open":signal_time, "signal_close_time":signal_time + step,
+               "signal_close":float(bars.close.iloc[position]), "entry_time":entry_time, "entry_price":entry,
+               "exit_time":exit_time, "exit_price":exit_price, "exit_reason":reason, "fees_return":.002,
+               "gross_return":gross, "net_return":net, "return_pct":net * 100, "holding_minutes":(exit_time-entry_time).total_seconds()/60,
+               "reference_signal_risk":float(signal.risk), "risk_fraction_at_entry":risk_fraction,
+               "net_r":net / risk_fraction, "mae_return":mae, "mfe_return":mfe,
+               "drawdown_return":min(mae, 0.), "tail_capture":net / mfe if mfe > 0 else np.nan,
+               "censored":reason == "censored", "volume_ratio":float(replayed.rv.iloc[position]),
+               "tr_atr_expansion":float(replayed.expansion.iloc[position]), "density_width_atr":float(replayed.pastWidth.iloc[position]),
+               "density_duration":int(replayed.quiet_bars.iloc[position]),
+               "breakout_distance_atr":(float(bars.close.iloc[position])-float(replayed.launch_high.iloc[position]))/float(replayed.atr.iloc[position]),
+               "price_position":(float(bars.close.iloc[position])-float(bars.low.iloc[position])) / max(float(bars.high.iloc[position])-float(bars.low.iloc[position]), np.finfo(float).eps),
+               "delayed_release_bars":int(replayed.wait_bars.iloc[position]) if np.isfinite(float(replayed.wait_bars.iloc[position])) else 0}
+        rows.append(row)
+    return rows
+
+
+def evaluate_covered() -> None:
+    """Incrementally ledger every locally complete market/timeframe.
+
+    Coverage begins as all frozen current-catalog venue/symbol/timeframe cells.
+    A source becomes ``evaluated`` only after its own continuous segments have
+    passed V1 warmup and its ledger receipt pins the source bytes.  Thus a
+    growing covered universe never changes the 1,681×4 denominator.
+    """
+    catalog_frame = pd.read_json(DATA / "catalog.json")
+    catalog_frame = catalog_frame.loc[catalog_frame.eligible].copy()
+    base = pd.MultiIndex.from_product([CONFIG["timeframes"], range(len(catalog_frame))], names=["timeframe_min","catalog_i"]).to_frame(index=False)
+    coverage = base.join(catalog_frame.reset_index(drop=True), on="catalog_i")[["venue","symbol","asset","timeframe_min"]]
+    coverage["status"], coverage["detail"], coverage["trade_rows"] = "not_acquired", "", 0
+    tick_lookup = {(r.venue,r.symbol):r.tick for r in catalog_frame.itertuples()}
+    inputs: list[tuple[dict[str, Any], int, pd.DataFrame, str]] = []
+    for path in sorted((DATA / "market_receipts").glob("*/*.json")):
+        item = json.loads(path.read_text())
+        mask = coverage.venue.eq(item["venue"]) & coverage.symbol.eq(item["symbol"])
+        if item.get("status") != "complete":
+            coverage.loc[mask, ["status","detail"]] = "source_" + item.get("status","unknown"), item.get("error","")
+            continue
+        source = pd.read_csv(item["path"], index_col=0, parse_dates=True)
+        source.index = pd.DatetimeIndex(source.index, tz="UTC") if source.index.tz is None else source.index.tz_convert("UTC")
+        for minutes in CONFIG["timeframes"]:
+            inputs.append((item, minutes, aggregate(source, minutes), digest(Path(item["path"]).read_bytes())))
+    for path in sorted((DATA / "gate_timeframe_receipts").glob("*.json")):
+        item = json.loads(path.read_text()); minutes = int(item["minutes"])
+        mask = coverage.venue.eq("gate") & coverage.symbol.eq(item["symbol"]) & coverage.timeframe_min.eq(minutes)
+        if item.get("status") not in ("complete","partial"):
+            coverage.loc[mask, ["status","detail"]] = "source_" + item.get("status","unknown"), item.get("error","")
+            continue
+        source = pd.read_csv(item["path"], index_col=0, parse_dates=True)
+        source.index = pd.DatetimeIndex(source.index, tz="UTC") if source.index.tz is None else source.index.tz_convert("UTC")
+        tick = tick_lookup.get(("gate", item["symbol"]))
+        inputs.append((dict(item, tick=tick), minutes, source, digest(Path(item["path"]).read_bytes())))
+    for item, minutes, frame, source_sha in inputs:
+        mask = coverage.venue.eq(item["venue"]) & coverage.symbol.eq(item["symbol"]) & coverage.timeframe_min.eq(minutes)
+        dest = RESULTS / "covered_ledgers" / item["venue"] / (item["symbol"] + f"_{minutes}m.csv.gz")
+        receipt = dest.with_suffix(".receipt.json")
+        if receipt.exists() and dest.exists() and json.loads(receipt.read_text()).get("source_sha256") == source_sha:
+            prior = json.loads(receipt.read_text()); coverage.loc[mask,["status","detail","trade_rows"]] = "evaluated", prior["source_window"], prior["trade_rows"]
+            continue
+        rows = []
+        for segment in _continuous(frame, minutes): rows.extend(_trade_rows(item, segment, minutes))
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        pd.DataFrame(rows).to_csv(dest, index=False, compression={"method":"gzip","mtime":0})
+        receipt_data = {"source_sha256":source_sha, "source_window":f"{frame.index.min() if len(frame) else None}..{frame.index.max() if len(frame) else None}", "trade_rows":len(rows), "completed_at":stamp()}
+        atomic_json(receipt, receipt_data); coverage.loc[mask,["status","detail","trade_rows"]] = "evaluated", receipt_data["source_window"], len(rows)
+        print("evaluated", item["venue"], item["symbol"], minutes, len(rows), flush=True)
+    RESULTS.mkdir(parents=True, exist_ok=True)
+    coverage.to_csv(RESULTS / "coverage_limited.csv", index=False)
+    ledgers = list((RESULTS / "covered_ledgers").glob("*/*.csv.gz"))
+    atomic_json(RESULTS / "coverage_progress.json", {"generated_at":stamp(), "denominator_cells":len(coverage),
+                "statuses":coverage.status.value_counts().to_dict(), "evaluated_cells":int(coverage.status.eq("evaluated").sum()),
+                "ledger_files":len(ledgers), "trade_rows":int(coverage.trade_rows.sum())})
+
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument("phase", choices=("catalog", "fetch", "gate-timeframes", "evaluate")); parser.add_argument("--max-markets", type=int); parser.add_argument("--venue", choices=tuple(VENUES))
+    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument("phase", choices=("catalog", "fetch", "gate-timeframes", "evaluate", "evaluate-covered")); parser.add_argument("--max-markets", type=int); parser.add_argument("--venue", choices=tuple(VENUES))
     args = parser.parse_args()
     if args.phase == "catalog": catalog()
     elif args.phase == "fetch": fetch(args.max_markets, args.venue)
     elif args.phase == "gate-timeframes": fetch_gate_timeframes(args.max_markets)
-    else: evaluate()
+    elif args.phase == "evaluate": evaluate()
+    else: evaluate_covered()
 
 
 if __name__ == "__main__": main()
