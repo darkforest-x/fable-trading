@@ -75,11 +75,21 @@ python3 -m yoyo.monitor.replay_import \
 
 另一个真实前端合同错误出现在实时 DATA 30m 卡片。浏览器内显示周期为 `30`，而 `/api/chart` 只接受 `30m`；`85566e2` 在请求边界显式映射 `30/60/240 → 30m/1H/4H`，未知周期 fail closed。已直接读取 `DATA-USDT-SWAP` 的 `/api/chart?timeframe=30m`，返回 240 根 K 线。共享 IAB 刷新后实际点“页内预览”，右侧呈现价格刻度、6 MA、120 根信号附近 K 线、V1 风险线和时间轴；截图为 `analysis/output/spike_v1_ui_20260911/desktop-live-before-theme.png`。图中未出现服务 HTTP 400 或伪造行情。
 
+实机继续覆盖了深/浅主题、放大、滚轮缩放和拖拽：缩放后时间轴从 `9/8 17:00` 延至 `9/10 16:30`，拖拽后为 `9/8 05:00` 至 `9/10 04:30`，风险线和 K 线保持同一视图；收起时 dialog 已关闭。桌面与 390×844 窄屏也成功读取 Binance AIXBT 4H 的同源冻结 OHLC：信号 `2026-09-05 12:00`、收盘 `0.02197`、风险 `0.01915`，图中明确注明信号后的 K 线仅供回看。窄屏 `clientWidth=scrollWidth=390`，详情、放大/收起和返回卡片均可用。相应截图在 `analysis/output/spike_v1_ui_20260911/`。
+
+随后发现 source/周期切换时，已飞行的实时请求可在回放筛选之前落地，短暂重选 IBM live 详情。`ad6a98e` 用 `source + timeframe + revision` 作为查询上下文：切换时先清空旧卡片/详情/图表为加载态，旧回包不再写入；若切换发生在同步期间，则当前上下文自动排队重取。图表回包还必须匹配当前 id、source、confirmation 与收盘时刻。受控 IAB 复验中，DATA live 立即切到 replay 4H 后，页面显示“正在读取历史回放”、卡片为空、详情为空且没有 IBM/DATA 残留；AIXBT 的展示符号已从 `AIXBTUSDT · USDT` 收敛为 `AIXBT · USDT`，预览 aria 标签加入 venue。
+
+`c70f10f` 进一步清除了空详情时遗留的 chart aria，并使加载态 aria 直接描述当前 source、合约和周期。最终受控检查中，replay ARC Binance 1H 实际载入 98 根冻结 K 线（`2026-09-06` 至 `2026-09-10`）、风险 `0.0714`；工具 DOM 已确认真实图表数据，筛选截图为 `desktop-replay-1h-filter.png`。随后从 1H 切到 30m 仍立即回到空列表/空详情加载态，没有旧卡片、旧图或旧 aria。
+
+最后，ARC Binance 30m 也从同一冻结来源真实载入 105 根 K 线、风险 `0.07145`（`desktop-replay-30m-filter.png`）。因此当前桌面和窄屏均已验 live/replay、30m/1H/4H、主题、选择、放大/收起、缩放、拖拽、同源历史图和筛选加载态；没有重复执行这些 UI 场景。
+
+独立复核还验证 `3f98028` 的候选守门按 **raw bar 的原始收盘时刻** 重判，所以不会把合法的 1H/4H 等待窗口误杀。`e5f006b` 对第二阶段明确分时钟：raw 仍必须在当时通过 cutover/新鲜度，YOLO 追加事件则按自己的确认收盘时刻发送 Bark。回归覆盖“raw 已两小时、当前 1H 确认刚收盘 → 入库并追加 Bark”及“确认自身过期 → 仅入库、不补发”。这个 Python 后端提交尚未载入正在完成冷首轮的 worker；静态前端提交无需重启已由 IAB 验收。
+
 在 2026-09-11 的低频只读检查中，当前同一 scan `started_at_ms=1789068913215` 处于 `875 / 1434`（status 快照为 871）、errors 0；`/api/health` 为 636ms，`/api/status` 为 491ms。模型已实际 `ready`、`loaded=true`，已处理 7 个 endpoint，队列 0，唯一候选为上述 disabled 历史项。`market_ready=false` 仍正确，因为首轮没有完成；Bark outbox 的 pending/sent/failed/unknown 均为 0。
 
 ## 实现与验证
 
-本轮 monitor 提交链：`bf08b3c`、`8129087`、`603ea45`、`07e2db7`、`468fc5a`、`229b654`、`6b11464`、`a481311`、`1e5a286`、`7ce4971`、`df6c8f6`、`63e0b29`、`f35caf4`、`181193f`、`cc6bf62`、`3f98028`、`85566e2`。其中 `f35caf4` 使 replay 图依赖在选卡时才导入，避免 pandas/NumPy/PyArrow 在 FastAPI 监听前阻塞；`181193f` 是上述 overview blocker 的最小修复；`cc6bf62` 是保留因果输入的显示物化优化与 V1 gate 测试迁移；后两项分别保护 cutover 候选与实时图表周期合同。
+本轮 monitor 提交链：`bf08b3c`、`8129087`、`603ea45`、`07e2db7`、`468fc5a`、`229b654`、`6b11464`、`a481311`、`1e5a286`、`7ce4971`、`df6c8f6`、`63e0b29`、`f35caf4`、`181193f`、`cc6bf62`、`3f98028`、`85566e2`、`ad6a98e`、`a006636`、`c70f10f`、`e5f006b`。其中 `f35caf4` 使 replay 图依赖在选卡时才导入，避免 pandas/NumPy/PyArrow 在 FastAPI 监听前阻塞；`181193f` 是上述 overview blocker 的最小修复；`cc6bf62` 是保留因果输入的显示物化优化与 V1 gate 测试迁移；后续提交分别保护 cutover 候选、实时图表周期、筛选后详情、跨查询上下文的旧回包、加载态 aria 和延迟确认的通知时钟。
 
 本轮实际执行的定向代码验证：
 
@@ -95,7 +105,7 @@ node --check yoyo/monitor/static/app.js
 node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.test.cjs
 ```
 
-本次最终 V1 gate/worker focused suite 为 46 passed；此前回放/API 相邻 suite 为 10 passed。它们不是两个独立测试集，不应相加。`test_model_gate.py` 已迁到 current V1 live/raw/long/closed 合同，保留到期、延迟确认、去重、重启和因果端点覆盖；旧 IMACD `md` 失效断言以 V1 source/confirmation/direction/side/risk fail-closed 注册测试替代。随后对 cutover 修复的组合 suite 为 25 passed，前端 Node 合同测试在周期修复后为 7 passed；两者含重叠文件，不能相加。此前独立 CUA surface 的 `getTab('3', {browser:'1'})` 返回 `Browser is not available: 1`，但 root 已用共享 IAB 完成上述单张真实卡片验收。静态/API 合同检查仍不替代桌面与窄屏全部交互验收。
+本次最终 V1 gate/worker focused suite 为 46 passed；此前回放/API 相邻 suite 为 10 passed。它们不是两个独立测试集，不应相加。`test_model_gate.py` 已迁到 current V1 live/raw/long/closed 合同，保留到期、延迟确认、去重、重启和因果端点覆盖；旧 IMACD `md` 失效断言以 V1 source/confirmation/direction/side/risk fail-closed 注册测试替代。随后对 cutover 修复的组合 suite 为 25 passed，前端 Node 合同测试为 10 passed，延迟确认 focused suite 为 11 passed；它们含重叠文件，不能相加。此前独立 CUA surface 的 `getTab('3', {browser:'1'})` 返回 `Browser is not available: 1`，但 root 已用共享 IAB 完成上述真实卡片与窄屏验收。静态/API 合同检查不替代尚未完成的全市场扫描。
 
 ## 运行环境与未完成项
 
@@ -103,4 +113,4 @@ node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.t
 
 此前本任务暂停的 `yoyo.evaluation.spike_v1_twoyear_allmarkets fetch --venue binance`（PID 51814）已核对命令身份并 `SIGCONT` 恢复，进程从 `T+` 变为 `S+`。它是独立两年采集，不是本轮 monitor 结果；恢复不表示其评估账本问题已解决。
 
-后续仍需在资源可用时完成：全 1,434 单元扫描、真实浏览器桌面/窄屏的主题、筛选、缩放、拖拽和全屏验收。应验证 live/raw、live/yolo 与 replay 的分栏和标签，以及 replay 图中历史后续 K 线的说明。更广泛 V1 或 YOLO 有效性、收益和手机实际送达均不在本次功能验收范围。
+后续仍需在资源可用时完成：全 1,434 单元扫描，并在不丢失内存 OHLC cache 的受控 reload 时载入 `e5f006b`。更广泛 V1 或 YOLO 有效性、收益和手机实际送达均不在本次功能验收范围。
