@@ -1,0 +1,63 @@
+{
+  "status": "passed",
+  "checks": {
+    "manifests_complete": true,
+    "validation_pins_prepared": true,
+    "configs_identical": true,
+    "all_builder_pins": true,
+    "all_source_pins": true,
+    "all_artifact_pins": true,
+    "labels_byte_identical": true,
+    "exposure_byte_identical": true,
+    "event_ids_unique": true,
+    "old_v2_signal_positions_identical": true,
+    "shared_changes_exact": true,
+    "removed_changes_exact": true,
+    "new_changes_exact": true,
+    "trade_event_schedule_exact": true,
+    "trade_control_schedule_exact": true,
+    "old_v2_actual_outcomes_exact": true,
+    "controls_have_existing_same_arm_parent": true,
+    "confirmed_signal_clock_and_inputs": true,
+    "control_same_asset_week_causal_bucket_history_and_known_exclusion": true,
+    "actual_next_open_clock_and_price": true,
+    "independent_episode_attribution_and_no_reuse": true,
+    "costs_all_twenty_bp": true,
+    "entry_risk_algebra": true,
+    "gross_price_return_algebra": true,
+    "net_cost_algebra": true,
+    "r_algebra": true,
+    "v2_summary_counts": true,
+    "v2_summary_means": true,
+    "episode_summary_counts": true,
+    "episode_summary_means": true
+  },
+  "counts": {
+    "jobs": 278,
+    "signal_clock_checks": 2795,
+    "control_contract_checks": 8199,
+    "trade_clock_checks": 10994,
+    "episode_provenance_checks": 1381,
+    "signals": 2795,
+    "controls": 8199,
+    "trade_rows": 10994,
+    "blocked": 70,
+    "changes": {
+      "shared": 1369,
+      "removed": 45,
+      "new": 12
+    },
+    "source_hashes": 311,
+    "builder_hashes": 11
+  },
+  "errors": [],
+  "prepared_sha256": "9d302173bee347538b4ae04095808bfad2e4805585fc364f9234f01f2c797340",
+  "validation_sha256": "577fc7efa60e53fb6c51e2b0eb5d92c13bdc7e074497d3e524380b6268f95c77",
+  "scope": "read-only independently reconstructed attribution, data/clock/algebra and baseline comparisons; not a second outcome scoring pass",
+  "limitations": [
+    "Full intrabar path not independently resimulated.",
+    "Past12 control exclusion independently checked against in-study union; pre-study warmup exclusion comes from frozen matcher code/source audit.",
+    "Episode re-use independently checked over in-study events; warmup consumption behavior is covered by source and synthetic causality tests.",
+    "Independent reviewer authored candidate module and tests earlier; this is separate reconstruction, not organizationally independent review."
+  ]
+}

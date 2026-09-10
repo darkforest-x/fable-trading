@@ -26762,3 +26762,82 @@ artifacts:
     production_eligible: false
     notes: Warning recall exceeds80% on seen price-anchor proxy; related confirmation and trading quality not validated.
       Pine source only; no live changes.
+
+  - artifact_id: spike-noise-v4-20260910-report-source
+    artifact_type: report
+    role: retrospective_launch_noise_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: 187f5a230969e2433b3ff10b3986c24f8d382cff
+    source_path: analysis/p1_spike_burst_noise_20260910.md
+    sha256: 62c7618b5e1c4d5ec2c35d523c45447eafbac481561c076ac74b32c8cf5711e5
+    size_bytes: 7866
+    storage_uri: repo://analysis/p1_spike_burst_noise_20260910.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Single episode gate reduces signals2.33%, no quality advantage; rejected as noise solution. No live changes.
+  - artifact_id: spike-noise-v4-20260910-report-html
+    artifact_type: report
+    role: retrospective_launch_noise_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: 187f5a230969e2433b3ff10b3986c24f8d382cff
+    source_path: analysis/html/p1_spike_burst_noise_20260910.html
+    sha256: 278dd3bd2e440431c00627eaaae661afd7986230297104aceba88e7f33ae0a54
+    size_bytes: 150570
+    storage_uri: repo://analysis/html/p1_spike_burst_noise_20260910.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Single episode gate reduces signals2.33%, no quality advantage; rejected as noise solution. No live changes.
+  - artifact_id: spike-noise-v4-20260910-prepared_manifest
+    artifact_type: manifest
+    role: retrospective_launch_noise_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: 187f5a230969e2433b3ff10b3986c24f8d382cff
+    source_path: experiments/active/exp-spike-burst-noise-20260910-v4/results/prepared_manifest.json
+    sha256: 9d302173bee347538b4ae04095808bfad2e4805585fc364f9234f01f2c797340
+    size_bytes: 69261
+    storage_uri: repo://experiments/active/exp-spike-burst-noise-20260910-v4/results/prepared_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Single episode gate reduces signals2.33%, no quality advantage; rejected as noise solution. No live changes.
+  - artifact_id: spike-noise-v4-20260910-validation_manifest
+    artifact_type: manifest
+    role: retrospective_launch_noise_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: 187f5a230969e2433b3ff10b3986c24f8d382cff
+    source_path: experiments/active/exp-spike-burst-noise-20260910-v4/results/validation_manifest.json
+    sha256: 577fc7efa60e53fb6c51e2b0eb5d92c13bdc7e074497d3e524380b6268f95c77
+    size_bytes: 2734
+    storage_uri: repo://experiments/active/exp-spike-burst-noise-20260910-v4/results/validation_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Single episode gate reduces signals2.33%, no quality advantage; rejected as noise solution. No live changes.
+  - artifact_id: spike-noise-v4-20260910-report_manifest
+    artifact_type: manifest
+    role: retrospective_launch_noise_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: 187f5a230969e2433b3ff10b3986c24f8d382cff
+    source_path: experiments/active/exp-spike-burst-noise-20260910-v4/results/report_manifest.json
+    sha256: 8365d4bcd37ae787e22d5d1e5aaa85408c1ab0018ab0def3b1a11a6ecdd5220b
+    size_bytes: 871
+    storage_uri: repo://experiments/active/exp-spike-burst-noise-20260910-v4/results/report_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Single episode gate reduces signals2.33%, no quality advantage; rejected as noise solution. No live changes.
+  - artifact_id: spike-noise-v4-20260910-audit
+    artifact_type: manifest
+    role: retrospective_launch_noise_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: 187f5a230969e2433b3ff10b3986c24f8d382cff
+    source_path: experiments/active/exp-spike-burst-noise-20260910-v4/qa/independent_review.json
+    sha256: 1e9fbbf8d6351c363fceee4644c15155a2ddfae13dc00c3842fe7438bbfcf40e
+    size_bytes: 2441
+    storage_uri: repo://experiments/active/exp-spike-burst-noise-20260910-v4/qa/independent_review.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Single episode gate reduces signals2.33%, no quality advantage; rejected as noise solution. No live changes.

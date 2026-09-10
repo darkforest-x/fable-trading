@@ -7819,17 +7819,24 @@ experiments:
 
   - experiment_id: exp-spike-burst-noise-20260910-v4
     source_repo: darkforest-x/fable-trading
-    source_commit: 67454c80e83fce36d806e0a602b0af9edba38cd4
-    status: active
+    source_commit: 187f5a230969e2433b3ff10b3986c24f8d382cff
+    status: rejected
     question: Does consuming each density episode once reduce V2 repeated launch noise?
-    single_variable: One causal consumed-density-episode gate on progressive entries
-      only; risk and costs unchanged.
-    result: Preregistered, no scores yet. Actual TV reads V2, V3 remains offline.
-    holdout_consumed: false
+    single_variable: One causal consumed-density-episode gate on progressive entries only; risk and costs unchanged.
+    result: 278OKX1H/61days:1414 to1381 alerts (-2.33%); natural net win33.41% to33.28%; matched excess -70.89 to-74.84bp
+      in newly matched controls. Same labels; no noise solution.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
     canonical_report: analysis/html/p1_spike_burst_noise_20260910.html
-    artifacts: []
-    notes: Owner noise correction and prior all-dates authorization. One retrospective
-      exposure after builder commit; no live changes.
+    artifacts:
+    - spike-noise-v4-20260910-report-source
+    - spike-noise-v4-20260910-report-html
+    - spike-noise-v4-20260910-prepared_manifest
+    - spike-noise-v4-20260910-validation_manifest
+    - spike-noise-v4-20260910-report_manifest
+    - spike-noise-v4-20260910-audit
+    notes: First V4 retrospective exposure on already-seen dates. 56 tests,278source audit,10994 trade algebra checks.
+      Density toggles may still split same trend. TV remainsV2; no live or risk edits.
+

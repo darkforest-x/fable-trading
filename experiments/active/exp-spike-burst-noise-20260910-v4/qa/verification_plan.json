@@ -1,0 +1,15 @@
+{
+  "observed_native_tv": {
+    "symbol": "OKX:PEPEUSDT.P",
+    "timeframe": "1H",
+    "indicator_legend": "SPIKE BURST V2",
+    "source": "native app accessibility tree read in this turn"
+  },
+  "tests": {
+    "command": ".venv/bin/python -m pytest -q tests/test_spike_burst_episode.py tests/test_spike_burst_noise_study.py tests/test_spike_burst_progressive.py",
+    "passed": 56
+  },
+  "builder_commit": "187f5a230969e2433b3ff10b3986c24f8d382cff",
+  "native_pine_changed": false,
+  "monitor_or_notifications_changed": false
+}
