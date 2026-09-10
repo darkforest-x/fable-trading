@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import subprocess
 
 import matplotlib
 matplotlib.use('Agg')
@@ -20,7 +21,7 @@ from matplotlib import font_manager
 import numpy as np
 import pandas as pd
 
-from yoyo.evaluation.spike_burst_validation import EXPERIMENT, sha
+from yoyo.evaluation.spike_burst_validation import EXPERIMENT, ROOT, sha
 from yoyo.evaluation.spike_burst_execution import simulate_trade
 from yoyo.evaluation.spike_burst_replay import features
 from yoyo.evaluation.altseason_research import END, read_events
@@ -54,7 +55,7 @@ def curves(folder,out):
         axes[0,col].legend(fontsize=9,loc='upper left')
         for ax in axes[:,col]:ax.grid(axis='y');ax.axhline(0,color='#aeb9c2',lw=.7)
     fig.suptitle('SPIKE 强劲爆发 V1：最高浮盈之外，实际账户留下多少',x=.05,ha='left',fontsize=17,fontweight='bold')
-    fig.text(.05,.02,'2026-07-10 — 09-09 UTC｜固定20bp往返成本，资金费率/真实冲击未完整覆盖｜两个周期分别建账户',color='#566571')
+    fig.text(.05,.02,'2026-07-10 — 09-09 UTC｜固定20bp往返成本，资金费率/真实冲击未计入基础账户｜两个周期分别建账户',color='#566571')
     fig.tight_layout(rect=[0,.05,1,.94]);p=out/'account_paths.png';fig.savefig(p,dpi=155);plt.close(fig)
     return p
 
@@ -111,6 +112,11 @@ def run(folder=EXPERIMENT/'results'):
     # Authenticate the full dataset and account receipts before any chart reads.
     for manifest_name in ('dataset_manifest.json','validation_manifest.json'):
         manifest=json.loads((folder/manifest_name).read_text())
+        if manifest_name=='dataset_manifest.json':
+            for name in ('spike_burst_replay','spike_burst_execution'):
+                path='yoyo/evaluation/'+name+'.py'
+                if sha(ROOT/path)!=manifest['source_hashes'][path]:
+                    raise ValueError('Figure replay source differs from frozen dataset: '+path)
         for item in manifest['artifacts']:
             if sha(item['path'])!=item['sha256']:raise ValueError('Changed artifact: '+item['path'])
         for item in manifest.get('feature_sources',[]):
@@ -134,7 +140,9 @@ def run(folder=EXPERIMENT/'results'):
                 symbol=row.symbol,venue=row.venue,minutes=int(row.minutes),route=row.route,
                 entry_time=str(row.entry_time),exit_time=str(row.exit_time),peak_r=float(row.peak_r),
                 net_r=float(row.net_r),net_return=float(row.net_return),account_pnl=float(row.realized_net_pnl)))
-    result=dict(examples=examples,artifacts=[dict(path=str(p.resolve()),sha256=sha(p),size_bytes=p.stat().st_size) for p in paths])
+    result=dict(examples=examples,builder_sha256=sha(__file__),
+        code_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+        artifacts=[dict(path=str(p.resolve()),sha256=sha(p),size_bytes=p.stat().st_size) for p in paths])
     (folder/'figures_manifest.json').write_text(json.dumps(result,indent=2,ensure_ascii=False)+'\n')
     return result
 
