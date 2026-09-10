@@ -7734,18 +7734,27 @@ experiments:
   - experiment_id: exp-spike-burst-three-year-20260910-v1
     source_repo: darkforest-x/fable-trading
     source_commit: e05557d6e65a2b9965cf6dcc30c12c74ed8a11e7
-    status: active
+    status: completed
     question: Does frozen Burst V1 transfer across three historical years, and why is ETH1H sparse?
-    single_variable: Frozen entry and execution; longer chronological evaluation and documented Binance universe.
-      No fitting.
-    result: Preregistered; native-amount archive adapter and fixed-engine wrapper prepared. No three-year returns
-      evaluated yet.
+    single_variable: Frozen entry and execution; longer chronological evaluation and documented Binance universe. No fitting.
+    result: Complete 2023-09-09 to 2026-09-09 UTC retrospective, 649 markets, 10,442,235 1H bars. Primary 1H net +7.732%
+      / max DD 52.936%, 4H +1.091% / DD 22.676%; natural win 315/1133 and 78/278. All four primary Holm p=1. ETH1H six
+      long signals; recent OKX ETH1H zero. Independent cashbook 130841 checks / zero differences.
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
-    canonical_report: null
-    artifacts: []
-    notes: Owner explicitly requests three years and authorizes all dates. Frozen configuration return exposure2;
-      previously seen retrospective data. BTC and ETH diagnostics separate from primary altcoins. Live defaults/notifications
-      unchanged.
+    canonical_report: analysis/html/p1_spike_burst_three_year_20260910.html
+    artifacts:
+    - spike-burst-three-year-20260910-report-source
+    - spike-burst-three-year-20260910-report-html
+    - spike-burst-three-year-20260910-verification
+    - spike-burst-three-year-20260910-report-manifest
+    - spike-burst-three-year-20260910-dataset-manifest
+    - spike-burst-three-year-20260910-validation-manifest
+    - spike-burst-three-year-20260910-cashbook-audit
+    - spike-burst-three-year-20260910-rave-audit
+    - spike-burst-three-year-20260910-extreme-audit
+    notes: Owner explicitly requested three years/all dates. Frozen return exposure 2, previously seen retrospective history,
+      not blind OOS. BTC/ETH separate; frozen COIN pool includes XAUT. Historical lifetime audit applied before event preparation.
+      RAVE extreme simulated profit authenticated but material full-account dependence; no live/default/notification changes.

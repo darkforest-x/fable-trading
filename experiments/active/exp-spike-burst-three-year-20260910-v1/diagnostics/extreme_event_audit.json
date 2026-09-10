@@ -1,0 +1,1694 @@
+{
+  "schema": "spike-burst-extreme-event-audit-v1",
+  "generated_at": "2026-09-10T05:35:48.288746+00:00",
+  "scope": "Read-only audit of existing Burst valid naturally exited events; no trade-engine invocation, no new simulation, no rule changes. Observed extremal cases are intentionally selected for error detection, not representative performance estimates.",
+  "sources": {
+    "dataset_manifest": {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/dataset_manifest.json",
+      "sha256": "1e21b3393be372b40f9f9deb4311a838dd0768df987f9982c687353e43e323e2"
+    },
+    "history_manifest": {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/data_tradable/history_manifest.json",
+      "sha256": "f9e3c2127d508e63f3d4dacfb7e5a8165fd136e3665ad0b7833c4c3066ac7c8e"
+    },
+    "events": {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/events.csv.gz",
+      "sha256": "05c2d140029c802328015a55389e496ba53f46a34b3448883304f634d63b444a"
+    },
+    "archive_manifest": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/archive_fetch_summary.json",
+      "sha256": "de0b6b64550d4a5cc7cd7f61a8f76750e3819bc8fb316d723c9a693befbd6546"
+    }
+  },
+  "dataset_count": 28573,
+  "eligible_burst_natural_count": 1969,
+  "selection_rule": "For net_r, peak_r, net_return independently take highest3 and lowest3; deterministic tie break ascending event_id; deduplicate union. BTC/ETH remain eligible for this mechanical extreme audit and are identified by symbol.",
+  "rank_sets": {
+    "net_r_highest": [
+      {
+        "event_id": "d0ff2c71ba936ca97fcb99e97091",
+        "symbol": "RAVEUSDT",
+        "minutes": 60,
+        "net_r": 580.6340621761673
+      },
+      {
+        "event_id": "f016b5d330cc5972be0ef85612db",
+        "symbol": "1000FLOKIUSDT",
+        "minutes": 60,
+        "net_r": 29.064452012383935
+      },
+      {
+        "event_id": "6062ccbcb78f8b42e7c03bd91bb5",
+        "symbol": "USELESSUSDT",
+        "minutes": 60,
+        "net_r": 25.70103639514733
+      }
+    ],
+    "net_r_lowest": [
+      {
+        "event_id": "92c2d9f30961c4e4c54e59504737",
+        "symbol": "XAUTUSDT",
+        "minutes": 60,
+        "net_r": -1.2093771020502209
+      },
+      {
+        "event_id": "f7148518d227e4ad652ec5ada6f9",
+        "symbol": "BTCUSDT",
+        "minutes": 60,
+        "net_r": -1.1873635143598478
+      },
+      {
+        "event_id": "288eaa06d550f9d70cbb3cdfd668",
+        "symbol": "BNBUSDT",
+        "minutes": 60,
+        "net_r": -1.1567849740932676
+      }
+    ],
+    "peak_r_highest": [
+      {
+        "event_id": "d0ff2c71ba936ca97fcb99e97091",
+        "symbol": "RAVEUSDT",
+        "minutes": 60,
+        "peak_r": 913.2509252405648
+      },
+      {
+        "event_id": "66c2a1ca4e680040d91f1d5de70a",
+        "symbol": "FHEUSDT",
+        "minutes": 60,
+        "peak_r": 46.057534246575386
+      },
+      {
+        "event_id": "6062ccbcb78f8b42e7c03bd91bb5",
+        "symbol": "USELESSUSDT",
+        "minutes": 60,
+        "peak_r": 43.49220103986137
+      }
+    ],
+    "peak_r_lowest": [
+      {
+        "event_id": "09fdc8c6ccc1e0a228c30f3a1549",
+        "symbol": "TSTUSDT",
+        "minutes": 240,
+        "peak_r": 0.0
+      },
+      {
+        "event_id": "167bd73f8e7cfde3f139f7a1afdd",
+        "symbol": "ACTUSDT",
+        "minutes": 240,
+        "peak_r": 0.0
+      },
+      {
+        "event_id": "1bfaad081985b3ba61592daa73e0",
+        "symbol": "SOPHUSDT",
+        "minutes": 60,
+        "peak_r": 0.0
+      }
+    ],
+    "net_return_highest": [
+      {
+        "event_id": "d0ff2c71ba936ca97fcb99e97091",
+        "symbol": "RAVEUSDT",
+        "minutes": 60,
+        "net_return": 29.95061731129014
+      },
+      {
+        "event_id": "66c2a1ca4e680040d91f1d5de70a",
+        "symbol": "FHEUSDT",
+        "minutes": 60,
+        "net_return": 3.0767600459242255
+      },
+      {
+        "event_id": "f016b5d330cc5972be0ef85612db",
+        "symbol": "1000FLOKIUSDT",
+        "minutes": 60,
+        "net_return": 2.6142628794207745
+      }
+    ],
+    "net_return_lowest": [
+      {
+        "event_id": "19543eee10d5f64a04d3b59e7e7e",
+        "symbol": "MOVRUSDT",
+        "minutes": 240,
+        "net_return": -0.6763078913324709
+      },
+      {
+        "event_id": "142f153548670061d756fa1ae0f1",
+        "symbol": "BROCCOLI714USDT",
+        "minutes": 240,
+        "net_return": -0.676055829228243
+      },
+      {
+        "event_id": "9d2723b4575a9a37b7af68a8c3ec",
+        "symbol": "QUSDT",
+        "minutes": 240,
+        "net_return": -0.6075373037935585
+      }
+    ]
+  },
+  "selected_count": 13,
+  "feature_and_original_window_rows_checked": 1970,
+  "native_source_authentication": {
+    "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/RAVEUSDT/RAVEUSDT-15m-2026-04.zip": {
+      "sha256": "11ee0efca95ce54738c82ff561eb4e9b37a3e1ceb64fdc76ef063e3f2f33b41d",
+      "expected_sha256": "11ee0efca95ce54738c82ff561eb4e9b37a3e1ceb64fdc76ef063e3f2f33b41d",
+      "member": "RAVEUSDT-15m-2026-04.csv",
+      "csv_sha256": "a3f4eaf29d3a80f0d23d31055863237cd9d9b20cf7fcf2638a324ba4d50eb869",
+      "kind": "original_monthly_native_15m",
+      "rows": 2880,
+      "header": "open_time,open,high,low,close,volume,close_time,quote_volume,count,taker_buy_volume,taker_buy_quote_volume,ignore"
+    },
+    "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/1000FLOKIUSDT/1000FLOKIUSDT-15m-2024-02.zip": {
+      "sha256": "46e4e9667cecf7c6e267644c1c2ea6d359bf69fb3f60b75ef59800f00fdd2ad0",
+      "expected_sha256": "46e4e9667cecf7c6e267644c1c2ea6d359bf69fb3f60b75ef59800f00fdd2ad0",
+      "member": "1000FLOKIUSDT-15m-2024-02.csv",
+      "csv_sha256": "f52279205ccf0cc86ffeb9ae581adf2a91ac38c131b3f5d5a65edf458d5004c8",
+      "kind": "original_monthly_native_15m",
+      "rows": 2784,
+      "header": "open_time,open,high,low,close,volume,close_time,quote_volume,count,taker_buy_volume,taker_buy_quote_volume,ignore"
+    },
+    "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/1000FLOKIUSDT/1000FLOKIUSDT-15m-2024-03.zip": {
+      "sha256": "c2f86bf9adedc55114ebae01498f13c0be6d28fe95f28b2f8459ae69567c4827",
+      "expected_sha256": "c2f86bf9adedc55114ebae01498f13c0be6d28fe95f28b2f8459ae69567c4827",
+      "member": "1000FLOKIUSDT-15m-2024-03.csv",
+      "csv_sha256": "2dd87ed5728fcbc35623b78f5cd307c9a091bd2afd052d7e0d7b9cefd61d5ff3",
+      "kind": "original_monthly_native_15m",
+      "rows": 2976,
+      "header": "open_time,open,high,low,close,volume,close_time,quote_volume,count,taker_buy_volume,taker_buy_quote_volume,ignore"
+    },
+    "/Users/zhangzc/fable-trading/experiments/active/exp-altseason-multivenue-20260910-v1/data/normalized/binance/USELESSUSDT_1h.csv.gz": {
+      "sha256": "c35ba2183e2f16b93d2bfa6bff9fa919d5ace2f79735bf4a0f49078d18d2bd80",
+      "expected_sha256": "c35ba2183e2f16b93d2bfa6bff9fa919d5ace2f79735bf4a0f49078d18d2bd80",
+      "kind": "native_recent_1h",
+      "rows": 3144
+    },
+    "/Users/zhangzc/fable-trading/experiments/active/exp-altseason-multivenue-20260910-v1/data/normalized/binance/XAUTUSDT_1h.csv.gz": {
+      "sha256": "368ad4ce7c71d5a7fb590b715e8ac8c67524a2231d6bad3aaff6317451971105",
+      "expected_sha256": "368ad4ce7c71d5a7fb590b715e8ac8c67524a2231d6bad3aaff6317451971105",
+      "kind": "native_recent_1h",
+      "rows": 3144
+    },
+    "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/BTCUSDT/BTCUSDT-15m-2025-05.zip": {
+      "sha256": "303a174c2d15248fe00342ac2b01bec41bb4e11c4a5d26d480e2a382808bc020",
+      "expected_sha256": "303a174c2d15248fe00342ac2b01bec41bb4e11c4a5d26d480e2a382808bc020",
+      "member": "BTCUSDT-15m-2025-05.csv",
+      "csv_sha256": "fba5561d9c07a520e4166826092ab9bc70337cc818b8c26293183a6bc7349380",
+      "kind": "original_monthly_native_15m",
+      "rows": 2976,
+      "header": "open_time,open,high,low,close,volume,close_time,quote_volume,count,taker_buy_volume,taker_buy_quote_volume,ignore"
+    },
+    "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/BNBUSDT/BNBUSDT-15m-2024-10.zip": {
+      "sha256": "6159f32bfb79de1515ce401620e73de403dcb30b1163871416f5fab0e3e496cc",
+      "expected_sha256": "6159f32bfb79de1515ce401620e73de403dcb30b1163871416f5fab0e3e496cc",
+      "member": "BNBUSDT-15m-2024-10.csv",
+      "csv_sha256": "f1e5845b4fbbaa19f53102c2a2d002573c4a03c6ac869b40f8a03855c94d38d6",
+      "kind": "original_monthly_native_15m",
+      "rows": 2976,
+      "header": "open_time,open,high,low,close,volume,close_time,quote_volume,count,taker_buy_volume,taker_buy_quote_volume,ignore"
+    },
+    "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/FHEUSDT/FHEUSDT-15m-2026-01.zip": {
+      "sha256": "5166238fbb4067714528fc0b8955ca96e2848bd29091850006ff28f3f93b090b",
+      "expected_sha256": "5166238fbb4067714528fc0b8955ca96e2848bd29091850006ff28f3f93b090b",
+      "member": "FHEUSDT-15m-2026-01.csv",
+      "csv_sha256": "e3e1c81152c1449f994e2f6a18f4963a8236204fc480a914df6fee0015494ecf",
+      "kind": "original_monthly_native_15m",
+      "rows": 2976,
+      "header": "open_time,open,high,low,close,volume,close_time,quote_volume,count,taker_buy_volume,taker_buy_quote_volume,ignore"
+    },
+    "/Users/zhangzc/fable-trading/experiments/active/exp-altseason-multivenue-20260910-v1/data/normalized/binance/TSTUSDT_1h.csv.gz": {
+      "sha256": "eace10d2e026e7c7dcafee63a19648323c9ef5ec40b3d076061a55fd61aa25eb",
+      "expected_sha256": "eace10d2e026e7c7dcafee63a19648323c9ef5ec40b3d076061a55fd61aa25eb",
+      "kind": "native_recent_1h",
+      "rows": 3144
+    },
+    "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/ACTUSDT/ACTUSDT-15m-2025-10.zip": {
+      "sha256": "ae96ee0f9e5e753636a16d12465e4c40bd9bfd177cc5890f02fdd17e76a818ef",
+      "expected_sha256": "ae96ee0f9e5e753636a16d12465e4c40bd9bfd177cc5890f02fdd17e76a818ef",
+      "member": "ACTUSDT-15m-2025-10.csv",
+      "csv_sha256": "029eb18e1b5e50023f6ca0adff1f7e625a25c889b4927badb384eb63593986f1",
+      "kind": "original_monthly_native_15m",
+      "rows": 2976,
+      "header": "open_time,open,high,low,close,volume,close_time,quote_volume,count,taker_buy_volume,taker_buy_quote_volume,ignore"
+    },
+    "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/SOPHUSDT/SOPHUSDT-15m-2025-08.zip": {
+      "sha256": "85f93931d99622b8fde4b2582a181376dd2b2997cf193f4705d61fc126412af6",
+      "expected_sha256": "85f93931d99622b8fde4b2582a181376dd2b2997cf193f4705d61fc126412af6",
+      "member": "SOPHUSDT-15m-2025-08.csv",
+      "csv_sha256": "b9276179cf3b7e128922c8dd6e8c0ffe4eec02ddcf9958179920af2996b02787",
+      "kind": "original_monthly_native_15m",
+      "rows": 2976,
+      "header": "open_time,open,high,low,close,volume,close_time,quote_volume,count,taker_buy_volume,taker_buy_quote_volume,ignore"
+    },
+    "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/MOVRUSDT/MOVRUSDT-15m-2026-04.zip": {
+      "sha256": "45d562d878ecf24f60ced3ed365459da35df01fddc56f5d7c2745cc5f1dc492e",
+      "expected_sha256": "45d562d878ecf24f60ced3ed365459da35df01fddc56f5d7c2745cc5f1dc492e",
+      "member": "MOVRUSDT-15m-2026-04.csv",
+      "csv_sha256": "f40ca407a06ee75b0676032f8136d8ab68781bd37de9ff303a0158736a655d3d",
+      "kind": "original_monthly_native_15m",
+      "rows": 2880,
+      "header": "open_time,open,high,low,close,volume,close_time,quote_volume,count,taker_buy_volume,taker_buy_quote_volume,ignore"
+    },
+    "/Users/zhangzc/fable-trading/experiments/active/exp-altseason-multivenue-20260910-v1/data/normalized/binance/MOVRUSDT_1h.csv.gz": {
+      "sha256": "6ae1ef07c9b0637b8c095395dacb41ef1200b15473362fc178c886ba1eb250df",
+      "expected_sha256": "6ae1ef07c9b0637b8c095395dacb41ef1200b15473362fc178c886ba1eb250df",
+      "kind": "native_recent_1h",
+      "rows": 3144
+    },
+    "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/BROCCOLI714USDT/BROCCOLI714USDT-15m-2025-12.zip": {
+      "sha256": "8530d40d1e58d62d4ec54cc1626e52f19701368de41e83b36084df7b9954e371",
+      "expected_sha256": "8530d40d1e58d62d4ec54cc1626e52f19701368de41e83b36084df7b9954e371",
+      "member": "BROCCOLI714USDT-15m-2025-12.csv",
+      "csv_sha256": "4c6d18cd8c4894dce453dc500226d8dfe53d9322e047e44c71a43f1adfd83bdb",
+      "kind": "original_monthly_native_15m",
+      "rows": 2976,
+      "header": "open_time,open,high,low,close,volume,close_time,quote_volume,count,taker_buy_volume,taker_buy_quote_volume,ignore"
+    },
+    "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/BROCCOLI714USDT/BROCCOLI714USDT-15m-2026-01.zip": {
+      "sha256": "c23b949f56e7c3edced82249572372594f61d54f31a41de6100249893a95cf6d",
+      "expected_sha256": "c23b949f56e7c3edced82249572372594f61d54f31a41de6100249893a95cf6d",
+      "member": "BROCCOLI714USDT-15m-2026-01.csv",
+      "csv_sha256": "63568a2d9fd2b717af6f4b205dbb39cffc6dc5444a142fd23678e8be4d74dd7b",
+      "kind": "original_monthly_native_15m",
+      "rows": 2976,
+      "header": "open_time,open,high,low,close,volume,close_time,quote_volume,count,taker_buy_volume,taker_buy_quote_volume,ignore"
+    },
+    "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/BROCCOLI714USDT/BROCCOLI714USDT-15m-2026-02.zip": {
+      "sha256": "9abb597b7cd87f5b618a44a862bf15aca257d2fb4d9e2cc46e6d06f8e8405966",
+      "expected_sha256": "9abb597b7cd87f5b618a44a862bf15aca257d2fb4d9e2cc46e6d06f8e8405966",
+      "member": "BROCCOLI714USDT-15m-2026-02.csv",
+      "csv_sha256": "0384396eec5c637d1208faf2d44e3d9040cd5a2588d5dff6bf6041e7f9befc3f",
+      "kind": "original_monthly_native_15m",
+      "rows": 2688,
+      "header": "open_time,open,high,low,close,volume,close_time,quote_volume,count,taker_buy_volume,taker_buy_quote_volume,ignore"
+    },
+    "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/QUSDT/QUSDT-15m-2026-01.zip": {
+      "sha256": "d2cdd20ac629cb9a8dc3c1326739e529573af96288f4056797161ff479bad5ab",
+      "expected_sha256": "d2cdd20ac629cb9a8dc3c1326739e529573af96288f4056797161ff479bad5ab",
+      "member": "QUSDT-15m-2026-01.csv",
+      "csv_sha256": "b7ee8147279a84ac8368e9d4ed1643493e53f7e5f212d7781d7407b142a8195e",
+      "kind": "original_monthly_native_15m",
+      "rows": 2976,
+      "header": "open_time,open,high,low,close,volume,close_time,quote_volume,count,taker_buy_volume,taker_buy_quote_volume,ignore"
+    },
+    "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/QUSDT/QUSDT-15m-2026-02.zip": {
+      "sha256": "8a466b359922128c6ef59734332d649242d630e3926d457d6dca38cfc1d5366a",
+      "expected_sha256": "8a466b359922128c6ef59734332d649242d630e3926d457d6dca38cfc1d5366a",
+      "member": "QUSDT-15m-2026-02.csv",
+      "csv_sha256": "ebc0de3f56adb083b137cbb8f272e114b978cd16e254b1775276e0fa4073279d",
+      "kind": "original_monthly_native_15m",
+      "rows": 2688,
+      "header": "open_time,open,high,low,close,volume,close_time,quote_volume,count,taker_buy_volume,taker_buy_quote_volume,ignore"
+    },
+    "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/QUSDT/QUSDT-15m-2026-03.zip": {
+      "sha256": "ade9ae75bb5ad7607b73123f85a38af9cf7666af9603cc2b03c88438addc93c9",
+      "expected_sha256": "ade9ae75bb5ad7607b73123f85a38af9cf7666af9603cc2b03c88438addc93c9",
+      "member": "QUSDT-15m-2026-03.csv",
+      "csv_sha256": "42da4cc9f65f7ffa8d572fc9cef2255a870b7a89c0013cb6a928f48c11a93908",
+      "kind": "original_monthly_native_15m",
+      "rows": 2976,
+      "header": "open_time,open,high,low,close,volume,close_time,quote_volume,count,taker_buy_volume,taker_buy_quote_volume,ignore"
+    }
+  },
+  "suspicious_jump_threshold": "source timeframe close/previousclose or open/previousclose >=2 or <=0.5, or high/low>=2; entire signal-minus20 through exit window examined",
+  "suspicious_jump_rows": 6,
+  "all_numeric_or_source_errors": [],
+  "status": "passed_with_limitations",
+  "events": [
+    {
+      "event_id": "d0ff2c71ba936ca97fcb99e97091",
+      "symbol": "RAVEUSDT",
+      "minutes": 60,
+      "decision_time": "2026-04-07 13:00:00+00:00",
+      "entry_time": "2026-04-07 13:00:00+00:00",
+      "exit_time": "2026-04-13 21:00:00+00:00",
+      "entry_price": 0.26191,
+      "exit_price": 8.1068,
+      "signal_close": 0.26183,
+      "signal_atr": 0.004643215802119,
+      "initial_stop": 0.2484,
+      "initial_risk": 0.0135099999999999,
+      "initial_risk_frac": 0.051582604711542,
+      "net_r": 580.6340621761673,
+      "peak_r": 913.2509252405648,
+      "net_return": 29.95061731129014,
+      "gross_return": 29.95261731129014,
+      "exit_reason": "trailing_stop",
+      "exit_timing": "intrabar_unknown",
+      "hold_bars": 152,
+      "trail_armed": true,
+      "final_protection": 8.1068,
+      "selection": [
+        {
+          "metric": "net_r",
+          "order": "highest",
+          "rank": 1
+        },
+        {
+          "metric": "peak_r",
+          "order": "highest",
+          "rank": 1
+        },
+        {
+          "metric": "net_return",
+          "order": "highest",
+          "rank": 1
+        }
+      ],
+      "features_sha256": "ade045be6ecccb074a5f818c95cd6d0c9a55a5aeccbb5db39267f76ac47f55a2",
+      "features_path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/features/a29df8f2d11e3abe94aecc462095.pkl.gz",
+      "checked_window_start": "2026-04-06T16:00:00+00:00",
+      "checked_window_end": "2026-04-13T20:00:00+00:00",
+      "checked_rows": 173,
+      "native_maximum_abs_difference": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "errors": [],
+      "earlier_stop_hits": 0,
+      "source_zero_volume_rows": 0,
+      "source_zero_quote_rows": 0,
+      "delivery_time": "2100-12-25T08:00:00+00:00",
+      "listing_time": "2025-12-14T15:30:00+00:00",
+      "exit_bar": {
+        "open": 12.35749,
+        "high": 12.36201,
+        "low": 6.89256,
+        "close": 8.34405,
+        "volume": 38586090.0,
+        "quote_volume": 360328465.86105
+      },
+      "signal_last5_low": 0.24936,
+      "source_jump_candidates": [],
+      "max_source_ratios": {
+        "close_to_previous_close": 1.407422071296959,
+        "open_to_previous_close": 1.0012040939193256,
+        "high_to_low": 1.7935295449005886
+      },
+      "max_close_gain_r": 894.8001480384921,
+      "first_closed_2r_arm": "2026-04-08T10:00:00+00:00",
+      "rave_raw_detail": {
+        "rows15m": 608,
+        "gaps15m": 0,
+        "zero_volume_rows": 0,
+        "zero_quote_rows": 0,
+        "total_native_base_volume": 4572279061,
+        "total_native_quote_volume": 11003882246.09681,
+        "total_trades": 91714710,
+        "quote_vwap_within_ohlc_rows": 608,
+        "max_changes": {
+          "close_change": {
+            "value": 0.28116819588037756,
+            "time": "2026-04-09T22:30:00+00:00"
+          },
+          "open_gap": {
+            "value": 0.0014199283862204037,
+            "time": "2026-04-09T05:15:00+00:00"
+          },
+          "high_low_range": {
+            "value": 0.514876720414241,
+            "time": "2026-04-09T22:30:00+00:00"
+          }
+        },
+        "min_changes": {
+          "close_change": {
+            "value": -0.17416608534927414,
+            "time": "2026-04-11T09:00:00+00:00"
+          },
+          "open_gap": {
+            "value": -0.0014634470830838797,
+            "time": "2026-04-08T15:00:00+00:00"
+          },
+          "high_low_range": {
+            "value": 0.002201107890971832,
+            "time": "2026-04-08T07:45:00+00:00"
+          }
+        },
+        "daily": [
+          {
+            "open_time": "2026-04-07T00:00:00+00:00",
+            "open": 0.26191,
+            "high": 0.26975,
+            "low": 0.25606,
+            "close": 0.26679,
+            "volume": 4736159,
+            "quote_volume": 1245189.25815,
+            "count": 30210
+          },
+          {
+            "open_time": "2026-04-08T00:00:00+00:00",
+            "open": 0.26708,
+            "high": 0.32497,
+            "low": 0.2669,
+            "close": 0.31593,
+            "volume": 34206955,
+            "quote_volume": 10207039.38253,
+            "count": 190244
+          },
+          {
+            "open_time": "2026-04-09T00:00:00+00:00",
+            "open": 0.31614,
+            "high": 1.12928,
+            "low": 0.30537,
+            "close": 0.99763,
+            "volume": 740223150,
+            "quote_volume": 469826525.42038,
+            "count": 5540071
+          },
+          {
+            "open_time": "2026-04-10T00:00:00+00:00",
+            "open": 0.99767,
+            "high": 1.69846,
+            "low": 0.9,
+            "close": 1.60594,
+            "volume": 1496618030,
+            "quote_volume": 1932178933.84484,
+            "count": 21062934
+          },
+          {
+            "open_time": "2026-04-11T00:00:00+00:00",
+            "open": 1.60595,
+            "high": 2.288,
+            "low": 1.5624,
+            "close": 2.16936,
+            "volume": 987336715,
+            "quote_volume": 1967554835.32272,
+            "count": 17063872
+          },
+          {
+            "open_time": "2026-04-12T00:00:00+00:00",
+            "open": 2.16937,
+            "high": 6.25785,
+            "low": 1.86225,
+            "close": 5.97078,
+            "volume": 867201071,
+            "quote_volume": 2880820932.07562,
+            "count": 23271703
+          },
+          {
+            "open_time": "2026-04-13T00:00:00+00:00",
+            "open": 5.97116,
+            "high": 12.59993,
+            "low": 5.18888,
+            "close": 8.34405,
+            "volume": 441956981,
+            "quote_volume": 3742048790.79257,
+            "count": 24555676
+          }
+        ],
+        "last_4_hourly_bars": [
+          {
+            "open_time": "2026-04-13T17:00:00+00:00",
+            "open": 11.24749,
+            "high": 11.46521,
+            "low": 10.59395,
+            "close": 11.19345,
+            "volume": 11685672.0,
+            "quote_volume": 130080785.21751,
+            "atr": 1.011502971311992
+          },
+          {
+            "open_time": "2026-04-13T18:00:00+00:00",
+            "open": 11.19345,
+            "high": 12.345,
+            "low": 10.92,
+            "close": 11.47258,
+            "volume": 22875706.0,
+            "quote_volume": 265869986.53286,
+            "atr": 1.0410384733611355
+          },
+          {
+            "open_time": "2026-04-13T19:00:00+00:00",
+            "open": 11.47258,
+            "high": 12.59993,
+            "low": 11.28,
+            "close": 12.35066,
+            "volume": 14133791.0,
+            "quote_volume": 170227853.80701,
+            "atr": 1.060959296692483
+          },
+          {
+            "open_time": "2026-04-13T20:00:00+00:00",
+            "open": 12.35749,
+            "high": 12.36201,
+            "low": 6.89256,
+            "close": 8.34405,
+            "volume": 38586090.0,
+            "quote_volume": 360328465.86105,
+            "atr": 1.3758514897858771
+          }
+        ],
+        "original_entry_15m_bar": {
+          "open_time": 1775566800000.0,
+          "open": 0.26191,
+          "high": 0.26278,
+          "low": 0.25978,
+          "close": 0.26247,
+          "volume": 178599.0,
+          "close_time": 1775567699999.0,
+          "quote_volume": 46636.96202,
+          "count": 1022.0,
+          "taker_buy_volume": 95424.0,
+          "taker_buy_quote_volume": 24925.71318,
+          "ignore": 0.0
+        },
+        "price_unit_observation": "Original RAVEUSDT monthly ZIP already contains the same prices, with no 1000 scaling applied by this pipeline. No 100% adjacent 15m/1H discontinuity observed in held window. Historical contract multiplier/specification changes have not been independently authenticated.",
+        "exit_hour_native15m": [
+          {
+            "open_time": "2026-04-13 20:00:00+00:00",
+            "open": 12.35749,
+            "high": 12.36201,
+            "low": 11.84,
+            "close": 12.06357,
+            "volume": 2426865,
+            "quote_volume": 29347473.75931,
+            "count": 254051
+          },
+          {
+            "open_time": "2026-04-13 20:15:00+00:00",
+            "open": 12.06265,
+            "high": 12.29416,
+            "low": 11.5,
+            "close": 11.63773,
+            "volume": 2332155,
+            "quote_volume": 27919829.67533,
+            "count": 244425
+          },
+          {
+            "open_time": "2026-04-13 20:30:00+00:00",
+            "open": 11.63772,
+            "high": 11.65,
+            "low": 8.1,
+            "close": 9.9857,
+            "volume": 14487073,
+            "quote_volume": 144298764.95959,
+            "count": 1145903
+          },
+          {
+            "open_time": "2026-04-13 20:45:00+00:00",
+            "open": 9.98346,
+            "high": 10.11111,
+            "low": 6.89256,
+            "close": 8.34405,
+            "volume": 19339997,
+            "quote_volume": 158762397.46682,
+            "count": 1362697
+          }
+        ]
+      }
+    },
+    {
+      "event_id": "f016b5d330cc5972be0ef85612db",
+      "symbol": "1000FLOKIUSDT",
+      "minutes": 60,
+      "decision_time": "2024-02-23 11:00:00+00:00",
+      "entry_time": "2024-02-23 11:00:00+00:00",
+      "exit_time": "2024-03-05 09:00:00+00:00",
+      "entry_price": 0.03591,
+      "exit_price": 0.12986,
+      "signal_close": 0.0359,
+      "signal_atr": 0.000687127051932,
+      "initial_stop": 0.03268,
+      "initial_risk": 0.0032299999999999,
+      "initial_risk_frac": 0.0899470899470898,
+      "net_r": 29.064452012383935,
+      "peak_r": 43.00619195046444,
+      "net_return": 2.6142628794207745,
+      "gross_return": 2.6162628794207743,
+      "exit_reason": "trailing_stop",
+      "exit_timing": "intrabar_unknown",
+      "hold_bars": 262,
+      "trail_armed": true,
+      "final_protection": 0.12986,
+      "selection": [
+        {
+          "metric": "net_r",
+          "order": "highest",
+          "rank": 2
+        },
+        {
+          "metric": "net_return",
+          "order": "highest",
+          "rank": 3
+        }
+      ],
+      "features_sha256": "385b758c16643fe51f212ffc1ff3eb8848a4743eb96808e69f39326e823aea0b",
+      "features_path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/features/bf43accbfdd1d552a6b31a508595.pkl.gz",
+      "checked_window_start": "2024-02-22T14:00:00+00:00",
+      "checked_window_end": "2024-03-05T08:00:00+00:00",
+      "checked_rows": 283,
+      "native_maximum_abs_difference": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "errors": [],
+      "earlier_stop_hits": 0,
+      "source_zero_volume_rows": 0,
+      "source_zero_quote_rows": 0,
+      "delivery_time": "2100-12-25T08:00:00+00:00",
+      "listing_time": "2023-05-06T00:00:00+00:00",
+      "exit_bar": {
+        "open": 0.13524,
+        "high": 0.13749,
+        "low": 0.12627,
+        "close": 0.13286,
+        "volume": 302794874.0,
+        "quote_volume": 39955128.71403
+      },
+      "signal_last5_low": 0.03282,
+      "source_jump_candidates": [],
+      "max_source_ratios": {
+        "close_to_previous_close": 1.193539961692495,
+        "open_to_previous_close": 1.0005479452054795,
+        "high_to_low": 1.2800315084679008
+      },
+      "max_close_gain_r": 41.386996904024805,
+      "first_closed_2r_arm": "2024-02-26T23:00:00+00:00"
+    },
+    {
+      "event_id": "6062ccbcb78f8b42e7c03bd91bb5",
+      "symbol": "USELESSUSDT",
+      "minutes": 60,
+      "decision_time": "2026-08-30 22:00:00+00:00",
+      "entry_time": "2026-08-30 22:00:00+00:00",
+      "exit_time": "2026-09-06 10:00:00+00:00",
+      "entry_price": 0.06751,
+      "exit_price": 0.21594,
+      "signal_close": 0.06747,
+      "signal_atr": 0.0016234689012983,
+      "initial_stop": 0.06174,
+      "initial_risk": 0.0057699999999999,
+      "initial_risk_frac": 0.0854688194341578,
+      "net_r": 25.70103639514733,
+      "peak_r": 43.49220103986137,
+      "net_return": 2.1966372389275666,
+      "gross_return": 2.1986372389275664,
+      "exit_reason": "trailing_stop",
+      "exit_timing": "intrabar_unknown",
+      "hold_bars": 156,
+      "trail_armed": true,
+      "final_protection": 0.21594,
+      "selection": [
+        {
+          "metric": "net_r",
+          "order": "highest",
+          "rank": 3
+        },
+        {
+          "metric": "peak_r",
+          "order": "highest",
+          "rank": 3
+        }
+      ],
+      "features_sha256": "827605628c001e20f210d51dfe6e895315d0de6572c2c8bf494b4e3a0f284136",
+      "features_path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/features/4ac77093609f69291e74f1546e0d.pkl.gz",
+      "checked_window_start": "2026-08-30T01:00:00+00:00",
+      "checked_window_end": "2026-09-06T09:00:00+00:00",
+      "checked_rows": 177,
+      "native_maximum_abs_difference": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "errors": [],
+      "earlier_stop_hits": 0,
+      "source_zero_volume_rows": 0,
+      "source_zero_quote_rows": 0,
+      "delivery_time": "2100-12-25T08:00:00+00:00",
+      "listing_time": "2025-08-15T12:15:00+00:00",
+      "exit_bar": {
+        "open": 0.23556,
+        "high": 0.23573,
+        "low": 0.21004,
+        "close": 0.21399,
+        "volume": 90486066.0,
+        "quote_volume": 19955772.35939
+      },
+      "signal_last5_low": 0.06207,
+      "source_jump_candidates": [],
+      "max_source_ratios": {
+        "close_to_previous_close": 1.1829687804244824,
+        "open_to_previous_close": 1.0007359434795406,
+        "high_to_low": 1.3135291916167664
+      },
+      "max_close_gain_r": 39.97400346620452,
+      "first_closed_2r_arm": "2026-08-31T16:00:00+00:00"
+    },
+    {
+      "event_id": "92c2d9f30961c4e4c54e59504737",
+      "symbol": "XAUTUSDT",
+      "minutes": 60,
+      "decision_time": "2026-05-24 23:00:00+00:00",
+      "entry_time": "2026-05-24 23:00:00+00:00",
+      "exit_time": "2026-05-26 12:00:00+00:00",
+      "entry_price": 4544.53,
+      "exit_price": 4501.12,
+      "signal_close": 4544.53,
+      "signal_atr": 8.085140707455594,
+      "initial_stop": 4501.12,
+      "initial_risk": 43.409999999999854,
+      "initial_risk_frac": 0.009552142905867,
+      "net_r": -1.2093771020502209,
+      "peak_r": 0.4312370421561925,
+      "net_return": -0.011552142905867,
+      "gross_return": -0.009552142905867,
+      "exit_reason": "initial_stop",
+      "exit_timing": "intrabar_unknown",
+      "hold_bars": 37,
+      "trail_armed": false,
+      "final_protection": 4501.12,
+      "selection": [
+        {
+          "metric": "net_r",
+          "order": "lowest",
+          "rank": 1
+        }
+      ],
+      "features_sha256": "7f320628a07e5edff40f0aa8a6db1fea45bab166eba2c8b360061cea008fb4c9",
+      "features_path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/features/a4cd6ee2de144aeaac00062ef7bc.pkl.gz",
+      "checked_window_start": "2026-05-24T02:00:00+00:00",
+      "checked_window_end": "2026-05-26T11:00:00+00:00",
+      "checked_rows": 58,
+      "native_maximum_abs_difference": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "errors": [],
+      "earlier_stop_hits": 0,
+      "source_zero_volume_rows": 0,
+      "source_zero_quote_rows": 0,
+      "delivery_time": "2100-12-25T08:00:00+00:00",
+      "listing_time": "2026-03-26T14:00:00+00:00",
+      "exit_bar": {
+        "open": 4520.86,
+        "high": 4522.7,
+        "low": 4494.03,
+        "close": 4496.83,
+        "volume": 463.75,
+        "quote_volume": 2088159.72163
+      },
+      "signal_last5_low": 4502.74,
+      "source_jump_candidates": [],
+      "max_source_ratios": {
+        "close_to_previous_close": 1.0087164780722977,
+        "open_to_previous_close": 1.000015411611108,
+        "high_to_low": 1.008907366056565
+      },
+      "max_close_gain_r": 0.2469477079014119,
+      "first_closed_2r_arm": null
+    },
+    {
+      "event_id": "f7148518d227e4ad652ec5ada6f9",
+      "symbol": "BTCUSDT",
+      "minutes": 60,
+      "decision_time": "2025-05-18 14:00:00+00:00",
+      "entry_time": "2025-05-18 14:00:00+00:00",
+      "exit_time": "2025-05-18 21:00:00+00:00",
+      "entry_price": 104708.1,
+      "exit_price": 103590.4,
+      "signal_close": 104708.2,
+      "signal_atr": 351.2160962456519,
+      "initial_stop": 103590.4,
+      "initial_risk": 1117.699999999997,
+      "initial_risk_frac": 0.0106744368391747,
+      "net_r": -1.1873635143598478,
+      "peak_r": 1.155587366914194,
+      "net_return": -0.0126744368391747,
+      "gross_return": -0.0106744368391747,
+      "exit_reason": "initial_stop",
+      "exit_timing": "intrabar_unknown",
+      "hold_bars": 7,
+      "trail_armed": false,
+      "final_protection": 103590.4,
+      "selection": [
+        {
+          "metric": "net_r",
+          "order": "lowest",
+          "rank": 2
+        }
+      ],
+      "features_sha256": "e682d1505e81b0ebba1f93737a272d6db19c1b2d9e90230effc407e6000fa74e",
+      "features_path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/features/ca08e93e76120ef22d40270e7287.pkl.gz",
+      "checked_window_start": "2025-05-17T17:00:00+00:00",
+      "checked_window_end": "2025-05-18T20:00:00+00:00",
+      "checked_rows": 28,
+      "native_maximum_abs_difference": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "errors": [],
+      "earlier_stop_hits": 0,
+      "source_zero_volume_rows": 0,
+      "source_zero_quote_rows": 0,
+      "delivery_time": "2100-12-25T08:00:00+00:00",
+      "listing_time": "2019-09-08T17:55:00+00:00",
+      "exit_bar": {
+        "open": 103834.1,
+        "high": 104199.7,
+        "low": 103217.2,
+        "close": 104002.6,
+        "volume": 13085.264,
+        "quote_volume": 1356886042.5028
+      },
+      "signal_last5_low": 103660.7,
+      "source_jump_candidates": [],
+      "max_source_ratios": {
+        "close_to_previous_close": 1.0077155904587296,
+        "open_to_previous_close": 1.000000971051027,
+        "high_to_low": 1.010291354594181
+      },
+      "max_close_gain_r": 0.9672541826966038,
+      "first_closed_2r_arm": null
+    },
+    {
+      "event_id": "288eaa06d550f9d70cbb3cdfd668",
+      "symbol": "BNBUSDT",
+      "minutes": 60,
+      "decision_time": "2024-10-20 23:00:00+00:00",
+      "entry_time": "2024-10-20 23:00:00+00:00",
+      "exit_time": "2024-10-21 14:00:00+00:00",
+      "entry_price": 605.19,
+      "exit_price": 597.47,
+      "signal_close": 605.19,
+      "signal_atr": 2.1207880073338052,
+      "initial_stop": 597.47,
+      "initial_risk": 7.720000000000027,
+      "initial_risk_frac": 0.0127563244600869,
+      "net_r": -1.1567849740932676,
+      "peak_r": 0.9417098445595798,
+      "net_return": -0.014756324460087,
+      "gross_return": -0.012756324460087,
+      "exit_reason": "initial_stop",
+      "exit_timing": "intrabar_unknown",
+      "hold_bars": 15,
+      "trail_armed": false,
+      "final_protection": 597.47,
+      "selection": [
+        {
+          "metric": "net_r",
+          "order": "lowest",
+          "rank": 3
+        }
+      ],
+      "features_sha256": "f51969725493987e7755c4f6f5c55a3987c6e7b37b744b9c600cf1030e0cd2a1",
+      "features_path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/features/1ba2e4d17ef1f459e936c3ff293c.pkl.gz",
+      "checked_window_start": "2024-10-20T02:00:00+00:00",
+      "checked_window_end": "2024-10-21T13:00:00+00:00",
+      "checked_rows": 36,
+      "native_maximum_abs_difference": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "errors": [],
+      "earlier_stop_hits": 0,
+      "source_zero_volume_rows": 0,
+      "source_zero_quote_rows": 0,
+      "delivery_time": "2100-12-25T08:00:00+00:00",
+      "listing_time": "2020-02-10T08:00:00+00:00",
+      "exit_bar": {
+        "open": 605.35,
+        "high": 605.68,
+        "low": 594.71,
+        "close": 596.43,
+        "volume": 102627.51000000001,
+        "quote_volume": 61624159.9212
+      },
+      "signal_last5_low": 597.9,
+      "source_jump_candidates": [],
+      "max_source_ratios": {
+        "close_to_previous_close": 1.0085659528372637,
+        "open_to_previous_close": 1.0000168242538443,
+        "high_to_low": 1.0184459652603788
+      },
+      "max_close_gain_r": 0.5375647668393734,
+      "first_closed_2r_arm": null
+    },
+    {
+      "event_id": "66c2a1ca4e680040d91f1d5de70a",
+      "symbol": "FHEUSDT",
+      "minutes": 60,
+      "decision_time": "2026-01-07 01:00:00+00:00",
+      "entry_time": "2026-01-07 01:00:00+00:00",
+      "exit_time": "2026-01-21 09:00:00+00:00",
+      "entry_price": 0.04355,
+      "exit_price": 0.17763,
+      "signal_close": 0.04353,
+      "signal_atr": 0.0013418261034771,
+      "initial_stop": 0.03625,
+      "initial_risk": 0.0072999999999999,
+      "initial_risk_frac": 0.1676234213547645,
+      "net_r": 18.355191780821933,
+      "peak_r": 46.057534246575386,
+      "net_return": 3.0767600459242255,
+      "gross_return": 3.0787600459242253,
+      "exit_reason": "trailing_stop",
+      "exit_timing": "intrabar_unknown",
+      "hold_bars": 344,
+      "trail_armed": true,
+      "final_protection": 0.17763,
+      "selection": [
+        {
+          "metric": "peak_r",
+          "order": "highest",
+          "rank": 2
+        },
+        {
+          "metric": "net_return",
+          "order": "highest",
+          "rank": 2
+        }
+      ],
+      "features_sha256": "ae856de42b1a3ce909024d4db31b3be594d87dbc2afeda8de9150ced04837ebf",
+      "features_path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/features/3cabb3b0c4ec99172a974d6d0b52.pkl.gz",
+      "checked_window_start": "2026-01-06T04:00:00+00:00",
+      "checked_window_end": "2026-01-21T08:00:00+00:00",
+      "checked_rows": 365,
+      "native_maximum_abs_difference": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "errors": [],
+      "earlier_stop_hits": 0,
+      "source_zero_volume_rows": 0,
+      "source_zero_quote_rows": 0,
+      "delivery_time": "2100-12-25T08:00:00+00:00",
+      "listing_time": "2025-04-12T15:00:00+00:00",
+      "exit_bar": {
+        "open": 0.19763,
+        "high": 0.21857,
+        "low": 0.17156,
+        "close": 0.17312,
+        "volume": 141662968.0,
+        "quote_volume": 27751290.53757
+      },
+      "signal_last5_low": 0.03652,
+      "source_jump_candidates": [],
+      "max_source_ratios": {
+        "close_to_previous_close": 1.2253018660812294,
+        "open_to_previous_close": 1.0009952229299364,
+        "high_to_low": 1.668365329701709
+      },
+      "max_close_gain_r": 30.569863013698654,
+      "first_closed_2r_arm": "2026-01-14T18:00:00+00:00"
+    },
+    {
+      "event_id": "09fdc8c6ccc1e0a228c30f3a1549",
+      "symbol": "TSTUSDT",
+      "minutes": 240,
+      "decision_time": "2026-07-31 08:00:00+00:00",
+      "entry_time": "2026-07-31 08:00:00+00:00",
+      "exit_time": "2026-07-31 12:00:00+00:00",
+      "entry_price": 0.01255,
+      "exit_price": 0.01087,
+      "signal_close": 0.01256,
+      "signal_atr": 0.0005110168556553,
+      "initial_stop": 0.01087,
+      "initial_risk": 0.0016799999999999,
+      "initial_risk_frac": 0.1338645418326692,
+      "net_r": -1.0149404761904763,
+      "peak_r": 0.0,
+      "net_return": -0.1358645418326692,
+      "gross_return": -0.1338645418326692,
+      "exit_reason": "initial_stop",
+      "exit_timing": "intrabar_unknown",
+      "hold_bars": 1,
+      "trail_armed": false,
+      "final_protection": 0.01087,
+      "selection": [
+        {
+          "metric": "peak_r",
+          "order": "lowest",
+          "rank": 1
+        }
+      ],
+      "features_sha256": "72608e868e9dacc809e620b6e61bfd6569b8fbdd75c4960ff8c05601f992de19",
+      "features_path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/features/db1efe8e86f88970681a031bd24b.pkl.gz",
+      "checked_window_start": "2026-07-27T20:00:00+00:00",
+      "checked_window_end": "2026-07-31T08:00:00+00:00",
+      "checked_rows": 22,
+      "native_maximum_abs_difference": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "errors": [],
+      "earlier_stop_hits": 0,
+      "source_zero_volume_rows": 0,
+      "source_zero_quote_rows": 0,
+      "delivery_time": "2100-12-25T08:00:00+00:00",
+      "listing_time": "2025-02-09T13:00:00+00:00",
+      "exit_bar": {
+        "open": 0.01255,
+        "high": 0.01271,
+        "low": 0.01033,
+        "close": 0.01164,
+        "volume": 287523458.0,
+        "quote_volume": 3345463.945654
+      },
+      "signal_last5_low": 0.01098,
+      "source_jump_candidates": [],
+      "max_source_ratios": {
+        "close_to_previous_close": 1.0902777777777777,
+        "open_to_previous_close": 1.001787310098302,
+        "high_to_low": 1.2303969022265246
+      },
+      "max_close_gain_r": null,
+      "first_closed_2r_arm": null
+    },
+    {
+      "event_id": "167bd73f8e7cfde3f139f7a1afdd",
+      "symbol": "ACTUSDT",
+      "minutes": 240,
+      "decision_time": "2025-10-07 12:00:00+00:00",
+      "entry_time": "2025-10-07 12:00:00+00:00",
+      "exit_time": "2025-10-07 16:00:00+00:00",
+      "entry_price": 0.03549,
+      "exit_price": 0.032781,
+      "signal_close": 0.03548,
+      "signal_atr": 0.0009445054441205,
+      "initial_stop": 0.032781,
+      "initial_risk": 0.002709,
+      "initial_risk_frac": 0.0763313609467456,
+      "net_r": -1.026201550387597,
+      "peak_r": 0.0,
+      "net_return": -0.0783313609467456,
+      "gross_return": -0.0763313609467456,
+      "exit_reason": "initial_stop",
+      "exit_timing": "intrabar_unknown",
+      "hold_bars": 1,
+      "trail_armed": false,
+      "final_protection": 0.032781,
+      "selection": [
+        {
+          "metric": "peak_r",
+          "order": "lowest",
+          "rank": 2
+        }
+      ],
+      "features_sha256": "c8e2fd748c6a1e79d7802be259fea854a8771a31bc7c0a4c0e85f0eb37bde7f5",
+      "features_path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/features/cd71a74c2cfb70ac3c3c6c79e6c4.pkl.gz",
+      "checked_window_start": "2025-10-04T00:00:00+00:00",
+      "checked_window_end": "2025-10-07T12:00:00+00:00",
+      "checked_rows": 22,
+      "native_maximum_abs_difference": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "volume": 0.0,
+        "quote_volume": 9.313225746154785e-10
+      },
+      "errors": [],
+      "earlier_stop_hits": 0,
+      "source_zero_volume_rows": 0,
+      "source_zero_quote_rows": 0,
+      "delivery_time": "2100-12-25T08:00:00+00:00",
+      "listing_time": "2024-11-11T12:15:00+00:00",
+      "exit_bar": {
+        "open": 0.03549,
+        "high": 0.0358,
+        "low": 0.032,
+        "close": 0.03228,
+        "volume": 116960604.0,
+        "quote_volume": 3940025.3195
+      },
+      "signal_last5_low": 0.03297,
+      "source_jump_candidates": [],
+      "max_source_ratios": {
+        "close_to_previous_close": 1.0597371565113498,
+        "open_to_previous_close": 1.0003051571559352,
+        "high_to_low": 1.11875
+      },
+      "max_close_gain_r": null,
+      "first_closed_2r_arm": null
+    },
+    {
+      "event_id": "1bfaad081985b3ba61592daa73e0",
+      "symbol": "SOPHUSDT",
+      "minutes": 60,
+      "decision_time": "2025-08-29 07:00:00+00:00",
+      "entry_time": "2025-08-29 07:00:00+00:00",
+      "exit_time": "2025-08-29 08:00:00+00:00",
+      "entry_price": 0.033164,
+      "exit_price": 0.031477,
+      "signal_close": 0.033164,
+      "signal_atr": 0.0003861879813895,
+      "initial_stop": 0.031477,
+      "initial_risk": 0.001687,
+      "initial_risk_frac": 0.0508684115305753,
+      "net_r": -1.0393171310017773,
+      "peak_r": 0.0,
+      "net_return": -0.0528684115305753,
+      "gross_return": -0.0508684115305753,
+      "exit_reason": "initial_stop",
+      "exit_timing": "intrabar_unknown",
+      "hold_bars": 1,
+      "trail_armed": false,
+      "final_protection": 0.031477,
+      "selection": [
+        {
+          "metric": "peak_r",
+          "order": "lowest",
+          "rank": 3
+        }
+      ],
+      "features_sha256": "f4220a9b24ed97f32e9fb00ec2e63a44e2c56caa0a7d498c3013949774043c35",
+      "features_path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/features/98cbbe6fa7a9f0c53244c52edae4.pkl.gz",
+      "checked_window_start": "2025-08-28T10:00:00+00:00",
+      "checked_window_end": "2025-08-29T07:00:00+00:00",
+      "checked_rows": 22,
+      "native_maximum_abs_difference": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "errors": [],
+      "earlier_stop_hits": 0,
+      "source_zero_volume_rows": 0,
+      "source_zero_quote_rows": 0,
+      "delivery_time": "2100-12-25T08:00:00+00:00",
+      "listing_time": "2025-05-28T13:00:00+00:00",
+      "exit_bar": {
+        "open": 0.033164,
+        "high": 0.033279,
+        "low": 0.031028,
+        "close": 0.031137,
+        "volume": 116158385.0,
+        "quote_volume": 3700833.048227
+      },
+      "signal_last5_low": 0.031555,
+      "source_jump_candidates": [],
+      "max_source_ratios": {
+        "close_to_previous_close": 1.0252890620169417,
+        "open_to_previous_close": 1.0001916749193367,
+        "high_to_low": 1.0725473765631044
+      },
+      "max_close_gain_r": null,
+      "first_closed_2r_arm": null
+    },
+    {
+      "event_id": "19543eee10d5f64a04d3b59e7e7e",
+      "symbol": "MOVRUSDT",
+      "minutes": 240,
+      "decision_time": "2026-04-17 08:00:00+00:00",
+      "entry_time": "2026-04-17 08:00:00+00:00",
+      "exit_time": "2026-06-05 04:00:00+00:00",
+      "entry_price": 3.865,
+      "exit_price": 1.2588,
+      "signal_close": 3.867,
+      "signal_atr": 0.2507426068799045,
+      "initial_stop": 1.2588,
+      "initial_risk": 2.6062000000000003,
+      "initial_risk_frac": 0.6743078913324709,
+      "net_r": -1.0029660041439643,
+      "peak_r": 0.2052797175965006,
+      "net_return": -0.6763078913324709,
+      "gross_return": -0.6743078913324709,
+      "exit_reason": "initial_stop",
+      "exit_timing": "intrabar_unknown",
+      "hold_bars": 293,
+      "trail_armed": false,
+      "final_protection": 1.2588,
+      "selection": [
+        {
+          "metric": "net_return",
+          "order": "lowest",
+          "rank": 1
+        }
+      ],
+      "features_sha256": "09ffc7ecbb7328335dd20da0ef86e8dc43d77a4fdb0d3893074f9054da8eceb8",
+      "features_path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/features/e5038095378abf4b5db9efbba89a.pkl.gz",
+      "checked_window_start": "2026-04-13T20:00:00+00:00",
+      "checked_window_end": "2026-06-05T00:00:00+00:00",
+      "checked_rows": 314,
+      "native_maximum_abs_difference": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "volume": 7.450580596923828e-09,
+        "quote_volume": 2.9802322387695312e-08
+      },
+      "errors": [],
+      "earlier_stop_hits": 0,
+      "source_zero_volume_rows": 0,
+      "source_zero_quote_rows": 0,
+      "delivery_time": "2100-12-25T08:00:00+00:00",
+      "listing_time": "2023-12-26T12:30:00+00:00",
+      "exit_bar": {
+        "open": 1.326,
+        "high": 1.336,
+        "low": 1.249,
+        "close": 1.265,
+        "volume": 496032.93999999994,
+        "quote_volume": 639620.21596
+      },
+      "signal_last5_low": 1.309,
+      "source_jump_candidates": [
+        {
+          "open_time": "2026-04-17T04:00:00+00:00",
+          "ratios": {
+            "close_to_previous_close": 2.659559834938102,
+            "open_to_previous_close": 1.0,
+            "high_to_low": 2.9782456140350875
+          },
+          "bar": {
+            "open": 1.454,
+            "high": 4.244,
+            "low": 1.425,
+            "close": 3.867,
+            "volume": 56904594.580000006,
+            "quote_volume": 179585738.01749
+          },
+          "native_bar": {
+            "open": 1.454,
+            "high": 4.244,
+            "low": 1.425,
+            "close": 3.867,
+            "volume": 56904594.58,
+            "quote_volume": 179585738.01749
+          },
+          "native15m_detail": {
+            "rows": 16,
+            "first_open": 1.454,
+            "last_close": 3.867,
+            "max_adjacent_close_return": 0.2828054298642533,
+            "min_adjacent_close_return": -0.05576856047403278,
+            "max_absolute_open_gap": 0.001361470388019148,
+            "max_intrabar_high_low_return": 0.41210374639769465,
+            "volume": 56904594.58,
+            "quote_volume": 179585738.01749003,
+            "trades": 1732000,
+            "zero_volume_rows": 0,
+            "native_source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/MOVRUSDT/MOVRUSDT-15m-2026-04.zip",
+            "delivery_boundary_nearby": false
+          }
+        }
+      ],
+      "max_source_ratios": {
+        "close_to_previous_close": 2.659559834938102,
+        "open_to_previous_close": 1.0014398848092152,
+        "high_to_low": 2.9782456140350875
+      },
+      "max_close_gain_r": -0.2110352236973372,
+      "first_closed_2r_arm": null
+    },
+    {
+      "event_id": "142f153548670061d756fa1ae0f1",
+      "symbol": "BROCCOLI714USDT",
+      "minutes": 240,
+      "decision_time": "2025-12-31 20:00:00+00:00",
+      "entry_time": "2025-12-31 20:00:00+00:00",
+      "exit_time": "2026-02-06 04:00:00+00:00",
+      "entry_price": 0.03654,
+      "exit_price": 0.01191,
+      "signal_close": 0.03678,
+      "signal_atr": 0.0022916229925838,
+      "initial_stop": 0.01191,
+      "initial_risk": 0.02463,
+      "initial_risk_frac": 0.674055829228243,
+      "net_r": -1.002967113276492,
+      "peak_r": 2.2095006090133977,
+      "net_return": -0.676055829228243,
+      "gross_return": -0.674055829228243,
+      "exit_reason": "initial_stop",
+      "exit_timing": "intrabar_unknown",
+      "hold_bars": 218,
+      "trail_armed": false,
+      "final_protection": 0.01191,
+      "selection": [
+        {
+          "metric": "net_return",
+          "order": "lowest",
+          "rank": 2
+        }
+      ],
+      "features_sha256": "060aaab1cb67af0268c5e63ca3793c2114cb24a9fd1f133f5ac30f9f471d4aaa",
+      "features_path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/features/7acf2e0cfdb22d760641ce0c28ff.pkl.gz",
+      "checked_window_start": "2025-12-28T08:00:00+00:00",
+      "checked_window_end": "2026-02-06T00:00:00+00:00",
+      "checked_rows": 239,
+      "native_maximum_abs_difference": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "volume": 0.0,
+        "quote_volume": 1.4901161193847656e-08
+      },
+      "errors": [],
+      "earlier_stop_hits": 0,
+      "source_zero_volume_rows": 0,
+      "source_zero_quote_rows": 0,
+      "delivery_time": "2100-12-25T08:00:00+00:00",
+      "listing_time": "2025-03-21T09:00:00+00:00",
+      "exit_bar": {
+        "open": 0.01295,
+        "high": 0.01344,
+        "low": 0.01149,
+        "close": 0.01305,
+        "volume": 410594328.0,
+        "quote_volume": 5149491.07047
+      },
+      "signal_last5_low": 0.01237,
+      "source_jump_candidates": [
+        {
+          "open_time": "2025-12-31T16:00:00+00:00",
+          "ratios": {
+            "close_to_previous_close": 2.896062992125984,
+            "open_to_previous_close": 1.0,
+            "high_to_low": 3.201104100946372
+          },
+          "bar": {
+            "open": 0.0127,
+            "high": 0.04059,
+            "low": 0.01268,
+            "close": 0.03678,
+            "volume": 2354902509.0,
+            "quote_volume": 57800284.831240006
+          },
+          "native_bar": {
+            "open": 0.0127,
+            "high": 0.04059,
+            "low": 0.01268,
+            "close": 0.03678,
+            "volume": 2354902509.0,
+            "quote_volume": 57800284.83124
+          },
+          "native15m_detail": {
+            "rows": 16,
+            "first_open": 0.0127,
+            "last_close": 0.03678,
+            "max_adjacent_close_return": 0.8233082706766919,
+            "min_adjacent_close_return": -0.04043829898252027,
+            "max_absolute_open_gap": 0.0044673539518900185,
+            "max_intrabar_high_low_return": 0.8612167300380229,
+            "volume": 2354902509.0,
+            "quote_volume": 57800284.83123999,
+            "trades": 429092,
+            "zero_volume_rows": 0,
+            "native_source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/BROCCOLI714USDT/BROCCOLI714USDT-15m-2025-12.zip",
+            "delivery_boundary_nearby": false
+          }
+        },
+        {
+          "open_time": "2025-12-31T20:00:00+00:00",
+          "ratios": {
+            "close_to_previous_close": 0.4744426318651441,
+            "open_to_previous_close": 0.9934747145187602,
+            "high_to_low": 5.328646748681899
+          },
+          "bar": {
+            "open": 0.03654,
+            "high": 0.09096,
+            "low": 0.01707,
+            "close": 0.01745,
+            "volume": 7942887889.0,
+            "quote_volume": 238034424.83807
+          },
+          "native_bar": {
+            "open": 0.03654,
+            "high": 0.09096,
+            "low": 0.01707,
+            "close": 0.01745,
+            "volume": 7942887889.0,
+            "quote_volume": 238034424.83807
+          },
+          "native15m_detail": {
+            "rows": 16,
+            "first_open": 0.03654,
+            "last_close": 0.01745,
+            "max_adjacent_close_return": 0.07453605111043493,
+            "min_adjacent_close_return": -0.7306058890147226,
+            "max_absolute_open_gap": 0.010617214043035172,
+            "max_intrabar_high_low_return": 3.0,
+            "volume": 7942887889.0,
+            "quote_volume": 238034424.83806998,
+            "trades": 1866644,
+            "zero_volume_rows": 0,
+            "native_source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/BROCCOLI714USDT/BROCCOLI714USDT-15m-2025-12.zip",
+            "delivery_boundary_nearby": false
+          }
+        }
+      ],
+      "max_source_ratios": {
+        "close_to_previous_close": 2.896062992125984,
+        "open_to_previous_close": 1.001609010458568,
+        "high_to_low": 5.328646748681899
+      },
+      "max_close_gain_r": 0.17011774259033693,
+      "first_closed_2r_arm": null
+    },
+    {
+      "event_id": "9d2723b4575a9a37b7af68a8c3ec",
+      "symbol": "QUSDT",
+      "minutes": 240,
+      "decision_time": "2026-01-29 00:00:00+00:00",
+      "entry_time": "2026-01-29 00:00:00+00:00",
+      "exit_time": "2026-03-05 00:00:00+00:00",
+      "entry_price": 0.035613,
+      "exit_price": 0.014048,
+      "signal_close": 0.035667,
+      "signal_atr": 0.0022550938942766,
+      "initial_stop": 0.014048,
+      "initial_risk": 0.021565,
+      "initial_risk_frac": 0.6055373037935585,
+      "net_r": -1.0033028518432645,
+      "peak_r": 0.1209830744261535,
+      "net_return": -0.6075373037935585,
+      "gross_return": -0.6055373037935585,
+      "exit_reason": "initial_stop",
+      "exit_timing": "intrabar_unknown",
+      "hold_bars": 210,
+      "trail_armed": false,
+      "final_protection": 0.014048,
+      "selection": [
+        {
+          "metric": "net_return",
+          "order": "lowest",
+          "rank": 3
+        }
+      ],
+      "features_sha256": "bd0be0eb0d8f4d4994668145a214bd69a451575d973bf19abad1107caefe3cfc",
+      "features_path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/features/1b62f4c7f848fab954f9804a01c1.pkl.gz",
+      "checked_window_start": "2026-01-25T12:00:00+00:00",
+      "checked_window_end": "2026-03-04T20:00:00+00:00",
+      "checked_rows": 231,
+      "native_maximum_abs_difference": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "volume": 0.0,
+        "quote_volume": 1.4901161193847656e-08
+      },
+      "errors": [],
+      "earlier_stop_hits": 0,
+      "source_zero_volume_rows": 0,
+      "source_zero_quote_rows": 0,
+      "delivery_time": "2100-12-25T08:00:00+00:00",
+      "listing_time": "2025-09-02T07:30:00+00:00",
+      "exit_bar": {
+        "open": 0.025077,
+        "high": 0.03065,
+        "low": 0.011825,
+        "close": 0.012498,
+        "volume": 3225684026.0,
+        "quote_volume": 57122440.733306
+      },
+      "signal_last5_low": 0.0145,
+      "source_jump_candidates": [
+        {
+          "open_time": "2026-01-28T20:00:00+00:00",
+          "ratios": {
+            "close_to_previous_close": 2.3118356235416124,
+            "open_to_previous_close": 0.9994814622763806,
+            "high_to_low": 2.551655172413793
+          },
+          "bar": {
+            "open": 0.01542,
+            "high": 0.036999,
+            "low": 0.0145,
+            "close": 0.035667,
+            "volume": 3183596893.0,
+            "quote_volume": 79793840.369659
+          },
+          "native_bar": {
+            "open": 0.01542,
+            "high": 0.036999,
+            "low": 0.0145,
+            "close": 0.035667,
+            "volume": 3183596893.0,
+            "quote_volume": 79793840.36965899
+          },
+          "native15m_detail": {
+            "rows": 16,
+            "first_open": 0.01542,
+            "last_close": 0.035667,
+            "max_adjacent_close_return": 0.235808936825886,
+            "min_adjacent_close_return": -0.06536112335495237,
+            "max_absolute_open_gap": 0.002652729936255094,
+            "max_intrabar_high_low_return": 0.3879555281037679,
+            "volume": 3183596893.0,
+            "quote_volume": 79793840.369659,
+            "trades": 809770,
+            "zero_volume_rows": 0,
+            "native_source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/QUSDT/QUSDT-15m-2026-01.zip",
+            "delivery_boundary_nearby": false
+          }
+        },
+        {
+          "open_time": "2026-01-29T00:00:00+00:00",
+          "ratios": {
+            "close_to_previous_close": 0.5926486668348895,
+            "open_to_previous_close": 0.9984859954579864,
+            "high_to_low": 2.0052463144640886
+          },
+          "bar": {
+            "open": 0.035613,
+            "high": 0.038222,
+            "low": 0.019061,
+            "close": 0.021138,
+            "volume": 5708057973.0,
+            "quote_volume": 159937273.948562
+          },
+          "native_bar": {
+            "open": 0.035613,
+            "high": 0.038222,
+            "low": 0.019061,
+            "close": 0.021138,
+            "volume": 5708057973.0,
+            "quote_volume": 159937273.948562
+          },
+          "native15m_detail": {
+            "rows": 16,
+            "first_open": 0.035613,
+            "last_close": 0.021138,
+            "max_adjacent_close_return": 0.051226131627410965,
+            "min_adjacent_close_return": -0.21140314569536423,
+            "max_absolute_open_gap": 0.0010554675999221441,
+            "max_intrabar_high_low_return": 0.4514356435643565,
+            "volume": 5708057973.0,
+            "quote_volume": 159937273.94856203,
+            "trades": 1721702,
+            "zero_volume_rows": 0,
+            "native_source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/QUSDT/QUSDT-15m-2026-01.zip",
+            "delivery_boundary_nearby": false
+          }
+        },
+        {
+          "open_time": "2026-03-04T20:00:00+00:00",
+          "ratios": {
+            "close_to_previous_close": 0.4982856231560482,
+            "open_to_previous_close": 0.9998006538553543,
+            "high_to_low": 2.5919661733615222
+          },
+          "bar": {
+            "open": 0.025077,
+            "high": 0.03065,
+            "low": 0.011825,
+            "close": 0.012498,
+            "volume": 3225684026.0,
+            "quote_volume": 57122440.733306
+          },
+          "native_bar": {
+            "open": 0.025077,
+            "high": 0.03065,
+            "low": 0.011825,
+            "close": 0.012498,
+            "volume": 3225684026.0,
+            "quote_volume": 57122440.733306
+          },
+          "native15m_detail": {
+            "rows": 16,
+            "first_open": 0.025077,
+            "last_close": 0.012498,
+            "max_adjacent_close_return": 0.0336521431101664,
+            "min_adjacent_close_return": -0.5070123542717939,
+            "max_absolute_open_gap": 0.0008329547175525143,
+            "max_intrabar_high_low_return": 1.5747647849462365,
+            "volume": 3225684026.0,
+            "quote_volume": 57122440.733306,
+            "trades": 614329,
+            "zero_volume_rows": 0,
+            "native_source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/QUSDT/QUSDT-15m-2026-03.zip",
+            "delivery_boundary_nearby": false
+          }
+        }
+      ],
+      "max_source_ratios": {
+        "close_to_previous_close": 2.3118356235416124,
+        "open_to_previous_close": 1.0011927351585796,
+        "high_to_low": 2.5919661733615222
+      },
+      "max_close_gain_r": -0.43830280547182926,
+      "first_closed_2r_arm": null
+    }
+  ],
+  "limitations": [
+    "Checks establish agreement with archived Binance native candles and the frozen hypothetical execution algebra, not proof of actual fills or a price history unchanged by Binance.",
+    "The 20bp cost is fixed on entry notional; it does not model both-leg exchange fees that scale with changing exit notional, funding, spread, market impact, liquidity limits, partial fills or exchange outages.",
+    "Historical lot size, tick schedule, contract multiplier and exchange migration/re-denomination schedules have not been independently authenticated; current catalog tick is used in the frozen model.",
+    "Stop-hit candles are conservatively excluded from peak R, but OHLC cannot establish exact intrabar stop fill time or slippage.",
+    "Very wide initial stops in tail cases are part of the frozen signal-stop construction; -1R may represent a 60%-67% loss of position notional, not the account equity when position sizing limits risk.",
+    "Highest-return extreme RAVE dominates potential tail conclusions; performance without that symbol/trade must be reported, and these handpicked extremes cannot establish broad generalization.",
+    "XAUT is a gold-backed token in current COIN metadata, so the nominal altcoin pool has heterogeneous instruments; BTC/ETH are already separate diagnostics."
+  ],
+  "observed_findings": [
+    {
+      "finding": "13 selected events reconcile to native six-column source bars and frozen accounting",
+      "evidence": "1970 bars checked over signal-minus20 through exit, 19 authenticated native files. OHLC exact; max volume roundoff 7.46e-9, max quote roundoff 2.99e-8. No entry-clock, initial-stop, carried-protection, premature-stop, netR, peakR or fee-model mismatch."
+    },
+    {
+      "finding": "RAVE return is an extreme native price path, not a demonstrated pipeline multiplier jump",
+      "evidence": "Entry 0.26191 and modeled exit 8.1068 directly match native data/stop algebra. 608 native 15m bars during held interval, zero gaps or zero-activity bars; maximum adjacent15m close rise28.12%, maximum hourly close rise40.74%; daily closes climb in several stages. True native quote turnover totals11003882246.09681 USDT, 91714710 reported trades. Every15m quote/base VWAP lies within low/high. Historical contract specification continuity remains unauthenticated."
+    },
+    {
+      "finding": "Native flash-move losers expose a late-entry risk of 4H confirmation",
+      "evidence": "MOVR signalbar closes +165.96%, BROCCOLI714 +189.61%, Q +131.18%; historical last5 low stop remains far below post-spike next-open entry, yielding initial risk fractions67.43%,67.41%,60.55%. All six suspect bars match original ZIP and have positive activity, current catalog delivery boundary2100, not expired-contract zero placeholders."
+    },
+    {
+      "finding": "BROCCOLI peak 2.21R never arms its closed-bar2R protection",
+      "evidence": "High excursion reaches2.2095R but maximum held-bar close gain is only0.1701R; frozen rule requires a close >=2R, hence later loss at initialstop is consistent rather than a missing trail update."
+    },
+    {
+      "finding": "RAVE modeled stop occurs amid an exceptionally violent exit hour",
+      "evidence": "2026-04-13 20Z hourly open12.35749 high12.36201 low6.89256 close8.34405; 8.1068 protection came from prior19Z close12.35066 minus4xATR1.0609593 rounded to0.0001. Hourly OHLC supports stop crossing, but execution/slippage and changing-notional fees are not authenticated."
+    },
+    {
+      "finding": "Small price risk amplifies cost in netR losers",
+      "evidence": "XAUT and BTC price losses are about0.955% and1.067% respectively; adding fixed0.2% entry-notional cost produces -1.209R and -1.187R. This is not a leverage or percentage-unit error."
+    }
+  ]
+}

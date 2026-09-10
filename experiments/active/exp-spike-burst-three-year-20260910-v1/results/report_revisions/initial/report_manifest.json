@@ -1,0 +1,395 @@
+{
+  "status": "complete",
+  "generated_at": "2026-09-10T05:33:45.680181+00:00",
+  "code_commit": "59d2aac251ba6cf75b65967ff6703cd362a6337f",
+  "sources": [
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_long_report.py",
+      "sha256": "736ac3736643666bed67e873fb6723408ad58556312580a613ed79397fb0f302",
+      "size_bytes": 37259
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_figures.py",
+      "sha256": "2bf9f5edd958d1ac7c8f7575714d4235da16c5d52468fa99418f6b5b1de4b25b",
+      "size_bytes": 9933
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_execution.py",
+      "sha256": "05c96e98498cbf11cc426ed4cc939199b47af2cf8fd5a409c79fc720552f45cc",
+      "size_bytes": 9367
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_replay.py",
+      "sha256": "996ef56ceb5b70da5337422d8390487330f7e387f648ee527b5afc9bda72a33f",
+      "size_bytes": 20925
+    }
+  ],
+  "input_artifacts": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/validation_manifest.json",
+      "sha256": "d5ca1fa73a9516f08702f05b3ed41a3ab094f9a31bddb6228e95a9a641fe746b",
+      "size_bytes": 24753
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/dataset_manifest.json",
+      "sha256": "1e21b3393be372b40f9f9deb4311a838dd0768df987f9982c687353e43e323e2",
+      "size_bytes": 735753
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/data_tradable/history_manifest.json",
+      "sha256": "f9e3c2127d508e63f3d4dacfb7e5a8165fd136e3665ad0b7833c4c3066ac7c8e",
+      "size_bytes": 8271620
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/data/history_manifest.json",
+      "sha256": "9fe6f6ddd45b551542cb1b6dc6c9d824d96faf1430e605713e6d9ecd2c80426e",
+      "size_bytes": 7133975
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/diagnostics/previous_study_delivery_audit.json",
+      "sha256": "c6be92556372c333b5af7faa33cf73a9914686f3c65e3ca64389c0e2372a1dfc",
+      "size_bytes": 77731
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/diagnostics/source_audit_pre_sanitize.json",
+      "sha256": "72fde128e5b50a929da16e95aac8a985852360afd93b91d060ba890402596337",
+      "size_bytes": 6262
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/diagnostics/source_audit_tradable.json",
+      "sha256": "85b644f5da0d4acf5d1c8a3f7c295481bf81da13926db44e44ee2caba0b86232",
+      "size_bytes": 207945
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/60_altcoins_burst_trail_full_curve.csv.gz",
+      "sha256": "958bfa1efedca4ab8b57b0cbec8ca9142cbd0941ed279d3b2e9d014adfd7146d",
+      "size_bytes": 547113
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/60_altcoins_focus_trail_full_curve.csv.gz",
+      "sha256": "5dcfbfba02eebaca91973d88785e2f51678caae3b9d6bb37398ea84f038463eb",
+      "size_bytes": 637921
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/60_altcoins_burst_trail_paired_actual_curve.csv.gz",
+      "sha256": "8db02bbd45de8a4aa023c728800b57a7d898c4203284e1aa39de72caa8d77605",
+      "size_bytes": 546410
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/60_altcoins_burst_trail_paired_random_curve.csv.gz",
+      "sha256": "1fb7553aba0b2696bb6b716aa3c0fa13f3b1818d9f509c5f642779eef801512b",
+      "size_bytes": 518447
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/240_altcoins_burst_trail_full_curve.csv.gz",
+      "sha256": "b5ba2ca5978a0bfb3e33b8a0fa2e242f6e0443ee7b24d8414069b38d78567f0c",
+      "size_bytes": 137161
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/240_altcoins_focus_trail_full_curve.csv.gz",
+      "sha256": "fd04f6e949be26dba7892a111ac35361828823718c52ebc264dda5927586ad9e",
+      "size_bytes": 160417
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/240_altcoins_burst_trail_paired_actual_curve.csv.gz",
+      "sha256": "0482502c9d06bff9f3a2c97e17224df53dcc0bc12ff30952419f8e68f4626b74",
+      "size_bytes": 131764
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/240_altcoins_burst_trail_paired_random_curve.csv.gz",
+      "sha256": "7561bf5b8a09a5428a7d2b1b977f6c12b40eb62585308e83001b1806cd648dc5",
+      "size_bytes": 110895
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/60_altcoins_burst_trail_full_ledger.csv.gz",
+      "sha256": "ee68176f59cec9ebc429fc93fb7253fd1abb0f41b5dd35d8ac687bd07868f9c2",
+      "size_bytes": 413419
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/240_altcoins_burst_trail_full_ledger.csv.gz",
+      "sha256": "fef9d0de869aacf01139b2ff33f3ca9b53e14985527bcffb2e291633f2bafb69",
+      "size_bytes": 105606
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/features/a29df8f2d11e3abe94aecc462095.pkl.gz",
+      "sha256": "ade045be6ecccb074a5f818c95cd6d0c9a55a5aeccbb5db39267f76ac47f55a2",
+      "size_bytes": 1225946
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/features/582bee648f91c5e079462551018e.pkl.gz",
+      "sha256": "682eb89dad832b8e9c850fac0f57e7860c8f0149825b2393cc7fa75d19a91bc8",
+      "size_bytes": 4260144
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/features/9eb5170667ff53a2d9cf9c94bf63.pkl.gz",
+      "sha256": "a8748fbc924514a22a14539857181ddded3dd009115734e1b2e272536f694b30",
+      "size_bytes": 1300560
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/features/ddb3f36e7895e3caa6d3604a6708.pkl.gz",
+      "sha256": "8deb96a6a294fc306244bb505ef62c747b7afbc001c5958170bb0f0733db336d",
+      "size_bytes": 1425762
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts_summary.csv",
+      "sha256": "940958544c6a171d6ffd2968c829c967e639968e3aa97ef9b205a5b54b51f7a9",
+      "size_bytes": 8824
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/event_summary.csv",
+      "sha256": "f2aa9d1de7b849f3c6c6f1f6bc28842772f3c22f1433da8735036ff1d76ec2b3",
+      "size_bytes": 3785
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/annual_summary.csv",
+      "sha256": "8896e4868091605edf5342e04e2b0b18513554c9669c342fefef563f4793dbd1",
+      "size_bytes": 20048
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/score_summary.csv",
+      "sha256": "f93208dc53e21776b0610c4c426a1f72a0f3c39878d6d9b0fa3337da81c9dc7d",
+      "size_bytes": 3905
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/events.csv.gz",
+      "sha256": "05c2d140029c802328015a55389e496ba53f46a34b3448883304f634d63b444a",
+      "size_bytes": 6019848
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/controls.csv.gz",
+      "sha256": "3f9c5769b185d83f72b9918baeae9849327e066781c675dff0dc2221251ea315",
+      "size_bytes": 17664226
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/coverage.csv",
+      "sha256": "7170a58d3aad1a06cc1122e48c12f2197fe32f4841247f3634b922f83fc29599",
+      "size_bytes": 85522
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/60_altcoins_focus_trail_full_ledger.csv.gz",
+      "sha256": "78a962fb0f07c60e8bdc33fecf084d68a5e1bffc2274b05eb561bf47a016e25d",
+      "size_bytes": 4796447
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/60_altcoins_burst_trail_paired_actual_ledger.csv.gz",
+      "sha256": "2a32d2ec556f5b2268850435c4fd2e54eb78b6d6a551d0c4efae9312fe2993e2",
+      "size_bytes": 409601
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/60_altcoins_burst_trail_paired_random_ledger.csv.gz",
+      "sha256": "60ac5b03af374f1fc97555620593c5241d97bc8a3ef90e9d9ef01081aaf74d91",
+      "size_bytes": 451207
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/240_altcoins_focus_trail_full_ledger.csv.gz",
+      "sha256": "64bdb21cc3072c78bbfd99cb32f239b9a89de5cd47e720f82f928cd9cb8287bb",
+      "size_bytes": 1021764
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/240_altcoins_burst_trail_paired_actual_ledger.csv.gz",
+      "sha256": "62b9496d58e2666d56d9a77d8362d86d6477387cde78adcc887cae9dddb0e1c1",
+      "size_bytes": 88353
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/240_altcoins_burst_trail_paired_random_ledger.csv.gz",
+      "sha256": "11e985571b436904803cc790735396d64624e3bbb1a89ae4722bedf322cdd23d",
+      "size_bytes": 96625
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/60_BTC_burst_trail_full_ledger.csv.gz",
+      "sha256": "da8f044a24ccf7b89b12c023aaabb05b0d28ef407a73a263a6ee857fa1507be6",
+      "size_bytes": 4211
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/60_BTC_focus_trail_full_ledger.csv.gz",
+      "sha256": "ccf5e384be8a83b06a883290451228133e348c5d067df2a5cd422ffa7e719ba9",
+      "size_bytes": 18154
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/240_BTC_burst_trail_full_ledger.csv.gz",
+      "sha256": "9700af4fd182f8a8be09b31108c40ff4e60f56ca3877760baf720dbd4a9185ea",
+      "size_bytes": 906
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/240_BTC_focus_trail_full_ledger.csv.gz",
+      "sha256": "c48ce23316bba68053ede755a193fbd310f3d7b353ad7b64ecd5adde3a361c95",
+      "size_bytes": 3634
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/60_ETH_burst_trail_full_ledger.csv.gz",
+      "sha256": "05351695450d5678d7ecb18c44a5f576fa9d5b89bcfeb33d399975ea6417c453",
+      "size_bytes": 2318
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/60_ETH_focus_trail_full_ledger.csv.gz",
+      "sha256": "146d51deeab43686193a4f2e92620d9817c5d245428f80ff4af32aaef863cdd7",
+      "size_bytes": 18488
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/240_ETH_burst_trail_full_ledger.csv.gz",
+      "sha256": "324b3632ec3539d88d0cdfa5cf3ed78ff62c96c27da0c6aba7ee16059b28d115",
+      "size_bytes": 956
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/accounts/240_ETH_focus_trail_full_ledger.csv.gz",
+      "sha256": "706b61fde853349692a9bbcdf93f08b9aef65c907ef31e1e77077e58768b17f7",
+      "size_bytes": 5029
+    }
+  ],
+  "config": {
+    "schema": "spike-burst-three-year-v1",
+    "start": "2023-09-09T00:00:00+00:00",
+    "end": "2026-09-09T00:00:00+00:00",
+    "annual_cuts": [
+      "2023-09-09T00:00:00+00:00",
+      "2024-09-09T00:00:00+00:00",
+      "2025-09-09T00:00:00+00:00",
+      "2026-09-09T00:00:00+00:00"
+    ],
+    "minutes": [
+      60,
+      240
+    ],
+    "arms": [
+      "burst_trail",
+      "focus_trail"
+    ],
+    "direction": "long_only",
+    "primary_cohort": "altcoins",
+    "diagnostic_cohorts": [
+      "BTC",
+      "ETH"
+    ],
+    "cost_roundtrip": 0.002,
+    "primary_hypotheses": 4,
+    "holdout_consumption": 2,
+    "retrospective": true,
+    "optimization": false,
+    "production_eligible": false
+  },
+  "full_study_rescored": false,
+  "selected_display_paths_replayed": true,
+  "display_path_reconciliation": "Existing helper only; selected frozen fills checked field-by-field",
+  "examples": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/report_figures/trade_01.png",
+      "reason": "2026年 · 本周期自然退出利润最高",
+      "event_id": "d0ff2c71ba936ca97fcb99e97091",
+      "minutes": 60,
+      "asset": "RAVE",
+      "symbol": "RAVEUSDT",
+      "venue": "binance",
+      "portfolio_selected": true,
+      "entry_time": "2026-04-07T13:00:00+00:00",
+      "exit_time": "2026-04-13T21:00:00+00:00",
+      "entry_price": 0.26191,
+      "exit_price": 8.1068,
+      "peak_r": 913.2509252405648,
+      "net_r": 580.6340621761673,
+      "net_return": 29.95061731129014,
+      "account_pnl": 53809.13380935607,
+      "notional": 1796.59515028
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/report_figures/trade_02.png",
+      "reason": "2024年 · 本周期自然退出盈亏最低",
+      "event_id": "6ee8a991dd7220df963d4e0db913",
+      "minutes": 60,
+      "asset": "BOME",
+      "symbol": "BOMEUSDT",
+      "venue": "binance",
+      "portfolio_selected": true,
+      "entry_time": "2024-06-06T03:00:00+00:00",
+      "exit_time": "2024-06-06T21:00:00+00:00",
+      "entry_price": 0.014002,
+      "exit_price": 0.0131588,
+      "peak_r": 0.1838235294117632,
+      "net_r": -1.0332115749525608,
+      "net_return": -0.0622199685759177,
+      "account_pnl": -581.7773284423452,
+      "notional": 9350.331441143191
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/report_figures/trade_03.png",
+      "reason": "2025年 · 本周期自然退出利润最高",
+      "event_id": "94dbce89cf0e4928cd42466fd1e6",
+      "minutes": 240,
+      "asset": "ZEC",
+      "symbol": "ZECUSDT",
+      "venue": "binance",
+      "portfolio_selected": true,
+      "entry_time": "2025-09-07T00:00:00+00:00",
+      "exit_time": "2025-10-11T00:00:00+00:00",
+      "entry_price": 47.38,
+      "exit_price": 160.06,
+      "peak_r": 37.08280254777069,
+      "net_r": 17.927585987261146,
+      "net_return": 2.376218657661461,
+      "account_pnl": 8874.312275306269,
+      "notional": 3734.636224109048
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/report_figures/trade_04.png",
+      "reason": "2024年 · 本周期自然退出盈亏最低",
+      "event_id": "69a3521ab7941d3c2f144d79aadf",
+      "minutes": 240,
+      "asset": "ROSE",
+      "symbol": "ROSEUSDT",
+      "venue": "binance",
+      "portfolio_selected": true,
+      "entry_time": "2024-02-27T12:00:00+00:00",
+      "exit_time": "2024-02-28T20:00:00+00:00",
+      "entry_price": 0.14235,
+      "exit_price": 0.1239349999999999,
+      "peak_r": 0.0852565843062713,
+      "net_r": -1.0154602226445832,
+      "net_return": -0.1313642430628733,
+      "account_pnl": -586.9766267038228,
+      "notional": 4468.313545740773
+    }
+  ],
+  "chart_contract": {
+    "maximum_pngs": 6,
+    "account_chart": "saved continuous NAV and drawdown; linear shared axes",
+    "examples": "actual SPIKE altcoin natural fills; highest/lowest PnL per timeframe plus global largest giveback",
+    "retrospective_selection": true,
+    "no_rule_selection": true
+  },
+  "artifacts": [
+    {
+      "path": "/Users/zhangzc/fable-trading/analysis/p1_spike_burst_three_year_20260910.md",
+      "sha256": "7ef4f5f9a1120f4c25b408e220d0c2bdd8f822e494e1014b9e542e5f1da44f35",
+      "size_bytes": 22257
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/report_figures/account_paths.png",
+      "sha256": "5b2918d02b038490ff0715f41564338ad2190d949dc4d22e2ceb25e4727e4017",
+      "size_bytes": 389328
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/report_figures/trade_01.png",
+      "sha256": "089eaff5217bb993d9e3dd033f293d910158235dc517024ae0e008c914083fb3",
+      "size_bytes": 187591
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/report_figures/trade_02.png",
+      "sha256": "44436e1afe7b19330677d9ce69dd223e31c2214f5246d9aeef224a0286340a91",
+      "size_bytes": 209953
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/report_figures/trade_03.png",
+      "sha256": "ff9c3450cc6b21c9ab41633f20711658f19ae4203876849a052363890c007567",
+      "size_bytes": 207989
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/results/report_figures/trade_04.png",
+      "sha256": "f0e1f741d615b0e109952974eb6429d8098bf4e301b34505cc619e8dc50a266d",
+      "size_bytes": 208019
+    }
+  ],
+  "reviewer_summary": {
+    "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/reviewer_summary.md",
+    "sha256": "54fce5fde7aa42342c6582e8b9958f2a5a5ab9579b11d71a777e739a9e33f224",
+    "size_bytes": 2808
+  }
+}
