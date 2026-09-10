@@ -55,6 +55,8 @@ def render(folder=EXPERIMENT/'results'):
     if subprocess.check_output(['git','show','HEAD:'+str(source.relative_to(ROOT))],cwd=ROOT)!=source.read_bytes():
         raise ValueError('Commit report builder before rendering')
     manifest=json.loads((folder/'accounts_manifest.json').read_text())
+    audit=json.loads((folder/'audit.json').read_text())
+    if audit['errors']:raise ValueError('Independent audit has unresolved errors')
     feature_sources={str(Path(x['path']).resolve()):x['sha256'] for x in manifest['feature_sources']}
     case_source=ROOT/'yoyo/evaluation/altseason_report.py'
     if subprocess.check_output(['git','show','HEAD:yoyo/evaluation/altseason_report.py'],cwd=ROOT)!=case_source.read_bytes():
@@ -66,6 +68,12 @@ def render(folder=EXPERIMENT/'results'):
     scores=pd.read_csv(folder/'score_summary.csv')
     thinning=pd.read_csv(folder/'thinning_summary.csv')
     full=accounts.loc[accounts.scope.eq('combined')&accounts.account.eq('full')]
+    def with_paired(frame):
+        keys=['period','scope','variant','population']
+        for account,name in [('paired_actual','paired_strategy'),('paired_random','paired_random')]:
+            selected=accounts.loc[accounts.account.eq(account),keys+['return_pct']].rename(columns={'return_pct':name})
+            frame=frame.merge(selected,on=keys,how='left')
+        return frame
     normal=full.loc[full.population.eq('all_assets')].copy()
     paired=accounts.loc[accounts.scope.eq('combined')&accounts.population.eq('all_assets')&accounts.account.ne('full')]
     for account,name in [('paired_actual','paired_strategy'),('paired_random','paired_random')]:
@@ -104,7 +112,7 @@ def render(folder=EXPERIMENT/'results'):
         table(normal.to_dict('records'),[('era','时段'),('rule','规则'),('return_pct','组合收益%'),('max_drawdown_pct','最大回撤%'),('trades','成交数'),('win_rate_pct','胜率%'),('paired_strategy','配对策略%'),('paired_random','配对随机%'),('paired0_fraction_pct','配对覆盖%')]),
         '## 去掉USELESS后，还剩多少？',
         '下面从三个交易所候选里删除整个USELESS资产，并从初始资金重新运行账户，空出的资金和席位可以进入其他币。它不是静态扣掉某笔盈利，也不是建议上线一个事后黑名单。',
-        table(full.loc[full.population.eq('without_useless')].to_dict('records'),[('era','时段'),('rule','规则'),('return_pct','重新配资收益%'),('max_drawdown_pct','最大回撤%'),('trades','成交数'),('top1_positive_profit_share_pct','最大赢家占正利润%'),('return_minus_top1_contribution_pct','再静态减最大赢家后%')]),
+        table(with_paired(full.loc[full.population.eq('without_useless')]).to_dict('records'),[('era','时段'),('rule','规则'),('return_pct','重新配资收益%'),('max_drawdown_pct','最大回撤%'),('trades','成交数'),('paired_strategy','配对策略%'),('paired_random','配对随机%'),('top1_positive_profit_share_pct','最大赢家占正利润%'),('return_minus_top1_contribution_pct','再静态减最大赢家后%')]),
         '## 少交易本身，能否解释过滤后的变化？']
     thinrows=[]
     for (period,variant),g in thinning.groupby(['period','variant'],sort=False):
@@ -120,7 +128,7 @@ def render(folder=EXPERIMENT/'results'):
         table(events.loc[events.scope.eq('combined')].to_dict('records'),[('era','时段'),('rule','规则'),('valid','有效路径'),('initial_stop_rate_pct','初损退出率%'),('natural_exits','自然退出'),('censored','段末盯市'),('natural_big_winners','自然退出≥50%'),('mean_net_bp','全体净bp'),('matched_actual_mean_bp','匹配策略bp'),('matched_random_mean_bp','匹配随机bp'),('any_control_fraction_pct','任意对照覆盖%'),('asset_balanced_excess_bp','资产等权超额bp'),('holm_p','Holm p')]),
         '全体均值包含无随机控制的路径，匹配策略/随机均值只比较有对照的相同候选；任意对照覆盖率可与前面control0账户配对覆盖率不同。',
         '## 分交易所：结果能否迁移',
-        table(accounts.loc[accounts.population.eq('all_assets')&accounts.account.eq('full')&accounts.scope.ne('combined')].to_dict('records'),[('era','时段'),('scope','交易所'),('rule','规则'),('return_pct','组合收益%'),('max_drawdown_pct','最大回撤%'),('trades','成交数')]),
+        table(with_paired(accounts.loc[accounts.population.eq('all_assets')&accounts.account.eq('full')&accounts.scope.ne('combined')]).to_dict('records'),[('era','时段'),('scope','交易所'),('rule','规则'),('return_pct','组合收益%'),('max_drawdown_pct','最大回撤%'),('trades','成交数'),('paired_strategy','配对策略%'),('paired_random','配对随机%')]),
         '各所账户独立使用100000资金，不能直接相加收益。相同币在不同交易所出现不算独立重复验证。',
         '## 保留、错过和失败的全局图']
     cases=[];seen=set()
@@ -153,10 +161,11 @@ def render(folder=EXPERIMENT/'results'):
         table(scores.to_dict('records'),[('period','时段'),('scope','市场'),('feature','单特征'),('auc_positive_net','排序AUC'),('top_decile_n','Top10%路径'),('top_decile_gross_bp','毛bp'),('top_decile_net_bp','净bp'),('top_decile_matched_actual_bp','匹配策略bp'),('top_decile_random_bp','匹配随机bp')]),
         '## 成本、数据与诚实限制',
         '费用压力表保持原成交和数量，仅增加成本贡献，没有重算费用变化后配资。资金费不完整，未将未知填零；Binance此前403仍按原记录保留，未绕过或重试。本轮不据这些账面数字宣称完整实盘收益。',
-        table(normal.to_dict('records'),[('era','时段'),('rule','规则'),('return_pct','原20bp%'),('stress40_static_pct','40bp静态%'),('stress60_static_pct','60bp静态%'),('boundary_marks','段末盯市')]),
+        table(normal.to_dict('records'),[('era','时段'),('rule','规则'),('return_pct','原20bp%'),('stress40_static_pct','40bp静态%'),('stress60_static_pct','60bp静态%'),('paired_strategy','20bp配对策略%'),('paired_random','20bp配对随机%'),('boundary_marks','段末盯市')]),
         '目录是之前冻结的当时目录及可获取历史，历史退市覆盖不完整。较早时期同样有幸存者偏差。两门槛来自已看过数据的线索，未达到跨期和对照一致时不能改称最优参数。无新训练、无自动promote，无线上策略或通知变更。',
         '## 验证与复现',
-        'known无过滤基线四个账户对原报告收益、回撤、成交数逐项复现一致。earlier在本段截止处冻结退出；全部源/特征SHA、控制索引、配资账本、随机稀释ID与状态在本实验results中。该配置首次评分消耗holdout第1次；报告仅复用保存账本，图中价格一致性验证不再重跑参数。',
+        'known无过滤基线四个账户对原报告收益、回撤、成交数逐项复现一致。earlier在本段截止处冻结退出；全部源/特征SHA、控制索引、配资账本、随机稀释ID与状态在本实验results中。该配置首次评分消耗holdout第1次，独立原生价格复核第2次；报告仅复用保存账本，图中价格一致性验证不再重跑参数。',
+        f"独立审计{audit['selected']}个样本，手算ATR/MD、量比/扩张并逐bar重放退出，包括VELVET/USELESS最大盈利贡献；{audit['known_parity_rows']}条known事件关键字段与原结果一致，全部{audit['all_censored_boundary_rows']}条censored边界检查通过，错误0。30项定向pytest与4项审计合成时序自检通过。",
         '构建提交：`'+manifest['code_commit']+'`；报告提交：`'+head+'`。']
     runbook=EXPERIMENT/'RUNBOOK.md'
     if runbook.exists():pieces.append(runbook.read_text())
@@ -164,7 +173,7 @@ def render(folder=EXPERIMENT/'results'):
     subprocess.run([str(ROOT/'.venv/bin/python'),str(ROOT/'scripts/md_to_html.py'),str(report),'--out-dir',str(ROOT/'analysis/html')],check=True,cwd=ROOT)
     html=ROOT/'analysis/html'/report.with_suffix('.html').name
     receipt=dict(builder_commit=head,report=str(report),html=str(html),report_sha256=sha(report),html_sha256=sha(html),
-        accounts_manifest_sha256=sha(folder/'accounts_manifest.json'),case_renderer_sha256=sha(case_source),
+        accounts_manifest_sha256=sha(folder/'accounts_manifest.json'),audit_sha256=sha(folder/'audit.json'),case_renderer_sha256=sha(case_source),
         figures=[dict(path=str(p),sha256=sha(p)) for p in figures],cases=cases,scoring_performed=False)
     (gallery/'report_manifest.json').write_text(json.dumps(receipt,indent=2,default=str)+'\n')
     print(json.dumps(dict(report=str(html),figures=len(figures),cases=len(cases))),flush=True)
