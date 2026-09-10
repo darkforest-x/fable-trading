@@ -1,0 +1,48 @@
+{
+  "schema": "spike-v5-native-save-v1",
+  "source_commit": "cb246cdd40c9a962e99d9f8525ecdea1bbde3d93",
+  "pine_sha256": "c97553220bc0b5f164f00dcfa1278966047cc469a11429dfce5cf1562a3bd873",
+  "app": "TradingView Desktop",
+  "chart": "cn.tradingview.com/chart/AlGc61US/",
+  "symbol": "OKX:PEPEUSDT.P",
+  "interval": "1H",
+  "timezone": "Asia/Shanghai",
+  "private_script": "SPIKE V5 · 结构确认",
+  "saved_revision": 3,
+  "saved_ui_time": "2026-09-10 23:48 Asia/Shanghai",
+  "compile_evidence": "Native Pine button 图表更新 disabled after save; revision 3; new short data fields and chart markers rendered.",
+  "input_verified": {
+    "showMilestones": true,
+    "showRR": true,
+    "showMarks": true
+  },
+  "short_case": {
+    "bar_open_beijing": "2026-08-26 22:00",
+    "close": 3.677e-06,
+    "open": 3.752e-06,
+    "high": 3.768e-06,
+    "low": 3.668e-06,
+    "native_final_short": 1,
+    "frozen_parent_high": 3.88e-06,
+    "frozen_parent_low": 3.698e-06,
+    "wait_bars": 0
+  },
+  "long_case": {
+    "bar_open_beijing": "2026-08-20 00:00",
+    "close": 2.714e-06,
+    "native_final_long": 1,
+    "frozen_parent_high": 2.606e-06,
+    "frozen_parent_low": 2.566e-06
+  },
+  "visual_observations": [
+    "Confirmed short candle rendered white against blue chart candles.",
+    "Short red risk fill above entry and green reward fill below; no rectangular outer strokes; independent stop/entry/protection lines remain.",
+    "Long 3R/5R/10R milestone text visible in August 20–22 range.",
+    "Existing V4 hidden and owner annotations retained."
+  ],
+  "limitations": [
+    "Small native sample verifies implementation and display, not profitability or all-symbol parity.",
+    "One active risk reference remains owned by its starting signal; opposite confirmations do not force a reversal.",
+    "Observed inputs are this chart snapshot, not guaranteed synchronization to other devices."
+  ]
+}

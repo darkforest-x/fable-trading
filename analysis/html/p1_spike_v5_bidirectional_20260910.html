@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>V5 多空确认、白色信号 K 线与无边框盈亏区</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>V5 多空确认、白色信号 K 线与无边框盈亏区</h1>
+<p>当前私有 TradingView <strong>V5 第 3 版</strong>已保存，原生显示保存时间为 2026-09-10 23:48。默认启用多空确认，确认 K 线白色，R 里程碑开启，盈亏矩形外边框移除。保留原填色及独立入场、初始止损、趋势保护线。</p>
+<h2>对照与验证</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>更新前 V5</th>
+<th>本次 V5</th>
+</tr></thead><tbody>
+<tr><td>方向</td><td>仅多头确认</td><td>多空独立确认、独立冷却与结构等待</td></tr>
+<tr><td>确认 K 线</td><td>原多头颜色</td><td>多空均为白色</td></tr>
+<tr><td>R 里程碑默认</td><td>关闭</td><td>开启，原 3R/5R/10R 达到提示</td></tr>
+<tr><td>盈亏框外边框</td><td>有</td><td>无，保留填色和独立价格线</td></tr>
+<tr><td>PEPE 1H 已冻结多头案例</td><td>2 个</td><td>2 个，时间完全保留</td></tr>
+<tr><td>同窗口空头确认</td><td>未实现</td><td>4 个</td></tr>
+<tr><td>功能检查</td><td>前版基线</td><td>29 项通过；多空前缀一致性通过</td></tr>
+</tbody></table>
+<p><strong>原生 TV 核对：</strong>PEPE 1H，北京时间 8 月 20 日 00:00 多头确认仍在，收盘参考 0.000002714；8 月 26 日 22:00 出现空头确认，收盘参考 0.000003677，冻结父高/父低 0.000003880 / 0.000003698。上述均为 K 线开盘标签，收盘确认时间晚一小时。原生数据窗口最终确认分别为 1，空头确认等待 0 根。已目视看到白色确认 K 线、空头风险向上/收益向下的无边框填色，以及多头区间的 3R/5R/10R 文字。</p>
+<p>里程碑是走势达到提示，不是固定止盈。原风险倍数、跟随趋势的保护方法不变；空头保护价只向下收紧。当前仍只有一组活跃跟踪参考，其他确认不会强行重置它或反手。已有 V4 隐藏状态及用户批注保留。</p>
+<h2>数据与方法</h2>
+<p>这是一轮功能修改及软件回归，并非参数优化或收益回测。源代码及 builder 先提交于 <code>cb246cdd40c9a962e99d9f8525ecdea1bbde3d93</code>，再执行历史回归。</p>
+<p>认证特征源：<code>experiments/active/exp-spike-burst-validation-20260910-v1/results/features/75d10ad8568817c52dd030fd1e6a.pkl.gz</code>，SHA256 为 <code>031d3e57bb6081002e3ce4484e999b90ca7759322e6e78da8d9d61173248d07a</code>。复用 PEPE 1H 已有数据；完整来源 3144 根，复核 UTC 2026-08-14 00:00 至 2026-09-09 00:00（右端不含）中的 624 根。产生 2 个多头、4 个空头确认。没有新标注、训练集、val 正类率或 val 样本。</p>
+<p>Owner 已在当前会话授权任何时间段数据；<strong>这是该配置第 1 次消耗 holdout</strong>，仅已知案例软件回归，不能作为盲测或样本外盈利证据。</p>
+<p>AUC、置换 p、top-decile 毛/净收益、胜率、随机入场收益对照、单特征收益基线不适用：本轮不计算经济结果。替代功能对照为：冻结多头时点、合成方向镜像、无旧候选/区间失效/数据缺口反例、任意前缀结果一致、空头风险方向和不借用止损后最低价的测试。镜像只用于软件测试，未用于 YOLO 图像增强或训练。</p>
+<h2>复现命令</h2>
+<p>在仓库根目录，使用现有锁定 venv 与上述已认证本地特征工件：</p>
+<pre><code>
+git show cb246cdd40c9a962e99d9f8525ecdea1bbde3d93:yoyo/evaluation/spike_v5_bidirectional_check.py
+.venv/bin/python -m pytest -q tests/test_spike_burst_v5_structure.py tests/test_spike_v5_bidirectional.py tests/test_spike_burst_v4_release.py
+.venv/bin/python -m yoyo.evaluation.spike_v5_bidirectional_check
+.venv/bin/python scripts/md_to_html.py analysis/p1_spike_v5_bidirectional_20260910.md --out-dir analysis/html
+</code></pre>
+<p>原生验证需打开现有私有 V5，粘贴完整 <code>yoyo/evaluation/pine/spike_burst_v5.pine</code>、保存编译，检查 PEPE 1H 两个时间点和当前实例输入。已保存的回执为 <code>experiments/active/exp-spike-v5-bidirectional-20260910-v1/qa/tradingview_receipt.json</code>；历史回归逐事件结果在同目录 <code>results/regression.json</code>。</p>
+<h2>风险与诚实声明</h2>
+<p>29 项测试及少量原生案例只能证明本次功能和方向一致性，不能证明空头盈利、所有币种等价或噪音问题已解决。9 月 4 日原有不理想的多头形态仍在。本次没有放宽多头门槛或重新搜索参数。白色在浅色图表上对比度较低，此处按 Owner 指定颜色设置。少量原生与缓存样本不构成全历史逐根 parity。</p>
+<p>本次没有改通知、后台服务、模型 ACTIVE 或执行配置，没有下单。后续若继续筛噪，需要单独定义成功/失败结构并做时间隔离验证；不把增加空头方向当成盈利结论。</p>
+</body>
+</html>

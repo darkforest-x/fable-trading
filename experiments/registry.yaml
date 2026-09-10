@@ -8242,15 +8242,28 @@ experiments:
       changed.
   - experiment_id: exp-spike-v5-bidirectional-20260910-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 6fa8ea7b2b5e8a9f2db3b701cc52c996a4867042
-    status: active
-    question: Default V5 to long/short confirmations with white signal candles,R milestones and borderless risk boxes.
-    single_variable: Owner-authorized feature/UI change; no optimization or economic experiment.
-    result: 29 focused tests pass; native verification pending.
+    source_commit: cb246cdd40c9a962e99d9f8525ecdea1bbde3d93
+    status: accepted
+    question: Implement owner-requested mirrored short confirmations, white signal candles, enabled R milestones
+      and borderless risk/reward boxes while preserving original longs.
+    result: 'Functional scope passed: 29 tests; 624 PEPE1H reviewed bars, frozen 2 long times unchanged, 4 short
+      confirmations, prefix checks passed; native TV V5 revision3 compiled and saved23:48, long and short reference
+      bars checked. Profitability and noise reduction not evaluated.'
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    reuse_allowed: false
-    artifacts: []
-    notes: No services,models,notifications or execution changes. Existing long chronology preserved; short mirror
-      requires native check.
+    canonical_report: analysis/p1_spike_v5_bidirectional_20260910.md
+    artifacts:
+    - spike-v5-bidirectional-20260910-1
+    - spike-v5-bidirectional-20260910-2
+    - spike-v5-bidirectional-20260910-3
+    - spike-v5-bidirectional-20260910-4
+    - spike-v5-bidirectional-20260910-5
+    - spike-v5-bidirectional-20260910-6
+    - spike-v5-bidirectional-20260910-7
+    - spike-v5-bidirectional-20260910-8
+    - spike-v5-bidirectional-20260910-9
+    single_variable: Owner-approved bundled directional implementation and requested display defaults; no parameter
+      search.
+    notes: First holdout consumption for this configuration under persistent owner all-date authorization. Accepted
+      is software delivery only, not trading validation.
