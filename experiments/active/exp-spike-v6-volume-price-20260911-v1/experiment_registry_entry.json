@@ -1,0 +1,23 @@
+{
+  "experiment_id": "exp-spike-v6-volume-price-20260911-v1",
+  "source_repo": "darkforest-x/fable-trading",
+  "source_commit": "2dcbccc6b85e4f28f3e3edaad07a7b8fb1ee37df",
+  "status": "inconclusive",
+  "question": "Does carrying V1 directional-candle quality as causal evidence across the V5 pending structure window preserve the authorized PEPE 1H functional event without restoring V1 same-bar RV or TR hard gates?",
+  "single_variable": "V5 plus one V1 directional candle-shape evidence latch paired with V5's existing rolling-three progress and volume envelope; risk, display, source provenance, thresholds, and exit references unchanged.",
+  "result": "Authorized 24-bar PEPE 1H functional replay retained the one V5 event at 2026-08-19 16:00 UTC in V6 (V5=1, V6=1, common=1, V5-only=0, V6-only=0); six focused contracts passed. Private V6 revision 2 compiled, applied, and was checked on the specified PEPE 1H long and short charts. This is software behavior only, with no profit, recall, noise, or full-series native parity conclusion.",
+  "holdout_consumed": true,
+  "training_eligible": false,
+  "production_eligible": false,
+  "canonical_report": "analysis/p1_spike_v6_volume_price_20260911.md",
+  "artifacts": [
+    "spike-v6-volume-price-20260911-plan",
+    "spike-v6-volume-price-20260911-pine",
+    "spike-v6-volume-price-20260911-functional-trace",
+    "spike-v6-volume-price-20260911-functional-receipt",
+    "spike-v6-volume-price-20260911-report-source",
+    "spike-v6-volume-price-20260911-report-html"
+  ],
+  "reuse_allowed": false,
+  "notes": "Owner authorized this fixed PEPE functional holdout read as configuration consumption #1. The separate two-year V1 backtest remains pending and was neither read nor rerun here. Root recorded private V6 revision 2 compiled/applied and saved after long and short UI checks at 2026-09-11 01:29–01:37 BJT."
+}

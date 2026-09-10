@@ -219,6 +219,7 @@ def test_holdout_consumption_is_declared_per_experiment_not_assumed():
         "exp-pine-eth-15m-v1",
         "exp-yoyo-trading-fixed-w10-classifier-holdout3d",
         "exp-spike-v1-twoyear-allmarkets-20260911-v1",
+        "exp-spike-v6-volume-price-20260911-v1",
     }, (
         "the set of experiments declaring holdout consumption changed: "
         f"{sorted(consumers)}. Every entry needs an owner authorisation recorded "

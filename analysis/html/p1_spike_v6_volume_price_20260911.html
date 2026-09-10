@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>SPIKE V6：量价结构证据的 PEPE 1H 功能核对</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>SPIKE V6：量价结构证据的 PEPE 1H 功能核对</h1>
+<p>日期：2026-09-11。实验：<code>exp-spike-v6-volume-price-20260911-v1</code>。状态：已完成一段 Owner 授权的 holdout 内软件功能核对和原生 Pine 编译/指定 PEPE 图表核对；未完成全样本召回或任何经济验收。</p>
+<h2>结论</h2>
+<p>V6 只增加一个条件：V5 的冻结 V4 来源等待期间，必须已有一根满足 V1 方向实体质量的 K 线，并且它与 V5 既有的三根推进和三根量比包络同时成立。它不恢复 V1 的单根 RV≥4 或 TR/ATR≥3 硬门。</p>
+<p>在固定 PEPE 1H 的 24 根窗口中，V5 的唯一确认（2026-08-19 16:00 UTC，即 2026-08-20 00:00 北京时间）被 V6 保留；没有移动、新增或显式拒绝的信号。这是单一已知案例的软件行为，不是对 V6 盈利、召回或噪声的证据。</p>
+<h2>冻结规则与因果时钟</h2>
+<p>V1 原版把近零/密集箱、方向价位、IMACD、RV≥4、TR/ATR≥3、实体占比≥55%、方向侧收盘位置≥75%同时压在一根 K 线，且只给释放后六根机会。这些同根条件在放量或扩张未恰好落在确认根时可能排除结构候选；本轮没有对 V1 的漏检走势作经验性评估。</p>
+<p>V5 已经在 V4 来源确认中要求因果三根推进≥1.5 ATR、三根量比≥1.5、近期密集及 IMACD 条件；最终仍要完整实体越过六均线、越冻结父区并且 MD 转强。V6 不重复这两个三根门，也不再加 V1 的 RV/TR 绝对硬门。它只借用 V1 的方向实体质量：方向一致、实体/全幅≥0.55、方向侧收盘位置≥0.75。</p>
+<p>来源确认时，V6 可从该根及前两根的已收盘方向实体中锁定证据，因为当根 V5 三根包络已成立。之后等待期间，只有当前根同时满足方向实体与同一既有三根包络才可新锁定。V6 在<strong>证据与全部 V5 结构条件首次同时成立</strong>的实际已收盘根发出箭头；并非保证保留原 V5 的任何一根。新来源、gap、未知结构输入、父区失效或一次确认消费都会清除证据。多空完全镜像。</p>
+<h2>固定 PEPE 1H 功能结果</h2>
+<p>来源为已认证特征文件 <code>75d10ad8568817c52dd030fd1e6a.pkl.gz</code>，SHA256 <code>031d3e57bb6081002e3ce4484e999b90ca7759322e6e78da8d9d61173248d07a</code>。为保留因果状态，检查载入并处理该文件的连续 3,144 根 1H 上下文（2026-05-01 00:00 UTC 至 2026-09-09 00:00 UTC，右端不含），仅报告 UTC <code>[2026-08-19 12:00, 2026-08-20 12:00)</code> 的 24 根输出窗口。此配置第 1 次功能性 holdout 读取已获 Owner 授权；没有标签、未来收益、成本、持仓或随机对照计算。</p>
+<table><thead><tr>
+<th>指标</th>
+<th>V5</th>
+<th>V6</th>
+<th>V5→V6 变化</th>
+</tr></thead><tbody>
+<tr><td>输出窗口根数</td><td>24</td><td>24</td><td>相同窗口</td></tr>
+<tr><td>确认信号</td><td>1</td><td>1</td><td>共同保留 1</td></tr>
+<tr><td>V5 独有、被 V6 明确拒绝</td><td>—</td><td>0</td><td>无</td></tr>
+<tr><td>V6 独有</td><td>—</td><td>0</td><td>无</td></tr>
+<tr><td>已知 PEPE 00:00 BJT 确认</td><td>有</td><td>有</td><td>未移动</td></tr>
+<tr><td>前缀因果检查</td><td>—</td><td>通过</td><td>后缀改动未改变前缀输出</td></tr>
+</tbody></table>
+<p>在该确认前，V6 在 12:00–15:00 UTC 已锁定方向实体证据；随后依次等待实体/MD 结构完成，16:00 UTC 才确认。确认根的 Data Window 记录消费的证据 K 线，避免在消费后把它错误显示为“无证据”。完整机器可读收据与逐根状态在 <code>experiments/active/exp-spike-v6-volume-price-20260911-v1/results/</code>。</p>
+<h2>原生 Pine 指定图表核对</h2>
+<p>主线程在 TradingView 私有保存 <code>SPIKE V6 · 量价结构确认</code> 第 2 版（2026-09-11 01:29 北京时间）；本地来源 694 行、编辑器光标 695，已成功编译并添加到图表。原 V5/V4 隐藏保留，未替换或改写它们。OKX <code>PEPEUSDT.P</code> 1H 的 2026-08-20 00:00 北京时间确认根收盘为 <code>0.000002714</code>；Data Window 显示 V6 最终确认=1、量价证据已锁定=1、V4 来源 K=5532、实体支持 K=5536、等待=4 根、参考起点=1。</p>
+<p>该原生检查还核对 <code>showPanel=true</code>、里程碑=true、退出文字=false、<code>rrKeep=60</code>，以及白色完整确认 K 线默认值。空头同在 OKX <code>PEPEUSDT.P</code> 1H 的 2026-08-26 22:00 北京时间确认：数值标签为 <code>0.000003677</code>，白色带影线信号 K 线和 RR 框可见；Data Window 为 shortFinal=1、shortEvidence=1、evidenceBar=5702、shortWait=0、MD=−0.000000094、SB=−0.000000069。V6 合并在原 oscillator pane 并固定既有右轴 A，没有额外空白 pane；V4/V5 隐藏保留。布局已保存（2026-09-11 01:36–01:37 北京时间）。这些检查证明指定图表的编译和可见字段，不替代 Python/Pine 全序列 parity、召回、噪声或收益验收。</p>
+<h2>同等严格的零假设对照</h2>
+<p>这不是方向性收益实验，故 val AUC、置换 p、top-decile 毛/净收益、胜率、单特征收益基线与匹配随机入场均不适用，不能编造或留空。</p>
+<p>替代的零假设是“V6 方向实体证据实际上没有约束力，任一 V5 式结构完成都会照样发信号”。合成反例保持 V5 式来源、父区、实体支持和 MD 完成，仅把候选 K 线改为长影线/弱实体或平幅 K 线；V6 明确停在 <code>await_launch_evidence</code>，且平幅 K 线不除零。另一个合成反例在旧方向实体与新来源之间插入 gap：即使输入错误标成随后 <code>ready=true</code>，oracle 也不跨 gap 回看前两根。这些对照证明门和因果边界生效，不证明市场效果。</p>
+<h2>验证与复现</h2>
+<p>源与计划先提交，再运行：</p>
+<pre><code>
+git branch --show-current
+git rev-parse HEAD
+.venv/bin/python -m pytest -q tests/test_spike_burst_v6_structure.py
+.venv/bin/python -m yoyo.evaluation.spike_burst_v6_pepe_check
+python3 scripts/md_to_html.py analysis/p1_spike_v6_volume_price_20260911.md --out-dir analysis/html
+</code></pre>
+<p>实际结果：6 个聚焦合成/静态合同通过；PEPE 功能检查输出 V5=1、V6=1、共同=1、V5-only=0、V6-only=0，且前缀因果通过。私有 V6 Pine 已在指定 PEPE 图表原生编译并核对；该单点原生检查不能以 Python oracle 或静态字符串检查替代，也不能冒充全序列 parity。</p>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>这是一个已知的 24 小时 PEPE 片段，不能宣称对更长历史、别的币、别的周期或空头有效。</li>
+<li>保留一个 V5 信号不意味着 V6 改善盈利、假阳性、延迟或召回；两年回测仍由另一任务独立进行，尚未读取或汇总。</li>
+<li>V6 会明确拒绝一些 V5 信号，也可能在其后才第一次满足联合条件；本例没有观察到这些变化，不能把零变化写成普遍保留。</li>
+<li>没有修改 V1/V5、监控、Bark、Telegram、模型、ACTIVE、执行器、通知或仓位；训练与生产资格均为 false。</li>
+</ul>
+<h2>下一步</h2>
+<ol>
+<li>另一已分配任务完成独立两年 V1 回测；本实验不重复读取或扩展该历史。</li>
+<li>V6 的更广泛有效性、召回、噪声和经济结果仍未验证，且不属于这个有限功能核对。</li>
+</ol>
+</body>
+</html>
