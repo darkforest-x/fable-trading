@@ -222,7 +222,9 @@ def chart(frame, signals, left, right, title, output, footnotes, focus=None, tra
                 raise ValueError("Figure signal timestamp differs from frozen opening bar")
         label = ARM_NAMES[arm] + ("：本窗口无新标记" if not len(indices) else "（实际收盘确认）")
         if len(indices):
-            ax.scatter(indices, frame.low.iloc[indices].to_numpy() - span * offset, marker=marker, s=72,
+            lows=frame.low.iloc[indices].to_numpy()
+            marker_y=lows-np.minimum(span*offset,lows*.15)
+            ax.scatter(indices, marker_y, marker=marker, s=72,
                        color=color, zorder=6, label=label)
         else:
             ax.plot([], [], color=color, marker=marker, linestyle="none", label=label)
@@ -473,12 +475,18 @@ def report_text(evidence, prior, examples, failure, report):
         for target in blocked:
             previous=[row for row in example["arrows"] if row["arm"]=="early" and row["decision_i"]<target["decision_i"]]
             later=[row for row in example["arrows"] if row["arm"]=="confirmed" and row["decision_i"]>=target["decision_i"]]
+            earlier=[row for row in example["arrows"] if row["arm"]=="confirmed" and row["decision_i"]<target["decision_i"]]
             parent=max(previous,key=lambda row:row["decision_i"]) if previous else None
             child=min(later,key=lambda row:row["decision_i"]) if later else None
-            lines += ["%s：%s开盘根达到新预警上升沿，但被冷却拦截。此前最近已接纳预警确认于%s（收盘%s）；后续动能确认%s。此前预警不应冒充目标根的新提醒，冷却造成的遗漏仍保留，没有为这一例事后调短冷却。" %
+            earlier_child=max(earlier,key=lambda row:row["decision_i"]) if earlier else None
+            prior_text="；此前最近的动能确认已在"+bjt(earlier_child["decision_time"])+"发生" if earlier_child else "；此前图窗没有动能确认"
+            if parent and target["decision_i"]-parent["decision_i"]>3 and not any(
+                    row["arm"]=="confirmed" and row["parent_event_id"]==parent["event_id"] for row in example["arrows"]):
+                prior_text+="；上述父预警的0..3根确认窗在目标根前已经过期，未获确认"
+            lines += ["%s：%s开盘根达到新预警上升沿，但被冷却拦截。此前最近已接纳预警确认于%s（收盘%s）；目标根之后的动能确认%s%s。已有预警/确认与目标根的新提醒分开统计，不把每次冷却阻断都当作漏掉行情，也没有为这一例事后调短冷却。" %
                 (example["asset"],bjt(target["bar_open"]),bjt(parent["decision_time"]) if parent else "窗口外",
                  format(parent["signal_close"],".8g") if parent else "未知",
-                 "直到"+bjt(child["decision_time"])+"才出现" if child else "在图窗中未出现"), ""]
+                 "直到"+bjt(child["decision_time"])+"才出现" if child else "在剩余图窗中未再出现",prior_text), ""]
     children=signals.loc[signals.arm.eq("confirmed")]
     lines += [table(["父子等待根数","确认条数"],[[age,int(children.confirm_age.eq(age).sum())] for age in range(4)]), ""]
     for example in examples:
@@ -571,10 +579,10 @@ def run(folder=EXP/"results", report=REPORT):
         shared_anchor_recall_is_not_predictive_validation=True,
         chart_contract="Three complete96bar cases, saved V2/early/confirmed markers at actual close; deterministic worst natural early failure",
         examples=examples,failure=failure,artifacts=[artifact(path) for path in [report,html]+images])
-    initial_attempt=EXP/"qa/report_render_attempts/initial/archive_receipt.json"
-    if initial_attempt.is_file():
-        manifest["prior_render_attempt_archive"]=artifact(initial_attempt)
-        manifest["render_revision_reason"]="Normalize missing NaT values in manifest and clarify stored cooldown diagnostics; frozen study unchanged"
+    attempts=sorted((EXP/"qa/report_render_attempts").glob("*/archive_receipt.json"))
+    if attempts:
+        manifest["prior_render_attempt_archives"]=[artifact(path) for path in attempts]
+        manifest["render_revision_reason"]="Normalize missing NaT, distinguish earlier confirmations from new cooldown suppression, keep positive-price chart markers positive; frozen study unchanged"
     receipt.write_text(json.dumps(clean(manifest),ensure_ascii=False,indent=2,allow_nan=False)+"\n")
     return manifest
 
