@@ -495,10 +495,12 @@ class Store:
         deleted as explicitly authorized monitor-signal history, while the
         caller records this transaction in its migration receipt.
         """
-        obsolete = ("imacd-tv-visible-start-monitor-v3", "imacd-yolo-confirmation-monitor-v1")
+        obsolete = ("imacd-tv-visible-start-monitor-v3", "imacd-yolo-confirmation-monitor-v1",
+                    "imacd-zero-axis-monitor-v2", "imacd-pine-v2.2-default-monitor-v1")
         with self.connect() as db:
             db.execute("BEGIN IMMEDIATE")
-            ids = [r[0] for r in db.execute("SELECT id FROM events WHERE json_extract(payload,'$.protocol') IN (?,?)", obsolete)]
+            marks = ",".join("?" for _ in obsolete)
+            ids = [r[0] for r in db.execute("SELECT id FROM events WHERE json_extract(payload,'$.protocol') IN (" + marks + ")", obsolete)]
             if ids:
                 marks = ",".join("?" for _ in ids)
                 db.execute("DELETE FROM telegram_media WHERE event_id IN (" + marks + ")", ids)
@@ -506,9 +508,12 @@ class Store:
                 db.execute("DELETE FROM bark_outbox WHERE event_id IN (" + marks + ")", ids)
                 db.execute("DELETE FROM model_candidates WHERE id IN (" + marks + ")", ids)
                 db.execute("DELETE FROM events WHERE id IN (" + marks + ")", ids)
-            db.execute("DELETE FROM markets")
-            db.execute("DELETE FROM meta WHERE key='scan' OR key LIKE 'notification_policy:%' OR key LIKE 'notification_timeframe:%'")
+            # This method may run after a V1 cutover.  Deleting its market
+            # cache or notification metadata here would erase the forward-only
+            # boundary and invite historical replay, so cleanup is event-only.
+            prior = json.loads(db.execute("SELECT payload FROM meta WHERE key='migration:spike-burst-v1'").fetchone()[0]) if db.execute("SELECT 1 FROM meta WHERE key='migration:spike-burst-v1'").fetchone() else {}
             receipt = {"migrated_at_ms": int(cutoff_ms), "obsolete_event_rows": len(ids),
+                       "obsolete_event_rows_cumulative": int(prior.get("obsolete_event_rows_cumulative", prior.get("obsolete_event_rows", 0))) + len(ids),
                        "protocol": "spike-burst-v1-monitor-v1", "cutoff_ms": int(cutoff_ms)}
             db.execute("INSERT OR REPLACE INTO meta VALUES (?,?)", ("migration:spike-burst-v1", encode(receipt)))
         return receipt
