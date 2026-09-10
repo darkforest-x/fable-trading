@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>SPIKE V5：将“同一段结构完成”作为最终确认</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>SPIKE V5：将“同一段结构完成”作为最终确认</h1>
+<p>本版落实 Owner 最新的 PEPE 4H 批注定义：整根实体站上六条均线，可以先于或晚于旧信号；全部条件完成后才在当前收盘标一次确认。它是可检验的形态原型，尚未证明盈利改善或保留 80% 大趋势。</p>
+<h2>V4 与 V5 的具体差别</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>原 V4</th>
+<th>V5 结构原型</th>
+</tr></thead><tbody>
+<tr><td>副图先走平</td><td>没有连续近零门；主线等于信号线可通过</td><td>两线连续近零至少 12 根，再向上离开冻结带</td></tr>
+<tr><td>六线</td><td><code>close &gt; ropeHigh</code> 仅为质量字段</td><td>当前结构内曾有开盘与收盘均在线上；允许下影线</td></tr>
+<tr><td>条件顺序</td><td>旧质量门当根完成</td><td>实体证据与旧确认可先后出现，保存各自时间</td></tr>
+<tr><td>实体证据失效</td><td>不适用</td><td>后续收盘回到六线带或以下则失效</td></tr>
+<tr><td>价格位置</td><td>旧父候选高点</td><td>同时突破完整近零段高点与冻结父候选高点</td></tr>
+<tr><td>等待</td><td>旧父子确认最多 3 根</td><td>旧规则内部保留；结构释放另有 6 根窗口（0–5）</td></tr>
+<tr><td>出图时间</td><td>旧确认当前根</td><td>结构齐备的当前根，绝不回填旧事件根</td></tr>
+<tr><td>重复</td><td>同段可以多次旧确认</td><td>同一合格近零结构只发一次最终确认</td></tr>
+<tr><td>风险展示</td><td>首个空闲确认建立参考框</td><td>沿用，按最终确认当根价格建立</td></tr>
+</tbody></table>
+<p>六线仍是 SMA/EMA 20、60、120，采用当根收盘时的均线值。最终根不必再次整根实体在线上：如果当前结构较早已有有效实体证据，最终根开盘可以在线下，但收盘必须仍在线上。新蓄势段不能借用旧段的证据。</p>
+<h2>规则与局限</h2>
+<p>近零宽度为前根 ATR 的 0.10 倍，第 12 根冻结，延续到本结构等待结束。释放窗口 6 根（含释放当根）；两条线重新进入近零、跌破结构低点、主线为负、缺口、未知输入或到期时取消旧等待。仅价格抬升而副图仍水平，不出确认。</p>
+<p>这三个数字沿用旧 Focus 原型，未在本轮搜索最优值。旧 V4 质量门仍需三根进展、量比和近期密集等条件；因此 V5 仍可能因这些条件或等待上限漏掉启动。旧信号迟到、实体证据迟到都可能使入场参考价格更高。没有声称“信号更少就必然更赚钱”。</p>
+<p>保留六线原配色、零轴、双线副图和风险框；不增加柱状图、预警标签或等待标签。风险规则仍为过去 5 根极值加 0.2 ATR 缓冲且至少 2 ATR 初始距离；收盘到 2R 后启动 4 ATR 跟踪，新保护线下一根才生效。3R 是观察位，没有固定 3R 止盈；最大 R 是历史浮盈，不能当已实现收益。</p>
+<h2>验证与复现</h2>
+<p>2026-09-10 本地 15 项检查通过（V5 状态门 9 项 + V4 继承验收 6 项，1.30 秒）。Terra High 独立静态复核未发现新的状态逻辑问题；指出 Python 文档的 parity 措辞过宽，已改成仅验证结构门。完整规则见 <code>experiments/active/exp-spike-v5-structure-confirmation-20260910-v1/PROJECT_PLAN.md</code>。</p>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+.venv/bin/python -m pytest tests/test_spike_burst_v5_structure.py tests/test_spike_burst_v4_release.py -q
+.venv/bin/python scripts/md_to_html.py analysis/p1_spike_v5_structure_confirmation_20260910.md --out-dir analysis/html
+</code></pre>
+<p>本轮软件验收采用合成正例、反例、顺序交换、跨结构污染检查与前缀/未来扰动一致性。Python oracle 仅覆盖新结构状态机，不重算全套 Pine 特征，不能冒充完整数值 parity。Pine 需单独在原生 TradingView 编译并观察实际显示。</p>
+<h2>TradingView 保存与实图检查</h2>
+<p>已保存到 Mac TradingView 的私有脚本 <strong>SPIKE V5 · 结构确认</strong>，版本 1（2026-09-10 22:24 北京时间）。新脚本原生编译后成功加入 OKX PEPEUSDT.P 4H 图，副图双线、零轴与数据窗口均显示；布局已保存。V4 仅隐藏，V5 放在原副图同一右侧坐标，九条人工批注、三个矩形与趋势线保留。</p>
+<p><strong>这次目标案例仍然漏报，不能把功能完成说成降噪研究成功。</strong> 实际数据窗口如下（时间是 K 线开盘的北京时间）：</p>
+<table><thead><tr>
+<th>PEPE 4H</th>
+<th>开盘价 / 收盘价</th>
+<th>六线最高值</th>
+<th>主线 / 信号线</th>
+<th>V5 状态</th>
+</tr></thead><tbody>
+<tr><td>08-19 20:00</td><td>0.000002600 / 0.000002691</td><td>0.000002770</td><td>-0.000000092 / -0.000000110</td><td>静默0，未激活释放，未确认</td></tr>
+<tr><td>08-20 04:00</td><td>0.000002717 / 0.000002875</td><td>0.000002770</td><td>-0.000000056 / -0.000000098</td><td>静默0，未激活释放，未确认</td></tr>
+<tr><td>08-20 12:00</td><td>0.000002913 / 0.000002971</td><td>0.000002774</td><td>-0.000000004 / -0.000000077</td><td>实体已站上，仍无合格蓄势段，未确认</td></tr>
+<tr><td>08-20 16:00</td><td>0.000002971 / 0.000003151</td><td>0.000002777</td><td>0 / -0.000000065</td><td>实体已站上，仍未确认</td></tr>
+</tbody></table>
+<p>这是从负值回升的结构，现原型要求“两条线先连续近零12根”，定义过窄。实体允许先后发生已实现，但不能补救缺少合格蓄势段。下一轮应区别“零轴蓄势释放”和“均线压制后的反转”，先用 Owner 标注定义二者；本轮没有看着此图降低阈值或补写一个追认信号。</p>
+<p>当前窗口未出现 V5 最终事件，因此风险框保留是代码及继承测试证据，不能宣称已在这个无信号窗口看到风险框。原生编译和静态检查也不等于全历史无重绘审计；软件保证新门按已收盘状态前进且不回填旧 bar，数据源修订与设置变更不在该保证内。</p>
+<h2>风险与诚实声明</h2>
+<p>本轮没有市场候选池收益评估，数据量、正类率、AUC、置换检验 p、top-decile 收益、胜率、同币同时间同波动随机收益对照均不适用。合成反例只能检验实现规则，不能替代经济评价。PEPE 图曾经被看过，不是盲样本外；V5 第 1 次使用 Owner 授权的 holdout 图表做功能/语义检查已记录在 qa/tradingview_receipt.json，不训练、不调参、不计算利润。</p>
+<p>原 V1/V3 基准与 A–G 不通过记录保留。V5 私有指标不接入通知或真实交易，也不 promote 模型。下一步可以逐段固定 Owner 的期望启动与明确不该出现信号区，再验证延迟、保留、误报及成本后收益；不能用个别成功图代替这一步。</p>
+</body>
+</html>

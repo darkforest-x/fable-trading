@@ -8185,16 +8185,28 @@ experiments:
       only.
   - experiment_id: exp-spike-v5-structure-confirmation-20260910-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 1c26374073169da1da66ce1db05100486c3a5bfa
+    source_commit: 0de01c88780af2bee7ef6f195f9704c7a838c155
     status: active
     question: Implement Owner structural before/after body-above-six confirmation as a private V5 prototype.
     single_variable: Owner-authorized bundled semantic prototype, not a single-variable profitability experiment.
-    result: Frozen 12-bar, 0.10 prior-ATR quiet band and 6-bar release window; implementation and synthetic verification
-      in progress. No optimization claim.
-    holdout_consumed: false
+    result: Private V5 saved/compiled on native TV,15 focused tests pass and Terra High review resolved. Body support
+      may precede/follow within one episode, no backfill. PEPE4H Aug19-20 still missed by near-zero requirement; research
+      efficacy unproven.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
-    artifacts: []
-    notes: 'Owner latest clarification: body support may precede or follow legacy confirmation within one episode.
-      No live notification changes. Native chart inspection will be separately recorded.'
+    artifacts:
+    - spike-v5-structure-20260910-1
+    - spike-v5-structure-20260910-2
+    - spike-v5-structure-20260910-3
+    - spike-v5-structure-20260910-4
+    - spike-v5-structure-20260910-5
+    - spike-v5-structure-20260910-6
+    - spike-v5-structure-20260910-7
+    - spike-v5-structure-20260910-8
+    - spike-v5-structure-20260910-9
+    notes: First owner-authorized V5 chart-semantic holdout read; no economic scoring/tuning/blind OOS. V4 preserved
+      hidden, V5 visible in same pane; annotations preserved. No notification or execution changes. Active means profitability/recall
+      validation incomplete, not automatic deployment.
+    canonical_report: analysis/html/p1_spike_v5_structure_confirmation_20260910.html
