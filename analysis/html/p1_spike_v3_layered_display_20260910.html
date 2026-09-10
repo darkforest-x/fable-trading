@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>V3 分层观察：保留事件，减少反复开仓的视觉暗示</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>V3 分层观察：保留事件，减少反复开仓的视觉暗示</h1>
+<p><strong>本地研究版已完成，23 项静态/合成测试与独立审核通过；尚未在 TradingView 原生编译、保存或替换图表。</strong> 本项只改显示，原 V3 的信号数量和警报条件不变。它不是已通过回测的降噪策略，主要降噪目标仍在研究中。</p>
+<p><a href="/Users/zhangzc/fable-trading/yoyo/evaluation/pine/spike_burst_v3_layered_display.pine">打开 Pine 源码</a> · <a href="/Users/zhangzc/fable-trading/analysis/html/p1_spike_v3_noise_overview_20260910.html">六项过滤与原版对照</a></p>
+<h2>图上如何区分重点</h2>
+<table><thead><tr>
+<th>场景</th>
+<th>原 V3 / 完整显示</th>
+<th>分层观察默认显示</th>
+</tr></thead><tbody>
+<tr><td>无参考时产生原结构预警，且风险数据可用</td><td>结构预警大标签、亮色 K 线，新建原参考框</td><td>突出“观察起点”、真实收盘价、亮色 K 线；建立同一个原参考框</td></tr>
+<tr><td>当前参考的原预警得到第二阶段确认</td><td>结构确认标签及亮色 K 线</td><td>“参考升级”，亮色 K 线；只升级质量，不重置入场和止损</td></tr>
+<tr><td>参考期间另一个结构预警</td><td>同样大标签和亮色 K 线，容易被当作重新开仓</td><td>小点及“补充观察”轻量文字，保留实际时点和价格</td></tr>
+<tr><td>另一预警的后续确认</td><td>确认标签及亮色 K 线</td><td>“补充确认”；不得把另一预警的质量归给当前参考</td></tr>
+<tr><td>关闭标签文字、或历史文字超过平台限额</td><td>最近标签受平台限制</td><td>已加载历史中每个原事件仍有连续小点，数据窗口保留原事件与价格</td></tr>
+<tr><td>切换“完整显示”</td><td>原显示</td><td>恢复原标签、面板和 K 线染色</td></tr>
+</tbody></table>
+<p>“补充观察”可能是独立机会，不能凭已有参考就断言是重复或噪音。参考框不是用户持仓。是否重复开单应由明确的交易管理规则决定，不能让图表标签暗示每个观察都必须下单。</p>
+<p>六条均线、IMACD 双线、零轴、副图信号点、风险参数及盈亏双框保持原样。没有固定止盈；峰值 R 仍是历史路径参考，不是已实现收益。</p>
+<h2>验证证据</h2>
+<table><thead><tr>
+<th>检查</th>
+<th>结果</th>
+<th>范围</th>
+</tr></thead><tbody>
+<tr><td>原文件 SHA 固定</td><td>通过</td><td>原 V3 源码没有被修改</td></tr>
+<tr><td>特征、ALERT STATE、REFERENCE STATE、风险函数字节守恒</td><td>通过</td><td>显示变量不反馈检测或参考状态</td></tr>
+<tr><td>原常数、参数及 3 条 alertcondition</td><td>通过</td><td>提示数量和通知触发语义没有改变</td></tr>
+<tr><td>原风险框、六均线、双线、零轴、原 Data Window 项</td><td>通过</td><td>静态源码对照</td></tr>
+<tr><td>同根/延迟确认、另一父、退出根、无效风险、前缀及状态重置</td><td>23 项测试通过</td><td>合成事件，没有读取市场样本</td></tr>
+<tr><td>独立提取 Pine 显示表达式</td><td>96 组检查通过</td><td>事件守恒及参考归属</td></tr>
+<tr><td>plot 预算</td><td>静态保守上界 52，小于 64</td><td>不是原生编译测量</td></tr>
+<tr><td>TradingView 原生编译、实际深浅色视觉</td><td>待验</td><td>本机显示账号已在另一台 PC 活跃；保留该会话，未重新连接</td></tr>
+</tbody></table>
+<p>参考起点编号只在已收盘原参考起点增加。确认必须同时满足原 <code>confirmedSignal</code>、参考仍活动、<code>parentBar == entryBar</code>；所有标签在真实当前 bar 绘制，时间使用当根收盘，绝不回填到父预警 K 线。</p>
+<p>主图连续 <code>plotshape</code> 独立于文字标签生命周期。文字、悬浮说明与风险/里程碑共享原来的 300 个 label 对象上限，因此旧文字可被 TradingView 回收；这不等于事件从检测、副图或数据窗口中消失。“完整保留”指原事件与已加载数据，不承诺平台未加载的无限历史。</p>
+<h2>数据与统计适用范围</h2>
+<p>本项没有新市场输入、候选池或未来收益标签；没有新增 holdout 评估、训练、调参或经济模拟。市场候选数/正类率/val 样本数、val AUC、置换 p、top-decile 毛净收益、胜率和匹配随机在本项均不适用。严格对照为原 V3 检测及警报字节一致、合成输入事件不增不减、显示状态前缀一致。</p>
+<p>交易统计请查看上方原版/V3及六项固定过滤报告，不将显示守恒当作胜率改善，也不将补充提示淡化当作成功过滤亏损交易。</p>
+<h2>复现</h2>
+<p>源码、测试、计划和独立审核已先提交在 <code>b79c863</code>。</p>
+<pre><code>
+.venv/bin/python -m pytest -q tests/test_spike_burst_v3_layered_display.py
+python3 scripts/md_to_html.py analysis/p1_spike_v3_layered_display_20260910.md --out-dir analysis/html
+</code></pre>
+<ul>
+<li>原 V3 SHA：<code>d604051c0c633e3ee9dac4c23bbae51ce20fe9365da60aa33a760e08cf4ea882</code></li>
+<li>分层 Pine SHA：<code>5c54df7adfa0146c5e124578c5ad18d797f3372e218f07fadcb2bc631b73a2e7</code></li>
+<li>测试 SHA：<code>1f584fa672e170fb828fd41b1cc04316cb4b2e741df79e8a422ce51fb0e735e5</code></li>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-layered-display-20260910-v1/qa/independent_review.json">独立审核</a>：<code>fb613a1276a1f09e06a69bfcad2f3c396c8d5aeab33daf420aad04c7d0ff176c</code></li>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-layered-display-20260910-v1/PROJECT_PLAN.md">计划</a></li>
+<li><a href="/Users/zhangzc/fable-trading/docs/learnings/display-ownership-must-not-filter-independent-signal-events.md">实现经验</a></li>
+</ul>
+<h2>风险与诚实声明</h2>
+<p>原 V3 仍会产生较多结构预警；本版没有降低统计上的假启动或保证未来正确信号不丢。原研究主要为 1H，其他周期不因显示改动而自动得到验证。静态与合成测试不替代原生 Pine 编译或原生/Python 全历史逐根对照。</p>
+<p>没有接管另一台电脑的 TradingView 会话，没有改动线上通知、执行或已有图表。HTML 只完成静态文档检查；未将其宣称为真实图表视觉验收。</p>
+<h2>后续验收</h2>
+<p>原生活跃会话恢复到此 Mac 后，再验证编译、浅/深色、历史标签回收后的连续标记、完整模式切换及原风险框。主要研究继续区分独立启动、趋势内再次突破和真正失败，仍需事前定义、失败样本对照与独立验证，不能靠删箭头或改分母宣称完成目标。</p>
+</body>
+</html>

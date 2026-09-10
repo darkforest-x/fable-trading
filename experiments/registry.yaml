@@ -8017,18 +8017,24 @@ experiments:
       overview is descriptive and not a shared-control tournament.
   - experiment_id: exp-spike-v3-layered-display-20260910-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: eef18a3b5783b766d0fbd310b6271b2cf61969b6
+    source_commit: b79c863286bf27a57b31c74dfef2073d917ced1c
     status: active
     question: Can display ownership reduce repeated-entry implications while retaining every original V3 event?
     single_variable: One-way UI projection only; original detection, reference state, parameters and alert conditions
       remain byte-identical.
-    result: Display-only source and23 synthetic/static tests complete; independent review and native chart verification
-      tracked separately. No market scoring.
+    result: 23 static/synthetic tests and96 independent expression cases pass; original event/alert/risk core preserved.
+      Local Pine complete; native compile, chart visuals and save pending other active device session.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
     canonical_report: analysis/html/p1_spike_v3_layered_display_20260910.html
-    artifacts: []
+    artifacts:
+    - spike-v3-layered-display-20260910-pine
+    - spike-v3-layered-display-20260910-tests
+    - spike-v3-layered-display-20260910-report-source
+    - spike-v3-layered-display-20260910-report-html
+    - spike-v3-layered-display-20260910-independent-review
+    - spike-v3-layered-display-20260910-report-review
     notes: Research display improvement only, not a seventh strategy filter or evidence of improved returns. Do
       not seize another active TradingView device session.

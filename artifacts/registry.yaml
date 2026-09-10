@@ -27684,3 +27684,93 @@ artifacts:
       audit passed; no deployment or eligibility. Original V1 historical controls remain separate. source_commit
       identifies the reviewed frozen study; this is a QA record, not a claim that the generated receipt existed
       in that source commit.
+  - artifact_id: spike-v3-layered-display-20260910-pine
+    artifact_type: config
+    role: display_only_original_event_conservation
+    source_repo: darkforest-x/fable-trading
+    source_commit: b79c863286bf27a57b31c74dfef2073d917ced1c
+    source_path: yoyo/evaluation/pine/spike_burst_v3_layered_display.pine
+    sha256: 5c54df7adfa0146c5e124578c5ad18d797f3372e218f07fadcb2bc631b73a2e7
+    size_bytes: 33960
+    storage_uri: repo://yoyo/evaluation/pine/spike_burst_v3_layered_display.pine
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 'Display-only artifact: no new market or holdout scoring. Registry has no not_applicable value; unknown
+      is a conservative eligibility placeholder, not evidence of scored data. Native compile/save/visual QA pending;
+      original V3 core unchanged.'
+  - artifact_id: spike-v3-layered-display-20260910-tests
+    artifact_type: config
+    role: display_only_original_event_conservation
+    source_repo: darkforest-x/fable-trading
+    source_commit: b79c863286bf27a57b31c74dfef2073d917ced1c
+    source_path: tests/test_spike_burst_v3_layered_display.py
+    sha256: 1f584fa672e170fb828fd41b1cc04316cb4b2e741df79e8a422ce51fb0e735e5
+    size_bytes: 10874
+    storage_uri: repo://tests/test_spike_burst_v3_layered_display.py
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 'Display-only artifact: no new market or holdout scoring. Registry has no not_applicable value; unknown
+      is a conservative eligibility placeholder, not evidence of scored data. Native compile/save/visual QA pending;
+      original V3 core unchanged.'
+  - artifact_id: spike-v3-layered-display-20260910-report-source
+    artifact_type: report
+    role: display_only_original_event_conservation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8f6b3a80af4365e734e651a04dbc9ddcec39eb67
+    source_path: analysis/p1_spike_v3_layered_display_20260910.md
+    sha256: 8c3bf65c9a2874babf2eb74066aad77efd96666f714d177b3d12d649998f56a8
+    size_bytes: 5971
+    storage_uri: repo://analysis/p1_spike_v3_layered_display_20260910.md
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 'Display-only artifact: no new market or holdout scoring. Registry has no not_applicable value; unknown
+      is a conservative eligibility placeholder, not evidence of scored data. Native compile/save/visual QA pending;
+      original V3 core unchanged.'
+  - artifact_id: spike-v3-layered-display-20260910-report-html
+    artifact_type: report
+    role: display_only_original_event_conservation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8f6b3a80af4365e734e651a04dbc9ddcec39eb67
+    source_path: analysis/html/p1_spike_v3_layered_display_20260910.html
+    sha256: 3915a5a9e34859273075f40764babfb9f8731655f0fe8e25451b97d6120eecd8
+    size_bytes: 9175
+    storage_uri: repo://analysis/html/p1_spike_v3_layered_display_20260910.html
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 'Display-only artifact: no new market or holdout scoring. Registry has no not_applicable value; unknown
+      is a conservative eligibility placeholder, not evidence of scored data. Native compile/save/visual QA pending;
+      original V3 core unchanged.'
+  - artifact_id: spike-v3-layered-display-20260910-independent-review
+    artifact_type: report
+    role: display_only_original_event_conservation
+    source_repo: darkforest-x/fable-trading
+    source_commit: b79c863286bf27a57b31c74dfef2073d917ced1c
+    source_path: experiments/active/exp-spike-v3-layered-display-20260910-v1/qa/independent_review.json
+    sha256: fb613a1276a1f09e06a69bfcad2f3c396c8d5aeab33daf420aad04c7d0ff176c
+    size_bytes: 5713
+    storage_uri: repo://experiments/active/exp-spike-v3-layered-display-20260910-v1/qa/independent_review.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 'Display-only artifact: no new market or holdout scoring. Registry has no not_applicable value; unknown
+      is a conservative eligibility placeholder, not evidence of scored data. Native compile/save/visual QA pending;
+      original V3 core unchanged.'
+  - artifact_id: spike-v3-layered-display-20260910-report-review
+    artifact_type: report
+    role: display_only_original_event_conservation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8f6b3a80af4365e734e651a04dbc9ddcec39eb67
+    source_path: experiments/active/exp-spike-v3-layered-display-20260910-v1/qa/report_review.json
+    sha256: b648d9abf70b1e2743fe20cf7460280e97aabf8833c513e3aebef5681989a810
+    size_bytes: 741
+    storage_uri: repo://experiments/active/exp-spike-v3-layered-display-20260910-v1/qa/report_review.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 'Display-only artifact: no new market or holdout scoring. Registry has no not_applicable value; unknown
+      is a conservative eligibility placeholder, not evidence of scored data. Native compile/save/visual QA pending;
+      original V3 core unchanged.'
