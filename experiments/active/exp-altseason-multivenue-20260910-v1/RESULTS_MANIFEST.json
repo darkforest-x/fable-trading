@@ -1,0 +1,195 @@
+{
+  "experiment_id": "exp-altseason-multivenue-20260910-v1",
+  "generated_at": "2026-09-10T00:08:47.752362+00:00",
+  "report_generator_commit": "1642e65164178e149505e77bf10000b23a332cad",
+  "evaluation": {
+    "generated_at": "2026-09-09T18:07:09.310720+00:00",
+    "start": "2026-07-10 00:00:00+00:00",
+    "split": "2026-08-10 00:00:00+00:00",
+    "end": "2026-09-09 00:00:00+00:00",
+    "code_commit": "4a98bb1a65b1957f006a2e1f4c47d74740728774",
+    "holdout_consumption": 4,
+    "historical_exploration": true,
+    "optimization": false,
+    "live_changes": false,
+    "events": 123257,
+    "controls": 224889,
+    "markets": 1496,
+    "venues": {
+      "okx": {
+        "eligible": 281,
+        "completed": 281,
+        "errors": 0
+      },
+      "binance": {
+        "eligible": 655,
+        "completed": 654,
+        "errors": 1
+      },
+      "gate": {
+        "eligible": 561,
+        "completed": 561,
+        "errors": 0
+      }
+    },
+    "fees": "20bp static entry notional; full funding/impact excluded from base account",
+    "control_protocol": "three matched schedules, variable availability; asset clustered paired test; no same-asset price paths treated as independent",
+    "identity": "Exact base names only; unverified numeric multiplier aliases excluded from combined account",
+    "source_survivorship": "Current catalogs plus available nontrading Binance history; not complete historical listings",
+    "holdout_passes": [
+      {
+        "pass": 1,
+        "scope": "Frozen full-market event, control and base-account evaluation"
+      },
+      {
+        "pass": 2,
+        "scope": "Preliminary independent replay and prefix inspection; temporary scripts were not yet committed, not claimed reproducible"
+      },
+      {
+        "pass": 3,
+        "scope": "Committed independent replay of30events plus4prefix/source audits, all passed"
+      },
+      {
+        "pass": 4,
+        "scope": "Fixed-ledger fee sensitivity, matched-identity cashbook and gallery price verification; no parameter selection or signal/exit refit"
+      }
+    ],
+    "cost_boundary_audit": "Initial5s accounting retained in precheck_clock5s; observed native offsets up to8s required conservative1minute uncertainty in final costs.",
+    "source_hashes": {
+      "yoyo/evaluation/altseason_engine.py": "569e5dbb7be283f0d276a64d58688c454927723dd8671e541b43ed780040e689",
+      "yoyo/evaluation/altseason_dataset.py": "7417234871dba289d3bee90fd04038ca10fc2e190e114ef52465eba316fba6e6",
+      "yoyo/evaluation/altseason_research.py": "35d6e171a8a7b25516871ae119c2780dcc1130d2beaaffdd270d2b2f99742075",
+      "yoyo/evaluation/altseason_portfolio.py": "a4628d1cfefc325c6ab0e2dff558d117f5dd915e78aa4f8c5372f51f4f5ad369"
+    },
+    "funding_coverage_audit": "../data/funding/funding_coverage_audit.json"
+  },
+  "artifacts": [
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/results/portfolio_summary.csv",
+      "sha256": "b7dd5c522b4ee98f2e539e808d65927ee56db84ba0fcce22de610ac9a85e0202",
+      "size_bytes": 53802
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/results/paired_portfolio_summary.csv",
+      "sha256": "7beba713b02f26feadba93c4987f78472404271ea67940d641c4fde8d2482972",
+      "size_bytes": 83602
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/results/summary.csv",
+      "sha256": "421215bfec847d395b31ade948432d5ebfd7694306b3a8b0e3ad695f2a6d9643",
+      "size_bytes": 48310
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/results/feature_diagnostics.csv",
+      "sha256": "dc99cafcf0a5099617c0d5d9ea369413de68b650e47a73cb9493074152e5e4da",
+      "size_bytes": 222581
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/results/score_diagnostics.csv",
+      "sha256": "2197e3d6c4a0389442b0107dd87ad93e29706896124cd59be6fc11ff70a84419",
+      "size_bytes": 138709
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/results/cost_diagnostics.csv",
+      "sha256": "48681537bd911d03bfefb8b0d86e088aa5149cbef6c06f224a450cb06b84a2e4",
+      "size_bytes": 16624
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/results/audit_real.json",
+      "sha256": "f6349e7892501fea885e588a3eef77a1ced7b2867d0729deaf7439bccc83e6d0",
+      "size_bytes": 234555
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/results/audit_prefix.json",
+      "sha256": "ca2653a7634330e83469f7218324dc09f11b3a09093fd7539d798709d06a6527",
+      "size_bytes": 7487
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/results/manifest.json",
+      "sha256": "5810476db49f25a24e57c1f24a1f90a0dd776ff65c7734348885898bee5c47dd",
+      "size_bytes": 2481
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/results/paired_portfolio_manifest.json",
+      "sha256": "a109fb89427e5c021aeb0eaebfe6655750e4cecc01c8592c2e49f4dfab56678d",
+      "size_bytes": 589227
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/results/events.csv.gz",
+      "sha256": "acd1f7c68c196d6d046a2880e2aa9b40f4ff2493f5fcad2609e054fcb1254bb9",
+      "size_bytes": 38989001
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/results/controls.csv.gz",
+      "sha256": "c3c3b1c655aaa62d8bf936f848246cccf9656cad31265d8b6195fc61993cf6e2",
+      "size_bytes": 54027587
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/results/calendar_events.csv.gz",
+      "sha256": "581dfef5f4a737208ec837c550f65b7e192d2c9803842d643d6ade89f1892634",
+      "size_bytes": 3748065
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/results/opportunity_audit.csv.gz",
+      "sha256": "a8d3cffd00aa2c5aa3fdae01c221cdf3b4bc49ff94a154e7c8897e5af3c69116",
+      "size_bytes": 113894
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/results/portfolio_selections.csv.gz",
+      "sha256": "3a09f18484ce65e102b670ba260bec33611e8798790fde903211a3d8bb0bf2de",
+      "size_bytes": 89505154
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/results/cost_details.csv.gz",
+      "sha256": "bd3c00c5db4dfe28dbaf75a596c949bc9915d6ca339a208ffc5a319b589e657a",
+      "size_bytes": 8911510
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/results/coverage.csv",
+      "sha256": "90c1dae2b3ae4d0fe133b475e1cd130a58423491024c3de536bcf94d6ef08a0d",
+      "size_bytes": 9236744
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/results/gallery/report_manifest.json",
+      "sha256": "33c40a1b13e1e18188d3fd9a7299640317b7587fecc21b3e6d37a03930ea91e0",
+      "size_bytes": 11948
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/data/funding/funding_coverage_audit.json",
+      "sha256": "40585ba73bc482b7a7c5dc0b35311829a4610c54e9429d4b8cd1aef97de92b67",
+      "size_bytes": 4857
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/data/okx_collection_manifest.json",
+      "sha256": "95b8bb4571911a5b8ed55d7c9afb61fcdf1fc159701bf710317a69c2f33da386",
+      "size_bytes": 1281579
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/data/binance_collection_manifest.json",
+      "sha256": "a278057e7096a0deb18c211bda94e99a647937b67299f853bbd647532653d006",
+      "size_bytes": 1300231
+    },
+    {
+      "path": "experiments/active/exp-altseason-multivenue-20260910-v1/data/gate_collection_manifest.json",
+      "sha256": "d2a34969604c8fb3aa0cbad701f809c1c62340a296bafbe15ec2518eb411141e",
+      "size_bytes": 917395
+    }
+  ],
+  "report_source_sha256": "a6a9b63864ce518abe174e712c474de54586650fdbe358c50bebca012d4819dd",
+  "report_html_sha256": "ce680bdc85fbaf0dc6e48a05d55d9e185eb9079193f2f8061d783d472fa1bece",
+  "figures": 19,
+  "tests_passed": 71,
+  "independent_events_checked": 30,
+  "prefix_source_cases_checked": 4,
+  "production_eligible": false,
+  "training_eligible": false,
+  "decision": "inconclusive: fixed1H focus trend-holding deserves prospective validation; not proven optimal or promoted",
+  "delivery_validation": {
+    "embedded_images": 19,
+    "tables": 27,
+    "artifact_hashes_checked": 22,
+    "summary_snapshot_pairs_checked": 8,
+    "md_html_match_gallery_manifest": true,
+    "strategy_source_hashes_unchanged": true
+  }
+}
