@@ -7816,3 +7816,20 @@ experiments:
     notes: First scored V3 configuration exposure, seen retrospective history. Initial prep init bug before market
       jobs archived; later render/CSV parser corrections did not rescore. Broad shared-anchor recall is not predictive
       accuracy. Native Pine compile not performed; current TV/monitor/notifications unchanged.
+
+  - experiment_id: exp-spike-burst-noise-20260910-v4
+    source_repo: darkforest-x/fable-trading
+    source_commit: 67454c80e83fce36d806e0a602b0af9edba38cd4
+    status: active
+    question: Does consuming each density episode once reduce V2 repeated launch noise?
+    single_variable: One causal consumed-density-episode gate on progressive entries
+      only; risk and costs unchanged.
+    result: Preregistered, no scores yet. Actual TV reads V2, V3 remains offline.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    canonical_report: analysis/html/p1_spike_burst_noise_20260910.html
+    artifacts: []
+    notes: Owner noise correction and prior all-dates authorization. One retrospective
+      exposure after builder commit; no live changes.
