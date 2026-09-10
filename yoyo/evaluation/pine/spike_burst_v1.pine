@@ -178,7 +178,9 @@ if barstate.isconfirmed and ready
                     label.new(bar_index, sideBefore == 1 ? high : low, str.tostring(level, "#") + "R 已到", style=sideBefore == 1 ? label.style_label_down : label.style_label_up, color=color.new(sideBefore == 1 ? bull : bear, 90), textcolor=sideBefore == 1 ? bull : bear, size=size.tiny, force_overlay=true)
 
     float band = quietCount >= minQuiet and not na(frozenBand) ? frozenBand : nearAtr * atr[1]
-    bool near = math.max(math.abs(md), math.abs(sb)) <= band
+    // A pending launch owns its frozen band. ATR changes must not create a new
+    // quiet episode that silently cancels an otherwise valid waiting launch.
+    bool near = pendingSide == 0 and math.max(math.abs(md), math.abs(sb)) <= band
     if near
         pendingSide := 0
         quietCount += 1
