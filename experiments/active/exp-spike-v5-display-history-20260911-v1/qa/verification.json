@@ -1,0 +1,56 @@
+{
+  "schema": "spike-v5-display-native-v1",
+  "source_commit": "bb779f7adcead85f9eceda415e8201207c87ac38",
+  "pine_sha256": "3e480c639b459917cfd7647eb0fb4a39bbb29b7516e68189a97f5821212737c0",
+  "unchanged_sections_vs_1898ba5": {
+    "risk": "ac0af7dc2541be6d936d829a3ddf56c30f720cdd742bb7962c062f50ce1ea04c",
+    "long_fields": "57d0c2c9df20409303260f0d46f2643a1823c7fc54d80080232b312b81225c69",
+    "short_fields": "eea62a7f2f6b75dde739654ef1b31c63b93eb7b1dc82d359b1c90c27e78044c5",
+    "long_legacy": "e1c71e16cb45d478480e9a09c36eff12f82fdece39701da90001a9b44457ae32",
+    "short_legacy": "b61ffc8189b71dd71f772a26c7dcab5dabd7d8000825d9b3650d0695c2b53ec1",
+    "structural_gate_span": "fd6b540f785c622d1cc94d735261b949554e423029a8a26afd9e4d77244d9ae5"
+  },
+  "test_count": 29,
+  "existing_warning": "urllib3 LibreSSL",
+  "delegated_review": "budget-debugger Terra High; read-only old retention diagnosis and new grouped lifecycle review",
+  "native": {
+    "app": "TradingView Desktop",
+    "chart": "cn.tradingview.com/chart/AlGc61US/",
+    "symbol": "OKX:PEPEUSDT.P",
+    "timeframe": "1H",
+    "revision": 4,
+    "save_time_beijing": "2026-09-11 00:16",
+    "compile": "Chart update button disabled after save; displayed grouped boxes/lines without runtime errors",
+    "final_inputs": {
+      "showPanel": true,
+      "showMilestones": true,
+      "showExitLabels": false,
+      "rrKeep": 60,
+      "rrAhead": 12,
+      "signalColor": "#FFFFFF",
+      "opacity": 100
+    },
+    "history_counterfactual": {
+      "range": "2026-06-15..2026-06-30",
+      "keep60": "June boxes and price labels visible",
+      "keep8": "Same June boxes and price labels absent; arrows retained",
+      "restored60": true
+    },
+    "older_signal": {
+      "open_beijing": "2026-06-18 01:00",
+      "side": "long",
+      "confirmation_close": 3.014e-06,
+      "final_confirmation": 1,
+      "groups_at_this_bar": 31
+    },
+    "milestones": "Aug20..22: dashed 3R/5R/10R levels visible; exit captions absent",
+    "short": "Aug26..29: short boxes, sl caption and full white confirmed candle visible"
+  },
+  "max_object_budget": {
+    "boxes": 120,
+    "lines": 180,
+    "labels": 480
+  },
+  "holdout_consumption": 1,
+  "economic_evaluation": false
+}

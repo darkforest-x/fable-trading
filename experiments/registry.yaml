@@ -8269,13 +8269,22 @@ experiments:
       is software delivery only, not trading validation.
   - experiment_id: exp-spike-v5-display-history-20260911-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 1898ba5bba82f24c9c4578099bf8248f5fe2ef97
-    status: active
-    question: Owner requested restored borders, separate R/exit controls, dashed reached milestones, configurable
-      full signal candles, panel default and older risk histories.
-    result: Implementation and 29 regression tests complete; native compile/display verification pending.
-    holdout_consumed: false
+    source_commit: bb779f7adcead85f9eceda415e8201207c87ac38
+    status: accepted
+    question: Restore borders, separate R/exit controls, dashed reached milestones, configurable full candles, panel
+      default and older risk histories.
+    result: 'Functional delivery passed: 29 checks, signal/risk code regions byte-identical to1898ba5, native revision4
+      compiled/saved00:16; June history disappeared at keep8 and returned at60. Final panel/R on, exit off, keep60,
+      colorFFFFFF.'
+    holdout_consumed: true
     production_eligible: false
     training_eligible: false
-    single_variable: Owner-approved display and object-lifecycle bundle; frozen signal and risk mathematics.
-    notes: Default60 drawing groups with synchronized deletion and bounded total objects. No economic evaluation.
+    canonical_report: analysis/p1_spike_v5_display_history_20260911.md
+    artifacts:
+    - spike-v5-display-history-20260911-1
+    - spike-v5-display-history-20260911-2
+    - spike-v5-display-history-20260911-3
+    - spike-v5-display-history-20260911-4
+    - spike-v5-display-history-20260911-5
+    single_variable: Owner-approved display/lifecycle bundle; no signal or risk parameter changes.
+    notes: Accepted only as software delivery. One known-history use; no economic evaluation or trading validation.
