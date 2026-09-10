@@ -183,6 +183,7 @@ def fetch(max_markets: int | None = None, venue: str | None = None) -> None:
             ledger.append(json.loads(receipt.read_text())); continue
         client, chunks, pages, error = Client(venue), [], [], ""
         dest.parent.mkdir(parents=True, exist_ok=True)
+        expected = pd.DatetimeIndex([], tz="UTC")
         cursor = WARMUP_START
         try:
             while cursor < END:
