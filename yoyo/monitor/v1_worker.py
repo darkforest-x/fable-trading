@@ -78,7 +78,12 @@ class V1Scanner:
                             # armed direct policy permits this newly closed bar.
                             raw_bark = delivery_error(store, event, client.clock(), "bark") is None
                             store.upsert_event(event, bark_notify=raw_bark)
-                            if 0 <= client.clock() - event["bar_close_ms"] <= 9 * TIMEFRAMES[timeframe]:
+                            # YOLO is only an extra stage for a raw event that
+                            # was eligible to notify at registration time. A
+                            # cold scan can rediscover an old closed bar within
+                            # nine TF bars; retain that raw history but never
+                            # load/infer it as if it were a new live candidate.
+                            if raw_bark:
                                 store.register_candidate(event, pending_proof(event))
                         state = dict(result["state"], symbol=symbol, venue="okx", active=True, stale=False,
                                      gap_count=gaps, available_bars=len(candles), tick_size=instrument["tickSz"],

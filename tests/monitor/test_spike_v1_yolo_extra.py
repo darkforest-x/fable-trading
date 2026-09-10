@@ -52,8 +52,9 @@ def test_raw_v1_remains_independent_while_yolo_adds_a_separate_bark_leg(tmp_path
                 "ema60": 100.0, "sma120": 100.0, "ema120": 100.0}
                for t in range(p - 20 * step, p + step, step)]
     store = Store(tmp_path / "monitor.sqlite3")
-    store.activate_bark_policy(0, protocol=MODEL_PROTOCOL)
-    store.activate_timeframe_policy(timeframe, 0, protocol=MODEL_PROTOCOL)
+    # A durable candidate is valid only when its original raw leg was itself
+    # forward-eligible.  The arm records both raw and YOLO-extra stages.
+    arm_v1_bark(store, 0)
     detector = Detector(proposal)
     gate = ModelGate(store, lambda: close + 1_000, threading.Event(), detector)
     assert gate.register(raw)

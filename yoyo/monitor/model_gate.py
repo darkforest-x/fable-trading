@@ -150,6 +150,15 @@ class ModelGate:
         cache = {}
         for event in self.store.list_candidates(2000, symbol, timeframe, pending_only=True):
             proof, p = dict(event["model"]), event["bar_open_ms"]
+            # A candidate persisted by an older worker must still prove that
+            # its raw V1 leg was post-cutover at the original close. Evaluate
+            # at that close, not at ``now``: a legitimate pending 4H candidate
+            # may wait beyond the 30-minute raw freshness window.
+            raw_error = delivery_error(self.store, event, event["bar_close_ms"], "bark")
+            if raw_error is not None:
+                proof.update(status="disabled", reason="raw_not_eligible:" + raw_error)
+                self.store.update_candidate(event["id"], proof)
+                continue
             cursor = proof.get("last_checked_close_ms")
             first = max(p, cursor if cursor is not None else p)
             last = min(closed[-1]["t"], p + MODEL_MAX_WAIT * step)
