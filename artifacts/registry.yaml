@@ -24340,7 +24340,7 @@ artifacts:
     source_commit: b494138028a64b293d1fb3a950467c0420725030
     source_path: experiments/active/exp-imacd-yolo-timeframes-20260908-v1/results/summary.json
     sha256: 5f8892b6d663faae16cede37675efc4fb4c58b98e745fa11b437674f7f65fb48
-    size_bytes: 8834
+    size_bytes: 8835
     storage_uri: repo://experiments/active/exp-imacd-yolo-timeframes-20260908-v1/results/summary.json
     holdout_status: holdout_consumed
     training_eligible: false
@@ -29493,27 +29493,29 @@ artifacts:
       No return scoring.
   - artifact_id: spike-v1-twoyear-allmarkets-20260911-report-source
     artifact_type: report
-    role: all_market_data_availability_failure_record
+    role: coverage_limited_incremental_backtest_report
     source_repo: darkforest-x/fable-trading
-    source_commit: 465450d886d74ffda12e570445cef7f0cabb1787
+    source_commit: fa91d12
+    generator_commit: 395dcc3
     source_path: analysis/p1_spike_v1_twoyear_20260911.md
-    sha256: b9788fca6448621c1613041054e62f9b9f000590cbef1838fddc169e55b1322f
-    size_bytes: 4895
+    sha256: 2294b2eb96d3c47100539cbf9af94eb9416bf58709ee7d9847abc8a18802421f
+    size_bytes: 5827
     storage_uri: repo://analysis/p1_spike_v1_twoyear_20260911.md
     holdout_status: holdout_consumed
     training_eligible: false
     production_eligible: false
-    notes: Frozen three-venue V1 run blocked before trade simulation because Gate lacks requested two-year 30m coverage.
+    notes: Frozen current-catalog denominator remains 1,681x4; this report exposes incremental executable ledgers without claiming all-market completion.
   - artifact_id: spike-v1-twoyear-allmarkets-20260911-report-html
     artifact_type: report
-    role: owner_delivery_data_availability_failure_record
+    role: owner_delivery_coverage_limited_incremental_report
     source_repo: darkforest-x/fable-trading
-    source_commit: 465450d886d74ffda12e570445cef7f0cabb1787
+    source_commit: fa91d12
+    generator_commit: 395dcc3
     source_path: analysis/html/p1_spike_v1_twoyear_20260911.html
-    sha256: 39bd3d525b68203cb5f41d32f76a0bbe3c0fd4fac1b028fba3bd00ccd785e568
-    size_bytes: 7827
+    sha256: 72b376c410cc71fbdfef8cdc05fb7c147f905926fc35c010cfdcc062ecf80a7c
+    size_bytes: 8835
     storage_uri: repo://analysis/html/p1_spike_v1_twoyear_20260911.html
     holdout_status: holdout_consumed
     training_eligible: false
     production_eligible: false
-    notes: HTML delivery for the frozen all-market data availability failure record.
+    notes: HTML delivery labels the run coverage-limited and links the searchable incremental ledger.
