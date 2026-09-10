@@ -183,8 +183,12 @@ def fetch(max_markets: int | None = None, venue: str | None = None) -> None:
             ledger.append(json.loads(receipt.read_text())); continue
         client, chunks, pages, error = Client(venue), [], [], ""
         dest.parent.mkdir(parents=True, exist_ok=True)
-        expected = pd.DatetimeIndex([], tz="UTC")
-        cursor = WARMUP_START
+        raw_listing = row.get("listing_ms")
+        listed = int(raw_listing) if pd.notna(raw_listing) and float(raw_listing) > 0 else 0
+        listed_at = pd.Timestamp(listed, unit="ms", tz="UTC").ceil("30min") if listed > 0 else WARMUP_START
+        requested_start = max(WARMUP_START, listed_at)
+        expected = pd.date_range(requested_start, END, freq="30min", inclusive="left")
+        cursor = requested_start
         try:
             while cursor < END:
                 right = min(END, cursor + pd.Timedelta(minutes=30 * client.limit))
@@ -193,9 +197,6 @@ def fetch(max_markets: int | None = None, venue: str | None = None) -> None:
             frame = pd.concat(chunks).sort_index() if chunks else pd.DataFrame()
             if len(frame) and frame.index.duplicated().any(): raise ValueError("duplicate rows after page join")
             frame.to_csv(dest, compression={"method": "gzip", "mtime": 0})
-            listed = int(row.get("listing_ms") or 0)
-            listed_at = pd.Timestamp(listed, unit="ms", tz="UTC").ceil("30min") if listed > 0 else WARMUP_START
-            expected = pd.date_range(max(WARMUP_START, listed_at), END, freq="30min", inclusive="left")
             missing = expected.difference(frame.index).astype(str).tolist() if len(frame) else expected.astype(str).tolist()
             status = "complete" if not missing else "gapped"
         except Exception as exc: frame, pages, missing, status, error = pd.DataFrame(), pages, [], "error", repr(exc)
