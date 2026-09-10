@@ -1,0 +1,4477 @@
+{
+  "status": "complete",
+  "generated_at": "2026-09-10T10:02:43.530613+00:00",
+  "scope": "Read-only fixed HYPE/NEAR/PEPE saved-event diagnostic. No detector invocation, no new configuration, thresholds, outcome labels, economic evaluation or scoring.",
+  "prepared_manifest_sha256": "84c60082d9df02deb8f2dbeb5f9043559e3d963abb682490c7160b334158fbd4",
+  "authenticated_inputs": {
+    "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/prepared_manifest.json": "84c60082d9df02deb8f2dbeb5f9043559e3d963abb682490c7160b334158fbd4",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/matching.json": "183f55055f82c31f6e7ed4281d4038c34a7cb2fb166163060fb914e36197730c",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/signals.csv.gz": "ae1bee272e387aecb4b823785d64b8f5910e3f519877d92c9f409bb97a14a5ed",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/parent_registry.csv.gz": "30ed57ca355a4d0aa4b79d1f6ca6944bd3e1e3942446702f9bb9297c7e8c68bf",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/states/113_HYPE.csv.gz": "4e976006e29bed7a3b4a2315c312b3cfa8077e32b1454acd0e5daedf34a5a88c",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/features/d85c61f8617e34d1ac6eb5b16bf8.pkl.gz": "ab000f7a00a6e0819155d080f1def5e2d0bc68f42f86d873cd49bdd03f1a11af",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/states/160_NEAR.csv.gz": "af963d6b8a30b59cd34db4d70992483b8e50b6e06c32ce1751d94d542b18d4c4",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/features/a01b67a7fd813e1549b642bb63e1.pkl.gz": "62305f3b3ed0bbe53843ff416db05547211a3bd74f99b88b83eecc4c4eeeee27",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/states/183_PEPE.csv.gz": "cc06bf031532fa31fb240974141d89631735d569bdd6d8d512bf1f93e4b0100b",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/features/75d10ad8568817c52dd030fd1e6a.pkl.gz": "031d3e57bb6081002e3ce4484e999b90ca7759322e6e78da8d9d61173248d07a"
+  },
+  "window": {
+    "first_confirmed_at_bjt": "2026-08-19T00:00:00+08:00",
+    "last_confirmed_at_bjt_inclusive": "2026-08-20T08:00:00+08:00"
+  },
+  "checks": {
+    "hourly_case_rows": 99,
+    "stored_event_rows_verified": 15,
+    "timestamps_match_authenticated_feature_open_plus_1h": true,
+    "state_events_equal_saved_signals": true,
+    "stored_formation_matches_fixed_prior12_formula": true,
+    "old_and_new_raw_edges_identical": true
+  },
+  "conclusions": {
+    "HYPE": "D retains V3 early at 08-19 21:00 BJT close 59.279 and child at 08-20 00:00 close 61.851 (age3). The 08-19 23:00 close raw edge is blocked by the same 21:00 accepted-parent cooldown, not by formation; a parent already exists.",
+    "NEAR": "D rejects the 08-19 15:00 close parent (1.620), so the 23:00 close edge is no longer cooldown-blocked. However its own formed=False rejects that edge, and again at 08-20 02:00. Formed becomes true at04:00 with no raw edge. D first accepts at05:00 (1.723), then confirms06:00 (1.770), exactly the same late pair as V3. The proposed cooldown-release benefit does not materialize in this case.",
+    "PEPE": "D retains V3 early+child at08-19 21:00 BJT, age0. The 23:00 close raw edge is cooldown-blocked in both arms after that earlier confirmed parent. This is not a total failure to identify this episode.",
+    "timestamp": "Selected TradingView 08-19 22:00 open is confirmed at08-19 23:00 BJT; selected23:00 open is confirmed at08-20 00:00 BJT. Decisions are never backdated to candle open."
+  },
+  "cases": [
+    {
+      "asset": "HYPE",
+      "instrument": "okx:HYPE-USDT-SWAP:segment0",
+      "feature_source": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/features/d85c61f8617e34d1ac6eb5b16bf8.pkl.gz",
+      "state_source": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/states/113_HYPE.csv.gz",
+      "saved_events": [
+        {
+          "arm": "v3",
+          "stage": "early",
+          "event_id": "577aaf1ad27751f87046cff6e8f6",
+          "bar_open_bjt": "2026-08-19T20:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T21:00:00+08:00",
+          "signal_close": 59.279,
+          "parent_i": 2652,
+          "parent_event_id": "577aaf1ad27751f87046cff6e8f6",
+          "parent_confirmed_at_bjt": "2026-08-19T21:00:00+08:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "confirmed",
+          "event_id": "31f96a4f7d4b692fab83ac39ac39",
+          "bar_open_bjt": "2026-08-19T23:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T00:00:00+08:00",
+          "signal_close": 61.851,
+          "parent_i": 2652,
+          "parent_event_id": "577aaf1ad27751f87046cff6e8f6",
+          "parent_confirmed_at_bjt": "2026-08-19T21:00:00+08:00",
+          "confirm_age": 3.0
+        },
+        {
+          "arm": "formation_gate",
+          "stage": "early",
+          "event_id": "fdd6304e91a1bc2e6447e6522031",
+          "bar_open_bjt": "2026-08-19T20:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T21:00:00+08:00",
+          "signal_close": 59.279,
+          "parent_i": 2652,
+          "parent_event_id": "fdd6304e91a1bc2e6447e6522031",
+          "parent_confirmed_at_bjt": "2026-08-19T21:00:00+08:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "formation_gate",
+          "stage": "confirmed",
+          "event_id": "9a840484d2b8b5767cc9da5b3c60",
+          "bar_open_bjt": "2026-08-19T23:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T00:00:00+08:00",
+          "signal_close": 61.851,
+          "parent_i": 2652,
+          "parent_event_id": "fdd6304e91a1bc2e6447e6522031",
+          "parent_confirmed_at_bjt": "2026-08-19T21:00:00+08:00",
+          "confirm_age": 3.0
+        }
+      ],
+      "hourly_rows": [
+        {
+          "decision_i": 2631,
+          "bar_open_bjt": "2026-08-18T23:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T00:00:00+08:00",
+          "ohlc": {
+            "open": 59.146,
+            "high": 59.56,
+            "low": 59.102,
+            "close": 59.369
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 1.7865500000000054,
+          "recent_six_width_median": 1.795276153806988,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 9
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 9
+          }
+        },
+        {
+          "decision_i": 2632,
+          "bar_open_bjt": "2026-08-19T00:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T01:00:00+08:00",
+          "ohlc": {
+            "open": 59.369,
+            "high": 59.424,
+            "low": 58.269,
+            "close": 58.783
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 1.7800281380252407,
+          "recent_six_width_median": 1.795276153806988,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 10
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 10
+          }
+        },
+        {
+          "decision_i": 2633,
+          "bar_open_bjt": "2026-08-19T01:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T02:00:00+08:00",
+          "ohlc": {
+            "open": 58.783,
+            "high": 58.827,
+            "low": 58.234,
+            "close": 58.639
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.7800281380252407,
+          "recent_six_width_median": 1.7728219257524032,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 11
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 11
+          }
+        },
+        {
+          "decision_i": 2634,
+          "bar_open_bjt": "2026-08-19T02:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T03:00:00+08:00",
+          "ohlc": {
+            "open": 58.639,
+            "high": 58.761,
+            "low": 58.521,
+            "close": 58.698
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.7800281380252407,
+          "recent_six_width_median": 1.7594541666666643,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 12
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 12
+          }
+        },
+        {
+          "decision_i": 2635,
+          "bar_open_bjt": "2026-08-19T03:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T04:00:00+08:00",
+          "ohlc": {
+            "open": 58.698,
+            "high": 59.045,
+            "low": 58.659,
+            "close": 58.914
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.7939031994131547,
+          "recent_six_width_median": 1.7556999999999938,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 13
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 13
+          }
+        },
+        {
+          "decision_i": 2636,
+          "bar_open_bjt": "2026-08-19T04:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T05:00:00+08:00",
+          "ohlc": {
+            "open": 58.914,
+            "high": 59.118,
+            "low": 58.504,
+            "close": 58.562
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.795276153806988,
+          "recent_six_width_median": 1.7424583333333317,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 14
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 14
+          }
+        },
+        {
+          "decision_i": 2637,
+          "bar_open_bjt": "2026-08-19T05:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T06:00:00+08:00",
+          "ohlc": {
+            "open": 58.563,
+            "high": 58.728,
+            "low": 58.517,
+            "close": 58.721
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.795276153806988,
+          "recent_six_width_median": 1.7165750000000024,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 15
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 15
+          }
+        },
+        {
+          "decision_i": 2638,
+          "bar_open_bjt": "2026-08-19T06:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T07:00:00+08:00",
+          "ohlc": {
+            "open": 58.721,
+            "high": 58.823,
+            "low": 58.338,
+            "close": 58.399
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.795276153806988,
+          "recent_six_width_median": 1.6847583333333347,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 16
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 16
+          }
+        },
+        {
+          "decision_i": 2639,
+          "bar_open_bjt": "2026-08-19T07:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T08:00:00+08:00",
+          "ohlc": {
+            "open": 58.4,
+            "high": 58.667,
+            "low": 58.3,
+            "close": 58.515
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.7728219257524032,
+          "recent_six_width_median": 1.6353416666666654,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 17
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 17
+          }
+        },
+        {
+          "decision_i": 2640,
+          "bar_open_bjt": "2026-08-19T08:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T09:00:00+08:00",
+          "ohlc": {
+            "open": 58.519,
+            "high": 58.718,
+            "low": 58.164,
+            "close": 58.527
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.7594541666666643,
+          "recent_six_width_median": 1.588316666666664,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 18
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 18
+          }
+        },
+        {
+          "decision_i": 2641,
+          "bar_open_bjt": "2026-08-19T09:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T10:00:00+08:00",
+          "ohlc": {
+            "open": 58.531,
+            "high": 58.843,
+            "low": 58.527,
+            "close": 58.535
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.7556999999999938,
+          "recent_six_width_median": 1.547516666666663,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 19
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 19
+          }
+        },
+        {
+          "decision_i": 2642,
+          "bar_open_bjt": "2026-08-19T10:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T11:00:00+08:00",
+          "ohlc": {
+            "open": 58.535,
+            "high": 58.535,
+            "low": 58.231,
+            "close": 58.393
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.7424583333333317,
+          "recent_six_width_median": 1.4972958333333288,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 20
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 20
+          }
+        },
+        {
+          "decision_i": 2643,
+          "bar_open_bjt": "2026-08-19T11:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T12:00:00+08:00",
+          "ohlc": {
+            "open": 58.393,
+            "high": 58.5,
+            "low": 58.235,
+            "close": 58.391
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.7165750000000024,
+          "recent_six_width_median": 1.4488708333333378,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 21
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 21
+          }
+        },
+        {
+          "decision_i": 2644,
+          "bar_open_bjt": "2026-08-19T12:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T13:00:00+08:00",
+          "ohlc": {
+            "open": 58.39,
+            "high": 58.583,
+            "low": 58.338,
+            "close": 58.549
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.6847583333333347,
+          "recent_six_width_median": 1.4062041666666723,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 22
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 22
+          }
+        },
+        {
+          "decision_i": 2645,
+          "bar_open_bjt": "2026-08-19T13:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T14:00:00+08:00",
+          "ohlc": {
+            "open": 58.553,
+            "high": 58.688,
+            "low": 58.2,
+            "close": 58.231
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.6353416666666654,
+          "recent_six_width_median": 1.340766666666667,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 23
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 23
+          }
+        },
+        {
+          "decision_i": 2646,
+          "bar_open_bjt": "2026-08-19T14:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T15:00:00+08:00",
+          "ohlc": {
+            "open": 58.231,
+            "high": 58.603,
+            "low": 58.023,
+            "close": 58.477
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.588316666666664,
+          "recent_six_width_median": 1.2563374999999972,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 24
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 24
+          }
+        },
+        {
+          "decision_i": 2647,
+          "bar_open_bjt": "2026-08-19T15:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T16:00:00+08:00",
+          "ohlc": {
+            "open": 58.477,
+            "high": 58.542,
+            "low": 58.16,
+            "close": 58.16
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.547516666666663,
+          "recent_six_width_median": 1.1835749999999976,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 25
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 25
+          }
+        },
+        {
+          "decision_i": 2648,
+          "bar_open_bjt": "2026-08-19T16:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T17:00:00+08:00",
+          "ohlc": {
+            "open": 58.161,
+            "high": 58.499,
+            "low": 58.087,
+            "close": 58.295
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.4972958333333288,
+          "recent_six_width_median": 1.139787499999997,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 26
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 26
+          }
+        },
+        {
+          "decision_i": 2649,
+          "bar_open_bjt": "2026-08-19T17:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T18:00:00+08:00",
+          "ohlc": {
+            "open": 58.294,
+            "high": 58.469,
+            "low": 58.217,
+            "close": 58.25
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.4488708333333378,
+          "recent_six_width_median": 1.1277624999999993,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 27
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 27
+          }
+        },
+        {
+          "decision_i": 2650,
+          "bar_open_bjt": "2026-08-19T18:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T19:00:00+08:00",
+          "ohlc": {
+            "open": 58.252,
+            "high": 58.524,
+            "low": 58.144,
+            "close": 58.524
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.4062041666666723,
+          "recent_six_width_median": 1.1226583333333373,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 28
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 28
+          }
+        },
+        {
+          "decision_i": 2651,
+          "bar_open_bjt": "2026-08-19T19:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T20:00:00+08:00",
+          "ohlc": {
+            "open": 58.523,
+            "high": 58.955,
+            "low": 58.5,
+            "close": 58.73
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.340766666666667,
+          "recent_six_width_median": 1.120679166666669,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 29
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 29
+          }
+        },
+        {
+          "decision_i": 2652,
+          "bar_open_bjt": "2026-08-19T20:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T21:00:00+08:00",
+          "ohlc": {
+            "open": 58.731,
+            "high": 59.369,
+            "low": 58.651,
+            "close": 59.279
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.2563374999999972,
+          "recent_six_width_median": 1.120679166666669,
+          "original_raw_edge": true,
+          "v3": {
+            "early": true,
+            "confirmed": false,
+            "early_reason": "accepted_new_parent",
+            "parent_i": 2652.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 30
+          },
+          "formation_gate": {
+            "early": true,
+            "confirmed": false,
+            "early_reason": "accepted_new_parent",
+            "parent_i": 2652.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 30
+          }
+        },
+        {
+          "decision_i": 2653,
+          "bar_open_bjt": "2026-08-19T21:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T22:00:00+08:00",
+          "ohlc": {
+            "open": 59.28,
+            "high": 59.414,
+            "low": 58.583,
+            "close": 58.637
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.1835749999999976,
+          "recent_six_width_median": 1.120679166666669,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2652.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 1
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2652.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 1
+          }
+        },
+        {
+          "decision_i": 2654,
+          "bar_open_bjt": "2026-08-19T22:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T23:00:00+08:00",
+          "ohlc": {
+            "open": 58.637,
+            "high": 59.935,
+            "low": 58.621,
+            "close": 59.879
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.139787499999997,
+          "recent_six_width_median": 1.1198916666666712,
+          "original_raw_edge": true,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "original_accepted_parent_12bar_cooldown",
+            "parent_i": 2652.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 2
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "original_accepted_parent_12bar_cooldown",
+            "parent_i": 2652.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 2
+          }
+        },
+        {
+          "decision_i": 2655,
+          "bar_open_bjt": "2026-08-19T23:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T00:00:00+08:00",
+          "ohlc": {
+            "open": 59.88,
+            "high": 61.88,
+            "low": 59.643,
+            "close": 61.851
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.1277624999999993,
+          "recent_six_width_median": 1.1197250000000025,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": true,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2652.0,
+            "confirm_age": 3.0,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 3
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": true,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2652.0,
+            "confirm_age": 3.0,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 3
+          }
+        },
+        {
+          "decision_i": 2656,
+          "bar_open_bjt": "2026-08-20T00:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T01:00:00+08:00",
+          "ohlc": {
+            "open": 61.85,
+            "high": 62.645,
+            "low": 61.534,
+            "close": 61.959
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 1.1226583333333373,
+          "recent_six_width_median": 1.1196333333333364,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 4
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 4
+          }
+        },
+        {
+          "decision_i": 2657,
+          "bar_open_bjt": "2026-08-20T01:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T02:00:00+08:00",
+          "ohlc": {
+            "open": 61.958,
+            "high": 62.423,
+            "low": 61.577,
+            "close": 62.182
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 1.120679166666669,
+          "recent_six_width_median": 1.1224500000000042,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 5
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 5
+          }
+        },
+        {
+          "decision_i": 2658,
+          "bar_open_bjt": "2026-08-20T02:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T03:00:00+08:00",
+          "ohlc": {
+            "open": 62.181,
+            "high": 62.497,
+            "low": 61.755,
+            "close": 62.235
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 1.120679166666669,
+          "recent_six_width_median": 1.1254416666666707,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 6
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 6
+          }
+        },
+        {
+          "decision_i": 2659,
+          "bar_open_bjt": "2026-08-20T03:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T04:00:00+08:00",
+          "ohlc": {
+            "open": 62.232,
+            "high": 72.321,
+            "low": 62.022,
+            "close": 70.266
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 1.120679166666669,
+          "recent_six_width_median": 1.2058667826879343,
+          "original_raw_edge": true,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "original_accepted_parent_12bar_cooldown",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 7
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "original_accepted_parent_12bar_cooldown",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 7
+          }
+        },
+        {
+          "decision_i": 2660,
+          "bar_open_bjt": "2026-08-20T04:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T05:00:00+08:00",
+          "ohlc": {
+            "open": 70.266,
+            "high": 71.172,
+            "low": 68.346,
+            "close": 71.119
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 1.1198916666666712,
+          "recent_six_width_median": 1.4031043876595533,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 8
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 8
+          }
+        },
+        {
+          "decision_i": 2661,
+          "bar_open_bjt": "2026-08-20T05:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T06:00:00+08:00",
+          "ohlc": {
+            "open": 71.119,
+            "high": 72.621,
+            "low": 69.872,
+            "close": 71.332
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 1.1197250000000025,
+          "recent_six_width_median": 1.6093833348665783,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 9
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 9
+          }
+        },
+        {
+          "decision_i": 2662,
+          "bar_open_bjt": "2026-08-20T06:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T07:00:00+08:00",
+          "ohlc": {
+            "open": 71.332,
+            "high": 72.0,
+            "low": 70.275,
+            "close": 70.89
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 1.1196333333333364,
+          "recent_six_width_median": 2.142025993450712,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 10
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 10
+          }
+        },
+        {
+          "decision_i": 2663,
+          "bar_open_bjt": "2026-08-20T07:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T08:00:00+08:00",
+          "ohlc": {
+            "open": 70.895,
+            "high": 71.351,
+            "low": 69.124,
+            "close": 69.768
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 1.1224500000000042,
+          "recent_six_width_median": 3.0010540734395335,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 11
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 11
+          }
+        }
+      ],
+      "fixed_window_details": [
+        {
+          "confirmed_at_bjt": "2026-08-19T21:00:00+08:00",
+          "decision_i": 2652,
+          "old_six": [
+            {
+              "bar_open_bjt": "2026-08-19T08:00:00+08:00",
+              "width": 1.426425000000009
+            },
+            {
+              "bar_open_bjt": "2026-08-19T09:00:00+08:00",
+              "width": 1.3859833333333356
+            },
+            {
+              "bar_open_bjt": "2026-08-19T10:00:00+08:00",
+              "width": 1.2955499999999986
+            },
+            {
+              "bar_open_bjt": "2026-08-19T11:00:00+08:00",
+              "width": 1.2171249999999958
+            },
+            {
+              "bar_open_bjt": "2026-08-19T12:00:00+08:00",
+              "width": 1.1500249999999994
+            },
+            {
+              "bar_open_bjt": "2026-08-19T13:00:00+08:00",
+              "width": 1.1295499999999947
+            }
+          ],
+          "recent_six": [
+            {
+              "bar_open_bjt": "2026-08-19T14:00:00+08:00",
+              "width": 1.125975000000004
+            },
+            {
+              "bar_open_bjt": "2026-08-19T15:00:00+08:00",
+              "width": 1.1193416666666707
+            },
+            {
+              "bar_open_bjt": "2026-08-19T16:00:00+08:00",
+              "width": 1.1177666666666752
+            },
+            {
+              "bar_open_bjt": "2026-08-19T17:00:00+08:00",
+              "width": 1.117433333333338
+            },
+            {
+              "bar_open_bjt": "2026-08-19T18:00:00+08:00",
+              "width": 1.122016666666667
+            },
+            {
+              "bar_open_bjt": "2026-08-19T19:00:00+08:00",
+              "width": 1.1276500000000027
+            }
+          ]
+        },
+        {
+          "confirmed_at_bjt": "2026-08-19T23:00:00+08:00",
+          "decision_i": 2654,
+          "old_six": [
+            {
+              "bar_open_bjt": "2026-08-19T10:00:00+08:00",
+              "width": 1.2955499999999986
+            },
+            {
+              "bar_open_bjt": "2026-08-19T11:00:00+08:00",
+              "width": 1.2171249999999958
+            },
+            {
+              "bar_open_bjt": "2026-08-19T12:00:00+08:00",
+              "width": 1.1500249999999994
+            },
+            {
+              "bar_open_bjt": "2026-08-19T13:00:00+08:00",
+              "width": 1.1295499999999947
+            },
+            {
+              "bar_open_bjt": "2026-08-19T14:00:00+08:00",
+              "width": 1.125975000000004
+            },
+            {
+              "bar_open_bjt": "2026-08-19T15:00:00+08:00",
+              "width": 1.1193416666666707
+            }
+          ],
+          "recent_six": [
+            {
+              "bar_open_bjt": "2026-08-19T16:00:00+08:00",
+              "width": 1.1177666666666752
+            },
+            {
+              "bar_open_bjt": "2026-08-19T17:00:00+08:00",
+              "width": 1.117433333333338
+            },
+            {
+              "bar_open_bjt": "2026-08-19T18:00:00+08:00",
+              "width": 1.122016666666667
+            },
+            {
+              "bar_open_bjt": "2026-08-19T19:00:00+08:00",
+              "width": 1.1276500000000027
+            },
+            {
+              "bar_open_bjt": "2026-08-19T20:00:00+08:00",
+              "width": 1.1336333333333357
+            },
+            {
+              "bar_open_bjt": "2026-08-19T21:00:00+08:00",
+              "width": 1.1172500000000056
+            }
+          ]
+        },
+        {
+          "confirmed_at_bjt": "2026-08-20T00:00:00+08:00",
+          "decision_i": 2655,
+          "old_six": [
+            {
+              "bar_open_bjt": "2026-08-19T11:00:00+08:00",
+              "width": 1.2171249999999958
+            },
+            {
+              "bar_open_bjt": "2026-08-19T12:00:00+08:00",
+              "width": 1.1500249999999994
+            },
+            {
+              "bar_open_bjt": "2026-08-19T13:00:00+08:00",
+              "width": 1.1295499999999947
+            },
+            {
+              "bar_open_bjt": "2026-08-19T14:00:00+08:00",
+              "width": 1.125975000000004
+            },
+            {
+              "bar_open_bjt": "2026-08-19T15:00:00+08:00",
+              "width": 1.1193416666666707
+            },
+            {
+              "bar_open_bjt": "2026-08-19T16:00:00+08:00",
+              "width": 1.1177666666666752
+            }
+          ],
+          "recent_six": [
+            {
+              "bar_open_bjt": "2026-08-19T17:00:00+08:00",
+              "width": 1.117433333333338
+            },
+            {
+              "bar_open_bjt": "2026-08-19T18:00:00+08:00",
+              "width": 1.122016666666667
+            },
+            {
+              "bar_open_bjt": "2026-08-19T19:00:00+08:00",
+              "width": 1.1276500000000027
+            },
+            {
+              "bar_open_bjt": "2026-08-19T20:00:00+08:00",
+              "width": 1.1336333333333357
+            },
+            {
+              "bar_open_bjt": "2026-08-19T21:00:00+08:00",
+              "width": 1.1172500000000056
+            },
+            {
+              "bar_open_bjt": "2026-08-19T22:00:00+08:00",
+              "width": 1.0968750000000043
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "asset": "NEAR",
+      "instrument": "okx:NEAR-USDT-SWAP:segment0",
+      "feature_source": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/features/a01b67a7fd813e1549b642bb63e1.pkl.gz",
+      "state_source": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/states/160_NEAR.csv.gz",
+      "saved_events": [
+        {
+          "arm": "v3",
+          "stage": "early",
+          "event_id": "f8f55ce330102b4a5e22bc1f0b47",
+          "bar_open_bjt": "2026-08-19T14:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T15:00:00+08:00",
+          "signal_close": 1.62,
+          "parent_i": 2646,
+          "parent_event_id": "f8f55ce330102b4a5e22bc1f0b47",
+          "parent_confirmed_at_bjt": "2026-08-19T15:00:00+08:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "event_id": "8a1cdcc00e8950261be4a92d2433",
+          "bar_open_bjt": "2026-08-20T04:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T05:00:00+08:00",
+          "signal_close": 1.723,
+          "parent_i": 2660,
+          "parent_event_id": "8a1cdcc00e8950261be4a92d2433",
+          "parent_confirmed_at_bjt": "2026-08-20T05:00:00+08:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "confirmed",
+          "event_id": "0b6950cc9627630d5c112c9c0eef",
+          "bar_open_bjt": "2026-08-20T05:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T06:00:00+08:00",
+          "signal_close": 1.77,
+          "parent_i": 2660,
+          "parent_event_id": "8a1cdcc00e8950261be4a92d2433",
+          "parent_confirmed_at_bjt": "2026-08-20T05:00:00+08:00",
+          "confirm_age": 1.0
+        },
+        {
+          "arm": "formation_gate",
+          "stage": "early",
+          "event_id": "e11d17e207cd466cdb8e476b4349",
+          "bar_open_bjt": "2026-08-20T04:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T05:00:00+08:00",
+          "signal_close": 1.723,
+          "parent_i": 2660,
+          "parent_event_id": "e11d17e207cd466cdb8e476b4349",
+          "parent_confirmed_at_bjt": "2026-08-20T05:00:00+08:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "formation_gate",
+          "stage": "confirmed",
+          "event_id": "a2982537ae3905d0c7afc236fa1b",
+          "bar_open_bjt": "2026-08-20T05:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T06:00:00+08:00",
+          "signal_close": 1.77,
+          "parent_i": 2660,
+          "parent_event_id": "e11d17e207cd466cdb8e476b4349",
+          "parent_confirmed_at_bjt": "2026-08-20T05:00:00+08:00",
+          "confirm_age": 1.0
+        }
+      ],
+      "hourly_rows": [
+        {
+          "decision_i": 2631,
+          "bar_open_bjt": "2026-08-18T23:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T00:00:00+08:00",
+          "ohlc": {
+            "open": 1.628,
+            "high": 1.647,
+            "low": 1.625,
+            "close": 1.634
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 0.010333333333333194,
+          "recent_six_width_median": 0.005570833333333414,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 9
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 85
+          }
+        },
+        {
+          "decision_i": 2632,
+          "bar_open_bjt": "2026-08-19T00:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T01:00:00+08:00",
+          "ohlc": {
+            "open": 1.634,
+            "high": 1.635,
+            "low": 1.61,
+            "close": 1.614
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 0.010333333333333194,
+          "recent_six_width_median": 0.005570833333333414,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 10
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 86
+          }
+        },
+        {
+          "decision_i": 2633,
+          "bar_open_bjt": "2026-08-19T01:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T02:00:00+08:00",
+          "ohlc": {
+            "open": 1.613,
+            "high": 1.614,
+            "low": 1.596,
+            "close": 1.61
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 0.009824999999999862,
+          "recent_six_width_median": 0.005570833333333414,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 11
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 87
+          }
+        },
+        {
+          "decision_i": 2634,
+          "bar_open_bjt": "2026-08-19T02:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T03:00:00+08:00",
+          "ohlc": {
+            "open": 1.61,
+            "high": 1.616,
+            "low": 1.61,
+            "close": 1.613
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 0.008299999999999863,
+          "recent_six_width_median": 0.005279166666666613,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 12
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 88
+          }
+        },
+        {
+          "decision_i": 2635,
+          "bar_open_bjt": "2026-08-19T03:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T04:00:00+08:00",
+          "ohlc": {
+            "open": 1.613,
+            "high": 1.614,
+            "low": 1.607,
+            "close": 1.607
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 0.007008333333333172,
+          "recent_six_width_median": 0.005279166666666613,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 13
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 89
+          }
+        },
+        {
+          "decision_i": 2636,
+          "bar_open_bjt": "2026-08-19T04:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T05:00:00+08:00",
+          "ohlc": {
+            "open": 1.607,
+            "high": 1.607,
+            "low": 1.595,
+            "close": 1.597
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 0.006066666666666665,
+          "recent_six_width_median": 0.005233333333333201,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 14
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 90
+          }
+        },
+        {
+          "decision_i": 2637,
+          "bar_open_bjt": "2026-08-19T05:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T06:00:00+08:00",
+          "ohlc": {
+            "open": 1.596,
+            "high": 1.601,
+            "low": 1.584,
+            "close": 1.592
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 0.005570833333333414,
+          "recent_six_width_median": 0.005245047974652528,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 15
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 91
+          }
+        },
+        {
+          "decision_i": 2638,
+          "bar_open_bjt": "2026-08-19T06:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T07:00:00+08:00",
+          "ohlc": {
+            "open": 1.591,
+            "high": 1.597,
+            "low": 1.585,
+            "close": 1.588
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 0.005570833333333414,
+          "recent_six_width_median": 0.005245047974652528,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 16
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 92
+          }
+        },
+        {
+          "decision_i": 2639,
+          "bar_open_bjt": "2026-08-19T07:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T08:00:00+08:00",
+          "ohlc": {
+            "open": 1.587,
+            "high": 1.592,
+            "low": 1.586,
+            "close": 1.586
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 0.005570833333333414,
+          "recent_six_width_median": 0.005245047974652528,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 17
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 93
+          }
+        },
+        {
+          "decision_i": 2640,
+          "bar_open_bjt": "2026-08-19T08:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T09:00:00+08:00",
+          "ohlc": {
+            "open": 1.587,
+            "high": 1.587,
+            "low": 1.562,
+            "close": 1.575
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 0.005279166666666613,
+          "recent_six_width_median": 0.006578777501413224,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 18
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 94
+          }
+        },
+        {
+          "decision_i": 2641,
+          "bar_open_bjt": "2026-08-19T09:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T10:00:00+08:00",
+          "ohlc": {
+            "open": 1.575,
+            "high": 1.588,
+            "low": 1.57,
+            "close": 1.585
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 0.005279166666666613,
+          "recent_six_width_median": 0.008677366204724923,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 19
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 95
+          }
+        },
+        {
+          "decision_i": 2642,
+          "bar_open_bjt": "2026-08-19T10:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T11:00:00+08:00",
+          "ohlc": {
+            "open": 1.584,
+            "high": 1.593,
+            "low": 1.579,
+            "close": 1.587
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 0.005233333333333201,
+          "recent_six_width_median": 0.010767173207231417,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 20
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 96
+          }
+        },
+        {
+          "decision_i": 2643,
+          "bar_open_bjt": "2026-08-19T11:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T12:00:00+08:00",
+          "ohlc": {
+            "open": 1.588,
+            "high": 1.6,
+            "low": 1.587,
+            "close": 1.599
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 0.005245047974652528,
+          "recent_six_width_median": 0.013121358543649486,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 21
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 97
+          }
+        },
+        {
+          "decision_i": 2644,
+          "bar_open_bjt": "2026-08-19T12:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T13:00:00+08:00",
+          "ohlc": {
+            "open": 1.599,
+            "high": 1.599,
+            "low": 1.585,
+            "close": 1.587
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 0.005245047974652528,
+          "recent_six_width_median": 0.015234828678032275,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 22
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 98
+          }
+        },
+        {
+          "decision_i": 2645,
+          "bar_open_bjt": "2026-08-19T13:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T14:00:00+08:00",
+          "ohlc": {
+            "open": 1.587,
+            "high": 1.603,
+            "low": 1.586,
+            "close": 1.601
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 0.005245047974652528,
+          "recent_six_width_median": 0.016619172109408664,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 23
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 99
+          }
+        },
+        {
+          "decision_i": 2646,
+          "bar_open_bjt": "2026-08-19T14:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T15:00:00+08:00",
+          "ohlc": {
+            "open": 1.601,
+            "high": 1.624,
+            "low": 1.598,
+            "close": 1.62
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 0.006578777501413224,
+          "recent_six_width_median": 0.017273844997997556,
+          "original_raw_edge": true,
+          "v3": {
+            "early": true,
+            "confirmed": false,
+            "early_reason": "accepted_new_parent",
+            "parent_i": 2646.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2622,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 24
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "prior_width_formation_rejected_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 100
+          }
+        },
+        {
+          "decision_i": 2647,
+          "bar_open_bjt": "2026-08-19T15:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T16:00:00+08:00",
+          "ohlc": {
+            "open": 1.619,
+            "high": 1.622,
+            "low": 1.61,
+            "close": 1.611
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 0.008677366204724923,
+          "recent_six_width_median": 0.017273844997997556,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2646.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2646,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 1
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 101
+          }
+        },
+        {
+          "decision_i": 2648,
+          "bar_open_bjt": "2026-08-19T16:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T17:00:00+08:00",
+          "ohlc": {
+            "open": 1.612,
+            "high": 1.619,
+            "low": 1.606,
+            "close": 1.609
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 0.010767173207231417,
+          "recent_six_width_median": 0.017273844997997556,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2646.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2646,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 2
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 102
+          }
+        },
+        {
+          "decision_i": 2649,
+          "bar_open_bjt": "2026-08-19T17:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T18:00:00+08:00",
+          "ohlc": {
+            "open": 1.61,
+            "high": 1.611,
+            "low": 1.6,
+            "close": 1.602
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 0.013121358543649486,
+          "recent_six_width_median": 0.017220846218905295,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2646.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2646,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 3
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 103
+          }
+        },
+        {
+          "decision_i": 2650,
+          "bar_open_bjt": "2026-08-19T18:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T19:00:00+08:00",
+          "ohlc": {
+            "open": 1.603,
+            "high": 1.611,
+            "low": 1.598,
+            "close": 1.61
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 0.015234828678032275,
+          "recent_six_width_median": 0.017462499999999825,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2646,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 4
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 104
+          }
+        },
+        {
+          "decision_i": 2651,
+          "bar_open_bjt": "2026-08-19T19:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T20:00:00+08:00",
+          "ohlc": {
+            "open": 1.611,
+            "high": 1.627,
+            "low": 1.611,
+            "close": 1.617
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 0.016619172109408664,
+          "recent_six_width_median": 0.017462499999999825,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2646,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 5
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 105
+          }
+        },
+        {
+          "decision_i": 2652,
+          "bar_open_bjt": "2026-08-19T20:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T21:00:00+08:00",
+          "ohlc": {
+            "open": 1.618,
+            "high": 1.628,
+            "low": 1.613,
+            "close": 1.623
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 0.017273844997997556,
+          "recent_six_width_median": 0.017462499999999825,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2646,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 6
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 106
+          }
+        },
+        {
+          "decision_i": 2653,
+          "bar_open_bjt": "2026-08-19T21:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T22:00:00+08:00",
+          "ohlc": {
+            "open": 1.622,
+            "high": 1.623,
+            "low": 1.613,
+            "close": 1.619
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 0.017273844997997556,
+          "recent_six_width_median": 0.018299999999999872,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2646,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 7
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 107
+          }
+        },
+        {
+          "decision_i": 2654,
+          "bar_open_bjt": "2026-08-19T22:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T23:00:00+08:00",
+          "ohlc": {
+            "open": 1.619,
+            "high": 1.64,
+            "low": 1.619,
+            "close": 1.638
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 0.017273844997997556,
+          "recent_six_width_median": 0.01908333333333323,
+          "original_raw_edge": true,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "original_accepted_parent_12bar_cooldown",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2646,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 8
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "prior_width_formation_rejected_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 108
+          }
+        },
+        {
+          "decision_i": 2655,
+          "bar_open_bjt": "2026-08-19T23:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T00:00:00+08:00",
+          "ohlc": {
+            "open": 1.638,
+            "high": 1.696,
+            "low": 1.634,
+            "close": 1.66
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 0.017220846218905295,
+          "recent_six_width_median": 0.01908333333333323,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2646,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 9
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 109
+          }
+        },
+        {
+          "decision_i": 2656,
+          "bar_open_bjt": "2026-08-20T00:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T01:00:00+08:00",
+          "ohlc": {
+            "open": 1.66,
+            "high": 1.695,
+            "low": 1.657,
+            "close": 1.68
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 0.017462499999999825,
+          "recent_six_width_median": 0.01908333333333323,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2646,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 10
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 110
+          }
+        },
+        {
+          "decision_i": 2657,
+          "bar_open_bjt": "2026-08-20T01:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T02:00:00+08:00",
+          "ohlc": {
+            "open": 1.68,
+            "high": 1.705,
+            "low": 1.673,
+            "close": 1.702
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 0.017462499999999825,
+          "recent_six_width_median": 0.018979166666666658,
+          "original_raw_edge": true,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "original_accepted_parent_12bar_cooldown",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2646,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 11
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "prior_width_formation_rejected_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 111
+          }
+        },
+        {
+          "decision_i": 2658,
+          "bar_open_bjt": "2026-08-20T02:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T03:00:00+08:00",
+          "ohlc": {
+            "open": 1.702,
+            "high": 1.711,
+            "low": 1.692,
+            "close": 1.693
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 0.017462499999999825,
+          "recent_six_width_median": 0.01754583333333337,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2646,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 12
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 112
+          }
+        },
+        {
+          "decision_i": 2659,
+          "bar_open_bjt": "2026-08-20T03:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T04:00:00+08:00",
+          "ohlc": {
+            "open": 1.693,
+            "high": 1.703,
+            "low": 1.689,
+            "close": 1.7
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 0.018299999999999872,
+          "recent_six_width_median": 0.016091076393796033,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2646,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 13
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 113
+          }
+        },
+        {
+          "decision_i": 2660,
+          "bar_open_bjt": "2026-08-20T04:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T05:00:00+08:00",
+          "ohlc": {
+            "open": 1.699,
+            "high": 1.731,
+            "low": 1.698,
+            "close": 1.723
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 0.01908333333333323,
+          "recent_six_width_median": 0.016091076393796033,
+          "original_raw_edge": true,
+          "v3": {
+            "early": true,
+            "confirmed": false,
+            "early_reason": "accepted_new_parent",
+            "parent_i": 2660.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2646,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T15:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 14
+          },
+          "formation_gate": {
+            "early": true,
+            "confirmed": false,
+            "early_reason": "accepted_new_parent",
+            "parent_i": 2660.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2546,
+            "last_accepted_close_bjt_before_bar": "2026-08-15T11:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 114
+          }
+        },
+        {
+          "decision_i": 2661,
+          "bar_open_bjt": "2026-08-20T05:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T06:00:00+08:00",
+          "ohlc": {
+            "open": 1.723,
+            "high": 1.776,
+            "low": 1.72,
+            "close": 1.77
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 0.01908333333333323,
+          "recent_six_width_median": 0.016091076393796033,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": true,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2660.0,
+            "confirm_age": 1.0,
+            "last_accepted_i_before_bar": 2660,
+            "last_accepted_close_bjt_before_bar": "2026-08-20T05:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 1
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": true,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2660.0,
+            "confirm_age": 1.0,
+            "last_accepted_i_before_bar": 2660,
+            "last_accepted_close_bjt_before_bar": "2026-08-20T05:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 1
+          }
+        },
+        {
+          "decision_i": 2662,
+          "bar_open_bjt": "2026-08-20T06:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T07:00:00+08:00",
+          "ohlc": {
+            "open": 1.771,
+            "high": 1.774,
+            "low": 1.721,
+            "close": 1.734
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 0.01908333333333323,
+          "recent_six_width_median": 0.016380767349172598,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2660.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2660,
+            "last_accepted_close_bjt_before_bar": "2026-08-20T05:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 2
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2660.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2660,
+            "last_accepted_close_bjt_before_bar": "2026-08-20T05:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 2
+          }
+        },
+        {
+          "decision_i": 2663,
+          "bar_open_bjt": "2026-08-20T07:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T08:00:00+08:00",
+          "ohlc": {
+            "open": 1.735,
+            "high": 1.744,
+            "low": 1.726,
+            "close": 1.733
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 0.018979166666666658,
+          "recent_six_width_median": 0.020500772387334942,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2660.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2660,
+            "last_accepted_close_bjt_before_bar": "2026-08-20T05:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 3
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2660.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2660,
+            "last_accepted_close_bjt_before_bar": "2026-08-20T05:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 3
+          }
+        }
+      ],
+      "fixed_window_details": [
+        {
+          "confirmed_at_bjt": "2026-08-19T15:00:00+08:00",
+          "decision_i": 2646,
+          "old_six": [
+            {
+              "bar_open_bjt": "2026-08-19T02:00:00+08:00",
+              "width": 0.004275000000000029
+            },
+            {
+              "bar_open_bjt": "2026-08-19T03:00:00+08:00",
+              "width": 0.003801437570699173
+            },
+            {
+              "bar_open_bjt": "2026-08-19T04:00:00+08:00",
+              "width": 0.005548429282638656
+            },
+            {
+              "bar_open_bjt": "2026-08-19T05:00:00+08:00",
+              "width": 0.007609125720187793
+            },
+            {
+              "bar_open_bjt": "2026-08-19T06:00:00+08:00",
+              "width": 0.009745606689262054
+            },
+            {
+              "bar_open_bjt": "2026-08-19T07:00:00+08:00",
+              "width": 0.01178873972520078
+            }
+          ],
+          "recent_six": [
+            {
+              "bar_open_bjt": "2026-08-19T08:00:00+08:00",
+              "width": 0.014453977362098192
+            },
+            {
+              "bar_open_bjt": "2026-08-19T09:00:00+08:00",
+              "width": 0.01601567999396636
+            },
+            {
+              "bar_open_bjt": "2026-08-19T10:00:00+08:00",
+              "width": 0.01722266422485097
+            },
+            {
+              "bar_open_bjt": "2026-08-19T11:00:00+08:00",
+              "width": 0.017325025771144142
+            },
+            {
+              "bar_open_bjt": "2026-08-19T12:00:00+08:00",
+              "width": 0.01833334507578188
+            },
+            {
+              "bar_open_bjt": "2026-08-19T13:00:00+08:00",
+              "width": 0.01809976639316968
+            }
+          ]
+        },
+        {
+          "confirmed_at_bjt": "2026-08-19T23:00:00+08:00",
+          "decision_i": 2654,
+          "old_six": [
+            {
+              "bar_open_bjt": "2026-08-19T10:00:00+08:00",
+              "width": 0.01722266422485097
+            },
+            {
+              "bar_open_bjt": "2026-08-19T11:00:00+08:00",
+              "width": 0.017325025771144142
+            },
+            {
+              "bar_open_bjt": "2026-08-19T12:00:00+08:00",
+              "width": 0.01833334507578188
+            },
+            {
+              "bar_open_bjt": "2026-08-19T13:00:00+08:00",
+              "width": 0.01809976639316968
+            },
+            {
+              "bar_open_bjt": "2026-08-19T14:00:00+08:00",
+              "width": 0.016443160783445432
+            },
+            {
+              "bar_open_bjt": "2026-08-19T15:00:00+08:00",
+              "width": 0.01674999999999982
+            }
+          ],
+          "recent_six": [
+            {
+              "bar_open_bjt": "2026-08-19T16:00:00+08:00",
+              "width": 0.017116666666666447
+            },
+            {
+              "bar_open_bjt": "2026-08-19T17:00:00+08:00",
+              "width": 0.017808333333333204
+            },
+            {
+              "bar_open_bjt": "2026-08-19T18:00:00+08:00",
+              "width": 0.01879166666666654
+            },
+            {
+              "bar_open_bjt": "2026-08-19T19:00:00+08:00",
+              "width": 0.019783333333333264
+            },
+            {
+              "bar_open_bjt": "2026-08-19T20:00:00+08:00",
+              "width": 0.019583333333333508
+            },
+            {
+              "bar_open_bjt": "2026-08-19T21:00:00+08:00",
+              "width": 0.01937499999999992
+            }
+          ]
+        },
+        {
+          "confirmed_at_bjt": "2026-08-20T02:00:00+08:00",
+          "decision_i": 2657,
+          "old_six": [
+            {
+              "bar_open_bjt": "2026-08-19T13:00:00+08:00",
+              "width": 0.01809976639316968
+            },
+            {
+              "bar_open_bjt": "2026-08-19T14:00:00+08:00",
+              "width": 0.016443160783445432
+            },
+            {
+              "bar_open_bjt": "2026-08-19T15:00:00+08:00",
+              "width": 0.01674999999999982
+            },
+            {
+              "bar_open_bjt": "2026-08-19T16:00:00+08:00",
+              "width": 0.017116666666666447
+            },
+            {
+              "bar_open_bjt": "2026-08-19T17:00:00+08:00",
+              "width": 0.017808333333333204
+            },
+            {
+              "bar_open_bjt": "2026-08-19T18:00:00+08:00",
+              "width": 0.01879166666666654
+            }
+          ],
+          "recent_six": [
+            {
+              "bar_open_bjt": "2026-08-19T19:00:00+08:00",
+              "width": 0.019783333333333264
+            },
+            {
+              "bar_open_bjt": "2026-08-19T20:00:00+08:00",
+              "width": 0.019583333333333508
+            },
+            {
+              "bar_open_bjt": "2026-08-19T21:00:00+08:00",
+              "width": 0.01937499999999992
+            },
+            {
+              "bar_open_bjt": "2026-08-19T22:00:00+08:00",
+              "width": 0.018583333333333396
+            },
+            {
+              "bar_open_bjt": "2026-08-19T23:00:00+08:00",
+              "width": 0.016508333333333347
+            },
+            {
+              "bar_open_bjt": "2026-08-20T00:00:00+08:00",
+              "width": 0.013025000000000064
+            }
+          ]
+        },
+        {
+          "confirmed_at_bjt": "2026-08-20T04:00:00+08:00",
+          "decision_i": 2659,
+          "old_six": [
+            {
+              "bar_open_bjt": "2026-08-19T15:00:00+08:00",
+              "width": 0.01674999999999982
+            },
+            {
+              "bar_open_bjt": "2026-08-19T16:00:00+08:00",
+              "width": 0.017116666666666447
+            },
+            {
+              "bar_open_bjt": "2026-08-19T17:00:00+08:00",
+              "width": 0.017808333333333204
+            },
+            {
+              "bar_open_bjt": "2026-08-19T18:00:00+08:00",
+              "width": 0.01879166666666654
+            },
+            {
+              "bar_open_bjt": "2026-08-19T19:00:00+08:00",
+              "width": 0.019783333333333264
+            },
+            {
+              "bar_open_bjt": "2026-08-19T20:00:00+08:00",
+              "width": 0.019583333333333508
+            }
+          ],
+          "recent_six": [
+            {
+              "bar_open_bjt": "2026-08-19T21:00:00+08:00",
+              "width": 0.01937499999999992
+            },
+            {
+              "bar_open_bjt": "2026-08-19T22:00:00+08:00",
+              "width": 0.018583333333333396
+            },
+            {
+              "bar_open_bjt": "2026-08-19T23:00:00+08:00",
+              "width": 0.016508333333333347
+            },
+            {
+              "bar_open_bjt": "2026-08-20T00:00:00+08:00",
+              "width": 0.013025000000000064
+            },
+            {
+              "bar_open_bjt": "2026-08-20T01:00:00+08:00",
+              "width": 0.014910537291549009
+            },
+            {
+              "bar_open_bjt": "2026-08-20T02:00:00+08:00",
+              "width": 0.01567381945425872
+            }
+          ]
+        },
+        {
+          "confirmed_at_bjt": "2026-08-20T05:00:00+08:00",
+          "decision_i": 2660,
+          "old_six": [
+            {
+              "bar_open_bjt": "2026-08-19T16:00:00+08:00",
+              "width": 0.017116666666666447
+            },
+            {
+              "bar_open_bjt": "2026-08-19T17:00:00+08:00",
+              "width": 0.017808333333333204
+            },
+            {
+              "bar_open_bjt": "2026-08-19T18:00:00+08:00",
+              "width": 0.01879166666666654
+            },
+            {
+              "bar_open_bjt": "2026-08-19T19:00:00+08:00",
+              "width": 0.019783333333333264
+            },
+            {
+              "bar_open_bjt": "2026-08-19T20:00:00+08:00",
+              "width": 0.019583333333333508
+            },
+            {
+              "bar_open_bjt": "2026-08-19T21:00:00+08:00",
+              "width": 0.01937499999999992
+            }
+          ],
+          "recent_six": [
+            {
+              "bar_open_bjt": "2026-08-19T22:00:00+08:00",
+              "width": 0.018583333333333396
+            },
+            {
+              "bar_open_bjt": "2026-08-19T23:00:00+08:00",
+              "width": 0.016508333333333347
+            },
+            {
+              "bar_open_bjt": "2026-08-20T00:00:00+08:00",
+              "width": 0.013025000000000064
+            },
+            {
+              "bar_open_bjt": "2026-08-20T01:00:00+08:00",
+              "width": 0.014910537291549009
+            },
+            {
+              "bar_open_bjt": "2026-08-20T02:00:00+08:00",
+              "width": 0.01567381945425872
+            },
+            {
+              "bar_open_bjt": "2026-08-20T03:00:00+08:00",
+              "width": 0.017087715244086477
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "asset": "PEPE",
+      "instrument": "okx:PEPE-USDT-SWAP:segment0",
+      "feature_source": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/features/75d10ad8568817c52dd030fd1e6a.pkl.gz",
+      "state_source": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/states/183_PEPE.csv.gz",
+      "saved_events": [
+        {
+          "arm": "v3",
+          "stage": "early",
+          "event_id": "14cd0b1a5972fbee507836d7cfe7",
+          "bar_open_bjt": "2026-08-18T23:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T00:00:00+08:00",
+          "signal_close": 2.609e-06,
+          "parent_i": 2631,
+          "parent_event_id": "14cd0b1a5972fbee507836d7cfe7",
+          "parent_confirmed_at_bjt": "2026-08-19T00:00:00+08:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "event_id": "b3e3e6e9dd1934004e8e988c699e",
+          "bar_open_bjt": "2026-08-19T20:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T21:00:00+08:00",
+          "signal_close": 2.616e-06,
+          "parent_i": 2652,
+          "parent_event_id": "b3e3e6e9dd1934004e8e988c699e",
+          "parent_confirmed_at_bjt": "2026-08-19T21:00:00+08:00",
+          "confirm_age": 0.0
+        },
+        {
+          "arm": "v3",
+          "stage": "confirmed",
+          "event_id": "f4e0a8f122bb683f0fb1a9413dfe",
+          "bar_open_bjt": "2026-08-19T20:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T21:00:00+08:00",
+          "signal_close": 2.616e-06,
+          "parent_i": 2652,
+          "parent_event_id": "b3e3e6e9dd1934004e8e988c699e",
+          "parent_confirmed_at_bjt": "2026-08-19T21:00:00+08:00",
+          "confirm_age": 0.0
+        },
+        {
+          "arm": "formation_gate",
+          "stage": "early",
+          "event_id": "4e8919a8ccb339cab276349c0d91",
+          "bar_open_bjt": "2026-08-18T23:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T00:00:00+08:00",
+          "signal_close": 2.609e-06,
+          "parent_i": 2631,
+          "parent_event_id": "4e8919a8ccb339cab276349c0d91",
+          "parent_confirmed_at_bjt": "2026-08-19T00:00:00+08:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "formation_gate",
+          "stage": "early",
+          "event_id": "e7247575234c6e473e0fc81a0483",
+          "bar_open_bjt": "2026-08-19T20:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T21:00:00+08:00",
+          "signal_close": 2.616e-06,
+          "parent_i": 2652,
+          "parent_event_id": "e7247575234c6e473e0fc81a0483",
+          "parent_confirmed_at_bjt": "2026-08-19T21:00:00+08:00",
+          "confirm_age": 0.0
+        },
+        {
+          "arm": "formation_gate",
+          "stage": "confirmed",
+          "event_id": "95fefff0f7b24292ee45de706d4a",
+          "bar_open_bjt": "2026-08-19T20:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T21:00:00+08:00",
+          "signal_close": 2.616e-06,
+          "parent_i": 2652,
+          "parent_event_id": "e7247575234c6e473e0fc81a0483",
+          "parent_confirmed_at_bjt": "2026-08-19T21:00:00+08:00",
+          "confirm_age": 0.0
+        }
+      ],
+      "hourly_rows": [
+        {
+          "decision_i": 2631,
+          "bar_open_bjt": "2026-08-18T23:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T00:00:00+08:00",
+          "ohlc": {
+            "open": 2.58e-06,
+            "high": 2.61e-06,
+            "low": 2.58e-06,
+            "close": 2.609e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 6.257069198978545e-08,
+          "recent_six_width_median": 6.065373496754265e-08,
+          "original_raw_edge": true,
+          "v3": {
+            "early": true,
+            "confirmed": false,
+            "early_reason": "accepted_new_parent",
+            "parent_i": 2631.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2613,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T06:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 18
+          },
+          "formation_gate": {
+            "early": true,
+            "confirmed": false,
+            "early_reason": "accepted_new_parent",
+            "parent_i": 2631.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2613,
+            "last_accepted_close_bjt_before_bar": "2026-08-18T06:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 18
+          }
+        },
+        {
+          "decision_i": 2632,
+          "bar_open_bjt": "2026-08-19T00:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T01:00:00+08:00",
+          "ohlc": {
+            "open": 2.609e-06,
+            "high": 2.62e-06,
+            "low": 2.599e-06,
+            "close": 2.603e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 6.310580940180477e-08,
+          "recent_six_width_median": 6.016454431369738e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2631.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 1
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2631.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 1
+          }
+        },
+        {
+          "decision_i": 2633,
+          "bar_open_bjt": "2026-08-19T01:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T02:00:00+08:00",
+          "ohlc": {
+            "open": 2.604e-06,
+            "high": 2.612e-06,
+            "low": 2.595e-06,
+            "close": 2.603e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 6.310580940180477e-08,
+          "recent_six_width_median": 5.958586220493241e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2631.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 2
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2631.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 2
+          }
+        },
+        {
+          "decision_i": 2634,
+          "bar_open_bjt": "2026-08-19T02:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T03:00:00+08:00",
+          "ohlc": {
+            "open": 2.602e-06,
+            "high": 2.619e-06,
+            "low": 2.602e-06,
+            "close": 2.615e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 6.310580940180477e-08,
+          "recent_six_width_median": 5.8297051233367035e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2631.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 3
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2631.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 3
+          }
+        },
+        {
+          "decision_i": 2635,
+          "bar_open_bjt": "2026-08-19T03:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T04:00:00+08:00",
+          "ohlc": {
+            "open": 2.614e-06,
+            "high": 2.615e-06,
+            "low": 2.601e-06,
+            "close": 2.602e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 6.28710300679312e-08,
+          "recent_six_width_median": 5.698945534521253e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 4
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 4
+          }
+        },
+        {
+          "decision_i": 2636,
+          "bar_open_bjt": "2026-08-19T04:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T05:00:00+08:00",
+          "ohlc": {
+            "open": 2.603e-06,
+            "high": 2.604e-06,
+            "low": 2.574e-06,
+            "close": 2.578e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 6.179631370709215e-08,
+          "recent_six_width_median": 5.6313596579175904e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 5
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 5
+          }
+        },
+        {
+          "decision_i": 2637,
+          "bar_open_bjt": "2026-08-19T05:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T06:00:00+08:00",
+          "ohlc": {
+            "open": 2.577e-06,
+            "high": 2.589e-06,
+            "low": 2.577e-06,
+            "close": 2.586e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 6.065373496754265e-08,
+          "recent_six_width_median": 5.5168950354726744e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 6
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 6
+          }
+        },
+        {
+          "decision_i": 2638,
+          "bar_open_bjt": "2026-08-19T06:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T07:00:00+08:00",
+          "ohlc": {
+            "open": 2.586e-06,
+            "high": 2.595e-06,
+            "low": 2.575e-06,
+            "close": 2.579e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 6.016454431369738e-08,
+          "recent_six_width_median": 5.36463230761362e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 7
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 7
+          }
+        },
+        {
+          "decision_i": 2639,
+          "bar_open_bjt": "2026-08-19T07:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T08:00:00+08:00",
+          "ohlc": {
+            "open": 2.579e-06,
+            "high": 2.59e-06,
+            "low": 2.579e-06,
+            "close": 2.585e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 5.958586220493241e-08,
+          "recent_six_width_median": 5.282324335586954e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 8
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 8
+          }
+        },
+        {
+          "decision_i": 2640,
+          "bar_open_bjt": "2026-08-19T08:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T09:00:00+08:00",
+          "ohlc": {
+            "open": 2.585e-06,
+            "high": 2.594e-06,
+            "low": 2.566e-06,
+            "close": 2.588e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 5.8297051233367035e-08,
+          "recent_six_width_median": 5.17782310689957e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 9
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 9
+          }
+        },
+        {
+          "decision_i": 2641,
+          "bar_open_bjt": "2026-08-19T09:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T10:00:00+08:00",
+          "ohlc": {
+            "open": 2.588e-06,
+            "high": 2.601e-06,
+            "low": 2.583e-06,
+            "close": 2.594e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 5.698945534521253e-08,
+          "recent_six_width_median": 4.987879749760729e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 10
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 10
+          }
+        },
+        {
+          "decision_i": 2642,
+          "bar_open_bjt": "2026-08-19T10:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T11:00:00+08:00",
+          "ohlc": {
+            "open": 2.594e-06,
+            "high": 2.595e-06,
+            "low": 2.582e-06,
+            "close": 2.587e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 5.6313596579175904e-08,
+          "recent_six_width_median": 4.7708073572027124e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 11
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 11
+          }
+        },
+        {
+          "decision_i": 2643,
+          "bar_open_bjt": "2026-08-19T11:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T12:00:00+08:00",
+          "ohlc": {
+            "open": 2.587e-06,
+            "high": 2.6e-06,
+            "low": 2.581e-06,
+            "close": 2.594e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 5.5168950354726744e-08,
+          "recent_six_width_median": 4.572364260389494e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 12
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 12
+          }
+        },
+        {
+          "decision_i": 2644,
+          "bar_open_bjt": "2026-08-19T12:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T13:00:00+08:00",
+          "ohlc": {
+            "open": 2.595e-06,
+            "high": 2.598e-06,
+            "low": 2.589e-06,
+            "close": 2.592e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 5.36463230761362e-08,
+          "recent_six_width_median": 4.354907826333495e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 13
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 13
+          }
+        },
+        {
+          "decision_i": 2645,
+          "bar_open_bjt": "2026-08-19T13:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T14:00:00+08:00",
+          "ohlc": {
+            "open": 2.592e-06,
+            "high": 2.605e-06,
+            "low": 2.59e-06,
+            "close": 2.591e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 5.282324335586954e-08,
+          "recent_six_width_median": 4.115033316807321e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 14
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 14
+          }
+        },
+        {
+          "decision_i": 2646,
+          "bar_open_bjt": "2026-08-19T14:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T15:00:00+08:00",
+          "ohlc": {
+            "open": 2.591e-06,
+            "high": 2.605e-06,
+            "low": 2.581e-06,
+            "close": 2.604e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 5.17782310689957e-08,
+          "recent_six_width_median": 3.8968991573008925e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 15
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 15
+          }
+        },
+        {
+          "decision_i": 2647,
+          "bar_open_bjt": "2026-08-19T15:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T16:00:00+08:00",
+          "ohlc": {
+            "open": 2.605e-06,
+            "high": 2.606e-06,
+            "low": 2.586e-06,
+            "close": 2.587e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 4.987879749760729e-08,
+          "recent_six_width_median": 3.7879559205411373e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 16
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 16
+          }
+        },
+        {
+          "decision_i": 2648,
+          "bar_open_bjt": "2026-08-19T16:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T17:00:00+08:00",
+          "ohlc": {
+            "open": 2.586e-06,
+            "high": 2.593e-06,
+            "low": 2.577e-06,
+            "close": 2.583e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 4.7708073572027124e-08,
+          "recent_six_width_median": 3.770675657391715e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 17
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 17
+          }
+        },
+        {
+          "decision_i": 2649,
+          "bar_open_bjt": "2026-08-19T17:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T18:00:00+08:00",
+          "ohlc": {
+            "open": 2.584e-06,
+            "high": 2.591e-06,
+            "low": 2.582e-06,
+            "close": 2.582e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 4.572364260389494e-08,
+          "recent_six_width_median": 3.7283160046524504e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 18
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 18
+          }
+        },
+        {
+          "decision_i": 2650,
+          "bar_open_bjt": "2026-08-19T18:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T19:00:00+08:00",
+          "ohlc": {
+            "open": 2.583e-06,
+            "high": 2.587e-06,
+            "low": 2.574e-06,
+            "close": 2.584e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 4.354907826333495e-08,
+          "recent_six_width_median": 3.673309404024612e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 19
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 19
+          }
+        },
+        {
+          "decision_i": 2651,
+          "bar_open_bjt": "2026-08-19T19:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T20:00:00+08:00",
+          "ohlc": {
+            "open": 2.583e-06,
+            "high": 2.601e-06,
+            "low": 2.581e-06,
+            "close": 2.6e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 4.115033316807321e-08,
+          "recent_six_width_median": 3.607483353269398e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 20
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 20
+          }
+        },
+        {
+          "decision_i": 2652,
+          "bar_open_bjt": "2026-08-19T20:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T21:00:00+08:00",
+          "ohlc": {
+            "open": 2.6e-06,
+            "high": 2.628e-06,
+            "low": 2.6e-06,
+            "close": 2.616e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 3.8968991573008925e-08,
+          "recent_six_width_median": 3.506836245501879e-08,
+          "original_raw_edge": true,
+          "v3": {
+            "early": true,
+            "confirmed": true,
+            "early_reason": "accepted_new_parent",
+            "parent_i": 2652.0,
+            "confirm_age": 0.0,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 21
+          },
+          "formation_gate": {
+            "early": true,
+            "confirmed": true,
+            "early_reason": "accepted_new_parent",
+            "parent_i": 2652.0,
+            "confirm_age": 0.0,
+            "last_accepted_i_before_bar": 2631,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T00:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 21
+          }
+        },
+        {
+          "decision_i": 2653,
+          "bar_open_bjt": "2026-08-19T21:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T22:00:00+08:00",
+          "ohlc": {
+            "open": 2.616e-06,
+            "high": 2.617e-06,
+            "low": 2.59e-06,
+            "close": 2.596e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 3.7879559205411373e-08,
+          "recent_six_width_median": 3.408878897091385e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2652.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 1
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2652.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 1
+          }
+        },
+        {
+          "decision_i": 2654,
+          "bar_open_bjt": "2026-08-19T22:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-19T23:00:00+08:00",
+          "ohlc": {
+            "open": 2.595e-06,
+            "high": 2.656e-06,
+            "low": 2.594e-06,
+            "close": 2.65e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 3.770675657391715e-08,
+          "recent_six_width_median": 3.328463543420436e-08,
+          "original_raw_edge": true,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "original_accepted_parent_12bar_cooldown",
+            "parent_i": 2652.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 2
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "original_accepted_parent_12bar_cooldown",
+            "parent_i": 2652.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 2
+          }
+        },
+        {
+          "decision_i": 2655,
+          "bar_open_bjt": "2026-08-19T23:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T00:00:00+08:00",
+          "ohlc": {
+            "open": 2.65e-06,
+            "high": 2.765e-06,
+            "low": 2.642e-06,
+            "close": 2.691e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 3.7283160046524504e-08,
+          "recent_six_width_median": 3.245231363639388e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2652.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 3
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": 2652.0,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 3
+          }
+        },
+        {
+          "decision_i": 2656,
+          "bar_open_bjt": "2026-08-20T00:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T01:00:00+08:00",
+          "ohlc": {
+            "open": 2.691e-06,
+            "high": 2.727e-06,
+            "low": 2.685e-06,
+            "close": 2.714e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 3.673309404024612e-08,
+          "recent_six_width_median": 3.179814316306527e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 4
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 4
+          }
+        },
+        {
+          "decision_i": 2657,
+          "bar_open_bjt": "2026-08-20T01:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T02:00:00+08:00",
+          "ohlc": {
+            "open": 2.714e-06,
+            "high": 2.717e-06,
+            "low": 2.676e-06,
+            "close": 2.704e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 3.607483353269398e-08,
+          "recent_six_width_median": 3.154500581050775e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 5
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 5
+          }
+        },
+        {
+          "decision_i": 2658,
+          "bar_open_bjt": "2026-08-20T02:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T03:00:00+08:00",
+          "ohlc": {
+            "open": 2.705e-06,
+            "high": 2.719e-06,
+            "low": 2.685e-06,
+            "close": 2.706e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 3.506836245501879e-08,
+          "recent_six_width_median": 3.154500581050775e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 6
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 6
+          }
+        },
+        {
+          "decision_i": 2659,
+          "bar_open_bjt": "2026-08-20T03:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T04:00:00+08:00",
+          "ohlc": {
+            "open": 2.706e-06,
+            "high": 2.72e-06,
+            "low": 2.693e-06,
+            "close": 2.716e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 3.408878897091385e-08,
+          "recent_six_width_median": 3.154500581050775e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 7
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 7
+          }
+        },
+        {
+          "decision_i": 2660,
+          "bar_open_bjt": "2026-08-20T04:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T05:00:00+08:00",
+          "ohlc": {
+            "open": 2.717e-06,
+            "high": 2.765e-06,
+            "low": 2.712e-06,
+            "close": 2.755e-06
+          },
+          "ready": true,
+          "formed": true,
+          "formation_valid": true,
+          "old_six_width_median": 3.328463543420436e-08,
+          "recent_six_width_median": 3.2285751391339147e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 8
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 8
+          }
+        },
+        {
+          "decision_i": 2661,
+          "bar_open_bjt": "2026-08-20T05:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T06:00:00+08:00",
+          "ohlc": {
+            "open": 2.755e-06,
+            "high": 2.928e-06,
+            "low": 2.751e-06,
+            "close": 2.916e-06
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 3.245231363639388e-08,
+          "recent_six_width_median": 3.611911091908182e-08,
+          "original_raw_edge": true,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "original_accepted_parent_12bar_cooldown",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 9
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "original_accepted_parent_12bar_cooldown",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 9
+          }
+        },
+        {
+          "decision_i": 2662,
+          "bar_open_bjt": "2026-08-20T06:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T07:00:00+08:00",
+          "ohlc": {
+            "open": 2.916e-06,
+            "high": 2.932e-06,
+            "low": 2.847e-06,
+            "close": 2.89e-06
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 3.179814316306527e-08,
+          "recent_six_width_median": 4.23161003553595e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 10
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 10
+          }
+        },
+        {
+          "decision_i": 2663,
+          "bar_open_bjt": "2026-08-20T07:00:00+08:00",
+          "confirmed_at_bjt": "2026-08-20T08:00:00+08:00",
+          "ohlc": {
+            "open": 2.889e-06,
+            "high": 2.909e-06,
+            "low": 2.868e-06,
+            "close": 2.875e-06
+          },
+          "ready": true,
+          "formed": false,
+          "formation_valid": true,
+          "old_six_width_median": 3.154500581050775e-08,
+          "recent_six_width_median": 4.94066304802461e-08,
+          "original_raw_edge": false,
+          "v3": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 11
+          },
+          "formation_gate": {
+            "early": false,
+            "confirmed": false,
+            "early_reason": "no_new_original_raw_condition_edge",
+            "parent_i": null,
+            "confirm_age": null,
+            "last_accepted_i_before_bar": 2652,
+            "last_accepted_close_bjt_before_bar": "2026-08-19T21:00:00+08:00",
+            "bars_since_last_accepted_before_bar": 11
+          }
+        }
+      ],
+      "fixed_window_details": [
+        {
+          "confirmed_at_bjt": "2026-08-19T21:00:00+08:00",
+          "decision_i": 2652,
+          "old_six": [
+            {
+              "bar_open_bjt": "2026-08-19T08:00:00+08:00",
+              "width": 4.479657058219627e-08
+            },
+            {
+              "bar_open_bjt": "2026-08-19T09:00:00+08:00",
+              "width": 4.230158594447364e-08
+            },
+            {
+              "bar_open_bjt": "2026-08-19T10:00:00+08:00",
+              "width": 3.9999080391672785e-08
+            },
+            {
+              "bar_open_bjt": "2026-08-19T11:00:00+08:00",
+              "width": 3.7938902754345065e-08
+            },
+            {
+              "bar_open_bjt": "2026-08-19T12:00:00+08:00",
+              "width": 3.782021565647768e-08
+            },
+            {
+              "bar_open_bjt": "2026-08-19T13:00:00+08:00",
+              "width": 3.7593297491356616e-08
+            }
+          ],
+          "recent_six": [
+            {
+              "bar_open_bjt": "2026-08-19T14:00:00+08:00",
+              "width": 3.697302260169239e-08
+            },
+            {
+              "bar_open_bjt": "2026-08-19T15:00:00+08:00",
+              "width": 3.649316547879985e-08
+            },
+            {
+              "bar_open_bjt": "2026-08-19T16:00:00+08:00",
+              "width": 3.5656501586588106e-08
+            },
+            {
+              "bar_open_bjt": "2026-08-19T17:00:00+08:00",
+              "width": 3.4480223323449474e-08
+            },
+            {
+              "bar_open_bjt": "2026-08-19T18:00:00+08:00",
+              "width": 3.369735461837823e-08
+            },
+            {
+              "bar_open_bjt": "2026-08-19T19:00:00+08:00",
+              "width": 3.2871916250030485e-08
+            }
+          ]
+        },
+        {
+          "confirmed_at_bjt": "2026-08-19T23:00:00+08:00",
+          "decision_i": 2654,
+          "old_six": [
+            {
+              "bar_open_bjt": "2026-08-19T10:00:00+08:00",
+              "width": 3.9999080391672785e-08
+            },
+            {
+              "bar_open_bjt": "2026-08-19T11:00:00+08:00",
+              "width": 3.7938902754345065e-08
+            },
+            {
+              "bar_open_bjt": "2026-08-19T12:00:00+08:00",
+              "width": 3.782021565647768e-08
+            },
+            {
+              "bar_open_bjt": "2026-08-19T13:00:00+08:00",
+              "width": 3.7593297491356616e-08
+            },
+            {
+              "bar_open_bjt": "2026-08-19T14:00:00+08:00",
+              "width": 3.697302260169239e-08
+            },
+            {
+              "bar_open_bjt": "2026-08-19T15:00:00+08:00",
+              "width": 3.649316547879985e-08
+            }
+          ],
+          "recent_six": [
+            {
+              "bar_open_bjt": "2026-08-19T16:00:00+08:00",
+              "width": 3.5656501586588106e-08
+            },
+            {
+              "bar_open_bjt": "2026-08-19T17:00:00+08:00",
+              "width": 3.4480223323449474e-08
+            },
+            {
+              "bar_open_bjt": "2026-08-19T18:00:00+08:00",
+              "width": 3.369735461837823e-08
+            },
+            {
+              "bar_open_bjt": "2026-08-19T19:00:00+08:00",
+              "width": 3.2871916250030485e-08
+            },
+            {
+              "bar_open_bjt": "2026-08-19T20:00:00+08:00",
+              "width": 3.203271102275728e-08
+            },
+            {
+              "bar_open_bjt": "2026-08-19T21:00:00+08:00",
+              "width": 3.1563575303373265e-08
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

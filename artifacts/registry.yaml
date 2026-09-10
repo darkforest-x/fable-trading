@@ -27150,3 +27150,153 @@ artifacts:
     production_eligible: false
     notes: C failed all fixed gates. Full sequence and independent trade audit passed. Same previously seen history;
       no C Pine port or live deployment.
+  - artifact_id: spike-v3-formation-gate-20260910-report-source
+    artifact_type: report
+    role: v3_prior_ribbon_formation_gate
+    source_repo: darkforest-x/fable-trading
+    source_commit: d28f0dbbcc614a3957a4964a7334061209200bf5
+    source_path: analysis/p1_spike_v3_formation_gate_20260910_r2.md
+    sha256: 5e7dde205c9ae19619d2d4b6ef48565aed2615a99f3f65556b3ffe6638d1664c
+    size_bytes: 17942
+    storage_uri: repo://analysis/p1_spike_v3_formation_gate_20260910_r2.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: D failed all fixed gates; independent full-state/trade audit passed. Preflight receipt committed late,
+      transparently recorded. R2 fixes QA links only; original report retained, no detection or scoring rerun. No
+      D Pine or deployment.
+  - artifact_id: spike-v3-formation-gate-20260910-report-html
+    artifact_type: report
+    role: v3_prior_ribbon_formation_gate
+    source_repo: darkforest-x/fable-trading
+    source_commit: d28f0dbbcc614a3957a4964a7334061209200bf5
+    source_path: analysis/html/p1_spike_v3_formation_gate_20260910_r2.html
+    sha256: 3f278be2344aa9e91886d07f082872c2da9a6c28b48f96de9f3cc421ad32ae43
+    size_bytes: 1288147
+    storage_uri: repo://analysis/html/p1_spike_v3_formation_gate_20260910_r2.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: D failed all fixed gates; independent full-state/trade audit passed. Preflight receipt committed late,
+      transparently recorded. R2 fixes QA links only; original report retained, no detection or scoring rerun. No
+      D Pine or deployment.
+  - artifact_id: spike-v3-formation-gate-20260910-prepared
+    artifact_type: manifest
+    role: v3_prior_ribbon_formation_gate
+    source_repo: darkforest-x/fable-trading
+    source_commit: 736a5e3cfb33d87490d95978d56d0b3397cf99a1
+    source_path: experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/prepared_manifest.json
+    sha256: 84c60082d9df02deb8f2dbeb5f9043559e3d963abb682490c7160b334158fbd4
+    size_bytes: 253568
+    storage_uri: repo://experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/prepared_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: D failed all fixed gates; independent full-state/trade audit passed. Preflight receipt committed late,
+      transparently recorded. R2 fixes QA links only; original report retained, no detection or scoring rerun. No
+      D Pine or deployment.
+  - artifact_id: spike-v3-formation-gate-20260910-validation
+    artifact_type: manifest
+    role: v3_prior_ribbon_formation_gate
+    source_repo: darkforest-x/fable-trading
+    source_commit: 736a5e3cfb33d87490d95978d56d0b3397cf99a1
+    source_path: experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/validation_manifest.json
+    sha256: e9847380c17d74f24cc1db8b065d387d8e621286dd46069376e36162d5c005f9
+    size_bytes: 5339
+    storage_uri: repo://experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/validation_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: D failed all fixed gates; independent full-state/trade audit passed. Preflight receipt committed late,
+      transparently recorded. R2 fixes QA links only; original report retained, no detection or scoring rerun. No
+      D Pine or deployment.
+  - artifact_id: spike-v3-formation-gate-20260910-report-manifest
+    artifact_type: manifest
+    role: v3_prior_ribbon_formation_gate
+    source_repo: darkforest-x/fable-trading
+    source_commit: d28f0dbbcc614a3957a4964a7334061209200bf5
+    source_path: experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/formation_report_manifest_r2.json
+    sha256: 38c9f6c04859867635558f26ccee1ea2bed35fb928a1f973af8cb8325b8ebea0
+    size_bytes: 293191
+    storage_uri: repo://experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/formation_report_manifest_r2.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: D failed all fixed gates; independent full-state/trade audit passed. Preflight receipt committed late,
+      transparently recorded. R2 fixes QA links only; original report retained, no detection or scoring rerun. No
+      D Pine or deployment.
+  - artifact_id: spike-v3-formation-gate-20260910-preflight
+    artifact_type: manifest
+    role: v3_prior_ribbon_formation_gate
+    source_repo: darkforest-x/fable-trading
+    source_commit: 736a5e3cfb33d87490d95978d56d0b3397cf99a1
+    source_path: experiments/active/exp-spike-v3-formation-gate-20260910-v1/qa/preflight_review.json
+    sha256: e5bf8acbac1771fcb81390d48e88509e81884c6d014d9bdbdc9d167c468eadb2
+    size_bytes: 12173
+    storage_uri: repo://experiments/active/exp-spike-v3-formation-gate-20260910-v1/qa/preflight_review.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: D failed all fixed gates; independent full-state/trade audit passed. Preflight receipt committed late,
+      transparently recorded. R2 fixes QA links only; original report retained, no detection or scoring rerun. No
+      D Pine or deployment.
+  - artifact_id: spike-v3-formation-gate-20260910-independent-review
+    artifact_type: manifest
+    role: v3_prior_ribbon_formation_gate
+    source_repo: darkforest-x/fable-trading
+    source_commit: 736a5e3cfb33d87490d95978d56d0b3397cf99a1
+    source_path: experiments/active/exp-spike-v3-formation-gate-20260910-v1/qa/independent_review.json
+    sha256: 0c9f75b99b3364618ce4546b7b93c5eff31f609e66d60e31555002ff1dee5c54
+    size_bytes: 12158
+    storage_uri: repo://experiments/active/exp-spike-v3-formation-gate-20260910-v1/qa/independent_review.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: D failed all fixed gates; independent full-state/trade audit passed. Preflight receipt committed late,
+      transparently recorded. R2 fixes QA links only; original report retained, no detection or scoring rerun. No
+      D Pine or deployment.
+  - artifact_id: spike-v3-formation-gate-20260910-case-diagnostic
+    artifact_type: manifest
+    role: v3_prior_ribbon_formation_gate
+    source_repo: darkforest-x/fable-trading
+    source_commit: 736a5e3cfb33d87490d95978d56d0b3397cf99a1
+    source_path: experiments/active/exp-spike-v3-formation-gate-20260910-v1/qa/case_diagnostic.json
+    sha256: 58be196d3ead288706a3e67097ddfbc8d3843d3c6741413470e6d97dff520f11
+    size_bytes: 164780
+    storage_uri: repo://experiments/active/exp-spike-v3-formation-gate-20260910-v1/qa/case_diagnostic.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: D failed all fixed gates; independent full-state/trade audit passed. Preflight receipt committed late,
+      transparently recorded. R2 fixes QA links only; original report retained, no detection or scoring rerun. No
+      D Pine or deployment.
+  - artifact_id: spike-v3-formation-gate-20260910-report-review
+    artifact_type: manifest
+    role: v3_prior_ribbon_formation_gate
+    source_repo: darkforest-x/fable-trading
+    source_commit: d28f0dbbcc614a3957a4964a7334061209200bf5
+    source_path: experiments/active/exp-spike-v3-formation-gate-20260910-v1/qa/report_review.json
+    sha256: 6b748f7266e93238204660ae6477f92a260331d911e77a4b5d326420e6229a08
+    size_bytes: 1262
+    storage_uri: repo://experiments/active/exp-spike-v3-formation-gate-20260910-v1/qa/report_review.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: D failed all fixed gates; independent full-state/trade audit passed. Preflight receipt committed late,
+      transparently recorded. R2 fixes QA links only; original report retained, no detection or scoring rerun. No
+      D Pine or deployment.
+  - artifact_id: spike-v3-formation-gate-20260910-first-report-manifest
+    artifact_type: manifest
+    role: v3_prior_ribbon_formation_gate
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1ed090bb34402ef6d5f1fefb6c196c54f613775c
+    source_path: experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/formation_report_manifest.json
+    sha256: f8ce5c5db8eea0367ba5e0307e5459cb8b859888096d40cfe07a1a7944762500
+    size_bytes: 293185
+    storage_uri: repo://experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/formation_report_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: D failed all fixed gates; independent full-state/trade audit passed. Preflight receipt committed late,
+      transparently recorded. R2 fixes QA links only; original report retained, no detection or scoring rerun. No
+      D Pine or deployment.

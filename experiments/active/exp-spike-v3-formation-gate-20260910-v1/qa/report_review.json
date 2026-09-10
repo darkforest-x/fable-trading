@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "reviewer": "root",
+  "reviewed_at": "2026-09-10T10:07:29.966674+00:00",
+  "figures": [
+    "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/figures/hype.png",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/figures/near.png",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-formation-gate-20260910-v1/results/figures/pepe.png"
+  ],
+  "checks": [
+    "All three full96bar PNGs visually reviewed: original V1/V3/D actual signal markers, zero axis, six MAs and volume legible.",
+    "NEAR missed timing retained; HYPE/PEPE successes not presented as complete sample.",
+    "D background is only prior formation eligibility, not entry/position.",
+    "Three PNGs embedded in HTML; absolute local QA links exist.",
+    "R2 is link-only document rendering correction; every PNG SHA and validation SHA unchanged; first document/manifest preserved."
+  ],
+  "limitations": [
+    "Browser-rendered HTML layout QA not performed because earlier local file browser navigation was denied; no alternate browser or HTTP workaround used.",
+    "Retrospective plots are not detector inputs; QA PASS is not strategy acceptance."
+  ]
+}

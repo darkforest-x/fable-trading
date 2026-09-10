@@ -7923,17 +7923,30 @@ experiments:
       recall. No deployment.
   - experiment_id: exp-spike-v3-formation-gate-20260910-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 89ba3348296ca5a5d3eec8b7fc4c4471bd724097
-    status: active
+    source_commit: 736a5e3cfb33d87490d95978d56d0b3397cf99a1
+    status: rejected
     question: Can ordered pre-breakout six-MA convergence reduce V3 alerts while preserving original timely launches?
     single_variable: 'One pre-signal twelve-bar formation gate: last-six median raw six-MA width <= preceding-six
-      median; all V3 raw edges, accepted cooldown and confirmations preserved.'
-    result: Preregistered fourth structural hypothesis before D market detection or scoring; original fixed denominators
-      and four acceptance gates retained.
-    holdout_consumed: false
+      median; V3 raw edges, accepted cooldown and confirmations preserved.'
+    result: 278 OKX 1H/61 days:6209 parents and7132 distinct labels (-40.77%),761/1463 original timely hits retained
+      (52.02%),426/947 large hits (44.98%).746 new parent times and14 newly caught prior misses do not repair loss;
+      matched excess -109.59bp,Holm4=1. All four gates failed.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
-    canonical_report: analysis/html/p1_spike_v3_formation_gate_20260910.html
-    artifacts: []
-    notes: Sequential exploration after13 gates plus A/B/C; previously seen history. No threshold search, no deployment.
+    canonical_report: analysis/html/p1_spike_v3_formation_gate_20260910_r2.html
+    artifacts:
+    - spike-v3-formation-gate-20260910-report-source
+    - spike-v3-formation-gate-20260910-report-html
+    - spike-v3-formation-gate-20260910-prepared
+    - spike-v3-formation-gate-20260910-validation
+    - spike-v3-formation-gate-20260910-report-manifest
+    - spike-v3-formation-gate-20260910-preflight
+    - spike-v3-formation-gate-20260910-independent-review
+    - spike-v3-formation-gate-20260910-case-diagnostic
+    - spike-v3-formation-gate-20260910-report-review
+    - spike-v3-formation-gate-20260910-first-report-manifest
+    notes: First D configuration scoring on already-seen owner-authorized history; fourth structural hypothesis after13
+      gates. Original V1/V3 baselines retained. Audit implementation PASS but process receipt ordering not fully met;
+      no rewrite/backdate/rescore. No live changes.

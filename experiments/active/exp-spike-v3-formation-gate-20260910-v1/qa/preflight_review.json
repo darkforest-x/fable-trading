@@ -1,0 +1,210 @@
+{
+  "status": "passed",
+  "scope": "Read-only preregistered D detector, tests, study runner and fixed evaluation design; synthetic tests only, no real-market D detection or outcome scoring.",
+  "reviewer": "/root/noise_mechanism_audit",
+  "plan_commit": "56288a03bdd1f601e891f9ed50cf0e268be203c3",
+  "blockers": [],
+  "single_intervention": "Original V3 raw parent edge is eligible only when median absolute six-MA width on prior bars i-6..i-1 is no greater than median width on i-12..i-7. Original accepted-only cooldown and child quality remain unchanged; no A/B/C suppression.",
+  "tests": {
+    "command": ".venv/bin/python -m pytest -q tests/test_spike_burst_v3_formation_gate.py tests/test_spike_burst_v3_formation_study.py",
+    "passed": 50,
+    "wall_seconds": 1.13,
+    "warning": "Existing urllib3/LibreSSL warning; tests unaffected"
+  },
+  "independent_synthetic_probe": {
+    "seeds": 5,
+    "bars": 1490,
+    "prefix_checks": 50,
+    "parents": 61,
+    "children": 41,
+    "invalid_prior_windows": 360,
+    "reversed_halves_changes_gate": true,
+    "samebar_age0_upgrade": true,
+    "positive_price_scale_invariance": true,
+    "passed": true,
+    "method": "Literal NumPy slices of independently calculated six-MA widths compared against detector diagnostics; random finite widths, injected NaN and gaps. No market data used."
+  },
+  "checks": {
+    "all_six_original_ma_columns_required": true,
+    "six_ma_finite_vector_no_skipna": true,
+    "width_in_raw_price_not_current_atr": true,
+    "exact_prior_twelve_excludes_current": true,
+    "older_six_shift7_recent_six_shift1": true,
+    "full_finite_twelve_required": true,
+    "current_width_missing_does_not_add_current_gate": true,
+    "current_missing_width_invalidates_next_twelve": true,
+    "gap_restarts_prior_twelve_and_parent_clock": true,
+    "raw_complete_condition_edge_not_formed_condition_edge": true,
+    "rejected_edge_consumed": true,
+    "rejected_parent_does_not_update_accepted_cooldown": true,
+    "accepted_only_twelve_bar_cooldown_preserved": true,
+    "child_requires_actual_accepted_parent_age0_to3": true,
+    "child_does_not_reapply_formation": true,
+    "samebar_parent_child_supported_without_duplicate_economics": true,
+    "expired_parent_never_revived": true,
+    "no_A_B_C_reference_or_suppression": true,
+    "no_risk_cost_exit_change": true,
+    "no_future_labels_or_outcome_input_in_detector": true,
+    "prefix_and_future_mutation_stability": true,
+    "fixed_original_label_sha_chain": true,
+    "fixed_1660_positive_and_947_large_denominators": true,
+    "original_V3_1463_timely_positive_hits_preserved_as_baseline": true,
+    "fresh_recall_cannot_be_repaired_by_old_reference_or_child": true,
+    "samebar_distinct_labels_versus_parent_upgrade_counts_separate": true,
+    "V1_preserved_historical_comparison_and_V3_shared_controls": true,
+    "same_instrument_week_causal_atr_controls_and_known_past_exclusion": true,
+    "execution_is_actual_next_open_parent_only": true,
+    "cache_source_tick_timeframe_cutoff_and_contract_checked": true,
+    "ABCD_frozen_p_values_in_four_hypothesis_Holm": true,
+    "missing_historical_p_kept_conservatively_as_one": true,
+    "prior_thirteen_explorations_disclosed": true,
+    "all_four_fixed_acceptance_gates_unchanged": true,
+    "builder_and_both_test_modules_in_source_pins": true,
+    "exact_committed_builder_required_before_market_prepare": true,
+    "global_preparation_precedes_evaluation": true,
+    "no_account_NAV_or_portfolio_MDD_claim": true
+  },
+  "fixed_acceptance": {
+    "baseline_distinct_labels": 12042,
+    "max_distinct_labels": 6021,
+    "min_label_drop": 0.5,
+    "baseline_timely_positive_hits": 1463,
+    "min_retained_hits": 1317,
+    "min_retention": 0.9,
+    "large_positive_events": 947,
+    "min_large_hits": 758,
+    "min_large_recall": 0.8,
+    "min_matched_excess_bp_exclusive": 0,
+    "max_four_hypothesis_holm_p_exclusive": 0.01
+  },
+  "evidence": [
+    {
+      "file": "yoyo/evaluation/spike_burst_v3_formation_gate.py",
+      "lines": [
+        35,
+        39,
+        41,
+        43,
+        46,
+        47,
+        48,
+        51
+      ],
+      "finding": "Six finite MA values produce raw width; gap segmentation, exact prior-half rolling medians and full finite windows."
+    },
+    {
+      "file": "yoyo/evaluation/spike_burst_v3_formation_gate.py",
+      "lines": [
+        71,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        82,
+        85,
+        95
+      ],
+      "finding": "Gap reset, full raw edge, accepted-only cooldown, accepted-parent age0..3 and edge consumed even when formation rejects."
+    },
+    {
+      "file": "yoyo/evaluation/spike_burst_v3_formation_study.py",
+      "lines": [
+        57,
+        95,
+        106,
+        157,
+        183,
+        218,
+        248,
+        277,
+        293,
+        367,
+        412
+      ],
+      "finding": "Pinned test/source inputs and historical C/AB/V3 authentication; parent-only economics, immutable labels, four-hypothesis correction, fixed gates and historical V1 comparison."
+    },
+    {
+      "file": "experiments/active/exp-spike-v3-formation-gate-20260910-v1/PROJECT_PLAN.md",
+      "lines": [
+        7,
+        11,
+        24,
+        26,
+        28,
+        30,
+        32
+      ],
+      "finding": "Previously seen fourth exploratory hypothesis with exact formula, original denominators, fixed four gates, parent-only execution and no deployment."
+    }
+  ],
+  "observations": [
+    "Equality is accepted. Constant wide six-MA ribbons can pass; formed means non-expansion or contraction of the median width, not an absolute density confirmation.",
+    "Current missing slow MA can still permit a parent if original V3 ready/fast-MA conditions and all prior12 width values remain valid. This is explicitly preregistered, not an overlooked current-bar check.",
+    "Signal times and parent identity may shift after a rejected parent because rejected edges do not consume accepted cooldown. The study must evaluate reconstructed sequences, not post-filter old V3 outcomes.",
+    "Label file SHA authentication preserves the947 large subgroup even though the early frozen_inputs row-count assertion explicitly spells out14904/8046/1660; final artifact audit will separately verify947 and1463.",
+    "The50 synthetic tests pass. An additional audit harness initially used an unavailable tests package import, then was run through runpy without changing any source; the corrected harness passed all stated checks.",
+    "The initial50-test run preceded two additional D tests. When the initial JSON was written it already captured the final source hashes, including those tests; the later52-test run verifies that frozen snapshot. The original50 count is not silently replaced."
+  ],
+  "limitations": [
+    "Preflight establishes implementation/design consistency, not D market performance, threshold optimality or strategy acceptance.",
+    "No new D market detection, outcome scoring or real artifact audit was run by this reviewer.",
+    "Historical periods have already been inspected. Four-hypothesis Holm does not undo adaptive exploration or cover all prior13 gate tests.",
+    "Original V1 keeps its historical random controls; its matched excess is not a newly paired V3/D randomized comparison.",
+    "Execution frictions remain the frozen20bp assumption; no funding/impact model or live trading validation is implied.",
+    "No Pine/native parity was reviewed in this preflight.",
+    "Only this new QA receipt is written; source, registry, prior QA and other workers' files remain untouched."
+  ],
+  "reviewed_at": "2026-09-10T09:57:49.718602+00:00",
+  "source_sha256": {
+    "yoyo/evaluation/spike_burst_v3_formation_gate.py": "ccaa4d113e91f1b55e933c67f1f6acfb4a9694a9420b40972d1b7b514e9baf5f",
+    "tests/test_spike_burst_v3_formation_gate.py": "c0162d19270f0c0c533b770bf6c088b95faa8687d0eb1f44b7e361833b50cb4b",
+    "yoyo/evaluation/spike_burst_v3_formation_study.py": "1d574f85459ff55ce67b6e9121090b7029d3867179e8230990c248b012cad77b",
+    "tests/test_spike_burst_v3_formation_study.py": "7148f5ae13b8ddd09a4feebe86e1c91f4d576523f3cf38c89b4a8d264afcdad1",
+    "experiments/active/exp-spike-v3-formation-gate-20260910-v1/PROJECT_PLAN.md": "5198749762bef5a01d14f23533d8cd64d8fb39ddb36c9e1bf19de2a896391467",
+    "yoyo/evaluation/spike_burst_early_warning.py": "31f5422524b15b2a758cb8e6d55b1e943123d099655f4d743051215dbacb9abf",
+    "yoyo/evaluation/spike_burst_progressive.py": "cec81a33997bd39272762bd70a451ceb5bf218da0e7fc0606271d165437fde08",
+    "yoyo/evaluation/spike_burst_execution.py": "05c96e98498cbf11cc426ed4cc939199b47af2cf8fd5a409c79fc720552f45cc",
+    "yoyo/evaluation/spike_burst_dataset.py": "e03585c03e32387b84ade03ce12966d8ff0b6468a2814f0c0199a814d69dcdd1"
+  },
+  "process_compliance": "deviation_recorded: message-based PASS preceded preparation, but written QA receipt and its commit did not precede preparation",
+  "timing_addendum": {
+    "recorded_at": "2026-09-10T10:00:56.080673+00:00",
+    "initial_receipt_sha256": "78ff6e3ab03d19a09054adeb3ca3275b9105fa5def14f402374739dfc1602cac",
+    "initial_receipt_reviewed_at_preserved": "2026-09-10T09:57:49.718602+00:00",
+    "initial_receipt_mtime_observed": "2026-09-10T09:57:49.720001+00:00",
+    "frozen_source_commit": "736a5e3cfb33d87490d95978d56d0b3397cf99a1",
+    "frozen_source_commit_time_utc": "2026-09-10T09:57:36+00:00",
+    "prepare_started_json_mtime_observed": "2026-09-10T09:57:37.295906+00:00",
+    "written_receipt_delay_after_prepare_start_seconds": 12.422696,
+    "message_order": "Reviewer sent source PASS with50 tests before root reported starting prepare. Exact gate/study/tests were frozen by736a5e3 before started.json. JSON was written about12.4 seconds after started.json; receipt was not included in that prior source commit.",
+    "deviation": "PROJECT_PLAN required preflight to be committed before market run. Message PASS and committed code do not satisfy the missing receipt-commit order. This requirement was not fully met.",
+    "no_backdating_or_rerun": "Original reviewed_at and initial50-test record are retained. No source, plan, prepared/validation manifest or output is rewritten; no configuration rerun.",
+    "evidence_limits": "Times are observed filesystem mtimes plus git commit time, not independent signed timestamps. Message ordering is based on this task conversation and root confirmation."
+  },
+  "latest_synthetic_verification": {
+    "command": ".venv/bin/python -m pytest -q tests/test_spike_burst_v3_formation_gate.py tests/test_spike_burst_v3_formation_study.py",
+    "passed": 52,
+    "wall_seconds": 1.12,
+    "recorded_at": "2026-09-10T10:00:56.080680+00:00",
+    "original_probe_preserved": 50,
+    "root_reported_regression_suite": {
+      "passed": 69,
+      "composition": "52 D tests plus17 original V3 regression tests",
+      "independent_reexecution": "Reviewer independently reran52 D tests;69 total is root-reported"
+    }
+  },
+  "latest_source_sha256": {
+    "yoyo/evaluation/spike_burst_v3_formation_gate.py": "ccaa4d113e91f1b55e933c67f1f6acfb4a9694a9420b40972d1b7b514e9baf5f",
+    "tests/test_spike_burst_v3_formation_gate.py": "c0162d19270f0c0c533b770bf6c088b95faa8687d0eb1f44b7e361833b50cb4b",
+    "yoyo/evaluation/spike_burst_v3_formation_study.py": "1d574f85459ff55ce67b6e9121090b7029d3867179e8230990c248b012cad77b",
+    "tests/test_spike_burst_v3_formation_study.py": "7148f5ae13b8ddd09a4feebe86e1c91f4d576523f3cf38c89b4a8d264afcdad1",
+    "experiments/active/exp-spike-v3-formation-gate-20260910-v1/PROJECT_PLAN.md": "5198749762bef5a01d14f23533d8cd64d8fb39ddb36c9e1bf19de2a896391467",
+    "yoyo/evaluation/spike_burst_early_warning.py": "31f5422524b15b2a758cb8e6d55b1e943123d099655f4d743051215dbacb9abf",
+    "yoyo/evaluation/spike_burst_progressive.py": "cec81a33997bd39272762bd70a451ceb5bf218da0e7fc0606271d165437fde08",
+    "yoyo/evaluation/spike_burst_execution.py": "05c96e98498cbf11cc426ed4cc939199b47af2cf8fd5a409c79fc720552f45cc",
+    "yoyo/evaluation/spike_burst_dataset.py": "e03585c03e32387b84ade03ce12966d8ff0b6468a2814f0c0199a814d69dcdd1"
+  },
+  "latest_source_matches_initial_receipt_snapshot": true
+}
