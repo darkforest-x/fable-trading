@@ -8,7 +8,7 @@ import pytest
 
 from yoyo.evaluation.spike_burst_replay import SOURCE_SHA256
 from yoyo.monitor import (BARK_TIMEFRAMES, MODEL_KIND, MODEL_PROTOCOL, MODEL_SHA256,
-                          SIGNAL_KIND, SIGNAL_PROTOCOL, TIMEFRAMES)
+                          SIGNAL_KIND, SIGNAL_PROTOCOL, TIMEFRAMES, FRESH_MS)
 from yoyo.monitor.model_gate import ModelGate
 from yoyo.monitor.notification_policy import arm_v1_bark, delivery_error
 from yoyo.monitor.policy import is_model_signal
@@ -90,6 +90,43 @@ def test_new_v1_bark_cutover_keeps_old_raw_and_replay_out_of_every_outbox(tmp_pa
     assert delivery_error(store, fresh, fresh["bar_close_ms"] + 1, "bark") is None
     assert store.upsert_event(fresh, bark_notify=True)
     assert store.bark_status()["pending"] == 1 and store.telegram_status()["pending"] == 0
+
+
+@pytest.mark.parametrize("confirmation_lag, expected_bark", [(0, 1), (FRESH_MS + 1, 0)])
+def test_delayed_yolo_uses_confirmation_freshness_not_raw_age(tmp_path, confirmation_lag, expected_bark):
+    """A legal 1H wait can outlive raw freshness; its own closed bar controls Bark."""
+    timeframe, step, p = "1H", TIMEFRAMES["1H"], 80 * TIMEFRAMES["1H"]
+    raw_close, confirmation_open = p + step, p + 2 * step
+    now = confirmation_open + step + confirmation_lag
+    raw = {"protocol": SIGNAL_PROTOCOL, "kind": SIGNAL_KIND, "source": "live", "confirmation": "raw",
+           "venue": "okx", "symbol": "TEST-USDT-SWAP", "timeframe": timeframe, "timeframe_min": 60,
+           "direction": "long", "side": "long", "bar_open_ms": p, "bar_close_ms": raw_close,
+           "signal_close_time": raw_close, "is_closed": True, "price": 100., "risk": 2., "initial_stop": 98.,
+           "source_sha256": SOURCE_SHA256, "entry_reference": "next_open", "executable_entry_time": None,
+           "detected_at_ms": raw_close, "confirmed": True, "ready": True}
+    proposal = {"model_sha256": MODEL_SHA256, "confidence": .65, "detection_id": "delayed-extra",
+                "input_pixel_sha256": "c" * 64, "side": "long", "structural_pass": True, "window_len": 18,
+                "window_start_ms": confirmation_open - 17 * step, "window_end_ms": confirmation_open,
+                "core_start_ms": p - 3 * step, "core_end_ms": p, "core_length_bars": 4, "post_bars": 2}
+
+    class DelayedDetector(Detector):
+        def predict(self, candles, symbol, checked_timeframe, endpoint_ms):
+            self.calls.append(endpoint_ms)
+            return [proposal] if endpoint_ms == confirmation_open else []
+
+    candles = [{"t": t, "o": 99., "h": 101., "l": 98., "c": 100., "v": 20., "md": 0.,
+                "sma20": 100., "ema20": 100., "sma60": 100., "ema60": 100., "sma120": 100., "ema120": 100.}
+               for t in range(p - 20 * step, confirmation_open + step, step)]
+    store = Store(tmp_path / "monitor.sqlite3")
+    arm_v1_bark(store, 0)
+    detector = DelayedDetector(proposal)
+    gate = ModelGate(store, lambda: now, threading.Event(), detector)
+    assert gate.register(raw)
+    gate.process(raw["symbol"], timeframe, candles)
+    yolo = store.list_events(kind=MODEL_KIND, protocol=MODEL_PROTOCOL)
+    assert len(yolo) == 1 and yolo[0]["bar_close_ms"] == confirmation_open + step
+    assert detector.calls == [p, p + step, confirmation_open]
+    assert store.bark_status()["pending"] == expected_bark
 
 
 def test_idle_v1_model_gate_does_not_load_yolo_before_a_raw_candidate(tmp_path):

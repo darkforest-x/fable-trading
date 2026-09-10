@@ -207,7 +207,11 @@ class ModelGate:
     def _commit(self, original, event, candles):
         now = self.clock()
         stream = self.store.timeframe_activation(event["timeframe"], protocol=MODEL_PROTOCOL)
-        common = (stream is not None and original["bar_close_ms"] > stream
+        # The raw arrow must have cleared its own forward cutover, while the
+        # extra Bark leg is fresh by the later, exchange-confirmed YOLO bar.
+        # A valid 1H/4H confirmation may deliberately arrive after the raw
+        # 30-minute freshness window but still be new information to deliver.
+        common = (stream is not None and original["bar_close_ms"] > stream and event["bar_close_ms"] > stream
                   and 0 <= now - event["bar_close_ms"] <= FRESH_MS)
         tg = (self.store.get_meta("notification_policy:" + MODEL_PROTOCOL, {}).get("activated_ms")
               if self.telegram_enabled else None)
