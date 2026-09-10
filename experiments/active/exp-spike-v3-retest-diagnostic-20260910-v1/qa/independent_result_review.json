@@ -1,0 +1,148 @@
+{
+  "status": "passed",
+  "reviewed_at_utc": "2026-09-10T12:14:03.380471+00:00",
+  "classification_sha": "aaff96c3af614b65452e3cabca3609c3732d7f1f3fbe54d46667eebedf312f89",
+  "joined_sha": "184aff26411b4649095d1a85558e021367b182efcecda7fa64cfc275480159fd",
+  "prepared_sha": "32abdf5316732247e4912cd17e3c7c94353ba6756a33df38c007fd7933d83a42",
+  "validation_sha": "a0cb43b3b7d548148938b9404d1744d85b5d1a60ccb8b35ab04edff012b5a570",
+  "authentication_reference_checks": 6006,
+  "unique_authenticated_files": 1815,
+  "source_pins": {
+    "yoyo/evaluation/spike_burst_v3_retest_diagnostic.py": "b465f8840572f8ac1504642531c3076d429b5e93b7d36a95ca940ca35126d7bb",
+    "tests/test_spike_burst_v3_retest_diagnostic.py": "0ffb5f14949c235414e6a852837f2b996cf05a0504fcf125f9213f035f86bcff",
+    "experiments/active/exp-spike-v3-retest-diagnostic-20260910-v1/PROJECT_PLAN.md": "dd47862ed8fc30f5f33104eab2470f76d4b1bbfa846301af6037520d68458235",
+    "experiments/active/exp-spike-v3-retest-diagnostic-20260910-v1/qa/preflight_review.json": "5d7eaef36b641d61f106744f1bbaf28d5b2f86f39f23ce2a7494d5f92c120f0c"
+  },
+  "markets": 278,
+  "source_bars": 837239,
+  "source_gaps": 0,
+  "candidates": 10386,
+  "numeric_checks": 83088,
+  "timestamp_checks": 41544,
+  "text_checks": 72702,
+  "independent_prior_interval_ohlc_values": 249264,
+  "raw_v3_original_event_checks": 10386,
+  "label_source_cells_checked": 128736,
+  "anchors": 8046,
+  "positive": 1660,
+  "large_positive": 947,
+  "timely_positive": 1463,
+  "distinct_timely_candidate_links": 1463,
+  "position_counts": {
+    "above": 6942,
+    "inside": 3419,
+    "below": 25,
+    "unknown": 0
+  },
+  "timely_positive_counts": {
+    "above": 1171,
+    "inside": 292,
+    "below": 0,
+    "unknown": 0,
+    "not_caught": 0
+  },
+  "large_positive_counts": {
+    "above": 643,
+    "inside": 155,
+    "below": 0,
+    "unknown": 0,
+    "not_caught": 149
+  },
+  "fixed_examples": [
+    {
+      "asset": "HYPE",
+      "candidate_time": "2026-08-19 13:00:00+00:00",
+      "classification_time": "2026-08-19 14:00:00+00:00",
+      "low": 58.023,
+      "high": 58.955,
+      "next_close": 58.637,
+      "location": "inside"
+    },
+    {
+      "asset": "NEAR",
+      "candidate_time": "2026-08-19 07:00:00+00:00",
+      "classification_time": "2026-08-19 08:00:00+00:00",
+      "low": 1.562,
+      "high": 1.616,
+      "next_close": 1.611,
+      "location": "inside"
+    },
+    {
+      "asset": "PEPE",
+      "candidate_time": "2026-08-19 13:00:00+00:00",
+      "classification_time": "2026-08-19 14:00:00+00:00",
+      "low": 2.566e-06,
+      "high": 2.606e-06,
+      "next_close": 2.596e-06,
+      "location": "inside"
+    }
+  ],
+  "methodological_scope": "Independent literal recomputation from authenticated F original states, raw cached OHLC and candidate registry; no diagnostic import or market detector/simulator/score call",
+  "blocking_findings": [],
+  "reviewer": "independent noise_mechanism_audit",
+  "confidence": "share_with_caveats",
+  "test_evidence": {
+    "command": ".venv/bin/python -m pytest -q tests/test_spike_burst_v3_retest_diagnostic.py",
+    "passed": 34,
+    "observed_output": "34 passed in 0.68s"
+  },
+  "checks": {
+    "actual_complete_join_receipt": "joined_manifest was complete before label/outcome association was independently audited",
+    "freeze_clock": "Every original candidate box independently recalculated from exactly t-12..t-1 cached OHLC; all observed decisions independently checked against valid t+1 OHLC and the original immutable F registry/state",
+    "causality": "No diagnostic generation function, market detector, simulator, strategy score, new data fetch or parameter configuration called. Full authenticated historical feature files were loaded for validation; numerical classification consumed only prior12 OHLC and actual next-bar OHLC",
+    "original_stream": "All 10386 actual original V3 candidate identities, closed-bar timestamps and prices matched exact frozen signals; no new public signal stream generated",
+    "label_membership": "All original 8046 in-study anchor records preserved and their 128736 source cells compared; original first_signal_lag and hit_1 used unchanged. All 1463 timely candidate links happened to be distinct in this fixed dataset",
+    "partition": "Four candidate categories and five large-label categories sum to their separate denominators; inclusive box boundaries; unknown and not_caught retained",
+    "risk_and_economics": "Original V1/V3/F economic results and four gates were neither altered nor rescored; old positive labels are not transaction profits",
+    "visual_review": "Viewed all four generated PNGs: count populations/denominators separate; price figures display exactly original and next closes plus frozen bounds; labels and scales readable; line explicitly does not represent intrabar path. No HTML/browser/native TradingView rendering claimed"
+  },
+  "limitations": [
+    "Inside is a next-close location, not proof of normal/successful retest or profitable continuation. Below is observed structural price breach, not a trading-loss label.",
+    "The 292 inside cases describe the composition of original timely positives, not the success probability of the 3419 inside candidates.",
+    "Non-timely positives, negative anchors and unknown anchors remain in joined_anchors, but their candidate location is deliberately not mapped by this diagnostic; not_caught is not a new negative trading class.",
+    "All candidate and original-anchor denominators remain separate. Although the 1463 timely links are distinct here, dividing timely positives by all category candidates is not a validated precision or win-rate estimator.",
+    "Above equals the existing F acceptance rule by construction. Separating inside/below describes F rejection reasons; it is not independent evidence for a new filter.",
+    "Counts share symbols and market episodes, and this is repeatedly observed authorized history. No causal treatment effect, blind out-of-sample performance, new p-value or predictive validation is established.",
+    "Only 25 of 10386 candidates are below at t+1; eliminating that location alone would remove 0.2407% of candidate records before any new state/timing interaction, not meet the unchanged 50% public-label-reduction target.",
+    "Original V1/V3 comparisons and all prior A-F failures remain in their authenticated prior reports, not newly evaluated by this descriptive builder."
+  ],
+  "writes_restricted_to": "experiments/active/exp-spike-v3-retest-diagnostic-20260910-v1/qa/independent_result_review.json",
+  "new_strategy_scoring": false,
+  "production_eligible": false,
+  "training_eligible": false,
+  "independent_oracle_source": "\nfrom pathlib import Path\nimport json, hashlib, subprocess, datetime, math\nimport numpy as np, pandas as pd\nROOT=Path('/Users/zhangzc/fable-trading')\nR=ROOT/'experiments/active/exp-spike-v3-retest-diagnostic-20260910-v1/results'\nF=ROOT/'experiments/active/exp-spike-v3-price-acceptance-20260910-v1/results'\nH=pd.Timedelta(hours=1); START=pd.Timestamp('2026-07-10T00:00Z'); END=pd.Timestamp('2026-09-09T00:00Z')\nexpected={'prepared_manifest.json':'32abdf5316732247e4912cd17e3c7c94353ba6756a33df38c007fd7933d83a42','validation_manifest.json':'a0cb43b3b7d548148938b9404d1744d85b5d1a60ccb8b35ab04edff012b5a570'}\nseen={}; check_count=0\ndef sha(p):\n h=hashlib.sha256()\n with Path(p).open('rb') as f:\n  for b in iter(lambda:f.read(1024*1024),b''):h.update(b)\n return h.hexdigest()\ndef verify(p,d):\n global check_count\n p=Path(p).resolve();check_count+=1\n if str(p) in seen:assert seen[str(p)]==d,('conflict',p)\n else:assert sha(p)==d,('sha',p);seen[str(p)]=d\n return p\nP=json.loads(verify(F/'prepared_manifest.json',expected['prepared_manifest.json']).read_text())\nV=json.loads(verify(F/'validation_manifest.json',expected['validation_manifest.json']).read_text())\nCSHA='aaff96c3af614b65452e3cabca3609c3732d7f1f3fbe54d46667eebedf312f89'\nC=json.loads(verify(R/'classification_manifest.json',CSHA).read_text())\nJSHA=sha(R/'joined_manifest.json');J=json.loads(verify(R/'joined_manifest.json',JSHA).read_text())\nfor m in (P,V,C,J):assert m['status']=='complete'\nassert V['prepared_sha']==expected['prepared_manifest.json']\nassert J['classification_sha']==CSHA and C['labels_parsed'] is False\nassert C['prepared_sha']==J['prepared_sha']==expected['prepared_manifest.json']\nassert C['validation_sha']==J['validation_sha']==expected['validation_manifest.json']\nassert C['config']==J['config'] and C['source_pins']==J['source_pins']\nfor m in (P,V,C,J):\n for p,d in m.get('sources',{}).items():verify(p,d)\n for p,d in m.get('source_pins',{}).items():verify(ROOT/p,d)\n for a in m['artifacts']:verify(a['path'],a['sha256'])\nfor p,d in C['source_pins'].items():\n assert hashlib.sha256(subprocess.check_output(['git','show','HEAD:'+p],cwd=ROOT)).hexdigest()==d,('head',p)\nqa=json.loads((ROOT/'experiments/active/exp-spike-v3-retest-diagnostic-20260910-v1/qa/preflight_review.json').read_text())\nassert qa['status']=='passed'\nfor p,d in qa['source_sha256'].items():assert C['source_pins'][p]==d\nmatch=json.loads((F/'matching.json').read_text());assert len(match['jobs'])==len(match['state_artifacts'])==278\nassert match['config']==P['config']\nreg=pd.read_csv(F/'candidate_registry.csv.gz',float_precision='round_trip')\nreg['candidate_time']=pd.to_datetime(reg.candidate_time,utc=True)\nreg=reg[(reg.candidate_time>=START)&(reg.candidate_time<END)]\nassert len(reg)==10386 and not reg.duplicated(['instrument','candidate_i']).any()\nobserved=pd.read_csv(R/'classified_candidates.csv.gz',float_precision='round_trip').set_index(['instrument','candidate_i'],verify_integrity=True)\nassert len(observed)==10386\ntimecols={'candidate_time','interval_source_time','expected_decision_time','classification_time'}\nnumchecks=txtchecks=timechecks=0\ndef eq(a,b,name):\n global numchecks,txtchecks,timechecks\n if name in timecols:\n  timechecks+=1\n  aa=pd.to_datetime(a,utc=True);bb=pd.to_datetime(b,utc=True)\n  assert (pd.isna(aa) and pd.isna(bb)) or aa==bb,(name,aa,bb)\n elif isinstance(b,(int,float,bool,np.number,np.bool_)) or pd.isna(b):\n  numchecks+=1\n  assert (pd.isna(a) and pd.isna(b)) or a==b,(name,a,b)\n else:\n  txtchecks+=1;assert a==b,(name,a,b)\ncalc=[]; source_bars=0;interval_values=0;source_gaps=0\nfor n,(job,a) in enumerate(zip(match['jobs'],match['state_artifacts'])):\n assert Path(a['path']).resolve()==F/'states'/('%03d_%s.csv.gz'%(n,job['asset']))\n verify(a['path'],a['sha256']);verify(job['features_path'],job['features_sha256'])\n state=pd.read_csv(a['path'],float_precision='round_trip')\n frame=pd.read_pickle(job['features_path'])\n frame=frame.loc[frame.index<END]\n assert len(frame)==len(state)==job['bars']\n assert np.array_equal(state.decision_i,np.arange(len(frame)))\n clocks=pd.to_datetime(state.decision_time,utc=True)\n assert np.array_equal(clocks.to_numpy(),(frame.index+H).to_numpy())\n source_bars+=len(frame);source_gaps+=int(np.sum(np.diff(frame.index.asi8)!=H.value))\n local=reg[reg.instrument==job['instrument']]\n for r in local.to_dict('records'):\n  i=int(r['candidate_i']);t=frame.index[i]+H;s=state.iloc[i]\n  assert i>=12 and np.all(np.diff(frame.index[i-12:i+1].asi8)==H.value)\n  assert bool(s.v3_early) and s.v3_parent_i==i and r['candidate_time']==t\n  assert s.price_acceptance_candidate_status=='pending' and s.price_acceptance_candidate_i==i\n  low=float(frame.low.iloc[i-12:i].min());high=float(frame.high.iloc[i-12:i].max())\n  assert s.v3_prog_prior_low==low and s.v3_prog_prior_high==high\n  assert s.v3_frozen_parent_high==s.price_acceptance_frozen_parent_high==r['frozen_parent_high']==high\n  assert s.price_acceptance_candidate_close==r['candidate_close']==frame.close.iloc[i]\n  interval_values+=24\n  status=r['candidate_status'];reason=r['reason'];j=r['decision_i'];ct=pd.to_datetime(r['decision_time'],utc=True);price=r['decision_close']\n  if pd.isna(j):\n   assert status=='unknown' and reason=='no_next_bar_at_sample_end' and i==len(frame)-1 and pd.isna(ct) and pd.isna(price)\n   cat='unknown'\n  else:\n   j=int(j);assert j==i+1 and j<len(frame)\n   sb=state.iloc[j];bar=frame.iloc[j]\n   assert ct==frame.index[j]+H and sb.price_acceptance_candidate_i==i\n   assert sb.price_acceptance_decision_i==j and pd.to_datetime(sb.price_acceptance_decision_time,utc=True)==ct\n   assert sb.price_acceptance_candidate_status==status and sb.price_acceptance_reason==reason\n   assert sb.price_acceptance_decision_close==price==bar.close\n   valid=(np.isfinite(bar[['open','high','low','close']].to_numpy(float)).all()\n       and min(bar.open,bar.high,bar.low,bar.close)>0\n       and bar.low<=min(bar.open,bar.close) and bar.high>=max(bar.open,bar.close))\n   if frame.index[j]-frame.index[i]!=H:\n    assert status=='unknown' and reason=='missing_next_hour';cat='unknown'\n   elif not valid:\n    assert status=='unknown' and reason=='invalid_next_ohlc';cat='unknown'\n   else:\n    assert status==('accepted' if price>high else 'rejected')\n    assert reason==('close_above_frozen_high' if price>high else 'close_at_or_below_frozen_high')\n    cat='above' if price>high else 'below' if price<low else 'inside'\n  row={k:r[k] for k in ('instrument','asset','symbol','venue','minutes')}\n  row.update(candidate_i=i,candidate_time=t,candidate_close=r['candidate_close'],\n    frozen_prior_low=low,frozen_prior_high=high,interval_source_i=i,interval_source_time=t,\n    expected_decision_time=t+H,decision_i=r['decision_i'],classification_time=ct,decision_close=price,\n    f_status=status,f_reason=reason,location=cat,\n    location_reason=reason if cat=='unknown' else 'frozen_interval_comparison',available_at_candidate=False)\n  out=observed.loc[(r['instrument'],i)]\n  for k,v in row.items():\n   if k not in ('instrument','candidate_i'):eq(out[k],v,k)\n  calc.append(row)\nprint('source_classification_complete',json.dumps({'markets':278,'bars':source_bars,'candidates':len(calc)}),flush=True)\ncal=pd.DataFrame(calc).sort_values(['instrument','candidate_i']).reset_index(drop=True)\nraw=pd.read_csv(F/'signals.csv.gz',float_precision='round_trip')\nraw=raw[(raw.arm=='v3')&(raw.stage=='early')]\nassert len(raw)==10386 and not raw.duplicated(['instrument','decision_i']).any()\nlk=raw.set_index(['instrument','decision_i'])\nfor r in cal.itertuples():\n s=lk.loc[(r.instrument,r.candidate_i)]\n assert s.signal_close==r.candidate_close and pd.to_datetime(s.decision_time,utc=True)==r.candidate_time\ngroups={c:int((cal.location==c).sum()) for c in ('above','inside','below','unknown')}\nps=pd.read_csv(R/'position_summary.csv').set_index('location')\nfor c,k in groups.items():\n assert ps.loc[c,'candidates']==k and ps.loc[c,'candidate_denominator']==10386\n assert math.isclose(ps.loc[c,'candidate_fraction'],k/10386,rel_tol=0,abs_tol=1e-15)\ncross=pd.read_csv(R/'f_status_crosstab.csv')\nexp=cal.groupby(['location','f_status','f_reason'],dropna=False).size().rename('candidates').reset_index()\npd.testing.assert_frame_equal(cross,exp,check_dtype=False)\nlabels=pd.read_csv(F/'labels.csv.gz',float_precision='round_trip')\ndet=pd.read_csv(F/'detections.csv.gz',float_precision='round_trip')\nassert len(labels)==14904\nlabels['decision_time']=pd.to_datetime(labels.decision_time,utc=True)\nanchors=labels[(labels.decision_time>=START)&(labels.decision_time<END)].copy()\nassert len(anchors)==8046 and not anchors.duplicated(['instrument','event_i']).any()\nactualjoin=pd.read_csv(R/'joined_anchors.csv.gz',float_precision='round_trip').set_index(['instrument','event_i'],verify_integrity=True)\nassert len(actualjoin)==8046\ndet=det[(det.arm=='v3')&(det.stage=='early')].set_index(['instrument','event_i'],verify_integrity=True)\ncl=cal.set_index(['instrument','candidate_i'],verify_integrity=True)\nloccounts={c:0 for c in ('above','inside','below','unknown','not_caught')}\nbigcounts=dict(loccounts);positive=large=timely=0;labelcellchecks=0;linkset=[]\nfor a in anchors.to_dict('records'):\n key=(a['instrument'],a['event_i']);d=det.loc[key];out=actualjoin.loc[key]\n for k,v in a.items():\n  if k in ('instrument','event_i'):continue\n  x=out[k]\n  if k in ('decision_time','bar_open'):assert pd.to_datetime(x,utc=True)==pd.to_datetime(v,utc=True)\n  elif pd.isna(v):assert pd.isna(x)\n  else:assert x==v,(key,k,x,v)\n  labelcellchecks+=1\n hit=bool(d.hit_1);lag=d.first_signal_lag\n assert bool(out.hit_1)==hit\n assert (pd.isna(lag) and pd.isna(out.first_signal_lag)) or lag==out.first_signal_lag\n if hit:\n  assert a['label']=='positive' and lag in (0,1)\n  ci=int(a['event_i']+lag);r=cl.loc[(a['instrument'],ci)]\n  assert r.candidate_time==a['decision_time']+lag*H and out.original_signal_i==ci\n  cat=r.location;linkset.append((a['instrument'],ci))\n  for k,v in r.items():\n   outputkey=k+'_candidate' if k in ('asset','symbol','venue','minutes') else k\n   if k in timecols:assert pd.to_datetime(out[outputkey],utc=True)==pd.to_datetime(v,utc=True)\n   elif pd.isna(v):assert pd.isna(out[outputkey])\n   else:assert out[outputkey]==v,(key,k,out[outputkey],v)\n  assert out.candidate_i==ci\n else:\n  assert pd.isna(out.original_signal_i) and pd.isna(out.candidate_i) and pd.isna(out.location)\n  cat='not_caught'\n assert out.timely_location==cat\n if a['label']=='positive':\n  positive+=1\n  if hit:timely+=1;loccounts[cat]+=1\n  if bool(a['large_peak']):large+=1;bigcounts[cat]+=1\nassert (positive,large,timely)==(1660,947,1463)\nls=pd.read_csv(R/'timely_positive_positions.csv').set_index('location')\nfor cat in loccounts:\n assert ls.loc[cat,'timely_positive']==loccounts[cat] and ls.loc[cat,'original_timely_denominator']==1463\n assert ls.loc[cat,'large_positive_anchors']==bigcounts[cat] and ls.loc[cat,'original_large_denominator']==947\n assert math.isclose(ls.loc[cat,'fraction_of_original_timely'],loccounts[cat]/1463,rel_tol=0,abs_tol=1e-15)\n assert math.isclose(ls.loc[cat,'fraction_of_original_large'],bigcounts[cat]/947,rel_tol=0,abs_tol=1e-15)\nassert J['counts']==dict(source_labels=14904,anchors=8046,positive=1660,large_positive=947,timely_positive=1463)\nfc=pd.read_csv(R/'fixed_examples.csv',float_precision='round_trip')\nfixed=[]\nfor asset,tim in [('HYPE','2026-08-19T21:00+08:00'),('NEAR','2026-08-19T15:00+08:00'),('PEPE','2026-08-19T21:00+08:00')]:\n t=pd.Timestamp(tim).tz_convert('UTC');x=cal[(cal.asset==asset)&(cal.candidate_time==t)]\n assert len(x)==1\n r=x.iloc[0];out=fc[fc.asset==asset].iloc[0]\n for k,v in r.items():\n  if k in timecols:assert pd.to_datetime(out[k],utc=True)==v\n  else:assert out[k]==v,(asset,k,out[k],v)\n fixed.append(dict(asset=asset,candidate_time=str(t),classification_time=str(r.classification_time),\n  low=float(r.frozen_prior_low),high=float(r.frozen_prior_high),next_close=float(r.decision_close),location=r.location))\n# Final source/receipt integrity recheck of the new pipeline plus immutable F receipts.\nfor m in (C,J):\n for p,d in m['source_pins'].items():assert sha(ROOT/p)==d\n for a in m['artifacts']:assert sha(a['path'])==a['sha256']\nassert sha(R/'classification_manifest.json')==CSHA and sha(R/'joined_manifest.json')==JSHA\nresult=dict(status='passed',reviewed_at_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),\n classification_sha=CSHA,joined_sha=JSHA,prepared_sha=expected['prepared_manifest.json'],validation_sha=expected['validation_manifest.json'],\n authentication_reference_checks=check_count,unique_authenticated_files=len(seen),source_pins=C['source_pins'],\n markets=278,source_bars=source_bars,source_gaps=source_gaps,candidates=len(cal),numeric_checks=numchecks,\n timestamp_checks=timechecks,text_checks=txtchecks,independent_prior_interval_ohlc_values=interval_values,\n raw_v3_original_event_checks=len(raw),label_source_cells_checked=labelcellchecks,anchors=8046,\n positive=positive,large_positive=large,timely_positive=timely,\n distinct_timely_candidate_links=len(set(linkset)),position_counts=groups,timely_positive_counts=loccounts,\n large_positive_counts=bigcounts,fixed_examples=fixed,\n methodological_scope='Independent literal recomputation from authenticated F original states, raw cached OHLC and candidate registry; no diagnostic import or market detector/simulator/score call',\n blocking_findings=[])\nprint('AUDIT_RESULT '+json.dumps(result,ensure_ascii=False),flush=True)\n",
+  "report_artifact_review": {
+    "status": "passed",
+    "manifest_sha256": "c24fceeefce926a50b4e24ca3fc44017f539df34f9bbc194f259ca30315eae90",
+    "builder_sha256": {
+      "yoyo/evaluation/spike_burst_v3_retest_report.py": "15cf4552f060ef3bee743505b97a201e4c56a19affc501511c14d402d8a101b8"
+    },
+    "authenticated_sources": 1815,
+    "artifacts": [
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-retest-diagnostic-20260910-v1/results/figures/retest_position_counts.png",
+        "sha256": "4180ae08e66a61c403f82b64bb5e6cc0434e27b900658facd8ea1d2cbd482217"
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-retest-diagnostic-20260910-v1/results/figures/HYPE_next_close_position.png",
+        "sha256": "172fd40186f7ad4ef1608256aa0b5ca65417568441cf4ad479b4e39f3029b239"
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-retest-diagnostic-20260910-v1/results/figures/NEAR_next_close_position.png",
+        "sha256": "10a9c0ba7311c25bc223473f852e965bbe0bc9db50a64c4515c7cdbbf69ad9e0"
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-retest-diagnostic-20260910-v1/results/figures/PEPE_next_close_position.png",
+        "sha256": "2c1ae4e76424ec59ef24fb3f36a578b56200b54f9d465f809417a7018eee7997"
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-retest-diagnostic-20260910-v1/results/retest_report_fragment.json",
+        "sha256": "1162e131cf08fe0eb9944ad7cae9bcfc0668f7534825b4458281a283764718f9"
+      }
+    ],
+    "fragment_summary_rows": 12,
+    "viewed_pngs": 4
+  },
+  "independent_oracle_sha256": "81006fda3f0ec6e0070a5c9c7f66290f2d48f65f00a3ea9be6dbdd4f83033ba5",
+  "receipt_written_at_utc": "2026-09-10T12:15:58.899941+00:00"
+}

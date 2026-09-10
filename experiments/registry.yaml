@@ -8061,18 +8061,40 @@ experiments:
   - experiment_id: exp-spike-v3-retest-diagnostic-20260910-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2d534c0e7d232561da9c6702671b94b820364af0
-    status: active
+    status: accepted
     question: Among F-rejected original V3 timely positives, did the next close return inside or close below the original
       prior12 interval?
     single_variable: Descriptive original t frozen box location at the actual t+1 close; no new signal or trading
       configuration.
-    result: Builder, tests, plan and actual independent preflight committed;34 synthetic tests pass. Classification
-      and label join not yet run.
-    holdout_consumed: false
+    result: Read-only diagnostic complete and independently verified:10386 original candidates,6942 above/3419 inside/25
+      below/0 unknown; all292 removed original timely positives (including155 large) inside. Fixed1463/947 denominators
+      preserved. Accepted descriptive integrity only; F still fails all strategy gates.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
-    canonical_report: experiments/active/exp-spike-v3-retest-diagnostic-20260910-v1/PROJECT_PLAN.md
-    artifacts: []
-    notes: Owner authorized all dates; descriptive reread of already-scored F, not fresh OOS or another scoring consumption.
-      Original8046/1660/947/1463 preserved; inside is not a success label. No live change.
+    canonical_report: analysis/html/p1_spike_v3_retest_diagnostic_20260910.html
+    artifacts:
+    - spike-v3-retest-diagnostic-20260910-qa-independent-result-review-json
+    - spike-v3-retest-diagnostic-20260910-results-classification-manifest-json
+    - spike-v3-retest-diagnostic-20260910-results-classification-started-json
+    - spike-v3-retest-diagnostic-20260910-results-classified-candidates-csv-gz
+    - spike-v3-retest-diagnostic-20260910-results-f-status-crosstab-csv
+    - spike-v3-retest-diagnostic-20260910-results-figures-hype-next-close-position-png
+    - spike-v3-retest-diagnostic-20260910-results-figures-near-next-close-position-png
+    - spike-v3-retest-diagnostic-20260910-results-figures-pepe-next-close-position-png
+    - spike-v3-retest-diagnostic-20260910-results-figures-retest-position-counts-png
+    - spike-v3-retest-diagnostic-20260910-results-fixed-examples-csv
+    - spike-v3-retest-diagnostic-20260910-results-join-started-json
+    - spike-v3-retest-diagnostic-20260910-results-joined-anchors-csv-gz
+    - spike-v3-retest-diagnostic-20260910-results-joined-manifest-json
+    - spike-v3-retest-diagnostic-20260910-results-position-summary-csv
+    - spike-v3-retest-diagnostic-20260910-results-retest-report-fragment-json
+    - spike-v3-retest-diagnostic-20260910-results-retest-report-manifest-json
+    - spike-v3-retest-diagnostic-20260910-results-retest-report-started-json
+    - spike-v3-retest-diagnostic-20260910-results-timely-positive-positions-csv
+    - spike-v3-retest-diagnostic-20260910-p1-spike-v3-retest-diagnostic-20260910-md
+    - spike-v3-retest-diagnostic-20260910-p1-spike-v3-retest-diagnostic-20260910-html
+    notes: Already-scored F configuration descriptive reread under owner all-dates authorization, not another economic
+      scoring consumption or fresh OOS.34 synthetic tests plus independent literal reconstruction. No TV, monitor,
+      notification, training or execution change.
