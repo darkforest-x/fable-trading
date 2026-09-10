@@ -14,6 +14,13 @@ import pandas as pd
 
 from yoyo.evaluation.spike_v1_twoyear_allmarkets import METHOD_VERSION, PINE_SHA, RESULTS, SOURCE_SHA256
 
+V1_TIMEFRAME_MINUTES = (30, 60, 240)
+
+
+def _v1_only(frame: pd.DataFrame) -> pd.DataFrame:
+    """Keep the frozen V1 30m/1H/4H contract out of legacy 1D ledger rows."""
+    return frame.loc[frame["timeframe_min"].isin(V1_TIMEFRAME_MINUTES)].copy()
+
 
 def _as_censored(values: pd.Series) -> pd.Series:
     return values.map(lambda value: bool(value) if isinstance(value, (bool, np.bool_))
@@ -44,7 +51,7 @@ def build() -> dict:
     ledger_path = RESULTS / "covered_trade_ledger.csv.gz"
     coverage_path = RESULTS / "coverage_limited.csv"
     manifest_path = RESULTS / "coverage_progress.json"
-    ledger, coverage = pd.read_csv(ledger_path), pd.read_csv(coverage_path)
+    ledger, coverage = _v1_only(pd.read_csv(ledger_path)), _v1_only(pd.read_csv(coverage_path))
     manifest = json.loads(manifest_path.read_text())
     if manifest.get("method_version") != METHOD_VERSION:
         raise ValueError("coverage ledger method version is not the executable-risk build")
