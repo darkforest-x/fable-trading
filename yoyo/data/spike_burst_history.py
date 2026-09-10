@@ -23,6 +23,7 @@ import hashlib
 import io
 import json
 from pathlib import Path
+import re
 import subprocess
 import zipfile
 
@@ -356,6 +357,154 @@ def committed_sources():
     return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(), records
 
 
+def verify_history(path, expected_sha256):
+    """Authenticate an immutable parent, including old code via Git objects.
+
+    Old builder bytes may intentionally differ from today's sanitizer. Their
+    original committed blobs, not today's working copies, prove the recorded
+    builder lineage. Source manifests and all source segments remain on disk
+    and are authenticated against the parent's already pinned digest.
+    """
+    parent = json.loads(checked(path, expected_sha256))
+    if parent.get("schema") != "spike-burst-history-v1" or parent.get("status") != "complete":
+        raise ValueError("Complete source history manifest required")
+    commit = parent.get("builder_commit", "")
+    if not re.fullmatch(r"[0-9a-f]{40}", commit):
+        raise ValueError("Parent builder commit must be an exact Git object")
+    for row in parent.get("builder_sources", []):
+        relative = str(Path(row["path"]).resolve().relative_to(ROOT))
+        blob = subprocess.check_output(["git", "show", commit + ":" + relative], cwd=ROOT)
+        if digest(blob) != row["sha256"]:
+            raise ValueError("Parent committed builder SHA mismatch")
+    for row in parent.get("source_manifests", []):
+        checked(row["path"], row["sha256"])
+    flat = parent.get("segments", [])
+    nested = [s for market in parent["markets"] for s in market.get("segments", [])]
+    by_id = {s["instrument"]: s for s in flat}
+    if len(by_id) != len(flat) or len(nested) != len(flat) or any(by_id.get(s["instrument"]) != s for s in nested):
+        raise ValueError("Parent flattened/nested segment identities disagree")
+    for segment in flat:
+        checked(segment["source_features_path"], segment["source_features_sha256"])
+    return parent
+
+
+def trim_tradable(frame, listing_ms=None, delisting_ms=None):
+    """Apply known lifetime boundaries, retaining original native candles.
+
+    A known delivery timestamp admits only candles whose full close is at or
+    before it. This is an observability boundary, not an entry feature or a
+    claim about actual settlement fills. Nonzero trading before onboardDate
+    is retained and flagged: a current onboard snapshot can be a relisting.
+    Leading zero-turnover history cannot supply indicator warmup. Interior
+    inactive candles are retained; missing candles are never manufactured.
+    """
+    frame = validate_frame(frame.copy(), 60)
+    listing = pd.Timestamp(listing_ms, unit="ms", tz="UTC") if listing_ms else None
+    delivery = pd.Timestamp(delisting_ms, unit="ms", tz="UTC") if delisting_ms else None
+    prelisting = ((frame.index < listing) & frame.volume.gt(0).to_numpy()) if listing is not None else np.zeros(len(frame), bool)
+    after = ((frame.index + pd.Timedelta(hours=1)) > delivery) if delivery is not None else np.zeros(len(frame), bool)
+    audit = dict(source_rows=len(frame), positive_rows_before_onboard=int(prelisting.sum()),
+                 onboard_snapshot_conflict=bool(prelisting.any()),
+                 rows_removed_delivery=int(after.sum()), positive_rows_removed_delivery=int(frame.volume.loc[after].gt(0).sum()),
+                 rows_removed_leading_zero=0, rows_removed_all_zero=0,
+                 listing_time=listing.isoformat() if listing is not None else None,
+                 delivery_time=delivery.isoformat() if delivery is not None else None)
+    kept = frame.loc[~after].copy()
+    active = np.flatnonzero(kept.volume.gt(0).to_numpy())
+    if not len(active):
+        audit["rows_removed_all_zero"] = len(kept)
+        audit["status"] = "excluded_no_trading" if len(kept) else "outside_known_lifetime"
+        return empty_frame(60), audit
+    audit["rows_removed_leading_zero"] = int(active[0])
+    kept = kept.iloc[active[0]:].copy()
+    audit.update(status="included", retained_rows=len(kept))
+    return validate_frame(kept, 60), audit
+
+
+def sanitize_history(input_path, output, expected_sha256):
+    """Create a separately authenticated tradable view; never rewrite raw history."""
+    commit, code = committed_sources()
+    input_path, output = Path(input_path).resolve(), Path(output).resolve()
+    if output.exists() and any(output.iterdir()):
+        raise ValueError("Sanitized output directory must be empty")
+    parent = verify_history(input_path, expected_sha256)
+    jobs, catalog_artifacts = load_inputs()
+    raw = {job["symbol"]: job for job in jobs}
+    if set(raw) != {r["symbol"] for r in parent["markets"]}:
+        raise ValueError("Parent universe differs from authenticated catalog union")
+    # The parent acquisition constants must refer to the same frozen catalog.
+    current_catalogs = {row["path"]: row["sha256"] for row in catalog_artifacts}
+    for row in parent.get("source_manifests", []):
+        if row["path"] in current_catalogs and current_catalogs[row["path"]] != row["sha256"]:
+            raise ValueError("Sanitizer catalog differs from parent catalog")
+    output.mkdir(parents=True, exist_ok=True)
+    markets, audits = [], []
+    for original in parent["markets"]:
+        market = dict(original)
+        market.update(raw_status=original["status"], raw_rows=original.get("rows", 0),
+                      raw_actual_start=original.get("actual_start"), raw_actual_end=original.get("actual_end"),
+                      segments=[], tradability_segments=[])
+        meta = raw[market["symbol"]]
+        for name in ("listing_ms", "delisting_ms", "tick"):
+            if original.get(name) != meta.get(name):
+                raise ValueError("Parent/catalog lifetime or tick metadata disagrees: " + name)
+        for segment in original.get("segments", []):
+            source = Path(segment["source_features_path"])
+            # Recheck immediately before deserialization as well as preflight.
+            checked(source, segment["source_features_sha256"])
+            frame = pd.read_pickle(source)
+            cleaned, audit = trim_tradable(frame, meta.get("listing_ms"), meta.get("delisting_ms"))
+            audit.update(symbol=market["symbol"], source_instrument=segment["instrument"],
+                         source_features_path=str(source), source_features_sha256=segment["source_features_sha256"])
+            audits.append(audit)
+            market["tradability_segments"].append(audit)
+            if cleaned.empty:
+                continue
+            destination = output / "segments" / source.name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            if destination.exists():
+                raise ValueError("Refusing to overwrite sanitized segment")
+            cleaned.to_pickle(destination, compression={"method": "gzip", "mtime": 0})
+            evidence = artifact(destination)
+            derived = dict(segment, source_features_path=evidence["path"], source_features_sha256=evidence["sha256"],
+                           rows=len(cleaned), actual_start=cleaned.index[0].isoformat(),
+                           actual_end=(cleaned.index[-1] + pd.Timedelta(hours=1)).isoformat(),
+                           parent_source_features_path=str(source), parent_source_features_sha256=segment["source_features_sha256"],
+                           tradability_status="included")
+            market["segments"].append(derived)
+        if original.get("segments"):
+            if market["segments"]:
+                market.update(status="complete", rows=sum(s["rows"] for s in market["segments"]),
+                              actual_start=market["segments"][0]["actual_start"], actual_end=market["segments"][-1]["actual_end"])
+            else:
+                market.update(status="excluded", exclude_reason="excluded_no_tradable_history", rows=0,
+                              actual_start=None, actual_end=None)
+        markets.append(market)
+    totals = {key: sum(a[key] for a in audits) for key in
+              ("source_rows", "rows_removed_delivery", "positive_rows_removed_delivery",
+               "rows_removed_leading_zero", "rows_removed_all_zero", "positive_rows_before_onboard")}
+    tradability = dict(status="complete", input_segments=len(parent["segments"]),
+        output_segments=sum(len(m["segments"]) for m in markets), **totals,
+        wholly_removed_segments=sum(a["status"] != "included" for a in audits),
+        onboard_conflict_symbols=sorted({a["symbol"] for a in audits if a["onboard_snapshot_conflict"]}),
+        policy="known delivery: full close<=delivery; preserve/report positive pre-onboard bars; trim leading zero activity; exclude all-zero segments",
+        execution="boundary exit remains source-end censored at last observed close; not a settlement fill",
+        entry_features="current/future catalog status is not an entry feature; only actual original OHLCV enters replay")
+    segments = [s for market in markets for s in market.get("segments", [])]
+    manifest = dict(parent, generated_at=pd.Timestamp.now(tz="UTC").isoformat(), builder_commit=commit, builder_sources=code,
+                    source_manifests=[artifact(input_path)], raw_parent=artifact(input_path),
+                    authenticated_lifetime_catalogs=catalog_artifacts,
+                    markets=markets, segments=segments, tradability_audit=tradability,
+                    status_counts={status: sum(r["status"] == status for r in markets)
+                                   for status in ("complete", "excluded", "empty", "rejected")})
+    # The parent and all retained parents stay unchanged throughout sanitation.
+    checked(input_path, expected_sha256)
+    for source in parent["segments"]:
+        checked(source["source_features_path"], source["source_features_sha256"])
+    (output / "history_manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
+    return manifest
+
+
 def build(output, start, end, workers=4, archive_root=ARCHIVE, recent_root=RECENT):
     start, end = utc(start), utc(end)
     hour = pd.Timedelta(hours=1).value
@@ -393,14 +542,22 @@ def build(output, start, end, workers=4, archive_root=ARCHIVE, recent_root=RECEN
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("action", nargs="?", choices=("build", "sanitize"), default="build")
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--input", type=Path, help="Original immutable history_manifest.json for sanitize")
+    parser.add_argument("--input-sha", help="Pinned original manifest SHA-256; required for sanitize")
     parser.add_argument("--start", default="2023-05-01T00:00:00Z")
     parser.add_argument("--end", default="2026-09-09T00:00:00Z")
     parser.add_argument("--workers", type=int, default=4)
     args = parser.parse_args()
     if args.workers < 1:
         parser.error("workers must be positive")
-    manifest = build(args.output, args.start, args.end, args.workers)
+    if args.action == "sanitize":
+        if args.input is None or not args.input_sha:
+            parser.error("sanitize requires --input and --input-sha")
+        manifest = sanitize_history(args.input, args.output, args.input_sha)
+    else:
+        manifest = build(args.output, args.start, args.end, args.workers)
     print(json.dumps(dict(manifest=str(args.output / "history_manifest.json"), markets=len(manifest["markets"]),
                           segments=len(manifest["segments"]))), flush=True)
 

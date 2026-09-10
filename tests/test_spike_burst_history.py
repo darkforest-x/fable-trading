@@ -244,3 +244,122 @@ def test_artifacts_blocked_when_builder_is_not_committed(tmp_path, monkeypatch):
     with pytest.raises(ValueError, match="committed HEAD"):
         history.build(tmp_path / "result", "2023-05-01T00:00Z", "2026-09-09T00:00Z")
     assert not (tmp_path / "result").exists()
+
+
+def test_known_delivery_clips_full_hour_not_settlement_bar():
+    frame = hourly(count=4)
+    deadline = pd.Timestamp("2026-05-01T02:30Z").value // 1000000
+    kept, audit = history.trim_tradable(frame, delisting_ms=deadline)
+    assert kept.index.tolist() == frame.index[:2].tolist()
+    assert audit["rows_removed_delivery"] == 2 and audit["positive_rows_removed_delivery"] == 2
+    assert kept.index[-1] + pd.Timedelta(hours=1) <= pd.Timestamp(deadline, unit="ms", tz="UTC")
+
+
+def test_positive_pre_onboard_is_preserved_and_reported():
+    frame = hourly(count=4)
+    onboard = pd.Timestamp("2026-05-01T02:00Z").value // 1000000
+    kept, audit = history.trim_tradable(frame, listing_ms=onboard)
+    pd.testing.assert_frame_equal(kept, frame)
+    assert audit["positive_rows_before_onboard"] == 2 and audit["onboard_snapshot_conflict"]
+
+
+def test_only_leading_zero_is_removed_interior_zero_retained():
+    frame = hourly(count=5)
+    frame.loc[frame.index[[0, 1, 3]], ["volume", "quote_volume"]] = 0
+    kept, audit = history.trim_tradable(frame)
+    assert kept.index.tolist() == frame.index[2:].tolist()
+    assert kept.volume.tolist() == [8., 0., 8.]
+    assert audit["rows_removed_leading_zero"] == 2
+
+
+def test_all_zero_and_entirely_after_delivery_are_explicit():
+    frame = hourly(count=4)
+    frame[["volume", "quote_volume"]] = 0
+    kept, audit = history.trim_tradable(frame)
+    assert kept.empty and audit["status"] == "excluded_no_trading" and audit["rows_removed_all_zero"] == 4
+    kept, audit = history.trim_tradable(hourly(), delisting_ms=pd.Timestamp("2026-04-01T00:00Z").value // 1000000)
+    assert kept.empty and audit["status"] == "outside_known_lifetime"
+
+
+def synthetic_parent(tmp_path, monkeypatch):
+    import subprocess
+    output = tmp_path / "raw"
+    output.mkdir()
+    frame = hourly(count=4)
+    frame.loc[frame.index[0], ["volume", "quote_volume"]] = 0
+    first = output / "first.pkl.gz"
+    frame.to_pickle(first)
+    zero = frame.copy()
+    zero[["volume", "quote_volume"]] = 0
+    second = output / "zero.pkl.gz"
+    zero.to_pickle(second)
+    deadline = pd.Timestamp("2026-05-01T03:00Z").value // 1000000
+    base = dict(venue="binance", symbol="ABCUSDT", asset="ABC", major=False, tick="0.001",
+                tick_origin="PRICE_FILTER", tick_snapshot="recent_catalog", listing_ms=None, delisting_ms=deadline)
+    parts = []
+    for i, path in enumerate([first, second]):
+        parts.append(dict(base, source_features_path=str(path), source_features_sha256=history.digest(path.read_bytes()),
+                          instrument="binance:ABCUSDT:segment" + str(i), minutes=60, rows=4,
+                          actual_start=frame.index[0].isoformat(), actual_end=(frame.index[-1] + pd.Timedelta(hours=1)).isoformat()))
+    commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=history.ROOT, text=True).strip()
+    codepath = history.ROOT / "yoyo/data/binance_um_archives.py"
+    builder_sources = [history.artifact(codepath)]
+    manifest = dict(schema="spike-burst-history-v1", status="complete", builder_commit=commit, builder_sources=builder_sources,
+                    source_manifests=[], segments=parts,
+                    markets=[dict(base, status="complete", rows=8, segments=parts, exclude_reason="")])
+    path = output / "history_manifest.json"
+    path.write_text(json.dumps(manifest))
+    monkeypatch.setattr(history, "committed_sources", lambda: (commit, builder_sources))
+    monkeypatch.setattr(history, "load_inputs", lambda: ([dict(base)], []))
+    return path, history.digest(path.read_bytes()), manifest
+
+
+def test_sanitize_full_source_chain_separate_output_and_original_untouched(tmp_path, monkeypatch):
+    path, pinned, original = synthetic_parent(tmp_path, monkeypatch)
+    output = tmp_path / "tradable"
+    result = history.sanitize_history(path, output, pinned)
+    assert result["tradability_audit"]["status"] == "complete"
+    assert result["source_manifests"] == [history.artifact(path)]
+    assert result["tradability_audit"]["input_segments"] == 2
+    assert result["tradability_audit"]["output_segments"] == 1
+    assert result["tradability_audit"]["rows_removed_delivery"] == 2
+    assert result["tradability_audit"]["rows_removed_leading_zero"] == 1
+    assert result["tradability_audit"]["rows_removed_all_zero"] == 3
+    segment = result["segments"][0]
+    frame = pd.read_pickle(segment["source_features_path"])
+    assert len(frame) == 2 and frame.index[0] == pd.Timestamp("2026-05-01T01:00Z")
+    assert segment["parent_source_features_path"] == original["segments"][0]["source_features_path"]
+    assert history.digest(path.read_bytes()) == pinned
+    for row in original["segments"]:
+        assert history.digest(Path(row["source_features_path"]).read_bytes()) == row["source_features_sha256"]
+    with pytest.raises(ValueError, match="directory must be empty"):
+        history.sanitize_history(path, output, pinned)
+
+
+def test_sanitize_parent_or_segment_corruption_prevents_output(tmp_path, monkeypatch):
+    path, pinned, original = synthetic_parent(tmp_path, monkeypatch)
+    with pytest.raises(ValueError, match="SHA mismatch"):
+        history.sanitize_history(path, tmp_path / "bad_manifest", "0" * 64)
+    assert not (tmp_path / "bad_manifest").exists()
+    Path(original["segments"][1]["source_features_path"]).write_bytes(b"corrupt")
+    with pytest.raises(ValueError, match="SHA mismatch"):
+        history.sanitize_history(path, tmp_path / "bad_segment", pinned)
+    assert not (tmp_path / "bad_segment").exists()
+
+
+def test_sanitize_catalog_conflict_fails_without_changing_input(tmp_path, monkeypatch):
+    path, pinned, original = synthetic_parent(tmp_path, monkeypatch)
+    raw = dict(original["markets"][0], delisting_ms=12345)
+    monkeypatch.setattr(history, "load_inputs", lambda: ([raw], []))
+    with pytest.raises(ValueError, match="metadata disagrees"):
+        history.sanitize_history(path, tmp_path / "conflict", pinned)
+    assert history.digest(path.read_bytes()) == pinned
+
+
+def test_sanitize_requires_committed_builder_before_any_real_artifact(tmp_path, monkeypatch):
+    def mismatch():
+        raise ValueError("Builder must match committed HEAD")
+    monkeypatch.setattr(history, "committed_sources", mismatch)
+    with pytest.raises(ValueError, match="committed HEAD"):
+        history.sanitize_history(tmp_path / "missing.json", tmp_path / "out", "0" * 64)
+    assert not (tmp_path / "out").exists()
