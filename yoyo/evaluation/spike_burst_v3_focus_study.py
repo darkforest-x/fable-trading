@@ -57,7 +57,8 @@ def frozen_inputs():
     labels=pd.read_csv(prior.PRIOR/'labels.csv.gz',float_precision='round_trip')
     labels['decision_time']=pd.to_datetime(labels.decision_time,utc=True)
     labels['bar_open']=pd.to_datetime(labels.bar_open,utc=True)
-    if len(labels)!=8046 or labels.label.eq('positive').sum()!=1660:
+    in_window=labels[labels.decision_time.ge(old.START)&labels.decision_time.lt(old.END)]
+    if len(in_window)!=8046 or in_window.label.eq('positive').sum()!=1660:
         raise ValueError('Frozen label denominator drift')
     return jobs,labels,refs
 
