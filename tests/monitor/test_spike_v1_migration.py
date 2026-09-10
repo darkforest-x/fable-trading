@@ -50,3 +50,20 @@ def test_v1_migration_removes_the_two_remaining_imacd_protocols_without_erasing_
     assert receipt['obsolete_event_rows'] == 2
     assert store.list_events() == [dict(v1, id=store.event_id(v1), notification_status='history', bark_notification_status='history')]
     assert store.get_meta('notification_policy:v1_bark_arm')['activated_ms'] == 3
+
+
+def test_v1_identity_dedupe_only_removes_legacy_row_when_canonical_exists(tmp_path):
+    store = Store(tmp_path / 'm.sqlite')
+    event = dict(protocol=SIGNAL_PROTOCOL, kind=SIGNAL_KIND, source='live', confirmation='raw', direction='long',
+                 symbol='BTC-USDT-SWAP', timeframe='1H', timeframe_min=60, side='long', bar_open_ms=0,
+                 bar_close_ms=TIMEFRAMES['1H'], signal_close_time=TIMEFRAMES['1H'], is_closed=True,
+                 price=100., risk=1., initial_stop=99., source_sha256='a' * 64, entry_reference='next_open',
+                 executable_entry_time=None, detected_at_ms=1)
+    legacy_id = 'legacy-id'
+    with store.connect() as db:
+        db.execute("INSERT INTO events VALUES (?,?,?,?,?,?,?,?)", (legacy_id, event['symbol'], event['timeframe'], event['kind'],
+                   event['side'], event['bar_close_ms'], event['detected_at_ms'], __import__('json').dumps(event)))
+    assert store.dedupe_v1_legacy_identity() == {'removed': 0, 'deferred_without_canonical': 1}
+    assert store.upsert_event(event)
+    assert store.dedupe_v1_legacy_identity() == {'removed': 1, 'deferred_without_canonical': 0}
+    assert [row['id'] for row in store.list_events()] == [store.event_id(event)]

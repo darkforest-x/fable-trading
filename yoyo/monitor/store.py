@@ -517,3 +517,26 @@ class Store:
                        "protocol": "spike-burst-v1-monitor-v1", "cutoff_ms": int(cutoff_ms)}
             db.execute("INSERT OR REPLACE INTO meta VALUES (?,?)", ("migration:spike-burst-v1", encode(receipt)))
         return receipt
+
+    def dedupe_v1_legacy_identity(self):
+        """Remove only an old V1 identity when its canonical replacement exists."""
+        with self.connect() as db:
+            rows = db.execute("SELECT id,payload FROM events WHERE kind=? AND json_extract(payload,'$.protocol')=? "
+                              "AND json_extract(payload,'$.source')='live' AND json_extract(payload,'$.confirmation')='raw'",
+                              (SIGNAL_KIND, SIGNAL_PROTOCOL)).fetchall()
+            removable = []
+            deferred = 0
+            for row in rows:
+                canonical = self.event_id(json.loads(row[1]))
+                if canonical != row[0]:
+                    if db.execute("SELECT 1 FROM events WHERE id=?", (canonical,)).fetchone():
+                        removable.append(row[0])
+                    else:
+                        deferred += 1
+            if removable:
+                marks = ",".join("?" for _ in removable)
+                for table, column in (("telegram_media", "event_id"), ("outbox", "event_id"),
+                                      ("bark_outbox", "event_id"), ("model_candidates", "id")):
+                    db.execute("DELETE FROM " + table + " WHERE " + column + " IN (" + marks + ")", removable)
+                db.execute("DELETE FROM events WHERE id IN (" + marks + ")", removable)
+        return {"removed": len(removable), "deferred_without_canonical": deferred}
