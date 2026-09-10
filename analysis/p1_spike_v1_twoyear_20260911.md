@@ -2,7 +2,7 @@
 
 ## 结论
 
-本配置**尚未**产生任何交易绩效结论、排行榜或交易账本。冻结的三所全市场合同在 Gate 两年 30 分钟历史上不可满足；Binance 与 OKX 正继续按 current-catalog 全目录收集，Gate 则按原生周期记录可得窗。评估器会拒绝把局部历史称为“all-market”。这次已消耗 owner 明确授权的该配置第 1 次 holdout 读取，用于验证固定 V1 和公共历史可得性；没有训练、调参、promote 或执行路径改动。
+本配置尚未完成三所全市场回测，但已开始以固定的 **1,681 × 4 = 6,724** current-catalog × timeframe 单元为分母，增量生成可审计的覆盖受限账本。2026-09-10T17:43Z 的快照为 51 个 evaluated 单元、113 笔可执行交易、6,669 个尚未取得单元、3 个源错误和 1 个源时间戳缺口；这些不是全市场绩效结论。冻结的三所全市场合同在 Gate 两年 30 分钟历史上不可满足；Binance 与 OKX 正继续按 current-catalog 全目录收集，Gate 则按原生周期记录可得窗。评估器不会把局部历史称为“all-market”。这次已消耗 owner 明确授权的该配置第 1 次 holdout 读取；没有训练、调参、promote 或执行路径改动。
 
 ## 冻结合同与复现
 
@@ -15,28 +15,32 @@
 python3 -m yoyo.evaluation.spike_v1_twoyear_allmarkets catalog
 python3 -m yoyo.evaluation.spike_v1_twoyear_allmarkets fetch
 python3 -m yoyo.evaluation.spike_v1_twoyear_allmarkets evaluate
+python3 -m yoyo.evaluation.spike_v1_twoyear_allmarkets evaluate-covered
+python3 -m yoyo.evaluation.spike_v1_twoyear_allmarkets report-covered
 ```
 
-最后一条只会在每个请求市场均完整、无缺口和无错误时运行；这是防止部分样本冒充全市场的门。
+`evaluate` 只会在每个请求市场均完整、无缺口和无错误时运行；这是防止部分样本冒充全市场的门。`evaluate-covered` 不绕过该门：它逐单元保留 `not_acquired`、`source_error`、`source_gapped` 或 `warmup_insufficient`，只为实际完整且已预热的连续段写账本。
 
 ## 目录与实际覆盖
 
 | venue | 当前目录中合格 USDT 永续 | 两年 30m 样本 | 结果 |
 | --- | ---: | --- | --- |
-| Binance USD-M | 658 | 2 个完整市场：0GUSDT 17,153 根/36 页；1000000BOBUSDT 22,159 根/15 页 | 全目录续跑中 |
-| OKX SWAP | 460 | 2 个完整市场：0G-USDT-SWAP 16,923 根/178 页；1INCH-USDT-SWAP 53,136 根/178 页 | 全目录续跑中 |
-| Gate USDT Futures | 563 | 0G_USDT 30m 被拒；原生 1H 8,576 根、4H 2,144 根可得但该 2025 上市标的自然不足两年 | 按周期覆盖收集，不能静默补成 30m |
-| 合计 | 1,681 | 4 个 Binance/OKX 完整样本；Gate 1 个按周期审计样本 | 尚未达到全量评估 |
+| Binance USD-M | 658 | 12 个 30m 接收据已完成，后台持续 |
+| OKX SWAP | 460 | 3 个 30m 接收据已完成，后台持续 |
+| Gate USDT Futures | 563 | 24 个原生 timeframe 接收据；30m/1H 的 10k 限制与个别缺口均逐单元保留 |
+| 合计 | 1,681 | 51/6,724 单元实际 evaluated，113 笔账本交易 | **coverage-limited，后台续跑** |
 
 这是 current-catalog universe，不是 all-ever-listed：三个 2026-09-10/11 的目录快照不能找回已删除或历史退市合约。历史 listing 时间也只是当前目录字段，不能证明早期连续可交易性。
 
 Gate REST 返回 HTTP 400：`INVALID_PARAM_VALUE`，正文为 “Candlestick too long ago. Maximum 10000 points recently are allowed”。直接按原生周期取数后，0G 的 1H/4H 可从其 2025 上市后连续读取，30m 仍被拒；日线返回 UTC 00 时钟，而该标的 listing 时钟不在日边界，故不自动重采样或挪动 timestamp。其官方 REST 文档也说明单次最多 2,000 点；历史下载说明列有 futures archive，但按其公开 URL 构造的 `futures_usdt/candlesticks_{30m,1h,4h,1d}` 对 BTC_USDT、ETH_USDT 和 0G_USDT 测试均为 404。原始响应、请求参数、HTTP 状态和页面 SHA 均保存于实验 `data/raw/gate/`、`data/market_receipts/gate/` 与 `data/gate_timeframe_receipts/`，没有静默换源。
 
-## 执行与统计口径（已冻结，未运行）
+## 执行与统计口径（冻结；增量快照仅作描述）
 
 V1 信号在收盘确认；诊断会另存 signal-close 风险参考，实际交易才会下一根开盘进入。保护线由信号收盘冻结；入场跳空穿越保护线时按该开盘价退出，后续单根中触及保护线按 stop-first 保守顺序处理。费用是既有 0.2% 往返名义成本。资金费、各所费率档、冲击和容量没有完整历史，均为未建模，不能当作零。
 
-本应交付的全交易 ledger（时间、特征、MAE/MFE、费用、net R、退出原因）、按 venue/timeframe/month/year/regime 的 PF、等风险与容量组合、同币同周同波动桶随机对照、bootstrap 与 feature bins 均为**不适用**：没有完整母体，生成其中任何一个会制造局部市场结果。AUC 也不适用，因为 V1 是固定规则、非分类器。
+已生成覆盖受限的 [逐笔 CSV ledger](../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_ledger.csv.gz) 与 [可搜索 HTML drilldown](../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_drilldown.html)，每笔包含 venue、symbol、TF、信号/入场/出场时刻、因果特征、费用、net R、收益、持仓、MAE/MFE、drawdown、tail capture 和退出理由；还有按 venue/TF 与月份的等名义汇总。它们只描述已覆盖细胞，不能用于选币、参数比较或外推。
+
+按 venue/timeframe/month/year/regime 的最终 PF、等风险与容量组合、同币同周同波动桶随机对照、bootstrap 与 feature bins 会随完整可用覆盖更新；当前样本没有足够的横截面或时间覆盖，禁止把小样本显著性或赢家分析当证据。AUC 不适用，因为 V1 是固定规则、非分类器。
 
 ## 风险与诚实声明
 
