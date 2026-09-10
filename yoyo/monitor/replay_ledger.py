@@ -17,6 +17,9 @@ import gzip
 import hashlib
 import json
 import math
+import os
+import shutil
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
@@ -121,6 +124,15 @@ def _outcome(row: dict[str, object]) -> tuple[str, dict[str, object]]:
     }
 
 
+def _stale_audit(event: dict) -> dict[str, object] | None:
+    """Carry a prior invalidated link forward without restoring its outcome."""
+    link = event.get("covered_ledger")
+    if (event.get("performance_status") == "stale_evidence_unverified" and isinstance(link, dict)
+            and link.get("link_status") == "stale_evidence"):
+        return link
+    return None
+
+
 def build_updates(events: Iterable[dict], *, ledger_path: Path, manifest_path: Path,
                   ohlc_root: Path = REPLAY_DATA_ROOT) -> tuple[list[tuple[str, dict]], dict[str, int]]:
     """Prepare all reconciliation updates before writing a single journal row."""
@@ -162,21 +174,110 @@ def build_updates(events: Iterable[dict], *, ledger_path: Path, manifest_path: P
             stats["matched_realized"] += 1
         else:
             stats["matched_censored"] += 1
-        updates.append((event_id, {
-            "performance_status": status,
-            "covered_ledger": {
-                "link_status": outcome["status"],
-                "monitor_event_id": event_id,
-                "ledger_event_id": str(row["event_id"]),
-                "match_key": {"venue": event["venue"], "symbol": event["symbol"],
-                              "timeframe_min": int(event["timeframe_min"]), "signal_bar_open_ms": int(event["bar_open_ms"])},
-                "evidence": {**artifact_evidence,
-                             "frozen_ohlc_file": str(source_path), "frozen_ohlc_sha256": ohlc_hashes[source_path],
-                             "frozen_ohlc_timeframe_min": native_minutes},
-                "outcome": outcome,
-            },
-        }))
+        link = {
+            "link_status": outcome["status"],
+            "monitor_event_id": event_id,
+            "ledger_event_id": str(row["event_id"]),
+            "match_key": {"venue": event["venue"], "symbol": event["symbol"],
+                          "timeframe_min": int(event["timeframe_min"]), "signal_bar_open_ms": int(event["bar_open_ms"])},
+            "evidence": {**artifact_evidence,
+                         "frozen_ohlc_file": str(source_path), "frozen_ohlc_sha256": ohlc_hashes[source_path],
+                         "frozen_ohlc_timeframe_min": native_minutes},
+            "outcome": outcome,
+        }
+        prior_stale = _stale_audit(event)
+        if prior_stale is not None:
+            link["superseded_stale_evidence"] = prior_stale
+        updates.append((event_id, {"performance_status": status, "covered_ledger": link}))
     return updates, stats
+
+
+def invalidate_replay_links(store: Store, *, reason: str) -> int:
+    """Hide mutable-ledger outcomes while retaining the exact prior evidence.
+
+    The original payload remains under ``previous_link`` for audit.  The public
+    link intentionally contains no ``outcome`` so a stale receipt cannot be
+    displayed as a current ledger fact while recovery is incomplete.
+    """
+    if not isinstance(reason, str) or not reason:
+        raise ValueError("invalid stale evidence reason")
+    count = 0
+    for event in store.list_events(limit=2000, source="replay", confirmation="raw"):
+        prior = event.get("covered_ledger")
+        if not isinstance(prior, dict):
+            continue
+        if event.get("performance_status") == "stale_evidence_unverified" and prior.get("link_status") == "stale_evidence":
+            continue
+        audit = {
+            "link_status": "stale_evidence",
+            "reason": reason,
+            "previous_performance_status": event.get("performance_status"),
+            "previous_link": prior,
+        }
+        if not store.update_event_payload(event["id"], {
+            "performance_status": "stale_evidence_unverified", "covered_ledger": audit,
+        }):
+            raise RuntimeError("replay event disappeared during invalidation")
+        count += 1
+    return count
+
+
+def _immutable_copy(source: Path, destination: Path) -> str:
+    """Copy one artifact atomically and fail if its source changes mid-copy."""
+    before = _sha256(source)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if destination.exists():
+        if _sha256(destination) != before:
+            raise ValueError("immutable artifact name collision")
+        return before
+    with tempfile.NamedTemporaryFile(dir=destination.parent, delete=False) as handle:
+        temporary = Path(handle.name)
+        with source.open("rb") as input_handle:
+            shutil.copyfileobj(input_handle, handle)
+        handle.flush()
+        os.fsync(handle.fileno())
+    try:
+        if _sha256(source) != before or _sha256(temporary) != before:
+            raise ValueError("artifact changed while freezing")
+        os.replace(temporary, destination)
+    finally:
+        temporary.unlink(missing_ok=True)
+    return before
+
+
+def freeze_ledger_snapshot(*, ledger_path: Path, manifest_path: Path, snapshot_dir: Path) -> tuple[Path, Path]:
+    """Create content-addressed copies before linking monitor events to them."""
+    ledger_path, manifest_path, snapshot_dir = Path(ledger_path), Path(manifest_path), Path(snapshot_dir)
+    _read_manifest(manifest_path)
+    ledger_sha, manifest_sha = _sha256(ledger_path), _sha256(manifest_path)
+    ledger_destination = snapshot_dir / f"covered_trade_ledger.{ledger_sha}.csv.gz"
+    manifest_destination = snapshot_dir / f"coverage_progress.{manifest_sha}.json"
+    _immutable_copy(ledger_path, ledger_destination)
+    _immutable_copy(manifest_path, manifest_destination)
+    receipt = snapshot_dir / f"snapshot.{ledger_sha}.{manifest_sha}.json"
+    if not receipt.exists():
+        payload = {
+            "ledger_file": str(ledger_destination), "ledger_sha256": ledger_sha,
+            "coverage_receipt_file": str(manifest_destination), "coverage_receipt_sha256": manifest_sha,
+            "source_ledger_file": str(ledger_path), "source_coverage_receipt_file": str(manifest_path),
+        }
+        temporary = receipt.with_suffix(receipt.suffix + ".tmp")
+        temporary.write_text(json.dumps(payload, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+        os.replace(temporary, receipt)
+    return ledger_destination, manifest_destination
+
+
+def reconcile_replay_events(store: Store, *, ledger_path: Path, manifest_path: Path, snapshot_dir: Path,
+                            ohlc_root: Path = REPLAY_DATA_ROOT, stale_reason: str) -> dict[str, int]:
+    """Invalidate old evidence, freeze bytes, then re-link only exact matches."""
+    invalidated = invalidate_replay_links(store, reason=stale_reason)
+    immutable_ledger, immutable_manifest = freeze_ledger_snapshot(
+        ledger_path=ledger_path, manifest_path=manifest_path, snapshot_dir=snapshot_dir,
+    )
+    result = link_replay_events(store, ledger_path=immutable_ledger, manifest_path=immutable_manifest,
+                                ohlc_root=ohlc_root)
+    result["invalidated"] = invalidated
+    return result
 
 
 def link_replay_events(store: Store, *, ledger_path: Path = RESULTS / "covered_trade_ledger.csv.gz",
@@ -233,10 +334,17 @@ def main() -> None:
     parser.add_argument("--coverage-manifest", type=Path, default=RESULTS / "coverage_progress.json")
     parser.add_argument("--ohlc-root", type=Path, default=REPLAY_DATA_ROOT)
     parser.add_argument("--receipt", type=Path)
+    parser.add_argument("--snapshot-dir", type=Path)
+    parser.add_argument("--stale-reason", default="mutable_ledger_artifact_replaced")
     args = parser.parse_args()
     store = Store(args.database)
-    result = link_replay_events(store, ledger_path=args.ledger, manifest_path=args.coverage_manifest,
-                                ohlc_root=args.ohlc_root)
+    if args.snapshot_dir:
+        result = reconcile_replay_events(store, ledger_path=args.ledger, manifest_path=args.coverage_manifest,
+                                         snapshot_dir=args.snapshot_dir, ohlc_root=args.ohlc_root,
+                                         stale_reason=args.stale_reason)
+    else:
+        result = link_replay_events(store, ledger_path=args.ledger, manifest_path=args.coverage_manifest,
+                                    ohlc_root=args.ohlc_root)
     if args.receipt:
         result["receipt_rows"] = write_link_receipt(store, args.receipt)
         result["receipt_file"] = str(args.receipt)

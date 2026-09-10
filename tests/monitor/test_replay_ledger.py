@@ -9,7 +9,8 @@ from pathlib import Path
 
 from yoyo.evaluation.spike_v1_twoyear_allmarkets import METHOD_VERSION, PINE_SHA, SOURCE_SHA256
 from yoyo.monitor.replay_import import normalize_row
-from yoyo.monitor.replay_ledger import link_replay_events, write_link_receipt
+from yoyo.monitor.replay_ledger import (freeze_ledger_snapshot, invalidate_replay_links, link_replay_events,
+                                        reconcile_replay_events, write_link_receipt)
 from yoyo.monitor.store import Store
 
 START = 1_800_000_000_000
@@ -93,3 +94,40 @@ def test_replay_ledger_refuses_source_mismatch_without_writing(tmp_path):
     updated = store.get_event(event["id"])
     assert updated["performance_status"] == "unverified"
     assert "covered_ledger" not in updated
+
+
+def test_reconcile_freezes_bytes_and_keeps_stale_audit_without_display_outcome(tmp_path):
+    store, ledger, manifest, root = _setup(tmp_path)
+    assert link_replay_events(store, ledger_path=ledger, manifest_path=manifest, ohlc_root=root)["linked"] == 2
+    old = store.list_events(limit=1, source="replay", confirmation="raw")[0]
+    old_hash = old["covered_ledger"]["evidence"]["ledger_sha256"]
+    old_status = old["performance_status"]
+    snapshots = tmp_path / "immutable"
+    result = reconcile_replay_events(store, ledger_path=ledger, manifest_path=manifest,
+                                     snapshot_dir=snapshots, ohlc_root=root,
+                                     stale_reason="mutable_ledger_artifact_replaced")
+    assert result == {"replay_events": 2, "matched_realized": 1, "matched_censored": 1,
+                      "unmatched": 0, "source_mismatch": 0, "ohlc_missing": 0,
+                      "linked": 2, "invalidated": 2}
+    copied_ledger, copied_manifest = freeze_ledger_snapshot(
+        ledger_path=ledger, manifest_path=manifest, snapshot_dir=snapshots)
+    assert copied_ledger.read_bytes() == ledger.read_bytes()
+    assert copied_manifest.read_bytes() == manifest.read_bytes()
+    refreshed = store.get_event(old["id"])
+    assert refreshed["covered_ledger"]["evidence"]["ledger_file"] == str(copied_ledger)
+    stale = refreshed["covered_ledger"]["superseded_stale_evidence"]
+    assert stale["reason"] == "mutable_ledger_artifact_replaced"
+    assert stale["previous_performance_status"] == old_status
+    assert stale["previous_link"]["evidence"]["ledger_sha256"] == old_hash
+
+
+def test_invalidation_hides_stale_outcome_until_a_new_snapshot_is_linked(tmp_path):
+    store, ledger, manifest, root = _setup(tmp_path)
+    assert link_replay_events(store, ledger_path=ledger, manifest_path=manifest, ohlc_root=root)["linked"] == 2
+    assert invalidate_replay_links(store, reason="ledger_bytes_missing") == 2
+    for event in store.list_events(limit=10, source="replay", confirmation="raw"):
+        assert event["performance_status"] == "stale_evidence_unverified"
+        link = event["covered_ledger"]
+        assert link["link_status"] == "stale_evidence"
+        assert "outcome" not in link
+        assert link["previous_link"]["outcome"]["status"] in {"realized", "censored"}

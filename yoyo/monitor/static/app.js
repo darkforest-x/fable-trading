@@ -140,8 +140,12 @@
       ];
     }
     if (item.performance_status === "covered_linked_censored_unverified" && outcome?.status === "censored") {
-      return [["覆盖账本关联", "已关联 · 右端 censored", "model-color"],
+      return [["覆盖账本关联", "已关联 · 样本结束时尚未退出", "model-color"],
               ["账本结果", "未实现；不计胜率、PF 或净收益", ""]];
+    }
+    if (item.performance_status === "stale_evidence_unverified" && link?.link_status === "stale_evidence") {
+      return [["覆盖账本关联", "账本证据已过期 · 不展示收益", "muted"],
+              ["账本结果", "等待新的不可变账本快照重链", ""]];
     }
     return [["覆盖账本关联", "尚未关联 v2 覆盖账本 · 不展示收益", ""]];
   }
