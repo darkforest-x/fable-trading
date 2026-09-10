@@ -334,7 +334,8 @@ def _trade_rows(item: dict[str, Any], bars: pd.DataFrame, minutes: int) -> list[
     """
     if len(bars) < 341 or not np.isfinite(float(item["tick"])) or float(item["tick"]) <= 0:
         return []
-    replayed = replay(features(bars), float(item["tick"]))
+    feature_frame = features(bars)
+    replayed = replay(feature_frame, float(item["tick"]))
     step, rows = pd.Timedelta(minutes=minutes), []
     for signal_time, signal in replayed.loc[replayed.burst].iterrows():
         position = bars.index.get_loc(signal_time)
@@ -375,10 +376,10 @@ def _trade_rows(item: dict[str, Any], bars: pd.DataFrame, minutes: int) -> list[
                "reference_signal_risk":float(signal.risk), "risk_fraction_at_entry":risk_fraction,
                "net_r":net / risk_fraction, "mae_return":mae, "mfe_return":mfe,
                "drawdown_return":min(mae, 0.), "tail_capture":net / mfe if mfe > 0 else np.nan,
-               "censored":reason == "censored", "volume_ratio":float(replayed.rv.iloc[position]),
-               "tr_atr_expansion":float(replayed.expansion.iloc[position]), "density_width_atr":float(replayed.pastWidth.iloc[position]),
+               "censored":reason == "censored", "volume_ratio":float(feature_frame.rv.iloc[position]),
+               "tr_atr_expansion":float(feature_frame.expansion.iloc[position]), "density_width_atr":float(feature_frame.pastWidth.iloc[position]),
                "density_duration":int(replayed.quiet_bars.iloc[position]),
-               "breakout_distance_atr":(float(bars.close.iloc[position])-float(replayed.launch_high.iloc[position]))/float(replayed.atr.iloc[position]),
+               "breakout_distance_atr":(float(bars.close.iloc[position])-float(replayed.launch_high.iloc[position]))/float(feature_frame.atr.iloc[position]),
                "price_position":(float(bars.close.iloc[position])-float(bars.low.iloc[position])) / max(float(bars.high.iloc[position])-float(bars.low.iloc[position]), np.finfo(float).eps),
                "delayed_release_bars":int(replayed.wait_bars.iloc[position]) if np.isfinite(float(replayed.wait_bars.iloc[position])) else 0}
         rows.append(row)
