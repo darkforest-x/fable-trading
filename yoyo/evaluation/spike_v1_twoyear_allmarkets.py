@@ -51,6 +51,7 @@ VENUES = {"binance": ("https://fapi.binance.com", 1500, 0.12),
           "okx": ("https://www.okx.com", 300, 0.25),
           "gate": ("https://api.gateio.ws/api/v4", 2000, 0.12)}
 LEDGER_COLUMNS = ("event_id","venue","symbol","asset","timeframe_min","direction","signal_bar_open","signal_close_time","signal_close","entry_time","entry_price","exit_time","exit_price","exit_reason","fees_return","gross_return","net_return","return_pct","holding_minutes","reference_signal_risk","risk_fraction_at_entry","net_r","mae_return","mfe_return","drawdown_return","tail_capture","censored","volume_ratio","tr_atr_expansion","density_width_atr","density_duration","breakout_distance_atr","price_position","delayed_release_bars")
+SOURCE_COLUMNS = ("open", "high", "low", "close", "volume", "quote_volume")
 
 
 def digest(payload: bytes) -> str:
@@ -228,7 +229,7 @@ def fetch_gate_timeframes(max_markets: int | None = None) -> None:
             available = max(desired, END - pd.Timedelta(minutes=minutes * 10_000))
             dest = DATA / "normalized_gate_direct" / (row["symbol"] + f"_{minutes}m.csv.gz")
             receipt = DATA / "gate_timeframe_receipts" / (row["symbol"] + f"_{minutes}m.json")
-            if dest.exists() and receipt.exists() and json.loads(receipt.read_text()).get("status") in ("complete", "partial"):
+            if receipt.exists() and json.loads(receipt.read_text()).get("status") in ("complete", "partial", "gapped", "error"):
                 outputs.append(json.loads(receipt.read_text())); continue
             dest.parent.mkdir(parents=True, exist_ok=True); client, pieces, pages, error = Client("gate"), [], [], ""
             cursor = available
@@ -269,8 +270,11 @@ def fetch(max_markets: int | None = None, venue: str | None = None) -> None:
         venue, symbol = row["venue"], row["symbol"]
         dest = DATA / "normalized" / venue / (symbol + "_30m.csv.gz")
         receipt = DATA / "market_receipts" / venue / (symbol + ".json")
-        if dest.exists() and receipt.exists() and json.loads(receipt.read_text()).get("status") == "complete":
-            ledger.append(json.loads(receipt.read_text())); continue
+        if receipt.exists():
+            prior = json.loads(receipt.read_text())
+            status = prior.get("status")
+            if status in ("gapped", "error") or (status == "complete" and dest.exists()):
+                ledger.append(prior); continue
         client, chunks, pages, error = Client(venue), [], [], ""
         dest.parent.mkdir(parents=True, exist_ok=True)
         raw_listing = row.get("listing_ms")
@@ -301,9 +305,19 @@ def fetch(max_markets: int | None = None, venue: str | None = None) -> None:
 
 
 def aggregate(frame: pd.DataFrame, minutes: int) -> pd.DataFrame:
+    """Aggregate a schema-complete frozen source without inventing bars."""
+    missing = [column for column in SOURCE_COLUMNS if column not in frame.columns]
+    if missing:
+        raise ValueError("source missing OHLCV columns: " + ",".join(missing))
     grouped = frame.resample(f"{minutes}min", origin="epoch", closed="left", label="left")
     output = grouped.agg({"open":"first", "high":"max", "low":"min", "close":"last", "volume":"sum", "quote_volume":"sum"})
     return output.loc[grouped.size().eq(minutes // 30)]
+
+
+def _source_failure_detail(receipt_path: Path, item: dict[str, Any], error: Exception | str) -> str:
+    """Keep a skipped source traceable without rewriting its frozen receipt."""
+    detail = str(error) if isinstance(error, str) else f"{type(error).__name__}: {error}"
+    return f"receipt={receipt_path}; source={item.get('path', '')}; {detail}"
 
 
 def evaluate() -> None:
@@ -448,20 +462,34 @@ def evaluate_covered() -> None:
         item = json.loads(path.read_text())
         mask = coverage.venue.eq(item["venue"]) & coverage.symbol.eq(item["symbol"])
         if item.get("status") != "complete":
-            coverage.loc[mask, ["status","detail"]] = "source_" + item.get("status","unknown"), item.get("error","")
+            coverage.loc[mask, ["status","detail"]] = "source_" + item.get("status","unknown"), _source_failure_detail(path, item, item.get("error") or item.get("status", "unknown"))
             continue
-        source = _read_utc_source(item["path"])
-        for minutes in CONFIG["timeframes"]:
-            inputs.append((item, minutes, aggregate(source, minutes), digest(Path(item["path"]).read_bytes())))
+        try:
+            source = _read_utc_source(item["path"])
+            frames = [(minutes, aggregate(source, minutes)) for minutes in CONFIG["timeframes"]]
+            source_sha = digest(Path(item["path"]).read_bytes())
+        except (OSError, pd.errors.ParserError, ValueError, KeyError, TypeError) as error:
+            coverage.loc[mask, ["status","detail"]] = "source_error", _source_failure_detail(path, item, error)
+            continue
+        for minutes, frame in frames:
+            inputs.append((item, minutes, frame, source_sha))
     for path in sorted((DATA / "gate_timeframe_receipts").glob("*.json")):
         item = json.loads(path.read_text()); minutes = int(item["minutes"])
         mask = coverage.venue.eq("gate") & coverage.symbol.eq(item["symbol"]) & coverage.timeframe_min.eq(minutes)
         if item.get("status") not in ("complete","partial"):
-            coverage.loc[mask, ["status","detail"]] = "source_" + item.get("status","unknown"), item.get("error","")
+            coverage.loc[mask, ["status","detail"]] = "source_" + item.get("status","unknown"), _source_failure_detail(path, item, item.get("error") or item.get("status", "unknown"))
             continue
-        source = _read_utc_source(item["path"])
+        try:
+            source = _read_utc_source(item["path"])
+            missing = [column for column in SOURCE_COLUMNS if column not in source.columns]
+            if missing:
+                raise ValueError("source missing OHLCV columns: " + ",".join(missing))
+            source_sha = digest(Path(item["path"]).read_bytes())
+        except (OSError, pd.errors.ParserError, ValueError, KeyError, TypeError) as error:
+            coverage.loc[mask, ["status","detail"]] = "source_error", _source_failure_detail(path, item, error)
+            continue
         tick = tick_lookup.get(("gate", item["symbol"]))
-        inputs.append((dict(item, tick=tick), minutes, source, digest(Path(item["path"]).read_bytes())))
+        inputs.append((dict(item, tick=tick), minutes, source, source_sha))
     for item, minutes, frame, source_sha in inputs:
         mask = coverage.venue.eq(item["venue"]) & coverage.symbol.eq(item["symbol"]) & coverage.timeframe_min.eq(minutes)
         segments = _continuous(frame, minutes)
