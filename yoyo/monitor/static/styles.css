@@ -1318,6 +1318,7 @@ h2 {
   color:var(--muted);
   overflow-wrap:anywhere;
 }
+.chart-actions { display:flex; align-items:center; gap:7px; }
 
 .chart-expand-button {
   display:inline-flex;
@@ -1380,6 +1381,7 @@ html:has(#chart-dialog[open]) { overflow:hidden; }
   height:1px;
   background:var(--chart-ma60);
 }
+.legend-risk { width:10px; height:0; border-top:1px dashed var(--amber); }
 
 .chart-bars-note {
   margin-left:auto;
@@ -1391,7 +1393,8 @@ html:has(#chart-dialog[open]) { overflow:hidden; }
   height:288px;
   width:100%;
   position:relative;
-  touch-action:pan-y;
+  touch-action:none;
+  cursor:crosshair;
 }
 
 .market-chart {
