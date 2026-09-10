@@ -144,3 +144,9 @@ node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.t
 最新共享 IAB 的回放 QA 还实际选中了 Binance `AKTUSDT` 30m、UTC `2026-09-08 15:00` 的 linked censored 行：同源图有 120 根真实 K 线和风险 `0.5385`，页面不显示退出或单笔净 R，并说明样本结束时尚未退出、不计胜率/PF/净收益。已实现行继续只显示“回测退出”“单笔净 R · 非账户收益，未独立核验”；这些字段是有 receipt 的账本联结，不是策略收益宣称。
 
 本提交的定向验证为 24 个 Python tests、12 个 Node 前端合同 tests 和 `py_compile`。旧 `tests/monitor/test_signals.py` 仍针对已经移除的 IMACD API，单独运行会失败，未把该陈旧 suite 计入通过数，也没有为它放宽 V1 协议。
+
+## `5dceb5f` 受控 checkpoint reload 实测
+
+独立只读复核通过后，按授权只执行一次 LaunchAgent reload。新父进程为 `8843`（run 4）；新 scanner 写入 `started_at_ms=1789078801148`。reload 前数据库已有 121 个完整 checkpoint；新 worker 启动时恢复这些已有 seed，随后在初始冷轮写入 129/1,434、errors 0、checkpoint 130。它证明**已有的 121 个序列**可以 hydrate，不能证明其余 1,313 个单元已经有缓存或已经追平。
+
+新代码的分阶段计时已落到持久 `scan.timing_ms`：该观察点为 fetch total 51.542s / max 8.516s，analyze total 19.074s / max 5.334s，checkpoint total 4.683s / max 0.842s。这些是截至 129 个单元的累计，不是全轮 SLA。服务在子进程启动时短暂返回 503；随后 `/api/health` 与 `/api/status` 都为 HTTP 200（此次读取约 644ms / 560ms），状态快照 non-stale。YOLO 为 idle、loaded=false、queue 0；Bark 的 pending/sent/failed/unknown 全为 0，Telegram 仍 disabled。没有为了这次检查再次 reload、没有历史补发。

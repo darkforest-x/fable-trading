@@ -146,5 +146,8 @@ node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.t
 <p>固定的 720 根 1H 因果 fixture 与变更前 <code>HEAD</code> 实现逐字输出相等；新的 SHA-256 为 <code>2ecb21f572e9403dd00fd8733626e9621285e63a978d37e891a2b1da2d135bec</code>。同一输入、本机五次串行调用的均值约从 172.04ms 降至 52.43ms（最小值 160.38ms 到 47.97ms）。这只是离线函数耗时，不含 OKX、SQLite、系统调度或全轮吞吐，不能作为线上速度承诺。</p>
 <p>最新共享 IAB 的回放 QA 还实际选中了 Binance <code>AKTUSDT</code> 30m、UTC <code>2026-09-08 15:00</code> 的 linked censored 行：同源图有 120 根真实 K 线和风险 <code>0.5385</code>，页面不显示退出或单笔净 R，并说明样本结束时尚未退出、不计胜率/PF/净收益。已实现行继续只显示“回测退出”“单笔净 R · 非账户收益，未独立核验”；这些字段是有 receipt 的账本联结，不是策略收益宣称。</p>
 <p>本提交的定向验证为 24 个 Python tests、12 个 Node 前端合同 tests 和 <code>py_compile</code>。旧 <code>tests/monitor/test_signals.py</code> 仍针对已经移除的 IMACD API，单独运行会失败，未把该陈旧 suite 计入通过数，也没有为它放宽 V1 协议。</p>
+<h2><code>5dceb5f</code> 受控 checkpoint reload 实测</h2>
+<p>独立只读复核通过后，按授权只执行一次 LaunchAgent reload。新父进程为 <code>8843</code>（run 4）；新 scanner 写入 <code>started_at_ms=1789078801148</code>。reload 前数据库已有 121 个完整 checkpoint；新 worker 启动时恢复这些已有 seed，随后在初始冷轮写入 129/1,434、errors 0、checkpoint 130。它证明<strong>已有的 121 个序列</strong>可以 hydrate，不能证明其余 1,313 个单元已经有缓存或已经追平。</p>
+<p>新代码的分阶段计时已落到持久 <code>scan.timing_ms</code>：该观察点为 fetch total 51.542s / max 8.516s，analyze total 19.074s / max 5.334s，checkpoint total 4.683s / max 0.842s。这些是截至 129 个单元的累计，不是全轮 SLA。服务在子进程启动时短暂返回 503；随后 <code>/api/health</code> 与 <code>/api/status</code> 都为 HTTP 200（此次读取约 644ms / 560ms），状态快照 non-stale。YOLO 为 idle、loaded=false、queue 0；Bark 的 pending/sent/failed/unknown 全为 0，Telegram 仍 disabled。没有为了这次检查再次 reload、没有历史补发。</p>
 </body>
 </html>
