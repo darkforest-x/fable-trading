@@ -87,6 +87,14 @@ def test_pine_keeps_v4_feature_legacy_risk_and_visual_sections_frozen():
     boxes = _section(v5, "// BEGIN V2 RISK BOX DISPLAY", "// END V2 RISK BOX DISPLAY")
     assert "int rrNewSide = trendSide" in boxes
     assert boxes.count("border_width=1, bgcolor=") == 2
+    assert "bool protectionOverlapsInitial = not na(visibleProtection) and not na(visibleInitial) and visibleProtection == visibleInitial" in v5
+    assert "color protectionColor = rrShow and protectionOverlapsInitial ? na : trailArmed ? bull : bear" in v5
+    assert "color initialColor = rrShow ? na : color.new(bear, 55)" in v5
+    assert 'pProtect = plot(showRisk ? visibleProtection : na, "本根有效保护", protectionColor, 1,' in v5
+    assert 'signalSideText + "确认 · " + str.tostring(close, format.mintick)' not in visible
+    assert 'label.new(bar_index, signalSide == 1 ? low - atr * 0.35 : high + atr * 0.35, str.tostring(close, format.mintick)' in visible
+    assert 'f_rrPriceTag(rrRightTime, entry, str.tostring(entry, format.mintick)' in boxes
+    assert 'label.set_text(activeRR.entryTag, str.tostring(activeRR.entryPrice, format.mintick))' in boxes
     assert "bool showMilestones = input.bool(true," in v5
     assert "barcolor(signalSide != 0 ? signalColor : na" in v5
     assert 'input.color(color.white,' in v5

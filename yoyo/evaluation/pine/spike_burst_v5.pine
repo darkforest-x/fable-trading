@@ -432,7 +432,7 @@ if barstate.isconfirmed and signalSide != 0 and showLabels
     string tip = signalSideText + "确认收盘：" + str.tostring(close, format.mintick) + "\n" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n" + trackingTip
     if array.size(signalTags) >= 80
         label.delete(array.shift(signalTags))
-    array.push(signalTags, label.new(bar_index, signalSide == 1 ? low - atr * 0.35 : high + atr * 0.35, signalSideText + "确认 · " + str.tostring(close, format.mintick), style=signalSide == 1 ? label.style_label_up : label.style_label_down, color=color.new(signalSide == 1 ? bull : bear, 91), textcolor=signalSide == 1 ? bull : bear, size=size.small, tooltip=tip, force_overlay=true))
+    array.push(signalTags, label.new(bar_index, signalSide == 1 ? low - atr * 0.35 : high + atr * 0.35, str.tostring(close, format.mintick), style=signalSide == 1 ? label.style_label_up : label.style_label_down, color=color.new(signalSide == 1 ? bull : bear, 91), textcolor=signalSide == 1 ? bull : bear, size=size.small, tooltip=tip, force_overlay=true))
 // END CONFIRMED DISPLAY
 
 // BEGIN V2 RISK BOX DISPLAY (one complete drawing group per reference)
@@ -507,7 +507,7 @@ if barstate.isconfirmed
                 string tip = sideText + "确认收盘参考，不是实际成交。初始风险冻结；3R仅为观察位，不触发止盈。绿色框为走势参考，峰值未兑现。"
                 activeRR.riskBox := box.new(time, math.max(entry, initialStop), rrRightTime, math.min(entry, initialStop), xloc=xloc.bar_time, border_color=color.new(bear, 45), border_width=1, bgcolor=color.new(bear, 92), force_overlay=true)
                 activeRR.rewardBox := observation > 0 ? box.new(time, math.max(entry, observation), rrRightTime, math.min(entry, observation), xloc=xloc.bar_time, border_color=color.new(bull, 45), border_width=1, bgcolor=color.new(bull, 92), force_overlay=true) : na
-                activeRR.entryTag := f_rrPriceTag(rrRightTime, entry, sideText + "确认参考 · " + str.tostring(entry, format.mintick), ink, tip)
+                activeRR.entryTag := f_rrPriceTag(rrRightTime, entry, str.tostring(entry, format.mintick), ink, tip)
                 activeRR.stopTag := f_rrPriceTag(rrRightTime, initialStop, "sl · " + str.tostring(initialStop, format.mintick), bear, tip)
                 activeRR.peakTag := observation > 0 ? f_rrPriceTag(rrRightTime, observation, "3R 观察位 · " + str.tostring(observation, format.mintick), bull, tip) : na
 
@@ -517,13 +517,12 @@ if barstate.isconfirmed
         activeRR.maximum := math.max(activeRR.maximum, nz(peakR, 0.0))
         float extentR = math.max(3.0, activeRR.maximum)
         float extent = activeRR.entryPrice + activeRR.side * extentR * activeRR.distance
-        string ending = showExitLabels and ended ? " · 本段结束" : ""
         string reference = "确认收盘参考，不是实际成交。已确认峰值 " + str.tostring(activeRR.maximum, "#.##") + "R；当前路径 " + str.tostring(currentR, "#.##") + "R。峰值未兑现；无固定止盈。"
         if not na(activeRR.riskBox)
             box.set_right(activeRR.riskBox, edge)
             label.set_x(activeRR.entryTag, edge)
             label.set_x(activeRR.stopTag, edge)
-            label.set_text(activeRR.entryTag, (activeRR.side == 1 ? "多头" : "空头") + "确认参考 · " + str.tostring(activeRR.entryPrice, format.mintick) + ending)
+            label.set_text(activeRR.entryTag, str.tostring(activeRR.entryPrice, format.mintick))
             label.set_tooltip(activeRR.entryTag, reference)
             label.set_tooltip(activeRR.stopTag, reference + " 冻结初始风险；当前保护 " + str.tostring(protection, format.mintick))
         if not na(activeRR.rewardBox) and extent > 0
@@ -565,8 +564,11 @@ plot(showMas ? s60 : na, "SMA60", color.new(blue, 40), 1, force_overlay=true, di
 plot(showMas ? e60 : na, "EMA60", color.new(blue, 60), 1, force_overlay=true, display=display.pane + display.data_window)
 plot(showMas ? s120 : na, "SMA120", color.new(ink, 48), 1, force_overlay=true, display=display.pane + display.data_window)
 plot(showMas ? e120 : na, "EMA120", color.new(ink, 66), 1, force_overlay=true, display=display.pane + display.data_window)
-pProtect = plot(showRisk ? visibleProtection : na, "本根有效保护", trailArmed ? bull : bear, 2, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
-pInitial = plot(showRisk ? visibleInitial : na, "冻结初始止损", color.new(bear, 55), 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
+bool protectionOverlapsInitial = not na(visibleProtection) and not na(visibleInitial) and visibleProtection == visibleInitial
+color protectionColor = rrShow and protectionOverlapsInitial ? na : trailArmed ? bull : bear
+color initialColor = rrShow ? na : color.new(bear, 55)
+pProtect = plot(showRisk ? visibleProtection : na, "本根有效保护", protectionColor, 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
+pInitial = plot(showRisk ? visibleInitial : na, "冻结初始止损", initialColor, 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
 pEntry = plot(showRisk ? visibleEntry : na, "确认收盘参考", color.new(ink, 60), 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
 fill(pInitial, pEntry, color.new(bear, 94), title="初始风险区")
 barcolor(signalSide != 0 ? signalColor : na, title="确认关键K线")
