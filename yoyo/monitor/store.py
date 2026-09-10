@@ -269,6 +269,13 @@ class Store:
                 backfilled += 1
         return {"backfilled": backfilled, "skipped": skipped}
 
+    def market_summary_counts(self):
+        """Return row counts without reading either market payload column."""
+        with self.connect() as db:
+            markets = db.execute("SELECT COUNT(*) FROM markets").fetchone()[0]
+            summaries = db.execute("SELECT COUNT(*) FROM market_summaries").fetchone()[0]
+        return {"markets": markets, "summaries": summaries}
+
     def list_markets(self):
         with self.connect() as db:
             return [json.loads(r[0]) for r in db.execute("SELECT payload FROM markets ORDER BY symbol,timeframe")]

@@ -233,5 +233,8 @@ test("signals refresh never requests market summaries and Watch loads them once"
   assert.match(app, /if \(state\.view === "watch"\) loadMarkets\(\);/);
   assert.match(app, /async function loadMarkets\(\)[\s\S]*state\.marketsLoaded \|\| state\.marketsLoading/);
   assert.match(app, /api\("\/api\/markets"\)/);
-  assert.match(app, /marketsLoading: false/);
+  assert.match(app, /marketsLoading: false, marketsRetryTimer: null/);
+  assert.match(app, /A legacy summary backfill returns 503/);
+  assert.match(app, /if \(!state\.marketsRetryTimer && state\.view === "watch"\)/);
+  assert.match(app, /if \(state\.view === "watch" && !state\.marketsLoaded\) loadMarkets\(\);/);
 });

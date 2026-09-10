@@ -5,7 +5,7 @@
   const $ = (id) => document.getElementById(id);
   const state = {
     view: "signals", signals: [], directSignals: [], rawYoloSignals: [], candidates: [], signalScope: "direct", markets: [], status: null, health: null,
-    signalsLoaded: false, directSignalsLoaded: false, directSignalTotal: 0, candidatesLoaded: false, candidateTotal: 0, candidateCounts: null, marketsLoaded: false, marketsLoading: false, signalTotal: 0, rowLimit: 24, watchLimit: 24, search: "", watchSearch: "", watchScope: "building",
+    signalsLoaded: false, directSignalsLoaded: false, directSignalTotal: 0, candidatesLoaded: false, candidateTotal: 0, candidateCounts: null, marketsLoaded: false, marketsLoading: false, marketsRetryTimer: null, signalTotal: 0, rowLimit: 24, watchLimit: 24, search: "", watchSearch: "", watchScope: "building",
     rawNextCursor: null, rawHasMore: false, rawPaged: false, rawLoadingMore: false,
     timeframe: "all", watchTimeframe: "all", side: "long", signalSource: "live", selected: null,
     chartKey: null, chart: null, chartRequest: 0, chartController: null, chartExpanded: false, chartViewport: null,
@@ -943,6 +943,14 @@
       delete state.errors.markets;
     } catch (error) {
       state.errors.markets = error.message || "请求失败";
+      // A legacy summary backfill returns 503 instead of an empty success.
+      // Retry one serialized request only while the user remains in Watch.
+      if (!state.marketsRetryTimer && state.view === "watch") {
+        state.marketsRetryTimer = window.setTimeout(() => {
+          state.marketsRetryTimer = null;
+          if (state.view === "watch" && !state.marketsLoaded) loadMarkets();
+        }, 3000);
+      }
     } finally {
       state.marketsLoading = false;
       renderErrors(); renderWatch();

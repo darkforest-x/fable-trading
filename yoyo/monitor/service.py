@@ -107,6 +107,13 @@ class Monitor:
                                              "worker_pid": None, "worker_started_at_ms": None,
                                              "completed": 0, "total": 0, "errors": 0,
                                              "error_samples": [], "isolated": True})
+                summary_counts = self.store.market_summary_counts()
+                if summary_counts["summaries"] < summary_counts["markets"]:
+                    # The worker will backfill legacy rows before it exposes an
+                    # overview.  HTTP must not cache an empty success response.
+                    self.store.set_meta("market_summary_backfill", {
+                        "status": "starting", **summary_counts, "generation": generation,
+                    })
                 self.scan_process = multiprocessing.Process(target=scan_forever,
                                                             args=(str(self.store.path), self.interval, generation), daemon=True)
                 self.scan_process.start()

@@ -74,7 +74,9 @@ class V1Scanner:
         # Migration runs once per worker before any HTTP overview reads.  The
         # selected-chart table remains the only source of legacy full payloads.
         if not getattr(self, "_summary_backfilled", False):
-            store.set_meta("market_summary_backfill", store.backfill_market_summaries())
+            store.set_meta("market_summary_backfill", {"status": "running", "generation": self.generation})
+            receipt = store.backfill_market_summaries()
+            store.set_meta("market_summary_backfill", {"status": "complete", "generation": self.generation, **receipt})
             self._summary_backfilled = True
         client.synchronize()
         arm_v1_bark(store, client.clock())

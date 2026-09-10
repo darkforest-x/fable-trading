@@ -138,6 +138,12 @@ def create_app(runtime=None, start_monitor=True):
 
     @app.get("/api/markets")
     def markets():
+        # A newly introduced summary table is populated by the scanner, never
+        # by HTTP.  Reject its short initialization window so a Watch tab does
+        # not cache an empty successful response from legacy full rows.
+        backfill = store.get_meta("market_summary_backfill", {})
+        if backfill.get("status") in {"starting", "running"}:
+            raise HTTPException(503, "市场观察摘要正在初始化，请稍后重试。")
         rows = monitor.markets()
         return {"items": rows, "total": len(rows)}
 
