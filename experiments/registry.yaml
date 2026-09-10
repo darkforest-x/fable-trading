@@ -8017,19 +8017,22 @@ experiments:
       overview is descriptive and not a shared-control tournament.
   - experiment_id: exp-spike-v3-layered-display-20260910-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 7a60d8270dec1e76f1b11f883baea8f4421a51b2
+    source_commit: c81d06e147116dbe5f5d1423819f3e243e34926a
     status: active
-    question: Can display ownership reduce repeated-entry implications while retaining every original V3 event?
-    single_variable: One-way UI projection only; original detection, reference state, parameters and alert conditions
-      remain byte-identical.
-    result: V4 revision2 privately saved and native compiled 20:05; default main/pane shows reference start and owned
-      confirmation only. Full mode/alerts preserve all raw V3 events.5 dedicated invariants pass. This is display
-      suppression, not verified strategy denoising; overall research remains active.
+    question: Can V4 show only actual confirmations with coherently confirmation-priced
+      risk references?
+    single_variable: Owner-directed presentation revision; frozen parent/confirmation
+      engine and risk multipliers unchanged. Reference origin follows displayed confirmation
+      instead of hidden warning.
+    result: V4 revision3 saved and native compiled 20:22; confirmation-only triangles/prices,
+      optional panel/exit/milestones off and verified. Reference starts from actual
+      confirmation close. 29 source-contract tests and independent review pass; no new
+      economic validation.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
-    canonical_report: analysis/html/p1_spike_v4_quiet_display_20260910.html
+    canonical_report: analysis/html/p1_spike_v4_confirmed_only_20260910.html
     artifacts:
     - spike-v3-layered-display-20260910-pine
     - spike-v3-layered-display-20260910-tests
@@ -8047,8 +8050,14 @@ experiments:
     - spike-v4-quiet-display-20260910-tests
     - spike-v4-quiet-display-20260910-report-source
     - spike-v4-quiet-display-20260910-report-html
-    notes: Display-only V4 save authorized by owner. Old reports remain immutable. Private script and current layout
-      saved; no alert creation, notification change, orders, or active bundle promotion.
+    - spike-v4-confirmed-only-20260910-pine
+    - spike-v4-confirmed-only-20260910-tests
+    - spike-v4-confirmed-only-20260910-report-source
+    - spike-v4-confirmed-only-20260910-report-html
+    - spike-v4-confirmed-only-20260910-native-save
+    notes: Owner latest instruction overrides layered default UI. Previous reports remain
+      immutable. Only private V4/current layout changed; monitor/Bark/TG/orders unchanged.
+      Protection event timing may change with reference origin.
   - experiment_id: exp-spike-v3-retest-diagnostic-20260910-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2d534c0e7d232561da9c6702671b94b820364af0

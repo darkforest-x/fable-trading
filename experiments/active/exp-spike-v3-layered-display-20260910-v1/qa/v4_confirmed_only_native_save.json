@@ -1,0 +1,48 @@
+{
+  "recorded_at": "2026-09-10T20:26:04.731182+08:00",
+  "status": "passed_with_scope_limits",
+  "script_name": "SPIKE V4 · 确认信号",
+  "script_saved_version_observed": "3 ∙ 今天, 20:22",
+  "pine_sha256": "05a813664397dc7e10ebeea44194c408a4d634887469d77554dde7e893579bf5",
+  "source_commit": "c81d06e",
+  "cloud_save": true,
+  "native_compile_and_calculate": true,
+  "chart_url": "https://cn.tradingview.com/chart/AlGc61US/",
+  "chart_symbol": "OKX:PEPEUSDT.P",
+  "chart_interval": "60",
+  "layout_saved": true,
+  "observed_settings": {
+    "showMas": true,
+    "showLabels": true,
+    "showRisk": true,
+    "showPanel": false,
+    "showMilestones": false,
+    "rrShow": true
+  },
+  "observed": [
+    "Native editor saved V4 version 3 at 20:22 and update button became disabled after calculation.",
+    "Private script renamed to SPIKE V4 · 确认信号.",
+    "Light chart shows confirmation triangle, confirmation price, confirmation oscillator point, six MAs, zero axis and risk boxes. No warning/additional event labels or state panel were visible.",
+    "Current instance settings explicitly showed both showPanel and showMilestones unchecked, confirmation labels and risk boxes checked.",
+    "Layout save button became disabled after save."
+  ],
+  "changes": {
+    "confirmation_engine": "unchanged",
+    "risk_helpers_and_multipliers": "unchanged",
+    "risk_origin": "first actual confirmation close while reference is flat; differs from former early-warning origin",
+    "protection_event_timing": "may change with confirmation-origin reference",
+    "actual_notification_services": "unchanged"
+  },
+  "static_tests": "29 passed, independently repeated by early_warning_design_audit",
+  "scope_limits": [
+    "Native UI transcript/screenshots are direct evidence; no exported remote-source byte-for-byte readback.",
+    "Only current light PEPE 1H chart visually reviewed, not all devices/periods/themes.",
+    "No market backtest or economic validation in this display task.",
+    "Raw parent diagnostics and existing Pine alertcondition declarations remain; no TV alerts were created or updated."
+  ],
+  "publicly_published": false,
+  "notifications_changed": false,
+  "orders_changed": false,
+  "production_eligible": false,
+  "training_eligible": false
+}

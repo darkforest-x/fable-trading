@@ -27924,3 +27924,83 @@ artifacts:
     notes: Private V4 revision2 saved 20:05. Default hides extra raw candidates; full display and original alerts
       preserve events. No economic scoring; unknown is conservative schema placeholder. source_commit identifies release
       input, generated HTML may be stored later.
+  - artifact_id: spike-v4-confirmed-only-20260910-pine
+    artifact_type: config
+    role: confirmation_only_chart_and_confirmation_priced_reference
+    source_repo: darkforest-x/fable-trading
+    source_commit: c81d06e147116dbe5f5d1423819f3e243e34926a
+    source_path: yoyo/evaluation/pine/spike_burst_v4.pine
+    sha256: 05a813664397dc7e10ebeea44194c408a4d634887469d77554dde7e893579bf5
+    size_bytes: 24326
+    storage_uri: repo://yoyo/evaluation/pine/spike_burst_v4.pine
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Owner requested confirmation-only chart. Confirmation engine unchanged; reference
+      begins at actual confirmation close so risk outcomes differ. Native version3 saved
+      20:22, renamed; no economic scoring. Unknown is conservative no-market schema
+      placeholder. Source commit identifies release input; report/receipt stored later.
+  - artifact_id: spike-v4-confirmed-only-20260910-tests
+    artifact_type: config
+    role: confirmation_only_chart_and_confirmation_priced_reference
+    source_repo: darkforest-x/fable-trading
+    source_commit: c81d06e147116dbe5f5d1423819f3e243e34926a
+    source_path: tests/test_spike_burst_v4_release.py
+    sha256: 74908c15983dd593955b24220e71198fb33b028fd89c4dfcc4156f6c7ca53982
+    size_bytes: 4091
+    storage_uri: repo://tests/test_spike_burst_v4_release.py
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Owner requested confirmation-only chart. Confirmation engine unchanged; reference
+      begins at actual confirmation close so risk outcomes differ. Native version3 saved
+      20:22, renamed; no economic scoring. Unknown is conservative no-market schema
+      placeholder. Source commit identifies release input; report/receipt stored later.
+  - artifact_id: spike-v4-confirmed-only-20260910-report-source
+    artifact_type: report
+    role: confirmation_only_chart_and_confirmation_priced_reference
+    source_repo: darkforest-x/fable-trading
+    source_commit: c81d06e147116dbe5f5d1423819f3e243e34926a
+    source_path: analysis/p1_spike_v4_confirmed_only_20260910.md
+    sha256: 5c1f9bcfe0b25262ed733daf97b5b7a06d2121e7ffc171a24c24ee107cb96772
+    size_bytes: 4037
+    storage_uri: repo://analysis/p1_spike_v4_confirmed_only_20260910.md
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Owner requested confirmation-only chart. Confirmation engine unchanged; reference
+      begins at actual confirmation close so risk outcomes differ. Native version3 saved
+      20:22, renamed; no economic scoring. Unknown is conservative no-market schema
+      placeholder. Source commit identifies release input; report/receipt stored later.
+  - artifact_id: spike-v4-confirmed-only-20260910-report-html
+    artifact_type: report
+    role: confirmation_only_chart_and_confirmation_priced_reference
+    source_repo: darkforest-x/fable-trading
+    source_commit: c81d06e147116dbe5f5d1423819f3e243e34926a
+    source_path: analysis/html/p1_spike_v4_confirmed_only_20260910.html
+    sha256: d2035b5b16fcf8461fe704966d1d2a562ffc10afa00c4edcae3f8b89fa4fce6a
+    size_bytes: 6814
+    storage_uri: repo://analysis/html/p1_spike_v4_confirmed_only_20260910.html
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Owner requested confirmation-only chart. Confirmation engine unchanged; reference
+      begins at actual confirmation close so risk outcomes differ. Native version3 saved
+      20:22, renamed; no economic scoring. Unknown is conservative no-market schema
+      placeholder. Source commit identifies release input; report/receipt stored later.
+  - artifact_id: spike-v4-confirmed-only-20260910-native-save
+    artifact_type: manifest
+    role: confirmation_only_chart_and_confirmation_priced_reference
+    source_repo: darkforest-x/fable-trading
+    source_commit: c81d06e147116dbe5f5d1423819f3e243e34926a
+    source_path: experiments/active/exp-spike-v3-layered-display-20260910-v1/qa/v4_confirmed_only_native_save.json
+    sha256: 49e8bb4b77e1a2f7790dbab0dbf2d2f3fe0e11439a5b0fcb6b3f375512f1f884
+    size_bytes: 2280
+    storage_uri: repo://experiments/active/exp-spike-v3-layered-display-20260910-v1/qa/v4_confirmed_only_native_save.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Owner requested confirmation-only chart. Confirmation engine unchanged; reference
+      begins at actual confirmation close so risk outcomes differ. Native version3 saved
+      20:22, renamed; no economic scoring. Unknown is conservative no-market schema
+      placeholder. Source commit identifies release input; report/receipt stored later.

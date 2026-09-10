@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>V4：图表只显示确认信号</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>V4：图表只显示确认信号</h1>
+<p><strong>已更新并保存 TradingView 私有「SPIKE V4 · 确认信号」；原生编译完成。</strong> 当前 OKX PEPEUSDT.P 1H 图表布局也已保存。</p>
+<h2>图面调整</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>前一版 V4</th>
+<th>当前 V4</th>
+</tr></thead><tbody>
+<tr><td>信号</td><td>预警文字＋所属确认点，另有完整显示</td><td>只画确认三角及实际确认收盘价</td></tr>
+<tr><td>分层选项</td><td>低干扰／完整显示</td><td>删除</td></tr>
+<tr><td>预警、补充、未确认</td><td>存在分层显示或面板文字</td><td>不在图上显示</td></tr>
+<tr><td>状态、退出与 R 里程碑文字</td><td>默认打开</td><td>默认关闭，当前实例也已核实关闭</td></tr>
+<tr><td>盈亏框起点</td><td>首个空闲预警收盘</td><td>首个空闲确认收盘</td></tr>
+<tr><td>六条均线、双线及零轴</td><td>保留</td><td>保留</td></tr>
+</tbody></table>
+<p>同根确认和随后 1–3 根的延迟确认，都在<strong>实际确认 K 线</strong>显示，使用这根的收盘价。确认引擎、量能与推进门槛、候选归属、冷却和到期规则完全保留。</p>
+<p>已有风险参考期间再次确认，仍显示该确认，但不会重置原盈亏框；其所属关系放入悬停说明，不增加“补充确认”等图面分类。风险参考结束同根不重新开启，沿用原处理次序。独立的连续三角保留历史信号位置，价格标签仍受 TradingView 300 个共享标签对象上限限制。</p>
+<h2>为什么盈亏框要同步改起点</h2>
+<p>只隐藏预警、继续沿用预警价格，会让确认标签旁的盈亏框使用当时尚未确认的入场位置。本版从确认收盘才建立风险参考，并用确认当时的 ATR 和近期极值计算初始风险；当前和峰值 R 从 0 开始，随后才逐根跟踪。</p>
+<p>止损倍数、风险取整、跳空保护、移动保护算法保持。<strong>起始时刻不同，入场价、止损价、R 和保护触及时间会变化</strong>，不能套用原预警回测的收益数字。3R 仍只是观察位，不是固定止盈。</p>
+<h2>验证和证据</h2>
+<p>6 项 V4 源码契约检查及 23 项冻结父版测试共 29 项通过，并有独立复核。特征和 ALERT 状态与冻结父源逐字一致；REFERENCE 的逻辑差异限定为确认起点和可选退出文字；风险框数值算法一致，仅更新价格来源文案。</p>
+<p>原生编辑器显示保存版本 <code>3 ∙ 今天, 20:22</code>，编译计算完成后“图表更新”禁用；随后私有脚本重命名为「SPIKE V4 · 确认信号」。图面可见确认位置、价格、确认副图点、盈亏框，没有预警文字。设置里确认标签、六线、风险框开启，面板和里程碑关闭。保存布局后按钮禁用。</p>
+<p><a href="/Users/zhangzc/fable-trading/yoyo/evaluation/pine/spike_burst_v4.pine">Pine 源码</a> · <a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-layered-display-20260910-v1/qa/v4_confirmed_only_native_save.json">原生保存收据</a></p>
+<p>Pine SHA：<code>05a813664397dc7e10ebeea44194c408a4d634887469d77554dde7e893579bf5</code>。源码提交：<code>c81d06e</code>。</p>
+<pre><code>
+.venv/bin/python -m pytest -q tests/test_spike_burst_v4_release.py tests/test_spike_burst_v3_layered_display.py
+python3 scripts/md_to_html.py analysis/p1_spike_v4_confirmed_only_20260910.md --out-dir analysis/html
+</code></pre>
+<h2>风险与诚实声明</h2>
+<p>本次是按 Owner 要求更改图表显示及其风险价格来源，没有新增行情回测、训练或 holdout 评分。候选数、正类率、val 样本数、AUC、置换 p、top-decile 收益、胜率、匹配随机对照均不适用；严格对照为冻结事件源码、有限差异风险契约与独立复核。它们不能证明确认信号更赚钱。</p>
+<p>未改原 V3、监控服务、Bark/TG 或下单配置，也没有创建或更新 TV 警报。现存 Pine 原候选及确认 alertcondition 声明保留；保护触及事件跟随新的确认参考，所以不能称所有 Pine 输出数值都不变。本次只核验当前浅色 PEPE 1H 图表，不代表所有主题、周期和手机实例都已验收。HTML 进行静态检查，不宣称浏览器渲染验收。</p>
+<p>降噪研究继续保留原 V1 和 V3 对照，单独验证信号质量，不将隐藏文字当作统计改善。</p>
+</body>
+</html>
