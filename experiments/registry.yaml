@@ -17,17 +17,32 @@ experiments:
   - experiment_id: exp-launch-quality-20260910-v1
     source_repo: darkforest-x/fable-trading
     source_commit: cffb7a76a666df15e9b3be2c6bed3389d3387d2c
-    status: active
+    status: rejected
     question: Do fixed single-factor volume4 or expansion3 filters improve 1H focus/md trend holding beyond fewer
       trades and one winner?
-    single_variable: Original focus/md versus one causal filter at a time; no entry, stop, exit, cost or live changes.
-    result: Preregistered earlier-period replication and known-window explanation pending.
-    holdout_consumed: false
+    single_variable: Original focus/md versus one causal filter at a time; no entry, stop, exit, cost or live
+      changes.
+    result: 'Two hard filters failed stable cross-period improvement: earlier baseline/volume4/expansion3 +22.41/+4.67/+1.74%;
+      known +15.31/+21.63/+28.50%. Known without USELESS reallocation -2.22/+3.13/+9.40%. Both filters increased
+      initial-stop incidence and missed winners. Minimum Holm p=0.2424. 19 count-matched thinning schedules do
+      not distinguish a superior candle selector.'
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    canonical_report: experiments/active/exp-launch-quality-20260910-v1/PROJECT_PLAN.md
-    artifacts: []
-    notes: Owner requests next research with existing all-history authorization. No pristine OOS or production claim.
+    canonical_report: analysis/p1_launch_quality_20260910.md
+    artifacts:
+    - launch-quality-20260910-report-source
+    - launch-quality-20260910-report-html
+    - launch-quality-20260910-accounts
+    - launch-quality-20260910-events
+    - launch-quality-20260910-scores
+    - launch-quality-20260910-thinning
+    - launch-quality-20260910-audit
+    - launch-quality-20260910-manifest
+    notes: 'Research complete: 144 accounts plus76 random-thinning accounts,17 independent native-price replays,4615
+      known key-field matches,158 boundary checks. No strategy or notification changes. Rejected means hard-gate
+      hypothesis unproven across periods, not that all trend following is unprofitable. Historical consumption2
+      including independent audit.'
   - experiment_id: exp-altseason-donchian-ewmac-20260910-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
