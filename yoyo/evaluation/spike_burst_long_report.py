@@ -7,6 +7,8 @@ saved NAV. At most five post-hoc natural-exit examples are selected from actual
 SPIKE account fills by highest PnL, lowest PnL per timeframe, and largest global
 peak-minus-net-R giveback. The existing figure helper reconstructs only each
 selected display path and reconciles prices/times/R against its frozen ledger.
+An explicit text refresh instead authenticates the existing report and PNGs,
+archives their original receipt/text, and never calls a path replay or renderer.
 
 Chart contract: one two-timeframe 2x2 NAV/drawdown figure, neutral titles,
 linear axes, blue/gold plus neutral controls and line-style distinctions.
@@ -24,6 +26,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import tempfile
 
 import matplotlib
 matplotlib.use("Agg")
@@ -43,11 +46,15 @@ CHOICES = (("burst_trail", "full", "SPIKE 全部", "#3F6FAE", "-"),
            ("burst_trail", "paired_random", "SPIKE 匹配随机", "#69747D", ":"))
 ARM_NAMES = {"burst_trail": "SPIKE 爆发", "focus_trail": "旧 IMACD 入场"}
 LEDGER_COLUMNS = ["event_id", "asset", "minutes", "arm", "valid", "portfolio_selected",
-    "realized_net_pnl", "natural_exit", "censored", "exit_time", "peak_r", "net_r"]
+    "realized_net_pnl", "natural_exit", "censored", "exit_time", "exit_time_lower",
+    "exit_time_upper", "exit_timing", "peak_r", "net_r"]
 CONTEXT_AUDITS = {
     "previous_study_delivery_audit.json": "c6be92556372c333b5af7faa33cf73a9914686f3c65e3ca64389c0e2372a1dfc",
     "source_audit_pre_sanitize.json": "72fde128e5b50a929da16e95aac8a985852360afd93b91d060ba890402596337",
     "source_audit_tradable.json": "85b644f5da0d4acf5d1c8a3f7c295481bf81da13926db44e44ee2caba0b86232",
+    "three_year_cashbook_audit.json": "beca0a795904d4e692f2093393c8d583ce7dfabcdd26d113a46bdd859119a21a",
+    "rave_cash_contribution_audit.json": "bdd2dd8e3a0a4635c766a3095b5861ce24902dfb0b3325fa9e94f6fdc2d6db17",
+    "extreme_event_audit.json": "ea990ae1f61ef7a95af19e8b8c2e5397913f937597c7f13f7a234c41be58b5ed",
 }
 
 
@@ -273,7 +280,62 @@ def render_cases(evidence, output):
     return examples
 
 
+def ledger_examples(evidence, examples):
+    """Attach the saved exit interval; never infer an intrabar crossing instant.
+
+    Inputs are immutable selected example identities and their authenticated
+    account ledger. Existing prices, returns and selected membership must still
+    agree before the extra timing fields are allowed into the report.
+    """
+    result = []
+    for item in examples:
+        minutes = int(item["minutes"])
+        row = one(evidence.account(minutes, "altcoins", "burst_trail", "full", "ledger"),
+                  event_id=item["event_id"])
+        if not (row.portfolio_selected == True and row.natural_exit == True and row.censored == False):
+            raise ValueError("Example must remain an actually selected natural exit")
+        for name in ("asset", "symbol", "venue"):
+            if str(row[name]) != str(item[name]):
+                raise ValueError("Example identity differs from authenticated ledger: " + name)
+        for name in ("entry_time", "exit_time"):
+            if pd.Timestamp(row[name]) != pd.Timestamp(item[name]):
+                raise ValueError("Example clock differs from authenticated ledger: " + name)
+        for name, column in [(name, name) for name in
+                ("entry_price", "exit_price", "peak_r", "net_r", "net_return", "notional")] + [
+                ("account_pnl", "realized_net_pnl")]:
+            if not np.isclose(float(item[name]), float(row[column]), rtol=1e-12, atol=0):
+                raise ValueError("Example value differs from authenticated ledger: " + name)
+        lower, upper = pd.Timestamp(row.exit_time_lower), pd.Timestamp(row.exit_time_upper)
+        timing = row.exit_timing
+        if (pd.isna(lower) or pd.isna(upper) or lower.tzinfo is None or upper.tzinfo is None
+                or lower > upper or upper != pd.Timestamp(row.exit_time)):
+            raise ValueError("Invalid authenticated exit interval")
+        if timing == "intrabar_unknown":
+            if upper - lower != pd.Timedelta(minutes=minutes):
+                raise ValueError("Intrabar exit interval must span one complete source bar")
+        elif timing not in ("open", "close") or lower != upper:
+            raise ValueError("Exact open/close exit must have equal bounds")
+        result.append(dict(item, exit_time_lower=lower.isoformat(),
+                           exit_time_upper=upper.isoformat(), exit_timing=timing))
+    return result
+
+
+def example_clock(item):
+    """BJT display of saved execution bounds, separate from cash settlement."""
+    def bjt(value):
+        return pd.Timestamp(value).tz_convert("Asia/Shanghai").strftime("%Y-%m-%d %H:%M")
+    prefix = "北京时间：%s 入场；" % bjt(item["entry_time"])
+    if item["exit_timing"] == "intrabar_unknown":
+        return (prefix + "%s—%s 这根 K 线内触及保护退出，盘中具体时刻未知。"
+                "账户使用区间上界 %s 释放现金、计入结算，不能将此上界当作精确成交时刻。") % (
+                    bjt(item["exit_time_lower"]), bjt(item["exit_time_upper"]), bjt(item["exit_time_upper"]))
+    if item["exit_timing"] == "open":
+        return prefix + "%s 开盘退出。" % bjt(item["exit_time_upper"])
+    return prefix + "%s 收盘边界估值，非自然保护成交。" % bjt(item["exit_time_upper"])
+
+
 def report_text(evidence, curve_path, examples, report_path, summary_text=None):
+    examples = ledger_examples(evidence, examples)
     accounts = evidence.table("accounts_summary.csv")
     events_summary = evidence.table("event_summary.csv")
     annual = evidence.table("annual_summary.csv")
@@ -298,7 +360,7 @@ def report_text(evidence, curve_path, examples, report_path, summary_text=None):
     image_ref = lambda p: os.path.relpath(Path(p).resolve(), Path(report_path).resolve().parent)
     lines = ["# SPIKE 强劲爆发 V1：三年冻结规则回顾", "", "## 结果概览", "",
         summary_text.strip() if summary_text else "；".join(literal) + "。下表同时列出旧 IMACD 入场和同条件随机对照，不能只看盈利案例判断系统。",
-        "", "评价时间为 **2023-09-09 至 2026-09-09（UTC，1096天）**。本轮是币安 USDT 永续多头回顾，BTC、ETH 单列，不混入山寨池。原始数据从2023-05-01用于预热，新上市品种只从实际可得历史开始。",
+        "", "评价时间为 **2023-09-09 至 2026-09-09（UTC，1096天）**。本轮是币安 USDT 永续多头回顾，BTC、ETH 单列，不混入山寨池。此处山寨池是既定 COIN 池的报告简称，包含 XAUT 黄金代币，并非纯粹的热门山寨币集合；本轮保留原池，不因看过结果再删资产重算。[XAUT 官方介绍](https://gold.tether.to/) 原始数据从2023-05-01用于预热，新上市品种只从实际可得历史开始。",
         "", "这是同一冻结配置第 **2** 次收益评估消耗 holdout，正式边界仍为2026-05-04，且与前次61天研究重叠。**不是新的盲测或未见样本外结果，也没有通过本轮数据调参。**",
         "", "## 完整账户与匹配账户分别比较", "",
         "全部账户回答整套候选能留下多少收益；可配对账户与随机账户只比较同一批可匹配事件。每周期均从10万美元现金开始，账户互相独立。旧 IMACD 使用原启动入场加同一套宽止损/趋势退出，不能称为原策略整体收益。",
@@ -372,9 +434,7 @@ def report_text(evidence, curve_path, examples, report_path, summary_text=None):
         "按固定事后规则选择每周期自然退出利润最高与最低各一例，再选择两周期自然退出峰值回吐最大的一例，按event_id去重，最多5例。所有图都是账户确实持有的历史模拟成交；它们用于解释路径，不代表全部信号成功率。紫线为信号、绿三角为下一根开盘模拟入场、橙线为本根有效保护、红叉为保护成交。浅蓝区域是信号当时看不到的后续价格。"]
     for index, item in enumerate(examples, 1):
         lines += ["", "### %d · %s %dH · %s" % (index, item["asset"], item["minutes"] // 60, item["reason"]), "",
-            "北京时间：%s 入场，%s 退出。" %
-            (pd.Timestamp(item["entry_time"]).tz_convert("Asia/Shanghai").strftime("%Y-%m-%d %H:%M"),
-             pd.Timestamp(item["exit_time"]).tz_convert("Asia/Shanghai").strftime("%Y-%m-%d %H:%M")), "",
+            example_clock(item), "",
             "已由山寨全部账户实际选入。入场 %s → 退出 %s；最高浮盈 **%sR**，退出扣成本后 **%sR**，单笔净收益 %s%%。该笔名义仓位 $%s，账户盈亏 $%s；单笔涨幅不能冒充账户收益。" %
             (format(item["entry_price"], ".10g"), format(item["exit_price"], ".10g"), number(item["peak_r"]), number(item["net_r"], signed=True),
              number(100 * item["net_return"], signed=True), number(item["notional"]), number(item["account_pnl"], signed=True)),
@@ -410,6 +470,7 @@ def report_text(evidence, curve_path, examples, report_path, summary_text=None):
         ["周期段状态", json.dumps(dict(frame_status), ensure_ascii=False)],
         ["记录的缺失月项", missing], ["候选 / 随机控制条数", "%d / %d" % (len(events), len(controls))]]),
         "", "目录是既有档案收录与冻结近期目录的并集，包含部分非交易状态，仍不是完整历史退市全集，存在存活者和档案可得性偏差。上市不足三年的币没有凭空补足三年。缺失不插值，断档拆段并重新预热。上市前或退市后的零成交量固定价占位段不是实际交易覆盖；上表按清理后源段统计，不沿用原markets的archive/recent原始行数。段首零活动和全零段单列剔除，已知交割仅保留完整收盘不晚于交割边界的K线；尚有仓位的段尾估值不冒充结算成交。若上市快照之前已有正量，保留并报告冲突，不能仅凭当前上市快照删掉真实历史。",
+        "", "币安 USD-M K 线档案提供12列字段，含真实报价币成交额（quote asset volume），不是用收盘价乘基础币量代替。官方档案可能修订，并提供 CHECKSUM 文件；本轮使用固定文件哈希及独立源抽查记录保留所用版本。[币安官方公开数据说明](https://github.com/binance/binance-public-data)",
         "", "档案的15分钟数据仅以完整四根合成1H；4H仅由完整UTC四根1H合成。档案与近期1H数据只检查接缝相邻，没有共同覆盖窗可作跨源价格一致性验证。历史公开数据的真实发布时间延迟未知，历史tick变化未重建；使用冻结目录步长近似，不能宣称历史撮合精度完全一致。",
         "", "## 风险与诚实声明", "",
         "本次全量结论不能直接与前次61天三交易所研究作因果比较：日期和品种/交易所构成都变了，本次还加入可交易边界清理。此前61天账户的已分配记录按已知币安交割日补查，没有在这些交割日之后入场或继续持有；但旧focus事件和控制中存在未被账户买入的交割后零量记录，因此不能将此前的事件对照称为完全无污染，也不推断其它交易所退市覆盖完整。所有年度都是同一冻结规则的历史切片，后年度不自动成为新的未见样本外。保留亏损、未匹配、少信号、拒单和边界估值，不把峰值R当已兑现收益。",
@@ -455,7 +516,7 @@ def run(folder=EXP / "results", report=REPORT, figures=None, summary_file=None):
     figures.mkdir(parents=True)
     case_figures.style()
     curve = neutral_curves(evidence, figures)
-    examples = render_cases(evidence, figures)
+    examples = ledger_examples(evidence, render_cases(evidence, figures))
     report.parent.mkdir(parents=True, exist_ok=True)
     report.write_text(report_text(evidence, curve, examples, report, summary))
     evidence.finish()
@@ -477,11 +538,135 @@ def run(folder=EXP / "results", report=REPORT, figures=None, summary_file=None):
     return manifest
 
 
+def refresh_text(folder=EXP / "results", report=REPORT, summary_file=None):
+    """Revise narrative only, preserving authenticated PNG bytes and old text.
+
+    This is an explicit one-time revision of the initial report, not overwrite
+    permission for the study or its figures. Every previous output and input is
+    checked before any write. Current final evidence and committed builders are
+    checked independently. The original reviewer summary must still be present
+    so the previous narrative remains reproducible. No candles are simulated,
+    no examples are reselected, and no plotting entry point is invoked.
+    """
+    folder, report = Path(folder).resolve(), Path(report).resolve()
+    receipt = folder / "report_manifest.json"
+    previous_receipt = artifact(receipt)
+    previous_raw = receipt.read_bytes()
+    previous = json.loads(previous_raw)
+    if previous.get("status") != "complete" or previous.get("config") != CONFIG:
+        raise ValueError("Complete original report with the frozen protocol required")
+    if previous.get("revision"):
+        raise ValueError("This original report already has a text revision")
+    registered = {}
+    for item in previous["artifacts"]:
+        path = check(item["path"], item["sha256"])
+        if item.get("size_bytes") != path.stat().st_size or str(path) in registered:
+            raise ValueError("Invalid or duplicate original report artifact")
+        registered[str(path)] = item
+    if str(report) not in registered:
+        raise ValueError("Requested Markdown is not the original report artifact")
+    previous_md = registered[str(report)]
+    previous_md_bytes = report.read_bytes()
+    pngs = [item for path, item in registered.items() if Path(path).suffix.lower() == ".png"]
+    if len(pngs) + 1 != len(registered) or not 1 <= len(pngs) <= 6:
+        raise ValueError("Expected the original Markdown and one to six PNGs only")
+    curves = [item for item in pngs if Path(item["path"]).name == "account_paths.png"]
+    if len(curves) != 1:
+        raise ValueError("Exactly one original account figure is required")
+    png_paths = {str(Path(item["path"]).resolve()) for item in pngs}
+    for item in previous["examples"]:
+        if str(Path(item["path"]).resolve()) not in png_paths:
+            raise ValueError("Original example image is not authenticated")
+    previous_inputs = {}
+    for item in previous["input_artifacts"]:
+        path = check(item["path"], item["sha256"])
+        previous_inputs[str(path)] = item
+    prior_summary = previous.get("reviewer_summary")
+    if prior_summary:
+        check(prior_summary["path"], prior_summary["sha256"])
+    summary_path = Path(summary_file).resolve() if summary_file else (
+        Path(prior_summary["path"]).resolve() if prior_summary else None)
+    current_summary = artifact(summary_path) if summary_path else None
+    summary = summary_path.read_text() if summary_path else None
+
+    evidence = Evidence(folder)
+    sources = committed_sources(evidence)
+    examples = ledger_examples(evidence, previous["examples"])
+    text = report_text(evidence, Path(curves[0]["path"]), examples, report, summary)
+    evidence.finish()
+    for item in sources + list(previous_inputs.values()) + list(registered.values()):
+        check(item["path"], item["sha256"])
+    if current_summary:
+        check(current_summary["path"], current_summary["sha256"])
+    check(receipt, previous_receipt["sha256"])
+
+    archive = folder / "report_revisions" / "initial"
+    def save_original(source, name):
+        path = check(source["path"], source["sha256"])
+        destination = archive / name
+        archive.mkdir(parents=True, exist_ok=True)
+        if destination.exists():
+            check(destination, source["sha256"])
+        else:
+            with destination.open("xb") as stream:
+                stream.write(path.read_bytes())
+        check(destination, source["sha256"])
+        return artifact(destination)
+
+    archived_receipt = save_original(previous_receipt, "report_manifest.json")
+    archived_md = save_original(previous_md, report.name)
+    archived_summary = save_original(prior_summary, "reviewer_summary.md") if prior_summary else None
+    inputs = dict(previous_inputs)
+    for key, item in evidence.read_sources.items():
+        if key in inputs and inputs[key]["sha256"] != item["sha256"]:
+            raise ValueError("Text revision cannot change an existing evidence source")
+        inputs[key] = item
+    new_bytes = text.encode("utf-8")
+    markdown_record = dict(path=str(report), sha256=hashlib.sha256(new_bytes).hexdigest(), size_bytes=len(new_bytes))
+    manifest = dict(previous, generated_at=pd.Timestamp.now(tz="UTC").isoformat(),
+        code_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
+        sources=sources, input_artifacts=list(inputs.values()),
+        full_study_rescored=False, selected_display_paths_replayed=False,
+        display_path_reconciliation="Text-only revision; initial authenticated figure reconciliation retained in archived receipt",
+        examples=examples, artifacts=[markdown_record if str(Path(item["path"]).resolve()) == str(report)
+                                     else item for item in previous["artifacts"]],
+        revision=dict(kind="text_only", number=1, previous_report_manifest=archived_receipt,
+            previous_markdown=archived_md, previous_reviewer_summary=archived_summary,
+            unchanged_pngs=pngs, selected_examples_unchanged=True, no_path_replay=True,
+            no_figure_render=True, exit_intervals_source="authenticated full SPIKE altcoin account ledgers"))
+    if current_summary:
+        manifest["reviewer_summary"] = current_summary
+    # Stage both files only after the old receipt, text and summary are archived.
+    # Roll back the two live files together if replacing or verifying either fails.
+    with tempfile.TemporaryDirectory(prefix="spike-text-refresh-", dir=folder) as temporary:
+        staged_md, staged_receipt = Path(temporary) / "report.md", Path(temporary) / "receipt.json"
+        staged_md.write_bytes(new_bytes)
+        staged_receipt.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
+        check(report, previous_md["sha256"])
+        check(receipt, previous_receipt["sha256"])
+        try:
+            os.replace(staged_md, report)
+            os.replace(staged_receipt, receipt)
+            for item in manifest["artifacts"]:
+                check(item["path"], item["sha256"])
+        except BaseException:
+            report.write_bytes(previous_md_bytes)
+            receipt.write_bytes(previous_raw)
+            raise
+    return manifest
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--results", type=Path, default=EXP / "results")
     parser.add_argument("--report", type=Path, default=REPORT)
     parser.add_argument("--figures", type=Path)
     parser.add_argument("--summary-file", type=Path)
+    parser.add_argument("--refresh-text", action="store_true", help="Archive the original text and update it without rerendering PNGs or replaying paths")
     args = parser.parse_args()
-    run(args.results, args.report, args.figures, args.summary_file)
+    if args.refresh_text:
+        if args.figures:
+            parser.error("--figures cannot be used with --refresh-text; original images must be retained")
+        refresh_text(args.results, args.report, args.summary_file)
+    else:
+        run(args.results, args.report, args.figures, args.summary_file)
