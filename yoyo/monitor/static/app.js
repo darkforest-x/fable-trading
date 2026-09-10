@@ -440,12 +440,18 @@
     $("nav-signal-count").textContent = twoStage() ? number(counts.indicator_starts_24h) : "—";
     $("metric-building").textContent = number(counts.building ?? 0);
     $("metric-universe").textContent = number(status.universe?.count);
-    $("metric-building-detail").textContent = finite(counts.ready) ? `${number(counts.ready)} 个窗口已就绪` : "零轴横盘与均线密集";
-    $("metric-signals-detail").textContent = modelProtocol() ? `另有 ${number(counts.signals_24h)} 条 YOLO 追加确认` : "模型口径待同步";
     const scanning = ["running", "scanning", "in_progress", "starting", "bootstrap"].includes(scan.status);
     const scanErrorCount = Array.isArray(scan.errors) ? scan.errors.length : numeric(scan.errors);
     const complete = numeric(scan.completed);
     const total = numeric(scan.total);
+    // `counts.ready` describes persisted feature phase and may belong to a
+    // prior pass.  It cannot prove every cell has caught the current close.
+    $("metric-building-detail").textContent = scanning
+      ? `已扫描 ${number(complete)} / ${number(total)} · 预热/追平中`
+      : total > 0 && complete >= total
+        ? `已扫描 ${number(complete)} / ${number(total)} · 已覆盖，按收盘刷新`
+        : "扫描状态待同步";
+    $("metric-signals-detail").textContent = modelProtocol() ? `另有 ${number(counts.signals_24h)} 条 YOLO 追加确认` : "模型口径待同步";
     $("metric-scan-detail").textContent = scanning ? `扫描 ${number(complete)} / ${number(total)}` : scan.finished_at_ms ? `${ageLabel(scan.finished_at_ms)}更新` : "等待扫描";
     $("sidebar-runtime").textContent = online ? status.started_at_ms ? `已运行 ${duration(Date.now() - Number(status.started_at_ms))}` : "服务运行中" : "连接中断 · 自动重连";
     const scanDegraded = scan.status === "degraded" || scanErrorCount > 0;

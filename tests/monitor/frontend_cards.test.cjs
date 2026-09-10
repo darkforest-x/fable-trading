@@ -99,6 +99,13 @@ test("covered replay receipts distinguish realized facts from censored rows with
   assert.match(app, /尚未关联 v2 覆盖账本 · 不展示收益/);
 });
 
+test("overview never presents a persisted ready phase as fresh all-market coverage", () => {
+  assert.match(app, /counts\.ready` describes persisted feature phase/);
+  assert.match(app, /已扫描 \$\{number\(complete\)\} \/ \$\{number\(total\)\} · 预热\/追平中/);
+  assert.match(app, /已扫描 \$\{number\(complete\)\} \/ \$\{number\(total\)\} · 已覆盖，按收盘刷新/);
+  assert.doesNotMatch(app, /个窗口已就绪/);
+});
+
 test("selected timeframe is filtered by the API before its 2000-row limit", () => {
   assert.match(app, /const apiTimeframe =/);
   assert.match(app, /&timeframe=\$\{encodeURIComponent\(apiTimeframe\(queryTimeframe\)/);
