@@ -16,9 +16,6 @@ import numpy as np
 import pandas as pd
 
 
-MIN_QUIET = 12
-NEAR_ATR = 0.10
-RELEASE_BARS = 6
 REQUIRED = (
     "open", "high", "low", "close", "md", "sb", "atr", "ropeHigh",
     "legacy_confirmed", "legacy_parent_high", "ready", "data_gap", "confirmed",
@@ -49,38 +46,29 @@ def _valid_ohlc(row: pd.Series) -> bool:
 
 @dataclass
 class _State:
-    structure_id: int = 0
-    quiet_count: int = 0
-    quiet_high: float | None = None
-    quiet_low: float | None = None
-    frozen_band: float | None = None
-    release_i: int | None = None
     body_support_i: int | None = None
     legacy_i: int | None = None
     legacy_parent_high: float | None = None
     pending: bool = False
-    consumed: bool = False
-    prior_atr: float | None = None
     prior_md: float | None = None
 
-    def clear_episode(self) -> None:
-        self.quiet_count = 0
-        self.quiet_high = self.quiet_low = self.frozen_band = None
-        self.release_i = self.body_support_i = self.legacy_i = None
+    def clear(self) -> None:
+        self.body_support_i = self.legacy_i = None
         self.legacy_parent_high = None
-        self.pending = self.consumed = False
+        self.pending = False
 
 
 def detect(frame: pd.DataFrame) -> pd.DataFrame:
     """Replay V5 from supplied closed-bar inputs without mutating ``frame``.
 
-    A mature quiet episode freezes ``0.10 * prior ATR`` at its twelfth quiet
-    close. Its full range ends before the release bar. A full candle body over
-    ``ropeHigh`` and an in-episode V4 confirmation may arrive in either order;
-    neither is a same-candle requirement. Gaps, unknown values and a new quiet
-    run reset all provenance rather than synthesising a continuation. The frame
-    may end with one unconfirmed tip; an unconfirmed or unknown interior row is
-    rejected because this oracle does not model TradingView intrabar revisions.
+    A full candle body over ``ropeHigh`` and a supplied V4 confirmation may
+    arrive in either order; neither is a same-candle requirement. The body
+    persists only during a continuous close-above-rope run. A V4 confirmation
+    freezes its supplied parent high, supersedes an older pending provenance,
+    and is consumed after one final event. Gaps and unknown values clear all
+    provenance rather than synthesising a continuation. The frame may end with
+    one unconfirmed tip; an unconfirmed or unknown interior row is rejected
+    because this oracle does not model TradingView intrabar revisions.
     """
     missing = [name for name in REQUIRED if name not in frame]
     if missing:
@@ -100,83 +88,49 @@ def detect(frame: pd.DataFrame) -> pd.DataFrame:
                 and _true(row.ready)
                 and _valid_ohlc(row)
                 and all(_finite(row[name]) for name in ("md", "sb", "atr", "ropeHigh"))
-                and state.prior_atr is not None
-                and state.prior_atr > 0
                 and float(row.atr) > 0
             )
             if not valid:
-                state.clear_episode()
+                state.clear()
                 why = "gap" if _true(row.data_gap) else "unknown"
-                state.prior_atr = float(row.atr) if _finite(row.atr) and float(row.atr) > 0 else None
                 state.prior_md = float(row.md) if _finite(row.md) else None
             else:
-                o, h, l, c = (float(row[name]) for name in ("open", "high", "low", "close"))
+                o, _, _, c = (float(row[name]) for name in ("open", "high", "low", "close"))
                 md, sb, rope = float(row.md), float(row.sb), float(row.ropeHigh)
-                developing_band = NEAR_ATR * state.prior_atr
-                active_band = state.frozen_band if (state.quiet_count >= MIN_QUIET or state.pending) else developing_band
-                near = max(abs(md), abs(sb)) <= active_band
                 full_body = min(o, c) > rope
                 if c <= rope:
                     state.body_support_i = None
                 elif full_body:
                     state.body_support_i = i
 
-                if near:
-                    if state.quiet_count == 0:
-                        state.structure_id += 1
-                        state.quiet_high, state.quiet_low = h, l
-                        state.frozen_band = None
-                        state.release_i = state.body_support_i = state.legacy_i = None
-                        state.legacy_parent_high = None
-                        state.pending = state.consumed = False
-                        state.body_support_i = i if full_body else None
-                    else:
-                        state.quiet_high = max(float(state.quiet_high), h)
-                        state.quiet_low = min(float(state.quiet_low), l)
-                    state.quiet_count += 1
-                    if state.quiet_count == MIN_QUIET:
-                        state.frozen_band = developing_band
-                    if state.quiet_count >= MIN_QUIET and _true(row.legacy_confirmed) and _finite(row.legacy_parent_high) and state.legacy_i is None:
-                        state.legacy_i, state.legacy_parent_high = i, float(row.legacy_parent_high)
-                    why = "building" if state.quiet_count < MIN_QUIET else "quiet"
+                if _true(row.legacy_confirmed) and _finite(row.legacy_parent_high):
+                    state.legacy_i = i
+                    state.legacy_parent_high = float(row.legacy_parent_high)
+                    state.pending = True
+                if state.pending and c <= float(state.legacy_parent_high):
+                    state.legacy_i = None
+                    state.legacy_parent_high = None
+                    state.pending = False
+                    why = "parent_broken"
+                elif (
+                    state.pending and state.body_support_i is not None
+                    and state.legacy_parent_high is not None and state.prior_md is not None
+                    and c > rope and c > state.legacy_parent_high
+                    and md > sb and md > state.prior_md
+                ):
+                    event = True
+                    state.pending = False
+                    why = "confirmed"
                 else:
-                    if state.quiet_count > 0:
-                        if state.quiet_count >= MIN_QUIET and md > 0:
-                            state.pending, state.release_i = True, i
-                            why = "release"
-                        else:
-                            state.clear_episode()
-                            why = "down_release" if md < 0 else "short_quiet"
-                        state.quiet_count = 0
-                    release_age = None if state.release_i is None else i - state.release_i
-                    if state.pending and _true(row.legacy_confirmed) and _finite(row.legacy_parent_high) and state.legacy_i is None:
-                        state.legacy_i, state.legacy_parent_high = i, float(row.legacy_parent_high)
-                    if state.pending:
-                        if release_age is None or release_age >= RELEASE_BARS:
-                            state.clear_episode(); why = "expired"
-                        elif c < float(state.quiet_low):
-                            state.clear_episode(); why = "below_quiet_low"
-                        elif md < 0:
-                            state.clear_episode(); why = "negative_md"
-                        elif (
-                            not state.consumed and state.legacy_i is not None
-                            and state.body_support_i is not None and state.legacy_parent_high is not None
-                            and state.prior_md is not None and md > float(state.frozen_band)
-                            and md > sb and md > state.prior_md and c > rope
-                            and c > float(state.quiet_high) and c > state.legacy_parent_high
-                        ):
-                            event = True
-                            state.consumed, state.pending = True, False
-                            why = "confirmed"
-                        else:
-                            why = "await_legacy" if state.legacy_i is None else "await_body" if state.body_support_i is None else "await_release"
-                state.prior_atr, state.prior_md = float(row.atr), md
+                    why = (
+                        "await_legacy" if not state.pending else
+                        "await_body" if state.body_support_i is None else
+                        "await_md_turn" if state.prior_md is None else
+                        "await_momentum"
+                    )
+                state.prior_md = md
 
-        release_age = None if state.release_i is None else i - state.release_i
         rows.append({
-            "structure_id": state.structure_id,
-            "quiet_count": state.quiet_count,
-            "release_age": release_age,
             "body_support_i": state.body_support_i,
             "legacy_i": state.legacy_i,
             "legacy_parent_high": state.legacy_parent_high,
@@ -185,7 +139,7 @@ def detect(frame: pd.DataFrame) -> pd.DataFrame:
             "why_pending": why,
         })
     result = pd.DataFrame(rows, index=frame.index)
-    for name in ("structure_id", "quiet_count", "release_age", "body_support_i", "legacy_i", "legacy_parent_high"):
+    for name in ("body_support_i", "legacy_i", "legacy_parent_high"):
         result[name] = pd.to_numeric(result[name], errors="coerce")
     result["pending"] = result["pending"].astype(bool)
     result["confirmed"] = result["confirmed"].astype(bool)

@@ -21,13 +21,10 @@ const float stopBuffer = 0.2
 const float riskFloor = 2.0
 const float armR = 2.0
 const float trailAtr = 4.0
-const int minQuiet = 12
-const float nearAtr = 0.10
-const int releaseBars = 6
 
 string gView = "01 · 显示"
 bool showMas = input.bool(true, "六条均线", group=gView, display=display.none)
-bool showLabels = input.bool(true, "确认信号与价格", group=gView, tooltip="只显示完成静默结构、实体支持与原确认关联后的最终信号，标在实际完成K线上，不回填。", display=display.none)
+bool showLabels = input.bool(true, "确认信号与价格", group=gView, tooltip="只显示完成实体支撑、原确认关联与主线转强后的最终信号，标在实际完成K线上，不回填。", display=display.none)
 bool showRisk = input.bool(true, "风险区与保护线", group=gView, tooltip="空闲后的首个确认信号开启风险参考，使用该根实际收盘价。跟踪期间的其他确认不会重置已有盈亏框；框内价格属于开启它的确认信号。", display=display.none)
 bool showPanel = input.bool(false, "显示状态面板", group=gView, display=display.none)
 bool showMilestones = input.bool(false, "退出与 R 里程碑文字", group=gView, display=display.none)
@@ -189,136 +186,54 @@ if barstate.isconfirmed
 
 // BEGIN V5 STRUCTURAL GATE
 // A complete body above the six-MA rope is support evidence, not a same-bar
-// gate. It may precede or follow V4's confirmation within one quiet episode.
-var int structureId = 0
-var int quietCount = 0
-var float quietHigh = na
-var float quietLow = na
-var float frozenBand = na
-var int releaseBar = na
+// gate. It may precede or follow a closed, valid V4 confirmation. A lower wick
+// does not break support; only a close at/below the rope does.
 var int bodySupportBar = na
 var int legacyBar = na
 var float legacyParentHigh = na
 var bool structurePending = false
-var bool structureConsumed = false
 bool confirmedSignal = false
 int confirmationAge = na
 string pendingWhy = "idle"
 
 if barstate.isconfirmed
-    bool finiteAtr = not na(atr) and atr > 0 and not na(atr[1]) and atr[1] > 0
+    bool finiteAtr = not na(atr) and atr > 0
     bool knownStructure = ready and pricesValid and finiteAtr and not na(md) and not na(sb) and not na(ropeHigh) and not na(middle)
     if dataGap or not knownStructure
-        quietCount := 0
-        quietHigh := na
-        quietLow := na
-        frozenBand := na
-        releaseBar := na
         bodySupportBar := na
         legacyBar := na
         legacyParentHigh := na
         structurePending := false
-        structureConsumed := false
         pendingWhy := dataGap ? "gap" : "unknown"
     else
-        float developingBand = nearAtr * atr[1]
-        float activeBand = (quietCount >= minQuiet or structurePending) ? frozenBand : developingBand
-        bool nearZero = not na(activeBand) and activeBand > 0 and math.max(math.abs(md), math.abs(sb)) <= activeBand
         bool fullBodyAbove = math.min(open, close) > ropeHigh
-        // A close at/below the rope breaks support; a lower wick alone does not.
         if close <= ropeHigh
             bodySupportBar := na
         else if fullBodyAbove
             bodySupportBar := bar_index
-
-        if nearZero
-            if quietCount == 0
-                // A new near run cannot borrow support, V4 provenance, or a
-                // consumed confirmation from an older released episode.
-                structureId += 1
-                quietHigh := high
-                quietLow := low
-                frozenBand := na
-                releaseBar := na
-                bodySupportBar := fullBodyAbove ? bar_index : na
-                legacyBar := na
-                legacyParentHigh := na
-                structurePending := false
-                structureConsumed := false
-            else
-                quietHigh := math.max(quietHigh, high)
-                quietLow := math.min(quietLow, low)
-            quietCount += 1
-            if quietCount == minQuiet
-                frozenBand := developingBand
-            if quietCount >= minQuiet and legacyConfirmedSignal and not na(legacyConfirmationParentHigh) and na(legacyBar)
-                legacyBar := bar_index
-                legacyParentHigh := legacyConfirmationParentHigh
-            pendingWhy := quietCount < minQuiet ? "building" : "quiet"
+        // A later V4 confirmation replaces older pending provenance. It must
+        // carry a finite parent high from this closed bar; unknown provenance
+        // is never imported into the structural state.
+        if legacyConfirmedSignal and not na(legacyConfirmationParentHigh)
+            legacyBar := bar_index
+            legacyParentHigh := legacyConfirmationParentHigh
+            structurePending := true
+        if structurePending and (na(legacyParentHigh) or close <= legacyParentHigh)
+            // Crossing the frozen parent high invalidates that provenance. This
+            // is a structural failure, deliberately not an arbitrary timer.
+            legacyBar := na
+            legacyParentHigh := na
+            structurePending := false
+            pendingWhy := "parent_broken"
+        else if structurePending and not na(bodySupportBar) and not na(legacyParentHigh) and not na(md[1]) and close > ropeHigh and close > legacyParentHigh and md > sb and md > md[1]
+            confirmedSignal := true
+            confirmationAge := bar_index - legacyBar
+            // Consume this provenance. A new V4 event may arm another final
+            // signal inside the same continuous body-above-rope run.
+            structurePending := false
+            pendingWhy := "confirmed"
         else
-            if quietCount > 0
-                if quietCount >= minQuiet and md > 0
-                    structurePending := true
-                    releaseBar := bar_index
-                    pendingWhy := "release"
-                else
-                    quietHigh := na
-                    quietLow := na
-                    frozenBand := na
-                    releaseBar := na
-                    bodySupportBar := na
-                    legacyBar := na
-                    legacyParentHigh := na
-                    structurePending := false
-                    structureConsumed := false
-                    pendingWhy := md < 0 ? "down_release" : "short_quiet"
-                quietCount := 0
-            int releaseAge = na(releaseBar) ? na : bar_index - releaseBar
-            if structurePending and legacyConfirmedSignal and not na(legacyConfirmationParentHigh) and na(legacyBar)
-                legacyBar := bar_index
-                legacyParentHigh := legacyConfirmationParentHigh
-            if structurePending
-                if na(releaseAge) or releaseAge >= releaseBars
-                    quietHigh := na
-                    quietLow := na
-                    frozenBand := na
-                    releaseBar := na
-                    bodySupportBar := na
-                    legacyBar := na
-                    legacyParentHigh := na
-                    structurePending := false
-                    structureConsumed := false
-                    pendingWhy := "expired"
-                else if close < quietLow
-                    quietHigh := na
-                    quietLow := na
-                    frozenBand := na
-                    releaseBar := na
-                    bodySupportBar := na
-                    legacyBar := na
-                    legacyParentHigh := na
-                    structurePending := false
-                    structureConsumed := false
-                    pendingWhy := "below_quiet_low"
-                else if md < 0
-                    quietHigh := na
-                    quietLow := na
-                    frozenBand := na
-                    releaseBar := na
-                    bodySupportBar := na
-                    legacyBar := na
-                    legacyParentHigh := na
-                    structurePending := false
-                    structureConsumed := false
-                    pendingWhy := "negative_md"
-                else if not structureConsumed and not na(legacyBar) and not na(bodySupportBar) and not na(legacyParentHigh) and md > frozenBand and md > sb and md > md[1] and close > ropeHigh and close > quietHigh and close > legacyParentHigh
-                    confirmedSignal := true
-                    confirmationAge := releaseAge
-                    structureConsumed := true
-                    structurePending := false
-                    pendingWhy := "confirmed"
-                else
-                    pendingWhy := na(legacyBar) ? "await_legacy" : na(bodySupportBar) ? "await_body" : "await_release"
+            pendingWhy := not structurePending ? "await_legacy" : na(bodySupportBar) ? "await_body" : na(md[1]) ? "await_md_turn" : "await_momentum"
 // END V5 STRUCTURAL GATE
 
 // BEGIN REFERENCE STATE: first confirmation while flat owns this display only.
@@ -500,18 +415,14 @@ pEntry = plot(showRisk ? visibleEntry : na, "确认收盘参考", color.new(ink,
 fill(pInitial, pEntry, color.new(bear, 94), title="初始风险区")
 barcolor(confirmedSignal ? #00CBB1 : na, title="确认关键K线")
 
-// Historical Data Window belongs to the selected bar; no internal V4 event is
-// public. Pending reason: 0 idle, 1 building, 2 quiet, 3 release, 4 awaiting
-// legacy, 5 awaiting body, 6 awaiting release, 7 confirmed, 8 expired,
-// 9 gap, 10 unknown, 11 down release, 12 short quiet, 13 below quiet low,
-// 14 negative MD.
-float pendingWhyCode = pendingWhy == "building" ? 1 : pendingWhy == "quiet" ? 2 : pendingWhy == "release" ? 3 : pendingWhy == "await_legacy" ? 4 : pendingWhy == "await_body" ? 5 : pendingWhy == "await_release" ? 6 : pendingWhy == "confirmed" ? 7 : pendingWhy == "expired" ? 8 : pendingWhy == "gap" ? 9 : pendingWhy == "unknown" ? 10 : pendingWhy == "down_release" ? 11 : pendingWhy == "short_quiet" ? 12 : pendingWhy == "below_quiet_low" ? 13 : pendingWhy == "negative_md" ? 14 : 0
-int releaseAgeWindow = na(releaseBar) ? na : bar_index - releaseBar
-plot(barstate.isconfirmed ? structureId : na, "V5 结构编号", display=display.data_window)
-plot(barstate.isconfirmed ? quietCount : na, "V5 静默根数", display=display.data_window)
-plot(barstate.isconfirmed ? releaseAgeWindow : na, "V5 释放年龄", display=display.data_window)
+// Historical Data Window belongs to the selected bar. Pending reason: 0 idle,
+// 1 awaiting V4 provenance, 2 awaiting a full body, 3 awaiting MD turn,
+// 4 awaiting MD over signal, 5 confirmed, 6 parent broken, 7 gap, 8 unknown.
+float pendingWhyCode = pendingWhy == "await_legacy" ? 1 : pendingWhy == "await_body" ? 2 : pendingWhy == "await_md_turn" ? 3 : pendingWhy == "await_momentum" ? 4 : pendingWhy == "confirmed" ? 5 : pendingWhy == "parent_broken" ? 6 : pendingWhy == "gap" ? 7 : pendingWhy == "unknown" ? 8 : 0
 plot(barstate.isconfirmed ? bodySupportBar : na, "V5 实体支持K线", display=display.data_window)
 plot(barstate.isconfirmed ? legacyBar : na, "V5 V4确认K线", display=display.data_window)
+plot(barstate.isconfirmed ? (legacyConfirmedSignal ? 1 : 0) : na, "V5 本根V4旧确认诊断", display=display.data_window)
+plot(barstate.isconfirmed ? legacyParentHigh : na, "V5 冻结V4父高", display=display.data_window)
 plot(barstate.isconfirmed ? (confirmedSignal ? 1 : 0) : na, "V5 最终确认", display=display.data_window)
 plot(barstate.isconfirmed ? pendingWhyCode : na, "V5 等待原因代码", display=display.data_window)
 plot(confirmedSignal ? confirmationAge : na, "V5 确认等待根数", display=display.data_window)

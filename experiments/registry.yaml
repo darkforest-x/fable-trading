@@ -8210,3 +8210,17 @@ experiments:
       hidden, V5 visible in same pane; annotations preserved. No notification or execution changes. Active means profitability/recall
       validation incomplete, not automatic deployment.
     canonical_report: analysis/html/p1_spike_v5_structure_confirmation_20260910.html
+  - experiment_id: exp-spike-v5-pepe-1h-repair-20260910-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: b8bf1aa2b6a025e0a216a0d859661118c4438d22
+    status: active
+    question: Repair missing V5 signals on the owner-intended PEPE 1H chart.
+    single_variable: Minimal structural-gate correction; no parameter search or economic evaluation.
+    result: Implementation frozen;19 synthetic/source tests passed. Native1H regression and save pending.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    artifacts: []
+    notes: Owner all-date authorization persists. First use of this repaired configuration on already-inspected history.
+      Preserve prior4H record as mistaken acceptance context; no blindOOS claim.
