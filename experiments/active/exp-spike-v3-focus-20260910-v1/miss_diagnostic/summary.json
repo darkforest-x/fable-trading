@@ -1,0 +1,35 @@
+{
+  "config": {
+    "schema": "v3-focus-frozen-miss-description-v1",
+    "population": "positive labels in study window with V3 early hit_1 and no A early hit_1",
+    "diagnostic_clock": "fixed label event_i; actual missed V3 arrow_i reported separately",
+    "reference_coverage": "active before and after event, same accepted owner, owner_i < event_i",
+    "actual_coverage": "A owner's valid next-open trade with entry_i <= event_i < exit_i",
+    "same_bar_exit": "not coverage; natural stop and boundary mark distinguished",
+    "current_mark": "event close / actual entry - 1 - original fee_return; live only",
+    "natural_outcomes": "posterior description; unique accepted parent economics, not new trades",
+    "top_examples": "top10 future24-bar high peaks, descending; instrument/event_i stable ties",
+    "fresh_misses_unchanged": true,
+    "new_hypotheses": 0,
+    "detector_changes": false,
+    "production_eligible": false
+  },
+  "baseline_timely_positive_events": 1463,
+  "retained_timely_positive_events": 663,
+  "fresh_misses": 800,
+  "original_timely_retention": 0.4531784005468216,
+  "actual_status_counts": {
+    "actual_live": 719,
+    "unscored_warmup_parent": 77,
+    "exited_before_event": 4
+  },
+  "reference_covered_events": 800,
+  "strict_actual_live_events": 719,
+  "strict_actual_live_at_missed_arrow": 719,
+  "pure_miss_no_live_actual_trade": 4,
+  "same_bar_natural_exit_events": 0,
+  "same_bar_boundary_mark_events": 0,
+  "unscored_warmup_parent_events": 77,
+  "reference_only_events": 81,
+  "posterior_context_not_a_new_success_metric": true
+}

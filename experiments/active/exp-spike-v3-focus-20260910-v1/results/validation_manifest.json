@@ -1,0 +1,69 @@
+{
+  "status": "complete",
+  "config": {
+    "schema": "spike-v3-focus-structural-v1",
+    "arms": [
+      "v3",
+      "reference",
+      "near_box"
+    ],
+    "interventions": "independent, never stacked",
+    "primary_economics": "parent early only; children are upgrades",
+    "holdout_per_new_config": 1,
+    "acceptance": {
+      "label_drop": 0.5,
+      "large_recall": 0.8,
+      "baseline_positive_retention": 0.9
+    },
+    "execution": "unchanged actual next-open; detection occupancy is signal-close reference",
+    "cost_bp": 20
+  },
+  "source_pins": {
+    "yoyo/evaluation/spike_burst_v3_focus_study.py": "b3f6d72d84fc9afd693b9620405d6f05c604fe98a3503bd72f952027c7e78679",
+    "experiments/active/exp-spike-v3-focus-20260910-v1/PROJECT_PLAN.md": "8b594cc1212cf75a74d386d62a4707e8620863b7c109a90cdd24b8e774d24e27",
+    "yoyo/evaluation/spike_burst_v3_reference_gate.py": "07f4172b09316f35e60642bf969c51c3c33d9b95ccb721236745e90849d61a11",
+    "yoyo/evaluation/spike_burst_v3_structural.py": "b71e45550847ddefa5b10243951b6889e16db0633791d0e0381152e95bd185d6",
+    "yoyo/evaluation/spike_burst_early_warning.py": "31f5422524b15b2a758cb8e6d55b1e943123d099655f4d743051215dbacb9abf",
+    "yoyo/evaluation/spike_burst_replay.py": "996ef56ceb5b70da5337422d8390487330f7e387f648ee527b5afc9bda72a33f",
+    "yoyo/evaluation/spike_burst_execution.py": "05c96e98498cbf11cc426ed4cc939199b47af2cf8fd5a409c79fc720552f45cc",
+    "yoyo/evaluation/spike_burst_dataset.py": "e03585c03e32387b84ade03ce12966d8ff0b6468a2814f0c0199a814d69dcdd1",
+    "yoyo/evaluation/spike_burst_recall_study.py": "a9e532861cad640b5dcf6dbf8d465b3ad381cb7ef2b02d65cad153b8c849dbbb",
+    "yoyo/evaluation/spike_v3_gate_diagnostic.py": "a5dd2c574158815361949b5a53a5a3211e8369a5099a188bc190cb12326bb1b9",
+    "yoyo/evaluation/altseason_research.py": "35d6e171a8a7b25516871ae119c2780dcc1130d2beaaffdd270d2b2f99742075"
+  },
+  "prepared_sha": "a219b7fe8b25ce165121a988fed1b16b572211de932f74abdea1af4de740eeb4",
+  "new_execution_paths": 15715,
+  "artifacts": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/trade_events.csv.gz",
+      "sha256": "1cdee9249e8d3dda099c622e645eb83cbb0cf74ac0edcc0765a0c152ca5ea417",
+      "size_bytes": 2343279
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/trade_controls.csv.gz",
+      "sha256": "33ca8dd63380d758510dc96cfe421bb3ac8fddd8696845e23ea7fdf87105b0a4",
+      "size_bytes": 7771586
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/trade_summary.csv",
+      "sha256": "4e738c7d47d9471d82241fb6e032fedf836689ee94105662143a42fcee6bb5b7",
+      "size_bytes": 13666
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/score_summary.csv",
+      "sha256": "358105a40ca3922d83e5f4b96de3dfe5fc71b24f2ab2f9f977e6ac335387cc65",
+      "size_bytes": 1271
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/retention_summary.csv",
+      "sha256": "8ef03cdd07f15d113942518ba679e9a65422696da1cca5f834afa6120a1ce66c",
+      "size_bytes": 17652
+    }
+  ],
+  "limitations": [
+    "Seen historical pool; not blind OOS",
+    "Independent parent-event economics, not account NAV",
+    "Reference occupancy uses signal close; economic fills are next open",
+    "Complete structural interventions, not frozen event filtering"
+  ]
+}

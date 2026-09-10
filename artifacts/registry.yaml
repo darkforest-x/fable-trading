@@ -26912,3 +26912,143 @@ artifacts:
     production_eligible: false
     notes: Original SPIKE V1 versus V3; 13 frozen-event single-gate diagnostics, no validated deployable filter or
       live change.
+  - artifact_id: spike-v3-focus-20260910-report-source
+    artifact_type: report
+    role: original_v1_v3_structural_noise_reduction
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5e85fa70f92f1bb110547518a932f90837ede872
+    source_path: analysis/p1_spike_v3_focus_20260910.md
+    sha256: 05c8c60adf80021d9dd77daa74d9668b181966ec562c69fa0feacebab97ef689
+    size_bytes: 50640
+    storage_uri: repo://analysis/p1_spike_v3_focus_20260910.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: A/B failed fixed fresh-retention and economic targets. Old actual trade coverage is descriptive only. Native
+      Pine smoke passed; no full-series parity or live deployment.
+  - artifact_id: spike-v3-focus-20260910-report-html
+    artifact_type: report
+    role: original_v1_v3_structural_noise_reduction
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5e85fa70f92f1bb110547518a932f90837ede872
+    source_path: analysis/html/p1_spike_v3_focus_20260910.html
+    sha256: d5b5d671b4dabaacdd350f82eb2e686b15b3335150814d1a2024b9e34ccc187b
+    size_bytes: 2407520
+    storage_uri: repo://analysis/html/p1_spike_v3_focus_20260910.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: A/B failed fixed fresh-retention and economic targets. Old actual trade coverage is descriptive only. Native
+      Pine smoke passed; no full-series parity or live deployment.
+  - artifact_id: spike-v3-focus-20260910-prepared
+    artifact_type: manifest
+    role: original_v1_v3_structural_noise_reduction
+    source_repo: darkforest-x/fable-trading
+    source_commit: a4ffdcdf807b91578f150654b5fa659ac664ea3d
+    source_path: experiments/active/exp-spike-v3-focus-20260910-v1/results/prepared_manifest.json
+    sha256: a219b7fe8b25ce165121a988fed1b16b572211de932f74abdea1af4de740eeb4
+    size_bytes: 137883
+    storage_uri: repo://experiments/active/exp-spike-v3-focus-20260910-v1/results/prepared_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: A/B failed fixed fresh-retention and economic targets. Old actual trade coverage is descriptive only. Native
+      Pine smoke passed; no full-series parity or live deployment.
+  - artifact_id: spike-v3-focus-20260910-validation
+    artifact_type: manifest
+    role: original_v1_v3_structural_noise_reduction
+    source_repo: darkforest-x/fable-trading
+    source_commit: a4ffdcdf807b91578f150654b5fa659ac664ea3d
+    source_path: experiments/active/exp-spike-v3-focus-20260910-v1/results/validation_manifest.json
+    sha256: b94367b06517fd4639473dbf6a4806cdf9d12dddbb7cfa59c3a1f98f5f8d121b
+    size_bytes: 3535
+    storage_uri: repo://experiments/active/exp-spike-v3-focus-20260910-v1/results/validation_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: A/B failed fixed fresh-retention and economic targets. Old actual trade coverage is descriptive only. Native
+      Pine smoke passed; no full-series parity or live deployment.
+  - artifact_id: spike-v3-focus-20260910-report-manifest
+    artifact_type: manifest
+    role: original_v1_v3_structural_noise_reduction
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5e85fa70f92f1bb110547518a932f90837ede872
+    source_path: experiments/active/exp-spike-v3-focus-20260910-v1/results/focus_report_manifest.json
+    sha256: df4572d3cf85ddf0ed47e734cc15126fa75a20f716f45ed4c488c2fe99945af2
+    size_bytes: 143077
+    storage_uri: repo://experiments/active/exp-spike-v3-focus-20260910-v1/results/focus_report_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: A/B failed fixed fresh-retention and economic targets. Old actual trade coverage is descriptive only. Native
+      Pine smoke passed; no full-series parity or live deployment.
+  - artifact_id: spike-v3-focus-20260910-miss-manifest
+    artifact_type: manifest
+    role: original_v1_v3_structural_noise_reduction
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0a6937ee7414a08bd6ef6a12ae0115b069b6fc54
+    source_path: experiments/active/exp-spike-v3-focus-20260910-v1/miss_diagnostic/manifest.json
+    sha256: fc7835025892b9105bdeb0a6360fd7c724b9e8f36d793e54fc9002b48b295987
+    size_bytes: 57188
+    storage_uri: repo://experiments/active/exp-spike-v3-focus-20260910-v1/miss_diagnostic/manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: A/B failed fixed fresh-retention and economic targets. Old actual trade coverage is descriptive only. Native
+      Pine smoke passed; no full-series parity or live deployment.
+  - artifact_id: spike-v3-focus-20260910-independent-review
+    artifact_type: manifest
+    role: original_v1_v3_structural_noise_reduction
+    source_repo: darkforest-x/fable-trading
+    source_commit: 251c66873240ceb13345dc06b3a414ca56718851
+    source_path: experiments/active/exp-spike-v3-focus-20260910-v1/qa/independent_review.json
+    sha256: 4317b537d99e12195ead6ccb6c2bb4d478669d55d7da998c45c8bca9f47e5b74
+    size_bytes: 3259
+    storage_uri: repo://experiments/active/exp-spike-v3-focus-20260910-v1/qa/independent_review.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: A/B failed fixed fresh-retention and economic targets. Old actual trade coverage is descriptive only. Native
+      Pine smoke passed; no full-series parity or live deployment.
+  - artifact_id: spike-v3-focus-20260910-native-pine
+    artifact_type: manifest
+    role: original_v1_v3_structural_noise_reduction
+    source_repo: darkforest-x/fable-trading
+    source_commit: 251c66873240ceb13345dc06b3a414ca56718851
+    source_path: experiments/active/exp-spike-v3-focus-20260910-v1/qa/native_pine_receipt.json
+    sha256: 6c0e95fdd157a4b41a36850df24939fa573df136726ef76e4339ccb9af32f132
+    size_bytes: 1376
+    storage_uri: repo://experiments/active/exp-spike-v3-focus-20260910-v1/qa/native_pine_receipt.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: A/B failed fixed fresh-retention and economic targets. Old actual trade coverage is descriptive only. Native
+      Pine smoke passed; no full-series parity or live deployment.
+  - artifact_id: spike-v3-focus-20260910-report-review
+    artifact_type: manifest
+    role: original_v1_v3_structural_noise_reduction
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5e85fa70f92f1bb110547518a932f90837ede872
+    source_path: experiments/active/exp-spike-v3-focus-20260910-v1/qa/report_review.json
+    sha256: cad23799dc40badc86ead193eaec450ed8c07c10e49f879ac876dc129b224200
+    size_bytes: 909
+    storage_uri: repo://experiments/active/exp-spike-v3-focus-20260910-v1/qa/report_review.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: A/B failed fixed fresh-retention and economic targets. Old actual trade coverage is descriptive only. Native
+      Pine smoke passed; no full-series parity or live deployment.
+  - artifact_id: spike-v3-focus-20260910-pine
+    artifact_type: config
+    role: original_v1_v3_structural_noise_reduction
+    source_repo: darkforest-x/fable-trading
+    source_commit: 251c66873240ceb13345dc06b3a414ca56718851
+    source_path: yoyo/evaluation/pine/spike_burst_v3_focus.pine
+    sha256: 74c5a5f06025da5081dbabd54be4cbf20226a05350f383a44880f93ea5de45ce
+    size_bytes: 34431
+    storage_uri: repo://yoyo/evaluation/pine/spike_burst_v3_focus.pine
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: A/B failed fixed fresh-retention and economic targets. Old actual trade coverage is descriptive only. Native
+      Pine smoke passed; no full-series parity or live deployment.

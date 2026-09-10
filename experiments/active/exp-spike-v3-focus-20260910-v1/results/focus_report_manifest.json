@@ -1,0 +1,2029 @@
+{
+  "status": "complete",
+  "prepared_sha256": "a219b7fe8b25ce165121a988fed1b16b572211de932f74abdea1af4de740eeb4",
+  "validation_sha256": "b94367b06517fd4639473dbf6a4806cdf9d12dddbb7cfa59c3a1f98f5f8d121b",
+  "report_builder": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_v3_focus_report.py",
+  "report_builder_sha256": "56c82897c0322ae9b010123071435d57954e0604dad167eb5555454a442ae54a",
+  "report_code_commit": "5e85fa70f92f1bb110547518a932f90837ede872",
+  "source_pins": {
+    "yoyo/evaluation/spike_burst_v3_focus_study.py": "b3f6d72d84fc9afd693b9620405d6f05c604fe98a3503bd72f952027c7e78679",
+    "experiments/active/exp-spike-v3-focus-20260910-v1/PROJECT_PLAN.md": "8b594cc1212cf75a74d386d62a4707e8620863b7c109a90cdd24b8e774d24e27",
+    "yoyo/evaluation/spike_burst_v3_reference_gate.py": "07f4172b09316f35e60642bf969c51c3c33d9b95ccb721236745e90849d61a11",
+    "yoyo/evaluation/spike_burst_v3_structural.py": "b71e45550847ddefa5b10243951b6889e16db0633791d0e0381152e95bd185d6",
+    "yoyo/evaluation/spike_burst_early_warning.py": "31f5422524b15b2a758cb8e6d55b1e943123d099655f4d743051215dbacb9abf",
+    "yoyo/evaluation/spike_burst_replay.py": "996ef56ceb5b70da5337422d8390487330f7e387f648ee527b5afc9bda72a33f",
+    "yoyo/evaluation/spike_burst_execution.py": "05c96e98498cbf11cc426ed4cc939199b47af2cf8fd5a409c79fc720552f45cc",
+    "yoyo/evaluation/spike_burst_dataset.py": "e03585c03e32387b84ade03ce12966d8ff0b6468a2814f0c0199a814d69dcdd1",
+    "yoyo/evaluation/spike_burst_recall_study.py": "a9e532861cad640b5dcf6dbf8d465b3ad381cb7ef2b02d65cad153b8c849dbbb",
+    "yoyo/evaluation/spike_v3_gate_diagnostic.py": "a5dd2c574158815361949b5a53a5a3211e8369a5099a188bc190cb12326bb1b9",
+    "yoyo/evaluation/altseason_research.py": "35d6e171a8a7b25516871ae119c2780dcc1130d2beaaffdd270d2b2f99742075"
+  },
+  "inputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-launch-recall-20260910-v2/results/recall_summary.csv",
+      "sha256": "1eca062ab758fb4ea86f0936bfcd459e241c80aad7a97585b2ef74f66f145056"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-launch-recall-20260910-v2/results/signals.csv.gz",
+      "sha256": "308bbe4d2d1f8622aba5b10ee0463d01fbebf54cb48e2aed21341f19924c80bd"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-launch-recall-20260910-v2/results/trade_summary.csv",
+      "sha256": "07762c6f1f50e2ffb03917b3304f908605f27dbef9fd69b10d20aff5138d0d02"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/features/2ce89ff0059e7977f39bc523a5e5.pkl.gz",
+      "sha256": "0f0ccc17db6f1b54ffdf83fb088bd6b66338da5e794c26100147db9ec3fd2407"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/features/75d10ad8568817c52dd030fd1e6a.pkl.gz",
+      "sha256": "031d3e57bb6081002e3ce4484e999b90ca7759322e6e78da8d9d61173248d07a"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/features/8bf389c89be9f34ae378413ae9fe.pkl.gz",
+      "sha256": "3d2ac184d407296fabef68102d105e6acef1525d34350d58ee74cdf0d881ef38"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/features/a01b67a7fd813e1549b642bb63e1.pkl.gz",
+      "sha256": "62305f3b3ed0bbe53843ff416db05547211a3bd74f99b88b83eecc4c4eeeee27"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/features/d85c61f8617e34d1ac6eb5b16bf8.pkl.gz",
+      "sha256": "ab000f7a00a6e0819155d080f1def5e2d0bc68f42f86d873cd49bdd03f1a11af"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/miss_diagnostic/manifest.json",
+      "sha256": "fc7835025892b9105bdeb0a6360fd7c724b9e8f36d793e54fc9002b48b295987"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/miss_diagnostic/missed_events.csv.gz",
+      "sha256": "dcbc2d90eea6ba58c590e3897c87f16c1bd0228714f86264181f7b436a0f81a7"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/miss_diagnostic/posterior_exit_reason_summary.csv",
+      "sha256": "a6b7e4fd2cd9af6701e9f7f9c86fe65eac3ec3b43e38f8c8842b364c3258b206"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/miss_diagnostic/reference_actual_crosstab.csv",
+      "sha256": "298040050210cbc3b0bb8c422f53ff7f76bd9ae4a8d8c264c68a1059b7c89efb"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/miss_diagnostic/status_summary.csv",
+      "sha256": "6647b78feef5dc88eedb0d8c8cc69e97f6482d8434e6b953db184cc76fd003c8"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/miss_diagnostic/summary.json",
+      "sha256": "a9df7ed6fbc1f47fb60c3276dc7836acc71382ae0461e678593306b43114eca3"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/miss_diagnostic/top10_future_high_peaks.csv",
+      "sha256": "6c50113634a7a2b975d1da62fdb9b00aaea2471d63abcef957fdab86ad916032"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/qa/native_pine_receipt.json",
+      "sha256": "6c0e95fdd157a4b41a36850df24939fa573df136726ef76e4339ccb9af32f132"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/controls.csv.gz",
+      "sha256": "cee0c40955a6df6fdffd926716febf573512e1d2c422df7eed1a037ca39b0f5e"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/detections.csv.gz",
+      "sha256": "e6c3ebf107ffd4e6b02a79d72e5613df0278d77707096a38c57e54adea57ee09"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/exposure.csv.gz",
+      "sha256": "319c4c0f6466e9f44f9beecc62f08d756cfaff955b6fb135defc0e3b8e5af9db"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/labels.csv.gz",
+      "sha256": "861326d772b30dd3ef3b4f8e79f36aee389676592670b059a04529d114089f01"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/matching.json",
+      "sha256": "de4f58c9450ca61c386dc6dd71ee9af0fe30ff3f9245ab9d00917707343ffd7c"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/prepared_manifest.json",
+      "sha256": "a219b7fe8b25ce165121a988fed1b16b572211de932f74abdea1af4de740eeb4"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/retention_summary.csv",
+      "sha256": "8ef03cdd07f15d113942518ba679e9a65422696da1cca5f834afa6120a1ce66c"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/score_summary.csv",
+      "sha256": "358105a40ca3922d83e5f4b96de3dfe5fc71b24f2ab2f9f977e6ac335387cc65"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/signals.csv.gz",
+      "sha256": "b2ce1a4dcc6d5f5f177571ab37c4e35dc3ebd2e932a35fd79448e9dcf64c8843"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/000_0G.csv.gz",
+      "sha256": "2f8fd52f02dcc3ab7be81e2c03c6c04a3089ae91770f68bb9003b3bb7e3f187e"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/001_1INCH.csv.gz",
+      "sha256": "3a06825571b08f1dd1e91d88be9b1b2151f8ebe22dc8e6ec200023ef714767c3"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/002_2Z.csv.gz",
+      "sha256": "f9bcf48c09770f85ee7493a596c858ccd591a7b5f10fc513474631a42dc77657"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/003_A.csv.gz",
+      "sha256": "5ea573edf7bbc8b2b236a9e463ec0bdfa10328057c2243f154509e3284c6f6eb"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/004_AAVE.csv.gz",
+      "sha256": "89e67f71138e8318a455c106f5b3ed320dd917c4341b9d7c970bc47b8876afe1"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/005_ACH.csv.gz",
+      "sha256": "c59e1a1254d773e1e2d8853d5ba6a82e26dd69fc743541d7074ec7c5f36bc7ea"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/006_ACT.csv.gz",
+      "sha256": "dd7a5eaa9db363c2895d8e6b0b85a0e4a65890b1b2fa8217b4fd67d282dcae2e"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/007_ACU.csv.gz",
+      "sha256": "9821adea0aa361359e7eba1f5d77887a1fc9498183cf41e3b2c87f854e598e07"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/008_ADA.csv.gz",
+      "sha256": "d1ba7c9fe5d97e2a033ca93789af1c5556f79431d8b3d30706a04356f9b61dd4"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/009_AEON.csv.gz",
+      "sha256": "dfc6cb1fb0c8c4027dbad7b7f485b33bf4ba4d08bae19d27afef77f365b0cb70"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/010_AERO.csv.gz",
+      "sha256": "a9017cb6ce5b35f0c379170315b354f1eb5ff39aced755d9f609e6f63cda0869"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/011_AEVO.csv.gz",
+      "sha256": "fb8278328fe5176454634dc2f874efba57b1b41066137540f665ba0d2f9145eb"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/012_AGLD.csv.gz",
+      "sha256": "ca7839b6188edef47c3a5ee99c42f15f288e3093220f4a94a4fcfc14103c3af5"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/013_AI.csv.gz",
+      "sha256": "0e98759b679e313a3b727538f866636cd46a934e164634006cecee2261ebe004"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/014_AIXBT.csv.gz",
+      "sha256": "43a501c38c7d003da62ad39f7d7b0e2622d548f29ecf0421be51cb5981cc5124"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/015_ALGO.csv.gz",
+      "sha256": "3eea4cdd254f4632dcf63a0357b699049cde6425038789cb5b18262954e1fa12"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/016_ALLO.csv.gz",
+      "sha256": "19030af218955e0245e03affd295cc992b0a16d706b478e2870b17c1d4b1961b"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/017_ANIME.csv.gz",
+      "sha256": "8ece98fb1446258943116988def462a0f6b9bf97e5b911f184069e33c194bc0a"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/018_APE.csv.gz",
+      "sha256": "8db36cea9f5d91eeda2c6776fd6c4cb45f388e671cbfb9582ca288da7808de17"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/019_API3.csv.gz",
+      "sha256": "c80ef76d286fd934c8637069bd38bc59d826483d02b870870ffb68aa2eb65f69"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/020_APR.csv.gz",
+      "sha256": "8083fa2304108cf4bbc916aa8bcedcaef058bdfeb5350aef90026a8fa3f87122"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/021_APT.csv.gz",
+      "sha256": "5494e5f1fc0aec4412a4af4fba1cc5cc94d9169378681ba460ac9f1e0fcdc536"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/022_AR.csv.gz",
+      "sha256": "1f18b5c1ff1339bd99b287bbe5d7068ff8aa4fb0ac8a003d4e1c63b2a076554a"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/023_ARB.csv.gz",
+      "sha256": "5e0145a58cee098ce62f306024519fdfd613d8cb917194fa0a094ae2a35483e1"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/024_ARKM.csv.gz",
+      "sha256": "69c15b0aa7803ba4e0553de6b8801d617eb0c5741345f7e3ada0f550ab6154e1"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/025_ARX.csv.gz",
+      "sha256": "6988f86511770e01490b649637a63c4c895b465b872542b698080e08a7a24122"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/026_ASTER.csv.gz",
+      "sha256": "faef2444f0baca613271816d9c26fa5f4b3aaf834c721f111d33dd0b6274ff01"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/027_AT.csv.gz",
+      "sha256": "20ebb7cb2507098b83346441fa463ab51d458764f6fe3867b03bd3eadb73f4ca"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/028_ATH.csv.gz",
+      "sha256": "4004d57c5bf4788dbae49ff326b4a1087674e0dbe3cbcb8716db5be0dd33aa19"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/029_ATOM.csv.gz",
+      "sha256": "3bfd3476ae945cd6f248a37abea4e3d39f5a9629a357b231535c340d26401af1"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/030_AUCTION.csv.gz",
+      "sha256": "dbc7338c816aa99aa360e4c7359e4db9fc52017112a4599738b31b4a9bb0584a"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/031_AVAX.csv.gz",
+      "sha256": "d43e90699464db28cef057d9a917bf4881e32ad342ec91bc26e0c1498644d6d7"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/032_AVNT.csv.gz",
+      "sha256": "b321c6d18fdb0650861b2cfc995cd2226715f4bdbb3f089e8789dcf43d12d156"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/033_AXS.csv.gz",
+      "sha256": "7f3b356cf67dd5cc2e96db5fe111945fd28d671dddfac8fcb6418a32e891245c"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/034_AZTEC.csv.gz",
+      "sha256": "7e550d94e7236f5199bc218fd318e97d350f74bd6d1a6af11f53c55371a03b46"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/035_BABY.csv.gz",
+      "sha256": "4b7fe74cab0fe00753db57b83bc9639dfd3477e56f0fa0cd516aacc8bf2c4531"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/036_BAND.csv.gz",
+      "sha256": "71f1bc808041f8fed8d4dc7ab09ff86dbb553954af60c094281794d26d83310f"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/037_BARD.csv.gz",
+      "sha256": "256e4b0bd4733bde58c9a1503452a43635654643ccb24ea9c7f8b5a22a1a1ed0"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/038_BASED.csv.gz",
+      "sha256": "bffa7c38b8b64306e14a1a3c7ceffa35ef73a8ec3e594972866614e7296de891"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/039_BAT.csv.gz",
+      "sha256": "3d57aa65c13648a9ab2ef4ddfe29a306d0cd079d3825bd8a4e8b8916af2ee607"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/040_BCH.csv.gz",
+      "sha256": "8aeb5a1db3db9b2ebe54854d395b371d900b6de834ded1459d5354a9ac469d86"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/041_BEAT.csv.gz",
+      "sha256": "59a2299f87f4b3085f92ea04444dc85bf9e12677e8f2e10c8a89320b484b7dcd"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/042_BERA.csv.gz",
+      "sha256": "2e6633c21e330ddf8e2569d9064f72b95088248ddb5fdce14ff05de5b73eda94"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/043_BICO.csv.gz",
+      "sha256": "c9870575f40009914b69c6928756cbc4ce5d76c040be2235baf792b4774005fd"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/044_BIGTIME.csv.gz",
+      "sha256": "cd30c35ff740d2445f817b03afdd005dd8be0ccfa458f8379b1101b995582101"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/045_BILL.csv.gz",
+      "sha256": "efb8a46c48e2877dd2bd7517d2c7e2a1ef24f196fba3a3622b7a1166f4cb2824"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/046_BIO.csv.gz",
+      "sha256": "544399df3696db2fbaf98d3ea98cd1e00945653e51e22c597ec240ef747db870"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/047_BLEND.csv.gz",
+      "sha256": "9c2e0b712854222b9b17d63d2a7d4483104f9bc12e3bbc1adfbded8a920f7e11"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/048_BLUR.csv.gz",
+      "sha256": "bb7a2e24750a207d32430a27940f2b31119864c016c74e13b3323737d8646c7c"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/049_BNB.csv.gz",
+      "sha256": "3a15ff02ae215663cb89dfec4a02e716928b1437b362a8cfdebf46e537968821"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/050_BOME.csv.gz",
+      "sha256": "fd496eb8a934d80d0bf721dd8e974c42e26b52e3601478aaffda5cb2c746f7eb"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/051_BONK.csv.gz",
+      "sha256": "34e51b99a019fc095d7886bfecd681fe8ca96157bb9979df67a6671d16c867c7"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/052_BRETT.csv.gz",
+      "sha256": "d00c324f28acf0305e5c2c13db2b4c3689d9d201e29ecaa587879ab888133c28"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/053_BREV.csv.gz",
+      "sha256": "bd1b5087b41898444004b5f51a211cc03e5c3b43dd201fb5ded260baed96260b"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/054_BSB.csv.gz",
+      "sha256": "b88982f91ffccf942b7f2ac903667481035a29e97ae84a1cb5efd611d9f2b119"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/055_CAP.csv.gz",
+      "sha256": "b7fb4280ce60b8351fe9ecd83544288e34d9d74772c7e413582ab57b25bcc55d"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/056_CASHCAT.csv.gz",
+      "sha256": "944a09f811c01672189f2daeb376af153131143ef52c6f76aef81628120a2d6a"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/057_CC.csv.gz",
+      "sha256": "54b8223f984942e2d2d0c490e03c914995329f59315fce5dc522d2b63bb3fa4c"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/058_CELO.csv.gz",
+      "sha256": "114f147defbd167a2e5b04b59f40758f54777b1b1b61adb2ae8812cac5afa915"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/059_CFX.csv.gz",
+      "sha256": "c2c268e7451b9911bcc74488e1ed89ed4298e8d7f8c87452a1eae0258abdba1e"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/060_CHIP.csv.gz",
+      "sha256": "de150d01007dad2c58e37dfbd0398fb02d29440bdc9ddaa475272743fc87843e"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/061_CHZ.csv.gz",
+      "sha256": "2cb91e7c5025b4d457710ac034b59fbaa25a6946b54ab3b151d2c7d9299d41b3"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/062_CNPY.csv.gz",
+      "sha256": "181462a19c6074a40bff892d4e8b5ad0ec7a5e526e5bc8c28394a05f52753849"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/063_COAI.csv.gz",
+      "sha256": "41fe186babefb39e38abd6285c9ca6853c961a344d8f0d5c39190b5ed0a54178"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/064_COMP.csv.gz",
+      "sha256": "7af62bac9579ff810f74ca1dfeda59d67d60427742607a4610061edb9aa52536"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/065_CORE.csv.gz",
+      "sha256": "04c8634c96af180a7166ad4d5a227bbfd72f8e08611c0c79ab334b19679417a9"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/066_CP.csv.gz",
+      "sha256": "f8aa17261125650d4d4edd9c9bddedc0d10d0579bb6782434b7da0db378c2e4d"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/067_CRO.csv.gz",
+      "sha256": "94708611e1207fc21ca8884e47a76640a598c55a680d97433382150500f8db7c"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/068_CRV.csv.gz",
+      "sha256": "d6b104de0b513cc17a67837c4ae7b862c208720bb5e58b26df4b7e848ff03bc4"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/069_CVX.csv.gz",
+      "sha256": "82f0536fa0bd3a32900a7ed8da79429b35a7d16abf3a1cd60b6c39ed302bc7ea"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/070_DASH.csv.gz",
+      "sha256": "5ee280054da2d9d2dd46bf433a6b12cf8537802d35ea45af7255da0836ce8906"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/071_DATA.csv.gz",
+      "sha256": "764d73fc7ee5c116593a04c244fa4b96771930dd9683c3b1c777cae83710cf6d"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/072_DGAI.csv.gz",
+      "sha256": "b1d0fcf04d3c73519fa0b455a1e41d334caa484a3d3755bae69923c9531a7749"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/073_DOGE.csv.gz",
+      "sha256": "01a8ee4b5737c6b26da2e88c03badcb14ba1e3a65734547b09c2349d5a97d9d3"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/074_DOOD.csv.gz",
+      "sha256": "0492275d26ade8a3a260305248dcb360933f8862b98ebda7eff0f20a292c2428"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/075_DOS.csv.gz",
+      "sha256": "dc680cc72c2c04c30455fabe6b4ea798571f42b36c19c40a1149e077de1c9c9e"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/076_DOT.csv.gz",
+      "sha256": "178f9a1ff9ad001f1f5ca8a31e6644a533ba3e49fb12c307e82d654b408aca1b"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/077_DYDX.csv.gz",
+      "sha256": "fe716933bcb134e1ad38469849411f36148db9c6e8e25b83e1daaabb2e9877bd"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/078_EDEN.csv.gz",
+      "sha256": "1b5839e06fa54e8bd8b2104e4b12a8deacaad34b4ec633939b6d34bce3ddf9bf"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/079_EDGE.csv.gz",
+      "sha256": "e60c3cfb6bf02821490197b926ef661c511e439653aee651af1dcef6516a0cb3"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/080_EGLD.csv.gz",
+      "sha256": "d66e3d767ec6b2c1aa9bca630b776efc1c6b86607395d9d25d67ce6697aa94ba"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/081_EIGEN.csv.gz",
+      "sha256": "0ce727167acde6f1dfbbd43310e3f36adc4cd356057a2dd7583165e877d3ab90"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/082_ENA.csv.gz",
+      "sha256": "86c20ed73b43e1ec20a046a31c8c68c7631c5f25e57c1054fde6f16be2cfab0c"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/083_ENJ.csv.gz",
+      "sha256": "645a1ab58600f11c7b8ac2a35b54174451e436c0b525c28167135d8c08e0e2b9"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/084_ENS.csv.gz",
+      "sha256": "0ebe0e71ca7a5c8d73c3b2d78ee8cc3735a23c70bf8e13d11968956062157370"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/085_ENSO.csv.gz",
+      "sha256": "d895f1ccfc58a4b6063609d8ac4700bc62b23e9727eb4d74d9df8205c9487fb2"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/086_ESP.csv.gz",
+      "sha256": "5cf21920b498f75178188bdca38de37abbffef3ece4f9536fdc59a85557668fc"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/087_ETC.csv.gz",
+      "sha256": "9bf9348d7270427fe18b765617a92397a0d89df2aa07882708ae92a0d0ab67f1"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/088_ETHFI.csv.gz",
+      "sha256": "d7a6e4e6a1b9e755d43221a6a16a2e7bc9f059347632596bb57e6935a598103a"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/089_ETHW.csv.gz",
+      "sha256": "76750ebde996d8aa0617bfd6ee091f3af34b130843b3ade1315021b68d11730a"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/090_F.csv.gz",
+      "sha256": "e60863073ab355a9474b93554cc0c1f95f64e733387637bfe72f492a95cc71fa"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/091_FARTCOIN.csv.gz",
+      "sha256": "a302d6c03d3897705495a8cee9c77310505d089206dfad1975240d9e0d090e68"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/092_FET.csv.gz",
+      "sha256": "fffeb1e5b213d340adfce30020ee4ebefabe9da6a656535ccfc6fddc8f59a1cc"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/093_FIL.csv.gz",
+      "sha256": "68f9f3a0dfef08f704c5bac81182c9c9ff059ff594255764b588be432b90d0da"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/094_FLOKI.csv.gz",
+      "sha256": "363aecc552064aef23afdd0056a096942e4ad33591c41ff5e74040bae37d5d6f"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/095_FLOW.csv.gz",
+      "sha256": "95d4329a4fab4759aeca3e6ca3c05d23052b6e76db13dc80259a5c38c400f31c"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/096_FOGO.csv.gz",
+      "sha256": "795e89bd029a87e38a21c843a01ae5d01879d6f0c25ed3e25d21655bb255d568"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/097_GALA.csv.gz",
+      "sha256": "0accf242f48ddd88d2102a0ca8aae4f16af91eb4a2a0e212037e24741f28e69e"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/098_GAS.csv.gz",
+      "sha256": "33b4e4b0a1a36624a9e3b2bdfebc06dc3a2997f107be752d168c6e9c4e3e824b"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/099_GIGGLE.csv.gz",
+      "sha256": "01da74eeffc75a678b2f06d751559637b571f7c68d8ec87a6bda7aa354ea0030"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/100_GLM.csv.gz",
+      "sha256": "67757a91467642e5578341958744dd67077eea08e3632b84426977cbf6d7ec7f"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/101_GMT.csv.gz",
+      "sha256": "2ab3819430a1aea811faa95daf67e4d2f483a5e930b37fa62e7b19f7904fb22a"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/102_GMX.csv.gz",
+      "sha256": "ed14a793843a556b341604c88b5f344d423d97b190ccb83611cd1c37836deef9"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/103_GPS.csv.gz",
+      "sha256": "cf7a8abeb6301ea79cd00104c67d14eb6b0dd854f654a8155f50a0437027e1b5"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/104_GRAM.csv.gz",
+      "sha256": "f5516da870fe3bfd645f9fcddcaef6e5cf6ff872913000965dd107a05c48afbb"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/105_GRASS.csv.gz",
+      "sha256": "5538f13ae7757a0cdc9f58b1a033d82e460e7f34e19c73f3e43491d2ffd8cf26"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/106_GRT.csv.gz",
+      "sha256": "c6f75a73bbd69480ce4cac9efd86ded81e9cd3e172d20b228a2b835710c85689"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/107_GRVT.csv.gz",
+      "sha256": "652291c3da13f4ebed6c2aa03376036d90e2ea570b5200bcb8393a7901e7f9b9"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/108_H.csv.gz",
+      "sha256": "791fbe72bda0718124f53b0562a79a4aa5d6e117f8767132bbaab712a490d57d"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/109_HBAR.csv.gz",
+      "sha256": "e655029806d7ead778d16d5b1b9fb7809c6ddb43dfceff57755500b10f5c97cd"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/110_HMSTR.csv.gz",
+      "sha256": "a669715b886e3a873b5da6512fe18898c88a3af9a5c8d7be1c81e0c64594e30c"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/111_HOME.csv.gz",
+      "sha256": "856a502f05a50a83671db1fe8ec6f97fe2df1d149b879997586b96f0ef887bd8"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/112_HUMA.csv.gz",
+      "sha256": "c7467245ae0073ec1512033b725384a79a4d1c3af8d572c99aa4d7a7b4c11790"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/113_HYPE.csv.gz",
+      "sha256": "d527bbe5764956fbcf85dd7762f6e3998129ef9960b61594c0ace339c7a00452"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/114_ICP.csv.gz",
+      "sha256": "be78e43b1a81ce92d6c4ef860a263ef0d9f476c44a9e358094a44468006ac243"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/115_ICX.csv.gz",
+      "sha256": "ac6d10e64f3dbb53d0624086f423a6a7b1b00934104a112bcceae30632d22b60"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/116_IMX.csv.gz",
+      "sha256": "1081fd55bd524d8830fb4a2edbfed647bffb7d3285dae2e15e7121f30b88f2f2"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/117_INIT.csv.gz",
+      "sha256": "08928b28e5b11fd59698b31155be9e5151668043a30dd37e8810cc987f83c0cb"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/118_INJ.csv.gz",
+      "sha256": "7caa118dc958df6ddf2b99acfbf3385a2decbfc512a11a5582af44a5f5f7fd77"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/119_IOST.csv.gz",
+      "sha256": "4ad41eb9ef85a9d57ab4d65b2137cbb9a2f1c486207f756e9f1661b3feb038c5"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/120_IOTA.csv.gz",
+      "sha256": "a1a01c40f9904e67fae3c0872f168dd3d6b29170c75225792afdef1df61be31d"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/121_IRYS.csv.gz",
+      "sha256": "dc1f5a959ead560b79e4158012f6059da755e8ec535fdba36eed1c2ffed859c8"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/122_JELLYJELLY.csv.gz",
+      "sha256": "bc9ad073c77cc29c0b5964c84329663a232faf73e254bb2a2f39d882238981bd"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/123_JTO.csv.gz",
+      "sha256": "fc046ebd6354d67d973ab47e1a3d1541e437414c8307b3bccc6f45ae4ffd1b47"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/124_JUP.csv.gz",
+      "sha256": "7297725612d05d843d512430497ad4a425a9a37a49bfcd31e1310daca0dfb283"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/125_KAITO.csv.gz",
+      "sha256": "346139c865e2a593d4de622fcb30b292f495075d288ded594da36bf4fee69182"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/126_KAT.csv.gz",
+      "sha256": "a7bf1ec1046fe76c96e4d91bafae5f8b1ebd3a7202ae98c04433e32ff2fb53e5"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/127_KGEN.csv.gz",
+      "sha256": "e1ded68cf1c4e31a88c7799f8ae5f3c332a296c23b3de9fc19a3d737b7cdef27"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/128_KITE.csv.gz",
+      "sha256": "8070bfc9f0480bac7a336a0058824118d7cac6bd56afa67b24e03fbf30d7733e"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/129_KMNO.csv.gz",
+      "sha256": "0524b5f47b34893f62aa1173b8671605f905b00380dcaa7a8012d1f8f9cd2690"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/130_KSM.csv.gz",
+      "sha256": "0d3535552137f53f12c574ee8d91af0ef4e896f9b2d8996194252ac932be4f9f"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/131_LA.csv.gz",
+      "sha256": "f8e78a3592a0759988c1a755a71683d5cf0eb9ab0ae7765311d8a41f95ea9d71"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/132_LAB.csv.gz",
+      "sha256": "e79f317ac94ec6efd28d2cdf89c10361692561b0571eb89d8f5e669917b3cdc1"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/133_LAYER.csv.gz",
+      "sha256": "1b7609301c002273630e6d6ab5c64b294ed5803e374aebf59c84ab06fdb070b0"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/134_LDO.csv.gz",
+      "sha256": "19fd42628aad47ef4913987bec17ad9899b53acf32fc9c57ebb372d10de4fe48"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/135_LIGHT.csv.gz",
+      "sha256": "c363e6d6b215bf51973b6869bac9f6c14b48471db02e64192b119c55595bd632"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/136_LINEA.csv.gz",
+      "sha256": "5c6def76e196f1214c9441dc4acba8493081b8d823936ea990f0f4584f1876ff"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/137_LINK.csv.gz",
+      "sha256": "4b858afdcc86185ce103231bc7c320a7e12753b2b6664bb215cc0f5f8eceb3cc"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/138_LIT.csv.gz",
+      "sha256": "084a99da2c0b4ffa3b6dc1896bc32864fc4f6f088e99d0314716ca5d58617108"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/139_LPT.csv.gz",
+      "sha256": "526690a70880063125a7ea9e309a344e51b07d0d64bef60d99f7db10dbd94b4b"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/140_LQTY.csv.gz",
+      "sha256": "6a17833e13281e3e2453e39f0d0c66e8879556c3222f63e4cd0a0778f6853719"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/141_LTC.csv.gz",
+      "sha256": "1b45b782ea0b5bb0f3a532c70ed953062763dbfb9fd3bf557f4b346cbda068c8"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/142_LUNA.csv.gz",
+      "sha256": "d0f49b5a8578ac6e7be168f4434d3afed6e15f328b275e01ad24254c27246bd6"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/143_MAGIC.csv.gz",
+      "sha256": "eae1d0771990645ef4d920a5612d5cde026ae8423552dbf7c820c614329ad0a6"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/144_MANA.csv.gz",
+      "sha256": "d3807a7727f1c2b18a715815f32144bb7c57ef894f6d85232a7e403b8cdef448"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/145_MASK.csv.gz",
+      "sha256": "a5c7757b7e05322bf5b9822fd5b5a60862069628715df1114f00a68e22f94c52"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/146_ME.csv.gz",
+      "sha256": "2070bee78e24294794ac2402b249c04b077322045c7ab4be2ecfb6f0b2c24241"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/147_MEGA.csv.gz",
+      "sha256": "de95b82031b15cd73459918125292e56c7019037eb93fe214ec771ef04e3db0f"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/148_MEME.csv.gz",
+      "sha256": "57d0a53cd7d0e16fdb5c475de40b0323f63078ffac940a8864652c6982340716"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/149_MERL.csv.gz",
+      "sha256": "5cec457323eeed2749fc7c02530842ef7ef4cd180b6dc256e8ae3902cbef298b"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/150_MET.csv.gz",
+      "sha256": "5ee31ec6dfe5928c18e925dbdc003522fef5808f0e67198c0bc09d4b324da2a9"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/151_METIS.csv.gz",
+      "sha256": "b50b77df6f91eec83a5669726fa277f156da05f81b4ee6f7d4b5abfe71df5a0c"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/152_MEW.csv.gz",
+      "sha256": "0cd9f6908fc039430abc4b845d47091ef95f9f7f7dae80fca332dfe12f66e27b"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/153_MINA.csv.gz",
+      "sha256": "ca5283274637180817363b14909f75bdfb6208e67aeb4b54d6ecff10f4e1de54"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/154_MMT.csv.gz",
+      "sha256": "9cd425bb73b5cc6bfbafa0f92c1e6a506e67049f1ed42dbc37433b37d718f069"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/155_MON.csv.gz",
+      "sha256": "7eaa7ebe24f50ce28b8863c3b48ceb8a7dae288afa1793c46857b21396b650f8"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/156_MOODENG.csv.gz",
+      "sha256": "d22bfba167ce04eca80bee03f9dfe6b14a70bd5f4d0d845fe77e4b9c1878d965"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/157_MORPHO.csv.gz",
+      "sha256": "323c3e9bec97cb74925dfc109e13d5f602545e69db399c9acb2adc19063a59cb"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/158_MOVE.csv.gz",
+      "sha256": "f0bca71aa86037430c7cfe3f16f7ccc4a68a8452bc945127e9c8c8ab5212bcad"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/159_MUBARAK.csv.gz",
+      "sha256": "a409af6f762c5671c26562eacdf80beea1390b9511dee0183d7b6f804db12e20"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/160_NEAR.csv.gz",
+      "sha256": "d1a376a043a3e4fa9171b98f3b2d1a031a2eb84c8e445678f08b7b6507ed5b06"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/161_NEIRO.csv.gz",
+      "sha256": "631820299de592c3b76275bcdfe6a3973c8ae8baede409ef8c83ad456065bf09"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/162_NEO.csv.gz",
+      "sha256": "2a78bc455a0027cef23b344dee3ebf58f9673446f28e66d4d83af4418f4e8aba"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/163_NES.csv.gz",
+      "sha256": "f19c7d4ba6501937ee4bdc9ac4ce0aef89408c2439b183f43eed5fc5167bdbbf"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/164_NIGHT.csv.gz",
+      "sha256": "83640fbe82ff3b4fce2d3c9a33ace976cd2c8b34fb66e99259f37d713f0972a1"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/165_NMR.csv.gz",
+      "sha256": "6b7f67ba2a5ef35d6ababa01700cb89eb99bc16036d7faf4f44358d9c24b0cdb"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/166_NOT.csv.gz",
+      "sha256": "3ecd0e4cc5e14db4f2a967ce07c834a856e63cf21b9d4ef7a3e8226bbd08473e"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/167_O.csv.gz",
+      "sha256": "69307eaefbf0a30aab8a77ba701d82bc4954d087e3bed4568605d215a1a5e131"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/168_OFC.csv.gz",
+      "sha256": "a3908c6fada37e42f27fc6130cc569b68dbef961e88fa8691d7e7fe6a6ffc788"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/169_OKB.csv.gz",
+      "sha256": "1a9caf756e6316023cf7efd48221b951c3a8e1649c6c34e0907cec06de9b4a85"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/170_OL.csv.gz",
+      "sha256": "2e6224374cfefd53a8f48af10dfee9347c23729fababb4c707e4147544428ca8"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/171_ONDO.csv.gz",
+      "sha256": "7a3c98149ce4da5bf8336c9bcadbd4f8b52759f83a9e86a496d6ff3c7a52bcad"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/172_ONE.csv.gz",
+      "sha256": "6c593e6627951fef8f37917f3fe5158df25e96aed6ff0f8c1dddaeb7023b7efd"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/173_ONT.csv.gz",
+      "sha256": "724c52c91d3a0ab6118ce3528c426893a03781ad070bd3ec040b370a80149b36"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/174_OP.csv.gz",
+      "sha256": "6c1b92443cffd8c6244d3ed8148fb2b7f66e5a50a0fd8e6fce8e4858a4486251"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/175_OPG.csv.gz",
+      "sha256": "db2c1b448effc6cb1ee960e0b2c6cc70bd1ae4e9f48cacb2dedc4c2caa615eab"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/176_OPN.csv.gz",
+      "sha256": "43ad73bdcdeb9c314700c5591f46a3d8e42d94783893dacee7cad61e111f1362"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/177_ORDER.csv.gz",
+      "sha256": "255af89b5378bdd9bb9a856108fc5d048724928719e2ad0c3dce975765137b44"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/178_ORDI.csv.gz",
+      "sha256": "61fd590477ca9e8dc4ca34bbf4bcbaf43e0853922b20b4ad59439821720063c7"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/179_PARTI.csv.gz",
+      "sha256": "fb63d6579c7e5473ffb6e8969e012d9484bc341b5d4066d5b27f267570263867"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/180_PENDLE.csv.gz",
+      "sha256": "33246d11e6bfd554f78f6874acb326583392abfd19296360751ee001ee7119fa"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/181_PENGU.csv.gz",
+      "sha256": "25eafbf2b9d29e8fe653f475b47a1d018adaa849ca24596fe3212a4c0d4c6035"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/182_PEOPLE.csv.gz",
+      "sha256": "bc274d6b11b4791fe8a9f5cdd3637cc35adf93299945b2dd61d65651aec29515"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/183_PEPE.csv.gz",
+      "sha256": "7945663e25069e5e2a15b986030c9e3129af5abf0b224afda3820fb2a7225f31"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/184_PI.csv.gz",
+      "sha256": "708c0099a865a53d5ab24cce43b2436689d1970a04ca5b8d1f04133882b5e095"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/185_PIEVERSE.csv.gz",
+      "sha256": "44e894203095b3bc694ee96480ff4e19b7ea838ce9643aa03949966f13b1d7b4"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/186_PIPPIN.csv.gz",
+      "sha256": "742f03563db2e2138176b89556b438570abe5341e0761cb5c62c30b08fc52162"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/187_PLUME.csv.gz",
+      "sha256": "d9f59001575a2a46cec1b18cc002136830dbc2100a46c93a8930f0a7f2f766a2"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/188_PNUT.csv.gz",
+      "sha256": "f7094b2b7bc51a01ee2e67fe96775eb526f51857e9fee9ca61e068aed03c8843"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/189_POL.csv.gz",
+      "sha256": "7e527fd2779bfee2f9d600a91fa730a082b27f877d7fd0680b422d0d5fba4d6b"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/190_PONS.csv.gz",
+      "sha256": "e009c578a07b52c8302f75a1b3a7c4dc09d6b9ebb61927bdf48efa9af58ef2dc"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/191_POPCAT.csv.gz",
+      "sha256": "624346982990717ec0b7ed37ca6f6c151b9dbd9b9be5fc4da2801076d783e7ba"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/192_PROS.csv.gz",
+      "sha256": "fccc79607e0db4a755f196a4206fe4d1b5c2a924a2dee633bae46a8c7518623b"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/193_PROVE.csv.gz",
+      "sha256": "6e306d1006c4506f7a6c246445d5f414894b0165643bc9b19320677bcd6d592d"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/194_PUMP.csv.gz",
+      "sha256": "931c17f0b8bdf69d7eef8de4109578d977f1b34650d9f0aa8ae7cabfae12e230"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/195_PYTH.csv.gz",
+      "sha256": "108fa0bc088bd272e75773aa695e2c3d902adf3f0088e4f791eb664ec275814f"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/196_QTUM.csv.gz",
+      "sha256": "668aa455bac2de6af962442192ea3563a39d3bcb2c8855e8406a455d361de232"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/197_RAVE.csv.gz",
+      "sha256": "0e807aa35e92532669753f3c6ae1574fe3653f178cffbe516caa592121cefffc"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/198_RAY.csv.gz",
+      "sha256": "a1da1c177e463f0fa3ace314e9e8b25d4f4b8e33078dee22ba4ac5711c024d11"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/199_RE.csv.gz",
+      "sha256": "77ccfd571cd0c1ac6ddcd8dd11568054b7ab293ebe0d2e265ddbdc8946916739"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/200_RECALL.csv.gz",
+      "sha256": "55bd67bab159df964457dde8d756326e08efb274e2f7a5a65c279805036ac1cf"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/201_RENDER.csv.gz",
+      "sha256": "cf58918f6260823b81d9cca6128cbfe8e8e04102ebe7b4fe3f1ca61435176121"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/202_RESOLV.csv.gz",
+      "sha256": "bad133517043bdbe82d912ad716470710f7129bd05d2d978537fbd2334929e35"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/203_RIVER.csv.gz",
+      "sha256": "76461fcb741d6ba6e8c80259440158e26f3316ed2f931af5d16e8eb0682054e2"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/204_RLS.csv.gz",
+      "sha256": "a507eb4379b5c01f291024cf6f8d25e434db41572bccb8dd5bcf5a652c0a4951"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/205_ROBO.csv.gz",
+      "sha256": "9134a705dfdce2f5c014b7a96801388f60069bc808ba990829bf4b0c1375df9f"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/206_RSR.csv.gz",
+      "sha256": "19ad8e56fbd2999df11cb79c7995c9f264301117569ab1e2e1223d1cd8dafc55"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/207_RVN.csv.gz",
+      "sha256": "134377f314264960a8fe5842cfc1fe324be86d80d91bb712fa533c1d9560e2a4"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/208_S.csv.gz",
+      "sha256": "4e321c81437a7ada0c6b1a4d1ef1c87e3d07ef54e3ece381004b2e83df85ee6d"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/209_SAHARA.csv.gz",
+      "sha256": "6c62358e3a72a4702365a412e586f33f3943e4126bc594c7d5d5376ccde368a2"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/210_SAND.csv.gz",
+      "sha256": "340f9e04d01521ceec7c641c86d1e4b6668192a7f3ba5a3fb4f8c5ddaf4102c5"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/211_SAPIEN.csv.gz",
+      "sha256": "f87e1197aeb2dbea810dd698e97302347defe210a4325ce84c28611eaf6a2d9e"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/212_SATS.csv.gz",
+      "sha256": "326718c9e42d13011dc9b289cc9f43e2f7a3c8e3b137ac4082391b3bc3612812"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/213_SEI.csv.gz",
+      "sha256": "bbb516d124315c025900516da1ecdfa8749f873e2b7021fcd0547eb9415e9e3f"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/214_SENT.csv.gz",
+      "sha256": "4e305c75562c18dd66aac9659409f512b8c60bb0cef5a0b5f46cdd66c995d5e3"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/215_SHELL.csv.gz",
+      "sha256": "4c2305c074601aa2686dfc96c6ef1e44ab31d328a94bf525b95e614c787638b5"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/216_SHIB.csv.gz",
+      "sha256": "08a6852dbba3b9447404510f7b3974a5e9fdf7e770bbdf54cd4b1e1ae4268c9b"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/217_SIGN.csv.gz",
+      "sha256": "0ef0f6387dc2f26a0680a4cc1e69672165825a1ce145f687305f2916bd7e75f6"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/218_SKY.csv.gz",
+      "sha256": "678f5b1c6355e42c6d23b7404705ea7d4628afbbff5b97459fd1195074d1e464"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/219_SLX.csv.gz",
+      "sha256": "d0181fa887eef73601153ba33677fad8b1b5f6978a0639c00f3e662f979442ae"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/220_SNX.csv.gz",
+      "sha256": "dfd4908b7cf77a5f3ff40850bf8da7acc8cd782affd15eb65517f126da00e0b3"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/221_SOL.csv.gz",
+      "sha256": "71781297a95f5d6345670aa849e5164bb4c0855ec6c97452acb6f4f6eb4908f9"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/222_SOON.csv.gz",
+      "sha256": "8947fc190f94451c8915c358db8134327877dca8b120f87bb9797f292db2b439"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/223_SOPH.csv.gz",
+      "sha256": "57c3d72fb29c07dd548fc0f808e570b9694aacea2ed0460e9f5c4964b61304c6"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/224_SPACE.csv.gz",
+      "sha256": "8a442b48cb1adb1825d2236c51906a35c131cd16e247d5a3f9c677a360058ef4"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/225_SPK.csv.gz",
+      "sha256": "735b24e894c05f5aa104f5a7789336389bb92a355701858e392115f193eb2ec3"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/226_SPX.csv.gz",
+      "sha256": "3ee614419b12cfb349468f0576e21f1c051fafe9cd243f1b8f29f171b6c5189e"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/227_SSV.csv.gz",
+      "sha256": "5d099c0632b2482c955e44ddb9be281cdff9bb41d2453cdf92464d968d9c8c58"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/228_STABLE.csv.gz",
+      "sha256": "92babd3457a734227873c4ce012ecb413cd27e5d4bf942c77329cfeefec44dc2"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/229_STRK.csv.gz",
+      "sha256": "cc8f40a4443cdc08b2fb698d7423c1d7c2313a70bb780596c05707d2cf7dcd46"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/230_STX.csv.gz",
+      "sha256": "6306e4c06f6acc22967c46add28a4c5535d7852a16fe3cff97877ec08f1d8090"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/231_SUI.csv.gz",
+      "sha256": "5a53fc54741c8db2409a7031ff825fa123123ef0c269335fc58bdfe952560f9b"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/232_SUSHI.csv.gz",
+      "sha256": "0caff4f04099f05a0b18844b9562d7e22cf6c94bad4085b126a377fee321bb37"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/233_SYRUP.csv.gz",
+      "sha256": "3548decfe70132ae71f5bda1135f11e380cfa5a1b77b8aa079a105bb30e348f4"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/234_TAO.csv.gz",
+      "sha256": "40709bee779d7a52a9a10de60113d0bea1c22d3b890b53bff5b7f9ab01129c4e"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/235_THETA.csv.gz",
+      "sha256": "77d67c41f72a3a68bd6465b9e264740c569673f8c42145f4302d023f5e6b2552"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/236_TIA.csv.gz",
+      "sha256": "e814941c7c44b5476d4017b04ec89dceea17c846c66b4c65babc6c8badd69499"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/237_TRB.csv.gz",
+      "sha256": "db01f0fbed3823d52599aa0f074fcefaed49f7e804336aefafdb9c14875f1d48"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/238_TRIA.csv.gz",
+      "sha256": "610d98c0e08bbba57c195f626a2a53d1f9cb8e04d168d5a037ccf4fc1d85a61e"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/239_TRUMP.csv.gz",
+      "sha256": "ffc9b3b95c5e37de7dac013d84c9f660911c34dc3f44f3260e2e6e577011c5da"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/240_TRUST.csv.gz",
+      "sha256": "ca7acc05d8acbc4800f78a6c62d5d39881bcd2d93983ff57df0779b35e51dee1"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/241_TRUTH.csv.gz",
+      "sha256": "60fecc5349c8376300b47c41d6d4805a125229392c4c3bcec6b36fd606128eb4"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/242_TRX.csv.gz",
+      "sha256": "c4b4d89cc79289e1855c3d85b7071dcc6c4e97dc48ebb25b51cf2900ff914b8a"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/243_TURBO.csv.gz",
+      "sha256": "89f250e0243833dc16bd1bebe533173534d8ceea0549dbfc10a783c513b84d1f"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/244_UB.csv.gz",
+      "sha256": "ab519ff0b5eb99e4ec82236f629901cf333b3e100b2d1b8c145941c7e458141e"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/245_UMA.csv.gz",
+      "sha256": "379fcf68ed2d536a07ce16587fbbdd02d0821660de4217b362e941fff3eb7521"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/246_UNI.csv.gz",
+      "sha256": "0ce5cde5f8b2eef0a5955f1a4b616dd1715074c6d0f8b98ac23a99c388784a37"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/247_UP.csv.gz",
+      "sha256": "5de091ddd493ae5a0ad31df850b6e5e4085d3669c1ca2286f204cf9e28c1b1a2"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/248_USELESS.csv.gz",
+      "sha256": "561425c2aaa5aff6a19cb4fee9beda1b377e9971e5f5fd0808e53b8d20f8831f"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/249_VANA.csv.gz",
+      "sha256": "586590f622654515b8a902bf7a350f8806a21d3fc6c511691babbadca4e9b964"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/250_VIRTUAL.csv.gz",
+      "sha256": "5011f10c9935eff9f011a35c043236d3f0f1ea605428fce93deeaf36a93652af"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/251_VVV.csv.gz",
+      "sha256": "30f1ea1e2ea97e16bf549c030ecca5b1b7f38d15992c7c74e0210eab5f2287cd"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/252_W.csv.gz",
+      "sha256": "4a6fb335d276132cb196d8e431503504e7fb7456a56e3c92685790c4b270bc1c"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/253_WAL.csv.gz",
+      "sha256": "d073a1e1ce0fb2497ff51e6a920b938d246186eb3c55af78def98cb37a53f106"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/254_WCT.csv.gz",
+      "sha256": "75c7f0275d89d5e2253d94f12c2b6997c1eefd56db8db1568b041e04cfd71c74"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/255_WET.csv.gz",
+      "sha256": "24c6a89347254f3b482679ad7b51d712f58321332e49047ed5e00ce39afc4579"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/256_WIF.csv.gz",
+      "sha256": "d4d9e5779d259ab4df71922b5f616e3652840560e49f037931ccd66a925acc0f"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/257_WLD.csv.gz",
+      "sha256": "8f36f50af9758c7dd097fb157460ec94c7b0c6fcfbe2147a6a093308521364d0"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/258_WLFI.csv.gz",
+      "sha256": "9a332884a69959ace611d20cbdabe5c03723b8cd408d29ba491a2b5cb19a2b39"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/259_WOO.csv.gz",
+      "sha256": "c4ef6f8d76117de4a9bebda013adbb2fe93c7acf2c5cd543f959a17109784ed2"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/260_XLM.csv.gz",
+      "sha256": "340f8c565108002f0661a144d9a69c86614213172ae8563f0d812ea3a534b62b"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/261_XPL.csv.gz",
+      "sha256": "1af50bb424178deb06c2fb2f494be6e4dd75ff7ca9755e4a61bc90f0c6e6b7f5"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/262_XRP.csv.gz",
+      "sha256": "c1bb9fa376b80607198085d2dcf5bdcc259d03f135d60c019b48b334848c46d7"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/263_XTZ.csv.gz",
+      "sha256": "957c7e004f0dd4dcf630348daebd73e53236532b3c7d1b3bc2f40efb3202e092"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/264_YB.csv.gz",
+      "sha256": "a94f6d3b6966e6666abaf0476fb6c7191e062650baf8097e72e8a08a7cfc936e"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/265_YFI.csv.gz",
+      "sha256": "f60b33a10493e1cc27e7435be5fb868bdbc9bc5b9b329f83d1b95a7444ebf179"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/266_YGG.csv.gz",
+      "sha256": "91c6fc4e2389e298555ee5687fa7e2f67e765edce78b5f11109b87e7809ee04f"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/267_ZAMA.csv.gz",
+      "sha256": "0885eeaa8ed190f11aeb922deec2eab40f7c62d98b1908a62b61f58449809190"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/268_ZBT.csv.gz",
+      "sha256": "3c73993545c71b6f7288b7ac7d312b4d04c0fd2c695202f9a603d1fae9201cba"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/269_ZEC.csv.gz",
+      "sha256": "3a957b78de8d112bc37486e22b50e314d255d751a23a0e00ed77c401adf97900"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/270_ZEN.csv.gz",
+      "sha256": "0ed2f40a4d0f1e741f2387a188dee7c9278d3eb4fe486b1cc1bf36b4b90070d1"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/271_ZETA.csv.gz",
+      "sha256": "4fd0c72b1dd447b617f497108f4b7b4094666275cb3b92b92234842e364a26e3"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/272_ZIL.csv.gz",
+      "sha256": "27740de230384cf6dbca4b7a61a7417b8dd16edc475247b0d6c0c732e7768537"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/273_ZK.csv.gz",
+      "sha256": "bcb0ddcd8fb580c805b07b22fb0cbe54d96a893a788bdee03d74761cb49df0df"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/274_ZKP.csv.gz",
+      "sha256": "9719a154ec65d4210cd7d35dc1421978289f2060db3b4ec13200d8e85dec55ab"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/275_ZORA.csv.gz",
+      "sha256": "92322dff2041cc8bd01227d5d84907b6f50092ce62fb47a9d15882e8bd44bf31"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/276_ZRO.csv.gz",
+      "sha256": "6111d5c682a6178652774c795dc09b4ec21197ff8fd7e3265359e417c228fb61"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/277_ZRX.csv.gz",
+      "sha256": "f39e2c8ec761626f46fd38b0aeef5949478812c52224cc6bcd596c36e9e6d24b"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/trade_controls.csv.gz",
+      "sha256": "33ca8dd63380d758510dc96cfe421bb3ac8fddd8696845e23ea7fdf87105b0a4"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/trade_events.csv.gz",
+      "sha256": "1cdee9249e8d3dda099c622e645eb83cbb0cf74ac0edcc0765a0c152ca5ea417"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/trade_summary.csv",
+      "sha256": "4e738c7d47d9471d82241fb6e032fedf836689ee94105662143a42fcee6bb5b7"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/validation_manifest.json",
+      "sha256": "b94367b06517fd4639473dbf6a4806cdf9d12dddbb7cfa59c3a1f98f5f8d121b"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/pine/spike_burst_v3_focus.pine",
+      "sha256": "74c5a5f06025da5081dbabd54be4cbf20226a05350f383a44880f93ea5de45ce"
+    }
+  ],
+  "figures": [
+    {
+      "key": "hype",
+      "asset": "HYPE",
+      "instrument": "okx:HYPE-USDT-SWAP:segment0",
+      "focus_time": "2026-08-19 16:00:00+00:00",
+      "fixed_window": true,
+      "selection": "fixed owner date, no outcome selection",
+      "first_open": "2026-08-17 16:00:00+00:00",
+      "last_open": "2026-08-21 15:00:00+00:00",
+      "first_close": "2026-08-17 17:00:00+00:00",
+      "last_close": "2026-08-21 16:00:00+00:00",
+      "bars": 96,
+      "image": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/figures/hype.png",
+      "image_sha256": "29374ecdb402456158c29257eb464d62c4b7f0fa03c18da4ce3e73c199c9f60d",
+      "signals": [
+        {
+          "arm": "v3",
+          "stage": "early",
+          "time": "2026-08-18 07:00:00+00:00",
+          "signal_close": 59.976,
+          "parent_time": "2026-08-18 07:00:00+00:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "time": "2026-08-19 13:00:00+00:00",
+          "signal_close": 59.279,
+          "parent_time": "2026-08-19 13:00:00+00:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "confirmed",
+          "time": "2026-08-19 16:00:00+00:00",
+          "signal_close": 61.851,
+          "parent_time": "2026-08-19 13:00:00+00:00",
+          "confirm_age": 3.0
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "time": "2026-08-20 09:00:00+00:00",
+          "signal_close": 73.13,
+          "parent_time": "2026-08-20 09:00:00+00:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "time": "2026-08-20 22:00:00+00:00",
+          "signal_close": 74.915,
+          "parent_time": "2026-08-20 22:00:00+00:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "time": "2026-08-21 14:00:00+00:00",
+          "signal_close": 76.918,
+          "parent_time": "2026-08-21 14:00:00+00:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "reference",
+          "stage": "early",
+          "time": "2026-08-19 13:00:00+00:00",
+          "signal_close": 59.279,
+          "parent_time": "2026-08-19 13:00:00+00:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "reference",
+          "stage": "confirmed",
+          "time": "2026-08-19 16:00:00+00:00",
+          "signal_close": 61.851,
+          "parent_time": "2026-08-19 13:00:00+00:00",
+          "confirm_age": 3.0
+        }
+      ]
+    },
+    {
+      "key": "near",
+      "asset": "NEAR",
+      "instrument": "okx:NEAR-USDT-SWAP:segment0",
+      "focus_time": "2026-08-19 15:00:00+00:00",
+      "fixed_window": true,
+      "selection": "fixed owner date, no outcome selection",
+      "first_open": "2026-08-17 16:00:00+00:00",
+      "last_open": "2026-08-21 15:00:00+00:00",
+      "first_close": "2026-08-17 17:00:00+00:00",
+      "last_close": "2026-08-21 16:00:00+00:00",
+      "bars": 96,
+      "image": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/figures/near.png",
+      "image_sha256": "2e2840289342daadf1ee095666bd152f2037853e58837f5f304f92b5f402e65a",
+      "signals": [
+        {
+          "arm": "v3",
+          "stage": "early",
+          "time": "2026-08-18 07:00:00+00:00",
+          "signal_close": 1.65,
+          "parent_time": "2026-08-18 07:00:00+00:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "time": "2026-08-19 07:00:00+00:00",
+          "signal_close": 1.62,
+          "parent_time": "2026-08-19 07:00:00+00:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "time": "2026-08-19 21:00:00+00:00",
+          "signal_close": 1.723,
+          "parent_time": "2026-08-19 21:00:00+00:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "confirmed",
+          "time": "2026-08-19 22:00:00+00:00",
+          "signal_close": 1.77,
+          "parent_time": "2026-08-19 21:00:00+00:00",
+          "confirm_age": 1.0
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "time": "2026-08-20 23:00:00+00:00",
+          "signal_close": 1.773,
+          "parent_time": "2026-08-20 23:00:00+00:00",
+          "confirm_age": null
+        }
+      ]
+    },
+    {
+      "key": "pepe",
+      "asset": "PEPE",
+      "instrument": "okx:PEPE-USDT-SWAP:segment0",
+      "focus_time": "2026-08-19 15:00:00+00:00",
+      "fixed_window": true,
+      "selection": "fixed owner date, no outcome selection",
+      "first_open": "2026-08-17 16:00:00+00:00",
+      "last_open": "2026-08-21 15:00:00+00:00",
+      "first_close": "2026-08-17 17:00:00+00:00",
+      "last_close": "2026-08-21 16:00:00+00:00",
+      "bars": 96,
+      "image": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/figures/pepe.png",
+      "image_sha256": "19a20f77b3f2fdd86ee4a73385819c50073514aae3925128c50849828b660c2f",
+      "signals": [
+        {
+          "arm": "v3",
+          "stage": "early",
+          "time": "2026-08-17 22:00:00+00:00",
+          "signal_close": 2.604e-06,
+          "parent_time": "2026-08-17 22:00:00+00:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "time": "2026-08-18 16:00:00+00:00",
+          "signal_close": 2.609e-06,
+          "parent_time": "2026-08-18 16:00:00+00:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "time": "2026-08-19 13:00:00+00:00",
+          "signal_close": 2.616e-06,
+          "parent_time": "2026-08-19 13:00:00+00:00",
+          "confirm_age": 0.0
+        },
+        {
+          "arm": "v3",
+          "stage": "confirmed",
+          "time": "2026-08-19 13:00:00+00:00",
+          "signal_close": 2.616e-06,
+          "parent_time": "2026-08-19 13:00:00+00:00",
+          "confirm_age": 0.0
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "time": "2026-08-20 05:00:00+00:00",
+          "signal_close": 2.952e-06,
+          "parent_time": "2026-08-20 05:00:00+00:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "time": "2026-08-21 05:00:00+00:00",
+          "signal_close": 3.315e-06,
+          "parent_time": "2026-08-21 05:00:00+00:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "reference",
+          "stage": "early",
+          "time": "2026-08-17 22:00:00+00:00",
+          "signal_close": 2.604e-06,
+          "parent_time": "2026-08-17 22:00:00+00:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "reference",
+          "stage": "early",
+          "time": "2026-08-18 16:00:00+00:00",
+          "signal_close": 2.609e-06,
+          "parent_time": "2026-08-18 16:00:00+00:00",
+          "confirm_age": null
+        }
+      ]
+    },
+    {
+      "event_i": 2468,
+      "bar_open": "2026-08-11 20:00:00+00:00",
+      "decision_time": "2026-08-11 21:00:00+00:00",
+      "entry_reference": 0.2066,
+      "frozen_atr": 0.002840758647649696,
+      "label": "positive",
+      "unknown_reason": null,
+      "target_lag": 8.0,
+      "adverse_lag": null,
+      "future_peak_return": 1.2071636011616649,
+      "large_peak": true,
+      "in_study": true,
+      "label_id": "073f326983d9b478a85ab7091fbd",
+      "instrument": "okx:APR-USDT-SWAP:segment0",
+      "asset": "APR",
+      "symbol": "APR-USDT-SWAP",
+      "venue": "okx",
+      "minutes": 60,
+      "base_hit": true,
+      "a_hit": false,
+      "key": "largest_missed_by_a",
+      "kept_by_a": false,
+      "selection": "largest future24 high return among original V3 timely positives; tie instrument/event_i",
+      "focus_time": "2026-08-11 21:00:00+00:00",
+      "fixed_window": false,
+      "first_open": "2026-08-09 20:00:00+00:00",
+      "last_open": "2026-08-13 19:00:00+00:00",
+      "first_close": "2026-08-09 21:00:00+00:00",
+      "last_close": "2026-08-13 20:00:00+00:00",
+      "bars": 96,
+      "image": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/figures/largest_missed_by_a.png",
+      "image_sha256": "3ac2cdc879ebc8d209fdf31a44b1564601e659ad5414cdd2fad5f16cb3ec613c",
+      "signals": [
+        {
+          "arm": "v3",
+          "stage": "early",
+          "time": "2026-08-11 21:00:00+00:00",
+          "signal_close": 0.2066,
+          "parent_time": "2026-08-11 21:00:00+00:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "time": "2026-08-12 14:00:00+00:00",
+          "signal_close": 0.3945,
+          "parent_time": "2026-08-12 14:00:00+00:00",
+          "confirm_age": 0.0
+        },
+        {
+          "arm": "v3",
+          "stage": "confirmed",
+          "time": "2026-08-12 14:00:00+00:00",
+          "signal_close": 0.3945,
+          "parent_time": "2026-08-12 14:00:00+00:00",
+          "confirm_age": 0.0
+        }
+      ]
+    },
+    {
+      "event_i": 2695,
+      "bar_open": "2026-08-21 07:00:00+00:00",
+      "decision_time": "2026-08-21 08:00:00+00:00",
+      "entry_reference": 1.723,
+      "frozen_atr": 0.038578929187725,
+      "label": "positive",
+      "unknown_reason": null,
+      "target_lag": 5.0,
+      "adverse_lag": null,
+      "future_peak_return": 1.138131166569936,
+      "large_peak": true,
+      "in_study": true,
+      "label_id": "d098f2966c1fecaf502331dfe7a4",
+      "instrument": "okx:TRUMP-USDT-SWAP:segment0",
+      "asset": "TRUMP",
+      "symbol": "TRUMP-USDT-SWAP",
+      "venue": "okx",
+      "minutes": 60,
+      "base_hit": true,
+      "a_hit": true,
+      "key": "largest_retained_by_a",
+      "kept_by_a": true,
+      "selection": "largest future24 high return among original V3 timely positives; tie instrument/event_i",
+      "focus_time": "2026-08-21 08:00:00+00:00",
+      "fixed_window": false,
+      "first_open": "2026-08-19 07:00:00+00:00",
+      "last_open": "2026-08-23 06:00:00+00:00",
+      "first_close": "2026-08-19 08:00:00+00:00",
+      "last_close": "2026-08-23 07:00:00+00:00",
+      "bars": 96,
+      "image": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/figures/largest_retained_by_a.png",
+      "image_sha256": "beb86401a86894a24807d705a2c14e960c687a43d26cf468b8c68a1953997596",
+      "signals": [
+        {
+          "arm": "v3",
+          "stage": "early",
+          "time": "2026-08-19 15:00:00+00:00",
+          "signal_close": 1.422,
+          "parent_time": "2026-08-19 15:00:00+00:00",
+          "confirm_age": 0.0
+        },
+        {
+          "arm": "v3",
+          "stage": "confirmed",
+          "time": "2026-08-19 15:00:00+00:00",
+          "signal_close": 1.422,
+          "parent_time": "2026-08-19 15:00:00+00:00",
+          "confirm_age": 0.0
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "time": "2026-08-21 08:00:00+00:00",
+          "signal_close": 1.723,
+          "parent_time": "2026-08-21 08:00:00+00:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "time": "2026-08-22 03:00:00+00:00",
+          "signal_close": 2.195,
+          "parent_time": "2026-08-22 03:00:00+00:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "v1",
+          "stage": "original",
+          "time": "2026-08-19 20:00:00+00:00",
+          "signal_close": 1.493,
+          "parent_time": null,
+          "confirm_age": null
+        },
+        {
+          "arm": "reference",
+          "stage": "early",
+          "time": "2026-08-21 08:00:00+00:00",
+          "signal_close": 1.723,
+          "parent_time": "2026-08-21 08:00:00+00:00",
+          "confirm_age": null
+        },
+        {
+          "arm": "near_box",
+          "stage": "early",
+          "time": "2026-08-19 16:00:00+00:00",
+          "signal_close": 1.44,
+          "parent_time": "2026-08-19 16:00:00+00:00",
+          "confirm_age": 0.0
+        },
+        {
+          "arm": "near_box",
+          "stage": "confirmed",
+          "time": "2026-08-19 16:00:00+00:00",
+          "signal_close": 1.44,
+          "parent_time": "2026-08-19 16:00:00+00:00",
+          "confirm_age": 0.0
+        }
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/analysis/p1_spike_v3_focus_20260910.md",
+      "sha256": "05c8c60adf80021d9dd77daa74d9668b181966ec562c69fa0feacebab97ef689"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/analysis/html/p1_spike_v3_focus_20260910.html",
+      "sha256": "d5b5d671b4dabaacdd350f82eb2e686b15b3335150814d1a2024b9e34ccc187b"
+    }
+  ],
+  "posthoc_selection": "fixed largest future24 peak among V3 timely positives; A missed/kept separately",
+  "miss_diagnostic": {
+    "status": "complete",
+    "generated_at": "2026-09-10T09:18:57.134790+00:00",
+    "config": {
+      "schema": "v3-focus-frozen-miss-description-v1",
+      "population": "positive labels in study window with V3 early hit_1 and no A early hit_1",
+      "diagnostic_clock": "fixed label event_i; actual missed V3 arrow_i reported separately",
+      "reference_coverage": "active before and after event, same accepted owner, owner_i < event_i",
+      "actual_coverage": "A owner's valid next-open trade with entry_i <= event_i < exit_i",
+      "same_bar_exit": "not coverage; natural stop and boundary mark distinguished",
+      "current_mark": "event close / actual entry - 1 - original fee_return; live only",
+      "natural_outcomes": "posterior description; unique accepted parent economics, not new trades",
+      "top_examples": "top10 future24-bar high peaks, descending; instrument/event_i stable ties",
+      "fresh_misses_unchanged": true,
+      "new_hypotheses": 0,
+      "detector_changes": false,
+      "production_eligible": false
+    },
+    "source_pins": {
+      "yoyo/evaluation/spike_burst_v3_focus_misses.py": "7fcf42e69f4571fe52cebcb3a3a3ebc25b63b83ba4ea3c2b3609c92e3e9e95f0"
+    },
+    "source_refs": {
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/prepared_manifest.json": "a219b7fe8b25ce165121a988fed1b16b572211de932f74abdea1af4de740eeb4",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/signals.csv.gz": "b2ce1a4dcc6d5f5f177571ab37c4e35dc3ebd2e932a35fd79448e9dcf64c8843",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/controls.csv.gz": "cee0c40955a6df6fdffd926716febf573512e1d2c422df7eed1a037ca39b0f5e",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/detections.csv.gz": "e6c3ebf107ffd4e6b02a79d72e5613df0278d77707096a38c57e54adea57ee09",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/exposure.csv.gz": "319c4c0f6466e9f44f9beecc62f08d756cfaff955b6fb135defc0e3b8e5af9db",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/labels.csv.gz": "861326d772b30dd3ef3b4f8e79f36aee389676592670b059a04529d114089f01",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/matching.json": "de4f58c9450ca61c386dc6dd71ee9af0fe30ff3f9245ab9d00917707343ffd7c",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/000_0G.csv.gz": "2f8fd52f02dcc3ab7be81e2c03c6c04a3089ae91770f68bb9003b3bb7e3f187e",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/001_1INCH.csv.gz": "3a06825571b08f1dd1e91d88be9b1b2151f8ebe22dc8e6ec200023ef714767c3",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/002_2Z.csv.gz": "f9bcf48c09770f85ee7493a596c858ccd591a7b5f10fc513474631a42dc77657",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/003_A.csv.gz": "5ea573edf7bbc8b2b236a9e463ec0bdfa10328057c2243f154509e3284c6f6eb",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/004_AAVE.csv.gz": "89e67f71138e8318a455c106f5b3ed320dd917c4341b9d7c970bc47b8876afe1",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/005_ACH.csv.gz": "c59e1a1254d773e1e2d8853d5ba6a82e26dd69fc743541d7074ec7c5f36bc7ea",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/006_ACT.csv.gz": "dd7a5eaa9db363c2895d8e6b0b85a0e4a65890b1b2fa8217b4fd67d282dcae2e",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/007_ACU.csv.gz": "9821adea0aa361359e7eba1f5d77887a1fc9498183cf41e3b2c87f854e598e07",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/008_ADA.csv.gz": "d1ba7c9fe5d97e2a033ca93789af1c5556f79431d8b3d30706a04356f9b61dd4",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/009_AEON.csv.gz": "dfc6cb1fb0c8c4027dbad7b7f485b33bf4ba4d08bae19d27afef77f365b0cb70",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/010_AERO.csv.gz": "a9017cb6ce5b35f0c379170315b354f1eb5ff39aced755d9f609e6f63cda0869",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/011_AEVO.csv.gz": "fb8278328fe5176454634dc2f874efba57b1b41066137540f665ba0d2f9145eb",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/012_AGLD.csv.gz": "ca7839b6188edef47c3a5ee99c42f15f288e3093220f4a94a4fcfc14103c3af5",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/013_AI.csv.gz": "0e98759b679e313a3b727538f866636cd46a934e164634006cecee2261ebe004",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/014_AIXBT.csv.gz": "43a501c38c7d003da62ad39f7d7b0e2622d548f29ecf0421be51cb5981cc5124",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/015_ALGO.csv.gz": "3eea4cdd254f4632dcf63a0357b699049cde6425038789cb5b18262954e1fa12",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/016_ALLO.csv.gz": "19030af218955e0245e03affd295cc992b0a16d706b478e2870b17c1d4b1961b",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/017_ANIME.csv.gz": "8ece98fb1446258943116988def462a0f6b9bf97e5b911f184069e33c194bc0a",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/018_APE.csv.gz": "8db36cea9f5d91eeda2c6776fd6c4cb45f388e671cbfb9582ca288da7808de17",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/019_API3.csv.gz": "c80ef76d286fd934c8637069bd38bc59d826483d02b870870ffb68aa2eb65f69",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/020_APR.csv.gz": "8083fa2304108cf4bbc916aa8bcedcaef058bdfeb5350aef90026a8fa3f87122",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/021_APT.csv.gz": "5494e5f1fc0aec4412a4af4fba1cc5cc94d9169378681ba460ac9f1e0fcdc536",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/022_AR.csv.gz": "1f18b5c1ff1339bd99b287bbe5d7068ff8aa4fb0ac8a003d4e1c63b2a076554a",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/023_ARB.csv.gz": "5e0145a58cee098ce62f306024519fdfd613d8cb917194fa0a094ae2a35483e1",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/024_ARKM.csv.gz": "69c15b0aa7803ba4e0553de6b8801d617eb0c5741345f7e3ada0f550ab6154e1",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/025_ARX.csv.gz": "6988f86511770e01490b649637a63c4c895b465b872542b698080e08a7a24122",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/026_ASTER.csv.gz": "faef2444f0baca613271816d9c26fa5f4b3aaf834c721f111d33dd0b6274ff01",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/027_AT.csv.gz": "20ebb7cb2507098b83346441fa463ab51d458764f6fe3867b03bd3eadb73f4ca",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/028_ATH.csv.gz": "4004d57c5bf4788dbae49ff326b4a1087674e0dbe3cbcb8716db5be0dd33aa19",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/029_ATOM.csv.gz": "3bfd3476ae945cd6f248a37abea4e3d39f5a9629a357b231535c340d26401af1",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/030_AUCTION.csv.gz": "dbc7338c816aa99aa360e4c7359e4db9fc52017112a4599738b31b4a9bb0584a",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/031_AVAX.csv.gz": "d43e90699464db28cef057d9a917bf4881e32ad342ec91bc26e0c1498644d6d7",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/032_AVNT.csv.gz": "b321c6d18fdb0650861b2cfc995cd2226715f4bdbb3f089e8789dcf43d12d156",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/033_AXS.csv.gz": "7f3b356cf67dd5cc2e96db5fe111945fd28d671dddfac8fcb6418a32e891245c",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/034_AZTEC.csv.gz": "7e550d94e7236f5199bc218fd318e97d350f74bd6d1a6af11f53c55371a03b46",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/035_BABY.csv.gz": "4b7fe74cab0fe00753db57b83bc9639dfd3477e56f0fa0cd516aacc8bf2c4531",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/036_BAND.csv.gz": "71f1bc808041f8fed8d4dc7ab09ff86dbb553954af60c094281794d26d83310f",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/037_BARD.csv.gz": "256e4b0bd4733bde58c9a1503452a43635654643ccb24ea9c7f8b5a22a1a1ed0",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/038_BASED.csv.gz": "bffa7c38b8b64306e14a1a3c7ceffa35ef73a8ec3e594972866614e7296de891",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/039_BAT.csv.gz": "3d57aa65c13648a9ab2ef4ddfe29a306d0cd079d3825bd8a4e8b8916af2ee607",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/040_BCH.csv.gz": "8aeb5a1db3db9b2ebe54854d395b371d900b6de834ded1459d5354a9ac469d86",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/041_BEAT.csv.gz": "59a2299f87f4b3085f92ea04444dc85bf9e12677e8f2e10c8a89320b484b7dcd",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/042_BERA.csv.gz": "2e6633c21e330ddf8e2569d9064f72b95088248ddb5fdce14ff05de5b73eda94",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/043_BICO.csv.gz": "c9870575f40009914b69c6928756cbc4ce5d76c040be2235baf792b4774005fd",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/044_BIGTIME.csv.gz": "cd30c35ff740d2445f817b03afdd005dd8be0ccfa458f8379b1101b995582101",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/045_BILL.csv.gz": "efb8a46c48e2877dd2bd7517d2c7e2a1ef24f196fba3a3622b7a1166f4cb2824",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/046_BIO.csv.gz": "544399df3696db2fbaf98d3ea98cd1e00945653e51e22c597ec240ef747db870",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/047_BLEND.csv.gz": "9c2e0b712854222b9b17d63d2a7d4483104f9bc12e3bbc1adfbded8a920f7e11",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/048_BLUR.csv.gz": "bb7a2e24750a207d32430a27940f2b31119864c016c74e13b3323737d8646c7c",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/049_BNB.csv.gz": "3a15ff02ae215663cb89dfec4a02e716928b1437b362a8cfdebf46e537968821",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/050_BOME.csv.gz": "fd496eb8a934d80d0bf721dd8e974c42e26b52e3601478aaffda5cb2c746f7eb",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/051_BONK.csv.gz": "34e51b99a019fc095d7886bfecd681fe8ca96157bb9979df67a6671d16c867c7",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/052_BRETT.csv.gz": "d00c324f28acf0305e5c2c13db2b4c3689d9d201e29ecaa587879ab888133c28",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/053_BREV.csv.gz": "bd1b5087b41898444004b5f51a211cc03e5c3b43dd201fb5ded260baed96260b",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/054_BSB.csv.gz": "b88982f91ffccf942b7f2ac903667481035a29e97ae84a1cb5efd611d9f2b119",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/055_CAP.csv.gz": "b7fb4280ce60b8351fe9ecd83544288e34d9d74772c7e413582ab57b25bcc55d",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/056_CASHCAT.csv.gz": "944a09f811c01672189f2daeb376af153131143ef52c6f76aef81628120a2d6a",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/057_CC.csv.gz": "54b8223f984942e2d2d0c490e03c914995329f59315fce5dc522d2b63bb3fa4c",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/058_CELO.csv.gz": "114f147defbd167a2e5b04b59f40758f54777b1b1b61adb2ae8812cac5afa915",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/059_CFX.csv.gz": "c2c268e7451b9911bcc74488e1ed89ed4298e8d7f8c87452a1eae0258abdba1e",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/060_CHIP.csv.gz": "de150d01007dad2c58e37dfbd0398fb02d29440bdc9ddaa475272743fc87843e",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/061_CHZ.csv.gz": "2cb91e7c5025b4d457710ac034b59fbaa25a6946b54ab3b151d2c7d9299d41b3",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/062_CNPY.csv.gz": "181462a19c6074a40bff892d4e8b5ad0ec7a5e526e5bc8c28394a05f52753849",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/063_COAI.csv.gz": "41fe186babefb39e38abd6285c9ca6853c961a344d8f0d5c39190b5ed0a54178",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/064_COMP.csv.gz": "7af62bac9579ff810f74ca1dfeda59d67d60427742607a4610061edb9aa52536",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/065_CORE.csv.gz": "04c8634c96af180a7166ad4d5a227bbfd72f8e08611c0c79ab334b19679417a9",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/066_CP.csv.gz": "f8aa17261125650d4d4edd9c9bddedc0d10d0579bb6782434b7da0db378c2e4d",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/067_CRO.csv.gz": "94708611e1207fc21ca8884e47a76640a598c55a680d97433382150500f8db7c",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/068_CRV.csv.gz": "d6b104de0b513cc17a67837c4ae7b862c208720bb5e58b26df4b7e848ff03bc4",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/069_CVX.csv.gz": "82f0536fa0bd3a32900a7ed8da79429b35a7d16abf3a1cd60b6c39ed302bc7ea",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/070_DASH.csv.gz": "5ee280054da2d9d2dd46bf433a6b12cf8537802d35ea45af7255da0836ce8906",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/071_DATA.csv.gz": "764d73fc7ee5c116593a04c244fa4b96771930dd9683c3b1c777cae83710cf6d",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/072_DGAI.csv.gz": "b1d0fcf04d3c73519fa0b455a1e41d334caa484a3d3755bae69923c9531a7749",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/073_DOGE.csv.gz": "01a8ee4b5737c6b26da2e88c03badcb14ba1e3a65734547b09c2349d5a97d9d3",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/074_DOOD.csv.gz": "0492275d26ade8a3a260305248dcb360933f8862b98ebda7eff0f20a292c2428",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/075_DOS.csv.gz": "dc680cc72c2c04c30455fabe6b4ea798571f42b36c19c40a1149e077de1c9c9e",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/076_DOT.csv.gz": "178f9a1ff9ad001f1f5ca8a31e6644a533ba3e49fb12c307e82d654b408aca1b",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/077_DYDX.csv.gz": "fe716933bcb134e1ad38469849411f36148db9c6e8e25b83e1daaabb2e9877bd",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/078_EDEN.csv.gz": "1b5839e06fa54e8bd8b2104e4b12a8deacaad34b4ec633939b6d34bce3ddf9bf",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/079_EDGE.csv.gz": "e60c3cfb6bf02821490197b926ef661c511e439653aee651af1dcef6516a0cb3",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/080_EGLD.csv.gz": "d66e3d767ec6b2c1aa9bca630b776efc1c6b86607395d9d25d67ce6697aa94ba",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/081_EIGEN.csv.gz": "0ce727167acde6f1dfbbd43310e3f36adc4cd356057a2dd7583165e877d3ab90",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/082_ENA.csv.gz": "86c20ed73b43e1ec20a046a31c8c68c7631c5f25e57c1054fde6f16be2cfab0c",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/083_ENJ.csv.gz": "645a1ab58600f11c7b8ac2a35b54174451e436c0b525c28167135d8c08e0e2b9",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/084_ENS.csv.gz": "0ebe0e71ca7a5c8d73c3b2d78ee8cc3735a23c70bf8e13d11968956062157370",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/085_ENSO.csv.gz": "d895f1ccfc58a4b6063609d8ac4700bc62b23e9727eb4d74d9df8205c9487fb2",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/086_ESP.csv.gz": "5cf21920b498f75178188bdca38de37abbffef3ece4f9536fdc59a85557668fc",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/087_ETC.csv.gz": "9bf9348d7270427fe18b765617a92397a0d89df2aa07882708ae92a0d0ab67f1",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/088_ETHFI.csv.gz": "d7a6e4e6a1b9e755d43221a6a16a2e7bc9f059347632596bb57e6935a598103a",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/089_ETHW.csv.gz": "76750ebde996d8aa0617bfd6ee091f3af34b130843b3ade1315021b68d11730a",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/090_F.csv.gz": "e60863073ab355a9474b93554cc0c1f95f64e733387637bfe72f492a95cc71fa",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/091_FARTCOIN.csv.gz": "a302d6c03d3897705495a8cee9c77310505d089206dfad1975240d9e0d090e68",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/092_FET.csv.gz": "fffeb1e5b213d340adfce30020ee4ebefabe9da6a656535ccfc6fddc8f59a1cc",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/093_FIL.csv.gz": "68f9f3a0dfef08f704c5bac81182c9c9ff059ff594255764b588be432b90d0da",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/094_FLOKI.csv.gz": "363aecc552064aef23afdd0056a096942e4ad33591c41ff5e74040bae37d5d6f",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/095_FLOW.csv.gz": "95d4329a4fab4759aeca3e6ca3c05d23052b6e76db13dc80259a5c38c400f31c",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/096_FOGO.csv.gz": "795e89bd029a87e38a21c843a01ae5d01879d6f0c25ed3e25d21655bb255d568",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/097_GALA.csv.gz": "0accf242f48ddd88d2102a0ca8aae4f16af91eb4a2a0e212037e24741f28e69e",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/098_GAS.csv.gz": "33b4e4b0a1a36624a9e3b2bdfebc06dc3a2997f107be752d168c6e9c4e3e824b",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/099_GIGGLE.csv.gz": "01da74eeffc75a678b2f06d751559637b571f7c68d8ec87a6bda7aa354ea0030",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/100_GLM.csv.gz": "67757a91467642e5578341958744dd67077eea08e3632b84426977cbf6d7ec7f",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/101_GMT.csv.gz": "2ab3819430a1aea811faa95daf67e4d2f483a5e930b37fa62e7b19f7904fb22a",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/102_GMX.csv.gz": "ed14a793843a556b341604c88b5f344d423d97b190ccb83611cd1c37836deef9",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/103_GPS.csv.gz": "cf7a8abeb6301ea79cd00104c67d14eb6b0dd854f654a8155f50a0437027e1b5",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/104_GRAM.csv.gz": "f5516da870fe3bfd645f9fcddcaef6e5cf6ff872913000965dd107a05c48afbb",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/105_GRASS.csv.gz": "5538f13ae7757a0cdc9f58b1a033d82e460e7f34e19c73f3e43491d2ffd8cf26",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/106_GRT.csv.gz": "c6f75a73bbd69480ce4cac9efd86ded81e9cd3e172d20b228a2b835710c85689",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/107_GRVT.csv.gz": "652291c3da13f4ebed6c2aa03376036d90e2ea570b5200bcb8393a7901e7f9b9",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/108_H.csv.gz": "791fbe72bda0718124f53b0562a79a4aa5d6e117f8767132bbaab712a490d57d",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/109_HBAR.csv.gz": "e655029806d7ead778d16d5b1b9fb7809c6ddb43dfceff57755500b10f5c97cd",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/110_HMSTR.csv.gz": "a669715b886e3a873b5da6512fe18898c88a3af9a5c8d7be1c81e0c64594e30c",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/111_HOME.csv.gz": "856a502f05a50a83671db1fe8ec6f97fe2df1d149b879997586b96f0ef887bd8",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/112_HUMA.csv.gz": "c7467245ae0073ec1512033b725384a79a4d1c3af8d572c99aa4d7a7b4c11790",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/113_HYPE.csv.gz": "d527bbe5764956fbcf85dd7762f6e3998129ef9960b61594c0ace339c7a00452",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/114_ICP.csv.gz": "be78e43b1a81ce92d6c4ef860a263ef0d9f476c44a9e358094a44468006ac243",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/115_ICX.csv.gz": "ac6d10e64f3dbb53d0624086f423a6a7b1b00934104a112bcceae30632d22b60",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/116_IMX.csv.gz": "1081fd55bd524d8830fb4a2edbfed647bffb7d3285dae2e15e7121f30b88f2f2",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/117_INIT.csv.gz": "08928b28e5b11fd59698b31155be9e5151668043a30dd37e8810cc987f83c0cb",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/118_INJ.csv.gz": "7caa118dc958df6ddf2b99acfbf3385a2decbfc512a11a5582af44a5f5f7fd77",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/119_IOST.csv.gz": "4ad41eb9ef85a9d57ab4d65b2137cbb9a2f1c486207f756e9f1661b3feb038c5",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/120_IOTA.csv.gz": "a1a01c40f9904e67fae3c0872f168dd3d6b29170c75225792afdef1df61be31d",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/121_IRYS.csv.gz": "dc1f5a959ead560b79e4158012f6059da755e8ec535fdba36eed1c2ffed859c8",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/122_JELLYJELLY.csv.gz": "bc9ad073c77cc29c0b5964c84329663a232faf73e254bb2a2f39d882238981bd",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/123_JTO.csv.gz": "fc046ebd6354d67d973ab47e1a3d1541e437414c8307b3bccc6f45ae4ffd1b47",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/124_JUP.csv.gz": "7297725612d05d843d512430497ad4a425a9a37a49bfcd31e1310daca0dfb283",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/125_KAITO.csv.gz": "346139c865e2a593d4de622fcb30b292f495075d288ded594da36bf4fee69182",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/126_KAT.csv.gz": "a7bf1ec1046fe76c96e4d91bafae5f8b1ebd3a7202ae98c04433e32ff2fb53e5",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/127_KGEN.csv.gz": "e1ded68cf1c4e31a88c7799f8ae5f3c332a296c23b3de9fc19a3d737b7cdef27",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/128_KITE.csv.gz": "8070bfc9f0480bac7a336a0058824118d7cac6bd56afa67b24e03fbf30d7733e",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/129_KMNO.csv.gz": "0524b5f47b34893f62aa1173b8671605f905b00380dcaa7a8012d1f8f9cd2690",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/130_KSM.csv.gz": "0d3535552137f53f12c574ee8d91af0ef4e896f9b2d8996194252ac932be4f9f",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/131_LA.csv.gz": "f8e78a3592a0759988c1a755a71683d5cf0eb9ab0ae7765311d8a41f95ea9d71",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/132_LAB.csv.gz": "e79f317ac94ec6efd28d2cdf89c10361692561b0571eb89d8f5e669917b3cdc1",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/133_LAYER.csv.gz": "1b7609301c002273630e6d6ab5c64b294ed5803e374aebf59c84ab06fdb070b0",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/134_LDO.csv.gz": "19fd42628aad47ef4913987bec17ad9899b53acf32fc9c57ebb372d10de4fe48",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/135_LIGHT.csv.gz": "c363e6d6b215bf51973b6869bac9f6c14b48471db02e64192b119c55595bd632",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/136_LINEA.csv.gz": "5c6def76e196f1214c9441dc4acba8493081b8d823936ea990f0f4584f1876ff",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/137_LINK.csv.gz": "4b858afdcc86185ce103231bc7c320a7e12753b2b6664bb215cc0f5f8eceb3cc",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/138_LIT.csv.gz": "084a99da2c0b4ffa3b6dc1896bc32864fc4f6f088e99d0314716ca5d58617108",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/139_LPT.csv.gz": "526690a70880063125a7ea9e309a344e51b07d0d64bef60d99f7db10dbd94b4b",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/140_LQTY.csv.gz": "6a17833e13281e3e2453e39f0d0c66e8879556c3222f63e4cd0a0778f6853719",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/141_LTC.csv.gz": "1b45b782ea0b5bb0f3a532c70ed953062763dbfb9fd3bf557f4b346cbda068c8",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/142_LUNA.csv.gz": "d0f49b5a8578ac6e7be168f4434d3afed6e15f328b275e01ad24254c27246bd6",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/143_MAGIC.csv.gz": "eae1d0771990645ef4d920a5612d5cde026ae8423552dbf7c820c614329ad0a6",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/144_MANA.csv.gz": "d3807a7727f1c2b18a715815f32144bb7c57ef894f6d85232a7e403b8cdef448",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/145_MASK.csv.gz": "a5c7757b7e05322bf5b9822fd5b5a60862069628715df1114f00a68e22f94c52",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/146_ME.csv.gz": "2070bee78e24294794ac2402b249c04b077322045c7ab4be2ecfb6f0b2c24241",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/147_MEGA.csv.gz": "de95b82031b15cd73459918125292e56c7019037eb93fe214ec771ef04e3db0f",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/148_MEME.csv.gz": "57d0a53cd7d0e16fdb5c475de40b0323f63078ffac940a8864652c6982340716",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/149_MERL.csv.gz": "5cec457323eeed2749fc7c02530842ef7ef4cd180b6dc256e8ae3902cbef298b",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/150_MET.csv.gz": "5ee31ec6dfe5928c18e925dbdc003522fef5808f0e67198c0bc09d4b324da2a9",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/151_METIS.csv.gz": "b50b77df6f91eec83a5669726fa277f156da05f81b4ee6f7d4b5abfe71df5a0c",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/152_MEW.csv.gz": "0cd9f6908fc039430abc4b845d47091ef95f9f7f7dae80fca332dfe12f66e27b",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/153_MINA.csv.gz": "ca5283274637180817363b14909f75bdfb6208e67aeb4b54d6ecff10f4e1de54",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/154_MMT.csv.gz": "9cd425bb73b5cc6bfbafa0f92c1e6a506e67049f1ed42dbc37433b37d718f069",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/155_MON.csv.gz": "7eaa7ebe24f50ce28b8863c3b48ceb8a7dae288afa1793c46857b21396b650f8",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/156_MOODENG.csv.gz": "d22bfba167ce04eca80bee03f9dfe6b14a70bd5f4d0d845fe77e4b9c1878d965",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/157_MORPHO.csv.gz": "323c3e9bec97cb74925dfc109e13d5f602545e69db399c9acb2adc19063a59cb",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/158_MOVE.csv.gz": "f0bca71aa86037430c7cfe3f16f7ccc4a68a8452bc945127e9c8c8ab5212bcad",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/159_MUBARAK.csv.gz": "a409af6f762c5671c26562eacdf80beea1390b9511dee0183d7b6f804db12e20",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/160_NEAR.csv.gz": "d1a376a043a3e4fa9171b98f3b2d1a031a2eb84c8e445678f08b7b6507ed5b06",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/161_NEIRO.csv.gz": "631820299de592c3b76275bcdfe6a3973c8ae8baede409ef8c83ad456065bf09",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/162_NEO.csv.gz": "2a78bc455a0027cef23b344dee3ebf58f9673446f28e66d4d83af4418f4e8aba",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/163_NES.csv.gz": "f19c7d4ba6501937ee4bdc9ac4ce0aef89408c2439b183f43eed5fc5167bdbbf",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/164_NIGHT.csv.gz": "83640fbe82ff3b4fce2d3c9a33ace976cd2c8b34fb66e99259f37d713f0972a1",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/165_NMR.csv.gz": "6b7f67ba2a5ef35d6ababa01700cb89eb99bc16036d7faf4f44358d9c24b0cdb",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/166_NOT.csv.gz": "3ecd0e4cc5e14db4f2a967ce07c834a856e63cf21b9d4ef7a3e8226bbd08473e",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/167_O.csv.gz": "69307eaefbf0a30aab8a77ba701d82bc4954d087e3bed4568605d215a1a5e131",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/168_OFC.csv.gz": "a3908c6fada37e42f27fc6130cc569b68dbef961e88fa8691d7e7fe6a6ffc788",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/169_OKB.csv.gz": "1a9caf756e6316023cf7efd48221b951c3a8e1649c6c34e0907cec06de9b4a85",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/170_OL.csv.gz": "2e6224374cfefd53a8f48af10dfee9347c23729fababb4c707e4147544428ca8",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/171_ONDO.csv.gz": "7a3c98149ce4da5bf8336c9bcadbd4f8b52759f83a9e86a496d6ff3c7a52bcad",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/172_ONE.csv.gz": "6c593e6627951fef8f37917f3fe5158df25e96aed6ff0f8c1dddaeb7023b7efd",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/173_ONT.csv.gz": "724c52c91d3a0ab6118ce3528c426893a03781ad070bd3ec040b370a80149b36",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/174_OP.csv.gz": "6c1b92443cffd8c6244d3ed8148fb2b7f66e5a50a0fd8e6fce8e4858a4486251",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/175_OPG.csv.gz": "db2c1b448effc6cb1ee960e0b2c6cc70bd1ae4e9f48cacb2dedc4c2caa615eab",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/176_OPN.csv.gz": "43ad73bdcdeb9c314700c5591f46a3d8e42d94783893dacee7cad61e111f1362",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/177_ORDER.csv.gz": "255af89b5378bdd9bb9a856108fc5d048724928719e2ad0c3dce975765137b44",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/178_ORDI.csv.gz": "61fd590477ca9e8dc4ca34bbf4bcbaf43e0853922b20b4ad59439821720063c7",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/179_PARTI.csv.gz": "fb63d6579c7e5473ffb6e8969e012d9484bc341b5d4066d5b27f267570263867",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/180_PENDLE.csv.gz": "33246d11e6bfd554f78f6874acb326583392abfd19296360751ee001ee7119fa",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/181_PENGU.csv.gz": "25eafbf2b9d29e8fe653f475b47a1d018adaa849ca24596fe3212a4c0d4c6035",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/182_PEOPLE.csv.gz": "bc274d6b11b4791fe8a9f5cdd3637cc35adf93299945b2dd61d65651aec29515",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/183_PEPE.csv.gz": "7945663e25069e5e2a15b986030c9e3129af5abf0b224afda3820fb2a7225f31",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/184_PI.csv.gz": "708c0099a865a53d5ab24cce43b2436689d1970a04ca5b8d1f04133882b5e095",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/185_PIEVERSE.csv.gz": "44e894203095b3bc694ee96480ff4e19b7ea838ce9643aa03949966f13b1d7b4",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/186_PIPPIN.csv.gz": "742f03563db2e2138176b89556b438570abe5341e0761cb5c62c30b08fc52162",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/187_PLUME.csv.gz": "d9f59001575a2a46cec1b18cc002136830dbc2100a46c93a8930f0a7f2f766a2",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/188_PNUT.csv.gz": "f7094b2b7bc51a01ee2e67fe96775eb526f51857e9fee9ca61e068aed03c8843",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/189_POL.csv.gz": "7e527fd2779bfee2f9d600a91fa730a082b27f877d7fd0680b422d0d5fba4d6b",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/190_PONS.csv.gz": "e009c578a07b52c8302f75a1b3a7c4dc09d6b9ebb61927bdf48efa9af58ef2dc",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/191_POPCAT.csv.gz": "624346982990717ec0b7ed37ca6f6c151b9dbd9b9be5fc4da2801076d783e7ba",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/192_PROS.csv.gz": "fccc79607e0db4a755f196a4206fe4d1b5c2a924a2dee633bae46a8c7518623b",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/193_PROVE.csv.gz": "6e306d1006c4506f7a6c246445d5f414894b0165643bc9b19320677bcd6d592d",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/194_PUMP.csv.gz": "931c17f0b8bdf69d7eef8de4109578d977f1b34650d9f0aa8ae7cabfae12e230",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/195_PYTH.csv.gz": "108fa0bc088bd272e75773aa695e2c3d902adf3f0088e4f791eb664ec275814f",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/196_QTUM.csv.gz": "668aa455bac2de6af962442192ea3563a39d3bcb2c8855e8406a455d361de232",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/197_RAVE.csv.gz": "0e807aa35e92532669753f3c6ae1574fe3653f178cffbe516caa592121cefffc",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/198_RAY.csv.gz": "a1da1c177e463f0fa3ace314e9e8b25d4f4b8e33078dee22ba4ac5711c024d11",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/199_RE.csv.gz": "77ccfd571cd0c1ac6ddcd8dd11568054b7ab293ebe0d2e265ddbdc8946916739",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/200_RECALL.csv.gz": "55bd67bab159df964457dde8d756326e08efb274e2f7a5a65c279805036ac1cf",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/201_RENDER.csv.gz": "cf58918f6260823b81d9cca6128cbfe8e8e04102ebe7b4fe3f1ca61435176121",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/202_RESOLV.csv.gz": "bad133517043bdbe82d912ad716470710f7129bd05d2d978537fbd2334929e35",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/203_RIVER.csv.gz": "76461fcb741d6ba6e8c80259440158e26f3316ed2f931af5d16e8eb0682054e2",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/204_RLS.csv.gz": "a507eb4379b5c01f291024cf6f8d25e434db41572bccb8dd5bcf5a652c0a4951",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/205_ROBO.csv.gz": "9134a705dfdce2f5c014b7a96801388f60069bc808ba990829bf4b0c1375df9f",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/206_RSR.csv.gz": "19ad8e56fbd2999df11cb79c7995c9f264301117569ab1e2e1223d1cd8dafc55",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/207_RVN.csv.gz": "134377f314264960a8fe5842cfc1fe324be86d80d91bb712fa533c1d9560e2a4",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/208_S.csv.gz": "4e321c81437a7ada0c6b1a4d1ef1c87e3d07ef54e3ece381004b2e83df85ee6d",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/209_SAHARA.csv.gz": "6c62358e3a72a4702365a412e586f33f3943e4126bc594c7d5d5376ccde368a2",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/210_SAND.csv.gz": "340f9e04d01521ceec7c641c86d1e4b6668192a7f3ba5a3fb4f8c5ddaf4102c5",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/211_SAPIEN.csv.gz": "f87e1197aeb2dbea810dd698e97302347defe210a4325ce84c28611eaf6a2d9e",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/212_SATS.csv.gz": "326718c9e42d13011dc9b289cc9f43e2f7a3c8e3b137ac4082391b3bc3612812",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/213_SEI.csv.gz": "bbb516d124315c025900516da1ecdfa8749f873e2b7021fcd0547eb9415e9e3f",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/214_SENT.csv.gz": "4e305c75562c18dd66aac9659409f512b8c60bb0cef5a0b5f46cdd66c995d5e3",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/215_SHELL.csv.gz": "4c2305c074601aa2686dfc96c6ef1e44ab31d328a94bf525b95e614c787638b5",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/216_SHIB.csv.gz": "08a6852dbba3b9447404510f7b3974a5e9fdf7e770bbdf54cd4b1e1ae4268c9b",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/217_SIGN.csv.gz": "0ef0f6387dc2f26a0680a4cc1e69672165825a1ce145f687305f2916bd7e75f6",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/218_SKY.csv.gz": "678f5b1c6355e42c6d23b7404705ea7d4628afbbff5b97459fd1195074d1e464",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/219_SLX.csv.gz": "d0181fa887eef73601153ba33677fad8b1b5f6978a0639c00f3e662f979442ae",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/220_SNX.csv.gz": "dfd4908b7cf77a5f3ff40850bf8da7acc8cd782affd15eb65517f126da00e0b3",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/221_SOL.csv.gz": "71781297a95f5d6345670aa849e5164bb4c0855ec6c97452acb6f4f6eb4908f9",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/222_SOON.csv.gz": "8947fc190f94451c8915c358db8134327877dca8b120f87bb9797f292db2b439",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/223_SOPH.csv.gz": "57c3d72fb29c07dd548fc0f808e570b9694aacea2ed0460e9f5c4964b61304c6",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/224_SPACE.csv.gz": "8a442b48cb1adb1825d2236c51906a35c131cd16e247d5a3f9c677a360058ef4",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/225_SPK.csv.gz": "735b24e894c05f5aa104f5a7789336389bb92a355701858e392115f193eb2ec3",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/226_SPX.csv.gz": "3ee614419b12cfb349468f0576e21f1c051fafe9cd243f1b8f29f171b6c5189e",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/227_SSV.csv.gz": "5d099c0632b2482c955e44ddb9be281cdff9bb41d2453cdf92464d968d9c8c58",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/228_STABLE.csv.gz": "92babd3457a734227873c4ce012ecb413cd27e5d4bf942c77329cfeefec44dc2",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/229_STRK.csv.gz": "cc8f40a4443cdc08b2fb698d7423c1d7c2313a70bb780596c05707d2cf7dcd46",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/230_STX.csv.gz": "6306e4c06f6acc22967c46add28a4c5535d7852a16fe3cff97877ec08f1d8090",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/231_SUI.csv.gz": "5a53fc54741c8db2409a7031ff825fa123123ef0c269335fc58bdfe952560f9b",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/232_SUSHI.csv.gz": "0caff4f04099f05a0b18844b9562d7e22cf6c94bad4085b126a377fee321bb37",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/233_SYRUP.csv.gz": "3548decfe70132ae71f5bda1135f11e380cfa5a1b77b8aa079a105bb30e348f4",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/234_TAO.csv.gz": "40709bee779d7a52a9a10de60113d0bea1c22d3b890b53bff5b7f9ab01129c4e",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/235_THETA.csv.gz": "77d67c41f72a3a68bd6465b9e264740c569673f8c42145f4302d023f5e6b2552",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/236_TIA.csv.gz": "e814941c7c44b5476d4017b04ec89dceea17c846c66b4c65babc6c8badd69499",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/237_TRB.csv.gz": "db01f0fbed3823d52599aa0f074fcefaed49f7e804336aefafdb9c14875f1d48",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/238_TRIA.csv.gz": "610d98c0e08bbba57c195f626a2a53d1f9cb8e04d168d5a037ccf4fc1d85a61e",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/239_TRUMP.csv.gz": "ffc9b3b95c5e37de7dac013d84c9f660911c34dc3f44f3260e2e6e577011c5da",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/240_TRUST.csv.gz": "ca7acc05d8acbc4800f78a6c62d5d39881bcd2d93983ff57df0779b35e51dee1",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/241_TRUTH.csv.gz": "60fecc5349c8376300b47c41d6d4805a125229392c4c3bcec6b36fd606128eb4",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/242_TRX.csv.gz": "c4b4d89cc79289e1855c3d85b7071dcc6c4e97dc48ebb25b51cf2900ff914b8a",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/243_TURBO.csv.gz": "89f250e0243833dc16bd1bebe533173534d8ceea0549dbfc10a783c513b84d1f",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/244_UB.csv.gz": "ab519ff0b5eb99e4ec82236f629901cf333b3e100b2d1b8c145941c7e458141e",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/245_UMA.csv.gz": "379fcf68ed2d536a07ce16587fbbdd02d0821660de4217b362e941fff3eb7521",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/246_UNI.csv.gz": "0ce5cde5f8b2eef0a5955f1a4b616dd1715074c6d0f8b98ac23a99c388784a37",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/247_UP.csv.gz": "5de091ddd493ae5a0ad31df850b6e5e4085d3669c1ca2286f204cf9e28c1b1a2",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/248_USELESS.csv.gz": "561425c2aaa5aff6a19cb4fee9beda1b377e9971e5f5fd0808e53b8d20f8831f",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/249_VANA.csv.gz": "586590f622654515b8a902bf7a350f8806a21d3fc6c511691babbadca4e9b964",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/250_VIRTUAL.csv.gz": "5011f10c9935eff9f011a35c043236d3f0f1ea605428fce93deeaf36a93652af",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/251_VVV.csv.gz": "30f1ea1e2ea97e16bf549c030ecca5b1b7f38d15992c7c74e0210eab5f2287cd",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/252_W.csv.gz": "4a6fb335d276132cb196d8e431503504e7fb7456a56e3c92685790c4b270bc1c",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/253_WAL.csv.gz": "d073a1e1ce0fb2497ff51e6a920b938d246186eb3c55af78def98cb37a53f106",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/254_WCT.csv.gz": "75c7f0275d89d5e2253d94f12c2b6997c1eefd56db8db1568b041e04cfd71c74",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/255_WET.csv.gz": "24c6a89347254f3b482679ad7b51d712f58321332e49047ed5e00ce39afc4579",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/256_WIF.csv.gz": "d4d9e5779d259ab4df71922b5f616e3652840560e49f037931ccd66a925acc0f",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/257_WLD.csv.gz": "8f36f50af9758c7dd097fb157460ec94c7b0c6fcfbe2147a6a093308521364d0",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/258_WLFI.csv.gz": "9a332884a69959ace611d20cbdabe5c03723b8cd408d29ba491a2b5cb19a2b39",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/259_WOO.csv.gz": "c4ef6f8d76117de4a9bebda013adbb2fe93c7acf2c5cd543f959a17109784ed2",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/260_XLM.csv.gz": "340f8c565108002f0661a144d9a69c86614213172ae8563f0d812ea3a534b62b",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/261_XPL.csv.gz": "1af50bb424178deb06c2fb2f494be6e4dd75ff7ca9755e4a61bc90f0c6e6b7f5",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/262_XRP.csv.gz": "c1bb9fa376b80607198085d2dcf5bdcc259d03f135d60c019b48b334848c46d7",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/263_XTZ.csv.gz": "957c7e004f0dd4dcf630348daebd73e53236532b3c7d1b3bc2f40efb3202e092",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/264_YB.csv.gz": "a94f6d3b6966e6666abaf0476fb6c7191e062650baf8097e72e8a08a7cfc936e",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/265_YFI.csv.gz": "f60b33a10493e1cc27e7435be5fb868bdbc9bc5b9b329f83d1b95a7444ebf179",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/266_YGG.csv.gz": "91c6fc4e2389e298555ee5687fa7e2f67e765edce78b5f11109b87e7809ee04f",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/267_ZAMA.csv.gz": "0885eeaa8ed190f11aeb922deec2eab40f7c62d98b1908a62b61f58449809190",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/268_ZBT.csv.gz": "3c73993545c71b6f7288b7ac7d312b4d04c0fd2c695202f9a603d1fae9201cba",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/269_ZEC.csv.gz": "3a957b78de8d112bc37486e22b50e314d255d751a23a0e00ed77c401adf97900",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/270_ZEN.csv.gz": "0ed2f40a4d0f1e741f2387a188dee7c9278d3eb4fe486b1cc1bf36b4b90070d1",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/271_ZETA.csv.gz": "4fd0c72b1dd447b617f497108f4b7b4094666275cb3b92b92234842e364a26e3",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/272_ZIL.csv.gz": "27740de230384cf6dbca4b7a61a7417b8dd16edc475247b0d6c0c732e7768537",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/273_ZK.csv.gz": "bcb0ddcd8fb580c805b07b22fb0cbe54d96a893a788bdee03d74761cb49df0df",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/274_ZKP.csv.gz": "9719a154ec65d4210cd7d35dc1421978289f2060db3b4ec13200d8e85dec55ab",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/275_ZORA.csv.gz": "92322dff2041cc8bd01227d5d84907b6f50092ce62fb47a9d15882e8bd44bf31",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/276_ZRO.csv.gz": "6111d5c682a6178652774c795dc09b4ec21197ff8fd7e3265359e417c228fb61",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/states/277_ZRX.csv.gz": "f39e2c8ec761626f46fd38b0aeef5949478812c52224cc6bcd596c36e9e6d24b",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/validation_manifest.json": "b94367b06517fd4639473dbf6a4806cdf9d12dddbb7cfa59c3a1f98f5f8d121b",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/trade_events.csv.gz": "1cdee9249e8d3dda099c622e645eb83cbb0cf74ac0edcc0765a0c152ca5ea417",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/trade_controls.csv.gz": "33ca8dd63380d758510dc96cfe421bb3ac8fddd8696845e23ea7fdf87105b0a4",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/trade_summary.csv": "4e738c7d47d9471d82241fb6e032fedf836689ee94105662143a42fcee6bb5b7",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/score_summary.csv": "358105a40ca3922d83e5f4b96de3dfe5fc71b24f2ab2f9f977e6ac335387cc65",
+      "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/results/retention_summary.csv": "8ef03cdd07f15d113942518ba679e9a65422696da1cca5f834afa6120a1ce66c"
+    },
+    "code_commit": "0a6937ee7414a08bd6ef6a12ae0115b069b6fc54",
+    "artifacts": [
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/miss_diagnostic/missed_events.csv.gz",
+        "sha256": "dcbc2d90eea6ba58c590e3897c87f16c1bd0228714f86264181f7b436a0f81a7",
+        "size_bytes": 74776
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/miss_diagnostic/status_summary.csv",
+        "sha256": "6647b78feef5dc88eedb0d8c8cc69e97f6482d8434e6b953db184cc76fd003c8",
+        "size_bytes": 705
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/miss_diagnostic/posterior_exit_reason_summary.csv",
+        "sha256": "a6b7e4fd2cd9af6701e9f7f9c86fe65eac3ec3b43e38f8c8842b364c3258b206",
+        "size_bytes": 1130
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/miss_diagnostic/reference_actual_crosstab.csv",
+        "sha256": "298040050210cbc3b0bb8c422f53ff7f76bd9ae4a8d8c264c68a1059b7c89efb",
+        "size_bytes": 125
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/miss_diagnostic/top10_future_high_peaks.csv",
+        "sha256": "6c50113634a7a2b975d1da62fdb9b00aaea2471d63abcef957fdab86ad916032",
+        "size_bytes": 4989
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-focus-20260910-v1/miss_diagnostic/summary.json",
+        "sha256": "a9df7ed6fbc1f47fb60c3276dc7836acc71382ae0461e678593306b43114eca3",
+        "size_bytes": 1576
+      }
+    ],
+    "limitations": [
+      "Miss population is selected from already-frozen future labels; diagnosis only, no causal edge claim",
+      "Actual occupancy uses A owner's trade only; same-bar exits excluded conservatively",
+      "Warmup parents without scored A trades remain unknown",
+      "Current mark is unrealized hypothetical liquidation after fixed20bp, not realized cash",
+      "Final natural results and future high peaks are posterior and cannot select entries",
+      "Multiple misses can share one prior parent; event counts are not independent trades",
+      "No misses are added back to fresh recall/retention; no pass criterion or detector changed"
+    ]
+  },
+  "native_qa": {
+    "observed_at": "2026-09-10T09:15:03.308522+00:00",
+    "source_path": "yoyo/evaluation/pine/spike_burst_v3_focus.pine",
+    "source_sha256": "74c5a5f06025da5081dbabd54be4cbf20226a05350f383a44880f93ea5de45ce",
+    "private_saved_name": "SPIKE V3 · 精选观察（研究版）",
+    "transport": "Local file opened in TextEdit; Select All/Copy; new native Pine editor Select All/Paste; observed 581 lines",
+    "saved": true,
+    "native_compilation": "Add to chart succeeded; SPIKE FOCUS rendered oscillator without compilation/runtime error on observed PEPE 1H chart",
+    "mode_a_rendered": true,
+    "mode_b_rendered": true,
+    "zero_axis_and_two_lines_visible": true,
+    "temporary_layer_removed": true,
+    "existing_script_replaced": false,
+    "layout_save_clicked": false,
+    "alerts_created": false,
+    "validation_limits": [
+      "Native UI smoke on one chart only, not full-series numerical Pine/Python parity",
+      "File-to-editor copy observed; no independent server-side source byte hash",
+      "Research candidates failed the preregistered retention/economic objectives; not production deployment"
+    ],
+    "evidence": "Native TradingView UI observations in this Codex turn, 2026-09-10 17:12–17:14 Asia/Shanghai. A screenshot: SPIKE FOCUS rendered beneath existing study. B screenshot: panel B 完整蓄势 and both oscillator lines. No screenshot file was saved by this receipt."
+  },
+  "native_status": "native UI smoke receipt attached; not full-series parity",
+  "no_detection_or_rescoring": true,
+  "no_online_changes": true
+}

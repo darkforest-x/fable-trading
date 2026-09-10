@@ -7868,18 +7868,47 @@ experiments:
 
   - experiment_id: exp-spike-v3-focus-20260910-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: f3324d9e2a3ea6c96e2c726de86cdb837038d6ab
-    status: active
-    question: Can V3 structural reference lock or complete near-zero setup reduce alerts while retaining timely big
-      launches?
-    single_variable: Two independent structure interventions, each versus original V3; no combination or threshold
-      search.
-    result: Preregistered before scoring. Original SPIKE V1 remains the historical comparison baseline.
-    holdout_consumed: false
+    source_commit: a4ffdcdf807b91578f150654b5fa659ac664ea3d
+    status: rejected
+    question: Can structural reference lock or complete near-zero setup reduce alerts while retaining timely big launches?
+    single_variable: Two independent structural interventions versus V3, original V1 historical comparison; no combination.
+    result: A labels -61.11% with 45.32% baseline timely positive retention; B labels -95.09% with 1.44% retention.
+      Both fail fixed retention/economics; A 800 fresh misses remain, 719 old actual trades alive,77 warmup unknown,4
+      already exited. QA passed but no deployable edge.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
     canonical_report: analysis/html/p1_spike_v3_focus_20260910.html
+    artifacts:
+    - spike-v3-focus-20260910-report-source
+    - spike-v3-focus-20260910-report-html
+    - spike-v3-focus-20260910-prepared
+    - spike-v3-focus-20260910-validation
+    - spike-v3-focus-20260910-report-manifest
+    - spike-v3-focus-20260910-miss-manifest
+    - spike-v3-focus-20260910-independent-review
+    - spike-v3-focus-20260910-native-pine
+    - spike-v3-focus-20260910-report-review
+    - spike-v3-focus-20260910-pine
+    notes: Each fixed new config first retrospective holdout use under owner all-date authorization; seen history,
+      not blind OOS. 63 tests and independent full replay verified. New confirmation ownership hypothesis separately
+      registered.
+  - experiment_id: exp-spike-v3-confirmation-gate-20260910-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5e85fa70f92f1bb110547518a932f90837ede872
+    status: active
+    question: Does acquiring suppression only after confirmation reduce V3 noise without a weak unconfirmed parent
+      blocking later launches?
+    single_variable: Only confirmation-gated suppression ownership; original V3/A thresholds, costs and execution
+      unchanged.
+    result: Preregistered third structural hypothesis before C market detection or scoring; original V1/V3 comparison
+      and original acceptance targets retained.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    canonical_report: analysis/html/p1_spike_v3_confirmation_gate_20260910.html
     artifacts: []
-    notes: 'Owner goal-mode authorization. Engineering targets fixed before scoring: labels -50%, large recall80%,
-      baseline timely positive retention90%. Failure will not be hidden by held-reference coverage.'
+    notes: Sequential exploration on previously seen dates, not blind OOS. Preserve original fresh miss denominator;
+      reference/suppression coverage separate.
