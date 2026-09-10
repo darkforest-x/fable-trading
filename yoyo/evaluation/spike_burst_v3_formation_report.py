@@ -21,8 +21,8 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[2]
 EXP = ROOT / "experiments/active/exp-spike-v3-formation-gate-20260910-v1"
 OUT = EXP / "results"
-MD = ROOT / "analysis/p1_spike_v3_formation_gate_20260910.md"
-HTML = ROOT / "analysis/html/p1_spike_v3_formation_gate_20260910.html"
+MD = ROOT / "analysis/p1_spike_v3_formation_gate_20260910_r2.md"
+HTML = ROOT / "analysis/html/p1_spike_v3_formation_gate_20260910_r2.html"
 AB = ROOT / "experiments/active/exp-spike-v3-focus-20260910-v1/results"
 C_SOURCE = ROOT / "experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/results"
 C_VALIDATION_SHA = "ae9c40bf2e264763dfc517f3ff8afa6d64903800cd145bbdc50b0a09961e9209"
@@ -251,7 +251,7 @@ def build(validation_sha):
     relative = str(builder.relative_to(ROOT))
     if subprocess.check_output(["git", "show", "HEAD:" + relative], cwd=ROOT) != builder.read_bytes():
         raise ValueError("Commit the exact report builder before generating products")
-    if MD.exists() or HTML.exists() or (OUT / "formation_report_manifest.json").exists():
+    if MD.exists() or HTML.exists() or (OUT / "formation_report_manifest_r2.json").exists():
         raise ValueError("Refusing to overwrite a completed report")
     prepared, validation, inputs = authenticate(validation_sha)
     signals, labels = read("signals.csv.gz"), read("labels.csv.gz")
@@ -357,7 +357,8 @@ def build(validation_sha):
         "- 事件会重叠，不是账户组合；未计算账户NAV、收益曲线或最大回撤，不填假零。20bp未完整覆盖资金费、滑点与冲击，峰值不等于兑现收益。",
         "- 流程偏差：独立预审PASS消息先于prepare，检测器、runner、测试与计划均已提交；但预审JSON收据晚于prepare启动才落盘和提交。没有倒填时间，也没有因此修改配置或重跑，收据提交时序未完全符合本轮计划。",
         "## 下一步与原始证据",
-        "代码验证：D检测器/研究runner合成测试与原V3回归合计69项通过。独立[预审收据](../experiments/active/exp-spike-v3-formation-gate-20260910-v1/qa/preflight_review.json)、[最终复核收据](../experiments/active/exp-spike-v3-formation-gate-20260910-v1/qa/independent_review.json)和[固定案例逐根诊断](../experiments/active/exp-spike-v3-formation-gate-20260910-v1/qa/case_diagnostic.json)分别记录审核范围；程序测试通过不代表策略通过。",
+        "本报告第2次文档渲染只修复HTML审核记录链接的相对目录问题；第一份文档与manifest保留，检测、评分、配置、图片选择和数值未重跑或改变。",
+        "代码验证：D检测器/研究runner合成测试与原V3回归合计69项通过。独立[预审收据](/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-formation-gate-20260910-v1/qa/preflight_review.json)、[最终复核收据](/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-formation-gate-20260910-v1/qa/independent_review.json)和[固定案例逐根诊断](/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-formation-gate-20260910-v1/qa/case_diagnostic.json)分别记录审核范围；程序测试通过不代表策略通过。",
         "固定门有任何一项未过，D按失败研究保留，不替换当前指标。即使全部通过，仍需未见数据前向验证及独立Pine因果一致性验证；不能从同一历史反复改门得到的好数字直接推出未来收益。",
         "原始完整逐周与阶段数据：" + "、".join(f"[{label}]({OUT / filename})" for label, filename in (
             ("召回/时点CSV", "retention_summary.csv"), ("收益CSV", "trade_summary.csv"), ("原V1/V3/D对照CSV", "version_comparison.csv"),
@@ -366,7 +367,7 @@ def build(validation_sha):
         "准确builder、detector、测试和计划先提交，再prepare全局冻结，再evaluate；报告源码同样先提交再生成。已完成产物核验SHA，不删除覆盖重跑；缺失缓存不能静默换新数据。",
         "```bash\n.venv/bin/python -m pytest -q tests/test_spike_burst_v3_formation_gate.py tests/test_spike_burst_v3_formation_study.py\n.venv/bin/python -m yoyo.evaluation.spike_burst_v3_formation_study prepare\n.venv/bin/python -m yoyo.evaluation.spike_burst_v3_formation_study evaluate --workers 3\n.venv/bin/python -m yoyo.evaluation.spike_burst_v3_formation_report --validation-sha " + validation_sha + "\n```",
         f"D prepared SHA256：{validation['prepared_sha']}。D validation SHA256：{validation_sha}。A/B validation：{AB_VALIDATION_SHA}。C validation：{C_VALIDATION_SHA}。",
-        "先生成MD，立即用项目scripts/md_to_html.py的同一转换器生成嵌图HTML。完整来源、状态、图片和文档SHA见results/formation_report_manifest.json。",
+        "先生成MD，立即用项目scripts/md_to_html.py的同一转换器生成嵌图HTML。完整来源、状态、图片和文档SHA见results/formation_report_manifest_r2.json。",
     ]
     text = "\n\n".join(body) + "\n"
     MD.write_text(text)
@@ -389,9 +390,9 @@ def build(validation_sha):
         outputs=[dict(path=str(path), sha256=sha(path)) for path in (MD, HTML)],
         no_detection_or_rescoring=True, no_outcome_based_case_selection=True, no_online_changes=True,
         d_pine_status="not_ported_not_validated", hypotheses="fourth sequential exploratory hypothesis, not blind OOS")
-    (OUT / "formation_report_manifest.json").write_text(json.dumps(clean(manifest), ensure_ascii=False, indent=2, allow_nan=False) + "\n")
+    (OUT / "formation_report_manifest_r2.json").write_text(json.dumps(clean(manifest), ensure_ascii=False, indent=2, allow_nan=False) + "\n")
     print(json.dumps(dict(md=str(MD), html=str(HTML), figures=3,
-        manifest_sha256=sha(OUT / "formation_report_manifest.json")), ensure_ascii=False))
+        manifest_sha256=sha(OUT / "formation_report_manifest_r2.json")), ensure_ascii=False))
 
 
 if __name__ == "__main__":
