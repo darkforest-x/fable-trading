@@ -20,6 +20,9 @@
   const eventNames = { tv_start: "原始 V1 启动", yolo_confirmed: "YOLO 补充确认" };
   const modelStates = { pending: "等待确认", confirmed: "模型已通过", invalidated: "结构失效", expired: "等待已到期", error: "检测异常", disabled: "周期已关闭" };
   const TV_SETTINGS = "近零至少 12 根 · 0.1 ATR · 普通系统标记关闭";
+  // Server cursor pages are intentionally smaller than its 2,000-row safety cap.
+  // Cards need a browse path, not multi-megabyte concurrent JSON responses.
+  const SIGNAL_PAGE_SIZE = 500;
   const TV_INTERVALS = new Map([["30", "30"], ["60", "60"], ["240", "240"]]);
   const apiTimeframe = (value) => ({ "30": "30m", "60": "1H", "240": "4H", 30: "30m", 60: "1H", 240: "4H" }[value] || null);
   const uiTimeframe = (value) => ({ "30m": "30", "1H": "60", "4H": "240", "30": "30", "60": "60", "240": "240", 30: "30", 60: "60", 240: "240" }[value] || null);
@@ -318,7 +321,7 @@
     $("load-more-signals").textContent = `显示更多（${Math.min(state.rowLimit, items.length)} / ${items.length}）`;
     $("load-earlier-signals").classList.toggle("hidden", !hasEarlierPage);
     $("load-earlier-signals").disabled = state.rawLoadingMore;
-    $("load-earlier-signals").textContent = state.rawLoadingMore ? "正在读取更早记录…" : "加载更早记录（再取最多 2,000 条）";
+    $("load-earlier-signals").textContent = state.rawLoadingMore ? "正在读取更早记录…" : `加载更早记录（再取最多 ${SIGNAL_PAGE_SIZE.toLocaleString("zh-CN")} 条）`;
     $("signal-empty").classList.toggle("hidden", items.length > 0);
     if (!items.length) {
       const hasFilters = state.search || state.timeframe !== "all" || state.side !== "all";
@@ -858,9 +861,9 @@
       const timeframe = queryTimeframe === "all" ? "" : `&timeframe=${encodeURIComponent(apiTimeframe(queryTimeframe) || "")}`;
       const results = await Promise.allSettled([
         api("/api/status"),
-        api(`/api/signals?limit=2000&source=${source}&confirmation=yolo${timeframe}`),
-        api(`/api/signals?limit=2000&source=${source}&confirmation=raw${timeframe}`),
-        api(`/api/signals?limit=2000&source=${source}&confirmation=raw_yolo${timeframe}`),
+        api(`/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=yolo${timeframe}`),
+        api(`/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw${timeframe}`),
+        api(`/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw_yolo${timeframe}`),
       ]);
       if (queryRevision !== state.signalQueryRevision || querySource !== state.signalSource || queryTimeframe !== state.timeframe) return;
       const keys = ["status", "signals", "directSignals", "rawYoloSignals"];
@@ -933,7 +936,7 @@
     renderSignals();
     try {
       const timeframe = queryTimeframe === "all" ? "" : `&timeframe=${encodeURIComponent(apiTimeframe(queryTimeframe) || "")}`;
-      const path = `/api/signals?limit=2000&source=${encodeURIComponent(querySource)}&confirmation=raw${timeframe}`
+      const path = `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${encodeURIComponent(querySource)}&confirmation=raw${timeframe}`
         + `&before_close_ms=${encodeURIComponent(cursor.close_ms)}&before_id=${encodeURIComponent(cursor.event_id)}`;
       const result = await api(path);
       if (queryRevision !== state.signalQueryRevision || querySource !== state.signalSource || queryTimeframe !== state.timeframe) return;

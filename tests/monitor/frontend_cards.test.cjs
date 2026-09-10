@@ -206,7 +206,10 @@ test("replay direct cards can page older raw records without replacing loaded pa
   assert.match(app, /before_id=\$\{encodeURIComponent\(cursor\.event_id\)\}/);
   assert.match(page, /id="load-earlier-signals"/);
   assert.match(app, /\$\("load-earlier-signals"\)\.classList\.toggle\("hidden", !hasEarlierPage\)/);
-  assert.match(app, /加载更早记录（再取最多 2,000 条）/);
+  assert.match(app, /const SIGNAL_PAGE_SIZE = 500/);
+  assert.match(app, /limit=\$\{SIGNAL_PAGE_SIZE\}&source=\$\{source\}/);
+  assert.match(app, /limit=\$\{SIGNAL_PAGE_SIZE\}&source=\$\{encodeURIComponent\(querySource\)\}/);
+  assert.match(app, /加载更早记录（再取最多 \$\{SIGNAL_PAGE_SIZE\.toLocaleString/);
   assert.match(app, /\$\("load-earlier-signals"\)\.addEventListener\("click", loadEarlierRawSignals\)/);
   assert.match(app, /当前页 \$\{number\(source\.length\)\} 条；可直接读取更早记录/);
   assert.match(app, /state\.rawPaged = true/);
