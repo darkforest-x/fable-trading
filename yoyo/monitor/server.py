@@ -81,16 +81,20 @@ def create_app(runtime=None, start_monitor=True):
 
     @app.get("/api/signals")
     def signals(limit: int = Query(200, ge=1, le=2000), symbol: str = None, timeframe: str = None,
-                kind: str = MODEL_KIND, side: str = None):
+                kind: str = MODEL_KIND, side: str = None, source: str = None, confirmation: str = None):
         if kind not in (MODEL_KIND, SIGNAL_KIND):
             raise HTTPException(400, "支持指标启动或 YOLO 确认信号。")
         direct = kind == SIGNAL_KIND
         protocol = SIGNAL_PROTOCOL if direct else MODEL_PROTOCOL
         rows = store.list_events(limit, symbol, timeframe, kind, side, protocol=protocol, direct_only=direct)
+        if source not in (None, "live", "replay") or confirmation not in (None, "raw", "yolo", "raw_yolo"):
+            raise HTTPException(400, "unsupported source or confirmation")
+        rows = [row for row in rows if (source is None or row.get("source") == source)
+                and (confirmation is None or row.get("confirmation") == confirmation)]
         for row in rows:
             row["is_fresh"] = 0 <= monitor.client.clock() - row["bar_close_ms"] <= FRESH_MS
-        return {"items": rows, "total": store.direct_event_count() if direct else store.event_count(MODEL_KIND, MODEL_PROTOCOL),
-                "kind": kind, "protocol": protocol}
+        return {"items": rows, "total": len(rows), "kind": kind, "protocol": protocol,
+                "source": source, "confirmation": confirmation}
 
     @app.get("/api/candidates")
     def candidates(limit: int = Query(200, ge=1, le=2000), symbol: str = None, timeframe: str = None):

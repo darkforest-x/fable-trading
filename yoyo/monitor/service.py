@@ -11,6 +11,7 @@ from __future__ import annotations
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
+import multiprocessing
 import hashlib
 from pathlib import Path
 import subprocess
@@ -58,6 +59,7 @@ class Monitor:
         self.timeframe_since = {tf: store.timeframe_activation(tf, protocol=PROTOCOL) for tf in MONITORED_TIMEFRAMES}
         self.model_gate = ModelGate(store, lambda: self.client.clock(), self.stop_event)
         self.threads = []
+        self.scan_process = None
 
     def start(self):
         # Called only after server lifespan owns the singleton process lock.
@@ -65,25 +67,26 @@ class Monitor:
         self.store.retire_telegram_pending()
         self.store.retire_disabled_timeframes()
         self.store.retire_muted_bark_timeframes()
-        for name, target in (("bark", self.deliver_bark),):
+        for name, target in (("scan", self.run), ("bark", self.deliver_bark)):
             thread = threading.Thread(target=target, name="impulse-" + name, daemon=True)
             self.threads.append(thread)
             thread.start()
 
     def close(self):
         self.stop_event.set()
+        if self.scan_process is not None and self.scan_process.is_alive():
+            self.scan_process.terminate()
+            self.scan_process.join(timeout=2)
         for thread in self.threads:
             thread.join(timeout=2)
 
     def run(self):
+        """Launch one isolated replay worker at a time; never block FastAPI's GIL."""
+        from yoyo.monitor.v1_worker import scan_once
         while not self.stop_event.is_set():
-            try:
-                self.scan()
-            except Exception as exc:
-                LOG.error("scan failed: %s", type(exc).__name__)
-                scan = self.store.get_meta("scan", {})
-                scan.update(status="error", error=type(exc).__name__, finished_at_ms=now_ms(), next_scan_ms=now_ms() + self.interval * 1000)
-                self.store.set_meta("scan", scan)
+            if self.scan_process is None or not self.scan_process.is_alive():
+                self.scan_process = multiprocessing.Process(target=scan_once, args=(str(self.store.path),), daemon=True)
+                self.scan_process.start()
             self.stop_event.wait(self.interval)
 
     def deliver_bark(self):
@@ -243,6 +246,9 @@ class Monitor:
         with self.lock:
             chart = self.charts.get((symbol, timeframe))
             if chart is None:
+                stored = next((row for row in self.store.list_markets() if row.get("symbol") == symbol and row.get("timeframe") == timeframe), None)
+                if stored and stored.get("chart") is not None:
+                    return {"symbol":symbol, "timeframe":timeframe, "candles":stored["chart"], "events":stored.get("events", []), "state":stored}
                 return None
             state = dict(chart["state"])
             expected = self.client.clock() // TIMEFRAMES[timeframe] * TIMEFRAMES[timeframe]
