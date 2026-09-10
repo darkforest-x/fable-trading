@@ -113,6 +113,12 @@ node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.t
 
 本次最终 V1 gate/worker focused suite 为 46 passed；此前回放/API 相邻 suite 为 10 passed。它们不是两个独立测试集，不应相加。`test_model_gate.py` 已迁到 current V1 live/raw/long/closed 合同，保留到期、延迟确认、去重、重启和因果端点覆盖；旧 IMACD `md` 失效断言以 V1 source/confirmation/direction/side/risk fail-closed 注册测试替代。随后对 cutover 修复的组合 suite 为 25 passed，前端 Node 合同测试为 10 passed，延迟确认 focused suite 为 11 passed；它们含重叠文件，不能相加。此前独立 CUA surface 的 `getTab('3', {browser:'1'})` 返回 `Browser is not available: 1`，但 root 已用共享 IAB 完成上述真实卡片与窄屏验收。静态/API 合同检查不替代尚未完成的全市场扫描。
 
+## Scanner recurrence checkpoint（`64d4308`，待单次受控 reload）
+
+诊断确认 scanner 的完整 OHLC recurrence 过去只在 worker RAM；`markets.chart` 只有 240 根，不能替代 V1 的 340 根 warmup，也不能安全拼接增量。`64d4308` 新增 monitor 私有 SQLite 的 gzip raw checkpoint：每个成功获取的完整序列在 replay/market write 前保存，重启时只有通过周期对齐、连续性、有限 OHLCV 和价格边界校验的序列才会恢复；异常或 gap payload fail closed，回到 cold fetch。
+
+定向恢复测试以 341 根种子重启并追加一根，断言恢复后的 V1 state 和末 240 chart 与完整序列重放相同；另测 gap checkpoint 不会进入 recurrence seed。它不裁剪输入、不改 Pine、特征、cutover 或通知逻辑。该提交尚未载入当前 worker，第一次迁移 reload 仍会失去旧进程尚未持久化的 RAM seed；之后每个成功 cell 会有可验证 checkpoint。
+
 ## 运行环境与未完成项
 
 受控 trace 已从 LaunchAgent 移除并以无 trace 的 cleanup reload 启动。启动仍受本机其它 ccxt-mcp/ChatGPT 作业竞争影响：诊断时系统 load 约 100、CPU idle 0%、swap 约 6.4GB；本任务无权停止其它会话。监听器可在约一分钟后建立，因而不能以冷启动瞬时健康响应设定性能承诺。
