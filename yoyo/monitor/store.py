@@ -103,6 +103,27 @@ class Store:
         with self.connect() as db:
             return self._insert_event(db, e, notify, bark_notify, telegram_photo, photo_error)
 
+    def update_event_payload(self, event_id, updates):
+        """Merge audited display metadata into one existing journal event.
+
+        Historical reconciliation must never use ``upsert_event``: event
+        insertion is intentionally immutable and the only path that can seed
+        an outbox.  This narrow update preserves the event identity, receipt
+        tables and candidate tables while allowing a separately audited,
+        read-only provenance attachment.
+        """
+        if not isinstance(event_id, str) or not event_id or not isinstance(updates, dict):
+            raise ValueError("invalid event payload update")
+        with self.connect() as db:
+            row = db.execute("SELECT payload FROM events WHERE id=?", (event_id,)).fetchone()
+            if row is None:
+                return False
+            event = json.loads(row[0])
+            if event.get("id") != event_id:
+                raise ValueError("event payload identity mismatch")
+            event.update(updates)
+            return db.execute("UPDATE events SET payload=? WHERE id=?", (encode(event), event_id)).rowcount == 1
+
     @staticmethod
     def _insert_event(db, e, notify, bark_notify, telegram_photo=None, photo_error=None):
         cur = db.execute("INSERT OR IGNORE INTO events VALUES (?,?,?,?,?,?,?,?)", (

@@ -126,6 +126,24 @@
     const n = Number(value);
     return n.toLocaleString("en-US", { minimumFractionDigits: Math.abs(n) >= 1 ? 2 : 0, maximumFractionDigits: 12 });
   }
+  function coveredLedgerFacts(item) {
+    // A replay receipt is an identity link to the covered ledger, never a
+    // strategy verdict.  Keep censored rows out of every realized outcome.
+    if (item?.source !== "replay") return [];
+    const link = item.covered_ledger, outcome = link?.outcome;
+    if (item.performance_status === "covered_linked_realized_unverified" && outcome?.status === "realized") {
+      return [
+        ["覆盖账本关联", "已关联 · 未独立收益审核", "model-color"],
+        ["账本退出 · 北京时间", `${String(outcome.exit_reason || "未知")} · ${shortDate(outcome.exit_time_ms)}`, ""],
+        ["覆盖净 R · 非账户", finite(outcome.net_r) ? `${Number(outcome.net_r).toFixed(3)} R` : "—", ""],
+      ];
+    }
+    if (item.performance_status === "covered_linked_censored_unverified" && outcome?.status === "censored") {
+      return [["覆盖账本关联", "已关联 · 右端 censored", "model-color"],
+              ["账本结果", "未实现；不计胜率、PF 或净收益", ""]];
+    }
+    return [["覆盖账本关联", "尚未关联 v2 覆盖账本 · 不展示收益", ""]];
+  }
   function axisPrice(value) {
     if (!finite(value)) return "—";
     const n = Number(value), abs = Math.abs(n);
@@ -544,6 +562,7 @@
     const original = originalSignal(item), confirmed = isConfirmed(item), candidate = isCandidate(item), direct = directReceipt(item);
     const facts = [
       ["记录来源", sourceName(item), item.source === "replay" ? "model-color" : "mint"],
+      ...coveredLedgerFacts(item),
       ["信号 K 线", item.is_closed ? "交易所已确认收盘" : "尚未确认 · 不作为可执行 V1", item.is_closed ? "mint" : "red"],
       ["可执行次开盘", item.executable_entry_time ? item.source === "replay" ? `回放执行时钟 ${shortDate(milliseconds(item.executable_entry_time))}` : shortDate(milliseconds(item.executable_entry_time)) : item.source === "replay" ? "回放未提供成交时钟" : item.entry_reference === "next_open" ? "等待真实成交记录" : "后端未提供", ""],
       ["V1 风险参考", finite(item.risk) ? price(item.risk) : "—", ""],

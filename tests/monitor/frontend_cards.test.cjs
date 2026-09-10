@@ -89,6 +89,16 @@ test("replay fixture is labeled historical and never inherits a live notificatio
   assert.match(app, /信号之后的 K 线仅用于回看/);
 });
 
+test("covered replay receipts distinguish realized facts from censored rows without a performance claim", () => {
+  assert.match(app, /function coveredLedgerFacts\(item\)/);
+  assert.match(app, /covered_linked_realized_unverified/);
+  assert.match(app, /已关联 · 未独立收益审核/);
+  assert.match(app, /覆盖净 R · 非账户/);
+  assert.match(app, /covered_linked_censored_unverified/);
+  assert.match(app, /未实现；不计胜率、PF 或净收益/);
+  assert.match(app, /尚未关联 v2 覆盖账本 · 不展示收益/);
+});
+
 test("selected timeframe is filtered by the API before its 2000-row limit", () => {
   assert.match(app, /const apiTimeframe =/);
   assert.match(app, /&timeframe=\$\{encodeURIComponent\(apiTimeframe\(queryTimeframe\)/);
