@@ -7950,3 +7950,20 @@ experiments:
     notes: First D configuration scoring on already-seen owner-authorized history; fourth structural hypothesis after13
       gates. Original V1/V3 baselines retained. Audit implementation PASS but process receipt ordering not fully met;
       no rewrite/backdate/rescore. No live changes.
+  - experiment_id: exp-spike-v3-htf-gate-20260910-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 618aa77a349d7f1b00e1efe52d12362b8219178e
+    status: active
+    question: Can known closed4H relative momentum veto weak V3 hourly launches while preserving early true launches?
+    single_variable: Only veto original V3 parent when complete341-bar-warmed4H md<sb; neutral or unknown passes without
+      pretending unknown is confirmed.
+    result: Preregistered fifth structural hypothesis before E market detection or scoring; original four acceptance
+      gates and all denominators retained.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    canonical_report: analysis/html/p1_spike_v3_htf_gate_20260910.html
+    artifacts: []
+    notes: Previously seen history after13 gates and A-D. New higher-timeframe coverage inspected without signal/outcome
+      scoring. No live change.
