@@ -26641,3 +26641,124 @@ artifacts:
     production_eligible: false
     notes: V2 config exposure 1; retrospective. 80% timely recall NOT met. Pine saved privately; monitor and execution
       unchanged. Frozen risk and costs; no tuning after results.
+
+  - artifact_id: spike-early-warning-20260910-v3-pine-source
+    artifact_type: config
+    role: retrospective_structural_warning_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: abdf3eabd0a9e764ff845a30e9c1c9ee2bee5035
+    generator_commit: null
+    source_path: yoyo/evaluation/pine/spike_burst_v3_early_warning.pine
+    sha256: d604051c0c633e3ee9dac4c23bbae51ce20fe9365da60aa33a760e08cf4ea882
+    size_bytes: 25900
+    storage_uri: repo://yoyo/evaluation/pine/spike_burst_v3_early_warning.pine
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Warning recall exceeds80% on seen price-anchor proxy; related confirmation and trading quality not validated.
+      Pine source only; no live changes.
+  - artifact_id: spike-early-warning-20260910-v3-report-source
+    artifact_type: report
+    role: retrospective_structural_warning_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: abdf3eabd0a9e764ff845a30e9c1c9ee2bee5035
+    generator_commit: null
+    source_path: analysis/p1_spike_burst_early_warning_20260910.md
+    sha256: 787e66c806588be73f2ca671b1bcfe34fd6f49a785b3c9669ad2da754b7723d0
+    size_bytes: 22212
+    storage_uri: repo://analysis/p1_spike_burst_early_warning_20260910.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Warning recall exceeds80% on seen price-anchor proxy; related confirmation and trading quality not validated.
+      Pine source only; no live changes.
+  - artifact_id: spike-early-warning-20260910-v3-report-html
+    artifact_type: report
+    role: retrospective_structural_warning_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: abdf3eabd0a9e764ff845a30e9c1c9ee2bee5035
+    generator_commit: null
+    source_path: analysis/html/p1_spike_burst_early_warning_20260910.html
+    sha256: 92b01e2f82cf13172fe393678eff21c2c5a456a0efebdc4234a2df6e7b06db73
+    size_bytes: 1817842
+    storage_uri: repo://analysis/html/p1_spike_burst_early_warning_20260910.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Warning recall exceeds80% on seen price-anchor proxy; related confirmation and trading quality not validated.
+      Pine source only; no live changes.
+  - artifact_id: spike-early-warning-20260910-v3-prepared
+    artifact_type: manifest
+    role: retrospective_structural_warning_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: abdf3eabd0a9e764ff845a30e9c1c9ee2bee5035
+    generator_commit: null
+    source_path: experiments/active/exp-spike-burst-early-warning-20260910-v3/results/prepared_manifest.json
+    sha256: 519d3bafb7d82a7e46a162ee5b109869bb85baf118ce8480450d5a7fafffbd6d
+    size_bytes: 72011
+    storage_uri: repo://experiments/active/exp-spike-burst-early-warning-20260910-v3/results/prepared_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Warning recall exceeds80% on seen price-anchor proxy; related confirmation and trading quality not validated.
+      Pine source only; no live changes.
+  - artifact_id: spike-early-warning-20260910-v3-validation
+    artifact_type: manifest
+    role: retrospective_structural_warning_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: abdf3eabd0a9e764ff845a30e9c1c9ee2bee5035
+    generator_commit: null
+    source_path: experiments/active/exp-spike-burst-early-warning-20260910-v3/results/validation_manifest.json
+    sha256: 14c73602956911b66f8adbb5472430f68d99a1117daf69c2542d5228e72794c0
+    size_bytes: 4352
+    storage_uri: repo://experiments/active/exp-spike-burst-early-warning-20260910-v3/results/validation_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Warning recall exceeds80% on seen price-anchor proxy; related confirmation and trading quality not validated.
+      Pine source only; no live changes.
+  - artifact_id: spike-early-warning-20260910-v3-report-manifest
+    artifact_type: manifest
+    role: retrospective_structural_warning_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: abdf3eabd0a9e764ff845a30e9c1c9ee2bee5035
+    generator_commit: null
+    source_path: experiments/active/exp-spike-burst-early-warning-20260910-v3/results/report_manifest.json
+    sha256: ab5807b81007e28d506390a710b64ff2e9d752bce4c824e0170a2cf5b3d4016b
+    size_bytes: 71793
+    storage_uri: repo://experiments/active/exp-spike-burst-early-warning-20260910-v3/results/report_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Warning recall exceeds80% on seen price-anchor proxy; related confirmation and trading quality not validated.
+      Pine source only; no live changes.
+  - artifact_id: spike-early-warning-20260910-v3-independent-audit
+    artifact_type: manifest
+    role: retrospective_structural_warning_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: abdf3eabd0a9e764ff845a30e9c1c9ee2bee5035
+    generator_commit: null
+    source_path: experiments/active/exp-spike-burst-early-warning-20260910-v3/qa/independent_audit.json
+    sha256: 8edeb38b2178742450eabebb4129f4a835ac4f554e9acd70eb864578cc2801df
+    size_bytes: 802
+    storage_uri: repo://experiments/active/exp-spike-burst-early-warning-20260910-v3/qa/independent_audit.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Warning recall exceeds80% on seen price-anchor proxy; related confirmation and trading quality not validated.
+      Pine source only; no live changes.
+  - artifact_id: spike-early-warning-20260910-v3-verification
+    artifact_type: manifest
+    role: retrospective_structural_warning_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: abdf3eabd0a9e764ff845a30e9c1c9ee2bee5035
+    generator_commit: null
+    source_path: experiments/active/exp-spike-burst-early-warning-20260910-v3/qa/root_verification.json
+    sha256: 8170571109cdc395448ca68a447243e8fbe1081e6c0045a878f1360f1419ee30
+    size_bytes: 1415
+    storage_uri: repo://experiments/active/exp-spike-burst-early-warning-20260910-v3/qa/root_verification.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Warning recall exceeds80% on seen price-anchor proxy; related confirmation and trading quality not validated.
+      Pine source only; no live changes.

@@ -1,0 +1,12 @@
+/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+Traceback (most recent call last):
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 197, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_early_warning.py", line 424, in <module>
+    prepare(args.results) if args.phase == "prepare" else evaluate(args.results)
+  File "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_early_warning.py", line 215, in prepare
+    signals, controls, detections, exposure, breadth, snapshots, cases, schedules, parents = [], [], [], [], [], [], [], [], [], []
+ValueError: too many values to unpack (expected 9)

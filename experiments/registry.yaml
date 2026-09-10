@@ -7792,14 +7792,27 @@ experiments:
 
   - experiment_id: exp-spike-burst-early-warning-20260910-v3
     source_repo: darkforest-x/fable-trading
-    source_commit: be74924
-    status: active
-    question: Can a holding-independent structural early warning cover launches promptly while a separate causal confirmation reports quality?
-    single_variable: Stage-separated detection with fixed early and child-confirmation rules; unchanged labels, execution and costs.
-    holdout_consumed: false
+    source_commit: 3e53a4c059a033477028cdd47fbc095e1ff33236
+    status: inconclusive
+    question: Can holding-independent structural early warnings cover launches promptly with separate causal confirmation?
+    single_variable: Fixed stage-separated detection; unchanged original labels, execution and costs.
+    result: 278 OKX1H historical contracts /61days. Early +1 recall1463/1660=88.13%, night129/144=89.58%;10386alerts/170.26perday/14.63%event
+      precision. Confirmed recall29.40%/49.31%. Matched random excess -98.21bp/-78.61bp, Holm1. NEAR cooldown miss
+      persists. No live promotion.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
     canonical_report: analysis/html/p1_spike_burst_early_warning_20260910.html
-    artifacts: []
-    notes: Owner continuing adjustment authorization. Previously viewed retrospective data; not blind OOS. 80% coverage is not win rate. No monitor, notification or order changes.
+    artifacts:
+    - spike-early-warning-20260910-v3-pine-source
+    - spike-early-warning-20260910-v3-report-source
+    - spike-early-warning-20260910-v3-report-html
+    - spike-early-warning-20260910-v3-prepared
+    - spike-early-warning-20260910-v3-validation
+    - spike-early-warning-20260910-v3-report-manifest
+    - spike-early-warning-20260910-v3-independent-audit
+    - spike-early-warning-20260910-v3-verification
+    notes: First scored V3 configuration exposure, seen retrospective history. Initial prep init bug before market
+      jobs archived; later render/CSV parser corrections did not rescore. Broad shared-anchor recall is not predictive
+      accuracy. Native Pine compile not performed; current TV/monitor/notifications unchanged.

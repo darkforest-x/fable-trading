@@ -1,0 +1,96 @@
+{
+  "status": "complete",
+  "source_pins": {
+    "yoyo/evaluation/spike_burst_early_warning.py": "31f5422524b15b2a758cb8e6d55b1e943123d099655f4d743051215dbacb9abf",
+    "experiments/active/exp-spike-burst-early-warning-20260910-v3/PROJECT_PLAN.md": "32f41bdb6479d2c4eb9fc0ef5e1c7023ff76ee3375e44ffed3e23246ede29f90",
+    "yoyo/evaluation/spike_burst_recall_study.py": "a9e532861cad640b5dcf6dbf8d465b3ad381cb7ef2b02d65cad153b8c849dbbb",
+    "yoyo/evaluation/spike_burst_progressive.py": "cec81a33997bd39272762bd70a451ceb5bf218da0e7fc0606271d165437fde08",
+    "yoyo/evaluation/spike_burst_replay.py": "996ef56ceb5b70da5337422d8390487330f7e387f648ee527b5afc9bda72a33f",
+    "yoyo/evaluation/spike_burst_dataset.py": "e03585c03e32387b84ade03ce12966d8ff0b6468a2814f0c0199a814d69dcdd1",
+    "yoyo/evaluation/spike_burst_execution.py": "05c96e98498cbf11cc426ed4cc939199b47af2cf8fd5a409c79fc720552f45cc",
+    "yoyo/evaluation/altseason_research.py": "35d6e171a8a7b25516871ae119c2780dcc1130d2beaaffdd270d2b2f99742075",
+    "yoyo/evaluation/launch_quality_dataset.py": "df95efee4db18d09f160bbae8dd521bd39d52585c5dd42c5786e6a6b3876b6ed",
+    "yoyo/data/altseason_sources.py": "d9182612de0c5401ae74a00a2b220f6b280e6e71b9de306c26a4acb3638d0eb7"
+  },
+  "config": {
+    "schema": "spike-early-warning-v3",
+    "start": "2026-07-10T00:00:00+00:00",
+    "exclusive_end": "2026-09-09T00:00:00+00:00",
+    "venue": "okx",
+    "minutes": 60,
+    "anchor_prior_highs": 12,
+    "refractory_bars": 24,
+    "future_bars": 24,
+    "label_target_atr": 4,
+    "label_adverse_atr": 2,
+    "large_peak_return": 0.08,
+    "recall_lags": [
+      0,
+      1,
+      2,
+      6
+    ],
+    "target_recall": 0.8,
+    "target_max_lag": 1,
+    "precision_match_lags": [
+      0,
+      6
+    ],
+    "controls": 3,
+    "seed": 20260910,
+    "retrospective": true,
+    "optimization": false,
+    "training": false,
+    "label_clock": "confirmed close",
+    "execution": "unchanged next real open",
+    "precision_definition": "earliest unique signal matching a positive event in [0,+6]; not trade win rate",
+    "arms": [
+      "early",
+      "confirmed"
+    ],
+    "early": "ready & close>prior12high & close>max(SMA20,EMA20); rising edge",
+    "early_cooldown_bars": 12,
+    "confirmation_max_age": 3,
+    "confirmation": "close>parentHigh & recentDense & advance>=1.5 & volume>=1.5 & md>=sb & middleRising",
+    "holding_suppression": false,
+    "breadth": "same-confirmed-hour descriptive only; valid denominator",
+    "labels": "exact authenticated V2 labels, never regenerated",
+    "primary_tests": 2
+  },
+  "primary_tests": 2,
+  "prepared_manifest_sha256": "519d3bafb7d82a7e46a162ee5b109869bb85baf118ce8480450d5a7fafffbd6d",
+  "artifacts": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-early-warning-20260910-v3/results/trade_events.csv.gz",
+      "sha256": "1d77457a770807180f033d8e0128a4851f76479975f6b4ca04242dd8af045627",
+      "size_bytes": 2984285
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-early-warning-20260910-v3/results/trade_controls.csv.gz",
+      "sha256": "2a589ffbba82aaf831125198cb63fcaa41ddd105cd9f5bf4244cfb46ee46ce0f",
+      "size_bytes": 7335820
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-early-warning-20260910-v3/results/trade_summary.csv",
+      "sha256": "c48b46014f0ee0d5d36152bd8f716cad617eadd1c2ecf1e3da728a0065a1df50",
+      "size_bytes": 10199
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-early-warning-20260910-v3/results/score_summary.csv",
+      "sha256": "255fb3c19b91f5d9e29c571e865b60d589611baf4f8b20cdc41828119f15afb6",
+      "size_bytes": 896
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-early-warning-20260910-v3/results/trade_comparison.csv",
+      "sha256": "74d68f82136e185c439d5fdd7bcfc3f8f0de3614ed094d55108f0d04dec43bf8",
+      "size_bytes": 18324
+    }
+  ],
+  "costs": "Unchanged20bp entry-notional; funding/impact unmodeled",
+  "account_return_not_computed": true,
+  "limitations": [
+    "Descriptive seen-data event outcomes, not blind OOS or portfolio returns",
+    "Early/confirmation arms are related; controls can repeat across events",
+    "Same-night co-movement is not independent evidence"
+  ]
+}
