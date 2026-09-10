@@ -117,7 +117,9 @@ node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.t
 
 诊断确认 scanner 的完整 OHLC recurrence 过去只在 worker RAM；`markets.chart` 只有 240 根，不能替代 V1 的 340 根 warmup，也不能安全拼接增量。`64d4308` 新增 monitor 私有 SQLite 的 gzip raw checkpoint：每个成功获取的完整序列在 replay/market write 前保存，重启时只有通过周期对齐、连续性、有限 OHLCV 和价格边界校验的序列才会恢复；异常或 gap payload fail closed，回到 cold fetch。
 
-定向恢复测试以 341 根种子重启并追加一根，断言恢复后的 V1 state 和末 240 chart 与完整序列重放相同；另测 gap checkpoint 不会进入 recurrence seed。它不裁剪输入、不改 Pine、特征、cutover 或通知逻辑。该提交尚未载入当前 worker，第一次迁移 reload 仍会失去旧进程尚未持久化的 RAM seed；之后每个成功 cell 会有可验证 checkpoint。
+定向恢复测试以 341 根种子重启并追加一根，断言恢复后的 V1 state 和末 240 chart 与完整序列重放相同；另测 gap checkpoint 不会进入 recurrence seed。它不裁剪输入、不改 Pine、特征、cutover 或通知逻辑。
+
+在第一轮完成后仅执行一次受控 LaunchAgent reload；旧 RAM seed 因旧 worker 尚未具备 checkpoint 能力而不可迁移，这是首次部署的明确边界。新 worker 的 scan `started_at_ms=1789077675850` 从 0 进至 21/1,434、errors 0，并已有 22 个 checkpoint。model ready 后，两个重启前遗留且早于 Bark cutover 的 IBM 4H、STABLE 1H candidates 都变为 `disabled/raw_not_eligible:before_bark_activation`；Bark pending/failed/unknown 保持 0，未发生历史补发。
 
 ## 运行环境与未完成项
 
