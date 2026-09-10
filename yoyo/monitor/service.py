@@ -65,7 +65,7 @@ class Monitor:
         self.store.retire_telegram_pending()
         self.store.retire_disabled_timeframes()
         self.store.retire_muted_bark_timeframes()
-        for name, target in (("scan", self.run), ("model", self.model_gate.run), ("bark", self.deliver_bark)):
+        for name, target in (("scan", self.run), ("bark", self.deliver_bark)):
             thread = threading.Thread(target=target, name="impulse-" + name, daemon=True)
             self.threads.append(thread)
             thread.start()
@@ -131,7 +131,7 @@ class Monitor:
                     completed=0, total=len(self.instruments) * len(MONITORED_TIMEFRAMES), errors=0, next_scan_ms=None,
                     error_samples=[])
         self.store.set_meta("scan", scan)
-        with ThreadPoolExecutor(max_workers=8, thread_name_prefix="okx-public") as executor:
+        with ThreadPoolExecutor(max_workers=1, thread_name_prefix="okx-public") as executor:
             jobs = {executor.submit(self.scan_symbol, x): x["instId"] for x in self.instruments}
             for future in as_completed(jobs):
                 symbol = jobs[future]
