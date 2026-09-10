@@ -8212,15 +8212,31 @@ experiments:
     canonical_report: analysis/html/p1_spike_v5_structure_confirmation_20260910.html
   - experiment_id: exp-spike-v5-pepe-1h-repair-20260910-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: b8bf1aa2b6a025e0a216a0d859661118c4438d22
+    source_commit: 2d7955750f0a950a08799613dac5c1fbd84ca5c4
     status: active
-    question: Repair missing V5 signals on the owner-intended PEPE 1H chart.
-    single_variable: Minimal structural-gate correction; no parameter search or economic evaluation.
-    result: Implementation frozen;19 synthetic/source tests passed. Native1H regression and save pending.
+    question: Repair missing V5 signals on the owner-intended PEPE1H chart.
+    single_variable: Minimal structural-gate correction; retest boundary amended after first regression failure. No
+      parameter search or PnL.
+    result: '20 tests and3 native price/legacy/body/density probes pass.624 reviewed1H bars: V4=3,brokenV5=0,repairedV5=2.
+      Aug19 candidate finalizes4bars later Aug20 00:00open/01:00close Beijing. NativeprivateV5 revision2 saved; Sep4
+      unwanted shape remains.'
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
-    artifacts: []
-    notes: Owner all-date authorization persists. First use of this repaired configuration on already-inspected history.
-      Preserve prior4H record as mistaken acceptance context; no blindOOS claim.
+    canonical_report: analysis/html/p1_spike_v5_pepe_1h_repair_20260910.html
+    artifacts:
+    - spike-v5-pepe-1h-repair-20260910-1
+    - spike-v5-pepe-1h-repair-20260910-2
+    - spike-v5-pepe-1h-repair-20260910-3
+    - spike-v5-pepe-1h-repair-20260910-4
+    - spike-v5-pepe-1h-repair-20260910-5
+    - spike-v5-pepe-1h-repair-20260910-6
+    - spike-v5-pepe-1h-repair-20260910-7
+    - spike-v5-pepe-1h-repair-20260910-8
+    - spike-v5-pepe-1h-repair-20260910-9
+    - spike-v5-pepe-1h-repair-20260910-10
+    - spike-v5-pepe-1h-repair-20260910-11
+    notes: Functional repair verified; broader noise efficacy incomplete. Firstrepair configuration used twice includingfailurediagnosis;
+      finalconfiguration used onceinreplay plusnativecheck. Prior4H interpretation corrected. No services/models/orders
+      changed.

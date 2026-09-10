@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>PEPE 1H：V5 漏报修复与实际确认时间</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>PEPE 1H：V5 漏报修复与实际确认时间</h1>
+<p><strong>研究周期是 PEPEUSDT.P 1H。之前用 4H 解答是核对错误。</strong> 修复后的私有「SPIKE V5 · 结构确认」已保存第 2 版，在原生 TradingView 的 PEPE 1H 编译并逐根核对。旧 V4 与 Owner 批注保留。</p>
+<p>这次恢复了八月十九日启动段的确认来源，但不声称噪音已经全部消失，也没有做收益回测。</p>
+<h2>这段 1H 行情发生了什么</h2>
+<p>下表全部为北京时间；TradingView 横轴标的是 K 线开盘时间，确认需等到该根收盘。</p>
+<table><thead><tr>
+<th>K 线开盘</th>
+<th>收盘确认时间</th>
+<th>实际条件</th>
+<th>修复版显示</th>
+</tr></thead><tbody>
+<tr><td>8 月 19 日 20:00</td><td>21:00</td><td>原 V4 确认出现，收盘 0.000002616；实体仍未完全站上六线</td><td>内部保留候选，不画最终箭头</td></tr>
+<tr><td>8 月 19 日 21:00</td><td>22:00</td><td>价格回踩原突破位，仍在原整理区内</td><td>保留等待</td></tr>
+<tr><td>8 月 19 日 23:00</td><td>8 月 20 日 00:00</td><td>实体已经完全在线上，主线仍为零</td><td>等待主线抬升</td></tr>
+<tr><td><strong>8 月 20 日 00:00</strong></td><td><strong>01:00</strong></td><td>实体、收盘位置、主线上升及高于信号线全部完成</td><td><strong>最终确认，参考收盘 0.000002714</strong></td></tr>
+</tbody></table>
+<p>原生 TV 数据窗口已核对最后一行：最终确认 = 1、等待 4 根、原确认 bar index 5532、最终 bar index 5536。冻结父结构上沿 0.000002606、下沿 0.000002566。新信号没有回填到原 20:00，也没有使用后续上涨幅度决定当时是否发信号。</p>
+<h2>为什么首版 V5 把它删掉</h2>
+<p>首版把 Owner 的“实体可以在原信号前后完成”扩成了一组新的前置要求：双线连续近零 12 根、0.10 ATR 冻结带、6 根释放时限、整个静默箱体突破。该段的合法原确认发生得更早，没有进入新门槛定义的成熟结构，旧确认来源因此被丢弃。合成测试通过只说明代码实现了这套规则，不能说明规则符合 Owner 的图形要求。</p>
+<p>诊断初期还有两项错误，均已纠正并保留记录：一是把当前打开的 4H 当成 Owner 指定的 1H；二是把上游旧 IMACD 特征工件当成 SPIKE 本身的特征工件。先前据错误输入列出的 8 月 21/22 日确认时间不作为本报告证据。这里认证的是 <code>75d10ad8568817c52dd030fd1e6a.pkl.gz</code>，SHA-256 为 <code>031d3e57bb6081002e3ce4484e999b90ca7759322e6e78da8d9d61173248d07a</code>。</p>
+<h2>现在的规则</h2>
+<ul>
+<li>原 V4 的确认条件、质量门与冷却保持原行为。</li>
+<li>实体定义仍为开盘和收盘严格高于六条均线，允许下影线回踩；证据可以先于或晚于原确认。</li>
+<li>允许候选之后在原整理区内部回踩，严格跌破原父事件前 12 根低点才取消等待。最终确认仍须收在父结构高点和六线之上。</li>
+<li>主线必须高于信号线且较前根上升。连续水平零值不会完成最终确认；负值向上不因绝对值为负而直接取消。</li>
+<li>每个原候选最多完成一次，只画实际完成时的最终信号。零轴、双线副图、均线配色、风险框和原趋势保护算法保持原行为。</li>
+</ul>
+<p>第一次修复仍误把“回到父高以下”当成失效，真实回归因此失败，<strong>没有保存到 TV</strong>。最终只将该失效边界纠正为父结构低点，没有通过改止损、收益目标或加杠杆挽救结果。</p>
+<h2>同期对照与验证范围</h2>
+<p>验证源含 3,144 根连续 1H K 线，2026-05-01 00:00 UTC 至 2026-09-08 23:00 UTC；前段用于原指标历史状态。报告区间为 2026-08-14 00:00 UTC 至 2026-09-09 00:00 UTC（右端不含），共 <strong>624 根 / 26 天</strong>。只查看 PEPE，没有扩成全市场参数搜索。</p>
+<table><thead><tr>
+<th>同期版本</th>
+<th>最终确认数</th>
+<th>解释</th>
+</tr></thead><tbody>
+<tr><td>原 V4</td><td>3</td><td>8/19 20:00、8/27 16:00、9/4 00:00，北京开盘时间</td></tr>
+<tr><td>错误 V5 首版</td><td>0</td><td>新静默结构门删除全部确认</td></tr>
+<tr><td>修复 V5</td><td>2</td><td>8/19 原候选延迟 4 根完成；9/4 原候选同根完成</td></tr>
+</tbody></table>
+<p>8/27 的候选未完成实体条件，后于 8/29 02:00 K 线跌破父结构下沿而取消。<strong>9/4 那个不符合 Owner 理想“水平后启动”的形态仍保留</strong>，本轮没有解决全部形态噪音。3 降到 2 只是事件数量变化，不能当成假信号率下降 33%、胜率提升或“正确行情全部保留”。</p>
+<p>通过 20 项定向软件测试，包括实体前后顺序、下影、普通回踩、结构失效、超过 6 根等待、未知输入、缺口、当前收盘确认和因果前缀。原生核对 3 个明确时点的 OHLC、原确认、实体状态及密集计数；修复后又核对对应的最终确认与等待根数。原生第 2 版于北京时间 2026-09-10 23:16 保存。</p>
+<h2>风险与诚实声明</h2>
+<p>这是软件语义修复，<strong>不是策略盈利验证</strong>。没有正负收益标签或验证集，因此正类率、val 样本数、AUC、收益置换 p 值、top-decile 毛/净收益、胜率和匹配随机入场收益不适用。替代对照是未站上实体、水平主线、失效结构等合成反例，以及逐根来源联结、真实原版/错误版对照和前缀一致性，不编造经济指标。</p>
+<p>Owner 已允许任何时间数据。第一修复配置使用已知 holdout 第 1 次回归失败，第 2 次用于失败逐根诊断；第二修复配置第 1 次回归通过，随后第 2 次为原生图表核验。首版错误 V5 的本次 1H 诊断及对照也是已消费历史再使用。以上都不是新的盲样本外，不可作为下一轮筛选参数的独立验证集。</p>
+<p>本地单根 RV 3.2403737686 与 TV 3.267025658 有约 0.82% 差异；本报告没有获得原生全部历史成交量序列来解释差异，不宣称整段 Pine 数值完全一致。实际旧确认及本次目标来源已在原生图核对。原 V4 的量能门使用三根量比，不应把这个单根 RV 直接当成原确认门槛。</p>
+<p>Python 是结构状态 oracle 加已存在的 V4 来源引擎，尚未逐根验证整份 Pine 的所有历史数值。绿色收益框仍是历史路径参考，未兑现峰值不等于交易利润。没有改动监控、Bark/TG、模型、ACTIVE 或真实订单。</p>
+<h2>复现与证据</h2>
+<p>先使用源码提交 <code>2d7955750f0a950a08799613dac5c1fbd84ca5c4</code> 中的文件（共享主仓不为复现切分支或覆盖其他会话修改）。本地保留上述认证工件；缺少它则不能用其他同名文件替代。</p>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+.venv/bin/python -m pytest -q tests/test_spike_burst_v5_structure.py tests/test_spike_burst_v4_release.py
+.venv/bin/python -m yoyo.evaluation.spike_v5_pepe_regression
+.venv/bin/python scripts/md_to_html.py analysis/p1_spike_v5_pepe_1h_repair_20260910.md --out-dir analysis/html
+</code></pre>
+<p>Builder 会验证源工件 SHA、连续 1H 时间轴及代码/计划已提交，再生成 <code>results/regression.json</code> 和 <code>results/pepe_1h_trace.csv.gz</code>。原生操作与读数在 <code>qa/tradingview_receipt.json</code>；测试与首轮失败记录在 <code>qa/tests.json</code>。它不会下载数据、训练模型、计算收益或触发通知。</p>
+<p>下一步仍需围绕 Owner 的理想启动段与不该出现的 9/4 形态，分别验证“副图形成过程”而非再捆绑一串门槛；这不是本轮已经完成的结论。</p>
+</body>
+</html>

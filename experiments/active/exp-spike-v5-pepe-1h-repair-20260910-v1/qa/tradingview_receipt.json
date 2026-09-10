@@ -1,0 +1,65 @@
+{
+  "schema": "spike-v5-native-repair-receipt-v1",
+  "observed_at": "2026-09-10T15:20:30.871511+00:00",
+  "capture_method": "Native TradingView CUA AX and screenshots, transcribed observed values",
+  "source_commit": "2d7955750f0a950a08799613dac5c1fbd84ca5c4",
+  "pine_sha256": "78f9613c68963976ab4149e23cda55aaa9393a0544e8aa0a2a8deab2e000be59",
+  "pine_characters": 27099,
+  "pine_editor_final_line": 469,
+  "private_script": "SPIKE V5 · 结构确认",
+  "saved_revision": 2,
+  "saved_time_beijing": "2026-09-10 23:16",
+  "chart": "OKX:PEPEUSDT.P",
+  "timeframe": "60",
+  "chart_type": "standard candles",
+  "chart_timezone": "UTC+8",
+  "layout": "综合过滤",
+  "layout_path": "AlGc61US",
+  "v4_preserved_hidden": true,
+  "v5_visible": true,
+  "zero_axis_and_six_mas_and_risk_boxes_visible": true,
+  "owner_annotations_preserved": true,
+  "native_compile": "Chart updated; final confirmation/data-window values verified",
+  "probes": [
+    {
+      "bar_open_beijing": "2026-08-19 20:00",
+      "bar_close_beijing": "2026-08-19 21:00",
+      "v4": 1,
+      "v5": 0,
+      "body_bar": null,
+      "legacy_bar": 5532,
+      "reason": 2
+    },
+    {
+      "bar_open_beijing": "2026-08-19 23:00",
+      "bar_close_beijing": "2026-08-20 00:00",
+      "v4": 0,
+      "v5": 0,
+      "body_bar": 5535,
+      "legacy_bar": 5532,
+      "md_display": 0,
+      "sb_display": 0,
+      "reason": 4
+    },
+    {
+      "bar_open_beijing": "2026-08-20 00:00",
+      "bar_close_beijing": "2026-08-20 01:00",
+      "v4": 0,
+      "v5": 1,
+      "body_bar": 5536,
+      "legacy_bar": 5532,
+      "wait_bars": 4,
+      "close": 2.714e-06,
+      "parent_high": 2.606e-06,
+      "parent_low": 2.566e-06,
+      "md_display": 6e-09,
+      "sb_display": 1e-09,
+      "reason": 5
+    }
+  ],
+  "limitations": [
+    "Only these native bars cross-checked; not full history Pine parity",
+    "TV volume ratio at original bar 3.267025658 vs cached 3.2403737686; exact volume series difference unresolved",
+    "No native profit validation, alarms, notifications or orders"
+  ]
+}

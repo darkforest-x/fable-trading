@@ -29057,3 +29057,157 @@ artifacts:
     notes: Source commit fixes implementation before native UI inspection. Gate-only oracle and synthetic tests do
       not prove full Pine parity or returns. Native PEPE4H target rebound still missed. Reports/receipt human-authored
       from observed UI; not generated market datasets.
+  - artifact_id: spike-v5-pepe-1h-repair-20260910-1
+    artifact_type: config
+    role: known_history_software_regression_not_economic_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2d7955750f0a950a08799613dac5c1fbd84ca5c4
+    source_path: yoyo/evaluation/pine/spike_burst_v5.pine
+    sha256: 78f9613c68963976ab4149e23cda55aaa9393a0544e8aa0a2a8deab2e000be59
+    size_bytes: 28500
+    storage_uri: repo://yoyo/evaluation/pine/spike_burst_v5.pine
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Corrected owner timeframe to1H; actual TV revision2 saved23:16. Known PEPE startup restored at actual completion.
+      Sep4 unwanted shape remains; no profitability or blindOOS claim.
+  - artifact_id: spike-v5-pepe-1h-repair-20260910-2
+    artifact_type: config
+    role: known_history_software_regression_not_economic_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2d7955750f0a950a08799613dac5c1fbd84ca5c4
+    source_path: yoyo/evaluation/spike_burst_v5_structure.py
+    sha256: 26764fd4a7edc6747e3bd8f3dd6939c438c8c143664a4bb8a457fe84a91f1fef
+    size_bytes: 6658
+    storage_uri: repo://yoyo/evaluation/spike_burst_v5_structure.py
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Corrected owner timeframe to1H; actual TV revision2 saved23:16. Known PEPE startup restored at actual completion.
+      Sep4 unwanted shape remains; no profitability or blindOOS claim.
+  - artifact_id: spike-v5-pepe-1h-repair-20260910-3
+    artifact_type: config
+    role: known_history_software_regression_not_economic_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2d7955750f0a950a08799613dac5c1fbd84ca5c4
+    source_path: yoyo/evaluation/spike_v5_pepe_regression.py
+    sha256: 4b69515877f84b1cb90051e825cc7d379342a895b014b1c1eb872cbff154719a
+    size_bytes: 7522
+    storage_uri: repo://yoyo/evaluation/spike_v5_pepe_regression.py
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Corrected owner timeframe to1H; actual TV revision2 saved23:16. Known PEPE startup restored at actual completion.
+      Sep4 unwanted shape remains; no profitability or blindOOS claim.
+  - artifact_id: spike-v5-pepe-1h-repair-20260910-4
+    artifact_type: config
+    role: known_history_software_regression_not_economic_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2d7955750f0a950a08799613dac5c1fbd84ca5c4
+    source_path: tests/test_spike_burst_v5_structure.py
+    sha256: 22c7dbf41f0b07d397435bf02fd40acf96d9eee677597e641ca30ac5a0ad566d
+    size_bytes: 9780
+    storage_uri: repo://tests/test_spike_burst_v5_structure.py
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Corrected owner timeframe to1H; actual TV revision2 saved23:16. Known PEPE startup restored at actual completion.
+      Sep4 unwanted shape remains; no profitability or blindOOS claim.
+  - artifact_id: spike-v5-pepe-1h-repair-20260910-5
+    artifact_type: config
+    role: known_history_software_regression_not_economic_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2d7955750f0a950a08799613dac5c1fbd84ca5c4
+    source_path: experiments/active/exp-spike-v5-pepe-1h-repair-20260910-v1/PROJECT_PLAN.md
+    sha256: 6b688a773407365ccf7242f12290f7664eaa4fe22304e8bcfc6f45a04e633713
+    size_bytes: 4894
+    storage_uri: repo://experiments/active/exp-spike-v5-pepe-1h-repair-20260910-v1/PROJECT_PLAN.md
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Corrected owner timeframe to1H; actual TV revision2 saved23:16. Known PEPE startup restored at actual completion.
+      Sep4 unwanted shape remains; no profitability or blindOOS claim.
+  - artifact_id: spike-v5-pepe-1h-repair-20260910-6
+    artifact_type: manifest
+    role: known_history_software_regression_not_economic_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2d7955750f0a950a08799613dac5c1fbd84ca5c4
+    source_path: experiments/active/exp-spike-v5-pepe-1h-repair-20260910-v1/results/regression.json
+    sha256: 10aa2603b8de1f05eca521b1df6f944d031f63c527aef3bae1e1127d0c230e9b
+    size_bytes: 2763
+    storage_uri: repo://experiments/active/exp-spike-v5-pepe-1h-repair-20260910-v1/results/regression.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Corrected owner timeframe to1H; actual TV revision2 saved23:16. Known PEPE startup restored at actual completion.
+      Sep4 unwanted shape remains; no profitability or blindOOS claim.
+  - artifact_id: spike-v5-pepe-1h-repair-20260910-7
+    artifact_type: dataset
+    role: known_history_software_regression_not_economic_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2d7955750f0a950a08799613dac5c1fbd84ca5c4
+    source_path: experiments/active/exp-spike-v5-pepe-1h-repair-20260910-v1/results/pepe_1h_trace.csv.gz
+    sha256: 1ea142764305a02e959dc4d2192e482dc23a8f80ae75fe3eddecf970f6e7aeea
+    size_bytes: 73258
+    storage_uri: repo://experiments/active/exp-spike-v5-pepe-1h-repair-20260910-v1/results/pepe_1h_trace.csv.gz
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Corrected owner timeframe to1H; actual TV revision2 saved23:16. Known PEPE startup restored at actual completion.
+      Sep4 unwanted shape remains; no profitability or blindOOS claim.
+  - artifact_id: spike-v5-pepe-1h-repair-20260910-8
+    artifact_type: manifest
+    role: known_history_software_regression_not_economic_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2d7955750f0a950a08799613dac5c1fbd84ca5c4
+    source_path: experiments/active/exp-spike-v5-pepe-1h-repair-20260910-v1/qa/tests.json
+    sha256: 561155f2e1d1a68d28a04bd3f2c1af2045f1344c947a91ac2cc85dc9392a65c4
+    size_bytes: 732
+    storage_uri: repo://experiments/active/exp-spike-v5-pepe-1h-repair-20260910-v1/qa/tests.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Corrected owner timeframe to1H; actual TV revision2 saved23:16. Known PEPE startup restored at actual completion.
+      Sep4 unwanted shape remains; no profitability or blindOOS claim.
+  - artifact_id: spike-v5-pepe-1h-repair-20260910-9
+    artifact_type: manifest
+    role: known_history_software_regression_not_economic_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2d7955750f0a950a08799613dac5c1fbd84ca5c4
+    source_path: experiments/active/exp-spike-v5-pepe-1h-repair-20260910-v1/qa/tradingview_receipt.json
+    sha256: c4da3955014a777658bf52b6eecd3adb2a9ad00a5843ef21d4718cf342b8d058
+    size_bytes: 2051
+    storage_uri: repo://experiments/active/exp-spike-v5-pepe-1h-repair-20260910-v1/qa/tradingview_receipt.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Corrected owner timeframe to1H; actual TV revision2 saved23:16. Known PEPE startup restored at actual completion.
+      Sep4 unwanted shape remains; no profitability or blindOOS claim.
+  - artifact_id: spike-v5-pepe-1h-repair-20260910-10
+    artifact_type: report
+    role: known_history_software_regression_not_economic_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2d7955750f0a950a08799613dac5c1fbd84ca5c4
+    source_path: analysis/p1_spike_v5_pepe_1h_repair_20260910.md
+    sha256: 42c382f52ede5f689df27daf2347a23d5ed923d7647893c62ddc04dccff98a78
+    size_bytes: 7079
+    storage_uri: repo://analysis/p1_spike_v5_pepe_1h_repair_20260910.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Corrected owner timeframe to1H; actual TV revision2 saved23:16. Known PEPE startup restored at actual completion.
+      Sep4 unwanted shape remains; no profitability or blindOOS claim.
+  - artifact_id: spike-v5-pepe-1h-repair-20260910-11
+    artifact_type: report
+    role: known_history_software_regression_not_economic_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2d7955750f0a950a08799613dac5c1fbd84ca5c4
+    source_path: analysis/html/p1_spike_v5_pepe_1h_repair_20260910.html
+    sha256: 87142aeac65c8c7a24af91fde21a1768d76c793b7460c769a24760414ee29ff9
+    size_bytes: 10155
+    storage_uri: repo://analysis/html/p1_spike_v5_pepe_1h_repair_20260910.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Corrected owner timeframe to1H; actual TV revision2 saved23:16. Known PEPE startup restored at actual completion.
+      Sep4 unwanted shape remains; no profitability or blindOOS claim.

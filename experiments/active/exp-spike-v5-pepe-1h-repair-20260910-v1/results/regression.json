@@ -1,0 +1,74 @@
+{
+  "schema": "spike-v5-pepe-1h-repair-regression-v1",
+  "source_commit": "2d7955750f0a950a08799613dac5c1fbd84ca5c4",
+  "source_path": "experiments/active/exp-spike-burst-validation-20260910-v1/results/features/75d10ad8568817c52dd030fd1e6a.pkl.gz",
+  "source_sha256": "031d3e57bb6081002e3ce4484e999b90ca7759322e6e78da8d9d61173248d07a",
+  "source_pins": {
+    "yoyo/evaluation/spike_burst_v5_structure.py": "26764fd4a7edc6747e3bd8f3dd6939c438c8c143664a4bb8a457fe84a91f1fef",
+    "yoyo/evaluation/pine/spike_burst_v5.pine": "78f9613c68963976ab4149e23cda55aaa9393a0544e8aa0a2a8deab2e000be59",
+    "yoyo/evaluation/spike_v5_pepe_regression.py": "4b69515877f84b1cb90051e825cc7d379342a895b014b1c1eb872cbff154719a",
+    "experiments/active/exp-spike-v5-pepe-1h-repair-20260910-v1/PROJECT_PLAN.md": "6b688a773407365ccf7242f12290f7664eaa4fe22304e8bcfc6f45a04e633713",
+    "yoyo/evaluation/spike_burst_early_warning.py": "31f5422524b15b2a758cb8e6d55b1e943123d099655f4d743051215dbacb9abf",
+    "yoyo/evaluation/spike_burst_progressive.py": "cec81a33997bd39272762bd70a451ceb5bf218da0e7fc0606271d165437fde08"
+  },
+  "source_rows": 3144,
+  "source_first": "2026-05-01 00:00:00+00:00",
+  "source_last": "2026-09-08 23:00:00+00:00",
+  "evaluated_bar_open_utc": [
+    "2026-08-14 00:00:00+00:00",
+    "2026-09-09 00:00:00+00:00"
+  ],
+  "evaluated_bars": 624,
+  "counts": {
+    "v4": 3,
+    "broken_v5": 0,
+    "repaired_v5": 2,
+    "same_bar": 1,
+    "delayed": 1
+  },
+  "native_probes": [
+    {
+      "bar_open_utc": "2026-08-19T12:00Z",
+      "ohlc": true,
+      "native_legacy": true,
+      "native_body": true,
+      "native_density": true
+    },
+    {
+      "bar_open_utc": "2026-08-19T15:00Z",
+      "ohlc": true,
+      "native_legacy": true,
+      "native_body": true,
+      "native_density": true
+    },
+    {
+      "bar_open_utc": "2026-08-19T16:00Z",
+      "ohlc": true,
+      "native_legacy": true,
+      "native_body": true,
+      "native_density": true
+    }
+  ],
+  "final_events": [
+    {
+      "final_open_beijing": "2026-08-20 00:00:00+08:00",
+      "final_close_beijing": "2026-08-20 01:00:00+08:00",
+      "legacy_open_beijing": "2026-08-19 20:00:00+08:00",
+      "wait_bars": 4,
+      "close": 2.714e-06
+    },
+    {
+      "final_open_beijing": "2026-09-04 00:00:00+08:00",
+      "final_close_beijing": "2026-09-04 01:00:00+08:00",
+      "legacy_open_beijing": "2026-09-04 00:00:00+08:00",
+      "wait_bars": 0,
+      "close": 3.835e-06
+    }
+  ],
+  "prefix_passed": true,
+  "trace_sha256": "1ea142764305a02e959dc4d2192e482dc23a8f80ae75fe3eddecf970f6e7aeea",
+  "repair_configuration": 2,
+  "holdout_consumption": 1,
+  "economic_evaluation": false,
+  "limitations": "Known-history software regression; not false-positive accuracy, profitability or blind OOS."
+}

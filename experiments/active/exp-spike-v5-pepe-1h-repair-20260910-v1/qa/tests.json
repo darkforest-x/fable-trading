@@ -1,0 +1,13 @@
+{
+  "command": ".venv/bin/python -m pytest -q tests/test_spike_burst_v5_structure.py tests/test_spike_burst_v4_release.py",
+  "passed": 20,
+  "duration_seconds": 1.26,
+  "source_commit": "2d7955750f0a950a08799613dac5c1fbd84ca5c4",
+  "builder_before_replay": true,
+  "initial_repair_commit": "518591c",
+  "initial_regression": "failed: parent-high invalidation wrongly discarded internal retest; not saved to TV",
+  "final_repair_commit": "2d7955750f0a950a08799613dac5c1fbd84ca5c4",
+  "final_regression": "passed;3 native field probes and prefix check",
+  "delegate_model": "budget-implementer: Terra High",
+  "diagnostic_correction": "First delegate used upstream IMACD features; discarded and authenticated SPIKE features used."
+}
