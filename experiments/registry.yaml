@@ -7789,3 +7789,17 @@ experiments:
     notes: Owner authorized all dates and adjustments. This V2 configuration first retrospective evaluation; not blind
       OOS. 22/23 BJT bar opens confirm one hour later. Native chart updated, original cloud V1 retained; monitor/Bark/TG/orders/ACTIVE
       unchanged.
+
+  - experiment_id: exp-spike-burst-early-warning-20260910-v3
+    source_repo: darkforest-x/fable-trading
+    source_commit: be74924
+    status: active
+    question: Can a holding-independent structural early warning cover launches promptly while a separate causal confirmation reports quality?
+    single_variable: Stage-separated detection with fixed early and child-confirmation rules; unchanged labels, execution and costs.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    canonical_report: analysis/html/p1_spike_burst_early_warning_20260910.html
+    artifacts: []
+    notes: Owner continuing adjustment authorization. Previously viewed retrospective data; not blind OOS. 80% coverage is not win rate. No monitor, notification or order changes.
