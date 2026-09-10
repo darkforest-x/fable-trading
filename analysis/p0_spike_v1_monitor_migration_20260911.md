@@ -61,25 +61,33 @@ python3 -m yoyo.monitor.replay_import \
 
 因此三周期已开始扫描但远未完成，当前自然 live raw 为 22 条、live YOLO 为 0 条。没有把待预热、扫描中或模型加载中表示为可通知状态。
 
+## 发布后运行验收（`cc6bf62`）
+
+`cc6bf62` 保留完整 720 根的冻结特征与 replay，只在 worker 内避免构造随后会丢弃的前 480 条 chart JSON；state、events 与末 240 条 chart 的逐值等价测试通过。它还将无候选时的 YOLO 状态从误导性的 `loading` 改为 `idle`：该状态仍为 `loaded=false`、不等于 ready，也不会改变任何通知判定。
+
+发布后的第一次读取看到 `117 / 1434`，但其 `scan.started_at_ms` 早于新 monitor 的 `started_at_ms` 约 15 分钟，故它是重启前轮次留下的持久 meta，不能作为此次发布的吞吐证据。进程树复核只剩新 parent `72471` 与其两个 multiprocessing child `72653` / `72777`，没有旧孤儿 writer。新 scanner 随后写入新的 `scan.started_at_ms=1789068913215`；低频连续两点从 `3 / 1434` 到 `39 / 1434`、errors `0`，约 33 cells/min。这只是当前资源条件下的一分钟观测，不是 15 分钟 SLA 或全轮预测。
+
+同一最终检查的 `/api/health` 为 HTTP 200 / 696ms，`market_ready=false`、`model_ready=false`、`ok=false`；`/api/status` 为 HTTP 200 / 384ms，scanner 仍为 `scanning`。YOLO 为 `idle`、`loaded=false`、queue `0`、processed endpoints `0`、last error `null`，即没有 raw candidate 时按设计延迟加载，而不是已经推理就绪。首轮全市场尚未完成，不能称 ready。
+
 ## 实现与验证
 
-本轮 monitor 提交链：`bf08b3c`、`8129087`、`603ea45`、`07e2db7`、`468fc5a`、`229b654`、`6b11464`、`a481311`、`1e5a286`、`7ce4971`、`df6c8f6`、`63e0b29`、`f35caf4`、`181193f`。其中 `f35caf4` 使 replay 图依赖在选卡时才导入，避免 pandas/NumPy/PyArrow 在 FastAPI 监听前阻塞；`181193f` 是上述 overview blocker 的最小修复。
+本轮 monitor 提交链：`bf08b3c`、`8129087`、`603ea45`、`07e2db7`、`468fc5a`、`229b654`、`6b11464`、`a481311`、`1e5a286`、`7ce4971`、`df6c8f6`、`63e0b29`、`f35caf4`、`181193f`、`cc6bf62`。其中 `f35caf4` 使 replay 图依赖在选卡时才导入，避免 pandas/NumPy/PyArrow 在 FastAPI 监听前阻塞；`181193f` 是上述 overview blocker 的最小修复；`cc6bf62` 是保留因果输入的显示物化优化与 V1 gate 测试迁移。
 
 本轮实际执行的定向代码验证：
 
 ```bash
 python3 -m pytest -q \
-  tests/monitor/test_market_summaries.py \
-  tests/monitor/test_api_startup_imports.py \
-  tests/monitor/test_replay_chart.py \
-  tests/monitor/test_spike_v1_api_replay.py \
-  tests/monitor/test_v1_status_snapshot.py
-python3 -m py_compile yoyo/monitor/store.py yoyo/monitor/service.py yoyo/monitor/server.py
+  tests/monitor/test_v1_chart_limit.py \
+  tests/monitor/test_v1_worker_cache.py \
+  tests/monitor/test_model_gate.py \
+  tests/monitor/test_spike_v1_yolo_extra.py \
+  tests/monitor/test_spike_v1_health.py
+python3 -m py_compile yoyo/monitor/signals.py yoyo/monitor/v1_worker.py yoyo/monitor/model_gate.py
 node --check yoyo/monitor/static/app.js
 node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.test.cjs
 ```
 
-这组 Python 测试最后一次为 11 passed；此前回放/API 紧邻测试为 10 passed。它们不是两个独立测试集，不应相加。前端 Node 合同测试此前为 10 passed；本轮没有在 CUA 中重新获得浏览器页面：`cua.getApp("Google Chrome")` 返回 `-10005 timeoutReached`，按约束没有反复连接或伪造截图。静态/API 合同检查不替代桌面与窄屏交互验收。
+本次最终 V1 gate/worker focused suite 为 46 passed；此前回放/API 相邻 suite 为 10 passed。它们不是两个独立测试集，不应相加。`test_model_gate.py` 已迁到 current V1 live/raw/long/closed 合同，保留到期、延迟确认、去重、重启和因果端点覆盖；旧 IMACD `md` 失效断言以 V1 source/confirmation/direction/side/risk fail-closed 注册测试替代。前端 Node 合同测试此前为 10 passed；本轮没有在 CUA 中重新获得浏览器页面：`cua.getApp("Google Chrome")` 返回 `-10005 timeoutReached`，按约束没有反复连接或伪造截图。静态/API 合同检查不替代桌面与窄屏交互验收。
 
 ## 运行环境与未完成项
 
