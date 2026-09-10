@@ -121,7 +121,7 @@ def _score(job, folder, global_matching_sha):
     return dict(events=str(sub/'events.csv.gz'), controls=str(sub/'controls.csv.gz'))
 
 
-def prepare(history_path=EXP/'data/history_manifest.json', folder=EXP/'results', workers=2):
+def prepare(history_path=EXP/'data_tradable/history_manifest.json', folder=EXP/'results', workers=2):
     folder, history_path = Path(folder), Path(history_path)
     frozen_sources = sources()
     if (folder/'dataset_started.json').exists():
@@ -130,8 +130,10 @@ def prepare(history_path=EXP/'data/history_manifest.json', folder=EXP/'results',
     history = json.loads(history_path.read_text())
     if history.get('schema') != 'spike-burst-history-v1' or history.get('status') != 'complete':
         raise ValueError('Complete authenticated history manifest required')
-    if (pd.Timestamp(history.get('start')) > pd.Timestamp('2023-05-01T00:00:00Z') or
-            pd.Timestamp(history.get('exclusive_end')) < END):
+    history_start = pd.Timestamp(history.get('start'))
+    history_end = pd.Timestamp(history.get('exclusive_end'))
+    if (pd.isna(history_start) or pd.isna(history_end) or
+            history_start > pd.Timestamp('2023-05-01T00:00:00Z') or history_end < END):
         raise ValueError('History request does not cover the frozen calendar and warmup')
     for source in history.get('builder_sources', []):
         key = str(Path(source['path']).resolve().relative_to(ROOT))
@@ -139,6 +141,10 @@ def prepare(history_path=EXP/'data/history_manifest.json', folder=EXP/'results',
             raise ValueError('History adapter/parser source differs from this study')
     if len(history.get('builder_sources', [])) != 2:
         raise ValueError('Missing history adapter/parser source receipt')
+    if {Path(s['path']).name for s in history['builder_sources']} != {'spike_burst_history.py','binance_um_archives.py'}:
+        raise ValueError('History adapter/parser receipt identities missing or duplicated')
+    if history.get('tradability_audit', {}).get('status') != 'complete':
+        raise ValueError('Listing/delivery and zero-volume boundary audit required before scoring')
     folder.mkdir(parents=True, exist_ok=True)
     started = dict(status='running', generated_at=utc_now(), config=CONFIG,
                    code_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
@@ -214,6 +220,8 @@ def annual_rows(curve, ledger, cuts=CUTS):
     The opening equity is the previous bar's known close. Existing positions
     are neither closed nor reopened at annual boundaries. Boundary-value
     events count only where their actual recorded close/mark is located.
+    At a cut, a close belongs to the ending period; an open belongs to the
+    new period, matching the cashbook's close-then-next-open sequence.
     """
     c = curve.copy()
     c['time'] = pd.to_datetime(c.time,utc=True)
@@ -227,8 +235,14 @@ def annual_rows(curve, ledger, cuts=CUTS):
         values = np.r_[opening,segment.equity.to_numpy(float)]
         dd = values/np.maximum.accumulate(values)-1
         selected = ledger.loc[ledger.portfolio_selected.eq(True)].copy() if len(ledger) else ledger
-        exits = selected.loc[pd.to_datetime(selected.exit_time,utc=True).gt(start)&
-                              pd.to_datetime(selected.exit_time,utc=True).le(end)] if len(selected) else selected
+        if len(selected):
+            clock = pd.to_datetime(selected.exit_time, utc=True)
+            at_open = selected.exit_timing.eq('open')
+            in_period = ((at_open & clock.ge(start) & clock.lt(end)) |
+                         (~at_open & clock.gt(start) & clock.le(end)))
+            exits = selected.loc[in_period]
+        else:
+            exits = selected
         natural = exits.loc[exits.natural_exit.eq(True)] if len(exits) else exits
         rows.append(dict(period='year'+str(i+1), start=start.isoformat(),end=end.isoformat(),
                          opening_equity=opening,ending_equity=values[-1],
@@ -313,7 +327,7 @@ def evaluate(folder=EXP/'results'):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('phase',choices=['prepare','evaluate'])
-    parser.add_argument('--history',type=Path,default=EXP/'data/history_manifest.json')
+    parser.add_argument('--history',type=Path,default=EXP/'data_tradable/history_manifest.json')
     parser.add_argument('--results',type=Path,default=EXP/'results')
     parser.add_argument('--workers',type=int,default=2)
     args=parser.parse_args()

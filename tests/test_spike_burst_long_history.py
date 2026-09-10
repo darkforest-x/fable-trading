@@ -14,7 +14,7 @@ def test_annual_nav_inherits_boundary_equity_and_counts_exit_clock():
                                               '2024-01-02 12:00','2024-01-03 00:00'],utc=True),
                           'equity':[110000.,120000.,108000.,114000.]})
     ledger = pd.DataFrame([dict(portfolio_selected=True,entry_time=cuts[0],
-                                exit_time=cuts[2],realized_net_pnl=14000.,natural_exit=True)])
+                                exit_time=cuts[2],exit_timing='close',realized_net_pnl=14000.,natural_exit=True)])
     rows=annual_rows(curve,ledger,cuts)
     assert rows[0]['return_pct']==pytest.approx(20.)
     assert rows[1]['opening_equity']==120000.
@@ -24,6 +24,18 @@ def test_annual_nav_inherits_boundary_equity_and_counts_exit_clock():
     assert rows[1]['exits']==1 and rows[1]['win_rate']==1
     # A winning eventual exit cannot be used to label the first year's trades.
     assert rows[0]['natural_exits']==0
+
+
+def test_boundary_open_exit_belongs_to_new_year_like_its_cash_settlement():
+    cuts = list(pd.to_datetime(['2024-01-01','2024-01-02','2024-01-03'], utc=True))
+    curve = pd.DataFrame({'time':[cuts[0],cuts[1],cuts[2]],
+                          'equity':[100000.,100000.,98000.]})
+    ledger = pd.DataFrame([dict(portfolio_selected=True,exit_time=cuts[1],
+                               exit_timing='open',realized_net_pnl=-2000.,natural_exit=True)])
+    rows = annual_rows(curve,ledger,cuts)
+    assert rows[0]['return_pct']==0 and rows[0]['exits']==0
+    assert rows[1]['return_pct']==pytest.approx(-2.)
+    assert rows[1]['exits']==1 and rows[1]['win_rate']==0
 
 
 def test_majors_do_not_leak_into_altcoin_primary_cohort():
