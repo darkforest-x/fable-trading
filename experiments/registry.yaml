@@ -8240,3 +8240,17 @@ experiments:
     notes: Functional repair verified; broader noise efficacy incomplete. Firstrepair configuration used twice includingfailurediagnosis;
       finalconfiguration used onceinreplay plusnativecheck. Prior4H interpretation corrected. No services/models/orders
       changed.
+  - experiment_id: exp-spike-v5-bidirectional-20260910-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6fa8ea7b2b5e8a9f2db3b701cc52c996a4867042
+    status: active
+    question: Default V5 to long/short confirmations with white signal candles,R milestones and borderless risk boxes.
+    single_variable: Owner-authorized feature/UI change; no optimization or economic experiment.
+    result: 29 focused tests pass; native verification pending.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    artifacts: []
+    notes: No services,models,notifications or execution changes. Existing long chronology preserved; short mirror
+      requires native check.

@@ -60,7 +60,7 @@ class _State:
         self.pending = False
 
 
-def detect(frame: pd.DataFrame) -> pd.DataFrame:
+def detect(frame: pd.DataFrame, side: int = 1) -> pd.DataFrame:
     """Replay V5 from supplied closed-bar inputs without mutating ``frame``.
 
     A full candle body over ``ropeHigh`` and a supplied V4 confirmation may
@@ -72,9 +72,16 @@ def detect(frame: pd.DataFrame) -> pd.DataFrame:
     and unknown values clear all provenance rather than synthesising a
     continuation. The frame may end with one unconfirmed tip; an unconfirmed
     or unknown interior row is rejected because this oracle does not model
-    TradingView intrabar revisions.
+    TradingView intrabar revisions. ``side=-1`` is the exact directional
+    mirror: body below ropeLow, upper wick permitted, parent-high failure,
+    close below parent low and falling MD below SB. No prices are transformed,
+    and the existing long path remains the default.
     """
-    missing = [name for name in REQUIRED if name not in frame]
+    if isinstance(side, bool) or side not in (1, -1):
+        raise ValueError("side must be +1 or -1")
+    rope_column = "ropeHigh" if side == 1 else "ropeLow"
+    required = [rope_column if name == "ropeHigh" else name for name in REQUIRED]
+    missing = [name for name in required if name not in frame]
     if missing:
         raise ValueError("Missing V5 structural columns: " + ", ".join(missing))
     confirmed = [_true(value) for value in frame["confirmed"]]
@@ -91,7 +98,7 @@ def detect(frame: pd.DataFrame) -> pd.DataFrame:
                 _false(row.data_gap)
                 and _true(row.ready)
                 and _valid_ohlc(row)
-                and all(_finite(row[name]) for name in ("md", "sb", "atr", "ropeHigh"))
+                and all(_finite(row[name]) for name in ("md", "sb", "atr", rope_column))
                 and float(row.atr) > 0
             )
             if not valid:
@@ -100,9 +107,9 @@ def detect(frame: pd.DataFrame) -> pd.DataFrame:
                 state.prior_md = float(row.md) if _finite(row.md) else None
             else:
                 o, _, _, c = (float(row[name]) for name in ("open", "high", "low", "close"))
-                md, sb, rope = float(row.md), float(row.sb), float(row.ropeHigh)
-                full_body = min(o, c) > rope
-                if c <= rope:
+                md, sb, rope = float(row.md), float(row.sb), float(row[rope_column])
+                full_body = min(o, c) > rope if side == 1 else max(o, c) < rope
+                if side * (c - rope) <= 0:
                     state.body_support_i = None
                 elif full_body:
                     state.body_support_i = i
@@ -118,7 +125,11 @@ def detect(frame: pd.DataFrame) -> pd.DataFrame:
                     state.legacy_parent_high = float(row.legacy_parent_high)
                     state.legacy_parent_low = float(row.legacy_parent_low)
                     state.pending = True
-                if state.pending and c < float(state.legacy_parent_low):
+                invalidated = state.pending and (
+                    c < float(state.legacy_parent_low) if side == 1
+                    else c > float(state.legacy_parent_high)
+                )
+                if invalidated:
                     state.legacy_i = None
                     state.legacy_parent_high = None
                     state.legacy_parent_low = None
@@ -128,8 +139,9 @@ def detect(frame: pd.DataFrame) -> pd.DataFrame:
                     state.pending and state.body_support_i is not None
                     and state.legacy_parent_high is not None and state.legacy_parent_low is not None
                     and state.prior_md is not None
-                    and c > rope and c > state.legacy_parent_high
-                    and md > sb and md > state.prior_md
+                    and side * (c - rope) > 0
+                    and (c > state.legacy_parent_high if side == 1 else c < state.legacy_parent_low)
+                    and side * (md - sb) > 0 and side * (md - state.prior_md) > 0
                 ):
                     event = True
                     state.pending = False

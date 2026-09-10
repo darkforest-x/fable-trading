@@ -44,12 +44,7 @@ def hold_above_parent(frame, start, end, md=-0.2, sb=-0.3):
 def test_pine_keeps_v4_feature_legacy_risk_and_visual_sections_frozen():
     v4 = (ROOT / "yoyo/evaluation/pine/spike_burst_v4.pine").read_text()
     v5 = (ROOT / "yoyo/evaluation/pine/spike_burst_v5.pine").read_text()
-    for begin, end in (
-        ("// BEGIN UNCHANGED V2 RISK HELPERS", "// END UNCHANGED V2 RISK HELPERS"),
-        ("// BEGIN REFERENCE STATE", "// END REFERENCE STATE"),
-        ("// BEGIN V2 RISK BOX DISPLAY", "// END V2 RISK BOX DISPLAY"),
-    ):
-        assert _section(v5, begin, end) == _section(v4, begin, end)
+    assert _section(v5, "// BEGIN UNCHANGED V2 RISK HELPERS", "// END UNCHANGED V2 RISK HELPERS") == _section(v4, "// BEGIN UNCHANGED V2 RISK HELPERS", "// END UNCHANGED V2 RISK HELPERS")
     fields = _section(v5, "// BEGIN TWO STAGE FIELDS", "// END TWO STAGE FIELDS")
     fields = fields.replace("// Auxiliary parent-range support only. It does not alter V4 candidate,\n// confirmation-quality, or cooldown conditions.\nfloat priorLow = ta.lowest(low[1], breakoutLookback)\n", "")
     assert fields == _section(v4, "// BEGIN TWO STAGE FIELDS", "// END TWO STAGE FIELDS")
@@ -74,13 +69,30 @@ def test_pine_keeps_v4_feature_legacy_risk_and_visual_sections_frozen():
         legacy_engine = legacy_engine.replace(old, new)
     assert legacy_engine == _section(v4, "// BEGIN ALERT STATE", "// END ALERT STATE")
     visible = _section(v5, "// BEGIN CONFIRMED DISPLAY", "// END CONFIRMED DISPLAY")
-    assert "plotshape(confirmedSignal," in visible and "offset=" not in v5
+    assert "plotshape(confirmedSignal, title=\"确认多头\"" in visible
+    assert "plotshape(confirmedShortSignal, title=\"确认空头\"" in visible
+    assert "signalSide == 1 ? low - atr * 0.35 : high + atr * 0.35" in visible
+    assert "offset=" not in v5
     assert "legacyConfirmedSignal" not in visible
     alerts = [line for line in v5.splitlines() if line.startswith("alertcondition(")]
-    assert len(alerts) == 2 and all("legacy" not in line.lower() for line in alerts)
+    assert len(alerts) == 4 and all("legacy" not in line.lower() for line in alerts)
+    assert "alertcondition(signalSide != 0, \"SPIKE V5 结构确认\"" in v5
+    assert "alertcondition(confirmedSignal, \"SPIKE V5 多头结构确认\"" in v5
+    assert "alertcondition(confirmedShortSignal, \"SPIKE V5 空头结构确认\"" in v5
+    reference = _section(v5, "// BEGIN REFERENCE STATE", "// END REFERENCE STATE")
+    assert "f_path(trendSide," in reference
+    assert "if signalSide != 0 and trendSide == 0 and not endedThisBar" in reference
+    assert "f_risk(signalSide, close, signalSide == 1 ? recentLow : recentHigh" in reference
+    assert "trendSide := signalSide" in reference
+    boxes = _section(v5, "// BEGIN V2 RISK BOX DISPLAY", "// END V2 RISK BOX DISPLAY")
+    assert "int rrNewSide = trendSide" in boxes
+    assert boxes.count("border_color=na, border_width=0") == 2
+    assert "bool showMilestones = input.bool(true," in v5
+    assert "barcolor(signalSide != 0 ? color.white : na" in v5
     for obsolete in ("minQuiet", "nearAtr", "releaseBars", "quietCount", "quietHigh", "quietLow", "frozenBand", "releaseBar"):
         assert obsolete not in v5
     assert "V5 本根V4旧确认诊断" in v5 and "V5 冻结V4父高" in v5 and "V5 冻结V4父低" in v5
+    assert "V5 本根空头旧确认诊断" in v5 and "V5 空头最终确认" in v5 and "V5 空头等待原因代码" in v5
     assert "plot.style_histogram" not in v5 and "hline(0, \"零轴\"" in v5
 
 

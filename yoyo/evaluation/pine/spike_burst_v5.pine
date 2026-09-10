@@ -27,7 +27,7 @@ bool showMas = input.bool(true, "六条均线", group=gView, display=display.non
 bool showLabels = input.bool(true, "确认信号与价格", group=gView, tooltip="只显示完成实体支撑、原确认关联与主线转强后的最终信号，标在实际完成K线上，不回填。", display=display.none)
 bool showRisk = input.bool(true, "风险区与保护线", group=gView, tooltip="空闲后的首个确认信号开启风险参考，使用该根实际收盘价。跟踪期间的其他确认不会重置已有盈亏框；框内价格属于开启它的确认信号。", display=display.none)
 bool showPanel = input.bool(false, "显示状态面板", group=gView, display=display.none)
-bool showMilestones = input.bool(false, "退出与 R 里程碑文字", group=gView, display=display.none)
+bool showMilestones = input.bool(true, "退出与 R 里程碑文字", group=gView, display=display.none)
 color bull = #008F82
 color bear = #D34B66
 color gold = #AD7B29
@@ -140,6 +140,14 @@ bool confirmQuality = ready and recentDense and advance3 >= minAdvance and volum
 // Efficiency, close location and six-line position are quality tags, NOT gates.
 // END TWO STAGE FIELDS
 
+// BEGIN SHORT MIRROR FIELDS
+// The short candidate is deliberately independent from the frozen V4 long
+// field above. It shares only causal feature values from the current close.
+float recentHigh = ta.highest(high, stopLen)
+bool earlyShortRaw = ready and close < priorLow and close < math.min(s20, e20)
+bool confirmShortQuality = ready and recentDense and advance3 <= -minAdvance and volumeRatio3 >= minVolume and md <= sb and middle < middle[1]
+// END SHORT MIRROR FIELDS
+
 if barstate.isfirst and (not chart.is_standard or timeframe.isticks)
     runtime.error("请使用普通时间 K 线，合成K线不支持。")
 
@@ -192,6 +200,57 @@ if barstate.isconfirmed
         legacyConfirmationParentLow := parentLow
         parentConfirmed := true
 // END LEGACY ENGINE
+
+// BEGIN SHORT LEGACY ENGINE
+// Short provenance mirrors the V4 chronology with wholly separate cooldown,
+// candidate parent, and confirmation latch state.
+var bool previousEarlyShortRaw = false
+var int lastShortAcceptedBar = na
+var int shortParentBar = na
+var float shortParentHigh = na
+var float shortParentLow = na
+var float shortParentPrice = na
+var bool shortParentConfirmed = false
+bool legacyShortEarlySignal = false
+bool legacyShortConfirmedSignal = false
+int legacyShortConfirmationAge = na
+float legacyShortConfirmationParentPrice = na
+float legacyShortConfirmationParentHigh = na
+float legacyShortConfirmationParentLow = na
+if barstate.isconfirmed
+    if dataGap
+        lastShortAcceptedBar := na
+        previousEarlyShortRaw := false
+        shortParentBar := na
+        shortParentHigh := na
+        shortParentLow := na
+        shortParentPrice := na
+        shortParentConfirmed := false
+    bool shortCooldownPassed = na(lastShortAcceptedBar) or bar_index - lastShortAcceptedBar >= cooldownBars
+    legacyShortEarlySignal := earlyShortRaw and not previousEarlyShortRaw and shortCooldownPassed
+    previousEarlyShortRaw := earlyShortRaw
+    if legacyShortEarlySignal
+        lastShortAcceptedBar := bar_index
+        shortParentBar := bar_index
+        shortParentHigh := priorHigh
+        shortParentLow := priorLow
+        shortParentPrice := close
+        shortParentConfirmed := false
+    int shortAge = na(shortParentBar) ? na : bar_index - shortParentBar
+    if not na(shortAge) and shortAge > confirmMaxAge
+        shortParentBar := na
+        shortParentHigh := na
+        shortParentLow := na
+        shortParentPrice := na
+        shortParentConfirmed := false
+    if not na(shortParentBar) and not shortParentConfirmed and shortAge >= 0 and shortAge <= confirmMaxAge and close < shortParentLow and confirmShortQuality
+        legacyShortConfirmedSignal := true
+        legacyShortConfirmationAge := shortAge
+        legacyShortConfirmationParentPrice := shortParentPrice
+        legacyShortConfirmationParentHigh := shortParentHigh
+        legacyShortConfirmationParentLow := shortParentLow
+        shortParentConfirmed := true
+// END SHORT LEGACY ENGINE
 
 // BEGIN V5 STRUCTURAL GATE
 // A complete body above the six-MA rope is support evidence, not a same-bar
@@ -250,6 +309,56 @@ if barstate.isconfirmed
             pendingWhy := not structurePending ? "await_legacy" : na(bodySupportBar) ? "await_body" : na(md[1]) ? "await_md_turn" : "await_momentum"
 // END V5 STRUCTURAL GATE
 
+// BEGIN V5 SHORT STRUCTURAL GATE
+// A complete body below the rope is bearish evidence. Its upper wick may cross
+// the rope; only a close at/above it clears the stored evidence.
+var int shortBodySupportBar = na
+var int shortLegacyBar = na
+var float shortLegacyParentHigh = na
+var float shortLegacyParentLow = na
+var bool shortStructurePending = false
+bool confirmedShortSignal = false
+int shortConfirmationAge = na
+string shortPendingWhy = "idle"
+
+if barstate.isconfirmed
+    bool finiteShortAtr = not na(atr) and atr > 0
+    bool knownShortStructure = ready and pricesValid and finiteShortAtr and not na(md) and not na(sb) and not na(ropeLow) and not na(middle)
+    if dataGap or not knownShortStructure
+        shortBodySupportBar := na
+        shortLegacyBar := na
+        shortLegacyParentHigh := na
+        shortLegacyParentLow := na
+        shortStructurePending := false
+        shortPendingWhy := dataGap ? "gap" : "unknown"
+    else
+        bool fullBodyBelow = math.max(open, close) < ropeLow
+        if close >= ropeLow
+            shortBodySupportBar := na
+        else if fullBodyBelow
+            shortBodySupportBar := bar_index
+        if legacyShortConfirmedSignal and not na(legacyShortConfirmationParentHigh) and not na(legacyShortConfirmationParentLow) and legacyShortConfirmationParentLow <= legacyShortConfirmationParentHigh
+            shortLegacyBar := bar_index
+            shortLegacyParentHigh := legacyShortConfirmationParentHigh
+            shortLegacyParentLow := legacyShortConfirmationParentLow
+            shortStructurePending := true
+        if shortStructurePending and close > shortLegacyParentHigh
+            shortLegacyBar := na
+            shortLegacyParentHigh := na
+            shortLegacyParentLow := na
+            shortStructurePending := false
+            shortPendingWhy := "parent_broken"
+        else if shortStructurePending and not na(shortBodySupportBar) and not na(shortLegacyParentHigh) and not na(shortLegacyParentLow) and not na(md[1]) and close < ropeLow and close < shortLegacyParentLow and md < sb and md < md[1]
+            confirmedShortSignal := true
+            shortConfirmationAge := bar_index - shortLegacyBar
+            shortStructurePending := false
+            shortPendingWhy := "confirmed"
+        else
+            shortPendingWhy := not shortStructurePending ? "await_legacy" : na(shortBodySupportBar) ? "await_body" : na(md[1]) ? "await_md_turn" : "await_momentum"
+// END V5 SHORT STRUCTURAL GATE
+
+int signalSide = confirmedSignal ? 1 : confirmedShortSignal ? -1 : 0
+
 // BEGIN REFERENCE STATE: first confirmation while flat owns this display only.
 var int trendSide = 0
 var int entryBar = na
@@ -278,7 +387,8 @@ if barstate.isconfirmed
     bool endedThisBar = false
     if ready and trendSide != 0 and bar_index > entryBar
         float oldPeak = peakR
-        [alive, newProtection, newPeak, newCurrent, exitPrice, armed] = f_path(1, entry, risk, protection, peakR, trailArmed, open, high, low, close, atr, armR, trailAtr, syminfo.mintick)
+        int activeSide = trendSide
+        [alive, newProtection, newPeak, newCurrent, exitPrice, armed] = f_path(trendSide, entry, risk, protection, peakR, trailArmed, open, high, low, close, atr, armR, trailAtr, syminfo.mintick)
         protection := newProtection
         peakR := newPeak
         currentR := newCurrent
@@ -288,16 +398,18 @@ if barstate.isconfirmed
             endedThisBar := true
             trendSide := 0
             if showLabels and showMilestones
-                label.new(bar_index, exitPrice, "保护触及 · 参考结束\n" + str.tostring(exitPrice, format.mintick), style=label.style_label_down, color=color.new(chart.bg_color, 8), textcolor=ink, size=size.small, force_overlay=true)
+                string exitSideText = activeSide == 1 ? "多头" : "空头"
+                label.new(bar_index, exitPrice, exitSideText + "保护触及 · 参考结束\n" + str.tostring(exitPrice, format.mintick), style=activeSide == 1 ? label.style_label_down : label.style_label_up, color=color.new(chart.bg_color, 8), textcolor=ink, size=size.small, force_overlay=true)
         else if showMilestones and showLabels
             float level = oldPeak < 10 and peakR >= 10 ? 10 : oldPeak < 5 and peakR >= 5 ? 5 : oldPeak < 3 and peakR >= 3 ? 3 : na
             if not na(level)
-                label.new(bar_index, high, str.tostring(level, "#") + "R 已到", style=label.style_label_down, color=color.new(bull, 90), textcolor=bull, size=size.tiny, force_overlay=true)
-    if confirmedSignal and trendSide == 0 and not endedThisBar
-        [newStop, newRisk, validRisk] = f_risk(1, close, recentLow, atr, riskFloor, stopBuffer, syminfo.mintick)
+                string milestoneSideText = activeSide == 1 ? "多头" : "空头"
+                label.new(bar_index, activeSide == 1 ? high : low, milestoneSideText + " " + str.tostring(level, "#") + "R 已到", style=activeSide == 1 ? label.style_label_down : label.style_label_up, color=color.new(activeSide == 1 ? bull : bear, 90), textcolor=activeSide == 1 ? bull : bear, size=size.tiny, force_overlay=true)
+    if signalSide != 0 and trendSide == 0 and not endedThisBar
+        [newStop, newRisk, validRisk] = f_risk(signalSide, close, signalSide == 1 ? recentLow : recentHigh, atr, riskFloor, stopBuffer, syminfo.mintick)
         if validRisk
             referenceStarted := true
-            trendSide := 1
+            trendSide := signalSide
             entryBar := bar_index
             entry := close
             initialStop := newStop
@@ -312,11 +424,13 @@ if barstate.isconfirmed
 // Every confirmation keeps its actual current bar and price. The risk display
 // starts only when flat; another confirmation never resets an active reference.
 // A continuous triangle survives label garbage collection on long histories.
-plotshape(confirmedSignal, title="确认信号", style=shape.triangleup, location=location.belowbar, color=bull, size=size.tiny, force_overlay=true, display=display.pane)
-if barstate.isconfirmed and confirmedSignal and showLabels
+plotshape(confirmedSignal, title="确认多头", style=shape.triangleup, location=location.belowbar, color=bull, size=size.tiny, force_overlay=true, display=display.pane)
+plotshape(confirmedShortSignal, title="确认空头", style=shape.triangledown, location=location.abovebar, color=bear, size=size.tiny, force_overlay=true, display=display.pane)
+if barstate.isconfirmed and signalSide != 0 and showLabels
     string trackingTip = referenceStarted ? "本根开启盈亏参考。" : trendSide != 0 ? "已有盈亏参考继续跟踪，本根确认不会重置原框。" : "本根未开启盈亏参考。"
-    string tip = "确认收盘：" + str.tostring(close, format.mintick) + "\n" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n" + trackingTip
-    label.new(bar_index, low - atr * 0.35, "确认 · " + str.tostring(close, format.mintick), style=label.style_label_up, color=color.new(bull, 91), textcolor=bull, size=size.small, tooltip=tip, force_overlay=true)
+    string signalSideText = signalSide == 1 ? "多头" : "空头"
+    string tip = signalSideText + "确认收盘：" + str.tostring(close, format.mintick) + "\n" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n" + trackingTip
+    label.new(bar_index, signalSide == 1 ? low - atr * 0.35 : high + atr * 0.35, signalSideText + "确认 · " + str.tostring(close, format.mintick), style=signalSide == 1 ? label.style_label_up : label.style_label_down, color=color.new(signalSide == 1 ? bull : bear, 91), textcolor=signalSide == 1 ? bull : bear, size=size.small, tooltip=tip, force_overlay=true)
 // END CONFIRMED DISPLAY
 
 // BEGIN V2 RISK BOX DISPLAY (trigger changed to referenceStarted only)
@@ -350,7 +464,7 @@ if barstate.isconfirmed and showRisk and rrShow
     int rrCloseTime = na(time_close) ? time + rrBarMillis : time_close
     int rrRightTime = rrCloseTime + rrAhead * rrBarMillis
     if referenceStarted
-        int rrNewSide = 1
+        int rrNewSide = trendSide
         float rrNewDistance = rrNewSide * (entry - initialStop)
         bool rrValid = not na(entry) and not na(initialStop) and entry > 0 and initialStop > 0 and rrNewDistance > 0
         if rrValid
@@ -361,12 +475,13 @@ if barstate.isconfirmed and showRisk and rrShow
             rrDistance := rrNewDistance
             rrMaximum := 0.0
             float rrObservation = rrEntry + rrSide * 3.0 * rrDistance
-            string rrTip = "确认收盘参考，不是实际成交。初始风险冻结；3R仅为观察位，不触发止盈。绿色框扩展表示已确认最高浮盈，不代表已实现收益。"
-            rrRiskBox := box.new(rrStartedAt, math.max(rrEntry, rrStop), rrRightTime, math.min(rrEntry, rrStop), xloc=xloc.bar_time, border_color=color.new(bear, 30), border_width=1, bgcolor=color.new(bear, 92), force_overlay=true)
-            rrRewardBox := rrObservation > 0 ? box.new(rrStartedAt, math.max(rrEntry, rrObservation), rrRightTime, math.min(rrEntry, rrObservation), xloc=xloc.bar_time, border_color=color.new(bull, 30), border_width=1, bgcolor=color.new(bull, 92), force_overlay=true) : na
-            rrEntryTag := f_rrPriceTag(rrRightTime, rrEntry, "确认参考 · " + str.tostring(rrEntry, format.mintick), ink, rrTip)
-            rrStopTag := f_rrPriceTag(rrRightTime, rrStop, "初始止损 · " + str.tostring(rrStop, format.mintick), bear, rrTip)
-            rrPeakTag := rrObservation > 0 ? f_rrPriceTag(rrRightTime, rrObservation, "3R 观察位 · " + str.tostring(rrObservation, format.mintick), bull, rrTip) : na
+            string rrSideText = rrNewSide == 1 ? "多头" : "空头"
+            string rrTip = rrSideText + "确认收盘参考，不是实际成交。初始风险冻结；3R仅为观察位，不触发止盈。绿色框扩展表示已确认最高浮盈，不代表已实现收益。"
+            rrRiskBox := box.new(rrStartedAt, math.max(rrEntry, rrStop), rrRightTime, math.min(rrEntry, rrStop), xloc=xloc.bar_time, border_color=na, border_width=0, bgcolor=color.new(bear, 92), force_overlay=true)
+            rrRewardBox := rrObservation > 0 ? box.new(rrStartedAt, math.max(rrEntry, rrObservation), rrRightTime, math.min(rrEntry, rrObservation), xloc=xloc.bar_time, border_color=na, border_width=0, bgcolor=color.new(bull, 92), force_overlay=true) : na
+            rrEntryTag := f_rrPriceTag(rrRightTime, rrEntry, rrSideText + "确认参考 · " + str.tostring(rrEntry, format.mintick), ink, rrTip)
+            rrStopTag := f_rrPriceTag(rrRightTime, rrStop, rrSideText + "初始止损 · " + str.tostring(rrStop, format.mintick), bear, rrTip)
+            rrPeakTag := rrObservation > 0 ? f_rrPriceTag(rrRightTime, rrObservation, rrSideText + " 3R 观察位 · " + str.tostring(rrObservation, format.mintick), bull, rrTip) : na
             array.push(rrRiskHistory, rrRiskBox)
             array.push(rrRewardHistory, rrRewardBox)
             array.push(rrEntryHistory, rrEntryTag)
@@ -390,11 +505,11 @@ if barstate.isconfirmed and showRisk and rrShow
         float rrExtentR = math.max(3.0, rrMaximum)
         float rrExtent = rrEntry + rrSide * rrExtentR * rrDistance
         string rrEnding = referenceGap ? " · 数据缺口中止" : rrEnded ? " · 本段结束" : ""
-        string rrReference = "确认收盘参考，不是实际成交。已确认峰值 " + str.tostring(rrMaximum, "#.##") + "R；当前路径 " + str.tostring(currentR, "#.##") + "R。峰值未兑现；3R为观察位，无固定止盈。"
+        string rrReference = (rrSide == 1 ? "多头" : "空头") + "确认收盘参考，不是实际成交。已确认峰值 " + str.tostring(rrMaximum, "#.##") + "R；当前路径 " + str.tostring(currentR, "#.##") + "R。峰值未兑现；3R为观察位，无固定止盈。"
         box.set_right(rrRiskBox, rrEdge)
         label.set_x(rrEntryTag, rrEdge)
         label.set_x(rrStopTag, rrEdge)
-        label.set_text(rrEntryTag, "确认参考 · " + str.tostring(rrEntry, format.mintick) + rrEnding)
+        label.set_text(rrEntryTag, (rrSide == 1 ? "多头" : "空头") + "确认参考 · " + str.tostring(rrEntry, format.mintick) + rrEnding)
         label.set_tooltip(rrEntryTag, rrReference)
         label.set_tooltip(rrStopTag, rrReference + " 冻结初始止损；当前保护 " + str.tostring(protection, format.mintick) + "，以原保护线为准。")
         if not na(rrRewardBox) and rrExtent > 0
@@ -402,7 +517,7 @@ if barstate.isconfirmed and showRisk and rrShow
             box.set_top(rrRewardBox, math.max(rrEntry, rrExtent))
             box.set_bottom(rrRewardBox, math.min(rrEntry, rrExtent))
             label.set_xy(rrPeakTag, rrEdge, rrExtent)
-            label.set_text(rrPeakTag, (rrMaximum >= 3.0 ? "已到峰值 " + str.tostring(rrMaximum, "#.##") + "R · " : "3R 观察位 · ") + str.tostring(rrExtent, format.mintick))
+            label.set_text(rrPeakTag, (rrSide == 1 ? "多头 " : "空头 ") + (rrMaximum >= 3.0 ? "已到峰值 " + str.tostring(rrMaximum, "#.##") + "R · " : "3R 观察位 · ") + str.tostring(rrExtent, format.mintick))
             label.set_tooltip(rrPeakTag, rrReference)
         if rrEnded
             // Retain completed objects. A later signal owns a new independent
@@ -416,7 +531,8 @@ float shownSb = barstate.isconfirmed ? sb : sb[1]
 hline(0, "零轴", color=color.new(ink, 38), linestyle=hline.style_solid, linewidth=1)
 plot(shownMd, "IMACD 主线", blue, 2, display=display.pane + display.data_window)
 plot(shownSb, "IMACD 信号线", #CB882A, 2, display=display.pane + display.data_window)
-plot(confirmedSignal ? md : na, "确认点", bull, 4, plot.style_circles, display=display.pane + display.data_window)
+plot(confirmedSignal ? md : na, "多头确认点", bull, 4, plot.style_circles, display=display.pane + display.data_window)
+plot(confirmedShortSignal ? md : na, "空头确认点", bear, 4, plot.style_circles, display=display.pane + display.data_window)
 plot(showMas ? s20 : na, "SMA20", color.new(bull, 38), 1, force_overlay=true, display=display.pane + display.data_window)
 plot(showMas ? e20 : na, "EMA20", color.new(bull, 58), 1, force_overlay=true, display=display.pane + display.data_window)
 plot(showMas ? s60 : na, "SMA60", color.new(blue, 40), 1, force_overlay=true, display=display.pane + display.data_window)
@@ -427,7 +543,7 @@ pProtect = plot(showRisk ? visibleProtection : na, "本根有效保护", trailAr
 pInitial = plot(showRisk ? visibleInitial : na, "冻结初始止损", color.new(bear, 55), 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
 pEntry = plot(showRisk ? visibleEntry : na, "确认收盘参考", color.new(ink, 60), 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
 fill(pInitial, pEntry, color.new(bear, 94), title="初始风险区")
-barcolor(confirmedSignal ? #00CBB1 : na, title="确认关键K线")
+barcolor(signalSide != 0 ? color.white : na, title="确认关键K线")
 
 // Historical Data Window belongs to the selected bar. Pending reason: 0 idle,
 // 1 awaiting V4 provenance, 2 awaiting a full body, 3 awaiting MD turn,
@@ -441,6 +557,15 @@ plot(barstate.isconfirmed ? legacyParentLow : na, "V5 冻结V4父低", display=d
 plot(barstate.isconfirmed ? (confirmedSignal ? 1 : 0) : na, "V5 最终确认", display=display.data_window)
 plot(barstate.isconfirmed ? pendingWhyCode : na, "V5 等待原因代码", display=display.data_window)
 plot(confirmedSignal ? confirmationAge : na, "V5 确认等待根数", display=display.data_window)
+float shortPendingWhyCode = shortPendingWhy == "await_legacy" ? 1 : shortPendingWhy == "await_body" ? 2 : shortPendingWhy == "await_md_turn" ? 3 : shortPendingWhy == "await_momentum" ? 4 : shortPendingWhy == "confirmed" ? 5 : shortPendingWhy == "parent_broken" ? 6 : shortPendingWhy == "gap" ? 7 : shortPendingWhy == "unknown" ? 8 : 0
+plot(barstate.isconfirmed ? shortBodySupportBar : na, "V5 空头实体支持K线", display=display.data_window)
+plot(barstate.isconfirmed ? shortLegacyBar : na, "V5 空头旧确认K线", display=display.data_window)
+plot(barstate.isconfirmed ? (legacyShortConfirmedSignal ? 1 : 0) : na, "V5 本根空头旧确认诊断", display=display.data_window)
+plot(barstate.isconfirmed ? shortLegacyParentHigh : na, "V5 空头冻结父高", display=display.data_window)
+plot(barstate.isconfirmed ? shortLegacyParentLow : na, "V5 空头冻结父低", display=display.data_window)
+plot(barstate.isconfirmed ? (confirmedShortSignal ? 1 : 0) : na, "V5 空头最终确认", display=display.data_window)
+plot(barstate.isconfirmed ? shortPendingWhyCode : na, "V5 空头等待原因代码", display=display.data_window)
+plot(confirmedShortSignal ? shortConfirmationAge : na, "V5 空头确认等待根数", display=display.data_window)
 plot(barstate.isconfirmed ? (ready ? 1 : 0) : na, "连续数据已就绪", display=display.data_window)
 plot(barstate.isconfirmed ? rv : na, "收盘量比 RV", display=display.data_window)
 plot(barstate.isconfirmed ? expansion : na, "收盘 TR / 前根ATR", display=display.data_window)
@@ -452,7 +577,7 @@ plot(barstate.isconfirmed ? closePosition : na, "收盘位置 · 仅质量标签
 plot(barstate.isconfirmed ? (aboveSix ? 1 : 0) : na, "当前收盘六线之上", display=display.data_window)
 
 // Only optional diagnostics; no observation/confirmation display taxonomy.
-plot(barstate.isconfirmed and confirmedSignal ? close : na, "确认实际收盘价", display=display.data_window)
+plot(barstate.isconfirmed and signalSide != 0 ? close : na, "确认实际收盘价", display=display.data_window)
 plot(barstate.isconfirmed ? (referenceStarted ? 1 : 0) : na, "确认参考起点", display=display.data_window)
 
 var table panel = table.new(position.top_right, 2, 2, bgcolor=color.new(chart.bg_color, 8), border_width=0)
@@ -464,5 +589,7 @@ if barstate.islast and showPanel
     table.cell(panel, 1, 1, na(currentR) ? "—" : str.tostring(currentR, "#.##") + "R / " + str.tostring(peakR, "#.##") + "R", text_color=ink, text_size=size.tiny)
 
 // These are local study conditions. Creating a TV alert is a separate action.
-alertcondition(confirmedSignal, "SPIKE V5 结构确认", "SPIKE V5 结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}")
+alertcondition(signalSide != 0, "SPIKE V5 结构确认", "SPIKE V5 结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}")
+alertcondition(confirmedSignal, "SPIKE V5 多头结构确认", "SPIKE V5 多头结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}")
+alertcondition(confirmedShortSignal, "SPIKE V5 空头结构确认", "SPIKE V5 空头结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}")
 alertcondition(exitReference, "SPIKE 参考保护触及", "SPIKE 参考保护已触及 | {{exchange}}:{{ticker}} | {{interval}} | 已收盘确认，请查看参考价")
