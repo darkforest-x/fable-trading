@@ -192,15 +192,55 @@ def link_replay_events(store: Store, *, ledger_path: Path = RESULTS / "covered_t
     return stats
 
 
+def write_link_receipt(store: Store, path: Path) -> int:
+    """Write one auditable row per attached replay event without outcomes aggregation."""
+    rows = []
+    for event in store.list_events(limit=2000, source="replay", confirmation="raw"):
+        link = event.get("covered_ledger")
+        if not isinstance(link, dict) or link.get("monitor_event_id") != event.get("id"):
+            continue
+        evidence, outcome = link.get("evidence", {}), link.get("outcome", {})
+        rows.append({
+            "monitor_event_id": event["id"], "ledger_event_id": link.get("ledger_event_id"),
+            "venue": event.get("venue"), "symbol": event.get("symbol"), "timeframe_min": event.get("timeframe_min"),
+            "signal_bar_open_ms": event.get("bar_open_ms"), "link_status": link.get("link_status"),
+            "performance_status": event.get("performance_status"), "source_sha256": evidence.get("source_sha256"),
+            "pine_sha256": evidence.get("pine_sha256"), "ledger_sha256": evidence.get("ledger_sha256"),
+            "coverage_receipt_sha256": evidence.get("coverage_receipt_sha256"),
+            "frozen_ohlc_file": evidence.get("frozen_ohlc_file"), "frozen_ohlc_sha256": evidence.get("frozen_ohlc_sha256"),
+            "frozen_ohlc_timeframe_min": evidence.get("frozen_ohlc_timeframe_min"),
+            "exit_reason": outcome.get("exit_reason") if outcome.get("status") == "realized" else None,
+            "net_r": outcome.get("net_r") if outcome.get("status") == "realized" else None,
+        })
+    rows.sort(key=lambda row: (row["venue"], row["symbol"], int(row["timeframe_min"]), int(row["signal_bar_open_ms"])))
+    fields = ["monitor_event_id", "ledger_event_id", "venue", "symbol", "timeframe_min", "signal_bar_open_ms",
+              "link_status", "performance_status", "source_sha256", "pine_sha256", "ledger_sha256",
+              "coverage_receipt_sha256", "frozen_ohlc_file", "frozen_ohlc_sha256", "frozen_ohlc_timeframe_min",
+              "exit_reason", "net_r"]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    opener = gzip.open if path.suffix == ".gz" else open
+    with opener(path, "wt", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        writer.writerows(rows)
+    return len(rows)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Link imported replay events to the covered V2 ledger")
     parser.add_argument("--database", required=True, type=Path)
     parser.add_argument("--ledger", type=Path, default=RESULTS / "covered_trade_ledger.csv.gz")
     parser.add_argument("--coverage-manifest", type=Path, default=RESULTS / "coverage_progress.json")
     parser.add_argument("--ohlc-root", type=Path, default=REPLAY_DATA_ROOT)
+    parser.add_argument("--receipt", type=Path)
     args = parser.parse_args()
-    print(json.dumps(link_replay_events(Store(args.database), ledger_path=args.ledger,
-                                        manifest_path=args.coverage_manifest, ohlc_root=args.ohlc_root), sort_keys=True))
+    store = Store(args.database)
+    result = link_replay_events(store, ledger_path=args.ledger, manifest_path=args.coverage_manifest,
+                                ohlc_root=args.ohlc_root)
+    if args.receipt:
+        result["receipt_rows"] = write_link_receipt(store, args.receipt)
+        result["receipt_file"] = str(args.receipt)
+    print(json.dumps(result, sort_keys=True))
 
 
 if __name__ == "__main__":

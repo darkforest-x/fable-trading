@@ -9,7 +9,7 @@ from pathlib import Path
 
 from yoyo.evaluation.spike_v1_twoyear_allmarkets import METHOD_VERSION, PINE_SHA, SOURCE_SHA256
 from yoyo.monitor.replay_import import normalize_row
-from yoyo.monitor.replay_ledger import link_replay_events
+from yoyo.monitor.replay_ledger import link_replay_events, write_link_receipt
 from yoyo.monitor.store import Store
 
 START = 1_800_000_000_000
@@ -73,6 +73,15 @@ def test_replay_ledger_link_keeps_both_ids_evidence_and_delivery_isolation(tmp_p
     assert censored["performance_status"] == "covered_linked_censored_unverified"
     assert censored["covered_ledger"]["outcome"] == {"status": "censored"}
     assert store.bark_status()["pending"] == 0 and store.candidate_counts() == {}
+    receipt = tmp_path / "link_receipt.csv.gz"
+    assert write_link_receipt(store, receipt) == 2
+    with gzip.open(receipt, "rt", encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    assert {(row["monitor_event_id"], row["ledger_event_id"], row["link_status"]) for row in rows} == {
+        (realized["id"], f"ledger-{START}", "realized"),
+        (censored["id"], f"ledger-{START + STEP}", "censored"),
+    }
+    assert all(row["frozen_ohlc_sha256"] for row in rows)
 
 
 def test_replay_ledger_refuses_source_mismatch_without_writing(tmp_path):
