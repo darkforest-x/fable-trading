@@ -102,14 +102,23 @@ def import_rows(store: Store, rows: Iterable[dict[str, object]], *, import_id: s
     """Insert validated rows with no outbox/candidate side effect, idempotently."""
     if not import_id or len(import_id) > 160:
         raise ValueError("invalid import id")
-    inserted = skipped = 0
+    inserted = already_present = outside_v1_contract = 0
     for row in rows:
-        event = normalize_row(row, import_id=import_id)
+        try:
+            event = normalize_row(row, import_id=import_id)
+        except ValueError as exc:
+            # A covered ledger may include daily rows; this monitor only owns
+            # 30m/1H/4H. Do not turn that known boundary into a partial crash.
+            if str(exc) == "unsupported replay instrument" and str(row.get("timeframe_min", "")) not in {"30", "60", "240"}:
+                outside_v1_contract += 1
+                continue
+            raise
         if store.upsert_event(event, notify=False, bark_notify=False):
             inserted += 1
         else:
-            skipped += 1
-    return {"inserted": inserted, "already_present": skipped}
+            already_present += 1
+    return {"inserted": inserted, "already_present": already_present,
+            "outside_v1_contract": outside_v1_contract}
 
 
 def import_csv(store: Store, path: Path, *, import_id: str) -> dict[str, int]:

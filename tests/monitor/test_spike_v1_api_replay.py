@@ -61,8 +61,8 @@ def test_replay_import_keeps_only_signal_fields_and_never_creates_delivery(tmp_p
         "entry_time": str(NOW + TIMEFRAMES["1H"]),
         "net_return": "999", "exit_reason": "untrusted outcome",
     }
-    assert import_rows(store, [row], import_id="synthetic-ledger") == {"inserted": 1, "already_present": 0}
-    assert import_rows(store, [row], import_id="synthetic-ledger") == {"inserted": 0, "already_present": 1}
+    assert import_rows(store, [row], import_id="synthetic-ledger") == {"inserted": 1, "already_present": 0, "outside_v1_contract": 0}
+    assert import_rows(store, [row], import_id="synthetic-ledger") == {"inserted": 0, "already_present": 1, "outside_v1_contract": 0}
     event = store.list_events()[0]
     assert event["source"] == "replay" and event["confirmation"] == "raw"
     assert event["replay_unverified"] is True and event["performance_status"] == "unverified"
@@ -77,4 +77,13 @@ def test_replay_import_fails_before_a_bad_row_can_be_notified(tmp_path):
         import_rows(store, [{"venue": "okx", "symbol": "BTC-USDT-SWAP", "timeframe_min": "60",
                              "direction": "short", "signal_bar_open": "0", "signal_close_time": "3600000",
                              "signal_close": "1", "reference_signal_risk": ".1"}], import_id="bad")
+    assert store.list_events() == []
+
+
+def test_replay_import_skips_daily_rows_outside_the_v1_monitor_contract(tmp_path):
+    store = Store(tmp_path / "monitor.sqlite3")
+    result = import_rows(store, [{"venue": "okx", "symbol": "BTC-USDT-SWAP", "timeframe_min": "1440",
+                                  "direction": "long", "signal_bar_open": "0", "signal_close_time": "86400000",
+                                  "signal_close": "1", "reference_signal_risk": ".1"}], import_id="daily")
+    assert result == {"inserted": 0, "already_present": 0, "outside_v1_contract": 1}
     assert store.list_events() == []
