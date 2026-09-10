@@ -4,7 +4,7 @@
 
 本轮把本机 `127.0.0.1:8766` 的监控协议收敛到冻结的 **SPIKE V1 长多 30m / 1H / 4H**：收盘后的原始 V1 启动和额外 YOLO 确认是独立事件、独立 Bark 阶段；历史回放只用于浏览，既不补发 Bark，也不展示未经修复的回测收益。已导入的 1,019 条 V1 回放信号能够按 event id 读取同源冻结 OHLC，并在前端明确标为历史复盘上下文。
 
-本机服务可监听且关键 `/api/status` 超时根因已经通过 trace 确认并修复；当前首轮扫描仍在进行，不能把进程存活或部分完成误称为市场/模型就绪。原生浏览器交互验收仍被 CUA 的 `-10005 timeoutReached` 阻塞。没有任何盈利、模型泛化或 Bark 手机送达声明。
+本机服务可监听且关键 `/api/status` 超时根因已经通过 trace 确认并修复；当前首轮扫描仍在进行，不能把进程存活或部分完成误称为市场就绪。共享 IAB 已完成一张实时卡的实际预览验收，桌面/窄屏的全部交互仍待补齐。没有任何盈利、模型泛化或 Bark 手机送达声明。
 
 ## 协议与数据边界
 
@@ -69,9 +69,17 @@ python3 -m yoyo.monitor.replay_import \
 
 同一最终检查的 `/api/health` 为 HTTP 200 / 696ms，`market_ready=false`、`model_ready=false`、`ok=false`；`/api/status` 为 HTTP 200 / 384ms，scanner 仍为 `scanning`。YOLO 为 `idle`、`loaded=false`、queue `0`、processed endpoints `0`、last error `null`，即没有 raw candidate 时按设计延迟加载，而不是已经推理就绪。首轮全市场尚未完成，不能称 ready。
 
+## Cutover 候选与实际卡片预览
+
+冷首轮发现 IBM `4H` 的 raw 记录 `0b2652408b7f176fa6b5f831`：它在 Bark arm 前约 24.8 小时收盘，但仍落在旧的九根候选窗口内。raw 的 Bark 判定已正确拒绝它，所以 outbox 始终为零；问题是旧代码仍会把它送入 YOLO 候选。`3f98028` 现以同一 raw eligibility 判定注册候选，并在模型 worker 处理持久候选前再次验证原始 bar 的 cutover。这个历史候选在数据库中标为 `disabled/raw_not_eligible:before_bark_activation`，原始事件和审计保留；没有删除 live/replay 记录、没有发送错误通知，也没有为这项小修重启正在缓存首轮的 worker。
+
+另一个真实前端合同错误出现在实时 DATA 30m 卡片。浏览器内显示周期为 `30`，而 `/api/chart` 只接受 `30m`；`85566e2` 在请求边界显式映射 `30/60/240 → 30m/1H/4H`，未知周期 fail closed。已直接读取 `DATA-USDT-SWAP` 的 `/api/chart?timeframe=30m`，返回 240 根 K 线。共享 IAB 刷新后实际点“页内预览”，右侧呈现价格刻度、6 MA、120 根信号附近 K 线、V1 风险线和时间轴；截图为 `analysis/output/spike_v1_ui_20260911/desktop-live-before-theme.png`。图中未出现服务 HTTP 400 或伪造行情。
+
+在 2026-09-11 的低频只读检查中，当前同一 scan `started_at_ms=1789068913215` 处于 `875 / 1434`（status 快照为 871）、errors 0；`/api/health` 为 636ms，`/api/status` 为 491ms。模型已实际 `ready`、`loaded=true`，已处理 7 个 endpoint，队列 0，唯一候选为上述 disabled 历史项。`market_ready=false` 仍正确，因为首轮没有完成；Bark outbox 的 pending/sent/failed/unknown 均为 0。
+
 ## 实现与验证
 
-本轮 monitor 提交链：`bf08b3c`、`8129087`、`603ea45`、`07e2db7`、`468fc5a`、`229b654`、`6b11464`、`a481311`、`1e5a286`、`7ce4971`、`df6c8f6`、`63e0b29`、`f35caf4`、`181193f`、`cc6bf62`。其中 `f35caf4` 使 replay 图依赖在选卡时才导入，避免 pandas/NumPy/PyArrow 在 FastAPI 监听前阻塞；`181193f` 是上述 overview blocker 的最小修复；`cc6bf62` 是保留因果输入的显示物化优化与 V1 gate 测试迁移。
+本轮 monitor 提交链：`bf08b3c`、`8129087`、`603ea45`、`07e2db7`、`468fc5a`、`229b654`、`6b11464`、`a481311`、`1e5a286`、`7ce4971`、`df6c8f6`、`63e0b29`、`f35caf4`、`181193f`、`cc6bf62`、`3f98028`、`85566e2`。其中 `f35caf4` 使 replay 图依赖在选卡时才导入，避免 pandas/NumPy/PyArrow 在 FastAPI 监听前阻塞；`181193f` 是上述 overview blocker 的最小修复；`cc6bf62` 是保留因果输入的显示物化优化与 V1 gate 测试迁移；后两项分别保护 cutover 候选与实时图表周期合同。
 
 本轮实际执行的定向代码验证：
 
@@ -87,7 +95,7 @@ node --check yoyo/monitor/static/app.js
 node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.test.cjs
 ```
 
-本次最终 V1 gate/worker focused suite 为 46 passed；此前回放/API 相邻 suite 为 10 passed。它们不是两个独立测试集，不应相加。`test_model_gate.py` 已迁到 current V1 live/raw/long/closed 合同，保留到期、延迟确认、去重、重启和因果端点覆盖；旧 IMACD `md` 失效断言以 V1 source/confirmation/direction/side/risk fail-closed 注册测试替代。前端 Node 合同测试此前为 10 passed；本轮没有在 CUA 中重新获得浏览器页面：`cua.getApp("Google Chrome")` 返回 `-10005 timeoutReached`，按约束没有反复连接或伪造截图。静态/API 合同检查不替代桌面与窄屏交互验收。
+本次最终 V1 gate/worker focused suite 为 46 passed；此前回放/API 相邻 suite 为 10 passed。它们不是两个独立测试集，不应相加。`test_model_gate.py` 已迁到 current V1 live/raw/long/closed 合同，保留到期、延迟确认、去重、重启和因果端点覆盖；旧 IMACD `md` 失效断言以 V1 source/confirmation/direction/side/risk fail-closed 注册测试替代。随后对 cutover 修复的组合 suite 为 25 passed，前端 Node 合同测试在周期修复后为 7 passed；两者含重叠文件，不能相加。此前独立 CUA surface 的 `getTab('3', {browser:'1'})` 返回 `Browser is not available: 1`，但 root 已用共享 IAB 完成上述单张真实卡片验收。静态/API 合同检查仍不替代桌面与窄屏全部交互验收。
 
 ## 运行环境与未完成项
 
@@ -95,4 +103,4 @@ node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.t
 
 此前本任务暂停的 `yoyo.evaluation.spike_v1_twoyear_allmarkets fetch --venue binance`（PID 51814）已核对命令身份并 `SIGCONT` 恢复，进程从 `T+` 变为 `S+`。它是独立两年采集，不是本轮 monitor 结果；恢复不表示其评估账本问题已解决。
 
-后续仍需在资源可用时完成：全 1,434 单元扫描、模型 ready、真实浏览器桌面/窄屏卡片选择与图表缩放验收。若浏览器自动化恢复，应验证 live/raw、live/yolo 与 replay 的分栏和标签，以及 replay 图中历史后续 K 线的说明。更广泛 V1 或 YOLO 有效性、收益和手机实际送达均不在本次功能验收范围。
+后续仍需在资源可用时完成：全 1,434 单元扫描、真实浏览器桌面/窄屏的主题、筛选、缩放、拖拽和全屏验收。应验证 live/raw、live/yolo 与 replay 的分栏和标签，以及 replay 图中历史后续 K 线的说明。更广泛 V1 或 YOLO 有效性、收益和手机实际送达均不在本次功能验收范围。
