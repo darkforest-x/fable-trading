@@ -1,0 +1,53 @@
+{
+  "status": "passed",
+  "generated_at": "2026-09-10T09:06:14.523413+00:00",
+  "prepared_manifest_sha256": "a219b7fe8b25ce165121a988fed1b16b572211de932f74abdea1af4de740eeb4",
+  "hashes_checked": 597,
+  "jobs": 278,
+  "source_bars": 837239,
+  "independent_stage_bar_checks": 5023434,
+  "control_rows_reproduced": 44189,
+  "full_label_rows": 14904,
+  "study_label_rows": 8046,
+  "study_positive_events": 1660,
+  "warmup_parent_signal_references": 0,
+  "signal_counts": "{('near_box', 'confirmed'): 333, ('near_box', 'early'): 519, ('reference', 'confirmed'): 1212, ('reference', 'early'): 4120, ('v3', 'confirmed'): 3809, ('v3', 'early'): 10386}",
+  "source_review": "Independent scalar A/B/rawV3 state machines; no detector imports. A uses signal-close reference, accepted cooldown, prior stop first, no end liquidation; children are quality upgrades. B complete frozen12 near-zero box, release0..5, one parent per box. No signal selection read execution outcomes.",
+  "checks": [
+    "All three regenerated early/child event sequences and parent IDs/highs independently reconstructed",
+    "Reference occupancy/owner/protection/exits/blocked events independently reconstructed",
+    "Structural box boundaries/setup IDs/ages independently reconstructed",
+    "All labels lag0/1/2/6 hits independently reconciled without inflating tracking as fresh signals",
+    "Random schedules reproduced exactly with shared cross-arm source-clock positions; current/past12 exclusion only",
+    "Only early parents enter economics; confirmations never create duplicate trades",
+    "Every unique actual/control trade independently replayed with original next-open,20bp,risk/trail,stop-before-high rules",
+    "Cached overlapping positions equal original pinned outcomes",
+    "Every summary period count/mean/win/control excess and retention denominator reconciled",
+    "Reference coverage remains distinct from new timely alerts; source-end marks do not alter detector",
+    "34 existing causal/prefix/synthetic tests passed"
+  ],
+  "limitations": [
+    "Native Pine runtime/compile not covered by this audit; static/Python parity and UI are separate",
+    "Reference occupancy is signal-close observation; actual next-open trades can have different occupancy",
+    "No account NAV and no deployment guarantee; seen historical pool remains retrospective",
+    "Full-period permutation independently replayed; per-week permutation and top-decile AUC not independently recalculated"
+  ],
+  "completed_at": "2026-09-10T09:09:32.146594+00:00",
+  "validation_manifest_sha256": "b94367b06517fd4639473dbf6a4806cdf9d12dddbb7cfa59c3a1f98f5f8d121b",
+  "economics": {
+    "parent_only_rows": 15025,
+    "control_rows": 44189,
+    "unique_positions": 40327,
+    "cached_positions_equal": 24612,
+    "full_independent_path_replays": 40327,
+    "trade_summary_value_checks": 672,
+    "retention_summary_value_checks": 1680,
+    "full_period_permutation_rng_recomputed": 3,
+    "holm_tests": 2
+  },
+  "prefix_and_synthetic_tests": {
+    "passed": 34,
+    "command": ".venv/bin/python -m pytest -q tests/test_spike_burst_v3_reference_gate.py tests/test_spike_burst_v3_structural.py tests/test_spike_burst_v3_focus_study.py",
+    "warning": "Pre-existing urllib3 LibreSSL warning"
+  }
+}
