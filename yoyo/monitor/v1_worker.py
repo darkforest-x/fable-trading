@@ -74,6 +74,12 @@ class V1Scanner:
             pending = {}
             cell_iter = iter(cells)
 
+            def fetch(symbol, timeframe, previous):
+                """Time public fetch only; worker state remains main-thread-owned."""
+                started_at = time.monotonic()
+                candles, gaps = client.candles(symbol, timeframe, previous=previous, limit=720)
+                return candles, gaps, round((time.monotonic() - started_at) * 1000, 3)
+
             def submit_next():
                 try:
                     instrument, timeframe = next(cell_iter)
@@ -83,8 +89,7 @@ class V1Scanner:
                 cell = (symbol, timeframe)
                 # The worker only fetches public OHLCV.  The main thread owns
                 # recurrence state, Pine replay and all SQLite writes.
-                pending[cell] = (instrument, timeframe, pool.submit(
-                    client.candles, symbol, timeframe, previous=self.candles.get(cell), limit=720))
+                pending[cell] = (instrument, timeframe, pool.submit(fetch, symbol, timeframe, self.candles.get(cell)))
                 return True
 
             for _ in range(min(8, len(cells))):
@@ -92,9 +97,10 @@ class V1Scanner:
             for instrument, timeframe in cells:
                 symbol = instrument["instId"]
                 cell = (symbol, timeframe)
+                fetch_ms = analyze_ms = checkpoint_ms = 0.0
                 try:
                     _, _, future = pending.pop(cell)
-                    candles, gaps = future.result()
+                    candles, gaps, fetch_ms = future.result()
                     self.candles[cell] = candles
                     close = candles[-1]["t"] + TIMEFRAMES[timeframe] if candles else None
                     key = f"v1:last_closed:{symbol}:{timeframe}"
@@ -106,10 +112,14 @@ class V1Scanner:
                     # sequence, but no invalid payload is ever restored.  Do
                     # not rewrite an unchanged compressed seed every pass.
                     if not unchanged or cell not in self._checkpointed:
+                        checkpoint_started = time.monotonic()
                         store.save_candle_checkpoint(symbol, timeframe, candles)
+                        checkpoint_ms = round((time.monotonic() - checkpoint_started) * 1000, 3)
                         self._checkpointed.add(cell)
                     if not unchanged:
+                        analyze_started = time.monotonic()
                         result = analyze(candles, [], timeframe, tick=float(instrument["tickSz"]), chart_limit=240)
+                        analyze_ms = round((time.monotonic() - analyze_started) * 1000, 3)
                         for event in result["events"]:
                             event.update(symbol=symbol, venue="okx", detected_at_ms=now_ms())
                             # Raw V1 is its own Bark stage when a separately
@@ -131,6 +141,13 @@ class V1Scanner:
                     scan["errors"] += 1
                     if len(scan["error_samples"]) < 8: scan["error_samples"].append({"symbol":symbol,"timeframe":timeframe,"error":type(exc).__name__})
                 scan["completed"] += 1
+                timing = scan.setdefault("timing_ms", {"cells": 0, "fetch_total": 0.0, "analyze_total": 0.0,
+                                                        "checkpoint_total": 0.0, "fetch_max": 0.0, "analyze_max": 0.0,
+                                                        "checkpoint_max": 0.0})
+                timing["cells"] += 1
+                for name, value in (("fetch", fetch_ms), ("analyze", analyze_ms), ("checkpoint", checkpoint_ms)):
+                    timing[name + "_total"] = round(timing[name + "_total"] + value, 3)
+                    timing[name + "_max"] = max(timing[name + "_max"], value)
                 # Durable per-cell progress: a slow first pass is never reported as zero.
                 store.set_meta("scan", scan)
                 submit_next()

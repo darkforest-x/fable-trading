@@ -59,23 +59,32 @@ def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, t
         raise ValueError("invalid chart_limit")
     chart_start = max(0, len(frame) - chart_limit) if chart_limit is not None else 0
     chart, events = [], []
-    for i, (ts, row) in enumerate(frame.iterrows()):
-        close_ms = int(ts.value // 1_000_000) + step
-        r = replayed.iloc[i]
+    # Pull immutable V1 outputs once.  Repeated Series ``.iloc`` calls made
+    # the monitor spend most of a cell replay in pandas indexing rather than
+    # the frozen feature/replay functions; these arrays retain every input and
+    # every bar's value exactly while avoiding display-loop reconstruction.
+    times = frame.index.asi8 // 1_000_000
+    ohlcv = frame[["open", "high", "low", "close", "volume"]].to_numpy(dtype=float, copy=False)
+    feature_values = {name: feature_frame[name].to_numpy(copy=False) for name in
+                      ("md", "s20", "e20", "s60", "e60", "s120", "e120", "ready", "rv", "expansion")}
+    replay_values = {name: replayed[name].to_numpy(copy=False) for name in ("burst", "burst_up", "risk_valid", "risk", "initial_stop")}
+    for i, stamp in enumerate(times):
+        close_ms = int(stamp) + step
+        o, h, l, c, v = ohlcv[i]
         if i >= chart_start:
-            chart.append({"t": int(ts.value // 1_000_000), "o":row.open,"h":row.high,"l":row.low,"c":row.close,"v":row.volume,
-                          "md":_json_number(feature_frame.md.iloc[i]), "sma20":_json_number(feature_frame.s20.iloc[i]), "ema20":_json_number(feature_frame.e20.iloc[i]),
-                          "sma60":_json_number(feature_frame.s60.iloc[i]), "ema60":_json_number(feature_frame.e60.iloc[i]),
-                          "sma120":_json_number(feature_frame.s120.iloc[i]), "ema120":_json_number(feature_frame.e120.iloc[i]),
-                          "burst":bool(r.burst), "ready":bool(feature_frame.ready.iloc[i])})
-        if bool(r.burst_up) and bool(r.risk_valid):
+            chart.append({"t": int(stamp), "o":o,"h":h,"l":l,"c":c,"v":v,
+                          "md":_json_number(feature_values["md"][i]), "sma20":_json_number(feature_values["s20"][i]), "ema20":_json_number(feature_values["e20"][i]),
+                          "sma60":_json_number(feature_values["s60"][i]), "ema60":_json_number(feature_values["e60"][i]),
+                          "sma120":_json_number(feature_values["s120"][i]), "ema120":_json_number(feature_values["e120"][i]),
+                          "burst":bool(replay_values["burst"][i]), "ready":bool(feature_values["ready"][i])})
+        if bool(replay_values["burst_up"][i]) and bool(replay_values["risk_valid"][i]):
             events.append({"protocol":SIGNAL_PROTOCOL,"kind":SIGNAL_KIND,"source":"live","confirmation":"raw","direction":"long",
-                           "side":"long","timeframe":timeframe,"timeframe_min":step//60000,"bar_open_ms":int(ts.value//1_000_000),
+                           "side":"long","timeframe":timeframe,"timeframe_min":step//60000,"bar_open_ms":int(stamp),
                            "bar_close_ms":close_ms,"signal_close_time":close_ms,"is_closed":True,
-                           "price":float(row.close),"risk":float(r.risk),"initial_stop":float(r.initial_stop),"source_sha256":SOURCE_SHA256,
+                           "price":float(c),"risk":float(replay_values["risk"][i]),"initial_stop":float(replay_values["initial_stop"][i]),"source_sha256":SOURCE_SHA256,
                            "entry_reference":"next_open","executable_entry_time":None,"ready":True,"confirmed":True,
-                           "volume_ratio":float(feature_frame.rv.iloc[i]),"tr_atr_expansion":float(feature_frame.expansion.iloc[i])})
-    state={"phase":"ready","ready":bool(feature_frame.ready.iloc[-1]),"bars":len(frame),"timeframe":timeframe,
+                           "volume_ratio":float(feature_values["rv"][i]),"tr_atr_expansion":float(feature_values["expansion"][i])})
+    state={"phase":"ready","ready":bool(feature_values["ready"][-1]),"bars":len(frame),"timeframe":timeframe,
            "bar_open_ms":chart[-1]["t"],"bar_close_ms":chart[-1]["t"]+step,"price":chart[-1]["c"],"direction":"long_only",
            "protocol":SIGNAL_PROTOCOL,"source_sha256":SOURCE_SHA256}
     return {"events":events,"chart":chart,"state":state,"protocol":dict(PROTOCOL)}

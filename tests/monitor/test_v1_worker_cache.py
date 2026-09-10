@@ -44,6 +44,9 @@ def test_persistent_worker_reuses_client_candles_and_skips_unchanged_replay(tmp_
     assert len(client.calls) == 2 * len(MONITORED_TIMEFRAMES)
     assert all(previous for _, _, previous, _ in client.calls[len(MONITORED_TIMEFRAMES):])
     assert all(limit == 720 for _, _, _, limit in client.calls)
+    timing = scanner.store.get_meta("scan")["timing_ms"]
+    assert timing["cells"] == len(MONITORED_TIMEFRAMES)
+    assert all(timing[name] >= 0 for name in ("fetch_total", "analyze_total", "checkpoint_total"))
 
 
 def test_prefetches_up_to_eight_cells_but_replays_and_writes_in_cell_order(tmp_path, monkeypatch):
