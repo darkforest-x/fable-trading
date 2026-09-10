@@ -321,7 +321,7 @@
       <span class="card-price-label">${caption}</span><span class="card-price">${escapeHTML(price(item.price))}</span>
       ${confirmed && item.indicator ? `<span class="card-origin">原始 V1 ${escapeHTML(price(original.price))} · ${escapeHTML(shortDate(original.bar_close_ms))}</span>` : ""}
       <span class="card-context"><span>信号 K 线</span><strong>${item.is_closed ? "已确认" : "待确认"}</strong></span>
-      <span class="card-confirmed"><span>${item.executable_entry_time ? `实际进场 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : item.entry_reference === "next_open" ? "次开盘参考 · 等待实际成交" : "仅信号收盘参考"}</span><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))}</time></span>
+      <span class="card-confirmed"><span>${item.executable_entry_time ? item.source === "replay" ? `回放执行时钟 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : `实际进场 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : item.entry_reference === "next_open" ? "次开盘参考 · 等待实际成交" : "仅信号收盘参考"}</span><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))}</time></span>
       <span class="card-footer"><span class="notification-stack">${item.source === "replay" ? `<span class="candidate-notice">历史回放不通知</span>` : notificationHTML(item)}</span><span class="card-actions"><button type="button" class="card-preview" data-preview-signal-id="${escapeHTML(item.id)}" data-signal-kind="${escapeHTML(item.kind)}" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" aria-pressed="${Boolean(selected)}" aria-label="${escapeHTML(`页内预览 ${shortSymbol(item.symbol)} ${quoteSymbol(item.symbol)} ${timeframeLabel(item.timeframe)}`)}"><span>页内预览</span></button><span class="card-open" data-tradingview-label="TradingView ↗" aria-hidden="true">TradingView ↗</span></span></span>
     </article>`;
   }
@@ -513,7 +513,7 @@
     const facts = [
       ["记录来源", sourceName(item), item.source === "replay" ? "model-color" : "mint"],
       ["信号 K 线", item.is_closed ? "交易所已确认收盘" : "尚未确认 · 不作为可执行 V1", item.is_closed ? "mint" : "red"],
-      ["可执行次开盘", item.executable_entry_time ? shortDate(milliseconds(item.executable_entry_time)) : item.source === "replay" ? "回放未提供成交时钟" : item.entry_reference === "next_open" ? "等待真实成交记录" : "后端未提供", ""],
+      ["可执行次开盘", item.executable_entry_time ? item.source === "replay" ? `回放执行时钟 ${shortDate(milliseconds(item.executable_entry_time))}` : shortDate(milliseconds(item.executable_entry_time)) : item.source === "replay" ? "回放未提供成交时钟" : item.entry_reference === "next_open" ? "等待真实成交记录" : "后端未提供", ""],
       ["V1 风险参考", finite(item.risk) ? price(item.risk) : "—", ""],
       ["特征来源哈希", item.source_sha256 ? `${String(item.source_sha256).slice(0, 12)}…` : "—", ""],
       [confirmed || candidate ? "原箭头收盘 · 北京时间" : "最近收盘 · 北京时间", shortDate(original.bar_close_ms), ""],

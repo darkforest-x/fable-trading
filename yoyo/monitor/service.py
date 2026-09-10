@@ -67,7 +67,8 @@ class Monitor:
         self.store.retire_telegram_pending()
         self.store.retire_disabled_timeframes()
         self.store.retire_muted_bark_timeframes()
-        for name, target in (("scan", self.run), ("bark", self.deliver_bark)):
+        for name, target in (("scan", self.run), ("model", self.model_gate.run),
+                             ("model-submit", self.submit_model_work), ("bark", self.deliver_bark)):
             thread = threading.Thread(target=target, name="impulse-" + name, daemon=True)
             self.threads.append(thread)
             thread.start()
@@ -81,25 +82,42 @@ class Monitor:
             thread.join(timeout=2)
 
     def run(self):
-        """Launch one isolated replay worker at a time; never block FastAPI's GIL."""
-        from yoyo.monitor.v1_worker import scan_once
+        """Launch the persistent isolated worker; never block FastAPI's GIL."""
+        from yoyo.monitor.v1_worker import scan_forever
         while not self.stop_event.is_set():
             if self.scan_process is None or not self.scan_process.is_alive():
-                self.scan_process = multiprocessing.Process(target=scan_once, args=(str(self.store.path),), daemon=True)
+                self.scan_process = multiprocessing.Process(target=scan_forever, args=(str(self.store.path), self.interval), daemon=True)
                 self.scan_process.start()
             self.stop_event.wait(self.interval)
 
     def deliver_bark(self):
         while not self.stop_event.is_set():
             if not self.notification_ready.is_set():
-                self.stop_event.wait(3)
-                continue
+                if self.store.get_meta("notification_policy:v1_bark_arm") is None:
+                    self.stop_event.wait(3)
+                    continue
+                self.notification_ready.set()
             try:
                 worked = self.bark.deliver_once(self.client.clock())
             except Exception as exc:
                 LOG.error("bark worker failure: %s", type(exc).__name__)
                 worked = False
             self.stop_event.wait(1.1 if worked else 3)
+
+    def submit_model_work(self):
+        """Feed persisted V1 charts to the independent YOLO-extra worker.
+
+        The scan process owns HTTP/replay. This thread reads only completed
+        SQLite charts, so detector work cannot block FastAPI or refetch prices.
+        Replay rows never enter the candidate table.
+        """
+        while not self.stop_event.is_set():
+            for event in self.store.list_candidates(2000, pending_only=True):
+                market = self.store.get_market(event["symbol"], event["timeframe"])
+                candles = market.get("chart") if market else None
+                if isinstance(candles, list) and candles:
+                    self.model_gate.submit(event["symbol"], event["timeframe"], candles)
+            self.stop_event.wait(3)
 
     def scan(self):
         start = now_ms()
@@ -257,8 +275,8 @@ class Monitor:
             return dict(chart, state=state)
 
     def status(self):
-        rows = self.markets()
-        counts = Counter("stale" if r.get("stale") and r.get("phase") != "loading" else r.get("phase", "loading") for r in rows)
+        counts = self.store.market_phase_counts(MONITORED_TIMEFRAMES)
+        arm_receipt = self.store.get_meta("notification_policy:v1_bark_arm")
         return dict(service="spike Impulse Monitor", version=VERSION, protocol=PROTOCOL,
                     now_ms=self.client.clock(), started_at_ms=self.started,
                     scan=self.store.get_meta("scan", {"status": "starting", "completed": 0, "total": 0, "errors": 0}),
@@ -269,8 +287,8 @@ class Monitor:
                     "fresh_minutes": FRESH_MS // 60000, "interval_seconds": self.interval, "timeframes": list(MONITORED_TIMEFRAMES),
                     "clock_offset_ms": self.client.offset_ms, "public_requests": self.client.requests,
                     "candle_storage": "memory_only", "history_days": 7,
-                    "signal_mode": "5m/15m/30m 仅前端 · 1H/4H/日线 启动发 Bark，YOLO 通过追加确认", "signal_kind": MODEL_KIND,
-                    "notification_mode": "two_stage", "direct_timeframes": list(DIRECT_TIMEFRAMES),
+                    "signal_mode": "SPIKE V1 长多 30m/1H/4H；原始收盘启动与 YOLO 补充确认分离", "signal_kind": MODEL_KIND,
+                    "notification_mode": "two_stage" if arm_receipt else "two_stage_disarmed", "direct_timeframes": list(DIRECT_TIMEFRAMES),
                     "notification_channels": ["bark"],
                     "bark_timeframes": list(BARK_TIMEFRAMES),
                     "display_only_timeframes": [tf for tf in MONITORED_TIMEFRAMES if tf not in BARK_TIMEFRAMES],
@@ -278,6 +296,7 @@ class Monitor:
                     "direct_notification_since_ms": {c: activation(self.store, c, DIRECT_POLICY) for c in ("telegram", "bark")},
                     "direct_timeframe_since_ms": {tf: self.store.timeframe_activation(tf, protocol=DIRECT_POLICY) for tf in DIRECT_TIMEFRAMES},
                     "model_gate": self.model_gate.status(),
+                    "notification_armed": bool(arm_receipt),
                     "tv_profile": {"id": TV_PROFILE_ID, "show_focus": True, "show_marks": False,
                                    "focus_min_bars": 12, "focus_atr_band": .10, "verified_on": "2026-09-08",
                                    "sync_mode": "observed_settings_snapshot"},
@@ -287,6 +306,20 @@ class Monitor:
                     "higher_mode": "已确认高周期背景标注，不过滤启动",
                     "source_commit": self.source_commit, "startup_source_sha256": self.source_hashes,
                     "warmup_bars": 340, "launch_agent": "com.fable.impulse-monitor"})
+
+    def health(self):
+        """Return liveness without decoding charts, events, or receipt history."""
+        now = self.client.clock()
+        scan = self.store.get_meta("scan", {"status": "starting", "completed": 0, "total": 0, "errors": 0})
+        model = self.model_gate.status()
+        last = scan.get("finished_at_ms")
+        market_ready = bool(last and now - last < 20 * 60000
+                            and scan.get("total", 0) > scan.get("errors", 0)
+                            and scan.get("status") not in ("error", "starting"))
+        model_ready = model.get("status") == "ready"
+        return {"service_alive": True, "now_ms": now, "scan": scan,
+                "market_ready": market_ready, "model_ready": model_ready,
+                "ok": market_ready and model_ready and scan.get("errors", 0) == 0}
 
     def markets(self):
         rows = [r for r in self.store.list_markets()

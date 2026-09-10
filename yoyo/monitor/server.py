@@ -68,31 +68,26 @@ def create_app(runtime=None, start_monitor=True):
     @app.get("/api/health")
     @app.get("/healthz")
     def health():
-        state = monitor.status()
-        scan = state["scan"]
-        last = scan.get("finished_at_ms")
-        state["service_alive"] = True
-        state["market_ready"] = bool(last and state["now_ms"] - last < 20 * 60000
-                                     and scan.get("total", 0) > scan.get("errors", 0)
-                                     and scan.get("status") not in ("error", "starting"))
-        state["model_ready"] = state["runtime"]["model_gate"]["status"] == "ready"
-        state["ok"] = state["market_ready"] and state["model_ready"] and scan.get("errors", 0) == 0
-        return state
+        return monitor.health()
 
     @app.get("/api/signals")
     def signals(limit: int = Query(200, ge=1, le=2000), symbol: str = None, timeframe: str = None,
-                kind: str = MODEL_KIND, side: str = None, source: str = None, confirmation: str = None):
-        if kind not in (MODEL_KIND, SIGNAL_KIND):
-            raise HTTPException(400, "支持指标启动或 YOLO 确认信号。")
-        direct = kind == SIGNAL_KIND
-        protocol = SIGNAL_PROTOCOL if direct else MODEL_PROTOCOL
-        rows = store.list_events(limit, symbol, timeframe, kind, side, protocol=protocol, direct_only=direct)
+                kind: str = None, side: str = None, source: str = None, confirmation: str = None):
         if source not in (None, "live", "replay") or confirmation not in (None, "raw", "yolo", "raw_yolo"):
             raise HTTPException(400, "unsupported source or confirmation")
-        rows = [row for row in rows if (source is None or row.get("source") == source)
-                and (confirmation is None or row.get("confirmation") == confirmation)]
+        # The V1 UI filters by confirmation.  Infer its event kind when the
+        # legacy `kind` parameter is omitted, rather than silently querying
+        # only YOLO rows for `confirmation=raw`.
+        if kind is None:
+            kind = SIGNAL_KIND if confirmation == "raw" else MODEL_KIND if confirmation == "yolo" else None
+        if kind not in (None, MODEL_KIND, SIGNAL_KIND):
+            raise HTTPException(400, "支持指标启动或 YOLO 确认信号。")
+        direct = kind == SIGNAL_KIND
+        protocol = SIGNAL_PROTOCOL if kind == SIGNAL_KIND else MODEL_PROTOCOL if kind == MODEL_KIND else None
+        rows = store.list_events(limit, symbol, timeframe, kind, side, protocol=protocol,
+                                 source=source, confirmation=confirmation)
         for row in rows:
-            row["is_fresh"] = 0 <= monitor.client.clock() - row["bar_close_ms"] <= FRESH_MS
+            row["is_fresh"] = row.get("source") == "live" and 0 <= monitor.client.clock() - row["bar_close_ms"] <= FRESH_MS
         return {"items": rows, "total": len(rows), "kind": kind, "protocol": protocol,
                 "source": source, "confirmation": confirmation}
 

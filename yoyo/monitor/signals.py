@@ -48,7 +48,10 @@ def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, t
         close_ms = int(ts.value // 1_000_000) + step
         r = replayed.iloc[i]
         chart.append({"t": int(ts.value // 1_000_000), "o":row.open,"h":row.high,"l":row.low,"c":row.close,"v":row.volume,
-                      "md":float(feature_frame.md.iloc[i]), "burst":bool(r.burst), "ready":bool(feature_frame.ready.iloc[i])})
+                      "md":float(feature_frame.md.iloc[i]), "sma20":float(feature_frame.s20.iloc[i]), "ema20":float(feature_frame.e20.iloc[i]),
+                      "sma60":float(feature_frame.s60.iloc[i]), "ema60":float(feature_frame.e60.iloc[i]),
+                      "sma120":float(feature_frame.s120.iloc[i]), "ema120":float(feature_frame.e120.iloc[i]),
+                      "burst":bool(r.burst), "ready":bool(feature_frame.ready.iloc[i])})
         if bool(r.burst_up) and bool(r.risk_valid):
             events.append({"protocol":SIGNAL_PROTOCOL,"kind":SIGNAL_KIND,"source":"live","confirmation":"raw","direction":"long",
                            "side":"long","timeframe":timeframe,"timeframe_min":step//60000,"bar_open_ms":int(ts.value//1_000_000),

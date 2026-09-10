@@ -40,6 +40,10 @@ class Store:
                 kind TEXT NOT NULL, side TEXT NOT NULL, close_ms INTEGER NOT NULL,
                 detected_ms INTEGER NOT NULL, payload TEXT NOT NULL);
             CREATE INDEX IF NOT EXISTS event_time ON events(close_ms DESC);
+            -- Health and status may only need counts.  Keep those requests on
+            -- indexed columns rather than decoding every historic payload.
+            CREATE INDEX IF NOT EXISTS event_protocol_kind_close ON events(
+                kind, json_extract(payload, '$.protocol'), close_ms DESC);
             CREATE TABLE IF NOT EXISTS model_candidates (
                 id TEXT PRIMARY KEY REFERENCES events(id), symbol TEXT NOT NULL,
                 timeframe TEXT NOT NULL, close_ms INTEGER NOT NULL,
@@ -76,7 +80,11 @@ class Store:
 
     @staticmethod
     def event_id(event):
-        key = "|".join(str(event[k]) for k in ("protocol", "symbol", "timeframe", "bar_close_ms", "kind", "side"))
+        # A historical replay can describe the same source bar as a live
+        # observation.  Its identity must remain separate so importing it
+        # never consumes, overwrites, or creates a receipt for the live leg.
+        key = "|".join(str(event.get(k, "")) for k in
+                       ("protocol", "source", "confirmation", "symbol", "timeframe", "bar_close_ms", "kind", "side"))
         if event.get("kind") == MODEL_KIND:
             key += "|" + str(event.get("source_event_id", Store.event_id(event["indicator"])))
         return hashlib.sha256(key.encode()).hexdigest()[:24]
@@ -174,8 +182,14 @@ class Store:
         with self.connect() as db:
             return [json.loads(r[0]) for r in db.execute("SELECT payload FROM markets ORDER BY symbol,timeframe")]
 
+    def get_market(self, symbol, timeframe):
+        """Read one persisted chart for the separate causal YOLO worker."""
+        with self.connect() as db:
+            row = db.execute("SELECT payload FROM markets WHERE symbol=? AND timeframe=?", (symbol, timeframe)).fetchone()
+        return json.loads(row[0]) if row else None
+
     def list_events(self, limit=200, symbol=None, timeframe=None, kind=None, side=None, protocol=None,
-                    *, direct_only=False):
+                    source=None, confirmation=None, *, direct_only=False):
         filters, values = [], []
         for field, value in (("symbol", symbol), ("timeframe", timeframe), ("kind", kind), ("side", side)):
             if value:
@@ -184,6 +198,12 @@ class Store:
         if protocol:
             filters.append("json_extract(e.payload,'$.protocol')=?")
             values.append(protocol)
+        if source:
+            filters.append("json_extract(e.payload,'$.source')=?")
+            values.append(source)
+        if confirmation:
+            filters.append("json_extract(e.payload,'$.confirmation')=?")
+            values.append(confirmation)
         if direct_only:
             clause, args = self._direct_filter()
             filters.append(clause)
@@ -430,6 +450,15 @@ class Store:
             return db.execute("SELECT COUNT(*) FROM events e WHERE " + clause + " AND e.close_ms>=?",
                               args + [since]).fetchone()[0]
 
+    def market_phase_counts(self, timeframes):
+        """Return the small status summary without deserializing saved charts."""
+        marks = ",".join("?" for _ in timeframes)
+        sql = ("SELECT COALESCE(json_extract(payload, '$.phase'), 'loading'), COUNT(*) FROM markets "
+               "WHERE COALESCE(json_extract(payload, '$.active'), 1)=1 "
+               "AND timeframe IN (" + marks + ") GROUP BY 1")
+        with self.connect() as db:
+            return {row[0]: row[1] for row in db.execute(sql, list(timeframes))}
+
     def _notification_filter(self, channel):
         clause, args = self._direct_filter(channel)
         return ("((e.kind=? AND json_extract(e.payload,'$.protocol')=?) OR " + clause + ")",
@@ -441,7 +470,10 @@ class Store:
             raise ValueError("unsupported notification channel")
         table = "outbox" if channel == "telegram" else "bark_outbox"
         clause, args = self._notification_filter(channel)
-        base = " FROM " + table + " o JOIN events e ON e.id=o.event_id WHERE " + clause
+        # Keep the outbox as the outer relation.  A health/status read when
+        # there is no pending history must not scan every event payload merely
+        # to discover that no receipt exists.
+        base = " FROM " + table + " o CROSS JOIN events e ON e.id=o.event_id WHERE " + clause
         with self.connect() as db:
             counts = {r[0]: r[1] for r in db.execute("SELECT o.status,COUNT(*)" + base + " GROUP BY o.status", args)}
             sent = db.execute("SELECT MAX(o.updated_ms)" + base + " AND o.status='sent'", args).fetchone()[0]

@@ -13,6 +13,27 @@ from yoyo.monitor import (DIRECT_POLICY, DIRECT_TIMEFRAMES, FRESH_MS, MODEL_PROT
 from yoyo.monitor.policy import finite, is_model_signal, is_tv_start
 
 
+def arm_v1_bark(store, activated_ms):
+    """Create one forward-only V1 Bark cutover for raw and YOLO-extra stages.
+
+    This is deliberately independent of Telegram and is idempotent.  The
+    caller supplies the synchronized exchange clock before scanning a new bar;
+    pre-cutover rows remain history and are never enqueued retrospectively.
+    """
+    key = "notification_policy:v1_bark_arm"
+    existing = store.get_meta(key)
+    if existing is not None:
+        return existing
+    for protocol in (DIRECT_POLICY, MODEL_PROTOCOL):
+        store.activate_bark_policy(activated_ms, protocol=protocol, retire_obsolete=False)
+        for timeframe in BARK_TIMEFRAMES:
+            store.activate_timeframe_policy(timeframe, activated_ms, protocol=protocol)
+    receipt = {"activated_ms": int(activated_ms), "protocols": [DIRECT_POLICY, MODEL_PROTOCOL],
+               "timeframes": list(BARK_TIMEFRAMES), "telegram": "disabled"}
+    store.set_meta(key, receipt)
+    return receipt
+
+
 def activation(store, channel, protocol):
     if channel not in ("telegram", "bark"):
         raise ValueError("unsupported notification channel")

@@ -1,10 +1,8 @@
-"""Durable, causal IMACD -> YOLO confirmation for local notifications only.
+"""Durable, causal SPIKE V1 -> YOLO-extra confirmation for notifications.
 
-Owner authorized the frozen chart-review rule on 2026-09-08. Original arrow p
-and its setup are immutable. At each closed endpoint p..p+9, read only md from
-p through that endpoint and W18/W19 OHLC + close-source MA images. A zero,
-reversal or missing md cancels before a detector match. No followthrough,
-next open, future outcome, ACTIVE bundle, or execution path is consulted.
+The raw V1 signal remains authoritative.  YOLO reads only closed OHLCV and six
+close-source moving averages in its p..p+9 causal window, and may add a later
+record; it never invalidates, delays, recolors, or replaces the raw V1 event.
 """
 from __future__ import annotations
 
@@ -28,25 +26,29 @@ def pending_proof(event):
 
 
 def confirmation(event, proposal, candle, checked_at):
-    """Link a detector core to this same frozen setup at this closed endpoint."""
+    """Link a detector proposal to a V1 raw event at a closed endpoint."""
     if (proposal.get("structural_pass") is not True or proposal.get("side") != event["side"]
             or proposal.get("model_sha256") != MODEL_SHA256):
         return None
     step = TIMEFRAMES[event["timeframe"]]
     a, b = proposal["core_start_ms"], proposal["core_end_ms"]
-    left, right = max(a, event["focus_start_ms"]), min(b, event["bar_open_ms"])
-    if left > right:
+    # A detector core must begin no later than the V1 source bar.  This binds
+    # the extra confirmation to the same causal launch window without making
+    # an IMACD/focus predicate part of the V1 signal definition.
+    if a > event["bar_open_ms"] or b < a:
         return None
     proof = dict(proposal, status="confirmed", protocol=MODEL_PROTOCOL,
                  profile_id=MODEL_PROFILE_ID, max_wait_bars=MODEL_MAX_WAIT,
                  wait_bars=(candle["t"] - event["bar_open_ms"]) // step,
-                 overlap_bars=(right-left) // step + 1,
                  confirmation_close_ms=candle["t"] + step, checked_at_ms=checked_at,
                  last_checked_close_ms=candle["t"] + step, reason=None)
-    derived = dict(protocol=MODEL_PROTOCOL, kind=MODEL_KIND, symbol=event["symbol"],
-                   timeframe=event["timeframe"], side=event["side"], price=candle["c"],
+    derived = dict(protocol=MODEL_PROTOCOL, kind=MODEL_KIND, source="live", confirmation="yolo",
+                   direction="long", venue=event.get("venue", "okx"), symbol=event["symbol"],
+                   timeframe=event["timeframe"], timeframe_min=event["timeframe_min"], side="long", price=candle["c"],
                    bar_open_ms=candle["t"], bar_close_ms=candle["t"] + step,
-                   detected_at_ms=checked_at, near_zero_bars=event["near_zero_bars"],
+                   signal_close_time=candle["t"] + step, is_closed=True,
+                   source_sha256=event["source_sha256"], entry_reference="next_open", executable_entry_time=None,
+                   detected_at_ms=checked_at,
                    source_event_id=event["id"], indicator={k:v for k,v in event.items() if k != "model"},
                    model=proof)
     if not is_model_signal(derived):
@@ -158,12 +160,6 @@ class ModelGate:
                     proof.update(status="expired" if now > proof["expires_at_ms"] + step else "error",
                                  reason="confirmation_history_unavailable" if now > proof["expires_at_ms"] + step
                                  else "missing_causal_candles")
-                    self.store.update_candidate(event["id"], proof)
-                    break
-                if any(not finite(r.get("md")) or r["md"] == 0 or
-                       (r["md"] > 0) != (event["side"] == "long") for r in path):
-                    proof.update(status="invalidated", reason="md_zero_or_reversal",
-                                 last_checked_close_ms=end+step)
                     self.store.update_candidate(event["id"], proof)
                     break
                 try:
