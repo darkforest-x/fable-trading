@@ -2,7 +2,7 @@
 
 ## 结论
 
-本轮把本机 `127.0.0.1:8766` 的监控协议收敛到冻结的 **SPIKE V1 长多 30m / 1H / 4H**：收盘后的原始 V1 启动和额外 YOLO 确认是独立事件、独立 Bark 阶段；历史回放只用于浏览，既不补发 Bark，也不展示未经修复的回测收益。已导入的 1,019 条 V1 回放信号能够按 event id 读取同源冻结 OHLC，并在前端明确标为历史复盘上下文。
+本轮把本机 `127.0.0.1:8766` 的监控协议收敛到冻结的 **SPIKE V1 长多 30m / 1H / 4H**：收盘后的原始 V1 启动和额外 YOLO 确认是独立事件、独立 Bark 阶段；历史回放只用于浏览且绝不补发 Bark。已导入的 1,019 条 V1 回放信号可按 event id 读取同源冻结 OHLC，并在前端明确标为历史复盘上下文；它们已另行联结到 v2 覆盖账本，但联结不是盈利或策略有效性证明。
 
 本机服务可监听且关键 `/api/status` 超时根因已经通过 trace 确认并修复；当前首轮扫描仍在进行，不能把进程存活或部分完成误称为市场就绪。共享 IAB 已完成一张实时卡的实际预览验收，桌面/窄屏的全部交互仍待补齐。没有任何盈利、模型泛化或 Bark 手机送达声明。
 
@@ -14,7 +14,7 @@
 | 通知 | `source=live, confirmation=raw` 与随后 `source=live, confirmation=yolo` 分别去重、分别允许 Bark；Telegram 关闭 |
 | 回放 | `source=replay, confirmation=raw`；无候选、无 outbox、无通知 |
 | 回放图 | 只由已保存 event id 定位 `venue/symbol/timeframe/bar_open_ms`；按需读取冻结 gzip OHLC；后续 K 线标为历史复盘，未输入扫描器或 YOLO |
-| 回测指标 | 已知 actual-fill、风险、censoring 和 drawdown 账本问题未在本轮改动；回放浏览不显示或推断 PnL |
+| 回测指标 | 回放只显示有四元组与 SHA 证据的 v2 单笔退出/净 R；已实现与 censored 分开，均标为未独立收益审核，不推断 PnL |
 
 回放导入命令已在此配置下执行一次：
 
@@ -26,6 +26,12 @@ python3 -m yoyo.monitor.replay_import \
 ```
 
 结果为 783 条新导入、236 条既有相同记录、11 条不属于 V1 30m/1H/4H 的记录跳过；运行库最终有 1,019 条 `replay/raw`。对这 1,019 条已导入记录按文件存在性检查，冻结 OHLC 覆盖为 1,019/1,019；这里的覆盖只说明可画出对应源 K 线，不说明交易完整性或策略表现。
+
+## 回放账本逐笔联结（`9015364`、`f831db3`）
+
+signal-only importer 保持不复制 outcome；随后独立命令以 `venue/symbol/timeframe_min/signal_bar_open_ms` 精确联结运行库中的 1,019 条 replay/raw 与冻结 `covered-v2-next-open-risk-realized-event-sequence` ledger。实际运行得到 1,001 条 realized、18 条 censored、0 unmatched/source mismatch/OHLC missing；四元组、monitor journal id 和 ledger source-event id 均无重复。每条 payload 同时保存两种 id、Pine/source、ledger、coverage receipt 和冻结 OHLC SHA。
+
+此操作只调用已有事件的 payload update，不经 event insertion、outbox 或 candidate 路径；运行后 Bark outbox 仍为 0。前端为 realized 行显示冻结账本的退出与“覆盖净 R · 非账户”，为 censored 行明确显示“不计胜率、PF 或净收益”，并持续标注“未独立收益审核”。逐笔 receipt、命令和完整边界见 [p1_spike_v1_replay_ledger_link_20260911.md](p1_spike_v1_replay_ledger_link_20260911.md)。
 
 历史遗留处理限定为源为空、协议为旧 IMACD 的 9,160 条错误 journal 行；它们已在有完整数据库备份后移除。迁移期间另发现 5 个可由 canonical V1 raw identity 替换的旧重复 id，已幂等清理；11 个无 canonical 替代的旧 id 未伪造替代记录。没有再次清库，也没有触及本次 live/replay 行。
 

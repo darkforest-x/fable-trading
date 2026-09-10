@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>SPIKE V1 回放记录与 v2 覆盖账本逐笔关联</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>SPIKE V1 回放记录与 v2 覆盖账本逐笔关联</h1>
+<h2>结论</h2>
+<p>2026-09-11（北京时间）已将 monitor 中全部 <strong>1,019</strong> 条 <code>source=replay, confirmation=raw</code> 的 V1 信号，与冻结 <code>covered-v2-next-open-risk-realized-event-sequence</code> 账本按四元组 <code>venue / symbol / timeframe_min / signal_bar_open_ms</code> 一对一关联。所有记录同时保存 monitor journal id、账本 source-event id、Pine/replay source SHA、ledger SHA、coverage receipt SHA 和对应冻结 OHLC 文件 SHA。</p>
+<p>关联只证明这条回放卡与哪一条覆盖账本、哪一份冻结输入相对应。它不构成独立经济审计、完整市场覆盖、账户收益、策略有效性或盈利结论。前端对已实现行只显示该账本的退出与净 R，并标为“未独立收益审核”；18 条右端 censored 行不显示净 R、胜率、PF 或净收益。</p>
+<h2>冻结输入与复现</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>值</th>
+</tr></thead><tbody>
+<tr><td>V1 Pine / replay source SHA256</td><td><code>18bbb6955fdf12e124688003799c44fc2a641f11a342edcf478157b1c9641fe2</code></td></tr>
+<tr><td>覆盖账本方法</td><td><code>covered-v2-next-open-risk-realized-event-sequence</code></td></tr>
+<tr><td>covered ledger SHA256</td><td><code>d35483bcfad3a567376f6009aaac58f41981e2c522a6478a745d3481e1730064</code></td></tr>
+<tr><td>coverage receipt SHA256</td><td><code>014be0a70370527e6e0dba89ff24b55208d666fa1b1f85b6f857bd05442e2fff</code></td></tr>
+<tr><td>信号时间范围（UTC）</td><td>2024-09-10 16:00 至 2026-09-09 16:30</td></tr>
+</tbody></table>
+<pre><code>
+python3 -m pytest -q tests/monitor/test_replay_ledger.py tests/monitor/test_spike_v1_api_replay.py
+node --test tests/monitor/frontend_cards.test.cjs
+python3 -m yoyo.monitor.replay_ledger \
+  --database &quot;$HOME/Library/Application Support/Fable/ImpulseMonitor/monitor.sqlite3&quot; \
+  --receipt experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/replay_ledger_link_receipt.csv.gz
+python3 scripts/md_to_html.py analysis/p1_spike_v1_replay_ledger_link_20260911.md --out-dir analysis/html
+</code></pre>
+<p>上述实际运行返回：<code>linked=1019</code>、<code>matched_realized=1001</code>、<code>matched_censored=18</code>、<code>unmatched=0</code>、<code>source_mismatch=0</code>、<code>ohlc_missing=0</code>。receipt 中的 1,019 行没有重复四元组、monitor id 或 ledger id。运行后 Bark pending/failed/unknown 均为 0；模型 candidate 计数没有由回放联结创建或改变。</p>
+<h2>覆盖分布</h2>
+<table><thead><tr>
+<th>维度</th>
+<th>30m</th>
+<th>1H</th>
+<th>4H</th>
+<th>合计</th>
+</tr></thead><tbody>
+<tr><td>已关联回放卡</td><td>592</td><td>301</td><td>126</td><td>1,019</td></tr>
+<tr><td>已实现账本行</td><td>—</td><td>—</td><td>—</td><td>1,001</td></tr>
+<tr><td>censored</td><td>—</td><td>—</td><td>—</td><td>18</td></tr>
+</tbody></table>
+<table><thead><tr>
+<th>交易所</th>
+<th>已关联回放卡</th>
+</tr></thead><tbody>
+<tr><td>Binance</td><td>733</td></tr>
+<tr><td>OKX</td><td>233</td></tr>
+<tr><td>Gate</td><td>53</td></tr>
+</tbody></table>
+<p>逐笔证据在 <a href="../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/replay_ledger_link_receipt.csv.gz">replay_ledger_link_receipt.csv.gz</a>：每一行包含双方 id、四元组、状态、四种 SHA 及冻结 OHLC 文件。运行库的同名 <code>covered_ledger</code> payload 还保留已实现行的 entry/exit/净 R，或仅保留 censored 状态。</p>
+<h2>实现边界</h2>
+<p><code>replay_import</code> 仍只导入信号字段。<code>replay_ledger</code> 是单独命令，先验证 manifest 的方法、Pine 和 source SHA，再完整准备所有更新，最后只用 <code>Store.update_event_payload()</code> 修改既有 replay journal payload；它不走 <code>upsert_event()</code>，因此不会新建 event、Bark outbox、Telegram outbox 或 YOLO candidate。无匹配、source 不符或 OHLC 文件缺失的行保持 <code>performance_status=unverified</code>。</p>
+<p>前端将三类状态分开：已关联已实现、已关联 censored、未关联。页面上的“覆盖净 R · 非账户”是 frozen covered ledger 的单笔字段，不是账户回撤、组合收益、实时成交或独立验证后的推荐。</p>
+<h2>风险与诚实声明</h2>
+<p>这 1,019 条是已有 partial covered inputs 的回放子集，不是完整两年三所全市场评估。covered ledger 虽已修复 next-open 风险分母、censoring 与事件序列描述问题，仍缺完整覆盖、匹配随机对照、资金组合模型和独立经济审计。不得从此关联推导 V1、YOLO、通知或实盘仓位调整。</p>
+<p>历史图的信号后 K 线仍只用于回看，未输入 live scanner 或 YOLO；回放继续不通知。运行中的 live scanner、Bark cutover 和模型候选不因该数据库元数据联结而改变。</p>
+</body>
+</html>
