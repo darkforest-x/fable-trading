@@ -1,0 +1,694 @@
+//@version=6
+// SPIKE V6: V4 confirmation is provenance inside a closed-bar structure, with
+// one causal V1 directional-candle evidence latch during the V6 pending window.
+// A final event belongs to the current close, never to a historical body or
+// legacy confirmation. This prototype is not validated for any deployment.
+// This prototype has no market breadth, performance, or PnL evaluation.
+indicator("SPIKE V6 · 量价结构确认", shorttitle="SPIKE V6", overlay=false, max_labels_count=500, max_boxes_count=150, max_lines_count=200, explicit_plot_zorder=true, behind_chart=false)
+
+// Frozen research constants; changing them defines a new unvalidated config.
+const int maLen = 34
+const int sigLen = 9
+const int denseLen = 12
+const float denseWidth = 3.0
+const int denseCrosses = 2
+const int breakoutLookback = 12
+const int cooldownBars = 12
+const int confirmMaxAge = 3
+const float minAdvance = 1.5
+const float minVolume = 1.5
+// Fixed V1 candle-shape semantics. V6 deliberately does not restore V1's
+// same-bar RV>=4 or TR>=3 hard gates.
+const float minBody = 0.55
+const float minEnd = 0.75
+const int stopLen = 5
+const float stopBuffer = 0.2
+const float riskFloor = 2.0
+const float armR = 2.0
+const float trailAtr = 4.0
+
+string gView = "01 · 显示"
+bool showMas = input.bool(true, "六条均线", group=gView, display=display.none)
+bool showLabels = input.bool(true, "确认信号与价格", group=gView, tooltip="只显示完成实体支撑、原确认关联与主线转强后的最终信号，标在实际完成K线上，不回填。", display=display.none)
+bool showRisk = input.bool(true, "风险区与保护线", group=gView, tooltip="空闲后的首个确认信号开启风险参考，使用该根实际收盘价。跟踪期间的其他确认不会重置已有盈亏框；框内价格属于开启它的确认信号。", display=display.none)
+bool showPanel = input.bool(true, "显示状态面板", group=gView, display=display.none)
+bool showMilestones = input.bool(true, "R 里程碑与虚线", group=gView, tooltip="分别显示已达到的 3R、5R、10R 价位与虚线；不是固定止盈。", display=display.none)
+bool showExitLabels = input.bool(false, "退出文字", group=gView, display=display.none)
+color signalColor = input.color(color.white, "信号 K 线颜色（实体 / 影线）", group=gView, display=display.none)
+color bull = #008F82
+color bear = #D34B66
+color gold = #AD7B29
+color blue = #4679C9
+color ink = chart.fg_color
+color muted = color.new(ink, 40)
+
+// BEGIN UNCHANGED V2 RISK HELPERS
+// Frozen signal-close inputs only; outward rounding preserves the minimum risk.
+f_risk(int side, float entry, float extreme, float a, float floorAtr, float bufferAtr, float tick) =>
+    bool known = (side == 1 or side == -1) and entry > 0 and a > 0 and tick > 0 and not na(extreme)
+    float candidate = side == 1 ? math.min(extreme - bufferAtr * a, entry - floorAtr * a) : math.max(extreme + bufferAtr * a, entry + floorAtr * a)
+    float stop = known ? (side == 1 ? math.floor(candidate / tick) * tick : math.ceil(candidate / tick) * tick) : na
+    float risk = side * (entry - stop)
+    bool valid = known and stop > 0 and risk > 0
+    [valid ? stop : na, valid ? risk : na, valid]
+
+// Call only AFTER the entry bar. priorProtection was fixed at the previous close.
+// First apply the operative stop and adverse gap; never count stop-bar highs as profit.
+// A new close-based ATR ratchet only becomes operative on the next bar.
+f_path(int side, float entry, float risk, float priorProtection, float priorPeak, bool wasArmed, float o, float h, float l, float c, float a, float activationR, float distanceAtr, float tick) =>
+    bool stopped = side == 1 ? l <= priorProtection : h >= priorProtection
+    float exitPrice = stopped ? (side == 1 ? math.min(o, priorProtection) : math.max(o, priorProtection)) : na
+    float currentR = side * ((stopped ? exitPrice : c) - entry) / risk
+    float peakR = stopped ? priorPeak : math.max(priorPeak, side * ((side == 1 ? h : l) - entry) / risk)
+    bool armed = wasArmed or (not stopped and currentR >= activationR)
+    float protection = priorProtection
+    if not stopped and armed and a > 0
+        float raw = c - side * distanceAtr * a
+        float candidate = side == 1 ? math.floor(raw / tick) * tick : math.ceil(raw / tick) * tick
+        protection := side == 1 ? math.max(priorProtection, candidate) : math.min(priorProtection, candidate)
+    [not stopped, protection, peakR, currentR, exitPrice, armed]
+// END UNCHANGED V2 RISK HELPERS
+
+// Existing V1 averages keep their full-history semantics. New alert windows
+// independently require contiguous history and do not bridge missing bars.
+f_smma(float source, int length) =>
+    float seed = ta.sma(source, length)
+    var float value = na
+    value := na(value[1]) ? seed : (value[1] * (length - 1) + source) / length
+    value
+f_flip(float a, float b) =>
+    float d = a - b
+    (d > 0 and d[1] <= 0) or (d < 0 and d[1] >= 0) ? 1.0 : 0.0
+
+// V1's directional candle quality, without its same-bar volume/TR thresholds.
+// V6 pairs it with V4's existing causal three-bar advance and volume envelope.
+f_directionalCandle(int side, float o, float h, float l, float c, float bodyGate, float endGate) =>
+    float span = h - l
+    bool known = span > 0 and not na(o) and not na(h) and not na(l) and not na(c)
+    float body = known ? math.abs(c - o) / span : na
+    float endPosition = known ? (side == 1 ? (c - l) / span : (h - c) / span) : na
+    bool direction = side == 1 ? c > o : side == -1 ? c < o : false
+    known and direction and body >= bodyGate and endPosition >= endGate
+
+bool pricesValid = not na(open) and not na(high) and not na(low) and not na(close) and low > 0 and high >= math.max(open, close, low) and low <= math.min(open, close, high)
+bool dataGap = not barstate.isfirst and (time != time_close[1] or not pricesValid or not pricesValid[1])
+var int segmentIndex = -1
+segmentIndex := dataGap or not pricesValid ? 0 : segmentIndex + 1
+bool resetVolume = barstate.isfirst or dataGap
+float tr = ta.tr(true)
+float smHigh = f_smma(high, maLen)
+float smLow = f_smma(low, maLen)
+float ema1 = ta.ema(hlc3, maLen)
+float middle = 2.0 * ema1 - ta.ema(ema1, maLen)
+float md = middle > smHigh ? middle - smHigh : middle < smLow ? middle - smLow : 0.0
+float sb = ta.sma(md, sigLen)
+float atr = f_smma(tr, 14)
+float s20 = ta.sma(close, 20)
+float e20 = ta.ema(close, 20)
+float s60 = ta.sma(close, 60)
+float e60 = ta.ema(close, 60)
+float s120 = ta.sma(close, 120)
+float e120 = ta.ema(close, 120)
+float ropeHigh = math.max(s20, e20, s60, e60, s120, e120)
+float ropeLow = math.min(s20, e20, s60, e60, s120, e120)
+float width = atr > 0 ? (ropeHigh - ropeLow) / atr : na
+float flips = f_flip(s20,e20) + f_flip(s20,s60) + f_flip(s20,e60) + f_flip(s20,s120) + f_flip(s20,e120) + f_flip(e20,s60) + f_flip(e20,e60) + f_flip(e20,s120) + f_flip(e20,e120) + f_flip(s60,e60) + f_flip(s60,s120) + f_flip(s60,e120) + f_flip(e60,s120) + f_flip(e60,e120) + f_flip(s120,e120)
+float pastWidth = ta.sma(width[1], denseLen)
+float pastCrosses = math.sum(flips[1], denseLen)
+bool baseReady = pricesValid and bar_index >= math.max(340, 10 * maLen) and atr[1] > 0 and not na(sb) and not na(pastWidth)
+bool ready = baseReady and segmentIndex >= breakoutLookback
+
+// Last20 nonmissing volumes in THIS segment; missing volume does not block
+// structural alerts. Confirmation requires all three current volumes known.
+var array<float> validVolumes = array.new<float>()
+if resetVolume
+    array.clear(validVolumes)
+if not na(volume) and volume >= 0
+    array.push(validVolumes, volume)
+    if array.size(validVolumes) > 20
+        array.shift(validVolumes)
+float volumeMedian = array.size(validVolumes) == 20 ? array.median(validVolumes) : na
+float rv = volumeMedian[1] > 0 and not na(volume) ? volume / volumeMedian[1] : na
+float expansion = atr[1] > 0 ? tr / atr[1] : na
+float recentLow = ta.lowest(low, stopLen)
+
+// BEGIN TWO STAGE FIELDS
+// At least 12 prior contiguous bars before allowing the old density field.
+bool dense = baseReady and segmentIndex >= denseLen and pastWidth <= denseWidth and pastCrosses >= denseCrosses
+float denseHitsRaw = math.sum(dense[1] ? 1.0 : 0.0, breakoutLookback)
+float denseHits = segmentIndex >= breakoutLookback ? denseHitsRaw : na
+bool recentDense = denseHits > 0
+float priorHigh = ta.highest(high[1], breakoutLookback)
+// Auxiliary parent-range support only. It does not alter V4 candidate,
+// confirmation-quality, or cooldown conditions.
+float priorLow = ta.lowest(low[1], breakoutLookback)
+float move3 = close - close[3]
+float advance3 = atr[3] > 0 ? move3 / atr[3] : na
+float volumeBase3 = volumeMedian[3]
+float volumeSum3 = math.sum(volume, 3)
+bool volumeKnown3 = not na(volume) and not na(volume[1]) and not na(volume[2])
+float volumeRatio3 = volumeKnown3 and volumeBase3 > 0 ? volumeSum3 / (3.0 * volumeBase3) : na
+float trSum3 = math.sum(tr, 3)
+float efficiency3 = trSum3 > 0 ? move3 / trSum3 : na
+float closePosition = high > low ? (close - low) / (high - low) : na
+bool aboveSix = close > ropeHigh
+bool earlyRaw = ready and close > priorHigh and close > math.max(s20, e20)
+bool confirmQuality = ready and recentDense and advance3 >= minAdvance and volumeRatio3 >= minVolume and md >= sb and middle > middle[1]
+// Efficiency, close location and six-line position are quality tags, NOT gates.
+// END TWO STAGE FIELDS
+
+// BEGIN SHORT MIRROR FIELDS
+// The short candidate is deliberately independent from the frozen V4 long
+// field above. It shares only causal feature values from the current close.
+float recentHigh = ta.highest(high, stopLen)
+bool earlyShortRaw = ready and close < priorLow and close < math.min(s20, e20)
+bool confirmShortQuality = ready and recentDense and advance3 <= -minAdvance and volumeRatio3 >= minVolume and md <= sb and middle < middle[1]
+bool longCandleShape = f_directionalCandle(1, open, high, low, close, minBody, minEnd)
+bool shortCandleShape = f_directionalCandle(-1, open, high, low, close, minBody, minEnd)
+bool longEvidenceNow = longCandleShape and advance3 >= minAdvance and volumeRatio3 >= minVolume
+bool shortEvidenceNow = shortCandleShape and advance3 <= -minAdvance and volumeRatio3 >= minVolume
+// A V4 confirmation already certifies this causal rolling-three envelope. Any
+// qualifying directional candle within that closed launch window may seed V6.
+bool longLaunchWindowShape = longCandleShape or longCandleShape[1] or longCandleShape[2]
+bool shortLaunchWindowShape = shortCandleShape or shortCandleShape[1] or shortCandleShape[2]
+int longLaunchWindowShapeBar = longCandleShape ? bar_index : longCandleShape[1] ? bar_index - 1 : longCandleShape[2] ? bar_index - 2 : na
+int shortLaunchWindowShapeBar = shortCandleShape ? bar_index : shortCandleShape[1] ? bar_index - 1 : shortCandleShape[2] ? bar_index - 2 : na
+bool longLegacySeedEvidence = longLaunchWindowShape and advance3 >= minAdvance and volumeRatio3 >= minVolume
+bool shortLegacySeedEvidence = shortLaunchWindowShape and advance3 <= -minAdvance and volumeRatio3 >= minVolume
+// END SHORT MIRROR FIELDS
+
+if barstate.isfirst and (not chart.is_standard or timeframe.isticks)
+    runtime.error("请使用普通时间 K 线，合成K线不支持。")
+
+// BEGIN LEGACY ENGINE: retained byte-for-byte in behaviour for provenance only.
+// V6 intentionally does not display or alert this internal V4 confirmation.
+var bool previousEarlyRaw = false
+var int lastAcceptedBar = na
+var int parentBar = na
+var float parentHigh = na
+var float parentLow = na
+var float parentPrice = na
+var bool parentConfirmed = false
+bool legacyEarlySignal = false
+bool legacyConfirmedSignal = false
+int legacyConfirmationAge = na
+float legacyConfirmationParentPrice = na
+float legacyConfirmationParentHigh = na
+float legacyConfirmationParentLow = na
+if barstate.isconfirmed
+    if dataGap
+        lastAcceptedBar := na
+        previousEarlyRaw := false
+        parentBar := na
+        parentHigh := na
+        parentLow := na
+        parentPrice := na
+        parentConfirmed := false
+    bool cooldownPassed = na(lastAcceptedBar) or bar_index - lastAcceptedBar >= cooldownBars
+    legacyEarlySignal := earlyRaw and not previousEarlyRaw and cooldownPassed
+    previousEarlyRaw := earlyRaw
+    if legacyEarlySignal
+        lastAcceptedBar := bar_index
+        parentBar := bar_index
+        parentHigh := priorHigh
+        parentLow := priorLow
+        parentPrice := close
+        parentConfirmed := false
+    int age = na(parentBar) ? na : bar_index - parentBar
+    if not na(age) and age > confirmMaxAge
+        parentBar := na
+        parentHigh := na
+        parentLow := na
+        parentPrice := na
+        parentConfirmed := false
+    if not na(parentBar) and not parentConfirmed and age >= 0 and age <= confirmMaxAge and close > parentHigh and confirmQuality
+        legacyConfirmedSignal := true
+        legacyConfirmationAge := age
+        legacyConfirmationParentPrice := parentPrice
+        legacyConfirmationParentHigh := parentHigh
+        legacyConfirmationParentLow := parentLow
+        parentConfirmed := true
+// END LEGACY ENGINE
+
+// BEGIN SHORT LEGACY ENGINE
+// Short provenance mirrors the V4 chronology with wholly separate cooldown,
+// candidate parent, and confirmation latch state.
+var bool previousEarlyShortRaw = false
+var int lastShortAcceptedBar = na
+var int shortParentBar = na
+var float shortParentHigh = na
+var float shortParentLow = na
+var float shortParentPrice = na
+var bool shortParentConfirmed = false
+bool legacyShortEarlySignal = false
+bool legacyShortConfirmedSignal = false
+int legacyShortConfirmationAge = na
+float legacyShortConfirmationParentPrice = na
+float legacyShortConfirmationParentHigh = na
+float legacyShortConfirmationParentLow = na
+if barstate.isconfirmed
+    if dataGap
+        lastShortAcceptedBar := na
+        previousEarlyShortRaw := false
+        shortParentBar := na
+        shortParentHigh := na
+        shortParentLow := na
+        shortParentPrice := na
+        shortParentConfirmed := false
+    bool shortCooldownPassed = na(lastShortAcceptedBar) or bar_index - lastShortAcceptedBar >= cooldownBars
+    legacyShortEarlySignal := earlyShortRaw and not previousEarlyShortRaw and shortCooldownPassed
+    previousEarlyShortRaw := earlyShortRaw
+    if legacyShortEarlySignal
+        lastShortAcceptedBar := bar_index
+        shortParentBar := bar_index
+        shortParentHigh := priorHigh
+        shortParentLow := priorLow
+        shortParentPrice := close
+        shortParentConfirmed := false
+    int shortAge = na(shortParentBar) ? na : bar_index - shortParentBar
+    if not na(shortAge) and shortAge > confirmMaxAge
+        shortParentBar := na
+        shortParentHigh := na
+        shortParentLow := na
+        shortParentPrice := na
+        shortParentConfirmed := false
+    if not na(shortParentBar) and not shortParentConfirmed and shortAge >= 0 and shortAge <= confirmMaxAge and close < shortParentLow and confirmShortQuality
+        legacyShortConfirmedSignal := true
+        legacyShortConfirmationAge := shortAge
+        legacyShortConfirmationParentPrice := shortParentPrice
+        legacyShortConfirmationParentHigh := shortParentHigh
+        legacyShortConfirmationParentLow := shortParentLow
+        shortParentConfirmed := true
+// END SHORT LEGACY ENGINE
+
+// BEGIN V6 STRUCTURAL GATE
+// A complete body above the six-MA rope is support evidence, not a same-bar
+// gate. It may precede or follow a closed, valid V4 confirmation. A lower wick
+// does not break support; only a close at/below the rope does.
+var int bodySupportBar = na
+var int legacyBar = na
+var float legacyParentHigh = na
+var float legacyParentLow = na
+var bool structurePending = false
+var bool launchEvidence = false
+var int launchEvidenceBar = na
+bool confirmedSignal = false
+bool consumedLaunchEvidence = false
+int consumedLaunchEvidenceBar = na
+int confirmationAge = na
+string pendingWhy = "idle"
+
+if barstate.isconfirmed
+    bool finiteAtr = not na(atr) and atr > 0
+    bool knownStructure = ready and pricesValid and finiteAtr and not na(md) and not na(sb) and not na(ropeHigh) and not na(middle)
+    if dataGap or not knownStructure
+        bodySupportBar := na
+        legacyBar := na
+        legacyParentHigh := na
+        legacyParentLow := na
+        structurePending := false
+        launchEvidence := false
+        launchEvidenceBar := na
+        pendingWhy := dataGap ? "gap" : "unknown"
+    else
+        bool fullBodyAbove = math.min(open, close) > ropeHigh
+        if close <= ropeHigh
+            bodySupportBar := na
+        else if fullBodyAbove
+            bodySupportBar := bar_index
+        // A later V4 confirmation replaces older pending provenance. It must
+        // carry a finite, ordered parent range from this closed bar; unknown
+        // provenance is never imported into the structural state.
+        if legacyConfirmedSignal and not na(legacyConfirmationParentHigh) and not na(legacyConfirmationParentLow) and legacyConfirmationParentLow <= legacyConfirmationParentHigh
+            legacyBar := bar_index
+            legacyParentHigh := legacyConfirmationParentHigh
+            legacyParentLow := legacyConfirmationParentLow
+            structurePending := true
+            launchEvidence := longLegacySeedEvidence
+            launchEvidenceBar := longLegacySeedEvidence ? longLaunchWindowShapeBar : na
+        else if structurePending and longEvidenceNow
+            launchEvidence := true
+            launchEvidenceBar := bar_index
+        if structurePending and (na(legacyParentHigh) or na(legacyParentLow) or close < legacyParentLow)
+            // Strictly below the frozen parent range is a structural failure,
+            // deliberately not an arbitrary timer. A parent-range retest may
+            // wait for later body support and MD recovery.
+            legacyBar := na
+            legacyParentHigh := na
+            legacyParentLow := na
+            structurePending := false
+            launchEvidence := false
+            launchEvidenceBar := na
+            pendingWhy := "parent_broken"
+        else if structurePending and launchEvidence and not na(bodySupportBar) and not na(legacyParentHigh) and not na(legacyParentLow) and not na(md[1]) and close > ropeHigh and close > legacyParentHigh and md > sb and md > md[1]
+            confirmedSignal := true
+            consumedLaunchEvidence := launchEvidence
+            consumedLaunchEvidenceBar := launchEvidenceBar
+            confirmationAge := bar_index - legacyBar
+            // Consume this provenance. A new V4 event may arm another final
+            // signal inside the same continuous body-above-rope run.
+            structurePending := false
+            launchEvidence := false
+            launchEvidenceBar := na
+            pendingWhy := "confirmed"
+        else
+            pendingWhy := not structurePending ? "await_legacy" : not launchEvidence ? "await_launch_evidence" : na(bodySupportBar) ? "await_body" : na(md[1]) ? "await_md_turn" : "await_momentum"
+// END V6 STRUCTURAL GATE
+
+// BEGIN V6 SHORT STRUCTURAL GATE
+// A complete body below the rope is bearish evidence. Its upper wick may cross
+// the rope; only a close at/above it clears the stored evidence.
+var int shortBodySupportBar = na
+var int shortLegacyBar = na
+var float shortLegacyParentHigh = na
+var float shortLegacyParentLow = na
+var bool shortStructurePending = false
+var bool shortLaunchEvidence = false
+var int shortLaunchEvidenceBar = na
+bool confirmedShortSignal = false
+bool consumedShortLaunchEvidence = false
+int consumedShortLaunchEvidenceBar = na
+int shortConfirmationAge = na
+string shortPendingWhy = "idle"
+
+if barstate.isconfirmed
+    bool finiteShortAtr = not na(atr) and atr > 0
+    bool knownShortStructure = ready and pricesValid and finiteShortAtr and not na(md) and not na(sb) and not na(ropeLow) and not na(middle)
+    if dataGap or not knownShortStructure
+        shortBodySupportBar := na
+        shortLegacyBar := na
+        shortLegacyParentHigh := na
+        shortLegacyParentLow := na
+        shortStructurePending := false
+        shortLaunchEvidence := false
+        shortLaunchEvidenceBar := na
+        shortPendingWhy := dataGap ? "gap" : "unknown"
+    else
+        bool fullBodyBelow = math.max(open, close) < ropeLow
+        if close >= ropeLow
+            shortBodySupportBar := na
+        else if fullBodyBelow
+            shortBodySupportBar := bar_index
+        if legacyShortConfirmedSignal and not na(legacyShortConfirmationParentHigh) and not na(legacyShortConfirmationParentLow) and legacyShortConfirmationParentLow <= legacyShortConfirmationParentHigh
+            shortLegacyBar := bar_index
+            shortLegacyParentHigh := legacyShortConfirmationParentHigh
+            shortLegacyParentLow := legacyShortConfirmationParentLow
+            shortStructurePending := true
+            shortLaunchEvidence := shortLegacySeedEvidence
+            shortLaunchEvidenceBar := shortLegacySeedEvidence ? shortLaunchWindowShapeBar : na
+        else if shortStructurePending and shortEvidenceNow
+            shortLaunchEvidence := true
+            shortLaunchEvidenceBar := bar_index
+        if shortStructurePending and close > shortLegacyParentHigh
+            shortLegacyBar := na
+            shortLegacyParentHigh := na
+            shortLegacyParentLow := na
+            shortStructurePending := false
+            shortLaunchEvidence := false
+            shortLaunchEvidenceBar := na
+            shortPendingWhy := "parent_broken"
+        else if shortStructurePending and shortLaunchEvidence and not na(shortBodySupportBar) and not na(shortLegacyParentHigh) and not na(shortLegacyParentLow) and not na(md[1]) and close < ropeLow and close < shortLegacyParentLow and md < sb and md < md[1]
+            confirmedShortSignal := true
+            consumedShortLaunchEvidence := shortLaunchEvidence
+            consumedShortLaunchEvidenceBar := shortLaunchEvidenceBar
+            shortConfirmationAge := bar_index - shortLegacyBar
+            shortStructurePending := false
+            shortLaunchEvidence := false
+            shortLaunchEvidenceBar := na
+            shortPendingWhy := "confirmed"
+        else
+            shortPendingWhy := not shortStructurePending ? "await_legacy" : not shortLaunchEvidence ? "await_launch_evidence" : na(shortBodySupportBar) ? "await_body" : na(md[1]) ? "await_md_turn" : "await_momentum"
+// END V6 SHORT STRUCTURAL GATE
+
+int signalSide = confirmedSignal ? 1 : confirmedShortSignal ? -1 : 0
+
+// BEGIN REFERENCE STATE: first confirmation while flat owns this display only.
+var int trendSide = 0
+var int entryBar = na
+var float entry = na
+var float initialStop = na
+var float risk = na
+var float protection = na
+var float peakR = 0.0
+var float currentR = na
+var bool trailArmed = false
+var array<label> exitTags = array.new<label>()
+bool referenceStarted = false
+bool exitReference = false
+bool referenceGap = false
+float visibleProtection = trendSide != 0 ? protection : na
+float visibleInitial = trendSide != 0 ? initialStop : na
+float visibleEntry = trendSide != 0 ? entry : na
+if barstate.isconfirmed
+    if dataGap and trendSide != 0
+        // The unobserved interval cannot be certified as a fill or profit.
+        referenceGap := true
+        trendSide := 0
+        currentR := na
+        visibleProtection := na
+        visibleInitial := na
+        visibleEntry := na
+    bool endedThisBar = false
+    if ready and trendSide != 0 and bar_index > entryBar
+        int activeSide = trendSide
+        [alive, newProtection, newPeak, newCurrent, exitPrice, armed] = f_path(trendSide, entry, risk, protection, peakR, trailArmed, open, high, low, close, atr, armR, trailAtr, syminfo.mintick)
+        protection := newProtection
+        peakR := newPeak
+        currentR := newCurrent
+        trailArmed := armed
+        if not alive
+            exitReference := true
+            endedThisBar := true
+            trendSide := 0
+            if showExitLabels
+                string exitSideText = activeSide == 1 ? "多头" : "空头"
+                if array.size(exitTags) >= 40
+                    label.delete(array.shift(exitTags))
+                array.push(exitTags, label.new(bar_index, exitPrice, exitSideText + "保护触及 · 参考结束\n" + str.tostring(exitPrice, format.mintick), style=activeSide == 1 ? label.style_label_down : label.style_label_up, color=color.new(chart.bg_color, 8), textcolor=ink, size=size.small, force_overlay=true))
+    if signalSide != 0 and trendSide == 0 and not endedThisBar
+        [newStop, newRisk, validRisk] = f_risk(signalSide, close, signalSide == 1 ? recentLow : recentHigh, atr, riskFloor, stopBuffer, syminfo.mintick)
+        if validRisk
+            referenceStarted := true
+            trendSide := signalSide
+            entryBar := bar_index
+            entry := close
+            initialStop := newStop
+            risk := newRisk
+            protection := newStop
+            peakR := 0.0
+            currentR := 0.0
+            trailArmed := false
+// END REFERENCE STATE
+
+// BEGIN CONFIRMED DISPLAY
+// Every confirmation keeps its actual current bar and price. The risk display
+// starts only when flat; another confirmation never resets an active reference.
+// A continuous triangle survives label garbage collection on long histories.
+plotshape(confirmedSignal, title="确认多头", style=shape.triangleup, location=location.belowbar, color=bull, size=size.tiny, force_overlay=true, display=display.pane)
+plotshape(confirmedShortSignal, title="确认空头", style=shape.triangledown, location=location.abovebar, color=bear, size=size.tiny, force_overlay=true, display=display.pane)
+var array<label> signalTags = array.new<label>()
+if barstate.isconfirmed and signalSide != 0 and showLabels
+    string trackingTip = referenceStarted ? "本根开启盈亏参考。" : trendSide != 0 ? "已有盈亏参考继续跟踪，本根确认不会重置原框。" : "本根未开启盈亏参考。"
+    string signalSideText = signalSide == 1 ? "多头" : "空头"
+    string tip = signalSideText + "确认收盘：" + str.tostring(close, format.mintick) + "\n" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n" + trackingTip
+    if array.size(signalTags) >= 80
+        label.delete(array.shift(signalTags))
+    array.push(signalTags, label.new(bar_index, signalSide == 1 ? low - atr * 0.35 : high + atr * 0.35, str.tostring(close, format.mintick), style=signalSide == 1 ? label.style_label_up : label.style_label_down, color=color.new(signalSide == 1 ? bull : bear, 91), textcolor=signalSide == 1 ? bull : bear, size=size.small, tooltip=tip, force_overlay=true))
+// END CONFIRMED DISPLAY
+
+// BEGIN V2 RISK BOX DISPLAY (one complete drawing group per reference)
+string rrGroup = "05 · 趋势盈亏框"
+bool rrShow = input.bool(true, "显示盈亏双框", group=rrGroup, tooltip="红框为冻结初始风险；绿框先显示3R观察位，随后随已确认峰值扩展。没有固定止盈。价格均为信号收盘参考，并非实际成交。", display=display.none)
+int rrKeep = input.int(60, "保留盈亏框组数", minval=1, maxval=60, group=rrGroup, tooltip="保留最近 60 组以内的完整历史框、价格标签和 R 虚线。仅清理超出组数的最旧参考；信号箭头本身不受此限制。", display=display.none)
+int rrAhead = input.int(12, "当前框向右展示根数", minval=2, maxval=60, group=rrGroup, tooltip="仅影响当前框的视觉宽度，不改变任何信号或持有规则；保护触及后固定在该根收盘。", display=display.none)
+
+f_rrPriceTag(int stamp, float price, string caption, color tone, string tip) =>
+    label.new(stamp, price, caption, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(chart.bg_color, 12), textcolor=tone, size=size.small, tooltip=tip, force_overlay=true)
+
+// Bounded ownership prevents independent garbage collection from leaving
+// orphan labels/lines or deleting old boxes while keeping their captions.
+// 60 groups: <=120 boxes, <=180 lines, <=360 labels. Signal/exit caps add120.
+type RRDrawing
+    box riskBox
+    box rewardBox
+    label entryTag
+    label stopTag
+    label peakTag
+    array<line> milestoneLines
+    array<label> milestoneTags
+    int side
+    int startedAt
+    float entryPrice
+    float stopPrice
+    float distance
+    float maximum
+
+method deleteDrawings(RRDrawing group) =>
+    box.delete(group.riskBox)
+    box.delete(group.rewardBox)
+    label.delete(group.entryTag)
+    label.delete(group.stopTag)
+    label.delete(group.peakTag)
+    for slot = 0 to 2
+        line.delete(array.get(group.milestoneLines, slot))
+        label.delete(array.get(group.milestoneTags, slot))
+
+var array<RRDrawing> rrHistory = array.new<RRDrawing>()
+var RRDrawing activeRR = na
+if barstate.isconfirmed
+    int rrBarMillis = na(time_close) ? int(timeframe.in_seconds() * 1000) : time_close - time
+    int rrCloseTime = na(time_close) ? time + rrBarMillis : time_close
+    int rrRightTime = rrCloseTime + rrAhead * rrBarMillis
+    // End old ownership BEFORE handling a possible same-bar post-gap start.
+    // Missing bars cannot certify milestones, exits, or extension across a gap.
+    if referenceGap and not na(activeRR)
+        if not na(activeRR.riskBox)
+            box.set_right(activeRR.riskBox, time_close[1])
+            if not na(activeRR.rewardBox)
+                box.set_right(activeRR.rewardBox, time_close[1])
+            label.set_x(activeRR.entryTag, time_close[1])
+            label.set_x(activeRR.stopTag, time_close[1])
+            if not na(activeRR.peakTag)
+                label.set_x(activeRR.peakTag, time_close[1])
+        activeRR := na
+    if referenceStarted
+        int rrNewSide = trendSide
+        float rrNewDistance = rrNewSide * (entry - initialStop)
+        bool rrValid = not na(entry) and not na(initialStop) and entry > 0 and initialStop > 0 and rrNewDistance > 0
+        if rrValid
+            // Delete before allocation, so the engine never exceeds its budget.
+            while array.size(rrHistory) >= rrKeep
+                RRDrawing oldest = array.shift(rrHistory)
+                oldest.deleteDrawings()
+            activeRR := RRDrawing.new(na, na, na, na, na, array.new<line>(3, na), array.new<label>(3, na), rrNewSide, time, entry, initialStop, rrNewDistance, 0.0)
+            array.push(rrHistory, activeRR)
+            if showRisk and rrShow
+                float observation = entry + rrNewSide * 3.0 * rrNewDistance
+                string sideText = rrNewSide == 1 ? "多头" : "空头"
+                string tip = sideText + "确认收盘参考，不是实际成交。初始风险冻结；3R仅为观察位，不触发止盈。绿色框为走势参考，峰值未兑现。"
+                activeRR.riskBox := box.new(time, math.max(entry, initialStop), rrRightTime, math.min(entry, initialStop), xloc=xloc.bar_time, border_color=color.new(bear, 45), border_width=1, bgcolor=color.new(bear, 92), force_overlay=true)
+                activeRR.rewardBox := observation > 0 ? box.new(time, math.max(entry, observation), rrRightTime, math.min(entry, observation), xloc=xloc.bar_time, border_color=color.new(bull, 45), border_width=1, bgcolor=color.new(bull, 92), force_overlay=true) : na
+                activeRR.entryTag := f_rrPriceTag(rrRightTime, entry, str.tostring(entry, format.mintick), ink, tip)
+                activeRR.stopTag := f_rrPriceTag(rrRightTime, initialStop, "sl · " + str.tostring(initialStop, format.mintick), bear, tip)
+                activeRR.peakTag := observation > 0 ? f_rrPriceTag(rrRightTime, observation, "3R 观察位 · " + str.tostring(observation, format.mintick), bull, tip) : na
+
+    if not na(activeRR)
+        bool ended = exitReference
+        int edge = ended ? rrCloseTime : rrRightTime
+        activeRR.maximum := math.max(activeRR.maximum, nz(peakR, 0.0))
+        float extentR = math.max(3.0, activeRR.maximum)
+        float extent = activeRR.entryPrice + activeRR.side * extentR * activeRR.distance
+        string reference = "确认收盘参考，不是实际成交。已确认峰值 " + str.tostring(activeRR.maximum, "#.##") + "R；当前路径 " + str.tostring(currentR, "#.##") + "R。峰值未兑现；无固定止盈。"
+        if not na(activeRR.riskBox)
+            box.set_right(activeRR.riskBox, edge)
+            label.set_x(activeRR.entryTag, edge)
+            label.set_x(activeRR.stopTag, edge)
+            label.set_text(activeRR.entryTag, str.tostring(activeRR.entryPrice, format.mintick))
+            label.set_tooltip(activeRR.entryTag, reference)
+            label.set_tooltip(activeRR.stopTag, reference + " 冻结初始风险；当前保护 " + str.tostring(protection, format.mintick))
+        if not na(activeRR.rewardBox) and extent > 0
+            box.set_right(activeRR.rewardBox, edge)
+            box.set_top(activeRR.rewardBox, math.max(activeRR.entryPrice, extent))
+            box.set_bottom(activeRR.rewardBox, math.min(activeRR.entryPrice, extent))
+            label.set_xy(activeRR.peakTag, edge, extent)
+            label.set_text(activeRR.peakTag, (activeRR.maximum >= 3.0 ? "峰值 " + str.tostring(activeRR.maximum, "#.##") + "R · " : "3R 观察位 · ") + str.tostring(extent, format.mintick))
+            label.set_tooltip(activeRR.peakTag, reference)
+        // Each reached level is independent: a single jump through 3/5/10R
+        // must create all three milestones, not only the highest one.
+        for slot = 0 to 2
+            float level = slot == 0 ? 3.0 : slot == 1 ? 5.0 : 10.0
+            float levelPrice = activeRR.entryPrice + activeRR.side * level * activeRR.distance
+            if showMilestones and activeRR.maximum >= level and levelPrice > 0 and na(array.get(activeRR.milestoneLines, slot))
+                string hitTip = "收盘确认已触及 " + str.tostring(level, "#") + "R · " + str.format_time(time_close, "MM-dd HH:mm", "Asia/Shanghai") + " 北京时间。虚线为冻结入场风险计算的价位，不是止盈指令。"
+                line guide = line.new(activeRR.startedAt, levelPrice, rrCloseTime, levelPrice, xloc=xloc.bar_time, color=color.new(bull, 35), style=line.style_dashed, width=1, force_overlay=true)
+                label tag = label.new(time, levelPrice, str.tostring(level, "#") + "R 已达", xloc=xloc.bar_time, style=label.style_label_left, color=color.new(bull, 88), textcolor=bull, size=size.tiny, tooltip=hitTip, force_overlay=true)
+                array.set(activeRR.milestoneLines, slot, guide)
+                array.set(activeRR.milestoneTags, slot, tag)
+            line guide = array.get(activeRR.milestoneLines, slot)
+            if not na(guide)
+                line.set_x2(guide, rrCloseTime)
+        if ended
+            activeRR := na
+// END V2 RISK BOX DISPLAY
+
+// Only confirmed oscillator points are shown; the live tip holds prior values.
+float shownMd = barstate.isconfirmed ? md : md[1]
+float shownSb = barstate.isconfirmed ? sb : sb[1]
+hline(0, "零轴", color=color.new(ink, 38), linestyle=hline.style_solid, linewidth=1)
+plot(shownMd, "IMACD 主线", blue, 2, display=display.pane + display.data_window)
+plot(shownSb, "IMACD 信号线", #CB882A, 2, display=display.pane + display.data_window)
+plot(confirmedSignal ? md : na, "多头确认点", bull, 4, plot.style_circles, display=display.pane + display.data_window)
+plot(confirmedShortSignal ? md : na, "空头确认点", bear, 4, plot.style_circles, display=display.pane + display.data_window)
+plot(showMas ? s20 : na, "SMA20", color.new(bull, 38), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? e20 : na, "EMA20", color.new(bull, 58), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? s60 : na, "SMA60", color.new(blue, 40), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? e60 : na, "EMA60", color.new(blue, 60), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? s120 : na, "SMA120", color.new(ink, 48), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? e120 : na, "EMA120", color.new(ink, 66), 1, force_overlay=true, display=display.pane + display.data_window)
+bool protectionOverlapsInitial = not na(visibleProtection) and not na(visibleInitial) and visibleProtection == visibleInitial
+color protectionColor = rrShow and protectionOverlapsInitial ? na : trailArmed ? bull : bear
+color initialColor = rrShow ? na : color.new(bear, 55)
+pProtect = plot(showRisk ? visibleProtection : na, "本根有效保护", protectionColor, 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
+pInitial = plot(showRisk ? visibleInitial : na, "冻结初始止损", initialColor, 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
+pEntry = plot(showRisk ? visibleEntry : na, "确认收盘参考", color.new(ink, 60), 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
+fill(pInitial, pEntry, color.new(bear, 94), title="初始风险区")
+barcolor(signalSide != 0 ? signalColor : na, title="确认关键K线")
+// Original OHLC, overlaid only on actual confirmed signal bars. Explicit
+// wick/border colors avoid relying on the user's native candle styling.
+plotcandle(signalSide != 0 ? open : na, high, low, close, title="确认K线实体与影线", color=signalColor, wickcolor=signalColor, bordercolor=signalColor, editable=false, force_overlay=true, display=display.pane)
+
+// Historical Data Window belongs to the selected bar. Pending reason: 0 idle,
+// 1 awaiting V4 provenance, 2 awaiting a full body, 3 awaiting MD turn,
+// 4 awaiting MD over signal, 5 confirmed, 6 parent broken, 7 gap, 8 unknown,
+// 9 awaiting V1 directional-candle evidence within the V6 pending window.
+float pendingWhyCode = pendingWhy == "await_legacy" ? 1 : pendingWhy == "await_body" ? 2 : pendingWhy == "await_md_turn" ? 3 : pendingWhy == "await_momentum" ? 4 : pendingWhy == "confirmed" ? 5 : pendingWhy == "parent_broken" ? 6 : pendingWhy == "gap" ? 7 : pendingWhy == "unknown" ? 8 : pendingWhy == "await_launch_evidence" ? 9 : 0
+plot(barstate.isconfirmed ? bodySupportBar : na, "V6 实体支持K线", display=display.data_window)
+plot(barstate.isconfirmed ? legacyBar : na, "V6 V4确认K线", display=display.data_window)
+plot(barstate.isconfirmed ? (legacyConfirmedSignal ? 1 : 0) : na, "V6 本根V4旧确认诊断", display=display.data_window)
+plot(barstate.isconfirmed ? legacyParentHigh : na, "V6 冻结V4父高", display=display.data_window)
+plot(barstate.isconfirmed ? legacyParentLow : na, "V6 冻结V4父低", display=display.data_window)
+plot(barstate.isconfirmed ? ((confirmedSignal ? consumedLaunchEvidence : launchEvidence) ? 1 : 0) : na, "V6 量价证据已锁定", display=display.data_window)
+plot(barstate.isconfirmed ? (confirmedSignal ? consumedLaunchEvidenceBar : launchEvidenceBar) : na, "V6 量价证据K线", display=display.data_window)
+plot(barstate.isconfirmed ? (confirmedSignal ? 1 : 0) : na, "V6 最终确认", display=display.data_window)
+plot(barstate.isconfirmed ? pendingWhyCode : na, "V6 等待原因代码", display=display.data_window)
+plot(confirmedSignal ? confirmationAge : na, "V6 确认等待根数", display=display.data_window)
+float shortPendingWhyCode = shortPendingWhy == "await_legacy" ? 1 : shortPendingWhy == "await_body" ? 2 : shortPendingWhy == "await_md_turn" ? 3 : shortPendingWhy == "await_momentum" ? 4 : shortPendingWhy == "confirmed" ? 5 : shortPendingWhy == "parent_broken" ? 6 : shortPendingWhy == "gap" ? 7 : shortPendingWhy == "unknown" ? 8 : shortPendingWhy == "await_launch_evidence" ? 9 : 0
+plot(barstate.isconfirmed ? shortBodySupportBar : na, "V6 空头实体支持K线", display=display.data_window)
+plot(barstate.isconfirmed ? shortLegacyBar : na, "V6 空头旧确认K线", display=display.data_window)
+plot(barstate.isconfirmed ? (legacyShortConfirmedSignal ? 1 : 0) : na, "V6 本根空头旧确认诊断", display=display.data_window)
+plot(barstate.isconfirmed ? shortLegacyParentHigh : na, "V6 空头冻结父高", display=display.data_window)
+plot(barstate.isconfirmed ? shortLegacyParentLow : na, "V6 空头冻结父低", display=display.data_window)
+plot(barstate.isconfirmed ? ((confirmedShortSignal ? consumedShortLaunchEvidence : shortLaunchEvidence) ? 1 : 0) : na, "V6 空头量价证据已锁定", display=display.data_window)
+plot(barstate.isconfirmed ? (confirmedShortSignal ? consumedShortLaunchEvidenceBar : shortLaunchEvidenceBar) : na, "V6 空头量价证据K线", display=display.data_window)
+plot(barstate.isconfirmed ? (confirmedShortSignal ? 1 : 0) : na, "V6 空头最终确认", display=display.data_window)
+plot(barstate.isconfirmed ? shortPendingWhyCode : na, "V6 空头等待原因代码", display=display.data_window)
+plot(confirmedShortSignal ? shortConfirmationAge : na, "V6 空头确认等待根数", display=display.data_window)
+plot(barstate.isconfirmed ? (ready ? 1 : 0) : na, "连续数据已就绪", display=display.data_window)
+plot(barstate.isconfirmed ? rv : na, "收盘量比 RV", display=display.data_window)
+plot(barstate.isconfirmed ? expansion : na, "收盘 TR / 前根ATR", display=display.data_window)
+plot(barstate.isconfirmed ? denseHits : na, "前12根密集命中", display=display.data_window)
+plot(barstate.isconfirmed ? advance3 : na, "三根净进展 ATR", display=display.data_window)
+plot(barstate.isconfirmed ? volumeRatio3 : na, "三根量比", display=display.data_window)
+plot(barstate.isconfirmed ? efficiency3 : na, "方向效率 · 仅质量标签", display=display.data_window)
+plot(barstate.isconfirmed ? closePosition : na, "收盘位置 · 仅质量标签", display=display.data_window)
+plot(barstate.isconfirmed ? (aboveSix ? 1 : 0) : na, "当前收盘六线之上", display=display.data_window)
+
+// Only optional diagnostics; no observation/confirmation display taxonomy.
+plot(barstate.isconfirmed and signalSide != 0 ? close : na, "确认实际收盘价", display=display.data_window)
+plot(barstate.isconfirmed ? (referenceStarted ? 1 : 0) : na, "确认参考起点", display=display.data_window)
+
+plot(array.size(rrHistory), "已保留盈亏参考组数", display=display.data_window)
+
+var table panel = table.new(position.top_right, 2, 2, bgcolor=color.new(chart.bg_color, 8), border_width=0)
+if barstate.islast and showPanel
+    string stateText = trendSide == 1 ? "多头跟踪" : trendSide == -1 ? "空头跟踪" : "当前无跟踪参考"
+    table.cell(panel, 0, 0, "SPIKE V6", text_color=ink, text_size=size.small)
+    table.cell(panel, 1, 0, stateText, text_color=trendSide == 1 ? bull : trendSide == -1 ? bear : muted, text_size=size.small)
+    table.cell(panel, 0, 1, "参考 / 峰值", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 1, na(currentR) ? "—" : str.tostring(currentR, "#.##") + "R / " + str.tostring(peakR, "#.##") + "R", text_color=ink, text_size=size.tiny)
+
+// These are local study conditions. Creating a TV alert is a separate action.
+alertcondition(signalSide != 0, "SPIKE V6 结构确认", "SPIKE V6 结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}")
+alertcondition(confirmedSignal, "SPIKE V6 多头结构确认", "SPIKE V6 多头结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}")
+alertcondition(confirmedShortSignal, "SPIKE V6 空头结构确认", "SPIKE V6 空头结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}")
+alertcondition(exitReference, "SPIKE 参考保护触及", "SPIKE 参考保护已触及 | {{exchange}}:{{ticker}} | {{interval}} | 已收盘确认，请查看参考价")
