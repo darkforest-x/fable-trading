@@ -379,7 +379,7 @@ def report_text(evidence, examples, failure, report):
     lines = ["# SPIKE V2：渐进启动补漏与全池召回验证", "", "## 结论与80%目标", "",
         "V2 在**最多延后1根收盘确认**的主口径下，召回 %s；V1为 %s。**%s80%%目标。**这个分母来自全池独立价格事件，不是三张成功截图，也不是全部上涨币种。" %
         (ratio(target.hits_1, target.positive_events), ratio(full.loc["v1"].hits_1, full.loc["v1"].positive_events), "达到本次价格代理定义下的" if met else "尚未达到"),
-        "", "当晚北京时间8/19 18:00—8/20 06:00，同口径从V1的%s提高到V2的%s，仍不代表及时覆盖了所有启动。全期箭头从%d增至%d；提醒变多必须同时检查精确率和误报，不能只看补到几个案例。" %
+        "", "当晚按北京时间确认时刻区间 **[8/19 18:00, 8/20 06:00)**（右端不含）统计，同口径从V1的%s提高到V2的%s，仍不代表及时覆盖了所有启动。全期箭头从%d增至%d；提醒变多必须同时检查精确率和误报，不能只看补到几个案例。" %
         (ratio(night.loc["v1"].hits_1,night.loc["v1"].positive_events),ratio(night.loc["v2"].hits_1,night.loc["v2"].positive_events),full.loc["v1"].signals,target.signals),
         "", "V2的全期事件匹配实际相对随机平均超额为%s bp，两项主检验Holm p=%s。**新增路径尚未证明改善盈利。**这是单笔事件对照，不能换算成账户收益。" %
         (num(v2_trade.mean_excess_bp),num(v2_trade.holm_p,6)),
@@ -424,7 +424,7 @@ def report_text(evidence, examples, failure, report):
     for r in recall.itertuples():
         rows.append([r.period,ARM[r.arm],int(r.positive_events),ratio(r.hits_0,r.positive_events),ratio(r.hits_1,r.positive_events),ratio(r.hits_2,r.positive_events),ratio(r.hits_6,r.positive_events),int(r.signals),pct(r.precision_all),num(r.false_alerts_per_100_asset_days)])
     lines += [table(["期间","版本","正事件 n","当根","+1","+2","+6","箭头","精确率","每100合约日无匹配"],rows),"",
-        "first31为7/10—8/10，last30为8/10—9/9；week按UTC周切片并裁到评价窗，case_night为北京时间8/19 18:00—8/20 06:00。所有期间都是已见回顾，同一夜不同币并非独立重复。", "", "## 新增、被替代与更早", ""]
+        "first31为7/10—8/10，last30为8/10—9/9；week按UTC周切片并裁到评价窗。case_night按北京时间确认时刻 **[8/19 18:00, 8/20 06:00)**，右端不含，故NEAR/PEPE恰好06:00确认不计入当晚80条信号。所有期间都是已见回顾，同一夜不同币并非独立重复。", "", "## 新增、被替代与更早", ""]
     counts=changes.change.value_counts()
     positives=timing.loc[timing.in_study.eq(True)&timing.label.eq("positive")]
     comparable=positives.loc[positives.first_signal_lag_v1.notna()&positives.first_signal_lag_v2.notna()]
@@ -546,6 +546,10 @@ def run(folder=EXP/"results", report=REPORT):
         no_signal_replay=True,no_trade_scoring=True,no_account_returns=True,
         chart_contract="Three fixed96-bar specified cases; sixMAs/volume/zero-axisIMACD; saved V1/V2 arrows and BJT open/confirm clocks; one lowest-net natural new-only V2 event if present",
         examples=examples,failure=failure,artifacts=[artifact(p) for p in [report,html]+images])
+    previous = EXP / "qa/report_revisions/initial/report_manifest.json"
+    if previous.is_file():
+        manifest["previous_render_manifest"] = artifact(previous)
+        manifest["display_revision"] = "Clarify exclusive confirmation-time night interval; no study result or figure changed."
     receipt.write_text(json.dumps(study.clean(manifest),ensure_ascii=False,indent=2,allow_nan=False)+"\n")
     return manifest
 
