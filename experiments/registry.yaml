@@ -7730,3 +7730,22 @@ experiments:
     - spike-burst-risk-display-20260910-verification
     notes: Seen historical visual check, no new return holdout consumption.3R observation is not take profit. Signal, exit,
       monitor and notification rules unchanged.
+
+  - experiment_id: exp-spike-burst-three-year-20260910-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: e05557d6e65a2b9965cf6dcc30c12c74ed8a11e7
+    status: active
+    question: Does frozen Burst V1 transfer across three historical years, and why is ETH1H sparse?
+    single_variable: Frozen entry and execution; longer chronological evaluation and documented Binance universe.
+      No fitting.
+    result: Preregistered; native-amount archive adapter and fixed-engine wrapper prepared. No three-year returns
+      evaluated yet.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    canonical_report: null
+    artifacts: []
+    notes: Owner explicitly requests three years and authorizes all dates. Frozen configuration return exposure2;
+      previously seen retrospective data. BTC and ETH diagnostics separate from primary altcoins. Live defaults/notifications
+      unchanged.
