@@ -152,3 +152,24 @@ def test_fractional_checkpoint_timestamp_is_not_restored(tmp_path, monkeypatch):
     monkeypatch.setattr(v1_worker, "OKX", lambda: client)
     scanner = v1_worker.V1Scanner(str(database))
     assert ("TEST-USDT-SWAP", "1H") not in scanner.candles
+
+
+def test_scanner_publishes_generation_before_synchronize(tmp_path, monkeypatch):
+    database = tmp_path / "monitor.sqlite3"
+    observed = {}
+
+    class StartupClient(Client):
+        def synchronize(self):
+            observed.update(Store(database).get_meta("scan"))
+            return 0
+
+    client = StartupClient()
+    monkeypatch.setattr(v1_worker, "OKX", lambda: client)
+    scanner = v1_worker.V1Scanner(str(database), generation="worker-generation-1")
+    scanner.scan_once()
+
+    assert observed["status"] == "starting"
+    assert observed["generation"] == "worker-generation-1"
+    assert observed["worker_pid"] > 0
+    assert observed["worker_started_at_ms"] > 0
+    assert observed["total"] == observed["completed"] == 0

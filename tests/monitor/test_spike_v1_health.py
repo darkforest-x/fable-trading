@@ -35,3 +35,25 @@ def test_v1_health_reads_only_scan_and_model_state(tmp_path, monkeypatch, status
     assert result["market_ready"] is (status not in ("error", "starting") and 3 > errors and age_ms < 20 * 60_000)
     assert result["model_ready"] is (model_status == "ready")
     assert calls == ["scan", "v1:model_gate"]
+
+
+def test_health_hides_previous_worker_scan_generation(tmp_path, monkeypatch):
+    from yoyo.monitor.server import create_app
+
+    app = create_app(runtime=tmp_path, start_monitor=False)
+    monitor = app.state.monitor
+    monitor.scan_generation = "current-worker"
+    previous = {"status": "idle", "generation": "previous-worker", "completed": 1434,
+                "total": 1434, "errors": 0, "finished_at_ms": NOW}
+    monkeypatch.setattr(monitor.client, "clock", lambda: NOW)
+    monkeypatch.setattr(monitor.store, "get_meta", lambda key, default=None:
+                        previous if key == "scan" else {"status": "ready"})
+    endpoint = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/healthz")
+
+    result = endpoint()
+
+    assert result["scan"]["status"] == "starting"
+    assert result["scan"]["stale_previous_run"] is True
+    assert result["scan"]["generation"] == "current-worker"
+    assert result["market_ready"] is False
+    assert result["ok"] is False

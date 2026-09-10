@@ -18,6 +18,7 @@ from pathlib import Path
 import subprocess
 import threading
 import time
+import uuid
 
 from yoyo.monitor import (FRESH_MS, TIMEFRAMES, VERSION, SIGNAL_PROTOCOL, SIGNAL_KIND,
                           TV_PROFILE_ID, HIGHER_TIMEFRAME, MONITORED_TIMEFRAMES, MODEL_KIND, MODEL_PROTOCOL, MODEL_MAX_WAIT,
@@ -62,6 +63,7 @@ class Monitor:
         self.model_gate = ModelGate(store, lambda: self.client.clock(), self.stop_event)
         self.threads = []
         self.scan_process = None
+        self.scan_generation = None
         self.model_process = None
         # HTTP must never wait behind SQLite's WAL writer.  The initial value
         # deliberately describes an incomplete service until the background
@@ -97,7 +99,16 @@ class Monitor:
         from yoyo.monitor.v1_worker import scan_forever
         while not self.stop_event.is_set():
             if self.scan_process is None or not self.scan_process.is_alive():
-                self.scan_process = multiprocessing.Process(target=scan_forever, args=(str(self.store.path), self.interval), daemon=True)
+                generation = uuid.uuid4().hex
+                # Replace old durable scan progress before the child reaches
+                # synchronization, so HTTP never reports a prior worker as live.
+                self.scan_generation = generation
+                self.store.set_meta("scan", {"status": "starting", "generation": generation,
+                                             "worker_pid": None, "worker_started_at_ms": None,
+                                             "completed": 0, "total": 0, "errors": 0,
+                                             "error_samples": [], "isolated": True})
+                self.scan_process = multiprocessing.Process(target=scan_forever,
+                                                            args=(str(self.store.path), self.interval, generation), daemon=True)
                 self.scan_process.start()
             self.stop_event.wait(self.interval)
 
@@ -291,6 +302,14 @@ class Monitor:
                             "signal_mode": "SPIKE V1 长多 30m/1H/4H；原始收盘启动与 YOLO 补充确认分离"},
                 "snapshot_at_ms": None, "stale": True}
 
+    def _current_scan(self, scan):
+        """Fail closed when durable scan meta belongs to a prior worker."""
+        current = self.scan_generation
+        if current and scan.get("generation") != current:
+            return {"status": "starting", "generation": current, "completed": 0, "total": 0,
+                    "errors": 0, "stale_previous_run": True, "isolated": True}
+        return scan
+
     def _collect_status(self):
         counts = self.store.market_phase_counts(MONITORED_TIMEFRAMES)
         arm_receipt = self.store.get_meta("notification_policy:v1_bark_arm")
@@ -299,7 +318,7 @@ class Monitor:
             model_status = self.model_gate.status()
         return dict(service="spike Impulse Monitor", version=VERSION, protocol=PROTOCOL,
                     now_ms=self.client.clock(), started_at_ms=self.started,
-                    scan=self.store.get_meta("scan", {"status": "starting", "completed": 0, "total": 0, "errors": 0}),
+                    scan=self._current_scan(self.store.get_meta("scan", {"status": "starting", "completed": 0, "total": 0, "errors": 0})),
                     universe=self.store.get_meta("universe", {"count": 0, "scope": "OKX 全部在交易永续合约"}),
                     counts=dict(counts, signals_24h=self.store.count_since(self.client.clock() - 86400000, MODEL_KIND, PROTOCOL),
                                 indicator_starts_24h=self.store.direct_event_count(self.client.clock() - 86400000)),
@@ -357,7 +376,7 @@ class Monitor:
     def health(self):
         """Return liveness without decoding charts, events, or receipt history."""
         now = self.client.clock()
-        scan = self.store.get_meta("scan", {"status": "starting", "completed": 0, "total": 0, "errors": 0})
+        scan = self._current_scan(self.store.get_meta("scan", {"status": "starting", "completed": 0, "total": 0, "errors": 0}))
         model = self.store.get_meta("v1:model_gate")
         if model is None:
             model = self.model_gate.status()

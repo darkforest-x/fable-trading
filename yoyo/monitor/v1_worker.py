@@ -2,6 +2,7 @@
 from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 import math
+import os
 import time
 from pathlib import Path
 from yoyo.monitor import MONITORED_TIMEFRAMES, SIGNAL_PROTOCOL, TIMEFRAMES
@@ -38,8 +39,10 @@ def _valid_checkpoint(candles: object, timeframe: str) -> bool:
 
 class V1Scanner:
     """Keep the public client and complete recurrence history across passes."""
-    def __init__(self, database: str):
+    def __init__(self, database: str, generation: str | None = None):
         self.store = Store(Path(database))
+        self.generation = generation
+        self.worker_started_at_ms = now_ms()
         self.client = OKX()
         self.instruments = []
         self.universe_at = 0
@@ -59,15 +62,23 @@ class V1Scanner:
         forward cutover; historical or replay rows never acquire a receipt.
         """
         store, client = self.store, self.client
-        started = now_ms(); client.synchronize()
+        started = now_ms()
+        # Publish this process before synchronization or universe discovery.
+        # A parent reload can otherwise expose the previous worker's completed
+        # scan meta while this new worker is still preparing its first pass.
+        scan = {"status": "starting", "generation": self.generation,
+                "worker_pid": os.getpid(), "worker_started_at_ms": self.worker_started_at_ms,
+                "started_at_ms": started, "finished_at_ms": None, "completed": 0,
+                "total": 0, "errors": 0, "error_samples": [], "isolated": True}
+        store.set_meta("scan", scan)
+        client.synchronize()
         arm_v1_bark(store, client.clock())
         if not self.instruments or started - self.universe_at >= 3_600_000:
             self.instruments = client.instruments()
             self.universe_at = started
             store.set_meta("universe", {"count": len(self.instruments), "scope": "OKX all live SWAP", "updated_at_ms": started})
         instruments = self.instruments
-        scan = {"status":"scanning","started_at_ms":started,"finished_at_ms":None,"completed":0,
-                "total":len(instruments)*len(MONITORED_TIMEFRAMES),"errors":0,"error_samples":[],"isolated":True}
+        scan.update(status="scanning", total=len(instruments) * len(MONITORED_TIMEFRAMES))
         store.set_meta("scan", scan)
         cells = [(instrument, timeframe) for instrument in instruments for timeframe in MONITORED_TIMEFRAMES]
         with ThreadPoolExecutor(max_workers=8, thread_name_prefix="v1-okx") as pool:
@@ -161,9 +172,9 @@ def scan_once(database: str) -> None:
     V1Scanner(database).scan_once()
 
 
-def scan_forever(database: str, interval_seconds: int = 120) -> None:
+def scan_forever(database: str, interval_seconds: int = 120, generation: str | None = None) -> None:
     """Run persistent V1 passes without re-fetching/replaying unchanged cells."""
-    scanner = V1Scanner(database)
+    scanner = V1Scanner(database, generation=generation)
     while True:
         scanner.scan_once()
         time.sleep(interval_seconds)
