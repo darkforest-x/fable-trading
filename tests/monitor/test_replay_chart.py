@@ -76,7 +76,7 @@ def test_replay_chart_api_uses_stored_event_identity_not_client_provenance(tmp_p
     assert app.state.monitor.store.upsert_event(source)
     source["id"] = app.state.monitor.store.event_id(source)
     received = []
-    monkeypatch.setattr(server, "load_replay_chart", lambda row: received.append(row) or {"source": "replay", "candles": []})
+    monkeypatch.setattr(server, "replay_chart_result", lambda row: received.append(row) or {"source": "replay", "candles": []})
     endpoint = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/api/replay/chart")
     assert endpoint(source["id"]) == {"source": "replay", "candles": []}
     assert len(received) == 1

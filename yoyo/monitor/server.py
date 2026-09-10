@@ -18,7 +18,6 @@ from yoyo.monitor import FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, MONITORED_TIMEFRA
 from yoyo.monitor.service import Monitor
 from yoyo.monitor.store import Store
 from yoyo.monitor.tradingview import DesktopOpenError, open_chart
-from yoyo.monitor.replay_chart import ReplayChartUnavailable, load_replay_chart
 
 STATIC = Path(__file__).parent / "static"
 DEFAULT_RUNTIME = Path.home() / "Library/Application Support/Fable/ImpulseMonitor"
@@ -36,6 +35,25 @@ def dispatch_trace(marker: str, *, started_ns: int | None = None) -> None:
 class DesktopChartRequest(BaseModel):
     symbol: str = Field(min_length=1, max_length=48)
     timeframe: str = Field(min_length=1, max_length=5)
+
+
+class ReplayChartEndpointUnavailable(ValueError):
+    """Translate the optional frozen-history loader error at the API edge."""
+
+
+def replay_chart_result(event: dict) -> dict:
+    """Load frozen replay OHLC only for a selected historical chart request.
+
+    ``replay_chart`` depends on pandas/numpy and frozen evaluation features.
+    Keeping that optional display dependency out of the FastAPI import path lets
+    the listener become available before an operator opens a replay card.
+    """
+    from yoyo.monitor.replay_chart import ReplayChartUnavailable, load_replay_chart
+
+    try:
+        return load_replay_chart(event)
+    except ReplayChartUnavailable as error:
+        raise ReplayChartEndpointUnavailable(error.code) from error
 
 
 def create_app(runtime=None, start_monitor=True):
@@ -132,9 +150,9 @@ def create_app(runtime=None, start_monitor=True):
         if event is None:
             raise HTTPException(404, "未找到历史回放信号。")
         try:
-            return load_replay_chart(event)
-        except ReplayChartUnavailable as error:
-            raise HTTPException(404, "该历史信号缺少可核验的冻结 OHLC：" + error.code) from error
+            return replay_chart_result(event)
+        except ReplayChartEndpointUnavailable as error:
+            raise HTTPException(404, "该历史信号缺少可核验的冻结 OHLC：" + str(error)) from error
 
     @app.post("/api/tradingview/open")
     def tradingview_open(payload: DesktopChartRequest, request: Request):
