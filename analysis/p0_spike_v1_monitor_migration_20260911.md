@@ -169,3 +169,13 @@ node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.t
 在不可变 snapshot 独立复核后，signal-only importer 将全部 6,185 条 30m / 1H / 4H V1 回放记录接入 monitor（5,166 新行，1,019 幂等既有）；68 条 1D 行按当前 UI/通知协议跳过。修正此前 audit 错继承浏览上限的缺陷，以及中文 Binance/Gate 合约被 ASCII 路径校验误报为缺 OHLC 的问题后，cursor 全量重链和 receipt 都覆盖 6,185 行：6,116 条已实现、69 条 censored、0 条 `ohlc_missing`。Unicode 路径仍拒绝 NUL、`/`、`\`，并在 resolve 后精确限制在对应 venue 的冻结目录；页面不会借当前行情或其他 venue 画图。
 
 全量导入和联结不走 `upsert_event()` 的通知参数、candidate 或 Bark sender：Bark/TG outbox 仍是 pending/sent/failed/unknown 全 0，既有 disabled candidates 为 2。前端已有服务器 cursor 路径可从 2,000 条一页继续读取更早 raw 历史；当前运行实例尚未 reload `d03cc3a` / `3af2e8e`，因此这项分页 UI/API 发布验收应在不打断正在进行的增量 scan 后再做。
+
+## 完整增量轮、30 分钟通知截止与 checkpoint reload
+
+首轮完成后，同一运行实例的下一轮从 `started_at_ms=1789081029475` 至 `finished_at_ms=1789082805403`，完成 **1,434 / 1,434**、errors `0`，持续 `1775.93` 秒。它只验证当前机器在当时资源条件下的一整轮完成，不构成固定扫描 SLA。
+
+通知时效按当前固定 `FRESH_MS=30min` 的实际截止定义检查：对每个周期要求 `actual_close >= floor_to_timeframe(now - 30min)`，而不是错误地要求 1H/4H 都等于当前最新收盘。在 `now_ms=1789082257844` 的只读检查中，30m required close 为 `1789079400000`、1H 为 `1789077600000`、4H 为 `1789070400000`；三个周期各 478 个单元都达到各自截止，欠截止单元为 **0**。短历史与 feature warmup 继续单列，未被这一通知截止账掩盖。
+
+随后只执行一次受控 LaunchAgent reload 以载入 cursor 分页和 Unicode 冻结 OHLC 路径修复。reload 前 checkpoint 为 1,434 个非空 seed（每周期 478）；新父进程 `18080` 保留相同的三周期 checkpoint。新 worker 已写入 `started_at_ms=1789083154333` 的增量轮，并达到 `312 / 1,434`、errors `0`，因此它不是重启前的持久 completed meta。Bark 和 Telegram outbox 均为空，两个历史候选仍为 disabled。该检查证明此后 restart 能以完整 checkpoint 为种子启动；它不替代正在进行的新一轮完成检查。
+
+reload 后首次分页 API 请求在运行负载下两次未在 10 秒和 30 秒内给出首字节；独立只读检查确认同一 cursor SQL 在数据库为 0.164ms，不能把这两次超时归因于分页查询。当前服务 PID 的无 trace 运行无法事后定位调度边界；没有因此更改 SQL/async 或再次 reload。分页与中文合约的真实 UI 验收仍待一次低负载受控操作。
