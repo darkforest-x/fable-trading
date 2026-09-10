@@ -7660,3 +7660,16 @@ experiments:
       - imacd-altcoin-trends-20260909-external-history
       - imacd-altcoin-trends-20260909-extreme-case-audit
     notes: "Completed research, not proof that every future strategy is unprofitable. Formal May4 holdout remains; corrected1H/4H audit round2,15m round1,external round1. Original clock-v1 results retained and superseded. No parameter retuning from2026outcomes, no live mutation; current IMACD-to-YOLO notifications unchanged."
+
+  - experiment_id: exp-spike-burst-indicator-20260910-v1
+    source_repo: darkforest-x/fable-trading
+    status: active
+    question: Can a standalone closed-bar explosive launch indicator implement the owner requested morphology causally?
+    single_variable: Owner-authorized standalone morphology product; fixed combined conditions, engineering verification only.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    canonical_report: analysis/html/p0_spike_burst_indicator_20260910.html
+    artifacts: []
+    notes: New private Pine script, no production or notification changes; thresholds are not profit optimized.
