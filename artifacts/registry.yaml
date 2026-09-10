@@ -26293,3 +26293,64 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Known July10-September9 sample; frozen return evaluation1; no retuning or live changes; all16 primary Holm p=1.
+
+  - artifact_id: spike-burst-risk-display-20260910-source
+    artifact_type: config
+    role: display_only_risk_reward_restoration
+    source_repo: darkforest-x/fable-trading
+    source_commit: ebf3b762f5f17da035ac6f875c80afb6ce411955
+    generator_commit: ebf3b762f5f17da035ac6f875c80afb6ce411955
+    source_path: yoyo/evaluation/pine/spike_burst_v1_display.pine
+    sha256: 1fc6ec83ca035a371c1146edf86c0ca1f628678ea069bfd1f26ec8c77c7f952c
+    size_bytes: 30063
+    storage_uri: repo://yoyo/evaluation/pine/spike_burst_v1_display.pine
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Display engineering on previously seen chart, no new return evaluation. Private TV version4 and Mac refresh
+      verified.
+  - artifact_id: spike-burst-risk-display-20260910-report-source
+    artifact_type: report
+    role: display_only_risk_reward_restoration
+    source_repo: darkforest-x/fable-trading
+    source_commit: ebf3b762f5f17da035ac6f875c80afb6ce411955
+    generator_commit: ebf3b762f5f17da035ac6f875c80afb6ce411955
+    source_path: analysis/p0_spike_burst_risk_display_20260910.md
+    sha256: 6fbb72fb716e1e47d7889780c1e892d515e8918f0aaf3a63e22b6467cf9dd881
+    size_bytes: 4672
+    storage_uri: repo://analysis/p0_spike_burst_risk_display_20260910.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Display engineering on previously seen chart, no new return evaluation. Private TV version4 and Mac refresh
+      verified.
+  - artifact_id: spike-burst-risk-display-20260910-report-html
+    artifact_type: report
+    role: display_only_risk_reward_restoration
+    source_repo: darkforest-x/fable-trading
+    source_commit: ebf3b762f5f17da035ac6f875c80afb6ce411955
+    generator_commit: ebf3b762f5f17da035ac6f875c80afb6ce411955
+    source_path: analysis/html/p0_spike_burst_risk_display_20260910.html
+    sha256: 970d4e84da68d6ac06e19a2839dcbd22fbf61909af23f725385c2e34a6328a54
+    size_bytes: 544424
+    storage_uri: repo://analysis/html/p0_spike_burst_risk_display_20260910.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Display engineering on previously seen chart, no new return evaluation. Private TV version4 and Mac refresh
+      verified.
+  - artifact_id: spike-burst-risk-display-20260910-verification
+    artifact_type: manifest
+    role: display_only_risk_reward_restoration
+    source_repo: darkforest-x/fable-trading
+    source_commit: ebf3b762f5f17da035ac6f875c80afb6ce411955
+    generator_commit: ebf3b762f5f17da035ac6f875c80afb6ce411955
+    source_path: experiments/active/exp-spike-burst-risk-display-20260910-v1/qa/verification.json
+    sha256: 2a45f596b332a95a98bf185e84095bd10d81f3bf74607b053655b935b7c6b184
+    size_bytes: 2362
+    storage_uri: repo://experiments/active/exp-spike-burst-risk-display-20260910-v1/qa/verification.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Display engineering on previously seen chart, no new return evaluation. Private TV version4 and Mac refresh
+      verified.

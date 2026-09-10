@@ -7709,3 +7709,24 @@ experiments:
     - spike-burst-validation-20260910-allocation-audit
     notes: Owner all-dates authorization persists. Frozen config first return exposure; known retrospective data, not fresh
       OOS. Engineering accepted in prior experiment; returns inconclusive. No signal, cost, exit, monitor or notification tuning.
+
+  - experiment_id: exp-spike-burst-risk-display-20260910-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: ebf3b762f5f17da035ac6f875c80afb6ce411955
+    status: accepted
+    question: Restore visible risk/reward boxes without modifying frozen Burst V1 signals or exits.
+    single_variable: Owner-requested display layer only; original full-file bytes preserved after stripping declared block.
+    result: Engineering accepted:2 source contracts, native TV version4 compiled/saved, exact editor source verified, ETH4H
+      Chrome and Mac display screenshots.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    canonical_report: analysis/p0_spike_burst_risk_display_20260910.md
+    artifacts:
+    - spike-burst-risk-display-20260910-source
+    - spike-burst-risk-display-20260910-report-source
+    - spike-burst-risk-display-20260910-report-html
+    - spike-burst-risk-display-20260910-verification
+    notes: Seen historical visual check, no new return holdout consumption.3R observation is not take profit. Signal, exit,
+      monitor and notification rules unchanged.

@@ -1,0 +1,55 @@
+{
+  "verified_at": "2026-09-10T04:19:15.206036+00:00",
+  "source_commit": "ebf3b762f5f17da035ac6f875c80afb6ce411955",
+  "scope": "display_only_no_new_profit_evaluation",
+  "python_tests": {
+    "passed": 2,
+    "command": ".venv/bin/python -m pytest tests/test_spike_burst_display_contract.py -q"
+  },
+  "original_file_identical_after_removing_declared_display_block": true,
+  "independent_review": "passed direction, lifecycle, source isolation, object budget",
+  "tradingview": {
+    "private_script_title": "SPIKE 强劲爆发 V1",
+    "version": 4,
+    "version_time_bjt": "2026-09-10 12:09",
+    "first_compile_attempt": "version3 CE10150 reserved function parameter text; corrected to caption",
+    "final_compile": "passed; indicator rendered and error control absent",
+    "copied_editor_text_lf_normalized_matches_local_source": true,
+    "layout_saved": true,
+    "auto_save_restored": true,
+    "native_mac_refresh_verified": true,
+    "chart": "OKX:ETHUSDT.P 4H",
+    "entry_reference": 2085.15,
+    "initial_stop": 1899.21,
+    "three_r_observation": 2642.97,
+    "not_a_fixed_take_profit": true,
+    "watchlist_note": "Native refresh loaded saved Watchlist. Restoring cached todo elicited Basic plan upgrade prompt; dismissed without changes to list contents."
+  },
+  "limitations": [
+    "Native visual verification covers light-theme ETH4H historical closed long segment.",
+    "Source tests do not substitute for Pine native compilation.",
+    "Chart peak R is unrealized reference, not a trade execution or performance claim."
+  ],
+  "files": [
+    {
+      "path": "yoyo/evaluation/pine/spike_burst_v1.pine",
+      "sha256": "18bbb6955fdf12e124688003799c44fc2a641f11a342edcf478157b1c9641fe2",
+      "bytes": 23627
+    },
+    {
+      "path": "yoyo/evaluation/pine/spike_burst_v1_display.pine",
+      "sha256": "1fc6ec83ca035a371c1146edf86c0ca1f628678ea069bfd1f26ec8c77c7f952c",
+      "bytes": 30063
+    },
+    {
+      "path": "experiments/active/exp-spike-burst-risk-display-20260910-v1/qa/eth4h_boxes.png",
+      "sha256": "fb02d721104b48f058daf97b599e3cc7aa730e2e95b75945ad6bd3de9ec8797f",
+      "bytes": 155686
+    },
+    {
+      "path": "experiments/active/exp-spike-burst-risk-display-20260910-v1/qa/mac_eth4h_boxes.png",
+      "sha256": "ec20211f049202823375864779505b41a94996da2dd9adfceef18943390e7b31",
+      "bytes": 247097
+    }
+  ]
+}
