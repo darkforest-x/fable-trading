@@ -36,7 +36,10 @@
   const number = (n) => finite(n) ? Number(n).toLocaleString("zh-CN") : "—";
   const sideName = (side) => side === "long" ? "多头" : side === "short" ? "空头" : side === "unknown" || side == null ? "未就绪" : "中性";
   const sideArrow = (side) => side === "short" ? "↓" : side === "long" ? "↑" : "·";
-  const shortSymbol = (symbol) => String(symbol || "—").replace(/-(USDT|USD)-SWAP$/, "").replace(/USDT\.P$/, "");
+  const shortSymbol = (symbol) => {
+    const value = String(symbol || "—").replace(/-(USDT|USD)-SWAP$/, "").replace(/USDT\.P$/, "");
+    return value.endsWith("USDT") && value !== "USDT" ? value.slice(0, -4) : value;
+  };
   const focusRun = (item) => item.near_zero_bars;
   const modelProtocol = () => state.status?.runtime?.signal_kind === "yolo_confirmed" && typeof state.status?.protocol === "string";
   const isConfirmed = (item) => item?.confirmation === "yolo" || item?.confirmation === "raw_yolo";
@@ -98,6 +101,7 @@
   }
   const modelScore = (item) => finite(item.model?.confidence) && Number(item.model.confidence) >= 0 && Number(item.model.confidence) <= 1 ? Number(item.model.confidence).toFixed(2) : "—";
   const sameEvent = (a, b) => a && b && a.kind === b.kind && String(a.id) === String(b.id) && a.symbol === b.symbol && a.timeframe === b.timeframe;
+  const sameSelection = (a, b) => sameEvent(a, b) && a.source === b.source && a.confirmation === b.confirmation && a.bar_close_ms === b.bar_close_ms;
   const quoteSymbol = (symbol) => /-USD-SWAP$/.test(String(symbol)) ? "USD" : "USDT";
   const normalSearch = (value) => String(value).toUpperCase().replace(/[^A-Z0-9]/g, "");
   const displayPhase = (phase) => phaseNames[phase] || String(phase || "观察中");
@@ -328,16 +332,9 @@
   }
   function applySignalFilters() {
     const items = filteredSignals();
-    if (!items.some((item) => sameEvent(state.selected, item))) {
+    if (!items.some((item) => sameSelection(state.selected, item))) {
       if (items.length) chooseSignal(items[0]);
-      else {
-        state.selected = null;
-        state.chartController?.abort();
-        state.chartRequest++;
-        state.chartKey = null;
-        state.chart = null;
-        renderDetail();
-      }
+      else clearSelectedSignal();
     }
     renderSignals();
   }
@@ -473,6 +470,13 @@
   }
   function chooseSignal(item, scroll = false, origin = "signals") {
     if (!item) return;
+    // Invalidate any chart response for the prior card before changing detail.
+    if (!sameSelection(state.selected, item)) {
+      state.chartController?.abort();
+      state.chartRequest++;
+      state.chartKey = null;
+      state.chart = null;
+    }
     state.chartViewport = null;
     state.selected = { ...item };
     state.detailOrigin = origin;
@@ -482,6 +486,16 @@
       $("detail-content").closest("aside").scrollIntoView({ behavior: "instant", block: "start" });
       $("detail-symbol").focus({ preventScroll: true });
     }
+  }
+  function clearSelectedSignal() {
+    state.selected = null;
+    state.chartController?.abort();
+    state.chartController = null;
+    state.chartRequest++;
+    state.chartKey = null;
+    state.chart = null;
+    state.chartViewport = null;
+    renderDetail();
   }
   function renderDetail() {
     const item = state.selected;
@@ -554,12 +568,12 @@
       const data = await api(item.source === "replay"
         ? `/api/replay/chart?event_id=${encodeURIComponent(item.id)}`
         : `/api/chart?symbol=${encodeURIComponent(item.symbol)}&timeframe=${encodeURIComponent(chartTimeframe)}`, controller.signal);
-      if (request !== state.chartRequest) return;
+      if (request !== state.chartRequest || !sameSelection(state.selected, item)) return;
       if (!Array.isArray(data.candles)) throw new Error("图表数据格式有误");
       state.chart = data;
       renderChart();
     } catch (error) {
-      if (request !== state.chartRequest) return;
+      if (request !== state.chartRequest || !sameSelection(state.selected, item)) return;
       state.chartKey = null; // Retry the same selected chart on the next successful poll.
       $("chart-container").innerHTML = `<div class="chart-placeholder">图表暂时不可用<br>${escapeHTML(error.message || "无法连接行情服务")}</div>`;
       $("chart-hint").textContent = "图表读取失败，信号记录仍可查看";
@@ -802,11 +816,15 @@
       if (results[1]?.status === "fulfilled") state.signalTotal = numeric(results[1].value.total, state.signals.length) + rawYoloTotal;
       if (results[2]?.status === "fulfilled") state.directSignalTotal = numeric(results[2].value.total, state.directSignals.length) + rawYoloTotal;
       if (anySuccess) state.lastSync = Date.now();
+      const currentItems = filteredSignals();
+      if (state.detailOrigin === "signals" && !currentItems.some((item) => sameSelection(state.selected, item))) {
+        if (currentItems.length) chooseSignal(currentItems[0]);
+        else clearSelectedSignal();
+      } else if (!state.selected && currentItems.length) chooseSignal(currentItems[0]);
       renderErrors(); renderStatus(); renderSignals(); renderWatch();
       $("last-sync").textContent = state.errors[sourceKey()] ? "同步失败 · 保留缓存" : `同步 ${clockTime(state.lastSync)}`;
-      if (!state.selected && filteredSignals().length) chooseSignal(filteredSignals()[0]);
-      else if (state.selected) {
-        const updated = state.selected.id !== undefined ? [...sourceItems(), ...state.signals, ...state.candidates, ...state.directSignals].find((item) => sameEvent(item, state.selected)) : state.markets.find((item) => item.symbol === state.selected.symbol && item.timeframe === state.selected.timeframe);
+      if (state.selected) {
+        const updated = state.selected.id !== undefined ? currentItems.find((item) => sameSelection(item, state.selected)) : state.markets.find((item) => item.symbol === state.selected.symbol && item.timeframe === state.selected.timeframe);
         if (updated) state.selected = { ...updated };
         renderDetail();
       }
@@ -852,7 +870,7 @@
   }));
   document.querySelectorAll("[data-signal-source]").forEach((button) => button.addEventListener("click", () => {
     state.signalSource = button.dataset.signalSource;
-    state.rowLimit = 24; state.selected = null; state.chartKey = null;
+    state.rowLimit = 24; clearSelectedSignal();
     document.querySelectorAll("[data-signal-source]").forEach((other) => { const selected = other === button; other.classList.toggle("selected", selected); other.setAttribute("aria-pressed", String(selected)); });
     refresh();
   }));

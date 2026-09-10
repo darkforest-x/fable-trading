@@ -128,3 +128,21 @@ test("live chart translates the display timeframe to the monitor API timeframe",
   assert.match(app, /timeframe=\$\{encodeURIComponent\(chartTimeframe\)\}/);
   assert.match(app, /图表周期不受当前 V1 服务支持/);
 });
+
+test("changing source or timeframe cannot retain a stale detail chart", () => {
+  assert.match(app, /const sameSelection = .*a\.source === b\.source.*a\.confirmation === b\.confirmation/s);
+  assert.match(app, /state\.chartController\?\.abort\(\);\s*state\.chartRequest\+\+;/s);
+  assert.match(app, /!currentItems\.some\(\(item\) => sameSelection\(state\.selected, item\)\)/);
+  assert.match(app, /request !== state\.chartRequest \|\| !sameSelection\(state\.selected, item\)/);
+  assert.match(app, /state\.signalSource = button\.dataset\.signalSource;\s*state\.rowLimit = 24; clearSelectedSignal\(\);/s);
+});
+
+test("replay symbols without a swap separator do not repeat their quote asset", () => {
+  const shortSymbol = (symbol) => {
+    const value = String(symbol || "—").replace(/-(USDT|USD)-SWAP$/, "").replace(/USDT\.P$/, "");
+    return value.endsWith("USDT") && value !== "USDT" ? value.slice(0, -4) : value;
+  };
+  assert.equal(shortSymbol("AIXBTUSDT"), "AIXBT");
+  assert.equal(shortSymbol("DATA-USDT-SWAP"), "DATA");
+  assert.equal(shortSymbol("PEPEUSDT.P"), "PEPE");
+});
