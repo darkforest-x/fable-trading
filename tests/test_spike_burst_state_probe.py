@@ -21,8 +21,11 @@ def test_actual_state_and_helpers_are_preserved_exactly():
     assert textwrap.indent(state, "    ") in probe
     assert extract(source, BEGIN_HELPERS, END_HELPERS) in probe
     assert hashlib.sha256(state.encode()).hexdigest() in probe
-    assert count == 27
-    assert "passed == 27" in probe
+    assert count == 35
+    assert "passed == 35" in probe
+    assert "float middle = 100.0 * u + md" in probe
+    assert "f_fixture(9)" in probe
+    assert "price-first burst emits before MD release" in probe
 
 
 def test_builder_fails_if_state_boundary_missing_or_duplicated():
@@ -49,5 +52,8 @@ def test_probe_generation_is_deterministic_and_does_not_claim_execution(tmp_path
     assert build(SOURCE, output) == count
     assert output.read_text() == expected
     assert "runtime.error(\"BURST STATE FAIL:" in expected
-    assert "At least 28 closed chart bars required" in expected
+    assert "At least 29 closed chart bars required" in expected
+    assert "int b = bar_index - 1" in expected
+    assert "int step = bar_index - 1" in expected
+    assert "if bar_index ==" not in ASSERTIONS
     assert "request.security" not in ASSERTIONS

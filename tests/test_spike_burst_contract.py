@@ -14,7 +14,8 @@ import pytest
 
 from yoyo.evaluation.build_spike_burst_probe import (
     BEGIN, END, BURST_CASES, BURST_FIELDS, DEFAULT_SOURCE, LONG, SHORT,
-    PATH_CASES, RISK_CASES, WINDOW_CASES, assertion_body, build, extract_helpers,
+    PATH_CASES, PRICE_CASES, PRICE_FIELDS, RISK_CASES, WINDOW_CASES,
+    assertion_body, build, extract_helpers,
 )
 
 
@@ -49,7 +50,7 @@ def test_probe_embeds_actual_helpers_exactly_and_source_hash(tmp_path):
     helpers = extract_helpers(text)
     assert generated.count(helpers) == 1
     assert hashlib.sha256(text.encode("utf-8")).hexdigest() in generated
-    assert count == 71
+    assert count == 81
     assert len(re.findall(r"^    f_check\(", generated, re.M)) == count
     assert f"{count} Pine contracts PASS" in generated
     assert 'runtime.error("SPIKE Burst contract failed: "' in generated
@@ -97,6 +98,23 @@ def test_signal_gate_fixtures_have_independent_geometry_and_mirror():
     exact_body = next(case for case in BURST_CASES if case.name == "long exact body threshold")
     values = dict(zip(BURST_FIELDS, exact_body.values))
     assert (_d(values["c"]) - _d(values["o"])) / (_d(values["h"]) - _d(values["l"])) == _d(values["bodyGate"])
+
+
+def test_price_first_zero_main_line_fixture_and_one_factor_negative_controls():
+    assert len(PRICE_CASES) == 10
+    positives = [case for case in PRICE_CASES if case.passes]
+    assert len(positives) == 2
+    for case in positives:
+        values = dict(zip(PRICE_FIELDS, case.values))
+        assert values["md"] == values["sb"] == 0
+        assert values["side"] * (values["mi"] - values["priorMi"]) > 0
+    for case in PRICE_CASES:
+        if not case.passes:
+            assert len(case.changes) == 1
+            assert sum(a != b for a, b in zip(case.base, case.values)) == 1
+    assert {next(iter(case.changes)) for case in PRICE_CASES if not case.passes} == {
+        "priorMi", "md", "rv", "o", "c", "zoneHigh",
+    }
 
 
 def test_inclusive_six_bar_window_and_frozen_band_counterexample_exist():
@@ -180,6 +198,24 @@ def test_pending_episode_cannot_be_cancelled_by_recomputed_near_band():
     assert "launchHigh := quietHigh" in text
     assert "launchLow := quietLow" in text
     assert "pendingSide := 0" in text.split("if burst", 1)[1]
+
+
+def test_price_first_uses_prior_box_before_current_bar_can_enlarge_it():
+    text = SOURCE.read_text(encoding="utf-8")
+    parents = _ancestors(text, "bool leadUp = canLead")
+    assert "if barstate.isconfirmed and ready" in parents
+    qualification = next(line for line in text.splitlines() if "bool canLead =" in line)
+    for required in ("quietCount >= minQuiet", "pendingSide == 0", "trendSide == 0",
+                     "not endedThisBar", "pastWidth <= denseWidth", "pastCrosses >= denseCrosses"):
+        assert required in qualification
+    assert "middle, middle[1], quietHigh, quietLow" in text
+    assert text.index("bool leadUp = canLead") < text.index("quietHigh := quietCount == 1 ?")
+    consumption = text.split("if leadingSide != 0", 1)[1].split("else if near", 1)[0]
+    assert "launchHigh := quietHigh" in consumption
+    assert "launchQuiet := quietCount" in consumption
+    assert "quietCount := 0" in consumption
+    assert "bool validWindow = leadingSide != 0 or f_window(" in text
+    assert "bool burst = leadingSide != 0 or f_burst(" in text
 
 
 def test_signal_features_are_past_only_and_plots_do_not_backstamp():

@@ -44,6 +44,17 @@ color ink = chart.fg_color
 color muted = color.new(ink, 40)
 
 // BEGIN BURST PURE HELPERS
+// Price-first launch uses the same force gates BEFORE an IMACD release can lag.
+// Caller must supply a fully qualified PRIOR quiet/dense episode and frozen box.
+// IMACD cannot oppose the direction; rising/falling ZLEMA is current-bar causal.
+f_priceBurst(int side, float o, float h, float l, float c, float md, float sb, float mi, float priorMi, float zoneHigh, float zoneLow, float ropeHigh, float ropeLow, float rv, float expansion, float volGate, float trGate, float bodyGate, float endGate) =>
+    float span = h - l
+    bool known = span > 0 and not na(rv) and not na(expansion) and not na(priorMi) and not na(ropeHigh) and not na(ropeLow) and not na(zoneHigh) and not na(zoneLow)
+    float body = span > 0 ? math.abs(c - o) / span : 0.0
+    float endPosition = span > 0 ? (side == 1 ? (c - l) / span : (h - c) / span) : 0.0
+    bool directional = side == 1 ? c > o and c > zoneHigh and c > ropeHigh and md >= 0 and md >= sb and mi > priorMi : side == -1 ? c < o and c < zoneLow and c < ropeLow and md <= 0 and md <= sb and mi < priorMi : false
+    known and directional and rv >= volGate and expansion >= trGate and body >= bodyGate and endPosition >= endGate
+
 // Uses current OHLC/md/sb and prior md, with previously frozen zone boundaries.
 // rv uses current volume / median(volume[1],20), expansion uses TR/ATR[1].
 f_burst(int side, float o, float h, float l, float c, float md, float previousMd, float sb, float zoneHigh, float zoneLow, float ropeHigh, float ropeLow, float rv, float expansion, float volGate, float trGate, float bodyGate, float endGate) =>
@@ -179,10 +190,28 @@ if barstate.isconfirmed and ready
                     label.new(bar_index, sideBefore == 1 ? high : low, str.tostring(level, "#") + "R 已到", style=sideBefore == 1 ? label.style_label_down : label.style_label_up, color=color.new(sideBefore == 1 ? bull : bear, 90), textcolor=sideBefore == 1 ? bull : bear, size=size.tiny, force_overlay=true)
 
     float band = quietCount >= minQuiet and not na(frozenBand) ? frozenBand : nearAtr * atr[1]
+    // Evaluate the already qualified box BEFORE including the current burst bar.
+    // Price-first and oscillator-release paths consume the SAME episode once.
+    bool canLead = quietCount >= minQuiet and pendingSide == 0 and trendSide == 0 and not endedThisBar and pastWidth <= denseWidth and pastCrosses >= denseCrosses
+    bool leadUp = canLead and direction != "空头" and f_priceBurst(1, open, high, low, close, md, sb, middle, middle[1], quietHigh, quietLow, ropeHigh, ropeLow, rv, expansion, minVolume, minExpansion, minBody, minEnd)
+    bool leadDown = canLead and direction != "多头" and f_priceBurst(-1, open, high, low, close, md, sb, middle, middle[1], quietHigh, quietLow, ropeHigh, ropeLow, rv, expansion, minVolume, minExpansion, minBody, minEnd)
+    int leadingSide = leadUp ? 1 : leadDown ? -1 : 0
     // A pending launch owns its frozen band. ATR changes must not create a new
     // quiet episode that silently cancels an otherwise valid waiting launch.
     bool near = pendingSide == 0 and math.max(math.abs(md), math.abs(sb)) <= band
-    if near
+    if leadingSide != 0
+        pendingSide := leadingSide
+        releasedAt := bar_index
+        launchHigh := quietHigh
+        launchLow := quietLow
+        launchBand := band
+        launchQuiet := quietCount
+        quietCount := 0
+        frozenBand := na
+        quietHigh := na
+        quietLow := na
+        zone := na
+    else if near
         pendingSide := 0
         quietCount += 1
         quietHigh := quietCount == 1 ? high : math.max(quietHigh, high)
@@ -223,13 +252,13 @@ if barstate.isconfirmed and ready
 
     if pendingSide != 0 and trendSide == 0 and not endedThisBar
         int age = bar_index - releasedAt
-        bool validWindow = f_window(age, opportunity, pendingSide, md, launchBand, close, launchHigh, launchLow)
+        bool validWindow = leadingSide != 0 or f_window(age, opportunity, pendingSide, md, launchBand, close, launchHigh, launchLow)
         if not validWindow
             pendingSide := 0
             stateText := "窗口结束 · 等待新蓄势"
         else
             stateText := "待爆发 · " + str.tostring(age + 1) + "/" + str.tostring(opportunity)
-            bool burst = f_burst(pendingSide, open, high, low, close, md, md[1], sb, launchHigh, launchLow, ropeHigh, ropeLow, rv, expansion, minVolume, minExpansion, minBody, minEnd)
+            bool burst = leadingSide != 0 or f_burst(pendingSide, open, high, low, close, md, md[1], sb, launchHigh, launchLow, ropeHigh, ropeLow, rv, expansion, minVolume, minExpansion, minBody, minEnd)
             if burst
                 int side = pendingSide
                 burstUp := side == 1
@@ -248,8 +277,9 @@ if barstate.isconfirmed and ready
                 stateText := riskValid ? "强劲爆发 · 初始保护" : "爆发 · 风险参考不可用"
                 color signalColor = side == 1 ? bull : bear
                 string riskText = riskValid ? "初始保护 " + str.tostring(sl, format.mintick) + " · " + str.tostring(100 * r / close, "#.##") + "%" : "风险参考不可用"
-                string details = "蓄势 " + str.tostring(launchQuiet) + " 根 · 释放后等待 " + str.tostring(age) + " 根\n量比 " + str.tostring(rv, "#.##") + "× · TR扩张 " + str.tostring(expansion, "#.##") + "×\n" + riskText + "\n收盘价为观察参考，不是成交；峰值R不等于兑现收益。"
-                label.new(bar_index, side == 1 ? low : high, (side == 1 ? "↑ 强劲爆发" : "↓ 强劲爆发") + "\n" + str.tostring(close, format.mintick), style=side == 1 ? label.style_label_up : label.style_label_down, color=signalColor, textcolor=color.white, size=size.small, tooltip=details, force_overlay=true)
+                string timing = leadingSide != 0 ? "量价启动" : "释放确认"
+                string details = timing + " · 蓄势 " + str.tostring(launchQuiet) + " 根 · 等待 " + str.tostring(age) + " 根\n量比 " + str.tostring(rv, "#.##") + "× · TR扩张 " + str.tostring(expansion, "#.##") + "×\n" + riskText + "\n收盘价为观察参考，不是成交；峰值R不等于兑现收益。"
+                label.new(bar_index, side == 1 ? low : high, (side == 1 ? "↑ 强劲爆发" : "↓ 强劲爆发") + "\n" + str.tostring(close, format.mintick) + " · " + timing, style=side == 1 ? label.style_label_up : label.style_label_down, color=signalColor, textcolor=color.white, size=size.small, tooltip=details, force_overlay=true)
                 // Separate pane marker; no overlapping diamond, arrow and full label.
                 label.new(bar_index, md, side == 1 ? "↑ 爆发" : "↓ 爆发", style=side == 1 ? label.style_label_up : label.style_label_down, color=color.new(signalColor, 92), textcolor=signalColor, size=size.small, tooltip=details)
                 if not na(liveTag)
@@ -270,20 +300,20 @@ if barstate.isconfirmed and ready
 float shownMd = barstate.isconfirmed ? md : md[1]
 float shownSb = barstate.isconfirmed ? sb : sb[1]
 hline(0, "零轴", color=color.new(ink, 38), linestyle=hline.style_solid, linewidth=1)
-plot(shownMd, "IMACD 主线", blue, 2)
-plot(shownSb, "IMACD 信号线", #CB882A, 2)
-plot(quietCount >= minQuiet ? 0.0 : na, "已确认蓄势", color.new(gold, 10), 3, plot.style_linebr)
-plot(burstUp or burstDown ? md : na, "爆发确认点", burstUp ? bull : bear, 4, plot.style_circles)
-plot(showMas ? s20 : na, "SMA20", color.new(bull, 38), 1, force_overlay=true)
-plot(showMas ? e20 : na, "EMA20", color.new(bull, 58), 1, force_overlay=true)
-plot(showMas ? s60 : na, "SMA60", color.new(blue, 40), 1, force_overlay=true)
-plot(showMas ? e60 : na, "EMA60", color.new(blue, 60), 1, force_overlay=true)
-plot(showMas ? s120 : na, "SMA120", color.new(ink, 48), 1, force_overlay=true)
-plot(showMas ? e120 : na, "EMA120", color.new(ink, 66), 1, force_overlay=true)
+plot(shownMd, "IMACD 主线", blue, 2, display=display.pane + display.data_window)
+plot(shownSb, "IMACD 信号线", #CB882A, 2, display=display.pane + display.data_window)
+plot(quietCount >= minQuiet ? 0.0 : na, "已确认蓄势", color.new(gold, 10), 3, plot.style_linebr, display=display.pane + display.data_window)
+plot(burstUp or burstDown ? md : na, "爆发确认点", burstUp ? bull : bear, 4, plot.style_circles, display=display.pane + display.data_window)
+plot(showMas ? s20 : na, "SMA20", color.new(bull, 38), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? e20 : na, "EMA20", color.new(bull, 58), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? s60 : na, "SMA60", color.new(blue, 40), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? e60 : na, "EMA60", color.new(blue, 60), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? s120 : na, "SMA120", color.new(ink, 48), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? e120 : na, "EMA120", color.new(ink, 66), 1, force_overlay=true, display=display.pane + display.data_window)
 // Historical line at bar t is the protection that was actually active DURING t.
-pProtect = plot(showRisk ? visibleProtection : na, "本根有效保护", trailArmed ? bull : bear, 2, plot.style_linebr, force_overlay=true)
-pInitial = plot(showRisk ? visibleInitial : na, "冻结初始止损", color.new(bear, 55), 1, plot.style_linebr, force_overlay=true)
-pEntry = plot(showRisk ? visibleEntry : na, "信号收盘参考", color.new(ink, 60), 1, plot.style_linebr, force_overlay=true)
+pProtect = plot(showRisk ? visibleProtection : na, "本根有效保护", trailArmed ? bull : bear, 2, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
+pInitial = plot(showRisk ? visibleInitial : na, "冻结初始止损", color.new(bear, 55), 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
+pEntry = plot(showRisk ? visibleEntry : na, "信号收盘参考", color.new(ink, 60), 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
 fill(pInitial, pEntry, color.new(bear, 94), title="初始风险区")
 barcolor(burstUp ? #00CBB1 : burstDown ? #F05A78 : na, title="爆发关键K线")
 

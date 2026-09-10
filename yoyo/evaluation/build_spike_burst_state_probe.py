@@ -1,7 +1,7 @@
 """Build native Pine full-state regression fixtures from the actual Burst block.
 
 The state-machine text and pure helpers are extracted byte-for-byte, then run
-inside seven distinct Pine call scopes. Only its input series are synthetic.
+inside ten distinct Pine call scopes. Only its input series are synthetic.
 No market OHLCV, return scoring, parameter search or Python state mirror is used.
 The invalid-ATR fixture deliberately supplies an impossible scale to exercise
 risk-reference failure independently of an otherwise valid burst decision.
@@ -23,7 +23,9 @@ FIXTURE = r'''
 // Fixtures intentionally bypass feature warmup: they test the state consumer,
 // while indicator feature warmup is an independent production-source contract.
 f_fixture(int scenario) =>
-    int b = bar_index
+    // One explicit preroll chart bar supplies atr[1] to fixture step zero.
+    // The extracted state still uses the real bar_index without modification.
+    int b = bar_index - 1
     float u = syminfo.mintick * 100000.0
     bool ready = true
     bool showZone = false
@@ -115,6 +117,21 @@ f_fixture(int scenario) =>
         md := -md
         sb := -sb
         recentHigh := 200.0 * u - recentLow
+    float middle = 100.0 * u + md
+    // Price leads while both oscillator lines remain exactly zero. These
+    // fixtures test the prior qualified box before this candle can enlarge it.
+    if scenario >= 7 and b >= 12 and b <= 13
+        open := (b == 12 ? 100.0 : 104.0) * u
+        high := (b == 12 ? 104.2 : 108.2) * u
+        low := (b == 12 ? 99.0 : 104.0) * u
+        close := (b == 12 ? 104.0 : 108.0) * u
+        md := 0.0
+        sb := 0.0
+        rv := 5.0
+        expansion := 4.0
+        middle := (scenario == 9 ? (b == 12 ? 99.9 : 99.8) : (b == 12 ? 100.2 : 100.4)) * u
+        if scenario == 8
+            pastWidth := 4.0
 '''
 
 RETURNS = "    [burstUp, burstDown, exitUp, exitDown, trendSide, pendingSide, quietCount, risk, protection, peakR, currentR, trailArmed, visibleProtection]\n"
@@ -123,6 +140,10 @@ ASSERTIONS = r'''
 var array<int> checkCount = array.new_int(1, 0)
 f_eq(float a, float b) =>
     not na(a) and not na(b) and math.abs(a-b) <= 1e-7 * math.max(1.0, math.max(math.abs(a), math.abs(b)))
+// Decimal expectations may sit one tick away after outward float rounding.
+// Keep R comparisons separate: an instrument price tick is not an R tolerance.
+f_priceEq(float a, float b) =>
+    not na(a) and not na(b) and math.abs(a-b) <= 1.01 * syminfo.mintick + 1e-12 * math.max(math.abs(a), math.abs(b))
 f_check(bool passed, string title) =>
     if not passed
         runtime.error("BURST STATE FAIL: " + title)
@@ -135,18 +156,29 @@ f_check(bool passed, string title) =>
 [up4,dn4,xu4,xd4,side4,pend4,q4,r4,p4,peak4,cur4,arm4,visible4] = f_fixture(4)
 [up5,dn5,xu5,xd5,side5,pend5,q5,r5,p5,peak5,cur5,arm5,visible5] = f_fixture(5)
 [up6,dn6,xu6,xd6,side6,pend6,q6,r6,p6,peak6,cur6,arm6,visible6] = f_fixture(6)
+[up7,dn7,xu7,xd7,side7,pend7,q7,r7,p7,peak7,cur7,arm7,visible7] = f_fixture(7)
+[up8,dn8,xu8,xd8,side8,pend8,q8,r8,p8,peak8,cur8,arm8,visible8] = f_fixture(8)
+[up9,dn9,xu9,xd9,side9,pend9,q9,r9,p9,peak9,cur9,arm9,visible9] = f_fixture(9)
 float unit = syminfo.mintick * 100000.0
+int step = bar_index - 1
 if barstate.isconfirmed
-    if bar_index == 11
+    if step == 11
         f_check(q0 == 12 and pend0 == 0 and side0 == 0, "12 closed quiet bars qualify")
         f_check(q1 == 12 and not up1 and not dn1, "quiet qualification is not a burst")
-    if bar_index == 12
+        f_check(q7 == 12 and q8 == 12 and q9 == 12, "price-first fixtures own prior qualified quiet")
+    if step == 12
         f_check(pend0 == 1 and pend1 == -1 and not up0 and not dn1, "release opens pending only")
-    if bar_index == 13
+        f_check(up7 and side7 == 1 and pend7 == 0 and q7 == 0, "price-first burst emits before MD release and consumes quiet")
+        f_check(f_eq(peak7,0) and f_eq(cur7,0) and na(visible7), "price-first signal candle has no post-entry excursion")
+        f_check(not up8 and side8 == 0 and q8 == 13, "price-first burst requires prior MA compression")
+        f_check(not up9 and side9 == 0 and q9 == 13, "price-first burst rejects opposing ZLEMA slope")
+    if step == 13
         f_check(pend0 == 1 and q0 == 0, "new ATR band cannot cancel frozen long window")
         f_check(pend1 == -1 and q1 == 0, "new ATR band cannot cancel frozen short window")
         f_check(pend3 == 0 and not up3, "return inside frozen band cancels episode")
-    if bar_index == 14
+        f_check(not up7 and side7 == 1 and f_eq(r7,r7[1]), "price-first repeated force cannot reset or duplicate active reference")
+        f_check(not up8 and not up9, "price-first negative controls remain silent")
+    if step == 14
         f_check(up0 and not dn0 and side0 == 1 and pend0 == 0, "later strong candle emits once")
         f_check(dn1 and not up1 and side1 == -1 and pend1 == 0, "short mirrored later burst")
         f_check(f_eq(peak0,0) and f_eq(cur0,0) and na(visible0), "signal candle has no post-entry excursion")
@@ -155,24 +187,25 @@ if barstate.isconfirmed
         f_check(not up3 and side3 == 0 and pend3 == 0, "cancelled launch cannot revive")
         f_check(not up4 and side4 == 0, "one failed required gate rejects burst")
         f_check(up5 and side5 == 0 and na(r5) and na(cur5), "invalid risk retains arrow but no fabricated R")
-    if bar_index == 15
+        f_check(not up7 and side7 == 1, "later MD release cannot duplicate price-first episode")
+    if step == 15
         f_check(not up0 and not dn1, "strong later candles do not duplicate consumed episode")
-        f_check(side0 == 1 and arm0 and f_eq(p0,109.8*unit), "confirmed 2R arms close-ATR ratchet")
-        f_check(f_eq(visible0,98.74*unit) and visible0 < 104*unit and p0 > 104*unit, "new protection cannot stop its creation candle")
-        f_check(side1 == -1 and arm1 and f_eq(p1,90.2*unit) and f_eq(visible1,101.26*unit), "short next-bar protection mirror")
-    if bar_index == 16
+        f_check(side0 == 1 and arm0 and f_priceEq(p0,109.8*unit), "confirmed 2R arms close-ATR ratchet")
+        f_check(f_priceEq(visible0,98.74*unit) and visible0 < 104*unit and p0 > 104*unit, "new protection cannot stop its creation candle")
+        f_check(side1 == -1 and arm1 and f_priceEq(p1,90.2*unit) and f_priceEq(visible1,101.26*unit), "short next-bar protection mirror")
+    if step == 16
         f_check(f_eq(p0,p0[1]) and f_eq(p1,p1[1]), "ratchet never loosens on pullback")
-    if bar_index == 17
+    if step == 17
         f_check(xu0 and side0 == 0 and not up0, "operative long protection exits")
         f_check(xd1 and side1 == 0 and not dn1, "operative short protection exits")
         f_check(f_eq(cur0,unit/r0) and f_eq(cur1,unit/r1), "adverse gaps use open beyond prior protection")
         f_check(f_eq(peak0,peak0[1]) and f_eq(peak1,peak1[1]), "stop bar cannot increase recorded peak")
-    if bar_index == 18
+    if step == 18
         f_check(not up2 and pend2 == 0 and side2 == 0, "release plus five excludes age six")
         f_check(side0 == 0 and not up0 and f_eq(cur0,cur0[1]), "exited path cannot resurrect or change R")
-    if bar_index == 26
+    if step == 26
         f_check(side6 == 1 and q6 == 12 and not up6, "new quiet structure can form without overwriting active trend")
-    if bar_index == 27
+    if step == 27
         f_check(xu6 and not up6 and side6 == 0 and pend6 == 0, "stop and valid new release cannot exit and re-enter together")
 '''
 
@@ -199,7 +232,7 @@ var table result = table.new(position.middle_center, 1, 1)
 if barstate.islast
     int passed = array.get(checkCount, 0)
     bool complete = passed == {count}
-    table.cell(result, 0, 0, complete ? "BURST STATE · " + str.tostring(passed) + "/{count} PASS\\n7 independent synthetic state paths\\nActual source block · no return estimate" : "WAIT / " + str.tostring(passed) + "/{count} checks\\nAt least 28 closed chart bars required", text_color=complete ? color.teal : color.orange)
+    table.cell(result, 0, 0, complete ? "BURST STATE · " + str.tostring(passed) + "/{count} PASS\\n10 independent synthetic state paths\\nActual source block · no return estimate" : "WAIT / " + str.tostring(passed) + "/{count} checks\\nAt least 29 closed chart bars required", text_color=complete ? color.teal : color.orange)
 plot(na, display=display.none)
 '''
     header = '//@version=6\nindicator("SPIKE BURST · native state probe", overlay=false, max_labels_count=300)\n'

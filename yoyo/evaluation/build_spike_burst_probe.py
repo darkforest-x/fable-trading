@@ -27,6 +27,13 @@ BURST_FIELDS = (
 )
 LONG: Tuple[Number, ...] = (1, 102, 120, 100, 115, 3, 2, 2.5, 110, 90, 108, 94, 4, 3, 4, 3, .55, .75)
 SHORT: Tuple[Number, ...] = (-1, 98, 100, 80, 85, -3, -2, -2.5, 110, 90, 106, 92, 4, 3, 4, 3, .55, .75)
+PRICE_FIELDS = (
+    "side", "o", "h", "l", "c", "md", "sb", "mi", "priorMi", "zoneHigh",
+    "zoneLow", "ropeHigh", "ropeLow", "rv", "expansion", "volGate",
+    "trGate", "bodyGate", "endGate",
+)
+PRICE_LONG: Tuple[Number, ...] = (1, 102, 120, 100, 115, 0, 0, 105, 104, 110, 90, 108, 94, 4, 3, 4, 3, .55, .75)
+PRICE_SHORT: Tuple[Number, ...] = (-1, 98, 100, 80, 85, 0, 0, 95, 96, 110, 90, 106, 92, 4, 3, 4, 3, .55, .75)
 
 
 @dataclass(frozen=True)
@@ -35,10 +42,11 @@ class BurstCase:
     base: Tuple[Number, ...]
     changes: Dict[str, Number]
     passes: bool
+    fields: Tuple[str, ...] = BURST_FIELDS
 
     @property
     def values(self) -> Tuple[Number, ...]:
-        return tuple(self.changes.get(field, value) for field, value in zip(BURST_FIELDS, self.base))
+        return tuple(self.changes.get(field, value) for field, value in zip(self.fields, self.base))
 
 
 BURST_CASES = (
@@ -68,6 +76,22 @@ BURST_CASES = (
     BurstCase("short rope equality rejected", SHORT, {"ropeLow": 85}, False),
     BurstCase("short loss of acceleration", SHORT, {"previousMd": -3}, False),
     BurstCase("short signal equality rejected", SHORT, {"sb": -3}, False),
+)
+
+# Additive revision: the original 71 release/path assertions remain unchanged.
+# Price-first requires the caller's PRIOR qualified quiet/dense episode; the
+# helper permits md=sb=0 only if current zero-lag price average already turns.
+PRICE_CASES = (
+    BurstCase("price-first long zero-md rising-mi", PRICE_LONG, {}, True, PRICE_FIELDS),
+    BurstCase("price-first short zero-md falling-mi", PRICE_SHORT, {}, True, PRICE_FIELDS),
+    BurstCase("price-first long flat-mi rejected", PRICE_LONG, {"priorMi": 105}, False, PRICE_FIELDS),
+    BurstCase("price-first short flat-mi rejected", PRICE_SHORT, {"priorMi": 95}, False, PRICE_FIELDS),
+    BurstCase("price-first long opposite-md rejected", PRICE_LONG, {"md": -.01}, False, PRICE_FIELDS),
+    BurstCase("price-first short opposite-md rejected", PRICE_SHORT, {"md": .01}, False, PRICE_FIELDS),
+    BurstCase("price-first missing-volume rejected", PRICE_LONG, {"rv": None}, False, PRICE_FIELDS),
+    BurstCase("price-first same body gate", PRICE_LONG, {"o": 104.001}, False, PRICE_FIELDS),
+    BurstCase("price-first short same close-side gate", PRICE_SHORT, {"c": 85.001}, False, PRICE_FIELDS),
+    BurstCase("price-first frozen box equality rejected", PRICE_LONG, {"zoneHigh": 115}, False, PRICE_FIELDS),
 )
 
 # age,count,side,md,frozenBand,close,zoneHigh,zoneLow
@@ -160,6 +184,9 @@ def _matches(variable: str, value: Union[Number, bool]) -> str:
 
 def assertion_body() -> Tuple[str, int]:
     lines = ["if barstate.isfirst"]
+    for case in PRICE_CASES:
+        expression = _call("f_priceBurst", case.values)
+        lines.append(f'    f_check({expression if case.passes else "not " + expression}, "{case.name}")')
     for case in BURST_CASES:
         expression = _call("f_burst", case.values)
         lines.append(f'    f_check({expression if case.passes else "not " + expression}, "{case.name}")')
