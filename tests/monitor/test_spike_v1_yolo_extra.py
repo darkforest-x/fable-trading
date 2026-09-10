@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import threading
+import time
 
 import pytest
 
@@ -88,3 +89,22 @@ def test_new_v1_bark_cutover_keeps_old_raw_and_replay_out_of_every_outbox(tmp_pa
     assert delivery_error(store, fresh, fresh["bar_close_ms"] + 1, "bark") is None
     assert store.upsert_event(fresh, bark_notify=True)
     assert store.bark_status()["pending"] == 1 and store.telegram_status()["pending"] == 0
+
+
+def test_idle_v1_model_gate_does_not_load_yolo_before_a_raw_candidate(tmp_path):
+    class DormantDetector:
+        def __init__(self): self.warmups = 0
+        def status(self): return {"ready": False}
+        def warmup(self): self.warmups += 1
+
+    stop = threading.Event()
+    detector = DormantDetector()
+    gate = ModelGate(Store(tmp_path / "monitor.sqlite3"), lambda: 0, stop, detector)
+    thread = threading.Thread(target=gate.run)
+    thread.start()
+    time.sleep(.05)
+    stop.set()
+    with gate._condition:
+        gate._condition.notify_all()
+    thread.join(timeout=1)
+    assert not thread.is_alive() and detector.warmups == 0

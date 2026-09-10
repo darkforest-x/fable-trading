@@ -101,18 +101,13 @@ class ModelGate:
                     max_wait_bars=MODEL_MAX_WAIT, candidates=counts, detector=detector)
 
     def run(self):
-        while not self.stop_event.is_set():
-            try:
-                if self.detector is None:
-                    from yoyo.monitor.yolo_detector import YoloDetector
-                    self.detector = YoloDetector()
-                self.detector.warmup()
-                self._error = None
-                break
-            except Exception as exc:
-                self._error = "model_unavailable:" + type(exc).__name__
-                LOG.error("model unavailable: %s", type(exc).__name__)
-                self.stop_event.wait(30)
+        """Wait for a live raw candidate before loading the inference runtime.
+
+        Importing Torch/Ultralytics can hold the interpreter long enough to
+        starve the loopback API.  There is no model work before a candidate,
+        so an idle monitor keeps the expensive runtime dormant; candidates are
+        still processed in their original p..p+9 window when they arrive.
+        """
         while not self.stop_event.is_set():
             with self._condition:
                 if not self._queue:
@@ -121,10 +116,16 @@ class ModelGate:
                 key, candles = self._queue.popitem(last=False)
             self._active = {"symbol": key[0], "timeframe": key[1]}
             try:
+                if self.detector is None:
+                    from yoyo.monitor.yolo_detector import YoloDetector
+                    self.detector = YoloDetector()
+                if not self.detector.status().get("ready"):
+                    self.detector.warmup()
                 self.process(*key, candles)
                 self._error = None
             except Exception as exc:
-                self._error = "model_worker_failure:" + type(exc).__name__
+                prefix = "model_unavailable" if self._processed == 0 else "model_worker_failure"
+                self._error = prefix + ":" + type(exc).__name__
                 LOG.error("model worker failure: %s", type(exc).__name__)
             finally:
                 self._active = None
