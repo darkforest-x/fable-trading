@@ -16,6 +16,7 @@ import subprocess
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from matplotlib.patches import Rectangle
 from matplotlib import font_manager
 import numpy as np
@@ -54,6 +55,8 @@ def curves(folder,out):
         axes[0,col].set_ylabel('账户累计收益 %');axes[1,col].set_ylabel('收盘权益回撤 %')
         axes[0,col].legend(fontsize=9,loc='upper left')
         for ax in axes[:,col]:ax.grid(axis='y');ax.axhline(0,color='#aeb9c2',lw=.7)
+        axes[1,col].xaxis.set_major_locator(mdates.WeekdayLocator(byweekday=mdates.MO,interval=2))
+        axes[1,col].xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
     fig.suptitle('SPIKE 强劲爆发 V1：最高浮盈之外，实际账户留下多少',x=.05,ha='left',fontsize=17,fontweight='bold')
     fig.text(.05,.02,'2026-07-10 — 09-09 UTC｜固定20bp往返成本，资金费率/真实冲击未计入基础账户｜两个周期分别建账户',color='#566571')
     fig.tight_layout(rect=[0,.05,1,.94]);p=out/'account_paths.png';fig.savefig(p,dpi=155);plt.close(fig)
