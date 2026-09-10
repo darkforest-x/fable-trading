@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>SPIKE V1 Mac monitor migration：信号浏览、冻结回放图与服务验收记录</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>SPIKE V1 Mac monitor migration：信号浏览、冻结回放图与服务验收记录</h1>
+<h2>结论</h2>
+<p>本轮把本机 <code>127.0.0.1:8766</code> 的监控协议收敛到冻结的 <strong>SPIKE V1 长多 30m / 1H / 4H</strong>：收盘后的原始 V1 启动和额外 YOLO 确认是独立事件、独立 Bark 阶段；历史回放只用于浏览，既不补发 Bark，也不展示未经修复的回测收益。已导入的 1,019 条 V1 回放信号能够按 event id 读取同源冻结 OHLC，并在前端明确标为历史复盘上下文。</p>
+<p>本机服务可监听且关键 <code>/api/status</code> 超时根因已经通过 trace 确认并修复；当前首轮扫描仍在进行，不能把进程存活或部分完成误称为市场/模型就绪。原生浏览器交互验收仍被 CUA 的 <code>-10005 timeoutReached</code> 阻塞。没有任何盈利、模型泛化或 Bark 手机送达声明。</p>
+<h2>协议与数据边界</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>当前行为</th>
+</tr></thead><tbody>
+<tr><td>实时信号</td><td>原版 SPIKE V1、仅 long、30m / 1H / 4H 的已收盘 bar</td></tr>
+<tr><td>通知</td><td><code>source=live, confirmation=raw</code> 与随后 <code>source=live, confirmation=yolo</code> 分别去重、分别允许 Bark；Telegram 关闭</td></tr>
+<tr><td>回放</td><td><code>source=replay, confirmation=raw</code>；无候选、无 outbox、无通知</td></tr>
+<tr><td>回放图</td><td>只由已保存 event id 定位 <code>venue/symbol/timeframe/bar_open_ms</code>；按需读取冻结 gzip OHLC；后续 K 线标为历史复盘，未输入扫描器或 YOLO</td></tr>
+<tr><td>回测指标</td><td>已知 actual-fill、风险、censoring 和 drawdown 账本问题未在本轮改动；回放浏览不显示或推断 PnL</td></tr>
+</tbody></table>
+<p>回放导入命令已在此配置下执行一次：</p>
+<pre><code>
+python3 -m yoyo.monitor.replay_import \
+  experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_ledger.csv.gz \
+  --database &quot;$HOME/Library/Application Support/Fable/ImpulseMonitor/monitor.sqlite3&quot; \
+  --import-id spike-v1-covered-ledger-20260911-unverified-partial
+</code></pre>
+<p>结果为 783 条新导入、236 条既有相同记录、11 条不属于 V1 30m/1H/4H 的记录跳过；运行库最终有 1,019 条 <code>replay/raw</code>。对这 1,019 条已导入记录按文件存在性检查，冻结 OHLC 覆盖为 1,019/1,019；这里的覆盖只说明可画出对应源 K 线，不说明交易完整性或策略表现。</p>
+<p>历史遗留处理限定为源为空、协议为旧 IMACD 的 9,160 条错误 journal 行；它们已在有完整数据库备份后移除。迁移期间另发现 5 个可由 canonical V1 raw identity 替换的旧重复 id，已幂等清理；11 个无 canonical 替代的旧 id 未伪造替代记录。没有再次清库，也没有触及本次 live/replay 行。</p>
+<h2>回放图实际接口核验</h2>
+<p>清理 trace 后，对本机 API 读取一条已导入记录：</p>
+<table><thead><tr>
+<th>字段</th>
+<th>实测</th>
+</tr></thead><tbody>
+<tr><td>event id</td><td><code>120295e8085b51f7fc21ca36</code></td></tr>
+<tr><td>来源</td><td>Binance <code>ARCUSDT</code>，30m，<code>bar_open_ms=1788971400000</code></td></tr>
+<tr><td><code>/api/replay/chart</code></td><td>HTTP 200，105 根实际可用上下文 K 线</td></tr>
+<tr><td>定位</td><td>返回 target K 线时间与该 event 的 <code>bar_open_ms</code> 完全相同</td></tr>
+<tr><td>target OHLC</td><td>0.07349 / 0.07850 / 0.07297 / 0.07774</td></tr>
+<tr><td>未来上下文</td><td><code>historical_review_only_not_model_input</code></td></tr>
+</tbody></table>
+<p>该端点拒绝客户端提供 venue、symbol 或时间；只从数据库中的 event 读取。缺冻结文件会显式返回 <code>frozen_ohlc_missing</code>，不会改画当前 OKX 行情。</p>
+<h2>HTTP 与扫描真实状态</h2>
+<p>诊断 trace 先排除了 <code>/api/status</code> 自身的数据库读取：它的 handler 可在约 16ms 到达。真正阻塞来自 <code>/api/markets</code>：旧实现会同步 JSON 解码 214 行完整 market payload，合计约 11.5MB（每行含 chart/events），并在共享解释器路径序列化响应。trace 记录的两次旧请求内耗时为 25.792s 与 19.595s。</p>
+<p>提交 <code>181193f</code> 后，概览改读排除 <code>chart/events</code> 的摘要，选中图才按主键读取完整记录。受当前机器资源竞争影响，摘要仍需 SQLite 解析旧 JSON 输入，trace 内为 5.569s，实际响应约 6.323s，输出仅 85,842 bytes；但紧跟其后的 <code>/api/status</code> 成功返回，handler 约 488ms、请求总计 556ms，没有再次零字节超时。若未来必须进一步压低市场概览延迟，正确范围是写入时保存紧凑 summary 列或表，不能把 chart/events 再塞回概览。</p>
+<p>最终 cleanup reload 后的单次实际 API 检查：</p>
+<table><thead><tr>
+<th>检查</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td><code>/api/health</code></td><td>HTTP 200，<code>service_alive=true</code>，扫描写入当时为 <code>30 / 1434</code>、errors <code>0</code>；但 <code>market_ready=false</code>、<code>model_ready=false</code>、<code>ok=false</code></td></tr>
+<tr><td><code>/api/status</code></td><td>HTTP 200，非 stale 快照；紧邻读取的已缓存扫描快照为 <code>27 / 1434</code>、errors <code>0</code>，模型仍 <code>loading</code>。扫描写入与状态快照不同步，故不把两者混为一个精确完成计数</td></tr>
+<tr><td><code>/api/markets</code></td><td>HTTP 200，214 条摘要：30m 72、1H 71、4H 71，三周期这些已记录行均为 ready；没有 <code>chart/events</code> 字段</td></tr>
+<tr><td>Bark 状态</td><td><code>v1_bark_arm</code> 已设置；当前 V1 bark outbox 为 0，未发送测试消息</td></tr>
+</tbody></table>
+<p>因此三周期已开始扫描但远未完成，当前自然 live raw 为 22 条、live YOLO 为 0 条。没有把待预热、扫描中或模型加载中表示为可通知状态。</p>
+<h2>实现与验证</h2>
+<p>本轮 monitor 提交链：<code>bf08b3c</code>、<code>8129087</code>、<code>603ea45</code>、<code>07e2db7</code>、<code>468fc5a</code>、<code>229b654</code>、<code>6b11464</code>、<code>a481311</code>、<code>1e5a286</code>、<code>7ce4971</code>、<code>df6c8f6</code>、<code>63e0b29</code>、<code>f35caf4</code>、<code>181193f</code>。其中 <code>f35caf4</code> 使 replay 图依赖在选卡时才导入，避免 pandas/NumPy/PyArrow 在 FastAPI 监听前阻塞；<code>181193f</code> 是上述 overview blocker 的最小修复。</p>
+<p>本轮实际执行的定向代码验证：</p>
+<pre><code>
+python3 -m pytest -q \
+  tests/monitor/test_market_summaries.py \
+  tests/monitor/test_api_startup_imports.py \
+  tests/monitor/test_replay_chart.py \
+  tests/monitor/test_spike_v1_api_replay.py \
+  tests/monitor/test_v1_status_snapshot.py
+python3 -m py_compile yoyo/monitor/store.py yoyo/monitor/service.py yoyo/monitor/server.py
+node --check yoyo/monitor/static/app.js
+node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.test.cjs
+</code></pre>
+<p>这组 Python 测试最后一次为 11 passed；此前回放/API 紧邻测试为 10 passed。它们不是两个独立测试集，不应相加。前端 Node 合同测试此前为 10 passed；本轮没有在 CUA 中重新获得浏览器页面：<code>cua.getApp(&quot;Google Chrome&quot;)</code> 返回 <code>-10005 timeoutReached</code>，按约束没有反复连接或伪造截图。静态/API 合同检查不替代桌面与窄屏交互验收。</p>
+<h2>运行环境与未完成项</h2>
+<p>受控 trace 已从 LaunchAgent 移除并以无 trace 的 cleanup reload 启动。启动仍受本机其它 ccxt-mcp/ChatGPT 作业竞争影响：诊断时系统 load 约 100、CPU idle 0%、swap 约 6.4GB；本任务无权停止其它会话。监听器可在约一分钟后建立，因而不能以冷启动瞬时健康响应设定性能承诺。</p>
+<p>此前本任务暂停的 <code>yoyo.evaluation.spike_v1_twoyear_allmarkets fetch --venue binance</code>（PID 51814）已核对命令身份并 <code>SIGCONT</code> 恢复，进程从 <code>T+</code> 变为 <code>S+</code>。它是独立两年采集，不是本轮 monitor 结果；恢复不表示其评估账本问题已解决。</p>
+<p>后续仍需在资源可用时完成：全 1,434 单元扫描、模型 ready、真实浏览器桌面/窄屏卡片选择与图表缩放验收。若浏览器自动化恢复，应验证 live/raw、live/yolo 与 replay 的分栏和标签，以及 replay 图中历史后续 K 线的说明。更广泛 V1 或 YOLO 有效性、收益和手机实际送达均不在本次功能验收范围。</p>
+</body>
+</html>
