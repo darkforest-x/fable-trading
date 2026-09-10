@@ -8015,3 +8015,20 @@ experiments:
       audited.3444 discovered parents rejected; label reduction4656=3565 rejected labels+0unknown+3out-1in+1089
       merged early confirmations. Unknown labels conservatively added back for primary gate. No live changes; A-F
       overview is descriptive and not a shared-control tournament.
+  - experiment_id: exp-spike-v3-layered-display-20260910-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: eef18a3b5783b766d0fbd310b6271b2cf61969b6
+    status: active
+    question: Can display ownership reduce repeated-entry implications while retaining every original V3 event?
+    single_variable: One-way UI projection only; original detection, reference state, parameters and alert conditions
+      remain byte-identical.
+    result: Display-only source and23 synthetic/static tests complete; independent review and native chart verification
+      tracked separately. No market scoring.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    canonical_report: analysis/html/p1_spike_v3_layered_display_20260910.html
+    artifacts: []
+    notes: Research display improvement only, not a seventh strategy filter or evidence of improved returns. Do
+      not seize another active TradingView device session.

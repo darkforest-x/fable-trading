@@ -1,0 +1,109 @@
+{
+  "schema": "spike-v3-layered-display-independent-static-review-v1",
+  "status": "approved_static_native_pending",
+  "generated_at_utc": "2026-09-10T11:12:56.011223+00:00",
+  "scope": "Read-only source/clock/display review and synthetic tests only; no market data, detector, tuning, TradingView operation, notification or order.",
+  "files": {
+    "yoyo/evaluation/pine/spike_burst_v3_early_warning.pine": "d604051c0c633e3ee9dac4c23bbae51ce20fe9365da60aa33a760e08cf4ea882",
+    "yoyo/evaluation/pine/spike_burst_v3_layered_display.pine": "5c54df7adfa0146c5e124578c5ad18d797f3372e218f07fadcb2bc631b73a2e7",
+    "tests/test_spike_burst_v3_layered_display.py": "1f584fa672e170fb828fd41b1cc04316cb4b2e741df79e8a422ce51fb0e735e5"
+  },
+  "checks": {
+    "risk_helpers_features_alert_reference": {
+      "byte_equal": true,
+      "sha256": "bf0aa8e2ddaa6b2e7af37723f9aaabb981fd49b7ec16a953b8d09489aa563c0d",
+      "bytes": 10251
+    },
+    "risk_box_display": {
+      "byte_equal": true,
+      "sha256": "11346240b18d866a206c33d6a433104b3c256d9a615918ace499759e4548cefe",
+      "bytes": 6056
+    },
+    "alerts": {
+      "exact_lines": [
+        "alertcondition(earlySignal, \"SPIKE 结构预警\", \"SPIKE 结构预警（不代表已确认） | {{exchange}}:{{ticker}} | {{interval}} | 预警收盘 {{close}}\")",
+        "alertcondition(confirmedSignal, \"SPIKE 结构确认\", \"SPIKE 结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}\")",
+        "alertcondition(exitReference, \"SPIKE 参考保护触及\", \"SPIKE 参考保护已触及 | {{exchange}}:{{ticker}} | {{interval}} | 已收盘确认，请查看参考价\")"
+      ],
+      "count": 3,
+      "display_filtered": false
+    },
+    "parameters": {
+      "original_constants_unchanged": 15,
+      "original_inputs_unchanged": 8,
+      "only_new_input": "displayMode"
+    },
+    "oscillator_six_ma_and_risk_plots": "Exact original lines, zero axis retained, no histograms added.",
+    "one_way_display_mutations": [
+      "displayReferenceId += 1",
+      "displayReferenceStartTime := time_close",
+      "displayReferenceConfirmed := false",
+      "displayReferenceConfirmed := true"
+    ],
+    "extracted_boolean_projection": {
+      "combinations": 96,
+      "results": "All pass; includes unreachable Boolean combinations for robustness, not a market replay or Pine execution."
+    },
+    "event_marker_conservation": {
+      "anchor": "plotshape(lowInterference and (earlySignal or confirmedSignal), title=\"原V3事件 · 历史锚点\", style=shape.circle, location=location.belowbar, color=color.new(ink, 25), size=size.tiny, force_overlay=true, display=display.pane)",
+      "loaded_history": true,
+      "independent_of_showLabels": true,
+      "label_gc_cannot_remove_plotshape": true,
+      "same_bar_parent_child": "One union anchor, separate unchanged data-window bits and alerts.",
+      "current_bar_time_price": "bar_index / time_close / close; parentBar and confirmationParentPrice are separately identified metadata.",
+      "text_and_tooltip_limit": "Shared max_labels_count=300 with risk/milestone tags; older text/tooltips can disappear, chart marker and data-window values remain."
+    },
+    "plot_budget": {
+      "plot_calls": 33,
+      "plotshape_calls": 1,
+      "alertcondition_calls": 3,
+      "barcolor_calls": 1,
+      "fill_calls": 1,
+      "hline_calls": 1,
+      "conservative_upper_bound": 52,
+      "limit": 64,
+      "expected_static_count": 40,
+      "expectation_explanation": "33 plot series + 2 original series colors (event dot/protection) + 1 input-color plotshape + 3 alertcondition + 1 barcolor. chart.fg_color is input color; constant/input colors and constant fill add no series count. Conservative bound charges every pane color plus the shape color and fill anyway.",
+      "native_measured": false
+    }
+  },
+  "tests": {
+    "command": ".venv/bin/python -m pytest tests/test_spike_burst_v3_layered_display.py -q",
+    "exit_code": 0,
+    "stdout": "23 passed in 0.06s",
+    "test_kind": "Local static source contracts and synthetic display projection; not native Pine compilation"
+  },
+  "findings": [
+    {
+      "id": "LD-01",
+      "severity": "medium",
+      "status": "resolved_before_approval",
+      "initial_problem": "Low mode used label.new only, so labels/circle markers could disappear beyond shared300 objects.",
+      "resolution": "Independent force_overlay plotshape preserves every original event union over loaded history. Shared text/tooltip limit is disclosed."
+    },
+    {
+      "id": "LD-02",
+      "severity": "limitation",
+      "status": "open_acceptance_boundary",
+      "detail": "No native Pine compile or chart visual QA was performed. Static approval cannot establish real typography, collision handling, runtime resource count or TradingView availability."
+    },
+    {
+      "id": "LD-03",
+      "severity": "interpretation",
+      "status": "disclosed",
+      "detail": "Original candidates and alerts are unchanged. Less prominent supplemental labels are not filtered trades, improved precision, reduced alert count or validated same-trend deduplication. Main reference ownership is an existing signal-close display path, not actual position ownership."
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://www.tradingview.com/pine-script-docs/writing/limitations/",
+      "supports": "64 plot-count ceiling, objects do not count as plots, max_labels_count and series-color counts"
+    },
+    {
+      "url": "https://www.tradingview.com/pine-script-docs/concepts/chart-information/",
+      "supports": "chart.bg_color and chart.fg_color are input color values"
+    }
+  ],
+  "native_compile_verified": false,
+  "live_updated": false
+}
