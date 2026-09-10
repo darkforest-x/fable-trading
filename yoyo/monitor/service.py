@@ -198,7 +198,7 @@ class Monitor:
                 if not stale:
                     self.model_gate.submit(symbol, timeframe, cached["candles"])
                 continue
-            result = analyze(lower, loaded[higher], timeframe)
+            result = analyze(lower, loaded[higher], timeframe, tick=float(instrument["tickSz"]))
             state = dict(result["state"], symbol=symbol, timeframe=timeframe, active=True,
                          last_scan_ms=now, stale=stale, gap_count=gaps.get(timeframe, 0),
                          available_bars=len(lower), higher_bars=len(loaded[higher]),

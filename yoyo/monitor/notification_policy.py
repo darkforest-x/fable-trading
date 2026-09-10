@@ -32,12 +32,11 @@ def is_direct_start(event):
             or not re.fullmatch(r"[A-Z0-9]+-[A-Z0-9]+-SWAP", event["symbol"])
             or not finite(event.get("price")) or event["price"] <= 0):
         return False
-    start, end, setup = (event.get(k) for k in ("bar_open_ms", "bar_close_ms", "focus_start_ms"))
-    if not all(type(t) is int and t >= 0 for t in (start, end, setup)):
+    start, end = (event.get(k) for k in ("bar_open_ms", "bar_close_ms"))
+    if not all(type(t) is int and t >= 0 for t in (start, end)):
         return False
     step = TIMEFRAMES[event["timeframe"]]
-    return (start % step == 0 and end == start + step
-            and setup == start - event["near_zero_bars"] * step)
+    return start % step == 0 and end == start + step
 
 
 def delivery_error(store, event, now, channel):

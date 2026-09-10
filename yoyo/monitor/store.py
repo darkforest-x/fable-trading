@@ -454,3 +454,29 @@ class Store:
             row = db.execute("SELECT COUNT(m.png),SUM(CASE WHEN m.error IS NOT NULL THEN 1 ELSE 0 END) "
                              "FROM telegram_media m JOIN events e ON e.id=m.event_id WHERE " + clause, args).fetchone()
         return {"snapshots": row[0], "render_fallbacks": row[1] or 0}
+
+    def migrate_v1_protocol(self, cutoff_ms):
+        """Remove only obsolete monitor observations after a pre-migration backup.
+
+        Historical research and non-monitor files are outside this SQLite DB.
+        Terminal receipts are not reclassified; the old protocol rows are
+        deleted as explicitly authorized monitor-signal history, while the
+        caller records this transaction in its migration receipt.
+        """
+        obsolete = ("imacd-tv-visible-start-monitor-v3", "imacd-yolo-confirmation-monitor-v1")
+        with self.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            ids = [r[0] for r in db.execute("SELECT id FROM events WHERE json_extract(payload,'$.protocol') IN (?,?)", obsolete)]
+            if ids:
+                marks = ",".join("?" for _ in ids)
+                db.execute("DELETE FROM telegram_media WHERE event_id IN (" + marks + ")", ids)
+                db.execute("DELETE FROM outbox WHERE event_id IN (" + marks + ")", ids)
+                db.execute("DELETE FROM bark_outbox WHERE event_id IN (" + marks + ")", ids)
+                db.execute("DELETE FROM model_candidates WHERE id IN (" + marks + ")", ids)
+                db.execute("DELETE FROM events WHERE id IN (" + marks + ")", ids)
+            db.execute("DELETE FROM markets")
+            db.execute("DELETE FROM meta WHERE key='scan' OR key LIKE 'notification_policy:%' OR key LIKE 'notification_timeframe:%'")
+            receipt = {"migrated_at_ms": int(cutoff_ms), "obsolete_event_rows": len(ids),
+                       "protocol": "spike-burst-v1-monitor-v1", "cutoff_ms": int(cutoff_ms)}
+            db.execute("INSERT OR REPLACE INTO meta VALUES (?,?)", ("migration:spike-burst-v1", encode(receipt)))
+        return receipt

@@ -19,23 +19,13 @@ def finite(value):
 
 
 def is_tv_start(event):
-    md, previous, previous_sb = event.get("md"), event.get("previous_md"), event.get("previous_sb")
-    band, count = event.get("focus_band"), event.get("near_zero_bars")
-    return (event.get("protocol") == SIGNAL_PROTOCOL
-            and event.get("kind") == SIGNAL_KIND
-            and event.get("source_kind") == "release"
-            and event.get("tv_marker") == "focus_release"
-            and event.get("tv_profile") == TV_PROFILE_ID
-            and event.get("confirmed") is True and event.get("ready") is True
-            and event.get("focus_qualified_before") is True
-            and event.get("tv_marker_visible") is True
-            and event.get("tv_show_focus") is True and event.get("tv_show_marks") is False
-            and finite(band) and band >= 0
-            and finite(md) and abs(md) > band
-            and finite(previous) and finite(previous_sb)
-            and max(abs(previous), abs(previous_sb)) <= band
-            and type(count) is int and count >= 12
-            and event.get("side") == ("long" if md > 0 else "short"))
+    """Compatibility name: validate a closed, raw, long-only V1 signal."""
+    return (event.get("protocol") == SIGNAL_PROTOCOL and event.get("kind") == SIGNAL_KIND
+            and event.get("source") == "live" and event.get("confirmation") == "raw"
+            and event.get("direction") == "long" and event.get("side") == "long"
+            and event.get("confirmed") is True and event.get("is_closed") is True
+            and finite(event.get("price")) and event["price"] > 0
+            and finite(event.get("risk")) and event["risk"] > 0)
 
 
 def is_model_signal(event):
