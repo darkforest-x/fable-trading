@@ -464,14 +464,68 @@ def evaluate_covered() -> None:
                 "combined_ledger":str(RESULTS / "covered_trade_ledger.csv.gz")})
 
 
+def _performance_summary(frame: pd.DataFrame, groups: list[str]) -> pd.DataFrame:
+    """Summarize executable, equal-notional returns without inventing leverage."""
+    rows = []
+    for key, part in frame.groupby(groups, dropna=False):
+        values = part.net_return.astype(float)
+        profits, losses = values[values > 0].sum(), values[values < 0].sum()
+        equity = values.cumsum()
+        drawdown = (equity - equity.cummax()).min() if len(equity) else np.nan
+        label = key if isinstance(key, tuple) else (key,)
+        rows.append(dict(zip(groups, label), trades=len(part), wins=int((values > 0).sum()),
+                         win_rate=float((values > 0).mean()), profit_factor=float(profits / abs(losses)) if losses else np.nan,
+                         expectancy=float(values.mean()), net_return=float(values.sum()), max_drawdown=float(drawdown),
+                         censored=int(part.censored.sum())))
+    return pd.DataFrame(rows)
+
+
+def report_covered() -> None:
+    """Publish incremental summaries and a standalone searchable executable ledger.
+
+    These are descriptive only: they use equal notional per independent signal;
+    no capital allocation, leverage, funding, or capacity model is implied.
+    """
+    ledger_path = RESULTS / "covered_trade_ledger.csv.gz"
+    coverage_path = RESULTS / "coverage_limited.csv"
+    if not ledger_path.exists() or not coverage_path.exists():
+        raise FileNotFoundError("run evaluate-covered before report-covered")
+    ledger, coverage = pd.read_csv(ledger_path), pd.read_csv(coverage_path)
+    if ledger.empty:
+        ledger = pd.DataFrame(columns=LEDGER_COLUMNS)
+    for name in ("entry_time", "exit_time", "signal_close_time"):
+        if name in ledger:
+            ledger[name] = pd.to_datetime(ledger[name], utc=True)
+    ledger["year"] = ledger.entry_time.dt.year if len(ledger) else pd.Series(dtype="int64")
+    ledger["month"] = ledger.entry_time.dt.strftime("%Y-%m") if len(ledger) else pd.Series(dtype="string")
+    summary = _performance_summary(ledger, ["venue", "timeframe_min"]) if len(ledger) else pd.DataFrame()
+    monthly = _performance_summary(ledger, ["venue", "timeframe_min", "year", "month"]) if len(ledger) else pd.DataFrame()
+    summary.to_csv(RESULTS / "incremental_summary_by_venue_timeframe.csv", index=False)
+    monthly.to_csv(RESULTS / "incremental_summary_by_month.csv", index=False)
+    coverage.status.value_counts().rename_axis("status").reset_index(name="cells").to_csv(RESULTS / "incremental_coverage_status.csv", index=False)
+    visible = ledger.copy()
+    for name in ("entry_time", "exit_time", "signal_close_time", "signal_bar_open"):
+        if name in visible:
+            visible[name] = visible[name].astype(str)
+    table = visible.to_html(index=False, escape=True, table_id="ledger")
+    document = f'''<!doctype html><html><head><meta charset="utf-8"><title>SPIKE V1 coverage-limited trade drilldown</title>
+<style>body{{font-family:system-ui;margin:20px}}input{{width:50%;padding:8px}}table{{border-collapse:collapse;font-size:12px}}th,td{{padding:4px 6px;border:1px solid #ddd;white-space:nowrap}}th{{position:sticky;top:0;background:#eee}}</style></head><body>
+<h1>SPIKE Burst V1: executable trade drilldown</h1><p>Coverage-limited current catalog; {len(ledger)} executable trades. Search is literal across every displayed field. Cost is 0.2% round trip; funding and capacity are unmodelled.</p>
+<input id="q" placeholder="Search venue, symbol, exit, date, feature…"><p id="count"></p>{table}
+<script>const q=document.querySelector('#q'), rows=[...document.querySelectorAll('#ledger tbody tr')], c=document.querySelector('#count');function f(){{let n=0,x=q.value.toLowerCase();rows.forEach(r=>{{let ok=r.innerText.toLowerCase().includes(x);r.hidden=!ok;if(ok)n++}});c.textContent=n+' / '+rows.length+' trades'}}q.oninput=f;f()</script></body></html>'''
+    (RESULTS / "covered_trade_drilldown.html").write_text(document, encoding="utf-8")
+    atomic_json(RESULTS / "incremental_report_manifest.json", {"generated_at":stamp(), "trade_rows":len(ledger), "coverage_cells":len(coverage), "coverage_statuses":coverage.status.value_counts().to_dict(), "files":{"drilldown":str(RESULTS / "covered_trade_drilldown.html"), "summary":str(RESULTS / "incremental_summary_by_venue_timeframe.csv"), "monthly":str(RESULTS / "incremental_summary_by_month.csv")}})
+
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument("phase", choices=("catalog", "fetch", "gate-timeframes", "evaluate", "evaluate-covered")); parser.add_argument("--max-markets", type=int); parser.add_argument("--venue", choices=tuple(VENUES))
+    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument("phase", choices=("catalog", "fetch", "gate-timeframes", "evaluate", "evaluate-covered", "report-covered")); parser.add_argument("--max-markets", type=int); parser.add_argument("--venue", choices=tuple(VENUES))
     args = parser.parse_args()
     if args.phase == "catalog": catalog()
     elif args.phase == "fetch": fetch(args.max_markets, args.venue)
     elif args.phase == "gate-timeframes": fetch_gate_timeframes(args.max_markets)
     elif args.phase == "evaluate": evaluate()
-    else: evaluate_covered()
+    elif args.phase == "evaluate-covered": evaluate_covered()
+    else: report_covered()
 
 
 if __name__ == "__main__": main()
