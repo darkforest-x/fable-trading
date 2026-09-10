@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL
-from yoyo.monitor.replay_chart import ReplayChartUnavailable, load_replay_chart
+from yoyo.monitor.replay_chart import ReplayChartUnavailable, _source_path, load_replay_chart
 from yoyo.monitor.store import Store
 
 
@@ -82,3 +82,24 @@ def test_replay_chart_api_uses_stored_event_identity_not_client_provenance(tmp_p
     assert len(received) == 1
     assert {key: received[0][key] for key in ("id", "source", "venue", "symbol", "bar_open_ms")} == {
         key: source[key] for key in ("id", "source", "venue", "symbol", "bar_open_ms")}
+
+
+def test_unicode_symbols_resolve_only_inside_the_expected_frozen_venue_directory(tmp_path):
+    binance = event(venue="binance", symbol="币安人生USDT", minutes=60)
+    source = write_frozen(tmp_path, symbol="币安人生USDT")
+    binance_path = tmp_path / "binance" / "币安人生USDT_30m.csv.gz"
+    binance_path.parent.mkdir(exist_ok=True)
+    source.replace(binance_path)
+    resolved, minutes = _source_path(binance, tmp_path)
+    assert resolved == binance_path.resolve() and minutes == 30
+    gate = event(venue="gate", symbol="龙虾_USDT", minutes=60)
+    direct = tmp_path.parent / "normalized_gate_direct"
+    direct.mkdir(exist_ok=True)
+    gate_path = direct / "龙虾_USDT_60m.csv.gz"
+    pd.DataFrame({"time": pd.date_range("1970-01-01", periods=400, freq="1h", tz="UTC"),
+                  "open": 1., "high": 1.1, "low": .9, "close": 1., "volume": 100.}).to_csv(
+                      gate_path, index=False, compression={"method": "gzip", "mtime": 0})
+    resolved, minutes = _source_path(gate, tmp_path)
+    assert resolved == gate_path.resolve() and minutes == 60
+    with pytest.raises(ReplayChartUnavailable, match="invalid_replay_symbol"):
+        _source_path(event(venue="binance", symbol="../escape"), tmp_path)

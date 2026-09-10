@@ -56,7 +56,7 @@ def test_replay_ledger_link_keeps_both_ids_evidence_and_delivery_isolation(tmp_p
     store, ledger, manifest, root = _setup(tmp_path)
     result = link_replay_events(store, ledger_path=ledger, manifest_path=manifest, ohlc_root=root)
     assert result == {"replay_events": 2, "matched_realized": 1, "matched_censored": 1,
-                      "unmatched": 0, "source_mismatch": 0, "ohlc_missing": 0, "linked": 2, "reconciled": 2}
+                      "unmatched": 0, "source_mismatch": 0, "ohlc_missing": 0, "source_path_error": 0, "linked": 2, "reconciled": 2}
     events = {event["bar_open_ms"]: event for event in store.list_events(limit=10, source="replay", confirmation="raw")}
     realized, censored = events[START], events[START + STEP]
     link = realized["covered_ledger"]
@@ -110,7 +110,7 @@ def test_reconcile_freezes_bytes_and_keeps_stale_audit_without_display_outcome(t
                                      stale_reason="mutable_ledger_artifact_replaced")
     assert result == {"replay_events": 2, "matched_realized": 1, "matched_censored": 1,
                       "unmatched": 0, "source_mismatch": 0, "ohlc_missing": 0,
-                      "linked": 2, "reconciled": 2, "invalidated": 2}
+                      "linked": 2, "reconciled": 2, "source_path_error": 0, "invalidated": 2}
     copied_ledger, copied_manifest = freeze_ledger_snapshot(
         ledger_path=ledger, manifest_path=manifest, snapshot_dir=snapshots)
     assert copied_ledger.read_bytes() == ledger.read_bytes()

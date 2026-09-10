@@ -162,7 +162,7 @@ def build_updates(events: Iterable[dict], *, ledger_path: Path, manifest_path: P
     ohlc_hashes: dict[Path, str] = {}
     updates: list[tuple[str, dict]] = []
     stats = {"replay_events": 0, "matched_realized": 0, "matched_censored": 0,
-             "unmatched": 0, "source_mismatch": 0, "ohlc_missing": 0}
+             "unmatched": 0, "source_mismatch": 0, "ohlc_missing": 0, "source_path_error": 0}
     for event in events:
         if event.get("source") != "replay" or event.get("confirmation") != "raw":
             continue
@@ -183,10 +183,15 @@ def build_updates(events: Iterable[dict], *, ledger_path: Path, manifest_path: P
             continue
         try:
             source_path, native_minutes = _source_path(event, Path(ohlc_root))
-        except ReplayChartUnavailable:
-            stats["ohlc_missing"] += 1
+        except ReplayChartUnavailable as error:
+            if error.code == "frozen_ohlc_missing":
+                stats["ohlc_missing"] += 1
+                status = "ohlc_missing"
+            else:
+                stats["source_path_error"] += 1
+                status = "source_path_error"
             updates.append(_unlinked_update(event, artifact_evidence=artifact_evidence,
-                                            link_status="ohlc_missing", reason="frozen_ohlc_missing", row=row))
+                                            link_status=status, reason=error.code, row=row))
             continue
         if source_path not in ohlc_hashes:
             ohlc_hashes[source_path] = _sha256(source_path)

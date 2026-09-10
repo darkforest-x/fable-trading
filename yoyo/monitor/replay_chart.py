@@ -10,7 +10,6 @@ historical review context and are never passed to the live scanner or YOLO.
 from __future__ import annotations
 
 import hashlib
-import re
 from pathlib import Path
 
 import numpy as np
@@ -36,7 +35,7 @@ def _source_path(event: dict, root: Path) -> tuple[Path, int]:
     venue, symbol = event.get("venue"), event.get("symbol")
     if venue not in {"binance", "okx", "gate"} or not isinstance(symbol, str):
         raise ReplayChartUnavailable("unsupported_replay_provenance")
-    if not re.fullmatch(r"[A-Z0-9_-]{1,80}", symbol):
+    if not (1 <= len(symbol) <= 80) or "\x00" in symbol or "/" in symbol or "\\" in symbol:
         raise ReplayChartUnavailable("invalid_replay_symbol")
     base = root.resolve()
     if venue == "gate":
