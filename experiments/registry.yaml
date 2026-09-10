@@ -7663,13 +7663,24 @@ experiments:
 
   - experiment_id: exp-spike-burst-indicator-20260910-v1
     source_repo: darkforest-x/fable-trading
-    status: active
+    source_commit: 989fb657251b5beb6ff895bb57d5a815eace78f6
+    status: accepted
     question: Can a standalone closed-bar explosive launch indicator implement the owner requested morphology causally?
-    single_variable: Owner-authorized standalone morphology product; fixed combined conditions, engineering verification only.
-    holdout_consumed: false
+    single_variable: Owner-authorized standalone morphology product; documented price-first design revision, no profit
+      tuning.
+    result: 'Engineering accepted: saved private Pine version2;81 helper and35 actual-state native assertions,22 Python
+      tests;USELESS1H price-first andETH4H release-confirmation chart checks. Profit advantage not evaluated.'
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
-    canonical_report: analysis/html/p0_spike_burst_indicator_20260910.html
-    artifacts: []
-    notes: New private Pine script, no production or notification changes; thresholds are not profit optimized.
+    canonical_report: analysis/p0_spike_burst_indicator_20260910.md
+    artifacts:
+    - spike-burst-indicator-20260910-source
+    - spike-burst-indicator-20260910-report-source
+    - spike-burst-indicator-20260910-report-html
+    - spike-burst-indicator-20260910-native-contract-probe
+    - spike-burst-indicator-20260910-native-state-probe
+    - spike-burst-indicator-20260910-verification
+    notes: Owner all-dates authorization; first spec engineering exposure1, revised price-first spec exposure2. Historical
+      chart R is uncosted unrealized reference, not fresh OOS. No model promotion, monitor, Bark, or order changes.

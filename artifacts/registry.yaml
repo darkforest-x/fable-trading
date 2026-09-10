@@ -26104,3 +26104,94 @@ artifacts:
     production_eligible: false
     notes: Fixed baseline/volume4/expansion3 on earlier and known periods, two historical passes including independent
       audit. No pristine OOS or production eligibility; incomplete funding.
+
+  - artifact_id: spike-burst-indicator-20260910-source
+    artifact_type: config
+    role: standalone_pine_engineering
+    source_repo: darkforest-x/fable-trading
+    source_commit: 989fb657251b5beb6ff895bb57d5a815eace78f6
+    generator_commit: 6d357fc0046553b424a995c5e709cdf544bc06e4
+    source_path: yoyo/evaluation/pine/spike_burst_v1.pine
+    sha256: 18bbb6955fdf12e124688003799c44fc2a641f11a342edcf478157b1c9641fe2
+    size_bytes: 23627
+    storage_uri: repo://yoyo/evaluation/pine/spike_burst_v1.pine
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Native engineering acceptance only. Private TV version2; 81+35 native checks,22 Python tests. Seen-case timing
+      revision and unrealized chart R exposed; no account profit validation. Original monitor and notifications unchanged.
+  - artifact_id: spike-burst-indicator-20260910-report-source
+    artifact_type: report
+    role: standalone_pine_engineering
+    source_repo: darkforest-x/fable-trading
+    source_commit: 989fb657251b5beb6ff895bb57d5a815eace78f6
+    generator_commit: 6d357fc0046553b424a995c5e709cdf544bc06e4
+    source_path: analysis/p0_spike_burst_indicator_20260910.md
+    sha256: a96ec361ec7428f612bc6ab7bd28cda3a856ca5785aebddfcb06cefd0e76f337
+    size_bytes: 33824
+    storage_uri: repo://analysis/p0_spike_burst_indicator_20260910.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Native engineering acceptance only. Private TV version2; 81+35 native checks,22 Python tests. Seen-case timing
+      revision and unrealized chart R exposed; no account profit validation. Original monitor and notifications unchanged.
+  - artifact_id: spike-burst-indicator-20260910-report-html
+    artifact_type: report
+    role: standalone_pine_engineering
+    source_repo: darkforest-x/fable-trading
+    source_commit: 989fb657251b5beb6ff895bb57d5a815eace78f6
+    generator_commit: 6d357fc0046553b424a995c5e709cdf544bc06e4
+    source_path: analysis/html/p0_spike_burst_indicator_20260910.html
+    sha256: 5e08eefe42ff53d23c732a3282d790e8195fd0ba0386fa32b1685c47c1962f39
+    size_bytes: 626358
+    storage_uri: repo://analysis/html/p0_spike_burst_indicator_20260910.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Native engineering acceptance only. Private TV version2; 81+35 native checks,22 Python tests. Seen-case timing
+      revision and unrealized chart R exposed; no account profit validation. Original monitor and notifications unchanged.
+  - artifact_id: spike-burst-indicator-20260910-native-contract-probe
+    artifact_type: config
+    role: standalone_pine_engineering
+    source_repo: darkforest-x/fable-trading
+    source_commit: 989fb657251b5beb6ff895bb57d5a815eace78f6
+    generator_commit: 6d357fc0046553b424a995c5e709cdf544bc06e4
+    source_path: experiments/active/exp-spike-burst-indicator-20260910-v1/results/native_contract_probe_v2.pine
+    sha256: 6ff94ba12f16543ecf7bd8abdae892ff7f415a2a3241c5be259b678bffe258a4
+    size_bytes: 18575
+    storage_uri: repo://experiments/active/exp-spike-burst-indicator-20260910-v1/results/native_contract_probe_v2.pine
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Native engineering acceptance only. Private TV version2; 81+35 native checks,22 Python tests. Seen-case timing
+      revision and unrealized chart R exposed; no account profit validation. Original monitor and notifications unchanged.
+  - artifact_id: spike-burst-indicator-20260910-native-state-probe
+    artifact_type: config
+    role: standalone_pine_engineering
+    source_repo: darkforest-x/fable-trading
+    source_commit: 989fb657251b5beb6ff895bb57d5a815eace78f6
+    generator_commit: 6d357fc0046553b424a995c5e709cdf544bc06e4
+    source_path: experiments/active/exp-spike-burst-indicator-20260910-v1/results/native_state_probe_v2.pine
+    sha256: 3d33b13635aeed4afb9825095cd3a03bec31ebbc517d26697debf5c648788582
+    size_bytes: 28026
+    storage_uri: repo://experiments/active/exp-spike-burst-indicator-20260910-v1/results/native_state_probe_v2.pine
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Native engineering acceptance only. Private TV version2; 81+35 native checks,22 Python tests. Seen-case timing
+      revision and unrealized chart R exposed; no account profit validation. Original monitor and notifications unchanged.
+  - artifact_id: spike-burst-indicator-20260910-verification
+    artifact_type: manifest
+    role: standalone_pine_engineering
+    source_repo: darkforest-x/fable-trading
+    source_commit: 989fb657251b5beb6ff895bb57d5a815eace78f6
+    generator_commit: 6d357fc0046553b424a995c5e709cdf544bc06e4
+    source_path: experiments/active/exp-spike-burst-indicator-20260910-v1/results/verification.json
+    sha256: 1bac6bc79c2a66a5409eb06a4172c82a7e923f819c445a5f6dfa3eb64368246e
+    size_bytes: 7591
+    storage_uri: repo://experiments/active/exp-spike-burst-indicator-20260910-v1/results/verification.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Native engineering acceptance only. Private TV version2; 81+35 native checks,22 Python tests. Seen-case timing
+      revision and unrealized chart R exposed; no account profit validation. Original monitor and notifications unchanged.
