@@ -60,6 +60,10 @@ def main():
     supplied = frame[['open', 'high', 'low', 'close', 'md', 'sb', 'atr', 'ropeHigh', 'ready']].copy()
     supplied['legacy_confirmed'] = old.confirmed.astype(bool)
     supplied['legacy_parent_high'] = old.frozen_parent_high
+    supplied['legacy_parent_low'] = [
+        float(old.prog_prior_low.iloc[int(parent)]) if np.isfinite(parent) else np.nan
+        for parent in old.parent_i
+    ]
     supplied['data_gap'] = False
     supplied['confirmed'] = True
     broken = frozen_old_gate()(supplied)
@@ -131,7 +135,7 @@ def main():
                     repaired_v5=int(reviewed.repaired_v5.sum()),
                     same_bar=sum(r['wait_bars']==0 for r in linked), delayed=sum(r['wait_bars']>0 for r in linked)),
         native_probes=checks, final_events=linked, prefix_passed=True,
-        trace_sha256=sha(trace), holdout_consumption=1, economic_evaluation=False,
+        trace_sha256=sha(trace), repair_configuration=2, holdout_consumption=1, economic_evaluation=False,
         limitations='Known-history software regression; not false-positive accuracy, profitability or blind OOS.')
     (output / 'regression.json').write_text(json.dumps(receipt, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({k: receipt[k] for k in ('counts','native_probes','prefix_passed')},ensure_ascii=False,indent=2))

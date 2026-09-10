@@ -122,6 +122,9 @@ float denseHitsRaw = math.sum(dense[1] ? 1.0 : 0.0, breakoutLookback)
 float denseHits = segmentIndex >= breakoutLookback ? denseHitsRaw : na
 bool recentDense = denseHits > 0
 float priorHigh = ta.highest(high[1], breakoutLookback)
+// Auxiliary parent-range support only. It does not alter V4 candidate,
+// confirmation-quality, or cooldown conditions.
+float priorLow = ta.lowest(low[1], breakoutLookback)
 float move3 = close - close[3]
 float advance3 = atr[3] > 0 ? move3 / atr[3] : na
 float volumeBase3 = volumeMedian[3]
@@ -146,6 +149,7 @@ var bool previousEarlyRaw = false
 var int lastAcceptedBar = na
 var int parentBar = na
 var float parentHigh = na
+var float parentLow = na
 var float parentPrice = na
 var bool parentConfirmed = false
 bool legacyEarlySignal = false
@@ -153,12 +157,14 @@ bool legacyConfirmedSignal = false
 int legacyConfirmationAge = na
 float legacyConfirmationParentPrice = na
 float legacyConfirmationParentHigh = na
+float legacyConfirmationParentLow = na
 if barstate.isconfirmed
     if dataGap
         lastAcceptedBar := na
         previousEarlyRaw := false
         parentBar := na
         parentHigh := na
+        parentLow := na
         parentPrice := na
         parentConfirmed := false
     bool cooldownPassed = na(lastAcceptedBar) or bar_index - lastAcceptedBar >= cooldownBars
@@ -168,12 +174,14 @@ if barstate.isconfirmed
         lastAcceptedBar := bar_index
         parentBar := bar_index
         parentHigh := priorHigh
+        parentLow := priorLow
         parentPrice := close
         parentConfirmed := false
     int age = na(parentBar) ? na : bar_index - parentBar
     if not na(age) and age > confirmMaxAge
         parentBar := na
         parentHigh := na
+        parentLow := na
         parentPrice := na
         parentConfirmed := false
     if not na(parentBar) and not parentConfirmed and age >= 0 and age <= confirmMaxAge and close > parentHigh and confirmQuality
@@ -181,6 +189,7 @@ if barstate.isconfirmed
         legacyConfirmationAge := age
         legacyConfirmationParentPrice := parentPrice
         legacyConfirmationParentHigh := parentHigh
+        legacyConfirmationParentLow := parentLow
         parentConfirmed := true
 // END LEGACY ENGINE
 
@@ -191,6 +200,7 @@ if barstate.isconfirmed
 var int bodySupportBar = na
 var int legacyBar = na
 var float legacyParentHigh = na
+var float legacyParentLow = na
 var bool structurePending = false
 bool confirmedSignal = false
 int confirmationAge = na
@@ -203,6 +213,7 @@ if barstate.isconfirmed
         bodySupportBar := na
         legacyBar := na
         legacyParentHigh := na
+        legacyParentLow := na
         structurePending := false
         pendingWhy := dataGap ? "gap" : "unknown"
     else
@@ -212,20 +223,23 @@ if barstate.isconfirmed
         else if fullBodyAbove
             bodySupportBar := bar_index
         // A later V4 confirmation replaces older pending provenance. It must
-        // carry a finite parent high from this closed bar; unknown provenance
-        // is never imported into the structural state.
-        if legacyConfirmedSignal and not na(legacyConfirmationParentHigh)
+        // carry a finite, ordered parent range from this closed bar; unknown
+        // provenance is never imported into the structural state.
+        if legacyConfirmedSignal and not na(legacyConfirmationParentHigh) and not na(legacyConfirmationParentLow) and legacyConfirmationParentLow <= legacyConfirmationParentHigh
             legacyBar := bar_index
             legacyParentHigh := legacyConfirmationParentHigh
+            legacyParentLow := legacyConfirmationParentLow
             structurePending := true
-        if structurePending and (na(legacyParentHigh) or close <= legacyParentHigh)
-            // Crossing the frozen parent high invalidates that provenance. This
-            // is a structural failure, deliberately not an arbitrary timer.
+        if structurePending and (na(legacyParentHigh) or na(legacyParentLow) or close < legacyParentLow)
+            // Strictly below the frozen parent range is a structural failure,
+            // deliberately not an arbitrary timer. A parent-range retest may
+            // wait for later body support and MD recovery.
             legacyBar := na
             legacyParentHigh := na
+            legacyParentLow := na
             structurePending := false
             pendingWhy := "parent_broken"
-        else if structurePending and not na(bodySupportBar) and not na(legacyParentHigh) and not na(md[1]) and close > ropeHigh and close > legacyParentHigh and md > sb and md > md[1]
+        else if structurePending and not na(bodySupportBar) and not na(legacyParentHigh) and not na(legacyParentLow) and not na(md[1]) and close > ropeHigh and close > legacyParentHigh and md > sb and md > md[1]
             confirmedSignal := true
             confirmationAge := bar_index - legacyBar
             // Consume this provenance. A new V4 event may arm another final
@@ -423,6 +437,7 @@ plot(barstate.isconfirmed ? bodySupportBar : na, "V5 实体支持K线", display=
 plot(barstate.isconfirmed ? legacyBar : na, "V5 V4确认K线", display=display.data_window)
 plot(barstate.isconfirmed ? (legacyConfirmedSignal ? 1 : 0) : na, "V5 本根V4旧确认诊断", display=display.data_window)
 plot(barstate.isconfirmed ? legacyParentHigh : na, "V5 冻结V4父高", display=display.data_window)
+plot(barstate.isconfirmed ? legacyParentLow : na, "V5 冻结V4父低", display=display.data_window)
 plot(barstate.isconfirmed ? (confirmedSignal ? 1 : 0) : na, "V5 最终确认", display=display.data_window)
 plot(barstate.isconfirmed ? pendingWhyCode : na, "V5 等待原因代码", display=display.data_window)
 plot(confirmedSignal ? confirmationAge : na, "V5 确认等待根数", display=display.data_window)

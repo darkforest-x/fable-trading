@@ -18,7 +18,7 @@ import pandas as pd
 
 REQUIRED = (
     "open", "high", "low", "close", "md", "sb", "atr", "ropeHigh",
-    "legacy_confirmed", "legacy_parent_high", "ready", "data_gap", "confirmed",
+    "legacy_confirmed", "legacy_parent_high", "legacy_parent_low", "ready", "data_gap", "confirmed",
 )
 
 
@@ -49,12 +49,14 @@ class _State:
     body_support_i: int | None = None
     legacy_i: int | None = None
     legacy_parent_high: float | None = None
+    legacy_parent_low: float | None = None
     pending: bool = False
     prior_md: float | None = None
 
     def clear(self) -> None:
         self.body_support_i = self.legacy_i = None
         self.legacy_parent_high = None
+        self.legacy_parent_low = None
         self.pending = False
 
 
@@ -64,11 +66,13 @@ def detect(frame: pd.DataFrame) -> pd.DataFrame:
     A full candle body over ``ropeHigh`` and a supplied V4 confirmation may
     arrive in either order; neither is a same-candle requirement. The body
     persists only during a continuous close-above-rope run. A V4 confirmation
-    freezes its supplied parent high, supersedes an older pending provenance,
-    and is consumed after one final event. Gaps and unknown values clear all
-    provenance rather than synthesising a continuation. The frame may end with
-    one unconfirmed tip; an unconfirmed or unknown interior row is rejected
-    because this oracle does not model TradingView intrabar revisions.
+    freezes its supplied parent range, supersedes an older pending provenance,
+    and is consumed after one final event. A close strictly below the frozen
+    parent low cancels it; an in-range retest may wait for later support. Gaps
+    and unknown values clear all provenance rather than synthesising a
+    continuation. The frame may end with one unconfirmed tip; an unconfirmed
+    or unknown interior row is rejected because this oracle does not model
+    TradingView intrabar revisions.
     """
     missing = [name for name in REQUIRED if name not in frame]
     if missing:
@@ -103,18 +107,27 @@ def detect(frame: pd.DataFrame) -> pd.DataFrame:
                 elif full_body:
                     state.body_support_i = i
 
-                if _true(row.legacy_confirmed) and _finite(row.legacy_parent_high):
+                parent_range_valid = (
+                    _true(row.legacy_confirmed)
+                    and _finite(row.legacy_parent_high)
+                    and _finite(row.legacy_parent_low)
+                    and float(row.legacy_parent_low) <= float(row.legacy_parent_high)
+                )
+                if parent_range_valid:
                     state.legacy_i = i
                     state.legacy_parent_high = float(row.legacy_parent_high)
+                    state.legacy_parent_low = float(row.legacy_parent_low)
                     state.pending = True
-                if state.pending and c <= float(state.legacy_parent_high):
+                if state.pending and c < float(state.legacy_parent_low):
                     state.legacy_i = None
                     state.legacy_parent_high = None
+                    state.legacy_parent_low = None
                     state.pending = False
                     why = "parent_broken"
                 elif (
                     state.pending and state.body_support_i is not None
-                    and state.legacy_parent_high is not None and state.prior_md is not None
+                    and state.legacy_parent_high is not None and state.legacy_parent_low is not None
+                    and state.prior_md is not None
                     and c > rope and c > state.legacy_parent_high
                     and md > sb and md > state.prior_md
                 ):
@@ -134,12 +147,13 @@ def detect(frame: pd.DataFrame) -> pd.DataFrame:
             "body_support_i": state.body_support_i,
             "legacy_i": state.legacy_i,
             "legacy_parent_high": state.legacy_parent_high,
+            "legacy_parent_low": state.legacy_parent_low,
             "pending": state.pending,
             "confirmed": event,
             "why_pending": why,
         })
     result = pd.DataFrame(rows, index=frame.index)
-    for name in ("body_support_i", "legacy_i", "legacy_parent_high"):
+    for name in ("body_support_i", "legacy_i", "legacy_parent_high", "legacy_parent_low"):
         result[name] = pd.to_numeric(result[name], errors="coerce")
     result["pending"] = result["pending"].astype(bool)
     result["confirmed"] = result["confirmed"].astype(bool)

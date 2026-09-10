@@ -22,7 +22,7 @@ def fixture(n=24):
     return pd.DataFrame({
         "open": 99.8, "high": 101.0, "low": 99.0, "close": 100.5,
         "md": -0.5, "sb": -0.6, "atr": 1.0, "ropeHigh": 100.0,
-        "legacy_confirmed": False, "legacy_parent_high": 100.5,
+        "legacy_confirmed": False, "legacy_parent_high": 100.5, "legacy_parent_low": 99.5,
         "ready": True, "data_gap": False, "confirmed": True,
     }, index=pd.RangeIndex(n))
 
@@ -32,8 +32,8 @@ def body(frame, i, md=-0.2, sb=-0.3):
     frame.loc[i, ["open", "high", "low", "close", "md", "sb"]] = [101.0, 101.6, 99.0, 101.3, md, sb]
 
 
-def legacy(frame, i, parent=100.5, md=-0.2, sb=-0.3):
-    frame.loc[i, ["open", "high", "low", "close", "md", "sb", "legacy_confirmed", "legacy_parent_high"]] = [99.8, 101.5, 99.0, 101.3, md, sb, True, parent]
+def legacy(frame, i, parent=100.5, parent_low=99.5, md=-0.2, sb=-0.3):
+    frame.loc[i, ["open", "high", "low", "close", "md", "sb", "legacy_confirmed", "legacy_parent_high", "legacy_parent_low"]] = [99.8, 101.5, 99.0, 101.3, md, sb, True, parent, parent_low]
 
 
 def hold_above_parent(frame, start, end, md=-0.2, sb=-0.3):
@@ -46,14 +46,24 @@ def test_pine_keeps_v4_feature_legacy_risk_and_visual_sections_frozen():
     v5 = (ROOT / "yoyo/evaluation/pine/spike_burst_v5.pine").read_text()
     for begin, end in (
         ("// BEGIN UNCHANGED V2 RISK HELPERS", "// END UNCHANGED V2 RISK HELPERS"),
-        ("// BEGIN TWO STAGE FIELDS", "// END TWO STAGE FIELDS"),
         ("// BEGIN REFERENCE STATE", "// END REFERENCE STATE"),
         ("// BEGIN V2 RISK BOX DISPLAY", "// END V2 RISK BOX DISPLAY"),
     ):
         assert _section(v5, begin, end) == _section(v4, begin, end)
+    fields = _section(v5, "// BEGIN TWO STAGE FIELDS", "// END TWO STAGE FIELDS")
+    fields = fields.replace("// Auxiliary parent-range support only. It does not alter V4 candidate,\n// confirmation-quality, or cooldown conditions.\nfloat priorLow = ta.lowest(low[1], breakoutLookback)\n", "")
+    assert fields == _section(v4, "// BEGIN TWO STAGE FIELDS", "// END TWO STAGE FIELDS")
     legacy_engine = _section(v5, "// BEGIN LEGACY ENGINE", "// END LEGACY ENGINE")
     legacy_engine = legacy_engine.replace("// V5 intentionally does not display or alert this internal V4 confirmation.\n", "")
     legacy_engine = legacy_engine.replace(": retained byte-for-byte in behaviour for provenance only.", ": deliberately independent of risk-reference holding state.")
+    for extra in (
+        "var float parentLow = na\n",
+        "float legacyConfirmationParentLow = na\n",
+        "        parentLow := na\n",
+        "        parentLow := priorLow\n",
+        "        legacyConfirmationParentLow := parentLow\n",
+    ):
+        legacy_engine = legacy_engine.replace(extra, "")
     for old, new in (
         ("legacyEarlySignal", "earlySignal"),
         ("legacyConfirmedSignal", "confirmedSignal"),
@@ -70,7 +80,7 @@ def test_pine_keeps_v4_feature_legacy_risk_and_visual_sections_frozen():
     assert len(alerts) == 2 and all("legacy" not in line.lower() for line in alerts)
     for obsolete in ("minQuiet", "nearAtr", "releaseBars", "quietCount", "quietHigh", "quietLow", "frozenBand", "releaseBar"):
         assert obsolete not in v5
-    assert "V5 本根V4旧确认诊断" in v5 and "V5 冻结V4父高" in v5
+    assert "V5 本根V4旧确认诊断" in v5 and "V5 冻结V4父高" in v5 and "V5 冻结V4父低" in v5
     assert "plot.style_histogram" not in v5 and "hline(0, \"零轴\"" in v5
 
 
@@ -116,12 +126,27 @@ def test_close_at_rope_clears_body_but_keeps_valid_parent_waiting():
     assert detect(f).confirmed.iloc[6]
 
 
-def test_close_at_or_below_frozen_parent_high_cancels_old_pending_provenance():
+def test_retest_below_parent_high_but_above_low_survives_for_later_full_body():
     f = fixture()
-    legacy(f, 3, parent=101.4, md=-0.3, sb=-0.4)
+    legacy(f, 2, md=-0.4, sb=-0.5)
+    f.loc[3, ["open", "high", "low", "close", "md", "sb"]] = [99.8, 101.0, 99.0, 100.25, -0.3, -0.4]
     out = detect(f)
-    assert out.why_pending.iloc[3] == "parent_broken"
-    body(f, 4, md=-0.1, sb=-0.2)
+    assert out.pending.iloc[3] and out.why_pending.iloc[3] == "await_body"
+    body(f, 4, md=-0.2, sb=-0.3)
+    assert detect(f).confirmed.iloc[4]
+    equal_low = fixture()
+    legacy(equal_low, 2, md=-0.4, sb=-0.5)
+    equal_low.loc[3, ["open", "high", "low", "close", "md", "sb"]] = [99.8, 101.0, 99.0, 99.5, -0.3, -0.4]
+    assert detect(equal_low).pending.iloc[3]
+
+
+def test_close_strictly_below_frozen_parent_low_cancels_old_pending_provenance():
+    f = fixture()
+    legacy(f, 3, parent=101.4, parent_low=101.2, md=-0.3, sb=-0.4)
+    f.loc[4, ["open", "high", "low", "close", "md", "sb"]] = [99.8, 101.5, 99.0, 101.1, -0.2, -0.3]
+    out = detect(f)
+    assert out.why_pending.iloc[4] == "parent_broken"
+    body(f, 5, md=-0.1, sb=-0.2)
     assert not detect(f).confirmed.any()
 
 
@@ -170,10 +195,14 @@ def test_gap_or_unknown_clears_body_and_pending_provenance(column, value, why):
     assert not out.confirmed.any()
 
 
-def test_unknown_legacy_provenance_never_arms_and_prior_atr_is_not_required():
+def test_unknown_or_inverted_legacy_provenance_never_arms_and_prior_atr_is_not_required():
     f = fixture()
     f.loc[3, "legacy_confirmed"] = True
-    f.loc[3, "legacy_parent_high"] = np.nan
+    f.loc[3, "legacy_parent_low"] = np.nan
+    body(f, 4, md=-0.2, sb=-0.3)
+    assert not detect(f).confirmed.any()
+    f = fixture()
+    legacy(f, 3, parent=99.0, parent_low=100.0, md=-0.3, sb=-0.4)
     body(f, 4, md=-0.2, sb=-0.3)
     assert not detect(f).confirmed.any()
     f = fixture()
