@@ -17,12 +17,11 @@
     system: ["运行状态", "行情、扫描与通知，每个环节都清晰可见。"],
   };
   const eventNames = { tv_start: "原始 V1 启动", yolo_confirmed: "YOLO 补充确认" };
-  const MODEL_PROTOCOL = "imacd-yolo-confirmation-monitor-v1";
   const modelStates = { pending: "等待确认", confirmed: "模型已通过", invalidated: "结构失效", expired: "等待已到期", error: "检测异常", disabled: "周期已关闭" };
-  const TV_PROTOCOL = "imacd-tv-visible-start-monitor-v3";
-  const TV_PROFILE = "imacd-v2.2-focus12-band0.10-marks-off";
   const TV_SETTINGS = "近零至少 12 根 · 0.1 ATR · 普通系统标记关闭";
   const TV_INTERVALS = new Map([["30", "30"], ["60", "60"], ["240", "240"]]);
+  const apiTimeframe = (value) => ({ "30": "30m", "60": "1H", "240": "4H", 30: "30m", 60: "1H", 240: "4H" }[value] || null);
+  const uiTimeframe = (value) => ({ "30m": "30", "1H": "60", "4H": "240", "30": "30", "60": "60", "240": "240", 30: "30", 60: "60", 240: "240" }[value] || null);
   const timeframeLabel = (value) => ({ "30": "30m", "60": "1H", "240": "4H", 30: "30m", 60: "1H", 240: "4H" }[value] || value || "—");
   const phaseNames = {
     building: "蓄势中", accumulating: "蓄势中", accumulation: "蓄势中", compression: "密集蓄势",
@@ -39,9 +38,9 @@
   const sideArrow = (side) => side === "short" ? "↓" : side === "long" ? "↑" : "·";
   const shortSymbol = (symbol) => String(symbol || "—").replace(/-(USDT|USD)-SWAP$/, "").replace(/USDT\.P$/, "");
   const focusRun = (item) => item.near_zero_bars;
-  const modelProtocol = () => state.status?.runtime?.signal_kind === "yolo_confirmed" && state.status?.protocol === MODEL_PROTOCOL;
-  const isConfirmed = (item) => item?.confirmation === "yolo" || item?.confirmation === "raw_yolo" || item?.kind === "yolo_confirmed" && item.protocol === MODEL_PROTOCOL && item.model?.status === "confirmed";
-  const isCandidate = (item) => item?.confirmation === "raw" || item?.confirmation === "raw_yolo" || item?.kind === "tv_start" && item.protocol === TV_PROTOCOL;
+  const modelProtocol = () => state.status?.runtime?.signal_kind === "yolo_confirmed" && typeof state.status?.protocol === "string";
+  const isConfirmed = (item) => item?.confirmation === "yolo" || item?.confirmation === "raw_yolo";
+  const isCandidate = (item) => item?.confirmation === "raw" || item?.confirmation === "raw_yolo";
   const isDirectRecord = (item) => isCandidate(item) && TV_INTERVALS.has(String(item.timeframe));
   const sourceName = (item) => item?.source === "replay" ? "历史回放" : "实时";
   const milliseconds = (value) => typeof value === "string" ? Date.parse(value) : Number(value);
@@ -74,7 +73,9 @@
   const DISPLAY_ONLY_NOTE = "仅前端 · Bark 已关闭";
   const runtimeTimeframes = (field) => {
     const values = state.status?.runtime?.[field];
-    return Array.isArray(values) && values.every((value) => TV_INTERVALS.has(value)) ? values : null;
+    if (!Array.isArray(values)) return null;
+    const normalized = values.map(uiTimeframe);
+    return normalized.every((value) => value && TV_INTERVALS.has(value)) ? normalized : null;
   };
   const displayOnlyTimeframes = () => runtimeTimeframes("display_only_timeframes") || (runtimeTimeframes("bark_timeframes") ? (runtimeTimeframes("timeframes") || []).filter((value) => !runtimeTimeframes("bark_timeframes").includes(value)) : []);
   const isDisplayOnly = (item) => displayOnlyTimeframes().includes(item?.timeframe);
@@ -111,7 +112,7 @@
     const age = now - Number(item.bar_close_ms);
     const confirmed = isConfirmed(item), direct = directReceipt(item);
     const directTimeframes = state.status?.runtime?.direct_timeframes;
-    const eligible = confirmed ? modelProtocol() : Boolean(direct && twoStage() && Array.isArray(directTimeframes) && directTimeframes.includes(item.timeframe));
+    const eligible = confirmed ? item?.source === "live" : Boolean(direct && twoStage() && Array.isArray(directTimeframes) && directTimeframes.includes(item.timeframe));
     const record = confirmed ? item : direct;
     return record?.is_fresh === true && eligible && !state.errors[confirmed ? "signals" : "directSignals"] && !state.errors.status &&
       finite(state.status?.now_ms) && finite(state.statusReceivedAt) && finite(minutes) && Number(minutes) > 0 && finite(item.bar_close_ms) && age >= 0 && age <= Number(minutes) * 60000;
@@ -300,7 +301,7 @@
     const minutes = state.status?.runtime?.fresh_minutes;
     const clockLabel = direct ? "箭头收盘" : "模型确认";
     const group = (heading, list, recent) => list.length ? `<div class="signal-group-heading${recent ? " fresh-heading" : ""}"><h3>${heading}<span class="group-count">${list.length}</span></h3><span>${recent ? `${clockLabel}后 ${escapeHTML(number(minutes))} 分钟内` : confirmed ? "按模型确认时间排列" : "按原箭头时间排列"}</span></div><div class="signal-card-grid">${list.map((item) => signalCardHTML(item, now)).join("")}</div>` : "";
-    const freshnessKnown = (direct ? twoStage() : modelProtocol()) && finite(minutes) && Number(minutes) > 0 && finite(state.status?.now_ms) && finite(state.statusReceivedAt);
+    const freshnessKnown = (direct ? twoStage() : true) && finite(minutes) && Number(minutes) > 0 && finite(state.status?.now_ms) && finite(state.statusReceivedAt);
     const pendingFreshness = fetchError || state.errors.status || !freshnessKnown;
     const noFresh = notifying && !fresh.length && items.length ? `<div id="fresh-empty" class="fresh-empty"><strong>${pendingFreshness ? "新鲜状态待同步" : direct ? "当前筛选下暂无新鲜启动" : "当前筛选下暂无新鲜确认"}</strong><span>${pendingFreshness ? "保留已获取的记录，状态同步后重新确认时效。" : `${clockLabel} ${escapeHTML(number(minutes))} 分钟内的信号会优先出现在这里。下方可回看此前记录。`}</span></div>` : "";
     $("signal-rows").innerHTML = noFresh + group(direct ? "新鲜启动" : "新鲜确认", freshVisible, true) + group(confirmed ? fresh.length ? "更早确认" : "已记录确认" : direct ? "已记录启动" : "指标候选 · 模型等待状态", earlierVisible, false);
@@ -544,6 +545,13 @@
     state.chartController = controller;
     state.chartKey = key;
     state.chart = null;
+    if (item.source === "replay") {
+      // The live cache is OKX's current observation.  It cannot establish a
+      // historical replay's venue, bar, or later path.
+      $("chart-container").innerHTML = '<div class="chart-placeholder">历史回放未提供可核验的同源 OHLC。<br>不会以当前 OKX 行情代替回放图表。</div>';
+      $("chart-hint").textContent = "历史信号可查看；图表需后端提供对应时点的原始 OHLC";
+      return;
+    }
     $("chart-container").innerHTML = '<div class="chart-placeholder">正在加载真实行情…</div>';
     $("chart-hint").textContent = "仅展示已返回的真实 K 线";
     const timeout = setTimeout(() => controller.abort(), 20000);
@@ -763,11 +771,12 @@
     $("refresh-button").classList.add("loading");
     try {
       const source = encodeURIComponent(state.signalSource);
+      const timeframe = state.timeframe === "all" ? "" : `&timeframe=${encodeURIComponent(apiTimeframe(state.timeframe) || "")}`;
       const results = await Promise.allSettled([
         api("/api/status"),
-        api(`/api/signals?limit=2000&source=${source}&confirmation=yolo`),
-        api(`/api/signals?limit=2000&source=${source}&confirmation=raw`),
-        api(`/api/signals?limit=2000&source=${source}&confirmation=raw_yolo`),
+        api(`/api/signals?limit=2000&source=${source}&confirmation=yolo${timeframe}`),
+        api(`/api/signals?limit=2000&source=${source}&confirmation=raw${timeframe}`),
+        api(`/api/signals?limit=2000&source=${source}&confirmation=raw_yolo${timeframe}`),
       ]);
       const keys = ["status", "signals", "directSignals", "rawYoloSignals"];
       let anySuccess = false;
