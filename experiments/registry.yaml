@@ -8017,18 +8017,19 @@ experiments:
       overview is descriptive and not a shared-control tournament.
   - experiment_id: exp-spike-v3-layered-display-20260910-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: b79c863286bf27a57b31c74dfef2073d917ced1c
+    source_commit: 9045983d8a0b935c9cb07d5bb27b538374634228
     status: active
     question: Can display ownership reduce repeated-entry implications while retaining every original V3 event?
     single_variable: One-way UI projection only; original detection, reference state, parameters and alert conditions
       remain byte-identical.
-    result: 23 static/synthetic tests and96 independent expression cases pass; original event/alert/risk core preserved.
-      Local Pine complete; native compile, chart visuals and save pending other active device session.
+    result: V4 private script saved at 19:26 and native compiled on OKX PEPE 1H. Light-chart risk boxes/zero lines
+      and full/low display round trip passed; 24 static/synthetic tests passed. All original V3 events/alerts remain;
+      broader dark/history QA and main noise-reduction objective are not claimed complete.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
-    canonical_report: analysis/html/p1_spike_v3_layered_display_20260910.html
+    canonical_report: analysis/html/p1_spike_v4_saved_20260910.html
     artifacts:
     - spike-v3-layered-display-20260910-pine
     - spike-v3-layered-display-20260910-tests
@@ -8036,5 +8037,11 @@ experiments:
     - spike-v3-layered-display-20260910-report-html
     - spike-v3-layered-display-20260910-independent-review
     - spike-v3-layered-display-20260910-report-review
-    notes: Research display improvement only, not a seventh strategy filter or evidence of improved returns. Do
-      not seize another active TradingView device session.
+    - spike-v4-layered-display-20260910-pine
+    - spike-v4-layered-display-20260910-tests
+    - spike-v4-layered-display-20260910-report-source
+    - spike-v4-layered-display-20260910-report-html
+    - spike-v4-layered-display-20260910-native-save
+    - spike-v4-layered-display-20260910-report-review
+    notes: Display-only V4 save authorized by owner. Old reports remain immutable. Private script and current layout
+      saved; no alert creation, notification change, orders, or active bundle promotion.
