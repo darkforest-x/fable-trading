@@ -424,13 +424,20 @@ def evaluate_covered() -> None:
         inputs.append((dict(item, tick=tick), minutes, source, digest(Path(item["path"]).read_bytes())))
     for item, minutes, frame, source_sha in inputs:
         mask = coverage.venue.eq(item["venue"]) & coverage.symbol.eq(item["symbol"]) & coverage.timeframe_min.eq(minutes)
+        segments = _continuous(frame, minutes)
+        # V1 needs at least 340 bars to stabilize its daily SMMA and other rolling state.
+        # A fetched new listing is coverage evidence, but it is not a V1-eligible evaluation.
+        if not any(len(segment) >= 341 for segment in segments):
+            detail = f"{len(frame)} bars; no continuous segment reaches 341-bar V1 warmup"
+            coverage.loc[mask, ["status", "detail"]] = "warmup_insufficient", detail
+            continue
         dest = RESULTS / "covered_ledgers" / item["venue"] / (item["symbol"] + f"_{minutes}m.csv.gz")
         receipt = dest.with_suffix(".receipt.json")
         if receipt.exists() and dest.exists() and dest.stat().st_size > 50 and json.loads(receipt.read_text()).get("source_sha256") == source_sha:
             prior = json.loads(receipt.read_text()); coverage.loc[mask,["status","detail","trade_rows"]] = "evaluated", prior["source_window"], prior["trade_rows"]
             continue
         rows = []
-        for segment in _continuous(frame, minutes): rows.extend(_trade_rows(item, segment, minutes))
+        for segment in segments: rows.extend(_trade_rows(item, segment, minutes))
         dest.parent.mkdir(parents=True, exist_ok=True)
         pd.DataFrame(rows, columns=LEDGER_COLUMNS).to_csv(dest, index=False, compression={"method":"gzip","mtime":0})
         receipt_data = {"source_sha256":source_sha, "source_window":f"{frame.index.min() if len(frame) else None}..{frame.index.max() if len(frame) else None}", "trade_rows":len(rows), "completed_at":stamp()}
@@ -439,7 +446,17 @@ def evaluate_covered() -> None:
     RESULTS.mkdir(parents=True, exist_ok=True)
     coverage.to_csv(RESULTS / "coverage_limited.csv", index=False)
     ledgers = list((RESULTS / "covered_ledgers").glob("*/*.csv.gz"))
-    combined = pd.concat([pd.read_csv(path) for path in ledgers], ignore_index=True) if ledgers else pd.DataFrame(columns=LEDGER_COLUMNS)
+    # Early incremental builds wrote zero-event gzip files without a header. Repair
+    # only those owned generated files so one valid zero-trade cell cannot block all ledgers.
+    frames = []
+    for path in ledgers:
+        try:
+            frames.append(pd.read_csv(path))
+        except pd.errors.EmptyDataError:
+            empty = pd.DataFrame(columns=LEDGER_COLUMNS)
+            empty.to_csv(path, index=False, compression={"method":"gzip","mtime":0})
+            frames.append(empty)
+    combined = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame(columns=LEDGER_COLUMNS)
     combined.to_csv(RESULTS / "covered_trade_ledger.csv.gz", index=False, compression={"method":"gzip","mtime":0})
     atomic_json(RESULTS / "coverage_progress.json", {"generated_at":stamp(), "denominator_cells":len(coverage),
                 "statuses":coverage.status.value_counts().to_dict(), "evaluated_cells":int(coverage.status.eq("evaluated").sum()),
