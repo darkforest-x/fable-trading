@@ -2,7 +2,7 @@
 
 ## 结论
 
-2026-09-11（北京时间）完成了覆盖受限 V1 账本的经济口径重建。它读取的是本轮运行开始时已落盘、带收据的 OHLC CSV；本阶段没有发起行情抓取、训练、参数搜索、通知、模型切换或交易操作。当前覆盖仍不足以构成“三所全市场”或收益有效性的结论：固定分母 **6,724** 个 current-catalog × timeframe 单元中，只有 **3,029** 个实际 evaluated，生成 **4,027** 个信号行；其中 **3,964** 行已实现退出，**63** 行在观察窗右端 censored。
+2026-09-11（北京时间）完成了覆盖受限 V1 账本的经济口径重建。它读取的是本轮运行开始时已落盘、带收据的 OHLC CSV；本阶段没有发起行情抓取、训练、参数搜索、通知、模型切换或交易操作。当前覆盖仍不足以构成“三所全市场”或收益有效性的结论：固定分母 **6,724** 个 current-catalog × timeframe 单元中，最新一次本地冻结输入重建后有 **4,464** 个实际 evaluated，生成 **6,253** 个信号行；其中 **6,170** 行已实现退出，**83** 行在观察窗右端 censored。
 
 本次消耗的是 owner 已授权的该配置第 **1** 次 holdout 读取。它只修正已授权配置的账本因果与统计，不用这些数值选择 V1 参数，也不主张任何盈利、PF、胜率或账户回撤结论。
 
@@ -36,17 +36,16 @@ python3 -m yoyo.evaluation.spike_v1_coverage_diagnostics
 python3 scripts/md_to_html.py analysis/p1_spike_v1_twoyear_20260911.md --out-dir analysis/html
 ```
 
-本轮专属测试为 7 passed。它覆盖完整 UTC 聚合、未确认 OKX bar、可执行 next-open 风险、非正风险 R 为空、censored 排除、稳定事件序列回撤及空/无效冻结时间轴。
+本轮专属测试为 13 passed。它覆盖完整 UTC 聚合、未确认 OKX bar、可执行 next-open 风险、非正风险 R 为空、censored 排除、稳定事件序列回撤、空/无效冻结时间轴、缺 OHLCV schema 的 fail-closed 分类，以及 Binance/OKX/Gate 对 gapped/error 终态 receipt 不重抓。
 
 ## 当前覆盖快照
 
 | 状态 | 单元数 |
 | --- | ---: |
-| evaluated | 3,029 |
-| not_acquired | 1,568 |
-| source_error | 874 |
-| source_gapped | 859 |
-| warmup_insufficient | 394 |
+| evaluated | 4,464 |
+| source_error | 894 |
+| source_gapped | 867 |
+| warmup_insufficient | 499 |
 | 固定分母 | 6,724 |
 
 逐笔账本位于 [covered_trade_ledger.csv.gz](../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_ledger.csv.gz)，可搜索浏览页位于 [covered_trade_drilldown.html](../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_drilldown.html)。这些文件只描述已覆盖单元，不能替代完整市场、匹配随机对照、资金组合或样本外评估。
@@ -59,16 +58,22 @@ AUC、置换检验、top-decile 净收益、匹配随机交易对照在这一固
 
 | 周期 | 信号行 | 已实现 / censored | 已实现正 / 非正 | 已实现正收益率 | 已实现等权净收益和 | 已实现净 R 和 | 已实现 PF | 事件序列回撤 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 30m | 2,271 | 2,260 / 11 | 669 / 1,591 | 29.60% | +0.8837 | +92.1065 | 1.0093 | -12.7666 |
-| 1H | 1,309 | 1,299 / 10 | 350 / 949 | 26.94% | +11.3079 | +427.7132 | 1.1439 | -23.3025 |
-| 4H | 400 | 369 / 31 | 107 / 262 | 29.00% | -12.1982 | -45.6470 | 0.7166 | -21.3297 |
-| 合计 | 3,980 | 3,928 / 52 | 1,126 / 2,802 | — | — | — | — | — |
+| 30m | 3,594 | 3,579 / 15 | 1,038 / 2,541 | 29.00% | -10.3299 | -41.3873 | 0.9323 | -28.4789 |
+| 1H | 2,039 | 2,024 / 15 | 537 / 1,487 | 26.53% | +34.4558 | +943.0324 | 1.2790 | -35.6811 |
+| 4H | 552 | 513 / 39 | 146 / 367 | 28.46% | -15.4274 | -46.9460 | 0.7497 | -26.9365 |
+| 合计 | 6,185 | 6,116 / 69 | 1,721 / 4,395 | — | — | — | — | — |
 
 这只是当前可获得单元的等权描述，正负值均不能视作策略的成功或失败结论。`net_r` 使用本轮修复后的 next-open 风险分母，仍是单笔标准化账本字段，不是账户收益；事件序列回撤也没有资本分配或重叠仓位模型。按入场年份、交易所和周期拆分的完整行在 CSV 中保留，避免将不同时间段混成一个成绩单。
 
-**获利记录与失败原因。** 这 3,928 条已实现行的 exit label 全部是 `protective_stop`：其中 1,126 条最终 `net_return > 0`，2,802 条非正；因此该 label 不能被误读成“每一条都是失败”，也不能从中单独识别或归因“成功大趋势”。同一已覆盖子集的所有 protective-stop 行等权净收益和为 -0.0065，中位 MFE 为 +5.81%，中位 MAE 为 -4.00%。这些是路径描述，不是完整市场、匹配对照或策略 edge；不能据此改变 V1 的风险线或阈值。
+**获利记录与失败原因。** 这 6,116 条已实现行的 exit label 全部是 `protective_stop`：其中 1,721 条最终 `net_return > 0`，4,395 条非正；因此该 label 不能被误读成“每一条都是失败”，也不能从中单独识别或归因“成功大趋势”。同一已覆盖子集的所有 protective-stop 行等权净收益和为 +8.6985，中位 MFE 为 +5.85%，中位 MAE 为 -4.02%。这些是路径描述，不是完整市场、匹配对照或策略 edge；不能据此改变 V1 的风险线或阈值。
 
-逐周期逐笔 source-event id、entry/exit、censored 与 v2 字段仍在 [covered_trade_ledger.csv.gz](../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_ledger.csv.gz)。仅导入 monitor 的 1,019 条回放卡另有 [replay_ledger_link_receipt.csv.gz](../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/replay_ledger_link_receipt.csv.gz)；它们是 partial covered subset，不能替代全部 3,980 行。
+逐周期逐笔 source-event id、entry/exit、censored 与 v2 字段仍在 [covered_trade_ledger.csv.gz](../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_ledger.csv.gz)。仅导入 monitor 的 1,019 条回放卡另有 [replay_ledger_link_receipt.csv.gz](../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/replay_ledger_link_receipt.csv.gz)；它们是 partial covered subset，不能替代全部 6,185 条三周期信号行。
+
+## 本次重建的来源边界
+
+`954e54a` 后，2026-09-10T22:38:36Z 的一次已有冻结输入重建完成；随后 `report-covered` 在 22:38:46Z 生成同一方法版本的 drilldown。此前一个标为 complete 但没有 OHLCV schema 的 `US100-USDT-SWAP` 源会使整轮聚合 `KeyError`；现在其四个周期均为 `source_error`，coverage detail 含原 receipt 路径、CSV 路径和缺失列名。该分类没有补写、重抓或伪造任何 K 线。
+
+Binance/OKX 的 `gapped/error` 与 Gate 的 `complete/partial/gapped/error` receipt 现在都被视为该固定窗口的终态，循环不会把同一已知失败无限重抓。新增覆盖来自此轮之前已落盘且本轮 Gate worker 已完成的 receipt；它不代表全市场连续两年历史，也不替代缺口的来源。
 
 ## 风险与诚实声明
 
