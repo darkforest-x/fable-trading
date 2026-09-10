@@ -121,9 +121,9 @@ def build(folder: Path, output: Path):
 
 **新指标能找到部分强劲爆发，并用跟踪退出留下大幅利润；但当前规则加上固定账户分配，还没有证明能稳定优于对照。**
 
-你关心的 USELESS 1H 被新指标在北京时间 **8月31日06:00** 识别。OKX 下一根开盘模拟入场 0.06746，9月6日18:00 前结束的那根K线触发保护，模拟退出 0.21586，净 **219.78%、26.15R**。它没有在3R平仓，也没有在最高点平仓。这是信号后的模拟路径，不是已发生的真实交易回执。
+你关心的 USELESS 1H 被新指标在北京时间 **8月31日06:00** 识别。OKX 下一根开盘模拟入场 0.06746，9月6日17:00—18:00这根K线盘中触及保护（具体时刻未知），模拟退出 0.21586，净 **219.78%、26.15R**。它没有在3R平仓，也没有在最高点平仓。这是信号后的模拟路径，不是已发生的真实交易回执。
 
-但跨交易所合并账户没有持有这笔 USELESS：最后一个席位先分给了同批成交额更高的 ZEN。全期合并账户爆发版 **1H +1.34%、最大回撤7.99%；4H +0.61%、最大回撤7.07%**。可配对账户均弱于对应随机入场。16项主检验的 Holm p 全为1，未通过预登记的 p<0.01 门槛。
+但跨交易所合并账户没有持有这笔 USELESS：最后一个席位先分给了同批成交额更高的 ZEN。全期合并账户爆发版 **1H +1.34%、最大回撤7.99%；4H +0.61%、最大回撤7.07%**。爆发版两个合并可配对账户均弱于对应随机入场。16项主检验的 Holm p 全为1，未通过预登记的 p<0.01 门槛。
 
 因此，本轮交付是可复查的收益验证与问题定位，**没有把成功案例包装成最优参数，也没有据此修改线上参数或通知**。上一轮“工程验收通过”只证明 Pine 实现了形态，不等于这轮收益验收通过。
 
@@ -168,6 +168,8 @@ SKYAI 两所事件净涨幅约224.5%—225.2%也被满席拒绝。Gate BTR 则�
 ## 3. 箭头本身：更少、更集中，但仍有许多失败
 
 以下为合并候选事件，尚未套账户席位，**事件平均收益不是账户收益**。50%/5R只计自然退出兑现，不用最高浮盈凑数；边界估值是样本结束或断档边界仍持有，不能当完成交易。
+
+净胜率、中位净R、初始止损率的分母是全部有效事件，包含边界估值；只有“自然≥20%/≥50%/≥5R”明确只统计自然退出。账户净值及其净胜率/PF也包含期末未退出持仓的估值，不能冒充全部平仓后的实收收益。
 
 {stats}
 
@@ -220,7 +222,9 @@ OKX1H爆发版16.56%明显好于合并1H1.34%，不是收益可以相加或按�
 
 {diagnostics}
 
-1H爆发版量比AUC0.427，最高量比十分位净均值为负；TR扩张AUC0.443但顶部净均值为正，反映少数大赢家可能拉高均值，不能用AUC或均值其中一个替代净收益验证。4H顶部匹配覆盖与全体不同，必须比较“其中可匹配均值”和“随机均值”，不能混用分母。完整三所32行诊断保存在score_summary.csv。
+1H爆发版量比AUC0.427，最高量比十分位净均值为负；TR扩张AUC0.443但顶部净均值为正，反映少数大赢家可能拉高均值，不能用AUC或均值其中一个替代净收益验证。4H顶部匹配覆盖与全体不同，必须比较“其中可匹配均值”和“随机均值”，不能混用分母。三所及合并共32行诊断保存在score_summary.csv。
+
+上表“其中可匹配”的实际分母（量比/TR扩张顺序）：1H爆发43/45、42/45；1H旧入场443/458、444/458；4H爆发8/16、11/16；4H旧入场95/127、93/127。尤其4H爆发的量比顶部只有一半能匹配，解释了全顶部净均值为负、可匹配子集却为正的差异。
 
 ## 8. 行情阶段、成本与利润集中
 
@@ -261,7 +265,7 @@ OKX1H爆发版16.56%明显好于合并1H1.34%，不是收益可以相加或按�
 
 ## 11. 下一步：一次只回答一个问题
 
-优先候选是 **在冻结信号与退出不变时，检验持仓分配/席位占用**：目前按历史成交额排序容易把最后名额分给流动性更高而非更有延续性的信号。需要先登记一个有因果依据的替代方案，在新时间段与现有分配并行纸面跟踪，再比较兑现收益、漏掉大赢家与回撤。不能把本轮USELESS当训练目标，也不能靠无限增仓改善数字。
+优先候选是 **在冻结信号与退出不变时，检验持仓分配/席位占用**：当前排序优先历史流动性；它是否偏离趋势延续目标尚需独立验证。需要先登记一个有因果依据的替代方案，在新时间段与现有分配并行纸面跟踪，再比较兑现收益、漏掉大赢家与回撤。不能把本轮USELESS当训练目标，也不能靠无限增仓改善数字。
 
 随后才适合分别检验停滞时间退出、趋势环境或1H启动加4H背景；每次只改变一项。新的成本、止损、阈值或线上切换仍需按Owner授权范围登记。这些是下一步实验选项，**本报告没有宣称已验证或已上线**。
 
@@ -276,6 +280,28 @@ git branch --show-current
 .venv/bin/python -m yoyo.evaluation.spike_burst_dataset --old-experiment experiments/active/exp-altseason-multivenue-20260910-v1 --out experiments/active/exp-spike-burst-validation-20260910-v1/reproduction
 .venv/bin/python -m yoyo.evaluation.spike_burst_validation --results experiments/active/exp-spike-burst-validation-20260910-v1/reproduction
 .venv/bin/python -m yoyo.evaluation.spike_burst_figures --results experiments/active/exp-spike-burst-validation-20260910-v1/reproduction
+```
+
+上述命令重建全局图与五张预登记案例。补充本报告的已知USELESS图及日期布局副本（不改变收益）可在同一个全新reproduction目录执行：
+
+```bash
+.venv/bin/python - <<'PY'
+from pathlib import Path
+from yoyo.evaluation.spike_burst_figures import style, curves, example
+from yoyo.evaluation.spike_burst_validation import read_events
+p = Path('experiments/active/exp-spike-burst-validation-20260910-v1/reproduction').resolve()
+style()
+a = p / 'figures_account_v2'
+a.mkdir()
+curves(p, a)
+b = p / 'figures_known_case'
+b.mkdir()
+ledger = read_events(p / 'accounts/okx_60_burst_trail_all_assets_full_ledger.csv.gz')
+row = ledger.loc[ledger.asset.eq('USELESS') & ledger.portfolio_selected.eq(True)].iloc[0]
+example(row, '已知 USELESS：OKX 单所账户成交', b, 6)
+PY
+.venv/bin/python -m yoyo.evaluation.spike_burst_report --results experiments/active/exp-spike-burst-validation-20260910-v1/reproduction --output analysis/p1_spike_burst_validation_20260910_reproduction.md
+python3 scripts/md_to_html.py analysis/p1_spike_burst_validation_20260910_reproduction.md --out-dir analysis/html
 ```
 
 本轮实际执行使用模块默认results目录，日志留在实验根目录。builder先于评分提交649a1a5；dataset记录该提交，账户计算时HEAD为52ede2e，核心回放/成交/账户SHA未变，期间仅图形检查与来源认证改动。d5fafa2仅调整全景图日期布局，旧图保留，account_figure_v2_manifest.json记录显示替代。补充USELESS图选定的是OKX单所实际持仓，独立known_case_manifest.json记录。
