@@ -132,3 +132,15 @@ node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.t
 此前本任务暂停的 `yoyo.evaluation.spike_v1_twoyear_allmarkets fetch --venue binance`（PID 51814）已核对命令身份并 `SIGCONT` 恢复，进程从 `T+` 变为 `S+`。它是独立两年采集，不是本轮 monitor 结果；恢复不表示其评估账本问题已解决。
 
 后续仍需在资源可用时完成：全 1,434 单元扫描，并在不丢失内存 OHLC cache 的受控 reload 时载入 `e5f006b`。更广泛 V1 或 YOLO 有效性、收益和手机实际送达均不在本次功能验收范围。
+
+## 冻结 replay 的热点与吞吐边界（`5dceb5f`，未部署）
+
+2026-09-11 对新 cold scanner 的只读采样显示，它近 20 个单元约为 4.5--10.4 秒/单元；采样栈主要落在 pandas/NumPy，而不是网络、SQLite WAL 或 gzip。该观察发生在系统 load 约 118、swap 使用约 9.42/10GB 的资源竞争下，scanner 本身约 3.9% CPU，因此它不能推出稳态延迟或 15 分钟全市场 SLA。
+
+`5dceb5f` 是一项不改变冻结 V1 输入或规则的等价物化优化：`features(frame)` 与 `replay(feature_frame, tick)` 仍对每个单元的完整 720 根历史执行；只在两者返回后，一次性取得 OHLCV、特征与 replay 列数组，替代逐 bar 的 `iterrows()` 和 Series `.iloc`。raw events、state 与末 240 根 chart 仍由同一完整 replay 输出构造，未截断 warmup、未改周期、风险、cutover 或通知。worker 同时在持久 `scan` meta 中记录每轮 fetch/analyze/checkpoint 的总计与最大毫秒数，供下一次受控发布后的实际瓶颈归因；当前运行 PID 没有载入该源码，未因本优化重启。
+
+固定的 720 根 1H 因果 fixture 与变更前 `HEAD` 实现逐字输出相等；新的 SHA-256 为 `2ecb21f572e9403dd00fd8733626e9621285e63a978d37e891a2b1da2d135bec`。同一输入、本机五次串行调用的均值约从 172.04ms 降至 52.43ms（最小值 160.38ms 到 47.97ms）。这只是离线函数耗时，不含 OKX、SQLite、系统调度或全轮吞吐，不能作为线上速度承诺。
+
+最新共享 IAB 的回放 QA 还实际选中了 Binance `AKTUSDT` 30m、UTC `2026-09-08 15:00` 的 linked censored 行：同源图有 120 根真实 K 线和风险 `0.5385`，页面不显示退出或单笔净 R，并说明样本结束时尚未退出、不计胜率/PF/净收益。已实现行继续只显示“回测退出”“单笔净 R · 非账户收益，未独立核验”；这些字段是有 receipt 的账本联结，不是策略收益宣称。
+
+本提交的定向验证为 24 个 Python tests、12 个 Node 前端合同 tests 和 `py_compile`。旧 `tests/monitor/test_signals.py` 仍针对已经移除的 IMACD API，单独运行会失败，未把该陈旧 suite 计入通过数，也没有为它放宽 V1 协议。
