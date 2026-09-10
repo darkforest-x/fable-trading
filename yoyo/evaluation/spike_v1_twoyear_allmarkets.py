@@ -46,6 +46,7 @@ CONFIG = {"schema": "spike-v1-twoyear-allmarkets-v1", "evaluation_start": START.
           "source_minutes": 30, "timeframes": [30, 60, 240, 1440], "direction": "long_only",
           "entry": "next_open", "round_trip_cost": 0.002, "funding": "unmodelled",
           "holdout_consumption": 1, "optimization": False, "production_eligible": False}
+METHOD_VERSION = "covered-v2-next-open-risk-realized-event-sequence"
 VENUES = {"binance": ("https://fapi.binance.com", 1500, 0.12),
           "okx": ("https://www.okx.com", 300, 0.25),
           "gate": ("https://api.gateio.ws/api/v4", 2000, 0.12)}
@@ -65,6 +66,41 @@ def atomic_json(path: Path, value: Any) -> None:
 
 def stamp() -> str:
     return pd.Timestamp.now(tz="UTC").isoformat()
+
+
+def _read_utc_source(path: str | Path) -> pd.DataFrame:
+    """Read a frozen CSV index as UTC, including a legitimate empty source.
+
+    The collector writes ISO-8601 UTC clocks.  Empty CSVs deserialize to a
+    generic ``Index`` rather than a ``DatetimeIndex``; normalize that empty
+    timeline explicitly instead of treating it as a fetch failure or inventing
+    bars. Invalid non-empty clocks still fail closed.
+    """
+    source = pd.read_csv(path, index_col=0, parse_dates=True)
+    if not len(source.index):
+        source.index = pd.DatetimeIndex([], tz="UTC")
+        return source
+    if pd.api.types.is_numeric_dtype(source.index):
+        raise ValueError("invalid frozen source timeline")
+    try:
+        index = pd.DatetimeIndex(pd.to_datetime(source.index, utc=True, errors="raise"))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("invalid frozen source timeline") from exc
+    if index.hasnans or not index.is_monotonic_increasing or index.has_duplicates:
+        raise ValueError("invalid frozen source timeline")
+    source.index = index
+    return source
+
+
+def _entry_risk_fraction(entry: float, initial_stop: float) -> float:
+    """Risk fraction frozen at executable next-open entry, not signal close."""
+    distance = entry - initial_stop
+    return distance / entry if np.isfinite(distance) and entry > 0 and distance > 0 else np.nan
+
+
+def _is_censored(value: Any) -> bool:
+    """Interpret persisted CSV booleans without treating the string ``False`` as true."""
+    return bool(value) if isinstance(value, (bool, np.bool_)) else isinstance(value, str) and value.strip().lower() == "true"
 
 
 class Client:
@@ -276,8 +312,7 @@ def evaluate() -> None:
         raise ValueError("Refusing partial/gapped universe as all-market backtest; inspect error_ledger.csv")
     records = []
     for receipt in sorted((DATA / "market_receipts").glob("*/*.json")):
-        item = json.loads(receipt.read_text()); source = pd.read_csv(item["path"], index_col=0, parse_dates=True)
-        source.index = pd.DatetimeIndex(source.index, tz="UTC") if source.index.tz is None else source.index.tz_convert("UTC")
+        item = json.loads(receipt.read_text()); source = _read_utc_source(item["path"])
         for minutes in CONFIG["timeframes"]:
             bars = aggregate(source, minutes); step = pd.Timedelta(minutes=minutes)
             split = np.flatnonzero(np.diff(bars.index.asi8) != step.value) + 1
@@ -289,7 +324,8 @@ def evaluate() -> None:
                     if pos + 1 >= len(segment): continue
                     entry_time, entry = segment.index[pos + 1], float(segment.open.iloc[pos + 1])
                     if not (START <= entry_time < END): continue
-                    stop, exit_time, exit_price, reason = float(signal.initial_stop), None, None, "censored"
+                    initial_stop = float(signal.initial_stop)
+                    stop, exit_time, exit_price, reason = initial_stop, None, None, "censored"
                     if entry <= stop: exit_time, exit_price, reason = entry_time, entry, "entry_gap_through_stop"
                     else:
                         for j in range(pos + 1, len(segment)):
@@ -300,20 +336,25 @@ def evaluate() -> None:
                             stop = float(replayed.protection.iloc[j]) if bool(replayed.trend_side.iloc[j]) else stop
                     if exit_time is None: exit_time, exit_price = min(END, segment.index[-1] + step), float(segment.close.iloc[-1])
                     gross = exit_price / entry - 1; net = gross - .002
-                    records.append({"venue": item["venue"], "symbol": item["symbol"], "asset": item["asset"], "timeframe": minutes,
+                    risk_fraction = _entry_risk_fraction(entry, initial_stop)
+                    records.append({"event_id": digest(f"{item['venue']}|{item['symbol']}|{minutes}|{i.isoformat()}".encode()),
+                        "venue": item["venue"], "symbol": item["symbol"], "asset": item["asset"], "timeframe": minutes,
                         "direction": "long", "signal_close_time": i + step, "signal_close": float(segment.close.iloc[pos]), "entry_time": entry_time,
                         "entry_price": entry, "exit_time": exit_time, "exit_price": exit_price, "exit_reason": reason, "fees_return": .002,
                         "gross_return": gross, "net_return": net, "return_pct": net * 100, "holding_minutes": (exit_time-entry_time).total_seconds()/60,
-                        "net_r": (exit_price-entry)/(float(signal.risk) or np.nan), "volume_ratio": float(replayed.rv.iloc[pos]),
+                        "net_r": net / risk_fraction if np.isfinite(risk_fraction) else np.nan,
+                        "risk_fraction_at_entry": risk_fraction, "volume_ratio": float(replayed.rv.iloc[pos]),
                         "tr_atr_expansion": float(replayed.expansion.iloc[pos]), "density_width_atr": float(replayed.pastWidth.iloc[pos]),
                         "density_duration": int(replayed.quiet_bars.iloc[pos]), "breakout_distance_atr": (float(segment.close.iloc[pos])-float(replayed.launch_high.iloc[pos]))/float(replayed.atr.iloc[pos]),
                         "price_position": (float(segment.close.iloc[pos])-float(segment.low.iloc[pos]))/(float(segment.high.iloc[pos])-float(segment.low.iloc[pos]) or np.nan),
                         "reference_signal_risk": float(signal.risk), "censored": reason == "censored"})
     ledger = pd.DataFrame(records); RESULTS.mkdir(parents=True, exist_ok=True)
     ledger.to_csv(RESULTS / "trade_ledger.csv.gz", index=False, compression={"method":"gzip", "mtime":0})
-    summary = ledger.groupby(["venue", "timeframe"], dropna=False).agg(trades=("net_return","size"), win_rate=("net_return",lambda x:(x>0).mean()), net_return=("net_return","sum"), expectancy=("net_return","mean"), censored=("censored","sum")).reset_index()
+    summary = _performance_summary(ledger, ["venue", "timeframe"]) if len(ledger) else pd.DataFrame()
     summary.to_csv(RESULTS / "summary_by_venue_timeframe.csv", index=False)
-    atomic_json(RESULTS / "evaluation_manifest.json", {"config": CONFIG, "completed_at": stamp(), "trade_count": len(ledger), "ledger": str(RESULTS / "trade_ledger.csv.gz"), "funding": "unmodelled"})
+    atomic_json(RESULTS / "evaluation_manifest.json", {"config": CONFIG, "method_version": METHOD_VERSION,
+                "source_sha256": SOURCE_SHA256, "pine_sha256": PINE_SHA, "completed_at": stamp(),
+                "trade_count": len(ledger), "ledger": str(RESULTS / "trade_ledger.csv.gz"), "funding": "unmodelled"})
 
 
 def _continuous(frame: pd.DataFrame, minutes: int) -> list[pd.DataFrame]:
@@ -343,7 +384,7 @@ def _trade_rows(item: dict[str, Any], bars: pd.DataFrame, minutes: int) -> list[
         if position + 1 >= len(bars):
             continue
         entry_time, entry = bars.index[position + 1], float(bars.open.iloc[position + 1])
-        if not (START <= entry_time < END) or not np.isfinite(float(signal.risk)) or float(signal.risk) <= 0:
+        if not (START <= entry_time < END):
             continue
         protection, exit_position, exit_price, reason = float(signal.initial_stop), None, np.nan, "censored"
         if entry <= protection:
@@ -367,7 +408,8 @@ def _trade_rows(item: dict[str, Any], bars: pd.DataFrame, minutes: int) -> list[
         highs = held.high.to_numpy(float) if len(held) else np.array([entry])
         lows = held.low.to_numpy(float) if len(held) else np.array([entry])
         mfe = float(highs.max() / entry - 1); mae = float(lows.min() / entry - 1)
-        gross, net, risk_fraction = exit_price / entry - 1, exit_price / entry - 1 - .002, float(signal.risk) / entry
+        gross, net = exit_price / entry - 1, exit_price / entry - 1 - .002
+        risk_fraction = _entry_risk_fraction(entry, float(signal.initial_stop))
         row = {"event_id": digest(f"{item['venue']}|{item['symbol']}|{minutes}|{signal_time.isoformat()}".encode()),
                "venue":item["venue"], "symbol":item["symbol"], "asset":item["asset"], "timeframe_min":minutes,
                "direction":"long", "signal_bar_open":signal_time, "signal_close_time":signal_time + step,
@@ -375,7 +417,7 @@ def _trade_rows(item: dict[str, Any], bars: pd.DataFrame, minutes: int) -> list[
                "exit_time":exit_time, "exit_price":exit_price, "exit_reason":reason, "fees_return":.002,
                "gross_return":gross, "net_return":net, "return_pct":net * 100, "holding_minutes":(exit_time-entry_time).total_seconds()/60,
                "reference_signal_risk":float(signal.risk), "risk_fraction_at_entry":risk_fraction,
-               "net_r":net / risk_fraction, "mae_return":mae, "mfe_return":mfe,
+               "net_r":net / risk_fraction if np.isfinite(risk_fraction) else np.nan, "mae_return":mae, "mfe_return":mfe,
                "drawdown_return":min(mae, 0.), "tail_capture":net / mfe if mfe > 0 else np.nan,
                "censored":reason == "censored", "volume_ratio":float(feature_frame.rv.iloc[position]),
                "tr_atr_expansion":float(feature_frame.expansion.iloc[position]), "density_width_atr":float(feature_frame.pastWidth.iloc[position]),
@@ -408,8 +450,7 @@ def evaluate_covered() -> None:
         if item.get("status") != "complete":
             coverage.loc[mask, ["status","detail"]] = "source_" + item.get("status","unknown"), item.get("error","")
             continue
-        source = pd.read_csv(item["path"], index_col=0, parse_dates=True)
-        source.index = pd.DatetimeIndex(source.index, tz="UTC") if source.index.tz is None else source.index.tz_convert("UTC")
+        source = _read_utc_source(item["path"])
         for minutes in CONFIG["timeframes"]:
             inputs.append((item, minutes, aggregate(source, minutes), digest(Path(item["path"]).read_bytes())))
     for path in sorted((DATA / "gate_timeframe_receipts").glob("*.json")):
@@ -418,8 +459,7 @@ def evaluate_covered() -> None:
         if item.get("status") not in ("complete","partial"):
             coverage.loc[mask, ["status","detail"]] = "source_" + item.get("status","unknown"), item.get("error","")
             continue
-        source = pd.read_csv(item["path"], index_col=0, parse_dates=True)
-        source.index = pd.DatetimeIndex(source.index, tz="UTC") if source.index.tz is None else source.index.tz_convert("UTC")
+        source = _read_utc_source(item["path"])
         tick = tick_lookup.get(("gate", item["symbol"]))
         inputs.append((dict(item, tick=tick), minutes, source, digest(Path(item["path"]).read_bytes())))
     for item, minutes, frame, source_sha in inputs:
@@ -433,14 +473,17 @@ def evaluate_covered() -> None:
             continue
         dest = RESULTS / "covered_ledgers" / item["venue"] / (item["symbol"] + f"_{minutes}m.csv.gz")
         receipt = dest.with_suffix(".receipt.json")
-        if receipt.exists() and dest.exists() and dest.stat().st_size > 50 and json.loads(receipt.read_text()).get("source_sha256") == source_sha:
+        if (receipt.exists() and dest.exists() and dest.stat().st_size > 50
+                and json.loads(receipt.read_text()).get("source_sha256") == source_sha
+                and json.loads(receipt.read_text()).get("replay_source_sha256") == SOURCE_SHA256
+                and json.loads(receipt.read_text()).get("method_version") == METHOD_VERSION):
             prior = json.loads(receipt.read_text()); coverage.loc[mask,["status","detail","trade_rows"]] = "evaluated", prior["source_window"], prior["trade_rows"]
             continue
         rows = []
         for segment in segments: rows.extend(_trade_rows(item, segment, minutes))
         dest.parent.mkdir(parents=True, exist_ok=True)
         pd.DataFrame(rows, columns=LEDGER_COLUMNS).to_csv(dest, index=False, compression={"method":"gzip","mtime":0})
-        receipt_data = {"source_sha256":source_sha, "source_window":f"{frame.index.min() if len(frame) else None}..{frame.index.max() if len(frame) else None}", "trade_rows":len(rows), "completed_at":stamp()}
+        receipt_data = {"source_sha256":source_sha, "replay_source_sha256":SOURCE_SHA256, "source_window":f"{frame.index.min() if len(frame) else None}..{frame.index.max() if len(frame) else None}", "trade_rows":len(rows), "method_version":METHOD_VERSION, "pine_sha256":PINE_SHA, "completed_at":stamp()}
         atomic_json(receipt, receipt_data); coverage.loc[mask,["status","detail","trade_rows"]] = "evaluated", receipt_data["source_window"], len(rows)
         print("evaluated", item["venue"], item["symbol"], minutes, len(rows), flush=True)
     RESULTS.mkdir(parents=True, exist_ok=True)
@@ -458,25 +501,33 @@ def evaluate_covered() -> None:
             frames.append(empty)
     combined = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame(columns=LEDGER_COLUMNS)
     combined.to_csv(RESULTS / "covered_trade_ledger.csv.gz", index=False, compression={"method":"gzip","mtime":0})
-    atomic_json(RESULTS / "coverage_progress.json", {"generated_at":stamp(), "denominator_cells":len(coverage),
+    atomic_json(RESULTS / "coverage_progress.json", {"generated_at":stamp(), "method_version":METHOD_VERSION, "source_sha256":SOURCE_SHA256, "pine_sha256":PINE_SHA, "denominator_cells":len(coverage),
                 "statuses":coverage.status.value_counts().to_dict(), "evaluated_cells":int(coverage.status.eq("evaluated").sum()),
                 "ledger_files":len(ledgers), "trade_rows":int(coverage.trade_rows.sum()),
                 "combined_ledger":str(RESULTS / "covered_trade_ledger.csv.gz")})
 
 
 def _performance_summary(frame: pd.DataFrame, groups: list[str]) -> pd.DataFrame:
-    """Summarize executable, equal-notional returns without inventing leverage."""
+    """Summarize realized equal-notional events in stable economic order.
+
+    ``event_sequence_drawdown`` is an additive, equal-event diagnostic with a
+    zero baseline. It is not an account maximum drawdown: no capital allocation
+    or overlapping-position model is present in this coverage ledger.
+    """
     rows = []
     for key, part in frame.groupby(groups, dropna=False):
-        values = part.net_return.astype(float)
+        censored = part.censored.map(_is_censored)
+        realized = part.loc[~censored].copy()
+        realized = realized.sort_values(["exit_time", "entry_time", "event_id"], kind="mergesort")
+        values = realized.net_return.astype(float)
         profits, losses = values[values > 0].sum(), values[values < 0].sum()
-        equity = values.cumsum()
-        drawdown = (equity - equity.cummax()).min() if len(equity) else np.nan
+        equity = np.r_[0., values.cumsum().to_numpy(float)]
+        drawdown = float(np.min(equity - np.maximum.accumulate(equity))) if len(values) else np.nan
         label = key if isinstance(key, tuple) else (key,)
-        rows.append(dict(zip(groups, label), trades=len(part), wins=int((values > 0).sum()),
+        rows.append(dict(zip(groups, label), trades=len(realized), signal_rows=len(part), wins=int((values > 0).sum()),
                          win_rate=float((values > 0).mean()), profit_factor=float(profits / abs(losses)) if losses else np.nan,
-                         expectancy=float(values.mean()), net_return=float(values.sum()), max_drawdown=float(drawdown),
-                         censored=int(part.censored.sum())))
+                         expectancy=float(values.mean()), net_return=float(values.sum()), event_sequence_drawdown=drawdown,
+                         censored=int(censored.sum())))
     return pd.DataFrame(rows)
 
 
@@ -514,7 +565,7 @@ def report_covered() -> None:
 <input id="q" placeholder="Search venue, symbol, exit, date, feature…"><p id="count"></p>{table}
 <script>const q=document.querySelector('#q'), rows=[...document.querySelectorAll('#ledger tbody tr')], c=document.querySelector('#count');function f(){{let n=0,x=q.value.toLowerCase();rows.forEach(r=>{{let ok=r.innerText.toLowerCase().includes(x);r.hidden=!ok;if(ok)n++}});c.textContent=n+' / '+rows.length+' trades'}}q.oninput=f;f()</script></body></html>'''
     (RESULTS / "covered_trade_drilldown.html").write_text(document, encoding="utf-8")
-    atomic_json(RESULTS / "incremental_report_manifest.json", {"generated_at":stamp(), "trade_rows":len(ledger), "coverage_cells":len(coverage), "coverage_statuses":coverage.status.value_counts().to_dict(), "files":{"drilldown":str(RESULTS / "covered_trade_drilldown.html"), "summary":str(RESULTS / "incremental_summary_by_venue_timeframe.csv"), "monthly":str(RESULTS / "incremental_summary_by_month.csv")}})
+    atomic_json(RESULTS / "incremental_report_manifest.json", {"generated_at":stamp(), "method_version":METHOD_VERSION, "source_sha256":SOURCE_SHA256, "pine_sha256":PINE_SHA, "trade_rows":len(ledger), "coverage_cells":len(coverage), "coverage_statuses":coverage.status.value_counts().to_dict(), "files":{"drilldown":str(RESULTS / "covered_trade_drilldown.html"), "summary":str(RESULTS / "incremental_summary_by_venue_timeframe.csv"), "monthly":str(RESULTS / "incremental_summary_by_month.csv")}})
 
 
 def main() -> None:
