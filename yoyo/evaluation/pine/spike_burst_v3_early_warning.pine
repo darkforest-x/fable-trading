@@ -1,0 +1,401 @@
+//@version=6
+// SPIKE V3: fixed long-only two-stage research hypothesis, not optimized parameters.
+// A structural alert is not a confirmed burst or an order. A child confirmation
+// belongs to the current close, never to its parent's historical candle.
+// Market breadth is absent here: the Python report provides that context only.
+// Research evaluation is 1H only; other chart periods are not validated.
+indicator("SPIKE 结构预警 V3 · 两阶段", shorttitle="SPIKE V3", overlay=false, max_labels_count=300, max_boxes_count=80, max_lines_count=80, explicit_plot_zorder=true)
+
+// Frozen research constants; changing them defines a new unvalidated config.
+const int maLen = 34
+const int sigLen = 9
+const int denseLen = 12
+const float denseWidth = 3.0
+const int denseCrosses = 2
+const int breakoutLookback = 12
+const int cooldownBars = 12
+const int confirmMaxAge = 3
+const float minAdvance = 1.5
+const float minVolume = 1.5
+const int stopLen = 5
+const float stopBuffer = 0.2
+const float riskFloor = 2.0
+const float armR = 2.0
+const float trailAtr = 4.0
+
+string gView = "01 · 显示"
+bool showMas = input.bool(true, "六条均线", group=gView, display=display.none)
+bool showLabels = input.bool(true, "预警与确认标签", group=gView, tooltip="橙色为待确认结构预警；青色为满足第二阶段条件。确认最多等待3根，不回填到预警根。", display=display.none)
+bool showRisk = input.bool(true, "风险区与保护线", group=gView, tooltip="参考跟踪只附着空闲时的第一条预警；后续预警仍正常显示，但不会重置已有参考。不是实际交易。", display=display.none)
+bool showPanel = input.bool(true, "紧凑状态面板", group=gView, display=display.none)
+bool showMilestones = input.bool(true, "已达到 3R / 5R / 10R", group=gView, display=display.none)
+color bull = #008F82
+color bear = #D34B66
+color gold = #AD7B29
+color blue = #4679C9
+color ink = chart.fg_color
+color muted = color.new(ink, 40)
+
+// BEGIN UNCHANGED V2 RISK HELPERS
+// Frozen signal-close inputs only; outward rounding preserves the minimum risk.
+f_risk(int side, float entry, float extreme, float a, float floorAtr, float bufferAtr, float tick) =>
+    bool known = (side == 1 or side == -1) and entry > 0 and a > 0 and tick > 0 and not na(extreme)
+    float candidate = side == 1 ? math.min(extreme - bufferAtr * a, entry - floorAtr * a) : math.max(extreme + bufferAtr * a, entry + floorAtr * a)
+    float stop = known ? (side == 1 ? math.floor(candidate / tick) * tick : math.ceil(candidate / tick) * tick) : na
+    float risk = side * (entry - stop)
+    bool valid = known and stop > 0 and risk > 0
+    [valid ? stop : na, valid ? risk : na, valid]
+
+// Call only AFTER the entry bar. priorProtection was fixed at the previous close.
+// First apply the operative stop and adverse gap; never count stop-bar highs as profit.
+// A new close-based ATR ratchet only becomes operative on the next bar.
+f_path(int side, float entry, float risk, float priorProtection, float priorPeak, bool wasArmed, float o, float h, float l, float c, float a, float activationR, float distanceAtr, float tick) =>
+    bool stopped = side == 1 ? l <= priorProtection : h >= priorProtection
+    float exitPrice = stopped ? (side == 1 ? math.min(o, priorProtection) : math.max(o, priorProtection)) : na
+    float currentR = side * ((stopped ? exitPrice : c) - entry) / risk
+    float peakR = stopped ? priorPeak : math.max(priorPeak, side * ((side == 1 ? h : l) - entry) / risk)
+    bool armed = wasArmed or (not stopped and currentR >= activationR)
+    float protection = priorProtection
+    if not stopped and armed and a > 0
+        float raw = c - side * distanceAtr * a
+        float candidate = side == 1 ? math.floor(raw / tick) * tick : math.ceil(raw / tick) * tick
+        protection := side == 1 ? math.max(priorProtection, candidate) : math.min(priorProtection, candidate)
+    [not stopped, protection, peakR, currentR, exitPrice, armed]
+// END UNCHANGED V2 RISK HELPERS
+
+// Existing V1 averages keep their full-history semantics. New alert windows
+// independently require contiguous history and do not bridge missing bars.
+f_smma(float source, int length) =>
+    float seed = ta.sma(source, length)
+    var float value = na
+    value := na(value[1]) ? seed : (value[1] * (length - 1) + source) / length
+    value
+f_flip(float a, float b) =>
+    float d = a - b
+    (d > 0 and d[1] <= 0) or (d < 0 and d[1] >= 0) ? 1.0 : 0.0
+
+bool pricesValid = not na(open) and not na(high) and not na(low) and not na(close) and low > 0 and high >= math.max(open, close, low) and low <= math.min(open, close, high)
+bool dataGap = not barstate.isfirst and (time != time_close[1] or not pricesValid or not pricesValid[1])
+var int segmentIndex = -1
+segmentIndex := dataGap or not pricesValid ? 0 : segmentIndex + 1
+bool resetVolume = barstate.isfirst or dataGap
+float tr = ta.tr(true)
+float smHigh = f_smma(high, maLen)
+float smLow = f_smma(low, maLen)
+float ema1 = ta.ema(hlc3, maLen)
+float middle = 2.0 * ema1 - ta.ema(ema1, maLen)
+float md = middle > smHigh ? middle - smHigh : middle < smLow ? middle - smLow : 0.0
+float sb = ta.sma(md, sigLen)
+float atr = f_smma(tr, 14)
+float s20 = ta.sma(close, 20)
+float e20 = ta.ema(close, 20)
+float s60 = ta.sma(close, 60)
+float e60 = ta.ema(close, 60)
+float s120 = ta.sma(close, 120)
+float e120 = ta.ema(close, 120)
+float ropeHigh = math.max(s20, e20, s60, e60, s120, e120)
+float ropeLow = math.min(s20, e20, s60, e60, s120, e120)
+float width = atr > 0 ? (ropeHigh - ropeLow) / atr : na
+float flips = f_flip(s20,e20) + f_flip(s20,s60) + f_flip(s20,e60) + f_flip(s20,s120) + f_flip(s20,e120) + f_flip(e20,s60) + f_flip(e20,e60) + f_flip(e20,s120) + f_flip(e20,e120) + f_flip(s60,e60) + f_flip(s60,s120) + f_flip(s60,e120) + f_flip(e60,s120) + f_flip(e60,e120) + f_flip(s120,e120)
+float pastWidth = ta.sma(width[1], denseLen)
+float pastCrosses = math.sum(flips[1], denseLen)
+bool baseReady = pricesValid and bar_index >= math.max(340, 10 * maLen) and atr[1] > 0 and not na(sb) and not na(pastWidth)
+bool ready = baseReady and segmentIndex >= breakoutLookback
+
+// Last20 nonmissing volumes in THIS segment; missing volume does not block
+// structural alerts. Confirmation requires all three current volumes known.
+var array<float> validVolumes = array.new<float>()
+if resetVolume
+    array.clear(validVolumes)
+if not na(volume) and volume >= 0
+    array.push(validVolumes, volume)
+    if array.size(validVolumes) > 20
+        array.shift(validVolumes)
+float volumeMedian = array.size(validVolumes) == 20 ? array.median(validVolumes) : na
+float rv = volumeMedian[1] > 0 and not na(volume) ? volume / volumeMedian[1] : na
+float expansion = atr[1] > 0 ? tr / atr[1] : na
+float recentLow = ta.lowest(low, stopLen)
+
+// BEGIN TWO STAGE FIELDS
+// At least 12 prior contiguous bars before allowing the old density field.
+bool dense = baseReady and segmentIndex >= denseLen and pastWidth <= denseWidth and pastCrosses >= denseCrosses
+float denseHitsRaw = math.sum(dense[1] ? 1.0 : 0.0, breakoutLookback)
+float denseHits = segmentIndex >= breakoutLookback ? denseHitsRaw : na
+bool recentDense = denseHits > 0
+float priorHigh = ta.highest(high[1], breakoutLookback)
+float move3 = close - close[3]
+float advance3 = atr[3] > 0 ? move3 / atr[3] : na
+float volumeBase3 = volumeMedian[3]
+float volumeSum3 = math.sum(volume, 3)
+bool volumeKnown3 = not na(volume) and not na(volume[1]) and not na(volume[2])
+float volumeRatio3 = volumeKnown3 and volumeBase3 > 0 ? volumeSum3 / (3.0 * volumeBase3) : na
+float trSum3 = math.sum(tr, 3)
+float efficiency3 = trSum3 > 0 ? move3 / trSum3 : na
+float closePosition = high > low ? (close - low) / (high - low) : na
+bool aboveSix = close > ropeHigh
+bool earlyRaw = ready and close > priorHigh and close > math.max(s20, e20)
+bool confirmQuality = ready and recentDense and advance3 >= minAdvance and volumeRatio3 >= minVolume and md >= sb and middle > middle[1]
+// Efficiency, close location and six-line position are quality tags, NOT gates.
+// END TWO STAGE FIELDS
+
+if barstate.isfirst and (not chart.is_standard or timeframe.isticks)
+    runtime.error("请使用普通时间 K 线，合成K线不支持。")
+
+// BEGIN ALERT STATE: deliberately independent of risk-reference holding state.
+var bool previousEarlyRaw = false
+var int lastAcceptedBar = na
+var int parentBar = na
+var float parentHigh = na
+var float parentPrice = na
+var bool parentConfirmed = false
+bool earlySignal = false
+bool confirmedSignal = false
+int confirmationAge = na
+float confirmationParentPrice = na
+float confirmationParentHigh = na
+if barstate.isconfirmed
+    if dataGap
+        lastAcceptedBar := na
+        previousEarlyRaw := false
+        parentBar := na
+        parentHigh := na
+        parentPrice := na
+        parentConfirmed := false
+    bool cooldownPassed = na(lastAcceptedBar) or bar_index - lastAcceptedBar >= cooldownBars
+    earlySignal := earlyRaw and not previousEarlyRaw and cooldownPassed
+    previousEarlyRaw := earlyRaw
+    if earlySignal
+        lastAcceptedBar := bar_index
+        parentBar := bar_index
+        parentHigh := priorHigh
+        parentPrice := close
+        parentConfirmed := false
+    int age = na(parentBar) ? na : bar_index - parentBar
+    if not na(age) and age > confirmMaxAge
+        parentBar := na
+        parentHigh := na
+        parentPrice := na
+        parentConfirmed := false
+    if not na(parentBar) and not parentConfirmed and age >= 0 and age <= confirmMaxAge and close > parentHigh and confirmQuality
+        confirmedSignal := true
+        confirmationAge := age
+        confirmationParentPrice := parentPrice
+        confirmationParentHigh := parentHigh
+        parentConfirmed := true
+// END ALERT STATE
+
+// BEGIN REFERENCE STATE: first early alert while flat owns this display only.
+var int trendSide = 0
+var int entryBar = na
+var float entry = na
+var float initialStop = na
+var float risk = na
+var float protection = na
+var float peakR = 0.0
+var float currentR = na
+var bool trailArmed = false
+bool referenceStarted = false
+bool exitReference = false
+bool referenceGap = false
+float visibleProtection = trendSide != 0 ? protection : na
+float visibleInitial = trendSide != 0 ? initialStop : na
+float visibleEntry = trendSide != 0 ? entry : na
+if barstate.isconfirmed
+    if dataGap and trendSide != 0
+        // The unobserved interval cannot be certified as a fill or profit.
+        referenceGap := true
+        trendSide := 0
+        currentR := na
+        visibleProtection := na
+        visibleInitial := na
+        visibleEntry := na
+    bool endedThisBar = false
+    if ready and trendSide != 0 and bar_index > entryBar
+        float oldPeak = peakR
+        [alive, newProtection, newPeak, newCurrent, exitPrice, armed] = f_path(1, entry, risk, protection, peakR, trailArmed, open, high, low, close, atr, armR, trailAtr, syminfo.mintick)
+        protection := newProtection
+        peakR := newPeak
+        currentR := newCurrent
+        trailArmed := armed
+        if not alive
+            exitReference := true
+            endedThisBar := true
+            trendSide := 0
+            if showLabels
+                label.new(bar_index, exitPrice, "保护触及 · 参考结束\n" + str.tostring(exitPrice, format.mintick), style=label.style_label_down, color=color.new(chart.bg_color, 8), textcolor=ink, size=size.small, force_overlay=true)
+        else if showMilestones and showLabels
+            float level = oldPeak < 10 and peakR >= 10 ? 10 : oldPeak < 5 and peakR >= 5 ? 5 : oldPeak < 3 and peakR >= 3 ? 3 : na
+            if not na(level)
+                label.new(bar_index, high, str.tostring(level, "#") + "R 已到", style=label.style_label_down, color=color.new(bull, 90), textcolor=bull, size=size.tiny, force_overlay=true)
+    if earlySignal and trendSide == 0 and not endedThisBar
+        [newStop, newRisk, validRisk] = f_risk(1, close, recentLow, atr, riskFloor, stopBuffer, syminfo.mintick)
+        if validRisk
+            referenceStarted := true
+            trendSide := 1
+            entryBar := bar_index
+            entry := close
+            initialStop := newStop
+            risk := newRisk
+            protection := newStop
+            peakR := 0.0
+            currentR := 0.0
+            trailArmed := false
+// END REFERENCE STATE
+
+// One main-chart label on same-bar early+confirmation. Delayed children use
+// their own current bar and price, and identify their parent age explicitly.
+if barstate.isconfirmed and showLabels
+    if earlySignal
+        string headline = confirmedSignal ? "结构预警 · 已确认" : "结构预警 · 待确认"
+        string tracking = trendSide != 0 and not referenceStarted ? "\n跟踪中 · 新预警" : ""
+        string tip = "结构突破预警，不是买入建议。" + (confirmedSignal ? "本根通过第二阶段确认。" : "最晚随后3根确认，否则过期。") + "\n收盘确认：" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n六线之上：" + (aboveSix ? "是" : "否") + "；近期密集：" + (recentDense ? "是" : "否") + "\n方向效率 " + str.tostring(efficiency3, "#.##") + "；收盘位置 " + str.tostring(closePosition, "#.##") + "（质量标签）"
+        label.new(bar_index, low, headline + "\n收盘 " + str.tostring(close, format.mintick) + tracking, style=label.style_label_up, color=color.new(confirmedSignal ? bull : gold, 88), textcolor=confirmedSignal ? bull : gold, size=size.small, tooltip=tip, force_overlay=true)
+    else if confirmedSignal
+        string tip = "确认绘制在实际当前根，不回填预警根。父预警收盘 " + str.tostring(confirmationParentPrice, format.mintick) + "；冻结突破边界 " + str.tostring(confirmationParentHigh, format.mintick) + "\n确认时间：" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间"
+        label.new(bar_index, low, "结构确认 · 等待 " + str.tostring(confirmationAge) + " 根\n收盘 " + str.tostring(close, format.mintick), style=label.style_label_up, color=color.new(bull, 88), textcolor=bull, size=size.small, tooltip=tip, force_overlay=true)
+
+// BEGIN V2 RISK BOX DISPLAY (trigger changed to referenceStarted only)
+string rrGroup = "05 · 趋势盈亏框"
+bool rrShow = input.bool(true, "显示盈亏双框", group=rrGroup, tooltip="红框为冻结初始风险；绿框先显示3R观察位，随后随已确认峰值扩展。没有固定止盈。价格均为信号收盘参考，并非实际成交。", display=display.none)
+int rrKeep = input.int(8, "保留盈亏框组数", minval=1, maxval=20, group=rrGroup, display=display.none)
+int rrAhead = input.int(12, "当前框向右展示根数", minval=2, maxval=60, group=rrGroup, tooltip="仅影响当前框的视觉宽度，不改变任何信号或持有规则；保护触及后固定在该根收盘。", display=display.none)
+
+f_rrPriceTag(int stamp, float price, string caption, color tone, string tip) =>
+    label.new(stamp, price, caption, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(chart.bg_color, 12), textcolor=tone, size=size.small, tooltip=tip, force_overlay=true)
+
+var array<box> rrRiskHistory = array.new<box>()
+var array<box> rrRewardHistory = array.new<box>()
+var array<label> rrEntryHistory = array.new<label>()
+var array<label> rrStopHistory = array.new<label>()
+var array<label> rrPeakHistory = array.new<label>()
+var box rrRiskBox = na
+var box rrRewardBox = na
+var label rrEntryTag = na
+var label rrStopTag = na
+var label rrPeakTag = na
+var int rrSide = 0
+var int rrStartedAt = na
+var float rrEntry = na
+var float rrStop = na
+var float rrDistance = na
+var float rrMaximum = 0.0
+
+if barstate.isconfirmed and showRisk and rrShow
+    int rrBarMillis = na(time_close) ? int(timeframe.in_seconds() * 1000) : time_close - time
+    int rrCloseTime = na(time_close) ? time + rrBarMillis : time_close
+    int rrRightTime = rrCloseTime + rrAhead * rrBarMillis
+    if referenceStarted
+        int rrNewSide = 1
+        float rrNewDistance = rrNewSide * (entry - initialStop)
+        bool rrValid = not na(entry) and not na(initialStop) and entry > 0 and initialStop > 0 and rrNewDistance > 0
+        if rrValid
+            rrSide := rrNewSide
+            rrStartedAt := time
+            rrEntry := entry
+            rrStop := initialStop
+            rrDistance := rrNewDistance
+            rrMaximum := 0.0
+            float rrObservation = rrEntry + rrSide * 3.0 * rrDistance
+            string rrTip = "预警收盘参考，不是实际成交。初始风险冻结；3R仅为观察位，不触发止盈。绿色框扩展表示已确认最高浮盈，不代表已实现收益。"
+            rrRiskBox := box.new(rrStartedAt, math.max(rrEntry, rrStop), rrRightTime, math.min(rrEntry, rrStop), xloc=xloc.bar_time, border_color=color.new(bear, 30), border_width=1, bgcolor=color.new(bear, 92), force_overlay=true)
+            rrRewardBox := rrObservation > 0 ? box.new(rrStartedAt, math.max(rrEntry, rrObservation), rrRightTime, math.min(rrEntry, rrObservation), xloc=xloc.bar_time, border_color=color.new(bull, 30), border_width=1, bgcolor=color.new(bull, 92), force_overlay=true) : na
+            rrEntryTag := f_rrPriceTag(rrRightTime, rrEntry, "预警参考 · " + str.tostring(rrEntry, format.mintick), ink, rrTip)
+            rrStopTag := f_rrPriceTag(rrRightTime, rrStop, "初始止损 · " + str.tostring(rrStop, format.mintick), bear, rrTip)
+            rrPeakTag := rrObservation > 0 ? f_rrPriceTag(rrRightTime, rrObservation, "3R 观察位 · " + str.tostring(rrObservation, format.mintick), bull, rrTip) : na
+            array.push(rrRiskHistory, rrRiskBox)
+            array.push(rrRewardHistory, rrRewardBox)
+            array.push(rrEntryHistory, rrEntryTag)
+            array.push(rrStopHistory, rrStopTag)
+            array.push(rrPeakHistory, rrPeakTag)
+            while array.size(rrRiskHistory) > rrKeep
+                box.delete(array.shift(rrRiskHistory))
+                box.delete(array.shift(rrRewardHistory))
+                label.delete(array.shift(rrEntryHistory))
+                label.delete(array.shift(rrStopHistory))
+                label.delete(array.shift(rrPeakHistory))
+        else
+            // The signal itself remains visible; unavailable risk creates no
+            // fabricated entry/stop/target coordinates or substitute ATR stop.
+            rrSide := 0
+
+    if rrSide != 0 and not na(rrRiskBox)
+        bool rrEnded = exitReference or referenceGap
+        int rrEdge = rrEnded ? rrCloseTime : rrRightTime
+        rrMaximum := math.max(rrMaximum, nz(peakR, 0.0))
+        float rrExtentR = math.max(3.0, rrMaximum)
+        float rrExtent = rrEntry + rrSide * rrExtentR * rrDistance
+        string rrEnding = referenceGap ? " · 数据缺口中止" : rrEnded ? " · 本段结束" : ""
+        string rrReference = "预警收盘参考，不是实际成交。已确认峰值 " + str.tostring(rrMaximum, "#.##") + "R；当前路径 " + str.tostring(currentR, "#.##") + "R。峰值未兑现；3R为观察位，无固定止盈。"
+        box.set_right(rrRiskBox, rrEdge)
+        label.set_x(rrEntryTag, rrEdge)
+        label.set_x(rrStopTag, rrEdge)
+        label.set_text(rrEntryTag, "预警参考 · " + str.tostring(rrEntry, format.mintick) + rrEnding)
+        label.set_tooltip(rrEntryTag, rrReference)
+        label.set_tooltip(rrStopTag, rrReference + " 冻结初始止损；当前保护 " + str.tostring(protection, format.mintick) + "，以原保护线为准。")
+        if not na(rrRewardBox) and rrExtent > 0
+            box.set_right(rrRewardBox, rrEdge)
+            box.set_top(rrRewardBox, math.max(rrEntry, rrExtent))
+            box.set_bottom(rrRewardBox, math.min(rrEntry, rrExtent))
+            label.set_xy(rrPeakTag, rrEdge, rrExtent)
+            label.set_text(rrPeakTag, (rrMaximum >= 3.0 ? "已到峰值 " + str.tostring(rrMaximum, "#.##") + "R · " : "3R 观察位 · ") + str.tostring(rrExtent, format.mintick))
+            label.set_tooltip(rrPeakTag, rrReference)
+        if rrEnded
+            // Retain completed objects. A later signal owns a new independent
+            // group; completed prices and edges are never updated again.
+            rrSide := 0
+// END V2 RISK BOX DISPLAY
+
+// Only confirmed oscillator points are shown; the live tip holds prior values.
+float shownMd = barstate.isconfirmed ? md : md[1]
+float shownSb = barstate.isconfirmed ? sb : sb[1]
+hline(0, "零轴", color=color.new(ink, 38), linestyle=hline.style_solid, linewidth=1)
+plot(shownMd, "IMACD 主线", blue, 2, display=display.pane + display.data_window)
+plot(shownSb, "IMACD 信号线", #CB882A, 2, display=display.pane + display.data_window)
+plot(earlySignal or confirmedSignal ? md : na, "预警 / 确认点", confirmedSignal ? bull : gold, 4, plot.style_circles, display=display.pane + display.data_window)
+plot(showMas ? s20 : na, "SMA20", color.new(bull, 38), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? e20 : na, "EMA20", color.new(bull, 58), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? s60 : na, "SMA60", color.new(blue, 40), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? e60 : na, "EMA60", color.new(blue, 60), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? s120 : na, "SMA120", color.new(ink, 48), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? e120 : na, "EMA120", color.new(ink, 66), 1, force_overlay=true, display=display.pane + display.data_window)
+pProtect = plot(showRisk ? visibleProtection : na, "本根有效保护", trailArmed ? bull : bear, 2, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
+pInitial = plot(showRisk ? visibleInitial : na, "冻结初始止损", color.new(bear, 55), 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
+pEntry = plot(showRisk ? visibleEntry : na, "预警收盘参考", color.new(ink, 60), 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
+fill(pInitial, pEntry, color.new(bear, 94), title="初始风险区")
+barcolor(confirmedSignal ? #00CBB1 : earlySignal ? #D6A14A : na, title="预警与确认关键K线")
+
+// Historical Data Window belongs to the selected bar; panel is latest close.
+plot(barstate.isconfirmed ? (earlySignal ? 1 : 0) : na, "结构预警", display=display.data_window)
+plot(barstate.isconfirmed ? (confirmedSignal ? 1 : 0) : na, "后续确认", display=display.data_window)
+plot(confirmedSignal ? confirmationAge : na, "确认等待根数", display=display.data_window)
+plot(barstate.isconfirmed ? (ready ? 1 : 0) : na, "连续数据已就绪", display=display.data_window)
+plot(barstate.isconfirmed ? rv : na, "收盘量比 RV", display=display.data_window)
+plot(barstate.isconfirmed ? expansion : na, "收盘 TR / 前根ATR", display=display.data_window)
+plot(barstate.isconfirmed ? denseHits : na, "前12根密集命中", display=display.data_window)
+plot(barstate.isconfirmed ? advance3 : na, "三根净进展 ATR", display=display.data_window)
+plot(barstate.isconfirmed ? volumeRatio3 : na, "三根量比", display=display.data_window)
+plot(barstate.isconfirmed ? efficiency3 : na, "方向效率 · 仅质量标签", display=display.data_window)
+plot(barstate.isconfirmed ? closePosition : na, "收盘位置 · 仅质量标签", display=display.data_window)
+plot(barstate.isconfirmed ? (aboveSix ? 1 : 0) : na, "六线之上 · 仅质量标签", display=display.data_window)
+
+var table panel = table.new(position.top_right, 2, 5, bgcolor=color.new(chart.bg_color, 8), border_width=0)
+if barstate.islast and showPanel
+    bool panelReady = barstate.isconfirmed ? ready : ready[1]
+    bool panelEarly = barstate.isconfirmed ? earlySignal : earlySignal[1]
+    bool panelConfirmed = barstate.isconfirmed ? confirmedSignal : confirmedSignal[1]
+    string stateText = not panelReady ? "预热 / 连续数据不足" : panelConfirmed ? "结构已确认" : panelEarly ? "结构预警 · 待确认" : not na(parentBar) and not parentConfirmed ? "等待后续确认" : "当前无新预警"
+    table.cell(panel, 0, 0, "SPIKE V3 · 最新收盘", text_color=ink, text_size=size.small)
+    table.cell(panel, 1, 0, stateText, text_color=panelConfirmed ? bull : gold, text_size=size.small)
+    table.cell(panel, 0, 1, "三根推进 / 量比", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 1, str.tostring(barstate.isconfirmed ? advance3 : advance3[1], "#.##") + " ATR / " + str.tostring(barstate.isconfirmed ? volumeRatio3 : volumeRatio3[1], "#.##") + "×", text_color=ink, text_size=size.tiny)
+    table.cell(panel, 0, 2, "参考路径 / 峰值", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 2, na(currentR) ? "无可用参考" : str.tostring(currentR, "#.##") + "R / " + str.tostring(peakR, "#.##") + "R", text_color=ink, text_size=size.tiny)
+    table.cell(panel, 0, 3, "仅多头 · 无固定止盈", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 3, "预警≠买入 · 峰值未兑现", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 0, 4, "市场广度", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 4, "本脚本未计算", text_color=muted, text_size=size.tiny)
+
+// These are local study conditions. Creating a TV alert is a separate action.
+alertcondition(earlySignal, "SPIKE 结构预警", "SPIKE 结构预警（不代表已确认） | {{exchange}}:{{ticker}} | {{interval}} | 预警收盘 {{close}}")
+alertcondition(confirmedSignal, "SPIKE 结构确认", "SPIKE 结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}")
+alertcondition(exitReference, "SPIKE 参考保护触及", "SPIKE 参考保护已触及 | {{exchange}}:{{ticker}} | {{interval}} | 已收盘确认，请查看参考价")
