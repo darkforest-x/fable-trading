@@ -1,11 +1,14 @@
 # SPIKE Burst V1 — two-year all-market replay
 
 Frozen before collection on 2026-09-11 (Asia/Shanghai): evaluate the two UTC
-years `[2024-09-11T00:00:00Z, 2026-09-11T00:00:00Z)`, with a 376-day causal
-warm-up fetch beginning `2023-08-31T00:00:00Z`.  That is required for V1's
+years `[2024-09-10T00:00:00Z, 2026-09-10T00:00:00Z)`, with a 376-day causal
+warm-up fetch beginning `2023-08-30T00:00:00Z`.  That is required for V1's
 340-bar daily SMMA/MA stabilization; new listings and post-gap daily segments
-that cannot meet it are explicit warmup exclusions.  The right endpoint is the end of the latest fully closed UTC
-day (2026-09-10); no 2026-09-11 candle may enter this run.
+that cannot meet it are explicit warmup exclusions.  The right endpoint is the
+end of the latest fully closed UTC day (2026-09-09): at collection time it was
+2026-09-10 17:17 UTC / 2026-09-11 01:17 Shanghai, so the 2026-09-10 UTC daily
+bar was still incomplete.  No partial daily bar or 2026-09-10 00:00+ candle may
+enter this run.
 
 The contract is the unchanged `yoyo/evaluation/pine/spike_burst_v1.pine`
 (SHA `18bbb6955fdf12e124688003799c44fc2a641f11a342edcf478157b1c9641fe2`).

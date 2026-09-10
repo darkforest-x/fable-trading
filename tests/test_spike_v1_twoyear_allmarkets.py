@@ -4,9 +4,9 @@ from yoyo.evaluation.spike_v1_twoyear_allmarkets import END, START, WARMUP_START
 
 
 def test_frozen_two_year_window_ends_after_latest_closed_utc_day():
-    assert START == pd.Timestamp("2024-09-11T00:00:00Z")
-    assert END == pd.Timestamp("2026-09-11T00:00:00Z")
-    assert WARMUP_START <= pd.Timestamp("2023-08-31T00:00:00Z")
+    assert START == pd.Timestamp("2024-09-10T00:00:00Z")
+    assert END == pd.Timestamp("2026-09-10T00:00:00Z")
+    assert WARMUP_START <= pd.Timestamp("2023-08-30T00:00:00Z")
 
 
 def test_complete_utc_aggregation_discards_partial_group():

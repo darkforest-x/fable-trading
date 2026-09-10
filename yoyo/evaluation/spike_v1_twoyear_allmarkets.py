@@ -36,9 +36,9 @@ ROOT = Path(__file__).resolve().parents[2]
 EXP = ROOT / "experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1"
 DATA = EXP / "data"
 RESULTS = EXP / "results"
-START = pd.Timestamp("2024-09-11T00:00:00Z")
-END = pd.Timestamp("2026-09-11T00:00:00Z")
-WARMUP_START = pd.Timestamp("2023-08-31T00:00:00Z")
+START = pd.Timestamp("2024-09-10T00:00:00Z")
+END = pd.Timestamp("2026-09-10T00:00:00Z")
+WARMUP_START = pd.Timestamp("2023-08-30T00:00:00Z")
 PINE = ROOT / "yoyo/evaluation/pine/spike_burst_v1.pine"
 PINE_SHA = "18bbb6955fdf12e124688003799c44fc2a641f11a342edcf478157b1c9641fe2"
 CONFIG = {"schema": "spike-v1-twoyear-allmarkets-v1", "evaluation_start": START.isoformat(),
@@ -168,16 +168,19 @@ def normalize(venue: str, payload: Any, left: pd.Timestamp, right: pd.Timestamp)
     return out
 
 
-def fetch(max_markets: int | None = None) -> None:
+def fetch(max_markets: int | None = None, venue: str | None = None) -> None:
     rows = pd.read_json(DATA / "catalog.json")
     wanted = rows.loc[rows.eligible].sort_values(["venue", "symbol"]).to_dict("records")
+    if venue is not None:
+        wanted = [row for row in wanted if row["venue"] == venue]
     if max_markets is not None: wanted = wanted[:max_markets]
     ledger = []
     for number, row in enumerate(wanted, 1):
         venue, symbol = row["venue"], row["symbol"]
         dest = DATA / "normalized" / venue / (symbol + "_30m.csv.gz")
         receipt = DATA / "market_receipts" / venue / (symbol + ".json")
-        if dest.exists() and receipt.exists(): ledger.append(json.loads(receipt.read_text())); continue
+        if dest.exists() and receipt.exists() and json.loads(receipt.read_text()).get("status") == "complete":
+            ledger.append(json.loads(receipt.read_text())); continue
         client, chunks, pages, error = Client(venue), [], [], ""
         dest.parent.mkdir(parents=True, exist_ok=True)
         cursor = WARMUP_START
@@ -189,13 +192,16 @@ def fetch(max_markets: int | None = None) -> None:
             frame = pd.concat(chunks).sort_index() if chunks else pd.DataFrame()
             if len(frame) and frame.index.duplicated().any(): raise ValueError("duplicate rows after page join")
             frame.to_csv(dest, compression={"method": "gzip", "mtime": 0})
-            expected = pd.date_range(WARMUP_START, END, freq="30min", inclusive="left")
+            listed = int(row.get("listing_ms") or 0)
+            listed_at = pd.Timestamp(listed, unit="ms", tz="UTC").ceil("30min") if listed > 0 else WARMUP_START
+            expected = pd.date_range(max(WARMUP_START, listed_at), END, freq="30min", inclusive="left")
             missing = expected.difference(frame.index).astype(str).tolist() if len(frame) else expected.astype(str).tolist()
             status = "complete" if not missing else "gapped"
         except Exception as exc: frame, pages, missing, status, error = pd.DataFrame(), pages, [], "error", repr(exc)
         record = {"venue": venue, "symbol": symbol, "asset": row["asset"], "tick": row["tick"], "status": status,
                   "rows": len(frame), "pages": len(pages), "missing_30m": len(missing), "missing_examples": missing[:20],
-                  "error": error, "path": str(dest), "completed_at": stamp(), "page_receipts": pages}
+                  "error": error, "path": str(dest), "expected_from": expected[0].isoformat() if len(expected) else None,
+                  "completed_at": stamp(), "page_receipts": pages}
         atomic_json(receipt, record); ledger.append(record); print(number, len(wanted), venue, symbol, status, len(frame), flush=True)
     pd.DataFrame(ledger).drop(columns=["page_receipts"], errors="ignore").to_csv(DATA / "error_ledger.csv", index=False)
     atomic_json(DATA / "fetch_manifest.json", {"config": CONFIG, "generated_at": stamp(), "requested_markets": len(wanted),
@@ -255,10 +261,10 @@ def evaluate() -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument("phase", choices=("catalog", "fetch", "evaluate")); parser.add_argument("--max-markets", type=int)
+    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument("phase", choices=("catalog", "fetch", "evaluate")); parser.add_argument("--max-markets", type=int); parser.add_argument("--venue", choices=tuple(VENUES))
     args = parser.parse_args()
     if args.phase == "catalog": catalog()
-    elif args.phase == "fetch": fetch(args.max_markets)
+    elif args.phase == "fetch": fetch(args.max_markets, args.venue)
     else: evaluate()
 
 
