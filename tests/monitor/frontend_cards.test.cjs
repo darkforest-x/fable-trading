@@ -184,3 +184,13 @@ test("stale ledger evidence hides its prior outcome until an immutable snapshot 
   assert.match(app, /账本证据已过期 · 不展示收益/);
   assert.match(app, /等待新的不可变账本快照重链/);
 });
+
+
+test("replay direct cards can page older raw records without replacing loaded pages", () => {
+  assert.match(app, /before_close_ms=\$\{encodeURIComponent\(cursor\.close_ms\)\}/);
+  assert.match(app, /before_id=\$\{encodeURIComponent\(cursor\.event_id\)\}/);
+  assert.match(app, /加载更早记录（每页最多 2,000 条）/);
+  assert.match(app, /state\.rawPaged = true/);
+  assert.match(app, /key === "directSignals" && state\.rawPaged/);
+  assert.match(app, /已加载 \$\{number\(source\.length\)\} 条；可继续读取更早记录/);
+});

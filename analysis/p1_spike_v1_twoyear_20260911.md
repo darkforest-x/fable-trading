@@ -67,7 +67,27 @@ AUC、置换检验、top-decile 净收益、匹配随机交易对照在这一固
 
 **获利记录与失败原因。** 这 6,116 条已实现行的 exit label 全部是 `protective_stop`：其中 1,721 条最终 `net_return > 0`，4,395 条非正；因此该 label 不能被误读成“每一条都是失败”，也不能从中单独识别或归因“成功大趋势”。同一已覆盖子集的所有 protective-stop 行等权净收益和为 +8.6985，中位 MFE 为 +5.85%，中位 MAE 为 -4.02%。这些是路径描述，不是完整市场、匹配对照或策略 edge；不能据此改变 V1 的风险线或阈值。
 
-逐周期逐笔 source-event id、entry/exit、censored 与 v2 字段仍在 [covered_trade_ledger.csv.gz](../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_ledger.csv.gz)。仅导入 monitor 的 1,019 条回放卡另有 [replay_ledger_link_receipt.csv.gz](../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/replay_ledger_link_receipt.csv.gz)；它们是 partial covered subset，不能替代全部 6,185 条三周期信号行。
+逐周期逐笔 source-event id、entry/exit、censored 与 v2 字段仍在 [covered_trade_ledger.csv.gz](../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_ledger.csv.gz)。目前 monitor 仅已导入其中 1,019 条旧已取回放卡；尚有 **5,166** 条 30m / 1H / 4H 账本信号未接入 UI。它们必须从同一不可变 snapshot 以 signal-only import 后再联结，不能只导入获利记录，1D 也不属于当前 V1 三周期 UI 或通知合约。 信号 API 的稳定 cursor 已就绪：页面一次只保留最多 2,000 条，用户可继续加载更早的 raw 历史，定时刷新也不会丢失已加载页。它解决浏览路径，不代表剩余 5,166 条已经导入或通过经济审计。
+
+## 交易所、来源跨度与逐笔极值
+
+下表读取 `coverage_descriptive_by_venue_timeframe.csv` 的已实现独立事件描述；成本沿用固定的 0.2% 往返名义成本。`净收益和`、PF 和胜率均只在该交易所×周期的已覆盖子集内计算，censored 不进入分母，也没有匹配随机对照或账户模型。
+
+| 交易所 | 周期 | 已实现 / censored | 已实现正收益率 | 已实现净收益和 | PF |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Binance | 30m | 2,365 / 8 | 29.01% | -2.6936 | 0.9748 |
+| Binance | 1H | 1,327 / 6 | 25.40% | +11.0786 | 1.1288 |
+| Binance | 4H | 296 / 15 | 28.04% | -5.8059 | 0.8418 |
+| Gate | 30m | 34 / 1 | 17.65% | -0.7388 | 0.5464 |
+| Gate | 1H | 50 / 0 | 32.00% | -0.4040 | 0.8662 |
+| Gate | 4H | 84 / 5 | 32.14% | -5.5231 | 0.4759 |
+| OKX | 30m | 1,180 / 6 | 29.32% | -6.8975 | 0.8437 |
+| OKX | 1H | 647 / 9 | 28.44% | +23.7811 | 1.6902 |
+| OKX | 4H | 133 / 19 | 27.07% | -4.0984 | 0.7154 |
+
+按来源是否连续覆盖到 frozen start 分层，1H 的正数集中在 `partial_after_frozen_start`：full 1H 为 936 条已实现、-20.6536、PF 0.6173；partial 1H 为 1,088 条、+55.1094、PF 1.7925。30m full / partial 分别为 -1.2770 / -9.0529，4H 为 -11.4949 / -3.9325。这个不稳定的跨度差异正是不能从 partial 覆盖外推“edge”的原因。
+
+逐笔极值只用于核对账本路径，不能解释为策略的“成功大趋势”：最大两条为 2026-04-07 的 RAVE 1H（OKX +32.9379，Binance +29.9506），都属于 partial 来源窗口；最大负行是 Binance MOVR 4H -0.6763，属于 full 来源窗口。全部已实现行的 lifecycle label 均为 `protective_stop`，因此该标签只说明退出机制路径，不能单独归因为赢家或失败原因。完整 top-winner / top-loss 列表和 source scope 都保留在同一结果目录的 `coverage_descriptive_*.csv`，没有挑选它们作为前端或通知输入。
 
 ## 本次重建的来源边界
 

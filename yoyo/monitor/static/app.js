@@ -6,6 +6,7 @@
   const state = {
     view: "signals", signals: [], directSignals: [], rawYoloSignals: [], candidates: [], signalScope: "direct", markets: [], status: null, health: null,
     signalsLoaded: false, directSignalsLoaded: false, directSignalTotal: 0, candidatesLoaded: false, candidateTotal: 0, candidateCounts: null, marketsLoaded: false, signalTotal: 0, rowLimit: 24, watchLimit: 24, search: "", watchSearch: "", watchScope: "building",
+    rawNextCursor: null, rawHasMore: false, rawPaged: false, rawLoadingMore: false,
     timeframe: "all", watchTimeframe: "all", side: "long", signalSource: "live", selected: null,
     chartKey: null, chart: null, chartRequest: 0, chartController: null, chartExpanded: false, chartViewport: null,
     syncing: false, refreshQueued: false, signalQueryRevision: 0, lastSync: null, statusReceivedAt: null, errors: {}, chartHover: null, detailOrigin: "signals",
@@ -297,11 +298,19 @@
     $("signal-scope-note").textContent = state.signalSource === "replay"
       ? "历史回放只展示已记录事件与之后的真实行情；不触发、也不暗示通知。"
       : confirmed ? "YOLO 是原始 V1 之后的补充确认，不是启动门；两类实时记录各自以服务回执为准。" : "只展示已收盘的原始 V1 多头启动；次开盘的实际成交时间须由后端提供。";
-    $("signal-window-note").textContent = loaded ? `最近 ${number(source.length)} / 共 ${number(total)} 条` : "最近 2,000 条 · 每 15 秒同步";
+    $("signal-window-note").textContent = loaded
+      ? state.signalScope === "direct" && state.rawHasMore
+        ? `已加载 ${number(source.length)} 条；可继续读取更早记录`
+        : `已加载 ${number(source.length)} 条`
+      : "最近 2,000 条 · 每 15 秒同步";
     const candidateCount = $("candidate-count");
     if (candidateCount) { candidateCount.textContent = state.candidatesLoaded ? number(state.candidateCounts ? numeric(state.candidateCounts.pending) + numeric(state.candidateCounts.error) : state.candidates.filter((item) => ["pending", "error"].includes(item.model?.status)).length) : "—"; candidateCount.title = "候选状态仅在兼容旧服务时显示"; }
-    $("load-more-signals").classList.toggle("hidden", items.length <= state.rowLimit);
-    $("load-more-signals").textContent = `显示更多（${Math.min(state.rowLimit, items.length)} / ${items.length}）`;
+    const hasEarlierPage = state.signalScope === "direct" && state.rawHasMore;
+    $("load-more-signals").classList.toggle("hidden", items.length <= state.rowLimit && !hasEarlierPage);
+    $("load-more-signals").disabled = state.rawLoadingMore;
+    $("load-more-signals").textContent = items.length > state.rowLimit
+      ? `显示更多（${Math.min(state.rowLimit, items.length)} / ${items.length}）`
+      : state.rawLoadingMore ? "正在读取更早记录…" : "加载更早记录（每页最多 2,000 条）";
     $("signal-empty").classList.toggle("hidden", items.length > 0);
     if (!items.length) {
       const hasFilters = state.search || state.timeframe !== "all" || state.side !== "all";
@@ -371,6 +380,10 @@
     state.directSignalsLoaded = false;
     state.signalTotal = 0;
     state.directSignalTotal = 0;
+    state.rawNextCursor = null;
+    state.rawHasMore = false;
+    state.rawPaged = false;
+    state.rawLoadingMore = false;
     clearSelectedSignal();
     renderSignals();
   }
@@ -851,10 +864,20 @@
         anySuccess = true;
         if (key === "status") { state.status = result.value; state.statusReceivedAt = Date.now(); }
         else {
-          state[key] = result.value.items.filter((item) => item && typeof item === "object" && item.symbol).map(normalizeV1Event).filter((item) => key === "signals" ? isConfirmed(item) : key === "directSignals" ? isDirectRecord(item) : Boolean(item));
+          const items = result.value.items.filter((item) => item && typeof item === "object" && item.symbol).map(normalizeV1Event)
+            .filter((item) => key === "signals" ? isConfirmed(item) : key === "directSignals" ? isDirectRecord(item) : Boolean(item));
+          if (key === "directSignals" && state.rawPaged) {
+            state.directSignals = [...items, ...state.directSignals].filter((item, index, rows) => rows.findIndex((other) => sameEvent(other, item)) === index);
+          } else state[key] = items;
           state[`${key}Loaded`] = true;
           if (key === "signals") state.signalTotal = numeric(result.value.total, state.signals.length);
-          if (key === "directSignals") state.directSignalTotal = numeric(result.value.total, state.directSignals.length);
+          if (key === "directSignals") {
+            state.directSignalTotal = state.directSignals.length;
+            if (!state.rawPaged) {
+              state.rawNextCursor = result.value.next_cursor || null;
+              state.rawHasMore = Boolean(state.rawNextCursor);
+            }
+          }
           if (key !== "markets") state[key].sort((a, b) => numeric(b.bar_close_ms) - numeric(a.bar_close_ms) || numeric(b.detected_at_ms) - numeric(a.detected_at_ms));
         }
       });
@@ -891,6 +914,39 @@
       }
     }
   }
+  async function loadEarlierRawSignals() {
+    if (state.rawLoadingMore || !state.rawHasMore || !state.rawNextCursor || state.signalScope !== "direct") return;
+    const queryRevision = state.signalQueryRevision;
+    const querySource = state.signalSource;
+    const queryTimeframe = state.timeframe;
+    const cursor = state.rawNextCursor;
+    state.rawLoadingMore = true;
+    renderSignals();
+    try {
+      const timeframe = queryTimeframe === "all" ? "" : `&timeframe=${encodeURIComponent(apiTimeframe(queryTimeframe) || "")}`;
+      const path = `/api/signals?limit=2000&source=${encodeURIComponent(querySource)}&confirmation=raw${timeframe}`
+        + `&before_close_ms=${encodeURIComponent(cursor.close_ms)}&before_id=${encodeURIComponent(cursor.event_id)}`;
+      const result = await api(path);
+      if (queryRevision !== state.signalQueryRevision || querySource !== state.signalSource || queryTimeframe !== state.timeframe) return;
+      if (!Array.isArray(result.items)) throw new Error("服务返回的数据格式有误");
+      const older = result.items.filter((item) => item && typeof item === "object" && item.symbol)
+        .map(normalizeV1Event).filter(isDirectRecord);
+      const existing = state.directSignals;
+      state.directSignals = [...existing, ...older].filter((item, index, rows) => rows.findIndex((other) => sameEvent(other, item)) === index)
+        .sort((a, b) => numeric(b.bar_close_ms) - numeric(a.bar_close_ms) || String(b.id).localeCompare(String(a.id)));
+      state.directSignalTotal = state.directSignals.length;
+      state.rawNextCursor = result.next_cursor || null;
+      state.rawHasMore = Boolean(state.rawNextCursor);
+      state.rawPaged = true;
+      delete state.errors.directSignals;
+    } catch (error) {
+      state.errors.directSignals = error.message || "请求失败";
+    } finally {
+      state.rawLoadingMore = false;
+      renderErrors(); renderSignals();
+    }
+  }
+
   function redact(value) {
     if (Array.isArray(value)) return value.map(redact);
     if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, /token|secret|password|api.?key|chat.?id|authorization|device.?key|(?:bark|push|server).?(?:url|address)|endpoint|^url$/i.test(key) ? "[已隐藏]" : redact(item)]));
@@ -943,7 +999,10 @@
   $("chart-dialog").addEventListener("click", (event) => {
     if (event.target === $("chart-dialog")) setChartExpanded(false);
   });
-  $("load-more-signals").addEventListener("click", () => { state.rowLimit += 24; renderSignals(); });
+  $("load-more-signals").addEventListener("click", () => {
+    if (state.rowLimit < sourceItems().length) { state.rowLimit += 24; renderSignals(); }
+    else loadEarlierRawSignals();
+  });
   function activateRow(event, type) {
     const preview = event.target.closest(type === "signal" ? "[data-preview-signal-id]" : "[data-market-symbol]");
     const row = preview || event.target.closest("[data-tradingview-action]") || event.target.closest(type === "signal" ? ".signal-card" : ".watch-card")?.querySelector("[data-tradingview-action]");

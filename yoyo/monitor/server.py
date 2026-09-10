@@ -105,7 +105,8 @@ def create_app(runtime=None, start_monitor=True):
 
     @app.get("/api/signals")
     def signals(limit: int = Query(200, ge=1, le=2000), symbol: str = None, timeframe: str = None,
-                kind: str = None, side: str = None, source: str = None, confirmation: str = None):
+                kind: str = None, side: str = None, source: str = None, confirmation: str = None,
+                before_close_ms: int = None, before_id: str = None):
         if source not in (None, "live", "replay") or confirmation not in (None, "raw", "yolo", "raw_yolo"):
             raise HTTPException(400, "unsupported source or confirmation")
         # The V1 UI filters by confirmation.  Infer its event kind when the
@@ -117,12 +118,17 @@ def create_app(runtime=None, start_monitor=True):
             raise HTTPException(400, "支持指标启动或 YOLO 确认信号。")
         direct = kind == SIGNAL_KIND
         protocol = SIGNAL_PROTOCOL if kind == SIGNAL_KIND else MODEL_PROTOCOL if kind == MODEL_KIND else None
+        if (before_close_ms is None) != (before_id is None):
+            raise HTTPException(400, "cursor requires both close time and event id")
         rows = store.list_events(limit, symbol, timeframe, kind, side, protocol=protocol,
-                                 source=source, confirmation=confirmation)
+                                 source=source, confirmation=confirmation,
+                                 before_close_ms=before_close_ms, before_id=before_id)
         for row in rows:
             row["is_fresh"] = row.get("source") == "live" and 0 <= monitor.client.clock() - row["bar_close_ms"] <= FRESH_MS
+        cursor = ({"close_ms": rows[-1]["bar_close_ms"], "event_id": rows[-1]["id"]}
+                  if len(rows) == limit else None)
         return {"items": rows, "total": len(rows), "kind": kind, "protocol": protocol,
-                "source": source, "confirmation": confirmation}
+                "source": source, "confirmation": confirmation, "next_cursor": cursor}
 
     @app.get("/api/candidates")
     def candidates(limit: int = Query(200, ge=1, le=2000), symbol: str = None, timeframe: str = None):

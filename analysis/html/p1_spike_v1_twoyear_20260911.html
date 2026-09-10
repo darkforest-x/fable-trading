@@ -108,7 +108,29 @@ python3 scripts/md_to_html.py analysis/p1_spike_v1_twoyear_20260911.md --out-dir
 </tbody></table>
 <p>这只是当前可获得单元的等权描述，正负值均不能视作策略的成功或失败结论。<code>net_r</code> 使用本轮修复后的 next-open 风险分母，仍是单笔标准化账本字段，不是账户收益；事件序列回撤也没有资本分配或重叠仓位模型。按入场年份、交易所和周期拆分的完整行在 CSV 中保留，避免将不同时间段混成一个成绩单。</p>
 <p><strong>获利记录与失败原因。</strong> 这 6,116 条已实现行的 exit label 全部是 <code>protective_stop</code>：其中 1,721 条最终 <code>net_return &gt; 0</code>，4,395 条非正；因此该 label 不能被误读成“每一条都是失败”，也不能从中单独识别或归因“成功大趋势”。同一已覆盖子集的所有 protective-stop 行等权净收益和为 +8.6985，中位 MFE 为 +5.85%，中位 MAE 为 -4.02%。这些是路径描述，不是完整市场、匹配对照或策略 edge；不能据此改变 V1 的风险线或阈值。</p>
-<p>逐周期逐笔 source-event id、entry/exit、censored 与 v2 字段仍在 <a href="../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_ledger.csv.gz">covered_trade_ledger.csv.gz</a>。仅导入 monitor 的 1,019 条回放卡另有 <a href="../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/replay_ledger_link_receipt.csv.gz">replay_ledger_link_receipt.csv.gz</a>；它们是 partial covered subset，不能替代全部 6,185 条三周期信号行。</p>
+<p>逐周期逐笔 source-event id、entry/exit、censored 与 v2 字段仍在 <a href="../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_ledger.csv.gz">covered_trade_ledger.csv.gz</a>。目前 monitor 仅已导入其中 1,019 条旧已取回放卡；尚有 <strong>5,166</strong> 条 30m / 1H / 4H 账本信号未接入 UI。它们必须从同一不可变 snapshot 以 signal-only import 后再联结，不能只导入获利记录，1D 也不属于当前 V1 三周期 UI 或通知合约。 信号 API 的稳定 cursor 已就绪：页面一次只保留最多 2,000 条，用户可继续加载更早的 raw 历史，定时刷新也不会丢失已加载页。它解决浏览路径，不代表剩余 5,166 条已经导入或通过经济审计。</p>
+<h2>交易所、来源跨度与逐笔极值</h2>
+<p>下表读取 <code>coverage_descriptive_by_venue_timeframe.csv</code> 的已实现独立事件描述；成本沿用固定的 0.2% 往返名义成本。<code>净收益和</code>、PF 和胜率均只在该交易所×周期的已覆盖子集内计算，censored 不进入分母，也没有匹配随机对照或账户模型。</p>
+<table><thead><tr>
+<th>交易所</th>
+<th>周期</th>
+<th>已实现 / censored</th>
+<th>已实现正收益率</th>
+<th>已实现净收益和</th>
+<th>PF</th>
+</tr></thead><tbody>
+<tr><td>Binance</td><td>30m</td><td>2,365 / 8</td><td>29.01%</td><td>-2.6936</td><td>0.9748</td></tr>
+<tr><td>Binance</td><td>1H</td><td>1,327 / 6</td><td>25.40%</td><td>+11.0786</td><td>1.1288</td></tr>
+<tr><td>Binance</td><td>4H</td><td>296 / 15</td><td>28.04%</td><td>-5.8059</td><td>0.8418</td></tr>
+<tr><td>Gate</td><td>30m</td><td>34 / 1</td><td>17.65%</td><td>-0.7388</td><td>0.5464</td></tr>
+<tr><td>Gate</td><td>1H</td><td>50 / 0</td><td>32.00%</td><td>-0.4040</td><td>0.8662</td></tr>
+<tr><td>Gate</td><td>4H</td><td>84 / 5</td><td>32.14%</td><td>-5.5231</td><td>0.4759</td></tr>
+<tr><td>OKX</td><td>30m</td><td>1,180 / 6</td><td>29.32%</td><td>-6.8975</td><td>0.8437</td></tr>
+<tr><td>OKX</td><td>1H</td><td>647 / 9</td><td>28.44%</td><td>+23.7811</td><td>1.6902</td></tr>
+<tr><td>OKX</td><td>4H</td><td>133 / 19</td><td>27.07%</td><td>-4.0984</td><td>0.7154</td></tr>
+</tbody></table>
+<p>按来源是否连续覆盖到 frozen start 分层，1H 的正数集中在 <code>partial_after_frozen_start</code>：full 1H 为 936 条已实现、-20.6536、PF 0.6173；partial 1H 为 1,088 条、+55.1094、PF 1.7925。30m full / partial 分别为 -1.2770 / -9.0529，4H 为 -11.4949 / -3.9325。这个不稳定的跨度差异正是不能从 partial 覆盖外推“edge”的原因。</p>
+<p>逐笔极值只用于核对账本路径，不能解释为策略的“成功大趋势”：最大两条为 2026-04-07 的 RAVE 1H（OKX +32.9379，Binance +29.9506），都属于 partial 来源窗口；最大负行是 Binance MOVR 4H -0.6763，属于 full 来源窗口。全部已实现行的 lifecycle label 均为 <code>protective_stop</code>，因此该标签只说明退出机制路径，不能单独归因为赢家或失败原因。完整 top-winner / top-loss 列表和 source scope 都保留在同一结果目录的 <code>coverage_descriptive_*.csv</code>，没有挑选它们作为前端或通知输入。</p>
 <h2>本次重建的来源边界</h2>
 <p><code>954e54a</code> 后，2026-09-10T22:38:36Z 的一次已有冻结输入重建完成；随后 <code>report-covered</code> 在 22:38:46Z 生成同一方法版本的 drilldown。此前一个标为 complete 但没有 OHLCV schema 的 <code>US100-USDT-SWAP</code> 源会使整轮聚合 <code>KeyError</code>；现在其四个周期均为 <code>source_error</code>，coverage detail 含原 receipt 路径、CSV 路径和缺失列名。该分类没有补写、重抓或伪造任何 K 线。</p>
 <p>Binance/OKX 的 <code>gapped/error</code> 与 Gate 的 <code>complete/partial/gapped/error</code> receipt 现在都被视为该固定窗口的终态，循环不会把同一已知失败无限重抓。新增覆盖来自此轮之前已落盘且本轮 Gate worker 已完成的 receipt；它不代表全市场连续两年历史，也不替代缺口的来源。</p>

@@ -153,6 +153,10 @@ node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.t
 
 约 24 分钟后的低频读取仍是同一 `started_at_ms=1789078801148`，进度为 714/1,434、errors 0。该时 `health` 约 2.533s、`status` 约 431ms，`market_ready=false`；Bark outbox 的 pending/sent/failed/unknown 仍全为 0，Telegram 继续 disabled。这只能证明新的 checkpoint-aware worker 持续推进，不能证明全部合约已追平、模型已产生候选或通知已实际送达。
 
+## 回放全量浏览的分页边界
+
+目前数据库只装入 1,019 条已有回放；当前不可变三周期账本有 6,185 条，另有 5,166 条待按 signal-only 方式接入。为避免接入后 API 仅返回最近 2,000 条而让早期记录不可访问，`/api/signals` 现支持稳定的 `(bar_close_ms,event_id)` 降序 cursor。信号页在用户点“加载更早记录”时最多追加一页 2,000 条 raw 记录；周期/source 切换会清空旧 cursor，定时刷新不会覆盖已经加载的旧页。此路径不改变回放不通知、long-only、候选或账本 outcome 规则。
+
 ## 冷扫完成与增量验收待续
 
 `e55a421` 重链后不触发 scanner、候选或通知。低频读取显示同一新 cold scan `started_at_ms=1789078801148` 已在 `finished_at_ms=1789080909373` 完成 **1,434 / 1,434** 单元、`errors=0`，持续 `2108.22` 秒。该轮累计计时为 fetch `3443.925s`、analyze `1283.350s`、checkpoint `407.454s`；它们跨单元累加，不能相加成单条路径延迟或宣称 15 分钟时效。此时 `/api/health` 为 HTTP 200 / `1.377s`，`/api/status` 为 HTTP 200 / `0.316s`。

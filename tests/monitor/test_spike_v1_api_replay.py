@@ -87,3 +87,25 @@ def test_replay_import_skips_daily_rows_outside_the_v1_monitor_contract(tmp_path
                                   "signal_close": "1", "reference_signal_risk": ".1"}], import_id="daily")
     assert result == {"inserted": 0, "already_present": 0, "outside_v1_contract": 1}
     assert store.list_events() == []
+
+
+def test_replay_signal_cursor_pages_stably_past_the_first_limit(tmp_path, monkeypatch):
+    app = create_app(runtime=tmp_path, start_monitor=False)
+    store = app.state.monitor.store
+    for index in range(3):
+        event = raw(source="replay", close=NOW - index * TIMEFRAMES["1H"])
+        assert store.upsert_event(event, notify=False, bark_notify=False)
+    monkeypatch.setattr(app.state.monitor.client, "clock", lambda: NOW)
+    get = endpoint(app)
+    first = get(limit=2, symbol=None, timeframe=None, kind=None, side=None,
+                source="replay", confirmation="raw")
+    assert len(first["items"]) == 2 and first["next_cursor"]
+    cursor = first["next_cursor"]
+    second = get(limit=2, symbol=None, timeframe=None, kind=None, side=None,
+                 source="replay", confirmation="raw",
+                 before_close_ms=cursor["close_ms"], before_id=cursor["event_id"])
+    assert len(second["items"]) == 1 and second["next_cursor"] is None
+    assert {row["id"] for row in first["items"]}.isdisjoint({row["id"] for row in second["items"]})
+    with pytest.raises(Exception, match="cursor requires both"):
+        get(limit=2, symbol=None, timeframe=None, kind=None, side=None,
+            source="replay", confirmation="raw", before_close_ms=cursor["close_ms"])
