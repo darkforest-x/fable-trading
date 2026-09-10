@@ -29407,3 +29407,29 @@ artifacts:
     production_eligible: false
     notes: V5 native revision4 saved00:16. Owner-authorized display-only changes; known-history counterfactual8vs60.
       No return scoring.
+  - artifact_id: spike-v1-twoyear-allmarkets-20260911-report-source
+    artifact_type: report
+    role: all_market_data_availability_failure_record
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3140833c96aae83dedcfea119fb26079e5d66fe0
+    source_path: analysis/p1_spike_v1_twoyear_20260911.md
+    sha256: 682a58e55cb48988e4688cdf1b287510f3e2d2b2b7a64b1b5192c35051208589
+    size_bytes: 4477
+    storage_uri: repo://analysis/p1_spike_v1_twoyear_20260911.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen three-venue V1 run blocked before trade simulation because Gate lacks requested two-year 30m coverage.
+  - artifact_id: spike-v1-twoyear-allmarkets-20260911-report-html
+    artifact_type: report
+    role: owner_delivery_data_availability_failure_record
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3140833c96aae83dedcfea119fb26079e5d66fe0
+    source_path: analysis/html/p1_spike_v1_twoyear_20260911.html
+    sha256: edfd8458343cfe1b87915f2225e777d11b5d7349e89294c4483117d0ea72e677
+    size_bytes: 7427
+    storage_uri: repo://analysis/html/p1_spike_v1_twoyear_20260911.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: HTML delivery for the frozen all-market data availability failure record.
