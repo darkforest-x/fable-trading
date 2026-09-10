@@ -148,6 +148,10 @@
       return [["覆盖账本关联", "账本证据已过期 · 不展示收益", "muted"],
               ["账本结果", "等待新的不可变账本快照重链", ""]];
     }
+    if (item.performance_status === "unverified" && link?.link_status === "ohlc_missing") {
+      return [["覆盖账本关联", "缺少同源冻结 OHLC · 不展示收益", "muted"],
+              ["账本结果", "该回放无法核验历史图，不使用其他交易所或当前行情替代", ""]];
+    }
     return [["覆盖账本关联", "尚未关联 v2 覆盖账本 · 不展示收益", ""]];
   }
   function axisPrice(value) {

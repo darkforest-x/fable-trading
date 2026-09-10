@@ -56,7 +56,7 @@ def test_replay_ledger_link_keeps_both_ids_evidence_and_delivery_isolation(tmp_p
     store, ledger, manifest, root = _setup(tmp_path)
     result = link_replay_events(store, ledger_path=ledger, manifest_path=manifest, ohlc_root=root)
     assert result == {"replay_events": 2, "matched_realized": 1, "matched_censored": 1,
-                      "unmatched": 0, "source_mismatch": 0, "ohlc_missing": 0, "linked": 2}
+                      "unmatched": 0, "source_mismatch": 0, "ohlc_missing": 0, "linked": 2, "reconciled": 2}
     events = {event["bar_open_ms"]: event for event in store.list_events(limit=10, source="replay", confirmation="raw")}
     realized, censored = events[START], events[START + STEP]
     link = realized["covered_ledger"]
@@ -93,7 +93,9 @@ def test_replay_ledger_refuses_source_mismatch_without_writing(tmp_path):
     assert result["linked"] == 1 and result["source_mismatch"] == 1
     updated = store.get_event(event["id"])
     assert updated["performance_status"] == "unverified"
-    assert "covered_ledger" not in updated
+    assert updated["covered_ledger"]["link_status"] == "source_mismatch"
+    assert updated["covered_ledger"]["reason"] == "replay_source_sha256_mismatch"
+    assert "outcome" not in updated["covered_ledger"]
 
 
 def test_reconcile_freezes_bytes_and_keeps_stale_audit_without_display_outcome(tmp_path):
@@ -108,7 +110,7 @@ def test_reconcile_freezes_bytes_and_keeps_stale_audit_without_display_outcome(t
                                      stale_reason="mutable_ledger_artifact_replaced")
     assert result == {"replay_events": 2, "matched_realized": 1, "matched_censored": 1,
                       "unmatched": 0, "source_mismatch": 0, "ohlc_missing": 0,
-                      "linked": 2, "invalidated": 2}
+                      "linked": 2, "reconciled": 2, "invalidated": 2}
     copied_ledger, copied_manifest = freeze_ledger_snapshot(
         ledger_path=ledger, manifest_path=manifest, snapshot_dir=snapshots)
     assert copied_ledger.read_bytes() == ledger.read_bytes()
@@ -131,3 +133,37 @@ def test_invalidation_hides_stale_outcome_until_a_new_snapshot_is_linked(tmp_pat
         assert link["link_status"] == "stale_evidence"
         assert "outcome" not in link
         assert link["previous_link"]["outcome"]["status"] in {"realized", "censored"}
+
+
+def test_replay_ledger_reconciles_every_cursor_page(tmp_path):
+    store, ledger, manifest, root = _setup(tmp_path)
+    extra = _ledger_row(START + 2 * STEP)
+    event = normalize_row({**extra, "signal_close": "100", "reference_signal_risk": "10"}, import_id="test")
+    assert store.upsert_event(event, notify=False, bark_notify=False)
+    rows = [_ledger_row(START), _ledger_row(START + STEP, censored=True), extra]
+    with gzip.open(ledger, "wt", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer.writeheader(); writer.writerows(rows)
+    result = link_replay_events(store, ledger_path=ledger, manifest_path=manifest, ohlc_root=root, page_size=2)
+    assert result["replay_events"] == result["linked"] == 3
+    receipt = tmp_path / "all-pages.csv.gz"
+    assert write_link_receipt(store, receipt) == 3
+
+
+def test_replay_ledger_marks_missing_frozen_ohlc_without_borrowing_an_outcome(tmp_path):
+    store, ledger, manifest, root = _setup(tmp_path)
+    for path in root.rglob("*.csv.gz"):
+        path.unlink()
+    result = link_replay_events(store, ledger_path=ledger, manifest_path=manifest, ohlc_root=root)
+    assert result["replay_events"] == 2 and result["linked"] == 0 and result["reconciled"] == 2 and result["ohlc_missing"] == 2
+    for event in store.list_events(limit=10, source="replay", confirmation="raw"):
+        assert event["performance_status"] == "unverified"
+        assert event["covered_ledger"]["link_status"] == "ohlc_missing"
+        assert event["covered_ledger"]["reason"] == "frozen_ohlc_missing"
+        assert "outcome" not in event["covered_ledger"]
+    receipt = tmp_path / "missing.csv.gz"
+    assert write_link_receipt(store, receipt) == 2
+    with gzip.open(receipt, "rt", encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    assert {row["link_status"] for row in rows} == {"ohlc_missing"}
+    assert {row["link_reason"] for row in rows} == {"frozen_ohlc_missing"}

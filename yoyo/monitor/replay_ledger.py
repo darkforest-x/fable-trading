@@ -133,6 +133,21 @@ def _stale_audit(event: dict) -> dict[str, object] | None:
     return None
 
 
+def _unlinked_update(event: dict, *, artifact_evidence: dict[str, object], link_status: str,
+                     reason: str, row: dict[str, object] | None = None) -> tuple[str, dict]:
+    """Record a failed audit link without exposing an outcome field."""
+    event_id = event["id"]
+    link = {
+        "link_status": link_status, "reason": reason, "monitor_event_id": event_id,
+        "match_key": {"venue": event["venue"], "symbol": event["symbol"],
+                      "timeframe_min": int(event["timeframe_min"]), "signal_bar_open_ms": int(event["bar_open_ms"])},
+        "evidence": artifact_evidence,
+    }
+    if row is not None:
+        link["ledger_event_id"] = str(row["event_id"])
+    return event_id, {"performance_status": "unverified", "covered_ledger": link}
+
+
 def build_updates(events: Iterable[dict], *, ledger_path: Path, manifest_path: Path,
                   ohlc_root: Path = REPLAY_DATA_ROOT) -> tuple[list[tuple[str, dict]], dict[str, int]]:
     """Prepare all reconciliation updates before writing a single journal row."""
@@ -157,15 +172,21 @@ def build_updates(events: Iterable[dict], *, ledger_path: Path, manifest_path: P
             raise ValueError("replay event missing journal id")
         if event.get("source_sha256") != manifest["source_sha256"]:
             stats["source_mismatch"] += 1
+            updates.append(_unlinked_update(event, artifact_evidence=artifact_evidence,
+                                            link_status="source_mismatch", reason="replay_source_sha256_mismatch"))
             continue
         row = ledger.get(_event_key(event))
         if row is None:
             stats["unmatched"] += 1
+            updates.append(_unlinked_update(event, artifact_evidence=artifact_evidence,
+                                            link_status="unmatched", reason="covered_ledger_tuple_missing"))
             continue
         try:
             source_path, native_minutes = _source_path(event, Path(ohlc_root))
         except ReplayChartUnavailable:
             stats["ohlc_missing"] += 1
+            updates.append(_unlinked_update(event, artifact_evidence=artifact_evidence,
+                                            link_status="ohlc_missing", reason="frozen_ohlc_missing", row=row))
             continue
         if source_path not in ohlc_hashes:
             ohlc_hashes[source_path] = _sha256(source_path)
@@ -202,7 +223,7 @@ def invalidate_replay_links(store: Store, *, reason: str) -> int:
     if not isinstance(reason, str) or not reason:
         raise ValueError("invalid stale evidence reason")
     count = 0
-    for event in store.list_events(limit=2000, source="replay", confirmation="raw"):
+    for event in _replay_events(store):
         prior = event.get("covered_ledger")
         if not isinstance(prior, dict):
             continue
@@ -280,23 +301,49 @@ def reconcile_replay_events(store: Store, *, ledger_path: Path, manifest_path: P
     return result
 
 
+def _replay_events(store: Store, *, page_size: int = 2000) -> Iterable[dict]:
+    """Yield every replay/raw journal row in stable cursor order.
+
+    Reconciliation is an audit over the whole imported replay corpus.  It must
+    not inherit the browsing API's first-page limit.
+    """
+    cursor: tuple[int, str] | None = None
+    while True:
+        kwargs = {"limit": page_size, "source": "replay", "confirmation": "raw"}
+        if cursor is not None:
+            kwargs.update(before_close_ms=cursor[0], before_id=cursor[1])
+        page = store.list_events(**kwargs)
+        if not page:
+            return
+        for event in page:
+            yield event
+        if len(page) < page_size:
+            return
+        last = page[-1]
+        close, event_id = last.get("bar_close_ms"), last.get("id")
+        if isinstance(close, bool) or not isinstance(close, int) or not isinstance(event_id, str) or not event_id:
+            raise ValueError("invalid replay event cursor")
+        cursor = close, event_id
+
+
 def link_replay_events(store: Store, *, ledger_path: Path = RESULTS / "covered_trade_ledger.csv.gz",
                        manifest_path: Path = RESULTS / "coverage_progress.json",
-                       ohlc_root: Path = REPLAY_DATA_ROOT) -> dict[str, int]:
+                       ohlc_root: Path = REPLAY_DATA_ROOT, page_size: int = 2000) -> dict[str, int]:
     """Link all current replay/raw events with no delivery or candidate side effect."""
-    updates, stats = build_updates(store.list_events(limit=2000, source="replay", confirmation="raw"),
+    updates, stats = build_updates(_replay_events(store, page_size=page_size),
                                    ledger_path=Path(ledger_path), manifest_path=Path(manifest_path), ohlc_root=Path(ohlc_root))
     for event_id, update in updates:
         if not store.update_event_payload(event_id, update):
             raise RuntimeError("replay event disappeared during reconciliation")
-    stats["linked"] = len(updates)
+    stats["linked"] = stats["matched_realized"] + stats["matched_censored"]
+    stats["reconciled"] = len(updates)
     return stats
 
 
 def write_link_receipt(store: Store, path: Path) -> int:
-    """Write one auditable row per attached replay event without outcomes aggregation."""
+    """Write one auditable row per replay reconciliation state without aggregation."""
     rows = []
-    for event in store.list_events(limit=2000, source="replay", confirmation="raw"):
+    for event in _replay_events(store):
         link = event.get("covered_ledger")
         if not isinstance(link, dict) or link.get("monitor_event_id") != event.get("id"):
             continue
@@ -305,7 +352,7 @@ def write_link_receipt(store: Store, path: Path) -> int:
             "monitor_event_id": event["id"], "ledger_event_id": link.get("ledger_event_id"),
             "venue": event.get("venue"), "symbol": event.get("symbol"), "timeframe_min": event.get("timeframe_min"),
             "signal_bar_open_ms": event.get("bar_open_ms"), "link_status": link.get("link_status"),
-            "performance_status": event.get("performance_status"), "source_sha256": evidence.get("source_sha256"),
+            "link_reason": link.get("reason"), "performance_status": event.get("performance_status"), "source_sha256": evidence.get("source_sha256"),
             "pine_sha256": evidence.get("pine_sha256"), "ledger_sha256": evidence.get("ledger_sha256"),
             "coverage_receipt_sha256": evidence.get("coverage_receipt_sha256"),
             "frozen_ohlc_file": evidence.get("frozen_ohlc_file"), "frozen_ohlc_sha256": evidence.get("frozen_ohlc_sha256"),
@@ -315,7 +362,7 @@ def write_link_receipt(store: Store, path: Path) -> int:
         })
     rows.sort(key=lambda row: (row["venue"], row["symbol"], int(row["timeframe_min"]), int(row["signal_bar_open_ms"])))
     fields = ["monitor_event_id", "ledger_event_id", "venue", "symbol", "timeframe_min", "signal_bar_open_ms",
-              "link_status", "performance_status", "source_sha256", "pine_sha256", "ledger_sha256",
+              "link_status", "link_reason", "performance_status", "source_sha256", "pine_sha256", "ledger_sha256",
               "coverage_receipt_sha256", "frozen_ohlc_file", "frozen_ohlc_sha256", "frozen_ohlc_timeframe_min",
               "exit_reason", "net_r"]
     path.parent.mkdir(parents=True, exist_ok=True)

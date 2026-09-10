@@ -194,3 +194,10 @@ test("replay direct cards can page older raw records without replacing loaded pa
   assert.match(app, /key === "directSignals" && state\.rawPaged/);
   assert.match(app, /已加载 \$\{number\(source\.length\)\} 条；可继续读取更早记录/);
 });
+
+
+test("missing frozen OHLC remains unverified and is never replaced with a live chart", () => {
+  assert.match(app, /link\?\.link_status === "ohlc_missing"/);
+  assert.match(app, /缺少同源冻结 OHLC · 不展示收益/);
+  assert.match(app, /不使用其他交易所或当前行情替代/);
+});
