@@ -1,0 +1,62 @@
+{
+  "config": {
+    "schema": "spike-v3-density-rearm-v1",
+    "arms": [
+      "v3",
+      "density_rearm"
+    ],
+    "new_hypothesis": "G: bootstrap quota, then known false and known dense with prior12 support wholly after accepted owner",
+    "interventions": "one density quota; actual accepted-only cooldown rebuild; no A-F stacking",
+    "primary_economics": "early accepted parents only; original age0..3 quality upgrades",
+    "structural_hypothesis_number": 7,
+    "prior_single_gate_explorations": 13,
+    "holm_family": "all frozen A-F raw full-period p values plus new G",
+    "holdout_per_new_config": 1,
+    "retrospective": true,
+    "exploratory": true,
+    "acceptance": {
+      "max_distinct_labels": 6021,
+      "min_retained": 1317,
+      "baseline_timely": 1463,
+      "min_large_hits": 758,
+      "large_denominator": 947,
+      "min_label_drop": 0.5,
+      "holm_p": 0.01
+    },
+    "fixed_population": {
+      "markets": 278,
+      "source_bars": 837239,
+      "source_labels": 14904,
+      "anchors": 8046,
+      "positive": 1660,
+      "negative": 6240,
+      "unknown": 146,
+      "large_positive": 947,
+      "parents": 10386,
+      "children": 3809,
+      "distinct_labels": 12042,
+      "timely_positive": 1463,
+      "timely_children": 488,
+      "large_hits": 798
+    },
+    "cost_bp": 20,
+    "execution": "unchanged next-open, prior5/2ATR risk, 2R close activation and4ATR next-bar ratchet",
+    "production_eligible": false,
+    "training_eligible": false
+  },
+  "source_pins": {
+    "yoyo/evaluation/spike_burst_v3_density_rearm_study.py": "06469d8bc441036d77ded38f6f37b56a9565d884d044c45ee0efcdce05cc0915",
+    "yoyo/evaluation/spike_burst_v3_density_rearm_gate.py": "98f46d1b7881baf6c2fc6f3ba95541d3dd329cc27b759e6d47e33c4a19a3b01c",
+    "tests/test_spike_burst_v3_density_rearm_study.py": "318fc1b54ba2d7540314589d7349b336431320b9be680d781ccd0b77eca84223",
+    "tests/test_spike_burst_v3_density_rearm_gate.py": "6c6300c8d84cb6e1e29e1b5bc874f74294bf159d58cabe6c690b1294b1d51121",
+    "experiments/active/exp-spike-v3-density-rearm-20260910-v1/PROJECT_PLAN.md": "ba470f85b0e89f17dd2a68512672dbb69f035e15aee3511e24da9617adf947df",
+    "experiments/active/exp-spike-v3-density-rearm-20260910-v1/qa/preflight_review.json": "3606e628562be062e96bc9d980e58728314f80a78fe56120cc2f429366853afa",
+    "yoyo/evaluation/spike_burst_early_warning.py": "31f5422524b15b2a758cb8e6d55b1e943123d099655f4d743051215dbacb9abf",
+    "yoyo/evaluation/spike_burst_replay.py": "996ef56ceb5b70da5337422d8390487330f7e387f648ee527b5afc9bda72a33f",
+    "yoyo/evaluation/spike_burst_progressive.py": "cec81a33997bd39272762bd70a451ceb5bf218da0e7fc0606271d165437fde08",
+    "yoyo/evaluation/spike_burst_execution.py": "05c96e98498cbf11cc426ed4cc939199b47af2cf8fd5a409c79fc720552f45cc",
+    "yoyo/evaluation/spike_burst_dataset.py": "e03585c03e32387b84ade03ce12966d8ff0b6468a2814f0c0199a814d69dcdd1",
+    "yoyo/evaluation/spike_burst_recall_study.py": "a9e532861cad640b5dcf6dbf8d465b3ad381cb7ef2b02d65cad153b8c849dbbb",
+    "yoyo/evaluation/altseason_research.py": "35d6e171a8a7b25516871ae119c2780dcc1130d2beaaffdd270d2b2f99742075"
+  }
+}

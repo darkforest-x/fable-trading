@@ -1,0 +1,117 @@
+{
+  "status": "complete",
+  "config": {
+    "schema": "spike-v3-density-rearm-v1",
+    "arms": [
+      "v3",
+      "density_rearm"
+    ],
+    "new_hypothesis": "G: bootstrap quota, then known false and known dense with prior12 support wholly after accepted owner",
+    "interventions": "one density quota; actual accepted-only cooldown rebuild; no A-F stacking",
+    "primary_economics": "early accepted parents only; original age0..3 quality upgrades",
+    "structural_hypothesis_number": 7,
+    "prior_single_gate_explorations": 13,
+    "holm_family": "all frozen A-F raw full-period p values plus new G",
+    "holdout_per_new_config": 1,
+    "retrospective": true,
+    "exploratory": true,
+    "acceptance": {
+      "max_distinct_labels": 6021,
+      "min_retained": 1317,
+      "baseline_timely": 1463,
+      "min_large_hits": 758,
+      "large_denominator": 947,
+      "min_label_drop": 0.5,
+      "holm_p": 0.01
+    },
+    "fixed_population": {
+      "markets": 278,
+      "source_bars": 837239,
+      "source_labels": 14904,
+      "anchors": 8046,
+      "positive": 1660,
+      "negative": 6240,
+      "unknown": 146,
+      "large_positive": 947,
+      "parents": 10386,
+      "children": 3809,
+      "distinct_labels": 12042,
+      "timely_positive": 1463,
+      "timely_children": 488,
+      "large_hits": 798
+    },
+    "cost_bp": 20,
+    "execution": "unchanged next-open, prior5/2ATR risk, 2R close activation and4ATR next-bar ratchet",
+    "production_eligible": false,
+    "training_eligible": false
+  },
+  "source_pins": {
+    "yoyo/evaluation/spike_burst_v3_density_rearm_study.py": "06469d8bc441036d77ded38f6f37b56a9565d884d044c45ee0efcdce05cc0915",
+    "yoyo/evaluation/spike_burst_v3_density_rearm_gate.py": "98f46d1b7881baf6c2fc6f3ba95541d3dd329cc27b759e6d47e33c4a19a3b01c",
+    "tests/test_spike_burst_v3_density_rearm_study.py": "318fc1b54ba2d7540314589d7349b336431320b9be680d781ccd0b77eca84223",
+    "tests/test_spike_burst_v3_density_rearm_gate.py": "6c6300c8d84cb6e1e29e1b5bc874f74294bf159d58cabe6c690b1294b1d51121",
+    "experiments/active/exp-spike-v3-density-rearm-20260910-v1/PROJECT_PLAN.md": "ba470f85b0e89f17dd2a68512672dbb69f035e15aee3511e24da9617adf947df",
+    "experiments/active/exp-spike-v3-density-rearm-20260910-v1/qa/preflight_review.json": "3606e628562be062e96bc9d980e58728314f80a78fe56120cc2f429366853afa",
+    "yoyo/evaluation/spike_burst_early_warning.py": "31f5422524b15b2a758cb8e6d55b1e943123d099655f4d743051215dbacb9abf",
+    "yoyo/evaluation/spike_burst_replay.py": "996ef56ceb5b70da5337422d8390487330f7e387f648ee527b5afc9bda72a33f",
+    "yoyo/evaluation/spike_burst_progressive.py": "cec81a33997bd39272762bd70a451ceb5bf218da0e7fc0606271d165437fde08",
+    "yoyo/evaluation/spike_burst_execution.py": "05c96e98498cbf11cc426ed4cc939199b47af2cf8fd5a409c79fc720552f45cc",
+    "yoyo/evaluation/spike_burst_dataset.py": "e03585c03e32387b84ade03ce12966d8ff0b6468a2814f0c0199a814d69dcdd1",
+    "yoyo/evaluation/spike_burst_recall_study.py": "a9e532861cad640b5dcf6dbf8d465b3ad381cb7ef2b02d65cad153b8c849dbbb",
+    "yoyo/evaluation/altseason_research.py": "35d6e171a8a7b25516871ae119c2780dcc1130d2beaaffdd270d2b2f99742075"
+  },
+  "prepared_sha": "746b416ae9263ee798cc74f8077eca4efaa4fd1d6bd745b400812056ebab0204",
+  "new_execution_paths": 18838,
+  "prior_F_validation_sha": "a0cb43b3b7d548148938b9404d1744d85b5d1a60ccb8b35ab04edff012b5a570",
+  "artifacts": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-density-rearm-20260910-v1/results/trade_events.csv.gz",
+      "sha256": "c58b69a42bea57ae49b9506a63bfc8a9d32369a4c431505afdf45ee59941d374",
+      "size_bytes": 2951528
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-density-rearm-20260910-v1/results/trade_controls.csv.gz",
+      "sha256": "bad36f537bba4f0cdee135398b18c7bde1cf4030dd0128bcfb857397b9188ae1",
+      "size_bytes": 8460676
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-density-rearm-20260910-v1/results/trade_summary.csv",
+      "sha256": "d03fbd343ad3568f03f9a4b53f3546b76ea2f139d3bc0f88d291844dbd435283",
+      "size_bytes": 9335
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-density-rearm-20260910-v1/results/score_summary.csv",
+      "sha256": "d7d6fff08549742d2c5659ecb860d0510f965e3c2fb1a9bbbd1bad5e5dc299cc",
+      "size_bytes": 899
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-density-rearm-20260910-v1/results/retention_summary.csv",
+      "sha256": "3a314d9a70c7b1b075613e9a7a23402c0347567ab1715132d6c5686d660d2bf5",
+      "size_bytes": 11851
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-density-rearm-20260910-v1/results/structural_holm_family.csv",
+      "sha256": "52b65c74bd1e4259029f5419f5edf74ea61142de1e0b3d085ddabcdf2ef17214",
+      "size_bytes": 1020
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-density-rearm-20260910-v1/results/version_comparison.csv",
+      "sha256": "346c2fbba9c2791d0809f3fec036886bae00bedde17184919214192162b5fac7",
+      "size_bytes": 2723
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-density-rearm-20260910-v1/results/assessment.json",
+      "sha256": "1b99717cf293f64b44f4a0fb0be6ded14742deb082853498132e3344c210b81d",
+      "size_bytes": 612
+    }
+  ],
+  "limitations": [
+    "G and A-F are seven sequential exploratory hypotheses plus thirteen prior gate explorations; not blind OOS",
+    "Frozen A-F raw p values are not rescored; Holm7 includes all six older hypotheses",
+    "Rearmed provenance and stage spans never substitute for fresh timely detection",
+    "Independent parent events overlap; no account NAV/MDD computed",
+    "Original V1 remains its historical benchmark and random schedule, not the new shared controls",
+    "Latest V4 confirmation-only UI does not change this original parent-based research",
+    "No trained model, source, risk, cost, monitor, notification, ACTIVE or execution configuration promoted"
+  ]
+}

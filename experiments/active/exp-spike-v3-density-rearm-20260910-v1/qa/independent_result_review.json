@@ -1,0 +1,1055 @@
+{
+  "schema": "spike-g-density-rearm-independent-result-review-v1",
+  "status": "passed",
+  "generated_at_utc": "2026-09-10 13:23:17 UTC",
+  "reviewer": "/root/v3_noise_rules_audit",
+  "independent_reviewer": true,
+  "detector_author": false,
+  "study_runner_author": false,
+  "report_renderer_author": false,
+  "review_meaning": "Independent integrity, arithmetic and fixed-case review passed. The G hypothesis fails all four original acceptance gates; this is not a successful optimization or deployment approval.",
+  "scope": "Authenticated completed G prepared/validation/report lineage, independently reconstructed saved event/anchor counts and matching flags, verified actual price clocks/costs/controls, reproduced fixed sample exits literally, and viewed all three fixed PNGs. No detector, candidate selection, configuration, source artifact or stored result was changed.",
+  "pinned_inputs": {
+    "prepared_manifest_sha256": "746b416ae9263ee798cc74f8077eca4efaa4fd1d6bd745b400812056ebab0204",
+    "validation_manifest_sha256": "21d971a27363f225bb7451c310a9e5d5cd5554e1f6f36006eff1bf3a04286704",
+    "report_manifest_sha256": "dd5b3b45f32bdac704224a29cac31a3ce768db3b714b4e44bc0783f6513bc7d8",
+    "actual_passing_study_preflight_sha256": "3606e628562be062e96bc9d980e58728314f80a78fe56120cc2f429366853afa",
+    "actual_passing_report_preflight_sha256": "7d5d7bd354289fb8d5b095c0390ffce43617a44dc30ce203c14fae54def63d56",
+    "authenticated_reference_count": 2119,
+    "source_reference_location": "All exact source/artifact hashes are authenticated through the pinned prepared/validation/report manifests; all references were checked again at the end of the independent full-data script."
+  },
+  "fixed_data": {
+    "source_labels": 14904,
+    "anchors": 8046,
+    "positive": 1660,
+    "negative": 6240,
+    "unknown": 146,
+    "large": 947
+  },
+  "independently_reconstructed_retention": {
+    "v3_early": {
+      "signals": 10386,
+      "distinct_labels": 12042,
+      "label_drop": 0,
+      "positive_events": 1660,
+      "hits_1": 1463,
+      "baseline_hit_events": 1463,
+      "retained_hit_events": 1463,
+      "newly_caught": 0,
+      "large_positive_events": 947,
+      "large_hits_1": 798,
+      "same_time_kept": 10386,
+      "same_time_removed": 0,
+      "new_times": 0
+    },
+    "v3_confirmed": {
+      "signals": 3809,
+      "distinct_labels": 12042,
+      "label_drop": 0,
+      "positive_events": 1660,
+      "hits_1": 488,
+      "baseline_hit_events": 488,
+      "retained_hit_events": 488,
+      "newly_caught": 0,
+      "large_positive_events": 947,
+      "large_hits_1": 290,
+      "same_time_kept": 3809,
+      "same_time_removed": 0,
+      "new_times": 0
+    },
+    "density_rearm_early": {
+      "signals": 5707,
+      "distinct_labels": 6807,
+      "label_drop": 0.4347284504235177,
+      "positive_events": 1660,
+      "hits_1": 872,
+      "baseline_hit_events": 1463,
+      "retained_hit_events": 860,
+      "newly_caught": 12,
+      "large_positive_events": 947,
+      "large_hits_1": 445,
+      "same_time_kept": 5388,
+      "same_time_removed": 4998,
+      "new_times": 319
+    },
+    "density_rearm_confirmed": {
+      "signals": 2557,
+      "distinct_labels": 6807,
+      "label_drop": 0.4347284504235177,
+      "positive_events": 1660,
+      "hits_1": 371,
+      "baseline_hit_events": 488,
+      "retained_hit_events": 360,
+      "newly_caught": 11,
+      "large_positive_events": 947,
+      "large_hits_1": 214,
+      "same_time_kept": 2379,
+      "same_time_removed": 1430,
+      "new_times": 178
+    }
+  },
+  "independently_reconstructed_economics": {
+    "v3": {
+      "candidates": 10386,
+      "valid": 10386,
+      "matched": 10254,
+      "invalid": 0,
+      "natural_exits": 9912,
+      "censored": 474,
+      "mean_net_bp": 25.006476673055996,
+      "mean_gross_bp": 45.006476673056014,
+      "wins": 3064,
+      "win_rate": 0.2950125168496052,
+      "natural_wins": 2735,
+      "natural_win_rate": 0.27592816787732044,
+      "paired_actual_net_bp": 24.510570058137453,
+      "paired_random_net_bp": 128.50980091983664,
+      "mean_excess_bp": -103.99923086169919,
+      "censored_wins": 329,
+      "censored_win_rate": 0.6940928270042194,
+      "raw_saved_p": 1,
+      "asset_balanced_excess_bp": -98.49350129103307
+    },
+    "density_rearm": {
+      "candidates": 5707,
+      "valid": 5707,
+      "matched": 5634,
+      "invalid": 0,
+      "natural_exits": 5430,
+      "censored": 277,
+      "mean_net_bp": 33.655276979848395,
+      "mean_gross_bp": 53.655276979848416,
+      "wins": 1637,
+      "win_rate": 0.28684072192044857,
+      "natural_wins": 1445,
+      "natural_win_rate": 0.26611418047882135,
+      "paired_actual_net_bp": 34.64353058785913,
+      "paired_random_net_bp": 103.83127766997038,
+      "mean_excess_bp": -69.18774708211126,
+      "censored_wins": 192,
+      "censored_win_rate": 0.6931407942238267,
+      "raw_saved_p": 1,
+      "asset_balanced_excess_bp": -47.27636290163123
+    }
+  },
+  "holm_seven": [
+    {
+      "arm": "reference",
+      "raw_p": 0.9342065793420657,
+      "holm_p_seven": 1
+    },
+    {
+      "arm": "near_box",
+      "raw_p": 0.9991000899910009,
+      "holm_p_seven": 1
+    },
+    {
+      "arm": "confirmation_gate",
+      "raw_p": 1,
+      "holm_p_seven": 1
+    },
+    {
+      "arm": "formation_gate",
+      "raw_p": 1,
+      "holm_p_seven": 1
+    },
+    {
+      "arm": "htf_gate",
+      "raw_p": 1,
+      "holm_p_seven": 1
+    },
+    {
+      "arm": "price_acceptance",
+      "raw_p": 1,
+      "holm_p_seven": 1
+    },
+    {
+      "arm": "density_rearm",
+      "raw_p": 1,
+      "holm_p_seven": 1
+    }
+  ],
+  "acceptance_gates": {
+    "label_drop_pass": false,
+    "baseline_retention_pass": false,
+    "large_recall_pass": false,
+    "economic_pass": false
+  },
+  "all_fixed_acceptance_gates_pass": false,
+  "hypothesis_accepted": false,
+  "live_deployed": false,
+  "integrity_counts": {
+    "source_bars": 837239,
+    "stored_detection_boolean_checks": 238464,
+    "signal_price_clock_checks": 22459,
+    "trade_entry_checks": 63375,
+    "control_relationship_checks": 47282,
+    "literal_exit_replays": 40,
+    "density_unknown_hours": 2027,
+    "density_unknown_locked_hours": 0
+  },
+  "independent_execution_sample": {
+    "selection": "At most4 event IDs per arm/reason ordered by sha256(G-independent-exit-v1:event_id), profit-independent",
+    "actual_checked": [
+      {
+        "event_id": "3f1dc35da348876ff20c99ebf414",
+        "instrument": "okx:A-USDT-SWAP:segment0",
+        "arm": "v3",
+        "decision_i": 2161,
+        "reason": "trailing_stop_gap",
+        "valid": true
+      },
+      {
+        "event_id": "d9a615ac1543cfa8a8dde9349449",
+        "instrument": "okx:A-USDT-SWAP:segment0",
+        "arm": "v3",
+        "decision_i": 2190,
+        "reason": "trailing_stop_gap",
+        "valid": true
+      },
+      {
+        "event_id": "6d67f9ca139218dd297492e588d5",
+        "instrument": "okx:A-USDT-SWAP:segment0",
+        "arm": "density_rearm",
+        "decision_i": 2161,
+        "reason": "trailing_stop_gap",
+        "valid": true
+      },
+      {
+        "event_id": "fb3eaea0f378e30ff83bb6d89ac2",
+        "instrument": "okx:A-USDT-SWAP:segment0",
+        "arm": "density_rearm",
+        "decision_i": 2190,
+        "reason": "trailing_stop_gap",
+        "valid": true
+      },
+      {
+        "event_id": "98058bf057356a4c9dd484946879",
+        "instrument": "okx:ADA-USDT-SWAP:segment0",
+        "arm": "density_rearm",
+        "decision_i": 3135,
+        "reason": "boundary_mark",
+        "valid": true
+      },
+      {
+        "event_id": "e938a57668b1c2d2dd9f07386d8a",
+        "instrument": "okx:AR-USDT-SWAP:segment0",
+        "arm": "v3",
+        "decision_i": 3062,
+        "reason": "boundary_mark",
+        "valid": true
+      },
+      {
+        "event_id": "92e56eb998f5c7eea26bcc3edbed",
+        "instrument": "okx:ARB-USDT-SWAP:segment0",
+        "arm": "v3",
+        "decision_i": 2695,
+        "reason": "trailing_stop",
+        "valid": true
+      },
+      {
+        "event_id": "dcad62224799de5235e546379f7d",
+        "instrument": "okx:AZTEC-USDT-SWAP:segment0",
+        "arm": "density_rearm",
+        "decision_i": 2316,
+        "reason": "initial_stop_gap",
+        "valid": true
+      },
+      {
+        "event_id": "07e9f049cfc7848c5a11c6bba629",
+        "instrument": "okx:CAP-USDT-SWAP:segment0",
+        "arm": "v3",
+        "decision_i": 421,
+        "reason": "initial_stop",
+        "valid": true
+      },
+      {
+        "event_id": "9c3c81f9990295bc1ce046237037",
+        "instrument": "okx:COAI-USDT-SWAP:segment0",
+        "arm": "v3",
+        "decision_i": 2345,
+        "reason": "trailing_stop",
+        "valid": true
+      },
+      {
+        "event_id": "7d6e026f93f8b405efd84b2089c9",
+        "instrument": "okx:EIGEN-USDT-SWAP:segment0",
+        "arm": "density_rearm",
+        "decision_i": 1717,
+        "reason": "initial_stop",
+        "valid": true
+      },
+      {
+        "event_id": "22f482119bab5af54847b239ca08",
+        "instrument": "okx:ETC-USDT-SWAP:segment0",
+        "arm": "density_rearm",
+        "decision_i": 2543,
+        "reason": "initial_stop",
+        "valid": true
+      },
+      {
+        "event_id": "6c01a6847272abbf87bc6d75af9b",
+        "instrument": "okx:F-USDT-SWAP:segment0",
+        "arm": "v3",
+        "decision_i": 2357,
+        "reason": "initial_stop_gap",
+        "valid": true
+      },
+      {
+        "event_id": "93ae00bf730a442290a7de7c8ed9",
+        "instrument": "okx:FLOW-USDT-SWAP:segment0",
+        "arm": "v3",
+        "decision_i": 2654,
+        "reason": "trailing_stop",
+        "valid": true
+      },
+      {
+        "event_id": "1dbd721516f3d54c32e728d79768",
+        "instrument": "okx:FLOW-USDT-SWAP:segment0",
+        "arm": "density_rearm",
+        "decision_i": 3006,
+        "reason": "trailing_stop",
+        "valid": true
+      },
+      {
+        "event_id": "22d3baa0ed099ec8adc200d6714f",
+        "instrument": "okx:KAT-USDT-SWAP:segment0",
+        "arm": "v3",
+        "decision_i": 2331,
+        "reason": "trailing_stop_gap",
+        "valid": true
+      },
+      {
+        "event_id": "960e793dac7d5383a16ddcd79fbf",
+        "instrument": "okx:LAB-USDT-SWAP:segment0",
+        "arm": "v3",
+        "decision_i": 2031,
+        "reason": "initial_stop",
+        "valid": true
+      },
+      {
+        "event_id": "d85929d22e8f2bec0eee769d6a8a",
+        "instrument": "okx:LDO-USDT-SWAP:segment0",
+        "arm": "density_rearm",
+        "decision_i": 2161,
+        "reason": "initial_stop",
+        "valid": true
+      },
+      {
+        "event_id": "f34fcc56f7d2f8caa1c2a875fc18",
+        "instrument": "okx:MERL-USDT-SWAP:segment0",
+        "arm": "density_rearm",
+        "decision_i": 2975,
+        "reason": "trailing_stop",
+        "valid": true
+      },
+      {
+        "event_id": "0c89017591e19e46fe4ca86cbc94",
+        "instrument": "okx:NEIRO-USDT-SWAP:segment0",
+        "arm": "v3",
+        "decision_i": 2686,
+        "reason": "trailing_stop",
+        "valid": true
+      },
+      {
+        "event_id": "d741210f066ccb560be92ea215bc",
+        "instrument": "okx:NOT-USDT-SWAP:segment0",
+        "arm": "density_rearm",
+        "decision_i": 2930,
+        "reason": "boundary_mark",
+        "valid": true
+      },
+      {
+        "event_id": "668ecad2dc2aad5b131254f8239e",
+        "instrument": "okx:ONT-USDT-SWAP:segment0",
+        "arm": "v3",
+        "decision_i": 1947,
+        "reason": "initial_stop",
+        "valid": true
+      },
+      {
+        "event_id": "4c5d1ebfc7fe74df9ff30ce4c637",
+        "instrument": "okx:ORDER-USDT-SWAP:segment0",
+        "arm": "v3",
+        "decision_i": 3127,
+        "reason": "boundary_mark",
+        "valid": true
+      },
+      {
+        "event_id": "895c5fdbb91b151f81dc159d0cc1",
+        "instrument": "okx:PROVE-USDT-SWAP:segment0",
+        "arm": "v3",
+        "decision_i": 2505,
+        "reason": "initial_stop_gap",
+        "valid": true
+      },
+      {
+        "event_id": "dcedcc74d1e422fc7bed9656d767",
+        "instrument": "okx:PROVE-USDT-SWAP:segment0",
+        "arm": "density_rearm",
+        "decision_i": 2505,
+        "reason": "initial_stop_gap",
+        "valid": true
+      },
+      {
+        "event_id": "8a9cfb339e4c9d3e4708424f9003",
+        "instrument": "okx:RAVE-USDT-SWAP:segment0",
+        "arm": "v3",
+        "decision_i": 2012,
+        "reason": "initial_stop",
+        "valid": true
+      },
+      {
+        "event_id": "da384468f9ad09ac357195d7bccb",
+        "instrument": "okx:SAND-USDT-SWAP:segment0",
+        "arm": "v3",
+        "decision_i": 3050,
+        "reason": "boundary_mark",
+        "valid": true
+      },
+      {
+        "event_id": "41451bdb1ee0dc3437b3cb1ae927",
+        "instrument": "okx:SAPIEN-USDT-SWAP:segment0",
+        "arm": "density_rearm",
+        "decision_i": 2377,
+        "reason": "trailing_stop",
+        "valid": true
+      },
+      {
+        "event_id": "a63fcef9203b815cbeda266747ce",
+        "instrument": "okx:SATS-USDT-SWAP:segment0",
+        "arm": "density_rearm",
+        "decision_i": 2596,
+        "reason": "initial_stop",
+        "valid": true
+      },
+      {
+        "event_id": "23939a429e276c90c6a663f4999b",
+        "instrument": "okx:SHELL-USDT-SWAP:segment0",
+        "arm": "v3",
+        "decision_i": 1936,
+        "reason": "initial_stop_gap",
+        "valid": true
+      },
+      {
+        "event_id": "36bd3184b0f85e9e2b4b874f73dc",
+        "instrument": "okx:SHELL-USDT-SWAP:segment0",
+        "arm": "density_rearm",
+        "decision_i": 1936,
+        "reason": "initial_stop_gap",
+        "valid": true
+      },
+      {
+        "event_id": "06dc4282450b6a123f632d8b96f0",
+        "instrument": "okx:SIGN-USDT-SWAP:segment0",
+        "arm": "v3",
+        "decision_i": 1897,
+        "reason": "initial_stop_gap",
+        "valid": true
+      },
+      {
+        "event_id": "4f48d1789e775e75a9155cdf97da",
+        "instrument": "okx:SIGN-USDT-SWAP:segment0",
+        "arm": "density_rearm",
+        "decision_i": 1897,
+        "reason": "initial_stop_gap",
+        "valid": true
+      },
+      {
+        "event_id": "7b890b56d774b21f75de5d8206f3",
+        "instrument": "okx:SPK-USDT-SWAP:segment0",
+        "arm": "v3",
+        "decision_i": 2021,
+        "reason": "trailing_stop_gap",
+        "valid": true
+      },
+      {
+        "event_id": "9bfaeff1c6a3f14a30e75a2a5f47",
+        "instrument": "okx:SPK-USDT-SWAP:segment0",
+        "arm": "density_rearm",
+        "decision_i": 1922,
+        "reason": "trailing_stop_gap",
+        "valid": true
+      },
+      {
+        "event_id": "bcbfb7aab1205586664f6e505a63",
+        "instrument": "okx:SPK-USDT-SWAP:segment0",
+        "arm": "density_rearm",
+        "decision_i": 2021,
+        "reason": "trailing_stop_gap",
+        "valid": true
+      },
+      {
+        "event_id": "02ff3ed7ca0a0a14c6cfb41c1233",
+        "instrument": "okx:THETA-USDT-SWAP:segment0",
+        "arm": "density_rearm",
+        "decision_i": 2672,
+        "reason": "trailing_stop",
+        "valid": true
+      },
+      {
+        "event_id": "55fa930b3b3edc1dfff482efd9b8",
+        "instrument": "okx:THETA-USDT-SWAP:segment0",
+        "arm": "density_rearm",
+        "decision_i": 3018,
+        "reason": "boundary_mark",
+        "valid": true
+      },
+      {
+        "event_id": "83212cb1fbe2c5eda1ee094d77e5",
+        "instrument": "okx:VANA-USDT-SWAP:segment0",
+        "arm": "density_rearm",
+        "decision_i": 3027,
+        "reason": "boundary_mark",
+        "valid": true
+      },
+      {
+        "event_id": "12dd2d80c94104a372d32aff81d1",
+        "instrument": "okx:ZORA-USDT-SWAP:segment0",
+        "arm": "v3",
+        "decision_i": 3003,
+        "reason": "boundary_mark",
+        "valid": true
+      }
+    ],
+    "count": 40,
+    "method": "Separate literal loop from OHLC/ATR/tick: signal-close/prior5 risk, next real open, preceding effective stop before current high/close, permanent close-2R arming, close-minus4ATR outward tick protection next bar, gap stop fills, terminal close censoring and20bp. No simulate_trade import or call.",
+    "scope": "All recorded entry clocks/prices and gross-net/censoring arithmetic were checked; only this fixed40-event stratified sample received full literal exit-path replay. This sample is not a newly evaluated market configuration."
+  },
+  "original_timely_miss_attribution": {
+    "missed_original_timely": 603,
+    "quota_blocked": 600,
+    "cooldown_blocked": 3,
+    "unknown_density": 0,
+    "reason_groups": [
+      {
+        "reason": "await_density_false",
+        "missed_anchors": 164,
+        "large": 89,
+        "median_owner_age": 33.5,
+        "max_owner_age": 163
+      },
+      {
+        "reason": "await_density_reentry",
+        "missed_anchors": 436,
+        "large": 269,
+        "median_owner_age": 48,
+        "max_owner_age": 387
+      },
+      {
+        "reason": "cooldown",
+        "missed_anchors": 3,
+        "large": 2,
+        "median_owner_age": 9,
+        "max_owner_age": 10
+      }
+    ],
+    "median_owner_age": 42,
+    "maximum_owner_age": 387,
+    "interpretation": "These are only the original603 timely anchors G missed, attributed at the real original V3 signal bar from saved G state. Old owner is quota ownership, not a live trade or retention credit."
+  },
+  "unknown_density": {
+    "raw_edges": 0,
+    "asset_hours": 2027,
+    "locked_asset_hours": 0
+  },
+  "case_events_and_removed_parents": {
+    "HYPE": {
+      "events": [
+        {
+          "arm": "v3",
+          "stage": "early",
+          "decision_i": 2622,
+          "decision_time": "2026-08-18 07:00:00+00:00",
+          "signal_close": 59.976,
+          "parent_i": 2622,
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "decision_i": 2652,
+          "decision_time": "2026-08-19 13:00:00+00:00",
+          "signal_close": 59.279,
+          "parent_i": 2652,
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "decision_i": 2672,
+          "decision_time": "2026-08-20 09:00:00+00:00",
+          "signal_close": 73.13,
+          "parent_i": 2672,
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "decision_i": 2685,
+          "decision_time": "2026-08-20 22:00:00+00:00",
+          "signal_close": 74.915,
+          "parent_i": 2685,
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "decision_i": 2701,
+          "decision_time": "2026-08-21 14:00:00+00:00",
+          "signal_close": 76.918,
+          "parent_i": 2701,
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "confirmed",
+          "decision_i": 2655,
+          "decision_time": "2026-08-19 16:00:00+00:00",
+          "signal_close": 61.851,
+          "parent_i": 2652,
+          "confirm_age": 3
+        },
+        {
+          "arm": "density_rearm",
+          "stage": "early",
+          "decision_i": 2652,
+          "decision_time": "2026-08-19 13:00:00+00:00",
+          "signal_close": 59.279,
+          "parent_i": 2652,
+          "confirm_age": null
+        },
+        {
+          "arm": "density_rearm",
+          "stage": "confirmed",
+          "decision_i": 2655,
+          "decision_time": "2026-08-19 16:00:00+00:00",
+          "signal_close": 61.851,
+          "parent_i": 2652,
+          "confirm_age": 3
+        }
+      ],
+      "removed_parents": [
+        {
+          "decision_i": 2622,
+          "decision_time": "2026-08-18 07:00:00+00:00",
+          "close": 59.976,
+          "owner_i": 2563,
+          "owner_age": 59,
+          "reason": "await_density_reentry",
+          "density_valid": true
+        },
+        {
+          "decision_i": 2672,
+          "decision_time": "2026-08-20 09:00:00+00:00",
+          "close": 73.13,
+          "owner_i": 2652,
+          "owner_age": 20,
+          "reason": "await_density_reentry",
+          "density_valid": true
+        },
+        {
+          "decision_i": 2685,
+          "decision_time": "2026-08-20 22:00:00+00:00",
+          "close": 74.915,
+          "owner_i": 2652,
+          "owner_age": 33,
+          "reason": "await_density_reentry",
+          "density_valid": true
+        },
+        {
+          "decision_i": 2701,
+          "decision_time": "2026-08-21 14:00:00+00:00",
+          "close": 76.918,
+          "owner_i": 2652,
+          "owner_age": 49,
+          "reason": "await_density_reentry",
+          "density_valid": true
+        }
+      ]
+    },
+    "NEAR": {
+      "events": [
+        {
+          "arm": "v3",
+          "stage": "early",
+          "decision_i": 2622,
+          "decision_time": "2026-08-18 07:00:00+00:00",
+          "signal_close": 1.65,
+          "parent_i": 2622,
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "decision_i": 2646,
+          "decision_time": "2026-08-19 07:00:00+00:00",
+          "signal_close": 1.62,
+          "parent_i": 2646,
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "decision_i": 2660,
+          "decision_time": "2026-08-19 21:00:00+00:00",
+          "signal_close": 1.723,
+          "parent_i": 2660,
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "decision_i": 2686,
+          "decision_time": "2026-08-20 23:00:00+00:00",
+          "signal_close": 1.773,
+          "parent_i": 2686,
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "confirmed",
+          "decision_i": 2661,
+          "decision_time": "2026-08-19 22:00:00+00:00",
+          "signal_close": 1.77,
+          "parent_i": 2660,
+          "confirm_age": 1
+        }
+      ],
+      "removed_parents": [
+        {
+          "decision_i": 2622,
+          "decision_time": "2026-08-18 07:00:00+00:00",
+          "close": 1.65,
+          "owner_i": 2596,
+          "owner_age": 26,
+          "reason": "await_density_false",
+          "density_valid": true
+        },
+        {
+          "decision_i": 2646,
+          "decision_time": "2026-08-19 07:00:00+00:00",
+          "close": 1.62,
+          "owner_i": 2596,
+          "owner_age": 50,
+          "reason": "await_density_false",
+          "density_valid": true
+        },
+        {
+          "decision_i": 2660,
+          "decision_time": "2026-08-19 21:00:00+00:00",
+          "close": 1.723,
+          "owner_i": 2596,
+          "owner_age": 64,
+          "reason": "await_density_false",
+          "density_valid": true
+        },
+        {
+          "decision_i": 2686,
+          "decision_time": "2026-08-20 23:00:00+00:00",
+          "close": 1.773,
+          "owner_i": 2596,
+          "owner_age": 90,
+          "reason": "await_density_reentry",
+          "density_valid": true
+        }
+      ]
+    },
+    "PEPE": {
+      "events": [
+        {
+          "arm": "v3",
+          "stage": "early",
+          "decision_i": 2613,
+          "decision_time": "2026-08-17 22:00:00+00:00",
+          "signal_close": 0.000002604,
+          "parent_i": 2613,
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "decision_i": 2631,
+          "decision_time": "2026-08-18 16:00:00+00:00",
+          "signal_close": 0.000002609,
+          "parent_i": 2631,
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "decision_i": 2652,
+          "decision_time": "2026-08-19 13:00:00+00:00",
+          "signal_close": 0.000002616,
+          "parent_i": 2652,
+          "confirm_age": 0
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "decision_i": 2668,
+          "decision_time": "2026-08-20 05:00:00+00:00",
+          "signal_close": 0.000002952,
+          "parent_i": 2668,
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "decision_i": 2692,
+          "decision_time": "2026-08-21 05:00:00+00:00",
+          "signal_close": 0.000003315,
+          "parent_i": 2692,
+          "confirm_age": null
+        },
+        {
+          "arm": "v3",
+          "stage": "confirmed",
+          "decision_i": 2652,
+          "decision_time": "2026-08-19 13:00:00+00:00",
+          "signal_close": 0.000002616,
+          "parent_i": 2652,
+          "confirm_age": 0
+        },
+        {
+          "arm": "density_rearm",
+          "stage": "early",
+          "decision_i": 2652,
+          "decision_time": "2026-08-19 13:00:00+00:00",
+          "signal_close": 0.000002616,
+          "parent_i": 2652,
+          "confirm_age": 0
+        },
+        {
+          "arm": "density_rearm",
+          "stage": "confirmed",
+          "decision_i": 2652,
+          "decision_time": "2026-08-19 13:00:00+00:00",
+          "signal_close": 0.000002616,
+          "parent_i": 2652,
+          "confirm_age": 0
+        }
+      ],
+      "removed_parents": [
+        {
+          "decision_i": 2613,
+          "decision_time": "2026-08-17 22:00:00+00:00",
+          "close": 0.000002604,
+          "owner_i": 2583,
+          "owner_age": 30,
+          "reason": "await_density_reentry",
+          "density_valid": true
+        },
+        {
+          "decision_i": 2631,
+          "decision_time": "2026-08-18 16:00:00+00:00",
+          "close": 0.000002609,
+          "owner_i": 2583,
+          "owner_age": 48,
+          "reason": "await_density_reentry",
+          "density_valid": true
+        },
+        {
+          "decision_i": 2668,
+          "decision_time": "2026-08-20 05:00:00+00:00",
+          "close": 0.000002952,
+          "owner_i": 2652,
+          "owner_age": 16,
+          "reason": "await_density_false",
+          "density_valid": true
+        },
+        {
+          "decision_i": 2692,
+          "decision_time": "2026-08-21 05:00:00+00:00",
+          "close": 0.000003315,
+          "owner_i": 2652,
+          "owner_age": 40,
+          "reason": "await_density_reentry",
+          "density_valid": true
+        }
+      ]
+    }
+  },
+  "case_integrity": [
+    {
+      "asset": "HYPE",
+      "bars": 96,
+      "counts": [
+        {
+          "arm": "v1",
+          "stage": "original",
+          "events": 0
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "events": 5
+        },
+        {
+          "arm": "v3",
+          "stage": "confirmed",
+          "events": 1
+        },
+        {
+          "arm": "density_rearm",
+          "stage": "early",
+          "events": 1
+        },
+        {
+          "arm": "density_rearm",
+          "stage": "confirmed",
+          "events": 1
+        }
+      ],
+      "rearm_provenance": [
+        {
+          "rearm_i": 2644,
+          "decision_time": "2026-08-19 05:00:00+00:00",
+          "source_start_i": 2632,
+          "source_end_i": 2643,
+          "source_start_time": "2026-08-18 17:00:00+00:00",
+          "source_end_time": "2026-08-19 04:00:00+00:00",
+          "research_qualification_not_signal": true
+        }
+      ]
+    },
+    {
+      "asset": "NEAR",
+      "bars": 96,
+      "counts": [
+        {
+          "arm": "v1",
+          "stage": "original",
+          "events": 0
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "events": 4
+        },
+        {
+          "arm": "v3",
+          "stage": "confirmed",
+          "events": 1
+        },
+        {
+          "arm": "density_rearm",
+          "stage": "early",
+          "events": 0
+        },
+        {
+          "arm": "density_rearm",
+          "stage": "confirmed",
+          "events": 0
+        }
+      ],
+      "rearm_provenance": []
+    },
+    {
+      "asset": "PEPE",
+      "bars": 96,
+      "counts": [
+        {
+          "arm": "v1",
+          "stage": "original",
+          "events": 0
+        },
+        {
+          "arm": "v3",
+          "stage": "early",
+          "events": 5
+        },
+        {
+          "arm": "v3",
+          "stage": "confirmed",
+          "events": 1
+        },
+        {
+          "arm": "density_rearm",
+          "stage": "early",
+          "events": 1
+        },
+        {
+          "arm": "density_rearm",
+          "stage": "confirmed",
+          "events": 1
+        }
+      ],
+      "rearm_provenance": [
+        {
+          "rearm_i": 2644,
+          "decision_time": "2026-08-19 05:00:00+00:00",
+          "source_start_i": 2632,
+          "source_end_i": 2643,
+          "source_start_time": "2026-08-18 17:00:00+00:00",
+          "source_end_time": "2026-08-19 04:00:00+00:00",
+          "research_qualification_not_signal": true
+        }
+      ]
+    }
+  ],
+  "visual_review": {
+    "method": "Viewed each authenticated fixed96-bar PNG with view_image after successful formal rendering; cross-checked marker clocks/prices and stored state event identities independently.",
+    "figures": {
+      "hype": {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-density-rearm-20260910-v1/results/g_report_figures/hype_96h.png",
+        "sha256": "90c30c2912f47798f530b1256bc399c3856fd8792273a54949f6ec7b3811991e"
+      },
+      "near": {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-density-rearm-20260910-v1/results/g_report_figures/near_96h.png",
+        "sha256": "3b13aea7c4d4eeceb49be20d97eece12a49a5f0dac9a75264123c32630ed360b"
+      },
+      "pepe": {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-density-rearm-20260910-v1/results/g_report_figures/pepe_96h.png",
+        "sha256": "2eabde56533eb3d2aca49fb4b7e5936812543a87ef2a9bdbf06aafde2c4ebd4f"
+      }
+    },
+    "status": "passed",
+    "details": [
+      {
+        "asset": "HYPE",
+        "observed": "Original V3 shows5 parents/1 upgrade; G shows1 parent/1 upgrade. Both retain parent2026-08-19 21:00 Beijing at59.279 and actual delayed confirmation2026-08-20 00:00 at61.851, age3. No confirmation is backpainted to the parent."
+      },
+      {
+        "asset": "NEAR",
+        "observed": "Original V3 shows4 parents/1 upgrade, with confirmation2026-08-20 06:00 Beijing at1.77, age1. G shows0 parents and0 upgrades over the full96 bars. Old quota owner2596 remains the blocker; the missed launch is shown honestly rather than omitted."
+      },
+      {
+        "asset": "PEPE",
+        "observed": "Original V3 shows5 parents/1 upgrade; G shows1 parent/1 upgrade. Both show same-bar confirmation2026-08-19 21:00 Beijing at0.000002616, age0."
+      }
+    ],
+    "original_v1": "All three fixed windows contain zero stored V1 events. The grey star remains only as the V1 legend key, with no invented event star.",
+    "rearm_shading": "HYPE/PEPE shading displays stored12-bar source provenance, separately marked as known at2026-08-19 13:00 Beijing. It is labeled qualification provenance rather than an earlier visible entry signal. NEAR has no rearm band.",
+    "economics_label": "Small round markers are research early parents, explicitly not the separately saved V4 confirmation entry. Actual confirmation triangles are on their own close-price bar.",
+    "native_tradingview_test": false
+  },
+  "verification_programs": [
+    {
+      "name": "Independent stored-result reconstruction and fixed literal execution sample",
+      "command": ".venv/bin/python - <<'PY'\\n[python_source below]\\nPY",
+      "python_source": "import json,hashlib,math\nfrom pathlib import Path\nimport numpy as np\nimport pandas as pd\nfrom yoyo.evaluation import spike_burst_v3_density_rearm_report as r\nVS='21d971a27363f225bb7451c310a9e5d5cd5554e1f6f36006eff1bf3a04286704'\nPS='746b416ae9263ee798cc74f8077eca4efaa4fd1d6bd745b400812056ebab0204'\nRS='dd5b3b45f32bdac704224a29cac31a3ce768db3b714b4e44bc0783f6513bc7d8'\np,v,refs=r.authenticate(VS)\nassert v['prepared_sha']==PS\nrm=json.loads(r.checked(r.OUT/'g_report_manifest.json',RS,refs).read_text())\nassert rm['status']=='complete' and rm['validation_sha256']==VS and rm['prepared_sha256']==PS\nfor path,digest in rm['inputs'].items():r.checked(path,digest,refs)\nfor a in rm['artifacts']:r.checked(a['path'],a['sha256'],refs)\nr.checked(rm['builder']['path'],rm['builder']['sha256'],refs)\ndef table(name):return pd.read_csv(r.required(r.OUT/name,refs),float_precision='round_trip')\nsig=table('signals.csv.gz'); lab=table('labels.csv.gz'); det=table('detections.csv.gz')\nact=table('trade_events.csv.gz'); ctr=table('trade_controls.csv.gz')\nret=table('retention_summary.csv'); ts=table('trade_summary.csv')\nedges=table('raw_edges.csv.gz'); saved_rearm=table('rearm_summary.csv')\nfor df in (sig,lab,act,ctr,edges):df['decision_time']=pd.to_datetime(df.decision_time,utc=True)\nselected=lab[(lab.decision_time>=r.START)&(lab.decision_time<r.END)]\ncounts=dict(source_labels=len(lab),anchors=len(selected),positive=int(selected.label.eq('positive').sum()),negative=int(selected.label.eq('negative').sum()),unknown=int(selected.label.eq('unknown').sum()),large=int((selected.label.eq('positive')&selected.large_peak.eq(True)).sum()))\nassert counts==dict(source_labels=14904,anchors=8046,positive=1660,negative=6240,unknown=146,large=947)\nassert not lab.duplicated(['instrument','event_i']).any()\nassert not sig.event_id.duplicated().any()\nassert set(act.event_id)==set(sig[sig.stage.eq('early')].event_id)\nassert act.stage.eq('early').all() and ctr.stage.eq('early').all()\nparentmap=act.set_index('event_id')\nassert set(ctr.matched_event_id)<=set(parentmap.index)\nassert ctr.groupby('matched_event_id').size().max()<=3\nassert not ctr.duplicated(['matched_event_id','decision_i']).any()\ndef near(a,b,title):\n    assert np.isclose(float(a),float(b),rtol=1e-10,atol=1e-10,equal_nan=True),(title,a,b)\ndef record(frame,**kw):\n    x=frame\n    for k,value in kw.items():x=x[x[k].eq(value)]\n    assert len(x)==1,kw\n    return x.iloc[0]\nperiods={'full':(r.START,r.END),'first31':(r.START,pd.Timestamp('2026-08-10T00:00Z')),'last30':(pd.Timestamp('2026-08-10T00:00Z'),r.END),'case_night':(pd.Timestamp('2026-08-19T10:00Z'),pd.Timestamp('2026-08-19T22:00Z'))}\nstart=r.START.normalize()-pd.Timedelta(days=r.START.weekday())\nwhile start<r.END:\n    periods['week_'+start.strftime('%Y-%m-%d')]=(max(start,r.START),min(start+pd.Timedelta(days=7),r.END));start+=pd.Timedelta(days=7)\ndmap={}\nfor arm in r.ARMS:\n for stage in ('early','confirmed'):\n    d=det[det.arm.eq(arm)&det.stage.eq(stage)].set_index(['instrument','event_i'])\n    assert not d.index.duplicated().any() and set(d.index)==set(lab.set_index(['instrument','event_i']).index)\n    dmap[arm,stage]=d\nretained={}\nfor arm in r.ARMS:\n for stage in ('early','confirmed'):\n  for period,(lo,hi) in periods.items():\n    pos=lab[lab.label.eq('positive')&lab.decision_time.ge(lo)&lab.decision_time.lt(hi)].set_index(['instrument','event_i'])\n    dh=dmap[arm,stage].loc[pos.index]; bh=dmap['v3',stage].loc[pos.index]\n    a=sig[sig.arm.eq(arm)&sig.stage.eq(stage)&sig.decision_time.ge(lo)&sig.decision_time.lt(hi)]\n    b=sig[sig.arm.eq('v3')&sig.stage.eq(stage)&sig.decision_time.ge(lo)&sig.decision_time.lt(hi)]\n    au=sig[sig.arm.eq(arm)&sig.decision_time.ge(lo)&sig.decision_time.lt(hi)]\n    bu=sig[sig.arm.eq('v3')&sig.decision_time.ge(lo)&sig.decision_time.lt(hi)]\n    aa=set(zip(a.instrument,a.decision_i));bb=set(zip(b.instrument,b.decision_i))\n    union=len(au.drop_duplicates(['instrument','decision_i']));bun=len(bu.drop_duplicates(['instrument','decision_i']))\n    vals=dict(signals=len(a),distinct_labels=union,label_drop=1-union/bun,positive_events=len(pos),hits_1=int(dh.hit_1.sum()),baseline_hit_events=int(bh.hit_1.sum()),retained_hit_events=int((bh.hit_1&dh.hit_1).sum()),newly_caught=int((~bh.hit_1&dh.hit_1).sum()),large_positive_events=int(pos.large_peak.sum()),large_hits_1=int(dh[pos.large_peak].hit_1.sum()),same_time_kept=len(aa&bb),same_time_removed=len(bb-aa),new_times=len(aa-bb))\n    saved=record(ret,arm=arm,stage=stage,period=period)\n    for key,value in vals.items():near(value,saved[key],key)\n    if period=='full':retained[arm+'_'+stage]=vals\nmatching=json.loads(r.required(r.OUT/'matching.json',refs).read_text())\njobs=matching['jobs'];assert len(jobs)==278\nauditcounts=dict(source_bars=0,stored_detection_boolean_checks=0,signal_price_clock_checks=0,trade_entry_checks=0,control_relationship_checks=0,literal_exit_replays=0,density_unknown_hours=0,density_unknown_locked_hours=0)\ncaseinfo={}\n# Sample exits by fixed per-reason/event-id hash order; no choice based on profit.\nsample_ids=set()\nfor (arm,reason),group in act.groupby(['arm','reason'],dropna=False):\n order=sorted(group.event_id,key=lambda x:hashlib.sha256(('G-independent-exit-v1:'+x).encode()).hexdigest())\n sample_ids.update(order[:4])\ndef literal_path(f,i,tick):\n    if i+1>=len(f):return dict(valid=False,reason='no_entry_bar')\n    atr=float(f.atr.iloc[i]);close=float(f.close.iloc[i])\n    stop=math.floor(min(float(f.low.iloc[max(0,i-4):i+1].min())-.2*atr,close-2*atr)/tick)*tick\n    entry=float(f.open.iloc[i+1]);risk=entry-stop\n    if stop<=0:return dict(valid=False,reason='invalid_initial_stop')\n    if risk<=0:return dict(valid=False,reason='entry_at_or_below_stop')\n    protection=stop;peak=0.;armed=False\n    for j in range(i+1,len(f)):\n        z=f.iloc[j]\n        if z.low<=protection:\n            price=min(float(z.open),protection)\n            reason=('trailing_stop' if protection>stop else 'initial_stop')+('_gap' if z.open<=protection else '')\n            break\n        peak=max(peak,(float(z.high)-entry)/risk)\n        if (float(z.close)-entry)/risk>=2:armed=True\n        if j==len(f)-1:price=float(z.close);reason='boundary_mark';break\n        if armed and np.isfinite(z.atr) and z.atr>0:protection=max(protection,math.floor((float(z.close)-4*float(z.atr))/tick)*tick)\n    return dict(valid=True,reason=reason,entry_i=i+1,exit_i=j,entry_price=entry,exit_price=price,initial_stop=stop,initial_risk=risk,net_bp=10000*(price/entry-1)-20,peak_r=peak,final_protection=protection)\nliteral_details=[]\nfor job,state_item in zip(jobs,matching['state_artifacts']):\n    f=pd.read_pickle(r.checked(job['features_path'],job['features_sha256'],refs))\n    f=f.loc[f.index+r.HOUR<=r.END].copy(); f.attrs['minutes']=60\n    st=table(Path(state_item['path']).relative_to(r.OUT)) if str(state_item['path']).startswith(str(r.OUT)) else pd.read_csv(r.checked(state_item['path'],state_item['sha256'],refs),float_precision='round_trip')\n    clocks=f.index+r.HOUR;n=len(f);auditcounts['source_bars']+=n\n    assert len(st)==n and np.array_equal(st.decision_i,np.arange(n))\n    assert np.array_equal(pd.DatetimeIndex(pd.to_datetime(st.decision_time,utc=True)).asi8,clocks.as_unit('ns').asi8)\n    iname=job['instrument']; local=sig[sig.instrument.eq(iname)]; labels=lab[lab.instrument.eq(iname)]\n    union=set()\n    for arm in r.ARMS:\n     for stage in ('early','confirmed'):\n        event_indices=np.flatnonzero(st[arm+'_'+stage].to_numpy())\n        union.update(event_indices)\n        published=event_indices[(clocks[event_indices]>=r.START)&(clocks[event_indices]<r.END)]\n        saved=local[local.arm.eq(arm)&local.stage.eq(stage)]\n        assert np.array_equal(np.sort(saved.decision_i),published)\n        dl=dmap[arm,stage]\n        for row in labels.itertuples():\n            i=int(row.event_i);k=np.searchsorted(event_indices,i)\n            lag=int(event_indices[k]-i) if row.label=='positive' and k<len(event_indices) and event_indices[k]<=i+6 else None\n            dd=dl.loc[(iname,i)]\n            for ahead in (0,1,2,6):\n                assert bool(dd['hit_'+str(ahead)])==(lag is not None and lag<=ahead)\n                auditcounts['stored_detection_boolean_checks']+=1\n    for s in local.itertuples():\n        i=int(s.decision_i);pi=int(s.parent_i)\n        assert s.decision_time==clocks[i] and pd.Timestamp(s.bar_open)==f.index[i]\n        near(s.signal_close,f.close.iloc[i],'signal close');near(s.signal_atr,f.atr.iloc[i],'signal atr')\n        assert 0<=i-pi<=3 and bool(st[s.arm+'_early'].iloc[pi])\n        if s.stage=='confirmed':assert s.confirm_age==i-pi\n        auditcounts['signal_price_clock_checks']+=1\n    window=(clocks>=r.START)&(clocks<r.END)\n    unknown=~st.density_rearm_density_valid.to_numpy()\n    locked=~st.density_rearm_quota_armed.to_numpy()\n    auditcounts['density_unknown_hours']+=int((unknown&window).sum())\n    auditcounts['density_unknown_locked_hours']+=int((unknown&locked&window).sum())\n    rank=f.atr_pct.rolling(240,min_periods=60).rank(pct=True)\n    bucket=np.ceil(rank.to_numpy()*5)\n    weeks=clocks.normalize()-pd.to_timedelta(clocks.weekday,unit='d')\n    u=np.array(sorted(union),dtype=int)\n    c=ctr[ctr.instrument.eq(iname)]\n    for z in c.itertuples():\n        j=int(z.decision_i);pr=parentmap.loc[z.matched_event_id];i=int(pr.decision_i)\n        assert pr.instrument==iname and pr.arm==z.arm\n        assert weeks[j]==weeks[i] and bucket[j]==bucket[i]\n        assert f.ready.iloc[j] and f.history_count.iloc[j]>=340 and j<n-1\n        assert not np.any((u>=j-12)&(u<=j))\n        assert r.START<=clocks[j]<r.END and z.decision_time==clocks[j]\n        auditcounts['control_relationship_checks']+=1\n    allrows=pd.concat([act[act.instrument.eq(iname)],c],ignore_index=True)\n    for z in allrows.itertuples():\n        i=int(z.decision_i)\n        assert z.entry_i==i+1 and z.decision_time==clocks[i] and z.fee_bp==20\n        if i+1<n and np.isfinite(z.entry_price):\n            near(z.entry_price,f.open.iloc[i+1],'entry open')\n            assert pd.Timestamp(z.entry_time)==f.index[i+1]\n        if z.valid:\n            assert int(z.exit_i)<n and int(z.exit_i)>=i+1\n            near(z.gross_bp,10000*(z.exit_price/z.entry_price-1),'gross arithmetic')\n            near(z.net_bp,z.gross_bp-20,'fee arithmetic')\n            near(z.net_return,z.net_bp/10000,'net return')\n            assert bool(z.natural_exit)==(z.reason!='boundary_mark')\n            assert bool(z.censored)==(z.reason=='boundary_mark')\n        if z.event_id in sample_ids:\n            literal=literal_path(f,i,float(job['tick']))\n            assert literal['valid']==z.valid and literal['reason']==z.reason\n            for key,value in literal.items():\n                if key not in ('valid','reason'):near(value,getattr(z,key),'literal '+key)\n            literal_details.append(dict(event_id=z.event_id,instrument=iname,arm=z.arm,decision_i=i,reason=z.reason,valid=bool(z.valid)))\n            auditcounts['literal_exit_replays']+=1\n        auditcounts['trade_entry_checks']+=1\n    if job['asset'] in r.CASE_ASSETS:\n        selected_rows=np.flatnonzero((f.index>=r.CASE_BEGIN)&(f.index<r.CASE_BEGIN+96*r.HOUR))\n        e=local[local.decision_i.isin(selected_rows)]\n        removed=np.flatnonzero(st.v3_early.to_numpy()&~st.density_rearm_early.to_numpy()&np.isin(np.arange(n),selected_rows))\n        caseinfo[job['asset']]=dict(events=e[['arm','stage','decision_i','decision_time','signal_close','parent_i','confirm_age']].to_dict('records'),\n          removed_parents=[dict(decision_i=int(i),decision_time=clocks[i],close=float(f.close.iloc[i]),owner_i=st.density_rearm_structure_owner_before_i.iloc[i],owner_age=i-st.density_rearm_structure_owner_before_i.iloc[i],reason=st.density_rearm_reject_reason.iloc[i],density_valid=bool(st.density_rearm_density_valid.iloc[i])) for i in removed])\nassert auditcounts['source_bars']==837239\nassert auditcounts['literal_exit_replays']==len(sample_ids)\nrearm=record(saved_rearm,period='full')\nassert rearm.density_unknown_asset_hours==auditcounts['density_unknown_hours']\nassert rearm.density_unknown_locked_asset_hours==auditcounts['density_unknown_locked_hours']\nassert rearm.density_unknown_raw_edges==int((~edges.density_valid).sum())\n# Same decision index has identical control indices across current arms.\nfor (instrument,i),group in act.groupby(['instrument','decision_i']):\n    eids=list(group.event_id)\n    if len(eids)>1:\n        choices=[tuple(sorted(ctr.loc[ctr.matched_event_id.eq(e),'decision_i'])) for e in eids]\n        assert len(set(choices))==1\neconomic={}\nfor arm in r.ARMS:\n for period,(lo,hi) in periods.items():\n    a=act[act.arm.eq(arm)&act.decision_time.ge(lo)&act.decision_time.lt(hi)]\n    av=a[a.valid.eq(True)].copy()\n    c=ctr[ctr.matched_event_id.isin(a.event_id)&ctr.valid.eq(True)]\n    control_mean=c.groupby('matched_event_id').net_bp.mean()\n    av['random']=av.event_id.map(control_mean);av['excess']=av.net_bp-av.random\n    matched=av[av.excess.notna()]; natural=av[av.natural_exit.eq(True)]; censored=av[av.censored.eq(True)]\n    vals=dict(candidates=len(a),valid=len(av),matched=len(matched),invalid=len(a)-len(av),natural_exits=len(natural),censored=len(censored),\n       mean_net_bp=av.net_bp.mean(),mean_gross_bp=av.gross_bp.mean(),wins=int(av.net_bp.gt(0).sum()),win_rate=av.net_bp.gt(0).mean(),\n       natural_wins=int(natural.net_bp.gt(0).sum()),natural_win_rate=natural.net_bp.gt(0).mean(),paired_actual_net_bp=matched.net_bp.mean(),\n       paired_random_net_bp=matched.random.mean(),mean_excess_bp=matched.excess.mean())\n    saved=record(ts,arm=arm,period=period)\n    for key,value in vals.items():near(value,saved[key],key)\n    days=matched.decision_time.dt.normalize()\n    matched=matched.assign(week=days-pd.to_timedelta(days.dt.weekday,unit='d'))\n    units=matched.groupby(['asset','week']).excess.mean().groupby(level=0).mean()\n    near(units.mean(),saved.asset_balanced_excess_bp,'asset balanced excess');assert len(units)==saved.permutation_assets\n    if period=='full':\n        economic[arm]=dict(vals,censored_wins=int(censored.net_bp.gt(0).sum()),censored_win_rate=censored.net_bp.gt(0).mean(),raw_saved_p=float(saved.permutation_p),asset_balanced_excess_bp=float(units.mean()))\nfamily=table('structural_holm_family.csv')\nhist=pd.read_csv(r.required(r.F_SOURCE/'structural_holm_family.csv',refs),float_precision='round_trip')\nfor a in r.FAMILY[:-1]:near(record(family,arm=a).raw_p,record(hist,arm=a).raw_p,'frozen p')\npv=family.correction_input_p.to_numpy(float)\norder=np.argsort(pv); corrected=np.empty(7);corrected[order]=np.minimum(1,np.maximum.accumulate(pv[order]*np.arange(7,0,-1)))\nassert np.allclose(corrected,family.holm_p_seven,rtol=1e-14,atol=1e-15)\ng=retained['density_rearm_early'];te=economic['density_rearm'];hg=float(record(family,arm='density_rearm').holm_p_seven)\ngates=dict(label_drop_pass=g['distinct_labels']<=6021 and g['label_drop']>=.5,baseline_retention_pass=g['retained_hit_events']>=1317,large_recall_pass=g['large_hits_1']>=758,economic_pass=te['mean_excess_bp']>0 and hg<.01)\nsaved_gate=json.loads(r.required(r.OUT/'assessment.json',refs).read_text())\nfor k,value in gates.items():assert saved_gate[k]==value\nfor path,digest in refs.items():r.checked(path,digest,refs)\nout=dict(status='passed',authenticated_reference_count=len(refs),validation_sha=VS,prepared_sha=PS,report_manifest_sha=RS,\n fixed_counts=counts,retention=retained,economics=economic,holm_seven=family[['arm','raw_p','holm_p_seven']].to_dict('records'),gates=gates,\n integrity_counts=auditcounts,literal_replay_selection='At most4 event IDs per arm/reason ordered by sha256(G-independent-exit-v1:event_id), profit-independent',\n literal_replays=literal_details,cases=caseinfo,\n unknown_density=dict(raw_edges=int(rearm.density_unknown_raw_edges),asset_hours=int(rearm.density_unknown_asset_hours),locked_asset_hours=int(rearm.density_unknown_locked_asset_hours)),\n limitations=['No detector or signal selection was rerun. Saved event matching flags and outcomes were independently checked.',\n 'Literal execution replay was a fixed stratified identity sample only; all recorded fills/cost arithmetic and all random-control relationships were checked.',\n 'Raw permutation p values were authenticated; matched arithmetic and Holm7 were recomputed, no new statistical hypothesis was scored.',\n 'Chart images require a separate visual inspection in this same review.'])\nprint(json.dumps(r.clean(out),ensure_ascii=False))\n",
+      "exit_code": 0,
+      "outcome": "Passed all full-population checks; output fields are included above."
+    },
+    {
+      "name": "Original603 missed anchors: saved-owner reasons and chart provenance",
+      "command": ".venv/bin/python - <<'PY'\\n[python_source below]\\nPY",
+      "python_source": "import json,hashlib\nimport numpy as np\nimport pandas as pd\nfrom yoyo.evaluation import spike_burst_v3_density_rearm_report as r\np,v,refs=r.authenticate('21d971a27363f225bb7451c310a9e5d5cd5554e1f6f36006eff1bf3a04286704')\ndef read(name):return pd.read_csv(r.required(r.OUT/name,refs),float_precision='round_trip')\nlabs=read('labels.csv.gz');labs.decision_time=pd.to_datetime(labs.decision_time,utc=True)\ndet=read('detections.csv.gz')\nd0=det[det.arm.eq('v3')&det.stage.eq('early')].set_index(['instrument','event_i'])\nd1=det[det.arm.eq('density_rearm')&det.stage.eq('early')].set_index(['instrument','event_i'])\npos=labs[labs.label.eq('positive')&labs.decision_time.ge(r.START)&labs.decision_time.lt(r.END)].set_index(['instrument','event_i'])\nmiss=pos[d0.loc[pos.index].hit_1 & ~d1.loc[pos.index].hit_1].reset_index()\nmatching=json.loads(r.required(r.OUT/'matching.json',refs).read_text())\nout=[]\nfor job,item in zip(matching['jobs'],matching['state_artifacts']):\n    local=miss[miss.instrument.eq(job['instrument'])]\n    if local.empty:continue\n    st=pd.read_csv(r.checked(item['path'],item['sha256'],refs),float_precision='round_trip')\n    for a in local.itertuples():\n        i=int(a.event_i+d0.loc[(a.instrument,a.event_i),'first_signal_lag'])\n        z=st.iloc[i];owner=z.density_rearm_structure_owner_before_i\n        assert z.v3_early and not z.density_rearm_early\n        if pd.notna(owner):assert st.density_rearm_early.iloc[int(owner)]\n        out.append(dict(instrument=a.instrument,anchor_i=a.event_i,original_v3_i=i,large=bool(a.large_peak),\n          original_close_time=z.decision_time,reason=z.density_rearm_reject_reason,\n          quota_blocked=bool(z.density_rearm_structure_blocked),cooldown_blocked=bool(z.density_rearm_cooldown_blocked),\n          owner_i=owner,owner_age=i-owner if pd.notna(owner) else np.nan,density_valid=bool(z.density_rearm_density_valid)))\nm=pd.DataFrame(out);assert len(m)==603\nreasons=m.groupby('reason').agg(missed_anchors=('anchor_i','size'),large=('large','sum'),median_owner_age=('owner_age','median'),max_owner_age=('owner_age','max')).reset_index()\nfigures={}\nfor name in ['hype','near','pepe']:\n    path=r.OUT/'g_report_figures'/f'{name}_96h.png'\n    figures[name]=dict(path=str(path),sha256=r.sha(path))\nreport=json.loads(r.checked(r.OUT/'g_report_manifest.json','dd5b3b45f32bdac704224a29cac31a3ce768db3b714b4e44bc0783f6513bc7d8',refs).read_text())\nfor a in report['artifacts']:r.checked(a['path'],a['sha256'],refs)\nfragment=json.loads((r.OUT/'g_report_fragment.json').read_text())\ncaseinfo=[]\nfor case in fragment['cases']:\n    assert case['bars']==96\n    original=[x for x in case['counts'] if x['arm']=='v1']\n    assert len(original)==1 and original[0]['events']==0\n    for window in case['rearm_provenance']:\n        assert window['source_start_i']==window['rearm_i']-12\n        assert window['source_end_i']==window['rearm_i']-1\n        assert pd.Timestamp(window['source_end_time'])<pd.Timestamp(window['decision_time'])\n    caseinfo.append({key:case[key] for key in ['asset','bars','counts','rearm_provenance']})\nprint(json.dumps(r.clean(dict(status='passed',missed_original_timely=len(m),quota_blocked=int(m.quota_blocked.sum()),\n cooldown_blocked=int(m.cooldown_blocked.sum()),unknown_density=int((~m.density_valid).sum()),reason_groups=reasons.to_dict('records'),\n median_owner_age=m.owner_age.median(),maximum_owner_age=m.owner_age.max(),figures=figures,case_integrity=caseinfo,\n interpretation='These are only the original603 timely anchors G missed, attributed at the real original V3 signal bar from saved G state. Old owner is quota ownership, not a live trade or retention credit.'))))\n",
+      "exit_code": 0,
+      "outcome": "Passed; original misses remain misses, with no ownership/live-trade coverage credit."
+    }
+  ],
+  "unresolved_integrity_findings": [],
+  "limitations": [
+    "The registered seventh structural hypothesis failed every original gate. Lower label count and two attractive case charts do not establish useful denoising.",
+    "Raw permutation p values were authenticated rather than rerunning a permutation test; matched excess arithmetic, asset-balanced means, sample counts and Holm7 were independently reconstructed.",
+    "Known historical data has been explored by13 individual filters and seven structural hypotheses. These results are exploratory, not blind OOS or optimal parameters.",
+    "The three charts were fixed before G outcomes. They illustrate HYPE/PEPE retained launches and NEAR failure, not a representative selection of winners.",
+    "Of603 original timely anchors lost,600 were blocked by old quota ownership and3 by accepted-only cooldown. Owner identity is not a claim that an old actual trade remained alive.",
+    "There are2027 unknown-density asset-hours, but zero unknown raw edges and zero unknown-and-locked asset-hours. The missing launches reviewed here are not attributed to density data gaps.",
+    "Independent overlapping long-parent outcomes are not account NAV, account drawdown or V4 confirmation-entry returns. The fixed20bp model excludes funding, market impact and actual exchange fees/spreads.",
+    "No Pine, TradingView, monitor, notification, live execution setting, threshold, source artifact or existing QA receipt was changed."
+  ],
+  "next_action": "Finalize the G failure report with these exact counts and all three fixed cases. No new hypothesis, TV change, re-scoring or deployment is authorized by this integrity receipt."
+}

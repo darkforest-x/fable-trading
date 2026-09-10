@@ -1,0 +1,55 @@
+{
+  "status": "rendering",
+  "validation_sha256": "21d971a27363f225bb7451c310a9e5d5cd5554e1f6f36006eff1bf3a04286704",
+  "prepared_sha256": "746b416ae9263ee798cc74f8077eca4efaa4fd1d6bd745b400812056ebab0204",
+  "builder": {
+    "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_v3_density_rearm_report.py",
+    "sha256": "0e6792a3b8c072ec01d537ec8224dc51b8617069b26212e03f664ff9ba51c5f6",
+    "commit": "e49fa098f3b156f9f29760c47d61c2ab44afb41f"
+  },
+  "config": {
+    "schema": "spike-v3-density-rearm-v1",
+    "arms": [
+      "v3",
+      "density_rearm"
+    ],
+    "new_hypothesis": "G: bootstrap quota, then known false and known dense with prior12 support wholly after accepted owner",
+    "interventions": "one density quota; actual accepted-only cooldown rebuild; no A-F stacking",
+    "primary_economics": "early accepted parents only; original age0..3 quality upgrades",
+    "structural_hypothesis_number": 7,
+    "prior_single_gate_explorations": 13,
+    "holm_family": "all frozen A-F raw full-period p values plus new G",
+    "holdout_per_new_config": 1,
+    "retrospective": true,
+    "exploratory": true,
+    "acceptance": {
+      "max_distinct_labels": 6021,
+      "min_retained": 1317,
+      "baseline_timely": 1463,
+      "min_large_hits": 758,
+      "large_denominator": 947,
+      "min_label_drop": 0.5,
+      "holm_p": 0.01
+    },
+    "fixed_population": {
+      "markets": 278,
+      "source_bars": 837239,
+      "source_labels": 14904,
+      "anchors": 8046,
+      "positive": 1660,
+      "negative": 6240,
+      "unknown": 146,
+      "large_positive": 947,
+      "parents": 10386,
+      "children": 3809,
+      "distinct_labels": 12042,
+      "timely_positive": 1463,
+      "timely_children": 488,
+      "large_hits": 798
+    },
+    "cost_bp": 20,
+    "execution": "unchanged next-open, prior5/2ATR risk, 2R close activation and4ATR next-bar ratchet",
+    "production_eligible": false,
+    "training_eligible": false
+  }
+}
