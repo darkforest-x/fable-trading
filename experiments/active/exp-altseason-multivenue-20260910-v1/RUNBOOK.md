@@ -36,7 +36,7 @@ dataset先检查builder与提交字节一致，再检查输入manifest SHA；已
 资金费各币选择清单与原始CLI保存在 `data/funding/*_symbol_selection.json`、`funding_launch_receipt.json`。币种按冻结目录/非空OHLC选，不按结果挑选。Binance请求中途403后已停止；保留partial/blocked manifest，不能为复现而绕过拒绝访问或将未知费率补零。OKX/Gate读取实际历史费率，时间边界和代理价格限制见成本报告。
 
 ```bash
-.venv/bin/python -m pytest -q tests/test_altseason_sources.py tests/test_altseason_gate_catalog.py tests/test_altseason_funding.py tests/test_altseason_engine.py tests/test_altseason_dataset.py tests/test_altseason_portfolio.py tests/test_altseason_research.py tests/test_altseason_costs.py
+.venv/bin/python -m pytest -q tests/test_altseason_sources.py tests/test_altseason_gate_catalog.py tests/test_altseason_funding.py tests/test_altseason_engine.py tests/test_altseason_dataset.py tests/test_altseason_portfolio.py tests/test_altseason_research.py tests/test_altseason_costs.py tests/test_altseason_paired_portfolio.py
 ```
 
 全部为离线研究。没有启用新的线上信号，没有通知测试，没有改仓位、API凭据、ACTIVE或订单。
