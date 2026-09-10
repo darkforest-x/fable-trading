@@ -55,6 +55,10 @@ def render(folder=EXPERIMENT/'results'):
     if subprocess.check_output(['git','show','HEAD:'+str(source.relative_to(ROOT))],cwd=ROOT)!=source.read_bytes():
         raise ValueError('Commit report builder before rendering')
     manifest=json.loads((folder/'accounts_manifest.json').read_text())
+    feature_sources={str(Path(x['path']).resolve()):x['sha256'] for x in manifest['feature_sources']}
+    case_source=ROOT/'yoyo/evaluation/altseason_report.py'
+    if subprocess.check_output(['git','show','HEAD:yoyo/evaluation/altseason_report.py'],cwd=ROOT)!=case_source.read_bytes():
+        raise ValueError('Case renderer has uncommitted changes')
     for item in manifest['artifacts']:
         if sha(item['path'])!=item['sha256']:raise ValueError('Changed result: '+item['path'])
     accounts=enriched(pd.read_csv(folder/'accounts_summary.csv'))
@@ -113,7 +117,8 @@ def render(folder=EXPERIMENT/'results'):
     pieces+=['![两时期和稀释对照]('+str(p.resolve())+')' for p in figures]
     pieces+=['## 初损失败与大趋势保留',
         '这些是独立候选路径，可能同币跨所重复，不能相加为账户收益。大赢家指自然退出净价格涨幅≥50%；段末仍持有的路径单列。初损退出率不等于所有假启动的完整标签。',
-        table(events.loc[events.scope.eq('combined')].to_dict('records'),[('era','时段'),('rule','规则'),('valid','有效路径'),('initial_stop_rate_pct','初损退出率%'),('natural_exits','自然退出'),('censored','段末盯市'),('natural_big_winners','自然退出≥50%'),('mean_net_bp','平均净bp'),('matched_random_mean_bp','匹配随机bp'),('asset_balanced_excess_bp','资产等权超额bp'),('holm_p','Holm p')]),
+        table(events.loc[events.scope.eq('combined')].to_dict('records'),[('era','时段'),('rule','规则'),('valid','有效路径'),('initial_stop_rate_pct','初损退出率%'),('natural_exits','自然退出'),('censored','段末盯市'),('natural_big_winners','自然退出≥50%'),('mean_net_bp','全体净bp'),('matched_actual_mean_bp','匹配策略bp'),('matched_random_mean_bp','匹配随机bp'),('any_control_fraction_pct','任意对照覆盖%'),('asset_balanced_excess_bp','资产等权超额bp'),('holm_p','Holm p')]),
+        '全体均值包含无随机控制的路径，匹配策略/随机均值只比较有对照的相同候选；任意对照覆盖率可与前面control0账户配对覆盖率不同。',
         '## 分交易所：结果能否迁移',
         table(accounts.loc[accounts.population.eq('all_assets')&accounts.account.eq('full')&accounts.scope.ne('combined')].to_dict('records'),[('era','时段'),('scope','交易所'),('rule','规则'),('return_pct','组合收益%'),('max_drawdown_pct','最大回撤%'),('trades','成交数')]),
         '各所账户独立使用100000资金，不能直接相加收益。相同币在不同交易所出现不算独立重复验证。',
@@ -133,7 +138,10 @@ def render(folder=EXPERIMENT/'results'):
             pool=pool.loc[~pool.event_id.isin(seen)]
             if pool.empty:continue
             row=pool.iloc[0].to_dict();seen.add(row['event_id'])
-            f=pd.read_pickle(row['features_path']);f=f.loc[f.index<end].copy()
+            source_path=str(Path(row['features_path']).resolve())
+            if source_path not in feature_sources or sha(source_path)!=feature_sources[source_path]:
+                raise ValueError('Case feature source changed: '+source_path)
+            f=pd.read_pickle(source_path);f=f.loc[f.index<end].copy()
             dest=gallery/f'case_{len(cases)+1:02d}.png'
             check=_case_plot(f,row,dest);cases.append(dict(period=period,caption=caption,event_id=row['event_id'],source_sha256=sha(row['features_path']),**check))
             pieces+=['### '+PERIOD_LABELS[period]+' · '+caption+' · '+row['venue']+' '+row['symbol'],
@@ -156,7 +164,8 @@ def render(folder=EXPERIMENT/'results'):
     subprocess.run([str(ROOT/'.venv/bin/python'),str(ROOT/'scripts/md_to_html.py'),str(report),'--out-dir',str(ROOT/'analysis/html')],check=True,cwd=ROOT)
     html=ROOT/'analysis/html'/report.with_suffix('.html').name
     receipt=dict(builder_commit=head,report=str(report),html=str(html),report_sha256=sha(report),html_sha256=sha(html),
-        accounts_manifest_sha256=sha(folder/'accounts_manifest.json'),figures=[dict(path=str(p),sha256=sha(p)) for p in figures],cases=cases,scoring_performed=False)
+        accounts_manifest_sha256=sha(folder/'accounts_manifest.json'),case_renderer_sha256=sha(case_source),
+        figures=[dict(path=str(p),sha256=sha(p)) for p in figures],cases=cases,scoring_performed=False)
     (gallery/'report_manifest.json').write_text(json.dumps(receipt,indent=2,default=str)+'\n')
     print(json.dumps(dict(report=str(html),figures=len(figures),cases=len(cases))),flush=True)
 
