@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import hashlib
 from contextlib import contextmanager
+import gzip
 import json
 import sqlite3
 import time
@@ -52,6 +53,12 @@ class Store:
             CREATE TABLE IF NOT EXISTS markets (
                 symbol TEXT NOT NULL, timeframe TEXT NOT NULL, payload TEXT NOT NULL,
                 PRIMARY KEY(symbol,timeframe));
+            -- The isolated scanner owns this private, complete recurrence
+            -- seed.  UI chart rows are intentionally shorter and cannot be
+            -- used to restore frozen V1 feature state after a process restart.
+            CREATE TABLE IF NOT EXISTS candle_checkpoints (
+                symbol TEXT NOT NULL, timeframe TEXT NOT NULL, payload BLOB NOT NULL,
+                updated_ms INTEGER NOT NULL, PRIMARY KEY(symbol,timeframe));
             CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, payload TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS outbox (
                 event_id TEXT PRIMARY KEY REFERENCES events(id), status TEXT NOT NULL,
@@ -123,6 +130,28 @@ class Store:
                 raise ValueError("event payload identity mismatch")
             event.update(updates)
             return db.execute("UPDATE events SET payload=? WHERE id=?", (encode(event), event_id)).rowcount == 1
+
+    def save_candle_checkpoint(self, symbol, timeframe, candles):
+        """Persist the scanner's full raw recurrence seed, compressed locally."""
+        if not isinstance(symbol, str) or not isinstance(timeframe, str) or not isinstance(candles, list):
+            raise ValueError("invalid candle checkpoint")
+        payload = gzip.compress(encode(candles).encode("utf-8"), mtime=0)
+        with self.connect() as db:
+            db.execute("INSERT OR REPLACE INTO candle_checkpoints VALUES (?,?,?,?)",
+                       (symbol, timeframe, payload, now_ms()))
+
+    def load_candle_checkpoints(self):
+        """Return raw checkpoint payloads; malformed entries are explicit ``None``."""
+        with self.connect() as db:
+            rows = db.execute("SELECT symbol,timeframe,payload FROM candle_checkpoints").fetchall()
+        result = {}
+        for row in rows:
+            try:
+                value = json.loads(gzip.decompress(row[2]).decode("utf-8"))
+            except (OSError, UnicodeDecodeError, json.JSONDecodeError, TypeError):
+                value = None
+            result[(row[0], row[1])] = value
+        return result
 
     @staticmethod
     def _insert_event(db, e, notify, bark_notify, telegram_photo=None, photo_error=None):

@@ -1,6 +1,7 @@
 """Isolated public-data V1 scanner; only new forward V1 raw rows may seed Bark."""
 from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
+import math
 import time
 from pathlib import Path
 from yoyo.monitor import MONITORED_TIMEFRAMES, SIGNAL_PROTOCOL, TIMEFRAMES
@@ -11,6 +12,27 @@ from yoyo.monitor.signals import analyze
 from yoyo.monitor.store import Store, now_ms
 
 
+def _valid_checkpoint(candles: object, timeframe: str) -> bool:
+    """Accept only a complete, contiguous raw seed; malformed cache fails cold."""
+    if timeframe not in TIMEFRAMES or not isinstance(candles, list) or not candles:
+        return False
+    previous = None
+    for row in candles:
+        if not isinstance(row, dict):
+            return False
+        try:
+            stamp = int(row["t"])
+            o, h, l, c, v = (float(row[key]) for key in ("o", "h", "l", "c", "v"))
+        except (KeyError, TypeError, ValueError):
+            return False
+        if (stamp % TIMEFRAMES[timeframe] or (previous is not None and stamp - previous != TIMEFRAMES[timeframe])
+                or not all(math.isfinite(value) for value in (o, h, l, c, v)) or l <= 0 or v < 0
+                or h < max(o, l, c) or l > min(o, h, c)):
+            return False
+        previous = stamp
+    return True
+
+
 class V1Scanner:
     """Keep the public client and complete recurrence history across passes."""
     def __init__(self, database: str):
@@ -18,7 +40,13 @@ class V1Scanner:
         self.client = OKX()
         self.instruments = []
         self.universe_at = 0
-        self.candles: dict[tuple[str, str], list[dict]] = {}
+        # A restart only reuses exact raw sequences.  Do not seed recurrence
+        # from the shorter UI chart or a gapped/corrupt checkpoint.
+        self.candles: dict[tuple[str, str], list[dict]] = {
+            key: value for key, value in self.store.load_candle_checkpoints().items()
+            if _valid_checkpoint(value, key[1])
+        }
+        self._checkpointed = set(self.candles)
 
     def scan_once(self) -> None:
         """Fetch confirmed bars, replay only changed closed candles, persist read models.
@@ -70,6 +98,13 @@ class V1Scanner:
                     unchanged = close is not None and store.get_meta(key) == close
                     if not candles:
                         raise RuntimeError("market_data_unavailable")
+                    # Checkpoint before replay/market writes.  A later process
+                    # restart may fetch only the exchange delta with this exact
+                    # sequence, but no invalid payload is ever restored.  Do
+                    # not rewrite an unchanged compressed seed every pass.
+                    if not unchanged or cell not in self._checkpointed:
+                        store.save_candle_checkpoint(symbol, timeframe, candles)
+                        self._checkpointed.add(cell)
                     if not unchanged:
                         result = analyze(candles, [], timeframe, tick=float(instrument["tickSz"]), chart_limit=240)
                         for event in result["events"]:

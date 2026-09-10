@@ -4,6 +4,8 @@ import threading
 
 from yoyo.monitor import MONITORED_TIMEFRAMES, TIMEFRAMES
 from yoyo.monitor import v1_worker
+from yoyo.monitor.signals import analyze as real_analyze
+from yoyo.monitor.store import Store
 
 
 class Client:
@@ -77,3 +79,61 @@ def test_prefetches_up_to_eight_cells_but_replays_and_writes_in_cell_order(tmp_p
     thread.join(2)
     assert not thread.is_alive()
     assert replays == list(MONITORED_TIMEFRAMES) * 3
+
+
+def _complete_bars(timeframe, count=341):
+    step = TIMEFRAMES[timeframe]
+    return [{"t": index * step, "o": 100., "h": 101., "l": 99., "c": 100., "v": 100.}
+            for index in range(count)]
+
+
+def test_restart_hydrates_full_checkpoint_then_replays_exact_increment(tmp_path, monkeypatch):
+    class SeedClient(Client):
+        def candles(self, symbol, timeframe, previous=None, limit=720):
+            self.calls.append((symbol, timeframe, previous, limit))
+            assert previous is None
+            return _complete_bars(timeframe), 0
+
+    database = tmp_path / "monitor.sqlite3"
+    seed = SeedClient()
+    monkeypatch.setattr(v1_worker, "OKX", lambda: seed)
+    first = v1_worker.V1Scanner(str(database))
+    first.scan_once()
+
+    class IncrementClient(Client):
+        def candles(self, symbol, timeframe, previous=None, limit=720):
+            self.calls.append((symbol, timeframe, previous, limit))
+            assert previous == _complete_bars(timeframe)
+            step = TIMEFRAMES[timeframe]
+            return previous + [{"t": previous[-1]["t"] + step, "o": 100., "h": 101., "l": 99., "c": 100., "v": 100.}], 0
+
+    increment = IncrementClient()
+    monkeypatch.setattr(v1_worker, "OKX", lambda: increment)
+    second = v1_worker.V1Scanner(str(database))
+    assert all(second.candles[("TEST-USDT-SWAP", timeframe)] == _complete_bars(timeframe)
+               for timeframe in MONITORED_TIMEFRAMES)
+    second.scan_once()
+    store = Store(database)
+    for timeframe in MONITORED_TIMEFRAMES:
+        full = _complete_bars(timeframe)
+        step = TIMEFRAMES[timeframe]
+        full.append({"t": full[-1]["t"] + step, "o": 100., "h": 101., "l": 99., "c": 100., "v": 100.})
+        expected = real_analyze(full, [], timeframe, tick=.01, chart_limit=240)
+        actual = store.get_market("TEST-USDT-SWAP", timeframe)
+        assert actual["chart"] == expected["chart"]
+        assert {key: actual[key] for key in expected["state"]} == expected["state"]
+    assert all(previous for _, _, previous, _ in increment.calls)
+
+
+def test_gap_checkpoint_is_not_restored_as_a_recurrence_seed(tmp_path, monkeypatch):
+    database = tmp_path / "monitor.sqlite3"
+    store = Store(database)
+    step = TIMEFRAMES["1H"]
+    store.save_candle_checkpoint("TEST-USDT-SWAP", "1H", [
+        {"t": 0, "o": 100., "h": 101., "l": 99., "c": 100., "v": 1.},
+        {"t": 2 * step, "o": 100., "h": 101., "l": 99., "c": 100., "v": 1.},
+    ])
+    client = Client()
+    monkeypatch.setattr(v1_worker, "OKX", lambda: client)
+    scanner = v1_worker.V1Scanner(str(database))
+    assert ("TEST-USDT-SWAP", "1H") not in scanner.candles
