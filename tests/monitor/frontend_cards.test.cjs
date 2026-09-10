@@ -122,3 +122,9 @@ test("chart uses UTC timestamp distance, preserves gaps, and plots only explicit
   assert.match(app, /pointerdown/);
   assert.match(app, /event\.deltaY/);
 });
+
+test("live chart translates the display timeframe to the monitor API timeframe", () => {
+  assert.match(app, /const chartTimeframe = apiTimeframe\(item\.timeframe\)/);
+  assert.match(app, /timeframe=\$\{encodeURIComponent\(chartTimeframe\)\}/);
+  assert.match(app, /图表周期不受当前 V1 服务支持/);
+});

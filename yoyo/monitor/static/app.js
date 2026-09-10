@@ -549,9 +549,11 @@
     $("chart-hint").textContent = "仅展示已返回的真实 K 线";
     const timeout = setTimeout(() => controller.abort(), 20000);
     try {
+      const chartTimeframe = apiTimeframe(item.timeframe);
+      if (item.source !== "replay" && !chartTimeframe) throw new Error("图表周期不受当前 V1 服务支持");
       const data = await api(item.source === "replay"
         ? `/api/replay/chart?event_id=${encodeURIComponent(item.id)}`
-        : `/api/chart?symbol=${encodeURIComponent(item.symbol)}&timeframe=${encodeURIComponent(item.timeframe)}`, controller.signal);
+        : `/api/chart?symbol=${encodeURIComponent(item.symbol)}&timeframe=${encodeURIComponent(chartTimeframe)}`, controller.signal);
       if (request !== state.chartRequest) return;
       if (!Array.isArray(data.candles)) throw new Error("图表数据格式有误");
       state.chart = data;
