@@ -67,7 +67,7 @@ AUC、置换检验、top-decile 净收益、匹配随机交易对照在这一固
 
 **获利记录与失败原因。** 这 6,116 条已实现行的 exit label 全部是 `protective_stop`：其中 1,721 条最终 `net_return > 0`，4,395 条非正；因此该 label 不能被误读成“每一条都是失败”，也不能从中单独识别或归因“成功大趋势”。同一已覆盖子集的所有 protective-stop 行等权净收益和为 +8.6985，中位 MFE 为 +5.85%，中位 MAE 为 -4.02%。这些是路径描述，不是完整市场、匹配对照或策略 edge；不能据此改变 V1 的风险线或阈值。
 
-逐周期逐笔 source-event id、entry/exit、censored 与 v2 字段仍在 [covered_trade_ledger.csv.gz](../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_ledger.csv.gz)。目前 monitor 仅已导入其中 1,019 条旧已取回放卡；尚有 **5,166** 条 30m / 1H / 4H 账本信号未接入 UI。它们必须从同一不可变 snapshot 以 signal-only import 后再联结，不能只导入获利记录，1D 也不属于当前 V1 三周期 UI 或通知合约。 信号 API 的稳定 cursor 已就绪：页面一次只保留最多 2,000 条，用户可继续加载更早的 raw 历史，定时刷新也不会丢失已加载页。它解决浏览路径，不代表剩余 5,166 条已经导入或通过经济审计。
+逐周期逐笔 source-event id、entry/exit、censored 与 v2 字段仍在 [covered_trade_ledger.csv.gz](../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_ledger.csv.gz)。目前 monitor 已从同一不可变 snapshot signal-only 导入并逐笔联结全部 **6,185** 条 30m / 1H / 4H 账本信号（6,116 realized、69 censored）；没有只导入获利记录，1D 也不属于当前 V1 三周期 UI 或通知合约。信号 API 的稳定 cursor 已就绪：页面一次只保留最多 2,000 条，用户可继续加载更早的 raw 历史，定时刷新也不会丢失已加载页。联结只提供可追溯的单笔账本字段，不代表通过经济审计。
 
 ## 交易所、来源跨度与逐笔极值
 
@@ -99,6 +99,6 @@ Binance/OKX 的 `gapped/error` 与 Gate 的 `complete/partial/gapped/error` rece
 
 当前目录是 2026-09-10/11 的 current catalog，不是历史退市合约普查。Gate 的历史窗口和个别来源缺口仍被单元状态明确保留，不能用其他交易所替代。即使某一覆盖文件的已实现汇总为正或负，也会受存活偏差、未覆盖单元、未建模交易成本及非账户资金路径影响，不能据此修改 V1、通知、ACTIVE、模型或真实仓位。
 
-监控台现在有全部 6,185 条三周期 `replay/raw` 信号：6,082 条为 `covered_linked_realized_unverified`，69 条为 `covered_linked_censored_unverified`，34 条因缺同源冻结 OHLC 保持 `unverified/ohlc_missing` 且不显示 outcome 或借图。68 条 1D 账本行没有导入当前三周期 UI/通知协议。原先指向可变汇总文件的 1,019 条链接已先降级为 stale evidence，审计保留而旧 outcome 不显示；当前可联结行保存双方 id、四元组、输入 SHA 和内容寻址副本 SHA。它仍不是独立经济审计或策略验证；详情见 [p1_spike_v1_replay_ledger_link_20260911.md](p1_spike_v1_replay_ledger_link_20260911.md)。
+监控台现在有全部 6,185 条三周期 `replay/raw` 信号：6,116 条为 `covered_linked_realized_unverified`，69 条为 `covered_linked_censored_unverified`，没有未联结或缺同源冻结 OHLC 的记录。最初 34 条 Binance/Gate 中文合约被 ASCII 路径校验误报为缺 OHLC；修正并保持路径封闭检查后已全部按同源文件重链。68 条 1D 账本行没有导入当前三周期 UI/通知协议。原先指向可变汇总文件的 1,019 条链接已先降级为 stale evidence，审计保留而旧 outcome 不显示；当前可联结行保存双方 id、四元组、输入 SHA 和内容寻址副本 SHA。它仍不是独立经济审计或策略验证；详情见 [p1_spike_v1_replay_ledger_link_20260911.md](p1_spike_v1_replay_ledger_link_20260911.md)。
 
 本轮只解决会污染已覆盖账本的可执行时钟与已实现统计问题。全市场覆盖、独立经济账本验收、匹配随机对照和任何策略有效性判断仍未完成。

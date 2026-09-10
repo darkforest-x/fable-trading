@@ -166,6 +166,6 @@ node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.t
 
 ## 全量三周期回放接入与证据状态
 
-在不可变 snapshot 独立复核后，signal-only importer 将全部 6,185 条 30m / 1H / 4H V1 回放记录接入 monitor（5,166 新行，1,019 幂等既有）；68 条 1D 行按当前 UI/通知协议跳过。修正此前 audit 错继承浏览上限的缺陷后，cursor 全量重链和 receipt 都覆盖 6,185 行：6,082 条已实现、69 条 censored、34 条 `ohlc_missing`。后者仅来自 Binance 24 条与 Gate 10 条确实缺同源冻结文件的 source identity；页面明示缺失，不显示 outcome，不借当前行情或其他 venue 画图。
+在不可变 snapshot 独立复核后，signal-only importer 将全部 6,185 条 30m / 1H / 4H V1 回放记录接入 monitor（5,166 新行，1,019 幂等既有）；68 条 1D 行按当前 UI/通知协议跳过。修正此前 audit 错继承浏览上限的缺陷，以及中文 Binance/Gate 合约被 ASCII 路径校验误报为缺 OHLC 的问题后，cursor 全量重链和 receipt 都覆盖 6,185 行：6,116 条已实现、69 条 censored、0 条 `ohlc_missing`。Unicode 路径仍拒绝 NUL、`/`、`\`，并在 resolve 后精确限制在对应 venue 的冻结目录；页面不会借当前行情或其他 venue 画图。
 
 全量导入和联结不走 `upsert_event()` 的通知参数、candidate 或 Bark sender：Bark/TG outbox 仍是 pending/sent/failed/unknown 全 0，既有 disabled candidates 为 2。前端已有服务器 cursor 路径可从 2,000 条一页继续读取更早 raw 历史；当前运行实例尚未 reload `d03cc3a` / `3af2e8e`，因此这项分页 UI/API 发布验收应在不打断正在进行的增量 scan 后再做。
