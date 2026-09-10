@@ -1,0 +1,79 @@
+{
+  "status": "passed",
+  "reviewed_at": "2026-09-10T09:29:52.111528+00:00",
+  "scope": "read-only detector, tests and preregistered state design; synthetic only; no historical evaluation",
+  "sources": {
+    "yoyo/evaluation/spike_burst_v3_confirmation_gate.py": "38566e88825b29cf5e6199c88ac7d15f306cad0beef7cf36ecd7a2adb36bd8ab",
+    "tests/test_spike_burst_v3_confirmation_gate.py": "ed6ad1b4903907cfbea1af705d10ab2b41f9befccc7ecca317d36e180bde58da",
+    "experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/PROJECT_PLAN.md": "673ef2d92f92c80c0d09ae9b38d3d3874849a216c0a2df93c22997c63e7877a5",
+    "yoyo/evaluation/spike_burst_early_warning.py": "31f5422524b15b2a758cb8e6d55b1e943123d099655f4d743051215dbacb9abf",
+    "yoyo/evaluation/spike_burst_replay.py": "996ef56ceb5b70da5337422d8390487330f7e387f648ee527b5afc9bda72a33f"
+  },
+  "git_head_observed": "a6a77ca0b5f4401a05dff5fd1473d93bf8017acb",
+  "checks": {
+    "single_structural_change_confirmed_live_owner_only": true,
+    "original_early_fields_and_quality_tags_unchanged": true,
+    "original_risk_path_helpers_and_constants_reused": true,
+    "edge_updated_even_when_blocked": true,
+    "cooldown_updated_only_for_accepted_parent": true,
+    "confirmation_current_bar_age_zero_through_three": true,
+    "age_four_unconfirmed_cancel_has_no_synthetic_exit_fill": true,
+    "protection_before_current_child_upgrade": true,
+    "stopped_parent_child_does_not_resurrect_reference": true,
+    "confirmed_stop_bar_blocks_new_parent": true,
+    "confirmed_window_expiry_retains_valid_suppression": true,
+    "gap_censors_without_fabricated_trade_exit": true,
+    "no_period_end_liquidation": true,
+    "no_outcome_label_or_future_exit_input": true,
+    "separate_provisional_reference_and_confirmed_suppression_fields": true,
+    "five_seed_prefix_and_owner_invariants": true
+  },
+  "blockers": [],
+  "tests": {
+    "command": ".venv/bin/python -m pytest -q tests/test_spike_burst_v3_confirmation_gate.py",
+    "passed": 22,
+    "wall_seconds": 0.6,
+    "warning": "Existing urllib3/LibreSSL compatibility warning; tests unaffected"
+  },
+  "independent_synthetic_probe": {
+    "seeds": 5,
+    "rows": 2000,
+    "parents": 27,
+    "children": 9,
+    "suppression_acquisitions": 9,
+    "unconfirmed_expiries": 15,
+    "prefix_cuts": 25,
+    "passed": true,
+    "invariants": [
+      "suppression implies live qualified reference",
+      "acquisition implies actual current child/live owner",
+      "unconfirmed expiry has no exit flag or exit price",
+      "accepted early is condition edge and >=12 apart",
+      "suppression owner is an actual accepted parent and previously acquired",
+      "child actual parent age0..3",
+      "reference entry/initial stop/risk never repriced for one owner",
+      "prefix outputs match full history"
+    ]
+  },
+  "study_interface": {
+    "required_coverage_fields": [
+      "reference_active",
+      "reference_before",
+      "reference_owner_i",
+      "suppression_active",
+      "suppression_before",
+      "suppression_acquired",
+      "suppression_exit"
+    ],
+    "rule": "reference_active includes provisional occupancy; only suppression_active is live confirmed suppression. reference_qualified alone can stay true after exit and cannot count coverage.",
+    "parents": "early rows only for economics; confirmed rows are upgrades, not second orders",
+    "clocks": "signal-close reference for detection; separate actual next-open economics; neither reference nor suppression coverage repairs fresh recall",
+    "runner_review": "Runner file not yet available at this bounded review; interface contract reviewed, not a completed pipeline audit"
+  },
+  "observations": [
+    "On unconfirmed age4, an actual stop is checked first; cancellation emits no stop when reference otherwise alive.",
+    "Only confirmed-reference exits explicitly block same-bar early; provisional references exist at most4 bars, so unchanged12-bar accepted cooldown independently prevents a same-bar replacement before expiry.",
+    "No native Pine parity, profitability or live deployment conclusion is established by this preflight.",
+    "Post-sample analysis is planned as sequential exploration with3-hypothesis Holm and disclosure of earlier13 gate studies, not blind confirmation."
+  ]
+}
