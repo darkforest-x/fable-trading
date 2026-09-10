@@ -1,0 +1,186 @@
+{
+  "schema": "spike-v3-density-rearm-independent-preflight-v1",
+  "status": "passed",
+  "generated_at_utc": "2026-09-10 13:00:02 UTC",
+  "reviewer": "/root/v3_noise_rules_audit",
+  "scope": "Independent read-only G source/plan review and generated-synthetic validation before any G market preparation or outcome scoring.",
+  "source_sha256": {
+    "experiments/active/exp-spike-v3-density-rearm-20260910-v1/PROJECT_PLAN.md": "ba470f85b0e89f17dd2a68512672dbb69f035e15aee3511e24da9617adf947df",
+    "tests/test_spike_burst_v3_density_rearm_gate.py": "6c6300c8d84cb6e1e29e1b5bc874f74294bf159d58cabe6c690b1294b1d51121",
+    "tests/test_spike_burst_v3_density_rearm_study.py": "318fc1b54ba2d7540314589d7349b336431320b9be680d781ccd0b77eca84223",
+    "yoyo/evaluation/spike_burst_v3_density_rearm_gate.py": "98f46d1b7881baf6c2fc6f3ba95541d3dd329cc27b759e6d47e33c4a19a3b01c",
+    "yoyo/evaluation/spike_burst_v3_density_rearm_study.py": "06469d8bc441036d77ded38f6f37b56a9565d884d044c45ee0efcdce05cc0915"
+  },
+  "review_git_head": "b64123ae6b00d1026616f6e705f4fba4358fb5c5",
+  "review_branch": "main",
+  "source_unchanged_during_final_tests": true,
+  "commit_requirement": "This receipt and all five reviewed core files must be committed byte-for-byte to HEAD before prepare; this review does not assert they were committed when it ran.",
+  "actions": {
+    "historical_market_csv_or_pickle_read": false,
+    "new_market_fetch": false,
+    "market_detection": false,
+    "market_scoring": false,
+    "market_prepare": false,
+    "source_modified": false,
+    "committed": false,
+    "pine_or_v4_modified": false,
+    "notification_or_execution_modified": false
+  },
+  "fixed_contract": {
+    "source_markets": 278,
+    "source_timeframe": "1H",
+    "source_bars": 837239,
+    "source_labels": 14904,
+    "study_anchors": 8046,
+    "positive": 1660,
+    "negative": 6240,
+    "unknown_labels": 146,
+    "large_positive": 947,
+    "baseline_parent_events": 10386,
+    "baseline_child_events": 3809,
+    "baseline_distinct_labels": 12042,
+    "baseline_timely_positive": 1463,
+    "baseline_timely_child": 488,
+    "baseline_large_hits": 798,
+    "max_distinct_labels": 6021,
+    "min_original_timely_retained": 1317,
+    "min_large_timely_hits": 758,
+    "economic": "Actual accepted early parents only, original next-open fill and risk/ratchet mathematics, 20 bp round trip; child is an upgrade.",
+    "statistical_gate": "Positive matched excess and all seven A-G structural hypotheses Holm-adjusted p < 0.01, including frozen A-F raw p.",
+    "denominator_verification_scope": "Source contracts and synthetic fail-closed checks; actual historical reproduction is reserved for globally frozen prepare."
+  },
+  "checks": [
+    {
+      "name": "One causal quota intervention",
+      "status": "passed",
+      "evidence": "Original early_fields, complete raw rising edge and age0..3 child quality are reused. No A-F filter, trade occupancy, box-low reset, future label or outcome drives the gate."
+    },
+    {
+      "name": "Bootstrap and gap semantics",
+      "status": "passed",
+      "evidence": "Each continuous hourly segment starts armed; acceptance records bootstrap separately. Gap resets parent/cooldown/quota and prior12 support. The study start is not a reset."
+    },
+    {
+      "name": "Strict post-owner density departure",
+      "status": "passed",
+      "evidence": "Only valid density=False after the accepted owner sets departure. Owner acceptance clears false_seen; its own density cannot count as later departure. Invalid or missing density is not false."
+    },
+    {
+      "name": "Twelve original observations",
+      "status": "passed",
+      "evidence": "Density support is [i-12,i), all finite width/flips in the same segment, with finite current summaries and ready. Rearm requires i-12>owner_i, not twelve consecutive density summaries."
+    },
+    {
+      "name": "Sustained true and same-bar restoration",
+      "status": "passed",
+      "evidence": "A continuing valid dense=True run restores quota once its support becomes disjoint, provided known departure was observed. Restoration precedes raw-edge evaluation; same-bar restoration and acceptance are allowed."
+    },
+    {
+      "name": "Raw edge and accepted-only cooldown",
+      "status": "passed",
+      "evidence": "Every original raw condition updates previous_condition, including denied edges. Only accepted parents update 12-bar cooldown; G can emit at times original V3 cooldown denies, and the runner rebuilds both streams."
+    },
+    {
+      "name": "Actual parent and child clocks",
+      "status": "passed",
+      "evidence": "Only actual accepted parents own children. Child age remains 0..3 and frozen parent-high quality is not gated again by quota. Metadata is taken from the real accepted parent row, not a future child/rearm row."
+    },
+    {
+      "name": "No future structural segmentation",
+      "status": "passed",
+      "evidence": "Stored ownership spans end descriptively at the next accepted owner, gap or sample tail; they are not trade exits and never influence detection or fills."
+    },
+    {
+      "name": "Unknown density disclosure",
+      "status": "passed",
+      "evidence": "All unknown raw edges, unknown asset-hours and unknown-and-postdecision-locked asset-hours are counted independently; the intersection is computed per asset/bar before aggregation. Bootstrap acceptance with unknown density is included. These counts cannot be called confirmed denoising. The registered fixed gates receive no unregistered F-style addback."
+    },
+    {
+      "name": "Global preparation before scoring",
+      "status": "passed",
+      "evidence": "source_pins requires the passing review and exact HEAD bytes before frozen input reads. prepare freezes the complete candidate/child/matching/label/state population before a complete prepared manifest exists. evaluate and workers reject missing or changed preparation."
+    },
+    {
+      "name": "Fixed baseline and acceptance",
+      "status": "passed",
+      "evidence": "Source sequence/clock/price and counts are checked against the frozen original V3; labels cannot be shrunk. Absolute acceptance boundaries 6021/1317/758 and denominators 1463/947 are explicit and tested."
+    },
+    {
+      "name": "Common causal matched controls",
+      "status": "passed",
+      "evidence": "Same source coin, UTC week and causal ATR bucket; all V3/G events exclude only their current and following twelve bars from control eligibility. No future event/outcome exclusion. Identical parent positions share the same control schedule."
+    },
+    {
+      "name": "Cache identity and cost",
+      "status": "passed",
+      "evidence": "Authenticated F outcomes are reused only for identical feature SHA, tick, period, cutoff, decision index and pinned execution/replay sources. Duplicate cached paths must agree. Synthetic paths verify next-open entry and 20 bp round-trip cost."
+    },
+    {
+      "name": "Hypothesis family and historical comparison",
+      "status": "passed",
+      "evidence": "All six frozen A-F raw p values enter Holm7 with G; missing/duplicate/invalid families fail. Original V1 is a historical baseline with its own historical controls and is not relabeled as the new shared-control result."
+    }
+  ],
+  "automated_tests": {
+    "command": ".venv/bin/python -m pytest -q tests/test_spike_burst_v3_density_rearm_study.py tests/test_spike_burst_v3_density_rearm_gate.py tests/test_spike_burst_early_warning.py",
+    "cwd": "/Users/zhangzc/fable-trading",
+    "exit_code": 0,
+    "result": "95 passed, 1 warning in 3.02s",
+    "by_file": {
+      "density_rearm_study": 36,
+      "density_rearm_gate": 42,
+      "original_v3_early_warning": 17
+    },
+    "raw_output": "........................................................................ [ 75%]\n.......................                                                  [100%]\n=============================== warnings summary ===============================\n.venv/lib/python3.9/site-packages/urllib3/__init__.py:35\n  /Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020\n    warnings.warn(\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n95 passed, 1 warning in 3.02s\n",
+    "synthetic_pipeline_scope": "Two generated assets exercise real prepare serialization, causal matching, cache initialization and original next-open execution helpers. Detector streams are injected fixtures for this wiring smoke; the actual G gate is validated separately below. This is not a full-population market evaluate CLI pass.",
+    "warnings": "Existing urllib3 LibreSSL NotOpenSSLWarning only; no dependency changes."
+  },
+  "independent_oracles": [
+    {
+      "name": "Independent scalar quota and child oracle",
+      "command": ".venv/bin/python - <<'PY'\\n[python_source below]\\nPY",
+      "python_source": "import json, hashlib\nfrom unittest.mock import patch\nimport numpy as np\nimport pandas as pd\nfrom yoyo.evaluation import spike_burst_v3_density_rearm_gate as gate\n\ntotals=dict(seeds=16,bars=0,parents=0,children=0,rearms=0,blocked=0,prefix_checks=0,future_edit_checks=0)\nkeys=['early','confirmed','candidate_edge','cooldown_blocked','structure_blocked','quota_armed','rearmed',\n      'density_valid','density_known_false','density_is_dense','structure_owner_i','parent_i','last_accepted_i']\nfor seed in range(16):\n rng=np.random.default_rng(seed);n=210\n clock=pd.date_range('2026-01-01',periods=n,freq='h',tz='UTC')\n clock=clock+pd.to_timedelta(np.where(np.arange(n)>=137,2,0),unit='h')\n width=rng.uniform(.5,2,n);flips=rng.uniform(.1,.8,n)\n width[rng.choice(np.arange(25,n),3,replace=False)]=np.nan\n ready=np.ones(n,dtype=bool);ready[rng.choice(np.arange(20,n),4,replace=False)]=False\n summary=np.where((np.arange(n)//17)%2,4.,1.);summary[rng.choice(np.arange(20,n),3,replace=False)]=np.nan\n cross=np.full(n,3.);cross[rng.choice(np.arange(20,n),2,replace=False)]=np.nan\n frame=pd.DataFrame(dict(width=width,flips=flips,pastWidth=summary,pastCrosses=cross,ready=ready,\n                        close=100.+np.arange(n)*.01),index=clock)\n seg=np.r_[0,np.cumsum(np.diff(clock.asi8)!=pd.Timedelta(hours=1).value)]\n local=np.arange(n)-np.maximum.accumulate(np.r_[0,np.where(np.diff(seg)!=0,np.arange(1,n),0)])\n condition=(rng.random(n)<.42)&ready&(local>=12)\n dense=ready&(summary<=3)&(cross>=2)&(local>=12)\n fields=pd.DataFrame(dict(early_condition=condition,prog_dense=dense,\n     prog_prior_high=frame.close-.005,prog_prior_low=frame.close-1.,\n     tag_recent_density=rng.random(n)<.7,tag_advance=rng.random(n)<.6,tag_volume=rng.random(n)<.6,\n     tag_md_ge_signal=rng.random(n)<.7,tag_middle_rising=rng.random(n)<.8),index=clock)\n expected=[];armed=True;owner=None;seen=False;last=None;previous=False;parent=None;sent=False;parenthigh=np.nan;start=0\n for i in range(n):\n  if i and clock[i]-clock[i-1]!=pd.Timedelta(hours=1):\n   armed=True;owner=None;seen=False;last=None;previous=False;parent=None;sent=False;parenthigh=np.nan;start=i\n  valid=bool(i-start>=12 and ready[i] and np.isfinite([summary[i],cross[i]]).all()\n         and np.isfinite(frame[['width','flips']].iloc[i-12:i].to_numpy()).all())\n  isdense=bool(valid and summary[i]<=3 and cross[i]>=2)\n  knownfalse=valid and not isdense;rearmed=False\n  if owner is not None and not armed:\n   if i>owner and knownfalse:seen=True\n   if seen and isdense and i-12>owner:armed=True;rearmed=True\n  edge=bool(condition[i] and not previous);cool=last is None or i-last>=12\n  early=bool(edge and cool and armed);blocked=bool(edge and cool and not armed)\n  if early:\n   owner=last=parent=i;parenthigh=float(fields.prog_prior_high.iloc[i]);armed=False;seen=False;sent=False\n  if parent is not None and i-parent>3:parent=None;parenthigh=np.nan;sent=False\n  f=fields.iloc[i]\n  child=bool(parent is not None and not sent and ready[i] and frame.close.iloc[i]>parenthigh\n       and f.tag_recent_density and f.tag_advance and f.tag_volume and f.tag_md_ge_signal and f.tag_middle_rising)\n  if child:sent=True\n  expected.append(dict(early=early,confirmed=child,candidate_edge=edge,cooldown_blocked=bool(edge and not cool),\n     structure_blocked=blocked,quota_armed=bool(armed),rearmed=rearmed,density_valid=valid,\n     density_known_false=knownfalse,density_is_dense=isdense,\n     structure_owner_i=float(owner) if owner is not None else np.nan,\n     parent_i=float(parent) if parent is not None else np.nan,last_accepted_i=float(last) if last is not None else np.nan))\n  previous=bool(condition[i])\n with patch.object(gate,'early_fields',side_effect=lambda f:fields.loc[f.index].copy()):\n  actual=gate.detect(frame)\n  pd.testing.assert_frame_equal(actual[keys],pd.DataFrame(expected,index=clock)[keys])\n  for stop in [1,12,13,30,43,80,137,138,149,150,209]:\n   pd.testing.assert_frame_equal(gate.detect(frame.iloc[:stop]),actual.iloc[:stop]);totals['prefix_checks']+=1\n  modified=frame.copy();modified.iloc[160:,modified.columns.get_indexer(['width','flips','pastWidth','pastCrosses','close'])]=999.\n  pd.testing.assert_frame_equal(gate.detect(modified).iloc[:160],actual.iloc[:160]);totals['future_edit_checks']+=1\n totals['bars']+=n\n for target,col in [('parents','early'),('children','confirmed'),('rearms','rearmed'),('blocked','structure_blocked')]:totals[target]+=int(actual[col].sum())\nprint(json.dumps(dict(status='passed',scope='Independent scalar quota oracle over synthetic original-field snapshots; no market files or scoring',checks=totals)))\n",
+      "result": {
+        "status": "passed",
+        "seeds": 16,
+        "bars": 3360,
+        "parents": 111,
+        "children": 45,
+        "rearms": 90,
+        "quota_blocked": 394,
+        "prefix_checks": 176,
+        "future_input_perturbations": 16
+      },
+      "raw_output": "/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020\n  warnings.warn(\n{\"status\": \"passed\", \"scope\": \"Independent scalar quota oracle over synthetic original-field snapshots; no market files or scoring\", \"checks\": {\"seeds\": 16, \"bars\": 3360, \"parents\": 111, \"children\": 45, \"rearms\": 90, \"blocked\": 394, \"prefix_checks\": 176, \"future_edit_checks\": 16}}\n",
+      "scope": "Pure generated original-feature snapshots; independent scalar algorithm compared to G outputs. No stored market data."
+    },
+    {
+      "name": "Original feature stack from generated OHLCV",
+      "command": ".venv/bin/python - <<'PY'\\n[python_source below]\\nPY",
+      "python_source": "import json\nimport numpy as np\nimport pandas as pd\nfrom yoyo.evaluation import spike_burst_replay as base\nfrom yoyo.evaluation import spike_burst_v3_density_rearm_gate as gate\ntotals=dict(seeds=5,bars=0,parents=0,children=0,prefix_checks=0,future_ohlcv_edits=0)\nfor seed in range(5):\n rng=np.random.default_rng(seed+501);n=760\n c=100+np.cumsum(rng.normal(.01,.16,n))+2*np.sin(np.arange(n)/19)\n o=np.r_[c[0],c[:-1]]\n raw=pd.DataFrame(dict(open=o,high=np.maximum(o,c)+rng.uniform(.02,.3,n),\n     low=np.minimum(o,c)-rng.uniform(.02,.3,n),close=c,volume=rng.lognormal(5,1,n)),\n     index=pd.date_range('2024-01-01',periods=n,freq='h',tz='UTC'))\n full=gate.detect(base.features(raw))\n for stop in (340,341,360,430,500,600,759):\n  prefix=gate.detect(base.features(raw.iloc[:stop]))\n  pd.testing.assert_frame_equal(prefix,full.iloc[:stop]);totals['prefix_checks']+=1\n changed=raw.copy();changed.iloc[610:]=raw.iloc[610:]*3\n pd.testing.assert_frame_equal(gate.detect(base.features(changed)).iloc[:610],full.iloc[:610]);totals['future_ohlcv_edits']+=1\n totals['bars']+=n;totals['parents']+=int(full.early.sum());totals['children']+=int(full.confirmed.sum())\nprint(json.dumps(dict(status='passed',scope='Entire original feature stack from generated OHLCV only; no stored market inputs',checks=totals)))\n",
+      "result": {
+        "status": "passed",
+        "seeds": 5,
+        "bars": 3800,
+        "parents": 28,
+        "children": 8,
+        "prefix_checks": 35,
+        "future_ohlcv_perturbations": 5
+      },
+      "raw_output": "/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020\n  warnings.warn(\n{\"status\": \"passed\", \"scope\": \"Entire original feature stack from generated OHLCV only; no stored market inputs\", \"checks\": {\"seeds\": 5, \"bars\": 3800, \"parents\": 28, \"children\": 8, \"prefix_checks\": 35, \"future_ohlcv_edits\": 5}}\n",
+      "scope": "Generated OHLCV passes through the unchanged original feature builder and actual G detector. No stored market data."
+    }
+  ],
+  "unresolved_blockers": [],
+  "limitations": [
+    "Passing preflight establishes bounded engineering and temporal checks, not profitability, noise reduction, 80% large-move recall, 90% old-hit retention, or production readiness.",
+    "This is the seventh sequential structural hypothesis after thirteen earlier single-gate explorations on already-seen history; later results must not be called blind out-of-sample.",
+    "An early weak parent can consume quota and suppress a later genuine acceleration; old reference coverage must never replace a missing fresh signal in the numerator.",
+    "Disjoint prior12 observation rows do not remove older moving-average and flip dependencies.",
+    "Bootstrap is an initialization allowance, not evidence of a newly observed density episode.",
+    "Unknown density can prevent rearming; its raw-edge and locked-hour counts must accompany results and not be advertised as removal of false starts.",
+    "Independent overlapping parent trades are not a portfolio NAV or portfolio drawdown.",
+    "No G Pine port or native TradingView parity validation has occurred; current V4 display and signal-notification rules were not changed."
+  ],
+  "next_allowed_action": "Root may commit the exact five reviewed core files plus this actual receipt, verify all source_pins against HEAD, and only then run the already registered global prepare followed by evaluate. Any change to a reviewed core file requires updated independent review before market execution."
+}
