@@ -18,6 +18,12 @@ PROTOCOL = {"version": SIGNAL_PROTOCOL, "source": "yoyo/evaluation/pine/spike_bu
             "entry_reference": "next_bar_open_not_known_at_signal", "warmup_bars": WARMUP}
 
 
+def _json_number(value):
+    """Keep an unavailable pre-warmup feature explicit in persisted chart JSON."""
+    number = float(value)
+    return number if np.isfinite(number) else None
+
+
 def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, tick: float) -> dict:
     """Return V1 raw events and chart data using no bar after each signal close."""
     if timeframe not in TIMEFRAMES:
@@ -48,9 +54,9 @@ def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, t
         close_ms = int(ts.value // 1_000_000) + step
         r = replayed.iloc[i]
         chart.append({"t": int(ts.value // 1_000_000), "o":row.open,"h":row.high,"l":row.low,"c":row.close,"v":row.volume,
-                      "md":float(feature_frame.md.iloc[i]), "sma20":float(feature_frame.s20.iloc[i]), "ema20":float(feature_frame.e20.iloc[i]),
-                      "sma60":float(feature_frame.s60.iloc[i]), "ema60":float(feature_frame.e60.iloc[i]),
-                      "sma120":float(feature_frame.s120.iloc[i]), "ema120":float(feature_frame.e120.iloc[i]),
+                      "md":_json_number(feature_frame.md.iloc[i]), "sma20":_json_number(feature_frame.s20.iloc[i]), "ema20":_json_number(feature_frame.e20.iloc[i]),
+                      "sma60":_json_number(feature_frame.s60.iloc[i]), "ema60":_json_number(feature_frame.e60.iloc[i]),
+                      "sma120":_json_number(feature_frame.s120.iloc[i]), "ema120":_json_number(feature_frame.e120.iloc[i]),
                       "burst":bool(r.burst), "ready":bool(feature_frame.ready.iloc[i])})
         if bool(r.burst_up) and bool(r.risk_valid):
             events.append({"protocol":SIGNAL_PROTOCOL,"kind":SIGNAL_KIND,"source":"live","confirmation":"raw","direction":"long",

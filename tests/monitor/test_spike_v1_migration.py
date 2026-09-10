@@ -1,4 +1,5 @@
 import pandas as pd
+import json
 from yoyo.monitor import SIGNAL_PROTOCOL, SIGNAL_KIND, TIMEFRAMES
 from yoyo.monitor.notification_policy import delivery_error
 from yoyo.monitor.signals import analyze
@@ -13,6 +14,13 @@ def test_v1_adapter_is_long_only_and_closed_bar_only():
     result = analyze(bars(), [], '30m', tick=.01)
     assert result['protocol']['direction'] == 'long_only'
     assert all(e['direction'] == 'long' and e['is_closed'] for e in result['events'])
+
+
+def test_v1_adapter_serializes_insufficient_warmup_as_null_not_nan():
+    result = analyze(bars(40), [], '30m', tick=.01)
+    assert result['state']['ready'] is False
+    assert result['chart'][0]['sma120'] is None
+    json.dumps(result, allow_nan=False)
 
 
 def test_v1_migration_deletes_only_obsolete_monitor_journal(tmp_path):
