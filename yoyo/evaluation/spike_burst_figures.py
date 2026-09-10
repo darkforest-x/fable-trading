@@ -63,10 +63,15 @@ def example(row,reason,out,number):
     source=pd.read_pickle(row.features_path)
     raw=source[['open','high','low','close','volume','quote_volume']]
     frame=features(raw);frame.attrs['minutes']=int(row.minutes)
+    if not np.array_equal(frame.atr.to_numpy(),source.atr.to_numpy(),equal_nan=True):
+        raise ValueError('Figure recomputation changed frozen ATR')
     result=simulate_trade(frame,int(row.decision_i),float(row.tick),END,include_path=True)
-    for key in ('entry_price','exit_price','net_r'):
+    for key in ('entry_price','exit_price','net_r','initial_stop','peak_r','entry_i','exit_i'):
         if not np.isclose(result[key],float(row[key]),rtol=1e-10,atol=1e-10):
             raise ValueError('Figure execution differs from frozen record: '+key)
+    for key in ('entry_time','exit_time'):
+        if pd.Timestamp(result[key])!=pd.Timestamp(row[key]):
+            raise ValueError('Figure execution clock differs: '+key)
     i=int(row.decision_i);j=int(row.exit_i);left=max(0,i-100);right=min(len(frame),j+25)
     f=frame.iloc[left:right];x=np.arange(left,right)
     fig,(ax,lower)=plt.subplots(2,1,figsize=(15,8),sharex=True,height_ratios=[3.2,1])
@@ -117,8 +122,8 @@ def run(folder=EXPERIMENT/'results'):
         filled=ledger.loc[ledger.portfolio_selected.eq(True)&ledger.natural_exit.eq(True)].copy() if len(ledger) else ledger
         if filled.empty:continue
         filled['giveback']=filled.peak_r-filled.net_r
-        choices=[(filled.sort_values('realized_net_pnl',ascending=False),'最大自然盈利'),
-                 (filled.sort_values('realized_net_pnl'),'最大自然亏损'),
+        choices=[(filled.sort_values('realized_net_pnl',ascending=False),'自然退出盈亏最高'),
+                 (filled.sort_values('realized_net_pnl'),'自然退出盈亏最低'),
                  (filled.sort_values('giveback',ascending=False),'峰值回吐案例')]
         for pool,reason in choices:
             row=pool.iloc[0]
