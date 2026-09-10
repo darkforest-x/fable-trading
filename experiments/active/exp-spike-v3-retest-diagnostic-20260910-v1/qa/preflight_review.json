@@ -1,0 +1,40 @@
+{
+  "status": "passed",
+  "reviewer": "independent early_warning_design_audit",
+  "reviewed_at_utc": "2026-09-10T11:44:23.026681+00:00",
+  "source_sha256": {
+    "yoyo/evaluation/spike_burst_v3_retest_diagnostic.py": "b465f8840572f8ac1504642531c3076d429b5e93b7d36a95ca940ca35126d7bb",
+    "tests/test_spike_burst_v3_retest_diagnostic.py": "0ffb5f14949c235414e6a852837f2b996cf05a0504fcf125f9213f035f86bcff",
+    "experiments/active/exp-spike-v3-retest-diagnostic-20260910-v1/PROJECT_PLAN.md": "dd47862ed8fc30f5f33104eab2470f76d4b1bbfa846301af6037520d68458235"
+  },
+  "scope": "Read-only source, frozen F contract and plan review; synthetic tests only. No market classification, label join, detector, simulator or scoring was run by this reviewer.",
+  "test_evidence": {
+    "command": ".venv/bin/python -m pytest -q tests/test_spike_burst_v3_retest_diagnostic.py",
+    "exit_code": 0,
+    "passed": 34,
+    "observed_output": "34 passed in 0.44s"
+  },
+  "checks": {
+    "phase_separation": "classify parses only the candidate registry, original stored state fields and original signal identity; labels and detections are first parsed in join after a completed classification receipt and exact SHA. Source/plan/test/preflight must match committed HEAD.",
+    "source_authentication": "Both frozen F receipts are SHA-pinned; all referenced input/source/artifact bytes are verified before use and again before completion. Round-trip CSV floats preserve frozen numerical identity.",
+    "candidate_conservation": "The original 10386 candidates are selected by the unchanged UTC study window, verified against 278 instrument metadata/scheduled state files, and outer one-to-one joined to the exact V3 early stream using original index, time and close.",
+    "frozen_interval": "Both prior12 boundaries come from candidate t. The high is cross-checked against all stored original V3/F frozen-high fields. The rolling t+1 interval is never used.",
+    "partition": "Known finite valid intervals classify close > high as above, low <= close <= high as inside, and close < low as below. Both equalities are inside. Unknown F status or invalid original interval is unknown. Summaries validate category membership, duplicate identities and exhaustive totals.",
+    "clocks_unknowns": "Original t must be pending and match stored candidate identity. An observed adjudication is exactly the next stored row; a known decision must close precisely one hour after t. Gaps and invalid next OHLC preserve F unknown reasons; terminal unavailable decisions retain missing observation time, not a fabricated t+1 price. available_at_candidate is false.",
+    "label_identity": "Original V3 event_i + first_signal_lag maps timely positives to original candidates, not F acceptance/publication rows. Exact original clocks are checked. All 8046 study anchors remain, including negative and unknown labels; 1660 positives, 1463 timely positives and 947 large positives are fixed and asserted.",
+    "denominator_honesty": "The 14904 source labels remain authenticated unchanged. Within-study output retains 8046 original anchors. The 947 large-positive partition explicitly includes not_caught; 1463 timely positives are not a win-rate denominator.",
+    "fixed_cases": "HYPE/PEPE 2026-08-19 21:00 BJT and NEAR 2026-08-19 15:00 BJT were specified before this classification. Their selection does not depend on new location counts.",
+    "integrity_negative_controls": "Synthetic checks reject tampered hashes, frozen high, identity, observed clocks, status/price contradictions, missing joins, non-timely lag, duplicate candidates and overwrites.",
+    "no_strategy_change": "No detector, label generator, simulator, new feature selection, threshold change or execution import is introduced. Original F, V1/V3 comparisons and prior success/failure gates are unchanged."
+  },
+  "limitations": [
+    "This is a descriptive reread of already observed, authorized history, not blind out-of-sample validation.",
+    "Inside means only that the next close lies in the original interval. It is not sufficient evidence of normal retest, continuing trend, winning trade or a usable new filter.",
+    "Below is a price location, not a trade failure label. Unknown is not rejection or noise.",
+    "Classification trusts the authenticated and previously audited F OHLC-adjudication contract; it does not rerun OHLC validation or a detector.",
+    "All non-timely anchors remain in joined output, but location joins are deliberately defined only for original timely positive hits. Do not infer class-conditional precision or profitability from the timely-positive table.",
+    "Cross-symbol market episodes and rolling anchors within a trend are dependent observations; these counts do not establish an independent success rate.",
+    "This receipt approves only the frozen descriptive build after the exact reviewed files and receipt are committed. No market build or native TradingView compilation is claimed."
+  ],
+  "blocking_findings": []
+}
