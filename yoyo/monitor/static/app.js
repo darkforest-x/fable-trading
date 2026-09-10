@@ -545,18 +545,13 @@
     state.chartController = controller;
     state.chartKey = key;
     state.chart = null;
-    if (item.source === "replay") {
-      // The live cache is OKX's current observation.  It cannot establish a
-      // historical replay's venue, bar, or later path.
-      $("chart-container").innerHTML = '<div class="chart-placeholder">历史回放未提供可核验的同源 OHLC。<br>不会以当前 OKX 行情代替回放图表。</div>';
-      $("chart-hint").textContent = "历史信号可查看；图表需后端提供对应时点的原始 OHLC";
-      return;
-    }
     $("chart-container").innerHTML = '<div class="chart-placeholder">正在加载真实行情…</div>';
     $("chart-hint").textContent = "仅展示已返回的真实 K 线";
     const timeout = setTimeout(() => controller.abort(), 20000);
     try {
-      const data = await api(`/api/chart?symbol=${encodeURIComponent(item.symbol)}&timeframe=${encodeURIComponent(item.timeframe)}`, controller.signal);
+      const data = await api(item.source === "replay"
+        ? `/api/replay/chart?event_id=${encodeURIComponent(item.id)}`
+        : `/api/chart?symbol=${encodeURIComponent(item.symbol)}&timeframe=${encodeURIComponent(item.timeframe)}`, controller.signal);
       if (request !== state.chartRequest) return;
       if (!Array.isArray(data.candles)) throw new Error("图表数据格式有误");
       state.chart = data;
@@ -609,7 +604,7 @@
     return { core, confirmation };
   }
   function chartHint() {
-    return state.chart?.state?.stale ? "行情缓存已过期 · 等待重新同步" : state.chart?.state?.error ? "行情存在读取异常 · 当前为缓存" : isConfirmed(state.selected) ? "箭头：原指标 · 紫框：模型核心区间 · 紫线：模型确认" : "箭头：指标启动 · 金色：合格近零区";
+    return state.chart?.source === "replay" ? "冻结历史 OHLC；信号之后的 K 线仅用于回看，不参与当时模型输入" : state.chart?.state?.stale ? "行情缓存已过期 · 等待重新同步" : state.chart?.state?.error ? "行情存在读取异常 · 当前为缓存" : isConfirmed(state.selected) ? "箭头：原指标 · 紫框：模型核心区间 · 紫线：模型确认" : "箭头：指标启动 · 金色：合格近零区";
   }
   function renderChart() {
     if (!state.chart) return;
@@ -619,7 +614,7 @@
     const viewportCount = Math.max(24, Math.min(180, Math.round(state.chartViewport?.count || 120)));
     const startIndex = Math.min(Math.max(0, Number.isInteger(state.chartViewport?.start) ? state.chartViewport.start : defaultStart), Math.max(0, valid.length - viewportCount));
     const candles = valid.slice(startIndex, startIndex + viewportCount);
-    document.querySelector(".chart-bars-note").textContent = selectedIndex >= 0 && startIndex < valid.length - 120 ? "信号附近 120 根" : "最近 120 根";
+    document.querySelector(".chart-bars-note").textContent = state.chart.source === "replay" ? "冻结 OHLC · 前后历史回看" : selectedIndex >= 0 && startIndex < valid.length - 120 ? "信号附近 120 根" : "最近 120 根";
     if (!candles.length) {
       $("chart-container").innerHTML = '<div class="chart-placeholder">该合约尚无足够的已收盘行情。<br>后续扫描会继续补充。</div>';
       $("chart-hint").textContent = "暂无可绘制的真实数据";

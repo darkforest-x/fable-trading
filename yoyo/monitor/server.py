@@ -6,6 +6,7 @@ import fcntl
 import logging
 import os
 from pathlib import Path
+import time
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from pydantic import BaseModel, Field
@@ -17,9 +18,19 @@ from yoyo.monitor import FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, MONITORED_TIMEFRA
 from yoyo.monitor.service import Monitor
 from yoyo.monitor.store import Store
 from yoyo.monitor.tradingview import DesktopOpenError, open_chart
+from yoyo.monitor.replay_chart import ReplayChartUnavailable, load_replay_chart
 
 STATIC = Path(__file__).parent / "static"
 DEFAULT_RUNTIME = Path.home() / "Library/Application Support/Fable/ImpulseMonitor"
+LOG = logging.getLogger("fable.monitor.dispatch")
+DISPATCH_TRACE = os.environ.get("FABLE_MONITOR_DISPATCH_TRACE") == "1"
+
+
+def dispatch_trace(marker: str, *, started_ns: int | None = None) -> None:
+    """Temporarily expose route-dispatch timing without logging query strings."""
+    if DISPATCH_TRACE:
+        elapsed = "" if started_ns is None else f" elapsed_ms={(time.monotonic_ns() - started_ns) // 1_000_000}"
+        LOG.warning("dispatch marker=%s%s", marker, elapsed)
 
 
 class DesktopChartRequest(BaseModel):
@@ -50,7 +61,10 @@ def create_app(runtime=None, start_monitor=True):
 
     @app.middleware("http")
     async def headers(request, call_next):
+        started_ns = time.monotonic_ns()
+        dispatch_trace("entry:" + request.url.path)
         response = await call_next(request)
+        dispatch_trace("exit:" + request.url.path, started_ns=started_ns)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "no-referrer"
@@ -63,6 +77,7 @@ def create_app(runtime=None, start_monitor=True):
 
     @app.get("/api/status")
     def status():
+        dispatch_trace("handler:/api/status")
         return monitor.status()
 
     @app.get("/api/health")
@@ -110,6 +125,16 @@ def create_app(runtime=None, start_monitor=True):
         if result is None:
             raise HTTPException(404, "该交易对正在初始化，请稍后刷新。")
         return result
+
+    @app.get("/api/replay/chart")
+    def replay_chart(event_id: str = Query(min_length=24, max_length=24, pattern="^[0-9a-f]{24}$")):
+        event = store.get_event(event_id)
+        if event is None:
+            raise HTTPException(404, "未找到历史回放信号。")
+        try:
+            return load_replay_chart(event)
+        except ReplayChartUnavailable as error:
+            raise HTTPException(404, "该历史信号缺少可核验的冻结 OHLC：" + error.code) from error
 
     @app.post("/api/tradingview/open")
     def tradingview_open(payload: DesktopChartRequest, request: Request):

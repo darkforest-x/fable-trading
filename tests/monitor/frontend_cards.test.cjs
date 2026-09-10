@@ -85,8 +85,8 @@ test("replay fixture is labeled historical and never inherits a live notificatio
   assert.match(app, /历史回放不通知/);
   assert.match(app, /回放未提供成交时钟/);
   assert.match(app, /source=\$\{source\}/);
-  assert.match(app, /历史回放未提供可核验的同源 OHLC/);
-  assert.match(app, /不会以当前 OKX 行情代替回放图表/);
+  assert.match(app, /\/api\/replay\/chart\?event_id=/);
+  assert.match(app, /信号之后的 K 线仅用于回看/);
 });
 
 test("selected timeframe is filtered by the API before its 2000-row limit", () => {

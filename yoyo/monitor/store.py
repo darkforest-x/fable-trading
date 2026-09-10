@@ -218,6 +218,12 @@ class Store:
             return [dict(json.loads(r[0]), notification_status=r[1] or "history",
                          bark_notification_status=r[2] or "history") for r in db.execute(sql, values)]
 
+    def get_event(self, event_id):
+        """Read one journaled event for an API that derives no client-supplied identity."""
+        with self.connect() as db:
+            row = db.execute("SELECT payload FROM events WHERE id=?", (event_id,)).fetchone()
+        return dict(json.loads(row[0]), id=event_id) if row else None
+
     def event_count(self, kind=None, protocol=None):
         filters, values = [], []
         if kind:
