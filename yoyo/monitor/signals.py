@@ -55,7 +55,7 @@ def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, t
         if bool(r.burst_up) and bool(r.risk_valid):
             events.append({"protocol":SIGNAL_PROTOCOL,"kind":SIGNAL_KIND,"source":"live","confirmation":"raw","direction":"long",
                            "side":"long","timeframe":timeframe,"timeframe_min":step//60000,"bar_open_ms":int(ts.value//1_000_000),
-                           "bar_close_ms":close_ms,"signal_close_time":pd.Timestamp(close_ms,unit="ms",tz="UTC").isoformat(),"is_closed":True,
+                           "bar_close_ms":close_ms,"signal_close_time":close_ms,"is_closed":True,
                            "price":float(row.close),"risk":float(r.risk),"initial_stop":float(r.initial_stop),"source_sha256":SOURCE_SHA256,
                            "entry_reference":"next_open","executable_entry_time":None,"ready":True,"confirmed":True,
                            "volume_ratio":float(feature_frame.rv.iloc[i]),"tr_atr_expansion":float(feature_frame.expansion.iloc[i])})

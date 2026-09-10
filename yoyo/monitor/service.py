@@ -274,6 +274,9 @@ class Monitor:
     def status(self):
         counts = self.store.market_phase_counts(MONITORED_TIMEFRAMES)
         arm_receipt = self.store.get_meta("notification_policy:v1_bark_arm")
+        model_status = self.store.get_meta("v1:model_gate")
+        if model_status is None:
+            model_status = self.model_gate.status()
         return dict(service="spike Impulse Monitor", version=VERSION, protocol=PROTOCOL,
                     now_ms=self.client.clock(), started_at_ms=self.started,
                     scan=self.store.get_meta("scan", {"status": "starting", "completed": 0, "total": 0, "errors": 0}),
@@ -292,7 +295,7 @@ class Monitor:
                     "direct_notification_policy": DIRECT_POLICY,
                     "direct_notification_since_ms": {c: activation(self.store, c, DIRECT_POLICY) for c in ("telegram", "bark")},
                     "direct_timeframe_since_ms": {tf: self.store.timeframe_activation(tf, protocol=DIRECT_POLICY) for tf in DIRECT_TIMEFRAMES},
-                    "model_gate": self.store.get_meta("v1:model_gate", self.model_gate.status()),
+                    "model_gate": model_status,
                     "notification_armed": bool(arm_receipt),
                     "tv_profile": {"id": TV_PROFILE_ID, "show_focus": True, "show_marks": False,
                                    "focus_min_bars": 12, "focus_atr_band": .10, "verified_on": "2026-09-08",
@@ -308,7 +311,9 @@ class Monitor:
         """Return liveness without decoding charts, events, or receipt history."""
         now = self.client.clock()
         scan = self.store.get_meta("scan", {"status": "starting", "completed": 0, "total": 0, "errors": 0})
-        model = self.store.get_meta("v1:model_gate", self.model_gate.status())
+        model = self.store.get_meta("v1:model_gate")
+        if model is None:
+            model = self.model_gate.status()
         last = scan.get("finished_at_ms")
         market_ready = bool(last and now - last < 20 * 60000
                             and scan.get("total", 0) > scan.get("errors", 0)
