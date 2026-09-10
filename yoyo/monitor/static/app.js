@@ -126,6 +126,7 @@
     const n = Number(value);
     return n.toLocaleString("en-US", { minimumFractionDigits: Math.abs(n) >= 1 ? 2 : 0, maximumFractionDigits: 12 });
   }
+  const replayExitReason = (value) => ({ protective_stop: "保护止损", target: "目标退出", timeout: "观察期结束" }[String(value)] || "未知回测退出");
   function coveredLedgerFacts(item) {
     // A replay receipt is an identity link to the covered ledger, never a
     // strategy verdict.  Keep censored rows out of every realized outcome.
@@ -134,8 +135,8 @@
     if (item.performance_status === "covered_linked_realized_unverified" && outcome?.status === "realized") {
       return [
         ["覆盖账本关联", "已关联 · 未独立收益审核", "model-color"],
-        ["账本退出 · 北京时间", `${String(outcome.exit_reason || "未知")} · ${shortDate(outcome.exit_time_ms)}`, ""],
-        ["覆盖净 R · 非账户", finite(outcome.net_r) ? `${Number(outcome.net_r).toFixed(3)} R` : "—", ""],
+        ["回测退出 · 北京时间", `${replayExitReason(outcome.exit_reason)} · ${shortDate(outcome.exit_time_ms)}`, ""],
+        ["单笔净 R", finite(outcome.net_r) ? `${Number(outcome.net_r).toFixed(3)} R · 非账户收益，未独立核验` : "—", ""],
       ];
     }
     if (item.performance_status === "covered_linked_censored_unverified" && outcome?.status === "censored") {

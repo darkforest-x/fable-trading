@@ -93,7 +93,10 @@ test("covered replay receipts distinguish realized facts from censored rows with
   assert.match(app, /function coveredLedgerFacts\(item\)/);
   assert.match(app, /covered_linked_realized_unverified/);
   assert.match(app, /已关联 · 未独立收益审核/);
-  assert.match(app, /覆盖净 R · 非账户/);
+  assert.match(app, /replayExitReason.*protective_stop: "保护止损"/);
+  assert.match(app, /回测退出 · 北京时间/);
+  assert.match(app, /单笔净 R/);
+  assert.match(app, /非账户收益，未独立核验/);
   assert.match(app, /covered_linked_censored_unverified/);
   assert.match(app, /未实现；不计胜率、PF 或净收益/);
   assert.match(app, /尚未关联 v2 覆盖账本 · 不展示收益/);

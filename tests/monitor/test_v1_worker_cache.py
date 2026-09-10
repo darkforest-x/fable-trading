@@ -137,3 +137,15 @@ def test_gap_checkpoint_is_not_restored_as_a_recurrence_seed(tmp_path, monkeypat
     monkeypatch.setattr(v1_worker, "OKX", lambda: client)
     scanner = v1_worker.V1Scanner(str(database))
     assert ("TEST-USDT-SWAP", "1H") not in scanner.candles
+
+
+def test_fractional_checkpoint_timestamp_is_not_restored(tmp_path, monkeypatch):
+    database = tmp_path / "monitor.sqlite3"
+    store = Store(database)
+    store.save_candle_checkpoint("TEST-USDT-SWAP", "1H", [
+        {"t": 0.5, "o": 100., "h": 101., "l": 99., "c": 100., "v": 1.},
+    ])
+    client = Client()
+    monkeypatch.setattr(v1_worker, "OKX", lambda: client)
+    scanner = v1_worker.V1Scanner(str(database))
+    assert ("TEST-USDT-SWAP", "1H") not in scanner.candles

@@ -21,7 +21,10 @@ def _valid_checkpoint(candles: object, timeframe: str) -> bool:
         if not isinstance(row, dict):
             return False
         try:
-            stamp = int(row["t"])
+            raw_stamp = row["t"]
+            if isinstance(raw_stamp, bool) or not isinstance(raw_stamp, int):
+                return False
+            stamp = raw_stamp
             o, h, l, c, v = (float(row[key]) for key in ("o", "h", "l", "c", "v"))
         except (KeyError, TypeError, ValueError):
             return False
