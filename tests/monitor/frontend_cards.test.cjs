@@ -175,6 +175,14 @@ test("source or timeframe switches discard prior API results and queue the curre
   assert.match(app, /正在加载 \$\{sourceName\(item\)\} \$\{shortSymbol\(item\.symbol\)\}/);
 });
 
+test("Unicode replay symbols remain searchable without retaining an unrelated cached card", () => {
+  const normalSearch = (value) => String(value).normalize("NFKC").toUpperCase().replace(/[^\p{L}\p{N}]/gu, "");
+  assert.equal(normalSearch("龙虾_USDT"), "龙虾USDT");
+  assert.equal(normalSearch("币安人生-USDT"), "币安人生USDT");
+  assert.match(app, /normalize\("NFKC"\)\.toUpperCase\(\)\.replace\(\/\[\^\\p\{L\}\\p\{N\}\]\/gu, ""\)/);
+  assert.match(app, /if \(!items\.some\(\(item\) => sameSelection\(state\.selected, item\)\)\).*else clearSelectedSignal\(\);/s);
+});
+
 test("replay symbols without a swap separator do not repeat their quote asset", () => {
   const shortSymbol = (symbol) => {
     const value = String(symbol || "—").replace(/-(USDT|USD)-SWAP$/, "").replace(/USDT\.P$/, "");

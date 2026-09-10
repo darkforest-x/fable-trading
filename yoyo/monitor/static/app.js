@@ -104,7 +104,8 @@
   const sameEvent = (a, b) => a && b && a.kind === b.kind && String(a.id) === String(b.id) && a.symbol === b.symbol && a.timeframe === b.timeframe;
   const sameSelection = (a, b) => sameEvent(a, b) && a.source === b.source && a.confirmation === b.confirmation && a.bar_close_ms === b.bar_close_ms;
   const quoteSymbol = (symbol) => /-USD-SWAP$/.test(String(symbol)) ? "USD" : "USDT";
-  const normalSearch = (value) => String(value).toUpperCase().replace(/[^A-Z0-9]/g, "");
+  // Preserve Unicode letters/numbers: replay contracts may have non-ASCII names.
+  const normalSearch = (value) => String(value).normalize("NFKC").toUpperCase().replace(/[^\p{L}\p{N}]/gu, "");
   const displayPhase = (phase) => phaseNames[phase] || String(phase || "观察中");
   const marketPhase = (item) => item.error ? "读取异常" : item.stale ? "行情过期" : item.ready === false ? "数据预热" : displayPhase(item.phase);
   const shortDate = (ms) => finite(ms) && Number(ms) > 0 ? new Intl.DateTimeFormat("zh-CN", { timeZone: "Asia/Shanghai", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }).format(Number(ms)) : "—";
