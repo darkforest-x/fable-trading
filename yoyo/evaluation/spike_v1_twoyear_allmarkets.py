@@ -49,6 +49,7 @@ CONFIG = {"schema": "spike-v1-twoyear-allmarkets-v1", "evaluation_start": START.
 VENUES = {"binance": ("https://fapi.binance.com", 1500, 0.12),
           "okx": ("https://www.okx.com", 300, 0.25),
           "gate": ("https://api.gateio.ws/api/v4", 2000, 0.12)}
+LEDGER_COLUMNS = ("event_id","venue","symbol","asset","timeframe_min","direction","signal_bar_open","signal_close_time","signal_close","entry_time","entry_price","exit_time","exit_price","exit_reason","fees_return","gross_return","net_return","return_pct","holding_minutes","reference_signal_risk","risk_fraction_at_entry","net_r","mae_return","mfe_return","drawdown_return","tail_capture","censored","volume_ratio","tr_atr_expansion","density_width_atr","density_duration","breakout_distance_atr","price_position","delayed_release_bars")
 
 
 def digest(payload: bytes) -> str:
@@ -425,22 +426,25 @@ def evaluate_covered() -> None:
         mask = coverage.venue.eq(item["venue"]) & coverage.symbol.eq(item["symbol"]) & coverage.timeframe_min.eq(minutes)
         dest = RESULTS / "covered_ledgers" / item["venue"] / (item["symbol"] + f"_{minutes}m.csv.gz")
         receipt = dest.with_suffix(".receipt.json")
-        if receipt.exists() and dest.exists() and json.loads(receipt.read_text()).get("source_sha256") == source_sha:
+        if receipt.exists() and dest.exists() and dest.stat().st_size > 50 and json.loads(receipt.read_text()).get("source_sha256") == source_sha:
             prior = json.loads(receipt.read_text()); coverage.loc[mask,["status","detail","trade_rows"]] = "evaluated", prior["source_window"], prior["trade_rows"]
             continue
         rows = []
         for segment in _continuous(frame, minutes): rows.extend(_trade_rows(item, segment, minutes))
         dest.parent.mkdir(parents=True, exist_ok=True)
-        pd.DataFrame(rows).to_csv(dest, index=False, compression={"method":"gzip","mtime":0})
+        pd.DataFrame(rows, columns=LEDGER_COLUMNS).to_csv(dest, index=False, compression={"method":"gzip","mtime":0})
         receipt_data = {"source_sha256":source_sha, "source_window":f"{frame.index.min() if len(frame) else None}..{frame.index.max() if len(frame) else None}", "trade_rows":len(rows), "completed_at":stamp()}
         atomic_json(receipt, receipt_data); coverage.loc[mask,["status","detail","trade_rows"]] = "evaluated", receipt_data["source_window"], len(rows)
         print("evaluated", item["venue"], item["symbol"], minutes, len(rows), flush=True)
     RESULTS.mkdir(parents=True, exist_ok=True)
     coverage.to_csv(RESULTS / "coverage_limited.csv", index=False)
     ledgers = list((RESULTS / "covered_ledgers").glob("*/*.csv.gz"))
+    combined = pd.concat([pd.read_csv(path) for path in ledgers], ignore_index=True) if ledgers else pd.DataFrame(columns=LEDGER_COLUMNS)
+    combined.to_csv(RESULTS / "covered_trade_ledger.csv.gz", index=False, compression={"method":"gzip","mtime":0})
     atomic_json(RESULTS / "coverage_progress.json", {"generated_at":stamp(), "denominator_cells":len(coverage),
                 "statuses":coverage.status.value_counts().to_dict(), "evaluated_cells":int(coverage.status.eq("evaluated").sum()),
-                "ledger_files":len(ledgers), "trade_rows":int(coverage.trade_rows.sum())})
+                "ledger_files":len(ledgers), "trade_rows":int(coverage.trade_rows.sum()),
+                "combined_ledger":str(RESULTS / "covered_trade_ledger.csv.gz")})
 
 
 def main() -> None:
