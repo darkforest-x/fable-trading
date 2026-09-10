@@ -99,6 +99,6 @@ Binance/OKX 的 `gapped/error` 与 Gate 的 `complete/partial/gapped/error` rece
 
 当前目录是 2026-09-10/11 的 current catalog，不是历史退市合约普查。Gate 的历史窗口和个别来源缺口仍被单元状态明确保留，不能用其他交易所替代。即使某一覆盖文件的已实现汇总为正或负，也会受存活偏差、未覆盖单元、未建模交易成本及非账户资金路径影响，不能据此修改 V1、通知、ACTIVE、模型或真实仓位。
 
-监控台的 1,019 条 `replay/raw` 已在单独步骤中链接到**不可变** v2 covered ledger 快照：1,001 条为 `covered_linked_realized_unverified`，18 条为 `covered_linked_censored_unverified`。原先指向可变汇总文件的链接已先降级为 stale evidence，审计保留而旧 outcome 不显示；当前链接保存双方 id、四元组、输入 SHA 和内容寻址副本 SHA。它仍不是独立经济审计或策略验证；详情见 [p1_spike_v1_replay_ledger_link_20260911.md](p1_spike_v1_replay_ledger_link_20260911.md)。
+监控台现在有全部 6,185 条三周期 `replay/raw` 信号：6,082 条为 `covered_linked_realized_unverified`，69 条为 `covered_linked_censored_unverified`，34 条因缺同源冻结 OHLC 保持 `unverified/ohlc_missing` 且不显示 outcome 或借图。68 条 1D 账本行没有导入当前三周期 UI/通知协议。原先指向可变汇总文件的 1,019 条链接已先降级为 stale evidence，审计保留而旧 outcome 不显示；当前可联结行保存双方 id、四元组、输入 SHA 和内容寻址副本 SHA。它仍不是独立经济审计或策略验证；详情见 [p1_spike_v1_replay_ledger_link_20260911.md](p1_spike_v1_replay_ledger_link_20260911.md)。
 
 本轮只解决会污染已覆盖账本的可执行时钟与已实现统计问题。全市场覆盖、独立经济账本验收、匹配随机对照和任何策略有效性判断仍未完成。

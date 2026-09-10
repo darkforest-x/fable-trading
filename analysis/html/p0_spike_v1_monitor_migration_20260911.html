@@ -155,5 +155,8 @@ node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.t
 <h2>冷扫完成与增量验收待续</h2>
 <p><code>e55a421</code> 重链后不触发 scanner、候选或通知。低频读取显示同一新 cold scan <code>started_at_ms=1789078801148</code> 已在 <code>finished_at_ms=1789080909373</code> 完成 <strong>1,434 / 1,434</strong> 单元、<code>errors=0</code>，持续 <code>2108.22</code> 秒。该轮累计计时为 fetch <code>3443.925s</code>、analyze <code>1283.350s</code>、checkpoint <code>407.454s</code>；它们跨单元累加，不能相加成单条路径延迟或宣称 15 分钟时效。此时 <code>/api/health</code> 为 HTTP 200 / <code>1.377s</code>，<code>/api/status</code> 为 HTTP 200 / <code>0.316s</code>。</p>
 <p>完成首轮只说明当前 catalog 每个单元至少被本次 worker 处理过：短历史、下一根收盘时效和新鲜通知仍须由下一增量轮分别验收。状态的下一轮计划为 <code>1789081029373</code>；本记录不以 completed/ready 字段代替逐周期最新收盘证明，也不为此重启服务。此时 model gate 是 <code>idle</code>、<code>loaded=false</code>、queue <code>0</code>，对应没有合格 raw candidate 的惰性加载，不是假置 ready。Bark pending/sent/failed/unknown 都为 0；Telegram configured/enabled 均为 false，未发送测试通知。</p>
+<h2>全量三周期回放接入与证据状态</h2>
+<p>在不可变 snapshot 独立复核后，signal-only importer 将全部 6,185 条 30m / 1H / 4H V1 回放记录接入 monitor（5,166 新行，1,019 幂等既有）；68 条 1D 行按当前 UI/通知协议跳过。修正此前 audit 错继承浏览上限的缺陷后，cursor 全量重链和 receipt 都覆盖 6,185 行：6,082 条已实现、69 条 censored、34 条 <code>ohlc_missing</code>。后者仅来自 Binance 24 条与 Gate 10 条确实缺同源冻结文件的 source identity；页面明示缺失，不显示 outcome，不借当前行情或其他 venue 画图。</p>
+<p>全量导入和联结不走 <code>upsert_event()</code> 的通知参数、candidate 或 Bark sender：Bark/TG outbox 仍是 pending/sent/failed/unknown 全 0，既有 disabled candidates 为 2。前端已有服务器 cursor 路径可从 2,000 条一页继续读取更早 raw 历史；当前运行实例尚未 reload <code>d03cc3a</code> / <code>3af2e8e</code>，因此这项分页 UI/API 发布验收应在不打断正在进行的增量 scan 后再做。</p>
 </body>
 </html>

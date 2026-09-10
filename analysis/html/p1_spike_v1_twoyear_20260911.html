@@ -136,7 +136,7 @@ python3 scripts/md_to_html.py analysis/p1_spike_v1_twoyear_20260911.md --out-dir
 <p>Binance/OKX 的 <code>gapped/error</code> 与 Gate 的 <code>complete/partial/gapped/error</code> receipt 现在都被视为该固定窗口的终态，循环不会把同一已知失败无限重抓。新增覆盖来自此轮之前已落盘且本轮 Gate worker 已完成的 receipt；它不代表全市场连续两年历史，也不替代缺口的来源。</p>
 <h2>风险与诚实声明</h2>
 <p>当前目录是 2026-09-10/11 的 current catalog，不是历史退市合约普查。Gate 的历史窗口和个别来源缺口仍被单元状态明确保留，不能用其他交易所替代。即使某一覆盖文件的已实现汇总为正或负，也会受存活偏差、未覆盖单元、未建模交易成本及非账户资金路径影响，不能据此修改 V1、通知、ACTIVE、模型或真实仓位。</p>
-<p>监控台的 1,019 条 <code>replay/raw</code> 已在单独步骤中链接到<strong>不可变</strong> v2 covered ledger 快照：1,001 条为 <code>covered_linked_realized_unverified</code>，18 条为 <code>covered_linked_censored_unverified</code>。原先指向可变汇总文件的链接已先降级为 stale evidence，审计保留而旧 outcome 不显示；当前链接保存双方 id、四元组、输入 SHA 和内容寻址副本 SHA。它仍不是独立经济审计或策略验证；详情见 <a href="p1_spike_v1_replay_ledger_link_20260911.md">p1_spike_v1_replay_ledger_link_20260911.md</a>。</p>
+<p>监控台现在有全部 6,185 条三周期 <code>replay/raw</code> 信号：6,082 条为 <code>covered_linked_realized_unverified</code>，69 条为 <code>covered_linked_censored_unverified</code>，34 条因缺同源冻结 OHLC 保持 <code>unverified/ohlc_missing</code> 且不显示 outcome 或借图。68 条 1D 账本行没有导入当前三周期 UI/通知协议。原先指向可变汇总文件的 1,019 条链接已先降级为 stale evidence，审计保留而旧 outcome 不显示；当前可联结行保存双方 id、四元组、输入 SHA 和内容寻址副本 SHA。它仍不是独立经济审计或策略验证；详情见 <a href="p1_spike_v1_replay_ledger_link_20260911.md">p1_spike_v1_replay_ledger_link_20260911.md</a>。</p>
 <p>本轮只解决会污染已覆盖账本的可执行时钟与已实现统计问题。全市场覆盖、独立经济账本验收、匹配随机对照和任何策略有效性判断仍未完成。</p>
 </body>
 </html>

@@ -49,8 +49,8 @@ li { margin: .25rem 0; }
 <body>
 <h1>SPIKE V1 回放记录与 v2 覆盖账本逐笔关联</h1>
 <h2>结论</h2>
-<p>2026-09-11（北京时间）已将 monitor 中全部 <strong>1,019</strong> 条 <code>source=replay, confirmation=raw</code> 的 V1 信号，与<strong>内容寻址的不可变</strong> <code>covered-v2-next-open-risk-realized-event-sequence</code> 账本快照按四元组 <code>venue / symbol / timeframe_min / signal_bar_open_ms</code> 一对一关联。所有记录保存 monitor journal id、账本 source-event id、Pine/replay source SHA、ledger SHA、coverage receipt SHA 和对应冻结 OHLC 文件 SHA。</p>
-<p>此前 1,019 条链接指向会被 <code>evaluate-covered</code> 覆盖的可变汇总文件；旧文件字节不可再读取，故先全部降为 <code>stale_evidence_unverified</code> 并隐藏 outcome，审计中保留旧 status、id 和 SHA。随后才复制当前字节为 SHA 命名副本并重链。关联只证明回放卡与该特定快照和冻结输入相对应；它不构成独立经济审计、完整市场覆盖、账户收益、策略有效性或盈利结论。前端已实现行仍只显示该账本的退出与净 R，并标为“未独立收益审核”；18 条样本右端尚未退出的 censored 行不显示净 R、胜率、PF 或净收益。</p>
+<p>2026-09-11（北京时间）已将不可变 snapshot 中全部 <strong>6,185</strong> 条 30m / 1H / 4H <code>source=replay, confirmation=raw</code> 的 V1 信号导入 monitor，并按四元组 <code>venue / symbol / timeframe_min / signal_bar_open_ms</code> 与内容寻址的 <code>covered-v2-next-open-risk-realized-event-sequence</code> 账本核验。全部记录保存 monitor journal id、账本 source-event id、Pine/replay source SHA、ledger SHA、coverage receipt SHA 和对应冻结 OHLC 文件 SHA。1D 的 68 条账本行明确不属于当前三周期 UI/通知协议，没有导入。</p>
+<p>此前 1,019 条链接指向会被 <code>evaluate-covered</code> 覆盖的可变汇总文件；旧文件字节不可再读取，故先全部降为 <code>stale_evidence_unverified</code> 并隐藏 outcome，审计中保留旧 status、id 和 SHA。随后才复制当前字节为 SHA 命名副本并重链，再 signal-only 导入剩余三周期行。核验结果为 6,151 条可联结（6,082 realized、69 censored），另有 34 条在 frozen OHLC 根目录确实缺同源文件，保留 <code>unverified/ohlc_missing</code>、没有 outcome 或历史图替代。关联只证明回放卡与该特定快照和冻结输入相对应；它不构成独立经济审计、完整市场覆盖、账户收益、策略有效性或盈利结论。</p>
 <h2>冻结输入与复现</h2>
 <table><thead><tr>
 <th>项目</th>
@@ -72,7 +72,7 @@ python3 -m yoyo.monitor.replay_ledger \
   --receipt experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/replay_ledger_link_receipt.csv.gz
 python3 scripts/md_to_html.py analysis/p1_spike_v1_replay_ledger_link_20260911.md --out-dir analysis/html
 </code></pre>
-<p>上述实际运行先返回 <code>invalidated=1019</code>，再返回 <code>linked=1019</code>、<code>matched_realized=1001</code>、<code>matched_censored=18</code>、<code>unmatched=0</code>、<code>source_mismatch=0</code>、<code>ohlc_missing=0</code>。receipt 中的 1,019 行没有重复四元组、monitor id 或 ledger id；每行都指向同一对当前不可变 SHA。运行后 Bark pending/failed/unknown 均为 0；模型 candidate 计数没有由回放联结创建或改变。</p>
+<p>首次旧证据处理返回 <code>invalidated=1019</code>；随后全量操作的 import 返回 <code>inserted=5166</code>、<code>already_present=1019</code>、<code>outside_v1_contract=68</code>。修正审计分页后，最终重链返回 <code>replay_events=6185</code>、<code>reconciled=6185</code>、<code>linked=6151</code>、<code>matched_realized=6082</code>、<code>matched_censored=69</code>、<code>ohlc_missing=34</code>、<code>unmatched=0</code>、<code>source_mismatch=0</code>。receipt 的 6,185 行没有重复四元组、monitor id 或 ledger id；每行都指向同一对当前不可变 SHA。运行后 Bark pending/failed/unknown 均为 0；模型 candidate 计数没有由回放导入或联结创建或改变。</p>
 <h2>覆盖分布</h2>
 <table><thead><tr>
 <th>维度</th>
@@ -81,22 +81,23 @@ python3 scripts/md_to_html.py analysis/p1_spike_v1_replay_ledger_link_20260911.m
 <th>4H</th>
 <th>合计</th>
 </tr></thead><tbody>
-<tr><td>已关联回放卡</td><td>592</td><td>301</td><td>126</td><td>1,019</td></tr>
-<tr><td>已实现账本行</td><td>—</td><td>—</td><td>—</td><td>1,001</td></tr>
-<tr><td>censored</td><td>—</td><td>—</td><td>—</td><td>18</td></tr>
+<tr><td>已导入回放卡</td><td>3,594</td><td>2,039</td><td>552</td><td>6,185</td></tr>
+<tr><td>可联结已实现</td><td>3,563</td><td>2,009</td><td>510</td><td>6,082</td></tr>
+<tr><td>可联结 censored</td><td>15</td><td>15</td><td>39</td><td>69</td></tr>
+<tr><td>缺同源冻结 OHLC</td><td>16</td><td>15</td><td>3</td><td>34</td></tr>
 </tbody></table>
 <table><thead><tr>
-<th>交易所</th>
-<th>已关联回放卡</th>
+<th>缺文件交易所</th>
+<th>未联结行</th>
 </tr></thead><tbody>
-<tr><td>Binance</td><td>733</td></tr>
-<tr><td>OKX</td><td>233</td></tr>
-<tr><td>Gate</td><td>53</td></tr>
+<tr><td>Binance</td><td>24</td></tr>
+<tr><td>Gate</td><td>10</td></tr>
+<tr><td>OKX</td><td>0</td></tr>
 </tbody></table>
-<p>逐笔证据在 <a href="../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/replay_ledger_link_receipt.csv.gz">replay_ledger_link_receipt.csv.gz</a>：每一行包含双方 id、四元组、状态、四种 SHA 及冻结 OHLC 文件。运行库的同名 <code>covered_ledger</code> payload 对已实现行保留 entry/exit/净 R，对 censored 行只保留 censored 状态；同时所有 1,019 行保留 <code>superseded_stale_evidence</code>，其中包含不可读旧可变证据的原 status/id/hash 审计。</p>
+<p>逐笔证据在 <a href="../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/replay_ledger_link_receipt.csv.gz">replay_ledger_link_receipt.csv.gz</a>：6,185 行全部包含双方 id、四元组、状态、四种 SHA 和逐条 <code>link_reason</code>。可联结行记录冻结 OHLC 文件；34 条缺文件行的 <code>link_status=ohlc_missing</code>、<code>link_reason=frozen_ohlc_missing</code>，不携带 outcome。运行库对已实现行保留 entry/exit/净 R，对 censored 行只保留 censored 状态；原 1,019 行还保留 <code>superseded_stale_evidence</code>，其中包含不可读旧可变证据的原 status/id/hash 审计。</p>
 <h2>实现边界</h2>
 <p><code>replay_import</code> 仍只导入信号字段。<code>replay_ledger</code> 是单独命令：先把既有链接降级为不显示 outcome 的 stale audit，再验证 manifest 的方法、Pine 和 source SHA，把 ledger/receipt 原样复制并逐字哈希为不可变副本，最后才用 <code>Store.update_event_payload()</code> 修改既有 replay journal payload；它不走 <code>upsert_event()</code>，因此不会新建 event、Bark outbox、Telegram outbox 或 YOLO candidate。无匹配、source 不符或 OHLC 文件缺失的行保持 <code>performance_status=unverified</code>。</p>
-<p>前端区分已关联已实现、已关联样本结束时尚未退出、证据已过期和未关联。证据过期时不显示旧 outcome；页面上的“单笔净 R · 非账户收益”只在当前不可变 frozen covered ledger 的逐笔字段存在时展示，绝不是账户回撤、组合收益、实时成交或独立验证后的推荐。</p>
+<p>前端区分已关联已实现、已关联样本结束时尚未退出、缺少同源冻结 OHLC、证据已过期和未关联。缺 OHLC 不用当前行情、其他交易所或推断 K 线替代；证据过期时也不显示旧 outcome。页面上的“单笔净 R · 非账户收益”只在当前不可变 frozen covered ledger 的逐笔字段存在时展示，绝不是账户回撤、组合收益、实时成交或独立验证后的推荐。列表以服务器 cursor 每页最多读取 2,000 条更早 raw 记录，避免“最近 2,000”冒充全量浏览。</p>
 <h2>风险与诚实声明</h2>
 <p>这 1,019 条是已有 partial covered inputs 的回放子集，不是完整两年三所全市场评估。covered ledger 虽已修复 next-open 风险分母、censoring 与事件序列描述问题，仍缺完整覆盖、匹配随机对照、资金组合模型和独立经济审计。不得从此关联推导 V1、YOLO、通知或实盘仓位调整。</p>
 <p>历史图的信号后 K 线仍只用于回看，未输入 live scanner 或 YOLO；回放继续不通知。运行中的 live scanner、Bark cutover 和模型候选不因该数据库元数据联结而改变。</p>
