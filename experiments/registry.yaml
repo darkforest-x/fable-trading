@@ -8267,3 +8267,15 @@ experiments:
       search.
     notes: First holdout consumption for this configuration under persistent owner all-date authorization. Accepted
       is software delivery only, not trading validation.
+  - experiment_id: exp-spike-v5-display-history-20260911-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1898ba5bba82f24c9c4578099bf8248f5fe2ef97
+    status: active
+    question: Owner requested restored borders, separate R/exit controls, dashed reached milestones, configurable
+      full signal candles, panel default and older risk histories.
+    result: Implementation and 29 regression tests complete; native compile/display verification pending.
+    holdout_consumed: false
+    production_eligible: false
+    training_eligible: false
+    single_variable: Owner-approved display and object-lifecycle bundle; frozen signal and risk mathematics.
+    notes: Default60 drawing groups with synchronized deletion and bounded total objects. No economic evaluation.

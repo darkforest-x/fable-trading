@@ -3,7 +3,7 @@
 // A final event belongs to the current close, never to a historical body or
 // legacy confirmation. This prototype is not validated for any deployment.
 // This prototype has no market breadth, performance, or PnL evaluation.
-indicator("SPIKE V5 · 结构确认", shorttitle="SPIKE V5", overlay=false, max_labels_count=300, max_boxes_count=80, max_lines_count=80, explicit_plot_zorder=true)
+indicator("SPIKE V5 · 结构确认", shorttitle="SPIKE V5", overlay=false, max_labels_count=500, max_boxes_count=150, max_lines_count=200, explicit_plot_zorder=true, behind_chart=false)
 
 // Frozen research constants; changing them defines a new unvalidated config.
 const int maLen = 34
@@ -26,8 +26,10 @@ string gView = "01 · 显示"
 bool showMas = input.bool(true, "六条均线", group=gView, display=display.none)
 bool showLabels = input.bool(true, "确认信号与价格", group=gView, tooltip="只显示完成实体支撑、原确认关联与主线转强后的最终信号，标在实际完成K线上，不回填。", display=display.none)
 bool showRisk = input.bool(true, "风险区与保护线", group=gView, tooltip="空闲后的首个确认信号开启风险参考，使用该根实际收盘价。跟踪期间的其他确认不会重置已有盈亏框；框内价格属于开启它的确认信号。", display=display.none)
-bool showPanel = input.bool(false, "显示状态面板", group=gView, display=display.none)
-bool showMilestones = input.bool(true, "退出与 R 里程碑文字", group=gView, display=display.none)
+bool showPanel = input.bool(true, "显示状态面板", group=gView, display=display.none)
+bool showMilestones = input.bool(true, "R 里程碑与虚线", group=gView, tooltip="分别显示已达到的 3R、5R、10R 价位与虚线；不是固定止盈。", display=display.none)
+bool showExitLabels = input.bool(false, "退出文字", group=gView, display=display.none)
+color signalColor = input.color(color.white, "信号 K 线颜色（实体 / 影线）", group=gView, display=display.none)
 color bull = #008F82
 color bear = #D34B66
 color gold = #AD7B29
@@ -369,6 +371,7 @@ var float protection = na
 var float peakR = 0.0
 var float currentR = na
 var bool trailArmed = false
+var array<label> exitTags = array.new<label>()
 bool referenceStarted = false
 bool exitReference = false
 bool referenceGap = false
@@ -386,7 +389,6 @@ if barstate.isconfirmed
         visibleEntry := na
     bool endedThisBar = false
     if ready and trendSide != 0 and bar_index > entryBar
-        float oldPeak = peakR
         int activeSide = trendSide
         [alive, newProtection, newPeak, newCurrent, exitPrice, armed] = f_path(trendSide, entry, risk, protection, peakR, trailArmed, open, high, low, close, atr, armR, trailAtr, syminfo.mintick)
         protection := newProtection
@@ -397,14 +399,11 @@ if barstate.isconfirmed
             exitReference := true
             endedThisBar := true
             trendSide := 0
-            if showLabels and showMilestones
+            if showExitLabels
                 string exitSideText = activeSide == 1 ? "多头" : "空头"
-                label.new(bar_index, exitPrice, exitSideText + "保护触及 · 参考结束\n" + str.tostring(exitPrice, format.mintick), style=activeSide == 1 ? label.style_label_down : label.style_label_up, color=color.new(chart.bg_color, 8), textcolor=ink, size=size.small, force_overlay=true)
-        else if showMilestones and showLabels
-            float level = oldPeak < 10 and peakR >= 10 ? 10 : oldPeak < 5 and peakR >= 5 ? 5 : oldPeak < 3 and peakR >= 3 ? 3 : na
-            if not na(level)
-                string milestoneSideText = activeSide == 1 ? "多头" : "空头"
-                label.new(bar_index, activeSide == 1 ? high : low, milestoneSideText + " " + str.tostring(level, "#") + "R 已到", style=activeSide == 1 ? label.style_label_down : label.style_label_up, color=color.new(activeSide == 1 ? bull : bear, 90), textcolor=activeSide == 1 ? bull : bear, size=size.tiny, force_overlay=true)
+                if array.size(exitTags) >= 40
+                    label.delete(array.shift(exitTags))
+                array.push(exitTags, label.new(bar_index, exitPrice, exitSideText + "保护触及 · 参考结束\n" + str.tostring(exitPrice, format.mintick), style=activeSide == 1 ? label.style_label_down : label.style_label_up, color=color.new(chart.bg_color, 8), textcolor=ink, size=size.small, force_overlay=true))
     if signalSide != 0 and trendSide == 0 and not endedThisBar
         [newStop, newRisk, validRisk] = f_risk(signalSide, close, signalSide == 1 ? recentLow : recentHigh, atr, riskFloor, stopBuffer, syminfo.mintick)
         if validRisk
@@ -426,103 +425,130 @@ if barstate.isconfirmed
 // A continuous triangle survives label garbage collection on long histories.
 plotshape(confirmedSignal, title="确认多头", style=shape.triangleup, location=location.belowbar, color=bull, size=size.tiny, force_overlay=true, display=display.pane)
 plotshape(confirmedShortSignal, title="确认空头", style=shape.triangledown, location=location.abovebar, color=bear, size=size.tiny, force_overlay=true, display=display.pane)
+var array<label> signalTags = array.new<label>()
 if barstate.isconfirmed and signalSide != 0 and showLabels
     string trackingTip = referenceStarted ? "本根开启盈亏参考。" : trendSide != 0 ? "已有盈亏参考继续跟踪，本根确认不会重置原框。" : "本根未开启盈亏参考。"
     string signalSideText = signalSide == 1 ? "多头" : "空头"
     string tip = signalSideText + "确认收盘：" + str.tostring(close, format.mintick) + "\n" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n" + trackingTip
-    label.new(bar_index, signalSide == 1 ? low - atr * 0.35 : high + atr * 0.35, signalSideText + "确认 · " + str.tostring(close, format.mintick), style=signalSide == 1 ? label.style_label_up : label.style_label_down, color=color.new(signalSide == 1 ? bull : bear, 91), textcolor=signalSide == 1 ? bull : bear, size=size.small, tooltip=tip, force_overlay=true)
+    if array.size(signalTags) >= 80
+        label.delete(array.shift(signalTags))
+    array.push(signalTags, label.new(bar_index, signalSide == 1 ? low - atr * 0.35 : high + atr * 0.35, signalSideText + "确认 · " + str.tostring(close, format.mintick), style=signalSide == 1 ? label.style_label_up : label.style_label_down, color=color.new(signalSide == 1 ? bull : bear, 91), textcolor=signalSide == 1 ? bull : bear, size=size.small, tooltip=tip, force_overlay=true))
 // END CONFIRMED DISPLAY
 
-// BEGIN V2 RISK BOX DISPLAY (trigger changed to referenceStarted only)
+// BEGIN V2 RISK BOX DISPLAY (one complete drawing group per reference)
 string rrGroup = "05 · 趋势盈亏框"
 bool rrShow = input.bool(true, "显示盈亏双框", group=rrGroup, tooltip="红框为冻结初始风险；绿框先显示3R观察位，随后随已确认峰值扩展。没有固定止盈。价格均为信号收盘参考，并非实际成交。", display=display.none)
-int rrKeep = input.int(8, "保留盈亏框组数", minval=1, maxval=20, group=rrGroup, display=display.none)
+int rrKeep = input.int(60, "保留盈亏框组数", minval=1, maxval=60, group=rrGroup, tooltip="保留最近 60 组以内的完整历史框、价格标签和 R 虚线。仅清理超出组数的最旧参考；信号箭头本身不受此限制。", display=display.none)
 int rrAhead = input.int(12, "当前框向右展示根数", minval=2, maxval=60, group=rrGroup, tooltip="仅影响当前框的视觉宽度，不改变任何信号或持有规则；保护触及后固定在该根收盘。", display=display.none)
 
 f_rrPriceTag(int stamp, float price, string caption, color tone, string tip) =>
     label.new(stamp, price, caption, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(chart.bg_color, 12), textcolor=tone, size=size.small, tooltip=tip, force_overlay=true)
 
-var array<box> rrRiskHistory = array.new<box>()
-var array<box> rrRewardHistory = array.new<box>()
-var array<label> rrEntryHistory = array.new<label>()
-var array<label> rrStopHistory = array.new<label>()
-var array<label> rrPeakHistory = array.new<label>()
-var box rrRiskBox = na
-var box rrRewardBox = na
-var label rrEntryTag = na
-var label rrStopTag = na
-var label rrPeakTag = na
-var int rrSide = 0
-var int rrStartedAt = na
-var float rrEntry = na
-var float rrStop = na
-var float rrDistance = na
-var float rrMaximum = 0.0
+// Bounded ownership prevents independent garbage collection from leaving
+// orphan labels/lines or deleting old boxes while keeping their captions.
+// 60 groups: <=120 boxes, <=180 lines, <=360 labels. Signal/exit caps add120.
+type RRDrawing
+    box riskBox
+    box rewardBox
+    label entryTag
+    label stopTag
+    label peakTag
+    array<line> milestoneLines
+    array<label> milestoneTags
+    int side
+    int startedAt
+    float entryPrice
+    float stopPrice
+    float distance
+    float maximum
 
-if barstate.isconfirmed and showRisk and rrShow
+method deleteDrawings(RRDrawing group) =>
+    box.delete(group.riskBox)
+    box.delete(group.rewardBox)
+    label.delete(group.entryTag)
+    label.delete(group.stopTag)
+    label.delete(group.peakTag)
+    for slot = 0 to 2
+        line.delete(array.get(group.milestoneLines, slot))
+        label.delete(array.get(group.milestoneTags, slot))
+
+var array<RRDrawing> rrHistory = array.new<RRDrawing>()
+var RRDrawing activeRR = na
+if barstate.isconfirmed
     int rrBarMillis = na(time_close) ? int(timeframe.in_seconds() * 1000) : time_close - time
     int rrCloseTime = na(time_close) ? time + rrBarMillis : time_close
     int rrRightTime = rrCloseTime + rrAhead * rrBarMillis
+    // End old ownership BEFORE handling a possible same-bar post-gap start.
+    // Missing bars cannot certify milestones, exits, or extension across a gap.
+    if referenceGap and not na(activeRR)
+        if not na(activeRR.riskBox)
+            box.set_right(activeRR.riskBox, time_close[1])
+            if not na(activeRR.rewardBox)
+                box.set_right(activeRR.rewardBox, time_close[1])
+            label.set_x(activeRR.entryTag, time_close[1])
+            label.set_x(activeRR.stopTag, time_close[1])
+            if not na(activeRR.peakTag)
+                label.set_x(activeRR.peakTag, time_close[1])
+        activeRR := na
     if referenceStarted
         int rrNewSide = trendSide
         float rrNewDistance = rrNewSide * (entry - initialStop)
         bool rrValid = not na(entry) and not na(initialStop) and entry > 0 and initialStop > 0 and rrNewDistance > 0
         if rrValid
-            rrSide := rrNewSide
-            rrStartedAt := time
-            rrEntry := entry
-            rrStop := initialStop
-            rrDistance := rrNewDistance
-            rrMaximum := 0.0
-            float rrObservation = rrEntry + rrSide * 3.0 * rrDistance
-            string rrSideText = rrNewSide == 1 ? "多头" : "空头"
-            string rrTip = rrSideText + "确认收盘参考，不是实际成交。初始风险冻结；3R仅为观察位，不触发止盈。绿色框扩展表示已确认最高浮盈，不代表已实现收益。"
-            rrRiskBox := box.new(rrStartedAt, math.max(rrEntry, rrStop), rrRightTime, math.min(rrEntry, rrStop), xloc=xloc.bar_time, border_color=na, border_width=0, bgcolor=color.new(bear, 92), force_overlay=true)
-            rrRewardBox := rrObservation > 0 ? box.new(rrStartedAt, math.max(rrEntry, rrObservation), rrRightTime, math.min(rrEntry, rrObservation), xloc=xloc.bar_time, border_color=na, border_width=0, bgcolor=color.new(bull, 92), force_overlay=true) : na
-            rrEntryTag := f_rrPriceTag(rrRightTime, rrEntry, rrSideText + "确认参考 · " + str.tostring(rrEntry, format.mintick), ink, rrTip)
-            rrStopTag := f_rrPriceTag(rrRightTime, rrStop, rrSideText + "初始止损 · " + str.tostring(rrStop, format.mintick), bear, rrTip)
-            rrPeakTag := rrObservation > 0 ? f_rrPriceTag(rrRightTime, rrObservation, rrSideText + " 3R 观察位 · " + str.tostring(rrObservation, format.mintick), bull, rrTip) : na
-            array.push(rrRiskHistory, rrRiskBox)
-            array.push(rrRewardHistory, rrRewardBox)
-            array.push(rrEntryHistory, rrEntryTag)
-            array.push(rrStopHistory, rrStopTag)
-            array.push(rrPeakHistory, rrPeakTag)
-            while array.size(rrRiskHistory) > rrKeep
-                box.delete(array.shift(rrRiskHistory))
-                box.delete(array.shift(rrRewardHistory))
-                label.delete(array.shift(rrEntryHistory))
-                label.delete(array.shift(rrStopHistory))
-                label.delete(array.shift(rrPeakHistory))
-        else
-            // The signal itself remains visible; unavailable risk creates no
-            // fabricated entry/stop/target coordinates or substitute ATR stop.
-            rrSide := 0
+            // Delete before allocation, so the engine never exceeds its budget.
+            while array.size(rrHistory) >= rrKeep
+                RRDrawing oldest = array.shift(rrHistory)
+                oldest.deleteDrawings()
+            activeRR := RRDrawing.new(na, na, na, na, na, array.new<line>(3, na), array.new<label>(3, na), rrNewSide, time, entry, initialStop, rrNewDistance, 0.0)
+            array.push(rrHistory, activeRR)
+            if showRisk and rrShow
+                float observation = entry + rrNewSide * 3.0 * rrNewDistance
+                string sideText = rrNewSide == 1 ? "多头" : "空头"
+                string tip = sideText + "确认收盘参考，不是实际成交。初始风险冻结；3R仅为观察位，不触发止盈。绿色框为走势参考，峰值未兑现。"
+                activeRR.riskBox := box.new(time, math.max(entry, initialStop), rrRightTime, math.min(entry, initialStop), xloc=xloc.bar_time, border_color=color.new(bear, 45), border_width=1, bgcolor=color.new(bear, 92), force_overlay=true)
+                activeRR.rewardBox := observation > 0 ? box.new(time, math.max(entry, observation), rrRightTime, math.min(entry, observation), xloc=xloc.bar_time, border_color=color.new(bull, 45), border_width=1, bgcolor=color.new(bull, 92), force_overlay=true) : na
+                activeRR.entryTag := f_rrPriceTag(rrRightTime, entry, sideText + "确认参考 · " + str.tostring(entry, format.mintick), ink, tip)
+                activeRR.stopTag := f_rrPriceTag(rrRightTime, initialStop, "sl · " + str.tostring(initialStop, format.mintick), bear, tip)
+                activeRR.peakTag := observation > 0 ? f_rrPriceTag(rrRightTime, observation, "3R 观察位 · " + str.tostring(observation, format.mintick), bull, tip) : na
 
-    if rrSide != 0 and not na(rrRiskBox)
-        bool rrEnded = exitReference or referenceGap
-        int rrEdge = rrEnded ? rrCloseTime : rrRightTime
-        rrMaximum := math.max(rrMaximum, nz(peakR, 0.0))
-        float rrExtentR = math.max(3.0, rrMaximum)
-        float rrExtent = rrEntry + rrSide * rrExtentR * rrDistance
-        string rrEnding = referenceGap ? " · 数据缺口中止" : rrEnded ? " · 本段结束" : ""
-        string rrReference = (rrSide == 1 ? "多头" : "空头") + "确认收盘参考，不是实际成交。已确认峰值 " + str.tostring(rrMaximum, "#.##") + "R；当前路径 " + str.tostring(currentR, "#.##") + "R。峰值未兑现；3R为观察位，无固定止盈。"
-        box.set_right(rrRiskBox, rrEdge)
-        label.set_x(rrEntryTag, rrEdge)
-        label.set_x(rrStopTag, rrEdge)
-        label.set_text(rrEntryTag, (rrSide == 1 ? "多头" : "空头") + "确认参考 · " + str.tostring(rrEntry, format.mintick) + rrEnding)
-        label.set_tooltip(rrEntryTag, rrReference)
-        label.set_tooltip(rrStopTag, rrReference + " 冻结初始止损；当前保护 " + str.tostring(protection, format.mintick) + "，以原保护线为准。")
-        if not na(rrRewardBox) and rrExtent > 0
-            box.set_right(rrRewardBox, rrEdge)
-            box.set_top(rrRewardBox, math.max(rrEntry, rrExtent))
-            box.set_bottom(rrRewardBox, math.min(rrEntry, rrExtent))
-            label.set_xy(rrPeakTag, rrEdge, rrExtent)
-            label.set_text(rrPeakTag, (rrSide == 1 ? "多头 " : "空头 ") + (rrMaximum >= 3.0 ? "已到峰值 " + str.tostring(rrMaximum, "#.##") + "R · " : "3R 观察位 · ") + str.tostring(rrExtent, format.mintick))
-            label.set_tooltip(rrPeakTag, rrReference)
-        if rrEnded
-            // Retain completed objects. A later signal owns a new independent
-            // group; completed prices and edges are never updated again.
-            rrSide := 0
+    if not na(activeRR)
+        bool ended = exitReference
+        int edge = ended ? rrCloseTime : rrRightTime
+        activeRR.maximum := math.max(activeRR.maximum, nz(peakR, 0.0))
+        float extentR = math.max(3.0, activeRR.maximum)
+        float extent = activeRR.entryPrice + activeRR.side * extentR * activeRR.distance
+        string ending = showExitLabels and ended ? " · 本段结束" : ""
+        string reference = "确认收盘参考，不是实际成交。已确认峰值 " + str.tostring(activeRR.maximum, "#.##") + "R；当前路径 " + str.tostring(currentR, "#.##") + "R。峰值未兑现；无固定止盈。"
+        if not na(activeRR.riskBox)
+            box.set_right(activeRR.riskBox, edge)
+            label.set_x(activeRR.entryTag, edge)
+            label.set_x(activeRR.stopTag, edge)
+            label.set_text(activeRR.entryTag, (activeRR.side == 1 ? "多头" : "空头") + "确认参考 · " + str.tostring(activeRR.entryPrice, format.mintick) + ending)
+            label.set_tooltip(activeRR.entryTag, reference)
+            label.set_tooltip(activeRR.stopTag, reference + " 冻结初始风险；当前保护 " + str.tostring(protection, format.mintick))
+        if not na(activeRR.rewardBox) and extent > 0
+            box.set_right(activeRR.rewardBox, edge)
+            box.set_top(activeRR.rewardBox, math.max(activeRR.entryPrice, extent))
+            box.set_bottom(activeRR.rewardBox, math.min(activeRR.entryPrice, extent))
+            label.set_xy(activeRR.peakTag, edge, extent)
+            label.set_text(activeRR.peakTag, (activeRR.maximum >= 3.0 ? "峰值 " + str.tostring(activeRR.maximum, "#.##") + "R · " : "3R 观察位 · ") + str.tostring(extent, format.mintick))
+            label.set_tooltip(activeRR.peakTag, reference)
+        // Each reached level is independent: a single jump through 3/5/10R
+        // must create all three milestones, not only the highest one.
+        for slot = 0 to 2
+            float level = slot == 0 ? 3.0 : slot == 1 ? 5.0 : 10.0
+            float levelPrice = activeRR.entryPrice + activeRR.side * level * activeRR.distance
+            if showMilestones and activeRR.maximum >= level and levelPrice > 0 and na(array.get(activeRR.milestoneLines, slot))
+                string hitTip = "收盘确认已触及 " + str.tostring(level, "#") + "R · " + str.format_time(time_close, "MM-dd HH:mm", "Asia/Shanghai") + " 北京时间。虚线为冻结入场风险计算的价位，不是止盈指令。"
+                line guide = line.new(activeRR.startedAt, levelPrice, rrCloseTime, levelPrice, xloc=xloc.bar_time, color=color.new(bull, 35), style=line.style_dashed, width=1, force_overlay=true)
+                label tag = label.new(time, levelPrice, str.tostring(level, "#") + "R 已达", xloc=xloc.bar_time, style=label.style_label_left, color=color.new(bull, 88), textcolor=bull, size=size.tiny, tooltip=hitTip, force_overlay=true)
+                array.set(activeRR.milestoneLines, slot, guide)
+                array.set(activeRR.milestoneTags, slot, tag)
+            line guide = array.get(activeRR.milestoneLines, slot)
+            if not na(guide)
+                line.set_x2(guide, rrCloseTime)
+        if ended
+            activeRR := na
 // END V2 RISK BOX DISPLAY
 
 // Only confirmed oscillator points are shown; the live tip holds prior values.
@@ -543,7 +569,10 @@ pProtect = plot(showRisk ? visibleProtection : na, "本根有效保护", trailAr
 pInitial = plot(showRisk ? visibleInitial : na, "冻结初始止损", color.new(bear, 55), 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
 pEntry = plot(showRisk ? visibleEntry : na, "确认收盘参考", color.new(ink, 60), 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
 fill(pInitial, pEntry, color.new(bear, 94), title="初始风险区")
-barcolor(signalSide != 0 ? color.white : na, title="确认关键K线")
+barcolor(signalSide != 0 ? signalColor : na, title="确认关键K线")
+// Original OHLC, overlaid only on actual confirmed signal bars. Explicit
+// wick/border colors avoid relying on the user's native candle styling.
+plotcandle(signalSide != 0 ? open : na, high, low, close, title="确认K线实体与影线", color=signalColor, wickcolor=signalColor, bordercolor=signalColor, editable=false, force_overlay=true, display=display.pane)
 
 // Historical Data Window belongs to the selected bar. Pending reason: 0 idle,
 // 1 awaiting V4 provenance, 2 awaiting a full body, 3 awaiting MD turn,
@@ -580,11 +609,13 @@ plot(barstate.isconfirmed ? (aboveSix ? 1 : 0) : na, "当前收盘六线之上",
 plot(barstate.isconfirmed and signalSide != 0 ? close : na, "确认实际收盘价", display=display.data_window)
 plot(barstate.isconfirmed ? (referenceStarted ? 1 : 0) : na, "确认参考起点", display=display.data_window)
 
+plot(array.size(rrHistory), "已保留盈亏参考组数", display=display.data_window)
+
 var table panel = table.new(position.top_right, 2, 2, bgcolor=color.new(chart.bg_color, 8), border_width=0)
 if barstate.islast and showPanel
-    string stateText = trendSide != 0 ? "趋势跟踪" : "当前无跟踪参考"
+    string stateText = trendSide == 1 ? "多头跟踪" : trendSide == -1 ? "空头跟踪" : "当前无跟踪参考"
     table.cell(panel, 0, 0, "SPIKE V5", text_color=ink, text_size=size.small)
-    table.cell(panel, 1, 0, stateText, text_color=trendSide != 0 ? bull : muted, text_size=size.small)
+    table.cell(panel, 1, 0, stateText, text_color=trendSide == 1 ? bull : trendSide == -1 ? bear : muted, text_size=size.small)
     table.cell(panel, 0, 1, "参考 / 峰值", text_color=muted, text_size=size.tiny)
     table.cell(panel, 1, 1, na(currentR) ? "—" : str.tostring(currentR, "#.##") + "R / " + str.tostring(peakR, "#.##") + "R", text_color=ink, text_size=size.tiny)
 

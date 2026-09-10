@@ -86,9 +86,11 @@ def test_pine_keeps_v4_feature_legacy_risk_and_visual_sections_frozen():
     assert "trendSide := signalSide" in reference
     boxes = _section(v5, "// BEGIN V2 RISK BOX DISPLAY", "// END V2 RISK BOX DISPLAY")
     assert "int rrNewSide = trendSide" in boxes
-    assert boxes.count("border_color=na, border_width=0") == 2
+    assert boxes.count("border_width=1, bgcolor=") == 2
     assert "bool showMilestones = input.bool(true," in v5
-    assert "barcolor(signalSide != 0 ? color.white : na" in v5
+    assert "barcolor(signalSide != 0 ? signalColor : na" in v5
+    assert 'input.color(color.white,' in v5
+    assert 'wickcolor=signalColor, bordercolor=signalColor' in v5
     for obsolete in ("minQuiet", "nearAtr", "releaseBars", "quietCount", "quietHigh", "quietLow", "frozenBand", "releaseBar"):
         assert obsolete not in v5
     assert "V5 本根V4旧确认诊断" in v5 and "V5 冻结V4父高" in v5 and "V5 冻结V4父低" in v5
