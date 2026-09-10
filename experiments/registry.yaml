@@ -7921,3 +7921,19 @@ experiments:
     notes: First scored C configuration exposure under owner all-date authorization. Sequential exploration on previously
       seen dates, not blind OOS; prior13 gates and A/B disclosed. Reference/suppression coverage never repairs fresh
       recall. No deployment.
+  - experiment_id: exp-spike-v3-formation-gate-20260910-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 89ba3348296ca5a5d3eec8b7fc4c4471bd724097
+    status: active
+    question: Can ordered pre-breakout six-MA convergence reduce V3 alerts while preserving original timely launches?
+    single_variable: 'One pre-signal twelve-bar formation gate: last-six median raw six-MA width <= preceding-six
+      median; all V3 raw edges, accepted cooldown and confirmations preserved.'
+    result: Preregistered fourth structural hypothesis before D market detection or scoring; original fixed denominators
+      and four acceptance gates retained.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    canonical_report: analysis/html/p1_spike_v3_formation_gate_20260910.html
+    artifacts: []
+    notes: Sequential exploration after13 gates plus A/B/C; previously seen history. No threshold search, no deployment.
