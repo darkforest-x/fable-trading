@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="data:,">
-<title>SPIKE 强劲爆发 V1：两年三所全市场回测 — 数据可得性终止报告</title>
+<title>SPIKE 强劲爆发 V1：两年三所全市场回测 — 覆盖受限采集状态</title>
 <style>
 :root { color-scheme: light dark; }
 *, *::before, *::after { box-sizing: border-box; }
@@ -47,9 +47,9 @@ li { margin: .25rem 0; }
 </style>
 </head>
 <body>
-<h1>SPIKE 强劲爆发 V1：两年三所全市场回测 — 数据可得性终止报告</h1>
+<h1>SPIKE 强劲爆发 V1：两年三所全市场回测 — 覆盖受限采集状态</h1>
 <h2>结论</h2>
-<p>本配置<strong>没有</strong>产生任何交易绩效结论、排行榜或交易账本。冻结的三所全市场合同在 Gate 两年 30 分钟历史上不可满足；评估器按设计拒绝把 Binance/OKX 的局部历史称为“all-market”。这次已消耗 owner 明确授权的该配置第 1 次 holdout 读取，用于验证固定 V1 和公共历史可得性；没有训练、调参、promote 或执行路径改动。</p>
+<p>本配置<strong>尚未</strong>产生任何交易绩效结论、排行榜或交易账本。冻结的三所全市场合同在 Gate 两年 30 分钟历史上不可满足；Binance 与 OKX 正继续按 current-catalog 全目录收集，Gate 则按原生周期记录可得窗。评估器会拒绝把局部历史称为“all-market”。这次已消耗 owner 明确授权的该配置第 1 次 holdout 读取，用于验证固定 V1 和公共历史可得性；没有训练、调参、promote 或执行路径改动。</p>
 <h2>冻结合同与复现</h2>
 <ul>
 <li>评估窗：<code>[2024-09-10T00:00:00Z, 2026-09-10T00:00:00Z)</code>；这是采集时 UTC 为 <code>2026-09-10T17:17Z</code> 时最后完整的 UTC 日线边界。30m/1H/4H/1D 均从同一确认 30m 流按 UTC epoch 完整分组；不会混用 OKX <code>1D</code> 与 <code>1Dutc</code>。</li>
@@ -70,13 +70,13 @@ python3 -m yoyo.evaluation.spike_v1_twoyear_allmarkets evaluate
 <th>两年 30m 样本</th>
 <th>结果</th>
 </tr></thead><tbody>
-<tr><td>Binance USD-M</td><td>658</td><td>0GUSDT：36 页、17,153 根，自已知上市日到冻结右端连续</td><td>该<strong>单标的</strong>完整；不是 658 市场完成</td></tr>
-<tr><td>OKX SWAP</td><td>460</td><td>0G-USDT-SWAP：178 页、16,923 根，自已知上市日到冻结右端连续</td><td>该<strong>单标的</strong>完整；不是 460 市场完成</td></tr>
-<tr><td>Gate USDT Futures</td><td>563</td><td>0G_USDT 请求两年历史被拒绝</td><td>不可覆盖</td></tr>
-<tr><td>合计</td><td>1,681</td><td>2 个成功样本、1 个 Gate 失败样本</td><td>未达到 all-market</td></tr>
+<tr><td>Binance USD-M</td><td>658</td><td>2 个完整市场：0GUSDT 17,153 根/36 页；1000000BOBUSDT 22,159 根/15 页</td><td>全目录续跑中</td></tr>
+<tr><td>OKX SWAP</td><td>460</td><td>2 个完整市场：0G-USDT-SWAP 16,923 根/178 页；1INCH-USDT-SWAP 53,136 根/178 页</td><td>全目录续跑中</td></tr>
+<tr><td>Gate USDT Futures</td><td>563</td><td>0G_USDT 30m 被拒；原生 1H 8,576 根、4H 2,144 根可得但该 2025 上市标的自然不足两年</td><td>按周期覆盖收集，不能静默补成 30m</td></tr>
+<tr><td>合计</td><td>1,681</td><td>4 个 Binance/OKX 完整样本；Gate 1 个按周期审计样本</td><td>尚未达到全量评估</td></tr>
 </tbody></table>
 <p>这是 current-catalog universe，不是 all-ever-listed：三个 2026-09-10/11 的目录快照不能找回已删除或历史退市合约。历史 listing 时间也只是当前目录字段，不能证明早期连续可交易性。</p>
-<p>Gate REST 返回 HTTP 400：<code>INVALID_PARAM_VALUE</code>，正文为 “Candlestick too long ago. Maximum 10000 points recently are allowed”。其官方 REST 文档也说明单次最多 2,000 点；历史下载说明列有 futures archive，但按其公开 URL 构造的 <code>futures_usdt/candlesticks_{30m,1h,4h,1d}</code> 对 BTC_USDT、ETH_USDT 和 0G_USDT 测试均为 404。原始响应、请求参数、HTTP 状态和页面 SHA 均保存于实验 <code>data/raw/gate/</code> 与 <code>data/market_receipts/gate/</code>，没有静默换源。</p>
+<p>Gate REST 返回 HTTP 400：<code>INVALID_PARAM_VALUE</code>，正文为 “Candlestick too long ago. Maximum 10000 points recently are allowed”。直接按原生周期取数后，0G 的 1H/4H 可从其 2025 上市后连续读取，30m 仍被拒；日线返回 UTC 00 时钟，而该标的 listing 时钟不在日边界，故不自动重采样或挪动 timestamp。其官方 REST 文档也说明单次最多 2,000 点；历史下载说明列有 futures archive，但按其公开 URL 构造的 <code>futures_usdt/candlesticks_{30m,1h,4h,1d}</code> 对 BTC_USDT、ETH_USDT 和 0G_USDT 测试均为 404。原始响应、请求参数、HTTP 状态和页面 SHA 均保存于实验 <code>data/raw/gate/</code>、<code>data/market_receipts/gate/</code> 与 <code>data/gate_timeframe_receipts/</code>，没有静默换源。</p>
 <h2>执行与统计口径（已冻结，未运行）</h2>
 <p>V1 信号在收盘确认；诊断会另存 signal-close 风险参考，实际交易才会下一根开盘进入。保护线由信号收盘冻结；入场跳空穿越保护线时按该开盘价退出，后续单根中触及保护线按 stop-first 保守顺序处理。费用是既有 0.2% 往返名义成本。资金费、各所费率档、冲击和容量没有完整历史，均为未建模，不能当作零。</p>
 <p>本应交付的全交易 ledger（时间、特征、MAE/MFE、费用、net R、退出原因）、按 venue/timeframe/month/year/regime 的 PF、等风险与容量组合、同币同周同波动桶随机对照、bootstrap 与 feature bins 均为<strong>不适用</strong>：没有完整母体，生成其中任何一个会制造局部市场结果。AUC 也不适用，因为 V1 是固定规则、非分类器。</p>

@@ -1,8 +1,8 @@
-# SPIKE 强劲爆发 V1：两年三所全市场回测 — 数据可得性终止报告
+# SPIKE 强劲爆发 V1：两年三所全市场回测 — 覆盖受限采集状态
 
 ## 结论
 
-本配置**没有**产生任何交易绩效结论、排行榜或交易账本。冻结的三所全市场合同在 Gate 两年 30 分钟历史上不可满足；评估器按设计拒绝把 Binance/OKX 的局部历史称为“all-market”。这次已消耗 owner 明确授权的该配置第 1 次 holdout 读取，用于验证固定 V1 和公共历史可得性；没有训练、调参、promote 或执行路径改动。
+本配置**尚未**产生任何交易绩效结论、排行榜或交易账本。冻结的三所全市场合同在 Gate 两年 30 分钟历史上不可满足；Binance 与 OKX 正继续按 current-catalog 全目录收集，Gate 则按原生周期记录可得窗。评估器会拒绝把局部历史称为“all-market”。这次已消耗 owner 明确授权的该配置第 1 次 holdout 读取，用于验证固定 V1 和公共历史可得性；没有训练、调参、promote 或执行路径改动。
 
 ## 冻结合同与复现
 
@@ -23,14 +23,14 @@ python3 -m yoyo.evaluation.spike_v1_twoyear_allmarkets evaluate
 
 | venue | 当前目录中合格 USDT 永续 | 两年 30m 样本 | 结果 |
 | --- | ---: | --- | --- |
-| Binance USD-M | 658 | 0GUSDT：36 页、17,153 根，自已知上市日到冻结右端连续 | 该**单标的**完整；不是 658 市场完成 |
-| OKX SWAP | 460 | 0G-USDT-SWAP：178 页、16,923 根，自已知上市日到冻结右端连续 | 该**单标的**完整；不是 460 市场完成 |
-| Gate USDT Futures | 563 | 0G_USDT 请求两年历史被拒绝 | 不可覆盖 |
-| 合计 | 1,681 | 2 个成功样本、1 个 Gate 失败样本 | 未达到 all-market |
+| Binance USD-M | 658 | 2 个完整市场：0GUSDT 17,153 根/36 页；1000000BOBUSDT 22,159 根/15 页 | 全目录续跑中 |
+| OKX SWAP | 460 | 2 个完整市场：0G-USDT-SWAP 16,923 根/178 页；1INCH-USDT-SWAP 53,136 根/178 页 | 全目录续跑中 |
+| Gate USDT Futures | 563 | 0G_USDT 30m 被拒；原生 1H 8,576 根、4H 2,144 根可得但该 2025 上市标的自然不足两年 | 按周期覆盖收集，不能静默补成 30m |
+| 合计 | 1,681 | 4 个 Binance/OKX 完整样本；Gate 1 个按周期审计样本 | 尚未达到全量评估 |
 
 这是 current-catalog universe，不是 all-ever-listed：三个 2026-09-10/11 的目录快照不能找回已删除或历史退市合约。历史 listing 时间也只是当前目录字段，不能证明早期连续可交易性。
 
-Gate REST 返回 HTTP 400：`INVALID_PARAM_VALUE`，正文为 “Candlestick too long ago. Maximum 10000 points recently are allowed”。其官方 REST 文档也说明单次最多 2,000 点；历史下载说明列有 futures archive，但按其公开 URL 构造的 `futures_usdt/candlesticks_{30m,1h,4h,1d}` 对 BTC_USDT、ETH_USDT 和 0G_USDT 测试均为 404。原始响应、请求参数、HTTP 状态和页面 SHA 均保存于实验 `data/raw/gate/` 与 `data/market_receipts/gate/`，没有静默换源。
+Gate REST 返回 HTTP 400：`INVALID_PARAM_VALUE`，正文为 “Candlestick too long ago. Maximum 10000 points recently are allowed”。直接按原生周期取数后，0G 的 1H/4H 可从其 2025 上市后连续读取，30m 仍被拒；日线返回 UTC 00 时钟，而该标的 listing 时钟不在日边界，故不自动重采样或挪动 timestamp。其官方 REST 文档也说明单次最多 2,000 点；历史下载说明列有 futures archive，但按其公开 URL 构造的 `futures_usdt/candlesticks_{30m,1h,4h,1d}` 对 BTC_USDT、ETH_USDT 和 0G_USDT 测试均为 404。原始响应、请求参数、HTTP 状态和页面 SHA 均保存于实验 `data/raw/gate/`、`data/market_receipts/gate/` 与 `data/gate_timeframe_receipts/`，没有静默换源。
 
 ## 执行与统计口径（已冻结，未运行）
 
