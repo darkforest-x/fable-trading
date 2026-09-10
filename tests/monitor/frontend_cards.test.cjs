@@ -178,3 +178,9 @@ test("replay symbols without a swap separator do not repeat their quote asset", 
   assert.equal(shortSymbol("PEPEUSDT.P"), "PEPE");
   assert.match(app, /页内预览 \$\{venue\} \$\{shortSymbol\(item\.symbol\)\}/);
 });
+
+test("stale ledger evidence hides its prior outcome until an immutable snapshot relinks it", () => {
+  assert.match(app, /stale_evidence_unverified/);
+  assert.match(app, /账本证据已过期 · 不展示收益/);
+  assert.match(app, /等待新的不可变账本快照重链/);
+});

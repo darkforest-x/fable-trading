@@ -2,9 +2,9 @@
 
 ## 结论
 
-2026-09-11（北京时间）已将 monitor 中全部 **1,019** 条 `source=replay, confirmation=raw` 的 V1 信号，与冻结 `covered-v2-next-open-risk-realized-event-sequence` 账本按四元组 `venue / symbol / timeframe_min / signal_bar_open_ms` 一对一关联。所有记录同时保存 monitor journal id、账本 source-event id、Pine/replay source SHA、ledger SHA、coverage receipt SHA 和对应冻结 OHLC 文件 SHA。
+2026-09-11（北京时间）已将 monitor 中全部 **1,019** 条 `source=replay, confirmation=raw` 的 V1 信号，与**内容寻址的不可变** `covered-v2-next-open-risk-realized-event-sequence` 账本快照按四元组 `venue / symbol / timeframe_min / signal_bar_open_ms` 一对一关联。所有记录保存 monitor journal id、账本 source-event id、Pine/replay source SHA、ledger SHA、coverage receipt SHA 和对应冻结 OHLC 文件 SHA。
 
-关联只证明这条回放卡与哪一条覆盖账本、哪一份冻结输入相对应。它不构成独立经济审计、完整市场覆盖、账户收益、策略有效性或盈利结论。前端对已实现行只显示该账本的退出与净 R，并标为“未独立收益审核”；18 条右端 censored 行不显示净 R、胜率、PF 或净收益。
+此前 1,019 条链接指向会被 `evaluate-covered` 覆盖的可变汇总文件；旧文件字节不可再读取，故先全部降为 `stale_evidence_unverified` 并隐藏 outcome，审计中保留旧 status、id 和 SHA。随后才复制当前字节为 SHA 命名副本并重链。关联只证明回放卡与该特定快照和冻结输入相对应；它不构成独立经济审计、完整市场覆盖、账户收益、策略有效性或盈利结论。前端已实现行仍只显示该账本的退出与净 R，并标为“未独立收益审核”；18 条样本右端尚未退出的 censored 行不显示净 R、胜率、PF 或净收益。
 
 ## 冻结输入与复现
 
@@ -12,8 +12,9 @@
 | --- | --- |
 | V1 Pine / replay source SHA256 | `18bbb6955fdf12e124688003799c44fc2a641f11a342edcf478157b1c9641fe2` |
 | 覆盖账本方法 | `covered-v2-next-open-risk-realized-event-sequence` |
-| covered ledger SHA256 | `d35483bcfad3a567376f6009aaac58f41981e2c522a6478a745d3481e1730064` |
-| coverage receipt SHA256 | `014be0a70370527e6e0dba89ff24b55208d666fa1b1f85b6f857bd05442e2fff` |
+| 不可变 covered ledger SHA256 | `b15b69b8864e5eb651f2417fc6681ea688b5fbb95dacd15af1284b42744e3578` |
+| 不可变 coverage receipt SHA256 | `3e4c08972a2680fae48cc7b7862e960d8a6c969ab387531aca996ffe526a69a2` |
+| 不可变副本 | `results/immutable_replay_ledger/covered_trade_ledger.b15b69…e3578.csv.gz` 与 `coverage_progress.3e4c08…69a2.json` |
 | 信号时间范围（UTC） | 2024-09-10 16:00 至 2026-09-09 16:30 |
 
 ```bash
@@ -21,11 +22,12 @@ python3 -m pytest -q tests/monitor/test_replay_ledger.py tests/monitor/test_spik
 node --test tests/monitor/frontend_cards.test.cjs
 python3 -m yoyo.monitor.replay_ledger \
   --database "$HOME/Library/Application Support/Fable/ImpulseMonitor/monitor.sqlite3" \
+  --snapshot-dir experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/immutable_replay_ledger \
   --receipt experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/replay_ledger_link_receipt.csv.gz
 python3 scripts/md_to_html.py analysis/p1_spike_v1_replay_ledger_link_20260911.md --out-dir analysis/html
 ```
 
-上述实际运行返回：`linked=1019`、`matched_realized=1001`、`matched_censored=18`、`unmatched=0`、`source_mismatch=0`、`ohlc_missing=0`。receipt 中的 1,019 行没有重复四元组、monitor id 或 ledger id。运行后 Bark pending/failed/unknown 均为 0；模型 candidate 计数没有由回放联结创建或改变。
+上述实际运行先返回 `invalidated=1019`，再返回 `linked=1019`、`matched_realized=1001`、`matched_censored=18`、`unmatched=0`、`source_mismatch=0`、`ohlc_missing=0`。receipt 中的 1,019 行没有重复四元组、monitor id 或 ledger id；每行都指向同一对当前不可变 SHA。运行后 Bark pending/failed/unknown 均为 0；模型 candidate 计数没有由回放联结创建或改变。
 
 ## 覆盖分布
 
@@ -41,13 +43,13 @@ python3 scripts/md_to_html.py analysis/p1_spike_v1_replay_ledger_link_20260911.m
 | OKX | 233 |
 | Gate | 53 |
 
-逐笔证据在 [replay_ledger_link_receipt.csv.gz](../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/replay_ledger_link_receipt.csv.gz)：每一行包含双方 id、四元组、状态、四种 SHA 及冻结 OHLC 文件。运行库的同名 `covered_ledger` payload 还保留已实现行的 entry/exit/净 R，或仅保留 censored 状态。
+逐笔证据在 [replay_ledger_link_receipt.csv.gz](../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/replay_ledger_link_receipt.csv.gz)：每一行包含双方 id、四元组、状态、四种 SHA 及冻结 OHLC 文件。运行库的同名 `covered_ledger` payload 对已实现行保留 entry/exit/净 R，对 censored 行只保留 censored 状态；同时所有 1,019 行保留 `superseded_stale_evidence`，其中包含不可读旧可变证据的原 status/id/hash 审计。
 
 ## 实现边界
 
-`replay_import` 仍只导入信号字段。`replay_ledger` 是单独命令，先验证 manifest 的方法、Pine 和 source SHA，再完整准备所有更新，最后只用 `Store.update_event_payload()` 修改既有 replay journal payload；它不走 `upsert_event()`，因此不会新建 event、Bark outbox、Telegram outbox 或 YOLO candidate。无匹配、source 不符或 OHLC 文件缺失的行保持 `performance_status=unverified`。
+`replay_import` 仍只导入信号字段。`replay_ledger` 是单独命令：先把既有链接降级为不显示 outcome 的 stale audit，再验证 manifest 的方法、Pine 和 source SHA，把 ledger/receipt 原样复制并逐字哈希为不可变副本，最后才用 `Store.update_event_payload()` 修改既有 replay journal payload；它不走 `upsert_event()`，因此不会新建 event、Bark outbox、Telegram outbox 或 YOLO candidate。无匹配、source 不符或 OHLC 文件缺失的行保持 `performance_status=unverified`。
 
-前端将三类状态分开：已关联已实现、已关联 censored、未关联。页面上的“覆盖净 R · 非账户”是 frozen covered ledger 的单笔字段，不是账户回撤、组合收益、实时成交或独立验证后的推荐。
+前端区分已关联已实现、已关联样本结束时尚未退出、证据已过期和未关联。证据过期时不显示旧 outcome；页面上的“单笔净 R · 非账户收益”只在当前不可变 frozen covered ledger 的逐笔字段存在时展示，绝不是账户回撤、组合收益、实时成交或独立验证后的推荐。
 
 ## 风险与诚实声明
 

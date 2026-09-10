@@ -31,7 +31,7 @@ python3 -m yoyo.monitor.replay_import \
 
 signal-only importer 保持不复制 outcome；随后独立命令以 `venue/symbol/timeframe_min/signal_bar_open_ms` 精确联结运行库中的 1,019 条 replay/raw 与冻结 `covered-v2-next-open-risk-realized-event-sequence` ledger。实际运行得到 1,001 条 realized、18 条 censored、0 unmatched/source mismatch/OHLC missing；四元组、monitor journal id 和 ledger source-event id 均无重复。每条 payload 同时保存两种 id、Pine/source、ledger、coverage receipt 和冻结 OHLC SHA。
 
-此操作只调用已有事件的 payload update，不经 event insertion、outbox 或 candidate 路径；运行后 Bark outbox 仍为 0。前端为 realized 行显示冻结账本的退出与“覆盖净 R · 非账户”，为 censored 行明确显示“不计胜率、PF 或净收益”，并持续标注“未独立收益审核”。逐笔 receipt、命令和完整边界见 [p1_spike_v1_replay_ledger_link_20260911.md](p1_spike_v1_replay_ledger_link_20260911.md)。
+此操作只调用已有事件的 payload update，不经 event insertion、outbox 或 candidate 路径；运行后 Bark outbox 仍为 0。随后发现旧链接指向会被覆盖的汇总路径，故 `e55a421` 先将 1,019 条降为不显示 outcome 的 stale evidence 并保留旧 id/SHA 审计，再复制当前 ledger/coverage receipt 成 SHA 命名不可变副本后重链。最终仍为 1,001 realized、18 censored、0 mismatch/missing，双方 id 各 1,019 唯一，Bark/TG outbox 均为 0。前端为 realized 行显示冻结账本的退出与“单笔净 R · 非账户收益”，为 censored 行明确显示“样本结束时尚未退出；不计胜率、PF 或净收益”；若未来证据漂移则显示“账本证据已过期 · 不展示收益”。逐笔 receipt、命令和完整边界见 [p1_spike_v1_replay_ledger_link_20260911.md](p1_spike_v1_replay_ledger_link_20260911.md)。
 
 历史遗留处理限定为源为空、协议为旧 IMACD 的 9,160 条错误 journal 行；它们已在有完整数据库备份后移除。迁移期间另发现 5 个可由 canonical V1 raw identity 替换的旧重复 id，已幂等清理；11 个无 canonical 替代的旧 id 未伪造替代记录。没有再次清库，也没有触及本次 live/replay 行。
 
@@ -152,3 +152,9 @@ node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.t
 新代码的分阶段计时已落到持久 `scan.timing_ms`：该观察点为 fetch total 51.542s / max 8.516s，analyze total 19.074s / max 5.334s，checkpoint total 4.683s / max 0.842s。这些是截至 129 个单元的累计，不是全轮 SLA。服务在子进程启动时短暂返回 503；随后 `/api/health` 与 `/api/status` 都为 HTTP 200（此次读取约 644ms / 560ms），状态快照 non-stale。YOLO 为 idle、loaded=false、queue 0；Bark 的 pending/sent/failed/unknown 全为 0，Telegram 仍 disabled。没有为了这次检查再次 reload、没有历史补发。
 
 约 24 分钟后的低频读取仍是同一 `started_at_ms=1789078801148`，进度为 714/1,434、errors 0。该时 `health` 约 2.533s、`status` 约 431ms，`market_ready=false`；Bark outbox 的 pending/sent/failed/unknown 仍全为 0，Telegram 继续 disabled。这只能证明新的 checkpoint-aware worker 持续推进，不能证明全部合约已追平、模型已产生候选或通知已实际送达。
+
+## 冷扫完成与增量验收待续
+
+`e55a421` 重链后不触发 scanner、候选或通知。低频读取显示同一新 cold scan `started_at_ms=1789078801148` 已在 `finished_at_ms=1789080909373` 完成 **1,434 / 1,434** 单元、`errors=0`，持续 `2108.22` 秒。该轮累计计时为 fetch `3443.925s`、analyze `1283.350s`、checkpoint `407.454s`；它们跨单元累加，不能相加成单条路径延迟或宣称 15 分钟时效。此时 `/api/health` 为 HTTP 200 / `1.377s`，`/api/status` 为 HTTP 200 / `0.316s`。
+
+完成首轮只说明当前 catalog 每个单元至少被本次 worker 处理过：短历史、下一根收盘时效和新鲜通知仍须由下一增量轮分别验收。状态的下一轮计划为 `1789081029373`；本记录不以 completed/ready 字段代替逐周期最新收盘证明，也不为此重启服务。此时 model gate 是 `idle`、`loaded=false`、queue `0`，对应没有合格 raw candidate 的惰性加载，不是假置 ready。Bark pending/sent/failed/unknown 都为 0；Telegram configured/enabled 均为 false，未发送测试通知。
