@@ -5,7 +5,7 @@
   const $ = (id) => document.getElementById(id);
   const state = {
     view: "signals", signals: [], directSignals: [], rawYoloSignals: [], candidates: [], signalScope: "direct", markets: [], status: null, health: null,
-    signalsLoaded: false, directSignalsLoaded: false, directSignalTotal: 0, candidatesLoaded: false, candidateTotal: 0, candidateCounts: null, marketsLoaded: false, signalTotal: 0, rowLimit: 24, watchLimit: 24, search: "", watchSearch: "", watchScope: "building",
+    signalsLoaded: false, directSignalsLoaded: false, directSignalTotal: 0, candidatesLoaded: false, candidateTotal: 0, candidateCounts: null, marketsLoaded: false, marketsLoading: false, signalTotal: 0, rowLimit: 24, watchLimit: 24, search: "", watchSearch: "", watchScope: "building",
     rawNextCursor: null, rawHasMore: false, rawPaged: false, rawLoadingMore: false,
     timeframe: "all", watchTimeframe: "all", side: "long", signalSource: "live", selected: null,
     chartKey: null, chart: null, chartRequest: 0, chartController: null, chartExpanded: false, chartViewport: null,
@@ -263,6 +263,8 @@
     document.title = `spike · ${titles[state.view][0]}`;
     if (updateHash) history.replaceState(null, "", `#${state.view}`);
     if (state.view === "system") loadHealth();
+    // Signals never load the expensive market overview.  Watch opts in once.
+    if (state.view === "watch") loadMarkets();
   }
   function filteredSignals() {
     const q = normalSearch(state.search);
@@ -926,6 +928,27 @@
       }
     }
   }
+  async function loadMarkets() {
+    // The overview is explicitly user-entered and cannot overlap itself.  It
+    // is not part of the 15-second signal refresh, preventing abandoned pages
+    // from piling synchronous market reads onto the API process.
+    if (state.marketsLoaded || state.marketsLoading) return;
+    state.marketsLoading = true;
+    renderWatch();
+    try {
+      const result = await api("/api/markets");
+      if (!Array.isArray(result.items)) throw new Error("服务返回的数据格式有误");
+      state.markets = result.items.filter((item) => item && typeof item === "object" && item.symbol && item.timeframe);
+      state.marketsLoaded = true;
+      delete state.errors.markets;
+    } catch (error) {
+      state.errors.markets = error.message || "请求失败";
+    } finally {
+      state.marketsLoading = false;
+      renderErrors(); renderWatch();
+    }
+  }
+
   async function loadEarlierRawSignals() {
     if (state.rawLoadingMore || !state.rawHasMore || !state.rawNextCursor || state.signalScope !== "direct") return;
     const queryRevision = state.signalQueryRevision;

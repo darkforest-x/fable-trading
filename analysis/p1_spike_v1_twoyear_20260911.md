@@ -54,7 +54,7 @@ AUC、置换检验、top-decile 净收益、匹配随机交易对照在这一固
 
 ## 三周期已覆盖子集的描述性统计
 
-为避免既有账本中的旧 1D 行混进当前协议，诊断器只读取 **30m / 1H / 4H**。它按 `exit_time`、`entry_time`、`event_id` 排序，先以零作为等权事件序列基线，再计算 `event_sequence_drawdown`；这不是账户净值或账户回撤。下面数值来自同一冻结 receipt，明细保留在 `results/coverage_diagnostics_by_timeframe.csv`、`..._by_entry_year.csv` 与 `..._by_exit_reason.csv`。
+为避免既有账本中的旧 1D 行混进当前协议，诊断器只读取 **30m / 1H / 4H**。它按 `exit_time`、`entry_time`、`event_id` 排序，先以零作为等权事件序列基线，再计算 `event_sequence_drawdown`；这不是账户净值或账户回撤。下面数值来自当前冻结的 [coverage_descriptive_by_venue_timeframe.csv](../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/coverage_descriptive_by_venue_timeframe.csv) 与 [coverage_descriptive_snapshot_receipt.json](../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/coverage_descriptive_snapshot_receipt.json)。旧 `coverage_diagnostics_*` 文件属于此前 3,980 行快照，不再作为本表来源。完整账本为 6,253 = 6,170 realized + 83 censored；当前三周期子集为 6,185 = 6,116 + 69，差出的 68 条 1D 行为 54 realized + 14 censored，按当前 V1 UI/通知周期合约排除。
 
 | 周期 | 信号行 | 已实现 / censored | 已实现正 / 非正 | 已实现正收益率 | 已实现等权净收益和 | 已实现净 R 和 | 已实现 PF | 事件序列回撤 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |

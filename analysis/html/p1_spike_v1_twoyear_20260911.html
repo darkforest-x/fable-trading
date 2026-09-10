@@ -89,7 +89,7 @@ python3 scripts/md_to_html.py analysis/p1_spike_v1_twoyear_20260911.md --out-dir
 <p>逐笔账本位于 <a href="../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_ledger.csv.gz">covered_trade_ledger.csv.gz</a>，可搜索浏览页位于 <a href="../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_drilldown.html">covered_trade_drilldown.html</a>。这些文件只描述已覆盖单元，不能替代完整市场、匹配随机对照、资金组合或样本外评估。</p>
 <p>AUC、置换检验、top-decile 净收益、匹配随机交易对照在这一固定规则且覆盖未完成的账本修复阶段不适用；因此没有编造这些指标或留作隐性成功信号。</p>
 <h2>三周期已覆盖子集的描述性统计</h2>
-<p>为避免既有账本中的旧 1D 行混进当前协议，诊断器只读取 <strong>30m / 1H / 4H</strong>。它按 <code>exit_time</code>、<code>entry_time</code>、<code>event_id</code> 排序，先以零作为等权事件序列基线，再计算 <code>event_sequence_drawdown</code>；这不是账户净值或账户回撤。下面数值来自同一冻结 receipt，明细保留在 <code>results/coverage_diagnostics_by_timeframe.csv</code>、<code>..._by_entry_year.csv</code> 与 <code>..._by_exit_reason.csv</code>。</p>
+<p>为避免既有账本中的旧 1D 行混进当前协议，诊断器只读取 <strong>30m / 1H / 4H</strong>。它按 <code>exit_time</code>、<code>entry_time</code>、<code>event_id</code> 排序，先以零作为等权事件序列基线，再计算 <code>event_sequence_drawdown</code>；这不是账户净值或账户回撤。下面数值来自当前冻结的 <a href="../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/coverage_descriptive_by_venue_timeframe.csv">coverage_descriptive_by_venue_timeframe.csv</a> 与 <a href="../experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/coverage_descriptive_snapshot_receipt.json">coverage_descriptive_snapshot_receipt.json</a>。旧 <code>coverage_diagnostics_*</code> 文件属于此前 3,980 行快照，不再作为本表来源。完整账本为 6,253 = 6,170 realized + 83 censored；当前三周期子集为 6,185 = 6,116 + 69，差出的 68 条 1D 行为 54 realized + 14 censored，按当前 V1 UI/通知周期合约排除。</p>
 <table><thead><tr>
 <th>周期</th>
 <th>信号行</th>

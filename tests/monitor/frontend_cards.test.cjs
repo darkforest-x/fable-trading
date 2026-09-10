@@ -223,3 +223,15 @@ test("missing frozen OHLC remains unverified and is never replaced with a live c
   assert.match(app, /缺少同源冻结 OHLC · 不展示收益/);
   assert.match(app, /不使用其他交易所或当前行情替代/);
 });
+
+
+test("signals refresh never requests market summaries and Watch loads them once", () => {
+  const refreshStart = app.indexOf("async function refresh()");
+  const watchLoad = app.indexOf("async function loadMarkets()");
+  assert.ok(refreshStart >= 0 && watchLoad > refreshStart);
+  assert.doesNotMatch(app.slice(refreshStart, watchLoad), /\/api\/markets/);
+  assert.match(app, /if \(state\.view === "watch"\) loadMarkets\(\);/);
+  assert.match(app, /async function loadMarkets\(\)[\s\S]*state\.marketsLoaded \|\| state\.marketsLoading/);
+  assert.match(app, /api\("\/api\/markets"\)/);
+  assert.match(app, /marketsLoading: false/);
+});

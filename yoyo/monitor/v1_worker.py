@@ -71,6 +71,11 @@ class V1Scanner:
                 "started_at_ms": started, "finished_at_ms": None, "completed": 0,
                 "total": 0, "errors": 0, "error_samples": [], "isolated": True}
         store.set_meta("scan", scan)
+        # Migration runs once per worker before any HTTP overview reads.  The
+        # selected-chart table remains the only source of legacy full payloads.
+        if not getattr(self, "_summary_backfilled", False):
+            store.set_meta("market_summary_backfill", store.backfill_market_summaries())
+            self._summary_backfilled = True
         client.synchronize()
         arm_v1_bark(store, client.clock())
         if not self.instruments or started - self.universe_at >= 3_600_000:

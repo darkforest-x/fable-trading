@@ -53,6 +53,11 @@ class Store:
             CREATE TABLE IF NOT EXISTS markets (
                 symbol TEXT NOT NULL, timeframe TEXT NOT NULL, payload TEXT NOT NULL,
                 PRIMARY KEY(symbol,timeframe));
+            -- Keep overview cards physically separate from the full chart/event
+            -- record. SQLite json_remove still parses the whole source payload.
+            CREATE TABLE IF NOT EXISTS market_summaries (
+                symbol TEXT NOT NULL, timeframe TEXT NOT NULL, payload TEXT NOT NULL,
+                PRIMARY KEY(symbol,timeframe));
             -- The isolated scanner owns this private, complete recurrence
             -- seed.  UI chart rows are intentionally shorter and cannot be
             -- used to restore frozen V1 feature state after a process restart.
@@ -223,24 +228,56 @@ class Store:
                 return False
             return self._insert_event(db, e, notify, bark_notify, telegram_photo, photo_error)
 
+    @staticmethod
+    def _market_summary(row):
+        """Return overview-only state; charts/events stay in the selected row."""
+        return {key: value for key, value in row.items() if key not in {"chart", "events"}}
+
     def upsert_market(self, row):
+        """Atomically write the full selected-chart row and its compact card state."""
+        full_payload = encode(row)
+        summary_payload = encode(self._market_summary(row))
         with self.connect() as db:
             db.execute("INSERT OR REPLACE INTO markets VALUES (?,?,?)",
-                       (row["symbol"], row["timeframe"], encode(row)))
+                       (row["symbol"], row["timeframe"], full_payload))
+            db.execute("INSERT OR REPLACE INTO market_summaries VALUES (?,?,?)",
+                       (row["symbol"], row["timeframe"], summary_payload))
+
+    def backfill_market_summaries(self):
+        """Populate missing compact cards from legacy full rows in a scanner process.
+
+        This intentionally never runs in an HTTP request.  Corrupt legacy JSON is
+        left absent rather than making the endpoint deserialize a full record as a
+        fallback; the result reports that row for durable scanner diagnostics.
+        """
+        with self.connect() as db:
+            rows = db.execute("""SELECT m.symbol,m.timeframe,m.payload FROM markets m
+                LEFT JOIN market_summaries s ON s.symbol=m.symbol AND s.timeframe=m.timeframe
+                WHERE s.symbol IS NULL ORDER BY m.symbol,m.timeframe""").fetchall()
+            backfilled = skipped = 0
+            for row in rows:
+                try:
+                    payload = json.loads(row[2])
+                    if not isinstance(payload, dict):
+                        raise ValueError("market payload is not an object")
+                    summary = encode(self._market_summary(payload))
+                except (TypeError, ValueError, json.JSONDecodeError):
+                    skipped += 1
+                    continue
+                db.execute("INSERT OR REPLACE INTO market_summaries VALUES (?,?,?)",
+                           (row[0], row[1], summary))
+                backfilled += 1
+        return {"backfilled": backfilled, "skipped": skipped}
 
     def list_markets(self):
         with self.connect() as db:
             return [json.loads(r[0]) for r in db.execute("SELECT payload FROM markets ORDER BY symbol,timeframe")]
 
     def list_market_summaries(self):
-        """Read card state without decoding each persisted chart or event list.
-
-        The market overview needs only its compact state.  Charts remain in the
-        individual row for ``get_market`` and the selected-chart endpoint.
-        """
-        sql = "SELECT json_remove(payload, '$.chart', '$.events') FROM markets ORDER BY symbol,timeframe"
+        """Read only compact persisted cards; never parse chart/event JSON in HTTP."""
         with self.connect() as db:
-            return [json.loads(row[0]) for row in db.execute(sql)]
+            return [json.loads(row[0]) for row in db.execute(
+                "SELECT payload FROM market_summaries ORDER BY symbol,timeframe")]
 
     def get_market(self, symbol, timeframe):
         """Read one persisted chart for the separate causal YOLO worker."""
