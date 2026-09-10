@@ -1,0 +1,105 @@
+{
+  "schema": "spike-g-density-rearm-report-independent-preflight-v1",
+  "status": "passed",
+  "generated_at_utc": "2026-09-10 13:05:44 UTC",
+  "reviewer": "/root/v3_noise_rules_audit",
+  "source_sha256": {
+    "yoyo/evaluation/spike_burst_v3_density_rearm_report.py": "0e6792a3b8c072ec01d537ec8224dc51b8617069b26212e03f664ff9ba51c5f6"
+  },
+  "review_git_head": "2620a8c281b1d7840bcaa6c40487639af2904f6d",
+  "source_unchanged_during_review": true,
+  "scope": "Read-only renderer source audit, actual built-in synthetic self-test, and independent synthetic authentication/forbidden-call probes. No G market outputs were read.",
+  "checks": [
+    {
+      "name": "Complete receipt and source authentication",
+      "status": "passed",
+      "evidence": "Explicit full validation SHA is required. Prepared/validation status, config, source pins, original fixed population/gates/costs, and frozen F provenance are checked. Every referenced source/artifact is hashed before table/feature parsing and rechecked after rendering."
+    },
+    {
+      "name": "Immutable original V1 and F lineage",
+      "status": "passed",
+      "evidence": "Original V1 recall/trade/event hashes are fixed and independently authenticated. F prepared and validation hashes are fixed. G labels must match frozen F bytes. Original V1 statistics are explicitly historical and retain their own historical random controls."
+    },
+    {
+      "name": "No detector or economic rerun",
+      "status": "passed",
+      "evidence": "Renderer imports no yoyo detector, signal engine, simulator or scorer and calls none. It draws stored features/states/events and copies saved summaries; Holm7 arithmetic is verified from stored raw p values, not recomputed by a new statistical test."
+    },
+    {
+      "name": "Stored parent and child event clocks",
+      "status": "passed",
+      "evidence": "Charts check state index/close clocks against source, verify published prices and actual parent age0..3 identity, and require saved markers to equal stored state events. Same-bar and delayed children are drawn as triangles at their own stored close time and close price, without relocating confirmation to the parent."
+    },
+    {
+      "name": "Fixed global case selection",
+      "status": "passed",
+      "evidence": "HYPE/NEAR/PEPE have a fixed complete96-hour opening-bar window Aug18-Aug21. The axis uses actual Beijing close times; 8/19 22:00 and23:00 opening bars correspond to23:00 and8/20 00:00 closing lines. Both arms, original V1, six MAs, IMACD dual lines/zero and volume are shown."
+    },
+    {
+      "name": "Rearm provenance is not a backdated signal",
+      "status": "passed",
+      "evidence": "Past shading uses stored prior12 source support [i-12,i), while a separate line marks when restoration became known at actual close i. Legend/text calls it provenance and qualification, not an earlier trade signal."
+    },
+    {
+      "name": "Fixed denominator and economic interpretation",
+      "status": "passed",
+      "evidence": "Renderer verifies original1660/947/1463 denominators, parent/child/same-bar union counts, stored acceptance thresholds, and A-F+G Holm7. Economics remain accepted early-parent next-open paths, not saved V4 confirmation entries, and not account NAV."
+    },
+    {
+      "name": "Unknown density remains separate",
+      "status": "passed",
+      "evidence": "Authenticated rearm_summary table is preserved verbatim, including unknown raw-edge, unknown asset-hour and unknown∩postdecision-locked hour fields. No held/ownership coverage or unknown count is credited to fresh retention. Final narrative must explicitly report these separate counts."
+    },
+    {
+      "name": "Formal renderer lifecycle",
+      "status": "passed",
+      "evidence": "Exact builder bytes must match HEAD before formal build. Existing started/fragment/manifest/case/figure paths refuse overwrite. Sources and builder are rechecked before final report manifest."
+    }
+  ],
+  "self_test": {
+    "command": ".venv/bin/python -m yoyo.evaluation.spike_burst_v3_density_rearm_report --self-test",
+    "cwd": "/Users/zhangzc/fable-trading",
+    "exit_code": 0,
+    "output": "Synthetic renderer checks passed: Holm7, missing-arm rejection, unknowns, 96 bars, same-bar/late child clocks, rearm provenance, SHA tamper and overwrite guards. No market inputs read.\n",
+    "coverage": [
+      "Holm7 raw arithmetic",
+      "missing-arm rejection",
+      "unknown JSON values",
+      "all96 bars",
+      "same-bar and delayed confirmation clocks",
+      "stored prior12 rearm provenance",
+      "SHA tamper",
+      "figure overwrite rejection"
+    ]
+  },
+  "independent_probe": {
+    "command": ".venv/bin/python - <<'PY'\\n[python_source below]\\nPY",
+    "python_source": "import ast, hashlib, json, tempfile\nfrom pathlib import Path\nfrom unittest.mock import patch\nfrom yoyo.evaluation import spike_burst_v3_density_rearm_report as r\nsource_path=Path(r.__file__)\ntree=ast.parse(source_path.read_text())\nimports=[]\nfor node in ast.walk(tree):\n    if isinstance(node,ast.ImportFrom): imports.append(node.module or \"\")\n    elif isinstance(node,ast.Import): imports.extend(a.name for a in node.names)\nassert not any(name.startswith(\"yoyo\") for name in imports)\nfor node in ast.walk(tree):\n    if isinstance(node,ast.Call):\n        name=node.func.id if isinstance(node.func,ast.Name) else node.func.attr if isinstance(node.func,ast.Attribute) else \"\"\n        assert name not in {\"detect\",\"simulate_trade\",\"match_signals\",\"forward_outcome\",\"trade_summary\",\"early_fields\"}\nchecks=[\"no_detector_or_execution_import_or_call\"]\ndef dump(path,value):\n    path.write_text(json.dumps(value))\n    return r.sha(path)\ndef bad(call,name):\n    try:call()\n    except (ValueError,KeyError):checks.append(name)\n    else:raise AssertionError(\"Accepted invalid provenance: \"+name)\nwith tempfile.TemporaryDirectory(prefix=\"g-report-auth-synthetic-\") as folder:\n    root=Path(folder); gout=root/\"g\"; f=root/\"f\"; v1=root/\"v1\"\n    for d in (gout,f,v1):d.mkdir()\n    src=root/\"source.py\";src.write_text(\"# Synthetic immutable source\\n\")\n    pins={\"source.py\":r.sha(src)}\n    for d in (gout,f):(d/\"labels.csv.gz\").write_bytes(b\"synthetic identical labels, not real market data\")\n    def artifact(path):return {\"path\":str(path),\"sha256\":r.sha(path)}\n    fp={\"status\":\"complete\",\"config\":{\"fixture\":True},\"source_pins\":pins,\"sources\":{},\"artifacts\":[artifact(f/\"labels.csv.gz\")]}\n    fph=dump(f/\"prepared_manifest.json\",fp)\n    fv={\"status\":\"complete\",\"config\":fp[\"config\"],\"source_pins\":pins,\"prepared_sha\":fph,\"artifacts\":[]}\n    fvh=dump(f/\"validation_manifest.json\",fv)\n    config=dict(schema=\"spike-v3-density-rearm-v1\",arms=list(r.ARMS),fixed_population=r.FIXED,\n                acceptance=r.THRESHOLDS,cost_bp=20,structural_hypothesis_number=7,\n                prior_single_gate_explorations=13,holdout_per_new_config=1,\n                production_eligible=False,training_eligible=False)\n    gp={\"status\":\"complete\",\"config\":config,\"source_pins\":pins,\"sources\":{},\"artifacts\":[artifact(gout/\"labels.csv.gz\")]}\n    gph=dump(gout/\"prepared_manifest.json\",gp)\n    gv={\"status\":\"complete\",\"config\":config,\"source_pins\":pins,\"prepared_sha\":gph,\"prior_F_validation_sha\":fvh,\"artifacts\":[]}\n    gvh=dump(gout/\"validation_manifest.json\",gv)\n    originals={}\n    for name in r.ORIGINAL_HASHES:\n        p=v1/name;p.write_bytes(b\"synthetic original-V1 lineage only\")\n        originals[name]=r.sha(p)\n    patches=dict(ROOT=root,OUT=gout,F_SOURCE=f,F_PREPARED_SHA=fph,F_VALIDATION_SHA=fvh,\n                 ORIGINAL=v1,ORIGINAL_HASHES=originals)\n    with patch.multiple(r,**patches), patch.object(r.pd,\"read_csv\",side_effect=AssertionError(\"Authentication parsed a table\")), patch.object(r.pd,\"read_pickle\",side_effect=AssertionError(\"Authentication parsed a feature\")):\n        a,b,refs=r.authenticate(gvh)\n        assert a[\"config\"]==config and b[\"prepared_sha\"]==gph\n        checks.append(\"full_synthetic_G_F_V1_lineage_without_table_parsing\")\n        bad(lambda:r.authenticate(\"not-a-sha\"),\"explicit_valid_sha_required\")\n        bad(lambda:r.authenticate(\"0\"*64),\"wrong_validation_sha_denied\")\n        src.write_text(\"# mutated\")\n        bad(lambda:r.authenticate(gvh),\"changed_pinned_source_denied\")\n        src.write_text(\"# Synthetic immutable source\\n\")\n        op=v1/next(iter(originals)); saved=op.read_bytes();op.write_bytes(b\"mutated\")\n        bad(lambda:r.authenticate(gvh),\"changed_original_V1_denied\");op.write_bytes(saved)\n        before=(gout/\"labels.csv.gz\").read_bytes();(gout/\"labels.csv.gz\").write_bytes(b\"changed\")\n        bad(lambda:r.authenticate(gvh),\"changed_frozen_labels_denied\");(gout/\"labels.csv.gz\").write_bytes(before)\n        altered=dict(gv,status=\"started\")\n        ah=dump(gout/\"validation_manifest.json\",altered)\n        bad(lambda:r.authenticate(ah),\"incomplete_G_validation_denied\")\n        altered=dict(gv,config=dict(config,cost_bp=10))\n        ah=dump(gout/\"validation_manifest.json\",altered)\n        bad(lambda:r.authenticate(ah),\"changed_cost_or_prepare_contract_denied\")\nprint(json.dumps({\"status\":\"passed\",\"checks\":checks,\"synthetic_only\":True,\"real_market_files_read\":False}))\n",
+    "exit_code": 0,
+    "output": "{\"status\": \"passed\", \"checks\": [\"no_detector_or_execution_import_or_call\", \"full_synthetic_G_F_V1_lineage_without_table_parsing\", \"explicit_valid_sha_required\", \"wrong_validation_sha_denied\", \"changed_pinned_source_denied\", \"changed_original_V1_denied\", \"changed_frozen_labels_denied\", \"incomplete_G_validation_denied\", \"changed_cost_or_prepare_contract_denied\"], \"synthetic_only\": true, \"real_market_files_read\": false}\n",
+    "fixtures": "Only temporary generated text/JSON byte fixtures. No original historical market CSV/pickle or G result files were opened."
+  },
+  "observations": [
+    {
+      "severity": "report_author_note",
+      "text": "The renderer preserves density_unknown_* values in tables but does not itself add an explicit unknown-density sentence to risks_and_honesty. The final MD should state their actual values, and must not describe data-insufficiency suppression as removal of false starts. This does not require any change to the frozen detector or acceptance gates."
+    }
+  ],
+  "unresolved_blockers": [],
+  "limitations": [
+    "This is a preflight audit. Actual G validation SHA, live market-derived counts, case outputs and charts await completion and authenticated formal rendering.",
+    "Synthetic rendering was exercised by self-test, but no actual G market chart was visually inspected here.",
+    "Subsequent prices in the fixed96-bar charts are retrospective context only; this renderer does not establish causal forecasting success.",
+    "No native Pine compile/parity or online changes occurred."
+  ],
+  "actions": {
+    "market_files_read": false,
+    "market_outputs_read": false,
+    "detector_or_simulator_run": false,
+    "source_modified": false,
+    "existing_study_preflight_modified": false,
+    "market_render_run": false,
+    "committed": false
+  },
+  "next_allowed_action": "Root can commit this exact renderer and review receipt, wait for the independently completed G evaluation, then pass its full validation SHA to formal rendering. The renderer itself refuses premature, mismatched or repeated output."
+}
