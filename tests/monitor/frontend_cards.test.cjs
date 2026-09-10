@@ -102,6 +102,13 @@ test("covered replay receipts distinguish realized facts from censored rows with
   assert.match(app, /尚未关联 v2 覆盖账本 · 不展示收益/);
 });
 
+test("idle YOLO gate is shown as standby, while loading and error remain distinct", () => {
+  assert.match(app, /const gateIdle = gate\.status === "idle" && gate\.loaded !== true && Number\(gate\.queue_depth \|\| 0\) === 0/);
+  assert.match(app, /YOLO 待命；当前没有合格原始 V1 候选/);
+  assert.match(app, /YOLO 模型正在加载；原始 V1 启动不受影响/);
+  assert.match(app, /模型检测异常/);
+});
+
 test("overview never presents a persisted ready phase as fresh all-market coverage", () => {
   assert.match(app, /counts\.ready` describes persisted feature phase/);
   assert.match(app, /已扫描 \$\{number\(complete\)\} \/ \$\{number\(total\)\} · 预热\/追平中/);
