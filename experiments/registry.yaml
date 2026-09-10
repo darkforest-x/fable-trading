@@ -7758,3 +7758,23 @@ experiments:
     notes: Owner explicitly requested three years/all dates. Frozen return exposure 2, previously seen retrospective history,
       not blind OOS. BTC/ETH separate; frozen COIN pool includes XAUT. Historical lifetime audit applied before event preparation.
       RAVE extreme simulated profit authenticated but material full-account dependence; no live/default/notification changes.
+
+  - experiment_id: exp-spike-burst-launch-recall-20260910-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 33f2d6e5c10627bda1513c90545efcd875707602
+    status: active
+    question: Why did Burst V1 miss August19 gradual 1H launches, and does adding one frozen progressive route improve
+      timely recall without uncontrolled false alerts?
+    single_variable: Add the preregistered progressive entry route; preserve V1 force gates, protection, next-open execution
+      and costs. No grid search.
+    result: Preregistered; full eligible OKX 1H pool denominator and independent price-event label. Owner 80% target is
+      not yet demonstrated.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    canonical_report: null
+    artifacts: []
+    notes: Owner authorizes adjustment and all dates. This V2 config first retrospective evaluation; known 61-day history
+      and selected August19 screenshots are not blind OOS. Screenshot bar opens differ from confirmed_at by one hour. No
+      monitor/notification/order change.

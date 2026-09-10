@@ -15,6 +15,7 @@ The chart's last-bar table is deliberately not treated as a cursor-bar reading.
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
 import math
@@ -222,6 +223,9 @@ def build(output=OUTPUT, prior_results=OLD):
     records = {str(Path(r["path"]).resolve()): r["sha256"] for r in manifest["artifacts"]}
     matching_path = checked(old / "matching.json", records[str(old / "matching.json")])
     matching = json.loads(matching_path.read_text())
+    cov_record = next(r for r in manifest["prior_aggregate_sources"] if Path(r["path"]).name == "coverage.csv")
+    coverage_path = checked(cov_record["path"], cov_record["sha256"])
+    coverage = pd.read_csv(coverage_path, usecols=["venue", "symbol", "identity"])
     output = Path(output).resolve()
     output.mkdir(parents=True, exist_ok=True)
     start = pd.Timestamp("2026-08-18T00:00:00+08:00").tz_convert("UTC")
@@ -236,6 +240,17 @@ def build(output=OUTPUT, prior_results=OLD):
         original = pd.read_pickle(checked(job["source_features_path"], job["source_features_sha256"]))
         cols = ["open", "high", "low", "close", "volume", "quote_volume"]
         pd.testing.assert_frame_equal(cached[cols], original[cols], check_dtype=False, check_exact=True)
+        identities = coverage.loc[coverage.venue.eq("okx") & coverage.symbol.eq(case["symbol"]), "identity"]
+        if len(identities) != 1:
+            raise ValueError("Expected one native-source identity")
+        identity = ast.literal_eval(identities.iloc[0])
+        native_path = checked(identity["source_path"], identity["source_sha256"])
+        native = pd.read_csv(native_path)
+        native.index = pd.to_datetime(native.ts, unit="ms", utc=True).dt.as_unit("ns")
+        if not native.index.is_unique or not native.index.is_monotonic_increasing:
+            raise ValueError("Native candle timestamps must be unique and chronological")
+        np.testing.assert_allclose(native.loc[cached.index, cols].to_numpy(dtype=float),
+                                   cached[cols].to_numpy(dtype=float), rtol=0, atol=0)
         f = engine.features(cached[cols])
         for c in f.columns:
             pd.testing.assert_series_equal(f[c], cached[c], check_dtype=False, check_exact=True)
@@ -256,6 +271,8 @@ def build(output=OUTPUT, prior_results=OLD):
         summaries.append(dict(asset=case["asset"], symbol=case["symbol"], tick=job["tick"],
             source_features=dict(path=job["source_features_path"], sha256=job["source_features_sha256"]),
             cached_features=dict(path=job["features_path"], sha256=job["features_sha256"]),
+            native_hourly=dict(path=str(native_path), sha256=identity["source_sha256"],
+                               six_column_exact_match_rows=len(cached)),
             all_history_bars=len(f), exported_bars=len(selected), screenshot_case=case,
             screenshot_sha256=sha(screen) if screen.exists() else None,
             screenshot_check=screenshot_check(f.loc[t], case), target=trace.loc[t].to_dict(),
@@ -267,6 +284,7 @@ def build(output=OUTPUT, prior_results=OLD):
         builder_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         builder_sources=builders, prior_manifest=dict(path=str(manifest_path), sha256=sha(manifest_path)),
         prior_matching=dict(path=str(matching_path), sha256=sha(matching_path)), cases=summaries, artifacts=artifacts,
+        prior_coverage=dict(path=str(coverage_path), sha256=cov_record["sha256"]),
         status="complete", rules_changed=False, outcomes_scored=False,
         caveats=["Only three owner-selected positive examples: no recall/precision claim or parameter optimization.",
                  "Screenshots show opening times; signals confirm one hour later. Last-bar tables are not cursor data.",
