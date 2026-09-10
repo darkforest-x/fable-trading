@@ -7840,3 +7840,19 @@ experiments:
     notes: First V4 retrospective exposure on already-seen dates. 56 tests,278source audit,10994 trade algebra checks.
       Density toggles may still split same trend. TV remainsV2; no live or risk edits.
 
+
+  - experiment_id: exp-spike-v3-gate-diagnostic-20260910-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: b14654b0703000e2c4bc3383ed7fa4243c912534
+    status: active
+    question: Why V3 is noisy versus ORIGINAL SPIKE V1, and what do individual original gates remove?
+    single_variable: 13 independent one-gate filters of frozen V3 events; no stacked changes.
+    result: Preregistered; V2 explicitly excluded from comparison per owner.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    canonical_report: analysis/html/p1_spike_v3_gate_diagnostic_20260910.html
+    artifacts: []
+    notes: Original=SPIKE强劲爆发V1; existing V3 tags and authenticated original features only. Seen historical diagnosis,
+      no live changes.
