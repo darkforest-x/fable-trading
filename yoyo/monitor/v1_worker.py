@@ -46,7 +46,8 @@ def scan_once(database: str) -> None:
                 scan["errors"] += 1
                 if len(scan["error_samples"]) < 8: scan["error_samples"].append({"symbol":symbol,"timeframe":timeframe,"error":type(exc).__name__})
             scan["completed"] += 1
-            if scan["completed"] % 20 == 0: store.set_meta("scan", scan)
+            # Durable per-cell progress: a slow first pass is never reported as zero.
+            store.set_meta("scan", scan)
     scan.update(status="degraded" if scan["errors"] else "idle", finished_at_ms=now_ms(),
                 duration_seconds=round((now_ms()-started)/1000,2), next_scan_ms=now_ms()+120000)
     store.set_meta("scan", scan)

@@ -55,7 +55,7 @@ def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, t
                            "bar_close_ms":close_ms,"signal_close_time":pd.Timestamp(close_ms,unit="ms",tz="UTC").isoformat(),"is_closed":True,
                            "price":float(row.close),"risk":float(r.risk),"initial_stop":float(r.initial_stop),"source_sha256":SOURCE_SHA256,
                            "entry_reference":"next_open","executable_entry_time":None,"ready":True,"confirmed":True,
-                           "volume_ratio":float(replayed.rv.iloc[i]),"tr_atr_expansion":float(replayed.expansion.iloc[i])})
+                           "volume_ratio":float(feature_frame.rv.iloc[i]),"tr_atr_expansion":float(feature_frame.expansion.iloc[i])})
     state={"phase":"ready","ready":bool(feature_frame.ready.iloc[-1]),"bars":len(frame),"timeframe":timeframe,
            "bar_open_ms":chart[-1]["t"],"bar_close_ms":chart[-1]["t"]+step,"price":chart[-1]["c"],"direction":"long_only",
            "protocol":SIGNAL_PROTOCOL,"source_sha256":SOURCE_SHA256}
