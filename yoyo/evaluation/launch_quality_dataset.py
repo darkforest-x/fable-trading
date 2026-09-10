@@ -336,6 +336,11 @@ def build_dataset(old_experiment=OLD_EXPERIMENT, output=OUTPUT):
     if out == old or old in out.parents:
         raise ValueError("New outputs must not overwrite the previous experiment")
     out.mkdir(parents=True, exist_ok=True)
+    if (out / "dataset_started.json").exists() or (out / "dataset_manifest.json").exists() or (out / "earlier_matching.json").exists():
+        raise ValueError("Existing evaluation attempt; preserve it and use a separately recorded attempt directory")
+    atomic_json(out / "dataset_started.json", dict(generated_at=utc_now(), holdout_consumption=1,
+        code_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
+        status="started", old_experiment=str(old)))
     verified = load_verified_coverage(old_experiment)
     jobs, coverage, matching_path = freeze_earlier_matching(verified, out)
     # The matching file exists for all markets before this first simulation.
@@ -360,6 +365,8 @@ def build_dataset(old_experiment=OLD_EXPERIMENT, output=OUTPUT):
                     old_experiment=str(Path(old_experiment).resolve()),
                     old_results_manifest=artifact(verified["manifest_path"]),
                     old_input_artifacts=[artifact(p) for p in verified["paths"].values()],
+                    feature_sources=[dict(path=path, sha256=meta["features_sha256"])
+                                     for path, meta in verified["feature_index"].items()],
                     markets=len(coverage), feature_artifacts_verified=len(verified["feature_index"]),
                     earlier_events=len(earlier_events), earlier_controls=len(earlier_controls),
                     known_events=len(known_events), known_controls=len(known_controls),
