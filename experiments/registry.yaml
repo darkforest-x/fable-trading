@@ -7896,19 +7896,28 @@ experiments:
       registered.
   - experiment_id: exp-spike-v3-confirmation-gate-20260910-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 5e85fa70f92f1bb110547518a932f90837ede872
-    status: active
+    source_commit: c4fc1645d433cb9a824cd9f5c652b36b4aac69cd
+    status: rejected
     question: Does acquiring suppression only after confirmation reduce V3 noise without a weak unconfirmed parent
       blocking later launches?
     single_variable: Only confirmation-gated suppression ownership; original V3/A thresholds, costs and execution
       unchanged.
-    result: Preregistered third structural hypothesis before C market detection or scoring; original V1/V3 comparison
-      and original acceptance targets retained.
-    holdout_consumed: false
+    result: '278 OKX 1H / 61 days: 6777 parents,2308 upgrades,7818 distinct label bars (-35.08%). Retains970/1463
+      baseline timely positives (66.30%); large recall508/947 (53.64%). Mean net13.79bp, matched excess -94.65bp,
+      three-hypothesis Holm1. All four fixed gates failed; independent full replay passed.'
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
     canonical_report: analysis/html/p1_spike_v3_confirmation_gate_20260910.html
-    artifacts: []
-    notes: Sequential exploration on previously seen dates, not blind OOS. Preserve original fresh miss denominator;
-      reference/suppression coverage separate.
+    artifacts:
+    - spike-v3-confirmation-gate-20260910-report-source
+    - spike-v3-confirmation-gate-20260910-report-html
+    - spike-v3-confirmation-gate-20260910-prepared
+    - spike-v3-confirmation-gate-20260910-validation
+    - spike-v3-confirmation-gate-20260910-report-manifest
+    - spike-v3-confirmation-gate-20260910-independent-review
+    - spike-v3-confirmation-gate-20260910-report-review
+    notes: First scored C configuration exposure under owner all-date authorization. Sequential exploration on previously
+      seen dates, not blind OOS; prior13 gates and A/B disclosed. Reference/suppression coverage never repairs fresh
+      recall. No deployment.

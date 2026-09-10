@@ -27052,3 +27052,101 @@ artifacts:
     production_eligible: false
     notes: A/B failed fixed fresh-retention and economic targets. Old actual trade coverage is descriptive only. Native
       Pine smoke passed; no full-series parity or live deployment.
+  - artifact_id: spike-v3-confirmation-gate-20260910-report-source
+    artifact_type: report
+    role: v3_confirmation_owned_suppression
+    source_repo: darkforest-x/fable-trading
+    source_commit: d92d9f856a559926b83ff9a059edded26b3b3115
+    source_path: analysis/p1_spike_v3_confirmation_gate_20260910.md
+    sha256: b0ea6e211adc28b5f0c5fdef4907dc74eb63e925d5cdc08682b9fad0c34bbe03
+    size_bytes: 18539
+    storage_uri: repo://analysis/p1_spike_v3_confirmation_gate_20260910.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: C failed all fixed gates. Full sequence and independent trade audit passed. Same previously seen history;
+      no C Pine port or live deployment.
+  - artifact_id: spike-v3-confirmation-gate-20260910-report-html
+    artifact_type: report
+    role: v3_confirmation_owned_suppression
+    source_repo: darkforest-x/fable-trading
+    source_commit: d92d9f856a559926b83ff9a059edded26b3b3115
+    source_path: analysis/html/p1_spike_v3_confirmation_gate_20260910.html
+    sha256: 03705e3cf2e852eceb8c628079aa690ff3c01ed0ae8484f4a6ca8c25f1cdce61
+    size_bytes: 1263871
+    storage_uri: repo://analysis/html/p1_spike_v3_confirmation_gate_20260910.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: C failed all fixed gates. Full sequence and independent trade audit passed. Same previously seen history;
+      no C Pine port or live deployment.
+  - artifact_id: spike-v3-confirmation-gate-20260910-prepared
+    artifact_type: manifest
+    role: v3_confirmation_owned_suppression
+    source_repo: darkforest-x/fable-trading
+    source_commit: c4fc1645d433cb9a824cd9f5c652b36b4aac69cd
+    source_path: experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/results/prepared_manifest.json
+    sha256: 70a2f898a5593d4c87e5d272d1921ea0b9b492388b5e752e67ab1cf232da16d6
+    size_bytes: 195511
+    storage_uri: repo://experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/results/prepared_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: C failed all fixed gates. Full sequence and independent trade audit passed. Same previously seen history;
+      no C Pine port or live deployment.
+  - artifact_id: spike-v3-confirmation-gate-20260910-validation
+    artifact_type: manifest
+    role: v3_confirmation_owned_suppression
+    source_repo: darkforest-x/fable-trading
+    source_commit: c4fc1645d433cb9a824cd9f5c652b36b4aac69cd
+    source_path: experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/results/validation_manifest.json
+    sha256: ae9c40bf2e264763dfc517f3ff8afa6d64903800cd145bbdc50b0a09961e9209
+    size_bytes: 5008
+    storage_uri: repo://experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/results/validation_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: C failed all fixed gates. Full sequence and independent trade audit passed. Same previously seen history;
+      no C Pine port or live deployment.
+  - artifact_id: spike-v3-confirmation-gate-20260910-report-manifest
+    artifact_type: manifest
+    role: v3_confirmation_owned_suppression
+    source_repo: darkforest-x/fable-trading
+    source_commit: d92d9f856a559926b83ff9a059edded26b3b3115
+    source_path: experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/results/confirmation_report_manifest.json
+    sha256: bdfb416f3eabeaf947124d5082e0a573ae42c4d80a3572677ce8b6faa1a15ebd
+    size_bytes: 222362
+    storage_uri: repo://experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/results/confirmation_report_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: C failed all fixed gates. Full sequence and independent trade audit passed. Same previously seen history;
+      no C Pine port or live deployment.
+  - artifact_id: spike-v3-confirmation-gate-20260910-independent-review
+    artifact_type: manifest
+    role: v3_confirmation_owned_suppression
+    source_repo: darkforest-x/fable-trading
+    source_commit: c4fc1645d433cb9a824cd9f5c652b36b4aac69cd
+    source_path: experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/qa/independent_review.json
+    sha256: be69f2cef53d50f7fc1dc7ef95b4f00996bc1d610538e047814e135cb0aa06cc
+    size_bytes: 10146
+    storage_uri: repo://experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/qa/independent_review.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: C failed all fixed gates. Full sequence and independent trade audit passed. Same previously seen history;
+      no C Pine port or live deployment.
+  - artifact_id: spike-v3-confirmation-gate-20260910-report-review
+    artifact_type: manifest
+    role: v3_confirmation_owned_suppression
+    source_repo: darkforest-x/fable-trading
+    source_commit: d92d9f856a559926b83ff9a059edded26b3b3115
+    source_path: experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/qa/report_review.json
+    sha256: aebdf46732ca430963d2659ed251bda9c01b3529dfb71d4c7a265eea079a2d3f
+    size_bytes: 1042
+    storage_uri: repo://experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/qa/report_review.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: C failed all fixed gates. Full sequence and independent trade audit passed. Same previously seen history;
+      no C Pine port or live deployment.

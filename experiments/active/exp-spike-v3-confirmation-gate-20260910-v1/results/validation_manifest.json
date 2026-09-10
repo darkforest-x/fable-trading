@@ -1,0 +1,91 @@
+{
+  "status": "complete",
+  "config": {
+    "schema": "spike-v3-confirmation-suppression-v1",
+    "arms": [
+      "v3",
+      "confirmation_gate"
+    ],
+    "new_hypothesis": "C: confirmation acquires suppression; unconfirmed temporary reference expires at age4",
+    "interventions": "one new timing intervention; A/B not rerun or stacked",
+    "primary_economics": "parent early only; confirmations are upgrades",
+    "structural_hypothesis_number": 3,
+    "holm_family": "frozen A, frozen B, new C full-period p values",
+    "holdout_per_new_config": 1,
+    "retrospective": true,
+    "exploratory": true,
+    "acceptance": {
+      "label_drop": 0.5,
+      "large_recall": 0.8,
+      "baseline_positive_retention": 0.9
+    },
+    "execution": "unchanged actual next-open; detection reference uses signal-close price",
+    "cost_bp": 20,
+    "production_eligible": false
+  },
+  "source_pins": {
+    "yoyo/evaluation/spike_burst_v3_confirmation_study.py": "e092873256a39aa378ae1a38bb3e5346f812a88c4a5ef5657fe7cc7298112728",
+    "experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/PROJECT_PLAN.md": "673ef2d92f92c80c0d09ae9b38d3d3874849a216c0a2df93c22997c63e7877a5",
+    "tests/test_spike_burst_v3_confirmation_study.py": "b1ad981d16f97fe7baa37aa09afa6726e18537f690dede354934d3dc41ba0d78",
+    "yoyo/evaluation/spike_burst_v3_confirmation_gate.py": "38566e88825b29cf5e6199c88ac7d15f306cad0beef7cf36ecd7a2adb36bd8ab",
+    "yoyo/evaluation/spike_burst_early_warning.py": "31f5422524b15b2a758cb8e6d55b1e943123d099655f4d743051215dbacb9abf",
+    "yoyo/evaluation/spike_burst_replay.py": "996ef56ceb5b70da5337422d8390487330f7e387f648ee527b5afc9bda72a33f",
+    "yoyo/evaluation/spike_burst_execution.py": "05c96e98498cbf11cc426ed4cc939199b47af2cf8fd5a409c79fc720552f45cc",
+    "yoyo/evaluation/spike_burst_dataset.py": "e03585c03e32387b84ade03ce12966d8ff0b6468a2814f0c0199a814d69dcdd1",
+    "yoyo/evaluation/spike_burst_recall_study.py": "a9e532861cad640b5dcf6dbf8d465b3ad381cb7ef2b02d65cad153b8c849dbbb",
+    "yoyo/evaluation/altseason_research.py": "35d6e171a8a7b25516871ae119c2780dcc1130d2beaaffdd270d2b2f99742075"
+  },
+  "prepared_sha": "70a2f898a5593d4c87e5d272d1921ea0b9b492388b5e752e67ab1cf232da16d6",
+  "new_execution_paths": 7967,
+  "prior_AB_validation_sha": "b94367b06517fd4639473dbf6a4806cdf9d12dddbb7cfa59c3a1f98f5f8d121b",
+  "artifacts": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/results/trade_events.csv.gz",
+      "sha256": "4880b33b89004ef5869d1c43a7b5d44666dfc9e7c46022f18a4c6dd2c4a4dd94",
+      "size_bytes": 2489182
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/results/trade_controls.csv.gz",
+      "sha256": "913fef45fba8c17aa73920b940901d5d4cf9b9dc1690ec92061d75303b016ea7",
+      "size_bytes": 9001447
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/results/trade_summary.csv",
+      "sha256": "0cf3b90491964cb2d2e47ef3f9a23dbeb49c1d551a7f7d1e4d45726394eb5914",
+      "size_bytes": 9383
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/results/score_summary.csv",
+      "sha256": "f16624b535a2bd511f440403ea7493b069964b93cb3c1a6fbde6170c27e9a400",
+      "size_bytes": 904
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/results/retention_summary.csv",
+      "sha256": "0f518df2b35da0872dea4c3ba982df8417f415dd55fd72a028e0a7dff5132aed",
+      "size_bytes": 12305
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/results/structural_holm_family.csv",
+      "sha256": "b44fe092f995f930620871d746e8b027af62506b49bba2d8a9a3e29393a8430f",
+      "size_bytes": 480
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/results/version_comparison.csv",
+      "sha256": "48167dd3d33473c223e5fa92aa66e5e26c3d1214c79b33e05d7a239bec4f2ce5",
+      "size_bytes": 2742
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v3-confirmation-gate-20260910-v1/results/assessment.json",
+      "sha256": "4889ba71dce48864ee891fb4e2925e586958e14c7ad055fd4cff854d13c4fc46",
+      "size_bytes": 400
+    }
+  ],
+  "limitations": [
+    "Third sequential exploratory hypothesis on previously studied history, not blind OOS",
+    "A/B p values remain frozen; at least all three structural hypotheses receive Holm correction",
+    "Reference and confirmed suppression coverage never substitute for timely new parents",
+    "Economics use independent parent events, not account NAV or actual reference occupancy",
+    "Original V1 is a preserved historical benchmark with its original random controls",
+    "No source, risk, cost, monitor, alert or execution configuration promoted"
+  ]
+}
