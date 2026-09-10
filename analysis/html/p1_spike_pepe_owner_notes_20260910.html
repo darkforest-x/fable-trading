@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>PEPE 4H：Owner 批注与 V4 确认含义核对</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>PEPE 4H：Owner 批注与 V4 确认含义核对</h1>
+<p><strong>已在 Mac TradingView 直接读完九条批注。核心差别已经定位：Owner 要求的“实体站上六线、此前副图走平再抬头”，仓库 V4 并未全部作为确认条件。</strong>本轮整理解释，未更新指标或通知。</p>
+<p>实际查看的是 OKX PEPEUSDT.P、普通 4 小时 K 线、SPIKE V4、UTC+8。先从原生对象树逐条打开批注读取全文，再取消编辑；随后调整价格可视范围，看全上涨与回撤。没有编辑文字、移动绘图或改变指标参数。Owner 提供的 <a href="https://www.tradingview.com/x/eelo7OQk/">快照链接</a> 是案例入口；原文实际来源为 Mac 的批注对话框。</p>
+<h2>你标出的行情和规则</h2>
+<table><thead><tr>
+<th>原文编号</th>
+<th>批注原意</th>
+<th>本轮记录</th>
+</tr></thead><tbody>
+<tr><td>N1</td><td>启动段是重点观察开仓的部分</td><td>最终公开箭头应对应启动，而非所有潜在候选</td></tr>
+<tr><td>N2</td><td>这里也是一段趋势段</td><td>需要结合具体区间继续区分启动和延续</td></tr>
+<tr><td>N3</td><td>整段震荡不应有信号</td><td>这是要对照的负面案例，不因其中有一次小突破就默认有效</td></tr>
+<tr><td>N4</td><td>均线压制的趋势结束，站上均线后大幅拉升</td><td>保留原文“趋势段”，不擅自改成“蓄势段”</td></tr>
+<tr><td>N5</td><td>副图仍水平，为什么出信号</td><td>走平状态本身不等于已经开始抬头</td></tr>
+<tr><td>N6、N9</td><td>未先水平一段再向上，不符合逻辑</td><td>需要检验“前态走平→当前释放”的顺序</td></tr>
+<tr><td>N7</td><td>K 线未完全站上均线，被压制，不应出信号</td><td>六线站位应成为明确约束</td></tr>
+<tr><td>N8</td><td>可以再等完全站上六线，延迟一点没关系</td><td>候选出现与最终信号时间允许不同，最终价不能回填</td></tr>
+</tbody></table>
+<p><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-pepe-owner-review-20260910-v1/owner_notes.json">九条逐字原文与明确回答</a></p>
+<p>Owner 在对话补充：<strong>整根实体站上，开盘和收盘都在线上，允许下影线回踩。</strong>对应待验证表达式：</p>
+<pre><code>
+bodyAboveSix = math.min(open, close) &gt; math.max(s20, e20, s60, e60, s120, e120)
+</code></pre>
+<p>它在收盘时评估，使用该根已完成的六线值；不是要求最低价也在线上。六线为 SMA/EMA 20、60、120。这里仅记录定义，尚未接入 Pine；“站上”也不是要求六线已经按周期全部多头排列。</p>
+<h2>当前代码为什么允许你圈出的类型</h2>
+<table><thead><tr>
+<th>环节</th>
+<th>仓库 V4 条件</th>
+<th>与批注要求的差别</th>
+</tr></thead><tbody>
+<tr><td>候选</td><td>收盘超过前 12 根最高价，并高于 SMA20/EMA20</td><td>没要求实体越过全部六线</td></tr>
+<tr><td>确认位置</td><td>0—3 根内，收盘仍高于候选冻结的突破线</td><td>并未在确认时要求实体高于六线</td></tr>
+<tr><td>确认质量</td><td>近期曾密集，三根推进≥1.5ATR、三根量比≥1.5、md≥sb、middle 上升</td><td>不等于主/信号线连续近零走平后才抬头</td></tr>
+<tr><td>六线参考</td><td>aboveSix=close&gt;ropeHigh</td><td>只作参考标签，没有进入确认门，而且它也只看收盘</td></tr>
+</tbody></table>
+<p>源码位置：<a href="/Users/zhangzc/fable-trading/yoyo/evaluation/pine/spike_burst_v4.pine:90">六线与最高值</a>、<a href="/Users/zhangzc/fable-trading/yoyo/evaluation/pine/spike_burst_v4.pine:135">候选与质量</a>、<a href="/Users/zhangzc/fable-trading/yoyo/evaluation/pine/spike_burst_v4.pine:179">实际确认</a>。仓库源 SHA 为 <code>05a813664397dc7e10ebeea44194c408a4d634887469d77554dde7e893579bf5</code>。</p>
+<p>特别是 <code>md &gt;= sb</code>：当二者都为 0，这个比较依然成立；<code>middle</code> 小幅上升也可能还在平滑高低通道内。因此副图主线肉眼仍平，并不自动令当前确认质量为 false。这里说明的是逻辑允许性，<strong>没有据此声称某一根箭头的所有数值已经逐根重算</strong>。</p>
+<p>之前“只显示确认”的交付解决了预警文字干扰，确认引擎保持；不能将它称为已经实现这次批注中的形态过滤。</p>
+<h2>下一段共同复盘</h2>
+<p>先在本图固定左侧震荡、中间均线压制、随后上涨启动及右侧不应报的反弹，逐一确认真实起止 K 线。对最关键的启动，记录：候选出现、实体首次越过六线、副图开始抬头三个实际时刻，再判断你愿意接受哪根，失败案例用相同定义。</p>
+<p>副图“走平”究竟约束 md 还是 md+sb、近零容差、最少时长，以及候选何时失效，尚未由这九条原文确定。本轮不凭效果选数字，不将晚确认回填为早入场，也不使用旧 1H 收益替代本图 4H 结果。</p>
+<h2>验证与诚实声明</h2>
+<ul>
+<li>9 条批注直接读取原生文本；实体站位由 Owner 在对话明确选择。精确区间、逐笔成交与退出尚未记录，不能视为 9 笔交易或已验收 Gold 标签。</li>
+<li>这是本次人工语义检查第 1 次使用 Owner 已授权的 holdout 图表；没有新收益评分或盲 OOS。历史已经可见。</li>
+<li>样本候选数、正类率、val 样本、AUC、胜率、top-decile 收益、置换 p、匹配随机均不适用：本轮是文本与代码条件审计，不是方向性交易实验。对应反证是源码依赖追踪：aboveSix 未进入信号条件；并有 md=sb=0 的布尔反例，说明“确认必定要求抬头”不成立。</li>
+<li>当前同名 TV 实例的显示参数已读取并保持；本轮没有导出云端脚本逐字节比对。代码结论基于上述仓库源及此前保存回执，不冒充本轮完整 Pine parity 验收。</li>
+<li>HTML 静态检查与原生读图是两种证据；不声称已在浏览器验收 HTML 排版。</li>
+</ul>
+<pre><code>
+python3 -m json.tool experiments/active/exp-spike-pepe-owner-review-20260910-v1/owner_notes.json &gt;/dev/null
+python3 scripts/md_to_html.py analysis/p1_spike_pepe_owner_notes_20260910.md --out-dir analysis/html
+</code></pre>
+</body>
+</html>

@@ -1,0 +1,34 @@
+{
+  "schema": "spike-owner-chart-notes-v1",
+  "source_snapshot_url": "https://www.tradingview.com/x/eelo7OQk/",
+  "actual_read_surface": "Mac TradingView native accessibility annotation dialogs; cancelled without modifying annotation text",
+  "observed_chart": {"symbol": "OKX:PEPEUSDT.P", "timeframe": "4H", "chart_type": "standard_candles", "indicator": "SPIKE V4", "timezone": "UTC+8"},
+  "observed_date": "2026-09-10",
+  "note_order": "native object tree, top to bottom, annotations only",
+  "notes": [
+    {"id": "N1", "text": "这里出现信号这一块 我们把它叫做启动段 这个是多头的启动段  是我们重点观察要开仓的"},
+    {"id": "N2", "text": "这里也是一段趋势段"},
+    {"id": "N3", "text": "这一整段我们把它叫做震荡段 不应该出现任何信号 "},
+    {"id": "N4", "text": "可以看到这一块整个被均线压制住了 我们把它叫做趋势段  趋势段结束的时候  发现后面出了信号 所有K线都站上均线之后出现大幅度拉升  "},
+    {"id": "N5", "text": "副图还是水平的怎么就出信号了"},
+    {"id": "N6", "text": "这里出信号的逻辑是什么？\n副图这里并没有水平一段时候然后向上 和我们的逻辑不符合 不应该出信号啊"},
+    {"id": "N7", "text": "很明显都没有K线完全站上均线  都被压制了 不能出信号"},
+    {"id": "N8", "text": "这里出信号之后能不能再等待K线完全站上6条线之上再出信号 延迟一点没关系"},
+    {"id": "N9", "text": "这里并没有水平一段时候然后向上 和我们的逻辑不符合 不应该出信号啊"}
+  ],
+  "explicit_chat_clarification": {
+    "question": "你批注的“K线完全站上六条均线”，具体按哪一种判断？",
+    "answer": "整根实体站上：开盘价和收盘价都在线上，允许下影线回踩",
+    "expression_for_later_review": "barstate.isconfirmed and math.min(open, close) > math.max(s20, e20, s60, e60, s120, e120)",
+    "not_implemented": true
+  },
+  "provenance_limits": [
+    "Native annotation text was read directly, not OCR from the shared snapshot.",
+    "Whitespace is retained from observed dialog values; no native drawing export or stable drawing object IDs were available.",
+    "Exact per-note bar timestamps and region boundaries have not yet been verified; notes are not trade labels.",
+    "N4 literally says 趋势段; do not silently rewrite it to 蓄势段.",
+    "All nine notes are user commentary, not standalone authorization to change thresholds or live rules."
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}

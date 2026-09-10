@@ -28866,3 +28866,59 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Frozen synthetic report builder/preflight; no market computation.
+  - artifact_id: spike-pepe-owner-review-20260910-1
+    artifact_type: config
+    role: owner_semantic_review_not_gold
+    source_repo: darkforest-x/fable-trading
+    source_commit: 70d137fe23a7e5ffbe8efeb0ecdd6c287b9054a6
+    source_path: experiments/active/exp-spike-pepe-owner-review-20260910-v1/PROJECT_PLAN.md
+    sha256: 0de91be34f847a523781650ec5a1999c4d89be7a1f3845d7105fabe05dc43817
+    size_bytes: 1594
+    storage_uri: repo://experiments/active/exp-spike-pepe-owner-review-20260910-v1/PROJECT_PLAN.md
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Manual native UI transcription / source audit. Source commit identifies audited Pine repository state,
+      not a generated market dataset. No new scoring. Bar boundaries unverified; not Gold.
+  - artifact_id: spike-pepe-owner-review-20260910-2
+    artifact_type: annotation_set
+    role: owner_semantic_review_not_gold
+    source_repo: darkforest-x/fable-trading
+    source_commit: 70d137fe23a7e5ffbe8efeb0ecdd6c287b9054a6
+    source_path: experiments/active/exp-spike-pepe-owner-review-20260910-v1/owner_notes.json
+    sha256: 335870c5201012ab49fe7e4e6c78d7d432d8fc4acbfa6173c46596f9d70d0e1a
+    size_bytes: 2620
+    storage_uri: repo://experiments/active/exp-spike-pepe-owner-review-20260910-v1/owner_notes.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Manual native UI transcription / source audit. Source commit identifies audited Pine repository state,
+      not a generated market dataset. No new scoring. Bar boundaries unverified; not Gold.
+  - artifact_id: spike-pepe-owner-review-20260910-3
+    artifact_type: report
+    role: owner_semantic_review_not_gold
+    source_repo: darkforest-x/fable-trading
+    source_commit: 70d137fe23a7e5ffbe8efeb0ecdd6c287b9054a6
+    source_path: analysis/p1_spike_pepe_owner_notes_20260910.md
+    sha256: 8c5dcc1f927e6d9f3e74e905b7dd8e8bed654d1e69ea90ba6c7ee1e1e1370658
+    size_bytes: 5608
+    storage_uri: repo://analysis/p1_spike_pepe_owner_notes_20260910.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Manual native UI transcription / source audit. Source commit identifies audited Pine repository state,
+      not a generated market dataset. No new scoring. Bar boundaries unverified; not Gold.
+  - artifact_id: spike-pepe-owner-review-20260910-4
+    artifact_type: report
+    role: owner_semantic_review_not_gold
+    source_repo: darkforest-x/fable-trading
+    source_commit: 70d137fe23a7e5ffbe8efeb0ecdd6c287b9054a6
+    source_path: analysis/html/p1_spike_pepe_owner_notes_20260910.html
+    sha256: 51c082d3ec379acf44d14fc86d85de34f63eb0df9f4f20c102f5a5cedb62bfbb
+    size_bytes: 8708
+    storage_uri: repo://analysis/html/p1_spike_pepe_owner_notes_20260910.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Manual native UI transcription / source audit. Source commit identifies audited Pine repository state,
+      not a generated market dataset. No new scoring. Bar boundaries unverified; not Gold.

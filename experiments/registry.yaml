@@ -8161,3 +8161,25 @@ experiments:
       independent result review and three fixed 96-bar charts passed integrity.603 original timely misses:600 quota-locked
       and3 cooldown;12 newly caught kept separate. Prior A-F frozen. Current V4 confirmed-only UI unchanged. Parent-entry
       economics do not describe V4 confirmation-price entries.
+  - experiment_id: exp-spike-pepe-owner-review-20260910-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 70d137fe23a7e5ffbe8efeb0ecdd6c287b9054a6
+    status: active
+    question: Define Owner PEPE 4H launch vs range examples before further V3 noise filtering.
+    single_variable: No strategy experiment yet; manual annotation semantics and source dependency audit only.
+    result: Nine native TV annotation texts preserved. Owner explicitly requires open and close above all six MAs,
+      permits lower wick retest. Repository V4 aboveSix is non-gating and has no consecutive near-zero-flat condition.
+      Exact case bar boundaries and causal evaluation remain incomplete.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    canonical_report: analysis/html/p1_spike_pepe_owner_notes_20260910.html
+    artifacts:
+    - spike-pepe-owner-review-20260910-1
+    - spike-pepe-owner-review-20260910-2
+    - spike-pepe-owner-review-20260910-3
+    - spike-pepe-owner-review-20260910-4
+    notes: First authorized chart-semantic holdout read; no new economic evaluation or blind OOS. Current 4H chart
+      must not inherit prior 1H economics. TV annotations/Pine/notifications untouched; viewport read-only adjustments
+      only.
