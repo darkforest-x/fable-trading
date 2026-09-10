@@ -272,7 +272,7 @@ class Monitor:
         with self.lock:
             chart = self.charts.get((symbol, timeframe))
             if chart is None:
-                stored = next((row for row in self.store.list_markets() if row.get("symbol") == symbol and row.get("timeframe") == timeframe), None)
+                stored = self.store.get_market(symbol, timeframe)
                 if stored and stored.get("chart") is not None:
                     return {"symbol":symbol, "timeframe":timeframe, "candles":stored["chart"], "events":stored.get("events", []), "state":stored}
                 return None
@@ -371,7 +371,7 @@ class Monitor:
                 "ok": market_ready and model_ready and scan.get("errors", 0) == 0}
 
     def markets(self):
-        rows = [r for r in self.store.list_markets()
+        rows = [r for r in self.store.list_market_summaries()
                 if r.get("active", True) and r.get("timeframe") in MONITORED_TIMEFRAMES]
         now = self.client.clock()
         for row in rows:

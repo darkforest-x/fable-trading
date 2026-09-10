@@ -182,6 +182,16 @@ class Store:
         with self.connect() as db:
             return [json.loads(r[0]) for r in db.execute("SELECT payload FROM markets ORDER BY symbol,timeframe")]
 
+    def list_market_summaries(self):
+        """Read card state without decoding each persisted chart or event list.
+
+        The market overview needs only its compact state.  Charts remain in the
+        individual row for ``get_market`` and the selected-chart endpoint.
+        """
+        sql = "SELECT json_remove(payload, '$.chart', '$.events') FROM markets ORDER BY symbol,timeframe"
+        with self.connect() as db:
+            return [json.loads(row[0]) for row in db.execute(sql)]
+
     def get_market(self, symbol, timeframe):
         """Read one persisted chart for the separate causal YOLO worker."""
         with self.connect() as db:
