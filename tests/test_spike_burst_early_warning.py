@@ -217,3 +217,46 @@ def test_evaluate_rejects_second_scoring(monkeypatch, tmp_path):
     (tmp_path / "evaluation_started.json").write_text(json.dumps({"status": "running"}))
     with pytest.raises(ValueError, match="second scoring"):
         ew.evaluate(tmp_path)
+
+
+def test_synthetic_complete_prepare_evaluate_and_exact_labels(monkeypatch, tmp_path):
+    """Exercise orchestration, schemas and parent joins without market data."""
+    f = frame(500)
+    launch(f, 350)
+    f.loc[f.index[351], ["open", "high", "low", "close"]] = [104., 104.5, 103., 104.]
+    launch(f, 352, 109.)
+    launch(f, 400, 106.)
+    labels = old.label_events(f)
+    context = dict(instrument="synthetic", asset="SYNTH", symbol="SYNTH/USDT:USDT", venue="okx", minutes=60)
+    for key, value in context.items():
+        labels[key] = value
+    labels["label_id"] = [old.identity("synthetic", "label", int(i)) for i in labels.event_i]
+    previous = tmp_path / "prior"
+    previous.mkdir()
+    old.write_csv(previous / "labels.csv.gz", labels)
+    pd.DataFrame(columns=["arm", "period"]).to_csv(previous / "recall_summary.csv", index=False)
+    pd.DataFrame(columns=["arm", "period"]).to_csv(previous / "trade_summary.csv", index=False)
+    job = dict(context, features_path=str(tmp_path / "unused.pkl"), features_sha256="synthetic", tick=.01)
+    coverage = pd.DataFrame([context])
+    monkeypatch.setattr(ew, "source_pins", lambda: {})
+    monkeypatch.setattr(ew, "authenticated_prior", lambda _: ([job], coverage, {}, labels))
+    monkeypatch.setattr(ew, "load_feature", lambda *args: f.copy())
+    monkeypatch.setattr(ew, "V2", previous)
+    output = tmp_path / "results"
+    prepared = ew.prepare(output, previous)
+    assert prepared["status"] == "complete" and prepared["segments"] == 1
+    assert (output / "labels.csv.gz").read_bytes() == (previous / "labels.csv.gz").read_bytes()
+    signals = pd.read_csv(output / "signals.csv.gz")
+    parents = pd.read_csv(output / "parent_registry.csv.gz")
+    assert len(signals) and signals.parent_event_id.isin(parents.event_id).all()
+    assert set(signals.arm) == {"early", "confirmed"}
+    assert pd.read_csv(output / "controls.csv.gz").matched_event_id.isin(signals.event_id).all()
+    validated = ew.evaluate(output)
+    assert validated["status"] == "complete" and validated["primary_tests"] == 2
+    trades = pd.read_csv(output / "trade_events.csv.gz")
+    assert trades.valid.all() and set(trades.fee_bp) == {20.}
+    assert (trades.entry_i == trades.decision_i+1).all()
+    with pytest.raises(ValueError, match="overwrite"):
+        ew.prepare(output, previous)
+    with pytest.raises(ValueError, match="second scoring"):
+        ew.evaluate(output)

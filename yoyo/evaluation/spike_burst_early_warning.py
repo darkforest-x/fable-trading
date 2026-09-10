@@ -212,7 +212,7 @@ def prepare(output=EXPERIMENT / "results", v2=V2):
     jobs, coverage, references, labels = authenticated_prior(v2)
     output.mkdir(parents=True, exist_ok=True)
     old.write_json(output / "prepare_started.json", dict(status="running", config=CONFIG, source_pins=pins))
-    signals, controls, detections, exposure, breadth, snapshots, cases, schedules, parents = [], [], [], [], [], [], [], [], [], []
+    signals, controls, detections, exposure, breadth, snapshots, cases, schedules, parents = [], [], [], [], [], [], [], [], []
     for job in jobs:
         if job["asset"] in ("BTC", "ETH"):
             continue
