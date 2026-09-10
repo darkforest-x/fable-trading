@@ -1,0 +1,34 @@
+{
+  "status": "pass_static_and_figure_review",
+  "reviewed_at": "2026-09-10T11:10:49.785048+00:00",
+  "reports": [
+    {
+      "path": "analysis/html/p1_spike_v3_price_acceptance_20260910.html",
+      "sha256": "54cb2f9e3d6558729fdc94cf4102782e586974fbb458046a51616b219651ea50",
+      "embedded_pngs": 3,
+      "local_links_checked": 15
+    },
+    {
+      "path": "analysis/html/p1_spike_v3_noise_overview_20260910.html",
+      "sha256": "53c0ef4e15bed0afe991602f4225e9e9ee41164d063545253244a902907ed788",
+      "embedded_pngs": 4,
+      "local_links_checked": 14
+    }
+  ],
+  "figures_viewed": [
+    "hype.png",
+    "near.png",
+    "pepe.png",
+    "noise_recall_tradeoff.png"
+  ],
+  "findings": [
+    "Three fixed 96-bar charts show original events and actual delayed acceptance without backfilling; original V1 absent in those windows is stated.",
+    "Overview all six points lie outside the joint target regions; readable axes, labels and caveat.",
+    "Every embedded PNG decodes and all local report links resolve."
+  ],
+  "browser_html_visual_qa": false,
+  "browser_limitation": "Prior file navigation explicitly rejected. No alternate-browser or indirect-server workaround used. HTML has static checks only.",
+  "strategy_gates": "all_four_failed",
+  "validation_sha256": "a0cb43b3b7d548148938b9404d1744d85b5d1a60ccb8b35ab04edff012b5a570",
+  "independent_review_sha256": "18ee01ea83d87a76dce533b9b0a4649509335184e3aa02274b6011332f772ca5"
+}

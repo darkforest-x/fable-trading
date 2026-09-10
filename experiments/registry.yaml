@@ -7979,19 +7979,39 @@ experiments:
       No live changes.
   - experiment_id: exp-spike-v3-price-acceptance-20260910-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 1f10d360e51456e885ed2a5f4d479316324a3a44
-    status: active
-    question: Can one following close holding the original V3 frozen breakout boundary reject immediate failures while
-      preserving timely starts?
+    source_commit: be13db22ce692ac4c04d227b01c8044b10b21752
+    status: rejected
+    question: Can one following close holding the original V3 frozen breakout boundary reject immediate failures
+      while preserving timely starts?
     single_variable: Delay original V3 publication one close and require close above frozen candidate prior12 high;
       original candidate/child clock unchanged.
-    result: Preregistered sixth structural hypothesis, no F market detection or scoring yet. Fixed original labels
-      and four gates retained; intentional one-bar delay priced honestly.
-    holdout_consumed: false
+    result: 278 OKX1H/61days:6940 public accepted parents,3171 quality upgrades,7386 distinct labels (-38.66%);1171/1463
+      original timely hits retained (80.04%),643/947 large hits (67.90%). Net33.82bp but matched excess -114.95bp,Holm6
+      p=1. All four fixed gates failed.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
     canonical_report: analysis/html/p1_spike_v3_price_acceptance_20260910.html
-    artifacts: []
-    notes: After prior13 gates and fixed A-E on already-seen authorized dates. Pending/rejected/unknown and source/publication
-      clocks separated. No live changes.
+    artifacts:
+    - spike-v3-price-acceptance-20260910-prepared
+    - spike-v3-price-acceptance-20260910-validation
+    - spike-v3-price-acceptance-20260910-preflight-review
+    - spike-v3-price-acceptance-20260910-independent-review
+    - spike-v3-price-acceptance-20260910-case-diagnostic
+    - spike-v3-price-acceptance-20260910-report-source
+    - spike-v3-price-acceptance-20260910-report-html
+    - spike-v3-price-acceptance-20260910-report-manifest
+    - spike-v3-noise-overview-20260910-source
+    - spike-v3-noise-overview-20260910-html
+    - spike-v3-noise-overview-20260910-manifest
+    - spike-v3-price-acceptance-20260910-figure-hype
+    - spike-v3-price-acceptance-20260910-figure-near
+    - spike-v3-price-acceptance-20260910-figure-pepe
+    - spike-v3-noise-overview-20260910-tradeoff-figure
+    - spike-v3-price-acceptance-20260910-report-review
+    notes: First F scored configuration on previously inspected owner-authorized dates, after13 original gates and
+      A-E. Original V3 discovery/child/cooldown stream preserved; actual acceptance t+1 and next-open entry t+2
+      audited.3444 discovered parents rejected; label reduction4656=3565 rejected labels+0unknown+3out-1in+1089
+      merged early confirmations. Unknown labels conservatively added back for primary gate. No live changes; A-F
+      overview is descriptive and not a shared-control tournament.

@@ -27426,3 +27426,261 @@ artifacts:
     production_eligible: false
     notes: Fifth fixed structural hypothesis failed all four targets. Full independent state/price/path audit passed;
       written preflight was committed before preparation. Original V1/V3 preserved, no E Pine or deployment.
+  - artifact_id: spike-v3-price-acceptance-20260910-prepared
+    artifact_type: manifest
+    role: v3_one_close_price_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: be13db22ce692ac4c04d227b01c8044b10b21752
+    source_path: experiments/active/exp-spike-v3-price-acceptance-20260910-v1/results/prepared_manifest.json
+    sha256: 32abdf5316732247e4912cd17e3c7c94353ba6756a33df38c007fd7933d83a42
+    size_bytes: 369455
+    storage_uri: repo://experiments/active/exp-spike-v3-price-acceptance-20260910-v1/results/prepared_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: '2026-09-09T00:00:00Z'
+    notes: F failed all four fixed targets. Full independent causal-state, publication-clock and execution-path
+      audit passed; no deployment or eligibility. Original V1 historical controls remain separate.
+  - artifact_id: spike-v3-price-acceptance-20260910-validation
+    artifact_type: manifest
+    role: v3_one_close_price_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: be13db22ce692ac4c04d227b01c8044b10b21752
+    source_path: experiments/active/exp-spike-v3-price-acceptance-20260910-v1/results/validation_manifest.json
+    sha256: a0cb43b3b7d548148938b9404d1744d85b5d1a60ccb8b35ab04edff012b5a570
+    size_bytes: 6251
+    storage_uri: repo://experiments/active/exp-spike-v3-price-acceptance-20260910-v1/results/validation_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: '2026-09-09T00:00:00Z'
+    notes: F failed all four fixed targets. Full independent causal-state, publication-clock and execution-path
+      audit passed; no deployment or eligibility. Original V1 historical controls remain separate.
+  - artifact_id: spike-v3-price-acceptance-20260910-preflight-review
+    artifact_type: manifest
+    role: v3_one_close_price_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: be13db22ce692ac4c04d227b01c8044b10b21752
+    source_path: experiments/active/exp-spike-v3-price-acceptance-20260910-v1/qa/preflight_review.json
+    sha256: 194f4b50eb319fbdc8b25af94cc72c3053207673e5fe7d22bf85613e1296609a
+    size_bytes: 12743
+    storage_uri: repo://experiments/active/exp-spike-v3-price-acceptance-20260910-v1/qa/preflight_review.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: '2026-09-09T00:00:00Z'
+    notes: F failed all four fixed targets. Full independent causal-state, publication-clock and execution-path
+      audit passed; no deployment or eligibility. Original V1 historical controls remain separate. source_commit
+      identifies the reviewed frozen study; this is a QA record, not a claim that the generated receipt existed
+      in that source commit.
+  - artifact_id: spike-v3-price-acceptance-20260910-independent-review
+    artifact_type: manifest
+    role: v3_one_close_price_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: be13db22ce692ac4c04d227b01c8044b10b21752
+    source_path: experiments/active/exp-spike-v3-price-acceptance-20260910-v1/qa/independent_review.json
+    sha256: 18ee01ea83d87a76dce533b9b0a4649509335184e3aa02274b6011332f772ca5
+    size_bytes: 16001
+    storage_uri: repo://experiments/active/exp-spike-v3-price-acceptance-20260910-v1/qa/independent_review.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: '2026-09-09T00:00:00Z'
+    notes: F failed all four fixed targets. Full independent causal-state, publication-clock and execution-path
+      audit passed; no deployment or eligibility. Original V1 historical controls remain separate. source_commit
+      identifies the reviewed frozen study; this is a QA record, not a claim that the generated receipt existed
+      in that source commit.
+  - artifact_id: spike-v3-price-acceptance-20260910-case-diagnostic
+    artifact_type: manifest
+    role: v3_one_close_price_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: be13db22ce692ac4c04d227b01c8044b10b21752
+    source_path: experiments/active/exp-spike-v3-price-acceptance-20260910-v1/qa/case_diagnostic.json
+    sha256: 52d0c6a62dacd36a029b3ab826fe398dc8d32bbe9f3eff1c42cbe8ca1a9c75a1
+    size_bytes: 254032
+    storage_uri: repo://experiments/active/exp-spike-v3-price-acceptance-20260910-v1/qa/case_diagnostic.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: '2026-09-09T00:00:00Z'
+    notes: F failed all four fixed targets. Full independent causal-state, publication-clock and execution-path
+      audit passed; no deployment or eligibility. Original V1 historical controls remain separate. source_commit
+      identifies the reviewed frozen study; this is a QA record, not a claim that the generated receipt existed
+      in that source commit.
+  - artifact_id: spike-v3-price-acceptance-20260910-report-source
+    artifact_type: report
+    role: v3_one_close_price_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+    source_path: analysis/p1_spike_v3_price_acceptance_20260910.md
+    sha256: 1ce634cfcae2cb0c1f345a67e5d440171cc7961073930ef554b0c8b9423b608a
+    size_bytes: 18652
+    storage_uri: repo://analysis/p1_spike_v3_price_acceptance_20260910.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: '2026-09-09T00:00:00Z'
+    notes: F failed all four fixed targets. Full independent causal-state, publication-clock and execution-path
+      audit passed; no deployment or eligibility. Original V1 historical controls remain separate.
+    generator_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+  - artifact_id: spike-v3-price-acceptance-20260910-report-html
+    artifact_type: report
+    role: v3_one_close_price_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+    source_path: analysis/html/p1_spike_v3_price_acceptance_20260910.html
+    sha256: 54cb2f9e3d6558729fdc94cf4102782e586974fbb458046a51616b219651ea50
+    size_bytes: 1268375
+    storage_uri: repo://analysis/html/p1_spike_v3_price_acceptance_20260910.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: '2026-09-09T00:00:00Z'
+    notes: F failed all four fixed targets. Full independent causal-state, publication-clock and execution-path
+      audit passed; no deployment or eligibility. Original V1 historical controls remain separate.
+    generator_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+  - artifact_id: spike-v3-price-acceptance-20260910-report-manifest
+    artifact_type: manifest
+    role: v3_one_close_price_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+    source_path: experiments/active/exp-spike-v3-price-acceptance-20260910-v1/results/price_acceptance_report_manifest.json
+    sha256: 7fce222622d08b87b1c720f95e187131be7b9381c4b520085555cb208788b73a
+    size_bytes: 435998
+    storage_uri: repo://experiments/active/exp-spike-v3-price-acceptance-20260910-v1/results/price_acceptance_report_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: '2026-09-09T00:00:00Z'
+    notes: F failed all four fixed targets. Full independent causal-state, publication-clock and execution-path
+      audit passed; no deployment or eligibility. Original V1 historical controls remain separate.
+    generator_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+  - artifact_id: spike-v3-noise-overview-20260910-source
+    artifact_type: report
+    role: v3_noise_hypotheses_A_through_F_overview
+    source_repo: darkforest-x/fable-trading
+    source_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+    source_path: analysis/p1_spike_v3_noise_overview_20260910.md
+    sha256: 0c4a5b2f90147f790c792e12b4b189ab984daf854f5e486dee46b2d1f0d82598
+    size_bytes: 9411
+    storage_uri: repo://analysis/p1_spike_v3_noise_overview_20260910.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: '2026-09-09T00:00:00Z'
+    notes: Read-only A-F overview, preserving each historical control schedule and Holm6. All structural hypotheses
+      failed at least one target. No new detector or scoring and no deployment.
+    generator_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+  - artifact_id: spike-v3-noise-overview-20260910-html
+    artifact_type: report
+    role: v3_noise_hypotheses_A_through_F_overview
+    source_repo: darkforest-x/fable-trading
+    source_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+    source_path: analysis/html/p1_spike_v3_noise_overview_20260910.html
+    sha256: 53c0ef4e15bed0afe991602f4225e9e9ee41164d063545253244a902907ed788
+    size_bytes: 1408745
+    storage_uri: repo://analysis/html/p1_spike_v3_noise_overview_20260910.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: '2026-09-09T00:00:00Z'
+    notes: Read-only A-F overview, preserving each historical control schedule and Holm6. All structural hypotheses
+      failed at least one target. No new detector or scoring and no deployment.
+    generator_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+  - artifact_id: spike-v3-noise-overview-20260910-manifest
+    artifact_type: manifest
+    role: v3_noise_hypotheses_A_through_F_overview
+    source_repo: darkforest-x/fable-trading
+    source_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+    source_path: experiments/active/exp-spike-v3-price-acceptance-20260910-v1/results/noise_overview_manifest.json
+    sha256: f06757e14ea9b391dfd0e6de751f575af29fa44e543fa39b81a1e4287510bc70
+    size_bytes: 431486
+    storage_uri: repo://experiments/active/exp-spike-v3-price-acceptance-20260910-v1/results/noise_overview_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: '2026-09-09T00:00:00Z'
+    notes: Read-only A-F overview, preserving each historical control schedule and Holm6. All structural hypotheses
+      failed at least one target. No new detector or scoring and no deployment.
+    generator_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+  - artifact_id: spike-v3-price-acceptance-20260910-figure-hype
+    artifact_type: report
+    role: v3_one_close_price_acceptance_case_figure
+    source_repo: darkforest-x/fable-trading
+    source_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+    source_path: experiments/active/exp-spike-v3-price-acceptance-20260910-v1/results/figures/hype.png
+    sha256: b75942f66f603a9b56b9b8df75b65eb6758ffa8a4f04b41339929b523260092d
+    size_bytes: 324649
+    storage_uri: repo://experiments/active/exp-spike-v3-price-acceptance-20260910-v1/results/figures/hype.png
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: '2026-09-09T00:00:00Z'
+    notes: F failed all four fixed targets. Full independent causal-state, publication-clock and execution-path
+      audit passed; no deployment or eligibility. Original V1 historical controls remain separate.
+    generator_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+  - artifact_id: spike-v3-price-acceptance-20260910-figure-near
+    artifact_type: report
+    role: v3_one_close_price_acceptance_case_figure
+    source_repo: darkforest-x/fable-trading
+    source_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+    source_path: experiments/active/exp-spike-v3-price-acceptance-20260910-v1/results/figures/near.png
+    sha256: fcdb6350e23964abc0eda8f5ffc093efbe3266a7ed5a672520fdaecbbd2ae8d1
+    size_bytes: 289877
+    storage_uri: repo://experiments/active/exp-spike-v3-price-acceptance-20260910-v1/results/figures/near.png
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: '2026-09-09T00:00:00Z'
+    notes: F failed all four fixed targets. Full independent causal-state, publication-clock and execution-path
+      audit passed; no deployment or eligibility. Original V1 historical controls remain separate.
+    generator_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+  - artifact_id: spike-v3-price-acceptance-20260910-figure-pepe
+    artifact_type: report
+    role: v3_one_close_price_acceptance_case_figure
+    source_repo: darkforest-x/fable-trading
+    source_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+    source_path: experiments/active/exp-spike-v3-price-acceptance-20260910-v1/results/figures/pepe.png
+    sha256: 61cc7b5b43ff1ceff9c5fd791f7e2889c2d261765b98af9323a9453f653390a0
+    size_bytes: 317031
+    storage_uri: repo://experiments/active/exp-spike-v3-price-acceptance-20260910-v1/results/figures/pepe.png
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: '2026-09-09T00:00:00Z'
+    notes: F failed all four fixed targets. Full independent causal-state, publication-clock and execution-path
+      audit passed; no deployment or eligibility. Original V1 historical controls remain separate.
+    generator_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+  - artifact_id: spike-v3-noise-overview-20260910-tradeoff-figure
+    artifact_type: report
+    role: v3_noise_hypotheses_A_through_F_tradeoff_figure
+    source_repo: darkforest-x/fable-trading
+    source_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+    source_path: experiments/active/exp-spike-v3-price-acceptance-20260910-v1/results/figures/noise_recall_tradeoff.png
+    sha256: 6e05f32706f7d08caa5a4556e6cb138b9ad2c364c0a192dda8c9ac421bbfe869
+    size_bytes: 114990
+    storage_uri: repo://experiments/active/exp-spike-v3-price-acceptance-20260910-v1/results/figures/noise_recall_tradeoff.png
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: '2026-09-09T00:00:00Z'
+    notes: Read-only A-F overview, preserving each historical control schedule and Holm6. All structural hypotheses
+      failed at least one target. No new detector or scoring and no deployment.
+    generator_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+  - artifact_id: spike-v3-price-acceptance-20260910-report-review
+    artifact_type: manifest
+    role: v3_one_close_price_acceptance_report_qa
+    source_repo: darkforest-x/fable-trading
+    source_commit: d0793dd04d3336f7910f37a79013b8a4fae5019b
+    source_path: experiments/active/exp-spike-v3-price-acceptance-20260910-v1/qa/report_review.json
+    sha256: c5ab0571110eb0c86933c03cad55c7325fe9cf886dc6140b25dcb826e141c3b6
+    size_bytes: 1448
+    storage_uri: repo://experiments/active/exp-spike-v3-price-acceptance-20260910-v1/qa/report_review.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    data_cutoff: '2026-09-09T00:00:00Z'
+    notes: F failed all four fixed targets. Full independent causal-state, publication-clock and execution-path
+      audit passed; no deployment or eligibility. Original V1 historical controls remain separate. source_commit
+      identifies the reviewed frozen study; this is a QA record, not a claim that the generated receipt existed
+      in that source commit.
