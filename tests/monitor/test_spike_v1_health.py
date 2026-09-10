@@ -34,4 +34,4 @@ def test_v1_health_reads_only_scan_and_model_state(tmp_path, monkeypatch, status
     assert result["ok"] is ok
     assert result["market_ready"] is (status not in ("error", "starting") and 3 > errors and age_ms < 20 * 60_000)
     assert result["model_ready"] is (model_status == "ready")
-    assert calls == ["scan"]
+    assert calls == ["scan", "v1:model_gate"]

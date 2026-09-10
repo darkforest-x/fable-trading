@@ -60,6 +60,7 @@ class Monitor:
         self.model_gate = ModelGate(store, lambda: self.client.clock(), self.stop_event)
         self.threads = []
         self.scan_process = None
+        self.model_process = None
 
     def start(self):
         # Called only after server lifespan owns the singleton process lock.
@@ -67,8 +68,7 @@ class Monitor:
         self.store.retire_telegram_pending()
         self.store.retire_disabled_timeframes()
         self.store.retire_muted_bark_timeframes()
-        for name, target in (("scan", self.run), ("model", self.model_gate.run),
-                             ("model-submit", self.submit_model_work), ("bark", self.deliver_bark)):
+        for name, target in (("scan", self.run), ("model", self.run_model), ("bark", self.deliver_bark)):
             thread = threading.Thread(target=target, name="impulse-" + name, daemon=True)
             self.threads.append(thread)
             thread.start()
@@ -78,6 +78,9 @@ class Monitor:
         if self.scan_process is not None and self.scan_process.is_alive():
             self.scan_process.terminate()
             self.scan_process.join(timeout=2)
+        if self.model_process is not None and self.model_process.is_alive():
+            self.model_process.terminate()
+            self.model_process.join(timeout=2)
         for thread in self.threads:
             thread.join(timeout=2)
 
@@ -88,6 +91,15 @@ class Monitor:
             if self.scan_process is None or not self.scan_process.is_alive():
                 self.scan_process = multiprocessing.Process(target=scan_forever, args=(str(self.store.path), self.interval), daemon=True)
                 self.scan_process.start()
+            self.stop_event.wait(self.interval)
+
+    def run_model(self):
+        """Keep Torch/Ultralytics outside the API process."""
+        from yoyo.monitor.v1_model_worker import model_forever
+        while not self.stop_event.is_set():
+            if self.model_process is None or not self.model_process.is_alive():
+                self.model_process = multiprocessing.Process(target=model_forever, args=(str(self.store.path),), daemon=True)
+                self.model_process.start()
             self.stop_event.wait(self.interval)
 
     def deliver_bark(self):
@@ -103,21 +115,6 @@ class Monitor:
                 LOG.error("bark worker failure: %s", type(exc).__name__)
                 worked = False
             self.stop_event.wait(1.1 if worked else 3)
-
-    def submit_model_work(self):
-        """Feed persisted V1 charts to the independent YOLO-extra worker.
-
-        The scan process owns HTTP/replay. This thread reads only completed
-        SQLite charts, so detector work cannot block FastAPI or refetch prices.
-        Replay rows never enter the candidate table.
-        """
-        while not self.stop_event.is_set():
-            for event in self.store.list_candidates(2000, pending_only=True):
-                market = self.store.get_market(event["symbol"], event["timeframe"])
-                candles = market.get("chart") if market else None
-                if isinstance(candles, list) and candles:
-                    self.model_gate.submit(event["symbol"], event["timeframe"], candles)
-            self.stop_event.wait(3)
 
     def scan(self):
         start = now_ms()
@@ -295,7 +292,7 @@ class Monitor:
                     "direct_notification_policy": DIRECT_POLICY,
                     "direct_notification_since_ms": {c: activation(self.store, c, DIRECT_POLICY) for c in ("telegram", "bark")},
                     "direct_timeframe_since_ms": {tf: self.store.timeframe_activation(tf, protocol=DIRECT_POLICY) for tf in DIRECT_TIMEFRAMES},
-                    "model_gate": self.model_gate.status(),
+                    "model_gate": self.store.get_meta("v1:model_gate", self.model_gate.status()),
                     "notification_armed": bool(arm_receipt),
                     "tv_profile": {"id": TV_PROFILE_ID, "show_focus": True, "show_marks": False,
                                    "focus_min_bars": 12, "focus_atr_band": .10, "verified_on": "2026-09-08",
@@ -311,7 +308,7 @@ class Monitor:
         """Return liveness without decoding charts, events, or receipt history."""
         now = self.client.clock()
         scan = self.store.get_meta("scan", {"status": "starting", "completed": 0, "total": 0, "errors": 0})
-        model = self.model_gate.status()
+        model = self.store.get_meta("v1:model_gate", self.model_gate.status())
         last = scan.get("finished_at_ms")
         market_ready = bool(last and now - last < 20 * 60000
                             and scan.get("total", 0) > scan.get("errors", 0)
