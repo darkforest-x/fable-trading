@@ -176,6 +176,6 @@ node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.t
 
 通知时效按当前固定 `FRESH_MS=30min` 的实际截止定义检查：对每个周期要求 `actual_close >= floor_to_timeframe(now - 30min)`，而不是错误地要求 1H/4H 都等于当前最新收盘。在 `now_ms=1789082257844` 的只读检查中，30m required close 为 `1789079400000`、1H 为 `1789077600000`、4H 为 `1789070400000`；三个周期各 478 个单元都达到各自截止，欠截止单元为 **0**。短历史与 feature warmup 继续单列，未被这一通知截止账掩盖。
 
-随后只执行一次受控 LaunchAgent reload 以载入 cursor 分页和 Unicode 冻结 OHLC 路径修复。reload 前 checkpoint 为 1,434 个非空 seed（每周期 478）；新父进程 `18080` 保留相同的三周期 checkpoint。新 worker 已写入 `started_at_ms=1789083154333` 的增量轮，并达到 `312 / 1,434`、errors `0`，因此它不是重启前的持久 completed meta。Bark 和 Telegram outbox 均为空，两个历史候选仍为 disabled。该检查证明此后 restart 能以完整 checkpoint 为种子启动；它不替代正在进行的新一轮完成检查。
+随后只执行一次受控 LaunchAgent reload 以载入 cursor 分页和 Unicode 冻结 OHLC 路径修复。reload 前 checkpoint 为 1,434 个非空 seed（每周期 478）；新父进程 `18080` 仍可读取相同的三周期 checkpoint。reload 后元数据短暂显示 `started_at_ms=1789083154333`、`312 / 1,434`、errors `0`；后续以进程启动时间复核发现该时间戳早于新父进程，故它可能是保留的旧 scan meta，**不能**作为本次 hydrate 进度证据。Bark 和 Telegram outbox 均为空，两个历史候选仍为 disabled。完整 checkpoint 的可恢复性仍受 restart/hydrate parity 测试保护；本次运行只证明服务可启动并保留 seed，不把该计数写成新一轮完成。
 
 reload 后首次分页 API 请求在运行负载下两次未在 10 秒和 30 秒内给出首字节；独立只读检查确认同一 cursor SQL 在数据库为 0.164ms，不能把这两次超时归因于分页查询。当前服务 PID 的无 trace 运行无法事后定位调度边界；没有因此更改 SQL/async 或再次 reload。分页与中文合约的真实 UI 验收仍待一次低负载受控操作。
