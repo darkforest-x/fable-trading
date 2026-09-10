@@ -1,5 +1,6 @@
 """Isolated public-data V1 scanner; it never creates notification outbox rows."""
 from __future__ import annotations
+from concurrent.futures import ThreadPoolExecutor
 import time
 from pathlib import Path
 from yoyo.monitor import MONITORED_TIMEFRAMES, SIGNAL_PROTOCOL, TIMEFRAMES
@@ -37,12 +38,32 @@ class V1Scanner:
         scan = {"status":"scanning","started_at_ms":started,"finished_at_ms":None,"completed":0,
                 "total":len(instruments)*len(MONITORED_TIMEFRAMES),"errors":0,"error_samples":[],"isolated":True}
         store.set_meta("scan", scan)
-        for instrument in instruments:
-            symbol = instrument["instId"]
-            for timeframe in MONITORED_TIMEFRAMES:
+        cells = [(instrument, timeframe) for instrument in instruments for timeframe in MONITORED_TIMEFRAMES]
+        with ThreadPoolExecutor(max_workers=8, thread_name_prefix="v1-okx") as pool:
+            pending = {}
+            cell_iter = iter(cells)
+
+            def submit_next():
                 try:
-                    cell = (symbol, timeframe)
-                    candles, gaps = client.candles(symbol, timeframe, previous=self.candles.get(cell), limit=720)
+                    instrument, timeframe = next(cell_iter)
+                except StopIteration:
+                    return False
+                symbol = instrument["instId"]
+                cell = (symbol, timeframe)
+                # The worker only fetches public OHLCV.  The main thread owns
+                # recurrence state, Pine replay and all SQLite writes.
+                pending[cell] = (instrument, timeframe, pool.submit(
+                    client.candles, symbol, timeframe, previous=self.candles.get(cell), limit=720))
+                return True
+
+            for _ in range(min(8, len(cells))):
+                submit_next()
+            for instrument, timeframe in cells:
+                symbol = instrument["instId"]
+                cell = (symbol, timeframe)
+                try:
+                    _, _, future = pending.pop(cell)
+                    candles, gaps = future.result()
                     self.candles[cell] = candles
                     close = candles[-1]["t"] + TIMEFRAMES[timeframe] if candles else None
                     key = f"v1:last_closed:{symbol}:{timeframe}"
@@ -69,6 +90,7 @@ class V1Scanner:
                 scan["completed"] += 1
                 # Durable per-cell progress: a slow first pass is never reported as zero.
                 store.set_meta("scan", scan)
+                submit_next()
         scan.update(status="degraded" if scan["errors"] else "idle", finished_at_ms=now_ms(),
                     duration_seconds=round((now_ms()-started)/1000,2), next_scan_ms=now_ms()+120000)
         store.set_meta("scan", scan)

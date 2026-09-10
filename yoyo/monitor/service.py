@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from copy import deepcopy
 import logging
 import multiprocessing
 import hashlib
@@ -31,6 +32,7 @@ from yoyo.monitor.bark import BarkWorker
 
 LOG = logging.getLogger("fable.monitor")
 PROTOCOL = MODEL_PROTOCOL
+STATUS_REFRESH_SECONDS = 30
 
 
 class Monitor:
@@ -61,6 +63,11 @@ class Monitor:
         self.threads = []
         self.scan_process = None
         self.model_process = None
+        # HTTP must never wait behind SQLite's WAL writer.  The initial value
+        # deliberately describes an incomplete service until the background
+        # refresher obtains a complete read snapshot.
+        self.status_lock = threading.Lock()
+        self.status_snapshot = self._starting_status()
 
     def start(self):
         # Called only after server lifespan owns the singleton process lock.
@@ -68,7 +75,8 @@ class Monitor:
         self.store.retire_telegram_pending()
         self.store.retire_disabled_timeframes()
         self.store.retire_muted_bark_timeframes()
-        for name, target in (("scan", self.run), ("model", self.run_model), ("bark", self.deliver_bark)):
+        for name, target in (("scan", self.run), ("model", self.run_model), ("bark", self.deliver_bark),
+                             ("status", self.refresh_status_forever)):
             thread = threading.Thread(target=target, name="impulse-" + name, daemon=True)
             self.threads.append(thread)
             thread.start()
@@ -169,6 +177,9 @@ class Monitor:
         scan.update(status="degraded" if scan["errors"] else "idle", finished_at_ms=end,
                     duration_seconds=round((end - start) / 1000, 2), next_scan_ms=end + self.interval * 1000)
         self.store.set_meta("scan", scan)
+        # The legacy in-process path remains a deterministic unit-test seam;
+        # production refreshes this same snapshot on its own background loop.
+        self.refresh_status()
         LOG.info("scan complete: %s/%s pairs, %s errors, %.1fs", scan["completed"], scan["total"], scan["errors"], (end - start) / 1000)
 
     def scan_symbol(self, instrument):
@@ -271,7 +282,16 @@ class Monitor:
                 state.update(stale=True, error=state.get("error") or "awaiting_latest_confirmed_bar")
             return dict(chart, state=state)
 
-    def status(self):
+    def _starting_status(self):
+        return {"service": "spike Impulse Monitor", "version": VERSION, "protocol": PROTOCOL,
+                "now_ms": now_ms(), "started_at_ms": self.started,
+                "scan": {"status": "starting", "completed": 0, "total": 0, "errors": 0},
+                "universe": {"count": 0, "scope": "OKX all live SWAP"}, "counts": {},
+                "runtime": {"host": "This Mac", "notification_only": True,
+                            "signal_mode": "SPIKE V1 长多 30m/1H/4H；原始收盘启动与 YOLO 补充确认分离"},
+                "snapshot_at_ms": None, "stale": True}
+
+    def _collect_status(self):
         counts = self.store.market_phase_counts(MONITORED_TIMEFRAMES)
         arm_receipt = self.store.get_meta("notification_policy:v1_bark_arm")
         model_status = self.store.get_meta("v1:model_gate")
@@ -306,6 +326,33 @@ class Monitor:
                     "higher_mode": "已确认高周期背景标注，不过滤启动",
                     "source_commit": self.source_commit, "startup_source_sha256": self.source_hashes,
                     "warmup_bars": 340, "launch_agent": "com.fable.impulse-monitor"})
+
+    def refresh_status(self):
+        """Replace the status cache after one complete, possibly slow DB read."""
+        try:
+            snapshot = self._collect_status()
+            snapshot.update(snapshot_at_ms=now_ms(), stale=False)
+        except Exception as exc:
+            LOG.warning("status snapshot refresh failed: %s", type(exc).__name__)
+            with self.status_lock:
+                snapshot = dict(self.status_snapshot, stale=True,
+                                refresh_error=type(exc).__name__)
+                self.status_snapshot = snapshot
+            return False
+        with self.status_lock:
+            self.status_snapshot = snapshot
+        return True
+
+    def refresh_status_forever(self):
+        """Refresh outside request handlers; a locked DB cannot block HTTP."""
+        while not self.stop_event.is_set():
+            self.refresh_status()
+            self.stop_event.wait(STATUS_REFRESH_SECONDS)
+
+    def status(self):
+        """Return an atomic copy of the last complete status snapshot."""
+        with self.status_lock:
+            return deepcopy(self.status_snapshot)
 
     def health(self):
         """Return liveness without decoding charts, events, or receipt history."""
