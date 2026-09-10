@@ -7684,3 +7684,18 @@ experiments:
     - spike-burst-indicator-20260910-verification
     notes: Owner all-dates authorization; first spec engineering exposure1, revised price-first spec exposure2. Historical
       chart R is uncosted unrealized reference, not fresh OOS. No model promotion, monitor, Bark, or order changes.
+
+  - experiment_id: exp-spike-burst-validation-20260910-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6d357fc0046553b424a995c5e709cdf544bc06e4
+    status: active
+    question: Does frozen SPIKE Burst V1 capture and realize stronger altcoin trends than old focus entries and matched controls?
+    single_variable: Frozen standalone entry replacement with identical next-open execution and cashbook; no retuning.
+    result: Preregistered first return evaluation on the known July10-September9 multivenue sample; results pending.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    canonical_report: experiments/active/exp-spike-burst-validation-20260910-v1/PROJECT_PLAN.md
+    artifacts: []
+    notes: Owner all-dates authorization persists. No live changes; next-open actual R is separate from Pine reference R.

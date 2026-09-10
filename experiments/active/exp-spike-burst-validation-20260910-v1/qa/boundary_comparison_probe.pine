@@ -1,0 +1,11 @@
+//@version=6
+indicator("SPIKE · tiny input probe",overlay=false)
+float x=input.float(1e-10)
+f(float v)=>v>0
+var table t=table.new(position.middle_center,1,4,bgcolor=#111827)
+if barstate.islast
+    table.cell(t,0,0,"input x="+str.tostring(x,"0.000000000000000"),text_color=color.white)
+    table.cell(t,0,1,"1x="+str.tostring(f(x))+" 1.01x="+str.tostring(f(x*1.01))+" 1.1x="+str.tostring(f(x*1.1)),text_color=color.white)
+    table.cell(t,0,2,"2x="+str.tostring(f(x*2))+" 4.9x="+str.tostring(f(x*4.9))+" 5.1x="+str.tostring(f(x*5.1)),text_color=color.white)
+    table.cell(t,0,3,"x==0="+str.tostring(x==0)+" 1.01x==0="+str.tostring(x*1.01==0),text_color=color.white)
+plot(na,display=display.none)

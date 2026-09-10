@@ -1,0 +1,11 @@
+//@version=6
+indicator("SPIKE · float comparison probe", overlay=false)
+float x = close / (close + syminfo.mintick) * 0.49e-9
+float y = close / (close + syminfo.mintick) * 0.51e-9
+var table t = table.new(position.middle_center, 1, 4, bgcolor=#111827)
+if barstate.islast
+    table.cell(t,0,0,"LIVE SERIES x="+str.tostring(x,"0.000000000000000000"),text_color=color.white,text_size=size.small)
+    table.cell(t,0,1,"x>0="+str.tostring(x>0.0)+" / x==0="+str.tostring(x==0.0)+" / -x<0="+str.tostring(-x<0.0),text_color=color.white,text_size=size.small)
+    table.cell(t,0,2,"close+x>close="+str.tostring(close+x>close)+" / y>0="+str.tostring(y>0.0),text_color=color.white,text_size=size.small)
+    table.cell(t,0,3,"literal tiny>0="+str.tostring(1e-10>0.0)+" / 100+.4e-9>100="+str.tostring(100.0000000004>100.0),text_color=color.white,text_size=size.small)
+plot(na,display=display.none)

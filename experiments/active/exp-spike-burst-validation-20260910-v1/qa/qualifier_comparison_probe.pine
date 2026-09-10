@@ -1,0 +1,13 @@
+//@version=6
+indicator("SPIKE · float comparison probe",overlay=false)
+float tin = input.float(1e-10)
+float tm = syminfo.mintick / 100.0
+float x = close / (close+syminfo.mintick)*0.49e-9
+f_pos(float v) => v > 0.0
+var table t=table.new(position.middle_center,1,4,bgcolor=#111827)
+if barstate.islast
+    table.cell(t,0,0,"input="+str.tostring(tin,"0.000000000000000")+" >0="+str.tostring(tin>0.0)+" helper="+str.tostring(f_pos(tin)),text_color=color.white,text_size=size.small)
+    table.cell(t,0,1,"simple="+str.tostring(tm,"0.000000000000000")+" >0="+str.tostring(tm>0.0)+" helper="+str.tostring(f_pos(tm)),text_color=color.white,text_size=size.small)
+    table.cell(t,0,2,"series>0="+str.tostring(x>0.0)+" helper="+str.tostring(f_pos(x)),text_color=color.white,text_size=size.small)
+    table.cell(t,0,3,"literal>0="+str.tostring(1e-10>0.0)+" helper literal="+str.tostring(f_pos(1e-10)),text_color=color.white,text_size=size.small)
+plot(na,display=display.none)
