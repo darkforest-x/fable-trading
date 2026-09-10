@@ -7687,15 +7687,25 @@ experiments:
 
   - experiment_id: exp-spike-burst-validation-20260910-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 6d357fc0046553b424a995c5e709cdf544bc06e4
-    status: active
+    source_commit: 89f7eb0290201fdd5343fdea620445999f489a16
+    status: inconclusive
     question: Does frozen SPIKE Burst V1 capture and realize stronger altcoin trends than old focus entries and matched controls?
     single_variable: Frozen standalone entry replacement with identical next-open execution and cashbook; no retuning.
-    result: Preregistered first return evaluation on the known July10-September9 multivenue sample; results pending.
-    holdout_consumed: false
+    result: Completed61days/1496venue records. Combined1H +1.342% MDD7.992%;4H +0.606% MDD7.065%. Both combined burst paired
+      accounts underperform matched random; all16 Holm p=1. USELESS event +219.78% but combined allocation excluded it. No profit-advantage
+      acceptance.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
-    canonical_report: experiments/active/exp-spike-burst-validation-20260910-v1/PROJECT_PLAN.md
-    artifacts: []
-    notes: Owner all-dates authorization persists. No live changes; next-open actual R is separate from Pine reference R.
+    canonical_report: analysis/p1_spike_burst_validation_20260910.md
+    artifacts:
+    - spike-burst-validation-20260910-report-source
+    - spike-burst-validation-20260910-report-html
+    - spike-burst-validation-20260910-delivery
+    - spike-burst-validation-20260910-dataset
+    - spike-burst-validation-20260910-accounts
+    - spike-burst-validation-20260910-independent-audit
+    - spike-burst-validation-20260910-allocation-audit
+    notes: Owner all-dates authorization persists. Frozen config first return exposure; known retrospective data, not fresh
+      OOS. Engineering accepted in prior experiment; returns inconclusive. No signal, cost, exit, monitor or notification tuning.

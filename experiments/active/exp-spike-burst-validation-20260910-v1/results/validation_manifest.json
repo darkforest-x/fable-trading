@@ -1,0 +1,647 @@
+{
+  "status": "complete",
+  "generated_at": "2026-09-10T03:36:11.929722+00:00",
+  "code_commit": "52ede2e4d9eb976bdb2d088f5acfe23bde58d6d6",
+  "input_manifest_sha256": "e3faf5cbe51711a36faf07b5abbfcbb461748a4bfb698019ed1a78cec122ba51",
+  "builder_sha256": {
+    "yoyo/evaluation/spike_burst_validation.py": "737b3df9a0f832999f680d100f1fde289cd1a1b39e10dcfa2bb9571d8c79975a",
+    "yoyo/evaluation/spike_burst_dataset.py": "e03585c03e32387b84ade03ce12966d8ff0b6468a2814f0c0199a814d69dcdd1",
+    "yoyo/evaluation/spike_burst_replay.py": "996ef56ceb5b70da5337422d8390487330f7e387f648ee527b5afc9bda72a33f",
+    "yoyo/evaluation/spike_burst_execution.py": "05c96e98498cbf11cc426ed4cc939199b47af2cf8fd5a409c79fc720552f45cc",
+    "yoyo/evaluation/altseason_portfolio.py": "a4628d1cfefc325c6ab0e2dff558d117f5dd915e78aa4f8c5372f51f4f5ad369",
+    "yoyo/evaluation/altseason_research.py": "35d6e171a8a7b25516871ae119c2780dcc1130d2beaaffdd270d2b2f99742075",
+    "yoyo/evaluation/altseason_paired_portfolio.py": "502820fb2d4ca6967d6ac2b1310101a2efa65a9f9d684bd20d28f8d051ad395b",
+    "yoyo/evaluation/launch_quality_accounts.py": "4ebbd3bf89187d733c1eae2b72ffc70c56b636539ed2c8c7257fe86a628fc49e",
+    "experiments/active/exp-spike-burst-validation-20260910-v1/PROJECT_PLAN.md": "598158480424fe92c09cd04d7df9aefb6b5af70a93914c8d4cabbfa01eefe1fd",
+    "yoyo/evaluation/pine/spike_burst_v1.pine": "18bbb6955fdf12e124688003799c44fc2a641f11a342edcf478157b1c9641fe2"
+  },
+  "holdout_consumption": 1,
+  "retrospective": true,
+  "optimization": false,
+  "completed_at": "2026-09-10T03:36:38.040311+00:00",
+  "account_count": 60,
+  "primary_tests": 16,
+  "costs": "20bp entry-notional round trip; funding/impact excluded from base account; static stress does not reallocate",
+  "artifacts": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_60_burst_trail_all_assets_full_curve.csv.gz",
+      "sha256": "aaa90992ff5d5ec03b4f05ec08192e22e8a4b7ebad974840ed9bfc29843668dc",
+      "size_bytes": 32607
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_60_burst_trail_all_assets_full_ledger.csv.gz",
+      "sha256": "b7c2d8b19198987bd0048fe3c9f51d9f4abcb8ea3bac759444718593431d8baa",
+      "size_bytes": 24373
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_60_burst_trail_all_assets_paired_actual_curve.csv.gz",
+      "sha256": "591a6623fc22657e2ef291fc998de6d8c3380a9860ff618bc5ea23a8638a2863",
+      "size_bytes": 32500
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_60_burst_trail_all_assets_paired_actual_ledger.csv.gz",
+      "sha256": "9f913d5075ec3c1296500eed889c9c21184b8c46ff0faaa2eaed899b3990de27",
+      "size_bytes": 22758
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_60_burst_trail_all_assets_paired_random_curve.csv.gz",
+      "sha256": "09f875fe5de2b15a4128ad3e92d8bf8a85fb94f65b413ec82db59addd178ac19",
+      "size_bytes": 32256
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_60_burst_trail_all_assets_paired_random_ledger.csv.gz",
+      "sha256": "7750f6d09f3fd9464c22e02bb2cea17d54c9c4752dd63124571fb0c913b9f258",
+      "size_bytes": 24697
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_60_focus_trail_all_assets_full_curve.csv.gz",
+      "sha256": "de08aafda21f6ce5910a83e2a3dbb9355327ae095a37bc2b7c67602a04124e2d",
+      "size_bytes": 38015
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_60_focus_trail_all_assets_full_ledger.csv.gz",
+      "sha256": "ab2451fde9934293b22f35083dd4973519bfa9146c5515966b2d581d552151dc",
+      "size_bytes": 222750
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_60_focus_trail_all_assets_paired_actual_curve.csv.gz",
+      "sha256": "e290bc678c2ed1705e805dcd1dd661962b6e94c21927f0960bc2ee31fd757ebf",
+      "size_bytes": 38073
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_60_focus_trail_all_assets_paired_actual_ledger.csv.gz",
+      "sha256": "5567daee92134aebf24b462fa8be56ab535a7d42c311e8e8e78bda67cbd10b37",
+      "size_bytes": 220505
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_60_focus_trail_all_assets_paired_random_curve.csv.gz",
+      "sha256": "3e46823d5f1b378c9f0e5c7f42429b0e0cfe6006b1a874ee562dab6a745ab466",
+      "size_bytes": 37907
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_60_focus_trail_all_assets_paired_random_ledger.csv.gz",
+      "sha256": "73ff371c5e7ad86bc63213a49b1d6b4d24c1c2abb9ca4774d37b87af657bba43",
+      "size_bytes": 240295
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_60_burst_trail_all_assets_full_curve.csv.gz",
+      "sha256": "4079f4b25bf92d6f7930d030ec4864f5c1f97cf9fc92e06911a3b6dceec03e3e",
+      "size_bytes": 35863
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_60_burst_trail_all_assets_full_ledger.csv.gz",
+      "sha256": "72256bf733755d462dd27a047d7060de85e980683c05abad6b064ea64efecf93",
+      "size_bytes": 52757
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_60_burst_trail_all_assets_paired_actual_curve.csv.gz",
+      "sha256": "39c84d28cf607c7d1d5809d5fd1bc785b9efb1ff8c54cf45050bf9e101d6d6e1",
+      "size_bytes": 35937
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_60_burst_trail_all_assets_paired_actual_ledger.csv.gz",
+      "sha256": "fa31473d9150027f7622589b012539a261f793955c5489b77caece4e3214123e",
+      "size_bytes": 51088
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_60_burst_trail_all_assets_paired_random_curve.csv.gz",
+      "sha256": "7bed8d1debd87c3a8e55080d5fa8de49ec46465f1a625c9d79650616e72e3424",
+      "size_bytes": 36635
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_60_burst_trail_all_assets_paired_random_ledger.csv.gz",
+      "sha256": "7fade704b29da893f82340006aa36c242b05873468b90acc5ae79abd690ad001",
+      "size_bytes": 56049
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_60_focus_trail_all_assets_full_curve.csv.gz",
+      "sha256": "caa997453caf59fcfa5aef98bd09f6e657ed3b8308e2b2246eb50f1990dc6740",
+      "size_bytes": 38085
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_60_focus_trail_all_assets_full_ledger.csv.gz",
+      "sha256": "5fc41bf23304e18fedc05d44c97eea461470288a5255cb44c2afa9dea4e3a406",
+      "size_bytes": 448673
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_60_focus_trail_all_assets_paired_actual_curve.csv.gz",
+      "sha256": "209fb2e7302164ba5ec5af3b919646e4f5807997643d05985517712a9ee291c9",
+      "size_bytes": 38020
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_60_focus_trail_all_assets_paired_actual_ledger.csv.gz",
+      "sha256": "15e00f77fb37166d40b0f79b89584a8e56cbc1d537e596093456fdfdf9e56442",
+      "size_bytes": 445289
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_60_focus_trail_all_assets_paired_random_curve.csv.gz",
+      "sha256": "a7da2007ab0e4103fda3d85869cab058660193c6337c882283bd8771ec88c205",
+      "size_bytes": 37235
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_60_focus_trail_all_assets_paired_random_ledger.csv.gz",
+      "sha256": "b5a916e835ccf99cc741ca4e23a4ae016335d0491d006908c55f2b522bc2f1f9",
+      "size_bytes": 485590
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_60_burst_trail_all_assets_full_curve.csv.gz",
+      "sha256": "93ccf43c44b0e1109a75330cebb25209a80ab84e81f77dbb2851c426379d40b3",
+      "size_bytes": 35187
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_60_burst_trail_all_assets_full_ledger.csv.gz",
+      "sha256": "e7a6338164fddc788ad4dded4643f668cb99c0f1ac774bb97e2e33cf0613eb81",
+      "size_bytes": 44517
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_60_burst_trail_all_assets_paired_actual_curve.csv.gz",
+      "sha256": "5847a5719a5ad2425e5697d65d0cbe7f8833e61aa39fb6c536332ad67c9cdba5",
+      "size_bytes": 35205
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_60_burst_trail_all_assets_paired_actual_ledger.csv.gz",
+      "sha256": "6a1074810233b8f30ab8fc07f5fd4b7ff4c69b0c65b7116bdb092db6ad404d09",
+      "size_bytes": 43772
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_60_burst_trail_all_assets_paired_random_curve.csv.gz",
+      "sha256": "2cc8232c8f33e0291232433d46c8d1ad841a46ef9e2a46ca49d929b51f7372a7",
+      "size_bytes": 35034
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_60_burst_trail_all_assets_paired_random_ledger.csv.gz",
+      "sha256": "bbbd09fbea6f86215325e13c977faf279699053f3ab9a9c11b39362d8d2b6908",
+      "size_bytes": 47748
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_60_focus_trail_all_assets_full_curve.csv.gz",
+      "sha256": "f2d98fbbdc581bb9e9d9fdabead0edae01167eca1c29a8fbaa611d685178a006",
+      "size_bytes": 37852
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_60_focus_trail_all_assets_full_ledger.csv.gz",
+      "sha256": "ac60d980094c0c670840027367cce4035261dd204c8146477c1e07b0091b9af2",
+      "size_bytes": 339846
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_60_focus_trail_all_assets_paired_actual_curve.csv.gz",
+      "sha256": "e40ee59862258364415ef4c93e0f341aa6535ae9c6d427948edf73bb7fbecf49",
+      "size_bytes": 37861
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_60_focus_trail_all_assets_paired_actual_ledger.csv.gz",
+      "sha256": "2d33b9e6e5b090432d54fbef4542a8b978066ac5871eac36e6b76235c07e7eb6",
+      "size_bytes": 337139
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_60_focus_trail_all_assets_paired_random_curve.csv.gz",
+      "sha256": "32f2d7758d2b4c2382335445ac633966f021e70fb656947a3acd8d365fa12747",
+      "size_bytes": 36910
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_60_focus_trail_all_assets_paired_random_ledger.csv.gz",
+      "sha256": "7beaf0673b63f2c9e9b2dc718c381696fa1626b92017eea8a0b4282c0808cc81",
+      "size_bytes": 367973
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_burst_trail_all_assets_full_curve.csv.gz",
+      "sha256": "af95fbbc98de91568c51e535ff79fee00c5398f3dd19db5d4012d7a7b08d9edc",
+      "size_bytes": 36503
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_burst_trail_all_assets_full_ledger.csv.gz",
+      "sha256": "4a0883f0f0bd53b1cc43b36ad7393fb0e955ca1c6fdd52e662a26cd19b941136",
+      "size_bytes": 111619
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_burst_trail_all_assets_paired_actual_curve.csv.gz",
+      "sha256": "5a49d0c5651b6aaa319710931b52c7651985627793033ef433d8c3b9bcd9c43f",
+      "size_bytes": 36352
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_burst_trail_all_assets_paired_actual_ledger.csv.gz",
+      "sha256": "d88c68db0dd375daee1a5562dd25d953708ae0e95fcf182e24668068c186ced1",
+      "size_bytes": 107699
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_burst_trail_all_assets_paired_random_curve.csv.gz",
+      "sha256": "bd8cc4e30b47490116c2f8091baf277308964404b15df77af114653909973a6a",
+      "size_bytes": 37393
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_burst_trail_all_assets_paired_random_ledger.csv.gz",
+      "sha256": "28abb9630c8e0de855ffbf412eb6aab38780bbc96fa75eca10fd08cb021c4bf3",
+      "size_bytes": 118258
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_burst_trail_without_useless_full_curve.csv.gz",
+      "sha256": "5b3f36644c4c33926529e4abd138f43f81402a777d34d64b7f4a9a7578f78b5b",
+      "size_bytes": 36508
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_burst_trail_without_useless_full_ledger.csv.gz",
+      "sha256": "5cfcb9bc01af24e4f800b2d700f285a836de970b0eff1c892c541534d58bcb1e",
+      "size_bytes": 110848
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_burst_trail_without_useless_paired_actual_curve.csv.gz",
+      "sha256": "169c3bae7173ee556eb79141ea6e65f767df35601a069277750133dfe0105fba",
+      "size_bytes": 36357
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_burst_trail_without_useless_paired_actual_ledger.csv.gz",
+      "sha256": "bc1612315ea880abb917339fde2371f186a5141ba0e48c0133b0f82fbd4f1933",
+      "size_bytes": 106913
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_burst_trail_without_useless_paired_random_curve.csv.gz",
+      "sha256": "517b27ddd6bb0970c03201e9975f519583f0a27f3556270db4d1c968d1e892da",
+      "size_bytes": 37398
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_burst_trail_without_useless_paired_random_ledger.csv.gz",
+      "sha256": "f75a3648cbcab526634f6446e7cb3643695fd01b7cd3dbbbae0796453ad1d379",
+      "size_bytes": 117493
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_focus_trail_all_assets_full_curve.csv.gz",
+      "sha256": "ecdebdb9ca636f65cd8fe31e74e20ec35501ba0e30b68e3348b9b4399c967369",
+      "size_bytes": 38180
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_focus_trail_all_assets_full_ledger.csv.gz",
+      "sha256": "d0a60880792d8fb08282921f463fb1b79b24269dc3689f4718ac11c66551b9b6",
+      "size_bytes": 980951
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_focus_trail_all_assets_paired_actual_curve.csv.gz",
+      "sha256": "c5bfd54330182483133096f91979fc6052b0e77c4cd439fa0dbb2eb8020ec88f",
+      "size_bytes": 38174
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_focus_trail_all_assets_paired_actual_ledger.csv.gz",
+      "sha256": "826898661d6ae60744cfb9640ffd6838df1331f74f6db654f305f50d4e07ac42",
+      "size_bytes": 972366
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_focus_trail_all_assets_paired_random_curve.csv.gz",
+      "sha256": "dde98da078e478dbd94c4b933eb177381c8e5fc985789d036ece032d2457b245",
+      "size_bytes": 36950
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_focus_trail_all_assets_paired_random_ledger.csv.gz",
+      "sha256": "55df815cbba530fac88486d2564309c13fc6f3164f387e449abdd4c1226f3118",
+      "size_bytes": 1062301
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_focus_trail_without_useless_full_curve.csv.gz",
+      "sha256": "2a8c845fa1d91d2a30db6a5311ea35d881dbba2e833f03205f246164db315966",
+      "size_bytes": 38153
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_focus_trail_without_useless_full_ledger.csv.gz",
+      "sha256": "46a6a6f11702a7138381afa6928388b3601515514b69f5b66e333a0fc02d9158",
+      "size_bytes": 978972
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_focus_trail_without_useless_paired_actual_curve.csv.gz",
+      "sha256": "7d1351936bbc4444cee1c5630c5390ffabe4a353ef293307a382ea7e051680d7",
+      "size_bytes": 38169
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_focus_trail_without_useless_paired_actual_ledger.csv.gz",
+      "sha256": "ad970381013763c217ad8c7cc09c88c35847058014abc536540c2d9a7cefdc85",
+      "size_bytes": 970390
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_focus_trail_without_useless_paired_random_curve.csv.gz",
+      "sha256": "a039d34084cf35a4b948f7fa2ec53d038db599b5e567fc3624e65ba48c33b9ae",
+      "size_bytes": 36955
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_60_focus_trail_without_useless_paired_random_ledger.csv.gz",
+      "sha256": "9ae8a8f95fe06047372bbc016c7f3c2494e24ea5cdd6a496098ff48226b1d2de",
+      "size_bytes": 1060063
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_240_burst_trail_all_assets_full_curve.csv.gz",
+      "sha256": "2f6184b635bcec2441380a747413c9a08bd1d60908fff48a1b544bd1e07fe5f6",
+      "size_bytes": 9217
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_240_burst_trail_all_assets_full_ledger.csv.gz",
+      "sha256": "a59dec9a418c8e83c072d8188eb5fa16b6e5718fc7f0dcfed8960c2e290a47fe",
+      "size_bytes": 11119
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_240_burst_trail_all_assets_paired_actual_curve.csv.gz",
+      "sha256": "695803f8d45e56bd05fdda07bab220978879b307e054578f5af872a4fe9a132b",
+      "size_bytes": 9058
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_240_burst_trail_all_assets_paired_actual_ledger.csv.gz",
+      "sha256": "5d13431a0624923c1af22255c02698aa584dda36587e12ab048c8914bc467edb",
+      "size_bytes": 9524
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_240_burst_trail_all_assets_paired_random_curve.csv.gz",
+      "sha256": "c416b263b237723f1d35175fd15a4dfd1e6ff094abd6924b546ec201cdaede2c",
+      "size_bytes": 9043
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_240_burst_trail_all_assets_paired_random_ledger.csv.gz",
+      "sha256": "0e7b19c8edc91ed6021f2a3aee9e552d2f7e0cc531d688d5ae467de3d8a655d2",
+      "size_bytes": 10040
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_240_focus_trail_all_assets_full_curve.csv.gz",
+      "sha256": "a2c3bf5041c9570f2f60dad38f372debb84ea55dd8a556135bf6541e9aa3993d",
+      "size_bytes": 9926
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_240_focus_trail_all_assets_full_ledger.csv.gz",
+      "sha256": "19b67efdab45b383dac841cb239c41cc973747be1bde645d6f4cda200d2b7029",
+      "size_bytes": 62548
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_240_focus_trail_all_assets_paired_actual_curve.csv.gz",
+      "sha256": "86aa21fd4fe8e8f64a2120f8398a719e762b024db2d26c210e080bff4b5b11ba",
+      "size_bytes": 9960
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_240_focus_trail_all_assets_paired_actual_ledger.csv.gz",
+      "sha256": "4dea5000e92720de6e96db2d260c1911f97bbbf3dd7f02319dfe50c25085195f",
+      "size_bytes": 58129
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_240_focus_trail_all_assets_paired_random_curve.csv.gz",
+      "sha256": "fe4114cdf0e8abfb055465f1b28f4eb52a7ebef9e8fdfa52f54f28f9c6bdc700",
+      "size_bytes": 9803
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/okx_240_focus_trail_all_assets_paired_random_ledger.csv.gz",
+      "sha256": "9a9e04bf72507241bc016443cc3430b205899aa317c457577dfafe3510f63e86",
+      "size_bytes": 62870
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_240_burst_trail_all_assets_full_curve.csv.gz",
+      "sha256": "fa2f638e28d33810cb1ce8a2775537f27069732f0c02ec975b98afbb2c9f71fa",
+      "size_bytes": 9501
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_240_burst_trail_all_assets_full_ledger.csv.gz",
+      "sha256": "90bbb853eed11b696543d3a8dd0e77ae57839cf5563cb8dc13d2120b647acc6a",
+      "size_bytes": 17140
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_240_burst_trail_all_assets_paired_actual_curve.csv.gz",
+      "sha256": "cf67e71fed773b08f5132ea03a395e7952053434968abad2ee27451abfdc3aee",
+      "size_bytes": 9389
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_240_burst_trail_all_assets_paired_actual_ledger.csv.gz",
+      "sha256": "08276fb800cf575fcf9958b68172e72a9f6bda0196dc3b3817f387f25e462dc7",
+      "size_bytes": 13953
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_240_burst_trail_all_assets_paired_random_curve.csv.gz",
+      "sha256": "8384f430046cab9b133dee3e53b7e27d0e83de156219851679229de62ce2b730",
+      "size_bytes": 9580
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_240_burst_trail_all_assets_paired_random_ledger.csv.gz",
+      "sha256": "b3cd25f7e4973e43829a3f7915d486fcd2ca937b59461d58fe96267091ec1676",
+      "size_bytes": 15267
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_240_focus_trail_all_assets_full_curve.csv.gz",
+      "sha256": "fd7342f3d0f3f88eed681d218914dfa21a19b1d3ba584fb0d7098bda0292b423",
+      "size_bytes": 10140
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_240_focus_trail_all_assets_full_ledger.csv.gz",
+      "sha256": "af12d41677959f74bfaf0b700d18ba892a9149233a8b02344134a8bc9a3758bc",
+      "size_bytes": 124564
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_240_focus_trail_all_assets_paired_actual_curve.csv.gz",
+      "sha256": "7543f8c45ab9b84b06b96f5503921e45df991dd7816561feb75c515cb8af7828",
+      "size_bytes": 10174
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_240_focus_trail_all_assets_paired_actual_ledger.csv.gz",
+      "sha256": "ae302384b524d7b3f13870f0193e5b0b1a66a3cc7152721fe85d67ef343c4726",
+      "size_bytes": 115456
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_240_focus_trail_all_assets_paired_random_curve.csv.gz",
+      "sha256": "30d83e187b9a8b2d655c2b395056944590422bad062871d8af92261eb9388b0f",
+      "size_bytes": 9462
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/binance_240_focus_trail_all_assets_paired_random_ledger.csv.gz",
+      "sha256": "2acd669d3d7f177e2a578347ac4532eb6fc04af42a4330f9ad034022ad2fce90",
+      "size_bytes": 125171
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_240_burst_trail_all_assets_full_curve.csv.gz",
+      "sha256": "b1054c21339b093923eea3ce155526787157cf6c5766ffb8d4c998c5a856174c",
+      "size_bytes": 9244
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_240_burst_trail_all_assets_full_ledger.csv.gz",
+      "sha256": "44a8f0437cfc70004cf7814d85b3868ee4ce12ccc4a94e306f86c8423abf1963",
+      "size_bytes": 17220
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_240_burst_trail_all_assets_paired_actual_curve.csv.gz",
+      "sha256": "24758037eea2dfd0c61b85e39a397e621be02cd22d3b3e1c7607800fc7a1aa74",
+      "size_bytes": 9154
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_240_burst_trail_all_assets_paired_actual_ledger.csv.gz",
+      "sha256": "81de265c1de281eab3fbd82104a21e4b4deae249312b1c99aa15dd1d2fc54225",
+      "size_bytes": 14085
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_240_burst_trail_all_assets_paired_random_curve.csv.gz",
+      "sha256": "cb62e6abafd172bfd456dd8c6cef733f8809174b2f6232eaa8a6ad9a9d9d44e0",
+      "size_bytes": 9065
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_240_burst_trail_all_assets_paired_random_ledger.csv.gz",
+      "sha256": "c9cbf2d6cd04f6b15bf9cdbaf850d1854b85fbdbd62e4b585d4cf7242753c486",
+      "size_bytes": 15604
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_240_focus_trail_all_assets_full_curve.csv.gz",
+      "sha256": "f5fc703889b74ef9fd96756d2d3cf596c0834a428684a51c8df151ea07f3a0ea",
+      "size_bytes": 10103
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_240_focus_trail_all_assets_full_ledger.csv.gz",
+      "sha256": "67731b04c15e75906ced4e83b7370f53832b164a91bebc4208eaf5f4cda79866",
+      "size_bytes": 111755
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_240_focus_trail_all_assets_paired_actual_curve.csv.gz",
+      "sha256": "c22cfcf598ef33ffbb8769ee5fa2e98a9591d0ea3c73575a8da0b1b3305fafc0",
+      "size_bytes": 9932
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_240_focus_trail_all_assets_paired_actual_ledger.csv.gz",
+      "sha256": "109c30360f3df79d39708b25e09dd2a7009ced612399d5fc28594df623cd2cd1",
+      "size_bytes": 103827
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_240_focus_trail_all_assets_paired_random_curve.csv.gz",
+      "sha256": "e85ebd06f8126b85f87d673bf4eac9acdca9d95ee50f93fdfc0e6d4331f7571d",
+      "size_bytes": 9778
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/gate_240_focus_trail_all_assets_paired_random_ledger.csv.gz",
+      "sha256": "18a874669463f645ec15313c7838b8b1a046f499348c8829f5163c6f3f79d879",
+      "size_bytes": 113941
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_burst_trail_all_assets_full_curve.csv.gz",
+      "sha256": "7e051c6c1489fc99413e3539ea52bc41c66eb41088907ac451ab8960d329d2d0",
+      "size_bytes": 9518
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_burst_trail_all_assets_full_ledger.csv.gz",
+      "sha256": "e768d4c6072cb07fc14ee742b6c827f4fb6a93e5571ed0f7884836d4e7b51748",
+      "size_bytes": 39813
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_burst_trail_all_assets_paired_actual_curve.csv.gz",
+      "sha256": "17a3a2811f14836b20987f2827635d49751e744bac43c75515c8d88768432f76",
+      "size_bytes": 9511
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_burst_trail_all_assets_paired_actual_ledger.csv.gz",
+      "sha256": "40c43d712b84c93ac87d5e232fbd34c21395d2e13c2c4629745c4c4721d46e68",
+      "size_bytes": 32560
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_burst_trail_all_assets_paired_random_curve.csv.gz",
+      "sha256": "3cac91337a0e317376c1ee0d1293b6d295a967479803fa0df8bb1259f440a30d",
+      "size_bytes": 9769
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_burst_trail_all_assets_paired_random_ledger.csv.gz",
+      "sha256": "f66d9c9c8e4366ae5b885596f7ffc35b29cde351791097b204620093053c7c76",
+      "size_bytes": 35974
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_burst_trail_without_useless_full_curve.csv.gz",
+      "sha256": "d5705dddacfeb738b84ea694df1efe4fda0691ca70a78a8aa20d9aba9e003644",
+      "size_bytes": 9523
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_burst_trail_without_useless_full_ledger.csv.gz",
+      "sha256": "6a444311f9b7c0cc1c70fcacb93bdea77cac20825e6e554cd75e887cba9c5db4",
+      "size_bytes": 39818
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_burst_trail_without_useless_paired_actual_curve.csv.gz",
+      "sha256": "36df70e9bee11205fcb001f27a99a08691a6975736bec29ec782dedd5981100d",
+      "size_bytes": 9516
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_burst_trail_without_useless_paired_actual_ledger.csv.gz",
+      "sha256": "9e9364d8e3cc73c7cf16e6fda69230088aff3e191e3f220d4e5ee1aea197fab7",
+      "size_bytes": 32565
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_burst_trail_without_useless_paired_random_curve.csv.gz",
+      "sha256": "9935ac66f3690a98661df48598db7252d59cd06061919c6075cc97c07efb48cd",
+      "size_bytes": 9774
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_burst_trail_without_useless_paired_random_ledger.csv.gz",
+      "sha256": "93bdadff03a94325845c2317128368a2eebb4dc13e97d2a3547d85d778322ee5",
+      "size_bytes": 35979
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_focus_trail_all_assets_full_curve.csv.gz",
+      "sha256": "eb279f07ce6a81d95c850a35a94f98cdd4e8c6f7ab910e6f8820a08380bb53fe",
+      "size_bytes": 10166
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_focus_trail_all_assets_full_ledger.csv.gz",
+      "sha256": "3fbe350ed8f2adc9cf7ab7495909875989727bf9994f723faca1a0b95216a424",
+      "size_bytes": 287047
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_focus_trail_all_assets_paired_actual_curve.csv.gz",
+      "sha256": "945833fd55a3f71fd35a5567aba48a0ed383711919b98e30262a8f5bc447ac08",
+      "size_bytes": 10228
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_focus_trail_all_assets_paired_actual_ledger.csv.gz",
+      "sha256": "dc315588cf06e85e1bc0108b3a2d5e290638472c63924e861f50c335a4d48bed",
+      "size_bytes": 266211
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_focus_trail_all_assets_paired_random_curve.csv.gz",
+      "sha256": "dd5c852bb3c0986586bc8d0b0c9077c2dae035cb746a710d73f6205dc2539e9a",
+      "size_bytes": 9657
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_focus_trail_all_assets_paired_random_ledger.csv.gz",
+      "sha256": "d119e783cecdf92ad547a2a4d4d416e7dec6585ff1f357f5a51d8f12357e5365",
+      "size_bytes": 291964
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_focus_trail_without_useless_full_curve.csv.gz",
+      "sha256": "78c422432e0c0ecbc0250e0394c8a27c3814534184d77a2708e1fe4352570900",
+      "size_bytes": 10171
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_focus_trail_without_useless_full_ledger.csv.gz",
+      "sha256": "8835d75227d3fb0845df610d48e6a3fdf4689906657f0b90c9675e1dd2781914",
+      "size_bytes": 287052
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_focus_trail_without_useless_paired_actual_curve.csv.gz",
+      "sha256": "3571762cc8d5d512b896281e07a88a2cf857dcbefc35a007c93a0f0786248c17",
+      "size_bytes": 10233
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_focus_trail_without_useless_paired_actual_ledger.csv.gz",
+      "sha256": "4e12693e916fe777f8829a8339d9da651cf545317c99a264c7b6a8042fbc2486",
+      "size_bytes": 266216
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_focus_trail_without_useless_paired_random_curve.csv.gz",
+      "sha256": "538a6f0725953d4081120cc3bbd97a9e98b6dc64fa0138de31288cf9c9979432",
+      "size_bytes": 9662
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts/combined_240_focus_trail_without_useless_paired_random_ledger.csv.gz",
+      "sha256": "bef4ed83b02af636e4a3baa2124a2ba073762ad1b2fccd731170c95dcf398e79",
+      "size_bytes": 291969
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/accounts_summary.csv",
+      "sha256": "24cbc9249716b5834faa9e8225007b1b8c58c09f3b42b371aac79cba433b8f6e",
+      "size_bytes": 18112
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/event_summary.csv",
+      "sha256": "99910b8c40efe1bbd9c4ba097bbdc98bd1ed99da6fde21df3c2b8452987b3585",
+      "size_bytes": 5678
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/score_summary.csv",
+      "sha256": "3d2ba70a245d8793e6a400dd4af167ce9496e2f32ed09eefb73b8328ffce3010",
+      "size_bytes": 5696
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/period_summary.csv",
+      "sha256": "c6a469ccc2e28f581f443e1ddf38775e98d0f005f027f113ae6eedb9bf0feb7d",
+      "size_bytes": 46992
+    }
+  ]
+}

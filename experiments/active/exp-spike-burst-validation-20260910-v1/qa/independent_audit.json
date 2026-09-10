@@ -1,0 +1,328 @@
+{
+  "schema": "spike-burst-independent-audit-v1",
+  "generated_at": "2026-09-10T03:42:50.894840+00:00",
+  "status": "passed",
+  "auditor": "Codex bounded read-only data/account audit",
+  "audit_host_head": "d5fafa2611b464918e8faf0acc1d97bcf981251c",
+  "dataset_manifest": {
+    "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/dataset_manifest.json",
+    "sha256": "e3faf5cbe51711a36faf07b5abbfcbb461748a4bfb698019ed1a78cec122ba51"
+  },
+  "validation_manifest": {
+    "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-validation-20260910-v1/results/validation_manifest.json",
+    "sha256": "45947e3d97636fb4f4e936c084ff6c3b5a2cbff6e1f80657e8d459547a44c956"
+  },
+  "historical_access": "Owner-authorized existing July10-Sep9 retrospective data; this audit re-read frozen outcomes and independently replayed20 selected events. No new optimization or parameter choice.",
+  "method": "Read-only ad hoc checks executed in the local existing venv. This JSON records verified evidence; it is not a separately preregistered standalone audit builder.",
+  "changes": "Only this new audit JSON was written in this audit; source builders, existing results, services and parameters untouched. No complete market or cashbook replay rerun.",
+  "checks": [
+    {
+      "name": "dataset_and_parent_artifact_SHA256",
+      "passed": true,
+      "checked_records": 5968,
+      "details": "Unique paths across dataset artifacts, parent manifest/aggregate sources, catalog snapshots and original feature artifact list."
+    },
+    {
+      "name": "original_normalized_OHLCV_SHA256",
+      "passed": true,
+      "checked_records": 1496,
+      "details": "Every original per-market source_path/source_sha256 in authenticated parent coverage.csv."
+    },
+    {
+      "name": "original_feature_to_parent_coverage_membership",
+      "passed": true,
+      "checked_records": 2988
+    },
+    {
+      "name": "actual_event_unique_ids_and_all_clocks",
+      "passed": true,
+      "checked_records": 6497,
+      "valid_records": 6496,
+      "invalid_reasons": {
+        "entry_at_or_below_stop": 1
+      },
+      "details": "Unique IDs; decisions in [July10,Sep9)UTC; valid entry=decision close=next open, entry_i=decision_i+1; strictly later exit<=Sep9; interval bounds and exit_i valid."
+    },
+    {
+      "name": "control_unique_ids_and_all_clocks",
+      "passed": true,
+      "checked_records": 18650,
+      "valid_records": 18649,
+      "invalid_reasons": {
+        "entry_at_or_below_stop": 1
+      }
+    },
+    {
+      "name": "all_valid_event_and_control_net_return_R_arithmetic",
+      "passed": true,
+      "checked_records": 25145,
+      "details": "net_return=exit/entry-1-.002; net_r=net_return/initial_risk_frac."
+    },
+    {
+      "name": "control_matching_parent_and_eligibility",
+      "passed": true,
+      "checked_records": 18650,
+      "minimum_observed_history": 350,
+      "details": "Same venue/asset/instrument/timeframe/arm and UTC decision week; unique number/position within parent; exact saved matching index; same causal rolling240/min60 ATR-percent bucket; not at a signal or within12 bars after a known signal; next complete bar exists."
+    },
+    {
+      "name": "independent_sample_ATR_stop_fill_trailing_reconciliation",
+      "passed": true,
+      "checked_records": 20,
+      "details": "Independent numpy TR, SMA14 seed and SMMA recurrence, then independent next-open trade loop. Compared initial stop/risk, fill and exit prices, stop ratchet, event indices/times, net return/R, conservative peak, natural/censored status. Did not call production simulate_trade."
+    },
+    {
+      "name": "validation_artifact_SHA256",
+      "passed": true,
+      "checked_records": 124
+    },
+    {
+      "name": "all_cashbook_candidate_sets_allocation_and_cash",
+      "passed": true,
+      "checked_accounts": 60,
+      "checked_filled_records": 7775,
+      "details": "Every ledger event set equals full or exact matched0 source subset. Unique selected events, no overlapping same-asset holdings, <=10assets, cash nonnegative, quantity/notional agreement,10%equity/.5%risk/1%signal-turnover/.1%prior24h-turnover caps, PnL=qty*(exit-entry)-.002*notional, final NAV=100000+realizedPnL."
+    },
+    {
+      "name": "all_cost_and_drawdown_summary_arithmetic",
+      "passed": true,
+      "checked_accounts": 60,
+      "details": "Return and MDD match actual curve; 40/60bp stress subtracts additional .002/.004 entry notional per1000 NAV-percentage-unit; actual-turnover fee adjustment matches .001*qty*(exit-entry)/1000."
+    },
+    {
+      "name": "calendar_subperiod_inherits_NAV_and_holdings",
+      "passed": true,
+      "checked_period_rows": 180,
+      "details": "First31 closing NAV equals last30 opening NAV; compounded two subperiod returns equal full return; entry-cohort counts partition full. No independent rerun/reset at split."
+    },
+    {
+      "name": "paired_event_means_independent_units_and_Holm",
+      "passed": true,
+      "checked_primary_rows": 16,
+      "details": "Mean excess recomputed from same actual IDs and valid random mean; asset/week→asset averaging verified; permutation_assets are unique assets, not exchange copies;16-way Holm recalculated. Random sign draws not rerun."
+    },
+    {
+      "name": "source_builders_still_match_receipts",
+      "passed": true,
+      "details": "Current bytes match dataset source_hashes and validation builder_sha256."
+    }
+  ],
+  "sample_seed": 20260910,
+  "sample_design": "Sort groups by minutes,arm; sample5 without replacement in each of4 groups with one numpy default_rng stream.",
+  "sample_events": [
+    {
+      "event_id": "5040fb85b258096438e60c8e0a25",
+      "minutes": 60,
+      "arm": "burst_trail",
+      "symbol": "LINEA-USDT-SWAP",
+      "exit_reason": "initial_stop"
+    },
+    {
+      "event_id": "ad59ca3f25f78b33a3dcfe072e82",
+      "minutes": 60,
+      "arm": "burst_trail",
+      "symbol": "1000RATSUSDT",
+      "exit_reason": "trailing_stop"
+    },
+    {
+      "event_id": "b08a5277531e0f35dbc26a6cc275",
+      "minutes": 60,
+      "arm": "burst_trail",
+      "symbol": "S_USDT",
+      "exit_reason": "initial_stop"
+    },
+    {
+      "event_id": "76515803ae29c0cac8deedfb95ab",
+      "minutes": 60,
+      "arm": "burst_trail",
+      "symbol": "NOTUSDT",
+      "exit_reason": "initial_stop"
+    },
+    {
+      "event_id": "5b6578a2e016e808b99e7727e273",
+      "minutes": 60,
+      "arm": "burst_trail",
+      "symbol": "BIO_USDT",
+      "exit_reason": "boundary_mark"
+    },
+    {
+      "event_id": "3f7bccc08604e90031adc8b1642c",
+      "minutes": 60,
+      "arm": "focus_trail",
+      "symbol": "REUSDT",
+      "exit_reason": "initial_stop"
+    },
+    {
+      "event_id": "8299d1b1102bf0b70112dcc8cf15",
+      "minutes": 60,
+      "arm": "focus_trail",
+      "symbol": "ARPA_USDT",
+      "exit_reason": "trailing_stop"
+    },
+    {
+      "event_id": "78a98846792aa11a53eecace4af4",
+      "minutes": 60,
+      "arm": "focus_trail",
+      "symbol": "DRIFTUSDT",
+      "exit_reason": "initial_stop"
+    },
+    {
+      "event_id": "20dbbe9d54ec366199fb6569ff86",
+      "minutes": 60,
+      "arm": "focus_trail",
+      "symbol": "WOOUSDT",
+      "exit_reason": "trailing_stop"
+    },
+    {
+      "event_id": "18b81e2398bc5c1c32dfc3a20a7c",
+      "minutes": 60,
+      "arm": "focus_trail",
+      "symbol": "1INCHUSDT",
+      "exit_reason": "trailing_stop"
+    },
+    {
+      "event_id": "59d629f8f199dd3548822cd6ec9a",
+      "minutes": 240,
+      "arm": "burst_trail",
+      "symbol": "METIS_USDT",
+      "exit_reason": "boundary_mark"
+    },
+    {
+      "event_id": "b2ada492fc70c0d6efbf5fc4ac4f",
+      "minutes": 240,
+      "arm": "burst_trail",
+      "symbol": "AKE_USDT",
+      "exit_reason": "trailing_stop"
+    },
+    {
+      "event_id": "4a8dedcf339bd038c91951f850e1",
+      "minutes": 240,
+      "arm": "burst_trail",
+      "symbol": "APR-USDT-SWAP",
+      "exit_reason": "trailing_stop"
+    },
+    {
+      "event_id": "ebf79d89c6637d1e73f865aee7a1",
+      "minutes": 240,
+      "arm": "burst_trail",
+      "symbol": "BIO_USDT",
+      "exit_reason": "initial_stop"
+    },
+    {
+      "event_id": "05751c1d39397ed1115ff158b26a",
+      "minutes": 240,
+      "arm": "burst_trail",
+      "symbol": "EDU_USDT",
+      "exit_reason": "initial_stop"
+    },
+    {
+      "event_id": "1df142ea003509276a7fdb2801b2",
+      "minutes": 240,
+      "arm": "focus_trail",
+      "symbol": "KATUSDT",
+      "exit_reason": "boundary_mark"
+    },
+    {
+      "event_id": "ced39560ee6fb2e10e7608afdbd9",
+      "minutes": 240,
+      "arm": "focus_trail",
+      "symbol": "AGTUSDT",
+      "exit_reason": "boundary_mark"
+    },
+    {
+      "event_id": "bae89e2388b0db08ecf3b4412078",
+      "minutes": 240,
+      "arm": "focus_trail",
+      "symbol": "S_USDT",
+      "exit_reason": "boundary_mark"
+    },
+    {
+      "event_id": "4866c36bd95901f7dff0899ae820",
+      "minutes": 240,
+      "arm": "focus_trail",
+      "symbol": "BANANAS31USDT",
+      "exit_reason": "trailing_stop"
+    },
+    {
+      "event_id": "5cd3301a2cdb0dd5b2c8346a6fe2",
+      "minutes": 240,
+      "arm": "focus_trail",
+      "symbol": "MUBARAKUSDT",
+      "exit_reason": "boundary_mark"
+    }
+  ],
+  "paired_combined_units": [
+    {
+      "minutes": 60,
+      "arm": "burst_trail",
+      "assets": 215,
+      "any_control_events": 428,
+      "control0_events": 428
+    },
+    {
+      "minutes": 60,
+      "arm": "focus_trail",
+      "assets": 547,
+      "any_control_events": 4536,
+      "control0_events": 4535
+    },
+    {
+      "minutes": 240,
+      "arm": "burst_trail",
+      "assets": 58,
+      "any_control_events": 125,
+      "control0_events": 125
+    },
+    {
+      "minutes": 240,
+      "arm": "focus_trail",
+      "assets": 354,
+      "any_control_events": 1167,
+      "control0_events": 1167
+    }
+  ],
+  "without_useless": [
+    {
+      "minutes": 60,
+      "arm": "burst_trail",
+      "removed_candidate_rows": 3,
+      "newly_selected_events": 0,
+      "changed_shared_notionals": 0,
+      "remaining_useless_rows": 0,
+      "interpretation": "Removed candidates were not selected in the original full account; equal filled paths are expected, not evidence that a selected USELESS winner was removed."
+    },
+    {
+      "minutes": 60,
+      "arm": "focus_trail",
+      "removed_candidate_rows": 9,
+      "newly_selected_events": 3,
+      "changed_shared_notionals": 0,
+      "remaining_useless_rows": 0,
+      "interpretation": "Changed selected event identities demonstrate reallocation, not static subtraction. Shared quantities did not change."
+    },
+    {
+      "minutes": 240,
+      "arm": "burst_trail",
+      "removed_candidate_rows": 0,
+      "newly_selected_events": 0,
+      "changed_shared_notionals": 0,
+      "remaining_useless_rows": 0
+    },
+    {
+      "minutes": 240,
+      "arm": "focus_trail",
+      "removed_candidate_rows": 0,
+      "newly_selected_events": 0,
+      "changed_shared_notionals": 0,
+      "remaining_useless_rows": 0
+    }
+  ],
+  "limitations": [
+    "Account same-asset exclusivity is exact-base identity, not independently verified economic token mapping. Unverified numeric multiplier aliases are excluded in combined scope.",
+    "This audit verifies arithmetic and implementation consistency, not the profitability or generalization of the strategy.",
+    "Funding, spread, impact and actual fees are excluded from base account;40/60bp is fixed-allocation sensitivity.",
+    "Historical tick changes and absent delisted markets are not reconstructed.",
+    "Peak R is conservative outcome information, not realized return or an entry feature."
+  ],
+  "failed_checks": []
+}

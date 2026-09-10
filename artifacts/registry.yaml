@@ -26195,3 +26195,101 @@ artifacts:
     production_eligible: false
     notes: Native engineering acceptance only. Private TV version2; 81+35 native checks,22 Python tests. Seen-case timing
       revision and unrealized chart R exposed; no account profit validation. Original monitor and notifications unchanged.
+  - artifact_id: spike-burst-validation-20260910-report-source
+    artifact_type: report
+    role: frozen_burst_return_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 89f7eb0290201fdd5343fdea620445999f489a16
+    generator_commit: 89f7eb0290201fdd5343fdea620445999f489a16
+    source_path: analysis/p1_spike_burst_validation_20260910.md
+    sha256: 08d01f96047f3bbbd2dd83db27de2e132b290bc8ad727c5f90fa12c6dd600cc1
+    size_bytes: 27781
+    storage_uri: repo://analysis/p1_spike_burst_validation_20260910.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Known July10-September9 sample; frozen return evaluation1; no retuning or live changes; all16 primary Holm p=1.
+  - artifact_id: spike-burst-validation-20260910-report-html
+    artifact_type: report
+    role: frozen_burst_return_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 89f7eb0290201fdd5343fdea620445999f489a16
+    generator_commit: 89f7eb0290201fdd5343fdea620445999f489a16
+    source_path: analysis/html/p1_spike_burst_validation_20260910.html
+    sha256: 7fc8b62ec24aa5c77f88983704d2361addb42af77c8ba1ba1327d9cbccf7947f
+    size_bytes: 2402083
+    storage_uri: repo://analysis/html/p1_spike_burst_validation_20260910.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Known July10-September9 sample; frozen return evaluation1; no retuning or live changes; all16 primary Holm p=1.
+  - artifact_id: spike-burst-validation-20260910-delivery
+    artifact_type: manifest
+    role: frozen_burst_return_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 89f7eb0290201fdd5343fdea620445999f489a16
+    generator_commit: 89f7eb0290201fdd5343fdea620445999f489a16
+    source_path: experiments/active/exp-spike-burst-validation-20260910-v1/RESULTS_MANIFEST.json
+    sha256: 6495dddc0fd7badc0108e5abcdf8b8026fb2965ce99d5a47983fd3e0e0eedd0a
+    size_bytes: 9214
+    storage_uri: repo://experiments/active/exp-spike-burst-validation-20260910-v1/RESULTS_MANIFEST.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Known July10-September9 sample; frozen return evaluation1; no retuning or live changes; all16 primary Holm p=1.
+  - artifact_id: spike-burst-validation-20260910-dataset
+    artifact_type: manifest
+    role: frozen_burst_return_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 89f7eb0290201fdd5343fdea620445999f489a16
+    generator_commit: 89f7eb0290201fdd5343fdea620445999f489a16
+    source_path: experiments/active/exp-spike-burst-validation-20260910-v1/results/dataset_manifest.json
+    sha256: e3faf5cbe51711a36faf07b5abbfcbb461748a4bfb698019ed1a78cec122ba51
+    size_bytes: 2739801
+    storage_uri: repo://experiments/active/exp-spike-burst-validation-20260910-v1/results/dataset_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Known July10-September9 sample; frozen return evaluation1; no retuning or live changes; all16 primary Holm p=1.
+  - artifact_id: spike-burst-validation-20260910-accounts
+    artifact_type: manifest
+    role: frozen_burst_return_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 89f7eb0290201fdd5343fdea620445999f489a16
+    generator_commit: 89f7eb0290201fdd5343fdea620445999f489a16
+    source_path: experiments/active/exp-spike-burst-validation-20260910-v1/results/validation_manifest.json
+    sha256: 45947e3d97636fb4f4e936c084ff6c3b5a2cbff6e1f80657e8d459547a44c956
+    size_bytes: 39161
+    storage_uri: repo://experiments/active/exp-spike-burst-validation-20260910-v1/results/validation_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Known July10-September9 sample; frozen return evaluation1; no retuning or live changes; all16 primary Holm p=1.
+  - artifact_id: spike-burst-validation-20260910-independent-audit
+    artifact_type: manifest
+    role: frozen_burst_return_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 89f7eb0290201fdd5343fdea620445999f489a16
+    generator_commit: 89f7eb0290201fdd5343fdea620445999f489a16
+    source_path: experiments/active/exp-spike-burst-validation-20260910-v1/qa/independent_audit.json
+    sha256: 3b250d8fa4a8990df8ffae73d85aff9c6d687f5cad25104a968f1e545d560675
+    size_bytes: 11661
+    storage_uri: repo://experiments/active/exp-spike-burst-validation-20260910-v1/qa/independent_audit.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Known July10-September9 sample; frozen return evaluation1; no retuning or live changes; all16 primary Holm p=1.
+  - artifact_id: spike-burst-validation-20260910-allocation-audit
+    artifact_type: manifest
+    role: frozen_burst_return_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 89f7eb0290201fdd5343fdea620445999f489a16
+    generator_commit: 89f7eb0290201fdd5343fdea620445999f489a16
+    source_path: experiments/active/exp-spike-burst-validation-20260910-v1/qa/allocation_audit.json
+    sha256: 008a06a0c2811d91c268503dcc5c95450c997325ddf615f0e92fa0b74380512c
+    size_bytes: 249352
+    storage_uri: repo://experiments/active/exp-spike-burst-validation-20260910-v1/qa/allocation_audit.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Known July10-September9 sample; frozen return evaluation1; no retuning or live changes; all16 primary Holm p=1.

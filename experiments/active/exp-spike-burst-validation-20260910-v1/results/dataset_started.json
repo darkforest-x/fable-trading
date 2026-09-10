@@ -1,0 +1,38 @@
+{
+  "code_commit": "649a1a569f1964dd36ffab967f477778950ac0f4",
+  "config": {
+    "arms": [
+      "burst_trail",
+      "focus_trail"
+    ],
+    "candidate_exclusion": "current and previous12 only",
+    "control_history_minimum": 340,
+    "control_reuse": "allowed across events; disclosed",
+    "controls_maximum": 3,
+    "exclusive_end": "2026-09-09T00:00:00+00:00",
+    "holdout_consumption": 1,
+    "minutes": [
+      60,
+      240
+    ],
+    "optimization": false,
+    "rank_minimum": 60,
+    "rank_window": 240,
+    "retrospective": true,
+    "same_decision_arms": "share matching positions",
+    "schema": "spike-burst-dataset-v1",
+    "seed": 20260910,
+    "start": "2026-07-10T00:00:00+00:00"
+  },
+  "generated_at": "2026-09-10T03:31:03.640255+00:00",
+  "source_hashes": {
+    "experiments/active/exp-spike-burst-validation-20260910-v1/PROJECT_PLAN.md": "598158480424fe92c09cd04d7df9aefb6b5af70a93914c8d4cabbfa01eefe1fd",
+    "yoyo/data/altseason_sources.py": "d9182612de0c5401ae74a00a2b220f6b280e6e71b9de306c26a4acb3638d0eb7",
+    "yoyo/evaluation/launch_quality_dataset.py": "df95efee4db18d09f160bbae8dd521bd39d52585c5dd42c5786e6a6b3876b6ed",
+    "yoyo/evaluation/pine/spike_burst_v1.pine": "18bbb6955fdf12e124688003799c44fc2a641f11a342edcf478157b1c9641fe2",
+    "yoyo/evaluation/spike_burst_dataset.py": "e03585c03e32387b84ade03ce12966d8ff0b6468a2814f0c0199a814d69dcdd1",
+    "yoyo/evaluation/spike_burst_execution.py": "05c96e98498cbf11cc426ed4cc939199b47af2cf8fd5a409c79fc720552f45cc",
+    "yoyo/evaluation/spike_burst_replay.py": "996ef56ceb5b70da5337422d8390487330f7e387f648ee527b5afc9bda72a33f"
+  },
+  "status": "started"
+}
