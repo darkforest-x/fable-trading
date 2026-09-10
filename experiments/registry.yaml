@@ -7967,3 +7967,21 @@ experiments:
     artifacts: []
     notes: Previously seen history after13 gates and A-D. New higher-timeframe coverage inspected without signal/outcome
       scoring. No live change.
+  - experiment_id: exp-spike-v3-price-acceptance-20260910-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1f10d360e51456e885ed2a5f4d479316324a3a44
+    status: active
+    question: Can one following close holding the original V3 frozen breakout boundary reject immediate failures while
+      preserving timely starts?
+    single_variable: Delay original V3 publication one close and require close above frozen candidate prior12 high;
+      original candidate/child clock unchanged.
+    result: Preregistered sixth structural hypothesis, no F market detection or scoring yet. Fixed original labels
+      and four gates retained; intentional one-bar delay priced honestly.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    canonical_report: analysis/html/p1_spike_v3_price_acceptance_20260910.html
+    artifacts: []
+    notes: After prior13 gates and fixed A-E on already-seen authorized dates. Pending/rejected/unknown and source/publication
+      clocks separated. No live changes.
