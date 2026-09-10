@@ -69,12 +69,14 @@ def run():
     assert old.sha(folder / "labels.csv.gz") == old.sha(study.V2 / "labels.csv.gz")
     for rel, digest in prepared["source_pins"].items():
         old.checked(root / rel, digest)
-    signals = pd.read_csv(folder / "signals.csv.gz")
-    controls = pd.read_csv(folder / "controls.csv.gz")
-    trades = pd.read_csv(folder / "trade_events.csv.gz")
-    control_trades = pd.read_csv(folder / "trade_controls.csv.gz")
-    labels = pd.read_csv(folder / "labels.csv.gz")
-    detections = pd.read_csv(folder / "detections.csv.gz")
+    # Preserve the exact binary floats written by pandas. Default C parsing
+    # changes tiny prices enough to invalidate strict risk subtraction checks.
+    signals = pd.read_csv(folder / "signals.csv.gz", float_precision="round_trip")
+    controls = pd.read_csv(folder / "controls.csv.gz", float_precision="round_trip")
+    trades = pd.read_csv(folder / "trade_events.csv.gz", float_precision="round_trip")
+    control_trades = pd.read_csv(folder / "trade_controls.csv.gz", float_precision="round_trip")
+    labels = pd.read_csv(folder / "labels.csv.gz", float_precision="round_trip")
+    detections = pd.read_csv(folder / "detections.csv.gz", float_precision="round_trip")
     jobs = json.loads((folder / "matching.json").read_text())["jobs"]
     assert not signals.event_id.duplicated().any()
     assert not controls.event_id.duplicated().any()
@@ -138,7 +140,7 @@ def run():
         breadth_rows.append(pd.DataFrame(dict(decision_time=clocks[mask], valid_denominator=valid[mask].astype(int).to_numpy(), above_fast=above[mask].astype(int).to_numpy(), positive_return=rising[mask].astype(int).to_numpy(), joint=(above & rising)[mask].astype(int).to_numpy())))
         counts["signals"] += len(selected); counts["jobs"] += 1
     breadth = pd.concat(breadth_rows).groupby("decision_time").sum()
-    saved_breadth = pd.read_csv(folder / "breadth.csv.gz", parse_dates=["decision_time"]).set_index("decision_time")
+    saved_breadth = pd.read_csv(folder / "breadth.csv.gz", parse_dates=["decision_time"], float_precision="round_trip").set_index("decision_time")
     pd.testing.assert_frame_equal(breadth, saved_breadth[breadth.columns], check_dtype=False)
     counts["breadth_hours"] = len(breadth)
     for path, digest in hashes.items():

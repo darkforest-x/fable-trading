@@ -60,6 +60,8 @@ def check(path, expected):
 
 
 def clean(value):
+    if value is pd.NaT or value is pd.NA:
+        return None
     if isinstance(value, dict):
         return {str(k): clean(v) for k, v in value.items()}
     if isinstance(value, (list, tuple)):
@@ -155,7 +157,7 @@ class Evidence:
     def csv(self, name):
         path = self.path(name)
         if str(path) not in self.cache:
-            frame = pd.read_csv(path)
+            frame = pd.read_csv(path, float_precision="round_trip")
             for column in DATETIME_COLUMNS:
                 if column in frame:
                     frame[column] = pd.to_datetime(frame[column], utc=True)
@@ -405,8 +407,10 @@ def report_text(evidence, prior, examples, failure, report):
          "达到本次回顾口径的" if bool(primary.target_80_met) else "尚未达到"), "",
         "全期共 %d 条早预警，平均全池每日 %s 条；后续确认 %d 条。早预警事件匹配精确率 %s，后续确认 %s。覆盖与打扰必须同时看，提醒数增加本身不代表质量提高。" %
         (primary.signals,num(primary.alerts_per_day),confirmed.signals,pct(primary.precision_all),pct(confirmed.precision_all)), "",
-        "早预警模拟事件相对匹配随机平均超额 %s bp；资产均衡超额 %s bp，两臂主检验 Holm p=%s。该结果按事件计算，没有计算账户收益；是否存在可靠交易优势要结合下文对照与自然退出看。" %
-        (num(early_trade.mean_excess_bp),num(early_trade.asset_balanced_excess_bp),num(early_trade.holm_p,6)), "",
+        "早预警模拟事件相对匹配随机平均超额 %s bp；资产均衡超额 %s bp，两臂主检验 Holm p=%s。该结果按事件计算，没有计算账户收益；%s。" %
+        (num(early_trade.mean_excess_bp),num(early_trade.asset_balanced_excess_bp),num(early_trade.holm_p,6),
+         "在本回顾事件口径通过资产块检验，仍需新时段验证" if early_trade.asset_balanced_excess_bp>0 and early_trade.holm_p<.01
+         else "尚未证明早预警具有优于匹配随机的交易优势"), "",
         "**重要限制：价格突破预警与评价标签共享‘突破前12根高点’锚点。** 广覆盖有结构性原因，不是独立证明预测能力。若把全部同锚点突破按同样24根去重都通知，近100%召回可由定义直接得到，那只是机械上界，不是本轮候选成功。此次保留快均线和12根预警冷却，并同时评价所有提醒的代价与随机对照。", "",
         "本次是既有278个OKX 1H历史来源、UTC [2026-07-10,2026-09-09) 的61天回顾；来源预热历史一并保留，BTC/ETH仍为原池背景排除。不是当前全市场普查，也不是新盲测。本配置首次消耗holdout（固定边界2026-05-04），不代表首次见到这段历史。", "",
         "## 原版对照：同一标签，不改分母", ""]
@@ -443,6 +447,7 @@ def report_text(evidence, prior, examples, failure, report):
         "确认须有父预警，只允许父根到后3根，收盘仍高于父根冻结突破边界，近期密集、三根推进≥1.5ATR、三根量比≥1.5、MD≥SB、ZLEMA上升。一父最多确认一次；过期不复活，实际确认根和价格不回填。", ""]
     case_rows=[]
     first_rows=[]
+    cooldown_rows=[]
     for example in examples:
         for target in example["targets"]:
             direct=[row for row in example["arrows"] if row["decision_i"]==target["decision_i"]]
@@ -450,6 +455,9 @@ def report_text(evidence, prior, examples, failure, report):
             case_rows.append([example["asset"],bjt(target["bar_open"]),bjt(target["confirmed_at"]),format(target["close"],".8g")]+[
                 "有" if any(row["arm"]==arm for row in direct) else "无" for arm in ("v2","early","confirmed")]+
                 [bjt(child["parent_decision_time"]) if child else "—",int(child["confirm_age"]) if child else "—"])
+            cooldown_rows.append([example["asset"],bjt(target["bar_open"]),
+                "是" if target["early_condition"] else "否", "是" if target["candidate_edge"] else "否",
+                "是" if target["cooldown_blocked"] else "否"])
         for arm in ("v2","early","confirmed"):
             arrows=[row for row in example["around_arrows"] if row["arm"]==arm]
             first=min(arrows,key=lambda row:row["decision_time"]) if arrows else None
@@ -458,6 +466,19 @@ def report_text(evidence, prior, examples, failure, report):
     lines += [table(["币种","目标根开盘BJT","最早确认BJT","收盘价","旧V2","早预警","后续确认","确认的父预警时刻","等待根数"],case_rows), "",
         "下表‘附近’固定为开盘北京时间[8月19日14:00,8月20日10:00)，不从整段96根中挑更早但无关的预警冒充本次启动。", "",
         table(["币种","版本","附近条数","附近首根开盘","实际确认时刻","当根收盘价"],first_rows), ""]
+    lines += ["这里不能把整体覆盖达标写成三张截图都在指定根新发信号。HYPE与PEPE的附近预警可能早于22:00，而NEAR的先前预警会消耗冷却；下表使用保存的上升沿/冷却字段，区分‘已经提前预警’与‘需要新提醒却被冷却压住’。", "",
+        table(["币种","目标根开盘BJT","结构条件满足","本根条件上升沿","被12根冷却拦截"],cooldown_rows), ""]
+    for example in examples:
+        blocked=[target for target in example["targets"] if target["cooldown_blocked"]]
+        for target in blocked:
+            previous=[row for row in example["arrows"] if row["arm"]=="early" and row["decision_i"]<target["decision_i"]]
+            later=[row for row in example["arrows"] if row["arm"]=="confirmed" and row["decision_i"]>=target["decision_i"]]
+            parent=max(previous,key=lambda row:row["decision_i"]) if previous else None
+            child=min(later,key=lambda row:row["decision_i"]) if later else None
+            lines += ["%s：%s开盘根达到新预警上升沿，但被冷却拦截。此前最近已接纳预警确认于%s（收盘%s）；后续动能确认%s。此前预警不应冒充目标根的新提醒，冷却造成的遗漏仍保留，没有为这一例事后调短冷却。" %
+                (example["asset"],bjt(target["bar_open"]),bjt(parent["decision_time"]) if parent else "窗口外",
+                 format(parent["signal_close"],".8g") if parent else "未知",
+                 "直到"+bjt(child["decision_time"])+"才出现" if child else "在图窗中未出现"), ""]
     children=signals.loc[signals.arm.eq("confirmed")]
     lines += [table(["父子等待根数","确认条数"],[[age,int(children.confirm_age.eq(age).sum())] for age in range(4)]), ""]
     for example in examples:
@@ -550,6 +571,10 @@ def run(folder=EXP/"results", report=REPORT):
         shared_anchor_recall_is_not_predictive_validation=True,
         chart_contract="Three complete96bar cases, saved V2/early/confirmed markers at actual close; deterministic worst natural early failure",
         examples=examples,failure=failure,artifacts=[artifact(path) for path in [report,html]+images])
+    initial_attempt=EXP/"qa/report_render_attempts/initial/archive_receipt.json"
+    if initial_attempt.is_file():
+        manifest["prior_render_attempt_archive"]=artifact(initial_attempt)
+        manifest["render_revision_reason"]="Normalize missing NaT values in manifest and clarify stored cooldown diagnostics; frozen study unchanged"
     receipt.write_text(json.dumps(clean(manifest),ensure_ascii=False,indent=2,allow_nan=False)+"\n")
     return manifest
 
