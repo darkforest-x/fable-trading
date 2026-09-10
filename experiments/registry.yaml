@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-launch-quality-20260910-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: cffb7a76a666df15e9b3be2c6bed3389d3387d2c
+    status: active
+    question: Do fixed single-factor volume4 or expansion3 filters improve 1H focus/md trend holding beyond fewer
+      trades and one winner?
+    single_variable: Original focus/md versus one causal filter at a time; no entry, stop, exit, cost or live changes.
+    result: Preregistered earlier-period replication and known-window explanation pending.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/active/exp-launch-quality-20260910-v1/PROJECT_PLAN.md
+    artifacts: []
+    notes: Owner requests next research with existing all-history authorization. No pristine OOS or production claim.
   - experiment_id: exp-altseason-donchian-ewmac-20260910-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 8082e988083d8f702e37403fecd9ec0ccde991b7
