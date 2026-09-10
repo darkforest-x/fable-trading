@@ -7865,3 +7865,21 @@ experiments:
     notes: First use per fixed diagnostic configuration on owner-authorized already-seen history. Source hashes307;
       independently checked99365 tags and1860 summary values. Frozen parents/cooldowns, not a rebuilt detector. TV
       and notification rules unchanged.
+
+  - experiment_id: exp-spike-v3-focus-20260910-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f3324d9e2a3ea6c96e2c726de86cdb837038d6ab
+    status: active
+    question: Can V3 structural reference lock or complete near-zero setup reduce alerts while retaining timely big
+      launches?
+    single_variable: Two independent structure interventions, each versus original V3; no combination or threshold
+      search.
+    result: Preregistered before scoring. Original SPIKE V1 remains the historical comparison baseline.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    canonical_report: analysis/html/p1_spike_v3_focus_20260910.html
+    artifacts: []
+    notes: 'Owner goal-mode authorization. Engineering targets fixed before scoring: labels -50%, large recall80%,
+      baseline timely positive retention90%. Failure will not be hidden by held-reference coverage.'
