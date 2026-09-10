@@ -91,7 +91,7 @@ test("replay fixture is labeled historical and never inherits a live notificatio
 
 test("selected timeframe is filtered by the API before its 2000-row limit", () => {
   assert.match(app, /const apiTimeframe =/);
-  assert.match(app, /&timeframe=\$\{encodeURIComponent\(apiTimeframe\(state\.timeframe\)/);
+  assert.match(app, /&timeframe=\$\{encodeURIComponent\(apiTimeframe\(queryTimeframe\)/);
   assert.match(app, /runtimeTimeframes.*uiTimeframe/s);
   assert.match(app, /"30m": "30", "1H": "60", "4H": "240"/);
 });
@@ -134,7 +134,16 @@ test("changing source or timeframe cannot retain a stale detail chart", () => {
   assert.match(app, /state\.chartController\?\.abort\(\);\s*state\.chartRequest\+\+;/s);
   assert.match(app, /!currentItems\.some\(\(item\) => sameSelection\(state\.selected, item\)\)/);
   assert.match(app, /request !== state\.chartRequest \|\| !sameSelection\(state\.selected, item\)/);
-  assert.match(app, /state\.signalSource = button\.dataset\.signalSource;\s*state\.rowLimit = 24; clearSelectedSignal\(\);/s);
+  assert.match(app, /state\.signalSource = button\.dataset\.signalSource;\s*state\.rowLimit = 24; invalidateSignalQuery\(\);/s);
+});
+
+test("source or timeframe switches discard prior API results and queue the current request", () => {
+  assert.match(app, /refreshQueued: false, signalQueryRevision: 0/);
+  assert.match(app, /function invalidateSignalQuery\(\).*state\.signals = \[\];.*state\.directSignals = \[\];.*clearSelectedSignal\(\);/s);
+  assert.match(app, /if \(state\.syncing\) \{ state\.refreshQueued = true; return; \}/);
+  assert.match(app, /const queryRevision = state\.signalQueryRevision;.*const querySource = state\.signalSource;.*const queryTimeframe = state\.timeframe;/s);
+  assert.match(app, /if \(queryRevision !== state\.signalQueryRevision \|\| querySource !== state\.signalSource \|\| queryTimeframe !== state\.timeframe\) return;/);
+  assert.match(app, /if \(state\.refreshQueued\) \{\s*state\.refreshQueued = false;\s*refresh\(\);/s);
 });
 
 test("replay symbols without a swap separator do not repeat their quote asset", () => {
@@ -145,4 +154,5 @@ test("replay symbols without a swap separator do not repeat their quote asset", 
   assert.equal(shortSymbol("AIXBTUSDT"), "AIXBT");
   assert.equal(shortSymbol("DATA-USDT-SWAP"), "DATA");
   assert.equal(shortSymbol("PEPEUSDT.P"), "PEPE");
+  assert.match(app, /页内预览 \$\{venue\} \$\{shortSymbol\(item\.symbol\)\}/);
 });
