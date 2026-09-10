@@ -168,6 +168,59 @@ def normalize(venue: str, payload: Any, left: pd.Timestamp, right: pd.Timestamp)
     return out
 
 
+def fetch_gate_timeframes(max_markets: int | None = None) -> None:
+    """Collect Gate's maximum directly obtainable window for every requested TF.
+
+    Gate rejects old 30m requests after about 10,000 bars.  Each timeframe is
+    therefore requested directly (never a misleading resample of the short
+    30m tail).  The receipt declares whether its own source reaches the frozen
+    two-year start; short 30m/1H windows remain visible exclusions.
+    """
+    rows = pd.read_json(DATA / "catalog.json")
+    wanted = rows.loc[rows.eligible & rows.venue.eq("gate")].sort_values("symbol").to_dict("records")
+    if max_markets is not None: wanted = wanted[:max_markets]
+    outputs = []
+    for number, row in enumerate(wanted, 1):
+        raw_listing = row.get("listing_ms")
+        listed = int(raw_listing) if pd.notna(raw_listing) and float(raw_listing) > 0 else 0
+        listed_at = pd.Timestamp(listed, unit="ms", tz="UTC").ceil("30min") if listed else WARMUP_START
+        for minutes in CONFIG["timeframes"]:
+            desired = max(WARMUP_START, listed_at)
+            # Gate's own error declares a recent-10k-points horizon.  Do not
+            # ask earlier and call rejection a candle gap.
+            available = max(desired, END - pd.Timedelta(minutes=minutes * 10_000))
+            dest = DATA / "normalized_gate_direct" / (row["symbol"] + f"_{minutes}m.csv.gz")
+            receipt = DATA / "gate_timeframe_receipts" / (row["symbol"] + f"_{minutes}m.json")
+            if dest.exists() and receipt.exists() and json.loads(receipt.read_text()).get("status") in ("complete", "partial"):
+                outputs.append(json.loads(receipt.read_text())); continue
+            dest.parent.mkdir(parents=True, exist_ok=True); client, pieces, pages, error = Client("gate"), [], [], ""
+            cursor = available
+            try:
+                while cursor < END:
+                    right = min(END, cursor + pd.Timedelta(minutes=minutes * 2000))
+                    payload, page = client.get("/futures/usdt/candlesticks", {"contract": row["symbol"], "interval": {30:"30m",60:"1h",240:"4h",1440:"1d"}[minutes], "from": cursor.value // 10**9, "to": right.value // 10**9 - 1})
+                    raw = []
+                    for item in payload:
+                        timestamp = pd.Timestamp(int(item["t"]), unit="s", tz="UTC")
+                        if cursor <= timestamp and timestamp + pd.Timedelta(minutes=minutes) <= right:
+                            raw.append((timestamp, float(item["o"]), float(item["h"]), float(item["l"]), float(item["c"]), float(item["v"]), float(item["sum"])))
+                    pieces.append(pd.DataFrame(raw, columns=["time","open","high","low","close","volume","quote_volume"]).set_index("time"))
+                    pages.append(page); cursor = right
+                frame = pd.concat(pieces).sort_index() if pieces else pd.DataFrame()
+                if len(frame) and frame.index.duplicated().any(): raise ValueError("duplicate Gate direct timestamps")
+                expected = pd.date_range(available, END, freq=f"{minutes}min", inclusive="left")
+                missing = expected.difference(frame.index).astype(str).tolist() if len(frame) else expected.astype(str).tolist()
+                status = "complete" if not missing and available <= START else "partial" if not missing else "gapped"
+                frame.to_csv(dest, compression={"method":"gzip","mtime":0})
+            except Exception as exc:
+                frame, missing, status, error = pd.DataFrame(), [], "error", repr(exc)
+            record = {"venue":"gate", "symbol":row["symbol"], "asset":row["asset"], "minutes":minutes, "status":status,
+                      "rows":len(frame), "pages":len(pages), "requested_from":available.isoformat(), "two_year_source_coverage":available <= START,
+                      "missing":len(missing), "missing_examples":missing[:20], "error":error, "path":str(dest), "completed_at":stamp(), "page_receipts":pages}
+            atomic_json(receipt, record); outputs.append(record); print(number, len(wanted), "gate", row["symbol"], minutes, status, len(frame), flush=True)
+    pd.DataFrame(outputs).drop(columns=["page_receipts"], errors="ignore").to_csv(DATA / "gate_timeframe_coverage.csv", index=False)
+
+
 def fetch(max_markets: int | None = None, venue: str | None = None) -> None:
     rows = pd.read_json(DATA / "catalog.json")
     wanted = rows.loc[rows.eligible].sort_values(["venue", "symbol"]).to_dict("records")
@@ -263,10 +316,11 @@ def evaluate() -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument("phase", choices=("catalog", "fetch", "evaluate")); parser.add_argument("--max-markets", type=int); parser.add_argument("--venue", choices=tuple(VENUES))
+    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument("phase", choices=("catalog", "fetch", "gate-timeframes", "evaluate")); parser.add_argument("--max-markets", type=int); parser.add_argument("--venue", choices=tuple(VENUES))
     args = parser.parse_args()
     if args.phase == "catalog": catalog()
     elif args.phase == "fetch": fetch(args.max_markets, args.venue)
+    elif args.phase == "gate-timeframes": fetch_gate_timeframes(args.max_markets)
     else: evaluate()
 
 
