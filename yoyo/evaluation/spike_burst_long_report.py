@@ -47,6 +47,7 @@ LEDGER_COLUMNS = ["event_id", "asset", "minutes", "arm", "valid", "portfolio_sel
 CONTEXT_AUDITS = {
     "previous_study_delivery_audit.json": "c6be92556372c333b5af7faa33cf73a9914686f3c65e3ca64389c0e2372a1dfc",
     "source_audit_pre_sanitize.json": "72fde128e5b50a929da16e95aac8a985852360afd93b91d060ba890402596337",
+    "source_audit_tradable.json": "85b644f5da0d4acf5d1c8a3f7c295481bf81da13926db44e44ee2caba0b86232",
 }
 
 

@@ -1,0 +1,144 @@
+{
+  "audited_builder_commit": "8adf315657eeb1a978b7b6d9bbab84ceebca4f8c",
+  "audited_manifest": {
+    "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-three-year-20260910-v1/data/history_manifest.json",
+    "sha256": "9fe6f6ddd45b551542cb1b6dc6c9d824d96faf1430e605713e6d9ecd2c80426e"
+  },
+  "generated_at": "2026-09-10T05:12:20.999573+00:00",
+  "limitations": [
+    "Current catalog is not a complete historical listing/delisting census.",
+    "Original monthly source rows may be zero-activity pricing placeholders; authenticated bytes alone do not prove executability.",
+    "Original builder files were authenticated before the later sanitizer edit; recorded commit identifies those exact Git blobs.",
+    "Historical per-contract tick schedules and observed data delivery times remain unknown."
+  ],
+  "new_backtest_run": false,
+  "old_recent_adjacent_markets": 633,
+  "outcomes_read": false,
+  "raw_numerical_or_authentication_errors": [],
+  "recent_native_samples": [
+    {
+      "end_exclusive": "2026-09-09T00:00:00Z",
+      "hours": 3144,
+      "maximum_absolute_difference": 0.0,
+      "start": "2026-05-01T00:00:00Z",
+      "symbol": "BTCUSDT"
+    },
+    {
+      "end_exclusive": "2026-09-09T00:00:00Z",
+      "hours": 3144,
+      "maximum_absolute_difference": 0.0,
+      "start": "2026-05-01T00:00:00Z",
+      "symbol": "ETHUSDT"
+    },
+    {
+      "end_exclusive": "2026-09-09T00:00:00Z",
+      "hours": 3144,
+      "maximum_absolute_difference": 0.0,
+      "start": "2026-05-01T00:00:00Z",
+      "symbol": "PUMPUSDT"
+    },
+    {
+      "end_exclusive": "2026-09-09T00:00:00Z",
+      "hours": 3144,
+      "maximum_absolute_difference": 0.0,
+      "start": "2026-05-01T00:00:00Z",
+      "symbol": "AIAUSDT"
+    }
+  ],
+  "schema": "spike-burst-independent-source-audit-v1",
+  "scope": "raw source identity and native OHLCV/amount aggregation, before tradable-boundary sanitation",
+  "segment_sha_verified": 660,
+  "segments_clock_schema_tick_boundary_verified": 660,
+  "source_and_builder_artifacts_verified": 6,
+  "source_status_counts": {
+    "complete": 652,
+    "empty": 1,
+    "excluded": 244,
+    "rejected": 0
+  },
+  "total_hour_rows_checked": 11528983,
+  "tradability_findings": {
+    "entirely_zero_activity_hours": 92256,
+    "entirely_zero_activity_segments": 11,
+    "markets_with_rows_after_known_delivery": 128,
+    "pure_zero_symbols": [
+      "AIAUSDT",
+      "CTKUSDT",
+      "CVCUSDT",
+      "CVXUSDT",
+      "FTTUSDT",
+      "LITUSDT",
+      "MAVIAUSDT",
+      "PUMPUSDT",
+      "RAYUSDT",
+      "SCUSDT",
+      "SLPUSDT"
+    ],
+    "recommendation": "Separate immutable tradable view: close<=known delivery; exclude all-zero segments; preserve/report any positive pre-onboard conflict; no invented settlement fill",
+    "requires_correction_before_returns": true
+  },
+  "unique_catalog_markets": 897,
+  "zip_hours_compared": 4348,
+  "zip_samples": [
+    {
+      "csv_sha256": "6ab14b882d9b65cc078b5a02314fb8e8ff990ed03080d504bcd042890ce4800c",
+      "hours": 720,
+      "maximum_absolute_difference": 0.0,
+      "method": "independent raw member pandas groupby UTC floor hour; count=4, OHLC aggregation and native volume/quote sum",
+      "month": "2023-09",
+      "symbol": "BTCUSDT",
+      "zip_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/BTCUSDT/BTCUSDT-15m-2023-09.zip",
+      "zip_sha256": "f1f628bb4b1976ba632150bf999fde302ddcfc8899ff369a5119bdd5dba1e0d5"
+    },
+    {
+      "csv_sha256": "5b9f6a1ab3d10fde0a2af52680d0af4f4d557ea0bd55ffda9382acaece853c9d",
+      "hours": 720,
+      "maximum_absolute_difference": 0.0,
+      "method": "independent raw member pandas groupby UTC floor hour; count=4, OHLC aggregation and native volume/quote sum",
+      "month": "2026-04",
+      "symbol": "BTCUSDT",
+      "zip_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/BTCUSDT/BTCUSDT-15m-2026-04.zip",
+      "zip_sha256": "0bc151133aa47be76f535539e25c04970bd6d0afd54e532951638dc8330fcc58"
+    },
+    {
+      "csv_sha256": "6b38da3c66cefbf91c7e647aa5fcc98c87c173e00fdd16c3dabb947a8f070e05",
+      "hours": 720,
+      "maximum_absolute_difference": 0.0,
+      "method": "independent raw member pandas groupby UTC floor hour; count=4, OHLC aggregation and native volume/quote sum",
+      "month": "2023-09",
+      "symbol": "ETHUSDT",
+      "zip_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/ETHUSDT/ETHUSDT-15m-2023-09.zip",
+      "zip_sha256": "a4f6804bd2edb66ff385d70a029a52447e68f31d94cccc803aafe34bb537d8ce"
+    },
+    {
+      "csv_sha256": "fc732f354100880508773d772f734ea4ab68c83a409161f8fde6d12ee1dc8ce3",
+      "hours": 720,
+      "maximum_absolute_difference": 0.0,
+      "method": "independent raw member pandas groupby UTC floor hour; count=4, OHLC aggregation and native volume/quote sum",
+      "month": "2026-04",
+      "symbol": "ETHUSDT",
+      "zip_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/ETHUSDT/ETHUSDT-15m-2026-04.zip",
+      "zip_sha256": "d9974b77eb5b1b37c1b6b82f064a4edbb8c0b2a0531fbee487e3a34e519da6be"
+    },
+    {
+      "csv_sha256": "2bea4706a1bb521bc3ad5c552aadfdf1b7c9297e00f0412a263b26bbc0b3bea6",
+      "hours": 736,
+      "maximum_absolute_difference": 0.0,
+      "method": "independent raw member pandas groupby UTC floor hour; count=4, OHLC aggregation and native volume/quote sum",
+      "month": "2025-07",
+      "symbol": "PUMPUSDT",
+      "zip_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/PUMPUSDT/PUMPUSDT-15m-2025-07.zip",
+      "zip_sha256": "dfbf7ff6b6514eddf2ed9135c95bfc0f315c57869f8cd881f7abf074ee6de58c"
+    },
+    {
+      "csv_sha256": "44cb9d1a888052eab3b022fbca42e7b69aff1a07a84e45d7409580e01815a2e3",
+      "hours": 732,
+      "maximum_absolute_difference": 0.0,
+      "method": "independent raw member pandas groupby UTC floor hour; count=4, OHLC aggregation and native volume/quote sum",
+      "month": "2026-01",
+      "symbol": "AIAUSDT",
+      "zip_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um15m/downloads/AIAUSDT/AIAUSDT-15m-2026-01.zip",
+      "zip_sha256": "08f072942a00b607830144d309879fc6d8a9b20e043b5197a6bf80670c43d60b"
+    }
+  ]
+}
