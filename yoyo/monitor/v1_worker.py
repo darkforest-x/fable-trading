@@ -1,4 +1,4 @@
-"""Isolated public-data V1 scanner; it never creates notification outbox rows."""
+"""Isolated public-data V1 scanner; only new forward V1 raw rows may seed Bark."""
 from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 import time
@@ -24,8 +24,8 @@ class V1Scanner:
         """Fetch confirmed bars, replay only changed closed candles, persist read models.
 
         This runs in its own process so pandas/Pine replay cannot starve FastAPI.
-        Raw events are journalled with ``bark_notify=False``; a later explicit
-        delivery phase may arm only newly closed live signals after its cutover.
+        Raw events may seed their own Bark stage only after the persisted
+        forward cutover; historical or replay rows never acquire a receipt.
         """
         store, client = self.store, self.client
         started = now_ms(); client.synchronize()
