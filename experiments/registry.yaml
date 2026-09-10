@@ -3942,47 +3942,6 @@ experiments:
       No holdout, promotion, deployment, ACTIVE/frozen/forward mutation,
       Telegram or order action occurred.
 
-  - experiment_id: exp-15m-arbusdt-screenshot-probe-20260901-v1
-    source_repo: darkforest-x/fable-trading
-    source_commit: "f82431b7cca040ce84347276a899ed278c28e7ae"
-    status: accepted
-    question: >-
-      Does the latest completed Grade-A full40 native-1280 15m detector fire
-      on the Owner-provided 2026-09-01 09:05 CST ARBUSDT screenshot pattern,
-      and what are the preserved core, earliest detection time and price?
-    single_variable: >-
-      n/a -- one Owner-selected screenshot probe with the already-frozen
-      checkpoint, conf=0.25, NMS=0.70, W18/W19, core4/5 and post2-9 contract;
-      Binance photo-matched bars are cross-checked against OKX without tuning
-    result: >-
-      detected_as_one_delayed_long_episode. Binance and OKX independently
-      returned one dense_long episode with the same 2026-09-01 00:00..00:45
-      CST core and the same earliest 01:15 CST endpoint bar. The endpoint bar
-      closed at 0.08962 on Binance and was fully knowable at 01:30 CST; the
-      next bar opened at 0.08963. Earliest confidence was 0.6713 on Binance
-      and 0.5152 on OKX. The screenshot's still-forming 09:00 bar was excluded.
-    holdout_consumed: true
-    training_eligible: false
-    production_eligible: false
-    canonical_report: analysis/p1_15m_arbusdt_screenshot_model_probe_20260901.md
-    artifacts:
-      - 15m-arbusdt-screenshot-probe-20260901-v1-run-contract
-      - 15m-arbusdt-screenshot-probe-20260901-v1-result
-      - 15m-arbusdt-screenshot-probe-20260901-v1-annotated-chart
-      - 15m-arbusdt-screenshot-probe-20260901-v1-report
-      - 15m-arbusdt-screenshot-probe-20260901-v1-html
-    reuse_allowed: false
-    notes: >-
-      This is Grade-A full40 native-1280 checkpoint holdout use #3. The Owner
-      request and assistant commentary froze the target and exact inference
-      settings before the model call; the repository run-contract file was
-      honestly recorded afterward and is not presented as a backdated prereg.
-      The +30.48% move from detection close to the selected screenshot is
-      outcome-conditioned description, not detector precision or profit proof.
-      This completed-history model used two post-core bars and remains
-      production_eligible=false; no training, tuning, promotion, deployment,
-      forward mutation, Telegram delivery or order occurred.
-
   - experiment_id: exp-15m-ma-launch-l2-side-split-v1
     source_repo: darkforest-x/fable-trading
     source_commit: "976d1b3f0edba6a8c44f8ee2ce2141ccc1a70ac0"
