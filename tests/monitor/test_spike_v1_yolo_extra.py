@@ -108,3 +108,12 @@ def test_idle_v1_model_gate_does_not_load_yolo_before_a_raw_candidate(tmp_path):
         gate._condition.notify_all()
     thread.join(timeout=1)
     assert not thread.is_alive() and detector.warmups == 0
+
+
+def test_idle_v1_model_gate_reports_dormant_not_loading(tmp_path):
+    """No raw candidate means the deliberately lazy YOLO runtime is idle."""
+    gate = ModelGate(Store(tmp_path / "monitor.sqlite3"), lambda: 0, threading.Event())
+    status = gate.status()
+    assert status["status"] == "idle"
+    assert status["loaded"] is False
+    assert status["queue_depth"] == 0 and status["active"] is None

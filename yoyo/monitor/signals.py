@@ -24,8 +24,14 @@ def _json_number(value):
     return number if np.isfinite(number) else None
 
 
-def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, tick: float) -> dict:
-    """Return V1 raw events and chart data using no bar after each signal close."""
+def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, tick: float,
+            chart_limit: int | None = None) -> dict:
+    """Return causal V1 events and an optional trailing chart window.
+
+    Features and replay always consume the full supplied history.  ``chart_limit``
+    only avoids materializing display records which the persistent worker would
+    immediately discard; events and state remain computed from every bar.
+    """
     if timeframe not in TIMEFRAMES:
         raise ValueError("unsupported monitored timeframe")
     step = TIMEFRAMES[timeframe]
@@ -49,15 +55,19 @@ def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, t
     frame.columns = ["open", "high", "low", "close", "volume"]
     feature_frame = features(frame)
     replayed = replay(feature_frame, float(tick))
+    if chart_limit is not None and (type(chart_limit) is not int or chart_limit < 1):
+        raise ValueError("invalid chart_limit")
+    chart_start = max(0, len(frame) - chart_limit) if chart_limit is not None else 0
     chart, events = [], []
     for i, (ts, row) in enumerate(frame.iterrows()):
         close_ms = int(ts.value // 1_000_000) + step
         r = replayed.iloc[i]
-        chart.append({"t": int(ts.value // 1_000_000), "o":row.open,"h":row.high,"l":row.low,"c":row.close,"v":row.volume,
-                      "md":_json_number(feature_frame.md.iloc[i]), "sma20":_json_number(feature_frame.s20.iloc[i]), "ema20":_json_number(feature_frame.e20.iloc[i]),
-                      "sma60":_json_number(feature_frame.s60.iloc[i]), "ema60":_json_number(feature_frame.e60.iloc[i]),
-                      "sma120":_json_number(feature_frame.s120.iloc[i]), "ema120":_json_number(feature_frame.e120.iloc[i]),
-                      "burst":bool(r.burst), "ready":bool(feature_frame.ready.iloc[i])})
+        if i >= chart_start:
+            chart.append({"t": int(ts.value // 1_000_000), "o":row.open,"h":row.high,"l":row.low,"c":row.close,"v":row.volume,
+                          "md":_json_number(feature_frame.md.iloc[i]), "sma20":_json_number(feature_frame.s20.iloc[i]), "ema20":_json_number(feature_frame.e20.iloc[i]),
+                          "sma60":_json_number(feature_frame.s60.iloc[i]), "ema60":_json_number(feature_frame.e60.iloc[i]),
+                          "sma120":_json_number(feature_frame.s120.iloc[i]), "ema120":_json_number(feature_frame.e120.iloc[i]),
+                          "burst":bool(r.burst), "ready":bool(feature_frame.ready.iloc[i])})
         if bool(r.burst_up) and bool(r.risk_valid):
             events.append({"protocol":SIGNAL_PROTOCOL,"kind":SIGNAL_KIND,"source":"live","confirmation":"raw","direction":"long",
                            "side":"long","timeframe":timeframe,"timeframe_min":step//60000,"bar_open_ms":int(ts.value//1_000_000),

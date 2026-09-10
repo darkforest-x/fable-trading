@@ -30,7 +30,8 @@ class Client:
 def test_persistent_worker_reuses_client_candles_and_skips_unchanged_replay(tmp_path, monkeypatch):
     client, calls = Client(), []
     monkeypatch.setattr(v1_worker, "OKX", lambda: client)
-    def analyze(candles, higher, timeframe, *, tick):
+    def analyze(candles, higher, timeframe, *, tick, chart_limit=None):
+        assert chart_limit == 240
         calls.append((timeframe, tuple(row["t"] for row in candles)))
         return {"events": [], "chart": list(candles), "state": {"phase": "ready", "ready": True, "timeframe": timeframe}}
     monkeypatch.setattr(v1_worker, "analyze", analyze)
@@ -61,7 +62,7 @@ def test_prefetches_up_to_eight_cells_but_replays_and_writes_in_cell_order(tmp_p
 
     client, replays = PrefetchClient(), []
     monkeypatch.setattr(v1_worker, "OKX", lambda: client)
-    monkeypatch.setattr(v1_worker, "analyze", lambda candles, higher, timeframe, *, tick:
+    monkeypatch.setattr(v1_worker, "analyze", lambda candles, higher, timeframe, *, tick, chart_limit:
                         (replays.append(timeframe) or {"events": [], "chart": list(candles),
                                                         "state": {"phase": "ready", "ready": True}}))
     scanner = v1_worker.V1Scanner(str(tmp_path / "monitor.sqlite3"))

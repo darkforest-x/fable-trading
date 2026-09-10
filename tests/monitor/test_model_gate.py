@@ -28,18 +28,23 @@ class Detector:
         return {'ready': True}
 
 
-def scenario(tmp_path, tf='1H', side='long', wait=2):
+def scenario(tmp_path, tf='1H', wait=2, *, register=True):
     step = TIMEFRAMES[tf]
     p, end = 150 * step, (150+wait)*step
-    raw = model_event(close=end+step, timeframe=tf, side=side, wait=wait)['indicator']
+    raw = model_event(close=end+step, timeframe=tf, side='long', wait=wait)['indicator']
+    # The production gate now accepts only the frozen V1 closed raw-long
+    # contract.  Legacy IMACD fixture fields remain outside this focused suite.
+    raw.update(source='live', confirmation='raw', direction='long', side='long', venue='okx',
+               timeframe_min=TIMEFRAMES[tf] // 60_000, is_closed=True, risk=2., initial_stop=98.,
+               source_sha256='a' * 64, entry_reference='next_open', executable_entry_time=None)
     core_end = min(p, end-2*step)
     proposal = dict(model_sha256=MODEL_SHA256, confidence=.65, detection_id='synthetic-1',
-                    input_pixel_sha256='0'*64, side=side, structural_pass=True,
+                    input_pixel_sha256='0'*64, side='long', structural_pass=True,
                     window_len=18, window_start_ms=end-17*step, window_end_ms=end,
                     core_start_ms=core_end-3*step, core_end_ms=core_end,
                     core_length_bars=4, post_bars=(end-core_end)//step)
     candles = [dict(t=t, o=99.4, h=101., l=99., c=99.5 if t==p else 100.5, v=10.,
-                    md=.2 if side=='long' else -.2, sb=.02,
+                    md=.2, sb=.02,
                     sma20=100.,ema20=100.,sma60=100.,ema60=100.,sma120=100.,ema120=100.)
                for t in range(p-30*step, end+step, step)]
     store = Store(tmp_path/'model.sqlite')
@@ -50,15 +55,15 @@ def scenario(tmp_path, tf='1H', side='long', wait=2):
     clock = [end+step+1000]
     # Synthetic legacy-enabled mode preserves existing dual-channel coverage.
     gate = ModelGate(store, lambda: clock[0], threading.Event(), detector, telegram_enabled=True)
-    assert gate.register(raw)
+    if register:
+        assert gate.register(raw)
     return gate, store, detector, raw, candles, proposal, clock
 
 
 @pytest.mark.parametrize('tf', MONITORED_TIMEFRAMES)
-@pytest.mark.parametrize('side', ['long','short'])
 @pytest.mark.parametrize('wait', [0,2,9])
-def test_exact_frozen_wait_both_sides_all_timeframes(tmp_path, tf, side, wait):
-    gate, store, detector, raw, bars, prop, clock = scenario(tmp_path, tf, side, wait)
+def test_exact_frozen_wait_all_v1_timeframes(tmp_path, tf, wait):
+    gate, store, detector, raw, bars, prop, clock = scenario(tmp_path, tf, wait)
     gate.process(raw['symbol'],tf,bars)
     events = store.list_events(kind=MODEL_KIND, protocol=MODEL_PROTOCOL)
     assert len(events)==1 and is_model_signal(events[0])
@@ -100,16 +105,18 @@ def test_default_gate_records_confirmation_and_only_queues_permitted_bark(tmp_pa
     assert store.bark_status()['pending'] == int(tf in BARK_TIMEFRAMES)
 
 
-@pytest.mark.parametrize('md',[0,-.1,None,float('nan')])
-def test_invalidation_wins_over_same_bar_model_match(tmp_path, md):
-    gate,store,detector,raw,bars,prop,clock=scenario(tmp_path,wait=2)
-    bars[-1]['md']=md
+@pytest.mark.parametrize('changes', [
+    {'source': 'replay'}, {'confirmation': 'yolo'}, {'direction': 'short'},
+    {'side': 'short'}, {'risk': 0.},
+])
+def test_non_v1_raw_contract_cannot_enter_confirmation_queue(tmp_path, changes):
+    """Retires legacy IMACD ``md`` invalidation: V1 has no such gate."""
+    gate,store,detector,raw,bars,prop,clock=scenario(tmp_path,wait=2, register=False)
+    raw.update(changes)
+    assert not gate.register(raw)
     gate.process(raw['symbol'],'1H',bars)
-    assert store.list_candidates()[0]['model']['status']=='invalidated'
-    assert bars[-1]['t'] not in detector.calls
-    assert store.event_count(MODEL_KIND)==0
-    bars[-1]['md']=.2
-    gate.process(raw['symbol'],'1H',bars)
+    assert not store.list_candidates()
+    assert not detector.calls
     assert store.event_count(MODEL_KIND)==0
 
 

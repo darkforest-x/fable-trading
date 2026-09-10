@@ -71,7 +71,7 @@ class V1Scanner:
                     if not candles:
                         raise RuntimeError("market_data_unavailable")
                     if not unchanged:
-                        result = analyze(candles, [], timeframe, tick=float(instrument["tickSz"]))
+                        result = analyze(candles, [], timeframe, tick=float(instrument["tickSz"]), chart_limit=240)
                         for event in result["events"]:
                             event.update(symbol=symbol, venue="okx", detected_at_ms=now_ms())
                             # Raw V1 is its own Bark stage when a separately
@@ -82,7 +82,7 @@ class V1Scanner:
                                 store.register_candidate(event, pending_proof(event))
                         state = dict(result["state"], symbol=symbol, venue="okx", active=True, stale=False,
                                      gap_count=gaps, available_bars=len(candles), tick_size=instrument["tickSz"],
-                                     chart=result["chart"][-240:], events=result["events"][-100:])
+                                     chart=result["chart"], events=result["events"][-100:])
                         store.upsert_market(state); store.set_meta(key, close)
                 except Exception as exc:
                     scan["errors"] += 1

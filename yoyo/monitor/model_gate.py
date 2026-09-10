@@ -92,10 +92,13 @@ class ModelGate:
         detector = self.detector.status() if self.detector is not None else {}
         counts = self.store.candidate_counts()
         error = self._error or detector.get("error")
+        with self._condition:
+            queue_depth, active = len(self._queue), self._active
+        idle = self.detector is None and not counts.get("pending") and not queue_depth and active is None
         return dict(status="error" if error or counts.get("error") else
-                    ("ready" if detector.get("ready") else "loading"),
+                    ("ready" if detector.get("ready") else ("idle" if idle else "loading")),
                     loaded=bool(detector.get("ready")), last_error=error,
-                    queue_depth=len(self._queue), active=self._active,
+                    queue_depth=queue_depth, active=active,
                     processed_endpoints=self._processed, last_checked_at_ms=self._last_checked,
                     model_sha256=MODEL_SHA256, profile_id=MODEL_PROFILE_ID,
                     max_wait_bars=MODEL_MAX_WAIT, candidates=counts, detector=detector)
