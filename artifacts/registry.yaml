@@ -26490,3 +26490,154 @@ artifacts:
     production_eligible: false
     notes: Frozen long config return exposure 2; retrospective and no retuning. 649 Binance markets, BTC/ETH separate,
       XAUT retained; all four primary Holm p=1. Independent audit scripts are review evidence, not a new return run.
+
+  - artifact_id: spike-burst-launch-recall-20260910-v2-report-source
+    artifact_type: report
+    role: retrospective_launch_recall_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: a1cd999626f3e9bb797ede6487e7725aba86577b
+    generator_commit: a1cd999626f3e9bb797ede6487e7725aba86577b
+    source_path: analysis/p1_spike_burst_launch_recall_20260910.md
+    sha256: 12e7b8caad838b6ce9e60cac4d65f45296f3c060b822f66b60724e746baf2cee
+    size_bytes: 30862
+    storage_uri: repo://analysis/p1_spike_burst_launch_recall_20260910.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: V2 config exposure 1; retrospective. 80% timely recall NOT met. Pine saved privately; monitor and execution
+      unchanged. Frozen risk and costs; no tuning after results.
+  - artifact_id: spike-burst-launch-recall-20260910-v2-report-html
+    artifact_type: report
+    role: retrospective_launch_recall_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: a1cd999626f3e9bb797ede6487e7725aba86577b
+    generator_commit: a1cd999626f3e9bb797ede6487e7725aba86577b
+    source_path: analysis/html/p1_spike_burst_launch_recall_20260910.html
+    sha256: 9f4819cfd11449d9a394a77da64cb53fb8237ec6f3ddc27129e02f7078b8ecb7
+    size_bytes: 1715105
+    storage_uri: repo://analysis/html/p1_spike_burst_launch_recall_20260910.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: V2 config exposure 1; retrospective. 80% timely recall NOT met. Pine saved privately; monitor and execution
+      unchanged. Frozen risk and costs; no tuning after results.
+  - artifact_id: spike-burst-launch-recall-20260910-v2-report-manifest
+    artifact_type: manifest
+    role: retrospective_launch_recall_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: a1cd999626f3e9bb797ede6487e7725aba86577b
+    generator_commit: a1cd999626f3e9bb797ede6487e7725aba86577b
+    source_path: experiments/active/exp-spike-burst-launch-recall-20260910-v2/results/report_manifest.json
+    sha256: 2796582ddffbdedd0e66c156f91fa3a261ac462608e038bdd439716dce7187ec
+    size_bytes: 47230
+    storage_uri: repo://experiments/active/exp-spike-burst-launch-recall-20260910-v2/results/report_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: V2 config exposure 1; retrospective. 80% timely recall NOT met. Pine saved privately; monitor and execution
+      unchanged. Frozen risk and costs; no tuning after results.
+  - artifact_id: spike-burst-launch-recall-20260910-v2-prepared-manifest
+    artifact_type: manifest
+    role: retrospective_launch_recall_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: 679b308038e730c0defadbf85b61aa63327861aa
+    generator_commit: null
+    source_path: experiments/active/exp-spike-burst-launch-recall-20260910-v2/results/prepared_manifest.json
+    sha256: bfc3f89a6b0f3dd2fba20832fde8d414f2656316bcc6c583bb00d2ce5cf1d94f
+    size_bytes: 66535
+    storage_uri: repo://experiments/active/exp-spike-burst-launch-recall-20260910-v2/results/prepared_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: V2 config exposure 1; retrospective. 80% timely recall NOT met. Pine saved privately; monitor and execution
+      unchanged. Frozen risk and costs; no tuning after results.
+  - artifact_id: spike-burst-launch-recall-20260910-v2-validation-manifest
+    artifact_type: manifest
+    role: retrospective_launch_recall_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: 679b308038e730c0defadbf85b61aa63327861aa
+    generator_commit: null
+    source_path: experiments/active/exp-spike-burst-launch-recall-20260910-v2/results/validation_manifest.json
+    sha256: 7a88b0f3603281d051c368c1f59d5a0def18f0d2636fa07e40e634b1428827a9
+    size_bytes: 3717
+    storage_uri: repo://experiments/active/exp-spike-burst-launch-recall-20260910-v2/results/validation_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: V2 config exposure 1; retrospective. 80% timely recall NOT met. Pine saved privately; monitor and execution
+      unchanged. Frozen risk and costs; no tuning after results.
+  - artifact_id: spike-burst-launch-recall-20260910-v2-miss-audit
+    artifact_type: manifest
+    role: retrospective_launch_recall_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: 679b308038e730c0defadbf85b61aa63327861aa
+    generator_commit: null
+    source_path: experiments/active/exp-spike-burst-launch-recall-20260910-v2/diagnostics/owner_missed_launches_audit.json
+    sha256: f8e7187f8afcb79cd7829f4997749244c23219a76d8faeaf07f2a7388d7d3b76
+    size_bytes: 46116
+    storage_uri: repo://experiments/active/exp-spike-burst-launch-recall-20260910-v2/diagnostics/owner_missed_launches_audit.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: V2 config exposure 1; retrospective. 80% timely recall NOT met. Pine saved privately; monitor and execution
+      unchanged. Frozen risk and costs; no tuning after results.
+  - artifact_id: spike-burst-launch-recall-20260910-v2-gates-diagnostic
+    artifact_type: manifest
+    role: retrospective_launch_recall_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: 679b308038e730c0defadbf85b61aa63327861aa
+    generator_commit: null
+    source_path: experiments/active/exp-spike-burst-launch-recall-20260910-v2/qa/gates/diagnostic_manifest.json
+    sha256: 9a359637f2c3bc682625b84a9edd0d1fbf3d38a0b3ef2442dc8889a8e0108ba1
+    size_bytes: 67528
+    storage_uri: repo://experiments/active/exp-spike-burst-launch-recall-20260910-v2/qa/gates/diagnostic_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: V2 config exposure 1; retrospective. 80% timely recall NOT met. Pine saved privately; monitor and execution
+      unchanged. Frozen risk and costs; no tuning after results.
+  - artifact_id: spike-burst-launch-recall-20260910-v2-independent-audit
+    artifact_type: manifest
+    role: retrospective_launch_recall_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: 679b308038e730c0defadbf85b61aa63327861aa
+    generator_commit: null
+    source_path: experiments/active/exp-spike-burst-launch-recall-20260910-v2/qa/independent_completed_study_audit.json
+    sha256: 63461bf015f957e91a4ba136c0ec2226af5dc74e1fd675b475cdd8235e1dce20
+    size_bytes: 21960
+    storage_uri: repo://experiments/active/exp-spike-burst-launch-recall-20260910-v2/qa/independent_completed_study_audit.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: V2 config exposure 1; retrospective. 80% timely recall NOT met. Pine saved privately; monitor and execution
+      unchanged. Frozen risk and costs; no tuning after results.
+  - artifact_id: spike-burst-launch-recall-20260910-v2-tv-delivery
+    artifact_type: manifest
+    role: retrospective_launch_recall_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: 679b308038e730c0defadbf85b61aa63327861aa
+    generator_commit: null
+    source_path: experiments/active/exp-spike-burst-launch-recall-20260910-v2/qa/tradingview_delivery.json
+    sha256: 79fedc085abac345de1f111da499b5464d73b9fe22692db7f3bc725a2d9db117
+    size_bytes: 1112
+    storage_uri: repo://experiments/active/exp-spike-burst-launch-recall-20260910-v2/qa/tradingview_delivery.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: V2 config exposure 1; retrospective. 80% timely recall NOT met. Pine saved privately; monitor and execution
+      unchanged. Frozen risk and costs; no tuning after results.
+  - artifact_id: spike-burst-launch-recall-20260910-v2-root-verification
+    artifact_type: manifest
+    role: retrospective_launch_recall_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: 679b308038e730c0defadbf85b61aa63327861aa
+    generator_commit: null
+    source_path: experiments/active/exp-spike-burst-launch-recall-20260910-v2/qa/root_verification.json
+    sha256: 9ca392ec906a97287fdc5846e1c7e87b5c286bba9fae41c125d5c8ff13628fb0
+    size_bytes: 1331
+    storage_uri: repo://experiments/active/exp-spike-burst-launch-recall-20260910-v2/qa/root_verification.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: V2 config exposure 1; retrospective. 80% timely recall NOT met. Pine saved privately; monitor and execution
+      unchanged. Frozen risk and costs; no tuning after results.

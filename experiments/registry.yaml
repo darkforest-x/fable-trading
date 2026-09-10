@@ -7762,19 +7762,30 @@ experiments:
   - experiment_id: exp-spike-burst-launch-recall-20260910-v2
     source_repo: darkforest-x/fable-trading
     source_commit: 33f2d6e5c10627bda1513c90545efcd875707602
-    status: active
-    question: Why did Burst V1 miss August19 gradual 1H launches, and does adding one frozen progressive route improve
-      timely recall without uncontrolled false alerts?
-    single_variable: Add the preregistered progressive entry route; preserve V1 force gates, protection, next-open execution
+    status: inconclusive
+    question: Why did Burst V1 miss August19 gradual 1H launches, and does a frozen progressive route improve timely
+      recall?
+    single_variable: Add preregistered progressive entry; preserve V1 force gates, protection, next-open execution
       and costs. No grid search.
-    result: Preregistered; full eligible OKX 1H pool denominator and independent price-event label. Owner 80% target is
-      not yet demonstrated.
+    result: 278 OKX 1H markets; full timely recall V1 14/1660 vs V2 180/1660; case-night 5/144 vs 26/144. 80% target
+      not met. Arrows 86 to 1414; matched precision 39.53% to 23.90%. V2 event mean matched excess -65.19bp; Holm
+      p=.436256. Native Pine saved as an independent research script.
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
-    canonical_report: null
-    artifacts: []
-    notes: Owner authorizes adjustment and all dates. This V2 config first retrospective evaluation; known 61-day history
-      and selected August19 screenshots are not blind OOS. Screenshot bar opens differ from confirmed_at by one hour. No
-      monitor/notification/order change.
+    canonical_report: analysis/html/p1_spike_burst_launch_recall_20260910.html
+    artifacts:
+    - spike-burst-launch-recall-20260910-v2-report-source
+    - spike-burst-launch-recall-20260910-v2-report-html
+    - spike-burst-launch-recall-20260910-v2-report-manifest
+    - spike-burst-launch-recall-20260910-v2-prepared-manifest
+    - spike-burst-launch-recall-20260910-v2-validation-manifest
+    - spike-burst-launch-recall-20260910-v2-miss-audit
+    - spike-burst-launch-recall-20260910-v2-gates-diagnostic
+    - spike-burst-launch-recall-20260910-v2-independent-audit
+    - spike-burst-launch-recall-20260910-v2-tv-delivery
+    - spike-burst-launch-recall-20260910-v2-root-verification
+    notes: Owner authorized all dates and adjustments. This V2 configuration first retrospective evaluation; not blind
+      OOS. 22/23 BJT bar opens confirm one hour later. Native chart updated, original cloud V1 retained; monitor/Bark/TG/orders/ACTIVE
+      unchanged.

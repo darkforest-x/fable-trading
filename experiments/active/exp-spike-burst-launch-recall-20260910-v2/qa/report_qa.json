@@ -1,0 +1,106 @@
+{
+  "status": "pass",
+  "generated_at": "2026-09-10T07:19:18.966242+00:00",
+  "scope": "Read-only report presentation and frozen evidence reconciliation; no new replay, trade scoring, configuration, or metrics. Only this QA artifact written.",
+  "report_manifest": {
+    "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-launch-recall-20260910-v2/results/report_manifest.json",
+    "sha256": "2796582ddffbdedd0e66c156f91fa3a261ac462608e038bdd439716dce7187ec",
+    "code_commit": "a1cd999626f3e9bb797ede6487e7725aba86577b"
+  },
+  "reports": [
+    {
+      "path": "/Users/zhangzc/fable-trading/analysis/p1_spike_burst_launch_recall_20260910.md",
+      "sha256": "12e7b8caad838b6ce9e60cac4d65f45296f3c060b822f66b60724e746baf2cee"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/analysis/html/p1_spike_burst_launch_recall_20260910.html",
+      "sha256": "9f4819cfd11449d9a394a77da64cb53fb8237ec6f3ddc27129e02f7078b8ecb7"
+    }
+  ],
+  "checks": {
+    "authenticated_source_input_output_records": 52,
+    "hash_mismatches": 0,
+    "embedded_png_count": 4,
+    "embedded_png_exact_match": true,
+    "recall_period_rows_checked": 28,
+    "trade_period_rows_checked": 28,
+    "gate_diagnostic_rows_checked": 84,
+    "all_check_errors": [],
+    "case_correspondence": [
+      {
+        "asset": "HYPE",
+        "window_arrows": 0,
+        "v2_confirmation_times": [],
+        "target_rows": 2,
+        "target_new_arrows": 0,
+        "target_reference_tracking": 2,
+        "screenshot_ohlc_match": true
+      },
+      {
+        "asset": "NEAR",
+        "window_arrows": 1,
+        "v2_confirmation_times": [
+          "2026-08-19 22:00:00+00:00"
+        ],
+        "target_rows": 2,
+        "target_new_arrows": 0,
+        "target_reference_tracking": 0,
+        "screenshot_ohlc_match": true
+      },
+      {
+        "asset": "PEPE",
+        "window_arrows": 1,
+        "v2_confirmation_times": [
+          "2026-08-19 22:00:00+00:00"
+        ],
+        "target_rows": 2,
+        "target_new_arrows": 0,
+        "target_reference_tracking": 0,
+        "screenshot_ohlc_match": true
+      }
+    ],
+    "final_source_input_output_records": 52,
+    "final_hash_mismatches": 0,
+    "display_revision_changed_md_lines": [
+      7,
+      83
+    ],
+    "four_png_bytes_unchanged": true,
+    "initial_qa_archive": {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-launch-recall-20260910-v2/qa/report_revisions/initial/report_qa.json",
+      "sha256": "9978e0c8dcc6575c81efbcf9f2768a8bc1fe7bbf6ee2d4eabc16722ac9edb7c0"
+    }
+  },
+  "visual_review": {
+    "viewed_with_view_image": [
+      "hype_96bars.png",
+      "near_96bars.png"
+    ],
+    "HYPE": "96-bar window, six MA lines, volume and visible zero-axis IMACD are legible. No V1/V2 new arrow displayed; legend and footnote explicitly distinguish existing V2 reference tracking from a new arrow. Target open/close clocks align with the two candles.",
+    "NEAR": "Six MA/volume/IMACD panels legible. V2 triangle at 2026-08-20 05:00 BJT open-stamped candle, with 06:00 confirmation recorded in adjacent report arrow table; target 22:00 and 23:00 candles separately annotated. No premature arrow.",
+    "format_blockers": [],
+    "PEPE_and_failure": "Parent reports separate visual review; this audit authenticates their embedded byte content and manifest identities, does not claim independent visual inspection."
+  },
+  "methodology_disclosures_checked": [
+    "80% target denominator includes all1660 positive independent events; already-tracking is separate",
+    "10.84% full and18.06% night remain below target; no profitability claim",
+    "paired control mean excess -65.19bp and Holm p0.436256 shown",
+    "natural1290 versus censored124 V2 separated; no account return claim",
+    "retrospective seen history and first V2 holdout use disclosed",
+    "long-only Python validation and unvalidated Pine short mirror disclosed",
+    "overlapping gate failures not added and not treated as counterfactual gain",
+    "lowest-natural-new-only failure selected post hoc disclosed"
+  ],
+  "notes": [
+    {
+      "severity": "low",
+      "kind": "clock_definition_clarity",
+      "location": "MD lines 7 and 83",
+      "finding": "Case-night prose omits confirmation-time clock and exclusive right boundary. Stored interval is BJT [2026-08-19 18:00, 2026-08-20 06:00); NEAR/PEPE 06:00 confirmations are excluded. No arithmetic discrepancy.",
+      "reported_to_parent": true,
+      "status": "resolved",
+      "resolution": "Both displayed night interval labels now explicitly use confirmation times and an excluded 06:00 endpoint; line 83 states NEAR/PEPE 06:00 is outside the interval. Only MD lines 7 and 83 changed; all four PNGs identical and prior tables unchanged."
+    }
+  ],
+  "ready_for_delivery": true
+}

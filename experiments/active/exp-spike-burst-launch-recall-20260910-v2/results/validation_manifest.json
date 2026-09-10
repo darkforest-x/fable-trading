@@ -1,0 +1,80 @@
+{
+  "status": "complete",
+  "prepared_manifest_sha256": "bfc3f89a6b0f3dd2fba20832fde8d414f2656316bcc6c583bb00d2ce5cf1d94f",
+  "source_pins": {
+    "yoyo/evaluation/spike_burst_recall_study.py": "a9e532861cad640b5dcf6dbf8d465b3ad381cb7ef2b02d65cad153b8c849dbbb",
+    "yoyo/evaluation/spike_burst_progressive.py": "cec81a33997bd39272762bd70a451ceb5bf218da0e7fc0606271d165437fde08",
+    "yoyo/evaluation/spike_burst_replay.py": "996ef56ceb5b70da5337422d8390487330f7e387f648ee527b5afc9bda72a33f",
+    "yoyo/evaluation/spike_burst_execution.py": "05c96e98498cbf11cc426ed4cc939199b47af2cf8fd5a409c79fc720552f45cc",
+    "yoyo/evaluation/spike_burst_dataset.py": "e03585c03e32387b84ade03ce12966d8ff0b6468a2814f0c0199a814d69dcdd1",
+    "yoyo/evaluation/altseason_research.py": "35d6e171a8a7b25516871ae119c2780dcc1130d2beaaffdd270d2b2f99742075",
+    "yoyo/evaluation/launch_quality_dataset.py": "df95efee4db18d09f160bbae8dd521bd39d52585c5dd42c5786e6a6b3876b6ed",
+    "yoyo/data/altseason_sources.py": "d9182612de0c5401ae74a00a2b220f6b280e6e71b9de306c26a4acb3638d0eb7",
+    "yoyo/evaluation/pine/spike_burst_v1.pine": "18bbb6955fdf12e124688003799c44fc2a641f11a342edcf478157b1c9641fe2",
+    "yoyo/evaluation/pine/spike_burst_v2_progressive.pine": "87764a2e030fb0f7b58f95d2799485a92dbec791d424ad054afb5f417a57a70b",
+    "experiments/active/exp-spike-burst-launch-recall-20260910-v2/PROJECT_PLAN.md": "11151d44e71f2cd4dc610c2db6a11a9566bde7e7af4319d060c62dd3958f3a3b"
+  },
+  "config": {
+    "schema": "spike-progressive-recall-v2",
+    "start": "2026-07-10T00:00:00+00:00",
+    "exclusive_end": "2026-09-09T00:00:00+00:00",
+    "venue": "okx",
+    "minutes": 60,
+    "anchor_prior_highs": 12,
+    "refractory_bars": 24,
+    "future_bars": 24,
+    "label_target_atr": 4,
+    "label_adverse_atr": 2,
+    "large_peak_return": 0.08,
+    "recall_lags": [
+      0,
+      1,
+      2,
+      6
+    ],
+    "target_recall": 0.8,
+    "target_max_lag": 1,
+    "precision_match_lags": [
+      0,
+      6
+    ],
+    "controls": 3,
+    "seed": 20260910,
+    "retrospective": true,
+    "optimization": false,
+    "training": false,
+    "label_clock": "confirmed close",
+    "execution": "unchanged next real open",
+    "precision_definition": "earliest unique signal matching a positive event in [0,+6]; not trade win rate"
+  },
+  "primary_tests": 2,
+  "artifacts": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-launch-recall-20260910-v2/results/trade_events.csv.gz",
+      "sha256": "ffac2b35dfd82f8bb2214e43016955ebc75588eddb127044a895ebb4b748fc8c",
+      "size_bytes": 294408
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-launch-recall-20260910-v2/results/trade_controls.csv.gz",
+      "sha256": "563e01b9aa0a4477f7b9b6dc472b756ae7135f9cf3fa15c7e128b67b158ee4d7",
+      "size_bytes": 809597
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-launch-recall-20260910-v2/results/trade_summary.csv",
+      "sha256": "07762c6f1f50e2ffb03917b3304f908605f27dbef9fd69b10d20aff5138d0d02",
+      "size_bytes": 8294
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-burst-launch-recall-20260910-v2/results/score_summary.csv",
+      "sha256": "b410afd98a40a4c1324362f5c0dbbb2667c2a05aa7001fbaa3d5b663466c3de5",
+      "size_bytes": 865
+    }
+  ],
+  "costs": "Frozen 20bp entry-notional; funding/impact unmodeled",
+  "limitations": [
+    "Event outcomes are not capacity-constrained account returns",
+    "Previously seen retrospective sample",
+    "Asset-block tests do not remove all common-night market beta",
+    "Random matches can repeat across events; not independent replications"
+  ]
+}
