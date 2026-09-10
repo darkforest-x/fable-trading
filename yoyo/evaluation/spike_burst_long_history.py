@@ -55,7 +55,8 @@ def sha(path):
 
 def sources():
     """All executable study sources must be committed before real artifacts."""
-    paths = [Path(__file__), ROOT/'yoyo/data/spike_burst_history.py', EXP/'PROJECT_PLAN.md',
+    paths = [Path(__file__), ROOT/'yoyo/data/spike_burst_history.py',
+             ROOT/'yoyo/data/binance_um_archives.py', EXP/'PROJECT_PLAN.md',
              ROOT/'yoyo/evaluation/pine/spike_burst_v1.pine', ROOT/'yoyo/data/altcoin_features.py']
     names = ['spike_burst_dataset', 'spike_burst_execution', 'spike_burst_replay',
              'spike_burst_validation', 'altseason_engine', 'altseason_portfolio',
@@ -129,6 +130,15 @@ def prepare(history_path=EXP/'data/history_manifest.json', folder=EXP/'results',
     history = json.loads(history_path.read_text())
     if history.get('schema') != 'spike-burst-history-v1' or history.get('status') != 'complete':
         raise ValueError('Complete authenticated history manifest required')
+    if (pd.Timestamp(history.get('start')) > pd.Timestamp('2023-05-01T00:00:00Z') or
+            pd.Timestamp(history.get('exclusive_end')) < END):
+        raise ValueError('History request does not cover the frozen calendar and warmup')
+    for source in history.get('builder_sources', []):
+        key = str(Path(source['path']).resolve().relative_to(ROOT))
+        if frozen_sources.get(key) != source['sha256']:
+            raise ValueError('History adapter/parser source differs from this study')
+    if len(history.get('builder_sources', [])) != 2:
+        raise ValueError('Missing history adapter/parser source receipt')
     folder.mkdir(parents=True, exist_ok=True)
     started = dict(status='running', generated_at=utc_now(), config=CONFIG,
                    code_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
@@ -146,6 +156,8 @@ def prepare(history_path=EXP/'data/history_manifest.json', folder=EXP/'results',
             print('prepared', pending[future]['instrument'], 'jobs', len(jobs), flush=True)
     jobs.sort(key=lambda j:(j['instrument'],j['minutes']))
     coverages.sort(key=lambda j:(j['instrument'],j['minutes']))
+    if not jobs:
+        raise ValueError('No authenticated evaluable history jobs; no return report can be built')
     actual_schedule, control_schedule = schedule_rows(jobs)
     schedules = []
     for name, rows in [('candidate_schedule.csv.gz',actual_schedule),('control_schedule.csv.gz',control_schedule)]:
