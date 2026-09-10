@@ -179,3 +179,13 @@ node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.t
 随后只执行一次受控 LaunchAgent reload 以载入 cursor 分页和 Unicode 冻结 OHLC 路径修复。reload 前 checkpoint 为 1,434 个非空 seed（每周期 478）；新父进程 `18080` 仍可读取相同的三周期 checkpoint。reload 后元数据短暂显示 `started_at_ms=1789083154333`、`312 / 1,434`、errors `0`；后续以进程启动时间复核发现该时间戳早于新父进程，故它可能是保留的旧 scan meta，**不能**作为本次 hydrate 进度证据。Bark 和 Telegram outbox 均为空，两个历史候选仍为 disabled。完整 checkpoint 的可恢复性仍受 restart/hydrate parity 测试保护；本次运行只证明服务可启动并保留 seed，不把该计数写成新一轮完成。
 
 reload 后首次分页 API 请求在运行负载下两次未在 10 秒和 30 秒内给出首字节；独立只读检查确认同一 cursor SQL 在数据库为 0.164ms，不能把这两次超时归因于分页查询。当前服务 PID 的无 trace 运行无法事后定位调度边界；没有因此更改 SQL/async 或再次 reload。分页与中文合约的真实 UI 验收仍待一次低负载受控操作。
+
+## 分页响应与 Unicode 浏览修正（待低负载 UI 复验）
+
+对新进程 `19133` 的一次固定 `replay/raw/30m/limit=1` 请求，dispatch trace 记录 `entry → exit` 为 `574ms`，HTTP 200 的 TTFB 为 `0.580s`、总耗时 `0.664s`，返回 `next_cursor=true`。同一 trace 中，浏览器首屏并发的 `limit=2000` 信号请求曾在约 `19–28s` 后才 exit；独立 SQLite 同过滤查询为 `0.164ms`，因此不能把整条 HTTP 延迟归咎于 cursor SQL。trace 临时环境已从 LaunchAgent 取消；当前进程不再为关闭 trace 而重启。
+
+前端将每次信号 API 读取改为 500 条，服务端保留 2,000 条 cap；“显示更多（当前页卡片）”与“加载更早记录（cursor）”现在是并列入口，首屏不再把 500 或 2,000 写成历史总数。此前中文合约名在前端搜索中被 ASCII 归一化为空输入，导致筛选后残留无关 DATA 缓存卡；搜索现保留 Unicode 字母/数字，且当前筛选不存在已选卡时清空详情和图。相关静态提交为 `f8025dc`、`ab54034`、`6022205`；它们只在页面刷新后生效，不需要再 reload scanner。
+
+目前这三项还缺一次低负载的真实 IAB 验收：历史 30m 首屏应显示当前页与独立“加载更早记录”，点击后能跨 cursor；输入 `龙虾_USDT` 应只显示对应中文合约并读取同源冻结图。由于此前浏览器请求出现超时，不能把静态测试或 limit-1 探针替代为这项 UI 成功证据。
+
+`5d0e0b1` 还修正 reload 后 scan meta 的来源标识：parent 先写 current generation 的 `starting`，child 在同步前写同 generation、实际 pid 和启动时间；status/health 对 generation 不符的持久 meta fail closed 为 `starting/stale_previous_run`。该源代码尚未载入当前 PID19133，不能用旧 `936/1434` 再宣称 hydrate 新轮进度。
