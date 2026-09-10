@@ -515,7 +515,11 @@
     $("detail-empty").classList.toggle("hidden", Boolean(item));
     $("detail-content").classList.toggle("hidden", !item);
     $("back-to-signals").classList.toggle("hidden", !item);
-    if (!item) { setChartExpanded(false, false); return; }
+    if (!item) {
+      $("chart-container").removeAttribute("aria-label");
+      setChartExpanded(false, false);
+      return;
+    }
     $("back-to-signals").textContent = state.detailOrigin === "watch" ? "← 返回蓄势观察" : "← 返回信号卡片";
     $("detail-price-caption").textContent = "信号收盘价";
     $("detail-symbol").textContent = shortSymbol(item.symbol);
@@ -573,6 +577,7 @@
     state.chartKey = key;
     state.chart = null;
     $("chart-container").innerHTML = '<div class="chart-placeholder">正在加载真实行情…</div>';
+    $("chart-container").setAttribute("aria-label", `正在加载 ${sourceName(item)} ${shortSymbol(item.symbol)} ${timeframeLabel(item.timeframe)} 图表`);
     $("chart-hint").textContent = "仅展示已返回的真实 K 线";
     const timeout = setTimeout(() => controller.abort(), 20000);
     try {

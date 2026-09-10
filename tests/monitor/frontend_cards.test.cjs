@@ -144,6 +144,8 @@ test("source or timeframe switches discard prior API results and queue the curre
   assert.match(app, /const queryRevision = state\.signalQueryRevision;.*const querySource = state\.signalSource;.*const queryTimeframe = state\.timeframe;/s);
   assert.match(app, /if \(queryRevision !== state\.signalQueryRevision \|\| querySource !== state\.signalSource \|\| queryTimeframe !== state\.timeframe\) return;/);
   assert.match(app, /if \(state\.refreshQueued\) \{\s*state\.refreshQueued = false;\s*refresh\(\);/s);
+  assert.match(app, /\$\("chart-container"\)\.removeAttribute\("aria-label"\)/);
+  assert.match(app, /正在加载 \$\{sourceName\(item\)\} \$\{shortSymbol\(item\.symbol\)\}/);
 });
 
 test("replay symbols without a swap separator do not repeat their quote asset", () => {
