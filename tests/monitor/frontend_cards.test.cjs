@@ -196,7 +196,11 @@ test("stale ledger evidence hides its prior outcome until an immutable snapshot 
 test("replay direct cards can page older raw records without replacing loaded pages", () => {
   assert.match(app, /before_close_ms=\$\{encodeURIComponent\(cursor\.close_ms\)\}/);
   assert.match(app, /before_id=\$\{encodeURIComponent\(cursor\.event_id\)\}/);
-  assert.match(app, /加载更早记录（每页最多 2,000 条）/);
+  assert.match(page, /id="load-earlier-signals"/);
+  assert.match(app, /\$\("load-earlier-signals"\)\.classList\.toggle\("hidden", !hasEarlierPage\)/);
+  assert.match(app, /加载更早记录（再取最多 2,000 条）/);
+  assert.match(app, /\$\("load-earlier-signals"\)\.addEventListener\("click", loadEarlierRawSignals\)/);
+  assert.match(app, /当前页 \$\{number\(source\.length\)\} 条；可直接读取更早记录/);
   assert.match(app, /state\.rawPaged = true/);
   assert.match(app, /key === "directSignals" && state\.rawPaged/);
   assert.match(app, /已加载 \$\{number\(source\.length\)\} 条；可继续读取更早记录/);

@@ -295,9 +295,12 @@
     const confirmed = state.signalScope === "confirmed", direct = state.signalScope === "direct", notifying = confirmed || direct;
     const loaded = state[`${sourceKey()}Loaded`];
     const fetchError = state.errors[sourceKey()];
-    const source = sourceItems(), total = confirmed ? state.signalTotal : direct ? state.directSignalTotal : state.candidateTotal;
-    $("filtered-count").textContent = `${items.length} 条`;
-    $("filtered-count").title = `共 ${number(total)} 条记录；筛选最近 ${source.length} 条`;
+    const source = sourceItems();
+    const hasEarlierPage = state.signalScope === "direct" && state.rawHasMore;
+    $("filtered-count").textContent = `${items.length} 条${hasEarlierPage ? "（当前页）" : ""}`;
+    $("filtered-count").title = hasEarlierPage
+      ? `当前页 ${number(source.length)} 条；可直接读取更早记录`
+      : `当前已加载 ${number(source.length)} 条记录`;
     $("signal-section-title").textContent = confirmed ? "YOLO 补充确认" : "原始 V1 启动";
     $("signal-scope-note").textContent = state.signalSource === "replay"
       ? "历史回放只展示已记录事件与之后的真实行情；不触发、也不暗示通知。"
@@ -309,12 +312,12 @@
       : "最近 2,000 条 · 每 15 秒同步";
     const candidateCount = $("candidate-count");
     if (candidateCount) { candidateCount.textContent = state.candidatesLoaded ? number(state.candidateCounts ? numeric(state.candidateCounts.pending) + numeric(state.candidateCounts.error) : state.candidates.filter((item) => ["pending", "error"].includes(item.model?.status)).length) : "—"; candidateCount.title = "候选状态仅在兼容旧服务时显示"; }
-    const hasEarlierPage = state.signalScope === "direct" && state.rawHasMore;
-    $("load-more-signals").classList.toggle("hidden", items.length <= state.rowLimit && !hasEarlierPage);
-    $("load-more-signals").disabled = state.rawLoadingMore;
-    $("load-more-signals").textContent = items.length > state.rowLimit
-      ? `显示更多（${Math.min(state.rowLimit, items.length)} / ${items.length}）`
-      : state.rawLoadingMore ? "正在读取更早记录…" : "加载更早记录（每页最多 2,000 条）";
+    $("load-more-signals").classList.toggle("hidden", items.length <= state.rowLimit);
+    $("load-more-signals").disabled = false;
+    $("load-more-signals").textContent = `显示更多（${Math.min(state.rowLimit, items.length)} / ${items.length}）`;
+    $("load-earlier-signals").classList.toggle("hidden", !hasEarlierPage);
+    $("load-earlier-signals").disabled = state.rawLoadingMore;
+    $("load-earlier-signals").textContent = state.rawLoadingMore ? "正在读取更早记录…" : "加载更早记录（再取最多 2,000 条）";
     $("signal-empty").classList.toggle("hidden", items.length > 0);
     if (!items.length) {
       const hasFilters = state.search || state.timeframe !== "all" || state.side !== "all";
@@ -1006,8 +1009,8 @@
   });
   $("load-more-signals").addEventListener("click", () => {
     if (state.rowLimit < sourceItems().length) { state.rowLimit += 24; renderSignals(); }
-    else loadEarlierRawSignals();
   });
+  $("load-earlier-signals").addEventListener("click", loadEarlierRawSignals);
   function activateRow(event, type) {
     const preview = event.target.closest(type === "signal" ? "[data-preview-signal-id]" : "[data-market-symbol]");
     const row = preview || event.target.closest("[data-tradingview-action]") || event.target.closest(type === "signal" ? ".signal-card" : ".watch-card")?.querySelector("[data-tradingview-action]");
