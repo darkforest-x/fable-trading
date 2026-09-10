@@ -130,6 +130,8 @@ node --check yoyo/monitor/static/app.js
 node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.test.cjs
 </code></pre>
 <p>本次最终 V1 gate/worker focused suite 为 46 passed；此前回放/API 相邻 suite 为 10 passed。它们不是两个独立测试集，不应相加。<code>test_model_gate.py</code> 已迁到 current V1 live/raw/long/closed 合同，保留到期、延迟确认、去重、重启和因果端点覆盖；旧 IMACD <code>md</code> 失效断言以 V1 source/confirmation/direction/side/risk fail-closed 注册测试替代。随后对 cutover 修复的组合 suite 为 25 passed，前端 Node 合同测试为 10 passed，延迟确认 focused suite 为 11 passed；它们含重叠文件，不能相加。此前独立 CUA surface 的 <code>getTab(&#x27;3&#x27;, {browser:&#x27;1&#x27;})</code> 返回 <code>Browser is not available: 1</code>，但 root 已用共享 IAB 完成上述真实卡片与窄屏验收。静态/API 合同检查不替代尚未完成的全市场扫描。</p>
+<h2>扫描覆盖显示（<code>4419b1b</code>）</h2>
+<p>首页曾将持久化的 <code>counts.ready</code> 显示为“窗口已就绪”，但它可以来自上一轮 feature phase，不能证明新一轮已追平交易所收盘；短历史合约也可能未达到 340 根 warmup。现在概览只显示本轮 <code>scan.completed / scan.total</code>：扫描中为“已扫描 · 预热/追平中”，整轮完成后为“已覆盖，按收盘刷新”。它不把 <code>phase=ready</code> 或强制 <code>stale=false</code> 当作最新 bar 的证据。</p>
 <h2>Scanner recurrence checkpoint（<code>64d4308</code>，待单次受控 reload）</h2>
 <p>诊断确认 scanner 的完整 OHLC recurrence 过去只在 worker RAM；<code>markets.chart</code> 只有 240 根，不能替代 V1 的 340 根 warmup，也不能安全拼接增量。<code>64d4308</code> 新增 monitor 私有 SQLite 的 gzip raw checkpoint：每个成功获取的完整序列在 replay/market write 前保存，重启时只有通过周期对齐、连续性、有限 OHLCV 和价格边界校验的序列才会恢复；异常或 gap payload fail closed，回到 cold fetch。</p>
 <p>定向恢复测试以 341 根种子重启并追加一根，断言恢复后的 V1 state 和末 240 chart 与完整序列重放相同；另测 gap checkpoint 不会进入 recurrence seed。它不裁剪输入、不改 Pine、特征、cutover 或通知逻辑。</p>
