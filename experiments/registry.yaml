@@ -8183,3 +8183,18 @@ experiments:
     notes: First authorized chart-semantic holdout read; no new economic evaluation or blind OOS. Current 4H chart
       must not inherit prior 1H economics. TV annotations/Pine/notifications untouched; viewport read-only adjustments
       only.
+  - experiment_id: exp-spike-v5-structure-confirmation-20260910-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1c26374073169da1da66ce1db05100486c3a5bfa
+    status: active
+    question: Implement Owner structural before/after body-above-six confirmation as a private V5 prototype.
+    single_variable: Owner-authorized bundled semantic prototype, not a single-variable profitability experiment.
+    result: Frozen 12-bar, 0.10 prior-ATR quiet band and 6-bar release window; implementation and synthetic verification
+      in progress. No optimization claim.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    artifacts: []
+    notes: 'Owner latest clarification: body support may precede or follow legacy confirmation within one episode.
+      No live notification changes. Native chart inspection will be separately recorded.'

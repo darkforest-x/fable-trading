@@ -1,0 +1,20 @@
+{
+  "checked_at": "2026-09-10T14:21:10.625504+00:00",
+  "command": [
+    ".venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/test_spike_burst_v5_structure.py",
+    "tests/test_spike_burst_v4_release.py"
+  ],
+  "returncode": 0,
+  "stdout": "...............                                                          [100%]\n15 passed in 1.30s\n",
+  "stderr": "",
+  "source_sha256": {
+    "yoyo/evaluation/pine/spike_burst_v5.pine": "32380f7c83b118b9a082cc5be3aaf54c3deafe70578314925fc7ef9f25622096",
+    "yoyo/evaluation/spike_burst_v5_structure.py": "12f80b8f4d6584312d85e7b2be1ed1f868db3997e81020d055c00bc43a479b18",
+    "tests/test_spike_burst_v5_structure.py": "ea110c3fc72461318633118d141589ee9173389ef4c9fbadb814dcf234b31296"
+  },
+  "scope": "Synthetic V5 gate + inherited V4 static/risk tests; no market evaluation or native compilation."
+}
