@@ -179,6 +179,7 @@ def fetch(max_markets: int | None = None) -> None:
         receipt = DATA / "market_receipts" / venue / (symbol + ".json")
         if dest.exists() and receipt.exists(): ledger.append(json.loads(receipt.read_text())); continue
         client, chunks, pages, error = Client(venue), [], [], ""
+        dest.parent.mkdir(parents=True, exist_ok=True)
         cursor = WARMUP_START
         try:
             while cursor < END:

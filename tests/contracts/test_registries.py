@@ -197,6 +197,7 @@ def test_holdout_consumption_is_declared_per_experiment_not_assumed():
         "exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1",
         "exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1",
         "exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1",
+        "exp-15m-arbusdt-screenshot-probe-20260901-v1",
         "exp-15m-ashare-grade-a-yolo-latest-20260902-v1",
         "exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1",
         "exp-crypto-grade-a-yolo-mtf-latest-20260903-v1",
@@ -218,6 +219,7 @@ def test_holdout_consumption_is_declared_per_experiment_not_assumed():
         "exp-altcoin-1d-k1k2-early-launch-holdout-20260905-v4",
         "exp-pine-eth-15m-v1",
         "exp-yoyo-trading-fixed-w10-classifier-holdout3d",
+        "exp-spike-v1-twoyear-allmarkets-20260911-v1",
     }, (
         "the set of experiments declaring holdout consumption changed: "
         f"{sorted(consumers)}. Every entry needs an owner authorisation recorded "
