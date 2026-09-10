@@ -1,0 +1,157 @@
+//@version=6
+indicator("SPIKE Burst V1 · engineering probe", overlay=false)
+// Source SHA256: b1f940080117c9cd96db7710d406a38d29c1af097f99af5778b8ef09a971f659
+// Synthetic contract verification only; not a return or signal-quality estimate.
+// Uses current OHLC/md/sb and prior md, with previously frozen zone boundaries.
+// rv uses current volume / median(volume[1],20), expansion uses TR/ATR[1].
+f_burst(int side, float o, float h, float l, float c, float md, float previousMd, float sb, float zoneHigh, float zoneLow, float ropeHigh, float ropeLow, float rv, float expansion, float volGate, float trGate, float bodyGate, float endGate) =>
+    float span = h - l
+    bool known = span > 0 and not na(rv) and not na(expansion) and not na(previousMd) and not na(ropeHigh) and not na(ropeLow) and not na(zoneHigh) and not na(zoneLow)
+    float body = span > 0 ? math.abs(c - o) / span : 0.0
+    float endPosition = span > 0 ? (side == 1 ? (c - l) / span : (h - c) / span) : 0.0
+    bool directional = side == 1 ? c > o and c > zoneHigh and c > ropeHigh and md > 0 and md > sb and md > previousMd : side == -1 ? c < o and c < zoneLow and c < ropeLow and md < 0 and md < sb and md < previousMd : false
+    known and directional and rv >= volGate and expansion >= trGate and body >= bodyGate and endPosition >= endGate
+
+// Inclusive launch window; release is age zero. Same episode cannot emit twice.
+f_window(int age, int count, int side, float md, float band, float c, float zoneHigh, float zoneLow) =>
+    age >= 0 and age < count and (side == 1 ? md > band and c >= zoneLow : side == -1 ? md < -band and c <= zoneHigh : false)
+
+// Frozen signal-close inputs only; outward rounding preserves the minimum risk.
+f_risk(int side, float entry, float extreme, float a, float floorAtr, float bufferAtr, float tick) =>
+    bool known = (side == 1 or side == -1) and entry > 0 and a > 0 and tick > 0 and not na(extreme)
+    float candidate = side == 1 ? math.min(extreme - bufferAtr * a, entry - floorAtr * a) : math.max(extreme + bufferAtr * a, entry + floorAtr * a)
+    float stop = known ? (side == 1 ? math.floor(candidate / tick) * tick : math.ceil(candidate / tick) * tick) : na
+    float risk = side * (entry - stop)
+    bool valid = known and stop > 0 and risk > 0
+    [valid ? stop : na, valid ? risk : na, valid]
+
+// Call only AFTER the entry bar. priorProtection was fixed at the previous close.
+// First apply the operative stop and adverse gap; never count stop-bar highs as profit.
+// A new close-based ATR ratchet only becomes operative on the next bar.
+f_path(int side, float entry, float risk, float priorProtection, float priorPeak, bool wasArmed, float o, float h, float l, float c, float a, float activationR, float distanceAtr, float tick) =>
+    bool stopped = side == 1 ? l <= priorProtection : h >= priorProtection
+    float exitPrice = stopped ? (side == 1 ? math.min(o, priorProtection) : math.max(o, priorProtection)) : na
+    float currentR = side * ((stopped ? exitPrice : c) - entry) / risk
+    float peakR = stopped ? priorPeak : math.max(priorPeak, side * ((side == 1 ? h : l) - entry) / risk)
+    bool armed = wasArmed or (not stopped and currentR >= activationR)
+    float protection = priorProtection
+    if not stopped and armed and a > 0
+        float raw = c - side * distanceAtr * a
+        float candidate = side == 1 ? math.floor(raw / tick) * tick : math.ceil(raw / tick) * tick
+        protection := side == 1 ? math.max(priorProtection, candidate) : math.min(priorProtection, candidate)
+    [not stopped, protection, peakR, currentR, exitPrice, armed]
+
+f_check(bool condition, string name) =>
+    if not condition
+        runtime.error("SPIKE Burst contract failed: " + name)
+    true
+f_eq(float a, float b) =>
+    not na(a) and not na(b) and math.abs(a - b) < 0.000001
+
+if barstate.isfirst
+    f_check(f_burst(1, 102, 120, 100, 115, 3, 2, 2.5, 110, 90, 108, 94, 4, 3, 4, 3, 0.55, 0.75), "long inclusive volume/TR/close-location gates")
+    f_check(f_burst(-1, 98, 100, 80, 85, -3, -2, -2.5, 110, 90, 106, 92, 4, 3, 4, 3, 0.55, 0.75), "short exact mirrored launch")
+    f_check(f_burst(1, 104, 120, 100, 115, 3, 2, 2.5, 110, 90, 108, 94, 4, 3, 4, 3, 0.55, 0.75), "long exact body threshold")
+    f_check(f_burst(-1, 96, 100, 80, 85, -3, -2, -2.5, 110, 90, 106, 92, 4, 3, 4, 3, 0.55, 0.75), "short exact body threshold")
+    f_check(not f_burst(1, 102, 120, 100, 115, 3, 2, 2.5, 110, 90, 108, 94, 3.999, 3, 4, 3, 0.55, 0.75), "volume just below gate")
+    f_check(not f_burst(1, 102, 120, 100, 115, 3, 2, 2.5, 110, 90, 108, 94, 4, 2.999, 4, 3, 0.55, 0.75), "TR expansion just below gate")
+    f_check(not f_burst(1, 104.001, 120, 100, 115, 3, 2, 2.5, 110, 90, 108, 94, 4, 3, 4, 3, 0.55, 0.75), "body just below gate")
+    f_check(not f_burst(1, 102, 120, 100, 114.999, 3, 2, 2.5, 110, 90, 108, 94, 4, 3, 4, 3, 0.55, 0.75), "close location just below gate")
+    f_check(not f_burst(1, 102, 120, 100, 115, 3, 2, 2.5, 115, 90, 108, 94, 4, 3, 4, 3, 0.55, 0.75), "close must be strictly beyond frozen box")
+    f_check(not f_burst(1, 102, 120, 100, 115, 3, 2, 2.5, 110, 90, 115, 94, 4, 3, 4, 3, 0.55, 0.75), "close must be strictly beyond six-MA rope")
+    f_check(not f_burst(1, 102, 120, 100, 115, 3, 3, 2.5, 110, 90, 108, 94, 4, 3, 4, 3, 0.55, 0.75), "main line must accelerate")
+    f_check(not f_burst(1, 102, 120, 100, 115, 3, 2, 3, 110, 90, 108, 94, 4, 3, 4, 3, 0.55, 0.75), "main line must exceed signal")
+    f_check(not f_burst(1, 116, 120, 100, 115, 3, 2, 2.5, 110, 90, 108, 94, 4, 3, 4, 3, 0.55, 0.75), "wrong direction body")
+    f_check(not f_burst(1, 102, 120, 100, 115, 3, 2, 2.5, 110, 90, 108, 94, na, 3, 4, 3, 0.55, 0.75), "missing volume ratio")
+    f_check(not f_burst(1, 102, 120, 100, 115, 3, 2, 2.5, 110, 90, 108, 94, 4, na, 4, 3, 0.55, 0.75), "missing expansion")
+    f_check(not f_burst(1, 102, 120, 100, 115, 3, na, 2.5, 110, 90, 108, 94, 4, 3, 4, 3, 0.55, 0.75), "missing previous main line")
+    f_check(not f_burst(1, 102, 120, 100, 115, 3, 2, 2.5, 110, na, 108, 94, 4, 3, 4, 3, 0.55, 0.75), "missing box")
+    f_check(not f_burst(1, 102, 120, 100, 115, 3, 2, 2.5, 110, 90, 108, na, 4, 3, 4, 3, 0.55, 0.75), "missing rope")
+    f_check(not f_burst(1, 102, 100, 100, 115, 3, 2, 2.5, 110, 90, 108, 94, 4, 3, 4, 3, 0.55, 0.75), "zero candle span")
+    f_check(not f_burst(0, 102, 120, 100, 115, 3, 2, 2.5, 110, 90, 108, 94, 4, 3, 4, 3, 0.55, 0.75), "invalid direction")
+    f_check(not f_burst(-1, 98, 100, 80, 85, -3, -2, -2.5, 110, 90, 106, 92, 3.999, 3, 4, 3, 0.55, 0.75), "short volume below gate")
+    f_check(not f_burst(-1, 98, 100, 80, 85.001, -3, -2, -2.5, 110, 90, 106, 92, 4, 3, 4, 3, 0.55, 0.75), "short direction-side close below gate")
+    f_check(not f_burst(-1, 98, 100, 80, 85, -3, -2, -2.5, 110, 85, 106, 92, 4, 3, 4, 3, 0.55, 0.75), "short box equality rejected")
+    f_check(not f_burst(-1, 98, 100, 80, 85, -3, -2, -2.5, 110, 90, 106, 85, 4, 3, 4, 3, 0.55, 0.75), "short rope equality rejected")
+    f_check(not f_burst(-1, 98, 100, 80, 85, -3, -3, -2.5, 110, 90, 106, 92, 4, 3, 4, 3, 0.55, 0.75), "short loss of acceleration")
+    f_check(not f_burst(-1, 98, 100, 80, 85, -3, -2, -3, 110, 90, 106, 92, 4, 3, 4, 3, 0.55, 0.75), "short signal equality rejected")
+    f_check(f_window(0, 6, 1, 0.11, 0.1, 105, 110, 90), "release bar is age zero")
+    f_check(f_window(5, 6, 1, 0.11, 0.1, 105, 110, 90), "sixth bar included")
+    f_check(not f_window(6, 6, 1, 0.11, 0.1, 105, 110, 90), "seventh bar excluded")
+    f_check(not f_window(-1, 6, 1, 0.11, 0.1, 105, 110, 90), "pre-release excluded")
+    f_check(f_window(0, 1, 1, 0.11, 0.1, 105, 110, 90), "single-bar window includes release")
+    f_check(not f_window(1, 1, 1, 0.11, 0.1, 105, 110, 90), "single-bar window excludes next bar")
+    f_check(not f_window(1, 6, 1, 0.1, 0.1, 105, 110, 90), "frozen band equality cancels")
+    f_check(not f_window(1, 6, 1, 0.09, 0.1, 105, 110, 90), "return inside frozen band cancels")
+    f_check(not f_window(1, 6, 1, -0.11, 0.1, 105, 110, 90), "opposite-direction main line cancels")
+    f_check(f_window(1, 6, 1, 0.11, 0.1, 90, 110, 90), "opposite box edge equality allowed")
+    f_check(not f_window(1, 6, 1, 0.11, 0.1, 89.99, 110, 90), "opposite box breach cancels")
+    f_check(f_window(5, 6, -1, -0.11, 0.1, 95, 110, 90), "short sixth bar included")
+    f_check(not f_window(6, 6, -1, -0.11, 0.1, 95, 110, 90), "short seventh bar excluded")
+    f_check(not f_window(1, 6, -1, -0.11, 0.1, 110.01, 110, 90), "short opposite box breach")
+    f_check(f_window(2, 6, 1, 0.11, 0.1, 105, 110, 90), "frozen .10 keeps md .11 qualified")
+    f_check(not f_window(2, 6, 1, 0.11, 0.13, 105, 110, 90), "recomputed .13 would incorrectly cancel")
+    [risk0_0, risk0_1, risk0_2] = f_risk(1, 100, 99, 2, 2, 0.2, 0.01)
+    f_check(f_eq(risk0_0, 96) and f_eq(risk0_1, 4) and risk0_2, "long ATR floor")
+    [risk1_0, risk1_1, risk1_2] = f_risk(-1, 100, 101, 2, 2, 0.2, 0.01)
+    f_check(f_eq(risk1_0, 104) and f_eq(risk1_1, 4) and risk1_2, "short ATR floor")
+    [risk2_0, risk2_1, risk2_2] = f_risk(1, 100, 95, 2, 2, 0.2, 0.01)
+    f_check(f_eq(risk2_0, 94.6) and f_eq(risk2_1, 5.4) and risk2_2, "long wider structure")
+    [risk3_0, risk3_1, risk3_2] = f_risk(-1, 100, 105, 2, 2, 0.2, 0.01)
+    f_check(f_eq(risk3_0, 105.4) and f_eq(risk3_1, 5.4) and risk3_2, "short wider structure")
+    [risk4_0, risk4_1, risk4_2] = f_risk(1, 100, 97.991, 1, 2, 0, 0.01)
+    f_check(f_eq(risk4_0, 97.99) and f_eq(risk4_1, 2.01) and risk4_2, "long outward rounding")
+    [risk5_0, risk5_1, risk5_2] = f_risk(-1, 100, 102.009, 1, 2, 0, 0.01)
+    f_check(f_eq(risk5_0, 102.01) and f_eq(risk5_1, 2.01) and risk5_2, "short outward rounding")
+    [risk6_0, risk6_1, risk6_2] = f_risk(1, 100, 95, na, 2, 0.2, 0.01)
+    f_check(na(risk6_0) and na(risk6_1) and not risk6_2, "missing ATR")
+    [risk7_0, risk7_1, risk7_2] = f_risk(1, 100, 95, 0, 2, 0.2, 0.01)
+    f_check(na(risk7_0) and na(risk7_1) and not risk7_2, "zero ATR")
+    [risk8_0, risk8_1, risk8_2] = f_risk(1, 100, na, 2, 2, 0.2, 0.01)
+    f_check(na(risk8_0) and na(risk8_1) and not risk8_2, "missing structure")
+    [risk9_0, risk9_1, risk9_2] = f_risk(1, 100, 95, 2, 2, 0.2, 0)
+    f_check(na(risk9_0) and na(risk9_1) and not risk9_2, "invalid tick")
+    [risk10_0, risk10_1, risk10_2] = f_risk(0, 100, 95, 2, 2, 0.2, 0.01)
+    f_check(na(risk10_0) and na(risk10_1) and not risk10_2, "invalid side")
+    [risk11_0, risk11_1, risk11_2] = f_risk(1, 1, 0.5, 2, 2, 0.2, 0.01)
+    f_check(na(risk11_0) and na(risk11_1) and not risk11_2, "nonpositive outward stop invalid")
+    [path0_0, path0_1, path0_2, path0_3, path0_4, path0_5] = f_path(1, 100, 2, 98, 0, false, 100, 108, 99, 104, 1, 2, 4, 0.01)
+    f_check(path0_0 and f_eq(path0_1, 100) and f_eq(path0_2, 4) and f_eq(path0_3, 2) and na(path0_4) and path0_5, "long close arms / old stop operative")
+    [path1_0, path1_1, path1_2, path1_3, path1_4, path1_5] = f_path(1, 100, 2, 98, 0, false, 100, 108, 99, 103, 1, 2, 4, 0.01)
+    f_check(path1_0 and f_eq(path1_1, 98) and f_eq(path1_2, 4) and f_eq(path1_3, 1.5) and na(path1_4) and not path1_5, "wick alone cannot arm trailing")
+    [path2_0, path2_1, path2_2, path2_3, path2_4, path2_5] = f_path(1, 100, 2, 98, 1.5, false, 95, 140, 94, 130, 1, 2, 4, 0.01)
+    f_check(not path2_0 and f_eq(path2_1, 98) and f_eq(path2_2, 1.5) and f_eq(path2_3, -2.5) and f_eq(path2_4, 95) and not path2_5, "long adverse gap and stop priority")
+    [path3_0, path3_1, path3_2, path3_3, path3_4, path3_5] = f_path(1, 100, 2, 98, 1.5, false, 100, 140, 98, 130, 1, 2, 4, 0.01)
+    f_check(not path3_0 and f_eq(path3_1, 98) and f_eq(path3_2, 1.5) and f_eq(path3_3, -1) and f_eq(path3_4, 98) and not path3_5, "stop equality cannot add peak")
+    [path4_0, path4_1, path4_2, path4_3, path4_4, path4_5] = f_path(1, 100, 2, 100, 4, true, 104, 110, 101, 106, 3, 2, 4, 0.01)
+    f_check(path4_0 and f_eq(path4_1, 100) and f_eq(path4_2, 5) and f_eq(path4_3, 3) and na(path4_4) and path4_5, "long ATR rise cannot loosen")
+    [path5_0, path5_1, path5_2, path5_3, path5_4, path5_5] = f_path(1, 100, 2, 100, 4, true, 102, 103, 100.5, 101, 1, 2, 4, 0.01)
+    f_check(path5_0 and f_eq(path5_1, 100) and f_eq(path5_2, 4) and f_eq(path5_3, 0.5) and na(path5_4) and path5_5, "long remains armed after retrace")
+    [path6_0, path6_1, path6_2, path6_3, path6_4, path6_5] = f_path(1, 100, 2, 100, 4, true, 103, 106, 100, 104, 1, 2, 4, 0.01)
+    f_check(not path6_0 and f_eq(path6_1, 100) and f_eq(path6_2, 4) and f_eq(path6_3, 0) and f_eq(path6_4, 100) and path6_5, "long next bar touches ratcheted stop")
+    [path7_0, path7_1, path7_2, path7_3, path7_4, path7_5] = f_path(1, 100, 2, 100, 4, true, 99, 107, 98, 106, 1, 2, 4, 0.01)
+    f_check(not path7_0 and f_eq(path7_1, 100) and f_eq(path7_2, 4) and f_eq(path7_3, -0.5) and f_eq(path7_4, 99) and path7_5, "long next stop gap cannot use better old stop")
+    [path8_0, path8_1, path8_2, path8_3, path8_4, path8_5] = f_path(-1, 100, 2, 102, 0, false, 100, 101, 92, 96, 1, 2, 4, 0.01)
+    f_check(path8_0 and f_eq(path8_1, 100) and f_eq(path8_2, 4) and f_eq(path8_3, 2) and na(path8_4) and path8_5, "short mirror close arms")
+    [path9_0, path9_1, path9_2, path9_3, path9_4, path9_5] = f_path(-1, 100, 2, 102, 1.5, false, 105, 106, 60, 70, 1, 2, 4, 0.01)
+    f_check(not path9_0 and f_eq(path9_1, 102) and f_eq(path9_2, 1.5) and f_eq(path9_3, -2.5) and f_eq(path9_4, 105) and not path9_5, "short adverse gap and stop priority")
+    [path10_0, path10_1, path10_2, path10_3, path10_4, path10_5] = f_path(-1, 100, 2, 100, 4, true, 96, 99, 90, 94, 3, 2, 4, 0.01)
+    f_check(path10_0 and f_eq(path10_1, 100) and f_eq(path10_2, 5) and f_eq(path10_3, 3) and na(path10_4) and path10_5, "short ATR rise cannot loosen")
+    [path11_0, path11_1, path11_2, path11_3, path11_4, path11_5] = f_path(-1, 100, 2, 100, 4, true, 97, 100, 94, 96, 1, 2, 4, 0.01)
+    f_check(not path11_0 and f_eq(path11_1, 100) and f_eq(path11_2, 4) and f_eq(path11_3, 0) and f_eq(path11_4, 100) and path11_5, "short next bar touches ratcheted stop")
+    [path12_0, path12_1, path12_2, path12_3, path12_4, path12_5] = f_path(1, 100, 2, 98, 0, false, 103, 106, 102, 104.019, 1, 2, 4, 0.01)
+    f_check(path12_0 and f_eq(path12_1, 100.01) and f_eq(path12_2, 3) and f_eq(path12_3, 2.0095) and na(path12_4) and path12_5, "long ratchet rounds outward")
+    [path13_0, path13_1, path13_2, path13_3, path13_4, path13_5] = f_path(-1, 100, 2, 102, 0, false, 97, 98, 94, 95.981, 1, 2, 4, 0.01)
+    f_check(path13_0 and f_eq(path13_1, 99.99) and f_eq(path13_2, 3) and f_eq(path13_3, 2.0095) and na(path13_4) and path13_5, "short ratchet rounds outward")
+    [path14_0, path14_1, path14_2, path14_3, path14_4, path14_5] = f_path(1, 100, 2, 100, 4, true, 104, 110, 101, 106, na, 2, 4, 0.01)
+    f_check(path14_0 and f_eq(path14_1, 100) and f_eq(path14_2, 5) and f_eq(path14_3, 3) and na(path14_4) and path14_5, "missing current ATR holds old protection")
+    [seqA, seqStop, seqPeak, seqR, seqExit, seqArmed] = f_path(1, 100, 2, 98, 0, false, 100, 108, 99, 104, 1, 2, 4, 0.01)
+    [seqB, seqStopB, seqPeakB, seqRB, seqExitB, seqArmedB] = f_path(1, 100, 2, seqStop, seqPeak, seqArmed, 103, 106, 100, 104, 1, 2, 4, 0.01)
+    f_check(seqA and not seqB and f_eq(seqStop, 100) and f_eq(seqExitB, 100) and f_eq(seqPeakB, seqPeak), "native chained protection becomes operative next bar")
+    [prefixA, prefixStop, prefixPeak, prefixR, prefixExit, prefixArmed] = f_path(1, 100, 2, 98, 0, false, 100, 108, 99, 104, 1, 2, 4, 0.01)
+    f_check(prefixA == seqA and f_eq(prefixStop, seqStop) and f_eq(prefixPeak, seqPeak) and f_eq(prefixR, seqR), "replaying identical prefix after future bar stays identical")
+
+var table result = table.new(position.middle_center, 1, 1)
+if barstate.islast
+    table.cell(result, 0, 0, "SPIKE Burst · 71 Pine contracts PASS\nSynthetic engineering cases · no return estimate", text_color=color.teal)
+plot(na, display=display.none)

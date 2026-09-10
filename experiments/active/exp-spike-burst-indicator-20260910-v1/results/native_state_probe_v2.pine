@@ -1,0 +1,447 @@
+//@version=6
+indicator("SPIKE BURST · native state probe", overlay=false, max_labels_count=300)
+// Extracted production state SHA256: e68f3c0a1cc217743f56b7219d3f2b52fb814ebecdab424c209c047d2ccd2490
+
+string gSetup = "01 · 蓄势资格"
+int maLen = input.int(34, "IMACD 长度", minval=2, maxval=200, group=gSetup, display=display.none)
+int sigLen = input.int(9, "信号线长度", minval=1, maxval=100, group=gSetup, display=display.none)
+int minQuiet = input.int(12, "连续近零根数", minval=2, maxval=100, group=gSetup, display=display.none)
+float nearAtr = input.float(0.10, "近零带 / 前根 ATR", minval=0, maxval=1, step=0.01, group=gSetup, display=display.none)
+int denseLen = input.int(12, "释放前密集窗口", minval=2, maxval=100, group=gSetup, display=display.none)
+float denseWidth = input.float(3.0, "平均六均线宽度 / ATR 上限", minval=0.1, step=0.1, group=gSetup, display=display.none)
+int denseCrosses = input.int(2, "至少交织次数", minval=0, maxval=100, group=gSetup, display=display.none)
+int opportunity = input.int(6, "爆发窗口（含释放根）", minval=1, maxval=30, group=gSetup, tooltip="释放当根＋随后5根，默认共6根。爆发条件后到，箭头就画在后来的确认根，不回填。", display=display.none)
+
+string gBurst = "02 · 强劲爆发"
+string direction = input.string("多头", "方向", options=["多头", "双向", "空头"], group=gBurst, display=display.none)
+float minVolume = input.float(4.0, "最低量比", minval=1, step=0.25, group=gBurst, tooltip="本根成交量 / 前20根成交量中位数。量缺失或基数为0时不触发。", display=display.none)
+float minExpansion = input.float(3.0, "最低 TR / 前根 ATR", minval=1, step=0.25, group=gBurst, display=display.none)
+float minBody = input.float(0.55, "最低实体占比", minval=0.1, maxval=1, step=0.05, group=gBurst, display=display.none)
+float minEnd = input.float(0.75, "最低方向侧收盘位置", minval=0.5, maxval=1, step=0.05, group=gBurst, tooltip="多头(close-low)/(high-low)，空头相反。75%要求收在方向侧四分之一区域。", display=display.none)
+
+string gRisk = "03 · 宽止损与趋势保护"
+int stopLen = input.int(5, "初始结构回看根数", minval=1, maxval=100, group=gRisk, display=display.none)
+float stopBuffer = input.float(0.2, "结构外侧缓冲 ATR", minval=0, step=0.1, group=gRisk, display=display.none)
+float riskFloor = input.float(2.0, "最小初始距离 ATR", minval=0.25, step=0.25, group=gRisk, tooltip="是价格空间，不是账户风险额度。止损变宽时，同样账户风险应减少仓位。工程默认，未优化盈利。", display=display.none)
+float armR = input.float(2.0, "收盘浮盈达到多少 R 后跟踪", minval=0, step=0.25, group=gRisk, display=display.none)
+float trailAtr = input.float(4.0, "趋势保护距离 ATR", minval=0.5, step=0.25, group=gRisk, tooltip="收盘价外4ATR，单向收紧。本根更新从下一根生效；无固定止盈。", display=display.none)
+
+string gView = "04 · 显示"
+bool showMas = input.bool(true, "六条均线", group=gView, display=display.none)
+bool showZone = input.bool(true, "淡色蓄势区", group=gView, display=display.none)
+bool showRisk = input.bool(true, "风险区与保护线", group=gView, display=display.none)
+bool showPanel = input.bool(true, "紧凑状态面板", group=gView, display=display.none)
+bool showMilestones = input.bool(true, "已达到 3R / 5R / 10R", group=gView, display=display.none)
+int keepZones = input.int(8, "保留蓄势区组数", minval=1, maxval=30, group=gView, display=display.none)
+
+color bull = #008F82
+color bear = #D34B66
+color gold = #AD7B29
+color blue = #4679C9
+color ink = chart.fg_color
+color muted = color.new(ink, 40)
+
+// Price-first launch uses the same force gates BEFORE an IMACD release can lag.
+// Caller must supply a fully qualified PRIOR quiet/dense episode and frozen box.
+// IMACD cannot oppose the direction; rising/falling ZLEMA is current-bar causal.
+f_priceBurst(int side, float o, float h, float l, float c, float md, float sb, float mi, float priorMi, float zoneHigh, float zoneLow, float ropeHigh, float ropeLow, float rv, float expansion, float volGate, float trGate, float bodyGate, float endGate) =>
+    float span = h - l
+    bool known = span > 0 and not na(rv) and not na(expansion) and not na(priorMi) and not na(ropeHigh) and not na(ropeLow) and not na(zoneHigh) and not na(zoneLow)
+    float body = span > 0 ? math.abs(c - o) / span : 0.0
+    float endPosition = span > 0 ? (side == 1 ? (c - l) / span : (h - c) / span) : 0.0
+    bool directional = side == 1 ? c > o and c > zoneHigh and c > ropeHigh and md >= 0 and md >= sb and mi > priorMi : side == -1 ? c < o and c < zoneLow and c < ropeLow and md <= 0 and md <= sb and mi < priorMi : false
+    known and directional and rv >= volGate and expansion >= trGate and body >= bodyGate and endPosition >= endGate
+
+// Uses current OHLC/md/sb and prior md, with previously frozen zone boundaries.
+// rv uses current volume / median(volume[1],20), expansion uses TR/ATR[1].
+f_burst(int side, float o, float h, float l, float c, float md, float previousMd, float sb, float zoneHigh, float zoneLow, float ropeHigh, float ropeLow, float rv, float expansion, float volGate, float trGate, float bodyGate, float endGate) =>
+    float span = h - l
+    bool known = span > 0 and not na(rv) and not na(expansion) and not na(previousMd) and not na(ropeHigh) and not na(ropeLow) and not na(zoneHigh) and not na(zoneLow)
+    float body = span > 0 ? math.abs(c - o) / span : 0.0
+    float endPosition = span > 0 ? (side == 1 ? (c - l) / span : (h - c) / span) : 0.0
+    bool directional = side == 1 ? c > o and c > zoneHigh and c > ropeHigh and md > 0 and md > sb and md > previousMd : side == -1 ? c < o and c < zoneLow and c < ropeLow and md < 0 and md < sb and md < previousMd : false
+    known and directional and rv >= volGate and expansion >= trGate and body >= bodyGate and endPosition >= endGate
+
+// Inclusive launch window; release is age zero. Same episode cannot emit twice.
+f_window(int age, int count, int side, float md, float band, float c, float zoneHigh, float zoneLow) =>
+    age >= 0 and age < count and (side == 1 ? md > band and c >= zoneLow : side == -1 ? md < -band and c <= zoneHigh : false)
+
+// Frozen signal-close inputs only; outward rounding preserves the minimum risk.
+f_risk(int side, float entry, float extreme, float a, float floorAtr, float bufferAtr, float tick) =>
+    bool known = (side == 1 or side == -1) and entry > 0 and a > 0 and tick > 0 and not na(extreme)
+    float candidate = side == 1 ? math.min(extreme - bufferAtr * a, entry - floorAtr * a) : math.max(extreme + bufferAtr * a, entry + floorAtr * a)
+    float stop = known ? (side == 1 ? math.floor(candidate / tick) * tick : math.ceil(candidate / tick) * tick) : na
+    float risk = side * (entry - stop)
+    bool valid = known and stop > 0 and risk > 0
+    [valid ? stop : na, valid ? risk : na, valid]
+
+// Call only AFTER the entry bar. priorProtection was fixed at the previous close.
+// First apply the operative stop and adverse gap; never count stop-bar highs as profit.
+// A new close-based ATR ratchet only becomes operative on the next bar.
+f_path(int side, float entry, float risk, float priorProtection, float priorPeak, bool wasArmed, float o, float h, float l, float c, float a, float activationR, float distanceAtr, float tick) =>
+    bool stopped = side == 1 ? l <= priorProtection : h >= priorProtection
+    float exitPrice = stopped ? (side == 1 ? math.min(o, priorProtection) : math.max(o, priorProtection)) : na
+    float currentR = side * ((stopped ? exitPrice : c) - entry) / risk
+    float peakR = stopped ? priorPeak : math.max(priorPeak, side * ((side == 1 ? h : l) - entry) / risk)
+    bool armed = wasArmed or (not stopped and currentR >= activationR)
+    float protection = priorProtection
+    if not stopped and armed and a > 0
+        float raw = c - side * distanceAtr * a
+        float candidate = side == 1 ? math.floor(raw / tick) * tick : math.ceil(raw / tick) * tick
+        protection := side == 1 ? math.max(priorProtection, candidate) : math.min(priorProtection, candidate)
+    [not stopped, protection, peakR, currentR, exitPrice, armed]
+
+// Each written call owns a separate persistent copy of the ACTUAL state block.
+// Fixtures intentionally bypass feature warmup: they test the state consumer,
+// while indicator feature warmup is an independent production-source contract.
+f_fixture(int scenario) =>
+    // One explicit preroll chart bar supplies atr[1] to fixture step zero.
+    // The extracted state still uses the real bar_index without modification.
+    int b = bar_index - 1
+    float u = syminfo.mintick * 100000.0
+    bool ready = true
+    bool showZone = false
+    bool showRisk = false
+    bool showMilestones = false
+    string direction = "双向"
+    float open = 100.0 * u
+    float high = 100.4 * u
+    float low = 99.6 * u
+    float close = 100.0 * u
+    float md = 0.0
+    float sb = 0.0
+    float atr = (b >= 12 ? 1.3 : 1.0) * u
+    float rv = 1.0
+    float expansion = 1.0
+    float pastWidth = 1.0
+    float pastCrosses = 3.0
+    float ropeHigh = 100.2 * u
+    float ropeLow = 99.8 * u
+    float recentLow = 99.0 * u
+    float recentHigh = 101.0 * u
+    if b >= 12 and b <= 18
+        open := 100.0 * u
+        high := 100.6 * u
+        low := 99.9 * u
+        close := 100.3 * u
+        md := 0.11 * u
+        sb := 0.05 * u
+    // On bar13, dynamic band=.13 while the pending episode owns band=.10.
+    // MD=.11 remains a valid pending launch and MUST NOT be cancelled.
+    if b == 13 and scenario == 3
+        md := 0.09 * u
+    bool strongBar = b == 14 or (b == 18 and scenario == 2)
+    if strongBar
+        open := 100.0 * u
+        high := 104.2 * u
+        low := 99.0 * u
+        close := 104.0 * u
+        md := 0.30 * u
+        sb := 0.10 * u
+        rv := scenario == 4 ? 3.99 : scenario == 2 and b == 14 ? 1.0 : 5.0
+        expansion := 4.0
+        if scenario == 5
+            atr := 100.0 * u
+    if b >= 15 and b <= 17 and (scenario == 0 or scenario == 1)
+        open := 104.0 * u
+        high := 120.0 * u
+        low := 104.0 * u
+        close := 115.0 * u
+        md := 0.50 * u
+        sb := 0.20 * u
+        rv := 5.0
+        expansion := 4.0
+        if b == 16
+            open := 115.0 * u
+            high := 116.0 * u
+            low := 111.0 * u
+            close := 114.0 * u
+        if b == 17
+            open := 105.0 * u
+            high := 130.0 * u
+            low := 104.0 * u
+            close := 120.0 * u
+    // Twelve new quiet bars form while the existing path is still active.
+    // Bar27 then both hits protection and qualifies as a fresh strong release.
+    // The actual state consumer must exit without re-entering on that bar.
+    if scenario == 6 and b >= 15 and b <= 26
+        open := 104.0 * u
+        high := 104.2 * u
+        low := 103.9 * u
+        close := 104.0 * u
+        md := 0.0
+        sb := 0.0
+    if scenario == 6 and b == 27
+        open := 100.0 * u
+        high := 112.0 * u
+        low := 98.0 * u
+        close := 110.0 * u
+        md := 0.30 * u
+        sb := 0.10 * u
+        rv := 5.0
+        expansion := 4.0
+    if scenario == 1
+        float originalHigh = high
+        high := 200.0 * u - low
+        low := 200.0 * u - originalHigh
+        open := 200.0 * u - open
+        close := 200.0 * u - close
+        md := -md
+        sb := -sb
+        recentHigh := 200.0 * u - recentLow
+    float middle = 100.0 * u + md
+    // Price leads while both oscillator lines remain exactly zero. These
+    // fixtures test the prior qualified box before this candle can enlarge it.
+    if scenario >= 7 and b >= 12 and b <= 13
+        open := (b == 12 ? 100.0 : 104.0) * u
+        high := (b == 12 ? 104.2 : 108.2) * u
+        low := (b == 12 ? 99.0 : 104.0) * u
+        close := (b == 12 ? 104.0 : 108.0) * u
+        md := 0.0
+        sb := 0.0
+        rv := 5.0
+        expansion := 4.0
+        middle := (scenario == 9 ? (b == 12 ? 99.9 : 99.8) : (b == 12 ? 100.2 : 100.4)) * u
+        if scenario == 8
+            pastWidth := 4.0
+    var int quietCount = 0
+    var float frozenBand = na
+    var float quietHigh = na
+    var float quietLow = na
+    var box zone = na
+    var array<box> zones = array.new<box>()
+    var int pendingSide = 0
+    var int releasedAt = na
+    var float launchHigh = na
+    var float launchLow = na
+    var float launchBand = na
+    var int launchQuiet = 0
+    var int trendSide = 0
+    var int entryBar = na
+    var float entry = na
+    var float initialStop = na
+    var float risk = na
+    var float protection = na
+    var float peakR = 0.0
+    var float currentR = na
+    var bool trailArmed = false
+    var string stateText = "等待蓄势"
+    var label liveTag = na
+    bool burstUp = false
+    bool burstDown = false
+    bool exitUp = false
+    bool exitDown = false
+    float visibleProtection = trendSide != 0 ? protection : na
+    float visibleInitial = trendSide != 0 ? initialStop : na
+    float visibleEntry = trendSide != 0 ? entry : na
+
+    if barstate.isconfirmed and ready
+        bool endedThisBar = false
+        if trendSide != 0 and bar_index > entryBar
+            int sideBefore = trendSide
+            float oldPeak = peakR
+            [alive, newProtection, newPeak, newCurrent, exitPrice, armed] = f_path(trendSide, entry, risk, protection, peakR, trailArmed, open, high, low, close, atr, armR, trailAtr, syminfo.mintick)
+            protection := newProtection
+            peakR := newPeak
+            currentR := newCurrent
+            trailArmed := armed
+            if not alive
+                exitUp := trendSide == 1
+                exitDown := trendSide == -1
+                endedThisBar := true
+                trendSide := 0
+                pendingSide := 0
+                stateText := "保护触及 · 本段结束"
+                label.new(bar_index, exitPrice, "保护触及\n" + str.tostring(exitPrice, format.mintick) + " · " + str.tostring(currentR, "#.##") + "R参考", style=sideBefore == 1 ? label.style_label_down : label.style_label_up, color=color.new(ink, 88), textcolor=ink, size=size.small, force_overlay=true)
+            else
+                stateText := trailArmed ? "趋势跟踪" : "爆发后 · 初始保护"
+                if showMilestones
+                    float level = oldPeak < 10 and peakR >= 10 ? 10 : oldPeak < 5 and peakR >= 5 ? 5 : oldPeak < 3 and peakR >= 3 ? 3 : na
+                    if not na(level)
+                        label.new(bar_index, sideBefore == 1 ? high : low, str.tostring(level, "#") + "R 已到", style=sideBefore == 1 ? label.style_label_down : label.style_label_up, color=color.new(sideBefore == 1 ? bull : bear, 90), textcolor=sideBefore == 1 ? bull : bear, size=size.tiny, force_overlay=true)
+
+        float band = quietCount >= minQuiet and not na(frozenBand) ? frozenBand : nearAtr * atr[1]
+        // Evaluate the already qualified box BEFORE including the current burst bar.
+        // Price-first and oscillator-release paths consume the SAME episode once.
+        bool canLead = quietCount >= minQuiet and pendingSide == 0 and trendSide == 0 and not endedThisBar and pastWidth <= denseWidth and pastCrosses >= denseCrosses
+        bool leadUp = canLead and direction != "空头" and f_priceBurst(1, open, high, low, close, md, sb, middle, middle[1], quietHigh, quietLow, ropeHigh, ropeLow, rv, expansion, minVolume, minExpansion, minBody, minEnd)
+        bool leadDown = canLead and direction != "多头" and f_priceBurst(-1, open, high, low, close, md, sb, middle, middle[1], quietHigh, quietLow, ropeHigh, ropeLow, rv, expansion, minVolume, minExpansion, minBody, minEnd)
+        int leadingSide = leadUp ? 1 : leadDown ? -1 : 0
+        // A pending launch owns its frozen band. ATR changes must not create a new
+        // quiet episode that silently cancels an otherwise valid waiting launch.
+        bool near = pendingSide == 0 and math.max(math.abs(md), math.abs(sb)) <= band
+        if leadingSide != 0
+            pendingSide := leadingSide
+            releasedAt := bar_index
+            launchHigh := quietHigh
+            launchLow := quietLow
+            launchBand := band
+            launchQuiet := quietCount
+            quietCount := 0
+            frozenBand := na
+            quietHigh := na
+            quietLow := na
+            zone := na
+        else if near
+            pendingSide := 0
+            quietCount += 1
+            quietHigh := quietCount == 1 ? high : math.max(quietHigh, high)
+            quietLow := quietCount == 1 ? low : math.min(quietLow, low)
+            if quietCount == minQuiet
+                frozenBand := band
+                if showZone
+                    // Starts NOW at qualification, never backpaints the prior 11 bars.
+                    zone := box.new(bar_index, quietHigh, bar_index, quietLow, border_color=color.new(gold, 65), bgcolor=color.new(gold, 95), force_overlay=true)
+                    array.push(zones, zone)
+                    if array.size(zones) > keepZones
+                        box.delete(array.shift(zones))
+            if quietCount >= minQuiet and not na(zone)
+                box.set_right(zone, bar_index)
+                box.set_top(zone, quietHigh)
+                box.set_bottom(zone, quietLow)
+            if trendSide == 0 and not endedThisBar
+                stateText := quietCount >= minQuiet ? "蓄势就绪 · 等待爆发" : "近零整理"
+        else
+            if quietCount >= minQuiet
+                bool dense = pastWidth <= denseWidth and pastCrosses >= denseCrosses
+                int side = md > band ? 1 : md < -band ? -1 : 0
+                bool allowed = side == 1 ? direction != "空头" : side == -1 ? direction != "多头" : false
+                if dense and allowed and trendSide == 0 and not endedThisBar
+                    pendingSide := side
+                    releasedAt := bar_index
+                    launchHigh := quietHigh
+                    launchLow := quietLow
+                    launchBand := band
+                    launchQuiet := quietCount
+                else if trendSide == 0 and not endedThisBar
+                    stateText := dense ? "方向或主线未通过" : "释放 · 密集未通过"
+            quietCount := 0
+            frozenBand := na
+            quietHigh := na
+            quietLow := na
+            zone := na
+
+        if pendingSide != 0 and trendSide == 0 and not endedThisBar
+            int age = bar_index - releasedAt
+            bool validWindow = leadingSide != 0 or f_window(age, opportunity, pendingSide, md, launchBand, close, launchHigh, launchLow)
+            if not validWindow
+                pendingSide := 0
+                stateText := "窗口结束 · 等待新蓄势"
+            else
+                stateText := "待爆发 · " + str.tostring(age + 1) + "/" + str.tostring(opportunity)
+                bool burst = leadingSide != 0 or f_burst(pendingSide, open, high, low, close, md, md[1], sb, launchHigh, launchLow, ropeHigh, ropeLow, rv, expansion, minVolume, minExpansion, minBody, minEnd)
+                if burst
+                    int side = pendingSide
+                    burstUp := side == 1
+                    burstDown := side == -1
+                    [sl, r, riskValid] = f_risk(side, close, side == 1 ? recentLow : recentHigh, atr, riskFloor, stopBuffer, syminfo.mintick)
+                    entry := close
+                    initialStop := sl
+                    risk := r
+                    protection := sl
+                    entryBar := bar_index
+                    peakR := 0.0
+                    currentR := riskValid ? 0.0 : na
+                    trailArmed := false
+                    trendSide := riskValid ? side : 0
+                    pendingSide := 0
+                    stateText := riskValid ? "强劲爆发 · 初始保护" : "爆发 · 风险参考不可用"
+                    color signalColor = side == 1 ? bull : bear
+                    string riskText = riskValid ? "初始保护 " + str.tostring(sl, format.mintick) + " · " + str.tostring(100 * r / close, "#.##") + "%" : "风险参考不可用"
+                    string timing = leadingSide != 0 ? "量价启动" : "释放确认"
+                    string details = timing + " · 蓄势 " + str.tostring(launchQuiet) + " 根 · 等待 " + str.tostring(age) + " 根\n量比 " + str.tostring(rv, "#.##") + "× · TR扩张 " + str.tostring(expansion, "#.##") + "×\n" + riskText + "\n收盘价为观察参考，不是成交；峰值R不等于兑现收益。"
+                    label.new(bar_index, side == 1 ? low : high, (side == 1 ? "↑ 强劲爆发" : "↓ 强劲爆发") + "\n" + str.tostring(close, format.mintick) + " · " + timing, style=side == 1 ? label.style_label_up : label.style_label_down, color=signalColor, textcolor=color.white, size=size.small, tooltip=details, force_overlay=true)
+                    // Separate pane marker; no overlapping diamond, arrow and full label.
+                    label.new(bar_index, md, side == 1 ? "↑ 爆发" : "↓ 爆发", style=side == 1 ? label.style_label_up : label.style_label_down, color=color.new(signalColor, 92), textcolor=signalColor, size=size.small, tooltip=details)
+                    if not na(liveTag)
+                        label.delete(liveTag)
+                    liveTag := na
+
+        if showRisk and trendSide != 0
+            if na(liveTag)
+                liveTag := label.new(bar_index + 2, protection, "", style=label.style_label_left, color=color.new(chart.bg_color, 5), textcolor=ink, size=size.small, force_overlay=true)
+            label.set_xy(liveTag, bar_index + 2, protection)
+            label.set_text(liveTag, (trailArmed ? "下根跟踪保护 " : "下根初始保护 ") + str.tostring(protection, format.mintick) + "\n初始风险 " + str.tostring(100 * risk / entry, "#.##") + "% · 峰值 " + str.tostring(peakR, "#.##") + "R（未兑现）")
+        else if trendSide == 0 and not na(liveTag)
+            label.delete(liveTag)
+            liveTag := na
+
+    [burstUp, burstDown, exitUp, exitDown, trendSide, pendingSide, quietCount, risk, protection, peakR, currentR, trailArmed, visibleProtection]
+
+var array<int> checkCount = array.new_int(1, 0)
+f_eq(float a, float b) =>
+    not na(a) and not na(b) and math.abs(a-b) <= 1e-7 * math.max(1.0, math.max(math.abs(a), math.abs(b)))
+// Decimal expectations may sit one tick away after outward float rounding.
+// Keep R comparisons separate: an instrument price tick is not an R tolerance.
+f_priceEq(float a, float b) =>
+    not na(a) and not na(b) and math.abs(a-b) <= 1.01 * syminfo.mintick + 1e-12 * math.max(math.abs(a), math.abs(b))
+f_check(bool passed, string title) =>
+    if not passed
+        runtime.error("BURST STATE FAIL: " + title)
+    array.set(checkCount, 0, array.get(checkCount, 0) + 1)
+
+[up0,dn0,xu0,xd0,side0,pend0,q0,r0,p0,peak0,cur0,arm0,visible0] = f_fixture(0)
+[up1,dn1,xu1,xd1,side1,pend1,q1,r1,p1,peak1,cur1,arm1,visible1] = f_fixture(1)
+[up2,dn2,xu2,xd2,side2,pend2,q2,r2,p2,peak2,cur2,arm2,visible2] = f_fixture(2)
+[up3,dn3,xu3,xd3,side3,pend3,q3,r3,p3,peak3,cur3,arm3,visible3] = f_fixture(3)
+[up4,dn4,xu4,xd4,side4,pend4,q4,r4,p4,peak4,cur4,arm4,visible4] = f_fixture(4)
+[up5,dn5,xu5,xd5,side5,pend5,q5,r5,p5,peak5,cur5,arm5,visible5] = f_fixture(5)
+[up6,dn6,xu6,xd6,side6,pend6,q6,r6,p6,peak6,cur6,arm6,visible6] = f_fixture(6)
+[up7,dn7,xu7,xd7,side7,pend7,q7,r7,p7,peak7,cur7,arm7,visible7] = f_fixture(7)
+[up8,dn8,xu8,xd8,side8,pend8,q8,r8,p8,peak8,cur8,arm8,visible8] = f_fixture(8)
+[up9,dn9,xu9,xd9,side9,pend9,q9,r9,p9,peak9,cur9,arm9,visible9] = f_fixture(9)
+float unit = syminfo.mintick * 100000.0
+int step = bar_index - 1
+if barstate.isconfirmed
+    if step == 11
+        f_check(q0 == 12 and pend0 == 0 and side0 == 0, "12 closed quiet bars qualify")
+        f_check(q1 == 12 and not up1 and not dn1, "quiet qualification is not a burst")
+        f_check(q7 == 12 and q8 == 12 and q9 == 12, "price-first fixtures own prior qualified quiet")
+    if step == 12
+        f_check(pend0 == 1 and pend1 == -1 and not up0 and not dn1, "release opens pending only")
+        f_check(up7 and side7 == 1 and pend7 == 0 and q7 == 0, "price-first burst emits before MD release and consumes quiet")
+        f_check(f_eq(peak7,0) and f_eq(cur7,0) and na(visible7), "price-first signal candle has no post-entry excursion")
+        f_check(not up8 and side8 == 0 and q8 == 13, "price-first burst requires prior MA compression")
+        f_check(not up9 and side9 == 0 and q9 == 13, "price-first burst rejects opposing ZLEMA slope")
+    if step == 13
+        f_check(pend0 == 1 and q0 == 0, "new ATR band cannot cancel frozen long window")
+        f_check(pend1 == -1 and q1 == 0, "new ATR band cannot cancel frozen short window")
+        f_check(pend3 == 0 and not up3, "return inside frozen band cancels episode")
+        f_check(not up7 and side7 == 1 and f_eq(r7,r7[1]), "price-first repeated force cannot reset or duplicate active reference")
+        f_check(not up8 and not up9, "price-first negative controls remain silent")
+    if step == 14
+        f_check(up0 and not dn0 and side0 == 1 and pend0 == 0, "later strong candle emits once")
+        f_check(dn1 and not up1 and side1 == -1 and pend1 == 0, "short mirrored later burst")
+        f_check(f_eq(peak0,0) and f_eq(cur0,0) and na(visible0), "signal candle has no post-entry excursion")
+        f_check(f_eq(peak1,0) and f_eq(cur1,0) and na(visible1), "short signal candle has no excursion")
+        f_check(not up2 and pend2 == 1, "insufficient volume remains pending")
+        f_check(not up3 and side3 == 0 and pend3 == 0, "cancelled launch cannot revive")
+        f_check(not up4 and side4 == 0, "one failed required gate rejects burst")
+        f_check(up5 and side5 == 0 and na(r5) and na(cur5), "invalid risk retains arrow but no fabricated R")
+        f_check(not up7 and side7 == 1, "later MD release cannot duplicate price-first episode")
+    if step == 15
+        f_check(not up0 and not dn1, "strong later candles do not duplicate consumed episode")
+        f_check(side0 == 1 and arm0 and f_priceEq(p0,109.8*unit), "confirmed 2R arms close-ATR ratchet")
+        f_check(f_priceEq(visible0,98.74*unit) and visible0 < 104*unit and p0 > 104*unit, "new protection cannot stop its creation candle")
+        f_check(side1 == -1 and arm1 and f_priceEq(p1,90.2*unit) and f_priceEq(visible1,101.26*unit), "short next-bar protection mirror")
+    if step == 16
+        f_check(f_eq(p0,p0[1]) and f_eq(p1,p1[1]), "ratchet never loosens on pullback")
+    if step == 17
+        f_check(xu0 and side0 == 0 and not up0, "operative long protection exits")
+        f_check(xd1 and side1 == 0 and not dn1, "operative short protection exits")
+        f_check(f_eq(cur0,unit/r0) and f_eq(cur1,unit/r1), "adverse gaps use open beyond prior protection")
+        f_check(f_eq(peak0,peak0[1]) and f_eq(peak1,peak1[1]), "stop bar cannot increase recorded peak")
+    if step == 18
+        f_check(not up2 and pend2 == 0 and side2 == 0, "release plus five excludes age six")
+        f_check(side0 == 0 and not up0 and f_eq(cur0,cur0[1]), "exited path cannot resurrect or change R")
+    if step == 26
+        f_check(side6 == 1 and q6 == 12 and not up6, "new quiet structure can form without overwriting active trend")
+    if step == 27
+        f_check(xu6 and not up6 and side6 == 0 and pend6 == 0, "stop and valid new release cannot exit and re-enter together")
+
+var table result = table.new(position.middle_center, 1, 1)
+if barstate.islast
+    int passed = array.get(checkCount, 0)
+    bool complete = passed == 35
+    table.cell(result, 0, 0, complete ? "BURST STATE · " + str.tostring(passed) + "/35 PASS\n10 independent synthetic state paths\nActual source block · no return estimate" : "WAIT / " + str.tostring(passed) + "/35 checks\nAt least 29 closed chart bars required", text_color=complete ? color.teal : color.orange)
+plot(na, display=display.none)

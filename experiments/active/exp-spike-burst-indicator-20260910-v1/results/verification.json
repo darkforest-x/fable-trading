@@ -1,0 +1,199 @@
+{
+  "created_at": "2026-09-10T02:51:28.714904+00:00",
+  "kind": "manual_engineering_acceptance_with_hashed_evidence",
+  "source_commit": "6d357fc0046553b424a995c5e709cdf544bc06e4",
+  "private_tradingview_script": {
+    "name": "SPIKE 强劲爆发 V1",
+    "version": 2,
+    "saved_at_bjt": "2026-09-10 10:33",
+    "source_copy_equal_after_crlf_normalization": true,
+    "compiled_and_ran_in_native_pine": true,
+    "published_publicly": false
+  },
+  "checks": {
+    "python_tests": 22,
+    "python_result": "22 passed in 0.09s",
+    "native_helper_assertions": 81,
+    "native_state_assertions": 35,
+    "state_paths": 10,
+    "review": "Independent same-root read-only source review: no material issue; does not substitute native verification"
+  },
+  "engineering_exposure": {
+    "owner_authorization": "Owner explicitly allowed any historical period in this conversation",
+    "formal_holdout_boundary": "2026-05-04",
+    "initial_spec_pass": 1,
+    "revised_price_first_spec_pass": 2,
+    "account_profit_evaluations": 0,
+    "charts_include_unrealized_indicator_path_r": true,
+    "not_pristine_oos": true,
+    "thresholds_unchanged_but_timing_route_revised_after_seen_case": true
+  },
+  "observed_market_cases": [
+    {
+      "market": "OKX:USELESSUSDT.P",
+      "timeframe": "1H",
+      "open_bjt": "2026-08-31 05:00",
+      "close_bjt": "2026-08-31 06:00",
+      "arrow_price": 0.0675,
+      "route": "量价启动",
+      "native_chart_verified": true,
+      "prior_quiet_bars": 14,
+      "rv": 4.383352,
+      "tr_over_prior_atr": 4.121448,
+      "body_fraction": 0.814815,
+      "directional_end_fraction": 0.996296,
+      "prior_box_high": 0.06617
+    },
+    {
+      "market": "OKX:USELESSUSDT.P",
+      "timeframe": "1H",
+      "open_bjt": "2026-08-31 07:00",
+      "close_bjt": "2026-08-31 08:00",
+      "old_imacd_price": 0.068,
+      "initial_burst_spec_passes": false,
+      "reasons": [
+        "bearish body",
+        "body fraction 0.4853 < 0.55",
+        "directional end 0.4279 < 0.75",
+        "below then box high0.07195"
+      ]
+    },
+    {
+      "market": "OKX:ETHUSDT.P",
+      "timeframe": "4H",
+      "open_bjt": "2026-08-19 20:00",
+      "close_bjt": "2026-08-20 00:00",
+      "arrow_price": 2085.15,
+      "route": "释放确认",
+      "native_chart_verified": true,
+      "delay_after_release_bars": 1,
+      "rv": 13.002,
+      "tr_over_prior_atr": 14.056,
+      "body_fraction": 0.7697,
+      "directional_end_fraction": 0.773,
+      "prior_box_high": 1927
+    }
+  ],
+  "failures_retained": [
+    "Mac long-text typing corrupted punctuation; draft discarded, never saved/applied",
+    "Original27-assertion fixture missed ATR[1] on first bar; explicit preroll added and35-assertion final rerun passed",
+    "First burst spec missed observed USELESS because oscillator release followed price impulse; documented price-first design revision"
+  ],
+  "cleanup": {
+    "temporary_probes_not_saved": true,
+    "temporary_browser_charts_closed": true,
+    "original_imacd_private_version_15_unchanged": true,
+    "original_volume_and_imacd_layout_preserved": true,
+    "autosave_restored_on": true,
+    "native_garbled_draft_discarded": true,
+    "saved_layout_changed_elsewhere_during_work": "Latest cloud XAU1m was respected; native STRK1D left as found; no old layout snapshot overwritten"
+  },
+  "not_changed": [
+    "original IMACD source",
+    "Spike monitor",
+    "Bark notification rules",
+    "YOLO",
+    "orders",
+    "ACTIVE/frozen"
+  ],
+  "profit_validation": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "files": [
+    {
+      "path": "yoyo/evaluation/pine/spike_burst_v1.pine",
+      "sha256": "18bbb6955fdf12e124688003799c44fc2a641f11a342edcf478157b1c9641fe2",
+      "bytes": 23627
+    },
+    {
+      "path": "yoyo/evaluation/build_spike_burst_probe.py",
+      "sha256": "ce3b761abca09202fac0f4650b1bbd9130703cec0c592ac83183ab420cdfeebd",
+      "bytes": 14736
+    },
+    {
+      "path": "yoyo/evaluation/build_spike_burst_state_probe.py",
+      "sha256": "a757910d61463dc2b7a90390c06fdce61041e2465e69e72feb41f1ac943e0e4f",
+      "bytes": 12616
+    },
+    {
+      "path": "tests/test_spike_burst_contract.py",
+      "sha256": "ef52fe6afaa11e8188e3404c511a906976b950acc773a5b4f456b71ad4b9eacc",
+      "bytes": 11103
+    },
+    {
+      "path": "tests/test_spike_burst_state_probe.py",
+      "sha256": "7df5a2723b113e91d2db529b9fbd61c66386566d06f9856cfd925ca7a80df1c3",
+      "bytes": 2275
+    },
+    {
+      "path": "experiments/active/exp-spike-burst-indicator-20260910-v1/results/native_contract_probe.pine",
+      "sha256": "2d8bf6cc9526305f47accd358ce208df8c860b734297070c89d1476e37ab2434",
+      "bytes": 15912
+    },
+    {
+      "path": "experiments/active/exp-spike-burst-indicator-20260910-v1/results/native_contract_probe_v2.pine",
+      "sha256": "6ff94ba12f16543ecf7bd8abdae892ff7f415a2a3241c5be259b678bffe258a4",
+      "bytes": 18575
+    },
+    {
+      "path": "experiments/active/exp-spike-burst-indicator-20260910-v1/results/native_state_probe.pine",
+      "sha256": "23b71ce38411e7da617dd27893b3350cb2ffff5c22126cc7a3008e299cd3aa34",
+      "bytes": 23273
+    },
+    {
+      "path": "experiments/active/exp-spike-burst-indicator-20260910-v1/results/native_state_probe_v2.pine",
+      "sha256": "3d33b13635aeed4afb9825095cd3a03bec31ebbc517d26697debf5c648788582",
+      "bytes": 28026
+    },
+    {
+      "path": "experiments/active/exp-spike-burst-indicator-20260910-v1/results/eth_4h_release_verified.png",
+      "sha256": "16b2f3ee0591a7a266fb52a37bc08da958d0cd843df7809eac7d32e6d6c438d4",
+      "bytes": 122437
+    },
+    {
+      "path": "experiments/active/exp-spike-burst-indicator-20260910-v1/results/native_helpers_81_pass.png",
+      "sha256": "a76c2fce094dc9fbdd2f8bfaa1495f64574f820f580f5b9c909182b058f7a894",
+      "bytes": 95932
+    },
+    {
+      "path": "experiments/active/exp-spike-burst-indicator-20260910-v1/results/native_helpers_pass.png",
+      "sha256": "7642e454692b34d29c9cce36da9494a4b08e997293bff1f728969082cc544095",
+      "bytes": 121335
+    },
+    {
+      "path": "experiments/active/exp-spike-burst-indicator-20260910-v1/results/native_state_35_pass.png",
+      "sha256": "2a3f12f6151fd092194d9f05c1a744f31b37dd3b05abd16c2180ea64453ba37a",
+      "bytes": 96425
+    },
+    {
+      "path": "experiments/active/exp-spike-burst-indicator-20260910-v1/results/native_state_preroll_failure.png",
+      "sha256": "51dc578cd98ad2c0976b3e3b40368e7519683c10e3ab779db280fad8cad3b9f6",
+      "bytes": 124219
+    },
+    {
+      "path": "experiments/active/exp-spike-burst-indicator-20260910-v1/results/original_layout_and_autosave_restored.png",
+      "sha256": "68966427d5fbcfba45adeee67969f96451911e3e6c4ded79150650dbfd47641e",
+      "bytes": 128635
+    },
+    {
+      "path": "experiments/active/exp-spike-burst-indicator-20260910-v1/results/tv_private_v2_saved.png",
+      "sha256": "1a0a47d606f2fbebac5918b2bef2f8fbbf3da6836976b85e8d30734aa6904503",
+      "bytes": 128604
+    },
+    {
+      "path": "experiments/active/exp-spike-burst-indicator-20260910-v1/results/useless_1h_price_first_verified.png",
+      "sha256": "5d83ef37fc1cc41558b40cb6dde20de990bf76460856a11f62cbf70825546fd8",
+      "bytes": 126035
+    },
+    {
+      "path": "analysis/p0_spike_burst_indicator_20260910.md",
+      "sha256": "a96ec361ec7428f612bc6ab7bd28cda3a856ca5785aebddfcb06cefd0e76f337",
+      "bytes": 33824
+    },
+    {
+      "path": "analysis/html/p0_spike_burst_indicator_20260910.html",
+      "sha256": "5e08eefe42ff53d23c732a3282d790e8195fd0ba0386fa32b1685c47c1962f39",
+      "bytes": 626358
+    }
+  ]
+}
