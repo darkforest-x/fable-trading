@@ -169,7 +169,7 @@ def render(folder=EXPERIMENT/'results'):
         '构建提交：`'+manifest['code_commit']+'`；报告提交：`'+head+'`。']
     runbook=EXPERIMENT/'RUNBOOK.md'
     if runbook.exists():pieces.append(runbook.read_text())
-    report=ROOT/'analysis/p1_launch_quality_20260910.md';report.write_text('\n\n'.join(pieces)+'\n')
+    report=ROOT/'analysis/p1_launch_quality_20260910.md';report.write_text('\n\n'.join(pieces).rstrip()+'\n')
     subprocess.run([str(ROOT/'.venv/bin/python'),str(ROOT/'scripts/md_to_html.py'),str(report),'--out-dir',str(ROOT/'analysis/html')],check=True,cwd=ROOT)
     html=ROOT/'analysis/html'/report.with_suffix('.html').name
     receipt=dict(builder_commit=head,report=str(report),html=str(html),report_sha256=sha(report),html_sha256=sha(html),
