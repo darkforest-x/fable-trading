@@ -7952,21 +7952,31 @@ experiments:
       no rewrite/backdate/rescore. No live changes.
   - experiment_id: exp-spike-v3-htf-gate-20260910-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 618aa77a349d7f1b00e1efe52d12362b8219178e
-    status: active
+    source_commit: 1f10d360e51456e885ed2a5f4d479316324a3a44
+    status: rejected
     question: Can known closed4H relative momentum veto weak V3 hourly launches while preserving early true launches?
     single_variable: Only veto original V3 parent when complete341-bar-warmed4H md<sb; neutral or unknown passes without
       pretending unknown is confirmed.
-    result: Preregistered fifth structural hypothesis before E market detection or scoring; original four acceptance
-      gates and all denominators retained.
-    holdout_consumed: false
+    result: 278 OKX1H/61days:6458 parents,2615 upgrades,7559 distinct labels (-37.23%);816/1463 original timely hits
+      retained (55.78%),493/947 large hits (52.06%). Net36.34bp but matched excess -123.79bp,frozen five-hypothesis Holm p=1. All four gates failed.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     reuse_allowed: false
     canonical_report: analysis/html/p1_spike_v3_htf_gate_20260910.html
-    artifacts: []
-    notes: Previously seen history after13 gates and A-D. New higher-timeframe coverage inspected without signal/outcome
-      scoring. No live change.
+    artifacts:
+    - spike-v3-htf-gate-20260910-report-source
+    - spike-v3-htf-gate-20260910-report-html
+    - spike-v3-htf-gate-20260910-prepared
+    - spike-v3-htf-gate-20260910-validation
+    - spike-v3-htf-gate-20260910-report-manifest
+    - spike-v3-htf-gate-20260910-preflight-review
+    - spike-v3-htf-gate-20260910-independent-review
+    - spike-v3-htf-gate-20260910-case-diagnostic
+    - spike-v3-htf-gate-20260910-report-review
+    notes: First E scoring on previously studied owner-authorized history, after13 gates and A-D. Unknown230 original
+      parent identities preserved. Real complete4H exact-close clock audited; no permission claim for negative md>=sb.
+      No live changes.
   - experiment_id: exp-spike-v3-price-acceptance-20260910-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 1f10d360e51456e885ed2a5f4d479316324a3a44

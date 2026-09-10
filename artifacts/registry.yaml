@@ -27300,3 +27300,129 @@ artifacts:
     notes: D failed all fixed gates; independent full-state/trade audit passed. Preflight receipt committed late,
       transparently recorded. R2 fixes QA links only; original report retained, no detection or scoring rerun. No
       D Pine or deployment.
+  - artifact_id: spike-v3-htf-gate-20260910-report-source
+    artifact_type: report
+    role: v3_closed_4h_momentum_veto
+    source_repo: darkforest-x/fable-trading
+    source_commit: 23d8da99ce22e42db794930b6b1ae0072707fa01
+    source_path: analysis/p1_spike_v3_htf_gate_20260910.md
+    sha256: 39f6a2efa5d87fd31b60cdc9b4604577a8168b6da8322ffb2ee35e09ebc681c6
+    size_bytes: 20729
+    storage_uri: repo://analysis/p1_spike_v3_htf_gate_20260910.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Fifth fixed structural hypothesis failed all four targets. Full independent state/price/path audit passed;
+      written preflight was committed before preparation. Original V1/V3 preserved, no E Pine or deployment.
+  - artifact_id: spike-v3-htf-gate-20260910-report-html
+    artifact_type: report
+    role: v3_closed_4h_momentum_veto
+    source_repo: darkforest-x/fable-trading
+    source_commit: 23d8da99ce22e42db794930b6b1ae0072707fa01
+    source_path: analysis/html/p1_spike_v3_htf_gate_20260910.html
+    sha256: b2923c544fb52dd514c461eb1e78d278e4af9324410f5251a2331d4ee2179243
+    size_bytes: 1305959
+    storage_uri: repo://analysis/html/p1_spike_v3_htf_gate_20260910.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Fifth fixed structural hypothesis failed all four targets. Full independent state/price/path audit passed;
+      written preflight was committed before preparation. Original V1/V3 preserved, no E Pine or deployment.
+  - artifact_id: spike-v3-htf-gate-20260910-prepared
+    artifact_type: manifest
+    role: v3_closed_4h_momentum_veto
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1f10d360e51456e885ed2a5f4d479316324a3a44
+    source_path: experiments/active/exp-spike-v3-htf-gate-20260910-v1/results/prepared_manifest.json
+    sha256: 2e19ce168455a6f5c4b3764df589c31aa76c82d42fdb0925298cef88760d6aa8
+    size_bytes: 310088
+    storage_uri: repo://experiments/active/exp-spike-v3-htf-gate-20260910-v1/results/prepared_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Fifth fixed structural hypothesis failed all four targets. Full independent state/price/path audit passed;
+      written preflight was committed before preparation. Original V1/V3 preserved, no E Pine or deployment.
+  - artifact_id: spike-v3-htf-gate-20260910-validation
+    artifact_type: manifest
+    role: v3_closed_4h_momentum_veto
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1f10d360e51456e885ed2a5f4d479316324a3a44
+    source_path: experiments/active/exp-spike-v3-htf-gate-20260910-v1/results/validation_manifest.json
+    sha256: d8966ebbe3453fe01c821d37c51b8f5dd0bdd3f5f45f02420b218281ff1716c6
+    size_bytes: 5998
+    storage_uri: repo://experiments/active/exp-spike-v3-htf-gate-20260910-v1/results/validation_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Fifth fixed structural hypothesis failed all four targets. Full independent state/price/path audit passed;
+      written preflight was committed before preparation. Original V1/V3 preserved, no E Pine or deployment.
+  - artifact_id: spike-v3-htf-gate-20260910-report-manifest
+    artifact_type: manifest
+    role: v3_closed_4h_momentum_veto
+    source_repo: darkforest-x/fable-trading
+    source_commit: 23d8da99ce22e42db794930b6b1ae0072707fa01
+    source_path: experiments/active/exp-spike-v3-htf-gate-20260910-v1/results/htf_report_manifest.json
+    sha256: 25a6d83731e2327dba990b044269a1849609ed55825b3f80171445d5aecec1c2
+    size_bytes: 366103
+    storage_uri: repo://experiments/active/exp-spike-v3-htf-gate-20260910-v1/results/htf_report_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Fifth fixed structural hypothesis failed all four targets. Full independent state/price/path audit passed;
+      written preflight was committed before preparation. Original V1/V3 preserved, no E Pine or deployment.
+  - artifact_id: spike-v3-htf-gate-20260910-preflight-review
+    artifact_type: manifest
+    role: v3_closed_4h_momentum_veto
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1f10d360e51456e885ed2a5f4d479316324a3a44
+    source_path: experiments/active/exp-spike-v3-htf-gate-20260910-v1/qa/preflight_review.json
+    sha256: ee6c4d01699471b06ab9b6da0fb13886775e2f1583a3ef0e7314be57a6e407c4
+    size_bytes: 9047
+    storage_uri: repo://experiments/active/exp-spike-v3-htf-gate-20260910-v1/qa/preflight_review.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Fifth fixed structural hypothesis failed all four targets. Full independent state/price/path audit passed;
+      written preflight was committed before preparation. Original V1/V3 preserved, no E Pine or deployment.
+  - artifact_id: spike-v3-htf-gate-20260910-independent-review
+    artifact_type: manifest
+    role: v3_closed_4h_momentum_veto
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1f10d360e51456e885ed2a5f4d479316324a3a44
+    source_path: experiments/active/exp-spike-v3-htf-gate-20260910-v1/qa/independent_review.json
+    sha256: 4a24fc0f0320dd46339d7dbe2ebe7d94f09e311ee5f7c2edab16d0df0291e4a8
+    size_bytes: 12271
+    storage_uri: repo://experiments/active/exp-spike-v3-htf-gate-20260910-v1/qa/independent_review.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Fifth fixed structural hypothesis failed all four targets. Full independent state/price/path audit passed;
+      written preflight was committed before preparation. Original V1/V3 preserved, no E Pine or deployment.
+  - artifact_id: spike-v3-htf-gate-20260910-case-diagnostic
+    artifact_type: manifest
+    role: v3_closed_4h_momentum_veto
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1f10d360e51456e885ed2a5f4d479316324a3a44
+    source_path: experiments/active/exp-spike-v3-htf-gate-20260910-v1/qa/case_diagnostic.json
+    sha256: e55433a0897aa1cea6ec4e34b5651d9971d3ccfce2ca5c7b152e48729aee5494
+    size_bytes: 169365
+    storage_uri: repo://experiments/active/exp-spike-v3-htf-gate-20260910-v1/qa/case_diagnostic.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Fifth fixed structural hypothesis failed all four targets. Full independent state/price/path audit passed;
+      written preflight was committed before preparation. Original V1/V3 preserved, no E Pine or deployment.
+  - artifact_id: spike-v3-htf-gate-20260910-report-review
+    artifact_type: manifest
+    role: v3_closed_4h_momentum_veto
+    source_repo: darkforest-x/fable-trading
+    source_commit: 23d8da99ce22e42db794930b6b1ae0072707fa01
+    source_path: experiments/active/exp-spike-v3-htf-gate-20260910-v1/qa/report_review.json
+    sha256: cdbd56f29dea2b70005caa675353cefc02661d641624d7dd7138e69675a1c07e
+    size_bytes: 1265
+    storage_uri: repo://experiments/active/exp-spike-v3-htf-gate-20260910-v1/qa/report_review.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Fifth fixed structural hypothesis failed all four targets. Full independent state/price/path audit passed;
+      written preflight was committed before preparation. Original V1/V3 preserved, no E Pine or deployment.
