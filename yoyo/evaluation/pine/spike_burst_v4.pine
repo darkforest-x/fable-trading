@@ -1,10 +1,10 @@
 //@version=6
-// SPIKE V4: focused default display; raw V3 events remain in full mode and alerts.
+// SPIKE V4: show confirmed events only; parent candidates remain internal.
 // A structural alert is not a confirmed burst or an order. A child confirmation
 // belongs to the current close, never to its parent's historical candle.
 // Market breadth is absent here: the Python report provides that context only.
 // Research evaluation is 1H only; other chart periods are not validated.
-indicator("SPIKE V4 · 分层观察", shorttitle="SPIKE V4", overlay=false, max_labels_count=300, max_boxes_count=80, max_lines_count=80, explicit_plot_zorder=true)
+indicator("SPIKE V4 · 确认信号", shorttitle="SPIKE V4", overlay=false, max_labels_count=300, max_boxes_count=80, max_lines_count=80, explicit_plot_zorder=true)
 
 // Frozen research constants; changing them defines a new unvalidated config.
 const int maLen = 34
@@ -24,13 +24,11 @@ const float armR = 2.0
 const float trailAtr = 4.0
 
 string gView = "01 · 显示"
-string displayMode = input.string("低干扰", "显示层级", options=["低干扰", "完整显示"], group=gView, tooltip="低干扰：每段参考仅显示一个预警标签，所属确认用青色小点标记。其他原信号在本模式隐藏，可切完整显示或数据窗口核对；隐藏不代表已经证明是噪音。实际信号和警报条件不变。", display=display.none)
-bool lowInterference = displayMode == "低干扰"
 bool showMas = input.bool(true, "六条均线", group=gView, display=display.none)
-bool showLabels = input.bool(true, "预警与确认标签", group=gView, tooltip="橙色为待确认结构预警；青色为满足第二阶段条件。确认最多等待3根，不回填到预警根。", display=display.none)
-bool showRisk = input.bool(true, "风险区与保护线", group=gView, tooltip="参考跟踪只附着空闲时的第一条预警；后续预警仍正常显示，但不会重置已有参考。不是实际交易。", display=display.none)
-bool showPanel = input.bool(true, "紧凑状态面板", group=gView, display=display.none)
-bool showMilestones = input.bool(true, "已达到 3R / 5R / 10R", group=gView, display=display.none)
+bool showLabels = input.bool(true, "确认信号与价格", group=gView, tooltip="只显示通过原确认条件的信号，标在实际确认K线上，不回填到更早的候选位置。", display=display.none)
+bool showRisk = input.bool(true, "风险区与保护线", group=gView, tooltip="空闲后的首个确认信号开启风险参考，使用该根实际收盘价。跟踪期间的其他确认不会重置已有盈亏框；框内价格属于开启它的确认信号。", display=display.none)
+bool showPanel = input.bool(false, "显示状态面板", group=gView, display=display.none)
+bool showMilestones = input.bool(false, "退出与 R 里程碑文字", group=gView, display=display.none)
 color bull = #008F82
 color bear = #D34B66
 color gold = #AD7B29
@@ -186,7 +184,7 @@ if barstate.isconfirmed
         parentConfirmed := true
 // END ALERT STATE
 
-// BEGIN REFERENCE STATE: first early alert while flat owns this display only.
+// BEGIN REFERENCE STATE: first confirmation while flat owns this display only.
 var int trendSide = 0
 var int entryBar = na
 var float entry = na
@@ -223,13 +221,13 @@ if barstate.isconfirmed
             exitReference := true
             endedThisBar := true
             trendSide := 0
-            if showLabels
+            if showLabels and showMilestones
                 label.new(bar_index, exitPrice, "保护触及 · 参考结束\n" + str.tostring(exitPrice, format.mintick), style=label.style_label_down, color=color.new(chart.bg_color, 8), textcolor=ink, size=size.small, force_overlay=true)
         else if showMilestones and showLabels
             float level = oldPeak < 10 and peakR >= 10 ? 10 : oldPeak < 5 and peakR >= 5 ? 5 : oldPeak < 3 and peakR >= 3 ? 3 : na
             if not na(level)
                 label.new(bar_index, high, str.tostring(level, "#") + "R 已到", style=label.style_label_down, color=color.new(bull, 90), textcolor=bull, size=size.tiny, force_overlay=true)
-    if earlySignal and trendSide == 0 and not endedThisBar
+    if confirmedSignal and trendSide == 0 and not endedThisBar
         [newStop, newRisk, validRisk] = f_risk(1, close, recentLow, atr, riskFloor, stopBuffer, syminfo.mintick)
         if validRisk
             referenceStarted := true
@@ -244,52 +242,16 @@ if barstate.isconfirmed
             trailArmed := false
 // END REFERENCE STATE
 
-// BEGIN LAYERED DISPLAY STATE
-// Display-only metadata flows from frozen events/reference state, never back.
-// A reference is a signal-close path illustration, not an actual position.
-var int displayReferenceId = 0
-var int displayReferenceStartTime = na
-var bool displayReferenceConfirmed = false
-bool displayOwnerUpgrade = confirmedSignal and trendSide != 0 and not na(parentBar) and parentBar == entryBar
-bool displayAdditionalObservation = earlySignal and trendSide != 0 and not referenceStarted
-bool displayAdditionalConfirmation = confirmedSignal and not displayOwnerUpgrade
-bool displayEvent = earlySignal or confirmedSignal
-int displaySignalParentBar = earlySignal ? bar_index : confirmedSignal ? parentBar : na
-int displayOwnerParentBar = trendSide != 0 ? entryBar : na
-color displayPrimaryColor = displayOwnerUpgrade ? #00CBB1 : referenceStarted ? #D6A14A : na
-if barstate.isconfirmed
-    if referenceStarted
-        displayReferenceId += 1
-        displayReferenceStartTime := time_close
-        displayReferenceConfirmed := false
-    if displayOwnerUpgrade
-        displayReferenceConfirmed := true
-// END LAYERED DISPLAY STATE
-
-// Default view shows one reference-start label, not every raw candidate.
-// The owner's confirmation stays on its actual current bar; no backfill.
-// Hiding other candidates is a display preference, not statistical filtering.
-if barstate.isconfirmed and lowInterference and referenceStarted and showLabels
-    string displayTip = "原结构预警；不是开仓指令。\n预警收盘 " + str.tostring(close, format.mintick) + "\n" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n青色小点表示这条预警已通过第二阶段确认。\n同一参考期间的其他原信号在低干扰模式隐藏；完整显示可核对。"
-    label.new(bar_index, low, "预警\n" + str.tostring(close, format.mintick), style=label.style_label_up, color=color.new(gold, 90), textcolor=gold, size=size.small, tooltip=displayTip, force_overlay=true)
-
-// A same-bar confirmation is above the candle, separate from its warning label.
-plotshape(lowInterference and displayOwnerUpgrade, title="当前预警已确认 · 青点", style=shape.circle, location=location.abovebar, color=bull, size=size.tiny, force_overlay=true, display=display.pane)
-plotshape(lowInterference and referenceStarted and not showLabels, title="预警 · 隐藏文字时", style=shape.triangleup, location=location.belowbar, color=gold, size=size.tiny, force_overlay=true, display=display.pane)
-// Full mode also retains long-history event anchors after label garbage collection.
-plotshape(not lowInterference and (earlySignal or confirmedSignal), title="原V3事件 · 完整显示", style=shape.circle, location=location.belowbar, color=color.new(ink, 25), size=size.tiny, force_overlay=true, display=display.pane)
-
-// One main-chart label on same-bar early+confirmation. Delayed children use
-// their own current bar and price, and identify their parent age explicitly.
-if barstate.isconfirmed and showLabels and not lowInterference
-    if earlySignal
-        string headline = confirmedSignal ? "结构预警 · 已确认" : "结构预警 · 待确认"
-        string tracking = trendSide != 0 and not referenceStarted ? "\n跟踪中 · 新预警" : ""
-        string tip = "结构突破预警，不是买入建议。" + (confirmedSignal ? "本根通过第二阶段确认。" : "最晚随后3根确认，否则过期。") + "\n收盘确认：" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n六线之上：" + (aboveSix ? "是" : "否") + "；近期密集：" + (recentDense ? "是" : "否") + "\n方向效率 " + str.tostring(efficiency3, "#.##") + "；收盘位置 " + str.tostring(closePosition, "#.##") + "（质量标签）"
-        label.new(bar_index, low, headline + "\n收盘 " + str.tostring(close, format.mintick) + tracking, style=label.style_label_up, color=color.new(confirmedSignal ? bull : gold, 88), textcolor=confirmedSignal ? bull : gold, size=size.small, tooltip=tip, force_overlay=true)
-    else if confirmedSignal
-        string tip = "确认绘制在实际当前根，不回填预警根。父预警收盘 " + str.tostring(confirmationParentPrice, format.mintick) + "；冻结突破边界 " + str.tostring(confirmationParentHigh, format.mintick) + "\n确认时间：" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间"
-        label.new(bar_index, low, "结构确认 · 等待 " + str.tostring(confirmationAge) + " 根\n收盘 " + str.tostring(close, format.mintick), style=label.style_label_up, color=color.new(bull, 88), textcolor=bull, size=size.small, tooltip=tip, force_overlay=true)
+// BEGIN CONFIRMED DISPLAY
+// Every confirmation keeps its actual current bar and price. The risk display
+// starts only when flat; another confirmation never resets an active reference.
+// A continuous triangle survives label garbage collection on long histories.
+plotshape(confirmedSignal, title="确认信号", style=shape.triangleup, location=location.belowbar, color=bull, size=size.tiny, force_overlay=true, display=display.pane)
+if barstate.isconfirmed and confirmedSignal and showLabels
+    string trackingTip = referenceStarted ? "本根开启盈亏参考。" : trendSide != 0 ? "已有盈亏参考继续跟踪，本根确认不会重置原框。" : "本根未开启盈亏参考。"
+    string tip = "确认收盘：" + str.tostring(close, format.mintick) + "\n" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n" + trackingTip
+    label.new(bar_index, low - atr * 0.35, "确认 · " + str.tostring(close, format.mintick), style=label.style_label_up, color=color.new(bull, 91), textcolor=bull, size=size.small, tooltip=tip, force_overlay=true)
+// END CONFIRMED DISPLAY
 
 // BEGIN V2 RISK BOX DISPLAY (trigger changed to referenceStarted only)
 string rrGroup = "05 · 趋势盈亏框"
@@ -333,10 +295,10 @@ if barstate.isconfirmed and showRisk and rrShow
             rrDistance := rrNewDistance
             rrMaximum := 0.0
             float rrObservation = rrEntry + rrSide * 3.0 * rrDistance
-            string rrTip = "预警收盘参考，不是实际成交。初始风险冻结；3R仅为观察位，不触发止盈。绿色框扩展表示已确认最高浮盈，不代表已实现收益。"
+            string rrTip = "确认收盘参考，不是实际成交。初始风险冻结；3R仅为观察位，不触发止盈。绿色框扩展表示已确认最高浮盈，不代表已实现收益。"
             rrRiskBox := box.new(rrStartedAt, math.max(rrEntry, rrStop), rrRightTime, math.min(rrEntry, rrStop), xloc=xloc.bar_time, border_color=color.new(bear, 30), border_width=1, bgcolor=color.new(bear, 92), force_overlay=true)
             rrRewardBox := rrObservation > 0 ? box.new(rrStartedAt, math.max(rrEntry, rrObservation), rrRightTime, math.min(rrEntry, rrObservation), xloc=xloc.bar_time, border_color=color.new(bull, 30), border_width=1, bgcolor=color.new(bull, 92), force_overlay=true) : na
-            rrEntryTag := f_rrPriceTag(rrRightTime, rrEntry, "预警参考 · " + str.tostring(rrEntry, format.mintick), ink, rrTip)
+            rrEntryTag := f_rrPriceTag(rrRightTime, rrEntry, "确认参考 · " + str.tostring(rrEntry, format.mintick), ink, rrTip)
             rrStopTag := f_rrPriceTag(rrRightTime, rrStop, "初始止损 · " + str.tostring(rrStop, format.mintick), bear, rrTip)
             rrPeakTag := rrObservation > 0 ? f_rrPriceTag(rrRightTime, rrObservation, "3R 观察位 · " + str.tostring(rrObservation, format.mintick), bull, rrTip) : na
             array.push(rrRiskHistory, rrRiskBox)
@@ -362,11 +324,11 @@ if barstate.isconfirmed and showRisk and rrShow
         float rrExtentR = math.max(3.0, rrMaximum)
         float rrExtent = rrEntry + rrSide * rrExtentR * rrDistance
         string rrEnding = referenceGap ? " · 数据缺口中止" : rrEnded ? " · 本段结束" : ""
-        string rrReference = "预警收盘参考，不是实际成交。已确认峰值 " + str.tostring(rrMaximum, "#.##") + "R；当前路径 " + str.tostring(currentR, "#.##") + "R。峰值未兑现；3R为观察位，无固定止盈。"
+        string rrReference = "确认收盘参考，不是实际成交。已确认峰值 " + str.tostring(rrMaximum, "#.##") + "R；当前路径 " + str.tostring(currentR, "#.##") + "R。峰值未兑现；3R为观察位，无固定止盈。"
         box.set_right(rrRiskBox, rrEdge)
         label.set_x(rrEntryTag, rrEdge)
         label.set_x(rrStopTag, rrEdge)
-        label.set_text(rrEntryTag, "预警参考 · " + str.tostring(rrEntry, format.mintick) + rrEnding)
+        label.set_text(rrEntryTag, "确认参考 · " + str.tostring(rrEntry, format.mintick) + rrEnding)
         label.set_tooltip(rrEntryTag, rrReference)
         label.set_tooltip(rrStopTag, rrReference + " 冻结初始止损；当前保护 " + str.tostring(protection, format.mintick) + "，以原保护线为准。")
         if not na(rrRewardBox) and rrExtent > 0
@@ -388,7 +350,7 @@ float shownSb = barstate.isconfirmed ? sb : sb[1]
 hline(0, "零轴", color=color.new(ink, 38), linestyle=hline.style_solid, linewidth=1)
 plot(shownMd, "IMACD 主线", blue, 2, display=display.pane + display.data_window)
 plot(shownSb, "IMACD 信号线", #CB882A, 2, display=display.pane + display.data_window)
-plot((lowInterference ? (referenceStarted or displayOwnerUpgrade) : (earlySignal or confirmedSignal)) ? md : na, "预警 / 确认点", confirmedSignal ? bull : gold, 4, plot.style_circles, display=display.pane + display.data_window)
+plot(confirmedSignal ? md : na, "确认点", bull, 4, plot.style_circles, display=display.pane + display.data_window)
 plot(showMas ? s20 : na, "SMA20", color.new(bull, 38), 1, force_overlay=true, display=display.pane + display.data_window)
 plot(showMas ? e20 : na, "EMA20", color.new(bull, 58), 1, force_overlay=true, display=display.pane + display.data_window)
 plot(showMas ? s60 : na, "SMA60", color.new(blue, 40), 1, force_overlay=true, display=display.pane + display.data_window)
@@ -397,9 +359,9 @@ plot(showMas ? s120 : na, "SMA120", color.new(ink, 48), 1, force_overlay=true, d
 plot(showMas ? e120 : na, "EMA120", color.new(ink, 66), 1, force_overlay=true, display=display.pane + display.data_window)
 pProtect = plot(showRisk ? visibleProtection : na, "本根有效保护", trailArmed ? bull : bear, 2, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
 pInitial = plot(showRisk ? visibleInitial : na, "冻结初始止损", color.new(bear, 55), 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
-pEntry = plot(showRisk ? visibleEntry : na, "预警收盘参考", color.new(ink, 60), 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
+pEntry = plot(showRisk ? visibleEntry : na, "确认收盘参考", color.new(ink, 60), 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
 fill(pInitial, pEntry, color.new(bear, 94), title="初始风险区")
-barcolor(lowInterference ? displayPrimaryColor : (confirmedSignal ? #00CBB1 : earlySignal ? #D6A14A : na), title="预警与确认关键K线")
+barcolor(confirmedSignal ? #00CBB1 : na, title="确认关键K线")
 
 // Historical Data Window belongs to the selected bar; panel is latest close.
 plot(barstate.isconfirmed ? (earlySignal ? 1 : 0) : na, "结构预警", display=display.data_window)
@@ -415,47 +377,17 @@ plot(barstate.isconfirmed ? efficiency3 : na, "方向效率 · 仅质量标签",
 plot(barstate.isconfirmed ? closePosition : na, "收盘位置 · 仅质量标签", display=display.data_window)
 plot(barstate.isconfirmed ? (aboveSix ? 1 : 0) : na, "六线之上 · 仅质量标签", display=display.data_window)
 
-// Display metadata is not a new signal or an execution-state input.
-plot(barstate.isconfirmed and displayEvent ? close : na, "原事件实际收盘价", display=display.data_window)
-plot(barstate.isconfirmed and trendSide != 0 ? displayReferenceId : na, "本图参考编号", display=display.data_window)
-plot(barstate.isconfirmed ? displayOwnerParentBar : na, "当前参考owner原父编号", display=display.data_window)
-plot(barstate.isconfirmed and displayEvent ? displaySignalParentBar : na, "事件原父编号", display=display.data_window)
-plot(barstate.isconfirmed ? (referenceStarted ? 1 : 0) : na, "显示 · 观察起点", display=display.data_window)
-plot(barstate.isconfirmed ? (displayOwnerUpgrade ? 1 : 0) : na, "显示 · 当前参考升级", display=display.data_window)
-plot(barstate.isconfirmed ? (displayAdditionalObservation ? 1 : 0) : na, "显示 · 补充观察", display=display.data_window)
-plot(barstate.isconfirmed ? (displayAdditionalConfirmation ? 1 : 0) : na, "显示 · 补充确认", display=display.data_window)
-plot(barstate.isconfirmed and trendSide != 0 ? (displayReferenceConfirmed ? 1 : 0) : na, "显示 · 当前参考已确认", display=display.data_window)
+// Only optional diagnostics; no observation/confirmation display taxonomy.
+plot(barstate.isconfirmed and confirmedSignal ? close : na, "确认实际收盘价", display=display.data_window)
+plot(barstate.isconfirmed ? (referenceStarted ? 1 : 0) : na, "确认参考起点", display=display.data_window)
 
-var table panel = table.new(position.top_right, 2, 5, bgcolor=color.new(chart.bg_color, 8), border_width=0)
-if barstate.islast and showPanel and not lowInterference
-    bool panelReady = barstate.isconfirmed ? ready : ready[1]
-    bool panelEarly = barstate.isconfirmed ? earlySignal : earlySignal[1]
-    bool panelConfirmed = barstate.isconfirmed ? confirmedSignal : confirmedSignal[1]
-    string stateText = not panelReady ? "预热 / 连续数据不足" : panelConfirmed ? "结构已确认" : panelEarly ? "结构预警 · 待确认" : not na(parentBar) and not parentConfirmed ? "等待后续确认" : "当前无新预警"
-    table.cell(panel, 0, 0, "SPIKE V4 · 最新收盘", text_color=ink, text_size=size.small)
-    table.cell(panel, 1, 0, stateText, text_color=panelConfirmed ? bull : gold, text_size=size.small)
-    table.cell(panel, 0, 1, "三根推进 / 量比", text_color=muted, text_size=size.tiny)
-    table.cell(panel, 1, 1, str.tostring(barstate.isconfirmed ? advance3 : advance3[1], "#.##") + " ATR / " + str.tostring(barstate.isconfirmed ? volumeRatio3 : volumeRatio3[1], "#.##") + "×", text_color=ink, text_size=size.tiny)
-    table.cell(panel, 0, 2, "参考路径 / 峰值", text_color=muted, text_size=size.tiny)
-    table.cell(panel, 1, 2, na(currentR) ? "无可用参考" : str.tostring(currentR, "#.##") + "R / " + str.tostring(peakR, "#.##") + "R", text_color=ink, text_size=size.tiny)
-    table.cell(panel, 0, 3, "仅多头 · 无固定止盈", text_color=muted, text_size=size.tiny)
-    table.cell(panel, 1, 3, "预警≠买入 · 峰值未兑现", text_color=muted, text_size=size.tiny)
-    table.cell(panel, 0, 4, "市场广度", text_color=muted, text_size=size.tiny)
-    table.cell(panel, 1, 4, "本脚本未计算", text_color=muted, text_size=size.tiny)
-
-// Focused panel describes only the existing reference, not extra discoveries.
-if barstate.islast and showPanel and lowInterference
-    string displayReferenceText = trendSide != 0 ? (trailArmed ? "趋势跟踪" : displayReferenceConfirmed ? "预警已确认" : "预警未确认") : "等待预警"
+var table panel = table.new(position.top_right, 2, 2, bgcolor=color.new(chart.bg_color, 8), border_width=0)
+if barstate.islast and showPanel
+    string stateText = trendSide != 0 ? "趋势跟踪" : "当前无跟踪参考"
     table.cell(panel, 0, 0, "SPIKE V4", text_color=ink, text_size=size.small)
-    table.cell(panel, 1, 0, displayReferenceText, text_color=trendSide != 0 ? bull : muted, text_size=size.small)
-    table.cell(panel, 0, 1, "青点 = 所属确认", text_color=muted, text_size=size.tiny)
-    table.cell(panel, 1, 1, "预警不等于开仓", text_color=muted, text_size=size.tiny)
-    table.cell(panel, 0, 2, "参考 / 峰值", text_color=muted, text_size=size.tiny)
-    table.cell(panel, 1, 2, na(currentR) ? "—" : str.tostring(currentR, "#.##") + "R / " + str.tostring(peakR, "#.##") + "R", text_color=ink, text_size=size.tiny)
-    table.cell(panel, 0, 3, "其他原信号", text_color=muted, text_size=size.tiny)
-    table.cell(panel, 1, 3, "完整显示中查看", text_color=muted, text_size=size.tiny)
-    table.cell(panel, 0, 4, "", text_size=size.tiny)
-    table.cell(panel, 1, 4, "", text_size=size.tiny)
+    table.cell(panel, 1, 0, stateText, text_color=trendSide != 0 ? bull : muted, text_size=size.small)
+    table.cell(panel, 0, 1, "参考 / 峰值", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 1, na(currentR) ? "—" : str.tostring(currentR, "#.##") + "R / " + str.tostring(peakR, "#.##") + "R", text_color=ink, text_size=size.tiny)
 
 // These are local study conditions. Creating a TV alert is a separate action.
 alertcondition(earlySignal, "SPIKE 结构预警", "SPIKE 结构预警（不代表已确认） | {{exchange}}:{{ticker}} | {{interval}} | 预警收盘 {{close}}")
