@@ -86,6 +86,27 @@ li { margin: .25rem 0; }
 <tr><td>4H</td><td>60 / 32 / 28</td><td>31 / 20 / 11</td><td>2.289</td><td>2.073</td></tr>
 </tbody></table>
 <p>拒绝数是 <code>max_open_trades=1</code> 的重叠候选或边界，非策略的明确拒绝字段（该字段均为 0）。</p>
+<h2>V1 / V6 long-only：同一 Freqtrade 桥接口径</h2>
+<p>下表仅并列两个<strong>已完成的 Freqtrade 固定 stake 模拟</strong>，不把 V1 独立的净 R 或 event-sequence DD 混入钱包百分比。两套 bridge 都使用同一冻结 OKX <code>ETH-USDT-SWAP</code> OHLC、10,000 USDT dry-run wallet、1,000 USDT fixed stake、<code>max_open_trades=1</code>、1x、每边 10bp（20bp 往返）、信号收盘后的下一根 open 入场，以及“前一根收盘已知”的 active-stop。V1 的 config 是 spot-mode <strong>容器</strong>，但其 writer 明确写入同一永续 OHLC；V6 是 isolated futures，funding 固定为 0。故在 1x / funding=0 这一受限框架中，以下成交数、胜率、PF、wallet return 与 Freqtrade relative DD 可横向比较执行结果；它们仍不等同于实际现货或永续账户收益。</p>
+<table><thead><tr>
+<th>周期</th>
+<th>V1 long-only 实际成交</th>
+<th>V1 胜率</th>
+<th>V1 PF</th>
+<th>V1 wallet return</th>
+<th>V1 relative DD</th>
+<th>V6 long-only 实际成交</th>
+<th>V6 胜率</th>
+<th>V6 PF</th>
+<th>V6 wallet return</th>
+<th>V6 relative DD</th>
+</tr></thead><tbody>
+<tr><td>30m</td><td>11</td><td>63.64%</td><td>5.023</td><td>+6.338%</td><td>1.280%</td><td>127</td><td>30.71%</td><td>1.032</td><td>+0.783%</td><td>6.320%</td></tr>
+<tr><td>1H</td><td>3</td><td>0.00%</td><td>0.000</td><td>-1.929%</td><td>1.929%</td><td>73</td><td>21.92%</td><td>0.882</td><td>-2.340%</td><td>8.268%</td></tr>
+<tr><td>4H</td><td>1</td><td>100.00%</td><td>不适用（无亏损单）</td><td>+1.390%</td><td>0.000%</td><td>20</td><td>40.00%</td><td>2.073</td><td>+7.061%</td><td>3.054%</td></tr>
+</tbody></table>
+<p>V1 数来自三个已存 <code>backtest-result-2026-09-11_*.zip</code> 的 <code>FrozenV1BaselineBridge</code> report；V6 数来自 <code>freqtrade_execution_receipt.json</code> 的 <code>full_long_only_*_baseline</code> runs 和相应 gzip trade ledger。V1 30m/1H/4H 仅 11/3/1 笔，尤其 4H 的单笔 PF 不可估；V6 没有随机对照。表格只说明这两套冻结形态在同一受限执行框架下给出了不同的历史样本和结果，不能据此宣布 V1/V6 edge、参数优劣或实盘盈利。</p>
+<p>V1 另实际运行过 30m 小预算 Hyperopt（8 epochs、单 worker）来验证离散 initial/trail 空间；该空间有重复/平坦候选，未获得可靠最优。V6 没有 Hyperopt：只完成固定的单变量小网格和开发段选择、后段检查，同样没有可靠最优。两者都不应据此改动默认 Pine、监控或风险参数。</p>
 <h2>30m 单变量开发/后段检查</h2>
 <p>这是固定的单变量网格，不是 Hyperopt。30m 双向开发 baseline (2/4 ATR) 为 118 笔、PF 0.957、-1.110%；initial 1.5 为 118 笔、PF 0.970、-0.774%；trail 5 为 116 笔、PF 0.969、-0.793%。补跑同一后段 baseline：98 笔、PF 1.140、+2.350%；initial 1.5 为 PF 1.152、+2.526%，trail 5 为 PF 1.161、+2.547%。差异很小，不能构成参数优化结论。</p>
 <h2>Historical trade reviews</h2>

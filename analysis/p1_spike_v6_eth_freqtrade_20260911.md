@@ -32,6 +32,20 @@
 
 拒绝数是 `max_open_trades=1` 的重叠候选或边界，非策略的明确拒绝字段（该字段均为 0）。
 
+## V1 / V6 long-only：同一 Freqtrade 桥接口径
+
+下表仅并列两个**已完成的 Freqtrade 固定 stake 模拟**，不把 V1 独立的净 R 或 event-sequence DD 混入钱包百分比。两套 bridge 都使用同一冻结 OKX `ETH-USDT-SWAP` OHLC、10,000 USDT dry-run wallet、1,000 USDT fixed stake、`max_open_trades=1`、1x、每边 10bp（20bp 往返）、信号收盘后的下一根 open 入场，以及“前一根收盘已知”的 active-stop。V1 的 config 是 spot-mode **容器**，但其 writer 明确写入同一永续 OHLC；V6 是 isolated futures，funding 固定为 0。故在 1x / funding=0 这一受限框架中，以下成交数、胜率、PF、wallet return 与 Freqtrade relative DD 可横向比较执行结果；它们仍不等同于实际现货或永续账户收益。
+
+| 周期 | V1 long-only 实际成交 | V1 胜率 | V1 PF | V1 wallet return | V1 relative DD | V6 long-only 实际成交 | V6 胜率 | V6 PF | V6 wallet return | V6 relative DD |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 30m | 11 | 63.64% | 5.023 | +6.338% | 1.280% | 127 | 30.71% | 1.032 | +0.783% | 6.320% |
+| 1H | 3 | 0.00% | 0.000 | -1.929% | 1.929% | 73 | 21.92% | 0.882 | -2.340% | 8.268% |
+| 4H | 1 | 100.00% | 不适用（无亏损单） | +1.390% | 0.000% | 20 | 40.00% | 2.073 | +7.061% | 3.054% |
+
+V1 数来自三个已存 `backtest-result-2026-09-11_*.zip` 的 `FrozenV1BaselineBridge` report；V6 数来自 `freqtrade_execution_receipt.json` 的 `full_long_only_*_baseline` runs 和相应 gzip trade ledger。V1 30m/1H/4H 仅 11/3/1 笔，尤其 4H 的单笔 PF 不可估；V6 没有随机对照。表格只说明这两套冻结形态在同一受限执行框架下给出了不同的历史样本和结果，不能据此宣布 V1/V6 edge、参数优劣或实盘盈利。
+
+V1 另实际运行过 30m 小预算 Hyperopt（8 epochs、单 worker）来验证离散 initial/trail 空间；该空间有重复/平坦候选，未获得可靠最优。V6 没有 Hyperopt：只完成固定的单变量小网格和开发段选择、后段检查，同样没有可靠最优。两者都不应据此改动默认 Pine、监控或风险参数。
+
 ## 30m 单变量开发/后段检查
 
 这是固定的单变量网格，不是 Hyperopt。30m 双向开发 baseline (2/4 ATR) 为 118 笔、PF 0.957、-1.110%；initial 1.5 为 118 笔、PF 0.970、-0.774%；trail 5 为 116 笔、PF 0.969、-0.793%。补跑同一后段 baseline：98 笔、PF 1.140、+2.350%；initial 1.5 为 PF 1.152、+2.526%，trail 5 为 PF 1.161、+2.547%。差异很小，不能构成参数优化结论。
