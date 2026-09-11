@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>SPIKE V6 + original WVF reclaim pre-registration — 2026-09-12</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>SPIKE V6 + original WVF reclaim pre-registration — 2026-09-12</h1>
+<h2>Status</h2>
+<p>This is the implemented, unrun pre-registration. No market-data replay, economic result, random control, holdout score, model training, Pine update, or production action occurred in this step. The formal source mapping is still being frozen by the root agent, so no result table is fabricated here.</p>
+<h2>Fixed intervention</h2>
+<p>Variants A, B12 and C24 are defined in <code>experiments/active/exp-spike-v6-wvf-20260912-v1/PROJECT_PLAN.md</code> and <code>config.json</code>. B12 and C24 apply exactly one original CM Williams Vix Fix long-entry background condition. <code>ph=0.85</code> means 85% of a 50-bar rolling WVF maximum; it is not a quantile. V6 raw opposite confirmations remain exits for all variants, including when a long entry is rejected by WVF.</p>
+<p>The old Freqtrade bridge cannot supply this comparison&#x27;s exit behavior: <code>FrozenV6Bridge</code> disables exit signals and does not populate an exit trend. The new study model therefore fixes the currently requested next-open opposite V6 exit convention directly. Its stop/trail convention is the frozen five-bar extreme plus/minus 0.2 ATR, minimum 2 ATR risk, close-at-2R activation, and next-bar 4 ATR protection with 0.2% round-trip cost.</p>
+<h2>Reproduction and intended data split</h2>
+<p>The frozen pool is eight preselected OKX swaps: BTC, ETH, SOL, XRP, DOGE, PEPE, SOPH and USELESS. It reads the existing 30-minute normalized inputs from the previous two-year study, aggregates complete 1H/4H bars, and takes each instrument tick from the frozen source catalog. Evaluation is 2024-09-10 through 2026-09-10 exclusive; development ends 2025-09-10 and later rows are validation. The realized history start may be later for SOPH/USELESS and will be reported, not backfilled. It is a fixed mainstream plus owner-interest altcoin pool, not an all-market claim.</p>
+<p>Before any formal run, root must commit this builder and record input hashes and per-symbol ticks in the experiment receipt. Then run:</p>
+<pre><code>
+pytest -q tests/test_spike_v6_wvf_study.py
+python3 scripts/md_to_html.py analysis/p1_spike_v6_wvf_20260912.md --out-dir analysis/html
+</code></pre>
+<p>The formal evaluator will use time splits only. Rows at or after 2026-05-04, if selected, are this configuration&#x27;s authorized research evaluation #1 and must be reported as previously readable research history, not a new blind holdout. Candidate counts, positive rate, time ranges and validation counts are pending the frozen mapping.</p>
+<h2>Results and controls</h2>
+<p>There are no results yet. When run, each variant will include all raw signals and actual single-position trades by coin/period, split and side; win rate, profit factor, net R, gross/net return, 1x-notional maximum drawdown, baseline 10R retention/miss, MFE&gt;=10R, failure exclusion and deleted winners. A matched random-entry null will use 99 deterministic seeds and match coin, time block and causal volatility bucket under identical stop/cost execution. AUC, permutation p and top-decile performance do not apply: no prediction score or ranking is fitted in this filter study.</p>
+<h2>Risk and honest statement</h2>
+<p>Strict filtering can simply reduce activity, costs, and tail winners; a better selected trade ledger would not prove a better portfolio without the complete raw signal ledger, common unfiltered exit policy, single-position replay and matched controls. C24 is not a blind choice opportunity after B12; it remains a named sensitivity result. No short WVF semantic interpretation is made.</p>
+<h2>Next decision</h2>
+<p>Root agent must provide the frozen source/data mapping and commit reference for the formal single-process replay. No strategy conclusion or promotion is available from this pre-registration.</p>
+</body>
+</html>

@@ -1,0 +1,36 @@
+{
+  "schema": "spike-v6-wvf-study-v1",
+  "status": "pre_registered_not_run",
+  "source": {
+    "v6_pine": "yoyo/evaluation/pine/spike_burst_v6.pine",
+    "v6_oracle": "yoyo/evaluation/spike_burst_v6_structure.py",
+    "data_root": "experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/data/normalized/okx",
+    "symbols": ["BTC", "ETH", "SOL", "XRP", "DOGE", "PEPE", "SOPH", "USELESS"],
+    "base_cadence_minutes": 30,
+    "aggregate_minutes": [30, 60, 240],
+    "frozen_sha256": {
+      "v6_pine": "b3147f1357dc210a7b19d839a9f72163e29f1ae4e58cc299fa942c38c402fe07",
+      "v6_oracle": "e84690c02e7b03291cc3037eab37ac495cc2ece79326e24411cfa72aa1214d4b",
+      "old_eth_freqtrade_bridge": "da07b109108820cd324434427dd674c74b652c9c82400d01f2cfb48aaf00150e"
+    }
+  },
+  "variants": {
+    "A": "all original V6 signals",
+    "B12": "long entries require original-WVF strict reclaim in preceding 12 closed bars; shorts unfiltered",
+    "C24": "same fixed long reclaim rule with preceding 24 closed bars, reported as sensitivity only"
+  },
+  "wvf": {"pd": 22, "bbl": 20, "mult": 2.0, "lb": 50, "ph": 0.85, "std_ddof": 0},
+  "execution": {
+    "entry": "next observed open after closed V6 signal",
+    "initial_stop": "signal-bar last 5 extreme plus/minus 0.2 ATR, at least 2 ATR from signal close",
+    "trail": "close >= 2R arms; 4 ATR ratchet is active next bar",
+    "opposite_exit": "unfiltered opposite V6 confirmation exits at next tradable open",
+    "same_direction": "does not reset existing position",
+    "round_trip_cost": 0.002,
+    "account": "one position per coin/period; independent 1x-notional sequential account"
+  },
+  "splits": {"type": "time", "evaluate_start": "2024-09-10T00:00:00Z", "evaluate_end_exclusive": "2026-09-10T00:00:00Z", "development_end_exclusive": "2025-09-10T00:00:00Z", "validation_start": "2025-09-10T00:00:00Z", "post_2026_05_04": "authorized research evaluation #1 if read; previously researched, not blind holdout"},
+  "controls": {"design": "same coin x time block x causal volatility bucket random entries, same stop/cost", "seeds": 99},
+  "training_eligible": false,
+  "production_eligible": false
+}
