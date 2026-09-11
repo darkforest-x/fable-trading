@@ -48,6 +48,9 @@
   const modelProtocol = () => state.status?.runtime?.signal_kind === "yolo_confirmed" && typeof state.status?.protocol === "string";
   const isConfirmed = (item) => item?.confirmation === "yolo" || item?.confirmation === "raw_yolo";
   const isCandidate = (item) => item?.confirmation === "raw" || item?.confirmation === "raw_yolo";
+  // The monitor's current raw event kind is SPIKE V1.  Keep tv_start only for
+  // already-persisted legacy chart rows; it is not the current backend kind.
+  const isV1StartMarker = (event) => event?.kind === "spike_burst_v1" || event?.kind === "tv_start";
   const isDirectRecord = (item) => isCandidate(item) && TV_INTERVALS.has(String(item.timeframe));
   const sourceName = (item) => item?.source === "replay" ? "历史回放" : "实时";
   const milliseconds = (value) => typeof value === "string" ? Date.parse(value) : Number(value);
@@ -787,8 +790,8 @@
     });
     const eventList = [...(Array.isArray(state.chart.events) ? state.chart.events : [])];
     if (isCandidate(state.selected)) eventList.push(state.selected);
-    if (isConfirmed(state.selected) && state.selected.indicator) eventList.push({ ...state.selected.indicator, kind: "tv_start" });
-    eventList.filter((event) => event.kind === "tv_start").forEach((event) => breakouts.set(`${event.bar_open_ms ?? event.t}|${event.side}`, event));
+    if (isConfirmed(state.selected) && state.selected.indicator) eventList.push(state.selected.indicator);
+    eventList.filter(isV1StartMarker).forEach((event) => breakouts.set(`${event.bar_open_ms ?? event.t}|${event.side}`, event));
     Array.from(breakouts.values()).slice(-50).forEach((event) => {
       const index = candles.findIndex((bar) => Number(bar.t) === Number(event.bar_open_ms ?? event.t));
       if (index < 0 || !["long", "short"].includes(event.side)) return;

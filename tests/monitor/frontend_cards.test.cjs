@@ -234,6 +234,44 @@ test("initial SL SVG begins after the explicit original close and labels outside
   assert.doesNotMatch(harness.svg(), /chart-risk-line|chart-risk-label/);
 });
 
+test("chart markers accept the current SPIKE V1 raw kind and retain the YOLO parent arrow", () => {
+  const harness = chartHarness();
+  const raw = {
+    id: "raw-spike-v1", kind: "spike_burst_v1", source: "live", confirmation: "raw", side: "long",
+    bar_open_ms: 60_000, bar_close_ms: 120_000, price: 100, near_zero_bars: 12,
+  };
+  const markerX = (svg) => Number(svg.match(/<g data-event-kind="tv_start"[^>]*>[\s\S]*?<path d="M([^,]+),/)?.[1]);
+
+  // A live API chart stores the real current kind.  It must render even when
+  // no card has been selected, so this cannot rely on candidate fallback.
+  harness.state.chart = { source: "live", candles: chartBars(), events: [raw] };
+  harness.state.selected = null;
+  harness.renderChart();
+  assert.match(harness.svg(), /data-event-kind="tv_start" data-side="long"/,
+    "the current raw SPIKE V1 chart event must render a launch arrow without a selected candidate");
+  const rawMarkerX = markerX(harness.svg());
+  assert.ok(Number.isFinite(rawMarkerX));
+
+  harness.state.selected = { ...raw, id: "legacy-tv-start", kind: "tv_start" };
+  harness.state.chart = { source: "live", candles: chartBars(), events: [] };
+  harness.renderChart();
+  assert.match(harness.svg(), /data-event-kind="tv_start" data-side="long"/,
+    "persisted legacy chart rows must remain visible");
+
+  harness.state.selected = {
+    id: "yolo-confirmation", kind: "yolo_confirmed", source: "live", confirmation: "yolo", side: "long",
+    bar_open_ms: 120_000, bar_close_ms: 180_000, price: 101, indicator: raw, model: {},
+  };
+  harness.renderChart();
+  assert.match(harness.svg(), /data-event-kind="tv_start" data-side="long"/,
+    "a YOLO confirmation must render its original raw V1 arrow at the parent time");
+  assert.equal(markerX(harness.svg()), rawMarkerX,
+    "the YOLO parent arrow must stay on the original raw bar, not the confirmation bar");
+  assert.doesNotMatch(app, /indicator, kind: "tv_start"/,
+    "the compatibility renderer must not rewrite the parent event's backend kind");
+  assert.match(app, /const isV1StartMarker = \(event\) => event\?\.kind === "spike_burst_v1" \|\| event\?\.kind === "tv_start"/);
+});
+
 
 test("live chart translates the display timeframe to the monitor API timeframe", () => {
   assert.match(app, /const chartTimeframe = apiTimeframe\(item\.timeframe\)/);
