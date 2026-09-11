@@ -3,6 +3,7 @@
 from __future__ import annotations
 import argparse
 import json
+import math
 import shutil
 from pathlib import Path
 
@@ -26,8 +27,15 @@ def main() -> None:
         if args.data_dir.resolve() not in source.parents or not source.is_file():
             raise SystemExit(f"missing controlled chart data: {chart_path}")
         chart = json.loads(source.read_text())
-        if not isinstance(chart.get("candles"), list) or not chart["candles"]:
+        candles = chart.get("candles")
+        if not isinstance(candles, list) or not candles:
             raise SystemExit(f"chart needs nonempty candles: {chart_path}")
+        for candle in candles:
+            if not isinstance(candle, dict) or not all(
+                value is not None and not isinstance(value, bool) and math.isfinite(float(value))
+                for value in (candle.get("t"), candle.get("o"), candle.get("h"), candle.get("l"), candle.get("c"))
+            ):
+                raise SystemExit(f"chart needs finite OHLC timestamps: {chart_path}")
     args.out_dir.mkdir(parents=True, exist_ok=True)
     for name in ("index.html", "app.js", "styles.css"):
         shutil.copy2(SOURCE / name, args.out_dir / name)

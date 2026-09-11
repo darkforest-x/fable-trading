@@ -43,3 +43,14 @@ def test_review_builder_refuses_a_manifest_with_a_missing_chart(tmp_path: Path) 
     completed = subprocess.run([sys.executable, str(BUILD), "--data-dir", str(data), "--out-dir", str(tmp_path / "site")], text=True, capture_output=True)
     assert completed.returncode != 0
     assert "missing controlled chart data" in completed.stderr
+
+
+def test_review_builder_refuses_null_ohlc_that_would_render_as_a_fake_zero(tmp_path: Path) -> None:
+    data = make_data(tmp_path)
+    first_chart = data / "charts/001_okx.json"
+    payload = json.loads(first_chart.read_text())
+    payload["candles"][0]["c"] = None
+    first_chart.write_text(json.dumps(payload))
+    completed = subprocess.run([sys.executable, str(BUILD), "--data-dir", str(data), "--out-dir", str(tmp_path / "site")], text=True, capture_output=True)
+    assert completed.returncode != 0
+    assert "finite OHLC" in completed.stderr

@@ -9,8 +9,9 @@
     datetime: new Intl.DateTimeFormat("zh-CN", { timeZone: "Asia/Shanghai", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }),
     date: new Intl.DateTimeFormat("zh-CN", { timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit" }),
   };
-  const fmtTime = (ms) => Number.isFinite(Number(ms)) ? `${formatters.datetime.format(new Date(Number(ms)))} BJT` : "—";
-  const fmtPrice = (price) => Number.isFinite(Number(price)) ? Number(price).toLocaleString("en-US", { maximumFractionDigits: 10 }) : "—";
+  const presentNumber = (value) => value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value));
+  const fmtTime = (ms) => presentNumber(ms) ? `${formatters.datetime.format(new Date(Number(ms)))} BJT` : "—";
+  const fmtPrice = (price) => presentNumber(price) ? Number(price).toLocaleString("en-US", { maximumFractionDigits: 10 }) : "—";
   const seconds = (ms) => Math.floor(Number(ms) / 1000);
   const readNotes = () => { try { return JSON.parse(localStorage.getItem(NOTES_KEY) || "{}"); } catch { return {}; } };
   const writeNotes = (notes) => localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
@@ -40,11 +41,27 @@
   }
   function marker(time, position, color, shape, text) { return { time: seconds(time), position, color, shape, text }; }
   function signalGuide(chart, container, signalMs) {
-    if (!Number.isFinite(signalMs)) return undefined;
+    if (!presentNumber(signalMs)) return undefined;
     const guide = document.createElement("div"); guide.className = "signal-guide"; guide.setAttribute("aria-hidden", "true"); container.appendChild(guide);
     const position = () => { const x = chart.timeScale().timeToCoordinate(seconds(signalMs)); guide.hidden = x === null; if (x !== null) guide.style.transform = `translateX(${x}px)`; };
     chart.timeScale().subscribeVisibleLogicalRangeChange(position); requestAnimationFrame(position);
     return () => guide.remove();
+  }
+  function initialStopGuide(chart, series, container, startMs, stop, endMs) {
+    if (![startMs, stop].every(presentNumber)) return undefined;
+    const line = document.createElement("div"), label = document.createElement("span");
+    line.className = "initial-stop-guide"; label.textContent = `初始 SL ${fmtPrice(stop)}`; line.appendChild(label); container.appendChild(line);
+    const position = () => {
+      const left = chart.timeScale().timeToCoordinate(seconds(startMs));
+      const end = presentNumber(endMs) ? chart.timeScale().timeToCoordinate(seconds(endMs)) : null;
+      const y = series.priceToCoordinate(Number(stop));
+      if (left === null || y === null || (end !== null && end <= left)) { line.hidden = true; return; }
+      const right = end === null ? container.clientWidth - 54 : end;
+      if (right <= left) { line.hidden = true; return; }
+      line.hidden = false; line.style.left = `${left}px`; line.style.top = `${y}px`; line.style.width = `${right - left}px`;
+    };
+    chart.timeScale().subscribeVisibleLogicalRangeChange(position); chart.subscribeCrosshairMove(position); requestAnimationFrame(position);
+    return () => line.remove();
   }
   function fact(label, value) { return `<div class="fact"><span>${label}</span><strong>${value}</strong></div>`; }
   function setTheme(theme) { state.theme = theme; document.documentElement.dataset.theme = theme; localStorage.setItem("spike-review-theme", theme); $("theme-toggle").textContent = theme === "dark" ? "浅色" : "深色"; }
@@ -71,8 +88,8 @@
   function setNotes(record) { $("notes").value = record ? notesFor(record) : ""; $("notes-status").textContent = record ? "仅保存于此浏览器。" : ""; }
   function renderFacts(record) {
     if (!record) { $("facts").innerHTML = ""; return; }
-    const s = signal(record), entry = record.entry || null, exit = record.exit || null;
-    const facts = [fact("信号收盘", `${fmtPrice(s.price || s.signal_close)} · ${fmtTime(s.time_ms || s.bar_close_ms)}`), fact("初始 SL 参考（非动态）", fmtPrice(s.initial_stop)), fact("账本实际次开盘", entry ? `${fmtPrice(entry.price)} · ${fmtTime(entry.time_ms)}` : (record.live_status || "无账本成交记录")), fact("回测退出", exit ? `${exit.reason || "—"} · ${fmtPrice(exit.price)} · ${fmtTime(exit.time_ms)}` : (record.live_status || "无账本退出记录")), fact("数据范围", record.coverage || record.coverage_status || "见来源记录"), fact("来源", record.provenance?.source_sha256 ? String(record.provenance.source_sha256).slice(0, 12) + "…" : (record.source_sha256 ? String(record.source_sha256).slice(0, 12) + "…" : "—"))];
+    const s = signal(record), entry = record.entry || null, exit = record.exit || null, initialStop = record.initial_stop ?? s.initial_stop;
+    const facts = [fact("信号收盘", `${fmtPrice(s.price || s.signal_close)} · ${fmtTime(record.signal_close_ms ?? s.time_ms ?? s.bar_close_ms)}`), fact("初始 SL 参考（非动态）", fmtPrice(initialStop)), fact("账本实际次开盘", entry ? `${fmtPrice(entry.price)} · ${fmtTime(entry.time_ms)}` : (record.live_status || "无账本成交记录")), fact("回测退出", exit ? `${exit.reason || "—"} · ${fmtPrice(exit.price)} · ${fmtTime(exit.time_ms)}` : (record.live_status || "无账本退出记录")), fact("数据范围", record.coverage || record.coverage_status || "见来源记录"), fact("来源", record.provenance?.source_sha256 ? String(record.provenance.source_sha256).slice(0, 12) + "…" : (record.source_sha256 ? String(record.source_sha256).slice(0, 12) + "…" : "—"))];
     $("facts").innerHTML = facts.join("");
   }
   function renderRecordHeader(record) {
@@ -88,7 +105,7 @@
     const rows = Array.isArray(payload.candles) ? payload.candles : [];
     if (!rows.length) throw new Error("该记录没有可绘制的冻结 OHLC");
     destroyCharts();
-    const s = { ...signal(record), ...(payload.signal || {}) }, entry = payload.entry ?? record.entry, exit = payload.exit ?? record.exit;
+    const s = { ...signal(record), ...(payload.signal || {}) }, entry = payload.entry ?? record.entry, exit = payload.exit ?? record.exit, initialStop = payload.initial_stop ?? record.initial_stop ?? s.initial_stop;
     const priceContainer = $("price-chart"), mdContainer = $("momentum-chart"), volumeContainer = $("volume-chart");
     const priceChart = LightweightCharts.createChart(priceContainer, chartOptions(priceContainer, true));
     const mdChart = LightweightCharts.createChart(mdContainer, chartOptions(mdContainer, true));
@@ -97,18 +114,18 @@
     const priceSeries = candleSeries(priceChart); priceSeries.setData(toCandles(rows));
     [["sma20", "#60a5fa"], ["ema20", "#93c5fd"], ["sma60", "#f5c85b"], ["ema60", "#f9df98"], ["sma120", "#a78bfa"], ["ema120", "#c4b5fd"]].forEach(([key, color]) => line(priceChart, color).setData(rows.filter((row) => Number.isFinite(Number(row[key]))).map((row) => ({ time: seconds(row.t), value: Number(row[key]) }))));
     const markers = [];
-    const signalMs = Number(s.time_ms || s.bar_close_ms);
-    if (Number.isFinite(signalMs)) markers.push(marker(signalMs, "belowBar", "#eabf5f", "arrowUp", "V1 信号收盘"));
-    if (entry?.time_ms && Number.isFinite(Number(entry.price))) markers.push(marker(entry.time_ms, "belowBar", "#62d7ab", "circle", "账本实际 next open"));
-    if (exit?.time_ms && Number.isFinite(Number(exit.price))) markers.push(marker(exit.time_ms, "aboveBar", "#f2777a", "arrowDown", `退出 · ${exit.reason || "—"}`));
+    const signalMs = s.time_ms ?? record.signal_close_ms ?? s.bar_close_ms;
+    if (presentNumber(signalMs)) markers.push(marker(signalMs, "belowBar", "#eabf5f", "arrowUp", "V1 信号收盘"));
+    if (presentNumber(entry?.time_ms) && presentNumber(entry?.price)) markers.push(marker(entry.time_ms, "belowBar", "#62d7ab", "circle", "账本实际 next open"));
+    if (presentNumber(exit?.time_ms) && presentNumber(exit?.price)) markers.push(marker(exit.time_ms, "aboveBar", "#f2777a", "arrowDown", `退出 · ${exit.reason || "—"}`));
     priceSeries.setMarkers(markers.sort((a, b) => a.time - b.time));
-    state.charts[0].cleanup = signalGuide(priceChart, priceContainer, signalMs);
-    if (Number.isFinite(Number(s.initial_stop))) priceSeries.createPriceLine({ price: Number(s.initial_stop), color: "#eabf5f", lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dashed, axisLabelVisible: true, title: "初始 SL" });
-    if (Number.isFinite(signalMs)) line(priceChart, "#eabf5f", 1).setData([{ time: seconds(signalMs), value: Number(rows.find((row) => Number(row.t) === signalMs)?.c ?? s.price ?? s.signal_close) }]);
-    const md = line(mdChart, "#63b3ed", 2); md.setData(rows.filter((row) => Number.isFinite(Number(row.md))).map((row) => ({ time: seconds(row.t), value: Number(row.md) })));
-    const sb = line(mdChart, "#f5c85b", 2); sb.setData(rows.filter((row) => Number.isFinite(Number(row.sb))).map((row) => ({ time: seconds(row.t), value: Number(row.sb) })));
+    state.charts[0].cleanup = () => { state.charts[0].stopCleanup?.(); state.charts[0].signalCleanup?.(); };
+    state.charts[0].stopCleanup = signalGuide(priceChart, priceContainer, signalMs);
+    state.charts[0].signalCleanup = initialStopGuide(priceChart, priceSeries, priceContainer, signalMs, initialStop, exit?.time_ms);
+    const md = line(mdChart, "#63b3ed", 2); md.setData(rows.filter((row) => presentNumber(row.md)).map((row) => ({ time: seconds(row.t), value: Number(row.md) })));
+    const sb = line(mdChart, "#f5c85b", 2); sb.setData(rows.filter((row) => presentNumber(row.sb)).map((row) => ({ time: seconds(row.t), value: Number(row.sb) })));
     mdChart.addLineSeries({ color: "#8292aa", lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dotted, crosshairMarkerVisible: false, lastValueVisible: false, priceLineVisible: false }).setData([{ time: seconds(rows[0].t), value: 0 }, { time: seconds(rows.at(-1).t), value: 0 }]);
-    volumeChart.addHistogramSeries({ color: "#5b8def", priceFormat: { type: "volume" }, priceScaleId: "" }).setData(rows.filter((row) => Number.isFinite(Number(row.v))).map((row) => ({ time: seconds(row.t), value: Number(row.v), color: Number(row.c) >= Number(row.o) ? "#3fbf8f99" : "#e6636d99" })));
+    volumeChart.addHistogramSeries({ color: "#5b8def", priceFormat: { type: "volume" }, priceScaleId: "" }).setData(rows.filter((row) => presentNumber(row.v)).map((row) => ({ time: seconds(row.t), value: Number(row.v), color: Number(row.c) >= Number(row.o) ? "#3fbf8f99" : "#e6636d99" })));
     syncCharts([priceChart, mdChart, volumeChart]);
     [priceChart, mdChart, volumeChart].forEach((chart) => chart.timeScale().fitContent());
     state.chartControls = { rows, charts: [priceChart, mdChart, volumeChart], signalMs };
@@ -116,7 +133,7 @@
   function fit(mode) {
     const control = state.chartControls; if (!control) return;
     if (mode === "global") return control.charts.forEach((chart) => chart.timeScale().fitContent());
-    const index = control.rows.findIndex((row) => Number(row.t) === control.signalMs);
+    const index = control.rows.findIndex((row) => Number(row.t) === Number(control.signalMs));
     if (index < 0) return;
     const from = Math.max(0, index - 100), to = Math.min(control.rows.length - 1, index + 144);
     control.charts.forEach((chart) => chart.timeScale().setVisibleLogicalRange({ from, to }));
