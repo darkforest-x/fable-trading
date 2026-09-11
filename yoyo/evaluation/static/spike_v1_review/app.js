@@ -4,7 +4,7 @@
   const DATA_ROOT = "data/";
   const NOTES_KEY = "spike-v1-okx-133-review-notes-v1";
   const $ = (id) => document.getElementById(id);
-  const state = { manifest: null, records: [], visible: [], selected: null, charts: [], theme: localStorage.getItem("spike-review-theme") || "dark", syncing: false };
+  const state = { manifest: null, records: [], visible: [], selected: null, selectionEpoch: 0, chartAbort: null, charts: [], theme: localStorage.getItem("spike-review-theme") || "dark", syncing: false };
   const formatters = {
     datetime: new Intl.DateTimeFormat("zh-CN", { timeZone: "Asia/Shanghai", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }),
     date: new Intl.DateTimeFormat("zh-CN", { timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit" }),
@@ -152,17 +152,22 @@
     control.charts.forEach((chart) => chart.timeScale().setVisibleLogicalRange({ from, to }));
   }
   async function selectRecord(record) {
-    state.selected = record; renderList(); renderRecordHeader(record); renderFacts(record); setNotes(record); destroyCharts(); $("charts").hidden = true;
+    const requestEpoch = ++state.selectionEpoch, requestId = recordId(record || {}), charts = $("charts");
+    state.chartAbort?.abort(); state.chartAbort = null;
+    state.selected = record; renderList(); renderRecordHeader(record); renderFacts(record); setNotes(record); destroyCharts(); charts.hidden = true; delete charts.dataset.renderedRecordId;
     if (!record) return;
     if (unavailable(record)) { $("chart-status").textContent = `图表不可用：${record.error || "冻结 OHLC 证据时间线无效"}。不使用当前行情或其他交易所替代。`; return; }
+    const controller = new AbortController(); state.chartAbort = controller;
+    const isCurrent = () => SpikeV1ReviewSelection.isCurrentSelection({ requestEpoch, activeEpoch: state.selectionEpoch, requestId, activeId: recordId(state.selected || {}) });
     $("chart-status").textContent = "正在加载该笔冻结 OHLC…";
     try {
-      const response = await fetch(`${DATA_ROOT}${chartPath(record)}`, { cache: "no-store" });
+      const response = await fetch(`${DATA_ROOT}${chartPath(record)}`, { cache: "no-store", signal: controller.signal });
       if (!response.ok) throw new Error(`图表数据 HTTP ${response.status}`);
       const payload = await response.json();
-      if (recordId(record) !== recordId(state.selected || {})) return;
-      renderFacts({ ...record, ...payload }); draw(record, payload); $("charts").hidden = false; $("chart-status").textContent = "十字光标、缩放和拖动均只作用于本地历史数据。"; fit("signal");
-    } catch (error) { if (recordId(record) === recordId(state.selected || {})) $("chart-status").textContent = `图表不可用：${error.message}`; }
+      if (!isCurrent()) return;
+      renderFacts({ ...record, ...payload }); draw(record, payload); if (!isCurrent()) return;
+      charts.hidden = false; charts.dataset.renderedRecordId = requestId; $("chart-status").textContent = "十字光标、缩放和拖动均只作用于本地历史数据。"; fit("signal");
+    } catch (error) { if (isCurrent() && error.name !== "AbortError") $("chart-status").textContent = `图表不可用：${error.message}`; }
   }
   function move(delta) { const index = state.visible.findIndex((record) => recordId(record) === recordId(state.selected || {})); selectRecord(state.visible[Math.max(0, Math.min(state.visible.length - 1, index + delta))]); }
   function exportNotes() { const blob = new Blob([JSON.stringify(readNotes(), null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "spike-v1-okx-133-review-notes.json"; a.click(); URL.revokeObjectURL(url); }

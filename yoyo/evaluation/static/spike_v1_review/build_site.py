@@ -45,7 +45,7 @@ def main() -> None:
         available += 1
     if available + missing != 133: raise SystemExit("invalid review record accounting")
     args.out_dir.mkdir(parents=True, exist_ok=True)
-    for name in ("index.html", "app.js", "timing.js", "styles.css"):
+    for name in ("index.html", "app.js", "timing.js", "selection.js", "styles.css"):
         shutil.copy2(SOURCE / name, args.out_dir / name)
     shutil.copytree(SOURCE / "vendor", args.out_dir / "vendor", dirs_exist_ok=True)
     shutil.copytree(args.data_dir, args.out_dir / "data", dirs_exist_ok=True)

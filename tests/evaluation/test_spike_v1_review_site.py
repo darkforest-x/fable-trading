@@ -31,7 +31,7 @@ def test_review_builder_copies_only_a_complete_133_record_contract(tmp_path: Pat
     assert len(list((out / "data/charts").glob("*.json"))) == 133
     assert "Lightweight Charts" in (out / "index.html").read_text()
     assert "addCandlestickSeries" in (out / "app.js").read_text()
-    assert (out / "timing.js").is_file()
+    assert (out / "timing.js").is_file() and (out / "selection.js").is_file()
     assert "resolveChartTiming" in (out / "timing.js").read_text()
     assert "setMarkers" in (out / "app.js").read_text()
     assert "tickMarkFormatter" in (out / "app.js").read_text() and "timeFormatter" in (out / "app.js").read_text()
