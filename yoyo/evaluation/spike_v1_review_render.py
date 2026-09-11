@@ -28,7 +28,7 @@ EXPERIMENT = ROOT / "experiments" / "active" / "exp-spike-v1-okx-133-review-2026
 DATA = EXPERIMENT / "data"
 DEFAULT_OUTPUT = EXPERIMENT / "rendered"
 DEFAULT_SITE_URL = "http://localhost:8767/"
-VIEWPORT = (1600, 1000)
+VIEWPORT = (1600, 1400)
 SAMPLE_SEQUENCES = (1, 46, 133)
 PWCLI = Path.home() / ".codex" / "skills" / "playwright" / "scripts" / "playwright_cli.sh"
 
@@ -125,8 +125,7 @@ def inspect_record(browser: PlaywrightCli, record_id: str) -> dict[str, Any]:
       await page.waitForTimeout(150);
       return await page.evaluate((wanted) => {{
         const recordButton = document.querySelector(`button[data-record="${{wanted}}"]`);
-        const canvases = [...document.querySelectorAll('#price-chart canvas, #momentum-chart canvas, #volume-chart canvas')];
-        const canvas = canvases.map((node) => {{
+        const inspectCanvas = (node) => {{
           let nonzero = false, error = null;
           try {{
             const pixels = node.getContext('2d').getImageData(0, 0, node.width, node.height).data;
@@ -135,6 +134,12 @@ def inspect_record(browser: PlaywrightCli, record_id: str) -> dict[str, Any]:
             }}
           }} catch (exception) {{ error = String(exception); }}
           return {{width: node.width, height: node.height, nonzero, error}};
+        }};
+        const panels = ['price-chart', 'momentum-chart', 'volume-chart'].map((id) => {{
+          const canvas = [...document.querySelectorAll(`#${{id}} canvas`)].map(inspectCanvas);
+          // Lightweight Charts intentionally keeps transparent crosshair/axis overlay canvases.
+          // A panel is drawn when at least one substantive canvas has real pixels.
+          return {{id, canvas, primary_nonzero: canvas.some((item) => item.width * item.height >= 4096 && item.nonzero)}};
         }});
         const read = (selector) => document.querySelector(selector)?.textContent?.trim() || null;
         return {{
@@ -142,7 +147,7 @@ def inspect_record(browser: PlaywrightCli, record_id: str) -> dict[str, Any]:
           selected_active: Boolean(recordButton?.classList.contains('active')),
           chart_status: read('#chart-status'), charts_visible: !document.querySelector('#charts')?.hidden,
           title: read('#record-title'), sequence: read('#record-sequence'), facts: read('#facts'),
-          canvas, signal_guide_count: document.querySelectorAll('#price-chart .signal-guide:not([hidden])').length,
+          panels, signal_guide_count: document.querySelectorAll('#price-chart .signal-guide:not([hidden])').length,
           initial_stop_guide_count: document.querySelectorAll('#price-chart .initial-stop-guide:not([hidden])').length,
           errors: window.__spikeReviewRenderErrors || []
         }};
@@ -176,8 +181,8 @@ def render_records(browser: PlaywrightCli, records: list[dict[str, Any]], output
                 size = list(image.size)
             ready = (browser_state["selected_id"] == record["id"] and browser_state["selected_active"]
                      and browser_state["charts_visible"] and "十字光标" in (browser_state["chart_status"] or "")
-                     and len(browser_state["canvas"]) >= 3 and all(item["nonzero"] for item in browser_state["canvas"])
-                     and size[0] >= VIEWPORT[0] and size[1] >= VIEWPORT[1])
+                     and len(browser_state["panels"]) == 3 and all(item["primary_nonzero"] for item in browser_state["panels"])
+                     and not browser_state["errors"] and size[0] >= VIEWPORT[0] and size[1] >= VIEWPORT[1])
             state = "rendered" if ready else "failed_validation"
             error = None if ready else "browser_render_validation_failed"
         except (RenderError, subprocess.SubprocessError, OSError) as exc:
