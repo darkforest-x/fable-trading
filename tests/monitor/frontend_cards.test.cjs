@@ -37,7 +37,7 @@ function refreshHarness(fetchImpl) {
   const instrumented = `${app.slice(0, cutoff)}
   renderErrors = renderStatus = renderSignals = renderWatch = renderDetail = () => {};
   chooseSignal = clearSelectedSignal = () => {};
-  globalThis.__refreshHarness = { state, refresh, queueRefresh };
+  globalThis.__refreshHarness = { state, refresh, queueRefresh, loadEarlierRawSignals };
 })();`;
   const classList = { add() {}, remove() {}, toggle() {} };
   const element = { disabled: false, classList, textContent: "", innerHTML: "", style: {}, setAttribute() {}, removeAttribute() {} };
@@ -291,8 +291,8 @@ test("source or timeframe switches discard prior API results and queue the curre
   assert.match(app, /refreshQueued: null, signalQueryRevision: 0/);
   assert.match(app, /function invalidateSignalQuery\(\).*state\.signals = \[\];.*state\.directSignals = \[\];.*clearSelectedSignal\(\);/s);
   assert.match(app, /if \(state\.syncing\) \{ queueRefresh\(trigger\); return; \}/);
-  assert.match(app, /const queryRevision = state\.signalQueryRevision;.*const querySource = state\.signalSource;.*const queryTimeframe = state\.timeframe;/s);
-  assert.match(app, /if \(queryRevision !== state\.signalQueryRevision \|\| querySource !== state\.signalSource \|\| queryTimeframe !== state\.timeframe\) return;/);
+  assert.match(app, /const queryRevision = state\.signalQueryRevision;.*const querySource = signalQuerySource\(\);.*const queryView = state\.view;.*const queryTimeframe = state\.timeframe;/s);
+  assert.match(app, /if \(queryRevision !== state\.signalQueryRevision \|\| querySource !== signalQuerySource\(\) \|\| queryView !== state\.view \|\| queryTimeframe !== state\.timeframe\) return;/);
   assert.match(app, /if \(state\.refreshQueued\) \{\s*const queuedTrigger = state\.refreshQueued;\s*state\.refreshQueued = null;\s*refresh\(queuedTrigger\);/s);
   assert.match(app, /\$\("chart-container"\)\.removeAttribute\("aria-label"\)/);
   assert.match(app, /正在加载 \$\{sourceName\(item\)\} \$\{shortSymbol\(item\.symbol\)\}/);
@@ -427,10 +427,73 @@ test("refresh execution polls loaded replay status only and retains manual/live/
 });
 
 
-test("historical raw paging does not fetch hidden YOLO families", () => {
+test("replay raw paging does not fetch hidden YOLO families", () => {
   assert.match(app, /const queryScope = state\.signalScope/);
-  assert.match(app, /else if \(shouldRefreshSignalList\(trigger\) && queryScope === "direct"\) \{[\s\S]*confirmation=raw\$\{timeframe\}[\s\S]*if \(querySource === "live"\) requests\.push\(\{ key: "rawYoloSignals"/);
+  assert.match(app, /else if \(shouldRefreshSignalList\(trigger\) && queryScope === "direct"\) \{[\s\S]*confirmation=raw\$\{timeframe\}[\s\S]*if \(\["live", "warmup"\]\.includes\(querySource\)\) requests\.push\(\{ key: "rawYoloSignals"/);
   assert.match(app, /if \(shouldRefreshSignalList\(trigger\) && queryScope === "confirmed"\) \{[\s\S]*confirmation=yolo\$\{timeframe\}/);
   assert.match(app, /const results = await Promise\.allSettled\(requests\.map\(\(request\) => api\(request\.path\)\)\)/);
   assert.match(app, /Hidden families are fetched only when the reader actually switches to them/);
+});
+
+test("warmup nav queries its own source while preserving live/replay controls", () => {
+  assert.match(page, /data-view="warmup"[^>]*aria-label="预热历史"/);
+  assert.match(app, /warmup: \["预热历史", "初次启动前的回算信号，仅供复盘，不触发通知。"\]/);
+  assert.match(page, /id="warmup-notice"[^>]*>保留的服务回执仅作历史事实显示；这里不推断、补发或触发通知。/);
+  assert.match(page, /data-signal-source="live"/);
+  assert.match(page, /data-signal-source="replay"/);
+  assert.match(app, /const signalQuerySource = \(\) => state\.view === "warmup" \? "warmup" : state\.signalSource;/);
+  assert.match(app, /const changesWarmupScope = previousView === "warmup" \|\| state\.view === "warmup";[\s\S]*const entersSignalView = !signalView\(previousView\) && signalView\(state\.view\);[\s\S]*if \(changesWarmupScope \|\| entersSignalView\)[\s\S]*invalidateSignalQuery\(\);[\s\S]*if \(signalView\(state\.view\)\) refresh\(\);/);
+  assert.match(app, /\["live", "warmup"\]\.includes\(querySource\).*confirmation=raw_yolo/s);
+});
+
+test("warmup rows remain live-chart records but cannot become fresh or notification-pending", async () => {
+  const paths = [];
+  const harness = refreshHarness(async (path) => {
+    paths.push(path);
+    if (path === "/api/status") return jsonResponse({ now_ms: Date.now(), runtime: { fresh_minutes: 30, notification_mode: "two_stage" } });
+    const confirmation = path.includes("confirmation=raw_yolo") ? "raw_yolo" : "raw";
+    return jsonResponse({ items: [{ ...rawLive, id: `warmup-${confirmation}`, confirmation, display_scope: "warmup", is_fresh: true }], total: 1, next_cursor: null });
+  });
+  const { state, refresh } = harness;
+  state.view = "warmup";
+  state.signalSource = "replay";
+  await refresh();
+  assert.ok(paths.some((path) => path.includes("source=warmup") && path.includes("confirmation=raw")));
+  assert.ok(paths.some((path) => path.includes("source=warmup") && path.includes("confirmation=raw_yolo")));
+  assert.equal(state.directSignals[0].source, "live", "warmup keeps the underlying live chart route");
+  assert.equal(state.directSignals[0].display_scope, "warmup");
+  assert.match(app, /if \(isWarmupRecord\(item\)\) return false;/);
+  assert.match(app, /if \(isWarmupRecord\(item\)\) \{[\s\S]*保存回执 · 服务已接受[\s\S]*return \["预热历史不通知", "muted"\];/);
+  assert.match(app, /isWarmupRecord\(item\) \? "回算信号 · 仅供复盘"/);
+});
+
+test("late warmup pages cannot overwrite a later live route or its cursor", async () => {
+  const paths = [];
+  const pending = [];
+  const harness = refreshHarness((path) => new Promise((resolve) => {
+    paths.push(path);
+    pending.push(() => resolve(jsonResponse(path === "/api/status" ? { now_ms: Date.now(), runtime: {} } : { items: [{ ...rawLive, id: "late-warmup", display_scope: "warmup" }], total: 1, next_cursor: { close_ms: 1, event_id: "late" } })));
+  }));
+  const { state, refresh, loadEarlierRawSignals } = harness;
+  state.view = "warmup";
+  const topPage = refresh();
+  assert.ok(paths.some((path) => path.includes("source=warmup")));
+  state.view = "watch";
+  state.signalQueryRevision++;
+  pending.splice(0).forEach((resolve) => resolve());
+  await topPage;
+  assert.equal(state.directSignals.length, 0);
+  assert.equal(state.rawNextCursor, null);
+
+  state.view = "warmup";
+  state.rawHasMore = true;
+  state.rawNextCursor = { close_ms: 99, event_id: "warmup-boundary" };
+  const olderPage = loadEarlierRawSignals();
+  assert.ok(paths.some((path) => path.includes("source=warmup") && path.includes("before_id=warmup-boundary")));
+  state.view = "watch";
+  state.signalQueryRevision++;
+  pending.splice(0).forEach((resolve) => resolve());
+  await olderPage;
+  assert.equal(state.rawNextCursor.event_id, "warmup-boundary", "stale pagination cannot replace the prior cursor");
+  assert.equal(state.directSignals.length, 0);
 });

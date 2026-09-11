@@ -308,7 +308,7 @@ class Store:
 
     def list_events(self, limit=200, symbol=None, timeframe=None, kind=None, side=None, protocol=None,
                     source=None, confirmation=None, before_close_ms=None, before_id=None, *, direct_only=False,
-                    timing=None, summary=False):
+                    timing=None, summary=False, display_scope=None, display_cutoff_ms=None):
         filters, values = [], []
         for field, value in (("symbol", symbol), ("timeframe", timeframe), ("kind", kind), ("side", side)):
             if value:
@@ -323,6 +323,16 @@ class Store:
         if confirmation:
             filters.append("json_extract(e.payload,'$.confirmation')=?")
             values.append(confirmation)
+        if display_scope is not None:
+            if display_scope not in ("live", "warmup") or type(display_cutoff_ms) is not int or display_cutoff_ms < 0:
+                raise ValueError("invalid display boundary")
+            # Classify by the original arrow close, not its later YOLO close or
+            # discovery time. Apply before LIMIT so old history cannot hide a
+            # new signal. This is a read-only view, never a notification gate.
+            origin = "CASE WHEN json_extract(e.payload,'$.confirmation')='yolo' THEN json_extract(e.payload,'$.indicator.bar_close_ms') ELSE e.close_ms END"
+            filters.append("json_extract(e.payload,'$.source')='live'")
+            filters.append(f"({origin}) {'>' if display_scope == 'live' else '<='} ?")
+            values.append(display_cutoff_ms)
         if before_close_ms is not None or before_id is not None:
             if isinstance(before_close_ms, bool) or not isinstance(before_close_ms, int) or not isinstance(before_id, str) or not before_id:
                 raise ValueError("invalid event cursor")

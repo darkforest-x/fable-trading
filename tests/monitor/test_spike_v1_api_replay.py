@@ -52,6 +52,7 @@ def yolo(*, close: int = NOW - 1_000) -> dict:
 def test_confirmation_filters_select_raw_kind_and_keep_live_replay_separate(tmp_path, monkeypatch):
     app = create_app(runtime=tmp_path, start_monitor=False)
     store = app.state.monitor.store
+    store.set_meta("notification_policy:v1_bark_arm", {"activated_ms": NOW - 10 * TIMEFRAMES["1H"]})
     live, replay = raw(source="live"), raw(source="replay")
     assert store.upsert_event(live, bark_notify=False)
     assert store.upsert_event(replay, bark_notify=False)
@@ -133,6 +134,7 @@ def test_replay_signal_cursor_pages_stably_past_the_first_limit(tmp_path, monkey
 def test_signal_summary_keeps_live_channel_receipts_and_yolo_card_contract(tmp_path, monkeypatch):
     app = create_app(runtime=tmp_path, start_monitor=False)
     store = app.state.monitor.store
+    store.set_meta("notification_policy:v1_bark_arm", {"activated_ms": NOW - 10 * TIMEFRAMES["1H"]})
     sent = raw(source="live", close=NOW - 1_000)
     failed = raw(source="live", close=NOW - TIMEFRAMES["1H"])
     assert store.upsert_event(sent, notify=True, bark_notify=True)

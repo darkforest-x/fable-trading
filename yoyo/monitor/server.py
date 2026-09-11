@@ -112,8 +112,18 @@ def create_app(runtime=None, start_monitor=True):
                 before_close_ms: int = None, before_id: str = None):
         started_ns = time.monotonic_ns()
         dispatch_trace("handler:/api/signals")
-        if source not in (None, "live", "replay") or confirmation not in (None, "raw", "yolo", "raw_yolo"):
+        if source not in (None, "live", "warmup", "replay") or confirmation not in (None, "raw", "yolo", "raw_yolo"):
             raise HTTPException(400, "unsupported source or confirmation")
+        source = source or "live"
+        display_scope = source if source in ("live", "warmup") else None
+        display_cutoff_ms = None
+        if display_scope:
+            # The one-time V1 arm receipt survives restarts and notification
+            # setting changes. Migration timestamps can move on later cleanups.
+            receipt = store.get_meta("notification_policy:v1_bark_arm", {})
+            display_cutoff_ms = receipt.get("activated_ms") if isinstance(receipt, dict) else None
+            if type(display_cutoff_ms) is not int or display_cutoff_ms < 0:
+                raise HTTPException(503, "未找到 V1 首次启用时间，暂不混合展示实时与预热历史。")
         # The V1 UI filters by confirmation.  Infer its event kind when the
         # legacy `kind` parameter is omitted, rather than silently querying
         # only YOLO rows for `confirmation=raw`.
@@ -127,9 +137,10 @@ def create_app(runtime=None, start_monitor=True):
             raise HTTPException(400, "cursor requires both close time and event id")
         event_timing = {} if DISPATCH_TRACE else None
         rows = store.list_events(limit, symbol, timeframe, kind, side, protocol=protocol,
-                                 source=source, confirmation=confirmation,
+                                 source="live" if display_scope else source, confirmation=confirmation,
                                  before_close_ms=before_close_ms, before_id=before_id,
-                                 timing=event_timing, summary=True)
+                                 timing=event_timing, summary=True,
+                                 display_scope=display_scope, display_cutoff_ms=display_cutoff_ms)
         if event_timing is not None:
             dispatch_trace("signals:sqlite", elapsed_ms=event_timing["sqlite_ms"])
             dispatch_trace("signals:decode", elapsed_ms=event_timing["decode_ms"])
@@ -137,13 +148,15 @@ def create_app(runtime=None, start_monitor=True):
         # request filters, event identities, and response content.
         dispatch_trace(f"signals:rows={len(rows)}", started_ns=started_ns)
         for row in rows:
-            row["is_fresh"] = row.get("source") == "live" and 0 <= monitor.client.clock() - row["bar_close_ms"] <= FRESH_MS
+            row["display_scope"] = source
+            row["is_fresh"] = source == "live" and 0 <= monitor.client.clock() - row["bar_close_ms"] <= FRESH_MS
         dispatch_trace("signals:freshness", started_ns=started_ns)
         cursor = ({"close_ms": rows[-1]["bar_close_ms"], "event_id": rows[-1]["id"]}
                   if len(rows) == limit else None)
         dispatch_trace(f"signals:return={len(rows)}", started_ns=started_ns)
         return {"items": rows, "total": len(rows), "kind": kind, "protocol": protocol,
-                "source": source, "confirmation": confirmation, "next_cursor": cursor}
+                "source": source, "confirmation": confirmation, "next_cursor": cursor,
+                "display_cutoff_ms": display_cutoff_ms}
 
     @app.get("/api/candidates")
     def candidates(limit: int = Query(200, ge=1, le=2000), symbol: str = None, timeframe: str = None):

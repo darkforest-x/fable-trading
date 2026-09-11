@@ -14,6 +14,7 @@
   };
   const titles = {
     signals: ["信号中心", "指标启动与 YOLO 确认分开展示。Bark 通知周期以运行状态为准。"],
+    warmup: ["预热历史", "初次启动前的回算信号，仅供复盘，不触发通知。"],
     watch: ["蓄势观察", "还在横盘的，单独观察。这里的结构尚不是启动信号。"],
     system: ["运行状态", "行情、扫描与通知，每个环节都清晰可见。"],
   };
@@ -52,16 +53,22 @@
   // already-persisted legacy chart rows; it is not the current backend kind.
   const isV1StartMarker = (event) => event?.kind === "spike_burst_v1" || event?.kind === "tv_start";
   const isDirectRecord = (item) => isCandidate(item) && TV_INTERVALS.has(String(item.timeframe));
-  const sourceName = (item) => item?.source === "replay" ? "历史回放" : "实时";
+  const signalView = (view = state.view) => view === "signals" || view === "warmup";
+  const signalQuerySource = () => state.view === "warmup" ? "warmup" : state.signalSource;
+  const displayScope = (item) => item?.display_scope === "warmup" ? "warmup" : item?.display_scope === "replay" || item?.source === "replay" ? "replay" : "live";
+  const isWarmupRecord = (item) => displayScope(item) === "warmup";
+  const sourceName = (item) => displayScope(item) === "warmup" ? "预热历史" : displayScope(item) === "replay" ? "历史回放" : "实时";
   const milliseconds = (value) => typeof value === "string" ? Date.parse(value) : Number(value);
-  function normalizeV1Event(row) {
+  function normalizeV1Event(row, requestedScope = null) {
     const minutes = Number(row.timeframe_min ?? row.timeframe);
     const confirmation = row.confirmation;
     const close = milliseconds(row.signal_close_time ?? row.bar_close_ms);
     const direction = row.direction ?? row.side;
     if (![30, 60, 240].includes(minutes) || !["live", "replay"].includes(row.source) || !["raw", "yolo", "raw_yolo"].includes(confirmation) || direction !== "long" || !finite(close)) return null;
+    const rowScope = ["live", "warmup", "replay"].includes(row.display_scope) ? row.display_scope : requestedScope || row.source;
     return { ...row, id: String(row.id ?? `${row.source}|${confirmation}|${row.venue}|${row.symbol}|${minutes}|${row.signal_close_time}`),
       source: row.source === "replay" ? "replay" : "live", confirmation, timeframe: String(minutes), timeframe_min: minutes,
+      display_scope: rowScope,
       kind: confirmation === "raw" ? "tv_start" : "yolo_confirmed", side: "long", bar_close_ms: close,
       bar_open_ms: milliseconds(row.signal_bar_open ?? row.bar_open_ms) || close - minutes * 60000,
       price: row.signal_close ?? row.price, is_closed: row.is_closed === true,
@@ -120,6 +127,7 @@
   const signalClock = () => finite(state.status?.now_ms) && finite(state.statusReceivedAt) ? Number(state.status.now_ms) + Math.max(0, Date.now() - state.statusReceivedAt) : Date.now();
   // API freshness is authoritative; only expire cached badges using the same time budget.
   function isFresh(item, now = signalClock()) {
+    if (isWarmupRecord(item)) return false;
     const minutes = state.status?.runtime?.fresh_minutes;
     const age = now - Number(item.bar_close_ms);
     const confirmed = isConfirmed(item), direct = directReceipt(item);
@@ -252,9 +260,11 @@
     }
   }
   function setView(view, updateHash = true) {
-    if (state.chartExpanded && view !== state.view) setChartExpanded(false, false);
-    state.view = titles[view] ? view : "signals";
-    Object.keys(titles).forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== state.view));
+    const previousView = state.view;
+    const nextView = titles[view] ? view : "signals";
+    if (state.chartExpanded && nextView !== state.view) setChartExpanded(false, false);
+    state.view = nextView;
+    ["signals", "watch", "system"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== (signalView(state.view) ? "signals" : state.view)));
     document.querySelectorAll("[data-view]").forEach((button) => {
       const active = button.dataset.view === state.view;
       button.classList.toggle("active", active);
@@ -263,8 +273,18 @@
     $("page-title").textContent = titles[state.view][0];
     $("breadcrumb-current").textContent = titles[state.view][0];
     $("page-description").textContent = state.view === "signals" && state.status ? notificationPolicy() : titles[state.view][1];
+    $("signal-source-scope").classList.toggle("hidden", state.view === "warmup");
+    $("signal-scope-note").classList.toggle("hidden", state.view === "warmup");
+    $("warmup-notice").classList.toggle("hidden", state.view !== "warmup");
     document.title = `spike · ${titles[state.view][0]}`;
     if (updateHash) history.replaceState(null, "", `#${state.view}`);
+    const changesWarmupScope = previousView === "warmup" || state.view === "warmup";
+    const entersSignalView = !signalView(previousView) && signalView(state.view);
+    if (changesWarmupScope || entersSignalView) {
+      state.rowLimit = 24;
+      invalidateSignalQuery();
+      if (signalView(state.view)) refresh();
+    }
     if (state.view === "system") loadHealth();
     // Signals never load the expensive market overview.  Watch opts in once.
     if (state.view === "watch") loadMarkets();
@@ -276,6 +296,13 @@
       (state.side === "all" || item.side === state.side) && (state.signalScope === "confirmed" ? isConfirmed(item) : state.signalScope === "direct" ? isDirectRecord(item) : isCandidate(item) && (state.signalScope === "all" || ["pending", "error"].includes(item.model?.status))));
   }
   function notification(item, channel = "telegram") {
+    if (isWarmupRecord(item)) {
+      const saved = String(item[channel === "bark" ? "bark_notification_status" : "notification_status"] || "").toLowerCase();
+      if (["sent", "delivered", "success"].includes(saved)) return ["保存回执 · 服务已接受", "muted"];
+      if (["failed", "error", "dead"].includes(saved)) return ["保存回执 · 发送失败", "muted"];
+      if (saved === "unknown") return ["保存回执 · 未知", "muted"];
+      return ["预热历史不通知", "muted"];
+    }
     if (item?.source === "replay") return ["历史回放不通知", "muted"];
     const value = String(item[channel === "bark" ? "bark_notification_status" : "notification_status"] || "").toLowerCase();
     if (["sent", "delivered", "success"].includes(value)) return [channel === "bark" ? "服务已接受" : "已发送", "sent"];
@@ -301,7 +328,7 @@
   }
   function renderSignals() {
     const items = filteredSignals();
-    const confirmed = state.signalScope === "confirmed", direct = state.signalScope === "direct", notifying = confirmed || direct;
+    const confirmed = state.signalScope === "confirmed", direct = state.signalScope === "direct", warmup = state.view === "warmup", notifying = !warmup && (confirmed || direct);
     const loaded = state[`${sourceKey()}Loaded`];
     const fetchError = state.errors[sourceKey()];
     const source = sourceItems();
@@ -311,7 +338,9 @@
       ? `当前页 ${number(source.length)} 条；可直接读取更早记录`
       : `当前已加载 ${number(source.length)} 条记录`;
     $("signal-section-title").textContent = confirmed ? "YOLO 补充确认" : "原始 V1 启动";
-    $("signal-scope-note").textContent = state.signalSource === "replay"
+    $("signal-scope-note").textContent = warmup
+      ? "初次启动前的回算信号，仅供复盘，不触发通知。"
+      : state.signalSource === "replay"
       ? "历史回放只展示已记录事件与之后的真实行情；不触发、也不暗示通知。"
       : confirmed ? "YOLO 是原始 V1 之后的补充确认，不是启动门；两类实时记录各自以服务回执为准。" : "只展示已收盘的原始 V1 多头启动；次开盘的实际成交时间须由后端提供。";
     $("signal-window-note").textContent = loaded
@@ -334,11 +363,11 @@
         $("signal-empty-title").textContent = "信号服务暂时不可用";
         $("signal-empty-description").textContent = "正在自动重试。连接恢复后会展示真实记录。";
       } else if (!loaded) {
-        $("signal-empty-title").textContent = state.signalSource === "replay" ? "正在读取历史回放" : "正在连接实时信号服务";
+        $("signal-empty-title").textContent = warmup ? "正在读取预热历史" : state.signalSource === "replay" ? "正在读取历史回放" : "正在连接实时信号服务";
         $("signal-empty-description").textContent = "真实记录会在这里出现。";
       } else {
-        $("signal-empty-title").textContent = hasFilters ? "没有符合筛选的记录" : state.signalSource === "replay" ? "尚无导入的历史回放记录" : confirmed ? "等待 YOLO 补充确认" : "等待新的收盘启动";
-        $("signal-empty-description").textContent = hasFilters ? "试试其他合约或周期。" : state.signalSource === "replay" ? "回放数据导入后会在这里单独显示，不会被当作实时通知。" : confirmed ? "YOLO 确认会与原始 V1 启动分开显示。" : "只显示新的已收盘 V1 启动。";
+        $("signal-empty-title").textContent = hasFilters ? "没有符合筛选的记录" : warmup ? "尚无预热回算记录" : state.signalSource === "replay" ? "尚无导入的历史回放记录" : confirmed ? "等待 YOLO 补充确认" : "等待新的收盘启动";
+        $("signal-empty-description").textContent = hasFilters ? "试试其他合约或周期。" : warmup ? "初次启动前的回算信号会在这里单独显示，仅供复盘。" : state.signalSource === "replay" ? "回放数据导入后会在这里单独显示，不会被当作实时通知。" : confirmed ? "YOLO 确认会与原始 V1 启动分开显示。" : "只显示新的已收盘 V1 启动。";
       }
     }
     const focused = document.activeElement?.dataset;
@@ -356,7 +385,8 @@
     const freshnessKnown = (direct ? twoStage() : true) && finite(minutes) && Number(minutes) > 0 && finite(state.status?.now_ms) && finite(state.statusReceivedAt);
     const pendingFreshness = fetchError || state.errors.status || !freshnessKnown;
     const noFresh = notifying && !fresh.length && items.length ? `<div id="fresh-empty" class="fresh-empty"><strong>${pendingFreshness ? "新鲜状态待同步" : direct ? "当前筛选下暂无新鲜启动" : "当前筛选下暂无新鲜确认"}</strong><span>${pendingFreshness ? "保留已获取的记录，状态同步后重新确认时效。" : `${clockLabel} ${escapeHTML(number(minutes))} 分钟内的信号会优先出现在这里。下方可回看此前记录。`}</span></div>` : "";
-    $("signal-rows").innerHTML = noFresh + group(direct ? "新鲜启动" : "新鲜确认", freshVisible, true) + group(confirmed ? fresh.length ? "更早确认" : "已记录确认" : direct ? "已记录启动" : "指标候选 · 模型等待状态", earlierVisible, false);
+    $("signal-rows").innerHTML = noFresh + group(direct ? "新鲜启动" : "新鲜确认", freshVisible, true) + group(warmup ? confirmed ? "预热 YOLO 补充确认" : "预热原始 V1 启动" : confirmed ? fresh.length ? "更早确认" : "已记录确认" : direct ? "已记录启动" : "指标候选 · 模型等待状态", earlierVisible, false);
+    $("signal-footer-note").textContent = warmup ? "预热回算 · 不触发通知 · 北京时间" : "已收盘确认 · 北京时间";
     renderTradingViewButtons();
     if (focusedId) Array.from($("signal-rows").querySelectorAll(focusedPreview ? "[data-preview-signal-id]" : "[data-signal-id]")).find((card) => (card.dataset.signalId || card.dataset.previewSignalId) === focusedId && card.dataset.signalKind === focusedKind && card.dataset.tvSymbol === focused.tvSymbol && card.dataset.tvTimeframe === focused.tvTimeframe)?.focus({ preventScroll: true });
   }
@@ -370,12 +400,12 @@
     const waiting = `${number(item.model?.wait_bars)} / ${number(item.model?.max_wait_bars)} 根`;
     return `<article class="signal-card ${side}${confirmed || direct ? "" : " candidate-card"}${selected ? " selected" : ""}${fresh ? " is-fresh" : ""}"><button type="button" class="card-primary-action" data-signal-id="${escapeHTML(item.id)}" data-signal-kind="${escapeHTML(item.kind)}" data-tradingview-action="signal" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击卡片，在 本机 TradingView 打开" aria-label="${escapeHTML(`${venue} ${shortSymbol(item.symbol)} ${quoteSymbol(item.symbol)} ${timeframeLabel(item.timeframe)} ${sideName(item.side)}，${status}，${caption} ${price(item.price)}，${shortDate(item.bar_close_ms)}，在 本机 TradingView 打开`)}"></button>
       <span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>${escapeHTML(venue)} · ${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(timeframeLabel(item.timeframe))}</span></span>
-      <span class="signal-card-direction"><span class="card-direction">↑ 多头${confirmed ? " · 确认" : " · 启动"}</span><span class="card-recency">${item.source === "replay" ? "历史回放" : fresh ? "新 · " + ageLabel(item.bar_close_ms) : ageLabel(item.bar_close_ms)}</span></span>
-      <span class="model-card-status"><span class="model-badge ${confirmed ? "confirmed" : "pending"}">${escapeHTML(status)}</span><span>${item.source === "replay" ? "回放记录 · 不通知" : confirmed ? "补充确认 · 非启动门" : "第一阶段 · 已收盘"}</span></span>
+      <span class="signal-card-direction"><span class="card-direction">↑ 多头${confirmed ? " · 确认" : " · 启动"}</span><span class="card-recency">${isWarmupRecord(item) ? "预热历史" : item.source === "replay" ? "历史回放" : fresh ? "新 · " + ageLabel(item.bar_close_ms) : ageLabel(item.bar_close_ms)}</span></span>
+      <span class="model-card-status"><span class="model-badge ${confirmed ? "confirmed" : "pending"}">${escapeHTML(status)}</span><span>${isWarmupRecord(item) ? "预热回算 · 不通知" : item.source === "replay" ? "回放记录 · 不通知" : confirmed ? "补充确认 · 非启动门" : "第一阶段 · 已收盘"}</span></span>
       <span class="card-price-label">${caption}</span><span class="card-price">${escapeHTML(price(item.price))}</span>
       ${confirmed && item.indicator ? `<span class="card-origin">原始 V1 ${escapeHTML(price(original.price))} · ${escapeHTML(shortDate(original.bar_close_ms))}</span>` : ""}
       <span class="card-context"><span>信号 K 线</span><strong>${item.is_closed ? "已确认" : "待确认"}</strong></span>
-      <span class="card-confirmed"><span>${item.executable_entry_time ? item.source === "replay" ? `回放执行时钟 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : `实际进场 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : item.entry_reference === "next_open" ? "次开盘参考 · 等待实际成交" : "仅信号收盘参考"}</span><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))}</time></span>
+      <span class="card-confirmed"><span>${isWarmupRecord(item) ? "回算信号 · 仅供复盘" : item.executable_entry_time ? item.source === "replay" ? `回放执行时钟 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : `实际进场 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : item.entry_reference === "next_open" ? "次开盘参考 · 等待实际成交" : "仅信号收盘参考"}</span><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))}</time></span>
       <span class="card-footer"><span class="notification-stack">${item.source === "replay" ? `<span class="candidate-notice">历史回放不通知</span>` : notificationHTML(item)}</span><span class="card-actions"><button type="button" class="card-preview" data-preview-signal-id="${escapeHTML(item.id)}" data-signal-kind="${escapeHTML(item.kind)}" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" aria-pressed="${Boolean(selected)}" aria-label="${escapeHTML(`页内预览 ${venue} ${shortSymbol(item.symbol)} ${quoteSymbol(item.symbol)} ${timeframeLabel(item.timeframe)}`)}"><span>页内预览</span></button><span class="card-open" data-tradingview-label="TradingView ↗" aria-hidden="true">TradingView ↗</span></span></span>
     </article>`;
   }
@@ -602,17 +632,17 @@
     }
     const original = originalSignal(item), confirmed = isConfirmed(item), candidate = isCandidate(item), direct = directReceipt(item);
     const facts = [
-      ["记录来源", sourceName(item), item.source === "replay" ? "model-color" : "mint"],
+      ["记录来源", sourceName(item), item.source === "replay" ? "model-color" : isWarmupRecord(item) ? "" : "mint"],
       ...coveredLedgerFacts(item),
       ["信号 K 线", item.is_closed ? "交易所已确认收盘" : "尚未确认 · 不作为可执行 V1", item.is_closed ? "mint" : "red"],
-      ["可执行次开盘", item.executable_entry_time ? item.source === "replay" ? `回放执行时钟 ${shortDate(milliseconds(item.executable_entry_time))}` : shortDate(milliseconds(item.executable_entry_time)) : item.source === "replay" ? "回放未提供成交时钟" : item.entry_reference === "next_open" ? "等待真实成交记录" : "后端未提供", ""],
+      ["可执行次开盘", item.executable_entry_time ? item.source === "replay" ? `回放执行时钟 ${shortDate(milliseconds(item.executable_entry_time))}` : shortDate(milliseconds(item.executable_entry_time)) : item.source === "replay" ? "回放未提供成交时钟" : isWarmupRecord(item) ? "预热回算记录 · 不推断成交" : item.entry_reference === "next_open" ? "等待真实成交记录" : "后端未提供", ""],
       ["V1 风险参考", finite(original.risk) ? price(original.risk) : finite(item.risk) ? price(item.risk) : "—", ""],
       ["特征来源哈希", item.source_sha256 ? `${String(item.source_sha256).slice(0, 12)}…` : "—", ""],
       [confirmed || candidate ? "原箭头收盘 · 北京时间" : "最近收盘 · 北京时间", shortDate(original.bar_close_ms), ""],
       ...(confirmed || candidate ? [["原箭头收盘价", price(original.price), ""]] : []),
       ...(confirmed ? [["模型确认 · 北京时间", shortDate(item.bar_close_ms), "model-color"], ["模型确认收盘价", price(item.price), "model-color"]] : []),
-      ...(direct ? [["事件阶段", "指标启动 · 未经 YOLO 确认", ""], ["Bark 启动回执", notification(direct, "bark")[0], ""]] : []),
-      ...(confirmed ? [["Bark 确认回执", notification(item, "bark")[0], ""]] : []),
+      ...(direct ? [["事件阶段", "指标启动 · 未经 YOLO 确认", ""], [isWarmupRecord(item) ? "通知说明" : "Bark 启动回执", notification(direct, "bark")[0], ""]] : []),
+      ...(confirmed ? [[isWarmupRecord(item) ? "通知说明" : "Bark 确认回执", notification(item, "bark")[0], ""]] : []),
       ...(isDisplayOnly(item) ? [["当前通知方式", DISPLAY_ONLY_NOTE, ""]] : []),
       ...(item.model ? [["模型状态", modelState(item), item.model.status === "error" ? "red" : ""], ["等待 / 最大窗口", `${number(item.model.wait_bars)} / ${number(item.model.max_wait_bars)} 根`, ""], ...(confirmed ? [["检测分数 · 非胜率", modelScore(item), ""], ["核心区间", `${shortDate(item.model.core_start_ms)} → ${shortDate(item.model.core_end_ms)}`, ""]] : [["最近检测收盘", shortDate(item.model.last_checked_close_ms), ""], ["等待截止", shortDate(item.model.expires_at_ms), ""]])] : []),
       [confirmed || candidate ? "启动前近零蓄势" : "当前近零蓄势", `${number(focusRun(item))} 根`, ""],
@@ -620,8 +650,10 @@
       ["高周期方向 · 背景参考", sideName(original.htf_side), ""],
     ];
     $("detail-facts").innerHTML = facts.map(([label, value, color]) => `<div><div class="fact-label">${escapeHTML(label)}</div><div class="fact-value ${color}">${escapeHTML(value)}</div></div>`).join("");
-    const confirmationNotification = item.source === "replay" ? "历史回放不触发通知；图上的之后行情只用于回看，绝不表示当时已知。" : "实时原始 V1 与 YOLO 补充确认各自以服务回执为准。";
-    $("detail-reason").textContent = item.source === "replay"
+    const confirmationNotification = isWarmupRecord(item) ? "初次启动前的回算信号，仅供复盘，不触发通知；图上的之后行情只用于回看。" : item.source === "replay" ? "历史回放不触发通知；图上的之后行情只用于回看，绝不表示当时已知。" : "实时原始 V1 与 YOLO 补充确认各自以服务回执为准。";
+    $("detail-reason").textContent = isWarmupRecord(item)
+      ? `这是预热历史记录。${confirmed ? "YOLO 仅为额外确认，不改变原始 V1 的启动时点。" : "原始 V1 启动以信号收盘为参考。"}${confirmationNotification}`
+      : item.source === "replay"
       ? `这是历史回放记录。${confirmed ? "YOLO 仅为额外确认，不改变原始 V1 的启动时点。" : "原始 V1 启动以信号收盘为参考。"}${confirmationNotification}`
       : confirmed ? `YOLO 在原始 V1 启动之后提供补充确认，不是启动门。${confirmationNotification}`
       : `这是已收盘的原始 V1 多头启动。信号收盘价不是成交价；${item.executable_entry_time ? "实际成交时间已由后端记录。" : "实际次开盘成交仍待后端记录。"}${confirmationNotification}`;
@@ -872,7 +904,7 @@
     // Replay records are immutable journal entries.  After their visible
     // family has loaded, the 15-second clock only needs the lightweight
     // runtime status; re-fetching the same 500 cards can overlap chart work.
-    return trigger !== "periodic" || state.signalSource !== "replay" || !state[`${sourceKey()}Loaded`];
+    return trigger !== "periodic" || !["replay", "warmup"].includes(signalQuerySource()) || !state[`${sourceKey()}Loaded`];
   }
   function queueRefresh(trigger) {
     // A user action or changed query must win over an automatically queued
@@ -885,7 +917,8 @@
     if (state.rawLoadingMore) { queueRefresh(trigger); return; }
     if (state.syncing) { queueRefresh(trigger); return; }
     const queryRevision = state.signalQueryRevision;
-    const querySource = state.signalSource;
+    const querySource = signalQuerySource();
+    const queryView = state.view;
     const queryTimeframe = state.timeframe;
     const queryScope = state.signalScope;
     state.syncing = true;
@@ -900,13 +933,13 @@
       const requests = [{ key: "status", path: "/api/status" }];
       if (shouldRefreshSignalList(trigger) && queryScope === "confirmed") {
         requests.push({ key: "signals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=yolo${timeframe}` });
-        if (querySource === "live") requests.push({ key: "rawYoloSignals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw_yolo${timeframe}` });
+        if (["live", "warmup"].includes(querySource)) requests.push({ key: "rawYoloSignals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw_yolo${timeframe}` });
       } else if (shouldRefreshSignalList(trigger) && queryScope === "direct") {
         requests.push({ key: "directSignals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw${timeframe}` });
-        if (querySource === "live") requests.push({ key: "rawYoloSignals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw_yolo${timeframe}` });
+        if (["live", "warmup"].includes(querySource)) requests.push({ key: "rawYoloSignals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw_yolo${timeframe}` });
       }
       const results = await Promise.allSettled(requests.map((request) => api(request.path)));
-      if (queryRevision !== state.signalQueryRevision || querySource !== state.signalSource || queryTimeframe !== state.timeframe || queryScope !== state.signalScope) return;
+      if (queryRevision !== state.signalQueryRevision || querySource !== signalQuerySource() || queryView !== state.view || queryTimeframe !== state.timeframe || queryScope !== state.signalScope) return;
       const keys = requests.map((request) => request.key);
       let anySuccess = false;
       results.forEach((result, index) => {
@@ -917,7 +950,7 @@
         anySuccess = true;
         if (key === "status") { state.status = result.value; state.statusReceivedAt = Date.now(); }
         else {
-          const items = result.value.items.filter((item) => item && typeof item === "object" && item.symbol).map(normalizeV1Event)
+          const items = result.value.items.filter((item) => item && typeof item === "object" && item.symbol).map((item) => normalizeV1Event(item, querySource))
             .filter((item) => key === "signals" ? isConfirmed(item) : key === "directSignals" ? isDirectRecord(item) : Boolean(item));
           if (key === "directSignals" && state.rawPaged) {
             state.directSignals = [...items, ...state.directSignals].filter((item, index, rows) => rows.findIndex((other) => sameEvent(other, item)) === index);
@@ -1004,7 +1037,8 @@
   async function loadEarlierRawSignals() {
     if (state.rawLoadingMore || !state.rawHasMore || !state.rawNextCursor || state.signalScope !== "direct") return;
     const queryRevision = state.signalQueryRevision;
-    const querySource = state.signalSource;
+    const querySource = signalQuerySource();
+    const queryView = state.view;
     const queryTimeframe = state.timeframe;
     const cursor = state.rawNextCursor;
     state.rawLoadingMore = true;
@@ -1014,10 +1048,10 @@
       const path = `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${encodeURIComponent(querySource)}&confirmation=raw${timeframe}`
         + `&before_close_ms=${encodeURIComponent(cursor.close_ms)}&before_id=${encodeURIComponent(cursor.event_id)}`;
       const result = await api(path);
-      if (queryRevision !== state.signalQueryRevision || querySource !== state.signalSource || queryTimeframe !== state.timeframe) return;
+      if (queryRevision !== state.signalQueryRevision || querySource !== signalQuerySource() || queryView !== state.view || queryTimeframe !== state.timeframe) return;
       if (!Array.isArray(result.items)) throw new Error("服务返回的数据格式有误");
       const older = result.items.filter((item) => item && typeof item === "object" && item.symbol)
-        .map(normalizeV1Event).filter(isDirectRecord);
+        .map((item) => normalizeV1Event(item, querySource)).filter(isDirectRecord);
       const existing = state.directSignals;
       state.directSignals = [...existing, ...older].filter((item, index, rows) => rows.findIndex((other) => sameEvent(other, item)) === index)
         .sort((a, b) => numeric(b.bar_close_ms) - numeric(a.bar_close_ms) || String(b.id).localeCompare(String(a.id)));
@@ -1154,6 +1188,6 @@
   setView(location.hash.slice(1) || "signals", false);
   setInterval(() => { $("local-clock").textContent = clockTime(Date.now()); }, 1000);
   $("local-clock").textContent = clockTime(Date.now());
-  refresh();
+  if (state.view !== "warmup") refresh();
   setInterval(() => refresh("periodic"), 15000);
 })();
