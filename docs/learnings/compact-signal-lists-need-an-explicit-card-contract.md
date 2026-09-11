@@ -1,0 +1,7 @@
+# Compact signal lists need an explicit card contract
+
+- **Problem**: The historic signal list returned forensic replay evidence with every card, making 500-row pages large enough to pile up synchronous server work after browser aborts. A first projection removed fields the cards actually used, including delivery receipts and YOLO provenance.
+- **Dead end**: A generic top-level whitelist treated `kind`, `protocol`, channel status, `model`, and `indicator` as optional metadata. That made a compact response smaller by silently changing sent/failed badges and hiding the parent V1 arrow behind a YOLO confirmation.
+- **Effective path**: Define the list response from the card and detail reads: retain identity/filter fields, both channel receipts, V1 display context, a bounded model state, the bounded parent-arrow fields, and the realized/censored display outcome. Keep full evidence exclusively behind the existing `get_event(event_id)` path used by the chart and forensic APIs.
+- **General rule**: Before shrinking a persisted event payload, enumerate client reads and add a contract test for each user-visible state. Byte reduction is not valid if it changes notification, confirmation, or censored-outcome semantics.
+- **Connections**: `yoyo/monitor/store.py`, `yoyo/monitor/server.py`, `yoyo/monitor/static/app.js`, and `tests/monitor/test_spike_v1_api_replay.py`. The projection intentionally leaves event storage, replay delivery isolation, cursor ordering, and the full-event endpoint unchanged.

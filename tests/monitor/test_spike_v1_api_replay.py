@@ -5,7 +5,7 @@ import threading
 
 import pytest
 
-from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL, TIMEFRAMES
+from yoyo.monitor import MODEL_KIND, MODEL_PROTOCOL, SIGNAL_KIND, SIGNAL_PROTOCOL, TIMEFRAMES
 from yoyo.monitor import server as server_module
 from yoyo.monitor.replay_import import import_rows
 from yoyo.monitor.server import create_app
@@ -31,6 +31,22 @@ def raw(*, source: str, close: int = NOW - 1_000) -> dict:
 
 def endpoint(app):
     return next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/api/signals")
+
+
+def yolo(*, close: int = NOW - 1_000) -> dict:
+    indicator = raw(source="live", close=close - TIMEFRAMES["1H"])
+    return {
+        "protocol": MODEL_PROTOCOL, "kind": MODEL_KIND, "source": "live", "confirmation": "yolo",
+        "venue": indicator["venue"], "symbol": indicator["symbol"], "timeframe": "1H", "timeframe_min": 60,
+        "direction": "long", "side": "long", "bar_open_ms": close - TIMEFRAMES["1H"],
+        "bar_close_ms": close, "price": 0.000002800, "is_closed": True, "risk": indicator["risk"],
+        "source_sha256": indicator["source_sha256"], "detected_at_ms": close,
+        "indicator": indicator,
+        "model": {"status": "confirmed", "confidence": 0.73, "wait_bars": 2, "max_wait_bars": 9,
+                  "core_start_ms": close - 5 * TIMEFRAMES["1H"], "core_end_ms": close - 3 * TIMEFRAMES["1H"],
+                  "window_end_ms": close - TIMEFRAMES["1H"], "last_checked_close_ms": close,
+                  "expires_at_ms": close + 7 * TIMEFRAMES["1H"]},
+    }
 
 
 def test_confirmation_filters_select_raw_kind_and_keep_live_replay_separate(tmp_path, monkeypatch):
@@ -107,9 +123,83 @@ def test_replay_signal_cursor_pages_stably_past_the_first_limit(tmp_path, monkey
                  before_close_ms=cursor["close_ms"], before_id=cursor["event_id"])
     assert len(second["items"]) == 1 and second["next_cursor"] is None
     assert {row["id"] for row in first["items"]}.isdisjoint({row["id"] for row in second["items"]})
+    assert [row["id"] for row in first["items"] + second["items"]] == [
+        store.event_id(raw(source="replay", close=NOW - index * TIMEFRAMES["1H"])) for index in range(3)]
     with pytest.raises(Exception, match="cursor requires both"):
         get(limit=2, symbol=None, timeframe=None, kind=None, side=None,
             source="replay", confirmation="raw", before_close_ms=cursor["close_ms"])
+
+
+def test_signal_summary_keeps_live_channel_receipts_and_yolo_card_contract(tmp_path, monkeypatch):
+    app = create_app(runtime=tmp_path, start_monitor=False)
+    store = app.state.monitor.store
+    sent = raw(source="live", close=NOW - 1_000)
+    failed = raw(source="live", close=NOW - TIMEFRAMES["1H"])
+    assert store.upsert_event(sent, notify=True, bark_notify=True)
+    assert store.upsert_event(failed, notify=True, bark_notify=True)
+    sent_tg = store.claim(NOW)
+    sent_bark = store.claim_bark(NOW)
+    failed_tg = store.claim(NOW)
+    failed_bark = store.claim_bark(NOW)
+    store.finish(sent_tg["event_id"], "sent", message_id=7)
+    store.finish_bark(sent_bark["event_id"], "sent", server_timestamp=NOW)
+    store.finish(failed_tg["event_id"], "failed", error="synthetic")
+    store.finish_bark(failed_bark["event_id"], "failed", error="synthetic")
+    confirmed = yolo(close=NOW - 2 * TIMEFRAMES["1H"])
+    assert store.upsert_event(confirmed, notify=False, bark_notify=False)
+    monkeypatch.setattr(app.state.monitor.client, "clock", lambda: NOW)
+    get = endpoint(app)
+
+    raw_rows = get(limit=10, symbol=None, timeframe=None, kind=None, side=None,
+                   source="live", confirmation="raw")["items"]
+    receipt_rows = {row["id"]: row for row in raw_rows}
+    assert receipt_rows[sent_tg["event_id"]]["notification_status"] == "sent"
+    assert receipt_rows[sent_bark["event_id"]]["bark_notification_status"] == "sent"
+    assert receipt_rows[failed_tg["event_id"]]["notification_status"] == "failed"
+    assert receipt_rows[failed_bark["event_id"]]["bark_notification_status"] == "failed"
+    assert all(row["kind"] == SIGNAL_KIND and row["protocol"] == SIGNAL_PROTOCOL for row in raw_rows)
+
+    result = get(limit=10, symbol=None, timeframe=None, kind=None, side=None,
+                 source="live", confirmation="yolo")["items"]
+    assert len(result) == 1
+    row = result[0]
+    assert row["kind"] == MODEL_KIND and row["protocol"] == MODEL_PROTOCOL
+    assert row["model"] == {key: confirmed["model"][key] for key in
+                            ("status", "confidence", "wait_bars", "max_wait_bars", "core_start_ms",
+                             "core_end_ms", "window_end_ms", "last_checked_close_ms", "expires_at_ms")}
+    assert row["indicator"] == {key: confirmed["indicator"][key] for key in
+                                 ("protocol", "kind", "source", "confirmation", "timeframe", "timeframe_min",
+                                  "venue", "symbol", "direction", "side", "bar_open_ms", "bar_close_ms",
+                                  "price")}
+
+
+def test_signal_summary_projects_replay_outcomes_but_get_event_keeps_evidence(tmp_path, monkeypatch):
+    app = create_app(runtime=tmp_path, start_monitor=False)
+    store = app.state.monitor.store
+    realized = raw(source="replay", close=NOW - TIMEFRAMES["1H"])
+    censored = raw(source="replay", close=NOW - 2 * TIMEFRAMES["1H"])
+    realized.update(performance_status="covered_linked_realized_unverified", covered_ledger={
+        "link_status": "realized", "evidence": {"ledger_file": "/immutable/ledger.csv.gz", "ledger_sha256": "a" * 64},
+        "outcome": {"status": "realized", "entry_time_ms": NOW, "exit_time_ms": NOW + 1,
+                    "exit_reason": "protective_stop", "net_r": -1.02, "net_return": -0.01},
+    })
+    censored.update(performance_status="covered_linked_censored_unverified", covered_ledger={
+        "link_status": "censored", "evidence": {"ledger_file": "/immutable/ledger.csv.gz", "ledger_sha256": "b" * 64},
+        "outcome": {"status": "censored"},
+    })
+    assert store.upsert_event(realized, notify=False, bark_notify=False)
+    assert store.upsert_event(censored, notify=False, bark_notify=False)
+    monkeypatch.setattr(app.state.monitor.client, "clock", lambda: NOW)
+    rows = endpoint(app)(limit=10, symbol=None, timeframe=None, kind=None, side=None,
+                         source="replay", confirmation="raw")["items"]
+    by_id = {row["id"]: row for row in rows}
+    summary = by_id[store.event_id(realized)]
+    assert summary["covered_ledger"] == {"link_status": "realized", "outcome": {
+        "status": "realized", "exit_reason": "protective_stop", "exit_time_ms": NOW + 1, "net_r": -1.02}}
+    assert "evidence" not in summary["covered_ledger"]
+    assert by_id[store.event_id(censored)]["covered_ledger"] == {"link_status": "censored", "outcome": {"status": "censored"}}
+    assert store.get_event(store.event_id(realized))["covered_ledger"]["evidence"]["ledger_sha256"] == "a" * 64
+    assert store.bark_status()["pending"] == 0 and store.candidate_counts() == {}
 
 
 def test_signal_trace_has_phase_counts_without_request_identifiers(tmp_path, monkeypatch):

@@ -329,10 +329,29 @@ class Store:
                          bark_notification_status=raw[2] or "history")
             if not summary:
                 return event
-            keys = ("id", "source", "confirmation", "timeframe", "timeframe_min", "venue", "symbol", "side",
-                    "bar_close_ms", "bar_open_ms", "signal_close_time", "signal_bar_open", "signal_close", "price",
-                    "is_closed", "executable_entry_time", "entry_reference", "risk", "source_sha256", "performance_status")
+            # This is the card/detail contract, not a generic field whitelist.
+            # Keep channel receipts and the small two-stage provenance needed by
+            # the client; full evidence remains available through get_event().
+            keys = ("id", "protocol", "kind", "source", "confirmation", "timeframe", "timeframe_min",
+                    "venue", "symbol", "direction", "side", "bar_close_ms", "bar_open_ms",
+                    "signal_close_time", "signal_bar_open", "signal_close", "price", "is_closed",
+                    "executable_entry_time", "entry_reference", "risk", "source_sha256",
+                    "performance_status", "notification_status", "bark_notification_status",
+                    "near_zero_bars", "dense", "htf_side", "ready", "phase", "stale", "error")
             compact = {key: event[key] for key in keys if key in event}
+            indicator = event.get("indicator")
+            if isinstance(indicator, dict):
+                compact["indicator"] = {key: indicator[key] for key in
+                                        ("id", "protocol", "kind", "source", "confirmation", "timeframe",
+                                         "timeframe_min", "venue", "symbol", "direction", "side",
+                                         "bar_open_ms", "bar_close_ms", "price", "near_zero_bars", "dense",
+                                         "htf_side") if key in indicator}
+            model = event.get("model")
+            if isinstance(model, dict):
+                compact["model"] = {key: model[key] for key in
+                                    ("status", "reason", "confidence", "wait_bars", "max_wait_bars",
+                                     "core_start_ms", "core_end_ms", "window_end_ms",
+                                     "last_checked_close_ms", "expires_at_ms") if key in model}
             link = event.get("covered_ledger")
             if isinstance(link, dict):
                 outcome = link.get("outcome")
