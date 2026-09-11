@@ -1,0 +1,58 @@
+{
+  "experiment_id": "exp-spike-v6-bb-squeeze-20260912-v1",
+  "pre_registered": true,
+  "research_only": true,
+  "symbols": [
+    "BTC",
+    "ETH",
+    "SOL",
+    "XRP",
+    "DOGE",
+    "PEPE",
+    "SOPH",
+    "USELESS"
+  ],
+  "timeframes_min": [
+    15,
+    30,
+    60,
+    240
+  ],
+  "start": "2024-09-10T00:00:00Z",
+  "split": "2025-09-10T00:00:00Z",
+  "end_exclusive": "2026-09-10T00:00:00Z",
+  "bb": {
+    "length": 200,
+    "stdev_multiplier": 2,
+    "ddof": 0,
+    "width": "(upper-lower)/abs(basis)",
+    "prior_width_history": 500,
+    "quantile": 0.1,
+    "threshold_uses_shift": 1,
+    "compressed_consecutive_bars": 3,
+    "compression_memory_preceding_bars": 12
+  },
+  "rsi": {
+    "length": 6,
+    "threshold": 50,
+    "confirmation": "level in signal direction; not same-bar crossover"
+  },
+  "variants": {
+    "A": "original V6 on common BB-feature-ready decisions",
+    "B": "A plus recent compression, both directions",
+    "C": "B plus current width > previous width",
+    "D": "C plus RSI6>50 long or <50 short"
+  },
+  "coverage_reference": "Also report full unfiltered A0 to disclose warmup exclusion; no missing feature counted as negative evidence",
+  "execution": "Reuse unchanged spike_v6_wvf_study ExecutionSpec and raw V6 opposite exits; next open, 5/.2/2 ATR SL, 2R arms 4ATR trail, 0.2% roundtrip cost; no funding",
+  "controls": "99-seed same-symbol/timeframe/month/causal-volatility matched event control using existing verified single-event engine; do not reinterpret as a portfolio",
+  "source_hashes": {
+    "yoyo/evaluation/pine/spike_burst_v6.pine": "b3147f1357dc210a7b19d839a9f72163e29f1ae4e58cc299fa942c38c402fe07",
+    "yoyo/evaluation/spike_burst_v6_structure.py": "e84690c02e7b03291cc3037eab37ac495cc2ece79326e24411cfa72aa1214d4b",
+    "yoyo/evaluation/spike_v6_wvf_study.py": "ba8db5027680e259f0c7572e3d31b1fa709481869fd48679e004daec262d3fd4",
+    "yoyo/evaluation/spike_v6_wvf_study_post.py": "334772aa325660b5ae9abbf93db4ddbc9e8908d6becb2ddd7e7dd2d1d3866e9a"
+  },
+  "holdout": "Owner authorized historical data. Each new A/B/C/D fixed configuration first authorized post-2026-05-04 research evaluation; already-known history, not blind holdout. No tuning after outcomes.",
+  "training_eligible": false,
+  "production_eligible": false
+}
