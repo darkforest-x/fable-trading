@@ -173,7 +173,8 @@
   $("search").addEventListener("input", filtered); $("timeframe").addEventListener("change", filtered);
   $("previous").addEventListener("click", () => move(-1)); $("next").addEventListener("click", () => move(1)); $("fit-global").addEventListener("click", () => fit("global")); $("fit-signal").addEventListener("click", () => fit("signal"));
   $("theme-toggle").addEventListener("click", () => { setTheme(state.theme === "dark" ? "light" : "dark"); if (state.selected) selectRecord(state.selected); });
-  $("fullscreen").addEventListener("click", () => { $("charts").classList.toggle("is-fullscreen"); state.charts.forEach(({ chart }) => chart.resize(chart.chartElement().parentElement.clientWidth, chart.chartElement().parentElement.clientHeight)); });
+  const toggleFullscreen = () => { const expanded = $("charts").classList.toggle("is-fullscreen"); $("exit-fullscreen").hidden = !expanded; state.charts.forEach(({ chart }) => chart.resize(chart.chartElement().parentElement.clientWidth, chart.chartElement().parentElement.clientHeight)); };
+  $("fullscreen").addEventListener("click", toggleFullscreen); $("exit-fullscreen").addEventListener("click", toggleFullscreen);
   $("notes").addEventListener("input", () => { if (!state.selected) return; const all = readNotes(); all[recordId(state.selected)] = $("notes").value; writeNotes(all); $("notes-status").textContent = "已保存于此浏览器。"; }); $("export-notes").addEventListener("click", exportNotes);
   document.addEventListener("keydown", (event) => { if (event.target.matches("input,textarea,select")) return; if (event.key === "ArrowLeft") move(-1); if (event.key === "ArrowRight") move(1); });
   boot().catch((error) => { $("chart-status").textContent = `无法载入图册：${error.message}`; });
