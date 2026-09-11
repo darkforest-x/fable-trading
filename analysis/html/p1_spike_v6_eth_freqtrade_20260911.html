@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>SPIKE V6 ETH Freqtrade bridge：冻结镜像执行检查</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>SPIKE V6 ETH Freqtrade bridge：冻结镜像执行检查</h1>
+<p>生成时间：2026-09-11。此文记录一个离线、来源镜像研究，不是 TradingView 原生回测、实盘建议或收益结论。</p>
+<h2>口径与复现</h2>
+<ul>
+<li>V6 规则：冻结 Pine commit <code>6c12660</code>，Pine SHA <code>e15854bc577e5548c5799dcbba87d8b218c195fedf562940b621b9d7ef57c882</code>，oracle SHA <code>e84690c02e7b03291cc3037eab37ac495cc2ece79326e24411cfa72aa1214d4b</code>。</li>
+<li>数据：已存在 OKX ETH-USDT-SWAP 冻结 30m 源，SHA <code>80dc85ee0b926239b20a3e733e425550b2a863cf66f27f8c1a396d31d252855a</code>；评估窗 2024-09-10 至 2026-09-10 UTC。</li>
+<li>执行：next observed open 入场、单一活跃仓、双边各 10bp 费用、funding=0 占位。止损只读取前一根已收盘时的计划，不能用同根 high/low 更新后反查同根 low/high。</li>
+<li>命令：<code>python3 build_v6_bridge.py &amp;&amp; python3 write_frozen_ohlcv.py &amp;&amp; python3 run_freqtrade_v6.py</code>（本次只读取已完成产物，没有重取行情）。</li>
+</ul>
+<h2>因果与框架检查</h2>
+<p><code>test_v6_bridge.py</code> 通过。receipt 对 30m/1H/4H 的 501、2501、中段与末段前缀检查确认：追加未来 bars 不改变此前候选或当时 active stop。Freqtrade 实际成交逐笔均有信号/止损计划输入；入场缺失和止损输入缺失均为 0。单活跃仓使 467 个 30m 双向候选中只有 215 笔实际成交，这个差异是框架仓位约束的结果，不能当作 V6 漏信号。</p>
+<h2>全窗基线（双向）</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>候选</th>
+<th>Freqtrade 成交</th>
+<th>PF</th>
+<th>胜率</th>
+<th>累计收益率</th>
+<th>最大相对回撤</th>
+</tr></thead><tbody>
+<tr><td>30m</td><td>467</td><td>215</td><td>1.011</td><td>31.2%</td><td>0.489%</td><td>7.22%</td></tr>
+<tr><td>1H</td><td>246</td><td>119</td><td>0.998</td><td>25.2%</td><td>-0.070%</td><td>5.20%</td></tr>
+<tr><td>4H</td><td>60</td><td>32</td><td>2.289</td><td>40.6%</td><td>13.529%</td><td>2.27%</td></tr>
+</tbody></table>
+<p>4H 只有 32 笔，30m/1H 的结果也没有匹配随机入场对照；这些数不能支持 edge 或盈利声明。long-only 对照也已执行，保存在同一 receipt 中，未用来选择 V6 规则。</p>
+<h2>30m 单变量开发/后段检查</h2>
+<p>开发段仅比较初始止损轴 (1.5/2.0/2.5 ATR) 与跟踪轴 (3/4/5 ATR)，没有混合搜索。开发段的最高 PF 仍低于 1（initial 1.5: 0.970；trail 5.0: 0.969）。预先带入后段的两个候选分别为 PF 1.152 与 1.161，样本为 98 与 93 笔；后段同向但差异很小，不能构成参数优化结论。</p>
+<h2>风险与诚实声明</h2>
+<p>这里的 V6 是 Python 镜像逐式构建、fixture/前缀因果检查加 Freqtrade 执行对照；未进行 TradingView 原生 ETH 两年逐 bar 编译验证。没有 funding、滑点、流动性或多仓账户模型，且没有随机对照、显著性检验或授权 holdout 评分。结果仅用于核查 V6 形态镜像、next-open/止损时钟与框架成交边界；不得改动 live V1、Pine、通知或风险参数。</p>
+<p>产物：<code>experiments/active/exp-spike-v1-eth-stops-20260911/freqtrade_v6/results/freqtrade_execution_receipt.json</code>、<code>freqtrade_run_summary.csv</code> 与各逐笔 gzip ledger。</p>
+</body>
+</html>
