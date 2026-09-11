@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>SPIKE V1 · OKX 133 笔复盘</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div><p class="eyebrow">SPIKE V1 · 本地历史复盘</p><h1>OKX 133 笔逐笔图册</h1></div>
+    <div class="top-actions"><button id="theme-toggle" type="button" aria-label="切换主题">浅色</button><a id="tv-link" target="_blank" rel="noreferrer">TradingView 原站 ↗</a></div>
+  </header>
+  <main>
+    <section class="disclosure" aria-label="复盘口径">
+      <strong>TradingView Lightweight Charts · 本地历史数据</strong>
+      <span>信号后的 K 线只用于历史复盘，不是当时模型输入；原站链接不保证定位到历史 K 线。</span>
+    </section>
+    <section class="layout">
+      <aside class="records" aria-label="133 笔记录">
+        <div class="filters">
+          <label>搜索<input id="search" type="search" placeholder="合约、编号、时间"></label>
+          <label>周期<select id="timeframe"><option value="all">全部周期</option><option value="30m">30m</option><option value="1H">1H</option><option value="4H">4H</option></select></label>
+          <p id="record-count" class="muted">正在读取清单…</p>
+        </div>
+        <nav id="record-list" aria-label="记录列表"></nav>
+      </aside>
+      <section class="review" aria-live="polite">
+        <div class="record-head">
+          <div><p id="record-sequence" class="eyebrow">—</p><h2 id="record-title">正在读取历史数据…</h2><p id="record-meta" class="muted"></p></div>
+          <div class="review-actions"><button id="previous" type="button">← 上一笔</button><button id="next" type="button">下一笔 →</button><button id="fit-global" type="button">全局</button><button id="fit-signal" type="button">信号近景</button><button id="fullscreen" type="button">全屏</button></div>
+        </div>
+        <div id="facts" class="facts"></div>
+        <div id="chart-status" class="chart-status">请选择一笔记录。</div>
+        <div id="charts" class="charts" hidden>
+          <section class="chart-panel main-panel"><h3>价格 · 6MA · 信号与账本</h3><div id="price-chart" class="chart"></div></section>
+          <section class="chart-panel"><h3>IMACD · MD / SB</h3><div id="momentum-chart" class="chart small"></div></section>
+          <section class="chart-panel"><h3>成交量</h3><div id="volume-chart" class="chart small"></div></section>
+        </div>
+        <section class="notes"><div class="notes-header"><h3>本机复盘批注</h3><button id="export-notes" type="button">导出 JSON</button></div><textarea id="notes" rows="4" placeholder="仅保存于此浏览器。不会写入监控、通知或交易系统。"></textarea><p id="notes-status" class="muted"></p></section>
+      </section>
+    </section>
+  </main>
+  <footer>Lightweight Charts™ v4.2.0 · © TradingView, Inc. · Apache-2.0 · <a href="vendor/NOTICE" target="_blank">NOTICE</a> · <a href="vendor/LICENSE" target="_blank">LICENSE</a></footer>
+  <script src="vendor/lightweight-charts.standalone.production.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
