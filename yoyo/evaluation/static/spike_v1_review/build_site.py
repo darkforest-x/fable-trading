@@ -19,7 +19,13 @@ def main() -> None:
     payload = json.loads(manifest.read_text())
     records = payload.get("records")
     if not isinstance(records, list) or len(records) != 133: raise SystemExit("manifest must contain exactly 133 records")
+    available, missing = 0, 0
     for record in records:
+        if not isinstance(record, dict): raise SystemExit("records must be objects")
+        if record.get("status") == "missing" or record.get("state", {}).get("status") == "missing":
+            if not record.get("error"): raise SystemExit("missing record needs an explicit error")
+            missing += 1
+            continue
         chart_path = record.get("chart_path") if isinstance(record, dict) else None
         if not isinstance(chart_path, str) or not chart_path.startswith("charts/"):
             raise SystemExit("every record needs a relative charts/ chart_path")
@@ -36,11 +42,13 @@ def main() -> None:
                 for value in (candle.get("t"), candle.get("o"), candle.get("h"), candle.get("l"), candle.get("c"))
             ):
                 raise SystemExit(f"chart needs finite OHLC timestamps: {chart_path}")
+        available += 1
+    if available + missing != 133: raise SystemExit("invalid review record accounting")
     args.out_dir.mkdir(parents=True, exist_ok=True)
     for name in ("index.html", "app.js", "styles.css"):
         shutil.copy2(SOURCE / name, args.out_dir / name)
     shutil.copytree(SOURCE / "vendor", args.out_dir / "vendor", dirs_exist_ok=True)
     shutil.copytree(args.data_dir, args.out_dir / "data", dirs_exist_ok=True)
-    print(json.dumps({"site": str(args.out_dir), "records": len(records), "schema_version": payload.get("schema_version")}, ensure_ascii=False))
+    print(json.dumps({"site": str(args.out_dir), "records": len(records), "available": available, "missing": missing, "schema_version": payload.get("schema_version")}, ensure_ascii=False))
 
 if __name__ == "__main__": main()

@@ -38,6 +38,20 @@ def test_review_builder_copies_only_a_complete_133_record_contract(tmp_path: Pat
     assert (out / "vendor/LICENSE").is_file() and (out / "vendor/NOTICE").is_file()
 
 
+def test_review_builder_preserves_an_explicit_timeline_failure_without_a_chart_fallback(tmp_path: Path) -> None:
+    data = make_data(tmp_path)
+    manifest = json.loads((data / "manifest.json").read_text())
+    missing = manifest["records"][45]
+    missing["status"] = "missing"
+    missing["error"] = "ohlcv_timeline_invalid"
+    (data / missing["chart_path"]).unlink()
+    (data / "manifest.json").write_text(json.dumps(manifest))
+    completed = subprocess.run([sys.executable, str(BUILD), "--data-dir", str(data), "--out-dir", str(tmp_path / "site")], text=True, capture_output=True, check=True)
+    receipt = json.loads(completed.stdout)
+    assert receipt["available"] == 132 and receipt["missing"] == 1
+    assert not (tmp_path / "site" / "data" / missing["chart_path"]).exists()
+
+
 def test_review_builder_refuses_a_manifest_with_a_missing_chart(tmp_path: Path) -> None:
     data = make_data(tmp_path, include_charts=False)
     completed = subprocess.run([sys.executable, str(BUILD), "--data-dir", str(data), "--out-dir", str(tmp_path / "site")], text=True, capture_output=True)

@@ -23,6 +23,7 @@
   };
   const tvUrl = (record) => record.tradingview_url || record.tv_url || "https://www.tradingview.com/chart/";
   const canonicalTimeframe = (value) => ({ 30: "30m", 60: "1H", 240: "4H", "30": "30m", "60": "1H", "240": "4H" }[value] || value || "—");
+  const unavailable = (record) => record?.status === "missing" || record?.state?.status === "missing";
   const candleSeries = (chart) => chart.addCandlestickSeries({ upColor: "#3fbf8f", downColor: "#e6636d", wickUpColor: "#62d7ab", wickDownColor: "#f18890", borderVisible: false, priceLineVisible: false });
   const line = (chart, color, lineWidth = 1) => chart.addLineSeries({ color, lineWidth, crosshairMarkerVisible: false, lastValueVisible: true, priceLineVisible: false });
   function chartOptions(container, showTime = false) {
@@ -76,11 +77,13 @@
     if (!state.visible.some((record) => recordId(record) === recordId(state.selected || {}))) selectRecord(state.visible[0] || null);
   }
   function renderList() {
-    $("record-count").textContent = `显示 ${state.visible.length} / ${state.records.length} 笔`;
+    const available = state.records.filter((record) => !unavailable(record)).length;
+    $("record-count").textContent = `显示 ${state.visible.length} / ${state.records.length} 笔 · 可绘制 ${available}`;
     $("record-list").innerHTML = state.visible.map((record) => {
       const active = recordId(record) === recordId(state.selected || {});
       const s = signal(record);
-      return `<button class="record${active ? " active" : ""}" data-record="${recordId(record)}"><span class="badge">#${record.sequence}</span><span><strong>${record.symbol || "—"}</strong><small>${canonicalTimeframe(record.timeframe || record.timeframe_min)} · ${fmtTime(s.time_ms || s.bar_close_ms)}</small></span><span>›</span></button>`;
+      const missing = unavailable(record);
+      return `<button class="record${active ? " active" : ""}" data-record="${recordId(record)}"><span class="badge">#${record.sequence}</span><span><strong>${record.symbol || "—"}</strong><small>${canonicalTimeframe(record.timeframe || record.timeframe_min)} · ${missing ? "证据时间线无效" : fmtTime(record.signal_close_ms ?? s.time_ms ?? s.bar_close_ms)}</small></span><span>${missing ? "!" : "›"}</span></button>`;
     }).join("");
     document.querySelectorAll("[data-record]").forEach((node) => node.addEventListener("click", () => selectRecord(state.records.find((record) => recordId(record) === node.dataset.record))));
   }
@@ -97,7 +100,7 @@
     const s = signal(record);
     $("record-sequence").textContent = `第 ${record.sequence} / ${state.records.length} 笔`;
     $("record-title").textContent = `${record.symbol} · ${canonicalTimeframe(record.timeframe || record.timeframe_min)}`;
-    $("record-meta").textContent = `信号：${fmtTime(s.time_ms || s.bar_close_ms)} · 后续 K 线仅作历史复盘`;
+    $("record-meta").textContent = unavailable(record) ? `不可绘制：${record.error || "冻结 OHLC 不可用"}` : `信号：${fmtTime(record.signal_close_ms ?? s.time_ms ?? s.bar_close_ms)} · 后续 K 线仅作历史复盘`;
     $("tv-link").href = tvUrl(record);
   }
   function toCandles(rows) { return rows.map((row) => ({ time: seconds(row.t), open: Number(row.o), high: Number(row.h), low: Number(row.l), close: Number(row.c) })); }
@@ -141,13 +144,14 @@
   async function selectRecord(record) {
     state.selected = record; renderList(); renderRecordHeader(record); renderFacts(record); setNotes(record); destroyCharts(); $("charts").hidden = true;
     if (!record) return;
+    if (unavailable(record)) { $("chart-status").textContent = `图表不可用：${record.error || "冻结 OHLC 证据时间线无效"}。不使用当前行情或其他交易所替代。`; return; }
     $("chart-status").textContent = "正在加载该笔冻结 OHLC…";
     try {
       const response = await fetch(`${DATA_ROOT}${chartPath(record)}`, { cache: "no-store" });
       if (!response.ok) throw new Error(`图表数据 HTTP ${response.status}`);
       const payload = await response.json();
       if (recordId(record) !== recordId(state.selected || {})) return;
-      draw(record, payload); $("charts").hidden = false; $("chart-status").textContent = "十字光标、缩放和拖动均只作用于本地历史数据。"; fit("signal");
+      renderFacts({ ...record, ...payload }); draw(record, payload); $("charts").hidden = false; $("chart-status").textContent = "十字光标、缩放和拖动均只作用于本地历史数据。"; fit("signal");
     } catch (error) { if (recordId(record) === recordId(state.selected || {})) $("chart-status").textContent = `图表不可用：${error.message}`; }
   }
   function move(delta) { const index = state.visible.findIndex((record) => recordId(record) === recordId(state.selected || {})); selectRecord(state.visible[Math.max(0, Math.min(state.visible.length - 1, index + delta))]); }
