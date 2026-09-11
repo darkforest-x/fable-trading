@@ -14,8 +14,11 @@ tradable open.  Thus WVF filters admissions only; they never suppress exits.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
+import json
 import math
 from pathlib import Path
+import subprocess
 from typing import Iterable
 
 import numpy as np
@@ -162,6 +165,8 @@ def make_signal_ledger(signals: pd.DataFrame, reclaim: pd.DataFrame | None, *, v
     short = signals.short_signal.fillna(False).astype(bool)
     if (long & short).any():
         raise ValueError("a close cannot carry both V6 sides")
+    columns = ["signal_i", "signal_bar_open", "signal_confirm_time", "side", "direction", "variant",
+               "admitted_for_entry", "wvf_filter_reason", "wvf_current_extreme", "wvf_last_extreme_i"]
     rows: list[dict[str, object]] = []
     for i, stamp in enumerate(signals.index):
         for side, present in ((1, bool(long.iloc[i])), (-1, bool(short.iloc[i]))):
@@ -178,7 +183,7 @@ def make_signal_ledger(signals: pd.DataFrame, reclaim: pd.DataFrame | None, *, v
                          "admitted_for_entry": admitted, "wvf_filter_reason": reason,
                          "wvf_current_extreme": None if reclaim is None else bool(reclaim.wvf_current_extreme.iloc[i]),
                          "wvf_last_extreme_i": np.nan if reclaim is None else reclaim.wvf_last_extreme_i.iloc[i]})
-    return pd.DataFrame(rows)
+    return pd.DataFrame(rows, columns=columns)
 
 
 def _initial_position(frame: pd.DataFrame, signal_i: int, side: int, spec: ExecutionSpec,
@@ -448,7 +453,17 @@ def load_normalized_30m(path: Path) -> pd.DataFrame:
     required = ["open", "high", "low", "close", "volume", "quote_volume"]
     if set(required) - set(raw):
         raise ValueError(f"normalized source lacks columns: {path}")
-    return raw.loc[:, required]
+    raw = raw.loc[:, required]
+    if raw.index.has_duplicates or not raw.index.is_monotonic_increasing:
+        raise ValueError(f"normalized source has duplicate or unordered clocks: {path}")
+    if len(raw) > 1 and raw.index.to_series().diff().iloc[1:].ne(pd.Timedelta(minutes=30)).any():
+        raise ValueError(f"normalized source has a 30-minute gap: {path}")
+    prices = raw[["open", "high", "low", "close"]].to_numpy(dtype=float)
+    if (not np.isfinite(prices).all() or np.any(prices[:, 2] <= 0)
+            or np.any(prices[:, 1] < np.maximum(prices[:, 0], prices[:, 3]))
+            or np.any(prices[:, 2] > np.minimum(prices[:, 0], prices[:, 3]))):
+        raise ValueError(f"normalized source has invalid OHLC: {path}")
+    return raw
 
 
 def prepare_symbol(frame30: pd.DataFrame, *, minutes: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -462,3 +477,97 @@ def prepare_symbol(frame30: pd.DataFrame, *, minutes: int) -> tuple[pd.DataFrame
     signals = v6_signals(featured, minutes)
     wvf = wvf_features(featured, data_gap=gap)
     return featured, signals, wvf_long_reclaim(featured, wvf, window=12), wvf_long_reclaim(featured, wvf, window=24)
+
+
+def _catalog_ticks(catalog: Path, symbols: Iterable[str]) -> dict[str, float]:
+    rows = json.loads(catalog.read_text(encoding="utf-8"))
+    ticks: dict[str, float] = {}
+    for asset in symbols:
+        found = [row for row in rows if row.get("venue") == "okx" and row.get("symbol") == f"{asset}-USDT-SWAP"]
+        if len(found) != 1 or not math.isfinite(float(found[0].get("tick", math.nan))) or float(found[0]["tick"]) <= 0:
+            raise ValueError(f"missing valid OKX tick for {asset}")
+        ticks[asset] = float(found[0]["tick"])
+    return ticks
+
+
+def run_fixed_study(*, source_root: Path, output: Path,
+                    symbols: Iterable[str] = ("BTC", "ETH", "SOL", "XRP", "DOGE", "PEPE", "SOPH", "USELESS"),
+                    start: pd.Timestamp = pd.Timestamp("2024-09-10T00:00:00Z"),
+                    split: pd.Timestamp = pd.Timestamp("2025-09-10T00:00:00Z"),
+                    end: pd.Timestamp = pd.Timestamp("2026-09-10T00:00:00Z")) -> pd.DataFrame:
+    """Run fixed A/B12/C24 ledgers once per cached symbol/timeframe feature set.
+
+    This runner intentionally emits only the configured strategy ledgers and
+    closed-trade account summaries.  Matched random controls are a separate
+    explicitly materialized artifact; they are never approximated by sampling
+    the post-filtered trade book.
+    """
+    assets = tuple(symbols)
+    if not start < split < end:
+        raise ValueError("chronological start/split/end are required")
+    output.mkdir(parents=True, exist_ok=False)
+    ticks = _catalog_ticks(source_root.parents[1] / "catalog.json", assets)
+    summaries: list[dict[str, object]] = []
+    inputs: list[dict[str, object]] = []
+    for asset in assets:
+        path = source_root / f"{asset}-USDT-SWAP_30m.csv.gz"
+        raw = load_normalized_30m(path)
+        source_hash = hashlib.sha256(path.read_bytes()).hexdigest()
+        inputs.append({"symbol": asset, "path": str(path), "sha256": source_hash,
+                       "rows": len(raw), "start": raw.index.min().isoformat(), "end": raw.index.max().isoformat(), "tick": ticks[asset]})
+        for minutes in (30, 60, 240):
+            bars, signals, reclaim12, reclaim24 = prepare_symbol(raw, minutes=minutes)
+            gap = _data_gap(bars, minutes)
+            pd.to_pickle({"bars": bars, "signals": signals, "reclaim12": reclaim12,
+                          "reclaim24": reclaim24, "data_gap": gap},
+                         output / f"{asset}_{minutes}m_features.pkl.gz", compression="gzip")
+            for fold, fold_start, fold_end in (("development", start, split), ("validation", split, end)):
+                # Signal is known at close and fills at next open.  Retain the
+                # prior signal bar solely when its next open equals fold_start.
+                lower = fold_start - pd.Timedelta(minutes=minutes * 5)
+                selected = bars.loc[(bars.index >= lower) & (bars.index < fold_end)].copy()
+                selected.attrs["minutes"] = minutes
+                selected_signals = signals.reindex(selected.index, fill_value=False).copy()
+                selected_signals.loc[selected_signals.index + pd.Timedelta(minutes=minutes) < fold_start, :] = False
+                selected_gap = gap.reindex(selected.index).fillna(True)
+                variants = (("A", pd.Series(True, index=selected.index), None),
+                            ("B12", (selected_signals.short_signal | (selected_signals.long_signal & reclaim12.wvf_admitted.reindex(selected.index).fillna(False))), reclaim12.reindex(selected.index)),
+                            ("C24", (selected_signals.short_signal | (selected_signals.long_signal & reclaim24.wvf_admitted.reindex(selected.index).fillna(False))), reclaim24.reindex(selected.index)))
+                for variant, admission, reclaim in variants:
+                    signal_ledger, trades = simulate_v6_variant(selected, selected_signals, admission=admission,
+                                                                  variant=variant, data_gap=selected_gap, reclaim=reclaim,
+                                                                  spec=ExecutionSpec(tick=ticks[asset]))
+                    signal_ledger = signal_ledger.loc[signal_ledger.signal_confirm_time.ge(fold_start)].copy()
+                    trades = trades.loc[trades.entry_time.ge(fold_start)].copy() if len(trades) else trades
+                    for table, name in ((signal_ledger, "signals"), (trades, "trades")):
+                        table.assign(symbol=asset, timeframe_min=minutes, fold=fold).to_csv(
+                            output / f"{asset}_{minutes}m_{fold}_{variant}_{name}.csv.gz", index=False, compression="gzip")
+                    summary = summarize_account(trades)
+                    summaries.append({"symbol": asset, "timeframe_min": minutes, "fold": fold, "variant": variant,
+                                      "raw_long_signals": int((signal_ledger.side == 1).sum()) if len(signal_ledger) else 0,
+                                      "raw_short_signals": int((signal_ledger.side == -1).sum()) if len(signal_ledger) else 0,
+                                      "admitted_long_signals": int(((signal_ledger.side == 1) & signal_ledger.admitted_for_entry).sum()) if len(signal_ledger) else 0,
+                                      **summary})
+    summary = pd.DataFrame(summaries)
+    summary.to_csv(output / "strategy_summary.csv", index=False)
+    (output / "input_manifest.json").write_text(json.dumps({"source_root": str(source_root), "inputs": inputs,
+        "period": {"start": start.isoformat(), "split": split.isoformat(), "end_exclusive": end.isoformat()},
+        "builder_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+        "builder_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "execution": "current reference-exit-r2 next-open model; old Freqtrade bridge is not comparable", "matched_controls": "not_run"}, indent=2) + "\n", encoding="utf-8")
+    return summary
+
+
+def main() -> None:
+    """CLI for the committed fixed-input strategy ledger run only."""
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--source-root", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    run_fixed_study(source_root=args.source_root, output=args.output)
+
+
+if __name__ == "__main__":
+    main()

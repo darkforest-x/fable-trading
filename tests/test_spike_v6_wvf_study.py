@@ -149,3 +149,10 @@ def test_account_drawdown_includes_initial_cash_and_aggregation_keeps_only_full_
     f["volume"] = 1.0; f["quote_volume"] = 100.0
     partial = aggregate_complete(f, 240)
     assert len(partial) == 1 and partial.open.iloc[0] == 100.0
+
+
+def test_empty_signal_ledger_keeps_schema_for_runner_fold_filtering():
+    f = market(6)
+    signals = pd.DataFrame({"long_signal": False, "short_signal": False}, index=f.index)
+    ledger = make_signal_ledger(signals, None, variant="A", minutes=60)
+    assert ledger.empty and {"signal_confirm_time", "admitted_for_entry", "side"}.issubset(ledger)
