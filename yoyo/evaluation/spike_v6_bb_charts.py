@@ -85,13 +85,18 @@ def build(raw: Path, post: Path, output: Path):
     kept = trades.loc[trades.variant.eq("B"), KEY].drop_duplicates()
     base = base.merge(kept.assign(retained=True), how="left", on=KEY)
     base["retained"] = base.retained.eq(True)
+    signals = pd.read_csv(post / "signals.csv.gz")
+    decision = signals.loc[signals.variant.eq("B"), KEY + ["admitted"]]
+    base = base.merge(decision, how="left", on=KEY)
+    if base.admitted.isna().any():
+        raise ValueError("Each illustration needs its actual B admission decision")
     examples = []
     for minutes in (15, 30, 60, 240):
         p = base[base.timeframe_min.eq(minutes)]
         for slug, title, mask, asc in (
             ("retained", "B: retained profitable trend", p.retained & p.net_r.gt(0), False),
-            ("missed", "B: rejected profitable trend", ~p.retained & p.net_r.gt(0), False),
-            ("loss_filtered", "B: filtered loss", ~p.retained & p.net_r.lt(0), True),
+            ("missed", "B: rejected profitable trend", ~p.admitted & p.net_r.gt(0), False),
+            ("loss_filtered", "B: filtered loss", ~p.admitted & p.net_r.lt(0), True),
         ):
             candidates = p[mask].sort_values(["net_r", "symbol", "signal_bar_open"], ascending=[asc, True, True])
             if candidates.empty:
