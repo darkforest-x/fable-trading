@@ -32,6 +32,7 @@ def test_review_builder_copies_only_a_complete_133_record_contract(tmp_path: Pat
     assert "Lightweight Charts" in (out / "index.html").read_text()
     assert "addCandlestickSeries" in (out / "app.js").read_text()
     assert "setMarkers" in (out / "app.js").read_text()
+    assert "tickMarkFormatter" in (out / "app.js").read_text() and "timeFormatter" in (out / "app.js").read_text()
     assert 'src="vendor/lightweight-charts.standalone.production.js"' in (out / "index.html").read_text()
     assert 'src="https://' not in (out / "index.html").read_text()
     assert (out / "vendor/LICENSE").is_file() and (out / "vendor/NOTICE").is_file()
