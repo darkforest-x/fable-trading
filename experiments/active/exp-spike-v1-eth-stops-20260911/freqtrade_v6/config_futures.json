@@ -1,0 +1,42 @@
+{
+  "dry_run": true,
+  "dry_run_wallet": 10000,
+  "stake_currency": "USDT",
+  "stake_amount": 1000,
+  "max_open_trades": 1,
+  "trading_mode": "futures",
+  "margin_mode": "isolated",
+  "futures_funding_rate": 0.0,
+  "timeframe": "30m",
+  "exchange": {
+    "name": "okx",
+    "skip_pair_validation": true,
+    "pair_whitelist": [
+      "ETH/USDT:USDT"
+    ],
+    "pair_blacklist": [],
+    "_ft_has_params": {
+      "uses_leverage_tiers": false,
+      "exchange_has_overrides": {
+        "fetchLeverageTiers": false,
+        "fetchMarketLeverageTiers": false
+      }
+    }
+  },
+  "pairlists": [
+    {
+      "method": "StaticPairList"
+    }
+  ],
+  "entry_pricing": {
+    "price_side": "same",
+    "use_order_book": false
+  },
+  "exit_pricing": {
+    "price_side": "same",
+    "use_order_book": false
+  },
+  "internals": {
+    "process_throttle_secs": 5
+  }
+}
