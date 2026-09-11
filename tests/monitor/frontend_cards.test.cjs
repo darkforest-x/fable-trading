@@ -7,6 +7,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
+const vm = require("node:vm");
 
 const root = path.resolve(__dirname, "../..");
 const app = fs.readFileSync(path.join(root, "yoyo/monitor/static/app.js"), "utf8");
@@ -28,6 +29,31 @@ const rawReplay = Object.freeze({
   executable_entry_time: null,
 });
 const pending = Object.freeze({ ...rawLive, id: "pending", is_closed: false });
+
+
+function refreshHarness(fetchImpl) {
+  const cutoff = app.indexOf("  function redact(value)");
+  assert.ok(cutoff > 0, "refresh harness must cut before browser event bindings");
+  const instrumented = `${app.slice(0, cutoff)}
+  renderErrors = renderStatus = renderSignals = renderWatch = renderDetail = () => {};
+  chooseSignal = clearSelectedSignal = () => {};
+  globalThis.__refreshHarness = { state, refresh, queueRefresh };
+})();`;
+  const classList = { add() {}, remove() {}, toggle() {} };
+  const element = { disabled: false, classList, textContent: "", innerHTML: "", style: {}, setAttribute() {}, removeAttribute() {} };
+  const sandbox = {
+    AbortController, Date, Intl, Map, Set, Promise, Number, String, Boolean,
+    Array, Object, Math, RegExp, Error, TypeError, JSON, encodeURIComponent,
+    fetch: fetchImpl, setTimeout, clearTimeout,
+    document: { getElementById: () => element, querySelectorAll: () => [] },
+  };
+  vm.runInNewContext(instrumented, sandbox, { filename: "app-refresh-harness.js" });
+  return sandbox.__refreshHarness;
+}
+
+function jsonResponse(value) {
+  return { ok: true, headers: { get: () => "application/json" }, json: async () => value };
+}
 
 function consume(row) {
   if (!row || typeof row !== "object") throw new TypeError("API item must be an object");
@@ -249,14 +275,58 @@ test("cursor pages serialize periodic refresh and retain their own failure notic
 });
 
 
-test("loaded replay pages poll status only, while manual, live, and failed initial loads still fetch cards", () => {
-  assert.match(app, /function shouldRefreshSignalList\(trigger\)[\s\S]*trigger !== "periodic" \|\| state\.signalSource !== "replay" \|\| !state\[`\$\{sourceKey\(\)\}Loaded`\]/);
-  assert.match(app, /async function refresh\(trigger = "manual"\)/);
-  assert.match(app, /if \(shouldRefreshSignalList\(trigger\) && queryScope === "direct"\)[\s\S]*confirmation=raw/);
-  assert.match(app, /setInterval\(\(\) => refresh\("periodic"\), 15000\)/);
-  assert.match(app, /\$\("refresh-button"\)\.addEventListener\("click", refresh\)/);
-  assert.match(app, /data-signal-source[\s\S]*invalidateSignalQuery\(\);[\s\S]*refresh\(\);/);
-  assert.match(app, /function queueRefresh\(trigger\)[\s\S]*trigger === "manual" \? "manual"/);
+test("refresh execution polls loaded replay status only and retains manual/live/retry/cursor semantics", async () => {
+  const paths = [];
+  let failReplayOnce = false;
+  const harness = refreshHarness(async (path) => {
+    paths.push(path);
+    if (path.startsWith("/api/status")) return jsonResponse({ now_ms: Date.now(), runtime: {} });
+    if (path.includes("source=replay") && failReplayOnce) {
+      failReplayOnce = false;
+      throw new Error("temporary replay failure");
+    }
+    const source = path.includes("source=replay") ? "replay" : "live";
+    const confirmation = path.includes("confirmation=raw_yolo") ? "raw_yolo" : path.includes("confirmation=yolo") ? "yolo" : "raw";
+    return jsonResponse({ items: [{ ...rawLive, id: `${source}-${confirmation}-${paths.length}`, source, confirmation }], total: 1, next_cursor: null });
+  });
+  const { state, refresh } = harness;
+
+  state.signalSource = "replay";
+  state.directSignalsLoaded = true;
+  await refresh("periodic");
+  assert.deepEqual(paths, ["/api/status"]);
+
+  paths.length = 0;
+  await refresh();
+  assert.equal(paths.filter((path) => path.startsWith("/api/signals")).length, 1);
+  assert.match(paths.find((path) => path.startsWith("/api/signals")), /source=replay.*confirmation=raw/);
+
+  paths.length = 0;
+  state.signalSource = "live";
+  state.directSignalsLoaded = true;
+  await refresh("periodic");
+  assert.equal(paths.filter((path) => path.startsWith("/api/signals")).length, 2);
+  assert.ok(paths.some((path) => path.includes("confirmation=raw")));
+  assert.ok(paths.some((path) => path.includes("confirmation=raw_yolo")));
+
+  paths.length = 0;
+  state.signalSource = "replay";
+  state.directSignalsLoaded = false;
+  failReplayOnce = true;
+  await refresh("periodic");
+  assert.equal(state.directSignalsLoaded, false);
+  assert.ok(paths.some((path) => path.startsWith("/api/signals")));
+  paths.length = 0;
+  await refresh("periodic");
+  assert.equal(state.directSignalsLoaded, true);
+  assert.ok(paths.some((path) => path.startsWith("/api/signals")));
+
+  paths.length = 0;
+  state.rawLoadingMore = true;
+  await refresh("periodic");
+  await refresh();
+  assert.equal(state.refreshQueued, "manual");
+  assert.deepEqual(paths, []);
 });
 
 

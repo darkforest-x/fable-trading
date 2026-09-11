@@ -1066,7 +1066,7 @@
   }));
   const sideFilter = $("side-filter");
   if (sideFilter) sideFilter.addEventListener("change", (event) => { state.side = event.target.value; state.rowLimit = 24; applySignalFilters(); });
-  $("refresh-button").addEventListener("click", refresh);
+  $("refresh-button").addEventListener("click", () => refresh());
   $("tradingview-open").addEventListener("click", () => openTradingView(state.selected));
   $("chart-expand").addEventListener("click", () => setChartExpanded(!state.chartExpanded));
   $("chart-reset").addEventListener("click", () => { state.chartViewport = null; renderChart(); });
