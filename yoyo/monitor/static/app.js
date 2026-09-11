@@ -603,7 +603,7 @@
       ...coveredLedgerFacts(item),
       ["信号 K 线", item.is_closed ? "交易所已确认收盘" : "尚未确认 · 不作为可执行 V1", item.is_closed ? "mint" : "red"],
       ["可执行次开盘", item.executable_entry_time ? item.source === "replay" ? `回放执行时钟 ${shortDate(milliseconds(item.executable_entry_time))}` : shortDate(milliseconds(item.executable_entry_time)) : item.source === "replay" ? "回放未提供成交时钟" : item.entry_reference === "next_open" ? "等待真实成交记录" : "后端未提供", ""],
-      ["V1 风险参考", finite(item.risk) ? price(item.risk) : "—", ""],
+      ["V1 风险参考", finite(original.risk) ? price(original.risk) : finite(item.risk) ? price(item.risk) : "—", ""],
       ["特征来源哈希", item.source_sha256 ? `${String(item.source_sha256).slice(0, 12)}…` : "—", ""],
       [confirmed || candidate ? "原箭头收盘 · 北京时间" : "最近收盘 · 北京时间", shortDate(original.bar_close_ms), ""],
       ...(confirmed || candidate ? [["原箭头收盘价", price(original.price), ""]] : []),
@@ -721,7 +721,9 @@
     const maKeys = ["sma20", "ema20", "sma60", "ema60", "sma120", "ema120"];
     // A risk line is meaningful only when the backend supplied an explicit stop price.
     // `risk` may be a distance or a ratio, so it must never be guessed as a chart price.
-    const stopPrice = finite(state.selected?.initial_stop) ? Number(state.selected.initial_stop) : null;
+    const original = originalSignal(state.selected);
+    const stopPrice = finite(state.selected?.initial_stop) ? Number(state.selected.initial_stop)
+      : finite(original?.initial_stop) ? Number(original.initial_stop) : null;
     const rangeValues = candles.flatMap((bar) => [bar.h, bar.l, ...maKeys.map((key) => bar[key])]).filter(finite).map(Number);
     if (stopPrice !== null) rangeValues.push(stopPrice);
     let pMin = Math.min(...rangeValues), pMax = Math.max(...rangeValues);

@@ -335,7 +335,7 @@ class Store:
             keys = ("id", "protocol", "kind", "source", "confirmation", "timeframe", "timeframe_min",
                     "venue", "symbol", "direction", "side", "bar_close_ms", "bar_open_ms",
                     "signal_close_time", "signal_bar_open", "signal_close", "price", "is_closed",
-                    "executable_entry_time", "entry_reference", "risk", "source_sha256",
+                    "executable_entry_time", "entry_reference", "risk", "initial_stop", "source_sha256",
                     "performance_status", "notification_status", "bark_notification_status",
                     "near_zero_bars", "dense", "htf_side", "ready", "phase", "stale", "error")
             compact = {key: event[key] for key in keys if key in event}
@@ -344,7 +344,7 @@ class Store:
                 compact["indicator"] = {key: indicator[key] for key in
                                         ("id", "protocol", "kind", "source", "confirmation", "timeframe",
                                          "timeframe_min", "venue", "symbol", "direction", "side",
-                                         "bar_open_ms", "bar_close_ms", "price", "near_zero_bars", "dense",
+                                         "bar_open_ms", "bar_close_ms", "price", "risk", "initial_stop", "near_zero_bars", "dense",
                                          "htf_side") if key in indicator}
             model = event.get("model")
             if isinstance(model, dict):

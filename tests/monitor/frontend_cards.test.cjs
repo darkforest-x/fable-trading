@@ -169,7 +169,8 @@ test("chart uses UTC timestamp distance, preserves gaps, and plots only explicit
   assert.ok(x(timestamps[2]) - x(timestamps[1]) > 4 * (x(timestamps[1]) - x(timestamps[0])));
   assert.match(app, /const firstTime = Number\(candles\[0\]\.t\)/);
   assert.match(app, /timeRange = Math\.max\(nominalMs, lastTime - firstTime\)/);
-  assert.match(app, /initial_stop/);
+  assert.match(app, /original\?\.initial_stop/);
+  assert.match(app, /V1 风险参考.*original\.risk/s);
   assert.match(app, /may be a distance or a ratio/);
   assert.match(app, /chart-risk-line/);
   assert.match(app, /pointerdown/);

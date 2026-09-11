@@ -158,6 +158,9 @@ def test_signal_summary_keeps_live_channel_receipts_and_yolo_card_contract(tmp_p
     assert receipt_rows[failed_tg["event_id"]]["notification_status"] == "failed"
     assert receipt_rows[failed_bark["event_id"]]["bark_notification_status"] == "failed"
     assert all(row["kind"] == SIGNAL_KIND and row["protocol"] == SIGNAL_PROTOCOL for row in raw_rows)
+    raw_summary = receipt_rows[sent_tg["event_id"]]
+    assert raw_summary["initial_stop"] == sent["initial_stop"]
+    assert store.get_event(sent_tg["event_id"])["initial_stop"] == sent["initial_stop"]
 
     result = get(limit=10, symbol=None, timeframe=None, kind=None, side=None,
                  source="live", confirmation="yolo")["items"]
@@ -170,7 +173,7 @@ def test_signal_summary_keeps_live_channel_receipts_and_yolo_card_contract(tmp_p
     assert row["indicator"] == {key: confirmed["indicator"][key] for key in
                                  ("protocol", "kind", "source", "confirmation", "timeframe", "timeframe_min",
                                   "venue", "symbol", "direction", "side", "bar_open_ms", "bar_close_ms",
-                                  "price")}
+                                  "price", "risk", "initial_stop")}
 
 
 def test_signal_summary_projects_replay_outcomes_but_get_event_keeps_evidence(tmp_path, monkeypatch):
