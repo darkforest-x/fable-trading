@@ -109,7 +109,9 @@ var table reverseAudit = table.new(position.bottom_right, 1, 1)
 if barstate.islast
     table.cell(reverseAudit, 0, 0, "V1 REVERSE QA " + str.tostring(reverseProbeTotal) + "/12", text_color=color.white, bgcolor=color.teal)
 '''
-    return source + "\n" + fixture + textwrap.indent(state, "    ") + checks + "\n" + calls
+    marker = "// END BURST PURE HELPERS"
+    prefix, suffix = source.split(marker, 1)
+    return prefix + marker + "\n" + fixture + textwrap.indent(state, "    ") + checks + suffix + "\n" + calls
 
 
 def render(source: str) -> str:
@@ -174,7 +176,9 @@ var table reverseAudit = table.new(position.bottom_right, 1, 1)
 if barstate.islast
     table.cell(reverseAudit, 0, 0, "REVERSE QA " + str.tostring(reverseProbeTotal) + "/16", text_color=color.white, bgcolor=color.teal)
 '''
-    return source + "\n// Native reference probe SHA " + hashlib.sha256(state.encode()).hexdigest() + "\n" + fixture + textwrap.indent(state, "    ") + checks + "\n" + calls
+    marker = "// END UNCHANGED V2 RISK HELPERS"
+    prefix, suffix = source.split(marker, 1)
+    return prefix + marker + "\n// Native reference probe SHA " + hashlib.sha256(state.encode()).hexdigest() + "\n" + fixture + textwrap.indent(state, "    ") + checks + suffix + "\n" + calls
 
 
 if __name__ == "__main__":
