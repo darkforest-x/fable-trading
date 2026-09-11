@@ -35,7 +35,7 @@ def metrics(group):
     losses = -group.net_return.clip(upper=0).sum()
     return pd.Series({
         "trades": len(group), "win_rate": group.net_return.gt(0).mean(),
-        "profit_factor": gains / losses if losses else np.nan,
+        "profit_factor": gains / losses if losses else (np.inf if gains else np.nan),
         "sum_net_r": group.net_r.sum(), "mean_net_r": group.net_r.mean(),
         "mean_net_return": group.net_return.mean(),
         "realized_net_r_ge_10": group.net_r.ge(10).sum(),
@@ -104,6 +104,9 @@ def build(raw: Path, output: Path):
     trade.signal_bar_open = pd.to_datetime(trade.signal_bar_open, utc=True)
     trade.entry_time = pd.to_datetime(trade.entry_time, utc=True)
     trade.exit_time = pd.to_datetime(trade.exit_time, utc=True)
+    identity = trade.groupby(KEY, dropna=False)[["entry_time", "entry_price", "net_r", "net_return"]].nunique()
+    if identity.gt(1).any().any():
+        raise ValueError("Shared signal identity no longer implies identical actual entry/outcome")
     by_side = trade.groupby(["fold", "variant", "side"]).apply(metrics).reset_index()
     by_side.to_csv(output / "metrics_by_side.csv", index=False)
     trade.groupby(["fold", "variant"]).apply(metrics).reset_index().to_csv(output / "metrics_all_sides.csv", index=False)
