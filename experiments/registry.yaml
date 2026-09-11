@@ -8400,13 +8400,21 @@ experiments:
     notes: Owner explicitly authorized this frozen two-year holdout use once. Current catalogs are not all-ever-listed census; full data and report artifacts will be registered on completion.
   - experiment_id: exp-spike-v6-wvf-20260912-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: ee753d2b9f1fb62cc9fd92fb7544568a1f374a90
-    status: active
+    source_commit: 03816d872a03f41d2528a6c6771c43124a1fd29b
+    status: rejected
     question: Does a fixed original-WVF long-entry reclaim filter improve current SPIKE V6 across eight OKX markets and three periods?
     single_variable: Add one predeclared WVF long-entry filter with 12-bar primary and 24-bar sensitivity windows; preserve raw V6 reversal exits, stops, trailing and costs.
-    result: Protocol and execution contracts frozen; formal evaluation pending. No production eligibility or claimed improvement.
-    holdout_consumed: false
+    result: Completed 8-market x 3-period, two-year fixed A/B12/C24 replay with 99-seed matched controls. Validation long PF fell from 0.909 to 0.799/0.859; original 15 net>=10R longs retained 2/5. Reject these universal WVF entry gates; not all
+      WVF uses.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_v6_wvf_20260912.md
-    notes: Owner authorized combination testing and previously authorized all historical dates. Planned first research read after 2026-05-04 is not fresh blind holdout; eight-market sample is not an all-market census.
+    notes: This configuration consumed authorized post-2026-05-04 research history once, not blind holdout. No signal/stop parameter retuning, training, promotion, Pine or notification changes. Full report includes negative results, realized-vs-MFE
+      distinction and closed-trade DD limits.
+    artifacts:
+    - spike-v6-wvf-20260912-report-md
+    - spike-v6-wvf-20260912-report-html
+    - spike-v6-wvf-20260912-raw-receipt
+    - spike-v6-wvf-20260912-canonical-receipt
+    - spike-v6-wvf-20260912-charts-receipt

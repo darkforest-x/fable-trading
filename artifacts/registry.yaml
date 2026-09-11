@@ -29649,3 +29649,63 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: HTML delivery labels the run coverage-limited and links the searchable incremental ledger.
+  - artifact_id: spike-v6-wvf-20260912-report-md
+    artifact_type: report
+    role: fixed_strategy_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 273b89f6a1e9102459012315d0fe715e0e11059b
+    source_path: analysis/p1_spike_v6_wvf_20260912.md
+    sha256: 534acc45dc43e375dac98938805c1151bcfa098adb5709790300374c6d70e36c
+    storage_uri: file:///Users/zhangzc/fable-trading/analysis/p1_spike_v6_wvf_20260912.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized fixed research comparison only; no live trading eligibility. Original strategy replay remains frozen.
+  - artifact_id: spike-v6-wvf-20260912-report-html
+    artifact_type: report
+    role: owner_readable_comparison_with_embedded_charts
+    source_repo: darkforest-x/fable-trading
+    source_commit: 273b89f6a1e9102459012315d0fe715e0e11059b
+    source_path: analysis/html/p1_spike_v6_wvf_20260912.html
+    sha256: 8ce93d288b9d2e6820972690eba7833ab513d4a4599222f4551fa21c4aa46012
+    storage_uri: file:///Users/zhangzc/fable-trading/analysis/html/p1_spike_v6_wvf_20260912.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized fixed research comparison only; no live trading eligibility. Original strategy replay remains frozen.
+  - artifact_id: spike-v6-wvf-20260912-raw-receipt
+    artifact_type: manifest
+    role: frozen_market_inputs_and_raw_builder
+    source_repo: darkforest-x/fable-trading
+    source_commit: 03816d872a03f41d2528a6c6771c43124a1fd29b
+    source_path: experiments/active/exp-spike-v6-wvf-20260912-v1/results/strategy_run_03816d8/input_manifest.json
+    sha256: 2f5f7274dd4083248df28fedd361e9e6f8bac2946660552921322ca5989c9976
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-spike-v6-wvf-20260912-v1/results/strategy_run_03816d8/input_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized fixed research comparison only; no live trading eligibility. Original strategy replay remains frozen.
+  - artifact_id: spike-v6-wvf-20260912-canonical-receipt
+    artifact_type: manifest
+    role: controls_ledger_metrics_and_hashes
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7bd8c3667904d7069442bcbf1db357b1a0b7f11c
+    source_path: experiments/active/exp-spike-v6-wvf-20260912-v1/results/final_report/manifest.json
+    sha256: 025a17424424e75a7b126eeaa05a7ea334d3fb6046353f67a0c210b69621972b
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-spike-v6-wvf-20260912-v1/results/final_report/manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized fixed research comparison only; no live trading eligibility. Original strategy replay remains frozen.
+  - artifact_id: spike-v6-wvf-20260912-charts-receipt
+    artifact_type: manifest
+    role: four_ex_post_trade_illustrations
+    source_repo: darkforest-x/fable-trading
+    source_commit: ffcf04bacc4d9448ac7e023f8bd13b33fa13c535
+    source_path: experiments/active/exp-spike-v6-wvf-20260912-v1/results/charts/manifest.json
+    sha256: 3dff5dfb16fb723e2a74996f70a3737fe5e861793bcf3a55bdb94b03884e586c
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-spike-v6-wvf-20260912-v1/results/charts/manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized fixed research comparison only; no live trading eligibility. Original strategy replay remains frozen.
