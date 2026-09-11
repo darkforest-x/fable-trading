@@ -80,6 +80,7 @@ class V1Scanner:
             self._summary_backfilled = True
         client.synchronize()
         arm_v1_bark(store, client.clock())
+        store.arm_display_timeframe("15m", client.clock())
         if not self.instruments or started - self.universe_at >= 3_600_000:
             self.instruments = client.instruments()
             self.universe_at = started

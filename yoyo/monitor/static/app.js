@@ -24,10 +24,10 @@
   // Server cursor pages are intentionally smaller than its 2,000-row safety cap.
   // Cards need a browse path, not multi-megabyte concurrent JSON responses.
   const SIGNAL_PAGE_SIZE = 500;
-  const TV_INTERVALS = new Map([["30", "30"], ["60", "60"], ["240", "240"]]);
-  const apiTimeframe = (value) => ({ "30": "30m", "60": "1H", "240": "4H", 30: "30m", 60: "1H", 240: "4H" }[value] || null);
-  const uiTimeframe = (value) => ({ "30m": "30", "1H": "60", "4H": "240", "30": "30", "60": "60", "240": "240", 30: "30", 60: "60", 240: "240" }[value] || null);
-  const timeframeLabel = (value) => ({ "30": "30m", "60": "1H", "240": "4H", 30: "30m", 60: "1H", 240: "4H" }[value] || value || "—");
+  const TV_INTERVALS = new Map([["15", "15"], ["30", "30"], ["60", "60"], ["240", "240"]]);
+  const apiTimeframe = (value) => ({ "15": "15m", "30": "30m", "60": "1H", "240": "4H", 15: "15m", 30: "30m", 60: "1H", 240: "4H" }[value] || null);
+  const uiTimeframe = (value) => ({ "15m": "15", "30m": "30", "1H": "60", "4H": "240", "15": "15", "30": "30", "60": "60", "240": "240", 15: "15", 30: "30", 60: "60", 240: "240" }[value] || null);
+  const timeframeLabel = (value) => ({ "15": "15m", "30": "30m", "60": "1H", "240": "4H", 15: "15m", 30: "30m", 60: "1H", 240: "4H" }[value] || value || "—");
   const phaseNames = {
     building: "蓄势中", accumulating: "蓄势中", accumulation: "蓄势中", compression: "密集蓄势",
     ready: "等待启动", armed: "等待启动", flat: "零轴横盘", neutral: "观察中",
@@ -64,7 +64,7 @@
     const confirmation = row.confirmation;
     const close = milliseconds(row.signal_close_time ?? row.bar_close_ms);
     const direction = row.direction ?? row.side;
-    if (![30, 60, 240].includes(minutes) || !["live", "replay"].includes(row.source) || !["raw", "yolo", "raw_yolo"].includes(confirmation) || direction !== "long" || !finite(close)) return null;
+    if (![15, 30, 60, 240].includes(minutes) || !["live", "replay"].includes(row.source) || !["raw", "yolo", "raw_yolo"].includes(confirmation) || direction !== "long" || !finite(close)) return null;
     const rowScope = ["live", "warmup", "replay"].includes(row.display_scope) ? row.display_scope : requestedScope || row.source;
     return { ...row, id: String(row.id ?? `${row.source}|${confirmation}|${row.venue}|${row.symbol}|${minutes}|${row.signal_close_time}`),
       source: row.source === "replay" ? "replay" : "live", confirmation, timeframe: String(minutes), timeframe_min: minutes,

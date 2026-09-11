@@ -1,6 +1,6 @@
 """Causal live adapter for the frozen long-only SPIKE Burst V1 Pine replay.
 
-Only confirmed, aligned 30m/1H/4H bars are accepted.  The V1 source emits a
+Only confirmed, aligned 15m/30m/1H/4H bars are accepted.  The V1 source emits a
 signal at a bar close; this monitor records that close as raw signal evidence,
 never a fill.  There is no mirrored short signal and no outcome lookup.
 """

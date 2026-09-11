@@ -24,6 +24,9 @@ const yoloLive = Object.freeze({
   ...rawLive, id: "yolo-live-pepe-60-2", confirmation: "yolo", timeframe_min: 60,
   executable_entry_time: "2026-09-11T02:00:00Z",
 });
+const rawLive15m = Object.freeze({
+  ...rawLive, id: "raw-live-pepe-15-4", timeframe_min: 15,
+});
 const rawReplay = Object.freeze({
   ...rawLive, id: "raw-replay-pepe-240-3", source: "replay", timeframe_min: 240,
   executable_entry_time: null,
@@ -71,6 +74,21 @@ function chartHarness() {
   return { ...sandbox.__chartHarness, svg: () => sandbox.__chartSvg };
 }
 
+function cardHarness() {
+  const cutoff = app.indexOf("  function redact(value)");
+  assert.ok(cutoff > 0, "card harness must cut before browser event bindings");
+  const instrumented = `${app.slice(0, cutoff)}
+  globalThis.__cardHarness = { state, normalizeV1Event, signalCardHTML };
+})();`;
+  const sandbox = {
+    AbortController, Date, Intl, Map, Set, Promise, Number, String, Boolean,
+    Array, Object, Math, RegExp, Error, TypeError, JSON, encodeURIComponent,
+    document: { getElementById: () => ({}), querySelectorAll: () => [] },
+  };
+  vm.runInNewContext(instrumented, sandbox, { filename: "app-card-harness.js" });
+  return sandbox.__cardHarness;
+}
+
 function chartBars() {
   return [0, 60_000, 120_000, 180_000].map((t) => ({
     t, o: 100, h: 101, l: 99, c: 100, md: 1, sb: 0, focus: false,
@@ -81,7 +99,7 @@ function chartBars() {
 function consume(row) {
   if (!row || typeof row !== "object") throw new TypeError("API item must be an object");
   const timeframe = Number(row.timeframe_min);
-  if (!Number.isInteger(timeframe) || ![30, 60, 240].includes(timeframe)) throw new TypeError("unsupported timeframe");
+  if (!Number.isInteger(timeframe) || ![15, 30, 60, 240].includes(timeframe)) throw new TypeError("unsupported timeframe");
   if (!["live", "replay"].includes(row.source)) throw new TypeError("unknown source");
   if (!["raw", "yolo", "raw_yolo"].includes(row.confirmation)) throw new TypeError("unknown confirmation");
   if (row.direction !== "long") throw new TypeError("SPIKE V1 is long-only");
@@ -98,12 +116,13 @@ function consume(row) {
   };
 }
 
-test("V1 page exposes only live/replay and 30m/1H/4H signal controls", () => {
+test("V1 page exposes live/replay and 15m/30m/1H/4H signal controls", () => {
   const filters = page.match(/aria-label="信号周期"([\s\S]*?)<\/div>/)?.[1] || "";
+  assert.match(filters, /data-timeframe="15"/);
   assert.match(filters, /data-timeframe="30"/);
   assert.match(filters, /data-timeframe="60"/);
   assert.match(filters, /data-timeframe="240"/);
-  assert.doesNotMatch(filters, /5m|15m|1Dutc/);
+  assert.doesNotMatch(filters, /data-timeframe="5"|1Dutc/);
   assert.match(page, /data-signal-source="live"/);
   assert.match(page, /data-signal-source="replay"/);
   assert.match(page, /V1 · 仅多头 · 已收盘 K 线/);
@@ -175,7 +194,7 @@ test("selected timeframe is filtered by the API before its 2000-row limit", () =
 test("pending, malformed, and empty API cases do not become executable live signals", () => {
   assert.equal(consume(pending).closed, false);
   assert.throws(() => consume({ ...rawLive, source: "cache" }), /unknown source/);
-  assert.throws(() => consume({ ...rawLive, timeframe_min: 15 }), /unsupported timeframe/);
+  assert.throws(() => consume({ ...rawLive, timeframe_min: 5 }), /unsupported timeframe/);
   assert.throws(() => consume({ ...rawLive, direction: "short" }), /long-only/);
   assert.throws(() => consume(null), /API item/);
   assert.match(app, /服务返回的数据格式有误/);
@@ -274,9 +293,56 @@ test("chart markers accept the current SPIKE V1 raw kind and retain the YOLO par
 
 
 test("live chart translates the display timeframe to the monitor API timeframe", () => {
+  assert.match(app, /\["15", "15"\]/);
+  assert.match(app, /"15": "15m"/);
   assert.match(app, /const chartTimeframe = apiTimeframe\(item\.timeframe\)/);
   assert.match(app, /timeframe=\$\{encodeURIComponent\(chartTimeframe\)\}/);
   assert.match(app, /图表周期不受当前 V1 服务支持/);
+});
+
+test("15m raw and YOLO rows survive the shared signal and warmup routes as Bark-muted display-only records", async () => {
+  const paths = [];
+  const harness = refreshHarness(async (path) => {
+    paths.push(path);
+    if (path === "/api/status") {
+      return jsonResponse({ now_ms: Date.now(), runtime: {
+        fresh_minutes: 30, notification_mode: "two_stage", timeframes: ["15m", "30m"],
+        display_only_timeframes: ["15m"], bark_timeframes: ["30m"],
+      } });
+    }
+    const confirmation = path.includes("confirmation=raw_yolo") ? "raw_yolo" : "raw";
+    return jsonResponse({ items: [{ ...rawLive15m, id: `15m-${confirmation}`, confirmation, display_scope: "warmup" }], total: 1, next_cursor: null });
+  });
+  const { state, refresh } = harness;
+  state.view = "warmup";
+  state.timeframe = "15";
+  await refresh();
+  assert.ok(paths.some((path) => path.includes("source=warmup") && path.includes("timeframe=15m") && path.includes("confirmation=raw")));
+  assert.ok(paths.some((path) => path.includes("source=warmup") && path.includes("timeframe=15m") && path.includes("confirmation=raw_yolo")));
+  assert.equal(state.directSignals[0].timeframe, "15");
+  assert.equal(state.rawYoloSignals[0].timeframe, "15");
+  assert.match(app, /const DISPLAY_ONLY_NOTE = "仅前端 · Bark 已关闭"/);
+  assert.match(app, /if \(channel === "bark" && isDisplayOnly\(item\)\) return \[DISPLAY_ONLY_NOTE, "muted"\]/);
+});
+
+test("15m live cards retain raw and YOLO rows, use TradingView interval 15, and show the display-only Bark state", () => {
+  const { state, normalizeV1Event, signalCardHTML } = cardHarness();
+  state.status = { now_ms: Date.now(), runtime: {
+    fresh_minutes: 30, notification_mode: "two_stage", notification_channels: ["bark"],
+    display_only_timeframes: ["15m"], bark_timeframes: ["30m"],
+  } };
+  state.statusReceivedAt = Date.now();
+  const raw = normalizeV1Event(rawLive15m, "live");
+  const yolo = normalizeV1Event({ ...rawLive15m, id: "yolo-15", confirmation: "raw_yolo" }, "live");
+  state.directSignals = [raw, yolo];
+
+  const rawCard = signalCardHTML(raw);
+  const yoloCard = signalCardHTML(yolo);
+  assert.match(rawCard, /<span class="card-timeframe">15m<\/span>/);
+  assert.match(rawCard, /data-tv-timeframe="15"/);
+  assert.match(rawCard, /Bark<\/span><span>仅前端 · Bark 已关闭/);
+  assert.match(yoloCard, /YOLO 补充确认/);
+  assert.match(yoloCard, /data-tv-timeframe="15"/);
 });
 
 test("changing source or timeframe cannot retain a stale detail chart", () => {

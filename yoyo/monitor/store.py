@@ -324,15 +324,9 @@ class Store:
             filters.append("json_extract(e.payload,'$.confirmation')=?")
             values.append(confirmation)
         if display_scope is not None:
-            if display_scope not in ("live", "warmup") or type(display_cutoff_ms) is not int or display_cutoff_ms < 0:
-                raise ValueError("invalid display boundary")
-            # Classify by the original arrow close, not its later YOLO close or
-            # discovery time. Apply before LIMIT so old history cannot hide a
-            # new signal. This is a read-only view, never a notification gate.
-            origin = "CASE WHEN json_extract(e.payload,'$.confirmation')='yolo' THEN json_extract(e.payload,'$.indicator.bar_close_ms') ELSE e.close_ms END"
-            filters.append("json_extract(e.payload,'$.source')='live'")
-            filters.append(f"({origin}) {'>' if display_scope == 'live' else '<='} ?")
-            values.append(display_cutoff_ms)
+            clause, args = self._display_filter(display_scope, display_cutoff_ms)
+            filters.append(clause)
+            values.extend(args)
         if before_close_ms is not None or before_id is not None:
             if isinstance(before_close_ms, bool) or not isinstance(before_close_ms, int) or not isinstance(before_id, str) or not before_id:
                 raise ValueError("invalid event cursor")
@@ -393,6 +387,42 @@ class Store:
         decoded = [decorate(r) for r in raw_rows]
         timing["decode_ms"] = (time.monotonic_ns() - decode_started_ns) // 1_000_000
         return decoded
+
+    @staticmethod
+    def _display_filter(scope, cutoff_ms):
+        """Partition on original arrow close, before pagination or counting."""
+        if scope not in ("live", "warmup") or type(cutoff_ms) is not int or cutoff_ms < 0:
+            raise ValueError("invalid display boundary")
+        origin = "CASE WHEN json_extract(e.payload,'$.confirmation')='yolo' THEN json_extract(e.payload,'$.indicator.bar_close_ms') ELSE e.close_ms END"
+        # 15m was enabled after the original V1 streams. NULL excludes an
+        # unarmed stream until the scanner saves its synchronized cutover.
+        boundary = "CASE WHEN e.timeframe='15m' THEN (SELECT json_extract(payload,'$.activated_ms') FROM meta WHERE key='display_policy:spike-v1:15m') ELSE ? END"
+        return (f"(json_extract(e.payload,'$.source')='live' AND ({origin}) {'>' if scope == 'live' else '<='} ({boundary}))", [cutoff_ms])
+
+    def displayed_start_count(self, since=0):
+        """Count current display streams, including muted 15m, excluding warmup."""
+        receipt = self.get_meta("notification_policy:v1_bark_arm", {})
+        cutoff = receipt.get("activated_ms") if isinstance(receipt, dict) else None
+        if type(cutoff) is not int or cutoff < 0:
+            return 0
+        clause, args = self._display_filter("live", cutoff)
+        with self.connect() as db:
+            return db.execute("SELECT COUNT(*) FROM events e WHERE e.kind=? AND json_extract(e.payload,'$.protocol')=? AND e.close_ms>=? AND " + clause,
+                              [SIGNAL_KIND, SIGNAL_PROTOCOL, since] + args).fetchone()[0]
+
+    def arm_display_timeframe(self, timeframe, activated_ms):
+        """Persist a newly added display stream before its first cold scan.
+
+        This metadata never enables notification policies or creates outboxes.
+        The supplied timestamp is the synchronized exchange clock, not a bar
+        chosen from historical data. Repeated scans/restarts keep the first value.
+        """
+        if timeframe not in MONITORED_TIMEFRAMES or type(activated_ms) is not int or activated_ms < 0:
+            raise ValueError("invalid display activation")
+        key = "display_policy:spike-v1:" + timeframe
+        with self.connect() as db:
+            db.execute("INSERT OR IGNORE INTO meta VALUES (?,?)", (key, encode({"activated_ms": activated_ms})))
+            return json.loads(db.execute("SELECT payload FROM meta WHERE key=?", (key,)).fetchone()[0])["activated_ms"]
 
     def get_event(self, event_id):
         """Read one journaled event for an API that derives no client-supplied identity."""

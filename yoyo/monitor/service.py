@@ -1,7 +1,7 @@
 """Independent Mac scan loop: public OHLCV -> Pine-equivalent events -> outbox.
 
-The owner requested all-market 5m/15m/30m/1H/4H/daily monitoring. 5m, 15m and 30m
-are display-only; 1H/4H/daily send starts and extra confirmations via Bark;
+The V1 monitor scans 15m/30m/1H/4H. 15m is display-only;
+30m/1H/4H send starts and extra confirmations via Bark;
 Telegram is disabled. This is an indicator monitor, not an ACTIVE/model
 promotion, broker position tracker, execution path or backtest. Existing VPS
 cadence, cache and freshness settings remain untouched.
@@ -338,7 +338,7 @@ class Monitor:
                 "scan": {"status": "starting", "completed": 0, "total": 0, "errors": 0},
                 "universe": {"count": 0, "scope": "OKX all live SWAP"}, "counts": {},
                 "runtime": {"host": "This Mac", "notification_only": True,
-                            "signal_mode": "SPIKE V1 长多 30m/1H/4H；原始收盘启动与 YOLO 补充确认分离"},
+                            "signal_mode": "SPIKE V1 长多 15m/30m/1H/4H；15m 仅展示，其余周期保留 YOLO 补充确认"},
                 "snapshot_at_ms": None, "stale": True}
 
     def _current_scan(self, scan):
@@ -360,12 +360,12 @@ class Monitor:
                     scan=self._current_scan(self.store.get_meta("scan", {"status": "starting", "completed": 0, "total": 0, "errors": 0})),
                     universe=self.store.get_meta("universe", {"count": 0, "scope": "OKX 全部在交易永续合约"}),
                     counts=dict(counts, signals_24h=self.store.count_since(self.client.clock() - 86400000, MODEL_KIND, PROTOCOL),
-                                indicator_starts_24h=self.store.direct_event_count(self.client.clock() - 86400000)),
+                                indicator_starts_24h=self.store.displayed_start_count(self.client.clock() - 86400000)),
                     telegram=self.telegram.status(), bark=self.bark.status(), runtime={"host": "This Mac", "notification_only": True,
                     "fresh_minutes": FRESH_MS // 60000, "interval_seconds": self.interval, "timeframes": list(MONITORED_TIMEFRAMES),
                     "clock_offset_ms": self.client.offset_ms, "public_requests": self.client.requests,
                     "candle_storage": "memory_only", "history_days": 7,
-                    "signal_mode": "SPIKE V1 长多 30m/1H/4H；原始收盘启动与 YOLO 补充确认分离", "signal_kind": MODEL_KIND,
+                    "signal_mode": "SPIKE V1 长多 15m/30m/1H/4H；15m 仅展示，其余周期保留 YOLO 补充确认", "signal_kind": MODEL_KIND,
                     "notification_mode": "two_stage" if arm_receipt else "two_stage_disarmed", "direct_timeframes": list(DIRECT_TIMEFRAMES),
                     "notification_channels": ["bark"],
                     "bark_timeframes": list(BARK_TIMEFRAMES),
