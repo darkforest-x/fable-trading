@@ -104,3 +104,14 @@ def test_frozen_full_history_output_hash_survives_display_materialization_change
     assert hashlib.sha256(payload).hexdigest() == (
         "35212be0ccb01378b1d3587a9cf1b47656ed165a7b06dbe1f4783c6e98062c13"
     )
+
+
+def test_adding_sb_is_the_only_change_to_the_prior_frozen_display_contract():
+    """Old chart bytes return exactly when the new per-row display field is removed."""
+    result = analyze(candles(), [], "1H", tick=.01, chart_limit=240)
+    prior = dict(result)
+    prior["chart"] = [{key: value for key, value in row.items() if key != "sb"} for row in result["chart"]]
+    payload = json.dumps(prior, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    assert hashlib.sha256(payload).hexdigest() == (
+        "2ecb21f572e9403dd00fd8733626e9621285e63a978d37e891a2b1da2d135bec"
+    )
