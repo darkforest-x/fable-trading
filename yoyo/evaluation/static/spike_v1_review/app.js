@@ -24,8 +24,8 @@
   const tvUrl = (record) => record.tradingview_url || record.tv_url || "https://www.tradingview.com/chart/";
   const canonicalTimeframe = (value) => ({ 30: "30m", 60: "1H", 240: "4H", "30": "30m", "60": "1H", "240": "4H" }[value] || value || "—");
   const unavailable = (record) => record?.status === "missing" || record?.state?.status === "missing";
-  const candleSeries = (chart) => chart.addCandlestickSeries({ upColor: "#3fbf8f", downColor: "#e6636d", wickUpColor: "#62d7ab", wickDownColor: "#f18890", borderVisible: false, priceLineVisible: false });
-  const line = (chart, color, lineWidth = 1) => chart.addLineSeries({ color, lineWidth, crosshairMarkerVisible: false, lastValueVisible: true, priceLineVisible: false });
+  const candleSeries = (chart, priceFormat) => chart.addCandlestickSeries({ upColor: "#3fbf8f", downColor: "#e6636d", wickUpColor: "#62d7ab", wickDownColor: "#f18890", borderVisible: false, priceLineVisible: false, priceFormat });
+  const line = (chart, color, lineWidth = 1, options = {}) => chart.addLineSeries({ color, lineWidth, crosshairMarkerVisible: false, lastValueVisible: options.lastValueVisible ?? true, priceLineVisible: false, priceFormat: options.priceFormat });
   function chartOptions(container, showTime = false) {
     const dark = state.theme !== "light";
     return { width: container.clientWidth, height: container.clientHeight, layout: { background: { color: dark ? "#111a28" : "#ffffff" }, textColor: dark ? "#dce7f5" : "#29374a" }, grid: { vertLines: { color: dark ? "#1b2a40" : "#e5ebf4" }, horzLines: { color: dark ? "#1b2a40" : "#e5ebf4" } }, rightPriceScale: { borderColor: dark ? "#33445e" : "#cad5e4" }, timeScale: { borderColor: dark ? "#33445e" : "#cad5e4", timeVisible: showTime, secondsVisible: false, tickMarkFormatter: (time) => formatters.datetime.format(new Date(Number(time) * 1000)) }, localization: { timeFormatter: (time) => formatters.datetime.format(new Date(Number(time) * 1000)) }, crosshair: { mode: LightweightCharts.CrosshairMode.Normal } };
@@ -124,8 +124,10 @@
     const mdChart = LightweightCharts.createChart(mdContainer, chartOptions(mdContainer, true));
     const volumeChart = LightweightCharts.createChart(volumeContainer, chartOptions(volumeContainer, true));
     watchChart(priceChart, priceContainer); watchChart(mdChart, mdContainer); watchChart(volumeChart, volumeContainer);
-    const priceSeries = candleSeries(priceChart); priceSeries.setData(toCandles(rows));
-    [["sma20", "#60a5fa"], ["ema20", "#93c5fd"], ["sma60", "#f5c85b"], ["ema60", "#f9df98"], ["sma120", "#a78bfa"], ["ema120", "#c4b5fd"]].forEach(([key, color]) => line(priceChart, color).setData(rows.filter((row) => Number.isFinite(Number(row[key]))).map((row) => ({ time: seconds(row.t), value: Number(row[key]) }))));
+    const priceFormat = SpikeV1ReviewFormat.dynamicPriceFormat(rows.flatMap((row) => [row.o, row.h, row.l, row.c]));
+    const momentumFormat = SpikeV1ReviewFormat.dynamicPriceFormat(rows.flatMap((row) => [row.md, row.sb]));
+    const priceSeries = candleSeries(priceChart, priceFormat); priceSeries.setData(toCandles(rows));
+    [["sma20", "#60a5fa"], ["ema20", "#93c5fd"], ["sma60", "#f5c85b"], ["ema60", "#f9df98"], ["sma120", "#a78bfa"], ["ema120", "#c4b5fd"]].forEach(([key, color]) => line(priceChart, color, 1, { priceFormat, lastValueVisible: false }).setData(rows.filter((row) => Number.isFinite(Number(row[key]))).map((row) => ({ time: seconds(row.t), value: Number(row[key]) }))));
     const markers = [];
     const { signalBarMs, confirmationMs } = SpikeV1ReviewTiming.resolveChartTiming(payload, record, s);
     if (presentNumber(signalBarMs)) markers.push(marker(signalBarMs, "belowBar", "#eabf5f", "arrowUp", "V1 信号 K 线"));
@@ -135,9 +137,9 @@
     state.charts[0].cleanup = () => { state.charts[0].stopCleanup?.(); state.charts[0].signalCleanup?.(); };
     state.charts[0].stopCleanup = signalGuide(priceChart, priceContainer, signalBarMs);
     state.charts[0].signalCleanup = initialStopGuide(priceChart, priceSeries, priceContainer, confirmationMs, initialStop, exit?.time_ms);
-    const md = line(mdChart, "#63b3ed", 2); md.setData(rows.filter((row) => presentNumber(row.md)).map((row) => ({ time: seconds(row.t), value: Number(row.md) })));
-    const sb = line(mdChart, "#f5c85b", 2); sb.setData(rows.filter((row) => presentNumber(row.sb)).map((row) => ({ time: seconds(row.t), value: Number(row.sb) })));
-    mdChart.addLineSeries({ color: "#8292aa", lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dotted, crosshairMarkerVisible: false, lastValueVisible: false, priceLineVisible: false }).setData([{ time: seconds(rows[0].t), value: 0 }, { time: seconds(rows.at(-1).t), value: 0 }]);
+    const md = line(mdChart, "#63b3ed", 2, { priceFormat: momentumFormat }); md.setData(rows.filter((row) => presentNumber(row.md)).map((row) => ({ time: seconds(row.t), value: Number(row.md) })));
+    const sb = line(mdChart, "#f5c85b", 2, { priceFormat: momentumFormat }); sb.setData(rows.filter((row) => presentNumber(row.sb)).map((row) => ({ time: seconds(row.t), value: Number(row.sb) })));
+    mdChart.addLineSeries({ color: "#8292aa", lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dotted, crosshairMarkerVisible: false, lastValueVisible: false, priceLineVisible: false, priceFormat: momentumFormat }).setData([{ time: seconds(rows[0].t), value: 0 }, { time: seconds(rows.at(-1).t), value: 0 }]);
     volumeChart.addHistogramSeries({ color: "#5b8def", priceFormat: { type: "volume" }, priceScaleId: "" }).setData(rows.filter((row) => presentNumber(row.v)).map((row) => ({ time: seconds(row.t), value: Number(row.v), color: Number(row.c) >= Number(row.o) ? "#3fbf8f99" : "#e6636d99" })));
     syncCharts([priceChart, mdChart, volumeChart]);
     [priceChart, mdChart, volumeChart].forEach((chart) => chart.timeScale().fitContent());

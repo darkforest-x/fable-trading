@@ -9,11 +9,14 @@ const root = path.resolve(__dirname, "../..");
 const timingSource = fs.readFileSync(path.join(root, "yoyo/evaluation/static/spike_v1_review/timing.js"), "utf8");
 const appSource = fs.readFileSync(path.join(root, "yoyo/evaluation/static/spike_v1_review/app.js"), "utf8");
 const selectionSource = fs.readFileSync(path.join(root, "yoyo/evaluation/static/spike_v1_review/selection.js"), "utf8");
+const formatSource = fs.readFileSync(path.join(root, "yoyo/evaluation/static/spike_v1_review/format.js"), "utf8");
 const sandbox = {};
 vm.runInNewContext(timingSource, sandbox, { filename: "timing.js" });
 const { resolveChartTiming, isCensoredRecord } = sandbox.SpikeV1ReviewTiming;
 vm.runInNewContext(selectionSource, sandbox, { filename: "selection.js" });
 const { isCurrentSelection } = sandbox.SpikeV1ReviewSelection;
+vm.runInNewContext(formatSource, sandbox, { filename: "format.js" });
+const { dynamicPriceFormat } = sandbox.SpikeV1ReviewFormat;
 
 test("original V1 marker uses candle bar open while initial SL starts at confirmed close", () => {
   const timing = resolveChartTiming(
@@ -54,4 +57,14 @@ test("a stale filter request cannot paint over the active record", () => {
   assert.match(appSource, /state\.chartAbort\?\.abort\(\)/);
   assert.match(appSource, /charts\.dataset\.renderedRecordId = requestId/);
   assert.match(appSource, /if \(!isCurrent\(\)\) return;/);
+});
+
+
+test("small-token and oscillator scales retain useful dynamic precision", () => {
+  assert.deepEqual({ ...dynamicPriceFormat([0.03019, 0.02902]) }, { type: "price", precision: 5, minMove: 0.00001 });
+  assert.deepEqual({ ...dynamicPriceFormat([245.67, 238.4]) }, { type: "price", precision: 2, minMove: 0.01 });
+  assert.equal(dynamicPriceFormat([0.000002714]).precision, 9);
+  assert.equal(dynamicPriceFormat([null, undefined, ""]).precision, 2);
+  assert.match(appSource, /lastValueVisible: false/);
+  assert.match(appSource, /dynamicPriceFormat\(rows\.flatMap/);
 });
