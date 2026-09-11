@@ -55,6 +55,29 @@ function jsonResponse(value) {
   return { ok: true, headers: { get: () => "application/json" }, json: async () => value };
 }
 
+function chartHarness() {
+  const cutoff = app.indexOf("  function redact(value)");
+  const renderTarget = '    $("chart-container").innerHTML = parts.join("");';
+  let instrumented = app.slice(0, cutoff);
+  assert.ok(instrumented.includes(renderTarget), "chart harness must capture the rendered SVG before DOM bindings");
+  instrumented = instrumented.replace(renderTarget, '    globalThis.__chartSvg = parts.join(""); return;');
+  instrumented += '\n  globalThis.__chartHarness = { state, renderChart };\n})();';
+  const sandbox = {
+    AbortController, Date, Intl, Map, Set, Promise, Number, String, Boolean,
+    Array, Object, Math, RegExp, Error, TypeError, JSON, encodeURIComponent,
+    document: { getElementById: () => ({}), querySelector: () => ({ textContent: "" }), querySelectorAll: () => [] },
+  };
+  vm.runInNewContext(instrumented, sandbox, { filename: "app-chart-harness.js" });
+  return { ...sandbox.__chartHarness, svg: () => sandbox.__chartSvg };
+}
+
+function chartBars() {
+  return [0, 60_000, 120_000, 180_000].map((t) => ({
+    t, o: 100, h: 101, l: 99, c: 100, md: 1, sb: 0, focus: false,
+    sma20: 100, ema20: 100, sma60: 100, ema60: 100, sma120: 100, ema120: 100,
+  }));
+}
+
 function consume(row) {
   if (!row || typeof row !== "object") throw new TypeError("API item must be an object");
   const timeframe = Number(row.timeframe_min);
@@ -176,6 +199,34 @@ test("chart uses UTC timestamp distance, preserves gaps, and plots only explicit
   assert.match(app, /pointerdown/);
   assert.match(app, /event\.deltaY/);
 });
+
+test("initial SL SVG begins after the explicit original close and labels outside the price clip", () => {
+  const harness = chartHarness();
+  harness.state.chart = { source: "replay", candles: chartBars(), events: [] };
+  harness.state.selected = {
+    id: "signal", kind: "tv_start", source: "replay", confirmation: "raw", side: "long",
+    symbol: "PEPEUSDT", timeframe: "1", timeframe_min: 1, price: 100, initial_stop: 90,
+    bar_open_ms: 60_000, bar_close_ms: 120_000,
+  };
+  harness.renderChart();
+  const svg = harness.svg();
+  assert.match(svg, /class="chart-risk-line" x1="275"/);
+  const line = svg.indexOf('class="chart-risk-line"');
+  const clipClose = svg.indexOf("</g>", line);
+  const label = svg.indexOf('class="chart-risk-label"');
+  assert.ok(clipClose > line && label > clipClose, "initial SL label must be outside price-clip");
+  assert.match(svg, />初始 SL /);
+
+  harness.state.selected = { ...harness.state.selected, bar_close_ms: 300_000 };
+  harness.renderChart();
+  assert.doesNotMatch(harness.svg(), /chart-risk-line|chart-risk-label/);
+
+  harness.state.selected = { ...harness.state.selected };
+  delete harness.state.selected.bar_close_ms;
+  harness.renderChart();
+  assert.doesNotMatch(harness.svg(), /chart-risk-line|chart-risk-label/);
+});
+
 
 test("live chart translates the display timeframe to the monitor API timeframe", () => {
   assert.match(app, /const chartTimeframe = apiTimeframe\(item\.timeframe\)/);

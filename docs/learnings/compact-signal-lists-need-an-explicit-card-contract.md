@@ -7,3 +7,5 @@
 - **Connections**: `yoyo/monitor/store.py`, `yoyo/monitor/server.py`, `yoyo/monitor/static/app.js`, and `tests/monitor/test_spike_v1_api_replay.py`. The projection intentionally leaves event storage, replay delivery isolation, cursor ordering, and the full-event endpoint unchanged.
 
 - **Follow-up boundary**: A stop distance is not a drawable stop price. The compact contract must retain an event’s existing `initial_stop` where the chart reads it, including the nested original indicator of a YOLO confirmation. The client may choose that explicit parent value but must never derive a price from `risk`; Store→API tests must compare both the summary field and unchanged full event.
+
+- **Rendering boundary**: An initial stop is not a trade path. Draw it only from the original arrow’s explicit `bar_close_ms` onward, omit it when the visible interval is entirely before that close or lacks it, and place its price-scale label outside the plot clip. This prevents both a misleading full-history line and an invisible label without inventing a trailing stop.

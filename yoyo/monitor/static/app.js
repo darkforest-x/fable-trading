@@ -724,8 +724,13 @@
     const original = originalSignal(state.selected);
     const stopPrice = finite(state.selected?.initial_stop) ? Number(state.selected.initial_stop)
       : finite(original?.initial_stop) ? Number(original.initial_stop) : null;
+    // The line is the initial stop from the original, closed arrow. It starts
+    // after that bar closes; a viewport entirely before the arrow has no line.
+    const originalCloseMs = finite(original?.bar_close_ms) ? Number(original.bar_close_ms) : null;
+    const initialStopStartX = stopPrice !== null && originalCloseMs !== null && originalCloseMs < lastTime
+      ? Math.max(left, left + (originalCloseMs - firstTime) / timeRange * plotWidth) : null;
     const rangeValues = candles.flatMap((bar) => [bar.h, bar.l, ...maKeys.map((key) => bar[key])]).filter(finite).map(Number);
-    if (stopPrice !== null) rangeValues.push(stopPrice);
+    if (initialStopStartX !== null) rangeValues.push(stopPrice);
     let pMin = Math.min(...rangeValues), pMax = Math.max(...rangeValues);
     const pPadding = Math.max((pMax - pMin) * .07, pMax * .0001, .00000001);
     pMin -= pPadding; pMax += pPadding;
@@ -762,9 +767,9 @@
     parts.push(modelOverlay.core);
     const maColors = ["var(--chart-ma20)", "var(--chart-ma20-muted)", "var(--chart-ma60)", "var(--chart-ma60-muted)", "var(--chart-ma120)", "var(--chart-ma120-muted)"];
     maKeys.forEach((key, i) => parts.push(`<path d="${path(key, py)}" fill="none" stroke="${maColors[i]}" stroke-width=".8" opacity=".95"/>`));
-    if (stopPrice !== null) {
+    if (initialStopStartX !== null) {
       const stopY = py(stopPrice);
-      parts.push(`<line class="chart-risk-line" x1="${left}" x2="${width - right + 3}" y1="${stopY}" y2="${stopY}" stroke="var(--amber)" stroke-width=".9" stroke-dasharray="4 3"/><text x="${width - right + 9}" y="${stopY + 3}" style="fill:var(--amber)">V1 风险 ${escapeHTML(axisPrice(stopPrice))}</text>`);
+      parts.push(`<line class="chart-risk-line" x1="${initialStopStartX}" x2="${width - right + 3}" y1="${stopY}" y2="${stopY}" stroke="var(--amber)" stroke-width=".9" stroke-dasharray="4 3"/>`);
     }
     candles.forEach((bar, i) => {
       const bright = bar.retest_side === "long" || bar.retest_side === "short";
@@ -791,6 +796,11 @@
       parts.push(`<g data-event-kind="tv_start" data-side="${event.side}"><title>主图启动 · 蓄势释放${sideArrow(event.side)} · ${escapeHTML(number(event.near_zero_bars))} 根 · 收盘 ${escapeHTML(price(event.price ?? candles[index].c))}</title><path d="M${cx},${cy}l-3.5,${direction * 5}h7Z" fill="${long ? "var(--chart-marker-up)" : "var(--chart-marker-down)"}" stroke="var(--chart-marker-bg)" stroke-width=".55"/></g>`);
     });
     parts.push("</g>");
+    if (initialStopStartX !== null) {
+      const stopY = py(stopPrice);
+      // This label is outside price-clip because it is intentionally in the price scale.
+      parts.push(`<text class="chart-risk-label" x="${width - right + 9}" y="${stopY + 3}" style="fill:var(--amber)">初始 SL ${escapeHTML(axisPrice(stopPrice))}</text>`);
+    }
     parts.push(`<line x1="${left}" x2="${width - 12}" y1="180" y2="180" stroke="var(--line)" stroke-width=".7"/><text x="${left}" y="191" style="font-size:7px;fill:var(--chart-text)">IMACD</text><line x1="65" x2="76" y1="188.5" y2="188.5" stroke="var(--chart-md)" stroke-width="1.2"/><text x="80" y="191" style="font-size:7px">主线</text><line x1="109" x2="120" y1="188.5" y2="188.5" stroke="var(--chart-signal)" stroke-width="1.2"/><text x="124" y="191" style="font-size:7px">信号线</text>`);
     // Qualified accumulation bands come exclusively from backend focus state.
     // Exact md == 0 runs must not stand in for the TradingView near-zero area.
