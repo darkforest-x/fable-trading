@@ -1,6 +1,7 @@
 """Causality contracts for V6's one pending-window volume-price addition."""
 
 from pathlib import Path
+import re
 
 import numpy as np
 import pandas as pd
@@ -139,7 +140,7 @@ def test_short_is_exact_reflection_and_prefix_is_causal():
     pd.testing.assert_frame_equal(detect(changed).iloc[:8], baseline.iloc[:8])
 
 
-def test_pine_keeps_v5_display_and_risk_contract_with_data_window_only_evidence():
+def test_pine_keeps_signal_contract_and_has_confirmed_reverse_reference_lifecycle():
     source = (ROOT / "yoyo/evaluation/pine/spike_burst_v6.pine").read_text()
     v5 = (ROOT / "yoyo/evaluation/pine/spike_burst_v5.pine").read_text()
     assert 'indicator("SPIKE V6 · 量价结构确认", shorttitle="SPIKE V6"' in source
@@ -149,17 +150,33 @@ def test_pine_keeps_v5_display_and_risk_contract_with_data_window_only_evidence(
     assert "await_launch_evidence" in source
     assert 'consumedLaunchEvidence' in source and 'consumedLaunchEvidenceBar' in source
     assert 'confirmedSignal ? consumedLaunchEvidence : launchEvidence' in source
-    assert source.count("alertcondition(") == 4
+    assert source.count("alertcondition(") == 5
     assert "showExitLabels = input.bool(false" in source
     assert "int rrKeep = input.int(60" in source
     assert "input.color(color.white," in source
     assert "wickcolor=signalColor, bordercolor=signalColor" in source
     assert "bool showPanel = input.bool(true" in source
     assert "label.new(bar_index, signalSide == 1 ? low - atr * 0.35 : high + atr * 0.35, str.tostring(close, format.mintick)" in source
-    for begin, end in (
-        ("// BEGIN UNCHANGED V2 RISK HELPERS", "// END UNCHANGED V2 RISK HELPERS"),
-        ("// BEGIN REFERENCE STATE", "// END REFERENCE STATE"),
-        ("// BEGIN CONFIRMED DISPLAY", "// END CONFIRMED DISPLAY"),
-        ("// BEGIN V2 RISK BOX DISPLAY", "// END V2 RISK BOX DISPLAY"),
-    ):
-        assert _section(source, begin, end) == _section(v5, begin, end)
+    assert _section(source, "// BEGIN UNCHANGED V2 RISK HELPERS", "// END UNCHANGED V2 RISK HELPERS") == _section(v5, "// BEGIN UNCHANGED V2 RISK HELPERS", "// END UNCHANGED V2 RISK HELPERS")
+    state = _section(source, "// BEGIN REFERENCE STATE", "// END REFERENCE STATE")
+    display = _section(source, "// BEGIN V2 RISK BOX DISPLAY", "// END V2 RISK BOX DISPLAY")
+    assert state.index("f_path(trendSide") < state.index("bool oppositeStopSignal")
+    assert "bool referenceReverse = false" in state
+    assert "exitPeakR := peakR" in state and "exitProtection := protection" in state
+    assert "if signalSide != 0 and (not endedThisBar or oppositeStopSignal) and signalSide != trendSide" in state
+    assert "if trendSide != 0" in state and "referenceReverse := true" in state
+    assert display.index("if not na(activeRR)") < display.index("if referenceStarted")
+    assert "float groupPeakR = ended ? exitPeakR : peakR" in display
+    assert "label.set_text(activeRR.entryTag, str.tostring(activeRR.entryPrice, format.mintick))" in display
+    assert "V6 参考结束事件（1保护 / 2反向）" in source
+    assert 'alertcondition(referenceReverse, "SPIKE 参考反向结束"' in source
+
+
+def test_plot_call_floor_leaves_room_for_pine_multi_series_plot_costs():
+    source = (ROOT / "yoyo/evaluation/pine/spike_burst_v6.pine").read_text()
+    # This is intentionally only a source-level floor: TV can charge multiple
+    # plot slots to multi-series calls. Native compilation remains authoritative.
+    calls = re.findall(r"\bplot(?:shape|candle)?\s*\(", source)
+    assert len(calls) == 47
+    for removed in ("V6 本根V4旧确认诊断", "V6 最终确认", "V6 空头最终确认"):
+        assert removed not in source
