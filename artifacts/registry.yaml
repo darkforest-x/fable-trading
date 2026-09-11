@@ -18,6 +18,104 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v1-okx-133-review-20260911-data-manifest
+    artifact_type: manifest
+    role: fixed_133_signal_chart_membership
+    source_repo: darkforest-x/fable-trading
+    source_commit: 44c3fea7cee8dc1624d1bb49e48258c172d4f6cf
+    generator_commit: 1aade37391b138d39a8d5e79c557f9c6554ef394
+    source_path: experiments/active/exp-spike-v1-okx-133-review-20260911/data/manifest.json
+    sha256: 254832d132b9e180c44d4abcd0b3ea52af8045d9c46b6204145bcb8108cc9e31
+    size_bytes: 53827
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-okx-133-review-20260911/data/manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized fixed historical chart review only; no training, strategy evaluation, or trading eligibility.
+  - artifact_id: spike-v1-okx-133-review-20260911-render-receipt
+    artifact_type: manifest
+    role: per_record_browser_canvas_and_png_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: 44c3fea7cee8dc1624d1bb49e48258c172d4f6cf
+    generator_commit: d5a7aa8241bbbbc0412efb77deb1c8db37adfdba
+    source_path: experiments/active/exp-spike-v1-okx-133-review-20260911/rendered/render_receipt.json
+    sha256: 9d66263cd9f1912dd411693cae2a5a536ddf850daf5a88250b4464749c6d4418
+    size_bytes: 729036
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-okx-133-review-20260911/rendered/render_receipt.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized fixed historical chart review only; no training, strategy evaluation, or trading eligibility.
+  - artifact_id: spike-v1-okx-133-review-20260911-png-archive
+    artifact_type: dataset
+    role: all_133_browser_chart_images_with_index
+    source_repo: darkforest-x/fable-trading
+    source_commit: 44c3fea7cee8dc1624d1bb49e48258c172d4f6cf
+    generator_commit: d5a7aa8241bbbbc0412efb77deb1c8db37adfdba
+    source_path: experiments/active/exp-spike-v1-okx-133-review-20260911/rendered/spike-v1-okx-133-rendered.zip
+    sha256: 81175b9212c85706337df21f488be4d78dd92208aff106524f2126b740c07eda
+    size_bytes: 34662489
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-okx-133-review-20260911/rendered/spike-v1-okx-133-rendered.zip
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized fixed historical chart review only; no training, strategy evaluation, or trading eligibility.
+  - artifact_id: spike-v1-okx-133-review-20260911-root-acceptance
+    artifact_type: manifest
+    role: independent_identity_hash_and_iab_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: 44c3fea7cee8dc1624d1bb49e48258c172d4f6cf
+    generator_commit: 44c3fea7cee8dc1624d1bb49e48258c172d4f6cf
+    source_path: experiments/active/exp-spike-v1-okx-133-review-20260911/qa/root_acceptance.json
+    sha256: c639fa670eebf19f1aa29eebdb6be0ebae23d848415c0cc6ac8ec11e0856d1f0
+    size_bytes: 1757
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-okx-133-review-20260911/qa/root_acceptance.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized fixed historical chart review only; no training, strategy evaluation, or trading eligibility.
+  - artifact_id: spike-v1-okx-133-review-20260911-ui-acceptance
+    artifact_type: manifest
+    role: interactive_viewer_behavior_acceptance
+    source_repo: darkforest-x/fable-trading
+    source_commit: 44c3fea7cee8dc1624d1bb49e48258c172d4f6cf
+    generator_commit: 44c3fea7cee8dc1624d1bb49e48258c172d4f6cf
+    source_path: experiments/active/exp-spike-v1-okx-133-review-20260911/qa/ui_acceptance.json
+    sha256: 77204bd9e958d4926677c68c9fe0c8fcdfddd84203f3b5bda41b7607b7fcf91f
+    size_bytes: 2898
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-okx-133-review-20260911/qa/ui_acceptance.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized fixed historical chart review only; no training, strategy evaluation, or trading eligibility.
+  - artifact_id: spike-v1-okx-133-review-20260911-report-source
+    artifact_type: report
+    role: historical_chart_delivery_report_source
+    source_repo: darkforest-x/fable-trading
+    source_commit: 44c3fea7cee8dc1624d1bb49e48258c172d4f6cf
+    generator_commit: 44c3fea7cee8dc1624d1bb49e48258c172d4f6cf
+    source_path: analysis/p0_spike_v1_okx_133_review_20260911.md
+    sha256: c7090f627f0a2b9bff7758ca74a68b1acdbfce5a6ceac0e8bf220109406d31b0
+    size_bytes: 8100
+    storage_uri: file:///Users/zhangzc/fable-trading/analysis/p0_spike_v1_okx_133_review_20260911.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized fixed historical chart review only; no training, strategy evaluation, or trading eligibility.
+  - artifact_id: spike-v1-okx-133-review-20260911-report-html
+    artifact_type: report
+    role: historical_chart_delivery_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: 44c3fea7cee8dc1624d1bb49e48258c172d4f6cf
+    generator_commit: 44c3fea7cee8dc1624d1bb49e48258c172d4f6cf
+    source_path: analysis/html/p0_spike_v1_okx_133_review_20260911.html
+    sha256: 66e4658fb6946d0023ad058f79ba5171623c4aed7633cc54033145f1bdadf769
+    size_bytes: 11437
+    storage_uri: file:///Users/zhangzc/fable-trading/analysis/html/p0_spike_v1_okx_133_review_20260911.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized fixed historical chart review only; no training, strategy evaluation, or trading eligibility.
   - artifact_id: spike-v6-volume-price-20260911-plan
     artifact_type: config
     role: frozen_v6_single_variable_plan

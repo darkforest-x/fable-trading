@@ -16,17 +16,26 @@ schema_version: 1
 experiments:
   - experiment_id: exp-spike-v1-okx-133-review-20260911
     source_repo: darkforest-x/fable-trading
-    source_commit: 4dc18befbeb60d771d86cef2256c17cb43f9d140
-    status: active
-    question: Can all 133 recorded OKX V1 long signals from August 27 through September 10 Shanghai time be reviewed individually with genuine TradingView Lightweight Charts and traceable historical OHLC?
-    single_variable: Display-only reconstruction of a fixed signal manifest; no strategy, threshold, execution, notification, or parameter changes.
-    result: Data provenance, complete per-record rendering, and browser acceptance are pending.
+    source_commit: 44c3fea7cee8dc1624d1bb49e48258c172d4f6cf
+    status: accepted
+    question: Can all 133 fixed OKX V1 signals be reviewed individually with official TradingView Lightweight Charts and traceable frozen historical OHLC?
+    single_variable: Display-only reconstruction; no strategy, threshold, execution, notification, parameter, or outcome replay changes.
+    result: 'Software delivery accepted: 133/133 chart records and browser PNGs, zero render failures; 75 30m, 42 1H, 16 4H. 34 long histories use global
+      PNG views; 99 shorter histories fit completely. This is not a strategy profitability acceptance.'
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p0_spike_v1_okx_133_review_20260911.md
-    artifacts: []
-    notes: Owner explicitly requested all 133 charts using subagents. Historical post-signal candles are review context only. The frozen membership is 127 covered-ledger records plus six deduplicated monitor records, not 133 actual executed trades.
+    artifacts:
+    - spike-v1-okx-133-review-20260911-data-manifest
+    - spike-v1-okx-133-review-20260911-render-receipt
+    - spike-v1-okx-133-review-20260911-png-archive
+    - spike-v1-okx-133-review-20260911-root-acceptance
+    - spike-v1-okx-133-review-20260911-ui-acceptance
+    - spike-v1-okx-133-review-20260911-report-source
+    - spike-v1-okx-133-review-20260911-report-html
+    notes: 127 frozen backtest-ledger rows (102 completed, 25 censored) plus six journal signals without a backtest trade. Future candles are review context
+      only. No live service or notification rules changed.
   - experiment_id: exp-spike-v6-volume-price-20260911-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2dcbccc6b85e4f28f3e3edaad07a7b8fb1ee37df
