@@ -47,7 +47,10 @@ def build(old_root, recent_root, previous, output):
     streams, receipts = [], []
     for symbol in ASSETS:
         pattern = f"okx_{symbol}_USDT_SWAP_15m_*.csv"
-        old, recent = list(old_root.glob(pattern)), list(recent_root.glob(pattern))
+        old = list(old_root.glob(pattern))
+        if not old:
+            old = list(old_root.rglob(f"{symbol}_USDT_SWAP_15m.csv"))
+        recent = list(recent_root.glob(pattern))
         if len(old) != 1 or len(recent) != 1:
             raise ValueError(f"need exactly one old/recent source for {symbol}: {old}, {recent}")
         a, b = load(old[0]), load(recent[0])
@@ -59,6 +62,8 @@ def build(old_root, recent_root, previous, output):
                 raise ValueError(f"overlap mismatch {symbol} {col}; do not silently overwrite")
         joined = pd.concat([a, b.loc[~b.index.isin(a.index)]]).sort_index()
         joined = joined.loc[joined.index < END].copy()
+        # Preserve sufficient real pre-roll without replaying unrelated years.
+        joined = joined.loc[joined.index >= pd.Timestamp("2024-08-10T00:00:00Z")]
         if joined.index.max() + pd.Timedelta(minutes=15) != END:
             raise ValueError(f"15m does not reach frozen end: {symbol}")
         joined.to_csv(output / f"{symbol}_15m.csv.gz", index_label="time", compression="gzip")
@@ -82,7 +87,7 @@ def build(old_root, recent_root, previous, output):
                 "builder_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
                 "builder_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                 "higher_period_source": str(previous.resolve()),
-                "15m_coverage_note": "Existing June-2025 onward history plus recent gap-fill; shorter development history than 30m+; common full validation year.",
+                "15m_coverage_note": "Real cached 15m history plus recent verified overlap; development and validation cover the fixed two years where the market existed; new listings have shorter history.",
                 "end_exclusive": str(END)}
     (output / "input_manifest.json").write_text(json.dumps(manifest, indent=2))
 

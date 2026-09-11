@@ -18,4 +18,6 @@ All policies preserve original unfiltered V6 reversal exits and the same frozen 
 
 ## Acceptance and provenance
 
+Before outcome generation, freeze random-control eligibility to the same BB/RSI-ready timestamps as A. B/C/D use this common opportunity null; controls are not required to satisfy the added squeeze/expansion/RSI gates. Control positions are independent matched events, not an investable random portfolio.
+
 Commit all evaluation builders before formal generation. Tests must cover lagged compression thresholds, scale invariance, finite warmup, gap reset, setup expiry and no future dependence, plus reference execution tests. Register final report and receipts; convert report Markdown to self-contained HTML. Preserve negative findings. AUC/top-decile ranking and ranking permutation p do not apply to this non-ranked rule comparison; matching controls provide the economic null without claiming independent-seed statistical significance. No Pine/TV/monitor/Bark/order/training changes. Main only, no worktree, preserve other tasks.
