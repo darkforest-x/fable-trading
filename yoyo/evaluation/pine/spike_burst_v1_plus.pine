@@ -1,0 +1,704 @@
+//@version=6
+// SPIKE Burst V1+ is a separate engineering reference. Its optional protection,
+// rejection, and pullback modules are not fitted profit parameters and cannot inherit
+// any frozen V1/V6 monitor or backtest result. Current and prior OHLCV only.
+// Derived from LazyBear IMACD and the owner's frozen near-zero/6MA launch idea.
+// Current and prior OHLCV only; no security(), pivots, backstamping, or varip.
+indicator("SPIKE 强劲爆发 V1+", shorttitle="SPIKE V1+", overlay=false, max_labels_count=500, max_boxes_count=150, max_lines_count=200, explicit_plot_zorder=true, behind_chart=false)
+
+string gSetup = "01 · 蓄势资格"
+int maLen = input.int(34, "IMACD 长度", minval=2, maxval=200, group=gSetup, display=display.none)
+int sigLen = input.int(9, "信号线长度", minval=1, maxval=100, group=gSetup, display=display.none)
+int minQuiet = input.int(12, "连续近零根数", minval=2, maxval=100, group=gSetup, display=display.none)
+float nearAtr = input.float(0.10, "近零带 / 前根 ATR", minval=0, maxval=1, step=0.01, group=gSetup, display=display.none)
+int denseLen = input.int(12, "释放前密集窗口", minval=2, maxval=100, group=gSetup, display=display.none)
+float denseWidth = input.float(3.0, "平均六均线宽度 / ATR 上限", minval=0.1, step=0.1, group=gSetup, display=display.none)
+int denseCrosses = input.int(2, "至少交织次数", minval=0, maxval=100, group=gSetup, display=display.none)
+int opportunity = input.int(6, "爆发窗口（含释放根）", minval=1, maxval=30, group=gSetup, tooltip="释放当根＋随后5根，默认共6根。爆发条件后到，箭头就画在后来的确认根，不回填。", display=display.none)
+
+string gBurst = "02 · 强劲爆发"
+string direction = input.string("双向", "方向", options=["多头", "双向", "空头"], group=gBurst, display=display.none)
+float minVolume = input.float(4.0, "最低量比", minval=1, step=0.25, group=gBurst, tooltip="本根成交量 / 前20根成交量中位数。量缺失或基数为0时不触发。", display=display.none)
+float minExpansion = input.float(3.0, "最低 TR / 前根 ATR", minval=1, step=0.25, group=gBurst, display=display.none)
+float minBody = input.float(0.55, "最低实体占比", minval=0.1, maxval=1, step=0.05, group=gBurst, display=display.none)
+float minEnd = input.float(0.75, "最低方向侧收盘位置", minval=0.5, maxval=1, step=0.05, group=gBurst, tooltip="多头(close-low)/(high-low)，空头相反。75%要求收在方向侧四分之一区域。", display=display.none)
+
+string gRisk = "03 · 宽止损与趋势保护"
+int stopLen = input.int(5, "初始结构回看根数", minval=1, maxval=100, group=gRisk, display=display.none)
+float stopBuffer = input.float(0.2, "结构外侧缓冲 ATR", minval=0, step=0.1, group=gRisk, display=display.none)
+float riskFloor = input.float(2.0, "最小初始距离 ATR", minval=0.25, step=0.25, group=gRisk, tooltip="是价格空间，不是账户风险额度。止损变宽时，同样账户风险应减少仓位。工程默认，未优化盈利。", display=display.none)
+float armR = input.float(2.0, "收盘浮盈达到多少 R 后跟踪", minval=0, step=0.25, group=gRisk, display=display.none)
+float trailAtr = input.float(4.0, "趋势保护距离 ATR", minval=0.5, step=0.25, group=gRisk, tooltip="收盘价外4ATR，单向收紧。本根更新从下一根生效；无固定止盈。", display=display.none)
+
+string gPlus = "03+ · V1+ 可选保护（独立研究）"
+bool enablePlus = input.bool(true, "启用 V1+ 保护与门控", group=gPlus, tooltip="关闭时保留 V1 的原始确认、风险和趋势跟踪基线，便于直接对照。", display=display.none)
+bool useOverheatFilter = input.bool(true, "启用联合过热过滤", group=gPlus, tooltip="仅当量比和TR/前ATR同时超过上限时拒绝，并消费该原始确认。", display=display.none)
+float overheatRv = input.float(50.0, "过热量比上限", minval=1, step=1, group=gPlus, display=display.none)
+float overheatTr = input.float(10.0, "过热 TR / 前 ATR 上限", minval=1, step=0.5, group=gPlus, display=display.none)
+bool useRiskWidthCap = input.bool(false, "拒绝初始风险超过上限", group=gPlus, display=display.none)
+float riskWidthCapPct = input.float(30.0, "初始风险上限 %", minval=1, maxval=100, step=1, group=gPlus, tooltip="只拒绝新参考；不会收窄冻结的5根结构 + 0.2ATR且至少2ATR止损。", display=display.none)
+bool useStagedProtection = input.bool(true, "启用 1R / 2R 分段保护", group=gPlus, tooltip="1R后保护至-0.5R，2R后尝试成本缓冲参考；均于下一根生效。", display=display.none)
+float costBufferPct = input.float(0.20, "2R 成本缓冲参考 %", minval=0, maxval=5, step=0.01, group=gPlus, tooltip="价格参考估计，不是实际费率或成交保证。", display=display.none)
+string entryMode = input.string("直接确认", "进场模式", options=["直接确认", "回踩确认"], group=gPlus, tooltip="回踩确认先冻结原始确认，再等待后续影线触及冻结均线边缘并在更后根收盘重夺。", display=display.none)
+float pullbackToleranceAtr = input.float(0.25, "回踩边缘容差 ATR", minval=0, maxval=2, step=0.05, group=gPlus, display=display.none)
+int pullbackWindow = input.int(6, "回踩确认窗口", minval=1, maxval=30, group=gPlus, display=display.none)
+bool useStructuralFailure = input.bool(false, "早期结构失败结束", group=gPlus, display=display.none)
+int structuralBars = input.int(8, "结构失败观察根数", minval=1, maxval=30, group=gPlus, tooltip="前N个已完成K线：收盘回到冻结蓄势箱内，且方向MD未维持（多：MD<=0或<=信号或未上升；空镜像）时结束参考。", display=display.none)
+bool useStagnation = input.bool(false, "停滞保护", group=gPlus, display=display.none)
+int stagnationBars = input.int(12, "停滞完成根数", minval=1, maxval=100, group=gPlus, tooltip="若自参考开始没有新的有利收盘，收盘后把下一根保护收紧至收盘外2ATR；没有固定天数平仓。", display=display.none)
+int sameSideCooldown = input.int(0, "同向参考结束冷却根数", minval=0, maxval=200, group=gPlus, tooltip="只阻止同向新参考；原始反向确认仍先结束旧参考。", display=display.none)
+
+string gView = "04 · 显示"
+bool showMas = input.bool(true, "六条均线", group=gView, display=display.none)
+bool showZone = input.bool(true, "淡色蓄势区", group=gView, display=display.none)
+bool showRisk = input.bool(true, "风险区与保护线", group=gView, display=display.none)
+bool showPanel = input.bool(true, "紧凑状态面板", group=gView, display=display.none)
+bool showMilestones = input.bool(true, "已达到 3R / 5R / 10R", group=gView, display=display.none)
+bool showExitLabels = input.bool(false, "参考结束文字", group=gView, display=display.none)
+color signalCandleColor = input.color(color.white, "爆发 K 线颜色（实体 / 影线）", group=gView, display=display.none)
+int keepZones = input.int(8, "保留蓄势区组数", minval=1, maxval=30, group=gView, display=display.none)
+
+color bull = #008F82
+color bear = #D34B66
+color gold = #AD7B29
+color blue = #4679C9
+color ink = chart.fg_color
+color muted = color.new(ink, 40)
+
+// BEGIN BURST PURE HELPERS
+// Price-first launch uses the same force gates BEFORE an IMACD release can lag.
+// Caller must supply a fully qualified PRIOR quiet/dense episode and frozen box.
+// IMACD cannot oppose the direction; rising/falling ZLEMA is current-bar causal.
+f_priceBurst(int side, float o, float h, float l, float c, float md, float sb, float mi, float priorMi, float zoneHigh, float zoneLow, float ropeHigh, float ropeLow, float rv, float expansion, float volGate, float trGate, float bodyGate, float endGate) =>
+    float span = h - l
+    bool known = span > 0 and not na(rv) and not na(expansion) and not na(priorMi) and not na(ropeHigh) and not na(ropeLow) and not na(zoneHigh) and not na(zoneLow)
+    float body = span > 0 ? math.abs(c - o) / span : 0.0
+    float endPosition = span > 0 ? (side == 1 ? (c - l) / span : (h - c) / span) : 0.0
+    bool directional = side == 1 ? c > o and c > zoneHigh and c > ropeHigh and md >= 0 and md >= sb and mi > priorMi : side == -1 ? c < o and c < zoneLow and c < ropeLow and md <= 0 and md <= sb and mi < priorMi : false
+    known and directional and rv >= volGate and expansion >= trGate and body >= bodyGate and endPosition >= endGate
+
+// Uses current OHLC/md/sb and prior md, with previously frozen zone boundaries.
+// rv uses current volume / median(volume[1],20), expansion uses TR/ATR[1].
+f_burst(int side, float o, float h, float l, float c, float md, float previousMd, float sb, float zoneHigh, float zoneLow, float ropeHigh, float ropeLow, float rv, float expansion, float volGate, float trGate, float bodyGate, float endGate) =>
+    float span = h - l
+    bool known = span > 0 and not na(rv) and not na(expansion) and not na(previousMd) and not na(ropeHigh) and not na(ropeLow) and not na(zoneHigh) and not na(zoneLow)
+    float body = span > 0 ? math.abs(c - o) / span : 0.0
+    float endPosition = span > 0 ? (side == 1 ? (c - l) / span : (h - c) / span) : 0.0
+    bool directional = side == 1 ? c > o and c > zoneHigh and c > ropeHigh and md > 0 and md > sb and md > previousMd : side == -1 ? c < o and c < zoneLow and c < ropeLow and md < 0 and md < sb and md < previousMd : false
+    known and directional and rv >= volGate and expansion >= trGate and body >= bodyGate and endPosition >= endGate
+
+// Inclusive launch window; release is age zero. Same episode cannot emit twice.
+f_window(int age, int count, int side, float md, float band, float c, float zoneHigh, float zoneLow) =>
+    age >= 0 and age < count and (side == 1 ? md > band and c >= zoneLow : side == -1 ? md < -band and c <= zoneHigh : false)
+
+// Frozen signal-close inputs only; outward rounding preserves the minimum risk.
+f_risk(int side, float entry, float extreme, float a, float floorAtr, float bufferAtr, float tick) =>
+    bool known = (side == 1 or side == -1) and entry > 0 and a > 0 and tick > 0 and not na(extreme)
+    float candidate = side == 1 ? math.min(extreme - bufferAtr * a, entry - floorAtr * a) : math.max(extreme + bufferAtr * a, entry + floorAtr * a)
+    float stop = known ? (side == 1 ? math.floor(candidate / tick) * tick : math.ceil(candidate / tick) * tick) : na
+    float risk = side * (entry - stop)
+    bool valid = known and stop > 0 and risk > 0
+    [valid ? stop : na, valid ? risk : na, valid]
+
+// Call only AFTER the entry bar. priorProtection was fixed at the previous close.
+// First apply the operative stop and adverse gap; never count stop-bar highs as profit.
+// A new close-based ATR ratchet only becomes operative on the next bar.
+f_path(int side, float entry, float risk, float priorProtection, float priorPeak, bool wasArmed, float o, float h, float l, float c, float a, float activationR, float distanceAtr, float tick) =>
+    bool stopped = side == 1 ? l <= priorProtection : h >= priorProtection
+    float exitPrice = stopped ? (side == 1 ? math.min(o, priorProtection) : math.max(o, priorProtection)) : na
+    float currentR = side * ((stopped ? exitPrice : c) - entry) / risk
+    float peakR = stopped ? priorPeak : math.max(priorPeak, side * ((side == 1 ? h : l) - entry) / risk)
+    bool armed = wasArmed or (not stopped and currentR >= activationR)
+    float protection = priorProtection
+    if not stopped and armed and a > 0
+        float raw = c - side * distanceAtr * a
+        float candidate = side == 1 ? math.floor(raw / tick) * tick : math.ceil(raw / tick) * tick
+        protection := side == 1 ? math.max(priorProtection, candidate) : math.min(priorProtection, candidate)
+    [not stopped, protection, peakR, currentR, exitPrice, armed]
+
+// The old operative stop is always resolved before any close-based V1+ update.
+// Therefore every returned protection first becomes active on the next bar. Long
+// prices round down and short prices round up, so rounding never weakens a stop.
+// Stage 1 means a remaining -0.5R reference loss; stage 2 is only a cost-buffer
+// estimate. A candidate on the wrong side of the confirmed close is skipped.
+f_pathPlus(bool useStages, int side, float entry, float risk, float priorProtection, float priorPeak, bool wasArmed, bool priorStage1, bool priorStage2, float bestClose, bool useStagnationNow, int barsSinceEntry, int barsSinceFavorableClose, int stagnationAfter, float o, float h, float l, float c, float a, float activationR, float distanceAtr, float costPct, float tick) =>
+    bool stopped = side == 1 ? l <= priorProtection : h >= priorProtection
+    float exitPrice = stopped ? (side == 1 ? math.min(o, priorProtection) : math.max(o, priorProtection)) : na
+    float currentR = side * ((stopped ? exitPrice : c) - entry) / risk
+    float peakR = stopped ? priorPeak : math.max(priorPeak, side * ((side == 1 ? h : l) - entry) / risk)
+    bool armed = wasArmed or (not stopped and currentR >= activationR)
+    bool stage1 = priorStage1
+    bool stage2 = priorStage2
+    float protection = priorProtection
+    if not stopped
+        bool hitOneR = useStages and currentR >= 1.0
+        bool hitTwoR = useStages and currentR >= 2.0
+        stage1 := priorStage1 or hitOneR
+        stage2 := priorStage2 or hitTwoR
+        float rawStage1 = entry - side * 0.5 * risk
+        float rawStage2 = entry * (side == 1 ? 1.0 + costPct / 100.0 : 1.0 - costPct / 100.0)
+        bool stage1Possible = stage1 and (side == 1 ? rawStage1 < c : rawStage1 > c)
+        bool stage2Possible = stage2 and rawStage2 > 0 and (side == 1 ? rawStage2 < c : rawStage2 > c)
+        float raw = na
+        if stage1Possible
+            raw := rawStage1
+        if stage2Possible
+            raw := na(raw) ? rawStage2 : side == 1 ? math.max(raw, rawStage2) : math.min(raw, rawStage2)
+        bool newFavorableClose = side * (c - entry) > side * (bestClose - entry)
+        bool stagnant = useStagnationNow and barsSinceEntry >= stagnationAfter and barsSinceFavorableClose >= stagnationAfter and not newFavorableClose and a > 0
+        float rawStagnation = c - side * 2.0 * a
+        bool stagnationPossible = stagnant and rawStagnation > 0 and (side == 1 ? rawStagnation < c : rawStagnation > c)
+        if stagnationPossible
+            raw := na(raw) ? rawStagnation : side == 1 ? math.max(raw, rawStagnation) : math.min(raw, rawStagnation)
+        if armed and a > 0
+            float rawTrail = c - side * distanceAtr * a
+            bool trailPossible = rawTrail > 0 and (side == 1 ? rawTrail < c : rawTrail > c)
+            if trailPossible
+                raw := na(raw) ? rawTrail : side == 1 ? math.max(raw, rawTrail) : math.min(raw, rawTrail)
+        if not na(raw)
+            float rounded = side == 1 ? math.floor(raw / tick) * tick : math.ceil(raw / tick) * tick
+            protection := side == 1 ? math.max(priorProtection, rounded) : math.min(priorProtection, rounded)
+    [not stopped, protection, peakR, currentR, exitPrice, armed, stage1, stage2, not stopped and side * (c - entry) > side * (bestClose - entry)]
+
+// Raw opposite confirmation owns only the old-reference transition. Entry
+// filters belong to the later new-reference decision and must not alter this.
+f_rawEndsOppositeReference(int activeSide, int rawSide) =>
+    activeSide != 0 and rawSide != 0 and activeSide != rawSide
+// END BURST PURE HELPERS
+
+f_smma(float source, int length) =>
+    float seed = ta.sma(source, length)
+    var float value = na
+    value := na(value[1]) ? seed : (value[1] * (length - 1) + source) / length
+    value
+f_flip(float a, float b) =>
+    float d = a - b
+    (d > 0 and d[1] <= 0) or (d < 0 and d[1] >= 0) ? 1.0 : 0.0
+
+float smHigh = f_smma(high, maLen)
+float smLow = f_smma(low, maLen)
+float ema1 = ta.ema(hlc3, maLen)
+float middle = 2.0 * ema1 - ta.ema(ema1, maLen)
+float md = middle > smHigh ? middle - smHigh : middle < smLow ? middle - smLow : 0.0
+float sb = ta.sma(md, sigLen)
+float atr = f_smma(ta.tr(true), 14)
+float s20 = ta.sma(close, 20)
+float e20 = ta.ema(close, 20)
+float s60 = ta.sma(close, 60)
+float e60 = ta.ema(close, 60)
+float s120 = ta.sma(close, 120)
+float e120 = ta.ema(close, 120)
+float ropeHigh = math.max(s20, e20, s60, e60, s120, e120)
+float ropeLow = math.min(s20, e20, s60, e60, s120, e120)
+float width = atr > 0 ? (ropeHigh - ropeLow) / atr : na
+float flips = f_flip(s20,e20) + f_flip(s20,s60) + f_flip(s20,e60) + f_flip(s20,s120) + f_flip(s20,e120) + f_flip(e20,s60) + f_flip(e20,e60) + f_flip(e20,s120) + f_flip(e20,e120) + f_flip(s60,e60) + f_flip(s60,s120) + f_flip(s60,e120) + f_flip(e60,s120) + f_flip(e60,e120) + f_flip(s120,e120)
+float pastWidth = ta.sma(width[1], denseLen)
+float pastCrosses = math.sum(flips[1], denseLen)
+float pastVolume = ta.median(volume[1], 20)
+float rv = not na(volume) and pastVolume > 0 ? volume / pastVolume : na
+float expansion = atr[1] > 0 ? ta.tr(true) / atr[1] : na
+float recentLow = ta.lowest(low, stopLen)
+float recentHigh = ta.highest(high, stopLen)
+bool ready = bar_index >= math.max(340, 10 * maLen) and atr[1] > 0 and not na(sb) and not na(pastWidth)
+if barstate.isfirst and (not chart.is_standard or timeframe.isticks)
+    runtime.error("请使用普通时间 K 线，合成K线不支持。")
+
+// BEGIN BURST STATE MACHINE
+var int quietCount = 0
+var float frozenBand = na
+var float quietHigh = na
+var float quietLow = na
+var box zone = na
+var array<box> zones = array.new<box>()
+var int pendingSide = 0
+var int releasedAt = na
+var float launchHigh = na
+var float launchLow = na
+var float launchBand = na
+var int launchQuiet = 0
+var int trendSide = 0
+var int entryBar = na
+var float entry = na
+var float initialStop = na
+var float risk = na
+var float protection = na
+var float peakR = 0.0
+var float currentR = na
+var bool trailArmed = false
+var bool stageOneLatched = false
+var bool stageTwoLatched = false
+var float bestFavorableClose = na
+var int lastFavorableCloseBar = na
+var float entryZoneHigh = na
+var float entryZoneLow = na
+var int lastLongExitBar = na
+var int lastShortExitBar = na
+// Pullback mode freezes raw-confirmation context. It is an entry wait only;
+// it never paints a prewarning and cannot keep an old opposite reference open.
+var int pullbackSide = 0
+var int pullbackSignalBar = na
+var float pullbackEdge = na
+var float pullbackZoneHigh = na
+var float pullbackZoneLow = na
+var float pullbackAtr = na
+var bool pullbackTouched = false
+var float pullbackExtreme = na
+var string stateText = "等待蓄势"
+var array<label> signalTags = array.new<label>()
+var array<label> exitTags = array.new<label>()
+bool burstUp = false
+bool burstDown = false
+bool exitUp = false
+bool exitDown = false
+// An opposite qualified close ends the old reference before a valid new
+// reference can start. These snapshots are deliberately captured before the
+// new side overwrites entry/risk/peak state; the drawing layer consumes them.
+bool reverseExit = false
+int exitSide = 0
+float exitPeakR = na
+float exitCurrentR = na
+float exitProtection = na
+float exitReferencePrice = na
+string exitReason = ""
+float visibleProtection = trendSide != 0 ? protection : na
+float visibleInitial = trendSide != 0 ? initialStop : na
+float visibleEntry = trendSide != 0 ? entry : na
+
+if barstate.isconfirmed and ready
+    bool endedThisBar = false
+    if trendSide != 0 and bar_index > entryBar
+        int sideBefore = trendSide
+        int barsSinceEntry = bar_index - entryBar
+        int barsSinceFavorableClose = bar_index - lastFavorableCloseBar
+        [alive, newProtection, newPeak, newCurrent, exitPrice, armed, newStageOne, newStageTwo, newBestClose] = f_pathPlus(enablePlus and useStagedProtection, trendSide, entry, risk, protection, peakR, trailArmed, stageOneLatched, stageTwoLatched, bestFavorableClose, enablePlus and useStagnation, barsSinceEntry, barsSinceFavorableClose, stagnationBars, open, high, low, close, atr, armR, trailAtr, costBufferPct, syminfo.mintick)
+        protection := newProtection
+        peakR := newPeak
+        currentR := newCurrent
+        trailArmed := armed
+        stageOneLatched := newStageOne
+        stageTwoLatched := newStageTwo
+        if not alive
+            exitUp := trendSide == 1
+            exitDown := trendSide == -1
+            exitSide := sideBefore
+            exitPeakR := peakR
+            exitCurrentR := currentR
+            exitProtection := protection
+            exitReferencePrice := exitPrice
+            exitReason := "保护触及"
+            endedThisBar := true
+            trendSide := 0
+            pendingSide := 0
+            pullbackSide := 0
+            if sideBefore == 1
+                lastLongExitBar := bar_index
+            else
+                lastShortExitBar := bar_index
+            stateText := "保护触及 · 本段结束"
+            if showExitLabels
+                if array.size(exitTags) >= 40
+                    label.delete(array.shift(exitTags))
+                array.push(exitTags, label.new(bar_index, exitPrice, "保护触及\n" + str.tostring(exitPrice, format.mintick) + " · " + str.tostring(currentR, "#.##") + "R参考", style=sideBefore == 1 ? label.style_label_down : label.style_label_up, color=color.new(ink, 88), textcolor=ink, size=size.small, force_overlay=true))
+        else
+            bool structuralFailed = enablePlus and useStructuralFailure and barsSinceEntry <= structuralBars and close >= entryZoneLow and close <= entryZoneHigh and (trendSide == 1 ? (md <= 0 or md <= sb or md <= md[1]) : (md >= 0 or md >= sb or md >= md[1]))
+            if structuralFailed
+                exitUp := trendSide == 1
+                exitDown := trendSide == -1
+                exitSide := sideBefore
+                exitPeakR := peakR
+                exitCurrentR := sideBefore * (close - entry) / risk
+                exitProtection := protection
+                exitReferencePrice := close
+                exitReason := "早期结构失败"
+                endedThisBar := true
+                trendSide := 0
+                pendingSide := 0
+                pullbackSide := 0
+                if sideBefore == 1
+                    lastLongExitBar := bar_index
+                else
+                    lastShortExitBar := bar_index
+                stateText := "早期结构失败 · 本段结束"
+            else
+                if newBestClose
+                    bestFavorableClose := close
+                    lastFavorableCloseBar := bar_index
+                stateText := trailArmed ? "趋势跟踪" : "爆发后 · 初始保护"
+
+    float band = quietCount >= minQuiet and not na(frozenBand) ? frozenBand : nearAtr * atr[1]
+    // Evaluate the already qualified box BEFORE including the current burst bar.
+    // Price-first and oscillator-release paths consume the SAME episode once.
+    // Same-direction episodes are ignored while tracking, but an opposite
+    // qualified close remains eligible to end/restart the reference.
+    bool canLead = quietCount >= minQuiet and pendingSide == 0 and pastWidth <= denseWidth and pastCrosses >= denseCrosses
+    bool leadUp = canLead and direction != "空头" and (not endedThisBar or exitSide != 1) and f_priceBurst(1, open, high, low, close, md, sb, middle, middle[1], quietHigh, quietLow, ropeHigh, ropeLow, rv, expansion, minVolume, minExpansion, minBody, minEnd)
+    bool leadDown = canLead and direction != "多头" and (not endedThisBar or exitSide != -1) and f_priceBurst(-1, open, high, low, close, md, sb, middle, middle[1], quietHigh, quietLow, ropeHigh, ropeLow, rv, expansion, minVolume, minExpansion, minBody, minEnd)
+    int leadingSide = leadUp ? 1 : leadDown ? -1 : 0
+    // A pending launch owns its frozen band. ATR changes must not create a new
+    // quiet episode that silently cancels an otherwise valid waiting launch.
+    bool near = pendingSide == 0 and math.max(math.abs(md), math.abs(sb)) <= band
+    if leadingSide != 0 and (trendSide == 0 or leadingSide != trendSide)
+        pendingSide := leadingSide
+        releasedAt := bar_index
+        launchHigh := quietHigh
+        launchLow := quietLow
+        launchBand := band
+        launchQuiet := quietCount
+        quietCount := 0
+        frozenBand := na
+        quietHigh := na
+        quietLow := na
+        zone := na
+    else if near
+        pendingSide := 0
+        quietCount += 1
+        quietHigh := quietCount == 1 ? high : math.max(quietHigh, high)
+        quietLow := quietCount == 1 ? low : math.min(quietLow, low)
+        if quietCount == minQuiet
+            frozenBand := band
+            if showZone
+                // Starts NOW at qualification, never backpaints the prior 11 bars.
+                zone := box.new(bar_index, quietHigh, bar_index, quietLow, border_color=color.new(gold, 65), bgcolor=color.new(gold, 95), force_overlay=true)
+                array.push(zones, zone)
+                if array.size(zones) > keepZones
+                    box.delete(array.shift(zones))
+        if quietCount >= minQuiet and not na(zone)
+            box.set_right(zone, bar_index)
+            box.set_top(zone, quietHigh)
+            box.set_bottom(zone, quietLow)
+        if trendSide == 0 and not endedThisBar
+            stateText := quietCount >= minQuiet ? "蓄势就绪 · 等待爆发" : "近零整理"
+    else
+        if quietCount >= minQuiet
+            bool dense = pastWidth <= denseWidth and pastCrosses >= denseCrosses
+            int side = md > band ? 1 : md < -band ? -1 : 0
+            bool allowed = side == 1 ? direction != "空头" : side == -1 ? direction != "多头" : false
+            if dense and allowed and (not endedThisBar or side != exitSide) and (trendSide == 0 or side != trendSide)
+                pendingSide := side
+                releasedAt := bar_index
+                launchHigh := quietHigh
+                launchLow := quietLow
+                launchBand := band
+                launchQuiet := quietCount
+            else if trendSide == 0 and not endedThisBar
+                stateText := dense ? "方向或主线未通过" : "释放 · 密集未通过"
+        quietCount := 0
+        frozenBand := na
+        quietHigh := na
+        quietLow := na
+        zone := na
+
+    if pendingSide != 0 and (not endedThisBar or pendingSide != exitSide)
+        int age = bar_index - releasedAt
+        bool validWindow = leadingSide != 0 or f_window(age, opportunity, pendingSide, md, launchBand, close, launchHigh, launchLow)
+        if not validWindow
+            pendingSide := 0
+            stateText := "窗口结束 · 等待新蓄势"
+        else
+            stateText := "待爆发 · " + str.tostring(age + 1) + "/" + str.tostring(opportunity)
+            bool rawBurst = leadingSide != 0 or f_burst(pendingSide, open, high, low, close, md, md[1], sb, launchHigh, launchLow, ropeHigh, ropeLow, rv, expansion, minVolume, minExpansion, minBody, minEnd)
+            if rawBurst
+                int side = pendingSide
+                bool rawOverheated = enablePlus and useOverheatFilter and rv > overheatRv and expansion > overheatTr
+                bool sameDirection = trendSide == side
+                bool rawEndsOldReference = f_rawEndsOppositeReference(trendSide, side)
+                [rawSl, rawR, rawRiskValid] = f_risk(side, close, side == 1 ? recentLow : recentHigh, atr, riskFloor, stopBuffer, syminfo.mintick)
+                bool rawCapRejected = enablePlus and useRiskWidthCap and rawRiskValid and 100.0 * rawR / close > riskWidthCapPct
+                int rawLastSameExit = side == 1 ? lastLongExitBar : lastShortExitBar
+                bool rawCooldownRejected = enablePlus and sameSideCooldown > 0 and not na(rawLastSameExit) and bar_index - rawLastSameExit < sameSideCooldown
+                bool rawEntryGatePass = rawRiskValid and not rawCapRejected and not rawCooldownRejected
+                // Every opposite raw replaces a pending retest before its own
+                // risk gate is considered; an overheated opposite cannot leave
+                // a stale same-direction wait alive.
+                if pullbackSide != 0 and pullbackSide != side
+                    pullbackSide := 0
+                // Raw opposite confirmation owns old-reference termination even
+                // when V1+ rejects or waits before creating the new reference.
+                if rawEndsOldReference
+                    reverseExit := true
+                    exitSide := trendSide
+                    exitPeakR := peakR
+                    exitCurrentR := currentR
+                    exitProtection := protection
+                    exitReferencePrice := close
+                    exitReason := "反向确认"
+                    if trendSide == 1
+                        lastLongExitBar := bar_index
+                    else
+                        lastShortExitBar := bar_index
+                    trendSide := 0
+                pendingSide := 0
+                // A rejected raw episode is consumed. No delayed V1+ entry may
+                // reuse its old quiet box without a freshly qualified setup.
+                if enablePlus and entryMode == "回踩确认" and not rawOverheated and rawEntryGatePass and not sameDirection
+                    pullbackSide := side
+                    pullbackSignalBar := bar_index
+                    pullbackEdge := side == 1 ? ropeHigh : ropeLow
+                    pullbackZoneHigh := launchHigh
+                    pullbackZoneLow := launchLow
+                    pullbackAtr := atr
+                    pullbackTouched := false
+                    pullbackExtreme := na
+                    stateText := "回踩确认等待 · 无预警标签"
+                else
+                    bool accepted = not sameDirection and not rawOverheated and rawEntryGatePass
+                    // The V1 baseline draws its raw signal even if frozen risk
+                    // is unavailable. Master-off preserves that visible event
+                    // while leaving trendSide at zero and RR coordinates absent.
+                    bool baselineInvalidVisible = not enablePlus and not sameDirection and not rawRiskValid
+                    bool visibleRaw = accepted or baselineInvalidVisible
+                    if visibleRaw
+                        burstUp := side == 1
+                        burstDown := side == -1
+                        entry := close
+                        initialStop := rawSl
+                        risk := rawR
+                        protection := rawSl
+                        entryBar := bar_index
+                        peakR := 0.0
+                        currentR := rawRiskValid ? 0.0 : na
+                        trailArmed := false
+                        stageOneLatched := false
+                        stageTwoLatched := false
+                        bestFavorableClose := close
+                        lastFavorableCloseBar := bar_index
+                        entryZoneHigh := launchHigh
+                        entryZoneLow := launchLow
+                        trendSide := accepted ? side : 0
+                    stateText := sameDirection ? "同向爆发 · 参考不重置" : rawOverheated ? "过热原始确认已消费" : rawCapRejected ? "风险过宽原始确认已消费" : rawCooldownRejected ? "同向冷却原始确认已消费" : rawRiskValid ? "强劲爆发 · 初始保护" : "爆发 · 风险参考不可用"
+                    if visibleRaw
+                        color signalColor = side == 1 ? bull : bear
+                        string riskText = rawRiskValid ? "初始保护 " + str.tostring(rawSl, format.mintick) + " · " + str.tostring(100 * rawR / close, "#.##") + "%" : "风险参考不可用"
+                        string timing = leadingSide != 0 ? "量价启动" : "释放确认"
+                        string details = timing + " · 蓄势 " + str.tostring(launchQuiet) + " 根 · 等待 " + str.tostring(age) + " 根\n量比 " + str.tostring(rv, "#.##") + "× · TR扩张 " + str.tostring(expansion, "#.##") + "×\n" + riskText + "\n收盘价为观察参考，不是成交；峰值R不等于兑现收益。"
+                        if array.size(signalTags) >= 80
+                            label.delete(array.shift(signalTags))
+                        array.push(signalTags, label.new(bar_index, side == 1 ? low - atr * 0.35 : high + atr * 0.35, "强劲爆发\n" + str.tostring(close, format.mintick), style=side == 1 ? label.style_label_up : label.style_label_down, color=color.new(signalColor, 91), textcolor=signalColor, size=size.small, tooltip=details, force_overlay=true))
+
+    // In pullback mode a qualifying raw bar only freezes context. A later bar
+    // must first touch the frozen rope edge and a still later close must reclaim
+    // it and exceed that touch bar's directional extreme. The signal bar's wick
+    // is deliberately unavailable as a touch because of the strict > test.
+    if pullbackSide != 0 and not endedThisBar
+        int pullbackAge = bar_index - pullbackSignalBar
+        bool pullbackExpired = pullbackAge > pullbackWindow
+        bool structureBroken = pullbackSide == 1 ? close < pullbackZoneLow : close > pullbackZoneHigh
+        if pullbackExpired or structureBroken
+            pullbackSide := 0
+            stateText := pullbackExpired ? "回踩窗口结束" : "原蓄势箱体破坏"
+        else if pullbackAge > 0
+            float pullbackBandLow = pullbackEdge - pullbackToleranceAtr * pullbackAtr
+            float pullbackBandHigh = pullbackEdge + pullbackToleranceAtr * pullbackAtr
+            // Long requires the lower-wick interval [low, min(open, close)] to
+            // overlap the frozen edge band; short mirrors with the upper wick.
+            // A whole bar far beyond the edge is therefore not a pullback touch.
+            bool touchesEdge = pullbackSide == 1 ? low <= pullbackBandHigh and math.min(open, close) >= pullbackBandLow : high >= pullbackBandLow and math.max(open, close) <= pullbackBandHigh
+            if not pullbackTouched and touchesEdge
+                pullbackTouched := true
+                pullbackExtreme := pullbackSide == 1 ? high : low
+            else if pullbackTouched
+                bool retakes = pullbackSide == 1 ? close > pullbackEdge and close > pullbackExtreme and md >= 0 and md >= sb : close < pullbackEdge and close < pullbackExtreme and md <= 0 and md <= sb
+                if retakes
+                    int side = pullbackSide
+                    [sl, r, riskValid] = f_risk(side, close, side == 1 ? recentLow : recentHigh, atr, riskFloor, stopBuffer, syminfo.mintick)
+                    bool capRejected = useRiskWidthCap and riskValid and 100.0 * r / close > riskWidthCapPct
+                    int lastSameExit = side == 1 ? lastLongExitBar : lastShortExitBar
+                    bool cooldownRejected = sameSideCooldown > 0 and not na(lastSameExit) and bar_index - lastSameExit < sameSideCooldown
+                    bool accepted = trendSide != side and riskValid and not capRejected and not cooldownRejected
+                    if accepted
+                        burstUp := side == 1
+                        burstDown := side == -1
+                        entry := close
+                        initialStop := sl
+                        risk := r
+                        protection := sl
+                        entryBar := bar_index
+                        peakR := 0.0
+                        currentR := 0.0
+                        trailArmed := false
+                        stageOneLatched := false
+                        stageTwoLatched := false
+                        bestFavorableClose := close
+                        lastFavorableCloseBar := bar_index
+                        entryZoneHigh := pullbackZoneHigh
+                        entryZoneLow := pullbackZoneLow
+                        trendSide := side
+                        color signalColor = side == 1 ? bull : bear
+                        if array.size(signalTags) >= 80
+                            label.delete(array.shift(signalTags))
+                        array.push(signalTags, label.new(bar_index, side == 1 ? low - atr * 0.35 : high + atr * 0.35, "强劲爆发\n" + str.tostring(close, format.mintick), style=side == 1 ? label.style_label_up : label.style_label_down, color=color.new(signalColor, 91), textcolor=signalColor, size=size.small, tooltip="回踩确认后的收盘参考，不是成交。重新冻结5根结构风险。", force_overlay=true))
+                    pullbackSide := 0
+                    stateText := accepted ? "回踩确认 · 初始保护" : capRejected ? "回踩风险过宽已拒绝" : cooldownRejected ? "回踩同向冷却已拒绝" : "回踩风险参考不可用"
+
+// END BURST STATE MACHINE
+// BEGIN BURST DISPLAY ONLY
+// Read-only consumer of this derivative's confirmed reference state. Its bounded
+// risk/reward boxes use signal-close reference coordinates; green extent follows
+// confirmed peak only and is never a target or take-profit instruction.
+string rrGroup = "05 · 趋势盈亏框"
+bool rrShow = input.bool(true, "显示盈亏双框", group=rrGroup, tooltip="红框为冻结初始风险；绿框从3R观察位随已确认峰值扩展。没有固定止盈。", display=display.none)
+int rrKeep = input.int(60, "保留盈亏框组数", minval=1, maxval=60, group=rrGroup, display=display.none)
+int rrAhead = input.int(12, "当前框向右展示根数", minval=2, maxval=60, group=rrGroup, tooltip="仅影响当前框的视觉宽度，不改变任何信号或持有规则；保护触及后固定在该根收盘。", display=display.none)
+
+f_rrPriceTag(int stamp, float price, string caption, color tone, string tip) =>
+    label.new(stamp, price, caption, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(chart.bg_color, 12), textcolor=tone, size=size.small, tooltip=tip, force_overlay=true)
+
+type RRMarks
+    array<line> guides
+    array<label> tags
+
+var array<box> rrRiskHistory = array.new<box>()
+var array<box> rrRewardHistory = array.new<box>()
+var array<label> rrEntryHistory = array.new<label>()
+var array<label> rrStopHistory = array.new<label>()
+var array<label> rrPeakHistory = array.new<label>()
+var array<RRMarks> rrMarksHistory = array.new<RRMarks>()
+var box rrRiskBox = na
+var box rrRewardBox = na
+var label rrEntryTag = na
+var label rrStopTag = na
+var label rrPeakTag = na
+var int rrSide = 0
+var int rrStartedAt = na
+var float rrEntry = na
+var float rrStop = na
+var float rrDistance = na
+var float rrMaximum = 0.0
+var RRMarks rrMarks = na
+
+if barstate.isconfirmed and showRisk and rrShow
+    int rrBarMillis = na(time_close) ? int(timeframe.in_seconds() * 1000) : time_close - time
+    int rrCloseTime = na(time_close) ? time + rrBarMillis : time_close
+    int rrRightTime = rrCloseTime + rrAhead * rrBarMillis
+    // Close the old group before allocating a reverse group's objects. The
+    // snapshots prevent a newly reset peak/protection from changing old art.
+    if rrSide != 0 and not na(rrRiskBox)
+        bool rrEnded = exitUp or exitDown or reverseExit
+        float rrPeakForGroup = rrEnded ? exitPeakR : peakR
+        float rrCurrentForGroup = rrEnded ? exitCurrentR : currentR
+        float rrProtectionForGroup = rrEnded ? exitProtection : protection
+        int rrEdge = rrEnded ? rrCloseTime : rrRightTime
+        rrMaximum := math.max(rrMaximum, nz(rrPeakForGroup, 0.0))
+        float rrExtentR = math.max(3.0, rrMaximum)
+        float rrExtent = rrEntry + rrSide * rrExtentR * rrDistance
+        string rrEnding = rrEnded ? " · 本段结束" : ""
+        string rrReference = "信号收盘参考，不是实际成交。已确认峰值 " + str.tostring(rrMaximum, "#.##") + "R；当前路径 " + str.tostring(rrCurrentForGroup, "#.##") + "R。峰值未兑现；3R为观察位，无固定止盈。"
+        box.set_right(rrRiskBox, rrEdge)
+        label.set_x(rrEntryTag, rrEdge)
+        label.set_x(rrStopTag, rrEdge)
+        label.set_text(rrEntryTag, str.tostring(rrEntry, format.mintick))
+        label.set_tooltip(rrEntryTag, rrReference)
+        label.set_tooltip(rrStopTag, rrReference + " 冻结初始风险；当前保护 " + str.tostring(rrProtectionForGroup, format.mintick) + "，以原保护线为准。")
+        if not na(rrRewardBox) and rrExtent > 0
+            box.set_right(rrRewardBox, rrEdge)
+            box.set_top(rrRewardBox, math.max(rrEntry, rrExtent))
+            box.set_bottom(rrRewardBox, math.min(rrEntry, rrExtent))
+            label.set_xy(rrPeakTag, rrEdge, rrExtent)
+            label.set_text(rrPeakTag, (rrMaximum >= 3.0 ? "峰值 " + str.tostring(rrMaximum, "#.##") + "R · " : "3R 观察位 · ") + str.tostring(rrExtent, format.mintick))
+            label.set_tooltip(rrPeakTag, rrReference)
+        for slot = 0 to 2
+            float level = slot == 0 ? 3.0 : slot == 1 ? 5.0 : 10.0
+            float levelPrice = rrEntry + rrSide * level * rrDistance
+            if showMilestones and rrMaximum >= level and levelPrice > 0 and na(array.get(rrMarks.guides, slot))
+                line guide = line.new(rrStartedAt, levelPrice, rrCloseTime, levelPrice, xloc=xloc.bar_time, color=color.new(bull, 35), style=line.style_dashed, width=1, force_overlay=true)
+                label tag = label.new(time, levelPrice, str.tostring(level, "#") + "R 已达", xloc=xloc.bar_time, style=label.style_label_left, color=color.new(bull, 88), textcolor=bull, size=size.tiny, force_overlay=true)
+                array.set(rrMarks.guides, slot, guide)
+                array.set(rrMarks.tags, slot, tag)
+            line guide = array.get(rrMarks.guides, slot)
+            if not na(guide)
+                line.set_x2(guide, rrCloseTime)
+        if rrEnded
+            rrSide := 0
+
+    if burstUp or burstDown
+        int rrNewSide = burstUp ? 1 : -1
+        float rrNewDistance = rrNewSide * (entry - initialStop)
+        bool rrValid = not na(entry) and not na(initialStop) and entry > 0 and initialStop > 0 and rrNewDistance > 0
+        if rrValid
+            // Delete before allocation so a completed history never briefly
+            // exceeds the declared TV drawing budget.
+            while array.size(rrRiskHistory) >= rrKeep
+                box.delete(array.shift(rrRiskHistory))
+                box.delete(array.shift(rrRewardHistory))
+                label.delete(array.shift(rrEntryHistory))
+                label.delete(array.shift(rrStopHistory))
+                label.delete(array.shift(rrPeakHistory))
+                RRMarks oldestMarks = array.shift(rrMarksHistory)
+                for slot = 0 to 2
+                    line.delete(array.get(oldestMarks.guides, slot))
+                    label.delete(array.get(oldestMarks.tags, slot))
+            rrSide := rrNewSide
+            rrStartedAt := time
+            rrEntry := entry
+            rrStop := initialStop
+            rrDistance := rrNewDistance
+            rrMaximum := 0.0
+            rrMarks := RRMarks.new(array.new<line>(3, na), array.new<label>(3, na))
+            float rrObservation = rrEntry + rrSide * 3.0 * rrDistance
+            string rrTip = "信号收盘参考，不是实际成交。初始风险冻结；3R仅为观察位，不触发止盈。绿色框扩展表示已确认最高浮盈，不代表已实现收益。"
+            rrRiskBox := box.new(rrStartedAt, math.max(rrEntry, rrStop), rrRightTime, math.min(rrEntry, rrStop), xloc=xloc.bar_time, border_color=color.new(bear, 45), border_width=1, bgcolor=color.new(bear, 92), force_overlay=true)
+            rrRewardBox := rrObservation > 0 ? box.new(rrStartedAt, math.max(rrEntry, rrObservation), rrRightTime, math.min(rrEntry, rrObservation), xloc=xloc.bar_time, border_color=color.new(bull, 45), border_width=1, bgcolor=color.new(bull, 92), force_overlay=true) : na
+            rrEntryTag := f_rrPriceTag(rrRightTime, rrEntry, str.tostring(rrEntry, format.mintick), ink, rrTip)
+            rrStopTag := f_rrPriceTag(rrRightTime, rrStop, "sl · " + str.tostring(rrStop, format.mintick), bear, rrTip)
+            rrPeakTag := rrObservation > 0 ? f_rrPriceTag(rrRightTime, rrObservation, "3R 观察位 · " + str.tostring(rrObservation, format.mintick), bull, rrTip) : na
+            array.push(rrRiskHistory, rrRiskBox)
+            array.push(rrRewardHistory, rrRewardBox)
+            array.push(rrEntryHistory, rrEntryTag)
+            array.push(rrStopHistory, rrStopTag)
+            array.push(rrPeakHistory, rrPeakTag)
+            array.push(rrMarksHistory, rrMarks)
+        else
+            // The signal itself remains visible; unavailable risk creates no
+            // fabricated entry/stop/target coordinates or substitute ATR stop.
+            rrSide := 0
+
+// END BURST DISPLAY ONLY
+plotshape(burstUp, title="多头强劲爆发", style=shape.triangleup, location=location.belowbar, color=bull, size=size.tiny, force_overlay=true, display=display.pane)
+plotshape(burstDown, title="空头强劲爆发", style=shape.triangledown, location=location.abovebar, color=bear, size=size.tiny, force_overlay=true, display=display.pane)
+// Unclosed oscillator points are held at their last confirmed value.
+float shownMd = barstate.isconfirmed ? md : md[1]
+float shownSb = barstate.isconfirmed ? sb : sb[1]
+hline(0, "零轴", color=color.new(ink, 38), linestyle=hline.style_solid, linewidth=1)
+plot(shownMd, "IMACD 主线", blue, 2, display=display.pane + display.data_window)
+plot(shownSb, "IMACD 信号线", #CB882A, 2, display=display.pane + display.data_window)
+plot(quietCount >= minQuiet ? 0.0 : na, "已确认蓄势", color.new(gold, 10), 3, plot.style_linebr, display=display.pane + display.data_window)
+plot(burstUp or burstDown ? md : na, "爆发确认点", burstUp ? bull : bear, 4, plot.style_circles, display=display.pane + display.data_window)
+plot(showMas ? s20 : na, "SMA20", color.new(bull, 38), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? e20 : na, "EMA20", color.new(bull, 58), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? s60 : na, "SMA60", color.new(blue, 40), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? e60 : na, "EMA60", color.new(blue, 60), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? s120 : na, "SMA120", color.new(ink, 48), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? e120 : na, "EMA120", color.new(ink, 66), 1, force_overlay=true, display=display.pane + display.data_window)
+// Historical line at bar t is the protection that was actually active DURING t.
+// With the risk box visible, suppress the coincident initial-stop line so it
+// does not look thicker than the remaining reference borders.
+bool protectionOverlapsInitial = not na(visibleProtection) and not na(visibleInitial) and visibleProtection == visibleInitial
+color protectionColor = rrShow and protectionOverlapsInitial ? na : trailArmed ? bull : bear
+color initialColor = rrShow ? na : color.new(bear, 55)
+pProtect = plot(showRisk ? visibleProtection : na, "本根有效保护", protectionColor, 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
+pInitial = plot(showRisk ? visibleInitial : na, "冻结初始止损", initialColor, 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
+pEntry = plot(showRisk ? visibleEntry : na, "信号收盘参考", color.new(ink, 60), 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
+fill(pInitial, pEntry, color.new(bear, 94), title="初始风险区")
+barcolor(burstUp or burstDown ? signalCandleColor : na, title="爆发关键K线")
+plotcandle(burstUp or burstDown ? open : na, high, low, close, title="爆发K线实体与影线", color=signalCandleColor, wickcolor=signalCandleColor, bordercolor=signalCandleColor, editable=false, force_overlay=true, display=display.pane)
+bool protectionExitEvent = barstate.isconfirmed and (exitUp or exitDown) and exitReason == "保护触及"
+bool structuralExitEvent = barstate.isconfirmed and (exitUp or exitDown) and exitReason == "早期结构失败"
+plot(barstate.isconfirmed ? (reverseExit ? 2.0 : structuralExitEvent ? 3.0 : protectionExitEvent ? 1.0 : 0.0) : na, "参考结束事件（1保护 / 2反向 / 3结构）", display=display.data_window)
+plot(barstate.isconfirmed and (reverseExit or exitUp or exitDown) ? exitReferencePrice : na, "参考结束价格", display=display.data_window)
+
+var table panel = table.new(position.top_right, 2, 4, bgcolor=color.new(chart.bg_color, 8), border_width=0)
+if barstate.islast and showPanel
+    table.cell(panel, 0, 0, "SPIKE / BURST", text_color=ink, text_size=size.small)
+    table.cell(panel, 1, 0, ready ? stateText : "预热 / 数据不足", text_color=trendSide == 1 ? bull : trendSide == -1 ? bear : gold, text_size=size.small)
+    table.cell(panel, 0, 1, "量比 / TR扩张", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 1, str.tostring(barstate.isconfirmed ? rv : rv[1], "#.##") + "× / " + str.tostring(barstate.isconfirmed ? expansion : expansion[1], "#.##") + "×", text_color=ink, text_size=size.tiny)
+    table.cell(panel, 0, 2, "路径参考 / 峰值", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 2, na(currentR) ? (na(entry) ? "等待信号" : "风险参考不可用") : str.tostring(currentR, "#.##") + "R / " + str.tostring(peakR, "#.##") + "R", text_color=ink, text_size=size.tiny)
+    table.cell(panel, 0, 3, "收盘确认", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 3, "无固定止盈 · 峰值未兑现", text_color=muted, text_size=size.tiny)
+
+alertcondition(burstUp, "SPIKE 多头爆发", "SPIKE 多头强劲爆发 | {{exchange}}:{{ticker}} | {{interval}} | 信号收盘 {{close}}")
+alertcondition(burstDown, "SPIKE 空头爆发", "SPIKE 空头强劲爆发 | {{exchange}}:{{ticker}} | {{interval}} | 信号收盘 {{close}}")
+alertcondition(protectionExitEvent, "SPIKE 保护触及", "SPIKE 趋势保护已触及 | {{exchange}}:{{ticker}} | {{interval}} | 已收盘确认，请查看保护参考价")
+alertcondition(structuralExitEvent, "SPIKE 早期结构结束", "SPIKE 早期结构失败结束 | {{exchange}}:{{ticker}} | {{interval}} | 已收盘确认，请查看参考结束价")
+alertcondition(reverseExit, "SPIKE 参考反向结束", "SPIKE 参考反向结束 | {{exchange}}:{{ticker}} | {{interval}} | 反向确认收盘 {{close}}")
