@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "site_url": "http://localhost:8767/",
+  "site_contract": {
+    "records": 133,
+    "available": 133,
+    "missing": 0,
+    "timeframes": {
+      "30": 75,
+      "60": 42,
+      "240": 16
+    },
+    "chart_renderer": "TradingView Lightweight Charts v4.2.0 (local vendor, no runtime CDN)"
+  },
+  "source_commits": [
+    "d199b5f",
+    "5bb4fdc",
+    "9277520",
+    "52b2ee8",
+    "a8c561f",
+    "e8f55ab",
+    "8c87165"
+  ],
+  "source_sha256": {
+    "yoyo/evaluation/static/spike_v1_review/app.js": "ad0cedbb4d189855a0a72d8680e0e7851e6c1dbf993ba0d5938905ad7ad68080",
+    "yoyo/evaluation/static/spike_v1_review/timing.js": "9c55b38eb9df5a02eb021ba473dadbd7806a81d382f52bd67a3123b944fc16d6",
+    "yoyo/evaluation/static/spike_v1_review/selection.js": "611ebf100b10a1c36eb66aba160fbcf9bf5e404e2084b75deaba963dde32cdf0",
+    "yoyo/evaluation/static/spike_v1_review/format.js": "cbba835e9ed61ad4caa975bd744db7310158f7c9a296a021d1995a8fdabeaa42",
+    "yoyo/evaluation/static/spike_v1_review/build_site.py": "eb95cc3ea2cd4517921de8508c8d05f235bbf9c8b572f2e6f393a62c22b3bc49"
+  },
+  "focused_checks": [
+    {
+      "command": "python3 -m pytest -q tests/evaluation/test_spike_v1_review_site.py",
+      "result": "4 passed"
+    },
+    {
+      "command": "node --test tests/evaluation/test_spike_v1_review_timing.cjs",
+      "result": "5 passed"
+    },
+    {
+      "command": "node --check yoyo/evaluation/static/spike_v1_review/app.js",
+      "result": "passed"
+    }
+  ],
+  "ui_checks": [
+    {
+      "scenario": "record 1 desktop",
+      "result": "rendered local candle, 6MA, MD/SB, volume, initial SL, next-open and realized ledger fields"
+    },
+    {
+      "scenario": "4H filter then record 46 at 390x844",
+      "requested_record_id": "f80df7f6d43e672b5a2ebf27034151497a4304144aac1c966ab68f18040095c8",
+      "rendered_record_id": "f80df7f6d43e672b5a2ebf27034151497a4304144aac1c966ab68f18040095c8",
+      "result": "matched; list scroll does not cover record buttons; censored cutoff is not labelled exit"
+    },
+    {
+      "scenario": "1H filter then record 133",
+      "requested_record_id": "db18aa1894c0a04a6b3c2d9d",
+      "rendered_record_id": "db18aa1894c0a04a6b3c2d9d",
+      "result": "matched; small-token axis preserves precision; no covered trade ledger shown"
+    },
+    {
+      "scenario": "fullscreen",
+      "result": "enter and sticky in-chart exit control both exercised"
+    },
+    {
+      "scenario": "time contract",
+      "result": "execution test asserts V1 arrow/guide uses bar open while initial SL begins at confirmed close"
+    }
+  ],
+  "known_limits": [
+    "The site is a local frozen-history viewer, not a TradingView account chart or live signal feed.",
+    "Later candles are explicitly historical review context only.",
+    "The local 8767 server is a development static server and must be managed separately for persistent access."
+  ]
+}
