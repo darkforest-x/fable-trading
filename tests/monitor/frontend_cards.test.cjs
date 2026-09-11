@@ -216,6 +216,8 @@ test("initial SL SVG begins after the explicit original close and labels outside
   const label = svg.indexOf('class="chart-risk-label"');
   assert.ok(clipClose > line && label > clipClose, "initial SL label must be outside price-clip");
   assert.match(svg, />初始 SL /);
+  assert.match(svg, /class="chart-risk-label" x="596"[^>]*text-anchor="end"[^>]*>初始 SL 90\.00</,
+    "right-aligned label must keep the whole explicit stop price inside the SVG");
 
   harness.state.selected = { ...harness.state.selected, bar_close_ms: 240_000 };
   harness.renderChart();

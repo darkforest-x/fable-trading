@@ -800,7 +800,9 @@
     if (initialStopVisible) {
       const stopY = py(stopPrice);
       // This label is outside price-clip because it is intentionally in the price scale.
-      parts.push(`<text class="chart-risk-label" x="${width - right + 9}" y="${stopY + 3}" style="fill:var(--amber)">初始 SL ${escapeHTML(axisPrice(stopPrice))}</text>`);
+      // Keep the whole price inside the SVG: the price-scale gutter is too
+      // narrow for a left-anchored label on small-price instruments.
+      parts.push(`<text class="chart-risk-label" x="${width - 4}" y="${stopY + 3}" text-anchor="end" style="fill:var(--amber)">初始 SL ${escapeHTML(axisPrice(stopPrice))}</text>`);
     }
     parts.push(`<line x1="${left}" x2="${width - 12}" y1="180" y2="180" stroke="var(--line)" stroke-width=".7"/><text x="${left}" y="191" style="font-size:7px;fill:var(--chart-text)">IMACD</text><line x1="65" x2="76" y1="188.5" y2="188.5" stroke="var(--chart-md)" stroke-width="1.2"/><text x="80" y="191" style="font-size:7px">主线</text><line x1="109" x2="120" y1="188.5" y2="188.5" stroke="var(--chart-signal)" stroke-width="1.2"/><text x="124" y="191" style="font-size:7px">信号线</text>`);
     // Qualified accumulation bands come exclusively from backend focus state.
