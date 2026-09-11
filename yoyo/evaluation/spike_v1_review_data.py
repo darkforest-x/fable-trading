@@ -98,15 +98,30 @@ def _slug(value: str) -> str:
     return "".join(char.lower() if char.isalnum() else "-" for char in value).strip("-")
 
 
-def _read_ohlcv(path: Path) -> pd.DataFrame:
-    """Read and validate a source file before any aggregation or feature work."""
-    frame = pd.read_csv(path, compression="gzip", parse_dates=["time"])
+def _read_ohlcv(path: Path) -> tuple[pd.DataFrame, str]:
+    """Read source time explicitly, allowing one unambiguous legacy index column.
+
+    Some frozen CSVs retain their genuine timestamp in pandas' ``Unnamed: 0``
+    index export while their nominal ``time`` column is entirely blank.  That
+    representation is recoverable without rewriting or substituting evidence,
+    but partial values or two competing time columns remain fail-closed.
+    """
+    frame = pd.read_csv(path, compression="gzip")
     required = ["time", "open", "high", "low", "close", "volume"]
     if set(required) - set(frame.columns):
         raise ReviewDataError("ohlcv_schema_missing")
-    frame = frame.loc[:, required].set_index("time")
-    frame.index = pd.DatetimeIndex(frame.index, tz="UTC") if frame.index.tz is None else frame.index.tz_convert("UTC")
-    return _validate_ohlcv(frame)
+    declared = pd.to_datetime(frame["time"], utc=True, errors="coerce")
+    candidate_name = "Unnamed: 0"
+    candidate = pd.to_datetime(frame[candidate_name], utc=True, errors="coerce") if candidate_name in frame else None
+    if declared.notna().all() and (candidate is None or candidate.isna().all()):
+        timestamps, timestamp_source = declared, "time"
+    elif declared.isna().all() and candidate is not None and candidate.notna().all():
+        timestamps, timestamp_source = candidate, candidate_name
+    else:
+        raise ReviewDataError("ohlcv_timestamp_ambiguous_or_partial")
+    frame = frame.loc[:, ["open", "high", "low", "close", "volume"]]
+    frame.index = pd.DatetimeIndex(timestamps)
+    return _validate_ohlcv(frame), timestamp_source
 
 
 def _validate_ohlcv(frame: pd.DataFrame) -> pd.DataFrame:
@@ -259,10 +274,10 @@ def _source_ohlcv(output_root: Path, db_path: Path, record: ReviewRecord, eviden
     if (evidence.get("ledger_sha256") != LEDGER_SHA256 or evidence.get("frozen_ohlc_sha256") != actual_hash
             or evidence.get("frozen_ohlc_timeframe_min") != 30):
         raise ReviewDataError("covered_ledger_frozen_ohlc_hash_mismatch")
-    frame = _read_ohlcv(path)
+    frame, timestamp_source = _read_ohlcv(path)
     if record.timeframe_min != 30:
         frame = _aggregate(frame, record.timeframe_min)
-    return frame, {"type": "covered_ledger_frozen_ohlc", "path": str(path.relative_to(ROOT)), "sha256": actual_hash, "native_timeframe_min": 30,
+    return frame, {"type": "covered_ledger_frozen_ohlc", "path": str(path.relative_to(ROOT)), "sha256": actual_hash, "native_timeframe_min": 30, "timestamp_source": timestamp_source,
                    "covered_ledger_evidence": evidence}
 
 
@@ -296,6 +311,8 @@ def _chart(record: ReviewRecord, frame: pd.DataFrame, provenance: dict[str, Any]
         candles.append(candle)
     payload = record.payload
     signal_close_price = _finite(payload.get("signal_close") if record.source == "covered_ledger" else payload.get("price"))
+    if signal_close_price is not None and not np.isclose(float(enriched.loc[target, "close"]), signal_close_price, rtol=1e-10, atol=1e-12):
+        raise ReviewDataError("signal_close_price_mismatch")
     initial_stop = _finite(payload.get("initial_stop"))
     stop_provenance = "live_event_explicit_initial_stop"
     if record.source == "covered_ledger":
@@ -326,7 +343,7 @@ def _chart(record: ReviewRecord, frame: pd.DataFrame, provenance: dict[str, Any]
     }
 
 
-def build(output_root: Path = OUTPUT, ledger: Path = LEDGER, db_path: Path = MONITOR_DB) -> dict[str, Any]:
+def build(output_root: Path = OUTPUT, ledger: Path = LEDGER, db_path: Path = MONITOR_DB, *, only_missing: bool = False) -> dict[str, Any]:
     """Build one JSON per immutable record and a deterministic index manifest."""
     records = select_records(ledger, db_path)
     evidence_by_ledger_id = _ledger_evidence_map(db_path)
@@ -334,8 +351,16 @@ def build(output_root: Path = OUTPUT, ledger: Path = LEDGER, db_path: Path = MON
     charts.mkdir(parents=True, exist_ok=True)
     manifest_records = []
     source_cache: dict[tuple[str, str, int, str], tuple[pd.DataFrame, dict[str, Any], list[pd.DataFrame]]] = {}
+    prior_records: dict[str, dict[str, Any]] = {}
+    prior_manifest = output_root / "manifest.json"
+    if only_missing and prior_manifest.is_file():
+        prior_records = {str(row.get("id")): row for row in json.loads(prior_manifest.read_text(encoding="utf-8")).get("records", [])}
     for sequence, record in enumerate(records, 1):
         filename = f"{sequence:03d}_{_slug(record.symbol)}_{record.timeframe_min}m_{record.signal_close_ms}.json"
+        previous = prior_records.get(record.record_id)
+        if previous is not None and previous.get("status") == "available" and (output_root / str(previous.get("chart_path", ""))).is_file():
+            manifest_records.append(previous)
+            continue
         try:
             evidence = evidence_by_ledger_id.get(record.record_id) if record.source == "covered_ledger" else None
             evidence_hash = evidence.get("frozen_ohlc_sha256", "") if isinstance(evidence, dict) else "live_checkpoint"
@@ -371,8 +396,9 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=OUTPUT)
     parser.add_argument("--ledger", type=Path, default=LEDGER)
     parser.add_argument("--monitor-db", type=Path, default=MONITOR_DB)
+    parser.add_argument("--only-missing", action="store_true", help="keep existing available charts and rebuild only missing records")
     arguments = parser.parse_args()
-    manifest = build(arguments.output, arguments.ledger, arguments.monitor_db)
+    manifest = build(arguments.output, arguments.ledger, arguments.monitor_db, only_missing=arguments.only_missing)
     print(json.dumps(manifest["counts"], ensure_ascii=False, sort_keys=True))
 
 

@@ -58,6 +58,15 @@ def test_covered_ohlc_requires_replay_evidence_hash(tmp_path, monkeypatch):
         })
 
 
+def test_frozen_csv_can_use_only_an_unambiguous_unnamed_timestamp_column(tmp_path):
+    path = tmp_path / "frozen.csv.gz"
+    pd.DataFrame({"Unnamed: 0": ["2026-01-01T00:00:00Z", "2026-01-01T00:30:00Z"], "time": [None, None],
+                  "open": [1., 2.], "high": [2., 3.], "low": [1., 2.], "close": [1.5, 2.5], "volume": [1., 1.]}).to_csv(
+                      path, index=False, compression={"method": "gzip", "mtime": 0})
+    frame, source = review._read_ohlcv(path)
+    assert source == "Unnamed: 0" and frame.index.is_monotonic_increasing
+
+
 def test_live_checkpoint_is_frozen_once_and_not_re_read(tmp_path, monkeypatch):
     record = review.ReviewRecord("id", "live_journal", "A-USDT-SWAP", 30, 10, {})
     candles = [{"t": 0, "o": 1, "h": 2, "l": 1, "c": 1.5, "v": 3}]
