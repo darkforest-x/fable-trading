@@ -18,6 +18,38 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v1-plus-implementation-20260912-report
+    artifact_type: report
+    role: implementation_and_validation_limits
+    source_repo: darkforest-x/fable-trading
+    source_commit: dea2d8ba3daabf3c64fffd627d626be86d235169
+    source_path: analysis/p0_spike_v1_plus_implementation_20260912.md
+    sha256: 6b17d332f44b235522bcfb875c751f298e5dfd49e78300929ab41956c6e82aaf
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Software implementation only; runtime and profitability are not claimed.
+  - artifact_id: spike-v1-plus-implementation-20260912-receipt
+    artifact_type: manifest
+    role: source_and_native_save_identity
+    source_repo: darkforest-x/fable-trading
+    source_commit: dea2d8ba3daabf3c64fffd627d626be86d235169
+    source_path: experiments/active/exp-spike-v1-plus-implementation-20260912/implementation_receipt.json
+    sha256: 750031dc7a88bf777fee6fbf3fa44f965b4277bf857f1093dce540f0e2a40d22
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Software implementation only; runtime and profitability are not claimed.
+  - artifact_id: spike-v1-plus-implementation-20260912-preserved-sources
+    artifact_type: manifest
+    role: unchanged_baseline_and_monitor_source_hashes
+    source_repo: darkforest-x/fable-trading
+    source_commit: 11ed67f4b94e402463b437b711365c5804fe18e5
+    source_path: experiments/active/exp-spike-v1-plus-implementation-20260912/preserved_sources.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Source identity only; no price history or model evaluation.
   - artifact_id: spike-v1-okx-133-review-20260911-data-manifest
     artifact_type: manifest
     role: fixed_133_signal_chart_membership

@@ -14,6 +14,22 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-v1-plus-implementation-20260912
+    source_repo: darkforest-x/fable-trading
+    source_commit: dea2d8ba3daabf3c64fffd627d626be86d235169
+    status: inconclusive
+    question: Implement separately switchable causal protection and entry modules while retaining the V1 display baseline.
+    single_variable: Owner-authorized implementation bundle with individual module switches; no parameter fitting or economic replay.
+    result: Independent V1+ saved as TradingView revision 1; final native compile and local contracts pass. Native runtime fixtures are not executed because chart connections are limited; economic improvement is untested.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_spike_v1_plus_implementation_20260912.md
+    artifacts:
+    - spike-v1-plus-implementation-20260912-preserved-sources
+    - spike-v1-plus-implementation-20260912-report
+    - spike-v1-plus-implementation-20260912-receipt
+    notes: Synthetic software verification only. Existing loaded chart used for compilation/display, with no new historical outcome evaluation.
   - experiment_id: exp-spike-v1-okx-133-review-20260911
     source_repo: darkforest-x/fable-trading
     source_commit: 44c3fea7cee8dc1624d1bb49e48258c172d4f6cf
