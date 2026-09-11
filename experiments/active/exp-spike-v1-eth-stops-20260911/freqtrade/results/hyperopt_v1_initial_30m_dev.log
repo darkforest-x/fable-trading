@@ -1,0 +1,28 @@
+
+Best result:
+
+*    1/8:      5 trades. 4/0/1 Wins/Draws/Losses. Avg profit   6.38%. Median profit   4.07%. Total profit 319.46843381 USDT (   3.19%). Avg duration 3 days, 3:00:00 min. Objective: -319.46843
+
+
+    # Buy parameters:
+    buy_params = {
+        "initial_floor": 1.5,
+    }
+
+    # ROI parameters:  # value loaded from strategy
+    minimal_roi = {
+        "0": 100.0
+    }
+
+    # Stoploss parameters:
+    stoploss = -0.99  # value loaded from strategy
+
+    # Trailing stop parameters:
+    trailing_stop = False  # value loaded from strategy
+    trailing_stop_positive = None  # value loaded from strategy
+    trailing_stop_positive_offset = 0.0  # value loaded from strategy
+    trailing_only_offset_is_reached = False  # value loaded from strategy
+    
+
+    # max_open_trades parameters:
+    max_open_trades = 1  # value loaded from strategy
