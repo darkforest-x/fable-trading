@@ -7,5 +7,6 @@
       confirmationMs: payload?.signal_close_ms ?? signal?.time_ms ?? record?.signal_close_ms ?? signal?.bar_close_ms ?? null,
     });
   }
-  globalThis.SpikeV1ReviewTiming = Object.freeze({ resolveChartTiming });
+  function isCensoredRecord(exit) { return String(exit?.reason ?? "").toLowerCase() === "censored"; }
+  globalThis.SpikeV1ReviewTiming = Object.freeze({ resolveChartTiming, isCensoredRecord });
 })();

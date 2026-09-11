@@ -98,7 +98,11 @@
       ? `显示：前 ${coverage.display_before_bars ?? "—"} / 后 ${coverage.display_after_bars ?? "—"} 根；冻结：前 ${coverage.available_before_bars ?? "—"} / 后 ${coverage.available_after_bars ?? "—"} 根`
       : (coverage || record.coverage_status || "见来源记录");
     const noLedger = record.live_status ? "无成交账本" : "无账本成交记录";
-    const facts = [fact("信号收盘", `${fmtPrice(signalPrice)} · ${fmtTime(record.signal_close_ms ?? s.time_ms ?? s.bar_close_ms)}`), fact("初始 SL 参考（非动态）", fmtPrice(initialStop)), fact("账本实际次开盘", entry ? `${fmtPrice(entry.price)} · ${fmtTime(entry.time_ms)}` : noLedger), fact("回测退出", exit ? `${exit.reason || "—"} · ${fmtPrice(exit.price)} · ${fmtTime(exit.time_ms)}` : noLedger), fact("冻结范围", coverageText), fact("来源", record.provenance?.source_sha256 ? String(record.provenance.source_sha256).slice(0, 12) + "…" : (record.source_sha256 ? String(record.source_sha256).slice(0, 12) + "…" : "—"))];
+    const censored = SpikeV1ReviewTiming.isCensoredRecord(exit);
+    const endFact = censored
+      ? fact("数据截止", `尚无退出结论 · 期末参考 ${fmtPrice(exit.price)} · ${fmtTime(exit.time_ms)}`)
+      : fact("回测退出", exit ? `${exit.reason || "—"} · ${fmtPrice(exit.price)} · ${fmtTime(exit.time_ms)}` : noLedger);
+    const facts = [fact("信号收盘", `${fmtPrice(signalPrice)} · ${fmtTime(record.signal_close_ms ?? s.time_ms ?? s.bar_close_ms)}`), fact("初始 SL 参考（非动态）", fmtPrice(initialStop)), fact("回测入场·次开盘", entry ? `${fmtPrice(entry.price)} · ${fmtTime(entry.time_ms)}` : noLedger), endFact, fact("冻结范围", coverageText), fact("来源", record.provenance?.source_sha256 ? String(record.provenance.source_sha256).slice(0, 12) + "…" : (record.source_sha256 ? String(record.source_sha256).slice(0, 12) + "…" : "—"))];
     $("facts").innerHTML = facts.join("");
   }
   function renderRecordHeader(record) {
@@ -114,7 +118,7 @@
     const rows = Array.isArray(payload.candles) ? payload.candles : [];
     if (!rows.length) throw new Error("该记录没有可绘制的冻结 OHLC");
     destroyCharts();
-    const s = { ...signal(record), ...(payload.signal || {}) }, entry = payload.entry ?? record.entry, exit = payload.exit ?? record.exit, initialStop = payload.initial_stop ?? record.initial_stop ?? s.initial_stop;
+    const s = { ...signal(record), ...(payload.signal || {}) }, entry = payload.entry ?? record.entry, exit = payload.exit ?? record.exit, initialStop = payload.initial_stop ?? record.initial_stop ?? s.initial_stop, censored = SpikeV1ReviewTiming.isCensoredRecord(exit);
     const priceContainer = $("price-chart"), mdContainer = $("momentum-chart"), volumeContainer = $("volume-chart");
     const priceChart = LightweightCharts.createChart(priceContainer, chartOptions(priceContainer, true));
     const mdChart = LightweightCharts.createChart(mdContainer, chartOptions(mdContainer, true));
@@ -125,8 +129,8 @@
     const markers = [];
     const { signalBarMs, confirmationMs } = SpikeV1ReviewTiming.resolveChartTiming(payload, record, s);
     if (presentNumber(signalBarMs)) markers.push(marker(signalBarMs, "belowBar", "#eabf5f", "arrowUp", "V1 信号 K 线"));
-    if (presentNumber(entry?.time_ms) && presentNumber(entry?.price)) markers.push(marker(entry.time_ms, "belowBar", "#62d7ab", "circle", "账本实际 next open"));
-    if (presentNumber(exit?.time_ms) && presentNumber(exit?.price)) markers.push(marker(exit.time_ms, "aboveBar", "#f2777a", "arrowDown", `退出 · ${exit.reason || "—"}`));
+    if (presentNumber(entry?.time_ms) && presentNumber(entry?.price)) markers.push(marker(entry.time_ms, "belowBar", "#62d7ab", "circle", "回测入场·次开盘"));
+    if (presentNumber(exit?.time_ms) && presentNumber(exit?.price)) markers.push(marker(exit.time_ms, "aboveBar", censored ? "#8292aa" : "#f2777a", censored ? "circle" : "arrowDown", censored ? "数据截止 · 尚无退出结论" : `退出 · ${exit.reason || "—"}`));
     priceSeries.setMarkers(markers.sort((a, b) => a.time - b.time));
     state.charts[0].cleanup = () => { state.charts[0].stopCleanup?.(); state.charts[0].signalCleanup?.(); };
     state.charts[0].stopCleanup = signalGuide(priceChart, priceContainer, signalBarMs);

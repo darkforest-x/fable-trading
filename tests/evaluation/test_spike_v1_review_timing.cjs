@@ -10,7 +10,7 @@ const timingSource = fs.readFileSync(path.join(root, "yoyo/evaluation/static/spi
 const appSource = fs.readFileSync(path.join(root, "yoyo/evaluation/static/spike_v1_review/app.js"), "utf8");
 const sandbox = {};
 vm.runInNewContext(timingSource, sandbox, { filename: "timing.js" });
-const { resolveChartTiming } = sandbox.SpikeV1ReviewTiming;
+const { resolveChartTiming, isCensoredRecord } = sandbox.SpikeV1ReviewTiming;
 
 test("original V1 marker uses candle bar open while initial SL starts at confirmed close", () => {
   const timing = resolveChartTiming(
@@ -33,4 +33,13 @@ test("payload timing wins over record fallbacks without conflating next-open ent
   assert.equal(timing.signalBarMs, 10_000);
   assert.equal(timing.confirmationMs, 13_600);
   assert.notEqual(timing.signalBarMs, timing.confirmationMs);
+});
+
+
+test("censored ledger cutoff is not presented as an executed exit", () => {
+  assert.equal(isCensoredRecord({ reason: "censored" }), true);
+  assert.equal(isCensoredRecord({ reason: "protective_stop" }), false);
+  assert.match(appSource, /数据截止 · 尚无退出结论/);
+  assert.match(appSource, /回测入场·次开盘/);
+  assert.match(appSource, /censored \? "circle" : "arrowDown"/);
 });
