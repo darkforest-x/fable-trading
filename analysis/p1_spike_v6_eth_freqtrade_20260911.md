@@ -7,7 +7,7 @@
 - V6 规则：冻结 Pine commit `6c12660`，Pine SHA `e15854bc577e5548c5799dcbba87d8b218c195fedf562940b621b9d7ef57c882`，oracle SHA `e84690c02e7b03291cc3037eab37ac495cc2ece79326e24411cfa72aa1214d4b`。
 - 数据：已存在 OKX ETH-USDT-SWAP 冻结 30m 源，SHA `80dc85ee0b926239b20a3e733e425550b2a863cf66f27f8c1a396d31d252855a`；评估窗 2024-09-10 至 2026-09-10 UTC。
 - 执行：next observed open 入场、单一活跃仓、双边各 10bp 费用、funding=0 占位。止损只读取前一根已收盘时的计划，不能用同根 high/low 更新后反查同根 low/high。
-- 复现：`cd /Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-eth-stops-20260911/freqtrade_v6 && /Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python build_v6_bridge.py && /Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python write_frozen_ohlcv.py && /Users/zhangzc/.local/share/crypto-toolkit/venvs/freqtrade/bin/freqtrade backtesting ...`。后者由 `run_freqtrade_v6.py` 调用；本次只读取已完成产物，没有重取行情。
+- 复现：`cd /Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-eth-stops-20260911/freqtrade_v6 && /Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python build_v6_bridge.py && /Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python write_frozen_ohlcv.py && /Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python run_freqtrade_v6.py && /Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python render_cases.py`。`run_freqtrade_v6.py` 才是实际调用隔离 Freqtrade 2026.8 的完整 runner；本次图形修订只读取已完成 ledger 与冻结 OHLC，没有重跑该命令或重取行情。
 - 钱包与结果单位：dry-run wallet 10,000 USDT，fixed stake 1,000 USDT，isolated futures、1x leverage、最多一仓；累计收益率和相对回撤是该模拟钱包的 Freqtrade 输出，不是 V1 的独立净R，也不是复利账户或实盘收益。funding=0 占位。
 
 ## 因果与框架检查
@@ -38,7 +38,13 @@
 
 ## Historical trade reviews
 
-The two figures use the same frozen global OHLCV and actual Freqtrade ledger: [4h winner](../experiments/active/exp-spike-v1-eth-stops-20260911/freqtrade_v6/results/v6_4h_winner.png) and [1h loss](../experiments/active/exp-spike-v1-eth-stops-20260911/freqtrade_v6/results/v6_1h_loss.png). They show historical review context only: signal-to-next-open execution, causal plan initial/effective protection, actual exit, and 72 post-exit bars shaded blue. The shaded bars are not strategy inputs.
+The two figures use the same frozen global OHLCV and actual Freqtrade ledger. Bodies and wicks are frozen OHLC, not a close-only line. The diamond is the V6 signal close; the triangle is the actual next-open fill, and the red X is the actual ledger exit. In both selected cases signal close and next-open share the same boundary by the stated execution clock, so their adjacent labels deliberately show the same timestamp instead of inventing a lag.
+
+The orange initial SL is drawn only from entry to actual exit. The purple step is each `active_stop` known before that candle; it stops at the actual exit and is never extended backward from its final value. Blue shading begins after the exit and covers 72 bars of historical review context only. `row-N:open_timestamp:side` in each inset is the stable row identity in the named exported Freqtrade ledger; the export has no separate Freqtrade trade-id column.
+
+![4H long winner — frozen OHLC, causal stop and actual ledger points](../../experiments/active/exp-spike-v1-eth-stops-20260911/freqtrade_v6/results/v6_4h_winner.png)
+
+![1H short loss — frozen OHLC, causal stop and actual ledger points](../../experiments/active/exp-spike-v1-eth-stops-20260911/freqtrade_v6/results/v6_1h_loss.png)
 
 ## 风险与诚实声明
 
