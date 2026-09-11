@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from yoyo.evaluation.spike_v6_wvf_study import (
-    ExecutionSpec, WvfSpec, make_signal_ledger, simulate_v6_variant,
+    ExecutionSpec, WvfSpec, aggregate_complete, make_signal_ledger, simulate_v6_variant, summarize_account,
     wvf_features, wvf_long_reclaim,
 )
 
@@ -140,3 +140,12 @@ def test_open_stop_beats_pending_reverse_and_reverse_entry_can_follow():
     _, trades = simulate_v6_variant(f, signals, admission=pd.Series(True, index=f.index), variant="A", spec=ExecutionSpec(tick=.1))
     assert trades.iloc[0].exit_reason == "initial_stop_gap"
     assert trades.iloc[1].side == -1 and trades.iloc[1].entry_time == f.index[7]
+
+
+def test_account_drawdown_includes_initial_cash_and_aggregation_keeps_only_full_bars():
+    assert summarize_account(pd.DataFrame()).get("max_drawdown_closed_trade") == 0.0
+    f = market(9)
+    f.index = pd.date_range("2025-01-01", periods=9, freq="30min", tz="UTC")
+    f["volume"] = 1.0; f["quote_volume"] = 100.0
+    partial = aggregate_complete(f, 240)
+    assert len(partial) == 1 and partial.open.iloc[0] == 100.0

@@ -15,6 +15,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
+from pathlib import Path
 from typing import Iterable
 
 import numpy as np
@@ -235,6 +236,7 @@ def _gap_censor(pos: dict[str, object], *, exit_i: int, exit_time: object) -> di
 
 def simulate_v6_variant(frame: pd.DataFrame, signals: pd.DataFrame, *, admission: pd.Series,
                         variant: str, data_gap: pd.Series | None = None,
+                        reclaim: pd.DataFrame | None = None,
                         spec: ExecutionSpec = ExecutionSpec()) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Replay a single-coin, 1x-notional V6 variant without filtering exits.
 
@@ -249,7 +251,7 @@ def simulate_v6_variant(frame: pd.DataFrame, signals: pd.DataFrame, *, admission
     minutes = frame.attrs.get("minutes")
     if isinstance(minutes, bool) or not isinstance(minutes, int) or minutes <= 0:
         raise ValueError("frame.attrs minutes must be a positive integer")
-    ledger = make_signal_ledger(signals, None, variant=variant, minutes=minutes)
+    ledger = make_signal_ledger(signals, reclaim, variant=variant, minutes=minutes)
     allowed = pd.Series(admission, index=frame.index).fillna(False).astype(bool)
     gap = pd.Series(False, index=frame.index) if data_gap is None else pd.Series(data_gap, index=frame.index).fillna(True).astype(bool)
     raw_side = np.where(signals.long_signal.fillna(False), 1, np.where(signals.short_signal.fillna(False), -1, 0))
@@ -341,11 +343,11 @@ def summarize_account(trades: pd.DataFrame) -> dict[str, float | int]:
     """Summarize realized 1x-notional sequential trades; censored rows are excluded."""
     if trades.empty:
         return {"trades": 0, "win_rate": math.nan, "profit_factor": math.nan, "net_r": 0.0,
-                "gross_return": 0.0, "net_return": 0.0, "max_drawdown": 0.0}
+                "gross_return": 0.0, "net_return": 0.0, "max_drawdown_closed_trade": 0.0}
     done = trades.loc[~trades.censored.astype(bool)].copy()
     if done.empty:
         return {"trades": 0, "win_rate": math.nan, "profit_factor": math.nan, "net_r": 0.0,
-                "gross_return": 0.0, "net_return": 0.0, "max_drawdown": 0.0}
+                "gross_return": 0.0, "net_return": 0.0, "max_drawdown_closed_trade": 0.0}
     profits = done.net_return.clip(lower=0).sum()
     losses = -done.net_return.clip(upper=0).sum()
     equity = pd.concat([pd.Series([1.0]), (1.0 + done.net_return).cumprod()], ignore_index=True)
@@ -354,3 +356,109 @@ def summarize_account(trades: pd.DataFrame) -> dict[str, float | int]:
             "profit_factor": math.inf if losses == 0 and profits > 0 else float(profits / losses) if losses else math.nan,
             "net_r": float(done.net_r.sum()), "gross_return": float((1.0 + done.gross_return).prod() - 1.0),
             "net_return": float(equity.iloc[-1] - 1.0), "max_drawdown_closed_trade": float(drawdown.max())}
+
+
+def aggregate_complete(frame: pd.DataFrame, minutes: int) -> pd.DataFrame:
+    """Aggregate only full 30-minute UTC buckets, never inventing a partial bar."""
+    if minutes not in (30, 60, 240):
+        raise ValueError("study supports 30, 60, or 240 minutes")
+    if minutes == 30:
+        return frame.copy()
+    grouped = frame.resample(f"{minutes}min", origin="epoch", closed="left", label="left")
+    out = grouped.agg({"open": "first", "high": "max", "low": "min", "close": "last",
+                       "volume": "sum", "quote_volume": "sum"})
+    return out.loc[grouped.size().eq(minutes // 30)].copy()
+
+
+def _data_gap(frame: pd.DataFrame, minutes: int) -> pd.Series:
+    step = pd.Timedelta(minutes=minutes)
+    gap = frame.index.to_series().diff().ne(step)
+    gap.iloc[0] = False
+    return gap.astype(bool)
+
+
+def _legacy_v4(frame: pd.DataFrame, minutes: int, side: int) -> pd.DataFrame:
+    """Reconstruct V6's retained V4 provenance from closed feature rows."""
+    from yoyo.evaluation.spike_burst_progressive import progressive_fields
+
+    if side not in (1, -1):
+        raise ValueError("side must be ±1")
+    p, gap = progressive_fields(frame), _data_gap(frame, minutes)
+    dense = frame.ready.eq(True) & frame.pastWidth.le(3.0) & frame.pastCrosses.ge(2.0)
+    recent_dense = dense.astype(float).shift(1).rolling(12, min_periods=12).sum().gt(0)
+    prior_high, prior_low = frame.high.shift(1).rolling(12, min_periods=12).max(), frame.low.shift(1).rolling(12, min_periods=12).min()
+    fast_high, fast_low = frame[["s20", "e20"]].max(axis=1, skipna=False), frame[["s20", "e20"]].min(axis=1, skipna=False)
+    early = frame.ready.eq(True) & ((frame.close.gt(prior_high) & frame.close.gt(fast_high)) if side == 1 else (frame.close.lt(prior_low) & frame.close.lt(fast_low)))
+    quality = (frame.ready.eq(True) & recent_dense & (p.prog_advance.ge(1.5) if side == 1 else p.prog_advance.le(-1.5))
+               & p.prog_volume_ratio.ge(1.5) & (frame.md.ge(frame.sb) if side == 1 else frame.md.le(frame.sb))
+               & (frame.middle.gt(frame.middle.shift(1)) if side == 1 else frame.middle.lt(frame.middle.shift(1))))
+    previous_early = False
+    last_accepted = parent_i = None
+    parent_high = parent_low = math.nan
+    parent_confirmed = False
+    rows: list[dict[str, object]] = []
+    for i in range(len(frame)):
+        if bool(gap.iloc[i]):
+            previous_early = False; last_accepted = parent_i = None; parent_high = parent_low = math.nan; parent_confirmed = False
+        cooldown = last_accepted is None or i - last_accepted >= 12
+        early_signal = bool(early.iloc[i]) and not previous_early and cooldown
+        previous_early = bool(early.iloc[i])
+        if early_signal:
+            last_accepted = parent_i = i
+            parent_high, parent_low, parent_confirmed = float(prior_high.iloc[i]), float(prior_low.iloc[i]), False
+        age = None if parent_i is None else i - parent_i
+        if age is not None and age > 3:
+            parent_i = None; parent_high = parent_low = math.nan; parent_confirmed = False; age = None
+        confirms = bool(parent_i is not None and not parent_confirmed and age is not None and 0 <= age <= 3
+                        and bool(quality.iloc[i]) and (frame.close.iloc[i] > parent_high if side == 1 else frame.close.iloc[i] < parent_low))
+        if confirms:
+            parent_confirmed = True
+        rows.append({"legacy_confirmed": confirms, "legacy_parent_high": parent_high if confirms else math.nan,
+                     "legacy_parent_low": parent_low if confirms else math.nan})
+    return pd.DataFrame(rows, index=frame.index)
+
+
+def v6_signals(frame: pd.DataFrame, minutes: int) -> pd.DataFrame:
+    """Return current V6 long/short oracle signals without a Pine exit proxy."""
+    from yoyo.evaluation.spike_burst_progressive import progressive_fields
+    from yoyo.evaluation.spike_burst_v6_structure import detect
+
+    progress, gap = progressive_fields(frame), _data_gap(frame, minutes)
+    output = pd.DataFrame(index=frame.index)
+    for side, label in ((1, "long_signal"), (-1, "short_signal")):
+        legacy = _legacy_v4(frame, minutes, side)
+        supplied = frame[["open", "high", "low", "close", "md", "sb", "atr", "ropeHigh", "ropeLow", "ready"]].copy()
+        supplied["legacy_confirmed"] = legacy.legacy_confirmed.astype(bool)
+        supplied["legacy_parent_high"], supplied["legacy_parent_low"] = legacy.legacy_parent_high, legacy.legacy_parent_low
+        supplied["advance3"], supplied["volume_ratio3"] = progress.prog_advance, progress.prog_volume_ratio
+        supplied["data_gap"], supplied["confirmed"] = gap, True
+        output[label] = detect(supplied, side=side).confirmed.astype(bool)
+    if (output.long_signal & output.short_signal).any():
+        raise ValueError("V6 oracle yielded an ambiguous two-sided close")
+    return output
+
+
+def load_normalized_30m(path: Path) -> pd.DataFrame:
+    """Read one frozen normalized OKX receipt with its original UTC open clock."""
+    raw = pd.read_csv(path)
+    if "time" not in raw:
+        raise ValueError(f"normalized source lacks time: {path}")
+    raw.index = pd.DatetimeIndex(pd.to_datetime(raw.pop("time"), utc=True))
+    raw = raw.sort_index()
+    required = ["open", "high", "low", "close", "volume", "quote_volume"]
+    if set(required) - set(raw):
+        raise ValueError(f"normalized source lacks columns: {path}")
+    return raw.loc[:, required]
+
+
+def prepare_symbol(frame30: pd.DataFrame, *, minutes: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Cache V6 and WVF inputs once per symbol/timeframe before A/B/C replay."""
+    from yoyo.evaluation.spike_burst_replay import features
+
+    bars = aggregate_complete(frame30, minutes)
+    featured = features(bars)
+    featured.attrs["minutes"] = minutes
+    gap = _data_gap(featured, minutes)
+    signals = v6_signals(featured, minutes)
+    wvf = wvf_features(featured, data_gap=gap)
+    return featured, signals, wvf_long_reclaim(featured, wvf, window=12), wvf_long_reclaim(featured, wvf, window=24)
