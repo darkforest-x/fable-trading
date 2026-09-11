@@ -95,12 +95,15 @@ def load_replay_chart(event: dict, *, root: Path = REPLAY_DATA_ROOT) -> dict:
     enriched = features(segment)
     position = int(enriched.index.get_loc(target))
     visible = enriched.iloc[max(0, position - WINDOW_BEFORE):position + WINDOW_AFTER + 1]
-    ma_names = {"s20": "sma20", "e20": "ema20", "s60": "sma60", "e60": "ema60", "s120": "sma120", "e120": "ema120"}
+    display_names = {"md": "md", "sb": "sb", "s20": "sma20", "e20": "ema20",
+                     "s60": "sma60", "e60": "ema60", "s120": "sma120", "e120": "ema120"}
     candles = []
     for timestamp, row in visible.iterrows():
         candle = {"t": int(timestamp.value // 10**6), "o": float(row.open), "h": float(row.high),
                   "l": float(row.low), "c": float(row.close), "v": float(row.volume)}
-        for source, target_name in ma_names.items():
+        # These values come from the full, causal segment before this display
+        # slice.  Warmup remains null rather than being fabricated as zero.
+        for source, target_name in display_names.items():
             value = row[source]
             candle[target_name] = float(value) if pd.notna(value) else None
         candles.append(candle)

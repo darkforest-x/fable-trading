@@ -158,6 +158,20 @@ class Store:
             result[(row[0], row[1])] = value
         return result
 
+    def load_candle_checkpoint(self, symbol, timeframe):
+        """Read one raw recurrence seed for a selected display-only repair."""
+        if not isinstance(symbol, str) or not symbol or not isinstance(timeframe, str) or not timeframe:
+            raise ValueError("invalid candle checkpoint key")
+        with self.connect() as db:
+            row = db.execute("SELECT payload FROM candle_checkpoints WHERE symbol=? AND timeframe=?",
+                             (symbol, timeframe)).fetchone()
+        if row is None:
+            return None
+        try:
+            return json.loads(gzip.decompress(row[0]).decode("utf-8"))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError, TypeError):
+            return None
+
     @staticmethod
     def _insert_event(db, e, notify, bark_notify, telegram_photo=None, photo_error=None):
         cur = db.execute("INSERT OR IGNORE INTO events VALUES (?,?,?,?,?,?,?,?)", (

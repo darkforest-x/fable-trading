@@ -66,14 +66,15 @@ def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, t
     times = frame.index.asi8 // 1_000_000
     ohlcv = frame[["open", "high", "low", "close", "volume"]].to_numpy(dtype=float, copy=False)
     feature_values = {name: feature_frame[name].to_numpy(copy=False) for name in
-                      ("md", "s20", "e20", "s60", "e60", "s120", "e120", "ready", "rv", "expansion")}
+                      ("md", "sb", "s20", "e20", "s60", "e60", "s120", "e120", "ready", "rv", "expansion")}
     replay_values = {name: replayed[name].to_numpy(copy=False) for name in ("burst", "burst_up", "risk_valid", "risk", "initial_stop")}
     for i, stamp in enumerate(times):
         close_ms = int(stamp) + step
         o, h, l, c, v = ohlcv[i]
         if i >= chart_start:
             chart.append({"t": int(stamp), "o":o,"h":h,"l":l,"c":c,"v":v,
-                          "md":_json_number(feature_values["md"][i]), "sma20":_json_number(feature_values["s20"][i]), "ema20":_json_number(feature_values["e20"][i]),
+                          "md":_json_number(feature_values["md"][i]), "sb":_json_number(feature_values["sb"][i]),
+                          "sma20":_json_number(feature_values["s20"][i]), "ema20":_json_number(feature_values["e20"][i]),
                           "sma60":_json_number(feature_values["s60"][i]), "ema60":_json_number(feature_values["e60"][i]),
                           "sma120":_json_number(feature_values["s120"][i]), "ema120":_json_number(feature_values["e120"][i]),
                           "burst":bool(replay_values["burst"][i]), "ready":bool(feature_values["ready"][i])})

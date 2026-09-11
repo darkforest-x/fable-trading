@@ -7,8 +7,9 @@ import pandas as pd
 import pytest
 
 from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL
-from yoyo.monitor.replay_chart import ReplayChartUnavailable, _source_path, load_replay_chart
+from yoyo.monitor.replay_chart import ReplayChartUnavailable, _aggregate, _source_path, load_replay_chart
 from yoyo.monitor.store import Store
+from yoyo.evaluation.spike_burst_replay import features
 
 
 def event(*, event_id="a" * 24, source="replay", venue="okx", symbol="PEPE-USDT-SWAP", minutes=60, open_ms=160 * 3_600_000):
@@ -31,7 +32,7 @@ def write_frozen(root, *, symbol="PEPE-USDT-SWAP", mutate_after=None):
     return path
 
 
-def test_exact_frozen_ohlc_context_has_provenance_and_causal_mas(tmp_path):
+def test_exact_frozen_ohlc_context_has_provenance_and_causal_features(tmp_path):
     path = write_frozen(tmp_path)
     source = event()
     first = load_replay_chart(source, root=tmp_path)
@@ -41,12 +42,20 @@ def test_exact_frozen_ohlc_context_has_provenance_and_causal_mas(tmp_path):
     assert first["context_before_bars"] == first["context_after_bars"] == 90
     assert first["provenance"]["ohlc_sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()
     assert first["provenance"]["source_sha256"] == "frozen-v1-source"
-    assert all(key in target for key in ("sma20", "ema20", "sma60", "ema60", "sma120", "ema120"))
+    assert all(key in target for key in ("md", "sb", "sma20", "ema20", "sma60", "ema60", "sma120", "ema120"))
+    raw = pd.read_csv(path, compression="gzip", parse_dates=["time"]).set_index("time")
+    raw.index = raw.index.tz_localize("UTC") if raw.index.tz is None else raw.index.tz_convert("UTC")
+    expected = features(_aggregate(raw[["open", "high", "low", "close", "volume"]], 60)).loc[
+        pd.Timestamp(source["bar_open_ms"], unit="ms", tz="UTC")]
+    assert target["md"] == pytest.approx(float(expected.md))
+    assert target["sb"] == pytest.approx(float(expected.sb))
     write_frozen(tmp_path, mutate_after=600)
     second = load_replay_chart(source, root=tmp_path)
     target_after = second["candles"][second["context_before_bars"]]
-    assert (target["sma20"], target["ema20"], target["sma120"], target["ema120"]) == (
-        target_after["sma20"], target_after["ema20"], target_after["sma120"], target_after["ema120"])
+    assert (target["md"], target["sb"], target["sma20"], target["ema20"], target["sma120"], target["ema120"]) == (
+        target_after["md"], target_after["sb"], target_after["sma20"], target_after["ema20"], target_after["sma120"], target_after["ema120"])
+    early = load_replay_chart(event(open_ms=10 * 3_600_000), root=tmp_path)
+    assert early["candles"][0]["sb"] is None
 
 
 def test_missing_frozen_source_is_explicit_not_a_live_chart(tmp_path):
@@ -76,9 +85,10 @@ def test_replay_chart_api_uses_stored_event_identity_not_client_provenance(tmp_p
     assert app.state.monitor.store.upsert_event(source)
     source["id"] = app.state.monitor.store.event_id(source)
     received = []
-    monkeypatch.setattr(server, "replay_chart_result", lambda row: received.append(row) or {"source": "replay", "candles": []})
+    payload = {"source": "replay", "candles": [{"md": .1, "sb": .05}]}
+    monkeypatch.setattr(server, "replay_chart_result", lambda row: received.append(row) or payload)
     endpoint = next(route.endpoint for route in app.routes if getattr(route, "path", None) == "/api/replay/chart")
-    assert endpoint(source["id"]) == {"source": "replay", "candles": []}
+    assert endpoint(source["id"]) == payload
     assert len(received) == 1
     assert {key: received[0][key] for key in ("id", "source", "venue", "symbol", "bar_open_ms")} == {
         key: source[key] for key in ("id", "source", "venue", "symbol", "bar_open_ms")}

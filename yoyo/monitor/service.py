@@ -12,6 +12,7 @@ from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from copy import deepcopy
 import logging
+import math
 import multiprocessing
 import hashlib
 from pathlib import Path
@@ -292,13 +293,44 @@ class Monitor:
             if chart is None:
                 stored = self.store.get_market(symbol, timeframe)
                 if stored and stored.get("chart") is not None:
-                    return {"symbol":symbol, "timeframe":timeframe, "candles":stored["chart"], "events":stored.get("events", []), "state":stored}
+                    return self._stored_chart(symbol, timeframe, stored)
                 return None
             state = dict(chart["state"])
             expected = self.client.clock() // TIMEFRAMES[timeframe] * TIMEFRAMES[timeframe]
             if state.get("bar_close_ms", 0) < expected:
                 state.update(stale=True, error=state.get("error") or "awaiting_latest_confirmed_bar")
             return dict(chart, state=state)
+
+    def _stored_chart(self, symbol, timeframe, stored):
+        """Rebuild only a pre-MD/SB cached display from its full raw seed.
+
+        This never persists the repair: a display read must not replay a raw
+        arrow, advance ``last_closed``, or touch either notification path.
+        """
+        fallback_state = dict(stored)
+        fallback = {"symbol": symbol, "timeframe": timeframe, "candles": stored["chart"],
+                    "events": stored.get("events", []), "state": fallback_state}
+        cached = stored["chart"]
+        if not cached or all(isinstance(row, dict) and "sb" in row for row in cached):
+            return fallback
+        seed = self.store.load_candle_checkpoint(symbol, timeframe)
+        try:
+            # Reuse the scanner's exact full-seed validator.  A UI-sized chart
+            # must never seed the frozen recurrence.
+            from yoyo.monitor.v1_worker import _valid_checkpoint
+            from yoyo.monitor.signals import WARMUP, analyze
+            tick = float(stored.get("tick_size"))
+            if (not _valid_checkpoint(seed, timeframe) or len(seed) < WARMUP
+                    or not math.isfinite(tick) or tick <= 0):
+                raise ValueError("incomplete checkpoint")
+            rebuilt = analyze(seed, [], timeframe, tick=tick, chart_limit=240)
+        except (TypeError, ValueError):
+            fallback_state.update(chart_features_complete=False,
+                                  error=fallback_state.get("error") or "cached_chart_features_unavailable")
+            return fallback
+        fallback_state["chart_features_complete"] = True
+        return {"symbol": symbol, "timeframe": timeframe, "candles": rebuilt["chart"],
+                "events": stored.get("events", []), "state": fallback_state}
 
     def _starting_status(self):
         return {"service": "spike Impulse Monitor", "version": VERSION, "protocol": PROTOCOL,
