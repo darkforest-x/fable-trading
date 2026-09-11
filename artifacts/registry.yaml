@@ -29709,3 +29709,81 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Authorized fixed research comparison only; no live trading eligibility. Original strategy replay remains frozen.
+  - artifact_id: spike-v6-bb-squeeze-20260912-report-md
+    artifact_type: report
+    role: fixed_four_period_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 99aa24b3194650e82fb447065c077fa63326437f
+    source_path: analysis/p1_spike_v6_bb_squeeze_20260912.md
+    sha256: 16133666dfeb3d8e1a6b7f7089bd85f6cf4dd77df6ce620fcf2d694a35405667
+    size_bytes: 18970
+    storage_uri: file:///Users/zhangzc/fable-trading/analysis/p1_spike_v6_bb_squeeze_20260912.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized fixed historical research; not blind holdout or trading eligibility. No Pine, monitor, notification or execution changes.
+  - artifact_id: spike-v6-bb-squeeze-20260912-report-html
+    artifact_type: report
+    role: owner_report_with_12_embedded_outcome_charts
+    source_repo: darkforest-x/fable-trading
+    source_commit: 99aa24b3194650e82fb447065c077fa63326437f
+    source_path: analysis/html/p1_spike_v6_bb_squeeze_20260912.html
+    sha256: 1c09a8ded7a407707a2e9a89db98be6eb55f10f2538ed088bc9659c6cee377e2
+    size_bytes: 6928138
+    storage_uri: file:///Users/zhangzc/fable-trading/analysis/html/p1_spike_v6_bb_squeeze_20260912.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized fixed historical research; not blind holdout or trading eligibility. No Pine, monitor, notification or execution changes.
+  - artifact_id: spike-v6-bb-squeeze-20260912-input-receipt
+    artifact_type: manifest
+    role: real_15m_splice_and_frozen_higher_timeframe_inputs
+    source_repo: darkforest-x/fable-trading
+    source_commit: 99aa24b3194650e82fb447065c077fa63326437f
+    source_path: experiments/active/exp-spike-v6-bb-squeeze-20260912-v1/results/input_receipt.json
+    sha256: 89e92370f1761a5d85a5b05bccafc323705d66a0240a594c16d861b8c0c98f63
+    size_bytes: 17220
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-spike-v6-bb-squeeze-20260912-v1/results/input_receipt.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized fixed historical research; not blind holdout or trading eligibility. No Pine, monitor, notification or execution changes.
+  - artifact_id: spike-v6-bb-squeeze-20260912-raw-receipt
+    artifact_type: manifest
+    role: fixed_current_v6_and_bb_replay_source_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: 99aa24b3194650e82fb447065c077fa63326437f
+    source_path: experiments/active/exp-spike-v6-bb-squeeze-20260912-v1/results/replay_b7b60b8/manifest.json
+    sha256: 5f4972d40376c84d469e2f3b9c446fd03235005f5f7d7a9eec8c6bf9e9c6e397
+    size_bytes: 14189
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-spike-v6-bb-squeeze-20260912-v1/results/replay_b7b60b8/manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized fixed historical research; not blind holdout or trading eligibility. No Pine, monitor, notification or execution changes.
+  - artifact_id: spike-v6-bb-squeeze-20260912-post-receipt
+    artifact_type: manifest
+    role: trade_metrics_retention_and_99_seed_matched_controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: 99aa24b3194650e82fb447065c077fa63326437f
+    source_path: experiments/active/exp-spike-v6-bb-squeeze-20260912-v1/results/post_final/post_manifest.json
+    sha256: 680bd27208e250675fac910b52dc0fc93b29ca238cab0211f5d87fd6ccc538c7
+    size_bytes: 103309
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-spike-v6-bb-squeeze-20260912-v1/results/post_final/post_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized fixed historical research; not blind holdout or trading eligibility. No Pine, monitor, notification or execution changes.
+  - artifact_id: spike-v6-bb-squeeze-20260912-charts-receipt
+    artifact_type: manifest
+    role: twelve_ex_post_outcome_illustrations
+    source_repo: darkforest-x/fable-trading
+    source_commit: 99aa24b3194650e82fb447065c077fa63326437f
+    source_path: experiments/active/exp-spike-v6-bb-squeeze-20260912-v1/results/charts_final/manifest.json
+    sha256: 6ee7d4191989a67373dde55ef6bf7b57f4ad79bfef2bc9adb614ddab4d1b1b54
+    size_bytes: 1625
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-spike-v6-bb-squeeze-20260912-v1/results/charts_final/manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized fixed historical research; not blind holdout or trading eligibility. No Pine, monitor, notification or execution changes.

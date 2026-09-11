@@ -8420,13 +8420,22 @@ experiments:
     - spike-v6-wvf-20260912-charts-receipt
   - experiment_id: exp-spike-v6-bb-squeeze-20260912-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 306f50fd2640c19409952bbe4098bcb02cfd59b5
-    status: active
+    source_commit: 99aa24b3194650e82fb447065c077fa63326437f
+    status: inconclusive
     question: Does prior extreme BB200 compression improve current V6 entries across 15m/30m/1H/4H?
-    single_variable: Incremental A common-ready V6, B prior BB squeeze, C bandwidth expansion, D RSI6 directional level; full A0 coverage reference. Fixed parameters, exits and costs.
-    result: Pre-registered before combination outcomes. Real 15m source mapping and causal feature tests in progress.
-    holdout_consumed: false
+    single_variable: A common-ready V6; B adds prior squeeze; C adds width expansion; D adds RSI6 direction. Adjacent comparisons add one fixed condition; same raw reversal exits, stops and costs.
+    result: Completed eight-market, four-period, two-year fixed replay and 99-seed matched controls. Validation 1H PF A/B/C=1.126/1.857/2.133, but C retained only 1 of original 10 net>=10R entries and development C PF=0.931. 30m improvement
+      more consistent, 15m/4H not stable; D identical to C. No universal hard filter established; period-specific evidence remains inconclusive for forward use.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_v6_bb_squeeze_20260912.md
-    notes: Owner authorized historical combination tests. Post-cutoff use will be recorded per configuration; prior-known history is not blind holdout. Do not alter Pine/monitor/orders or external tasks.
+    artifacts:
+    - spike-v6-bb-squeeze-20260912-report-md
+    - spike-v6-bb-squeeze-20260912-report-html
+    - spike-v6-bb-squeeze-20260912-input-receipt
+    - spike-v6-bb-squeeze-20260912-raw-receipt
+    - spike-v6-bb-squeeze-20260912-post-receipt
+    - spike-v6-bb-squeeze-20260912-charts-receipt
+    notes: Owner authorized historical testing; each A/B/C/D configuration first post-cutoff research evaluation, not blind holdout. No retuning after outcomes. Real 15m history, verified next-open engine, 37 tests, independent evidence
+      review, complete negative findings and tail-retention disclosure.
