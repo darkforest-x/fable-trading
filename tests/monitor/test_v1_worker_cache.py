@@ -2,7 +2,7 @@
 from __future__ import annotations
 import threading
 
-from yoyo.monitor import MONITORED_TIMEFRAMES, TIMEFRAMES
+from yoyo.monitor import MONITORED_TIMEFRAMES, SIGNAL_KIND, SIGNAL_PROTOCOL, TIMEFRAMES
 from yoyo.monitor import v1_worker
 from yoyo.monitor.signals import analyze as real_analyze
 from yoyo.monitor.store import Store
@@ -46,7 +46,55 @@ def test_persistent_worker_reuses_client_candles_and_skips_unchanged_replay(tmp_
     assert all(limit == 720 for _, _, _, limit in client.calls)
     timing = scanner.store.get_meta("scan")["timing_ms"]
     assert timing["cells"] == len(MONITORED_TIMEFRAMES)
-    assert all(timing[name] >= 0 for name in ("fetch_total", "analyze_total", "checkpoint_total"))
+    assert timing["changed_cells"] == 0 and timing["unchanged_cells"] == len(MONITORED_TIMEFRAMES)
+    assert all(timing[name] >= 0 for name in ("fetch_total", "analyze_total", "checkpoint_total",
+                                                "analyze_cpu_total", "checkpoint_cpu_total"))
+
+
+def test_scan_timing_separates_main_thread_cpu_and_preserves_fixed_outputs(tmp_path, monkeypatch):
+    client = Client()
+    monkeypatch.setattr(v1_worker, "OKX", lambda: client)
+    cpu_ticks = iter(index / 1_000 for index in range(1, 100))
+    monkeypatch.setattr(v1_worker.time, "thread_time", lambda: next(cpu_ticks))
+
+    expected_charts = {}
+
+    def fixed_analyze(candles, higher, timeframe, *, tick, chart_limit):
+        assert higher == [] and chart_limit == 240
+        expected_charts[timeframe] = list(candles)
+        open_ms = candles[-1]["t"]
+        return {
+            "events": [{"protocol": SIGNAL_PROTOCOL, "kind": SIGNAL_KIND, "source": "live", "confirmation": "raw",
+                        "direction": "long", "side": "long", "confirmed": True, "is_closed": True,
+                        "timeframe": timeframe, "timeframe_min": TIMEFRAMES[timeframe] // 60_000,
+                        "bar_open_ms": open_ms, "bar_close_ms": open_ms + TIMEFRAMES[timeframe],
+                        "price": 100.0, "risk": 1.0, "initial_stop": 99.0, "source_sha256": "a" * 64}],
+            "chart": list(candles), "state": {"phase": "ready", "ready": True, "timeframe": timeframe},
+        }
+
+    monkeypatch.setattr(v1_worker, "analyze", fixed_analyze)
+    scanner = v1_worker.V1Scanner(str(tmp_path / "monitor.sqlite3"))
+    scanner.scan_once()
+    first = scanner.store.get_meta("scan")["timing_ms"]
+    assert first["cells"] == first["changed_cells"] == len(MONITORED_TIMEFRAMES)
+    assert first["unchanged_cells"] == 0
+    for name in ("analyze_cpu_total", "checkpoint_cpu_total", "analyze_cpu_max", "checkpoint_cpu_max"):
+        assert first[name] > 0
+    assert len(scanner.store.list_events()) == len(MONITORED_TIMEFRAMES)
+    assert scanner.store.bark_status()["pending"] == 0
+    for timeframe in MONITORED_TIMEFRAMES:
+        market = scanner.store.get_market("TEST-USDT-SWAP", timeframe)
+        assert market["chart"] == expected_charts[timeframe]
+        assert market["events"][0]["initial_stop"] == 99.0
+        assert market["events"][0]["symbol"] == "TEST-USDT-SWAP"
+
+    scanner.scan_once()
+    second = scanner.store.get_meta("scan")["timing_ms"]
+    assert second["cells"] == second["unchanged_cells"] == len(MONITORED_TIMEFRAMES)
+    assert second["changed_cells"] == 0
+    assert second["analyze_cpu_total"] == second["checkpoint_cpu_total"] == 0.0
+    assert len(scanner.store.list_events()) == len(MONITORED_TIMEFRAMES)
+    assert scanner.store.bark_status()["pending"] == 0
 
 
 def test_prefetches_up_to_eight_cells_but_replays_and_writes_in_cell_order(tmp_path, monkeypatch):

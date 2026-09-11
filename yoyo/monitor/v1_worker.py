@@ -116,9 +116,13 @@ class V1Scanner:
                 symbol = instrument["instId"]
                 cell = (symbol, timeframe)
                 fetch_ms = analyze_ms = checkpoint_ms = 0.0
+                analyze_cpu_ms = checkpoint_cpu_ms = 0.0
+                unchanged = None
+                has_candles = False
                 try:
                     _, _, future = pending.pop(cell)
                     candles, gaps, fetch_ms = future.result()
+                    has_candles = bool(candles)
                     self.candles[cell] = candles
                     close = candles[-1]["t"] + TIMEFRAMES[timeframe] if candles else None
                     key = f"v1:last_closed:{symbol}:{timeframe}"
@@ -131,13 +135,17 @@ class V1Scanner:
                     # not rewrite an unchanged compressed seed every pass.
                     if not unchanged or cell not in self._checkpointed:
                         checkpoint_started = time.monotonic()
+                        checkpoint_cpu_started = time.thread_time()
                         store.save_candle_checkpoint(symbol, timeframe, candles)
                         checkpoint_ms = round((time.monotonic() - checkpoint_started) * 1000, 3)
+                        checkpoint_cpu_ms = round((time.thread_time() - checkpoint_cpu_started) * 1000, 3)
                         self._checkpointed.add(cell)
                     if not unchanged:
                         analyze_started = time.monotonic()
+                        analyze_cpu_started = time.thread_time()
                         result = analyze(candles, [], timeframe, tick=float(instrument["tickSz"]), chart_limit=240)
                         analyze_ms = round((time.monotonic() - analyze_started) * 1000, 3)
+                        analyze_cpu_ms = round((time.thread_time() - analyze_cpu_started) * 1000, 3)
                         for event in result["events"]:
                             event.update(symbol=symbol, venue="okx", detected_at_ms=now_ms())
                             # Raw V1 is its own Bark stage when a separately
@@ -159,11 +167,18 @@ class V1Scanner:
                     scan["errors"] += 1
                     if len(scan["error_samples"]) < 8: scan["error_samples"].append({"symbol":symbol,"timeframe":timeframe,"error":type(exc).__name__})
                 scan["completed"] += 1
-                timing = scan.setdefault("timing_ms", {"cells": 0, "fetch_total": 0.0, "analyze_total": 0.0,
-                                                        "checkpoint_total": 0.0, "fetch_max": 0.0, "analyze_max": 0.0,
-                                                        "checkpoint_max": 0.0})
+                timing = scan.setdefault("timing_ms", {"cells": 0, "changed_cells": 0, "unchanged_cells": 0,
+                                                        "fetch_total": 0.0, "analyze_total": 0.0, "checkpoint_total": 0.0,
+                                                        "analyze_cpu_total": 0.0, "checkpoint_cpu_total": 0.0,
+                                                        "fetch_max": 0.0, "analyze_max": 0.0, "checkpoint_max": 0.0,
+                                                        "analyze_cpu_max": 0.0, "checkpoint_cpu_max": 0.0})
                 timing["cells"] += 1
-                for name, value in (("fetch", fetch_ms), ("analyze", analyze_ms), ("checkpoint", checkpoint_ms)):
+                if unchanged is True:
+                    timing["unchanged_cells"] += 1
+                elif unchanged is False and has_candles:
+                    timing["changed_cells"] += 1
+                for name, value in (("fetch", fetch_ms), ("analyze", analyze_ms), ("checkpoint", checkpoint_ms),
+                                    ("analyze_cpu", analyze_cpu_ms), ("checkpoint_cpu", checkpoint_cpu_ms)):
                     timing[name + "_total"] = round(timing[name + "_total"] + value, 3)
                     timing[name + "_max"] = max(timing[name + "_max"], value)
                 # Durable per-cell progress: a slow first pass is never reported as zero.
