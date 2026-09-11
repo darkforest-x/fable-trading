@@ -38,7 +38,7 @@ OLD_LEDGER = ROOT / "experiments/active/exp-spike-v1-twoyear-allmarkets-20260911
 START, END = pd.Timestamp("2024-09-10T00:00Z"), pd.Timestamp("2026-09-10T00:00Z")
 DEV_END = pd.Timestamp("2025-09-10T00:00Z")
 TICK, COST = 0.01, 0.002
-INITIAL_FLOORS, TRAIL_ATRS = (1.5, 2.0, 2.5, 3.0), (3.0, 4.0, 5.0)
+INITIAL_FLOORS, TRAIL_ATRS = (1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0), (3.0, 4.0, 5.0)
 
 
 def sha(path: Path) -> str:
@@ -171,7 +171,11 @@ def summary(frame: pd.DataFrame) -> pd.DataFrame:
     rows=[]
     for keys,g in frame.groupby(["strategy","variant","split","timeframe_min","side"],dropna=False):
         r=g.loc[~g.censored.astype(bool)].copy(); v=r.net_r.astype(float); prof=v[v>0].sum(); loss=-v[v<0].sum(); curve=np.r_[0.,v.to_numpy().cumsum()]; dd=float((curve-np.maximum.accumulate(curve)).min())
-        rows.append(dict(zip(["strategy","variant","split","timeframe_min","side"],keys),n=len(r),wins=int((v>0).sum()),win_rate=(v>0).mean() if len(v) else np.nan,net_r=v.sum(),pf=prof/loss if loss else np.nan,event_sequence_drawdown_r=dd,initial_stop_pct=r.initial_stop_hit.mean() if len(r) else np.nan,trailing_stop_pct=r.trailing_stop_hit.mean() if len(r) else np.nan,post_initial_stop_20bar_mfe=r.loc[r.initial_stop_hit.eq(1),"post_stop_20bar_mfe_return"].mean()))
+        rows.append(dict(zip(["strategy","variant","split","timeframe_min","side"],keys),
+                         total_events=len(g), realized_events=len(r), censored_events=int(g.censored.astype(bool).sum()),
+                         wins=int((v>0).sum()),win_rate=(v>0).mean() if len(v) else np.nan,net_r=v.sum(),pf=prof/loss if loss else np.nan,event_sequence_drawdown_r=dd,
+                         initial_stop_pct=r.initial_stop_hit.mean() if len(r) else np.nan,trailing_stop_pct=r.trailing_stop_hit.mean() if len(r) else np.nan,
+                         post_initial_stop_20bar_future_high_from_entry=r.loc[r.initial_stop_hit.eq(1),"post_stop_20bar_mfe_return"].mean()))
     return pd.DataFrame(rows)
 
 
