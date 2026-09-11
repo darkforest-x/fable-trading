@@ -1,0 +1,86 @@
+{
+  "source_root": "experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/data/normalized/okx",
+  "inputs": [
+    {
+      "symbol": "BTC",
+      "path": "experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/data/normalized/okx/BTC-USDT-SWAP_30m.csv.gz",
+      "sha256": "9d5717a9e3fb3a99efc52458b23af7799487b06de213aac12d95154a67261cdc",
+      "rows": 53136,
+      "start": "2023-08-30T00:00:00+00:00",
+      "end": "2026-09-09T23:30:00+00:00",
+      "tick": 0.1
+    },
+    {
+      "symbol": "ETH",
+      "path": "experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/data/normalized/okx/ETH-USDT-SWAP_30m.csv.gz",
+      "sha256": "80dc85ee0b926239b20a3e733e425550b2a863cf66f27f8c1a396d31d252855a",
+      "rows": 53136,
+      "start": "2023-08-30T00:00:00+00:00",
+      "end": "2026-09-09T23:30:00+00:00",
+      "tick": 0.01
+    },
+    {
+      "symbol": "SOL",
+      "path": "experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/data/normalized/okx/SOL-USDT-SWAP_30m.csv.gz",
+      "sha256": "f2f3992f792e1bd44630b5eeba31f9e894edc5a9447ee2f37513f7ed0eb34b8f",
+      "rows": 53136,
+      "start": "2023-08-30T00:00:00+00:00",
+      "end": "2026-09-09T23:30:00+00:00",
+      "tick": 0.01
+    },
+    {
+      "symbol": "XRP",
+      "path": "experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/data/normalized/okx/XRP-USDT-SWAP_30m.csv.gz",
+      "sha256": "dba8783c9e273934cdb680bcf9c022d670e8cddb419bff04c2aa5eeadba2db1b",
+      "rows": 53136,
+      "start": "2023-08-30T00:00:00+00:00",
+      "end": "2026-09-09T23:30:00+00:00",
+      "tick": 0.0001
+    },
+    {
+      "symbol": "DOGE",
+      "path": "experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/data/normalized/okx/DOGE-USDT-SWAP_30m.csv.gz",
+      "sha256": "6ec85b68c43f79d511cdec90cc65fec5c0aa41fc6d6f0aa21bbd600755619a34",
+      "rows": 53136,
+      "start": "2023-08-30T00:00:00+00:00",
+      "end": "2026-09-09T23:30:00+00:00",
+      "tick": 1e-05
+    },
+    {
+      "symbol": "PEPE",
+      "path": "experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/data/normalized/okx/PEPE-USDT-SWAP_30m.csv.gz",
+      "sha256": "82d2d17a7c225a76f1a1c53109ee27b15bbd9e39d6c918867e968a30b399913f",
+      "rows": 53136,
+      "start": "2023-08-30T00:00:00+00:00",
+      "end": "2026-09-09T23:30:00+00:00",
+      "tick": 1e-09
+    },
+    {
+      "symbol": "SOPH",
+      "path": "experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/data/normalized/okx/SOPH-USDT-SWAP_30m.csv.gz",
+      "sha256": "69a65fae241615f4abf296af76d8010fdfeb11855699929d18998811b6f4701d",
+      "rows": 22532,
+      "start": "2025-05-28T14:00:00+00:00",
+      "end": "2026-09-09T23:30:00+00:00",
+      "tick": 1e-06
+    },
+    {
+      "symbol": "USELESS",
+      "path": "experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/data/normalized/okx/USELESS-USDT-SWAP_30m.csv.gz",
+      "sha256": "6015a42a9ee4e5afc8b2009be457f89175f4f70225d9a292853bd9d724a5ced0",
+      "rows": 19755,
+      "start": "2025-07-25T10:30:00+00:00",
+      "end": "2026-09-09T23:30:00+00:00",
+      "tick": 1e-05
+    }
+  ],
+  "period": {
+    "start": "2024-09-10T00:00:00+00:00",
+    "split": "2025-09-10T00:00:00+00:00",
+    "end_exclusive": "2026-09-10T00:00:00+00:00"
+  },
+  "builder_commit": "03816d872a03f41d2528a6c6771c43124a1fd29b",
+  "builder_sha256": "ba8db5027680e259f0c7572e3d31b1fa709481869fd48679e004daec262d3fd4",
+  "execution": "current reference-exit-r2 next-open model; old Freqtrade bridge is not comparable",
+  "matched_controls": "not_run"
+}
