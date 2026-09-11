@@ -1,5 +1,65 @@
 # SPIKE V1 Mac monitor migration：信号浏览、冻结回放图与服务验收记录
 
+## `29bc1eb` / `22e0d70` 后新 generation 运行验收（2026-09-11 12:05 BJT）
+
+- **新实例的完整轮，不借用前代 receipt**：parent `48527` 与 isolated worker `48534` 仍存活，generation `1925e322af3e4d699928c7706b28b667` 已从 `started_at_ms=1789099366956` 完成至 `finished_at_ms=1789099476352`：`1,434 / 1,434`、errors `0`、`109.4s`。这是 `29bc1eb` 的 MD/SB 显示字段与 checkpoint migration 已载入后的新 generation；它不是前一 `40fe…` 的 `81.33s` receipt，二者的 changed 集合不同，不能合并成单一等工作量基准。该轮计时为 changed `841` / unchanged `593`，fetch 累计 `742.583s`（8 路 I/O 聚合）、analyze wall/CPU `46.878 / 44.531s`、checkpoint `12.554 / 10.503s`。
+- **通知截止已追平**：worker 写入的 `v1:last_closed:*` 是 candle open 加 timeframe 的**实际收盘时刻**（`yoyo/monitor/v1_worker.py:127-129`）。在 12:05 BJT 的只读快照，以 `floor_tf(now - 30min)` 为 required actual close，30m / 1H / 4H 各有 `478 / 478` 达标、欠账 `0`；每周期的最小和最大 stored close 都为 `04:00Z`，而 required close 分别为 `03:30Z / 03:00Z / 00:00Z`。因此不是把 bar open 误当 close，也不是用“now-last-close <30min”错误要求 1H/4H 即刻同步。
+- **通知协议与历史安全状态未变**：`notification_policy:v1_bark_arm` 仍只允许 `spike-burst-v1-raw-notifications-v1` 和 `spike-burst-v1-yolo-confirmation-v1`，范围为 30m / 1H / 4H，且明确 `telegram=disabled`。SQLite 只读计数为 Telegram `outbox=0`、Bark `bark_outbox=0`；按 event payload `source='replay'` 联结两类 outbox 均为 `0`；仅有 2 个 `model_candidates`，均为 `disabled`。这是当前队列/协议证据，不是任何终端 Bark 送达声明。
+- **测试诚实边界与最终 UI 证据**：本次 V1 聚焦测试为 `31 passed`。遗留 `tests/monitor/test_service.py tests/monitor/test_yolo_detector.py tests/monitor/test_signals.py` 为 `13 passed, 61 failed`：旧 IMACD fixtures 未传 tick、仍引用移除的 `signals._compute`，并使用已移除 5m/15m；实现者核对 `29bc1eb` 相对 parent 的 `signals.py` 仅加入 sb 的读取/序列化，并未改变这些接口或 timeframe。因此不把全仓测试称为绿色，也不在本轮重写遗留 fixture。root 实机验 DATA/30m 回放：95 根 OHLC、6MA、蓝 MD、金 SB、零轴、未裁切的 `initial_stop=0.1908` 与历史启动三角均可见（`analysis/output/spike_v1_ui_20260911/v1-marker-e7dae09-replay.png` / `.txt`；DOM marker `0.1958`）。随后静态 `e7dae09` 把当前 raw kind `spike_burst_v1` 纳入箭头筛选、无需 Python reload；STABLE/1H live 已实测启动三角、MD/SB、零轴与 `initial_stop=0.02902` 均可见，DOM marker `0.03019`（`.../v1-marker-current-kind-live.png` / `.txt`）。该静态变更另有 `23` 个 JS 测试通过，包括无 selected arrow 的 chart events 与 YOLO parent-bar 坐标断言；root 已将 IAB tab 置为 blank，未留下页面轮询。
+
+## `ProcessType=Interactive` 单变量 after（2026-09-11 11:55 BJT）
+
+- **完整 after receipt**：`226cc9f` 只在 LaunchAgent 生成配置中显式加入 `ProcessType=Interactive`（同时有 focused plist test；不改 scanner recurrence、信号、cutover 或通知规则）。一次受控 reload 后为 parent `47627`、worker `47633`、generation `40fe15c2e0e542deb8eae160bf7c973f`。after receipt 是 `analysis/output/spike_v1_ui_20260911/process_type_after_40fe15c2.json`，与 before receipt `.../process_type_before_d29f081b.json` 同字段相联。after 首轮为 `1,434 / 1,434`、errors `0`、`44.94s`，worker-start 至 scan-start hydrate `4.575s`，outbox 与 Bark outbox 均为空；按 actual close/FRESH 公式，30m / 1H / 4H 截止欠账均为 0。
+- **前后 wall/CPU 差异支持默认 Standard 限制假设，但不是唯一因果证明**：before 的 484 cell 有 changed `142` / unchanged `342`，analyze wall/CPU `263.489 / 11.028s`（每 changed `1.856s / 77.7ms`），checkpoint `62.709 / 1.965s`（每 changed `441.6 / 13.8ms`）；after 的完整 1,434 cell 有 changed `317` / unchanged `1,117`，analyze `17.286 / 16.715s`（每 changed `54.5 / 52.7ms`），checkpoint `5.044 / 4.354s`（每 changed `15.9 / 13.7ms`）。after 的 thread CPU 分别占 wall 96.7% / 86.3%，而 before 仅 4.19% / 3.13%。这是一次明确单字段、同机、同 scanner 计时的强对照，支持 launchd 默认 Standard 资源分类是此前 off-CPU wall 的主要解释；但两次 changed 集合和系统时刻不完全相同，故不将其表述为数学上唯一因果。
+- **bootstrap 与 UI 收敛边界**：该受控启动前曾有一次 I/O bootstrap 失败，只有在确认旧 job 已退出、plist 合法后才成功启动；它不是对同一运行 job 的重复 reload。root 的最终 IAB 已验 history/raw/30m 500 / 1,000 / 1,500、realized/censored 联结、手动 refresh 一次 signals 后周期只读 status，以及从信号收盘后显示的完整初始 SL `0.1908`；证据为 `analysis/output/spike_v1_ui_20260911/history-risk-1f7166d-final.txt`、`...-network.json`、`...-expanded.png`。冻结 DATA 的 md/sb 副图仍无线条，原因待只读核对，故不能冒充所有图表数据层均完成。
+
+## 新实例计时与 UI 复验（2026-09-11 11:44 BJT）
+
+- **新 generation，不能借用旧 `591d…`**：唯一受控 reload 后 parent 为 `46104`，SQLite scan meta 的新 generation 为 `d29f081bf6b74523b13a3c5d13b81936`，实际 scanner worker 为 `46222`。其 21/1,434 的首次有界读取为 errors `0`、changed `7`、unchanged `14`，是新实例的早期增量样本，不能与旧 worker PID 或旧 phase totals 混用。
+- **wall/CPU 已直接区分，等待来源仍未细分**：`dbea0e8` 的 main-thread `thread_time` 字段在该样本中给出 analyze wall `15,439.861ms`、CPU `495.522ms`，checkpoint wall `4,631.611ms`、CPU `119.229ms`。即 changed-cell 的 analyze wall 中约 `14,944ms` 及 checkpoint wall 中约 `4,512ms` 不是主线程在实际消耗 CPU。`analyze()` 本身没有 SQLite 路径，故 SQLite 写锁不能解释前一项差额；但这些字段不能继续分辨 OS 调度、解释器/库等待或页故障，不能借此指称 QoS 或其它任务。此前 3 秒 sample 与内存快照仍只支持“当时主线程在 pandas/NumPy 计算，fetch threads 等队列；无即时 SQLite/IO/GC 或内存压力栈”。
+- **未启用 Python 分配/调用跟踪**：服务源码与 monitor tests 没有 `tracemalloc`、`sys.settrace`、`sys.setprofile`、`cProfile`、pyinstrument 或 line-profiler 路径。LaunchAgent 的非敏感环境变量名只有 `PYTHONDONTWRITEBYTECODE`、`PYTHONUNBUFFERED`；唯一 trace 开关是 server 的 `FABLE_MONITOR_DISPATCH_TRACE` 路由阶段日志。因此没有证据支持 runtime allocation profiler 造成 hydrate、feature 或 gzip 变慢。
+- **launchd/taskpolicy 的可证边界**：本机 `launchd.plist(5)` 说明无 `ProcessType` 等同 Standard，且未指定时系统可施加轻度 CPU/IO 限制；Interactive 才是 app 同级的无该限制分类。当前 job 的 plist 没有 `ProcessType`、`Nice`、`LowPriorityIO` 或资源限制；`launchctl print` 只有 jetsam `daemon`/priority `40`（内存压力分类，不能证明 Darwin-background）。`ps` 的 `nice=0`、priority `20` 同样不显示 Darwin background/AppNap/QoS。`taskpolicy(8)` 没有只读 PID 查询：`-B -p` 会把目标移出 PRIO_DARWIN_BG，`-b -p` 会把目标设为 PRIO_DARWIN_BG。原状态不可观察，故不能安全做“无 restart 后再恢复原状”的 PID 调度试验；未实际改变调度。若 owner 另行授权，唯一可审计的对照是显式 `ProcessType=Interactive` 后一次受控 reload，再比较同一 `dbea0e8` 计时，并通过回退 plist+reload 恢复，而非冒充已确认的 background 根因。
+- **Interactive 单变量 before receipt**：在任何 ProcessType 变更前，`d29f…` 的 `484 / 1,434`、errors `0` 快照已写为 `analysis/output/spike_v1_ui_20260911/process_type_before_d29f081b.json`。其中 changed `142`、unchanged `342`；analyze wall/CPU 为 `263,488.725 / 11,028.239ms`，checkpoint wall/CPU 为 `62,708.844 / 1,965.483ms`。同一 captured-at 时按 actual close 计算，30m 与 1H 均 434/478 达标、欠 44；4H 478/478。该 receipt 固定 generation、worker、FRESH 公式和 close 口径，供之后同字段 after 对照；它不证明默认 Standard 已是根因。
+- **UI 仍有一项布局缺陷**：新版历史 30m 首页成功返回，`initial_stop=0.1908` 已进入主图；但 SVG 右侧轴标签仍被全局边界裁切。实现者正在仅静态修正，未再次 reload。在实际标签可见前，历史风险图仍未整体验收通过。
+
+## 最新扫描阶段（2026-09-11 11:29 BJT）
+
+- **首轮已完整，但不是稳态通过**：同一 parent `41343` / scanner `41671` / generation `591d…` 的 reload 后首轮已于 `finished_at_ms=1789097135018` 完成 `1,434 / 1,434`、errors `0`，从 `started_at_ms=1789095313025` 计 `1,821.99s`（30.37min）。累计 phase wall 计数为 fetch `608.913s`、analyze `1,179.952s`、checkpoint `287.140s`；fetch 并发而其它路径串行，三者不能相加为总 wall。完整首轮证明 checkpoint hydrate 后可追平和无 cell error，**不满足**“全市场一轮少于 15min”这一更高性能目标。
+- **第二轮已明确开始，尚无完成证据**：sleep 后该相同 worker 在 `started_at_ms=1789097255203` 写入新轮；11:29 只读 meta 为 `12 / 1,434`、errors `0`。前 12 cell 的 fetch/analyze/checkpoint 分别累计 `16.648s / 32.335s / 5.007s`（max analyze `6.242s`），是过短且波动的启动样本，不能外推成正常轮耗时或性能改善。当前 scan schema 不记录 changed/skipped 数，故不能把非零 phase total 误报为准确的 changed 数；它只证明至少一部分 cell 未走 unchanged fast path。部署任何后续静态风险线修复前，本条是唯一可用的 reload 后 baseline。
+- **3 秒 stack evidence（有限窗口）**：对 scanner `41671` 的一次 macOS `sample` 保存在 `analysis/output/spike_v1_ui_20260911/scanner41671-sample-20260911T1132.txt`。主线程落在 Python→pandas/NumPy 特征运算栈；6 个 fetch worker 均在 `_queue` / `PyThread_acquire_lock_timed` / `__psynch_cvwait` 等待任务。该窗口没有主线程 SQLite、gzip/zlib、socket/HTTP、IO wait 或 GC collector 栈。故它支持“当时由主线程特征/replay 计算推进、fetch workers 未并行计算”，但只有 3 秒，不能量化为整轮耗时占比或证明全机调度归因。同期 scanner RSS 约 62.8MiB、sample physical footprint 628.2MiB；`vm_stat` 的 throttled pages 为 0、系统 free 42%，没有即时内存压力/换页证据。
+
+## UI 复验增量（2026-09-11 11:23 BJT）
+
+- **历史分页与轮询修复通过该项场景**：root 的真实 IAB 在静态 `15b91a8` 下完成 history/raw/30m `500 → 1,000 → 1,500`，三个 signals 请求分别为 `1.610s / 4.239s / 7.489s`；默认 chart 为 `5.194s`。连续多次 15 秒 tick 仅请求 status、没有重复 signals、没有 `loadingFailed`。完整网络记录为 `analysis/output/spike_v1_ui_20260911/history-static-15b91a8-network.json`；详情例证为 `.../history-static-15b91a8-realized.txt`（TQQQ 30m，净 R `-1.199`、保护止损、标为未独立收益审核）和 `.../history-static-15b91a8-1500.txt` 的 censored 行（未实现、不计收益）。`87d1d5d` 另增加 Node VM 和真实 `MouseEvent` 入口测试。此结果只验证已加载历史的停止轮询与前三页串行分页。
+- **整体历史风险图仍未验收**：同次复验发现列表投影遗漏 `initial_stop`，导致选择历史信号时主图缺初始风险线；原有风险线文字也会落在裁切区域。实现者已定位为 `store.py` 投影白名单遗漏并在修复，且须把初始 SL 从信号收盘后显示，不回填到信号前，也不伪造动态止损。在字段和布局恢复、一次 IAB 复验实际风险线之前，不能把历史回放 UI 或风险图标为整体通过。此处不涉及通知、V1 replay 或任何 Python 服务 reload。
+
+## 最新运行快照（2026-09-11 11:19 BJT）
+
+本节是同一 `591d…` generation 的低频后续读取；它不代替下方 11:02 快照，也不把静态 `15b91a8` 的待验 IAB 行为写成已通过。
+
+- **进度与耗时**：parent `41343` 仍监听、scanner `41671` 仍为其 child。只读 status 随后持久 scan meta 先后为 `1,137`、`1,188 / 1,434`，均为 errors `0`、`scanning`、同一 generation；非原子读取间的 51 cell 推进不是 generation 切换。由 `started_at_ms=1789095313025` 至本次读取约 `1,442s`（24.0min），仍余 246 cell，故完整增量轮尚未完成。
+- **30m 欠账的可区分原因**：按本次 `floor(now − 30min)`，30m required actual close 仍为 `02:30Z`；426/478 达标、欠 52，且欠账 52 个的 `last_closed` 都为 `02:00Z`（其余为 `02:30Z` 的 228 个、`03:00Z` 的 198 个）。1H、4H 仍为 478/478 达标。没有 error sample 或 unavailable 记录。该形态与 `v1_worker.py:88-170` 的固定 `instrument × timeframe` 单次队列和未完成的后段 cell 一致：8 路仅并发 public fetch，而 `future.result()` 后的 recurrence replay/analyze、market/meta checkpoint 都由 worker 主线程顺序执行。累计 `analyze=902.8s`、`checkpoint=223.7s`，约为 24.0min wall 的 78%（fetch 累计 462.2s 是并发任务和 wall 不可直接相加）。因此目前有代码与计时支持的解释是**未完成的一轮主线程计算/持久化尾段**，不是通知拒绝、Bark/TG 队列、或已观测的 API 错误；是否能在完整轮后持续满足 30m 截止，仍需完整轮的下一次读数。
+- **通知与静态验收边界未变**：Bark arm 仍为 raw+YOLO、30m/1H/4H；Telegram disabled；Telegram/Bark outbox 均为空，candidate 只有 2 个 disabled 历史项。`15b91a8` 仅提交了“已加载 replay 卡片不轮询”的静态修复，未触发 Python reload；尚待 root 的真实 IAB 回执，故历史重复首页请求仍保持下方“未通过”状态。
+
+## 最新运行快照（2026-09-11 11:02 BJT）
+
+本节只追加本次 `0055c75` 受控 reload 后的新实例事实；下方 10:25 及更早段落保留当时的进程、generation 与验收边界。
+
+- **实例与本轮扫描**：父进程为 `41343`（10:47:50 BJT 启动，监听 `127.0.0.1:8766`），隔离 scanner 为 `41671`（10:50:16 BJT），generation `591d2349a6144e6bbbc716bde7d06356`。11:02 的只读 `/api/status` 为 `660 / 1,434`、errors `0`、`scanning`；因此本 generation 尚未完成一轮，不能把此前 generation 的完成数或截止账移植过来。root 记录本次 checkpoint hydrate 为 214s，此为启动成本，不能当稳态请求或增量轮耗时。
+- **按实际 close 的通知截止账**：worker 把 `last_closed` 记录为 candle open 加周期（`yoyo/monitor/v1_worker.py:123`）。以 11:02 BJT 的 `floor(now − 30min)` 复算，30m 的 required actual close 为 `02:30Z`，246/478 已达标、欠账 232（最早 `02:00Z`，最新 `03:00Z`）；1H required `02:00Z`、478/478；4H required `00:00Z`、478/478。30m 欠账是该 generation 尚在扫描中的快照，尚不能据此宣布持续增量验收通过或失败；1H/4H 本快照已追平。
+- **通知协议仍安全**：`v1_bark_arm` 仍只允许 raw 与 YOLO 两协议、`30m / 1H / 4H`，并明确 `telegram=disabled`。此刻 Telegram outbox、Bark outbox 都为 0；model candidate 只有 2 个历史 disabled 项。没有 replay candidate 或历史补发队列。这是队列/协议状态，不是任何设备送达证明。
+- **历史首页投影已部署，但重复自动刷新尚未验收通过**：`0055c75` 已载入。root 的 IAB 记录显示 history/raw/30m 首页 500 条以约 431KB 在 `7.549s` 返回（旧页约 1.28MB）；但 15 秒自动 tick 又拉取同一冻结首页，并与约 10 秒的默认 chart 请求重叠，重复页在 `12.034s` 被浏览器 abort。证据在 `analysis/output/spike_v1_ui_20260911/history-projection-0055c75-network.json`。因此“首个历史 500 页能返回”通过，“已加载历史期间不重复重拉同页”仍**未通过**。root 已关闭该 IAB tab，故没有残留浏览器轮询；`v6_volume_price` 正在处理仅静态的已加载历史轮询规则，尚未由本记录宣布部署或通过。
+
+## 最新运行快照（2026-09-11 10:25 BJT）
+
+本节是对下方 08:21 快照的增量记录；早期记录保留其发生时的事实和路径，不倒改为当前状态。
+
+- **扫描与通知截止**：同一服务父进程仍为 `22793`（08:17 启动）；当前隔离 scanner worker 为 `37053`，generation `842411f9217144c087051be68ff24fde`，10:25 读取为 `1,311 / 1,434`、errors `0`，所以该 generation **尚未完成**完整增量轮。worker 的 `last_closed` 是 K 线 open 时间加周期，而非 open 本身（`v1_worker.py:123`）。以 10:21 BJT 的 `floor(now − 30min)` 通知截止复算，30m / 1H / 4H 都是 `478 / 478` 达标、欠账 `0`：相应最小实际 close 为 `01:30Z / 01:00Z / 00:00Z`。FLOW 4H 为 active、非 stale、721 根、0 gap、实际 close `00:00Z`。这些是持久 checkpoint 的通知截止状态，不能移植成新 generation 已完整扫描的结论。
+- **Bark、Telegram 与 cutover**：`v1_bark_arm` 保留 `30m / 1H / 4H` 和 `telegram=disabled`；raw 与 YOLO 两条 Bark cutover receipt 均存在。此刻 `bark_outbox=0`、Telegram `outbox=0`、replay candidate `0`，两个遗留 live candidate 都是 disabled。也就是说没有历史回放补发或 Telegram 队列；此项只证明当前队列安全，不是手机送达证据。
+- **历史 30m 首页 UI 故障已实机复现**：root 在独立 IAB tab 由 live 158 条切至“历史回放 → 原始 V1 → 30m”后，首个 `limit=500` 请求反复在浏览器的 12s `AbortController` 截止前未回包，页面显示“指标启动：服务响应超时；运行状态：服务响应超时”，加载 `0` 条；DOM 与截图见 `analysis/output/spike_v1_ui_20260911/history-initial-500-20260911T1025.txt` / `.png`。这推翻了“仅第三 cursor 页”或“孤立 5s GET 即代表 UI 正常”的结论。
+- **trace 的已区分原因**：10:23:31 与 10:23:37 的两个 replay/raw/30m `rows=500` 分别到达 handler 后 `14.575s`、`16.450s`，超过前端 12s 截止；同时 `/api/markets` 一次耗时 `23.463s`，其它 live signals 也出现 15–20s 甚至 40s exit。前端 abort 不会取消正在执行的同步 FastAPI handler，15 秒轮询/重试可与未结束的请求叠加；多个 JSON decode/encode 路径竞争同一解释器，因此这是 payload/GIL 积压，**不是只在 cursor SQL 上的故障**。无重叠的同一真实 cursor GET 曾为 HTTP 200、500 条、`1,281,002B`、`5.192s`，显示 500 页负载是放大器而非单独充分条件。父进程在 `def1fb3`（08:21 提交）之前启动，当前 trace 没有该提交新增的 `signals:sqlite/decode` marker，故它确认尚未载入；只有下一次已授权 reload 才可细分 SQLite 与 decode，不能以提高 12s timeout 代替修复。
+- **最小可实现范围**：同一筛选下 500 个原 payload 为 `1,234,350B`；`covered_ledger` 占 `817,289B`（其中仅文件路径/SHA 的 evidence `556,508B`）。卡片和详情只读取 `covered_ledger.link_status` 与 `outcome.status/exit_reason/exit_time_ms/net_r`，图表已按 `event_id` 读取完整冻结 OHLC。服务端仅给列表投影这些 UI 字段可降到 `328,882B`（节省 `905,468B`，`73.4%`），同时保留 `get_event(event_id)` 的完整证据给图表/取证。这是当前唯一有字段级证据的最小修复方向；不更改事件、cutover 或通知规则。
+
 ## 当前验收状态（2026-09-11 08:21 BJT）
 
 本节覆盖下方早期阶段的 `1,019` 回放、首轮扫描和“仍待桌面/窄屏”的临时表述；旧段落保留为当时发生的审计记录，不改写其路径或结果。
