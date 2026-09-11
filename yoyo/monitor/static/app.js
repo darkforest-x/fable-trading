@@ -727,10 +727,11 @@
     // The line is the initial stop from the original, closed arrow. It starts
     // after that bar closes; a viewport entirely before the arrow has no line.
     const originalCloseMs = finite(original?.bar_close_ms) ? Number(original.bar_close_ms) : null;
-    const initialStopStartX = stopPrice !== null && originalCloseMs !== null && originalCloseMs < lastTime
+    const initialStopVisible = stopPrice !== null && originalCloseMs !== null && originalCloseMs <= lastTime;
+    const initialStopStartX = initialStopVisible && originalCloseMs < lastTime
       ? Math.max(left, left + (originalCloseMs - firstTime) / timeRange * plotWidth) : null;
     const rangeValues = candles.flatMap((bar) => [bar.h, bar.l, ...maKeys.map((key) => bar[key])]).filter(finite).map(Number);
-    if (initialStopStartX !== null) rangeValues.push(stopPrice);
+    if (initialStopVisible) rangeValues.push(stopPrice);
     let pMin = Math.min(...rangeValues), pMax = Math.max(...rangeValues);
     const pPadding = Math.max((pMax - pMin) * .07, pMax * .0001, .00000001);
     pMin -= pPadding; pMax += pPadding;
@@ -796,7 +797,7 @@
       parts.push(`<g data-event-kind="tv_start" data-side="${event.side}"><title>主图启动 · 蓄势释放${sideArrow(event.side)} · ${escapeHTML(number(event.near_zero_bars))} 根 · 收盘 ${escapeHTML(price(event.price ?? candles[index].c))}</title><path d="M${cx},${cy}l-3.5,${direction * 5}h7Z" fill="${long ? "var(--chart-marker-up)" : "var(--chart-marker-down)"}" stroke="var(--chart-marker-bg)" stroke-width=".55"/></g>`);
     });
     parts.push("</g>");
-    if (initialStopStartX !== null) {
+    if (initialStopVisible) {
       const stopY = py(stopPrice);
       // This label is outside price-clip because it is intentionally in the price scale.
       parts.push(`<text class="chart-risk-label" x="${width - right + 9}" y="${stopY + 3}" style="fill:var(--amber)">初始 SL ${escapeHTML(axisPrice(stopPrice))}</text>`);
@@ -830,7 +831,7 @@
     parts.push(modelOverlay.confirmation);
     parts.push(`<g class="chart-crosshair" visibility="hidden"><line class="crosshair-line" x1="0" x2="0" y1="${priceTop}" y2="${impulseBottom}" stroke="var(--chart-crosshair)" stroke-width=".8" stroke-dasharray="3 3"/><circle class="crosshair-dot" r="2.5" fill="var(--chart-marker-up)" stroke="var(--chart-marker-bg)" stroke-width="1.2"/></g><rect class="chart-hit-area" x="${left}" y="${priceTop}" width="${plotWidth}" height="${impulseBottom - priceTop}" fill="transparent" stroke="none"/></svg>`);
     $("chart-container").innerHTML = parts.join("");
-    $("chart-container").setAttribute("aria-label", `${shortSymbol(state.selected?.symbol)} ${timeframeLabel(state.selected?.timeframe)}，${candles.length} 根真实 K 线、六条均线、V1 启动标记${stopPrice === null ? "；后端未提供可绘制的风险价位" : "与风险参考线"}`);
+    $("chart-container").setAttribute("aria-label", `${shortSymbol(state.selected?.symbol)} ${timeframeLabel(state.selected?.timeframe)}，${candles.length} 根真实 K 线、六条均线、V1 启动标记${initialStopVisible ? "与初始 SL 参考" : "；后端未提供当前视口可绘制的初始 SL"}`);
     $("chart-hint").textContent = chartHint();
     const svg = $("chart-container").querySelector("svg");
     const crosshair = svg.querySelector(".chart-crosshair");

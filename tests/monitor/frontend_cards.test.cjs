@@ -217,6 +217,11 @@ test("initial SL SVG begins after the explicit original close and labels outside
   assert.ok(clipClose > line && label > clipClose, "initial SL label must be outside price-clip");
   assert.match(svg, />初始 SL /);
 
+  harness.state.selected = { ...harness.state.selected, bar_close_ms: 240_000 };
+  harness.renderChart();
+  assert.doesNotMatch(harness.svg(), /chart-risk-line/);
+  assert.match(harness.svg(), /class="chart-risk-label"[^>]*>初始 SL /);
+
   harness.state.selected = { ...harness.state.selected, bar_close_ms: 300_000 };
   harness.renderChart();
   assert.doesNotMatch(harness.svg(), /chart-risk-line|chart-risk-label/);
