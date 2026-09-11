@@ -1,15 +1,15 @@
 # SPIKE V1 Mac monitor migration：信号浏览、冻结回放图与服务验收记录
 
-## 当前验收状态（2026-09-11 08:13 BJT）
+## 当前验收状态（2026-09-11 08:21 BJT）
 
 本节覆盖下方早期阶段的 `1,019` 回放、首轮扫描和“仍待桌面/窄屏”的临时表述；旧段落保留为当时发生的审计记录，不改写其路径或结果。
 
 - **冻结回放与逐笔证据**：当前三周期运行库为 **6,185** 条 `replay/raw`，均联结至同一 SHA 命名不可变账本快照：**6,116 realized、69 censored、0 unverified/mismatch**。censored 不显示退出、净 R、胜率、PF 或收益；realized 的单笔字段仍标为“未独立收益审核”，不是策略 edge 或账户收益。回放导入与重链从未创建 candidate、Bark 或 Telegram outbox；当前两类 outbox 仍为 0。
-- **当前运行实例**：已部署的 monitor 父进程为 `20689`；scan generation `c1903d1315904c13a07335a8ff4480ab`、worker `20764`。08:13 的 SQLite 只读快照为 **1,250 / 1,434**、errors `0`、仍 `scanning`，并非完整增量验收。当前 1,434 个紧凑市场摘要已由 scanner 回填；摘要表不含 chart/events。
-- **分页 UI 的真实边界**：现有静态 `0d0a5eb` 在 root 的历史 30m 实机复验中成功读取 **500 → 1,000**；下一 cursor 页超时并保留 1,000 条与明确错误。更早版本曾成功读至 2,500 条，且 Unicode `龙虾` 的 Gate/Binance 筛选和同源冻结图已验，但这不能替代本次串行 cursor 的完整验收。后续受控 trace 将分开记录 handler、rows、freshness 与 return，不能仅提高超时或再缩页。
-- **待部署边界**：`8ec2727` 的市场摘要回填初始化保护和本次 trace 源码尚未载入 `20689`；要等当前增量轮完成后，再以完整 checkpoint 做一次有观测目的的受控 reload。运行中的 V1、cutover、新鲜度、风险和通知规则不变。
+- **当前运行实例**：前一代 `c1903…` 已完成 **1,434 / 1,434**、errors `0` 的增量轮；在 `now_ms=1789085850215`，依固定 `FRESH_MS=30min` 计算的 30m / 1H / 4H 通知截止欠账均为 **0 / 478**。随后为摘要回填防护与 trace 只执行一次有目的 reload：父进程 `22793`、generation `aa9b7d21f9aa4ff8bab0140366c5c13e`、worker `22886`；08:21 的新轮为 **12 / 1,434**、errors `0`，不能把前一轮完成数移植给新 generation。当前 1,434 个紧凑市场摘要已由 scanner 回填；摘要表不含 chart/events。
+- **分页 UI 的真实边界**：静态 `0d0a5eb` 在 root 的历史 30m 实机复验中成功读取 **500 → 1,000**；下一 cursor 页超时并保留 1,000 条与明确错误。更早版本曾成功读至 2,500 条，且 Unicode `龙虾` 的 Gate/Binance 筛选和同源冻结图已验，但这不能替代本次串行 cursor 的完整验收。reload 后一次固定的第 3 页 cursor 请求返回 500 行、1,280,998 bytes，TTFB `5.923s`、总计 `5.936s`；trace 为 entry→handler `276ms`、storage+decode 合计阶段 `3.074s`、handler return→middleware exit 约 `2.67s`。它尚未复现超时，也没有充分细分 SQLite 与 JSON decode，不能据此归因或仅提高超时。
+- **已部署与待部署边界**：`8ec2727` 的市场摘要回填初始化保护和 `9dfa121` 的无内容 phase trace 已载入 `22793`；`def1fb3` 进一步仅在 trace 打开时拆分 SQLite fetch 与 JSON decode，尚未载入，避免在新轮刚开始时再次 restart。运行中的 V1、cutover、新鲜度、风险和通知规则不变。
 
-没有新的实盘、收益、模型泛化或手机实际送达结论。完整增量轮、按 `FRESH_MS=30min` 的三周期截止欠账、以及 cursor 超时的分段证据仍是未完成验收项。
+没有新的实盘、收益、模型泛化或手机实际送达结论。前一 generation 的完整增量轮和按 `FRESH_MS=30min` 的三周期截止账已经通过；新 generation 的完整轮，以及 cursor 超时的 SQLite/decode/encode 分段证据仍是未完成验收项。
 
 ## 早期阶段结论（审计记录）
 
