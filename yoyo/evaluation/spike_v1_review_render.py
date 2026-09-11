@@ -19,7 +19,7 @@ import time
 import zipfile
 from collections import defaultdict
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from PIL import Image, ImageDraw
 
@@ -118,6 +118,7 @@ def inspect_record(browser: PlaywrightCli, record_id: str) -> dict[str, Any]:
         const charts = document.querySelector('#charts');
         const canvases = [...document.querySelectorAll('#price-chart canvas, #momentum-chart canvas, #volume-chart canvas')];
         return Boolean(node?.classList.contains('active') && charts && !charts.hidden
+          && charts.dataset.renderedRecordId === wanted
           && status?.textContent?.includes('十字光标') && canvases.length >= 3
           && canvases.every(canvas => canvas.width > 0 && canvas.height > 0));
       }}, id, {{timeout: 30000}});
@@ -145,6 +146,7 @@ def inspect_record(browser: PlaywrightCli, record_id: str) -> dict[str, Any]:
         return {{
           selected_id: recordButton?.dataset.record || null,
           selected_active: Boolean(recordButton?.classList.contains('active')),
+          rendered_record_id: document.querySelector('#charts')?.dataset.renderedRecordId || null,
           chart_status: read('#chart-status'), charts_visible: !document.querySelector('#charts')?.hidden,
           title: read('#record-title'), sequence: read('#record-sequence'), facts: read('#facts'),
           panels, signal_guide_count: document.querySelectorAll('#price-chart .signal-guide:not([hidden])').length,
@@ -166,7 +168,13 @@ def chart_payload(record: dict[str, Any], data_root: Path) -> dict[str, Any]:
     return json.loads((data_root / record["chart_path"]).read_text(encoding="utf-8"))
 
 
-def render_records(browser: PlaywrightCli, records: list[dict[str, Any]], output: Path, data_root: Path) -> list[dict[str, Any]]:
+def render_records(
+    browser: PlaywrightCli,
+    records: list[dict[str, Any]],
+    output: Path,
+    data_root: Path,
+    on_progress: Callable[[list[dict[str, Any]]], None] | None = None,
+) -> list[dict[str, Any]]:
     rendered: list[dict[str, Any]] = []
     images = output / "png"
     for record in records:
@@ -180,6 +188,7 @@ def render_records(browser: PlaywrightCli, records: list[dict[str, Any]], output
             with Image.open(destination) as image:
                 size = list(image.size)
             ready = (browser_state["selected_id"] == record["id"] and browser_state["selected_active"]
+                     and browser_state["rendered_record_id"] == record["id"]
                      and browser_state["charts_visible"] and "十字光标" in (browser_state["chart_status"] or "")
                      and len(browser_state["panels"]) == 3 and all(item["primary_nonzero"] for item in browser_state["panels"])
                      and not browser_state["errors"] and size[0] >= VIEWPORT[0] and size[1] >= VIEWPORT[1])
@@ -198,6 +207,8 @@ def render_records(browser: PlaywrightCli, records: list[dict[str, Any]], output
                                 "initial_stop_starts_at_signal_close_ms": chart.get("signal_close_ms") or chart.get("signal", {}).get("time_ms"),
                                 "initial_stop": chart.get("initial_stop")},
         })
+        if on_progress and len(rendered) % 25 == 0:
+            on_progress(rendered)
     return rendered
 
 
@@ -224,7 +235,26 @@ def contact_sheets(rows: list[dict[str, Any]], output: Path) -> list[str]:
     return result
 
 
-def archive(output: Path, receipt_path: Path) -> Path:
+def write_readme(output: Path, manifest_hash: str) -> Path:
+    """Explain the review-only archive without implying trading performance."""
+    path = output / "README.md"
+    path.write_text(
+        "# SPIKE V1 OKX 133-signal browser render archive\n\n"
+        "This archive contains browser PNG captures created by the local official "
+        "Lightweight Charts review viewer, one fixed historical signal per image. "
+        "Open the local viewer at http://localhost:8767/ while its static server is running.\n\n"
+        f"Data manifest SHA-256: `{manifest_hash}`.\n\n"
+        "The 2026-08-27 through 2026-09-11 BJT signal roster is a historical review "
+        "artifact. Ledger entry/exit fields are backtest-ledger evidence only; the six "
+        "live-source records have no trade ledger. A censored label means the frozen OHLC "
+        "data ended without an exit conclusion. These images make no trading-return or "
+        "execution claim.\n",
+        encoding="utf-8",
+    )
+    return path
+
+
+def archive(output: Path, receipt_path: Path, readme_path: Path) -> Path:
     path = output / "spike-v1-okx-133-rendered.zip"
     with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as bundle:
         for item in sorted((output / "png").glob("*.png")):
@@ -232,8 +262,17 @@ def archive(output: Path, receipt_path: Path) -> Path:
         for item in sorted((output / "contact_sheets").glob("*.jpg")):
             bundle.write(item, item.relative_to(output))
         bundle.write(receipt_path, receipt_path.relative_to(output))
+        bundle.write(readme_path, readme_path.relative_to(output))
         bundle.write(DATA / "manifest.json", "data-manifest.json")
     return path
+
+
+def clear_output(output: Path) -> None:
+    """Remove only renderer-owned mutable outputs before a deliberate fresh run."""
+    for directory in (output / "png", output / "contact_sheets"):
+        shutil.rmtree(directory, ignore_errors=True)
+    for filename in ("sample_render_receipt.json", "render_receipt.json", "spike-v1-okx-133-rendered.zip", "README.md"):
+        (output / filename).unlink(missing_ok=True)
 
 
 def main() -> None:
@@ -243,6 +282,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--session", default="spike-v1-133-render")
     parser.add_argument("--samples", action="store_true", help="Render only sequences 1, 46 and 133 for visual approval.")
+    parser.add_argument("--clean-output", action="store_true", help="Remove only renderer-owned prior PNGs, receipts and archive before this run.")
     arguments = parser.parse_args()
     manifest = json.loads((arguments.data_root / "manifest.json").read_text(encoding="utf-8"))
     records = list(manifest.get("records", []))
@@ -250,18 +290,40 @@ def main() -> None:
         raise RenderError("manifest_not_133_available_records")
     if arguments.samples:
         records = [record for record in records if int(record["sequence"]) in SAMPLE_SEQUENCES]
-    browser = PlaywrightCli(arguments.session)
-    prepare_browser(browser, arguments.site_url)
-    rows = render_records(browser, records, arguments.output, arguments.data_root)
-    sheets = contact_sheets(rows, arguments.output) if not arguments.samples else []
+    if arguments.clean_output:
+        clear_output(arguments.output)
     receipt_path = arguments.output / ("sample_render_receipt.json" if arguments.samples else "render_receipt.json")
-    receipt = {"schema_version": 1, "site_url": arguments.site_url, "viewport": list(VIEWPORT), "manifest_sha256": sha256_file(arguments.data_root / "manifest.json"),
-               "expected_records": len(records), "rendered": sum(row["state"] == "rendered" for row in rows), "failed": sum(row["state"] != "rendered" for row in rows),
-               "records": rows, "contact_sheets": sheets}
+    manifest_hash = sha256_file(arguments.data_root / "manifest.json")
+
+    def make_receipt(rows: list[dict[str, Any]], complete: bool, sheets: list[str] | None = None) -> dict[str, Any]:
+        return {
+            "schema_version": 1, "site_url": arguments.site_url, "viewport": list(VIEWPORT), "manifest_sha256": manifest_hash,
+            "expected_records": len(records), "rendered": sum(row["state"] == "rendered" for row in rows),
+            "failed": sum(row["state"] != "rendered" for row in rows), "complete": complete,
+            "records": rows, "contact_sheets": sheets or [],
+        }
+
+    def flush_progress(rows: list[dict[str, Any]]) -> None:
+        receipt_path.parent.mkdir(parents=True, exist_ok=True)
+        receipt_path.write_text(json.dumps(make_receipt(rows, complete=False), ensure_ascii=False, indent=2), encoding="utf-8")
+        print(json.dumps({"progress": len(rows), "rendered": sum(row["state"] == "rendered" for row in rows)}, ensure_ascii=False), flush=True)
+
+    browser = PlaywrightCli(arguments.session)
+    try:
+        prepare_browser(browser, arguments.site_url)
+        rows = render_records(browser, records, arguments.output, arguments.data_root, on_progress=flush_progress)
+    finally:
+        try:
+            browser.call("close")
+        except RenderError:
+            pass
+    sheets = contact_sheets(rows, arguments.output) if not arguments.samples else []
+    receipt = make_receipt(rows, complete=True, sheets=sheets)
     receipt_path.parent.mkdir(parents=True, exist_ok=True)
     receipt_path.write_text(json.dumps(receipt, ensure_ascii=False, indent=2), encoding="utf-8")
     if not arguments.samples and receipt["failed"] == 0:
-        bundle = archive(arguments.output, receipt_path)
+        readme_path = write_readme(arguments.output, manifest_hash)
+        bundle = archive(arguments.output, receipt_path, readme_path)
         receipt["archive"] = str(bundle.relative_to(arguments.output))
         receipt["archive_sha256"] = sha256_file(bundle)
         receipt_path.write_text(json.dumps(receipt, ensure_ascii=False, indent=2), encoding="utf-8")
