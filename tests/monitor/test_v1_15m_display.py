@@ -2,8 +2,9 @@
 from copy import deepcopy
 import math
 
-from yoyo.monitor import BARK_TIMEFRAMES, DIRECT_TIMEFRAMES, SIGNAL_KIND, SIGNAL_PROTOCOL, TIMEFRAMES, TV_INTERVALS
+from yoyo.monitor import BARK_TIMEFRAMES, DIRECT_TIMEFRAMES, DIRECT_POLICY, MODEL_PROTOCOL, SIGNAL_KIND, SIGNAL_PROTOCOL, TIMEFRAMES, TV_INTERVALS
 from yoyo.monitor import v1_worker
+from yoyo.monitor import notification_policy
 from yoyo.monitor.notification_policy import arm_v1_bark, delivery_error
 from yoyo.monitor.server import create_app
 from yoyo.monitor.signals import analyze
@@ -23,9 +24,11 @@ class Client:
         return [{"t": self.now // step * step - step, "o": 100., "h": 101., "l": 99., "c": 100., "v": 10.}], 0
 
 
-def test_new_15m_scan_is_partitioned_on_own_cutover_and_never_enqueues_bark(tmp_path, monkeypatch):
+def test_new_15m_scan_notifies_only_after_its_own_cutover(tmp_path, monkeypatch):
     store = Store(tmp_path / "monitor.sqlite3")
-    arm_v1_bark(store, 0)  # Original streams were enabled earlier.
+    with monkeypatch.context() as previous:
+        previous.setattr(notification_policy, "BARK_TIMEFRAMES", ("30m", "1H", "4H"))
+        original_receipt = arm_v1_bark(store, 0)
     client = Client()
     monkeypatch.setattr(v1_worker, "OKX", lambda: client)
     def replay(candles, higher, timeframe, *, tick, chart_limit):
@@ -49,12 +52,17 @@ def test_new_15m_scan_is_partitioned_on_own_cutover_and_never_enqueues_bark(tmp_
         rows = get(limit=10, source=source, timeframe="15m", confirmation="raw")["items"]
         assert len(rows) == 1 and rows[0]["bar_close_ms"] == close
         assert rows[0]["source"] == "live" and rows[0]["display_scope"] == source
-        assert delivery_error(store, rows[0], client.now, "bark") == "bark_timeframe_muted_by_owner"
+        persisted = store.get_event(rows[0]["id"])
+        assert delivery_error(store, persisted, client.now, "bark") == ("before_timeframe_activation" if source == "warmup" else None)
     assert store.displayed_start_count() == 1
-    assert store.direct_event_count() == 0
-    assert store.bark_status()["pending"] == 0 and store.telegram_status()["pending"] == 0
-    assert store.candidate_counts() == {}  # Existing YOLO notification scopes stay unchanged.
-    assert BARK_TIMEFRAMES == DIRECT_TIMEFRAMES == ("30m", "1H", "4H")
+    assert store.direct_event_count() == 1
+    assert store.bark_status()["pending"] == 1 and store.telegram_status()["pending"] == 0
+    assert store.candidate_counts() == {"pending": 1}
+    assert BARK_TIMEFRAMES == DIRECT_TIMEFRAMES == ("15m", "30m", "1H", "4H")
+    assert arm_v1_bark(store, client.now + STEP) == original_receipt
+    for protocol in (DIRECT_POLICY, MODEL_PROTOCOL):
+        assert store.timeframe_activation("15m", protocol=protocol) == NOW
+        assert store.timeframe_activation("1H", protocol=protocol) == 0
     assert TV_INTERVALS["15m"] == "15"
 
 

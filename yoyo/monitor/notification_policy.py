@@ -22,12 +22,18 @@ def arm_v1_bark(store, activated_ms):
     """
     key = "notification_policy:v1_bark_arm"
     existing = store.get_meta(key)
-    if existing is not None:
+    # A later owner-authorized timeframe needs its own fresh boundary. Keep
+    # the original arm receipt immutable: the history UI relies on that date.
+    if existing is not None and all(store.timeframe_activation(tf, protocol=p) is not None
+                                    for p in (DIRECT_POLICY, MODEL_PROTOCOL) for tf in BARK_TIMEFRAMES):
         return existing
     for protocol in (DIRECT_POLICY, MODEL_PROTOCOL):
         store.activate_bark_policy(activated_ms, protocol=protocol, retire_obsolete=False)
         for timeframe in BARK_TIMEFRAMES:
-            store.activate_timeframe_policy(timeframe, activated_ms, protocol=protocol)
+            if store.timeframe_activation(timeframe, protocol=protocol) is None:
+                store.activate_timeframe_policy(timeframe, activated_ms, protocol=protocol)
+    if existing is not None:
+        return existing
     receipt = {"activated_ms": int(activated_ms), "protocols": [DIRECT_POLICY, MODEL_PROTOCOL],
                "timeframes": list(BARK_TIMEFRAMES), "telegram": "disabled"}
     store.set_meta(key, receipt)

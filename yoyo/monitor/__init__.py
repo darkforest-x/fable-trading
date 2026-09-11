@@ -1,12 +1,12 @@
 """Owner-authorized, notification-only SPIKE Burst V1 monitor."""
 
-VERSION = "1.14.0"
+VERSION = "1.14.1"
 SIGNAL_PROTOCOL = "spike-burst-v1-monitor-v1"
 SIGNAL_KIND = "spike_burst_v1"
 MODEL_PROTOCOL = "spike-burst-v1-yolo-confirmation-v1"
 MODEL_KIND = "yolo_confirmed"
 DIRECT_POLICY = "spike-burst-v1-raw-notifications-v1"
-BARK_TIMEFRAMES = ("30m", "1H", "4H")
+BARK_TIMEFRAMES = ("15m", "30m", "1H", "4H")
 DIRECT_TIMEFRAMES = BARK_TIMEFRAMES
 MODEL_MAX_WAIT = 9
 MODEL_PROFILE_ID = "owner-grade-v1-w18w19-post2to9-wait9"
