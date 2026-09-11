@@ -70,7 +70,11 @@ def draw_case(raw, trade, path, title):
     axes[0].scatter([entry_x], [trade.entry_price], marker="^", s=90, color="#087565", zorder=5, label="Actual entry")
     axes[0].scatter([exit_x], [trade.exit_price], marker="X", s=75, color="#793fc5", zorder=5, label="Actual exit")
     axes[0].annotate(f"ENTRY {trade.entry_price:.7g}", (entry_x, trade.entry_price), xytext=(8, 18), textcoords="offset points", color="#086757")
-    axes[0].annotate(f"EXIT {trade.exit_price:.7g}\n{trade.exit_reason}", (exit_x, trade.exit_price), xytext=(-8, 23), ha="right", textcoords="offset points", color="#62339b")
+    close_labels = abs(exit_x-entry_x) < 20
+    axes[0].annotate(f"EXIT {trade.exit_price:.7g}\n{trade.exit_reason}", (exit_x, trade.exit_price),
+                     xytext=(16, -52) if close_labels else (-8, 23),
+                     ha="left" if close_labels else "right", textcoords="offset points", color="#62339b",
+                     arrowprops={"arrowstyle": "-", "color": "#9561ba", "lw": .7} if close_labels else None)
     axes[0].set_ylim(view.low.min() * .99, view.high.max() * 1.01)
     axes[0].legend(loc="upper left", ncol=5, fontsize=8, frameon=False)
     axes[1].plot(x, view.md, color="#487dcb", lw=1.4, label="IMACD")
