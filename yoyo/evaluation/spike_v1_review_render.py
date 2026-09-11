@@ -104,7 +104,7 @@ def prepare_browser(browser: PlaywrightCli, site_url: str) -> None:
     """))
 
 
-def inspect_record(browser: PlaywrightCli, record_id: str) -> dict[str, Any]:
+def inspect_record(browser: PlaywrightCli, record_id: str, view: str = "signal") -> dict[str, Any]:
     """Select one known id and wait for all three real charts, not just DOM creation."""
     payload = json.dumps(record_id)
     return browser.call("run-code", _code(f"""
@@ -122,6 +122,10 @@ def inspect_record(browser: PlaywrightCli, record_id: str) -> dict[str, Any]:
           && status?.textContent?.includes('十字光标') && canvases.length >= 3
           && canvases.every(canvas => canvas.width > 0 && canvas.height > 0));
       }}, id, {{timeout: 30000}});
+      if ({json.dumps(view)} === 'global') {{
+        await page.locator('#fit-global').click();
+        await page.waitForTimeout(150);
+      }}
       await page.locator('.review').scrollIntoViewIfNeeded();
       await page.waitForTimeout(150);
       return await page.evaluate((wanted) => {{
@@ -173,6 +177,7 @@ def render_records(
     records: list[dict[str, Any]],
     output: Path,
     data_root: Path,
+    view: str = "signal",
     on_progress: Callable[[list[dict[str, Any]]], None] | None = None,
 ) -> list[dict[str, Any]]:
     rendered: list[dict[str, Any]] = []
@@ -183,7 +188,7 @@ def render_records(
         destination = images / filename
         started = time.monotonic()
         try:
-            browser_state = inspect_record(browser, str(record["id"]))
+            browser_state = inspect_record(browser, str(record["id"]), view=view)
             screenshot(browser, destination)
             with Image.open(destination) as image:
                 size = list(image.size)
@@ -201,6 +206,7 @@ def render_records(
             "timeframe_min": record["timeframe_min"], "signal_close_ms": record["signal_close_ms"], "chart_path": record["chart_path"],
             "png": str(destination.relative_to(output)), "png_sha256": sha256_file(destination) if destination.is_file() else None,
             "png_size": size, "state": state, "error": error, "elapsed_seconds": round(time.monotonic() - started, 3),
+            "view": view,
             "selected_id": browser_state.get("selected_id") if browser_state else None,
             "browser": browser_state,
             "marker_contract": {"signal_marker_bar_open_ms": chart.get("signal_bar_open_ms") or chart.get("signal", {}).get("bar_open_ms"),
@@ -275,6 +281,11 @@ def clear_output(output: Path) -> None:
         (output / filename).unlink(missing_ok=True)
 
 
+def global_crop_records(records: list[dict[str, Any]], data_root: Path) -> list[dict[str, Any]]:
+    """Return only charts whose signal near-view cannot show every frozen candle."""
+    return [record for record in records if len(chart_payload(record, data_root).get("candles", [])) > 245]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--site-url", default=DEFAULT_SITE_URL)
@@ -283,22 +294,38 @@ def main() -> None:
     parser.add_argument("--session", default="spike-v1-133-render")
     parser.add_argument("--samples", action="store_true", help="Render only sequences 1, 46 and 133 for visual approval.")
     parser.add_argument("--clean-output", action="store_true", help="Remove only renderer-owned prior PNGs, receipts and archive before this run.")
+    parser.add_argument("--repair-global-crops", action="store_true", help="Re-render only over-245-candle PNGs in global view and merge them into the completed receipt.")
     arguments = parser.parse_args()
     manifest = json.loads((arguments.data_root / "manifest.json").read_text(encoding="utf-8"))
     records = list(manifest.get("records", []))
     if len(records) != 133 or manifest.get("counts", {}).get("available") != 133:
         raise RenderError("manifest_not_133_available_records")
+    if arguments.samples and arguments.repair_global_crops:
+        raise RenderError("samples_and_repair_global_crops_are_exclusive")
+    if arguments.clean_output and arguments.repair_global_crops:
+        raise RenderError("clean_output_would_destroy_repair_receipt")
     if arguments.samples:
         records = [record for record in records if int(record["sequence"]) in SAMPLE_SEQUENCES]
     if arguments.clean_output:
         clear_output(arguments.output)
     receipt_path = arguments.output / ("sample_render_receipt.json" if arguments.samples else "render_receipt.json")
     manifest_hash = sha256_file(arguments.data_root / "manifest.json")
+    existing_rows: list[dict[str, Any]] | None = None
+    if arguments.repair_global_crops:
+        previous = json.loads(receipt_path.read_text(encoding="utf-8"))
+        if not previous.get("complete") or previous.get("expected_records") != 133 or previous.get("manifest_sha256") != manifest_hash:
+            raise RenderError("repair_requires_completed_matching_133_receipt")
+        existing_rows = list(previous.get("records", []))
+        if len(existing_rows) != 133 or any(row.get("state") != "rendered" for row in existing_rows):
+            raise RenderError("repair_requires_133_rendered_rows")
+        records = global_crop_records(records, arguments.data_root)
+        if len(records) != 34:
+            raise RenderError(f"unexpected_global_crop_count:{len(records)}")
 
     def make_receipt(rows: list[dict[str, Any]], complete: bool, sheets: list[str] | None = None) -> dict[str, Any]:
         return {
             "schema_version": 1, "site_url": arguments.site_url, "viewport": list(VIEWPORT), "manifest_sha256": manifest_hash,
-            "expected_records": len(records), "rendered": sum(row["state"] == "rendered" for row in rows),
+            "expected_records": 133 if arguments.repair_global_crops else len(records), "rendered": sum(row["state"] == "rendered" for row in rows),
             "failed": sum(row["state"] != "rendered" for row in rows), "complete": complete,
             "records": rows, "contact_sheets": sheets or [],
         }
@@ -311,14 +338,28 @@ def main() -> None:
     browser = PlaywrightCli(arguments.session)
     try:
         prepare_browser(browser, arguments.site_url)
-        rows = render_records(browser, records, arguments.output, arguments.data_root, on_progress=flush_progress)
+        rows = render_records(
+            browser, records, arguments.output, arguments.data_root,
+            view="global" if arguments.repair_global_crops else "signal",
+            on_progress=None if arguments.repair_global_crops else flush_progress,
+        )
     finally:
         try:
             browser.call("close")
         except RenderError:
             pass
+    if existing_rows is not None:
+        replacements = {row["sequence"]: row for row in rows}
+        rows = [{**row, "view": row.get("view", "signal")} for row in existing_rows]
+        rows = [replacements.get(row["sequence"], row) for row in rows]
     sheets = contact_sheets(rows, arguments.output) if not arguments.samples else []
     receipt = make_receipt(rows, complete=True, sheets=sheets)
+    if arguments.repair_global_crops:
+        receipt["global_crop_repair"] = {
+            "rule": "candles > 245 (default signal view is signal -100 through +144)",
+            "repaired_records": len(records),
+            "sequences": [record["sequence"] for record in records],
+        }
     receipt_path.parent.mkdir(parents=True, exist_ok=True)
     receipt_path.write_text(json.dumps(receipt, ensure_ascii=False, indent=2), encoding="utf-8")
     if not arguments.samples and receipt["failed"] == 0:
