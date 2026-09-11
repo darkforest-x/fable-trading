@@ -165,12 +165,12 @@ test("changing source or timeframe cannot retain a stale detail chart", () => {
 });
 
 test("source or timeframe switches discard prior API results and queue the current request", () => {
-  assert.match(app, /refreshQueued: false, signalQueryRevision: 0/);
+  assert.match(app, /refreshQueued: null, signalQueryRevision: 0/);
   assert.match(app, /function invalidateSignalQuery\(\).*state\.signals = \[\];.*state\.directSignals = \[\];.*clearSelectedSignal\(\);/s);
-  assert.match(app, /if \(state\.syncing\) \{ state\.refreshQueued = true; return; \}/);
+  assert.match(app, /if \(state\.syncing\) \{ queueRefresh\(trigger\); return; \}/);
   assert.match(app, /const queryRevision = state\.signalQueryRevision;.*const querySource = state\.signalSource;.*const queryTimeframe = state\.timeframe;/s);
   assert.match(app, /if \(queryRevision !== state\.signalQueryRevision \|\| querySource !== state\.signalSource \|\| queryTimeframe !== state\.timeframe\) return;/);
-  assert.match(app, /if \(state\.refreshQueued\) \{\s*state\.refreshQueued = false;\s*refresh\(\);/s);
+  assert.match(app, /if \(state\.refreshQueued\) \{\s*const queuedTrigger = state\.refreshQueued;\s*state\.refreshQueued = null;\s*refresh\(queuedTrigger\);/s);
   assert.match(app, /\$\("chart-container"\)\.removeAttribute\("aria-label"\)/);
   assert.match(app, /正在加载 \$\{sourceName\(item\)\} \$\{shortSymbol\(item\.symbol\)\}/);
 });
@@ -226,7 +226,7 @@ test("missing frozen OHLC remains unverified and is never replaced with a live c
 
 
 test("signals refresh never requests market summaries and Watch loads them once", () => {
-  const refreshStart = app.indexOf("async function refresh()");
+  const refreshStart = app.indexOf("async function refresh(trigger = \"manual\")");
   const watchLoad = app.indexOf("async function loadMarkets()");
   assert.ok(refreshStart >= 0 && watchLoad > refreshStart);
   assert.doesNotMatch(app.slice(refreshStart, watchLoad), /\/api\/markets/);
@@ -241,18 +241,29 @@ test("signals refresh never requests market summaries and Watch loads them once"
 
 
 test("cursor pages serialize periodic refresh and retain their own failure notice", () => {
-  assert.match(app, /if \(state\.rawLoadingMore\) \{ state\.refreshQueued = true; return; \}/);
+  assert.match(app, /if \(state\.rawLoadingMore\) \{ queueRefresh\(trigger\); return; \}/);
   assert.match(app, /state\.errors\.earlierSignals = error\.message \|\| "请求失败"/);
   assert.match(app, /delete state\.errors\.earlierSignals/);
   assert.match(app, /earlierSignals: "更早历史记录"/);
-  assert.match(app, /state\.rawLoadingMore = false;[\s\S]*if \(state\.refreshQueued\) \{[\s\S]*refresh\(\);/);
+  assert.match(app, /state\.rawLoadingMore = false;[\s\S]*if \(state\.refreshQueued\) \{[\s\S]*refresh\(queuedTrigger\);/);
+});
+
+
+test("loaded replay pages poll status only, while manual, live, and failed initial loads still fetch cards", () => {
+  assert.match(app, /function shouldRefreshSignalList\(trigger\)[\s\S]*trigger !== "periodic" \|\| state\.signalSource !== "replay" \|\| !state\[`\$\{sourceKey\(\)\}Loaded`\]/);
+  assert.match(app, /async function refresh\(trigger = "manual"\)/);
+  assert.match(app, /if \(shouldRefreshSignalList\(trigger\) && queryScope === "direct"\)[\s\S]*confirmation=raw/);
+  assert.match(app, /setInterval\(\(\) => refresh\("periodic"\), 15000\)/);
+  assert.match(app, /\$\("refresh-button"\)\.addEventListener\("click", refresh\)/);
+  assert.match(app, /data-signal-source[\s\S]*invalidateSignalQuery\(\);[\s\S]*refresh\(\);/);
+  assert.match(app, /function queueRefresh\(trigger\)[\s\S]*trigger === "manual" \? "manual"/);
 });
 
 
 test("historical raw paging does not fetch hidden YOLO families", () => {
   assert.match(app, /const queryScope = state\.signalScope/);
-  assert.match(app, /if \(queryScope === "direct"\) \{[\s\S]*confirmation=raw\$\{timeframe\}[\s\S]*if \(querySource === "live"\) requests\.push\(\{ key: "rawYoloSignals"/);
-  assert.match(app, /if \(queryScope === "confirmed"\) \{[\s\S]*confirmation=yolo\$\{timeframe\}/);
+  assert.match(app, /else if \(shouldRefreshSignalList\(trigger\) && queryScope === "direct"\) \{[\s\S]*confirmation=raw\$\{timeframe\}[\s\S]*if \(querySource === "live"\) requests\.push\(\{ key: "rawYoloSignals"/);
+  assert.match(app, /if \(shouldRefreshSignalList\(trigger\) && queryScope === "confirmed"\) \{[\s\S]*confirmation=yolo\$\{timeframe\}/);
   assert.match(app, /const results = await Promise\.allSettled\(requests\.map\(\(request\) => api\(request\.path\)\)\)/);
   assert.match(app, /Hidden families are fetched only when the reader actually switches to them/);
 });

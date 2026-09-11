@@ -9,7 +9,7 @@
     rawNextCursor: null, rawHasMore: false, rawPaged: false, rawLoadingMore: false,
     timeframe: "all", watchTimeframe: "all", side: "long", signalSource: "live", selected: null,
     chartKey: null, chart: null, chartRequest: 0, chartController: null, chartExpanded: false, chartViewport: null,
-    syncing: false, refreshQueued: false, signalQueryRevision: 0, lastSync: null, statusReceivedAt: null, errors: {}, chartHover: null, detailOrigin: "signals",
+    syncing: false, refreshQueued: null, signalQueryRevision: 0, lastSync: null, statusReceivedAt: null, errors: {}, chartHover: null, detailOrigin: "signals",
     tradingViewPending: false,
   };
   const titles = {
@@ -850,11 +850,22 @@
     svg.addEventListener("pointerdown", (event) => { drag = { x: event.clientX, start: startIndex }; svg.setPointerCapture?.(event.pointerId); });
     svg.addEventListener("pointerup", (event) => { if (!drag) return; const delta = Math.round((event.clientX - drag.x) / Math.max(step, 1)); state.chartViewport = { count: viewportCount, start: Math.max(0, Math.min(valid.length - viewportCount, drag.start - delta)) }; drag = null; renderChart(); });
   }
-  async function refresh() {
+  function shouldRefreshSignalList(trigger) {
+    // Replay records are immutable journal entries.  After their visible
+    // family has loaded, the 15-second clock only needs the lightweight
+    // runtime status; re-fetching the same 500 cards can overlap chart work.
+    return trigger !== "periodic" || state.signalSource !== "replay" || !state[`${sourceKey()}Loaded`];
+  }
+  function queueRefresh(trigger) {
+    // A user action or changed query must win over an automatically queued
+    // status tick, so a source/timeframe switch cannot leave an empty list.
+    state.refreshQueued = trigger === "manual" ? "manual" : (state.refreshQueued || trigger);
+  }
+  async function refresh(trigger = "manual") {
     // Keep cursor pages serialized with the periodic top-page refresh.  An
     // aborted client fetch does not cancel the synchronous server work.
-    if (state.rawLoadingMore) { state.refreshQueued = true; return; }
-    if (state.syncing) { state.refreshQueued = true; return; }
+    if (state.rawLoadingMore) { queueRefresh(trigger); return; }
+    if (state.syncing) { queueRefresh(trigger); return; }
     const queryRevision = state.signalQueryRevision;
     const querySource = state.signalSource;
     const queryTimeframe = state.timeframe;
@@ -869,10 +880,10 @@
       // repeatedly asking for hidden YOLO variants wastes a large response
       // budget while the reader is paging historical V1 starts.
       const requests = [{ key: "status", path: "/api/status" }];
-      if (queryScope === "confirmed") {
+      if (shouldRefreshSignalList(trigger) && queryScope === "confirmed") {
         requests.push({ key: "signals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=yolo${timeframe}` });
         if (querySource === "live") requests.push({ key: "rawYoloSignals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw_yolo${timeframe}` });
-      } else if (queryScope === "direct") {
+      } else if (shouldRefreshSignalList(trigger) && queryScope === "direct") {
         requests.push({ key: "directSignals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw${timeframe}` });
         if (querySource === "live") requests.push({ key: "rawYoloSignals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw_yolo${timeframe}` });
       }
@@ -937,8 +948,9 @@
       $("refresh-button").disabled = false;
       $("refresh-button").classList.remove("loading");
       if (state.refreshQueued) {
-        state.refreshQueued = false;
-        refresh();
+        const queuedTrigger = state.refreshQueued;
+        state.refreshQueued = null;
+        refresh(queuedTrigger);
       }
     }
   }
@@ -1004,8 +1016,9 @@
       state.rawLoadingMore = false;
       renderErrors(); renderSignals();
       if (state.refreshQueued) {
-        state.refreshQueued = false;
-        refresh();
+        const queuedTrigger = state.refreshQueued;
+        state.refreshQueued = null;
+        refresh(queuedTrigger);
       }
     }
   }
@@ -1119,10 +1132,10 @@
     }
   });
   window.addEventListener("hashchange", () => setView(location.hash.slice(1), false));
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh("periodic"); });
   setView(location.hash.slice(1) || "signals", false);
   setInterval(() => { $("local-clock").textContent = clockTime(Date.now()); }, 1000);
   $("local-clock").textContent = clockTime(Date.now());
   refresh();
-  setInterval(refresh, 15000);
+  setInterval(() => refresh("periodic"), 15000);
 })();
