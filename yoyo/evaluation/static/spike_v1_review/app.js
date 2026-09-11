@@ -92,7 +92,13 @@
   function renderFacts(record) {
     if (!record) { $("facts").innerHTML = ""; return; }
     const s = signal(record), entry = record.entry || null, exit = record.exit || null, initialStop = record.initial_stop ?? s.initial_stop;
-    const facts = [fact("信号收盘", `${fmtPrice(s.price || s.signal_close)} · ${fmtTime(record.signal_close_ms ?? s.time_ms ?? s.bar_close_ms)}`), fact("初始 SL 参考（非动态）", fmtPrice(initialStop)), fact("账本实际次开盘", entry ? `${fmtPrice(entry.price)} · ${fmtTime(entry.time_ms)}` : (record.live_status || "无账本成交记录")), fact("回测退出", exit ? `${exit.reason || "—"} · ${fmtPrice(exit.price)} · ${fmtTime(exit.time_ms)}` : (record.live_status || "无账本退出记录")), fact("数据范围", record.coverage || record.coverage_status || "见来源记录"), fact("来源", record.provenance?.source_sha256 ? String(record.provenance.source_sha256).slice(0, 12) + "…" : (record.source_sha256 ? String(record.source_sha256).slice(0, 12) + "…" : "—"))];
+    const signalPrice = s.price ?? s.signal_close ?? s.close_price ?? record.signal_close_price;
+    const coverage = record.coverage;
+    const coverageText = coverage && typeof coverage === "object"
+      ? `显示：前 ${coverage.display_before_bars ?? "—"} / 后 ${coverage.display_after_bars ?? "—"} 根；冻结：前 ${coverage.available_before_bars ?? "—"} / 后 ${coverage.available_after_bars ?? "—"} 根`
+      : (coverage || record.coverage_status || "见来源记录");
+    const noLedger = record.live_status ? "无成交账本" : "无账本成交记录";
+    const facts = [fact("信号收盘", `${fmtPrice(signalPrice)} · ${fmtTime(record.signal_close_ms ?? s.time_ms ?? s.bar_close_ms)}`), fact("初始 SL 参考（非动态）", fmtPrice(initialStop)), fact("账本实际次开盘", entry ? `${fmtPrice(entry.price)} · ${fmtTime(entry.time_ms)}` : noLedger), fact("回测退出", exit ? `${exit.reason || "—"} · ${fmtPrice(exit.price)} · ${fmtTime(exit.time_ms)}` : noLedger), fact("冻结范围", coverageText), fact("来源", record.provenance?.source_sha256 ? String(record.provenance.source_sha256).slice(0, 12) + "…" : (record.source_sha256 ? String(record.source_sha256).slice(0, 12) + "…" : "—"))];
     $("facts").innerHTML = facts.join("");
   }
   function renderRecordHeader(record) {
@@ -117,21 +123,21 @@
     const priceSeries = candleSeries(priceChart); priceSeries.setData(toCandles(rows));
     [["sma20", "#60a5fa"], ["ema20", "#93c5fd"], ["sma60", "#f5c85b"], ["ema60", "#f9df98"], ["sma120", "#a78bfa"], ["ema120", "#c4b5fd"]].forEach(([key, color]) => line(priceChart, color).setData(rows.filter((row) => Number.isFinite(Number(row[key]))).map((row) => ({ time: seconds(row.t), value: Number(row[key]) }))));
     const markers = [];
-    const signalMs = s.time_ms ?? record.signal_close_ms ?? s.bar_close_ms;
-    if (presentNumber(signalMs)) markers.push(marker(signalMs, "belowBar", "#eabf5f", "arrowUp", "V1 信号收盘"));
+    const { signalBarMs, confirmationMs } = SpikeV1ReviewTiming.resolveChartTiming(payload, record, s);
+    if (presentNumber(signalBarMs)) markers.push(marker(signalBarMs, "belowBar", "#eabf5f", "arrowUp", "V1 信号 K 线"));
     if (presentNumber(entry?.time_ms) && presentNumber(entry?.price)) markers.push(marker(entry.time_ms, "belowBar", "#62d7ab", "circle", "账本实际 next open"));
     if (presentNumber(exit?.time_ms) && presentNumber(exit?.price)) markers.push(marker(exit.time_ms, "aboveBar", "#f2777a", "arrowDown", `退出 · ${exit.reason || "—"}`));
     priceSeries.setMarkers(markers.sort((a, b) => a.time - b.time));
     state.charts[0].cleanup = () => { state.charts[0].stopCleanup?.(); state.charts[0].signalCleanup?.(); };
-    state.charts[0].stopCleanup = signalGuide(priceChart, priceContainer, signalMs);
-    state.charts[0].signalCleanup = initialStopGuide(priceChart, priceSeries, priceContainer, signalMs, initialStop, exit?.time_ms);
+    state.charts[0].stopCleanup = signalGuide(priceChart, priceContainer, signalBarMs);
+    state.charts[0].signalCleanup = initialStopGuide(priceChart, priceSeries, priceContainer, confirmationMs, initialStop, exit?.time_ms);
     const md = line(mdChart, "#63b3ed", 2); md.setData(rows.filter((row) => presentNumber(row.md)).map((row) => ({ time: seconds(row.t), value: Number(row.md) })));
     const sb = line(mdChart, "#f5c85b", 2); sb.setData(rows.filter((row) => presentNumber(row.sb)).map((row) => ({ time: seconds(row.t), value: Number(row.sb) })));
     mdChart.addLineSeries({ color: "#8292aa", lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dotted, crosshairMarkerVisible: false, lastValueVisible: false, priceLineVisible: false }).setData([{ time: seconds(rows[0].t), value: 0 }, { time: seconds(rows.at(-1).t), value: 0 }]);
     volumeChart.addHistogramSeries({ color: "#5b8def", priceFormat: { type: "volume" }, priceScaleId: "" }).setData(rows.filter((row) => presentNumber(row.v)).map((row) => ({ time: seconds(row.t), value: Number(row.v), color: Number(row.c) >= Number(row.o) ? "#3fbf8f99" : "#e6636d99" })));
     syncCharts([priceChart, mdChart, volumeChart]);
     [priceChart, mdChart, volumeChart].forEach((chart) => chart.timeScale().fitContent());
-    state.chartControls = { rows, charts: [priceChart, mdChart, volumeChart], signalMs };
+    state.chartControls = { rows, charts: [priceChart, mdChart, volumeChart], signalMs: signalBarMs };
   }
   function fit(mode) {
     const control = state.chartControls; if (!control) return;
