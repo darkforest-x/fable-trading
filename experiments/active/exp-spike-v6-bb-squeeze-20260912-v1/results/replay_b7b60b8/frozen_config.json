@@ -1,0 +1,30 @@
+{
+  "folds": {
+    "development": [
+      "2024-09-10 00:00:00+00:00",
+      "2025-09-10 00:00:00+00:00"
+    ],
+    "validation": [
+      "2025-09-10 00:00:00+00:00",
+      "2026-09-10 00:00:00+00:00"
+    ]
+  },
+  "variants": [
+    "A0",
+    "A",
+    "B",
+    "C",
+    "D"
+  ],
+  "common_readiness": "bb_width_p10_prior500.shift(12).notna()",
+  "execution_spec_defaults": {
+    "stop_bars": 5,
+    "stop_buffer_atr": 0.2,
+    "risk_floor_atr": 2.0,
+    "arm_r": 2.0,
+    "trail_atr": 4.0,
+    "round_trip_cost": 0.002,
+    "tick": 0.01
+  },
+  "tick_source": "per-stream manifest tick"
+}
