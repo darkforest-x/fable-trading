@@ -1,0 +1,52 @@
+{
+  "records": 133,
+  "counts": {
+    "total": 133,
+    "by_timeframe_min": {
+      "30": 75,
+      "60": 42,
+      "240": 16
+    },
+    "available": 133,
+    "missing": 0
+  },
+  "errors": [],
+  "manifest_sha256": "254832d132b9e180c44d4abcd0b3ea52af8045d9c46b6204145bcb8108cc9e31",
+  "root_iab_observed": {
+    "url": "http://localhost:8767/",
+    "selected": "#1 ARM-USDT-SWAP 30m",
+    "displayed_available": 133,
+    "initial_stop": 238.4,
+    "covered_ledger_exit": 256.49,
+    "price_and_six_ma_canvas": true,
+    "md_sb_canvas": true,
+    "fullscreen_clicked": true,
+    "screenshot": "qa/root-iab-arm-fullscreen.png",
+    "four_hour_filter_count": 16,
+    "search_0g_title": "0G-USDT-SWAP · 4H",
+    "search_0g_initial_stop": 0.1598,
+    "search_0g_price_axis_precision": "4 decimal places, 0.12 to 0.30 range",
+    "search_0g_cutoff_label": true,
+    "search_0g_screenshot": "qa/root-iab-0g-final.png",
+    "final_css_direct_4h_then_46_click": true,
+    "direct_click_screenshot": "qa/root-iab-4h-direct-click-final.png"
+  },
+  "ledger_status_counts": {
+    "censored": 25,
+    "covered_completed": 102,
+    "live_without_ledger": 6
+  },
+  "exit_range_semantics": "Final candle interval includes its close; censored is data cutoff, not completed strategy exit.",
+  "final_render_audit": {
+    "records": 133,
+    "png_file_hashes_verified": 133,
+    "rendered_ids_verified": 133,
+    "global_long_views": 34,
+    "short_views_containing_all_frozen_candles": 99,
+    "zip_crc_verified": true,
+    "zip_png_count": 133,
+    "archive_sha256": "81175b9212c85706337df21f488be4d78dd92208aff106524f2126b740c07eda",
+    "errors": [],
+    "manually_viewed_final_global_example": "#44 USELESS-USDT-SWAP 1H, includes historical exit and subsequent bars"
+  }
+}
