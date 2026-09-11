@@ -294,7 +294,7 @@ class Store:
 
     def list_events(self, limit=200, symbol=None, timeframe=None, kind=None, side=None, protocol=None,
                     source=None, confirmation=None, before_close_ms=None, before_id=None, *, direct_only=False,
-                    timing=None):
+                    timing=None, summary=False):
         filters, values = [], []
         for field, value in (("symbol", symbol), ("timeframe", timeframe), ("kind", kind), ("side", side)):
             if value:
@@ -324,17 +324,30 @@ class Store:
                "LEFT JOIN bark_outbox b ON e.id=b.event_id") + where
         sql += " ORDER BY e.close_ms DESC,e.id DESC LIMIT ?"
         values.append(min(2000, max(1, int(limit))))
+        def decorate(raw):
+            event = dict(json.loads(raw[0]), notification_status=raw[1] or "history",
+                         bark_notification_status=raw[2] or "history")
+            if not summary:
+                return event
+            keys = ("id", "source", "confirmation", "timeframe", "timeframe_min", "venue", "symbol", "side",
+                    "bar_close_ms", "bar_open_ms", "signal_close_time", "signal_bar_open", "signal_close", "price",
+                    "is_closed", "executable_entry_time", "entry_reference", "risk", "source_sha256", "performance_status")
+            compact = {key: event[key] for key in keys if key in event}
+            link = event.get("covered_ledger")
+            if isinstance(link, dict):
+                outcome = link.get("outcome")
+                compact["covered_ledger"] = {"link_status": link.get("link_status"),
+                                            **({"outcome": {k: outcome.get(k) for k in ("status", "exit_reason", "exit_time_ms", "net_r") if k in outcome}} if isinstance(outcome, dict) else {})}
+            return compact
         if timing is None:
             with self.connect() as db:
-                return [dict(json.loads(r[0]), notification_status=r[1] or "history",
-                             bark_notification_status=r[2] or "history") for r in db.execute(sql, values)]
+                return [decorate(r) for r in db.execute(sql, values)]
         sql_started_ns = time.monotonic_ns()
         with self.connect() as db:
             raw_rows = list(db.execute(sql, values))
         timing["sqlite_ms"] = (time.monotonic_ns() - sql_started_ns) // 1_000_000
         decode_started_ns = time.monotonic_ns()
-        decoded = [dict(json.loads(r[0]), notification_status=r[1] or "history",
-                        bark_notification_status=r[2] or "history") for r in raw_rows]
+        decoded = [decorate(r) for r in raw_rows]
         timing["decode_ms"] = (time.monotonic_ns() - decode_started_ns) // 1_000_000
         return decoded
 

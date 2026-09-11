@@ -129,7 +129,7 @@ def create_app(runtime=None, start_monitor=True):
         rows = store.list_events(limit, symbol, timeframe, kind, side, protocol=protocol,
                                  source=source, confirmation=confirmation,
                                  before_close_ms=before_close_ms, before_id=before_id,
-                                 timing=event_timing)
+                                 timing=event_timing, summary=True)
         if event_timing is not None:
             dispatch_trace("signals:sqlite", elapsed_ms=event_timing["sqlite_ms"])
             dispatch_trace("signals:decode", elapsed_ms=event_timing["decode_ms"])
