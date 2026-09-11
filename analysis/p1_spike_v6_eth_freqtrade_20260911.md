@@ -34,7 +34,11 @@
 
 ## 30m 单变量开发/后段检查
 
-这是固定的单变量网格，不是 Hyperopt。30m 双向开发 baseline (2/4 ATR) 为 118 笔、PF 0.957、-1.110%；initial 1.5 为 118 笔、PF 0.970、-0.774%；trail 5 为 116 笔、PF 0.969、-0.793%。后段 baseline 没有另跑，故不能拿候选后段与“后段 baseline”作比较。预先带入后段的两个候选分别为 PF 1.152 与 1.161，样本为 98 与 93 笔；后段同向但差异很小，不能构成参数优化结论。
+这是固定的单变量网格，不是 Hyperopt。30m 双向开发 baseline (2/4 ATR) 为 118 笔、PF 0.957、-1.110%；initial 1.5 为 118 笔、PF 0.970、-0.774%；trail 5 为 116 笔、PF 0.969、-0.793%。补跑同一后段 baseline：98 笔、PF 1.140、+2.350%；initial 1.5 为 PF 1.152、+2.526%，trail 5 为 PF 1.161、+2.547%。差异很小，不能构成参数优化结论。
+
+## Historical trade reviews
+
+The two figures use the same frozen global OHLCV and actual Freqtrade ledger: [4h winner](../experiments/active/exp-spike-v1-eth-stops-20260911/freqtrade_v6/results/v6_4h_winner.png) and [1h loss](../experiments/active/exp-spike-v1-eth-stops-20260911/freqtrade_v6/results/v6_1h_loss.png). They show historical review context only: signal-to-next-open execution, causal plan initial/effective protection, actual exit, and 72 post-exit bars shaded blue. The shaded bars are not strategy inputs.
 
 ## 风险与诚实声明
 

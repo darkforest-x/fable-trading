@@ -87,7 +87,9 @@ li { margin: .25rem 0; }
 </tbody></table>
 <p>拒绝数是 <code>max_open_trades=1</code> 的重叠候选或边界，非策略的明确拒绝字段（该字段均为 0）。</p>
 <h2>30m 单变量开发/后段检查</h2>
-<p>这是固定的单变量网格，不是 Hyperopt。30m 双向开发 baseline (2/4 ATR) 为 118 笔、PF 0.957、-1.110%；initial 1.5 为 118 笔、PF 0.970、-0.774%；trail 5 为 116 笔、PF 0.969、-0.793%。后段 baseline 没有另跑，故不能拿候选后段与“后段 baseline”作比较。预先带入后段的两个候选分别为 PF 1.152 与 1.161，样本为 98 与 93 笔；后段同向但差异很小，不能构成参数优化结论。</p>
+<p>这是固定的单变量网格，不是 Hyperopt。30m 双向开发 baseline (2/4 ATR) 为 118 笔、PF 0.957、-1.110%；initial 1.5 为 118 笔、PF 0.970、-0.774%；trail 5 为 116 笔、PF 0.969、-0.793%。补跑同一后段 baseline：98 笔、PF 1.140、+2.350%；initial 1.5 为 PF 1.152、+2.526%，trail 5 为 PF 1.161、+2.547%。差异很小，不能构成参数优化结论。</p>
+<h2>Historical trade reviews</h2>
+<p>The two figures use the same frozen global OHLCV and actual Freqtrade ledger: <a href="../experiments/active/exp-spike-v1-eth-stops-20260911/freqtrade_v6/results/v6_4h_winner.png">4h winner</a> and <a href="../experiments/active/exp-spike-v1-eth-stops-20260911/freqtrade_v6/results/v6_1h_loss.png">1h loss</a>. They show historical review context only: signal-to-next-open execution, causal plan initial/effective protection, actual exit, and 72 post-exit bars shaded blue. The shaded bars are not strategy inputs.</p>
 <h2>风险与诚实声明</h2>
 <p>这里的 V6 是 Python 镜像逐式构建、fixture/前缀因果检查加 Freqtrade 执行对照；未进行 TradingView 原生 ETH 两年逐 bar 编译验证。每笔实际成交都有唯一 <code>(open_date,is_short)</code>，并且 receipt 的信号/stop 输入缺失均为 0；stop map 的 key 含 entry time，因此一个被单仓忽略的候选不能为当前交易提供 stop。没有 funding、滑点、流动性或多仓账户模型，也没有随机对照或显著性检验。数据包含 &gt;=2026-05-04，属于 owner 已授权的历史研究，已暴露，历史消费次数未知，不能称未见样本外。结果仅用于核查 V6 形态镜像、next-open/止损时钟与框架成交边界；不得改动 live V1、Pine、通知或风险参数。</p>
 <p>产物：<code>experiments/active/exp-spike-v1-eth-stops-20260911/freqtrade_v6/results/freqtrade_execution_receipt.json</code>、<code>freqtrade_run_summary.csv</code> 与各逐笔 gzip ledger。</p>
