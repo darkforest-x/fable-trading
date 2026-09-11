@@ -238,3 +238,21 @@ test("signals refresh never requests market summaries and Watch loads them once"
   assert.match(app, /if \(!state\.marketsRetryTimer && state\.view === "watch"\)/);
   assert.match(app, /if \(state\.view === "watch" && !state\.marketsLoaded\) loadMarkets\(\);/);
 });
+
+
+test("cursor pages serialize periodic refresh and retain their own failure notice", () => {
+  assert.match(app, /if \(state\.rawLoadingMore\) \{ state\.refreshQueued = true; return; \}/);
+  assert.match(app, /state\.errors\.earlierSignals = error\.message \|\| "请求失败"/);
+  assert.match(app, /delete state\.errors\.earlierSignals/);
+  assert.match(app, /earlierSignals: "更早历史记录"/);
+  assert.match(app, /state\.rawLoadingMore = false;[\s\S]*if \(state\.refreshQueued\) \{[\s\S]*refresh\(\);/);
+});
+
+
+test("historical raw paging does not fetch hidden YOLO families", () => {
+  assert.match(app, /const queryScope = state\.signalScope/);
+  assert.match(app, /if \(queryScope === "direct"\) \{[\s\S]*confirmation=raw\$\{timeframe\}[\s\S]*if \(querySource === "live"\) requests\.push\(\{ key: "rawYoloSignals"/);
+  assert.match(app, /if \(queryScope === "confirmed"\) \{[\s\S]*confirmation=yolo\$\{timeframe\}/);
+  assert.match(app, /const results = await Promise\.allSettled\(requests\.map\(\(request\) => api\(request\.path\)\)\)/);
+  assert.match(app, /Hidden families are fetched only when the reader actually switches to them/);
+});

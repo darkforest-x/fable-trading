@@ -533,7 +533,7 @@
     const errors = Object.entries(state.errors);
     $("error-notice").classList.toggle("hidden", !errors.length);
     if (errors.length) {
-      const names = { status: "运行状态", signals: "模型确认", directSignals: "指标启动", candidates: "指标候选", markets: "蓄势观察" };
+      const names = { status: "运行状态", signals: "模型确认", directSignals: "指标启动", earlierSignals: "更早历史记录", candidates: "指标候选", markets: "蓄势观察" };
       $("error-notice").textContent = `${errors.map(([key, error]) => `${names[key] || key}：${error}`).join("；")}。${state.lastSync ? "当前保留上次成功获取的数据，" : ""}15 秒后自动重试。`;
     }
   }
@@ -851,24 +851,34 @@
     svg.addEventListener("pointerup", (event) => { if (!drag) return; const delta = Math.round((event.clientX - drag.x) / Math.max(step, 1)); state.chartViewport = { count: viewportCount, start: Math.max(0, Math.min(valid.length - viewportCount, drag.start - delta)) }; drag = null; renderChart(); });
   }
   async function refresh() {
+    // Keep cursor pages serialized with the periodic top-page refresh.  An
+    // aborted client fetch does not cancel the synchronous server work.
+    if (state.rawLoadingMore) { state.refreshQueued = true; return; }
     if (state.syncing) { state.refreshQueued = true; return; }
     const queryRevision = state.signalQueryRevision;
     const querySource = state.signalSource;
     const queryTimeframe = state.timeframe;
+    const queryScope = state.signalScope;
     state.syncing = true;
     $("refresh-button").disabled = true;
     $("refresh-button").classList.add("loading");
     try {
       const source = encodeURIComponent(querySource);
       const timeframe = queryTimeframe === "all" ? "" : `&timeframe=${encodeURIComponent(apiTimeframe(queryTimeframe) || "")}`;
-      const results = await Promise.allSettled([
-        api("/api/status"),
-        api(`/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=yolo${timeframe}`),
-        api(`/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw${timeframe}`),
-        api(`/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw_yolo${timeframe}`),
-      ]);
-      if (queryRevision !== state.signalQueryRevision || querySource !== state.signalSource || queryTimeframe !== state.timeframe) return;
-      const keys = ["status", "signals", "directSignals", "rawYoloSignals"];
+      // Fetch only the visible signal family.  Replay imports are raw-only;
+      // repeatedly asking for hidden YOLO variants wastes a large response
+      // budget while the reader is paging historical V1 starts.
+      const requests = [{ key: "status", path: "/api/status" }];
+      if (queryScope === "confirmed") {
+        requests.push({ key: "signals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=yolo${timeframe}` });
+        if (querySource === "live") requests.push({ key: "rawYoloSignals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw_yolo${timeframe}` });
+      } else if (queryScope === "direct") {
+        requests.push({ key: "directSignals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw${timeframe}` });
+        if (querySource === "live") requests.push({ key: "rawYoloSignals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw_yolo${timeframe}` });
+      }
+      const results = await Promise.allSettled(requests.map((request) => api(request.path)));
+      if (queryRevision !== state.signalQueryRevision || querySource !== state.signalSource || queryTimeframe !== state.timeframe || queryScope !== state.signalScope) return;
+      const keys = requests.map((request) => request.key);
       let anySuccess = false;
       results.forEach((result, index) => {
         const key = keys[index];
@@ -901,9 +911,13 @@
       const appendUnique = (items, additional) => [...items, ...additional].filter((item, index, list) => list.findIndex((other) => sameEvent(other, item)) === index);
       state.signals = appendUnique(state.signals, rawYolo);
       state.directSignals = appendUnique(state.directSignals, rawYolo);
-      const rawYoloTotal = numeric(results[3]?.status === "fulfilled" ? results[3].value.total : 0);
-      if (results[1]?.status === "fulfilled") state.signalTotal = numeric(results[1].value.total, state.signals.length) + rawYoloTotal;
-      if (results[2]?.status === "fulfilled") state.directSignalTotal = numeric(results[2].value.total, state.directSignals.length) + rawYoloTotal;
+      const resultFor = (key) => results[keys.indexOf(key)];
+      const rawYoloResult = resultFor("rawYoloSignals");
+      const rawYoloTotal = numeric(rawYoloResult?.status === "fulfilled" ? rawYoloResult.value.total : 0);
+      const yoloResult = resultFor("signals");
+      const rawResult = resultFor("directSignals");
+      if (yoloResult?.status === "fulfilled") state.signalTotal = numeric(yoloResult.value.total, state.signals.length) + rawYoloTotal;
+      if (rawResult?.status === "fulfilled") state.directSignalTotal = numeric(rawResult.value.total, state.directSignals.length) + rawYoloTotal;
       if (anySuccess) state.lastSync = Date.now();
       const currentItems = filteredSignals();
       if (state.detailOrigin === "signals" && !currentItems.some((item) => sameSelection(state.selected, item))) {
@@ -981,12 +995,18 @@
       state.rawNextCursor = result.next_cursor || null;
       state.rawHasMore = Boolean(state.rawNextCursor);
       state.rawPaged = true;
-      delete state.errors.directSignals;
+      delete state.errors.earlierSignals;
     } catch (error) {
-      state.errors.directSignals = error.message || "请求失败";
+      // Keep pagination failures separate: a succeeding top-page refresh must
+      // not erase the reason the cursor page stayed at its prior boundary.
+      state.errors.earlierSignals = error.message || "请求失败";
     } finally {
       state.rawLoadingMore = false;
       renderErrors(); renderSignals();
+      if (state.refreshQueued) {
+        state.refreshQueued = false;
+        refresh();
+      }
     }
   }
 
@@ -1010,7 +1030,8 @@
   document.querySelectorAll("[data-signal-scope]").forEach((button) => button.addEventListener("click", () => {
     state.signalScope = button.dataset.signalScope; state.rowLimit = 24;
     document.querySelectorAll("[data-signal-scope]").forEach((other) => { const selected = other === button; other.classList.toggle("selected", selected); other.setAttribute("aria-pressed", String(selected)); });
-    applySignalFilters();
+    // Hidden families are fetched only when the reader actually switches to them.
+    if (!state[`${sourceKey()}Loaded`]) refresh(); else applySignalFilters();
   }));
   $("symbol-search").addEventListener("input", (event) => { state.search = event.target.value; state.rowLimit = 24; applySignalFilters(); });
   $("watch-search").addEventListener("input", (event) => { state.watchSearch = event.target.value; state.watchLimit = 24; renderWatch(); });
