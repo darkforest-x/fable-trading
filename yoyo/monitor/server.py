@@ -25,10 +25,13 @@ LOG = logging.getLogger("fable.monitor.dispatch")
 DISPATCH_TRACE = os.environ.get("FABLE_MONITOR_DISPATCH_TRACE") == "1"
 
 
-def dispatch_trace(marker: str, *, started_ns: int | None = None) -> None:
+def dispatch_trace(marker: str, *, started_ns: int | None = None, elapsed_ms: int | None = None) -> None:
     """Temporarily expose route-dispatch timing without logging query strings."""
     if DISPATCH_TRACE:
-        elapsed = "" if started_ns is None else f" elapsed_ms={(time.monotonic_ns() - started_ns) // 1_000_000}"
+        if elapsed_ms is not None:
+            elapsed = f" elapsed_ms={elapsed_ms}"
+        else:
+            elapsed = "" if started_ns is None else f" elapsed_ms={(time.monotonic_ns() - started_ns) // 1_000_000}"
         LOG.warning("dispatch marker=%s%s", marker, elapsed)
 
 
@@ -122,9 +125,14 @@ def create_app(runtime=None, start_monitor=True):
         protocol = SIGNAL_PROTOCOL if kind == SIGNAL_KIND else MODEL_PROTOCOL if kind == MODEL_KIND else None
         if (before_close_ms is None) != (before_id is None):
             raise HTTPException(400, "cursor requires both close time and event id")
+        event_timing = {} if DISPATCH_TRACE else None
         rows = store.list_events(limit, symbol, timeframe, kind, side, protocol=protocol,
                                  source=source, confirmation=confirmation,
-                                 before_close_ms=before_close_ms, before_id=before_id)
+                                 before_close_ms=before_close_ms, before_id=before_id,
+                                 timing=event_timing)
+        if event_timing is not None:
+            dispatch_trace("signals:sqlite", elapsed_ms=event_timing["sqlite_ms"])
+            dispatch_trace("signals:decode", elapsed_ms=event_timing["decode_ms"])
         # Trace only phase names and row counts.  It deliberately excludes
         # request filters, event identities, and response content.
         dispatch_trace(f"signals:rows={len(rows)}", started_ns=started_ns)

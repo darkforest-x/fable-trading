@@ -126,6 +126,7 @@ def test_signal_trace_has_phase_counts_without_request_identifiers(tmp_path, mon
 
     assert len(result["items"]) == 1
     assert markers == [
-        "handler:/api/signals", "signals:rows=1", "signals:freshness", "signals:return=1",
+        "handler:/api/signals", "signals:sqlite", "signals:decode", "signals:rows=1",
+        "signals:freshness", "signals:return=1",
     ]
     assert all("PEPE" not in marker and "replay" not in marker for marker in markers)

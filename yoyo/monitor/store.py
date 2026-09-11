@@ -293,7 +293,8 @@ class Store:
         return json.loads(row[0]) if row else None
 
     def list_events(self, limit=200, symbol=None, timeframe=None, kind=None, side=None, protocol=None,
-                    source=None, confirmation=None, before_close_ms=None, before_id=None, *, direct_only=False):
+                    source=None, confirmation=None, before_close_ms=None, before_id=None, *, direct_only=False,
+                    timing=None):
         filters, values = [], []
         for field, value in (("symbol", symbol), ("timeframe", timeframe), ("kind", kind), ("side", side)):
             if value:
@@ -323,9 +324,19 @@ class Store:
                "LEFT JOIN bark_outbox b ON e.id=b.event_id") + where
         sql += " ORDER BY e.close_ms DESC,e.id DESC LIMIT ?"
         values.append(min(2000, max(1, int(limit))))
+        if timing is None:
+            with self.connect() as db:
+                return [dict(json.loads(r[0]), notification_status=r[1] or "history",
+                             bark_notification_status=r[2] or "history") for r in db.execute(sql, values)]
+        sql_started_ns = time.monotonic_ns()
         with self.connect() as db:
-            return [dict(json.loads(r[0]), notification_status=r[1] or "history",
-                         bark_notification_status=r[2] or "history") for r in db.execute(sql, values)]
+            raw_rows = list(db.execute(sql, values))
+        timing["sqlite_ms"] = (time.monotonic_ns() - sql_started_ns) // 1_000_000
+        decode_started_ns = time.monotonic_ns()
+        decoded = [dict(json.loads(r[0]), notification_status=r[1] or "history",
+                        bark_notification_status=r[2] or "history") for r in raw_rows]
+        timing["decode_ms"] = (time.monotonic_ns() - decode_started_ns) // 1_000_000
+        return decoded
 
     def get_event(self, event_id):
         """Read one journaled event for an API that derives no client-supplied identity."""
