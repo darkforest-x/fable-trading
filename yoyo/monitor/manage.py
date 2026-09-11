@@ -69,6 +69,10 @@ def install():
         "ProgramArguments": ["/usr/bin/caffeinate", "-is", str(ROOT / ".venv/bin/python"), "-m", "yoyo.monitor.server", "--port", "8766"],
         "WorkingDirectory": str(ROOT), "RunAtLoad": True, "KeepAlive": True,
         "ThrottleInterval": 30, "ExitTimeOut": 10,
+        # This is an interactive desktop monitor, not a background batch job.
+        # Keep its launchd scheduling class explicit so an OS default cannot
+        # silently impose background CPU/IO treatment.
+        "ProcessType": "Interactive",
         "StandardOutPath": str(logs / "service.log"), "StandardErrorPath": str(logs / "service-error.log"),
         "EnvironmentVariables": {"PYTHONUNBUFFERED": "1", "PYTHONDONTWRITEBYTECODE": "1"},
     }

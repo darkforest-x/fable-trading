@@ -1,5 +1,6 @@
 """The status CLI must never disclose raw launchctl environment or errors."""
 import json
+import plistlib
 import subprocess
 from types import SimpleNamespace
 
@@ -100,3 +101,16 @@ def test_status_without_fields_is_unknown_not_running(monkeypatch):
     monkeypatch.setattr(manage.subprocess, "run", lambda *a, **kw: fake_result("job = {}"))
     result = manage.status("gui/501/" + manage.LABEL)
     assert result["state"] == "unknown" and result["pid"] is None
+
+
+def test_install_writes_interactive_process_type(monkeypatch, tmp_path):
+    """The monitor LaunchAgent must not inherit launchd's batch classification."""
+    plist = tmp_path / "com.fable.impulse-monitor.plist"
+    monkeypatch.setattr(manage, "PLIST", plist)
+    monkeypatch.setattr(manage.subprocess, "run", lambda *args, **kwargs: fake_result())
+
+    manage.install()
+
+    config = plistlib.loads(plist.read_bytes())
+    assert config["Label"] == manage.LABEL
+    assert config["ProcessType"] == "Interactive"
