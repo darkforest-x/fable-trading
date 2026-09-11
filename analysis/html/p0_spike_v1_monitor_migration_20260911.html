@@ -48,7 +48,16 @@ li { margin: .25rem 0; }
 </head>
 <body>
 <h1>SPIKE V1 Mac monitor migration：信号浏览、冻结回放图与服务验收记录</h1>
-<h2>结论</h2>
+<h2>当前验收状态（2026-09-11 08:13 BJT）</h2>
+<p>本节覆盖下方早期阶段的 <code>1,019</code> 回放、首轮扫描和“仍待桌面/窄屏”的临时表述；旧段落保留为当时发生的审计记录，不改写其路径或结果。</p>
+<ul>
+<li><strong>冻结回放与逐笔证据</strong>：当前三周期运行库为 <strong>6,185</strong> 条 <code>replay/raw</code>，均联结至同一 SHA 命名不可变账本快照：<strong>6,116 realized、69 censored、0 unverified/mismatch</strong>。censored 不显示退出、净 R、胜率、PF 或收益；realized 的单笔字段仍标为“未独立收益审核”，不是策略 edge 或账户收益。回放导入与重链从未创建 candidate、Bark 或 Telegram outbox；当前两类 outbox 仍为 0。</li>
+<li><strong>当前运行实例</strong>：已部署的 monitor 父进程为 <code>20689</code>；scan generation <code>c1903d1315904c13a07335a8ff4480ab</code>、worker <code>20764</code>。08:13 的 SQLite 只读快照为 <strong>1,250 / 1,434</strong>、errors <code>0</code>、仍 <code>scanning</code>，并非完整增量验收。当前 1,434 个紧凑市场摘要已由 scanner 回填；摘要表不含 chart/events。</li>
+<li><strong>分页 UI 的真实边界</strong>：现有静态 <code>0d0a5eb</code> 在 root 的历史 30m 实机复验中成功读取 <strong>500 → 1,000</strong>；下一 cursor 页超时并保留 1,000 条与明确错误。更早版本曾成功读至 2,500 条，且 Unicode <code>龙虾</code> 的 Gate/Binance 筛选和同源冻结图已验，但这不能替代本次串行 cursor 的完整验收。后续受控 trace 将分开记录 handler、rows、freshness 与 return，不能仅提高超时或再缩页。</li>
+<li><strong>待部署边界</strong>：<code>8ec2727</code> 的市场摘要回填初始化保护和本次 trace 源码尚未载入 <code>20689</code>；要等当前增量轮完成后，再以完整 checkpoint 做一次有观测目的的受控 reload。运行中的 V1、cutover、新鲜度、风险和通知规则不变。</li>
+</ul>
+<p>没有新的实盘、收益、模型泛化或手机实际送达结论。完整增量轮、按 <code>FRESH_MS=30min</code> 的三周期截止欠账、以及 cursor 超时的分段证据仍是未完成验收项。</p>
+<h2>早期阶段结论（审计记录）</h2>
 <p>本轮把本机 <code>127.0.0.1:8766</code> 的监控协议收敛到冻结的 <strong>SPIKE V1 长多 30m / 1H / 4H</strong>：收盘后的原始 V1 启动和额外 YOLO 确认是独立事件、独立 Bark 阶段；历史回放只用于浏览且绝不补发 Bark。已导入的 1,019 条 V1 回放信号可按 event id 读取同源冻结 OHLC，并在前端明确标为历史复盘上下文；它们已另行联结到 v2 覆盖账本，但联结不是盈利或策略有效性证明。</p>
 <p>本机服务可监听且关键 <code>/api/status</code> 超时根因已经通过 trace 确认并修复；当前首轮扫描仍在进行，不能把进程存活或部分完成误称为市场就绪。共享 IAB 已完成一张实时卡的实际预览验收，桌面/窄屏的全部交互仍待补齐。没有任何盈利、模型泛化或 Bark 手机送达声明。</p>
 <h2>协议与数据边界</h2>

@@ -107,6 +107,8 @@ def create_app(runtime=None, start_monitor=True):
     def signals(limit: int = Query(200, ge=1, le=2000), symbol: str = None, timeframe: str = None,
                 kind: str = None, side: str = None, source: str = None, confirmation: str = None,
                 before_close_ms: int = None, before_id: str = None):
+        started_ns = time.monotonic_ns()
+        dispatch_trace("handler:/api/signals")
         if source not in (None, "live", "replay") or confirmation not in (None, "raw", "yolo", "raw_yolo"):
             raise HTTPException(400, "unsupported source or confirmation")
         # The V1 UI filters by confirmation.  Infer its event kind when the
@@ -123,10 +125,15 @@ def create_app(runtime=None, start_monitor=True):
         rows = store.list_events(limit, symbol, timeframe, kind, side, protocol=protocol,
                                  source=source, confirmation=confirmation,
                                  before_close_ms=before_close_ms, before_id=before_id)
+        # Trace only phase names and row counts.  It deliberately excludes
+        # request filters, event identities, and response content.
+        dispatch_trace(f"signals:rows={len(rows)}", started_ns=started_ns)
         for row in rows:
             row["is_fresh"] = row.get("source") == "live" and 0 <= monitor.client.clock() - row["bar_close_ms"] <= FRESH_MS
+        dispatch_trace("signals:freshness", started_ns=started_ns)
         cursor = ({"close_ms": rows[-1]["bar_close_ms"], "event_id": rows[-1]["id"]}
                   if len(rows) == limit else None)
+        dispatch_trace(f"signals:return={len(rows)}", started_ns=started_ns)
         return {"items": rows, "total": len(rows), "kind": kind, "protocol": protocol,
                 "source": source, "confirmation": confirmation, "next_cursor": cursor}
 

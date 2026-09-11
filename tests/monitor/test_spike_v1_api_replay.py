@@ -6,6 +6,7 @@ import threading
 import pytest
 
 from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL, TIMEFRAMES
+from yoyo.monitor import server as server_module
 from yoyo.monitor.replay_import import import_rows
 from yoyo.monitor.server import create_app
 from yoyo.monitor.store import Store
@@ -109,3 +110,22 @@ def test_replay_signal_cursor_pages_stably_past_the_first_limit(tmp_path, monkey
     with pytest.raises(Exception, match="cursor requires both"):
         get(limit=2, symbol=None, timeframe=None, kind=None, side=None,
             source="replay", confirmation="raw", before_close_ms=cursor["close_ms"])
+
+
+def test_signal_trace_has_phase_counts_without_request_identifiers(tmp_path, monkeypatch):
+    app = create_app(runtime=tmp_path, start_monitor=False)
+    store = app.state.monitor.store
+    assert store.upsert_event(raw(source="replay"), notify=False, bark_notify=False)
+    monkeypatch.setattr(app.state.monitor.client, "clock", lambda: NOW)
+    markers = []
+    monkeypatch.setattr(server_module, "DISPATCH_TRACE", True)
+    monkeypatch.setattr(server_module, "dispatch_trace", lambda marker, **_: markers.append(marker))
+
+    result = endpoint(app)(limit=1, symbol="PEPE-USDT-SWAP", timeframe="1H", kind=None, side=None,
+                           source="replay", confirmation="raw")
+
+    assert len(result["items"]) == 1
+    assert markers == [
+        "handler:/api/signals", "signals:rows=1", "signals:freshness", "signals:return=1",
+    ]
+    assert all("PEPE" not in marker and "replay" not in marker for marker in markers)
