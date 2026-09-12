@@ -42,7 +42,7 @@ def _bool(frame: pd.DataFrame, column: str) -> pd.Series:
     values = frame[column]
     if not values.dropna().map(lambda value: isinstance(value, (bool, np.bool_))).all():
         raise ValueError(f"nonboolean values in {column}")
-    return values.fillna(False).astype(bool)
+    return values.astype("boolean").fillna(False).astype(bool)
 
 
 def _verify_file(path: Path, digest: str) -> None:
@@ -100,7 +100,8 @@ def _verify_discovery(discovery: Path) -> tuple[dict, pd.DataFrame]:
             raise ValueError("discovery isolation erratum is not bound to this manifest")
         features = features.copy()
         for column in exposed_columns:
-            features.loc[validation, column] = np.nan
+            features[column] = features[column].astype(object)
+            features.loc[validation, column] = pd.NA
         features.loc[validation, "failure_reason"] = "outcome_withheld_validation"
     features["outcome_available"] = features.period.eq("development")
     manifest = dict(manifest)
