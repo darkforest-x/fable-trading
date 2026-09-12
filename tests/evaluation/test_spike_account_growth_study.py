@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 
 import pandas as pd
 import pytest
@@ -23,6 +24,7 @@ def _write_source(path):
         dict(signal_bar_open="2024-01-01T00:00Z", entry_time="2024-01-01T01:00Z", exit_time="2024-01-01T02:00Z", side=1, entry_price=100.0, initial_risk=10.0, exit_price=120.0, exit_reason="trail", net_return=.20, net_r=2.0, mfe_r=3.0, censored=False, variant="v1_common_execution_long", venue="okx", symbol="AAA-USDT-SWAP", timeframe_min=30, segment="development", year_block="2024"),
         dict(signal_bar_open="2024-01-01T00:00Z", entry_time="2024-01-01T01:00Z", exit_time="2024-01-01T03:00Z", side=1, entry_price=100.0, initial_risk=10.0, exit_price=110.0, exit_reason="trail", net_return=.10, net_r=1.0, mfe_r=2.0, censored=False, variant="v1_common_execution_long", venue="binance", symbol="AAAUSDT.P", timeframe_min=30, segment="development", year_block="2024"),
         dict(signal_bar_open="2024-01-01T02:00Z", entry_time="2024-01-01T03:00Z", exit_time="2024-01-01T04:00Z", side=1, entry_price=100.0, initial_risk=10.0, exit_price=90.0, exit_reason="stop", net_return=-.10, net_r=-1.0, mfe_r=.5, censored=False, variant="v7_bb_long", venue="okx", symbol="BBB-USDC-SWAP", timeframe_min=60, segment="development", year_block="2024"),
+        dict(signal_bar_open="2024-01-01T02:00Z", entry_time="2024-01-01T03:00Z", exit_time="2024-01-01T04:00Z", side=1, entry_price=100.0, initial_risk=10.0, exit_price=90.0, exit_reason="stop", net_return=-.10, net_r=-1.0, mfe_r=.5, censored=False, variant="v6_unfiltered_long", venue="okx", symbol="NOISEUSDT", timeframe_min=60, segment="development", year_block="2024"),
     ])
     frame.to_csv(path, index=False, compression={"method": "gzip", "mtime": 0})
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -62,6 +64,8 @@ def test_loader_rejects_unpinned_source_and_scope_filters(tmp_path):
     digest = _write_source(path)
     trades = load_common_execution_trades(path, expected_sha256=digest)
     assert trades.base_asset.tolist() == ["AAA", "AAA", "BBB"]
+    assert trades.attrs["file_total_rows"] == 4
+    assert trades.attrs["loaded_relevant_rows"] == 3
     assert len(select_scope(trades, arm="v1_common_execution_long", venue_scope="okx", timeframe=30)) == 1
     assert len(select_scope(trades, arm="v1_common_execution_long", venue_scope="combined", timeframe="all")) == 2
     with pytest.raises(ValueError, match="hash mismatch"):
@@ -118,6 +122,11 @@ def test_fixed_grid_writes_auditable_outputs_and_preserves_rejections(tmp_path):
     assert rejected.rejection_reason.tolist() == ["base_asset_open", "base_asset_open"]
     accepted = pd.read_csv(output / "accepted_ledger.csv.gz")
     assert {"exit_price", "exit_reason", "net_return", "net_r", "mfe_r", "segment", "year_block"} <= set(accepted)
+    manifest = json.loads((output / "run_manifest.json").read_text())
+    assert manifest["source_rows"] == 4
+    assert manifest["loaded_relevant_rows"] == 3
+    assert manifest["sources"]["common_execution"]["file_total_rows"] == 4
+    assert manifest["sources"]["common_execution"]["loaded_relevant_rows"] == 3
 
 
 def test_period_scopes_use_entry_time_and_each_subperiod_restarts_at_1000(tmp_path):
@@ -142,6 +151,34 @@ def test_period_scopes_use_entry_time_and_each_subperiod_restarts_at_1000(tmp_pa
     )
     assert set(summary.period_scope) == {"development", "validation"}
     assert summary.initial_balance.eq(1000).all()
+
+
+def test_subperiod_rejections_are_counted_but_not_written_as_detail(tmp_path):
+    source = tmp_path / "subperiod-rejections.csv.gz"
+    _write_source(source)
+    raw = pd.read_csv(source)
+    # Two same-asset candidates share one development entry timestamp.  The
+    # account accepts one and records the other as asset-open, but subperiod
+    # rejection detail is intentionally omitted from the output bundle.
+    raw.loc[[0, 1], ["signal_bar_open", "entry_time", "exit_time"]] = [
+        ["2024-10-01T00:00Z", "2024-10-01T01:00Z", "2024-10-01T02:00Z"],
+        ["2024-10-01T00:00Z", "2024-10-01T01:00Z", "2024-10-01T03:00Z"],
+    ]
+    raw.to_csv(source, index=False, compression={"method": "gzip", "mtime": 0})
+    digest = hashlib.sha256(source.read_bytes()).hexdigest()
+
+    summary = run_account_growth_study(
+        tmp_path / "subperiod-output", source_path=source, expected_sha256=digest,
+        arms=("v1_common_execution_long",), venue_scopes=("combined",), timeframes=(30,),
+        period_scopes=("development",), sizings=("fixed",), risk_fractions=(.03,),
+    )
+
+    row = summary.iloc[0]
+    assert row["accepted"] == 1
+    assert row["rejected"] == 1
+    assert row["rejected_base_asset_open"] == 1
+    rejected = pd.read_csv(tmp_path / "subperiod-output" / "rejections.csv.gz")
+    assert rejected.empty
 
 
 def test_development_cross_boundary_is_zero_pnl_censor_not_future_exit_read(tmp_path):

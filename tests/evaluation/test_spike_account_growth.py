@@ -61,6 +61,17 @@ def test_exit_precedes_same_time_entry_and_releases_capacity():
     assert ledger.loc["b", "quantity"] == pytest.approx(11)
 
 
+def test_same_bar_entry_and_exit_settle_after_its_entry_group():
+    rows = [
+        dict(trade_id="instant", entry_time="2024-01-01T00:00Z", exit_time="2024-01-01T00:00Z", base_asset="A", entry_price=100, initial_risk=10, side=1, net_return=.10),
+        dict(trade_id="later", entry_time="2024-01-01T01:00Z", exit_time="2024-01-01T02:00Z", base_asset="B", entry_price=100, initial_risk=10, side=1, net_return=0),
+    ]
+    ledger = _run(rows)["ledger"].set_index("trade_id")
+    assert ledger.loc["instant", "selected"]
+    assert ledger.loc["instant", "realized_pnl"] == pytest.approx(100)
+    assert ledger.loc["later", "entry_balance"] == pytest.approx(1100)
+
+
 def test_gap_loss_can_exceed_one_r_and_floor_latches_new_entries():
     rows = [
         dict(trade_id="gap", entry_time="2024-01-01T00:00Z", exit_time="2024-01-01T01:00Z", base_asset="A", entry_price=100, initial_risk=10, side=1, net_return=-.85),
@@ -121,3 +132,25 @@ def test_censored_column_is_optional_as_documented():
     assert result["summary"]["closed"] == 1
     assert result["summary"]["censored_boundary"] == 0
     assert result["summary"]["final_balance"] == pytest.approx(1100)
+
+
+def test_random_small_ledger_is_invariant_to_input_order():
+    """A compact reference invariant for the former timestamp-scan event loop."""
+    start = pd.Timestamp("2024-01-01T00:00Z")
+    rows = []
+    for number in range(36):
+        entry_offset = (number * 7) % 13  # Deliberate collisions exercise same-time hashes.
+        rows.append(dict(
+            trade_id=f"random-{number}", entry_time=start + pd.Timedelta(hours=entry_offset),
+            exit_time=start + pd.Timedelta(hours=entry_offset + 1 + number % 4),
+            base_asset=f"asset-{number % 7}", entry_price=100 + number % 3,
+            initial_risk=(2, 5, 10)[number % 3], side=1 if number % 2 else -1,
+            net_return=(-.18, -.04, 0, .07, .22)[number % 5], censored=number % 11 == 0,
+        ))
+    frame = _trades(rows)
+    baseline = simulate_shared_account(frame, sizing="compound", risk_fraction=.03, seed=91)
+    shuffled = simulate_shared_account(frame.sample(frac=1, random_state=43), sizing="compound", risk_fraction=.03, seed=91)
+    assert baseline["summary"] == shuffled["summary"]
+    pd.testing.assert_frame_equal(baseline["ledger"], shuffled["ledger"])
+    pd.testing.assert_frame_equal(baseline["equity_curve"], shuffled["equity_curve"])
+    pd.testing.assert_frame_equal(baseline["daily_realized_pnl"], shuffled["daily_realized_pnl"])

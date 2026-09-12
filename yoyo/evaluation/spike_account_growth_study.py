@@ -53,11 +53,14 @@ ARM_SOURCE_CONTRACT = {
     "v7_bb_both": "common_execution_next_open_shared_exit",
     "v1_native_long": "original_v1_native_exit_not_fair_common_execution",
 }
+COMMON_VARIANTS = frozenset(("v1_common_execution_long", "v7_bb_long", "v7_bb_both"))
 REQUIRED_SOURCE_COLUMNS = {
     "signal_bar_open", "entry_time", "exit_time", "side", "entry_price",
     "initial_risk", "net_return", "censored", "variant", "venue", "symbol",
     "timeframe_min",
 }
+COMMON_AUDIT_COLUMNS = {"exit_price", "exit_reason", "net_r", "mfe_r", "segment", "year_block"}
+COMMON_LOAD_COLUMNS = tuple(sorted(REQUIRED_SOURCE_COLUMNS | COMMON_AUDIT_COLUMNS))
 DEFAULT_RISK_FRACTIONS = (0.03, 0.05, 0.10)
 DEFAULT_SIZINGS = ("fixed", "compound")
 DEFAULT_TIMEFRAMES: tuple[int | str, ...] = (30, 60, 240, "all")
@@ -138,11 +141,22 @@ def load_common_execution_trades(
     observed = sha256_file(path)
     if observed != expected_sha256:
         raise ValueError(f"frozen common ledger hash mismatch: expected {expected_sha256}, got {observed}")
-    frame = pd.read_csv(path, float_precision="round_trip")
-    missing = REQUIRED_SOURCE_COLUMNS - set(frame.columns)
+    header = pd.read_csv(path, nrows=0)
+    missing = (REQUIRED_SOURCE_COLUMNS | COMMON_AUDIT_COLUMNS) - set(header.columns)
     if missing:
         raise ValueError(f"common execution ledger missing columns: {sorted(missing)}")
-    frame = frame.copy().reset_index(names="source_row")
+    parts: list[pd.DataFrame] = []
+    file_total_rows = 0
+    # Keep source-row identity stable while dropping unrelated V6 rows before
+    # timestamp parsing, numeric copies, and per-row stable-hash generation.
+    for chunk in pd.read_csv(path, usecols=COMMON_LOAD_COLUMNS, chunksize=100_000, float_precision="round_trip"):
+        file_total_rows += len(chunk)
+        relevant = chunk.loc[chunk["variant"].isin(COMMON_VARIANTS)].copy()
+        if not relevant.empty:
+            parts.append(relevant)
+    if not parts:
+        raise ValueError("common execution ledger has no V1/V7 relevant rows")
+    frame = pd.concat(parts, axis=0).reset_index(names="source_row")
     for name in ("signal_bar_open", "entry_time", "exit_time"):
         frame[name] = pd.to_datetime(frame[name], utc=True, errors="coerce")
         if frame[name].isna().any():
@@ -173,6 +187,8 @@ def load_common_execution_trades(
         raise ValueError("stable source trade identifiers unexpectedly collided")
     frame.attrs["source_path"] = str(path)
     frame.attrs["source_sha256"] = observed
+    frame.attrs["file_total_rows"] = int(file_total_rows)
+    frame.attrs["loaded_relevant_rows"] = int(len(frame))
     frame["source_contract"] = "common_execution_next_open_shared_exit"
     return frame
 
@@ -195,6 +211,7 @@ def load_native_v1_trades(
     if observed != expected_sha256:
         raise ValueError(f"frozen native V1 ledger hash mismatch: expected {expected_sha256}, got {observed}")
     frame = pd.read_csv(path, float_precision="round_trip")
+    file_total_rows = int(len(frame))
     required = {
         "event_id", "venue", "symbol", "asset", "timeframe_min", "direction",
         "signal_bar_open", "entry_time", "entry_price", "exit_time", "exit_price",
@@ -241,6 +258,8 @@ def load_native_v1_trades(
     frame["source_contract"] = "original_v1_native_exit_not_fair_common_execution"
     frame.attrs["source_path"] = str(path)
     frame.attrs["source_sha256"] = observed
+    frame.attrs["file_total_rows"] = file_total_rows
+    frame.attrs["loaded_relevant_rows"] = int(len(frame))
     return frame
 
 
@@ -397,8 +416,9 @@ def run_account_growth_study(
     """Run the fixed account grid and write one immutable-style result bundle.
 
     ``all`` is a truly shared cross-timeframe account; it is not the sum of
-    three independent accounts.  Outputs include all candidates in the
-    rejection ledger so portfolio-cap omissions remain auditable.
+    three independent accounts.  Accepted-trade detail is retained for every
+    time scope, while rejection rows are retained only for ``full`` to keep
+    the fixed grid bounded; every scope's rejection counts remain in summary.
     """
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -416,17 +436,22 @@ def run_account_growth_study(
         common = load_common_execution_trades(Path(source_path), expected_sha256=expected_sha256)
         sources.append(common)
         source_receipts["common_execution"] = {
-            "path": common.attrs["source_path"], "sha256": common.attrs["source_sha256"], "rows": int(len(common)),
+            "path": common.attrs["source_path"], "sha256": common.attrs["source_sha256"],
+            "file_total_rows": common.attrs["file_total_rows"],
+            "loaded_relevant_rows": common.attrs["loaded_relevant_rows"],
         }
     if needs_native:
         native = load_native_v1_trades(Path(native_source_path), expected_sha256=native_expected_sha256)
         sources.append(native)
         source_receipts["v1_native"] = {
-            "path": native.attrs["source_path"], "sha256": native.attrs["source_sha256"], "rows": int(len(native)),
+            "path": native.attrs["source_path"], "sha256": native.attrs["source_sha256"],
+            "file_total_rows": native.attrs["file_total_rows"],
+            "loaded_relevant_rows": native.attrs["loaded_relevant_rows"],
         }
     source = pd.concat(sources, ignore_index=True)
     rows: list[dict[str, Any]] = []
-    ledgers: list[pd.DataFrame] = []
+    accepted_ledgers: list[pd.DataFrame] = []
+    rejected_ledgers: list[pd.DataFrame] = []
     curves: list[pd.DataFrame] = []
     dailies: list[pd.DataFrame] = []
     run_number = 0
@@ -481,17 +506,23 @@ def run_account_growth_study(
                                 name: f"source_{name}" for name in source_meta.columns
                                 if name in set(result["ledger"].columns)
                             })
-                            ledger = result["ledger"].join(renamed_meta, on="trade_id", how="left")
-                            ledgers.append(_with_run_context(ledger, context))
+                            selected_ledger = result["ledger"].loc[result["ledger"]["selected"]]
+                            if len(selected_ledger):
+                                accepted_ledgers.append(_with_run_context(
+                                    selected_ledger.join(renamed_meta, on="trade_id", how="left"), context
+                                ))
+                            if period_scope == "full":
+                                rejected_ledger = result["ledger"].loc[~result["ledger"]["selected"]]
+                                if len(rejected_ledger):
+                                    rejected_ledgers.append(_with_run_context(
+                                        rejected_ledger.join(renamed_meta, on="trade_id", how="left"), context
+                                    ))
                             curves.append(_with_run_context(result["equity_curve"], context))
                             dailies.append(_with_run_context(result["daily_realized_pnl"], context))
 
     summary = pd.DataFrame(rows)
-    all_ledgers = pd.concat(ledgers, ignore_index=True) if ledgers else pd.DataFrame()
-    accepted = all_ledgers.loc[all_ledgers["selected"]].copy() if len(all_ledgers) else all_ledgers
-    rejected = all_ledgers.loc[
-        ~all_ledgers["selected"] & all_ledgers["period_scope"].eq("full")
-    ].copy() if len(all_ledgers) else all_ledgers
+    accepted = pd.concat(accepted_ledgers, ignore_index=True) if accepted_ledgers else pd.DataFrame()
+    rejected = pd.concat(rejected_ledgers, ignore_index=True) if rejected_ledgers else pd.DataFrame(columns=accepted.columns)
     all_curves = pd.concat(curves, ignore_index=True) if curves else pd.DataFrame()
     all_dailies = pd.concat(dailies, ignore_index=True) if dailies else pd.DataFrame()
     summary.to_csv(output_dir / "summary.csv", index=False)
@@ -509,7 +540,8 @@ def run_account_growth_study(
         "daily_realized_pnl": int(len(all_dailies)),
     }
     manifest = {
-        "source_rows": int(len(source)), "source_time_range": source_time_range,
+        "source_rows": int(sum(item["file_total_rows"] for item in source_receipts.values())),
+        "loaded_relevant_rows": int(len(source)), "source_time_range": source_time_range,
         "sources": source_receipts, "source_contracts": ARM_SOURCE_CONTRACT,
         "module_sha256": sha256_file(Path(__file__)),
         "account_engine_sha256": sha256_file(Path(__file__).with_name("spike_account_growth.py")),

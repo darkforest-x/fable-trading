@@ -45,20 +45,21 @@ def _timestamp_series(values: pd.Series, name: str) -> pd.Series:
     return result
 
 
-def _identity(row: pd.Series) -> str:
+def _identity(
+    trade_id: object, base_asset: object, entry_time: pd.Timestamp, side: float,
+    entry_price: float, initial_risk: float, input_index: object,
+) -> str:
     """Use only identity and entry-known fields when ordering simultaneous rows."""
-    trade_id = row.get("trade_id")
     if pd.notna(trade_id):
         return f"id:{trade_id}"
     return "|".join((
-        str(row["base_asset"]), str(row["entry_time"]), str(row["side"]),
-        format(float(row["entry_price"]), ".17g"), format(float(row["initial_risk"]), ".17g"),
-        str(row["input_index"]),
+        str(base_asset), str(entry_time), str(side), format(float(entry_price), ".17g"),
+        format(float(initial_risk), ".17g"), str(input_index),
     ))
 
 
-def _stable_hash(seed: int | str, row: pd.Series) -> str:
-    return hashlib.sha256(f"spike-shared-account-v1|{seed}|{_identity(row)}".encode()).hexdigest()
+def _stable_hash(seed: int | str, *identity: object) -> str:
+    return hashlib.sha256(f"spike-shared-account-v1|{seed}|{_identity(*identity)}".encode()).hexdigest()
 
 
 def _empty_ledger() -> pd.DataFrame:
@@ -106,7 +107,13 @@ def simulate_shared_account(
     if missing:
         raise ValueError(f"trades missing required columns: {sorted(missing)}")
 
-    source = trades.copy().reset_index(drop=False).rename(columns={"index": "input_index"})
+    # Keep only the cashbook contract.  Real V1/V7 ledgers contain many
+    # descriptive columns, and copying all of them for 100k candidates makes
+    # the event engine needlessly memory-bound.
+    source_columns = ["entry_time", "exit_time", "base_asset", "entry_price", "initial_risk", "side"]
+    source_columns += [name for name in ("trade_id", "censored", "net_return", "exit_price") if name in trades]
+    source = trades.loc[:, source_columns].copy()
+    source.insert(0, "input_index", trades.index.to_numpy(copy=False))
     source["entry_time"] = _timestamp_series(source["entry_time"], "entry_time")
     source["exit_time"] = _timestamp_series(source["exit_time"], "exit_time")
     if "censored" not in source:
@@ -114,8 +121,8 @@ def simulate_shared_account(
     source["censored"] = source["censored"].fillna(False).astype(bool)
     for name in ("entry_price", "initial_risk", "side"):
         source[name] = pd.to_numeric(source[name], errors="coerce")
-    if (source["entry_time"] >= source["exit_time"]).any():
-        raise ValueError("exit_time must follow entry_time")
+    if (source["entry_time"] > source["exit_time"]).any():
+        raise ValueError("exit_time must not precede entry_time")
     if (not np.isfinite(source[["entry_price", "initial_risk", "side"]].to_numpy(dtype=float)).all()
             or (source["entry_price"] <= 0).any() or (source["initial_risk"] <= 0).any()
             or not source["side"].isin((-1, 1)).all()):
@@ -134,26 +141,41 @@ def simulate_shared_account(
         source["trade_id"] = [f"row-{i}" for i in range(len(source))]
     if source["trade_id"].duplicated().any():
         raise ValueError("trade_id must be unique")
-    source["selection_hash"] = source.apply(lambda row: _stable_hash(seed, row), axis=1)
+    source["selection_hash"] = [
+        _stable_hash(seed, trade_id, base_asset, entry_time, side, entry_price, initial_risk, input_index)
+        for trade_id, base_asset, entry_time, side, entry_price, initial_risk, input_index in zip(
+            source["trade_id"], source["base_asset"], source["entry_time"], source["side"],
+            source["entry_price"], source["initial_risk"], source["input_index"],
+        )
+    ]
     source = source.sort_values(["entry_time", "selection_hash"], kind="mergesort")
+
+    # Make the event schedule once.  The prior implementation selected
+    # ``source.loc[source.entry_time == stamp]`` at every timestamp, which is
+    # quadratic for a large cross-market ledger.  Candidates are already in
+    # the exact (entry_time, outcome-independent hash) order needed below.
+    entry_groups: dict[pd.Timestamp, list[dict[str, Any]]] = {}
+    times: set[pd.Timestamp] = set()
+    for candidate in source.to_dict("records"):
+        entry_groups.setdefault(candidate["entry_time"], []).append(candidate)
+        times.add(candidate["entry_time"])
+        times.add(candidate["exit_time"])
+    del source
 
     balance = float(initial_balance)
     entry_floor = float(initial_balance * entry_floor_fraction)
     floor_triggered = False
     bankrupt = False
     open_positions: dict[str, dict[str, Any]] = {}
+    exit_groups: dict[pd.Timestamp, list[dict[str, Any]]] = {}
     active_assets: set[str] = set()
     ledger: dict[str, dict[str, Any]] = {}
     curve_rows: list[dict[str, Any]] = []
 
-    times = sorted(set(source["entry_time"]).union(source["exit_time"]))
-    for stamp in times:
-        # Exit before entry is deliberate: its realized balance and released
-        # capacity are available to a candidate opening at exactly this stamp.
-        exiting = sorted(
-            (position for position in open_positions.values() if position["exit_time"] == stamp),
-            key=lambda position: position["selection_hash"],
-        )
+    def process_exits(exiting: list[dict[str, Any]]) -> tuple[float, int, int]:
+        """Realize an already-open time group, returning its curve deltas."""
+        nonlocal balance, bankrupt, floor_triggered
+        exiting.sort(key=lambda position: position["selection_hash"])
         realized = 0.0
         exits = 0
         boundary_marks = 0
@@ -178,14 +200,15 @@ def simulate_shared_account(
                        exit_r_multiple=pnl / position["target_risk_capital"])
             realized += pnl
             exits += 1
-        if exiting:
-            curve_rows.append(dict(time=stamp, balance=balance, realized_pnl=realized, exits=exits,
-                                   boundary_marks=boundary_marks, floor_triggered=floor_triggered))
+        return realized, exits, boundary_marks
 
-        candidates = source.loc[source["entry_time"].eq(stamp)].sort_values(
-            ["selection_hash"], kind="mergesort"
-        )
-        for candidate in candidates.to_dict("records"):
+    for stamp in sorted(times):
+        # Exit before entry is deliberate: its realized balance and released
+        # capacity are available to a candidate opening at exactly this stamp.
+        exiting = exit_groups.pop(stamp, [])
+        realized, exits, boundary_marks = process_exits(exiting)
+
+        for candidate in entry_groups.get(stamp, ()):
             trade_id = candidate["trade_id"]
             base_asset = str(candidate["base_asset"])
             initial_risk_fraction = float(candidate["initial_risk"] / candidate["entry_price"])
@@ -221,9 +244,21 @@ def simulate_shared_account(
                 continue
             position = {**candidate, **common}
             open_positions[trade_id] = position
+            exit_groups.setdefault(position["exit_time"], []).append(position)
             active_assets.add(base_asset)
             common["gross_leverage_after_entry"] = (reserved_notional + notional) / balance
             common["portfolio_risk_after_entry"] = (reserved_risk + target_risk) / balance
+
+        # An intrabar stop may share its bar-open timestamp with its own entry.
+        # Its outcome is deliberately unavailable to the candidates above, but
+        # it must settle before the next timestamp and release its reservation.
+        immediate_realized, immediate_exits, immediate_boundary = process_exits(exit_groups.pop(stamp, []))
+        realized += immediate_realized
+        exits += immediate_exits
+        boundary_marks += immediate_boundary
+        if exiting or immediate_exits or immediate_boundary:
+            curve_rows.append(dict(time=stamp, balance=balance, realized_pnl=realized, exits=exits,
+                                   boundary_marks=boundary_marks, floor_triggered=floor_triggered))
 
     ledger_frame = pd.DataFrame(list(ledger.values()), columns=_LEDGER_COLUMNS)
     if len(ledger_frame):
