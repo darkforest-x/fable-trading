@@ -157,7 +157,7 @@ def _hash(path: Path) -> str:
 
 def _read(path: Path) -> pd.DataFrame:
     try:
-        return pd.read_csv(path)
+        return pd.read_csv(path, converters={name:str for name in ("asset", "symbol", "venue", "cohort", "stream_key")})
     except pd.errors.EmptyDataError:
         return pd.DataFrame()
 

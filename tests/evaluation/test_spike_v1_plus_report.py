@@ -5,7 +5,7 @@ import pytest
 
 from yoyo.evaluation.spike_v1_plus_report import BASELINE, PLUS, metrics, exact_pairs
 from yoyo.evaluation.spike_v1_plus_controls import protection_outcome
-from yoyo.evaluation.spike_v1_plus_report import concentration_table
+from yoyo.evaluation.spike_v1_plus_report import concentration_table, _read
 
 
 def rows():
@@ -47,6 +47,15 @@ def test_concentration_excludes_boundary_estimates_and_keeps_losses():
     assert plus.total_net_r == -.2
     assert plus.without_top10_net_r == -.2
     assert pd.isna(plus.top_asset_positive_r_share)
+
+
+def test_csv_asset_identifiers_keep_numeric_and_na_like_symbols(tmp_path):
+    path = tmp_path / "trades.csv"
+    path.write_text("asset,symbol,net_r\n4,4USDT,1.5\nNA,NAUSDT,\n")
+    t = _read(path)
+    assert t.asset.tolist() == ["4", "NA"]
+    assert t.symbol.tolist() == ["4USDT", "NAUSDT"]
+    assert t.net_r.iloc[0] == 1.5 and pd.isna(t.net_r.iloc[1])
 
 
 def test_null_benchmark_checks_stop_on_entry_bar_before_profit():
