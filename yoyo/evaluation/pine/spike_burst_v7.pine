@@ -719,24 +719,9 @@ plotcandle(signalSide != 0 ? open : na, high, low, close, title="确认K线实�
 // 4 awaiting MD over signal, 5 confirmed, 6 parent broken, 7 gap, 8 unknown,
 // 9 awaiting V1 directional-candle evidence within the V6 pending window.
 float pendingWhyCode = pendingWhy == "await_legacy" ? 1 : pendingWhy == "await_body" ? 2 : pendingWhy == "await_md_turn" ? 3 : pendingWhy == "await_momentum" ? 4 : pendingWhy == "confirmed" ? 5 : pendingWhy == "parent_broken" ? 6 : pendingWhy == "gap" ? 7 : pendingWhy == "unknown" ? 8 : pendingWhy == "await_launch_evidence" ? 9 : 0
-plot(barstate.isconfirmed ? bodySupportBar : na, "V6 实体支持K线", display=display.data_window)
-plot(barstate.isconfirmed ? legacyBar : na, "V6 V4确认K线", display=display.data_window)
-plot(barstate.isconfirmed ? legacyParentHigh : na, "V6 冻结V4父高", display=display.data_window)
-plot(barstate.isconfirmed ? legacyParentLow : na, "V6 冻结V4父低", display=display.data_window)
-plot(barstate.isconfirmed ? ((confirmedSignal ? consumedLaunchEvidence : launchEvidence) ? 1 : 0) : na, "V6 量价证据已锁定", display=display.data_window)
-plot(barstate.isconfirmed ? (confirmedSignal ? consumedLaunchEvidenceBar : launchEvidenceBar) : na, "V6 量价证据K线", display=display.data_window)
-plot(barstate.isconfirmed ? pendingWhyCode : na, "V6 等待原因代码", display=display.data_window)
-plot(confirmedSignal ? confirmationAge : na, "V6 确认等待根数", display=display.data_window)
+// V7 omits 17 internal Data Window diagnostics to leave plot-count headroom.
+// Visible drawings, signal state and exits are unchanged.
 float shortPendingWhyCode = shortPendingWhy == "await_legacy" ? 1 : shortPendingWhy == "await_body" ? 2 : shortPendingWhy == "await_md_turn" ? 3 : shortPendingWhy == "await_momentum" ? 4 : shortPendingWhy == "confirmed" ? 5 : shortPendingWhy == "parent_broken" ? 6 : shortPendingWhy == "gap" ? 7 : shortPendingWhy == "unknown" ? 8 : shortPendingWhy == "await_launch_evidence" ? 9 : 0
-plot(barstate.isconfirmed ? shortBodySupportBar : na, "V6 空头实体支持K线", display=display.data_window)
-plot(barstate.isconfirmed ? shortLegacyBar : na, "V6 空头旧确认K线", display=display.data_window)
-plot(barstate.isconfirmed ? (legacyShortConfirmedSignal ? 1 : 0) : na, "V6 本根空头旧确认诊断", display=display.data_window)
-plot(barstate.isconfirmed ? shortLegacyParentHigh : na, "V6 空头冻结父高", display=display.data_window)
-plot(barstate.isconfirmed ? shortLegacyParentLow : na, "V6 空头冻结父低", display=display.data_window)
-plot(barstate.isconfirmed ? ((confirmedShortSignal ? consumedShortLaunchEvidence : shortLaunchEvidence) ? 1 : 0) : na, "V6 空头量价证据已锁定", display=display.data_window)
-plot(barstate.isconfirmed ? (confirmedShortSignal ? consumedShortLaunchEvidenceBar : shortLaunchEvidenceBar) : na, "V6 空头量价证据K线", display=display.data_window)
-plot(barstate.isconfirmed ? shortPendingWhyCode : na, "V6 空头等待原因代码", display=display.data_window)
-plot(confirmedShortSignal ? shortConfirmationAge : na, "V6 空头确认等待根数", display=display.data_window)
 plot(barstate.isconfirmed ? (ready ? 1 : 0) : na, "连续数据已就绪", display=display.data_window)
 plot(barstate.isconfirmed ? rv : na, "收盘量比 RV", display=display.data_window)
 plot(barstate.isconfirmed ? expansion : na, "收盘 TR / 前根ATR", display=display.data_window)
