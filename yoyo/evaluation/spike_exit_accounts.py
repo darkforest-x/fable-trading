@@ -144,3 +144,82 @@ def period_summary(path:pd.DataFrame, *, initial=10000.,
         peaks=np.maximum.accumulate(vals);dd=1.-np.divide(vals,peaks,out=np.zeros_like(vals),where=peaks>0)
         out.append(dict(period=name,opening_equity=opening,ending_equity=float(vals[-1]),net_return=float(vals[-1]/opening-1),max_close_drawdown=float(dd.max()),valid=True))
     return out
+
+
+def marked_account_grid(bars,trades,fills,*, settings=((.01,1.),(.03,1.),(.05,1.),(.10,1.),(.01,None),(.03,None),(.05,None),(.10,None)),initial=10000.,minutes=60,roundtrip_cost=.002,start='2024-09-10T00:00:00Z',end='2026-09-10T00:00:00Z'):
+    """Vectorize capital scenarios across an identical unit-position path.
+
+    This is algebraically the same frozen-quantity cashbook as marked_account;
+    no scenario is allowed to borrow another scenario's realized equity.
+    """
+    start,end=_utc(start),_utc(end);step=pd.Timedelta(minutes=minutes)
+    b=bars.loc[(bars.index>=start)&(bars.index<end)]
+    ix=b.index; closes=b.close.to_numpy(float);opens=b.open.to_numpy(float)
+    width=len(settings);risks=np.array([s[0] for s in settings]);caps=np.array([np.inf if s[1] is None else s[1] for s in settings])
+    if (risks<=0).any() or (risks>=1).any() or (caps<=0).any():raise ValueError('invalid capital grid')
+    cash=np.full(width,initial);nav=np.full((len(b),width),initial);cursor=0
+    ruined=np.zeros(width,bool);invalid=False;maxlev=np.zeros(width);effective_sum=np.zeros(width);allocations=np.zeros(width,int)
+    half=roundtrip_cost/2;boundary=0;max_error=0.;last_close_time=None
+    t=trades.sort_values(['entry_time','trade_id']).copy() if len(trades) else trades
+    legs={}
+    if len(fills):
+        f=fills.loc[fills.kind.ne('entry')].copy()
+        f['bar_i']=ix.get_indexer(pd.DatetimeIndex(pd.to_datetime(f.bar_open,utc=True)))
+        f['phase_i']=f.execution_phase.map({'open':0,'intrabar':1,'close':2})
+        if f.phase_i.isna().any():raise ValueError('unknown fill timing')
+        f=f.sort_values(['bar_i','phase_i','leg_no'] if 'leg_no' in f else ['bar_i','phase_i'])
+        for leg in f.itertuples(index=False):
+            legs.setdefault(leg.trade_id,[]).append((int(leg.bar_i),int(leg.phase_i),float(leg.qty_fraction),float(leg.price),leg.kind))
+    for row in t.itertuples(index=False):
+        stamp=_utc(row.entry_time)
+        if not start<=stamp<end:continue
+        ei=ix.get_indexer([stamp])[0]
+        if ei<0 or (last_close_time is not None and stamp<last_close_time):raise ValueError('missing entry or overlapping positions')
+        entry,risk,side=float(row.entry_price),float(row.initial_risk),int(row.side)
+        if side not in (-1,1) or entry<=0 or risk<=0 or not np.isclose(opens[ei],entry,rtol=1e-10,atol=0):raise ValueError('invalid entry')
+        nav[cursor:ei,:]=cash
+        ls=legs.get(row.trade_id)
+        if not ls:raise ValueError('missing final valuation')
+        arr=np.array([v[:4] for v in ls],float)
+        if not np.isfinite(arr).all():invalid=True;nav[ei:,:]=np.nan;break
+        positions=arr[:,0].astype(int);fractions=arr[:,2]
+        if (positions<ei).any() or (fractions<=0).any() or not np.isclose(fractions.sum(),1.,atol=1e-9):raise ValueError('fill chronology or quantity error')
+        final_i=int(positions[-1]);phase=int(arr[-1,1]);last_close_time=ix[final_i]+(step if phase else pd.Timedelta(0))
+        stop=final_i+int(phase!=0);n=final_i-ei+1
+        qr=np.zeros(n);pr=np.zeros(n)
+        np.add.at(qr,positions-ei,fractions)
+        np.add.at(pr,positions-ei,fractions*(side*(arr[:,3]/entry-1)-half))
+        remaining=1-np.cumsum(qr);realized=np.cumsum(pr)
+        net_ret=float(realized[-1]-half)
+        if hasattr(row,'net_return') and np.isfinite(float(row.net_return)):
+            error=abs(net_ret-float(row.net_return));max_error=max(max_error,error)
+            if error>1e-8:raise ValueError('fill return does not reconcile')
+        unit=-half+realized+remaining*(side*(closes[ei:final_i+1]/entry-1)-half)
+        lev=np.minimum(risks/(risk/entry),caps/(1+half));lev[ruined]=0
+        active=~ruined;allocations[active]+=1;effective_sum[active]+=lev[active]*risk/entry
+        values=cash[None,:]*(1+unit[:stop-ei,None]*lev[None,:])
+        nav[ei:stop,:]=values
+        if len(values):
+            exposure=cash[None,:]*lev[None,:]*remaining[:stop-ei,None]*(closes[ei:stop,None]/entry)
+            observed=np.divide(exposure,values,out=np.zeros_like(values),where=values>0)
+            maxlev=np.maximum(maxlev,observed.max(axis=0))
+        cash=cash*(1+lev*net_ret)
+        for j in np.flatnonzero(~ruined):
+            bad=np.flatnonzero(values[:,j]<=0)
+            if len(bad) or cash[j]<=0:
+                ruined[j]=True;at=ei+int(bad[0]) if len(bad) else stop
+                nav[at:,j]=0;cash[j]=0
+        for j in np.flatnonzero(ruined):
+            # Earlier ruin remains absorbing even if a hypothetical later trade recovers.
+            zeros=np.flatnonzero(nav[:stop,j]<=0)
+            if len(zeros):nav[int(zeros[0]):,j]=0
+        boundary+=int(any(v[4]=='censor' for v in ls))
+        cursor=stop
+    if not invalid:nav[cursor:,:]=cash
+    meta=[]
+    for j,(risk,cap) in enumerate(settings):
+        meta.append(dict(risk_fraction=risk,notional_cap='uncapped_stress' if cap is None else str(cap),
+                         ruined=bool(ruined[j]),invalid=invalid,boundary_marks=boundary,
+                         allocated_trades=int(allocations[j]),mean_effective_stop_risk=float(effective_sum[j]/allocations[j]) if allocations[j] else 0.,
+                         max_observed_close_leverage=float(maxlev[j]),max_net_return_error=max_error))
+    return ix+step,nav,meta

@@ -68,3 +68,24 @@ def test_next_open_reversal_close_belongs_to_new_trade():
     p,a,m=marked_account(b,t,f,risk_fraction=.01,notional_cap=None)
     assert len(a)==2
     assert p.equity.iloc[1]==pytest.approx(a.entry_equity.iloc[1]-a.quantity.iloc[1]*102*.002)
+
+
+def test_grid_is_exact_for_both_sides_partials_caps_and_reversal():
+    from yoyo.evaluation.spike_exit_accounts import marked_account_grid
+    settings=[(.01,1.),(.03,1.),(.1,None)]
+    for side in [1,-1]:
+        for partial in [False,True]:
+            b,t,f=fixture(side=side,partial=partial)
+            ix,nav,meta=marked_account_grid(b,t,f,settings=settings)
+            for j,(risk,cap) in enumerate(settings):
+                path,_,m=marked_account(b,t,f,risk_fraction=risk,notional_cap=cap)
+                np.testing.assert_allclose(nav[:,j],path.equity,atol=1e-8)
+                assert meta[j]['ruined']==m['ruined']
+
+
+def test_grid_ruin_remains_absorbing():
+    from yoyo.evaluation.spike_exit_accounts import marked_account_grid
+    b,t,f=fixture();b.loc[b.index[1],'close']=75
+    ix,nav,meta=marked_account_grid(b,t,f,settings=[(.01,1.),(.1,None)])
+    assert meta[1]['ruined'] and nav[-1,1]==0
+    assert not meta[0]['ruined']
