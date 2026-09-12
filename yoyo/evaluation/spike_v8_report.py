@@ -71,6 +71,26 @@ def _verify_file_or_bound_history(path: Path, digest: str) -> None:
         raise ValueError(f"historical receipt source hash disagrees: {relative}")
 
 
+def _withhold_exposed_validation_outcomes(
+    features: pd.DataFrame, exposed_columns: list[str],
+) -> pd.DataFrame:
+    """Clear legacy validation outcomes and add a separate non-outcome marker."""
+    features = features.copy()
+    validation = features.period.eq("validation")
+    for column in exposed_columns:
+        features[column] = features[column].astype(object)
+        features.loc[validation, column] = pd.NA
+    leaked = [
+        column for column in DISCOVERY_OUTCOME_COLUMNS
+        if column in features and features.loc[validation, column].notna().any()
+    ]
+    if leaked:
+        raise ValueError("failed to withhold legacy validation outcomes: " + ", ".join(leaked))
+    features["outcome_withheld_validation"] = validation
+    features["outcome_available"] = features.period.eq("development")
+    return features
+
+
 def _verify_discovery(discovery: Path) -> tuple[dict, pd.DataFrame]:
     manifest_path = discovery / "manifest.json"
     manifest = json.loads(manifest_path.read_text())
@@ -98,12 +118,10 @@ def _verify_discovery(discovery: Path) -> tuple[dict, pd.DataFrame]:
             raise ValueError("discovery isolation erratum does not acknowledge validation outcome exposure")
         if erratum.get("discovery_manifest_sha256") != sha256(manifest_path):
             raise ValueError("discovery isolation erratum is not bound to this manifest")
-        features = features.copy()
-        for column in exposed_columns:
-            features[column] = features[column].astype(object)
-            features.loc[validation, column] = pd.NA
-        features.loc[validation, "failure_reason"] = "outcome_withheld_validation"
-    features["outcome_available"] = features.period.eq("development")
+        features = _withhold_exposed_validation_outcomes(features, exposed_columns)
+    else:
+        features["outcome_withheld_validation"] = validation
+        features["outcome_available"] = features.period.eq("development")
     manifest = dict(manifest)
     manifest["validation_outcomes_exposed"] = exposed
     manifest["exposed_outcome_columns"] = exposed_columns

@@ -11,6 +11,7 @@ from yoyo.evaluation.spike_v8_report import (
     _retention_summary,
     _trade_summary,
     _unmatched_controls,
+    _withhold_exposed_validation_outcomes,
     cluster_effect,
 )
 
@@ -112,6 +113,20 @@ def test_matched_control_denominator_keeps_unmatched_rows_and_reasons():
     assert row.unmatched_reasons == "control_unresolved=1"
     unmatched = _unmatched_controls(controls).iloc[0]
     assert unmatched.reason == "control_unresolved" and unmatched.unmatched == 1
+
+
+def test_legacy_validation_outcomes_are_null_and_use_a_separate_marker():
+    features = pd.DataFrame({
+        "period": ["development", "validation"],
+        "net_return": [.03, -.02],
+        "failure_reason": ["positive_below10r", "initial_stop_later"],
+    })
+    result = _withhold_exposed_validation_outcomes(
+        features, ["net_return", "failure_reason"],
+    )
+    validation = result.loc[result.period.eq("validation")].iloc[0]
+    assert pd.isna(validation.net_return) and pd.isna(validation.failure_reason)
+    assert validation.outcome_withheld_validation and not validation.outcome_available
 
 
 def test_admission_contract_is_documented_as_distinct_from_actual_trades():
