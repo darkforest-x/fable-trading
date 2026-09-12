@@ -381,6 +381,109 @@ def _variant_block_rows(path: Path, *, monotonic_field: str, bounded_fields: tup
                 yield header, next(csv.reader([bytes(raw_line).decode("utf-8").rstrip("\r\n")]))
 
 
+def _variant_block_safe_record_numbers(path: Path, *, monotonic_field: str, bounded_fields: tuple[str, ...],
+                                       start: pd.Timestamp, cutoff: pd.Timestamp) -> tuple[list[str], set[int]]:
+    """Return development-safe record numbers without retaining non-scalar bytes.
+
+    This is the first pass for trade ledgers whose outcome fields can precede
+    ``exit_time``.  It retains only the variant and bounded timestamp scalars,
+    validates contiguous variant blocks through EOF, and records rows with all
+    bounded timestamps in ``[start, cutoff)``.  No other payload bytes are
+    buffered, decoded, or passed to a CSV parser.
+    """
+    with gzip.open(path, "rb") as stream:
+        header_bytes = stream.readline()
+        header = next(csv.reader([header_bytes.decode("utf-8").rstrip("\r\n")]))
+        required = {"variant", monotonic_field, *bounded_fields}
+        if missing := required.difference(header):
+            raise ValueError(f"frozen stream lacks required fields {sorted(missing)}: {path}")
+        indices = {name: header.index(name) for name in required}
+        fields_by_index = {index: name for name, index in indices.items()}
+        current_variant: str | None = None
+        closed_variants: set[str] = set()
+        previous: pd.Timestamp | None = None
+        selected: set[int] = set()
+        record_number = 0
+        while True:
+            scalars: dict[str, bytes] = {}
+            field = bytearray()
+            field_number = 0
+            has_char = False
+            while True:
+                character = stream.read(1)
+                if not character:
+                    if not has_char:
+                        return header, selected
+                    delimiter = b"\n"
+                else:
+                    has_char = True
+                    delimiter = character
+                if field_number in fields_by_index and delimiter not in (b",", b"\n"):
+                    field.extend(delimiter)
+                if field_number in fields_by_index and delimiter in (b",", b"\n"):
+                    scalars[fields_by_index[field_number]] = bytes(field)
+                if delimiter == b",":
+                    field_number += 1
+                    field.clear()
+                if delimiter == b"\n" or not character:
+                    break
+            if len(scalars) != len(indices):
+                raise ValueError(f"malformed frozen CSV row before required scalars: {path}")
+            variant = scalars["variant"].decode("utf-8")
+            if not variant:
+                raise ValueError(f"empty variant prevents safe block read: {path}")
+            if variant != current_variant:
+                if current_variant is not None:
+                    closed_variants.add(current_variant)
+                if variant in closed_variants:
+                    raise ValueError(f"variant block reappears after ending: {variant} in {path}")
+                current_variant, previous = variant, None
+            stamp = _utc(scalars[monotonic_field].decode("utf-8").rstrip("\r"))
+            if pd.isna(stamp):
+                raise ValueError(f"missing {monotonic_field} prevents safe block read: {path}")
+            if previous is not None and stamp < previous:
+                raise ValueError(
+                    f"non-monotonic {monotonic_field} within variant {variant} prevents safe read: {path}"
+                )
+            previous = stamp
+            bounded = [_utc(scalars[name].decode("utf-8").rstrip("\r")) for name in bounded_fields]
+            if any(pd.isna(value) for value in bounded):
+                raise ValueError(f"missing bounded timestamp prevents safe block read: {path}")
+            if all(start <= value < cutoff for value in bounded):
+                selected.add(record_number)
+            record_number += 1
+
+
+def _selected_csv_rows(path: Path, *, expected_header: list[str], selected: set[int]) -> Iterable[list[str]]:
+    """Parse only complete records selected by a prior scalar-only pass."""
+    with gzip.open(path, "rb") as stream:
+        header_bytes = stream.readline()
+        header = next(csv.reader([header_bytes.decode("utf-8").rstrip("\r\n")]))
+        if header != expected_header:
+            raise ValueError(f"frozen stream header changed between bounded passes: {path}")
+        record_number = 0
+        while True:
+            capture = record_number in selected
+            raw_line = bytearray() if capture else None
+            has_char = False
+            while True:
+                character = stream.read(1)
+                if not character:
+                    if not has_char:
+                        return
+                    delimiter = b"\n"
+                else:
+                    has_char = True
+                    delimiter = character
+                    if raw_line is not None:
+                        raw_line.extend(character)
+                if delimiter == b"\n" or not character:
+                    break
+            if raw_line is not None:
+                yield next(csv.reader([bytes(raw_line).decode("utf-8").rstrip("\r\n")]))
+            record_number += 1
+
+
 def _signal_density(catalog: pd.DataFrame, clock: pd.Series) -> pd.Series:
     """Count distinct V1/V6 base assets with a raw launch in the preceding hour."""
     raw = COMPARE_EXP / "results/replay_two_year_20260912_v3/streams"
@@ -448,9 +551,10 @@ def _background_returns(panel: pd.DataFrame, catalog: pd.DataFrame) -> pd.DataFr
 def _base_deduplicated_trades(catalog: pd.DataFrame) -> pd.DataFrame:
     """Read only development-closed trades from variant-block ledgers.
 
-    A potential trade extending beyond the development boundary is never parsed
-    as an outcome row: its ``exit_time`` is prefix-read first and the full row
-    is skipped.  This protects the holdout from the final two-year ledger.
+    The first pass reads only variant, entry, and exit timestamp scalars.  The
+    second pass materializes CSV records only for rows whose entry and exit are
+    both in development, so a cross-boundary row cannot materialize outcome
+    fields that appear before ``exit_time`` in the frozen schema.
     """
     root = COMPARE_EXP / "results/replay_two_year_20260912_v3/streams"
     available = {(row.venue, row.symbol) for row in catalog.itertuples(index=False)}
@@ -461,15 +565,15 @@ def _base_deduplicated_trades(catalog: pd.DataFrame) -> pd.DataFrame:
         path = folder / "trades.csv.gz"
         if not path.is_file():
             continue
-        for header, values in _variant_block_rows(
-            path, monotonic_field="entry_time", bounded_fields=("entry_time", "exit_time"), cutoff=DEVELOPMENT_END,
-        ):
-            if not required.issubset(header):
-                raise ValueError(f"stream schema changed: {path}")
+        header, selected = _variant_block_safe_record_numbers(
+            path, monotonic_field="entry_time", bounded_fields=("entry_time", "exit_time"),
+            start=DEVELOPMENT_START, cutoff=DEVELOPMENT_END,
+        )
+        if not required.issubset(header):
+            raise ValueError(f"stream schema changed: {path}")
+        for values in _selected_csv_rows(path, expected_header=header, selected=selected):
             item = dict(zip(header, values))
             entry, exit_time = _utc(item["entry_time"]), _utc(item["exit_time"])
-            if entry < DEVELOPMENT_START:
-                continue
             if item["variant"] not in VARIANTS or (item["venue"], item["symbol"]) not in available:
                 continue
             item["entry_time"] = entry
@@ -610,7 +714,7 @@ def write_report(report: Path, output: Path, catalog: pd.DataFrame, summary: pd.
 
 ## 范围与复现
 
-- 开发窗口：`2024-09-10T00:00:00Z` 至 `2025-09-10T00:00:00Z`（右端排除）。更正后的构建逐个流按时间前缀停止，未将边界后 OHLCV、信号或结果行放入数据表。
+- 开发窗口：`2024-09-10T00:00:00Z` 至 `2025-09-10T00:00:00Z`（右端排除）。OHLCV 按全局时间前缀读取；按 variant 连续块拼接的信号与交易账本则扫描至 EOF、逐块检查单调性。交易账本首遍只读取 variant/entry/exit 标量与安全行号，第二遍仅物化 entry 和 exit 均在开发期的行；边界后 OHLCV、信号或结果 payload 均未进入数据表。
 - 交易结果：逐流读取冻结 common-execution `trades.csv.gz` 的 V1 common execution long 与 V7 BB long；只保留入场与退出均在开发期的已实现行，不把跨开发边界的最终 P&L 作为开发结果。
 - 市场横截面：{len(catalog)} 个有冻结 30m OHLCV 的已评估底层资产，按 Binance、OKX 的固定优先级再按底层币种去重；1000/1000000 面额前缀在去重时还原。Gate direct 文件存在，但 30m 收据为 71 个 partial、0 个 complete，且无开发期覆盖，故 Gate 的广度上下文与对应候选均明确排除，未用网络或其他交易所补齐。
 - 指标：上涨参与率、SMA20 与 EMA20 双站上、联合广度、30/60m 联合广度变化、过去 1h 的 V1/V6 不同币启动密度、RV>1 且 TR/前20根 ATR>1、横截面 30m 收益中位/IQR、BTC/ETH 30m 背景。密度是严格 `(T-60m,T]`，包含信号自身；联合广度加速度同时附带分母变化标记，分母变化时只作描述。所有指标只用收盘 K 线及之前数据。
@@ -676,7 +780,10 @@ def run(output: Path, report: Path) -> None:
         "post_development_data_handling": {
             "post_cutoff_payload_materialized": False,
             "post_cutoff_payload_parsed": False,
-            "cutoff_check": "Only the cutoff timestamp field is decoded for the first boundary row.",
+            "cutoff_check": (
+                "Variant-block ledgers scan only variant plus bounded timestamp scalars through EOF; "
+                "trades use a scalar-only first pass and materialize CSV records only for development-safe row numbers."
+            ),
             "compressed_byte_read_boundary": "Not asserted: gzip may buffer or read ahead internally.",
         },
         "base_assets": len(catalog), "base_dedup_order": ["binance", "okx"],

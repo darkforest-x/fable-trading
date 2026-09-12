@@ -144,21 +144,31 @@ def test_variant_block_trade_reader_skips_cross_cutoff_outcome_poison_and_keeps_
     root = tmp_path / "results/replay_two_year_20260912_v3/streams/stream-a"
     root.mkdir(parents=True)
     header = [
-        "signal_bar_open", "entry_time", "entry_price", "side", "initial_risk", "mfe_r", "exit_time", "net_r",
-        "censored", "variant", "venue", "symbol", "asset", "timeframe_min", "segment",
+        "signal_i", "signal_bar_open", "entry_i", "entry_time", "side", "entry_price", "initial_stop",
+        "initial_risk", "initial_risk_frac", "protection", "mfe_r", "trail_armed", "exit_i", "exit_time",
+        "exit_price", "exit_reason", "gross_return", "net_return", "gross_r", "net_r", "censored",
+        "exit_time_precision", "account_equity_before", "account_equity_after", "variant", "venue", "symbol",
+        "asset", "timeframe_min", "segment", "source_sha256",
     ]
 
-    def row(*, variant: str, entry: str, exit_time: str, net_r: bytes) -> bytes:
+    def row(*, variant: str, entry: str, exit_time: str, mfe_r: bytes, net_r: bytes) -> bytes:
         values = [
-            entry, entry, "100", "1", "2", "3", exit_time, net_r, "False", variant,
-            "binance", "BTCUSDT", "BTC", "60", "development",
+            "1", entry, "2", entry, "1", "100", "98", "2", ".02", "none", mfe_r, "False", "3", exit_time,
+            "101", "end", ".01", ".009", ".5", net_r, "False", "bar", "1000", "1009", variant,
+            "binance", "BTCUSDT", "BTC", "60", "development", "source",
         ]
         return b",".join(value if isinstance(value, bytes) else value.encode() for value in values) + b"\n"
 
     (root / "trades.csv.gz").write_bytes(gzip.compress(
         ",".join(header).encode() + b"\n"
-        + row(variant="v1_common_execution_long", entry="2025-09-09T23:00:00+00:00", exit_time="2025-09-10T00:00:00+00:00", net_r=b"\xff")
-        + row(variant="v7_bb_long", entry="2025-09-09T22:00:00+00:00", exit_time="2025-09-09T23:00:00+00:00", net_r=b"1.5")
+        + row(
+            variant="v1_common_execution_long", entry="2025-09-09T23:00:00+00:00",
+            exit_time="2025-09-10T00:00:00+00:00", mfe_r=b"\xff", net_r=b"\xff",
+        )
+        + row(
+            variant="v7_bb_long", entry="2025-09-09T22:00:00+00:00",
+            exit_time="2025-09-09T23:00:00+00:00", mfe_r=b"3", net_r=b"1.5",
+        )
     ))
     monkeypatch.setattr(study, "COMPARE_EXP", tmp_path)
     catalog = pd.DataFrame([{"venue": "binance", "symbol": "BTCUSDT", "base_asset": "BTC"}])
