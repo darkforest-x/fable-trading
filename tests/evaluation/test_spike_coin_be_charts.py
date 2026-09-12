@@ -11,7 +11,7 @@ def test_chart_tradingview_link_keeps_the_source_venue_and_interval() -> None:
 
 def test_chart_template_keeps_r_level_labels_and_imacd_zero_line() -> None:
     page = html([])
-    assert "...r.r_levels.map(x=>[x.label,x.price])" in page
+    assert "...r.r_levels.map(x=>[x.label,displayPrice(x.price)])" in page
     assert "value:0" in page
 
 
