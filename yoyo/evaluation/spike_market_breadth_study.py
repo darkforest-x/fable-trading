@@ -208,6 +208,13 @@ def build_market_panel(catalog: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, s
             .reset_index(drop=True), prefix_digests)
 
 
+def development_asof_clock() -> pd.Series:
+    """Return the exact development as-of clock used by the final breadth panel."""
+    return pd.Series(pd.date_range(
+        DEVELOPMENT_START, DEVELOPMENT_END - pd.Timedelta(minutes=30), freq="30min", tz="UTC",
+    ))
+
+
 def _prefix_field(line: str, field_index: int) -> str:
     """Read one unquoted field without constructing later CSV outcome fields.
 
@@ -287,6 +294,93 @@ def _prefix_rows(path: Path, *, cutoff_field: str, cutoff: pd.Timestamp,
             yield header, next(csv.reader([raw_line.decode("utf-8").rstrip("\r\n")]))
 
 
+def _variant_block_rows(path: Path, *, monotonic_field: str, bounded_fields: tuple[str, ...],
+                        cutoff: pd.Timestamp) -> Iterable[tuple[list[str], list[str]]]:
+    """Yield rows whose bounded fields precede ``cutoff`` in variant blocks.
+
+    The comparison ledgers are concatenated by variant: their timestamps are
+    increasing *within* a block, but a later variant starts again in the
+    development period.  This reader therefore scans through EOF, resets the
+    monotonic check when ``variant`` changes, and rejects a variant that
+    reappears after its block ended.  It decodes only ``variant`` and the
+    requested timestamp scalars before deciding whether a row is eligible.
+
+    A row with any bounded timestamp at or after the cutoff is discarded
+    without buffering its remaining payload or giving it to ``csv.reader``.
+    Gzip may physically prefetch compressed bytes; this is a logical-record
+    boundary only.
+    """
+    with gzip.open(path, "rb") as stream:
+        header_bytes = stream.readline()
+        header = next(csv.reader([header_bytes.decode("utf-8").rstrip("\r\n")]))
+        required = {"variant", monotonic_field, *bounded_fields}
+        if missing := required.difference(header):
+            raise ValueError(f"frozen stream lacks required fields {sorted(missing)}: {path}")
+        indices = {name: header.index(name) for name in required}
+        scalar_indices = set(indices.values())
+        current_variant: str | None = None
+        closed_variants: set[str] = set()
+        previous: pd.Timestamp | None = None
+        while True:
+            raw_line = bytearray()
+            scalars: dict[str, bytes] = {}
+            field = bytearray()
+            field_number = 0
+            include: bool | None = None
+            has_char = False
+            while True:
+                character = stream.read(1)
+                if not character:
+                    if not has_char:
+                        return
+                    delimiter = b"\n"
+                else:
+                    has_char = True
+                    delimiter = character
+                    if include is not False:
+                        raw_line.extend(character)
+                if field_number in scalar_indices and delimiter not in (b",", b"\n"):
+                    field.extend(delimiter)
+                if field_number in scalar_indices and delimiter in (b",", b"\n"):
+                    for name, index in indices.items():
+                        if index == field_number:
+                            scalars[name] = bytes(field)
+                            break
+                if delimiter == b",":
+                    field_number += 1
+                    field.clear()
+                if include is None and len(scalars) == len(indices):
+                    variant = scalars["variant"].decode("utf-8")
+                    if not variant:
+                        raise ValueError(f"empty variant prevents safe block read: {path}")
+                    if variant != current_variant:
+                        if current_variant is not None:
+                            closed_variants.add(current_variant)
+                        if variant in closed_variants:
+                            raise ValueError(f"variant block reappears after ending: {variant} in {path}")
+                        current_variant, previous = variant, None
+                    stamp = _utc(scalars[monotonic_field].decode("utf-8").rstrip("\r"))
+                    if pd.isna(stamp):
+                        raise ValueError(f"missing {monotonic_field} prevents safe block read: {path}")
+                    if previous is not None and stamp < previous:
+                        raise ValueError(
+                            f"non-monotonic {monotonic_field} within variant {variant} prevents safe read: {path}"
+                        )
+                    previous = stamp
+                    bounded = [_utc(scalars[name].decode("utf-8").rstrip("\r")) for name in bounded_fields]
+                    if any(pd.isna(value) for value in bounded):
+                        raise ValueError(f"missing bounded timestamp prevents safe block read: {path}")
+                    include = all(value < cutoff for value in bounded)
+                    if not include:
+                        raw_line.clear()
+                if delimiter == b"\n" or not character:
+                    break
+            if include is None:
+                raise ValueError(f"malformed frozen CSV row before required scalars: {path}")
+            if include:
+                yield header, next(csv.reader([bytes(raw_line).decode("utf-8").rstrip("\r\n")]))
+
+
 def _signal_density(catalog: pd.DataFrame, clock: pd.Series) -> pd.Series:
     """Count distinct V1/V6 base assets with a raw launch in the preceding hour."""
     raw = COMPARE_EXP / "results/replay_two_year_20260912_v3/streams"
@@ -299,7 +393,9 @@ def _signal_density(catalog: pd.DataFrame, clock: pd.Series) -> pd.Series:
         path = folder / "signals.csv.gz"
         if not path.is_file():
             continue
-        for header, values in _prefix_rows(path, cutoff_field="signal_confirm_time", cutoff=DEVELOPMENT_END):
+        for header, values in _variant_block_rows(
+            path, monotonic_field="signal_confirm_time", bounded_fields=("signal_confirm_time",), cutoff=DEVELOPMENT_END,
+        ):
             row = dict(zip(header, values))
             stamp = _utc(row["signal_confirm_time"])
             if (row.get("variant") not in {"v1_common_execution_long", "v6_unfiltered_long", "v6_unfiltered_both"}
@@ -350,7 +446,7 @@ def _background_returns(panel: pd.DataFrame, catalog: pd.DataFrame) -> pd.DataFr
 
 
 def _base_deduplicated_trades(catalog: pd.DataFrame) -> pd.DataFrame:
-    """Read only closed development prefixes from chronological per-stream ledgers.
+    """Read only development-closed trades from variant-block ledgers.
 
     A potential trade extending beyond the development boundary is never parsed
     as an outcome row: its ``exit_time`` is prefix-read first and the full row
@@ -365,37 +461,23 @@ def _base_deduplicated_trades(catalog: pd.DataFrame) -> pd.DataFrame:
         path = folder / "trades.csv.gz"
         if not path.is_file():
             continue
-        # First, use only entry time for chronological cutoff.  For an in-window
-        # entry, inspect exit time without parsing return fields; a later close is
-        # boundary-censored and never enters the outcome table.
-        with gzip.open(path, "rt", encoding="utf-8", newline="") as stream:
-            header = next(csv.reader([stream.readline().rstrip("\n")]))
+        for header, values in _variant_block_rows(
+            path, monotonic_field="entry_time", bounded_fields=("entry_time", "exit_time"), cutoff=DEVELOPMENT_END,
+        ):
             if not required.issubset(header):
                 raise ValueError(f"stream schema changed: {path}")
-            entry_index, exit_index = header.index("entry_time"), header.index("exit_time")
-            previous: pd.Timestamp | None = None
-            for line in stream:
-                trimmed = line.rstrip("\n")
-                entry = _utc(_prefix_field(trimmed, entry_index))
-                if previous is not None and entry < previous:
-                    raise ValueError(f"non-monotonic entry_time prevents safe prefix read: {path}")
-                previous = entry
-                if entry >= DEVELOPMENT_END:
-                    break
-                if entry < DEVELOPMENT_START:
-                    continue
-                exit_time = _utc(_prefix_field(trimmed, exit_index))
-                if exit_time >= DEVELOPMENT_END:
-                    continue
-                item = dict(zip(header, next(csv.reader([line]))))
-                if item["variant"] not in VARIANTS or (item["venue"], item["symbol"]) not in available:
-                    continue
-                item["entry_time"] = entry
-                item["exit_time"] = exit_time
-                item["signal_bar_open"] = _utc(item["signal_bar_open"])
-                item["base_asset"] = canonical_asset(item["asset"])
-                item["venue_rank"] = VENUE_ORDER[item["venue"]]
-                rows.append(item)
+            item = dict(zip(header, values))
+            entry, exit_time = _utc(item["entry_time"]), _utc(item["exit_time"])
+            if entry < DEVELOPMENT_START:
+                continue
+            if item["variant"] not in VARIANTS or (item["venue"], item["symbol"]) not in available:
+                continue
+            item["entry_time"] = entry
+            item["exit_time"] = exit_time
+            item["signal_bar_open"] = _utc(item["signal_bar_open"])
+            item["base_asset"] = canonical_asset(item["asset"])
+            item["venue_rank"] = VENUE_ORDER[item["venue"]]
+            rows.append(item)
     trade = pd.DataFrame(rows)
     if trade.empty:
         raise ValueError("no safely bounded development trades")
@@ -564,13 +646,20 @@ def run(output: Path, report: Path) -> None:
     results = output / "results"
     results.mkdir(parents=True)
     catalog = _source_catalog()
+    # Validate every variant-block ledger before spending time on the frozen
+    # market panel.  The clock must match the final panel exactly before its
+    # preflight density can be attached.
+    trades = _base_deduplicated_trades(catalog)
+    asof_clock = development_asof_clock()
+    density = _signal_density(catalog, asof_clock)
     panel, prefix_digests = build_market_panel(catalog)
     catalog["actual_development_prefix_sha256"] = catalog.source_path.map(prefix_digests)
     if catalog.actual_development_prefix_sha256.isna().any():
         raise ValueError("development-prefix digest missing from breadth panel input")
+    if not pd.DatetimeIndex(panel.asof).equals(pd.DatetimeIndex(asof_clock)):
+        raise ValueError("preflight signal-density clock differs from breadth panel as-of clock")
     panel = _background_returns(panel, catalog)
-    panel["launch_density_1h"] = _signal_density(catalog, panel.asof)
-    trades = _base_deduplicated_trades(catalog)
+    panel["launch_density_1h"] = density.to_numpy()
     context = attach_context(trades, panel)
     context["mae_r_exit_bar_window_approx"] = _mae_r(context, catalog)
     summary, slices, rule = outcome_tables(context)

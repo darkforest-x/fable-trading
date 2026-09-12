@@ -7,9 +7,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
+import yoyo.evaluation.spike_market_breadth_study as study
 from yoyo.evaluation.spike_market_breadth_study import (
-    _load_bars, _prefix_rows, attach_context, canonical_asset, causal_asset_features, complete_aggregate_30m,
-    launch_density_from_events, summarize_slice,
+    _base_deduplicated_trades, _load_bars, _prefix_rows, _variant_block_rows, attach_context, canonical_asset,
+    causal_asset_features, complete_aggregate_30m, development_asof_clock, launch_density_from_events, summarize_slice,
 )
 
 
@@ -91,6 +92,85 @@ def test_development_prefix_digest_ignores_boundary_and_future_rows(tmp_path):
     second_bars, second_digest = load_digest(prefix + second_future)
     pd.testing.assert_frame_equal(first_bars, second_bars)
     assert first_digest == second_digest == hashlib.sha256(prefix).hexdigest()
+
+
+def test_variant_block_reader_keeps_later_development_block_without_decoding_future_payload(tmp_path):
+    path = tmp_path / "signals.csv.gz"
+    path.write_bytes(gzip.compress(
+        b"signal_confirm_time,variant,payload\n"
+        b"2025-09-09T23:30:00+00:00,A,kept-a\n"
+        b"2025-09-10T00:00:00+00:00,A,\xff\n"
+        b"2025-09-09T23:30:00+00:00,B,kept-b\n"
+    ))
+    rows = list(_variant_block_rows(
+        path, monotonic_field="signal_confirm_time", bounded_fields=("signal_confirm_time",),
+        cutoff=pd.Timestamp("2025-09-10T00:00:00Z"),
+    ))
+    assert [values for _, values in rows] == [
+        ["2025-09-09T23:30:00+00:00", "A", "kept-a"],
+        ["2025-09-09T23:30:00+00:00", "B", "kept-b"],
+    ]
+
+
+@pytest.mark.parametrize(
+    "payload, expected",
+    [
+        (
+            b"signal_confirm_time,variant,payload\n"
+            b"2025-09-09T23:30:00+00:00,A,x\n"
+            b"2025-09-09T23:30:00+00:00,B,x\n"
+            b"2025-09-09T23:30:00+00:00,A,x\n",
+            "variant block reappears",
+        ),
+        (
+            b"signal_confirm_time,variant,payload\n"
+            b"2025-09-09T23:30:00+00:00,A,x\n"
+            b"2025-09-09T23:00:00+00:00,A,x\n",
+            "non-monotonic signal_confirm_time within variant A",
+        ),
+    ],
+)
+def test_variant_block_reader_rejects_reappearance_and_intra_block_reversal(tmp_path, payload, expected):
+    path = tmp_path / "signals.csv.gz"
+    path.write_bytes(gzip.compress(payload))
+    with pytest.raises(ValueError, match=expected):
+        list(_variant_block_rows(
+            path, monotonic_field="signal_confirm_time", bounded_fields=("signal_confirm_time",),
+            cutoff=pd.Timestamp("2025-09-10T00:00:00Z"),
+        ))
+
+
+def test_variant_block_trade_reader_skips_cross_cutoff_outcome_poison_and_keeps_later_variant(tmp_path, monkeypatch):
+    root = tmp_path / "results/replay_two_year_20260912_v3/streams/stream-a"
+    root.mkdir(parents=True)
+    header = [
+        "signal_bar_open", "entry_time", "entry_price", "side", "initial_risk", "mfe_r", "exit_time", "net_r",
+        "censored", "variant", "venue", "symbol", "asset", "timeframe_min", "segment",
+    ]
+
+    def row(*, variant: str, entry: str, exit_time: str, net_r: bytes) -> bytes:
+        values = [
+            entry, entry, "100", "1", "2", "3", exit_time, net_r, "False", variant,
+            "binance", "BTCUSDT", "BTC", "60", "development",
+        ]
+        return b",".join(value if isinstance(value, bytes) else value.encode() for value in values) + b"\n"
+
+    (root / "trades.csv.gz").write_bytes(gzip.compress(
+        ",".join(header).encode() + b"\n"
+        + row(variant="v1_common_execution_long", entry="2025-09-09T23:00:00+00:00", exit_time="2025-09-10T00:00:00+00:00", net_r=b"\xff")
+        + row(variant="v7_bb_long", entry="2025-09-09T22:00:00+00:00", exit_time="2025-09-09T23:00:00+00:00", net_r=b"1.5")
+    ))
+    monkeypatch.setattr(study, "COMPARE_EXP", tmp_path)
+    catalog = pd.DataFrame([{"venue": "binance", "symbol": "BTCUSDT", "base_asset": "BTC"}])
+    trades = _base_deduplicated_trades(catalog)
+    assert trades[["variant", "net_r"]].to_dict("records") == [{"variant": "v7_bb_long", "net_r": 1.5}]
+
+
+def test_preflight_asof_clock_matches_final_panel_contract():
+    clock = development_asof_clock()
+    assert clock.iloc[0] == study.DEVELOPMENT_START
+    assert clock.iloc[-1] == study.DEVELOPMENT_END - pd.Timedelta(minutes=30)
+    assert len(clock) == int((study.DEVELOPMENT_END - study.DEVELOPMENT_START) / pd.Timedelta(minutes=30))
 
 
 def test_density_uses_strict_hour_and_includes_current_signal():
