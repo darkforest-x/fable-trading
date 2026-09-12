@@ -20,6 +20,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE_EXP = ROOT / "experiments/active/exp-spike-exit-policy-20260912-v1"
 FIXED_ASSETS = ("BTC", "ETH", "SOL", "ZEC", "PEPE", "WIF", "TAO", "SOPH", "USELESS", "BICO", "DOGE", "SUI")
+ASSET_ALIASES = {"PEPE": ("PEPE", "1000PEPE")}
 COHORTS = ("v1_common_long", "v6_both", "v7_both")
 POLICIES = ("baseline", "be1_price", "be1_cost")
 
@@ -126,46 +127,52 @@ def same_entry_pairs(trades: pd.DataFrame) -> pd.DataFrame:
     return pd.concat(pieces, ignore_index=True)
 
 
-def choose_cases(pairs: pd.DataFrame, limit: int = 10) -> pd.DataFrame:
-    """Choose deterministic explanatory cases, covering outcomes rather than winners."""
+def choose_cases(pairs: pd.DataFrame, limit: int = 12) -> pd.DataFrame:
+    """Choose a balanced, fixed-asset explanatory set rather than a winner reel."""
     scored = pairs.loc[pairs.same_entry & pairs.comparison_policy.eq("be1_price")].copy()
+    scored["asset_group"] = scored.asset.replace({alias: group for group, aliases in ASSET_ALIASES.items() for alias in aliases})
+    entry = pd.to_datetime(scored.entry_time, utc=True)
+    scored["case_period"] = entry.ge("2025-09-10T00:00:00Z").map({True: "validation", False: "development"})
+    scored["both_ge_10r"] = scored.baseline_net_r.ge(10) & scored.be1_price_net_r.ge(10)
+    scored["be_failure"] = scored.baseline_net_r.lt(0) & scored.net_r_delta.le(0)
     named = ["BTC", "ETH", "SOL", "ZEC", "PEPE", "WIF", "TAO"]
     examples = ["SOPH", "USELESS", "BICO", "DOGE", "SUI"]
     selected: list[pd.Series] = []
-    categories = {
-        "baseline_large_winner": lambda frame: frame.baseline_net_r.gt(0),
+    requested_kinds = {
+        "BTC": "be_reduced_loss", "ETH": "be_failure", "SOL": "be_reduced_loss", "ZEC": "both_ge_10r",
+        "PEPE": "be_failure", "WIF": "be_early_trend_exit", "TAO": "be_early_trend_exit",
+        "SOPH": "be_failure", "USELESS": "both_ge_10r", "BICO": "both_ge_10r", "DOGE": "be_early_trend_exit", "SUI": "be_failure",
+    }
+    predicates = {
+        "both_ge_10r": lambda frame: frame.both_ge_10r,
         "be_reduced_loss": lambda frame: frame.be_reduced_loss,
         "be_early_trend_exit": lambda frame: frame.be_cut_trend,
-        "baseline_loss": lambda frame: frame.baseline_net_r.lt(0),
+        "be_failure": lambda frame: frame.be_failure,
     }
     used: set[str] = set()
     def add(row: pd.Series, kind: str) -> bool:
         if str(row.baseline_trade_id) in used or len(selected) >= limit: return False
         copy = row.copy(); copy["case_kind"] = kind; selected.append(copy); used.add(str(copy.baseline_trade_id)); return True
-    # The first seven cases deliberately represent the coins named for review,
-    # independent of return.  Their category only describes what happened.
-    for asset in named:
-        hit = scored.loc[scored.asset.eq(asset)].assign(abs_delta=lambda x: x.net_r_delta.abs()).sort_values("abs_delta", ascending=False)
-        if len(hit):
-            row = hit.iloc[0]
-            kind = next((name for name, predicate in categories.items() if bool(predicate(pd.DataFrame([row])).iloc[0])), "paired_difference")
-            add(row, kind)
-    # Make success, failure, loss-reduction and prematurely cut trends visible.
-    for category, predicate in categories.items():
-        if any(row.case_kind == category for row in selected): continue
-        hit = scored.loc[predicate(scored)].assign(abs_delta=lambda x: x.net_r_delta.abs()).sort_values("abs_delta", ascending=False)
-        for _, row in hit.iterrows():
-            if add(row, category): break
-    # Historical examples are fixed additions, not return-selected substitutes.
-    for asset in examples:
-        hit = scored.loc[scored.asset.eq(asset)].assign(abs_delta=lambda x: x.net_r_delta.abs()).sort_values("abs_delta", ascending=False)
-        if len(hit): add(hit.iloc[0], "fixed_historical_example")
-    remaining = scored.assign(abs_delta=scored.net_r_delta.abs()).sort_values("abs_delta", ascending=False)
-    for _, row in remaining.iterrows():
-        if len(selected) >= limit: break
-        if str(row.baseline_trade_id) not in used:
-            row = row.copy(); row["case_kind"] = "paired_difference"; selected.append(row); used.add(str(row.baseline_trade_id))
+    def choose(asset: str, kind: str) -> None:
+        candidates = scored.loc[scored.asset_group.eq(asset) & predicates[kind](scored)].copy()
+        # 1H validation is preferred only among cases that satisfy the fixed
+        # explanatory category; it is not a return-ranking selection rule.
+        candidates["period_rank"] = candidates.case_period.ne("validation").astype(int)
+        candidates["timeframe_rank"] = candidates.timeframe_min.ne(60).astype(int)
+        candidates["magnitude"] = candidates.net_r_delta.abs()
+        candidates = candidates.sort_values(["period_rank", "timeframe_rank", "magnitude"], ascending=[True, True, False])
+        if len(candidates): add(candidates.iloc[0], kind)
+    for asset in named + examples:
+        choose(asset, requested_kinds[asset])
+    # A missing requested category is explicit, but a matching other asset may
+    # fill the display quota only after every fixed asset was attempted.
+    for kind, predicate in predicates.items():
+        if any(row.case_kind == kind for row in selected): continue
+        candidates = scored.loc[predicate(scored)].assign(magnitude=lambda x: x.net_r_delta.abs()).sort_values("magnitude", ascending=False)
+        for _, row in candidates.iterrows():
+            if add(row, kind): break
     result = pd.DataFrame(selected).reset_index(drop=True)
+    if len(result): result["selection_scope"] = "posthoc_explanatory_case_not_success_rate_estimate"
     if len(result): result.insert(0, "case_id", [f"case-{index:02d}" for index in range(1, len(result) + 1)])
     return result
 
@@ -175,19 +182,26 @@ def build(source: Path, output: Path, assets: Iterable[str] = FIXED_ASSETS) -> d
     verified = verify_inputs(source)
     config, summary = verified["config"], verified["stream_summary"]
     selected_assets = tuple(dict.fromkeys(str(asset).upper() for asset in assets))
-    stream_rows = summary.loc[summary.asset.isin(selected_assets)].copy()
+    actual_assets = tuple(dict.fromkeys(alias for asset in selected_assets for alias in ASSET_ALIASES.get(asset, (asset,))))
+    group_map = {alias: group for group, aliases in ASSET_ALIASES.items() for alias in aliases}
+    stream_rows = summary.loc[summary.asset.isin(actual_assets)].copy()
+    stream_rows["asset_group"] = stream_rows.asset.map(group_map).fillna(stream_rows.asset)
     stream_rows.to_csv(output / "statistics/selected_streams.csv", index=False)
     keys = set(stream_rows.stream_key)
     events = pd.read_csv(source / "post_full_v1/stream_event_rows.csv.gz")
     events = events.loc[events.stream_key.isin(keys) & events.cohort.isin(COHORTS) & events.policy.isin(POLICIES)].copy()
+    events["asset_group"] = events.asset.map(group_map).fillna(events.asset)
     events = event_metrics(events)
     events.to_csv(output / "statistics/coin_event_detail_all_venues.csv", index=False)
     okx = events.loc[events.venue.eq("okx")].copy()
     okx.to_csv(output / "statistics/coin_event_detail_okx.csv", index=False)
     accounts = read_selected_accounts(source / "post_full_v1/independent_account_rows.csv.gz", keys)
+    accounts["asset_group"] = accounts.asset.map(group_map).fillna(accounts.asset)
     accounts.to_csv(output / "statistics/coin_independent_accounts_all_venues.csv", index=False)
     accounts.loc[accounts.venue.eq("okx")].to_csv(output / "statistics/coin_independent_accounts_okx.csv", index=False)
     trades, fills = _read_stream_trades(source / "engine_results/full_v1", keys)
+    trades["asset_group"] = trades.asset.map(group_map).fillna(trades.asset)
+    fills["asset_group"] = fills.asset.map(group_map).fillna(fills.asset)
     trades.to_csv(output / "statistics/coin_trade_ledger.csv.gz", index=False, compression={"method": "gzip", "mtime": 0})
     fills.to_csv(output / "statistics/coin_fill_ledger.csv.gz", index=False, compression={"method": "gzip", "mtime": 0})
     pairs = same_entry_pairs(trades)
@@ -196,9 +210,9 @@ def build(source: Path, output: Path, assets: Iterable[str] = FIXED_ASSETS) -> d
     clean_cases = cases.astype(object).where(pd.notna(cases), None).to_dict("records")
     (output / "case_manifest.json").write_text(json.dumps({"schema_version": 1, "source": str(source), "assets": selected_assets,
         "cases": clean_cases}, indent=2, default=str, allow_nan=False) + "\n")
-    missing = sorted(set(selected_assets) - set(summary.asset))
+    missing = sorted(set(selected_assets) - set(stream_rows.asset_group))
     receipt = {"source_config_sha256": sha256(source / "config.json"), "raw_manifest_sha256": config["raw_manifest_sha256"],
-               "post_manifest_sha256": sha256(source / "post_full_v1/post_manifest.json"), "selected_assets": selected_assets,
+               "post_manifest_sha256": sha256(source / "post_full_v1/post_manifest.json"), "requested_assets": selected_assets, "actual_assets": actual_assets,
                "missing_assets": missing, "selected_streams": int(len(stream_rows)), "event_rows": int(len(events)),
                "account_rows": int(len(accounts)), "trade_rows": int(len(trades)), "fill_rows": int(len(fills)),
                "pair_rows": int(len(pairs)), "case_rows": int(len(cases))}
