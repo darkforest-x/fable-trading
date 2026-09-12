@@ -205,8 +205,10 @@ def build(raw: Path, post: Path, figures: Path, report: Path, delivery_dir: Path
         f"### {title}完整拆分\n\n{_markdown_table(table, columns)}"
         for title, table, columns in details
     )
-    figure_markdown = "\n".join(
-        f"- [{item['figure']}]({_relative(figures / item['figure'], report.parent)})：{item['selection']}；"
+    figure_markdown = "\n\n".join(
+        f"![{item['selection']}：{item['venue']} {item['symbol']} {item['timeframe_min']}m]"
+        f"({_relative(figures / item['figure'], report.parent)})\n\n"
+        f"[{item['figure']}]({_relative(figures / item['figure'], report.parent)})：{item['selection']}；"
         f"{item['venue']} {item['symbol']} {item['timeframe_min']}m，"
         f"{'多' if int(item['side']) == 1 else '空'}，仅供事后审阅，含未来 K 线。"
         for item in figure_rows
