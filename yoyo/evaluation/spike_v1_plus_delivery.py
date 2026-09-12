@@ -12,10 +12,29 @@ import json
 from pathlib import Path
 
 import pandas as pd
+import numpy as np
 
 from yoyo.evaluation.spike_v1_plus_report import EXP, BASELINE, PLUS
 
 ROOT=Path(__file__).resolve().parents[2]
+
+
+def return_benchmark(pairs):
+    """Use existing unit-notional outcomes; no new signal, exit or sample selection."""
+    rows=[]
+    for (cohort,minutes,period), group in pairs.groupby(["cohort","timeframe_min","period"]):
+        ok=group.loc[group.matched.eq(True)].copy()
+        ok["difference"]=ok.target_net_return-ok.control_net_return
+        blocks=ok.groupby("month").difference.mean().to_numpy()
+        p=np.nan
+        if len(blocks)>=3:
+            null=(np.random.default_rng(20260912).choice([-1.,1.],size=(9999,len(blocks)))*blocks).mean(axis=1)
+            p=float((np.sum(np.abs(null)>=abs(blocks.mean()))+1)/10000)
+        rows.append(dict(cohort=cohort,timeframe_min=minutes,period=period,targets=len(group),matched=len(ok),
+            month_blocks=len(blocks),mean_target_net_return=ok.target_net_return.mean(),
+            mean_control_net_return=ok.control_net_return.mean(),equal_month_difference=blocks.mean() if len(blocks) else np.nan,
+            exploratory_sign_flip_p=p))
+    return pd.DataFrame(rows)
 
 
 def table(frame, columns, percentages=()):
@@ -48,7 +67,8 @@ def deliver(post:Path, engine:Path):
     read=lambda name:pd.read_csv(post/name)
     events=read("event_summary.csv"); accounts=read("account_summary.csv")
     signals=read("signal_summary.csv"); pairs=read("same_entry_pairs.csv.gz"); trades=read("trades.csv.gz")
-    individual=read("independent_accounts.csv"); controls=read("matched_benchmark_summary.csv")
+    individual=read("independent_accounts.csv"); controls=return_benchmark(read("matched_benchmark.csv.gz"))
+    controls.to_csv(post/"benchmark_return_summary.csv",index=False)
     concentration=read("concentration.csv")
     full=events.loc[events.period.eq("full") & events.side_group.eq("both")]
     base_entries=int(full.loc[full.cohort.eq(BASELINE),"entries"].sum())
@@ -148,7 +168,11 @@ PF使用逐笔等名义净收益；净R合计不是账户百分比。止损K内�
 都不含原始反向参考退出。因此**这一表独立于上面的完整策略收益**，不是账户随机组合。
 未解决边界和无效风险匹配明确保留在明细，p值按月份块翻转，仅作探索；不能把跨所重复当独立试验。
 
-{table(controls,{"period":"期间","timeframe_min":"分钟","cohort":"版本","targets":"抽样目标","matched":"成功匹配","month_blocks":"月份块","mean_target_net_r":"目标平均净R","mean_control_net_r":"随机平均净R","equal_month_difference":"等月净R差","exploratory_sign_flip_p":"探索性p"})}
+原R对照出现约十亿量级的异常：随机时点开盘与SL几乎重合时，极小实际风险分母会放大成本。
+该R统计不用于结论。以下在**完全相同的匹配样本和退出路径**上展示原有等名义净收益比例，
+没有重选样本或更改止损。切换统计量是看到异常后的诊断修正，仍不是盲样本检验。
+
+{table(controls,{"period":"期间","timeframe_min":"分钟","cohort":"版本","targets":"抽样目标","matched":"成功匹配","month_blocks":"月份块","mean_target_net_return":"目标平均净收益","mean_control_net_return":"随机平均净收益","equal_month_difference":"等月收益差","exploratory_sign_flip_p":"探索性p"},["mean_target_net_return","mean_control_net_return","equal_month_difference"])}
 
 ## 成功与失败的逐笔入口
 
