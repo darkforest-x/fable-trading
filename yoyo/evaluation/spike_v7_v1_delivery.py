@@ -117,6 +117,7 @@ def _account_summary(accounts: pd.DataFrame) -> pd.DataFrame:
                      "closed_balance_return_p90": returns.quantile(.9),
                      "closed_balance_dd_median": drawdowns.median(),
                      "closed_balance_dd_p90": drawdowns.quantile(.9),
+                     "closed_balance_dd_max": drawdowns.max(),
                      "all_noninvalid_streams": len(noninvalid),
                      "all_noninvalid_zero_return_median": all_with_zero_return.median(),
                      "all_noninvalid_zero_return_p90": all_with_zero_return.quantile(.9),
@@ -202,6 +203,7 @@ def build(raw: Path, post: Path, figures: Path, report: Path, delivery_dir: Path
         ("eligible_closed_streams", "中位/P90样本", "int"),
         ("closed_balance_return_median", "余额收益中位", "pct"), ("closed_balance_return_p90", "余额收益P90", "pct"),
         ("closed_balance_dd_median", "余额DD中位", "pct"), ("closed_balance_dd_p90", "余额DD P90", "pct"),
+        ("closed_balance_dd_max", "最差单流余额DD", "pct"),
     ]
     details = [
         ("按年度", yearly, [("timeframe_min", "周期", "int"), ("year_block", "年度段", "text"),
