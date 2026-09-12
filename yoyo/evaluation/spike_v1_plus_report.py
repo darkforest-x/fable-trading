@@ -190,6 +190,15 @@ def run(engine: Path, output: Path) -> None:
         context = load_verified_stream(raw / "streams" / folder.name)
         if receipt["source_sha256"] != context.receipt["source_sha256"]:
             raise ValueError("new replay and account source differ")
+        if float(receipt["tick"]) != float(context.cache["tick"]):
+            raise ValueError(f"frozen price tick differs: {folder.name}")
+        for table in (t, f, s):
+            if len(table):
+                if not table.stream_key.eq(context.key).all():
+                    raise ValueError(f"stream key differs: {folder.name}")
+                for name, value in context.identity.items():
+                    if not table[name].eq(value).all():
+                        raise ValueError(f"stream {name} differs: {folder.name}")
         for variant in (BASELINE, PLUS):
             vt = t.loc[t.cohort.eq(variant)].copy() if len(t) else t.copy()
             vf = f.loc[f.cohort.eq(variant)].copy() if len(f) else f.copy()
