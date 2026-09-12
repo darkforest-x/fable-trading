@@ -8439,3 +8439,14 @@ experiments:
     - spike-v6-bb-squeeze-20260912-charts-receipt
     notes: Owner authorized historical testing; each A/B/C/D configuration first post-cutoff research evaluation, not blind holdout. No retuning after outcomes. Real 15m history, verified next-open engine, 37 tests, independent evidence
       review, complete negative findings and tail-retention disclosure.
+  - experiment_id: exp-spike-v7-v1-compare-20260912-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 04d935b
+    status: active
+    question: Does fixed prior BB200 compression admission improve V7 versus original V1 on the same archived market history?
+    single_variable: V6 to V7 adds only prior run3 compression in12; no expansion or RSI. V1 comparisons separate native rules and common execution, direction and warmup.
+    result: Frozen rule before new pool outcomes; mapping archived V1 coverage and preparing like-for-like replay.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized all historical dates. B was selected after prior eight-market study, so overlap is reused research rather than blind validation. No production monitor or notifications changed.

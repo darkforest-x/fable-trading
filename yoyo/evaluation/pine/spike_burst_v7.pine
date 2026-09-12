@@ -1,5 +1,5 @@
 //@version=6
-// SPIKE V7 BB-visual reference-exit-r2: V4 confirmation is provenance inside a closed-bar structure, with
+// SPIKE V7 BB-admission-r1 reference-exit-r2: V4 confirmation is provenance inside a closed-bar structure, with
 // one causal V1 directional-candle evidence latch during the V6 pending window.
 // A final event belongs to the current close, never to a historical body or
 // legacy confirmation. This prototype is not validated for any deployment.
@@ -45,6 +45,7 @@ color muted = color.new(ink, 40)
 
 // BEGIN V7 BB VISUAL INPUTS
 string gBb = "02 · BB 压缩通道"
+bool useBbFilter = input.bool(true, "仅保留近期持续压缩后的信号", group=gBb, tooltip="信号前12根内须有连续3根带宽处于此前500根最低10%区域。不要求信号当根扩张；原V6反向确认仍可结束已有风险参考。关闭可恢复V6信号。", display=display.none)
 bool showBb = input.bool(true, "显示 BB 压缩通道", group=gBb, display=display.none)
 int bbLength = input.int(200, "SMA 长度", minval=2, group=gBb, display=display.none)
 float bbMult = input.float(2.0, "标准差倍数", minval=0.1, step=0.1, group=gBb, display=display.none)
@@ -105,12 +106,12 @@ bool pricesValid = not na(open) and not na(high) and not na(low) and not na(clos
 bool dataGap = not barstate.isfirst and (time != time_close[1] or not pricesValid or not pricesValid[1])
 
 // BEGIN V7 BB VISUAL CALCULATION
-// Display-only BB200: every threshold value is based on the preceding 500
+// BB200 context: every threshold value is based on the preceding 500
 // widths. The independent contiguous counter suppresses warmup across gaps
-// without changing any V6 segment, signal, or reference state.
+// without changing the upstream V6 structural state machine.
 bool bbDataGap = not barstate.isfirst and (time != time_close[1] or not pricesValid or not pricesValid[1])
 var int bbSegmentBars = 0
-bbSegmentBars := bbDataGap or not pricesValid ? 0 : bbSegmentBars + 1
+bbSegmentBars := not pricesValid ? 0 : bbDataGap ? 1 : bbSegmentBars + 1
 float bbBasis = ta.sma(close, bbLength)
 float bbStdev = ta.stdev(close, bbLength, true)
 float bbUpper = bbBasis + bbMult * bbStdev
@@ -120,6 +121,13 @@ bool bbBandReady = pricesValid and bbSegmentBars >= bbLength and not na(bbBasis)
 float bbPriorWidthP10 = ta.percentile_linear_interpolation(bbWidth[1], 500, 10)
 bool bbReady = bbBandReady and bbSegmentBars >= bbLength + 500 and not na(bbPriorWidthP10)
 bool bbCompressed = bbReady and bbWidth <= bbPriorWidthP10
+// Historical compression may finish before the signal; do not require the
+// current bar to remain narrow or to have a rising bandwidth.
+bool bbAdmissionReady = bbReady and bbSegmentBars >= bbLength + 500 + 12
+bool bbRecentCompression = false
+for bbOffset = 1 to 10
+    bbRecentCompression := bbRecentCompression or (bbCompressed[bbOffset] and bbCompressed[bbOffset + 1] and bbCompressed[bbOffset + 2])
+bool bbEntryAllowed = not useBbFilter or (bbAdmissionReady and bbRecentCompression)
 // END V7 BB VISUAL CALCULATION
 var int segmentIndex = -1
 segmentIndex := dataGap or not pricesValid ? 0 : segmentIndex + 1
@@ -449,6 +457,10 @@ if barstate.isconfirmed
             shortPendingWhy := not shortStructurePending ? "await_legacy" : not shortLaunchEvidence ? "await_launch_evidence" : na(shortBodySupportBar) ? "await_body" : na(md[1]) ? "await_md_turn" : "await_momentum"
 // END V6 SHORT STRUCTURAL GATE
 
+// Keep raw opposite confirmations independent of entry permission.
+int rawSignalSide = confirmedSignal ? 1 : confirmedShortSignal ? -1 : 0
+confirmedSignal := confirmedSignal and bbEntryAllowed
+confirmedShortSignal := confirmedShortSignal and bbEntryAllowed
 int signalSide = confirmedSignal ? 1 : confirmedShortSignal ? -1 : 0
 
 // BEGIN REFERENCE STATE: a qualified opposite close may replace this display.
@@ -509,9 +521,9 @@ if barstate.isconfirmed
                 array.push(exitTags, label.new(bar_index, exitPrice, exitSideText + "保护触及 · 参考结束\n" + str.tostring(exitPrice, format.mintick), style=activeSide == 1 ? label.style_label_down : label.style_label_up, color=color.new(chart.bg_color, 8), textcolor=ink, size=size.small, force_overlay=true))
     // A same-bar stop retains f_path's price/reason, while a separately
     // qualified opposite close may still begin its own valid reference.
-    bool oppositeStopSignal = endedThisBar and exitSide != 0 and signalSide != exitSide
-    if signalSide != 0 and (not endedThisBar or oppositeStopSignal) and signalSide != trendSide
-        [newStop, newRisk, validRisk] = f_risk(signalSide, close, signalSide == 1 ? recentLow : recentHigh, atr, riskFloor, stopBuffer, syminfo.mintick)
+    bool oppositeStopSignal = endedThisBar and exitSide != 0 and rawSignalSide != exitSide
+    if rawSignalSide != 0 and (not endedThisBar or oppositeStopSignal) and rawSignalSide != trendSide
+        [newStop, newRisk, validRisk] = f_risk(rawSignalSide, close, rawSignalSide == 1 ? recentLow : recentHigh, atr, riskFloor, stopBuffer, syminfo.mintick)
         if trendSide != 0
             // f_path already resolved the old operative protection above. A
             // confirmed opposite signal therefore closes at this close, even
@@ -530,7 +542,7 @@ if barstate.isconfirmed
                 if array.size(exitTags) >= 40
                     label.delete(array.shift(exitTags))
                 array.push(exitTags, label.new(bar_index, close, exitSideText + "反向确认 · 参考结束\n" + str.tostring(close, format.mintick), style=exitSide == 1 ? label.style_label_down : label.style_label_up, color=color.new(chart.bg_color, 8), textcolor=ink, size=size.small, force_overlay=true))
-        if validRisk
+        if signalSide != 0 and validRisk
             referenceStarted := true
             trendSide := signalSide
             entryBar := bar_index
@@ -750,8 +762,8 @@ if barstate.islast and showPanel
     table.cell(panel, 1, 1, na(currentR) ? "—" : str.tostring(currentR, "#.##") + "R / " + str.tostring(peakR, "#.##") + "R", text_color=ink, text_size=size.tiny)
 
 // These are local study conditions. Creating a TV alert is a separate action.
-alertcondition(signalSide != 0, "SPIKE V6 结构确认", "SPIKE V6 结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}")
-alertcondition(confirmedSignal, "SPIKE V6 多头结构确认", "SPIKE V6 多头结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}")
-alertcondition(confirmedShortSignal, "SPIKE V6 空头结构确认", "SPIKE V6 空头结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}")
+alertcondition(signalSide != 0, "SPIKE V7 结构确认", "SPIKE V7 结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}")
+alertcondition(confirmedSignal, "SPIKE V7 多头结构确认", "SPIKE V7 多头结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}")
+alertcondition(confirmedShortSignal, "SPIKE V7 空头结构确认", "SPIKE V7 空头结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}")
 alertcondition(exitReference and not referenceReverse, "SPIKE 参考保护触及", "SPIKE 参考保护已触及 | {{exchange}}:{{ticker}} | {{interval}} | 已收盘确认，请查看参考价")
 alertcondition(referenceReverse, "SPIKE 参考反向结束", "SPIKE 参考反向结束 | {{exchange}}:{{ticker}} | {{interval}} | 反向确认收盘 {{close}}")

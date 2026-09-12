@@ -1,0 +1,34 @@
+{
+  "experiment_id": "exp-spike-v7-v1-compare-20260912-v1",
+  "pre_registered": true,
+  "research_only": true,
+  "selection_basis": "Owner asked for preferred BB logic. Fixed B chosen from previously observed eight-market study to reduce strict-C tail loss; not a fresh blind hypothesis.",
+  "bb": {
+    "length": 200,
+    "multiplier": 2.0,
+    "ddof": 0,
+    "prior_width_history": 500,
+    "quantile": 0.1,
+    "threshold_shift": 1,
+    "consecutive_compressed_bars": 3,
+    "prior_memory_bars": 12,
+    "include_signal_bar_in_memory": false,
+    "require_current_expansion": false,
+    "require_rsi": false,
+    "contiguous_ready_bars": 712
+  },
+  "variants": [
+    "historical_v1_native",
+    "v1_common_execution_long",
+    "v6_unfiltered_long",
+    "v7_bb_long",
+    "v6_unfiltered_both",
+    "v7_bb_both"
+  ],
+  "coverage": "Pending exact archived V1 manifest mapping; default same two-year covered OKX/Binance/Gate pool 30m/1H/4H, no current-winner selection.",
+  "execution": "Frozen original V1 native ledger reported separately; common execution uses next open, signal frozen 5-bar extreme/.2ATR buffer/min2ATR stop,2R activates4ATR trail,0.2% roundtrip costs. Raw unfiltered opposite confirmations close references even if filtered entry is denied.",
+  "holdout": "Owner authorized all dates. Fixed V7 B deployment configuration first evaluation in this new pool; overlapping B data already evaluated before, not fresh blind holdout. Report all reuse.",
+  "training_eligible": false,
+  "production_eligible": false,
+  "pine_sha256": "9878a9ddb769be558102e7f99284e80a8562b7eca3fa84999372992f48b6a36c"
+}
