@@ -66,6 +66,27 @@ def fixed_sample(trades: pd.DataFrame, limit: int) -> pd.DataFrame:
     return out.sort_values("_hash").groupby(["variant", "side"], sort=False).head(limit).drop(columns="_hash")
 
 
+def independent_account(trades: pd.DataFrame) -> dict:
+    """One actual stream/variant, both sides together, closed balance only.
+
+    Same 1x notional rebalancing as the replay reference. An unmodelled
+    insolvency event is flagged instead of compounding a negative balance.
+    This is never a cross-market or intrabar mark-to-market drawdown.
+    """
+    closed = trades.loc[~bools(trades.censored)].sort_values("entry_time")
+    net = closed.net_return.to_numpy(float)
+    invalid = int((~np.isfinite(net) | (net <= -1)).sum())
+    result = {"entries":len(trades),"closed":len(closed),"unresolved":len(trades)-len(closed),
+              "insolvency_or_invalid_return_events":invalid,
+              "net_return_closed_balance":np.nan,"max_drawdown_closed_balance":np.nan}
+    if not invalid:
+        equity = np.r_[1., np.cumprod(1+net)]
+        if np.isfinite(equity).all():
+            result.update(net_return_closed_balance=float(equity[-1]-1),
+                          max_drawdown_closed_balance=float((1-equity/np.maximum.accumulate(equity)).max()))
+    return result
+
+
 def verified_cache(folder: Path) -> dict:
     cache_path = folder / "control_cache.pkl.gz"
     cache_receipt = json.loads((folder / "control_cache.receipt.json").read_text())
@@ -198,7 +219,7 @@ def process(raw: Path, output: Path, *, controls: bool, allow_partial: bool) -> 
                      and json.loads(path.read_text()).get("key") == path.parent.name)
     if len(folders) != manifest["completed_streams"]:
         raise ValueError("materialized stream count differs from replay manifest")
-    trades, signal_summaries, accounts, matches, conflicts, filter_reasons = [], [], [], [], [], []
+    trades, signal_summaries, accounts, matches, conflicts, filter_reasons, true_accounts = [], [], [], [], [], [], []
     for i, folder in enumerate(folders, 1):
         cache = verified_cache(folder)
         receipt = pd.read_csv(folder / "receipt.csv").iloc[0]
@@ -217,6 +238,12 @@ def process(raw: Path, output: Path, *, controls: bool, allow_partial: bool) -> 
         ledger = pd.read_csv(folder / "trades.csv.gz", usecols=lambda name: name in needed)
         if len(ledger):
             trades.append(ledger)
+        for variant in config["variants"]:
+            if variant == "historical_v1_native":
+                continue
+            part = ledger.loc[ledger.variant.eq(variant)]
+            true_accounts.append({"venue":receipt.venue,"symbol":receipt.symbol,"timeframe_min":receipt.minutes,
+                                  "segment":receipt.segment,"variant":variant,**independent_account(part)})
         for name, accumulator in (("signal_summary.csv", signal_summaries), ("trade_summary.csv", accounts)):
             try:
                 part = pd.read_csv(folder / name)
@@ -271,7 +298,8 @@ def process(raw: Path, output: Path, *, controls: bool, allow_partial: bool) -> 
         signal = pd.concat(signal_summaries, ignore_index=True)
         signal.groupby(["variant", "minutes", "side"])[["entry_candidates", "entry_admitted", "raw_v6_short_exit_feed"]].sum().to_csv(output / "signal_counts.csv")
     if accounts:
-        pd.concat(accounts, ignore_index=True).to_csv(output / "independent_stream_closed_balance_metrics.csv.gz", index=False, compression="gzip")
+        pd.concat(accounts, ignore_index=True).to_csv(output / "stream_side_subset_reference_metrics.csv.gz", index=False, compression="gzip")
+    pd.DataFrame(true_accounts).to_csv(output / "independent_stream_closed_balance_metrics.csv.gz", index=False, compression="gzip")
     if conflicts:
         conflict = pd.concat(conflicts, ignore_index=True)
         conflict.to_csv(output / "v1_same_bar_exit_priority_conflicts.csv.gz", index=False, compression="gzip")
@@ -285,6 +313,14 @@ def process(raw: Path, output: Path, *, controls: bool, allow_partial: bool) -> 
     native = native.loc[native.timeframe_min.isin([30, 60, 240])].copy()
     native["variant"] = "historical_v1_native"
     grouped_metrics(native, ["variant", "timeframe_min"]).to_csv(output / "historical_v1_native_metrics.csv", index=False)
+    native_groups = {key:part for key,part in native.groupby(["venue","symbol","timeframe_min"])}
+    identities = pd.DataFrame(true_accounts)[["venue","symbol","timeframe_min","segment"]].drop_duplicates()
+    native_accounts = []
+    for row in identities.itertuples(index=False):
+        part = native_groups.get((row.venue,row.symbol,row.timeframe_min), native.iloc[:0])
+        native_accounts.append({"venue":row.venue,"symbol":row.symbol,"timeframe_min":row.timeframe_min,
+                                "segment":row.segment,"variant":"historical_v1_native",**independent_account(part)})
+    pd.DataFrame(native_accounts).to_csv(output / "historical_v1_native_independent_accounts.csv.gz", index=False, compression="gzip")
     if matches:
         paired = pd.concat(matches, ignore_index=True)
         paired.to_csv(output / "sampled_matched_controls.csv.gz", index=False, compression="gzip")

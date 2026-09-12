@@ -2,7 +2,7 @@
 import pandas as pd
 import pytest
 
-from yoyo.evaluation.spike_v7_v1_report import bools, event_metrics, exact_retention, fixed_sample, control_metrics
+from yoyo.evaluation.spike_v7_v1_report import bools, event_metrics, exact_retention, fixed_sample, control_metrics, independent_account
 
 
 def test_censored_rows_never_become_wins_and_no_fake_portfolio():
@@ -64,3 +64,16 @@ def test_duplicate_markets_do_not_inflate_month_block_sign_flip_sample_size():
     repeated = control_metrics(pd.concat([pairs]*20, ignore_index=True), ["variant"]).iloc[0]
     assert one.matched_months == repeated.matched_months == 6
     assert one.exploratory_month_block_sign_flip_p == repeated.exploratory_month_block_sign_flip_p
+
+
+def test_independent_account_keeps_both_sides_and_ignores_censored_marks():
+    trades = pd.DataFrame({"side":[1,-1,1], "net_return":[.1,-.2,4.], "censored":[False,False,True],
+                           "entry_time":pd.date_range("2025-01-01",periods=3,tz="UTC")})
+    result = independent_account(trades)
+    assert result["net_return_closed_balance"] == pytest.approx(-.12)
+    assert result["max_drawdown_closed_balance"] == pytest.approx(.2)
+    assert result["unresolved"] == 1
+    trades.loc[0,"net_return"] = -1.1
+    result = independent_account(trades)
+    assert result["insolvency_or_invalid_return_events"] == 1
+    assert pd.isna(result["net_return_closed_balance"])
