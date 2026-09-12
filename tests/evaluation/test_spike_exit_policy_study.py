@@ -5,6 +5,7 @@ import math
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 from yoyo.evaluation import spike_exit_policy_study as study
 
@@ -41,3 +42,58 @@ def test_frozen_representative_baseline_matches_legacy_closed_ledger() -> None:
     assert len(fills.loc[fills.kind.eq("entry")]) == len(new)
     assert (fills.groupby("trade_id").cost_return.sum() <= .002 + 1e-12).all()
     assert math.isclose(float(fills.groupby("trade_id").cost_return.sum().max()), .002, rel_tol=0, abs_tol=1e-12)
+
+
+def _synthetic():
+    import numpy as np
+    ix=pd.date_range('2024-09-10',periods=10,freq='h',tz='UTC')
+    b=pd.DataFrame({'open':100.,'high':100.5,'low':99.,'close':100.,'atr':1.,'s20':99.,'e20':99.,'md':2.,'sb':1.},index=ix)
+    sig=pd.DataFrame({'long_signal':False,'short_signal':False},index=ix);sig.iloc[4,0]=True
+    bb=pd.DataFrame({'v7_ready':True,'prior_squeeze_run3':True},index=ix)
+    cache=dict(bars=b,signals=sig,v1_signals=sig.copy(),data_gap=pd.Series(False,index=ix),bb=bb,tick=.01)
+    ledger=pd.DataFrame({'signal_bar_open':[ix[4]],'signal_i':[4]})
+    return study.StreamContext(Path('.'),'synthetic',{},cache,ledger,60,dict(venue='test',symbol='A',asset='A',timeframe_min=60))
+
+
+def test_new_breakeven_never_stops_earlier_in_trigger_bar():
+    c=_synthetic();b=c.cache['bars'];b.iloc[5,b.columns.get_loc('close')]=102.;b.iloc[5,b.columns.get_loc('high')]=103.
+    b.iloc[5,b.columns.get_loc('low')]=99. # old SL98 survives; new BE100 not retroactive
+    t,f,e=study.replay_policy(c,cohort='v6_both',policy='be1_price')
+    assert t.exit_i.iloc[0]==6
+    assert t.net_return.iloc[0]==pytest.approx(-.002)
+    assert not f.loc[f.kind.eq('exit'),'bar_open'].eq(b.index[5]).any()
+
+
+def test_cost_breakeven_and_partial_gap_use_real_next_open():
+    c=_synthetic();b=c.cache['bars'];b.iloc[5,b.columns.get_loc('close')]=102.;b.iloc[5,b.columns.get_loc('high')]=103.
+    b.iloc[6]=[100.3,100.5,100.1,100.4,1,99,99,2,1]
+    t,f,e=study.replay_policy(c,cohort='v6_both',policy='be1_cost')
+    assert t.net_return.iloc[0]==pytest.approx(0,abs=1e-12)
+    c=_synthetic();b=c.cache['bars'];b.iloc[5,b.columns.get_loc('close')]=106.;b.iloc[5,b.columns.get_loc('high')]=107.
+    b.iloc[6]=[107,108,97,100,1,99,99,2,1]
+    t,f,e=study.replay_policy(c,cohort='v6_both',policy='partial_1_25_3_35')
+    exits=f.loc[f.kind.ne('entry')]
+    assert exits.qty_fraction.tolist()==pytest.approx([.6,.4])
+    assert exits.price.iloc[0]==107
+    assert f.cost_return.sum()==pytest.approx(.002)
+    assert exits.execution_phase.tolist()==['open','intrabar']
+
+
+def test_trailing_protection_remains_armed_below_two_r():
+    c=_synthetic();b=c.cache['bars'];b.iloc[5]=[100,105,99,104,1,99,99,2,1]
+    b.iloc[6]=[103,103,100.5,101.5,.1,99,99,2,1]
+    b.iloc[7]=[101,102,100,101,1,99,99,2,1]
+    t,f,e=study.replay_policy(c,cohort='v6_both',policy='baseline')
+    assert t.exit_i.iloc[0]==7
+    assert t.exit_price.iloc[0]==101
+    assert t.exit_reason.iloc[0]=='trailing_stop_gap'
+
+
+def test_early_exit_changes_reentry_opportunity():
+    c=_synthetic();b=c.cache['bars'];b.iloc[5,b.columns.get_loc('md')]=0
+    sig=c.cache['signals'];sig.iloc[7,0]=True
+    c.signals_ledger.loc[1]=[b.index[7],7]
+    new,_,_=study.replay_policy(c,cohort='v6_both',policy='md_cross_exit')
+    old,_,_=study.replay_policy(c,cohort='v6_both',policy='baseline')
+    assert len(new)==2 and len(old)==1
+    assert new.exit_reason.iloc[0]=='md_sb_reverse_cross_next_open'

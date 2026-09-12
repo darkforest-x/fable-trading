@@ -11,6 +11,8 @@ import re
 ROOT = Path(__file__).resolve().parents[1]
 BASE = ROOT / "yoyo/evaluation/pine/spike_burst_v1.pine"
 DISPLAY = ROOT / "yoyo/evaluation/pine/spike_burst_v1_display.pine"
+V6 = ROOT / "yoyo/evaluation/pine/spike_burst_v6.pine"
+V7 = ROOT / "yoyo/evaluation/pine/spike_burst_v7.pine"
 SOURCE_SHA = "18bbb6955fdf12e124688003799c44fc2a641f11a342edcf478157b1c9641fe2"
 BEGIN, END = "// BEGIN BURST DISPLAY ONLY\n", "// END BURST DISPLAY ONLY\n"
 
@@ -82,3 +84,38 @@ def test_v1_risk_plot_suppresses_overlapping_initial_stop_when_box_is_visible():
     assert "bool protectionOverlapsInitial" in source
     assert "color protectionColor = rrShow and protectionOverlapsInitial ? na" in source
     assert "color initialColor = rrShow ? na" in source
+
+
+def test_r_reference_prices_are_visible_on_entry_without_new_plot_slots():
+    """All chart variants pre-draw live 1R/2R/3R price references.
+
+    The 400-line budget retains planned lines with all60 bounded groups;
+    price captions are live-only and reached 3R/5R/10R remain historical.
+    """
+    for path in (DISPLAY, V6, V7):
+        source = path.read_text()
+        assert 'showMilestones = input.bool(true, "R 参考与里程碑"' in source
+        assert "float targetR = targetSlot + 1.0" in source
+        assert 'str.tostring(targetR, "#") + "R · " + str.tostring(targetPrice, format.mintick)' in source
+        assert "预先显示的 " in source
+        assert "color.new(bull, 72)" in source
+        # The live 3R guide is replaced by the old reached milestone, avoiding
+        # a duplicate line while preserving the 3R/5R/10R achievement record.
+        assert "if slot == 0" in source
+        assert "float level = slot == 0 ? 3.0 : slot == 1 ? 5.0 : 10.0" in source
+        assert "line.delete(array.get(rrTargetLines, 2))" in source
+        assert "max_lines_count=400" in source
+        assert "array<line> targetLines" in source
+        assert "label.delete(array.get(rrTargetTags, targetSlot))" in source
+
+    # Lines and labels are created as drawings, never plot series. V6's
+    # existing source-level plot ceiling protects V7's copied display layer.
+    assert "plot(" not in display_layer()
+    assert len(re.findall(r"\bplot(?:shape|candle)?\s*\(", V6.read_text())) == 47
+    assert len(re.findall(r"\bplot(?:shape|candle)?\s*\(", V7.read_text())) == 33
+
+
+def test_v6_and_v7_keep_the_same_frozen_stop_and_path_helpers():
+    v6, v7 = V6.read_text(), V7.read_text()
+    begin, end = "// BEGIN UNCHANGED V2 RISK HELPERS", "// END UNCHANGED V2 RISK HELPERS"
+    assert _block(v6, begin, end) == _block(v7, begin, end)

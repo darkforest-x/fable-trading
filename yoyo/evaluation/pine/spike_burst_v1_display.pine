@@ -4,7 +4,7 @@
 // it is not the frozen monitor/backtest and cannot inherit their results.
 // Derived from LazyBear IMACD and the owner's frozen near-zero/6MA launch idea.
 // Current and prior OHLCV only; no security(), pivots, backstamping, or varip.
-indicator("SPIKE 强劲爆发 V1", shorttitle="SPIKE BURST", overlay=false, max_labels_count=500, max_boxes_count=150, max_lines_count=200, explicit_plot_zorder=true, behind_chart=false)
+indicator("SPIKE 强劲爆发 V1", shorttitle="SPIKE BURST", overlay=false, max_labels_count=500, max_boxes_count=150, max_lines_count=400, explicit_plot_zorder=true, behind_chart=false)
 
 string gSetup = "01 · 蓄势资格"
 int maLen = input.int(34, "IMACD 长度", minval=2, maxval=200, group=gSetup, display=display.none)
@@ -35,7 +35,7 @@ bool showMas = input.bool(true, "六条均线", group=gView, display=display.non
 bool showZone = input.bool(true, "淡色蓄势区", group=gView, display=display.none)
 bool showRisk = input.bool(true, "风险区与保护线", group=gView, display=display.none)
 bool showPanel = input.bool(true, "紧凑状态面板", group=gView, display=display.none)
-bool showMilestones = input.bool(true, "已达到 3R / 5R / 10R", group=gView, display=display.none)
+bool showMilestones = input.bool(true, "R 参考与里程碑", group=gView, tooltip="入场即预先显示 1R、2R、3R 参考价；达到后仍分别标记 3R、5R、10R。均不是固定止盈。", display=display.none)
 bool showExitLabels = input.bool(false, "参考结束文字", group=gView, display=display.none)
 color signalCandleColor = input.color(color.white, "爆发 K 线颜色（实体 / 影线）", group=gView, display=display.none)
 int keepZones = input.int(8, "保留蓄势区组数", minval=1, maxval=30, group=gView, display=display.none)
@@ -334,6 +334,7 @@ f_rrPriceTag(int stamp, float price, string caption, color tone, string tip) =>
     label.new(stamp, price, caption, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(chart.bg_color, 12), textcolor=tone, size=size.small, tooltip=tip, force_overlay=true)
 
 type RRMarks
+    array<line> targetLines
     array<line> guides
     array<label> tags
 
@@ -355,6 +356,10 @@ var float rrStop = na
 var float rrDistance = na
 var float rrMaximum = 0.0
 var RRMarks rrMarks = na
+// Planned lines persist with the same 60 historical groups. Only their live
+// price captions are recycled: at most 360 lines and 483 labels in total.
+var array<line> rrTargetLines = array.new<line>(3, na)
+var array<label> rrTargetTags = array.new<label>(3, na)
 
 if barstate.isconfirmed and showRisk and rrShow
     int rrBarMillis = na(time_close) ? int(timeframe.in_seconds() * 1000) : time_close - time
@@ -384,12 +389,26 @@ if barstate.isconfirmed and showRisk and rrShow
             box.set_top(rrRewardBox, math.max(rrEntry, rrExtent))
             box.set_bottom(rrRewardBox, math.min(rrEntry, rrExtent))
             label.set_xy(rrPeakTag, rrEdge, rrExtent)
-            label.set_text(rrPeakTag, (rrMaximum >= 3.0 ? "峰值 " + str.tostring(rrMaximum, "#.##") + "R · " : "3R 观察位 · ") + str.tostring(rrExtent, format.mintick))
+            label.set_text(rrPeakTag, showMilestones and rrMaximum < 3.0 ? "" : (rrMaximum >= 3.0 ? "峰值 " + str.tostring(rrMaximum, "#.##") + "R · " : "3R 观察位 · ") + str.tostring(rrExtent, format.mintick))
             label.set_tooltip(rrPeakTag, rrReference)
+        for targetSlot = 0 to 2
+            line targetLine = array.get(rrTargetLines, targetSlot)
+            label targetTag = array.get(rrTargetTags, targetSlot)
+            if not na(targetLine)
+                line.set_x2(targetLine, rrEdge)
+            if not na(targetTag)
+                label.set_x(targetTag, rrEdge)
         for slot = 0 to 2
             float level = slot == 0 ? 3.0 : slot == 1 ? 5.0 : 10.0
             float levelPrice = rrEntry + rrSide * level * rrDistance
             if showMilestones and rrMaximum >= level and levelPrice > 0 and na(array.get(rrMarks.guides, slot))
+                // The planned 3R guide yields to its reached milestone so the
+                // chart keeps one concise line at that price.
+                if slot == 0
+                    line.delete(array.get(rrTargetLines, 2))
+                    label.delete(array.get(rrTargetTags, 2))
+                    array.set(rrTargetLines, 2, na)
+                    array.set(rrTargetTags, 2, na)
                 line guide = line.new(rrStartedAt, levelPrice, rrCloseTime, levelPrice, xloc=xloc.bar_time, color=color.new(bull, 35), style=line.style_dashed, width=1, force_overlay=true)
                 label tag = label.new(time, levelPrice, str.tostring(level, "#") + "R 已达", xloc=xloc.bar_time, style=label.style_label_left, color=color.new(bull, 88), textcolor=bull, size=size.tiny, force_overlay=true)
                 array.set(rrMarks.guides, slot, guide)
@@ -398,6 +417,10 @@ if barstate.isconfirmed and showRisk and rrShow
             if not na(guide)
                 line.set_x2(guide, rrCloseTime)
         if rrEnded
+            for targetSlot = 0 to 2
+                label.delete(array.get(rrTargetTags, targetSlot))
+            rrTargetLines := array.new<line>(3, na)
+            rrTargetTags := array.new<label>(3, na)
             rrSide := 0
 
     if burstUp or burstDown
@@ -415,6 +438,7 @@ if barstate.isconfirmed and showRisk and rrShow
                 label.delete(array.shift(rrPeakHistory))
                 RRMarks oldestMarks = array.shift(rrMarksHistory)
                 for slot = 0 to 2
+                    line.delete(array.get(oldestMarks.targetLines, slot))
                     line.delete(array.get(oldestMarks.guides, slot))
                     label.delete(array.get(oldestMarks.tags, slot))
             rrSide := rrNewSide
@@ -423,14 +447,26 @@ if barstate.isconfirmed and showRisk and rrShow
             rrStop := initialStop
             rrDistance := rrNewDistance
             rrMaximum := 0.0
-            rrMarks := RRMarks.new(array.new<line>(3, na), array.new<label>(3, na))
+            rrMarks := RRMarks.new(array.new<line>(3, na), array.new<line>(3, na), array.new<label>(3, na))
+            rrTargetLines := rrMarks.targetLines
+            rrTargetTags := array.new<label>(3, na)
             float rrObservation = rrEntry + rrSide * 3.0 * rrDistance
             string rrTip = "信号收盘参考，不是实际成交。初始风险冻结；3R仅为观察位，不触发止盈。绿色框扩展表示已确认最高浮盈，不代表已实现收益。"
             rrRiskBox := box.new(rrStartedAt, math.max(rrEntry, rrStop), rrRightTime, math.min(rrEntry, rrStop), xloc=xloc.bar_time, border_color=color.new(bear, 45), border_width=1, bgcolor=color.new(bear, 92), force_overlay=true)
             rrRewardBox := rrObservation > 0 ? box.new(rrStartedAt, math.max(rrEntry, rrObservation), rrRightTime, math.min(rrEntry, rrObservation), xloc=xloc.bar_time, border_color=color.new(bull, 45), border_width=1, bgcolor=color.new(bull, 92), force_overlay=true) : na
             rrEntryTag := f_rrPriceTag(rrRightTime, rrEntry, str.tostring(rrEntry, format.mintick), ink, rrTip)
             rrStopTag := f_rrPriceTag(rrRightTime, rrStop, "sl · " + str.tostring(rrStop, format.mintick), bear, rrTip)
-            rrPeakTag := rrObservation > 0 ? f_rrPriceTag(rrRightTime, rrObservation, "3R 观察位 · " + str.tostring(rrObservation, format.mintick), bull, rrTip) : na
+            rrPeakTag := rrObservation > 0 ? f_rrPriceTag(rrRightTime, rrObservation, (showMilestones ? "" : "3R 观察位 · " + str.tostring(rrObservation, format.mintick)), bull, rrTip) : na
+            if showMilestones
+                for targetSlot = 0 to 2
+                    float targetR = targetSlot + 1.0
+                    float targetPrice = rrEntry + rrSide * targetR * rrDistance
+                    if targetPrice > 0
+                        string targetTip = "预先显示的 " + str.tostring(targetR, "#") + "R 参考价，基于冻结初始风险；不是止盈指令。"
+                        line targetLine = line.new(rrStartedAt, targetPrice, rrRightTime, targetPrice, xloc=xloc.bar_time, color=color.new(bull, 72), style=line.style_dashed, width=1, force_overlay=true)
+                        label targetTag = label.new(rrRightTime, targetPrice, str.tostring(targetR, "#") + "R · " + str.tostring(targetPrice, format.mintick), xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(chart.bg_color, 12), textcolor=bull, size=size.tiny, tooltip=targetTip, force_overlay=true)
+                        array.set(rrTargetLines, targetSlot, targetLine)
+                        array.set(rrTargetTags, targetSlot, targetTag)
             array.push(rrRiskHistory, rrRiskBox)
             array.push(rrRewardHistory, rrRewardBox)
             array.push(rrEntryHistory, rrEntryTag)

@@ -23,7 +23,8 @@ from typing import Iterable
 import numpy as np
 import pandas as pd
 
-from yoyo.evaluation.spike_v6_wvf_study import ExecutionSpec, _initial_position
+from yoyo.evaluation.spike_v6_wvf_study import ExecutionSpec
+from yoyo.evaluation.spike_v7_fast import _initial_position_fast
 
 
 START = pd.Timestamp("2024-09-10T00:00:00Z")
@@ -107,14 +108,15 @@ def load_verified_stream(folder: Path) -> StreamContext:
     minutes = int(receipt["key"].split("_")[1].removesuffix("m"))
     if not math.isfinite(float(cache["tick"])) or float(cache["tick"]) <= 0:
         raise ValueError(f"invalid frozen tick: {folder.name}")
+    completion = json.loads((folder / "completion.json").read_text())
+    if completion.get("status") != "complete" or completion.get("cache_sha256") != receipt["cache_sha256"] or completion.get("key") != folder.name:
+        raise ValueError("frozen completion/cache identity mismatch")
     ledger = pd.read_csv(ledger_path)
-    if ledger.empty or not {"venue", "symbol", "asset", "timeframe_min", "source_sha256"}.issubset(ledger):
-        raise ValueError(f"unexpected frozen signal ledger: {folder.name}")
-    first = ledger.iloc[0]
-    if str(first.source_sha256) != str(receipt.get("source_sha256")):
+    provenance = pd.read_csv(folder / "receipt.csv").iloc[0]
+    if str(provenance.source_sha256) != str(receipt.get("source_sha256")):
         raise ValueError(f"ledger/source receipt mismatch: {folder.name}")
-    identity = {"venue": str(first.venue), "symbol": str(first.symbol), "asset": str(first.asset),
-                "timeframe_min": int(first.timeframe_min)}
+    identity = {"venue": str(provenance.venue), "symbol": str(provenance.symbol), "asset": str(provenance.asset),
+                "timeframe_min": int(provenance.minutes)}
     if identity["timeframe_min"] != minutes:
         raise ValueError(f"timeframe mismatch: {folder.name}")
     return StreamContext(folder, str(receipt["key"]), receipt, cache, ledger, minutes, identity)
@@ -123,7 +125,7 @@ def load_verified_stream(folder: Path) -> StreamContext:
 def _cohort_inputs(context: StreamContext, cohort: str) -> tuple[pd.DataFrame, pd.Series]:
     """Restore only frozen admissions; V1 remains an explicitly long-only arm."""
     index = context.cache["bars"].index
-    in_window = pd.Series((index >= START) & (index < END), index=index)
+    in_window = pd.Series((index + pd.Timedelta(minutes=context.minutes) >= START) & (index + pd.Timedelta(minutes=context.minutes) < END), index=index)
     if cohort == "v1_common_long":
         signals = context.cache["v1_signals"][["long_signal", "short_signal"]].copy()
         allowed = signals.long_signal.fillna(False).astype(bool)
@@ -218,6 +220,7 @@ def _new_trade(pos: dict[str, object], *, trade_id: str, cohort: str, policy: st
 def _append_fill(fills: list[dict[str, object]], pos: dict[str, object], *, leg_no: int, bar_open: object,
                  event_time: object, phase: str, precision: str, kind: str, fraction: float, price: float,
                  cost: float, reason: str, context: StreamContext) -> None:
+    pos["fill_count"] = leg_no
     fills.append({"trade_id": pos["trade_id"], "leg_no": leg_no, "cohort": pos["cohort"], "policy": pos["policy"],
                   "stream_key": context.key, **context.identity, "side": int(pos["side"]), "entry_time": pos["entry_time"],
                   "bar_open": bar_open, "event_time": event_time, "execution_phase": phase,
@@ -245,7 +248,7 @@ def replay_policy(context: StreamContext, *, cohort: str, policy: str) -> tuple[
     """Replay one policy from raw candidates so exit timing can alter later entries."""
     if policy not in POLICIES or cohort not in COHORTS:
         raise ValueError("unknown policy or cohort")
-    frame = context.cache["bars"].copy()
+    frame = context.cache["bars"]
     frame.attrs["minutes"] = context.minutes
     signals, allowed = _cohort_inputs(context, cohort)
     gap = context.cache["data_gap"].reindex(frame.index).fillna(True).astype(bool)
@@ -261,11 +264,18 @@ def replay_policy(context: StreamContext, *, cohort: str, policy: str) -> tuple[
     pending_exit: tuple[int, int, str] | None = None
     pending_partial: tuple[float, str] | None = None
     next_id = 0
+    arrays = {name: frame[name].to_numpy(float) for name in ("open", "high", "low", "close", "atr", "s20", "e20", "md", "sb")}
+    oa,ha,la,ca,aa = (arrays[k] for k in ("open","high","low","close","atr"))
+    gap_a, allowed_a = gap.to_numpy(bool), allowed.to_numpy(bool)
+    ordinal = {}
+    if len(context.signals_ledger):
+        ledger = context.signals_ledger
+        ordinal = dict(zip(pd.to_datetime(ledger.signal_bar_open,utc=True),ledger.signal_i.astype(int)))
     for i, stamp in enumerate(frame.index):
         ended_side = 0
-        if bool(gap.iloc[i]):
+        if bool(gap_a[i]):
             if position is not None:
-                _append_fill(fills, position, leg_no=len([x for x in fills if x["trade_id"] == position["trade_id"]]) + 1,
+                _append_fill(fills, position, leg_no=int(position.get("fill_count", 0)) + 1,
                              bar_open=stamp, event_time=stamp, phase="close", precision="unknown_gap", kind="censor",
                              fraction=float(position["qty_remaining"]), price=math.nan, cost=0.0, reason="data_gap_censored", context=context)
                 position["last_exit_i"], position["last_exit_time"], position["last_exit_reason"] = i, stamp, "data_gap_censored"
@@ -275,7 +285,7 @@ def replay_policy(context: StreamContext, *, cohort: str, policy: str) -> tuple[
             continue
         # A stop known at the prior close has priority over a next-open discretionary action.
         if position is not None:
-            side, protection, opening = int(position["side"]), float(position["protection"]), float(frame.open.iloc[i])
+            side, protection, opening = int(position["side"]), float(position["protection"]), float(oa[i])
             stop_at_open = opening <= protection if side == 1 else opening >= protection
             if stop_at_open:
                 reason = "trailing_stop_gap" if protection != float(position["initial_stop"]) else "initial_stop_gap"
@@ -285,7 +295,7 @@ def replay_policy(context: StreamContext, *, cohort: str, policy: str) -> tuple[
                 position["qty_realized"] += fraction; position["qty_remaining"] = 0.0
                 position["realized_gross_return"] += gross; position["realized_net_return"] += gross - cost
                 position["last_exit_i"], position["last_exit_time"], position["last_exit_price"], position["last_exit_reason"] = i, stamp, opening, reason
-                _append_fill(fills, position, leg_no=len([x for x in fills if x["trade_id"] == position["trade_id"]]) + 1,
+                _append_fill(fills, position, leg_no=int(position.get("fill_count", 0)) + 1,
                              bar_open=stamp, event_time=stamp, phase="open", precision="bar_open", kind="exit", fraction=fraction,
                              price=opening, cost=cost, reason=reason, context=context)
                 trades.append(_trade_row(position, censored=False, precision="bar_open_or_intrabar_window")); ended_side = side
@@ -293,12 +303,12 @@ def replay_policy(context: StreamContext, *, cohort: str, policy: str) -> tuple[
         if position is not None and pending_exit is not None:
             _, old_side, reason = pending_exit
             if int(position["side"]) == old_side:
-                opening, fraction = float(frame.open.iloc[i]), float(position["qty_remaining"])
+                opening, fraction = float(oa[i]), float(position["qty_remaining"])
                 cost = fraction * EXIT_COST; gross = fraction * old_side * (opening / float(position["entry_price"]) - 1.0)
                 position["qty_realized"] += fraction; position["qty_remaining"] = 0.0
                 position["realized_gross_return"] += gross; position["realized_net_return"] += gross - cost
                 position["last_exit_i"], position["last_exit_time"], position["last_exit_price"], position["last_exit_reason"] = i, stamp, opening, reason
-                _append_fill(fills, position, leg_no=len([x for x in fills if x["trade_id"] == position["trade_id"]]) + 1,
+                _append_fill(fills, position, leg_no=int(position.get("fill_count", 0)) + 1,
                              bar_open=stamp, event_time=stamp, phase="open", precision="bar_open", kind="exit", fraction=fraction,
                              price=opening, cost=cost, reason=reason, context=context)
                 trades.append(_trade_row(position, censored=False, precision="bar_open_or_intrabar_window")); ended_side = old_side
@@ -308,21 +318,22 @@ def replay_policy(context: StreamContext, *, cohort: str, policy: str) -> tuple[
             fraction, reason = pending_partial
             fraction = min(float(fraction), float(position["qty_remaining"]))
             if fraction > 0:
-                opening, side = float(frame.open.iloc[i]), int(position["side"])
+                opening, side = float(oa[i]), int(position["side"])
                 cost = fraction * EXIT_COST; gross = fraction * side * (opening / float(position["entry_price"]) - 1.0)
                 position["qty_realized"] += fraction; position["qty_remaining"] -= fraction
                 position["realized_gross_return"] += gross; position["realized_net_return"] += gross - cost
                 position["last_exit_i"], position["last_exit_time"], position["last_exit_price"], position["last_exit_reason"] = i, stamp, opening, reason
-                _append_fill(fills, position, leg_no=len([x for x in fills if x["trade_id"] == position["trade_id"]]) + 1,
+                _append_fill(fills, position, leg_no=int(position.get("fill_count", 0)) + 1,
                              bar_open=stamp, event_time=stamp, phase="open", precision="bar_open", kind="partial", fraction=fraction,
                              price=opening, cost=cost, reason=reason, context=context)
             pending_partial = None
         if pending_entry is not None:
             signal_i, side = pending_entry
             if position is None and side != ended_side:
-                made = _initial_position(frame, signal_i, side, spec, gap)
+                made = _initial_position_fast(frame.index, oa,ha,la,ca,aa,gap_a,signal_i,side,spec)
                 if made is not None:
-                    original_i = _frozen_signal_i(context, frame.index[signal_i])
+                    made["initial_risk_frac"] = float(made["initial_risk"])/float(made["entry_price"])
+                    original_i = ordinal.get(frame.index[signal_i])
                     if original_i is not None:
                         # The cache retains only a short authenticated prefix;
                         # outputs retain the old full-frame ordinal for ledger parity.
@@ -335,7 +346,7 @@ def replay_policy(context: StreamContext, *, cohort: str, policy: str) -> tuple[
             pending_entry = None
         if position is not None:
             side, protection = int(position["side"]), float(position["protection"])
-            opening, high, low, close, atr = (float(frame[name].iloc[i]) for name in ("open", "high", "low", "close", "atr"))
+            opening, high, low, close, atr = (arr[i] for arr in (oa,ha,la,ca,aa))
             stopped = low <= protection if side == 1 else high >= protection
             if stopped:
                 price = min(opening, protection) if side == 1 else max(opening, protection)
@@ -348,7 +359,7 @@ def replay_policy(context: StreamContext, *, cohort: str, policy: str) -> tuple[
                 position["realized_gross_return"] += gross; position["realized_net_return"] += gross - cost
                 position["last_exit_i"], position["last_exit_time"], position["last_exit_price"], position["last_exit_reason"] = i, stamp, price, reason
                 phase = "open" if reason.endswith("_gap") else "intrabar"
-                _append_fill(fills, position, leg_no=len([x for x in fills if x["trade_id"] == position["trade_id"]]) + 1,
+                _append_fill(fills, position, leg_no=int(position.get("fill_count", 0)) + 1,
                              bar_open=stamp, event_time=stamp, phase=phase, precision="bar_open" if phase == "open" else "within_bar",
                              kind="exit", fraction=fraction, price=price, cost=cost, reason=reason, context=context)
                 trades.append(_trade_row(position, censored=False, precision="bar_open_or_intrabar_window")); ended_side = side
@@ -366,7 +377,8 @@ def replay_policy(context: StreamContext, *, cohort: str, policy: str) -> tuple[
                                        "bar_open": stamp, "event_time": _close_time(frame.index, i, context.minutes), "execution_phase": "close",
                                        "event_kind": "protection_update", "reason": reason, "protection_before": before,
                                        "protection_after": float(position["protection"]), "qty_fraction": float(position["qty_remaining"])})
-                if close_r >= spec.arm_r and _finite(atr) and atr > 0:
+                position["trail_armed"] = bool(position["trail_armed"]) or close_r >= spec.arm_r
+                if bool(position["trail_armed"]) and _finite(atr) and atr > 0:
                     candidate_raw = close - side * spec.trail_atr * atr
                     candidate = math.floor(candidate_raw / spec.tick) * spec.tick if side == 1 else math.ceil(candidate_raw / spec.tick) * spec.tick
                     before = float(position["protection"])
@@ -386,7 +398,14 @@ def replay_policy(context: StreamContext, *, cohort: str, policy: str) -> tuple[
                                    "bar_open": stamp, "event_time": _close_time(frame.index, i, context.minutes), "execution_phase": "close",
                                    "event_kind": "partial_scheduled", "reason": reason, "protection_before": float(position["protection"]),
                                    "protection_after": float(position["protection"]), "qty_fraction": fraction})
-                extra = _policy_exit(policy, frame, i, side)
+                extra = None
+                if policy == "fast_ma_exit" and (close < min(arrays["s20"][i],arrays["e20"][i]) if side==1 else close > max(arrays["s20"][i],arrays["e20"][i])):
+                    extra = "fast_ma_other_side_next_open"
+                if policy == "md_cross_exit" and i > 0:
+                    previous = arrays["md"][i-1]-arrays["sb"][i-1]
+                    current = arrays["md"][i]-arrays["sb"][i]
+                    if (previous >= 0 and current < 0) if side==1 else (previous <= 0 and current > 0):
+                        extra = "md_sb_reverse_cross_next_open"
                 if extra is not None:
                     pending_exit = (i, side, extra)
                     events.append({"trade_id": position["trade_id"], "cohort": cohort, "policy": policy, "stream_key": context.key,
@@ -397,17 +416,17 @@ def replay_policy(context: StreamContext, *, cohort: str, policy: str) -> tuple[
         if signal_side:
             if position is not None and signal_side != int(position["side"]) and policy != "no_reverse":
                 pending_exit = (i, int(position["side"]), "opposite_v6_next_open")
-                if bool(allowed.iloc[i]):
+                if bool(allowed_a[i]):
                     pending_entry = (i, signal_side)
-            elif position is None and signal_side != ended_side and bool(allowed.iloc[i]):
+            elif position is None and signal_side != ended_side and bool(allowed_a[i]):
                 pending_entry = (i, signal_side)
     if position is not None:
         last, stamp = len(frame) - 1, frame.index[-1]
-        _append_fill(fills, position, leg_no=len([x for x in fills if x["trade_id"] == position["trade_id"]]) + 1,
+        _append_fill(fills, position, leg_no=int(position.get("fill_count", 0)) + 1,
                      bar_open=stamp, event_time=_close_time(frame.index, last, context.minutes), phase="close", precision="last_complete_close",
-                     kind="censor", fraction=float(position["qty_remaining"]), price=float(frame.close.iloc[last]), cost=0.0,
+                     kind="censor", fraction=float(position["qty_remaining"]), price=float(ca[last]), cost=0.0,
                      reason="boundary_mark", context=context)
-        position["last_exit_i"], position["last_exit_time"], position["last_exit_price"], position["last_exit_reason"] = last, stamp, float(frame.close.iloc[last]), "boundary_mark"
+        position["last_exit_i"], position["last_exit_time"], position["last_exit_price"], position["last_exit_reason"] = last, stamp, float(ca[last]), "boundary_mark"
         trades.append(_trade_row(position, censored=True, precision="last_complete_close"))
     return (pd.DataFrame(trades, columns=TRADE_COLUMNS), pd.DataFrame(fills, columns=FILL_COLUMNS),
             pd.DataFrame(events, columns=EVENT_COLUMNS))
@@ -430,31 +449,64 @@ def replay_stream(context: StreamContext, policies: Iterable[str] = POLICIES) ->
     return trades, fills, events, summary
 
 
+def validate_baseline(context, trades):
+    """Every completed stream must reproduce its frozen unmodified ledger."""
+    from pandas.testing import assert_frame_equal
+    old=pd.read_csv(context.path/"trades.csv.gz")
+    for cohort,variant in zip(COHORTS,["v1_common_execution_long","v6_unfiltered_both","v7_bb_both"]):
+        a=old.loc[old.variant.eq(variant)&~old.censored.astype(bool)]
+        b=trades.loc[trades.cohort.eq(cohort)&trades.policy.eq("baseline")&~trades.censored.astype(bool)]
+        if a.empty and b.empty:continue
+        cols=["signal_i","entry_i","side","exit_i","exit_reason","entry_price","exit_price","initial_stop","initial_risk","net_return","net_r"]
+        assert_frame_equal(a[cols].sort_values("signal_i").reset_index(drop=True),b[cols].sort_values("signal_i").reset_index(drop=True),check_dtype=False,rtol=1e-9,atol=1e-9)
+
+
 def run_streams(streams_root: Path, output: Path, *, stream_limit: int | None = None, resume: bool = True) -> pd.DataFrame:
     """Write atomic per-stream engine artifacts; resume never treats a partial stream as complete."""
+    config_path=Path("experiments/active/exp-spike-exit-policy-20260912-v1/config.json")
+    config=json.loads(config_path.read_text())
+    manifest_path=streams_root.parent/"manifest.json"
+    if sha256(manifest_path)!=config["raw_manifest_sha256"]:
+        raise ValueError("frozen upstream manifest mismatch")
+    identity={"config_sha256":sha256(config_path),"engine_sha256":sha256(Path(__file__)),"upstream_manifest_sha256":sha256(manifest_path)}
+    for name in ["spike_v6_wvf_study.py","spike_v7_fast.py"]:
+        identity[name]=sha256(Path(__file__).with_name(name))
     output.mkdir(parents=True, exist_ok=True)
+    identity_path=output/"engine_identity.json"
+    if identity_path.exists() and json.loads(identity_path.read_text())!=identity:
+        raise ValueError("source/config changed; use new output directory")
+    identity_path.write_text(json.dumps(identity,indent=2))
     stream_output = output / "streams"; stream_output.mkdir(exist_ok=True)
     summaries = []
-    folders = sorted(path for path in streams_root.iterdir() if path.is_dir())
+    folders = sorted(path.parent for path in streams_root.glob("*/completion.json") if not path.parent.name.startswith("."))
+    if len(folders)!=config["expected_streams"]:raise ValueError("incomplete upstream pool")
     if stream_limit is not None:
         folders = folders[:stream_limit]
     for folder in folders:
-        context = load_verified_stream(folder)
-        complete = stream_output / f"{context.key}.completion.json"
+        complete = stream_output / f"{folder.name}.completion.json"
         if resume and complete.is_file():
-            summaries.append(json.loads(complete.read_text())); continue
+            row=json.loads(complete.read_text())
+            for name,digest in row["output_sha256"].items():
+                if sha256(stream_output/name)!=digest:raise ValueError("completed stream output changed")
+            summaries.append(row); continue
+        context = load_verified_stream(folder)
         trades, fills, events, summary = replay_stream(context)
+        validate_baseline(context,trades)
         for name, table in (("trades", trades), ("fills", fills), ("events", events)):
             temporary = stream_output / f".{context.key}.{name}.csv.gz.tmp"
             destination = stream_output / f"{context.key}.{name}.csv.gz"
-            table.to_csv(temporary, index=False, compression="gzip")
+            table.to_csv(temporary, index=False, compression={"method":"gzip","compresslevel":1,"mtime":0})
             temporary.replace(destination)
         row = summary.iloc[0].to_dict()
+        row["output_sha256"]={f"{context.key}.{name}.csv.gz":sha256(stream_output/f"{context.key}.{name}.csv.gz") for name in ("trades","fills","events")}
         temp_complete = stream_output / f".{context.key}.completion.json.tmp"
         temp_complete.write_text(json.dumps(row, indent=2, default=str)); temp_complete.replace(complete)
         summaries.append(row)
+        if len(summaries)%25==0 or len(summaries)==len(folders):
+            print(json.dumps({"completed":len(summaries),"target":len(folders)}),flush=True)
     result = pd.DataFrame(summaries)
     if len(result): result.to_csv(output / "engine_stream_summary.csv", index=False)
+    (output/"engine_manifest.json").write_text(json.dumps({**identity,"completed_streams":len(summaries),"expected_streams":config["expected_streams"],"complete":len(summaries)==config["expected_streams"],"summary_sha256":sha256(output/"engine_stream_summary.csv")},indent=2))
     return result
 
 

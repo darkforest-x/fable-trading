@@ -5,7 +5,7 @@
 // legacy confirmation. This prototype is not validated for any deployment.
 // This prototype has no market breadth, performance, or PnL evaluation. Its
 // reference-exit revision is not the frozen monitor/backtest configuration.
-indicator("SPIKE V7 · BB 压缩通道", shorttitle="SPIKE V7", overlay=false, max_labels_count=500, max_boxes_count=150, max_lines_count=200, explicit_plot_zorder=true, behind_chart=false)
+indicator("SPIKE V7 · BB 压缩通道", shorttitle="SPIKE V7", overlay=false, max_labels_count=500, max_boxes_count=150, max_lines_count=400, explicit_plot_zorder=true, behind_chart=false)
 
 // Frozen research constants; changing them defines a new unvalidated config.
 const int maLen = 34
@@ -33,7 +33,7 @@ bool showMas = input.bool(true, "六条均线", group=gView, display=display.non
 bool showLabels = input.bool(true, "确认信号与价格", group=gView, tooltip="只显示完成实体支撑、原确认关联与主线转强后的最终信号，标在实际完成K线上，不回填。", display=display.none)
 bool showRisk = input.bool(true, "风险区与保护线", group=gView, tooltip="确认收盘开启风险参考；同向重复不重置。反向确认在收盘结束旧参考，新风险有效时开启反向参考；本根先触及原保护时以原保护结算。", display=display.none)
 bool showPanel = input.bool(true, "显示状态面板", group=gView, display=display.none)
-bool showMilestones = input.bool(true, "R 里程碑与虚线", group=gView, tooltip="分别显示已达到的 3R、5R、10R 价位与虚线；不是固定止盈。", display=display.none)
+bool showMilestones = input.bool(true, "R 参考与里程碑", group=gView, tooltip="入场即预先显示 1R、2R、3R 参考价；达到后仍分别标记 3R、5R、10R。均不是固定止盈。", display=display.none)
 bool showExitLabels = input.bool(false, "退出文字", group=gView, display=display.none)
 color signalColor = input.color(color.white, "信号 K 线颜色（实体 / 影线）", group=gView, display=display.none)
 color bull = #008F82
@@ -582,13 +582,15 @@ f_rrPriceTag(int stamp, float price, string caption, color tone, string tip) =>
 
 // Bounded ownership prevents independent garbage collection from leaving
 // orphan labels/lines or deleting old boxes while keeping their captions.
-// 60 groups: <=120 boxes, <=180 lines, <=360 labels. Signal/exit caps add120.
+// 60 groups: <=120 boxes, <=360 planned/milestone lines, <=360 labels.
+// At most three live target captions plus120 signal/exit labels stay below500.
 type RRDrawing
     box riskBox
     box rewardBox
     label entryTag
     label stopTag
     label peakTag
+    array<line> targetLines
     array<line> milestoneLines
     array<label> milestoneTags
     int side
@@ -605,11 +607,14 @@ method deleteDrawings(RRDrawing group) =>
     label.delete(group.stopTag)
     label.delete(group.peakTag)
     for slot = 0 to 2
+        line.delete(array.get(group.targetLines, slot))
         line.delete(array.get(group.milestoneLines, slot))
         label.delete(array.get(group.milestoneTags, slot))
 
 var array<RRDrawing> rrHistory = array.new<RRDrawing>()
 var RRDrawing activeRR = na
+var array<line> rrTargetLines = array.new<line>(3, na)
+var array<label> rrTargetTags = array.new<label>(3, na)
 if barstate.isconfirmed
     int rrBarMillis = na(time_close) ? int(timeframe.in_seconds() * 1000) : time_close - time
     int rrCloseTime = na(time_close) ? time + rrBarMillis : time_close
@@ -625,6 +630,10 @@ if barstate.isconfirmed
             label.set_x(activeRR.stopTag, time_close[1])
             if not na(activeRR.peakTag)
                 label.set_x(activeRR.peakTag, time_close[1])
+        for targetSlot = 0 to 2
+            label.delete(array.get(rrTargetTags, targetSlot))
+        rrTargetLines := array.new<line>(3, na)
+        rrTargetTags := array.new<label>(3, na)
         activeRR := na
     if not na(activeRR)
         bool ended = exitReference
@@ -649,14 +658,28 @@ if barstate.isconfirmed
             box.set_top(activeRR.rewardBox, math.max(activeRR.entryPrice, extent))
             box.set_bottom(activeRR.rewardBox, math.min(activeRR.entryPrice, extent))
             label.set_xy(activeRR.peakTag, edge, extent)
-            label.set_text(activeRR.peakTag, (activeRR.maximum >= 3.0 ? "峰值 " + str.tostring(activeRR.maximum, "#.##") + "R · " : "3R 观察位 · ") + str.tostring(extent, format.mintick))
+            label.set_text(activeRR.peakTag, showMilestones and activeRR.maximum < 3.0 ? "" : (activeRR.maximum >= 3.0 ? "峰值 " + str.tostring(activeRR.maximum, "#.##") + "R · " : "3R 观察位 · ") + str.tostring(extent, format.mintick))
             label.set_tooltip(activeRR.peakTag, reference)
+        for targetSlot = 0 to 2
+            line targetLine = array.get(rrTargetLines, targetSlot)
+            label targetTag = array.get(rrTargetTags, targetSlot)
+            if not na(targetLine)
+                line.set_x2(targetLine, edge)
+            if not na(targetTag)
+                label.set_x(targetTag, edge)
         // Each reached level is independent: a single jump through 3/5/10R
         // must create all three milestones, not only the highest one.
         for slot = 0 to 2
             float level = slot == 0 ? 3.0 : slot == 1 ? 5.0 : 10.0
             float levelPrice = activeRR.entryPrice + activeRR.side * level * activeRR.distance
             if showMilestones and activeRR.maximum >= level and levelPrice > 0 and na(array.get(activeRR.milestoneLines, slot))
+                // Replace the planned 3R guide with its reached milestone to
+                // avoid a doubled line at one price.
+                if slot == 0
+                    line.delete(array.get(rrTargetLines, 2))
+                    label.delete(array.get(rrTargetTags, 2))
+                    array.set(rrTargetLines, 2, na)
+                    array.set(rrTargetTags, 2, na)
                 string hitTip = "收盘确认已触及 " + str.tostring(level, "#") + "R · " + str.format_time(time_close, "MM-dd HH:mm", "Asia/Shanghai") + " 北京时间。虚线为冻结入场风险计算的价位，不是止盈指令。"
                 line guide = line.new(activeRR.startedAt, levelPrice, rrCloseTime, levelPrice, xloc=xloc.bar_time, color=color.new(bull, 35), style=line.style_dashed, width=1, force_overlay=true)
                 label tag = label.new(time, levelPrice, str.tostring(level, "#") + "R 已达", xloc=xloc.bar_time, style=label.style_label_left, color=color.new(bull, 88), textcolor=bull, size=size.tiny, tooltip=hitTip, force_overlay=true)
@@ -666,6 +689,10 @@ if barstate.isconfirmed
             if not na(guide)
                 line.set_x2(guide, rrCloseTime)
         if ended
+            for targetSlot = 0 to 2
+                label.delete(array.get(rrTargetTags, targetSlot))
+            rrTargetLines := array.new<line>(3, na)
+            rrTargetTags := array.new<label>(3, na)
             activeRR := na
     // A reverse was fully rendered and frozen above. Only then may this
     // confirmed close allocate its independent replacement group.
@@ -678,7 +705,7 @@ if barstate.isconfirmed
             while array.size(rrHistory) >= rrKeep
                 RRDrawing oldest = array.shift(rrHistory)
                 oldest.deleteDrawings()
-            activeRR := RRDrawing.new(na, na, na, na, na, array.new<line>(3, na), array.new<label>(3, na), rrNewSide, time, entry, initialStop, rrNewDistance, 0.0)
+            activeRR := RRDrawing.new(na, na, na, na, na, array.new<line>(3, na), array.new<line>(3, na), array.new<label>(3, na), rrNewSide, time, entry, initialStop, rrNewDistance, 0.0)
             array.push(rrHistory, activeRR)
             if showRisk and rrShow
                 float observation = entry + rrNewSide * 3.0 * rrNewDistance
@@ -688,7 +715,19 @@ if barstate.isconfirmed
                 activeRR.rewardBox := observation > 0 ? box.new(time, math.max(entry, observation), rrRightTime, math.min(entry, observation), xloc=xloc.bar_time, border_color=color.new(bull, 45), border_width=1, bgcolor=color.new(bull, 92), force_overlay=true) : na
                 activeRR.entryTag := f_rrPriceTag(rrRightTime, entry, str.tostring(entry, format.mintick), ink, tip)
                 activeRR.stopTag := f_rrPriceTag(rrRightTime, initialStop, "sl · " + str.tostring(initialStop, format.mintick), bear, tip)
-                activeRR.peakTag := observation > 0 ? f_rrPriceTag(rrRightTime, observation, "3R 观察位 · " + str.tostring(observation, format.mintick), bull, tip) : na
+                activeRR.peakTag := observation > 0 ? f_rrPriceTag(rrRightTime, observation, (showMilestones ? "" : "3R 观察位 · " + str.tostring(observation, format.mintick)), bull, tip) : na
+                if showMilestones
+                    rrTargetLines := activeRR.targetLines
+                    rrTargetTags := array.new<label>(3, na)
+                    for targetSlot = 0 to 2
+                        float targetR = targetSlot + 1.0
+                        float targetPrice = entry + rrNewSide * targetR * rrNewDistance
+                        if targetPrice > 0
+                            string targetTip = "预先显示的 " + str.tostring(targetR, "#") + "R 参考价，基于冻结初始风险；不是止盈指令。"
+                            line targetLine = line.new(time, targetPrice, rrRightTime, targetPrice, xloc=xloc.bar_time, color=color.new(bull, 72), style=line.style_dashed, width=1, force_overlay=true)
+                            label targetTag = label.new(rrRightTime, targetPrice, str.tostring(targetR, "#") + "R · " + str.tostring(targetPrice, format.mintick), xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(chart.bg_color, 12), textcolor=bull, size=size.tiny, tooltip=targetTip, force_overlay=true)
+                            array.set(rrTargetLines, targetSlot, targetLine)
+                            array.set(rrTargetTags, targetSlot, targetTag)
 // END V2 RISK BOX DISPLAY
 
 // Only confirmed oscillator points are shown; the live tip holds prior values.
