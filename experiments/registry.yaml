@@ -8441,12 +8441,24 @@ experiments:
       review, complete negative findings and tail-retention disclosure.
   - experiment_id: exp-spike-v7-v1-compare-20260912-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 04d935b
-    status: active
+    source_commit: 3cb6fa35d83e074cc8e147020104aeb215f73ae8
+    status: inconclusive
     question: Does fixed prior BB200 compression admission improve V7 versus original V1 on the same archived market history?
     single_variable: V6 to V7 adds only prior run3 compression in12; no expansion or RSI. V1 comparisons separate native rules and common execution, direction and warmup.
-    result: Frozen rule before new pool outcomes; mapping archived V1 coverage and preparing like-for-like replay.
-    holdout_consumed: false
+    result: Completed 3531 archived streams. BB reduced V6 entries about 64-67% but V7 30m/1H PF remained below 1; 4H lacked matched-control support. V1 1H depended
+      strongly on one RAVE move. No universally superior configuration established.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    notes: Owner authorized all historical dates. B was selected after prior eight-market study, so overlap is reused research rather than blind validation. No production monitor or notifications changed.
+    notes: Owner authorized all historical dates. B selected after an overlapping eight-market study; this is reused research, not blind holdout. First full evaluation
+      per common arm; prior failed preflight, first-stream partial and resumed smoke are disclosed. Frozen raw at d88205a; post and arithmetic audit identities in receipts.
+      Production monitor and notifications unchanged.
+    canonical_report: analysis/p1_spike_v7_v1_compare_20260912.md
+    artifacts:
+    - spike-v7-v1-compare-20260912-report-md
+    - spike-v7-v1-compare-20260912-report-html
+    - spike-v7-v1-compare-20260912-raw-receipt
+    - spike-v7-v1-compare-20260912-post-receipt
+    - spike-v7-v1-compare-20260912-figures-receipt
+    - spike-v7-v1-compare-20260912-audit-receipt
+    - spike-v7-v1-compare-20260912-delivery-receipt

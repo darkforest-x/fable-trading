@@ -1,0 +1,73 @@
+{
+  "comparable_streams_frozen": 3531,
+  "completed_streams": 3531,
+  "config_path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v7-v1-compare-20260912-v1/config.json",
+  "config_sha256": "27f06ae10bf4747771b7d4793ec5deafebc3eaa14637aa1147743de3c2ce138c",
+  "covered_streams_frozen": 3531,
+  "excluded_cells": [
+    {
+      "minutes": 30,
+      "reason": "frozen normalized catalog tick=0; original V1 skipped execution and produced zero trades; historical raw tickSz is retained but not substituted",
+      "symbol": "SATS-USDT-SWAP",
+      "venue": "okx"
+    },
+    {
+      "minutes": 60,
+      "reason": "frozen normalized catalog tick=0; original V1 skipped execution and produced zero trades; historical raw tickSz is retained but not substituted",
+      "symbol": "SATS-USDT-SWAP",
+      "venue": "okx"
+    },
+    {
+      "minutes": 240,
+      "reason": "frozen normalized catalog tick=0; original V1 skipped execution and produced zero trades; historical raw tickSz is retained but not substituted",
+      "symbol": "SATS-USDT-SWAP",
+      "venue": "okx"
+    }
+  ],
+  "historical_v1_native": {
+    "method": "archived_v1_native_covered_ledger",
+    "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_ledger.csv.gz",
+    "rows_30m_1h_4h": 6185,
+    "sha256": "b15b69b8864e5eb651f2417fc6681ea688b5fbb95dacd15af1284b42744e3578"
+  },
+  "limitations": "Covered current-catalog subset only; no fetch, gap fill, cross-stream portfolio, funding, impact, or matched-control conclusion.",
+  "max_streams": null,
+  "reference_evaluated_cells": 3534,
+  "run_identity": {
+    "config_sha256": "27f06ae10bf4747771b7d4793ec5deafebc3eaa14637aa1147743de3c2ce138c",
+    "identity_sha256": "827831acfcd65ae1fbf5605b6f394b99cb109303ea4fb0f661cc65af06e01c9f",
+    "pine_sha256": "9878a9ddb769be558102e7f99284e80a8562b7eca3fa84999372992f48b6a36c",
+    "source_code_sha256": {
+      "yoyo/evaluation/spike_burst_progressive.py": "cec81a33997bd39272762bd70a451ceb5bf218da0e7fc0606271d165437fde08",
+      "yoyo/evaluation/spike_burst_replay.py": "996ef56ceb5b70da5337422d8390487330f7e387f648ee527b5afc9bda72a33f",
+      "yoyo/evaluation/spike_burst_v6_structure.py": "e84690c02e7b03291cc3037eab37ac495cc2ece79326e24411cfa72aa1214d4b",
+      "yoyo/evaluation/spike_v1_twoyear_allmarkets.py": "974c86a2d937ec3be80a5ba9002ae9acf381007e4794f2f3b679de2f4127ca9a",
+      "yoyo/evaluation/spike_v6_bb_squeeze.py": "31f02fdd44f677e227deb6a5560114d2277c206c42c8400ecef3ec864d4046c0",
+      "yoyo/evaluation/spike_v6_wvf_study.py": "ba8db5027680e259f0c7572e3d31b1fa709481869fd48679e004daec262d3fd4",
+      "yoyo/evaluation/spike_v7_fast.py": "f0cfe9e2fb6d16a71632728bdfca3f65160f21dbb5afff4d23e61d1acab3bdc0",
+      "yoyo/evaluation/spike_v7_v1_compare.py": "7868b180990912b1881f96c10495b48768d0d81a67dcd9ddb9681a3bea2f252f"
+    }
+  },
+  "source_code_sha256": {
+    "yoyo/evaluation/spike_burst_progressive.py": "cec81a33997bd39272762bd70a451ceb5bf218da0e7fc0606271d165437fde08",
+    "yoyo/evaluation/spike_burst_replay.py": "996ef56ceb5b70da5337422d8390487330f7e387f648ee527b5afc9bda72a33f",
+    "yoyo/evaluation/spike_burst_v6_structure.py": "e84690c02e7b03291cc3037eab37ac495cc2ece79326e24411cfa72aa1214d4b",
+    "yoyo/evaluation/spike_v1_twoyear_allmarkets.py": "974c86a2d937ec3be80a5ba9002ae9acf381007e4794f2f3b679de2f4127ca9a",
+    "yoyo/evaluation/spike_v6_bb_squeeze.py": "31f02fdd44f677e227deb6a5560114d2277c206c42c8400ecef3ec864d4046c0",
+    "yoyo/evaluation/spike_v6_wvf_study.py": "ba8db5027680e259f0c7572e3d31b1fa709481869fd48679e004daec262d3fd4",
+    "yoyo/evaluation/spike_v7_fast.py": "f0cfe9e2fb6d16a71632728bdfca3f65160f21dbb5afff4d23e61d1acab3bdc0",
+    "yoyo/evaluation/spike_v7_v1_compare.py": "7868b180990912b1881f96c10495b48768d0d81a67dcd9ddb9681a3bea2f252f"
+  },
+  "source_coverage_path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/coverage_limited.csv",
+  "source_coverage_sha256": "275b4ffd52bd38d96d2405426d78e77a31c9402babce4ab998d410858d7995ae",
+  "status": "complete",
+  "window": {
+    "end_exclusive": "2026-09-10T00:00:00+00:00",
+    "start": "2024-09-10T00:00:00+00:00",
+    "timeframes": [
+      30,
+      60,
+      240
+    ]
+  }
+}
