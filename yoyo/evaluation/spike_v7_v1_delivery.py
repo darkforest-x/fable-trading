@@ -252,6 +252,12 @@ V7 B 是既定的 V6 原始事件准入背景：先以当前及此前收盘价�
 
 {_variant_table(timeframe, both_variants)}
 
+## 共同执行拆分
+
+方向字段 `1` 表示多头，`-1` 表示空头。以下表格是同一已平仓事件指标的年度、交易所和方向拆分；不把不同流复利成全市场组合。
+
+{detail_markdown}
+
 ## 信号、准入与尾部逐笔留存
 
 V7 拒绝原因是先验门，而不是事后收益筛选。`insufficient_bb_history` 表示 712 根连续历史不足；`ready_without_recent_compression` 表示 BB 历史充分但此前 12 根没有完整 3 根压缩。
@@ -310,7 +316,7 @@ AUC 不适用：这里没有分类器概率或排序模型，只有规则事件�
 
 ```bash
 {command}
-python3 scripts/md_to_html.py {report} --out-dir analysis/html
+python3 scripts/md_to_html.py --out-dir analysis/html {report}
 ```
 
 输入目录：[`raw`]({raw_link})、[`post`]({post_link})、[`figures`]({figure_link})。报告 builder SHA256 在 delivery manifest 中记录；所有表格数字直接读取上述产物。
