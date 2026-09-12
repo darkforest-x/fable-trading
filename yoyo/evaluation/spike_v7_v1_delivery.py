@@ -294,7 +294,7 @@ V7 拒绝原因是先验门，而不是事后收益筛选。`insufficient_bb_his
 
 {_markdown_table(signals, [('variant', '执行臂', 'text'), ('minutes', '周期', 'int'), ('side', '方向', 'text'), ('entry_candidates', '候选', 'int'), ('entry_admitted', '准入', 'int'), ('raw_v6_short_exit_feed', '仅作反向退出的空头原始事件', 'int')])}
 
-逐笔同 entry identity 的真实兑现 ≥10R 留存如下；这是已平仓交易的精确联结，未把 MFE 当兑现。
+逐笔同 entry identity 的真实兑现 ≥10R 留存如下；这是已平仓交易的精确联结，未把 MFE 当兑现。这里的“同 entry 未留存”只表示 V7 没有在该 V6 进场根实际进场，**不等于整段行情漏掉**：V7 仍可能在另一根进场。本轮没有计算行情段级召回率；请同时查看 V7 自身的“真实兑现≥10R”笔数。
 
 {_markdown_table(tails, [('baseline', '基线', 'text'), ('target', 'V7目标', 'text'), ('timeframe_min', '周期', 'int'), ('baseline_closed', '基线已平仓', 'int'), ('baseline_net_ge_10r', '基线兑现≥10R', 'int'), ('same_entry_tails_retained', '同 entry 留存', 'int'), ('same_entry_tails_missed', '同 entry 未留存', 'int')])}
 
@@ -340,6 +340,7 @@ AUC 不适用：这里没有分类器概率或排序模型，只有规则事件�
 - BB 门需要完整前史 712 根；成本固定为往返 0.2%，未建模 funding、冲击、滑点差异或交易容量。
 - 未平仓交易标为删失，不参与已平仓胜率、PF、净R或独立余额；不能以 MFE 替代真实兑现。
 - PF 与事件净R是单笔描述；独立余额/DD 也只在单流内计算。本文没有全市场组合收益。
+- 历程包含失败尝试：`f02fbf0` 的预检因 SATS tick=0 未产生新交易输出；`aaa2767`/v2 在首流产生部分交易后于汇总失败；`d88205a`/v3 先完成 smoke 再续跑全池。v3 只复用 v2 已校验的输入清单，未复用其交易产物；因此不能称这批数据首次被查看或为盲测。
 - {'本 smoke 草稿只含一个流，任何好坏数字都不能推及 3,531 流或用于选择“最佳”V7。' if allow_partial else '完整覆盖也只能评价这个预注册的历史配置，不能自动 promote、训练或进入生产。'}
 
 ## 复现

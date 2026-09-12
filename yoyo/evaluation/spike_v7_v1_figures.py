@@ -1,4 +1,4 @@
-"""Render outcome-labelled V7 retained and missed trend examples from replay caches.
+"""Render outcome-labelled V7 retained and same-entry-not-retained examples.
 
 Images are retrospective review artifacts: they deliberately show future bars,
 which were not inputs to the entry filter. Selection is by realized net R and
@@ -23,7 +23,7 @@ from yoyo.evaluation.spike_v7_v1_report import bools
 
 
 def choose_examples(trades: pd.DataFrame) -> list[tuple[str, pd.Series]]:
-    """Pick winners, losses and missed tails with explicit retrospective labels."""
+    """Pick winners, losses and V6 entries not retained at that same entry."""
     closed = trades.loc[~bools(trades.censored)].copy()
     keys = ["venue", "symbol", "timeframe_min", "segment", "side", "signal_bar_open"]
     v7 = closed.loc[closed.variant.eq("v7_bb_both")]
@@ -35,7 +35,7 @@ def choose_examples(trades: pd.DataFrame) -> list[tuple[str, pd.Series]]:
     for title, frame, ascending in (("V1 common-execution winner", v1, False),
                                     ("V7 realized winner", v7, False),
                                     ("V7 realized loss", v7, True),
-                                    ("V6 trend missed by V7", missing, False)):
+                                    ("V6 entry not retained by V7", missing, False)):
         for _, row in frame.sort_values("net_r", ascending=ascending).drop_duplicates(["symbol", "timeframe_min"]).head(2).iterrows():
             selected.append((title, row))
     return selected
