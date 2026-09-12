@@ -23,12 +23,68 @@
     "v6_unfiltered_long",
     "v7_bb_long",
     "v6_unfiltered_both",
-    "v7_bb_both"
+    "v7_bb_both",
+    "v6_common_ready_long",
+    "v6_common_ready_both",
+    "v1_common_ready_long"
   ],
-  "coverage": "Pending exact archived V1 manifest mapping; default same two-year covered OKX/Binance/Gate pool 30m/1H/4H, no current-winner selection.",
-  "execution": "Frozen original V1 native ledger reported separately; common execution uses next open, signal frozen 5-bar extreme/.2ATR buffer/min2ATR stop,2R activates4ATR trail,0.2% roundtrip costs. Raw unfiltered opposite confirmations close references even if filtered entry is denied.",
+  "coverage": "Frozen original V1 evaluated cells from covered two-year current-catalog OKX/Binance/Gate pool,30m/1H/4H only; 3534 evaluated of5043 catalog cells; daily excluded. No fetch or outcome-selected symbols.",
+  "execution": "Frozen original V1 native ledger reported separately; common execution uses next open, signal frozen 5-bar extreme/.2ATR buffer/min2ATR stop,2R activates4ATR trail,0.2% roundtrip costs. Raw unfiltered opposite confirmations close references even if filtered entry is denied. V1 common long uses the same raw V6 short reversal-exit feed as V6/V7 long; native V1 ledger is separate and unchanged. When native V1 long and V6 short coincide, common execution gives exit priority and suppresses same-bar V1 long re-entry, with explicit conflict diagnostics; archived native ledger remains unchanged.",
   "holdout": "Owner authorized all dates. Fixed V7 B deployment configuration first evaluation in this new pool; overlapping B data already evaluated before, not fresh blind holdout. Report all reuse.",
   "training_eligible": false,
   "production_eligible": false,
-  "pine_sha256": "9878a9ddb769be558102e7f99284e80a8562b7eca3fa84999372992f48b6a36c"
+  "pine_sha256": "9878a9ddb769be558102e7f99284e80a8562b7eca3fa84999372992f48b6a36c",
+  "window": {
+    "start": "2024-09-10T00:00:00Z",
+    "end_exclusive": "2026-09-10T00:00:00Z",
+    "warmup_start": "2023-08-30T00:00:00Z",
+    "timeframes": [
+      30,
+      60,
+      240
+    ]
+  },
+  "common_ready": "Entry permission requires the same BB threshold history as V7, without requiring compression; original raw reverse signals are kept for exits.",
+  "frozen_inputs": {
+    "data/fetch_manifest.json": {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/data/fetch_manifest.json",
+      "sha256": "84ee11d7cc57001521a7c64786256cf4de8f4b332e0533d878c5be85231819f7"
+    },
+    "data/catalog.json": {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/data/catalog.json",
+      "sha256": "ed33bf444cec674f84081d55f05965b2aa39ef4c45a88bd458e1405d26a3aa3f"
+    },
+    "results/coverage_limited.csv": {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/coverage_limited.csv",
+      "sha256": "275b4ffd52bd38d96d2405426d78e77a31c9402babce4ab998d410858d7995ae"
+    },
+    "results/coverage_progress.json": {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/coverage_progress.json",
+      "sha256": "3e4c08972a2680fae48cc7b7862e960d8a6c969ab387531aca996ffe526a69a2"
+    },
+    "results/covered_trade_ledger.csv.gz": {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_ledger.csv.gz",
+      "sha256": "b15b69b8864e5eb651f2417fc6681ea688b5fbb95dacd15af1284b42744e3578"
+    }
+  },
+  "expected_coverage": {
+    "catalog_cells": 5043,
+    "evaluated_cells": 3534
+  },
+  "controls": {
+    "seeds": [
+      0
+    ],
+    "matching": [
+      "venue_symbol",
+      "timeframe",
+      "calendar_month",
+      "causal_prior120_volatility_quartile",
+      "side"
+    ],
+    "policy": "one prespecified matching seed per sampled realized event; same exit feed/risk/cost; common-ready arms also restrict random candidates to BB-ready history; unresolved controls excluded transparently; paired event comparison, not portfolio Random entry candidates likewise exclude opposite raw V6 confirmation on their own signal bar (exit priority).",
+    "inference": "time-block paired differences where sample permits; no claim of fresh blind validation",
+    "max_targets_per_stream_variant_side": 16,
+    "sample_selection": "SHA256 of entry identity, up to16 realized entries per stream/variant/side, before reading outcome values; all trades remain in performance tables"
+  }
 }
