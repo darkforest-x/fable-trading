@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v7-first-launch-20260912-config
+    artifact_type: config
+    role: fixed_first_launch_episode_ablation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 247075d9ac8b0c1db9c1ae47ba76fdc5d373d3a2
+    source_path: experiments/active/exp-spike-v7-first-launch-20260912-v1/config.json
+    sha256: 652e8fd9108925ae5e014d49689199e772bc9984fdc9c7f524c3f0a4090c8281
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen fixed B/A/C admission-only comparison; no parameter grid.
   - artifact_id: spike-exit-policy-20260912-config
     artifact_type: config
     role: prespecified_exit_and_capital_scenarios
