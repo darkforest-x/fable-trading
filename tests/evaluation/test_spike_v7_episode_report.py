@@ -4,7 +4,7 @@ import json
 import pandas as pd
 import pytest
 
-from yoyo.evaluation.spike_v7_episode_report import collect, cluster_effect, summarize
+from yoyo.evaluation.spike_v7_episode_report import collect, cluster_effect, summarize, normalize_booleans
 from yoyo.evaluation.spike_v7_episode_study import trade_metrics
 
 
@@ -55,3 +55,20 @@ def test_same_episode_later_entry_does_not_count_as_exact_tail_retention(tmp_pat
     assert summary.kept_winners10.eq(0).all()
     assert summary.episode_winners10.eq(1).all()
     assert result["event_summary"].loc[lambda x:x.arm.ne("baseline"), "signal_reduction"].eq(.6).all()
+
+
+def test_empty_csv_concat_object_bools_are_safe_to_invert():
+    tables = {
+        "accounts": pd.DataFrame({"valid": pd.Series([True, False], dtype=object)}),
+        "trades": pd.DataFrame({"censored": pd.Series([True, False], dtype=object)}),
+        "retention": pd.DataFrame({"exact_retained": pd.Series([True, False], dtype=object),
+                                    "same_episode_entry": pd.Series([False, True], dtype=object)}),
+        "controls": pd.DataFrame({"matched": pd.Series([None, True], dtype=object)}),
+    }
+    normalize_booleans(tables)
+    assert (~tables["retention"].exact_retained).tolist() == [False, True]
+    assert len(tables["retention"].loc[~tables["retention"].exact_retained]) == 1
+    assert tables["controls"].matched.tolist() == [False, True]
+    tables["accounts"]["valid"] = ["False", "True"]
+    with pytest.raises(ValueError, match="nonboolean"):
+        normalize_booleans(tables)

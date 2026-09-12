@@ -20,6 +20,25 @@ from yoyo.evaluation.spike_exit_policy_study import load_verified_stream
 LABELS = {"baseline": "B 原版V7", "first": "A 每段首次", "first_break": "C 首次突破边界"}
 
 
+def normalize_booleans(tables):
+    """Empty CSV streams can upcast actual bool values to object after concat.
+
+    Object-bool inversion produces integers -1/-2, so enforce actual Boolean
+    dtype before using any mask. Missing control matches mean unmatched only.
+    """
+    required = {"accounts": ["valid"], "trades": ["censored"],
+                "retention": ["exact_retained", "same_episode_entry"], "controls": ["matched"]}
+    for kind, columns in required.items():
+        for column in columns:
+            values = tables[kind][column]
+            if not values.dropna().map(lambda v: isinstance(v, (bool, np.bool_))).all():
+                raise ValueError(f"nonboolean values in {kind}.{column}")
+            if values.isna().any() and kind != "controls":
+                raise ValueError(f"missing required flag {kind}.{column}")
+            tables[kind][column] = values.fillna(False).astype(bool)
+    return tables
+
+
 def cluster_effect(values):
     """Paired stream-weighted mean with whole-base-asset resampling/sign flips."""
     clusters = values.groupby("asset").delta.agg(["sum", "count"])
@@ -81,6 +100,7 @@ def collect(result):
         if i % 500 == 0:
             print(json.dumps({"report_verified_streams": i}), flush=True)
     tables = {k: pd.concat(v, ignore_index=True) for k, v in parts.items()}
+    normalize_booleans(tables)
     return tables, dict(complete_streams=3531, all_baseline_rows_checked=checked, censored_rows_checked=censored)
 
 
