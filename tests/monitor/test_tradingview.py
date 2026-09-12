@@ -19,6 +19,29 @@ def test_exact_chart_identity(symbol, expected, timeframe, interval):
     assert parse_qs(url.query) == {"symbol": [expected], "interval": [interval]}
 
 
+@pytest.mark.parametrize("symbol,timeframe,canonical_symbol,canonical_timeframe", [
+    ("PEPEUSDT.P", "30", "PEPE-USDT-SWAP", "30m"),
+    ("OKX:ETHUSDT.P", "60", "ETH-USDT-SWAP", "1H"),
+    ("BTCUSDT", "240", "BTC-USDT-SWAP", "4H"),
+    ("SOL-USDT-SWAP", "1440", "SOL-USDT-SWAP", "1Dutc"),
+])
+def test_card_aliases_are_canonicalized_before_desktop_dispatch(
+        symbol, timeframe, canonical_symbol, canonical_timeframe, monkeypatch):
+    monkeypatch.setattr(tradingview.sys, "platform", "darwin")
+    monkeypatch.setattr(
+        tradingview.subprocess,
+        "run",
+        lambda *args, **kwargs: SimpleNamespace(returncode=0, stdout="loaded\n", stderr=""),
+    )
+    result = tradingview.open_chart(symbol, timeframe)
+    assert result == {
+        "requested": True,
+        "verified": True,
+        "symbol": canonical_symbol,
+        "timeframe": canonical_timeframe,
+    }
+
+
 @pytest.mark.parametrize("symbol,timeframe", [("BTC-USDT-SWAP&symbol=BAD", "1H"),
     ('BTC-USDT-SWAP\"', "1H"), ("https://evil.test", "1H"), ("BTC-USDT-SWAP", "10m"), ("", "4H")])
 def test_invalid_navigation_never_launches(symbol, timeframe, monkeypatch):
@@ -32,7 +55,7 @@ def test_bridge_uses_data_arguments_and_recovers_after_permission_failure(monkey
     monkeypatch.setattr(tradingview.sys, "platform", "darwin")
     calls = []
     responses = iter([SimpleNamespace(returncode=1, stdout="", stderr="private context -1743"),
-                      SimpleNamespace(returncode=0, stdout="requested\n", stderr="")])
+                      SimpleNamespace(returncode=0, stdout="loaded\n", stderr="")])
     def run(args, **kwargs):
         calls.append((args, kwargs))
         return next(responses)
@@ -41,8 +64,10 @@ def test_bridge_uses_data_arguments_and_recovers_after_permission_failure(monkey
         tradingview.open_chart("BTC-USDT-SWAP", "1H")
     assert "private context" not in str(error.value)
     assert tradingview.open_chart("ETH-USDT-SWAP", "4H")["requested"] is True
-    assert calls[1][0] == ["/usr/bin/osascript", str(tradingview.SCRIPT), tradingview.chart_url("ETH-USDT-SWAP", "4H")]
+    assert calls[1][0] == ["/usr/bin/osascript", str(tradingview.SCRIPT),
+                            tradingview.chart_url("ETH-USDT-SWAP", "4H"), "OKX:ETHUSDT.P", "240"]
     assert calls[1][1].get("shell", False) is False
+    assert calls[1][1]["timeout"] == 58
 
 
 def test_bridge_rejects_concurrent_clicks_without_launch(monkeypatch):
@@ -110,6 +135,7 @@ def test_process_timeout_releases_click_lock(monkeypatch):
     ("window_ready", "界面尚未就绪"),
     ("menu_button", "无法读取 TradingView 的打开链接菜单"),
     ("menu_items", "无法读取 TradingView 的打开链接菜单"),
+    ("verify_chart", "主图未加载到目标合约和周期"),
     ("dispatch", "界面尚未就绪"),
     ("clipboard", "无法读取或临时设置剪贴板"),
     ("layout", "图表布局配置不可用"),
@@ -138,6 +164,7 @@ def test_stage_diagnostics_are_precise_and_log_only_controlled_metadata(stage, e
     ("window_ready", "SPIKE_DEADLINE", "调用 TradingView 超时"),
     ("menu_button", "SPIKE_MENU_UNAVAILABLE", "无法读取 TradingView 的打开链接菜单"),
     ("menu_items", "SPIKE_MENU_UNAVAILABLE", "无法读取 TradingView 的打开链接菜单"),
+    ("verify_chart", "SPIKE_CHART_MISMATCH", "主图未加载到目标合约和周期"),
 ])
 def test_allowlisted_script_reasons_have_distinct_recovery_messages(stage, reason, expected, monkeypatch):
     monkeypatch.setattr(tradingview.sys, "platform", "darwin")
@@ -227,6 +254,16 @@ def test_process_failures_hide_exception_data_and_release_the_lock(failure, expe
     assert "private invocation" not in formatted
     assert "private OS failure" not in formatted
     monkeypatch.setattr(tradingview.subprocess, "run", lambda *a, **k:
-                        SimpleNamespace(returncode=0, stdout="requested\n", stderr=""))
+                        SimpleNamespace(returncode=0, stdout="loaded\n", stderr=""))
     assert tradingview.open_chart("BTC-USDT-SWAP", "1H") == {
-        "requested": True, "symbol": "BTC-USDT-SWAP", "timeframe": "1H"}
+        "requested": True, "verified": True,
+        "symbol": "BTC-USDT-SWAP", "timeframe": "1H"}
+
+
+def test_unverified_script_receipt_is_rejected(monkeypatch):
+    """A changed desktop tab title must never be accepted as a loaded chart."""
+    monkeypatch.setattr(tradingview.sys, "platform", "darwin")
+    monkeypatch.setattr(tradingview.subprocess, "run", lambda *a, **k:
+                        SimpleNamespace(returncode=0, stdout="requested\n", stderr=""))
+    with pytest.raises(tradingview.DesktopOpenError, match="未能打开 TradingView"):
+        tradingview.open_chart("BTC-USDT-SWAP", "1H")

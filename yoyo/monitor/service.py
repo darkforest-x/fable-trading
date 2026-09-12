@@ -258,14 +258,19 @@ class Monitor:
             self.store.upsert_market(state)
             history_since = now - 7 * 86400000
             kept = []
+            performance_by_close = getattr(result, "event_performance", {})
             for raw in result["events"]:
                 if raw["bar_close_ms"] < history_since:
                     continue
                 event = dict(raw, symbol=symbol, timeframe=timeframe, protocol=SIGNAL_PROTOCOL, detected_at_ms=now)
+                performance = event.pop("performance", None)
+                performance = performance_by_close.get(event["bar_close_ms"], performance)
                 event["is_fresh"] = 0 <= now - event["bar_close_ms"] <= FRESH_MS
                 # Queue the original first; candidate registration also journals it.
                 # Reinserted history must never acquire a new delivery receipt.
-                self.record_arrow(event, result["chart"], now, stale=stale)
+                inserted = self.record_arrow(event, result["chart"], now, stale=stale)
+                if isinstance(performance, dict):
+                    self.store.update_event_payload(self.store.event_id(event), {"performance": performance})
                 timeframe_since = self.timeframe_since.get(timeframe)
                 first_channel = min(self.notification_since, self.bark_since) if self.bark_since is not None else self.notification_since
                 if (is_tv_start(event) and timeframe_since is not None

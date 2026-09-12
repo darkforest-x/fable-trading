@@ -13,6 +13,9 @@ from yoyo.monitor.signals import analyze
 from yoyo.monitor.store import Store, now_ms
 
 
+PERFORMANCE_BACKFILL_PER_SCAN = 16
+
+
 def _valid_checkpoint(candles: object, timeframe: str) -> bool:
     """Accept only a complete, contiguous raw seed; malformed cache fails cold."""
     if timeframe not in TIMEFRAMES or not isinstance(candles, list) or not candles:
@@ -53,6 +56,9 @@ class V1Scanner:
             if _valid_checkpoint(value, key[1])
         }
         self._checkpointed = set(self.candles)
+        # Only replay cells that actually contain an older V1 card missing the
+        # new outcome projection.  This avoids a one-time full-universe CPU spike.
+        self._performance_backfill = self.store.event_pairs_missing_performance(SIGNAL_PROTOCOL)
 
     def scan_once(self) -> None:
         """Fetch confirmed bars, replay only changed closed candles, persist read models.
@@ -89,6 +95,9 @@ class V1Scanner:
         scan.update(status="scanning", total=len(instruments) * len(MONITORED_TIMEFRAMES))
         store.set_meta("scan", scan)
         cells = [(instrument, timeframe) for instrument in instruments for timeframe in MONITORED_TIMEFRAMES]
+        # Outcome projection is display-only.  Migrate a bounded number of
+        # unchanged markets per pass so startup cannot turn into a full replay.
+        performance_backfill = set(sorted(self._performance_backfill)[:PERFORMANCE_BACKFILL_PER_SCAN])
         with ThreadPoolExecutor(max_workers=8, thread_name_prefix="v1-okx") as pool:
             pending = {}
             cell_iter = iter(cells)
@@ -141,29 +150,39 @@ class V1Scanner:
                         checkpoint_ms = round((time.monotonic() - checkpoint_started) * 1000, 3)
                         checkpoint_cpu_ms = round((time.thread_time() - checkpoint_cpu_started) * 1000, 3)
                         self._checkpointed.add(cell)
-                    if not unchanged:
+                    needs_performance = cell in performance_backfill
+                    if not unchanged or needs_performance:
                         analyze_started = time.monotonic()
                         analyze_cpu_started = time.thread_time()
                         result = analyze(candles, [], timeframe, tick=float(instrument["tickSz"]), chart_limit=240)
                         analyze_ms = round((time.monotonic() - analyze_started) * 1000, 3)
                         analyze_cpu_ms = round((time.thread_time() - analyze_cpu_started) * 1000, 3)
+                        performance_by_close = getattr(result, "event_performance", {})
                         for event in result["events"]:
+                            # Older focused test doubles may still attach the
+                            # display projection directly. Never persist it as
+                            # part of the immutable signal before upsert.
+                            performance = event.pop("performance", None)
+                            performance = performance_by_close.get(event["bar_close_ms"], performance)
                             event.update(symbol=symbol, venue="okx", detected_at_ms=now_ms())
                             # Raw V1 is its own Bark stage when a separately
                             # armed direct policy permits this newly closed bar.
                             raw_bark = delivery_error(store, event, client.clock(), "bark") is None
-                            store.upsert_event(event, bark_notify=raw_bark)
+                            inserted = store.upsert_event(event, bark_notify=raw_bark)
+                            if isinstance(performance, dict):
+                                store.update_event_payload(store.event_id(event), {"performance": performance})
                             # YOLO is only an extra stage for a raw event that
                             # was eligible to notify at registration time. A
                             # cold scan can rediscover an old closed bar within
                             # nine TF bars; retain that raw history but never
                             # load/infer it as if it were a new live candidate.
-                            if raw_bark:
+                            if inserted and raw_bark:
                                 store.register_candidate(event, pending_proof(event))
                         state = dict(result["state"], symbol=symbol, venue="okx", active=True, stale=False,
                                      gap_count=gaps, available_bars=len(candles), tick_size=instrument["tickSz"],
                                      chart=result["chart"], events=result["events"][-100:])
                         store.upsert_market(state); store.set_meta(key, close)
+                        self._performance_backfill.discard(cell)
                 except Exception as exc:
                     scan["errors"] += 1
                     if len(scan["error_samples"]) < 8: scan["error_samples"].append({"symbol":symbol,"timeframe":timeframe,"error":type(exc).__name__})

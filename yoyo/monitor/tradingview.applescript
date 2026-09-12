@@ -69,13 +69,109 @@ on firstWebArea(rootElement, depthLeft)
     return missing value
 end firstWebArea
 
+-- Collect only the shallow web areas. Stopping at each AXWebArea avoids walking
+-- TradingView's full chart DOM until the verification step needs it.
+on collectWebAreas(rootElement, depthLeft)
+    my checkDeadline()
+    tell application "System Events"
+        try
+            if role of rootElement is "AXWebArea" then return {rootElement}
+            if depthLeft < 1 then return {}
+            set foundElements to {}
+            repeat with childElement in UI elements of rootElement
+                set foundElements to foundElements & my collectWebAreas(contents of childElement, depthLeft - 1)
+            end repeat
+            return foundElements
+        on error errorMessage number errorNumber
+            if errorNumber is -1712 or errorMessage is "SPIKE_DEADLINE" then error errorMessage number errorNumber
+            return {}
+        end try
+    end tell
+end collectWebAreas
+
+on validSymbol(symbolText)
+    if symbolText does not start with "OKX:" then return false
+    if symbolText does not end with ".P" then return false
+    if (length of symbolText) < 10 or (length of symbolText) > 48 then return false
+    repeat with c in characters 5 thru -3 of symbolText
+        if (contents of c) is not in "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" then return false
+    end repeat
+    return true
+end validSymbol
+
+on validInterval(intervalText)
+    return intervalText is in {"5", "15", "30", "60", "240", "1D"}
+end validInterval
+
+on intervalMatches(descriptionText, intervalText)
+    if intervalText is "5" then return descriptionText contains "5 分钟" or descriptionText contains "5 minute"
+    if intervalText is "15" then return descriptionText contains "15 分钟" or descriptionText contains "15 minute"
+    if intervalText is "30" then return descriptionText contains "30 分钟" or descriptionText contains "30 minute"
+    if intervalText is "60" then return descriptionText contains "1 小时" or descriptionText contains "1 hour"
+    if intervalText is "240" then return descriptionText contains "4 小时" or descriptionText contains "4 hour"
+    if intervalText is "1D" then return descriptionText contains "1 天" or descriptionText contains "1 日" or descriptionText contains "1 day"
+    return false
+end intervalMatches
+
+-- Window/tab titles can change before the visible chart does. Verify the
+-- chart canvas accessibility description itself, which includes both the
+-- loaded symbol and interval in current Chinese and English desktop builds.
+on loadedChartReady(chartWindow, targetSymbol, targetInterval)
+    my checkDeadline()
+    tell application "System Events" to tell application process "TradingView"
+        try
+            -- Opening a clipboard link rebuilds Electron's tab content and can
+            -- invalidate the AXWindow object captured before dispatch. Reacquire
+            -- only the current foreground window on every poll; never scan a
+            -- background window that may already show the requested chart.
+            set chartWindow to front window
+            set windowSize to size of chartWindow
+            if (item 1 of windowSize) < 601 or (item 2 of windowSize) < 301 then return false
+            -- Only inspect the window whose menu received this request. Another
+            -- open TradingView window may already show the same symbol/period;
+            -- it cannot prove that this click changed the active chart.
+            set webAreas to my collectWebAreas(contents of chartWindow, 10)
+            if (count of webAreas) < 2 then return false
+            set chartWebArea to item 2 of webAreas
+            set chartElements to entire contents of chartWebArea
+            repeat with e in chartElements
+                my checkDeadline()
+                try
+                    if role of e is "AXImage" then
+                        set imageText to ""
+                        try
+                            set imageText to description of e as text
+                        end try
+                        if imageText contains targetSymbol and my intervalMatches(imageText, targetInterval) then return true
+                        try
+                            set imageText to name of e as text
+                        end try
+                        if imageText contains targetSymbol and my intervalMatches(imageText, targetInterval) then return true
+                    end if
+                end try
+            end repeat
+        on error errorMessage number errorNumber
+            if errorNumber is -1712 or errorMessage is "SPIKE_DEADLINE" then error errorMessage number errorNumber
+            return false
+        end try
+    end tell
+    return false
+end loadedChartReady
+
 on run argv
-    set actionDeadline to (current date) + 15
+    -- A different symbol can take roughly 30–45 seconds to finish loading in
+    -- Desktop even though its new tab appears immediately. Keep one bounded
+    -- request alive long enough to verify the actual chart canvas.
+    set actionDeadline to (current date) + 52
     set operationStage to "layout"
     set previousClipboard to missing value
     set chartURL to missing value
     try
+        if (count of argv) is not 3 then error "SPIKE_INVALID_URL"
         set chartURL to item 1 of argv
+        set targetSymbol to item 2 of argv
+        set targetInterval to item 3 of argv
+        if not my validSymbol(targetSymbol) or not my validInterval(targetInterval) then error "SPIKE_INVALID_URL"
         -- This owner preference is outside source code. The generic URL cannot
         -- safely stand in for it because desktop layout restoration drops query.
         set layoutFile to (POSIX path of (path to home folder)) & "Library/Application Support/Fable/ImpulseMonitor/tradingview-layout.txt"
@@ -88,8 +184,9 @@ on run argv
         set chartURL to my bindToLayout(chartURL, layoutBase)
         set operationStage to "clipboard"
         set previousClipboard to the clipboard as record
-        -- Per-event timeout allows cleanup before the Python process deadline.
-        with timeout of 3 seconds
+        -- Keep UI traversal bounded while leaving time to verify the chart
+        -- canvas after Desktop consumes the clipboard link.
+        with timeout of 54 seconds
             set operationStage to "activate"
             tell application id "com.tradingview.tradingviewapp.desktop" to activate
             tell application "System Events" to tell application process "TradingView"
@@ -108,25 +205,25 @@ on run argv
                 -- activate. All retries remain inside the operation deadline.
                 repeat
                     my checkDeadline()
-                    repeat with w in windows
-                        my checkDeadline()
-                        try
-                            set s to size of w
-                            if (item 1 of s) > 600 and (item 2 of s) > 300 then
-                                set candidateChrome to my firstWebArea(contents of w, 14)
-                                if candidateChrome is not missing value then
-                                    set chartWindow to contents of w
-                                    set chrome to candidateChrome
-                                    exit repeat
-                                end if
+                    try
+                        -- Use the actual foreground chart window. Iterating every
+                        -- window can dispatch into a background TradingView window
+                        -- and then verify a different one than the user sees.
+                        set candidateWindow to front window
+                        set s to size of candidateWindow
+                        if (item 1 of s) > 600 and (item 2 of s) > 300 then
+                            set candidateChrome to my firstWebArea(contents of candidateWindow, 14)
+                            if candidateChrome is not missing value then
+                                set chartWindow to candidateWindow
+                                set chrome to candidateChrome
+                                exit repeat
                             end if
-                        on error errorMessage number errorNumber
-                            -- The splash may disappear during AX traversal.
-                            -- Permission and timeout errors must still surface.
-                            if not my isTransientAXError(errorNumber) then error errorMessage number errorNumber
-                        end try
-                    end repeat
-                    if chrome is not missing value then exit repeat
+                        end if
+                    on error errorMessage number errorNumber
+                        -- The splash may disappear during AX traversal.
+                        -- Permission and timeout errors must still surface.
+                        if not my isTransientAXError(errorNumber) then error errorMessage number errorNumber
+                    end try
                     delay 0.2
                 end repeat
                 -- Do not touch the clipboard while merely waiting for launch.
@@ -213,14 +310,27 @@ on run argv
             if not didRequest then error "SPIKE_MENU_UNAVAILABLE"
             -- Clipboard consumption is asynchronous in the desktop app.
             my checkDeadline()
-            delay 1
+            delay 2
+            set operationStage to "verify_chart"
+            set chartVerified to false
+            -- Desktop can switch the tab title several seconds before the chart
+            -- canvas finishes loading. Keep polling the canvas identity so a
+            -- valid slow load is not reported as a mismatch to the card UI.
+            repeat 40 times
+                if my loadedChartReady(chartWindow, targetSymbol, targetInterval) then
+                    set chartVerified to true
+                    exit repeat
+                end if
+                delay 1
+            end repeat
+            if not chartVerified then error "SPIKE_CHART_MISMATCH"
         end timeout
         my restoreClipboard(previousClipboard, chartURL)
-        return "requested"
+        return "loaded"
     on error errorMessage number errorNumber
         if previousClipboard is not missing value then my restoreClipboard(previousClipboard, chartURL)
         set errorReason to "SPIKE_AX_UNAVAILABLE"
-        repeat with knownReason in {"SPIKE_LAYOUT_UNAVAILABLE", "SPIKE_CLIPBOARD_CHANGED", "SPIKE_DEADLINE", "SPIKE_MENU_UNAVAILABLE", "SPIKE_INVALID_URL"}
+        repeat with knownReason in {"SPIKE_LAYOUT_UNAVAILABLE", "SPIKE_CLIPBOARD_CHANGED", "SPIKE_DEADLINE", "SPIKE_MENU_UNAVAILABLE", "SPIKE_CHART_MISMATCH", "SPIKE_INVALID_URL"}
             if errorMessage contains (contents of knownReason) then set errorReason to contents of knownReason
         end repeat
         error "SPIKE_STAGE=" & operationStage & ";SPIKE_CODE=" & errorNumber & ";SPIKE_REASON=" & errorReason number errorNumber

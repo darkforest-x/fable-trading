@@ -2,7 +2,8 @@
 
 Only confirmed, aligned 15m/30m/1H/4H bars are accepted.  The V1 source emits a
 signal at a bar close; this monitor records that close as raw signal evidence,
-never a fill.  There is no mirrored short signal and no outcome lookup.
+never a fill.  There is no mirrored short signal.  Closed bars after an event
+may update display-only V1 path state; that state never feeds signal generation.
 """
 from __future__ import annotations
 
@@ -18,10 +19,61 @@ PROTOCOL = {"version": SIGNAL_PROTOCOL, "source": "yoyo/evaluation/pine/spike_bu
             "entry_reference": "next_bar_open_not_known_at_signal", "warmup_bars": WARMUP}
 
 
+class AnalysisResult(dict):
+    """Frozen JSON result plus a non-serialized mutable card projection."""
+
+    __slots__ = ("event_performance",)
+
+    def __init__(self, payload: dict, event_performance: dict | None = None):
+        super().__init__(payload)
+        self.event_performance = event_performance or {}
+
+
 def _json_number(value):
     """Keep an unavailable pre-warmup feature explicit in persisted chart JSON."""
     number = float(value)
     return number if np.isfinite(number) else None
+
+
+def _path_performance(replayed: pd.DataFrame, times: np.ndarray, step: int,
+                      position: int, next_position: int) -> dict:
+    """Summarize V1's closed-bar path after one signal without feeding it back.
+
+    Columns used are replay outputs ``exit``, ``exit_price``, ``current_r``,
+    ``peak_r``, ``protection``, ``active_protection`` and ``trail_armed`` from
+    the signal bar through the bar before the next signal.  These are outcome
+    display fields only; signal generation never reads this dictionary.
+    """
+    segment = replayed.iloc[position:next_position]
+    exits = np.flatnonzero(segment["exit"].to_numpy(dtype=bool, copy=False))
+    stopped = bool(len(exits))
+    final_offset = int(exits[0]) if stopped else len(segment) - 1
+    final_position = position + final_offset
+    final = replayed.iloc[final_position]
+
+    current_r = _json_number(final["current_r"])
+    peak_r = _json_number(final["peak_r"])
+    exit_r = current_r if stopped else None
+    if stopped:
+        status = "profit" if current_r is not None and current_r > 1e-9 else "loss" if current_r is not None and current_r < -1e-9 else "breakeven"
+        stop_price = _json_number(final["active_protection"])
+    else:
+        status = "active"
+        stop_price = _json_number(final["protection"])
+    return {
+        "status": status,
+        "stop_triggered": stopped,
+        "current_r": current_r,
+        "peak_r": peak_r,
+        "exit_r": exit_r,
+        "exit_price": _json_number(final["exit_price"]) if stopped else None,
+        "stop_price": stop_price,
+        "trailing_active": bool(final["trail_armed"]),
+        "bars_held": final_position - position,
+        "updated_at_ms": int(times[final_position]) + step,
+        "exit_time_ms": int(times[final_position]) + step if stopped else None,
+        "basis": "v1_signal_close_reference",
+    }
 
 
 def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, tick: float,
@@ -50,7 +102,9 @@ def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, t
             raise ValueError("invalid candle")
         rows.append((pd.Timestamp(t, unit="ms", tz="UTC"), values)); prior = t
     if not rows:
-        return {"events": [], "chart": [], "state": {"phase":"loading","ready":False,"bars":0,"timeframe":timeframe}, "protocol":dict(PROTOCOL)}
+        return AnalysisResult({"events": [], "chart": [],
+                               "state": {"phase":"loading","ready":False,"bars":0,"timeframe":timeframe},
+                               "protocol":dict(PROTOCOL)})
     frame = pd.DataFrame([x[1] for x in rows], index=pd.DatetimeIndex([x[0] for x in rows]))
     frame.columns = ["open", "high", "low", "close", "volume"]
     feature_frame = features(frame)
@@ -58,7 +112,7 @@ def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, t
     if chart_limit is not None and (type(chart_limit) is not int or chart_limit < 1):
         raise ValueError("invalid chart_limit")
     chart_start = max(0, len(frame) - chart_limit) if chart_limit is not None else 0
-    chart, events = [], []
+    chart, events, event_positions, event_performance = [], [], [], {}
     # Pull immutable V1 outputs once.  Repeated Series ``.iloc`` calls made
     # the monitor spend most of a cell replay in pandas indexing rather than
     # the frozen feature/replay functions; these arrays retain every input and
@@ -85,7 +139,17 @@ def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, t
                            "price":float(c),"risk":float(replay_values["risk"][i]),"initial_stop":float(replay_values["initial_stop"][i]),"source_sha256":SOURCE_SHA256,
                            "entry_reference":"next_open","executable_entry_time":None,"ready":True,"confirmed":True,
                            "volume_ratio":float(feature_values["rv"][i]),"tr_atr_expansion":float(feature_values["expansion"][i])})
+            event_positions.append(i)
+    for index, (event, position) in enumerate(zip(events, event_positions)):
+        next_position = event_positions[index + 1] if index + 1 < len(event_positions) else len(replayed)
+        performance = _path_performance(replayed, times, step, position, next_position)
+        performance.update(entry_price=event["price"], initial_stop=event["initial_stop"])
+        # Outcome state is a mutable read-model keyed by immutable signal time.
+        # Keeping it outside ``events`` preserves prefix equality for the
+        # causal signal contract while allowing the monitor to refresh cards.
+        event_performance[event["bar_close_ms"]] = performance
     state={"phase":"ready","ready":bool(feature_values["ready"][-1]),"bars":len(frame),"timeframe":timeframe,
            "bar_open_ms":chart[-1]["t"],"bar_close_ms":chart[-1]["t"]+step,"price":chart[-1]["c"],"direction":"long_only",
            "protocol":SIGNAL_PROTOCOL,"source_sha256":SOURCE_SHA256}
-    return {"events":events,"chart":chart,"state":state,"protocol":dict(PROTOCOL)}
+    return AnalysisResult({"events":events,"chart":chart,"state":state,
+                           "protocol":dict(PROTOCOL)}, event_performance)

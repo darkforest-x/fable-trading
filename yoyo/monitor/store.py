@@ -133,8 +133,22 @@ class Store:
             event = json.loads(row[0])
             if event.get("id") != event_id:
                 raise ValueError("event payload identity mismatch")
+            if all(event.get(key) == value for key, value in updates.items()):
+                return False
             event.update(updates)
             return db.execute("UPDATE events SET payload=? WHERE id=?", (encode(event), event_id)).rowcount == 1
+
+    def event_pairs_missing_performance(self, protocol):
+        """Return live raw cells whose compact card outcome still needs backfill."""
+        with self.connect() as db:
+            rows = db.execute(
+                "SELECT DISTINCT symbol,timeframe FROM events "
+                "WHERE kind=? AND json_extract(payload,'$.protocol')=? "
+                "AND json_extract(payload,'$.source')='live' "
+                "AND json_type(payload,'$.performance') IS NULL",
+                (SIGNAL_KIND, protocol),
+            ).fetchall()
+        return {(row[0], row[1]) for row in rows}
 
     def save_candle_checkpoint(self, symbol, timeframe, candles):
         """Persist the scanner's full raw recurrence seed, compressed locally."""
@@ -354,7 +368,7 @@ class Store:
                     "venue", "symbol", "direction", "side", "bar_close_ms", "bar_open_ms",
                     "signal_close_time", "signal_bar_open", "signal_close", "price", "is_closed",
                     "executable_entry_time", "entry_reference", "risk", "initial_stop", "source_sha256",
-                    "performance_status", "notification_status", "bark_notification_status",
+                    "performance_status", "performance", "notification_status", "bark_notification_status",
                     "near_zero_bars", "dense", "htf_side", "ready", "phase", "stale", "error")
             compact = {key: event[key] for key in keys if key in event}
             indicator = event.get("indicator")
@@ -363,7 +377,7 @@ class Store:
                                         ("id", "protocol", "kind", "source", "confirmation", "timeframe",
                                          "timeframe_min", "venue", "symbol", "direction", "side",
                                          "bar_open_ms", "bar_close_ms", "price", "risk", "initial_stop", "near_zero_bars", "dense",
-                                         "htf_side") if key in indicator}
+                                         "htf_side", "performance") if key in indicator}
             model = event.get("model")
             if isinstance(model, dict):
                 compact["model"] = {key: model[key] for key in

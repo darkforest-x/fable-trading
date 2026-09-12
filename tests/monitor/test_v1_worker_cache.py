@@ -221,3 +221,49 @@ def test_scanner_publishes_generation_before_synchronize(tmp_path, monkeypatch):
     assert observed["worker_pid"] > 0
     assert observed["worker_started_at_ms"] > 0
     assert observed["total"] == observed["completed"] == 0
+
+
+def test_performance_backfill_is_bounded_and_never_registers_old_candidates(tmp_path, monkeypatch):
+    class ManyClient(Client):
+        def instruments(self):
+            return [{"instId": f"TEST{i:02d}-USDT-SWAP", "tickSz": "0.01"}
+                    for i in range(v1_worker.PERFORMANCE_BACKFILL_PER_SCAN + 2)]
+
+    client = ManyClient()
+    monkeypatch.setattr(v1_worker, "OKX", lambda: client)
+    replays = []
+
+    def replay(candles, higher, timeframe, *, tick, chart_limit):
+        replays.append(timeframe)
+        open_ms = candles[-1]["t"]
+        return {
+            "events": [{"protocol": SIGNAL_PROTOCOL, "kind": SIGNAL_KIND, "source": "live",
+                        "confirmation": "raw", "direction": "long", "side": "long",
+                        "confirmed": True, "is_closed": True, "timeframe": timeframe,
+                        "timeframe_min": TIMEFRAMES[timeframe] // 60_000,
+                        "bar_open_ms": open_ms, "bar_close_ms": open_ms + TIMEFRAMES[timeframe],
+                        "price": 100.0, "risk": 1.0, "initial_stop": 99.0,
+                        "source_sha256": "a" * 64,
+                        "performance": {"status": "active", "current_r": 0.0}}],
+            "chart": list(candles), "state": {"phase": "ready", "ready": True,
+                                                     "timeframe": timeframe},
+        }
+
+    monkeypatch.setattr(v1_worker, "analyze", replay)
+    database = tmp_path / "monitor.sqlite3"
+    scanner = v1_worker.V1Scanner(str(database))
+    scanner.scan_once()
+    # Treat every market as unchanged on the migration pass, and force more
+    # missing cells than the per-pass budget.
+    scanner._performance_backfill = {
+        (instrument["instId"], timeframe)
+        for instrument in client.instruments() for timeframe in MONITORED_TIMEFRAMES
+    }
+    replays.clear()
+    candidate_calls = []
+    monkeypatch.setattr(scanner.store, "register_candidate",
+                        lambda *args, **kwargs: candidate_calls.append((args, kwargs)))
+    scanner.scan_once()
+    assert len(replays) == v1_worker.PERFORMANCE_BACKFILL_PER_SCAN
+    assert candidate_calls == []
+    assert len(scanner._performance_backfill) > 0

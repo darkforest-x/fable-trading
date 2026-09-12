@@ -38,9 +38,8 @@ function refreshHarness(fetchImpl) {
   const cutoff = app.indexOf("  function redact(value)");
   assert.ok(cutoff > 0, "refresh harness must cut before browser event bindings");
   const instrumented = `${app.slice(0, cutoff)}
-  renderErrors = renderStatus = renderSignals = renderWatch = renderDetail = () => {};
-  chooseSignal = clearSelectedSignal = () => {};
-  globalThis.__refreshHarness = { state, refresh, queueRefresh, loadEarlierRawSignals };
+  renderErrors = renderStatus = renderSignals = renderWatch = () => {};
+  globalThis.__refreshHarness = { state, refresh, queueRefresh, loadEarlierRawSignals, invalidateSignalQuery, performanceView };
 })();`;
   const classList = { add() {}, remove() {}, toggle() {} };
   const element = { disabled: false, classList, textContent: "", innerHTML: "", style: {}, setAttribute() {}, removeAttribute() {} };
@@ -58,27 +57,11 @@ function jsonResponse(value) {
   return { ok: true, headers: { get: () => "application/json" }, json: async () => value };
 }
 
-function chartHarness() {
-  const cutoff = app.indexOf("  function redact(value)");
-  const renderTarget = '    $("chart-container").innerHTML = parts.join("");';
-  let instrumented = app.slice(0, cutoff);
-  assert.ok(instrumented.includes(renderTarget), "chart harness must capture the rendered SVG before DOM bindings");
-  instrumented = instrumented.replace(renderTarget, '    globalThis.__chartSvg = parts.join(""); return;');
-  instrumented += '\n  globalThis.__chartHarness = { state, renderChart };\n})();';
-  const sandbox = {
-    AbortController, Date, Intl, Map, Set, Promise, Number, String, Boolean,
-    Array, Object, Math, RegExp, Error, TypeError, JSON, encodeURIComponent,
-    document: { getElementById: () => ({}), querySelector: () => ({ textContent: "" }), querySelectorAll: () => [] },
-  };
-  vm.runInNewContext(instrumented, sandbox, { filename: "app-chart-harness.js" });
-  return { ...sandbox.__chartHarness, svg: () => sandbox.__chartSvg };
-}
-
 function cardHarness() {
   const cutoff = app.indexOf("  function redact(value)");
   assert.ok(cutoff > 0, "card harness must cut before browser event bindings");
   const instrumented = `${app.slice(0, cutoff)}
-  globalThis.__cardHarness = { state, normalizeV1Event, signalCardHTML };
+  globalThis.__cardHarness = { state, normalizeV1Event, signalCardHTML, performanceView };
 })();`;
   const sandbox = {
     AbortController, Date, Intl, Map, Set, Promise, Number, String, Boolean,
@@ -89,20 +72,13 @@ function cardHarness() {
   return sandbox.__cardHarness;
 }
 
-function chartBars() {
-  return [0, 60_000, 120_000, 180_000].map((t) => ({
-    t, o: 100, h: 101, l: 99, c: 100, md: 1, sb: 0, focus: false,
-    sma20: 100, ema20: 100, sma60: 100, ema60: 100, sma120: 100, ema120: 100,
-  }));
-}
-
 function consume(row) {
   if (!row || typeof row !== "object") throw new TypeError("API item must be an object");
   const timeframe = Number(row.timeframe_min);
-  if (!Number.isInteger(timeframe) || ![15, 30, 60, 240].includes(timeframe)) throw new TypeError("unsupported timeframe");
+  if (!Number.isInteger(timeframe) || ![5, 15, 30, 60, 240, 1440].includes(timeframe)) throw new TypeError("unsupported timeframe");
   if (!["live", "replay"].includes(row.source)) throw new TypeError("unknown source");
   if (!["raw", "yolo", "raw_yolo"].includes(row.confirmation)) throw new TypeError("unknown confirmation");
-  if (row.direction !== "long") throw new TypeError("SPIKE V1 is long-only");
+  if (!["long", "short"].includes(row.direction)) throw new TypeError("unknown direction");
   const close = Date.parse(row.signal_close_time);
   if (!Number.isFinite(close)) throw new TypeError("signal close must be UTC parseable");
   return {
@@ -125,7 +101,7 @@ test("V1 page exposes live/replay and 15m/30m/1H/4H signal controls", () => {
   assert.doesNotMatch(filters, /data-timeframe="5"|1Dutc/);
   assert.match(page, /data-signal-source="live"/);
   assert.match(page, /data-signal-source="replay"/);
-  assert.match(page, /V1 · 仅多头 · 已收盘 K 线/);
+  assert.match(page, /原版 V1 · 仅多头 · 已收盘/);
 });
 
 test("real-time raw V1 fixture remains separate from YOLO supplemental confirmation", () => {
@@ -151,23 +127,83 @@ test("replay fixture is labeled historical and never inherits a live notificatio
   assert.equal(replay.notification, "muted");
   assert.equal(replay.executableEntry, null);
   assert.match(app, /历史回放不通知/);
-  assert.match(app, /回放未提供成交时钟/);
   assert.match(app, /source=\$\{source\}/);
-  assert.match(app, /\/api\/replay\/chart\?event_id=/);
-  assert.match(app, /信号之后的 K 线仅用于回看/);
+  assert.doesNotMatch(page, /detail-panel|chart-dialog|页内预览/);
 });
 
-test("covered replay receipts distinguish realized facts from censored rows without a performance claim", () => {
-  assert.match(app, /function coveredLedgerFacts\(item\)/);
-  assert.match(app, /covered_linked_realized_unverified/);
-  assert.match(app, /已关联 · 未独立收益审核/);
-  assert.match(app, /replayExitReason.*protective_stop: "保护止损"/);
-  assert.match(app, /回测退出 · 北京时间/);
-  assert.match(app, /单笔净 R/);
-  assert.match(app, /非账户收益，未独立核验/);
-  assert.match(app, /covered_linked_censored_unverified/);
-  assert.match(app, /未实现；不计胜率、PF 或净收益/);
-  assert.match(app, /尚未关联 v2 覆盖账本 · 不展示收益/);
+test("cards distinguish active profit and stopped loss using signal-path R", () => {
+  const { state, normalizeV1Event, signalCardHTML } = cardHarness();
+  state.status = { now_ms: Date.now(), runtime: { notification_channels: [] } };
+  state.statusReceivedAt = Date.now();
+  const active = normalizeV1Event({ ...rawLive, performance: {
+    status: "active", current_r: 2.35, peak_r: 3.1, stop_price: 0.0000027,
+    trailing_active: true, bars_held: 12,
+  } }, "live");
+  const loss = normalizeV1Event({ ...rawLive, id: "loss", performance: {
+    status: "loss", current_r: -1, exit_r: -1, peak_r: 0.25,
+    stop_price: 0.00000262, trailing_active: false, bars_held: 4,
+  } }, "live");
+  assert.match(signalCardHTML(active), /outcome-active-win/);
+  assert.match(signalCardHTML(active), /运行中 · \+2\.35R/);
+  assert.match(signalCardHTML(active), /最高 R<\/dt><dd>\+3\.10R/);
+  assert.match(signalCardHTML(active), /跟随保护/);
+  assert.match(signalCardHTML(loss), /outcome-loss/);
+  assert.match(signalCardHTML(loss), /已止损 · -1\.00R/);
+  assert.match(signalCardHTML(loss), /信号收盘参考，并非账户实际成交/);
+});
+
+test("YOLO cards prefer the latest raw-event R state over their confirmation snapshot", () => {
+  const { state, normalizeV1Event, performanceView } = cardHarness();
+  const raw = normalizeV1Event({ ...rawLive, performance: {
+    status: "profit", current_r: 4.2, exit_r: 4.2, peak_r: 6.1,
+    stop_price: 0.000003108, trailing_active: true, bars_held: 33,
+  } }, "live");
+  const confirmed = normalizeV1Event({ ...yoloLive, source_event_id: raw.id, indicator: {
+    ...rawLive, id: raw.id, performance: {
+      status: "active", current_r: 0.3, peak_r: 0.4, stop_price: rawLive.initial_stop,
+    },
+  } }, "live");
+  state.directSignals = [raw];
+  const view = performanceView(confirmed);
+  assert.equal(view.className, "outcome-win");
+  assert.equal(view.value, "+4.20R");
+  assert.equal(view.peak, "+6.10R");
+});
+
+test("YOLO refresh reloads current raw R after query invalidation", async () => {
+  const paths = [];
+  const latest = {
+    status: "profit", current_r: 5.4, exit_r: 5.4, peak_r: 7.2,
+    stop_price: 0.000003201, trailing_active: true, bars_held: 41,
+  };
+  const harness = refreshHarness(async (path) => {
+    paths.push(path);
+    if (path === "/api/status") return jsonResponse({ now_ms: Date.now(), runtime: {} });
+    if (path.includes("confirmation=raw_yolo")) return jsonResponse({ items: [], total: 0, next_cursor: null });
+    if (path.includes("confirmation=yolo")) return jsonResponse({ items: [{
+      ...yoloLive, source_event_id: rawLive.id, indicator: {
+        ...rawLive, id: rawLive.id, performance: {
+          status: "active", current_r: 0.2, peak_r: 0.3,
+          stop_price: rawLive.initial_stop, trailing_active: false, bars_held: 2,
+        },
+      },
+    }], total: 1, next_cursor: null });
+    return jsonResponse({ items: [{ ...rawLive, timeframe_min: 60, performance: latest }], total: 1, next_cursor: null });
+  });
+  const { state, refresh, invalidateSignalQuery, performanceView } = harness;
+  state.directSignals = [{ stale: true }];
+  invalidateSignalQuery();
+  state.signalScope = "confirmed";
+  state.timeframe = "60";
+  await refresh();
+  assert.equal(state.directSignals.length, 0, "the hidden overlay must not become visible raw cards or receipts");
+  assert.equal(state.performanceSignals.length, 1);
+  assert.ok(paths.some((path) => path.includes("confirmation=yolo") && path.includes("timeframe=1H")));
+  assert.ok(paths.some((path) => path.includes("confirmation=raw") && path.includes("timeframe=1H")));
+  const view = performanceView(state.signals[0]);
+  assert.equal(view.className, "outcome-win");
+  assert.equal(view.value, "+5.40R");
+  assert.equal(view.peak, "+7.20R");
 });
 
 test("idle YOLO gate is shown as standby, while loading and error remain distinct", () => {
@@ -194,110 +230,22 @@ test("selected timeframe is filtered by the API before its 2000-row limit", () =
 test("pending, malformed, and empty API cases do not become executable live signals", () => {
   assert.equal(consume(pending).closed, false);
   assert.throws(() => consume({ ...rawLive, source: "cache" }), /unknown source/);
-  assert.throws(() => consume({ ...rawLive, timeframe_min: 5 }), /unsupported timeframe/);
-  assert.throws(() => consume({ ...rawLive, direction: "short" }), /long-only/);
+  assert.equal(consume({ ...rawLive, timeframe_min: 5 }).timeframe, 5);
+  assert.equal(consume({ ...rawLive, direction: "short" }).closed, true);
+  assert.throws(() => consume({ ...rawLive, direction: "flat" }), /unknown direction/);
   assert.throws(() => consume(null), /API item/);
   assert.match(app, /服务返回的数据格式有误/);
-  assert.match(app, /direction !== "long"/);
-  assert.match(app, /尚未确认 · 不作为可执行 V1/);
+  assert.match(app, /!\["long", "short"\]\.includes\(direction\)/);
   assert.match(app, /尚无导入的历史回放记录/);
 });
 
-test("chart uses UTC timestamp distance, preserves gaps, and plots only explicit stop prices", () => {
-  const timestamps = [Date.parse("2026-09-11T00:00:00Z"), Date.parse("2026-09-11T00:30:00Z"), Date.parse("2026-09-11T04:30:00Z")];
-  const first = timestamps[0];
-  const range = timestamps.at(-1) + 30 * 60_000 - first;
-  const x = (time) => (time - first + 15 * 60_000) / range;
-  assert.ok(x(timestamps[2]) - x(timestamps[1]) > 4 * (x(timestamps[1]) - x(timestamps[0])));
-  assert.match(app, /const firstTime = Number\(candles\[0\]\.t\)/);
-  assert.match(app, /timeRange = Math\.max\(nominalMs, lastTime - firstTime\)/);
-  assert.match(app, /original\?\.initial_stop/);
-  assert.match(app, /V1 风险参考.*original\.risk/s);
-  assert.match(app, /may be a distance or a ratio/);
-  assert.match(app, /chart-risk-line/);
-  assert.match(app, /pointerdown/);
-  assert.match(app, /event\.deltaY/);
-});
-
-test("initial SL SVG begins after the explicit original close and labels outside the price clip", () => {
-  const harness = chartHarness();
-  harness.state.chart = { source: "replay", candles: chartBars(), events: [] };
-  harness.state.selected = {
-    id: "signal", kind: "tv_start", source: "replay", confirmation: "raw", side: "long",
-    symbol: "PEPEUSDT", timeframe: "1", timeframe_min: 1, price: 100, initial_stop: 90,
-    bar_open_ms: 60_000, bar_close_ms: 120_000,
-  };
-  harness.renderChart();
-  const svg = harness.svg();
-  assert.match(svg, /class="chart-risk-line" x1="275"/);
-  const line = svg.indexOf('class="chart-risk-line"');
-  const clipClose = svg.indexOf("</g>", line);
-  const label = svg.indexOf('class="chart-risk-label"');
-  assert.ok(clipClose > line && label > clipClose, "initial SL label must be outside price-clip");
-  assert.match(svg, />初始 SL /);
-  assert.match(svg, /class="chart-risk-label" x="596"[^>]*text-anchor="end"[^>]*>初始 SL 90\.00</,
-    "right-aligned label must keep the whole explicit stop price inside the SVG");
-
-  harness.state.selected = { ...harness.state.selected, bar_close_ms: 240_000 };
-  harness.renderChart();
-  assert.doesNotMatch(harness.svg(), /chart-risk-line/);
-  assert.match(harness.svg(), /class="chart-risk-label"[^>]*>初始 SL /);
-
-  harness.state.selected = { ...harness.state.selected, bar_close_ms: 300_000 };
-  harness.renderChart();
-  assert.doesNotMatch(harness.svg(), /chart-risk-line|chart-risk-label/);
-
-  harness.state.selected = { ...harness.state.selected };
-  delete harness.state.selected.bar_close_ms;
-  harness.renderChart();
-  assert.doesNotMatch(harness.svg(), /chart-risk-line|chart-risk-label/);
-});
-
-test("chart markers accept the current SPIKE V1 raw kind and retain the YOLO parent arrow", () => {
-  const harness = chartHarness();
-  const raw = {
-    id: "raw-spike-v1", kind: "spike_burst_v1", source: "live", confirmation: "raw", side: "long",
-    bar_open_ms: 60_000, bar_close_ms: 120_000, price: 100, near_zero_bars: 12,
-  };
-  const markerX = (svg) => Number(svg.match(/<g data-event-kind="tv_start"[^>]*>[\s\S]*?<path d="M([^,]+),/)?.[1]);
-
-  // A live API chart stores the real current kind.  It must render even when
-  // no card has been selected, so this cannot rely on candidate fallback.
-  harness.state.chart = { source: "live", candles: chartBars(), events: [raw] };
-  harness.state.selected = null;
-  harness.renderChart();
-  assert.match(harness.svg(), /data-event-kind="tv_start" data-side="long"/,
-    "the current raw SPIKE V1 chart event must render a launch arrow without a selected candidate");
-  const rawMarkerX = markerX(harness.svg());
-  assert.ok(Number.isFinite(rawMarkerX));
-
-  harness.state.selected = { ...raw, id: "legacy-tv-start", kind: "tv_start" };
-  harness.state.chart = { source: "live", candles: chartBars(), events: [] };
-  harness.renderChart();
-  assert.match(harness.svg(), /data-event-kind="tv_start" data-side="long"/,
-    "persisted legacy chart rows must remain visible");
-
-  harness.state.selected = {
-    id: "yolo-confirmation", kind: "yolo_confirmed", source: "live", confirmation: "yolo", side: "long",
-    bar_open_ms: 120_000, bar_close_ms: 180_000, price: 101, indicator: raw, model: {},
-  };
-  harness.renderChart();
-  assert.match(harness.svg(), /data-event-kind="tv_start" data-side="long"/,
-    "a YOLO confirmation must render its original raw V1 arrow at the parent time");
-  assert.equal(markerX(harness.svg()), rawMarkerX,
-    "the YOLO parent arrow must stay on the original raw bar, not the confirmation bar");
-  assert.doesNotMatch(app, /indicator, kind: "tv_start"/,
-    "the compatibility renderer must not rewrite the parent event's backend kind");
-  assert.match(app, /const isV1StartMarker = \(event\) => event\?\.kind === "spike_burst_v1" \|\| event\?\.kind === "tv_start"/);
-});
-
-
-test("live chart translates the display timeframe to the monitor API timeframe", () => {
-  assert.match(app, /\["15", "15"\]/);
-  assert.match(app, /"15": "15m"/);
-  assert.match(app, /const chartTimeframe = apiTimeframe\(item\.timeframe\)/);
-  assert.match(app, /timeframe=\$\{encodeURIComponent\(chartTimeframe\)\}/);
-  assert.match(app, /图表周期不受当前 V1 服务支持/);
+test("whole-card TradingView requests normalize the UI timeframe and the inline preview is gone", () => {
+  assert.match(app, /const request = \{ symbol: item\.symbol, timeframe: apiTimeframe\(item\.timeframe\) \}/);
+  assert.match(app, /data-tradingview-action="signal"/);
+  assert.match(app, /title="点击整张卡片，在本机 TradingView 打开"/);
+  assert.match(app, /整卡打开 TradingView ↗/);
+  assert.doesNotMatch(app, /data-preview-signal-id|function renderChart|function loadChart|function renderDetail/);
+  assert.doesNotMatch(page, /detail-panel|chart-dialog|页内预览/);
 });
 
 test("15m raw and YOLO rows survive the shared signal and warmup routes as Bark-muted display-only records", async () => {
@@ -345,23 +293,13 @@ test("15m live cards retain raw and YOLO rows, use TradingView interval 15, and 
   assert.match(yoloCard, /data-tv-timeframe="15"/);
 });
 
-test("changing source or timeframe cannot retain a stale detail chart", () => {
-  assert.match(app, /const sameSelection = .*a\.source === b\.source.*a\.confirmation === b\.confirmation/s);
-  assert.match(app, /state\.chartController\?\.abort\(\);\s*state\.chartRequest\+\+;/s);
-  assert.match(app, /!currentItems\.some\(\(item\) => sameSelection\(state\.selected, item\)\)/);
-  assert.match(app, /request !== state\.chartRequest \|\| !sameSelection\(state\.selected, item\)/);
-  assert.match(app, /state\.signalSource = button\.dataset\.signalSource;\s*state\.rowLimit = 24; invalidateSignalQuery\(\);/s);
-});
-
 test("source or timeframe switches discard prior API results and queue the current request", () => {
   assert.match(app, /refreshQueued: null, signalQueryRevision: 0/);
-  assert.match(app, /function invalidateSignalQuery\(\).*state\.signals = \[\];.*state\.directSignals = \[\];.*clearSelectedSignal\(\);/s);
+  assert.match(app, /function invalidateSignalQuery\(\).*state\.signals = \[\];.*state\.directSignals = \[\];/s);
   assert.match(app, /if \(state\.syncing\) \{ queueRefresh\(trigger\); return; \}/);
   assert.match(app, /const queryRevision = state\.signalQueryRevision;.*const querySource = signalQuerySource\(\);.*const queryView = state\.view;.*const queryTimeframe = state\.timeframe;/s);
   assert.match(app, /if \(queryRevision !== state\.signalQueryRevision \|\| querySource !== signalQuerySource\(\) \|\| queryView !== state\.view \|\| queryTimeframe !== state\.timeframe\) return;/);
   assert.match(app, /if \(state\.refreshQueued\) \{\s*const queuedTrigger = state\.refreshQueued;\s*state\.refreshQueued = null;\s*refresh\(queuedTrigger\);/s);
-  assert.match(app, /\$\("chart-container"\)\.removeAttribute\("aria-label"\)/);
-  assert.match(app, /正在加载 \$\{sourceName\(item\)\} \$\{shortSymbol\(item\.symbol\)\}/);
 });
 
 test("Unicode replay symbols remain searchable without retaining an unrelated cached card", () => {
@@ -369,7 +307,7 @@ test("Unicode replay symbols remain searchable without retaining an unrelated ca
   assert.equal(normalSearch("龙虾_USDT"), "龙虾USDT");
   assert.equal(normalSearch("币安人生-USDT"), "币安人生USDT");
   assert.match(app, /normalize\("NFKC"\)\.toUpperCase\(\)\.replace\(\/\[\^\\p\{L\}\\p\{N\}\]\/gu, ""\)/);
-  assert.match(app, /if \(!items\.some\(\(item\) => sameSelection\(state\.selected, item\)\)\).*else clearSelectedSignal\(\);/s);
+  assert.doesNotMatch(app, /sameSelection|clearSelectedSignal|state\.selected/);
 });
 
 test("replay symbols without a swap separator do not repeat their quote asset", () => {
@@ -380,15 +318,8 @@ test("replay symbols without a swap separator do not repeat their quote asset", 
   assert.equal(shortSymbol("AIXBTUSDT"), "AIXBT");
   assert.equal(shortSymbol("DATA-USDT-SWAP"), "DATA");
   assert.equal(shortSymbol("PEPEUSDT.P"), "PEPE");
-  assert.match(app, /页内预览 \$\{venue\} \$\{shortSymbol\(item\.symbol\)\}/);
+  assert.match(app, /整卡打开 TradingView ↗/);
 });
-
-test("stale ledger evidence hides its prior outcome until an immutable snapshot relinks it", () => {
-  assert.match(app, /stale_evidence_unverified/);
-  assert.match(app, /账本证据已过期 · 不展示收益/);
-  assert.match(app, /等待新的不可变账本快照重链/);
-});
-
 
 test("replay direct cards can page older raw records without replacing loaded pages", () => {
   assert.match(app, /before_close_ms=\$\{encodeURIComponent\(cursor\.close_ms\)\}/);
@@ -404,13 +335,6 @@ test("replay direct cards can page older raw records without replacing loaded pa
   assert.match(app, /state\.rawPaged = true/);
   assert.match(app, /key === "directSignals" && state\.rawPaged/);
   assert.match(app, /已加载 \$\{number\(source\.length\)\} 条；可继续读取更早记录/);
-});
-
-
-test("missing frozen OHLC remains unverified and is never replaced with a live chart", () => {
-  assert.match(app, /link\?\.link_status === "ohlc_missing"/);
-  assert.match(app, /缺少同源冻结 OHLC · 不展示收益/);
-  assert.match(app, /不使用其他交易所或当前行情替代/);
 });
 
 

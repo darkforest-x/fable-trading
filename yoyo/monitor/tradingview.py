@@ -1,14 +1,10 @@
-"""Owner-authorized Mac chart navigation, separate from monitoring and trading.
+"""Owner-authorized Mac chart navigation, separate from trading and alerts.
 
-TradingView Desktop 3.4.0 on this Mac registers a login URL scheme but has no
-chart deep-link handler. Its documented Mac entry point is Open link from
-clipboard: https://www.tradingview.com/support/solutions/43000708221-how-in-app-link-handling-works-in-tradingview-desktop/
-Owner explicitly authorized this AppleScript bridge on 2026-09-08. It targets
-only that menu, receives a constructed OKX URL as argv (never executable source),
-and attempts to restore the previous clipboard unless the user has copied
-something else. Ordinary script errors clean up; an OS/process crash cannot
-guarantee clipboard restoration.
-No signal rule, model, notification or order execution is involved.
+TradingView Desktop does not apply chart query parameters through its registered
+login URL scheme. The bridge binds each validated request to the owner's saved
+layout and uses Desktop's "Open link from clipboard" entry point. It reports
+success only after the chart canvas exposes the requested symbol and interval.
+No signal rule, model, notification, or order execution is involved.
 """
 from __future__ import annotations
 
@@ -26,11 +22,12 @@ INTERVALS = TV_INTERVALS
 SCRIPT = Path(__file__).with_suffix(".applescript")
 _OPEN_LOCK = threading.Lock()
 LOG = logging.getLogger("spike.tradingview")
-_STAGES = frozenset({"activate", "accessibility", "window_ready", "menu_button",
-                     "menu_items", "dispatch", "clipboard", "layout"})
+_STAGES = frozenset({"arguments", "activate", "accessibility", "window_ready",
+                     "verify_chart", "dispatch", "clipboard", "layout",
+                     "menu_button", "menu_items"})
 _REASONS = frozenset({"SPIKE_LAYOUT_UNAVAILABLE", "SPIKE_CLIPBOARD_CHANGED",
                      "SPIKE_DEADLINE", "SPIKE_MENU_UNAVAILABLE", "SPIKE_AX_UNAVAILABLE",
-                     "SPIKE_INVALID_URL"})
+                     "SPIKE_CHART_MISMATCH", "SPIKE_INVALID_URL"})
 _STAGE_ERROR = re.compile(
     r"SPIKE_STAGE=([a-z_]+);SPIKE_CODE=(-?\d{1,6});SPIKE_REASON=([A-Z_]+)(?![A-Z0-9_])"
 )
@@ -69,6 +66,8 @@ def _failure_message(stage: str, code: int | None, reason: str) -> str:
         return "TradingView 界面尚未就绪或窗口已发生变化。请等待应用加载完成、关闭遮挡弹窗后重试。"
     if reason == "SPIKE_MENU_UNAVAILABLE" or stage in {"menu_button", "menu_items"}:
         return "无法读取 TradingView 的打开链接菜单。请关闭应用内弹窗、确认主窗口可操作后重试。"
+    if reason == "SPIKE_CHART_MISMATCH" or stage == "verify_chart":
+        return "TradingView 已接收链接，但主图未加载到目标合约和周期。请关闭应用内弹窗后重试。"
     if stage == "layout":
         return "TradingView 图表布局配置不可用。请先保存并配置要使用的图表布局，再重试。"
     if stage == "clipboard":
@@ -91,28 +90,66 @@ class DesktopOpenError(Exception):
         self.status_code = status_code
 
 
-def chart_url(symbol: str, timeframe: str) -> str:
-    """Only accept an OKX swap identity and one of the monitored timeframes."""
-    match = re.fullmatch(r"([A-Z0-9]{1,30})-([A-Z0-9]{2,10})-SWAP", symbol)
-    if not match or timeframe not in INTERVALS:
+_TIMEFRAME_ALIASES = {
+    "5": "5m", "5m": "5m",
+    "15": "15m", "15m": "15m",
+    "30": "30m", "30m": "30m",
+    "60": "1H", "1h": "1H", "1H": "1H",
+    "240": "4H", "4h": "4H", "4H": "4H",
+    "1440": "1Dutc", "1d": "1Dutc", "1D": "1Dutc", "1Dutc": "1Dutc", "D": "1Dutc",
+}
+_ALL_INTERVALS = {**INTERVALS, "5m": "5", "1Dutc": "1D"}
+
+
+def normalize_timeframe(timeframe: str) -> str:
+    """Normalize API/UI aliases without widening the allowed TV intervals."""
+    normalized = _TIMEFRAME_ALIASES.get(timeframe)
+    if normalized is None:
         raise DesktopOpenError("合约或周期无效；支持 OKX 永续的 5m、15m、30m、1H、4H、日线。", 400)
-    query = urlencode({"symbol": f"OKX:{match[1]}{match[2]}.P", "interval": INTERVALS[timeframe]})
+    return normalized
+
+
+def normalize_symbol(symbol: str) -> tuple[str, str, str]:
+    """Return canonical OKX id, base and quote from card or TV identities."""
+    value = symbol.strip().upper() if isinstance(symbol, str) else ""
+    if value.startswith("OKX:"):
+        value = value[4:]
+    if value.endswith(".P"):
+        value = value[:-2]
+    match = re.fullmatch(r"([A-Z0-9]{1,30})-(USDT|USDC|USD)-SWAP", value)
+    if match is None:
+        match = re.fullmatch(r"([A-Z0-9]{1,30})(USDT|USDC|USD)", value)
+    if match is None:
+        raise DesktopOpenError("合约或周期无效；支持 OKX 永续的 5m、15m、30m、1H、4H、日线。", 400)
+    base, quote = match.groups()
+    return f"{base}-{quote}-SWAP", base, quote
+
+
+def chart_url(symbol: str, timeframe: str) -> str:
+    """Accept the bounded identities emitted by current and historical cards."""
+    _, base, quote = normalize_symbol(symbol)
+    normalized_timeframe = normalize_timeframe(timeframe)
+    query = urlencode({"symbol": f"OKX:{base}{quote}.P", "interval": _ALL_INTERVALS[normalized_timeframe]})
     return "https://www.tradingview.com/chart/?" + query
 
 
 def open_chart(symbol: str, timeframe: str) -> dict:
     url = chart_url(symbol, timeframe)
+    canonical_symbol, base, quote = normalize_symbol(symbol)
+    canonical_timeframe = normalize_timeframe(timeframe)
     if sys.platform != "darwin":
         raise DesktopOpenError("一键打开需要在安装 TradingView 的 Mac 上运行。")
     if not _OPEN_LOCK.acquire(blocking=False):
         raise DesktopOpenError("上一张图还在打开，请稍后再试。", 409)
     try:
-        result = subprocess.run(["/usr/bin/osascript", str(SCRIPT), url],
-                                capture_output=True, text=True, timeout=25, check=False)
-        if result.returncode or result.stdout.strip() != "requested":
+        result = subprocess.run(["/usr/bin/osascript", str(SCRIPT), url,
+                                 f"OKX:{base}{quote}.P", _ALL_INTERVALS[canonical_timeframe]],
+                                capture_output=True, text=True, timeout=58, check=False)
+        if result.returncode or result.stdout.strip() != "loaded":
             # Never return raw AppleScript output or clipboard contents to the API.
             raise _report_failure(*_failure_details(result.stderr))
-        return {"requested": True, "symbol": symbol, "timeframe": timeframe}
+        return {"requested": True, "verified": True,
+                "symbol": canonical_symbol, "timeframe": canonical_timeframe}
     except subprocess.TimeoutExpired:
         raise _report_failure("dispatch", -1712, "SPIKE_DEADLINE") from None
     except OSError:

@@ -4,12 +4,11 @@
 
   const $ = (id) => document.getElementById(id);
   const state = {
-    view: "signals", signals: [], directSignals: [], rawYoloSignals: [], candidates: [], signalScope: "direct", markets: [], status: null, health: null,
+    view: "signals", signals: [], directSignals: [], performanceSignals: [], rawYoloSignals: [], candidates: [], signalScope: "direct", markets: [], status: null, health: null,
     signalsLoaded: false, directSignalsLoaded: false, directSignalTotal: 0, candidatesLoaded: false, candidateTotal: 0, candidateCounts: null, marketsLoaded: false, marketsLoading: false, marketsRetryTimer: null, signalTotal: 0, rowLimit: 24, watchLimit: 24, search: "", watchSearch: "", watchScope: "building",
     rawNextCursor: null, rawHasMore: false, rawPaged: false, rawLoadingMore: false,
-    timeframe: "all", watchTimeframe: "all", side: "long", signalSource: "live", selected: null,
-    chartKey: null, chart: null, chartRequest: 0, chartController: null, chartExpanded: false, chartViewport: null,
-    syncing: false, refreshQueued: null, signalQueryRevision: 0, lastSync: null, statusReceivedAt: null, errors: {}, chartHover: null, detailOrigin: "signals",
+    timeframe: "all", watchTimeframe: "all", side: "all", signalSource: "live",
+    syncing: false, refreshQueued: null, signalQueryRevision: 0, lastSync: null, statusReceivedAt: null, errors: {},
     tradingViewPending: false,
   };
   const titles = {
@@ -24,10 +23,10 @@
   // Server cursor pages are intentionally smaller than its 2,000-row safety cap.
   // Cards need a browse path, not multi-megabyte concurrent JSON responses.
   const SIGNAL_PAGE_SIZE = 500;
-  const TV_INTERVALS = new Map([["15", "15"], ["30", "30"], ["60", "60"], ["240", "240"]]);
-  const apiTimeframe = (value) => ({ "15": "15m", "30": "30m", "60": "1H", "240": "4H", 15: "15m", 30: "30m", 60: "1H", 240: "4H" }[value] || null);
-  const uiTimeframe = (value) => ({ "15m": "15", "30m": "30", "1H": "60", "4H": "240", "15": "15", "30": "30", "60": "60", "240": "240", 15: "15", 30: "30", 60: "60", 240: "240" }[value] || null);
-  const timeframeLabel = (value) => ({ "15": "15m", "30": "30m", "60": "1H", "240": "4H", 15: "15m", 30: "30m", 60: "1H", 240: "4H" }[value] || value || "—");
+  const TV_INTERVALS = new Map([["5", "5m"], ["15", "15m"], ["30", "30m"], ["60", "1H"], ["240", "4H"], ["1440", "1Dutc"], ["1Dutc", "1Dutc"]]);
+  const apiTimeframe = (value) => ({ "5": "5m", "5m": "5m", "15": "15m", "15m": "15m", "30": "30m", "30m": "30m", "60": "1H", "1h": "1H", "1H": "1H", "240": "4H", "4h": "4H", "4H": "4H", "1440": "1Dutc", "1D": "1Dutc", "1Dutc": "1Dutc", 5: "5m", 15: "15m", 30: "30m", 60: "1H", 240: "4H", 1440: "1Dutc" }[value] || null);
+  const uiTimeframe = (value) => ({ "5m": "5", "15m": "15", "30m": "30", "1H": "60", "4H": "240", "1Dutc": "1Dutc", "1D": "1Dutc", "5": "5", "15": "15", "30": "30", "60": "60", "240": "240", "1440": "1Dutc", 5: "5", 15: "15", 30: "30", 60: "60", 240: "240", 1440: "1Dutc" }[value] || null);
+  const timeframeLabel = (value) => ({ "5": "5m", "5m": "5m", "15": "15m", "15m": "15m", "30": "30m", "30m": "30m", "60": "1H", "1H": "1H", "240": "4H", "4H": "4H", "1Dutc": "日线", "1D": "日线", "1440": "日线", 5: "5m", 15: "15m", 30: "30m", 60: "1H", 240: "4H", 1440: "日线" }[value] || value || "—");
   const phaseNames = {
     building: "蓄势中", accumulating: "蓄势中", accumulation: "蓄势中", compression: "密集蓄势",
     ready: "等待启动", armed: "等待启动", flat: "零轴横盘", neutral: "观察中",
@@ -64,12 +63,12 @@
     const confirmation = row.confirmation;
     const close = milliseconds(row.signal_close_time ?? row.bar_close_ms);
     const direction = row.direction ?? row.side;
-    if (![15, 30, 60, 240].includes(minutes) || !["live", "replay"].includes(row.source) || !["raw", "yolo", "raw_yolo"].includes(confirmation) || direction !== "long" || !finite(close)) return null;
+    if (![5, 15, 30, 60, 240, 1440].includes(minutes) || !["live", "replay"].includes(row.source) || !["raw", "yolo", "raw_yolo"].includes(confirmation) || !["long", "short"].includes(direction) || !finite(close)) return null;
     const rowScope = ["live", "warmup", "replay"].includes(row.display_scope) ? row.display_scope : requestedScope || row.source;
     return { ...row, id: String(row.id ?? `${row.source}|${confirmation}|${row.venue}|${row.symbol}|${minutes}|${row.signal_close_time}`),
       source: row.source === "replay" ? "replay" : "live", confirmation, timeframe: String(minutes), timeframe_min: minutes,
       display_scope: rowScope,
-      kind: confirmation === "raw" ? "tv_start" : "yolo_confirmed", side: "long", bar_close_ms: close,
+      kind: confirmation === "raw" ? "tv_start" : "yolo_confirmed", side: direction, bar_close_ms: close,
       bar_open_ms: milliseconds(row.signal_bar_open ?? row.bar_open_ms) || close - minutes * 60000,
       price: row.signal_close ?? row.price, is_closed: row.is_closed === true,
       model: confirmation === "raw" ? row.model : { ...(row.model || {}), status: "confirmed" } };
@@ -115,7 +114,6 @@
   }
   const modelScore = (item) => finite(item.model?.confidence) && Number(item.model.confidence) >= 0 && Number(item.model.confidence) <= 1 ? Number(item.model.confidence).toFixed(2) : "—";
   const sameEvent = (a, b) => a && b && a.kind === b.kind && String(a.id) === String(b.id) && a.symbol === b.symbol && a.timeframe === b.timeframe;
-  const sameSelection = (a, b) => sameEvent(a, b) && a.source === b.source && a.confirmation === b.confirmation && a.bar_close_ms === b.bar_close_ms;
   const quoteSymbol = (symbol) => /-USD-SWAP$/.test(String(symbol)) ? "USD" : "USDT";
   // Preserve Unicode letters/numbers: replay contracts may have non-ASCII names.
   const normalSearch = (value) => String(value).normalize("NFKC").toUpperCase().replace(/[^\p{L}\p{N}]/gu, "");
@@ -141,39 +139,6 @@
     if (!finite(value)) return "—";
     const n = Number(value);
     return n.toLocaleString("en-US", { minimumFractionDigits: Math.abs(n) >= 1 ? 2 : 0, maximumFractionDigits: 12 });
-  }
-  const replayExitReason = (value) => ({ protective_stop: "保护止损", target: "目标退出", timeout: "观察期结束" }[String(value)] || "未知回测退出");
-  function coveredLedgerFacts(item) {
-    // A replay receipt is an identity link to the covered ledger, never a
-    // strategy verdict.  Keep censored rows out of every realized outcome.
-    if (item?.source !== "replay") return [];
-    const link = item.covered_ledger, outcome = link?.outcome;
-    if (item.performance_status === "covered_linked_realized_unverified" && outcome?.status === "realized") {
-      return [
-        ["覆盖账本关联", "已关联 · 未独立收益审核", "model-color"],
-        ["回测退出 · 北京时间", `${replayExitReason(outcome.exit_reason)} · ${shortDate(outcome.exit_time_ms)}`, ""],
-        ["单笔净 R", finite(outcome.net_r) ? `${Number(outcome.net_r).toFixed(3)} R · 非账户收益，未独立核验` : "—", ""],
-      ];
-    }
-    if (item.performance_status === "covered_linked_censored_unverified" && outcome?.status === "censored") {
-      return [["覆盖账本关联", "已关联 · 样本结束时尚未退出", "model-color"],
-              ["账本结果", "未实现；不计胜率、PF 或净收益", ""]];
-    }
-    if (item.performance_status === "stale_evidence_unverified" && link?.link_status === "stale_evidence") {
-      return [["覆盖账本关联", "账本证据已过期 · 不展示收益", "muted"],
-              ["账本结果", "等待新的不可变账本快照重链", ""]];
-    }
-    if (item.performance_status === "unverified" && link?.link_status === "ohlc_missing") {
-      return [["覆盖账本关联", "缺少同源冻结 OHLC · 不展示收益", "muted"],
-              ["账本结果", "该回放无法核验历史图，不使用其他交易所或当前行情替代", ""]];
-    }
-    return [["覆盖账本关联", "尚未关联 v2 覆盖账本 · 不展示收益", ""]];
-  }
-  function axisPrice(value) {
-    if (!finite(value)) return "—";
-    const n = Number(value), abs = Math.abs(n);
-    const digits = abs >= 1000 ? 2 : abs >= 10 ? 3 : abs >= 1 ? 4 : Math.min(12, Math.max(5, -Math.floor(Math.log10(abs || 1)) + 3));
-    return n.toLocaleString("en-US", { minimumFractionDigits: abs >= 1 ? 2 : 0, maximumFractionDigits: digits });
   }
   function ageLabel(ms) {
     if (!finite(ms) || Number(ms) <= 0) return "尚无记录";
@@ -209,7 +174,9 @@
     }
   }
   function canOpenTradingView(item) {
-    return typeof item?.symbol === "string" && /^[A-Z0-9]{1,30}-[A-Z0-9]{2,10}-SWAP$/.test(item.symbol) && TV_INTERVALS.has(item.timeframe);
+    const symbol = String(item?.symbol || "").toUpperCase();
+    const validSymbol = /^[A-Z0-9]{1,30}-(USDT|USDC|USD)-SWAP$/.test(symbol) || /^(?:OKX:)?[A-Z0-9]{1,30}(?:USDT|USDC|USD)(?:\.P)?$/.test(symbol);
+    return validSymbol && Boolean(apiTimeframe(item?.timeframe));
   }
   function renderTradingViewButtons() {
     document.querySelectorAll("[data-tradingview-action]").forEach((button) => {
@@ -233,13 +200,15 @@
       tradingViewStatus("当前合约或周期不支持在 TradingView 打开。", "error");
       return;
     }
-    const request = { symbol: item.symbol, timeframe: item.timeframe };
+    const request = { symbol: item.symbol, timeframe: apiTimeframe(item.timeframe) };
     const label = `${shortSymbol(request.symbol)} ${quoteSymbol(request.symbol)} · ${timeframeLabel(request.timeframe)}`;
     state.tradingViewPending = true;
     renderTradingViewButtons();
     tradingViewStatus(`正在请求 本机 TradingView 打开 ${label}…`, "pending");
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30000);
+    // TradingView Desktop may expose its tab before the chart canvas has
+    // switched. The server verifies that canvas for up to 58 seconds.
+    const timeout = setTimeout(() => controller.abort(), 62000);
     try {
       const response = await fetch("/api/tradingview/open", {
         method: "POST", cache: "no-store", signal: controller.signal,
@@ -249,8 +218,10 @@
       const isJSON = (response.headers.get("content-type") || "").includes("json");
       const result = isJSON ? await response.json() : null;
       if (!response.ok) throw new Error(typeof result?.detail === "string" ? result.detail : `服务返回 HTTP ${response.status}`);
-      if (result?.requested !== true || result.symbol !== request.symbol || result.timeframe !== request.timeframe) throw new Error("服务未返回有效的打开请求回执。");
-      tradingViewStatus(`已请求 TradingView 打开 ${label}。`, "");
+      if (result?.requested !== true || result?.verified !== true || result.timeframe !== request.timeframe) {
+        throw new Error("服务未确认目标主图已加载。");
+      }
+      tradingViewStatus(`已在 Mac TradingView 打开 ${label}。`, "");
     } catch (error) {
       tradingViewStatus(error.name === "AbortError" ? "打开请求超时，尚无法确认结果；请先查看 TradingView。" : `无法请求 TradingView：${error.message || "连接失败"}`, "error");
     } finally {
@@ -262,7 +233,6 @@
   function setView(view, updateHash = true) {
     const previousView = state.view;
     const nextView = titles[view] ? view : "signals";
-    if (state.chartExpanded && nextView !== state.view) setChartExpanded(false, false);
     state.view = nextView;
     ["signals", "watch", "system"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== (signalView(state.view) ? "signals" : state.view)));
     document.querySelectorAll("[data-view]").forEach((button) => {
@@ -326,6 +296,46 @@
       return `<span class="row-status ${className}" data-notification-channel="${channel}" title="${escapeHTML(description)}" aria-label="${escapeHTML(description)}"><span class="notification-channel">${name}</span><span>${escapeHTML(label)}</span></span>${policyNote}`;
     }).join("");
   }
+  function signalPerformance(item) {
+    const original = originalSignal(item);
+    if (isConfirmed(item)) {
+      const sourceId = String(item?.source_event_id || original?.id || "");
+      const originalClose = milliseconds(original?.bar_close_ms ?? original?.signal_close_time ?? item.bar_close_ms);
+      const latest = [...state.performanceSignals, ...state.directSignals].find((row) => !isConfirmed(row) &&
+        ((sourceId && String(row.id || "") === sourceId) ||
+          (row.symbol === item.symbol && row.timeframe === item.timeframe && row.side === item.side &&
+            milliseconds(row.bar_close_ms ?? row.signal_close_time) === originalClose)));
+      if (latest?.performance && typeof latest.performance === "object") return latest.performance;
+    }
+    if (original?.performance && typeof original.performance === "object") return original.performance;
+    if (item?.performance && typeof item.performance === "object") return item.performance;
+    return null;
+  }
+  function signedR(value) {
+    if (!finite(value)) return "—";
+    const amount = Number(value);
+    return `${amount > 0 ? "+" : ""}${amount.toFixed(2)}R`;
+  }
+  function performanceView(item) {
+    const performance = signalPerformance(item);
+    if (!performance) return {
+      className: "outcome-unknown", badge: "走势计算中", value: "—", valueLabel: "当前 R",
+      peak: "—", stop: finite(originalSignal(item)?.initial_stop) ? price(originalSignal(item).initial_stop) : "—",
+      stopLabel: "初始 SL", note: "等待已收盘行情更新",
+    };
+    const status = String(performance.status || "active");
+    const outcomeR = status === "active" ? performance.current_r : performance.exit_r ?? performance.current_r;
+    const positive = finite(outcomeR) && Number(outcomeR) > 0.005;
+    const negative = finite(outcomeR) && Number(outcomeR) < -0.005;
+    const className = status === "profit" ? "outcome-win" : status === "loss" ? "outcome-loss" : status === "breakeven" ? "outcome-even" : positive ? "outcome-active-win" : negative ? "outcome-active-loss" : "outcome-active";
+    const badge = status === "profit" ? `已保护退出 · ${signedR(outcomeR)}` : status === "loss" ? `已止损 · ${signedR(outcomeR)}` : status === "breakeven" ? "保本退出 · 0.00R" : `运行中 · ${signedR(outcomeR)}`;
+    const stop = performance.stop_price ?? performance.initial_stop ?? originalSignal(item)?.initial_stop;
+    return {
+      className, badge, value: signedR(outcomeR), valueLabel: status === "active" ? "当前 R" : "退出 R",
+      peak: signedR(performance.peak_r), stop: finite(stop) ? price(stop) : "—",
+      stopLabel: performance.trailing_active ? "跟随保护" : "SL", note: status === "active" ? `${number(performance.bars_held)} 根已收盘 K 线 · 保护线下一根生效` : `已持有 ${number(performance.bars_held)} 根 K 线`,
+    };
+  }
   function renderSignals() {
     const items = filteredSignals();
     const confirmed = state.signalScope === "confirmed", direct = state.signalScope === "direct", warmup = state.view === "warmup", notifying = !warmup && (confirmed || direct);
@@ -342,7 +352,7 @@
       ? "初次启动前的回算信号，仅供复盘，不触发通知。"
       : state.signalSource === "replay"
       ? "历史回放只展示已记录事件与之后的真实行情；不触发、也不暗示通知。"
-      : confirmed ? "YOLO 是原始 V1 之后的补充确认，不是启动门；两类实时记录各自以服务回执为准。" : "只展示已收盘的原始 V1 多头启动；次开盘的实际成交时间须由后端提供。";
+      : confirmed ? "YOLO 是原始 V1 之后的补充确认，不是启动门；两类实时记录各自以服务回执为准。" : "原版 V1 的冻结监控协议只生成多头启动；卡片 R 按信号收盘参考路径持续更新。";
     $("signal-window-note").textContent = loaded
       ? state.signalScope === "direct" && state.rawHasMore
         ? `已加载 ${number(source.length)} 条；可继续读取更早记录`
@@ -371,8 +381,7 @@
       }
     }
     const focused = document.activeElement?.dataset;
-    const focusedPreview = Boolean(focused?.previewSignalId);
-    const focusedId = focused?.signalId || focused?.previewSignalId, focusedKind = focused?.signalKind;
+    const focusedId = focused?.signalId, focusedKind = focused?.signalKind;
     const now = signalClock();
     const fresh = notifying ? items.filter((item) => isFresh(item, now)) : [];
     const earlier = items.filter((item) => !notifying || !isFresh(item, now));
@@ -388,39 +397,37 @@
     $("signal-rows").innerHTML = noFresh + group(direct ? "新鲜启动" : "新鲜确认", freshVisible, true) + group(warmup ? confirmed ? "预热 YOLO 补充确认" : "预热原始 V1 启动" : confirmed ? fresh.length ? "更早确认" : "已记录确认" : direct ? "已记录启动" : "指标候选 · 模型等待状态", earlierVisible, false);
     $("signal-footer-note").textContent = warmup ? "预热回算 · 不触发通知 · 北京时间" : "已收盘确认 · 北京时间";
     renderTradingViewButtons();
-    if (focusedId) Array.from($("signal-rows").querySelectorAll(focusedPreview ? "[data-preview-signal-id]" : "[data-signal-id]")).find((card) => (card.dataset.signalId || card.dataset.previewSignalId) === focusedId && card.dataset.signalKind === focusedKind && card.dataset.tvSymbol === focused.tvSymbol && card.dataset.tvTimeframe === focused.tvTimeframe)?.focus({ preventScroll: true });
+    if (focusedId) Array.from($("signal-rows").querySelectorAll("[data-signal-id]")).find((card) => card.dataset.signalId === focusedId && card.dataset.signalKind === focusedKind && card.dataset.tvSymbol === focused.tvSymbol && card.dataset.tvTimeframe === focused.tvTimeframe)?.focus({ preventScroll: true });
   }
   function signalCardHTML(item, now = signalClock()) {
-    const selected = sameEvent(state.selected, item);
     const confirmed = isConfirmed(item), original = originalSignal(item), direct = directReceipt(item);
     const side = item.side === "short" ? "short" : item.side === "long" ? "long" : "neutral";
     const venue = String(item.venue || "OKX").toUpperCase();
     const fresh = isFresh(item, now);
     const status = confirmed ? "YOLO 补充确认" : "原始 V1 启动", caption = "信号收盘价";
-    const waiting = `${number(item.model?.wait_bars)} / ${number(item.model?.max_wait_bars)} 根`;
-    return `<article class="signal-card ${side}${confirmed || direct ? "" : " candidate-card"}${selected ? " selected" : ""}${fresh ? " is-fresh" : ""}"><button type="button" class="card-primary-action" data-signal-id="${escapeHTML(item.id)}" data-signal-kind="${escapeHTML(item.kind)}" data-tradingview-action="signal" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击卡片，在 本机 TradingView 打开" aria-label="${escapeHTML(`${venue} ${shortSymbol(item.symbol)} ${quoteSymbol(item.symbol)} ${timeframeLabel(item.timeframe)} ${sideName(item.side)}，${status}，${caption} ${price(item.price)}，${shortDate(item.bar_close_ms)}，在 本机 TradingView 打开`)}"></button>
+    const outcome = performanceView(item);
+    return `<article class="signal-card ${side} ${outcome.className}${confirmed || direct ? "" : " candidate-card"}${fresh ? " is-fresh" : ""}"><button type="button" class="card-primary-action" data-signal-id="${escapeHTML(item.id)}" data-signal-kind="${escapeHTML(item.kind)}" data-tradingview-action="signal" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击整张卡片，在本机 TradingView 打开" aria-label="${escapeHTML(`${venue} ${shortSymbol(item.symbol)} ${quoteSymbol(item.symbol)} ${timeframeLabel(item.timeframe)} ${sideName(item.side)}，${status}，${caption} ${price(item.price)}，${outcome.badge}，${shortDate(item.bar_close_ms)}，在本机 TradingView 打开`)}"></button>
       <span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>${escapeHTML(venue)} · ${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(timeframeLabel(item.timeframe))}</span></span>
-      <span class="signal-card-direction"><span class="card-direction">↑ 多头${confirmed ? " · 确认" : " · 启动"}</span><span class="card-recency">${isWarmupRecord(item) ? "预热历史" : item.source === "replay" ? "历史回放" : fresh ? "新 · " + ageLabel(item.bar_close_ms) : ageLabel(item.bar_close_ms)}</span></span>
+      <span class="signal-card-direction"><span class="card-direction">${sideArrow(item.side)} ${sideName(item.side)}${confirmed ? " · 确认" : " · 启动"}</span><span class="card-recency">${isWarmupRecord(item) ? "预热历史" : item.source === "replay" ? "历史回放" : fresh ? "新 · " + ageLabel(item.bar_close_ms) : ageLabel(item.bar_close_ms)}</span></span>
       <span class="model-card-status"><span class="model-badge ${confirmed ? "confirmed" : "pending"}">${escapeHTML(status)}</span><span>${isWarmupRecord(item) ? "预热回算 · 不通知" : item.source === "replay" ? "回放记录 · 不通知" : confirmed ? "补充确认 · 非启动门" : "第一阶段 · 已收盘"}</span></span>
       <span class="card-price-label">${caption}</span><span class="card-price">${escapeHTML(price(item.price))}</span>
       ${confirmed && item.indicator ? `<span class="card-origin">原始 V1 ${escapeHTML(price(original.price))} · ${escapeHTML(shortDate(original.bar_close_ms))}</span>` : ""}
+      <span class="performance-badge">${escapeHTML(outcome.badge)}</span>
+      <dl class="card-performance"><div><dt>${escapeHTML(outcome.valueLabel)}</dt><dd>${escapeHTML(outcome.value)}</dd></div><div><dt>最高 R</dt><dd>${escapeHTML(outcome.peak)}</dd></div><div><dt>${escapeHTML(outcome.stopLabel)}</dt><dd>${escapeHTML(outcome.stop)}</dd></div></dl>
+      <span class="performance-note">${escapeHTML(outcome.note)} · 信号收盘参考，并非账户实际成交</span>
       <span class="card-context"><span>信号 K 线</span><strong>${item.is_closed ? "已确认" : "待确认"}</strong></span>
       <span class="card-confirmed"><span>${isWarmupRecord(item) ? "回算信号 · 仅供复盘" : item.executable_entry_time ? item.source === "replay" ? `回放执行时钟 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : `实际进场 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : item.entry_reference === "next_open" ? "次开盘参考 · 等待实际成交" : "仅信号收盘参考"}</span><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))}</time></span>
-      <span class="card-footer"><span class="notification-stack">${item.source === "replay" ? `<span class="candidate-notice">历史回放不通知</span>` : notificationHTML(item)}</span><span class="card-actions"><button type="button" class="card-preview" data-preview-signal-id="${escapeHTML(item.id)}" data-signal-kind="${escapeHTML(item.kind)}" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" aria-pressed="${Boolean(selected)}" aria-label="${escapeHTML(`页内预览 ${venue} ${shortSymbol(item.symbol)} ${quoteSymbol(item.symbol)} ${timeframeLabel(item.timeframe)}`)}"><span>页内预览</span></button><span class="card-open" data-tradingview-label="TradingView ↗" aria-hidden="true">TradingView ↗</span></span></span>
+      <span class="card-footer"><span class="notification-stack">${item.source === "replay" ? `<span class="candidate-notice">历史回放不通知</span>` : notificationHTML(item)}</span><span class="card-open" data-tradingview-label="整卡打开 TradingView ↗" aria-hidden="true">整卡打开 TradingView ↗</span></span>
     </article>`;
   }
   function applySignalFilters() {
-    const items = filteredSignals();
-    if (!items.some((item) => sameSelection(state.selected, item))) {
-      if (items.length) chooseSignal(items[0]);
-      else clearSelectedSignal();
-    }
     renderSignals();
   }
   function invalidateSignalQuery() {
     state.signalQueryRevision++;
     state.signals = [];
     state.directSignals = [];
+    state.performanceSignals = [];
     state.rawYoloSignals = [];
     state.signalsLoaded = false;
     state.directSignalsLoaded = false;
@@ -430,7 +437,6 @@
     state.rawHasMore = false;
     state.rawPaged = false;
     state.rawLoadingMore = false;
-    clearSelectedSignal();
     renderSignals();
   }
   function isBuilding(item) {
@@ -459,25 +465,23 @@
       emptyDescription.textContent = hasFilters ? "试试其他合约、周期，或切换全部合约。" : state.watchScope === "all" ? "全市场合约会在扫描后列出，当前状态不等于入场信号。" : "可切换全部合约查看其他交易对；蓄势状态不代表已经启动。";
     }
     const focused = document.activeElement?.dataset;
-    const focusedAction = focused?.tradingviewAction ? "tradingview" : "preview";
-    const focusedSymbol = focused?.marketSymbol || focused?.tvSymbol, focusedTimeframe = focused?.marketTimeframe || focused?.tvTimeframe;
+    const focusedSymbol = focused?.tvSymbol, focusedTimeframe = focused?.tvTimeframe;
     $("load-more-watch").classList.toggle("hidden", items.length <= state.watchLimit);
     $("load-more-watch").textContent = `显示更多（${Math.min(state.watchLimit, items.length)} / ${items.length}）`;
     $("watch-rows").innerHTML = items.slice(0, state.watchLimit).map((item) => {
       const valid = !state.errors.markets && !item.error && !item.stale && item.ready !== false;
       const phaseClass = state.errors.markets ? "stale" : item.error ? "error" : item.stale ? "stale" : item.ready === false ? "loading" : item.focus === true ? "ready" : "";
-      const selected = state.detailOrigin === "watch" && state.selected?.symbol === item.symbol && state.selected?.timeframe === item.timeframe;
-      return `<article class="watch-card${selected ? " selected" : ""}"><button type="button" class="card-primary-action" data-tradingview-action="watch" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击卡片，在 本机 TradingView 打开" aria-label="在 本机 TradingView 打开 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(quoteSymbol(item.symbol))} ${escapeHTML(timeframeLabel(item.timeframe))}，${escapeHTML(marketPhase(item))}"></button>
+      return `<article class="watch-card"><button type="button" class="card-primary-action" data-tradingview-action="watch" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击整张卡片，在本机 TradingView 打开" aria-label="在本机 TradingView 打开 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(quoteSymbol(item.symbol))} ${escapeHTML(timeframeLabel(item.timeframe))}，${escapeHTML(marketPhase(item))}"></button>
         <span class="watch-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(timeframeLabel(item.timeframe))}</span></span>
         <span class="watch-card-phase"><span class="phase-badge ${phaseClass}" title="${escapeHTML(item.error || (item.stale ? "当前保留过期行情，等待更新" : "当前结构尚不是启动信号"))}">${escapeHTML(state.errors.markets ? "缓存 · 待同步" : marketPhase(item))}</span><span class="card-status">${!valid ? "等待更新" : item.focus ? "已达蓄势门槛" : "观察中"}</span></span>
         <span class="watch-card-run"><strong>${valid ? escapeHTML(number(item.near_zero_bars)) : "—"}<small> 根</small></strong><span>当前近零蓄势</span></span>
         <span class="watch-card-background"><span>均线密集<strong>${valid ? item.dense === true ? "已密集" : item.dense === false ? "未密集" : "—" : "—"}</strong></span><span>高周期背景<strong>${valid ? escapeHTML(sideName(item.htf_side)) : "—"}</strong></span></span>
-        <div class="watch-card-foot"><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">收盘 ${escapeHTML(shortDate(item.bar_close_ms))}</time><span class="card-actions"><button type="button" class="card-preview" data-market-symbol="${escapeHTML(item.symbol)}" data-market-timeframe="${escapeHTML(item.timeframe)}" aria-pressed="${Boolean(selected)}" aria-label="页内预览 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(quoteSymbol(item.symbol))} ${escapeHTML(timeframeLabel(item.timeframe))} ${escapeHTML(marketPhase(item))}图表"><span>页内预览</span></button><span class="card-open" data-tradingview-label="TradingView ↗" aria-hidden="true">TradingView ↗</span></span></div>
+        <div class="watch-card-foot"><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">收盘 ${escapeHTML(shortDate(item.bar_close_ms))}</time><span class="card-open" data-tradingview-label="整卡打开 TradingView ↗" aria-hidden="true">整卡打开 TradingView ↗</span></div>
       </article>`;
     }).join("");
     renderTradingViewButtons();
-    if (focusedSymbol) Array.from($("watch-rows").querySelectorAll(focusedAction === "tradingview" ? "[data-tradingview-action]" : "[data-market-symbol]"))
-      .find((card) => (card.dataset.marketSymbol || card.dataset.tvSymbol) === focusedSymbol && (card.dataset.marketTimeframe || card.dataset.tvTimeframe) === focusedTimeframe)?.focus({ preventScroll: true });
+    if (focusedSymbol) Array.from($("watch-rows").querySelectorAll("[data-tradingview-action]"))
+      .find((card) => card.dataset.tvSymbol === focusedSymbol && card.dataset.tvTimeframe === focusedTimeframe)?.focus({ preventScroll: true });
   }
   function factsHTML(entries) {
     return entries.map(([key, value]) => `<dt>${escapeHTML(key)}</dt><dd>${escapeHTML(value)}</dd>`).join("");
@@ -566,339 +570,9 @@
     const errors = Object.entries(state.errors);
     $("error-notice").classList.toggle("hidden", !errors.length);
     if (errors.length) {
-      const names = { status: "运行状态", signals: "模型确认", directSignals: "指标启动", earlierSignals: "更早历史记录", candidates: "指标候选", markets: "蓄势观察" };
+      const names = { status: "运行状态", signals: "模型确认", directSignals: "指标启动", performanceSignals: "走势状态", earlierSignals: "更早历史记录", candidates: "指标候选", markets: "蓄势观察" };
       $("error-notice").textContent = `${errors.map(([key, error]) => `${names[key] || key}：${error}`).join("；")}。${state.lastSync ? "当前保留上次成功获取的数据，" : ""}15 秒后自动重试。`;
     }
-  }
-  function chooseSignal(item, scroll = false, origin = "signals") {
-    if (!item) return;
-    // Invalidate any chart response for the prior card before changing detail.
-    if (!sameSelection(state.selected, item)) {
-      state.chartController?.abort();
-      state.chartRequest++;
-      state.chartKey = null;
-      state.chart = null;
-    }
-    state.chartViewport = null;
-    state.selected = { ...item };
-    state.detailOrigin = origin;
-    renderSignals();
-    renderDetail();
-    if (scroll && window.innerWidth <= 1100) {
-      $("detail-content").closest("aside").scrollIntoView({ behavior: "instant", block: "start" });
-      $("detail-symbol").focus({ preventScroll: true });
-    }
-  }
-  function clearSelectedSignal() {
-    state.selected = null;
-    state.chartController?.abort();
-    state.chartController = null;
-    state.chartRequest++;
-    state.chartKey = null;
-    state.chart = null;
-    state.chartViewport = null;
-    renderDetail();
-  }
-  function renderDetail() {
-    const item = state.selected;
-    $("detail-empty").classList.toggle("hidden", Boolean(item));
-    $("detail-content").classList.toggle("hidden", !item);
-    $("back-to-signals").classList.toggle("hidden", !item);
-    if (!item) {
-      $("chart-container").removeAttribute("aria-label");
-      setChartExpanded(false, false);
-      return;
-    }
-    $("back-to-signals").textContent = state.detailOrigin === "watch" ? "← 返回蓄势观察" : "← 返回信号卡片";
-    $("detail-price-caption").textContent = "信号收盘价";
-    $("detail-symbol").textContent = shortSymbol(item.symbol);
-    $("detail-market-label").textContent = `${String(item.venue || "OKX").toUpperCase()} · ${quoteSymbol(item.symbol)} 永续 · ${sourceName(item)}`;
-    $("detail-timeframe").textContent = timeframeLabel(item.timeframe);
-    $("chart-title").textContent = `${shortSymbol(item.symbol)} · ${timeframeLabel(item.timeframe)} · K 线 / 6 MA`;
-    $("detail-price").textContent = price(item.price);
-    const name = directReceipt(item) ? "指标启动" : item.kind === "tv_start" ? modelState(item) : item.kind ? eventNames[item.kind] || item.kind : marketPhase(item);
-    $("detail-event-badge").innerHTML = `<span class="signal-badge ${item.side === "short" ? "short" : item.side === "long" ? "" : "neutral"}">${sideArrow(item.side)} ${escapeHTML(name)}</span>`;
-    const tvSymbol = String(item.symbol || "").replace(/-/g, "").replace(/SWAP$/, ".P");
-    const tvInterval = TV_INTERVALS.get(item.timeframe);
-    $("tradingview-open").dataset.tvSymbol = item.symbol;
-    $("tradingview-open").dataset.tvTimeframe = item.timeframe;
-    renderTradingViewButtons();
-    if (canOpenTradingView(item)) {
-      $("tradingview-web").href = `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(`OKX:${tvSymbol}`)}&interval=${tvInterval}`;
-      $("tradingview-web").removeAttribute("aria-disabled");
-    } else {
-      $("tradingview-web").removeAttribute("href");
-      $("tradingview-web").setAttribute("aria-disabled", "true");
-    }
-    const original = originalSignal(item), confirmed = isConfirmed(item), candidate = isCandidate(item), direct = directReceipt(item);
-    const facts = [
-      ["记录来源", sourceName(item), item.source === "replay" ? "model-color" : isWarmupRecord(item) ? "" : "mint"],
-      ...coveredLedgerFacts(item),
-      ["信号 K 线", item.is_closed ? "交易所已确认收盘" : "尚未确认 · 不作为可执行 V1", item.is_closed ? "mint" : "red"],
-      ["可执行次开盘", item.executable_entry_time ? item.source === "replay" ? `回放执行时钟 ${shortDate(milliseconds(item.executable_entry_time))}` : shortDate(milliseconds(item.executable_entry_time)) : item.source === "replay" ? "回放未提供成交时钟" : isWarmupRecord(item) ? "预热回算记录 · 不推断成交" : item.entry_reference === "next_open" ? "等待真实成交记录" : "后端未提供", ""],
-      ["V1 风险参考", finite(original.risk) ? price(original.risk) : finite(item.risk) ? price(item.risk) : "—", ""],
-      ["特征来源哈希", item.source_sha256 ? `${String(item.source_sha256).slice(0, 12)}…` : "—", ""],
-      [confirmed || candidate ? "原箭头收盘 · 北京时间" : "最近收盘 · 北京时间", shortDate(original.bar_close_ms), ""],
-      ...(confirmed || candidate ? [["原箭头收盘价", price(original.price), ""]] : []),
-      ...(confirmed ? [["模型确认 · 北京时间", shortDate(item.bar_close_ms), "model-color"], ["模型确认收盘价", price(item.price), "model-color"]] : []),
-      ...(direct ? [["事件阶段", "指标启动 · 未经 YOLO 确认", ""], [isWarmupRecord(item) ? "通知说明" : "Bark 启动回执", notification(direct, "bark")[0], ""]] : []),
-      ...(confirmed ? [[isWarmupRecord(item) ? "通知说明" : "Bark 确认回执", notification(item, "bark")[0], ""]] : []),
-      ...(isDisplayOnly(item) ? [["当前通知方式", DISPLAY_ONLY_NOTE, ""]] : []),
-      ...(item.model ? [["模型状态", modelState(item), item.model.status === "error" ? "red" : ""], ["等待 / 最大窗口", `${number(item.model.wait_bars)} / ${number(item.model.max_wait_bars)} 根`, ""], ...(confirmed ? [["检测分数 · 非胜率", modelScore(item), ""], ["核心区间", `${shortDate(item.model.core_start_ms)} → ${shortDate(item.model.core_end_ms)}`, ""]] : [["最近检测收盘", shortDate(item.model.last_checked_close_ms), ""], ["等待截止", shortDate(item.model.expires_at_ms), ""]])] : []),
-      [confirmed || candidate ? "启动前近零蓄势" : "当前近零蓄势", `${number(focusRun(item))} 根`, ""],
-      ["均线密集 · 背景参考", original.dense === true ? "已密集" : original.dense === false ? "未密集" : "—", original.dense ? "mint" : ""],
-      ["高周期方向 · 背景参考", sideName(original.htf_side), ""],
-    ];
-    $("detail-facts").innerHTML = facts.map(([label, value, color]) => `<div><div class="fact-label">${escapeHTML(label)}</div><div class="fact-value ${color}">${escapeHTML(value)}</div></div>`).join("");
-    const confirmationNotification = isWarmupRecord(item) ? "初次启动前的回算信号，仅供复盘，不触发通知；图上的之后行情只用于回看。" : item.source === "replay" ? "历史回放不触发通知；图上的之后行情只用于回看，绝不表示当时已知。" : "实时原始 V1 与 YOLO 补充确认各自以服务回执为准。";
-    $("detail-reason").textContent = isWarmupRecord(item)
-      ? `这是预热历史记录。${confirmed ? "YOLO 仅为额外确认，不改变原始 V1 的启动时点。" : "原始 V1 启动以信号收盘为参考。"}${confirmationNotification}`
-      : item.source === "replay"
-      ? `这是历史回放记录。${confirmed ? "YOLO 仅为额外确认，不改变原始 V1 的启动时点。" : "原始 V1 启动以信号收盘为参考。"}${confirmationNotification}`
-      : confirmed ? `YOLO 在原始 V1 启动之后提供补充确认，不是启动门。${confirmationNotification}`
-      : `这是已收盘的原始 V1 多头启动。信号收盘价不是成交价；${item.executable_entry_time ? "实际成交时间已由后端记录。" : "实际次开盘成交仍待后端记录。"}${confirmationNotification}`;
-    const market = state.markets.find((row) => row.symbol === item.symbol && row.timeframe === item.timeframe);
-    const key = `${item.kind || "market"}|${item.id || ""}|${item.model?.status || ""}|${item.model?.core_start_ms || ""}|${item.model?.core_end_ms || ""}|${item.symbol}|${item.timeframe}|${item.bar_close_ms || ""}|${market?.bar_close_ms || ""}|${market?.stale || false}|${market?.error || ""}`;
-    if (state.chartKey !== key) loadChart(item, key);
-  }
-  async function loadChart(item, key) {
-    if (state.chartController) state.chartController.abort();
-    const request = ++state.chartRequest;
-    const controller = new AbortController();
-    state.chartController = controller;
-    state.chartKey = key;
-    state.chart = null;
-    $("chart-container").innerHTML = '<div class="chart-placeholder">正在加载真实行情…</div>';
-    $("chart-container").setAttribute("aria-label", `正在加载 ${sourceName(item)} ${shortSymbol(item.symbol)} ${timeframeLabel(item.timeframe)} 图表`);
-    $("chart-hint").textContent = "仅展示已返回的真实 K 线";
-    const timeout = setTimeout(() => controller.abort(), 20000);
-    try {
-      const chartTimeframe = apiTimeframe(item.timeframe);
-      if (item.source !== "replay" && !chartTimeframe) throw new Error("图表周期不受当前 V1 服务支持");
-      const data = await api(item.source === "replay"
-        ? `/api/replay/chart?event_id=${encodeURIComponent(item.id)}`
-        : `/api/chart?symbol=${encodeURIComponent(item.symbol)}&timeframe=${encodeURIComponent(chartTimeframe)}`, controller.signal);
-      if (request !== state.chartRequest || !sameSelection(state.selected, item)) return;
-      if (!Array.isArray(data.candles)) throw new Error("图表数据格式有误");
-      state.chart = data;
-      renderChart();
-    } catch (error) {
-      if (request !== state.chartRequest || !sameSelection(state.selected, item)) return;
-      state.chartKey = null; // Retry the same selected chart on the next successful poll.
-      $("chart-container").innerHTML = `<div class="chart-placeholder">图表暂时不可用<br>${escapeHTML(error.message || "无法连接行情服务")}</div>`;
-      $("chart-hint").textContent = "图表读取失败，信号记录仍可查看";
-    } finally {
-      clearTimeout(timeout);
-    }
-  }
-  function setChartExpanded(expanded, restoreFocus = true) {
-    if (expanded === state.chartExpanded || (expanded && !state.selected)) return;
-    const dialog = $("chart-dialog"), frame = $("chart-frame"), button = $("chart-expand");
-    state.chartExpanded = expanded;
-    // Move the one live chart, preserving its data, crosshair and refresh target.
-    if (expanded) {
-      dialog.appendChild(frame);
-      dialog.showModal();
-    } else {
-      if (dialog.open) dialog.close();
-      $("chart-slot").appendChild(frame);
-    }
-    frame.classList.toggle("is-expanded", expanded);
-    button.setAttribute("aria-expanded", String(expanded));
-    button.setAttribute("aria-label", expanded ? "收起 K 线图" : "放大 K 线图");
-    button.setAttribute("title", expanded ? "收起 K 线图（Esc）" : "放大 K 线图");
-    $("chart-expand-label").textContent = expanded ? "收起 · Esc" : "放大";
-    if (expanded || (restoreFocus && state.selected && state.view === "signals")) button.focus({ preventScroll: true });
-  }
-  // The core is a time interval; its vertical envelope uses only core candles,
-  // never the following move. Backend confirmation timestamps remain authoritative.
-  function modelOverlayHTML(item, candles, x, py, bounds) {
-    const model = item?.model;
-    if (!isConfirmed(item) || ![model.core_start_ms, model.core_end_ms, model.window_end_ms, item.bar_open_ms, item.bar_close_ms, item.price].every(finite) ||
-      Number(model.core_start_ms) > Number(model.core_end_ms) || Number(model.core_end_ms) > Number(model.window_end_ms) ||
-      Number(model.window_end_ms) > Number(item.bar_close_ms)) return { core: "", confirmation: "" };
-    const indices = candles.flatMap((bar, i) => Number(bar.t) >= Number(model.core_start_ms) && Number(bar.t) <= Number(model.core_end_ms) ? [i] : []);
-    let core = "";
-    if (indices.length) {
-      const coreBars = indices.map((i) => candles[i]);
-      const top = Math.min(...coreBars.map((bar) => py(bar.h))), bottom = Math.max(...coreBars.map((bar) => py(bar.l)));
-      const left = x(indices[0]) - bounds.step / 2, right = x(indices[indices.length - 1]) + bounds.step / 2;
-      core = `<g class="model-core" data-source="model-core-interval"><title>模型核心区间 · ${escapeHTML(shortDate(model.core_start_ms))} 至 ${escapeHTML(shortDate(model.core_end_ms))}；纵向为区间 K 线高低包络</title><rect x="${left}" y="${top}" width="${right - left}" height="${Math.max(bottom - top, 1)}" fill="var(--chart-model-fill)" stroke="var(--chart-model)" stroke-width=".8" stroke-dasharray="3 2"/></g>`;
-    }
-    const index = candles.findIndex((bar) => Number(bar.t) === Number(item.bar_open_ms));
-    const confirmation = index < 0 ? "" : `<g class="model-confirmation" data-event-kind="yolo_confirmed"><title>模型确认 · 收盘 ${escapeHTML(shortDate(item.bar_close_ms))} · ${escapeHTML(price(item.price))} · 等待 ${escapeHTML(number(model.wait_bars))} 根</title><line x1="${x(index)}" x2="${x(index)}" y1="${bounds.top}" y2="${bounds.bottom}" stroke="var(--chart-model)" stroke-width="1" stroke-dasharray="4 3"/><circle cx="${x(index)}" cy="${py(item.price)}" r="2.4" fill="var(--chart-model)" stroke="var(--chart-marker-bg)" stroke-width="1"/><text x="${x(index) + (index > candles.length * .8 ? -4 : 4)}" y="${bounds.top + 8}" text-anchor="${index > candles.length * .8 ? "end" : "start"}" style="font-size:7px;fill:var(--chart-model)">模型确认</text></g>`;
-    return { core, confirmation };
-  }
-  function chartHint() {
-    return state.chart?.source === "replay" ? "冻结历史 OHLC；信号之后的 K 线仅用于回看，不参与当时模型输入" : state.chart?.state?.stale ? "行情缓存已过期 · 等待重新同步" : state.chart?.state?.error ? "行情存在读取异常 · 当前为缓存" : isConfirmed(state.selected) ? "箭头：原指标 · 紫框：模型核心区间 · 紫线：模型确认" : "箭头：指标启动 · 金色：合格近零区";
-  }
-  function renderChart() {
-    if (!state.chart) return;
-    const valid = state.chart.candles.filter((bar) => [bar.t, bar.o, bar.h, bar.l, bar.c].every(finite));
-    const selectedIndex = state.selected?.kind ? valid.findIndex((bar) => Number(bar.t) === Number(state.selected.bar_open_ms)) : -1;
-    const defaultStart = selectedIndex >= 0 ? Math.min(Math.max(0, valid.length - 120), Math.max(0, selectedIndex - 90)) : Math.max(0, valid.length - 120);
-    const viewportCount = Math.max(24, Math.min(180, Math.round(state.chartViewport?.count || 120)));
-    const startIndex = Math.min(Math.max(0, Number.isInteger(state.chartViewport?.start) ? state.chartViewport.start : defaultStart), Math.max(0, valid.length - viewportCount));
-    const candles = valid.slice(startIndex, startIndex + viewportCount);
-    document.querySelector(".chart-bars-note").textContent = state.chart.source === "replay" ? "冻结 OHLC · 前后历史回看" : selectedIndex >= 0 && startIndex < valid.length - 120 ? "信号附近 120 根" : "最近 120 根";
-    if (!candles.length) {
-      $("chart-container").innerHTML = '<div class="chart-placeholder">该合约尚无足够的已收盘行情。<br>后续扫描会继续补充。</div>';
-      $("chart-hint").textContent = "暂无可绘制的真实数据";
-      return;
-    }
-    const width = 600, height = 294, left = 17, right = 67, priceTop = 10, priceBottom = 162, impulseTop = 194, impulseBottom = 262;
-    const plotWidth = width - left - right;
-    const nominalMs = Math.max(1, Number(state.selected?.timeframe_min || state.selected?.timeframe || 60) * 60000);
-    const firstTime = Number(candles[0].t), lastTime = Number(candles[candles.length - 1].t) + nominalMs;
-    const timeRange = Math.max(nominalMs, lastTime - firstTime);
-    const x = (i) => left + ((Number(candles[i].t) - firstTime + nominalMs / 2) / timeRange) * plotWidth;
-    const step = Math.max(1, nominalMs / timeRange * plotWidth);
-    const maKeys = ["sma20", "ema20", "sma60", "ema60", "sma120", "ema120"];
-    // A risk line is meaningful only when the backend supplied an explicit stop price.
-    // `risk` may be a distance or a ratio, so it must never be guessed as a chart price.
-    const original = originalSignal(state.selected);
-    const stopPrice = finite(state.selected?.initial_stop) ? Number(state.selected.initial_stop)
-      : finite(original?.initial_stop) ? Number(original.initial_stop) : null;
-    // The line is the initial stop from the original, closed arrow. It starts
-    // after that bar closes; a viewport entirely before the arrow has no line.
-    const originalCloseMs = finite(original?.bar_close_ms) ? Number(original.bar_close_ms) : null;
-    const initialStopVisible = stopPrice !== null && originalCloseMs !== null && originalCloseMs <= lastTime;
-    const initialStopStartX = initialStopVisible && originalCloseMs < lastTime
-      ? Math.max(left, left + (originalCloseMs - firstTime) / timeRange * plotWidth) : null;
-    const rangeValues = candles.flatMap((bar) => [bar.h, bar.l, ...maKeys.map((key) => bar[key])]).filter(finite).map(Number);
-    if (initialStopVisible) rangeValues.push(stopPrice);
-    let pMin = Math.min(...rangeValues), pMax = Math.max(...rangeValues);
-    const pPadding = Math.max((pMax - pMin) * .07, pMax * .0001, .00000001);
-    pMin -= pPadding; pMax += pPadding;
-    const py = (v) => priceBottom - (Number(v) - pMin) / (pMax - pMin) * (priceBottom - priceTop);
-    const impulseValues = candles.flatMap((bar) => [bar.md, bar.sb, ...(bar.focus === true && finite(bar.focus_band) && Number(bar.focus_band) > 0 ? [Number(bar.focus_band), -Number(bar.focus_band)] : [])]).filter(finite).map(Number);
-    let mMin = Math.min(0, ...impulseValues), mMax = Math.max(0, ...impulseValues);
-    const mPadding = Math.max((mMax - mMin) * .18, (pMax - pMin) * .0001, .00000001);
-    mMin -= mPadding; mMax += mPadding;
-    const my = (v) => impulseBottom - (Number(v) - mMin) / (mMax - mMin) * (impulseBottom - impulseTop);
-    const path = (key, y) => {
-      let started = false;
-      return candles.map((bar, i) => {
-        if (!finite(bar[key])) { started = false; return ""; }
-        const command = `${started ? "L" : "M"}${x(i).toFixed(2)},${y(bar[key]).toFixed(2)}`;
-        started = true;
-        return command;
-      }).join(" ");
-    };
-    const parts = [`<svg class="market-chart" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="presentation"><defs><clipPath id="price-clip"><rect x="${left}" y="${priceTop}" width="${plotWidth}" height="${priceBottom - priceTop}"/></clipPath></defs>`];
-    for (let i = 0; i < 4; i++) {
-      const y = priceTop + i / 3 * (priceBottom - priceTop);
-      const value = pMax - i / 3 * (pMax - pMin);
-      parts.push(`<line x1="${left}" x2="${width - right + 3}" y1="${y}" y2="${y}" stroke="var(--chart-grid)" stroke-width=".65" stroke-dasharray="2 4"/><text x="${width - right + 9}" y="${y + 3}">${escapeHTML(axisPrice(value))}</text>`);
-    }
-    const labelIndices = [...new Set([0, Math.round((candles.length - 1) / 3), Math.round((candles.length - 1) * 2 / 3), candles.length - 1])];
-    labelIndices.forEach((i) => {
-      parts.push(`<line x1="${x(i)}" x2="${x(i)}" y1="${priceTop}" y2="${impulseBottom}" stroke="var(--chart-grid)" stroke-width=".6" stroke-dasharray="2 5"/>`);
-      const date = new Date(Number(candles[i].t));
-      const label = `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
-      parts.push(`<text x="${x(i)}" y="${height - 13}" text-anchor="${i === 0 ? "start" : i === candles.length - 1 ? "end" : "middle"}">${label}</text>`);
-    });
-    const modelOverlay = modelOverlayHTML(state.selected, candles, x, py, { step, top: priceTop, bottom: impulseBottom });
-    parts.push('<g clip-path="url(#price-clip)">');
-    parts.push(modelOverlay.core);
-    const maColors = ["var(--chart-ma20)", "var(--chart-ma20-muted)", "var(--chart-ma60)", "var(--chart-ma60-muted)", "var(--chart-ma120)", "var(--chart-ma120-muted)"];
-    maKeys.forEach((key, i) => parts.push(`<path d="${path(key, py)}" fill="none" stroke="${maColors[i]}" stroke-width=".8" opacity=".95"/>`));
-    if (initialStopStartX !== null) {
-      const stopY = py(stopPrice);
-      parts.push(`<line class="chart-risk-line" x1="${initialStopStartX}" x2="${width - right + 3}" y1="${stopY}" y2="${stopY}" stroke="var(--amber)" stroke-width=".9" stroke-dasharray="4 3"/>`);
-    }
-    candles.forEach((bar, i) => {
-      const bright = bar.retest_side === "long" || bar.retest_side === "short";
-      const rising = Number(bar.c) >= Number(bar.o);
-      const color = bright ? bar.retest_side === "short" ? "var(--chart-retest-down)" : "var(--chart-retest-up)" : rising ? "var(--chart-up)" : "var(--chart-down)";
-      const bodyWidth = Math.max(1, Math.min(6.4, step * .62));
-      const bodyY = Math.min(py(bar.o), py(bar.c));
-      const bodyHeight = Math.max(.7, Math.abs(py(bar.o) - py(bar.c)));
-      parts.push(`<line x1="${x(i)}" x2="${x(i)}" y1="${py(bar.h)}" y2="${py(bar.l)}" stroke="${color}" stroke-width="${bright ? 1.2 : .85}"/><rect x="${x(i) - bodyWidth / 2}" y="${bodyY}" width="${bodyWidth}" height="${bodyHeight}" fill="${color}" stroke="none"/>`);
-    });
-    const breakouts = new Map();
-    candles.forEach((bar, i) => {
-      if (["long", "short"].includes(bar.tv_start_side)) breakouts.set(`${bar.t}|${bar.tv_start_side}`, { bar_open_ms: bar.t, side: bar.tv_start_side, price: bar.c, near_zero_bars: numeric(bar.near_zero_bars) > 0 ? bar.near_zero_bars : candles[i - 1]?.near_zero_bars });
-    });
-    const eventList = [...(Array.isArray(state.chart.events) ? state.chart.events : [])];
-    if (isCandidate(state.selected)) eventList.push(state.selected);
-    if (isConfirmed(state.selected) && state.selected.indicator) eventList.push(state.selected.indicator);
-    eventList.filter(isV1StartMarker).forEach((event) => breakouts.set(`${event.bar_open_ms ?? event.t}|${event.side}`, event));
-    Array.from(breakouts.values()).slice(-50).forEach((event) => {
-      const index = candles.findIndex((bar) => Number(bar.t) === Number(event.bar_open_ms ?? event.t));
-      if (index < 0 || !["long", "short"].includes(event.side)) return;
-      const long = event.side === "long", cy = long ? py(candles[index].l) + 6 : py(candles[index].h) - 6;
-      const cx = x(index), direction = long ? 1 : -1;
-      parts.push(`<g data-event-kind="tv_start" data-side="${event.side}"><title>主图启动 · 蓄势释放${sideArrow(event.side)} · ${escapeHTML(number(event.near_zero_bars))} 根 · 收盘 ${escapeHTML(price(event.price ?? candles[index].c))}</title><path d="M${cx},${cy}l-3.5,${direction * 5}h7Z" fill="${long ? "var(--chart-marker-up)" : "var(--chart-marker-down)"}" stroke="var(--chart-marker-bg)" stroke-width=".55"/></g>`);
-    });
-    parts.push("</g>");
-    if (initialStopVisible) {
-      const stopY = py(stopPrice);
-      // This label is outside price-clip because it is intentionally in the price scale.
-      // Keep the whole price inside the SVG: the price-scale gutter is too
-      // narrow for a left-anchored label on small-price instruments.
-      parts.push(`<text class="chart-risk-label" x="${width - 4}" y="${stopY + 3}" text-anchor="end" style="fill:var(--amber)">初始 SL ${escapeHTML(axisPrice(stopPrice))}</text>`);
-    }
-    parts.push(`<line x1="${left}" x2="${width - 12}" y1="180" y2="180" stroke="var(--line)" stroke-width=".7"/><text x="${left}" y="191" style="font-size:7px;fill:var(--chart-text)">IMACD</text><line x1="65" x2="76" y1="188.5" y2="188.5" stroke="var(--chart-md)" stroke-width="1.2"/><text x="80" y="191" style="font-size:7px">主线</text><line x1="109" x2="120" y1="188.5" y2="188.5" stroke="var(--chart-signal)" stroke-width="1.2"/><text x="124" y="191" style="font-size:7px">信号线</text>`);
-    // Qualified accumulation bands come exclusively from backend focus state.
-    // Exact md == 0 runs must not stand in for the TradingView near-zero area.
-    let focusStart = null;
-    for (let i = 0; i <= candles.length; i++) {
-      const qualified = i < candles.length && candles[i].focus === true && finite(candles[i].focus_band) && Number(candles[i].focus_band) > 0;
-      if (qualified && focusStart === null) focusStart = i;
-      if (!qualified && focusStart !== null) {
-        const segment = candles.slice(focusStart, i);
-        const upper = segment.flatMap((bar, j) => [[left + (focusStart + j) * step, my(Number(bar.focus_band))], [left + (focusStart + j + 1) * step, my(Number(bar.focus_band))]]);
-        const lower = segment.flatMap((bar, j) => [[left + (focusStart + j) * step, my(-Number(bar.focus_band))], [left + (focusStart + j + 1) * step, my(-Number(bar.focus_band))]]);
-        const points = [...upper, ...lower.slice().reverse()].map(([px, yy]) => `${px.toFixed(2)},${yy.toFixed(2)}`).join(" ");
-        const startX = left + focusStart * step, focusWidth = segment.length * step;
-        const accumulationBars = Math.max(...segment.map((bar) => numeric(bar.near_zero_bars)));
-        parts.push(`<g class="focus-zone" data-source="backend-focus"><polygon points="${points}" fill="var(--chart-focus-fill)" stroke="var(--chart-focus-border)" stroke-width=".65"/><title>合格近零蓄势 · ${accumulationBars} 根</title></g>`);
-        if (focusWidth > 58) {
-          const bottom = Math.max(...lower.map((point) => point[1]));
-          parts.push(`<text x="${startX + focusWidth / 2}" y="${Math.min(impulseBottom - 1, bottom + 13)}" text-anchor="middle" style="font-size:7px;fill:var(--chart-focus-text)">近零蓄势 ${accumulationBars} 根</text>`);
-        }
-        focusStart = null;
-      }
-    }
-    // Keep the zero axis distinct from the qualified near-zero band.
-    const zeroY = my(0);
-    parts.push(`<line x1="${left}" x2="${width - right + 3}" y1="${zeroY}" y2="${zeroY}" stroke="var(--chart-zero)" stroke-width=".8" stroke-dasharray="3 3"/><text x="${width - right + 9}" y="${zeroY + 3}" style="fill:var(--chart-zero)">0.00</text>`);
-    parts.push(`<path d="${path("md", my)}" stroke="var(--chart-md)" stroke-width="1.35" fill="none"/><path d="${path("sb", my)}" stroke="var(--chart-signal)" stroke-width="1.2" fill="none"/>`);
-    parts.push(modelOverlay.confirmation);
-    parts.push(`<g class="chart-crosshair" visibility="hidden"><line class="crosshair-line" x1="0" x2="0" y1="${priceTop}" y2="${impulseBottom}" stroke="var(--chart-crosshair)" stroke-width=".8" stroke-dasharray="3 3"/><circle class="crosshair-dot" r="2.5" fill="var(--chart-marker-up)" stroke="var(--chart-marker-bg)" stroke-width="1.2"/></g><rect class="chart-hit-area" x="${left}" y="${priceTop}" width="${plotWidth}" height="${impulseBottom - priceTop}" fill="transparent" stroke="none"/></svg>`);
-    $("chart-container").innerHTML = parts.join("");
-    $("chart-container").setAttribute("aria-label", `${shortSymbol(state.selected?.symbol)} ${timeframeLabel(state.selected?.timeframe)}，${candles.length} 根真实 K 线、六条均线、V1 启动标记${initialStopVisible ? "与初始 SL 参考" : "；后端未提供当前视口可绘制的初始 SL"}`);
-    $("chart-hint").textContent = chartHint();
-    const svg = $("chart-container").querySelector("svg");
-    const crosshair = svg.querySelector(".chart-crosshair");
-    const move = (event) => {
-      const rect = svg.getBoundingClientRect();
-      const localX = (event.clientX - rect.left) / rect.width * width;
-      const index = Math.min(candles.length - 1, Math.max(0, Math.floor((localX - left) / step)));
-      const bar = candles[index];
-      const line = crosshair.querySelector("line"), dot = crosshair.querySelector("circle");
-      line.setAttribute("x1", x(index)); line.setAttribute("x2", x(index));
-      dot.setAttribute("cx", x(index)); dot.setAttribute("cy", py(bar.c));
-      crosshair.setAttribute("visibility", "visible");
-      const marker = Array.from(breakouts.values()).find((event) => Number(event.bar_open_ms ?? event.t) === Number(bar.t));
-      $("chart-hint").textContent = marker ? `${shortDate(bar.t)} · 蓄势释放${sideArrow(marker.side)} · ${number(marker.near_zero_bars)} 根 · 收盘 ${price(marker.price ?? bar.c)}` : `${shortDate(bar.t)}  O ${price(bar.o)}  H ${price(bar.h)}  L ${price(bar.l)}  C ${price(bar.c)}  MD ${price(bar.md)}`;
-    };
-    svg.addEventListener("pointermove", move);
-    svg.addEventListener("pointerleave", () => { crosshair.setAttribute("visibility", "hidden"); $("chart-hint").textContent = chartHint(); });
-    svg.addEventListener("wheel", (event) => {
-      event.preventDefault();
-      const rect = svg.getBoundingClientRect();
-      const local = (event.clientX - rect.left) / rect.width * width;
-      const anchor = Math.min(candles.length - 1, Math.max(0, Math.floor((local - left) / Math.max(step, 1))));
-      const next = Math.max(24, Math.min(180, Math.round(viewportCount * (event.deltaY < 0 ? .8 : 1.25))));
-      const absolute = startIndex + anchor;
-      state.chartViewport = { count: next, start: Math.max(0, Math.min(valid.length - next, absolute - Math.round(anchor * next / candles.length))) };
-      renderChart();
-    }, { passive: false });
-    let drag = null;
-    svg.addEventListener("pointerdown", (event) => { drag = { x: event.clientX, start: startIndex }; svg.setPointerCapture?.(event.pointerId); });
-    svg.addEventListener("pointerup", (event) => { if (!drag) return; const delta = Math.round((event.clientX - drag.x) / Math.max(step, 1)); state.chartViewport = { count: viewportCount, start: Math.max(0, Math.min(valid.length - viewportCount, drag.start - delta)) }; drag = null; renderChart(); });
   }
   function shouldRefreshSignalList(trigger) {
     // Replay records are immutable journal entries.  After their visible
@@ -934,6 +608,11 @@
       if (shouldRefreshSignalList(trigger) && queryScope === "confirmed") {
         requests.push({ key: "signals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=yolo${timeframe}` });
         if (["live", "warmup"].includes(querySource)) requests.push({ key: "rawYoloSignals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw_yolo${timeframe}` });
+        // A YOLO event embeds the original signal as it looked at confirmation
+        // time. Load the current raw read-model separately so its R/SL keeps
+        // moving after source/timeframe switches without turning it into a
+        // notification receipt or a visible raw-card family.
+        if (["live", "warmup"].includes(querySource)) requests.push({ key: "performanceSignals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw${timeframe}` });
       } else if (shouldRefreshSignalList(trigger) && queryScope === "direct") {
         requests.push({ key: "directSignals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw${timeframe}` });
         if (["live", "warmup"].includes(querySource)) requests.push({ key: "rawYoloSignals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw_yolo${timeframe}` });
@@ -951,7 +630,7 @@
         if (key === "status") { state.status = result.value; state.statusReceivedAt = Date.now(); }
         else {
           const items = result.value.items.filter((item) => item && typeof item === "object" && item.symbol).map((item) => normalizeV1Event(item, querySource))
-            .filter((item) => key === "signals" ? isConfirmed(item) : key === "directSignals" ? isDirectRecord(item) : Boolean(item));
+            .filter((item) => key === "signals" ? isConfirmed(item) : ["directSignals", "performanceSignals"].includes(key) ? isDirectRecord(item) : Boolean(item));
           if (key === "directSignals" && state.rawPaged) {
             state.directSignals = [...items, ...state.directSignals].filter((item, index, rows) => rows.findIndex((other) => sameEvent(other, item)) === index);
           } else state[key] = items;
@@ -981,18 +660,8 @@
       if (yoloResult?.status === "fulfilled") state.signalTotal = numeric(yoloResult.value.total, state.signals.length) + rawYoloTotal;
       if (rawResult?.status === "fulfilled") state.directSignalTotal = numeric(rawResult.value.total, state.directSignals.length) + rawYoloTotal;
       if (anySuccess) state.lastSync = Date.now();
-      const currentItems = filteredSignals();
-      if (state.detailOrigin === "signals" && !currentItems.some((item) => sameSelection(state.selected, item))) {
-        if (currentItems.length) chooseSignal(currentItems[0]);
-        else clearSelectedSignal();
-      } else if (!state.selected && currentItems.length) chooseSignal(currentItems[0]);
       renderErrors(); renderStatus(); renderSignals(); renderWatch();
       $("last-sync").textContent = state.errors[sourceKey()] ? "同步失败 · 保留缓存" : `同步 ${clockTime(state.lastSync)}`;
-      if (state.selected) {
-        const updated = state.selected.id !== undefined ? currentItems.find((item) => sameSelection(item, state.selected)) : state.markets.find((item) => item.symbol === state.selected.symbol && item.timeframe === state.selected.timeframe);
-        if (updated) state.selected = { ...updated };
-        renderDetail();
-      }
       if (state.view === "system" && $("health-json").closest("details").open) loadHealth();
     } finally {
       state.syncing = false;
@@ -1119,64 +788,33 @@
   const sideFilter = $("side-filter");
   if (sideFilter) sideFilter.addEventListener("change", (event) => { state.side = event.target.value; state.rowLimit = 24; applySignalFilters(); });
   $("refresh-button").addEventListener("click", () => refresh());
-  $("tradingview-open").addEventListener("click", () => openTradingView(state.selected));
-  $("chart-expand").addEventListener("click", () => setChartExpanded(!state.chartExpanded));
-  $("chart-reset").addEventListener("click", () => { state.chartViewport = null; renderChart(); });
-  $("chart-dialog").addEventListener("close", () => {
-    if (!$("chart-dialog").open) setChartExpanded(false);
-  });
-  $("chart-dialog").addEventListener("click", (event) => {
-    if (event.target === $("chart-dialog")) setChartExpanded(false);
-  });
   $("load-more-signals").addEventListener("click", () => {
     if (state.rowLimit < sourceItems().length) { state.rowLimit += 24; renderSignals(); }
   });
   $("load-earlier-signals").addEventListener("click", loadEarlierRawSignals);
   function activateRow(event, type) {
-    const preview = event.target.closest(type === "signal" ? "[data-preview-signal-id]" : "[data-market-symbol]");
-    const row = preview || event.target.closest("[data-tradingview-action]") || event.target.closest(type === "signal" ? ".signal-card" : ".watch-card")?.querySelector("[data-tradingview-action]");
+    const row = event.target.closest("[data-tradingview-action]") || event.target.closest(type === "signal" ? ".signal-card" : ".watch-card")?.querySelector("[data-tradingview-action]");
     if (!row) return;
     if (event.type === "keydown") {
-      // Preview buttons keep native keyboard clicks. Primary actions handle both
-      // keys here and cancel the synthesized click so the bridge runs once.
-      if (preview || !["Enter", " "].includes(event.key)) return;
+      if (!["Enter", " "].includes(event.key)) return;
       event.preventDefault();
       if (event.repeat) return;
     }
     event.preventDefault();
-    if (!preview && state.tradingViewPending) return;
+    if (state.tradingViewPending) return;
     const item = type === "signal"
-      ? sourceItems().find((candidate) => sameEvent(candidate, { id: row.dataset.signalId || row.dataset.previewSignalId, kind: row.dataset.signalKind, symbol: row.dataset.tvSymbol, timeframe: row.dataset.tvTimeframe }))
-      : state.markets.find((candidate) => candidate.symbol === (row.dataset.marketSymbol || row.dataset.tvSymbol) && candidate.timeframe === (row.dataset.marketTimeframe || row.dataset.tvTimeframe));
+      ? sourceItems().find((candidate) => sameEvent(candidate, { id: row.dataset.signalId, kind: row.dataset.signalKind, symbol: row.dataset.tvSymbol, timeframe: row.dataset.tvTimeframe }))
+      : state.markets.find((candidate) => candidate.symbol === row.dataset.tvSymbol && candidate.timeframe === row.dataset.tvTimeframe);
     if (!item) return;
-    if (!preview && !canOpenTradingView(item)) { openTradingView(item); return; }
-    if (preview && type === "market") {
-      state.search = shortSymbol(item.symbol); state.timeframe = item.timeframe; state.side = "long"; state.rowLimit = 24;
-      $("symbol-search").value = state.search; if (sideFilter) sideFilter.value = "long";
-      document.querySelectorAll("[data-timeframe]").forEach((button) => { const selected = button.dataset.timeframe === item.timeframe; button.classList.toggle("selected", selected); button.setAttribute("aria-pressed", String(selected)); });
-      setView("signals");
-    }
-    chooseSignal(item, Boolean(preview), type === "market" ? "watch" : "signals");
-    if (type === "market") renderWatch();
-    if (!preview) openTradingView(item);
+    openTradingView(item);
   }
   ["click", "keydown"].forEach((eventType) => {
     $("signal-rows").addEventListener(eventType, (event) => activateRow(event, "signal"));
     $("watch-rows").addEventListener(eventType, (event) => activateRow(event, "market"));
   });
   $("load-more-watch").addEventListener("click", () => { state.watchLimit += 24; renderWatch(); });
-  $("back-to-signals").addEventListener("click", () => {
-    const watch = state.detailOrigin === "watch";
-    if (watch) setView("watch");
-    const cards = document.querySelectorAll(watch ? "[data-market-symbol]" : "[data-signal-id]");
-    const card = Array.from(cards).find((node) => watch ? node.dataset.marketSymbol === state.selected?.symbol && node.dataset.marketTimeframe === state.selected?.timeframe : sameEvent(state.selected, { id: node.dataset.signalId, kind: node.dataset.signalKind, symbol: node.dataset.tvSymbol, timeframe: node.dataset.tvTimeframe }));
-    const target = card || $(watch ? "watch-search" : "symbol-search");
-    target.scrollIntoView({ behavior: "instant", block: "center" });
-    target.focus({ preventScroll: true });
-  });
   $("health-json").closest("details").addEventListener("toggle", (event) => { if (event.target.open) loadHealth(); });
   document.addEventListener("keydown", (event) => {
-    if (state.chartExpanded) return; // Native dialog handles Escape and focus containment.
     if (event.key === "/" && !event.metaKey && !event.ctrlKey && !event.altKey && !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName)) {
       event.preventDefault();
       if (state.view === "system") setView("signals");
