@@ -212,7 +212,7 @@ def render_cases(tables, output):
         g = gates.loc[signal]
         si, ei = (i-left)/stride, (j-left)/stride
         for panel in (ax, osc):
-            panel.axvspan(si, len(view), color="#527ea2", alpha=.08)
+            panel.axvspan((i+.5-left)/stride, len(view), color="#527ea2", alpha=.08)
             panel.axvline(si, color="#edd586", linestyle="--", linewidth=1)
             panel.axvline(ei, color="#f194a4", linestyle=":", linewidth=1)
         for value in (g.upper, g.lower):
@@ -220,14 +220,17 @@ def render_cases(tables, output):
         entry_x = (int(b.index.get_loc(pd.Timestamp(match.entry_time)))-left)/stride
         ax.scatter([entry_x], [match.entry_price], marker="^" if row.side == 1 else "v", color="#edd586", s=70, zorder=5)
         ax.scatter([ei], [match.exit_price], marker="x", color="#f194a4", s=60, zorder=5)
-        ax.set_ylim(view.low.min()*.98, view.high.max()*1.02); ax.set_xlim(-1, len(view))
+        low, high = float(view.low.min()), float(view.high.max())
+        pad = max(high-low, abs(high)*1e-6)*.05
+        ax.set_ylim(low-pad, high+pad); ax.set_xlim(-1, len(view))
         ax.set_title(f"{label} | {row.venue.upper()} {row.symbol} {row.timeframe_min}m | "
                      f"{'LONG' if row.side == 1 else 'SHORT'} | baseline realized {row.net_r:.2f}R", loc="left", color="#e6edf5", fontsize=13, pad=15)
         ticks = np.linspace(0, len(view)-1, 7).astype(int)
         osc.set_xticks(ticks, [times[a].tz_convert("Asia/Shanghai").strftime("%m-%d %H:%M") for a in ticks], fontsize=8)
-        fig.text(.06, .036, f"C rule: {row.reason}. Gold vertical: signal bar; triangle: next-open entry. Gold horizontals: previously known range. Pink: baseline exit.", color="#afbfca", fontsize=9)
+        fig.text(.06, .052, f"C rule: {row.reason}. Gold vertical: signal bar; triangle: next-open entry. Pink cross: baseline exit.", color="#afbfca", fontsize=9)
+        fig.text(.06, .035, "Gold horizontals: range known before the signal. Shading begins after the signal candle closes.", color="#afbfca", fontsize=9)
         fig.text(.06, .018, f"Shaded future is review only. Each displayed candle aggregates {stride} original bars. UTC+8.", color="#afbfca", fontsize=9)
-        fig.subplots_adjust(left=.065, right=.97, top=.93, bottom=.09, hspace=.1)
+        fig.subplots_adjust(left=.065, right=.97, top=.93, bottom=.12, hspace=.1)
         path = output/f"case_{k:02d}.png"; fig.savefig(path, dpi=130); plt.close(fig)
         receipts.append(dict(file=str(path), selection=label, asset=row.asset, timeframe=row.timeframe_min,
                              net_r=row.net_r, reason=row.reason, cache_sha256=context.receipt["cache_sha256"], stride=stride))
@@ -243,7 +246,9 @@ def table(frame, columns, percent=()):
             v = row[key]
             if key == "arm": v = LABELS[v]
             if key == "period": v = {"development": "开发年", "validation": "复用验证年", "full": "两年"}[v]
+            if key == "timeframe_min": v = {30: "30m", 60: "1H", 240: "4H"}.get(v, v)
             if key in percent: v = f"{100*float(v):.2f}%" if pd.notna(v) else "N/A"
+            elif key in {"base_winners10", "kept_winners10", "episode_winners10", "removed_losers", "removed_winners"} and pd.notna(v): v = str(int(v))
             elif isinstance(v, (float, np.floating)): v = f"{v:.4f}" if pd.notna(v) else "N/A"
             cells.append(str(v))
         lines.append("| " + " | ".join(cells) + " |")
@@ -298,6 +303,9 @@ def build(result, output):
         "## 全局案例图",
         "以下按复用验证年C保留赢家、误删赢家、删去亏损各选最多2例，属于结果已知的解释图，不参与特征或参数选择。阴影区域是信号当时未知的后续走势。",
     ]
+    interpretation = EXP/"INTERPRETATION.md"
+    if interpretation.exists():
+        content.insert(2, interpretation.read_text())
     cn = {"Retained winner": "保留的赢家", "Missed winner": "被误删的赢家", "Removed loser": "被过滤的亏损"}
     for case in cases:
         content.append(f"### {cn[case['selection']]}：{case['asset']} {case['timeframe']}m，原版兑现{case['net_r']:.2f}R\n\nC判定原因：`{case['reason']}`。\n\n![{cn[case['selection']]}](../{case['file']})")
@@ -310,9 +318,10 @@ def build(result, output):
         "按开发和复用验证两段一起判读，不因少提示就称为更赚钱。不通过目标的方案保留失败证据；若减少噪音同时误删大行情，先看误删图解释机制，不继续在同一验证年搜索阈值。后续可单独检验明确失效退出或前向冻结验证，当前Pine/监控/通知不自动更换。",
         "## 复现命令", f"```bash\n.venv/bin/python -m pytest -q tests/evaluation/test_spike_v7_episode_study.py tests/evaluation/test_spike_v7_episode_report.py\nOMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 .venv/bin/python -W ignore::FutureWarning -m yoyo.evaluation.spike_v7_episode_study --output {result}\n.venv/bin/python -W ignore::FutureWarning -m yoyo.evaluation.spike_v7_episode_report --result {result} --output {output}\n.venv/bin/python scripts/md_to_html.py {report} --out-dir analysis/html\n```",
     ])
-    report.write_text("\n\n".join(content)+"\n")
+    report.write_text("\n\n".join(content).replace("周期min", "周期")+"\n")
     receipt = dict(**parity, builder_sha256=sha256(Path(__file__)), engine_manifest_sha256=sha256(result/"manifest.json"),
-                   report_sha256=sha256(report), files={p.name: sha256(p) for p in output.iterdir() if p.is_file()},
+                   interpretation_sha256=sha256(interpretation) if interpretation.exists() else None,
+                   report_sha256=sha256(report), files={p.name: sha256(p) for p in output.iterdir() if p.is_file() and p.name != "report_manifest.json"},
                    generated_at=pd.Timestamp.now(tz="UTC").isoformat())
     (output/"report_manifest.json").write_text(json.dumps(receipt, indent=2))
     print(json.dumps(parity), flush=True)
