@@ -21,7 +21,13 @@ ROOT=Path(__file__).resolve().parents[2]
 def table(frame, columns, percentages=()):
     f=frame.loc[:,list(columns)].copy()
     for name in f:
-        if name in percentages:
+        if name == "cohort":
+            f[name]=f[name].replace({BASELINE:"V1 双向基线",PLUS:"V1+ 默认"})
+        elif name == "period":
+            f[name]=f[name].replace({"full":"完整两年","development":"前一年","validation":"后一年"})
+        elif name == "side_group":
+            f[name]=f[name].replace({"long":"多头","short":"空头","both":"多空合计"})
+        elif name in percentages:
             f[name]=f[name].map(lambda x:"—" if pd.isna(x) else f"{x:.2%}")
         elif name in {"entry_price", "exit_price"}:
             f[name]=f[name].map(lambda x:"—" if pd.isna(x) else f"{x:.10g}")
