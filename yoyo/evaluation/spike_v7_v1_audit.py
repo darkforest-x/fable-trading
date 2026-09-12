@@ -46,6 +46,8 @@ def run(raw: Path, post: Path, output: Path) -> None:
                              ("post_hoc_without_RAVE", part.loc[~part.symbol.str.contains("RAVE")]),
                              ("post_hoc_without_USDC", part.loc[~part.symbol.str.contains("USDC")])):
             stats = event_metrics(subset)
+            # Native V1 has no MFE field; concatenation must not imply zero MFE.
+            stats.pop("mfe_ge_10r", None)
             rows.append({"variant": variant, "timeframe_min": minutes, "diagnostic": name,
                          **stats, "excluded_positive_return_share":
                          1-stats["positive_net_return_sum"]/full["positive_net_return_sum"]})
