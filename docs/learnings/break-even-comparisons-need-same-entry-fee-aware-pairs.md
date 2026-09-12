@@ -1,0 +1,7 @@
+# Compare break-even exits on the same entry and distinguish fee-bearing exits
+
+- **问题**：The owner wanted coin-level comparisons between the original exit and a stop moved to entry after a 1R close. Different exit policies can free the account for different later entries, so their trade counts and ordering differ.
+- **死胡同**：Pairing the nth trade of each policy mixes unrelated entries. Calling a price-level break-even exit a nonnegative net outcome also fails: the frozen 0.2% round-trip cost remains payable. Selecting illustrations only by the largest profit hides the losses and the trends cut short.
+- **有效路径**：Authenticate each source ledger and join on stream, cohort, signal time, entry time and side. Retain unmatched trades instead of silently discarding them. Separate reduced losses from net nonloss outcomes; show actual net R independently of maximum favourable excursion. Keep whole-policy account results separate from the matched-entry illustration.
+- **通用规则**：Before comparing an exit policy, freeze the entry identity, cost definition and accounting unit. Match exact entries for mechanisms, use full independent account paths for policy performance, and label outcome-selected charts as retrospective explanations rather than an estimated success rate.
+- **牵连**：`yoyo/evaluation/spike_coin_be_report.py`; `experiments/active/exp-spike-coin-be-review-20260912-v1/`; the frozen `exp-spike-exit-policy-20260912-v1` next-bar break-even and independent-account contracts. No production rules changed.

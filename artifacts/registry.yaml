@@ -18,6 +18,48 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-coin-be-review-20260912-manifest
+    artifact_type: manifest
+    role: descriptive_coin_statistics_and_browser_provenance
+    source_repo: darkforest-x/fable-trading
+    source_commit: ea4761b490432bb43ccc89f01b5db8bff48a18a1
+    generator_commit: ea4761b490432bb43ccc89f01b5db8bff48a18a1
+    source_path: experiments/active/exp-spike-coin-be-review-20260912-v1/review_manifest.json
+    sha256: c66598c4fe1bce6088920989344000a4269ea8e43a9ea304b6f2001916a39a4f
+    size_bytes: 8344
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized descriptive reuse of fixed exit ledgers; includes Binance 1000PEPE alias, actual Lightweight
+      Charts browser screenshots, no new strategy scores or deployment.
+  - artifact_id: spike-coin-be-review-20260912-report
+    artifact_type: report
+    role: coin_exit_policy_results
+    source_repo: darkforest-x/fable-trading
+    source_commit: ea4761b490432bb43ccc89f01b5db8bff48a18a1
+    generator_commit: ea4761b490432bb43ccc89f01b5db8bff48a18a1
+    source_path: analysis/p1_spike_coin_be_review_20260912.md
+    sha256: e48b4dfc4433312d74780f929ac804b58e212c947d72a92d8c6c5ce23d1bd8dd
+    size_bytes: 12156
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized descriptive reuse of fixed exit ledgers; includes Binance 1000PEPE alias, actual Lightweight
+      Charts browser screenshots, no new strategy scores or deployment.
+  - artifact_id: spike-coin-be-review-20260912-html
+    artifact_type: report
+    role: owner_report_with_actual_tradingview_library_screenshots
+    source_repo: darkforest-x/fable-trading
+    source_commit: ea4761b490432bb43ccc89f01b5db8bff48a18a1
+    generator_commit: ea4761b490432bb43ccc89f01b5db8bff48a18a1
+    source_path: analysis/html/p1_spike_coin_be_review_20260912.html
+    sha256: a858d3bdf8bb76dc7e24161ae11d35cd419982c17922a96d1d2c5c605e6fda91
+    size_bytes: 982238
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized descriptive reuse of fixed exit ledgers; includes Binance 1000PEPE alias, actual Lightweight
+      Charts browser screenshots, no new strategy scores or deployment.
   - artifact_id: spike-v7-first-launch-20260912-html
     artifact_type: report
     role: owner_review_with_six_embedded_charts

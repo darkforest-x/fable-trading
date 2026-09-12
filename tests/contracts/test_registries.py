@@ -173,6 +173,8 @@ def test_holdout_consumption_is_declared_per_experiment_not_assumed():
     registries = load_registries(root=REPO)
     consumers = {e.experiment_id for e in registries.experiments if e.holdout_consumed}
     assert consumers == {
+        # Owner authorized this descriptive reuse of all-date exit ledgers.
+        "exp-spike-coin-be-review-20260912-v1",
         # Owner authorized V7 episode exploration and all historical dates (2026-09-12).
         "exp-spike-v7-first-launch-20260912-v1",
         # Owner explicitly authorized OKX, all timeframes and all dates in chat.
