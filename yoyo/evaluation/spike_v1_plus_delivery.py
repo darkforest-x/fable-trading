@@ -50,6 +50,11 @@ def deliver(post:Path, engine:Path):
     signals=read("signal_summary.csv"); pairs=read("same_entry_pairs.csv.gz"); trades=read("trades.csv.gz")
     individual=read("independent_accounts.csv"); controls=read("matched_benchmark_summary.csv")
     concentration=read("concentration.csv")
+    full=events.loc[events.period.eq("full") & events.side_group.eq("both")]
+    base_entries=int(full.loc[full.cohort.eq(BASELINE),"entries"].sum())
+    plus_entries=int(full.loc[full.cohort.eq(PLUS),"entries"].sum())
+    fewer=1-plus_entries/base_entries if base_entries else 0.
+    improving=accounts.loc[accounts.period.eq("validation") & accounts.mean_plus_return.gt(accounts.mean_base_return)]
     ids=trades[["stream_key","timeframe_min"]].drop_duplicates()
     pairs=pairs.merge(ids,on="stream_key",validate="many_to_one")
     tail=[]
@@ -70,6 +75,10 @@ def deliver(post:Path, engine:Path):
 
 本轮真实运行了 V1+ 完整默认配置，并与同一源码关闭加强模块的双向基线比较。
 **这是固定配置评估，不是参数寻优，也不是专门的 1R 保本实验。**
+
+加强版模拟入场 **{plus_entries:,}** 次，双向基线 **{base_entries:,}** 次，数量减少 **{fewer:.2%}**。
+后一年有 **{len(improving)}/3** 个周期的独立账户平均收益提高。改善幅度、回撤与大趋势保留必须一起看；
+信号数量的变化本身并不能证明假启动减少。
 
 完成 {manifest["streams"]:,} 个行情流；两臂共 {manifest["simulated_trades"]:,} 条模拟交易记录，
 其中包含同一机会的版本对照，不能视为独立市场机会数。完整方向/周期/账户数据在下表和 CSV。
@@ -167,10 +176,14 @@ PF使用逐笔等名义净收益；净R合计不是账户百分比。止损K内�
 - [同入场逐笔对照]({post / "same_entry_pairs.csv.gz"})
 - [完整实验计划]({EXP / "PROJECT_PLAN.md"})
 - [运行收据]({engine / "manifest.json"})
+- [定向恢复收据]({EXP / "receipts/replay_full_v3_resume_receipt.json"})
+- [技术运行记录]({EXP / "RUN_NOTES.md"})
 
 ```bash
 .venv/bin/python -m pytest -q tests/evaluation/test_spike_v1_plus_replay.py tests/evaluation/test_spike_v1_plus_report.py
 .venv/bin/python -m yoyo.evaluation.spike_v1_plus_study {engine.relative_to(ROOT)}
+# 若宿主时长上限打断，以下包装先验证已完成文件，只恢复缺失的冻结行情流。
+.venv/bin/python experiments/active/exp-spike-v1-plus-backtest-20260912-v1/resume_v3_driver.py
 .venv/bin/python -m yoyo.evaluation.spike_v1_plus_report {engine.relative_to(ROOT)} {post.relative_to(ROOT)}
 .venv/bin/python -m yoyo.evaluation.spike_v1_plus_delivery {post.relative_to(ROOT)} {engine.relative_to(ROOT)}
 .venv/bin/python scripts/md_to_html.py analysis/p1_spike_v1_plus_backtest_20260912.md --out-dir analysis/html
