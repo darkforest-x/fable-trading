@@ -21,6 +21,11 @@ EXP = ROOT / "experiments/active/exp-spike-v1-plus-backtest-20260912-v1"
 CONFIG = EXP / "config.json"
 RAW = ROOT / "experiments/active/exp-spike-v7-v1-compare-20260912-v1/results/replay_two_year_20260912_v3"
 VARIANTS = (("v1_display_both", False), ("v1_plus_default_both", True))
+SUMMARY_COLUMNS = (
+    "stream_key", "venue", "symbol", "asset", "timeframe_min", "segment", "variant", "year", "side",
+    "trades", "realized", "censored", "net_win_rate", "profit_factor", "total_net_r", "mean_net_r",
+    "net_return_sum", "realized_ge_5r", "realized_ge_10r", "mfe_ge_10r",
+)
 
 
 def digest(path: Path) -> str:
@@ -69,7 +74,14 @@ def _completed(folder: Path, identity: dict) -> bool:
 
 def _summarize(trades: pd.DataFrame, *, identity: dict, variant: str) -> list[dict]:
     records=[]
-    if trades.empty: return records
+    if trades.empty:
+        # A schema-bearing zero row makes resume/global aggregation readable
+        # and distinguishes an authenticated no-trade arm from a missing CSV.
+        return [{**identity, "variant": variant, "year": None, "side": None,
+                 "trades": 0, "realized": 0, "censored": 0, "net_win_rate": None,
+                 "profit_factor": None, "total_net_r": None, "mean_net_r": None,
+                 "net_return_sum": None, "realized_ge_5r": 0, "realized_ge_10r": 0,
+                 "mfe_ge_10r": 0}]
     trades=trades.copy(); trades["year"] = pd.to_datetime(trades.entry_time, utc=True).dt.year
     for (year,side), part in trades.groupby(["year","side"], dropna=False):
         done=part.loc[~part.censored.astype(bool)]; wins=done.net_return.gt(0)
@@ -122,7 +134,7 @@ def run(output: Path, *, limit: int | None = None) -> None:
         staging=roots/f".{key}.staging"; folder.exists() and (_ for _ in ()).throw(FileExistsError(folder)); staging.mkdir()
         for name,parts in (("signals",signal_frames),("trades",trade_frames),("fills",fill_frames),("events",event_frames)):
             out=pd.concat(parts,ignore_index=True) if parts else pd.DataFrame(); out.to_csv(staging/f"{name}.csv.gz",index=False,compression={"method":"gzip","mtime":0})
-        pd.DataFrame(per).to_csv(staging/"summary.csv",index=False)
+        pd.DataFrame(per, columns=SUMMARY_COLUMNS).to_csv(staging/"summary.csv",index=False)
         completion={"key":key,"identity":identity,"source_path":stream["source_path"],"source_sha256":stream["source_sha256"],"tick":stream["tick"],"status":"complete","files":{**{name:digest(staging/f"{name}.csv.gz") for name in ("signals","trades","fills","events")}, "summary":digest(staging/"summary.csv")}}
         _write_json(staging/"completion.json",completion); staging.replace(folder); processed += 1
         print(f"complete {processed} {key}",flush=True)

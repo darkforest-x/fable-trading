@@ -5,6 +5,7 @@ import pandas as pd
 
 import yoyo.evaluation.spike_v1_plus_replay as replay
 from yoyo.evaluation.spike_v1_plus_replay import _path_plus, simulate_next_open
+from yoyo.evaluation.spike_v1_plus_study import SUMMARY_COLUMNS, _summarize
 
 
 def _bars(rows):
@@ -76,6 +77,29 @@ def test_trade_ids_are_scoped_to_the_caller_stream_and_arm():
     trades, fills = simulate_next_open(bars, _refs(bars.index), tick=1, trade_id_prefix="okx_eth_60:v1_plus_default_both")
     assert trades.iloc[0].trade_id.startswith("okx_eth_60:v1_plus_default_both:")
     assert fills.iloc[0].trade_id == trades.iloc[0].trade_id
+
+
+def test_ghost_reference_reverse_cannot_exit_a_later_actual_entry():
+    # Evaluation starts flat even though the full Pine reference had an older
+    # opposite position. The queued exit is consumed before the new fill.
+    bars = _bars([{"open":100,"high":101,"low":99,"close":100},
+                  {"open":100,"high":104,"low":99,"close":103},
+                  {"open":103,"high":105,"low":102,"close":104}])
+    refs = _refs(bars.index)
+    refs.loc[refs.index[0], ["reference_exit", "reference_exit_reason"]] = [True, "opposite_reference"]
+    trades, fills = simulate_next_open(bars, refs, tick=1)
+    assert len(trades) == 1
+    assert trades.iloc[0].entry_time == bars.index[1]
+    assert trades.iloc[0].exit_reason == "boundary_mark"
+    assert set(fills.kind) == {"entry", "censor"}
+
+
+def test_zero_trade_summary_is_schema_bearing_and_counted():
+    rows = _summarize(pd.DataFrame(), identity={"stream_key": "s", "venue": "okx", "symbol": "X",
+                       "asset": "X", "timeframe_min": 60, "segment": "full"}, variant="v1_display_both")
+    frame = pd.DataFrame(rows, columns=SUMMARY_COLUMNS)
+    assert list(frame.columns) == list(SUMMARY_COLUMNS)
+    assert len(frame) == 1 and frame.iloc[0].trades == 0
 
 
 def test_prefix_execution_is_identical_after_unaffected_prefix():

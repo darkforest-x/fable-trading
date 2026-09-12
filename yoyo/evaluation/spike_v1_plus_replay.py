@@ -223,8 +223,13 @@ def simulate_next_open(
 
         # 2. A reference reversal observed at the prior close exits before
         # this bar's high/low is available.
-        if pos is not None and pending_reverse:
-            close_position(o, "opposite_reference_next_open", i, stamp, "open")
+        if pending_reverse:
+            # A reference can have existed before this evaluation window while
+            # the actual ledger deliberately starts flat, or an entry can have
+            # been rejected at its open.  Consume that reference decision once
+            # regardless; otherwise it could incorrectly exit a later trade.
+            if pos is not None:
+                close_position(o, "opposite_reference_next_open", i, stamp, "open")
             pending_reverse = False
 
         # 3. The next-open entry itself may be stopped inside this same bar.
