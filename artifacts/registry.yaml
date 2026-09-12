@@ -29,6 +29,58 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Frozen before full replay; authorized reused two-year data.
+  - artifact_id: spike-exit-policy-20260912-post-manifest
+    artifact_type: manifest
+    role: complete_exit_and_capital_replay_identity
+    source_repo: darkforest-x/fable-trading
+    source_commit: d3e0deeef63fcbb814989c6de32f22c520b3e264
+    source_path: experiments/active/exp-spike-exit-policy-20260912-v1/post_full_v1/post_manifest.json
+    sha256: e79b027eec50e99fa0a0c5b9b5ecd2400511163542867332a62f158a6f71ad62
+    size_bytes: 1259
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-spike-exit-policy-20260912-v1/post_full_v1/post_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Complete 3531-stream local manifest; large account/event tables remain local.
+  - artifact_id: spike-exit-policy-20260912-report
+    artifact_type: report
+    role: exit_policy_and_account_risk_result
+    source_repo: darkforest-x/fable-trading
+    source_commit: d3e0deeef63fcbb814989c6de32f22c520b3e264
+    source_path: analysis/p1_spike_exit_policy_20260912.md
+    sha256: 75a542b5c4507ec3910dd4af9bbaf6ea59115a92ffaa17e146bf59d16b1c51b2
+    size_bytes: 31126
+    storage_uri: file:///Users/zhangzc/fable-trading/analysis/p1_spike_exit_policy_20260912.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Source report; no exit or risk setting passed for deployment.
+  - artifact_id: spike-exit-policy-20260912-report-html
+    artifact_type: report
+    role: owner_facing_exit_policy_and_account_risk_result
+    source_repo: darkforest-x/fable-trading
+    source_commit: d3e0deeef63fcbb814989c6de32f22c520b3e264
+    source_path: analysis/html/p1_spike_exit_policy_20260912.html
+    sha256: e7e36f230f420620a9ca7cbd933da932cf69b6c4944ffdb8037db9f0d21cf8b8
+    size_bytes: 496539
+    storage_uri: file:///Users/zhangzc/fable-trading/analysis/html/p1_spike_exit_policy_20260912.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Self-contained HTML with embedded capital-risk chart.
+  - artifact_id: spike-exit-policy-20260912-tv-save-receipt
+    artifact_type: manifest
+    role: tradingview_display_only_save_identity
+    source_repo: darkforest-x/fable-trading
+    source_commit: d3e0deeef63fcbb814989c6de32f22c520b3e264
+    source_path: experiments/active/exp-spike-exit-policy-20260912-v1/receipts/tv_saved_r_levels.json
+    sha256: 46a8c63e7257950fceafb6973381ad14217e991790708428c65855f564b80812
+    size_bytes: 1411
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-spike-exit-policy-20260912-v1/receipts/tv_saved_r_levels.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: V1/V6/V7 native Pine save timestamps and source hashes; display only.
   - artifact_id: spike-v1-plus-implementation-20260912-report
     artifact_type: report
     role: implementation_and_validation_limits

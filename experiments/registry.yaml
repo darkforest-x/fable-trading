@@ -16,23 +16,30 @@ schema_version: 1
 experiments:
   - experiment_id: exp-spike-exit-policy-20260912-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 5918c5c2ab4e8be6281606a44fa32798f2dc1cbf
-    status: active
+    source_commit: d3e0deeef63fcbb814989c6de32f22c520b3e264
+    status: inconclusive
     question: Compare fixed causal exit policies and capital risk on the same frozen
       V1/V6/V7 streams.
     single_variable: One exit change versus baseline; owner-authorized partial-plus-BE
       combination; entry signals unchanged.
-    result: Full replay in progress. Display-only default 1R/2R/3R changes compiled
-      and saved to TradingView; no economic winner declared.
+    result: Full 3531-stream replay completed. All six non-baseline exits selected
+      on development underperformed their unchanged baseline in reused validation;
+      no replacement exit or account-risk setting was cleared. V1/V6/V7 display-only
+      1R/2R/3R defaults compiled and were saved to TradingView.
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    canonical_report: experiments/active/exp-spike-exit-policy-20260912-v1/PROJECT_PLAN.md
+    canonical_report: analysis/p1_spike_exit_policy_20260912.md
     artifacts:
     - spike-exit-policy-20260912-config
+    - spike-exit-policy-20260912-post-manifest
+    - spike-exit-policy-20260912-report
+    - spike-exit-policy-20260912-report-html
+    - spike-exit-policy-20260912-tv-save-receipt
     notes: Owner authorized all historical dates and research stop/exit/risk changes.
       Reused chronological evaluation, not blind holdout; V1 common-execution long only.
-      No live orders or production changes.
+      No live orders or production changes. Status is inconclusive because no changed
+      exit generalized and the reused second year is not blind validation.
   - experiment_id: exp-spike-v1-plus-implementation-20260912
     source_repo: darkforest-x/fable-trading
     source_commit: dea2d8ba3daabf3c64fffd627d626be86d235169
@@ -7852,7 +7859,7 @@ experiments:
   - experiment_id: exp-spike-burst-three-year-20260910-v1
     source_repo: darkforest-x/fable-trading
     source_commit: e05557d6e65a2b9965cf6dcc30c12c74ed8a11e7
-    status: completed
+    status: rejected
     question: Does frozen Burst V1 transfer across three historical years, and why is ETH1H sparse?
     single_variable: Frozen entry and execution; longer chronological evaluation and documented Binance universe. No fitting.
     result: Complete 2023-09-09 to 2026-09-09 UTC retrospective, 649 markets, 10,442,235 1H bars. Primary 1H net +7.732%
