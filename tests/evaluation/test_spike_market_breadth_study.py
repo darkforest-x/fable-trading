@@ -1,0 +1,89 @@
+"""Synthetic contracts for causal SPIKE market-breadth accounting."""
+from __future__ import annotations
+
+import gzip
+import numpy as np
+import pandas as pd
+import pytest
+
+from yoyo.evaluation.spike_market_breadth_study import (
+    _prefix_rows, attach_context, canonical_asset, causal_asset_features, complete_aggregate_30m,
+    launch_density_from_events, summarize_slice,
+)
+
+
+def test_canonical_asset_removes_only_exchange_contract_multipliers():
+    assert canonical_asset("1000BONK") == "BONK"
+    assert canonical_asset("1000000MOG") == "MOG"
+    assert canonical_asset("BTC") == "BTC"
+
+
+def test_causal_features_do_not_change_when_future_bars_are_appended():
+    index = pd.date_range("2024-01-01", periods=26, freq="30min", tz="UTC")
+    close = np.linspace(100, 110, len(index))
+    frame = pd.DataFrame({"open": close - .1, "high": close + 1, "low": close - 1,
+                          "close": close, "volume": np.arange(1, len(index) + 1)}, index=index)
+    first = causal_asset_features(frame)
+    extended = pd.concat([frame, pd.DataFrame({"open": [1.], "high": [2.], "low": [.5], "close": [1.5], "volume": [999.]},
+                                                index=[index[-1] + pd.Timedelta(minutes=30)])])
+    second = causal_asset_features(extended).loc[index]
+    pd.testing.assert_frame_equal(first, second, check_freq=False)
+    assert first.fast.iloc[18] is np.nan or pd.isna(first.fast.iloc[18])
+    assert bool(first.fast.iloc[19])
+
+
+def test_gap_resets_all_rolling_windows():
+    index = pd.date_range("2024-01-01", periods=45, freq="30min", tz="UTC").delete(25)
+    close = np.linspace(100, 110, len(index))
+    frame = pd.DataFrame({"open": close, "high": close + 1, "low": close - 1,
+                          "close": close, "volume": np.arange(1, len(index) + 1)}, index=index)
+    features = causal_asset_features(frame)
+    first_after_gap = index[25]
+    assert pd.isna(features.loc[first_after_gap, "fast"])
+    assert pd.isna(features.loc[first_after_gap, "rv_tr_atr"])
+
+
+def test_slice_summary_excludes_censored_from_realized_tail_and_reports_mae():
+    rows = pd.DataFrame({"censored": [False, False, True], "net_r": [11., -1., 20.],
+                         "mae_r_exit_bar_window_approx": [-.5, -2., -3.]})
+    result = summarize_slice(rows, label="all", metric="all")
+    assert result["candidates"] == 3 and result["closed"] == 2 and result["censored"] == 1
+    assert result["realized_ge_10r"] == pytest.approx(.5)
+    assert result["mae_r_exit_bar_window_approx_median"] == pytest.approx(-1.25)
+    assert pd.isna(result["matched_delta_net_r"])
+
+
+def test_prefix_reader_stops_before_future_payload_is_parsed(tmp_path):
+    path = tmp_path / "stream.csv.gz"
+    path.write_bytes(gzip.compress(
+        b"time,outcome\n2025-09-09T23:30:00+00:00,1.0\n2025-09-10T00:00:00+00:00,FORBIDDEN_FUTURE\n"
+    ))
+    rows = list(_prefix_rows(path, cutoff_field="time", cutoff=pd.Timestamp("2025-09-10T00:00:00Z")))
+    assert len(rows) == 1
+    assert rows[0][1] == ["2025-09-09T23:30:00+00:00", "1.0"]
+
+
+def test_density_uses_strict_hour_and_includes_current_signal():
+    clock = pd.Series(pd.to_datetime(["2024-01-01T01:00:00Z"]))
+    events = [(pd.Timestamp("2024-01-01T00:00:00Z"), "OLD"),
+              (pd.Timestamp("2024-01-01T00:30:00Z"), "A"),
+              (pd.Timestamp("2024-01-01T01:00:00Z"), "A"),
+              (pd.Timestamp("2024-01-01T01:00:00Z"), "B")]
+    assert launch_density_from_events(events, clock).tolist() == [2]
+
+
+def test_complete_bucket_drops_partial_60_and_retains_complete_240():
+    index = pd.date_range("2024-01-01", periods=9, freq="30min", tz="UTC").delete(2)
+    bars = pd.DataFrame({"open": 1., "high": 2., "low": .5, "close": 1.5, "volume": 1.}, index=index)
+    hourly = complete_aggregate_30m(bars, 60)
+    four_hour = complete_aggregate_30m(bars, 240)
+    assert pd.Timestamp("2024-01-01T02:00:00Z") in hourly.index
+    assert pd.Timestamp("2024-01-01T00:00:00Z") not in four_hour.index
+
+
+def test_context_joins_to_signal_bar_close_next_open_not_bar_open():
+    signal_open = pd.Timestamp("2024-01-01T00:00:00Z")
+    trades = pd.DataFrame({"entry_time": [signal_open + pd.Timedelta(hours=1)], "censored": [False]})
+    panel = pd.DataFrame({"bar_open": [signal_open], "asof": [signal_open + pd.Timedelta(hours=1)],
+                          "joint_breadth": [.4]})
+    assert attach_context(trades, panel).joint_breadth.tolist() == [.4]
