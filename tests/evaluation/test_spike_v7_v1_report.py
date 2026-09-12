@@ -2,7 +2,7 @@
 import pandas as pd
 import pytest
 
-from yoyo.evaluation.spike_v7_v1_report import bools, event_metrics, exact_retention, fixed_sample
+from yoyo.evaluation.spike_v7_v1_report import bools, event_metrics, exact_retention, fixed_sample, control_metrics
 
 
 def test_censored_rows_never_become_wins_and_no_fake_portfolio():
@@ -45,3 +45,11 @@ def test_tail_retention_requires_the_actual_same_entry():
 def test_unknown_boolean_fails_closed():
     with pytest.raises(ValueError, match="unrecognized"):
         bools(pd.Series(["maybe"]))
+
+
+def test_all_unresolved_controls_are_reported_without_fabricating_returns():
+    pairs = pd.DataFrame({"variant": ["v7_bb_long"], "matched": [False], "reason": ["control_unresolved"]})
+    result = control_metrics(pairs, ["variant"]).iloc[0]
+    assert result.sampled_targets == 1
+    assert result.matched_targets == 0
+    assert pd.isna(result.control_mean_net_r)

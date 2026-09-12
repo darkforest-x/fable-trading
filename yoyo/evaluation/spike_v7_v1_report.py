@@ -40,6 +40,8 @@ def event_metrics(trades: pd.DataFrame) -> dict:
     done = trades.loc[~bools(trades.censored)]
     net = pd.to_numeric(done.net_return, errors="raise")
     r = pd.to_numeric(done.net_r, errors="raise")
+    if not np.isfinite(net.to_numpy()).all() or not np.isfinite(r.to_numpy()).all():
+        raise ValueError("closed trades require finite net return and net R")
     positive, negative = float(net.clip(lower=0).sum()), float(-net.clip(upper=0).sum())
     result = {"entries": len(trades), "closed": len(done), "censored": len(trades)-len(done),
               "wins": int(net.gt(0).sum()), "win_rate": float(net.gt(0).mean()),
@@ -117,12 +119,28 @@ def grouped_metrics(trades: pd.DataFrame, keys: list[str]) -> pd.DataFrame:
 
 
 def control_metrics(pairs: pd.DataFrame, keys: list[str]) -> pd.DataFrame:
+    pairs = pairs.copy()
+    for column in ("target_net_r", "control_net_r", "net_r_difference", "net_return_difference"):
+        if column not in pairs:
+            pairs[column] = np.nan
     rows = []
     for group, part in pairs.groupby(keys, dropna=False, sort=True):
         if not isinstance(group, tuple):
             group = (group,)
         good = part.loc[bools(part.matched)]
-        rows.append({**dict(zip(keys, group)), "sampled_targets": len(part), "matched_targets": len(good),
+        inference = {"matched_months": 0, "equal_month_mean_net_r_difference": np.nan,
+                     "exploratory_month_block_sign_flip_p": np.nan}
+        if len(good):
+            month = pd.to_datetime(good.signal_bar_open, utc=True).dt.strftime("%Y-%m")
+            blocks = good.groupby(month).net_r_difference.mean().dropna().to_numpy(float)
+            inference["matched_months"] = len(blocks)
+            if len(blocks) >= 6:
+                observed = float(blocks.mean())
+                signs = np.random.default_rng(0).choice([-1.,1.], size=(9999,len(blocks)))
+                null = (signs * blocks).mean(axis=1)
+                inference.update(equal_month_mean_net_r_difference=observed,
+                                 exploratory_month_block_sign_flip_p=float((1+(null>=observed).sum())/10000))
+        rows.append({**dict(zip(keys, group)), **inference, "sampled_targets": len(part), "matched_targets": len(good),
                      "target_mean_net_r": good.target_net_r.mean(),
                      "control_mean_net_r": good.control_net_r.mean(),
                      "paired_mean_net_r_difference": good.net_r_difference.mean(),
@@ -157,6 +175,8 @@ def exact_retention(trades: pd.DataFrame) -> pd.DataFrame:
 def process(raw: Path, output: Path, *, controls: bool, allow_partial: bool) -> None:
     config = json.loads(CONFIG.read_text())
     manifest = json.loads((raw / "manifest.json").read_text())
+    if manifest.get("config_sha256") != hashlib.sha256(CONFIG.read_bytes()).hexdigest():
+        raise ValueError("replay and report configuration hashes differ")
     if not allow_partial and manifest.get("completed_streams") != manifest.get("covered_streams_frozen"):
         raise ValueError("full report requires all frozen streams completed")
     output.mkdir(parents=True, exist_ok=True)
