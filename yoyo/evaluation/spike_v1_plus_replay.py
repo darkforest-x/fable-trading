@@ -175,7 +175,7 @@ def replay_references(ohlcv: pd.DataFrame, tick: float, *, enable_plus: bool) ->
     return pd.DataFrame(rows).set_index("bar_open")
 
 
-def simulate_next_open(
+def _simulate_next_open_series(
     ohlcv: pd.DataFrame, refs: pd.DataFrame, *, tick: float, trade_id_prefix: str = "v1plus"
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Execute close references on the next open with an independent stop clock.
@@ -289,4 +289,112 @@ def simulate_next_open(
         last = ohlcv.iloc[-1]
         close_position(float(last.close), "boundary_mark", len(ohlcv) - 1,
                        ohlcv.index[-1], "close", censored=True)
+    return pd.DataFrame(trades, columns=TRADE_COLUMNS), pd.DataFrame(fills, columns=FILL_COLUMNS)
+
+
+def simulate_next_open(
+    ohlcv: pd.DataFrame, refs: pd.DataFrame, *, tick: float, trade_id_prefix: str = "v1plus"
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Array-backed equivalent of :func:`_simulate_next_open_series`.
+
+    This function changes only value access: the ordering of gap, queued
+    reversal, queued entry, intrabar stop, close protection and new queues is
+    kept deliberately identical to the reference implementation.  Avoiding
+    two ``.iloc`` Series constructions per bar is material on 3,531 streams.
+    """
+    if not refs.index.equals(ohlcv.index):
+        raise ValueError("reference and OHLC clocks must match")
+    if ohlcv.empty:
+        return pd.DataFrame(columns=TRADE_COLUMNS), pd.DataFrame(columns=FILL_COLUMNS)
+    index = ohlcv.index
+    o, h, l, c = (ohlcv[name].to_numpy(dtype=float, copy=False) for name in ("open", "high", "low", "close"))
+    signal = refs["signal"].to_numpy(dtype=bool, copy=False)
+    reason = refs["signal_reason"].astype(str).to_numpy(copy=False)
+    side = refs["side"].to_numpy(dtype=int, copy=False)
+    signal_i = refs["signal_i"].to_numpy(dtype=float, copy=False)
+    signal_close = refs["signal_close"].to_numpy(dtype=float, copy=False)
+    initial_stop = refs["reference_initial_stop"].to_numpy(dtype=float, copy=False)
+    reference_risk = refs["reference_risk"].to_numpy(dtype=float, copy=False)
+    reference_exit = refs["reference_exit"].to_numpy(dtype=bool, copy=False)
+    exit_reason = refs["reference_exit_reason"].astype(str).to_numpy(copy=False)
+    after_close_protection = refs["reference_protection_after_close"].to_numpy(dtype=float, copy=False)
+    trend_side = refs["trend_side"].to_numpy(dtype=int, copy=False)
+
+    trades: list[dict] = []
+    fills: list[dict] = []
+    pos: dict | None = None
+    pending_entry_i: int | None = None
+    pending_reverse = False
+    next_id = 0
+
+    def close_position(px: float, why: str, i: int, phase: str, *, censored: bool = False) -> None:
+        nonlocal pos
+        assert pos is not None
+        gross = pos["side"] * (px / pos["entry_price"] - 1.0)
+        net = gross - FEE
+        trades.append({**pos, "exit_i": i, "exit_time": index[i], "exit_price": px,
+                       "exit_reason": why, "gross_return": gross, "net_return": net,
+                       "gross_r": gross / pos["actual_risk_frac"],
+                       "net_r": net / pos["actual_risk_frac"], "censored": censored})
+        fills.append({"trade_id": pos["trade_id"], "leg_no": 2,
+                      "kind": "censor" if censored else "exit", "bar_open": index[i],
+                      "price": px, "reason": why, "execution_phase": phase,
+                      "qty_fraction": 1.0})
+        pos = None
+
+    for i in range(len(index)):
+        if pos is not None:
+            protection = float(pos["protection"])
+            gaps = o[i] <= protection if pos["side"] == 1 else o[i] >= protection
+            if gaps:
+                close_position(float(o[i]), "protective_stop_gap", i, "open")
+                pending_reverse = False
+        if pending_reverse:
+            if pos is not None:
+                close_position(float(o[i]), "opposite_reference_next_open", i, "open")
+            pending_reverse = False
+        if pending_entry_i is not None and pos is None:
+            j = pending_entry_i
+            stop = float(initial_stop[j])
+            risk = abs(float(o[i]) - stop)
+            direction = int(side[j])
+            through_stop = o[i] <= stop if direction == 1 else o[i] >= stop
+            if risk > 0 and stop > 0 and not through_stop:
+                next_id += 1
+                trade_id = f"{trade_id_prefix}:{next_id}"
+                pos = {"trade_id": trade_id, "signal_i": int(signal_i[j]),
+                       "signal_time": index[j], "signal_bar_open": index[j], "side": direction,
+                       "entry_i": i, "entry_time": index[i], "entry_price": float(o[i]),
+                       "reference_signal_close": float(signal_close[j]), "reference_initial_stop": stop,
+                       "reference_risk": float(reference_risk[j]), "actual_risk": risk,
+                       "initial_risk": risk, "actual_risk_frac": risk / float(o[i]), "tick": tick,
+                       "mfe_r": 0.0, "protection": stop}
+                fills.append({"trade_id": trade_id, "leg_no": 1, "kind": "entry",
+                              "bar_open": index[i], "price": float(o[i]), "reason": "next_open_entry",
+                              "execution_phase": "open", "qty_fraction": 1.0})
+            elif through_stop:
+                fills.append({"trade_id": f"{trade_id_prefix}:rejected:{int(signal_i[j])}",
+                              "leg_no": 0, "kind": "rejected_entry", "bar_open": index[i],
+                              "price": float(o[i]), "reason": "entry_gap_through_initial_stop",
+                              "execution_phase": "open", "qty_fraction": 0.0})
+            pending_entry_i = None
+        if pos is not None:
+            protection = float(pos["protection"])
+            stopped = l[i] <= protection if pos["side"] == 1 else h[i] >= protection
+            if stopped:
+                close_position(protection, "protective_stop", i, "intrabar")
+            else:
+                favorable = h[i] if pos["side"] == 1 else l[i]
+                pos["mfe_r"] = max(float(pos["mfe_r"]), pos["side"] *
+                                   (float(favorable) - pos["entry_price"]) / pos["actual_risk"])
+                next_protection = float(after_close_protection[i])
+                if (not bool(reference_exit[i]) and int(trend_side[i]) == pos["side"]
+                        and math.isfinite(next_protection)):
+                    pos["protection"] = next_protection
+        if bool(reference_exit[i]) and exit_reason[i] == "opposite_reference":
+            pending_reverse = True
+        if bool(signal[i]) and reason[i] == "accepted":
+            pending_entry_i = i
+    if pos is not None:
+        close_position(float(c[-1]), "boundary_mark", len(index) - 1, "close", censored=True)
     return pd.DataFrame(trades, columns=TRADE_COLUMNS), pd.DataFrame(fills, columns=FILL_COLUMNS)

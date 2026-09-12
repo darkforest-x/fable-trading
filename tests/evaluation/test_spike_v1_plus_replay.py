@@ -4,7 +4,7 @@ from __future__ import annotations
 import pandas as pd
 
 import yoyo.evaluation.spike_v1_plus_replay as replay
-from yoyo.evaluation.spike_v1_plus_replay import _path_plus, simulate_next_open
+from yoyo.evaluation.spike_v1_plus_replay import _path_plus, _simulate_next_open_series, simulate_next_open
 from yoyo.evaluation.spike_v1_plus_study import SUMMARY_COLUMNS, _summarize
 
 
@@ -100,6 +100,21 @@ def test_zero_trade_summary_is_schema_bearing_and_counted():
     frame = pd.DataFrame(rows, columns=SUMMARY_COLUMNS)
     assert list(frame.columns) == list(SUMMARY_COLUMNS)
     assert len(frame) == 1 and frame.iloc[0].trades == 0
+
+
+def test_array_execution_matches_series_reference_on_reverse_and_stop_path():
+    bars = _bars([{"open":100,"high":101,"low":99,"close":100},
+                  {"open":100,"high":106,"low":99,"close":105},
+                  {"open":104,"high":120,"low":103,"close":105},
+                  {"open":105,"high":106,"low":89,"close":90}])
+    refs = _refs(bars.index, reverse=True)
+    refs.loc[refs.index[2], ["signal", "signal_reason", "side", "signal_i", "signal_close",
+                             "reference_initial_stop", "reference_risk"]] = [True, "accepted", -1, 2, 105., 115., 10.]
+    refs.loc[refs.index[2], ["reference_exit", "reference_exit_reason"]] = [True, "opposite_reference"]
+    old = _simulate_next_open_series(bars, refs, tick=1, trade_id_prefix="parity")
+    new = simulate_next_open(bars, refs, tick=1, trade_id_prefix="parity")
+    pd.testing.assert_frame_equal(old[0], new[0])
+    pd.testing.assert_frame_equal(old[1], new[1])
 
 
 def test_prefix_execution_is_identical_after_unaffected_prefix():
