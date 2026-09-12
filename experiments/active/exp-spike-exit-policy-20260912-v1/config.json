@@ -1,0 +1,48 @@
+{
+  "experiment_id": "exp-spike-exit-policy-20260912-v1",
+  "research_only": true,
+  "raw": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v7-v1-compare-20260912-v1/results/replay_two_year_20260912_v3",
+  "raw_manifest_sha256": "37f65499611877c8b8b10f0f2fb7a8c99a07d95cc90cda282f5b8a5ac89d41b6",
+  "expected_streams": 3531,
+  "window_start": "2024-09-10T00:00:00Z",
+  "development_end": "2025-09-10T00:00:00Z",
+  "window_end": "2026-09-10T00:00:00Z",
+  "minutes": [
+    30,
+    60,
+    240
+  ],
+  "variants": [
+    "v1_common_execution_long",
+    "v6_unfiltered_both",
+    "v7_bb_both"
+  ],
+  "policies": [
+    "baseline",
+    "no_reverse",
+    "be095_price",
+    "be1_price",
+    "be1_cost",
+    "partial_1_25",
+    "partial_1_25_3_35",
+    "partial_be1_cost",
+    "fast_ma_exit",
+    "md_cross_exit"
+  ],
+  "risk_fractions": [
+    0.01,
+    0.03,
+    0.05,
+    0.1
+  ],
+  "entry_notional_caps": [
+    1.0,
+    null
+  ],
+  "roundtrip_cost": 0.002,
+  "initial_account": 10000,
+  "training_eligible": false,
+  "production_eligible": false,
+  "holdout": "Explicit all-date owner authorization; reused chronological evaluation, not blind",
+  "plan_sha256": "87cd9b6a241af1e90559a75385970dd0b04a47c86b20fbdcd572191dfef7ecff"
+}
