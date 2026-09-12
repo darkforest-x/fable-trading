@@ -97,3 +97,31 @@ def test_early_exit_changes_reentry_opportunity():
     old,_,_=study.replay_policy(c,cohort='v6_both',policy='baseline')
     assert len(new)==2 and len(old)==1
     assert new.exit_reason.iloc[0]=='md_sb_reverse_cross_next_open'
+
+@pytest.mark.parametrize('policy',study.POLICIES)
+@pytest.mark.parametrize('side',[1,-1])
+def test_extending_future_cannot_change_already_executable_fills(policy,side):
+    from dataclasses import replace
+    from pandas.testing import assert_frame_equal
+    c=_synthetic();b=c.cache['bars']
+    b.iloc[5]=[100,105,99,104,1,99,99,2,1]
+    b.iloc[6]=[103,108,102,107,1,99,99,2,1]
+    b.iloc[7]=[108,109,107,108,1,99,99,2,1]
+    b.iloc[8]=[90,91,80,81,1,99,99,0,1]
+    if side==-1:
+        old=b.copy()
+        for col in ['open','close','s20','e20']:b[col]=200-old[col]
+        b['high']=200-old.low;b['low']=200-old.high
+        b['md']=-old.md;b['sb']=-old.sb
+        c.cache['signals'].iloc[4]=[False,True]
+    cutoff=b.index[8]
+    c.cache['signals'].iloc[8]=[side==-1,side==1]
+    cache={k:(v.iloc[:8].copy() if isinstance(v,(pd.DataFrame,pd.Series)) else v) for k,v in c.cache.items()}
+    prefix=replace(c,cache=cache)
+    _,full_f,full_e=study.replay_policy(c,cohort='v6_both',policy=policy)
+    _,pre_f,pre_e=study.replay_policy(prefix,cohort='v6_both',policy=policy)
+    for full,pre in [(full_f,pre_f),(full_e,pre_e)]:
+        if 'kind' in full:
+            full=full.loc[full.kind.ne('censor')];pre=pre.loc[pre.kind.ne('censor')]
+        full=full.loc[full.event_time.le(cutoff) if 'event_kind' in full else full.event_time.lt(cutoff)]
+        assert_frame_equal(full.reset_index(drop=True),pre.reset_index(drop=True),check_dtype=False)

@@ -50,9 +50,11 @@ def figure(summary,selection,out):
     for j,cohort in enumerate(LABEL):
         for i,tf in enumerate(TF):
             ax=axes[j,i];policy=selection.loc[selection.cohort.eq(cohort)&selection.timeframe_min.eq(tf),'policy'].iloc[0]
-            for key,color in [('baseline','#8b95a5'),(policy,'#169b83')]:
+            curves=[('baseline','#8b95a5','baseline')]
+            if policy!='baseline':curves.append((policy,'#169b83','development-selected: '+policy))
+            for key,color,legend in curves:
                 g=summary.loc[summary.venue_scope.eq('all')&summary.period.eq('validation')&summary.notional_cap.astype(str).eq('1.0')&summary.cohort.eq(cohort)&summary.timeframe_min.eq(tf)&summary.policy.eq(key)].sort_values('risk_fraction')
-                ax.plot(g.risk_fraction*100,g.return_mean*100,'o-',color=color,label=key)
+                ax.plot(g.risk_fraction*100,g.return_mean*100,'o-',color=color,label=legend)
             ax.axhline(0,color='#d6dde5',lw=.8);ax.grid(alpha=.2);ax.set_title(f'{cohort} / {TF[tf]}');ax.set_xlabel('Target stop risk (% equity)');ax.set_ylabel('Mean independent-account return (%)');ax.legend(fontsize=7)
     fig.suptitle('Reused second-year evaluation | Entry notional capped at 1x equity',fontsize=14)
     fig.savefig(out/'capital_risk_comparison.png',dpi=160);plt.close(fig)
@@ -68,12 +70,23 @@ def build(engine,post,report):
     cap=summary.loc[summary.venue_scope.eq('all')&summary.period.eq('validation')&summary.notional_cap.astype(str).eq('1.0')]
     ref=cap.loc[cap.risk_fraction.eq(.01)]
     rows=[]
+    changed_selected=0;changed_improved=0
     for s in selection.sort_values(['cohort','timeframe_min']).itertuples():
         base=ref.loc[ref.cohort.eq(s.cohort)&ref.timeframe_min.eq(s.timeframe_min)&ref.policy.eq('baseline')].iloc[0]
         chosen=ref.loc[ref.cohort.eq(s.cohort)&ref.timeframe_min.eq(s.timeframe_min)&ref.policy.eq(s.policy)].iloc[0]
+        if s.policy!='baseline':
+            changed_selected+=1
+            changed_improved+=int(chosen.return_mean>base.return_mean)
         rows.append([LABEL[s.cohort],TF[s.timeframe_min],POLICY[s.policy],pct(base.return_mean),pct(chosen.return_mean),pct(chosen.return_median),pct(chosen.drawdown_mean),pct(chosen.drawdown_max),int(chosen.invalid_accounts)])
+    top=cap.sort_values('return_mean',ascending=False).iloc[0]
+    top_ref=ref.sort_values('return_mean',ascending=False).iloc[0]
     body=['# SPIKE V1／V6／V7：退出规则与账户风险比较','',
     '**这是完整固定方案回放，不是实盘收益承诺。** 本轮保持入场不变，比较10种退出方案及1%／3%／5%／10%账户风险。先用第一年选退出方案，再查看第二年；这些历史曾用于研究，因此第二年不是盲测。',
+    '', '## 结论',
+    f'**这轮没有找到可直接替换原退出的“最优系统”。** 第一年选中的{changed_selected}个非基线退出方案，在第二年有{changed_improved}个提高了同周期基线收益；因此不部署推保本、分批止盈或提前退出。保留原基线作为研究参照。',
+    f'如果只看第二年全池独立账户的算术平均，最高一格是{LABEL[top.cohort]} {TF[int(top.timeframe_min)]}／{POLICY[top.policy]}，目标风险{pct(top.risk_fraction)}：平均收益{pct(top.return_mean)}，但中位数{pct(top.return_median)}、平均最大回撤{pct(top.drawdown_mean)}、最坏账户回撤{pct(top.drawdown_max)}。因1倍入场名义金额上限，其全程平均实际初始风险只有{pct(top.full_run_effective_risk_mean)}。也就是说，10%在这张均值表里数字最高，却由少数赢家抬高，典型账户仍亏损，不能据此选10%。',
+    f'统一用1%研究风险时，最高一格是{LABEL[top_ref.cohort]} {TF[int(top_ref.timeframe_min)]}／{POLICY[top_ref.policy]}：平均收益{pct(top_ref.return_mean)}、中位数{pct(top_ref.return_median)}、平均最大回撤{pct(top_ref.drawdown_mean)}、最坏账户回撤{pct(top_ref.drawdown_max)}。这仍是复用历史和当前合约目录子集，不是新的盲测。',
+    '保本规则普遍提高表面胜率，却没有稳定提高账户收益。双20线或IMACD反向交叉能缩小回撤，但更早退出后又产生更多重入，明显削弱大趋势收益。V7的1R平25%＋3R平35%在第二年1H/4H表现值得做前向候选，但它是看完第二年才浮现的结果，不能在本报告里追认为已验证赢家。',
     '', '## 先看第一年选出的方案，在第二年如何表现',
     '下表每个币种／交易所／周期分别分配10,000单位初始资金，入场名义金额最多为当时权益的1倍，目标初始风险1%。均值、回撤均值及最坏回撤来自这些独立账户；不是把所有信号塞进一个账户的收益或回撤。',
     table(['版本','周期','第一年选出退出','基线均值','选出方案均值','方案中位数','平均最大回撤','最坏账户回撤','无有效估值账户'],rows),
