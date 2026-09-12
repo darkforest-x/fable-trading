@@ -1,0 +1,66 @@
+{
+  "experiment_id": "exp-spike-account-growth-20260913-v1",
+  "question": "Can a single 1000 USDT account execute frozen SPIKE V1 and V7 trades with fixed or compounded 3%, 5%, or 10% risk without impossible negative-capital paths, and how do results vary by timeframe and causal BTC/ETH market regime?",
+  "source": {
+    "common_execution_path": "experiments/active/exp-spike-v7-v1-compare-20260912-v1/results/post_final_v4/common_execution_trades.csv.gz",
+    "common_execution_sha256": "cd31bf4c1a4447b211af0f4ed42f5dbfef7b56e91cbec73a75f765e4ac8d5673",
+    "common_execution_rows": 1149527,
+    "native_v1_path": "experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_ledger.csv.gz",
+    "native_v1_sha256": "b15b69b8864e5eb651f2417fc6681ea688b5fbb95dacd15af1284b42744e3578",
+    "native_v1_rows_30m_1h_4h": 6185,
+    "evaluation_start_utc": "2024-09-10T00:00:00Z",
+    "split_utc": "2025-09-10T00:00:00Z",
+    "evaluation_end_utc_exclusive": "2026-09-10T00:00:00Z"
+  },
+  "arms": [
+    "v1_native_long",
+    "v1_common_execution_long",
+    "v7_bb_long",
+    "v7_bb_both"
+  ],
+  "venue_scopes": ["combined", "okx"],
+  "timeframes_min": [30, 60, 240, "all"],
+  "account": {
+    "initial_balance_usdt": 1000.0,
+    "sizing": ["fixed", "compound"],
+    "risk_fraction": [0.03, 0.05, 0.10],
+    "portfolio_initial_risk_cap": 0.10,
+    "gross_entry_notional_leverage_cap": 3.0,
+    "same_base_asset_max_positions": 1,
+    "entry_floor_fraction_of_initial": 0.20,
+    "same_timestamp_seed": 0,
+    "exit_before_entry_at_same_timestamp": true
+  },
+  "execution": {
+    "entry_and_exit": "unchanged frozen common-execution ledger",
+    "cost": "already included in source net_return",
+    "funding": "not modelled",
+    "slippage_and_market_impact": "not modelled",
+    "liquidation_and_maintenance_margin": "not modelled",
+    "mark_to_market_drawdown": "not available; report uses closed-balance drawdown and open initial-risk stress"
+  },
+  "regime_analysis": {
+    "source": "local frozen Binance BTCUSDT and ETHUSDT 30m candles, resampled causally to 4h",
+    "trend_window_4h_bars": 42,
+    "sma_window_4h_bars": 200,
+    "bull": "both BTC and ETH above their prior-closed SMA200 and both prior-closed 7d returns positive",
+    "bear": "both BTC and ETH below their prior-closed SMA200 and both prior-closed 7d returns negative",
+    "mixed": "all other complete observations",
+    "launch_breadth": {
+      "source": "causal V7 both-side candidate entry timestamps from the pinned common ledger",
+      "window_hours": 24,
+      "unit": "unique normalized base assets after cross-venue and multiplier-contract deduplication",
+      "wide_threshold": "development-period P80 of breadth observations, frozen without outcome labels",
+      "direction_share_threshold": 0.60,
+      "role": "descriptive regime attribution only; not a newly optimized entry filter"
+    }
+  },
+  "authorization": {
+    "owner_request_date": "2026-09-13",
+    "holdout_consumed": true,
+    "consumption_count_for_this_account_configuration": 1,
+    "scope": "Owner explicitly requested V1/V7 account backtests, all listed risks, compounding comparison, periodicity, market-regime analysis, and a next-week path. No production or live-order changes are authorized."
+  },
+  "training_eligible": false,
+  "production_eligible": false
+}
