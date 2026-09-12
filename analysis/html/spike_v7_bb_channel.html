@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>SPIKE V7 · BB 压缩通道</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>SPIKE V7 · BB 压缩通道</h1>
+<p>交付时间：2026-09-12。基于 <code>yoyo/evaluation/pine/spike_burst_v6.pine</code>，新增独立文件 <code>yoyo/evaluation/pine/spike_burst_v7.pine</code>。</p>
+<h2>显示规则</h2>
+<ul>
+<li>主图：SMA200 ± 2 倍总体标准差的细上下轨；中线默认隐藏。</li>
+<li>带宽为 <code>(上轨 − 下轨) / abs(中线)</code>；带宽不高于此前 500 根带宽的第 10 百分位时，以淡金色填充通道。</li>
+<li>通道本身等待 200 根连续有效数据；压缩分类额外等待 500 根带宽历史，缺口后重新预热。</li>
+<li>可设置通道长度、标准差倍数、颜色、中线，以及仅显示压缩段。</li>
+<li>BB 仅负责显示。没有 RSI、ChartArt 买卖订单、额外箭头、标签、警报、K 线或背景染色。</li>
+</ul>
+<p>V6 的多空确认、止损、趋势保护、反向退出、风险框、R 里程碑及副图保持原实现。BB 默认值来自所提供的通道和本轮研究定义，不宣称最优参数。</p>
+<h2>验证</h2>
+<ol>
+<li>去除三个 <code>V7 BB VISUAL</code> 区块并归一化版本显示名称后，V7 与 V6 的非空、非注释代码逐行一致。</li>
+<li>V6 SHA256：<code>b3147f1357dc210a7b19d839a9f72163e29f1ae4e58cc299fa942c38c402fe07</code>。</li>
+<li>V7 SHA256：<code>f02893c55749f3f4e57fe6f1c49296eeabb8180e966d96bd883f0f30d133fb52</code>。</li>
+<li>Mac TradingView 原生 Pine 编辑器于 09:32:16（北京时间）显示“SPIKE V7 · BB 压缩通道”已保存；09:32:38 编译日志显示“完成”。</li>
+<li>添加到当前图表触发 Basic 指标数量上限提示。日志虽显示“已添加到图表”，图表工具栏没有 V7，因此不将该日志当作成功上图证据。原图 SPIKE BURST / SPIKE V6 / SPIKE V1+ 保留。完整图表视觉验收尚未完成。</li>
+</ol>
+<p>本次是显示功能交付，不包含新的收益实验、模型训练、监控部署或通知变更。AUC、胜率与收益比较不适用于本次代码验证；对应的严格对照为去除新增显示代码后与 V6 完全一致。</p>
+<h2>使用</h2>
+<p>在 TradingView“我的脚本”中选择 <strong>SPIKE V7 · BB 压缩通道</strong>。需先为新指标留出可用图表名额。脚本已独立保存，原 V6 没有被覆盖。</p>
+</body>
+</html>
