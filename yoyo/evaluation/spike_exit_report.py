@@ -63,7 +63,7 @@ def build(engine,post,report):
     for name,digest in manifest['outputs'].items():
         if sha(post/name)!=digest:raise ValueError('post artifact changed: '+name)
     summary=pd.read_csv(post/'account_summary.csv');events=pd.read_csv(post/'event_summary.csv');selection=pd.read_csv(post/'development_selection.csv')
-    account=pd.read_csv(post/'independent_account_rows.csv.gz',usecols=['stream_key','cohort','policy','timeframe_min','risk_fraction','notional_cap','period','valid','asset','net_return'])
+    account=pd.read_csv(post/'independent_account_rows.csv.gz',usecols=['stream_key','cohort','policy','timeframe_min','risk_fraction','notional_cap','period','valid','venue','asset','net_return','max_close_drawdown'])
     audit=grouped_effect(account,selection,post);figure(summary,selection,post)
     cap=summary.loc[summary.venue_scope.eq('all')&summary.period.eq('validation')&summary.notional_cap.astype(str).eq('1.0')]
     ref=cap.loc[cap.risk_fraction.eq(.01)]
@@ -89,6 +89,14 @@ def build(engine,post,report):
     for r in selected.sort_values(['cohort','timeframe_min','risk_fraction']).itertuples():
         rows.append([LABEL[r.cohort],TF[r.timeframe_min],pct(r.risk_fraction),pct(r.return_mean),pct(r.return_median),pct(r.drawdown_mean),pct(r.drawdown_max),int(r.ruined_accounts)])
     body +=[table(['版本','周期','目标初始风险','平均收益','中位收益','平均最大回撤','最坏回撤','权益归零账户'],rows)]
+    body +=['','## 具体到 OKX 的 ETH／BTC 1H 独立账户','以下可以解释为仅在这个合约上逐笔执行的模拟账户，仍然有1倍入场名义金额上限。分别展示基线和第一年全池选出的方案；若选中基线，只出现一组。']
+    detail=account.loc[account.venue.eq('okx')&account.asset.isin(['ETH','BTC'])&account.timeframe_min.eq(60)&account.period.eq('validation')&account.notional_cap.eq('1.0')]
+    rows=[]
+    for r in detail.sort_values(['asset','cohort','policy','risk_fraction']).itertuples():
+        choice=selection.loc[selection.cohort.eq(r.cohort)&selection.timeframe_min.eq(60),'policy'].iloc[0]
+        if r.policy not in ('baseline',choice):continue
+        rows.append([r.asset,LABEL[r.cohort],POLICY[r.policy],pct(r.risk_fraction),pct(r.net_return),pct(r.max_close_drawdown),'有效' if r.valid else '估值不完整'])
+    body +=[table(['币种','版本','退出','目标风险','净收益','收盘最大回撤','估值'],rows)]
     body +=['','## 无名义金额上限：仅作数学压力测试','此处允许按风险距离放大任意名义金额。不模拟实际交易所强平，不应把本表最高值作为实盘建议。权益≤0按吸收归零处理，随后不能靠模拟交易复活；无有效估值账户另列。']
     stress=summary.loc[summary.venue_scope.eq('all')&summary.period.eq('validation')&summary.notional_cap.eq('uncapped_stress')].merge(selection[['timeframe_min','cohort','policy']],on=['timeframe_min','cohort','policy'])
     rows=[]
