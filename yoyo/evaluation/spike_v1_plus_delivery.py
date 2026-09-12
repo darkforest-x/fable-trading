@@ -34,7 +34,10 @@ def table(frame, columns, percentages=()):
         elif pd.api.types.is_float_dtype(f[name]):
             f[name]=f[name].map(lambda x:"—" if pd.isna(x) else f"{x:.3f}")
     f=f.rename(columns=columns)
-    return f.to_markdown(index=False, disable_numparse=True)
+    def row(values):
+        return "| " + " | ".join(str(v).replace("|", "\\|").replace("\n", " ") for v in values) + " |"
+    return "\n".join([row(f.columns), row(["---"] * len(f.columns)),
+                      *[row(values) for values in f.itertuples(index=False, name=None)]])
 
 
 def deliver(post:Path, engine:Path):
