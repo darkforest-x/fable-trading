@@ -41,8 +41,16 @@ def _identity(config: dict) -> dict:
     manifest = RAW / "manifest.json"
     if digest(manifest) != config["raw_manifest_sha256"]:
         raise ValueError("upstream raw manifest drifted")
+    input_manifest = RAW / "input_manifest.json"
+    helper = Path(__file__).with_name("spike_burst_replay.py")
+    stream_loader = Path(__file__).with_name("spike_v7_v1_compare.py")
     return {"config_sha256": digest(CONFIG), "pine_sha256": digest(pine),
-            "raw_manifest_sha256": digest(manifest), "replay_sha256": digest(Path(__file__).with_name("spike_v1_plus_replay.py"))}
+            "raw_manifest_sha256": digest(manifest),
+            "raw_input_manifest_sha256": digest(input_manifest),
+            "study_sha256": digest(Path(__file__)),
+            "replay_sha256": digest(Path(__file__).with_name("spike_v1_plus_replay.py")),
+            "feature_helper_sha256": digest(helper),
+            "stream_loader_sha256": digest(stream_loader)}
 
 
 def _completed(folder: Path, identity: dict) -> bool:
@@ -50,8 +58,13 @@ def _completed(folder: Path, identity: dict) -> bool:
     if not receipt.is_file(): return False
     try: item = json.loads(receipt.read_text())
     except json.JSONDecodeError: return False
-    required = ("signals.csv.gz", "trades.csv.gz", "fills.csv.gz", "events.csv.gz")
-    return item.get("identity") == identity and all((folder / name).is_file() for name in required)
+    required = ("signals.csv.gz", "trades.csv.gz", "fills.csv.gz", "events.csv.gz", "summary.csv")
+    files = item.get("files", {})
+    return (item.get("identity") == identity and all(
+        (folder / name).is_file() and files.get(name.removesuffix(".csv.gz")) == digest(folder / name)
+        for name in required if name != "summary.csv"
+    ) and (folder / "summary.csv").is_file()
+           and files.get("summary") == digest(folder / "summary.csv"))
 
 
 def _summarize(trades: pd.DataFrame, *, identity: dict, variant: str) -> list[dict]:
@@ -75,7 +88,7 @@ def run(output: Path, *, limit: int | None = None) -> None:
     if prior.exists() and json.loads(prior.read_text()) != identity: raise ValueError("output identity drift")
     _write_json(prior,identity)
     start=pd.Timestamp(config["window_start"]); end=pd.Timestamp(config["window_end"])
-    roots=output/"streams"; roots.mkdir(exist_ok=True); summaries=[]; processed=0
+    roots=output/"streams"; roots.mkdir(exist_ok=True); processed=0
     for stream in covered_streams():
         key=stream_key(stream); folder=roots/key
         if _completed(folder,identity): continue
@@ -85,13 +98,23 @@ def run(output: Path, *, limit: int | None = None) -> None:
         per=[]; signal_frames=[]; trade_frames=[]; fill_frames=[]; event_frames=[]
         for variant,enabled in VARIANTS:
             refs=replay_references(source,float(stream["tick"]),enable_plus=enabled)
-            mask=(refs.index+pd.Timedelta(minutes=int(stream["minutes"])))>=start
-            mask &= (refs.index+pd.Timedelta(minutes=int(stream["minutes"])))<end
+            close_time = refs.index + pd.Timedelta(minutes=int(stream["minutes"]))
+            # The END-close bar is part of the realised path/mark but cannot
+            # originate a new close-confirmed order after the study window.
+            mask = (close_time >= start) & (close_time <= end)
+            entry_eligible = close_time < end
             refs_eval=refs.loc[mask].copy(); bars_eval=source.loc[refs_eval.index].copy()
-            trades,fills=simulate_next_open(bars_eval,refs_eval,tick=float(stream["tick"]))
+            refs_eval["eligible_for_entry"] = entry_eligible[mask]
+            refs_eval.loc[~refs_eval["eligible_for_entry"], "signal"] = False
+            trades,fills=simulate_next_open(
+                bars_eval, refs_eval, tick=float(stream["tick"]),
+                trade_id_prefix=f"{key}:{variant}",
+            )
             for table in (refs_eval,trades,fills):
-                if len(table):
-                    table["variant"]=variant; table["cohort"]=variant; table["policy"]="default"; table["stream_key"]=key; table["venue"]=stream["venue"]; table["symbol"]=stream["symbol"]; table["asset"]=stream["asset"]; table["timeframe_min"]=stream["minutes"]; table["segment"]=stream["segment"]
+                # Keep a readable schema even for a zero-signal arm so the
+                # account postprocessor can distinguish an empty ledger from
+                # a truncated file.
+                table["variant"]=variant; table["cohort"]=variant; table["policy"]="default"; table["stream_key"]=key; table["venue"]=stream["venue"]; table["symbol"]=stream["symbol"]; table["asset"]=stream["asset"]; table["timeframe_min"]=stream["minutes"]; table["segment"]=stream["segment"]
             signals=refs_eval.loc[refs_eval.raw_signal | refs_eval.reference_exit].copy()
             events=refs_eval.loc[refs_eval.reference_exit].copy()
             signal_frames.append(signals.reset_index()); trade_frames.append(trades); fill_frames.append(fills); event_frames.append(events.reset_index())
@@ -100,11 +123,15 @@ def run(output: Path, *, limit: int | None = None) -> None:
         for name,parts in (("signals",signal_frames),("trades",trade_frames),("fills",fill_frames),("events",event_frames)):
             out=pd.concat(parts,ignore_index=True) if parts else pd.DataFrame(); out.to_csv(staging/f"{name}.csv.gz",index=False,compression={"method":"gzip","mtime":0})
         pd.DataFrame(per).to_csv(staging/"summary.csv",index=False)
-        completion={"key":key,"identity":identity,"source_path":stream["source_path"],"source_sha256":stream["source_sha256"],"tick":stream["tick"],"status":"complete","files":{name:digest(staging/f"{name}.csv.gz") for name in ("signals","trades","fills","events")}}
-        _write_json(staging/"completion.json",completion); staging.replace(folder); summaries.extend(per); processed += 1
+        completion={"key":key,"identity":identity,"source_path":stream["source_path"],"source_sha256":stream["source_sha256"],"tick":stream["tick"],"status":"complete","files":{**{name:digest(staging/f"{name}.csv.gz") for name in ("signals","trades","fills","events")}, "summary":digest(staging/"summary.csv")}}
+        _write_json(staging/"completion.json",completion); staging.replace(folder); processed += 1
         print(f"complete {processed} {key}",flush=True)
         if limit is not None and processed >= limit: break
-    table=pd.DataFrame(summaries)
+    # A resumed run must publish a summary of every receipt-verified stream,
+    # not only folders completed by this invocation.
+    all_summaries = [pd.read_csv(p / "summary.csv") for p in roots.iterdir()
+                     if p.is_dir() and not p.name.startswith(".") and _completed(p, identity)]
+    table=pd.concat(all_summaries, ignore_index=True) if all_summaries else pd.DataFrame()
     if len(table): table.to_csv(output/"stream_summary.csv",index=False)
     complete=sum(_completed(p,identity) for p in roots.iterdir() if p.is_dir() and not p.name.startswith("."))
     _write_json(output/"manifest.json",{"status":"complete" if complete==config["expected_streams"] else "partial","identity":identity,"completed_streams":complete,"expected_streams":config["expected_streams"],"window":{"start":str(start),"end":str(end)},"limitations":"Python causal translation; no native Pine runtime parity claim. Independent account/NAV and matched controls are postprocessed separately."})
