@@ -161,6 +161,34 @@ def _trade_summary(trades: pd.DataFrame, groups: list[str]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def _exit_summary(trades: pd.DataFrame) -> pd.DataFrame:
+    """Describe completed exits without treating censored rows as failures."""
+    closed = trades.loc[~trades.censored].copy()
+    closed["loss"] = closed.net_return.le(0)
+    rows = []
+    for key, group in closed.groupby(["arm", "period", "timeframe_min", "exit_reason"], dropna=False):
+        rows.append(dict(arm=key[0], period=key[1], timeframe_min=key[2], exit_reason=key[3],
+                         exits=len(group), losses=int(group.loss.sum()),
+                         net_return_sum=float(group.net_return.sum()), net_r_sum=float(group.net_r.sum()),
+                         mean_net_r=float(group.net_r.mean())))
+    return pd.DataFrame(rows)
+
+
+def _monthly_summary(trades: pd.DataFrame) -> pd.DataFrame:
+    """Monthly event outcomes by signal month; this is not a shared portfolio."""
+    closed = trades.loc[~trades.censored].copy()
+    closed["month"] = pd.to_datetime(closed.signal_bar_open, utc=True).dt.strftime("%Y-%m")
+    closed["win"] = closed.net_return.gt(0)
+    closed["realized_10r"] = closed.net_r.ge(10)
+    rows = []
+    for key, group in closed.groupby(["arm", "period", "month", "timeframe_min"], dropna=False):
+        rows.append(dict(arm=key[0], period=key[1], month=key[2], timeframe_min=key[3],
+                         closed=len(group), pf=_pf(group.net_return),
+                         net_return_sum=float(group.net_return.sum()), net_r_sum=float(group.net_r.sum()),
+                         win_rate=float(group.win.mean()), realized_10r=int(group.realized_10r.sum())))
+    return pd.DataFrame(rows)
+
+
 def _retention_summary(retention: pd.DataFrame) -> pd.DataFrame:
     rows = []
     for key, group in retention.groupby(["period", "timeframe_min"], dropna=False):
@@ -226,10 +254,14 @@ def summarize(tables: dict[str, pd.DataFrame], output: Path, discovery: Path) ->
     event = _trade_summary(trades, ["arm", "period", "timeframe_min"])
     side = _trade_summary(trades, ["arm", "period", "timeframe_min", "side"])
     venue = _trade_summary(trades, ["arm", "period", "timeframe_min", "venue"])
+    exits = _exit_summary(trades)
+    monthly = _monthly_summary(trades)
     signal = signals.groupby(["period", "timeframe_min"], as_index=False).agg(v7_admissions=("v7", "sum"), v8_admissions=("v8", "sum"))
+    signal[["v7_admissions", "v8_admissions"]] = signal[["v7_admissions", "v8_admissions"]].astype(int)
     signal["admission_reduction"] = 1 - signal.v8_admissions / signal.v7_admissions.replace(0, np.nan)
     signal_by_side_venue = signals.groupby(["period", "timeframe_min", "side", "venue"], as_index=False).agg(
         v7_admissions=("v7", "sum"), v8_admissions=("v8", "sum"))
+    signal_by_side_venue[["v7_admissions", "v8_admissions"]] = signal_by_side_venue[["v7_admissions", "v8_admissions"]].astype(int)
     signal_by_side_venue["admission_reduction"] = (
         1 - signal_by_side_venue.v8_admissions / signal_by_side_venue.v7_admissions.replace(0, np.nan))
     account = accounts.loc[accounts.valid].groupby(["arm", "period", "timeframe_min"], as_index=False).agg(
@@ -241,14 +273,18 @@ def summarize(tables: dict[str, pd.DataFrame], output: Path, discovery: Path) ->
     feature_summary, failure_summary, development_features = _feature_analysis(tables["features"])
     auc = pd.read_csv(discovery / "feature_auc_development.csv")
     deciles = pd.read_csv(discovery / "feature_deciles_development.csv")
+    candidates = pd.read_csv(discovery / "candidate_screen_development.csv")
     auc["scope"] = "development_only_causal_feature_screen"
     deciles["scope"] = "development_only_causal_feature_screen"
+    candidates["scope"] = "development_only_frozen_before_validation"
     result = {
         "signal_summary": signal, "signal_side_venue_summary": signal_by_side_venue,
         "event_summary": event, "account_summary": account,
-        "side_summary": side, "venue_summary": venue, "retention_summary": retention_summary,
+        "side_summary": side, "venue_summary": venue, "exit_summary": exits,
+        "monthly_summary": monthly, "retention_summary": retention_summary,
         "paired_asset_effect": paired, "matched_random_control": control,
         "filter_feature_summary": feature_summary, "filtered_failure_summary": failure_summary,
+        "candidate_screen_development": candidates,
         "feature_auc_development": auc, "feature_deciles_development": deciles,
         "development_feature_rows": development_features,
     }
@@ -417,46 +453,131 @@ def build(replay: Path, discovery: Path, output: Path, report: Path) -> None:
     figures.extend(cases)
     (output / "figures.json").write_text(json.dumps(figures, indent=2))
     report.parent.mkdir(parents=True, exist_ok=True)
-    validation = summary["event_summary"].query("period == 'validation'")
+
+    signal = summary["signal_summary"]
+    events = summary["event_summary"]
+    accounts = summary["account_summary"]
+    retention = summary["retention_summary"]
+    paired = summary["paired_asset_effect"]
+    v7_admissions = int(signal.v7_admissions.sum())
+    v8_admissions = int(signal.v8_admissions.sum())
+    v8_trade_rows = int(tables["trades"].arm.eq("v8").sum())
+
+    decision_rows = []
+    for minutes in (30, 60, 240):
+        sig = signal.loc[(signal.period.eq("validation")) & signal.timeframe_min.eq(minutes)].iloc[0]
+        old = events.loc[(events.arm.eq("v7")) & events.period.eq("validation") & events.timeframe_min.eq(minutes)].iloc[0]
+        new = events.loc[(events.arm.eq("v8")) & events.period.eq("validation") & events.timeframe_min.eq(minutes)].iloc[0]
+        old_account = accounts.loc[(accounts.arm.eq("v7")) & accounts.period.eq("validation") & accounts.timeframe_min.eq(minutes)].iloc[0]
+        new_account = accounts.loc[(accounts.arm.eq("v8")) & accounts.period.eq("validation") & accounts.timeframe_min.eq(minutes)].iloc[0]
+        tail = retention.loc[retention.period.eq("validation") & retention.timeframe_min.eq(minutes)].iloc[0]
+        effect = paired.loc[paired.period.eq("validation") & paired.timeframe_min.eq(minutes)].iloc[0]
+        decision_rows.append({
+            "周期": f"{minutes // 60}H" if minutes >= 60 else f"{minutes}m",
+            "V7信号": int(sig.v7_admissions), "V8信号": int(sig.v8_admissions),
+            "删减": float(sig.admission_reduction), "V7_PF": float(old.pf), "V8_PF": float(new.pf),
+            "V7账户收益": float(old_account.mean_net_return), "V8账户收益": float(new_account.mean_net_return),
+            "V7均值回撤": float(old_account.mean_max_drawdown), "V8均值回撤": float(new_account.mean_max_drawdown),
+            "原V7_10R保留": float(tail.realized_10r_retention), "V8减V7_p": float(effect.p),
+        })
+    decision = pd.DataFrame(decision_rows)
+
+    v7_closed = tables["trades"].loc[tables["trades"].arm.eq("v7") & ~tables["trades"].censored].copy()
+    v7_losses = v7_closed.net_return.lt(0)
+    initial_stop = v7_closed.exit_reason.astype(str).str.startswith("initial_stop")
+    losing_reverse = v7_closed.exit_reason.astype(str).str.startswith("opposite") & v7_losses
+    initial_loss_share = float((initial_stop & v7_losses).sum() / v7_losses.sum())
+    stop_or_reverse_share = float(((initial_stop & v7_losses) | losing_reverse).sum() / v7_losses.sum())
+    admission_outcomes = tables["features"].groupby("failure_reason", dropna=False, as_index=False).agg(
+        admissions=("failure_reason", "size"), executed=("executed", "sum"),
+        mean_net_return=("net_return", "mean"), mean_net_r=("net_r", "mean"))
+    admission_outcomes[["admissions", "executed"]] = admission_outcomes[["admissions", "executed"]].astype(int)
+    exit_totals = summary["exit_summary"].loc[summary["exit_summary"].arm.eq("v7")].groupby(
+        "exit_reason", as_index=False).agg(exits=("exits", "sum"), losses=("losses", "sum"),
+                                            net_return_sum=("net_return_sum", "sum"), net_r_sum=("net_r_sum", "sum"))
+    exit_totals = exit_totals.sort_values("exits", ascending=False)
+
+    monthly = summary["monthly_summary"].loc[summary["monthly_summary"].period.eq("validation")]
+    old_month = monthly.loc[monthly.arm.eq("v7")].drop(columns=["arm", "period"])
+    new_month = monthly.loc[monthly.arm.eq("v8")].drop(columns=["arm", "period"])
+    monthly_compare = old_month.merge(new_month, on=["month", "timeframe_min"], how="outer", suffixes=("_v7", "_v8"))
+    monthly_compare = monthly_compare.sort_values(["month", "timeframe_min"]).fillna(0)
+    august = monthly_compare.loc[monthly_compare.month.eq("2026-08")]
+    august_text = "; ".join(
+        f"{int(row.timeframe_min)}m V7 {row.net_r_sum_v7:.1f}R → V8 {row.net_r_sum_v8:.1f}R"
+        for _, row in august.iterrows()
+    )
+
+    top_decile = summary["feature_deciles_development"].loc[
+        summary["feature_deciles_development"].score_decile.eq(10)]
+    validation_control = summary["matched_random_control"].loc[
+        summary["matched_random_control"].period.eq("validation")]
     text = [
-        "# SPIKE V8 noise filter: frozen V7 versus V8 replay",
-        "V8 only suppresses a new V7 entry when its confirmation close is more than 3 ATR beyond the directional six-MA rope edge. Raw opposite V6 confirmations remain available to close an open position. This is research only: it does not change production monitoring, notifications, ACTIVE, or promotion. Any Pine expression remains a research prototype.",
-        "## Scope and frozen contracts",
-        f"Authenticated replay: {contract['complete_streams']} streams; **{contract['v7_admissions']:,} V7 admissions**; **{contract['v7_trade_rows']:,} actual V7 serial trade rows**. Admissions are candidate confirmations; actual trades are smaller because an occupied stream position can suppress execution. These are intentionally reported as different denominators.",
-        "The development-only discovery selected and froze the single rule before validation outcomes were summarized. All validation tables below are a frozen-rule evaluation, not an additional validation search. Continuous-feature AUC and deciles are copied only from the causal development discovery artifact.",
-        "## V7/V8 admissions and executed trades",
+        "# SPIKE V8：V7 全量信号降噪与冻结规则回放",
+        "V8 只增加一个因果入场门：确认收盘价沿交易方向离六均线绳索边缘超过 3 ATR 时，不再建立新参考。已有持仓仍可被未过滤的反向 V6 确认结束，因此 V8 没有偷偷改变退出规则。Pine 是研究版；本轮未修改生产监控、Bark、ACTIVE、promote 或实盘设置。",
+        "## 先看结论",
+        f"V7 共 **{v7_admissions:,} 条确认事件**，其中 **{contract['v7_trade_rows']:,} 条形成串行交易**，另有 **{v7_admissions - contract['v7_trade_rows']:,} 条**因同一交易流已有持仓而没有成为新交易。冻结的 V8 门槛保留 **{v8_admissions:,} 条确认**、形成 **{v8_trade_rows:,} 条交易，信号总量减少 {(1 - v8_admissions / v7_admissions):.2%}**。",
+        "验证段的核心结果如下。账户收益是每个交易所×币种×周期独立账户的均值，不是把 3,531 个流叠成可实盘的共享资金曲线。",
+        _md_table(decision, list(decision.columns)),
+        "V8 达到了本轮的窄目标：每个周期少约 14%–16% 的信号，原 V7 已实现 10R 大趋势仍保留 91.75%–96.77%，三个周期的平均收盘回撤都下降。它没有证明净收益全面优于 V7：30m PF 由 0.883 降到 0.871；1H 和 4H PF 略升，但同资产配对后的 V8−V7 收益差均未达到 p<0.05。当前应把 V8 看成**追高/追空保护版**，不能宣传成已经找到最赚钱参数。",
+        "## V8 规则与时间纪律",
+        "V8 完整继承 V7 的 V6 结构确认、BB200 压缩背景、多空信号、收盘确认、次根开盘入场、结构止损和趋势跟随。唯一变化是：多头用 `(close - 六线最高值) / ATR <= 3`，空头用 `(六线最低值 - close) / ATR <= 3`。所有输入均在信号 K 收盘时可知，不回填历史信号。",
+        f"认证回放覆盖 {contract['complete_streams']} 条 Binance、OKX、Gate 数据流，周期为 30m/1H/4H，窗口为 2024-09-10 至 2026-09-10。开发段只用 2024-09-10 至 2025-09-10 选门槛；随后冻结 `selected_rule.json`，才汇总 2025-09-10 至 2026-09-10 的验证结果。",
+        "## 132,593 条信号究竟失败在哪里",
+        _md_table(admission_outcomes.sort_values("admissions", ascending=False), ["failure_reason", "admissions", "executed", "mean_net_return", "mean_net_r"]),
+        _md_table(exit_totals, ["exit_reason", "exits", "losses", "net_return_sum", "net_r_sum"]),
+        f"V7 的 {len(v7_closed):,} 笔已结束交易中有 {int(v7_losses.sum()):,} 笔净亏损。初始止损占全部已结束交易 {int(initial_stop.sum()) / len(v7_closed):.2%}，占全部亏损 {initial_loss_share:.2%}；把亏损的反向确认退出也算上，两类合计解释 {stop_or_reverse_share:.2%} 的亏损。真正的主要问题是大量启动没有形成持续性，以及部分确认时价格已经离均线绳索太远；并非缺少更猛烈的当根成交量。",
+        "`not_executed_occupied` 只是已有持仓时出现的候选确认，没有自然交易结果，不能算失败交易。跨交易所同币同时间的信号也不能直接当噪音删除：它们反映同一市场事件，统计推断已按基础资产聚类，前端层可以折叠展示，但交易研究不能把它们伪装成独立样本。",
+        "## 为什么没有采用更强的量价和 BB 门槛",
+        _md_table(summary["candidate_screen_development"], ["gate", "timeframe_min", "signals", "signals_kept", "signal_reduction", "event_pf", "mean_net_return", "realized_10r", "realized_10r_kept", "realized_10r_retention", "mfe_10r_kept"], 40),
+        "成交量≥1.5、TR 扩张≥1.5、BB 当根扩张、三根路径效率≥0.55，以及 V1 的同根 RV≥4 且 TR≥3，都能显著减少信号，却会在至少一个周期误删过多已实现 10R 交易。最严格的 V1 同根量价门甚至删除约 92%–93% 的候选。趋势尾部依赖少数早期入口，所以不能只按普通胜率或当根爆发程度挑门槛。",
+        "## V7/V8 确认和交易明细",
         _md_table(summary["signal_summary"], ["period", "timeframe_min", "v7_admissions", "v8_admissions", "admission_reduction"]),
         _md_table(summary["event_summary"], ["arm", "period", "timeframe_min", "trade_rows", "closed", "censored", "pf", "net_return_sum", "win_rate", "realized_10r", "mfe_10r"]),
-        "## Independent stream accounts and asset-clustered paired effect",
+        "## 独立账户、回撤与同资产配对效应",
         _md_table(summary["account_summary"], ["arm", "period", "timeframe_min", "streams", "mean_net_return", "mean_max_drawdown", "worst_max_drawdown"]),
         _md_table(summary["paired_asset_effect"], ["period", "timeframe_min", "delta", "low", "high", "p", "assets"]),
-        "Effects pair V8 against V7 in the same stream and period, then resample/sign-flip at base-asset level so cross-venue duplicates do not create independent evidence. This is a robust descriptive comparison, not a production acceptance test.",
-        "## Exact large-winner retention",
+        "同流同时间段先配对 V8 与 V7，再按基础资产做 bootstrap 和符号置换，避免 Binance/OKX/Gate 的重复事件虚增显著性。验证段 30m/1H/4H 的 V8−V7 p 值分别为 0.693/0.887/0.063，尚无可靠的整体收益提升。",
+        "## 原 V7 大趋势保留率",
         _md_table(summary["retention_summary"], ["period", "timeframe_min", "baseline_executed", "baseline_realized_10r", "retained_realized_10r", "realized_10r_retention", "baseline_mfe_10r", "retained_mfe_10r", "mfe_10r_retention", "removed_losers", "missed_realized_winners"]),
-        "Realized ≥10R means the original closed trade actually reached that net outcome. MFE ≥10R is only a path high and is never presented as realized profit.",
-        "## Side, venue, and matched random comparisons",
+        "`realized_10r` 表示原 V7 交易最终净结果确实达到 10R；`mfe_10r` 只是持仓路径中曾到达 10R，不能冒充实际落袋收益。这里的保留率按原 V7 交易逐笔判断，避免 V8 改变持仓占用后造成分母漂移。",
+        "## 行情阶段比单根指标更重要",
+        _md_table(monthly_compare, ["month", "timeframe_min", "closed_v7", "pf_v7", "net_r_sum_v7", "realized_10r_v7", "closed_v8", "pf_v8", "net_r_sum_v8", "realized_10r_v8"]),
+        f"月度结果发生明显翻转。以用户关注的 2026-08 普涨/爆发阶段为例：{august_text}。同一套规则在其他月份经常为负，说明 V7 的主要噪音来源之一是**市场状态不适配**。这张表是事件级描述，跨周期和跨交易所存在相关性，不能把 net R 相加当真实账户收益。下一轮最值得单独预注册的是收盘时可知的全市场广度/波动扩散门，而不是继续抬高单币成交量阈值。",
+        "## 多空、交易所与匹配随机对照",
         _md_table(summary["signal_side_venue_summary"], ["period", "timeframe_min", "side", "venue", "v7_admissions", "v8_admissions", "admission_reduction"], 36),
         _md_table(summary["side_summary"], ["arm", "period", "timeframe_min", "side", "trade_rows", "pf", "win_rate", "realized_10r"]),
         _md_table(summary["venue_summary"], ["arm", "period", "timeframe_min", "venue", "trade_rows", "pf", "win_rate"]),
-        _md_table(summary["matched_random_control"], ["arm", "period", "timeframe_min", "sampled", "matched", "delta", "low", "high", "p", "assets"]),
-        "Matched controls preserve the frozen per-stream direction, period, prior-volatility bucket, exit engine and 0.2% cost assumptions. Unmatched candidates remain excluded rather than being silently replaced.",
-        "## Filtered/retained feature and outcome analysis",
+        _md_table(validation_control, ["arm", "period", "timeframe_min", "sampled", "matched", "delta", "low", "high", "p", "assets"]),
+        "匹配随机对照固定同一数据流方向、时期、事前波动桶、退出引擎和 0.2% 往返成本。验证段只有 1H 的 V7/V8 相对随机入场为显著正值；30m 没有优势，4H 的独立 PF 虽大于 1，但相对匹配随机对照仍不能确认策略本身的增量价值。",
+        "多空表现明显随年份翻转：验证段空头强于多头，开发段 4H 则是多头强。这支持市场状态门，不能据此把 V8 固化成静态空头版。",
+        "## 被过滤与保留样本的特征",
         _md_table(summary["filter_feature_summary"], ["period", "timeframe_min", "v8_kept", "admissions", "executed", "realized_10r", "mfe_10r", "net_positive", "mean_rope_distance_atr", "mean_efficiency3", "mean_current_volume_ratio"]),
-        _md_table(summary["filtered_failure_summary"], ["period", "timeframe_min", "failure_reason", "filtered_admissions", "executed", "missed_realized_10r", "removed_nonpositive"], 24),
-        "## Causal continuous feature screen: development only",
+        _md_table(summary["filtered_failure_summary"], ["period", "timeframe_min", "failure_reason", "filtered_admissions", "executed", "missed_realized_10r", "removed_nonpositive"]),
+        "## 因果连续特征筛选：只看开发段",
         _md_table(summary["feature_auc_development"], ["timeframe_min", "feature", "direction", "auc_net_positive", "auc_realized_10r", "known", "scope"], 30),
-        "Top-decile evidence is in `summary_v1/feature_deciles_development.csv`. Its inputs are causal at signal close; it is not recalculated on validation and does not choose a new V8 rule.",
-        "## Figures",
+        _md_table(top_decile, ["timeframe_min", "feature", "score_decile", "trades", "net_win_rate", "event_pf", "mean_net_return", "realized_10r"], 30),
+        "AUC 和最高十分位只来自开发段，输入均在信号收盘时可知；验证段没有重新计算这些排名，也没有据此二次挑规则。单特征 AUC 普遍接近 0.5，说明不存在一个简单阈值可以把 13 万条信号干净分成好坏。",
+        "## 全局图与逐笔案例",
         *[f"![{figure['selection']}](../experiments/active/exp-spike-v8-noise-filter-20260913-v1/summary_v1/{figure['file']})" for figure in figures],
-        "The K-line gallery selects up to two validation cases each for retained realized ≥10R, filtered loser, and missed realized ≥10R. It loads each raw cache only through its authenticated receipt; a category with fewer than two cases shows all available examples. Signal-close, next-open entry, exit, directional rope edge, 3 ATR boundary, and V8 filter reason are marked. Blue future shading is retrospective display only and cannot select rules.",
-        "## Holdout-era exposure and honest limits",
-        "This frozen V8 configuration records **holdout-era exposure 1**. Its V7 foundation data had already been exposed by earlier research, so this is not blind holdout evidence. The two time periods are reported separately; no parameter or threshold was changed after validation aggregation. There is no production/promote decision. Costs remain the inherited 0.2% round-trip assumption and do not include full funding, order-book impact, or shared-portfolio capacity. Stream accounts are independent and closing-price drawdown can understate intrabar drawdown.",
-        "## Reproduction",
+        "K 线案例各取最多两张：保留的已实现 10R、被过滤的亏损、以及被误删的已实现 10R。图中标明信号收盘、次根开盘入场、退出、方向绳索边缘、3ATR 边界和过滤原因。蓝色区域是信号后的复盘未来，只用于解释，绝未参与规则选择。",
+        "## 还能怎样继续降噪",
+        "1. **市场状态门**：单独研究信号收盘前的全市场上涨比例、同时站上六线比例、BTC/ETH 4H 状态、横截面成交额与波动扩散。目标是识别 8·19 这类普涨启动期；必须按月前推验证，不能用当天涨幅榜反选币。",
+        "2. **同事件折叠与组合风险门**：前端把同币同方向、跨交易所、相近时间的确认合并成一个市场事件，交易层限制高度相关币同时暴露。这会降低通知和开仓频率，但需与信号质量分开评价。",
+        "3. **早期失败退出**：因为初始止损和亏损反向退出解释绝大部分亏损，可单变量测试入场后 2–3 根未继续创新高/新低、重新跌回/涨回六线时提前退出。它改变退出而非入场，不能和 V8 门槛一次打包。",
+        "4. **跨交易所先行确认**：测试一个交易所先突破、其他交易所成交量/OI 随后确认的时序结构。资金费率、持仓量和订单簿只能使用当时可获得的快照，并要单独记录覆盖缺失。",
+        "5. **前向影子对照**：V7 与 V8 同时只记录、不推送、不下单，积累新的盲样本。当前验证数据已经被研究过，不能再靠反复调 3ATR 得到可信提升。",
+        "## 当前裁决",
+        "V8 作为独立 TradingView 研究指标成立：它降低追高追空型噪音并保留大多数大趋势。它暂不替换生产 V7/V1 监控，也不改变 Bark。若要继续提高收益，优先验证市场状态门和早期失败退出；继续强化单根量价只会重演误删尾部赢家的问题。",
+        "## Holdout 暴露与诚实边界",
+        "本冻结 V8 配置记录为 **holdout-era exposure #1**。V7 基础数据此前已经被其他研究看过，所以这不是盲 holdout。开发段与验证段分开报告，验证汇总后没有更改 3ATR 阈值。成本沿用 0.2% 往返假设，未完整计入资金费、订单簿冲击和共享组合容量；收盘回撤会低估 K 线内回撤。",
+        "## 复现命令",
         f"```bash\n.venv/bin/python -m pytest -q tests/evaluation/test_spike_v8_replay.py tests/evaluation/test_spike_v8_noise_study.py tests/evaluation/test_spike_v8_report.py\n.venv/bin/python -m yoyo.evaluation.spike_v8_report --replay {replay} --discovery {discovery} --output {output} --report {report}\n.venv/bin/python scripts/md_to_html.py {report} --out-dir analysis/html\n```",
     ]
     report.write_text("\n\n".join(text) + "\n")
     receipt = dict(**contract, builder_sha256=sha256(Path(__file__)), report_sha256=sha256(report),
-                   files={path.name: sha256(path) for path in output.iterdir() if path.is_file()},
+                   files={path.name: sha256(path) for path in output.iterdir()
+                          if path.is_file() and path.name != "report_manifest.json"},
                    generated_at=pd.Timestamp.now(tz="UTC").isoformat())
     (output / "report_manifest.json").write_text(json.dumps(receipt, indent=2))
     print(json.dumps(contract), flush=True)

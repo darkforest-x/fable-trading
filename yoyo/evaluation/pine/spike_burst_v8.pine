@@ -3,8 +3,8 @@
 // V4 confirmation is provenance inside a closed-bar structure, with
 // one causal V1 directional-candle evidence latch during the V6 pending window.
 // A final event belongs to the current close, never to a historical body or
-// legacy confirmation. This prototype is not validated for any deployment.
-// This prototype has no market breadth, performance, or PnL evaluation. Its
+// legacy confirmation. The frozen two-year replay is research evidence only;
+// it does not make this script eligible for production or live execution. Its
 // reference-exit revision is not the frozen monitor/backtest configuration.
 indicator("SPIKE V8 · 强启动不过热", shorttitle="SPIKE V8", overlay=false, max_labels_count=500, max_boxes_count=150, max_lines_count=400, explicit_plot_zorder=true, behind_chart=false)
 

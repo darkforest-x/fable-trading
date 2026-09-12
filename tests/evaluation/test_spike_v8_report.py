@@ -4,8 +4,10 @@ import pytest
 
 from yoyo.evaluation.spike_v8_report import (
     EXPECTED_ADMISSIONS,
+    _exit_summary,
     _feature_analysis,
     _matched_controls,
+    _monthly_summary,
     _retention_summary,
     _trade_summary,
     cluster_effect,
@@ -28,6 +30,21 @@ def test_trade_summary_excludes_censored_from_pf_and_realized_tail():
     assert result.trade_rows == 3 and result.closed == 2 and result.censored == 1
     assert result.realized_10r == 1 and result.mfe_10r == 2
     assert result.pf == pytest.approx(2.0)
+
+
+def test_exit_and_monthly_summaries_exclude_censored_rows():
+    trades = pd.DataFrame({
+        "arm": ["v7", "v7", "v7"], "period": ["validation"] * 3,
+        "timeframe_min": [60] * 3, "signal_bar_open": ["2026-08-01T00:00:00Z"] * 3,
+        "exit_reason": ["initial_stop", "trailing_stop", "boundary"],
+        "censored": [False, False, True], "net_return": [-.1, .2, .9],
+        "net_r": [-1., 3., 20.],
+    })
+    exits = _exit_summary(trades)
+    monthly = _monthly_summary(trades)
+    assert exits.exits.sum() == 2 and exits.losses.sum() == 1
+    assert monthly.closed.sum() == 2 and monthly.iloc[0].month == "2026-08"
+    assert monthly.iloc[0].realized_10r == 0
 
 
 def test_retention_distinguishes_realized_and_mfe_tails():
