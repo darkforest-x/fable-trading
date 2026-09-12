@@ -517,11 +517,16 @@ def build_post_diagnostics(result_dir: Path, output_dir: Path) -> dict[str, Any]
     output_dir.mkdir(parents=True, exist_ok=True)
     replay_manifest = verify_result_bundle(result_dir)
     summary = pd.read_csv(result_dir / "summary.csv")
-    accepted = pd.read_csv(result_dir / "accepted_ledger.csv.gz", float_precision="round_trip")
+    accepted = pd.read_csv(
+        result_dir / "accepted_ledger.csv.gz", float_precision="round_trip", low_memory=False
+    )
     curve = pd.read_csv(result_dir / "equity_curve.csv.gz", float_precision="round_trip")
     for name in ("entry_time", "exit_time"):
         if name in accepted:
-            accepted[name] = pd.to_datetime(accepted[name], utc=True)
+            # Same-bar exits are represented by the account replay as entry
+            # time + 1ns, while ordinary rows remain second-resolution ISO
+            # timestamps.  Pandas 2 requires ``mixed`` for that valid pair.
+            accepted[name] = pd.to_datetime(accepted[name], utc=True, format="mixed", errors="raise")
     curve["time"] = pd.to_datetime(curve["time"], utc=True)
     market = build_btc_eth_regime()
     common = load_common_execution_trades(COMMON_EXECUTION_PATH, expected_sha256=COMMON_EXECUTION_SHA256)

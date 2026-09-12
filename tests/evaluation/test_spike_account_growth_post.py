@@ -16,6 +16,15 @@ from yoyo.evaluation.spike_account_growth_post import (
 )
 
 
+def test_pandas_mixed_account_timestamps_cover_same_bar_nanosecond_receipt():
+    values = pd.Series([
+        "2024-11-01 13:00:00+00:00",
+        "2024-11-01 13:00:00.000000001+00:00",
+    ])
+    parsed = pd.to_datetime(values, utc=True, format="mixed", errors="raise")
+    assert parsed.iloc[1] - parsed.iloc[0] == pd.Timedelta(nanoseconds=1)
+
+
 def _market_csv(path, closes):
     times = pd.date_range("2024-01-01", periods=len(closes), freq="30min", tz="UTC")
     pd.DataFrame({"time": times, "close": closes}).to_csv(
