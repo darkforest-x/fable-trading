@@ -1,0 +1,36 @@
+{
+  "builder_commits": [
+    "54951ef",
+    "46bae02",
+    "3cacd92",
+    "6ddea30",
+    "2972ce0"
+  ],
+  "checks": {
+    "engine_streams": "3531/3531",
+    "post_simulated_trade_records": 20184,
+    "postprocessor_tests": "8 passed at 5ca0a2b",
+    "replay_tests": "11 passed"
+  },
+  "commands": [
+    "python3 -m pytest -q tests/evaluation/test_spike_v1_plus_replay.py",
+    "python3 -m yoyo.evaluation.spike_v1_plus_study .../results/replay_full_v3",
+    "python3 experiments/active/exp-spike-v1-plus-backtest-20260912-v1/resume_v3_driver.py",
+    ".venv/bin/python -m yoyo.evaluation.spike_v1_plus_report .../results/replay_full_v3 .../post_full_v2"
+  ],
+  "effective_engine": "results/replay_full_v3",
+  "effective_postprocess": "post_full_v2",
+  "engine_manifest_sha256": "7f33c463688f60a3f8ea0ff8de90f61eba9e1489a80d7c477ae19b8189d84136",
+  "invalid_attempts": [
+    "results/replay_full_v1",
+    "results/replay_full_v2",
+    "post_full_v1"
+  ],
+  "post_manifest_sha256": "cfc56f6390437cf6ebd4d346d765bbdee5f60a1db8443b140b36d919527c4d0f",
+  "resume_driver_commits": [
+    "e82cb45",
+    "667b08b"
+  ],
+  "resume_receipt_sha256": "443f06b100e7da94eeb01a78c37b6bae990ff2748b640257bfa26c2014366cff",
+  "status": "complete"
+}
