@@ -5,5 +5,10 @@
   "impact": "The development-only aggregate tables remain reproducible, but the validation period was not physically isolated. All V8 validation results are nonblind descriptive evidence and cannot authorize production promotion.",
   "remediation": "The corrected discovery runner requires a physically separate baseline_trades_development input, writes null outcome fields for every validation row, and fails closed on any non-development outcome input.",
   "blindness_restored": false,
+  "historical_source_commit": "626f829e40290a536e674980ced59649a33b143c",
+  "historical_identity_files": {
+    "yoyo/evaluation/spike_v8_noise_study.py": "d80c5e2141f82cd0f45a0f9941178f87aa3a8b9b54d22fa05e6f3c58d3324c05",
+    "experiments/active/exp-spike-v8-noise-filter-20260913-v1/PROJECT_PLAN.md": "314840ac7e534028b30e10cd6a1bb1f96511177458bed205376152b05514d3d7"
+  },
   "recorded_at": "2026-09-13T03:33:12+08:00"
 }

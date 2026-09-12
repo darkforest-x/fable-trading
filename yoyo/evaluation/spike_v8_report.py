@@ -9,8 +9,10 @@ treats the historical result as nonblind descriptive evidence.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
+import subprocess
 from pathlib import Path
 
 import numpy as np
@@ -20,6 +22,7 @@ from yoyo.evaluation.spike_exit_policy_study import load_verified_stream, sha256
 
 
 EXP = Path("experiments/active/exp-spike-v8-noise-filter-20260913-v1")
+ISOLATION_ERRATUM = EXP / "discovery_isolation_erratum.json"
 EXPECTED_KINDS = ("accounts", "events", "trades", "retention", "signals", "controls")
 EXPECTED_STREAMS = 3531
 EXPECTED_ADMISSIONS = 132593
@@ -45,6 +48,27 @@ def _bool(frame: pd.DataFrame, column: str) -> pd.Series:
 def _verify_file(path: Path, digest: str) -> None:
     if not path.is_file() or sha256(path) != digest:
         raise ValueError(f"altered or missing receipt file: {path.name}")
+
+
+def _verify_file_or_bound_history(path: Path, digest: str) -> None:
+    """Accept a changed source only through an explicit hash-bound git snapshot."""
+    if path.is_file() and sha256(path) == digest:
+        return
+    if not ISOLATION_ERRATUM.is_file():
+        raise ValueError(f"altered or missing receipt file: {path.name}")
+    erratum = json.loads(ISOLATION_ERRATUM.read_text())
+    try:
+        relative = str(path.resolve().relative_to(Path.cwd().resolve()))
+    except ValueError as exc:
+        raise ValueError(f"receipt source is outside repository: {path}") from exc
+    if erratum.get("historical_identity_files", {}).get(relative) != digest:
+        raise ValueError(f"altered receipt source is not bound by erratum: {relative}")
+    commit = str(erratum.get("historical_source_commit", ""))
+    historical = subprocess.run(
+        ["git", "show", f"{commit}:{relative}"], check=True, capture_output=True,
+    ).stdout
+    if hashlib.sha256(historical).hexdigest() != digest:
+        raise ValueError(f"historical receipt source hash disagrees: {relative}")
 
 
 def _verify_discovery(discovery: Path) -> tuple[dict, pd.DataFrame]:
@@ -96,7 +120,7 @@ def collect(replay: Path, discovery: Path) -> tuple[dict[str, pd.DataFrame], dic
     if sha256(identity_path) != manifest.get("identity_sha256"):
         raise ValueError("replay identity receipt changed")
     for source, digest in json.loads(identity_path.read_text()).items():
-        _verify_file(Path(source), digest)
+        _verify_file_or_bound_history(Path(source), digest)
     selected = json.loads((EXP / "selected_rule.json").read_text())
     discovery_manifest, features = _verify_discovery(discovery)
     if sha256(discovery / "manifest.json") != selected.get("discovery_manifest_sha256"):
