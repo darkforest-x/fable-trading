@@ -45,7 +45,8 @@ POST_FILES = frozenset((
     "development_selection.csv", "risk_summary.csv", "seed_sensitivity.csv",
     "regime_metrics.csv", "daily_realized_bjt.csv.gz", "best_days.csv",
     "milestone_chain.csv", "matched_control_reference.csv",
-    "annotated_accepted.csv.gz",
+    "annotated_accepted.csv.gz", "entry_hour_metrics.csv",
+    "entry_weekday_metrics.csv", "entry_month_metrics.csv",
 ))
 
 
@@ -292,6 +293,9 @@ def build_account_growth_report(
     seed = _read_csv(post_dir / "seed_sensitivity.csv")
     regime = _read_csv(post_dir / "regime_metrics.csv")
     best_days = _read_csv(post_dir / "best_days.csv")
+    entry_hour = _read_csv(post_dir / "entry_hour_metrics.csv")
+    entry_weekday = _read_csv(post_dir / "entry_weekday_metrics.csv")
+    entry_month = _read_csv(post_dir / "entry_month_metrics.csv")
     milestones = _read_csv(post_dir / "milestone_chain.csv")
     matched = _read_csv(post_dir / "matched_control_reference.csv")
     _require_columns(summary, ("run_id", "source_arm", "venue_scope", "timeframe", "sizing", "risk_fraction", "source_contract", "period_scope", "final_balance", "initial_balance", "max_drawdown_fraction", "reached_100k", "portfolio_risk_cap"), "summary.csv")
@@ -299,6 +303,16 @@ def build_account_growth_report(
     _require_columns(seed, ("source_arm", "venue_scope", "timeframe", "sizing", "risk_fraction", "period_scope", "seed", "final_balance", "max_balance", "max_closed_drawdown_fraction", "reached_100k"), "seed_sensitivity.csv")
     _require_columns(regime, ("run_id", "period_scope", "market_regime", "breadth_regime", "closed", "wins", "realized_pnl"), "regime_metrics.csv")
     _require_columns(best_days, ("run_id", "date_bjt", "realized_pnl", "start_balance", "end_balance", "exit_events"), "best_days.csv")
+    for frame, bucket, name in (
+        (entry_hour, "entry_hour_bjt", "entry_hour_metrics.csv"),
+        (entry_weekday, "entry_weekday_bjt", "entry_weekday_metrics.csv"),
+        (entry_month, "entry_month_bjt", "entry_month_metrics.csv"),
+    ):
+        _require_columns(
+            frame,
+            ("run_id", "period_scope", bucket, "closed", "wins", "realized_pnl", "mean_account_r", "win_rate"),
+            name,
+        )
     _require_columns(milestones, ("run_id", "threshold", "first_reached_time", "balance"), "milestone_chain.csv")
     _require_columns(matched, ("variant", "timeframe_min", "matched_months", "exploratory_month_block_sign_flip_p", "paired_mean_net_r_difference"), "matched_control_reference.csv")
     _require_columns(curve, ("run_id", "period_scope", "time", "balance"), "equity_curve.csv.gz")
@@ -402,6 +416,34 @@ def build_account_growth_report(
         closed = int(group["closed"].sum())
         wins = int(group["wins"].sum())
         operational_rows.append([str(market), str(breadth), str(closed), str(wins), _percent(wins / closed) if closed else "—", _money(group["realized_pnl"].sum())])
+    market_total_rows = []
+    for market, group in operational_regime.groupby("market_regime", dropna=False, sort=True):
+        closed = int(group["closed"].sum())
+        wins = int(group["wins"].sum())
+        market_total_rows.append([
+            str(market), str(closed), _percent(wins / closed) if closed else "—",
+            _money(group["realized_pnl"].sum()),
+        ])
+    calendar_rows = []
+    for dimension, frame, bucket in (
+        ("小时", entry_hour, "entry_hour_bjt"),
+        ("星期", entry_weekday, "entry_weekday_bjt"),
+        ("月份", entry_month, "entry_month_bjt"),
+    ):
+        eligible = frame.loc[
+            frame["run_id"].astype(str).eq(operational_validation_run)
+            & frame["period_scope"].eq("validation")
+            & frame["closed"].ge(5)
+        ].copy()
+        if eligible.empty:
+            continue
+        best_bucket = eligible.sort_values(["mean_account_r", bucket], ascending=[False, True], kind="mergesort").iloc[0]
+        worst_bucket = eligible.sort_values(["mean_account_r", bucket], ascending=[True, True], kind="mergesort").iloc[0]
+        for rank, row in (("最高", best_bucket), ("最低", worst_bucket)):
+            calendar_rows.append([
+                dimension, rank, str(row[bucket]), str(int(row.closed)),
+                _percent(row.win_rate), _number(row.mean_account_r), _money(row.realized_pnl),
+            ])
     grid_keys = ["source_arm", "venue_scope", "timeframe", "sizing", "risk_fraction", "seed"]
     grid = summary.pivot(index=grid_keys, columns="period_scope", values="final_balance").reset_index()
     grid_mdd = summary.pivot(index=grid_keys, columns="period_scope", values="max_drawdown_fraction").reset_index()
@@ -485,6 +527,8 @@ python3 scripts/md_to_html.py {report_path} --out-dir {report_path.parent / 'htm
 
 本轮没有任何 3% / 5% / 10% 风险配置可批准为实盘。fixed 10% 的单笔目标风险为 10%，组合初始风险上限为 {_percent(raw_best.portfolio_risk_cap)}，通常只能持有一仓；亏损后固定风险额仍按初始余额计算，可能高于当时可用额度，因而无法继续开仓。这是账户准入机制，不能作策略因果解释。
 
+表中每个风险档的 32 条是 4 个策略口径 × 2 个场所范围 × 4 个周期范围形成的结构路径，不是 32 次独立市场试验。它们共享大量底层行情，表中位数只能描述网格，不能当作抽样置信度。
+
 达到 100 倍的纯算术门槛如下：假定每一次都是连续净 +1R，复利账户余额每次乘以 `1+r`，fixed 风险账户则累计每次 `r` 倍初始余额。它只是算术，不是概率、胜率或预测；上面的独立 validation 失败正是不能把该门槛当成可达性证据的原因。
 
 {_md_table(["单笔风险", "复利：连续净+1R次数", "fixed：累计净R"], arithmetic_rows)}
@@ -515,11 +559,21 @@ development 与 validation 同时高于起始余额的组合是 {len(post_hoc)}/
 
 {_md_table(["策略臂", "场所", "周期", "仓位", "风险", "开发终值", "开发MDD", "验证终值", "验证MDD", "全期终值"], post_hoc_rows)}
 
+周期证据并不支持 V1 或 V7 纯多头：`v1_common_execution_long`、`v1_native_long` 与 `v7_bb_long` 都是 0 个开发/验证双正组合。11 个事后线索全部来自 `v7_bb_both`，其中 4H 有 5 个、1H 有 4 个、跨周期有 2 个、30m 为 0；但 V7 双向 4H 的匹配随机差为 -0.155R、p=0.9747，因此“4H 表内最好”仍不是已验证的信号优势。
+
 市场状态来自已完成 BTC/ETH 4H，宽度不含结果标签。下表只描述历史{focus_label}配置 `{operational_validation_run}` 在独立 validation 的联合分层，不能推断状态导致结果。该配置 validation 从 1,000U 降到 {_money(transient_selection.iloc[0].validation_final_balance)}；任何看似盈利的局部状态都没有救活整个账户。
 
 {_md_table(["市场状态", "宽度", "平仓数", "胜数", "胜率", "已实现PnL"], operational_rows)}
 
+合并宽度后，市场状态表现如下。bear 的历史损失集中并不自动产生一个可交易过滤器；bull 也没有稳定盈利，必须先冻结规则再用新数据验证。
+
+{_md_table(["市场状态", "平仓数", "胜率", "已实现PnL"], market_total_rows)}
+
 ![{focus_label}配置的独立 validation 市场状态描述]({figure_links["operational_v7_validation_market_state"]})
+
+同一 validation 路径按北京时间入场小时、星期和月份做了最低 5 笔的事后切片。下表只展示各维度平均账户 R 的最高/最低桶，用于证明周期漂移存在；它不能用于删除亏损时段。
+
+{_md_table(["维度", "排名", "桶", "平仓数", "胜率", "平均账户R", "已实现PnL"], calendar_rows)}
 
 ## V1/V7 合同性与 matched control
 
@@ -534,7 +588,7 @@ development 与 validation 同时高于起始余额的组合是 {len(post_hoc)}/
 - 回放是冻结 ledger 的现金簿模拟，不含真实成交、完整 funding、保证金、清算和滑点分布；full、development、validation 因余额和准入路径依赖不可相加。
 - OKX 官方说明杠杆会同时放大盈利与亏损，保证金与清算约束会改变真实存活路径；永续资金费率通常按 8 小时结算，也可能改为 1、2 或 4 小时。本回放没有完整模拟这些机制，不能把“bankrupt=0”解释成实盘不会爆仓：[杠杆与保证金](https://www.okx.com/en-gb/help/understanding-leverage-futures-and-margin)、[永续合约](https://www.okx.com/en-gb/help/i-perpetual-swaps)、[资金费率机制](https://www.okx.com/en-sg/help/perps-funding-fee-mechanism)。
 - 瞬时 100k、最高终值、最大单笔和北京日链路都是 hindsight 描述；禁止据此改阈值、风险或生产配置。
-- 下周的可执行结论是先保住这 1,000U：登记本轮为 rejected，保持配置冻结，不以 3%/5%/10% 风险实盘。下一轮只提名 `v7_bb_both / OKX / 4H` 做事前冻结的前向纸面验证，必须沿用相同账户约束、记录所有拒单，并以至少 100 笔新鲜平仓和匹配账户对照作为裁决；风险、阈值或生产切换仍需 owner 另行批准。
+- 下周的可执行结论是先保住这 1,000U：登记本轮为 rejected，保持配置冻结，不以 3%/5%/10% 风险实盘。若必须冻结一个研究候选，只提名事后表现相对一致的 `v7_bb_both / OKX / 4H / fixed 5%初始余额`：开发终值 4,165.04、验证终值 1,436.86，对应已实现 MDD 19.27% / 18.12%；它的事件层匹配对照仍失败，所以只能做前向纸面验证。必须沿用相同账户约束、记录所有拒单，并以至少 100 笔新鲜平仓和匹配账户对照作为裁决；风险、阈值或生产切换仍需 owner 另行批准。
 """
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(report, encoding="utf-8")

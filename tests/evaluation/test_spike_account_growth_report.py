@@ -79,11 +79,15 @@ def _bundle(tmp_path):
     ])
     matched = pd.DataFrame([dict(variant="v7_bb_long", timeframe_min=30, matched_months=12, exploratory_month_block_sign_flip_p=.02, paired_mean_net_r_difference=.3)])
     accepted = pd.DataFrame([dict(run_id="v7-fair", exit_time="2025-01-03T00:00:00Z", base_asset="BTC")])
+    entry_hour = pd.DataFrame([dict(run_id="v7-fair-val", period_scope="validation", entry_hour_bjt=8, closed=6, wins=3, realized_pnl=-100., mean_account_r=-.1, win_rate=.5)])
+    entry_weekday = pd.DataFrame([dict(run_id="v7-fair-val", period_scope="validation", entry_weekday_bjt="Monday", closed=6, wins=3, realized_pnl=-100., mean_account_r=-.1, win_rate=.5)])
+    entry_month = pd.DataFrame([dict(run_id="v7-fair-val", period_scope="validation", entry_month_bjt="2025-01", closed=6, wins=3, realized_pnl=-100., mean_account_r=-.1, win_rate=.5)])
     tables = {
         "development_selection.csv": selection, "risk_summary.csv": risk, "seed_sensitivity.csv": seeds,
         "regime_metrics.csv": regime, "daily_realized_bjt.csv.gz": daily, "best_days.csv": daily,
         "milestone_chain.csv": milestones, "matched_control_reference.csv": matched,
-        "annotated_accepted.csv.gz": accepted,
+        "annotated_accepted.csv.gz": accepted, "entry_hour_metrics.csv": entry_hour,
+        "entry_weekday_metrics.csv": entry_weekday, "entry_month_metrics.csv": entry_month,
     }
     post_hashes = {name: _write_csv(post / name, frame) for name, frame in tables.items()}
     (post / "post_manifest.json").write_text(json.dumps({"outputs": post_hashes, "account_replay_manifest_sha256": _sha(result / "run_manifest.json")}))
@@ -109,6 +113,9 @@ def test_builds_a_manifest_checked_chinese_report_and_five_relative_pngs(tmp_pat
     assert "市场状态" in text and "validation 从 1,000U 降到 800.00" in text
     assert "日初 85,000.00" in text and "3 笔合计 35,000.00" in text
     assert "AUC" in text and "不适用" in text
+    assert "不是 32 次独立市场试验" in text
+    assert "小时" in text and "Monday" in text and "2025-01" in text
+    assert "fixed 5%初始余额" in text
     assert "reproduce_full_v1" in text and "禁止把重现输出写回" in text
     assert "figures/focus_historical_path.png" in text
     assert len(list(figures.glob("*.png"))) == 5
