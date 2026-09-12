@@ -135,6 +135,9 @@ def test_seed_sensitivity_keeps_parameters_fixed_and_seed_only_changes_contested
         "timeframe": "30", "sizing": "fixed", "risk_fraction": .03,
         "selection_seed": 0, "selection_period": "development",
     }]
+    assert replayed["max_balance"].eq(1000.0).all()
+    assert replayed["max_closed_drawdown_fraction"].eq(0.0).all()
+    assert not replayed["reached_100k"].any()
 
 
 def test_seed_zero_replay_reproduces_frozen_summary_without_validation_selection():

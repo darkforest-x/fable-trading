@@ -359,6 +359,14 @@ def replay_seed_sensitivity(
                     seed=seed,
                 )
                 replay = result["summary"]
+                curve = result["equity_curve"]
+                balances = pd.concat(
+                    [pd.Series([float(initial_balance)]), curve["balance"].astype(float)],
+                    ignore_index=True,
+                )
+                peaks = balances.cummax()
+                drawdown = (peaks - balances) / peaks.replace(0.0, np.nan)
+                max_balance = float(balances.max())
                 rows.append({
                     "source_arm": str(config["source_arm"]),
                     "venue_scope": str(config["venue_scope"]),
@@ -376,6 +384,9 @@ def replay_seed_sensitivity(
                     "final_balance": float(replay["final_balance"]),
                     "net_pnl": float(replay["net_pnl"]),
                     "net_return": float(replay["net_return"]),
+                    "max_balance": max_balance,
+                    "max_closed_drawdown_fraction": float(drawdown.max()) if len(drawdown) else 0.0,
+                    "reached_100k": bool(max_balance >= 100_000.0),
                     "candidates": int(replay["candidates"]),
                     "accepted": int(replay["selected"]),
                     "rejected": int(replay["rejected"]),
@@ -606,6 +617,10 @@ def build_post_diagnostics(result_dir: Path, output_dir: Path) -> dict[str, Any]
             "ordering_rule": (
                 "simulate_shared_account uses seed only in its outcome-independent stable hash to order "
                 "candidates sharing an entry timestamp."
+            ),
+            "milestone_rule": (
+                "reached_100k means closed account balance reached 100000 USDT at an exit event; "
+                "it is not final balance or a forecast."
             ),
             "seed_zero_summary_reproduced": True,
         },
