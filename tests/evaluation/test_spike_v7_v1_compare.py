@@ -79,7 +79,9 @@ def test_replay_conflicts_align_to_truncated_featured_clock_when_source_has_end_
         return pd.DataFrame({"long_signal": False, "short_signal": [True, False, False, False]}, index=frame.index)
 
     def fake_diag(frame, *, data_gap):
-        return pd.DataFrame({"v7_ready": False, "prior_squeeze_run3": False}, index=frame.index)
+        return pd.DataFrame({"bb_basis": 100.0, "bb_std_ddof0": 1.0, "bb_width": .04,
+                             "bb_width_p10_prior500": .03, "bb_compressed": False,
+                             "v7_ready": False, "prior_squeeze_run3": False}, index=frame.index)
 
     def fake_v1(frame, tick):
         return pd.DataFrame({"long_signal": [True, False, False, False], "short_signal": False}, index=frame.index)
@@ -96,10 +98,12 @@ def test_replay_conflicts_align_to_truncated_featured_clock_when_source_has_end_
     stream = {"venue": "binance", "symbol": "TEST", "asset": "TEST", "minutes": 30, "tick": .01,
               "segment": 0, "source_path": "/tmp/source", "source_sha256": "a" * 64, "bars": source,
               "coverage_receipt": {"path": "/tmp/receipt", "sha256": "b" * 64, "source_sha256": "a" * 64}}
-    _, _, conflicts, receipt, _ = compare.replay_stream(stream)
+    _, _, conflicts, receipt, cache = compare.replay_stream(stream)
     assert len(conflicts) == 1
     assert conflicts.signal_bar_open.iloc[0] == compare.END - pd.Timedelta(minutes=60)
     assert receipt.v1_long_raw_v6_short_conflicts.iloc[0] == 1
+    assert cache["bb"].columns.tolist() == ["bb_basis", "bb_std_ddof0", "bb_width", "bb_width_p10_prior500",
+                                              "bb_compressed", "prior_squeeze_run3", "v7_ready"]
 
 
 def test_evaluation_window_uses_confirm_time_and_prevents_carry_in():
@@ -137,6 +141,23 @@ def test_uncovered_catalog_row_without_tick_does_not_mask_evaluated_tick():
     assert compare._catalog_tick_map(catalog) == {("binance", "COVERED"): .01}
 
 
+def test_pre_registered_exclusions_must_exactly_match_selected_invalid_ticks():
+    coverage = pd.DataFrame([
+        {"venue": "okx", "symbol": "SATS", "timeframe_min": minutes, "status": "evaluated"}
+        for minutes in (30, 60, 240)
+    ])
+    catalog = pd.DataFrame([{"venue": "okx", "symbol": "SATS", "eligible": True, "tick": 0.0}])
+    config = {"excluded_cells": [
+        {"venue": "okx", "symbol": "SATS", "minutes": minutes, "reason": "frozen tick is zero"}
+        for minutes in (30, 60, 240)
+    ]}
+    excluded = compare._excluded_cells(config, coverage, catalog)
+    assert set(excluded) == {("okx", "SATS", 30), ("okx", "SATS", 60), ("okx", "SATS", 240)}
+    config["excluded_cells"].pop()
+    with pytest.raises(ValueError, match="exactly three"):
+        compare._excluded_cells(config, coverage, catalog)
+
+
 def test_tail_retention_records_same_entry_rate_and_realized_ten_r():
     stamp = pd.Timestamp("2025-01-01T00:00:00Z")
     signals = pd.DataFrame([
@@ -162,6 +183,16 @@ def test_tail_retention_records_same_entry_rate_and_realized_ten_r():
     assert (long.baseline_entry_admitted, long.same_entry_v7_admitted, long.same_entry_v7_admission_rate) == (1, 1, 1.0)
     assert (long.baseline_realized_net_r_ge_10, long.same_realized_trade_v7_admitted) == (1, 1)
     assert (both.same_entry_v7_admitted, both.same_realized_trade_v7_admitted) == (0, 0)
+
+
+def test_all_empty_trade_arms_write_headered_stream_summaries():
+    stream = {"venue": "okx", "symbol": "SATS", "asset": "SATS", "minutes": 30, "segment": 0}
+    signals = pd.DataFrame(columns=["variant", "side", "signal_role", "admitted_for_entry", "signal_bar_open"])
+    signal_summary, trade_summary, retention = compare._stream_summaries(stream, signals, pd.DataFrame())
+    assert signal_summary.columns.tolist() == list(compare.SIGNAL_SUMMARY_COLUMNS)
+    assert trade_summary.columns.tolist() == list(compare.TRADE_SUMMARY_COLUMNS)
+    assert retention.columns.tolist() == list(compare.RETENTION_COLUMNS)
+    assert len(retention) == 2
 
 
 def test_run_identity_refuses_cross_builder_resume_and_allows_empty_preflight_retry(tmp_path):

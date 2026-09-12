@@ -28,7 +28,7 @@
     "v6_common_ready_both",
     "v1_common_ready_long"
   ],
-  "coverage": "Frozen original V1 evaluated cells from covered two-year current-catalog OKX/Binance/Gate pool,30m/1H/4H only; 3534 evaluated of5043 catalog cells; daily excluded. No fetch or outcome-selected symbols.",
+  "coverage": "Frozen original V1 evaluated cells from covered two-year current-catalog OKX/Binance/Gate pool,30m/1H/4H only;3534 evaluated of5043 catalog cells,3531 comparable after explicit exclusion of3 OKX SATS zero-tick cells. No fetch or outcome-selected symbols.",
   "execution": "Frozen original V1 native ledger reported separately; common execution uses next open, signal frozen 5-bar extreme/.2ATR buffer/min2ATR stop,2R activates4ATR trail,0.2% roundtrip costs. Raw unfiltered opposite confirmations close references even if filtered entry is denied. V1 common long uses the same raw V6 short reversal-exit feed as V6/V7 long; native V1 ledger is separate and unchanged. When native V1 long and V6 short coincide, common execution gives exit priority and suppresses same-bar V1 long re-entry, with explicit conflict diagnostics; archived native ledger remains unchanged.",
   "holdout": "Owner authorized all dates. Fixed V7 B deployment configuration first evaluation in this new pool; overlapping B data already evaluated before, not fresh blind holdout. Report all reuse.",
   "training_eligible": false,
@@ -69,7 +69,8 @@
   },
   "expected_coverage": {
     "catalog_cells": 5043,
-    "evaluated_cells": 3534
+    "evaluated_cells": 3534,
+    "comparable_cells": 3531
   },
   "controls": {
     "seeds": [
@@ -86,5 +87,25 @@
     "inference": "time-block paired differences where sample permits; no claim of fresh blind validation",
     "max_targets_per_stream_variant_side": 16,
     "sample_selection": "SHA256 of entry identity, up to16 realized entries per stream/variant/side, before reading outcome values; all trades remain in performance tables"
-  }
+  },
+  "excluded_cells": [
+    {
+      "venue": "okx",
+      "symbol": "SATS-USDT-SWAP",
+      "minutes": 30,
+      "reason": "frozen normalized catalog tick=0; original V1 skipped execution and produced zero trades; historical raw tickSz is retained but not substituted"
+    },
+    {
+      "venue": "okx",
+      "symbol": "SATS-USDT-SWAP",
+      "minutes": 60,
+      "reason": "frozen normalized catalog tick=0; original V1 skipped execution and produced zero trades; historical raw tickSz is retained but not substituted"
+    },
+    {
+      "venue": "okx",
+      "symbol": "SATS-USDT-SWAP",
+      "minutes": 240,
+      "reason": "frozen normalized catalog tick=0; original V1 skipped execution and produced zero trades; historical raw tickSz is retained but not substituted"
+    }
+  ]
 }

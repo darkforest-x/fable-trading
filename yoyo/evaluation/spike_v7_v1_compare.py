@@ -22,6 +22,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+from time import perf_counter
 from typing import Iterable
 
 import numpy as np
@@ -44,6 +45,7 @@ SOURCE_EXP = ROOT / "experiments/active/exp-spike-v1-twoyear-allmarkets-20260911
 SOURCE_DATA = SOURCE_EXP / "data"
 SOURCE_RESULTS = SOURCE_EXP / "results"
 CONFIG_PATH = EXP / "config.json"
+PINE_PATH = ROOT / "yoyo/evaluation/pine/spike_burst_v7.pine"
 TIMEFRAMES = (30, 60, 240)
 VARIANTS = ("v1_common_execution_long", "v6_unfiltered_long", "v7_bb_long",
             "v6_unfiltered_both", "v7_bb_both", "v6_common_ready_long",
@@ -59,6 +61,18 @@ STREAM_REQUIRED_FILES = (
     "signals.csv.gz", "trades.csv.gz", "control_cache.pkl.gz", "control_cache.receipt.json",
     "signal_summary.csv", "trade_summary.csv", "tail_retention.csv", "conflicts.csv", "receipt.csv",
 )
+EMPTY_TRADE_COLUMNS = ("variant", "side", "signal_bar_open", "censored", "net_r", "net_return",
+                       "gross_return", "mfe_r")
+IDENTITY_COLUMNS = ("venue", "symbol", "asset", "minutes", "segment")
+SIGNAL_SUMMARY_COLUMNS = IDENTITY_COLUMNS + ("variant", "side", "entry_candidates", "entry_admitted",
+                                             "raw_v6_short_exit_feed")
+TRADE_SUMMARY_COLUMNS = IDENTITY_COLUMNS + ("variant", "side", "trades", "win_rate", "profit_factor",
+                                            "net_r", "gross_return", "net_return", "max_drawdown_closed_trade",
+                                            "censored", "realized_net_r_ge_10", "realized_mfe_r_ge_10")
+RETENTION_COLUMNS = IDENTITY_COLUMNS + ("baseline", "filtered", "baseline_entry_admitted",
+                                        "same_entry_v7_admitted", "same_entry_v7_admission_rate",
+                                        "baseline_realized_trades", "baseline_realized_net_r_ge_10",
+                                        "same_realized_trade_v7_admitted")
 
 
 def sha256(path: Path) -> str:
@@ -85,6 +99,8 @@ def run_identity(config: dict) -> dict:
     pine_sha = config.get("pine_sha256")
     if not isinstance(pine_sha, str) or len(pine_sha) != 64:
         raise ValueError("config requires a pinned Pine SHA256")
+    if not PINE_PATH.is_file() or sha256(PINE_PATH) != pine_sha:
+        raise ValueError("current V7 Pine bytes do not match the pinned Pine SHA256")
     identity = {
         "config_sha256": sha256(CONFIG_PATH),
         "pine_sha256": pine_sha,
@@ -136,6 +152,35 @@ def _catalog_tick_map(catalog: pd.DataFrame) -> dict[tuple[str, str], float]:
         except (TypeError, ValueError):
             continue
     return ticks
+
+
+def _excluded_cells(config: dict, coverage: pd.DataFrame, catalog: pd.DataFrame) -> dict[tuple[str, str, int], dict]:
+    """Validate the sole pre-registered non-comparable cells before reading bars."""
+    entries = config.get("excluded_cells")
+    if not isinstance(entries, list) or len(entries) != 3:
+        raise ValueError("config requires exactly three excluded cells")
+    excluded: dict[tuple[str, str, int], dict] = {}
+    for item in entries:
+        if not isinstance(item, dict) or not isinstance(item.get("reason"), str) or not item["reason"].strip():
+            raise ValueError("every excluded cell requires a reason")
+        key = (str(item.get("venue")), str(item.get("symbol")), int(item.get("minutes")))
+        if key in excluded:
+            raise ValueError("duplicate excluded cell")
+        excluded[key] = {"venue": key[0], "symbol": key[1], "minutes": key[2], "reason": item["reason"]}
+    selected = coverage.loc[coverage.status.eq("evaluated") & coverage.timeframe_min.isin(TIMEFRAMES)].copy()
+    selected_keys = {(str(row.venue), str(row.symbol), int(row.timeframe_min)) for row in selected.itertuples(index=False)}
+    if not set(excluded).issubset(selected_keys):
+        raise ValueError("excluded cell is not an evaluated selected coverage cell")
+    ticks = {(str(row.venue), str(row.symbol)): row.tick for row in catalog.itertuples() if bool(row.eligible)}
+    invalid = set()
+    for venue, symbol, minutes in selected_keys:
+        try:
+            _tick(ticks.get((venue, symbol)))
+        except (TypeError, ValueError):
+            invalid.add((venue, symbol, minutes))
+    if invalid != set(excluded):
+        raise ValueError("invalid selected catalog ticks must exactly equal pre-registered exclusions")
+    return excluded
 
 
 def v7_diagnostics(bars: pd.DataFrame, *, data_gap: pd.Series) -> pd.DataFrame:
@@ -228,7 +273,8 @@ def evaluation_window(index: pd.DatetimeIndex, minutes: int) -> pd.Series:
     return pd.Series((index + step >= START) & (index + step < END), index=index)
 
 
-def covered_streams(*, limit: int | None = None, frozen: dict[str, dict] | None = None) -> Iterable[dict]:
+def covered_streams(*, limit: int | None = None, frozen: dict[str, dict] | None = None,
+                    excluded: dict[tuple[str, str, int], dict] | None = None) -> Iterable[dict]:
     """Yield only receipt-pinned V1-evaluated cells for 30m/1H/4H.
 
     Binance and OKX have verified 30m receipts and are aggregated locally into
@@ -247,6 +293,8 @@ def covered_streams(*, limit: int | None = None, frozen: dict[str, dict] | None 
     emitted = 0
     for row in coverage.sort_values(["venue", "symbol", "timeframe_min"]).itertuples(index=False):
         venue, symbol, minutes = str(row.venue), str(row.symbol), int(row.timeframe_min)
+        if excluded is not None and (venue, symbol, minutes) in excluded:
+            continue
         tick = tick_map.get((venue, symbol))
         if tick is None:
             raise ValueError(f"evaluated cell lacks catalog tick: {venue}:{symbol}")
@@ -319,14 +367,19 @@ def _variant_admissions(v1: pd.DataFrame, v6: pd.DataFrame, v7: pd.Series,
 
 def replay_stream(stream: dict) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, dict]:
     """Replay all eight common-execution variants for one continuous stream."""
+    started = perf_counter()
     source = stream["bars"].copy()
     featured = v1_features(source)
+    feature_seconds = perf_counter() - started
     featured.attrs["minutes"] = int(stream["minutes"])
     gap = _data_gap(featured, int(stream["minutes"]))
     v6 = v6_signals(featured, int(stream["minutes"]))
+    v6_seconds = perf_counter() - started - feature_seconds
     diagnostic = v7_diagnostics(featured, data_gap=gap)
     v7 = v7_admission(v6, diagnostic)
+    bb_seconds = perf_counter() - started - feature_seconds - v6_seconds
     v1 = v1_common_signals(featured, float(stream["tick"]))
+    v1_seconds = perf_counter() - started - feature_seconds - v6_seconds - bb_seconds
     # Long-only common execution shares the same raw V6 short exit feed.  It
     # does not turn those shorts into V1 entries; their role is labelled below.
     v1, v1_exit_conflicts = v1_common_with_v6_exit_feed(v1, v6.short_signal)
@@ -363,8 +416,12 @@ def replay_stream(stream: dict) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFram
              "v1_signals": v1.loc[(v1.index >= cache_start) & (v1.index < END)].copy(),
              "data_gap": gap.loc[(gap.index >= cache_start) & (gap.index < END)].copy(),
              "bb_ready": diagnostic.v7_ready.loc[(diagnostic.index >= cache_start) & (diagnostic.index < END)].copy(),
+             "bb": diagnostic.loc[(diagnostic.index >= cache_start) & (diagnostic.index < END),
+                                  ["bb_basis", "bb_std_ddof0", "bb_width", "bb_width_p10_prior500",
+                                   "bb_compressed", "prior_squeeze_run3", "v7_ready"]].copy(),
              "tick": float(stream["tick"])}
     signal_tables, trade_tables = [], []
+    arms_started = perf_counter()
     for variant, (signals, admission) in _variant_admissions(v1, v6, v7, common_ready).items():
         ledger, trades = simulate_v6_variant(
             featured, signals, admission=admission, variant=variant, data_gap=gap,
@@ -380,6 +437,7 @@ def replay_stream(stream: dict) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFram
                 table["source_sha256"] = stream["source_sha256"]
         signal_tables.append(ledger)
         trade_tables.append(trades)
+    arm_replay_seconds = perf_counter() - arms_started
     stream_receipt = pd.DataFrame([{
         **{key: stream[key] for key in ("venue", "symbol", "asset", "minutes", "segment", "source_path", "source_sha256")},
         "coverage_receipt_path": stream["coverage_receipt"]["path"],
@@ -388,14 +446,22 @@ def replay_stream(stream: dict) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFram
         "tick": float(stream["tick"]), "window_start": START.isoformat(), "window_end_exclusive": END.isoformat(),
         "cache_start": cache_start.isoformat(), "bars": len(featured), "v6_raw_events": int((v6.long_signal | v6.short_signal).sum()),
         "v1_long_raw_v6_short_conflicts": int(len(conflicts)),
+        "feature_seconds": feature_seconds, "v6_signal_seconds": v6_seconds, "bb_seconds": bb_seconds,
+        "v1_signal_seconds": v1_seconds, "eight_arm_replay_seconds": arm_replay_seconds,
+        "stream_replay_seconds": perf_counter() - started,
         "v7_admitted_events": int(v7.sum()), "v7_first_ready_bar": int(diagnostic.v7_ready.to_numpy().argmax()) if diagnostic.v7_ready.any() else None,
     }])
-    return (pd.concat(signal_tables, ignore_index=True), pd.concat(trade_tables, ignore_index=True),
+    trades_out = pd.concat(trade_tables, ignore_index=True)
+    if trades_out.empty:
+        trades_out = trades_out.reindex(columns=EMPTY_TRADE_COLUMNS)
+    return (pd.concat(signal_tables, ignore_index=True), trades_out,
             conflicts, stream_receipt, cache)
 
 
 def _stream_summaries(stream: dict, signals: pd.DataFrame, trades: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Summarize one stream only; never compound unrelated coins into an account."""
+    if trades.empty:
+        trades = trades.reindex(columns=EMPTY_TRADE_COLUMNS)
     identity = {key: stream[key] for key in ("venue", "symbol", "asset", "minutes", "segment")}
     signal_rows, trade_rows, retention = [], [], []
     for (variant, side), part in signals.groupby(["variant", "side"], dropna=False):
@@ -420,19 +486,33 @@ def _stream_summaries(stream: dict, signals: pd.DataFrame, trades: pd.DataFrame)
         base_trades = trades.loc[(trades.variant == base) & ~trades.censored.astype(bool), keys + ["net_r"]]
         accepted = signals.loc[signals.variant.eq(filtered), keys + ["admitted_for_entry"]].rename(
             columns={"admitted_for_entry": "v7_admitted"})
+        if base_entries.empty:
+            retention.append({**identity, "baseline": base, "filtered": filtered,
+                              "baseline_entry_admitted": 0, "same_entry_v7_admitted": 0,
+                              "same_entry_v7_admission_rate": math.nan, "baseline_realized_trades": 0,
+                              "baseline_realized_net_r_ge_10": 0, "same_realized_trade_v7_admitted": 0})
+            continue
         entry_joined = base_entries.merge(accepted, on=keys, how="left")
-        joined = base_trades.merge(accepted, on=keys, how="left")
         baseline_admitted = entry_joined.admitted_for_entry.astype(bool)
         same_admitted = baseline_admitted & entry_joined.v7_admitted.fillna(False).astype(bool)
+        if base_trades.empty:
+            baseline_realized_trades = baseline_realized_net_r_ge_10 = same_realized_trade_v7_admitted = 0
+        else:
+            joined = base_trades.merge(accepted, on=keys, how="left")
+            baseline_realized_trades = int(len(joined))
+            baseline_realized_net_r_ge_10 = int(joined.net_r.ge(10).sum())
+            same_realized_trade_v7_admitted = int((joined.net_r.ge(10) & joined.v7_admitted.fillna(False)).sum())
         retention.append({**identity, "baseline": base, "filtered": filtered,
                           "baseline_entry_admitted": int(baseline_admitted.sum()),
                           "same_entry_v7_admitted": int(same_admitted.sum()),
                           "same_entry_v7_admission_rate": (float(same_admitted.sum() / baseline_admitted.sum())
                                                              if baseline_admitted.any() else math.nan),
-                          "baseline_realized_trades": int(len(joined)),
-                          "baseline_realized_net_r_ge_10": int(joined.net_r.ge(10).sum()),
-                          "same_realized_trade_v7_admitted": int((joined.net_r.ge(10) & joined.v7_admitted.fillna(False)).sum())})
-    return pd.DataFrame(signal_rows), pd.DataFrame(trade_rows), pd.DataFrame(retention)
+                          "baseline_realized_trades": baseline_realized_trades,
+                          "baseline_realized_net_r_ge_10": baseline_realized_net_r_ge_10,
+                          "same_realized_trade_v7_admitted": same_realized_trade_v7_admitted})
+    return (pd.DataFrame(signal_rows, columns=SIGNAL_SUMMARY_COLUMNS),
+            pd.DataFrame(trade_rows, columns=TRADE_SUMMARY_COLUMNS),
+            pd.DataFrame(retention, columns=RETENTION_COLUMNS))
 
 
 def _native_v1_reference(output: Path) -> dict:
@@ -453,7 +533,7 @@ def _native_v1_reference(output: Path) -> dict:
             "rows_30m_1h_4h": int(len(ledger))}
 
 
-def _validate_frozen_inputs(config: dict) -> None:
+def _validate_frozen_inputs(config: dict) -> dict[tuple[str, str, int], dict]:
     """Fail closed on all pre-registered inputs and the three-period coverage."""
     inputs = config.get("frozen_inputs")
     if not isinstance(inputs, dict) or len(inputs) != 5:
@@ -467,24 +547,36 @@ def _validate_frozen_inputs(config: dict) -> None:
     coverage = pd.read_csv(SOURCE_RESULTS / "coverage_limited.csv")
     selected = coverage.loc[coverage.timeframe_min.isin(TIMEFRAMES)]
     expected = config.get("expected_coverage")
-    if not isinstance(expected, dict) or len(selected) != expected.get("catalog_cells") or int(selected.status.eq("evaluated").sum()) != expected.get("evaluated_cells"):
+    if (not isinstance(expected, dict) or len(selected) != expected.get("catalog_cells")
+            or int(selected.status.eq("evaluated").sum()) != expected.get("evaluated_cells")):
         raise ValueError("frozen three-period coverage denominator/evaluated count drift")
+    catalog = pd.read_json(SOURCE_DATA / "catalog.json")
+    excluded = _excluded_cells(config, coverage, catalog)
+    if expected.get("comparable_cells") != int(selected.status.eq("evaluated").sum()) - len(excluded):
+        raise ValueError("frozen comparable coverage count drift")
+    return excluded
 
 
-def _input_manifest(*, expected_catalog: int, expected_evaluated: int) -> dict:
+def _input_manifest(*, expected_catalog: int, expected_evaluated: int, expected_comparable: int,
+                    excluded: dict[tuple[str, str, int], dict]) -> dict:
     """Freeze every V1 receipt-bound source identity before new outcomes run."""
     streams = []
-    for stream in covered_streams():
+    started = perf_counter()
+    for count, stream in enumerate(covered_streams(excluded=excluded), 1):
         streams.append({"key": stream_key(stream), **{name: stream[name] for name in
                         ("source_path", "source_sha256", "minutes", "segment")},
                         "coverage_receipt_path": stream["coverage_receipt"]["path"],
                         "coverage_receipt_sha256": stream["coverage_receipt"]["sha256"],
                         "coverage_receipt_source_sha256": stream["coverage_receipt"]["source_sha256"]})
-    if len(streams) != expected_evaluated:
-        raise ValueError(f"receipt-bound continuous stream count {len(streams)} != frozen evaluated count {expected_evaluated}")
+        if count % 100 == 0:
+            print(f"input_manifest_verified={count} elapsed_seconds={perf_counter() - started:.1f}", flush=True)
+    if len(streams) != expected_comparable:
+        raise ValueError(f"receipt-bound continuous stream count {len(streams)} != frozen comparable count {expected_comparable}")
     return {"coverage_path": str((SOURCE_RESULTS / "coverage_limited.csv").resolve()),
             "coverage_sha256": sha256(SOURCE_RESULTS / "coverage_limited.csv"), "streams": streams,
-            "catalog_cells": expected_catalog, "evaluated_cells": expected_evaluated}
+            "catalog_cells": expected_catalog, "evaluated_cells": expected_evaluated,
+            "comparable_cells": expected_comparable,
+            "excluded_cells": [excluded[key] for key in sorted(excluded)]}
 
 
 def _completed(streams_root: Path, identity_sha256: str) -> set[str]:
@@ -522,7 +614,7 @@ def run(output: Path, *, max_streams: int | None = None) -> None:
     config = json.loads(CONFIG_PATH.read_text())
     if config.get("variants") != ["historical_v1_native", *VARIANTS]:
         raise ValueError("pre-registered variant order changed")
-    _validate_frozen_inputs(config)
+    excluded = _validate_frozen_inputs(config)
     expected_coverage = config["expected_coverage"]
     identity = run_identity(config)
     if output.exists() and not output.is_dir():
@@ -536,11 +628,15 @@ def run(output: Path, *, max_streams: int | None = None) -> None:
     else:
         output.mkdir(parents=True, exist_ok=True)
         inputs = _input_manifest(expected_catalog=int(expected_coverage["catalog_cells"]),
-                                 expected_evaluated=int(expected_coverage["evaluated_cells"]))
+                                 expected_evaluated=int(expected_coverage["evaluated_cells"]),
+                                 expected_comparable=int(expected_coverage["comparable_cells"]),
+                                 excluded=excluded)
         atomic_json(input_path, inputs)
-    if (inputs.get("catalog_cells"), inputs.get("evaluated_cells")) != (
-            expected_coverage["catalog_cells"], expected_coverage["evaluated_cells"]):
+    if (inputs.get("catalog_cells"), inputs.get("evaluated_cells"), inputs.get("comparable_cells")) != (
+            expected_coverage["catalog_cells"], expected_coverage["evaluated_cells"], expected_coverage["comparable_cells"]):
         raise ValueError("existing input manifest does not match frozen coverage counts")
+    if inputs.get("excluded_cells") != [excluded[key] for key in sorted(excluded)]:
+        raise ValueError("existing input manifest does not match frozen exclusions")
     frozen = {row["key"]: {key: row[key] for key in (
                   "source_path", "source_sha256", "minutes", "segment",
                   "coverage_receipt_path", "coverage_receipt_sha256", "coverage_receipt_source_sha256",
@@ -549,10 +645,12 @@ def run(output: Path, *, max_streams: int | None = None) -> None:
     progress = output / "progress.jsonl"
     streams_root = output / "streams"
     completed, processed = _completed(streams_root, identity["identity_sha256"]), 0
-    for stream in covered_streams(frozen=frozen):
+    for stream in covered_streams(frozen=frozen, excluded=excluded):
         key = stream_key(stream)
         if key in completed:
             continue
+        stream_started = perf_counter()
+        print(f"stream_start key={key}", flush=True)
         signals, trades, conflicts, receipt, cache = replay_stream(stream)
         streams_root.mkdir(parents=True, exist_ok=True)
         folder = streams_root / key
@@ -584,6 +682,8 @@ def run(output: Path, *, max_streams: int | None = None) -> None:
         trade_summary.to_csv(staging / "trade_summary.csv", index=False)
         retention.to_csv(staging / "tail_retention.csv", index=False)
         conflicts.to_csv(staging / "conflicts.csv", index=False)
+        receipt["stream_write_seconds"] = perf_counter() - stream_started - float(receipt.loc[0, "stream_replay_seconds"])
+        receipt["stream_wall_seconds"] = perf_counter() - stream_started
         receipt.to_csv(staging / "receipt.csv", index=False)
         atomic_json(staging / "completion.json", {"key": key, "status": "complete",
                                                     "source_sha256": stream["source_sha256"],
@@ -592,7 +692,10 @@ def run(output: Path, *, max_streams: int | None = None) -> None:
         staging.replace(folder)
         _append_progress(progress, {"key": key, "source_sha256": stream["source_sha256"],
                                     "run_identity_sha256": identity["identity_sha256"],
+                                    "stream_replay_seconds": float(receipt.loc[0, "stream_replay_seconds"]),
+                                    "stream_wall_seconds": float(receipt.loc[0, "stream_wall_seconds"]),
                                     "completed_at": pd.Timestamp.now(tz="UTC").isoformat()})
+        print(f"stream_complete key={key} wall_seconds={receipt.loc[0, 'stream_wall_seconds']:.1f}", flush=True)
         processed += 1
         if max_streams is not None and processed >= max_streams:
             break
@@ -604,7 +707,10 @@ def run(output: Path, *, max_streams: int | None = None) -> None:
         "source_coverage_path": str((SOURCE_RESULTS / "coverage_limited.csv").resolve()),
         "source_coverage_sha256": sha256(SOURCE_RESULTS / "coverage_limited.csv"),
         "window": {"start": START.isoformat(), "end_exclusive": END.isoformat(), "timeframes": list(TIMEFRAMES)},
+        "reference_evaluated_cells": int(inputs["evaluated_cells"]),
         "covered_streams_frozen": int(len(inputs["streams"])),
+        "comparable_streams_frozen": int(len(inputs["streams"])),
+        "excluded_cells": inputs["excluded_cells"],
         "completed_streams": len(_completed(streams_root, identity["identity_sha256"])),
         "max_streams": max_streams,
         "historical_v1_native": native,

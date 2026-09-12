@@ -27,11 +27,13 @@ def choose_examples(trades: pd.DataFrame) -> list[tuple[str, pd.Series]]:
     closed = trades.loc[~bools(trades.censored)].copy()
     keys = ["venue", "symbol", "timeframe_min", "segment", "side", "signal_bar_open"]
     v7 = closed.loc[closed.variant.eq("v7_bb_both")]
+    v1 = closed.loc[closed.variant.eq("v1_common_execution_long")]
     base = closed.loc[closed.variant.eq("v6_unfiltered_both")]
     missing = base.merge(v7[keys].assign(_retained=True), on=keys, how="left")
     missing = missing.loc[missing._retained.isna()]
     selected = []
-    for title, frame, ascending in (("V7 realized winner", v7, False),
+    for title, frame, ascending in (("V1 common-execution winner", v1, False),
+                                    ("V7 realized winner", v7, False),
                                     ("V7 realized loss", v7, True),
                                     ("V6 trend missed by V7", missing, False)):
         for _, row in frame.sort_values("net_r", ascending=ascending).drop_duplicates(["symbol", "timeframe_min"]).head(2).iterrows():
@@ -55,7 +57,8 @@ def render(raw: Path, post: Path, output: Path) -> None:
         receipt = json.loads((folder / "control_cache.receipt.json").read_text())
         if hashlib.sha256(cache_file.read_bytes()).hexdigest() != receipt["cache_sha256"]:
             raise ValueError("figure cache hash mismatch")
-        bars = pd.read_pickle(cache_file)["bars"]
+        cache = pd.read_pickle(cache_file)
+        bars = cache["bars"]
         begin, end = pd.Timestamp(trade.signal_bar_open), pd.Timestamp(trade.exit_time)
         i, j = int(bars.index.get_indexer([begin])[0]), int(bars.index.searchsorted(end))
         if i < 0:
@@ -82,6 +85,12 @@ def render(raw: Path, post: Path, output: Path) -> None:
         for col, color in zip(("s20","e20","s60","e60","s120","e120"),
                               ("#59c6ba","#86d2c9","#6496cb","#8bafd5","#a5abb8","#d2d8e0")):
             ax.plot(x, shown[col], color=color, linewidth=.8, alpha=.7)
+        if "bb" in cache:
+            channel = cache["bb"].loc[shown.index]
+            upper, lower = channel.bb_basis+2*channel.bb_std_ddof0, channel.bb_basis-2*channel.bb_std_ddof0
+            ax.plot(x,upper,color="#9b8d6b",linewidth=.7,alpha=.6)
+            ax.plot(x,lower,color="#9b8d6b",linewidth=.7,alpha=.6)
+            ax.fill_between(x,lower,upper,where=channel.bb_compressed.astype(bool),color="#e7bf62",alpha=.12)
         osc.plot(x, shown.md, color="#6d9eff", linewidth=1.3, label="IMACD")
         osc.plot(x, shown.sb, color="#eeb465", linewidth=1.2, label="Signal")
         osc.axhline(0,color="#8797a7",linewidth=.6)
@@ -92,6 +101,9 @@ def render(raw: Path, post: Path, output: Path) -> None:
             panel.axvline(ei,color="#f194a4",linestyle=":",linewidth=1)
         ax.scatter([si+1/stride], [trade.entry_price], marker="^" if trade.side==1 else "v", s=65,color="#edd586",zorder=7)
         ax.scatter([ei], [trade.exit_price], marker="x", s=55,color="#f194a4",zorder=7)
+        ax.hlines(trade.entry_price, si, ei, color="#edd586", linestyles=":", linewidth=.7)
+        if "initial_stop" in trade and np.isfinite(trade.initial_stop):
+            ax.hlines(trade.initial_stop, si, ei, color="#e68a96", linestyles="--", linewidth=.7)
         ax.set_ylim(shown.low.min()*.99, shown.high.max()*1.01)
         ax.set_xlim(-1,len(shown))
         ax.set_title(f"{title} | {trade.venue.upper()} {trade.symbol} {int(trade.timeframe_min)}m | "

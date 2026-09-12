@@ -198,7 +198,7 @@ def process(raw: Path, output: Path, *, controls: bool, allow_partial: bool) -> 
     for i, folder in enumerate(folders, 1):
         needed = {"variant", "venue", "symbol", "timeframe_min", "segment", "side",
                   "signal_bar_open", "entry_time", "exit_time", "entry_price", "exit_price",
-                  "exit_reason", "censored", "net_return", "net_r", "mfe_r"}
+                  "initial_stop", "initial_risk", "exit_reason", "censored", "net_return", "net_r", "mfe_r"}
         ledger = pd.read_csv(folder / "trades.csv.gz", usecols=lambda name: name in needed)
         if len(ledger):
             trades.append(ledger)
