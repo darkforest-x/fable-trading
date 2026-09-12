@@ -265,15 +265,27 @@ def match_stream_controls(cache: dict, targets: pd.DataFrame, *, variant: str,
     return pd.DataFrame(rows)
 
 
-def paired_sign_flip_p(values: pd.Series, *, seed: int = 0, draws: int = 9_999) -> float:
-    """Two-sided deterministic paired sign-flip p-value; no IID claim beyond pairs."""
+def paired_sign_flip_p(values: pd.Series, *, seed: int = 0, draws: int = 9_999,
+                       batch_draws: int = 128) -> float:
+    """Return a deterministic, two-sided paired sign-flip p-value in batches.
+
+    One batch holds at most ``batch_draws * len(values)`` signs, so the peak
+    allocation stays independent of the total number of permutations.  Calls
+    to one seeded generator remain in row-major draw order, matching the
+    former single-array calculation exactly for any batch size.
+    """
     value = pd.to_numeric(values, errors="coerce").dropna().to_numpy(float)
     if len(value) < 2:
         return math.nan
+    if draws <= 0 or batch_draws <= 0:
+        raise ValueError("draws and batch_draws must be positive")
     observed = abs(float(value.mean()))
-    signs = np.random.default_rng(seed).choice((-1.0, 1.0), size=(draws, len(value)))
-    null = np.abs((signs * value).mean(axis=1))
-    return float((1 + np.sum(null >= observed)) / (draws + 1))
+    generator, exceedances = np.random.default_rng(seed), 0
+    for first in range(0, draws, batch_draws):
+        signs = generator.choice((-1.0, 1.0), size=(min(batch_draws, draws - first), len(value)))
+        null = np.abs((signs * value).mean(axis=1))
+        exceedances += int(np.sum(null >= observed))
+    return float((1 + exceedances) / (draws + 1))
 
 
 def summarize_controls(pairs: pd.DataFrame, targets: pd.DataFrame) -> pd.DataFrame:
@@ -305,14 +317,20 @@ def summarize_controls(pairs: pd.DataFrame, targets: pd.DataFrame) -> pd.DataFra
         for metric, slice_name, mask in cohorts:
             selected = scoped_targets.loc[mask.fillna(False), "target_id"]
             part = pairs.loc[pairs.target_id.isin(selected)] if len(pairs) else pairs
+            if part.target_id.duplicated().any():
+                raise ValueError("matched-control pairs contain duplicate target ids")
             good = part.loc[part.matched.eq(True)] if len(part) else part
-            rows.append({**group_values, "metric": metric, "slice": slice_name, "targets": int(len(part)),
-                         "matched": int(len(good)), "match_rate": float(len(good) / len(part)) if len(part) else math.nan,
+            missing = int(len(selected) - len(part))
+            reasons = Counter(part.loc[~part.matched.eq(True), "reason"])
+            if missing:
+                reasons["missing_pair_record"] += missing
+            rows.append({**group_values, "metric": metric, "slice": slice_name, "targets": int(len(selected)),
+                         "matched": int(len(good)), "match_rate": float(len(good) / len(selected)) if len(selected) else math.nan,
                          "target_mean_net_r": good.target_net_r.mean() if len(good) else math.nan,
                          "control_mean_net_r": good.control_net_r.mean() if len(good) else math.nan,
                          "paired_delta_mean_net_r": good.net_r_difference.mean() if len(good) else math.nan,
                          "paired_sign_flip_p": paired_sign_flip_p(good.net_r_difference) if len(good) else math.nan,
-                         "unmatched_reasons": json.dumps(dict(sorted(Counter(part.loc[~part.matched.eq(True), "reason"]).items()))),
+                         "unmatched_reasons": json.dumps(dict(sorted(reasons.items()))),
                          })
     return pd.DataFrame(rows)
 

@@ -68,13 +68,22 @@ def test_summary_exposes_baseline_quartiles_frozen_rule_reasons_and_deterministi
     targets = pd.DataFrame({"target_id": ["a", "b", "c", "d"], "joint_breadth": [.1, .2, .8, .9],
                             "joint_delta_60m": [-1., .1, .2, .3]})
     pairs = pd.DataFrame({"target_id": ["a", "b", "c", "d"], "matched": [True, False, True, True],
-                          "reason": ["matched", "no_exact_causal_match", "matched", "matched"],
+                          "reason": ["matched", "fail_closed:receipt missing", "matched", "matched"],
                           "target_net_r": [1., np.nan, 2., 3.], "control_net_r": [0., np.nan, 1., 1.],
                           "net_r_difference": [1., np.nan, 1., 2.]})
     summary = summarize_controls(pairs, targets)
     assert {("baseline", "all"), ("joint_breadth", "bottom_quartile"),
             ("joint_breadth", "top_quartile"), ("joint_delta_60m", "positive_rule")} <= set(zip(summary.metric, summary.slice))
     baseline = summary.loc[(summary.metric == "baseline") & (summary.slice == "all")].iloc[0]
-    assert baseline.matched == 3 and "no_exact_causal_match" in baseline.unmatched_reasons
+    assert baseline.targets == 4 and baseline.matched == 3 and baseline.match_rate == pytest.approx(.75)
+    assert "fail_closed:receipt missing" in baseline.unmatched_reasons
     assert paired_sign_flip_p(pd.Series([1., 2.])) == paired_sign_flip_p(pd.Series([1., 2.]))
     assert np.isnan(paired_sign_flip_p(pd.Series([1.])))
+
+
+def test_signflip_batches_match_the_former_single_array_seeded_draw_order():
+    values, seed, draws = np.array([-.5, .25, 1.5, 2.]), 37, 97
+    observed = abs(float(values.mean()))
+    signs = np.random.default_rng(seed).choice((-1.0, 1.0), size=(draws, len(values)))
+    expected = float((1 + np.sum(np.abs((signs * values).mean(axis=1)) >= observed)) / (draws + 1))
+    assert paired_sign_flip_p(pd.Series(values), seed=seed, draws=draws, batch_draws=7) == expected
