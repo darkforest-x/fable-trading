@@ -26,7 +26,9 @@ from yoyo.evaluation.spike_v1_plus_replay import replay_references, simulate_nex
 from yoyo.evaluation.spike_v1_plus_study import (
     CONFIG, RAW, SUMMARY_COLUMNS, VARIANTS, _completed, _identity, _summarize, _write_json, digest,
 )
-from yoyo.evaluation.spike_v7_v1_compare import _catalog_tick_map, _continuous, _read_utc_source, _source_maps, aggregate
+from yoyo.evaluation.spike_v7_v1_compare import (
+    SOURCE_DATA, SOURCE_RESULTS, _catalog_tick_map, _continuous, _read_utc_source, _source_maps, aggregate,
+)
 
 EXP = Path(__file__).resolve().parent
 OUTPUT = EXP / "results/replay_full_v3"
@@ -39,7 +41,7 @@ def _driver_sha() -> str:
 
 def _frozen_metadata() -> dict[tuple[str, int], dict]:
     """Map authenticated source paths to frozen venue/symbol/asset metadata."""
-    coverage = pd.read_csv(ROOT / "experiments/active/exp-spike-v7-v1-compare-20260912-v1/results/replay_two_year_20260912_v3/coverage_limited.csv")
+    coverage = pd.read_csv(SOURCE_RESULTS / "coverage_limited.csv")
     coverage = coverage.loc[coverage.status.eq("evaluated") & coverage.timeframe_min.isin((30, 60, 240))]
     market, gate = _source_maps()
     out: dict[tuple[str, int], dict] = {}
@@ -148,7 +150,7 @@ def run(*, dry_run: bool = False) -> None:
         print(json.dumps({"skipped": len(skipped), "pending": len(pending_rows), "pending_keys": before["pending_keys"]}, ensure_ascii=False))
         return
     metadata = _frozen_metadata()
-    catalog = pd.read_json(ROOT / "experiments/active/exp-spike-v7-v1-compare-20260912-v1/data/catalog.json")
+    catalog = pd.read_json(SOURCE_DATA / "catalog.json")
     ticks = _catalog_tick_map(catalog)
     for n, row in enumerate(pending_rows, 1):
         stream = _stream_from_frozen(row, metadata, ticks)
