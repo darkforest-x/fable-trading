@@ -30155,3 +30155,106 @@ artifacts:
     production_eligible: false
     notes: Complete 3531 covered streams, frozen B, reused owner-authorized historical data; no broad V7 superiority, no production promotion. Generator and upstream
       identities are in receipts.
+  - artifact_id: spike-v8-noise-filter-20260913-selected-rule
+    artifact_type: config
+    role: development_frozen_single_variable_v8_entry_gate
+    source_repo: darkforest-x/fable-trading
+    source_commit: 626f829e40290a536e674980ced59649a33b143c
+    generator_commit: 626f829e40290a536e674980ced59649a33b143c
+    source_path: experiments/active/exp-spike-v8-noise-filter-20260913-v1/selected_rule.json
+    sha256: 2cd6044ef11a059ea6476e492f6ea518920adcf2f8c64f61390731ab67151c41
+    size_bytes: 909
+    storage_uri: repo://experiments/active/exp-spike-v8-noise-filter-20260913-v1/selected_rule.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Three-ATR directional rope-distance gate recorded from development aggregates. Discovery_v1 nevertheless
+      exposed validation outcome columns, so the selection evidence is nonblind; see the isolation erratum.
+  - artifact_id: spike-v8-noise-filter-20260913-replay-manifest
+    artifact_type: manifest
+    role: authenticated_3531_stream_v7_v8_serial_replay_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: 626f829e40290a536e674980ced59649a33b143c
+    generator_commit: 626f829e40290a536e674980ced59649a33b143c
+    source_path: experiments/active/exp-spike-v8-noise-filter-20260913-v1/replay_v1/manifest.json
+    sha256: 04469ed2e694f23d27591d8316b71b66eab5e6d0338fc0847b6ae004f4bd30b9
+    size_bytes: 394
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-spike-v8-noise-filter-20260913-v1/replay_v1/manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Nonblind reused-validation replay; holdout-era exposure #1 for this exact frozen V8 configuration.
+  - artifact_id: spike-v8-noise-filter-20260913-report-manifest
+    artifact_type: manifest
+    role: receipt_for_aggregate_tables_and_nine_embedded_figures
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9ea9a49f0582f0a0dc0f25b84cb9fda519d42bae
+    generator_commit: 9ea9a49f0582f0a0dc0f25b84cb9fda519d42bae
+    source_path: experiments/active/exp-spike-v8-noise-filter-20260913-v1/summary_v1/report_manifest.json
+    sha256: d7e4d1077b2f50c42dc11c1aee3aa39ab1a7f9fca7079bec1f049cd97d38ac30
+    size_bytes: 3423
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-spike-v8-noise-filter-20260913-v1/summary_v1/report_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Binds corrected report builder, source manifests, aggregate CSV tables and chart hashes; explicitly records
+      validation-outcome exposure. Report images are embedded in HTML.
+  - artifact_id: spike-v8-noise-filter-20260913-report-md
+    artifact_type: report
+    role: canonical_v7_132593_failure_analysis_and_v8_replay
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9ea9a49f0582f0a0dc0f25b84cb9fda519d42bae
+    generator_commit: 9ea9a49f0582f0a0dc0f25b84cb9fda519d42bae
+    source_path: analysis/p1_spike_v8_noise_filter_20260913.md
+    sha256: 19fb5d44bec3c19cf6f9f0a38d6a6b2b0a03e55d164c8112f46441aac37e123f
+    size_bytes: 37147
+    storage_uri: repo://analysis/p1_spike_v8_noise_filter_20260913.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Chinese source report with corrected matched-control denominators, isolation erratum, monthly regime table
+      and nonblind descriptive limits.
+  - artifact_id: spike-v8-noise-filter-20260913-report-html
+    artifact_type: report
+    role: owner_facing_self_contained_v8_evidence_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9ea9a49f0582f0a0dc0f25b84cb9fda519d42bae
+    generator_commit: 9ea9a49f0582f0a0dc0f25b84cb9fda519d42bae
+    source_path: analysis/html/p1_spike_v8_noise_filter_20260913.html
+    sha256: 98aea1bd92dd3b72dc47884683dc9209e3a9f1e5000b90647f7f4d606519b8fb
+    size_bytes: 1538088
+    storage_uri: repo://analysis/html/p1_spike_v8_noise_filter_20260913.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Self-contained HTML with nine embedded aggregate and authenticated K-line figures, corrected control
+      coverage, and the validation-isolation disclosure.
+  - artifact_id: spike-v8-noise-filter-20260913-pine
+    artifact_type: config
+    role: research_only_v7_plus_frozen_three_atr_overheat_gate
+    source_repo: darkforest-x/fable-trading
+    source_commit: 626f829e40290a536e674980ced59649a33b143c
+    generator_commit: 626f829e40290a536e674980ced59649a33b143c
+    source_path: yoyo/evaluation/pine/spike_burst_v8.pine
+    sha256: ca50a66e5ecfa16b6088be56936ac8c5cffb6c548f9a114d67364c9f42a439cc
+    size_bytes: 51830
+    storage_uri: repo://yoyo/evaluation/pine/spike_burst_v8.pine
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: TradingView compile completed and saved as SPIKE V8 · 强启动不过热; Basic-plan chart limit prevented adding a third indicator. No alert or monitor switch.
+  - artifact_id: spike-v8-noise-filter-20260913-isolation-erratum
+    artifact_type: manifest
+    role: hash_bound_disclosure_of_validation_outcome_exposure
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9ea9a49f0582f0a0dc0f25b84cb9fda519d42bae
+    generator_commit: 9ea9a49f0582f0a0dc0f25b84cb9fda519d42bae
+    source_path: experiments/active/exp-spike-v8-noise-filter-20260913-v1/discovery_isolation_erratum.json
+    sha256: 6bde12aa8462e08584100966343d364dafa0af7e84c8c70229c9e8bb1bda6557
+    size_bytes: 1102
+    storage_uri: repo://experiments/active/exp-spike-v8-noise-filter-20260913-v1/discovery_isolation_erratum.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Binds the affected discovery manifest and historical source hashes; current V8 validation is nonblind
+      descriptive evidence and cannot authorize production promotion.

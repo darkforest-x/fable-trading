@@ -16,16 +16,30 @@ schema_version: 1
 experiments:
   - experiment_id: exp-spike-v8-noise-filter-20260913-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 32ba038dd890de089e29842ea19655a126aad7b1
-    status: active
+    source_commit: 9ea9a49f0582f0a0dc0f25b84cb9fda519d42bae
+    status: inconclusive
     question: Which causal signal-close feature can reduce the 132593 frozen V7 admissions while retaining exact large-trend entries?
     single_variable: Development screens one causal entry-quality variable at a time; one selected rule must be frozen before reused-validation replay.
-    result: Discovery builder and candidate family frozen before new outcome aggregation; no V8 return claim yet.
-    holdout_consumed: false
+    result: The frozen 3 ATR rope-distance gate removed 14.55% of confirmations and retained 91.75%-96.77%
+      of original V7 realized-10R validation trades by timeframe. Mean close drawdown fell in every timeframe,
+      but paired V8-minus-V7 return differences were not significant and 30m PF worsened.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    artifacts: []
-    notes: Full V7 population is Binance, OKX and Gate 30m/1H/4H from 2024-09-10 through 2026-09-10. Discovery is restricted to the first year; no production switch is authorized.
+    canonical_report: analysis/p1_spike_v8_noise_filter_20260913.md
+    artifacts:
+    - spike-v8-noise-filter-20260913-selected-rule
+    - spike-v8-noise-filter-20260913-replay-manifest
+    - spike-v8-noise-filter-20260913-report-manifest
+    - spike-v8-noise-filter-20260913-report-md
+    - spike-v8-noise-filter-20260913-report-html
+    - spike-v8-noise-filter-20260913-pine
+    - spike-v8-noise-filter-20260913-isolation-erratum
+    notes: >-
+      Full V7 population is Binance, OKX and Gate 30m/1H/4H from 2024-09-10 through 2026-09-10.
+      Candidate aggregate tables used the first year, but discovery_v1 physically retained validation outcomes;
+      final review caught the isolation defect. Holdout-era exposure #1 is therefore explicitly nonblind descriptive
+      evidence, even though no post-replay retune is recorded. New forward shadow evidence is required. No production switch.
   - experiment_id: exp-spike-v1-plus-backtest-20260912-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2972ce0
