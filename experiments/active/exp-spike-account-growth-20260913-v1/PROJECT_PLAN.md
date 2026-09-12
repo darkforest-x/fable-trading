@@ -45,3 +45,13 @@ These are fixed engineering assumptions for feasibility, not optimized strategy 
 - No parameter search over entries or exits, no current leaderboard symbol selection, and no post-hoc removal of losses.
 - No ACTIVE, monitor, Bark, Telegram, TradingView, API key, position, order, or deployment change.
 - Builder code and tests land before full artifacts are generated.
+
+## Outcome — 2026-09-13
+
+- Status: **rejected for live use**. All 8 development-selected configurations finished the independent validation account below 1,000 USDT; none reached 100,000 USDT.
+- The highest full-period terminal balance was 10,510.49 USDT for the hindsight-only V7 long / OKX / 4H / fixed-10% path. Its 32 deterministic same-time-order replays were unstable: median terminal balance 967.98 USDT and only 2/32 finished above 1,000 USDT.
+- One V7 bidirectional / OKX / all-timeframe / compound-5% seed touched 123,534.27 USDT, then finished at 7,083.56 USDT after a 94.27% realized drawdown. Only 2/32 full-period order seeds touched 100,000 USDT, versus 0/32 in independent validation.
+- No matched event control passed the project p<0.01 threshold. The 11/192 development-and-validation-positive grid cells are post-hoc leads, all from V7 bidirectional, and are not a validated signal edge.
+- A single research-only forward-paper candidate is recorded: V7 bidirectional / OKX / 4H / fixed 5% of initial balance. It returned 4,165.04 / 1,436.86 USDT in independent development / validation paths with 19.27% / 18.12% realized drawdown, but its 4H matched control was -0.155R with p=0.9747.
+- Holdout-era configuration exposure is recorded as owner-authorized use #1. No production or notification configuration changed.
+- Canonical source: `analysis/p1_spike_account_growth_20260913.md`; owner delivery: `analysis/html/p1_spike_account_growth_20260913.html`.

@@ -1,12 +1,14 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **248** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **249** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
 > 视觉方向预检。**结论列是原文摘录,不是我的转述;空 = 机器提不出,不是没结论——去读原文。**
 
 ## 按日期倒序
+
+本轮增量入口（2026-09-13）：[SPIKE V1/V7 · 1000U共享账户风险回放](html/p1_spike_account_growth_20260913.html) · [MD源](p1_spike_account_growth_20260913.md)。8/8开发冻结配置样本外低于1000U，0/8到10万；瞬时到12.35万的路径最终7084U、回撤94.27%，实验拒绝实盘。
 
 本轮增量入口（2026-09-08）：[YOLO审核未来扩到150根](html/p1_yolo_review_future150_20260908.html) · [MD源](p1_yolo_review_future150_20260908.md)。1041×150、1×132缺口、1×13边界；原图/标签/任务保留，75聚焦检查和真实页面通过。
 

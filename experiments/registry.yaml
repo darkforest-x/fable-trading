@@ -14,6 +14,24 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-account-growth-20260913-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3fb6ece7662d43c28b1609cb623d49ccd04d7993
+    status: rejected
+    question: Can frozen SPIKE V1 and V7 events grow one shared 1000 USDT account to 100000 USDT under fixed-dollar or compounded 3%, 5%, or 10% per-position risk?
+    single_variable: Account sizing changes between fixed initial-balance risk and current-balance compounding at 3%, 5%, or 10%; frozen entries and exits do not change.
+    result: All 8 development-selected configurations finished independent validation below 1000 USDT and 0/8 reached 100000. One full-history seed touched 123534 then finished 7084 with 94.27% drawdown; no matched control passed p<0.01.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_account_growth_20260913.md
+    artifacts:
+    - spike-account-growth-20260913-replay-manifest
+    - spike-account-growth-20260913-post-manifest
+    - spike-account-growth-20260913-report-md
+    - spike-account-growth-20260913-report-html
+    - spike-account-growth-20260913-delivery
+    notes: Owner-authorized holdout-era configuration exposure #1. Full history is descriptive; development selection and independent validation are separate account paths. No production, notification, TradingView, API, position, order, or deployment change.
   - experiment_id: exp-spike-v8-noise-filter-20260913-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 9ea9a49f0582f0a0dc0f25b84cb9fda519d42bae

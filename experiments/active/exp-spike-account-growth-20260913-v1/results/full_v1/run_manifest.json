@@ -1,0 +1,92 @@
+{
+  "source_rows": 1155780,
+  "loaded_relevant_rows": 174281,
+  "source_time_range": {
+    "entry_time_min": "2024-09-10T00:00:00+00:00",
+    "entry_time_max": "2026-09-09T23:30:00+00:00"
+  },
+  "sources": {
+    "common_execution": {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v7-v1-compare-20260912-v1/results/post_final_v4/common_execution_trades.csv.gz",
+      "sha256": "cd31bf4c1a4447b211af0f4ed42f5dbfef7b56e91cbec73a75f765e4ac8d5673",
+      "file_total_rows": 1149527,
+      "loaded_relevant_rows": 168096
+    },
+    "v1_native": {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_ledger.csv.gz",
+      "sha256": "b15b69b8864e5eb651f2417fc6681ea688b5fbb95dacd15af1284b42744e3578",
+      "file_total_rows": 6253,
+      "loaded_relevant_rows": 6185
+    }
+  },
+  "source_contracts": {
+    "v1_common_execution_long": "common_execution_next_open_shared_exit",
+    "v7_bb_long": "common_execution_next_open_shared_exit",
+    "v7_bb_both": "common_execution_next_open_shared_exit",
+    "v1_native_long": "original_v1_native_exit_not_fair_common_execution"
+  },
+  "module_sha256": "886fb3982c9ca830cc52055204fca1238f35d680879ba5032a232173946fff5b",
+  "account_engine_sha256": "4c400b7c1939f7f237c27217fc83295215529db9691a082283926048d81fcf4b",
+  "arms": [
+    "v1_common_execution_long",
+    "v7_bb_long",
+    "v7_bb_both",
+    "v1_native_long"
+  ],
+  "venue_scopes": [
+    "combined",
+    "okx"
+  ],
+  "timeframes": [
+    30,
+    60,
+    240,
+    "all"
+  ],
+  "period_scopes": [
+    "full",
+    "development",
+    "validation"
+  ],
+  "sizings": [
+    "fixed",
+    "compound"
+  ],
+  "risk_fractions": [
+    0.03,
+    0.05,
+    0.1
+  ],
+  "initial_balance": 1000.0,
+  "portfolio_risk_cap": 0.1,
+  "gross_leverage_cap": 3.0,
+  "entry_floor_fraction": 0.2,
+  "seed": "0",
+  "runs": 576,
+  "same_timestamp_exit_accounting_adjustments": 1098,
+  "same_timestamp_exit_adjustment_contract": "For same-timestamp entry/exit rows only, account_exit_time is +1ns so admission happens before the supplied exit. Source exit_time, prices, net_return, net_r, mfe_r and all realized PnL are unchanged.",
+  "detail_retention": {
+    "accepted_ledger": "full, development, and validation accepted trades",
+    "equity_curve": "full, development, and validation account curves",
+    "daily_realized_pnl": "full, development, and validation daily realized PnL",
+    "rejections": "full only; development/validation rejection counts remain in summary.csv"
+  },
+  "period_boundary_censoring": {
+    "development_policy": "entry before validation split with supplied exit after split is marked censored at split with zero PnL",
+    "summary_total_across_runs": 17688
+  },
+  "output_row_counts": {
+    "summary": 576,
+    "accepted_ledger": 95360,
+    "rejections": 2732398,
+    "equity_curve": 87314,
+    "daily_realized_pnl": 157243
+  },
+  "outputs": {
+    "summary.csv": "bbc83fe07dcaecdb3eb09e9c9ed8b0efab207e5e83ea46c16cddc2d855d78fa5",
+    "accepted_ledger.csv.gz": "378956743e3f3adbf534d47e74c3e6a0855f70b85a0388b5ec896ab8d002aa21",
+    "rejections.csv.gz": "28083844f03cf15328c51489fb9e584ccf5b3e6c14b3eb9d8f16aa1d58cff1fd",
+    "equity_curve.csv.gz": "5e3b13af189dcda8faabb2143bb7f9d59c32aa0e7bda1dbf2420d9f317f47db9",
+    "daily_realized_pnl.csv.gz": "12ee965041a1572f87a7b57345245e3d4edc752189a8ef6f0a46834019627604"
+  }
+}

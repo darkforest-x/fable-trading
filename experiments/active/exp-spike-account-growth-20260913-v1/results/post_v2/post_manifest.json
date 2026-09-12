@@ -1,0 +1,131 @@
+{
+  "account_replay_manifest_sha256": "ce1f0d0d773fa33e9dde7a73fc0b45d94e67662b4c07776bd3964c4d6c57a5fb",
+  "account_replay_sources": {
+    "common_execution": {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v7-v1-compare-20260912-v1/results/post_final_v4/common_execution_trades.csv.gz",
+      "sha256": "cd31bf4c1a4447b211af0f4ed42f5dbfef7b56e91cbec73a75f765e4ac8d5673",
+      "file_total_rows": 1149527,
+      "loaded_relevant_rows": 168096
+    },
+    "v1_native": {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_ledger.csv.gz",
+      "sha256": "b15b69b8864e5eb651f2417fc6681ea688b5fbb95dacd15af1284b42744e3578",
+      "file_total_rows": 6253,
+      "loaded_relevant_rows": 6185
+    }
+  },
+  "btc_source": {
+    "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/data/normalized/binance/BTCUSDT_30m.csv.gz",
+    "sha256": "35c7d4266605f3e39fa8bdf6518cb847bb816ba37145cd992e4f8db16bfe67a8"
+  },
+  "eth_source": {
+    "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/data/normalized/binance/ETHUSDT_30m.csv.gz",
+    "sha256": "5753fedecf62de521cafff11d7c2c4db07ec508f80995dc1a87ec430ba6ed66e"
+  },
+  "matched_control_source": {
+    "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v7-v1-compare-20260912-v1/results/post_final_v4/matched_control_metrics.csv",
+    "sha256": "b4d2d64d02a9490091000b681fa16ef181b492ebaf5cd5e37ec236a0b8fcdd9b"
+  },
+  "common_source": {
+    "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v7-v1-compare-20260912-v1/results/post_final_v4/common_execution_trades.csv.gz",
+    "sha256": "cd31bf4c1a4447b211af0f4ed42f5dbfef7b56e91cbec73a75f765e4ac8d5673"
+  },
+  "breadth_contract": {
+    "window_hours": 24,
+    "development_end": "2025-09-10T00:00:00+00:00",
+    "quantile": 0.8,
+    "wide_threshold_unique_assets": 131,
+    "direction_share_threshold": 0.6,
+    "development_observations": 8257
+  },
+  "seed_sensitivity": {
+    "file": "seed_sensitivity.csv",
+    "sha256": "c671d0a72fa7e0dbd15aef3f81ccc678c99e4ca647a4871bce8174312a29e58e",
+    "rows": 512
+  },
+  "seed_sensitivity_contract": {
+    "selection_seed": 0,
+    "selection_period": "development",
+    "replay_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "replay_periods": [
+      "validation",
+      "full"
+    ],
+    "selection_rule": "One timeframe/sizing/risk_fraction tuple per source_arm and venue_scope is selected from seed=0 development rows only; validation and full rows are replay-only.",
+    "ordering_rule": "simulate_shared_account uses seed only in its outcome-independent stable hash to order candidates sharing an entry timestamp.",
+    "milestone_rule": "reached_100k means closed account balance reached 100000 USDT at an exit event; it is not final balance or a forecast.",
+    "seed_zero_summary_reproduced": true
+  },
+  "timezone": "Asia/Shanghai",
+  "module_sha256": "7e329cd185d9a34f9f0abf4cf4c1116a951187f66464a34ebff12af87c6e2ccc",
+  "outputs": {
+    "annotated_accepted.csv.gz": "65dc3f469dc85859ef9c635e47325a017de5b6bf0809371f2ed9084e62e71cba",
+    "regime_metrics.csv": "c0144a0512b20a722325c8f8aa981125b2a3dad55c134c4d0b8641351e756c62",
+    "entry_hour_metrics.csv": "65174648085e35e4cc043876e166ddcf66f671b203de9841b25dc9b9d4cb88bb",
+    "entry_weekday_metrics.csv": "3f5efa26adde335a7f974d5feabdeb0ec5920a0634e957e9098557a3c215049c",
+    "entry_month_metrics.csv": "e6bac02124f96d84b2405d4dae948d49e8f09f9c61f0b7d0e49141a26a9f7299",
+    "development_selection.csv": "adcc29bb622a34ddf1c69fbcc54a29a3b878614bc8d0a8ac291dcc159cabc803",
+    "seed_sensitivity.csv": "c671d0a72fa7e0dbd15aef3f81ccc678c99e4ca647a4871bce8174312a29e58e",
+    "risk_summary.csv": "b263fdec5746316de34dd25a194ddfd394a8cca53cca42f1d743ad6145e79571",
+    "daily_realized_bjt.csv.gz": "ebb3fb4cdacd42dd546c8141e147ce8a8fa6d5fc36a19e1fe2c7d2f4b9d2cb2e",
+    "best_days.csv": "cc3af5ddf3dbe42ab70754b20704d9190bf6fc37208c91875bf91cfc9ab32219",
+    "milestone_chain.csv": "cbde566e1aa8bd2bfdbd04c4dd223b497d21ed43b24d9f9b8a52fbcef334c8f1",
+    "matched_control_reference.csv": "17b49048f08b7eb9b3828274ab20ed1e497eb3a165ae13626974f01f1c2f1115",
+    "btc_eth_regime.csv.gz": "c3c9574c52f4b2c9f9d668c5e80436693dab25bd82887ef8bd029c4a59cb52e6",
+    "breadth_at_accepted_entries.csv.gz": "4dc74fdce6c4c86add47c4e10036ab8a89a8cee7256e7f0e0e3edff0dbc6a7dc"
+  },
+  "row_counts": {
+    "annotated_accepted.csv.gz": 95360,
+    "regime_metrics.csv": 4264,
+    "entry_hour_metrics.csv": 9010,
+    "entry_weekday_metrics.csv": 3592,
+    "entry_month_metrics.csv": 5462,
+    "development_selection.csv": 8,
+    "seed_sensitivity.csv": 512,
+    "risk_summary.csv": 18,
+    "daily_realized_bjt.csv.gz": 49140,
+    "best_days.csv": 192,
+    "milestone_chain.csv": 88,
+    "matched_control_reference.csv": 9,
+    "btc_eth_regime.csv.gz": 6642,
+    "breadth_at_accepted_entries.csv.gz": 11005
+  },
+  "notes": [
+    "Regimes and the P80 breadth threshold use no outcome label.",
+    "Matched controls are event-level references, not shared-account simulations.",
+    "Full-period best days and milestones are hindsight descriptions, not a forecast."
+  ]
+}

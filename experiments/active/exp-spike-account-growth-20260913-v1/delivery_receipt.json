@@ -1,0 +1,66 @@
+{
+  "experiment_id": "exp-spike-account-growth-20260913-v1",
+  "generated_at": "2026-09-12T21:49:17.732324+00:00",
+  "generator_commit": "3fb6ece",
+  "holdout_exposure": {
+    "authorized": true,
+    "configuration_consumption_number": 1
+  },
+  "status": "rejected",
+  "artifacts": {
+    "analysis/p1_spike_account_growth_20260913.md": {
+      "sha256": "07356bc3556c2d20c0ee5068ddbce8168a5801624e7abe96c761642e7cc50758",
+      "size_bytes": 14788
+    },
+    "analysis/html/p1_spike_account_growth_20260913.html": {
+      "sha256": "aff9058aed0b4554a5f0549ceb56d0e3409d7b8eb954a8f0a3ed0d2a7595c297",
+      "size_bytes": 510352
+    },
+    "experiments/active/exp-spike-account-growth-20260913-v1/PROJECT_PLAN.md": {
+      "sha256": "50048a28be958056581b6908de9371db8e1aad20dea0a2e571ab95de73ed3833",
+      "size_bytes": 5201
+    },
+    "experiments/active/exp-spike-account-growth-20260913-v1/config.json": {
+      "sha256": "ac791a5c0e5e254bb7a2ae1a063e035a1784a929e8f2f0324ee80132045ee39a",
+      "size_bytes": 3345
+    },
+    "experiments/active/exp-spike-account-growth-20260913-v1/results/full_v1/run_manifest.json": {
+      "sha256": "ce1f0d0d773fa33e9dde7a73fc0b45d94e67662b4c07776bd3964c4d6c57a5fb",
+      "size_bytes": 3419
+    },
+    "experiments/active/exp-spike-account-growth-20260913-v1/results/post_v2/post_manifest.json": {
+      "sha256": "aae2c467aec1c644afcbd0dd8b0f41e0b469c6e373098c5ae11c95bf8d082d09",
+      "size_bytes": 5562
+    },
+    "analysis/figures/p1_spike_account_growth_20260913/development_selection_vs_validation.png": {
+      "sha256": "0c92afd50cb3616b2d38e2cf5c8c8894ac694353108c9919a033a39723aa2c27",
+      "size_bytes": 97636
+    },
+    "analysis/figures/p1_spike_account_growth_20260913/focus_historical_path.png": {
+      "sha256": "15bac19ba5e37138eb79dbf55d488eb965b12a144c35cb0606765b7c6035679c",
+      "size_bytes": 95694
+    },
+    "analysis/figures/p1_spike_account_growth_20260913/operational_v7_validation_market_state.png": {
+      "sha256": "55bf0c84b53bdb000f2fc1eed146c71d850d70add707f77bc1530a35ac01522d",
+      "size_bytes": 60363
+    },
+    "analysis/figures/p1_spike_account_growth_20260913/risk_grid_fixed_compound.png": {
+      "sha256": "3418c58811b522bca1edc361d36d722b5a822421f1e6493d3378eb95d4eda21c",
+      "size_bytes": 65010
+    },
+    "analysis/figures/p1_spike_account_growth_20260913/seed_sensitivity.png": {
+      "sha256": "dab819b9e29e4c43a611c53f5446f3daf441b3c5498f765010a564c014c5af9e",
+      "size_bytes": 47561
+    }
+  },
+  "verification": {
+    "replay_manifest_outputs_verified": 5,
+    "post_manifest_outputs_verified": 14,
+    "account_report_tests_passed": 30,
+    "independent_review": "PASS",
+    "development_selected_below_start_validation": "8/8",
+    "development_selected_reached_100k_validation": "0/8",
+    "matched_controls_p_lt_0_01": "0/9"
+  },
+  "notes": "No production, monitor, notification, TradingView, API, position, order, or deployment configuration changed."
+}
