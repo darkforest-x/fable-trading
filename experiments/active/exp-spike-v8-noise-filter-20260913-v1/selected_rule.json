@@ -1,0 +1,20 @@
+{
+  "selection_stage": "development_only",
+  "selected_rule": "rope_distance_atr_lte_3",
+  "formula": "side * (close - directional_rope_edge) / atr <= 3.0",
+  "threshold": 3.0,
+  "discovery_manifest_sha256": "75391cc1d1da4c701147acb77e65884ad4c05e26bb0d525237137e0a509ca098",
+  "selection_reason": "Only nontrivial fixed gate retaining at least 80% of exact realized-10R development trades in every timeframe while reducing signals in every timeframe; 30m and 4H event PF improved and 1H remained approximately unchanged.",
+  "rejected_alternatives": [
+    "efficiency3_gte_0.55",
+    "bb_width_rising1",
+    "bb_width_above_p10",
+    "current_volume_ratio_gte_1.5",
+    "current_tr_expansion_gte_1.5",
+    "v1_same_bar_hard_impulse",
+    "cost_share_of_close_r_lte_0.25"
+  ],
+  "validation_outcomes_reviewed_before_freeze": false,
+  "raw_opposite_exit_feed_unchanged": true,
+  "production_eligible": false
+}

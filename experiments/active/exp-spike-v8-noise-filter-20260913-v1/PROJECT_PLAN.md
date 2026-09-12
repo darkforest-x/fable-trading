@@ -35,6 +35,12 @@ Do not choose the rule with the highest in-sample return alone. Prefer a simple 
 
 After selection, freeze one V8 rule, retain unfiltered opposite V6 confirmations for exits, run the full serial execution/account engine, compare V7/V8 by period/timeframe/side/venue and matched random controls, render retained and missed large-trend cases, and only then decide whether the Pine version deserves use. No automatic production promotion.
 
+## Development selection — frozen before reused-validation replay
+
+The complete development screen found that same-bar volume, TR, V1 hard impulse, BB release and three-bar efficiency removed 25% to 93% of signals but retained only 0% to 83% of realized-10R trades depending on timeframe. They failed the every-timeframe tail-retention gate. The cost/R rule retained the tails but removed less than 1.2% of signals.
+
+V8 therefore selects one rule: the confirmation close must be no farther than 3 ATR beyond the directional six-MA rope edge. In development this removed 13.86% / 14.28% / 12.07% of 30m / 1H / 4H admissions while retaining 136/143, 49/53 and 28/30 exact realized-10R trades. Event PF changed 1.136→1.147, 0.891→0.892 and 1.110→1.168. These are screening subsets, not yet a serial V8 replay. The selected rule, threshold and Pine expression are now frozen in `selected_rule.json`; validation outcomes have not been summarized.
+
 ## Fixed execution and costs
 
 Signal close, next observed open entry, prior five-bar structure plus 0.2 ATR buffer, minimum 2 ATR risk, trailing distance 4 ATR after 2R, raw opposite V6 exit feed, and 0.2% round-trip cost remain unchanged. Independent stream accounts use 1% target initial risk and 1x notional cap; they are not a shared portfolio.
