@@ -24,13 +24,18 @@ def return_benchmark(pairs):
     rows=[]
     for (cohort,minutes,period), group in pairs.groupby(["cohort","timeframe_min","period"]):
         ok=group.loc[group.matched.eq(True)].copy()
+        # Recover the risk fraction from the recorded identity net_R=return/risk.
+        # This is a floating-point validity check, not a return-based sample cut.
+        fractions=[(ok[f"{side}_net_return"]/ok[f"{side}_net_r"]).abs() for side in ("target","control")]
+        degenerate=fractions[0].le(8*np.finfo(float).eps) | fractions[1].le(8*np.finfo(float).eps)
+        invalid=int(degenerate.sum());ok=ok.loc[~degenerate]
         ok["difference"]=ok.target_net_return-ok.control_net_return
         blocks=ok.groupby("month").difference.mean().to_numpy()
         p=np.nan
         if len(blocks)>=3:
             null=(np.random.default_rng(20260912).choice([-1.,1.],size=(9999,len(blocks)))*blocks).mean(axis=1)
             p=float((np.sum(np.abs(null)>=abs(blocks.mean()))+1)/10000)
-        rows.append(dict(cohort=cohort,timeframe_min=minutes,period=period,targets=len(group),matched=len(ok),
+        rows.append(dict(cohort=cohort,timeframe_min=minutes,period=period,targets=len(group),matched=len(ok),invalid_numeric_risk=invalid,
             month_blocks=len(blocks),mean_target_net_return=ok.target_net_return.mean(),
             mean_control_net_return=ok.control_net_return.mean(),equal_month_difference=blocks.mean() if len(blocks) else np.nan,
             exploratory_sign_flip_p=p))
@@ -168,11 +173,13 @@ PF使用逐笔等名义净收益；净R合计不是账户百分比。止损K内�
 都不含原始反向参考退出。因此**这一表独立于上面的完整策略收益**，不是账户随机组合。
 未解决边界和无效风险匹配明确保留在明细，p值按月份块翻转，仅作探索；不能把跨所重复当独立试验。
 
-原R对照出现约十亿量级的异常：随机时点开盘与SL几乎重合时，极小实际风险分母会放大成本。
-该R统计不用于结论。以下在**完全相同的匹配样本和退出路径**上展示原有等名义净收益比例，
-没有重选样本或更改止损。切换统计量是看到异常后的诊断修正，仍不是盲样本检验。
+原R对照出现约十亿量级的异常：Gate KAT随机空头时点的开盘0.00441与SL0.004410000000000001
+只差浮点尾数，风险/价格约1.97e-16；同一控制时点在两臂各出现一次。该R统计不用于结论。
+下表使用原有等名义净收益比例，仅排除风险分母不大于8倍机器精度的2条无效匹配，保留剔除计数。
+没有重新抽样、调整止损或重算路径。实际20,184条策略记录最小风险为7个tick，无此问题。
+这是看到异常后的诊断修正，仍不是盲样本检验。
 
-{table(controls,{"period":"期间","timeframe_min":"分钟","cohort":"版本","targets":"抽样目标","matched":"成功匹配","month_blocks":"月份块","mean_target_net_return":"目标平均净收益","mean_control_net_return":"随机平均净收益","equal_month_difference":"等月收益差","exploratory_sign_flip_p":"探索性p"},["mean_target_net_return","mean_control_net_return","equal_month_difference"])}
+{table(controls,{"period":"期间","timeframe_min":"分钟","cohort":"版本","targets":"抽样目标","matched":"有效匹配","invalid_numeric_risk":"浮点零风险剔除","month_blocks":"月份块","mean_target_net_return":"目标平均净收益","mean_control_net_return":"随机平均净收益","equal_month_difference":"等月收益差","exploratory_sign_flip_p":"探索性p"},["mean_target_net_return","mean_control_net_return","equal_month_difference"])}
 
 ## 成功与失败的逐笔入口
 
