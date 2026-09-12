@@ -66,7 +66,15 @@ def fixed_sample(trades: pd.DataFrame, limit: int) -> pd.DataFrame:
     return out.sort_values("_hash").groupby(["variant", "side"], sort=False).head(limit).drop(columns="_hash")
 
 
-def controls_for_stream(folder: Path, limit: int) -> pd.DataFrame:
+def verified_cache(folder: Path) -> dict:
+    cache_path = folder / "control_cache.pkl.gz"
+    cache_receipt = json.loads((folder / "control_cache.receipt.json").read_text())
+    if hashlib.sha256(cache_path.read_bytes()).hexdigest() != cache_receipt["cache_sha256"]:
+        raise ValueError(f"control cache hash mismatch: {folder.name}")
+    return pd.read_pickle(cache_path)
+
+
+def controls_for_stream(folder: Path, limit: int, cache: dict | None = None) -> pd.DataFrame:
     """Reuse one control path across variants with identical entry identity.
 
     BB-ready arms match random opportunities with the same history-readiness
@@ -79,11 +87,7 @@ def controls_for_stream(folder: Path, limit: int) -> pd.DataFrame:
     sampled = fixed_sample(trades, limit)
     if sampled.empty:
         return pd.DataFrame()
-    cache_path = folder / "control_cache.pkl.gz"
-    cache_receipt = json.loads((folder / "control_cache.receipt.json").read_text())
-    if hashlib.sha256(cache_path.read_bytes()).hexdigest() != cache_receipt["cache_sha256"]:
-        raise ValueError(f"control cache hash mismatch: {folder.name}")
-    cache = pd.read_pickle(cache_path)
+    cache = verified_cache(folder) if cache is None else cache
     sampled["signal_bar_open"] = pd.to_datetime(sampled.signal_bar_open, utc=True)
     sampled["common_ready"] = sampled.variant.str.contains("common_ready|v7_bb", regex=True)
     rows = []
@@ -194,8 +198,19 @@ def process(raw: Path, output: Path, *, controls: bool, allow_partial: bool) -> 
                      and json.loads(path.read_text()).get("key") == path.parent.name)
     if len(folders) != manifest["completed_streams"]:
         raise ValueError("materialized stream count differs from replay manifest")
-    trades, signal_summaries, accounts, matches, conflicts = [], [], [], [], []
+    trades, signal_summaries, accounts, matches, conflicts, filter_reasons = [], [], [], [], [], []
     for i, folder in enumerate(folders, 1):
+        cache = verified_cache(folder)
+        receipt = pd.read_csv(folder / "receipt.csv").iloc[0]
+        for side, column in ((1,"long_signal"),(-1,"short_signal")):
+            events = cache["signals"][column].astype(bool)
+            ready = cache["bb"].v7_ready.astype(bool)
+            compressed = cache["bb"].prior_squeeze_run3.astype(bool)
+            filter_reasons.append({"venue":receipt.venue,"symbol":receipt.symbol,"timeframe_min":receipt.minutes,
+                                   "segment":receipt.segment,"side":side,"raw_v6":int(events.sum()),
+                                   "insufficient_bb_history":int((events & ~ready).sum()),
+                                   "ready_without_recent_compression":int((events & ready & ~compressed).sum()),
+                                   "v7_admitted":int((events & ready & compressed).sum())})
         needed = {"variant", "venue", "symbol", "timeframe_min", "segment", "side",
                   "signal_bar_open", "entry_time", "exit_time", "entry_price", "exit_price",
                   "initial_stop", "initial_risk", "exit_reason", "censored", "net_return", "net_r", "mfe_r"}
@@ -229,7 +244,7 @@ def process(raw: Path, output: Path, *, controls: bool, allow_partial: bool) -> 
                 except pd.errors.EmptyDataError:
                     paired = pd.DataFrame()
             else:
-                paired = controls_for_stream(folder, config["controls"]["max_targets_per_stream_variant_side"])
+                paired = controls_for_stream(folder, config["controls"]["max_targets_per_stream_variant_side"], cache)
                 paired.to_csv(destination, index=False, compression="gzip")
                 pair_receipt_path.write_text(json.dumps({"pairs_sha256": hashlib.sha256(destination.read_bytes()).hexdigest()}, indent=2))
             if len(paired):
@@ -239,6 +254,9 @@ def process(raw: Path, output: Path, *, controls: bool, allow_partial: bool) -> 
     if not trades:
         raise ValueError("no trade ledgers available")
     ledger = pd.concat(trades, ignore_index=True)
+    reasons = pd.DataFrame(filter_reasons)
+    reasons.to_csv(output / "filter_reasons_by_stream.csv.gz", index=False, compression="gzip")
+    reasons.groupby(["timeframe_min","side"])[["raw_v6","insufficient_bb_history","ready_without_recent_compression","v7_admitted"]].sum().to_csv(output / "filter_reasons.csv")
     ledger["signal_bar_open"] = pd.to_datetime(ledger.signal_bar_open, utc=True)
     ledger["year_block"] = np.where(ledger.signal_bar_open < pd.Timestamp("2025-09-10T00:00:00Z"),
                                     "2024-09_to_2025-09", "2025-09_to_2026-09")

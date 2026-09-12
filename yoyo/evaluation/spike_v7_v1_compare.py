@@ -34,10 +34,9 @@ from yoyo.evaluation.spike_v6_bb_squeeze import features as bb_features, recent_
 from yoyo.evaluation.spike_v6_wvf_study import (
     ExecutionSpec,
     _data_gap,
-    simulate_v6_variant,
     summarize_account,
-    v6_signals,
 )
+from yoyo.evaluation.spike_v7_fast import simulate_v6_variant, v6_signals, v7_diagnostics
 
 ROOT = Path(__file__).resolve().parents[2]
 EXP = ROOT / "experiments/active/exp-spike-v7-v1-compare-20260912-v1"
@@ -56,6 +55,9 @@ RUNNER_SOURCE_FILES = (
     ROOT / "yoyo/evaluation/spike_v6_wvf_study.py",
     ROOT / "yoyo/evaluation/spike_v6_bb_squeeze.py",
     ROOT / "yoyo/evaluation/spike_v1_twoyear_allmarkets.py",
+    ROOT / "yoyo/evaluation/spike_v7_fast.py",
+    ROOT / "yoyo/evaluation/spike_burst_v6_structure.py",
+    ROOT / "yoyo/evaluation/spike_burst_progressive.py",
 )
 STREAM_REQUIRED_FILES = (
     "signals.csv.gz", "trades.csv.gz", "control_cache.pkl.gz", "control_cache.receipt.json",
@@ -183,7 +185,7 @@ def _excluded_cells(config: dict, coverage: pd.DataFrame, catalog: pd.DataFrame)
     return excluded
 
 
-def v7_diagnostics(bars: pd.DataFrame, *, data_gap: pd.Series) -> pd.DataFrame:
+def reference_v7_diagnostics(bars: pd.DataFrame, *, data_gap: pd.Series) -> pd.DataFrame:
     """Calculate the V7 BB background using only this bar and its past.
 
     ``threshold_ready_prior12`` deliberately requires readiness at every bar
@@ -365,6 +367,22 @@ def _variant_admissions(v1: pd.DataFrame, v6: pd.DataFrame, v7: pd.Series,
     }
 
 
+def _tag_variant_results(ledger: pd.DataFrame, trades: pd.DataFrame, *, variant: str,
+                         admission: pd.Series, signal_index: pd.DatetimeIndex, stream: dict) -> None:
+    """Attach the actual admission decision and common stream identity to outputs."""
+    if len(ledger):
+        admitted = pd.Series(admission, index=signal_index).reindex(
+            pd.DatetimeIndex(ledger.signal_bar_open)
+        ).fillna(False).astype(bool).to_numpy()
+        ledger["admitted_for_entry"] = admitted
+    for table in (ledger, trades):
+        table["variant"] = variant
+        if len(table):
+            table["venue"], table["symbol"], table["asset"] = stream["venue"], stream["symbol"], stream["asset"]
+            table["timeframe_min"], table["segment"] = int(stream["minutes"]), int(stream["segment"])
+            table["source_sha256"] = stream["source_sha256"]
+
+
 def replay_stream(stream: dict) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, dict]:
     """Replay all eight common-execution variants for one continuous stream."""
     started = perf_counter()
@@ -427,14 +445,11 @@ def replay_stream(stream: dict) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFram
             featured, signals, admission=admission, variant=variant, data_gap=gap,
             spec=ExecutionSpec(tick=float(stream["tick"])),
         )
+        _tag_variant_results(ledger, trades, variant=variant, admission=admission,
+                             signal_index=signals.index, stream=stream)
         ledger["signal_role"] = "entry_candidate"
         if variant.startswith("v1_"):
             ledger.loc[ledger.side.eq(-1), "signal_role"] = "raw_v6_short_exit_feed"
-        for table in (ledger, trades):
-            if len(table):
-                table["venue"], table["symbol"], table["asset"] = stream["venue"], stream["symbol"], stream["asset"]
-                table["timeframe_min"], table["segment"] = int(stream["minutes"]), int(stream["segment"])
-                table["source_sha256"] = stream["source_sha256"]
         signal_tables.append(ledger)
         trade_tables.append(trades)
     arm_replay_seconds = perf_counter() - arms_started

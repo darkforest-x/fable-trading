@@ -53,3 +53,14 @@ def test_all_unresolved_controls_are_reported_without_fabricating_returns():
     assert result.sampled_targets == 1
     assert result.matched_targets == 0
     assert pd.isna(result.control_mean_net_r)
+
+
+def test_duplicate_markets_do_not_inflate_month_block_sign_flip_sample_size():
+    pairs = pd.DataFrame({"variant": "v7_bb_long", "matched": True,
+                          "signal_bar_open": pd.date_range("2025-01-01", periods=6, freq="MS", tz="UTC"),
+                          "target_net_r": 2., "control_net_r": 1., "net_r_difference": 1.,
+                          "net_return_difference": .02})
+    one = control_metrics(pairs, ["variant"]).iloc[0]
+    repeated = control_metrics(pd.concat([pairs]*20, ignore_index=True), ["variant"]).iloc[0]
+    assert one.matched_months == repeated.matched_months == 6
+    assert one.exploratory_month_block_sign_flip_p == repeated.exploratory_month_block_sign_flip_p

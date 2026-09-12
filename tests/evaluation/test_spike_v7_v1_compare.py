@@ -195,12 +195,46 @@ def test_all_empty_trade_arms_write_headered_stream_summaries():
     assert len(retention) == 2
 
 
+def test_actual_eight_arm_replay_tags_variant_and_actual_admission_before_summary():
+    index = pd.date_range("2025-01-01", periods=8, freq="30min", tz="UTC")
+    frame = pd.DataFrame({"open": 100.0, "high": 101.0, "low": 99.0, "close": 100.0, "atr": 1.0}, index=index)
+    frame.attrs["minutes"] = 30
+    v6 = pd.DataFrame({"long_signal": [False, False, False, False, True, False, False, False],
+                       "short_signal": [False, False, False, False, False, False, True, False]}, index=index)
+    v1 = pd.DataFrame({"long_signal": v6.long_signal, "short_signal": v6.short_signal}, index=index)
+    v7 = pd.Series(False, index=index)  # rejects the raw V6 long at i=4
+    stream = {"venue": "binance", "symbol": "TEST", "asset": "TEST", "minutes": 30,
+              "segment": 0, "source_sha256": "a" * 64}
+    ledgers, trades = [], []
+    for variant, (signals, admission) in compare._variant_admissions(v1, v6, v7, pd.Series(True, index=index)).items():
+        ledger, executed = compare.simulate_v6_variant(
+            frame, signals, admission=admission, variant=variant, data_gap=pd.Series(False, index=index),
+            spec=compare.ExecutionSpec(tick=.01),
+        )
+        compare._tag_variant_results(ledger, executed, variant=variant, admission=admission,
+                                     signal_index=signals.index, stream=stream)
+        ledger["signal_role"] = "entry_candidate"
+        if variant.startswith("v1_"):
+            ledger.loc[ledger.side.eq(-1), "signal_role"] = "raw_v6_short_exit_feed"
+        ledgers.append(ledger)
+        trades.append(executed)
+    signals_out, trades_out = pd.concat(ledgers, ignore_index=True), pd.concat(trades, ignore_index=True)
+    assert set(signals_out.variant) == set(compare.VARIANTS)
+    rejected = signals_out.loc[(signals_out.variant == "v7_bb_long") & signals_out.side.eq(1)]
+    assert len(rejected) == 1 and not rejected.admitted_for_entry.iloc[0]
+    closed_long = trades_out.loc[(trades_out.variant == "v6_unfiltered_long") & ~trades_out.censored]
+    assert closed_long.side.tolist() == [1]
+    signal_summary, trade_summary, _ = compare._stream_summaries(stream, signals_out, trades_out)
+    assert set(signal_summary.variant) == set(compare.VARIANTS)
+    assert "v6_unfiltered_long" in set(trade_summary.variant)
+
+
 def test_run_identity_refuses_cross_builder_resume_and_allows_empty_preflight_retry(tmp_path):
     config = json.loads(compare.CONFIG_PATH.read_text())
     identity = compare.run_identity(config)
     assert identity["config_sha256"] == compare.sha256(compare.CONFIG_PATH)
     assert identity["pine_sha256"] == config["pine_sha256"]
-    assert len(identity["source_code_sha256"]) == 5
+    assert len(identity["source_code_sha256"]) == 8
 
     empty_retry = tmp_path / "empty_retry"
     empty_retry.mkdir()
