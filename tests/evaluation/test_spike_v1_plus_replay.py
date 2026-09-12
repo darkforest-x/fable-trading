@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import pandas as pd
 
+import yoyo.evaluation.spike_v1_plus_replay as replay
 from yoyo.evaluation.spike_v1_plus_replay import _path_plus, simulate_next_open
 
 
@@ -62,3 +63,15 @@ def test_prefix_execution_is_identical_after_unaffected_prefix():
     whole,_=simulate_next_open(bars,refs,tick=1)
     suffix,_=simulate_next_open(bars.iloc[:],refs.iloc[:],tick=1)
     assert whole[["entry_price","exit_price","net_r"]].equals(suffix[["entry_price","exit_price","net_r"]])
+
+
+def test_joint_overheat_consumes_raw_event_but_master_off_keeps_baseline(monkeypatch):
+    index=pd.date_range("2025-01-01",periods=15,freq="h",tz="UTC")
+    frame=pd.DataFrame({"open":95.,"high":100.,"low":90.,"close":95.,"md":0.,"sb":0.,"middle":0.,"atr":1.,"pastWidth":0.,"pastCrosses":20.,"ropeHigh":100.,"ropeLow":90.,"recentLow":90.,"recentHigh":100.,"rv":1.,"expansion":1.,"ready":True},index=index)
+    frame.loc[index[13],["open","high","low","close","md","sb","middle","rv","expansion"]]=[100,120,99,119,1,0,1,60,11]
+    monkeypatch.setattr(replay,"features",lambda _:frame)
+    treated=replay.replay_references(pd.DataFrame(index=index),1.,enable_plus=True)
+    baseline=replay.replay_references(pd.DataFrame(index=index),1.,enable_plus=False)
+    assert treated.iloc[13].raw_signal and not treated.iloc[13].signal
+    assert treated.iloc[13].signal_reason == "overheat_rejected"
+    assert baseline.iloc[13].signal and baseline.iloc[13].side == 1

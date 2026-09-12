@@ -188,6 +188,8 @@ def simulate_next_open(ohlcv: pd.DataFrame, refs: pd.DataFrame, *, tick: float) 
                 next_id += 1
                 pos={"trade_id":f"v1plus:{next_id}","signal_i":int(sig["signal_i"]),"signal_time":sig.name,"signal_bar_open":sig.name,"side":int(sig.side),"entry_i":i,"entry_time":stamp,"entry_price":o,"reference_signal_close":float(sig.signal_close),"reference_initial_stop":stop,"reference_risk":float(sig.reference_risk),"actual_risk":risk,"initial_risk":risk,"actual_risk_frac":risk/o,"tick":tick,"mfe_r":0.0}
                 fills.append({"trade_id":pos["trade_id"],"leg_no":1,"kind":"entry","bar_open":stamp,"price":o,"reason":"next_open_entry","execution_phase":"open","qty_fraction":1.0})
+            elif through_stop:
+                fills.append({"trade_id":f"rejected:{int(sig['signal_i'])}","leg_no":0,"kind":"rejected_entry","bar_open":stamp,"price":o,"reason":"entry_gap_through_initial_stop","execution_phase":"open","qty_fraction":0.0})
             pending_entry=None
         if pos is not None:
             pos["mfe_r"] = max(float(pos["mfe_r"]), int(pos["side"]) * ((h if int(pos["side"]) == 1 else l) - float(pos["entry_price"])) / float(pos["actual_risk"]))
