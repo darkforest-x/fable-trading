@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import json
 import math
+import shlex
 from pathlib import Path
 from typing import Iterable
 
@@ -148,7 +149,8 @@ def _variant_table(metrics: pd.DataFrame, variants: tuple[str, ...]) -> str:
     ])
 
 
-def build(raw: Path, post: Path, figures: Path, report: Path, delivery_dir: Path, *, allow_partial: bool) -> Path:
+def build(raw: Path, post: Path, figures: Path, report: Path, delivery_dir: Path, *, allow_partial: bool,
+          interpretation: Path | None = None) -> Path:
     """Render a source-identified markdown report from immutable result artifacts."""
     config = _read_json(CONFIG)
     raw_manifest = _read_json(raw / "manifest.json")
@@ -163,6 +165,8 @@ def build(raw: Path, post: Path, figures: Path, report: Path, delivery_dir: Path
     if post_manifest.get("raw_manifest_sha256") != sha256(raw / "manifest.json"):
         raise ValueError("post artifact is not bound to supplied replay manifest")
     scope = _validate_scope(config, raw_manifest, post_manifest, allow_partial=allow_partial)
+    interpretation_text = interpretation.read_text(encoding="utf-8").strip() if interpretation else ""
+    interpretation_option = " --interpretation " + shlex.quote(str(interpretation.resolve())) if interpretation else ""
 
     overall = _read_csv(post, "metrics_overall.csv")
     timeframe = _read_csv(post, "metrics_timeframe.csv")
@@ -238,11 +242,13 @@ $TASK_PYTHON -m yoyo.evaluation.spike_v7_v1_compare "$REPLAY"
 $TASK_PYTHON -m yoyo.evaluation.spike_v7_v1_report "$REPLAY" "$POST" --controls
 $TASK_PYTHON -m yoyo.evaluation.spike_v7_v1_figures "$REPLAY" "$POST" "$FIGURES"
 $TASK_PYTHON -m yoyo.evaluation.spike_v7_v1_delivery --raw "$REPLAY" --post "$POST" --figures "$FIGURES" \\
-  --report {FINAL_REPORT} --delivery-dir "$DELIVERY"
+  --report {FINAL_REPORT} --delivery-dir "$DELIVERY"{interpretation_option}
 $TASK_PYTHON scripts/md_to_html.py --out-dir analysis/html {FINAL_REPORT}"""
     body = f"""# SPIKE V7 BB 背景准入与归档 V1：结果交付
 
 > **状态：{scope}。** 本文只读取已经完成的 replay、post 与 figures 产物；不重跑、不调参、不拉取数据。
+
+{interpretation_text}
 
 ## 规则与口径
 
@@ -357,6 +363,8 @@ AUC 不适用：这里没有分类器概率或排序模型，只有规则事件�
                 "figures_manifest_sha256": sha256(figures_manifest_path), "report": str(report.resolve()),
                 "report_sha256": sha256(report), "scope": scope, "allow_partial": allow_partial,
                 "inputs": {"raw": str(raw.resolve()), "post": str(post.resolve()), "figures": str(figures.resolve())}}
+    if interpretation:
+        manifest["interpretation"] = {"path": str(interpretation.resolve()), "sha256": sha256(interpretation)}
     (delivery_dir / "delivery_manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return report
 
@@ -369,8 +377,10 @@ def main() -> None:
     parser.add_argument("--report", type=Path, default=FINAL_REPORT, help="Markdown report path")
     parser.add_argument("--delivery-dir", type=Path, required=True, help="builder receipt and derived account tables")
     parser.add_argument("--allow-partial", action="store_true", help="create a labelled smoke draft; never a final report")
+    parser.add_argument("--interpretation", type=Path, help="reviewed, source-bound narrative included with its hash")
     args = parser.parse_args()
-    result = build(args.raw, args.post, args.figures, args.report, args.delivery_dir, allow_partial=args.allow_partial)
+    result = build(args.raw, args.post, args.figures, args.report, args.delivery_dir,
+                   allow_partial=args.allow_partial, interpretation=args.interpretation)
     print(result)
 
 
