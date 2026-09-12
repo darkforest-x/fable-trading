@@ -45,7 +45,13 @@ METRICS = (
 
 
 def sha256(path: Path) -> str:
-    """Return the byte identity used to pin every externally produced input."""
+    """Return a small artifact's complete byte identity.
+
+    This helper is deliberately never used for a normalized candle stream:
+    those files extend beyond the development boundary. Their upstream full
+    identities are receipt metadata, while this study records an independently
+    streamed development-prefix digest below.
+    """
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
@@ -121,15 +127,23 @@ def _source_catalog() -> pd.DataFrame:
     manifest = json.loads((COMPARE_EXP / "results/replay_two_year_20260912_v3/input_manifest.json").read_text())
     expected = {(str(Path(item["source_path"]).resolve()), int(item["minutes"])): item["source_sha256"]
                 for item in manifest["streams"]}
-    selected["expected_source_sha256"] = [expected.get((str(Path(raw).resolve()), 30)) for raw in selected.source_path]
-    if selected.expected_source_sha256.isna().any():
+    selected["frozen_upstream_expected_full_source_sha256"] = [
+        expected.get((str(Path(raw).resolve()), 30)) for raw in selected.source_path
+    ]
+    if selected.frozen_upstream_expected_full_source_sha256.isna().any():
         raise ValueError("selected breadth source absent from frozen input manifest")
-    return selected[["venue", "symbol", "asset", "base_asset", "source_path", "expected_source_sha256"]].reset_index(drop=True)
+    return selected[[
+        "venue", "symbol", "asset", "base_asset", "source_path",
+        "frozen_upstream_expected_full_source_sha256",
+    ]].reset_index(drop=True)
 
 
-def _load_bars(path: str) -> pd.DataFrame:
+def _load_bars(path: str, *, prefix_digest: hashlib._Hash | None = None) -> pd.DataFrame:
+    """Load only development OHLCV rows and optionally hash that exact prefix."""
     rows = []
-    for header, values in _prefix_rows(Path(path), cutoff_field="time", cutoff=DEVELOPMENT_END):
+    for header, values in _prefix_rows(
+        Path(path), cutoff_field="time", cutoff=DEVELOPMENT_END, prefix_digest=prefix_digest,
+    ):
         row = dict(zip(header, values))
         rows.append({name: row[name] for name in ("time", "open", "high", "low", "close", "volume")})
     frame = pd.DataFrame(rows)
@@ -146,16 +160,19 @@ def _load_bars(path: str) -> pd.DataFrame:
     return indexed
 
 
-def build_market_panel(catalog: pd.DataFrame) -> pd.DataFrame:
-    """Build an as-of-close 30-minute breadth panel over the de-duplicated universe."""
+def build_market_panel(catalog: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, str]]:
+    """Build an as-of-close panel and digest each exact development input prefix."""
     raw_start = DEVELOPMENT_START - pd.Timedelta(hours=12)
     raw_end = DEVELOPMENT_END - pd.Timedelta(minutes=30)
     clock = pd.date_range(raw_start, raw_end, freq="30min", tz="UTC")
     count = {name: np.zeros(len(clock), dtype=np.int32) for name in ("up", "fast", "joint", "rv_tr_atr", "returns")}
     total = {name: np.zeros(len(clock), dtype=np.int32) for name in ("up", "fast", "joint", "rv_tr_atr", "returns")}
     return_values: dict[int, list[float]] = defaultdict(list)
+    prefix_digests: dict[str, str] = {}
     for number, row in enumerate(catalog.itertuples(index=False), 1):
-        features = causal_asset_features(_load_bars(row.source_path))
+        digest = hashlib.sha256()
+        features = causal_asset_features(_load_bars(row.source_path, prefix_digest=digest))
+        prefix_digests[row.source_path] = digest.hexdigest()
         features = features.reindex(clock)
         for name in ("up", "fast", "joint", "rv_tr_atr"):
             valid = features[name].notna().to_numpy()
@@ -187,7 +204,8 @@ def build_market_panel(catalog: pd.DataFrame) -> pd.DataFrame:
     panel["joint_denominator_changed_30m"] = panel.joint_denominator_delta_30m.ne(0)
     panel["joint_denominator_changed_60m"] = panel.joint_denominator_delta_60m.ne(0)
     panel["joint_acceleration_descriptive"] = panel.joint_denominator_changed_30m | panel.joint_denominator_changed_60m
-    return panel.loc[panel["asof"].between(DEVELOPMENT_START, DEVELOPMENT_END, inclusive="left")].reset_index(drop=True)
+    return (panel.loc[panel["asof"].between(DEVELOPMENT_START, DEVELOPMENT_END, inclusive="left")]
+            .reset_index(drop=True), prefix_digests)
 
 
 def _prefix_field(line: str, field_index: int) -> str:
@@ -212,26 +230,61 @@ def _utc(value: str) -> pd.Timestamp:
     return pd.to_datetime(value, utc=True)
 
 
-def _prefix_rows(path: Path, *, cutoff_field: str, cutoff: pd.Timestamp) -> Iterable[tuple[list[str], list[str]]]:
+def _prefix_rows(path: Path, *, cutoff_field: str, cutoff: pd.Timestamp,
+                 prefix_digest: hashlib._Hash | None = None) -> Iterable[tuple[list[str], list[str]]]:
     """Yield only chronological CSV rows strictly before cutoff.
 
-    At the first boundary row this reads only ``cutoff_field`` then terminates.
-    It therefore cannot materialize post-cutoff result or feature columns.
+    At the first boundary row this reads and decodes only ``cutoff_field`` then
+    terminates. It does not materialize or parse the later payload columns of
+    that row. Gzip may still read ahead internally, so this establishes a
+    logical-record boundary rather than a physical compressed-byte boundary.
+
+    If supplied, ``prefix_digest`` receives the uncompressed header and every
+    complete pre-cutoff CSV record actually yielded to the caller. It excludes
+    the boundary row and all later records.
     """
-    with gzip.open(path, "rt", encoding="utf-8", newline="") as stream:
-        header = next(csv.reader([stream.readline().rstrip("\n")]))
+    with gzip.open(path, "rb") as stream:
+        header_bytes = stream.readline()
+        header = next(csv.reader([header_bytes.decode("utf-8").rstrip("\r\n")]))
         if cutoff_field not in header:
             raise ValueError(f"frozen stream lacks cutoff field {cutoff_field}: {path}")
+        if prefix_digest is not None:
+            prefix_digest.update(header_bytes)
         index = header.index(cutoff_field)
         previous: pd.Timestamp | None = None
-        for line in stream:
-            value = _utc(_prefix_field(line.rstrip("\n"), index))
-            if previous is not None and value < previous:
-                raise ValueError(f"non-monotonic {cutoff_field} prevents safe prefix read: {path}")
-            previous = value
-            if value >= cutoff:
-                return
-            yield header, next(csv.reader([line]))
+        while True:
+            line = bytearray()
+            field = bytearray()
+            field_number = 0
+            value: pd.Timestamp | None = None
+            while True:
+                character = stream.read(1)
+                if not character:
+                    if not line:
+                        return
+                    delimiter = b"\n"
+                else:
+                    delimiter = character
+                    line.extend(character)
+                if field_number == index and delimiter not in (b",", b"\n"):
+                    field.extend(delimiter)
+                if field_number == index and delimiter in (b",", b"\n"):
+                    value = _utc(field.decode("utf-8").rstrip("\r"))
+                    if previous is not None and value < previous:
+                        raise ValueError(f"non-monotonic {cutoff_field} prevents safe prefix read: {path}")
+                    previous = value
+                    if value >= cutoff:
+                        return
+                if delimiter == b",":
+                    field_number += 1
+                if delimiter == b"\n" or not character:
+                    break
+            if value is None:
+                raise ValueError(f"malformed frozen CSV row before requested field: {path}")
+            raw_line = bytes(line)
+            if prefix_digest is not None:
+                prefix_digest.update(raw_line)
+            yield header, next(csv.reader([raw_line.decode("utf-8").rstrip("\r\n")]))
 
 
 def _signal_density(catalog: pd.DataFrame, clock: pd.Series) -> pd.Series:
@@ -477,7 +530,7 @@ def write_report(report: Path, output: Path, catalog: pd.DataFrame, summary: pd.
 
 - 开发窗口：`2024-09-10T00:00:00Z` 至 `2025-09-10T00:00:00Z`（右端排除）。更正后的构建逐个流按时间前缀停止，未将边界后 OHLCV、信号或结果行放入数据表。
 - 交易结果：逐流读取冻结 common-execution `trades.csv.gz` 的 V1 common execution long 与 V7 BB long；只保留入场与退出均在开发期的已实现行，不把跨开发边界的最终 P&L 作为开发结果。
-- 市场横截面：{len(catalog)} 个有冻结 30m OHLCV 的已评估底层资产，按 Binance、OKX 的固定优先级再按底层币种去重；1000/1000000 面额前缀在去重时还原。Gate direct 文件存在，但 30m 收据中 0 个 complete、且无开发期覆盖，故 Gate 的广度上下文与对应候选均明确排除，未用网络或其他交易所补齐。
+- 市场横截面：{len(catalog)} 个有冻结 30m OHLCV 的已评估底层资产，按 Binance、OKX 的固定优先级再按底层币种去重；1000/1000000 面额前缀在去重时还原。Gate direct 文件存在，但 30m 收据为 71 个 partial、0 个 complete，且无开发期覆盖，故 Gate 的广度上下文与对应候选均明确排除，未用网络或其他交易所补齐。
 - 指标：上涨参与率、SMA20 与 EMA20 双站上、联合广度、30/60m 联合广度变化、过去 1h 的 V1/V6 不同币启动密度、RV>1 且 TR/前20根 ATR>1、横截面 30m 收益中位/IQR、BTC/ETH 30m 背景。密度是严格 `(T-60m,T]`，包含信号自身；联合广度加速度同时附带分母变化标记，分母变化时只作描述。所有指标只用收盘 K 线及之前数据。
 - 15m：冻结源只有 30m 基础 K 线，因此 `joint_delta_15m` 全部为缺失；没有将 30m 变化伪装为 15m。
 - 复现：`python3 -m yoyo.evaluation.spike_market_breadth_study --run`。产物及 SHA 见 `{output}/results/manifest.json`。
@@ -511,10 +564,11 @@ def run(output: Path, report: Path) -> None:
     results = output / "results"
     results.mkdir(parents=True)
     catalog = _source_catalog()
-    catalog["actual_source_sha256"] = catalog.source_path.map(lambda raw: sha256(Path(raw)))
-    if not catalog.actual_source_sha256.eq(catalog.expected_source_sha256).all():
-        raise ValueError("frozen source SHA mismatch; refusing breadth study")
-    panel = _background_returns(build_market_panel(catalog), catalog)
+    panel, prefix_digests = build_market_panel(catalog)
+    catalog["actual_development_prefix_sha256"] = catalog.source_path.map(prefix_digests)
+    if catalog.actual_development_prefix_sha256.isna().any():
+        raise ValueError("development-prefix digest missing from breadth panel input")
+    panel = _background_returns(panel, catalog)
     panel["launch_density_1h"] = _signal_density(catalog, panel.asof)
     trades = _base_deduplicated_trades(catalog)
     context = attach_context(trades, panel)
@@ -530,9 +584,26 @@ def run(output: Path, report: Path) -> None:
         "development_start": DEVELOPMENT_START.isoformat(), "development_end_exclusive": DEVELOPMENT_END.isoformat(),
         "holdout_consumed": True,
         "holdout_access_note": "A preliminary combined-ledger read materialized post-cutoff rows; this corrected run does not reuse it.",
-        "future_after_development_read": False,
+        "post_development_data_handling": {
+            "post_cutoff_payload_materialized": False,
+            "post_cutoff_payload_parsed": False,
+            "cutoff_check": "Only the cutoff timestamp field is decoded for the first boundary row.",
+            "compressed_byte_read_boundary": "Not asserted: gzip may buffer or read ahead internally.",
+        },
         "base_assets": len(catalog), "base_dedup_order": ["binance", "okx"],
-        "gate": "unavailable: no normalized frozen OHLCV; excluded from breadth context and candidate scoring",
+        "gate": (
+            "unavailable: direct 30m receipts are 71 partial and 0 complete, with no development-period coverage; "
+            "no normalized frozen OHLCV; excluded from breadth context and candidate scoring"
+        ),
+        "source_integrity": {
+            "frozen_upstream_expected_full_source_sha256": (
+                "Copied from the pre-existing comparison input manifest; not recomputed from market files by this run."
+            ),
+            "actual_development_prefix_sha256": (
+                "SHA-256 of each uncompressed CSV header plus complete rows strictly before development_end, "
+                "streamed while building the market panel."
+            ),
+        },
         "frozen_rule": "joint_delta_60m > 0", "joint_delta_15m": "unavailable: source cadence is 30m",
         "inputs": {str(path.relative_to(ROOT)): sha256(path) for path in (
             SOURCE_EXP / "results/coverage_limited.csv",

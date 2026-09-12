@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 import gzip
+import hashlib
 import numpy as np
 import pandas as pd
 import pytest
 
 from yoyo.evaluation.spike_market_breadth_study import (
-    _prefix_rows, attach_context, canonical_asset, causal_asset_features, complete_aggregate_30m,
+    _load_bars, _prefix_rows, attach_context, canonical_asset, causal_asset_features, complete_aggregate_30m,
     launch_density_from_events, summarize_slice,
 )
 
@@ -61,6 +62,35 @@ def test_prefix_reader_stops_before_future_payload_is_parsed(tmp_path):
     rows = list(_prefix_rows(path, cutoff_field="time", cutoff=pd.Timestamp("2025-09-10T00:00:00Z")))
     assert len(rows) == 1
     assert rows[0][1] == ["2025-09-09T23:30:00+00:00", "1.0"]
+
+
+def test_prefix_reader_does_not_decode_poisoned_boundary_payload(tmp_path):
+    path = tmp_path / "stream.csv.gz"
+    path.write_bytes(gzip.compress(
+        b"time,outcome\n2025-09-09T23:30:00+00:00,1.0\n2025-09-10T00:00:00+00:00,\xff\n"
+    ))
+    rows = list(_prefix_rows(path, cutoff_field="time", cutoff=pd.Timestamp("2025-09-10T00:00:00Z")))
+    assert rows == [(["time", "outcome"], ["2025-09-09T23:30:00+00:00", "1.0"])]
+
+
+def test_development_prefix_digest_ignores_boundary_and_future_rows(tmp_path):
+    path = tmp_path / "bars.csv.gz"
+    prefix = (
+        b"time,open,high,low,close,volume\n"
+        b"2025-09-09T23:30:00+00:00,1,2,0,1.5,10\n"
+    )
+    first_future = b"2025-09-10T00:00:00+00:00,2,3,1,2.5,11\n"
+    second_future = b"2025-09-10T00:00:00+00:00,999,999,999,999,999\n"
+
+    def load_digest(payload: bytes) -> tuple[pd.DataFrame, str]:
+        path.write_bytes(gzip.compress(payload))
+        digest = hashlib.sha256()
+        return _load_bars(str(path), prefix_digest=digest), digest.hexdigest()
+
+    first_bars, first_digest = load_digest(prefix + first_future)
+    second_bars, second_digest = load_digest(prefix + second_future)
+    pd.testing.assert_frame_equal(first_bars, second_bars)
+    assert first_digest == second_digest == hashlib.sha256(prefix).hexdigest()
 
 
 def test_density_uses_strict_hour_and_includes_current_signal():
