@@ -22,7 +22,7 @@ def event_stats(part):
     pos=float(ret[ret>0].sum());neg=float(-ret[ret<0].sum())
     return dict(entries=len(part),closed=len(closed),censored=len(part)-len(closed),wins=int((ret>0).sum()),positive_return_sum=pos,negative_return_sum=neg,net_r_sum=float(r.sum()),net_ge_10r=int((r>=10).sum()),mfe_ge_10r=int((closed.mfe_r>=10).sum()) if len(closed) else 0)
 
-def describe_grid(ix,nav,meta):
+def describe_grid(ix,nav,meta,entry_times=None):
     rows=[]
     periods=[('full','2024-09-10T00:00:00Z','2026-09-10T00:00:00Z'),('development','2024-09-10T00:00:00Z','2025-09-10T00:00:00Z'),('validation','2025-09-10T00:00:00Z','2026-09-10T00:00:00Z')]
     for label,a,b in periods:
@@ -33,8 +33,12 @@ def describe_grid(ix,nav,meta):
         peaks=np.maximum.accumulate(vals,axis=0)
         dd=1-np.divide(vals,peaks,out=np.ones_like(vals),where=peaks>0)
         mdd=np.max(dd,axis=0)
+        entries=int(((entry_times>=a)&(entry_times<b)).sum()) if entry_times is not None else 0
         for j,m in enumerate(meta):
-            rows.append({**m,'period':label,'valid':bool(valid[j]),'opening_equity':float(opening[j]),'ending_equity':float(vals[-1,j]),'net_return':float(vals[-1,j]/opening[j]-1) if valid[j] else np.nan,'max_close_drawdown':float(mdd[j]) if valid[j] else np.nan})
+            # Full-run execution diagnostics must never masquerade as period
+            # diagnostics: a validation ruin cannot contaminate development.
+            run_meta={('full_run_'+k if k not in ('risk_fraction','notional_cap') else k):v for k,v in m.items()}
+            rows.append({**run_meta,'period':label,'valid':bool(valid[j]),'ruined':bool(np.any(vals[:,j]<=0)), 'period_entry_signals':entries,'opening_equity':float(opening[j]),'ending_equity':float(vals[-1,j]),'net_return':float(vals[-1,j]/opening[j]-1) if valid[j] else np.nan,'max_close_drawdown':float(mdd[j]) if valid[j] else np.nan})
     return rows
 
 def process_stream(folder,engine,output):
@@ -52,7 +56,7 @@ def process_stream(folder,engine,output):
             f=fills.loc[fills.cohort.eq(cohort)&fills.policy.eq(policy)]
             ident=dict(stream_key=key,**c.identity,cohort=cohort,policy=policy)
             ix,nav,meta=marked_account_grid(c.cache['bars'],part,f,minutes=c.minutes)
-            accounts.extend({**ident,**row} for row in describe_grid(ix,nav,meta))
+            accounts.extend({**ident,**row} for row in describe_grid(ix,nav,meta,pd.DatetimeIndex(part.entry_time) if len(part) else pd.DatetimeIndex([],tz='UTC')))
             for period,a,b in [('full','2024-09-10T00:00:00Z','2026-09-10T00:00:00Z'),('development','2024-09-10T00:00:00Z','2025-09-10T00:00:00Z'),('validation','2025-09-10T00:00:00Z','2026-09-10T00:00:00Z')]:
                 selected=part.loc[part.entry_time.ge(pd.Timestamp(a))&part.entry_time.lt(pd.Timestamp(b))] if len(part) else part
                 events.append({**ident,'period':period,**event_stats(selected)})
@@ -82,11 +86,11 @@ def aggregate(output,expected):
         for key,g in part.groupby(keys,sort=False,dropna=False):
             good=g.loc[g.valid.astype(bool)]
             row=dict(zip(keys,key));row['venue_scope']=scope
-            row.update(streams=len(g),valid_accounts=len(good),invalid_accounts=len(g)-len(good),ruined_accounts=int(g.ruined.sum()),zero_entry_accounts=int(g.allocated_trades.eq(0).sum()))
+            row.update(streams=len(g),valid_accounts=len(good),invalid_accounts=len(g)-len(good),ruined_accounts=int(g.ruined.sum()),zero_entry_signal_accounts=int(g.period_entry_signals.eq(0).sum()))
             for column,prefix in [('net_return','return'),('max_close_drawdown','drawdown')]:
                 values=good[column].to_numpy(float)
                 row.update({prefix+'_mean':float(values.mean()) if len(values) else np.nan,prefix+'_median':float(np.median(values)) if len(values) else np.nan,prefix+'_p10':float(np.quantile(values,.1)) if len(values) else np.nan,prefix+'_p90':float(np.quantile(values,.9)) if len(values) else np.nan,prefix+'_max':float(values.max()) if len(values) else np.nan})
-            row.update(effective_risk_mean=float(g.mean_effective_stop_risk.mean()),max_observed_close_leverage=float(g.max_observed_close_leverage.max()))
+            row.update(full_run_effective_risk_mean=float(g.full_run_mean_effective_stop_risk.mean()),full_run_max_observed_close_leverage=float(g.full_run_max_observed_close_leverage.max()))
             rows.append(row)
     summary=pd.DataFrame(rows);summary.to_csv(output/'account_summary.csv',index=False)
     ekeys=['venue','timeframe_min','cohort','policy','period']
