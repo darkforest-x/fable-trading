@@ -1,0 +1,27 @@
+{
+  "engine": "yoyo.evaluation.spike_exit_policy_study",
+  "source_streams": "experiments/active/exp-spike-v7-v1-compare-20260912-v1/results/replay_two_year_20260912_v3/streams",
+  "window": {
+    "development_start": "2024-09-10T00:00:00+00:00",
+    "validation_start": "2025-09-10T00:00:00+00:00",
+    "end_exclusive": "2026-09-10T00:00:00+00:00",
+    "status": "reused_nonblind_history"
+  },
+  "cohorts": ["v1_common_long", "v6_both", "v7_both"],
+  "policies": [
+    "baseline", "no_reverse", "be095_price", "be1_price", "be1_cost",
+    "partial_1_25", "partial_1_25_3_35", "partial_be1_cost",
+    "fast_ma_exit", "md_cross_exit"
+  ],
+  "execution": {
+    "next_open_entry": true,
+    "stop_bars": 5,
+    "stop_buffer_atr": 0.2,
+    "risk_floor_atr": 2.0,
+    "trail_arm_r": 2.0,
+    "trail_atr": 4.0,
+    "round_trip_cost": 0.002,
+    "entry_cost": 0.001,
+    "exit_cost_per_original_fraction": 0.001
+  }
+}
