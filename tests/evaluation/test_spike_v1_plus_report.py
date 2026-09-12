@@ -6,6 +6,7 @@ import pytest
 from yoyo.evaluation.spike_v1_plus_report import BASELINE, PLUS, metrics, exact_pairs
 from yoyo.evaluation.spike_v1_plus_controls import protection_outcome
 from yoyo.evaluation.spike_v1_plus_report import concentration_table, _read
+from yoyo.evaluation.spike_v1_plus_delivery import return_benchmark
 
 
 def rows():
@@ -56,6 +57,15 @@ def test_csv_asset_identifiers_keep_numeric_and_na_like_symbols(tmp_path):
     assert t.asset.tolist() == ["4", "NA"]
     assert t.symbol.tolist() == ["4USDT", "NAUSDT"]
     assert t.net_r.iloc[0] == 1.5 and pd.isna(t.net_r.iloc[1])
+
+
+def test_null_return_summary_discloses_floating_zero_risk_without_resampling():
+    common=dict(cohort=PLUS,timeframe_min=30,period="validation",matched=True,month="2026-07",target_net_return=.04,target_net_r=2.)
+    p=pd.DataFrame([{**common,"control_net_return":-.004,"control_net_r":-2e13},
+                    {**common,"control_net_return":.02,"control_net_r":1.}])
+    r=return_benchmark(p).iloc[0]
+    assert r.targets==2 and r.matched==1 and r.invalid_numeric_risk==1
+    assert r.mean_control_net_return==.02 and r.equal_month_difference==.02
 
 
 def test_null_benchmark_checks_stop_on_entry_bar_before_profit():

@@ -18,6 +18,104 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v1-plus-backtest-20260912-config
+    artifact_type: manifest
+    role: fixed_default_research_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8df215b
+    generator_commit: 8df215b
+    source_path: experiments/active/exp-spike-v1-plus-backtest-20260912-v1/config.json
+    sha256: 3f7aa670733794769eb44687089e4f9382c683c57212ca265de3a1ff70735b7f
+    size_bytes: 1229
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized reused 2024-09-10 through 2026-09-10 history. Both directions. No live changes; complete v3
+      replay and v2 post, separate numeric-risk null correction.
+  - artifact_id: spike-v1-plus-backtest-20260912-engine
+    artifact_type: manifest
+    role: fixed_default_research_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2972ce0
+    generator_commit: 2972ce0
+    source_path: experiments/active/exp-spike-v1-plus-backtest-20260912-v1/results/replay_full_v3/manifest.json
+    sha256: 7f33c463688f60a3f8ea0ff8de90f61eba9e1489a80d7c477ae19b8189d84136
+    size_bytes: 1219
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized reused 2024-09-10 through 2026-09-10 history. Both directions. No live changes; complete v3
+      replay and v2 post, separate numeric-risk null correction.
+  - artifact_id: spike-v1-plus-backtest-20260912-post
+    artifact_type: manifest
+    role: fixed_default_research_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5ca0a2b
+    generator_commit: 5ca0a2b
+    source_path: experiments/active/exp-spike-v1-plus-backtest-20260912-v1/post_full_v2/post_manifest.json
+    sha256: cfc56f6390437cf6ebd4d346d765bbdee5f60a1db8443b140b36d919527c4d0f
+    size_bytes: 2454
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized reused 2024-09-10 through 2026-09-10 history. Both directions. No live changes; complete v3
+      replay and v2 post, separate numeric-risk null correction.
+  - artifact_id: spike-v1-plus-backtest-20260912-delivery
+    artifact_type: manifest
+    role: fixed_default_research_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9b908ec
+    generator_commit: 9b908ec
+    source_path: experiments/active/exp-spike-v1-plus-backtest-20260912-v1/delivery_receipt.json
+    sha256: abe1faa986bcd1b2b2511cd0bbefa729592314e297fb87c3ee5b8b97c27854e1
+    size_bytes: 1307
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized reused 2024-09-10 through 2026-09-10 history. Both directions. No live changes; complete v3
+      replay and v2 post, separate numeric-risk null correction.
+  - artifact_id: spike-v1-plus-backtest-20260912-report
+    artifact_type: report
+    role: fixed_default_research_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9b908ec
+    generator_commit: 9b908ec
+    source_path: analysis/p1_spike_v1_plus_backtest_20260912.md
+    sha256: 5a7b68b318623a29c68f1b609c8eda1c26459196171a02df01671a71e9c27ad4
+    size_bytes: 17681
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized reused 2024-09-10 through 2026-09-10 history. Both directions. No live changes; complete v3
+      replay and v2 post, separate numeric-risk null correction.
+  - artifact_id: spike-v1-plus-backtest-20260912-html
+    artifact_type: report
+    role: fixed_default_research_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9b908ec
+    generator_commit: 9b908ec
+    source_path: analysis/html/p1_spike_v1_plus_backtest_20260912.html
+    sha256: 7d5d04548997480e126f1e7d399ee07891401663d48d8d4cc413d82a4a9973ad
+    size_bytes: 27307
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized reused 2024-09-10 through 2026-09-10 history. Both directions. No live changes; complete v3
+      replay and v2 post, separate numeric-risk null correction.
+  - artifact_id: spike-v1-plus-backtest-20260912-return-null
+    artifact_type: manifest
+    role: fixed_default_research_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9b908ec
+    generator_commit: 9b908ec
+    source_path: experiments/active/exp-spike-v1-plus-backtest-20260912-v1/post_full_v2/benchmark_return_summary.csv
+    sha256: 25cf6de8fd448f4fde4abe140b552849db69146c599596e2df7cfc52e71267d1
+    size_bytes: 1596
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized reused 2024-09-10 through 2026-09-10 history. Both directions. No live changes; complete v3
+      replay and v2 post, separate numeric-risk null correction.
   - artifact_id: spike-coin-be-review-20260912-manifest
     artifact_type: manifest
     role: descriptive_coin_statistics_and_browser_provenance

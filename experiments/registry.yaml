@@ -16,18 +16,28 @@ schema_version: 1
 experiments:
   - experiment_id: exp-spike-v1-plus-backtest-20260912-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 8df215b
-    status: active
-    question: How does the complete pinned V1+ default perform versus its same-source master-off bidirectional baseline?
-    single_variable: Owner-requested existing V1+ default bundle; no threshold fitting or separate break-even search.
-    result: Design frozen; corrected single-worker full replay running. No complete economic result yet.
+    source_commit: 2972ce0
+    status: inconclusive
+    question: Does complete pinned V1+ improve on its same-source bidirectional master-off baseline?
+    single_variable: Owner requested the existing V1+ default bundle; no threshold search.
+    result: 3531 streams complete, 10006 V1+ entries vs10178 baseline. Full-period mean independent-account returns
+      improve by0.011-0.054 percentage points, but net win rates fall and exact realized10R winners retained56/58.
+      Profit concentration and weak4H remain; no promotion.
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_v1_plus_backtest_20260912.md
-    artifacts: []
-    notes: Owner explicitly authorized all historical dates and this full-default backtest. 3531 covered streams,
-      30m/1H/4H; reused two-year chronological sample, not blind.
+    artifacts:
+    - spike-v1-plus-backtest-20260912-config
+    - spike-v1-plus-backtest-20260912-engine
+    - spike-v1-plus-backtest-20260912-post
+    - spike-v1-plus-backtest-20260912-delivery
+    - spike-v1-plus-backtest-20260912-report
+    - spike-v1-plus-backtest-20260912-html
+    - spike-v1-plus-backtest-20260912-return-null
+    notes: First completed fixed-default economic evaluation on previously authorized, nonblind two-year data. Technical
+      attempts and tail recovery documented. 20 focused tests; browser tables checked. Random-R null invalid for2
+      floating-zero-risk matches; separately disclosed net-return null used.
   - experiment_id: exp-spike-coin-be-review-20260912-v1
     source_repo: darkforest-x/fable-trading
     source_commit: ea4761b490432bb43ccc89f01b5db8bff48a18a1
