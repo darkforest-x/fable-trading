@@ -107,8 +107,8 @@ def build(engine,post,report):
         body+=['',f'### {LABEL[cohort]}'];rows=[]
         for r in ref.loc[ref.cohort.eq(cohort)].sort_values(['timeframe_min','policy']).itertuples():
             ev=events.loc[events.venue.eq('all')&events.cohort.eq(cohort)&events.timeframe_min.eq(r.timeframe_min)&events.policy.eq(r.policy)&events.period.eq('validation')].iloc[0]
-            rows.append([TF[r.timeframe_min],POLICY[r.policy],int(ev.closed),pct(ev.win_rate),num(ev.event_pf),int(ev.mfe_ge_10r),int(ev.net_ge_10r),pct(r.return_mean),pct(r.drawdown_mean)])
-        body+=[table(['周期','退出方案','已关闭交易','净胜率','净PF','持有时曾到10R','实现≥10R笔数','账户均值','平均最大回撤'],rows)]
+            rows.append([TF[r.timeframe_min],POLICY[r.policy],int(ev.entries),int(ev.closed),int(ev.censored),pct(ev.win_rate),num(ev.event_pf),int(ev.mfe_ge_10r),int(ev.net_ge_10r),pct(r.return_mean),pct(r.drawdown_mean)])
+        body+=[table(['周期','退出方案','入场','已关闭','边界/缺口','净胜率','净PF','持有时曾到10R','实现≥10R笔数','账户均值','平均最大回撤'],rows)]
     body +=['','## 收益是否靠少数大行情，以及配对对照','对选出方案和基线采用同一币种账户配对。按基础币种聚类做2,000次重采样和符号置换，同币跨交易所一起变化；9项比较给出BH校正q。基线是退出效果的对照，不能替代随机入场的方向性收益对照。']
     rows=[]
     for r in audit.itertuples():rows.append([LABEL[r.cohort],TF[r.timeframe_min],pct(r.paired_mean),f'{pct(r.ci_low)} ~ {pct(r.ci_high)}',probability(r.permutation_p),probability(r.bh_q),r.top_positive_asset,pct(r.top_positive_share),pct(r.return_mean_excluding_top_asset)])
@@ -123,6 +123,7 @@ def build(engine,post,report):
     '', '## 范围、验证与风险诚实声明',
     f'- 3,531个完整输入流；Binance／OKX／Gate，30m／1H／4H；2024-09-10至2026-09-10。开发区间第一年，第二年为复用历史验证。账户明细{manifest["account_rows"]:,}行（包括周期分段），事件汇总{manifest["event_rows"]:,}行。15m不在这轮与此前V1一致的比较范围。',
     '- 每个输入流的三个基线逐笔对齐旧账本，校验信号、入场、退出时间、方向、价格、初始风险与净收益；输入缓存和输出均有SHA256回执。账户逐段成交量守恒、费用核算及快速/参考算法一致性有自动测试。',
+    '- 这是此前当前合约目录中已覆盖的冻结子集，并非包含所有已退市合约的历史全市场；存在存活与数据覆盖偏差。部分新上市币没有完整两年历史，不能把3,531个流都解释为连续两年有交易。',
     '- 账户权益按K线收盘盯市，报告的是收盘最大回撤，可能低估盘中回撤。初始/跟踪止损允许盘中触发，但没有订单簿、资金费率、标记价格、强平、最小下单量和容量模型。不能从这里推出10%风险实际可用。',
     '- 数据缺口持仓终止估值并计入无有效估值账户；研究截止时未平仓用最后完整收盘及预计费用作边界估值，不冒充已成交。独立账户跨年持仓与浮盈会继承，不在分界日无偿清仓重开。',
     '- 事件统计按入场时间分年；账户统计按日历权益分年，两种表不应混算。全程实际风险/杠杆诊断明确标记全程，不把后一年数据当成第一年的已知信息。',
