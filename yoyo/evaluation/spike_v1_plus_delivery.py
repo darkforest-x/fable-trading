@@ -80,6 +80,8 @@ def deliver(post:Path, engine:Path):
     plus_entries=int(full.loc[full.cohort.eq(PLUS),"entries"].sum())
     fewer=1-plus_entries/base_entries if base_entries else 0.
     improving=accounts.loc[accounts.period.eq("validation") & accounts.mean_plus_return.gt(accounts.mean_base_return)]
+    overview=full.loc[full.cohort.eq(PLUS)].merge(accounts.loc[accounts.period.eq("full")],on="timeframe_min",validate="one_to_one")
+    improvements=(overview.mean_plus_return-overview.mean_base_return)*100
     ids=trades[["stream_key","timeframe_min"]].drop_duplicates()
     pairs=pairs.merge(ids,on="stream_key",validate="many_to_one")
     tail=[]
@@ -99,11 +101,16 @@ def deliver(post:Path, engine:Path):
     text=f'''# SPIKE V1+ 完整默认配置：两年回测
 
 本轮真实运行了 V1+ 完整默认配置，并与同一源码关闭加强模块的双向基线比较。
-**这是固定配置评估，不是参数寻优，也不是专门的 1R 保本实验。**
+**这是固定配置评估，不是参数寻优。**
 
 加强版模拟入场 **{plus_entries:,}** 次，双向基线 **{base_entries:,}** 次，数量减少 **{fewer:.2%}**。
 后一年有 **{len(improving)}/3** 个周期的独立账户平均收益提高。改善幅度、回撤与大趋势保留必须一起看；
 信号数量的变化本身并不能证明假启动减少。
+
+全期独立账户平均收益仅提高 **{improvements.min():.3f}–{improvements.max():.3f} 个百分点**，改善幅度有限。
+包含无交易账户，每个账户资金独立；下表不是全市场统一资金池的收益。
+
+{table(overview,{"timeframe_min":"分钟","realized":"加强版已平仓","win_rate":"净胜率","event_pf":"PF","mean_base_return":"基线平均账户收益","mean_plus_return":"加强版平均账户收益"},["win_rate","mean_base_return","mean_plus_return"])}
 
 完成 {manifest["streams"]:,} 个行情流；两臂共 {manifest["simulated_trades"]:,} 条模拟交易记录，
 其中包含同一机会的版本对照，不能视为独立市场机会数。完整方向/周期/账户数据在下表和 CSV。
