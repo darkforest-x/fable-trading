@@ -29,3 +29,9 @@ Matched random event reference: deterministic maximum one naturally closed targe
 ## Deliverables
 
 Reproducible runner, synthetic tests, hashed per-stream results, all-stream count/parity receipts, account/event/signal/retention tables separated by period, explanatory example charts for retained winners, mistakenly removed winners and removed losers, Chinese Markdown report converted immediately to self-contained HTML, immutable learning and experiment/artifact registry entries. Report reused-data, independent-account, missing funding/slippage/mark-price and close-only-drawdown limitations. No parameter search after seeing outcomes.
+
+## Pre-aggregation amendment: cache-prefix defect
+
+The first attempted full replay (results_v1) was stopped after an independent mapper supplied a synthetic hidden-endpoint counterexample. No aggregate returns were inspected or used for changing the hypotheses. This remains an exposed attempted run, not an erased experiment. Its receipt count and invalidation reason are in results_v1/INVALIDATED.json. All partial results are retained but excluded from comparison.
+
+A cache index >=10 does not certify an episode reset: hidden qualifying endpoints at cache bars 0 and 1 can connect to the next visible endpoint at 11. The corrected implementation uses the authenticated full-source prior_squeeze_run3 flag (computed before cache slicing) being false to certify that no preceding qualifying endpoint can bridge. Unknown episodes pass all original admissions through. Gap reset semantics and all preregistered trading hypotheses remain unchanged. This is a correctness repair, not a parameter search. Corrected full replay is results_v2, the second attempted exposure and first intended complete comparison.

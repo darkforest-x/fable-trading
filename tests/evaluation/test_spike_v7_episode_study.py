@@ -82,11 +82,31 @@ def test_left_censored_episode_passes_through_until_observed_reset():
     bb.iloc[40:43, 0] = True
     s.loc[b.index[[16, 18, 43, 44]], "long_signal"] = True
     ready(bb)
+    bb.loc[bb.index[:3], "prior_squeeze_run3"] = True  # full-source pre-cache run
     a = episode_admissions(b, s, bb, g)
     assert a.fallback.iloc[16] and a.fallback.iloc[18]
     assert a["first"].iloc[16] and a["first"].iloc[18]
     assert not a.fallback.iloc[43]
     assert a["first"].iloc[43] and not a["first"].iloc[44]
+
+
+def test_hidden_prefix_endpoint_can_bridge_ten_bars_to_visible_run():
+    b, s, bb, g = inputs()
+    bb["bb_compressed"] = False
+    bb.loc[bb.index[[0, 1, 9, 10, 11]], "bb_compressed"] = True
+    bb.loc[bb.index[40:43], "bb_compressed"] = True
+    s.loc[b.index[[12, 13, 43, 44]], "long_signal"] = True
+    ready(bb)
+    # Pre-cache compressed bars make endpoints 0 and 1 valid. Endpoint 11
+    # belongs to the same unknown episode, exactly ten bars after endpoint 1.
+    bb.loc[bb.index[:12], "prior_squeeze_run3"] = True
+    a = episode_admissions(b, s, bb, g)
+    assert a.fallback.iloc[[12, 13]].all()
+    assert a["first"].iloc[[12, 13]].all()
+    assert a.first_break.iloc[[12, 13]].all()
+    assert not a.fallback.iloc[43]
+    assert a["first"].iloc[43] and not a["first"].iloc[44]
+    assert_frame_equal(a.iloc[:14], episode_admissions(b.iloc[:14], s.iloc[:14], bb.iloc[:14], g.iloc[:14]))
 
 
 def test_gap_invalidates_boundary_and_requires_new_qualified_episode():

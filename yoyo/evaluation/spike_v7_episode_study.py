@@ -35,7 +35,7 @@ def episode_admissions(bars, raw, bb, gap):
     Columns: frozen long/short signals, bb_compressed/prior_squeeze_run3/v7_ready,
     high/low/close and explicit gap. Compression endpoints and envelopes update
     AFTER the current entry decision. The first left-censored episode passes
-    through unchanged until an observed 10-bar reset makes its identity known.
+    through unchanged until the full-source prior-run flag certifies a reset.
     """
     ix = bars.index
     if not all(x.index.equals(ix) for x in (raw, bb, gap)):
@@ -46,8 +46,9 @@ def episode_admissions(bars, raw, bb, gap):
         raise ValueError("ambiguous signal side")
     side = np.where(long, 1, np.where(short, -1, 0))
     compressed = bb.bb_compressed.fillna(False).to_numpy(bool)
+    recent_run = bb.prior_squeeze_run3.fillna(False).to_numpy(bool)
     base = ((long | short) & bb.v7_ready.fillna(False).to_numpy(bool)
-            & bb.prior_squeeze_run3.fillna(False).to_numpy(bool))
+            & recent_run)
     h, l, c = (bars[k].to_numpy(float) for k in ("high", "low", "close"))
     gaps = gap.fillna(True).to_numpy(bool)
     n = len(ix)
@@ -66,7 +67,10 @@ def episode_admissions(bars, raw, bb, gap):
             hi = lo = np.nan
             first[i] = escape[i] = False
             continue
-        if last_q is None and i >= 10:
+        # The receipt-bound flag was computed BEFORE cache truncation. A cache
+        # index is not proof that a hidden qualifying endpoint has expired:
+        # it may bridge into another run visible near the cache boundary.
+        if not recent_run[i]:
             known = True
         active = last_q is not None and i - last_q <= 10
         ep[i] = serial if active else -1
@@ -96,8 +100,6 @@ def episode_admissions(bars, raw, bb, gap):
             else:
                 hi, lo = max(hi, float(np.max(h[i-2:i+1]))), min(lo, float(np.min(l[i-2:i+1])))
             last_q = i
-        elif last_q is not None and i - last_q >= 10:
-            known = True
     return pd.DataFrame({"baseline": base, "first": first, "first_break": escape,
                          "episode": ep, "upper": upper, "lower": lower,
                          "fallback": fallback, "side": side,
@@ -222,6 +224,7 @@ def run(output, limit=None):
         raise ValueError("frozen manifest changed")
     sources = [Path(__file__), Path(__file__).with_name("spike_exit_policy_study.py"),
                Path(__file__).with_name("spike_exit_accounts.py"), Path(__file__).with_name("spike_v6_wvf_study_post.py"),
+               Path(__file__).with_name("spike_v7_fast.py"), Path(__file__).with_name("spike_v6_wvf_study.py"),
                EXP / "config.json", EXP / "PROJECT_PLAN.md"]
     identity = {str(p): sha256(p) for p in sources}
     output.mkdir(parents=True, exist_ok=True)
