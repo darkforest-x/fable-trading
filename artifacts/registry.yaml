@@ -18,11 +18,67 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v7-first-launch-20260912-html
+    artifact_type: report
+    role: owner_review_with_six_embedded_charts
+    source_repo: darkforest-x/fable-trading
+    source_commit: ee8fb5333f7b7734db5551edb391f714a2d95e08
+    generator_commit: ee8fb5333f7b7734db5551edb391f714a2d95e08
+    source_path: analysis/html/p1_spike_v7_first_launch_20260912.html
+    sha256: 24f989f07e6806502ddcb4eb9fba1a5cdaff737e2795aba6e6805b23bfc6a193
+    size_bytes: 1520313
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized reused history. Fixed A/C gates rejected; no production changes. results_v1 invalidated;
+      results_v2 replay and summary_v3 presentation are authoritative.
+  - artifact_id: spike-v7-first-launch-20260912-report
+    artifact_type: report
+    role: negative_first_launch_ablation
+    source_repo: darkforest-x/fable-trading
+    source_commit: ee8fb5333f7b7734db5551edb391f714a2d95e08
+    generator_commit: ee8fb5333f7b7734db5551edb391f714a2d95e08
+    source_path: analysis/p1_spike_v7_first_launch_20260912.md
+    sha256: 1218ac818ec6d6f67a364f0573788e70f444cfa748c64e2622524d2b01d30031
+    size_bytes: 23978
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized reused history. Fixed A/C gates rejected; no production changes. results_v1 invalidated;
+      results_v2 replay and summary_v3 presentation are authoritative.
+  - artifact_id: spike-v7-first-launch-20260912-report-manifest
+    artifact_type: manifest
+    role: verified_trade_parity_and_all_statistics
+    source_repo: darkforest-x/fable-trading
+    source_commit: ee8fb5333f7b7734db5551edb391f714a2d95e08
+    generator_commit: ee8fb5333f7b7734db5551edb391f714a2d95e08
+    source_path: experiments/active/exp-spike-v7-first-launch-20260912-v1/summary_v3/report_manifest.json
+    sha256: e8d488c6bead7d5ed3f371495914fd202dee27d9995e547c8b92f6fe8f67c456
+    size_bytes: 2350
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized reused history. Fixed A/C gates rejected; no production changes. results_v1 invalidated;
+      results_v2 replay and summary_v3 presentation are authoritative.
+  - artifact_id: spike-v7-first-launch-20260912-run-manifest
+    artifact_type: manifest
+    role: complete_3531_stream_replay
+    source_repo: darkforest-x/fable-trading
+    source_commit: 04df26bda6c05d7b52c6048d4f3c4cf8439d3fda
+    generator_commit: 04df26bda6c05d7b52c6048d4f3c4cf8439d3fda
+    source_path: experiments/active/exp-spike-v7-first-launch-20260912-v1/results_v2/manifest.json
+    sha256: 20f91f5c59236b50cd1360361f7b4aa0abf0d2a8eecc0a777ca6d7f39c33d2e2
+    size_bytes: 300
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Authorized reused history. Fixed A/C gates rejected; no production changes. results_v1 invalidated;
+      results_v2 replay and summary_v3 presentation are authoritative.
   - artifact_id: spike-v7-first-launch-20260912-config
     artifact_type: config
     role: fixed_first_launch_episode_ablation
     source_repo: darkforest-x/fable-trading
-    source_commit: 247075d9ac8b0c1db9c1ae47ba76fdc5d373d3a2
+    source_commit: c403f221de47fd3b490811b2e6f77bb1879dae6c
     source_path: experiments/active/exp-spike-v7-first-launch-20260912-v1/config.json
     sha256: 652e8fd9108925ae5e014d49689199e772bc9984fdc9c7f524c3f0a4090c8281
     holdout_status: holdout_consumed

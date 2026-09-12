@@ -584,3 +584,7 @@
 - [IMACD→YOLO 1H／4H迁移（1H12→5；4H仅2候选未确认）](html/p1_imacd_yolo_timeframes_20260908.html) · 2026-09-08
 
 - [IMACD V2.5：持续阶段、冻结风险与首次回踩](html/p0_imacd_pine_lifecycle_20260908.html) · 工程验收；云端v11，24个实际Pine断言通过，原信号/通知不变。
+
+## V7 first-launch episode study — 2026-09-12
+
+- [V7 同段首次启动：0/6达到预定目标](p1_spike_v7_first_launch_20260912.md) · [HTML与六张全局图](html/p1_spike_v7_first_launch_20260912.html)。同源3531流、多空30m/1H/4H；首次去重和价格边界规则均有大赢家误删，不改线上。

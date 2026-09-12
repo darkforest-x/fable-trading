@@ -16,18 +16,29 @@ schema_version: 1
 experiments:
   - experiment_id: exp-spike-v7-first-launch-20260912-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 247075d9ac8b0c1db9c1ae47ba76fdc5d373d3a2
-    status: active
+    source_commit: 04df26bda6c05d7b52c6048d4f3c4cf8439d3fda
+    status: rejected
     question: Can first-per-BB-compression episodes reduce V7 noise while retaining realized large trends?
-    single_variable: A versus B adds episode consumption; C versus A adds prior-close compressed-price escape. Exits unchanged.
-    result: Preregistered before real replay; synthetic causal and exit-feed tests pass.
+    single_variable: A versus B adds episode consumption; C versus A adds prior-close compressed-price escape.
+      Exits unchanged.
+    result: Complete 3531-stream two-year replay; 107238 baseline trades including 547 censored rows match.
+      Zero of six arm/timeframe pairs meet both-year signal-reduction, exact realized-10R retention and
+      account-return targets. Validation 1H first retains 63/98 winners; first_break retains 25/98. Both
+      underperform original mean account return. No gate deployed.
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
-    canonical_report: experiments/active/exp-spike-v7-first-launch-20260912-v1/PROJECT_PLAN.md
+    canonical_report: analysis/p1_spike_v7_first_launch_20260912.md
     artifacts:
     - spike-v7-first-launch-20260912-config
-    notes: Owner authorized subagent exploration and all historical dates; reused chronological data, not blind. No production changes.
+    - spike-v7-first-launch-20260912-run-manifest
+    - spike-v7-first-launch-20260912-report-manifest
+    - spike-v7-first-launch-20260912-report
+    - spike-v7-first-launch-20260912-html
+    notes: Owner authorized subagent exploration and all dates; reused data is not blind. First attempted
+      replay invalidated before aggregate review for prefix-state bug; corrected replay complete. Accounts
+      are independent, 1% target risk with 1x notional cap. Twenty focused tests pass; TON missed reentry
+      and USDC cost/R distortion independently checked.
   - experiment_id: exp-spike-exit-policy-20260912-v1
     source_repo: darkforest-x/fable-trading
     source_commit: d3e0deeef63fcbb814989c6de32f22c520b3e264
