@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 
 from yoyo.evaluation.spike_v1_plus_report import BASELINE, PLUS, metrics, exact_pairs
+from yoyo.evaluation.spike_v1_plus_controls import protection_outcome
 
 
 def rows():
@@ -36,3 +37,21 @@ def test_duplicate_entry_is_rejected():
 def test_empty_side_has_unknown_win_rate():
     m = metrics(rows().iloc[:0])
     assert m["entries"] == 0 and np.isnan(m["win_rate"])
+
+
+def test_null_benchmark_checks_stop_on_entry_bar_before_profit():
+    a = {"open":np.array([100.,100.]), "high":np.array([101.,110.]), "low":np.array([99.,95.]),
+         "close":np.array([100.,108.]), "atr":np.array([1.,1.]),
+         "recentLow":np.array([99.,95.]), "recentHigh":np.array([101.,110.])}
+    result = protection_outcome(a,0,1,True,.01,1)
+    # 2-ATR initial SL is98; same-bar high cannot activate protection before that stop.
+    assert result["censored"] is False
+    assert result["net_return"] == pytest.approx(-.022)
+    assert result["net_r"] == pytest.approx(-1.1)
+
+
+def test_null_benchmark_does_not_admit_gap_beyond_initial_stop():
+    a = {"open":np.array([100.,95.]), "high":np.array([101.,100.]), "low":np.array([99.,94.]),
+         "close":np.array([100.,98.]), "atr":np.array([1.,1.]),
+         "recentLow":np.array([99.,94.]), "recentHigh":np.array([101.,101.])}
+    assert protection_outcome(a,0,1,True,.01,1) is None
