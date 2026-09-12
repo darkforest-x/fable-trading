@@ -8,10 +8,11 @@ each admitted V7 signal.  Every feature is available at the signal close:
 * current volume/TR ratios use V7's already-causal per-symbol baselines;
 * rope distance and close-risk use current OHLC/ATR plus the preceding four bars.
 
-Future prices appear only after the feature table is joined to the previously
-frozen baseline trade ledger for evaluation.  The discovery command refuses to
-summarize the validation year; a later, separately frozen replay owns that
-exposure.  This module neither changes monitor admissions nor touches orders.
+Future prices are joined only to development rows from the previously frozen
+baseline trade ledger.  Validation rows carry explicit withholding markers and
+never contain trade or outcome values.  A later, separately frozen replay owns
+that exposure.  This module neither changes monitor admissions nor touches
+orders.
 """
 from __future__ import annotations
 
@@ -30,6 +31,19 @@ from yoyo.evaluation.spike_exit_policy_study import END, SPLIT, START, load_veri
 
 EXP = Path("experiments/active/exp-spike-v8-noise-filter-20260913-v1")
 FEATURE_VERSION = "spike-v8-causal-signal-features-v1"
+
+# These values are all derived from the future-facing baseline trade ledger.
+# They may be materialized for development discovery only; validation rows must
+# retain nulls so the output artifact cannot be used to inspect validation
+# outcomes accidentally.
+TRADE_OUTCOME_COLUMNS = (
+    "trade_id", "entry_time", "exit_time", "exit_reason", "initial_risk_frac", "mfe_r",
+    "net_return", "net_r", "gross_return", "gross_r", "censored", "holding_bars",
+)
+DERIVED_OUTCOME_COLUMNS = (
+    "executed", "closed", "net_positive", "realized_10r", "mfe_10r", "failure_reason",
+)
+OUTCOME_VALUE_COLUMNS = TRADE_OUTCOME_COLUMNS + DERIVED_OUTCOME_COLUMNS
 
 
 def _safe_div(numerator: pd.Series, denominator: pd.Series) -> pd.Series:
@@ -208,8 +222,47 @@ def _failure_reason(row: pd.Series) -> str:
     return "other_nonpositive"
 
 
+def _assert_validation_outcomes_withheld(frame: pd.DataFrame) -> None:
+    """Reject an artifact that carries any future-facing values on validation rows."""
+    required = {"period", "outcome_available", "outcome_withheld_validation", *OUTCOME_VALUE_COLUMNS}
+    missing = required - set(frame.columns)
+    if missing:
+        raise AssertionError("outcome isolation columns missing: " + ", ".join(sorted(missing)))
+    validation = frame.loc[frame.period.eq("validation")]
+    leaked = [column for column in OUTCOME_VALUE_COLUMNS if validation[column].notna().any()]
+    if leaked:
+        raise AssertionError("validation rows contain withheld outcome values: " + ", ".join(leaked))
+    if validation.outcome_available.fillna(True).any():
+        raise AssertionError("validation rows cannot mark outcomes available")
+    if not validation.outcome_withheld_validation.fillna(False).all():
+        raise AssertionError("validation rows must declare outcome withholding")
+
+
+def _outcome_scope_metadata(frame: pd.DataFrame) -> dict[str, object]:
+    """Return the manifest declaration only after verifying physical isolation."""
+    _assert_validation_outcomes_withheld(frame)
+    return {
+        "validation_outcomes_present": False,
+        "outcome_scope": "development_only",
+    }
+
+
 def join_frozen_outcomes(features: pd.DataFrame, trades: pd.DataFrame) -> pd.DataFrame:
-    """Attach prior baseline outcomes; nonexecuted admissions remain explicit."""
+    """Attach prior baseline outcomes to development rows and withhold validation rows."""
+    if "period" not in features:
+        raise ValueError("features must declare development or validation period")
+    if "period" not in trades:
+        raise ValueError("outcome input must declare period and be physically development-only")
+    nondevelopment = trades.loc[~trades.period.eq("development")]
+    if len(nondevelopment):
+        raise ValueError(
+            "outcome input contains non-development rows; supply a separate development-only artifact"
+        )
+    unexpected = set(OUTCOME_VALUE_COLUMNS) & set(features.columns)
+    if unexpected:
+        raise ValueError("features must not already carry outcome values: " + ", ".join(sorted(unexpected)))
+    features = features.copy()
+    features["_outcome_join_order"] = np.arange(len(features), dtype=int)
     keys = ["stream_key", "signal_bar_open", "side"]
     outcome = trades.loc[trades.arm.eq("baseline")].copy()
     outcome["signal_bar_open"] = pd.to_datetime(outcome.signal_bar_open, utc=True)
@@ -218,19 +271,37 @@ def join_frozen_outcomes(features: pd.DataFrame, trades: pd.DataFrame) -> pd.Dat
     outcome["holding_bars"] = (
         (outcome.exit_time - outcome.entry_time).dt.total_seconds() / (60 * outcome.timeframe_min)
     )
-    columns = keys + [
-        "trade_id", "entry_time", "exit_time", "exit_reason", "initial_risk_frac", "mfe_r",
-        "net_return", "net_r", "gross_return", "gross_r", "censored", "holding_bars",
-    ]
+    columns = keys + list(TRADE_OUTCOME_COLUMNS)
     if outcome.duplicated(keys).any():
         raise ValueError("baseline outcomes are not unique by signal and side")
-    joined = features.merge(outcome[columns], on=keys, how="left", validate="one_to_one")
-    joined["executed"] = joined.trade_id.notna()
-    joined["closed"] = joined.executed & ~joined.censored.fillna(False).astype(bool)
-    joined["net_positive"] = joined.net_return.gt(0)
-    joined["realized_10r"] = joined.net_r.ge(10)
-    joined["mfe_10r"] = joined.mfe_r.ge(10)
-    joined["failure_reason"] = joined.apply(_failure_reason, axis=1).where(joined.executed, "not_executed_occupied")
+
+    development = features.loc[features.period.eq("development")].merge(
+        outcome[columns], on=keys, how="left", validate="one_to_one",
+    )
+    development["executed"] = development.trade_id.notna().astype("boolean")
+    development["closed"] = (development.executed & ~development.censored.fillna(False).astype(bool)).astype("boolean")
+    development["net_positive"] = development.net_return.gt(0).astype("boolean")
+    development["realized_10r"] = development.net_r.ge(10).astype("boolean")
+    development["mfe_10r"] = development.mfe_r.ge(10).astype("boolean")
+    development["failure_reason"] = development.apply(_failure_reason, axis=1).where(
+        development.executed, "not_executed_occupied",
+    )
+    development["outcome_available"] = development.executed.astype("boolean")
+    development["outcome_withheld_validation"] = pd.Series(False, index=development.index, dtype="boolean")
+
+    validation = features.loc[features.period.eq("validation")].copy()
+    for column in OUTCOME_VALUE_COLUMNS:
+        validation[column] = development[column].iloc[:0].reindex(validation.index)
+    validation["outcome_available"] = pd.Series(False, index=validation.index, dtype="boolean")
+    validation["outcome_withheld_validation"] = pd.Series(True, index=validation.index, dtype="boolean")
+
+    joined = (
+        pd.concat([development, validation], ignore_index=True)
+        .sort_values("_outcome_join_order", kind="stable")
+        .drop(columns="_outcome_join_order")
+        .reset_index(drop=True)
+    )
+    _assert_validation_outcomes_withheld(joined)
     return joined
 
 
@@ -371,11 +442,19 @@ def run_discovery(output: Path, *, limit: int | None = None) -> None:
     if output.exists() and any(output.iterdir()):
         raise ValueError("discovery output exists; use a new immutable directory")
     output.mkdir(parents=True, exist_ok=True)
+    outcome_source = config.get("baseline_trades_development")
+    if not outcome_source:
+        raise ValueError(
+            "config must point baseline_trades_development to a physically separate development-only artifact"
+        )
+    trades = pd.read_csv(str(outcome_source))
+    if "period" not in trades or not trades.period.eq("development").all():
+        raise ValueError("baseline_trades_development contains non-development outcomes")
     features = collect(config, limit=limit)
     if limit is None and len(features) != int(config["expected_v7_signals"]):
         raise ValueError(f"expected {config['expected_v7_signals']} V7 signals, found {len(features)}")
-    trades = pd.read_csv(str(config["baseline_trades"]))
     joined = join_frozen_outcomes(features, trades)
+    outcome_scope = _outcome_scope_metadata(joined)
     joined.to_csv(
         output / "signal_features.csv.gz", index=False,
         compression={"method": "gzip", "compresslevel": 1, "mtime": 0},
@@ -388,6 +467,7 @@ def run_discovery(output: Path, *, limit: int | None = None) -> None:
         "signals": len(joined),
         "executed_baseline_rows": int(joined.executed.sum()),
         "validation_outcomes_summarized": False,
+        **outcome_scope,
         "identity": identity,
         "files": {path.name: sha256(path) for path in output.iterdir() if path.is_file()},
         "generated_at": pd.Timestamp.now(tz="UTC").isoformat(),

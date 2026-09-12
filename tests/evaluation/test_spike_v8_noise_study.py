@@ -5,7 +5,16 @@ import numpy as np
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-from yoyo.evaluation.spike_v8_noise_study import _auc, signal_feature_frame
+import pytest
+
+from yoyo.evaluation.spike_v8_noise_study import (
+    OUTCOME_VALUE_COLUMNS,
+    _assert_validation_outcomes_withheld,
+    _auc,
+    _outcome_scope_metadata,
+    join_frozen_outcomes,
+    signal_feature_frame,
+)
 
 
 def inputs(n: int = 760):
@@ -78,3 +87,73 @@ def test_auc_is_tie_aware_and_directional():
     assert _auc(pd.Series([0, 1, 2, 3]), label) == 1.0
     assert _auc(pd.Series([3, 2, 1, 0]), label) == 0.0
     assert _auc(pd.Series([1, 1, 1, 1]), label) == 0.5
+
+
+def test_join_only_materializes_development_outcomes_and_marks_validation_withheld():
+    signal_times = pd.to_datetime(["2025-09-01T00:00:00Z", "2025-10-01T00:00:00Z"])
+    features = pd.DataFrame(
+        {
+            "stream_key": ["s", "s"],
+            "signal_bar_open": signal_times,
+            "side": [1, -1],
+            "period": ["development", "validation"],
+            "timeframe_min": [60, 60],
+            "cost_share_of_close_r": [0.1, 0.1],
+        }
+    )
+    trades = pd.DataFrame(
+        {
+            "arm": ["baseline"], "period": ["development"],
+            "stream_key": ["s"], "signal_bar_open": signal_times[:1],
+            "side": [1], "trade_id": ["development-trade"],
+            "entry_time": signal_times[:1],
+            "exit_time": signal_times[:1] + pd.Timedelta(hours=1),
+            "exit_reason": ["trailing"], "initial_risk_frac": [0.02],
+            "mfe_r": [11.0], "net_return": [0.03], "net_r": [1.5],
+            "gross_return": [0.032], "gross_r": [1.6],
+            "censored": [False], "timeframe_min": [60],
+        }
+    )
+
+    joined = join_frozen_outcomes(features, trades)
+    development = joined.loc[joined.period.eq("development")].iloc[0]
+    validation = joined.loc[joined.period.eq("validation")]
+
+    assert development.outcome_available
+    assert not development.outcome_withheld_validation
+    assert validation.outcome_available.eq(False).all()
+    assert validation.outcome_withheld_validation.eq(True).all()
+    assert validation.loc[:, OUTCOME_VALUE_COLUMNS].isna().all().all()
+    assert _outcome_scope_metadata(joined) == {
+        "validation_outcomes_present": False,
+        "outcome_scope": "development_only",
+    }
+
+
+def test_join_rejects_a_combined_development_and_validation_outcome_input():
+    signal_time = pd.Timestamp("2025-09-01T00:00:00Z")
+    features = pd.DataFrame({
+        "stream_key": ["s"], "signal_bar_open": [signal_time], "side": [1],
+        "period": ["development"], "timeframe_min": [60], "cost_share_of_close_r": [0.1],
+    })
+    trades = pd.DataFrame({
+        "arm": ["baseline"], "period": ["validation"], "stream_key": ["s"],
+        "signal_bar_open": [signal_time], "side": [1],
+    })
+    with pytest.raises(ValueError, match="separate development-only artifact"):
+        join_frozen_outcomes(features, trades)
+
+
+def test_validation_outcome_isolation_assertion_rejects_a_leaked_value():
+    frame = pd.DataFrame(
+        {
+            "period": ["validation"],
+            "outcome_available": [False],
+            "outcome_withheld_validation": [True],
+            **{column: [pd.NA] for column in OUTCOME_VALUE_COLUMNS},
+        }
+    )
+    frame.loc[0, "net_return"] = 0.01
+
+    with pytest.raises(AssertionError, match="validation rows contain withheld outcome values: net_return"):
+        _assert_validation_outcomes_withheld(frame)

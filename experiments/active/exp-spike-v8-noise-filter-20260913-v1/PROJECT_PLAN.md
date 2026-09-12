@@ -44,3 +44,19 @@ V8 therefore selects one rule: the confirmation close must be no farther than 3 
 ## Fixed execution and costs
 
 Signal close, next observed open entry, prior five-bar structure plus 0.2 ATR buffer, minimum 2 ATR risk, trailing distance 4 ATR after 2R, raw opposite V6 exit feed, and 0.2% round-trip cost remain unchanged. Independent stream accounts use 1% target initial risk and 1x notional cap; they are not a shared portfolio.
+
+## Isolation erratum found by final review
+
+The development aggregate tables were filtered to the development period, but
+the historical `discovery_v1/signal_features.csv.gz` had already merged and
+written validation-period trade outcomes.  The earlier statements that
+validation outcomes had not been read or were physically isolated are therefore
+false.  The affected manifest is bound in
+`discovery_isolation_erratum.json`; the artifact remains immutable and the
+current V8 result is nonblind descriptive evidence only.
+
+The corrected runner now fails closed unless configuration supplies a physically
+separate `baseline_trades_development` artifact, rejects any non-development
+outcome rows, and writes validation feature rows with null outcome fields.  This
+software correction cannot restore blindness to the current run.  V8 needs new
+forward shadow evidence before any production or notification decision.

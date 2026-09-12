@@ -10,6 +10,7 @@ from yoyo.evaluation.spike_v8_report import (
     _monthly_summary,
     _retention_summary,
     _trade_summary,
+    _unmatched_controls,
     cluster_effect,
 )
 
@@ -68,13 +69,15 @@ def test_feature_analysis_uses_explicit_boolean_gate_and_keeps_periods_separate(
     })
     feature, failures, development = _feature_analysis(f)
     assert feature.admissions.sum() == 2
-    assert failures.filtered_admissions.sum() == 1
+    assert failures.empty
+    validation = feature.loc[feature.period.eq("validation")].iloc[0]
+    assert pd.isna(validation.outcome_rows)
     assert development.period.eq("development").all()
 
 
 def test_filtered_nonexecuted_admission_is_not_counted_as_a_removed_losing_trade():
     f = pd.DataFrame({
-        "period": ["validation", "validation"], "timeframe_min": [60, 60],
+        "period": ["development", "development"], "timeframe_min": [60, 60],
         "gate_not_overheated3": [False, False], "executed": [False, True], "closed": [False, True],
         "realized_10r": [False, False], "mfe_10r": [False, False], "net_positive": [False, False],
         "failure_reason": ["not_executed_occupied", "initial_stop_later"],
@@ -94,6 +97,21 @@ def test_matched_controls_remain_separate_by_timeframe():
                              "net_return_difference": [.01, .02]})
     summary = _matched_controls(controls)
     assert set(summary.timeframe_min) == {30, 60}
+
+
+def test_matched_control_denominator_keeps_unmatched_rows_and_reasons():
+    controls = pd.DataFrame({
+        "arm": ["v8", "v8"], "period": ["validation", "validation"],
+        "timeframe_min": [60, 60], "asset": ["A", "A"],
+        "matched": [True, False], "reason": ["matched", "control_unresolved"],
+        "net_return_difference": [.02, float("nan")],
+    })
+    row = _matched_controls(controls).iloc[0]
+    assert row.sampled == 2 and row.matched == 1 and row.unmatched == 1
+    assert row.match_rate == pytest.approx(.5) and row.effect_rows == 1
+    assert row.unmatched_reasons == "control_unresolved=1"
+    unmatched = _unmatched_controls(controls).iloc[0]
+    assert unmatched.reason == "control_unresolved" and unmatched.unmatched == 1
 
 
 def test_admission_contract_is_documented_as_distinct_from_actual_trades():

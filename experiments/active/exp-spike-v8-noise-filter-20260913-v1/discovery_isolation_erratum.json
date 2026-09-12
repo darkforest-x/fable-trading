@@ -1,0 +1,9 @@
+{
+  "artifact": "discovery_v1/signal_features.csv.gz",
+  "discovery_manifest_sha256": "75391cc1d1da4c701147acb77e65884ad4c05e26bb0d525237137e0a509ca098",
+  "validation_outcomes_exposed": true,
+  "impact": "The development-only aggregate tables remain reproducible, but the validation period was not physically isolated. All V8 validation results are nonblind descriptive evidence and cannot authorize production promotion.",
+  "remediation": "The corrected discovery runner requires a physically separate baseline_trades_development input, writes null outcome fields for every validation row, and fails closed on any non-development outcome input.",
+  "blindness_restored": false,
+  "recorded_at": "2026-09-13T03:33:12+08:00"
+}

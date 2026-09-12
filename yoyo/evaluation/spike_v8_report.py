@@ -1,9 +1,10 @@
 """Build the receipt-bound V7 versus frozen V8 noise-filter report.
 
-The replay is the authority for serial execution and account outcomes.  This
-module only aggregates its authenticated stream files.  It deliberately keeps
-the development-only feature screen separate from the replay: the selected
-three-ATR rope rule was frozen before validation outcomes were read.
+The replay is the authority for serial execution and account outcomes.  The
+original V8 discovery artifact accidentally carried validation outcome columns
+even though its candidate summaries were development-only.  Reporting therefore
+requires a bound erratum, strips those columns before feature analysis, and
+treats the historical result as nonblind descriptive evidence.
 """
 from __future__ import annotations
 
@@ -25,6 +26,12 @@ EXPECTED_ADMISSIONS = 132593
 EXPECTED_V7_TRADES = 107238
 ARMS = ("v7", "v8")
 PERIODS = ("development", "validation")
+DISCOVERY_OUTCOME_COLUMNS = (
+    "trade_id", "entry_time", "exit_time", "exit_reason", "initial_risk_frac",
+    "mfe_r", "net_return", "net_r", "gross_return", "gross_r", "censored",
+    "holding_bars", "executed", "closed", "net_positive", "realized_10r",
+    "mfe_10r", "failure_reason",
+)
 
 
 def _bool(frame: pd.DataFrame, column: str) -> pd.Series:
@@ -52,6 +59,29 @@ def _verify_discovery(discovery: Path) -> tuple[dict, pd.DataFrame]:
     features = pd.read_csv(discovery / "signal_features.csv.gz")
     if len(features) != EXPECTED_ADMISSIONS:
         raise ValueError("discovery signal-feature row count disagrees with admission contract")
+    validation = features.period.eq("validation")
+    exposed_columns = [
+        column for column in DISCOVERY_OUTCOME_COLUMNS
+        if column in features and features.loc[validation, column].notna().any()
+    ]
+    exposed = bool(exposed_columns)
+    if exposed:
+        erratum_path = EXP / "discovery_isolation_erratum.json"
+        if not erratum_path.is_file():
+            raise ValueError("validation outcomes are present but no bound discovery isolation erratum exists")
+        erratum = json.loads(erratum_path.read_text())
+        if not erratum.get("validation_outcomes_exposed"):
+            raise ValueError("discovery isolation erratum does not acknowledge validation outcome exposure")
+        if erratum.get("discovery_manifest_sha256") != sha256(manifest_path):
+            raise ValueError("discovery isolation erratum is not bound to this manifest")
+        features = features.copy()
+        for column in exposed_columns:
+            features.loc[validation, column] = np.nan
+        features.loc[validation, "failure_reason"] = "outcome_withheld_validation"
+    features["outcome_available"] = features.period.eq("development")
+    manifest = dict(manifest)
+    manifest["validation_outcomes_exposed"] = exposed
+    manifest["exposed_outcome_columns"] = exposed_columns
     return manifest, features
 
 
@@ -120,6 +150,7 @@ def collect(replay: Path, discovery: Path) -> tuple[dict[str, pd.DataFrame], dic
         "replay_manifest_sha256": sha256(replay / "manifest.json"),
         "discovery_manifest_sha256": sha256(discovery / "manifest.json"),
         "discovery_streams": discovery_manifest.get("streams"),
+        "discovery_validation_outcomes_exposed": discovery_manifest.get("validation_outcomes_exposed", False),
     }
 
 
@@ -216,30 +247,74 @@ def _paired_accounts(accounts: pd.DataFrame) -> pd.DataFrame:
 
 
 def _matched_controls(controls: pd.DataFrame) -> pd.DataFrame:
-    controls = controls.loc[controls.matched].copy()
     if controls.empty:
-        return pd.DataFrame(columns=["arm", "period", "timeframe_min", "sampled", "matched", "delta", "low", "high", "p", "assets"])
+        return pd.DataFrame(columns=[
+            "arm", "period", "timeframe_min", "sampled", "matched", "unmatched",
+            "match_rate", "effect_rows", "unmatched_reasons", "delta", "low", "high", "p", "assets",
+        ])
+    controls = controls.copy()
+    controls["matched"] = _bool(controls, "matched")
     controls["delta"] = pd.to_numeric(controls.net_return_difference, errors="coerce")
     rows = []
     for key, group in controls.groupby(["arm", "period", "timeframe_min"]):
-        rows.append(dict(arm=key[0], period=key[1], timeframe_min=key[2], sampled=len(group), matched=len(group),
-                         **cluster_effect(group.dropna(subset=["delta"]))))
+        matched = group.loc[group.matched]
+        effect = matched.dropna(subset=["delta"])
+        unmatched = group.loc[~group.matched]
+        reason_values = (unmatched["reason"] if "reason" in unmatched else
+                         pd.Series("unspecified", index=unmatched.index, dtype=object))
+        reasons = reason_values.fillna("unspecified").astype(str).value_counts().sort_index()
+        rows.append(dict(
+            arm=key[0], period=key[1], timeframe_min=key[2], sampled=len(group), matched=len(matched),
+            unmatched=len(unmatched), match_rate=float(len(matched) / len(group)), effect_rows=len(effect),
+            unmatched_reasons="; ".join(f"{reason}={count}" for reason, count in reasons.items()) or "none",
+            **cluster_effect(effect),
+        ))
     return pd.DataFrame(rows)
+
+
+def _unmatched_controls(controls: pd.DataFrame) -> pd.DataFrame:
+    """Count every unmatched control and retain its recorded reason."""
+    if controls.empty:
+        return pd.DataFrame(columns=["arm", "period", "timeframe_min", "reason", "unmatched"])
+    controls = controls.copy()
+    controls["matched"] = _bool(controls, "matched")
+    unmatched = controls.loc[~controls.matched].copy()
+    if unmatched.empty:
+        return pd.DataFrame(columns=["arm", "period", "timeframe_min", "reason", "unmatched"])
+    if "reason" not in unmatched:
+        unmatched["reason"] = "unspecified"
+    unmatched["reason"] = unmatched.reason.fillna("unspecified").astype(str)
+    return unmatched.groupby(
+        ["arm", "period", "timeframe_min", "reason"], as_index=False
+    ).size().rename(columns={"size": "unmatched"})
 
 
 def _feature_analysis(features: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     features = features.copy()
     features["v8_kept"] = _bool(features, "gate_not_overheated3")
+    if "outcome_available" not in features:
+        features["outcome_available"] = features.period.eq("development")
+    features["outcome_available"] = _bool(features, "outcome_available")
     numeric = ["rope_distance_atr", "efficiency3", "current_volume_ratio", "current_tr_expansion", "bb_width_ratio_p10", "cost_share_of_close_r"]
     descriptions = features.groupby(["period", "timeframe_min", "v8_kept"], as_index=False).agg(
-        admissions=("v8_kept", "size"), executed=("executed", "sum"), realized_10r=("realized_10r", "sum"),
-        mfe_10r=("mfe_10r", "sum"), net_positive=("net_positive", "sum"), **{f"mean_{name}": (name, "mean") for name in numeric})
+        admissions=("v8_kept", "size"), **{f"mean_{name}": (name, "mean") for name in numeric})
+    # Development admissions may be unexecuted because a stream was already
+    # occupied.  They still have a valid admission-level classification, while
+    # validation rows are withheld wholesale after the isolation erratum.
+    available = features.loc[features.period.eq("development")].copy()
+    outcomes = available.groupby(["period", "timeframe_min", "v8_kept"], as_index=False).agg(
+        outcome_rows=("outcome_available", "size"), executed=("executed", "sum"),
+        realized_10r=("realized_10r", "sum"), mfe_10r=("mfe_10r", "sum"),
+        net_positive=("net_positive", "sum"))
+    descriptions = descriptions.merge(
+        outcomes, on=["period", "timeframe_min", "v8_kept"], how="left")
     # ``not_executed_occupied`` is an admission whose stream already held a
     # position.  It is useful coverage evidence, but no natural trade outcome
     # exists, so it cannot be counted among removed losing trades.
-    actual_nonpositive = _bool(features, "executed") & _bool(features, "closed") & ~_bool(features, "net_positive")
-    features["removed_nonpositive_trade"] = actual_nonpositive
-    reasons = features.loc[~features.v8_kept].groupby(["period", "timeframe_min", "failure_reason"], as_index=False).agg(
+    actual_nonpositive = (_bool(available, "executed") & _bool(available, "closed") &
+                          ~_bool(available, "net_positive"))
+    available["removed_nonpositive_trade"] = actual_nonpositive
+    reasons = available.loc[~available.v8_kept].groupby(["period", "timeframe_min", "failure_reason"], as_index=False).agg(
         filtered_admissions=("failure_reason", "size"), executed=("executed", "sum"),
         missed_realized_10r=("realized_10r", "sum"), removed_nonpositive=("removed_nonpositive_trade", "sum"))
     # These outputs were calculated only on causal feature values and development
@@ -270,19 +345,21 @@ def summarize(tables: dict[str, pd.DataFrame], output: Path, discovery: Path) ->
     retention_summary = _retention_summary(retention)
     paired = _paired_accounts(accounts)
     control = _matched_controls(controls)
+    unmatched_control = _unmatched_controls(controls)
     feature_summary, failure_summary, development_features = _feature_analysis(tables["features"])
     auc = pd.read_csv(discovery / "feature_auc_development.csv")
     deciles = pd.read_csv(discovery / "feature_deciles_development.csv")
     candidates = pd.read_csv(discovery / "candidate_screen_development.csv")
-    auc["scope"] = "development_only_causal_feature_screen"
-    deciles["scope"] = "development_only_causal_feature_screen"
-    candidates["scope"] = "development_only_frozen_before_validation"
+    auc["scope"] = "development_only_aggregate_nonblind_artifact"
+    deciles["scope"] = "development_only_aggregate_nonblind_artifact"
+    candidates["scope"] = "development_only_aggregate_nonblind_artifact"
     result = {
         "signal_summary": signal, "signal_side_venue_summary": signal_by_side_venue,
         "event_summary": event, "account_summary": account,
         "side_summary": side, "venue_summary": venue, "exit_summary": exits,
         "monthly_summary": monthly, "retention_summary": retention_summary,
         "paired_asset_effect": paired, "matched_random_control": control,
+        "matched_random_unmatched": unmatched_control,
         "filter_feature_summary": feature_summary, "filtered_failure_summary": failure_summary,
         "candidate_screen_development": candidates,
         "feature_auc_development": auc, "feature_deciles_development": deciles,
@@ -488,7 +565,8 @@ def build(replay: Path, discovery: Path, output: Path, report: Path) -> None:
     losing_reverse = v7_closed.exit_reason.astype(str).str.startswith("opposite") & v7_losses
     initial_loss_share = float((initial_stop & v7_losses).sum() / v7_losses.sum())
     stop_or_reverse_share = float(((initial_stop & v7_losses) | losing_reverse).sum() / v7_losses.sum())
-    admission_outcomes = tables["features"].groupby("failure_reason", dropna=False, as_index=False).agg(
+    available_features = tables["features"].loc[tables["features"].period.eq("development")]
+    admission_outcomes = available_features.groupby("failure_reason", dropna=False, as_index=False).agg(
         admissions=("failure_reason", "size"), executed=("executed", "sum"),
         mean_net_return=("net_return", "mean"), mean_net_r=("net_r", "mean"))
     admission_outcomes[["admissions", "executed"]] = admission_outcomes[["admissions", "executed"]].astype(int)
@@ -522,8 +600,9 @@ def build(replay: Path, discovery: Path, output: Path, report: Path) -> None:
         "V8 达到了本轮的窄目标：每个周期少约 14%–16% 的信号，原 V7 已实现 10R 大趋势仍保留 91.75%–96.77%，三个周期的平均收盘回撤都下降。它没有证明净收益全面优于 V7：30m PF 由 0.883 降到 0.871；1H 和 4H PF 略升，但同资产配对后的 V8−V7 收益差均未达到 p<0.05。当前应把 V8 看成**追高/追空保护版**，不能宣传成已经找到最赚钱参数。",
         "## V8 规则与时间纪律",
         "V8 完整继承 V7 的 V6 结构确认、BB200 压缩背景、多空信号、收盘确认、次根开盘入场、结构止损和趋势跟随。唯一变化是：多头用 `(close - 六线最高值) / ATR <= 3`，空头用 `(六线最低值 - close) / ATR <= 3`。所有输入均在信号 K 收盘时可知，不回填历史信号。",
-        f"认证回放覆盖 {contract['complete_streams']} 条 Binance、OKX、Gate 数据流，周期为 30m/1H/4H，窗口为 2024-09-10 至 2026-09-10。开发段只用 2024-09-10 至 2025-09-10 选门槛；随后冻结 `selected_rule.json`，才汇总 2025-09-10 至 2026-09-10 的验证结果。",
+        f"认证回放覆盖 {contract['complete_streams']} 条 Binance、OKX、Gate 数据流，周期为 30m/1H/4H，窗口为 2024-09-10 至 2026-09-10。候选汇总表只使用 2024-09-10 至 2025-09-10 的开发段，`selected_rule.json` 也先于串行验证回放写入；但独立复核发现，原 `discovery_v1/signal_features.csv.gz` 仍错误携带了 2025-09-10 至 2026-09-10 的验证结果列。报告生成器现要求哈希绑定的勘误并在分析前清空这些列，但已经发生的暴露无法撤销，所以本轮所有验证结论只能作为**非盲描述性证据**。",
         "## 132,593 条信号究竟失败在哪里",
+        "下面第一张分类表只统计开发段可用结果；全量 132,593 条确认的交易级失败结构由随后 107,238 笔串行交易及退出表给出。验证段确认的特征文件结果已被报告器主动屏蔽。",
         _md_table(admission_outcomes.sort_values("admissions", ascending=False), ["failure_reason", "admissions", "executed", "mean_net_return", "mean_net_r"]),
         _md_table(exit_totals, ["exit_reason", "exits", "losses", "net_return_sum", "net_r_sum"]),
         f"V7 的 {len(v7_closed):,} 笔已结束交易中有 {int(v7_losses.sum()):,} 笔净亏损。初始止损占全部已结束交易 {int(initial_stop.sum()) / len(v7_closed):.2%}，占全部亏损 {initial_loss_share:.2%}；把亏损的反向确认退出也算上，两类合计解释 {stop_or_reverse_share:.2%} 的亏损。真正的主要问题是大量启动没有形成持续性，以及部分确认时价格已经离均线绳索太远；并非缺少更猛烈的当根成交量。",
@@ -548,19 +627,20 @@ def build(replay: Path, discovery: Path, output: Path, report: Path) -> None:
         _md_table(summary["signal_side_venue_summary"], ["period", "timeframe_min", "side", "venue", "v7_admissions", "v8_admissions", "admission_reduction"], 36),
         _md_table(summary["side_summary"], ["arm", "period", "timeframe_min", "side", "trade_rows", "pf", "win_rate", "realized_10r"]),
         _md_table(summary["venue_summary"], ["arm", "period", "timeframe_min", "venue", "trade_rows", "pf", "win_rate"]),
-        _md_table(validation_control, ["arm", "period", "timeframe_min", "sampled", "matched", "delta", "low", "high", "p", "assets"]),
-        "匹配随机对照固定同一数据流方向、时期、事前波动桶、退出引擎和 0.2% 往返成本。验证段只有 1H 的 V7/V8 相对随机入场为显著正值；30m 没有优势，4H 的独立 PF 虽大于 1，但相对匹配随机对照仍不能确认策略本身的增量价值。",
+        _md_table(validation_control, ["arm", "period", "timeframe_min", "sampled", "matched", "unmatched", "match_rate", "effect_rows", "unmatched_reasons", "delta", "low", "high", "p", "assets"]),
+        _md_table(summary["matched_random_unmatched"].loc[summary["matched_random_unmatched"].period.eq("validation")], ["arm", "period", "timeframe_min", "reason", "unmatched"]),
+        "匹配随机对照固定同一数据流方向、时期、事前波动桶、退出引擎和 0.2% 往返成本。`sampled` 是全部抽样目标，`matched` 才是进入效应估计的样本；未匹配项及原因完整保留，不能伪装成 100% 匹配。验证段只有 1H 的 V7/V8 相对随机入场为显著正值；30m 没有优势，4H 的独立 PF 虽大于 1，但相对匹配随机对照仍不能确认策略本身的增量价值。",
         "多空表现明显随年份翻转：验证段空头强于多头，开发段 4H 则是多头强。这支持市场状态门，不能据此把 V8 固化成静态空头版。",
         "## 被过滤与保留样本的特征",
-        _md_table(summary["filter_feature_summary"], ["period", "timeframe_min", "v8_kept", "admissions", "executed", "realized_10r", "mfe_10r", "net_positive", "mean_rope_distance_atr", "mean_efficiency3", "mean_current_volume_ratio"]),
+        _md_table(summary["filter_feature_summary"], ["period", "timeframe_min", "v8_kept", "admissions", "outcome_rows", "executed", "realized_10r", "mfe_10r", "net_positive", "mean_rope_distance_atr", "mean_efficiency3", "mean_current_volume_ratio"]),
         _md_table(summary["filtered_failure_summary"], ["period", "timeframe_min", "failure_reason", "filtered_admissions", "executed", "missed_realized_10r", "removed_nonpositive"]),
         "## 因果连续特征筛选：只看开发段",
         _md_table(summary["feature_auc_development"], ["timeframe_min", "feature", "direction", "auc_net_positive", "auc_realized_10r", "known", "scope"], 30),
         _md_table(top_decile, ["timeframe_min", "feature", "score_decile", "trades", "net_win_rate", "event_pf", "mean_net_return", "realized_10r"], 30),
-        "AUC 和最高十分位只来自开发段，输入均在信号收盘时可知；验证段没有重新计算这些排名，也没有据此二次挑规则。单特征 AUC 普遍接近 0.5，说明不存在一个简单阈值可以把 13 万条信号干净分成好坏。",
+        "AUC 和最高十分位汇总表只来自开发段，输入均在信号收盘时可知。独立复核仍确认原发现文件曾暴露验证结果列，因此不能把这次时间切分描述成物理隔离或盲验证。单特征 AUC 普遍接近 0.5，说明不存在一个简单阈值可以把 13 万条信号干净分成好坏。",
         "## 全局图与逐笔案例",
         *[f"![{figure['selection']}](../experiments/active/exp-spike-v8-noise-filter-20260913-v1/summary_v1/{figure['file']})" for figure in figures],
-        "K 线案例各取最多两张：保留的已实现 10R、被过滤的亏损、以及被误删的已实现 10R。图中标明信号收盘、次根开盘入场、退出、方向绳索边缘、3ATR 边界和过滤原因。蓝色区域是信号后的复盘未来，只用于解释，绝未参与规则选择。",
+        "K 线案例各取最多两张：保留的已实现 10R、被过滤的亏损、以及被误删的已实现 10R。图中标明信号收盘、次根开盘入场、退出、方向绳索边缘、3ATR 边界和过滤原因。蓝色区域是信号后的复盘未来，只用于解释图；它不是因果特征。由于发现文件的隔离缺陷，本轮仍不能作盲选择声明。",
         "## 还能怎样继续降噪",
         "1. **市场状态门**：单独研究信号收盘前的全市场上涨比例、同时站上六线比例、BTC/ETH 4H 状态、横截面成交额与波动扩散。目标是识别 8·19 这类普涨启动期；必须按月前推验证，不能用当天涨幅榜反选币。",
         "2. **同事件折叠与组合风险门**：前端把同币同方向、跨交易所、相近时间的确认合并成一个市场事件，交易层限制高度相关币同时暴露。这会降低通知和开仓频率，但需与信号质量分开评价。",
@@ -570,7 +650,7 @@ def build(replay: Path, discovery: Path, output: Path, report: Path) -> None:
         "## 当前裁决",
         "V8 作为独立 TradingView 研究指标成立：它降低追高追空型噪音并保留大多数大趋势。它暂不替换生产 V7/V1 监控，也不改变 Bark。若要继续提高收益，优先验证市场状态门和早期失败退出；继续强化单根量价只会重演误删尾部赢家的问题。",
         "## Holdout 暴露与诚实边界",
-        "本冻结 V8 配置记录为 **holdout-era exposure #1**。V7 基础数据此前已经被其他研究看过，所以这不是盲 holdout。开发段与验证段分开报告，验证汇总后没有更改 3ATR 阈值。成本沿用 0.2% 往返假设，未完整计入资金费、订单簿冲击和共享组合容量；收盘回撤会低估 K 线内回撤。",
+        "本冻结 V8 配置记录为 **holdout-era exposure #1**。V7 基础数据此前已经被其他研究看过，且本轮 `discovery_v1` 还物理携带了验证 outcome；所以它不是盲 holdout，也不具备生产晋级证据等级。没有记录显示在验证回放后修改过 3ATR，但数据可见本身已经破坏隔离。只有新的前向影子样本能恢复独立证据。成本沿用 0.2% 往返假设，未完整计入资金费、订单簿冲击和共享组合容量；收盘回撤会低估 K 线内回撤。",
         "## 复现命令",
         f"```bash\n.venv/bin/python -m pytest -q tests/evaluation/test_spike_v8_replay.py tests/evaluation/test_spike_v8_noise_study.py tests/evaluation/test_spike_v8_report.py\n.venv/bin/python -m yoyo.evaluation.spike_v8_report --replay {replay} --discovery {discovery} --output {output} --report {report}\n.venv/bin/python scripts/md_to_html.py {report} --out-dir analysis/html\n```",
     ]
