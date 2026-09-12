@@ -176,6 +176,31 @@ def test_variant_block_trade_reader_skips_cross_cutoff_outcome_poison_and_keeps_
     assert trades[["variant", "net_r"]].to_dict("records") == [{"variant": "v7_bb_long", "net_r": 1.5}]
 
 
+def test_trade_reader_skips_header_only_reduced_schema_stream(tmp_path, monkeypatch):
+    path = tmp_path / "results/replay_two_year_20260912_v3/streams/binance_240m/trades.csv.gz"
+    path.parent.mkdir(parents=True)
+    path.write_bytes(gzip.compress(
+        b"variant,side,signal_bar_open,censored,net_r,net_return,gross_return,mfe_r\n"
+    ))
+    monkeypatch.setattr(study, "COMPARE_EXP", tmp_path)
+    catalog = pd.DataFrame(columns=["venue", "symbol", "base_asset"])
+    with pytest.raises(ValueError, match="no safely bounded development trades"):
+        _base_deduplicated_trades(catalog)
+
+
+def test_trade_reader_rejects_nonempty_reduced_schema_stream(tmp_path, monkeypatch):
+    path = tmp_path / "results/replay_two_year_20260912_v3/streams/binance_240m/trades.csv.gz"
+    path.parent.mkdir(parents=True)
+    path.write_bytes(gzip.compress(
+        b"variant,side,signal_bar_open,censored,net_r,net_return,gross_return,mfe_r\n"
+        b"v1_common_execution_long,1,2025-09-09T23:00:00+00:00,False,1.5,.01,.01,3\n"
+    ))
+    monkeypatch.setattr(study, "COMPARE_EXP", tmp_path)
+    catalog = pd.DataFrame(columns=["venue", "symbol", "base_asset"])
+    with pytest.raises(ValueError, match="non-empty trade stream schema changed"):
+        _base_deduplicated_trades(catalog)
+
+
 def test_preflight_asof_clock_matches_final_panel_contract():
     clock = development_asof_clock()
     assert clock.iloc[0] == study.DEVELOPMENT_START

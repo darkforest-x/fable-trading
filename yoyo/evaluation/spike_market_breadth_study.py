@@ -484,6 +484,16 @@ def _selected_csv_rows(path: Path, *, expected_header: list[str], selected: set[
             record_number += 1
 
 
+def _trade_header_and_is_empty(path: Path) -> tuple[list[str], bool]:
+    """Read a trade header and prove whether its gzip payload ends immediately."""
+    with gzip.open(path, "rb") as stream:
+        header_bytes = stream.readline()
+        if not header_bytes:
+            raise ValueError(f"frozen trade stream lacks header: {path}")
+        header = next(csv.reader([header_bytes.decode("utf-8").rstrip("\r\n")]))
+        return header, stream.read(1) == b""
+
+
 def _signal_density(catalog: pd.DataFrame, clock: pd.Series) -> pd.Series:
     """Count distinct V1/V6 base assets with a raw launch in the preceding hour."""
     raw = COMPARE_EXP / "results/replay_two_year_20260912_v3/streams"
@@ -554,7 +564,9 @@ def _base_deduplicated_trades(catalog: pd.DataFrame) -> pd.DataFrame:
     The first pass reads only variant, entry, and exit timestamp scalars.  The
     second pass materializes CSV records only for rows whose entry and exit are
     both in development, so a cross-boundary row cannot materialize outcome
-    fields that appear before ``exit_time`` in the frozen schema.
+    fields that appear before ``exit_time`` in the frozen schema.  Header-only
+    reduced-schema streams are empty and skipped; reduced schemas with a row
+    fail closed.
     """
     root = COMPARE_EXP / "results/replay_two_year_20260912_v3/streams"
     available = {(row.venue, row.symbol) for row in catalog.itertuples(index=False)}
@@ -565,6 +577,11 @@ def _base_deduplicated_trades(catalog: pd.DataFrame) -> pd.DataFrame:
         path = folder / "trades.csv.gz"
         if not path.is_file():
             continue
+        observed_header, is_empty = _trade_header_and_is_empty(path)
+        if not required.issubset(observed_header):
+            if is_empty:
+                continue
+            raise ValueError(f"non-empty trade stream schema changed: {path}")
         header, selected = _variant_block_safe_record_numbers(
             path, monotonic_field="entry_time", bounded_fields=("entry_time", "exit_time"),
             start=DEVELOPMENT_START, cutoff=DEVELOPMENT_END,
