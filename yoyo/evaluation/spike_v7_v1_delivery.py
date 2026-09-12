@@ -12,7 +12,6 @@ import argparse
 import hashlib
 import json
 import math
-import os
 from pathlib import Path
 from typing import Iterable
 
@@ -49,7 +48,9 @@ def _read_csv(folder: Path, name: str, *, gzip: bool = False) -> pd.DataFrame:
 
 
 def _relative(target: Path, base: Path) -> str:
-    return os.path.relpath(target.resolve(), base.resolve())
+    """Use absolute local paths so links survive conversion into analysis/html."""
+    del base
+    return target.resolve().as_posix()
 
 
 def _num(value: object, digits: int = 2) -> str:
@@ -79,6 +80,7 @@ def _markdown_table(frame: pd.DataFrame, columns: Iterable[tuple[str, str, str]]
         for field, _, style in cols:
             value = getattr(row, field)
             values.append(_pct(value) if style == "pct" else _num(value) if style == "num"
+                          else _num(value, 4) if style == "p4"
                           else _integer(value) if style == "int" else str(value))
         rows.append("| " + " | ".join(values) + " |")
     return "\n".join(rows)
@@ -86,34 +88,39 @@ def _markdown_table(frame: pd.DataFrame, columns: Iterable[tuple[str, str, str]]
 
 def _account_summary(accounts: pd.DataFrame) -> pd.DataFrame:
     """Describe independent 1x closed balances without a cross-market curve."""
-    required = {"variant", "timeframe_min", "closed", "insolvency_or_invalid_return_events",
+    required = {"variant", "timeframe_min", "entries", "closed", "insolvency_or_invalid_return_events",
                 "net_return_closed_balance", "max_drawdown_closed_balance"}
     if not required.issubset(accounts):
         raise ValueError("independent account artifact lacks required columns")
     rows: list[dict[str, object]] = []
     for (variant, minutes), part in accounts.groupby(["variant", "timeframe_min"], sort=True):
         closed = pd.to_numeric(part.closed, errors="raise")
+        entries = pd.to_numeric(part.entries, errors="raise")
         failed = pd.to_numeric(part.insolvency_or_invalid_return_events, errors="raise")
         eligible = part.loc[closed.gt(0) & failed.eq(0)].copy()
         returns = pd.to_numeric(eligible.net_return_closed_balance, errors="coerce")
         drawdowns = pd.to_numeric(eligible.max_drawdown_closed_balance, errors="coerce")
         if not returns.notna().all() or not drawdowns.notna().all():
             raise ValueError("closed non-insolvent account requires finite balance metrics")
-        all_with_zero_return = pd.to_numeric(part.net_return_closed_balance, errors="coerce").fillna(0.0)
-        all_with_zero_dd = pd.to_numeric(part.max_drawdown_closed_balance, errors="coerce").fillna(0.0)
+        noninvalid = part.loc[failed.eq(0)].copy()
+        all_with_zero_return = pd.to_numeric(noninvalid.net_return_closed_balance, errors="coerce").fillna(0.0)
+        all_with_zero_dd = pd.to_numeric(noninvalid.max_drawdown_closed_balance, errors="coerce").fillna(0.0)
         rows.append({"variant": variant, "timeframe_min": int(minutes), "total_streams": len(part),
                      "streams_with_closed_trades": int(closed.gt(0).sum()),
-                     "zero_trade_streams": int(closed.eq(0).sum()),
+                     "no_closed_trade_streams": int(closed.eq(0).sum()),
+                     "zero_entry_streams": int(entries.eq(0).sum()),
+                     "censored_only_streams": int((entries.gt(0) & closed.eq(0)).sum()),
                      "insolvency_or_invalid_streams": int(failed.gt(0).sum()),
                      "eligible_closed_streams": len(eligible),
                      "closed_balance_return_median": returns.median(),
                      "closed_balance_return_p90": returns.quantile(.9),
                      "closed_balance_dd_median": drawdowns.median(),
                      "closed_balance_dd_p90": drawdowns.quantile(.9),
-                     "all_streams_zero_return_median": all_with_zero_return.median(),
-                     "all_streams_zero_return_p90": all_with_zero_return.quantile(.9),
-                     "all_streams_zero_dd_median": all_with_zero_dd.median(),
-                     "all_streams_zero_dd_p90": all_with_zero_dd.quantile(.9)})
+                     "all_noninvalid_streams": len(noninvalid),
+                     "all_noninvalid_zero_return_median": all_with_zero_return.median(),
+                     "all_noninvalid_zero_return_p90": all_with_zero_return.quantile(.9),
+                     "all_noninvalid_zero_dd_median": all_with_zero_dd.median(),
+                     "all_noninvalid_zero_dd_p90": all_with_zero_dd.quantile(.9)})
     return pd.DataFrame(rows)
 
 
@@ -166,6 +173,8 @@ def build(raw: Path, post: Path, figures: Path, report: Path, delivery_dir: Path
     reasons = _read_csv(post, "filter_reasons.csv")
     tails = _read_csv(post, "exact_entry_tail_retention.csv")
     controls = _read_csv(post, "matched_control_metrics.csv")
+    conflict_path = post / "v1_conflict_counts.csv"
+    conflicts = pd.read_csv(conflict_path) if conflict_path.is_file() else pd.DataFrame()
     native = _read_csv(post, "historical_v1_native_metrics.csv")
     accounts = _read_csv(post, "independent_stream_closed_balance_metrics.csv.gz", gzip=True)
     native_accounts = _read_csv(post, "historical_v1_native_independent_accounts.csv.gz", gzip=True)
@@ -184,7 +193,8 @@ def build(raw: Path, post: Path, figures: Path, report: Path, delivery_dir: Path
     account_columns = [
         ("timeframe_min", "周期(分钟)", "int"), ("variant", "执行臂", "text"),
         ("total_streams", "总流数", "int"), ("streams_with_closed_trades", "有已平仓交易流", "int"),
-        ("zero_trade_streams", "零交易流", "int"), ("insolvency_or_invalid_streams", "破产/异常流", "int"),
+        ("no_closed_trade_streams", "无已平仓交易流", "int"), ("zero_entry_streams", "零进场流", "int"),
+        ("censored_only_streams", "仅删失流", "int"), ("insolvency_or_invalid_streams", "破产/异常流", "int"),
         ("eligible_closed_streams", "中位/P90样本", "int"),
         ("closed_balance_return_median", "余额收益中位", "pct"), ("closed_balance_return_p90", "余额收益P90", "pct"),
         ("closed_balance_dd_median", "余额DD中位", "pct"), ("closed_balance_dd_p90", "余额DD P90", "pct"),
@@ -214,9 +224,22 @@ def build(raw: Path, post: Path, figures: Path, report: Path, delivery_dir: Path
         for item in figure_rows
     ) or "- 本次产物没有可链接图例。"
     code_id_rows = pd.DataFrame(sorted(raw_manifest.get("source_code_sha256", {}).items()), columns=["source", "sha256"])
-    command = (f"python3 -m yoyo.evaluation.spike_v7_v1_delivery --raw {raw} --post {post} "
-               f"--figures {figures} --report {report} --delivery-dir {delivery_dir}"
-               + (" --allow-partial" if allow_partial else ""))
+    reproduce_root = EXPERIMENT / "results/replay_two_year_20260912_final"
+    reproduce_post = EXPERIMENT / "results/post_two_year_20260912_final"
+    reproduce_figures = EXPERIMENT / "results/figures_two_year_20260912_final"
+    reproduce_delivery = EXPERIMENT / "results/delivery_two_year_20260912_final"
+    command = f"""TASK_PYTHON=.venv/bin/python
+REPLAY={reproduce_root}
+POST={reproduce_post}
+FIGURES={reproduce_figures}
+DELIVERY={reproduce_delivery}
+
+$TASK_PYTHON -m yoyo.evaluation.spike_v7_v1_compare "$REPLAY"
+$TASK_PYTHON -m yoyo.evaluation.spike_v7_v1_report "$REPLAY" "$POST" --controls
+$TASK_PYTHON -m yoyo.evaluation.spike_v7_v1_figures "$REPLAY" "$POST" "$FIGURES"
+$TASK_PYTHON -m yoyo.evaluation.spike_v7_v1_delivery --raw "$REPLAY" --post "$POST" --figures "$FIGURES" \\
+  --report {FINAL_REPORT} --delivery-dir "$DELIVERY"
+$TASK_PYTHON scripts/md_to_html.py --out-dir analysis/html {FINAL_REPORT}"""
     body = f"""# SPIKE V7 BB 背景准入与归档 V1：结果交付
 
 > **状态：{scope}。** 本文只读取已经完成的 replay、post 与 figures 产物；不重跑、不调参、不拉取数据。
@@ -225,12 +248,13 @@ def build(raw: Path, post: Path, figures: Path, report: Path, delivery_dir: Path
 
 V7 B 是既定的 V6 原始事件准入背景：先以当前及此前收盘价计算 BB200（中轨为 SMA200，宽度为 `4 × population_std(close, 200) / abs(SMA200)`）；阈值是**前 500 个**宽度的 P10。信号前 12 根都必须已有阈值，且这 12 根中完整出现过连续 3 根压缩；信号根不进入记忆。要求连续历史至少 712 根。没有要求当前带宽扩张，也没有使用 RSI。V7 只过滤新开仓；未经滤除的反向 V6 原始事件仍在下一根开盘平仓。
 
-共同执行模型固定为：信号后下一根开盘进场；信号前 5 根极值、0.2 ATR 缓冲、最小 2 ATR 风险；2R 后启动 4 ATR 跟踪；往返成本 0.2%。V1 原版历史账本是**原有只多头执行**，与 V1 共同执行、V6、V7 不能混称为同一策略。V1 共同执行的空头 V6 信号仅作反向平仓；同根冲突以平仓优先。表中 PF 为已平仓**净事件收益**的正收益和除以负收益绝对值和，不是 R 的盈亏比。
+共同执行模型固定为：信号后下一根开盘进场；**含信号根的最近 5 根**极值、0.2 ATR 缓冲、最小 2 ATR 风险；2R 后启动 4 ATR 跟踪；往返成本 0.2%。V1 原版历史账本是**原有只多头执行**，与 V1 共同执行、V6、V7 不能混称为同一策略。V1 共同执行的空头 V6 信号仅作反向平仓；同根冲突以平仓优先。表中 PF 为已平仓**净事件收益**的正收益和除以负收益绝对值和，不是 R 的盈亏比。
 
 ## 覆盖与身份
 
 - 冻结可比流：{config['expected_coverage']['comparable_cells']}；原评估流：{config['expected_coverage']['evaluated_cells']}；当前目录完成：{raw_manifest.get('completed_streams')}。
 - 覆盖 Binance / OKX / Gate 的已评估当前目录子集，只含 30m、1H、4H；这不是全部历史上所有币种的池。
+- 评估确认窗口：{config['window']['start']} 至 {config['window']['end_exclusive']}（不含末点）；指标预热从 {config['window']['warmup_start']} 开始，仅供历史特征计算。
 - 三个 OKX SATS 流（30m/1H/4H）因冻结 catalog tick=0 排除，未用历史 raw tickSz 替代。
 - 配置 SHA256：`{config_hash}`；Pine SHA256：`{config['pine_sha256']}`；replay manifest SHA256：`{sha256(raw / 'manifest.json')}`；post manifest SHA256：`{sha256(post / 'post_manifest.json')}`。
 
@@ -240,7 +264,7 @@ V7 B 是既定的 V6 原始事件准入背景：先以当前及此前收盘价�
 
 ## 原版 V1 历史执行（独立参考）
 
-下表来自归档 V1 原版全覆盖历史账本。{'当前共同执行仅为部分 smoke，故这里的数值不得与下方共同执行收益直接比较。' if allow_partial else '完整共同执行完成后才与下方同池口径并列解读。'}
+下表来自归档 V1 原版**已覆盖子集**历史账本。{'当前共同执行仅为部分 smoke，故这里的数值不得与下方共同执行收益直接比较。' if allow_partial else '完整共同执行完成后才与下方同池口径并列解读。'}
 
 {_markdown_table(native, [('timeframe_min', '周期(分钟)', 'int'), ('entries', '进场', 'int'), ('closed', '已平仓', 'int'), ('censored', '删失', 'int'), ('win_rate', '胜率', 'pct'), ('event_pf', 'PF', 'num'), ('mean_net_r', '平均净R', 'num'), ('net_ge_10r', '真实兑现≥10R', 'int')])}
 
@@ -274,17 +298,21 @@ V7 拒绝原因是先验门，而不是事后收益筛选。`insufficient_bb_his
 
 {_markdown_table(tails, [('baseline', '基线', 'text'), ('target', 'V7目标', 'text'), ('timeframe_min', '周期', 'int'), ('baseline_closed', '基线已平仓', 'int'), ('baseline_net_ge_10r', '基线兑现≥10R', 'int'), ('same_entry_tails_retained', '同 entry 留存', 'int'), ('same_entry_tails_missed', '同 entry 未留存', 'int')])}
 
+### V1 同根冲突的退出优先
+
+{_markdown_table(conflicts, [('venue', '交易所', 'text'), ('timeframe_min', '周期', 'int'), ('suppressed_v1_long_entries', '被退出优先抑制的V1多头进场', 'int')]) if len(conflicts) else '当前 post 产物没有 `v1_conflict_counts.csv`：这不等于冲突为零，只表示该聚合文件未产出。原版 V1 历史账本始终未改。'}
+
 ## 单币独立 1x 已平仓余额与回撤
 
-每个市场/周期/segment 单独按 1x notional 已平仓净收益复利；没有跨币、跨交易所或跨流资金曲线。主表的收益/DD 中位与 P90 **只取有已平仓交易且无破产/无效收益事件的流**，因此同时报告总流数、有已平仓交易流、零交易流和异常流，避免零交易流被静默排除后误读回撤。
+每个市场/周期/segment 单独按 1x notional 已平仓净收益复利；没有跨币、跨交易所或跨流资金曲线。主表的收益/DD 中位与 P90 **只取有已平仓交易且无破产/无效收益事件的流**，因此同时报告总流数、有已平仓交易流、无已平仓交易流、零进场流、仅删失流和异常流，避免样本分母被静默改变后误读回撤。
 
 {_markdown_table(account_summary, account_columns)}
 
 ### 含零交易流的附表
 
-这里把零交易余额收益与 DD 记为 0，仅用于展示零交易流对分布的影响，不能与主表混读。
+这里先排除破产/无效收益流，再把其余无已平仓交易流的余额收益与 DD 记为 0；表中分母单列，仅用于展示无已平仓交易流对分布的影响，不能与主表混读。
 
-{_markdown_table(account_summary, [('timeframe_min', '周期', 'int'), ('variant', '执行臂', 'text'), ('total_streams', '总流数', 'int'), ('all_streams_zero_return_median', '余额收益中位（含零）', 'pct'), ('all_streams_zero_return_p90', '余额收益P90（含零）', 'pct'), ('all_streams_zero_dd_median', 'DD中位（含零）', 'pct'), ('all_streams_zero_dd_p90', 'DD P90（含零）', 'pct')])}
+{_markdown_table(account_summary, [('timeframe_min', '周期', 'int'), ('variant', '执行臂', 'text'), ('all_noninvalid_streams', '非异常分母', 'int'), ('all_noninvalid_zero_return_median', '余额收益中位（含零）', 'pct'), ('all_noninvalid_zero_return_p90', '余额收益P90（含零）', 'pct'), ('all_noninvalid_zero_dd_median', 'DD中位（含零）', 'pct'), ('all_noninvalid_zero_dd_p90', 'DD P90（含零）', 'pct')])}
 
 原版 V1 独立账户汇总在 [`historical_v1_native_independent_account_summary.csv`]({_relative(delivery_dir / 'historical_v1_native_independent_account_summary.csv', report.parent)})；它遵循上方原版 V1 的同一范围警告。
 
@@ -292,7 +320,7 @@ V7 拒绝原因是先验门，而不是事后收益筛选。`insufficient_bb_his
 
 每个已实现样本在读取结果前按 entry identity SHA256 选取，每个流/臂/方向至多 16 笔；匹配同 venue+symbol、周期、日历月、因果前 120 根波动分位与方向，seed=0。共同 ready / V7 臂的随机候选还须满足同一 BB 历史就绪门。配对差是事件层，不是共享资本组合收益；本研究复用既往审阅过的数据，**不是盲测**。少于六个月 block 时不报告 p 值。
 
-{_markdown_table(controls, [('timeframe_min', '周期', 'int'), ('variant', '执行臂', 'text'), ('sampled_targets', '预定样本', 'int'), ('matched_targets', '成功配对', 'int'), ('matched_months', '月block', 'int'), ('paired_mean_net_r_difference', '配对平均净R差', 'num'), ('equal_month_mean_net_r_difference', '等权月平均R差', 'num'), ('exploratory_month_block_sign_flip_p', '探索性sign-flip p', 'num')])}
+{_markdown_table(controls, [('timeframe_min', '周期', 'int'), ('variant', '执行臂', 'text'), ('sampled_targets', '预定样本', 'int'), ('matched_targets', '成功配对', 'int'), ('matched_months', '月block', 'int'), ('paired_mean_net_r_difference', '配对平均净R差', 'num'), ('equal_month_mean_net_r_difference', '等权月平均R差', 'num'), ('exploratory_month_block_sign_flip_p', '探索性sign-flip p', 'p4')])}
 
 AUC 不适用：这里没有分类器概率或排序模型，只有规则事件与成对随机入场对照。
 
@@ -318,7 +346,6 @@ AUC 不适用：这里没有分类器概率或排序模型，只有规则事件�
 
 ```bash
 {command}
-python3 scripts/md_to_html.py --out-dir analysis/html {report}
 ```
 
 输入目录：[`raw`]({raw_link})、[`post`]({post_link})、[`figures`]({figure_link})。报告 builder SHA256 在 delivery manifest 中记录；所有表格数字直接读取上述产物。
