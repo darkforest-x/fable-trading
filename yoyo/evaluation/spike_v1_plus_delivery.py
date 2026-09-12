@@ -101,6 +101,10 @@ PF使用逐笔等名义净收益；净R合计不是账户百分比。止损K内�
 
 {table(accounts,{"period":"期间","timeframe_min":"分钟","accounts":"账户","comparable":"可比较","mean_base_return":"基线平均收益","mean_plus_return":"V1+平均收益","mean_base_drawdown":"基线平均回撤","mean_plus_drawdown":"V1+平均回撤","improved_accounts":"收益改善账户","worsened_accounts":"收益下降账户"},["mean_base_return","mean_plus_return","mean_base_drawdown","mean_plus_drawdown"])}
 
+全期最差账户的最大回撤另列，避免均值掩盖尾部风险：
+
+{table(accounts.loc[accounts.period.eq("full")],{"timeframe_min":"分钟","worst_base_drawdown":"基线最差账户回撤","worst_plus_drawdown":"加强版最差账户回撤"},["worst_base_drawdown","worst_plus_drawdown"])}
+
 ## 多空分别看（后一年）
 
 多空交易是双向系统中的归因，不是独立运行的两个单向账户。

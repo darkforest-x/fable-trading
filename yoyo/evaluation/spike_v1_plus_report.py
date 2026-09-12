@@ -123,6 +123,7 @@ def account_comparison(accounts: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFra
                         mean_base_return=float(ok.net_return_base.mean()), mean_plus_return=float(ok.net_return_plus.mean()),
                         median_base_return=float(ok.net_return_base.median()), median_plus_return=float(ok.net_return_plus.median()),
                         mean_base_drawdown=float(ok.max_close_drawdown_base.mean()), mean_plus_drawdown=float(ok.max_close_drawdown_plus.mean()),
+                        worst_base_drawdown=float(ok.max_close_drawdown_base.max()), worst_plus_drawdown=float(ok.max_close_drawdown_plus.max()),
                         profitable_base=int(ok.net_return_base.gt(0).sum()), profitable_plus=int(ok.net_return_plus.gt(0).sum()),
                         improved_accounts=int(ok.return_change.gt(0).sum()), worsened_accounts=int(ok.return_change.lt(0).sum())))
     return paired, pd.DataFrame(out)
