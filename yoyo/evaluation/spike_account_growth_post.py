@@ -527,7 +527,7 @@ def build_post_diagnostics(result_dir: Path, output_dir: Path) -> dict[str, Any]
             # time + 1ns, while ordinary rows remain second-resolution ISO
             # timestamps.  Pandas 2 requires ``mixed`` for that valid pair.
             accepted[name] = pd.to_datetime(accepted[name], utc=True, format="mixed", errors="raise")
-    curve["time"] = pd.to_datetime(curve["time"], utc=True)
+    curve["time"] = pd.to_datetime(curve["time"], utc=True, format="mixed", errors="raise")
     market = build_btc_eth_regime()
     common = load_common_execution_trades(COMMON_EXECUTION_PATH, expected_sha256=COMMON_EXECUTION_SHA256)
     breadth, breadth_meta = build_launch_breadth(common, accepted["entry_time"])
