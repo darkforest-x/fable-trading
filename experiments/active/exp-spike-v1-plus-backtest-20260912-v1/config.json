@@ -1,0 +1,33 @@
+{
+  "experiment_id": "exp-spike-v1-plus-backtest-20260912-v1",
+  "research_only": true,
+  "raw": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v7-v1-compare-20260912-v1/results/replay_two_year_20260912_v3",
+  "raw_manifest_sha256": "37f65499611877c8b8b10f0f2fb7a8c99a07d95cc90cda282f5b8a5ac89d41b6",
+  "expected_streams": 3531,
+  "pine_path": "yoyo/evaluation/pine/spike_burst_v1_plus.pine",
+  "pine_sha256": "5ec3809210c827cc6a5777dc7af59e3eb431f9bdf25a170933e92a3da0861da3",
+  "window_start": "2024-09-10T00:00:00Z",
+  "development_end": "2025-09-10T00:00:00Z",
+  "window_end": "2026-09-10T00:00:00Z",
+  "minutes": [
+    30,
+    60,
+    240
+  ],
+  "variants": [
+    "v1_display_both",
+    "v1_plus_default_both"
+  ],
+  "direction": "both",
+  "roundtrip_cost": 0.002,
+  "initial_account": 10000,
+  "risk_fraction": 0.01,
+  "entry_notional_cap": 1.0,
+  "max_workers": 1,
+  "matched_control_seed": 20260912,
+  "matched_max_targets_per_stream_side_year": 2,
+  "training_eligible": false,
+  "production_eligible": false,
+  "holdout": "Explicit all-date owner authorization; first V1+ default economic run, reused non-blind periods",
+  "plan_sha256": "8b76a27157dcdaf67e2da872749c308c5d660a32fb019ceab1645d95d4d4d1d8"
+}
