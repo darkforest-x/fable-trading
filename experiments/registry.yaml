@@ -14,6 +14,25 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-exit-policy-20260912-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5918c5c2ab4e8be6281606a44fa32798f2dc1cbf
+    status: active
+    question: Compare fixed causal exit policies and capital risk on the same frozen
+      V1/V6/V7 streams.
+    single_variable: One exit change versus baseline; owner-authorized partial-plus-BE
+      combination; entry signals unchanged.
+    result: Full replay in progress. Display-only default 1R/2R/3R changes compiled
+      and saved to TradingView; no economic winner declared.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/active/exp-spike-exit-policy-20260912-v1/PROJECT_PLAN.md
+    artifacts:
+    - spike-exit-policy-20260912-config
+    notes: Owner authorized all historical dates and research stop/exit/risk changes.
+      Reused chronological evaluation, not blind holdout; V1 common-execution long only.
+      No live orders or production changes.
   - experiment_id: exp-spike-v1-plus-implementation-20260912
     source_repo: darkforest-x/fable-trading
     source_commit: dea2d8ba3daabf3c64fffd627d626be86d235169

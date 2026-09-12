@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-exit-policy-20260912-config
+    artifact_type: config
+    role: prespecified_exit_and_capital_scenarios
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5918c5c2ab4e8be6281606a44fa32798f2dc1cbf
+    source_path: experiments/active/exp-spike-exit-policy-20260912-v1/config.json
+    sha256: 5708e842c58f1585d5ff0c9366df30207136e36042a2d7be7d387a8836716fa2
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen before full replay; authorized reused two-year data.
   - artifact_id: spike-v1-plus-implementation-20260912-report
     artifact_type: report
     role: implementation_and_validation_limits
