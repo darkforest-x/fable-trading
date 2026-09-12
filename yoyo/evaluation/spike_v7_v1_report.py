@@ -73,6 +73,12 @@ def independent_account(trades: pd.DataFrame) -> dict:
     insolvency event is flagged instead of compounding a negative balance.
     This is never a cross-market or intrabar mark-to-market drawdown.
     """
+    # Frozen zero-trade ledgers intentionally contain no execution-only fields.
+    # They still represent an observed idle account, not missing market data.
+    if trades.empty:
+        return {"entries":0,"closed":0,"unresolved":0,
+                "insolvency_or_invalid_return_events":0,
+                "net_return_closed_balance":0.,"max_drawdown_closed_balance":0.}
     closed = trades.loc[~bools(trades.censored)].sort_values("entry_time")
     net = closed.net_return.to_numpy(float)
     invalid = int((~np.isfinite(net) | (net <= -1)).sum())

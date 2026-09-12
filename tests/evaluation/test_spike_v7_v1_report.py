@@ -77,3 +77,10 @@ def test_independent_account_keeps_both_sides_and_ignores_censored_marks():
     result = independent_account(trades)
     assert result["insolvency_or_invalid_return_events"] == 1
     assert pd.isna(result["net_return_closed_balance"])
+
+
+def test_zero_trade_archive_is_an_idle_account_without_execution_fields():
+    result = independent_account(pd.DataFrame(columns=["variant", "censored", "net_r", "net_return"]))
+    assert result["entries"] == result["closed"] == result["unresolved"] == 0
+    assert result["net_return_closed_balance"] == result["max_drawdown_closed_balance"] == 0
+    assert result["insolvency_or_invalid_return_events"] == 0
