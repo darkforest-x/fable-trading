@@ -40,6 +40,7 @@ def deliver(post:Path, engine:Path):
     events=read("event_summary.csv"); accounts=read("account_summary.csv")
     signals=read("signal_summary.csv"); pairs=read("same_entry_pairs.csv.gz"); trades=read("trades.csv.gz")
     individual=read("independent_accounts.csv"); controls=read("matched_benchmark_summary.csv")
+    concentration=read("concentration.csv")
     ids=trades[["stream_key","timeframe_min"]].drop_duplicates()
     pairs=pairs.merge(ids,on="stream_key",validate="many_to_one")
     tail=[]
@@ -109,6 +110,13 @@ PF使用逐笔等名义净收益；净R合计不是账户百分比。止损K内�
 ## 点名币种：OKX 1H 后一年
 
 {table(named,{"asset":"币","cohort":"版本","net_return":"账户收益","max_close_drawdown":"收盘最大回撤","valid":"有效"},["net_return","max_close_drawdown"])}
+
+## 利润是否依赖少数大单
+
+以下仅为事后敏感性检查，删除最大盈利行不会重新回放账户。按净R衡量，跨交易所重复行情仍可能重复计数。
+币种集中度使用盈利净R之和，PEPE与1000PEPE在该项合并；这不是跨币风险额度建议。
+
+{table(concentration.loc[concentration.period.eq("validation")],{"timeframe_min":"分钟","cohort":"版本","total_net_r":"净R合计","without_top1_net_r":"去最大1笔","without_top5_net_r":"去最大5笔","without_top10_net_r":"去最大10笔","top_asset":"盈利最多币","top_asset_positive_r_share":"占盈利R比例"},["top_asset_positive_r_share"])}
 
 ## 匹配随机入场：单独的零假设检查
 

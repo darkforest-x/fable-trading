@@ -128,6 +128,28 @@ def account_comparison(accounts: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFra
     return paired, pd.DataFrame(out)
 
 
+def concentration_table(trades: pd.DataFrame) -> pd.DataFrame:
+    """Retrospective sensitivity only; removal never changes any signal or account."""
+    t = trades.loc[~bools(trades.censored)].copy()
+    t["entry_time"] = pd.to_datetime(t.entry_time, utc=True)
+    rows = []
+    for period, left, right in (("full", START, END), ("development", START, SPLIT), ("validation", SPLIT, END)):
+        window = t.loc[t.entry_time.ge(left) & t.entry_time.lt(right)]
+        for (cohort, minutes), group in window.groupby(["cohort", "timeframe_min"]):
+            positive = group.loc[group.net_r.gt(0)]
+            total = float(group.net_r.sum())
+            largest = positive.net_r.nlargest(10)
+            asset_profit = positive.assign(underlying=positive.asset.replace({"1000PEPE":"PEPE"})).groupby("underlying").net_r.sum()
+            pos = float(positive.net_r.sum())
+            rows.append(dict(period=period, cohort=cohort, timeframe_min=minutes,
+                total_net_r=total, without_top1_net_r=total-float(largest.head(1).sum()),
+                without_top5_net_r=total-float(largest.head(5).sum()),
+                without_top10_net_r=total-float(largest.sum()),
+                top_asset_positive_r_share=float(asset_profit.max()/pos) if pos else np.nan,
+                top_asset=str(asset_profit.idxmax()) if pos else ""))
+    return pd.DataFrame(rows)
+
+
 def _hash(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -203,6 +225,7 @@ def run(engine: Path, output: Path) -> None:
               "coin_event_summary.csv":event_tables(trades, ["venue", "symbol", "asset", "cohort", "timeframe_min"]),
               "independent_accounts.csv":accounts, "account_pairs.csv":account_pairs,
               "account_summary.csv":account_summary, "same_entry_pairs.csv.gz":pairs,
+              "concentration.csv":concentration_table(trades),
               "matched_benchmark.csv.gz":controls, "matched_benchmark_summary.csv":benchmark_summary(controls),
               "exit_reasons.csv":trades.groupby(["cohort", "timeframe_min", "side", "exit_reason", "censored"]).agg(
                   trades=("trade_id", "size"), net_r=("net_r", "sum")).reset_index()}

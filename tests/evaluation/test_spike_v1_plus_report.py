@@ -5,6 +5,7 @@ import pytest
 
 from yoyo.evaluation.spike_v1_plus_report import BASELINE, PLUS, metrics, exact_pairs
 from yoyo.evaluation.spike_v1_plus_controls import protection_outcome
+from yoyo.evaluation.spike_v1_plus_report import concentration_table
 
 
 def rows():
@@ -37,6 +38,15 @@ def test_duplicate_entry_is_rejected():
 def test_empty_side_has_unknown_win_rate():
     m = metrics(rows().iloc[:0])
     assert m["entries"] == 0 and np.isnan(m["win_rate"])
+
+
+def test_concentration_excludes_boundary_estimates_and_keeps_losses():
+    t = rows().assign(asset="ETH", timeframe_min=60)
+    result = concentration_table(t)
+    plus = result.loc[result.cohort.eq(PLUS) & result.period.eq("full")].iloc[0]
+    assert plus.total_net_r == -.2
+    assert plus.without_top10_net_r == -.2
+    assert pd.isna(plus.top_asset_positive_r_share)
 
 
 def test_null_benchmark_checks_stop_on_entry_bar_before_profit():
