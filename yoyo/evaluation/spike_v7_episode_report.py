@@ -211,6 +211,15 @@ def render_cases(tables, output):
         gates = episode_admissions(b, context.cache["signals"], context.cache["bb"], context.cache["data_gap"])
         g = gates.loc[signal]
         si, ei = (i-left)/stride, (j-left)/stride
+        prior = gates.loc[(gates.index < signal) & gates.episode.eq(g.episode) & gates.baseline & gates.first_break]
+        if g.episode >= 0 and len(prior):
+            first_clock = prior.index[0]
+            q = int(b.index.get_loc(first_clock))
+            if q >= left:
+                qx, qy = (q-left)/stride, float(b.close.iloc[q])
+                ax.scatter([qx], [qy], marker="^" if prior.side.iloc[0] == 1 else "v", color="#bac4d0", s=45, zorder=5)
+                ax.annotate("Earlier C signal", (qx, qy), xytext=(0, 24), textcoords="offset points", color="#bac4d0", fontsize=8, ha="center",
+                            arrowprops={"arrowstyle": "-", "color": "#bac4d0", "lw": .7})
         for panel in (ax, osc):
             panel.axvspan((i+.5-left)/stride, len(view), color="#527ea2", alpha=.08)
             panel.axvline(si, color="#edd586", linestyle="--", linewidth=1)
