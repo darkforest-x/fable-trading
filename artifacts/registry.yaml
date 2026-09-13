@@ -30567,3 +30567,18 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Binds 21 local files including paired and serial outcomes, HTML and retained failed-aggregation provenance. Only the first run read OHLCV; run_v2 reuses completed tables. BE worsened net R and retained 1 of 2 post-cutoff 10R winners; no live changes.
+
+  - artifact_id: spike-v8-entry-evidence-20260914-delivery
+    artifact_type: manifest
+    role: independent_bb_ma_htf_entry_evidence_and_case_gallery
+    source_repo: darkforest-x/fable-trading
+    source_commit: cb0da47652574fb0b53bed034fe139b956ca00db
+    generator_commit: cb0da47652574fb0b53bed034fe139b956ca00db
+    source_path: experiments/active/exp-spike-v8-entry-evidence-20260914-v1/delivery_receipt.json
+    sha256: 174ed19e3cf122b255dde7bcd37cb9dfef95afae69f1508d635d3ba01c53c660
+    size_bytes: 10858
+    storage_uri: repo://experiments/active/exp-spike-v8-entry-evidence-20260914-v1/delivery_receipt.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Binds 47 canonical source/report/result files. Reused nonblind 113295 V8 events; three independent gates, no accepted universal live filter. Six full-path case charts and two explicitly relaxed losers; local large files stay hash-bound.

@@ -8884,13 +8884,14 @@ experiments:
     notes: Owner explicitly requested this exit change after authorizing available dates. Completed configuration-specific holdout-era use 1 on reused nonblind data; full_v1 failed only during outcome aggregation and run_v2 reuses retained tables without a new OHLCV read; no live changes, no parameter search or assumed same-bar tick ordering.
   - experiment_id: exp-spike-v8-entry-evidence-20260914-v1
     source_repo: darkforest-x/fable-trading
-    status: active
+    status: completed
     question: Do recent BB-segment directional ordering, overlapping MA compression, or completed higher-timeframe opposition identify lower-quality V8 entries?
     single_variable: Three independent fixed same-entry cohort comparisons; no combined gate or parameter search. Highest realized-R cases illustrate outcomes separately from inferential comparisons.
-    result: Registered before the official cache pass; frozen V8 events, costs, entries and exits are unchanged.
-    holdout_consumed: false
+    result: Completed 3531 streams and 113295 events. BB-segment ordering lifts validation win rate only from 28.86 to 29.31 percent while retaining 144 of 319 realized 10R trades; MA-overlap fails to generalize; explicit HTF opposition deletes 2.34 percent with negligible aggregate improvement. No uniform live gate accepted.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_v8_entry_evidence_20260914.md
-    artifacts: []
-    notes: Owner authorizes available dates and requests this research. Each fixed configuration will record authorized holdout-era use 1 on reused nonblind history. Case gallery is retrospective explanatory selection and cannot validate thresholds or causality.
+    artifacts:
+    - spike-v8-entry-evidence-20260914-delivery
+    notes: Authorized fixed-configuration holdout-era use 1 on reused nonblind history. Nine causal/coverage tests pass. Matched net-R intervals include zero; low match coverage and timeframe-side interactions preclude a general improvement claim. Six extreme-profit cases and two explicitly relaxed losers are explanatory only. CSV-only postprocessing and random-context receipts are separate from the price scan.

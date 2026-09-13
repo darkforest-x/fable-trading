@@ -1,0 +1,24 @@
+{
+  "complete": true,
+  "official": true,
+  "research_only": true,
+  "no_ohlcv_read": true,
+  "no_random_controls_created": true,
+  "no_development_selection": true,
+  "source": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v8_entry_random_context.py",
+  "input_sha256": {
+    "experiments/active/exp-spike-v8-entry-evidence-20260914-v1/results/full_v1/event_evidence.csv.gz": "2829bb85f32877a971e8aed8281bbce7c5591255f22b47c0d3bce9835e87bb8c",
+    "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/full_v1/existing_random_controls_reused.csv": "7f6d2a6b794abd42c66a2becf29dbc4ceba4b8b27fc7a5ee6085590411cc553d"
+  },
+  "labels": [
+    "bb_episode_directional_order9_run3",
+    "bb_ma_tight_overlap_run3",
+    "htf_opposed_completed"
+  ],
+  "reuse_limitation": "existing random-control artifact lacks the control exit timestamp; retained for descriptive context only, never development selection",
+  "outputs": {
+    "validation_matched_random_context.csv": "90495ac1f4e4f422f5f08eeded3f5b85d02d008cebf583adbbffabe21f1e2cf8",
+    "validation_label_target_vs_complement.csv": "4765d802b55e8031bdc93b444c73d1c9fa6e9577685b94d1893c175cf13e1787",
+    "join_audit.json": "2dbf0767aafea6abed8d498eabedd6512352af783f1de9828f88fa70b662c4b1"
+  }
+}
