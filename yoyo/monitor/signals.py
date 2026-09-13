@@ -1,9 +1,11 @@
-"""Causal live adapter for the frozen long-only SPIKE Burst V1 Pine replay.
+"""Causal SPIKE Burst V1 adapters with independent long and short replay state.
 
 Only confirmed, aligned 15m/30m/1H/4H bars are accepted.  The V1 source emits a
 signal at a bar close; this monitor records that close as raw signal evidence,
-never a fill.  There is no mirrored short signal.  Closed bars after an event
-may update display-only V1 path state; that state never feeds signal generation.
+never a fill.  The frozen long adapter is unchanged; the short display adapter
+replays Pine's short setting separately and never enters notification delivery.
+Closed bars after an event may update display-only V1 path state; that state
+never feeds signal generation.
 """
 from __future__ import annotations
 
@@ -11,7 +13,9 @@ import numpy as np
 import pandas as pd
 
 from yoyo.evaluation.spike_burst_replay import SOURCE_SHA256, features, replay
-from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL, TIMEFRAMES
+from yoyo.monitor import (SHORT_SIGNAL_KIND, SHORT_SIGNAL_PROTOCOL, SIGNAL_KIND,
+                          SIGNAL_PROTOCOL, TIMEFRAMES, TV_SHORT_PROFILE_ID)
+from yoyo.monitor.v1_short_replay import replay_short
 
 WARMUP = 340
 PROTOCOL = {"version": SIGNAL_PROTOCOL, "source": "yoyo/evaluation/pine/spike_burst_v1.pine",
@@ -36,7 +40,7 @@ def _json_number(value):
 
 
 def _path_performance(replayed: pd.DataFrame, times: np.ndarray, step: int,
-                      position: int, next_position: int) -> dict:
+                      position: int, next_position: int, *, basis: str = "v1_signal_close_reference") -> dict:
     """Summarize V1's closed-bar path after one signal without feeding it back.
 
     Columns used are replay outputs ``exit``, ``exit_price``, ``current_r``,
@@ -72,7 +76,7 @@ def _path_performance(replayed: pd.DataFrame, times: np.ndarray, step: int,
         "bars_held": final_position - position,
         "updated_at_ms": int(times[final_position]) + step,
         "exit_time_ms": int(times[final_position]) + step if stopped else None,
-        "basis": "v1_signal_close_reference",
+        "basis": basis,
     }
 
 
@@ -153,3 +157,88 @@ def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, t
            "protocol":SIGNAL_PROTOCOL,"source_sha256":SOURCE_SHA256}
     return AnalysisResult({"events":events,"chart":chart,"state":state,
                            "protocol":dict(PROTOCOL)}, event_performance)
+
+
+SHORT_PROTOCOL = {
+    "version": SHORT_SIGNAL_PROTOCOL,
+    "source": "yoyo/evaluation/pine/spike_burst_v1.pine",
+    "source_sha256": SOURCE_SHA256,
+    "direction": "short_only",
+    "pine_direction_setting": "空头",
+    "tradingview_default_direction": "多头",
+    "tradingview_default_is_short": False,
+    "tv_profile_id": TV_SHORT_PROFILE_ID,
+    "signal": "confirmed_bar_close",
+    "entry_reference": "next_bar_open_not_known_at_signal",
+    "warmup_bars": WARMUP,
+}
+
+
+def analyze_short(candles: list[dict], higher: list[dict] | None, timeframe: str, *, tick: float,
+                  chart_limit: int | None = None) -> AnalysisResult:
+    """Return independent Pine ``方向 = 空头`` V1 observations.
+
+    This does not alter the frozen long replay or its state.  ``higher`` and
+    ``chart_limit`` are accepted for adapter parity; the current V1 Pine source
+    reads no higher-timeframe inputs and short events always use the full closed
+    prefix regardless of display truncation.
+    """
+    del higher, chart_limit
+    if timeframe not in TIMEFRAMES:
+        raise ValueError("unsupported monitored timeframe")
+    step = TIMEFRAMES[timeframe]
+    rows = []
+    prior = None
+    for row in candles:
+        try:
+            t = int(row["t"]); values = {k: float(row[k]) for k in ("o", "h", "l", "c", "v")}
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError("invalid candle") from exc
+        if prior is not None and t - prior != step:
+            raise ValueError("candles must be continuous")
+        if t % step or not np.isfinite(list(values.values())).all() or values["l"] <= 0 or values["v"] < 0:
+            raise ValueError("invalid candle")
+        if values["h"] < max(values["o"], values["c"], values["l"]) or values["l"] > min(values["o"], values["c"], values["h"]):
+            raise ValueError("invalid candle")
+        rows.append((pd.Timestamp(t, unit="ms", tz="UTC"), values)); prior = t
+    if not rows:
+        return AnalysisResult({"events": [], "chart": [],
+                               "state": {"phase": "loading", "ready": False, "bars": 0, "timeframe": timeframe,
+                                         "direction": "short_only"},
+                               "protocol": dict(SHORT_PROTOCOL)})
+    frame = pd.DataFrame([x[1] for x in rows], index=pd.DatetimeIndex([x[0] for x in rows]))
+    frame.columns = ["open", "high", "low", "close", "volume"]
+    feature_frame = features(frame)
+    replayed = replay_short(feature_frame, float(tick))
+    times = frame.index.asi8 // 1_000_000
+    replay_values = {name: replayed[name].to_numpy(copy=False) for name in
+                     ("burst_down", "risk_valid", "risk", "initial_stop")}
+    events, positions, performance_by_close = [], [], {}
+    for i, stamp in enumerate(times):
+        if bool(replay_values["burst_down"][i]) and bool(replay_values["risk_valid"][i]):
+            close_ms = int(stamp) + step
+            events.append({"protocol": SHORT_SIGNAL_PROTOCOL, "kind": SHORT_SIGNAL_KIND,
+                           "source": "live", "confirmation": "raw", "direction": "short", "side": "short",
+                           "timeframe": timeframe, "timeframe_min": step // 60000, "bar_open_ms": int(stamp),
+                           "bar_close_ms": close_ms, "signal_close_time": close_ms, "is_closed": True,
+                           "price": float(frame.close.iloc[i]), "risk": float(replay_values["risk"][i]),
+                           "initial_stop": float(replay_values["initial_stop"][i]), "source_sha256": SOURCE_SHA256,
+                           "pine_direction_setting": "空头", "tradingview_default_direction": "多头",
+                           "tradingview_default_is_short": False, "tv_profile_id": TV_SHORT_PROFILE_ID,
+                           "display_only": True,
+                           "entry_reference": "next_open", "executable_entry_time": None, "ready": True,
+                           "confirmed": True, "volume_ratio": float(feature_frame.rv.iloc[i]),
+                           "tr_atr_expansion": float(feature_frame.expansion.iloc[i])})
+            positions.append(i)
+    for index, (event, position) in enumerate(zip(events, positions)):
+        next_position = positions[index + 1] if index + 1 < len(positions) else len(replayed)
+        performance = _path_performance(replayed, times, step, position, next_position,
+                                        basis="v1_short_signal_close_reference")
+        performance.update(entry_price=event["price"], initial_stop=event["initial_stop"])
+        performance_by_close[event["bar_close_ms"]] = performance
+    state = {"phase": "ready", "ready": bool(feature_frame.ready.iloc[-1]), "bars": len(frame),
+             "timeframe": timeframe, "direction": "short_only", "protocol": SHORT_SIGNAL_PROTOCOL,
+             "source_sha256": SOURCE_SHA256, "pine_direction_setting": "空头",
+             "tradingview_default_is_short": False}
+    return AnalysisResult({"events": events, "chart": [], "state": state,
+                           "protocol": dict(SHORT_PROTOCOL)}, performance_by_close)

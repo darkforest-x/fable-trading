@@ -10,7 +10,7 @@ import re
 
 from yoyo.monitor import (DIRECT_POLICY, DIRECT_TIMEFRAMES, FRESH_MS, MODEL_PROTOCOL,
                           MONITORED_TIMEFRAMES, TIMEFRAMES, BARK_TIMEFRAMES)
-from yoyo.monitor.policy import finite, is_model_signal, is_tv_start
+from yoyo.monitor.policy import finite, is_model_signal, is_tv_start, is_v1_short_display_signal
 
 
 def arm_v1_bark(store, activated_ms):
@@ -69,6 +69,8 @@ def is_direct_start(event):
 def delivery_error(store, event, now, channel):
     """Return a stable rejection code, or None for a currently deliverable leg."""
     # Recheck at the sender boundary: a durable queue may predate withdrawal.
+    if is_v1_short_display_signal(event):
+        return "short_display_only"
     if event.get("timeframe") not in MONITORED_TIMEFRAMES:
         return "timeframe_disabled_by_owner"
     if channel == "bark" and event.get("timeframe") not in BARK_TIMEFRAMES:

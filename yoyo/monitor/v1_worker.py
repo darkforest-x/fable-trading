@@ -5,15 +5,17 @@ import math
 import os
 import time
 from pathlib import Path
-from yoyo.monitor import MONITORED_TIMEFRAMES, SIGNAL_PROTOCOL, TIMEFRAMES
+from yoyo.monitor import (MONITORED_TIMEFRAMES, SHORT_DISPLAY_CUTOVER_KEY,
+                          SHORT_SIGNAL_PROTOCOL, SIGNAL_PROTOCOL, TIMEFRAMES)
 from yoyo.monitor.okx import OKX
 from yoyo.monitor.model_gate import pending_proof
 from yoyo.monitor.notification_policy import arm_v1_bark, delivery_error
-from yoyo.monitor.signals import analyze
+from yoyo.monitor.signals import analyze, analyze_short
 from yoyo.monitor.store import Store, now_ms
 
 
 PERFORMANCE_BACKFILL_PER_SCAN = 16
+SHORT_BACKFILL_PER_SCAN = 16
 
 
 def _valid_checkpoint(candles: object, timeframe: str) -> bool:
@@ -86,6 +88,11 @@ class V1Scanner:
             self._summary_backfilled = True
         client.synchronize()
         arm_v1_bark(store, client.clock())
+        # Display activation is a separate short identity, not a delivery
+        # policy.  Cold/restart replay before this exchange-clock boundary is
+        # retained as warmup and can never acquire a Bark or YOLO leg.
+        if store.get_meta(SHORT_DISPLAY_CUTOVER_KEY) is None:
+            store.set_meta(SHORT_DISPLAY_CUTOVER_KEY, {"activated_ms": client.clock()})
         store.arm_display_timeframe("15m", client.clock())
         if not self.instruments or started - self.universe_at >= 3_600_000:
             self.instruments = client.instruments()
@@ -98,6 +105,7 @@ class V1Scanner:
         # Outcome projection is display-only.  Migrate a bounded number of
         # unchanged markets per pass so startup cannot turn into a full replay.
         performance_backfill = set(sorted(self._performance_backfill)[:PERFORMANCE_BACKFILL_PER_SCAN])
+        short_backfill_remaining = SHORT_BACKFILL_PER_SCAN
         with ThreadPoolExecutor(max_workers=8, thread_name_prefix="v1-okx") as pool:
             pending = {}
             cell_iter = iter(cells)
@@ -151,19 +159,33 @@ class V1Scanner:
                         checkpoint_cpu_ms = round((time.thread_time() - checkpoint_cpu_started) * 1000, 3)
                         self._checkpointed.add(cell)
                     needs_performance = cell in performance_backfill
-                    if not unchanged or needs_performance:
+                    short_key = f"v1short:last_closed:{symbol}:{timeframe}"
+                    needs_short = not unchanged or store.get_meta(short_key) != close
+                    if unchanged and needs_short:
+                        if short_backfill_remaining:
+                            short_backfill_remaining -= 1
+                        else:
+                            needs_short = False
+                    if not unchanged or needs_performance or needs_short:
                         analyze_started = time.monotonic()
                         analyze_cpu_started = time.thread_time()
                         result = analyze(candles, [], timeframe, tick=float(instrument["tickSz"]), chart_limit=240)
+                        short_result = analyze_short(candles, [], timeframe, tick=float(instrument["tickSz"]), chart_limit=240) if needs_short else None
                         analyze_ms = round((time.monotonic() - analyze_started) * 1000, 3)
                         analyze_cpu_ms = round((time.thread_time() - analyze_cpu_started) * 1000, 3)
                         performance_by_close = getattr(result, "event_performance", {})
-                        for event in result["events"]:
+                        short_performance_by_close = getattr(short_result, "event_performance", {}) if short_result else {}
+                        events = list(result["events"])
+                        if short_result:
+                            events.extend(short_result["events"])
+                        events.sort(key=lambda event: (event["bar_close_ms"], event["side"], event["kind"]))
+                        for event in events:
                             # Older focused test doubles may still attach the
                             # display projection directly. Never persist it as
                             # part of the immutable signal before upsert.
                             performance = event.pop("performance", None)
-                            performance = performance_by_close.get(event["bar_close_ms"], performance)
+                            performance = (short_performance_by_close if event["protocol"] == SHORT_SIGNAL_PROTOCOL
+                                           else performance_by_close).get(event["bar_close_ms"], performance)
                             event.update(symbol=symbol, venue="okx", detected_at_ms=now_ms())
                             # Raw V1 is its own Bark stage when a separately
                             # armed direct policy permits this newly closed bar.
@@ -178,9 +200,14 @@ class V1Scanner:
                             # load/infer it as if it were a new live candidate.
                             if inserted and raw_bark:
                                 store.register_candidate(event, pending_proof(event))
+                        if short_result:
+                            store.set_meta(short_key, close)
                         state = dict(result["state"], symbol=symbol, venue="okx", active=True, stale=False,
                                      gap_count=gaps, available_bars=len(candles), tick_size=instrument["tickSz"],
-                                     chart=result["chart"], events=result["events"][-100:])
+                                     chart=result["chart"], events=events[-100:],
+                                     short_protocol=SHORT_SIGNAL_PROTOCOL,
+                                     short_pine_direction_setting="空头",
+                                     short_tradingview_default_is_short=False)
                         store.upsert_market(state); store.set_meta(key, close)
                         self._performance_backfill.discard(cell)
                 except Exception as exc:

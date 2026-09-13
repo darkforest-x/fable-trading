@@ -1,8 +1,13 @@
 """Owner-authorized, notification-only SPIKE Burst V1 monitor."""
 
-VERSION = "1.14.1"
+VERSION = "1.14.2"
 SIGNAL_PROTOCOL = "spike-burst-v1-monitor-v1"
 SIGNAL_KIND = "spike_burst_v1"
+SHORT_SIGNAL_PROTOCOL = "spike-burst-v1-short-monitor-v1"
+# The protocol, side and source-setting provenance make the short identity
+# independent; retaining the raw V1 kind keeps generic raw-signal consumers.
+SHORT_SIGNAL_KIND = SIGNAL_KIND
+SHORT_DISPLAY_CUTOVER_KEY = "display_policy:spike-v1-short"
 MODEL_PROTOCOL = "spike-burst-v1-yolo-confirmation-v1"
 MODEL_KIND = "yolo_confirmed"
 DIRECT_POLICY = "spike-burst-v1-raw-notifications-v1"
@@ -12,6 +17,7 @@ MODEL_MAX_WAIT = 9
 MODEL_PROFILE_ID = "owner-grade-v1-w18w19-post2to9-wait9"
 MODEL_SHA256 = "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838"
 TV_PROFILE_ID = "spike-burst-v1-default-long-only"
+TV_SHORT_PROFILE_ID = "spike-burst-v1-pine-short-setting"
 FRESH_MS = 30 * 60 * 1000
 TIMEFRAMES = {"15m": 900000, "30m": 1800000, "1H": 3600000, "4H": 14400000}
 MONITORED_TIMEFRAMES = tuple(TIMEFRAMES)

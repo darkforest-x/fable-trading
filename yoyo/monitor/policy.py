@@ -3,7 +3,8 @@ import math
 import re
 
 from yoyo.monitor import (SIGNAL_KIND, SIGNAL_PROTOCOL, MODEL_KIND,
-                          MODEL_PROTOCOL, MODEL_PROFILE_ID, MODEL_SHA256,
+                          MODEL_PROTOCOL, MODEL_PROFILE_ID, MODEL_SHA256, SHORT_SIGNAL_KIND,
+                          SHORT_SIGNAL_PROTOCOL,
                           MODEL_MAX_WAIT, TIMEFRAMES, MONITORED_TIMEFRAMES)
 
 
@@ -17,6 +18,19 @@ def is_tv_start(event):
             and event.get("source") == "live" and event.get("confirmation") == "raw"
             and event.get("direction") == "long" and event.get("side") == "long"
             and event.get("confirmed") is True and event.get("is_closed") is True
+            and finite(event.get("price")) and event["price"] > 0
+            and finite(event.get("risk")) and event["risk"] > 0)
+
+
+def is_v1_short_display_signal(event):
+    """Validate the display-only V1 short observation without widening V1 Bark."""
+    return (event.get("protocol") == SHORT_SIGNAL_PROTOCOL and event.get("kind") == SHORT_SIGNAL_KIND
+            and event.get("source") == "live" and event.get("confirmation") == "raw"
+            and event.get("direction") == "short" and event.get("side") == "short"
+            and event.get("confirmed") is True and event.get("is_closed") is True
+            and event.get("pine_direction_setting") == "空头"
+            and event.get("tradingview_default_direction") == "多头"
+            and event.get("tradingview_default_is_short") is False
             and finite(event.get("price")) and event["price"] > 0
             and finite(event.get("risk")) and event["risk"] > 0)
 

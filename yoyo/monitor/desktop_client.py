@@ -27,7 +27,7 @@ TIMEOUT_SECONDS = 12
 MAX_RESPONSE_BYTES = 20 * 1024 * 1024
 MAX_ACTION_BYTES = 512
 READ_ROUTES = frozenset({"/", "/api/status", "/api/health", "/healthz",
-                         "/api/signals", "/api/candidates", "/api/markets", "/api/chart",
+                         "/api/signals", "/api/signal-ledger", "/api/candidates", "/api/markets", "/api/chart",
                          "/api/shadow/status", "/api/shadow/events", "/api/shadow/market-state"})
 ACTION_PATH = "/api/tradingview/open"
 DESKTOP_IDENTITY = {"target": "windows", "source": "mac", "transport": "ssh-loopback"}

@@ -343,7 +343,7 @@ class Monitor:
                 "scan": {"status": "starting", "completed": 0, "total": 0, "errors": 0},
                 "universe": {"count": 0, "scope": "OKX all live SWAP"}, "counts": {},
                 "runtime": {"host": "This Mac", "notification_only": True,
-                            "signal_mode": "SPIKE V1 长多 15m/30m/1H/4H；原始启动通知，YOLO 通过后追加确认"},
+                            "signal_mode": "SPIKE V1 多空 15m/30m/1H/4H；多头 Bark 与 YOLO 追加确认，空头仅展示"},
                 "snapshot_at_ms": None, "stale": True}
 
     def _current_scan(self, scan):
@@ -370,7 +370,7 @@ class Monitor:
                     "fresh_minutes": FRESH_MS // 60000, "interval_seconds": self.interval, "timeframes": list(MONITORED_TIMEFRAMES),
                     "clock_offset_ms": self.client.offset_ms, "public_requests": self.client.requests,
                     "candle_storage": "memory_only", "history_days": 7,
-                    "signal_mode": "SPIKE V1 长多 15m/30m/1H/4H；原始启动通知，YOLO 通过后追加确认", "signal_kind": MODEL_KIND,
+                    "signal_mode": "SPIKE V1 多空 15m/30m/1H/4H；多头 Bark 与 YOLO 追加确认，空头仅展示", "signal_kind": MODEL_KIND,
                     "notification_mode": "two_stage" if arm_receipt else "two_stage_disarmed", "direct_timeframes": list(DIRECT_TIMEFRAMES),
                     "notification_channels": ["bark"],
                     "bark_timeframes": list(BARK_TIMEFRAMES),

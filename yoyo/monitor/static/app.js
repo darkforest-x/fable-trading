@@ -8,6 +8,7 @@
     signalsLoaded: false, directSignalsLoaded: false, directSignalTotal: 0, candidatesLoaded: false, candidateTotal: 0, candidateCounts: null, marketsLoaded: false, marketsLoading: false, marketsRetryTimer: null, signalTotal: 0, rowLimit: 24, watchLimit: 24, search: "", watchSearch: "", watchScope: "building",
     shadowStatus: null, shadowEvents: [], shadowMarket: [], shadowLoaded: false, shadowLoading: false, shadowTimeframe: "all",
     rawNextCursor: null, rawHasMore: false, rawPaged: false, rawLoadingMore: false,
+    ledger: null, period: "all", outcome: "all", sort: "newest", page: 0,
     timeframe: "all", watchTimeframe: "all", side: "all", signalSource: "live",
     syncing: false, refreshQueued: null, signalQueryRevision: 0, lastSync: null, statusReceivedAt: null, errors: {},
     tradingViewPending: false,
@@ -24,7 +25,7 @@
   const TV_SETTINGS = "近零至少 12 根 · 0.1 ATR · 普通系统标记关闭";
   // Server cursor pages are intentionally smaller than its 2,000-row safety cap.
   // Cards need a browse path, not multi-megabyte concurrent JSON responses.
-  const SIGNAL_PAGE_SIZE = 500;
+  const SIGNAL_PAGE_SIZE = 24;
   const TV_INTERVALS = new Map([["5", "5m"], ["15", "15m"], ["30", "30m"], ["60", "1H"], ["240", "4H"], ["1440", "1Dutc"], ["1Dutc", "1Dutc"]]);
   const apiTimeframe = (value) => ({ "5": "5m", "5m": "5m", "15": "15m", "15m": "15m", "30": "30m", "30m": "30m", "60": "1H", "1h": "1H", "1H": "1H", "240": "4H", "4h": "4H", "4H": "4H", "1440": "1Dutc", "1D": "1Dutc", "1Dutc": "1Dutc", 5: "5m", 15: "15m", 30: "30m", 60: "1H", 240: "4H", 1440: "1Dutc" }[value] || null);
   const uiTimeframe = (value) => ({ "5m": "5", "15m": "15", "30m": "30", "1H": "60", "4H": "240", "1Dutc": "1Dutc", "1D": "1Dutc", "5": "5", "15": "15", "30": "30", "60": "60", "240": "240", "1440": "1Dutc", 5: "5", 15: "15", 30: "30", 60: "60", 240: "240", 1440: "1Dutc" }[value] || null);
@@ -96,12 +97,12 @@
     return normalized.every((value) => value && TV_INTERVALS.has(value)) ? normalized : null;
   };
   const displayOnlyTimeframes = () => runtimeTimeframes("display_only_timeframes") || (runtimeTimeframes("bark_timeframes") ? (runtimeTimeframes("timeframes") || []).filter((value) => !runtimeTimeframes("bark_timeframes").includes(value)) : []);
-  const isDisplayOnly = (item) => displayOnlyTimeframes().includes(item?.timeframe);
+  const isDisplayOnly = (item) => item?.display_only === true || displayOnlyTimeframes().includes(item?.timeframe);
   const notificationPolicy = () => {
     const muted = displayOnlyTimeframes(), bark = runtimeTimeframes("bark_timeframes");
     const mutedNote = muted.length ? `${muted.map(timeframeLabel).join(" / ")} ${DISPLAY_ONLY_NOTE}；` : "";
     const delivery = bark === null ? "Bark 通知周期尚未同步；以实际回执为准。" : !bark.length ? "当前所有周期的 Bark 推送均已关闭。" : twoStage() ? `${bark.map(timeframeLabel).join(" / ")} 收盘启动先推送 Bark，YOLO 通过后追加推送；历史箭头不补发。` : `${bark.map(timeframeLabel).join(" / ")} 仍按模型确认通知，分阶段通知规则尚未启用。`;
-    return mutedNote + delivery;
+    return mutedNote + delivery + " 空头已接入信号中心，当前仅展示。";
   };
   function candidateNotificationNote(item) {
     if (isDisplayOnly(item)) return DISPLAY_ONLY_NOTE;
@@ -254,7 +255,7 @@
     const changesWarmupScope = previousView === "warmup" || state.view === "warmup";
     const entersSignalView = !signalView(previousView) && signalView(state.view);
     if (changesWarmupScope || entersSignalView) {
-      state.rowLimit = 24;
+      state.rowLimit = 24; state.page = 0;
       invalidateSignalQuery();
       if (signalView(state.view)) refresh();
     }
@@ -302,6 +303,7 @@
   }
   function signalPerformance(item) {
     const original = originalSignal(item);
+    if (Object.hasOwn(item, "origin_close_ms")) return item.performance || null;
     if (isConfirmed(item)) {
       const sourceId = String(item?.source_event_id || original?.id || "");
       const originalClose = milliseconds(original?.bar_close_ms ?? original?.signal_close_time ?? item.bar_close_ms);
@@ -322,13 +324,13 @@
   }
   function performanceView(item) {
     const performance = signalPerformance(item);
-    if (!performance) return {
+    if (!performance || !["active", "profit", "loss", "breakeven"].includes(performance.status)) return {
       className: "outcome-unknown", badge: "走势计算中", value: "—", valueLabel: "当前 R",
       peak: "—", stop: finite(originalSignal(item)?.initial_stop) ? price(originalSignal(item).initial_stop) : "—",
       stopLabel: "初始 SL", note: "等待已收盘行情更新",
     };
     const status = String(performance.status || "active");
-    const outcomeR = status === "active" ? performance.current_r : performance.exit_r ?? performance.current_r;
+    const outcomeR = status === "active" ? performance.current_r : performance.exit_r;
     const positive = finite(outcomeR) && Number(outcomeR) > 0.005;
     const negative = finite(outcomeR) && Number(outcomeR) < -0.005;
     const className = status === "profit" ? "outcome-win" : status === "loss" ? "outcome-loss" : status === "breakeven" ? "outcome-even" : positive ? "outcome-active-win" : negative ? "outcome-active-loss" : "outcome-active";
@@ -341,67 +343,52 @@
     };
   }
   function renderSignals() {
-    const items = filteredSignals();
-    const confirmed = state.signalScope === "confirmed", direct = state.signalScope === "direct", warmup = state.view === "warmup", notifying = !warmup && (confirmed || direct);
-    const loaded = state[`${sourceKey()}Loaded`];
-    const fetchError = state.errors[sourceKey()];
-    const source = sourceItems();
-    const hasEarlierPage = state.signalScope === "direct" && state.rawHasMore;
-    $("filtered-count").textContent = `${items.length} 条${hasEarlierPage ? "（当前页）" : ""}`;
-    $("filtered-count").title = hasEarlierPage
-      ? `当前页 ${number(source.length)} 条；可直接读取更早记录`
-      : `当前已加载 ${number(source.length)} 条记录`;
-    $("signal-section-title").textContent = confirmed ? "YOLO 补充确认" : "原始 V1 启动";
-    $("signal-scope-note").textContent = warmup
-      ? "初次启动前的回算信号，仅供复盘，不触发通知。"
-      : state.signalSource === "replay"
-      ? "历史回放只展示已记录事件与之后的真实行情；不触发、也不暗示通知。"
-      : confirmed ? "YOLO 是原始 V1 之后的补充确认，不是启动门；两类实时记录各自以服务回执为准。" : "原版 V1 的冻结监控协议只生成多头启动；卡片 R 按信号收盘参考路径持续更新。";
-    $("signal-window-note").textContent = loaded
-      ? state.signalScope === "direct" && state.rawHasMore
-        ? `已加载 ${number(source.length)} 条；可继续读取更早记录`
-        : `已加载 ${number(source.length)} 条`
-      : "最近 2,000 条 · 每 15 秒同步";
-    const candidateCount = $("candidate-count");
-    if (candidateCount) { candidateCount.textContent = state.candidatesLoaded ? number(state.candidateCounts ? numeric(state.candidateCounts.pending) + numeric(state.candidateCounts.error) : state.candidates.filter((item) => ["pending", "error"].includes(item.model?.status)).length) : "—"; candidateCount.title = "候选状态仅在兼容旧服务时显示"; }
-    $("load-more-signals").classList.toggle("hidden", items.length <= state.rowLimit);
-    $("load-more-signals").disabled = false;
-    $("load-more-signals").textContent = `显示更多（${Math.min(state.rowLimit, items.length)} / ${items.length}）`;
-    $("load-earlier-signals").classList.toggle("hidden", !hasEarlierPage);
-    $("load-earlier-signals").disabled = state.rawLoadingMore;
-    $("load-earlier-signals").textContent = state.rawLoadingMore ? "正在读取更早记录…" : `加载更早记录（再取最多 ${SIGNAL_PAGE_SIZE.toLocaleString("zh-CN")} 条）`;
+    const items = sourceItems(), data = state.ledger;
+    const loaded = Boolean(data), total = data?.total || 0;
+    const confirmed = state.signalScope === "confirmed", warmup = state.view === "warmup";
+    $("filtered-count").textContent = loaded ? `${number(total)} 条` : "—";
+    $("signal-section-title").textContent = confirmed ? "YOLO 补充确认" : "原始 V1 启动 · 多空";
+    $("signal-scope-note").textContent = confirmed
+      ? "统计回到原始启动的参考路径；YOLO 追加确认不会再算一笔。"
+      : "多空分开记录；R 是信号参考路径，未扣交易成本，不代表账户实际成交。";
+    $("signal-window-note").textContent = loaded ? `全量 ${number(total)} 条 · 第 ${state.page + 1} 页` : "正在读取全量统计";
+    $("load-more-signals").classList.toggle("hidden", !data?.has_more);
+    $("load-more-signals").disabled = state.syncing;
+    $("load-more-signals").textContent = "下一页 →";
+    $("load-earlier-signals").classList.toggle("hidden", state.page === 0);
+    $("load-earlier-signals").disabled = state.syncing;
+    $("load-earlier-signals").textContent = "← 上一页";
     $("signal-empty").classList.toggle("hidden", items.length > 0);
     if (!items.length) {
-      const hasFilters = state.search || state.timeframe !== "all" || state.side !== "all";
-      if (fetchError && !loaded) {
-        $("signal-empty-title").textContent = "信号服务暂时不可用";
-        $("signal-empty-description").textContent = "正在自动重试。连接恢复后会展示真实记录。";
-      } else if (!loaded) {
-        $("signal-empty-title").textContent = warmup ? "正在读取预热历史" : state.signalSource === "replay" ? "正在读取历史回放" : "正在连接实时信号服务";
-        $("signal-empty-description").textContent = "真实记录会在这里出现。";
-      } else {
-        $("signal-empty-title").textContent = hasFilters ? "没有符合筛选的记录" : warmup ? "尚无预热回算记录" : state.signalSource === "replay" ? "尚无导入的历史回放记录" : confirmed ? "等待 YOLO 补充确认" : "等待新的收盘启动";
-        $("signal-empty-description").textContent = hasFilters ? "试试其他合约或周期。" : warmup ? "初次启动前的回算信号会在这里单独显示，仅供复盘。" : state.signalSource === "replay" ? "回放数据导入后会在这里单独显示，不会被当作实时通知。" : confirmed ? "YOLO 确认会与原始 V1 启动分开显示。" : "只显示新的已收盘 V1 启动。";
-      }
+      $("signal-empty-title").textContent = state.errors[sourceKey()] ? "信号数据暂时不可用" : loaded ? "没有符合筛选的信号" : "正在读取信号";
+      $("signal-empty-description").textContent = loaded ? "可调整时间范围、方向、周期或状态。" : "正在同步已收盘行情与统计。";
     }
     const focused = document.activeElement?.dataset;
-    const focusedId = focused?.signalId, focusedKind = focused?.signalKind;
-    const now = signalClock();
-    const fresh = notifying ? items.filter((item) => isFresh(item, now)) : [];
-    const earlier = items.filter((item) => !notifying || !isFresh(item, now));
-    const visible = [...fresh, ...earlier].slice(0, state.rowLimit);
-    const freshVisible = visible.filter((item) => notifying && isFresh(item, now));
-    const earlierVisible = visible.filter((item) => !notifying || !isFresh(item, now));
-    const minutes = state.status?.runtime?.fresh_minutes;
-    const clockLabel = direct ? "箭头收盘" : "模型确认";
-    const group = (heading, list, recent) => list.length ? `<div class="signal-group-heading${recent ? " fresh-heading" : ""}"><h3>${heading}<span class="group-count">${list.length}</span></h3><span>${recent ? `${clockLabel}后 ${escapeHTML(number(minutes))} 分钟内` : confirmed ? "按模型确认时间排列" : "按原箭头时间排列"}</span></div><div class="signal-card-grid">${list.map((item) => signalCardHTML(item, now)).join("")}</div>` : "";
-    const freshnessKnown = (direct ? twoStage() : true) && finite(minutes) && Number(minutes) > 0 && finite(state.status?.now_ms) && finite(state.statusReceivedAt);
-    const pendingFreshness = fetchError || state.errors.status || !freshnessKnown;
-    const noFresh = notifying && !fresh.length && items.length ? `<div id="fresh-empty" class="fresh-empty"><strong>${pendingFreshness ? "新鲜状态待同步" : direct ? "当前筛选下暂无新鲜启动" : "当前筛选下暂无新鲜确认"}</strong><span>${pendingFreshness ? "保留已获取的记录，状态同步后重新确认时效。" : `${clockLabel} ${escapeHTML(number(minutes))} 分钟内的信号会优先出现在这里。下方可回看此前记录。`}</span></div>` : "";
-    $("signal-rows").innerHTML = noFresh + group(direct ? "新鲜启动" : "新鲜确认", freshVisible, true) + group(warmup ? confirmed ? "预热 YOLO 补充确认" : "预热原始 V1 启动" : confirmed ? fresh.length ? "更早确认" : "已记录确认" : direct ? "已记录启动" : "指标候选 · 模型等待状态", earlierVisible, false);
+    $("signal-rows").innerHTML = `<div class="signal-card-grid">${items.map((item) => signalCardHTML(item)).join("")}</div>`;
     $("signal-footer-note").textContent = warmup ? "预热回算 · 不触发通知 · 北京时间" : "已收盘确认 · 北京时间";
+    renderLedgerStats();
     renderTradingViewButtons();
-    if (focusedId) Array.from($("signal-rows").querySelectorAll("[data-signal-id]")).find((card) => card.dataset.signalId === focusedId && card.dataset.signalKind === focusedKind && card.dataset.tvSymbol === focused.tvSymbol && card.dataset.tvTimeframe === focused.tvTimeframe)?.focus({ preventScroll: true });
+    if (focused?.signalId) Array.from($("signal-rows").querySelectorAll("[data-signal-id]")).find((card) => card.dataset.signalId === focused.signalId)?.focus({ preventScroll: true });
+  }
+  function renderLedgerStats() {
+    const data = state.ledger, stats = data?.stats;
+    const setR = (id, value) => {
+      const node = $(id);
+      node.textContent = signedR(value);
+      node.classList.toggle("r-positive", finite(value) && Number(value) > 0);
+      node.classList.toggle("r-negative", finite(value) && Number(value) < 0);
+    };
+    setR("stats-realized", stats?.realized_r);
+    setR("stats-floating", stats?.floating_r);
+    $("stats-closed-note").textContent = stats ? `${stats.measured_closed} 笔有 R / ${stats.closed} 笔已结束` : "等待统计";
+    $("stats-active-note").textContent = stats ? `${stats.measured_active} 笔有 R / ${stats.active} 笔运行中` : "等待统计";
+    $("stats-winrate").textContent = finite(stats?.win_rate) ? `${(stats.win_rate * 100).toFixed(1)}%` : "—";
+    $("stats-win-note").textContent = stats ? `盈利 ${stats.profit} · 亏损 ${stats.loss} · 保本 ${stats.breakeven}` : "只统计有退出 R 的信号";
+    $("stats-total").textContent = stats ? number(stats.total) : "—";
+    $("stats-side-note").textContent = stats ? `多 ${stats.long} · 空 ${stats.short} · 缺 R ${stats.missing_r}` : "按原始启动去重";
+    const cellR = (r) => `<td class="${finite(r) && r > 0 ? "r-positive" : finite(r) && r < 0 ? "r-negative" : ""}">${escapeHTML(signedR(r))}</td>`;
+    $("stats-timeframes").innerHTML = (data?.by_timeframe || []).map((row) => `<tr><th scope="row">${escapeHTML(row.timeframe)}</th><td>${row.total}</td><td>${row.active}</td><td>${row.closed}</td>${cellR(row.realized_r)}${cellR(row.floating_r)}<td>${finite(row.win_rate) ? `${(row.win_rate * 100).toFixed(1)}%` : "—"}</td></tr>`).join("");
+    $("stats-basis").textContent = `按原始信号收盘日归属 · 北京时间 · 周一开始 · 全部筛选条件生效 · ${state.errors[sourceKey()] ? "同步失败，保留上次快照" : data ? `更新 ${clockTime(data.as_of_ms)}` : "等待同步"}`;
   }
   function signalCardHTML(item, now = signalClock()) {
     const confirmed = isConfirmed(item), original = originalSignal(item), direct = directReceipt(item);
@@ -419,16 +406,17 @@
       <span class="performance-badge">${escapeHTML(outcome.badge)}</span>
       <dl class="card-performance"><div><dt>${escapeHTML(outcome.valueLabel)}</dt><dd>${escapeHTML(outcome.value)}</dd></div><div><dt>最高 R</dt><dd>${escapeHTML(outcome.peak)}</dd></div><div><dt>${escapeHTML(outcome.stopLabel)}</dt><dd>${escapeHTML(outcome.stop)}</dd></div></dl>
       <span class="performance-note">${escapeHTML(outcome.note)} · 信号收盘参考，并非账户实际成交</span>
-      <span class="card-context"><span>信号 K 线</span><strong>${item.is_closed ? "已确认" : "待确认"}</strong></span>
+      <span class="card-context"><span>${item.side === "short" ? "TV 对照设置" : "信号 K 线"}</span><strong>${item.side === "short" ? "V1 · 方向＝空头" : item.is_closed ? "已确认" : "待确认"}</strong></span>
       <span class="card-confirmed"><span>${isWarmupRecord(item) ? "回算信号 · 仅供复盘" : item.executable_entry_time ? item.source === "replay" ? `回放执行时钟 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : `实际进场 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : item.entry_reference === "next_open" ? "次开盘参考 · 等待实际成交" : "仅信号收盘参考"}</span><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))}</time></span>
       <span class="card-footer"><span class="notification-stack">${item.source === "replay" ? `<span class="candidate-notice">历史回放不通知</span>` : notificationHTML(item)}</span><span class="card-open" data-tradingview-label="整卡打开 TradingView ↗" aria-hidden="true">整卡打开 TradingView ↗</span></span>
     </article>`;
   }
   function applySignalFilters() {
-    renderSignals();
+    state.page = 0; invalidateSignalQuery(); refresh();
   }
   function invalidateSignalQuery() {
     state.signalQueryRevision++;
+    state.ledger = null;
     state.signals = [];
     state.directSignals = [];
     state.performanceSignals = [];
@@ -648,107 +636,60 @@
       $("error-notice").textContent = `${errors.map(([key, error]) => `${names[key] || key}：${error}`).join("；")}。${state.lastSync ? "当前保留上次成功获取的数据，" : ""}15 秒后自动重试。`;
     }
   }
-  function shouldRefreshSignalList(trigger) {
-    // Replay records are immutable journal entries.  After their visible
-    // family has loaded, the 15-second clock only needs the lightweight
-    // runtime status; re-fetching the same 500 cards can overlap chart work.
-    return trigger !== "periodic" || !["replay", "warmup"].includes(signalQuerySource()) || !state[`${sourceKey()}Loaded`];
-  }
   function queueRefresh(trigger) {
-    // A user action or changed query must win over an automatically queued
-    // status tick, so a source/timeframe switch cannot leave an empty list.
     state.refreshQueued = trigger === "manual" ? "manual" : (state.refreshQueued || trigger);
   }
+  function ledgerPath() {
+    const pairs = { source: signalQuerySource(), confirmation: state.signalScope === "confirmed" ? "yolo" : "raw",
+      period: state.period, outcome: state.outcome, sort: state.sort,
+      offset: state.page * SIGNAL_PAGE_SIZE, limit: SIGNAL_PAGE_SIZE, search: state.search };
+    if (state.timeframe !== "all") pairs.timeframe = apiTimeframe(state.timeframe);
+    if (state.side !== "all") pairs.side = state.side;
+    return "/api/signals?view=ledger&" + Object.entries(pairs).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join("&");
+  }
   async function refresh(trigger = "manual") {
-    if (state.view === "shadow") {
-      await loadShadow();
-      return;
-    }
-    // Keep cursor pages serialized with the periodic top-page refresh.  An
-    // aborted client fetch does not cancel the synchronous server work.
-    if (state.rawLoadingMore) { queueRefresh(trigger); return; }
+    if (state.view === "shadow") { await loadShadow(); return; }
     if (state.syncing) { queueRefresh(trigger); return; }
-    const queryRevision = state.signalQueryRevision;
-    const querySource = signalQuerySource();
-    const queryView = state.view;
-    const queryTimeframe = state.timeframe;
-    const queryScope = state.signalScope;
+    const revision = state.signalQueryRevision, view = state.view, source = signalQuerySource(), key = sourceKey();
     state.syncing = true;
     $("refresh-button").disabled = true;
     $("refresh-button").classList.add("loading");
     try {
-      const source = encodeURIComponent(querySource);
-      const timeframe = queryTimeframe === "all" ? "" : `&timeframe=${encodeURIComponent(apiTimeframe(queryTimeframe) || "")}`;
-      // Fetch only the visible signal family.  Replay imports are raw-only;
-      // repeatedly asking for hidden YOLO variants wastes a large response
-      // budget while the reader is paging historical V1 starts.
       const requests = [{ key: "status", path: "/api/status" }];
-      if (shouldRefreshSignalList(trigger) && queryScope === "confirmed") {
-        requests.push({ key: "signals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=yolo${timeframe}` });
-        if (["live", "warmup"].includes(querySource)) requests.push({ key: "rawYoloSignals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw_yolo${timeframe}` });
-        // A YOLO event embeds the original signal as it looked at confirmation
-        // time. Load the current raw read-model separately so its R/SL keeps
-        // moving after source/timeframe switches without turning it into a
-        // notification receipt or a visible raw-card family.
-        if (["live", "warmup"].includes(querySource)) requests.push({ key: "performanceSignals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw${timeframe}` });
-      } else if (shouldRefreshSignalList(trigger) && queryScope === "direct") {
-        requests.push({ key: "directSignals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw${timeframe}` });
-        if (["live", "warmup"].includes(querySource)) requests.push({ key: "rawYoloSignals", path: `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${source}&confirmation=raw_yolo${timeframe}` });
-      }
+      if (signalView()) requests.push({ key, path: ledgerPath() });
       const results = await Promise.allSettled(requests.map((request) => api(request.path)));
-      if (queryRevision !== state.signalQueryRevision || querySource !== signalQuerySource() || queryView !== state.view || queryTimeframe !== state.timeframe || queryScope !== state.signalScope) return;
-      const keys = requests.map((request) => request.key);
-      let anySuccess = false;
+      if (revision !== state.signalQueryRevision || view !== state.view || source !== signalQuerySource() || key !== sourceKey()) return;
       results.forEach((result, index) => {
-        const key = keys[index];
-        if (result.status === "rejected") { state.errors[key] = result.reason.message || "请求失败"; return; }
-        if (key !== "status" && !Array.isArray(result.value.items)) { state.errors[key] = "服务返回的数据格式有误"; return; }
-        delete state.errors[key];
-        anySuccess = true;
-        if (key === "status") { state.status = result.value; state.statusReceivedAt = Date.now(); }
+        const current = requests[index].key;
+        if (result.status === "rejected") { state.errors[current] = result.reason.message || "请求失败"; return; }
+        const data = result.value;
+        if (current === "status") { state.status = data; state.statusReceivedAt = Date.now(); }
         else {
-          const items = result.value.items.filter((item) => item && typeof item === "object" && item.symbol).map((item) => normalizeV1Event(item, querySource))
-            .filter((item) => key === "signals" ? isConfirmed(item) : ["directSignals", "performanceSignals"].includes(key) ? isDirectRecord(item) : Boolean(item));
-          if (key === "directSignals" && state.rawPaged) {
-            state.directSignals = [...items, ...state.directSignals].filter((item, index, rows) => rows.findIndex((other) => sameEvent(other, item)) === index);
-          } else state[key] = items;
-          state[`${key}Loaded`] = true;
-          if (key === "signals") state.signalTotal = numeric(result.value.total, state.signals.length);
-          if (key === "directSignals") {
-            state.directSignalTotal = state.directSignals.length;
-            if (!state.rawPaged) {
-              state.rawNextCursor = result.value.next_cursor || null;
-              state.rawHasMore = Boolean(state.rawNextCursor);
-            }
+          if (!Array.isArray(data.items) || !data.stats || !Array.isArray(data.by_timeframe)) {
+            state.errors[current] = "统计数据格式有误"; return;
           }
-          if (key !== "markets") state[key].sort((a, b) => numeric(b.bar_close_ms) - numeric(a.bar_close_ms) || numeric(b.detected_at_ms) - numeric(a.detected_at_ms));
+          state.ledger = data;
+          state[current] = data.items.map((item) => normalizeV1Event(item, source)).filter(Boolean);
+          state[`${current}Loaded`] = true;
+          if (current === "directSignals") state.directSignalTotal = data.total;
+          else state.signalTotal = data.total;
+          // A dataset shrinking on refresh should return to a valid page.
+          if (!data.items.length && state.page > 0) { state.page = 0; queueRefresh("manual"); }
         }
+        delete state.errors[current];
+        state.lastSync = Date.now();
       });
-      // raw_yolo is an explicit API confirmation value. It belongs in both views,
-      // while keeping raw and YOLO endpoint records otherwise independent.
-      const rawYolo = state.rawYoloSignals.filter((item) => item?.confirmation === "raw_yolo");
-      const appendUnique = (items, additional) => [...items, ...additional].filter((item, index, list) => list.findIndex((other) => sameEvent(other, item)) === index);
-      state.signals = appendUnique(state.signals, rawYolo);
-      state.directSignals = appendUnique(state.directSignals, rawYolo);
-      const resultFor = (key) => results[keys.indexOf(key)];
-      const rawYoloResult = resultFor("rawYoloSignals");
-      const rawYoloTotal = numeric(rawYoloResult?.status === "fulfilled" ? rawYoloResult.value.total : 0);
-      const yoloResult = resultFor("signals");
-      const rawResult = resultFor("directSignals");
-      if (yoloResult?.status === "fulfilled") state.signalTotal = numeric(yoloResult.value.total, state.signals.length) + rawYoloTotal;
-      if (rawResult?.status === "fulfilled") state.directSignalTotal = numeric(rawResult.value.total, state.directSignals.length) + rawYoloTotal;
-      if (anySuccess) state.lastSync = Date.now();
       renderErrors(); renderStatus(); renderSignals(); renderWatch();
-      $("last-sync").textContent = state.errors[sourceKey()] ? "同步失败 · 保留缓存" : `同步 ${clockTime(state.lastSync)}`;
+      $("last-sync").textContent = state.errors[key] ? "同步失败 · 保留缓存" : `同步 ${clockTime(state.lastSync)}`;
       if (state.view === "system" && $("health-json").closest("details").open) loadHealth();
     } finally {
       state.syncing = false;
       $("refresh-button").disabled = false;
       $("refresh-button").classList.remove("loading");
+      $("load-more-signals").disabled = false;
+      $("load-earlier-signals").disabled = false;
       if (state.refreshQueued) {
-        const queuedTrigger = state.refreshQueued;
-        state.refreshQueued = null;
-        refresh(queuedTrigger);
+        const queued = state.refreshQueued; state.refreshQueued = null; refresh(queued);
       }
     }
   }
@@ -781,45 +722,8 @@
     }
   }
 
-  async function loadEarlierRawSignals() {
-    if (state.rawLoadingMore || !state.rawHasMore || !state.rawNextCursor || state.signalScope !== "direct") return;
-    const queryRevision = state.signalQueryRevision;
-    const querySource = signalQuerySource();
-    const queryView = state.view;
-    const queryTimeframe = state.timeframe;
-    const cursor = state.rawNextCursor;
-    state.rawLoadingMore = true;
-    renderSignals();
-    try {
-      const timeframe = queryTimeframe === "all" ? "" : `&timeframe=${encodeURIComponent(apiTimeframe(queryTimeframe) || "")}`;
-      const path = `/api/signals?limit=${SIGNAL_PAGE_SIZE}&source=${encodeURIComponent(querySource)}&confirmation=raw${timeframe}`
-        + `&before_close_ms=${encodeURIComponent(cursor.close_ms)}&before_id=${encodeURIComponent(cursor.event_id)}`;
-      const result = await api(path);
-      if (queryRevision !== state.signalQueryRevision || querySource !== signalQuerySource() || queryView !== state.view || queryTimeframe !== state.timeframe) return;
-      if (!Array.isArray(result.items)) throw new Error("服务返回的数据格式有误");
-      const older = result.items.filter((item) => item && typeof item === "object" && item.symbol)
-        .map((item) => normalizeV1Event(item, querySource)).filter(isDirectRecord);
-      const existing = state.directSignals;
-      state.directSignals = [...existing, ...older].filter((item, index, rows) => rows.findIndex((other) => sameEvent(other, item)) === index)
-        .sort((a, b) => numeric(b.bar_close_ms) - numeric(a.bar_close_ms) || String(b.id).localeCompare(String(a.id)));
-      state.directSignalTotal = state.directSignals.length;
-      state.rawNextCursor = result.next_cursor || null;
-      state.rawHasMore = Boolean(state.rawNextCursor);
-      state.rawPaged = true;
-      delete state.errors.earlierSignals;
-    } catch (error) {
-      // Keep pagination failures separate: a succeeding top-page refresh must
-      // not erase the reason the cursor page stayed at its prior boundary.
-      state.errors.earlierSignals = error.message || "请求失败";
-    } finally {
-      state.rawLoadingMore = false;
-      renderErrors(); renderSignals();
-      if (state.refreshQueued) {
-        const queuedTrigger = state.refreshQueued;
-        state.refreshQueued = null;
-        refresh(queuedTrigger);
-      }
-    }
+  function loadEarlierRawSignals() {
+    if (state.page > 0 && !state.syncing) { state.page--; invalidateSignalQuery(); refresh(); }
   }
 
   function redact(value) {
@@ -833,19 +737,30 @@
   }
   document.querySelectorAll("[data-view]").forEach((button) => button.addEventListener("click", () => setView(button.dataset.view)));
   document.querySelectorAll("[data-timeframe]").forEach((button) => button.addEventListener("click", () => {
-    state.timeframe = button.dataset.timeframe;
+    state.timeframe = button.dataset.timeframe; state.page = 0;
     state.rowLimit = 24;
     document.querySelectorAll("[data-timeframe]").forEach((other) => { const selected = other === button; other.classList.toggle("selected", selected); other.setAttribute("aria-pressed", String(selected)); });
     invalidateSignalQuery();
     refresh();
   }));
   document.querySelectorAll("[data-signal-scope]").forEach((button) => button.addEventListener("click", () => {
-    state.signalScope = button.dataset.signalScope; state.rowLimit = 24;
+    state.signalScope = button.dataset.signalScope; state.rowLimit = 24; state.page = 0;
     document.querySelectorAll("[data-signal-scope]").forEach((other) => { const selected = other === button; other.classList.toggle("selected", selected); other.setAttribute("aria-pressed", String(selected)); });
-    // Hidden families are fetched only when the reader actually switches to them.
-    if (!state[`${sourceKey()}Loaded`]) refresh(); else applySignalFilters();
+    invalidateSignalQuery(); refresh();
   }));
-  $("symbol-search").addEventListener("input", (event) => { state.search = event.target.value; state.rowLimit = 24; applySignalFilters(); });
+  let searchTimer;
+  $("symbol-search").addEventListener("input", (event) => {
+    state.search = event.target.value; state.page = 0;
+    invalidateSignalQuery(); clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => refresh(), 250);
+  });
+  document.querySelectorAll("[data-ledger-period]").forEach((button) => button.addEventListener("click", () => {
+    state.period = button.dataset.ledgerPeriod;
+    document.querySelectorAll("[data-ledger-period]").forEach((other) => { const selected = other === button; other.classList.toggle("selected", selected); other.setAttribute("aria-pressed", String(selected)); });
+    applySignalFilters();
+  }));
+  $("outcome-filter").addEventListener("change", (event) => { state.outcome = event.target.value; applySignalFilters(); });
+  $("sort-filter").addEventListener("change", (event) => { state.sort = event.target.value; applySignalFilters(); });
   $("watch-search").addEventListener("input", (event) => { state.watchSearch = event.target.value; state.watchLimit = 24; renderWatch(); });
   document.querySelectorAll("[data-watch-scope]").forEach((button) => button.addEventListener("click", () => {
     state.watchScope = button.dataset.watchScope; state.watchLimit = 24;
@@ -863,7 +778,7 @@
     renderShadow();
   }));
   document.querySelectorAll("[data-signal-source]").forEach((button) => button.addEventListener("click", () => {
-    state.signalSource = button.dataset.signalSource;
+    state.signalSource = button.dataset.signalSource; state.page = 0;
     state.rowLimit = 24; invalidateSignalQuery();
     document.querySelectorAll("[data-signal-source]").forEach((other) => { const selected = other === button; other.classList.toggle("selected", selected); other.setAttribute("aria-pressed", String(selected)); });
     refresh();
@@ -872,7 +787,7 @@
   if (sideFilter) sideFilter.addEventListener("change", (event) => { state.side = event.target.value; state.rowLimit = 24; applySignalFilters(); });
   $("refresh-button").addEventListener("click", () => refresh());
   $("load-more-signals").addEventListener("click", () => {
-    if (state.rowLimit < sourceItems().length) { state.rowLimit += 24; renderSignals(); }
+    if (state.ledger?.has_more && !state.syncing) { state.page++; invalidateSignalQuery(); refresh(); }
   });
   $("load-earlier-signals").addEventListener("click", loadEarlierRawSignals);
   function activateRow(event, type) {

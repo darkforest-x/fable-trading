@@ -349,3 +349,22 @@ Signal thresholds, model weights, nine-bar confirmation budget and the 30-minute
 freshness gate do not change. Daily model generalization/profitability is not
 established by the engineering tests. Official bar contract:
 https://www.okx.com/docs-v5/en/#order-book-trading-market-data-get-candlesticks
+
+### 1.14.2 · 多空信号与全量 R 账本（2026-09-13）
+
+- 信号中心新增真实 V1 空头：按照同一 Pine 源的“方向=空头”输入独立回放，原有多头身份与状态保持不变。这是多、空两个独立参考流的并集，不是 Pine“方向=双向”的共享持仓回放。空头以 `spike-burst-v1-short-monitor-v1` 记录，当前只展示，不进入 Bark 或 YOLO。
+- 首次同步持久化 `display_policy:spike-v1-short`。切点之前的空头进入“预热历史”；缓存补齐每轮最多 16 个未变化单元，出现新收盘时正常更新。历史回填不冒充新信号、不补通知。
+- `GET /api/signal-ledger` 提供全量统计与分页。参数：`source=live|warmup|replay`、`confirmation=raw|yolo`、`period=today|week|all`、`timeframe=15m|30m|1H|4H`、`side=long|short`、`search`、`outcome=all|active|profit|loss|breakeven|unknown`、`sort=newest|oldest|r_desc|r_asc`、`offset`、`limit`（1–2000）。旧 `/api/signals` 保留兼容，raw 返回多、空协议。
+- 统计先按原始事件去重，YOLO 关联原始信号的最新参考路径。按原始信号收盘日归属北京时间当天/本周（周一开始）；不是当天平仓现金流。所有筛选先于统计和分页，四周期表遵循相同筛选。
+- 已结束合计用 `exit_r`，运行中合计用 `current_r`；缺失及非有限值保持未知，不借用峰值 R。胜率分母为具有有限退出 R 的已结束信号，保本计入分母。这些是未扣成本的信号参考 R，不是实际账户成交或可累乘账户收益。
+- 历史回放记录没有可信 `performance` 时显示“等待计算/—”，不会把 `covered_ledger` 中不同执行时钟与成本口径的收益混入信号参考统计。
+- 卡片整卡打开本机 TradingView、深浅色与无右侧预览布局保留；新增多空、状态、时间筛选和全量 R 排序。兼容旧 Windows 网关的前端使用 `/api/signals?view=ledger` 只读别名，无需同步升级 Windows 客户端；新 `/api/signal-ledger` 也在更新版网关 allowlist 中。
+
+定向验证：
+
+```bash
+.venv/bin/python -m pytest -q tests/monitor/test_signal_analytics.py tests/monitor/test_spike_v1_api_replay.py tests/monitor/test_v1_short_signals.py tests/monitor/test_v1_card_performance.py tests/monitor/test_v1_worker_cache.py tests/monitor/test_v1_status_snapshot.py
+node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.test.cjs
+```
+
+工程验证使用合成事件：2003 条全量分页、北京时间边界、YOLO 去重/最新 R、多空隔离与历史切点。浏览器实测盈利筛选按退出 R 降序、当天统计、预热空头卡片与两种主题。未做新的策略收益评估，不代表空头表现已验证。

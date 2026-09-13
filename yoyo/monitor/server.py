@@ -14,7 +14,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from yoyo.monitor import FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, MONITORED_TIMEFRAMES, SIGNAL_KIND, SIGNAL_PROTOCOL
+from yoyo.monitor import FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, MONITORED_TIMEFRAMES, SIGNAL_KIND, SIGNAL_PROTOCOL, SHORT_SIGNAL_PROTOCOL
 from yoyo.monitor.service import Monitor
 from yoyo.monitor.shadow_api import (SHADOW_DATABASE, ShadowBookUnavailable, events as shadow_events,
                                      market_snapshots as shadow_market_snapshots,
@@ -110,10 +110,37 @@ def create_app(runtime=None, start_monitor=True):
     def health():
         return monitor.health()
 
+    @app.get("/api/signal-ledger")
+    def signal_ledger(source: str = "live", confirmation: str = "raw", period: str = "all",
+                      timeframe: str = None, side: str = None, search: str = "", outcome: str = "all",
+                      sort: str = "newest", offset: int = Query(0, ge=0), limit: int = Query(24, ge=1, le=2000)):
+        from yoyo.monitor.signal_analytics import ledger
+        try:
+            return ledger(store, now=monitor.client.clock(), source=source, confirmation=confirmation,
+                          period=period, timeframe=timeframe, side=side, search=search,
+                          outcome=outcome, sort=sort, offset=offset, limit=limit)
+        except ValueError as exc:
+            raise HTTPException(400, "不支持的统计筛选条件。") from exc
+        except RuntimeError as exc:
+            raise HTTPException(503, str(exc)) from exc
+
     @app.get("/api/signals")
     def signals(limit: int = Query(200, ge=1, le=2000), symbol: str = None, timeframe: str = None,
                 kind: str = None, side: str = None, source: str = None, confirmation: str = None,
-                before_close_ms: int = None, before_id: str = None):
+                before_close_ms: int = None, before_id: str = None, view: str = None,
+                period: str = "all", search: str = "", outcome: str = "all", sort: str = "newest",
+                offset: int = 0):
+        # Existing Windows gateways already permit this read-only route and
+        # forward its query unchanged; a Mac UI update must not require a
+        # simultaneous remote gateway deployment just to keep cards working.
+        if view == "ledger":
+            if offset < 0:
+                raise HTTPException(400, "分页位置不能为负数。")
+            return signal_ledger(source=source or "live", confirmation=confirmation or "raw", period=period,
+                                 timeframe=timeframe, side=side, search=search, outcome=outcome,
+                                 sort=sort, offset=offset, limit=limit)
+        if view is not None:
+            raise HTTPException(400, "不支持的信号视图。")
         started_ns = time.monotonic_ns()
         dispatch_trace("handler:/api/signals")
         if source not in (None, "live", "warmup", "replay") or confirmation not in (None, "raw", "yolo", "raw_yolo"):
@@ -136,7 +163,7 @@ def create_app(runtime=None, start_monitor=True):
         if kind not in (None, MODEL_KIND, SIGNAL_KIND):
             raise HTTPException(400, "支持指标启动或 YOLO 确认信号。")
         direct = kind == SIGNAL_KIND
-        protocol = SIGNAL_PROTOCOL if kind == SIGNAL_KIND else MODEL_PROTOCOL if kind == MODEL_KIND else None
+        protocol = (SIGNAL_PROTOCOL, SHORT_SIGNAL_PROTOCOL) if kind == SIGNAL_KIND else MODEL_PROTOCOL if kind == MODEL_KIND else None
         if (before_close_ms is None) != (before_id is None):
             raise HTTPException(400, "cursor requires both close time and event id")
         event_timing = {} if DISPATCH_TRACE else None
@@ -158,7 +185,8 @@ def create_app(runtime=None, start_monitor=True):
         cursor = ({"close_ms": rows[-1]["bar_close_ms"], "event_id": rows[-1]["id"]}
                   if len(rows) == limit else None)
         dispatch_trace(f"signals:return={len(rows)}", started_ns=started_ns)
-        return {"items": rows, "total": len(rows), "kind": kind, "protocol": protocol,
+        return {"items": rows, "total": len(rows), "kind": kind, "protocol": SIGNAL_PROTOCOL if direct else protocol,
+                "protocols": list(protocol) if isinstance(protocol, tuple) else ([protocol] if protocol else []),
                 "source": source, "confirmation": confirmation, "next_cursor": cursor,
                 "display_cutoff_ms": display_cutoff_ms}
 
