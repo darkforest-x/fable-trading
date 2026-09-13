@@ -1,0 +1,75 @@
+{
+  "receipt_kind": "TradingView native Pine final verified screenshot reading",
+  "created_at": "2026-09-14T02:30:42+08:00",
+  "status": "verified_for_internal_arithmetic_consistency",
+  "supersedes": {
+    "path": "run_receipt.json",
+    "preservation": "The earlier receipt remains unchanged as the original failed manual transcription.",
+    "replaced_fields": {
+      "confirmed_bars": { "old_manual": 794, "final_native_screenshot": 1794 },
+      "first_complete_warmup_utc": { "old_manual": "2026-07-14 16:00", "final_native_screenshot": "2026-08-14 07:00" },
+      "net_r": { "old_manual": 38.191, "final_native_screenshot": 38.491 },
+      "cost_r": { "old_manual": 0.738, "final_native_screenshot": 0.438 }
+    }
+  },
+  "source": {
+    "repository_source_sha256": "ae53ee8a8d6b0474586e0829cc1d3646e57d99cb446381e42ffc7caeb16a7db7",
+    "executed_editor_text_evidence": "Select All -> Copy -> clipboard.readText()",
+    "normalization": "Retained //@version=6; removed only blank lines and full-line comments; normalized LF line endings.",
+    "normalized_editor_text_sha256": "ae146b72487fc0a2a14970c747c3cf6f98d8fd6c104cb4838e09fcc9593c226c",
+    "normalized_editor_text_utf8_bytes": 32932
+  },
+  "environment": {
+    "venue": "TradingView web native Pine",
+    "symbol": "CRYPTOCAP:TOTAL2",
+    "interval": "1 hour",
+    "strategy_shorttitle": "V8 TOTAL2 R",
+    "history_selector": "Jul 1, 2026 — Sep 14, 2026",
+    "chart_timezone": "UTC+8",
+    "no_csv_export": true,
+    "no_deep_backtesting": true
+  },
+  "final_native_status_table_visual_reading": {
+    "confirmed_bars": 1794,
+    "first_open_utc": "2026-07-01 00:00",
+    "last_close_utc": "2026-09-13 18:00",
+    "first_complete_warmup_close_utc": "2026-08-14 07:00",
+    "first_v8_confirmation_close_utc": "2026-08-19 09:00",
+    "raw_v6_bb_admitted_final_v8": [3, 1, 1],
+    "v8_submissions_long_short": [1, 1, 0],
+    "volume_ratio3_known_at_least_1_5": [1454, 63],
+    "raw_opposite_exits": 0,
+    "closed_trades_valid_r": [1, 1],
+    "invalid_next_open_risk": 0,
+    "gross_r_total_mean": [38.928, 38.928],
+    "net_r_total": 38.491,
+    "cost_r_total": 0.438,
+    "gross_win_rate_profit_factor": ["100%", "NaN"],
+    "first_last_closed_utc": ["2026-08-22 05:00", "2026-08-22 05:00"]
+  },
+  "native_list_of_trades_dom": {
+    "trade": "1 Long",
+    "exit_chart_utc_plus_8": "Aug 22, 2026, 13:00",
+    "entry_chart_utc_plus_8": "Aug 19, 2026, 17:00",
+    "exit_price_usd": "1.05 T",
+    "entry_price_usd": "888.7 B",
+    "size": 1,
+    "native_net_pnl_usd": "+158,098,870,000.00",
+    "native_return": "+17.79%"
+  },
+  "screenshot_evidence": {
+    "producer": "CUA audit.getScreenshot() followed by nodeRepl.emitImage(statusShot)",
+    "encoding": "JPEG",
+    "byte_length": 125937,
+    "sha256": "f6e440b9e90ec1dbfb275f1a5658582d5e74dfb3a518f92e92c1c47a0799383e",
+    "disk_path": null,
+    "availability": "The image existed only as the CUA tool-return Uint8Array and image payload; the documented interface returned no filesystem path or base64 field. This receipt does not claim the image was saved to disk.",
+    "review_boundary": "Parent independently checked arithmetic consistency from the screenshot reading; this is not independent image authenticity verification."
+  },
+  "consistency_checks": {
+    "time_range_hours": "2026-07-01 00:00 to 2026-09-13 18:00 UTC equals 1794 one-hour bars",
+    "volume_ratio_count_bound": "1454 <= 1794",
+    "cost_relation": "0.438R is consistent after displayed rounding with the 0.20% cost formula and the native entry/PnL-derived risk; net 38.491R = gross 38.928R - cost 0.438R after rounding"
+  },
+  "interpretation_boundary": "TOTAL2 is an index path. Native USD PnL is not account PnL; only the script's R sensitivity and visible native execution are recorded."
+}

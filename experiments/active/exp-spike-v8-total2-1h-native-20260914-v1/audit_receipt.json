@@ -1,0 +1,62 @@
+{
+  "purpose": "Native TradingView re-run audit of run_receipt.json; this is a verification record, not a publishable performance result.",
+  "old_receipt": "run_receipt.json",
+  "old_receipt_status": "preserved unchanged as the original manual transcription; superseded for the corrected fields below",
+  "observed_at_local": "2026-09-14T02:22:07+08:00",
+  "source_evidence": {
+    "editor_text_provenance": "Pine Editor Select All, Copy, tab.clipboard.readText(), LF normalization, then crypto.subtle SHA-256",
+    "normalized_utf8_bytes": 32932,
+    "normalized_sha256": "ae146b72487fc0a2a14970c747c3cf6f98d8fd6c104cb4838e09fcc9593c226c",
+    "matches_frozen_normalized_source": true,
+    "compiler_observation": "The strategy was added to the chart and the active V8 TOTAL2 R strategy legend appeared."
+  },
+  "native_list_of_trades_ax_raw": {
+    "history_selector": "Jul 1, 2026 — Sep 14, 2026",
+    "trade_number_and_type": "1 Long",
+    "date_and_time_cells_in_chart_timezone_utc_plus_8": [
+      "Exit: Aug 22, 2026, 13:00",
+      "Entry: Aug 19, 2026, 17:00"
+    ],
+    "price_cells": [
+      "1.05 T USD",
+      "888.7 B USD"
+    ],
+    "size": "1",
+    "net_pnl": "+158,098,870,000.00 USD",
+    "return": "+17.79%"
+  },
+  "status_table_screenshot_observation_unverified": {
+    "note": "The CUA tool emitted a full chart screenshot payload for this run; no local image path was supplied by the tool and no download/export was used. Values below are a visual transcription only.",
+    "first_confirmed_open_utc_visually_read": "2026-07-01 00:00",
+    "last_confirmed_close_utc_visually_read": "2026-09-13 18:00",
+    "first_complete_warmup_utc_visually_read": "2026-07-14 16:00",
+    "first_v8_confirmation_close_utc_visually_read": "2026-08-19 09:00",
+    "raw_v6_bb_admitted_final_v8_visually_read": "3 / 1 / 1",
+    "v8_submissions_long_short_visually_read": "1 / 1 / 0",
+    "volume_ratio_known_at_least_1_5_visually_read": "1454 / 63",
+    "closed_trades_valid_r_visually_read": "1 / 1",
+    "invalid_next_open_risk_visually_read": "0",
+    "gross_r_total_mean_visually_read": "38.928 / 38.928",
+    "net_r_total_cost_0_20pct_visually_read": "38.491",
+    "cost_r_total_visually_read": "0.438",
+    "gross_r_win_rate_profit_factor_visually_read": "100% / NaN",
+    "first_last_closed_trade_utc_visually_read": "2026-08-22 05:00 / 2026-08-22 05:00"
+  },
+  "differences_from_old_manual_transcription": {
+    "net_r_total_cost_0_20pct": {
+      "old": "38.191",
+      "audit_visual": "38.491"
+    },
+    "cost_r_total": {
+      "old": "0.738",
+      "audit_visual": "0.438"
+    }
+  },
+  "audit_outcome": {
+    "status": "not_publishable",
+    "reason": "The screenshot's visible count/time fields still require independent machine-readable verification before they may be used. In particular, a visually read 794 confirmed-bar value would conflict with the displayed 1454 known-volume count and with the written Pine control flow. The screenshot may be truncating or obscuring a leading digit, so this audit does not assert 794 as a fact.",
+    "native_usd_pnl_is_not_account_pnl": true,
+    "csv_export_used": false,
+    "deep_backtesting_used": false
+  }
+}

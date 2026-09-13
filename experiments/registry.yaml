@@ -8923,3 +8923,16 @@ experiments:
     artifacts:
     - spike-v8-entry-evidence-20260914-delivery
     notes: Authorized fixed-configuration holdout-era use 1 on reused nonblind history. Nine causal/coverage tests pass. Matched net-R intervals include zero; low match coverage and timeframe-side interactions preclude a general improvement claim. Six extreme-profit cases and two explicitly relaxed losers are explanatory only. CSV-only postprocessing and random-context receipts are separate from the price scan.
+  - experiment_id: exp-spike-v8-total2-1h-native-20260914-v1
+    source_repo: darkforest-x/fable-trading
+    status: completed
+    question: Can frozen V8 be evaluated on authentic CRYPTOCAP TOTAL2 one-hour index history using the native chart strategy report?
+    single_variable: No signal tuning; keep the frozen V8 Pine prefix and use a separately disclosed native execution harness.
+    result: Native compiled run loads 1794 closed hours with one completed long from Aug 19 to Aug 22. Gross 38.928R and fixed 0.20-percent-cost sensitivity net 38.491R. Final screenshot reading and arithmetic checks supersede rejected manual receipts; no account-return or long-run win-rate inference.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v8_total2_1h_native_20260914.md
+    notes: Owner-authorized reused nonblind history, configuration use 1 with same-source rereads. First fully ready close is Aug 14 07 UTC; warmup delay and Volume aggregation remain unverified. No matched-random control or Python fill parity. Original scripts and monitor unchanged; temporary layout restored.
+    artifacts:
+    - spike-v8-total2-1h-native-20260914-delivery

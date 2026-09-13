@@ -1,0 +1,58 @@
+{
+  "run_kind": "TradingView native Pine v6 strategy harness",
+  "observed_at_local": "2026-09-14T02:18:12+08:00",
+  "chart": {
+    "symbol": "CRYPTOCAP:TOTAL2",
+    "interval": "1 hour",
+    "chart_timezone_visible": "UTC+8",
+    "bar_style": "Candles",
+    "current_data_window_volume_visible": "128 B",
+    "volume_semantics_or_history_completeness": "unverified"
+  },
+  "source": {
+    "frozen_file": "spike_v8_total2_1h_native.pine",
+    "frozen_file_sha256": "ae53ee8a8d6b0474586e0829cc1d3646e57d99cb446381e42ffc7caeb16a7db7",
+    "pasted_form": "full-line comments and blank lines removed only",
+    "pasted_normalized_utf8_bytes": 32932,
+    "pasted_normalized_sha256": "ae146b72487fc0a2a14970c747c3cf6f98d8fd6c104cb4838e09fcc9593c226c",
+    "pasted_text_hash_matches_normalized_source": true,
+    "compiler_result": "compiled and added to chart; active strategy legend was visible"
+  },
+  "status_table": {
+    "confirmed_bars": 794,
+    "first_confirmed_open_utc": "2026-07-01 00:00",
+    "last_confirmed_close_utc": "2026-09-13 18:00",
+    "unfinished_tip_excluded": true,
+    "first_complete_warmup_close_utc": "2026-07-14 16:00",
+    "first_v8_confirmation_close_utc": "2026-08-19 09:00",
+    "raw_v6_bb_admitted_final_v8": "3 / 1 / 1",
+    "v8_submissions_long_short": "1 / 1 / 0",
+    "three_bar_volume_ratio_known_at_least_1_5": "1454 / 63",
+    "raw_opposite_exits": 0,
+    "strategy_closed_trades_valid_r": "1 / 1",
+    "invalid_next_open_risk": 0,
+    "gross_r_total_mean": "38.928 / 38.928",
+    "net_r_total_cost_sensitivity_0_20pct": "38.191",
+    "cost_r_total": "0.738",
+    "gross_r_win_rate_profit_factor": "100% / NaN",
+    "first_last_closed_trade_utc": "2026-08-22 05:00 / 2026-08-22 05:00"
+  },
+  "native_strategy_report_visible": {
+    "history_selector": "Jul 1, 2026 — Sep 14, 2026",
+    "total_trades": 1,
+    "trade_type": "Long",
+    "entry_chart_timezone": "Aug 19, 2026, 17:00 (UTC+8)",
+    "exit_chart_timezone": "Aug 22, 2026, 13:00 (UTC+8)",
+    "entry_price_display": "888.7 B USD",
+    "exit_price_display": "1.05 T USD",
+    "native_report_pnl": "+158,098,867,777.00 USD",
+    "native_report_warning": "TOTAL2 is an index and the declaration uses one virtual index unit, initial_capital=1, margin=0. Native USD PnL/return is intentionally not account P&L."
+  },
+  "plan_and_layout_handling": {
+    "basic_plan_initial_block": "2 existing indicators reached the chart limit",
+    "temporary_actions": "Removed SPIKE V8 and SPIKE BURST from this temporary Chrome chart without saving, ran the unsaved strategy, then restored the original layout state by undoing strategy insertion and the two removals.",
+    "csv_export": "not used",
+    "deep_backtesting": "not used",
+    "saved_user_script_or_layout": false
+  }
+}

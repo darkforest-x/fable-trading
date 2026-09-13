@@ -30641,3 +30641,16 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Owner stopped at 2587 successful sources; 43 failed and 650 uncollected are explicit. All four mean net event returns and matched-control excesses are negative. Each fixed A-share holdout use number 1; frozen scoring code unchanged, no production or full-universe claim.
+  - artifact_id: spike-v8-total2-1h-native-20260914-delivery
+    artifact_type: manifest
+    role: native_index_path_backtest_ui_receipt
+    source_repo: darkforest-x/fable-trading
+    generator_commit: 1b450ccaf9
+    source_path: experiments/active/exp-spike-v8-total2-1h-native-20260914-v1/run_receipt_verified.json
+    sha256: 011d4ae989346489e074d2a1fd8a8b8b5b1c04bda2545b12f092b9244bb0b220
+    size_bytes: 3793
+    storage_uri: repo://experiments/active/exp-spike-v8-total2-1h-native-20260914-v1/run_receipt_verified.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: One completed long on 1794 loaded TOTAL2 hours. UI-reading corrections preserved; parent checks arithmetic only. Index volume semantics, warmup delay, matched-random control and account drawdown remain unverified.

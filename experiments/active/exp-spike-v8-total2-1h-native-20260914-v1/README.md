@@ -77,4 +77,16 @@ V8 exchange ledger or call it a serial account backtest.
    unknown volume semantics is a result/limitation. Do not substitute ETH,
    exchange OHLCV, or an altcoin aggregate.
 
-No historical result is included in this directory.
+## Observed run (2026-09-14)
+
+`run_receipt_verified.json` contains the final native screenshot reading and
+native trade-list DOM transcription: 1,794 closed hours; one closed long;
+gross 38.928R and net 38.491R under the fixed cost sensitivity. These are
+index-path results, not account profits. Full readiness first occurs at
+2026-08-14 07:00 UTC; the delay and Volume semantics remain unaudited.
+
+`run_receipt.json` is the rejected original transcription; `audit_receipt.json`
+is an intermediate insufficient audit. Preserve both; neither overrides the
+final receipt. The actual CUA image has no saved local file, so source hashing
+and arithmetic validation must not be described as an independent screenshot
+review. See `analysis/p1_spike_v8_total2_1h_native_20260914.md`.
