@@ -5,14 +5,28 @@
   "timeframes": [3, 5],
   "leaderboard": {
     "source": "Binance USD-M 5m local pre-holdout archive",
-    "rank": "previous fully closed UTC day open-to-close return top 10",
+    "rank": "previous fully closed UTC day open-to-close return top 10; D+1 admission starts only after its first 5m bar closes",
     "trade_window": "2026-03-01 through 2026-04-30",
     "same_day_top10": "post-hoc coverage diagnostic only"
   },
   "holdout_era": {
     "cutoff": "2026-05-04T00:00:00Z",
     "authorized_by_owner": "2026-09-13 low-timeframe V8 request",
-    "exposure_number_for_exact_lowtf_config": 1
+    "formal_exposures_consumed": [1, 2, 3],
+    "next_formal_exposure_number": 4,
+    "note": "run_v1 stopped after primary; run_v2 completed before review; run_v3 is the hash-pinned primary source. Final leaderboard rerun reuses run_v3 and does not reread 3m OHLCV."
+  },
+  "reusable_primary": {
+    "path": "experiments/active/exp-spike-v8-lowtf-20260913-v1/results/run_20260913_v3",
+    "formal_holdout_exposure_number": 3,
+    "sha256": {
+      "primary_signals.csv.gz": "8fa22643bcaa84ad8f2f058a8f4eebd76ba55f18e9c76532801b71e465e3d8db",
+      "primary_closed_trades.csv.gz": "2606f302dad35626251090ee2be6f1688c34499b84b0fd562077dc3f9469753f",
+      "primary_matched_controls.csv.gz": "34d2666e5d01f245e0ef22c5b1b86e3374429c97e3796060ea088f355e131e9b",
+      "primary_matched_control_summary.csv": "5d4ae2b09a9954100b9db530b2b7cebffa429422ec710852771f1f0c584cfe76",
+      "summary.csv": "4444e765300170bc0b7760a0da08fd71c3ccd9e676873f50a68d560e87c9c48b",
+      "manifest.json": "accf17e4cca0964faee682e969648c0f4e8350e077dca6a5cb0b3ac0539495aa"
+    }
   },
   "training_eligible": false,
   "production_eligible": false

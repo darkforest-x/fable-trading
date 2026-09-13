@@ -18,6 +18,7 @@ import hashlib
 import io
 import json
 import math
+import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -44,6 +45,13 @@ V8_DISTANCE_ATR = 3.0
 LEADERBOARD_START = pd.Timestamp("2026-03-01T00:00:00Z")
 LEADERBOARD_END = pd.Timestamp("2026-05-01T00:00:00Z")
 HOLDOUT_START = pd.Timestamp("2026-05-04T00:00:00Z")
+CONFIG = ROOT / "experiments/active/exp-spike-v8-lowtf-20260913-v1/config.json"
+PRIMARY_ARTIFACTS = (
+    "primary_signals.csv.gz",
+    "primary_closed_trades.csv.gz",
+    "primary_matched_controls.csv.gz",
+    "primary_matched_control_summary.csv",
+)
 
 
 @dataclass(frozen=True)
@@ -61,6 +69,45 @@ class Stream:
 
 def _utc(value: str | pd.Timestamp) -> pd.Timestamp:
     return pd.Timestamp(value, tz="UTC") if not isinstance(value, pd.Timestamp) else value.tz_convert("UTC")
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _reuse_primary(source: Path, out: Path, config: dict[str, object]) -> tuple[list[dict[str, object]], dict[str, object]]:
+    """Reuse hash-pinned 3m/5m results without rereading holdout-era OHLCV."""
+    receipt = config.get("reusable_primary")
+    if not isinstance(receipt, dict):
+        raise ValueError("config has no reusable_primary receipt")
+    expected_path = (ROOT / str(receipt["path"])).resolve()
+    if source.resolve() != expected_path:
+        raise ValueError(f"reuse-primary must be the pinned source: {expected_path}")
+    expected_hashes = receipt.get("sha256")
+    if not isinstance(expected_hashes, dict):
+        raise ValueError("reusable_primary has no sha256 map")
+    for name in (*PRIMARY_ARTIFACTS, "summary.csv", "manifest.json"):
+        path = source / name
+        expected = expected_hashes.get(name)
+        if not path.is_file() or not isinstance(expected, str) or _sha256(path) != expected:
+            raise ValueError(f"reusable primary artifact mismatch: {path}")
+    for name in PRIMARY_ARTIFACTS:
+        shutil.copy2(source / name, out / name)
+    summary = pd.read_csv(source / "summary.csv")
+    primary = summary.loc[summary["stream"].notna()].copy()
+    if len(primary) != 8 or set(primary.minutes.astype(int)) != {3, 5}:
+        raise ValueError("pinned primary summary does not contain the expected eight fold rows")
+    provenance = {
+        "mode": "hash_pinned_reuse_without_ohlcv_read",
+        "source": str(source),
+        "formal_holdout_exposure_number": int(receipt["formal_holdout_exposure_number"]),
+        "sha256": {name: _sha256(source / name) for name in (*PRIMARY_ARTIFACTS, "summary.csv", "manifest.json")},
+    }
+    return primary.to_dict("records"), provenance
 
 
 def _normalise(raw: pd.DataFrame) -> pd.DataFrame:
@@ -249,8 +296,22 @@ def _causal_leaderboards(tail_lines: int) -> tuple[pd.DataFrame, dict[pd.Timesta
 
 def _membership_mask(index: pd.DatetimeIndex, membership: dict[pd.Timestamp, set[str]], symbol: str,
                      minutes: int) -> pd.Series:
-    confirmation_day = (index + pd.Timedelta(minutes=minutes)).floor("D")
-    return pd.Series([symbol in membership.get(day, set()) for day in confirmation_day], index=index)
+    """Admit D+1 members only after the first D+1 bar has closed.
+
+    The D leaderboard is knowable at D+1 00:00 UTC.  A 23:55--00:00 signal
+    cannot be ranked and filled at that same 00:00 open without execution
+    latency.  Requiring confirmation strictly after midnight makes the first
+    eligible 5m signal the 00:00--00:05 bar, whose next-open fill is causal.
+    """
+    confirmation = index + pd.Timedelta(minutes=minutes)
+    confirmation_day = confirmation.floor("D")
+    rank_available = confirmation > confirmation_day
+    member = np.fromiter(
+        (symbol in membership.get(day, set()) for day in confirmation_day),
+        dtype=bool,
+        count=len(confirmation_day),
+    )
+    return pd.Series(rank_available & member, index=index)
 
 
 def posthoc_coverage(top: pd.DataFrame, signal_frames: dict[str, pd.DataFrame]) -> pd.DataFrame:
@@ -401,9 +462,26 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--tail-lines", type=int, default=24000)
+    parser.add_argument("--reuse-primary", type=Path,
+                        help="Hash-pinned completed primary run; avoids another 3m holdout read")
+    parser.add_argument("--allow-holdout", action="store_true",
+                        help="Owner-authorized fresh 3m holdout read; forbidden with --reuse-primary")
+    parser.add_argument("--holdout-exposure-number", type=int,
+                        help="Required receipt number for a fresh owner-authorized holdout read")
     args = parser.parse_args()
     if args.tail_lines < 20000:
         raise ValueError("tail-lines must retain at least 70 days for ranking and V7 warm-up")
+    if args.reuse_primary is not None and (args.allow_holdout or args.holdout_exposure_number is not None):
+        raise ValueError("reuse-primary cannot be combined with fresh holdout authorization")
+    if args.reuse_primary is None:
+        if not args.allow_holdout or args.holdout_exposure_number is None:
+            raise ValueError("fresh primary replay reads holdout-era 3m data; pass both --allow-holdout and --holdout-exposure-number after owner authorization")
+        config = json.loads(CONFIG.read_text())
+        expected_number = int(config["holdout_era"]["next_formal_exposure_number"])
+        if args.holdout_exposure_number != expected_number:
+            raise ValueError(f"next recorded formal holdout exposure number is {expected_number}")
+    else:
+        config = json.loads(CONFIG.read_text())
     out = args.out
     out.mkdir(parents=True, exist_ok=False)
     streams = [
@@ -418,35 +496,42 @@ def main() -> None:
         Stream("ETH_USDT_SWAP_3m_okx", "ETH-USDT-SWAP", "okx", 3, OKX_ETH_3M, 0.01,
                _utc("2023-07-31T11:12:00"), HOLDOUT_START, _utc("2026-07-30T11:09:00")),
     ]
-    summary_rows: list[dict[str, object]] = []
-    all_signals: list[pd.DataFrame] = []
-    all_trades: list[pd.DataFrame] = []
-    control_rows: list[pd.DataFrame] = []
-    for stream in streams:
-        print(f"running {stream.name}", flush=True)
-        rows, signals, trades, _, frame = run_primary(stream)
-        summary_rows.extend(rows)
-        all_signals.append(signals); all_trades.append(trades)
-        validation = trades.loc[trades.fold.eq("validation")]
-        raw_source = read_ohlcv(stream.path)
-        raw, _, _ = v8_mask(raw_source, stream.minutes)
-        if len(validation):
-            matches = _controls_for_stream(frame, raw, validation, tick=stream.tick, start=stream.split,
-                                           end=stream.end, symbol=stream.symbol, seeds=range(5))
-            if len(matches):
-                matches["stream"] = stream.name
-                control_rows.append(matches)
-    signals = pd.concat(all_signals, ignore_index=True)
-    trades = pd.concat(all_trades, ignore_index=True)
-    signals.to_csv(out / "primary_signals.csv.gz", index=False, compression="gzip")
-    trades.to_csv(out / "primary_closed_trades.csv.gz", index=False, compression="gzip")
-    primary_controls = pd.concat(control_rows, ignore_index=True) if control_rows else pd.DataFrame()
-    primary_controls.to_csv(out / "primary_matched_controls.csv.gz", index=False, compression="gzip")
-    primary_control_rows = []
-    if len(primary_controls):
-        for stream, group in primary_controls.groupby("stream"):
-            primary_control_rows.append({"stream": stream} | sign_flip_p(group))
-    pd.DataFrame(primary_control_rows).to_csv(out / "primary_matched_control_summary.csv", index=False)
+    if args.reuse_primary is not None:
+        summary_rows, primary_provenance = _reuse_primary(args.reuse_primary, out, config)
+    else:
+        summary_rows = []
+        all_signals: list[pd.DataFrame] = []
+        all_trades: list[pd.DataFrame] = []
+        control_rows: list[pd.DataFrame] = []
+        for stream in streams:
+            print(f"running {stream.name}", flush=True)
+            rows, signals, trades, _, frame = run_primary(stream)
+            summary_rows.extend(rows)
+            all_signals.append(signals); all_trades.append(trades)
+            validation = trades.loc[trades.fold.eq("validation")]
+            raw_source = read_ohlcv(stream.path)
+            raw, _, _ = v8_mask(raw_source, stream.minutes)
+            if len(validation):
+                matches = _controls_for_stream(frame, raw, validation, tick=stream.tick, start=stream.split,
+                                               end=stream.end, symbol=stream.symbol, seeds=range(5))
+                if len(matches):
+                    matches["stream"] = stream.name
+                    control_rows.append(matches)
+        signals = pd.concat(all_signals, ignore_index=True)
+        trades = pd.concat(all_trades, ignore_index=True)
+        signals.to_csv(out / "primary_signals.csv.gz", index=False, compression="gzip")
+        trades.to_csv(out / "primary_closed_trades.csv.gz", index=False, compression="gzip")
+        primary_controls = pd.concat(control_rows, ignore_index=True) if control_rows else pd.DataFrame()
+        primary_controls.to_csv(out / "primary_matched_controls.csv.gz", index=False, compression="gzip")
+        primary_control_rows = []
+        if len(primary_controls):
+            for stream, group in primary_controls.groupby("stream"):
+                primary_control_rows.append({"stream": stream} | sign_flip_p(group))
+        pd.DataFrame(primary_control_rows).to_csv(out / "primary_matched_control_summary.csv", index=False)
+        primary_provenance = {
+            "mode": "fresh_owner_authorized_holdout_read",
+            "formal_holdout_exposure_number": int(args.holdout_exposure_number),
+        }
     lb_rows, coverage, lb_control, top = run_leaderboard(args.tail_lines, out)
     summary_rows.extend(lb_rows)
     summary = pd.DataFrame(summary_rows)
@@ -463,7 +548,13 @@ def main() -> None:
         "round_trip_cost": ROUND_TRIP_COST,
         "leaderboard_membership": "UTC D final return Top10 may first enter D+1",
         "posthoc_diagnostic": "same-day final Top10 coverage only; not a trading cohort",
-        "holdout_era_exposure": "new exact low-timeframe configuration #1 for >=2026-05-04 results",
+        "holdout_era_exposure": (
+            f"formal primary source exposure #{primary_provenance['formal_holdout_exposure_number']}; "
+            + ("this run reused pinned artifacts and did not reread 3m OHLCV"
+               if primary_provenance["mode"] == "hash_pinned_reuse_without_ohlcv_read"
+               else "this run performed the explicitly authorized 3m OHLCV read")
+        ),
+        "primary_provenance": primary_provenance,
         "streams": [stream.__dict__ | {"path": str(stream.path)} for stream in streams],
         "tail_lines": args.tail_lines,
         "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
