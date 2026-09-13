@@ -18,6 +18,7 @@ require causal BB readiness, while V1 common execution does not.
 from __future__ import annotations
 
 import argparse
+import bisect
 import hashlib
 import json
 import math
@@ -268,6 +269,44 @@ def _quartile_buckets(bars: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
     return (fraction.to_numpy(float)[:, None] > values).sum(axis=1), np.isfinite(values).all(axis=1)
 
 
+def _control_candidate_pools(eligible: np.ndarray, signals: pd.DataFrame, months: np.ndarray,
+                             bucket: np.ndarray, target_positions: set[int]) -> tuple[dict, dict]:
+    """Pre-index legal control positions without changing their flatnonzero order.
+
+    ``match_stream_controls`` formerly rebuilt one full-clock boolean mask for
+    every target.  Eligibility and all target-bar exclusions are target
+    invariant, while the only target-dependent lookup is side/month/bucket.
+    These ascending pools are therefore semantically the same as filtering
+    ``np.flatnonzero`` for that tuple.  A selected position is removed from
+    every side pool it belongs to, preserving the original global no-reuse
+    contract even when it was legal for both long and short targets.
+    """
+    pools: dict[tuple[int, str, int], list[int]] = {}
+    pool_keys_by_position: dict[int, list[tuple[int, str, int]]] = {}
+    excluded = np.zeros(len(eligible), dtype=bool)
+    if target_positions:
+        excluded[np.fromiter(target_positions, dtype=int)] = True
+    for side, opposite in (
+        (1, signals.short_signal.to_numpy(bool)),
+        (-1, signals.long_signal.to_numpy(bool)),
+    ):
+        for position in np.flatnonzero(eligible & ~opposite & ~excluded):
+            key = (side, str(months[position]), int(bucket[position]))
+            pools.setdefault(key, []).append(int(position))
+            pool_keys_by_position.setdefault(int(position), []).append(key)
+    return pools, pool_keys_by_position
+
+
+def _remove_used_control(pools: dict, pool_keys_by_position: dict, position: int) -> None:
+    """Delete one globally used position from all ascending candidate pools."""
+    for key in pool_keys_by_position.get(position, ()):
+        pool = pools[key]
+        offset = bisect.bisect_left(pool, position)
+        if offset >= len(pool) or pool[offset] != position:
+            raise ValueError("candidate pool lost a selected control position")
+        del pool[offset]
+
+
 def match_stream_controls(cache: dict, targets: pd.DataFrame, *, variant: str,
                           seed: int = 0, fold_start: pd.Timestamp = DEVELOPMENT_START,
                           fold_end: pd.Timestamp = DEVELOPMENT_END,
@@ -298,7 +337,7 @@ def match_stream_controls(cache: dict, targets: pd.DataFrame, *, variant: str,
         for stamp in excluded_times
         if pd.Timestamp(stamp) in bars.index
     }
-    used_controls: set[int] = set()
+    pools, pool_keys_by_position = _control_candidate_pools(eligible, signals, months, bucket, target_positions)
     rows: list[dict] = []
     ordered_targets = targets.sort_values(["signal_bar_open", "target_id"], kind="stable")
     for target in ordered_targets.itertuples(index=False):
@@ -311,19 +350,12 @@ def match_stream_controls(cache: dict, targets: pd.DataFrame, *, variant: str,
         i = int(bars.index.get_loc(stamp))
         if not bucket_ready[i]:
             rows.append({**base, "reason": "target_bucket_unavailable"}); continue
-        allowed = eligible.copy()
-        opposite = signals.short_signal.to_numpy(bool) if side == 1 else signals.long_signal.to_numpy(bool)
-        allowed &= ~opposite
-        if target_positions:
-            allowed[np.fromiter(target_positions, dtype=int)] = False
-        if used_controls:
-            allowed[np.fromiter(used_controls, dtype=int)] = False
-        choices = np.flatnonzero(allowed & (months == months[i]) & (bucket == bucket[i]))
+        choices = pools.get((side, str(months[i]), int(bucket[i])), [])
         if not len(choices):
             rows.append({**base, "reason": "no_exact_causal_match"}); continue
         selected = int(choices[int(hashlib.sha256(
             f"{seed}|{target.target_id}|{stamp.isoformat()}".encode("utf-8")).hexdigest(), 16) % len(choices)])
-        used_controls.add(selected)
+        _remove_used_control(pools, pool_keys_by_position, selected)
         key = (selected, side)
         if key not in replayed:
             replayed[key] = evaluate_single_control(context, selected, side, tick=float(context["tick"]),
@@ -461,13 +493,18 @@ def run(stage_one: Path = STAGE_ONE, v7_raw: Path = V7_RAW, output: Path = DEFAU
     pairs = pd.concat(all_pairs + ([pd.DataFrame(failures)] if failures else []), ignore_index=True) if (all_pairs or failures) else pd.DataFrame()
     summary = summarize_controls(pairs, targets)
     output.mkdir(parents=True)
-    pairs.to_csv(output / "matched_control_pairs.csv.gz", index=False, compression={"method": "gzip", "mtime": 0})
-    summary.to_csv(output / "matched_control_summary.csv", index=False)
-    pd.DataFrame(receipts).to_csv(output / "control_receipts.csv", index=False)
+    pairs_path = output / "matched_control_pairs.csv.gz"
+    summary_path = output / "matched_control_summary.csv"
+    receipts_path = output / "control_receipts.csv"
+    pairs.to_csv(pairs_path, index=False, compression={"method": "gzip", "mtime": 0})
+    summary.to_csv(summary_path, index=False)
+    pd.DataFrame(receipts).to_csv(receipts_path, index=False)
     (output / "manifest.json").write_text(json.dumps({
         "development_start": DEVELOPMENT_START.isoformat(), "development_end_exclusive": DEVELOPMENT_END.isoformat(),
         "seed": 0, "input_candidate_context_sha256": sha256(targets_path), "input_source_manifest_sha256": sha256(source_path),
         "input_v7_manifest_sha256": sha256(input_manifest), "receipt_count": len(receipts),
+        "outputs": {path.name: sha256(path) for path in (pairs_path, summary_path, receipts_path)},
+        "study_code_sha256": sha256(Path(__file__)),
         "forbidden_inputs": ["control_cache.pkl.gz", "combined_trade_ledger", "post_2025-09-10 outcomes"],
     }, indent=2, sort_keys=True), encoding="utf-8")
 

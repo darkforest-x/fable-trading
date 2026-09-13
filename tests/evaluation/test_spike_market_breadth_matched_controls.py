@@ -1,11 +1,15 @@
 """Synthetic contracts for development-only SPIKE breadth matched controls."""
 from __future__ import annotations
 
+import hashlib
+import json
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pytest
+
+import yoyo.evaluation.spike_market_breadth_matched_controls as controls
 
 from yoyo.evaluation.spike_market_breadth_matched_controls import (
     DEVELOPMENT_END,
@@ -17,6 +21,66 @@ from yoyo.evaluation.spike_market_breadth_matched_controls import (
     paired_sign_flip_p,
     summarize_controls,
 )
+
+
+def _reference_match_stream_controls(cache: dict, targets: pd.DataFrame, *, variant: str,
+                                     seed: int = 0, fold_start: pd.Timestamp = DEVELOPMENT_END - pd.Timedelta(days=365),
+                                     fold_end: pd.Timestamp = DEVELOPMENT_END,
+                                     excluded_target_times: pd.Series | None = None) -> pd.DataFrame:
+    """The pre-pool implementation retained as an exact semantic reference."""
+    context = controls._variant_cache(cache, variant)
+    bars, signals = context["bars"], context["signals"]
+    bucket, bucket_ready = controls._quartile_buckets(bars)
+    cadence = pd.Timedelta(minutes=int(bars.attrs["minutes"]))
+    gap = pd.Series(context["data_gap"], index=bars.index).fillna(True).astype(bool)
+    valid = np.isfinite(bars[["open", "high", "low", "close", "atr"]].to_numpy(float)).all(axis=1)
+    next_contiguous = ~gap.shift(-1, fill_value=True).to_numpy(bool)
+    next_valid = np.r_[valid[1:], False]
+    history_continuous = ~gap.rolling(5, min_periods=5).max().fillna(1).to_numpy(bool)
+    eligible = (bars.ready.fillna(False).to_numpy(bool) & bucket_ready & valid & next_valid & next_contiguous
+                & history_continuous & (bars.atr.to_numpy(float) > 0) & (bars.close.to_numpy(float) > 0)
+                & ((bars.index + cadence) >= fold_start) & ((bars.index + cadence) < fold_end))
+    months = bars.index.strftime("%Y-%m").to_numpy()
+    excluded_times = targets.signal_bar_open if excluded_target_times is None else excluded_target_times
+    target_positions = {int(bars.index.get_loc(pd.Timestamp(stamp))) for stamp in excluded_times if pd.Timestamp(stamp) in bars.index}
+    used_controls, replayed, rows = set(), {}, []
+    for target in targets.sort_values(["signal_bar_open", "target_id"], kind="stable").itertuples(index=False):
+        stamp, side = pd.Timestamp(target.signal_bar_open), int(target.side)
+        identity = {name: getattr(target, name) for name in controls.IDENTITY if hasattr(target, name)}
+        base = {**identity, "target_id": target.target_id, "target_time": stamp, "side": side, "variant": variant,
+                "matched": False, "reason": "unmatched"}
+        if stamp not in bars.index:
+            rows.append({**base, "reason": "target_not_in_rebuilt_segment"}); continue
+        i = int(bars.index.get_loc(stamp))
+        if not bucket_ready[i]:
+            rows.append({**base, "reason": "target_bucket_unavailable"}); continue
+        allowed = eligible.copy()
+        opposite = signals.short_signal.to_numpy(bool) if side == 1 else signals.long_signal.to_numpy(bool)
+        allowed &= ~opposite
+        if target_positions:
+            allowed[np.fromiter(target_positions, dtype=int)] = False
+        if used_controls:
+            allowed[np.fromiter(used_controls, dtype=int)] = False
+        choices = np.flatnonzero(allowed & (months == months[i]) & (bucket == bucket[i]))
+        if not len(choices):
+            rows.append({**base, "reason": "no_exact_causal_match"}); continue
+        selected = int(choices[int(hashlib.sha256(
+            f"{seed}|{target.target_id}|{stamp.isoformat()}".encode("utf-8")).hexdigest(), 16) % len(choices)])
+        used_controls.add(selected)
+        key = (selected, side)
+        if key not in replayed:
+            replayed[key] = controls.evaluate_single_control(context, selected, side, tick=float(context["tick"]),
+                                                              fold_start=fold_start, fold_end=fold_end)
+        control = replayed[key]
+        if control is None or bool(control.get("censored", False)):
+            rows.append({**base, "reason": "control_unresolved"}); continue
+        rows.append({**base, "matched": True, "reason": "matched", "candidate_time": bars.index[selected],
+                     "calendar_month": months[i], "volatility_quartile": int(bucket[i]),
+                     "target_net_r": float(target.net_r), "control_net_r": float(control["net_r"]),
+                     "net_r_difference": float(target.net_r) - float(control["net_r"]),
+                     "target_net_return": float(target.net_return), "control_net_return": float(control["net_return"]),
+                     "net_return_difference": float(target.net_return) - float(control["net_return"])})
+    return pd.DataFrame(rows)
 
 
 def _cache(n: int = 150) -> tuple[dict, pd.DatetimeIndex]:
@@ -101,6 +165,33 @@ def test_controls_can_exclude_target_bars_from_another_variant():
     )
     assert not bool(pairs.matched.iloc[0])
     assert pairs.reason.iloc[0] == "no_exact_causal_match"
+
+
+def test_pooled_controls_match_reference_for_multiple_targets_cross_variant_exclusions_and_no_match(monkeypatch):
+    cache, index = _cache(360)
+    # Side -1 has no legal candidate because every bar has its opposite long
+    # signal. Side +1 still has a broad, deterministic pool.
+    cache["v1"]["long_signal"] = True
+    targets = pd.DataFrame({
+        "target_id": ["late", "first", "no-match"],
+        "signal_bar_open": [index[190], index[180], index[200]],
+        "side": [1, 1, -1], "net_r": [1.5, 2.0, -1.0], "net_return": [.03, .04, -.02],
+    })
+    excluded = pd.Series([index[170], index[190], index[200]])
+
+    def evaluated(_context, selected, side, **_kwargs):
+        return {"censored": False, "net_r": selected / 100., "net_return": side * selected / 10_000.}
+
+    monkeypatch.setattr(controls, "evaluate_single_control", evaluated)
+    kwargs = dict(variant="v1_common_execution_long", seed=17, fold_start=index[120],
+                  fold_end=index[-1] + pd.Timedelta(hours=1), excluded_target_times=excluded)
+    expected = _reference_match_stream_controls(cache, targets, **kwargs)
+    actual = match_stream_controls(cache, targets, **kwargs)
+    assert not set(actual.loc[actual.matched, "candidate_time"]).intersection(set(excluded))
+    assert actual.reason.tolist()[-1] == "no_exact_causal_match"
+    columns = ["target_id", "candidate_time", "reason", "matched", "control_net_r", "control_net_return",
+               "net_r_difference", "net_return_difference"]
+    pd.testing.assert_frame_equal(actual.reindex(columns=columns), expected.reindex(columns=columns))
 
 
 def test_active_source_prefix_loads_once_across_timeframes_and_replaces_on_source_change(tmp_path, monkeypatch):
@@ -217,3 +308,23 @@ def test_signflip_batches_match_the_former_single_array_seeded_draw_order():
     signs = np.random.default_rng(seed).choice((-1.0, 1.0), size=(draws, len(values)))
     expected = float((1 + np.sum(np.abs((signs * values).mean(axis=1)) >= observed)) / (draws + 1))
     assert paired_sign_flip_p(pd.Series(values), seed=seed, draws=draws, batch_draws=7) == expected
+
+
+def test_run_manifest_pins_pairs_summary_receipts_and_generator_code(tmp_path, monkeypatch):
+    stage, v7_raw, output = tmp_path / "stage", tmp_path / "v7", tmp_path / "output"
+    stage.mkdir(); v7_raw.mkdir()
+    (stage / "candidate_context.csv.gz").write_bytes(b"opaque candidates")
+    (stage / "source_manifest.csv").write_text("opaque source\n")
+    (v7_raw / "input_manifest.json").write_text(json.dumps({"streams": []}))
+    empty_targets = pd.DataFrame(columns=["venue", "symbol", "timeframe_min", "segment", "variant"])
+    monkeypatch.setattr(controls, "_read_targets", lambda _path: empty_targets)
+    monkeypatch.setattr(controls, "_source_rows", lambda _path: {})
+    monkeypatch.setattr(controls, "_v7_streams", lambda _path: {})
+
+    controls.run(stage, v7_raw, output)
+
+    manifest = json.loads((output / "manifest.json").read_text())
+    assert set(manifest["outputs"]) == {"matched_control_pairs.csv.gz", "matched_control_summary.csv", "control_receipts.csv"}
+    for name, expected in manifest["outputs"].items():
+        assert expected == hashlib.sha256((output / name).read_bytes()).hexdigest()
+    assert manifest["study_code_sha256"] == hashlib.sha256(Path(controls.__file__).read_bytes()).hexdigest()
