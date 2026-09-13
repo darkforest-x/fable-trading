@@ -1,3 +1,48 @@
+# Design QA — Spike NodeFlare reference pass
+
+## Comparison target
+
+- Source visual truth: `/tmp/codex-remote-attachments/01a086ad-0b77-7380-b6a6-2b62f505d12b/160117F8-81A8-4BB5-9013-A444FFADF2FF/1-照片-1.jpg`
+- Rendered implementation: `http://127.0.0.1:8766/#signals`
+- Final light screenshot: `/Users/zhangzc/.codex/visualizations/2026/09/13/01a086ad-0b77-7380-b6a6-2b62f505d12b/spike-nodeflare-signals-light.png`
+- Final dark screenshot: `/Users/zhangzc/.codex/visualizations/2026/09/13/01a086ad-0b77-7380-b6a6-2b62f505d12b/spike-nodeflare-signals-dark.png`
+- Final mobile screenshot: `/Users/zhangzc/.codex/visualizations/2026/09/13/01a086ad-0b77-7380-b6a6-2b62f505d12b/spike-nodeflare-signals-mobile.png`
+- Full-view comparison evidence: `/Users/zhangzc/.codex/visualizations/2026/09/13/01a086ad-0b77-7380-b6a6-2b62f505d12b/spike-nodeflare-comparison.png`
+- State: real local monitor data on the Signals route; light, dark, Watch, Shadow, and System views were checked separately.
+
+## Viewport and normalization
+
+- Source pixels: 1280 × 867.
+- Desktop implementation: 1470 × 727 at the browser's normal viewport.
+- Mobile implementation: 390 × 844 using a temporary viewport override that was reset after capture.
+- The comparison image scales both whole views into equal-width cells. Their aspect ratios differ because the source is a server dashboard reference rather than a pixel-identical product screen.
+
+## Findings
+
+- No actionable P0, P1, or P2 issues remain.
+- Hierarchy: the three real monitoring metrics read as one continuous strip, followed by compact stage controls and a predictable four-card desktop grid.
+- Density: cards expose symbol, timeframe, direction, lifecycle, price, R state, stop/protection state, age, and Bark status without adding invented progress bars or duplicate metrics.
+- Color: the light theme uses a cool gray canvas, white panels, restrained mint, and subtle outcome tints. The dark theme preserves the same hierarchy and semantic state colors.
+- Readability: the first light-theme pass made 9–11 px secondary text too faint. `--dim` was raised to `#647580`, restoring at least 4.5:1 contrast on the white card surfaces.
+- Responsive behavior: the desktop grid settles at four columns in the tested viewport, two columns on the compact in-app browser, and one column at 390 px. The bottom navigation does not cover the first card.
+- Interaction integrity: the existing full-card TradingView action remains the top interaction layer, with keyboard focus and all filters unchanged.
+
+## Intentional differences
+
+- Spike keeps three API-backed summary metrics instead of copying NodeFlare's five server counters.
+- Spike retains its navigation rail and trading outcome colors because they encode real product behavior.
+- Thin utilization bars were not copied: the current trading metrics have no truthful denominator that would make such bars meaningful.
+
+## Comparison history
+
+1. Initial pass — P2: secondary labels became too low-contrast after adopting the softer palette. Fixed by darkening the shared secondary token.
+2. Initial pass — P2: automatic 236 px cards produced five cramped columns at 1470 px. Fixed by raising the card minimum to 260 px, yielding four readable columns.
+3. Final pass: inspected Signals, Watch, Shadow, and System routes; verified light/dark themes and 390 px mobile layout with real runtime data.
+
+final result: passed
+
+---
+
 # Design QA — ClauseOS detail polish
 
 ## Comparison target
