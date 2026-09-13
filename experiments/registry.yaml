@@ -8871,13 +8871,14 @@ experiments:
     notes: Owner-authorized configuration-specific holdout-era use 1 on reused nonblind history. Future milestones are delay/cost diagnostics only; fixed states lack phase ground truth and do not create a new execution policy.
   - experiment_id: exp-spike-v8-eth3m-be-20260913-v1
     source_repo: darkforest-x/fable-trading
-    status: active
+    status: completed
     question: Does moving ETH 3m V8 protection to entry after a 1R favorable touch improve the frozen low-timeframe result?
     single_variable: High-low 1R touch observed at bar close activates entry-price protection from the next bar; all admissions, original stops, trailing and costs unchanged.
-    result: Pending exact reproduction of the frozen 111-trade ETH 3m post-cutoff baseline; compare paired original entries and a separate serial policy replay.
-    holdout_consumed: false
+    result: Frozen 111-entry baseline reproduced; BE changes net R from -26.282877 to -41.125801. Serial BE takes 119 trades for -35.474961R; 19 losses reduced but 9 original winners and 1 of 2 realized 10R trades lost. Not accepted for deployment.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_v8_eth3m_be_20260913.md
-    artifacts: []
-    notes: Owner explicitly requested this exit change after authorizing available dates. Planned configuration-specific holdout-era use 1 on reused nonblind data; no live changes, no parameter search or assumed same-bar tick ordering.
+    artifacts:
+    - spike-v8-eth3m-be-20260913-delivery
+    notes: Owner explicitly requested this exit change after authorizing available dates. Completed configuration-specific holdout-era use 1 on reused nonblind data; full_v1 failed only during outcome aggregation and run_v2 reuses retained tables without a new OHLCV read; no live changes, no parameter search or assumed same-bar tick ordering.
