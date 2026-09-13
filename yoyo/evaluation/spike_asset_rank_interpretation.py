@@ -51,8 +51,23 @@ def main() -> None:
         d['signal_confirm_time'] = pd.to_datetime(d.signal_confirm_time, utc=True)
     if ev.duplicated(keys).any():
         raise ValueError('Entry evidence keys are not unique')
-    profiles, cases, persistence, transitions = [], [], [], []
+    profiles, cases, persistence, transitions, totals = [], [], [], [], []
     for view, source in views(frame):
+        for scope in ['full_closed', 'development', 'validation']:
+            cohort = source[source.closed.eq(True)] if scope == 'full_closed' else source[source.scoring_closed.eq(True) & source.period.eq(scope)]
+            for tf in ['all', 30, 60, 240]:
+                part = cohort if tf == 'all' else cohort[cohort.timeframe_min.eq(tf)]
+                for direction in ['all', 1, -1]:
+                    x = part if direction == 'all' else part[part.side.eq(direction)]
+                    if x.empty:
+                        continue
+                    r, ret = x.net_r, x.net_return
+                    totals.append({'view': view, 'scope': scope, 'timeframe': tf, 'side': direction,
+                                   'n': len(x), 'assets': x.asset.nunique(), 'win_rate': r.gt(0).mean(),
+                                   'sum_r': r.sum(), 'mean_r': r.mean(), 'median_r': r.median(),
+                                   'pf_r': r.clip(lower=0).sum() / -r.clip(upper=0).sum(),
+                                   'pf_return': ret.clip(lower=0).sum() / -ret.clip(upper=0).sum(),
+                                   'realized10': int(r.ge(10).sum()), 'mfe10': int(x.mfe_r.ge(10).sum())})
         scored = source[source.scoring_closed.eq(True)].copy()
         dev = scored[scored.period.eq('development')]
         val = scored[scored.period.eq('validation')].copy()
@@ -73,7 +88,7 @@ def main() -> None:
                             'top_later_positive_assets': int(rows.mean_r_val.gt(0).sum()),
                             'top_later_sum_r': rows.sum_r_val.sum(min_count=1)})
         if view.startswith('v8'):
-            val = val.merge(ev, on=keys, validate='one_to_one', how='left', indicator=True)
+            val = val.drop(columns=[c for c in covars if c in val.columns]).merge(ev, on=keys, validate='one_to_one', how='left', indicator=True)
             if not val['_merge'].eq('both').all():
                 raise ValueError('Missing V8 feature join')
             val['directional_order'] = np.where(val.side.eq(1), val.current_ma_order_long, val.current_ma_order_short)
@@ -106,7 +121,7 @@ def main() -> None:
                               'sum_without_best_trade': x.net_r.sum()-x.net_r.max(),
                               'sum_without_best_asset_day': x.net_r.sum()-x.assign(day=x.signal_confirm_time.dt.floor('D')).groupby('day').net_r.sum().max(),
                               'median_risk': x.risk_fraction_at_entry.median(), 'median_fee_r': x.cost_r.median()})
-    for name, records in [('profiles', profiles), ('leader_cases', cases), ('rank_persistence', persistence), ('development_top_transfer', transitions)]:
+    for name, records in [('profiles', profiles), ('leader_cases', cases), ('rank_persistence', persistence), ('development_top_transfer', transitions), ('overall_metrics', totals)]:
         pd.DataFrame(records).to_csv(out/f'{name}.csv', index=False)
     outputs = {p.name: {'sha256': sha(p), 'bytes': p.stat().st_size} for p in sorted(out.glob('*.csv'))}
     (out/'manifest.json').write_text(json.dumps({'input_ledger': str(args.ledger), 'input_ledger_sha256': sha(args.ledger),
