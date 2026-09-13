@@ -18,6 +18,7 @@ import argparse
 import csv
 import gzip
 import hashlib
+import io
 import json
 import subprocess
 from collections import defaultdict
@@ -250,7 +251,7 @@ def _prefix_rows(path: Path, *, cutoff_field: str, cutoff: pd.Timestamp,
     complete pre-cutoff CSV record actually yielded to the caller. It excludes
     the boundary row and all later records.
     """
-    with gzip.open(path, "rb") as stream:
+    with gzip.open(path, "rb") as compressed, io.BufferedReader(compressed, buffer_size=65_536) as stream:
         header_bytes = stream.readline()
         header = next(csv.reader([header_bytes.decode("utf-8").rstrip("\r\n")]))
         if cutoff_field not in header:
@@ -310,7 +311,7 @@ def _variant_block_rows(path: Path, *, monotonic_field: str, bounded_fields: tup
     Gzip may physically prefetch compressed bytes; this is a logical-record
     boundary only.
     """
-    with gzip.open(path, "rb") as stream:
+    with gzip.open(path, "rb") as compressed, io.BufferedReader(compressed, buffer_size=65_536) as stream:
         header_bytes = stream.readline()
         header = next(csv.reader([header_bytes.decode("utf-8").rstrip("\r\n")]))
         required = {"variant", monotonic_field, *bounded_fields}
@@ -398,7 +399,7 @@ def _variant_block_safe_record_numbers(
     bounded timestamps in ``[start, cutoff)``.  No other payload bytes are
     buffered, decoded, or passed to a CSV parser.
     """
-    with gzip.open(path, "rb") as stream:
+    with gzip.open(path, "rb") as compressed, io.BufferedReader(compressed, buffer_size=65_536) as stream:
         header_bytes = stream.readline()
         header = next(csv.reader([header_bytes.decode("utf-8").rstrip("\r\n")]))
         required = {*block_fields, monotonic_field, *bounded_fields}
@@ -463,7 +464,7 @@ def _variant_block_safe_record_numbers(
 
 def _selected_csv_rows(path: Path, *, expected_header: list[str], selected: set[int]) -> Iterable[list[str]]:
     """Parse only complete records selected by a prior scalar-only pass."""
-    with gzip.open(path, "rb") as stream:
+    with gzip.open(path, "rb") as compressed, io.BufferedReader(compressed, buffer_size=65_536) as stream:
         header_bytes = stream.readline()
         header = next(csv.reader([header_bytes.decode("utf-8").rstrip("\r\n")]))
         if header != expected_header:
