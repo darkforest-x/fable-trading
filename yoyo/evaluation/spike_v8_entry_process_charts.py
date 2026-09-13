@@ -72,9 +72,19 @@ def _plot_case(case: pd.Series, output: Path) -> None:
     confirmation_close = confirm + pd.Timedelta(minutes=context.minutes)
     confirmation_local = confirmation_close.tz_convert("Asia/Shanghai")
     trades = pd.read_csv(V8_REPLAY / f"{case.stream_key}.trades.csv.gz")
-    trade = trades.loc[trades.trade_id.eq(case.trade_id)]
+    trade_signal_open = pd.to_datetime(trades.signal_bar_open, utc=True)
+    trade_side = pd.to_numeric(trades.side, errors="raise")
+    trade = trades.loc[
+        trades.trade_id.eq(case.trade_id)
+        & trades.arm.eq("v8")
+        & trade_signal_open.eq(confirm)
+        & trade_side.eq(int(case.side))
+    ]
     if len(trade) != 1:
-        raise ValueError(f"missing exact frozen V8 trade for chart: {case.trade_id}")
+        raise ValueError(
+            "missing exact frozen V8 trade for chart: "
+            f"trade_id={case.trade_id}, signal_bar_open={confirm}, side={case.side}"
+        )
     trade = trade.iloc[0]
     plt.rcParams["font.sans-serif"] = ["Arial Unicode MS"]
     plt.rcParams["axes.unicode_minus"] = False
@@ -105,10 +115,10 @@ def _plot_case(case: pd.Series, output: Path) -> None:
         ax.hlines([float(case.h2_range_low), float(case.h2_range_high)], q, confirmation_local, colors="#7c3aed", linestyles=":", lw=1.0,
                   label="突破前冻结区间")
     entry_time = pd.Timestamp(trade.entry_time).tz_convert("Asia/Shanghai")
-    ax.scatter([entry_time], [float(trade.entry_price)], color="#111827", marker="^", s=36, zorder=5, label="下一根开盘入场")
-    sl_end = min(local_time[-1], entry_time + pd.Timedelta(minutes=context.minutes * 72))
-    ax.hlines(float(trade.initial_stop), entry_time, sl_end, colors="#b91c1c", linestyles="-.", lw=1.0, label="原始止损")
     exit_time = pd.Timestamp(trade.exit_time).tz_convert("Asia/Shanghai")
+    ax.scatter([entry_time], [float(trade.entry_price)], color="#111827", marker="^", s=36, zorder=5, label="下一根开盘入场")
+    sl_end = min(exit_time, local_time[-1])
+    ax.hlines(float(trade.initial_stop), entry_time, sl_end, colors="#b91c1c", linestyles="-.", lw=1.0, label="原始止损")
     if local_time[0] <= exit_time <= local_time[-1] and not bool(trade.censored):
         ax.scatter([exit_time], [float(trade.exit_price)], color="#111827", marker="x", s=38, zorder=5, label="冻结退出")
     else:
