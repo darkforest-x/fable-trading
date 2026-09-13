@@ -18,6 +18,10 @@
   --red-soft:#38272e;
   --amber:#d9bc86;
   --blue:#91a9c6;
+  --direction-long:#90b9de;
+  --direction-long-bg:#1a2c3c;
+  --direction-short:#c4a2d5;
+  --direction-short-bg:#30243b;
   --on-accent:#11241e;
   --brand-bg:#152720;
   --brand-border:#254738;
@@ -166,6 +170,10 @@ html[data-theme="light"] {
   --red-soft:#fae8ec;
   --amber:#886329;
   --blue:#426789;
+  --direction-long:#3f6f9a;
+  --direction-long-bg:#eaf1f8;
+  --direction-short:#745288;
+  --direction-short-bg:#f4ecf7;
   --on-accent:#ffffff;
   --brand-bg:#e6f4ec;
   --brand-border:#b7d9c7;
@@ -1451,7 +1459,7 @@ h2 {
 
 .view-panel { min-width:0; }
 
-/* Cards show one event;/* Cards show one event; the side stripe is direction and the surface is outcome. */
+/* Direction belongs to the compact label; red/green denotes the R outcome. */
 .signal-group-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 10px; color:var(--muted); }
 .signal-group-heading h3 { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:550; }
 .signal-group-heading>span { font-size:12px; color:var(--dim); }
@@ -1460,44 +1468,47 @@ h2 {
 .group-count { padding:2px 7px; border:1px solid var(--line); border-radius:6px; color:var(--text-secondary); background:var(--count-bg); font-size:12px; font-variant-numeric:tabular-nums; }
 .signal-card-grid+.signal-group-heading, .fresh-empty+.signal-group-heading { margin-top:28px; }
 .signal-card-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
-.signal-card { --card-accent:var(--mint); display:grid; align-content:start; gap:8px; position:relative; width:100%; min-width:0; min-height:320px; padding:17px 17px 14px; border:1px solid var(--card-border); border-radius:13px; background:var(--card-bg); text-align:left; color:var(--muted); transition:border-color .16s,background .16s,box-shadow .16s,transform .16s; }
+.signal-card { display:grid; align-content:start; gap:8px; position:relative; width:100%; min-width:0; min-height:320px; padding:17px 17px 14px; border:1px solid var(--card-border); border-radius:13px; background:var(--card-bg); text-align:left; color:var(--muted); transition:border-color .16s,background .16s,box-shadow .16s,transform .16s; }
 .card-primary-action { position:absolute; inset:0; z-index:1; width:100%; height:100%; padding:0; border:0; border-radius:inherit; background:transparent; }
-.card-primary-action:focus-visible { outline:2px solid var(--card-accent); outline-offset:3px; }
+.card-primary-action:focus-visible { outline:2px solid var(--card-accent,var(--focus-border)); outline-offset:3px; }
 .card-primary-action:disabled { cursor:wait; }
 .card-primary-action[aria-busy="false"]:disabled { cursor:not-allowed; }
-.signal-card.short { --card-accent:var(--red); }
-.signal-card::before { content:""; position:absolute; top:20px; bottom:20px; left:-1px; width:2px; border-radius:2px; background:var(--card-accent); opacity:.45; }
 .signal-card:hover { border-color:var(--card-hover-border); transform:translateY(-1px); }
-.signal-card.is-fresh { background:var(--card-fresh-bg); border-color:var(--card-fresh-border); }
-.signal-card.is-fresh::before { opacity:.95; }
-.signal-card.outcome-win { background:var(--win-card-bg); border-color:var(--win-card-border); }
-.signal-card.outcome-loss { background:var(--loss-card-bg); border-color:var(--loss-card-border); }
-.signal-card.outcome-active-win { background:var(--active-win-card-bg); border-color:var(--positive-border); }
-.signal-card.outcome-active-loss { background:var(--active-loss-card-bg); border-color:var(--loss-card-border); }
-.signal-card.outcome-even, .signal-card.outcome-active, .signal-card.outcome-unknown { background:var(--outcome-neutral-bg); border-color:var(--outcome-neutral-border); }
 .signal-card-top, .signal-card-direction, .card-context, .card-confirmed, .watch-card-top, .watch-card-foot { display:flex; align-items:center; justify-content:space-between; gap:10px; min-width:0; }
 .card-symbol { display:flex; align-items:baseline; flex-wrap:wrap; gap:7px; min-width:0; }
 .card-symbol strong { color:var(--card-title); font-size:21px; font-weight:600; letter-spacing:-.4px; overflow-wrap:anywhere; }
 .card-symbol small { color:var(--dim); font-size:12px; font-weight:400; }
 .card-timeframe { display:inline-flex; align-items:center; flex-shrink:0; padding:3px 7px; border:1px solid var(--control-border); border-radius:5px; background:var(--tag-bg); color:var(--tag-text); font-size:12px; line-height:1.4; font-variant-numeric:tabular-nums; }
 .signal-card-direction { flex-wrap:wrap; gap:6px 10px; }
-.card-direction { display:inline-flex; align-items:center; gap:5px; width:fit-content; padding:2px 7px; border-radius:5px; background:var(--mint-soft); color:var(--mint); font-size:12px; font-weight:550; }
-.short .card-direction { color:var(--red); background:var(--red-soft); }
+.card-direction-group { display:inline-flex; align-items:center; gap:8px; min-width:0; }
+.card-direction { display:inline-flex; align-items:center; gap:5px; width:fit-content; padding:3px 7px; border-radius:6px; font-size:12px; font-weight:550; line-height:1.3; }
+.signal-card .card-direction { background:var(--direction-long-bg); color:var(--direction-long); }
+.signal-card.short .card-direction { background:var(--direction-short-bg); color:var(--direction-short); }
+.signal-card.neutral .card-direction { background:var(--tag-bg); color:var(--tag-text); }
+.direction-icon { display:flex; flex:0 0 16px; width:16px; height:16px; }
+.direction-icon svg { width:16px; height:16px; }
+.direction-name { white-space:nowrap; }
+.direction-stage { color:var(--dim); font-size:11px; line-height:1.3; white-space:nowrap; }
+.shadow-event-card .card-direction { background:var(--mint-soft); color:var(--mint); }
+.shadow-event-card.short .card-direction { color:var(--red); background:var(--red-soft); }
 .card-recency { color:var(--dim); font-size:12px; font-variant-numeric:tabular-nums; }
 .is-fresh .card-recency { color:var(--fresh-text); }
 .card-status, .card-price-label { color:var(--dim); font-size:12px; line-height:1.4; }
 .card-price-label { margin-top:3px; margin-bottom:-5px; }
 .card-price { min-width:0; color:var(--text); font-size:clamp(21px,1.8vw,27px); line-height:1.3; font-weight:560; letter-spacing:-.45px; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
-.performance-badge { display:inline-flex; width:fit-content; max-width:100%; margin-top:3px; padding:5px 8px; border:1px solid var(--outcome-neutral-border); border-radius:6px; background:var(--outcome-neutral-bg); color:var(--text-secondary); font-size:12px; font-weight:600; font-variant-numeric:tabular-nums; }
-.outcome-win .performance-badge, .outcome-active-win .performance-badge { border-color:var(--win-card-border); background:var(--positive-bg); color:var(--positive-text); }
-.outcome-loss .performance-badge, .outcome-active-loss .performance-badge { border-color:var(--loss-card-border); background:var(--negative-bg); color:var(--negative-strong); }
+.performance-badge { display:inline-flex; width:fit-content; max-width:100%; margin-top:3px; padding:5px 8px; border:0; border-radius:6px; background:var(--outcome-neutral-bg); color:var(--text-secondary); font-size:12px; font-weight:600; font-variant-numeric:tabular-nums; }
+.outcome-win .performance-badge, .outcome-active-win .performance-badge { background:var(--positive-bg); color:var(--positive-text); }
+.outcome-loss .performance-badge, .outcome-active-loss .performance-badge { background:var(--negative-bg); color:var(--negative-strong); }
 .card-performance { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin:1px 0 0; }
 .card-performance>div { min-width:0; padding:8px 9px; border:1px solid var(--line-soft); border-radius:7px; background:color-mix(in srgb,var(--surface) 76%,transparent); }
 .card-performance dt { color:var(--dim); font-size:10px; line-height:1.4; }
 .card-performance dd { margin:3px 0 0; color:var(--text); font-size:12px; font-weight:600; line-height:1.4; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.signal-card.outcome-win .card-performance>div:first-child dd, .signal-card.outcome-active-win .card-performance>div:first-child dd { color:var(--positive-text); }
+.signal-card.outcome-loss .card-performance>div:first-child dd, .signal-card.outcome-active-loss .card-performance>div:first-child dd { color:var(--negative-strong); }
 .performance-note { color:var(--dim); font-size:10px; line-height:1.55; }
 .card-context { padding-top:3px; color:var(--muted); font-size:12px; line-height:1.5; }
 .card-context strong { color:var(--warning-text); font-size:14px; font-weight:550; text-align:right; }
+.signal-card .card-context strong { color:var(--text-secondary); font-size:11px; font-weight:500; }
 .card-context small { font-size:12px; font-weight:400; }
 .card-confirmed { color:var(--dim); font-size:12px; line-height:1.5; }
 .card-confirmed time { color:var(--text-muted); text-align:right; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
@@ -1918,7 +1929,6 @@ h2 {
   padding:13px 14px 12px;
 }
 
-.signal-card::before,
 .shadow-event-card::before {
   top:14px;
   bottom:14px;
@@ -1952,7 +1962,6 @@ h2 {
 }
 
 .card-timeframe,
-.card-direction,
 .performance-badge,
 .shadow-v8-badge {
   border-radius:5px;

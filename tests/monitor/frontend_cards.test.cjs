@@ -147,7 +147,7 @@ test("both long and short cards keep a whole-card TradingView action", () => {
     const card = client.signalCardHTML(client.normalizeV1Event(row, "live"));
     assert.match(card, /data-tradingview-action="signal"/);
     assert.match(card, /title="点击整张卡片，在本机 TradingView 打开"/);
-    assert.match(card, row.direction === "short" ? /↓ 空头/ : /↑ 多头/);
+    assert.match(card, row.direction === "short" ? /class="direction-name">空头</ : /class="direction-name">多头</);
   }
 });
 
