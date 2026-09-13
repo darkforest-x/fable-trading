@@ -16,7 +16,7 @@ schema_version: 1
 experiments:
   - experiment_id: exp-spike-market-breadth-20260913-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: ab1d5b79fedb14497fcca9507b8f78913b0b818e
+    source_commit: 16e9a3cc49aef1b102db9fa9730ae22a45db17be
     status: active
     question: Can causal market-breadth state reduce V1/V7 noise while retaining exact realized 10R entries and outperforming matched random entries?
     single_variable: The frozen candidate admits only signals with joint 30m market breadth higher than 60 minutes earlier; all entries, exits, costs, and strategy parameters remain unchanged.
