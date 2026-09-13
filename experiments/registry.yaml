@@ -16,10 +16,10 @@ schema_version: 1
 experiments:
   - experiment_id: exp-spike-eth-lowtf-cost-diagnostic-20260914-v1
     source_repo: darkforest-x/fable-trading
-    status: active
+    status: completed
     question: Do fixed entry-risk-relative cost budgeting and frozen exit-path facts explain ETH V8 3m/5m low-timeframe losses without replaying a strategy?
     single_variable: One historical existing-trade subset label fee_R <= 0.5; four fee-R buckets are descriptive only, while ETH 3m 1R BE remains a separately frozen paired-exit explanation.
-    result: Pending read-only frozen-ledger aggregation.
+    result: ETH 3m later fee_R<=0.5 retains52/111 and changes mean netR from -0.237 to +0.015, but retains0/2 realized10R and is negative without its best trade. ETH 5m remains negative in both periods. The paired 1R break-even exit loses more trailing trend than it rescues from losses; no filter accepted.
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
