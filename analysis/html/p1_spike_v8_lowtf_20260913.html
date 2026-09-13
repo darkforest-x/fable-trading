@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>SPIKE V8 低周期：BTC、ETH 与因果日榜单回放</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>SPIKE V8 低周期：BTC、ETH 与因果日榜单回放</h1>
+<h2>结论</h2>
+<p>V8 不适合原样下放到 3m 或 5m。BTC/ETH 的 5m 开发、验证段 PF 均低于 1；授权查看的 3m holdout-era 段也全部低于 1。前一日 UTC 收益 Top10 的因果山寨池没有改善这一点：284 笔已结束交易 PF <strong>0.636</strong>、合计 <strong>-77.82R</strong>、没有已实现 10R。它相对同币、同月、先前120根波动桶匹配的随机入场有 +0.217R 的正差，但符号置换 p=0.182，不能据此把前一日涨幅榜作为 V8 的交易准入门。</p>
+<p>事后诊断也否定了“V8 低周期会自然抓住每天涨幅榜”的设想。2026-03 至 2026-04 的 610 个同日最终涨幅 Top10 日×币样本中，V8 仅在 <strong>19.34%</strong> 给出同向信号；在最终日涨幅完成 80% 前给出信号的比例是 <strong>17.54%</strong>。该表故意只用于解释漏抓，绝不是可交易回测池。</p>
+<p>本轮未改变 V8 阈值、Pine、监控、Bark、YOLO、ACTIVE 或任何订单路径。</p>
+<h2>固定规则与因果边界</h2>
+<p>V8 继承 V6 原始多空确认和 V7 的 BB200 历史压缩。唯一入场门保持冻结：</p>
+<pre><code>
+V6 原始信号
+AND V7 prior_squeeze_run3
+AND 多头 (close - ropeHigh) / ATR &lt;= 3
+    或空头 (ropeLow - close) / ATR &lt;= 3
+</code></pre>
+<p>所有特征都在信号 K 收盘可知。反向的<strong>原始</strong> V6 信号仍然可以结束现有仓位，即被 V8 门过滤的反向候选也不会暗中改变退出。执行不变：下一根开盘、信号前五根结构极值加 0.2 ATR、最小 2 ATR 风险、浮盈 2R 后 4 ATR 跟踪、0.2%往返成本。</p>
+<p>5m ETH 的 5,000 根独立小样本与冻结 <code>spike_v8_replay.v8_admissions()</code> 逐条比对，V8 admission mask 完全一致（13/13）。这证明本脚本没有另写一个低周期版本的 V8。</p>
+<h2>数据、时间切分与授权</h2>
+<table><thead><tr>
+<th>流</th>
+<th>交易所与覆盖</th>
+<th>开发段</th>
+<th>验证段</th>
+<th>数据缺口</th>
+</tr></thead><tbody>
+<tr><td>BTC 5m</td><td>Binance USD-M，2020-01-01 至 2026-04-30，665,856 根</td><td>2020-01-01 至 2023-12-31</td><td>2024-01-01 至 2026-04-30</td><td>0</td></tr>
+<tr><td>ETH 5m</td><td>Binance USD-M，2020-01-01 至 2026-04-30，665,856 根</td><td>同上</td><td>同上</td><td>0</td></tr>
+<tr><td>BTC 3m</td><td>OKX，2026-03-13 至 2026-07-11，57,705 根</td><td>2026-03-13 至 05-03</td><td>2026-05-04 至 07-11</td><td>0</td></tr>
+<tr><td>ETH 3m</td><td>OKX，2023-07-31 至 2026-07-30，525,599 根</td><td>2023-07-31 至 05-03</td><td>2026-05-04 至 07-30</td><td>0</td></tr>
+</tbody></table>
+<p>Owner 在 2026-09-13 明确要求测试 V8 的 3m/5m。正式 runner 在交付前共读取三次 3m 的 <code>&gt;=2026-05-04</code> 数据：<code>run_v1</code> 在 primary 后中断，记 <strong>formal exposure #1</strong>；<code>run_v2</code> 完成但复核发现榜单午夜成交边界，记 <strong>#2</strong>；修复前固定 primary 来源的 <code>run_v3</code> 记 <strong>#3</strong>。最终 <code>run_v4</code> 逐文件校验并复用 <code>run_v3</code> 的 primary 产物，只重跑 pre-holdout 榜单，因此<strong>没有第 4 次读取 3m OHLCV</strong>。此前另有一次使用较短 ETH 数据的临时 smoke，它属于不同的数据配置，也已明确视为一次非正式 holdout 查看。没有依据这些结果重新调 3 ATR、止损或任何阈值。BTC 3m 只有四个月历史，且开发段很短，不能与 ETH 的三年历史混为同等强度证据。</p>
+<h2>BTC / ETH 结果</h2>
+<p>下表的 <code>gross</code> 是未扣固定往返成本的交易收益率简单相加，<code>cost</code> 为每笔 0.2% 的合计，<code>net</code> 为扣成本后的简单相加。它们不是多笔并发的组合资金曲线；每条 BTC/ETH 流的“账户回撤”是按该流串行复利的已结束交易计算。</p>
+<table><thead><tr>
+<th>流 / 段</th>
+<th>信号（多/空）</th>
+<th>已结束交易</th>
+<th>胜率</th>
+<th>PF</th>
+<th>合计净R / 均值净R</th>
+<th>gross / cost / net</th>
+<th>已实现10R / MFE≥10R</th>
+<th>串行账户收益 / 最大回撤</th>
+</tr></thead><tbody>
+<tr><td>BTC 5m 开发</td><td>1625 (800/825)</td><td>1320</td><td>23.03%</td><td>0.694</td><td>-644.97 / -0.489</td><td>0.329 / 2.640 / -2.311</td><td>11 / 39</td><td>-91.54% / 91.54%</td></tr>
+<tr><td>BTC 5m 验证</td><td>909 (440/469)</td><td>731</td><td>20.38%</td><td>0.520</td><td>-534.04 / -0.731</td><td>-0.047 / 1.462 / -1.509</td><td>5 / 11</td><td>-78.57% / 80.59%</td></tr>
+<tr><td>ETH 5m 开发</td><td>1568 (805/763)</td><td>1261</td><td>25.69%</td><td>0.739</td><td>-433.92 / -0.344</td><td>0.243 / 2.522 / -2.279</td><td>8 / 26</td><td>-91.84% / 91.94%</td></tr>
+<tr><td>ETH 5m 验证</td><td>869 (409/460)</td><td>693</td><td>26.55%</td><td>0.772</td><td>-190.56 / -0.275</td><td>0.491 / 1.386 / -0.895</td><td>8 / 17</td><td>-62.26% / 72.92%</td></tr>
+<tr><td>BTC 3m 开发</td><td>95 (43/52)</td><td>72</td><td>30.56%</td><td>0.695</td><td>-34.09 / -0.474</td><td>0.080 / 0.144 / -0.064</td><td>1 / 2</td><td>-6.39% / 9.59%</td></tr>
+<tr><td>BTC 3m holdout-era（primary #3）</td><td>140 (67/73)</td><td>110</td><td>22.73%</td><td>0.383</td><td>-93.79 / -0.853</td><td>-0.026 / 0.220 / -0.246</td><td>0 / 2</td><td>-21.97% / 22.39%</td></tr>
+<tr><td>ETH 3m 开发</td><td>1817 (857/960)</td><td>1460</td><td>24.32%</td><td>0.542</td><td>-909.02 / -0.623</td><td>-0.043 / 2.920 / -2.963</td><td>9 / 26</td><td>-95.18% / 95.18%</td></tr>
+<tr><td>ETH 3m holdout-era（primary #3）</td><td>150 (72/78)</td><td>111</td><td>32.43%</td><td>0.851</td><td>-26.28 / -0.237</td><td>0.160 / 0.222 / -0.062</td><td>2 / 3</td><td>-6.46% / 14.21%</td></tr>
+</tbody></table>
+<p>3m 和 5m 的成本并不是唯一问题：例如 BTC 5m 验证段成本前也已略负（-0.047），BTC 3m holdout-era 成本前也为负（-0.026）。ETH 5m、ETH 3m 在成本前尚有微正收益，但固定 0.2% 往返成本足以抹掉它，而且串行回撤仍不可接受。</p>
+<h2>匹配随机对照</h2>
+<p>没有新增 L2 打分，V8 只是一个二元 admission，因此 AUC、top-decile 和单特征排序在此问题不适用。替代零假设是：每笔 V8 交易固定方向，匹配同币、同 UTC 月、信号前 120 根 <code>ATR/close</code> 波动桶的因果随机入场，使用相同止损、跟踪、反向退出与成本。每个目标固定 5 个随机种子，先对同一目标的种子均值去重，再按 <code>symbol × UTC month</code> 聚类做 20,000 次符号置换。</p>
+<table><thead><tr>
+<th>验证流</th>
+<th>月度聚类数</th>
+<th>V8 减匹配随机的均值净R</th>
+<th>双侧 p</th>
+<th>匹配率</th>
+</tr></thead><tbody>
+<tr><td>BTC 5m</td><td>28</td><td>-0.014</td><td>0.822</td><td>99.97%</td></tr>
+<tr><td>ETH 5m</td><td>28</td><td>+0.193</td><td>0.060</td><td>99.97%</td></tr>
+<tr><td>BTC 3m holdout-era（primary #3）</td><td>3</td><td>+0.121</td><td>0.503</td><td>100.00%</td></tr>
+<tr><td>ETH 3m holdout-era（primary #3）</td><td>3</td><td>+0.409</td><td>0.256</td><td>99.82%</td></tr>
+</tbody></table>
+<p>ETH 5m 的正差接近但未达到项目的 p&lt;0.01 标准；其他流没有可靠优势。尤其 3m 每个流只有三个 UTC 月聚类，p 值的信息量很有限。</p>
+<h2>因果每日排行榜 cohort：山寨池</h2>
+<p>完整 UTC 日 D 的开到收收益在 D 收盘后排序 Top10。排名在 D+1 00:00 才可知，因此 23:55--00:00 的信号不能无延迟成交在 00:00；<code>prior_day_top10</code> 最早接受 D+1 首根 5m K 收盘后的信号。2026-03-01 至 2026-04-30 使用 638 个 Binance USD-M 本地 series 中当时可用且最终快照仍为 <code>TRADING</code> 的合约；这带来明显的幸存者偏差，不能视为历史全市场的无偏名单。</p>
+<table><thead><tr>
+<th>口径</th>
+<th>信号（多/空）</th>
+<th>已结束交易</th>
+<th>胜率</th>
+<th>PF</th>
+<th>合计净R / 均值净R</th>
+<th>gross / cost / net</th>
+<th>已实现10R / MFE≥10R</th>
+<th>独立流数 / 平均账户收益 / 平均回撤</th>
+</tr></thead><tbody>
+<tr><td>选中币的所有日（同期间基线）</td><td>13042 (6426/6616)</td><td>10811</td><td>28.16%</td><td>0.793</td><td>-2033.72 / -0.188</td><td>-2.556 / 21.622 / -24.178</td><td>55 / 179</td><td>232 / -10.05% / 21.57%</td></tr>
+<tr><td>前一日 Top10 → 次日首根5m收盘后入场</td><td>333 (166/167)</td><td>284</td><td>24.30%</td><td>0.636</td><td>-77.82 / -0.274</td><td>-2.033 / 0.568 / -2.601</td><td>0 / 4</td><td>113 / -2.20% / 5.61%</td></tr>
+</tbody></table>
+<p>前一日 Top10 cohort 的匹配对照共有 138 个 <code>symbol × month</code> 聚类，平均净R差 +0.217、p=0.182、匹配率 99.93%。这说明它相对随机入场的方向可能有一点正向信息，但样本还不足以拒绝零假设；绝不能因它比“所有日”少亏而把它称为盈利过滤器。</p>
+<h2>同日涨幅榜覆盖诊断（不可交易）</h2>
+<table><thead><tr>
+<th>月份</th>
+<th>Top10 日×币样本</th>
+<th>当日任一同向 V8 信号</th>
+<th>在最终日涨幅80%前已有信号</th>
+<th>首个信号后的中位剩余涨幅</th>
+</tr></thead><tbody>
+<tr><td>2026-03</td><td>310</td><td>20.97%</td><td>18.71%</td><td>14.29%</td></tr>
+<tr><td>2026-04</td><td>300</td><td>17.67%</td><td>16.33%</td><td>22.33%</td></tr>
+<tr><td>合计</td><td>610</td><td>19.34%</td><td>17.54%</td><td>16.66%</td></tr>
+</tbody></table>
+<p>这个表回答的是“最后成为当天 Top10 的币，V8 在当天主要涨幅前是否曾出现同向信号”，它事后使用了最终排名，不能拿来回测收益或设置通知。它反而说明：若目标是每天绝大多数的瞬时爆发，当前依赖此前 BB 压缩和 V6 结构确认的 V8 并不是合适的发现器。</p>
+<h2>复现</h2>
+<pre><code>
+REPRO_OUT=&quot;/tmp/spike_v8_lowtf_repro_$(date +%s)&quot;
+PYTHONPATH=/Users/zhangzc/fable-trading \
+  .venv/bin/python yoyo/evaluation/spike_v8_lowtf_study.py \
+  --out &quot;$REPRO_OUT&quot; \
+  --tail-lines 24000 \
+  --reuse-primary experiments/active/exp-spike-v8-lowtf-20260913-v1/results/run_20260913_v3
+
+python3 scripts/md_to_html.py analysis/p1_spike_v8_lowtf_20260913.md --out-dir analysis/html
+</code></pre>
+<p>正式报告使用 <code>results/run_20260913_v4</code>。上述复现命令逐文件验证并复用 hash-pinned <code>run_v3</code> primary，只重跑 pre-holdout 榜单，不再次读取 3m holdout。产物包括逐笔已结束交易、V8 信号、匹配随机对照、因果榜单成员与事后覆盖表。运行单进程，排行榜只取每条 series 的末 24,000 行，不扫描完整 11GB archive。若要从 OHLCV 重跑 primary，runner 会 fail-closed；必须再次获得 Owner 授权并同时传入 <code>--allow-holdout --holdout-exposure-number 4</code>。</p>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>这些是研究回放，不是实盘表现。0.2%固定成本不含资金费、滑点、盘口冲击、借贷限制或撮合延迟；低周期实际成交通常更差。</li>
+<li>BTC/ETH 的单流账户曲线不能和多币 cohort 的并发交易混合；榜单表只报事件统计和独立流账户，未把并发 R 伪装成一个共享账户。</li>
+<li>5m Binance 数据止于 2026-04-30；正式 3m post-cutoff primary 已查看三次并固定在 exposure #3，不能用它反复调参。最终榜单修复没有再次读取这部分 OHLCV。</li>
+<li>同日最终涨幅 Top10 诊断含事后选择，唯一用途是量化漏抓，严禁用作收益结论。</li>
+<li>V8 原 30m/1H/4H 也仍是非盲描述性研究。这里的负面低周期结果不改变其现有前向影子状态。</li>
+</ul>
+<h2>下一步</h2>
+<ol>
+<li>保持 V8 的 3m/5m 不上线、不推送，积累现有 30m/1H/4H 前向影子样本。</li>
+<li>若目标是提高“当天强势榜”发现率，应单独预注册一个发现层，使用收盘时可见的跨市场广度、相对成交量、OI/资金费率和跨交易所扩散；不能把同日榜单倒灌给 V8。</li>
+<li>任何新的低周期规则必须先在 pre-holdout 时间段筛选，再一次性做新的 post-cutoff 评估并记录 exposure 编号。</li>
+</ol>
+</body>
+</html>

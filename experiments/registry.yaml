@@ -122,6 +122,26 @@ experiments:
       Candidate aggregate tables used the first year, but discovery_v1 physically retained validation outcomes;
       final review caught the isolation defect. Holdout-era exposure #1 is therefore explicitly nonblind descriptive
       evidence, even though no post-replay retune is recorded. New forward shadow evidence is required. No production switch.
+  - experiment_id: exp-spike-v8-lowtf-20260913-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4a428e921e9cc1c2fb6a0c2ecd68c2bc7c8bf836
+    status: rejected
+    question: Does the frozen SPIKE V8 admission retain an edge on BTC/ETH 3m/5m or in a causally shifted daily-gainer cohort?
+    single_variable: The V8 rule and execution stay frozen; this is an out-of-domain timeframe and cohort transfer evaluation, with same-day final winners isolated as a post-hoc recall diagnostic.
+    result: BTC/ETH 3m and 5m PF stayed below 1. The prior-day Top10 cohort produced 284 closed trades, PF 0.636 and -77.82R with zero realized 10R trades; same-day Top10 early recall was 17.54%.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v8_lowtf_20260913.md
+    artifacts:
+    - spike-v8-lowtf-20260913-run-v4-manifest
+    - spike-v8-lowtf-20260913-report-md
+    - spike-v8-lowtf-20260913-report-html
+    - spike-v8-lowtf-20260913-learning
+    notes: >-
+      Owner-authorized 3m primary was formally read three times during implementation and review; run_v3 is exposure #3.
+      Canonical run_v4 verifies and reuses its pinned primary artifacts, rerunning only the pre-holdout leaderboard.
+      A separate short-data smoke was also viewed and is disclosed in the report. No Pine, monitor, notification, ACTIVE or order path changed.
   - experiment_id: exp-spike-v1-plus-backtest-20260912-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2972ce0
