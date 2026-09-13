@@ -7,10 +7,9 @@ The only tabular inputs are the four small summary CSVs named below.  This
 keeps the report reproducible without opening the development candidate detail
 or any post-development/holdout data.
 
-The report is a research conclusion only.  Its hard filter is a transparent
-consistency check across every variant/timeframe (complete matching, positive
-paired net-R delta, and calendar-month sign-flip p < 0.01); it does not modify
-any production filter, notification, registry, or model setting.
+The report is a research conclusion only.  It displays cross-cohort evidence
+without inventing an acceptance gate, and does not modify any production
+filter, notification, registry, or model setting.
 """
 from __future__ import annotations
 
@@ -28,7 +27,6 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_STAGE_ONE = ROOT / "experiments/active/exp-spike-market-breadth-20260913-v1/results"
 DEFAULT_MATCHED = ROOT / "experiments/active/exp-spike-market-breadth-matched-controls-20260913-v1/results"
 FROZEN_RULE = "joint_delta_60m > 0"
-HARD_FILTER_P = 0.01
 
 _OUTCOME_REQUIRED = {
     "variant", "timeframe_min", "slice", "metric", "candidates", "closed", "censored",
@@ -179,23 +177,15 @@ def _assert_stage_hashes(stage_one: Path, manifest: dict, names: Iterable[str]) 
             raise ValueError(f"stage-one manifest hash mismatch for {name}")
 
 
-def _hard_filter(matched_summary: pd.DataFrame, keys: list[tuple[str, int]]) -> pd.DataFrame:
-    rows = []
-    for variant, timeframe in keys:
-        row = _one_row(matched_summary, variant=variant, timeframe=timeframe,
-                       metric="joint_delta_60m", slice_name="positive_rule")
-        targets, matched = _number(row.targets, integer=True), _number(row.matched, integer=True)
-        rate, delta, p_value = _number(row.match_rate), _number(row.paired_delta_mean_net_r), _number(row.paired_sign_flip_p)
-        coverage_ok = isinstance(targets, int) and isinstance(matched, int) and targets > 0 and matched == targets and rate == 1.0
-        effect_ok = isinstance(delta, float) and math.isfinite(delta) and delta > 0
-        significance_ok = isinstance(p_value, float) and math.isfinite(p_value) and p_value < HARD_FILTER_P
-        rows.append({
-            "variant": variant, "timeframe_min": timeframe, "targets": targets, "matched": matched,
-            "match_rate": rate, "paired_delta_mean_net_r": delta, "paired_sign_flip_p": p_value,
-            "coverage_ok": coverage_ok, "effect_ok": effect_ok, "significance_ok": significance_ok,
-            "passes_hard_filter": coverage_ok and effect_ok and significance_ok,
-        })
-    return pd.DataFrame(rows)
+def _assert_matched_summary_hash(matched: Path, manifest: dict) -> Path:
+    """Require the downstream summary's own manifest pin before it is parsed."""
+    summary = _stage_artifact(matched, "matched_control_summary.csv")
+    outputs = manifest.get("outputs")
+    if not isinstance(outputs, dict):
+        raise ValueError("matched manifest missing outputs object")
+    if outputs.get(summary.name) != sha256(summary):
+        raise ValueError("matched manifest hash mismatch for matched_control_summary.csv")
+    return summary
 
 
 def build_spike_market_breadth_report(stage_one: Path, matched: Path, report: Path) -> dict:
@@ -207,17 +197,20 @@ def build_spike_market_breadth_report(stage_one: Path, matched: Path, report: Pa
     """
     stage_one, matched, report = Path(stage_one), Path(matched), Path(report)
     stage_manifest, matched_manifest = validate_input_pins(stage_one, matched)
+    matched_summary = _assert_matched_summary_hash(matched, matched_manifest)
     _assert_stage_hashes(stage_one, stage_manifest, (
         "outcome_summary.csv", "frozen_candidate_rule.csv", "single_variable_slices.csv",
     ))
     outcome = _require_table(stage_one / "outcome_summary.csv", _OUTCOME_REQUIRED, label="outcome summary")
     frozen = _require_table(stage_one / "frozen_candidate_rule.csv", _RULE_REQUIRED, label="frozen candidate rule")
     slices = _require_table(stage_one / "single_variable_slices.csv", _SLICES_REQUIRED, label="single-variable slices")
-    controls = _require_table(matched / "matched_control_summary.csv", _MATCHED_REQUIRED, label="matched-control summary")
+    controls = _require_table(matched_summary, _MATCHED_REQUIRED, label="matched-control summary")
     if not frozen.rule.astype(str).eq(FROZEN_RULE).all() or stage_manifest.get("frozen_rule") != FROZEN_RULE:
         raise ValueError("stage-one frozen rule is not the expected joint_delta_60m > 0")
     if controls.duplicated(["variant", "timeframe_min", "metric", "slice"]).any():
         raise ValueError("matched-control summary has duplicate cohort rows")
+    if not controls.sign_flip_unit.astype(str).eq("calendar_month").all():
+        raise ValueError("matched-control summary must use sign_flip_unit=calendar_month")
 
     baseline = outcome.loc[(outcome.slice.astype(str) == "all") & (outcome.metric.astype(str) == "all")].copy()
     if baseline.empty:
@@ -227,6 +220,11 @@ def build_spike_market_breadth_report(stage_one: Path, matched: Path, report: Pa
     if len(set(keys)) != len(keys):
         raise ValueError("outcome summary has duplicate baseline cohorts")
     frozen["timeframe_min"] = pd.to_numeric(frozen.timeframe_min, errors="raise").astype(int)
+    frozen_keys = [(str(row.variant), int(row.timeframe_min)) for row in frozen.itertuples(index=False)]
+    if len(set(frozen_keys)) != len(frozen_keys):
+        raise ValueError("frozen candidate rule has duplicate baseline cohorts")
+    if set(frozen_keys) != set(keys):
+        raise ValueError("frozen candidate rule does not match baseline variant/timeframe cohorts")
     for variant, timeframe in keys:
         _one_row(controls, variant=variant, timeframe=timeframe, metric="baseline", slice_name="all")
         _one_row(controls, variant=variant, timeframe=timeframe, metric="joint_delta_60m", slice_name="positive_rule")
@@ -259,8 +257,26 @@ def build_spike_market_breadth_report(stage_one: Path, matched: Path, report: Pa
     if joined_other.matched.isna().any():
         raise ValueError("matched-control summary lacks a top/bottom single-variable cohort")
     joined_other = joined_other.sort_values(["variant", "timeframe_min", "metric", "slice"]).reset_index(drop=True)
-    hard = _hard_filter(controls, keys)
-    all_pass = bool(hard.passes_hard_filter.all())
+    frozen_evidence = controls.loc[
+        (controls.metric.astype(str) == "joint_delta_60m")
+        & (controls.slice.astype(str) == "positive_rule")
+    ].copy()
+    frozen_evidence["timeframe_min"] = pd.to_numeric(frozen_evidence.timeframe_min, errors="raise").astype(int)
+    frozen_evidence = frozen_evidence.merge(
+        frozen[["variant", "timeframe_min", "baseline_realized_ge_10r_count", "kept_realized_ge_10r_count",
+                "exact_entry_10r_retention"]],
+        on=["variant", "timeframe_min"], how="inner", validate="one_to_one",
+    ).sort_values(["variant", "timeframe_min"]).reset_index(drop=True)
+    if len(frozen_evidence) != len(keys):
+        raise ValueError("matched-control summary lacks a frozen-rule cohort")
+    deltas = pd.to_numeric(frozen_evidence.paired_delta_mean_net_r, errors="coerce").dropna()
+    direction_inconsistent = bool((deltas.gt(0).any()) and (deltas.le(0).any()))
+    ten_r_loss = bool(pd.to_numeric(frozen_evidence.kept_realized_ge_10r_count, errors="coerce").lt(
+        pd.to_numeric(frozen_evidence.baseline_realized_ge_10r_count, errors="coerce")).any())
+    if direction_inconsistent or ten_r_loss:
+        evidence_guidance = "跨组合的 matched 效应方向不一致或出现 ≥10R 候选损失；研究建议：不要统一硬过滤。"
+    else:
+        evidence_guidance = "本表未出现跨组合方向冲突或 ≥10R 候选损失；但未预注册降噪或 10R 验收阈值，不能把它读成统一硬过滤通过。"
 
     report.parent.mkdir(parents=True, exist_ok=True)
     report.write_text(f"""# SPIKE 市场广度：冻结候选的匹配随机对照整合报告
@@ -268,7 +284,7 @@ def build_spike_market_breadth_report(stage_one: Path, matched: Path, report: Pa
 ## 范围与证据边界
 
 - 阶段一开发窗口：`{stage_manifest.get('development_start')}` 至 `{stage_manifest.get('development_end_exclusive')}`（右端排除）。本整合器没有读取 holdout、市场面板、候选明细或原始逐笔大表；`candidate_context.csv.gz` 仅以字节 SHA-256 核验，未解析行内容。
-- matched manifest 的候选与来源 SHA 分别与阶段一的 `candidate_context.csv.gz`、`source_manifest.csv` 一致；阶段一 manifest 也再次固定了两者。匹配摘要的随机化种子为 `{matched_manifest.get('seed')}`，配对显著性单位由摘要明确记录为日历月。
+- matched manifest 的候选与来源 SHA 分别与阶段一的 `candidate_context.csv.gz`、`source_manifest.csv` 一致；阶段一 manifest 也再次固定了两者。matched manifest 还固定了本次读取的 `matched_control_summary.csv`。随机化种子为 `{matched_manifest.get('seed')}`，所有展示行的配对显著性单位均已核验为日历月。
 - 阶段一 manifest 记录 `holdout_consumed={stage_manifest.get('holdout_consumed')}`；本报告不把这轮开发期读作新的 holdout 消耗，也不据此声称独立样本外验证。
 
 ## 各周期基线（共同执行的已实现结果）
@@ -311,17 +327,25 @@ def build_spike_market_breadth_report(stage_one: Path, matched: Path, report: Pa
 
 该表排除已经冻结的 `joint_delta_60m`，其余 top/bottom 只作多重比较下的描述，不能据此重选变量、阈值或组合规则。
 
-## 统一研究硬过滤判断
+## 跨组合证据与研究建议
 
-硬过滤只用于本研究的结论措辞：每个变体×周期的冻结正规则都必须同时满足 **匹配率 100%**、**配对均值净R差值 > 0**、**日历月 sign-flip p < {HARD_FILTER_P:.2f}**。这不是线上过滤阈值，也不会改动信号、通知、仓位或注册表。
+本研究**没有预注册**降噪阈值、≥10R 保留阈值或统一验收门；因此不从匹配率、净R差值、p 值生成“通过/不通过”的布尔准入。下表只并列每个冻结规则组合的证据，且不会改动信号、通知、仓位或注册表。
 
-{_markdown_table(hard, [
+{_markdown_table(frozen_evidence, [
     ('变体', 'variant', {}), ('周期(分)', 'timeframe_min', {'integer': True}), ('匹配率', 'match_rate', {'percent': True}),
     ('配对差值净R', 'paired_delta_mean_net_r', {}), ('月块 p', 'paired_sign_flip_p', {}),
-    ('覆盖', 'coverage_ok', {}), ('效应', 'effect_ok', {}), ('显著性', 'significance_ok', {}), ('通过', 'passes_hard_filter', {}),
+    ('基线≥10R', 'baseline_realized_ge_10r_count', {'integer': True}), ('保留≥10R', 'kept_realized_ge_10r_count', {'integer': True}),
+    ('≥10R保留率', 'exact_entry_10r_retention', {'percent': True}),
 ])}
 
-**统一判断：{'通过研究硬过滤。仍需项目所有者另行决定任何验证或生产动作。' if all_pass else '不通过研究硬过滤；不得将 `joint_delta_60m > 0` 接入生产过滤、训练、通知或仓位。'}**
+**研究建议：{evidence_guidance} 无论上述现象是否出现，当前证据都不是冻结验收门，也不可上线。**
+
+## 如何优化（下一轮研究，而非上线）
+
+- 先把市场广度作为市场状态标签或排序维度，保留现有规则的单变量身份，不把它直接变成交易过滤。
+- 下一轮只测试一个变量：按信号周期归一化广度窗口，避免把 30m 面板的固定 60m 变化直接当作所有信号周期的同义特征。
+- 重算 `launch_density` 时排除目标币，避免候选自身的启动进入它自己的市场环境指标。
+- 这些项目需要新的预注册与 owner 决策；在完成独立验证前，不得上线、训练、通知或改仓位。
 
 ## 风险与诚实声明
 
@@ -340,8 +364,7 @@ python3 -m yoyo.evaluation.spike_market_breadth_report \\
 """, encoding="utf-8")
     return {
         "report": str(report), "stage_one_manifest_sha256": sha256(stage_one / "manifest.json"),
-        "matched_manifest_sha256": sha256(matched / "manifest.json"), "hard_filter_passed": all_pass,
-        "cohorts": len(hard),
+        "matched_manifest_sha256": sha256(matched / "manifest.json"), "cohorts": len(frozen_evidence),
     }
 
 

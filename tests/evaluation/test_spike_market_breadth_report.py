@@ -67,11 +67,12 @@ def _bundle(tmp_path):
         "holdout_consumed": True, "frozen_rule": "joint_delta_60m > 0", "outputs": hashes,
     }))
     matched.mkdir()
-    _csv(matched / "matched_control_summary.csv", controls)
+    matched_summary_sha = _csv(matched / "matched_control_summary.csv", controls)
     (matched / "manifest.json").write_text(json.dumps({
         "development_start": "2024-09-10T00:00:00+00:00", "development_end_exclusive": "2025-09-10T00:00:00+00:00",
         "seed": 0, "input_candidate_context_sha256": hashes["candidate_context.csv.gz"],
         "input_source_manifest_sha256": hashes["source_manifest.csv"],
+        "outputs": {"matched_control_summary.csv": matched_summary_sha},
     }))
     return stage, matched
 
@@ -81,13 +82,14 @@ def test_builds_a_pinned_chinese_report_from_summary_tables_only(tmp_path):
     report = tmp_path / "out" / "report.md"
     result = build_spike_market_breadth_report(stage, matched, report)
     text = report.read_text()
-    assert result["hard_filter_passed"] is False
+    assert result["cohorts"] == 2
     assert "candidate_context.csv.gz` 仅以字节 SHA-256 核验" in text
     assert "joint_delta_60m > 0" in text
     assert "匹配随机对照：基线与冻结规则" in text
     assert "其他单变量：matched top/bottom 对比" in text
-    assert "不通过研究硬过滤" in text
-    assert "不得将 `joint_delta_60m > 0` 接入生产过滤" in text
+    assert "没有预注册" in text
+    assert "不可上线" in text
+    assert "如何优化" in text
     assert "joint_breadth" in text and "launch_density_1h" in text
 
 
@@ -105,6 +107,36 @@ def test_refuses_a_stage_summary_whose_bytes_no_longer_match_its_manifest(tmp_pa
     (stage / "outcome_summary.csv").write_text("tampered\n")
     with pytest.raises(ValueError, match="stage-one manifest hash mismatch for outcome_summary.csv"):
         build_spike_market_breadth_report(stage, matched, tmp_path / "report.md")
+
+
+def test_refuses_a_matched_summary_whose_bytes_no_longer_match_its_manifest(tmp_path):
+    stage, matched = _bundle(tmp_path)
+    (matched / "matched_control_summary.csv").write_text("tampered\n")
+    with pytest.raises(ValueError, match="matched manifest hash mismatch for matched_control_summary.csv"):
+        build_spike_market_breadth_report(stage, matched, tmp_path / "report.md")
+
+
+def test_refuses_non_monthly_sign_flip_units_and_non_bijective_frozen_rows(tmp_path):
+    stage, matched = _bundle(tmp_path)
+    summary = pd.read_csv(matched / "matched_control_summary.csv")
+    summary.loc[0, "sign_flip_unit"] = "event"
+    summary.to_csv(matched / "matched_control_summary.csv", index=False)
+    manifest = json.loads((matched / "manifest.json").read_text())
+    manifest["outputs"]["matched_control_summary.csv"] = _sha(matched / "matched_control_summary.csv")
+    (matched / "manifest.json").write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="sign_flip_unit=calendar_month"):
+        build_spike_market_breadth_report(stage, matched, tmp_path / "report.md")
+
+    missing = tmp_path / "missing"
+    missing.mkdir()
+    stage, matched = _bundle(missing)
+    frozen = pd.read_csv(stage / "frozen_candidate_rule.csv").iloc[:1]
+    frozen.to_csv(stage / "frozen_candidate_rule.csv", index=False)
+    stage_manifest = json.loads((stage / "manifest.json").read_text())
+    stage_manifest["outputs"]["frozen_candidate_rule.csv"] = _sha(stage / "frozen_candidate_rule.csv")
+    (stage / "manifest.json").write_text(json.dumps(stage_manifest))
+    with pytest.raises(ValueError, match="does not match baseline variant/timeframe cohorts"):
+        build_spike_market_breadth_report(stage, matched, tmp_path / "missing-report.md")
 
 
 def test_cli_accepts_temporary_result_directories(tmp_path):
