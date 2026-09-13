@@ -40,6 +40,10 @@ _RULE_REQUIRED = {
     "candidates", "closed", "mean_net_r", "median_net_r", "win_rate", "realized_ge_10r",
 }
 _SLICES_REQUIRED = {"variant", "timeframe_min", "slice", "metric", "candidates", "mean_net_r", "win_rate"}
+_STAGE_SLICE_DESCRIPTION_COLUMNS = (
+    "variant", "timeframe_min", "slice", "metric", "candidates", "closed", "censored", "mean_net_r",
+    "median_net_r", "win_rate", "realized_ge_10r_count", "realized_ge_10r",
+)
 _MATCHED_REQUIRED = {
     "variant", "timeframe_min", "metric", "slice", "targets", "matched", "match_rate",
     "target_mean_net_r", "control_mean_net_r", "paired_delta_mean_net_r", "paired_sign_flip_p",
@@ -253,10 +257,9 @@ def build_spike_market_breadth_report(stage_one: Path, matched: Path, report: Pa
     controls_view["cohort"] = controls_view.apply(
         lambda row: "基线" if row.metric == "baseline" else "冻结规则：delta_60m > 0", axis=1)
     controls_view = controls_view.sort_values(["variant", "timeframe_min", "metric"]).reset_index(drop=True)
-    other = slices.loc[
-        slices.slice.astype(str).isin(("bottom_quartile", "top_quartile"))
-        & slices.metric.astype(str).ne("joint_delta_60m")
-    ].copy()
+    other_mask = (slices.slice.astype(str).isin(("bottom_quartile", "top_quartile"))
+                  & slices.metric.astype(str).ne("joint_delta_60m"))
+    other = slices.loc[other_mask, [name for name in _STAGE_SLICE_DESCRIPTION_COLUMNS if name in slices.columns]].copy()
     if other.empty:
         raise ValueError("single-variable slices lacks non-frozen top/bottom cohorts")
     other["timeframe_min"] = pd.to_numeric(other.timeframe_min, errors="raise").astype(int)

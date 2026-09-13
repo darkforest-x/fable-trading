@@ -43,7 +43,8 @@ def _bundle(tmp_path):
             for slice_name, value in (("bottom_quartile", -.2), ("top_quartile", .3)):
                 slices.append(dict(variant=variant, timeframe_min=minutes, threshold=0., slice=slice_name,
                                    metric=metric, candidates=3, closed=3, censored=0, mean_net_r=value,
-                                   median_net_r=value, win_rate=.5, realized_ge_10r_count=0, realized_ge_10r=0.))
+                                   median_net_r=value, win_rate=.5, realized_ge_10r_count=0, realized_ge_10r=0.,
+                                   matched=0, matched_delta_net_r=float("nan"), matched_signflip_p=float("nan")))
                 controls.append(dict(variant=variant, timeframe_min=minutes, metric=metric, slice=slice_name,
                                      targets=3, matched=3, match_rate=1., target_mean_net_r=value,
                                      control_mean_net_r=0., paired_delta_mean_net_r=value,
@@ -100,6 +101,7 @@ def test_builds_a_pinned_chinese_report_from_summary_tables_only(tmp_path):
     assert "不可上线" in text
     assert "如何优化" in text
     assert "joint_breadth" in text and "launch_density_1h" in text
+    assert "配对差值净R" in text
 
 
 def test_refuses_a_matched_manifest_pinned_to_another_candidate_file(tmp_path):
