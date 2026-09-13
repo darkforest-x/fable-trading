@@ -20,6 +20,7 @@ EXP = ROOT / "experiments/active/exp-spike-v8-entry-evidence-20260914-v1"
 def main() -> None:
     result = EXP / "results/full_v1"
     cases = EXP / "cases_v2"
+    random_context = EXP / "results/random_context"
     if not json.loads((result / "manifest.json").read_text())["complete"]:
         raise ValueError("incomplete research output")
     if not json.loads((cases / "receipt.json").read_text())["complete"]:
@@ -32,8 +33,14 @@ def main() -> None:
                 raise ValueError(f"output hash mismatch: {receipt.parent / name}")
     report = ROOT / "analysis/p1_spike_v8_entry_evidence_20260914.md"
     html = ROOT / "analysis/html/p1_spike_v8_entry_evidence_20260914.html"
-    files = [Path(__file__), report, html]
-    files += [p for folder in (result, cases) for p in folder.iterdir() if p.is_file()]
+    if not json.loads((random_context / "manifest.json").read_text())["complete"]:
+        raise ValueError("incomplete random-entry context")
+    files = [Path(__file__), report, html,
+             ROOT / "yoyo/evaluation/spike_v8_entry_random_context.py",
+             ROOT / "yoyo/evaluation/spike_v8_entry_case_gallery.py",
+             ROOT / "yoyo/evaluation/spike_v8_entry_evidence_study.py",
+             ROOT / "tests/evaluation/test_spike_v8_entry_evidence_study.py"]
+    files += [p for folder in (result, cases, random_context) for p in folder.iterdir() if p.is_file()]
     files += [EXP / name for name in ("config.json", "PROJECT_PLAN.md", "holdout_receipt.json")]
     records = [{"path": str(p.relative_to(ROOT)), "sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
                 "size_bytes": p.stat().st_size} for p in sorted(set(files))]
