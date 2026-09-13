@@ -58,6 +58,18 @@ def build_entry(out: Path) -> list[Path]:
                              "baseline_mean_r": base["mean_r"]})
     pd.DataFrame(rows).to_csv(out / "entry_period_summary.csv", index=False)
     pd.DataFrame(harm).to_csv(out / "entry_filter_tradeoffs.csv", index=False)
+    closed["month"] = pd.to_datetime(closed.signal_confirm_time, utc=True).dt.strftime("%Y-%m")
+    stability = []
+    for keys, whole in closed.groupby(["period", "month", "timeframe_min", "side"]):
+        for name, flag in arms.items():
+            if flag is None:
+                continue
+            tagged, other = whole.loc[whole[flag]], whole.loc[~whole[flag]]
+            stability.append({"period": keys[0], "month": keys[1], "timeframe_min": keys[2], "side": keys[3],
+                              "cohort": name, "tagged_trades": len(tagged), "other_trades": len(other),
+                              "tagged_mean_r": tagged.net_r.mean(), "other_mean_r": other.net_r.mean(),
+                              "tagged_minus_other_r": tagged.net_r.mean() - other.net_r.mean()})
+    pd.DataFrame(stability).to_csv(out / "entry_monthly_comparison.csv", index=False)
 
     pairs = pd.read_csv(ENTRY / "same_stream_month_pairs.csv")
     matched = pairs.loc[pairs.matched].copy()
