@@ -63,8 +63,8 @@ def render(frame: pd.DataFrame, output: Path) -> None:
     width = df[[f"{k}{n}" for n in (20,60,120) for k in ("s","e")]].max(axis=1)-df[[f"{k}{n}" for n in (20,60,120) for k in ("s","e")]].min(axis=1)
     axes[2].plot(x, width/df.close*100, color="#BD8431", linewidth=1.5)
     axes[2].set_ylabel("六线宽度 / 价格 %")
-    entries = [("2026-07-24 00:00",17.61,"A 多头 17.61",35),
-               ("2026-07-26 12:00",17.43,"B 多头 17.43",36),
+    entries = [("2026-07-24 00:00",17.61,"A 多头 17.61",-50),
+               ("2026-07-26 12:00",17.43,"B 多头 17.43",24),
                ("2026-07-27 16:00",17.20,"C 空头 17.20",-43)]
     for when, price, label, offset in entries:
         t = pd.Timestamp(when, tz="Asia/Shanghai")
