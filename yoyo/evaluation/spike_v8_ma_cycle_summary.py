@@ -35,11 +35,16 @@ def paired_stats(frame, rng):
     if frame.empty:
         return dict(n=0, mean_difference_r=np.nan, block_sign_flip_p=np.nan, blocks=0)
     blocks = frame.groupby(['asset', 'calendar_month']).difference_r.sum().to_numpy()
+    if not np.isfinite(blocks).all():
+        raise ValueError('Nonfinite paired block effects')
     observed = abs(blocks.sum())
     exceed = 0
     for _ in range(100):
         signs = rng.integers(0, 2, size=(100, len(blocks))) * 2 - 1
-        exceed += int((np.abs(signs @ blocks) >= observed - 1e-12).sum())
+        simulated = (signs * blocks[None, :]).sum(axis=1, dtype=np.float64)
+        if not np.isfinite(simulated).all():
+            raise ValueError('Nonfinite sign-flip statistics')
+        exceed += int((np.abs(simulated) >= observed - 1e-12).sum())
     return dict(n=len(frame), mean_difference_r=frame.difference_r.mean(),
                 block_sign_flip_p=(1+exceed)/10001, blocks=len(blocks))
 
