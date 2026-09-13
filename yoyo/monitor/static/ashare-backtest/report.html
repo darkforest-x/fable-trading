@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>SPIKE V1 / V8：沪深主板近三年日线与周线</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>SPIKE V1 / V8：沪深主板近三年日线与周线</h1>
+<p>固定四组评估已完成本轮可用数据处理。目标 <strong>3280</strong> 只，实际覆盖 <strong>2587</strong> 只，缺数或隔离 <strong>43</strong> 只。结果状态：<strong>incomplete</strong>。未就绪证券保留在分母中；这是历史研究，未通过实盘准入。</p>
+<p>Owner 要求停止继续取数，固定已有 2587 只有成功源收据的股票。另有 43 只取数失败、650 只未采集，均不再重试。评估隔离 0 只；所有类别合计 3280 只。这是按采集进度截取的可用样本，未按收益筛选，但并非全主板随机代表样本；不能外推为全主板表现。</p>
+<p><strong>结论：四组单笔平均净收益均为负，且全部低于本次固定匹配随机对照；本样本不支持这四组入场规则具有正向超额。</strong> 这是已采集样本的描述性历史结论，不能推断完整主板、共享账户或未来实盘表现。</p>
+<h2>冻结口径与授权</h2>
+<ul>
+<li>收益窗口：2023-09-13 至 2026-09-11，交易日日历为 BaoStock 0.9.3；2008 年起的数据仅为预热。</li>
+<li>当前 SPIKE V1 与 V8 的原有入场条件保留，普通主板账户仅做多。V8 保留 BB200、前 500 根宽度阈值、前 12 根中的连续 3 根压缩和距六均线边缘不超过 3 ATR；原始 V6 反向确认仍可退出。</li>
+<li>结构止损最近 5 根减 0.2 ATR、至少 2 ATR 风险底线，2R 收盘后激活 4ATR 跟踪；下一真实交易日开盘入场，T+1 与涨跌停按日撮合，周线跟踪只在周收盘更新。</li>
+<li>Owner 于 2026-09-13 明确授权四组各评估一次。<strong>V1 日线、V1 周线、V8 日线、V8 周线：这是各配置第 1 次消耗本次 A 股 holdout。</strong> 不重读已完成流作参数试验，不把旧加密资产发现称为本次盲测。</li>
+</ul>
+<h2>版本同表对照</h2>
+<p>PF 按自然平仓净 R 的盈利和亏损计算；平均收益为独立事件均值，累计 R 不代表共享资金账户。期末未平仓从胜率、PF 和已实现累计 R 排除。</p>
+<table><thead><tr>
+<th>版本</th>
+<th>周期</th>
+<th>就绪股票</th>
+<th>信号</th>
+<th>平仓</th>
+<th>未结束</th>
+<th>胜率</th>
+<th>净R PF</th>
+<th>平均毛收益</th>
+<th>平均净收益</th>
+<th>累计净R</th>
+<th>随机净收益</th>
+<th>池均值超额</th>
+<th>聚类置换p</th>
+</tr></thead><tbody>
+<tr><td>V1</td><td>1D</td><td>2540</td><td>316</td><td>276</td><td>11</td><td>34.058%</td><td>1.0819</td><td>-0.793%</td><td>-0.993%</td><td>15.2965</td><td>8.421%</td><td>-9.414%</td><td>1.0000</td></tr>
+<tr><td>V8</td><td>1D</td><td>2494</td><td>2280</td><td>1843</td><td>41</td><td>29.192%</td><td>1.0365</td><td>-0.125%</td><td>-0.325%</td><td>47.5443</td><td>2.462%</td><td>-2.787%</td><td>1.0000</td></tr>
+<tr><td>V1</td><td>1W</td><td>2182</td><td>113</td><td>69</td><td>30</td><td>24.638%</td><td>0.5483</td><td>-9.925%</td><td>-10.125%</td><td>-23.9557</td><td>16.558%</td><td>-26.683%</td><td>1.0000</td></tr>
+<tr><td>V8</td><td>1W</td><td>1593</td><td>704</td><td>472</td><td>84</td><td>30.085%</td><td>0.9169</td><td>-0.671%</td><td>-0.871%</td><td>-27.0448</td><td>4.376%</td><td>-5.247%</td><td>1.0000</td></tr>
+</tbody></table>
+<h2>数据统计与时间分层</h2>
+<p>无训练、调参或随机 train/val 切分。四组为预先冻结的历史评价，按实际入场年度分层；全部自然平仓数就是各组的评价样本数，正类比例在这里明确定义为净收益大于零的平仓胜率。全池采集/隔离清单见 <code>source_coverage.csv</code>；预热不足、随机配对缺额及不能成交的原因见 <code>coverage.csv</code>。</p>
+<table><thead><tr>
+<th>入场年</th>
+<th>版本</th>
+<th>周期</th>
+<th>自然平仓数</th>
+<th>胜率</th>
+<th>平均净收益</th>
+<th>累计净R</th>
+</tr></thead><tbody>
+<tr><td>2023</td><td>V1</td><td>1D</td><td>17</td><td>17.647%</td><td>-8.856%</td><td>-9.6048</td></tr>
+<tr><td>2024</td><td>V1</td><td>1D</td><td>37</td><td>35.135%</td><td>-0.135%</td><td>-2.7859</td></tr>
+<tr><td>2025</td><td>V1</td><td>1D</td><td>184</td><td>37.500%</td><td>0.402%</td><td>38.8885</td></tr>
+<tr><td>2026</td><td>V1</td><td>1D</td><td>38</td><td>23.684%</td><td>-5.068%</td><td>-11.2012</td></tr>
+<tr><td>2023</td><td>V8</td><td>1D</td><td>234</td><td>18.376%</td><td>-3.793%</td><td>-88.1373</td></tr>
+<tr><td>2024</td><td>V8</td><td>1D</td><td>351</td><td>31.339%</td><td>-1.039%</td><td>-38.2148</td></tr>
+<tr><td>2025</td><td>V8</td><td>1D</td><td>746</td><td>36.863%</td><td>3.512%</td><td>349.8654</td></tr>
+<tr><td>2026</td><td>V8</td><td>1D</td><td>512</td><td>21.484%</td><td>-3.840%</td><td>-175.9690</td></tr>
+<tr><td>2023</td><td>V1</td><td>1W</td><td>11</td><td>27.273%</td><td>2.118%</td><td>-0.2829</td></tr>
+<tr><td>2024</td><td>V1</td><td>1W</td><td>11</td><td>45.455%</td><td>4.867%</td><td>1.9994</td></tr>
+<tr><td>2025</td><td>V1</td><td>1W</td><td>39</td><td>23.077%</td><td>-14.847%</td><td>-17.5911</td></tr>
+<tr><td>2026</td><td>V1</td><td>1W</td><td>8</td><td>0.000%</td><td>-24.554%</td><td>-8.0811</td></tr>
+<tr><td>2023</td><td>V8</td><td>1W</td><td>41</td><td>9.756%</td><td>-15.240%</td><td>-34.9649</td></tr>
+<tr><td>2024</td><td>V8</td><td>1W</td><td>169</td><td>40.828%</td><td>7.689%</td><td>52.1699</td></tr>
+<tr><td>2025</td><td>V8</td><td>1W</td><td>185</td><td>34.595%</td><td>1.317%</td><td>23.5561</td></tr>
+<tr><td>2026</td><td>V8</td><td>1W</td><td>77</td><td>6.494%</td><td>-17.264%</td><td>-67.8059</td></tr>
+</tbody></table>
+<h2>对照、指标适用性与解读</h2>
+<ul>
+<li>匹配随机对照：同一股票、同一季度、同一因果 ATR/close 四分位桶，固定种子且不放回抽取与策略信号等量的入场候选，使用同样的成交、止损、原始反向退出、周期跟踪和 0.2% 成本。无可配位置诚实计缺；串行持仓与涨跌停可使最终成交数不等。未凭结果选择随机种子。</li>
+<li>聚类置换 p：对同时存在自然平仓的股票配对比较两侧平均净收益，用 9,999 次固定种子的符号置换检验超额是否为正。该统计按股票等权，表中池均值超额按已平仓事件等权，两者口径不同。样本不足返回不适用，不伪造显著性。</li>
+<li>val AUC：不适用，本轮没有拟合概率分类器或验证排序器。</li>
+<li>top-decile 毛/净收益与单特征排序基线：不适用，本轮执行的是两套冻结布尔信号，没有经过授权的排序变量；不能事后挑一列排名再冒充原策略。可比较的入场基线是同分层随机对照，毛/净事件收益同时列出。</li>
+<li>V1/V8 的信号定义和就绪时长不同，原始数量变化不能单独归因为过滤效果；V8 日/周更长的背景预热会减少可评估股票。周线事件持有更长、期末截尾更多时，应同时看未结束数量，不能把截尾收益当自然退出成绩。</li>
+<li>日线的净 R 合计和净 R PF 略为正，但单笔平均百分比收益为负，两者并不矛盾：每笔净 R = 净收益率 ÷（初始风险 / 入场价），风险比例因交易而异。净 R 相当于另一套风险权重，不能用正累计 R 或 PF 大于 1 宣称等额投资盈利。两套口径均完整保留。</li>
+<li>年度表显示结果随入场年份显著变化，不能把 2025 年的正值外推为稳定优势；2026 年截至 9 月 11 日，尚未结束的交易仍被排除。年份对比还受持仓时长与截尾影响，不能据此事后挑选年份。</li>
+</ul>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>按各版本实际预热就绪覆盖统计；V8 周线需要约 712 根历史周 K 线，不能把未就绪当无信号。</li>
+<li>指标沿真实成交日/周 K 线条数计算，明确跨已记录停牌保留历史状态；不插入虚构价格。未解释的缺失交易日整只隔离。</li>
+<li>日线 OHLC 无法还原盘中排队成交；涨停买入、跌停卖出采用保守阻断。后复权为总回报坐标，非分红送股现金账。</li>
+<li>0.2% 为固定往返研究成本；累计净 R 是独立事件相加，不是共享账户收益或最大资金回撤。</li>
+<li>随机对照固定单一种子，按同股票×同季度×因果 ATR 波动桶匹配入场候选；成交限制和持仓互斥可造成笔数不同。</li>
+<li>p 值为股票聚类配对平均净收益的 9,999 次符号置换；与总池加权平均超额是不同统计量，不是独立前向验证。</li>
+<li>四组配置各首次授权使用本次 A 股 holdout 区间；本轮不据结果调参。</li>
+<li>Owner 要求停止继续取数，固定已有 2587 只有成功源收据的股票。另有 43 只取数失败、650 只未采集，均不再重试。评估隔离 0 只；所有类别合计 3280 只。这是按采集进度截取的可用样本，未按收益筛选，但并非全主板随机代表样本；不能外推为全主板表现。</li>
+<li>1 只股票因周期仅有一根 K 线触发原始指标的短数组错误；终审仅核对至多 5 个源交易日，按原有预热门记为未就绪、零交易，未重算指标或收益。原始错误、独立覆盖生成器 SHA 与每只收据保留在 warmup_recovery.json。</li>
+<li>全量目标是 BaoStock 历史名单与 IPO/退市基础资料的并集，仍受供应商历史退市数据质量约束；源记录不等于交易所逐笔成交真相。</li>
+<li>本次不提供共享资金复利、容量、100 股手数账户、融资融券、分红送股现金到账或真实税费账；固定 0.2% 研究成本沿用原 SPIKE 契约，不能称实际 A 股账户净利润。</li>
+<li>若结果覆盖不完整，必须带覆盖率阅读，不进行全主板盈利裁决。即使描述性指标为正，也不自动达到项目经济准入和前向验证标准。</li>
+</ul>
+<h2>复现命令</h2>
+<p>完整输入与逐流产物已冻结，重启命令会验收并复用已完成流，不能修改代码后覆盖原结果。原始请求收据、逐股票 normalized SHA 和 evaluation_identity.json 共同绑定输入与生成器。</p>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+# Owner 已停止取数：复现仅使用冻结的 data/collection_records.json，不再调用采集器。
+.venv/bin/python -m yoyo.evaluation.spike_ashare_study --experiment experiments/active/exp-spike-ashare-v1-v8-three-year-20260913-v1
+.venv/bin/python -m yoyo.evaluation.spike_ashare_delivery
+.venv/bin/python -m pytest tests/evaluation/test_spike_ashare_engine.py tests/evaluation/test_spike_ashare_study.py tests/test_spike_burst_replay.py -q
+node --test tests/monitor/frontend_ashare.test.cjs tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.test.cjs
+</code></pre>
+<h2>下一步</h2>
+<ul>
+<li>可以按年度、股票覆盖与无法成交原因阅读冻结结果，不改变参数。</li>
+<li>新规则、成本、止损或再次使用 holdout 需 Owner 决策；不自动训练、promote、部署到信号扫描或实盘下单。</li>
+</ul>
+<h2>来源与产物</h2>
+<ul>
+<li><a href="https://pypi.org/project/baostock/0.9.3/">BaoStock 0.9.3 官方维护包</a></li>
+<li><a href="https://www.sse.com.cn/lawandrules/sselawsrules2025/trade/universal/c/c_20260424_10816492.shtml">上交所 2026 交易规则与施行日期</a></li>
+<li><a href="https://docs.static.szse.cn/www/lawrules/rule/trade/current/W020260424690713155663.pdf">深交所 2026 交易规则</a></li>
+<li>逐笔：<code>experiments/active/exp-spike-ashare-v1-v8-three-year-20260913-v1/results/trades.csv.gz</code>；覆盖：<code>experiments/active/exp-spike-ashare-v1-v8-three-year-20260913-v1/results/coverage.csv</code>；生成器身份：<code>experiments/active/exp-spike-ashare-v1-v8-three-year-20260913-v1/results/evaluation_identity.json</code>。</li>
+</ul>
+</body>
+</html>

@@ -8830,16 +8830,18 @@ experiments:
   - experiment_id: exp-spike-ashare-v1-v8-three-year-20260913-v1
     source_repo: darkforest-x/fable-trading
     source_commit: d69365b
-    status: active
+    status: rejected
     question: How do fixed SPIKE V1 and V8 perform on Shanghai/Shenzhen main-board daily and weekly signals over the last three years?
     single_variable: Four owner-requested frozen version/timeframe cells under the same long-only A-share execution and 0.2 percent cost contract; no tuning.
-    result: Background collection and four-cell evaluation running against 3280 main-board codes; the frontend menu displays explicitly partial receipt-backed results until completion.
+    result: Owner stopped collection at 2587 successful sources; 43 source failures and 650 uncollected remain disclosed. All four mean net event returns are negative (-0.993/-0.325/-10.125/-0.871 percent for V1 daily/V8 daily/V1 weekly/V8 weekly) and below fixed matched random controls; no positive entry-edge or production claim.
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_ashare_v1_v8_three_year_20260913.md
-    artifacts: []
-    notes: Owner explicitly authorized each fixed configuration once in the conversation on 2026-09-13. Each of V1 daily, V1 weekly, V8 daily and V8 weekly has now begun authorized holdout use number 1; no tuning. Completion heartbeat a-v1-v8 and an independent LaunchAgent supervise delivery.
+    artifacts:
+    - spike-ashare-v1-v8-three-year-20260913-delivery
+    - spike-ashare-v1-v8-three-year-20260913-acceptance
+    notes: Each fixed configuration consumed its authorized A-share holdout once. Frozen evaluator d69365b unchanged; ce3863b003 honors owner stop and 1815a5212e explains reporting units. Singleton IPO coverage recovered from calendar counts without rescoring. Partial source coverage is not representative of the complete main board. Notion research record https://app.notion.com/p/3da8856479af81cc9db8f1c806b443b5 .
   - experiment_id: exp-comp-ma-sequence-20260913-v1
     source_repo: darkforest-x/fable-trading
     source_commit: f0d685b66e216cbfcb17afb8bb27f35fb4f7770f

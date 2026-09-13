@@ -308,6 +308,7 @@
 | — | [`p_prereg_holdout9_midvol.md`](p_prereg_holdout9_midvol.md) | 预注册卡 — holdout 第 9 次消耗:中波动带 × 高置信 |  |
 | — | [`p_v14_windows_train.md`](p_v14_windows_train.md) | v14 pad200 → Windows（3060）训练交接 |  |
 | — | [`short_tf_side_channel.md`](short_tf_side_channel.md) | 短周期支线（1m / 5m） |  |
+| — | [`p1_spike_ashare_v1_v8_three_year_20260913.md`](p1_spike_ashare_v1_v8_three_year_20260913.md) | SPIKE V1 / V8：沪深主板近三年日线与周线 | 结论：四组单笔平均净收益均为负，且全部低于本次固定匹配随机对照；本样本不支持这四组入场规则具有正向超额。** 这是已采集样本的描述性历史结论，不能推断完整主板、共享账户或未来实盘表现。 |
 
 ## 按文件名(便于 grep)
 
@@ -596,3 +597,4 @@
 ## SPIKE V8 追高/追空降噪 — 2026-09-13
 
 - [V7 132,593 条信号全量失败归因与 V8 冻结回放](html/p1_spike_v8_noise_filter_20260913.html) · 3ATR 六线距离门删除 14.55% 确认，逐周期保留 91.75%–96.77% 的原 V7 已实现 10R；平均回撤下降，但未证明收益显著优于 V7。最终复核发现 discovery_v1 暴露验证结果，证据已降级为非盲描述性，不进入生产。
+- [`p1_spike_ashare_v1_v8_three_year_20260913.md`](p1_spike_ashare_v1_v8_three_year_20260913.md) — SPIKE V1 / V8：沪深主板近三年日线与周线

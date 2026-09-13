@@ -30612,3 +30612,32 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Frozen ETH V8 3m and 5m trade-cost diagnostics; nonblind historical subset, no new OHLCV replay or accepted live rule.
+
+  - artifact_id: spike-ashare-v1-v8-three-year-20260913-delivery
+    artifact_type: manifest
+    role: fixed_v1_v8_ashare_daily_weekly_partial_source_study
+    source_repo: darkforest-x/fable-trading
+    source_commit: d69365beec1338bfcbdd353caaf159070cd2dc01
+    generator_commit: 1815a5212e52fd5d2a8624f6f3af30549c7d7969
+    source_path: experiments/active/exp-spike-ashare-v1-v8-three-year-20260913-v1/results/delivery_receipt.json
+    sha256: c6068d33889bd00b293840c45ef83f1563c763dd6f91134bf0de83895c29e3d8
+    size_bytes: 1497
+    storage_uri: repo://experiments/active/exp-spike-ashare-v1-v8-three-year-20260913-v1/results/delivery_receipt.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner stopped at 2587 successful sources; 43 failed and 650 uncollected are explicit. All four mean net event returns and matched-control excesses are negative. Each fixed A-share holdout use number 1; frozen scoring code unchanged, no production or full-universe claim.
+  - artifact_id: spike-ashare-v1-v8-three-year-20260913-acceptance
+    artifact_type: manifest
+    role: receipt_and_saved_outcome_arithmetic_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: d69365beec1338bfcbdd353caaf159070cd2dc01
+    generator_commit: 1815a5212e52fd5d2a8624f6f3af30549c7d7969
+    source_path: experiments/active/exp-spike-ashare-v1-v8-three-year-20260913-v1/results/final_acceptance.json
+    sha256: e606c0800d1ef209114dfbba65aed4a492063c9fcedd80a857aaeb0b610a46f2
+    size_bytes: 3185
+    storage_uri: repo://experiments/active/exp-spike-ashare-v1-v8-three-year-20260913-v1/results/final_acceptance.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner stopped at 2587 successful sources; 43 failed and 650 uncollected are explicit. All four mean net event returns and matched-control excesses are negative. Each fixed A-share holdout use number 1; frozen scoring code unchanged, no production or full-universe claim.
