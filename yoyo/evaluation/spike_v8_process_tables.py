@@ -91,13 +91,19 @@ def build_entry(out: Path) -> list[Path]:
 def build_exit(out: Path) -> list[Path]:
     source = EXIT / "trades.csv.gz"
     trades = pd.read_csv(source)
+    # Development must use the frozen prefix, never late outcomes of positions
+    # entered before the split. Full replay is retained for later-year paths.
+    prefix_source = EXIT / "development_trades.csv.gz"
+    prefix = pd.read_csv(prefix_source)
+    later = pd.to_datetime(trades.entry_time, utc=True) >= pd.Timestamp("2025-09-10T00:00:00Z")
+    trades = pd.concat([prefix, trades.loc[later]], ignore_index=True)
     trades = trades.loc[~trades.censored].copy()
     trades["period"] = np.where(pd.to_datetime(trades.entry_time, utc=True) < pd.Timestamp("2025-09-10T00:00:00Z"), "development", "validation_reused_history")
     rows = []
     for keys, part in trades.groupby(["period", "policy"]):
         rows.append({"period": keys[0], "policy": keys[1], **metrics(part)})
-    pd.DataFrame(rows).to_csv(out / "exit_full_period_summary.csv", index=False)
-    return [source, EXIT / "manifest.json", EXIT / "selected_rule.json"]
+    pd.DataFrame(rows).to_csv(out / "exit_scoring_period_summary.csv", index=False)
+    return [source, prefix_source, EXIT / "manifest.json", EXIT / "selected_rule.json"]
 
 
 def main() -> None:
