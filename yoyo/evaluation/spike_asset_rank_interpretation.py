@@ -34,14 +34,14 @@ def views(frame: pd.DataFrame):
 def main() -> None:
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument('--ledger', type=Path, default=EXP / 'results/full_v1/normalized_ledger.csv.gz')
-    parser.add_argument('--output', type=Path, default=EXP / 'interpretation/full_v1')
+    parser.add_argument('--output', type=Path, default=EXP / 'interpretation/full_v2')
     args = parser.parse_args()
     out = args.output
     out.mkdir(parents=True, exist_ok=False)
     if sha(EVIDENCE) != EVIDENCE_SHA:
         raise ValueError('Frozen entry evidence changed')
     frame = pd.read_csv(args.ledger)
-    ev = pd.read_csv(EVIDENCE)
+    ev = pd.read_csv(EVIDENCE, low_memory=False)
     keys = ['stream_key', 'signal_confirm_time', 'side']
     covars = ['current_ma_width_close', 'current_ma_order_long', 'current_ma_order_short',
               'rope_distance_atr', 'bb_episode_directional_order9_run3',
@@ -93,7 +93,10 @@ def main() -> None:
                 raise ValueError('Missing V8 feature join')
             val['directional_order'] = np.where(val.side.eq(1), val.current_ma_order_long, val.current_ma_order_short)
             val['long_fraction'] = val.side.eq(1).astype(float)
-            val['holding_hours'] = val.holding_bars * val.timeframe_min / 60
+            # The frozen evidence holding_bars column is entirely missing.
+            # Use the recorded entry/exit timestamp difference, not a made-up
+            # bar count. Intrabar fill precision is not available in this field.
+            val['holding_hours'] = (pd.to_datetime(val.exit_time, utc=True) - pd.to_datetime(val.entry_time, utc=True)).dt.total_seconds() / 3600
             for name in ['bb_episode_directional_order9_run3', 'bb_ma_tight_overlap_run3', 'htf_opposed_completed']:
                 val[name] = val[name].map({True: 1., False: 0.})
         main_assets = vs[vs.n.ge(30)]
@@ -106,11 +109,12 @@ def main() -> None:
                                   'long_fraction', 'holding_hours', 'bb_episode_directional_order9_run3',
                                   'bb_ma_tight_overlap_run3', 'htf_opposed_completed']
             for feature in feature_names:
-                per_asset = sub.groupby('asset')[feature].median()
+                rates = ['long_fraction', 'bb_episode_directional_order9_run3', 'bb_ma_tight_overlap_run3', 'htf_opposed_completed']
+                per_asset = sub.groupby('asset')[feature].mean() if feature in rates else sub.groupby('asset')[feature].median()
                 profiles.append({'view': view, 'cohort': cohort, 'feature': feature,
                                  'assets_observed': int(per_asset.notna().sum()),
                                  'event_observations': int(sub[feature].notna().sum()),
-                                 'equal_asset_median': per_asset.median()})
+                                 'equal_asset_median': per_asset.median() if per_asset.notna().any() else np.nan})
             for asset in chosen.index:
                 x = sub[sub.asset.eq(asset)].sort_values('net_r', ascending=False)
                 positive = x.loc[x.net_r.gt(0), 'net_r'].sum()
