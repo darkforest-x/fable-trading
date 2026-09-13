@@ -24,8 +24,9 @@ import pandas as pd
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_STAGE_ONE = ROOT / "experiments/active/exp-spike-market-breadth-20260913-v1/results"
-DEFAULT_MATCHED = ROOT / "experiments/active/exp-spike-market-breadth-matched-controls-20260913-v1/results"
+DEFAULT_STAGE_ONE = ROOT / "experiments/active/exp-spike-market-breadth-20260913-v2/results"
+DEFAULT_MATCHED = ROOT / "experiments/active/exp-spike-market-breadth-matched-controls-20260913-v2/results"
+STAGE_ONE_CODE = ROOT / "yoyo/evaluation/spike_market_breadth_study.py"
 MATCHED_CONTROLS_CODE = ROOT / "yoyo/evaluation/spike_market_breadth_matched_controls.py"
 MATCHED_OUTPUTS = ("matched_control_pairs.csv.gz", "matched_control_summary.csv", "control_receipts.csv")
 FROZEN_RULE = "joint_delta_60m > 0"
@@ -127,7 +128,8 @@ def _number(value: object, *, integer: bool = False) -> float | int:
     return int(number) if integer else float(number)
 
 
-def _format(value: object, *, percent: bool = False, integer: bool = False) -> str:
+def _format(value: object, *, percent: bool = False, integer: bool = False, pvalue: bool = False,
+            decimal: bool = False) -> str:
     number = _number(value, integer=integer)
     if isinstance(number, float) and math.isnan(number):
         return "—"
@@ -135,6 +137,10 @@ def _format(value: object, *, percent: bool = False, integer: bool = False) -> s
         return f"{number:,}"
     if percent:
         return f"{float(number):.1%}"
+    if pvalue:
+        return f"{float(number):.4g}"
+    if decimal:
+        return f"{float(number):.3f}"
     return f"{float(number):.3f}"
 
 
@@ -183,6 +189,15 @@ def _assert_stage_hashes(stage_one: Path, manifest: dict, names: Iterable[str]) 
             raise ValueError(f"stage-one manifest hash mismatch for {name}")
 
 
+def _assert_study_code_pin(manifest: dict, *, code: Path, label: str) -> None:
+    """Require a manifest to name the exact current study-generator bytes."""
+    code_sha = manifest.get("study_code_sha256")
+    if not isinstance(code_sha, str) or len(code_sha) != 64 or any(char not in "0123456789abcdef" for char in code_sha.lower()):
+        raise ValueError(f"{label} manifest has invalid study_code_sha256")
+    if code_sha != sha256(code):
+        raise ValueError(f"{label} manifest study_code_sha256 differs from current generator")
+
+
 def _assert_matched_artifact_pins(matched: Path, manifest: dict) -> Path:
     """Verify all matched artifacts and the exact generator bytes before parsing.
 
@@ -200,11 +215,7 @@ def _assert_matched_artifact_pins(matched: Path, manifest: dict) -> Path:
         if not isinstance(expected, str) or expected != sha256(path):
             raise ValueError(f"matched manifest hash mismatch for {name}")
         paths[name] = path
-    code_sha = manifest.get("study_code_sha256")
-    if not isinstance(code_sha, str) or len(code_sha) != 64 or any(char not in "0123456789abcdef" for char in code_sha.lower()):
-        raise ValueError("matched manifest has invalid study_code_sha256")
-    if code_sha != sha256(MATCHED_CONTROLS_CODE):
-        raise ValueError("matched manifest study_code_sha256 differs from current matched-controls generator")
+    _assert_study_code_pin(manifest, code=MATCHED_CONTROLS_CODE, label="matched")
     return paths["matched_control_summary.csv"]
 
 
@@ -217,6 +228,7 @@ def build_spike_market_breadth_report(stage_one: Path, matched: Path, report: Pa
     """
     stage_one, matched, report = Path(stage_one), Path(matched), Path(report)
     stage_manifest, matched_manifest = validate_input_pins(stage_one, matched)
+    _assert_study_code_pin(stage_manifest, code=STAGE_ONE_CODE, label="stage-one")
     matched_summary = _assert_matched_artifact_pins(matched, matched_manifest)
     _assert_stage_hashes(stage_one, stage_manifest, (
         "outcome_summary.csv", "frozen_candidate_rule.csv", "single_variable_slices.csv",
@@ -257,6 +269,18 @@ def build_spike_market_breadth_report(stage_one: Path, matched: Path, report: Pa
     controls_view["cohort"] = controls_view.apply(
         lambda row: "基线" if row.metric == "baseline" else "冻结规则：delta_60m > 0", axis=1)
     controls_view = controls_view.sort_values(["variant", "timeframe_min", "metric"]).reset_index(drop=True)
+    baseline_controls = controls.loc[
+        (controls.metric.astype(str) == "baseline") & (controls.slice.astype(str) == "all")
+    ].copy()
+    baseline_targets = pd.to_numeric(baseline_controls.targets, errors="raise")
+    baseline_matched = pd.to_numeric(baseline_controls.matched, errors="raise")
+    if (baseline_targets.lt(0) | baseline_matched.lt(0) | baseline_matched.gt(baseline_targets)).any():
+        raise ValueError("matched-control baseline has invalid target or matched totals")
+    total_baseline_targets = int(baseline_targets.sum())
+    total_baseline_matched = int(baseline_matched.sum())
+    if total_baseline_targets <= 0:
+        raise ValueError("matched-control baseline has no targets")
+    total_baseline_match_rate = total_baseline_matched / total_baseline_targets
     other_mask = (slices.slice.astype(str).isin(("bottom_quartile", "top_quartile"))
                   & slices.metric.astype(str).ne("joint_delta_60m"))
     other = slices.loc[other_mask, [name for name in _STAGE_SLICE_DESCRIPTION_COLUMNS if name in slices.columns]].copy()
@@ -276,6 +300,14 @@ def build_spike_market_breadth_report(stage_one: Path, matched: Path, report: Pa
     if joined_other.matched.isna().any():
         raise ValueError("matched-control summary lacks a top/bottom single-variable cohort")
     joined_other = joined_other.sort_values(["variant", "timeframe_min", "metric", "slice"]).reset_index(drop=True)
+    descriptive_p = pd.to_numeric(matched_other.paired_sign_flip_p, errors="coerce")
+    if descriptive_p.isna().any() or (~descriptive_p.between(0, 1)).any():
+        raise ValueError("descriptive matched-control cohorts have invalid paired p values")
+    descriptive_comparisons = len(descriptive_p)
+    if descriptive_comparisons == 0:
+        raise ValueError("matched-control summary lacks descriptive paired p values")
+    descriptive_min_p = float(descriptive_p.min())
+    descriptive_bonferroni_upper = min(1.0, descriptive_min_p * descriptive_comparisons)
     frozen_evidence = controls.loc[
         (controls.metric.astype(str) == "joint_delta_60m")
         & (controls.slice.astype(str) == "positive_rule")
@@ -288,17 +320,23 @@ def build_spike_market_breadth_report(stage_one: Path, matched: Path, report: Pa
     ).sort_values(["variant", "timeframe_min"]).reset_index(drop=True)
     if len(frozen_evidence) != len(keys):
         raise ValueError("matched-control summary lacks a frozen-rule cohort")
-    deltas = pd.to_numeric(frozen_evidence.paired_delta_mean_net_r, errors="coerce").dropna()
-    direction_inconsistent = bool((deltas.gt(0).any()) and (deltas.le(0).any()))
+    deltas = pd.to_numeric(frozen_evidence.paired_delta_mean_net_r, errors="coerce")
+    frozen_p = pd.to_numeric(frozen_evidence.paired_sign_flip_p, errors="coerce")
+    if deltas.isna().any() or frozen_p.isna().any() or (~frozen_p.between(0, 1)).any():
+        raise ValueError("frozen-rule cohorts lack valid matched effects or paired p values")
+    direction_inconsistent = bool((deltas.gt(0).any()) and (deltas.lt(0).any()))
+    all_frozen_p_not_significant = bool(frozen_p.ge(0.05).all())
     ten_r_loss = bool(pd.to_numeric(frozen_evidence.kept_realized_ge_10r_count, errors="coerce").lt(
         pd.to_numeric(frozen_evidence.baseline_realized_ge_10r_count, errors="coerce")).any())
-    if direction_inconsistent or ten_r_loss:
-        evidence_guidance = "跨组合的 matched 效应方向不一致或出现 ≥10R 候选损失；研究建议：不要统一硬过滤。"
-    else:
-        evidence_guidance = "本表未出现跨组合方向冲突或 ≥10R 候选损失；但未预注册降噪或 10R 验收阈值，不能把它读成统一硬过滤通过。"
+    if not (direction_inconsistent and all_frozen_p_not_significant and ten_r_loss):
+        raise ValueError("frozen-rule evidence does not support the required uniform-gate rejection conclusion")
 
     report.parent.mkdir(parents=True, exist_ok=True)
     report.write_text(f"""# SPIKE 市场广度：冻结候选的匹配随机对照整合报告
+
+## 结论
+
+冻结的 `joint_delta_60m > 0` **应拒绝作为统一硬过滤**：{len(frozen_evidence)} 个 cohort 的 matched 配对差值净R跨组合方向翻转，全部 {len(frozen_p)} 个 paired p 均不显著（最小 p={_format(frozen_p.min(), pvalue=True)}），且至少一个 cohort 丢失了原有 ≥10R 候选。此结论只拒绝这条冻结硬过滤；不构成任何上线、通知、训练或仓位调整建议。
 
 ## 范围与证据边界
 
@@ -310,7 +348,7 @@ def build_spike_market_breadth_report(stage_one: Path, matched: Path, report: Pa
 
 {_markdown_table(baseline.sort_values(['variant', 'timeframe_min']), [
     ('变体', 'variant', {}), ('周期(分)', 'timeframe_min', {'integer': True}), ('候选', 'candidates', {'integer': True}),
-    ('已平仓', 'closed', {'integer': True}), ('均值净R', 'mean_net_r', {}), ('中位净R', 'median_net_r', {}),
+    ('已平仓', 'closed', {'integer': True}), ('均值净R', 'mean_net_r', {'decimal': True}), ('中位净R', 'median_net_r', {'decimal': True}),
     ('胜率', 'win_rate', {'percent': True}), ('≥10R', 'realized_ge_10r', {'percent': True}),
 ])}
 
@@ -319,18 +357,20 @@ def build_spike_market_breadth_report(stage_one: Path, matched: Path, report: Pa
 {_markdown_table(frozen, [
     ('变体', 'variant', {}), ('周期(分)', 'timeframe_min', {'integer': True}), ('基线候选', 'baseline_candidates', {'integer': True}),
     ('保留候选', 'candidates', {'integer': True}), ('保留率', 'candidate_retention', {'percent': True}),
-    ('均值净R', 'mean_net_r', {}), ('胜率', 'win_rate', {'percent': True}), ('≥10R保留率', 'exact_entry_10r_retention', {'percent': True}),
+    ('均值净R', 'mean_net_r', {'decimal': True}), ('胜率', 'win_rate', {'percent': True}), ('≥10R保留率', 'exact_entry_10r_retention', {'percent': True}),
 ])}
 
 阶段一只冻结这一条单变量候选；没有将广度水平、密度、量价扩张、BTC/ETH 背景或其他切片叠加成新规则。
 
 ## 匹配随机对照：基线与冻结规则
 
+基线 summary 合计目标 `{_format(total_baseline_targets, integer=True)}`、匹配 `{_format(total_baseline_matched, integer=True)}`，动态匹配率 `{_format(total_baseline_match_rate, percent=True)}`。
+
 {_markdown_table(controls_view, [
     ('变体', 'variant', {}), ('周期(分)', 'timeframe_min', {'integer': True}), ('队列', 'cohort', {}),
     ('目标', 'targets', {'integer': True}), ('匹配', 'matched', {'integer': True}), ('匹配率', 'match_rate', {'percent': True}),
-    ('目标均值净R', 'target_mean_net_r', {}), ('对照均值净R', 'control_mean_net_r', {}),
-    ('配对差值净R', 'paired_delta_mean_net_r', {}), ('月块 sign-flip p', 'paired_sign_flip_p', {}),
+    ('目标均值净R', 'target_mean_net_r', {'decimal': True}), ('对照均值净R', 'control_mean_net_r', {'decimal': True}),
+    ('配对差值净R', 'paired_delta_mean_net_r', {'decimal': True}), ('月块 sign-flip p', 'paired_sign_flip_p', {'pvalue': True}),
 ])}
 
 未匹配原因仍保留在 `matched_control_summary.csv`；低于 100% 的匹配率不得被解释成对照组支持。
@@ -340,24 +380,24 @@ def build_spike_market_breadth_report(stage_one: Path, matched: Path, report: Pa
 {_markdown_table(joined_other, [
     ('变体', 'variant', {}), ('周期(分)', 'timeframe_min', {'integer': True}), ('变量', 'metric', {}), ('分位', 'slice', {}),
     ('候选', 'candidates', {'integer': True}), ('匹配', 'matched', {'integer': True}), ('匹配率', 'match_rate', {'percent': True}),
-    ('目标均值净R', 'target_mean_net_r', {}), ('对照均值净R', 'control_mean_net_r', {}),
-    ('配对差值净R', 'paired_delta_mean_net_r', {}), ('月块 sign-flip p', 'paired_sign_flip_p', {}),
+    ('目标均值净R', 'target_mean_net_r', {'decimal': True}), ('对照均值净R', 'control_mean_net_r', {'decimal': True}),
+    ('配对差值净R', 'paired_delta_mean_net_r', {'decimal': True}), ('月块 sign-flip p', 'paired_sign_flip_p', {'pvalue': True}),
 ])}
 
-该表排除已经冻结的 `joint_delta_60m`，其余 top/bottom 只作多重比较下的描述，不能据此重选变量、阈值或组合规则。
+该表排除已经冻结的 `joint_delta_60m`。`matched_control_summary.csv` 动态给出 `{descriptive_comparisons}` 个其余变量×top/bottom×cohort 描述性 paired p：最小未校正 p=`{_format(descriptive_min_p, pvalue=True)}`，Bonferroni 上界=`min(1, {descriptive_comparisons} × {_format(descriptive_min_p, pvalue=True)}) = {_format(descriptive_bonferroni_upper, pvalue=True)}`。不得事后挑选其中任何一行来重选变量、阈值或组合规则。
 
 ## 跨组合证据与研究建议
 
-本研究**没有预注册**降噪阈值、≥10R 保留阈值或统一验收门；因此不从匹配率、净R差值、p 值生成“通过/不通过”的布尔准入。下表只并列每个冻结规则组合的证据，且不会改动信号、通知、仓位或注册表。
+本研究**没有预注册**降噪阈值、≥10R 保留阈值或统一验收门；下表只并列拒绝这条冻结规则的证据，且不会改动信号、通知、仓位或注册表。
 
 {_markdown_table(frozen_evidence, [
     ('变体', 'variant', {}), ('周期(分)', 'timeframe_min', {'integer': True}), ('匹配率', 'match_rate', {'percent': True}),
-    ('配对差值净R', 'paired_delta_mean_net_r', {}), ('月块 p', 'paired_sign_flip_p', {}),
+    ('配对差值净R', 'paired_delta_mean_net_r', {'decimal': True}), ('月块 p', 'paired_sign_flip_p', {'pvalue': True}),
     ('基线≥10R', 'baseline_realized_ge_10r_count', {'integer': True}), ('保留≥10R', 'kept_realized_ge_10r_count', {'integer': True}),
     ('≥10R保留率', 'exact_entry_10r_retention', {'percent': True}),
 ])}
 
-**研究建议：{evidence_guidance} 无论上述现象是否出现，当前证据都不是冻结验收门，也不可上线。**
+**研究结论：跨 cohort 方向翻转、全部 paired p 不显著及 ≥10R 丢失共同拒绝 `joint_delta_60m > 0` 作为统一硬过滤。它不是其他规则的上线验收，也不可上线。**
 
 ## 如何优化（下一轮研究，而非上线）
 

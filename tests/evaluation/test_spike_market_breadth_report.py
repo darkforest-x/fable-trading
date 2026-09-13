@@ -9,6 +9,7 @@ import pandas as pd
 import pytest
 
 import yoyo.evaluation.spike_market_breadth_matched_controls as matched_controls
+import yoyo.evaluation.spike_market_breadth_study as breadth_study
 from yoyo.evaluation.spike_market_breadth_report import build_spike_market_breadth_report, main
 
 
@@ -32,12 +33,14 @@ def _bundle(tmp_path):
     slices = []
     controls = []
     for variant, minutes in (("v1_common_execution_long", 30), ("v7_bb_long", 60)):
+        kept_10r = 0 if variant.startswith("v7") else 1
+        frozen_delta = -.1 if variant.startswith("v7") else .2
         outcome.append(dict(variant=variant, timeframe_min=minutes, slice="all", metric="all", candidates=10,
                             closed=10, censored=0, mean_net_r=.1, median_net_r=-.2, win_rate=.4,
                             realized_ge_10r_count=1, realized_ge_10r=.1))
         frozen.append(dict(variant=variant, timeframe_min=minutes, rule="joint_delta_60m > 0",
                            baseline_candidates=10, candidate_retention=.5, baseline_realized_ge_10r_count=1,
-                           kept_realized_ge_10r_count=1, exact_entry_10r_retention=1., candidates=5, closed=5,
+                           kept_realized_ge_10r_count=kept_10r, exact_entry_10r_retention=float(kept_10r), candidates=5, closed=5,
                            mean_net_r=.2, median_net_r=.1, win_rate=.6, realized_ge_10r=.2))
         for metric in ("joint_breadth", "launch_density_1h"):
             for slice_name, value in (("bottom_quartile", -.2), ("top_quartile", .3)):
@@ -48,14 +51,14 @@ def _bundle(tmp_path):
                 controls.append(dict(variant=variant, timeframe_min=minutes, metric=metric, slice=slice_name,
                                      targets=3, matched=3, match_rate=1., target_mean_net_r=value,
                                      control_mean_net_r=0., paired_delta_mean_net_r=value,
-                                     paired_sign_flip_p=.5, sign_flip_unit="calendar_month", unmatched_reasons="{}"))
+                                     paired_sign_flip_p=.123456789, sign_flip_unit="calendar_month", unmatched_reasons="{}"))
         controls.extend([
             dict(variant=variant, timeframe_min=minutes, metric="baseline", slice="all", targets=10, matched=10,
                  match_rate=1., target_mean_net_r=.1, control_mean_net_r=0., paired_delta_mean_net_r=.1,
                  paired_sign_flip_p=.02, sign_flip_unit="calendar_month", unmatched_reasons="{}"),
             dict(variant=variant, timeframe_min=minutes, metric="joint_delta_60m", slice="positive_rule", targets=5,
-                 matched=5, match_rate=1., target_mean_net_r=.2, control_mean_net_r=0., paired_delta_mean_net_r=.2,
-                 paired_sign_flip_p=.005 if variant.startswith("v1") else .02,
+                 matched=5, match_rate=1., target_mean_net_r=frozen_delta, control_mean_net_r=0., paired_delta_mean_net_r=frozen_delta,
+                 paired_sign_flip_p=.5,
                  sign_flip_unit="calendar_month", unmatched_reasons="{}"),
         ])
     hashes = {
@@ -67,7 +70,8 @@ def _bundle(tmp_path):
     }
     (stage / "manifest.json").write_text(json.dumps({
         "development_start": "2024-09-10T00:00:00+00:00", "development_end_exclusive": "2025-09-10T00:00:00+00:00",
-        "holdout_consumed": True, "frozen_rule": "joint_delta_60m > 0", "outputs": hashes,
+        "holdout_consumed": True, "frozen_rule": "joint_delta_60m > 0", "study_code_sha256": _sha(Path(breadth_study.__file__)),
+        "outputs": hashes,
     }))
     matched.mkdir()
     matched_summary_sha = _csv(matched / "matched_control_summary.csv", controls)
@@ -95,6 +99,7 @@ def test_builds_a_pinned_chinese_report_from_summary_tables_only(tmp_path):
     assert result["cohorts"] == 2
     assert "candidate_context.csv.gz` 仅以字节 SHA-256 核验" in text
     assert "joint_delta_60m > 0" in text
+    assert "应拒绝作为统一硬过滤" in text
     assert "匹配随机对照：基线与冻结规则" in text
     assert "其他单变量：matched top/bottom 对比" in text
     assert "没有预注册" in text
@@ -102,6 +107,10 @@ def test_builds_a_pinned_chinese_report_from_summary_tables_only(tmp_path):
     assert "如何优化" in text
     assert "joint_breadth" in text and "launch_density_1h" in text
     assert "配对差值净R" in text
+    assert "基线 summary 合计目标 `20`、匹配 `20`，动态匹配率 `100.0%`" in text
+    assert "动态给出 `8` 个其余变量×top/bottom×cohort 描述性 paired p" in text
+    assert "Bonferroni 上界" in text
+    assert "0.123456789" not in text
 
 
 def test_refuses_a_matched_manifest_pinned_to_another_candidate_file(tmp_path):
@@ -141,6 +150,20 @@ def test_refuses_matched_manifest_with_tampered_generator_code_identity(tmp_path
     manifest["study_code_sha256"] = "0" * 64
     (matched / "manifest.json").write_text(json.dumps(manifest))
     with pytest.raises(ValueError, match="study_code_sha256 differs"):
+        build_spike_market_breadth_report(stage, matched, tmp_path / "report.md")
+
+
+@pytest.mark.parametrize(
+    ("value", "message"),
+    (("not-a-sha", "stage-one manifest has invalid study_code_sha256"),
+     ("0" * 64, "stage-one manifest study_code_sha256 differs from current generator")),
+)
+def test_refuses_stage_manifest_without_current_well_formed_study_code_identity(tmp_path, value, message):
+    stage, matched = _bundle(tmp_path)
+    manifest = json.loads((stage / "manifest.json").read_text())
+    manifest["study_code_sha256"] = value
+    (stage / "manifest.json").write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match=message):
         build_spike_market_breadth_report(stage, matched, tmp_path / "report.md")
 
 
