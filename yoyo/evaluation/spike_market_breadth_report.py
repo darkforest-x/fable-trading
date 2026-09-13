@@ -1,0 +1,359 @@
+"""Render the bounded SPIKE market-breadth matched-control conclusion.
+
+This reporter deliberately treats stage-one candidates as opaque bytes.  It
+only hashes ``candidate_context.csv.gz`` to verify the matched-control input
+pin; it never parses that ledger, the market panel, or any normalized OHLCV.
+The only tabular inputs are the four small summary CSVs named below.  This
+keeps the report reproducible without opening the development candidate detail
+or any post-development/holdout data.
+
+The report is a research conclusion only.  Its hard filter is a transparent
+consistency check across every variant/timeframe (complete matching, positive
+paired net-R delta, and calendar-month sign-flip p < 0.01); it does not modify
+any production filter, notification, registry, or model setting.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import math
+from pathlib import Path
+from typing import Iterable
+
+import pandas as pd
+
+
+ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_STAGE_ONE = ROOT / "experiments/active/exp-spike-market-breadth-20260913-v1/results"
+DEFAULT_MATCHED = ROOT / "experiments/active/exp-spike-market-breadth-matched-controls-20260913-v1/results"
+FROZEN_RULE = "joint_delta_60m > 0"
+HARD_FILTER_P = 0.01
+
+_OUTCOME_REQUIRED = {
+    "variant", "timeframe_min", "slice", "metric", "candidates", "closed", "censored",
+    "mean_net_r", "median_net_r", "win_rate", "realized_ge_10r_count", "realized_ge_10r",
+}
+_RULE_REQUIRED = {
+    "variant", "timeframe_min", "rule", "baseline_candidates", "candidate_retention",
+    "baseline_realized_ge_10r_count", "kept_realized_ge_10r_count", "exact_entry_10r_retention",
+    "candidates", "closed", "mean_net_r", "median_net_r", "win_rate", "realized_ge_10r",
+}
+_SLICES_REQUIRED = {"variant", "timeframe_min", "slice", "metric", "candidates", "mean_net_r", "win_rate"}
+_MATCHED_REQUIRED = {
+    "variant", "timeframe_min", "metric", "slice", "targets", "matched", "match_rate",
+    "target_mean_net_r", "control_mean_net_r", "paired_delta_mean_net_r", "paired_sign_flip_p",
+    "sign_flip_unit", "unmatched_reasons",
+}
+
+
+def sha256(path: Path) -> str:
+    """Return a byte identity without decoding the artifact's rows."""
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _load_json(path: Path) -> dict:
+    if not path.is_file():
+        raise FileNotFoundError(f"missing required manifest: {path}")
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"invalid JSON manifest: {path}") from exc
+    if not isinstance(value, dict):
+        raise ValueError(f"manifest must be an object: {path}")
+    return value
+
+
+def _require_table(path: Path, columns: set[str], *, label: str) -> pd.DataFrame:
+    if not path.is_file():
+        raise FileNotFoundError(f"missing required {label}: {path}")
+    table = pd.read_csv(path)
+    missing = columns.difference(table.columns)
+    if missing:
+        raise ValueError(f"{label} missing columns: " + ", ".join(sorted(missing)))
+    return table
+
+
+def _stage_artifact(stage_one: Path, name: str) -> Path:
+    path = stage_one / name
+    if not path.is_file():
+        raise FileNotFoundError(f"stage-one artifact is missing: {path}")
+    return path
+
+
+def validate_input_pins(stage_one: Path, matched: Path) -> tuple[dict, dict]:
+    """Fail closed unless both reports point at the exact same stage-one bytes.
+
+    Candidate detail and source catalog are intentionally not parsed here.  The
+    matched-control manifest is compared to their complete byte SHA-256 values,
+    and stage one's own manifest must also pin those bytes.  The check is the
+    evidence boundary that prevents joining an attractive control result to a
+    different candidate population.
+    """
+    stage_manifest = _load_json(_stage_artifact(stage_one, "manifest.json"))
+    matched_manifest = _load_json(_stage_artifact(matched, "manifest.json"))
+    candidate = _stage_artifact(stage_one, "candidate_context.csv.gz")
+    source = _stage_artifact(stage_one, "source_manifest.csv")
+    actual = {
+        "candidate_context.csv.gz": sha256(candidate),
+        "source_manifest.csv": sha256(source),
+    }
+    stage_outputs = stage_manifest.get("outputs")
+    if not isinstance(stage_outputs, dict):
+        raise ValueError("stage-one manifest missing outputs object")
+    matched_pins = {
+        "candidate_context.csv.gz": matched_manifest.get("input_candidate_context_sha256"),
+        "source_manifest.csv": matched_manifest.get("input_source_manifest_sha256"),
+    }
+    for name, actual_sha in actual.items():
+        if stage_outputs.get(name) != actual_sha:
+            raise ValueError(f"stage-one manifest hash mismatch for {name}")
+        if matched_pins[name] != actual_sha:
+            raise ValueError(f"matched manifest does not reference stage-one {name}")
+    for key in ("development_start", "development_end_exclusive"):
+        if matched_manifest.get(key) != stage_manifest.get(key):
+            raise ValueError(f"matched manifest {key} differs from stage one")
+    return stage_manifest, matched_manifest
+
+
+def _number(value: object, *, integer: bool = False) -> float | int:
+    number = pd.to_numeric(pd.Series([value]), errors="coerce").iloc[0]
+    if pd.isna(number):
+        return math.nan
+    return int(number) if integer else float(number)
+
+
+def _format(value: object, *, percent: bool = False, integer: bool = False) -> str:
+    number = _number(value, integer=integer)
+    if isinstance(number, float) and math.isnan(number):
+        return "—"
+    if integer:
+        return f"{number:,}"
+    if percent:
+        return f"{float(number):.1%}"
+    return f"{float(number):.3f}"
+
+
+def _markdown_table(frame: pd.DataFrame, columns: Iterable[tuple[str, str, dict]]) -> str:
+    """Render a compact deterministic Markdown table without optional extras."""
+    columns = list(columns)
+    header = "| " + " | ".join(title for title, _, _ in columns) + " |"
+    divider = "| " + " | ".join("---" for _ in columns) + " |"
+    rows = []
+    for row in frame.itertuples(index=False):
+        cells = []
+        for _, field, options in columns:
+            value = getattr(row, field)
+            if options:
+                value = _format(value, **options)
+            elif pd.isna(value):
+                value = "—"
+            else:
+                value = str(value)
+            cells.append(str(value).replace("|", "\\|").replace("\n", "<br>"))
+        rows.append("| " + " | ".join(cells) + " |")
+    return "\n".join([header, divider, *rows])
+
+
+def _one_row(table: pd.DataFrame, *, variant: str, timeframe: int, metric: str, slice_name: str) -> pd.Series:
+    selected = table.loc[
+        table.variant.astype(str).eq(variant)
+        & pd.to_numeric(table.timeframe_min, errors="coerce").eq(timeframe)
+        & table.metric.astype(str).eq(metric)
+        & table.slice.astype(str).eq(slice_name)
+    ]
+    if len(selected) != 1:
+        raise ValueError(
+            f"expected exactly one matched row for {variant}/{timeframe}/{metric}/{slice_name}; got {len(selected)}"
+        )
+    return selected.iloc[0]
+
+
+def _assert_stage_hashes(stage_one: Path, manifest: dict, names: Iterable[str]) -> None:
+    outputs = manifest.get("outputs")
+    if not isinstance(outputs, dict):
+        raise ValueError("stage-one manifest missing outputs object")
+    for name in names:
+        path = _stage_artifact(stage_one, name)
+        if outputs.get(name) != sha256(path):
+            raise ValueError(f"stage-one manifest hash mismatch for {name}")
+
+
+def _hard_filter(matched_summary: pd.DataFrame, keys: list[tuple[str, int]]) -> pd.DataFrame:
+    rows = []
+    for variant, timeframe in keys:
+        row = _one_row(matched_summary, variant=variant, timeframe=timeframe,
+                       metric="joint_delta_60m", slice_name="positive_rule")
+        targets, matched = _number(row.targets, integer=True), _number(row.matched, integer=True)
+        rate, delta, p_value = _number(row.match_rate), _number(row.paired_delta_mean_net_r), _number(row.paired_sign_flip_p)
+        coverage_ok = isinstance(targets, int) and isinstance(matched, int) and targets > 0 and matched == targets and rate == 1.0
+        effect_ok = isinstance(delta, float) and math.isfinite(delta) and delta > 0
+        significance_ok = isinstance(p_value, float) and math.isfinite(p_value) and p_value < HARD_FILTER_P
+        rows.append({
+            "variant": variant, "timeframe_min": timeframe, "targets": targets, "matched": matched,
+            "match_rate": rate, "paired_delta_mean_net_r": delta, "paired_sign_flip_p": p_value,
+            "coverage_ok": coverage_ok, "effect_ok": effect_ok, "significance_ok": significance_ok,
+            "passes_hard_filter": coverage_ok and effect_ok and significance_ok,
+        })
+    return pd.DataFrame(rows)
+
+
+def build_spike_market_breadth_report(stage_one: Path, matched: Path, report: Path) -> dict:
+    """Verify pinned development summaries and write their Chinese conclusion.
+
+    ``stage_one`` and ``matched`` are result directories, enabling unit tests
+    and one-off report delivery to use temporary bundles.  Existing input bytes
+    are never modified.  ``report`` is the sole output.
+    """
+    stage_one, matched, report = Path(stage_one), Path(matched), Path(report)
+    stage_manifest, matched_manifest = validate_input_pins(stage_one, matched)
+    _assert_stage_hashes(stage_one, stage_manifest, (
+        "outcome_summary.csv", "frozen_candidate_rule.csv", "single_variable_slices.csv",
+    ))
+    outcome = _require_table(stage_one / "outcome_summary.csv", _OUTCOME_REQUIRED, label="outcome summary")
+    frozen = _require_table(stage_one / "frozen_candidate_rule.csv", _RULE_REQUIRED, label="frozen candidate rule")
+    slices = _require_table(stage_one / "single_variable_slices.csv", _SLICES_REQUIRED, label="single-variable slices")
+    controls = _require_table(matched / "matched_control_summary.csv", _MATCHED_REQUIRED, label="matched-control summary")
+    if not frozen.rule.astype(str).eq(FROZEN_RULE).all() or stage_manifest.get("frozen_rule") != FROZEN_RULE:
+        raise ValueError("stage-one frozen rule is not the expected joint_delta_60m > 0")
+    if controls.duplicated(["variant", "timeframe_min", "metric", "slice"]).any():
+        raise ValueError("matched-control summary has duplicate cohort rows")
+
+    baseline = outcome.loc[(outcome.slice.astype(str) == "all") & (outcome.metric.astype(str) == "all")].copy()
+    if baseline.empty:
+        raise ValueError("outcome summary lacks baseline rows")
+    baseline["timeframe_min"] = pd.to_numeric(baseline.timeframe_min, errors="raise").astype(int)
+    keys = [(str(row.variant), int(row.timeframe_min)) for row in baseline.sort_values(["variant", "timeframe_min"]).itertuples(index=False)]
+    if len(set(keys)) != len(keys):
+        raise ValueError("outcome summary has duplicate baseline cohorts")
+    frozen["timeframe_min"] = pd.to_numeric(frozen.timeframe_min, errors="raise").astype(int)
+    for variant, timeframe in keys:
+        _one_row(controls, variant=variant, timeframe=timeframe, metric="baseline", slice_name="all")
+        _one_row(controls, variant=variant, timeframe=timeframe, metric="joint_delta_60m", slice_name="positive_rule")
+    frozen = frozen.sort_values(["variant", "timeframe_min"]).reset_index(drop=True)
+    controls_view = controls.loc[
+        ((controls.metric.astype(str) == "baseline") & (controls.slice.astype(str) == "all"))
+        | ((controls.metric.astype(str) == "joint_delta_60m") & (controls.slice.astype(str) == "positive_rule"))
+    ].copy()
+    controls_view["timeframe_min"] = pd.to_numeric(controls_view.timeframe_min, errors="raise").astype(int)
+    controls_view["cohort"] = controls_view.apply(
+        lambda row: "基线" if row.metric == "baseline" else "冻结规则：delta_60m > 0", axis=1)
+    controls_view = controls_view.sort_values(["variant", "timeframe_min", "metric"]).reset_index(drop=True)
+    other = slices.loc[
+        slices.slice.astype(str).isin(("bottom_quartile", "top_quartile"))
+        & slices.metric.astype(str).ne("joint_delta_60m")
+    ].copy()
+    if other.empty:
+        raise ValueError("single-variable slices lacks non-frozen top/bottom cohorts")
+    other["timeframe_min"] = pd.to_numeric(other.timeframe_min, errors="raise").astype(int)
+    matched_other = controls.loc[
+        controls.slice.astype(str).isin(("bottom_quartile", "top_quartile"))
+        & controls.metric.astype(str).ne("joint_delta_60m")
+    ].copy()
+    matched_other["timeframe_min"] = pd.to_numeric(matched_other.timeframe_min, errors="raise").astype(int)
+    joined_other = other.merge(
+        matched_other[["variant", "timeframe_min", "metric", "slice", "matched", "match_rate",
+                       "target_mean_net_r", "control_mean_net_r", "paired_delta_mean_net_r", "paired_sign_flip_p"]],
+        on=["variant", "timeframe_min", "metric", "slice"], how="left", validate="one_to_one",
+    )
+    if joined_other.matched.isna().any():
+        raise ValueError("matched-control summary lacks a top/bottom single-variable cohort")
+    joined_other = joined_other.sort_values(["variant", "timeframe_min", "metric", "slice"]).reset_index(drop=True)
+    hard = _hard_filter(controls, keys)
+    all_pass = bool(hard.passes_hard_filter.all())
+
+    report.parent.mkdir(parents=True, exist_ok=True)
+    report.write_text(f"""# SPIKE 市场广度：冻结候选的匹配随机对照整合报告
+
+## 范围与证据边界
+
+- 阶段一开发窗口：`{stage_manifest.get('development_start')}` 至 `{stage_manifest.get('development_end_exclusive')}`（右端排除）。本整合器没有读取 holdout、市场面板、候选明细或原始逐笔大表；`candidate_context.csv.gz` 仅以字节 SHA-256 核验，未解析行内容。
+- matched manifest 的候选与来源 SHA 分别与阶段一的 `candidate_context.csv.gz`、`source_manifest.csv` 一致；阶段一 manifest 也再次固定了两者。匹配摘要的随机化种子为 `{matched_manifest.get('seed')}`，配对显著性单位由摘要明确记录为日历月。
+- 阶段一 manifest 记录 `holdout_consumed={stage_manifest.get('holdout_consumed')}`；本报告不把这轮开发期读作新的 holdout 消耗，也不据此声称独立样本外验证。
+
+## 各周期基线（共同执行的已实现结果）
+
+{_markdown_table(baseline.sort_values(['variant', 'timeframe_min']), [
+    ('变体', 'variant', {}), ('周期(分)', 'timeframe_min', {'integer': True}), ('候选', 'candidates', {'integer': True}),
+    ('已平仓', 'closed', {'integer': True}), ('均值净R', 'mean_net_r', {}), ('中位净R', 'median_net_r', {}),
+    ('胜率', 'win_rate', {'percent': True}), ('≥10R', 'realized_ge_10r', {'percent': True}),
+])}
+
+## 冻结单变量候选：`joint_delta_60m > 0`
+
+{_markdown_table(frozen, [
+    ('变体', 'variant', {}), ('周期(分)', 'timeframe_min', {'integer': True}), ('基线候选', 'baseline_candidates', {'integer': True}),
+    ('保留候选', 'candidates', {'integer': True}), ('保留率', 'candidate_retention', {'percent': True}),
+    ('均值净R', 'mean_net_r', {}), ('胜率', 'win_rate', {'percent': True}), ('≥10R保留率', 'exact_entry_10r_retention', {'percent': True}),
+])}
+
+阶段一只冻结这一条单变量候选；没有将广度水平、密度、量价扩张、BTC/ETH 背景或其他切片叠加成新规则。
+
+## 匹配随机对照：基线与冻结规则
+
+{_markdown_table(controls_view, [
+    ('变体', 'variant', {}), ('周期(分)', 'timeframe_min', {'integer': True}), ('队列', 'cohort', {}),
+    ('目标', 'targets', {'integer': True}), ('匹配', 'matched', {'integer': True}), ('匹配率', 'match_rate', {'percent': True}),
+    ('目标均值净R', 'target_mean_net_r', {}), ('对照均值净R', 'control_mean_net_r', {}),
+    ('配对差值净R', 'paired_delta_mean_net_r', {}), ('月块 sign-flip p', 'paired_sign_flip_p', {}),
+])}
+
+未匹配原因仍保留在 `matched_control_summary.csv`；低于 100% 的匹配率不得被解释成对照组支持。
+
+## 其他单变量：matched top/bottom 对比（描述性）
+
+{_markdown_table(joined_other, [
+    ('变体', 'variant', {}), ('周期(分)', 'timeframe_min', {'integer': True}), ('变量', 'metric', {}), ('分位', 'slice', {}),
+    ('候选', 'candidates', {'integer': True}), ('匹配', 'matched', {'integer': True}), ('匹配率', 'match_rate', {'percent': True}),
+    ('目标均值净R', 'target_mean_net_r', {}), ('对照均值净R', 'control_mean_net_r', {}),
+    ('配对差值净R', 'paired_delta_mean_net_r', {}), ('月块 sign-flip p', 'paired_sign_flip_p', {}),
+])}
+
+该表排除已经冻结的 `joint_delta_60m`，其余 top/bottom 只作多重比较下的描述，不能据此重选变量、阈值或组合规则。
+
+## 统一研究硬过滤判断
+
+硬过滤只用于本研究的结论措辞：每个变体×周期的冻结正规则都必须同时满足 **匹配率 100%**、**配对均值净R差值 > 0**、**日历月 sign-flip p < {HARD_FILTER_P:.2f}**。这不是线上过滤阈值，也不会改动信号、通知、仓位或注册表。
+
+{_markdown_table(hard, [
+    ('变体', 'variant', {}), ('周期(分)', 'timeframe_min', {'integer': True}), ('匹配率', 'match_rate', {'percent': True}),
+    ('配对差值净R', 'paired_delta_mean_net_r', {}), ('月块 p', 'paired_sign_flip_p', {}),
+    ('覆盖', 'coverage_ok', {}), ('效应', 'effect_ok', {}), ('显著性', 'significance_ok', {}), ('通过', 'passes_hard_filter', {}),
+])}
+
+**统一判断：{'通过研究硬过滤。仍需项目所有者另行决定任何验证或生产动作。' if all_pass else '不通过研究硬过滤；不得将 `joint_delta_60m > 0` 接入生产过滤、训练、通知或仓位。'}**
+
+## 风险与诚实声明
+
+- 这是已消费开发期上的单变量研究及其匹配随机对照，不是新的样本外、前向或实盘证据。
+- 匹配对照衡量的是同一候选池与同币/同月/同波动桶随机入场的差异；它不能证明交易成本、流动性、滑点、资金费或实际执行会与历史回放一致。
+- 单变量 top/bottom 表包含多个描述性比较，不能把其中看似较好的行当作发现后确认，亦不能绕开冻结规则追加条件。
+
+## 复现命令
+
+```bash
+python3 -m yoyo.evaluation.spike_market_breadth_report \\
+  --stage-one {stage_one} \\
+  --matched {matched} \\
+  --report {report}
+```
+""", encoding="utf-8")
+    return {
+        "report": str(report), "stage_one_manifest_sha256": sha256(stage_one / "manifest.json"),
+        "matched_manifest_sha256": sha256(matched / "manifest.json"), "hard_filter_passed": all_pass,
+        "cohorts": len(hard),
+    }
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--stage-one", type=Path, default=DEFAULT_STAGE_ONE)
+    parser.add_argument("--matched", type=Path, default=DEFAULT_MATCHED)
+    parser.add_argument("--report", type=Path, required=True)
+    args = parser.parse_args(argv)
+    build_spike_market_breadth_report(args.stage_one, args.matched, args.report)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

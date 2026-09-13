@@ -1,0 +1,114 @@
+"""Synthetic contracts for the SPIKE breadth report integrator."""
+from __future__ import annotations
+
+import hashlib
+import json
+
+import pandas as pd
+import pytest
+
+from yoyo.evaluation.spike_market_breadth_report import build_spike_market_breadth_report, main
+
+
+def _sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _csv(path, rows):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(rows).to_csv(path, index=False)
+    return _sha(path)
+
+
+def _bundle(tmp_path):
+    stage, matched = tmp_path / "stage", tmp_path / "matched"
+    stage.mkdir()
+    (stage / "candidate_context.csv.gz").write_bytes(b"opaque-candidate-detail; never parse this")
+    _csv(stage / "source_manifest.csv", [{"source": "opaque-source-catalog"}])
+    outcome = []
+    frozen = []
+    slices = []
+    controls = []
+    for variant, minutes in (("v1_common_execution_long", 30), ("v7_bb_long", 60)):
+        outcome.append(dict(variant=variant, timeframe_min=minutes, slice="all", metric="all", candidates=10,
+                            closed=10, censored=0, mean_net_r=.1, median_net_r=-.2, win_rate=.4,
+                            realized_ge_10r_count=1, realized_ge_10r=.1))
+        frozen.append(dict(variant=variant, timeframe_min=minutes, rule="joint_delta_60m > 0",
+                           baseline_candidates=10, candidate_retention=.5, baseline_realized_ge_10r_count=1,
+                           kept_realized_ge_10r_count=1, exact_entry_10r_retention=1., candidates=5, closed=5,
+                           mean_net_r=.2, median_net_r=.1, win_rate=.6, realized_ge_10r=.2))
+        for metric in ("joint_breadth", "launch_density_1h"):
+            for slice_name, value in (("bottom_quartile", -.2), ("top_quartile", .3)):
+                slices.append(dict(variant=variant, timeframe_min=minutes, threshold=0., slice=slice_name,
+                                   metric=metric, candidates=3, closed=3, censored=0, mean_net_r=value,
+                                   median_net_r=value, win_rate=.5, realized_ge_10r_count=0, realized_ge_10r=0.))
+                controls.append(dict(variant=variant, timeframe_min=minutes, metric=metric, slice=slice_name,
+                                     targets=3, matched=3, match_rate=1., target_mean_net_r=value,
+                                     control_mean_net_r=0., paired_delta_mean_net_r=value,
+                                     paired_sign_flip_p=.5, sign_flip_unit="calendar_month", unmatched_reasons="{}"))
+        controls.extend([
+            dict(variant=variant, timeframe_min=minutes, metric="baseline", slice="all", targets=10, matched=10,
+                 match_rate=1., target_mean_net_r=.1, control_mean_net_r=0., paired_delta_mean_net_r=.1,
+                 paired_sign_flip_p=.02, sign_flip_unit="calendar_month", unmatched_reasons="{}"),
+            dict(variant=variant, timeframe_min=minutes, metric="joint_delta_60m", slice="positive_rule", targets=5,
+                 matched=5, match_rate=1., target_mean_net_r=.2, control_mean_net_r=0., paired_delta_mean_net_r=.2,
+                 paired_sign_flip_p=.005 if variant.startswith("v1") else .02,
+                 sign_flip_unit="calendar_month", unmatched_reasons="{}"),
+        ])
+    hashes = {
+        "candidate_context.csv.gz": _sha(stage / "candidate_context.csv.gz"),
+        "source_manifest.csv": _sha(stage / "source_manifest.csv"),
+        "outcome_summary.csv": _csv(stage / "outcome_summary.csv", outcome),
+        "frozen_candidate_rule.csv": _csv(stage / "frozen_candidate_rule.csv", frozen),
+        "single_variable_slices.csv": _csv(stage / "single_variable_slices.csv", slices),
+    }
+    (stage / "manifest.json").write_text(json.dumps({
+        "development_start": "2024-09-10T00:00:00+00:00", "development_end_exclusive": "2025-09-10T00:00:00+00:00",
+        "holdout_consumed": True, "frozen_rule": "joint_delta_60m > 0", "outputs": hashes,
+    }))
+    matched.mkdir()
+    _csv(matched / "matched_control_summary.csv", controls)
+    (matched / "manifest.json").write_text(json.dumps({
+        "development_start": "2024-09-10T00:00:00+00:00", "development_end_exclusive": "2025-09-10T00:00:00+00:00",
+        "seed": 0, "input_candidate_context_sha256": hashes["candidate_context.csv.gz"],
+        "input_source_manifest_sha256": hashes["source_manifest.csv"],
+    }))
+    return stage, matched
+
+
+def test_builds_a_pinned_chinese_report_from_summary_tables_only(tmp_path):
+    stage, matched = _bundle(tmp_path)
+    report = tmp_path / "out" / "report.md"
+    result = build_spike_market_breadth_report(stage, matched, report)
+    text = report.read_text()
+    assert result["hard_filter_passed"] is False
+    assert "candidate_context.csv.gz` 仅以字节 SHA-256 核验" in text
+    assert "joint_delta_60m > 0" in text
+    assert "匹配随机对照：基线与冻结规则" in text
+    assert "其他单变量：matched top/bottom 对比" in text
+    assert "不通过研究硬过滤" in text
+    assert "不得将 `joint_delta_60m > 0` 接入生产过滤" in text
+    assert "joint_breadth" in text and "launch_density_1h" in text
+
+
+def test_refuses_a_matched_manifest_pinned_to_another_candidate_file(tmp_path):
+    stage, matched = _bundle(tmp_path)
+    manifest = json.loads((matched / "manifest.json").read_text())
+    manifest["input_candidate_context_sha256"] = "0" * 64
+    (matched / "manifest.json").write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="does not reference stage-one candidate_context.csv.gz"):
+        build_spike_market_breadth_report(stage, matched, tmp_path / "report.md")
+
+
+def test_refuses_a_stage_summary_whose_bytes_no_longer_match_its_manifest(tmp_path):
+    stage, matched = _bundle(tmp_path)
+    (stage / "outcome_summary.csv").write_text("tampered\n")
+    with pytest.raises(ValueError, match="stage-one manifest hash mismatch for outcome_summary.csv"):
+        build_spike_market_breadth_report(stage, matched, tmp_path / "report.md")
+
+
+def test_cli_accepts_temporary_result_directories(tmp_path):
+    stage, matched = _bundle(tmp_path)
+    report = tmp_path / "report.md"
+    assert main(["--stage-one", str(stage), "--matched", str(matched), "--report", str(report)]) == 0
+    assert report.is_file()
