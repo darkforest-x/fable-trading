@@ -365,6 +365,125 @@ def primary_rank_p(summary: pd.DataFrame) -> pd.DataFrame:
     }])
 
 
+def accounting_attribution(primary: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Decompose one already-fixed V8-both validation result by removed asset.
+
+    This is arithmetic on the existing causal admission outcome.  In
+    particular, the ``excluding_USDC`` subtotal removes USDC from *both* the
+    baseline and retained books; it is not a proposed alternative exclusion.
+    """
+    baseline = primary.copy()
+    removed = baseline.loc[baseline.causal_excluded]
+    retained = baseline.loc[~baseline.causal_excluded]
+    improvement = float(retained.net_r.sum() - baseline.net_r.sum())
+    by_asset = removed.groupby("asset", sort=True).agg(
+        removed_trades=("net_r", "size"),
+        removed_net_r_sum=("net_r", "sum"),
+        removed_net_r_mean=("net_r", "mean"),
+        removed_realized_10r=("net_r", lambda values: int(values.ge(10).sum())),
+    ).reset_index()
+    by_asset["improvement_contribution_net_r"] = -by_asset.removed_net_r_sum
+    by_asset["improvement_share"] = (
+        by_asset.improvement_contribution_net_r / improvement if improvement else np.nan
+    )
+    by_asset.insert(0, "record_type", "asset_removed_contribution")
+    totals: list[dict[str, object]] = []
+    for label, asset_filter in (("all_assets", pd.Series(True, index=baseline.index)), ("excluding_USDC_accounting_only", baseline.asset.ne("USDC"))):
+        base = baseline.loc[asset_filter]
+        keep = retained.loc[retained.asset.isin(base.asset.unique())]
+        totals.append({
+            "record_type": "accounting_subtotal",
+            "asset": label,
+            "baseline_trades": int(len(base)),
+            "baseline_net_r_sum": float(base.net_r.sum()),
+            "retained_trades": int(len(keep)),
+            "retained_net_r_sum": float(keep.net_r.sum()),
+            "improvement_contribution_net_r": float(keep.net_r.sum() - base.net_r.sum()),
+            "note": "accounting decomposition; not a different exclusion policy",
+        })
+    monthly_rows: list[dict[str, object]] = []
+    for month, base in baseline.groupby("calendar_month", sort=True):
+        keep = retained.loc[retained.calendar_month.eq(month)]
+        monthly_rows.append({
+            "record_type": "monthly_stability",
+            "asset": month,
+            "baseline_trades": int(len(base)),
+            "baseline_net_r_sum": float(base.net_r.sum()),
+            "baseline_net_r_mean": float(base.net_r.mean()),
+            "retained_trades": int(len(keep)),
+            "retained_net_r_sum": float(keep.net_r.sum()),
+            "retained_net_r_mean": float(keep.net_r.mean()),
+            "net_r_sum_improved": bool(keep.net_r.sum() > base.net_r.sum()),
+            "net_r_mean_improved": bool(keep.net_r.mean() > base.net_r.mean()),
+        })
+    attribution = pd.concat([by_asset, pd.DataFrame(totals), pd.DataFrame(monthly_rows)], ignore_index=True, sort=False)
+    lost_10r = removed.loc[removed.net_r.ge(10)].groupby("asset", sort=True).agg(
+        lost_10r_trades=("net_r", "size"),
+        lost_10r_net_r_sum=("net_r", "sum"),
+        largest_lost_10r=("net_r", "max"),
+    ).reset_index().sort_values(["lost_10r_net_r_sum", "asset"], ascending=[False, True], kind="mergesort")
+    monthly = pd.DataFrame(monthly_rows)
+    return attribution, lost_10r, monthly
+
+
+def finalize_attribution(ledger_path: Path, output: Path) -> None:
+    """Add output-only accounting attribution to a completed exclusion folder.
+
+    The existing ``monthly_asset_lists.csv`` is the only admission input.  This
+    function deliberately does not call ``monthly_lists`` or generate any new
+    random lists, so it cannot alter the frozen rule or rerun the experiment.
+    """
+    manifest_path = output / "manifest.json"
+    lists_path = output / "monthly_asset_lists.csv"
+    summary_path = output / "counterfactual_summary.csv"
+    if not manifest_path.is_file() or not lists_path.is_file() or not summary_path.is_file():
+        raise FileNotFoundError("completed exclusion output is required for attribution finalization")
+    manifest = json.loads(manifest_path.read_text())
+    if manifest.get("input", {}).get(str(ledger_path)) != sha256(ledger_path):
+        raise ValueError("attribution ledger SHA does not match the completed exclusion manifest")
+    lists = pd.read_csv(lists_path)
+    lists["decision_time"] = pd.to_datetime(lists["decision_time"], utc=True, errors="coerce")
+    if lists.decision_time.isna().any():
+        raise ValueError("existing monthly asset lists have invalid decision clocks")
+    ledger = load_ledger(ledger_path)
+    v8 = scopes(ledger)["v8_both"]
+    attached = attach_lists(v8, lists.loc[lists.scope.eq("v8_both")])
+    primary = attached.loc[
+        attached.scoring_closed.eq(True)
+        & _known_closed_outcome(attached)
+        & attached.signal_confirm_time.ge(SPLIT)
+        & attached.signal_confirm_time.lt(END)
+    ].copy()
+    primary["calendar_month"] = primary.signal_confirm_time.dt.strftime("%Y-%m")
+    summary = pd.read_csv(summary_path)
+    expected = summary.loc[
+        summary.scope.eq("v8_both")
+        & summary.level.eq("period")
+        & summary.period.eq("validation")
+        & summary.policy.isin(["baseline", "causal_bottom20_negative"]),
+        ["policy", "net_r_sum"],
+    ].set_index("policy")["net_r_sum"]
+    if not np.isclose(primary.net_r.sum(), expected["baseline"], atol=1e-9):
+        raise ValueError("attribution baseline does not match completed summary")
+    if not np.isclose(primary.loc[~primary.causal_excluded, "net_r"].sum(), expected["causal_bottom20_negative"], atol=1e-9):
+        raise ValueError("attribution retained result does not match completed summary")
+    attribution, lost_10r, monthly = accounting_attribution(primary)
+    attribution_path = output / "attribution.csv"
+    lost_path = output / "lost_10r_assets.csv"
+    attribution.to_csv(attribution_path, index=False)
+    lost_10r.to_csv(lost_path, index=False)
+    monthly_summary = {
+        "validation_months": int(len(monthly)),
+        "net_r_sum_improved_months": int(monthly.net_r_sum_improved.sum()),
+        "net_r_mean_improved_months": int(monthly.net_r_mean_improved.sum()),
+        "method": "same-ledger accounting attribution only; no new admission list, random draw, or replay",
+    }
+    manifest["output_only_attribution"] = monthly_summary
+    manifest["outputs"].update({attribution_path.name: sha256(attribution_path), lost_path.name: sha256(lost_path)})
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+    (output / "receipt.json").write_text(json.dumps({path.name: sha256(path) for path in output.iterdir() if path.is_file() and path.name != "receipt.json"}, indent=2) + "\n")
+
+
 def run(ledger_path: Path, output: Path) -> None:
     """Write one fixed-rule, non-replayed counterfactual from an empty folder."""
     if output.exists() and any(output.iterdir()):
@@ -432,5 +551,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ledger", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--finalize-attribution", action="store_true")
     args = parser.parse_args()
-    run(args.ledger, args.output)
+    if args.finalize_attribution:
+        finalize_attribution(args.ledger, args.output)
+    else:
+        run(args.ledger, args.output)

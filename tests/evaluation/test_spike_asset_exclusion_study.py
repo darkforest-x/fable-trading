@@ -5,6 +5,7 @@ import pandas as pd
 
 from yoyo.evaluation.spike_asset_exclusion_study import (
     _metrics,
+    accounting_attribution,
     attach_lists,
     load_ledger,
     monthly_lists,
@@ -121,3 +122,21 @@ def test_metrics_report_both_r_and_return_pf_and_primary_rank_p_uses_100_draws()
     })
     p = primary_rank_p(pd.concat([random, causal], ignore_index=True))
     assert p.one_tailed_rank_p.item() == 2 / 101
+
+
+def test_accounting_attribution_separates_usdc_without_calling_it_a_new_policy() -> None:
+    primary = pd.DataFrame({
+        "asset": ["USDC", "ETH", "ETH"],
+        "net_r": [-7.0, -2.0, 12.0],
+        "causal_excluded": [True, False, True],
+        "calendar_month": ["2025-09", "2025-09", "2025-10"],
+    })
+    attribution, lost, monthly = accounting_attribution(primary)
+    usdc = attribution.loc[
+        attribution.record_type.eq("asset_removed_contribution") & attribution.asset.eq("USDC")
+    ].iloc[0]
+    assert usdc.improvement_contribution_net_r == 7.0
+    excluding = attribution.loc[attribution.asset.eq("excluding_USDC_accounting_only")].iloc[0]
+    assert excluding.improvement_contribution_net_r == -12.0
+    assert lost.loc[lost.asset.eq("ETH"), "lost_10r_trades"].item() == 1
+    assert monthly.net_r_mean_improved.sum() == 1
