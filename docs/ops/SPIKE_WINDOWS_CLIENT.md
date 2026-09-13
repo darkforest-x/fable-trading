@@ -33,7 +33,7 @@ Mac 浏览器 127.0.0.1:8766 → 原 Mac 服务与 AppleScript
 
 | 项目 | 当前值 |
 |---|---|
-| 已核实 Windows | `WIN-ZZC` / `Administrator` / `192.168.1.2` |
+| 已核实 Windows | `WIN-ZZC` / `Administrator` / `192.168.1.3`（2026-09-13 复核，DHCP 已从 `.2` 漂回 `.3`） |
 | Windows 客户端目录 | `C:\fable\spike-client` |
 | Windows Python | `C:\fable\.venv\Scripts\pythonw.exe`，现有 Python 3.9，无新依赖 |
 | Windows 登录任务 | `SpikeDesktopClient`，Interactive / Limited，登录启动、失败一分钟后重启 |
@@ -45,6 +45,8 @@ Mac 浏览器 127.0.0.1:8766 → 原 Mac 服务与 AppleScript
 | Windows TV | `TradingView.Desktop` 3.4.1.8194，动态读取已安装包路径 |
 
 `192.168.1.3` 是旧 DHCP 地址，本次连接拒绝；`.2` 已用原 SSH 主机密钥验证并读到 WIN-ZZC。
+
+2026-09-13 再次漂移：`.2` 上已无 sshd（ping 不通、22 端口 refused/timeout），Windows 回到 `.3`。判定机器身份只用 SSH 主机密钥指纹，不用 IP —— `.3` 实测仍是`SHA256:fQTPIk3nUVNYmPuRzt7DhZfZaRjKukRP9fHJn19karY`，与 `.2`/`.5` 的 known_hosts 记录同key，因此只改 plist 最后一个 SSH 参数并 `launchctl bootout` + `bootstrap`，未关主机密钥检查、未重启 Mac 扫描（`started_at_ms` 不变）。Windows `SpikeDesktopClient` 一直 Running、loopback 8766 一直在听——症状「检查 SSH 隧道」来自网关连不上 8767，不是客户端挂了。
 若将来 DHCP 改变，先重新确认目标主机与密钥，再修改本任务 plist 的最后一个 SSH 参数并重新加载；
 不要关闭主机密钥检查，也不要因为地址失效就重启 Mac 监控。
 
@@ -71,15 +73,15 @@ Mac 浏览器 127.0.0.1:8766 → 原 Mac 服务与 AppleScript
 只同步以下显示层文件，**不复制整个仓库、数据、模型或配置密钥**。已有用户任务若同名但描述不同，
 安装器拒绝覆盖；重复部署会短暂重启此显示客户端，不会重启 Mac 扫描。
 
-Mac 仓库根目录：
+Mac 仓库根目录（下面的地址按上表「已核实 Windows」当前值替换，DHCP 会漂）：
 
 ```sh
-ssh Administrator@192.168.1.2 'New-Item -ItemType Directory -Force C:\fable\spike-client\yoyo\monitor | Out-Null'
-scp yoyo/__init__.py Administrator@192.168.1.2:/C:/fable/spike-client/yoyo/__init__.py
-scp yoyo/monitor/__init__.py yoyo/monitor/tradingview.py yoyo/monitor/windows_tradingview.py yoyo/monitor/windows_tradingview.ps1 yoyo/monitor/desktop_client.py Administrator@192.168.1.2:/C:/fable/spike-client/yoyo/monitor/
-scp scripts/windows/install_spike_client.ps1 Administrator@192.168.1.2:/C:/fable/spike-client/install_spike_client.ps1
-ssh Administrator@192.168.1.2 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\fable\spike-client\install_spike_client.ps1 -LayoutUrl https://cn.tradingview.com/chart/AlGc61US/'
-.venv/bin/python -m yoyo.monitor.desktop_tunnel Administrator@192.168.1.2
+ssh Administrator@192.168.1.3 'New-Item -ItemType Directory -Force C:\fable\spike-client\yoyo\monitor | Out-Null'
+scp yoyo/__init__.py Administrator@192.168.1.3:/C:/fable/spike-client/yoyo/__init__.py
+scp yoyo/monitor/__init__.py yoyo/monitor/tradingview.py yoyo/monitor/windows_tradingview.py yoyo/monitor/windows_tradingview.ps1 yoyo/monitor/desktop_client.py Administrator@192.168.1.3:/C:/fable/spike-client/yoyo/monitor/
+scp scripts/windows/install_spike_client.ps1 Administrator@192.168.1.3:/C:/fable/spike-client/install_spike_client.ps1
+ssh Administrator@192.168.1.3 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\fable\spike-client\install_spike_client.ps1 -LayoutUrl https://cn.tradingview.com/chart/AlGc61US/'
+.venv/bin/python -m yoyo.monitor.desktop_tunnel Administrator@192.168.1.3
 .venv/bin/python -m pytest tests/monitor/test_desktop_client.py tests/monitor/test_windows_tradingview.py tests/monitor/test_tradingview.py -q
 node --test tests/monitor/frontend_cards.test.cjs tests/monitor/frontend_theme.test.cjs
 ```
