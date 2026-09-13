@@ -140,7 +140,7 @@ def _source_catalog() -> pd.DataFrame:
 
 
 def _load_bars(path: str, *, prefix_digest: hashlib._Hash | None = None) -> pd.DataFrame:
-    """Load only development OHLCV rows and optionally hash that exact prefix."""
+    """Load finite numeric development OHLCV rows and hash the exact raw prefix."""
     rows = []
     for header, values in _prefix_rows(
         Path(path), cutoff_field="time", cutoff=DEVELOPMENT_END, prefix_digest=prefix_digest,
@@ -158,6 +158,10 @@ def _load_bars(path: str, *, prefix_digest: hashlib._Hash | None = None) -> pd.D
             if len(group.drop_duplicates()) != 1:
                 raise ValueError(f"conflicting duplicate candle in frozen source: {path}")
         indexed = indexed.loc[~indexed.index.duplicated(keep="first")]
+    ohlcv = ["open", "high", "low", "close", "volume"]
+    indexed[ohlcv] = indexed[ohlcv].apply(pd.to_numeric, errors="raise")
+    if not np.isfinite(indexed[ohlcv].to_numpy(dtype=float)).all():
+        raise ValueError(f"non-finite OHLCV in frozen source: {path}")
     return indexed
 
 

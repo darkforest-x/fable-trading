@@ -113,6 +113,41 @@ def test_development_prefix_digest_ignores_boundary_and_future_rows(tmp_path):
     assert first_digest == second_digest == hashlib.sha256(prefix).hexdigest()
 
 
+def test_load_bars_normalizes_string_ohlcv_before_60m_aggregation(tmp_path):
+    path = tmp_path / "bars.csv.gz"
+    payload = (
+        b"time,open,high,low,close,volume\n"
+        b"2024-01-01T00:00:00+00:00,100000.0,102000.1,98704.6,101000.0,123.456\n"
+        b"2024-01-01T00:30:00+00:00,101000.0,102543.2,99000.0,102000.0,11065.111\n"
+    )
+    path.write_bytes(gzip.compress(payload))
+    digest = hashlib.sha256()
+
+    bars = _load_bars(str(path), prefix_digest=digest)
+    hourly = complete_aggregate_30m(bars, 60)
+
+    assert all(pd.api.types.is_numeric_dtype(bars[column]) for column in ["open", "high", "low", "close", "volume"])
+    assert hourly.loc[pd.Timestamp("2024-01-01T00:00:00Z"), "high"] == pytest.approx(102543.2)
+    assert hourly.loc[pd.Timestamp("2024-01-01T00:00:00Z"), "low"] == pytest.approx(98704.6)
+    assert hourly.loc[pd.Timestamp("2024-01-01T00:00:00Z"), "volume"] == pytest.approx(11188.567)
+    assert all(pd.api.types.is_numeric_dtype(hourly[column]) for column in ["open", "high", "low", "close", "volume"])
+    assert digest.hexdigest() == hashlib.sha256(payload).hexdigest()
+
+
+@pytest.mark.parametrize("non_finite", ["NaN", "inf", "-inf"])
+def test_load_bars_rejects_non_finite_ohlcv(tmp_path, non_finite):
+    path = tmp_path / "bars.csv.gz"
+    path.write_bytes(gzip.compress(
+        (
+            "time,open,high,low,close,volume\n"
+            f"2024-01-01T00:00:00+00:00,100,101,99,100,{non_finite}\n"
+        ).encode()
+    ))
+
+    with pytest.raises(ValueError):
+        _load_bars(str(path))
+
+
 def test_variant_block_reader_keeps_later_development_block_without_decoding_future_payload(tmp_path):
     path = tmp_path / "signals.csv.gz"
     path.write_bytes(gzip.compress(
