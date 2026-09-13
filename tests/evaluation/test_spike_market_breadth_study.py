@@ -20,6 +20,8 @@ from yoyo.evaluation.spike_market_breadth_study import (
     "2025-09-09T16:00:00Z",
     "2025-09-10T00:00:00+08:00",
     "2025-09-09 16:00:00",
+    "2025-09-09 16:00:00+00:00",
+    "2025-09-09 16:00:00.123456+00:00",
 ])
 def test_utc_fast_parser_matches_pandas_utc_semantics(value):
     assert _utc(value) == pd.to_datetime(value, utc=True)
