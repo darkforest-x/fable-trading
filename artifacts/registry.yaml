@@ -30328,3 +30328,60 @@ artifacts:
     production_eligible: false
     notes: Binds the affected discovery manifest and historical source hashes; current V8 validation is nonblind
       descriptive evidence and cannot authorize production promotion.
+
+  - artifact_id: spike-market-breadth-20260913-v2-stage-manifest
+    artifact_type: manifest
+    role: causal_market_breadth_stage_one_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: 068260118d6d579b7d112b2fda83e50e09f09b17
+    generator_commit: 3024609ec4d5cd9d31cb50a7b184b0897c6cdb84
+    source_path: experiments/active/exp-spike-market-breadth-20260913-v2/results/manifest.json
+    sha256: bac0fea4fcd2afc00d96a3531859c94d89990fceb3625ecf61b2108056bbb870
+    size_bytes: 2515
+    storage_uri: repo://experiments/active/exp-spike-market-breadth-20260913-v2/results/manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Corrected numeric-OHLCV development receipt for 830 deduplicated base assets and the rejected frozen joint_delta_60m hard gate.
+  - artifact_id: spike-market-breadth-20260913-v2-matched-manifest
+    artifact_type: manifest
+    role: symbol_month_volatility_matched_control_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: 068260118d6d579b7d112b2fda83e50e09f09b17
+    generator_commit: 4c5b08e8ffd520abdfbeab08732fa2ac433d7d92
+    source_path: experiments/active/exp-spike-market-breadth-matched-controls-20260913-v2/results/manifest.json
+    sha256: 2f0c2daa7ede8a8eb801df3e40a638bf5be70103e7b51bf8520cfafe9c2b5cea
+    size_bytes: 986
+    storage_uri: repo://experiments/active/exp-spike-market-breadth-matched-controls-20260913-v2/results/manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Binds 15,159 targets, 15,056 matched controls, seed zero and 1,345 source receipts; no production decision.
+  - artifact_id: spike-market-breadth-20260913-v2-report-md
+    artifact_type: report
+    role: canonical_market_breadth_rejection_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: 068260118d6d579b7d112b2fda83e50e09f09b17
+    generator_commit: 792e569d601ca4fd20654579fc32325562cc3a9b
+    source_path: analysis/p1_spike_market_breadth_20260913.md
+    sha256: 497fc9b79f22a846ad3e289cc2a40a07e1642558b9977eaa609501460de0f900
+    size_bytes: 21644
+    storage_uri: repo://analysis/p1_spike_market_breadth_20260913.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Canonical report rejecting a universal market-breadth hard gate after matched monthly controls and exact 10R retention checks.
+  - artifact_id: spike-market-breadth-20260913-v2-report-html
+    artifact_type: report
+    role: owner_facing_market_breadth_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: 068260118d6d579b7d112b2fda83e50e09f09b17
+    generator_commit: 792e569d601ca4fd20654579fc32325562cc3a9b
+    source_path: analysis/html/p1_spike_market_breadth_20260913.html
+    sha256: 124d1090658ed718759a45941f51e30c30cf8f8117ffed4bbfbf69af56c46047
+    size_bytes: 35572
+    storage_uri: repo://analysis/html/p1_spike_market_breadth_20260913.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Browser-ready owner delivery of the corrected development and matched-control evidence.
