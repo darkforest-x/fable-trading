@@ -1,0 +1,359 @@
+{
+  "created_at": "2026-09-13T15:38:17.272380+00:00",
+  "complete": true,
+  "source_commit": "96d9b49c6cf25c6a74606572d4762171d73a4967",
+  "data_use": "authorized configuration-specific holdout-era use 1; reused nonblind history",
+  "streams": 3531,
+  "events": 113295,
+  "scoring_closed": 94180,
+  "training_eligible": false,
+  "production_eligible": false,
+  "scope": "Fixed causal state diagnostic and independent same-entry comparisons; no changed V8 execution or account",
+  "files": [
+    {
+      "path": "analysis/p1_spike_v8_ma_cycle_20260913.md",
+      "size_bytes": 21360,
+      "sha256": "0d4e41c9b4d9602cf70fd54bc67fbc87115bf90a9766ca81eaa5b113b9df6d11"
+    },
+    {
+      "path": "analysis/html/p1_spike_v8_ma_cycle_20260913.html",
+      "size_bytes": 3758574,
+      "sha256": "915e9228db299ede385e6edddfe413363b9bbbeb9c64872e4f69662132ea9795"
+    },
+    {
+      "path": "yoyo/evaluation/spike_v8_ma_cycle_delivery.py",
+      "size_bytes": 3136,
+      "sha256": "2ce7b0c845e60ee6e24b1ccb7659780f27626766425049a4f7b096478d103cdd"
+    },
+    {
+      "path": "yoyo/evaluation/spike_v8_ma_cycle_study.py",
+      "size_bytes": 20871,
+      "sha256": "1254257838a0937ddc6cc987acf7e16e7bdf38d394913989b0d706626b207be5"
+    },
+    {
+      "path": "yoyo/evaluation/spike_v8_ma_cycle_summary.py",
+      "size_bytes": 9455,
+      "sha256": "0360348f30c668088f2744d49aa9a061aa19284837b94f11a4e9edaea028679a"
+    },
+    {
+      "path": "yoyo/evaluation/spike_v8_ma_cycle_charts.py",
+      "size_bytes": 10238,
+      "sha256": "71f872b89fb918ba016e1c23b912ff74f46585ec136d4e7a5e436d681ef67934"
+    },
+    {
+      "path": "tests/evaluation/test_spike_v8_ma_cycle_study.py",
+      "size_bytes": 6092,
+      "sha256": "51a084365f78eb038b5ab0306caf83467657830e016c9dbb1058dc3e92f16eee"
+    },
+    {
+      "path": "docs/learnings/market-phase-labels-and-trade-references-have-separate-clocks.md",
+      "size_bytes": 1577,
+      "sha256": "8db3445850f59487cc9ebccca750b32a612417147c5f79e7d862a8153a08094f"
+    },
+    {
+      "path": "docs/learnings/state-machine-progress-is-not-market-phase-ground-truth.md",
+      "size_bytes": 1336,
+      "sha256": "d799a85238330da3558a27f32584f413e6a67c85fcbcba97263510276af54c5d"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/config.json",
+      "size_bytes": 3055,
+      "sha256": "02ceff722c6328ffacf971abbed980fac13204b28d13da3f13eed3d09dffabe0"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/PROJECT_PLAN.md",
+      "size_bytes": 5765,
+      "sha256": "04ce5f9d23623ec33c2a0fe04197787797f09bd0a95cfa31404c3c342a011023"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/holdout_receipt.json",
+      "size_bytes": 418,
+      "sha256": "27fe21835062f4a74c41116edfbd09d464698fd40330ad1bb0383b54d9fe4649"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v1/comp_1h_cycle.png",
+      "size_bytes": 355365,
+      "sha256": "28fdae10f0dcffc7fdb381ad224f594f3e908df61d138fd6537011fc43cbd5cc"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v1/expansion_-1_loss.png",
+      "size_bytes": 308229,
+      "sha256": "0a3c352b5da6815c1f5e2abf994a83a4dc7717ae2af71ef4d2b257068d5490c6"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v1/expansion_-1_profit.png",
+      "size_bytes": 299538,
+      "sha256": "73b1d04f0b966ce4b8e8ab0f5a4dcbc4e375d43bad1229fd0b852bffee00b88a"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v1/expansion_1_loss.png",
+      "size_bytes": 267249,
+      "sha256": "cc1be55d830a50427c337f7845f97babca95459e34c2af61176ca178e8edc367"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v1/expansion_1_profit.png",
+      "size_bytes": 304811,
+      "sha256": "5cd959c8924d7954366f33ddece30fd9096d5e5ab68569c163b72897be2557ab"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v1/launch_-1_loss.png",
+      "size_bytes": 325288,
+      "sha256": "937525f9f7cbda264a00b4cdd4c7949e6e94c5d8cd077fa7fb44ed26a918f183"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v1/launch_-1_profit.png",
+      "size_bytes": 363311,
+      "sha256": "7a30020451ca463dcd59092ff2ed4dd2ad7da41127e6a59cb6ad1a425dce5faf"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v1/launch_1_loss.png",
+      "size_bytes": 309104,
+      "sha256": "ec31001f08ebbf2bb5c6a6c78c5faa20507822d2ca6609efc3dfe65fb6c6fa6b"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v1/launch_1_profit.png",
+      "size_bytes": 286906,
+      "sha256": "b742b8a2aa26227742fe6d0b09486aace407103082e34079dc90202fc9b3dce2"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v1/manifest.json",
+      "size_bytes": 1369,
+      "sha256": "464c20b22ce7fda12eacd9592ee8c80c33635a62ffbda04bb83bd57466af8347"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v1/selection.csv",
+      "size_bytes": 1413,
+      "sha256": "9504d3c64d7a6ac741c4ec63e6302ccd02ced1448f521aae8ee0e9ae3101128b"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v2/comp_1h_cycle.png",
+      "size_bytes": 334662,
+      "sha256": "76c2adea0c9d4481e74aaf91037cfa055ab5fe28e963389bf605824d10499610"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v2/expansion_-1_loss.png",
+      "size_bytes": 308229,
+      "sha256": "0a3c352b5da6815c1f5e2abf994a83a4dc7717ae2af71ef4d2b257068d5490c6"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v2/expansion_-1_profit.png",
+      "size_bytes": 299538,
+      "sha256": "73b1d04f0b966ce4b8e8ab0f5a4dcbc4e375d43bad1229fd0b852bffee00b88a"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v2/expansion_1_loss.png",
+      "size_bytes": 267249,
+      "sha256": "cc1be55d830a50427c337f7845f97babca95459e34c2af61176ca178e8edc367"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v2/expansion_1_profit.png",
+      "size_bytes": 304811,
+      "sha256": "5cd959c8924d7954366f33ddece30fd9096d5e5ab68569c163b72897be2557ab"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v2/launch_-1_loss.png",
+      "size_bytes": 325288,
+      "sha256": "937525f9f7cbda264a00b4cdd4c7949e6e94c5d8cd077fa7fb44ed26a918f183"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v2/launch_-1_profit.png",
+      "size_bytes": 363311,
+      "sha256": "7a30020451ca463dcd59092ff2ed4dd2ad7da41127e6a59cb6ad1a425dce5faf"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v2/launch_1_loss.png",
+      "size_bytes": 309104,
+      "sha256": "ec31001f08ebbf2bb5c6a6c78c5faa20507822d2ca6609efc3dfe65fb6c6fa6b"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v2/launch_1_profit.png",
+      "size_bytes": 286906,
+      "sha256": "b742b8a2aa26227742fe6d0b09486aace407103082e34079dc90202fc9b3dce2"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v2/manifest.json",
+      "size_bytes": 1369,
+      "sha256": "7a55146458915bf677aaf80a5def3baa89f7335f8151964080539a79edec5a05"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/charts_v2/selection.csv",
+      "size_bytes": 1413,
+      "sha256": "9504d3c64d7a6ac741c4ec63e6302ccd02ced1448f521aae8ee0e9ae3101128b"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/full_v1/comp_1h_cycle_window.csv.gz",
+      "size_bytes": 17033,
+      "sha256": "92517e11ef7091b8360c7283564216a141d76287d30c769f780cbf7e52a5086d"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/full_v1/event_states.csv.gz",
+      "size_bytes": 21153588,
+      "sha256": "5edc5e17874583eead8d787ef930daeca32a164a979ccd124fbd7f456ea5a0af"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/full_v1/existing_random_controls_reused.csv",
+      "size_bytes": 4277219,
+      "sha256": "7f6d2a6b794abd42c66a2becf29dbc4ceba4b8b27fc7a5ee6085590411cc553d"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/full_v1/input_trade_hash_audit.json",
+      "size_bytes": 1815479,
+      "sha256": "09cdfcc566f66a6f5261b5bbb2668c7c5299ca9c855b6ac752f2b8fc575e1bc7"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/full_v1/manifest.json",
+      "size_bytes": 1698,
+      "sha256": "f5ead4ef547193ce8f21c86251323c05697e80308bda19de9ca743098649d137"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/full_v1/monthly_state_summary.csv",
+      "size_bytes": 130146,
+      "sha256": "b3f2ec3a515fcc585985018312a4e6c257aeade56438219193eae8a92b2004f4"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/full_v1/outcome_state_summary.csv",
+      "size_bytes": 11129,
+      "sha256": "920d4604e27ea7119f91e1f9ae4e117240cace5d8c57520f80428feae093b478"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/full_v1/outcome_summary.csv",
+      "size_bytes": 9258,
+      "sha256": "1f75eab1be1ea21a8d45d2c903276cb36f6c3302d9eddbc048c3c29c26c0ad61"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/full_v1/process_availability.csv.gz",
+      "size_bytes": 3066685,
+      "sha256": "8a023df2fc93a73e508119ca5fc79082ee880ca68424b31b43516d3bc8dfecbb"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/full_v1/receipt.json",
+      "size_bytes": 901,
+      "sha256": "90ed663157192208689d0a72818d85e4f267603d4bdc452e59368c64567f8b72"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/full_v1/same_stream_month_side_volatility_pairs.csv",
+      "size_bytes": 6118001,
+      "sha256": "5097083291f25d834b09905bb7c507fd0129a3d43618f03e7221cd9d3d427fa3"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/owner_case_v1/comp_1h_cycle.png",
+      "size_bytes": 348183,
+      "sha256": "bd5a85328c780d0b430d1de3b7ddd521b6665acd30dc492013d074cc1cbb0c4c"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/owner_case_v1/manifest.json",
+      "size_bytes": 464,
+      "sha256": "ccb30e362b98abeec8f45f664359f6d33251fcadbb55f55b6bbf5998d6b8fdd3"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v1/aggregate.csv",
+      "size_bytes": 2296,
+      "sha256": "158da4ceef66a60a2fe06a53d31fe9757c80f461101aacc1999992f5cc613d46"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v1/all_event_state_counts.csv",
+      "size_bytes": 533,
+      "sha256": "0a204e54134fa47e1dd0a74fde2032facb9e5de5c9ba5aefdac282dbc1eee1e1"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v1/confirmation_cost.csv",
+      "size_bytes": 1436,
+      "sha256": "9a94dfcc58fea72c277c9ef0faee0d59c96e2ccda3a4cc5eb10179862dde83eb"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v1/manifest.json",
+      "size_bytes": 1403,
+      "sha256": "2dc7bc609c7ca8bf470d0af0b6304f36b19e57cec669844ef83c1d2f5584d8f4"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v1/matched_summary.csv",
+      "size_bytes": 401,
+      "sha256": "9a39cc2f5032938e971854d69f6ad531bb0c2e6652880c6da161fef304b3ca8c"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v1/monthly.csv",
+      "size_bytes": 26249,
+      "sha256": "2933843e097a4c4e62895bbdefe537ae61a2f942e97eafca15db533af88f57fe"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v1/process_status_counts.csv",
+      "size_bytes": 2279,
+      "sha256": "f683d997596f1d2bda5f14c728b9aca98d08d9081312df6331dee0166471416a"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v1/random_summary.csv",
+      "size_bytes": 1780,
+      "sha256": "893bd56c0e30aa577f0b02ebe52e359f91a1363ea073bb0e123ca27676a00d65"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v1/state_age.csv",
+      "size_bytes": 7177,
+      "sha256": "34becc187c8d17fd931c7fc548d11624a36bef8bef3deb577050ff1183d7761e"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v1/timeframe_side.csv",
+      "size_bytes": 7089,
+      "sha256": "5ec710e9020fd4a46cdb4db657ca16b20ef7729f5a26999f91e53d0c7c86599c"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v1/unmatched_counts.csv",
+      "size_bytes": 157,
+      "sha256": "0b10be337c63bd9d6e13933132c8cdc366c89b625703ebae118c6a7dfd45de2c"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v2/aggregate.csv",
+      "size_bytes": 2296,
+      "sha256": "158da4ceef66a60a2fe06a53d31fe9757c80f461101aacc1999992f5cc613d46"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v2/all_event_state_counts.csv",
+      "size_bytes": 533,
+      "sha256": "0a204e54134fa47e1dd0a74fde2032facb9e5de5c9ba5aefdac282dbc1eee1e1"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v2/confirmation_cost.csv",
+      "size_bytes": 1436,
+      "sha256": "9a94dfcc58fea72c277c9ef0faee0d59c96e2ccda3a4cc5eb10179862dde83eb"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v2/manifest.json",
+      "size_bytes": 1403,
+      "sha256": "a1089aac652386473deb8a98dfc8ab0e7954371d0cbfe93da9256519f30e6997"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v2/matched_summary.csv",
+      "size_bytes": 401,
+      "sha256": "9a39cc2f5032938e971854d69f6ad531bb0c2e6652880c6da161fef304b3ca8c"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v2/monthly.csv",
+      "size_bytes": 26249,
+      "sha256": "2933843e097a4c4e62895bbdefe537ae61a2f942e97eafca15db533af88f57fe"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v2/process_status_counts.csv",
+      "size_bytes": 2279,
+      "sha256": "f683d997596f1d2bda5f14c728b9aca98d08d9081312df6331dee0166471416a"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v2/random_summary.csv",
+      "size_bytes": 1780,
+      "sha256": "893bd56c0e30aa577f0b02ebe52e359f91a1363ea073bb0e123ca27676a00d65"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v2/state_age.csv",
+      "size_bytes": 7177,
+      "sha256": "34becc187c8d17fd931c7fc548d11624a36bef8bef3deb577050ff1183d7761e"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v2/timeframe_side.csv",
+      "size_bytes": 7089,
+      "sha256": "5ec710e9020fd4a46cdb4db657ca16b20ef7729f5a26999f91e53d0c7c86599c"
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/summary_v2/unmatched_counts.csv",
+      "size_bytes": 157,
+      "sha256": "0b10be337c63bd9d6e13933132c8cdc366c89b625703ebae118c6a7dfd45de2c"
+    }
+  ]
+}
