@@ -8856,3 +8856,15 @@ experiments:
     artifacts:
     - spike-v8-process-20260913-delivery
     notes: Authorized configuration-specific holdout-era use 1. Supplements rather than rebrands the earlier V7-only exit experiment; no online execution changes.
+  - experiment_id: exp-spike-v8-ma-cycle-20260913-v1
+    source_repo: darkforest-x/fable-trading
+    status: active
+    question: Do causal compression, directional launch, ordered expansion and reconsolidation states distinguish frozen V8 outcomes beyond static MA order?
+    single_variable: Fixed lifecycle classification and two separately reported same-entry state cohorts; no parameter search or changed trading policy.
+    result: Pre-registered state definitions and source implementation in progress; official scoring has not started.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v8_ma_cycle_20260913.md
+    artifacts: []
+    notes: Owner authorized all available dates and this experiment. Planned configuration-specific holdout-era use 1 on reused nonblind history; future milestones are delay/cost diagnostics only, never entry labels.

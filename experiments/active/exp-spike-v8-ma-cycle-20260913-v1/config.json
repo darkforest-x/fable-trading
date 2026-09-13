@@ -1,0 +1,76 @@
+{
+  "experiment_id": "exp-spike-v8-ma-cycle-20260913-v1",
+  "entry_process": "experiments/active/exp-spike-v8-entry-process-20260913-v1/results/full_v1",
+  "entry_process_manifest_sha256": "f258b3c35c7c5924a4c092a7d0d269f79e257c70e99768e835279b49da1476aa",
+  "raw": "experiments/active/exp-spike-v7-v1-compare-20260912-v1/results/replay_two_year_20260912_v3",
+  "expected_streams": 3531,
+  "expected_v8_signals": 113295,
+  "expected_scoring_closed": 94180,
+  "window": {
+    "start": "2024-09-10T00:00:00Z",
+    "split": "2025-09-10T00:00:00Z",
+    "end": "2026-09-10T00:00:00Z"
+  },
+  "holdout_era_authorization": "Owner explicitly authorized all available dates. This configuration records holdout-era exposure #1; later history is reused and nonblind.",
+  "ma_columns": [
+    "s20",
+    "e20",
+    "s60",
+    "e60",
+    "s120",
+    "e120"
+  ],
+  "slope_lag_bars": 3,
+  "compression": {
+    "history_bars": 256,
+    "quantile": 0.2,
+    "consecutive_bars": 3,
+    "range_bars": 12
+  },
+  "launch": {
+    "body": "open_and_close_fully_outside_six_ma_envelope; wick_allowed",
+    "slope": "all_three_group_centers_same_direction_over_three_bars",
+    "breakout": "close_through_launch_bar_preceding_12_bar_high_or_low",
+    "order_not_required": true,
+    "width_expansion_not_required": true
+  },
+  "expansion": {
+    "minimum_directional_order_score": 9,
+    "pair_gaps": "direction*(center20-center60)>0 and direction*(center60-center120)>0, each larger than three bars earlier",
+    "order12": "milestone_only_not_entry_gate"
+  },
+  "reconsolidation": {
+    "max_width_fraction": 0.7,
+    "consecutive_bars": 3,
+    "requires": "width below episode_running_max_width fraction and slopes no longer all same direction"
+  },
+  "process": {
+    "horizon_bars": 48,
+    "post_exit_display_bars": 0,
+    "milestone": "same_episode_same_direction_expansion_or_order12",
+    "confirmation_cost": "milestone_close_to_next_observed_open versus original V8 entry in original initial-risk R"
+  },
+  "matching": {
+    "volatility": "causal event-preceding 256-bar atr_over_close quintile",
+    "keys": [
+      "stream_key",
+      "period",
+      "calendar_month",
+      "side",
+      "causal_volatility_bucket"
+    ],
+    "control": "nearest signal confirmation time among non-target state; deterministic trade_id tie break",
+    "nonrandom": true
+  },
+  "research_only": true,
+  "training_eligible": false,
+  "production_eligible": false,
+  "armed": {
+    "valid_after_last_compression_bars": 12,
+    "definition": "armed only through 12 bars after the most recent qualifying compression bar; continued compression updates last_compact_i but never changes episode_id or start"
+  },
+  "v8_replay": "experiments/active/exp-spike-v8-noise-filter-20260913-v1/replay_v1",
+  "entry_process_evidence_sha256": "9c904b2d21a348dbbcca4b6276aefad599f57518508ff3e7ae08e1596db8b4c9",
+  "raw_manifest_sha256": "37f65499611877c8b8b10f0f2fb7a8c99a07d95cc90cda282f5b8a5ac89d41b6",
+  "v8_replay_manifest_sha256": "04469ed2e694f23d27591d8316b71b66eab5e6d0338fc0847b6ae004f4bd30b9"
+}
