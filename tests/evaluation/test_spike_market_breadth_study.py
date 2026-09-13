@@ -11,6 +11,7 @@ import yoyo.evaluation.spike_market_breadth_study as study
 from yoyo.evaluation.spike_market_breadth_study import (
     _base_deduplicated_trades, _load_bars, _prefix_rows, _variant_block_rows, attach_context, canonical_asset,
     causal_asset_features, complete_aggregate_30m, development_asof_clock, launch_density_from_events, summarize_slice,
+    validate_panel_clock,
 )
 
 
@@ -207,6 +208,13 @@ def test_preflight_asof_clock_matches_final_panel_contract():
     assert clock.iloc[0] == study.DEVELOPMENT_START
     assert clock.iloc[-1] == study.DEVELOPMENT_END - pd.Timedelta(minutes=30)
     assert len(clock) == int((study.DEVELOPMENT_END - study.DEVELOPMENT_START) / pd.Timedelta(minutes=30))
+
+
+def test_panel_clock_validation_uses_asof_column_not_dataframe_method():
+    clock = pd.Series(pd.to_datetime(["2025-01-01T00:00:00Z", "2025-01-01T00:30:00Z"]))
+    validate_panel_clock(pd.DataFrame({"asof": clock}), clock)
+    with pytest.raises(ValueError, match="preflight signal-density clock differs"):
+        validate_panel_clock(pd.DataFrame({"asof": clock.iloc[::-1].reset_index(drop=True)}), clock)
 
 
 def test_density_uses_strict_hour_and_includes_current_signal():

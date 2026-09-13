@@ -216,6 +216,12 @@ def development_asof_clock() -> pd.Series:
     ))
 
 
+def validate_panel_clock(panel: pd.DataFrame, clock: pd.Series) -> None:
+    """Fail closed unless the materialized panel uses the preflight as-of clock."""
+    if not pd.DatetimeIndex(panel["asof"]).equals(pd.DatetimeIndex(clock)):
+        raise ValueError("preflight signal-density clock differs from breadth panel as-of clock")
+
+
 def _prefix_field(line: str, field_index: int) -> str:
     """Read one unquoted field without constructing later CSV outcome fields.
 
@@ -816,8 +822,7 @@ def run(output: Path, report: Path) -> None:
     catalog["actual_development_prefix_sha256"] = catalog.source_path.map(prefix_digests)
     if catalog.actual_development_prefix_sha256.isna().any():
         raise ValueError("development-prefix digest missing from breadth panel input")
-    if not pd.DatetimeIndex(panel.asof).equals(pd.DatetimeIndex(asof_clock)):
-        raise ValueError("preflight signal-density clock differs from breadth panel as-of clock")
+    validate_panel_clock(panel, asof_clock)
     panel = _background_returns(panel, catalog)
     panel["launch_density_1h"] = density.to_numpy()
     context = attach_context(trades, panel)
