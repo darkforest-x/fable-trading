@@ -95,6 +95,11 @@ def _read_targets(path: Path) -> pd.DataFrame:
         table[name] = pd.to_datetime(table[name], utc=True, errors="raise")
     table["censored"] = table.censored.map(_truth)
     table["side"] = pd.to_numeric(table.side, errors="raise").astype(int)
+    for name in ("timeframe_min", "segment"):
+        numeric = pd.to_numeric(table[name], errors="raise")
+        if not np.isfinite(numeric).all() or not numeric.mod(1).eq(0).all():
+            raise ValueError(f"candidate context contains a non-integer {name}")
+        table[name] = numeric.astype(int)
     if not table.side.isin((1, -1)).all():
         raise ValueError("candidate context contains an invalid side")
     if (table.variant.isin(VARIANTS) & table.side.ne(1)).any():

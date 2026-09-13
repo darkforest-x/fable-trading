@@ -167,6 +167,23 @@ def test_target_reader_rejects_boundary_row_before_outcome_csv_parse(tmp_path, m
     assert not parsed
 
 
+def test_target_reader_normalizes_decimal_identity_fields_to_integers(tmp_path):
+    import gzip
+    path = tmp_path / "candidate_context.csv.gz"
+    header = ["variant", "timeframe_min", "signal_bar_open", "entry_time", "exit_time", "side",
+              "censored", "net_r", "net_return", "venue", "symbol", "segment"]
+    safe = ["v1_common_execution_long", "60.0", "2025-09-09T22:00:00Z", "2025-09-09T23:00:00Z",
+            "2025-09-09T23:30:00Z", "1", "False", "1.0", ".01", "binance", "BTCUSDT", "0.0"]
+    path.write_bytes(gzip.compress((",".join(header) + "\n" + ",".join(safe) + "\n").encode()))
+
+    table = _read_targets(path)
+
+    assert table.timeframe_min.tolist() == [60]
+    assert table.segment.tolist() == [0]
+    assert pd.api.types.is_integer_dtype(table.timeframe_min)
+    assert pd.api.types.is_integer_dtype(table.segment)
+
+
 def test_summary_exposes_baseline_quartiles_frozen_rule_reasons_and_deterministic_signflip():
     targets = pd.DataFrame({"target_id": ["a", "b", "c", "d"], "joint_breadth": [.1, .2, .8, .9],
                             "joint_delta_60m": [-1., .1, .2, .3]})
