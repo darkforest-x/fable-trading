@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-spike-eth-lowtf-cost-diagnostic-20260914-v1",
+  "purpose": "Read-only cost-risk and exit-path diagnosis of existing ETH V8 3m/5m trades; no OHLCV, signal, exit, or account replay.",
+  "frozen_rule": "V6 raw + V7 prior_squeeze_run3 + signed rope distance <= 3 ATR; next-open entry; five-bar extreme plus 0.2 ATR; minimum 2 ATR risk; 2R activates 4 ATR trailing; raw V6 opposite exits; fixed 0.2% round-trip cost.",
+  "input_sha256": {
+    "experiments/active/exp-spike-v8-lowtf-20260913-v1/results/run_20260913_v3/manifest.json": "accf17e4cca0964faee682e969648c0f4e8350e077dca6a5cb0b3ac0539495aa",
+    "experiments/active/exp-spike-v8-lowtf-20260913-v1/results/run_20260913_v3/primary_closed_trades.csv.gz": "2606f302dad35626251090ee2be6f1688c34499b84b0fd562077dc3f9469753f",
+    "experiments/active/exp-spike-v8-eth3m-be-20260913-v1/results/run_v2/manifest.json": "837d9a243887928195f7ef46538a160c43b1d78aeec438532ff6eccb487b161f",
+    "experiments/active/exp-spike-v8-eth3m-be-20260913-v1/results/run_v2/development_fixed_entry_pairs.csv.gz": "d345fc866f7104e9528555f041c84910b1d8b51213e7e6a92e9da452f71dfefe",
+    "experiments/active/exp-spike-v8-eth3m-be-20260913-v1/results/run_v2/post_authorized_holdout_fixed_entry_pairs.csv.gz": "273d4a211ebf0e8141bfa3b629f8f6b14bdd8c05c0b715f57615c8796ba4c728"
+  },
+  "streams": {
+    "ETH 3m OKX": {"source": "ETH-USDT-SWAP", "development": "2023-07-31T11:12:00Z to 2026-05-04T00:00:00Z", "later": "2026-05-04T00:00:00Z to 2026-07-30T11:09:00Z"},
+    "ETH 5m Binance": {"source": "ETHUSDT", "development": "2020-01-01T00:00:00Z to 2024-01-01T00:00:00Z", "later": "2024-01-01T00:00:00Z to 2026-05-01T00:00:00Z"}
+  },
+  "single_predeclared_gate": {"fee_r_max": 0.5, "definition": "fee_r = 0.002 / frozen initial_risk_frac; equivalent to initial risk fraction >=0.004", "causal_limit": "initial_risk_frac includes next-open filled entry and is only an entry-time check, not necessarily known at signal close"},
+  "descriptive_fee_r_buckets": ["<=0.25", "0.25-0.5", "0.5-1", ">1"],
+  "history_status": "Previously authorized and already-studied historical/holdout-era ledger re-analysis. This builder reads no OHLCV and is not a new blind validation or new OHLCV exposure.",
+  "research_only": true,
+  "training_eligible": false,
+  "production_eligible": false
+}
