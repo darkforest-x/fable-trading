@@ -241,7 +241,8 @@ def _prefix_field(line: str, field_index: int) -> str:
 
 def _utc(value: str) -> pd.Timestamp:
     """Parse an ISO timestamp while accepting the archive's explicit UTC offset."""
-    return pd.to_datetime(value, utc=True)
+    stamp = pd.Timestamp(value)
+    return stamp.tz_localize("UTC") if stamp.tzinfo is None else stamp.tz_convert("UTC")
 
 
 def _prefix_rows(path: Path, *, cutoff_field: str, cutoff: pd.Timestamp,

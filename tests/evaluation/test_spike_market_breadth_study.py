@@ -9,10 +9,20 @@ import pytest
 
 import yoyo.evaluation.spike_market_breadth_study as study
 from yoyo.evaluation.spike_market_breadth_study import (
-    _base_deduplicated_trades, _load_bars, _prefix_rows, _variant_block_rows, attach_context, canonical_asset,
+    _base_deduplicated_trades, _load_bars, _prefix_rows, _utc, _variant_block_rows, attach_context, canonical_asset,
     causal_asset_features, complete_aggregate_30m, development_asof_clock, launch_density_from_events, summarize_slice,
     validate_panel_clock,
 )
+
+
+@pytest.mark.parametrize("value", [
+    "2025-09-09T16:00:00+00:00",
+    "2025-09-09T16:00:00Z",
+    "2025-09-10T00:00:00+08:00",
+    "2025-09-09 16:00:00",
+])
+def test_utc_fast_parser_matches_pandas_utc_semantics(value):
+    assert _utc(value) == pd.to_datetime(value, utc=True)
 
 
 def test_canonical_asset_removes_only_exchange_contract_multipliers():
