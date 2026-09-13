@@ -14,6 +14,23 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-market-breadth-20260913-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: ab1d5b79fedb14497fcca9507b8f78913b0b818e
+    status: active
+    question: Can causal market-breadth state reduce V1/V7 noise while retaining exact realized 10R entries and outperforming matched random entries?
+    single_variable: The frozen candidate admits only signals with joint 30m market breadth higher than 60 minutes earlier; all entries, exits, costs, and strategy parameters remain unchanged.
+    result: in_progress
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_market_breadth_20260913.md
+    artifacts: []
+    notes: >-
+      Formal computation is restricted to [2024-09-10, 2025-09-10). An earlier
+      abandoned combined-ledger probe materialized later rows, so the experiment
+      conservatively records holdout_consumed=true even though its corrected
+      artifacts use only bounded development rows. No online filter or notifier changes.
   - experiment_id: exp-spike-account-growth-20260913-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 3fb6ece7662d43c28b1609cb623d49ccd04d7993
@@ -32,6 +49,28 @@ experiments:
     - spike-account-growth-20260913-report-html
     - spike-account-growth-20260913-delivery
     notes: Owner-authorized holdout-era configuration exposure #1. Full history is descriptive; development selection and independent validation are separate account paths. No production, notification, TradingView, API, position, order, or deployment change.
+  - experiment_id: exp-ai-strategy-factory-audit-20260913-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0b479e1d57a46c3c6880e7b65066dedf697c87ce
+    status: inconclusive
+    question: Does the public AI strategy-factory workflow establish profitability, and can SPIKE be integrated without
+      changing its trade contract?
+    single_variable: Non-directional evidence and architecture audit; no market experiment or parameter changes.
+    result: Public claims do not establish reproducible live profitability. Research orchestration is reusable; fixed
+      exits, sizing and win-rate admission conflict with SPIKE trend logic. Profit improvement remains unproven.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_ai_strategy_factory_workflow_audit_20260913.md
+    artifacts:
+    - ai-strategy-factory-audit-20260913-report-md
+    - ai-strategy-factory-audit-20260913-report-html
+    - ai-strategy-factory-audit-20260913-plan
+    - ai-strategy-factory-audit-20260913-sources
+    - ai-strategy-factory-audit-20260913-learning
+    notes: Original X fetched through same-ID public mirror after 403; original image inspected; official pages compared
+      with current code and written V1/V7/V8 reports. No install, signup, private keys, new evaluation, runtime activation
+      or trade actions.
   - experiment_id: exp-spike-v8-noise-filter-20260913-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 9ea9a49f0582f0a0dc0f25b84cb9fda519d42bae
@@ -170,6 +209,24 @@ experiments:
     - spike-v1-plus-implementation-20260912-report
     - spike-v1-plus-implementation-20260912-receipt
     notes: Synthetic software verification only. Existing loaded chart used for compilation/display, with no new historical outcome evaluation.
+  - experiment_id: exp-spike-v1-plus-evidence-20260912
+    source_repo: darkforest-x/fable-trading
+    source_commit: 11ed67f4b94e402463b437b711365c5804fe18e5
+    status: inconclusive
+    question: Which conclusions in the supplied V1 Notion analysis are supported by their actual frozen ledger, and
+      what causal changes deserve an independent V1 Plus evaluation?
+    single_variable: Evidence-only source and arithmetic audit; no new signal, exit, parameter or return replay.
+    result: Long-only scope and separate two-year versus three-year artifacts identified. An enhancement specification
+      is proposed; no enhanced profitability result is claimed.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_spike_v1_plus_evidence_20260912.md
+    artifacts:
+    - spike-v1-plus-evidence-20260912-source-receipt
+    - spike-v1-plus-evidence-20260912-report
+    notes: 'Owner-authorized existing-evidence audit read #1; new strategy holdout return evaluations #0. Prior results
+      remain previously seen historical evidence.'
   - experiment_id: exp-spike-v1-okx-133-review-20260911
     source_repo: darkforest-x/fable-trading
     source_commit: 44c3fea7cee8dc1624d1bb49e48258c172d4f6cf
