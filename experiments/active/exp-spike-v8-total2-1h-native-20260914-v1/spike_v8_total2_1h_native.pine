@@ -1,0 +1,715 @@
+//@version=6
+// SPIKE V8 overheat-filter-r1: V7 confirmation plus one causal late-entry guard.
+// V4 confirmation is provenance inside a closed-bar structure, with
+// one causal V1 directional-candle evidence latch during the V6 pending window.
+// A final event belongs to the current close, never to a historical body or
+// legacy confirmation. The frozen two-year replay is research evidence only;
+// it does not make this script eligible for production or live execution. Its
+// reference-exit revision is not the frozen monitor/backtest configuration.
+strategy("SPIKE V8 TOTAL2 1H · 原生研究", shorttitle="V8 TOTAL2 R", overlay=true, pyramiding=0, process_orders_on_close=false, calc_on_order_fills=false, calc_on_every_tick=false, commission_type=strategy.commission.percent, commission_value=0, default_qty_type=strategy.fixed, default_qty_value=1, initial_capital=1, margin_long=0, margin_short=0, max_labels_count=100, max_lines_count=100, explicit_plot_zorder=true)
+
+// Frozen research constants; changing them defines a new unvalidated config.
+const int maLen = 34
+const int sigLen = 9
+const int denseLen = 12
+const float denseWidth = 3.0
+const int denseCrosses = 2
+const int breakoutLookback = 12
+const int cooldownBars = 12
+const int confirmMaxAge = 3
+const float minAdvance = 1.5
+const float minVolume = 1.5
+// Fixed V1 candle-shape semantics. V6 deliberately does not restore V1's
+// same-bar RV>=4 or TR>=3 hard gates.
+const float minBody = 0.55
+const float minEnd = 0.75
+const int stopLen = 5
+const float stopBuffer = 0.2
+const float riskFloor = 2.0
+const float armR = 2.0
+const float trailAtr = 4.0
+// Development-selected V8 rule. At confirmation close, do not enter after
+// price has already stretched more than 3 ATR beyond the directional edge of
+// the six-MA rope. Raw opposite V6 confirmations still remain exit events.
+const float maxRopeDistanceAtr = 3.0
+
+string gView = "01 · 显示"
+bool showMas = input.bool(true, "六条均线", group=gView, display=display.none)
+bool showLabels = input.bool(true, "确认信号与价格", group=gView, tooltip="只显示完成实体支撑、原确认关联与主线转强后的最终信号，标在实际完成K线上，不回填。", display=display.none)
+bool showRisk = input.bool(true, "风险区与保护线", group=gView, tooltip="确认收盘开启风险参考；同向重复不重置。反向确认在收盘结束旧参考，新风险有效时开启反向参考；本根先触及原保护时以原保护结算。", display=display.none)
+bool showPanel = input.bool(true, "显示状态面板", group=gView, display=display.none)
+bool showMilestones = input.bool(true, "R 参考与里程碑", group=gView, tooltip="入场即预先显示 1R、2R、3R 参考价；达到后仍分别标记 3R、5R、10R。均不是固定止盈。", display=display.none)
+bool showExitLabels = input.bool(false, "退出文字", group=gView, display=display.none)
+color signalColor = input.color(color.white, "信号 K 线颜色（实体 / 影线）", group=gView, display=display.none)
+color bull = #008F82
+color bear = #D34B66
+color gold = #AD7B29
+color blue = #4679C9
+color ink = chart.fg_color
+color muted = color.new(ink, 40)
+
+// BEGIN V7 BB VISUAL INPUTS
+string gBb = "02 · BB 压缩通道"
+bool useBbFilter = input.bool(true, "仅保留近期持续压缩后的信号", group=gBb, tooltip="信号前12根内须有连续3根带宽处于此前500根最低10%区域。不要求信号当根扩张；原V6反向确认仍可结束已有风险参考。关闭可恢复V6信号。", display=display.none)
+bool showBb = input.bool(true, "显示 BB 压缩通道", group=gBb, display=display.none)
+int bbLength = input.int(200, "SMA 长度", minval=2, group=gBb, display=display.none)
+float bbMult = input.float(2.0, "标准差倍数", minval=0.1, step=0.1, group=gBb, display=display.none)
+bool bbOnlyCompressed = input.bool(false, "仅显示压缩段", group=gBb, display=display.none)
+bool bbShowBasis = input.bool(false, "显示中线", group=gBb, display=display.none)
+color bbChannelColor = input.color(color.new(#7D8490, 48), "通道颜色", group=gBb, display=display.none)
+color bbCompressionColor = input.color(#AD7B29, "压缩颜色", group=gBb, display=display.none)
+// END V7 BB VISUAL INPUTS
+string gV8 = "03 · V8 噪音过滤"
+bool useOverheatFilter = input.bool(true, "过滤离六线超过 3ATR 的迟到信号", group=gV8, tooltip="只影响新入场确认：多头收盘离六线最高边、空头收盘离六线最低边超过3ATR时不显示、不报警。原始反向确认仍可结束已有参考。", display=display.none)
+// BEGIN UNCHANGED V2 RISK HELPERS
+// Frozen signal-close inputs only; outward rounding preserves the minimum risk.
+f_risk(int side, float entry, float extreme, float a, float floorAtr, float bufferAtr, float tick) =>
+    bool known = (side == 1 or side == -1) and entry > 0 and a > 0 and tick > 0 and not na(extreme)
+    float candidate = side == 1 ? math.min(extreme - bufferAtr * a, entry - floorAtr * a) : math.max(extreme + bufferAtr * a, entry + floorAtr * a)
+    float stop = known ? (side == 1 ? math.floor(candidate / tick) * tick : math.ceil(candidate / tick) * tick) : na
+    float risk = side * (entry - stop)
+    bool valid = known and stop > 0 and risk > 0
+    [valid ? stop : na, valid ? risk : na, valid]
+
+// Call only AFTER the entry bar. priorProtection was fixed at the previous close.
+// First apply the operative stop and adverse gap; never count stop-bar highs as profit.
+// A new close-based ATR ratchet only becomes operative on the next bar.
+f_path(int side, float entry, float risk, float priorProtection, float priorPeak, bool wasArmed, float o, float h, float l, float c, float a, float activationR, float distanceAtr, float tick) =>
+    bool stopped = side == 1 ? l <= priorProtection : h >= priorProtection
+    float exitPrice = stopped ? (side == 1 ? math.min(o, priorProtection) : math.max(o, priorProtection)) : na
+    float currentR = side * ((stopped ? exitPrice : c) - entry) / risk
+    float peakR = stopped ? priorPeak : math.max(priorPeak, side * ((side == 1 ? h : l) - entry) / risk)
+    bool armed = wasArmed or (not stopped and currentR >= activationR)
+    float protection = priorProtection
+    if not stopped and armed and a > 0
+        float raw = c - side * distanceAtr * a
+        float candidate = side == 1 ? math.floor(raw / tick) * tick : math.ceil(raw / tick) * tick
+        protection := side == 1 ? math.max(priorProtection, candidate) : math.min(priorProtection, candidate)
+    [not stopped, protection, peakR, currentR, exitPrice, armed]
+// END UNCHANGED V2 RISK HELPERS
+
+// Existing V1 averages keep their full-history semantics. New alert windows
+// independently require contiguous history and do not bridge missing bars.
+f_smma(float source, int length) =>
+    float seed = ta.sma(source, length)
+    var float value = na
+    value := na(value[1]) ? seed : (value[1] * (length - 1) + source) / length
+    value
+f_flip(float a, float b) =>
+    float d = a - b
+    (d > 0 and d[1] <= 0) or (d < 0 and d[1] >= 0) ? 1.0 : 0.0
+
+// V1's directional candle quality, without its same-bar volume/TR thresholds.
+// V6 pairs it with V4's existing causal three-bar advance and volume envelope.
+f_directionalCandle(int side, float o, float h, float l, float c, float bodyGate, float endGate) =>
+    float span = h - l
+    bool known = span > 0 and not na(o) and not na(h) and not na(l) and not na(c)
+    float body = known ? math.abs(c - o) / span : na
+    float endPosition = known ? (side == 1 ? (c - l) / span : (h - c) / span) : na
+    bool direction = side == 1 ? c > o : side == -1 ? c < o : false
+    known and direction and body >= bodyGate and endPosition >= endGate
+
+bool pricesValid = not na(open) and not na(high) and not na(low) and not na(close) and low > 0 and high >= math.max(open, close, low) and low <= math.min(open, close, high)
+bool dataGap = not barstate.isfirst and (time != time_close[1] or not pricesValid or not pricesValid[1])
+
+// BEGIN V7 BB VISUAL CALCULATION
+// BB200 context: every threshold value is based on the preceding 500
+// widths. The independent contiguous counter suppresses warmup across gaps
+// without changing the upstream V6 structural state machine.
+bool bbDataGap = not barstate.isfirst and (time != time_close[1] or not pricesValid or not pricesValid[1])
+var int bbSegmentBars = 0
+bbSegmentBars := not pricesValid ? 0 : bbDataGap ? 1 : bbSegmentBars + 1
+float bbBasis = ta.sma(close, bbLength)
+float bbStdev = ta.stdev(close, bbLength, true)
+float bbUpper = bbBasis + bbMult * bbStdev
+float bbLower = bbBasis - bbMult * bbStdev
+float bbWidth = bbBasis != 0 ? (bbUpper - bbLower) / math.abs(bbBasis) : na
+bool bbBandReady = pricesValid and bbSegmentBars >= bbLength and not na(bbBasis) and not na(bbStdev)
+float bbPriorWidthP10 = ta.percentile_linear_interpolation(bbWidth[1], 500, 10)
+bool bbReady = bbBandReady and bbSegmentBars >= bbLength + 500 and not na(bbPriorWidthP10)
+bool bbCompressed = bbReady and bbWidth <= bbPriorWidthP10
+// Historical compression may finish before the signal; do not require the
+// current bar to remain narrow or to have a rising bandwidth.
+bool bbAdmissionReady = bbReady and bbSegmentBars >= bbLength + 500 + 12
+bool bbRecentCompression = false
+for bbOffset = 1 to 10
+    bbRecentCompression := bbRecentCompression or (bbCompressed[bbOffset] and bbCompressed[bbOffset + 1] and bbCompressed[bbOffset + 2])
+bool bbEntryAllowed = not useBbFilter or (bbAdmissionReady and bbRecentCompression)
+// END V7 BB VISUAL CALCULATION
+var int segmentIndex = -1
+segmentIndex := dataGap or not pricesValid ? 0 : segmentIndex + 1
+bool resetVolume = barstate.isfirst or dataGap
+float tr = ta.tr(true)
+float smHigh = f_smma(high, maLen)
+float smLow = f_smma(low, maLen)
+float ema1 = ta.ema(hlc3, maLen)
+float middle = 2.0 * ema1 - ta.ema(ema1, maLen)
+float md = middle > smHigh ? middle - smHigh : middle < smLow ? middle - smLow : 0.0
+float sb = ta.sma(md, sigLen)
+float atr = f_smma(tr, 14)
+float s20 = ta.sma(close, 20)
+float e20 = ta.ema(close, 20)
+float s60 = ta.sma(close, 60)
+float e60 = ta.ema(close, 60)
+float s120 = ta.sma(close, 120)
+float e120 = ta.ema(close, 120)
+float ropeHigh = math.max(s20, e20, s60, e60, s120, e120)
+float ropeLow = math.min(s20, e20, s60, e60, s120, e120)
+float width = atr > 0 ? (ropeHigh - ropeLow) / atr : na
+float flips = f_flip(s20,e20) + f_flip(s20,s60) + f_flip(s20,e60) + f_flip(s20,s120) + f_flip(s20,e120) + f_flip(e20,s60) + f_flip(e20,e60) + f_flip(e20,s120) + f_flip(e20,e120) + f_flip(s60,e60) + f_flip(s60,s120) + f_flip(s60,e120) + f_flip(e60,s120) + f_flip(e60,e120) + f_flip(s120,e120)
+float pastWidth = ta.sma(width[1], denseLen)
+float pastCrosses = math.sum(flips[1], denseLen)
+bool baseReady = pricesValid and bar_index >= math.max(340, 10 * maLen) and atr[1] > 0 and not na(sb) and not na(pastWidth)
+bool ready = baseReady and segmentIndex >= breakoutLookback
+
+// Last20 nonmissing volumes in THIS segment; missing volume does not block
+// structural alerts. Confirmation requires all three current volumes known.
+var array<float> validVolumes = array.new<float>()
+if resetVolume
+    array.clear(validVolumes)
+if not na(volume) and volume >= 0
+    array.push(validVolumes, volume)
+    if array.size(validVolumes) > 20
+        array.shift(validVolumes)
+float volumeMedian = array.size(validVolumes) == 20 ? array.median(validVolumes) : na
+float rv = volumeMedian[1] > 0 and not na(volume) ? volume / volumeMedian[1] : na
+float expansion = atr[1] > 0 ? tr / atr[1] : na
+float recentLow = ta.lowest(low, stopLen)
+
+// BEGIN TWO STAGE FIELDS
+// At least 12 prior contiguous bars before allowing the old density field.
+bool dense = baseReady and segmentIndex >= denseLen and pastWidth <= denseWidth and pastCrosses >= denseCrosses
+float denseHitsRaw = math.sum(dense[1] ? 1.0 : 0.0, breakoutLookback)
+float denseHits = segmentIndex >= breakoutLookback ? denseHitsRaw : na
+bool recentDense = denseHits > 0
+float priorHigh = ta.highest(high[1], breakoutLookback)
+// Auxiliary parent-range support only. It does not alter V4 candidate,
+// confirmation-quality, or cooldown conditions.
+float priorLow = ta.lowest(low[1], breakoutLookback)
+float move3 = close - close[3]
+float advance3 = atr[3] > 0 ? move3 / atr[3] : na
+float volumeBase3 = volumeMedian[3]
+float volumeSum3 = math.sum(volume, 3)
+bool volumeKnown3 = not na(volume) and not na(volume[1]) and not na(volume[2])
+float volumeRatio3 = volumeKnown3 and volumeBase3 > 0 ? volumeSum3 / (3.0 * volumeBase3) : na
+float trSum3 = math.sum(tr, 3)
+float efficiency3 = trSum3 > 0 ? move3 / trSum3 : na
+float closePosition = high > low ? (close - low) / (high - low) : na
+bool aboveSix = close > ropeHigh
+bool earlyRaw = ready and close > priorHigh and close > math.max(s20, e20)
+bool confirmQuality = ready and recentDense and advance3 >= minAdvance and volumeRatio3 >= minVolume and md >= sb and middle > middle[1]
+// Efficiency, close location and six-line position are quality tags, NOT gates.
+// END TWO STAGE FIELDS
+
+// BEGIN SHORT MIRROR FIELDS
+// The short candidate is deliberately independent from the frozen V4 long
+// field above. It shares only causal feature values from the current close.
+float recentHigh = ta.highest(high, stopLen)
+bool earlyShortRaw = ready and close < priorLow and close < math.min(s20, e20)
+bool confirmShortQuality = ready and recentDense and advance3 <= -minAdvance and volumeRatio3 >= minVolume and md <= sb and middle < middle[1]
+bool longCandleShape = f_directionalCandle(1, open, high, low, close, minBody, minEnd)
+bool shortCandleShape = f_directionalCandle(-1, open, high, low, close, minBody, minEnd)
+bool longEvidenceNow = longCandleShape and advance3 >= minAdvance and volumeRatio3 >= minVolume
+bool shortEvidenceNow = shortCandleShape and advance3 <= -minAdvance and volumeRatio3 >= minVolume
+// A V4 confirmation already certifies this causal rolling-three envelope. Any
+// qualifying directional candle within that closed launch window may seed V6.
+bool longLaunchWindowShape = longCandleShape or longCandleShape[1] or longCandleShape[2]
+bool shortLaunchWindowShape = shortCandleShape or shortCandleShape[1] or shortCandleShape[2]
+int longLaunchWindowShapeBar = longCandleShape ? bar_index : longCandleShape[1] ? bar_index - 1 : longCandleShape[2] ? bar_index - 2 : na
+int shortLaunchWindowShapeBar = shortCandleShape ? bar_index : shortCandleShape[1] ? bar_index - 1 : shortCandleShape[2] ? bar_index - 2 : na
+bool longLegacySeedEvidence = longLaunchWindowShape and advance3 >= minAdvance and volumeRatio3 >= minVolume
+bool shortLegacySeedEvidence = shortLaunchWindowShape and advance3 <= -minAdvance and volumeRatio3 >= minVolume
+// END SHORT MIRROR FIELDS
+
+if barstate.isfirst and (not chart.is_standard or timeframe.isticks)
+    runtime.error("请使用普通时间 K 线，合成K线不支持。")
+
+// BEGIN LEGACY ENGINE: retained byte-for-byte in behaviour for provenance only.
+// V6 intentionally does not display or alert this internal V4 confirmation.
+var bool previousEarlyRaw = false
+var int lastAcceptedBar = na
+var int parentBar = na
+var float parentHigh = na
+var float parentLow = na
+var float parentPrice = na
+var bool parentConfirmed = false
+bool legacyEarlySignal = false
+bool legacyConfirmedSignal = false
+int legacyConfirmationAge = na
+float legacyConfirmationParentPrice = na
+float legacyConfirmationParentHigh = na
+float legacyConfirmationParentLow = na
+if barstate.isconfirmed
+    if dataGap
+        lastAcceptedBar := na
+        previousEarlyRaw := false
+        parentBar := na
+        parentHigh := na
+        parentLow := na
+        parentPrice := na
+        parentConfirmed := false
+    bool cooldownPassed = na(lastAcceptedBar) or bar_index - lastAcceptedBar >= cooldownBars
+    legacyEarlySignal := earlyRaw and not previousEarlyRaw and cooldownPassed
+    previousEarlyRaw := earlyRaw
+    if legacyEarlySignal
+        lastAcceptedBar := bar_index
+        parentBar := bar_index
+        parentHigh := priorHigh
+        parentLow := priorLow
+        parentPrice := close
+        parentConfirmed := false
+    int age = na(parentBar) ? na : bar_index - parentBar
+    if not na(age) and age > confirmMaxAge
+        parentBar := na
+        parentHigh := na
+        parentLow := na
+        parentPrice := na
+        parentConfirmed := false
+    if not na(parentBar) and not parentConfirmed and age >= 0 and age <= confirmMaxAge and close > parentHigh and confirmQuality
+        legacyConfirmedSignal := true
+        legacyConfirmationAge := age
+        legacyConfirmationParentPrice := parentPrice
+        legacyConfirmationParentHigh := parentHigh
+        legacyConfirmationParentLow := parentLow
+        parentConfirmed := true
+// END LEGACY ENGINE
+
+// BEGIN SHORT LEGACY ENGINE
+// Short provenance mirrors the V4 chronology with wholly separate cooldown,
+// candidate parent, and confirmation latch state.
+var bool previousEarlyShortRaw = false
+var int lastShortAcceptedBar = na
+var int shortParentBar = na
+var float shortParentHigh = na
+var float shortParentLow = na
+var float shortParentPrice = na
+var bool shortParentConfirmed = false
+bool legacyShortEarlySignal = false
+bool legacyShortConfirmedSignal = false
+int legacyShortConfirmationAge = na
+float legacyShortConfirmationParentPrice = na
+float legacyShortConfirmationParentHigh = na
+float legacyShortConfirmationParentLow = na
+if barstate.isconfirmed
+    if dataGap
+        lastShortAcceptedBar := na
+        previousEarlyShortRaw := false
+        shortParentBar := na
+        shortParentHigh := na
+        shortParentLow := na
+        shortParentPrice := na
+        shortParentConfirmed := false
+    bool shortCooldownPassed = na(lastShortAcceptedBar) or bar_index - lastShortAcceptedBar >= cooldownBars
+    legacyShortEarlySignal := earlyShortRaw and not previousEarlyShortRaw and shortCooldownPassed
+    previousEarlyShortRaw := earlyShortRaw
+    if legacyShortEarlySignal
+        lastShortAcceptedBar := bar_index
+        shortParentBar := bar_index
+        shortParentHigh := priorHigh
+        shortParentLow := priorLow
+        shortParentPrice := close
+        shortParentConfirmed := false
+    int shortAge = na(shortParentBar) ? na : bar_index - shortParentBar
+    if not na(shortAge) and shortAge > confirmMaxAge
+        shortParentBar := na
+        shortParentHigh := na
+        shortParentLow := na
+        shortParentPrice := na
+        shortParentConfirmed := false
+    if not na(shortParentBar) and not shortParentConfirmed and shortAge >= 0 and shortAge <= confirmMaxAge and close < shortParentLow and confirmShortQuality
+        legacyShortConfirmedSignal := true
+        legacyShortConfirmationAge := shortAge
+        legacyShortConfirmationParentPrice := shortParentPrice
+        legacyShortConfirmationParentHigh := shortParentHigh
+        legacyShortConfirmationParentLow := shortParentLow
+        shortParentConfirmed := true
+// END SHORT LEGACY ENGINE
+
+// BEGIN V6 STRUCTURAL GATE
+// A complete body above the six-MA rope is support evidence, not a same-bar
+// gate. It may precede or follow a closed, valid V4 confirmation. A lower wick
+// does not break support; only a close at/below the rope does.
+var int bodySupportBar = na
+var int legacyBar = na
+var float legacyParentHigh = na
+var float legacyParentLow = na
+var bool structurePending = false
+var bool launchEvidence = false
+var int launchEvidenceBar = na
+bool confirmedSignal = false
+bool consumedLaunchEvidence = false
+int consumedLaunchEvidenceBar = na
+int confirmationAge = na
+string pendingWhy = "idle"
+
+if barstate.isconfirmed
+    bool finiteAtr = not na(atr) and atr > 0
+    bool knownStructure = ready and pricesValid and finiteAtr and not na(md) and not na(sb) and not na(ropeHigh) and not na(middle)
+    if dataGap or not knownStructure
+        bodySupportBar := na
+        legacyBar := na
+        legacyParentHigh := na
+        legacyParentLow := na
+        structurePending := false
+        launchEvidence := false
+        launchEvidenceBar := na
+        pendingWhy := dataGap ? "gap" : "unknown"
+    else
+        bool fullBodyAbove = math.min(open, close) > ropeHigh
+        if close <= ropeHigh
+            bodySupportBar := na
+        else if fullBodyAbove
+            bodySupportBar := bar_index
+        // A later V4 confirmation replaces older pending provenance. It must
+        // carry a finite, ordered parent range from this closed bar; unknown
+        // provenance is never imported into the structural state.
+        if legacyConfirmedSignal and not na(legacyConfirmationParentHigh) and not na(legacyConfirmationParentLow) and legacyConfirmationParentLow <= legacyConfirmationParentHigh
+            legacyBar := bar_index
+            legacyParentHigh := legacyConfirmationParentHigh
+            legacyParentLow := legacyConfirmationParentLow
+            structurePending := true
+            launchEvidence := longLegacySeedEvidence
+            launchEvidenceBar := longLegacySeedEvidence ? longLaunchWindowShapeBar : na
+        else if structurePending and longEvidenceNow
+            launchEvidence := true
+            launchEvidenceBar := bar_index
+        if structurePending and (na(legacyParentHigh) or na(legacyParentLow) or close < legacyParentLow)
+            // Strictly below the frozen parent range is a structural failure,
+            // deliberately not an arbitrary timer. A parent-range retest may
+            // wait for later body support and MD recovery.
+            legacyBar := na
+            legacyParentHigh := na
+            legacyParentLow := na
+            structurePending := false
+            launchEvidence := false
+            launchEvidenceBar := na
+            pendingWhy := "parent_broken"
+        else if structurePending and launchEvidence and not na(bodySupportBar) and not na(legacyParentHigh) and not na(legacyParentLow) and not na(md[1]) and close > ropeHigh and close > legacyParentHigh and md > sb and md > md[1]
+            confirmedSignal := true
+            consumedLaunchEvidence := launchEvidence
+            consumedLaunchEvidenceBar := launchEvidenceBar
+            confirmationAge := bar_index - legacyBar
+            // Consume this provenance. A new V4 event may arm another final
+            // signal inside the same continuous body-above-rope run.
+            structurePending := false
+            launchEvidence := false
+            launchEvidenceBar := na
+            pendingWhy := "confirmed"
+        else
+            pendingWhy := not structurePending ? "await_legacy" : not launchEvidence ? "await_launch_evidence" : na(bodySupportBar) ? "await_body" : na(md[1]) ? "await_md_turn" : "await_momentum"
+// END V6 STRUCTURAL GATE
+
+// BEGIN V6 SHORT STRUCTURAL GATE
+// A complete body below the rope is bearish evidence. Its upper wick may cross
+// the rope; only a close at/above it clears the stored evidence.
+var int shortBodySupportBar = na
+var int shortLegacyBar = na
+var float shortLegacyParentHigh = na
+var float shortLegacyParentLow = na
+var bool shortStructurePending = false
+var bool shortLaunchEvidence = false
+var int shortLaunchEvidenceBar = na
+bool confirmedShortSignal = false
+bool consumedShortLaunchEvidence = false
+int consumedShortLaunchEvidenceBar = na
+int shortConfirmationAge = na
+string shortPendingWhy = "idle"
+
+if barstate.isconfirmed
+    bool finiteShortAtr = not na(atr) and atr > 0
+    bool knownShortStructure = ready and pricesValid and finiteShortAtr and not na(md) and not na(sb) and not na(ropeLow) and not na(middle)
+    if dataGap or not knownShortStructure
+        shortBodySupportBar := na
+        shortLegacyBar := na
+        shortLegacyParentHigh := na
+        shortLegacyParentLow := na
+        shortStructurePending := false
+        shortLaunchEvidence := false
+        shortLaunchEvidenceBar := na
+        shortPendingWhy := dataGap ? "gap" : "unknown"
+    else
+        bool fullBodyBelow = math.max(open, close) < ropeLow
+        if close >= ropeLow
+            shortBodySupportBar := na
+        else if fullBodyBelow
+            shortBodySupportBar := bar_index
+        if legacyShortConfirmedSignal and not na(legacyShortConfirmationParentHigh) and not na(legacyShortConfirmationParentLow) and legacyShortConfirmationParentLow <= legacyShortConfirmationParentHigh
+            shortLegacyBar := bar_index
+            shortLegacyParentHigh := legacyShortConfirmationParentHigh
+            shortLegacyParentLow := legacyShortConfirmationParentLow
+            shortStructurePending := true
+            shortLaunchEvidence := shortLegacySeedEvidence
+            shortLaunchEvidenceBar := shortLegacySeedEvidence ? shortLaunchWindowShapeBar : na
+        else if shortStructurePending and shortEvidenceNow
+            shortLaunchEvidence := true
+            shortLaunchEvidenceBar := bar_index
+        if shortStructurePending and close > shortLegacyParentHigh
+            shortLegacyBar := na
+            shortLegacyParentHigh := na
+            shortLegacyParentLow := na
+            shortStructurePending := false
+            shortLaunchEvidence := false
+            shortLaunchEvidenceBar := na
+            shortPendingWhy := "parent_broken"
+        else if shortStructurePending and shortLaunchEvidence and not na(shortBodySupportBar) and not na(shortLegacyParentHigh) and not na(shortLegacyParentLow) and not na(md[1]) and close < ropeLow and close < shortLegacyParentLow and md < sb and md < md[1]
+            confirmedShortSignal := true
+            consumedShortLaunchEvidence := shortLaunchEvidence
+            consumedShortLaunchEvidenceBar := shortLaunchEvidenceBar
+            shortConfirmationAge := bar_index - shortLegacyBar
+            shortStructurePending := false
+            shortLaunchEvidence := false
+            shortLaunchEvidenceBar := na
+            shortPendingWhy := "confirmed"
+        else
+            shortPendingWhy := not shortStructurePending ? "await_legacy" : not shortLaunchEvidence ? "await_launch_evidence" : na(shortBodySupportBar) ? "await_body" : na(md[1]) ? "await_md_turn" : "await_momentum"
+// END V6 SHORT STRUCTURAL GATE
+
+// Keep raw opposite confirmations independent of entry permission.
+int rawSignalSide = confirmedSignal ? 1 : confirmedShortSignal ? -1 : 0
+float ropeDistanceAtr = rawSignalSide == 1 and atr > 0 ? (close - ropeHigh) / atr : rawSignalSide == -1 and atr > 0 ? (ropeLow - close) / atr : na
+bool v8EntryAllowed = not useOverheatFilter or (not na(ropeDistanceAtr) and ropeDistanceAtr <= maxRopeDistanceAtr)
+confirmedSignal := confirmedSignal and bbEntryAllowed and v8EntryAllowed
+confirmedShortSignal := confirmedShortSignal and bbEntryAllowed and v8EntryAllowed
+int signalSide = confirmedSignal ? 1 : confirmedShortSignal ? -1 : 0
+
+// === NATIVE RESEARCH EXECUTION HARNESS ===
+// This section is intentionally separate from the frozen signal block above.
+// It schedules qualifying V8 orders for the next bar open. It is a research
+// approximation to the Python ledger, not a production execution script.
+const float nativeRoundTripCost = 0.002
+
+// Each submitted id owns its signal-close stop. Pending orders and an observed
+// filled position deliberately use different state so a reversal submission
+// never overwrites the old position's stop/trail state.
+var array<string> submittedIds = array.new_string()
+var array<float> submittedStops = array.new_float()
+var int submittedLong = 0
+var int submittedShort = 0
+var int rawOppositeExits = 0
+var int v8EntryEvents = 0
+var int rawV6Events = 0
+var int bbAdmittedRawEvents = 0
+var int finalV8Events = 0
+var int volumeRatioKnownBars = 0
+var int volumeRatioAtLeastMinBars = 0
+var int invalidNextOpenRisk = 0
+var int confirmedBarCount = 0
+var int firstConfirmedTime = na
+var int lastConfirmedCloseTime = na
+var int firstCompleteWarmupTime = na
+var int firstV8SignalCloseTime = na
+var int firstClosedTime = na
+var int lastClosedTime = na
+var int lastProcessedClosed = 0
+var float grossRSum = 0.0
+var float netRSum = 0.0
+var float costRSum = 0.0
+var int validClosedR = 0
+var int grossWins = 0
+var float grossProfitR = 0.0
+var float grossLossR = 0.0
+var string pendingId = ""
+var float pendingStop = na
+var int pendingSide = 0
+var string activeId = ""
+var float activeFrozenStop = na
+var float activeProtection = na
+var bool activeTrailArmed = false
+var int activeSide = 0
+
+f_stop_for_id(string wanted) =>
+    float result = na
+    int count = array.size(submittedIds)
+    if count > 0
+        for idx = 0 to count - 1
+            if array.get(submittedIds, idx) == wanted
+                result := array.get(submittedStops, idx)
+    result
+
+// Pine functions may not mutate globals. Return all closed-trade contributions
+// to the caller, including invalid actual next-open risk.
+f_closed_r(int tradeNo) =>
+    string closedId = strategy.closedtrades.entry_id(tradeNo)
+    float frozenStop = f_stop_for_id(closedId)
+    float fillEntry = strategy.closedtrades.entry_price(tradeNo)
+    float fillExit = strategy.closedtrades.exit_price(tradeNo)
+    float signedSize = strategy.closedtrades.size(tradeNo)
+    int side = signedSize > 0 ? 1 : signedSize < 0 ? -1 : 0
+    float riskDistance = side * (fillEntry - frozenStop)
+    bool valid = side != 0 and not na(frozenStop) and fillEntry > 0 and fillExit > 0 and riskDistance > 0
+    float grossR = valid ? side * (fillExit - fillEntry) / riskDistance : na
+    float costR = valid ? nativeRoundTripCost * fillEntry / riskDistance : na
+    float netR = valid ? grossR - costR : na
+    float profitPart = valid and grossR > 0 ? grossR : 0.0
+    float lossPart = valid and grossR < 0 ? grossR : 0.0
+    [closedId, valid, grossR, costR, netR, profitPart, lossPart]
+
+// This counts only confirmed bars and exposes their real UTC range rather than
+// using bar_index as a calendar proxy. The unfinished realtime bar is excluded.
+if barstate.isconfirmed
+    confirmedBarCount += 1
+    if na(firstConfirmedTime)
+        firstConfirmedTime := time
+    lastConfirmedCloseTime := time_close
+    if na(firstCompleteWarmupTime) and ready and bbAdmissionReady
+        firstCompleteWarmupTime := time_close
+    if signalSide != 0 and na(firstV8SignalCloseTime)
+        firstV8SignalCloseTime := time_close
+    if rawSignalSide != 0
+        rawV6Events += 1
+    if rawSignalSide != 0 and bbEntryAllowed
+        bbAdmittedRawEvents += 1
+    if signalSide != 0
+        finalV8Events += 1
+    if ready and not na(volumeRatio3)
+        volumeRatioKnownBars += 1
+        volumeRatioAtLeastMinBars += volumeRatio3 >= minVolume ? 1 : 0
+
+// Resolve filled trades before looking at a new signal. A close is attributed
+// with its own submitted id/stop; clearing applies only to that filled id, not
+// to any reversal order submitted later on this same completed bar.
+if strategy.closedtrades > lastProcessedClosed
+    int newest = strategy.closedtrades - 1
+    for tradeNo = lastProcessedClosed to newest
+        [closedId, validR, grossR, costR, netR, profitPart, lossPart] = f_closed_r(tradeNo)
+        if na(firstClosedTime)
+            firstClosedTime := strategy.closedtrades.exit_time(tradeNo)
+        lastClosedTime := strategy.closedtrades.exit_time(tradeNo)
+        if validR
+            grossRSum += grossR
+            netRSum += netR
+            costRSum += costR
+            validClosedR += 1
+            grossWins += grossR > 0 ? 1 : 0
+            grossProfitR += profitPart
+            grossLossR += lossPart
+        else
+            invalidNextOpenRisk += 1
+        if closedId == pendingId
+            // A stop may fill in the same entry bar before a filled-position
+            // state is observed. Clear that stale pending id so later signals
+            // are not blocked forever.
+            pendingId := ""
+            pendingStop := na
+            pendingSide := 0
+        if closedId == activeId
+            activeId := ""
+            activeFrozenStop := na
+            activeProtection := na
+            activeTrailArmed := false
+            activeSide := 0
+    lastProcessedClosed := strategy.closedtrades
+
+// Promote a submitted order only once TradingView reports the position filled.
+// A stop that filled entirely within its entry bar remains covered by f_closed_r
+// and is never backfilled as an active trade.
+if barstate.isconfirmed and strategy.position_size != 0 and activeId == "" and pendingId != ""
+    int observedSide = strategy.position_size > 0 ? 1 : -1
+    if observedSide == pendingSide
+        activeId := pendingId
+        activeFrozenStop := pendingStop
+        activeProtection := pendingStop
+        activeTrailArmed := false
+        activeSide := pendingSide
+        pendingId := ""
+        pendingStop := na
+        pendingSide := 0
+
+// Manage only the already-filled trade. A close>=2R arms the ratchet; its new
+// order is submitted at close and can act no earlier than the following bar.
+if barstate.isconfirmed and strategy.position_size != 0 and activeId != ""
+    int heldSide = strategy.position_size > 0 ? 1 : -1
+    float fillEntry = strategy.position_avg_price
+    float liveRisk = heldSide * (fillEntry - activeFrozenStop)
+    if heldSide != activeSide or liveRisk <= 0
+        invalidNextOpenRisk += 1
+        strategy.close(activeId, comment="invalid next-open risk")
+    else
+        float closeR = heldSide * (close - fillEntry) / liveRisk
+        activeTrailArmed := activeTrailArmed or closeR >= armR
+        if activeTrailArmed and atr > 0
+            float proposed = heldSide == 1 ? math.floor((close - trailAtr * atr) / syminfo.mintick) * syminfo.mintick : math.ceil((close + trailAtr * atr) / syminfo.mintick) * syminfo.mintick
+            activeProtection := heldSide == 1 ? math.max(activeProtection, proposed) : math.min(activeProtection, proposed)
+        strategy.exit(activeId + "-stop", from_entry=activeId, stop=activeProtection, comment=activeTrailArmed ? "2R close armed; next-bar ratchet" : "frozen signal stop")
+
+// Decide whether this V8 order will reverse an existing filled trade before
+// issuing any raw-opposite close. A qualifying opposite strategy.entry is the
+// sole reversal order; raw-only opposite confirmation closes only when it
+// cannot open the new V8 side.
+[signalStop, signalRiskAtClose, signalRiskValid] = f_risk(signalSide, close, signalSide == 1 ? recentLow : recentHigh, atr, riskFloor, stopBuffer, syminfo.mintick)
+int heldSideAtClose = strategy.position_size > 0 ? 1 : strategy.position_size < 0 ? -1 : 0
+bool maySubmit = barstate.isconfirmed and signalSide != 0 and signalRiskValid and pendingId == "" and (heldSideAtClose == 0 or heldSideAtClose != signalSide)
+bool willAutoReverse = maySubmit and heldSideAtClose != 0 and heldSideAtClose != signalSide
+
+// Raw opposite V6 closes next open even when filtered by V8, except when the
+// one qualifying opposite strategy.entry below will perform that reversal.
+if barstate.isconfirmed and strategy.position_size != 0 and activeId != "" and rawSignalSide != 0
+    int heldSide = strategy.position_size > 0 ? 1 : -1
+    if rawSignalSide != heldSide and not willAutoReverse
+        strategy.close(activeId, comment="raw V6 opposite; next open")
+        rawOppositeExits += 1
+
+// Submit after old-position management. Its pending state cannot overwrite the
+// active old state. In a valid opposite case, strategy.entry alone reverses.
+if maySubmit
+    string nextId = (signalSide == 1 ? "V8L-" : "V8S-") + str.tostring(bar_index)
+    array.push(submittedIds, nextId)
+    array.push(submittedStops, signalStop)
+    pendingId := nextId
+    pendingStop := signalStop
+    pendingSide := signalSide
+    if signalSide == 1
+        strategy.entry(nextId, strategy.long, comment=willAutoReverse ? "V8 reverse; next open" : "V8 confirmed; next open")
+        strategy.exit(nextId + "-stop", from_entry=nextId, stop=signalStop, comment="frozen signal stop")
+        submittedLong += 1
+    else
+        strategy.entry(nextId, strategy.short, comment=willAutoReverse ? "V8 reverse; next open" : "V8 confirmed; next open")
+        strategy.exit(nextId + "-stop", from_entry=nextId, stop=signalStop, comment="frozen signal stop")
+        submittedShort += 1
+    v8EntryEvents += 1
+
+var table status = table.new(position.top_right, 2, 18, bgcolor=color.new(chart.bg_color, 8), frame_color=color.new(chart.fg_color, 55), frame_width=1)
+if barstate.islastconfirmedhistory or barstate.isrealtime
+    float winRate = validClosedR > 0 ? 100.0 * grossWins / validClosedR : na
+    float pfR = grossLossR < 0 ? grossProfitR / math.abs(grossLossR) : na
+    string firstSample = na(firstConfirmedTime) ? "无" : str.format_time(firstConfirmedTime, "yyyy-MM-dd HH:mm", "Etc/UTC")
+    string lastSample = na(lastConfirmedCloseTime) ? "无" : str.format_time(lastConfirmedCloseTime, "yyyy-MM-dd HH:mm", "Etc/UTC")
+    table.cell(status, 0, 0, "TOTAL2 1H 原生研究", text_color=color.white, bgcolor=color.new(color.blue, 45))
+    table.cell(status, 1, 0, "仅指数路径；非账户", text_color=color.white, bgcolor=color.new(color.blue, 45))
+    table.cell(status, 0, 1, "确认K线数")
+    table.cell(status, 1, 1, str.tostring(confirmedBarCount))
+    table.cell(status, 0, 2, "首根开盘 UTC")
+    table.cell(status, 1, 2, firstSample)
+    table.cell(status, 0, 3, "末根收盘 UTC")
+    table.cell(status, 1, 3, lastSample)
+    table.cell(status, 0, 4, "完整预热后首收盘 UTC")
+    table.cell(status, 1, 4, na(firstCompleteWarmupTime) ? "无" : str.format_time(firstCompleteWarmupTime, "yyyy-MM-dd HH:mm", "Etc/UTC"))
+    table.cell(status, 0, 5, "首个V8确认收盘 UTC")
+    table.cell(status, 1, 5, na(firstV8SignalCloseTime) ? "无" : str.format_time(firstV8SignalCloseTime, "yyyy-MM-dd HH:mm", "Etc/UTC"))
+    table.cell(status, 0, 6, "raw V6 / BB后 / 最终V8")
+    table.cell(status, 1, 6, str.tostring(rawV6Events) + " / " + str.tostring(bbAdmittedRawEvents) + " / " + str.tostring(finalV8Events))
+    table.cell(status, 0, 7, "V8提交/多/空")
+    table.cell(status, 1, 7, str.tostring(v8EntryEvents) + " / " + str.tostring(submittedLong) + " / " + str.tostring(submittedShort))
+    table.cell(status, 0, 8, "量比3有效 / >=1.5")
+    table.cell(status, 1, 8, str.tostring(volumeRatioKnownBars) + " / " + str.tostring(volumeRatioAtLeastMinBars))
+    table.cell(status, 0, 9, "raw反向退出")
+    table.cell(status, 1, 9, str.tostring(rawOppositeExits))
+    table.cell(status, 0, 10, "策略平仓 / 有效R")
+    table.cell(status, 1, 10, str.tostring(strategy.closedtrades) + " / " + str.tostring(validClosedR))
+    table.cell(status, 0, 11, "next-open风险无效")
+    table.cell(status, 1, 11, str.tostring(invalidNextOpenRisk))
+    table.cell(status, 0, 12, "毛R合计 / 均值")
+    table.cell(status, 1, 12, str.tostring(grossRSum, "#.###") + " / " + str.tostring(validClosedR > 0 ? grossRSum / validClosedR : na, "#.###"))
+    table.cell(status, 0, 13, "净R合计 (成本0.20%)")
+    table.cell(status, 1, 13, str.tostring(netRSum, "#.###"))
+    table.cell(status, 0, 14, "成本R合计")
+    table.cell(status, 1, 14, str.tostring(costRSum, "#.###"))
+    table.cell(status, 0, 15, "毛R胜率 / PF")
+    table.cell(status, 1, 15, str.tostring(winRate, "#.##") + "% / " + str.tostring(pfR, "#.###"))
+    table.cell(status, 0, 16, "首/末平仓 UTC")
+    table.cell(status, 1, 16, (na(firstClosedTime) ? "无" : str.format_time(firstClosedTime, "yyyy-MM-dd HH:mm", "Etc/UTC")) + " / " + (na(lastClosedTime) ? "无" : str.format_time(lastClosedTime, "yyyy-MM-dd HH:mm", "Etc/UTC")))
+    table.cell(status, 0, 17, "量比计数口径")
+    table.cell(status, 1, 17, "已收盘、ready、三根量比")
+    for row = 1 to 17
+        table.cell_set_text_color(status, 0, row, chart.fg_color)
+        table.cell_set_text_color(status, 1, row, chart.fg_color)
