@@ -1,0 +1,45 @@
+{
+  "experiment_id": "exp-spike-v8-entry-evidence-20260914-v1",
+  "entry_process": "experiments/active/exp-spike-v8-entry-process-20260913-v1/results/full_v1",
+  "ma_cycle": "experiments/active/exp-spike-v8-ma-cycle-20260913-v1/results/full_v1",
+  "raw": "experiments/active/exp-spike-v7-v1-compare-20260912-v1/results/replay_two_year_20260912_v3",
+  "expected_streams": 3531,
+  "expected_v8_events": 113295,
+  "expected_scoring_closed": 94180,
+  "window": {
+    "start": "2024-09-10T00:00:00Z",
+    "split": "2025-09-10T00:00:00Z",
+    "end": "2026-09-10T00:00:00Z"
+  },
+  "entry_process_manifest_sha256": "f258b3c35c7c5924a4c092a7d0d269f79e257c70e99768e835279b49da1476aa",
+  "entry_process_evidence_sha256": "9c904b2d21a348dbbcca4b6276aefad599f57518508ff3e7ae08e1596db8b4c9",
+  "ma_cycle_manifest_sha256": "f5ead4ef547193ce8f21c86251323c05697e80308bda19de9ca743098649d137",
+  "ma_cycle_event_states_sha256": "5edc5e17874583eead8d787ef930daeca32a164a979ccd124fbd7f456ea5a0af",
+  "raw_manifest_sha256": "37f65499611877c8b8b10f0f2fb7a8c99a07d95cc90cda282f5b8a5ac89d41b6",
+  "holdout_era_authorization": "Owner explicitly authorized all available dates for this fixed configuration. This records holdout-era exposure #1; the later interval is previously studied, nonblind historical evidence.",
+  "bb_episode": {
+    "memory_bars": 12,
+    "minimum_continuous_compressed_bars": 3,
+    "selection": "latest qualifying contiguous bb_compressed run wholly in the confirmation-preceding 12 valid BB bars; a left-truncated run exposes its actual known start/length for description but the label uses only the in-window portion"
+  },
+  "independent_labels": {
+    "bb_episode_directional_order9_run3": "within selected BB episode, any 3 consecutive bars whose cross-group six-MA order is >=9/12 in V8 side; >=12/12 run is descriptive only",
+    "bb_ma_tight_overlap_run3": "within selected BB episode, any 3 consecutive bb_compressed bars also at/below causal preceding-256 valid-bar P20 of six-MA width/close",
+    "opposed_completed_htf": "last completed same-venue/symbol HTF bar as of signal confirmation: adverse cross-group order >=9/12 and close on adverse side of fast-pair center"
+  },
+  "htf": {
+    "mapping": {"30": 60, "60": 240, "240": 1440},
+    "daily": "UTC day made only from all six valid, no-gap four-hour bars; close-only SMA/EMA 20/60/120 is calculated per contiguous complete-day segment",
+    "asof": "last HTF close_time <= V8 signal_confirmation_time; missing source/history is unknown, never false",
+    "diagnostics": ["fast_slope3", "middle_slope3", "slow_slope3", "slope_vote", "md_sb_when_inherited"]
+  },
+  "matching": {
+    "keys": ["stream_key", "period", "calendar_month", "side", "causal_volatility_bucket"],
+    "control": "nearest confirmation time from label complement, deterministic trade_id tiebreak, no reuse within label and exact block",
+    "inference": "asset-by-month block sign-flip, fixed 10000 draws plus-one two-sided correction; Holm across three labels, exploratory nonblind"
+  },
+  "execution_contract": "Unchanged frozen V8 same-entry outcome, signal close to next observed open, original 3ATR admission, stops/exits/costs. No execution replay or account curve.",
+  "research_only": true,
+  "training_eligible": false,
+  "production_eligible": false
+}
