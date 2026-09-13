@@ -41,6 +41,7 @@ def main():
              Path('yoyo/evaluation/spike_v8_ma_cycle_charts.py'),
              Path('tests/evaluation/test_spike_v8_ma_cycle_study.py'),
              Path('docs/learnings/market-phase-labels-and-trade-references-have-separate-clocks.md'),
+             Path('docs/learnings/state-machine-progress-is-not-market-phase-ground-truth.md'),
              EXP/'config.json',EXP/'PROJECT_PLAN.md',EXP/'holdout_receipt.json']
     paths += sorted(p for p in (EXP/'results').rglob('*') if p.is_file())
     receipt = dict(created_at=datetime.now(timezone.utc).isoformat(),complete=True,
