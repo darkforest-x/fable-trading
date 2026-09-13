@@ -1,0 +1,172 @@
+{
+  "experiment_id": "exp-spike-v78-forward-shadow-20260913-v1",
+  "protocol": "spike-v7-v8-forward-shadow-v2",
+  "activation": {
+    "protocol": "spike-v7-v8-forward-shadow-v2",
+    "activated_ms": 1789290446988,
+    "config_sha256": "eebbb1f1021a7958e0fd771a5050ec352468bf98be9d6a98027193da72493c9b",
+    "contract": {
+      "protocol": "spike-v7-v8-forward-shadow-v2",
+      "timeframes": [
+        "30m",
+        "1H",
+        "4H"
+      ],
+      "v8_max_rope_distance_atr": 3.0,
+      "path_horizon_bars": 240,
+      "entry_semantics": "observation_only_no_fill",
+      "market_state_semantics": "descriptive_only_no_gate",
+      "sources": {
+        "yoyo/monitor/v78_shadow.py": "49db3ad294bb32047bc220e22cb1e7a747e3a03e9028b75ca381d5fbb1e101b3",
+        "yoyo/evaluation/spike_burst_replay.py": "996ef56ceb5b70da5337422d8390487330f7e387f648ee527b5afc9bda72a33f",
+        "yoyo/evaluation/spike_burst_progressive.py": "cec81a33997bd39272762bd70a451ceb5bf218da0e7fc0606271d165437fde08",
+        "yoyo/evaluation/spike_burst_v6_structure.py": "e84690c02e7b03291cc3037eab37ac495cc2ece79326e24411cfa72aa1214d4b",
+        "yoyo/evaluation/spike_v7_fast.py": "f0cfe9e2fb6d16a71632728bdfca3f65160f21dbb5afff4d23e61d1acab3bdc0",
+        "yoyo/evaluation/spike_v8_replay.py": "afe934b3b81f9e949edc55b2cb3a6dc18c076224bd8135b894bfc0a58eb3ada3"
+      },
+      "config_sha256": "eebbb1f1021a7958e0fd771a5050ec352468bf98be9d6a98027193da72493c9b"
+    }
+  },
+  "activated_at_utc": "2026-09-13T09:07:26.988000+00:00",
+  "activated_at_beijing": "2026-09-13T17:07:26.988000+08:00",
+  "observed_at_utc": "2026-09-13T09:29:25.629041+00:00",
+  "first_scan": {
+    "status": "idle",
+    "started_ms": 1789290446991,
+    "total": 1437,
+    "processed": 1437,
+    "unchanged": 0,
+    "errors": 0,
+    "events_inserted": 0,
+    "error_samples": [],
+    "finished_ms": 1789290729947,
+    "snapshots": [],
+    "elapsed_seconds": 282.956
+  },
+  "observed_status": {
+    "configured": true,
+    "events": 0,
+    "v8_admitted": 0,
+    "path_bars": 0,
+    "market_snapshots": 0,
+    "cells": {
+      "ready": 1234,
+      "warming": 203
+    },
+    "activation": {
+      "protocol": "spike-v7-v8-forward-shadow-v2",
+      "activated_ms": 1789290446988,
+      "config_sha256": "eebbb1f1021a7958e0fd771a5050ec352468bf98be9d6a98027193da72493c9b",
+      "contract": {
+        "protocol": "spike-v7-v8-forward-shadow-v2",
+        "timeframes": [
+          "30m",
+          "1H",
+          "4H"
+        ],
+        "v8_max_rope_distance_atr": 3.0,
+        "path_horizon_bars": 240,
+        "entry_semantics": "observation_only_no_fill",
+        "market_state_semantics": "descriptive_only_no_gate",
+        "sources": {
+          "yoyo/monitor/v78_shadow.py": "49db3ad294bb32047bc220e22cb1e7a747e3a03e9028b75ca381d5fbb1e101b3",
+          "yoyo/evaluation/spike_burst_replay.py": "996ef56ceb5b70da5337422d8390487330f7e387f648ee527b5afc9bda72a33f",
+          "yoyo/evaluation/spike_burst_progressive.py": "cec81a33997bd39272762bd70a451ceb5bf218da0e7fc0606271d165437fde08",
+          "yoyo/evaluation/spike_burst_v6_structure.py": "e84690c02e7b03291cc3037eab37ac495cc2ece79326e24411cfa72aa1214d4b",
+          "yoyo/evaluation/spike_v7_fast.py": "f0cfe9e2fb6d16a71632728bdfca3f65160f21dbb5afff4d23e61d1acab3bdc0",
+          "yoyo/evaluation/spike_v8_replay.py": "afe934b3b81f9e949edc55b2cb3a6dc18c076224bd8135b894bfc0a58eb3ada3"
+        },
+        "config_sha256": "eebbb1f1021a7958e0fd771a5050ec352468bf98be9d6a98027193da72493c9b"
+      }
+    },
+    "scan": {
+      "status": "idle",
+      "started_ms": 1789291643940,
+      "total": 1437,
+      "processed": 0,
+      "unchanged": 1437,
+      "errors": 0,
+      "events_inserted": 0,
+      "error_samples": [],
+      "finished_ms": 1789291646257,
+      "snapshots": []
+    }
+  },
+  "primary_health": {
+    "service_alive": true,
+    "now_ms": 1789290871742,
+    "scan": {
+      "status": "idle",
+      "generation": "67e92785398d49f09661c8368c01ec28",
+      "worker_pid": 60238,
+      "worker_started_at_ms": 1789290447101,
+      "started_at_ms": 1789290828282,
+      "finished_at_ms": 1789290835907,
+      "completed": 1916,
+      "total": 1916,
+      "errors": 0,
+      "error_samples": [],
+      "isolated": true,
+      "timing_ms": {
+        "cells": 1916,
+        "changed_cells": 0,
+        "unchanged_cells": 1916,
+        "fetch_total": 37.691,
+        "analyze_total": 0.0,
+        "checkpoint_total": 0.0,
+        "analyze_cpu_total": 0.0,
+        "checkpoint_cpu_total": 0.0,
+        "fetch_max": 1.659,
+        "analyze_max": 0.0,
+        "checkpoint_max": 0.0,
+        "analyze_cpu_max": 0.0,
+        "checkpoint_cpu_max": 0.0
+      },
+      "duration_seconds": 7.62,
+      "next_scan_ms": 1789290955907
+    },
+    "market_ready": true,
+    "model_ready": true,
+    "ok": true
+  },
+  "retired_v1_receipt": "retired_v1_activation_receipt.json",
+  "retired_v1_reason": "pre-activation market snapshots were not excluded; zero signal events existed",
+  "notification_eligible": false,
+  "execution_eligible": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "source_sha256": {
+    "yoyo/monitor/shadow_api.py": "b254f53da7d320f98409c7a8bfbddcd169e212ba973fb89ee1c22e4547947ccd",
+    "yoyo/monitor/v78_shadow.py": "49db3ad294bb32047bc220e22cb1e7a747e3a03e9028b75ca381d5fbb1e101b3",
+    "yoyo/monitor/v78_shadow_manage.py": "7228930822a4152a58926338375c8d60f4c1cc00cc48866909abee48c6b5816d",
+    "yoyo/monitor/server.py": "770d15cd844025380a05971b66cdd85785c23fee591d1a34c29bc424e776435f",
+    "yoyo/monitor/desktop_client.py": "6f7642b4da5e51ed7fb03346317851709fa5c87c2707239eafbf4ea1b8139652",
+    "tests/monitor/test_v78_shadow.py": "5cbb446b2c456b00eea45670571a28ebbd7eabfd4ddfbf40f47da4b6f54a3e31",
+    "tests/monitor/test_v78_shadow_web.py": "8233bc04dab6b2f95c04344bfcd1424d2d4198ac06ef731e189650fbf87feadf"
+  },
+  "focused_validation": {
+    "pytest": "70 passed, 4 warnings",
+    "py_compile": "passed",
+    "node_check": "passed"
+  },
+  "benchmark_reference": {
+    "isolated_cold_smoke_seconds": 106.98,
+    "isolated_cold_smoke_cells": 1437,
+    "isolated_cold_smoke_errors": 0,
+    "isolated_peak_rss_mb": 97.6,
+    "isolated_unchanged_smoke_seconds": 1.25
+  },
+  "steady_state_scan": {
+    "status": "idle",
+    "started_ms": 1789291643940,
+    "total": 1437,
+    "processed": 0,
+    "unchanged": 1437,
+    "errors": 0,
+    "events_inserted": 0,
+    "error_samples": [],
+    "finished_ms": 1789291646257,
+    "snapshots": [],
+    "elapsed_seconds": 2.317
+  }
+}

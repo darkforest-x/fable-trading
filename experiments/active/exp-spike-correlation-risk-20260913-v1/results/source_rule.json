@@ -1,0 +1,16 @@
+{
+  "source_timeframe_min": 30,
+  "venue_precedence": [
+    "binance",
+    "okx",
+    "gate"
+  ],
+  "tie_break": "lexicographically smallest stream_key after venue precedence",
+  "return_definition": "arithmetic close-to-close return on selected 30-minute cached bars; no fill or resampling",
+  "availability_clock": "a return for bar [t, t+30m) is available at t+30m and is eligible only when t+30m < candidate entry_time",
+  "lookback_calendar_days": 30,
+  "lookback_observations": 1440,
+  "unknown_history_policy": "fail_closed",
+  "selected_assets": 816,
+  "assets_without_30m_source": 7
+}

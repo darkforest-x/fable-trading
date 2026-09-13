@@ -16,6 +16,9 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from yoyo.monitor import FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, MONITORED_TIMEFRAMES, SIGNAL_KIND, SIGNAL_PROTOCOL
 from yoyo.monitor.service import Monitor
+from yoyo.monitor.shadow_api import (SHADOW_DATABASE, ShadowBookUnavailable, events as shadow_events,
+                                     market_snapshots as shadow_market_snapshots,
+                                     status as shadow_status)
 from yoyo.monitor.store import Store
 from yoyo.monitor.tradingview import DesktopOpenError, open_chart
 
@@ -62,6 +65,7 @@ def replay_chart_result(event: dict) -> dict:
 def create_app(runtime=None, start_monitor=True):
     runtime = Path(runtime or os.environ.get("FABLE_IMPULSE_RUNTIME", DEFAULT_RUNTIME))
     store = Store(runtime / "monitor.sqlite3")
+    shadow_book = runtime / SHADOW_DATABASE
     monitor = Monitor(store)
 
     @asynccontextmanager
@@ -174,6 +178,45 @@ def create_app(runtime=None, start_monitor=True):
             raise HTTPException(503, "市场观察摘要正在初始化，请稍后重试。")
         rows = monitor.markets()
         return {"items": rows, "total": len(rows)}
+
+    @app.get("/api/shadow/status")
+    def v78_shadow_status():
+        try:
+            return shadow_status(shadow_book)
+        except ShadowBookUnavailable as error:
+            if str(error) == "shadow_not_started":
+                return {"configured": False, "events": 0, "v8_admitted": 0,
+                        "path_bars": 0, "market_snapshots": 0, "cells": {},
+                        "activation": None, "scan": None}
+            raise HTTPException(503, "V7/V8 影子账本暂不可读。") from error
+
+    @app.get("/api/shadow/events")
+    def v78_shadow_events(limit: int = Query(200, ge=1, le=2000), timeframe: str = None,
+                          side: int = Query(None, ge=-1, le=1)):
+        if timeframe not in (None, "30m", "1H", "4H") or side == 0:
+            raise HTTPException(400, "影子观察仅支持 30m、1H、4H 与多/空方向。")
+        try:
+            rows = shadow_events(shadow_book, limit=limit, timeframe=timeframe, side=side)
+        except ShadowBookUnavailable as error:
+            if str(error) == "shadow_not_started":
+                rows = []
+            else:
+                raise HTTPException(503, "V7/V8 影子账本暂不可读。") from error
+        return {"items": rows, "total": len(rows), "notification_eligible": False,
+                "execution_eligible": False}
+
+    @app.get("/api/shadow/market-state")
+    def v78_shadow_market_state(limit: int = Query(12, ge=1, le=200), timeframe: str = None):
+        if timeframe not in (None, "30m", "1H", "4H"):
+            raise HTTPException(400, "市场状态仅支持 30m、1H、4H。")
+        try:
+            rows = shadow_market_snapshots(shadow_book, limit=limit, timeframe=timeframe)
+        except ShadowBookUnavailable as error:
+            if str(error) == "shadow_not_started":
+                rows = []
+            else:
+                raise HTTPException(503, "V7/V8 市场状态暂不可读。") from error
+        return {"items": rows, "total": len(rows), "semantics": "descriptive_only_no_gate"}
 
     @app.get("/api/chart")
     def chart(symbol: str, timeframe: str = "1H"):

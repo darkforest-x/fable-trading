@@ -1,0 +1,25 @@
+{
+  "experiment_id": "exp-spike-v78-forward-shadow-20260913-v1",
+  "protocol": "spike-v7-v8-forward-shadow-v2",
+  "retired_protocol": "spike-v7-v8-forward-shadow-v1",
+  "retired_protocol_reason": "pre-activation market snapshots were not excluded; zero signal events existed",
+  "activated_ms": 1789290446988,
+  "activated_at_utc": "2026-09-13T09:07:26.988000+00:00",
+  "activated_at_beijing": "2026-09-13T17:07:26.988000+08:00",
+  "source": "primary_monitor_closed_okx_checkpoints",
+  "timeframes": [
+    "30m",
+    "1H",
+    "4H"
+  ],
+  "v8_max_rope_distance_atr": 3.0,
+  "path_horizon_bars": 240,
+  "poll_seconds": 300,
+  "config_sha256": "eebbb1f1021a7958e0fd771a5050ec352468bf98be9d6a98027193da72493c9b",
+  "entry_semantics": "observation_only_no_fill",
+  "market_state_semantics": "descriptive_only_no_gate",
+  "notification_eligible": false,
+  "execution_eligible": false,
+  "training_eligible": false,
+  "production_eligible": false
+}

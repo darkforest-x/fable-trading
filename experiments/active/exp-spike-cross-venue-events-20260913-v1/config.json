@@ -1,0 +1,18 @@
+{
+  "experiment_id": "exp-spike-cross-venue-events-20260913-v1",
+  "source_replay": "experiments/active/exp-spike-v8-noise-filter-20260913-v1/replay_v1",
+  "source_manifest_sha256": "04469ed2e694f23d27591d8316b71b66eab5e6d0338fc0847b6ae004f4bd30b9",
+  "expected_streams": 3531,
+  "expected_v7_signals": 132593,
+  "input_receipt_manifest": "input_receipts.json",
+  "input_receipt_manifest_sha256": "35097aae4782bea41507a8ad57c9c101b779a20ddc412f61bccf42f7f1a00f56",
+  "input_receipt_aggregate_sha256": "de7f38d2c005292657847a566339c5787995bfcf72c66cfb18b19f5eec77f61c",
+  "expected_input_receipts": 10593,
+  "canonical_key": ["asset", "timeframe_min", "side"],
+  "event_tolerance_bars": 1,
+  "confirmation": "a distinct venue first appears no later than one whole timeframe after the event leader",
+  "coverage_sensitivity_only": "observed V7-admission coverage: at least two source venues with a V7 admission for asset/timeframe/period/calendar month; this is retrospective within-month evidence and must not be used as a causal gate",
+  "research_only": true,
+  "training_eligible": false,
+  "production_eligible": false
+}

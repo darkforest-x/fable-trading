@@ -6,6 +6,7 @@
   const state = {
     view: "signals", signals: [], directSignals: [], performanceSignals: [], rawYoloSignals: [], candidates: [], signalScope: "direct", markets: [], status: null, health: null,
     signalsLoaded: false, directSignalsLoaded: false, directSignalTotal: 0, candidatesLoaded: false, candidateTotal: 0, candidateCounts: null, marketsLoaded: false, marketsLoading: false, marketsRetryTimer: null, signalTotal: 0, rowLimit: 24, watchLimit: 24, search: "", watchSearch: "", watchScope: "building",
+    shadowStatus: null, shadowEvents: [], shadowMarket: [], shadowLoaded: false, shadowLoading: false, shadowTimeframe: "all",
     rawNextCursor: null, rawHasMore: false, rawPaged: false, rawLoadingMore: false,
     timeframe: "all", watchTimeframe: "all", side: "all", signalSource: "live",
     syncing: false, refreshQueued: null, signalQueryRevision: 0, lastSync: null, statusReceivedAt: null, errors: {},
@@ -15,6 +16,7 @@
     signals: ["信号中心", "指标启动与 YOLO 确认分开展示。Bark 通知周期以运行状态为准。"],
     warmup: ["预热历史", "初次启动前的回算信号，仅供复盘，不触发通知。"],
     watch: ["蓄势观察", "还在横盘的，单独观察。这里的结构尚不是启动信号。"],
+    shadow: ["前向影子", "V7 与 V8 在相同新收盘数据上并行记录，积累未参与调参的新样本。"],
     system: ["运行状态", "行情、扫描与通知，每个环节都清晰可见。"],
   };
   const eventNames = { tv_start: "原始 V1 启动", yolo_confirmed: "YOLO 补充确认" };
@@ -234,7 +236,8 @@
     const previousView = state.view;
     const nextView = titles[view] ? view : "signals";
     state.view = nextView;
-    ["signals", "watch", "system"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== (signalView(state.view) ? "signals" : state.view)));
+    ["signals", "watch", "shadow", "system"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== (signalView(state.view) ? "signals" : state.view)));
+    $("primary-metrics").classList.toggle("hidden", state.view === "shadow");
     document.querySelectorAll("[data-view]").forEach((button) => {
       const active = button.dataset.view === state.view;
       button.classList.toggle("active", active);
@@ -258,6 +261,7 @@
     if (state.view === "system") loadHealth();
     // Signals never load the expensive market overview.  Watch opts in once.
     if (state.view === "watch") loadMarkets();
+    if (state.view === "shadow") loadShadow();
   }
   function filteredSignals() {
     const q = normalSearch(state.search);
@@ -483,6 +487,76 @@
     if (focusedSymbol) Array.from($("watch-rows").querySelectorAll("[data-tradingview-action]"))
       .find((card) => card.dataset.tvSymbol === focusedSymbol && card.dataset.tvTimeframe === focusedTimeframe)?.focus({ preventScroll: true });
   }
+  const percentage = (value) => finite(value) ? `${(Number(value) * 100).toFixed(1)}%` : "—";
+  const percentageDelta = (value) => finite(value) ? `${Number(value) >= 0 ? "+" : ""}${(Number(value) * 100).toFixed(1)}pp` : "—";
+  const shadowSide = (value) => Number(value) === -1 ? "short" : Number(value) === 1 ? "long" : "unknown";
+  function renderShadow() {
+    const status = state.shadowStatus || {};
+    const configured = status.configured === true;
+    const cellCounts = status.cells && typeof status.cells === "object" ? status.cells : {};
+    const cells = Object.values(cellCounts).reduce((sum, value) => sum + numeric(value), 0);
+    $("shadow-event-count").textContent = configured ? number(status.events) : "—";
+    $("shadow-v8-count").textContent = configured ? number(status.v8_admitted) : "—";
+    $("shadow-cell-count").textContent = configured ? number(cells) : "—";
+    $("nav-shadow-count").textContent = configured ? number(status.events) : "—";
+    $("shadow-event-detail").textContent = configured ? `${number(status.path_bars)} 根前向路径 K 线` : "影子服务尚未启用";
+    $("shadow-v8-detail").textContent = configured && numeric(status.events) > 0
+      ? `保留率 ${percentage(numeric(status.v8_admitted) / numeric(status.events))} · 距六线边缘 ≤ 3 ATR`
+      : "单变量：距六线边缘不超过 3 ATR";
+    $("shadow-cell-detail").textContent = configured
+      ? `就绪 ${number(cellCounts.ready || 0)} · 预热 ${number(cellCounts.warming || 0)} · 异常 ${number(cellCounts.error || 0)}`
+      : "30m / 1H / 4H";
+    $("shadow-activation").textContent = configured && status.activation?.activated_ms
+      ? `固定启用点 ${fullDate(status.activation.activated_ms)} 北京时间`
+      : "尚未启用前向账本";
+    $("shadow-last-scan").textContent = configured && status.scan
+      ? `${status.scan.status === "degraded" ? "部分异常" : status.scan.status === "error" ? "扫描失败" : "上轮扫描"} · ${fullDate(status.scan.finished_ms || status.scan.started_ms)}`
+      : "等待扫描";
+
+    const latest = new Map();
+    state.shadowMarket.forEach((item) => { if (item && !latest.has(item.timeframe)) latest.set(item.timeframe, item); });
+    $("shadow-market-grid").innerHTML = ["30m", "1H", "4H"].map((timeframe) => {
+      const item = latest.get(timeframe);
+      if (!item) return `<article class="shadow-market-card waiting"><span class="shadow-market-top"><strong>${timeframe}</strong><small>等待共同收盘</small></span><p>覆盖达到 80% 后显示同一时点的市场广度。</p></article>`;
+      const delta = finite(item.joint_up_delta_60m) ? item.joint_up_delta_60m : item.joint_up_delta_previous_bar;
+      const deltaLabel = finite(item.joint_up_delta_60m) ? "联合广度 60m 变化" : "联合广度上一根变化";
+      return `<article class="shadow-market-card"><span class="shadow-market-top"><strong>${timeframe}</strong><small>${escapeHTML(shortDate(item.bar_close_ms))}</small></span><dl><div><dt>上涨参与率</dt><dd>${escapeHTML(percentage(item.up_share))}</dd></div><div><dt>实体站上六线</dt><dd>${escapeHTML(percentage(item.body_above_six_share))}</dd></div><div><dt>${deltaLabel}</dt><dd class="${numeric(delta) > 0 ? "positive" : numeric(delta) < 0 ? "negative" : ""}">${escapeHTML(percentageDelta(delta))}</dd></div><div><dt>V7 / V8 当根</dt><dd>${escapeHTML(number(item.v7_signal_count))} / ${escapeHTML(number(item.v8_signal_count))}</dd></div></dl><span class="shadow-coverage">覆盖 ${escapeHTML(number(item.coverage))} / ${escapeHTML(number(item.expected))} · 仅作复盘分层</span></article>`;
+    }).join("");
+
+    const events = state.shadowEvents.filter((item) => state.shadowTimeframe === "all" || item.timeframe === state.shadowTimeframe);
+    $("shadow-filtered-count").textContent = `${events.length} 条`;
+    $("shadow-empty").classList.toggle("hidden", events.length > 0);
+    const focusedId = document.activeElement?.dataset?.shadowId;
+    $("shadow-rows").innerHTML = events.map((item) => {
+      const side = shadowSide(item.side);
+      const admitted = item.v8_admitted === true;
+      return `<article class="shadow-event-card ${side} ${admitted ? "admitted" : "filtered"}"><button type="button" class="card-primary-action" data-shadow-id="${escapeHTML(item.id)}" data-tradingview-action="shadow" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击整张卡片，在本机 TradingView 打开" aria-label="在本机 TradingView 打开 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(timeframeLabel(item.timeframe))}"></button><span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>OKX · ${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(timeframeLabel(item.timeframe))}</span></span><span class="signal-card-direction"><span class="card-direction">${sideArrow(side)} ${sideName(side)} · V7</span><span class="shadow-v8-badge ${admitted ? "admitted" : "filtered"}">${admitted ? "V8 保留" : "V8 过滤"}</span></span><span class="card-price-label">信号收盘价</span><span class="card-price">${escapeHTML(price(item.close))}</span><dl class="shadow-event-facts"><div><dt>距六线边缘</dt><dd>${finite(item.rope_distance_atr) ? `${Number(item.rope_distance_atr).toFixed(2)} ATR` : "—"}</dd></div><div><dt>V8 原因</dt><dd>${admitted ? "未过热" : "超过 3 ATR"}</dd></div></dl><span class="card-footer"><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))}</time><span class="card-open" data-tradingview-label="整卡打开 TradingView ↗" aria-hidden="true">整卡打开 TradingView ↗</span></span></article>`;
+    }).join("");
+    renderTradingViewButtons();
+    if (focusedId) Array.from($("shadow-rows").querySelectorAll("[data-shadow-id]"))
+      .find((card) => card.dataset.shadowId === focusedId)?.focus({ preventScroll: true });
+  }
+  async function loadShadow() {
+    if (state.shadowLoading) return;
+    state.shadowLoading = true;
+    try {
+      const [status, events, market] = await Promise.all([
+        api("/api/shadow/status"), api("/api/shadow/events?limit=200"), api("/api/shadow/market-state?limit=12"),
+      ]);
+      if (!Array.isArray(events.items) || !Array.isArray(market.items)) throw new Error("服务返回的数据格式有误");
+      state.shadowStatus = status;
+      state.shadowEvents = events.items.filter((item) => item && typeof item === "object" && item.id && item.symbol);
+      state.shadowMarket = market.items.filter((item) => item && typeof item === "object" && item.timeframe);
+      state.shadowLoaded = true;
+      delete state.errors.shadow;
+    } catch (error) {
+      state.errors.shadow = error.message || "请求失败";
+    } finally {
+      state.shadowLoading = false;
+      renderErrors();
+      renderShadow();
+    }
+  }
   function factsHTML(entries) {
     return entries.map(([key, value]) => `<dt>${escapeHTML(key)}</dt><dd>${escapeHTML(value)}</dd>`).join("");
   }
@@ -570,7 +644,7 @@
     const errors = Object.entries(state.errors);
     $("error-notice").classList.toggle("hidden", !errors.length);
     if (errors.length) {
-      const names = { status: "运行状态", signals: "模型确认", directSignals: "指标启动", performanceSignals: "走势状态", earlierSignals: "更早历史记录", candidates: "指标候选", markets: "蓄势观察" };
+      const names = { status: "运行状态", signals: "模型确认", directSignals: "指标启动", performanceSignals: "走势状态", earlierSignals: "更早历史记录", candidates: "指标候选", markets: "蓄势观察", shadow: "前向影子" };
       $("error-notice").textContent = `${errors.map(([key, error]) => `${names[key] || key}：${error}`).join("；")}。${state.lastSync ? "当前保留上次成功获取的数据，" : ""}15 秒后自动重试。`;
     }
   }
@@ -586,6 +660,10 @@
     state.refreshQueued = trigger === "manual" ? "manual" : (state.refreshQueued || trigger);
   }
   async function refresh(trigger = "manual") {
+    if (state.view === "shadow") {
+      await loadShadow();
+      return;
+    }
     // Keep cursor pages serialized with the periodic top-page refresh.  An
     // aborted client fetch does not cancel the synchronous server work.
     if (state.rawLoadingMore) { queueRefresh(trigger); return; }
@@ -779,6 +857,11 @@
     document.querySelectorAll("[data-watch-timeframe]").forEach((other) => { const selected = other === button; other.classList.toggle("selected", selected); other.setAttribute("aria-pressed", String(selected)); });
     renderWatch();
   }));
+  document.querySelectorAll("[data-shadow-timeframe]").forEach((button) => button.addEventListener("click", () => {
+    state.shadowTimeframe = button.dataset.shadowTimeframe;
+    document.querySelectorAll("[data-shadow-timeframe]").forEach((other) => { const selected = other === button; other.classList.toggle("selected", selected); other.setAttribute("aria-pressed", String(selected)); });
+    renderShadow();
+  }));
   document.querySelectorAll("[data-signal-source]").forEach((button) => button.addEventListener("click", () => {
     state.signalSource = button.dataset.signalSource;
     state.rowLimit = 24; invalidateSignalQuery();
@@ -793,7 +876,8 @@
   });
   $("load-earlier-signals").addEventListener("click", loadEarlierRawSignals);
   function activateRow(event, type) {
-    const row = event.target.closest("[data-tradingview-action]") || event.target.closest(type === "signal" ? ".signal-card" : ".watch-card")?.querySelector("[data-tradingview-action]");
+    const cardClass = type === "signal" ? ".signal-card" : type === "shadow" ? ".shadow-event-card" : ".watch-card";
+    const row = event.target.closest("[data-tradingview-action]") || event.target.closest(cardClass)?.querySelector("[data-tradingview-action]");
     if (!row) return;
     if (event.type === "keydown") {
       if (!["Enter", " "].includes(event.key)) return;
@@ -804,20 +888,23 @@
     if (state.tradingViewPending) return;
     const item = type === "signal"
       ? sourceItems().find((candidate) => sameEvent(candidate, { id: row.dataset.signalId, kind: row.dataset.signalKind, symbol: row.dataset.tvSymbol, timeframe: row.dataset.tvTimeframe }))
-      : state.markets.find((candidate) => candidate.symbol === row.dataset.tvSymbol && candidate.timeframe === row.dataset.tvTimeframe);
+      : type === "shadow"
+        ? state.shadowEvents.find((candidate) => candidate.id === row.dataset.shadowId)
+        : state.markets.find((candidate) => candidate.symbol === row.dataset.tvSymbol && candidate.timeframe === row.dataset.tvTimeframe);
     if (!item) return;
     openTradingView(item);
   }
   ["click", "keydown"].forEach((eventType) => {
     $("signal-rows").addEventListener(eventType, (event) => activateRow(event, "signal"));
     $("watch-rows").addEventListener(eventType, (event) => activateRow(event, "market"));
+    $("shadow-rows").addEventListener(eventType, (event) => activateRow(event, "shadow"));
   });
   $("load-more-watch").addEventListener("click", () => { state.watchLimit += 24; renderWatch(); });
   $("health-json").closest("details").addEventListener("toggle", (event) => { if (event.target.open) loadHealth(); });
   document.addEventListener("keydown", (event) => {
     if (event.key === "/" && !event.metaKey && !event.ctrlKey && !event.altKey && !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName)) {
       event.preventDefault();
-      if (state.view === "system") setView("signals");
+      if (["system", "shadow"].includes(state.view)) setView("signals");
       (state.view === "watch" ? $("watch-search") : $("symbol-search")).focus();
     }
   });

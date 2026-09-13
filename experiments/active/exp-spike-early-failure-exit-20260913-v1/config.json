@@ -1,0 +1,28 @@
+{
+  "experiment_id": "exp-spike-early-failure-exit-20260913-v1",
+  "contract_written_after_completed_run": true,
+  "source_streams": "experiments/active/exp-spike-v7-v1-compare-20260912-v1/results/replay_two_year_20260912_v3/streams",
+  "source_streams_manifest_sha256": "37f65499611877c8b8b10f0f2fb7a8c99a07d95cc90cda282f5b8a5ac89d41b6",
+  "expected_streams": 3531,
+  "cohort": "v7_both",
+  "timeframes": ["30m", "1H", "4H"],
+  "directions": ["long", "short"],
+  "development_boundary": "signal_bar_open < 2025-09-10T00:00:00Z",
+  "policies": [
+    "baseline",
+    "no_new_extreme_2",
+    "no_new_extreme_3",
+    "back_inside_rope_2",
+    "back_inside_rope_3"
+  ],
+  "selection_gate": {
+    "mean_loss_or_closed_trade_drawdown_improves": true,
+    "mean_stream_account_return_1pct_risk_not_worse": true,
+    "realized_ge_10r_retention_min": 0.95
+  },
+  "formal_result": "results/full_v3",
+  "nonblind_reused_history": true,
+  "research_only": true,
+  "training_eligible": false,
+  "production_eligible": false
+}

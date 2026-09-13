@@ -1,0 +1,5 @@
+{
+  "implemented": false,
+  "rule": "past_30d_same_direction_return_correlation_ge_0.8",
+  "reason": "The frozen cross-venue event and replay trade receipts contain outcomes and clocks, but no frozen multi-asset OHLC return panel. Using later realized trade outcomes to estimate correlation would violate the causal rule."
+}

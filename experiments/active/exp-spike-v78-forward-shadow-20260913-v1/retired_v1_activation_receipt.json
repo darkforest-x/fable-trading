@@ -1,0 +1,145 @@
+{
+  "activation": {
+    "activated_ms": 1789289462123,
+    "config_sha256": "310734b7cf7b00ed098f249bb103256c9ea7afbf24933bca8a7f6382580bbcee",
+    "contract": {
+      "config_sha256": "310734b7cf7b00ed098f249bb103256c9ea7afbf24933bca8a7f6382580bbcee",
+      "entry_semantics": "observation_only_no_fill",
+      "market_state_semantics": "descriptive_only_no_gate",
+      "path_horizon_bars": 240,
+      "protocol": "spike-v7-v8-forward-shadow-v1",
+      "sources": {
+        "yoyo/evaluation/spike_burst_progressive.py": "cec81a33997bd39272762bd70a451ceb5bf218da0e7fc0606271d165437fde08",
+        "yoyo/evaluation/spike_burst_replay.py": "996ef56ceb5b70da5337422d8390487330f7e387f648ee527b5afc9bda72a33f",
+        "yoyo/evaluation/spike_burst_v6_structure.py": "e84690c02e7b03291cc3037eab37ac495cc2ece79326e24411cfa72aa1214d4b",
+        "yoyo/evaluation/spike_v7_fast.py": "f0cfe9e2fb6d16a71632728bdfca3f65160f21dbb5afff4d23e61d1acab3bdc0",
+        "yoyo/evaluation/spike_v8_replay.py": "afe934b3b81f9e949edc55b2cb3a6dc18c076224bd8135b894bfc0a58eb3ada3",
+        "yoyo/monitor/v78_shadow.py": "92c6c892a30198897d34499a51406dac4e008138957344075d927449e287e596"
+      },
+      "timeframes": [
+        "30m",
+        "1H",
+        "4H"
+      ],
+      "v8_max_rope_distance_atr": 3.0
+    },
+    "protocol": "spike-v7-v8-forward-shadow-v1"
+  },
+  "cold_smoke": {
+    "cells": 1437,
+    "elapsed_seconds": 106.98,
+    "errors": 0,
+    "historical_events": 0,
+    "peak_rss_mb": 97.6
+  },
+  "execution_eligible": false,
+  "experiment_id": "exp-spike-v78-forward-shadow-20260913-v1",
+  "focused_validation": {
+    "node_check": "passed",
+    "py_compile": "passed",
+    "pytest": "64 passed, 4 warnings"
+  },
+  "notification_eligible": false,
+  "observed_at_utc": "2026-09-13T09:02:42.322280+00:00",
+  "observed_status": {
+    "activation": {
+      "activated_ms": 1789289462123,
+      "config_sha256": "310734b7cf7b00ed098f249bb103256c9ea7afbf24933bca8a7f6382580bbcee",
+      "contract": {
+        "config_sha256": "310734b7cf7b00ed098f249bb103256c9ea7afbf24933bca8a7f6382580bbcee",
+        "entry_semantics": "observation_only_no_fill",
+        "market_state_semantics": "descriptive_only_no_gate",
+        "path_horizon_bars": 240,
+        "protocol": "spike-v7-v8-forward-shadow-v1",
+        "sources": {
+          "yoyo/evaluation/spike_burst_progressive.py": "cec81a33997bd39272762bd70a451ceb5bf218da0e7fc0606271d165437fde08",
+          "yoyo/evaluation/spike_burst_replay.py": "996ef56ceb5b70da5337422d8390487330f7e387f648ee527b5afc9bda72a33f",
+          "yoyo/evaluation/spike_burst_v6_structure.py": "e84690c02e7b03291cc3037eab37ac495cc2ece79326e24411cfa72aa1214d4b",
+          "yoyo/evaluation/spike_v7_fast.py": "f0cfe9e2fb6d16a71632728bdfca3f65160f21dbb5afff4d23e61d1acab3bdc0",
+          "yoyo/evaluation/spike_v8_replay.py": "afe934b3b81f9e949edc55b2cb3a6dc18c076224bd8135b894bfc0a58eb3ada3",
+          "yoyo/monitor/v78_shadow.py": "92c6c892a30198897d34499a51406dac4e008138957344075d927449e287e596"
+        },
+        "timeframes": [
+          "30m",
+          "1H",
+          "4H"
+        ],
+        "v8_max_rope_distance_atr": 3.0
+      },
+      "protocol": "spike-v7-v8-forward-shadow-v1"
+    },
+    "cells": {
+      "ready": 1234,
+      "warming": 203
+    },
+    "configured": true,
+    "events": 0,
+    "market_snapshots": 3,
+    "path_bars": 0,
+    "scan": {
+      "error_samples": [],
+      "errors": 0,
+      "events_inserted": 0,
+      "finished_ms": 1789290058859,
+      "processed": 0,
+      "snapshots": [
+        "30m",
+        "1H",
+        "4H"
+      ],
+      "started_ms": 1789290056666,
+      "status": "idle",
+      "total": 1437,
+      "unchanged": 1437
+    },
+    "v8_admitted": 0
+  },
+  "primary_health": {
+    "market_ready": false,
+    "model_ready": true,
+    "ok": false,
+    "scan": {
+      "completed": 458,
+      "error_samples": [],
+      "errors": 0,
+      "finished_at_ms": null,
+      "generation": "04ad8e66de51475fb4a583021c26beb4",
+      "isolated": true,
+      "started_at_ms": 1789290116968,
+      "status": "scanning",
+      "timing_ms": {
+        "analyze_cpu_max": 153.902,
+        "analyze_cpu_total": 8937.191,
+        "analyze_max": 166.369,
+        "analyze_total": 9064.183,
+        "cells": 458,
+        "changed_cells": 344,
+        "checkpoint_cpu_max": 19.919,
+        "checkpoint_cpu_total": 3053.827,
+        "checkpoint_max": 28.963,
+        "checkpoint_total": 3646.767,
+        "fetch_max": 1854.044,
+        "fetch_total": 232870.634,
+        "unchanged_cells": 114
+      },
+      "total": 1916,
+      "worker_pid": 58420,
+      "worker_started_at_ms": 1789289479598
+    },
+    "service_alive": true
+  },
+  "production_eligible": false,
+  "source_sha256": {
+    "tests/monitor/test_v78_shadow.py": "b417eb1d74a4c4c37fcc58789ced53ddd155184901f711830db4cc7e3dda66cf",
+    "tests/monitor/test_v78_shadow_web.py": "8233bc04dab6b2f95c04344bfcd1424d2d4198ac06ef731e189650fbf87feadf",
+    "yoyo/monitor/shadow_api.py": "0686f08dbf5eb1d627a71eb5cdf75d69b328366aa1951b4803dd42d030f1c670",
+    "yoyo/monitor/v78_shadow.py": "92c6c892a30198897d34499a51406dac4e008138957344075d927449e287e596",
+    "yoyo/monitor/v78_shadow_manage.py": "7228930822a4152a58926338375c8d60f4c1cc00cc48866909abee48c6b5816d"
+  },
+  "training_eligible": false,
+  "unchanged_smoke": {
+    "cells": 1437,
+    "elapsed_seconds": 1.25,
+    "unchanged": 1437
+  }
+}
