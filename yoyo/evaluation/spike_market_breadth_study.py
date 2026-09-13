@@ -749,11 +749,21 @@ def outcome_tables(context: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, p
 
 
 def _markdown_table(frame: pd.DataFrame, columns: Iterable[str]) -> str:
+    """Render a small Markdown table without pandas' optional tabulate extra."""
     view = frame.loc[:, list(columns)].copy()
     for column in view.columns:
         if pd.api.types.is_float_dtype(view[column]):
             view[column] = view[column].map(lambda x: "—" if pd.isna(x) else f"{x:.3f}")
-    return view.to_markdown(index=False)
+
+    def cell(value: object) -> str:
+        if pd.isna(value):
+            return "—"
+        return str(value).replace("|", "\\|").replace("\n", "<br>")
+
+    header = "| " + " | ".join(cell(name) for name in view.columns) + " |"
+    separator = "| " + " | ".join("---" for _ in view.columns) + " |"
+    rows = ["| " + " | ".join(cell(value) for value in row) + " |" for row in view.itertuples(index=False, name=None)]
+    return "\n".join([header, separator, *rows])
 
 
 def write_report(report: Path, output: Path, catalog: pd.DataFrame, summary: pd.DataFrame,

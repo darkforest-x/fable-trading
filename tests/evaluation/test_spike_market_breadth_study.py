@@ -9,7 +9,7 @@ import pytest
 
 import yoyo.evaluation.spike_market_breadth_study as study
 from yoyo.evaluation.spike_market_breadth_study import (
-    _base_deduplicated_trades, _load_bars, _prefix_rows, _utc, _variant_block_rows, attach_context, canonical_asset,
+    _base_deduplicated_trades, _load_bars, _markdown_table, _prefix_rows, _utc, _variant_block_rows, attach_context, canonical_asset,
     causal_asset_features, complete_aggregate_30m, development_asof_clock, launch_density_from_events, summarize_slice,
     validate_panel_clock,
 )
@@ -25,6 +25,11 @@ from yoyo.evaluation.spike_market_breadth_study import (
 ])
 def test_utc_fast_parser_matches_pandas_utc_semantics(value):
     assert _utc(value) == pd.to_datetime(value, utc=True)
+
+
+def test_markdown_table_has_no_optional_tabulate_dependency():
+    rendered = _markdown_table(pd.DataFrame({"name": ["A|B"], "score": [1.25]}), ["name", "score"])
+    assert rendered == "| name | score |\n| --- | --- |\n| A\\|B | 1.250 |"
 
 
 def test_canonical_asset_removes_only_exchange_contract_multipliers():
