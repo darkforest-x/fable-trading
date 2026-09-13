@@ -44,8 +44,14 @@ def freeze(destination, config):
         start = query('query_all_stock', {'day': config['start']}, 'universe_start.csv')
         end = query('query_all_stock', {'day': config['end']}, 'universe_end.csv')
         basic = query('query_stock_basic', {}, 'stock_basic.csv')
-        calendar = query('query_trade_dates', {'start_date': config['history_start'],
-                         'end_date': config['end']}, 'calendar.csv')
+        calendars = []
+        for year in range(int(config['history_start'][:4]), int(config['end'][:4]) + 1):
+            lo = max(config['history_start'], f'{year}-01-01')
+            hi = min(config['end'], f'{year}-12-31')
+            calendars.append(query('query_trade_dates', {'start_date': lo,
+                             'end_date': hi}, f'calendars/{year}.csv'))
+        calendar = pd.concat(calendars, ignore_index=True)
+        calendar.to_csv(destination / 'calendar.csv', index=False)
     required = {'code', 'ipoDate', 'outDate', 'type', 'code_name'}
     if not required.issubset(basic) or basic.code.duplicated().any():
         raise ValueError('stock-basic census is malformed')
