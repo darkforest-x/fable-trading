@@ -34,6 +34,10 @@ def main():
              Path('docs/learnings/breakeven-fill-counts-need-protection-level-evidence.md'),
              exp / 'config.json', exp / 'PROJECT_PLAN.md', exp / 'holdout_usage.json']
     paths += sorted(p for p in args.results.rglob('*') if p.is_file())
+    if 'reused_failed_run' in meta:
+        failed = Path(meta['reused_failed_run'])
+        assert sha(failed / 'manifest.json') == meta['reused_failed_manifest_sha256']
+        paths += [failed / 'manifest.json', failed / 'holdout_read_receipt.json']
     receipt = {'complete': True, 'created_at': datetime.now(timezone.utc).isoformat(),
                'source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
                'study_source_commit': meta['source_commit'], 'results': str(args.results),
