@@ -1,7 +1,8 @@
 """Render final receipt-bound A-share results as Markdown and HTML artifacts.
 
-Only completed study summaries and their trade/coverage receipts are read.
-This reporting step does not recompute indicators or rerun strategy outcomes.
+Completed summaries and trade/coverage receipts are read. A narrowly proven
+singleton failure may be recovered from source calendar/bar counts after
+writers finish. No indicators or strategy outcomes are recomputed.
 """
 from __future__ import annotations
 
@@ -11,14 +12,22 @@ import subprocess
 import sys
 
 from yoyo.evaluation.spike_ashare_data import save
-from yoyo.evaluation.spike_ashare_study import EXP, ROOT, STATIC, sha
+from yoyo.evaluation.spike_ashare_study import EXP, ROOT, STATIC, publish, sha
+from yoyo.evaluation.spike_ashare_recovery import recover_singleton_coverage
 
 
 def deliver(exp=EXP):
     exp=Path(exp);out=exp/'results'
+    if recover_singleton_coverage(exp):
+        publish(out,exp/'data',json.loads((exp/'config.json').read_text()),final=True)
     summary=json.loads((out/'summary.json').read_text())
     if summary['status'] not in ('complete','incomplete'):
         raise ValueError('report requires a finished collection/evaluation pass')
+    recovery_path=out/'warmup_recovery.json'
+    recovery=json.loads(recovery_path.read_text()) if recovery_path.exists() else {}
+    recovery_note=(f"- {len(recovery)} 只股票因周期仅有一根 K 线触发原始指标的短数组错误；"
+        "终审仅核对至多 5 个源交易日，按原有预热门记为未就绪、零交易，未重算指标或收益。"
+        "原始错误、独立覆盖生成器 SHA 与每只收据保留在 warmup_recovery.json。") if recovery else ''
     def n(value,percent=False):
         if value is None:return '不适用／样本不足'
         return f'{value*100:.3f}%' if percent else f'{value:.4f}'
@@ -71,6 +80,7 @@ PF 按自然平仓净 R 的盈利和亏损计算；平均收益为独立事件�
 ## 风险与诚实声明
 
 {chr(10).join('- '+w for w in summary['warnings'])}
+{recovery_note}
 - 全量目标是 BaoStock 历史名单与 IPO/退市基础资料的并集，仍受供应商历史退市数据质量约束；源记录不等于交易所逐笔成交真相。
 - 本次不提供共享资金复利、容量、100 股手数账户、融资融券、分红送股现金到账或真实税费账；固定 0.2% 研究成本沿用原 SPIKE 契约，不能称实际 A 股账户净利润。
 - 若结果覆盖不完整，必须带覆盖率阅读，不进行全主板盈利裁决。即使描述性指标为正，也不自动达到项目经济准入和前向验证标准。
@@ -107,6 +117,7 @@ node --test tests/monitor/frontend_ashare.test.cjs tests/monitor/frontend_cards.
     summary['report_url']='/static/ashare-backtest/report.html'
     save(out/'summary.json',summary);save(STATIC/'summary.json',summary)
     files=[md,html,out/'summary.json',out/'trades.csv.gz',out/'coverage.csv',out/'evaluation_identity.json']
+    if recovery_path.exists():files.append(recovery_path)
     receipt=dict(generated_at=summary['generated_at'],files={str(p.relative_to(ROOT)):sha(p) for p in files})
     save(out/'delivery_receipt.json',receipt)
     return receipt
