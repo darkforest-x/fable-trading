@@ -60,6 +60,7 @@ def main():
     if args.output.exists():
         raise ValueError('Preserve prior summary output')
     events = pd.read_csv(args.input/'event_states.csv.gz')
+    events['static_order12'] = np.where(events.side.eq(1), events.order_long, events.order_short) == 12
     process = pd.read_csv(args.input/'process_availability.csv.gz')
     pairs = pd.read_csv(args.input/'same_stream_month_side_volatility_pairs.csv')
     closed = events.loc[events.scoring_closed].copy()
@@ -88,7 +89,9 @@ def main():
                    ('same_direction_launch', part.loc[part.same_direction_launch]),
                    ('non_launch', part.loc[~part.same_direction_launch]),
                    ('same_direction_expansion', part.loc[part.same_direction_expansion]),
-                   ('non_expansion', part.loc[~part.same_direction_expansion])]
+                   ('non_expansion', part.loc[~part.same_direction_expansion]),
+                   ('static_order12', part.loc[part.static_order12]),
+                   ('static_compression', part.loc[part.compression_qualified])]
         for name, sub in cohorts:
             row = metrics(sub)
             aggregate.append(dict(period=period, comparison=name, **row,
@@ -99,6 +102,11 @@ def main():
     ages = []
     for k, sub in closed.groupby(['period','state','state_direction_match','state_age_bucket']):
         ages.append(dict(zip(['period','state','state_direction_match','state_age_bucket'],k))|metrics(sub))
+    strata = []
+    for period, part in closed.groupby('period'):
+        for flag in ('same_direction_launch','same_direction_expansion','static_order12','compression_qualified'):
+            for (minutes, side), sub in part.loc[part[flag]].groupby(['timeframe_min','side']):
+                strata.append(dict(period=period,comparison=flag,timeframe_min=minutes,side=side,**metrics(sub)))
     rng = np.random.default_rng(20260913)
     pairing = []
     for (period, comparison), group in matched.groupby(['period','comparison']):
@@ -106,8 +114,9 @@ def main():
     # Reused frozen random entries carry no reliable control exit clock. Keep
     # these as a separate descriptive table and never use them for selection.
     random = pd.read_csv(args.input/'existing_random_controls_reused.csv')
+    random = random.merge(events[keys+['static_order12','compression_qualified']],on=keys,validate='many_to_one')
     random_summary = []
-    for flag in ('same_direction_launch','same_direction_expansion'):
+    for flag in ('same_direction_launch','same_direction_expansion','static_order12','compression_qualified'):
         for (period, tagged), group in random.groupby(['period',flag],dropna=False):
             group = group.loc[group.matched & group.net_r_difference.notna()]
             random_summary.append(dict(period=period,comparison=flag,tagged=tagged,n=len(group),
@@ -128,7 +137,7 @@ def main():
     args.output.mkdir(parents=True)
     for filename, data in [('aggregate.csv',aggregate),('monthly.csv',month),('state_age.csv',ages),
                            ('matched_summary.csv',pairing),('random_summary.csv',random_summary),
-                           ('confirmation_cost.csv',costs)]:
+                           ('confirmation_cost.csv',costs),('timeframe_side.csv',strata)]:
         pd.DataFrame(data).to_csv(args.output/filename,index=False)
     events.groupby(['period','state','state_direction_match'],dropna=False).size().rename('n').to_csv(args.output/'all_event_state_counts.csv')
     process.groupby(['period','milestone_target','status','has_original_trade_reference'],dropna=False).size().rename('n').to_csv(args.output/'process_status_counts.csv')
