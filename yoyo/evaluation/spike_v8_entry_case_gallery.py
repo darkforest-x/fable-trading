@@ -157,9 +157,17 @@ def _trade_geometry(case: pd.Series, prefix: str, context) -> dict[str, object]:
     signal_i = context.cache["bars"].index.get_indexer([signal_open])[0]
     if signal_i < 0 or confirmation != expected_confirmation:
         raise ValueError(f"frozen confirmation clock mismatch: {trade_id}")
+    entry_time, exit_time = _utc(row.entry_time), _utc(row.exit_time)
+    entry_i = context.cache["bars"].index.get_indexer([entry_time])[0]
+    exit_i = context.cache["bars"].index.get_indexer([exit_time])[0]
+    if entry_i < 0 or exit_i < 0:
+        raise ValueError(f"frozen execution time absent from authenticated cache: {trade_id}")
+    if entry_time != _utc(case[f"{prefix}_entry_time"]) or exit_time != _utc(case[f"{prefix}_exit_time"]):
+        raise ValueError(f"frozen execution clock mismatch: {trade_id}")
     return {"trade_receipt_sha256": sha256(receipt), "trade_file_sha256": sha256(path),
             "signal_i": int(signal_i), "signal_bar_open": str(signal_open), "signal_confirm_time": str(confirmation),
-            "entry_i": int(row.entry_i), "exit_i": int(row.exit_i), "entry_price": float(row.entry_price),
+            "entry_i": int(entry_i), "exit_i": int(exit_i), "entry_i_global": int(row.entry_i), "exit_i_global": int(row.exit_i),
+            "entry_time": str(entry_time), "exit_time": str(exit_time), "entry_price": float(row.entry_price),
             "initial_stop": float(row.initial_stop), "initial_risk": float(row.initial_risk), "exit_price": float(row.exit_price),
             "exit_reason": str(row.exit_reason), "net_r": float(row.net_r), "mfe_r": float(row.mfe_r)}
 
