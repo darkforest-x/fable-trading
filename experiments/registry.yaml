@@ -8828,3 +8828,27 @@ experiments:
     artifacts:
     - comp-ma-sequence-20260913-delivery
     notes: Authorized known-outcome holdout-era view number 1. Three prefix invariance checks passed; selected cases do not establish trading edge or override earlier negative gate tests.
+  - experiment_id: exp-spike-v8-entry-process-20260913-v1
+    source_repo: darkforest-x/fable-trading
+    status: active
+    question: Do stale V6 shape evidence and failed volume breakout reversals distinguish the outcomes of frozen V8 entries?
+    single_variable: Independently stratify by two pre-registered stale-progress labels and one failed-breakout reversal label; no combined filter or parameter selection.
+    result: Source and fixed definitions registered before the official full replay; results pending.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v8_entry_process_early_exit_20260913.md
+    artifacts: []
+    notes: Authorized configuration-specific holdout-era use 1. Same-entry descriptive analysis on reused nonblind history, not a dynamic account or live admission change.
+  - experiment_id: exp-spike-v8-early-exit-20260913-v1
+    source_repo: darkforest-x/fable-trading
+    status: active
+    question: Do fixed two- or three-bar early-failure exits improve V8 while retaining its exact realized 10R winners?
+    single_variable: Four independent early-exit arms with unchanged V8 admission, original stops, raw opposite exit feed and cost.
+    result: Frozen protocol registered; full replay will follow prefix-only development selection and V8 baseline parity.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v8_entry_process_early_exit_20260913.md
+    artifacts: []
+    notes: Authorized configuration-specific holdout-era use 1. Supplements rather than rebrands the earlier V7-only exit experiment; no online execution changes.

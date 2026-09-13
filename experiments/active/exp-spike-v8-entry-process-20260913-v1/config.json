@@ -1,0 +1,16 @@
+{
+  "experiment_id": "exp-spike-v8-entry-process-20260913-v1",
+  "raw": "experiments/active/exp-spike-v7-v1-compare-20260912-v1/results/replay_two_year_20260912_v3",
+  "v8_replay": "experiments/active/exp-spike-v8-noise-filter-20260913-v1/replay_v1",
+  "v8_replay_manifest_sha256": "04469ed2e694f23d27591d8316b71b66eab5e6d0338fc0847b6ae004f4bd30b9",
+  "expected_streams": 3531,
+  "expected_v8_signals": 113295,
+  "window": {"start": "2024-09-10T00:00:00Z", "split": "2025-09-10T00:00:00Z", "end": "2026-09-10T00:00:00Z"},
+  "holdout_era_authorization": "Owner explicitly authorized all available dates; this configuration records holdout-era exposure #1. The validation interval was previously studied and is nonblind descriptive evidence.",
+  "execution_contract": "Unchanged V8: signal close -> next observed open; prior five-bar structure plus 0.2 ATR buffer and minimum 2 ATR risk; arm at 2R and trail at 4 ATR; raw opposite V6 exit feed; 0.2% round-trip cost. This is same-entry outcome stratification, not a dynamic account replay.",
+  "h1": {"evidence_anchor": "Exact causal V6 state-machine evidence bar reconstructed from frozen cache.", "min_lag_bars": 2, "max_directional_close_advance_anchor_atr": 0.25, "variants": {"max_no_progress": "lag>=2 and maximum directional close advance from anchor close through confirmation <=0.25 anchor ATR", "confirmation_no_progress": "lag>=2 and directional confirmation-close advance from anchor close <=0.25 anchor ATR"}},
+  "h2": {"name": "failed_volume_break_reversal_setup", "prior_range_bars": 12, "candidate_age_bars": [2, 12], "minimum_breakout_relative_volume": 1.5, "definition": "Opposite q closes outside q-preceding frozen 12-bar range on causal rv>=1.5; a later pre-confirmation close returns inside it; final V8 confirmation closes through the opposite frozen boundary."},
+  "research_only": true,
+  "training_eligible": false,
+  "production_eligible": false
+}
