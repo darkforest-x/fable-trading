@@ -1,0 +1,37 @@
+{
+  "base_assets": 830,
+  "base_dedup_order": [
+    "binance",
+    "okx"
+  ],
+  "development_end_exclusive": "2025-09-10T00:00:00+00:00",
+  "development_start": "2024-09-10T00:00:00+00:00",
+  "frozen_rule": "joint_delta_60m > 0",
+  "gate": "unavailable: direct 30m receipts are 71 partial and 0 complete, with no development-period coverage; no normalized frozen OHLCV; excluded from breadth context and candidate scoring",
+  "holdout_access_note": "A preliminary combined-ledger read materialized post-cutoff rows; this corrected run does not reuse it.",
+  "holdout_consumed": true,
+  "inputs": {
+    "experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/coverage_limited.csv": "275b4ffd52bd38d96d2405426d78e77a31c9402babce4ab998d410858d7995ae",
+    "experiments/active/exp-spike-v7-v1-compare-20260912-v1/results/replay_two_year_20260912_v3/input_manifest.json": "c0c55c93d26e751495e5ed414e6b16d79045ec338dd53d90b3e620dacbce2bcc"
+  },
+  "joint_delta_15m": "unavailable: source cadence is 30m",
+  "outputs": {
+    "candidate_context.csv.gz": "0b31eda46d3e34aaae7058980d650dbfe487fee5d86131edbf76f9cfef4f9b50",
+    "frozen_candidate_rule.csv": "3c3400566815dcbcb37ddbe8ccd1eb98c247ca952766b56193935b34367f4bfa",
+    "market_breadth_30m.csv.gz": "e666a75a85e1e8545a870441b07107fad056ad6d43c865a6d113ed4e39970fc1",
+    "outcome_summary.csv": "6a263dca0fa7a6fd004744f2f6fb25f586e4eca51d8422920799ba2182aaa967",
+    "single_variable_slices.csv": "e58286dd73ef14b8c6d3995cf2d4636db94617bd17bea46f0956e16b37e0ff50",
+    "source_manifest.csv": "de1ecdde125466203a28f2fd6a5ce178e703e48cc4bd5437feabcf7a45781698"
+  },
+  "post_development_data_handling": {
+    "compressed_byte_read_boundary": "Not asserted: gzip may buffer or read ahead internally.",
+    "cutoff_check": "Variant-block ledgers scan only variant plus bounded timestamp scalars through EOF; trades use a scalar-only first pass and materialize CSV records only for development-safe row numbers.",
+    "post_cutoff_payload_materialized": false,
+    "post_cutoff_payload_parsed": false
+  },
+  "source_integrity": {
+    "actual_development_prefix_sha256": "SHA-256 of each uncompressed CSV header plus complete rows strictly before development_end, streamed while building the market panel.",
+    "frozen_upstream_expected_full_source_sha256": "Copied from the pre-existing comparison input manifest; not recomputed from market files by this run."
+  },
+  "study_code_sha256": "6e578a8004583a985a9cb754b3e93a924fc9fe07d7fc41c77176bc5c5554f269"
+}
