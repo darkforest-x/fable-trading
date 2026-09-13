@@ -8684,3 +8684,100 @@ experiments:
     - spike-v7-v1-compare-20260912-figures-receipt
     - spike-v7-v1-compare-20260912-audit-receipt
     - spike-v7-v1-compare-20260912-delivery-receipt
+  - experiment_id: exp-spike-cross-venue-events-20260913-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    status: inconclusive
+    question: Does causal leader/follower confirmation across Binance, OKX and Gate remove duplicate V7/V8 events or improve entry quality?
+    single_variable: Fold same asset, timeframe and direction within one full bar; historical outcome analysis only tags the frozen leader by later venue confirmation.
+    result: V7/V8 confirmations folded by 24.55%/23.76%; about 30% of events were multi-venue and about 87% confirmed on the same bar. Folding is accepted for event identity, but leader outcomes did not prove an advantage for waiting for follower confirmation.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_noise_reduction_execution_20260913.md
+    artifacts:
+    - spike-cross-venue-events-20260913-input-receipts
+    - spike-cross-venue-events-20260913-run-manifest
+    - spike-noise-reduction-20260913-report-md
+    - spike-noise-reduction-20260913-report-html
+    notes: Configuration-specific authorized holdout-era use #1. Reused nonblind history; no delayed-entry replay, notification change, promotion or order path.
+  - experiment_id: exp-spike-early-failure-exit-20260913-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    status: rejected
+    question: Do fixed two- or three-bar failure exits reduce V7 losses without damaging account expectancy and realized 10R tails?
+    single_variable: Add one causal next-open exit after no new directional extreme or a close back inside the six-MA rope; entries, costs and all other exits remain frozen.
+    result: All four candidates failed the development gate. Validation cumulative net R was no better than baseline and realized 10R trades fell from 335 to 247, 263, 315 or 309.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_noise_reduction_execution_20260913.md
+    artifacts:
+    - spike-early-failure-exit-20260913-receipt
+    - spike-noise-reduction-20260913-report-md
+    - spike-noise-reduction-20260913-report-html
+    notes: Configuration-specific authorized holdout-era use #1. Reused nonblind validation is diagnostic; no exit rule changed online.
+  - experiment_id: exp-spike-portfolio-risk-20260913-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    status: rejected
+    question: Do event-leader deduplication, one open position per asset and a maximum of five concurrent positions improve frozen V7/V8 quality?
+    single_variable: Apply deterministic portfolio admission ledgers to frozen event outcomes without changing entry, exit, cost or per-trade outcome.
+    result: Event folding is useful for identity, but the five-position cap accepted only 637 V7 and 721 V8 validation events, retained 2 and 3 realized 10R trades, and left PF below 1. It is rejected as a signal-quality gate.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_noise_reduction_execution_20260913.md
+    artifacts:
+    - spike-portfolio-risk-20260913-run-manifest
+    - spike-noise-reduction-20260913-report-md
+    - spike-noise-reduction-20260913-report-html
+    notes: Configuration-specific authorized holdout-era use #1. This is not a shared cash, margin, liquidation or funding simulation.
+  - experiment_id: exp-spike-correlation-risk-20260913-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    status: rejected
+    question: Does a fixed causal 30-day Pearson correlation threshold of 0.80 improve the five-position V7/V8 portfolio ledger?
+    single_variable: Reject a candidate only when its pre-entry 1440-bar 30m return correlation with an already open different asset is at least 0.80.
+    result: The gate was unstable across V7/V8 and development/reused validation, reduced or failed to add 10R trades, and left validation PF below 1. It is rejected for default admission.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_noise_reduction_execution_20260913.md
+    artifacts:
+    - spike-correlation-risk-20260913-run-manifest
+    - spike-noise-reduction-20260913-report-md
+    - spike-noise-reduction-20260913-report-html
+    notes: Configuration-specific authorized holdout-era use #1. Metadata and six result files are hash-bound; missing histories fail closed. No online risk rule changed.
+  - experiment_id: exp-spike-v78-forward-shadow-20260913-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    status: active
+    question: How do V7 and V8 behave on newly closed, previously unseen OKX 30m, 1H and 4H bars under the same event clock?
+    single_variable: Record both versions from one post-activation checkpoint; V8 differs only by rope_distance_atr less than or equal to 3.
+    result: Protocol v2 is active from 2026-09-13 17:07:26.988 Beijing time. First scan covered 1437 cells with zero errors, historical events or pre-activation market snapshots; the ledger is record-only.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_noise_reduction_execution_20260913.md
+    artifacts:
+    - spike-v78-forward-shadow-20260913-activation-receipt
+    - spike-noise-reduction-20260913-report-md
+    - spike-noise-reduction-20260913-report-html
+    notes: No historical outcome scoring, Bark, Telegram, YOLO candidate, execution, order or promotion path. V1 database retired because its context snapshot crossed the activation boundary.
+  - experiment_id: exp-spike-noise-reduction-execution-20260913-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    status: inconclusive
+    question: Which of the five owner-requested V7/V8 noise-reduction routes are supported strongly enough for reviewable use?
+    single_variable: Umbrella delivery only; each causal historical rule remains a separately registered single-variable experiment and the forward comparison is isolated.
+    result: Cross-venue folding is retained for deduplication and risk counting; breadth, early exits, five-position and correlation hard gates are rejected; V7/V8 forward shadow is active for new evidence.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_noise_reduction_execution_20260913.md
+    artifacts:
+    - spike-noise-reduction-20260913-report-md
+    - spike-noise-reduction-20260913-report-html
+    - spike-noise-reduction-20260913-delivery-receipt
+    notes: Synthesis consumed no additional holdout view. Four child configurations each record authorized holdout-era use #1; market-breadth history was registered separately.

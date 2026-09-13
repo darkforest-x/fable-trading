@@ -1,0 +1,122 @@
+{
+  "experiment_id": "exp-spike-noise-reduction-execution-20260913-v1",
+  "source_commit": "6b32aa210030aa7f83c22aedf25f53a026a3138e",
+  "generated_at_utc": "2026-09-13T09:40:06.604721+00:00",
+  "scope": "five owner-requested V7/V8 noise-reduction routes plus forward shadow",
+  "decisions": {
+    "market_breadth_hard_gate": "rejected",
+    "cross_venue_event_folding": "accepted_for_deduplication_and_risk_counting_only",
+    "early_failure_exit": "rejected",
+    "max_five_positions_gate": "rejected_as_signal_quality_gate",
+    "correlation_0_80_gate": "rejected",
+    "v7_v8_forward_shadow": "active_record_only"
+  },
+  "validation": {
+    "focused_pytest": "70 passed, 4 warnings",
+    "py_compile": "passed",
+    "node_check": "passed",
+    "independent_review": "P0 none; receipt identity and output inventory verified; registry closure pending this receipt"
+  },
+  "holdout": {
+    "boundary": "2026-05-04",
+    "cross_venue": "configuration-specific authorized use #1",
+    "early_failure_exit": "configuration-specific authorized use #1",
+    "portfolio_risk": "configuration-specific authorized use #1",
+    "correlation_risk": "configuration-specific authorized use #1",
+    "forward_shadow": "0 historical outcome reads",
+    "evidence_status": "nonblind_reused_history_except_new_forward_shadow"
+  },
+  "repository_files": [
+    {
+      "path": "analysis/p1_spike_noise_reduction_execution_20260913.md",
+      "bytes": 16672,
+      "sha256": "53f1e9a99b0795bbe86799ed04fa4aa692c3a8f27ffabff19c8c47497fd9a426"
+    },
+    {
+      "path": "analysis/html/p1_spike_noise_reduction_execution_20260913.html",
+      "bytes": 21610,
+      "sha256": "e3e75f394cec3b2b63bf06360efe6c5836e4e8e9c202125f2f77a9dc92bf2bf6"
+    },
+    {
+      "path": "experiments/active/exp-spike-cross-venue-events-20260913-v1/input_receipts.json",
+      "bytes": 2045765,
+      "sha256": "35097aae4782bea41507a8ad57c9c101b779a20ddc412f61bccf42f7f1a00f56"
+    },
+    {
+      "path": "experiments/active/exp-spike-cross-venue-events-20260913-v1/results/run_manifest.json",
+      "bytes": 1024,
+      "sha256": "e5d360e952c99d07eaa0ec423de72d30fe7693f9f8f69dce167f0c3a931280b4"
+    },
+    {
+      "path": "experiments/active/exp-spike-early-failure-exit-20260913-v1/results/full_v3/receipt.json",
+      "bytes": 1143,
+      "sha256": "ce45e18c1526d23b12d622866fc457fb8f89be3d04616a0dbd7c4f6ba97a03c7"
+    },
+    {
+      "path": "experiments/active/exp-spike-portfolio-risk-20260913-v1/results/run_manifest.json",
+      "bytes": 943,
+      "sha256": "84febeb7041b627672686dc0633c1ee1806c009d2bbbf57e12e3e51805e3f4ba"
+    },
+    {
+      "path": "experiments/active/exp-spike-correlation-risk-20260913-v1/results/run_manifest.json",
+      "bytes": 2503,
+      "sha256": "7586168aca0f136fe004b6d8841089c7c79c5c729ed3e3114f4d171eeee7b309"
+    },
+    {
+      "path": "experiments/active/exp-spike-v78-forward-shadow-20260913-v1/activation_receipt.json",
+      "bytes": 6519,
+      "sha256": "845d994afda4ff13b403b0739c9df3809d1593b1d0c7feddbbf632eb2776d2e1"
+    },
+    {
+      "path": "yoyo/evaluation/spike_cross_venue_event_study.py",
+      "bytes": 29709,
+      "sha256": "6a63d802a53ca15bca12d663db2246760cf46dd8a3783450f0fcc78ccd2e898d"
+    },
+    {
+      "path": "yoyo/evaluation/spike_early_failure_exit_study.py",
+      "bytes": 27765,
+      "sha256": "433c0ea226412d89c26cdc921cadecfd28ab9a45f931a459064808d7b04e21f1"
+    },
+    {
+      "path": "yoyo/evaluation/spike_portfolio_risk_study.py",
+      "bytes": 20774,
+      "sha256": "b586c4c1eff11e6c48a2bd33448c5229ee86b9c929cbee9c10facc4cfc7250d8"
+    },
+    {
+      "path": "yoyo/evaluation/spike_correlation_risk_study.py",
+      "bytes": 35524,
+      "sha256": "5af257b9650052d9efc5f8e5a29d0207a4753389f10ad846a5c9317e0547ba09"
+    },
+    {
+      "path": "yoyo/monitor/v78_shadow.py",
+      "bytes": 27265,
+      "sha256": "49db3ad294bb32047bc220e22cb1e7a747e3a03e9028b75ca381d5fbb1e101b3"
+    }
+  ],
+  "local_large_artifacts": [
+    {
+      "path": "experiments/active/exp-spike-cross-venue-events-20260913-v1/results/event_members.csv.gz",
+      "bytes": 17779735,
+      "sha256": "9a7e6300e23573e7c805e1bd3143a684d083194e23fcaa451b43568a73798018"
+    },
+    {
+      "path": "experiments/active/exp-spike-early-failure-exit-20260913-v1/results/full_v3/trades.csv.gz",
+      "bytes": 46533150,
+      "sha256": "eafa9be5ba1da49097e53365665f2cc8dfb3f04682f6fc2ee85e7fb6cf2799fd"
+    },
+    {
+      "path": "experiments/active/exp-spike-portfolio-risk-20260913-v1/results/risk_gate_event_audit.csv.gz",
+      "bytes": 36304890,
+      "sha256": "19bfdba3f8bf6cd192717efa274f05b9d7224818241e48722b00e2af62576095"
+    },
+    {
+      "path": "experiments/active/exp-spike-correlation-risk-20260913-v1/results/candidate_audit.csv.gz",
+      "bytes": 29280101,
+      "sha256": "3aa61924870acf31bdcea8cda2bf05fa67402a2ab97c4057c9fbd23a29ba6e33"
+    }
+  ],
+  "notification_eligible": false,
+  "execution_eligible": false,
+  "training_eligible": false,
+  "production_eligible": false
+}

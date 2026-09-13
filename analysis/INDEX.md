@@ -8,6 +8,8 @@
 
 ## 按日期倒序
 
+本轮增量入口（2026-09-13）：[SPIKE V7／V8 五条降噪路线](html/p1_spike_noise_reduction_execution_20260913.html) · [MD源](p1_spike_noise_reduction_execution_20260913.md)。跨所事件折叠约24%可用于去重；市场广度、2／3根早退、五仓和0.80相关性硬门均未通过；独立前向影子只记录新收盘，不推送、不下单。
+
 本轮增量入口（2026-09-13）：[SPIKE V1/V7 · 1000U共享账户风险回放](html/p1_spike_account_growth_20260913.html) · [MD源](p1_spike_account_growth_20260913.md)。8/8开发冻结配置样本外低于1000U，0/8到10万；瞬时到12.35万的路径最终7084U、回撤94.27%，实验拒绝实盘。
 
 本轮增量入口（2026-09-08）：[YOLO审核未来扩到150根](html/p1_yolo_review_future150_20260908.html) · [MD源](p1_yolo_review_future150_20260908.md)。1041×150、1×132缺口、1×13边界；原图/标签/任务保留，75聚焦检查和真实页面通过。

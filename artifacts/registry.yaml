@@ -30385,3 +30385,129 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Browser-ready owner delivery of the corrected development and matched-control evidence.
+  - artifact_id: spike-noise-reduction-20260913-report-md
+    artifact_type: report
+    role: canonical_five_route_noise_reduction_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    generator_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    source_path: analysis/p1_spike_noise_reduction_execution_20260913.md
+    sha256: 53f1e9a99b0795bbe86799ed04fa4aa692c3a8f27ffabff19c8c47497fd9a426
+    size_bytes: 16672
+    storage_uri: repo://analysis/p1_spike_noise_reduction_execution_20260913.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Research-only evidence. Historical results are nonblind reused evidence and cannot authorize production; large row-level CSV artifacts remain local and are hash-bound by the registered receipts.
+  - artifact_id: spike-noise-reduction-20260913-report-html
+    artifact_type: report
+    role: owner_facing_five_route_noise_reduction_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    generator_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    source_path: analysis/html/p1_spike_noise_reduction_execution_20260913.html
+    sha256: e3e75f394cec3b2b63bf06360efe6c5836e4e8e9c202125f2f77a9dc92bf2bf6
+    size_bytes: 21610
+    storage_uri: repo://analysis/html/p1_spike_noise_reduction_execution_20260913.html
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Research-only evidence. Historical results are nonblind reused evidence and cannot authorize production; large row-level CSV artifacts remain local and are hash-bound by the registered receipts.
+  - artifact_id: spike-cross-venue-events-20260913-input-receipts
+    artifact_type: manifest
+    role: receipt_identity_for_10593_source_files
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    generator_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    source_path: experiments/active/exp-spike-cross-venue-events-20260913-v1/input_receipts.json
+    sha256: 35097aae4782bea41507a8ad57c9c101b779a20ddc412f61bccf42f7f1a00f56
+    size_bytes: 2045765
+    storage_uri: repo://experiments/active/exp-spike-cross-venue-events-20260913-v1/input_receipts.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Research-only evidence. Historical results are nonblind reused evidence and cannot authorize production; large row-level CSV artifacts remain local and are hash-bound by the registered receipts.
+  - artifact_id: spike-cross-venue-events-20260913-run-manifest
+    artifact_type: manifest
+    role: causal_cross_venue_event_folding_run
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    generator_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    source_path: experiments/active/exp-spike-cross-venue-events-20260913-v1/results/run_manifest.json
+    sha256: e5d360e952c99d07eaa0ec423de72d30fe7693f9f8f69dce167f0c3a931280b4
+    size_bytes: 1024
+    storage_uri: repo://experiments/active/exp-spike-cross-venue-events-20260913-v1/results/run_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Research-only evidence. Historical results are nonblind reused evidence and cannot authorize production; large row-level CSV artifacts remain local and are hash-bound by the registered receipts.
+  - artifact_id: spike-early-failure-exit-20260913-receipt
+    artifact_type: manifest
+    role: four_fixed_early_exit_candidates_and_output_hashes
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    generator_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    source_path: experiments/active/exp-spike-early-failure-exit-20260913-v1/results/full_v3/receipt.json
+    sha256: ce45e18c1526d23b12d622866fc457fb8f89be3d04616a0dbd7c4f6ba97a03c7
+    size_bytes: 1143
+    storage_uri: repo://experiments/active/exp-spike-early-failure-exit-20260913-v1/results/full_v3/receipt.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Research-only evidence. Historical results are nonblind reused evidence and cannot authorize production; large row-level CSV artifacts remain local and are hash-bound by the registered receipts.
+  - artifact_id: spike-portfolio-risk-20260913-run-manifest
+    artifact_type: manifest
+    role: event_deduplication_and_capacity_policy_run
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    generator_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    source_path: experiments/active/exp-spike-portfolio-risk-20260913-v1/results/run_manifest.json
+    sha256: 84febeb7041b627672686dc0633c1ee1806c009d2bbbf57e12e3e51805e3f4ba
+    size_bytes: 943
+    storage_uri: repo://experiments/active/exp-spike-portfolio-risk-20260913-v1/results/run_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Research-only evidence. Historical results are nonblind reused evidence and cannot authorize production; large row-level CSV artifacts remain local and are hash-bound by the registered receipts.
+  - artifact_id: spike-correlation-risk-20260913-run-manifest
+    artifact_type: manifest
+    role: causal_thirty_day_correlation_gate_run
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    generator_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    source_path: experiments/active/exp-spike-correlation-risk-20260913-v1/results/run_manifest.json
+    sha256: 7586168aca0f136fe004b6d8841089c7c79c5c729ed3e3114f4d171eeee7b309
+    size_bytes: 2503
+    storage_uri: repo://experiments/active/exp-spike-correlation-risk-20260913-v1/results/run_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Research-only evidence. Historical results are nonblind reused evidence and cannot authorize production; large row-level CSV artifacts remain local and are hash-bound by the registered receipts.
+  - artifact_id: spike-v78-forward-shadow-20260913-activation-receipt
+    artifact_type: manifest
+    role: forward_only_shadow_activation_and_isolation_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    generator_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    source_path: experiments/active/exp-spike-v78-forward-shadow-20260913-v1/activation_receipt.json
+    sha256: 845d994afda4ff13b403b0739c9df3809d1593b1d0c7feddbbf632eb2776d2e1
+    size_bytes: 6519
+    storage_uri: repo://experiments/active/exp-spike-v78-forward-shadow-20260913-v1/activation_receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Forward-only record after a fixed activation clock; unknown is conservative because the registry has no forward-only holdout enum. No historical outcome scoring or production eligibility.
+  - artifact_id: spike-noise-reduction-20260913-delivery-receipt
+    artifact_type: manifest
+    role: hash_bound_five_route_delivery_and_local_large_artifact_inventory
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    generator_commit: 6b32aa210030aa7f83c22aedf25f53a026a3138e
+    source_path: experiments/active/exp-spike-noise-reduction-execution-20260913-v1/delivery_receipt.json
+    sha256: e369c450aefa3d510e9f8a62057bce331e732d0da41ef065f6c2975b012a8ae0
+    size_bytes: 5013
+    storage_uri: repo://experiments/active/exp-spike-noise-reduction-execution-20260913-v1/delivery_receipt.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Research-only evidence. Historical results are nonblind reused evidence and cannot authorize production; large row-level CSV artifacts remain local and are hash-bound by the registered receipts.
