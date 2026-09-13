@@ -50,6 +50,7 @@ def test_slice_summary_excludes_censored_from_realized_tail_and_reports_mae():
                          "mae_r_exit_bar_window_approx": [-.5, -2., -3.]})
     result = summarize_slice(rows, label="all", metric="all")
     assert result["candidates"] == 3 and result["closed"] == 2 and result["censored"] == 1
+    assert result["realized_ge_10r_count"] == 1
     assert result["realized_ge_10r"] == pytest.approx(.5)
     assert result["mae_r_exit_bar_window_approx_median"] == pytest.approx(-1.25)
     assert pd.isna(result["matched_delta_net_r"])

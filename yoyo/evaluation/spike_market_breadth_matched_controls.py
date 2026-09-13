@@ -32,6 +32,8 @@ from yoyo.evaluation.spike_market_breadth_study import (
     DEVELOPMENT_END,
     DEVELOPMENT_START,
     _load_bars,
+    _selected_csv_rows,
+    _variant_block_safe_record_numbers,
     complete_aggregate_30m,
 )
 from yoyo.evaluation.spike_v1_twoyear_allmarkets import _continuous
@@ -71,11 +73,24 @@ def _identity(row: object) -> tuple[str, str, int, int]:
 
 
 def _read_targets(path: Path) -> pd.DataFrame:
-    """Read only the stage-one candidate context and reject post-fold outcomes."""
-    table = pd.read_csv(path)
-    missing = TARGET_REQUIRED.difference(table.columns)
+    """Materialize outcomes only after every row passes scalar fold checks."""
+    header, selected, record_count = _variant_block_safe_record_numbers(
+        path,
+        monotonic_field="signal_bar_open",
+        bounded_fields=("entry_time", "exit_time"),
+        start=DEVELOPMENT_START,
+        cutoff=DEVELOPMENT_END,
+        block_fields=("variant", "timeframe_min"),
+    )
+    missing = TARGET_REQUIRED.difference(header)
     if missing:
         raise ValueError("candidate context missing columns: " + ", ".join(sorted(missing)))
+    if len(selected) != record_count:
+        raise ValueError("candidate context contains a row outside the development fold")
+    table = pd.DataFrame(
+        _selected_csv_rows(path, expected_header=header, selected=selected),
+        columns=header,
+    )
     for name in ("signal_bar_open", "entry_time", "exit_time"):
         table[name] = pd.to_datetime(table[name], utc=True, errors="raise")
     table["censored"] = table.censored.map(_truth)
@@ -208,7 +223,8 @@ def _quartile_buckets(bars: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
 
 def match_stream_controls(cache: dict, targets: pd.DataFrame, *, variant: str,
                           seed: int = 0, fold_start: pd.Timestamp = DEVELOPMENT_START,
-                          fold_end: pd.Timestamp = DEVELOPMENT_END) -> pd.DataFrame:
+                          fold_end: pd.Timestamp = DEVELOPMENT_END,
+                          excluded_target_times: pd.Series | None = None) -> pd.DataFrame:
     """Pair targets with deterministic same-stream/month/causal-volatility controls."""
     required = {"target_id", "signal_bar_open", "side", "net_r", "net_return"}
     if missing := required.difference(targets.columns):
@@ -229,8 +245,16 @@ def match_stream_controls(cache: dict, targets: pd.DataFrame, *, variant: str,
                 & ((bars.index + cadence) >= fold_start) & ((bars.index + cadence) < fold_end))
     months = bars.index.strftime("%Y-%m").to_numpy()
     replayed: dict[tuple[int, int], dict | None] = {}
+    excluded_times = targets.signal_bar_open if excluded_target_times is None else excluded_target_times
+    target_positions = {
+        int(bars.index.get_loc(pd.Timestamp(stamp)))
+        for stamp in excluded_times
+        if pd.Timestamp(stamp) in bars.index
+    }
+    used_controls: set[int] = set()
     rows: list[dict] = []
-    for target in targets.itertuples(index=False):
+    ordered_targets = targets.sort_values(["signal_bar_open", "target_id"], kind="stable")
+    for target in ordered_targets.itertuples(index=False):
         stamp, side = pd.Timestamp(target.signal_bar_open), int(target.side)
         identity = {name: getattr(target, name) for name in IDENTITY if hasattr(target, name)}
         base = {**identity, "target_id": target.target_id, "target_time": stamp, "side": side, "variant": variant,
@@ -243,12 +267,16 @@ def match_stream_controls(cache: dict, targets: pd.DataFrame, *, variant: str,
         allowed = eligible.copy()
         opposite = signals.short_signal.to_numpy(bool) if side == 1 else signals.long_signal.to_numpy(bool)
         allowed &= ~opposite
+        if target_positions:
+            allowed[np.fromiter(target_positions, dtype=int)] = False
+        if used_controls:
+            allowed[np.fromiter(used_controls, dtype=int)] = False
         choices = np.flatnonzero(allowed & (months == months[i]) & (bucket == bucket[i]))
-        choices = choices[choices != i]
         if not len(choices):
             rows.append({**base, "reason": "no_exact_causal_match"}); continue
         selected = int(choices[int(hashlib.sha256(
             f"{seed}|{target.target_id}|{stamp.isoformat()}".encode("utf-8")).hexdigest(), 16) % len(choices)])
+        used_controls.add(selected)
         key = (selected, side)
         if key not in replayed:
             replayed[key] = evaluate_single_control(context, selected, side, tick=float(context["tick"]),
@@ -267,13 +295,7 @@ def match_stream_controls(cache: dict, targets: pd.DataFrame, *, variant: str,
 
 def paired_sign_flip_p(values: pd.Series, *, seed: int = 0, draws: int = 9_999,
                        batch_draws: int = 128) -> float:
-    """Return a deterministic, two-sided paired sign-flip p-value in batches.
-
-    One batch holds at most ``batch_draws * len(values)`` signs, so the peak
-    allocation stays independent of the total number of permutations.  Calls
-    to one seeded generator remain in row-major draw order, matching the
-    former single-array calculation exactly for any batch size.
-    """
+    """Return a deterministic, two-sided sign-flip p-value in batches."""
     value = pd.to_numeric(values, errors="coerce").dropna().to_numpy(float)
     if len(value) < 2:
         return math.nan
@@ -286,6 +308,21 @@ def paired_sign_flip_p(values: pd.Series, *, seed: int = 0, draws: int = 9_999,
         null = np.abs((signs * value).mean(axis=1))
         exceedances += int(np.sum(null >= observed))
     return float((1 + exceedances) / (draws + 1))
+
+
+def month_cluster_sign_flip_p(pairs: pd.DataFrame) -> float:
+    """Flip calendar-month sums while preserving the event-weighted estimand.
+
+    Signals and controls from the same broad market month share regime risk.
+    Summing within month before the sign flip avoids treating cross-sectional
+    trades or overlapping paths as independent observations.  The total pair
+    count is constant under every flip, so testing monthly sums is the clustered
+    equivalent of the reported event-weighted mean difference.
+    """
+    if pairs.empty or "calendar_month" not in pairs:
+        return math.nan
+    monthly = pairs.groupby("calendar_month", sort=True).net_r_difference.sum()
+    return paired_sign_flip_p(monthly)
 
 
 def summarize_controls(pairs: pd.DataFrame, targets: pd.DataFrame) -> pd.DataFrame:
@@ -329,7 +366,8 @@ def summarize_controls(pairs: pd.DataFrame, targets: pd.DataFrame) -> pd.DataFra
                          "target_mean_net_r": good.target_net_r.mean() if len(good) else math.nan,
                          "control_mean_net_r": good.control_net_r.mean() if len(good) else math.nan,
                          "paired_delta_mean_net_r": good.net_r_difference.mean() if len(good) else math.nan,
-                         "paired_sign_flip_p": paired_sign_flip_p(good.net_r_difference) if len(good) else math.nan,
+                         "paired_sign_flip_p": month_cluster_sign_flip_p(good) if len(good) else math.nan,
+                         "sign_flip_unit": "calendar_month",
                          "unmatched_reasons": json.dumps(dict(sorted(reasons.items()))),
                          })
     return pd.DataFrame(rows)
@@ -351,8 +389,14 @@ def run(stage_one: Path = STAGE_ONE, v7_raw: Path = V7_RAW, output: Path = DEFAU
             source_row, receipt, receipt_path = _stream_for_target(representative, sources, streams, streams_root)
             cache = _rebuild_cache(source_row, minutes=int(identity[2]), segment=int(identity[3]), tick=receipt["tick"],
                                    expected_prefix_sha256=str(source_row["actual_development_prefix_sha256"]))
+            excluded_target_times = part.signal_bar_open.copy()
             for variant, chosen in part.groupby("variant", sort=True):
-                all_pairs.append(match_stream_controls(cache, chosen, variant=str(variant)))
+                all_pairs.append(match_stream_controls(
+                    cache,
+                    chosen,
+                    variant=str(variant),
+                    excluded_target_times=excluded_target_times,
+                ))
             receipts.append({"venue": identity[0], "symbol": identity[1], "timeframe_min": identity[2], "segment": identity[3],
                              "receipt_path": str(receipt_path), "receipt_sha256": sha256(receipt_path),
                              "source_sha256": receipt["source_sha256"], "tick": receipt["tick"]})

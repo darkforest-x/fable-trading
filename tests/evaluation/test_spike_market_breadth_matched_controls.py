@@ -7,8 +7,10 @@ import pytest
 
 from yoyo.evaluation.spike_market_breadth_matched_controls import (
     DEVELOPMENT_END,
+    _read_targets,
     _quartile_buckets,
     match_stream_controls,
+    month_cluster_sign_flip_p,
     paired_sign_flip_p,
     summarize_controls,
 )
@@ -64,11 +66,70 @@ def test_v7_controls_require_bb_ready_but_v1_common_execution_does_not():
     assert not bool(v7.matched.iloc[0]) and v7.reason.iloc[0] == "no_exact_causal_match"
 
 
+def test_controls_are_without_replacement_and_exclude_all_target_bars():
+    cache, index = _cache(155)
+    cache["bars"]["ready"] = False
+    cache["bars"].loc[[index[120], index[121], index[130], index[131]], "ready"] = True
+    cache["bars"].loc[index[122], "low"] = 90.0
+    cache["bars"].loc[index[123], "low"] = 90.0
+    targets = pd.concat([_target(index, 130), _target(index, 131)], ignore_index=True)
+    targets["target_id"] = ["one", "two"]
+    pairs = match_stream_controls(cache, targets, variant="v1_common_execution_long",
+                                  fold_start=index[120], fold_end=index[-1] + pd.Timedelta(hours=1))
+    matched = pairs.loc[pairs.matched]
+    assert matched.candidate_time.is_unique
+    assert not set(matched.candidate_time).intersection(set(targets.signal_bar_open))
+
+
+def test_controls_can_exclude_target_bars_from_another_variant():
+    cache, index = _cache(155)
+    cache["bars"]["ready"] = False
+    cache["bars"].loc[[index[120], index[130]], "ready"] = True
+    cache["bars"].loc[index[121], "low"] = 90.0
+    target = _target(index, 130)
+    excluded = pd.Series([index[120], index[130]])
+    pairs = match_stream_controls(
+        cache,
+        target,
+        variant="v1_common_execution_long",
+        fold_start=index[120],
+        fold_end=index[-1] + pd.Timedelta(hours=1),
+        excluded_target_times=excluded,
+    )
+    assert not bool(pairs.matched.iloc[0])
+    assert pairs.reason.iloc[0] == "no_exact_causal_match"
+
+
+def test_target_reader_rejects_boundary_row_before_outcome_csv_parse(tmp_path, monkeypatch):
+    import gzip
+    path = tmp_path / "candidate_context.csv.gz"
+    header = ["variant", "timeframe_min", "signal_bar_open", "entry_time", "exit_time", "side",
+              "censored", "net_r", "net_return", "venue", "symbol", "segment"]
+    safe = ["v1_common_execution_long", "60", "2025-09-09T22:00:00Z", "2025-09-09T23:00:00Z",
+            "2025-09-09T23:30:00Z", "1", "False", "1.0", ".01", "binance", "BTCUSDT", "0"]
+    future = ["v1_common_execution_long", "60", "2025-09-10T00:00:00Z", "2025-09-10T01:00:00Z",
+              "2025-09-10T02:00:00Z", "1", "False", "\udcff", "\udcff", "binance", "BTCUSDT", "0"]
+    payload = ",".join(header).encode() + b"\n" + ",".join(safe).encode() + b"\n" + ",".join(future).encode("utf-8", "surrogateescape") + b"\n"
+    path.write_bytes(gzip.compress(payload))
+    parsed = False
+
+    def forbidden(*args, **kwargs):
+        nonlocal parsed
+        parsed = True
+        raise AssertionError("full outcome parser must not run")
+
+    monkeypatch.setattr(pd, "read_csv", forbidden)
+    with pytest.raises(ValueError, match="outside the development fold"):
+        _read_targets(path)
+    assert not parsed
+
+
 def test_summary_exposes_baseline_quartiles_frozen_rule_reasons_and_deterministic_signflip():
     targets = pd.DataFrame({"target_id": ["a", "b", "c", "d"], "joint_breadth": [.1, .2, .8, .9],
                             "joint_delta_60m": [-1., .1, .2, .3]})
     pairs = pd.DataFrame({"target_id": ["a", "b", "c", "d"], "matched": [True, False, True, True],
                           "reason": ["matched", "fail_closed:receipt missing", "matched", "matched"],
+                          "calendar_month": ["2025-01", "2025-01", "2025-02", "2025-03"],
                           "target_net_r": [1., np.nan, 2., 3.], "control_net_r": [0., np.nan, 1., 1.],
                           "net_r_difference": [1., np.nan, 1., 2.]})
     summary = summarize_controls(pairs, targets)
@@ -79,6 +140,15 @@ def test_summary_exposes_baseline_quartiles_frozen_rule_reasons_and_deterministi
     assert "fail_closed:receipt missing" in baseline.unmatched_reasons
     assert paired_sign_flip_p(pd.Series([1., 2.])) == paired_sign_flip_p(pd.Series([1., 2.]))
     assert np.isnan(paired_sign_flip_p(pd.Series([1.])))
+    assert month_cluster_sign_flip_p(pairs.loc[pairs.matched]) == paired_sign_flip_p(pd.Series([1., 1., 2.]))
+
+
+def test_month_cluster_signflip_uses_sums_to_match_event_weighted_effect():
+    pairs = pd.DataFrame({
+        "calendar_month": ["2025-01"] * 100 + ["2025-02"],
+        "net_r_difference": [1.0] * 100 + [-10.0],
+    })
+    assert month_cluster_sign_flip_p(pairs) == paired_sign_flip_p(pd.Series([100.0, -10.0]))
 
 
 def test_signflip_batches_match_the_former_single_array_seeded_draw_order():

@@ -381,8 +381,15 @@ def _variant_block_rows(path: Path, *, monotonic_field: str, bounded_fields: tup
                 yield header, next(csv.reader([bytes(raw_line).decode("utf-8").rstrip("\r\n")]))
 
 
-def _variant_block_safe_record_numbers(path: Path, *, monotonic_field: str, bounded_fields: tuple[str, ...],
-                                       start: pd.Timestamp, cutoff: pd.Timestamp) -> tuple[list[str], set[int]]:
+def _variant_block_safe_record_numbers(
+    path: Path,
+    *,
+    monotonic_field: str,
+    bounded_fields: tuple[str, ...],
+    start: pd.Timestamp,
+    cutoff: pd.Timestamp,
+    block_fields: tuple[str, ...] = ("variant",),
+) -> tuple[list[str], set[int], int]:
     """Return development-safe record numbers without retaining non-scalar bytes.
 
     This is the first pass for trade ledgers whose outcome fields can precede
@@ -394,13 +401,13 @@ def _variant_block_safe_record_numbers(path: Path, *, monotonic_field: str, boun
     with gzip.open(path, "rb") as stream:
         header_bytes = stream.readline()
         header = next(csv.reader([header_bytes.decode("utf-8").rstrip("\r\n")]))
-        required = {"variant", monotonic_field, *bounded_fields}
+        required = {*block_fields, monotonic_field, *bounded_fields}
         if missing := required.difference(header):
             raise ValueError(f"frozen stream lacks required fields {sorted(missing)}: {path}")
         indices = {name: header.index(name) for name in required}
         fields_by_index = {index: name for name, index in indices.items()}
-        current_variant: str | None = None
-        closed_variants: set[str] = set()
+        current_block: tuple[str, ...] | None = None
+        closed_blocks: set[tuple[str, ...]] = set()
         previous: pd.Timestamp | None = None
         selected: set[int] = set()
         record_number = 0
@@ -413,7 +420,7 @@ def _variant_block_safe_record_numbers(path: Path, *, monotonic_field: str, boun
                 character = stream.read(1)
                 if not character:
                     if not has_char:
-                        return header, selected
+                        return header, selected, record_number
                     delimiter = b"\n"
                 else:
                     has_char = True
@@ -429,21 +436,21 @@ def _variant_block_safe_record_numbers(path: Path, *, monotonic_field: str, boun
                     break
             if len(scalars) != len(indices):
                 raise ValueError(f"malformed frozen CSV row before required scalars: {path}")
-            variant = scalars["variant"].decode("utf-8")
-            if not variant:
-                raise ValueError(f"empty variant prevents safe block read: {path}")
-            if variant != current_variant:
-                if current_variant is not None:
-                    closed_variants.add(current_variant)
-                if variant in closed_variants:
-                    raise ValueError(f"variant block reappears after ending: {variant} in {path}")
-                current_variant, previous = variant, None
+            block = tuple(scalars[name].decode("utf-8") for name in block_fields)
+            if any(not value for value in block):
+                raise ValueError(f"empty block identity prevents safe block read: {path}")
+            if block != current_block:
+                if current_block is not None:
+                    closed_blocks.add(current_block)
+                if block in closed_blocks:
+                    raise ValueError(f"variant block reappears after ending: {block} in {path}")
+                current_block, previous = block, None
             stamp = _utc(scalars[monotonic_field].decode("utf-8").rstrip("\r"))
             if pd.isna(stamp):
                 raise ValueError(f"missing {monotonic_field} prevents safe block read: {path}")
             if previous is not None and stamp < previous:
                 raise ValueError(
-                    f"non-monotonic {monotonic_field} within variant {variant} prevents safe read: {path}"
+                    f"non-monotonic {monotonic_field} within variant {block} prevents safe read: {path}"
                 )
             previous = stamp
             bounded = [_utc(scalars[name].decode("utf-8").rstrip("\r")) for name in bounded_fields]
@@ -485,13 +492,26 @@ def _selected_csv_rows(path: Path, *, expected_header: list[str], selected: set[
 
 
 def _trade_header_and_is_empty(path: Path) -> tuple[list[str], bool]:
-    """Read a trade header and prove whether its gzip payload ends immediately."""
+    """Read a trade header and prove header-only output without reading a record.
+
+    ``gzip.GzipFile.read(1)`` after ``readline`` would return and materialize the
+    first byte of a data record before its timestamps had passed the fold gate.
+    The generator writes one gzip member, so its four-byte ISIZE footer proves
+    a reduced-schema file is header-only without returning record payload.
+    """
     with gzip.open(path, "rb") as stream:
         header_bytes = stream.readline()
         if not header_bytes:
             raise ValueError(f"frozen trade stream lacks header: {path}")
         header = next(csv.reader([header_bytes.decode("utf-8").rstrip("\r\n")]))
-        return header, stream.read(1) == b""
+    if path.stat().st_size < 18:
+        raise ValueError(f"frozen trade stream is not a complete gzip member: {path}")
+    with path.open("rb") as compressed:
+        compressed.seek(-4, 2)
+        uncompressed_size = int.from_bytes(compressed.read(4), byteorder="little", signed=False)
+    if uncompressed_size < len(header_bytes):
+        raise ValueError(f"frozen trade stream gzip size is smaller than its header: {path}")
+    return header, uncompressed_size == len(header_bytes)
 
 
 def _signal_density(catalog: pd.DataFrame, clock: pd.Series) -> pd.Series:
@@ -582,7 +602,7 @@ def _base_deduplicated_trades(catalog: pd.DataFrame) -> pd.DataFrame:
             if is_empty:
                 continue
             raise ValueError(f"non-empty trade stream schema changed: {path}")
-        header, selected = _variant_block_safe_record_numbers(
+        header, selected, _ = _variant_block_safe_record_numbers(
             path, monotonic_field="entry_time", bounded_fields=("entry_time", "exit_time"),
             start=DEVELOPMENT_START, cutoff=DEVELOPMENT_END,
         )
@@ -643,6 +663,7 @@ def summarize_slice(part: pd.DataFrame, *, label: str, metric: str) -> dict[str,
         "slice": label, "metric": metric, "candidates": len(part), "closed": len(closed),
         "censored": int(part.censored.astype(bool).sum()), "mean_net_r": closed.net_r.mean(),
         "median_net_r": closed.net_r.median(), "win_rate": closed.net_r.gt(0).mean(),
+        "realized_ge_10r_count": int(closed.net_r.ge(10).sum()),
         "realized_ge_10r": closed.net_r.ge(10).mean(),
         "mae_r_exit_bar_window_approx_median": closed.mae_r_exit_bar_window_approx.median(),
         "mae_r_exit_bar_window_approx_p05": closed.mae_r_exit_bar_window_approx.quantile(.05), "matched": 0,
@@ -702,9 +723,19 @@ def outcome_tables(context: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, p
     rule = context.loc[context.joint_delta_60m.gt(0)].copy()
     rule_rows = []
     for (variant, minutes), part in rule.groupby(["variant", "timeframe_min"], sort=True):
+        baseline = context.loc[(context.variant == variant) & context.timeframe_min.eq(minutes)]
+        baseline_closed = baseline.loc[~baseline.censored.astype(bool)]
+        part_closed = part.loc[~part.censored.astype(bool)]
+        baseline_10r = int(baseline_closed.net_r.ge(10).sum())
+        kept_10r = int(part_closed.net_r.ge(10).sum())
         rule_rows.append({"variant": variant, "timeframe_min": int(minutes), "rule": "joint_delta_60m > 0",
                           "month_block_label_permutation_p": month_block_permutation(context.loc[
                               (context.variant == variant) & context.timeframe_min.eq(minutes)]),
+                          "baseline_candidates": int(len(baseline)),
+                          "candidate_retention": float(len(part) / len(baseline)) if len(baseline) else np.nan,
+                          "baseline_realized_ge_10r_count": baseline_10r,
+                          "kept_realized_ge_10r_count": kept_10r,
+                          "exact_entry_10r_retention": float(kept_10r / baseline_10r) if baseline_10r else np.nan,
                           **summarize_slice(part, label="candidate", metric="joint_delta_60m")})
     return pd.DataFrame(summary), pd.DataFrame(slices), pd.DataFrame(rule_rows)
 
@@ -721,8 +752,15 @@ def write_report(report: Path, output: Path, catalog: pd.DataFrame, summary: pd.
                  rule: pd.DataFrame, manifest: dict) -> None:
     """Render a Chinese source report whose claims are linked to frozen artifacts."""
     report.parent.mkdir(parents=True, exist_ok=True)
-    tables = _markdown_table(summary, ["variant", "timeframe_min", "candidates", "closed", "mean_net_r", "median_net_r", "win_rate", "realized_ge_10r", "mae_r_exit_bar_window_approx_median"])
-    proposed = _markdown_table(rule, ["variant", "timeframe_min", "candidates", "closed", "mean_net_r", "median_net_r", "win_rate", "month_block_label_permutation_p"]) if len(rule) else "无足够样本。"
+    tables = _markdown_table(summary, [
+        "variant", "timeframe_min", "candidates", "closed", "mean_net_r", "median_net_r", "win_rate",
+        "realized_ge_10r_count", "realized_ge_10r", "mae_r_exit_bar_window_approx_median",
+    ])
+    proposed = _markdown_table(rule, [
+        "variant", "timeframe_min", "baseline_candidates", "candidates", "candidate_retention",
+        "mean_net_r", "median_net_r", "win_rate", "baseline_realized_ge_10r_count",
+        "kept_realized_ge_10r_count", "exact_entry_10r_retention", "month_block_label_permutation_p",
+    ]) if len(rule) else "无足够样本。"
     report.write_text(f"""# SPIKE 市场广度开发期研究（2026-09-13）
 
 ## 结论
