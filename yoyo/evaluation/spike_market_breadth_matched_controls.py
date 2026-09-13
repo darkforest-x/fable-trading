@@ -175,13 +175,55 @@ def _stream_for_target(target: object, source: dict, streams: dict, streams_root
     return source_row, receipt, receipt_path
 
 
-def _rebuild_cache(source_row: dict, *, minutes: int, segment: int, tick: float,
-                   expected_prefix_sha256: str) -> dict:
-    """Rebuild a minimal causal replay cache from one safe 30m source prefix."""
-    digest = hashlib.sha256()
-    raw = _load_bars(str(source_row["source_path"]), prefix_digest=digest)
-    if digest.hexdigest() != str(expected_prefix_sha256):
-        raise ValueError("normalized source development-prefix digest drift")
+class _ActiveSourcePrefix:
+    """Hold one verified normalized source while its stream variants are rebuilt.
+
+    Target identities are grouped in venue/symbol/timeframe/segment order, so
+    the 30m, 60m, and 240m segments for one normalized source are contiguous.
+    Retaining exactly one raw source bounds memory while avoiding repeated
+    prefix reads and digest checks.  A source change clears the previous frame
+    before any replacement read; a failed replacement therefore cannot reuse
+    a stale source.
+    """
+
+    def __init__(self) -> None:
+        self.source_path: str | None = None
+        self.prefix_sha256: str | None = None
+        self.bars: pd.DataFrame | None = None
+
+    def load(self, source_row: dict, *, expected_prefix_sha256: str) -> pd.DataFrame:
+        """Return the currently verified development prefix, or replace it safely."""
+        source_path = str(Path(source_row["source_path"]).resolve())
+        expected = str(expected_prefix_sha256)
+        if self.source_path == source_path:
+            if self.prefix_sha256 != expected or self.bars is None:
+                raise ValueError("normalized source development-prefix identity drift")
+            return self.bars
+
+        # Release first: if the replacement cannot be verified, no subsequent
+        # identity can accidentally replay the previous source's candles.
+        self.source_path, self.prefix_sha256, self.bars = None, None, None
+        digest = hashlib.sha256()
+        raw = _load_bars(source_path, prefix_digest=digest)
+        actual = digest.hexdigest()
+        if actual != expected:
+            raise ValueError("normalized source development-prefix digest drift")
+        self.source_path, self.prefix_sha256, self.bars = source_path, actual, raw
+        return raw
+
+    def rebuild(self, source_row: dict, *, minutes: int, segment: int, tick: float,
+                expected_prefix_sha256: str) -> dict:
+        """Build one timeframe/segment replay cache from the active raw prefix."""
+        return _rebuild_cache(
+            self.load(source_row, expected_prefix_sha256=expected_prefix_sha256),
+            minutes=minutes,
+            segment=segment,
+            tick=tick,
+        )
+
+
+def _rebuild_cache(raw: pd.DataFrame, *, minutes: int, segment: int, tick: float) -> dict:
+    """Rebuild a minimal causal replay cache from a verified 30m source prefix."""
     bars = complete_aggregate_30m(raw, minutes)
     segments = _continuous(bars, minutes)
     if segment < 0 or segment >= len(segments):
@@ -383,12 +425,18 @@ def run(stage_one: Path = STAGE_ONE, v7_raw: Path = V7_RAW, output: Path = DEFAU
     streams_root = v7_raw / "streams"
     streams = _v7_streams(input_manifest)
     all_pairs, receipts, failures = [], [], []
+    source_prefix = _ActiveSourcePrefix()
     for identity, part in targets.groupby(list(IDENTITY), sort=True):
         representative = next(part.itertuples(index=False))
         try:
             source_row, receipt, receipt_path = _stream_for_target(representative, sources, streams, streams_root)
-            cache = _rebuild_cache(source_row, minutes=int(identity[2]), segment=int(identity[3]), tick=receipt["tick"],
-                                   expected_prefix_sha256=str(source_row["actual_development_prefix_sha256"]))
+            cache = source_prefix.rebuild(
+                source_row,
+                minutes=int(identity[2]),
+                segment=int(identity[3]),
+                tick=receipt["tick"],
+                expected_prefix_sha256=str(source_row["actual_development_prefix_sha256"]),
+            )
             excluded_target_times = part.signal_bar_open.copy()
             for variant, chosen in part.groupby("variant", sort=True):
                 all_pairs.append(match_stream_controls(

@@ -1,12 +1,15 @@
 """Synthetic contracts for development-only SPIKE breadth matched controls."""
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
 
 from yoyo.evaluation.spike_market_breadth_matched_controls import (
     DEVELOPMENT_END,
+    _ActiveSourcePrefix,
     _read_targets,
     _quartile_buckets,
     match_stream_controls,
@@ -98,6 +101,46 @@ def test_controls_can_exclude_target_bars_from_another_variant():
     )
     assert not bool(pairs.matched.iloc[0])
     assert pairs.reason.iloc[0] == "no_exact_causal_match"
+
+
+def test_active_source_prefix_loads_once_across_timeframes_and_replaces_on_source_change(tmp_path, monkeypatch):
+    import hashlib
+    import yoyo.evaluation.spike_market_breadth_matched_controls as controls
+
+    first, second = tmp_path / "first.csv.gz", tmp_path / "second.csv.gz"
+    first_expected = hashlib.sha256(b"first-development-prefix").hexdigest()
+    second_expected = hashlib.sha256(b"second-development-prefix").hexdigest()
+    first_raw, second_raw = pd.DataFrame({"source": ["first"]}), pd.DataFrame({"source": ["second"]})
+    calls: list[str] = []
+
+    def fake_load(path: str, *, prefix_digest):
+        calls.append(path)
+        if Path(path) == first.resolve():
+            prefix_digest.update(b"first-development-prefix")
+            return first_raw
+        assert Path(path) == second.resolve()
+        prefix_digest.update(b"second-development-prefix")
+        return second_raw
+
+    def fake_rebuild(raw, *, minutes, segment, tick):
+        return {"raw": raw, "minutes": minutes, "segment": segment, "tick": tick}
+
+    monkeypatch.setattr(controls, "_load_bars", fake_load)
+    monkeypatch.setattr(controls, "_rebuild_cache", fake_rebuild)
+    active = _ActiveSourcePrefix()
+    first_row, second_row = {"source_path": str(first)}, {"source_path": str(second)}
+    rebuilt = [active.rebuild(first_row, minutes=minutes, segment=segment, tick=.1,
+                              expected_prefix_sha256=first_expected)
+               for minutes, segment in ((30, 0), (60, 1), (240, 2))]
+
+    assert calls == [str(first.resolve())]
+    assert [item["raw"] for item in rebuilt] == [first_raw, first_raw, first_raw]
+    replacement = active.rebuild(second_row, minutes=30, segment=0, tick=.01,
+                                 expected_prefix_sha256=second_expected)
+    assert calls == [str(first.resolve()), str(second.resolve())]
+    assert active.source_path == str(second.resolve())
+    assert active.bars is second_raw
+    assert replacement["raw"] is second_raw
 
 
 def test_target_reader_rejects_boundary_row_before_outcome_csv_parse(tmp_path, monkeypatch):
