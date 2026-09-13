@@ -1,0 +1,51 @@
+{
+  "experiment_id": "exp-spike-v1-v8-asset-ranking-20260914-v1",
+  "purpose": "Read-only asset-level diagnostics for frozen V1 common-execution long and V8 ledgers; no signal or execution replay.",
+  "v1_common_root": "experiments/active/exp-spike-v7-v1-compare-20260912-v1/results/replay_two_year_20260912_v3",
+  "v8_replay_root": "experiments/active/exp-spike-v8-noise-filter-20260913-v1/replay_v1",
+  "v8_same_entry_evidence": "experiments/active/exp-spike-v8-entry-process-20260913-v1/results/full_v1/same_entry_evidence.csv.gz",
+  "v1_variant": "v1_common_execution_long",
+  "views": [
+    "v1_common_execution_long",
+    "v8_long",
+    "v8_both"
+  ],
+  "window": {
+    "start": "2024-09-10T00:00:00Z",
+    "split": "2025-09-10T00:00:00Z",
+    "end": "2026-09-10T00:00:00Z",
+    "signal_clock": "signal_confirm_time = signal_bar_open + timeframe_min"
+  },
+  "main_ranking_min_closed_trades": 30,
+  "cost_assumption": {
+    "round_trip_fraction": 0.002,
+    "cost_r": "round_trip_fraction / frozen initial_risk_frac where positive; V8 uses frozen replay detail and otherwise remains missing"
+  },
+  "metrics": [
+    "n_closed",
+    "win_rate",
+    "pf_net_r",
+    "pf_net_return",
+    "sum_net_r",
+    "mean_net_r",
+    "median_net_r",
+    "realized_ge10r",
+    "top1_positive_r_share",
+    "top1_abs_net_r_share",
+    "risk_fraction_at_entry",
+    "cost_r"
+  ],
+  "ranking_sort": "sum_net_r descending, mean_net_r descending, n_closed descending, asset ascending",
+  "v1_common_manifest_sha256": "37f65499611877c8b8b10f0f2fb7a8c99a07d95cc90cda282f5b8a5ac89d41b6",
+  "v8_replay_manifest_sha256": "04469ed2e694f23d27591d8316b71b66eab5e6d0338fc0847b6ae004f4bd30b9",
+  "v8_same_entry_evidence_sha256": "9c904b2d21a348dbbcca4b6276aefad599f57518508ff3e7ae08e1596db8b4c9",
+  "holdout_era_authorization": "Owner explicitly authorized all available dates for this fixed descriptive configuration. This records holdout-era exposure #1; all history is previously studied and nonblind.",
+  "research_only": true,
+  "training_eligible": false,
+  "production_eligible": false,
+  "expected_streams": 3531,
+  "expected_v1_common_entries": 6185,
+  "expected_v1_common_closed": 6138,
+  "v1_post_final_common_execution_reference": "experiments/active/exp-spike-v7-v1-compare-20260912-v1/results/post_final_v4/common_execution_trades.csv.gz",
+  "v1_post_final_reference_limit": "Compared by identity and frozen prices/outcomes; post manifest does not bind this file content SHA, so this is a consistency check, not full receipt authentication."
+}
