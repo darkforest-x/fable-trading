@@ -3,10 +3,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+from pathlib import Path
 
 import pandas as pd
 import pytest
 
+import yoyo.evaluation.spike_market_breadth_matched_controls as matched_controls
 from yoyo.evaluation.spike_market_breadth_report import build_spike_market_breadth_report, main
 
 
@@ -68,11 +70,18 @@ def _bundle(tmp_path):
     }))
     matched.mkdir()
     matched_summary_sha = _csv(matched / "matched_control_summary.csv", controls)
+    (matched / "matched_control_pairs.csv.gz").write_bytes(b"opaque matched pairs; never parse this")
+    (matched / "control_receipts.csv").write_bytes(b"opaque control receipts; never parse this")
     (matched / "manifest.json").write_text(json.dumps({
         "development_start": "2024-09-10T00:00:00+00:00", "development_end_exclusive": "2025-09-10T00:00:00+00:00",
         "seed": 0, "input_candidate_context_sha256": hashes["candidate_context.csv.gz"],
         "input_source_manifest_sha256": hashes["source_manifest.csv"],
-        "outputs": {"matched_control_summary.csv": matched_summary_sha},
+        "outputs": {
+            "matched_control_pairs.csv.gz": _sha(matched / "matched_control_pairs.csv.gz"),
+            "matched_control_summary.csv": matched_summary_sha,
+            "control_receipts.csv": _sha(matched / "control_receipts.csv"),
+        },
+        "study_code_sha256": _sha(Path(matched_controls.__file__)),
     }))
     return stage, matched
 
@@ -113,6 +122,23 @@ def test_refuses_a_matched_summary_whose_bytes_no_longer_match_its_manifest(tmp_
     stage, matched = _bundle(tmp_path)
     (matched / "matched_control_summary.csv").write_text("tampered\n")
     with pytest.raises(ValueError, match="matched manifest hash mismatch for matched_control_summary.csv"):
+        build_spike_market_breadth_report(stage, matched, tmp_path / "report.md")
+
+
+@pytest.mark.parametrize("name", ["matched_control_pairs.csv.gz", "control_receipts.csv"])
+def test_refuses_unparsed_matched_artifacts_whose_bytes_no_longer_match_manifest(tmp_path, name):
+    stage, matched = _bundle(tmp_path)
+    (matched / name).write_bytes(b"tampered opaque artifact")
+    with pytest.raises(ValueError, match=f"matched manifest hash mismatch for {name}"):
+        build_spike_market_breadth_report(stage, matched, tmp_path / "report.md")
+
+
+def test_refuses_matched_manifest_with_tampered_generator_code_identity(tmp_path):
+    stage, matched = _bundle(tmp_path)
+    manifest = json.loads((matched / "manifest.json").read_text())
+    manifest["study_code_sha256"] = "0" * 64
+    (matched / "manifest.json").write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="study_code_sha256 differs"):
         build_spike_market_breadth_report(stage, matched, tmp_path / "report.md")
 
 

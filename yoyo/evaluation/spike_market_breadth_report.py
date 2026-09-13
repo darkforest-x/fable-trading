@@ -26,6 +26,8 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_STAGE_ONE = ROOT / "experiments/active/exp-spike-market-breadth-20260913-v1/results"
 DEFAULT_MATCHED = ROOT / "experiments/active/exp-spike-market-breadth-matched-controls-20260913-v1/results"
+MATCHED_CONTROLS_CODE = ROOT / "yoyo/evaluation/spike_market_breadth_matched_controls.py"
+MATCHED_OUTPUTS = ("matched_control_pairs.csv.gz", "matched_control_summary.csv", "control_receipts.csv")
 FROZEN_RULE = "joint_delta_60m > 0"
 
 _OUTCOME_REQUIRED = {
@@ -177,15 +179,29 @@ def _assert_stage_hashes(stage_one: Path, manifest: dict, names: Iterable[str]) 
             raise ValueError(f"stage-one manifest hash mismatch for {name}")
 
 
-def _assert_matched_summary_hash(matched: Path, manifest: dict) -> Path:
-    """Require the downstream summary's own manifest pin before it is parsed."""
-    summary = _stage_artifact(matched, "matched_control_summary.csv")
+def _assert_matched_artifact_pins(matched: Path, manifest: dict) -> Path:
+    """Verify all matched artifacts and the exact generator bytes before parsing.
+
+    Pairs and receipts remain opaque: this reporter reads their bytes only to
+    check manifest identity.  The summary is returned for the one subsequent
+    CSV parse that produces the report tables.
+    """
     outputs = manifest.get("outputs")
     if not isinstance(outputs, dict):
         raise ValueError("matched manifest missing outputs object")
-    if outputs.get(summary.name) != sha256(summary):
-        raise ValueError("matched manifest hash mismatch for matched_control_summary.csv")
-    return summary
+    paths = {}
+    for name in MATCHED_OUTPUTS:
+        path = _stage_artifact(matched, name)
+        expected = outputs.get(name)
+        if not isinstance(expected, str) or expected != sha256(path):
+            raise ValueError(f"matched manifest hash mismatch for {name}")
+        paths[name] = path
+    code_sha = manifest.get("study_code_sha256")
+    if not isinstance(code_sha, str) or len(code_sha) != 64 or any(char not in "0123456789abcdef" for char in code_sha.lower()):
+        raise ValueError("matched manifest has invalid study_code_sha256")
+    if code_sha != sha256(MATCHED_CONTROLS_CODE):
+        raise ValueError("matched manifest study_code_sha256 differs from current matched-controls generator")
+    return paths["matched_control_summary.csv"]
 
 
 def build_spike_market_breadth_report(stage_one: Path, matched: Path, report: Path) -> dict:
@@ -197,7 +213,7 @@ def build_spike_market_breadth_report(stage_one: Path, matched: Path, report: Pa
     """
     stage_one, matched, report = Path(stage_one), Path(matched), Path(report)
     stage_manifest, matched_manifest = validate_input_pins(stage_one, matched)
-    matched_summary = _assert_matched_summary_hash(matched, matched_manifest)
+    matched_summary = _assert_matched_artifact_pins(matched, matched_manifest)
     _assert_stage_hashes(stage_one, stage_manifest, (
         "outcome_summary.csv", "frozen_candidate_rule.csv", "single_variable_slices.csv",
     ))
@@ -284,7 +300,7 @@ def build_spike_market_breadth_report(stage_one: Path, matched: Path, report: Pa
 ## 范围与证据边界
 
 - 阶段一开发窗口：`{stage_manifest.get('development_start')}` 至 `{stage_manifest.get('development_end_exclusive')}`（右端排除）。本整合器没有读取 holdout、市场面板、候选明细或原始逐笔大表；`candidate_context.csv.gz` 仅以字节 SHA-256 核验，未解析行内容。
-- matched manifest 的候选与来源 SHA 分别与阶段一的 `candidate_context.csv.gz`、`source_manifest.csv` 一致；阶段一 manifest 也再次固定了两者。matched manifest 还固定了本次读取的 `matched_control_summary.csv`。随机化种子为 `{matched_manifest.get('seed')}`，所有展示行的配对显著性单位均已核验为日历月。
+- matched manifest 的候选与来源 SHA 分别与阶段一的 `candidate_context.csv.gz`、`source_manifest.csv` 一致；阶段一 manifest 也再次固定了两者。报告器还逐字节核验 `matched_control_pairs.csv.gz`、`matched_control_summary.csv`、`control_receipts.csv` 和当前 matched-controls 生成器代码身份；pairs 与 receipts 不解析。随机化种子为 `{matched_manifest.get('seed')}`，所有展示行的配对显著性单位均已核验为日历月。
 - 阶段一 manifest 记录 `holdout_consumed={stage_manifest.get('holdout_consumed')}`；本报告不把这轮开发期读作新的 holdout 消耗，也不据此声称独立样本外验证。
 
 ## 各周期基线（共同执行的已实现结果）
