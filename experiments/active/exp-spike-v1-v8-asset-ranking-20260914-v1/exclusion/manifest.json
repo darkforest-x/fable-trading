@@ -1,0 +1,44 @@
+{
+  "complete": true,
+  "official": true,
+  "research_only": true,
+  "single_variable": "causal asset admission exclusion only",
+  "non_replayed_fixed_ledger_counterfactual": true,
+  "ranking_shadow": "original full strategy ledger; exclusions never alter later history",
+  "ranking": {
+    "decision_clock": "UTC month boundary; signal confirmation governs admission",
+    "history": "already closed original trades in [decision-90d, decision)",
+    "min_trades": 10,
+    "bottom_fraction": 0.2,
+    "selection": "bottom ceil(20% of all n>=10 assets), then require mean net R < 0",
+    "asset_pooling": "same asset across venues, timeframes, and sides within each fixed scope",
+    "random_control": "100 fixed seeds 0..99; each draws the same actual causal asset deletion count, never equal trade count"
+  },
+  "primary": "v8_both validation",
+  "diagnostic_scopes": [
+    "v1_long",
+    "v8_long"
+  ],
+  "input": {
+    "experiments/active/exp-spike-v1-v8-asset-ranking-20260914-v1/results/full_v1/normalized_ledger.csv.gz": "ec1a0793794ae196a7505371a2a4920aaa652be5950dd621ae4a0a0a0322e826",
+    "rows": 101376,
+    "known_closed_outcomes": 100884,
+    "unscored_or_open_rows_retained_for_audit": 492
+  },
+  "outputs": {
+    "monthly_asset_lists.csv": "5bbf1c72d10ffcb8f32abb86ece46c0c209fdf2e91cadcd1eebc76f8d9a404c1",
+    "random_asset_lists.csv.gz": "34a81507fcc8a2ae67298b8f68143f70615f867c64b2d55bfc7a0411f29a0b0b",
+    "counterfactual_summary.csv": "545b900fd2cd65b64331a0c85d3298fe6361583289bb06a0a2720326a56763f7",
+    "random_distribution.csv": "f2b48c0fbc48004ef58bce70a21c488687c9ae17e01d6f449ec37dfef1d5cdcb",
+    "exploratory_primary_rank_p.csv": "876b69e1db8dcd8aea48a15f5fa673cee25256b154f8b7fb96fcd7ca0eb1c660",
+    "asset_leaderboard.csv": "9666e23a7e21206fa2a08d0ef63e0401ae487054004eaf14ff931ea04eb5b0b7",
+    "attribution.csv": "ec72fa2b1b7b7a35a4c9787443d754e8058497a8c83253812a19ed75671c85d6",
+    "lost_10r_assets.csv": "acfbb2a5f142a06a155909d73b937f2f200030f2bbf8de7f649d9fe65633c72d"
+  },
+  "output_only_attribution": {
+    "validation_months": 13,
+    "net_r_sum_improved_months": 12,
+    "net_r_mean_improved_months": 10,
+    "method": "same-ledger accounting attribution only; no new admission list, random draw, or replay"
+  }
+}

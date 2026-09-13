@@ -16,16 +16,17 @@ schema_version: 1
 experiments:
   - experiment_id: exp-spike-v1-v8-asset-ranking-20260914-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 8c32db4519
-    status: running
+    source_commit: 4984dcafa1
+    status: inconclusive
     question: Which assets dominate frozen V1 and V8 returns, and can a causal monthly blacklist improve the following period without discarding large trends?
     single_variable: Monthly asset admission uses prior 90 days of closed shadow outcomes, min10 trades, bottom20percent meanR then negative mean; entry and exit ledgers stay unchanged.
-    result: Running fixed descriptive rankings and one causal exclusion rule with equal-count random asset controls. No production changes.
+    result: Rankings completed for 6138 V1-long and 94746 V8-both closed trades. Causal monthly exclusion improves V8-both validation from -4829.46R to -3277.61R but remains negative, loses56 of319 realized10R events, and USDC explains51.27percent of improvement. V8-long average R worsens; V1 barely changes. Random-asset rank p0.00990 is exploratory, not acceptance.
     holdout_consumed: true
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_v1_v8_asset_ranking_20260914.md
-    artifacts: []
+    artifacts:
+    - spike-v1-v8-asset-ranking-20260914-delivery
     notes: Owner-authorized reused-history exposure number1. V1 common execution is long-only; V8 long is a side subset of its bidirectional replay. R and nominal-return PF are separate. Descriptive full-period winners and losers must not become same-period predictive filters.
   - experiment_id: exp-spike-market-breadth-20260913-v1
     source_repo: darkforest-x/fable-trading

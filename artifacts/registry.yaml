@@ -30582,3 +30582,18 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Binds 47 canonical source/report/result files. Reused nonblind 113295 V8 events; three independent gates, no accepted universal live filter. Six full-path case charts and two explicitly relaxed losers; local large files stay hash-bound.
+
+  - artifact_id: spike-v1-v8-asset-ranking-20260914-delivery
+    artifact_type: manifest
+    role: research_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4984dcafa19e22357d85c964ddf5a5ae5c7d253f
+    generator_commit: 4984dcafa19e22357d85c964ddf5a5ae5c7d253f
+    source_path: experiments/active/exp-spike-v1-v8-asset-ranking-20260914-v1/delivery_receipt.json
+    sha256: 6107488d0e713a224aca7ffcfd0d661abd61a12fb33b60cc73bc2e745f994445
+    size_bytes: 9485
+    storage_uri: repo://experiments/active/exp-spike-v1-v8-asset-ranking-20260914-v1/delivery_receipt.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Canonical asset rankings, one causal monthly exclusion and 100 random-asset controls; historical research only, no live rule changes.
