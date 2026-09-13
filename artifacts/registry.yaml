@@ -30511,3 +30511,17 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Research-only evidence. Historical results are nonblind reused evidence and cannot authorize production; large row-level CSV artifacts remain local and are hash-bound by the registered receipts.
+  - artifact_id: comp-ma-sequence-20260913-delivery
+    artifact_type: manifest
+    role: owner_selected_comp_causal_sequence_case
+    source_repo: darkforest-x/fable-trading
+    source_commit: f0d685b66e216cbfcb17afb8bb27f35fb4f7770f
+    generator_commit: 95166e1b2ac71e93d0501bc5dd4109a07434a035
+    source_path: experiments/active/exp-comp-ma-sequence-20260913-v1/delivery_manifest.json
+    sha256: 15dea697249586754a3ed84e8b7e77a802c971431db55db4bb559cf2194a64fa
+    size_bytes: 2481
+    storage_uri: repo://experiments/active/exp-comp-ma-sequence-20260913-v1/delivery_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Hash-bound local CSV, figure and HTML for three known-outcome entries; original entry features and later confirmation observations are separate. Not a performance validation.

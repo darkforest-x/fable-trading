@@ -8814,3 +8814,17 @@ experiments:
     canonical_report: analysis/p1_spike_ashare_v1_v8_three_year_20260913.md
     artifacts: []
     notes: Owner explicitly authorized each fixed configuration once in the conversation on 2026-09-13. Actual consumption will be recorded after evaluation; metadata-only preflight is not scoring.
+  - experiment_id: exp-comp-ma-sequence-20260913-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f0d685b66e216cbfcb17afb8bb27f35fb4f7770f
+    status: inconclusive
+    question: How do MA order level, slope transitions and dispersion differ across the owner-selected COMP 1H examples?
+    single_variable: No trading policy tested; causal descriptive reconstruction of two long entries, one short entry and subsequent consolidation.
+    result: The short began with bullish cross-period ordering but negative slopes in all three groups; full bearish ordering followed 28 hours later. One failed long already had 23 consecutive full-order bars.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_comp_ma_sequence_case_20260913.md
+    artifacts:
+    - comp-ma-sequence-20260913-delivery
+    notes: Authorized known-outcome holdout-era view number 1. Three prefix invariance checks passed; selected cases do not establish trading edge or override earlier negative gate tests.
