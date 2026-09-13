@@ -30597,3 +30597,18 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Canonical asset rankings, one causal monthly exclusion and 100 random-asset controls; historical research only, no live rule changes.
+
+  - artifact_id: spike-eth-lowtf-cost-diagnostic-20260914-delivery
+    artifact_type: manifest
+    role: research_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: 36ba7d28b54068c11e0787b3127626a52268d5c0
+    generator_commit: 36ba7d28b54068c11e0787b3127626a52268d5c0
+    source_path: experiments/active/exp-spike-eth-lowtf-cost-diagnostic-20260914-v1/delivery_receipt.json
+    sha256: 46670c0021e61716531b068cfe127230d6e984a4c7821701ddc129ac533ecaa0
+    size_bytes: 5130
+    storage_uri: repo://experiments/active/exp-spike-eth-lowtf-cost-diagnostic-20260914-v1/delivery_receipt.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen ETH V8 3m and 5m trade-cost diagnostics; nonblind historical subset, no new OHLCV replay or accepted live rule.
