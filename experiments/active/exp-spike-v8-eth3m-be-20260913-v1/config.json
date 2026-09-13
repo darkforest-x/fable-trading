@@ -1,0 +1,12 @@
+{
+  "experiment_id": "exp-spike-v8-eth3m-be-20260913-v1",
+  "rule": "Frozen ETH 3m V8 admission and raw opposite exits; a high/low +1 initial-R touch is confirmed at the bar close and moves protection to entry from the next bar.",
+  "single_variable": "Entry-price breakeven protection after one favorable initial R; no signal, entry, stop, trail, cost, or threshold change.",
+  "round_trip_cost": 0.002,
+  "execution": {"entry": "next open", "initial_stop": "frozen original", "trail": "2R arm / 4ATR", "same_bar": "old effective stop has priority; BE is not active until next bar", "breakeven": "price only; 0.2% round-trip cost remains"},
+  "source": {"primary": "experiments/active/exp-spike-v8-lowtf-20260913-v1/results/run_20260913_v3", "final_reuse": "experiments/active/exp-spike-v8-lowtf-20260913-v1/results/run_20260913_v4", "symbol": "ETH-USDT-SWAP", "venue": "okx", "minutes": 3},
+  "folds": {"development_start": "2023-07-31T11:12:00Z", "split": "2026-05-04T00:00:00Z", "end": "2026-07-30T11:09:00Z"},
+  "holdout_era": {"authorized_by_owner": "2026-09-13 explicit ETH 3m 1R price-breakeven exit request", "formal_exposure_number": 1, "note": "Reused nonblind research history; no new blind validation, parameter search, admission, or live change."},
+  "training_eligible": false,
+  "production_eligible": false
+}
