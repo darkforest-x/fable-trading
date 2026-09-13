@@ -1,0 +1,19 @@
+{
+  "experiment_id": "exp-spike-v8-lowtf-20260913-v1",
+  "rule": "V6 raw confirmation + V7 prior_squeeze_run3 + V8 signed rope distance <= 3 ATR",
+  "round_trip_cost": 0.002,
+  "timeframes": [3, 5],
+  "leaderboard": {
+    "source": "Binance USD-M 5m local pre-holdout archive",
+    "rank": "previous fully closed UTC day open-to-close return top 10",
+    "trade_window": "2026-03-01 through 2026-04-30",
+    "same_day_top10": "post-hoc coverage diagnostic only"
+  },
+  "holdout_era": {
+    "cutoff": "2026-05-04T00:00:00Z",
+    "authorized_by_owner": "2026-09-13 low-timeframe V8 request",
+    "exposure_number_for_exact_lowtf_config": 1
+  },
+  "training_eligible": false,
+  "production_eligible": false
+}
