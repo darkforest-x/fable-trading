@@ -30525,3 +30525,17 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Hash-bound local CSV, figure and HTML for three known-outcome entries; original entry features and later confirmation observations are separate. Not a performance validation.
+  - artifact_id: spike-v8-process-20260913-delivery
+    artifact_type: manifest
+    role: frozen_v8_entry_process_and_early_exit_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2848dc8
+    generator_commit: 7b145cd
+    source_path: experiments/active/exp-spike-v8-entry-process-20260913-v1/delivery_receipt.json
+    sha256: a66fe35122abac3cead44456e9e5d816b60d1f7434d63eaee697348a09b0b6d7
+    size_bytes: 10416
+    storage_uri: repo://experiments/active/exp-spike-v8-entry-process-20260913-v1/delivery_receipt.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Binds 41 local files including complete 3531-stream evidence, report, four full-lifecycle charts, tables and supplemental source audit. Same-entry tags and dynamic exits remain separate; no live change.

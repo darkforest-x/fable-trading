@@ -1,0 +1,32 @@
+{
+  "complete": true,
+  "official": true,
+  "streams": 3531,
+  "signals": 113295,
+  "execution_contract": "Unchanged V8: signal close -> next observed open; prior five-bar structure plus 0.2 ATR buffer and minimum 2 ATR risk; arm at 2R and trail at 4 ATR; raw opposite V6 exit feed; 0.2% round-trip cost. This is same-entry outcome stratification, not a dynamic account replay.",
+  "h1": {
+    "evidence_anchor": "Exact causal V6 state-machine evidence bar reconstructed from frozen cache.",
+    "min_lag_bars": 2,
+    "max_directional_close_advance_anchor_atr": 0.25,
+    "variants": {
+      "max_no_progress": "lag>=2 and maximum directional close advance from anchor close through confirmation <=0.25 anchor ATR",
+      "confirmation_no_progress": "lag>=2 and directional confirmation-close advance from anchor close <=0.25 anchor ATR"
+    }
+  },
+  "h2": {
+    "name": "failed_volume_break_reversal_setup",
+    "prior_range_bars": 12,
+    "candidate_age_bars": [
+      2,
+      12
+    ],
+    "minimum_breakout_relative_volume": 1.5,
+    "definition": "Opposite q closes outside q-preceding frozen 12-bar range on causal rv>=1.5; a later pre-confirmation close returns inside it; final V8 confirmation closes through the opposite frozen boundary."
+  },
+  "source": {
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v8_entry_process_study.py": "165b2a5e1f24deac1b5988ea4af94e1856820da2d9e3e7f78c48a9c5037efcbe",
+    "experiments/active/exp-spike-v8-entry-process-20260913-v1/config.json": "d5f6b52bbe027765ba9a3012526607ea74ede63aa7de2273593acdd7134781cd",
+    "experiments/active/exp-spike-v8-entry-process-20260913-v1/PROJECT_PLAN.md": "5d38e61f6b16e6644b4d5dfd8c4cb5e20a72c7d953a36d62eef01366811b7f6e",
+    "experiments/active/exp-spike-v8-noise-filter-20260913-v1/replay_v1/manifest.json": "04469ed2e694f23d27591d8316b71b66eab5e6d0338fc0847b6ae004f4bd30b9"
+  }
+}
