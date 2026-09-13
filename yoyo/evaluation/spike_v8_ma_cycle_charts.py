@@ -83,6 +83,8 @@ def plot(context, start: int, end: int, output: Path, *, title: str,
                     xytext=(0, 46), textcoords='offset points', ha='center', fontsize=9,
                     bbox=dict(boxstyle='round,pad=.4', facecolor='white', edgecolor='#ddd5e3', alpha=.95),
                     arrowprops=dict(arrowstyle='->',color='#725294',lw=.8))
+    if reference_marks:
+        ax.margins(y=.18)
     ax.set_title(title, fontsize=13)
     ax.set_ylabel("价格")
     ax.legend(ncol=6, loc="upper left", fontsize=8)

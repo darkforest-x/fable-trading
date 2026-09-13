@@ -28,7 +28,7 @@ def main():
     assert manifest['streams_scanned'] == 3531
     for name, expected in json.loads((raw/'receipt.json').read_text()).items():
         assert sha(raw/name) == expected, name
-    for folder in ('summary_v2','charts_v1'):
+    for folder in ('summary_v2','charts_v2'):
         meta = json.loads((EXP/'results'/folder/'manifest.json').read_text())
         for name, expected in meta.get('files',meta.get('charts',{})).items():
             assert sha(EXP/'results'/folder/name) == expected, name
