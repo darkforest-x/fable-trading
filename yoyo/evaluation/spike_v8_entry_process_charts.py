@@ -66,11 +66,6 @@ def _plot_case(case: pd.Series, output: Path) -> None:
     bars = context.cache["bars"]
     confirm = pd.Timestamp(case.signal_bar_open)
     i = int(bars.index.get_loc(confirm))
-    start, end = max(0, i - 48), min(len(bars), i + 73)
-    view = bars.iloc[start:end].copy()
-    local_time = view.index.tz_convert("Asia/Shanghai")
-    confirmation_close = confirm + pd.Timedelta(minutes=context.minutes)
-    confirmation_local = confirmation_close.tz_convert("Asia/Shanghai")
     trades = pd.read_csv(V8_REPLAY / f"{case.stream_key}.trades.csv.gz")
     trade_signal_open = pd.to_datetime(trades.signal_bar_open, utc=True)
     trade_side = pd.to_numeric(trades.side, errors="raise")
@@ -86,9 +81,22 @@ def _plot_case(case: pd.Series, output: Path) -> None:
             f"trade_id={case.trade_id}, signal_bar_open={confirm}, side={case.side}"
         )
     trade = trade.iloc[0]
+    exit_time = pd.Timestamp(trade.exit_time)
+    exit_i = int(bars.index.get_indexer([exit_time])[0])
+    if exit_i < 0:
+        raise ValueError(f"frozen V8 exit timestamp absent from cache: {case.trade_id} {exit_time}")
+    # Preserve 48 prefix bars and at least 72 post-confirmation bars.  A late
+    # exit extends the view through its own bar plus 12 later bars so the
+    # figure always explains the selected trade's realized outcome.
+    start = max(0, i - 48)
+    end = min(len(bars), max(i + 73, exit_i + 13))
+    view = bars.iloc[start:end].copy()
+    local_time = view.index.tz_convert("Asia/Shanghai")
+    confirmation_close = confirm + pd.Timedelta(minutes=context.minutes)
+    confirmation_local = confirmation_close.tz_convert("Asia/Shanghai")
     plt.rcParams["font.sans-serif"] = ["Arial Unicode MS"]
     plt.rcParams["axes.unicode_minus"] = False
-    fig, ax = plt.subplots(figsize=(14, 6), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(16, 6), constrained_layout=True)
     date_values = mdates.date2num(local_time.to_pydatetime())
     width = (context.minutes / 1440.0) * .68
     for x, bar in zip(date_values, view.itertuples(index=False)):
@@ -115,7 +123,7 @@ def _plot_case(case: pd.Series, output: Path) -> None:
         ax.hlines([float(case.h2_range_low), float(case.h2_range_high)], q, confirmation_local, colors="#7c3aed", linestyles=":", lw=1.0,
                   label="突破前冻结区间")
     entry_time = pd.Timestamp(trade.entry_time).tz_convert("Asia/Shanghai")
-    exit_time = pd.Timestamp(trade.exit_time).tz_convert("Asia/Shanghai")
+    exit_time = exit_time.tz_convert("Asia/Shanghai")
     ax.scatter([entry_time], [float(trade.entry_price)], color="#111827", marker="^", s=36, zorder=5, label="下一根开盘入场")
     sl_end = min(exit_time, local_time[-1])
     ax.hlines(float(trade.initial_stop), entry_time, sl_end, colors="#b91c1c", linestyles="-.", lw=1.0, label="原始止损")
@@ -123,7 +131,10 @@ def _plot_case(case: pd.Series, output: Path) -> None:
         ax.scatter([exit_time], [float(trade.exit_price)], color="#111827", marker="x", s=38, zorder=5, label="冻结退出")
     else:
         ax.text(.01, .02, "冻结退出在展示窗外或为边界censor", transform=ax.transAxes, fontsize=9, color="#374151")
-    ax.set_title(f"定义示例：{case.chart_id} · {case.symbol} · {context.minutes}分钟")
+    label_name = {"h1_confirmation_stale": "旧证据", "h2_failed_break_reversal": "失败突破反转"}[str(case.label)]
+    outcome_name = "盈" if str(case.outcome) == "profit" else "亏"
+    direction = "多" if int(case.side) == 1 else "空"
+    ax.set_title(f"定义示例：{label_name}·{outcome_name}｜{direction}｜已实现净R {float(case.net_r):.2f}｜{case.symbol} · {context.minutes}分钟")
     ax.set_ylabel("价格")
     ax.set_xlabel("北京时间K线开盘时间（虚线：确认收盘时点）")
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d\n%H:%M", tz=local_time.tz))
