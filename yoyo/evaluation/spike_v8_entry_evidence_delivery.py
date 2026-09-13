@@ -21,16 +21,29 @@ def main() -> None:
     result = EXP / "results/full_v1"
     cases = EXP / "cases_v2"
     random_context = EXP / "results/random_context"
+    derived = EXP / "results/derived_v2"
     if not json.loads((result / "manifest.json").read_text())["complete"]:
         raise ValueError("incomplete research output")
     if not json.loads((cases / "receipt.json").read_text())["complete"]:
         raise ValueError("incomplete case gallery")
-    for receipt in (result / "receipt.json", cases / "receipt.json"):
+    verified_files = []
+    for receipt in (result / "receipt.json", cases / "receipt.json", random_context / "receipt.json"):
         content = json.loads(receipt.read_text())
         expected = content.get("output_sha256", content)
         for name, digest in expected.items():
             if hashlib.sha256((receipt.parent / name).read_bytes()).hexdigest() != digest:
                 raise ValueError(f"output hash mismatch: {receipt.parent / name}")
+            verified_files.append(receipt.parent / name)
+        verified_files.append(receipt)
+    derived_manifest = json.loads((derived / "manifest.json").read_text())
+    if not derived_manifest["complete"]:
+        raise ValueError("incomplete saved-row summaries")
+    for name, digest in derived_manifest["tables"].items():
+        path = derived / name
+        if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+            raise ValueError(f"derived output hash mismatch: {path}")
+        verified_files.append(path)
+    verified_files.append(derived / "manifest.json")
     report = ROOT / "analysis/p1_spike_v8_entry_evidence_20260914.md"
     html = ROOT / "analysis/html/p1_spike_v8_entry_evidence_20260914.html"
     if not json.loads((random_context / "manifest.json").read_text())["complete"]:
@@ -39,8 +52,10 @@ def main() -> None:
              ROOT / "yoyo/evaluation/spike_v8_entry_random_context.py",
              ROOT / "yoyo/evaluation/spike_v8_entry_case_gallery.py",
              ROOT / "yoyo/evaluation/spike_v8_entry_evidence_study.py",
+             ROOT / "yoyo/evaluation/spike_v8_entry_evidence_postprocess.py",
+             ROOT / "tests/evaluation/test_spike_v8_entry_evidence_postprocess.py",
              ROOT / "tests/evaluation/test_spike_v8_entry_evidence_study.py"]
-    files += [p for folder in (result, cases, random_context) for p in folder.iterdir() if p.is_file()]
+    files += verified_files
     files += [EXP / name for name in ("config.json", "PROJECT_PLAN.md", "holdout_receipt.json")]
     records = [{"path": str(p.relative_to(ROOT)), "sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
                 "size_bytes": p.stat().st_size} for p in sorted(set(files))]
