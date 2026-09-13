@@ -19,7 +19,7 @@
     const status = ({ collecting:"历史数据采集中", running:"固定配置回测中", complete:"回测完成", incomplete:"结果覆盖不完整", error:"数据读取失败" })[data.status] || "等待统计";
     $("ashare-status").textContent = status;
     $("ashare-period").textContent = `${data.start || "—"} 至 ${data.end || "—"}`;
-    $("ashare-coverage").textContent = `目标 ${number(data.universe_count,0)} 只 · 已覆盖 ${number(data.covered_symbols,0)} 只 · 缺数 ${number(data.failed_symbols,0)} 只`;
+    $("ashare-coverage").textContent = `目标 ${number(data.universe_count,0)} 只 · 已覆盖 ${number(data.covered_symbols,0)} 只 · 异常/待重试 ${number(data.failed_symbols,0)} 只`;
     $("ashare-source").textContent = `${data.source || "BaoStock"} · 更新 ${data.generated_at ? new Date(data.generated_at).toLocaleString("zh-CN",{timeZone:"Asia/Shanghai"}) : "—"}`;
     $("ashare-rows").innerHTML = table(filter(data.groups, version, timeframe));
     $("ashare-annual").innerHTML = table(filter(data.annual, version, timeframe), true);

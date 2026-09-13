@@ -8803,17 +8803,17 @@ experiments:
     notes: Synthesis consumed no additional holdout view. Four child configurations each record authorized holdout-era use #1; market-breadth history was registered separately.
   - experiment_id: exp-spike-ashare-v1-v8-three-year-20260913-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: d58cb25ed9d9a4cf6c606a15f1ea6aa03ccdfd93
+    source_commit: d69365b
     status: active
     question: How do fixed SPIKE V1 and V8 perform on Shanghai/Shenzhen main-board daily and weekly signals over the last three years?
     single_variable: Four owner-requested frozen version/timeframe cells under the same long-only A-share execution and 0.2 percent cost contract; no tuning.
-    result: Preregistered; collecting receipt-bound history and building the calendar-aware replay and frontend result menu.
-    holdout_consumed: false
+    result: Background collection and four-cell evaluation running against 3280 main-board codes; the frontend menu displays explicitly partial receipt-backed results until completion.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_ashare_v1_v8_three_year_20260913.md
     artifacts: []
-    notes: Owner explicitly authorized each fixed configuration once in the conversation on 2026-09-13. Actual consumption will be recorded after evaluation; metadata-only preflight is not scoring.
+    notes: Owner explicitly authorized each fixed configuration once in the conversation on 2026-09-13. Each of V1 daily, V1 weekly, V8 daily and V8 weekly has now begun authorized holdout use number 1; no tuning. Completion heartbeat a-v1-v8 and an independent LaunchAgent supervise delivery.
   - experiment_id: exp-comp-ma-sequence-20260913-v1
     source_repo: darkforest-x/fable-trading
     source_commit: f0d685b66e216cbfcb17afb8bb27f35fb4f7770f

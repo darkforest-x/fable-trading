@@ -245,6 +245,11 @@
       button.classList.toggle("active", active);
       if (active) button.setAttribute("aria-current", "page"); else button.removeAttribute("aria-current");
     });
+    $("exchange-mark").textContent = state.view === "ashare" ? "A股" : "OKX";
+    $("market-scope").textContent = state.view === "ashare" ? "沪深主板" : "全市场永续";
+    $("connection-label").classList.toggle("hidden", state.view === "ashare");
+    $("bark-header").classList.toggle("hidden", state.view === "ashare");
+    if (state.view === "ashare") $("sidebar-runtime").textContent = "历史回测独立运行";
     $("page-title").textContent = titles[state.view][0];
     $("breadcrumb-current").textContent = titles[state.view][0];
     $("page-description").textContent = state.view === "signals" && state.status ? notificationPolicy() : titles[state.view][1];
