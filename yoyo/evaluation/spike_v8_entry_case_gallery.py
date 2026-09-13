@@ -118,7 +118,19 @@ def select_cases(events: pd.DataFrame) -> pd.DataFrame:
                         "state_age", "slope_votes", "entry_price", "initial_stop", "initial_risk", "signal_i_local", "holding_bars"):
                 row[f"exploratory_relaxed_{key}"] = exploratory.get(key)
         selected.append(row)
-    return pd.DataFrame(selected)
+    result = pd.DataFrame(selected)
+    # All six cells may lack an exact loser.  Retain a stable nullable schema
+    # so the renderer treats that outcome as a single-panel case, rather than
+    # treating an absent column as a data-dependent implementation failure.
+    fields = ("stream_key", "venue", "asset", "symbol", "signal_bar_open", "signal_confirm_time", "entry_time", "exit_time", "exit_reason",
+              "net_r", "mfe_r", "net_return", "gross_r", "rope_distance_atr", "causal_volatility_bucket", "state",
+              "state_age", "slope_votes", "entry_price", "initial_stop", "initial_risk", "signal_i_local", "holding_bars")
+    for prefix in ("loser", "exploratory_relaxed"):
+        for field in fields:
+            column = f"{prefix}_{field}"
+            if column not in result:
+                result[column] = pd.NA
+    return result
 
 
 def _trade_geometry(case: pd.Series, prefix: str, context) -> dict[str, object]:
