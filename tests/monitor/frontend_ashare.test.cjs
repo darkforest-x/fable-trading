@@ -23,3 +23,12 @@ test("unavailable and unsafe labels remain explicit escaped text", () => {
   assert.match(html,/&lt;IMG/);
   assert.match(html,/—/);
 });
+test("owner-stopped coverage distinguishes uncollected stocks from failures", () => {
+  const text = ui.coverageText({universe_count:3280,covered_symbols:2587,failed_symbols:43,
+    collection:{owner_stopped:true,uncollected:650,errors:43}});
+  assert.match(text,/已覆盖 2,587/);
+  assert.match(text,/采集失败 43/);
+  assert.match(text,/评估隔离 0/);
+  assert.match(text,/未采集 650/);
+  assert.ok(!text.includes("待重试"));
+});

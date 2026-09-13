@@ -11,6 +11,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+import pandas as pd
+
 from yoyo.evaluation.spike_ashare_data import save
 from yoyo.evaluation.spike_ashare_study import EXP, ROOT, STATIC, publish, sha
 from yoyo.evaluation.spike_ashare_recovery import recover_singleton_coverage
@@ -28,6 +30,37 @@ def deliver(exp=EXP):
     recovery_note=(f"- {len(recovery)} 只股票因周期仅有一根 K 线触发原始指标的短数组错误；"
         "终审仅核对至多 5 个源交易日，按原有预热门记为未就绪、零交易，未重算指标或收益。"
         "原始错误、独立覆盖生成器 SHA 与每只收据保留在 warmup_recovery.json。") if recovery else ''
+    stop_path=out/'owner_stop.json'
+    stopped=json.loads(stop_path.read_text()) if stop_path.exists() else None
+    stop_note=''
+    if stopped:
+        omitted=len(stopped['uncollected_codes'])
+        isolated=summary['failed_symbols']-stopped['failed_sources']
+        pending=summary['universe_count']-summary['covered_symbols']-summary['failed_symbols']-omitted
+        if isolated<0 or pending!=0:
+            raise ValueError('owner-stopped coverage does not reconcile to the frozen universe')
+        summary.update(owner_stopped=True,uncollected_symbols=omitted,
+            collection_failed_symbols=stopped['failed_sources'],evaluation_isolated_symbols=isolated)
+        stop_note=(f"Owner 要求停止继续取数，固定已有 {stopped['successful_sources']} 只有成功源收据的股票。"
+            f"另有 {stopped['failed_sources']} 只取数失败、{omitted} 只未采集，均不再重试。"
+            f"评估隔离 {isolated} 只；所有类别合计 {summary['universe_count']} 只。"
+            "这是按采集进度截取的可用样本，未按收益筛选，但并非全主板随机代表样本；不能外推为全主板表现。")
+        if stop_note not in summary['warnings']:summary['warnings'].append(stop_note)
+    universe=json.loads((exp/'data/universe.json').read_text())
+    sources={r['code']:r for r in json.loads((exp/'data/collection_records.json').read_text())}
+    errors_path=out/'evaluation_errors.json'
+    errors=json.loads(errors_path.read_text()) if errors_path.exists() else {}
+    source_rows=[]
+    for code in universe['codes']:
+        record=sources.get(code)
+        evaluated=(out/'streams'/f'{code}.json').exists()
+        source_rows.append(dict(code=code,name=universe['names'].get(code,''),
+            collection_status='uncollected' if record is None else 'failed' if 'error' in record else 'collected',
+            evaluation_status='covered' if evaluated else 'isolated' if code in errors else 'unavailable',
+            error=errors.get(code,record.get('error','') if record else 'owner_stopped' if stopped else 'not_collected')))
+    pd.DataFrame(source_rows).to_csv(out/'source_coverage.csv',index=False)
+    (STATIC/'source_coverage.csv').write_bytes((out/'source_coverage.csv').read_bytes())
+    summary['source_coverage_url']='/static/ashare-backtest/source_coverage.csv'
     def n(value,percent=False):
         if value is None:return '不适用／样本不足'
         return f'{value*100:.3f}%' if percent else f'{value:.4f}'
@@ -46,6 +79,8 @@ def deliver(exp=EXP):
 
 固定四组评估已完成本轮可用数据处理。目标 **{summary['universe_count']}** 只，实际覆盖 **{summary['covered_symbols']}** 只，缺数或隔离 **{summary['failed_symbols']}** 只。结果状态：**{summary['status']}**。未就绪证券保留在分母中；这是历史研究，未通过实盘准入。
 
+{stop_note}
+
 ## 冻结口径与授权
 
 - 收益窗口：{summary['start']} 至 {summary['end']}，交易日日历为 BaoStock 0.9.3；2008 年起的数据仅为预热。
@@ -63,7 +98,7 @@ PF 按自然平仓净 R 的盈利和亏损计算；平均收益为独立事件�
 
 ## 数据统计与时间分层
 
-无训练、调参或随机 train/val 切分。四组为预先冻结的历史评价，按实际入场年度分层；全部自然平仓数就是各组的评价样本数，正类比例在这里明确定义为净收益大于零的平仓胜率。缺数、预热不足、随机配对缺额及不能成交的原因见覆盖文件。
+无训练、调参或随机 train/val 切分。四组为预先冻结的历史评价，按实际入场年度分层；全部自然平仓数就是各组的评价样本数，正类比例在这里明确定义为净收益大于零的平仓胜率。全池采集/隔离清单见 `source_coverage.csv`；预热不足、随机配对缺额及不能成交的原因见 `coverage.csv`。
 
 | 入场年 | 版本 | 周期 | 自然平仓数 | 胜率 | 平均净收益 | 累计净R |
 |---|---|---|---:|---:|---:|---:|
@@ -91,7 +126,7 @@ PF 按自然平仓净 R 的盈利和亏损计算；平均收益为独立事件�
 
 ```bash
 cd /Users/zhangzc/fable-trading
-PYTHONPATH=/tmp/spike-ashare-v18-bs093 .venv/bin/python -m yoyo.evaluation.spike_ashare_data --config {exp.relative_to(ROOT)}/config.json --destination {exp.relative_to(ROOT)}/data --workers 4
+{('# Owner 已停止取数：复现仅使用冻结的 data/collection_records.json，不再调用采集器。' if stopped else f'PYTHONPATH=/tmp/spike-ashare-v18-bs093 .venv/bin/python -m yoyo.evaluation.spike_ashare_data --config {exp.relative_to(ROOT)}/config.json --destination {exp.relative_to(ROOT)}/data --workers 4')}
 .venv/bin/python -m yoyo.evaluation.spike_ashare_study --experiment {exp.relative_to(ROOT)}
 .venv/bin/python -m yoyo.evaluation.spike_ashare_delivery
 .venv/bin/python -m pytest tests/evaluation/test_spike_ashare_engine.py tests/evaluation/test_spike_ashare_study.py tests/test_spike_burst_replay.py -q
@@ -116,8 +151,9 @@ node --test tests/monitor/frontend_ashare.test.cjs tests/monitor/frontend_cards.
     (STATIC/'report.html').write_bytes(html.read_bytes())
     summary['report_url']='/static/ashare-backtest/report.html'
     save(out/'summary.json',summary);save(STATIC/'summary.json',summary)
-    files=[md,html,out/'summary.json',out/'trades.csv.gz',out/'coverage.csv',out/'evaluation_identity.json']
+    files=[md,html,out/'summary.json',out/'trades.csv.gz',out/'coverage.csv',out/'source_coverage.csv',out/'evaluation_identity.json']
     if recovery_path.exists():files.append(recovery_path)
+    if stop_path.exists():files.append(stop_path)
     receipt=dict(generated_at=summary['generated_at'],files={str(p.relative_to(ROOT)):sha(p) for p in files})
     save(out/'delivery_receipt.json',receipt)
     return receipt

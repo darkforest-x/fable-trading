@@ -13,18 +13,26 @@
   }
   let data = null, loading = false;
   const $ = id => root.document.getElementById(id);
+  function coverageText(value) {
+    const stopped = value.owner_stopped || value.collection?.owner_stopped;
+    const omitted = value.uncollected_symbols ?? value.collection?.uncollected;
+    const failed = value.collection_failed_symbols ?? value.collection?.errors;
+    const isolated = value.evaluation_isolated_symbols ?? (typeof failed === "number" ? value.failed_symbols - failed : null);
+    return `目标 ${number(value.universe_count,0)} 只 · 已覆盖 ${number(value.covered_symbols,0)} 只 · ${stopped ? `采集失败 ${number(failed,0)} 只 · 评估隔离 ${number(isolated,0)} 只 · 未采集 ${number(omitted,0)} 只（不再补抓）` : `异常/待重试 ${number(value.failed_symbols,0)} 只`}`;
+  }
   function render() {
     if (!data) return;
     const version = $("ashare-version").value, timeframe = $("ashare-timeframe").value;
-    const status = ({ collecting:"历史数据采集中", running:"固定配置回测中", complete:"回测完成", incomplete:"结果覆盖不完整", error:"数据读取失败" })[data.status] || "等待统计";
+    const stopped = data.owner_stopped || data.collection?.owner_stopped;
+    const status = stopped ? ((data.status === "complete" || data.status === "incomplete") ? "已有数据回测完成 · 部分主板覆盖" : "已停止取数 · 已有数据回测中") : (({ collecting:"历史数据采集中", running:"固定配置回测中", complete:"回测完成", incomplete:"结果覆盖不完整", error:"数据读取失败" })[data.status] || "等待统计");
     $("ashare-status").textContent = status;
     $("ashare-period").textContent = `${data.start || "—"} 至 ${data.end || "—"}`;
-    $("ashare-coverage").textContent = `目标 ${number(data.universe_count,0)} 只 · 已覆盖 ${number(data.covered_symbols,0)} 只 · 异常/待重试 ${number(data.failed_symbols,0)} 只`;
+    $("ashare-coverage").textContent = coverageText(data);
     $("ashare-source").textContent = `${data.source || "BaoStock"} · 更新 ${data.generated_at ? new Date(data.generated_at).toLocaleString("zh-CN",{timeZone:"Asia/Shanghai"}) : "—"}`;
     $("ashare-rows").innerHTML = table(filter(data.groups, version, timeframe));
     $("ashare-annual").innerHTML = table(filter(data.annual, version, timeframe), true);
-    $("ashare-notes").innerHTML = (data.warnings || []).map(note => `<li>${escape(note)}</li>`).join("");
-    $("ashare-downloads").innerHTML = [["完整报告",data.report_url],["逐笔交易 CSV",data.trades_url],["股票覆盖 CSV",data.coverage_url]]
+    $("ashare-notes").innerHTML = (data.warnings || []).map(note => stopped && note.startsWith("全量仍在运行") ? "已按用户要求停止取数，仅完成已有数据；当前覆盖未代表全主板。" : note).map(note => `<li>${escape(note)}</li>`).join("");
+    $("ashare-downloads").innerHTML = [["完整报告",data.report_url],["逐笔交易 CSV",data.trades_url],["股票覆盖 CSV",data.coverage_url],["全池采集清单",data.source_coverage_url]]
       .filter(([,url]) => safeLink(url)).map(([label,url]) => `<a class="load-more" href="${escape(url)}" target="_blank" rel="noopener">${label} ↗</a>`).join("");
   }
   async function load() {
@@ -45,7 +53,7 @@
       $("ashare-status").textContent = data ? "上次快照 · 刷新失败" : "等待可核验结果";
     } finally { clearTimeout(timer); loading = false; }
   }
-  const api = {load,render,number,percent,safeLink,filter,table};
+  const api = {load,render,number,percent,safeLink,filter,table,coverageText};
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else {
     root.SpikeAshare = api;

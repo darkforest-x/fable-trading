@@ -87,6 +87,8 @@ def collect(config_path, destination, workers=4):
     """Collect every frozen security with per-file receipts and explicit errors."""
     config = json.loads(Path(config_path).read_text())
     destination = Path(destination)
+    if (destination.parent/'results/owner_stop.json').exists():
+        raise ValueError('owner stopped collection; only frozen-source closeout is authorized')
     universe = freeze(destination, config)
     began = time.monotonic()
     prior_path=destination/'collection_records.json'
