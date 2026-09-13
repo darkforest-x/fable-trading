@@ -1,0 +1,25 @@
+{
+  "experiment_id": "exp-spike-v8-early-exit-20260913-v1",
+  "raw": "experiments/active/exp-spike-v7-v1-compare-20260912-v1/results/replay_two_year_20260912_v3",
+  "raw_manifest_sha256": "37f65499611877c8b8b10f0f2fb7a8c99a07d95cc90cda282f5b8a5ac89d41b6",
+  "v8_replay": "experiments/active/exp-spike-v8-noise-filter-20260913-v1/replay_v1",
+  "v8_replay_manifest_sha256": "04469ed2e694f23d27591d8316b71b66eab5e6d0338fc0847b6ae004f4bd30b9",
+  "expected_streams": 3531,
+  "start": "2024-09-10T00:00:00Z",
+  "split": "2025-09-10T00:00:00Z",
+  "end": "2026-09-10T00:00:00Z",
+  "admission": "V8 rope_distance_atr_lte_3",
+  "execution_contract": "next-open entry; original five-bar/2ATR initial stop; 2R arm and 4ATR trail; raw V6 opposite next-open exit; 0.2% round-trip cost",
+  "policies": ["baseline", "no_new_extreme_2", "no_new_extreme_3", "back_inside_rope_2", "back_inside_rope_3"],
+  "selection": {
+    "period": "entry_time < 2025-09-10T00:00:00Z",
+    "mean_loss_or_closed_trade_mdd_improves": true,
+    "independent_stream_account_return_1pct_not_worse": "mean over the identical fixed 3531-stream pool; zero-closed streams are zero return/drawdown and nonpositive factors are bankrupt",
+    "exact_realized_ge_10r_retention_min": 0.95
+  },
+  "same_entry_null": "development and validation_reused_history rows are reported separately; all_descriptive is never a selection p-value",
+  "random_control_reuse": "not used: V8's existing random-control rows do not identify outcomes for exit-created reentries",
+  "research_only": true,
+  "training_eligible": false,
+  "production_eligible": false
+}
