@@ -98,6 +98,7 @@ def run(output: Path, official: bool)->None:
     output.mkdir(parents=True,exist_ok=False)
     baseline=load_baseline(); pairs=load_be_pairs()
     baseline.to_csv(output/'baseline_event_ledger.csv.gz',index=False,compression='gzip')
+    _summary(baseline,['stream','period']).to_csv(output/'baseline_overall_summary.csv',index=False)
     pairs.to_csv(output/'eth3m_be_fixed_entry_pairs.csv.gz',index=False,compression='gzip')
     gate=baseline.assign(cost_budget_group=np.where(baseline.cost_budget_pass,'pass_fee_r_le_0_5','excluded_fee_r_gt_0_5'))
     _summary(gate,['stream','period','cost_budget_group']).to_csv(output/'cost_budget_gate_summary.csv',index=False)
