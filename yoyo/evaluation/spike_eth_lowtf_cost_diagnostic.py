@@ -101,6 +101,7 @@ def run(output: Path, official: bool)->None:
     pairs.to_csv(output/'eth3m_be_fixed_entry_pairs.csv.gz',index=False,compression='gzip')
     gate=baseline.assign(cost_budget_group=np.where(baseline.cost_budget_pass,'pass_fee_r_le_0_5','excluded_fee_r_gt_0_5'))
     _summary(gate,['stream','period','cost_budget_group']).to_csv(output/'cost_budget_gate_summary.csv',index=False)
+    _summary(gate,['stream','period','month','cost_budget_group']).to_csv(output/'cost_budget_monthly_summary.csv',index=False)
     _summary(baseline,['stream','period','fee_r_bucket']).to_csv(output/'fee_r_bucket_summary.csv',index=False)
     _summary(baseline,['stream','period','side','exit_reason']).to_csv(output/'baseline_direction_exit_summary.csv',index=False)
     _summary(baseline,['stream','period','month']).to_csv(output/'baseline_monthly_summary.csv',index=False)
