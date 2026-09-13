@@ -25,7 +25,7 @@ from yoyo.evaluation.spike_v8_ma_cycle_study import cycle_features
 
 EXP = Path("experiments/active/exp-spike-v8-ma-cycle-20260913-v1")
 COLORS = {"armed_consolidation": ("压缩就绪", "#d8ad53"),
-          "launch": ("启动", "#1b9e87"), "expansion": ("排列扩散", "#5484cd"),
+          "launch": ("启动中", "#1b9e87"), "expansion": ("排列扩散", "#5484cd"),
           "reconsolidation": ("重新收拢", "#ad80bd"),
           "awaiting_compression": ("等待新整理", "#b9c1c9"), "unknown": ("未知", "#dfe3e6")}
 MAS = (("s20", "#157f75"), ("e20", "#75b2a6"), ("s60", "#3565a4"),
@@ -37,7 +37,8 @@ def sha(path: Path) -> str:
 
 
 def plot(context, start: int, end: int, output: Path, *, title: str,
-         confirmation: pd.Timestamp | None = None, trade: pd.Series | None = None) -> None:
+         confirmation: pd.Timestamp | None = None, trade: pd.Series | None = None,
+         reference_marks: list[tuple[str, str]] | None = None) -> None:
     bars = context.cache["bars"]
     gap = context.cache["data_gap"].reindex(bars.index).fillna(True).astype(bool)
     fields = cycle_features(bars, gap, context.minutes)
@@ -74,6 +75,14 @@ def plot(context, start: int, end: int, output: Path, *, title: str,
         ax.scatter(exit_time.tz_convert("Asia/Shanghai"), trade.exit_price, color="#111827", marker="x", zorder=8)
         ax.hlines(trade.initial_stop, entry.tz_convert("Asia/Shanghai"), exit_time.tz_convert("Asia/Shanghai"),
                   color="#c35a63", ls="--", lw=.8)
+    for stamp, label in reference_marks or []:
+        instant = pd.Timestamp(stamp)
+        value = float(bars.loc[instant, 'close'])
+        ax.scatter(instant.tz_convert('Asia/Shanghai'), value, s=32, color='#725294', zorder=9)
+        ax.annotate(label, xy=(instant.tz_convert('Asia/Shanghai'), value),
+                    xytext=(0, 46), textcoords='offset points', ha='center', fontsize=9,
+                    bbox=dict(boxstyle='round,pad=.4', facecolor='white', edgecolor='#ddd5e3', alpha=.95),
+                    arrowprops=dict(arrowstyle='->',color='#725294',lw=.8))
     ax.set_title(title, fontsize=13)
     ax.set_ylabel("价格")
     ax.legend(ncol=6, loc="upper left", fontsize=8)
@@ -85,7 +94,10 @@ def plot(context, start: int, end: int, output: Path, *, title: str,
     axes[2].plot(local, state.compression_threshold*100, color="#b88b36", ls="--", label="此前256根20%分位")
     axes[2].set_ylabel("带宽 %"); axes[2].legend(loc="upper left", ncol=2, fontsize=8)
     axes[2].xaxis.set_major_formatter(mdates.DateFormatter("%m-%d\n%H:%M", tz=local.tz))
-    axes[2].set_xlabel("北京时间K线开盘标时；状态在各自收盘后才可知。紫线为V8确认时点，灰色叠加区为后续走势。")
+    caption = "北京时间K线开盘标时；状态在各自收盘后才可知。"
+    caption += ("紫线为V8确认时点，灰色叠加区为后续走势；三角为原入场，叉为原退出。" if confirmation is not None
+                else "A/B/C为原图三笔观察；背景为每根收盘后的固定状态，不是事后回填。")
+    axes[2].set_xlabel(caption)
     fig.legend(handles=[Patch(facecolor=c, alpha=.4, label=n) for n,c in COLORS.values()],
                loc="outside upper center", ncol=6, fontsize=9)
     fig.savefig(output, dpi=150)
@@ -139,7 +151,10 @@ def main() -> None:
         context=load_verified_stream(raw/"streams"/str(comp.stream_key.iloc[0])); bars=context.cache["bars"]
         start=int(bars.index.searchsorted(pd.Timestamp("2026-07-22T00:00:00Z")))
         end=int(bars.index.searchsorted(pd.Timestamp("2026-08-04T00:00:00Z")))
-        plot(context,start,end,args.output/"comp_1h_cycle.png",title="COMP 1H · 原案例区间的固定状态划分（非新信号，不以此调参）")
+        plot(context,start,end,args.output/"comp_1h_cycle.png",title="COMP 1H · 原案例区间的固定状态划分（非新信号，不以此调参）",
+             reference_marks=[('2026-07-23T16:00:00Z','A · 多 17.61'),
+                              ('2026-07-26T04:00:00Z','B · 多 17.43'),
+                              ('2026-07-27T08:00:00Z','C · 空 17.20')])
     pd.DataFrame(selected).to_csv(args.output/"selection.csv",index=False)
     (args.output/"manifest.json").write_text(json.dumps({"builder_sha256":sha(Path(__file__)),
         "state_builder_sha256":sha(Path("yoyo/evaluation/spike_v8_ma_cycle_study.py")),
