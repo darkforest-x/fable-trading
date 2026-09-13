@@ -130,7 +130,14 @@ def verify_v1_post_consistency(root: Path = V1_ROOT, post_path: Path = V1_POST_C
     fields = ["venue", "symbol", "timeframe_min", "signal_bar_open", "side", "entry_price", "initial_stop", "initial_risk", "mfe_r", "exit_time", "exit_price", "exit_reason", "net_return", "net_r", "censored"]
     for path in sorted((root / "streams").glob("*/trades.csv.gz")):
         raw = pd.read_csv(path)
+        if "variant" not in raw or not raw.variant.eq("v1_common_execution_long").any():
+            continue
+        missing = set(fields) - set(raw.columns)
+        if missing:
+            raise ValueError(f"V1 common trade schema missing {sorted(missing)} in {path}")
         parts.append(raw.loc[raw.variant.eq("v1_common_execution_long"), fields])
+    if not parts:
+        raise ValueError("no V1 common trades available for post consistency check")
     stream = pd.concat(parts, ignore_index=True)
     post = pd.read_csv(post_path)
     post = post.loc[post.variant.eq("v1_common_execution_long"), fields]
