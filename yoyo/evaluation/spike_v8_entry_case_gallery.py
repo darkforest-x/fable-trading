@@ -230,7 +230,7 @@ def _plot_trade(ax_full, ax_zoom, context, geom: dict[str, object], title: str, 
     ax_full.axhline(geom["entry_price"], color="#1b9e77", linewidth=.55); ax_full.axhline(geom["initial_stop"], color="#e41a1c", linewidth=.55, linestyle=":")
     ax_full.axvspan(bars.index[entry_i], bars.index[min(end-1, exit_i+12)], color="#eeeeee", alpha=.18, label="outcome window")
     ax_full.set_title(title, fontsize=8); ax_full.grid(alpha=.15); ax_full.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
-    z0,z1=max(0,entry_i-60),min(len(bars),entry_i+80)
+    z0,z1=max(0,entry_i-60),min(len(bars),entry_i+13)
     _candles(ax_zoom,bars,z0,z1)
     for column, color in zip(MA, colors): ax_zoom.plot(bars.index[z0:z1],bars[column].iloc[z0:z1],color=color,linewidth=.55)
     ax_zoom.plot(bars.index[z0:z1], (basis+2*std).iloc[z0:z1], color="#777777", linewidth=.45, linestyle="--")
@@ -239,6 +239,43 @@ def _plot_trade(ax_full, ax_zoom, context, geom: dict[str, object], title: str, 
     ax_zoom.axvline(bars.index[entry_i],color="#1b9e77",linewidth=.8); ax_zoom.scatter([bars.index[entry_i]],[geom["entry_price"]],marker="^",s=18,color="#1b9e77",zorder=5)
     ax_zoom.axhline(geom["entry_price"],color="#1b9e77",linewidth=.55); ax_zoom.axhline(geom["initial_stop"],color="#e41a1c",linewidth=.55,linestyle=":")
     ax_zoom.axvspan(bars.index[entry_i],bars.index[z1-1],color="#eeeeee",alpha=.15); ax_zoom.set_title("entry vicinity: purple=confirmation, green=entry",fontsize=7);ax_zoom.grid(alpha=.15);ax_zoom.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d"))
+
+
+def _at_entry_facts(context, geom: dict[str, object], side: int) -> dict[str, object]:
+    """Causal values at the completed confirmation bar; no future state is read."""
+    bars, bb, i = context.cache["bars"], context.cache["bb"], int(geom["signal_i"])
+    row, old = bars.iloc[i], bars.iloc[i - 3]
+    groups = (("s20", "e20"), ("s60", "e60"), ("s120", "e120"))
+    centers = np.array([(row[a] + row[b]) / 2 for a, b in groups], dtype=float)
+    old_centers = np.array([(old[a] + old[b]) / 2 for a, b in groups], dtype=float)
+    slopes = centers - old_centers
+    directional_order = sum(int(side * (float(row[a]) - float(row[b])) > 0)
+                            for left, right in ((0,1),(0,2),(1,2)) for a in groups[left] for b in groups[right])
+    lines = row.loc[list(MA)].astype(float); hi, lo = float(lines.max()), float(lines.min())
+    body_outside = bool(row.open > hi and row.close > hi) if side == 1 else bool(row.open < lo and row.close < lo)
+    previous = bars.iloc[i-12:i]
+    breaks = bool(row.close > previous.high.max()) if side == 1 else bool(row.close < previous.low.min())
+    b = bb.iloc[i]
+    return {"signal_bar_open": str(bars.index[i]), "signal_confirm_time": str(bars.index[i] + pd.Timedelta(minutes=context.minutes)),
+            "open": float(row.open), "high": float(row.high), "low": float(row.low), "close": float(row.close),
+            "atr": float(row.atr), "tr": float(row.tr), "tr_over_atr": float(row.tr / row.atr) if row.atr > 0 else math.nan,
+            "rv": float(row.rv), "ma_envelope_width": hi-lo, "ma_envelope_width_over_close": (hi-lo)/float(row.close),
+            "directional_order_0_to_12": directional_order, "slope20_3bar": slopes[0], "slope60_3bar": slopes[1], "slope120_3bar": slopes[2],
+            "all_three_slopes_same_direction": bool(np.all(slopes > 0) if side == 1 else np.all(slopes < 0)),
+            "body_fully_outside_six_ma_envelope": body_outside, "close_breaks_prior12_extreme": breaks,
+            "bb_basis": float(b.bb_basis), "bb_width": float(b.bb_width), "bb_width_p10_prior500": float(b.bb_width_p10_prior500),
+            "bb_compressed": bool(b.bb_compressed), "prior_squeeze_run3": bool(b.prior_squeeze_run3), "v7_ready": bool(b.v7_ready)}
+
+
+def _entry_window(context, geom: dict[str, object], case_id: str, role: str) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Export exactly the 60-pre/12-post cache slice used by the entry audit."""
+    i = int(geom["entry_i"]); start, end = max(0, i-60), min(len(context.cache["bars"]), i+13)
+    bars = context.cache["bars"].iloc[start:end].copy().reset_index(names="bar_open")
+    bb = context.cache["bb"].iloc[start:end].copy().reset_index(names="bar_open")
+    for table in (bars, bb):
+        table.insert(0, "case_id", case_id); table.insert(1, "role", role)
+        table.insert(2, "entry_i_local", i); table.insert(3, "entry_i_global", int(geom["entry_i_global"]))
+    return bars, bb
 
 
 def _render_case(case: pd.Series, contexts: dict[str, object], geometries: dict[tuple[str, str], dict[str, object]], output: Path) -> None:
@@ -253,7 +290,7 @@ def _render_case(case: pd.Series, contexts: dict[str, object], geometries: dict[
         context, geom = contexts[str(case[f"{prefix}_stream_key"])], geometries[(case.case_id, prefix)]
         label = f"{role}: {case[f'{prefix}_asset']} {case.timeframe_min}m {'long' if case.side == 1 else 'short'} | netR={geom['net_r']:.3f}, MFE={geom['mfe_r']:.3f}"
         _plot_trade(axes[row,0], axes[row,1], context, geom, label, int(case.timeframe_min))
-    handles, labels = axes[0,0].get_legend_handles_labels(); fig.legend(handles,labels,loc="upper center",ncol=6,fontsize=7)
+    axes[0,0].legend(loc="lower right", ncol=2, fontsize=5, framealpha=.75)
     fig.savefig(output / f"{case.case_id}_winner_loser.png", dpi=170); plt.close(fig)
 
 
@@ -265,6 +302,7 @@ def run(output: Path) -> None:
     if len(keys) > 12: raise ValueError("case selection exceeded the 12-stream cap")
     contexts = {key: load_verified_stream(RAW / "streams" / key) for key in keys}
     geometries: dict[tuple[str, str], dict[str, object]] = {}; facts: list[dict[str, object]] = []
+    entry_facts: list[dict[str, object]] = []; windows: list[pd.DataFrame] = []; bb_windows: list[pd.DataFrame] = []
     for _, case in cases.iterrows():
         for prefix in ("winner", "loser", "exploratory_relaxed"):
             if pd.isna(case.get(f"{prefix}_trade_id")): continue
@@ -273,15 +311,23 @@ def run(output: Path) -> None:
             facts.append({"case_id": case.case_id, "role": prefix, "stream_key": context.key, **geom, **_anomaly(context, geom),
                           "entry_known_fields": "rope_distance_atr, causal_volatility_bucket, state/state_age/slope_votes, entry price and frozen stop",
                           "outcome_only_fields": "exit price/reason, netR and MFE; none is an entry feature"})
+            entry_facts.append({"case_id": case.case_id, "role": prefix, "stream_key": context.key, "side": int(case.side),
+                                **_at_entry_facts(context, geom, int(case.side)),
+                                "interpretation": "causal description at confirmation only; not a new gate or threshold"})
+            w, b = _entry_window(context, geom, case.case_id, prefix); windows.append(w); bb_windows.append(b)
     output.mkdir(parents=True)
     cases.to_csv(output / "fixed_case_selection.csv", index=False)
     pd.DataFrame(facts).to_csv(output / "case_facts.csv", index=False)
+    pd.DataFrame(entry_facts).to_csv(output / "at_entry_facts.csv", index=False)
+    pd.concat(windows, ignore_index=True).to_csv(output / "entry_windows_bars.csv.gz", index=False, compression="gzip")
+    pd.concat(bb_windows, ignore_index=True).to_csv(output / "entry_windows_cached_bb.csv.gz", index=False, compression="gzip")
     for _, case in cases.iterrows(): _render_case(case, contexts, geometries, output)
     notes = ["# V8 entry case gallery", "", "This is a fixed explanatory sample, not a threshold search or full-pool performance claim.",
              "Six winners are the maximum netR scoring-closed V8 trades in the reused validation segment, one per 30m/1H/4H × long/short cell.",
              "Primary losers use the same stream (therefore venue/asset/timeframe), UTC month, direction and exact causal pre-signal volatility bucket. Missing primary controls remain missing. A nearest-bucket row, where present, is explicitly exploratory and never replaces the primary match.",
              "The global winner selection does not deduplicate assets; any repeated asset is intentional and stated in fixed_case_selection.csv.",
              "Figures are rendered from authenticated Python frozen price caches, not TradingView screenshots. Purple/green/orange marks are confirmation/entry/exit; grey shading is the future outcome window.",
+             "at_entry_facts.csv and the bounded entry_windows_bars/cached_bb exports contain only confirmation-time or 60-pre/12-post cache context for audit. They add no gate and no threshold.",
              "NetR and MFE are outcomes. MA arrangement, BB200 and state fields shown at confirmation are descriptive case facts only; later movement is not an entry feature.",
              "Holdout-era use: owner-authorized explanatory gallery configuration #1 on reused nonblind history; no model, production or live rule changed."]
     (output / "notes.md").write_text("\n".join(notes)+"\n")
