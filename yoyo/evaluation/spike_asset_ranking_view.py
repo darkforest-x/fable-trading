@@ -31,7 +31,7 @@ PAGE = r'''<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="v
 <p style="margin-top:16px">点击表头也可排序。V1 信号稀疏，切换 V1 时默认显示低样本观察榜；可自行提高最低笔数。全期收益榜是事后描述，不能据此直接剔除同期亏损币。低样本只供查阅；PF 按 R 与按名义价格收益会不同。R 分母过小、费用占 R 过大及少数极端盈利，都可能扭曲排名。</p>
 <div class="links"><a href="p1_spike_v1_v8_asset_ranking_20260914.html">研究结论与排除检验</a><a href="__ASSET_CSV__">下载完整币种统计 CSV</a><a href="__LEDGER__">下载全部逐笔账本 CSV.gz</a></div>
 </main><script type="application/json" id="data">__DATA__</script><script>
-const data=JSON.parse(document.getElementById('data').textContent),by=id=>document.getElementById(id);
+const packed=JSON.parse(document.getElementById('data').textContent),data=Object.fromEntries(Object.entries(packed).map(([k,v])=>[k,v.rows.map(row=>Object.fromEntries(v.columns.map((c,i)=>[c,row[i]])))])),by=id=>document.getElementById(id);
 const cols=[['label','币种 / 分组','text'],['n_closed','交易数','int'],['sum_net_r','累计净 R','number'],['mean_net_r','平均净 R','number'],['win_rate','净胜率','pct'],['pf_net_r','PF · R','number'],['pf_net_return','PF · 价格收益','number'],['realized_ge10r','兑现 ≥10R','int'],['top1_positive_r_share','最大单笔 / 正收益','pct'],['median_risk_fraction_at_entry','初始风险中位','pct'],['median_cost_r','费用 R 中位','number']];
 for(const [key,label] of cols){const th=document.createElement('th');th.textContent=label;th.onclick=()=>{if(!Array.from(by('sort').options).some(o=>o.value===key)){const o=new Option(label,key);by('sort').add(o)}by('sort').value=key;by('direction').value=by('direction').value==='desc'?'asc':'desc';render()};by('head').append(th)}
 function render(){const dim=by('dimension').value,query=by('search').value.trim().toUpperCase(),key=by('sort').value,sign=by('direction').value==='desc'?-1:1;const rows=data[dim].filter(r=>r.view===by('view').value&&r.scope===by('scope').value&&Number(r.n_closed)>=Math.max(1,Number(by('minimum').value)||1)&&r.asset.toUpperCase().includes(query));for(const r of rows){r.label=r.asset+(dim==='venue_asset'?' · '+r.venue:dim==='asset_timeframe_side'?' · '+r.timeframe_min+'m · '+(Number(r.side)===1?'多':'空'):'')};rows.sort((a,b)=>key==='label'?sign*a.label.localeCompare(b.label):sign*(Number(a[key])-Number(b[key]))||a.label.localeCompare(b.label));by('count').textContent=rows.length+' 个分组 · '+rows.reduce((s,r)=>s+Number(r.n_closed),0).toLocaleString()+' 笔已平仓事件';by('body').replaceChildren();for(const r of rows){const tr=document.createElement('tr');for(const [key,,type]of cols){const td=document.createElement('td'),n=Number(r[key]);td.textContent=type==='text'?r[key]:r[key]===''||r[key]===null?'—':!Number.isFinite(n)?String(r[key]):type==='pct'?(n*100).toFixed(2)+'%':type==='int'?n.toLocaleString():n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:3});if(key.includes('net_r'))td.className=n>=0?'pos':'neg';tr.append(td)}by('body').append(tr)}}
@@ -47,8 +47,16 @@ def main() -> None:
         path = ROOT / f'results/full_v1/{dim}_ranking_all.csv'
         inputs[str(path)] = hashlib.sha256(path.read_bytes()).hexdigest()
         with path.open() as source:
-            data[dim] = list(csv.DictReader(source))
-    text = PAGE.replace('__DATA__', json.dumps(data, ensure_ascii=False).replace('<', '\\u003c'))
+            raw = list(csv.DictReader(source))
+        columns = ['view', 'scope', 'asset', 'venue', 'timeframe_min', 'side',
+                   'n_closed', 'sum_net_r', 'mean_net_r', 'win_rate', 'pf_net_r',
+                   'pf_net_return', 'realized_ge10r', 'top1_positive_r_share',
+                   'median_risk_fraction_at_entry', 'median_cost_r']
+        columns = [c for c in columns if c in raw[0]]
+        # Columnar transport avoids repeating thousands of long field names;
+        # full precision numeric text remains in the source CSV and payload.
+        data[dim] = {'columns': columns, 'rows': [[r[c] for c in columns] for r in raw]}
+    text = PAGE.replace('__DATA__', json.dumps(data, ensure_ascii=False, separators=(',', ':')).replace('<', '\\u003c'))
     text = text.replace('__ASSET_CSV__', str((ROOT/'results/full_v1/asset_ranking_all.csv').resolve()))
     text = text.replace('__LEDGER__', str((ROOT/'results/full_v1/normalized_ledger.csv.gz').resolve()))
     OUT.parent.mkdir(exist_ok=True)
