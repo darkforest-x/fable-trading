@@ -13,6 +13,7 @@ import argparse
 import hashlib
 import json
 import math
+import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -271,6 +272,83 @@ def _signflip(pairs: pd.DataFrame, *, draws: int = 20000) -> dict[str, object]:
             "p_formula": "(exceedances + 1) / (draws + 1)", "limitation": "three UTC-month blocks; descriptive only"}
 
 
+def _be_stop_masks(post: pd.DataFrame) -> tuple[pd.Series, pd.Series]:
+    """Separate an entry-protection BE stop from a better original trail fill."""
+    at_entry = post.protection_be.sub(post.entry_price_be).abs().le(1e-12)
+    # ``be_armed`` only exists on the BE input to the paired merge, hence it
+    # intentionally remains unsuffixed.
+    be_stop = post.be_armed.astype(bool) & post.exit_reason_be.str.contains("trailing_stop", na=False) & at_entry
+    price_fill = be_stop & post.exit_price_be.sub(post.entry_price_be).abs().le(1e-12)
+    return be_stop, price_fill
+
+
+def _paired_outcome_summary(post: pd.DataFrame) -> dict[str, object]:
+    """Aggregate material paired changes while preserving raw CSV deltas."""
+    tolerance = 1e-8
+    delta = post.net_r_difference.astype(float)
+    improved, worsened = delta.gt(tolerance), delta.lt(-tolerance)
+    unchanged = ~(improved | worsened)
+    be_stop, price_be_fill = _be_stop_masks(post)
+    be_stop_losses = post.loc[be_stop & post.net_r_be.lt(0), "net_r_be"]
+    return {"paired_delta_tolerance_net_r": tolerance, "unchanged_pairs": int(unchanged.sum()),
+            "improved_pairs": int(improved.sum()), "worsened_pairs": int(worsened.sum()),
+            "positive_delta_net_r_sum": float(delta.loc[improved].sum()), "negative_delta_net_r_sum": float(delta.loc[worsened].sum()),
+            "one_r_triggered_fixed": int(post.be_trigger_count.gt(0).sum()),
+            "be_protection_stop_fixed": int(be_stop.sum()), "price_be_fill_fixed": int(price_be_fill.sum()),
+            "be_gap_stop_fixed": int((be_stop & post.exit_reason_be.str.endswith("_gap", na=False)).sum()),
+            "be_stop_loss_median_net_r": float(be_stop_losses.median()) if len(be_stop_losses) else math.nan,
+            "rescued_original_losers": int((post.net_r_baseline.lt(0) & improved).sum()),
+            "lost_original_winners": int((post.net_r_baseline.gt(0) & post.net_r_be.le(0)).sum()),
+            "lost_original_10r": int((post.net_r_baseline.ge(10) & post.net_r_be.lt(10)).sum()),
+            **_signflip(post)}
+
+
+def finalize_existing(failed: Path, output: Path) -> None:
+    """Finalize an interrupted post-processing stage without opening OHLCV or replaying.
+
+    ``failed`` is immutable evidence of the first authorized read.  This path
+    accepts only its already-materialized tables, hashes them before copying,
+    and makes an explicitly separate reused-output receipt.
+    """
+    if output.exists():
+        raise FileExistsError(output)
+    failed_manifest = json.loads((failed / "manifest.json").read_text())
+    if failed_manifest.get("status") != "failed" or failed_manifest.get("complete"):
+        raise ValueError("finalize-existing requires an incomplete failed run")
+    required = ["summary.csv", "development_serial_closed_trades.csv.gz", "post_authorized_holdout_serial_closed_trades.csv.gz",
+                "development_fixed_entry_pairs.csv.gz", "post_authorized_holdout_fixed_entry_pairs.csv.gz",
+                "development_diagnostics.json", "post_authorized_holdout_diagnostics.json"]
+    missing = [name for name in required if not (failed / name).is_file()]
+    if missing:
+        raise ValueError("failed run lacks materialized inputs: " + ", ".join(missing))
+    input_hashes = {name: _sha256(failed / name) for name in required}
+    output.mkdir(parents=True)
+    source_commit = subprocess.run(["git", "rev-parse", "HEAD"], check=True, text=True, stdout=subprocess.PIPE).stdout.strip()
+    receipt = {"mode": "finalize_existing_without_ohlcv_read", "source_failed_run": str(failed),
+               "source_failed_manifest_sha256": _sha256(failed / "manifest.json"), "input_sha256": input_hashes,
+               "source_commit": source_commit, "no_new_holdout_ohlcv_read": True}
+    (output / "reused_input_receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
+    for name in required:
+        shutil.copy2(failed / name, output / name)
+    pairs = pd.read_csv(output / "post_authorized_holdout_fixed_entry_pairs.csv.gz")
+    if len(pairs) != 111 or pairs["fold_baseline"].ne("post_authorized_holdout").any():
+        raise AssertionError("reused post paired table is not the fixed 111-entry ETH baseline")
+    if not math.isclose(float(pairs.net_r_baseline.sum()), -26.282877310782634, rel_tol=0, abs_tol=1e-10):
+        raise AssertionError("reused post paired baseline does not equal -26.282877R")
+    if pairs.duplicated(["signal_i", "entry_i", "side"]).any():
+        raise AssertionError("reused paired table is not one-to-one")
+    outcomes = _paired_outcome_summary(pairs)
+    (output / "paired_outcomes.json").write_text(json.dumps(outcomes, indent=2) + "\n")
+    output_hashes = {path.name: _sha256(path) for path in sorted(output.iterdir()) if path.is_file()}
+    manifest = {"experiment": "exp-spike-v8-eth3m-be-20260913-v1", "status": "complete", "complete": True,
+                "mode": "finalize_existing_without_ohlcv_read", "source_commit": source_commit,
+                "source_sha256": _sha256(Path(__file__)), "reused_failed_run": str(failed),
+                "reused_failed_manifest_sha256": receipt["source_failed_manifest_sha256"], "input_sha256": input_hashes,
+                "output_sha256": output_hashes, "holdout": "No new OHLCV read; reused tables created during owner-authorized use #1.",
+                "frozen_baseline_check": {"closed_trades": 111, "net_r": -26.282877310782634}}
+    (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+
+
 def run(output: Path, *, allow_holdout: bool, holdout_exposure_number: int, prefix_end: pd.Timestamp | None = None) -> None:
     """Run one authorized ETH 3m configuration, never a market-wide scan."""
     config = json.loads(CONFIG.read_text())
@@ -354,14 +432,7 @@ def run(output: Path, *, allow_holdout: bool, holdout_exposure_number: int, pref
       pairs = pd.concat(fixed_pairs, ignore_index=True) if fixed_pairs else pd.DataFrame()
       if len(pairs):
           post = pairs.loc[pairs.fold_baseline.eq("post_authorized_holdout")]
-          be_protection_at_entry = post.protection_be.sub(post.entry_price_be).abs().le(1e-12)
-          be_stop = post.be_armed_be.astype(bool) & post.exit_reason_be.str.contains("trailing_stop", na=False) & be_protection_at_entry
-          price_be_fill = be_stop & post.exit_price_be.sub(post.entry_price_be).abs().le(1e-12)
-          outcomes = {"one_r_triggered_fixed": int(post.be_trigger_count_be.gt(0).sum()),
-                      "be_protection_stop_fixed": int(be_stop.sum()), "price_be_fill_fixed": int(price_be_fill.sum()),
-                      "be_gap_stop_fixed": int((be_stop & post.exit_reason_be.str.endswith("_gap", na=False)).sum()),
-                      "rescued_original_losers": int(post.rescued_original_loser.sum()), "lost_original_winners": int(post.lost_original_winner.sum()),
-                      "lost_original_10r": int(post.lost_original_10r.sum()), **_signflip(post)}
+          outcomes = _paired_outcome_summary(post)
       else: outcomes = {}
       (output / "paired_outcomes.json").write_text(json.dumps(outcomes, indent=2) + "\n")
       (output / "holdout_read_receipt.json").write_text(json.dumps({"status": "complete", "exposure": 1, "input_sha256": input_hash, "source_commit": source_commit}, indent=2) + "\n")
@@ -381,7 +452,14 @@ def main() -> None:
     parser.add_argument("--allow-holdout", action="store_true")
     parser.add_argument("--holdout-exposure-number", type=int)
     parser.add_argument("--prefix-end")
+    parser.add_argument("--finalize-existing", type=Path,
+                        help="Pure post-processing reuse of a failed materialized run; never opens OHLCV.")
     args = parser.parse_args()
+    if args.finalize_existing is not None:
+        if args.allow_holdout or args.holdout_exposure_number is not None or args.prefix_end:
+            raise ValueError("finalize-existing cannot be combined with replay or holdout-read flags")
+        finalize_existing(args.finalize_existing, args.out)
+        return
     run(args.out, allow_holdout=args.allow_holdout, holdout_exposure_number=args.holdout_exposure_number,
         prefix_end=pd.Timestamp(args.prefix_end, tz="UTC") if args.prefix_end else None)
 

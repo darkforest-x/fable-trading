@@ -88,3 +88,24 @@ def test_prefix_does_not_change_a_preexisting_next_bar_be_fill() -> None:
     got = full.loc[~full.censored, study.TRADE_KEY].reset_index(drop=True)
     want = prefix.loc[~prefix.censored, study.TRADE_KEY].reset_index(drop=True)
     pd.testing.assert_frame_equal(got, want, check_dtype=False)
+
+
+def test_paired_be_stop_count_excludes_a_better_original_trail() -> None:
+    post = pd.DataFrame({"be_armed": [True, True, False], "protection_be": [100., 103., 100.],
+                         "entry_price_be": [100., 100., 100.], "exit_price_be": [100., 103., 100.],
+                         "exit_reason_be": ["trailing_stop", "trailing_stop", "trailing_stop"]})
+    be_stop, price_fill = study._be_stop_masks(post)
+    assert be_stop.tolist() == [True, False, False]
+    assert price_fill.tolist() == [True, False, False]
+
+
+def test_paired_outcomes_ignore_near_zero_float_deltas() -> None:
+    post = pd.DataFrame({"net_r_difference": [2., 5e-10, -3., -5e-10], "net_r_baseline": [-1., -1., 2., 11.],
+                         "net_r_be": [1., -1., -1., 9.], "be_trigger_count": [1, 0, 1, 1], "be_armed": [True] * 4,
+                         "protection_be": [100.] * 4, "entry_price_be": [100.] * 4, "exit_price_be": [100.] * 4,
+                         "exit_reason_be": ["trailing_stop"] * 4,
+                         "entry_time_baseline": ["2026-05-01T00:00Z"] * 4})
+    summary = study._paired_outcome_summary(post)
+    assert (summary["improved_pairs"], summary["worsened_pairs"], summary["unchanged_pairs"]) == (1, 1, 2)
+    assert summary["rescued_original_losers"] == 1
+    assert summary["lost_original_winners"] == 1
