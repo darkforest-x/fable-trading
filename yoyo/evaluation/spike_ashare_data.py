@@ -88,13 +88,25 @@ def collect(config_path, destination, workers=4):
     config = json.loads(Path(config_path).read_text())
     destination = Path(destination)
     universe = freeze(destination, config)
-    save(destination / 'collection_progress.json', dict(status='collecting', completed=0,
-         expected=len(universe['codes']), errors=0))
     began = time.monotonic()
-    records = []
+    prior_path=destination/'collection_records.json'
+    prior=json.loads(prior_path.read_text()) if prior_path.exists() else []
+    records=[]
+    for record in prior:
+        path=destination/'daily'/f"{record['code']}.csv"
+        if ('error' not in record and record['code'] in universe['codes'] and path.exists()
+                and hashlib.sha256(path.read_bytes()).hexdigest()==record.get('daily_sha256')):
+            records.append(record)
+    complete_codes={r['code'] for r in records}
+    if len(complete_codes)!=len(records):
+        raise ValueError('duplicate completed source receipt')
+    pending=[code for code in universe['codes'] if code not in complete_codes]
+    save(destination / 'collection_progress.json', dict(status='collecting', completed=len(records),
+         expected=len(universe['codes']), errors=0))
+    save(destination/'collection_records.json',records)
     with ProcessPoolExecutor(max_workers=workers, mp_context=multiprocessing.get_context('spawn')) as pool:
         futures = {pool.submit(_fetch_worker, (str(destination), code,
-                   config['history_start'], config['end'])): code for code in universe['codes']}
+                   config['history_start'], config['end'])): code for code in pending}
         for future in as_completed(futures):
             code = futures[future]
             try:
@@ -110,13 +122,15 @@ def collect(config_path, destination, workers=4):
                     record['error'] = 'empty_history'
             records.append(record)
             save(destination / 'collection_records.json', records)
-            progress = dict(status='collecting', completed=len(records), expected=len(futures),
+            progress = dict(status='collecting', completed=len(records), expected=len(universe['codes']),
                             errors=sum('error' in r for r in records),
                             elapsed_seconds=round(time.monotonic()-began, 1))
             save(destination / 'collection_progress.json', progress)
-            if len(records) % 10 == 0 or len(records) == len(futures):
+            if len(records) % 10 == 0 or len(records) == len(universe['codes']):
                 print(json.dumps(progress), flush=True)
-    progress['status'] = 'complete' if not progress['errors'] else 'incomplete'
+    progress=dict(status='incomplete' if any('error' in r for r in records) else 'complete',
+                  completed=len(records),expected=len(universe['codes']),
+                  errors=sum('error' in r for r in records),elapsed_seconds=round(time.monotonic()-began,1))
     save(destination / 'collection_progress.json', progress)
     print(json.dumps(progress), flush=True)
 

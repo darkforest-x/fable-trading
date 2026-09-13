@@ -186,6 +186,23 @@ def test_native_full_state_path_freezes_band_waits_and_uses_next_bar_protection(
     assert r.burst.sum() == 1
 
 
+def test_optional_adjusted_tick_keeps_scalar_default_and_scaled_active_path():
+    frame = _state_fixture()
+    scalar = replay(frame, .01)
+    aligned = replay(frame, .01, price_ticks=pd.Series(.01, index=frame.index))
+    aligned.attrs = scalar.attrs
+    pd.testing.assert_frame_equal(scalar, aligned)
+    scaled = frame.copy()
+    for column in ['open','high','low','close','md','sb','middle','atr','recentLow',
+                   'ropeHigh','ropeLow']:
+        scaled[column] *= 3
+    result = replay(scaled, .01, price_ticks=pd.Series(.03,index=frame.index))
+    assert result.burst.sum() == 1 and result.exit.sum() == 1
+    pd.testing.assert_series_equal(scalar.burst, result.burst)
+    np.testing.assert_allclose(result.initial_stop/3,scalar.initial_stop,equal_nan=True)
+    np.testing.assert_allclose(result.current_r,scalar.current_r,equal_nan=True,rtol=1e-10)
+
+
 def test_native_window_cancel_expiry_failed_gate_and_invalid_risk():
     cancelled = replay(_state_fixture(3), .00001)
     assert cancelled.iloc[14].pending_side == 0 and not cancelled.burst.any()

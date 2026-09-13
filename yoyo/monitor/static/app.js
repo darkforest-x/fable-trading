@@ -18,6 +18,7 @@
     warmup: ["预热历史", "初次启动前的回算信号，仅供复盘，不触发通知。"],
     watch: ["蓄势观察", "还在横盘的，单独观察。这里的结构尚不是启动信号。"],
     shadow: ["前向影子", "V7 与 V8 在相同新收盘数据上并行记录，积累未参与调参的新样本。"],
+    ashare: ["A股回测", "沪深主板近三年 · 固定 V1 / V8 · 日线与周线对照。"],
     system: ["运行状态", "行情、扫描与通知，每个环节都清晰可见。"],
   };
   const eventNames = { tv_start: "原始 V1 启动", yolo_confirmed: "YOLO 补充确认" };
@@ -237,8 +238,8 @@
     const previousView = state.view;
     const nextView = titles[view] ? view : "signals";
     state.view = nextView;
-    ["signals", "watch", "shadow", "system"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== (signalView(state.view) ? "signals" : state.view)));
-    $("primary-metrics").classList.toggle("hidden", state.view === "shadow");
+    ["signals", "watch", "shadow", "ashare", "system"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== (signalView(state.view) ? "signals" : state.view)));
+    $("primary-metrics").classList.toggle("hidden", ["shadow", "ashare"].includes(state.view));
     document.querySelectorAll("[data-view]").forEach((button) => {
       const active = button.dataset.view === state.view;
       button.classList.toggle("active", active);
@@ -263,6 +264,7 @@
     // Signals never load the expensive market overview.  Watch opts in once.
     if (state.view === "watch") loadMarkets();
     if (state.view === "shadow") loadShadow();
+    if (state.view === "ashare") window.SpikeAshare.load();
   }
   function filteredSignals() {
     const q = normalSearch(state.search);
@@ -648,6 +650,7 @@
     return "/api/signals?view=ledger&" + Object.entries(pairs).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join("&");
   }
   async function refresh(trigger = "manual") {
+    if (state.view === "ashare") { await window.SpikeAshare.load(); return; }
     if (state.view === "shadow") { await loadShadow(); return; }
     if (state.syncing) { queueRefresh(trigger); return; }
     const revision = state.signalQueryRevision, view = state.view, source = signalQuerySource(), key = sourceKey();
@@ -819,7 +822,7 @@
   document.addEventListener("keydown", (event) => {
     if (event.key === "/" && !event.metaKey && !event.ctrlKey && !event.altKey && !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName)) {
       event.preventDefault();
-      if (["system", "shadow"].includes(state.view)) setView("signals");
+      if (["system", "shadow", "ashare"].includes(state.view)) setView("signals");
       (state.view === "watch" ? $("watch-search") : $("symbol-search")).focus();
     }
   });

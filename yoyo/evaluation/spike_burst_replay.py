@@ -247,7 +247,7 @@ def path_reference(side, entry, risk, prior_protection, prior_peak, was_armed,
     return PathReference(not stopped, protection, peak_r, current_r, exit_price, armed)
 
 
-def replay(frame, tick):
+def replay(frame, tick, *, price_ticks=None):
     """Replay frozen default LONG-only Pine; input is ``features(ohlcv)`` output.
 
     ``burst``/``exit`` and ``route`` are single-bar events. ``initial_stop``,
@@ -257,10 +257,20 @@ def replay(frame, tick):
     known AFTER this close; ``active_protection`` is what was operative DURING
     this bar (na on the signal bar), also preserved on the stop bar. No intrabar
     exits/reentries or signal-bar peak excursion are invented.
+    ``price_ticks`` is an optional aligned current-bar tick in adjusted-price
+    coordinates (raw exchange tick times that bar's causal adjustment factor).
+    The default scalar-tick path remains the frozen Pine replay.
     """
     _validate_index(frame)
     if tick is None or not math.isfinite(tick) or tick <= 0:
         raise ValueError("A positive finite exchange price tick is required; no inferred tick")
+    ticks = None
+    if price_ticks is not None:
+        if not isinstance(price_ticks, pd.Series) or not price_ticks.index.equals(frame.index):
+            raise ValueError("adjusted price ticks must align exactly with the bar clock")
+        ticks = price_ticks.to_numpy(dtype=float)
+        if not np.isfinite(ticks).all() or (ticks <= 0).any():
+            raise ValueError("adjusted price ticks must be positive and finite")
     required = {"open", "high", "low", "close", "md", "sb", "middle", "atr", "pastWidth",
                 "pastCrosses", "ropeHigh", "ropeLow", "recentLow", "recentHigh", "rv", "expansion", "ready"}
     missing = required - set(frame.columns)
@@ -278,6 +288,7 @@ def replay(frame, tick):
     state = "等待蓄势"
     records = []
     for i, row in enumerate(frame.itertuples(index=False)):
+        row_tick = tick if ticks is None else float(ticks[i])
         o, h, l, c = row.open, row.high, row.low, row.close
         active_protection = protection if trend_side else NAN
         active_initial = initial_stop if trend_side else NAN
@@ -289,7 +300,7 @@ def replay(frame, tick):
         if bool(row.ready):
             if trend_side and i > entry_bar:
                 path = path_reference(trend_side, entry, risk, protection, peak_r, trail_armed,
-                                      o, h, l, c, row.atr, tick=tick)
+                                      o, h, l, c, row.atr, tick=row_tick)
                 protection, peak_r, current_r, trail_armed = path.protection, path.peak_r, path.current_r, path.armed
                 if not path.alive:
                     exit_event, ended, exit_price = True, True, path.exit_price
@@ -344,7 +355,7 @@ def replay(frame, tick):
                     if fires:
                         side = pending_side
                         burst_event, route = True, "price_first" if leading_side else "release_confirm"
-                        ref = risk_reference(side, c, row.recentLow, row.atr, tick=tick)
+                        ref = risk_reference(side, c, row.recentLow, row.atr, tick=row_tick)
                         entry, initial_stop, risk, protection, entry_bar = c, ref.stop, ref.risk, ref.stop, i
                         peak_r, current_r, trail_armed = 0.0, 0.0 if ref.valid else NAN, False
                         trend_side, pending_side = side if ref.valid else 0, 0
@@ -366,4 +377,6 @@ def replay(frame, tick):
     result.attrs.update(frame.attrs)
     result.attrs.update(source_sha256=SOURCE_SHA256, direction="long", tick=float(tick),
                         price_semantics="signal-close references, not execution fills")
+    if ticks is not None:
+        result.attrs['price_tick_mode'] = 'aligned_adjusted_coordinate_ticks'
     return result
