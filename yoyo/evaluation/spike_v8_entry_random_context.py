@@ -123,10 +123,14 @@ def build_tables(events: pd.DataFrame, random: pd.DataFrame) -> tuple[pd.DataFra
     if missing:
         raise ValueError(f"{missing} random-receipt rows have no event-evidence identity")
     joined = joined.drop(columns="_merge")
-    expected = joined["net_r"].to_numpy(float)
-    recorded = joined["target_net_r"].to_numpy(float)
+    # Unmatched receipts intentionally have no generated control (and thus no
+    # target/control return pair).  They retain their event labels for audit,
+    # but only a matched receipt can authenticate the old paired net-R field.
+    paired = joined.loc[joined["matched"].eq(True)]
+    expected = paired["net_r"].to_numpy(float)
+    recorded = paired["target_net_r"].to_numpy(float)
     if not np.isfinite(expected).all() or not np.isfinite(recorded).all():
-        raise ValueError("target net R must be finite in both frozen receipts")
+        raise ValueError("matched target net R must be finite in both frozen receipts")
     if not np.allclose(expected, recorded, rtol=0.0, atol=1e-10):
         raise ValueError("existing random receipt target_net_r differs from event evidence")
 
