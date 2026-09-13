@@ -73,6 +73,10 @@ def deliver(exp=EXP):
     annual=[]
     for g in summary['annual']:
         annual.append(f"| {g['year']} | {g['version'].upper()} | {g['timeframe']} | {g['closed_trades']} | {n(g['win_rate'],True)} | {n(g['mean_net_return'],True)} | {n(g['sum_net_r'])} |")
+    negative=all(g['mean_net_return'] is not None and g['mean_net_return']<0 for g in summary['groups'])
+    behind=all(g['excess_mean_net_return'] is not None and g['excess_mean_net_return']<0 for g in summary['groups'])
+    verdict=('四组单笔平均净收益均为负，且全部低于本次固定匹配随机对照；本样本不支持这四组入场规则具有正向超额。'
+             if negative and behind else '四组结果按下表逐一阅读，不能以单项指标代替经济验收。')
     stem='p1_spike_ashare_v1_v8_three_year_20260913'
     md=ROOT/'analysis'/f'{stem}.md'
     text=f'''# SPIKE V1 / V8：沪深主板近三年日线与周线
@@ -80,6 +84,8 @@ def deliver(exp=EXP):
 固定四组评估已完成本轮可用数据处理。目标 **{summary['universe_count']}** 只，实际覆盖 **{summary['covered_symbols']}** 只，缺数或隔离 **{summary['failed_symbols']}** 只。结果状态：**{summary['status']}**。未就绪证券保留在分母中；这是历史研究，未通过实盘准入。
 
 {stop_note}
+
+**结论：{verdict}** 这是已采集样本的描述性历史结论，不能推断完整主板、共享账户或未来实盘表现。
 
 ## 冻结口径与授权
 
@@ -111,6 +117,8 @@ PF 按自然平仓净 R 的盈利和亏损计算；平均收益为独立事件�
 - val AUC：不适用，本轮没有拟合概率分类器或验证排序器。
 - top-decile 毛/净收益与单特征排序基线：不适用，本轮执行的是两套冻结布尔信号，没有经过授权的排序变量；不能事后挑一列排名再冒充原策略。可比较的入场基线是同分层随机对照，毛/净事件收益同时列出。
 - V1/V8 的信号定义和就绪时长不同，原始数量变化不能单独归因为过滤效果；V8 日/周更长的背景预热会减少可评估股票。周线事件持有更长、期末截尾更多时，应同时看未结束数量，不能把截尾收益当自然退出成绩。
+- 日线的净 R 合计和净 R PF 略为正，但单笔平均百分比收益为负，两者并不矛盾：每笔净 R = 净收益率 ÷（初始风险 / 入场价），风险比例因交易而异。净 R 相当于另一套风险权重，不能用正累计 R 或 PF 大于 1 宣称等额投资盈利。两套口径均完整保留。
+- 年度表显示结果随入场年份显著变化，不能把 2025 年的正值外推为稳定优势；2026 年截至 9 月 11 日，尚未结束的交易仍被排除。年份对比还受持仓时长与截尾影响，不能据此事后挑选年份。
 
 ## 风险与诚实声明
 
