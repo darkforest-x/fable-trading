@@ -7,11 +7,11 @@ strategy("ETH multi-timeframe E5 - research", overlay=true, initial_capital=500,
      commission_type=strategy.commission.percent, commission_value=0.10,
      slippage=0, margin_long=0, margin_short=0, use_bar_magnifier=false)
 
-// C0 is the predetermined E5 baseline for all three supported parent frames.
+// Frozen on2026-09-14 from independent2023/2024 development folds only.
 string variantInput = input.string("Auto", "Research variant", options=["Auto", "C0", "C1", "C2", "C3", "C4", "C5"])
-string preset15 = "C0"
-string preset60 = "C0"
-string preset240 = "C0"
+string preset15 = "C2"
+string preset60 = "C3"
+string preset240 = "C1"
 string researchVariant = variantInput == "Auto" ? (timeframe.period == "15" ? preset15 : timeframe.period == "60" ? preset60 : preset240) : variantInput
 int analysisStart = input.time(timestamp("2023-01-01T00:00:00Z"), "Research start UTC")
 int requestedEnd = input.time(timestamp("2026-05-01T00:00:00Z"), "Research end UTC, exclusive")
