@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>V8 ETH 永续 3分钟 / 5分钟：原始交易统计</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>V8 ETH 永续 3分钟 / 5分钟：原始交易统计</h1>
+<p>这里回答信号与交易本身，不施加1000U资金、倍投、保证金或拒单筛选。数据来自既有冻结V8自然平仓账本；没有新回放或改变止盈止损。</p>
+<h2>核心结果</h2>
+<table><thead><tr>
+<th>流</th>
+<th>平仓笔数</th>
+<th>净赢笔数/胜率</th>
+<th>毛赢笔数/胜率</th>
+<th>最长连续净亏</th>
+<th>最长连续净亏止损</th>
+<th>最长连续价格亏损止损</th>
+<th>最长连续初始止损</th>
+<th>记录浮盈≥3R</th>
+<th>最终净赚≥3R</th>
+</tr></thead><tbody>
+<tr><td>ETH 3m OKX</td><td>1571</td><td>391 / 24.89%</td><td>468 / 29.79%</td><td>27</td><td>13</td><td>12</td><td>12</td><td>328 / 20.88%</td><td>75 / 4.77%</td></tr>
+<tr><td>ETH 5m Binance</td><td>1954</td><td>508 / 26.00%</td><td>575 / 29.43%</td><td>25</td><td>15</td><td>14</td><td>13</td><td>420 / 21.49%</td><td>119 / 6.09%</td></tr>
+</tbody></table>
+<p>3m：OKX ETH-USDT-SWAP，原始数据2023-07-31至2026-07-30；5m：Binance ETHUSDT永续，2020-01-01至2026-05-01。两者交易所和区间不同。统计为全部已保存自然平仓，不包括窗口末尚未平仓。历史分段从空仓重启，连续次数在分段边界归零，不把两段拼成未经回放的连续序列。</p>
+<h2>定义</h2>
+<ul>
+<li>1R为实际下一根开盘入场价与初始止损价的距离；净结果扣每笔名义本金0.2%往返成本。价格上涨获利但不够覆盖成本的单，会成为净亏。</li>
+<li>连续净亏：逐笔net_R&lt;0，任何其他结果中断。连续净亏止损：每笔既是stop退出又net_R&lt;0；反向退出无论盈亏都中断这项连续记录。连续初始止损只数initial_stop及跳空版本。盈利跟踪止损不算亏损止损。</li>
+<li>V8无固定3R止盈。记录浮盈≥3R是原引擎MFE列的保守统计：引擎先判断退出，发生退出的那根不更新MFE；它不是完整逐tick最高浮盈，也不是固定3R策略胜率。最终净赚≥3R是实际退出扣费后的结果，两者不能混用。</li>
+</ul>
+<h2>V8冻结规则</h2>
+<p>V6均线密集启动确认 + V7此前BB200压缩连续3根门 + V8同方向绳索距离≤3ATR；六线为SMA/EMA 20、60、120。确认后次根开盘入场，同流单仓，可多可空。初始保护取含信号根最近5根极值外0.2ATR与信号收盘外2ATR中较远者；按tick向外取整。收盘达到2R后启用4ATR跟踪，收盘更新、次根有效；原V6反向信号次根开盘退出。无固定3R止盈、无分批止盈。</p>
+<h2>分段统计</h2>
+<table><thead><tr>
+<th>stream</th>
+<th>period</th>
+<th>n</th>
+<th>net_wins</th>
+<th>net_win_rate</th>
+<th>max_consecutive_net_loss</th>
+<th>max_consecutive_net_loss_stop</th>
+<th>mfe_r_ge3_n</th>
+<th>net_r_ge3_n</th>
+<th>mean_net_r</th>
+<th>pf_net_r</th>
+</tr></thead><tbody>
+<tr><td>ETH 3m OKX</td><td>development</td><td>1460</td><td>355</td><td>0.2432</td><td>27</td><td>13</td><td>295</td><td>69</td><td>-0.6226</td><td>0.4462</td></tr>
+<tr><td>ETH 3m OKX</td><td>later</td><td>111</td><td>36</td><td>0.3243</td><td>11</td><td>10</td><td>33</td><td>6</td><td>-0.2368</td><td>0.7633</td></tr>
+<tr><td>ETH 5m Binance</td><td>development</td><td>1261</td><td>324</td><td>0.2569</td><td>25</td><td>15</td><td>267</td><td>73</td><td>-0.3441</td><td>0.6328</td></tr>
+<tr><td>ETH 5m Binance</td><td>later</td><td>693</td><td>184</td><td>0.2655</td><td>19</td><td>14</td><td>153</td><td>46</td><td>-0.2750</td><td>0.7053</td></tr>
+</tbody></table>
+<h2>R分布</h2>
+<table><thead><tr>
+<th>流</th>
+<th>R门槛</th>
+<th>记录浮盈达到</th>
+<th>实际毛利润达到</th>
+<th>实际净利润达到</th>
+</tr></thead><tbody>
+<tr><td>ETH 3m OKX</td><td>1</td><td>771</td><td>316</td><td>221</td></tr>
+<tr><td>ETH 3m OKX</td><td>2</td><td>507</td><td>170</td><td>124</td></tr>
+<tr><td>ETH 3m OKX</td><td>3</td><td>328</td><td>97</td><td>75</td></tr>
+<tr><td>ETH 3m OKX</td><td>5</td><td>142</td><td>43</td><td>34</td></tr>
+<tr><td>ETH 3m OKX</td><td>10</td><td>29</td><td>12</td><td>11</td></tr>
+<tr><td>ETH 5m Binance</td><td>1</td><td>1003</td><td>381</td><td>301</td></tr>
+<tr><td>ETH 5m Binance</td><td>2</td><td>648</td><td>221</td><td>191</td></tr>
+<tr><td>ETH 5m Binance</td><td>3</td><td>420</td><td>138</td><td>119</td></tr>
+<tr><td>ETH 5m Binance</td><td>5</td><td>180</td><td>63</td><td>55</td></tr>
+<tr><td>ETH 5m Binance</td><td>10</td><td>43</td><td>18</td><td>16</td></tr>
+</tbody></table>
+<h2>最长亏损段的时间</h2>
+<table><thead><tr>
+<th>stream</th>
+<th>kind</th>
+<th>length</th>
+<th>first_entry_beijing</th>
+<th>last_exit_bar_beijing</th>
+<th>sum_net_r</th>
+</tr></thead><tbody>
+<tr><td>ETH 3m OKX</td><td>net_loss</td><td>27</td><td>2023-08-24T14:06:00+08:00</td><td>2023-09-07T21:39:00+08:00</td><td>-57.3234</td></tr>
+<tr><td>ETH 5m Binance</td><td>net_loss</td><td>25</td><td>2023-08-25T21:15:00+08:00</td><td>2023-09-15T14:10:00+08:00</td><td>-49.9274</td></tr>
+<tr><td>ETH 5m Binance</td><td>net_loss_stop</td><td>15</td><td>2023-09-03T12:00:00+08:00</td><td>2023-09-14T01:45:00+08:00</td><td>-33.5715</td></tr>
+<tr><td>ETH 3m OKX</td><td>net_loss_stop</td><td>13</td><td>2023-09-20T11:24:00+08:00</td><td>2023-09-24T14:27:00+08:00</td><td>-32.0416</td></tr>
+<tr><td>ETH 5m Binance</td><td>initial_stop</td><td>13</td><td>2024-02-17T21:25:00+08:00</td><td>2024-03-09T22:50:00+08:00</td><td>-17.9198</td></tr>
+<tr><td>ETH 3m OKX</td><td>initial_stop</td><td>12</td><td>2023-09-21T14:24:00+08:00</td><td>2023-09-24T14:27:00+08:00</td><td>-31.4790</td></tr>
+</tbody></table>
+<p>时间为北京时间；退出时刻是退出K线开盘标记，盘中实际退出可能晚3/5分钟。完整连续段在streaks.csv，不能把历史最长次数当未来上限。</p>
+<h2>退出原因</h2>
+<table><thead><tr>
+<th>stream</th>
+<th>exit_reason</th>
+<th>n</th>
+<th>wins</th>
+<th>sum_net_r</th>
+</tr></thead><tbody>
+<tr><td>ETH 3m OKX</td><td>initial_stop</td><td>906</td><td>0</td><td>-1509.8415</td></tr>
+<tr><td>ETH 3m OKX</td><td>opposite_v6_next_open</td><td>208</td><td>14</td><td>-182.3870</td></tr>
+<tr><td>ETH 3m OKX</td><td>trailing_stop</td><td>457</td><td>377</td><td>756.9243</td></tr>
+<tr><td>ETH 5m Binance</td><td>initial_stop</td><td>1131</td><td>0</td><td>-1611.8860</td></tr>
+<tr><td>ETH 5m Binance</td><td>opposite_v6_next_open</td><td>259</td><td>20</td><td>-171.0929</td></tr>
+<tr><td>ETH 5m Binance</td><td>trailing_stop</td><td>564</td><td>488</td><td>1158.4951</td></tr>
+</tbody></table>
+<h2>收益描述与边界</h2>
+<table><thead><tr>
+<th>stream</th>
+<th>sum_net_r</th>
+<th>mean_net_r</th>
+<th>median_net_r</th>
+<th>pf_net_r</th>
+<th>best_net_r</th>
+<th>worst_net_r</th>
+</tr></thead><tbody>
+<tr><td>ETH 3m OKX</td><td>-935.3042</td><td>-0.5954</td><td>-1.3080</td><td>0.4663</td><td>28.2216</td><td>-5.9641</td></tr>
+<tr><td>ETH 5m Binance</td><td>-624.4839</td><td>-0.3196</td><td>-1.1731</td><td>0.6584</td><td>30.1232</td><td>-4.0016</td></tr>
+</tbody></table>
+<p>累计R仅为逐笔等风险单位相加，不是1000U账户收益。本轮为固定账本的描述性汇总，无预测器、无排序选择、无新入场比较，AUC/top-decile/新置换检验不适用；不把胜率或连亏统计解释为alpha。原研究后段匹配随机对照与检验见原低周期报告，不将其p值借作3R规则的证据。</p>
+<p>既有原研究后段3m相对匹配随机净R差+0.4091、p=0.2559；5m差+0.1931、p=0.06，均未达到项目p&lt;0.01门槛。这些是原研究既有对照，不是本轮新检验，也不能代表全时段。</p>
+<h2>数据、复现与诚实声明</h2>
+<p>输入：<code>experiments/active/exp-spike-eth-lowtf-cost-diagnostic-20260914-v1/results/full_v3/baseline_event_ledger.csv.gz</code>，SHA256 <code>b14ff66a312f6b9d30fd86ddbfb90cd90c68784efe4cf690de770f4e0063c673</code>。原自然平仓3525笔，3m1571笔、5m1954笔。只重用已授权且已暴露的同一V8账本，不读取OHLCV，不评估新策略；本描述配置第1次重用既有结果，不是新增独立holdout验证。原低周期主回放记录为正式holdout曝光第3次，旧记录不重置。</p>
+<p>三分钟数据无法消除同根先止盈还是先止损的歧义；固定3R退出还会释放原持仓期间的新机会，不能拿MFE截断旧单代替完整新策略回放。当前Python冻结参数也不自动代表用户任意TradingView图表设置。</p>
+<pre><code>
+.venv/bin/python -m pytest -q tests/evaluation/test_spike_v8_eth_baseline_stats.py
+.venv/bin/python -m yoyo.evaluation.spike_v8_eth_baseline_stats
+</code></pre>
+<p>已有results目录拒绝覆盖；重新归约需另立输出版本。无订单或生产配置变更。</p>
+<p>来源：<a href="p1_spike_v8_lowtf_20260913.md">原V8低周期报告</a>；<a href="p1_spike_eth_lowtf_cost_diagnostic_20260914.md">完整规则与成本诊断</a>。</p>
+<p>下一步由3R口径决定：原始结果描述已完成；固定3R止盈属于另一套退出规则，需单独回放后才能给出其胜率和连续止损。</p>
+</body>
+</html>

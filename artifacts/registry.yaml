@@ -18,6 +18,22 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v8-eth-baseline-stats-20260914-delivery
+    artifact_type: manifest
+    role: frozen_ledger_descriptive_streak_and_r_distribution
+    source_repo: darkforest-x/fable-trading
+    source_commit: 49e41d0fa5
+    source_path: experiments/active/exp-spike-v8-eth-baseline-stats-20260914-v1/results/manifest.json
+    sha256: 6a620f216092f0a9cbea4a280edb0a776206e9ac86304dc17631561e91a41632
+    size_bytes: 1143
+    storage_uri: repo://experiments/active/exp-spike-v8-eth-baseline-stats-20260914-v1/results/manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Derived only from previously exposed fixed V8 ledger;3525 closed trades.
+      No OHLCV or policy replay;streaks break at original fold boundaries. MFE is conservative
+      legacy record,not fixed3R fills. Four synthetic tests plus independent streak
+      reconciliation pass.
   - artifact_id: spike-eth-martingale-20260914-delivery
     artifact_type: manifest
     role: frozen_v8_finite_cash_stop_loss_doubling_research

@@ -14,6 +14,28 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-v8-eth-baseline-stats-20260914-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 49e41d0fa5
+    status: inconclusive
+    question: What are raw frozen V8 ETH perpetual3m/5m win rates,longest losing-stop
+      streaks,and R attainment before capital-policy design?
+    single_variable: None;descriptive aggregation of one SHA-pinned unchanged trade
+      ledger,no strategy search.
+    result: 3m1571 trades,391 wins24.89pct,longest net-loss27/losing-stop13/initial-stop12,MFE3R328,net3R75;5m1954
+      trades,508 wins26.00pct,25/15/13,MFE3R420,net3R119. Descriptive only;does not
+      validate a new trading policy.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v8_eth_baseline_stats_20260914.md
+    artifacts:
+    - spike-v8-eth-baseline-stats-20260914-delivery
+    notes: Owner corrected scope to raw baseline facts. First descriptive reuse here
+      of existing exposed source outcomes,not new independent holdout validation. Source
+      original formal holdout exposure3 retained;no OHLCV reread. Different venue/date
+      coverage. Initial report render lacked tabulate;dependency-free fix preserves
+      byte-identical CSVs.
   - experiment_id: exp-spike-eth-martingale-20260914-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 00cb37d879
