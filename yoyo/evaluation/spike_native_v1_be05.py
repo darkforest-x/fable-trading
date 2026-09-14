@@ -365,6 +365,42 @@ def summarize_existing(output: Path) -> dict[str, Any]:
     return receipt
 
 
+def rave_diagnostic_existing(output: Path) -> dict[str, Any]:
+    """Measure RAVE concentration from completed paired outcomes, without reselection.
+
+    Asset identity comes only from the immutable native V1 ledger keyed by
+    event ID.  Exchange symbols are deliberately not parsed, so contract
+    aliases cannot be mistaken for the RAVE underlying.
+    """
+    receipt_path, pairs_path = output / "receipt.json", output / "paired_trade_ledger.csv.gz"
+    receipt = json.loads(receipt_path.read_text())
+    if receipt.get("status") != "complete" or receipt.get("files", {}).get("paired_trade_ledger.csv.gz") != sha256(pairs_path):
+        raise ValueError("paired ledger must be complete and match receipt before concentration diagnostic")
+    if sha256(IMMUTABLE_LEDGER) != EXPECTED_LEDGER_SHA256:
+        raise ValueError("immutable baseline ledger SHA differs from frozen receipt")
+    pairs = pd.read_csv(pairs_path)
+    assets = pd.read_csv(IMMUTABLE_LEDGER, usecols=["event_id", "asset"])
+    joined = pairs.merge(assets, on="event_id", how="left", validate="one_to_one")
+    if joined.asset.isna().any() or len(joined) != len(pairs):
+        raise ValueError("paired events do not map one-to-one to immutable native asset identity")
+    rows: list[dict[str, Any]] = []
+    for scope, part in (("all", joined), ("asset_RAVE", joined.loc[joined.asset.eq("RAVE")]),
+                        ("excluding_asset_RAVE", joined.loc[~joined.asset.eq("RAVE")])):
+        for arm in ("baseline", "be05"):
+            closed = ~part[f"{arm}_censored"].astype(bool)
+            values = pd.to_numeric(part.loc[closed, f"{arm}_net_r"], errors="coerce").dropna()
+            rows.append({"scope": scope, "arm": arm, "signal_rows": len(part), "closed": len(values),
+                         "censored": int((~closed).sum()), "realized_wins": int((values > 0).sum()),
+                         "total_net_r": float(values.sum()), "mean_net_r": float(values.mean()) if len(values) else np.nan,
+                         "rave_asset_literal": "RAVE"})
+    diagnostic = pd.DataFrame(rows)
+    diagnostic.to_csv(output / "rave_concentration.csv", index=False)
+    receipt["files"]["rave_concentration.csv"] = sha256(output / "rave_concentration.csv")
+    receipt["rave_concentration_diagnostic"] = "post-hoc concentration only; asset joined from immutable ledger by event_id; not an admission rule"
+    write_json(receipt_path, receipt)
+    return receipt
+
+
 def run(output: Path, *, max_streams: int | None = None) -> dict[str, Any]:
     """Generate paired evidence, retaining a failure receipt if a source drifts."""
     output.mkdir(parents=True, exist_ok=True)
@@ -467,11 +503,14 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--max-streams", type=int, help="Bounded source timing/parity probe; never an all-universe result.")
     parser.add_argument("--summarize-existing", action="store_true", help="Rebuild summary only from a complete hash-pinned paired ledger.")
+    parser.add_argument("--rave-diagnostic-existing", action="store_true", help="Run only the literal-asset RAVE concentration diagnostic from paired output.")
     args = parser.parse_args()
-    if args.summarize_existing:
+    if args.summarize_existing or args.rave_diagnostic_existing:
         if args.max_streams is not None:
-            raise ValueError("--summarize-existing cannot combine with --max-streams")
-        result = summarize_existing(args.output)
+            raise ValueError("existing-output postprocessors cannot combine with --max-streams")
+        if args.summarize_existing and args.rave_diagnostic_existing:
+            raise ValueError("choose one existing-output postprocessor per invocation")
+        result = summarize_existing(args.output) if args.summarize_existing else rave_diagnostic_existing(args.output)
     else:
         result = run(args.output, max_streams=args.max_streams)
     print(json.dumps(result, ensure_ascii=False, indent=2))
