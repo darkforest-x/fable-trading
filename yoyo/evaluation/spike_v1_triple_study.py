@@ -95,6 +95,8 @@ def dedup_events(events):
     frame['_venue_rank'] = frame.venue.map({'binance': 0, 'okx': 1, 'gate': 2}).fillna(9)
     ordered = frame.sort_values(['entry_time', 'timeframe_min', '_venue_rank', 'event_id'],
                                 ascending=[True, False, True, True])
+    if {'entry_price', 'initial_stop'}.issubset(ordered.columns):
+        ordered = ordered.loc[ordered.entry_price.gt(ordered.initial_stop)]
     selected = set(ordered.drop_duplicates(['base_asset', 'entry_day']).event_id)
     frame['dedup_keep'] = frame.event_id.isin(selected)
     return frame.drop(columns='_venue_rank')
@@ -182,7 +184,7 @@ def native_events(bars, *, venue, symbol, asset, minutes, tick, start, end):
                          venue=venue, symbol=symbol, asset=asset, base_asset=asset, timeframe_min=minutes,
                          side=1, signal_bar_open=stamp, signal_close=float(bars.close.iloc[i]),
                          reference_signal_risk=float(signal.risk), initial_stop=float(signal.initial_stop),
-                         entry_time=bars.index[i + 1], volume_ratio=float(bars.rv.iloc[i]),
+                         entry_time=bars.index[i + 1], entry_price=float(bars.open.iloc[i + 1]), volume_ratio=float(bars.rv.iloc[i]),
                          tr_atr_expansion=float(bars.expansion.iloc[i]), tick=tick,
                          stock_linked=False, instrument_type='crypto'))
     return pd.DataFrame(rows)
@@ -320,13 +322,86 @@ def run_original(limit=None, controls=True):
         print('original6253', number, len(grouped), key, len(sample), round(time.monotonic()-started, 2), flush=True)
 
 
+def prepare_top20():
+    config = freeze_check()
+    path = EXP / 'data/stream_manifest.json'
+    manifest = json.loads(path.read_text())
+    start, end = pd.Timestamp(config['start']), pd.Timestamp(config['end_exclusive'])
+    folder = EXP / 'results/top20/prepared'; folder.mkdir(parents=True, exist_ok=True)
+    registry, all_events = [], []
+    for stream in manifest['streams']:
+        key = (stream['symbol'], int(stream['minutes']))
+        row = dict(stream)
+        if not stream.get('tick_size') or not stream.get('normalized_path'):
+            registry.append(row | dict(replay_status='unavailable_tick_or_data', prepared_segments=[]))
+            continue
+        source = Path(stream['normalized_path'])
+        if sha(source) != stream['normalized_sha256']:
+            raise ValueError('normalized archive source changed: ' + str(source))
+        bars = pd.read_csv(source)
+        bars.index = pd.to_datetime(bars.pop('open_time'), utc=True)
+        bars = bars.loc[bars.index < end]
+        paths, n = [], 0
+        for number, segment in enumerate(_continuous(bars, key[1])):
+            if len(segment) < 341:
+                continue
+            featured = features(segment)
+            events = native_events(featured, venue='binance', symbol=key[0], asset=stream['asset'],
+                                   minutes=key[1], tick=float(stream['tick_size']), start=start, end=end)
+            p = folder / f'{key[0]}_{key[1]}m_{number}.pkl.gz'
+            featured.to_pickle(p, compression='gzip')
+            paths.append(dict(path=str(p), sha256=sha(p), bars=len(featured)))
+            if len(events):
+                all_events.append(events); n += len(events)
+        registry.append(row | dict(replay_status='prepared', prepared_segments=paths, native_events=n))
+        print('top20_prepare', key, n, flush=True)
+    events = dedup_events(pd.concat(all_events, ignore_index=True)) if all_events else pd.DataFrame()
+    write_csv(EXP / 'results/top20/events.csv.gz', events)
+    atomic_json(EXP / 'results/top20/prepared_manifest.json', dict(source_manifest_sha256=sha(path), streams=registry))
+
+
+def run_top20(limit=None, controls=True):
+    config = freeze_check()
+    manifest_path = EXP / 'results/top20/prepared_manifest.json'
+    if not manifest_path.exists():
+        prepare_top20()
+    manifest = json.loads(manifest_path.read_text())
+    if manifest['source_manifest_sha256'] != sha(EXP / 'data/stream_manifest.json'):
+        raise ValueError('prepared inputs bind a different archive manifest')
+    events = pd.read_csv(EXP / 'results/top20/events.csv.gz')
+    completed = 0
+    for stream in manifest['streams']:
+        if stream['replay_status'] != 'prepared':
+            continue
+        chosen = events.loc[events.symbol.eq(stream['symbol']) & events.timeframe_min.eq(stream['minutes'])]
+        if chosen.empty:
+            continue
+        pieces = []
+        for item in stream['prepared_segments']:
+            if sha(item['path']) != item['sha256']:
+                raise ValueError('prepared bars hash mismatch')
+            pieces.append(pd.read_pickle(item['path'], compression='gzip'))
+        run_stream('top20', ('binance', stream['symbol'], stream['minutes']), chosen, pieces,
+                   dict(source='binance_native_monthly_zip', source_sha256=stream['source_sha256']),
+                   end=pd.Timestamp(config['end_exclusive']), controls=controls)
+        completed += 1
+        print('top20_replay', completed, stream['symbol'], stream['minutes'], len(chosen), flush=True)
+        if limit and completed >= limit:
+            break
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('cohort', choices=['original6253'])
+    parser.add_argument('cohort', choices=['original6253', 'top20', 'prepare_top20'])
     parser.add_argument('--limit', type=int)
     parser.add_argument('--no-controls', action='store_true')
     args = parser.parse_args()
-    run_original(args.limit, controls=not args.no_controls)
+    if args.cohort == 'original6253':
+        run_original(args.limit, controls=not args.no_controls)
+    elif args.cohort == 'top20':
+        run_top20(args.limit, controls=not args.no_controls)
+    else:
+        prepare_top20()
 
 
 if __name__ == '__main__':
