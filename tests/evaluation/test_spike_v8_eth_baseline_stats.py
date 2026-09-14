@@ -1,6 +1,6 @@
 """Synthetic checks for streak boundaries and stop-versus-loss semantics."""
 import pandas as pd
-from yoyo.evaluation.spike_v8_eth_baseline_stats import runs, masks
+from yoyo.evaluation.spike_v8_eth_baseline_stats import runs, masks, table
 
 
 def test_runs_preserve_terminal_streak_and_breaks():
@@ -20,3 +20,7 @@ def test_profitable_trailing_stop_is_not_losing_stop():
 
 def test_fold_streaks_are_not_joined():
     assert max(b-a+1 for fold in [[True,True],[True,True,True]] for a,b in runs(fold)) == 3
+
+
+def test_table_requires_no_optional_dependency():
+    assert '| a\\|b | 1.2500 |' in table(pd.DataFrame([['a|b',1.25]],columns=['name','value']))

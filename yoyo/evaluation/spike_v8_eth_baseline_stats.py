@@ -68,7 +68,13 @@ def describe(frame):
 
 
 def table(frame):
-    return frame.to_markdown(index=False, floatfmt='.4f')
+    """Render plain Markdown without pandas' optional tabulate dependency."""
+    def cell(value):
+        text = f'{value:.4f}' if isinstance(value, float) else str(value)
+        return text.replace('|', '\\|').replace('\n', ' ')
+    rows = [list(frame.columns), ['---'] * len(frame.columns)]
+    rows.extend(frame.itertuples(index=False, name=None))
+    return '\n'.join('| ' + ' | '.join(cell(value) for value in row) + ' |' for row in rows)
 
 
 def main():
