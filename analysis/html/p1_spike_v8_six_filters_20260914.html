@@ -143,6 +143,9 @@ li { margin: .25rem 0; }
 <tr><td>北京 0 点剔除（敏感性）</td><td>177.24</td><td>0.08</td><td>-202.84</td></tr>
 <tr><td>北京周日剔除（敏感性）</td><td>523.01</td><td>633.96</td><td>79.12</td></tr>
 </tbody></table>
+<h2>月度一致性与单币集中度</h2>
+<p>保存的原单删除归因按25个日历月统计（首尾月并非完整月份）：UTC周日净增量20个月为正、5个月为负；量比&gt;50为21正、3负、1零。两年累计改善不等于每个月都改善；不能将完整2025年9月桶直接归入跨2025-09-10的前后年。</p>
+<p>UTC周日完整重跑的最大单资产增量来自USDC：全期204.30R、后一年98.94R。按底层资产合并跨交易所贡献后，扣掉该资产，剩余净增量仍分别为2564.42R和1707.82R。因此这条日历候选的全部改善并非USDC一币造成；这项归因不构成新增选币规则，也不替代前文的匹配对照与右尾损失。</p>
 <h2>保留原入场的归因，与完整重跑的区别</h2>
 <table><thead><tr>
 <th>规则</th>
@@ -320,5 +323,6 @@ fi
 </code></pre>
 <p>来源：experiments/active/exp-spike-v8-six-filters-20260914-v1/delivery/statistics_v1；experiments/active/exp-spike-v8-six-filters-20260914-v1/exit/full_v1；原始 V1 Notion https://app.notion.com/p/nick-wiki/3d88856479af806d8abcf00b1c393d85 。</p>
 <p>知识库：<a href="https://app.notion.com/p/3db8856479af81f8b41be2baab4d2f57">Spike研究记录</a>。</p>
+<p>终审核对：独立只读核验未发现核心算术错误。summary_v1的summary_receipt.json旧字段admission_receipt_sha256实际绑定statistics_v1/statistics_receipt.json；字段到实际路径的映射已在delivery_manifest.json明确保留，不虚构full_v3级别的独立receipt文件。</p>
 </body>
 </html>

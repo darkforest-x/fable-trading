@@ -129,13 +129,13 @@
   "final_report": [
     {
       "path": "analysis/p1_spike_v8_six_filters_20260914.md",
-      "sha256": "ed5f77f2d78d5c7ee4a777d7ec6b2e63e5593620773098d7aa5337830df825f8",
-      "size_bytes": 21881
+      "sha256": "1ba42e63b86758aa76352b41808d263e1ec53ccc37613fcebf66e23912d38531",
+      "size_bytes": 22875
     },
     {
       "path": "analysis/html/p1_spike_v8_six_filters_20260914.html",
-      "sha256": "b5e306db0f25ab56675a76576a48626a1ed5786a5c6b8d1a03446c47eb1a1e7d",
-      "size_bytes": 30007
+      "sha256": "2935a08501bfc8b213e138c6f1c510472b1101709fdd252f2a618fbc7804ab38",
+      "size_bytes": 31027
     }
   ],
   "notion_url": "https://app.notion.com/p/3db8856479af81f8b41be2baab4d2f57",
@@ -147,7 +147,8 @@
     "admission_csv_only_sha_mismatches": 0,
     "candidate_clock_mismatches": 0,
     "exit_archive_parity": true,
-    "notion_readback": "page fetched; experiment key, later-year losses and final next-step text present"
+    "notion_readback": "page fetched; experiment key, later-year losses and final next-step text present",
+    "independent_evidence_review": "Core arithmetic and receipt binding agree;25-month and asset contributions verified;legacy receipt field alias documented without mutating original receipt."
   },
   "non_selected_runs": {
     "admission_completed_streams": {
@@ -176,5 +177,13 @@
     "four_hour_exit_serial_delta_r": -1895.5733461788714,
     "four_hour_exit_decision": "rejected for this specification",
     "universal_filter_decision": "none accepted; timezone/tail/statistical limits remain"
-  }
+  },
+  "receipt_field_aliases": [
+    {
+      "file": "delivery/summary_v1/summary_receipt.json",
+      "field": "admission_receipt_sha256",
+      "actual_target": "delivery/statistics_v1/statistics_receipt.json",
+      "meaning": "legacy argument-derived field name; the saved aggregation receipt, not a nonexistent full_v3/receipt.json"
+    }
+  ]
 }
