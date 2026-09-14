@@ -1,0 +1,46 @@
+{
+  "signals": 25,
+  "counts": {
+    "original": 20,
+    "next_bar": 22,
+    "ohlc": 22,
+    "olhc": 22
+  },
+  "closed": {
+    "original": 19,
+    "next_bar": 22,
+    "ohlc": 22,
+    "olhc": 22
+  },
+  "original_independent_replay_parity": true,
+  "tail_gaps": 0,
+  "full_prefix_bars": 525599,
+  "last_complete_close_bj": "2026-09-14 21:18:00",
+  "original_continuous": true,
+  "alternatives_start_flat": true,
+  "capacity_filters": false,
+  "parameter_search": false,
+  "holdout_configuration_exposure": 1,
+  "builder_commit": "4baf2d6ffc2994f7a74534a1960dc15c29192359",
+  "delivery_independent_checks": {
+    "trade_rows_checked": 86,
+    "max_r_arithmetic_error": 6.106226635438361e-14,
+    "entry_source_open_matches": true,
+    "exit_time_cutoff_checks": true,
+    "signal_unique_count": 25,
+    "full_original_stop_path_matches": true
+  },
+  "focused_tests": {
+    "passed": 112,
+    "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q -p no:cacheprovider --capture=no tests/evaluation/test_spike_net_recovery_exit.py tests/evaluation/test_spike_recovery_exit.py tests/boundaries/test_layer_imports.py tests/causality/test_holdout_boundary_is_single_valued.py"
+  },
+  "full_repository_gate": "Not rerun; known unrelated registry/source-migration failures recorded in prior net-recovery report, not fixed here.",
+  "dashboard_qa": {
+    "charts_checked": 86,
+    "signals": 25,
+    "all_arm_navigation": true,
+    "finite_svg": true,
+    "kind": "minimal DOM logic check; no browser visual QA",
+    "command": "node experiments/active/exp-spike-eth3m-september-trade-audit-20260914-v1/verify_dashboard.js analysis/html/p1_spike_eth3m_september_trade_audit_20260914.html"
+  }
+}

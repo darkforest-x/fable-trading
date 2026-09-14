@@ -9137,12 +9137,15 @@ experiments:
 
   - experiment_id: exp-spike-eth3m-september-trade-audit-20260914-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: aba4bc4f7e
-    status: active
+    source_commit: 4baf2d6ffc2994f7a74534a1960dc15c29192359
+    status: inconclusive
     question: Enumerate every OKX ETH3m frozen V8 trade and all admitted signals from Sep1 through Sep14 21:19 Beijing for owner row-level audit.
     single_variable: No optimization; fixed original and already-frozen fee-protected net1R rules.
-    holdout_consumed: false
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_eth3m_september_trade_audit_20260914.md
     notes: Explicit owner September audit authorization; source-read receipt must precede all data reads. No live action.
+    result: Completed descriptive audit;25 signals,20 original trades including19 natural exits and1 boundary open. Each fixed net1R timing has22 natural trades. No strategy-acceptance decision.
+    artifacts:
+    - spike-eth3m-september-trade-audit-20260914-delivery

@@ -1,5 +1,11 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
+## 最新：ETH3m 9月逐笔核对已交付（2026-09-14）
+
+Owner要求北京时间9月1日至9月14日21:19全部交易，确认OKX。固定原始V8为25信号、20实际交易（19已平仓＋1截止持仓），无carry-in、无资金容量过滤；费用保本净1R三时序各22笔，单独列出，未优化。
+源补齐至21:18完整收盘，22124根含1重叠一致、无尾部缺口；每配置第1次专项holdout消耗，读取前回执已落地。86交易价格/R核对、原始逐bar止损及独立回放一致，112相关测试通过；HTML86图最小DOM检查通过，未做浏览器像素验收。
+交付：analysis/html/p1_spike_eth3m_september_trade_audit_20260914.html；中文CSV：experiments/active/exp-spike-eth3m-september-trade-audit-20260914-v1/results/original_trades_zh.csv；Notion：https://app.notion.com/p/3db8856479af81a8b169e8c429ab98b6。等待owner按序号拆解；不据此接受策略、不改实盘。
+
 ## 最新：ETH3m净1R＋费用保本验证已完成（2026-09-14）
 
 - Owner要求验证“保本提高0.2%”。冻结净1R全平、成本BE、一tick后触发、亏后翻倍、累计净回本才复位；无六层认亏重启。nextbar/O-H-L-C/O-L-H-C时序及固定/翻倍容量对照共40账户均未盈利；本配置holdout0次。

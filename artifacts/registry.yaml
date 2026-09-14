@@ -30867,3 +30867,19 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Forty frozen account windows; same-exit fixed and matched random controls. BE correctly classified but no profitable account. No holdout use; two intrabar paths are assumptions.
+
+  - artifact_id: spike-eth3m-september-trade-audit-20260914-delivery
+    artifact_type: manifest
+    role: owner_requested_recent_per_trade_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4baf2d6ffc2994f7a74534a1960dc15c29192359
+    source_path: experiments/active/exp-spike-eth3m-september-trade-audit-20260914-v1/results/manifest.json
+    sha256: 483f8d864923c44456f27ea3282c3e531c95072211d732ee87278e50dbd45b4b
+    size_bytes: 6144
+    storage_uri: repo://experiments/active/exp-spike-eth3m-september-trade-audit-20260914-v1/results/manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Owner authorized Sep1-Sep14 21:19 Beijing audit;original19closed plus1open,25signals,no
+      bankroll filtering. Original replay/SL parity and112tests passed. HTML minimal
+      DOM logic checked86charts;no browser visual QA.
