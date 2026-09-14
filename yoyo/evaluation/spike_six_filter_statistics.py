@@ -58,7 +58,10 @@ def matched_deletion(frame: pd.DataFrame, *, iterations: int = N_NULL) -> dict:
     are used only after selection to score the null. Bins are fixed fractions,
     never ranks fit to future monthly volatility or outcome quantiles.
     """
-    frame = frame.loc[~frame.censored].copy()
+    eligible = ~frame.censored
+    if 'feature_known' in frame:
+        eligible &= strict_bool(frame.feature_known)
+    frame = frame.loc[eligible].copy()
     frame['month'] = frame.entry_time.dt.strftime('%Y-%m')
     frame['vol_bin'] = pd.cut(frame.signal_atr_pct, VOL_BINS, labels=False).astype('Int64').astype(str)
     keys = ['venue', 'asset', 'timeframe_min', 'side', 'month', 'vol_bin']
@@ -106,6 +109,7 @@ def fixed_effect(frame: pd.DataFrame) -> dict:
         means = blocks['sum'].to_numpy()[ix].sum(axis=1) / blocks['size'].to_numpy()[ix].sum(axis=1)
         lo, hi = np.quantile(means, [.025, .975])
     return {**{f'base_{k}': v for k, v in old.items()}, **{f'kept_{k}': v for k, v in new.items()},
+            'feature_unknown': int((~strict_bool(frame.feature_known)).sum()) if 'feature_known' in frame else 0,
             'removed_closed': len(removed), 'saved_loss_r': float(-removed.loc[removed.net_r <= 0, 'net_r'].sum()),
             'lost_winner_r': float(removed.loc[removed.net_r > 0, 'net_r'].sum()),
             'fixed_delta_r': float(delta.sum()), 'original_ge10': int(winners.sum()),
@@ -115,6 +119,7 @@ def fixed_effect(frame: pd.DataFrame) -> dict:
 
 def load_results(root: Path) -> tuple[pd.DataFrame, pd.DataFrame, list[dict]]:
     """Read only complete receipts and their typed fixed/serial CSV outputs."""
+    from yoyo.evaluation.spike_v8_six_filters import POLICIES
     receipts = sorted((root / 'streams').glob('*/completion.json'))
     manifest = json.loads((root / 'manifest.json').read_text())
     if len(receipts) != 3531 or not manifest.get('complete'):
@@ -125,6 +130,10 @@ def load_results(root: Path) -> tuple[pd.DataFrame, pd.DataFrame, list[dict]]:
         rec = json.loads(rp.read_text())
         if rec.get('status') != 'complete':
             raise ValueError(f'Incomplete stream {rp}')
+        required = {f'v8.{kind}_{policy}.csv.gz' for policy in POLICIES for kind in ('fixed','serial')}
+        required.add('v8.serial_baseline.csv.gz')
+        if not required.issubset(rec['files']):
+            raise ValueError(f'Missing predeclared policy tables: {rp}')
         for name, expected in rec['files'].items():
             kind = next((k for k in parts if name.startswith(f'v8.{k}_') and name.endswith('.csv.gz')), None)
             if kind is None:
@@ -143,6 +152,12 @@ def load_results(root: Path) -> tuple[pd.DataFrame, pd.DataFrame, list[dict]]:
         if table.duplicated(['policy', 'event_key']).any():
             raise ValueError('Duplicate policy/event')
     outputs[0]['gate_rejected'] = strict_bool(outputs[0].gate_rejected)
+    reference = None
+    for _, group in outputs[0].groupby('policy'):
+        keys = set(group.event_key)
+        if reference is not None and reference != keys:
+            raise ValueError('Fixed original entry population differs between policies')
+        reference = keys
     return *outputs, sources
 
 
