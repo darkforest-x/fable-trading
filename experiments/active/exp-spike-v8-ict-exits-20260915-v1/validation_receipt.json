@@ -1,0 +1,67 @@
+{
+  "date": "2026-09-15",
+  "scope": "Frozen eight-arm ETH15m ICT exit-only comparison; no Fanshen exits",
+  "tests": {
+    "focused_passed": 45,
+    "boundary_and_holdout_definition_passed": 184,
+    "boundary_and_holdout_definition_failed": 5,
+    "failure": "Existing HEAD artifact spike-v8-total2-1h-native-20260914-delivery lacks source_commit; same RegistryError in five teacher registry tests. Unrelated row preserved.",
+    "commands": [
+      "PYTHONPATH=.venv/lib/python3.9/site-packages:. /usr/bin/python3 -m pytest -q tests/test_spike_v8_ict_exit_study.py tests/evaluation/test_spike_partial_exit.py tests/evaluation/test_spike_recovery_exit.py tests/test_spike_v8_ict.py",
+      "PYTHONPATH=.venv/lib/python3.9/site-packages:. /usr/bin/python3 -m pytest -q tests/boundaries tests/causality/test_holdout_boundary_is_single_valued.py"
+    ]
+  },
+  "runtime": {
+    "interpreter": "/usr/bin/python3",
+    "python": "3.9.6",
+    "pandas": "2.3.3",
+    "numpy": "2.0.2",
+    "packages": ".venv/lib/python3.9/site-packages",
+    "dependencies_installed": false
+  },
+  "builder_commit": "e3811a6683b79e9d16d84a995adedbe54dbc0dc4",
+  "selection_commit": "da1da182babfc74d7e40868e5a3bc1eefc9390c9",
+  "evaluation_read_commit": "da1da182babfc74d7e40868e5a3bc1eefc9390c9",
+  "reporter_commit": "7fc167dad54f24fa96b1b75f9fa8f9257d3d4c7e",
+  "parent_checks": {
+    "frozen_builders_unchanged": 15,
+    "html_tables": 19,
+    "csv_links_resolved": 16,
+    "html_visual_preview": "Not performed: browser security policy blocked local file URL; no workaround attempted"
+  },
+  "holdout_consumption_number": 0,
+  "native_tradingview_parity": false,
+  "notion_url": "https://app.notion.com/p/3db8856479af8159b151f2482806cd3c",
+  "economic_breakeven": {
+    "definition": "cost protection armed, trailing-stop exit, natural net R between zero and one tick/initial_risk; diagnostic only",
+    "common_cost_be2": {
+      "natural": 17,
+      "profit_excluding_floor": 9,
+      "fee_floor": 2,
+      "loss": 6,
+      "strict_positive_rate": 0.6470588235294118
+    },
+    "legacy_cash_label_limitation": "n_net_be is based on cost_be exit_reason; this replay uses trailing_stop. Label counts are not economic BE counts. Debt reset is determined by actual cumulative net cash."
+  },
+  "independent_audit": {
+    "reviewer": "ict_result_audit / budget-evidence / Luna Max",
+    "scope": "Existing scoped code and CSVgz/JSON only; no raw OHLC/pickle/holdout or new strategy experiment",
+    "verdict": "PASS arithmetic and execution accounting; not validated profitability",
+    "statistic_groups": 32,
+    "cash_accounts": 64,
+    "parity_groups": 6,
+    "result_hashes_verified": 236,
+    "max_stat_error_upper_bound": 2e-06,
+    "fills_max_fraction_error": 0,
+    "fills_max_gross_error": 3.6e-15,
+    "fills_max_cost_error": 1.1e-16,
+    "fills_max_net_error": 4.6e-14,
+    "max_cash_identity_error_upper_bound": 1.2e-13,
+    "selection_committed_before_evaluation_verified": true,
+    "fixed_cash_signal_sets_match_serial": true,
+    "double_capacity_rejection_releases_occupancy": true,
+    "cost_be_labels_do_not_control_resets": true,
+    "common_cost_be2_fee_floor_total_r": 0.00118365,
+    "common_cost_be2_largest_fee_floor_r": 0.0006284
+  }
+}

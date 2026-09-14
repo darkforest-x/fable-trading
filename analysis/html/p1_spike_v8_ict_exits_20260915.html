@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>ETH15min＋ICT：止盈与利润保护的8套对照</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>ETH15min＋ICT：止盈与利润保护的8套对照</h1>
+<p>问题是能否减少浮盈回吐，同时保留原V8的大赢家。本轮只研究OKX ETH-USDT-SWAP 15min；翻身指标退出已去掉。没有重跑其他周期，也没有扩大参数网格。</p>
+<p>开发期按预先冻结的“自然交易至少30笔、总净R最高”选中<strong>毛3R全平</strong>，开发净R为-27.83。开发期8套均亏损，选中仅表示比较内亏得最少。选择文件先提交，随后才读取2025及2026年数据。</p>
+<h2>各年份总净收益：不能只挑近期冠军</h2>
+<table><thead><tr>
+<th>退出规则</th>
+<th>开发净R</th>
+<th>2025净R</th>
+<th>2026前4月净R</th>
+<th>连续历史净R</th>
+</tr></thead><tbody>
+<tr><td>原版4ATR跟踪</td><td>-34.51</td><td>1.93</td><td>22.74</td><td>-9.84</td></tr>
+<tr><td>3ATR跟踪</td><td>-36.02</td><td>-16.49</td><td>12.02</td><td>-40.48</td></tr>
+<tr><td>2ATR跟踪</td><td>-29.62</td><td>-13.75</td><td>16.61</td><td>-26.76</td></tr>
+<tr><td>净浮盈1R后含费保本</td><td>-33.19</td><td>0.19</td><td>22.42</td><td>-10.58</td></tr>
+<tr><td>净浮盈2R后含费保本</td><td>-38.86</td><td>3.26</td><td>24.68</td><td>-10.92</td></tr>
+<tr><td>毛2R兑现25%</td><td>-33.80</td><td>-1.16</td><td>20.37</td><td>-14.59</td></tr>
+<tr><td>毛2R兑现50%</td><td>-33.09</td><td>-4.24</td><td>18.00</td><td>-19.33</td></tr>
+<tr><td>毛3R全平（开发选中）</td><td>-27.83</td><td>-12.88</td><td>13.00</td><td>-27.70</td></tr>
+</tbody></table>
+<p>在2025和2026前4月都超过原版的修改：净浮盈2R后含费保本。连续历史包含开发期，不能拿它当独立验证；原版不是保证盈利的方案，只是判断修改有没有增益的必要对照。</p>
+<p><strong>可继续观察的方向是“净浮盈2R后含费保本＋保留原4ATR尾仓跟踪”。</strong> 它在2025把净R从1.93提高到3.26，2026前4月从22.74提高到24.68，后者结算回撤从3.29R降到2.25R，未截短原毛3R赢家。但开发期更差，连续历史−10.92R也略差于原版−9.84R；这是8个冻结候选中的事后观察，不能替换开发预选方案并冒充验证通过。</p>
+<p>开发预选的固定3R在后续两段均落后原版；3ATR/2ATR跟踪及2R分批也都减少了后续净收益。净1R保护在连续历史把最长净亏从14降到6，却仍为124笔净−10.58R，较原版少赚0.74R；其同入场退出损失16.38R，提前释放仓位带来的新增准入抵消了大部分。历史6连亏不能成为未来上限，更不能推出倍投必赚。</p>
+<h2>开发：2023年8月—2024年末</h2>
+<table><thead><tr>
+<th>规则</th>
+<th>候选</th>
+<th>自然＋边界</th>
+<th>净胜率</th>
+<th>总毛R</th>
+<th>总净R</th>
+<th>PF</th>
+<th>最长净亏</th>
+<th>最长完整初始SL</th>
+<th>结算回撤R</th>
+<th>毛≥3R笔数</th>
+</tr></thead><tbody>
+<tr><td>原版4ATR跟踪</td><td>70</td><td>66＋0</td><td>21.2%</td><td>-11.89</td><td>-34.51</td><td>0.48</td><td>13</td><td>7</td><td>34.51</td><td>6</td></tr>
+<tr><td>3ATR跟踪</td><td>70</td><td>66＋0</td><td>24.2%</td><td>-13.40</td><td>-36.02</td><td>0.45</td><td>7</td><td>7</td><td>36.02</td><td>3</td></tr>
+<tr><td>2ATR跟踪</td><td>70</td><td>66＋0</td><td>24.2%</td><td>-7.00</td><td>-29.62</td><td>0.54</td><td>7</td><td>7</td><td>29.83</td><td>5</td></tr>
+<tr><td>净浮盈1R后含费保本</td><td>70</td><td>66＋0</td><td>39.4%</td><td>-10.57</td><td>-33.19</td><td>0.38</td><td>5</td><td>5</td><td>33.19</td><td>4</td></tr>
+<tr><td>净浮盈2R后含费保本</td><td>70</td><td>66＋0</td><td>25.8%</td><td>-16.24</td><td>-38.86</td><td>0.39</td><td>7</td><td>7</td><td>38.86</td><td>5</td></tr>
+<tr><td>毛2R兑现25%</td><td>70</td><td>66＋0</td><td>22.7%</td><td>-11.18</td><td>-33.80</td><td>0.47</td><td>13</td><td>7</td><td>33.80</td><td>5</td></tr>
+<tr><td>毛2R兑现50%</td><td>70</td><td>66＋0</td><td>27.3%</td><td>-10.47</td><td>-33.09</td><td>0.47</td><td>7</td><td>7</td><td>33.09</td><td>4</td></tr>
+<tr><td>毛3R全平</td><td>70</td><td>66＋0</td><td>24.2%</td><td>-5.21</td><td>-27.83</td><td>0.57</td><td>7</td><td>7</td><td>30.28</td><td>13</td></tr>
+</tbody></table>
+<table><thead><tr>
+<th>规则</th>
+<th>完整匹配/自然</th>
+<th>随机均净R</th>
+<th>匹配超额均净R</th>
+<th>月块p</th>
+<th>Holm校正p</th>
+<th>匹配月数</th>
+</tr></thead><tbody>
+<tr><td>原版4ATR跟踪</td><td>62/66</td><td>-0.24</td><td>-0.35</td><td>0.99</td><td>1.00</td><td>17</td></tr>
+<tr><td>3ATR跟踪</td><td>62/66</td><td>-0.30</td><td>-0.32</td><td>0.99</td><td>1.00</td><td>17</td></tr>
+<tr><td>2ATR跟踪</td><td>62/66</td><td>-0.34</td><td>-0.19</td><td>0.90</td><td>1.00</td><td>17</td></tr>
+<tr><td>净浮盈1R后含费保本</td><td>62/66</td><td>-0.20</td><td>-0.36</td><td>0.98</td><td>1.00</td><td>17</td></tr>
+<tr><td>净浮盈2R后含费保本</td><td>62/66</td><td>-0.25</td><td>-0.41</td><td>1.00</td><td>1.00</td><td>17</td></tr>
+<tr><td>毛2R兑现25%</td><td>62/66</td><td>-0.26</td><td>-0.31</td><td>0.99</td><td>1.00</td><td>17</td></tr>
+<tr><td>毛2R兑现50%</td><td>62/66</td><td>-0.28</td><td>-0.28</td><td>0.99</td><td>1.00</td><td>17</td></tr>
+<tr><td>毛3R全平</td><td>62/66</td><td>-0.27</td><td>-0.20</td><td>0.97</td><td>1.00</td><td>17</td></tr>
+</tbody></table>
+<p>每行退出均与同币、同方向、同入场月/纽约小时/周末状态、同因果波动桶的随机入场配对，目标每笔5个。匹配超额只在完整匹配子集上计算，不能拿全体均值减随机均值复算；缺匹配明确保留。</p>
+<h2>后续：2025全年</h2>
+<table><thead><tr>
+<th>规则</th>
+<th>候选</th>
+<th>自然＋边界</th>
+<th>净胜率</th>
+<th>总毛R</th>
+<th>总净R</th>
+<th>PF</th>
+<th>最长净亏</th>
+<th>最长完整初始SL</th>
+<th>结算回撤R</th>
+<th>毛≥3R笔数</th>
+</tr></thead><tbody>
+<tr><td>原版4ATR跟踪</td><td>43</td><td>40＋0</td><td>22.5%</td><td>9.57</td><td>1.93</td><td>1.06</td><td>14</td><td>14</td><td>18.25</td><td>2</td></tr>
+<tr><td>3ATR跟踪</td><td>43</td><td>40＋0</td><td>25.0%</td><td>-8.85</td><td>-16.49</td><td>0.53</td><td>14</td><td>14</td><td>20.18</td><td>1</td></tr>
+<tr><td>2ATR跟踪</td><td>43</td><td>40＋0</td><td>25.0%</td><td>-6.10</td><td>-13.75</td><td>0.61</td><td>14</td><td>14</td><td>19.42</td><td>2</td></tr>
+<tr><td>净浮盈1R后含费保本</td><td>43</td><td>41＋0</td><td>41.5%</td><td>8.06</td><td>0.19</td><td>1.01</td><td>6</td><td>6</td><td>14.62</td><td>2</td></tr>
+<tr><td>净浮盈2R后含费保本</td><td>43</td><td>40＋0</td><td>27.5%</td><td>10.90</td><td>3.26</td><td>1.10</td><td>14</td><td>14</td><td>17.13</td><td>2</td></tr>
+<tr><td>毛2R兑现25%</td><td>43</td><td>40＋0</td><td>25.0%</td><td>6.49</td><td>-1.16</td><td>0.97</td><td>14</td><td>14</td><td>17.13</td><td>1</td></tr>
+<tr><td>毛2R兑现50%</td><td>43</td><td>40＋0</td><td>30.0%</td><td>3.40</td><td>-4.24</td><td>0.87</td><td>14</td><td>14</td><td>17.13</td><td>1</td></tr>
+<tr><td>毛3R全平</td><td>43</td><td>40＋0</td><td>25.0%</td><td>-5.24</td><td>-12.88</td><td>0.62</td><td>14</td><td>14</td><td>19.60</td><td>6</td></tr>
+</tbody></table>
+<table><thead><tr>
+<th>规则</th>
+<th>完整匹配/自然</th>
+<th>随机均净R</th>
+<th>匹配超额均净R</th>
+<th>月块p</th>
+<th>Holm校正p</th>
+<th>匹配月数</th>
+</tr></thead><tbody>
+<tr><td>原版4ATR跟踪</td><td>37/40</td><td>-0.08</td><td>0.22</td><td>0.38</td><td>1.00</td><td>12</td></tr>
+<tr><td>3ATR跟踪</td><td>37/40</td><td>-0.18</td><td>-0.18</td><td>0.72</td><td>1.00</td><td>12</td></tr>
+<tr><td>2ATR跟踪</td><td>37/40</td><td>-0.27</td><td>-0.02</td><td>0.52</td><td>1.00</td><td>12</td></tr>
+<tr><td>净浮盈1R后含费保本</td><td>38/41</td><td>-0.07</td><td>0.12</td><td>0.37</td><td>1.00</td><td>12</td></tr>
+<tr><td>净浮盈2R后含费保本</td><td>37/40</td><td>-0.08</td><td>0.21</td><td>0.38</td><td>1.00</td><td>12</td></tr>
+<tr><td>毛2R兑现25%</td><td>37/40</td><td>-0.13</td><td>0.16</td><td>0.37</td><td>1.00</td><td>12</td></tr>
+<tr><td>毛2R兑现50%</td><td>37/40</td><td>-0.17</td><td>0.10</td><td>0.38</td><td>1.00</td><td>12</td></tr>
+<tr><td>毛3R全平</td><td>37/40</td><td>-0.35</td><td>-0.02</td><td>0.54</td><td>1.00</td><td>12</td></tr>
+</tbody></table>
+<p>每行退出均与同币、同方向、同入场月/纽约小时/周末状态、同因果波动桶的随机入场配对，目标每笔5个。匹配超额只在完整匹配子集上计算，不能拿全体均值减随机均值复算；缺匹配明确保留。</p>
+<h2>后续：2026年1—4月</h2>
+<table><thead><tr>
+<th>规则</th>
+<th>候选</th>
+<th>自然＋边界</th>
+<th>净胜率</th>
+<th>总毛R</th>
+<th>总净R</th>
+<th>PF</th>
+<th>最长净亏</th>
+<th>最长完整初始SL</th>
+<th>结算回撤R</th>
+<th>毛≥3R笔数</th>
+</tr></thead><tbody>
+<tr><td>原版4ATR跟踪</td><td>21</td><td>17＋0</td><td>52.9%</td><td>26.32</td><td>22.74</td><td>3.79</td><td>2</td><td>2</td><td>3.29</td><td>5</td></tr>
+<tr><td>3ATR跟踪</td><td>21</td><td>17＋0</td><td>58.8%</td><td>15.60</td><td>12.02</td><td>2.58</td><td>2</td><td>2</td><td>2.97</td><td>2</td></tr>
+<tr><td>2ATR跟踪</td><td>21</td><td>17＋0</td><td>58.8%</td><td>20.18</td><td>16.61</td><td>3.18</td><td>2</td><td>2</td><td>2.97</td><td>4</td></tr>
+<tr><td>净浮盈1R后含费保本</td><td>21</td><td>17＋0</td><td>70.6%</td><td>26.00</td><td>22.42</td><td>4.91</td><td>2</td><td>2</td><td>2.25</td><td>5</td></tr>
+<tr><td>净浮盈2R后含费保本</td><td>21</td><td>17＋0</td><td>64.7%</td><td>28.26</td><td>24.68</td><td>4.97</td><td>2</td><td>2</td><td>2.25</td><td>5</td></tr>
+<tr><td>毛2R兑现25%</td><td>21</td><td>17＋0</td><td>52.9%</td><td>23.95</td><td>20.37</td><td>3.95</td><td>2</td><td>2</td><td>2.25</td><td>4</td></tr>
+<tr><td>毛2R兑现50%</td><td>21</td><td>17＋0</td><td>64.7%</td><td>21.58</td><td>18.00</td><td>3.89</td><td>2</td><td>2</td><td>2.25</td><td>3</td></tr>
+<tr><td>毛3R全平</td><td>21</td><td>17＋0</td><td>58.8%</td><td>16.58</td><td>13.00</td><td>2.71</td><td>2</td><td>2</td><td>3.29</td><td>7</td></tr>
+</tbody></table>
+<table><thead><tr>
+<th>规则</th>
+<th>完整匹配/自然</th>
+<th>随机均净R</th>
+<th>匹配超额均净R</th>
+<th>月块p</th>
+<th>Holm校正p</th>
+<th>匹配月数</th>
+</tr></thead><tbody>
+<tr><td>原版4ATR跟踪</td><td>17/17</td><td>0.11</td><td>1.23</td><td>0.18</td><td>0.99</td><td>4</td></tr>
+<tr><td>3ATR跟踪</td><td>17/17</td><td>0.06</td><td>0.65</td><td>0.18</td><td>0.99</td><td>4</td></tr>
+<tr><td>2ATR跟踪</td><td>17/17</td><td>0.25</td><td>0.73</td><td>0.18</td><td>0.99</td><td>4</td></tr>
+<tr><td>净浮盈1R后含费保本</td><td>17/17</td><td>0.04</td><td>1.28</td><td>0.12</td><td>0.99</td><td>4</td></tr>
+<tr><td>净浮盈2R后含费保本</td><td>17/17</td><td>0.15</td><td>1.30</td><td>0.18</td><td>0.99</td><td>4</td></tr>
+<tr><td>毛2R兑现25%</td><td>17/17</td><td>0.02</td><td>1.18</td><td>0.18</td><td>0.99</td><td>4</td></tr>
+<tr><td>毛2R兑现50%</td><td>17/17</td><td>-0.06</td><td>1.12</td><td>0.12</td><td>0.99</td><td>4</td></tr>
+<tr><td>毛3R全平</td><td>17/17</td><td>-0.02</td><td>0.78</td><td>0.12</td><td>0.99</td><td>4</td></tr>
+</tbody></table>
+<p>每行退出均与同币、同方向、同入场月/纽约小时/周末状态、同因果波动桶的随机入场配对，目标每笔5个。匹配超额只在完整匹配子集上计算，不能拿全体均值减随机均值复算；缺匹配明确保留。</p>
+<h2>连续：2023年8月—2026年4月</h2>
+<table><thead><tr>
+<th>规则</th>
+<th>候选</th>
+<th>自然＋边界</th>
+<th>净胜率</th>
+<th>总毛R</th>
+<th>总净R</th>
+<th>PF</th>
+<th>最长净亏</th>
+<th>最长完整初始SL</th>
+<th>结算回撤R</th>
+<th>毛≥3R笔数</th>
+</tr></thead><tbody>
+<tr><td>原版4ATR跟踪</td><td>134</td><td>123＋0</td><td>26.0%</td><td>24.00</td><td>-9.84</td><td>0.91</td><td>14</td><td>14</td><td>38.33</td><td>13</td></tr>
+<tr><td>3ATR跟踪</td><td>134</td><td>123＋0</td><td>29.3%</td><td>-6.65</td><td>-40.48</td><td>0.62</td><td>14</td><td>14</td><td>53.89</td><td>6</td></tr>
+<tr><td>2ATR跟踪</td><td>134</td><td>123＋0</td><td>29.3%</td><td>7.07</td><td>-26.76</td><td>0.75</td><td>14</td><td>14</td><td>46.22</td><td>11</td></tr>
+<tr><td>净浮盈1R后含费保本</td><td>134</td><td>124＋0</td><td>44.4%</td><td>23.49</td><td>-10.58</td><td>0.88</td><td>6</td><td>6</td><td>35.93</td><td>11</td></tr>
+<tr><td>净浮盈2R后含费保本</td><td>134</td><td>123＋0</td><td>31.7%</td><td>22.92</td><td>-10.92</td><td>0.89</td><td>14</td><td>14</td><td>42.68</td><td>12</td></tr>
+<tr><td>毛2R兑现25%</td><td>134</td><td>123＋0</td><td>27.6%</td><td>19.25</td><td>-14.59</td><td>0.86</td><td>14</td><td>14</td><td>37.35</td><td>10</td></tr>
+<tr><td>毛2R兑现50%</td><td>134</td><td>123＋0</td><td>33.3%</td><td>14.50</td><td>-19.33</td><td>0.81</td><td>14</td><td>14</td><td>40.67</td><td>8</td></tr>
+<tr><td>毛3R全平</td><td>134</td><td>123＋0</td><td>29.3%</td><td>6.14</td><td>-27.70</td><td>0.74</td><td>14</td><td>14</td><td>46.78</td><td>26</td></tr>
+</tbody></table>
+<table><thead><tr>
+<th>规则</th>
+<th>完整匹配/自然</th>
+<th>随机均净R</th>
+<th>匹配超额均净R</th>
+<th>月块p</th>
+<th>Holm校正p</th>
+<th>匹配月数</th>
+</tr></thead><tbody>
+<tr><td>原版4ATR跟踪</td><td>116/123</td><td>-0.14</td><td>0.06</td><td>0.40</td><td>1.00</td><td>33</td></tr>
+<tr><td>3ATR跟踪</td><td>116/123</td><td>-0.21</td><td>-0.14</td><td>0.81</td><td>1.00</td><td>33</td></tr>
+<tr><td>2ATR跟踪</td><td>116/123</td><td>-0.23</td><td>-0.00</td><td>0.50</td><td>1.00</td><td>33</td></tr>
+<tr><td>净浮盈1R后含费保本</td><td>117/124</td><td>-0.12</td><td>0.03</td><td>0.43</td><td>1.00</td><td>33</td></tr>
+<tr><td>净浮盈2R后含费保本</td><td>116/123</td><td>-0.14</td><td>0.04</td><td>0.43</td><td>1.00</td><td>33</td></tr>
+<tr><td>毛2R兑现25%</td><td>116/123</td><td>-0.18</td><td>0.06</td><td>0.39</td><td>1.00</td><td>33</td></tr>
+<tr><td>毛2R兑现50%</td><td>116/123</td><td>-0.22</td><td>0.05</td><td>0.39</td><td>1.00</td><td>33</td></tr>
+<tr><td>毛3R全平</td><td>116/123</td><td>-0.26</td><td>0.00</td><td>0.49</td><td>1.00</td><td>33</td></tr>
+</tbody></table>
+<p>每行退出均与同币、同方向、同入场月/纽约小时/周末状态、同因果波动桶的随机入场配对，目标每笔5个。匹配超额只在完整匹配子集上计算，不能拿全体均值减随机均值复算；缺匹配明确保留。</p>
+<h2>同一入场：救回亏损与截短赢家</h2>
+<h3>后续：2025全年</h3>
+<table><thead><tr>
+<th>规则</th>
+<th>配对数</th>
+<th>同入场净R增减</th>
+<th>改善</th>
+<th>变差</th>
+<th>原净亏转净赚</th>
+<th>原毛3R被截短</th>
+<th>分批单</th>
+<th>止损/目标同根歧义单</th>
+</tr></thead><tbody>
+<tr><td>原版4ATR跟踪</td><td>40</td><td>0.00</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>3ATR跟踪</td><td>40</td><td>-18.42</td><td>9</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td></tr>
+<tr><td>2ATR跟踪</td><td>40</td><td>-15.68</td><td>8</td><td>2</td><td>1</td><td>1</td><td>0</td><td>0</td></tr>
+<tr><td>净浮盈1R后含费保本</td><td>40</td><td>-17.39</td><td>8</td><td>3</td><td>8</td><td>1</td><td>0</td><td>0</td></tr>
+<tr><td>净浮盈2R后含费保本</td><td>40</td><td>1.33</td><td>2</td><td>0</td><td>2</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>毛2R兑现25%</td><td>40</td><td>-3.09</td><td>9</td><td>3</td><td>1</td><td>1</td><td>12</td><td>0</td></tr>
+<tr><td>毛2R兑现50%</td><td>40</td><td>-6.17</td><td>9</td><td>3</td><td>3</td><td>1</td><td>12</td><td>0</td></tr>
+<tr><td>毛3R全平</td><td>40</td><td>-14.81</td><td>4</td><td>2</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+</tbody></table>
+<h3>后续：2026年1—4月</h3>
+<table><thead><tr>
+<th>规则</th>
+<th>配对数</th>
+<th>同入场净R增减</th>
+<th>改善</th>
+<th>变差</th>
+<th>原净亏转净赚</th>
+<th>原毛3R被截短</th>
+<th>分批单</th>
+<th>止损/目标同根歧义单</th>
+</tr></thead><tbody>
+<tr><td>原版4ATR跟踪</td><td>17</td><td>0.00</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>3ATR跟踪</td><td>17</td><td>-10.72</td><td>5</td><td>4</td><td>1</td><td>4</td><td>0</td><td>0</td></tr>
+<tr><td>2ATR跟踪</td><td>17</td><td>-6.13</td><td>5</td><td>4</td><td>1</td><td>2</td><td>0</td><td>0</td></tr>
+<tr><td>净浮盈1R后含费保本</td><td>17</td><td>-0.32</td><td>3</td><td>2</td><td>3</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>净浮盈2R后含费保本</td><td>17</td><td>1.94</td><td>2</td><td>0</td><td>2</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>毛2R兑现25%</td><td>17</td><td>-2.37</td><td>5</td><td>6</td><td>0</td><td>1</td><td>11</td><td>0</td></tr>
+<tr><td>毛2R兑现50%</td><td>17</td><td>-4.74</td><td>5</td><td>6</td><td>2</td><td>2</td><td>11</td><td>0</td></tr>
+<tr><td>毛3R全平</td><td>17</td><td>-9.74</td><td>2</td><td>5</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+</tbody></table>
+<h3>连续：2023年8月—2026年4月</h3>
+<table><thead><tr>
+<th>规则</th>
+<th>配对数</th>
+<th>同入场净R增减</th>
+<th>改善</th>
+<th>变差</th>
+<th>原净亏转净赚</th>
+<th>原毛3R被截短</th>
+<th>分批单</th>
+<th>止损/目标同根歧义单</th>
+</tr></thead><tbody>
+<tr><td>原版4ATR跟踪</td><td>123</td><td>0.00</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>3ATR跟踪</td><td>123</td><td>-30.65</td><td>25</td><td>10</td><td>4</td><td>8</td><td>0</td><td>0</td></tr>
+<tr><td>2ATR跟踪</td><td>123</td><td>-16.93</td><td>25</td><td>10</td><td>4</td><td>4</td><td>0</td><td>0</td></tr>
+<tr><td>净浮盈1R后含费保本</td><td>123</td><td>-16.38</td><td>23</td><td>10</td><td>23</td><td>3</td><td>0</td><td>0</td></tr>
+<tr><td>净浮盈2R后含费保本</td><td>123</td><td>-1.08</td><td>7</td><td>3</td><td>7</td><td>1</td><td>0</td><td>0</td></tr>
+<tr><td>毛2R兑现25%</td><td>123</td><td>-4.75</td><td>24</td><td>17</td><td>2</td><td>3</td><td>41</td><td>0</td></tr>
+<tr><td>毛2R兑现50%</td><td>123</td><td>-9.50</td><td>24</td><td>17</td><td>9</td><td>5</td><td>41</td><td>0</td></tr>
+<tr><td>毛3R全平</td><td>123</td><td>-17.86</td><td>13</td><td>13</td><td>4</td><td>0</td><td>0</td><td>0</td></tr>
+</tbody></table>
+<p>同入场对照固定原版实际成交信号，允许修改退出后原信号之间相互重叠，用于隔离退出本身；不能当作可同时执行的账户。完整串行统计则从全部机会重建单仓，提前退出会释放后续信号，因此两种差值不应混用。</p>
+<h2>原版回吐诊断与大赢家逐笔对照</h2>
+<p>2026前4月原版17笔中，记录到浮盈至少1R后净亏的有3笔，合计-2.42R；原版全部净亏合计-8.16R。前三个赢家合计21.20R，占原版总净收益93.2%。因此保护小回吐必须同时检查大赢家被减掉多少。</p>
+<table><thead><tr>
+<th>原前三赢家入场北京时间</th>
+<th>原版4ATR跟踪</th>
+<th>3ATR跟踪</th>
+<th>2ATR跟踪</th>
+<th>净浮盈1R后含费保本</th>
+<th>净浮盈2R后含费保本</th>
+<th>毛2R兑现25%</th>
+<th>毛2R兑现50%</th>
+<th>毛3R全平</th>
+</tr></thead><tbody>
+<tr><td>2026-02-04 21:00:00+08:00</td><td>10.05</td><td>1.88</td><td>2.88</td><td>10.05</td><td>10.05</td><td>8.00</td><td>5.95</td><td>2.85</td></tr>
+<tr><td>2026-02-13 18:15:00+08:00</td><td>5.83</td><td>6.31</td><td>6.78</td><td>5.83</td><td>5.83</td><td>4.82</td><td>3.80</td><td>2.78</td></tr>
+<tr><td>2026-03-04 15:00:00+08:00</td><td>5.32</td><td>2.32</td><td>2.98</td><td>5.32</td><td>5.32</td><td>4.45</td><td>3.58</td><td>2.83</td></tr>
+</tbody></table>
+<p>MFE沿用旧引擎记录，不包含被止损根的新有利极值。它是路径诊断，不证明能成交在最高点；固定止盈是否成交由逐根订单模型判断，不能直接把MFE减实际收益叫作可追回利润。</p>
+<h2>含费保本与净胜率的区别</h2>
+<table><thead><tr>
+<th>窗口</th>
+<th>规则</th>
+<th>自然数</th>
+<th>剔除保护位微盈后的盈利</th>
+<th>含费保护位微盈</th>
+<th>净亏</th>
+<th>剔除微盈胜率</th>
+<th>微盈合计R</th>
+</tr></thead><tbody>
+<tr><td>后续：2025全年</td><td>净浮盈1R后含费保本</td><td>41</td><td>7</td><td>11</td><td>23</td><td>17.1%</td><td>0.001375</td></tr>
+<tr><td>后续：2025全年</td><td>净浮盈2R后含费保本</td><td>40</td><td>9</td><td>2</td><td>29</td><td>22.5%</td><td>0.000378</td></tr>
+<tr><td>后续：2026年1—4月</td><td>净浮盈1R后含费保本</td><td>17</td><td>7</td><td>5</td><td>5</td><td>41.2%</td><td>0.001628</td></tr>
+<tr><td>后续：2026年1—4月</td><td>净浮盈2R后含费保本</td><td>17</td><td>9</td><td>2</td><td>6</td><td>52.9%</td><td>0.001184</td></tr>
+<tr><td>连续：2023年8月—2026年4月</td><td>净浮盈1R后含费保本</td><td>124</td><td>23</td><td>33</td><td>68</td><td>18.5%</td><td>0.007353</td></tr>
+<tr><td>连续：2023年8月—2026年4月</td><td>净浮盈2R后含费保本</td><td>123</td><td>29</td><td>10</td><td>84</td><td>23.6%</td><td>0.003431</td></tr>
+</tbody></table>
+<p>微盈定义为含费保护已激活、经移动止损退出且净收益在0至一个价格最小步长折算R内，只做结果口径拆分，不改变交易或参数。主表按净R&gt;1e-9算胜，故2026前4月净2R保护的64.7%含2笔合计约0.00118R的微盈；分开看是9笔盈利、2笔含费保本微盈、6笔净亏。现金旧引擎按exit_reason识别net_be，而此重放统一把移动保护退出记作trailing_stop，因此现金n_net_be字段不能用于经济保本计数；不影响其按累计实际净金额决定回本重置。</p>
+<h2>1000U账户：固定价格风险1U与亏后翻倍</h2>
+<h3>开发：2023年8月—2024年末</h3>
+<table><thead><tr>
+<th>规则</th>
+<th>固定期末U</th>
+<th>固定结算回撤</th>
+<th>翻倍期末U</th>
+<th>翻倍自然笔数</th>
+<th>边界数</th>
+<th>翻倍结算回撤</th>
+<th>容量拒绝</th>
+<th>未回本U</th>
+</tr></thead><tbody>
+<tr><td>原版4ATR跟踪</td><td>965.49</td><td>3.5%</td><td>678.33</td><td>9</td><td>0</td><td>32.2%</td><td>61</td><td>321.67</td></tr>
+<tr><td>3ATR跟踪</td><td>963.98</td><td>3.6%</td><td>678.69</td><td>11</td><td>0</td><td>32.2%</td><td>58</td><td>321.65</td></tr>
+<tr><td>2ATR跟踪</td><td>970.38</td><td>3.0%</td><td>732.71</td><td>11</td><td>0</td><td>26.8%</td><td>58</td><td>268.61</td></tr>
+<tr><td>净浮盈1R后含费保本</td><td>966.81</td><td>3.3%</td><td>678.46</td><td>10</td><td>0</td><td>32.2%</td><td>60</td><td>321.54</td></tr>
+<tr><td>净浮盈2R后含费保本</td><td>961.14</td><td>3.9%</td><td>678.33</td><td>9</td><td>0</td><td>32.2%</td><td>61</td><td>321.67</td></tr>
+<tr><td>毛2R兑现25%</td><td>966.20</td><td>3.4%</td><td>792.79</td><td>10</td><td>0</td><td>20.7%</td><td>59</td><td>207.30</td></tr>
+<tr><td>毛2R兑现50%</td><td>966.91</td><td>3.3%</td><td>739.38</td><td>12</td><td>0</td><td>26.1%</td><td>57</td><td>261.45</td></tr>
+<tr><td>毛3R全平</td><td>972.17</td><td>3.0%</td><td>835.31</td><td>22</td><td>0</td><td>24.3%</td><td>47</td><td>267.85</td></tr>
+</tbody></table>
+<h3>后续：2025全年</h3>
+<table><thead><tr>
+<th>规则</th>
+<th>固定期末U</th>
+<th>固定结算回撤</th>
+<th>翻倍期末U</th>
+<th>翻倍自然笔数</th>
+<th>边界数</th>
+<th>翻倍结算回撤</th>
+<th>容量拒绝</th>
+<th>未回本U</th>
+</tr></thead><tbody>
+<tr><td>原版4ATR跟踪</td><td>1001.93</td><td>1.8%</td><td>1142.58</td><td>18</td><td>0</td><td>34.2%</td><td>24</td><td>594.70</td></tr>
+<tr><td>3ATR跟踪</td><td>983.51</td><td>2.0%</td><td>739.06</td><td>17</td><td>0</td><td>28.8%</td><td>25</td><td>298.98</td></tr>
+<tr><td>2ATR跟踪</td><td>986.25</td><td>1.9%</td><td>764.55</td><td>17</td><td>0</td><td>28.1%</td><td>25</td><td>298.98</td></tr>
+<tr><td>净浮盈1R后含费保本</td><td>1000.19</td><td>1.4%</td><td>941.72</td><td>20</td><td>0</td><td>23.7%</td><td>23</td><td>292.90</td></tr>
+<tr><td>净浮盈2R后含费保本</td><td>1003.26</td><td>1.7%</td><td>1142.58</td><td>18</td><td>0</td><td>34.2%</td><td>24</td><td>594.70</td></tr>
+<tr><td>毛2R兑现25%</td><td>998.84</td><td>1.7%</td><td>967.47</td><td>18</td><td>0</td><td>37.9%</td><td>24</td><td>591.48</td></tr>
+<tr><td>毛2R兑现50%</td><td>995.76</td><td>1.7%</td><td>1747.19</td><td>32</td><td>0</td><td>21.7%</td><td>8</td><td>7.64</td></tr>
+<tr><td>毛3R全平</td><td>987.12</td><td>2.0%</td><td>757.94</td><td>17</td><td>0</td><td>28.3%</td><td>25</td><td>298.98</td></tr>
+</tbody></table>
+<h3>后续：2026年1—4月</h3>
+<table><thead><tr>
+<th>规则</th>
+<th>固定期末U</th>
+<th>固定结算回撤</th>
+<th>翻倍期末U</th>
+<th>翻倍自然笔数</th>
+<th>边界数</th>
+<th>翻倍结算回撤</th>
+<th>容量拒绝</th>
+<th>未回本U</th>
+</tr></thead><tbody>
+<tr><td>原版4ATR跟踪</td><td>1022.74</td><td>0.3%</td><td>1132.28</td><td>17</td><td>0</td><td>0.8%</td><td>0</td><td>0.00</td></tr>
+<tr><td>3ATR跟踪</td><td>1012.02</td><td>0.3%</td><td>1049.43</td><td>17</td><td>0</td><td>0.6%</td><td>0</td><td>0.00</td></tr>
+<tr><td>2ATR跟踪</td><td>1016.61</td><td>0.3%</td><td>1029.96</td><td>17</td><td>0</td><td>0.6%</td><td>0</td><td>0.00</td></tr>
+<tr><td>净浮盈1R后含费保本</td><td>1022.42</td><td>0.2%</td><td>1051.45</td><td>17</td><td>0</td><td>0.3%</td><td>0</td><td>1.24</td></tr>
+<tr><td>净浮盈2R后含费保本</td><td>1024.68</td><td>0.2%</td><td>1077.66</td><td>17</td><td>0</td><td>0.3%</td><td>0</td><td>0.00</td></tr>
+<tr><td>毛2R兑现25%</td><td>1020.37</td><td>0.2%</td><td>1032.98</td><td>17</td><td>0</td><td>0.3%</td><td>0</td><td>0.00</td></tr>
+<tr><td>毛2R兑现50%</td><td>1018.00</td><td>0.2%</td><td>1029.93</td><td>17</td><td>0</td><td>0.3%</td><td>0</td><td>0.00</td></tr>
+<tr><td>毛3R全平</td><td>1013.00</td><td>0.3%</td><td>1058.75</td><td>17</td><td>0</td><td>0.9%</td><td>0</td><td>0.00</td></tr>
+</tbody></table>
+<h3>连续：2023年8月—2026年4月</h3>
+<table><thead><tr>
+<th>规则</th>
+<th>固定期末U</th>
+<th>固定结算回撤</th>
+<th>翻倍期末U</th>
+<th>翻倍自然笔数</th>
+<th>边界数</th>
+<th>翻倍结算回撤</th>
+<th>容量拒绝</th>
+<th>未回本U</th>
+</tr></thead><tbody>
+<tr><td>原版4ATR跟踪</td><td>990.16</td><td>3.8%</td><td>678.33</td><td>9</td><td>0</td><td>32.2%</td><td>125</td><td>321.67</td></tr>
+<tr><td>3ATR跟踪</td><td>959.52</td><td>5.4%</td><td>678.69</td><td>11</td><td>0</td><td>32.2%</td><td>122</td><td>321.65</td></tr>
+<tr><td>2ATR跟踪</td><td>973.24</td><td>4.6%</td><td>732.71</td><td>11</td><td>0</td><td>26.8%</td><td>122</td><td>268.61</td></tr>
+<tr><td>净浮盈1R后含费保本</td><td>989.42</td><td>3.6%</td><td>678.46</td><td>10</td><td>0</td><td>32.2%</td><td>124</td><td>321.54</td></tr>
+<tr><td>净浮盈2R后含费保本</td><td>989.08</td><td>4.3%</td><td>678.33</td><td>9</td><td>0</td><td>32.2%</td><td>125</td><td>321.67</td></tr>
+<tr><td>毛2R兑现25%</td><td>985.41</td><td>3.7%</td><td>792.79</td><td>10</td><td>0</td><td>20.7%</td><td>123</td><td>207.30</td></tr>
+<tr><td>毛2R兑现50%</td><td>980.67</td><td>4.1%</td><td>739.38</td><td>12</td><td>0</td><td>26.1%</td><td>121</td><td>261.45</td></tr>
+<tr><td>毛3R全平</td><td>972.30</td><td>4.7%</td><td>835.31</td><td>22</td><td>0</td><td>24.3%</td><td>111</td><td>267.85</td></tr>
+</tbody></table>
+<p>基础1U是价格止损风险，成本另计；10倍保证金容量保持旧研究假设。净亏后翻倍，累计净收益偿清前亏才重置，保本不抹去债务。资金不足时拒绝新仓，拒绝会改变后续序列；高期末余额若只做了少数单，不能替代全部机会表现。分批资金在整单终结时合计结算，以上仅为整单已实现回撤，未模拟分批到账时点、盘中权益或标记价格强平。未纳入资金费率和额外滑点。</p>
+<h2>冻结执行规则与时间边界</h2>
+<p>所有规则保留V8入场、5bar极值初始止损、0.2ATR缓冲、2ATR风险下限和原V6反向下一开盘退出。只在纽约本地[02:00,11:00)的实际下一根开盘准入，周末保留，时段外继续管理持仓。夏令时北京时间14—23点、冬令时15—次日0点；受保护ICT脚本冬季行为未核实，这里明确采用America/New_York模型。</p>
+<p>原跟踪在收盘浮盈达到毛2R后激活，保持单向收紧；3ATR/2ATR仅改变跟踪宽度。新增含费保本使用该根未先止损且高/低曾达到净1R或净2R的条件，在收盘确认，下一根生效；保护价相对开仓价有利偏移0.2%，再按0.01价格步长取整。这不是触及即生效，跳空仍可能净亏。</p>
+<p>分批是在毛2R处卖出/买回初始数量25%或50%，剩余继续原4ATR跟踪，不叠加新的残仓止损。毛3R全平方案保留初始止损、原跟踪与反向退出，新增一个更早可成交的上限。一笔名义0.2%往返成本按成交份额分配，绝不每一批再扣完整成本；分批不改变初始R分母。残仓碰到初始止损不等于全仓完整初始SL。</p>
+<p>限价目标入场后即有效，跳空用观察到的开盘价；同根止损和目标都可触发时止损优先并标记歧义。OHLC不能给出所有盘中顺序，TradingView也明确区分默认模拟路径和更细粒度数据；这里采用明确的保守规则，不声称已与TV原生逐笔一致。<a href="https://www.tradingview.com/pine-script-docs/concepts/strategies/">TradingView策略执行文档</a></p>
+<p>开发只读2025-01-01前价格且标签在该点截断；选择JSON提交后才读后续价格。2025标签同样在2026-01-01前截断；2026前4月和连续历史截止2026-05-01。所有窗口未自然终结的持仓单列边界，不混入自然胜率；连续窗单独回放，不能拼接每年重置的资金账本。所有规则holdout消耗0次。</p>
+<h2>可复现证据</h2>
+<table><thead><tr>
+<th>窗口</th>
+<th>基线核验</th>
+<th>明细</th>
+</tr></thead><tbody>
+<tr><td>development</td><td>original_engine</td><td>{&quot;rows&quot;: 66, &quot;numeric_fields&quot;: 9, &quot;categorical_fields&quot;: 2, &quot;passed&quot;: true}</td></tr>
+<tr><td>validation</td><td>original_engine</td><td>{&quot;rows&quot;: 40, &quot;numeric_fields&quot;: 9, &quot;categorical_fields&quot;: 2, &quot;passed&quot;: true}</td></tr>
+<tr><td>common</td><td>original_engine</td><td>{&quot;rows&quot;: 17, &quot;numeric_fields&quot;: 9, &quot;categorical_fields&quot;: 2, &quot;passed&quot;: true}</td></tr>
+<tr><td>common</td><td>previous_ict</td><td>{&quot;rows&quot;: 17, &quot;numeric_fields&quot;: 9, &quot;other_fields&quot;: 5, &quot;passed&quot;: true}</td></tr>
+<tr><td>available</td><td>original_engine</td><td>{&quot;rows&quot;: 123, &quot;numeric_fields&quot;: 9, &quot;categorical_fields&quot;: 2, &quot;passed&quot;: true}</td></tr>
+<tr><td>available</td><td>previous_ict</td><td>{&quot;rows&quot;: 123, &quot;numeric_fields&quot;: 9, &quot;other_fields&quot;: 5, &quot;passed&quot;: true}</td></tr>
+</tbody></table>
+<p>共32组统计、64组现金账本。冻结builder为<code>e3811a6683b79e9d16d84a995adedbe54dbc0dc4</code>；开发选择提交与评价读入提交见results/evaluate/read_receipt.json。每个输入前缀和输出文件的SHA在分阶段manifest.json中，分批比例、毛R贡献、成本与净R均由运行断言核对。测试与复核详情见validation_receipt.json。</p>
+<p>开发读入104962根，最早2022-01-03 15:30 UTC用于预热，最后完整收盘2025-01-01 00:00；评价读入151522根，最后完整收盘2026-05-01 00:00。两个前缀均无缺口、无重复、受限价格解析行数为0；正式开仓起点2023-08-01，较早价格只用于因果预热。</p>
+<p>本轮45项退出专项检查通过。扩大至仓库边界和holdout单一定义的检查为184通过、5失败；失败均因既有spike-v8-total2-1h-native-20260914-delivery登记缺source_commit，原HEAD已存在此缺项，本轮未改该记录，不能声称仓库检查全绿。HTML静态结构为19张表、16个逐笔CSV链接均可解析到本地文件；应用浏览器安全策略阻止file URL预览，因此未声称完成视觉渲染核验。</p>
+<p>每窗口8项月块9999次符号置换做Holm校正；这些检验针对匹配随机入场超额，不是退出修改相对原版的显著性检验。无预测模型或排名，AUC、top-decile毛净收益、单特征评分基线不适用，给出原版与匹配随机入场作为零假设对照，不编造分类指标。</p>
+<h2>逐笔下载</h2>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-exits-20260915-v1/delivery/ETH_15m_common_original.csv">后续：2026年1—4月｜原版4ATR跟踪</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-exits-20260915-v1/delivery/ETH_15m_common_trail3_atr.csv">后续：2026年1—4月｜3ATR跟踪</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-exits-20260915-v1/delivery/ETH_15m_common_trail2_atr.csv">后续：2026年1—4月｜2ATR跟踪</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-exits-20260915-v1/delivery/ETH_15m_common_cost_be1.csv">后续：2026年1—4月｜净浮盈1R后含费保本</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-exits-20260915-v1/delivery/ETH_15m_common_cost_be2.csv">后续：2026年1—4月｜净浮盈2R后含费保本</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-exits-20260915-v1/delivery/ETH_15m_common_partial25_at2.csv">后续：2026年1—4月｜毛2R兑现25%</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-exits-20260915-v1/delivery/ETH_15m_common_partial50_at2.csv">后续：2026年1—4月｜毛2R兑现50%</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-exits-20260915-v1/delivery/ETH_15m_common_fixed3r.csv">后续：2026年1—4月｜毛3R全平</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-exits-20260915-v1/delivery/ETH_15m_available_original.csv">连续：2023年8月—2026年4月｜原版4ATR跟踪</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-exits-20260915-v1/delivery/ETH_15m_available_trail3_atr.csv">连续：2023年8月—2026年4月｜3ATR跟踪</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-exits-20260915-v1/delivery/ETH_15m_available_trail2_atr.csv">连续：2023年8月—2026年4月｜2ATR跟踪</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-exits-20260915-v1/delivery/ETH_15m_available_cost_be1.csv">连续：2023年8月—2026年4月｜净浮盈1R后含费保本</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-exits-20260915-v1/delivery/ETH_15m_available_cost_be2.csv">连续：2023年8月—2026年4月｜净浮盈2R后含费保本</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-exits-20260915-v1/delivery/ETH_15m_available_partial25_at2.csv">连续：2023年8月—2026年4月｜毛2R兑现25%</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-exits-20260915-v1/delivery/ETH_15m_available_partial50_at2.csv">连续：2023年8月—2026年4月｜毛2R兑现50%</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-exits-20260915-v1/delivery/ETH_15m_available_fixed3r.csv">连续：2023年8月—2026年4月｜毛3R全平</a></li>
+</ul>
+<p>退出根时间对盘中成交只是K线标签，不是精确秒；分批单收益是所有fills加权结果，末次退出价无法单独还原整单收益。</p>
+<h2>风险与诚实声明</h2>
+<p>研究历史已经被以前实验观察过，因此这次按时间分段也不是全新盲测。只测试预先列明的8套，不等于搜索到了所有止盈的全局最优。原版近期17笔的盈利集中于少数大单，任何胜率、最大连亏或回撤改善都不能保证未来。固定3R和保本不能保证倍投回本；本轮没有使用holdout、训练、promote或改动实盘。</p>
+<h2>复现命令</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+export PYTHONPATH=/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages:/Users/zhangzc/fable-trading
+/usr/bin/python3 -m pytest -q tests/test_spike_v8_ict_exit_study.py tests/evaluation/test_spike_partial_exit.py tests/evaluation/test_spike_recovery_exit.py tests/test_spike_v8_ict.py
+# 只在源文件已提交且对应phase目录不存在的干净复现环境运行；不得覆盖本轮证据
+/usr/bin/python3 -m yoyo.evaluation.spike_v8_ict_exit_study develop
+git branch --show-current
+git add experiments/active/exp-spike-v8-ict-exits-20260915-v1/results/selection.json
+git commit -m &quot;research: freeze development exit selection&quot;
+/usr/bin/python3 -m yoyo.evaluation.spike_v8_ict_exit_study evaluate
+/usr/bin/python3 scripts/report_spike_v8_ict_exits.py
+/usr/bin/python3 scripts/md_to_html.py analysis/p1_spike_v8_ict_exits_20260915.md --out-dir analysis/html
+</code></pre>
+<h2>下一步选项</h2>
+<p>先保留原版作为研究基线。若继续改变退出机制，应另冻结新实验并同时报告保护亏损与截短大赢家的效果；原生TV逐笔对齐仍是未完成的外部校验。任何进入新holdout或实盘的动作须按项目规则另行确认。</p>
+</body>
+</html>

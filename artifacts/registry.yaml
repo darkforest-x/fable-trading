@@ -30942,3 +30942,17 @@ artifacts:
     production_eligible: false
     notes: Original exits only;24trade groups,48cash accounts,24parity groups,104result hashes reconciled.15m recent
       efficiency improves but long window remains negative;4h sparse matching explicit. Zero holdout, no live changes.
+
+  - artifact_id: spike-v8-ict-exits-20260915-delivery
+    artifact_type: manifest
+    role: development_first_ict_exit_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: e3811a6683b79e9d16d84a995adedbe54dbc0dc4
+    source_path: experiments/active/exp-spike-v8-ict-exits-20260915-v1/delivery_manifest.json
+    sha256: de3a65d422fd4e31056ca8a98a88d3426de5d47e932fb3e34d0b220b451d8cb0
+    size_bytes: 11241
+    storage_uri: repo://experiments/active/exp-spike-v8-ict-exits-20260915-v1/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Eight frozen exit arms;32statistic groups,64cash accounts,6parity groups and236file hashes reconciled. All continuous variants negative; no stable improvement or live acceptance.45focused tests pass;5unrelated registry tests fail as disclosed.
