@@ -1,0 +1,158 @@
+{
+  "phase": "dev",
+  "created_at": "2026-09-14T06:12:21.509699+00:00",
+  "source_commit": "1a05685bff88c39256b81ca7d5d10a280f79cb32",
+  "signal_kind": "confirmation",
+  "input_sha256": {
+    "output/offline_tasks/owner_review_exports/20260908T130556806730Z/answers.jsonl": "e997b7aca59e6074aba4eb3212c65d6b8a1258ec5d62e44abfec2cd95c70ea0d",
+    "datasets/owner_box_refinement_20260907_v1/manifest.jsonl": "7588f9c62f26a66986f747f9dd27dff8f6c216a6b26f307e705cba2880c3a641"
+  },
+  "source_sha256": {
+    "yoyo/evaluation/gold_ma_candidate.py": "90257f2c3bcd73aacea659567a2e83367c6d2f1e22764670d3a2016512997ffa",
+    "yoyo/evaluation/ma_drift_v1_reference.py": "007878d7cd1234999467ec1f0bdfe9b7cfa623ce25db067c82a271646fdf80f0",
+    "yoyo/evaluation/owner_gold_indicator_bridge.py": "1d2e563a8dfb3d25ed4e8e38c07cf4466e9c01234f1a91d85b3b985f1776cbb4",
+    "experiments/active/exp-gold-ma-indicator-20260914-v2/replay_gold.py": "244ce1dbe893a6da0dcafe591b3e6a7774f1a6acf77b62db8d875eec61882668"
+  },
+  "metadata_accepted": 356,
+  "selected": 156,
+  "reserved": 200,
+  "source_success_cases": 156,
+  "source_failures": [],
+  "metadata_exclusions": [
+    {
+      "review_id": "ce1f116e6bd0b4f13d312608",
+      "annotation_id": 13084,
+      "task_id": 34866,
+      "status": "conflict_needs_review",
+      "reason": "conflict_needs_review"
+    },
+    {
+      "review_id": "348a94c00ff906d410ebaa8d",
+      "annotation_id": 13097,
+      "task_id": 34879,
+      "status": "conflict_needs_review",
+      "reason": "conflict_needs_review"
+    },
+    {
+      "review_id": "bd23c080f89428f51d82ac7e",
+      "annotation_id": 13100,
+      "task_id": 34882,
+      "status": "conflict_needs_review",
+      "reason": "conflict_needs_review"
+    },
+    {
+      "review_id": "8add38b06fd2bca04da7bf39",
+      "annotation_id": 13107,
+      "task_id": 34889,
+      "status": "conflict_needs_review",
+      "reason": "conflict_needs_review"
+    },
+    {
+      "review_id": "5abb2d6cf830d90317de1dcb",
+      "annotation_id": 13110,
+      "task_id": 34892,
+      "status": "conflict_needs_review",
+      "reason": "conflict_needs_review"
+    },
+    {
+      "review_id": "3330d00991c2ea1e20054b20",
+      "annotation_id": 13151,
+      "task_id": 34933,
+      "status": "conflict_needs_review",
+      "reason": "conflict_needs_review"
+    },
+    {
+      "review_id": "266125d60a5cb9fda35b251e",
+      "annotation_id": 13156,
+      "task_id": 34938,
+      "status": "conflict_needs_review",
+      "reason": "conflict_needs_review"
+    },
+    {
+      "review_id": "07f0a81c572285aa07c8b055",
+      "annotation_id": 13236,
+      "task_id": 35018,
+      "status": "conflict_needs_review",
+      "reason": "conflict_needs_review"
+    },
+    {
+      "review_id": "ec6ad5efce93be6587b2f66a",
+      "annotation_id": 13238,
+      "task_id": 35020,
+      "status": "conflict_needs_review",
+      "reason": "conflict_needs_review"
+    },
+    {
+      "review_id": "5e456d36e15f795c7f99700a",
+      "annotation_id": 13242,
+      "task_id": 35024,
+      "status": "conflict_needs_review",
+      "reason": "conflict_needs_review"
+    },
+    {
+      "review_id": "029e25d5ab012f7259b59b7e",
+      "annotation_id": 13339,
+      "task_id": 35121,
+      "status": "conflict_needs_review",
+      "reason": "conflict_needs_review"
+    },
+    {
+      "review_id": "86a1685d85b265e92f6bd23f",
+      "annotation_id": 13343,
+      "task_id": 35125,
+      "status": "conflict_needs_review",
+      "reason": "conflict_needs_review"
+    }
+  ],
+  "positive_n": 134,
+  "negative_n": 22,
+  "metrics": {
+    "v1": {
+      "positive_n": 134,
+      "inside": 9,
+      "late_1_3_only": 3,
+      "late_4_5_only": 0,
+      "no_hit_by_available_end": 122,
+      "inside_recall": 0.06716417910447761,
+      "negative_n": 22,
+      "negative_false_positive": 5,
+      "null_mean_hit_rate": 0.012011371712864248,
+      "side_inside": {
+        "long": {
+          "n": 73,
+          "hit": 0
+        },
+        "short": {
+          "n": 61,
+          "hit": 9
+        }
+      }
+    },
+    "candidate_a": {
+      "positive_n": 134,
+      "inside": 95,
+      "late_1_3_only": 10,
+      "late_4_5_only": 4,
+      "no_hit_by_available_end": 25,
+      "inside_recall": 0.7089552238805971,
+      "negative_n": 22,
+      "negative_false_positive": 16,
+      "null_mean_hit_rate": 0.11188722140214678,
+      "side_inside": {
+        "long": {
+          "n": 73,
+          "hit": 55
+        },
+        "short": {
+          "n": 61,
+          "hit": 40
+        }
+      }
+    }
+  },
+  "new_training": false,
+  "holdout_read": false,
+  "production_eligible": false,
+  "time_cut": "2025-07-01T00:00:00+00:00",
+  "note": "Human review references, not an admission as new Gold; no outcomes evaluated."
+}

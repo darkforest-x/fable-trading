@@ -28,15 +28,17 @@ experiments:
     notes: Owner authorizes historical exit research. Planned configuration-specific holdout-era use1 on reused nonblind history; no online or paused automation changes.
   - experiment_id: exp-gold-ma-indicator-20260914-v2
     source_repo: darkforest-x/fable-trading
-    status: active
+    source_commit: 428a4ef6c5
+    status: rejected
     question: Can a closed-bar numeric indicator localize the owner's actual YOLO human-reviewed shapes, including both directions?
     single_variable: Initial morphology candidate A compared with rejected short-only V1 on identical effective human rectangles; no model training or economic tuning.
-    result: Human-source bridge and frozen candidate prepared before OHLC replay; no recognition claim yet.
+    result: On134 June human boxes V1 warnings hit12 and candidate A markers84; on22 explicit no-target images candidate A misfires18. Later confirmation hits95 but misfires16. Candidate rejected;200 later answers remain unscored.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p0_gold_ma_indicator_20260914.md
-    artifacts: []
+    artifacts:
+    - gold-ma-indicator-20260914-rejected-candidate
     reuse_allowed: false
     notes: Frozen human review snapshot323 boxes33 explicit no-target12 conflicts. Chronological development before2025-07-01; later pre-holdout reserved. No Gold admission or live changes.
   - experiment_id: exp-release-eth-multitf-20260914-v1
@@ -56,10 +58,10 @@ experiments:
   - experiment_id: exp-spike-ma-drift-short-20260914-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 4b7fa9f0508ef5d802cb5e7b34584a60c3e52e3b
-    status: inconclusive
+    status: rejected
     question: Can the owner's bearish MA-rope drift be expressed as distinct causal warning and frozen-low breakout events?
     single_variable: Engineering implementation of one independent short-only morphology indicator; no market experiment or threshold tuning.
-    result: Pine v6 privately saved after native compilation; five static checks and eight synthetic PineTS groups pass, including nine pure-state assertions. Real-sample recall and profitability are untested.
+    result: Engineering checks and private native save succeeded, but Owner rejected the pattern semantics. Follow-up human-box audit exp-gold-ma-indicator-20260914-v2 finds only12/134 inside warnings; no profitability claim.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false

@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: gold-ma-indicator-20260914-rejected-candidate
+    artifact_type: manifest
+    role: human_annotation_morphology_replay_rejected_candidate
+    source_repo: darkforest-x/fable-trading
+    source_commit: aebc4e8b22
+    source_path: experiments/active/exp-gold-ma-indicator-20260914-v2/results/delivery_manifest.json
+    sha256: b605826c1e69f7c9c4bbdcc9a306fb7fb9b73ae1da38cddd3de3c26032758db3
+    size_bytes: 4429
+    storage_uri: repo://experiments/active/exp-gold-ma-indicator-20260914-v2/results/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Development-only human-box localization and no-target false positives. Candidate rejected; no native TV compile or save. Raw images stay in original local pack; original human geometry is referenced, not promoted.
   - artifact_id: release-eth-multitf-20260914-delivery
     artifact_type: manifest
     role: frozen_eth_multitimeframe_research

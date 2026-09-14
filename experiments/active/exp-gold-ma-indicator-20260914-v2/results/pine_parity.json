@@ -1,0 +1,34 @@
+{
+  "created_at": "2026-09-14T06:14:29.048Z",
+  "pine_sha256": "a6aea6acdaad70de0a70c008285fb05c61a9cd72038332406e055e0ea1820e5c",
+  "runtime": "pinets@0.9.33",
+  "source": "synthetic only",
+  "checks": [
+    "Pine/Python four-event parity 1m",
+    "Pine/Python four-event parity 3m",
+    "Pine/Python four-event parity 15m",
+    "flat negative control",
+    "truncation after nonempty signals",
+    "future price/time mutation"
+  ],
+  "expected": {
+    "a_long_marker": [
+      405,
+      486
+    ],
+    "a_short_marker": [
+      364,
+      445
+    ],
+    "a_long_confirmation": [
+      408,
+      489
+    ],
+    "a_short_confirmation": [
+      367,
+      448
+    ]
+  },
+  "native_compile": false,
+  "market_performance_verified": false
+}
