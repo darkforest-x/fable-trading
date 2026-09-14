@@ -18,6 +18,21 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v8-six-filters-20260914-delivery
+    artifact_type: manifest
+    role: independent_v8_admission_and_causal_exit_replay
+    source_repo: darkforest-x/fable-trading
+    source_commit: ad3bcb6c82
+    source_path: experiments/active/exp-spike-v8-six-filters-20260914-v1/delivery_manifest.json
+    sha256: 05721c5f492e3748d7b112b55ef8ad5094ac141d2aebac6e43db647ab3ca4b83
+    size_bytes: 6791
+    storage_uri: repo://experiments/active/exp-spike-v8-six-filters-20260914-v1/delivery_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Nine independent gates plus one causal four-hour exit;3531 matched streams,17 focused tests. Reused history;USDC
+      savings96.16pct costR,Sunday harms tail,and all recent-year single arms remain negative. Large per-event CSV files stay
+      local and are transitively SHA-bound;no live changes.
   - artifact_id: spike-v1-v8-tier-lock-20260914-delivery
     artifact_type: manifest
     role: three_arm_tier_exit_sensitivity
