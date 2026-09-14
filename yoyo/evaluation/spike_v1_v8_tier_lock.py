@@ -98,7 +98,10 @@ def _tier_updates(position: dict[str, object], *, high: float, low: float, close
         if bool(position[armed]) or mfe < threshold:
             continue
         before = float(position["protection"])
-        level = _round_lock(side, raw_level, tick)
+        # Stage 1 is the exact actual fill price, matching the frozen BE05
+        # contract.  Only the newly introduced 0.5R lock needs conservative
+        # tick quantization.
+        level = raw_level if stage == 1 else _round_lock(side, raw_level, tick)
         changed = _raise_protection(position, level)
         position[armed] = True
         position[f"stage{stage}_trigger_count"] = int(position[f"stage{stage}_trigger_count"]) + 1
@@ -260,10 +263,11 @@ def replay_fixed_entry(context: base.StreamContext, row: pd.Series, *, arm: str,
         protection = float(pos["protection"])
         if pending_reverse is not None:
             if side == pending_reverse:
-                reason = ("trailing_stop_gap" if protection != float(pos["initial_stop"]) else "initial_stop_gap") if (oa[i] <= protection if side == 1 else oa[i] >= protection) else "opposite_v6_next_open"
+                stop_at_open = oa[i] <= protection if side == 1 else oa[i] >= protection
+                reason = ("trailing_stop_gap" if protection != float(pos["initial_stop"]) else "initial_stop_gap") if stop_at_open else "opposite_v6_next_open"
                 pos["qty_realized"], pos["qty_remaining"] = 1., 0.; pos["realized_gross_return"] = side * (oa[i] / float(pos["entry_price"]) - 1); pos["realized_net_return"] = pos["realized_gross_return"] - base.ENTRY_COST - base.EXIT_COST
                 pos["last_exit_i"], pos["last_exit_time"], pos["last_exit_price"], pos["last_exit_reason"] = i, stamp, oa[i], reason
-                pos["exit_protection_source"] = "opposite"
+                pos["exit_protection_source"] = str(pos["protection_source"]) if stop_at_open else "opposite"
                 return base._trade_row(pos, censored=False, precision="bar_open_or_intrabar_window") | _tier_fields(pos)
             pending_reverse = None
         if la[i] <= protection if side == 1 else ha[i] >= protection:
