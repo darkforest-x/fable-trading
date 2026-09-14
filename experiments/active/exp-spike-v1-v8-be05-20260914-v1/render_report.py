@@ -31,6 +31,7 @@ def main():
     native_r, v8_r = full.loc['v1_native'], full.loc['v8']
     chunks = ['# V1 / V8：浮盈触及 0.5R 后推开仓价，效果如何',
         '研究日期：2026-09-14。唯一实验键：`exp-spike-v1-v8-be05-20260914-v1`。状态：历史敏感性研究，未接入线上。',
+        '[Notion研究记录](https://app.notion.com/p/3db8856479af817e8bb8d93773c5a171)；相关因果顺序、成本、状态生命周期及统计口径测试共19项通过。',
         '## 先看结果',
         f"原版 V1 在同一批 {int(native_r.joint_closed):,} 笔双方已结束交易上，累计净 R 从 {f(native_r.baseline_total_r)} 变为 {f(native_r.be05_total_r)}，变化 {f(native_r.delta_r)}R；V8 在 {int(v8_r.joint_closed):,} 笔相同入场上，变化 {f(v8_r.delta_r)}R。净胜率和大趋势保留率必须一起判断，不能只看累计 R。",
         '下面主表只比较相同入场、且两种退出都已有完整结果的交易，排除重新开仓与未结束样本变化。R 是每笔实际入场价到初始止损的价差单位。**累计 R 是事件账本之和，不是账户收益率，也不等于可实现的组合资金曲线。**',
@@ -48,8 +49,8 @@ def main():
         '5. 固定扣 0.20% 往返名义成本。开仓价退出仍为小亏：净R = −0.20% / 初始止损百分比。开盘跳过保护位按较差开盘价退出。',
         '这是一种收盘更新保护的规则，不能把结果等同于交易所逐笔实时触及0.5R立刻改单；后者要更细粒度数据才能验证。',
         '## 救回了多少亏损，又牺牲了多少趋势',
-        table(['系统','减轻原亏损笔数','减轻亏损贡献R','伤害原盈利笔数','被削减盈利R','净变化R','每笔ΔR 周块95%区间'],[
-            [NAMES[s],int(r.rescued_losers),f(r.rescue_delta_r),int(r.harmed_winners),f(r.harmed_delta_r),f(r.delta_r),
+        table(['系统','减轻原亏损笔数','减轻亏损贡献R','伤害原盈利笔数','被削减盈利R','其余变化R','净变化R','每笔ΔR 周块95%区间'],[
+            [NAMES[s],int(r.rescued_losers),f(r.rescue_delta_r),int(r.harmed_winners),f(r.harmed_delta_r),f(r.delta_r-r.rescue_delta_r-r.harmed_delta_r),f(r.delta_r),
              f'[{f(r.mean_delta_weekly_ci_low,4)}, {f(r.mean_delta_weekly_ci_high,4)}]'] for s,r in full.iterrows()]),
         '“减轻原亏损”包含 −1R 变成手续费小亏，不表示变成盈利单。“大趋势保留”依据原来实际兑现净R≥10，而非盘中峰值≥10。周块区间以整周重采样，尽量保留同一时段多币、多交易所的相关性；这仍是反复研究过的历史，并非未来收益保证。',
         '## 周期差异：相同入场对照',

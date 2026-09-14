@@ -1,0 +1,90 @@
+{
+  "experiment_id": "exp-spike-v1-v8-be05-20260914-v1",
+  "generated_at": "2026-09-14T06:57:36.485350+00:00",
+  "status": "historical_inconclusive_no_promotion",
+  "notion_url": "https://app.notion.com/p/3db8856479af817e8bb8d93773c5a171",
+  "scope": "2024-09-10 inclusive to 2026-09-10 exclusive UTC; Binance/OKX/Gate existing 30m/1H/4H streams",
+  "rule": "Observed surviving completed candle favorable touch>=0.5 actual initialR arms price entry stop from next bar; cost0.002",
+  "common_builder_commit": "ef6f5daa3d9b459ab3f7f6b336e72a6da5b813af",
+  "common_run_local": "2026-09-14 14:35:03 to 14:52:57 +08",
+  "common_identity": {
+    "config_sha256": "ec9682ccb890c323cf2429360116ff364fe2b9fe237d73c74bef31c00c23d35a",
+    "plan_sha256": "40cadba3440fb31100fd9bb63b1dd3661904eaf47e8a0dec85d8fb959d0c0575",
+    "raw_manifest_sha256": "37f65499611877c8b8b10f0f2fb7a8c99a07d95cc90cda282f5b8a5ac89d41b6",
+    "study_sha256": "72a325fccdfc8b0298e651d136beb6fffc89bb9c79b1ae086cc92b0d5142c98f",
+    "test_sha256": "81f13b9285daea39a29a1dd83a782c6ce2f560e2037c08edb3d4bcdaf39feae0",
+    "v8_oracle_manifest_sha256": "04469ed2e694f23d27591d8316b71b66eab5e6d0338fc0847b6ae004f4bd30b9"
+  },
+  "native_generator_reconstructed_commit": "3b9dd8d46ad955b7ac75bde4f4f345e6a8082a63",
+  "native_identity_limitation": "Commit/time reconstructed from delegate execution log, git and file mtime; original receipt does not record runtime Python/commit.",
+  "history": "Owner-authorized reused nonblind history. Configuration number1 is not physical-read count: sample and failed/full reruns repeated history.",
+  "tests": {
+    "passed": 19,
+    "command": ".venv/bin/python -m pytest tests/test_spike_native_v1_be05.py tests/test_spike_v1_v8_be05.py tests/test_spike_be05_report.py -q"
+  },
+  "archive_to_clean_changed_events": 0,
+  "common_completed_streams": 3531,
+  "native_frozen_events": 6185,
+  "native_raw_source_files": 1121,
+  "saved_outcome_rows": 424833,
+  "fixed_pair_rows": 107561,
+  "training_eligible": false,
+  "production_eligible": false,
+  "files": [
+    {
+      "path": "analysis/p1_spike_v1_v8_be05_20260914.md",
+      "size_bytes": 14190,
+      "sha256": "924659c1c933643aa9355a145ac7308d1e9fe64ce719baa9da0a61e8090e71f8"
+    },
+    {
+      "path": "analysis/html/p1_spike_v1_v8_be05_20260914.html",
+      "size_bytes": 19832,
+      "sha256": "24c0572318933f31433244b4168a70c9d15ad6e0b6bc19941f4b0e17f604a66f"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-v8-be05-20260914-v1/delivery_v1/aggregation_receipt.json",
+      "size_bytes": 7782979,
+      "sha256": "e784d1cf2b02e50a3dc1dbafaa23f98504347d12827826b509255c91e20dfb40"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-v8-be05-20260914-v1/native_v1/receipt.json",
+      "size_bytes": 1602,
+      "sha256": "e92720b969c660693eaa13a76da3d622d7110bb93d298a0145e42d56a8e33928"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-v8-be05-20260914-v1/common/results/full_v3/manifest.json",
+      "size_bytes": 1918866,
+      "sha256": "613b445c69d1b74459dff7334e633e2dc3079061ab828286d70c22aac7837899"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-v8-be05-20260914-v1/common/results/full_v3/identity.json",
+      "size_bytes": 537,
+      "sha256": "99a5572dac8af82c88a73102d50f72f4c72a17a4ae7794bfef107c90d5581552"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-v8-be05-20260914-v1/delivery_v1/all_outcomes.csv.gz",
+      "size_bytes": 25766059,
+      "sha256": "7ae8f0857d1ef29a61e001a44665e78aacf1b7c5a71e398fd5a6ccfecf9611bc"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-v8-be05-20260914-v1/delivery_v1/delta_examples.csv",
+      "size_bytes": 8417,
+      "sha256": "a11c029c0b8221eb37d3684e1fcf804f50f45cd4089f3fda3bc4a61264e445d3"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-v8-be05-20260914-v1/delivery_v1/metrics.csv",
+      "size_bytes": 21747,
+      "sha256": "e9319f84bd8a8c9d73737b3aeafe3fc233412dd6cc5f1a4630308b3e1371157c"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-v8-be05-20260914-v1/delivery_v1/paired_changes.csv",
+      "size_bytes": 11825,
+      "sha256": "ad3c408fad99b95171c19fdd83771f0404956e8a73c657138fa23baff4f94d37"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-v8-be05-20260914-v1/delivery_v1/paired_trades.csv.gz",
+      "size_bytes": 5745319,
+      "sha256": "e34fa4f2defc75fac56f42a51aa20c065ffddbef2316d1aedebfb1775f80c8a2"
+    }
+  ]
+}
