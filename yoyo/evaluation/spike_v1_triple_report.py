@@ -50,6 +50,10 @@ def read_outcomes(cohort):
 def wide_trades(cohort):
     events = pd.read_csv(EXP / 'results' / cohort / 'events.csv.gz')
     result = read_outcomes(cohort)
+    projection = EXP / 'results/stats' / f'{cohort}_identity_dedup.csv'
+    if projection.exists():
+        identity = pd.read_csv(projection).set_index('event_id')
+        events['dedup_keep'] = events.event_id.map(identity.dedup_keep)
     metric = result.pivot(index='event_id', columns='arm', values='net_r')
     primary = result.loc[result.arm.eq('baseline')].set_index('event_id')
     combo = result.loc[result.arm.eq('triple')].set_index('event_id')
