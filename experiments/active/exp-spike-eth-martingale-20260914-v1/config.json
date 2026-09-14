@@ -1,0 +1,86 @@
+{
+  "experiment_id": "exp-spike-eth-martingale-20260914-v1",
+  "initial_balance": 1000,
+  "streams": [
+    {
+      "name": "ETH_3m_OKX",
+      "symbol": "ETH-USDT-SWAP",
+      "minutes": 3,
+      "venue": "okx",
+      "tick": 0.01,
+      "path": "data/kline_deep/okx_ETH_USDT_SWAP_3m_525599.csv",
+      "sha256": "37a49d3e7150bdefdbfa21bd507fbfe60200532dbd70c1604a5e770081eadbb3",
+      "size_bytes": 41813176
+    },
+    {
+      "name": "ETH_5m_Binance",
+      "symbol": "ETHUSDT",
+      "minutes": 5,
+      "venue": "binance",
+      "tick": 0.01,
+      "path": "data/kline_preholdout_binance_um5m/series/binance_um_ETHUSDT_5m_665856.csv",
+      "sha256": "8041770149cff3551f84966b1b5f3641f2f731dc3ae7c7d0bfeaf7b24dcd64e8",
+      "size_bytes": 53200730
+    }
+  ],
+  "round_trip_cost": 0.002,
+  "development": [
+    "2023-08-01T00:00:00Z",
+    "2025-01-01T00:00:00Z"
+  ],
+  "validation": [
+    "2025-01-01T00:00:00Z",
+    "2026-01-01T00:00:00Z"
+  ],
+  "preholdout": [
+    "2026-01-01T00:00:00Z",
+    "2026-05-01T00:00:00Z"
+  ],
+  "holdout": [
+    "2026-05-04T00:00:00Z",
+    "2026-07-30T11:09:00Z"
+  ],
+  "max_levels": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "reset_modes": [
+    "win",
+    "recovery"
+  ],
+  "base_risks": [
+    1,
+    2,
+    5,
+    10,
+    20,
+    50
+  ],
+  "leverage_caps": [
+    3,
+    5,
+    10,
+    20
+  ],
+  "control_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "permutation_draws": 9999,
+  "seed": 20260914,
+  "training_eligible": false,
+  "production_eligible": false
+}
