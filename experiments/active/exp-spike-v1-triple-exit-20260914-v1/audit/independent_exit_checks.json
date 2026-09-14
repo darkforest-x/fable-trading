@@ -1,0 +1,79 @@
+{
+  "audit_date": "2026-09-14",
+  "scope": "read-only four-event original6253 exit audit; no replay, network, or rule change",
+  "conclusion": "no causal ordering, gap-fill, cost, or actual-entry-risk error found in the bounded audit",
+  "engine_sha256": "cefacf20b8ebb9aa8b1d2de59b0ac201df1f6a8aa73f33d25fa175e3e3f8d404",
+  "study_sha256": "8ce4de2c4630a0d23a37562aa6050f5183e4943298cf13e5ec1afc8df593023f",
+  "events_sha256": "ca27280ec1ab2a98809052bf281854db18b24986ae4779494b0d88299f0b59ac",
+  "ordering": [
+    "select prior native/overlay active stop",
+    "test this bar open/low and fill gap at next open when crossed",
+    "only after survival update native path and actual-entry MFE/MAE overlays for the next bar"
+  ],
+  "result_scope_reconciliation": {
+    "contract": "closed = not censored and finite(net_r); cross_cut_excluded is counted but does not filter primary return sums",
+    "baseline": {
+      "all_rows": {"n": 6253, "sum_net_r": 862.1320314579953},
+      "closed_finite": {"n": 6170, "sum_net_r": 838.1784703181971},
+      "censored_finite": {"n": 83, "sum_net_r": 23.953561139797955},
+      "nonfinite_n": 0,
+      "cross_cut_excluded_count": 34
+    },
+    "triple": {
+      "all_rows": {"n": 6253, "sum_net_r": 1208.092057360558},
+      "closed_finite": {"n": 6237, "sum_net_r": 1201.2537896987315},
+      "censored_finite": {"n": 16, "sum_net_r": 6.838267661826339},
+      "nonfinite_n": 0,
+      "cross_cut_excluded_count": 9
+    }
+  },
+  "samples": [
+    {
+      "case": "mae_gap_exit",
+      "event_id": "bf1ef8416ebaf80e416ebc3fda1e868c3efeacc19c9da505311af8adb3e8fb88",
+      "market": "binance:GALAUSDT:60m",
+      "source_sha256": "ed253795f9e127f99ec42cd7e7d74df6b10fc004d9e9f19302e3f92c29394ebd",
+      "entry": 0.02162,
+      "initial_stop": 0.019055,
+      "initial_risk": 0.002565,
+      "decision_bar": {"open_time": "2025-03-03T14:00:00Z", "low": 0.01985, "mae_r": 0.690058479532164, "next_bar_adverse_stop": 0.01995275},
+      "exit_bar": {"open_time": "2025-03-03T15:00:00Z", "open": 0.01989, "fill": 0.01989, "source": "adverse65", "fill_source": "next_open_gap"},
+      "calculated": {"gross_return": -0.08001850138760402, "net_return": -0.08201850138760403, "risk_fraction": 0.11864014801110083, "net_r": -0.6913216374269002}
+    },
+    {
+      "case": "be05_exit",
+      "event_id": "9e32c6e90b3890ece590b37b8e45d88cca96e5f23314de68a7d3c934c1d222c0",
+      "market": "binance:COMMONUSDT:30m",
+      "source_sha256": "a303e18dc3215d220515ad29f3178c3eb451584e7c05018085598e105ff3e059",
+      "entry": 0.003154,
+      "initial_risk": 0.000153,
+      "decision_bar": {"open_time": "2026-01-10T20:00:00Z", "high": 0.003242, "mfe_r": 0.5751633986928102, "next_bar_be_stop": 0.003154},
+      "exit_bar": {"open_time": "2026-01-10T22:00:00Z", "open": 0.003187, "low": 0.003146, "fill": 0.003154, "source": "be05", "fill_source": "intrabar_stop"},
+      "calculated": {"gross_return": 0.0, "net_return": -0.002, "risk_fraction": 0.04850982878883957, "net_r": -0.04122875816993464}
+    },
+    {
+      "case": "lock50_exit",
+      "event_id": "b9ae6951f0d5942593b045dc79665dcbae9dd14445727307815a009d17a8fc15",
+      "market": "binance:BNTUSDT:240m",
+      "source_sha256": "8fe86a49ee2098f47c97f4a97e99fcfd1438648725808d93c040348cf6a1be22",
+      "entry": 0.2858,
+      "initial_risk": 0.0219,
+      "decision_bar": {"open_time": "2026-08-22T04:00:00Z", "high": 0.3424, "mfe_r": 2.5844748858447484, "next_bar_lock_stop": 0.3141},
+      "exit_bar": {"open_time": "2026-08-26T12:00:00Z", "open": 0.321, "low": 0.3131, "fill": 0.3141, "source": "lock50", "fill_source": "intrabar_stop"},
+      "calculated": {"gross_return": 0.09902029391182632, "net_return": 0.09702029391182632, "risk_fraction": 0.07662701189643106, "net_r": 1.2661369863013683}
+    },
+    {
+      "case": "same_bar_old_stop_before_protection",
+      "event_id": "06b787db6d7513e2abb8b39cb99d1191a5f6d8d9ec5d9e546c396fe9898ccfcc",
+      "market": "okx:BSB-USDT-SWAP:60m",
+      "source_sha256": "ad3e40e119e4d2a4a99e0967a2197e28aa6fc775ed9a44d9969fd71509c86c55",
+      "entry": 0.2767,
+      "initial_stop": 0.23194,
+      "initial_risk": 0.04476,
+      "prior_bar": {"open_time": "2026-04-20T17:00:00Z", "high": 0.2963, "mfe_r": 0.437891,"next_bar_overlay": null},
+      "stop_bar": {"open_time": "2026-04-20T18:00:00Z", "open": 0.2941, "low": 0.2301, "high": 0.3749, "hypothetical_high_r_if_alive": 2.193923145665773, "old_active_stop": 0.23194, "fill": 0.23194},
+      "both_arms": {"baseline_exit_protection_source": "native_initial", "triple_exit_protection_source": "native_initial", "same_exit": true},
+      "calculated": {"gross_return": -0.16176364293458623, "net_return": -0.16376364293458623, "risk_fraction": 0.1617636429345862, "net_r": -1.0123637176050047}
+    }
+  ]
+}
