@@ -125,7 +125,9 @@ def replay_serial(context: base.StreamContext, *, candidate: bool) -> tuple[pd.D
             else:
                 common._close_updates(pos, high=float(ha[i]), low=float(la[i]), close=float(ca[i]), atr=float(aa[i]), spec=spec, enable_be=False, events=[], context=context, arm="v8", policy=policy, i=i)
                 if candidate and _check_four_hour(pos, stamp=stamp, minutes=context.minutes, high=float(ha[i]), low=float(la[i]), close=float(ca[i])):
-                    pending_four = (i, int(pos["side"])); events.append({"trade_id": pos["trade_id"], "bar_open": stamp, "event_kind": "exit_scheduled", "reason": POLICY})
+                    pending_four = (i, int(pos["side"])); events.append({"trade_id": pos["trade_id"], "bar_open": stamp,
+                        "bar_close_available_at": stamp + pd.Timedelta(minutes=context.minutes), "scheduled_next_open": frame.index[i + 1] if i + 1 < len(frame) else pd.NaT,
+                        "event_kind": "exit_scheduled", "reason": POLICY})
         signal_side = int(raw[i])
         if signal_side:
             if pos is not None and signal_side != int(pos["side"]):
@@ -142,15 +144,18 @@ def replay_serial(context: base.StreamContext, *, candidate: bool) -> tuple[pd.D
 def validate_saved_baseline(context: base.StreamContext, actual: pd.DataFrame) -> str:
     """Require exact baseline parity with the completed common BE05 serial file."""
     from pandas.testing import assert_frame_equal
-    path = SAVED / context.key / "v8.serial_baseline.csv.gz"
-    old = pd.read_csv(path); got = actual.loc[~actual.censored.astype(bool)]
-    assert_frame_equal(old.loc[~old.censored.astype(bool)].reindex(columns=KEY).sort_values("signal_i").reset_index(drop=True), got.reindex(columns=KEY).sort_values("signal_i").reset_index(drop=True), check_dtype=False, rtol=1e-9, atol=1e-9)
-    return sha256(path)
+    folder, path = SAVED / context.key, SAVED / context.key / "v8.serial_baseline.csv.gz"
+    completion = json.loads((folder / "completion.json").read_text())
+    expected_sha = completion.get("files", {}).get(path.name)
+    if not expected_sha or sha256(path) != expected_sha: raise ValueError(f"saved baseline receipt SHA drift: {context.key}")
+    old = pd.read_csv(path)
+    assert_frame_equal(old.reindex(columns=KEY + ["censored"]).sort_values("signal_i").reset_index(drop=True), actual.reindex(columns=KEY + ["censored"]).sort_values("signal_i").reset_index(drop=True), check_dtype=False, rtol=1e-9, atol=1e-9)
+    return expected_sha
 
 
-def _fixed(context: base.StreamContext, row: pd.Series, *, candidate: bool) -> dict[str, Any]:
+def _fixed(context: base.StreamContext, row: pd.Series, *, candidate: bool, prepared: common.PreparedArm | None = None) -> dict[str, Any]:
     """Fixed original-entry path; raw reverse remains a next-open exit feed."""
-    prepared = common.prepare_arm(context, arm="v8"); frame, spec = prepared.frame, prepared.spec
+    prepared = common.prepare_arm(context, arm="v8") if prepared is None else prepared; frame, spec = prepared.frame, prepared.spec
     oa, ha, la, ca, aa, gap, raw = prepared.open, prepared.high, prepared.low, prepared.close, prepared.atr, prepared.gap, prepared.raw_side
     start = int(frame.index.get_loc(pd.Timestamp(row.entry_time)))
     data = {k: row[k] for k in ("signal_i", "signal_bar_open", "entry_i", "entry_time", "side", "entry_price", "initial_stop", "initial_risk", "initial_risk_frac")}
@@ -184,25 +189,31 @@ def _gzip(path: Path, data: pd.DataFrame) -> None:
 
 
 def run(output: Path, *, limit: int | None = None) -> dict[str, Any]:
+    if output.exists() and any(output.iterdir()): raise ValueError("output already exists; preserve previous attempt and choose a new directory")
     folders = sorted(p for p in (RAW / "streams").iterdir() if (p / "completion.json").is_file())
     if len(folders) != 3531: raise ValueError("authenticated source stream count drift")
     folders = folders if limit is None else folders[:limit]; output.mkdir(parents=True, exist_ok=True); streams = output / "streams"; streams.mkdir(exist_ok=True)
     started=perf_counter(); all_serial=[]; all_fixed=[]; hashes=[]
     for n, folder in enumerate(folders,1):
-        context=base.load_verified_stream(folder); baseline,_,_=replay_serial(context,candidate=False); old_sha=validate_saved_baseline(context,baseline)
+        context=base.load_verified_stream(folder); prepared=common.prepare_arm(context, arm="v8"); baseline,_,_=replay_serial(context,candidate=False); old_sha=validate_saved_baseline(context,baseline)
         candidate,_,_=replay_serial(context,candidate=True)
         # Some authenticated streams have no V8 entries.  Keep the fixed-path
         # schema so an empty baseline still receives its explicit parity check.
-        fixed_base=pd.DataFrame([_fixed(context,row,candidate=False) for _,row in baseline.iterrows()], columns=[*base.TRADE_COLUMNS, *EXTRA])
-        fixed_candidate=pd.DataFrame([_fixed(context,row,candidate=True) for _,row in baseline.iterrows()], columns=[*base.TRADE_COLUMNS, *EXTRA])
+        fixed_base=pd.DataFrame([_fixed(context,row,candidate=False,prepared=prepared) for _,row in baseline.iterrows()], columns=[*base.TRADE_COLUMNS, *EXTRA])
+        fixed_candidate=pd.DataFrame([_fixed(context,row,candidate=True,prepared=prepared) for _,row in baseline.iterrows()], columns=[*base.TRADE_COLUMNS, *EXTRA])
         common.validate_fixed_baseline(baseline, fixed_base)
         _gzip(streams/f"{context.key}.serial_baseline.csv.gz",baseline); _gzip(streams/f"{context.key}.serial_four_hour.csv.gz",candidate)
         _gzip(streams/f"{context.key}.fixed_baseline.csv.gz",fixed_base); _gzip(streams/f"{context.key}.fixed_four_hour.csv.gz",fixed_candidate)
+        names=[]
+        for name, table in (("serial_baseline",baseline),("serial_four_hour",candidate),("fixed_baseline",fixed_base),("fixed_four_hour",fixed_candidate)):
+            file=streams/f"{context.key}.{name}.csv.gz"; _gzip(file,table); names.append(file.name)
+        (streams/f"{context.key}.receipt.json").write_text(json.dumps({"stream_key":context.key,"saved_baseline_sha256":old_sha,"files":{x:sha256(streams/x) for x in names}},indent=2,sort_keys=True)+"\n")
         hashes.append({"stream_key":context.key,"saved_baseline_sha256":old_sha}); all_serial += [baseline,candidate]; all_fixed += [fixed_base,fixed_candidate]
         if n%25==0 or n==len(folders): print(json.dumps({"streams":n,"target":len(folders),"seconds":round(perf_counter()-started,1)}),flush=True)
     serial=pd.concat(all_serial,ignore_index=True); fixed=pd.concat(all_fixed,ignore_index=True)
     _gzip(output/"serial_trades.csv.gz",serial); _gzip(output/"fixed_original_entries.csv.gz",fixed); pd.DataFrame(hashes).to_csv(output/"baseline_sha_manifest.csv",index=False)
-    cand=serial.loc[serial.policy.eq(POLICY)]; receipt={"status":"complete","streams":len(folders),"baseline_parity":True,"builder_sha256":sha256(Path(__file__)),"source_raw_manifest_sha256":sha256(RAW/"manifest.json"),"saved_common_manifest_sha256":sha256(SAVED.parent/"manifest.json"),"cost":.002,"rule":"first completed bar at least 4h after entry; observed MFE<1R and gross closeR<=0; next open once","candidate_serial_trades":len(cand),"four_hour_checked":int(cand.four_hour_checked.fillna(False).sum()),"four_hour_triggered":int(cand.four_hour_triggered.fillna(False).sum()),"ended_before_four_hour":int((~cand.four_hour_checked.fillna(False)).sum()),"elapsed_seconds":perf_counter()-started}
+    cand=serial.loc[serial.policy.eq(POLICY)].copy(); checked=cand.four_hour_checked.fillna(False).astype(bool); duration=pd.to_datetime(cand.exit_time,utc=True)-pd.to_datetime(cand.entry_time,utc=True)
+    receipt={"status":"complete","streams":len(folders),"baseline_parity":True,"builder_sha256":sha256(Path(__file__)),"test_sha256":sha256(Path("tests/test_spike_v8_four_hour_exit.py")),"source_raw_manifest_sha256":sha256(RAW/"manifest.json"),"saved_common_manifest_sha256":sha256(SAVED.parent/"manifest.json"),"cost":.002,"rule":"first completed bar at least 4h after entry; observed MFE<1R and gross closeR<=0; next open once","candidate_serial_trades":len(cand),"four_hour_checked":int(checked.sum()),"four_hour_triggered":int(cand.four_hour_triggered.fillna(False).sum()),"untriggered_after_four_hour":int((checked & ~cand.four_hour_triggered.fillna(False)).sum()),"censored_before_check":int((~checked & cand.censored.astype(bool)).sum()),"closed_before_four_hour":int((~checked & ~cand.censored.astype(bool) & duration.lt(pd.Timedelta(hours=4))).sum()),"stop_closed_before_check":int((~checked & cand.exit_reason.astype(str).str.contains("stop")).sum()),"elapsed_seconds":perf_counter()-started}
     receipt["files"]={x:sha256(output/x) for x in ("serial_trades.csv.gz","fixed_original_entries.csv.gz","baseline_sha_manifest.csv")}; (output/"receipt.json").write_text(json.dumps(receipt,indent=2,sort_keys=True)+"\n"); return receipt
 
 
