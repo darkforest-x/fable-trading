@@ -61,7 +61,7 @@ def measure(case, events, columns):
     return result
 
 
-def run(phase, signals="marker"):
+def run(phase, signals="marker", output_root=None, verify_against=None):
     commit = check_committed()
     input_sha = {str(p.relative_to(ROOT)): digest(p) for p in (DEFAULT_ANSWERS, DEFAULT_MANIFEST)}
     cases, excluded = load_cases()
@@ -75,9 +75,16 @@ def run(phase, signals="marker"):
     for case in selected:
         groups[case["source_path"]].append(case)
     results, audits, failures = [], [], []
+    expected_audits = None
+    if verify_against is not None:
+        expected_audits = {r["source_path"]: r for r in json.loads(Path(verify_against).read_text())}
     for source_number, (source, group) in enumerate(sorted(groups.items()), 1):
         try:
             frame, audit = load_source(group)
+            if expected_audits is not None:
+                expected = expected_audits.get(audit["source_path"])
+                if expected is None or any(audit[k] != expected[k] for k in ("bounded_prefix_sha256", "end_exclusive", "rows_materialized")):
+                    raise RuntimeError("Frozen source prefix identity changed before replay: "+source)
             events = replay(frame, bar_minutes=15)
             audits.append(audit)
             for case in group:
@@ -118,7 +125,7 @@ def run(phase, signals="marker"):
             "null_mean_hit_rate": float(np.mean(null)) if null else None,
             "side_inside": {side: {"n": sum(r["side"].lower() == side for r in positive),
                 "hit": sum(r["side"].lower() == side and r[model]["hit_inside"] for r in positive)} for side in ("long", "short")}}
-    output = HERE/"results"/(phase if signals == "marker" else phase+"_confirmation")
+    output = (Path(output_root) if output_root else HERE/"results")/(phase if signals == "marker" else phase+"_confirmation")
     output.mkdir(parents=True, exist_ok=True)
     if (output/"summary.json").exists():
         raise RuntimeError("Frozen result exists; use a new version rather than overwrite")
@@ -143,5 +150,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--phase", choices=("dev", "later"), required=True)
     parser.add_argument("--signals", choices=("marker", "confirmation"), default="marker")
+    parser.add_argument("--output-root", type=Path)
+    parser.add_argument("--verify-against", type=Path)
     args = parser.parse_args()
-    run(args.phase, args.signals)
+    run(args.phase, args.signals, args.output_root, args.verify_against)
