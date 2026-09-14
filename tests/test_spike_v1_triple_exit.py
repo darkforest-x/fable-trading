@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 from yoyo.evaluation import spike_native_v1_be05 as frozen_be05
-from yoyo.evaluation.spike_v1_triple_exit import AdmissionFilters, replay_native_v1_arms
+from yoyo.evaluation.spike_v1_triple_exit import ALL_ARMS, AdmissionFilters, replay_native_v1_arms
 
 
 def _bars(rows: list[tuple[float, float, float, float]]) -> pd.DataFrame:
@@ -105,3 +105,23 @@ def test_unfiltered_baseline_retains_native_entry_gap_as_a_ledger_outcome() -> N
         "entry_gap_through_initial_stop", pytest.approx(97), pytest.approx(-.002), False,
     )
     assert math.isnan(trade.net_r)
+
+
+def test_seven_arm_contract_keeps_raw_and_filtered_arms_separate_without_paths() -> None:
+    bars = _bars([(100, 100, 99, 100), (100, 101, 99, 100), (100, 101, 99, 100)])
+    event = _event(bars, initial_stop=60.0, reference_signal_risk=40.0)
+    result = replay_native_v1_arms(bars, event, tick=.01, arms=ALL_ARMS, store_paths=False)
+    assert set(result.outcomes.arm) == set(ALL_ARMS)
+    assert result.schedule.empty
+    accepted = result.admission.set_index("arm").accepted.to_dict()
+    assert accepted == {arm: True for arm in ALL_ARMS}
+
+
+def test_random_event_can_derive_its_own_native_risk_reference() -> None:
+    bars = _bars([(100, 100, 99, 100), (100, 101, 99, 100), (100, 101, 99, 100)])
+    random_event = pd.DataFrame([{"event_id": "random", "signal_bar_open": bars.index[0], "signal_close": 100.0,
+                                  "recent_low": 95.0, "signal_atr": 1.0}])
+    result = replay_native_v1_arms(bars, random_event, tick=.01)
+    trade = result.outcomes.iloc[0]
+    # V1 risk_reference takes min(95 - .2ATR, 100 - 2ATR), then floors to tick.
+    assert (trade.initial_stop, trade.reference_signal_risk) == (pytest.approx(94.8), pytest.approx(5.2))

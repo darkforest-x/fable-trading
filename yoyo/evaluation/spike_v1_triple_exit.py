@@ -17,14 +17,14 @@ or supply matched controls without bypassing the same entry safety checks.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import math
 from typing import Any, Collection, Iterable, Mapping
 
 import numpy as np
 import pandas as pd
 
-from yoyo.evaluation.spike_burst_replay import path_reference
+from yoyo.evaluation.spike_burst_replay import path_reference, risk_reference
 
 ROUND_TRIP_COST = 0.002
 ADVERSE_R = 0.65
@@ -32,7 +32,7 @@ BE_R = 0.5
 LOCK_TRIGGER_R = 2.0
 LOCK_FRACTION = 0.5
 NATIVE_LONG_ONLY = 1
-ALL_ARMS = ("baseline", "adverse65", "be05", "lock50", "triple")
+ALL_ARMS = ("baseline", "adverse65", "be05", "lock50", "triple", "filters_only", "filtered_triple")
 
 
 @dataclass(frozen=True)
@@ -89,9 +89,9 @@ def _event_stop(event: Mapping[str, Any]) -> float:
     return float(event["signal_close"]) - int(event.get("side", NATIVE_LONG_ONLY)) * float(event["reference_signal_risk"])
 
 
-def _event_rows(events: pd.DataFrame | Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
+def _event_rows(events: pd.DataFrame | Iterable[Mapping[str, Any]], tick: float) -> list[dict[str, Any]]:
     frame = events.copy() if isinstance(events, pd.DataFrame) else pd.DataFrame(list(events))
-    required = {"event_id", "signal_bar_open", "signal_close", "reference_signal_risk"}
+    required = {"event_id", "signal_bar_open", "signal_close"}
     missing = required.difference(frame.columns)
     if missing:
         raise ValueError("event feed missing: " + ", ".join(sorted(missing)))
@@ -102,6 +102,18 @@ def _event_rows(events: pd.DataFrame | Iterable[Mapping[str, Any]]) -> list[dict
         event["event_id"] = str(event["event_id"])
         event["signal_bar_open"] = _as_utc(event["signal_bar_open"])
         event["side"] = int(event.get("side", NATIVE_LONG_ONLY))
+        if "reference_signal_risk" not in event or pd.isna(event["reference_signal_risk"]):
+            # Matched controls may start at a random causal bar, but their
+            # stop/reference must be built with the same V1 risk function.
+            # ``signal_atr`` avoids confusing this signal-time fact with a
+            # later prepared-bar ATR column.
+            if "recent_low" not in event or "signal_atr" not in event:
+                raise ValueError("event needs reference_signal_risk or recent_low/signal_atr for native risk_reference")
+            reference = risk_reference(event["side"], float(event["signal_close"]), float(event["recent_low"]),
+                                       float(event["signal_atr"]), tick=tick)
+            if not reference.valid:
+                raise ValueError("random event has invalid native risk_reference")
+            event["reference_signal_risk"], event["initial_stop"] = reference.risk, reference.stop
         event["initial_stop"] = _event_stop(event)
         rows.append(event)
     return rows
@@ -151,6 +163,15 @@ def _overlay_stop(arm: str, side: int, entry: float, initial_risk: float, peak_f
     return (max(candidates, key=lambda item: item[0]) if side == 1 else min(candidates, key=lambda item: item[0]))
 
 
+def _core_arm(arm: str) -> str:
+    """Map filter-only reporting labels to their underlying exit contract."""
+    return {"filters_only": "baseline", "filtered_triple": "triple"}.get(arm, arm)
+
+
+def _uses_filter_bundle(arm: str, filters: AdmissionFilters) -> bool:
+    return filters.enabled or arm in {"filters_only", "filtered_triple"}
+
+
 def _active_stop(native_stop: float, native_source: str, overlay_stop: float | None, overlay_source: str | None, side: int) -> tuple[float, str]:
     if overlay_stop is None:
         return native_stop, native_source
@@ -159,10 +180,12 @@ def _active_stop(native_stop: float, native_source: str, overlay_stop: float | N
     return native_stop, native_source
 
 
-def _run_arm(bars: pd.DataFrame, event: Mapping[str, Any], *, tick: float, arm: str, end: pd.Timestamp | None) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+def _run_arm(bars: pd.DataFrame, event: Mapping[str, Any], *, tick: float, arm: str, end: pd.Timestamp | None,
+             store_paths: bool) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """Replay one admitted event with its native V1 path and one overlay arm."""
     if arm not in ALL_ARMS:
         raise ValueError(f"unknown arm: {arm}")
+    core_arm = _core_arm(arm)
     side = int(event["side"])
     if side not in (-1, 1):
         raise ValueError("side must be 1 or -1")
@@ -177,12 +200,13 @@ def _run_arm(bars: pd.DataFrame, event: Mapping[str, Any], *, tick: float, arm: 
         # admission rewrite.  Filtered arms reject it above, but unfiltered
         # baseline parity retains it in the ledger.
         gross, net = 0.0, -ROUND_TRIP_COST
-        schedule = [{"event_id": event["event_id"], "arm": arm, "bar_open": bars.index[entry_i], "bar_i": entry_i,
+        schedule = ([{"event_id": event["event_id"], "arm": arm, "bar_open": bars.index[entry_i], "bar_i": entry_i,
                      "entry_time": bars.index[entry_i], "active_stop": initial_stop, "active_stop_source": "native_initial",
                      "observed_mfe_r_before": 0.0, "observed_mae_r_before": 0.0, "native_stop_before": initial_stop,
                      "overlay_stop_before": None, "filled": True, "fill_source": "entry_next_open_gap", "fill_price": entry,
                      "observed_mfe_r_after": 0.0, "observed_mae_r_after": 0.0, "native_stop_after": initial_stop,
                      "overlay_stop_after": None, "next_bar_stop": initial_stop, "next_bar_stop_source": "native_initial"}]
+                    if store_paths else [])
         return ({"event_id": event["event_id"], "arm": arm, "side": side, "signal_bar_open": event["signal_bar_open"],
                  "signal_close": float(event["signal_close"]), "reference_signal_risk": float(event["reference_signal_risk"]),
                  "entry_time": bars.index[entry_i], "entry_price": entry, "initial_stop": initial_stop, "initial_risk": initial_risk,
@@ -218,7 +242,8 @@ def _run_arm(bars: pd.DataFrame, event: Mapping[str, Any], *, tick: float, arm: 
                        observed_mfe_r_after=peak_favorable_r, observed_mae_r_after=peak_adverse_r,
                        native_stop_after=native_stop, overlay_stop_after=overlay,
                        next_bar_stop=active, next_bar_stop_source=active_source)
-            schedule.append(row)
+            if store_paths:
+                schedule.append(row)
             break
         favorable = side * ((float(bar.high) if side == 1 else float(bar.low)) - entry) / initial_risk
         adverse = side * (entry - (float(bar.low) if side == 1 else float(bar.high))) / initial_risk
@@ -231,12 +256,13 @@ def _run_arm(bars: pd.DataFrame, event: Mapping[str, Any], *, tick: float, arm: 
         if (side == 1 and path.protection > native_stop) or (side == -1 and path.protection < native_stop):
             native_source = "native_trailing"
         native_stop, native_peak, native_armed = path.protection, path.peak_r, path.armed
-        overlay, overlay_source = _overlay_stop(arm, side, entry, initial_risk, peak_favorable_r, peak_adverse_r)
+        overlay, overlay_source = _overlay_stop(core_arm, side, entry, initial_risk, peak_favorable_r, peak_adverse_r)
         next_stop, next_source = _active_stop(native_stop, native_source, overlay, overlay_source, side)
         row.update(observed_mfe_r_after=peak_favorable_r, observed_mae_r_after=peak_adverse_r,
                    native_stop_after=native_stop, overlay_stop_after=overlay,
                    next_bar_stop=next_stop, next_bar_stop_source=next_source)
-        schedule.append(row)
+        if store_paths:
+            schedule.append(row)
     step = bars.index[1] - bars.index[0] if len(bars) > 1 else pd.Timedelta(0)
     if exit_i is None:
         exit_i, exit_price = len(bars) - 1, float(bars.close.iloc[-1])
@@ -266,7 +292,8 @@ def _run_arm(bars: pd.DataFrame, event: Mapping[str, Any], *, tick: float, arm: 
 def replay_native_v1_arms(bars: pd.DataFrame, events: pd.DataFrame | Iterable[Mapping[str, Any]], *, tick: float,
                           arms: Iterable[str] = ("baseline",), filters: AdmissionFilters = AdmissionFilters(),
                           eligibility: Collection[str] | Mapping[str, bool] | None = None,
-                          end: pd.Timestamp | str | None = None, native_long_only: bool = True) -> ReplayResult:
+                          end: pd.Timestamp | str | None = None, native_long_only: bool = True,
+                          store_paths: bool = True) -> ReplayResult:
     """Replay prepared native V1 events without reading data or selecting signals.
 
     Eligibility is checked before a position is created.  Matched random
@@ -283,35 +310,36 @@ def replay_native_v1_arms(bars: pd.DataFrame, events: pd.DataFrame | Iterable[Ma
     outcomes: list[dict[str, Any]] = []
     schedules: list[dict[str, Any]] = []
     admissions: list[dict[str, Any]] = []
-    for event in _event_rows(events):
+    for event in _event_rows(events, tick):
         base_audit = {"event_id": event["event_id"], "signal_bar_open": event["signal_bar_open"], "side": event["side"],
                       "eligible": _eligible(event, eligibility), "entry_time": pd.NaT, "entry_price": math.nan,
                       "initial_stop": event["initial_stop"], "actual_risk_fraction": math.nan}
         if native_long_only and event["side"] != NATIVE_LONG_ONLY:
-            admissions.append(base_audit | {"accepted": False, "reason": "native_v1_long_only"})
+            admissions.extend(base_audit | {"arm": arm, "accepted": False, "reason": "native_v1_long_only"} for arm in requested_arms)
             continue
         if not base_audit["eligible"]:
-            admissions.append(base_audit | {"accepted": False, "reason": "ineligible_before_position"})
+            admissions.extend(base_audit | {"arm": arm, "accepted": False, "reason": "ineligible_before_position"} for arm in requested_arms)
             continue
         if event["signal_bar_open"] not in bars.index:
-            admissions.append(base_audit | {"accepted": False, "reason": "signal_bar_absent"})
+            admissions.extend(base_audit | {"arm": arm, "accepted": False, "reason": "signal_bar_absent"} for arm in requested_arms)
             continue
         signal_i = int(bars.index.get_loc(event["signal_bar_open"]))
         if signal_i + 1 >= len(bars):
-            admissions.append(base_audit | {"accepted": False, "reason": "no_following_open"})
+            admissions.extend(base_audit | {"arm": arm, "accepted": False, "reason": "no_following_open"} for arm in requested_arms)
             continue
         entry = float(bars.open.iloc[signal_i + 1])
         risk_fraction = event["side"] * (entry - event["initial_stop"]) / entry
-        reason = _admission_reason(event, entry, event["initial_stop"], filters)
-        audit = base_audit | {"entry_time": bars.index[signal_i + 1], "entry_price": entry,
-                              "actual_risk_fraction": risk_fraction, "accepted": reason == "accepted", "reason": reason}
-        admissions.append(audit)
-        if reason != "accepted":
-            continue
         for arm in requested_arms:
-            outcome, schedule = _run_arm(bars, event, tick=tick, arm=arm, end=finished)
+            arm_filters = replace(filters, enabled=_uses_filter_bundle(arm, filters))
+            reason = _admission_reason(event, entry, event["initial_stop"], arm_filters)
+            admissions.append(base_audit | {"arm": arm, "entry_time": bars.index[signal_i + 1], "entry_price": entry,
+                                             "actual_risk_fraction": risk_fraction, "accepted": reason == "accepted", "reason": reason})
+            if reason != "accepted":
+                continue
+            outcome, schedule = _run_arm(bars, event, tick=tick, arm=arm, end=finished, store_paths=store_paths)
             outcomes.append(outcome)
-            schedules.extend(schedule)
+            if store_paths:
+                schedules.extend(schedule)
     return ReplayResult(pd.DataFrame(outcomes), pd.DataFrame(schedules), pd.DataFrame(admissions))
 
 
@@ -334,4 +362,9 @@ def replay_single_exit(bars: pd.DataFrame, events: pd.DataFrame | Iterable[Mappi
 
 def replay_filters_only(bars: pd.DataFrame, events: pd.DataFrame | Iterable[Mapping[str, Any]], **kwargs: Any) -> ReplayResult:
     """Run the unchanged native baseline after the optional fixed filter bundle."""
-    return replay_native_v1_arms(bars, events, arms=("baseline",), **kwargs)
+    return replay_native_v1_arms(bars, events, arms=("filters_only",), **kwargs)
+
+
+def replay_filtered_triple(bars: pd.DataFrame, events: pd.DataFrame | Iterable[Mapping[str, Any]], **kwargs: Any) -> ReplayResult:
+    """Run the combined triple protection only after the fixed filter bundle."""
+    return replay_native_v1_arms(bars, events, arms=("filtered_triple",), **kwargs)
