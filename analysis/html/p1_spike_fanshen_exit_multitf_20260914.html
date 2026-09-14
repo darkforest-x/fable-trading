@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>V8 × 翻身 Stoch：六周期退出回测</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>V8 × 翻身 Stoch：六周期退出回测</h1>
+<p>六个周期已完成。直接加入翻身反向箭头提前退出，在3m、5m和15m共同窗口中提高了胜率，却减少了净收益；30m和1h仍亏损。4h有改善，但较长历史也只有15笔，尚不能确定最佳退出方案。</p>
+<p>日期：2026-09-14。市场为OKX ETH-USDT-SWAP。主方案在看数据前指定为：保留原V8保护，持仓扣费后盈利时，遇到同周期反向箭头于下一根开盘平仓。</p>
+<p>本轮比较9套冻结退出，共同窗口2026-01-01至2026-05-01（UTC，右端不含）；另报各周期可用历史。未使用holdout，没有调K/D或WVF参数，没有实盘操作。</p>
+<h2>共同窗口：原V8与主方案</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>自然平仓数</th>
+<th>净胜率</th>
+<th>总净R</th>
+<th>最长净亏连单</th>
+<th>最长初始止损连单</th>
+<th>同入场净R变化</th>
+</tr></thead><tbody>
+<tr><td>3m</td><td>185→192</td><td>26.5%→35.9%</td><td>-85.08→-114.82</td><td>13→11</td><td>9→8</td><td>-26.72</td></tr>
+<tr><td>5m</td><td>84→85</td><td>33.3%→42.4%</td><td>11.89→-20.14</td><td>12→6</td><td>12→6</td><td>-32.23</td></tr>
+<tr><td>15m</td><td>30→31</td><td>43.3%→54.8%</td><td>27.75→13.98</td><td>5→4</td><td>4→4</td><td>-12.54</td></tr>
+<tr><td>30m</td><td>14→15</td><td>21.4%→26.7%</td><td>-6.42→-5.04</td><td>6→6</td><td>6→6</td><td>2.46</td></tr>
+<tr><td>60m</td><td>7→8</td><td>0.0%→37.5%</td><td>-5.68→-2.07</td><td>7→5</td><td>3→3</td><td>3.23</td></tr>
+<tr><td>240m</td><td>4→4</td><td>25.0%→100.0%</td><td>-1.91→2.60</td><td>3→0</td><td>1→0</td><td>4.51</td></tr>
+</tbody></table>
+<p>总净R来自各方案各自完整串行交易；最后一列固定原V8入场，仅改退出，所以不应与两个串行总R直接相减混用。胜率只认扣费后净R&gt;0；初始止损与所有净亏损分别统计。</p>
+<p>同入场主方案改善的周期：[30, 60, 240]；空列表表示没有。这个描述不等于样本外有效性。共同窗口仅4个月，大周期交易少时必须结合逐笔和长期栏判断。</p>
+<h2>提前止盈救回了什么，又少赚了什么</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>同入场自然配对</th>
+<th>改善笔数</th>
+<th>变差笔数</th>
+<th>原净亏变净赚</th>
+<th>原毛3R变不足3R</th>
+<th>实际翻身退出</th>
+</tr></thead><tbody>
+<tr><td>3m</td><td>185</td><td>32</td><td>24</td><td>17</td><td>9</td><td>58</td></tr>
+<tr><td>5m</td><td>84</td><td>15</td><td>10</td><td>7</td><td>8</td><td>26</td></tr>
+<tr><td>15m</td><td>30</td><td>6</td><td>8</td><td>4</td><td>4</td><td>14</td></tr>
+<tr><td>30m</td><td>14</td><td>4</td><td>0</td><td>1</td><td>0</td><td>4</td></tr>
+<tr><td>60m</td><td>7</td><td>2</td><td>0</td><td>2</td><td>0</td><td>3</td></tr>
+<tr><td>240m</td><td>4</td><td>3</td><td>0</td><td>3</td><td>0</td><td>3</td></tr>
+</tbody></table>
+<p>5m是关键反例：救回7笔原亏损单，同时截短8笔原毛收益≥3R的交易。2026-04-13 13:00 UTC入场的同一笔，原退出净赚9.11R，主方案只赚0.06R。净胜率上升不能抵消这些大赢家被提前平掉的损失。</p>
+<p>MFE是沿用原引擎的审慎记录：先判断止损，止损根的新有利极值不计入。因此MFE≥1R后净亏只用于同口径诊断，不能证明盘中先赚1R后才止损，更不能把MFE≥3R当固定3R止盈成交。</p>
+<h2>1000U账户：固定1U与亏损翻倍</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>退出</th>
+<th>固定1U期末U</th>
+<th>翻倍期末U</th>
+<th>翻倍已实现最大回撤</th>
+<th>翻倍自然笔数</th>
+<th>资金约束</th>
+</tr></thead><tbody>
+<tr><td>3m</td><td>原V8</td><td>914.92</td><td>867.79</td><td>13.2%</td><td>11</td><td>无永久终止；容量拒绝222次；未回本132.21U</td></tr>
+<tr><td>3m</td><td>箭头＋原跟踪／盈利才平</td><td>885.18</td><td>918.10</td><td>15.1%</td><td>24</td><td>无永久终止；容量拒绝207次；未回本163.65U</td></tr>
+<tr><td>5m</td><td>原V8</td><td>1011.89</td><td>2546.70</td><td>13.8%</td><td>74</td><td>无永久终止；容量拒绝10次；未回本344.17U</td></tr>
+<tr><td>5m</td><td>箭头＋原跟踪／盈利才平</td><td>979.86</td><td>724.51</td><td>28.0%</td><td>22</td><td>无永久终止；容量拒绝75次；未回本281.09U</td></tr>
+<tr><td>15m</td><td>原V8</td><td>1027.75</td><td>1123.22</td><td>10.6%</td><td>28</td><td>无永久终止；容量拒绝2次；未回本0.00U</td></tr>
+<tr><td>15m</td><td>箭头＋原跟踪／盈利才平</td><td>1013.98</td><td>1100.99</td><td>1.7%</td><td>31</td><td>无永久终止；容量拒绝0次；未回本0.00U</td></tr>
+<tr><td>30m</td><td>原V8</td><td>993.58</td><td>1087.12</td><td>6.9%</td><td>14</td><td>无永久终止；容量拒绝0次；未回本9.55U</td></tr>
+<tr><td>30m</td><td>箭头＋原跟踪／盈利才平</td><td>994.96</td><td>1121.37</td><td>6.8%</td><td>15</td><td>无永久终止；容量拒绝0次；未回本17.27U</td></tr>
+<tr><td>60m</td><td>原V8</td><td>995.01</td><td>994.13</td><td>9.4%</td><td>7</td><td>无永久终止；容量拒绝0次；未回本5.87U</td></tr>
+<tr><td>60m</td><td>箭头＋原跟踪／盈利才平</td><td>997.93</td><td>991.06</td><td>2.3%</td><td>8</td><td>无永久终止；容量拒绝0次；未回本11.10U</td></tr>
+<tr><td>240m</td><td>原V8</td><td>998.09</td><td>995.29</td><td>0.5%</td><td>4</td><td>无永久终止；容量拒绝0次；未回本5.28U</td></tr>
+<tr><td>240m</td><td>箭头＋原跟踪／盈利才平</td><td>1002.60</td><td>1002.60</td><td>0.0%</td><td>4</td><td>无永久终止；容量拒绝0次；未回本0.00U</td></tr>
+</tbody></table>
+<p>上表现金账户会按容量拒绝入场，随后准入序列也可能改变；总净R表则是不受本金容量限制的串行回放，因此笔数和收益不能机械相加对齐。‘无永久终止’也可能伴随大量容量拒绝，并不表示所有信号都能参与。</p>
+<p>资金口径：本金1000U；基础1U是价格止损风险，另计费用；成本固定为名义金额0.2%往返，保留既有10倍保证金容量假设。亏损后风险翻倍，只有累计净回本才重置，保本不会抹去前亏。容量不足时保持欠账，风险已超过现金则终止。未建模交易所标记价格强平、资金费率、额外滑点及盘中浮动权益；此回撤是已实现现金回撤，不能叫实盘强平概率。边界单按最后完整收盘估值，未纳入自然胜率。</p>
+<h2>所有冻结方案与匹配随机对照</h2>
+<h3>共同2026年1—4月</h3>
+<h4>3分钟｜2026-01-01 00:00:00+00:00 至 2026-05-01 UTC</h4>
+<table><thead><tr>
+<th>退出</th>
+<th>笔数</th>
+<th>净胜率</th>
+<th>毛R</th>
+<th>净R</th>
+<th>PF</th>
+<th>净亏连单</th>
+<th>随机均净R</th>
+<th>超额均净R</th>
+<th>校正p</th>
+<th>匹配笔数</th>
+</tr></thead><tbody>
+<tr><td>原V8</td><td>185</td><td>26.5%</td><td>35.55</td><td>-85.08</td><td>0.60</td><td>13</td><td>-0.52</td><td>0.06</td><td>1.00</td><td>185</td></tr>
+<tr><td>箭头＋原跟踪／盈利才平</td><td>192</td><td>35.9%</td><td>8.53</td><td>-114.82</td><td>0.41</td><td>11</td><td>-0.54</td><td>-0.06</td><td>1.00</td><td>192</td></tr>
+<tr><td>箭头＋原跟踪／见信号就平</td><td>201</td><td>26.9%</td><td>11.07</td><td>-117.45</td><td>0.36</td><td>13</td><td>-0.59</td><td>0.00</td><td>1.00</td><td>201</td></tr>
+<tr><td>箭头替换跟踪／盈利才平</td><td>192</td><td>34.4%</td><td>12.72</td><td>-110.63</td><td>0.46</td><td>11</td><td>-0.53</td><td>-0.05</td><td>1.00</td><td>192</td></tr>
+<tr><td>箭头替换跟踪／见信号就平</td><td>201</td><td>25.4%</td><td>14.76</td><td>-113.75</td><td>0.40</td><td>13</td><td>-0.59</td><td>0.03</td><td>1.00</td><td>201</td></tr>
+<tr><td>警报＋原跟踪／盈利才平</td><td>192</td><td>34.9%</td><td>10.38</td><td>-112.97</td><td>0.43</td><td>12</td><td>-0.55</td><td>-0.04</td><td>1.00</td><td>192</td></tr>
+<tr><td>警报＋原跟踪／见信号就平</td><td>198</td><td>29.8%</td><td>15.89</td><td>-110.45</td><td>0.41</td><td>14</td><td>-0.56</td><td>0.00</td><td>1.00</td><td>198</td></tr>
+<tr><td>警报替换跟踪／盈利才平</td><td>192</td><td>32.8%</td><td>23.89</td><td>-99.46</td><td>0.52</td><td>12</td><td>-0.53</td><td>0.01</td><td>1.00</td><td>192</td></tr>
+<tr><td>警报替换跟踪／见信号就平</td><td>198</td><td>27.8%</td><td>30.62</td><td>-95.71</td><td>0.51</td><td>15</td><td>-0.53</td><td>0.04</td><td>1.00</td><td>198</td></tr>
+</tbody></table>
+<h4>5分钟｜2026-01-01 00:00:00+00:00 至 2026-05-01 UTC</h4>
+<table><thead><tr>
+<th>退出</th>
+<th>笔数</th>
+<th>净胜率</th>
+<th>毛R</th>
+<th>净R</th>
+<th>PF</th>
+<th>净亏连单</th>
+<th>随机均净R</th>
+<th>超额均净R</th>
+<th>校正p</th>
+<th>匹配笔数</th>
+</tr></thead><tbody>
+<tr><td>原V8</td><td>84</td><td>33.3%</td><td>53.60</td><td>11.89</td><td>1.15</td><td>12</td><td>-0.30</td><td>0.44</td><td>1.00</td><td>84</td></tr>
+<tr><td>箭头＋原跟踪／盈利才平</td><td>85</td><td>42.4%</td><td>21.69</td><td>-20.14</td><td>0.72</td><td>6</td><td>-0.45</td><td>0.21</td><td>1.00</td><td>85</td></tr>
+<tr><td>箭头＋原跟踪／见信号就平</td><td>90</td><td>30.0%</td><td>14.65</td><td>-29.19</td><td>0.60</td><td>10</td><td>-0.53</td><td>0.20</td><td>1.00</td><td>90</td></tr>
+<tr><td>箭头替换跟踪／盈利才平</td><td>85</td><td>37.6%</td><td>16.27</td><td>-25.56</td><td>0.66</td><td>7</td><td>-0.44</td><td>0.14</td><td>1.00</td><td>85</td></tr>
+<tr><td>箭头替换跟踪／见信号就平</td><td>90</td><td>25.6%</td><td>6.82</td><td>-37.03</td><td>0.52</td><td>10</td><td>-0.54</td><td>0.13</td><td>1.00</td><td>90</td></tr>
+<tr><td>警报＋原跟踪／盈利才平</td><td>85</td><td>41.2%</td><td>20.08</td><td>-21.76</td><td>0.70</td><td>6</td><td>-0.46</td><td>0.20</td><td>1.00</td><td>85</td></tr>
+<tr><td>警报＋原跟踪／见信号就平</td><td>89</td><td>30.3%</td><td>12.20</td><td>-31.47</td><td>0.58</td><td>10</td><td>-0.52</td><td>0.16</td><td>1.00</td><td>89</td></tr>
+<tr><td>警报替换跟踪／盈利才平</td><td>85</td><td>36.5%</td><td>17.16</td><td>-24.67</td><td>0.68</td><td>7</td><td>-0.45</td><td>0.16</td><td>1.00</td><td>85</td></tr>
+<tr><td>警报替换跟踪／见信号就平</td><td>89</td><td>25.8%</td><td>6.86</td><td>-36.80</td><td>0.53</td><td>10</td><td>-0.52</td><td>0.10</td><td>1.00</td><td>89</td></tr>
+</tbody></table>
+<h4>15分钟｜2026-01-01 00:00:00+00:00 至 2026-05-01 UTC</h4>
+<table><thead><tr>
+<th>退出</th>
+<th>笔数</th>
+<th>净胜率</th>
+<th>毛R</th>
+<th>净R</th>
+<th>PF</th>
+<th>净亏连单</th>
+<th>随机均净R</th>
+<th>超额均净R</th>
+<th>校正p</th>
+<th>匹配笔数</th>
+</tr></thead><tbody>
+<tr><td>原V8</td><td>30</td><td>43.3%</td><td>34.35</td><td>27.75</td><td>2.65</td><td>5</td><td>-0.42</td><td>1.35</td><td>1.00</td><td>30</td></tr>
+<tr><td>箭头＋原跟踪／盈利才平</td><td>31</td><td>54.8%</td><td>20.81</td><td>13.98</td><td>1.90</td><td>4</td><td>-0.23</td><td>0.68</td><td>1.00</td><td>31</td></tr>
+<tr><td>箭头＋原跟踪／见信号就平</td><td>31</td><td>51.6%</td><td>22.32</td><td>15.50</td><td>2.18</td><td>4</td><td>-0.24</td><td>0.74</td><td>1.00</td><td>31</td></tr>
+<tr><td>箭头替换跟踪／盈利才平</td><td>31</td><td>54.8%</td><td>29.50</td><td>22.67</td><td>2.35</td><td>4</td><td>-0.09</td><td>0.83</td><td>1.00</td><td>31</td></tr>
+<tr><td>箭头替换跟踪／见信号就平</td><td>31</td><td>51.6%</td><td>32.08</td><td>25.25</td><td>2.90</td><td>4</td><td>-0.14</td><td>0.95</td><td>1.00</td><td>31</td></tr>
+<tr><td>警报＋原跟踪／盈利才平</td><td>31</td><td>54.8%</td><td>28.69</td><td>21.86</td><td>2.41</td><td>4</td><td>-0.25</td><td>0.96</td><td>1.00</td><td>31</td></tr>
+<tr><td>警报＋原跟踪／见信号就平</td><td>31</td><td>51.6%</td><td>30.20</td><td>23.38</td><td>2.78</td><td>4</td><td>-0.26</td><td>1.01</td><td>1.00</td><td>31</td></tr>
+<tr><td>警报替换跟踪／盈利才平</td><td>31</td><td>54.8%</td><td>32.79</td><td>25.97</td><td>2.55</td><td>4</td><td>-0.13</td><td>0.97</td><td>1.00</td><td>31</td></tr>
+<tr><td>警报替换跟踪／见信号就平</td><td>31</td><td>51.6%</td><td>35.38</td><td>28.55</td><td>3.15</td><td>4</td><td>-0.12</td><td>1.04</td><td>1.00</td><td>31</td></tr>
+</tbody></table>
+<h4>30分钟｜2026-01-01 00:00:00+00:00 至 2026-05-01 UTC</h4>
+<table><thead><tr>
+<th>退出</th>
+<th>笔数</th>
+<th>净胜率</th>
+<th>毛R</th>
+<th>净R</th>
+<th>PF</th>
+<th>净亏连单</th>
+<th>随机均净R</th>
+<th>超额均净R</th>
+<th>校正p</th>
+<th>匹配笔数</th>
+</tr></thead><tbody>
+<tr><td>原V8</td><td>14</td><td>21.4%</td><td>-4.39</td><td>-6.42</td><td>0.45</td><td>6</td><td>-0.16</td><td>-0.30</td><td>1.00</td><td>14</td></tr>
+<tr><td>箭头＋原跟踪／盈利才平</td><td>15</td><td>26.7%</td><td>-2.93</td><td>-5.04</td><td>0.60</td><td>6</td><td>-0.02</td><td>-0.32</td><td>1.00</td><td>15</td></tr>
+<tr><td>箭头＋原跟踪／见信号就平</td><td>15</td><td>26.7%</td><td>-2.93</td><td>-5.04</td><td>0.60</td><td>6</td><td>-0.04</td><td>-0.29</td><td>1.00</td><td>15</td></tr>
+<tr><td>箭头替换跟踪／盈利才平</td><td>15</td><td>26.7%</td><td>-2.93</td><td>-5.04</td><td>0.60</td><td>6</td><td>-0.04</td><td>-0.30</td><td>1.00</td><td>15</td></tr>
+<tr><td>箭头替换跟踪／见信号就平</td><td>15</td><td>26.7%</td><td>-2.93</td><td>-5.04</td><td>0.60</td><td>6</td><td>-0.03</td><td>-0.30</td><td>1.00</td><td>15</td></tr>
+<tr><td>警报＋原跟踪／盈利才平</td><td>15</td><td>26.7%</td><td>-2.93</td><td>-5.04</td><td>0.60</td><td>6</td><td>-0.02</td><td>-0.31</td><td>1.00</td><td>15</td></tr>
+<tr><td>警报＋原跟踪／见信号就平</td><td>15</td><td>26.7%</td><td>-2.93</td><td>-5.04</td><td>0.60</td><td>6</td><td>-0.06</td><td>-0.27</td><td>1.00</td><td>15</td></tr>
+<tr><td>警报替换跟踪／盈利才平</td><td>15</td><td>26.7%</td><td>-2.93</td><td>-5.04</td><td>0.60</td><td>6</td><td>-0.04</td><td>-0.30</td><td>1.00</td><td>15</td></tr>
+<tr><td>警报替换跟踪／见信号就平</td><td>15</td><td>26.7%</td><td>-2.93</td><td>-5.04</td><td>0.60</td><td>6</td><td>-0.05</td><td>-0.29</td><td>1.00</td><td>15</td></tr>
+</tbody></table>
+<h4>60分钟｜2026-01-01 00:00:00+00:00 至 2026-05-01 UTC</h4>
+<table><thead><tr>
+<th>退出</th>
+<th>笔数</th>
+<th>净胜率</th>
+<th>毛R</th>
+<th>净R</th>
+<th>PF</th>
+<th>净亏连单</th>
+<th>随机均净R</th>
+<th>超额均净R</th>
+<th>校正p</th>
+<th>匹配笔数</th>
+</tr></thead><tbody>
+<tr><td>原V8</td><td>7</td><td>0.0%</td><td>-4.89</td><td>-5.68</td><td>0.00</td><td>7</td><td>-0.39</td><td>-0.42</td><td>1.00</td><td>7</td></tr>
+<tr><td>箭头＋原跟踪／盈利才平</td><td>8</td><td>37.5%</td><td>-1.23</td><td>-2.07</td><td>0.55</td><td>5</td><td>-0.21</td><td>-0.05</td><td>1.00</td><td>8</td></tr>
+<tr><td>箭头＋原跟踪／见信号就平</td><td>8</td><td>25.0%</td><td>-1.68</td><td>-2.52</td><td>0.46</td><td>6</td><td>-0.20</td><td>-0.12</td><td>1.00</td><td>8</td></tr>
+<tr><td>箭头替换跟踪／盈利才平</td><td>8</td><td>37.5%</td><td>-1.81</td><td>-2.65</td><td>0.49</td><td>5</td><td>-0.27</td><td>-0.06</td><td>1.00</td><td>8</td></tr>
+<tr><td>箭头替换跟踪／见信号就平</td><td>8</td><td>25.0%</td><td>-2.26</td><td>-3.10</td><td>0.41</td><td>6</td><td>-0.26</td><td>-0.13</td><td>1.00</td><td>8</td></tr>
+<tr><td>警报＋原跟踪／盈利才平</td><td>7</td><td>14.3%</td><td>-3.00</td><td>-3.78</td><td>0.33</td><td>5</td><td>-0.25</td><td>-0.29</td><td>1.00</td><td>7</td></tr>
+<tr><td>警报＋原跟踪／见信号就平</td><td>8</td><td>12.5%</td><td>-3.01</td><td>-3.85</td><td>0.33</td><td>6</td><td>-0.37</td><td>-0.11</td><td>1.00</td><td>8</td></tr>
+<tr><td>警报替换跟踪／盈利才平</td><td>7</td><td>14.3%</td><td>-3.58</td><td>-4.37</td><td>0.30</td><td>5</td><td>-0.33</td><td>-0.30</td><td>1.00</td><td>7</td></tr>
+<tr><td>警报替换跟踪／见信号就平</td><td>8</td><td>12.5%</td><td>-3.60</td><td>-4.44</td><td>0.30</td><td>6</td><td>-0.44</td><td>-0.12</td><td>1.00</td><td>8</td></tr>
+</tbody></table>
+<h4>240分钟｜2026-01-01 00:00:00+00:00 至 2026-05-01 UTC</h4>
+<table><thead><tr>
+<th>退出</th>
+<th>笔数</th>
+<th>净胜率</th>
+<th>毛R</th>
+<th>净R</th>
+<th>PF</th>
+<th>净亏连单</th>
+<th>随机均净R</th>
+<th>超额均净R</th>
+<th>校正p</th>
+<th>匹配笔数</th>
+</tr></thead><tbody>
+<tr><td>原V8</td><td>4</td><td>25.0%</td><td>-1.71</td><td>-1.91</td><td>0.23</td><td>3</td><td>-0.28</td><td>-0.20</td><td>1.00</td><td>4</td></tr>
+<tr><td>箭头＋原跟踪／盈利才平</td><td>4</td><td>100.0%</td><td>2.80</td><td>2.60</td><td>—</td><td>0</td><td>0.36</td><td>0.28</td><td>1.00</td><td>4</td></tr>
+<tr><td>箭头＋原跟踪／见信号就平</td><td>4</td><td>75.0%</td><td>2.63</td><td>2.43</td><td>82.62</td><td>1</td><td>0.32</td><td>0.28</td><td>1.00</td><td>4</td></tr>
+<tr><td>箭头替换跟踪／盈利才平</td><td>3</td><td>100.0%</td><td>5.29</td><td>5.14</td><td>—</td><td>0</td><td>0.57</td><td>1.14</td><td>1.00</td><td>3</td></tr>
+<tr><td>箭头替换跟踪／见信号就平</td><td>3</td><td>66.7%</td><td>5.12</td><td>4.97</td><td>167.78</td><td>1</td><td>0.51</td><td>1.14</td><td>1.00</td><td>3</td></tr>
+<tr><td>警报＋原跟踪／盈利才平</td><td>4</td><td>100.0%</td><td>2.80</td><td>2.60</td><td>—</td><td>0</td><td>0.36</td><td>0.28</td><td>1.00</td><td>4</td></tr>
+<tr><td>警报＋原跟踪／见信号就平</td><td>4</td><td>75.0%</td><td>2.63</td><td>2.43</td><td>82.62</td><td>1</td><td>0.32</td><td>0.28</td><td>1.00</td><td>4</td></tr>
+<tr><td>警报替换跟踪／盈利才平</td><td>3</td><td>100.0%</td><td>5.29</td><td>5.14</td><td>—</td><td>0</td><td>0.57</td><td>1.14</td><td>1.00</td><td>3</td></tr>
+<tr><td>警报替换跟踪／见信号就平</td><td>3</td><td>66.7%</td><td>5.12</td><td>4.97</td><td>167.78</td><td>1</td><td>0.51</td><td>1.14</td><td>1.00</td><td>3</td></tr>
+</tbody></table>
+<h3>各周期可用历史</h3>
+<h4>3分钟｜2023-08-03 14:15:00+00:00 至 2026-05-01 UTC</h4>
+<table><thead><tr>
+<th>退出</th>
+<th>笔数</th>
+<th>净胜率</th>
+<th>毛R</th>
+<th>净R</th>
+<th>PF</th>
+<th>净亏连单</th>
+<th>随机均净R</th>
+<th>超额均净R</th>
+<th>校正p</th>
+<th>匹配笔数</th>
+</tr></thead><tbody>
+<tr><td>原V8</td><td>1453</td><td>24.4%</td><td>6.53</td><td>-901.25</td><td>0.45</td><td>27</td><td>-0.62</td><td>0.00</td><td>1.00</td><td>1453</td></tr>
+<tr><td>箭头＋原跟踪／盈利才平</td><td>1509</td><td>36.2%</td><td>-40.86</td><td>-974.68</td><td>0.36</td><td>26</td><td>-0.64</td><td>-0.01</td><td>1.00</td><td>1509</td></tr>
+<tr><td>箭头＋原跟踪／见信号就平</td><td>1636</td><td>22.9%</td><td>-32.35</td><td>-1047.66</td><td>0.27</td><td>30</td><td>-0.65</td><td>0.01</td><td>1.00</td><td>1636</td></tr>
+<tr><td>箭头替换跟踪／盈利才平</td><td>1504</td><td>35.8%</td><td>-33.55</td><td>-962.45</td><td>0.38</td><td>17</td><td>-0.64</td><td>-0.00</td><td>1.00</td><td>1504</td></tr>
+<tr><td>箭头替换跟踪／见信号就平</td><td>1636</td><td>22.4%</td><td>-42.04</td><td>-1057.34</td><td>0.27</td><td>30</td><td>-0.65</td><td>0.00</td><td>1.00</td><td>1636</td></tr>
+<tr><td>警报＋原跟踪／盈利才平</td><td>1502</td><td>35.0%</td><td>-29.55</td><td>-959.72</td><td>0.37</td><td>26</td><td>-0.64</td><td>0.00</td><td>1.00</td><td>1502</td></tr>
+<tr><td>警报＋原跟踪／见信号就平</td><td>1608</td><td>24.1%</td><td>-33.51</td><td>-1034.34</td><td>0.29</td><td>30</td><td>-0.65</td><td>0.00</td><td>1.00</td><td>1608</td></tr>
+<tr><td>警报替换跟踪／盈利才平</td><td>1497</td><td>34.1%</td><td>-23.20</td><td>-948.46</td><td>0.40</td><td>17</td><td>-0.64</td><td>0.01</td><td>1.00</td><td>1497</td></tr>
+<tr><td>警报替换跟踪／见信号就平</td><td>1607</td><td>23.3%</td><td>-19.08</td><td>-1019.42</td><td>0.32</td><td>30</td><td>-0.65</td><td>0.01</td><td>1.00</td><td>1607</td></tr>
+</tbody></table>
+<h4>5分钟｜2025-12-25 15:05:00+00:00 至 2026-05-01 UTC</h4>
+<table><thead><tr>
+<th>退出</th>
+<th>笔数</th>
+<th>净胜率</th>
+<th>毛R</th>
+<th>净R</th>
+<th>PF</th>
+<th>净亏连单</th>
+<th>随机均净R</th>
+<th>超额均净R</th>
+<th>校正p</th>
+<th>匹配笔数</th>
+</tr></thead><tbody>
+<tr><td>原V8</td><td>89</td><td>31.5%</td><td>50.39</td><td>4.89</td><td>1.06</td><td>12</td><td>-0.34</td><td>0.40</td><td>1.00</td><td>89</td></tr>
+<tr><td>箭头＋原跟踪／盈利才平</td><td>90</td><td>41.1%</td><td>18.71</td><td>-26.92</td><td>0.66</td><td>6</td><td>-0.48</td><td>0.18</td><td>1.00</td><td>90</td></tr>
+<tr><td>箭头＋原跟踪／见信号就平</td><td>96</td><td>29.2%</td><td>11.24</td><td>-37.44</td><td>0.54</td><td>10</td><td>-0.54</td><td>0.15</td><td>1.00</td><td>96</td></tr>
+<tr><td>箭头替换跟踪／盈利才平</td><td>90</td><td>36.7%</td><td>13.29</td><td>-32.34</td><td>0.61</td><td>7</td><td>-0.47</td><td>0.11</td><td>1.00</td><td>90</td></tr>
+<tr><td>箭头替换跟踪／见信号就平</td><td>96</td><td>25.0%</td><td>3.41</td><td>-45.28</td><td>0.47</td><td>10</td><td>-0.55</td><td>0.08</td><td>1.00</td><td>96</td></tr>
+<tr><td>警报＋原跟踪／盈利才平</td><td>90</td><td>40.0%</td><td>17.09</td><td>-28.53</td><td>0.64</td><td>6</td><td>-0.49</td><td>0.17</td><td>1.00</td><td>90</td></tr>
+<tr><td>警报＋原跟踪／见信号就平</td><td>95</td><td>29.5%</td><td>8.79</td><td>-39.72</td><td>0.52</td><td>10</td><td>-0.55</td><td>0.13</td><td>1.00</td><td>95</td></tr>
+<tr><td>警报替换跟踪／盈利才平</td><td>90</td><td>35.6%</td><td>14.18</td><td>-31.45</td><td>0.62</td><td>7</td><td>-0.48</td><td>0.13</td><td>1.00</td><td>90</td></tr>
+<tr><td>警报替换跟踪／见信号就平</td><td>95</td><td>25.3%</td><td>3.45</td><td>-45.05</td><td>0.49</td><td>10</td><td>-0.55</td><td>0.08</td><td>1.00</td><td>95</td></tr>
+</tbody></table>
+<h4>15分钟｜2023-08-01 00:00:00+00:00 至 2026-05-01 UTC</h4>
+<table><thead><tr>
+<th>退出</th>
+<th>笔数</th>
+<th>净胜率</th>
+<th>毛R</th>
+<th>净R</th>
+<th>PF</th>
+<th>净亏连单</th>
+<th>随机均净R</th>
+<th>超额均净R</th>
+<th>校正p</th>
+<th>匹配笔数</th>
+</tr></thead><tbody>
+<tr><td>原V8</td><td>269</td><td>23.8%</td><td>46.82</td><td>-28.55</td><td>0.88</td><td>20</td><td>-0.12</td><td>0.01</td><td>1.00</td><td>269</td></tr>
+<tr><td>箭头＋原跟踪／盈利才平</td><td>280</td><td>35.7%</td><td>-9.15</td><td>-86.22</td><td>0.61</td><td>14</td><td>-0.26</td><td>-0.04</td><td>1.00</td><td>280</td></tr>
+<tr><td>箭头＋原跟踪／见信号就平</td><td>286</td><td>31.5%</td><td>2.73</td><td>-77.81</td><td>0.62</td><td>21</td><td>-0.26</td><td>-0.01</td><td>1.00</td><td>286</td></tr>
+<tr><td>箭头替换跟踪／盈利才平</td><td>280</td><td>34.3%</td><td>3.25</td><td>-73.82</td><td>0.68</td><td>20</td><td>-0.27</td><td>0.01</td><td>1.00</td><td>280</td></tr>
+<tr><td>箭头替换跟踪／见信号就平</td><td>286</td><td>30.1%</td><td>13.49</td><td>-67.05</td><td>0.68</td><td>21</td><td>-0.27</td><td>0.04</td><td>1.00</td><td>286</td></tr>
+<tr><td>警报＋原跟踪／盈利才平</td><td>280</td><td>35.4%</td><td>0.78</td><td>-76.29</td><td>0.66</td><td>14</td><td>-0.15</td><td>-0.12</td><td>1.00</td><td>280</td></tr>
+<tr><td>警报＋原跟踪／见信号就平</td><td>286</td><td>31.8%</td><td>11.91</td><td>-68.63</td><td>0.67</td><td>21</td><td>-0.14</td><td>-0.10</td><td>1.00</td><td>286</td></tr>
+<tr><td>警报替换跟踪／盈利才平</td><td>280</td><td>33.9%</td><td>3.82</td><td>-73.25</td><td>0.68</td><td>20</td><td>-0.19</td><td>-0.07</td><td>1.00</td><td>280</td></tr>
+<tr><td>警报替换跟踪／见信号就平</td><td>286</td><td>30.4%</td><td>13.31</td><td>-67.23</td><td>0.69</td><td>21</td><td>-0.18</td><td>-0.05</td><td>1.00</td><td>286</td></tr>
+</tbody></table>
+<h4>30分钟｜2023-08-01 00:00:00+00:00 至 2026-05-01 UTC</h4>
+<table><thead><tr>
+<th>退出</th>
+<th>笔数</th>
+<th>净胜率</th>
+<th>毛R</th>
+<th>净R</th>
+<th>PF</th>
+<th>净亏连单</th>
+<th>随机均净R</th>
+<th>超额均净R</th>
+<th>校正p</th>
+<th>匹配笔数</th>
+</tr></thead><tbody>
+<tr><td>原V8</td><td>124</td><td>25.0%</td><td>2.69</td><td>-15.81</td><td>0.84</td><td>9</td><td>0.02</td><td>-0.14</td><td>1.00</td><td>124</td></tr>
+<tr><td>箭头＋原跟踪／盈利才平</td><td>127</td><td>39.4%</td><td>11.68</td><td>-7.13</td><td>0.92</td><td>6</td><td>-0.02</td><td>-0.03</td><td>1.00</td><td>127</td></tr>
+<tr><td>箭头＋原跟踪／见信号就平</td><td>134</td><td>35.8%</td><td>12.09</td><td>-7.61</td><td>0.90</td><td>9</td><td>-0.05</td><td>-0.01</td><td>1.00</td><td>134</td></tr>
+<tr><td>箭头替换跟踪／盈利才平</td><td>127</td><td>39.4%</td><td>11.19</td><td>-7.62</td><td>0.91</td><td>6</td><td>-0.04</td><td>-0.02</td><td>1.00</td><td>127</td></tr>
+<tr><td>箭头替换跟踪／见信号就平</td><td>134</td><td>35.8%</td><td>11.61</td><td>-8.10</td><td>0.90</td><td>9</td><td>-0.06</td><td>0.00</td><td>1.00</td><td>134</td></tr>
+<tr><td>警报＋原跟踪／盈利才平</td><td>127</td><td>38.6%</td><td>7.33</td><td>-11.48</td><td>0.87</td><td>8</td><td>-0.00</td><td>-0.09</td><td>1.00</td><td>127</td></tr>
+<tr><td>警报＋原跟踪／见信号就平</td><td>131</td><td>36.6%</td><td>10.94</td><td>-8.26</td><td>0.90</td><td>9</td><td>-0.04</td><td>-0.03</td><td>1.00</td><td>131</td></tr>
+<tr><td>警报替换跟踪／盈利才平</td><td>127</td><td>37.0%</td><td>3.72</td><td>-15.09</td><td>0.83</td><td>8</td><td>0.01</td><td>-0.13</td><td>1.00</td><td>127</td></tr>
+<tr><td>警报替换跟踪／见信号就平</td><td>131</td><td>35.1%</td><td>7.33</td><td>-11.87</td><td>0.86</td><td>9</td><td>-0.02</td><td>-0.07</td><td>1.00</td><td>131</td></tr>
+</tbody></table>
+<h4>60分钟｜2023-08-01 00:00:00+00:00 至 2026-05-01 UTC</h4>
+<table><thead><tr>
+<th>退出</th>
+<th>笔数</th>
+<th>净胜率</th>
+<th>毛R</th>
+<th>净R</th>
+<th>PF</th>
+<th>净亏连单</th>
+<th>随机均净R</th>
+<th>超额均净R</th>
+<th>校正p</th>
+<th>匹配笔数</th>
+</tr></thead><tbody>
+<tr><td>原V8</td><td>65</td><td>15.4%</td><td>0.84</td><td>-6.18</td><td>0.89</td><td>15</td><td>-0.13</td><td>0.04</td><td>1.00</td><td>65</td></tr>
+<tr><td>箭头＋原跟踪／盈利才平</td><td>66</td><td>31.8%</td><td>-1.99</td><td>-9.07</td><td>0.80</td><td>8</td><td>-0.16</td><td>0.03</td><td>1.00</td><td>66</td></tr>
+<tr><td>箭头＋原跟踪／见信号就平</td><td>68</td><td>27.9%</td><td>2.04</td><td>-5.21</td><td>0.87</td><td>8</td><td>-0.20</td><td>0.12</td><td>1.00</td><td>68</td></tr>
+<tr><td>箭头替换跟踪／盈利才平</td><td>66</td><td>28.8%</td><td>-3.80</td><td>-10.88</td><td>0.78</td><td>11</td><td>-0.12</td><td>-0.04</td><td>1.00</td><td>66</td></tr>
+<tr><td>箭头替换跟踪／见信号就平</td><td>68</td><td>25.0%</td><td>-0.38</td><td>-7.63</td><td>0.83</td><td>11</td><td>-0.15</td><td>0.04</td><td>1.00</td><td>68</td></tr>
+<tr><td>警报＋原跟踪／盈利才平</td><td>65</td><td>29.2%</td><td>-3.76</td><td>-10.79</td><td>0.77</td><td>9</td><td>-0.13</td><td>-0.04</td><td>1.00</td><td>65</td></tr>
+<tr><td>警报＋原跟踪／见信号就平</td><td>68</td><td>26.5%</td><td>0.70</td><td>-6.54</td><td>0.85</td><td>9</td><td>-0.17</td><td>0.07</td><td>1.00</td><td>68</td></tr>
+<tr><td>警报替换跟踪／盈利才平</td><td>65</td><td>26.2%</td><td>-12.00</td><td>-19.03</td><td>0.62</td><td>12</td><td>-0.09</td><td>-0.21</td><td>1.00</td><td>65</td></tr>
+<tr><td>警报替换跟踪／见信号就平</td><td>68</td><td>23.5%</td><td>-8.15</td><td>-15.40</td><td>0.67</td><td>12</td><td>-0.13</td><td>-0.10</td><td>1.00</td><td>68</td></tr>
+</tbody></table>
+<h4>240分钟｜2023-08-01 00:00:00+00:00 至 2026-05-01 UTC</h4>
+<table><thead><tr>
+<th>退出</th>
+<th>笔数</th>
+<th>净胜率</th>
+<th>毛R</th>
+<th>净R</th>
+<th>PF</th>
+<th>净亏连单</th>
+<th>随机均净R</th>
+<th>超额均净R</th>
+<th>校正p</th>
+<th>匹配笔数</th>
+</tr></thead><tbody>
+<tr><td>原V8</td><td>15</td><td>40.0%</td><td>3.01</td><td>2.29</td><td>1.27</td><td>3</td><td>0.35</td><td>-0.19</td><td>1.00</td><td>15</td></tr>
+<tr><td>箭头＋原跟踪／盈利才平</td><td>15</td><td>66.7%</td><td>10.74</td><td>10.03</td><td>3.03</td><td>2</td><td>-0.00</td><td>0.67</td><td>1.00</td><td>15</td></tr>
+<tr><td>箭头＋原跟踪／见信号就平</td><td>15</td><td>53.3%</td><td>9.57</td><td>8.86</td><td>3.14</td><td>2</td><td>-0.02</td><td>0.61</td><td>1.00</td><td>15</td></tr>
+<tr><td>箭头替换跟踪／盈利才平</td><td>14</td><td>57.1%</td><td>12.00</td><td>11.33</td><td>3.07</td><td>2</td><td>-0.03</td><td>0.84</td><td>1.00</td><td>14</td></tr>
+<tr><td>箭头替换跟踪／见信号就平</td><td>14</td><td>42.9%</td><td>10.83</td><td>10.16</td><td>3.17</td><td>2</td><td>-0.05</td><td>0.78</td><td>1.00</td><td>14</td></tr>
+<tr><td>警报＋原跟踪／盈利才平</td><td>15</td><td>66.7%</td><td>10.74</td><td>10.03</td><td>3.03</td><td>2</td><td>-0.00</td><td>0.67</td><td>1.00</td><td>15</td></tr>
+<tr><td>警报＋原跟踪／见信号就平</td><td>15</td><td>53.3%</td><td>9.57</td><td>8.86</td><td>3.14</td><td>2</td><td>-0.02</td><td>0.61</td><td>1.00</td><td>15</td></tr>
+<tr><td>警报替换跟踪／盈利才平</td><td>14</td><td>57.1%</td><td>12.00</td><td>11.33</td><td>3.07</td><td>2</td><td>-0.03</td><td>0.84</td><td>1.00</td><td>14</td></tr>
+<tr><td>警报替换跟踪／见信号就平</td><td>14</td><td>42.9%</td><td>10.83</td><td>10.16</td><td>3.17</td><td>2</td><td>-0.05</td><td>0.78</td><td>1.00</td><td>14</td></tr>
+</tbody></table>
+<p>随机对照按同ETH、周期、UTC月、方向、信号时点ATR/价格相对前120根的三分位桶匹配；每笔5个随机入场，采用同退出和成本。它是独立交易对照，不能拼成可执行随机账户。边界截尾样本重采，缺失数保存在summary与逐笔controls文件。月块符号置换9999次；每个窗口54项作Holm校正。四个月检验分辨率有限，未设研究期内参数选择。</p>
+<h2>源码、时间与交易语义</h2>
+<ul>
+<li>K/D=Stochastic5／SMA3／SMA3；绿箭头为当前K、D均&lt;20的金叉，红箭头为均&gt;80的死叉。买入警报额外要求WVF绿色，卖出警报与红箭头相同。多仓看红信号，空仓看绿信号。</li>
+<li>九组仅比较反向箭头／警报、保留／移除原跟踪、盈利才平／所有反向信号平。全部保留初始5bar极值＋0.2ATR缓冲及2ATR风险下限，也保留原V6反向退出。替换跟踪不是无止损持有。</li>
+<li>盈利门按信号收盘、扣固定费用后判断。下一开盘可能跳空变亏，不能把它称为稳赚止盈。</li>
+<li>已触发止损优先于同根收盘箭头；下一开盘穿越保护则记止损；原V6反向与翻身同时出现时保留原优先级。</li>
+</ul>
+<p>Pine指标会在实时未收盘K线上重算；本实验只使用最终收盘值，避免把盘中暂现箭头当成稳定历史信号。参见<a href="https://www.tradingview.com/pine-script-docs/language/execution-model/">TradingView执行模型</a>。</p>
+<h2>数据与复核证据</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>源前缀根数</th>
+<th>源首根UTC</th>
+<th>最后完整收盘UTC</th>
+<th>聚合根数</th>
+</tr></thead><tbody>
+<tr><td>3</td><td>482176</td><td>2023-07-31 11:12:00+00:00</td><td>2026-05-01 00:00:00+00:00</td><td>482176</td></tr>
+<tr><td>5</td><td>37896</td><td>2025-12-20 10:00:00+00:00</td><td>2026-05-01 00:00:00+00:00</td><td>37896</td></tr>
+<tr><td>15</td><td>151522</td><td>2022-01-03 15:30:00+00:00</td><td>2026-05-01 00:00:00+00:00</td><td>151522</td></tr>
+<tr><td>30</td><td>151522</td><td>2022-01-03 15:30:00+00:00</td><td>2026-05-01 00:00:00+00:00</td><td>75761</td></tr>
+<tr><td>60</td><td>151522</td><td>2022-01-03 15:30:00+00:00</td><td>2026-05-01 00:00:00+00:00</td><td>37880</td></tr>
+<tr><td>240</td><td>151522</td><td>2022-01-03 15:30:00+00:00</td><td>2026-05-01 00:00:00+00:00</td><td>9470</td></tr>
+</tbody></table>
+<p>Builder提交：<code>29fe7bfefd5a1f16570f0519fa3bce4ac7ff6f95</code>。原V8逐笔parity：12组，共2341行通过（共同窗与可用历史有重叠，不代表独立交易总数）。29项公式、缺失处理、时间边界和执行测试通过；哈希及读取边界见results/run_receipt.json、input_receipts.json、manifest.json。</p>
+<p>独立只读复核重算108组逐笔统计、配对变化、全部随机匹配及216组现金恒等式，未发现分母、算术或配对错误；605个结果文件哈希全部一致。现金恒等式最大残差1.56e-12U，统计误差约2.3e-13。复核没有再读源行情或holdout。</p>
+<p>4h较长历史主方案15笔合计+10.03R，原版+2.30R；其中2024-05-18入场的一笔贡献+7.37R，约占净总额73.5%。已逐条核对8笔翻身退出的K/D交叉、收盘信号到下一开盘的时间及净R算式，均一致；这确认账本计算，不能消除小样本和行情集中风险。</p>
+<p>没有预测模型或事前交易评分排序，val AUC、top-decile排序毛／净收益及单特征排序基线不适用；不能用事后盈利挑top10%。零假设对照为原V8同入场配对与同成本匹配随机入场。样本数、胜率和时间范围均见完整表；正类率即净胜率。</p>
+<h2>逐笔文件</h2>
+<ul>
+<li><a href="../../experiments/active/exp-spike-fanshen-exit-multitf-20260914-v1/delivery/ETH_3m_primary_2026JanApr.csv">3分钟主方案逐笔CSV</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-fanshen-exit-multitf-20260914-v1/delivery/ETH_5m_primary_2026JanApr.csv">5分钟主方案逐笔CSV</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-fanshen-exit-multitf-20260914-v1/delivery/ETH_15m_primary_2026JanApr.csv">15分钟主方案逐笔CSV</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-fanshen-exit-multitf-20260914-v1/delivery/ETH_30m_primary_2026JanApr.csv">30分钟主方案逐笔CSV</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-fanshen-exit-multitf-20260914-v1/delivery/ETH_60m_primary_2026JanApr.csv">60分钟主方案逐笔CSV</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-fanshen-exit-multitf-20260914-v1/delivery/ETH_240m_primary_2026JanApr.csv">240分钟主方案逐笔CSV</a></li>
+</ul>
+<p>所有方案逐笔、原入场配对、匹配控制和资金账本在<code>experiments/active/exp-spike-fanshen-exit-multitf-20260914-v1/results</code>，summary.csv为108组完整统计；原源码在source/owner_fanshen_v1_20250706.pine。</p>
+<h2>风险与诚实声明</h2>
+<p>本配置消耗holdout次数为0；截至2026-05-01的历史已被多轮研究观察，不能冒充完全未见样本。共同窗口短；大周期少数交易和单一行情可能主导结果；不同可用历史长度不能直接跨周期比总收益。Python公式和执行已做定向验证，尚未完成TradingView原生逐信号一一对齐；源自Owner粘贴代码，不代表TV保存版本逐字节身份已认证。历史较好的方案仍是待验证候选，不能保证最多6连损或倍投必胜。</p>
+<h2>复现命令</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+.venv/bin/python -m pytest -q tests/test_spike_fanshen_exit.py tests/test_spike_fanshen_study.py tests/evaluation/test_spike_recovery_exit.py
+# 使用上述冻结builder；结果目录必须不存在，已有结果应保留并改用独立重跑目录
+.venv/bin/python -m yoyo.evaluation.spike_fanshen_study
+.venv/bin/python scripts/report_spike_fanshen.py
+.venv/bin/python scripts/md_to_html.py analysis/p1_spike_fanshen_exit_multitf_20260914.md --out-dir analysis/html
+</code></pre>
+<h2>下一步</h2>
+<p>先逐笔核对主要改善与受损交易，再决定是否单独冻结最有希望的周期与退出版本作独立验收。新增holdout评估须按配置记录已有或新取得的Owner明确授权；本次没有推进任何实盘配置。</p>
+</body>
+</html>

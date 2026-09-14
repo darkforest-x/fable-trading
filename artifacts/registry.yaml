@@ -30899,3 +30899,31 @@ artifacts:
     notes: Six fixed entry sessions;four frozen exits;NY immediate path assumptions
       max natural net-loss streak5 but both fixed-risk and double cash negative. No
       new holdout. Original744row parity,13tests and artifact arithmetic passed.
+
+  - artifact_id: spike-fanshen-source-audit-20260914-delivery
+    artifact_type: manifest
+    role: source_identity_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: 29fe7bfefd5a1f16570f0519fa3bce4ac7ff6f95
+    source_path: experiments/active/exp-spike-fanshen-source-audit-20260914-v1/delivery_manifest.json
+    sha256: 9fbc082816de2c23984353d79e52c949b490cc006c74b38b8b8041cab7c56fa6
+    size_bytes: 940
+    storage_uri: repo://experiments/active/exp-spike-fanshen-source-audit-20260914-v1/delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Excluded Notion Stoch candidate; source blocker superseded by owner supplied Pine. No price evaluation.
+  - artifact_id: spike-fanshen-exit-multitf-20260914-delivery
+    artifact_type: manifest
+    role: frozen_six_timeframe_exit_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 29fe7bfefd5a1f16570f0519fa3bce4ac7ff6f95
+    source_path: experiments/active/exp-spike-fanshen-exit-multitf-20260914-v1/delivery_manifest.json
+    sha256: a6e9061f12553d10eb43bd929b795ae22936b5597d05fc3d79e8d1927e2028ae
+    size_bytes: 6939
+    storage_uri: repo://experiments/active/exp-spike-fanshen-exit-multitf-20260914-v1/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 108 statistics,216 cash ledgers,12 baseline parity groups,605 result hashes reconciled; no native TV signal
+      parity or validated best strategy.

@@ -1,0 +1,33 @@
+{
+  "recorded_date": "2026-09-14",
+  "independent_reviewer": "ict_result_audit, budget-evidence, Luna Max",
+  "scope": "Existing result artifacts only; no new source OHLC, pickle or holdout reads",
+  "verdict": "No material arithmetic, denominator or pairing errors found",
+  "summary_rows_reconciled": 108,
+  "cash_ledgers_reconciled": 216,
+  "baseline_parity_groups_passed": 12,
+  "result_file_hashes_verified": 605,
+  "statistic_max_floating_error": 2.3e-13,
+  "cash_identity_max_residual_usdt": 1.56e-12,
+  "cash_identity": "final_balance = 1000 + sum(accepted ledger pnl), including boundary marks",
+  "controls": "Every trade has five serialized matched draws; extra attempts represent rejected boundary draws",
+  "primary_paired_common_delta_r_3_5_15_30_60_240m": [-26.7199806004, -32.2294870325, -12.5378681384, 2.46090437279, 3.23298361720, 4.50881824521],
+  "parent_4h_signal_checks": {
+    "count": 8,
+    "checks": ["Strict K/D 20 or 80 crossover against previous closed bar", "pending_signal_i + 1 equals exit_i", "exit open equals signal bar open plus four hours", "net_r = (side * (exit_price - entry_price) - 0.002 * entry_price) / initial_risk"],
+    "entry_times_utc": ["2024-01-09T00:00:00Z", "2024-05-18T08:00:00Z", "2024-11-01T00:00:00Z", "2024-11-06T20:00:00Z", "2025-05-08T08:00:00Z", "2026-01-13T20:00:00Z", "2026-03-16T00:00:00Z", "2026-04-14T04:00:00Z"],
+    "verdict": "All passed",
+    "largest_trade_net_r": 7.37034551056,
+    "available_primary_total_net_r": 10.029244,
+    "limitation": "One trade contributes about 73.5 percent of total net profit; signal arithmetic is not independent strategy validation"
+  },
+  "limitations": ["No native TradingView per-signal parity", "Capacity rejection changes later serial admission; cash and unconstrained trade counts are different denominators", "Profitability gate uses signal close; next-open fill is not guaranteed profitable", "Holdout consumption remains zero"],
+  "delivery_runtime_note": {
+    "observation": "After the replay and 29 tests completed, .venv/bin/python could not execute because its Xcode target path no longer existed",
+    "render_only_fallback": "PYTHONPATH=/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages /usr/bin/python3",
+    "versions": "Python 3.9.6, pandas 2.3.3, numpy 2.0.2",
+    "environment_mutated": false,
+    "replay_repeated": false
+  },
+  "notion_source_and_result": "https://app.notion.com/p/3db8856479af8186b259fc3779e2e6b4"
+}

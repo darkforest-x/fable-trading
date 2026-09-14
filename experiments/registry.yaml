@@ -9167,20 +9167,28 @@ experiments:
 
   - experiment_id: exp-spike-fanshen-source-audit-20260914-v1
     source_repo: darkforest-x/fable-trading
-    status: completed
+    source_commit: 29fe7bfefd5a1f16570f0519fa3bce4ac7ff6f95
+    status: superseded
     question: Identify the exact Fanshen V1 source in Notion before exit replay.
+    result: Notion candidate excluded as a different Stoch script; owner then supplied full Stoch5-3-3 plus WVF source, enabling the linked six-period experiment.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_fanshen_source_audit_20260914.md
+    artifacts:
+    - spike-fanshen-source-audit-20260914-delivery
     notes: Owner supplied target Pine after the Notion candidate was excluded; no live changes.
 
   - experiment_id: exp-spike-fanshen-exit-multitf-20260914-v1
     source_repo: darkforest-x/fable-trading
-    status: running
+    source_commit: 29fe7bfefd5a1f16570f0519fa3bce4ac7ff6f95
+    status: inconclusive
     question: Compare owner-supplied Stoch arrow and WVF-filtered alert exits against frozen V8 across six OKX ETH periods.
+    result: Primary lowers common-window net R on3m5m15m despite higher win rates;4h available15trades improve2.30to10.03R but one trade contributes73.5percent. No adjusted significant superiority; best timeframe unresolved due small samples and reused research history.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_fanshen_exit_multitf_20260914.md
-    notes: Owner supplied target Pine after the Notion candidate was excluded; no live changes.
+    artifacts:
+    - spike-fanshen-exit-multitf-20260914-delivery
+    notes: Nine exits frozen before replay,108rows and216cash ledgers independently reconciled,605result hashes verified. Zero holdout use.3m5m early-exit improvement hypothesis fails;4h remains exploratory. No live changes.
