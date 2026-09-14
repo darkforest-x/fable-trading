@@ -33,7 +33,10 @@ def load_saved(common: Path, native: Path) -> tuple[pd.DataFrame, list[dict]]:
     native_receipt = json.loads((native / "receipt.json").read_text())
     if native_receipt.get("status") != "complete" or int(native_receipt["paired_events"]) != 6185:
         raise ValueError("native replay is not the complete requested scope")
-    for receipt_path in sorted((common / "streams").glob("*/completion.json")):
+    receipts = sorted((common / "streams").glob("*/completion.json"))
+    if len(receipts) != int(manifest["streams"]):
+        raise ValueError("manifest stream count does not match saved receipts")
+    for receipt_path in receipts:
         receipt = json.loads(receipt_path.read_text())
         if receipt.get("status") != "complete":
             raise ValueError(f"unfinished stream {receipt_path}")
@@ -133,7 +136,14 @@ def paired_stats(p: pd.DataFrame) -> dict:
         ix = rng.integers(0, len(blocks), size=(2000, len(blocks)))
         values = blocks["sum"].to_numpy()[ix].sum(axis=1) / blocks["size"].to_numpy()[ix].sum(axis=1)
         interval = np.quantile(values, [.025, .975]).tolist()
-    return dict(joint_closed=len(p), delta_r=float(delta.sum()), mean_delta_r=float(delta.mean()) if len(p) else None,
+    outcome = {}
+    for rule in ("baseline", "be05"):
+        r = p[f"net_r_{rule}"]
+        loss = -r.loc[r < 0].sum()
+        outcome.update({f"{rule}_total_r":float(r.sum()), f"{rule}_mean_r":float(r.mean()) if len(r) else None,
+                        f"{rule}_win_rate":float((r > 0).mean()) if len(r) else None,
+                        f"{rule}_pf_r":float(r.loc[r > 0].sum()/loss) if loss > 0 else None})
+    return dict(**outcome, joint_closed=len(p), delta_r=float(delta.sum()), mean_delta_r=float(delta.mean()) if len(p) else None,
                 rescued_losers=int(improved_loser.sum()), rescue_delta_r=float(delta[improved_loser].sum()),
                 harmed_winners=int(harmed_winner.sum()), harmed_delta_r=float(delta[harmed_winner].sum()),
                 original_realized_ge10=int(original_tail.sum()),
