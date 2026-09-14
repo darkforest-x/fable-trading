@@ -147,7 +147,7 @@ def main():
     parts.append('## 风险与诚实声明\n')
     parts.append('这次是原版成交路径的描述性诊断。盈利单按最终净结果筛选，不能在开仓时识别；所有条件比例只适用于原退出允许的持仓长度，改退出后会改变成交集合。峰值位于已持有的K线，不计退出后的新行情。32赢家峰值无退出根歧义；123笔中仅一笔初始止损单的峰值可能为0—0.356R，不影响≥1R统计。\n')
     parts.append('普通OHLC不能提供每根内的精确高低顺序，订单和保护生效时序须明确建模，不能假定在事后最高点成交。[TradingView策略执行文档](https://www.tradingview.com/pine-script-docs/concepts/strategies/)\n')
-    parts.append('数据截止2026-05-01 UTC之前，holdout消耗0。研究历史此前已看过，不是新盲测。仍是Python原V8＋纽约[02,11)实际下一开盘准入、周末保留；受保护ICT脚本冬季行为和TV原生逐笔对齐仍未完成。没有新方向性实验、预测模型或排名，AUC/top-decile/单特征排序不适用；用原MFE、开仓/退出价格、原4ATR保护位的逐笔重建及已有匹配随机结果提供同等严格的事实对照。费用仅为既定0.2%，没有实盘、训练或promote。\n')
+    parts.append('数据截止2026-05-01 UTC之前，holdout消耗0。研究历史此前已看过，不是新盲测。仍是Python原V8＋纽约[02,11)实际下一开盘准入、周末保留；受保护ICT脚本冬季行为和TV原生逐笔对齐仍未完成。没有新方向性实验、预测模型或排名，AUC/top-decile/单特征排序不适用；用原MFE、开仓/退出价格、原4ATR保护位的逐笔重建及已有匹配随机结果提供同等严格的事实对照。费用仅为既定0.2%，未计资金费率和额外滑点，没有实盘、训练或promote。\n')
     parts.append('## 明细与复现\n')
     delivery=EXP/'delivery';delivery.mkdir(exist_ok=True)
     for window,df in profiles.items():
@@ -158,7 +158,7 @@ def main():
         df=df[['入场北京时间','方向']+list(cols)].rename(columns=cols);f=delivery/f'ETH15m_{window}_winning_peaks.csv';df.to_csv(f,index=False,encoding='utf-8-sig')
         parts.append(f'- [{LABEL[window]}：全部盈利单峰值明细]({URLBASE}delivery/{f.name})\n')
     parts.append(f'- [可运行的数据核对Notebook]({URLBASE}peak_analysis.ipynb)\n')
-    parts.append('生成代码、输入与输出SHA、123条独立路径的核验记录见实验目录。报告图表来自同一profiles和持仓路径导出。运行检查75项通过（4项峰值专项＋71项层间边界），没有把上一轮更广检查的失败说成通过。\n')
+    parts.append('生成代码、输入与输出SHA、123笔独立交易的核验记录见实验目录。其中122条非空路径共有6301根完整持仓bar，另1笔入场根即止损、没有完整持仓bar。报告图表来自同一profiles和持仓路径导出。运行检查75项通过（4项峰值专项＋71项层间边界），没有把上一轮更广检查的失败说成通过。\n')
     parts.append('```bash\ncd /Users/zhangzc/fable-trading\nexport PYTHONPATH=/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages:/Users/zhangzc/fable-trading\n/usr/bin/python3 -m pytest -q tests/test_spike_v8_winner_peaks.py tests/boundaries/test_layer_imports.py\n# builder需先提交；仅在新结果目录不存在时运行，禁止覆盖本轮证据\n/usr/bin/python3 -m yoyo.evaluation.spike_v8_winner_peaks\n/usr/bin/python3 scripts/report_spike_v8_winner_peaks.py\n/usr/bin/python3 scripts/md_to_html.py analysis/p1_spike_v8_ict_winner_peaks_20260915.md --out-dir analysis/html\n```\n')
     REPORT.write_text('\n'.join(parts))
     cells=[{'cell_type':'markdown','metadata':{},'source':['# ETH15m ICT winning-peak evidence\n','Read-only analysis of frozen outputs. No OHLC, holdout, or new exit replay.\n']}]
