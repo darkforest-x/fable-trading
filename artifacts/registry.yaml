@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v9-entry-bundle-20260915-delivery
+    artifact_type: manifest
+    role: owner_selected_v9_implementation_and_synthetic_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: ef4de009d068c30bba33166b52423e53d26d1781
+    source_path: experiments/active/exp-spike-v9-entry-bundle-20260915-v1/delivery_manifest.json
+    sha256: af750a8c55cbd39441edc3e0461b467b37767c3a0567be8580c73144a32b70cd
+    size_bytes: 2436
+    storage_uri: repo://experiments/active/exp-spike-v9-entry-bundle-20260915-v1/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Synthetic 2025 fixtures only; zero real market or holdout reads. 134 checks pass. Manifest pins V9 sources, immutable V8 parent, report and receipt; no new return comparison or TradingView compilation.
   - artifact_id: spike-v8-eth-baseline-stats-20260914-delivery
     artifact_type: manifest
     role: frozen_ledger_descriptive_streak_and_r_distribution

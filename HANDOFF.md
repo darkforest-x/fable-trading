@@ -1,5 +1,10 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
+## 最新：SPIKE V9 三条过滤已实现（2026-09-15）
+
+Owner 明确“不需要对照啊 直接做”“升级为v9”，故合并底层USDC、确认RV>50、UTC周日计划开仓三条排除；继承V8结构与退出，增加确认价风险/成本R说明。134项合成与边界检查通过，源码ef4de009d0；未读真实行情、holdout0次，未运行新收益对照。
+交付：analysis/html/p1_spike_v9_implementation_20260915.html；Pine：yoyo/evaluation/pine/spike_burst_v9.pine；Python：yoyo/evaluation/spike_v9.py。TradingView尚未编译/加载，旧V7/V8 shadow未改名或切换，版本实现不代表盈利或实盘验收。Notion新版本：https://app.notion.com/p/3db8856479af81e1b257dbd9ae09aca3。
+
 ## 最新：ETH3m ICT开仓时段研究已完成（2026-09-14）
 
 按owner当前图表，夏令时北京时间London14–17、午间17–20、纽约20–23；IANA纽约冬季同钟面为未原生验证模型。六组时段、四种既有退出，仅用2023-08至2026-04；本配置holdout消耗0次。

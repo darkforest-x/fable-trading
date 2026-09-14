@@ -14,6 +14,19 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-v9-entry-bundle-20260915-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: ef4de009d068c30bba33166b52423e53d26d1781
+    status: inconclusive
+    question: Implement the owner-selected V9 entry bundle without a new performance comparison.
+    single_variable: Owner explicitly authorized the combined USDC-base, RV>50 and UTC-Sunday scheduled-open exclusions and version V9; informational reference-risk diagnostics only.
+    result: V9 Pine and Python adapter delivered; 134 synthetic and boundary checks pass. Profitability was not evaluated. No historical market data read or monitor switch; TradingView compilation not performed.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v9_implementation_20260915.md
+    artifacts: [spike-v9-entry-bundle-20260915-delivery]
+    notes: Source committed before delivery report. Parent engines and raw reversal feed preserved; scheduled-clock admission remains causal and missing bars cancel pending fills. Unknown base/RV/clock block entry. Inconclusive describes financial evidence, not implementation completion. Notion version linked to V8.
   - experiment_id: exp-spike-v8-eth-baseline-stats-20260914-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 49e41d0fa5

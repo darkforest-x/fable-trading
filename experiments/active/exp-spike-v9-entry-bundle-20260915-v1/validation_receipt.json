@@ -1,0 +1,23 @@
+{
+  "version": "spike-v9-entry-bundle-20260915-v1",
+  "source_commit": "ef4de009d068c30bba33166b52423e53d26d1781",
+  "recorded_at": "2026-09-14T18:41:52.211955+00:00",
+  "input_type": "synthetic_2025_40bar_1h_sequences_and_boundary_variants",
+  "market_data_read": false,
+  "holdout_consumptions": 0,
+  "pytest": {
+    "command": "python3 -m pytest -q tests/evaluation/test_spike_v9.py tests/evaluation/test_spike_v8_replay.py tests/boundaries/test_layer_imports.py tests/boundaries/test_yoyo_package_is_local.py tests/boundaries/test_experiment_isolation.py tests/causality/test_holdout_boundary_is_single_valued.py",
+    "passed": 134,
+    "failed": 0,
+    "elapsed_seconds": 57.38,
+    "source": "exec session 46867 terminal completion",
+    "earlier_failure": "One new metamorphic test compared whole-index pandas freq after a future gap; check_freq disabled only for that test, all timestamps and business values still compared."
+  },
+  "pine_validation": "source invariants and official API review only; TradingView compilation not run",
+  "deployment": "local source release; no monitor, chart, alert or execution switch",
+  "notion": {
+    "url": "https://app.notion.com/p/3db8856479af81e1b257dbd9ae09aca3",
+    "unique_key": "spike-v9-entry-bundle-20260915-v1",
+    "verified": true
+  }
+}
