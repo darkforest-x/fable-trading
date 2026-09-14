@@ -65,6 +65,28 @@ def wide_trades(cohort):
     return out.reset_index()
 
 
+def exit_attribution(cohort):
+    """Decompose paired improvement without ignoring the hurt original winners."""
+    result = read_outcomes(cohort)
+    base = result.loc[result.arm.eq('baseline') & ~result.censored, ['event_id','net_r']].rename(columns={'net_r':'baseline_net_r'})
+    joined = result.loc[~result.censored].merge(base, on='event_id', validate='many_to_one')
+    rows = []
+    for arm in ['adverse65','be05','lock50','triple']:
+        f = joined.loc[joined.arm.eq(arm)].copy()
+        f['delta'] = f.net_r - f.baseline_net_r
+        extra = result.loc[result.arm.eq(arm) & ~result.censored & ~result.event_id.isin(base.event_id)]
+        rows.append(dict(arm=arm, paired_trades=len(f),
+                         prior_losers_delta_r=f.loc[f.baseline_net_r.le(0),'delta'].sum(),
+                         prior_winners_delta_r=f.loc[f.baseline_net_r.gt(0),'delta'].sum(),
+                         paired_delta_r=f.delta.sum(),
+                         winner_to_nonwinner=int((f.baseline_net_r.gt(0)&f.net_r.le(0)).sum()),
+                         loss_to_winner=int((f.baseline_net_r.le(0)&f.net_r.gt(0)).sum()),
+                         newly_closed_trades=len(extra), newly_closed_net_r=extra.net_r.sum()))
+    frame = pd.DataFrame(rows)
+    frame.to_csv(EXP / 'results' / f'{cohort}_exit_attribution.csv', index=False)
+    return frame
+
+
 def sheet_spec(name, title, frame, subtitle='', columns=None):
     if columns is not None:
         frame = frame[[c for c in columns if c in frame]].copy()
@@ -109,6 +131,7 @@ def build():
     baseline = original_rows.get('baseline', {})
     triple = original_rows.get('triple', {})
     delta = triple.get('sum_net_r', np.nan) - baseline.get('sum_net_r', np.nan)
+    attribution = exit_attribution('original6253')
     report = [
         '# SPIKE V1 三规则组合退出：逐根回放',
         '',
@@ -119,6 +142,11 @@ def build():
         table(original_main, ['arm']),
         '',
         '### 去RAVE敏感性', table(ex, ['cohort', 'event_scope', 'arm']),
+        '',
+        '### 为什么近似改善不能兑现',
+        '下表固定在原版已平仓的同一组事件，分开计算对原亏损单的帮助与对原盈利单的损害。额外平掉的原版未完成交易单列，不能把分母变化当成同样本改善。',
+        human(attribution).to_markdown(index=False, floatfmt='.2f'),
+        '保本或提前减损不会只作用于最终输家。它们也会扫掉曾经回踩、随后走出趋势的赢家。组合各规则共享同一路径，三个单规则改善不能相加。用户XLSX公式尚未取得，不能断言它具体漏了哪一项；此表给出精确回放中实际发生的两面影响。',
         '',
         '## 2. 固定前20流动性三年检验',
         '先按2023年8月真实USDT成交额选池，再观察2023年9月至2026年8月。不会按今天涨幅排行倒选历史。主表按底层标的×UTC入场日只保留最早可执行一笔，过滤后不补选当天其他信号。',
@@ -181,6 +209,7 @@ def build():
              sheet_spec('时间分区', '开发期与时序测试期', period, '固定阈值；历史已暴露，不能称为新盲测', fields),
              sheet_spec('分周期', '15m 1H 4H与原队列周期', timeframe, '旧队列和独立前20池分开比较', ['cohort','event_scope','timeframe_min','arm']+TABLE_FIELDS),
              sheet_spec('单规则消融', '单规则与组合的差别', summary.loc[summary.group_type.eq('primary')], '不能把单规则改善值相加', fields)]
+    specs.append(sheet_spec('改善拆解','救回亏损与截断盈利', attribution, '同一组原版已平仓交易；新增平仓另列'))
     for group, name, title in [('month', '逐月', '固定规则逐月表现'), ('symbol', '标的明细', '逐标的已平仓结果')]:
         part = summary.loc[summary.group_type.eq(group) & summary.event_scope.eq('dedup') & summary.asset_scope.eq('all') & summary.arm.isin(MAIN)]
         specs.append(sheet_spec(name, title, part, '去重后的事件；不依据此榜单反选历史', ['cohort','period','symbol','timeframe_min','arm']+TABLE_FIELDS))
