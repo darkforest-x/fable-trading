@@ -332,7 +332,8 @@ def freeze_top20(*, output_dir: Path, cache_dir: Path) -> dict[str, Any]:
     tick_sources: dict[str, dict[str, Any]] = {}
     for row in rows:
         symbol = row["symbol"]
-        if row.get("tick_size") not in {None, "", "nan"}:
+        tick_size = row.get("tick_size")
+        if isinstance(tick_size, str) and tick_size.strip():
             continue
         record = OFFICIAL_TICK_RECORDS.get(symbol)
         if record is None:
