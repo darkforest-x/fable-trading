@@ -14,6 +14,8 @@ from typing import Iterable
 import numpy as np
 import pandas as pd
 
+from yoyo.evaluation.spike_market_breadth_study import canonical_asset
+
 ROOT = Path(__file__).resolve().parents[2]
 EXP = ROOT / "experiments/active/exp-spike-v1-triple-exit-20260914-v1"
 PRIMARY_ARMS = ("baseline", "triple", "filtered_triple")
@@ -56,6 +58,65 @@ def normalize_outcomes(frame: pd.DataFrame) -> pd.DataFrame:
         if column in out:
             out[column] = pd.to_numeric(out[column], errors="coerce")
     return out
+
+
+def identity_dedup_projection(outcomes: pd.DataFrame) -> pd.DataFrame:
+    """Project canonical asset identity and causal same-day deduplication.
+
+    The source runner's literal ticker identity can treat exchange denomination
+    wrappers (``1000PEPE`` versus ``PEPE``) as different assets.  This is a
+    read-time metadata projection only: it is derived once from the native
+    baseline event, before any arm return is inspected, and never changes the
+    persisted ledger.  The protocol chooses the earliest executable event per
+    canonical asset and UTC entry day; exact-time ties prefer larger timeframe,
+    then Binance, OKX, Gate, and finally event ID.
+    """
+    baseline = outcomes.loc[outcomes.arm.eq("baseline")].copy()
+    if baseline.empty:
+        raise ValueError("native outcomes require one baseline row per event for identity deduplication")
+    identity = baseline.loc[:, ["event_id", "entry_time", "entry_day", "timeframe_min", "venue", "base_asset", "dedup_keep"]].copy()
+    if identity.event_id.duplicated().any():
+        raise ValueError("native baseline event_id is not unique for identity deduplication")
+    identity["entry_day"] = identity.entry_time.dt.strftime("%Y-%m-%d")
+    identity = identity.rename(columns={"base_asset": "original_base_asset", "dedup_keep": "original_dedup_keep"})
+    identity["base_asset"] = identity.original_base_asset.map(canonical_asset)
+    venue_rank = {"binance": 0, "okx": 1, "gate": 2}
+    identity["_venue_rank"] = identity.venue.astype(str).str.lower().map(venue_rank).fillna(len(venue_rank)).astype(int)
+    identity = identity.sort_values(
+        ["base_asset", "entry_day", "entry_time", "timeframe_min", "_venue_rank", "event_id"],
+        ascending=[True, True, True, False, True, True], kind="mergesort")
+    identity["dedup_keep"] = ~identity.duplicated(["base_asset", "entry_day"], keep="first")
+    return identity.loc[:, ["event_id", "original_base_asset", "base_asset", "dedup_keep", "original_dedup_keep"]].sort_values("event_id", kind="mergesort").reset_index(drop=True)
+
+
+def apply_identity_dedup(outcomes: pd.DataFrame, controls: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Attach the native identity projection to all arms and matched controls.
+
+    Controls inherit their parent's canonical asset and dedup decision.  Their
+    random entry time is deliberately absent from this selection path.
+    """
+    identity = identity_dedup_projection(outcomes)
+    native = outcomes.copy()
+    native["original_base_asset"] = native.base_asset
+    native["original_dedup_keep"] = native.dedup_keep
+    native = native.drop(columns=["base_asset", "dedup_keep"]).merge(
+        identity[["event_id", "base_asset", "dedup_keep"]], how="left", on="event_id", validate="many_to_one")
+    if native.base_asset.isna().any():
+        raise ValueError("native arm is missing its baseline identity projection")
+    if controls.empty:
+        return native, controls.copy(), identity
+    if "parent_event_id" not in controls:
+        raise ValueError("controls require parent_event_id for native identity deduplication")
+    control = controls.copy()
+    control["original_base_asset"] = control.base_asset
+    control["original_dedup_keep"] = control.dedup_keep
+    control = control.drop(columns=["base_asset", "dedup_keep"]).merge(
+        identity[["event_id", "base_asset", "dedup_keep"]].rename(columns={"event_id": "parent_event_id"}),
+        how="left", on="parent_event_id", validate="many_to_one")
+    if control.base_asset.isna().any():
+        missing = int(control.base_asset.isna().sum())
+        raise ValueError(f"{missing} controls have no native parent identity projection")
+    return native, control, identity
 
 
 def select_scope(frame: pd.DataFrame, *, dedup: bool, ex_rave: bool) -> pd.DataFrame:
@@ -257,6 +318,43 @@ def baseline_opportunity_capture(frame: pd.DataFrame) -> tuple[pd.DataFrame, pd.
     return paired, summary
 
 
+def paired_baseline_triple_delta(frame: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Reconcile triple's closed-R change against the same baseline event.
+
+    The paired delta deliberately uses only events closed in *both* arms.  It
+    separately reports triple-only and baseline-only closes, so an arm closing
+    a baseline-censored event cannot be presented as an exit-rule improvement.
+    """
+    columns = ["event_id", "base_asset", "entry_day", "baseline_net_r", "triple_net_r", "delta_net_r", "closure_case"]
+    baseline = frame.loc[frame.arm.eq("baseline"), ["event_id", "base_asset", "entry_day", "censored", "net_r"]].rename(
+        columns={"censored": "baseline_censored", "net_r": "baseline_net_r"})
+    triple = frame.loc[frame.arm.eq("triple"), ["event_id", "base_asset", "entry_day", "censored", "net_r"]].rename(
+        columns={"censored": "triple_censored", "net_r": "triple_net_r"})
+    paired = baseline.merge(triple.drop(columns=["base_asset", "entry_day"]), how="outer", on="event_id", validate="one_to_one")
+    if paired.empty:
+        return _empty(columns), _empty(("asset_scope", "both_closed_events", "both_closed_baseline_net_r", "both_closed_triple_net_r", "both_closed_delta_net_r", "both_closed_delta_mean_net_r", "triple_only_closed_events", "triple_only_closed_net_r", "baseline_only_closed_events", "baseline_only_closed_net_r", "observed_total_delta_net_r", "reconciled_total_delta_net_r", "reconciliation_difference_net_r"))
+    base_closed = ~paired.baseline_censored.fillna(True) & np.isfinite(paired.baseline_net_r)
+    triple_closed = ~paired.triple_censored.fillna(True) & np.isfinite(paired.triple_net_r)
+    paired["closure_case"] = np.select([base_closed & triple_closed, ~base_closed & triple_closed, base_closed & ~triple_closed], ["both_closed", "triple_only_closed", "baseline_only_closed"], default="neither_closed")
+    paired["delta_net_r"] = paired.triple_net_r - paired.baseline_net_r
+    events = paired.loc[:, columns]
+    rows = []
+    for asset_scope, scoped in (("all", paired), ("ex_rave", paired.loc[~paired.base_asset.eq("RAVE")])):
+        both = scoped.loc[scoped.closure_case.eq("both_closed")]
+        triple_only = scoped.loc[scoped.closure_case.eq("triple_only_closed")]
+        baseline_only = scoped.loc[scoped.closure_case.eq("baseline_only_closed")]
+        observed = float(closed(frame.loc[frame.arm.eq("triple") & (frame.event_id.isin(scoped.event_id))]).net_r.sum()) - float(closed(frame.loc[frame.arm.eq("baseline") & (frame.event_id.isin(scoped.event_id))]).net_r.sum())
+        reconciled = float(both.delta_net_r.sum()) + float(triple_only.triple_net_r.sum()) - float(baseline_only.baseline_net_r.sum())
+        rows.append({"asset_scope": asset_scope, "both_closed_events": int(len(both)),
+                     "both_closed_baseline_net_r": float(both.baseline_net_r.sum()), "both_closed_triple_net_r": float(both.triple_net_r.sum()),
+                     "both_closed_delta_net_r": float(both.delta_net_r.sum()), "both_closed_delta_mean_net_r": float(both.delta_net_r.mean()) if len(both) else np.nan,
+                     "triple_only_closed_events": int(len(triple_only)), "triple_only_closed_net_r": float(triple_only.triple_net_r.sum()),
+                     "baseline_only_closed_events": int(len(baseline_only)), "baseline_only_closed_net_r": float(baseline_only.baseline_net_r.sum()),
+                     "observed_total_delta_net_r": observed, "reconciled_total_delta_net_r": reconciled,
+                     "reconciliation_difference_net_r": observed - reconciled})
+    return events, pd.DataFrame(rows)
+
+
 def _write_csv(path: Path, frame: pd.DataFrame) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     frame.to_csv(path, index=False)
@@ -294,6 +392,8 @@ def build(results: Path = EXP / "results") -> dict[str, object]:
         if outcomes.empty:
             receipt["cohorts"][cohort] = {"status": "no_stream_outcomes"}
             continue
+        outcomes, controls, identity = apply_identity_dedup(outcomes, controls)
+        _write_csv(output / f"{cohort}_identity_dedup.csv", identity)
         outcomes, controls = time_labels(outcomes), time_labels(controls) if not controls.empty else controls
         primary_frames, matching_frames, paired_frames, grouped_outputs = [], [], [], {"diagnostic_arms": [], "period": [], "month": [], "year": [], "timeframe_min": [], "venue": [], "symbol": []}
         for scope, scoped, scoped_controls in (
@@ -333,6 +433,13 @@ def build(results: Path = EXP / "results") -> dict[str, object]:
         capture_events, capture_summary = baseline_opportunity_capture(outcomes)
         _write_csv(output / f"{cohort}_baseline_opportunity_capture_events.csv", capture_events)
         _write_csv(output / f"{cohort}_baseline_opportunity_capture_summary.csv", capture_summary)
+        delta_events, delta_summary = [], []
+        for scope, scoped in (("raw", outcomes), ("dedup", select_scope(outcomes, dedup=True, ex_rave=False))):
+            events, summary = paired_baseline_triple_delta(scoped)
+            delta_events.append(events.assign(event_scope=scope))
+            delta_summary.append(summary.assign(event_scope=scope))
+        _write_csv(output / f"{cohort}_baseline_triple_closed_delta_events.csv", pd.concat(delta_events, ignore_index=True))
+        _write_csv(output / f"{cohort}_baseline_triple_closed_delta_summary.csv", pd.concat(delta_summary, ignore_index=True))
         receipt["cohorts"][cohort] = {"status": "complete", "outcome_rows": int(len(outcomes)), "control_rows": int(len(controls)), "matched_rows": int(len(paired_all))}
     _write_csv(output / "summary.csv", pd.concat(summary_frames, ignore_index=True) if summary_frames else _empty(SUMMARY_COLUMNS))
     (output / "receipt.json").write_text(json.dumps(receipt, indent=2, default=str) + "\n")

@@ -29,6 +29,32 @@ def test_raw_and_dedup_scopes_do_not_replace_an_early_filtered_duplicate() -> No
     assert stats.arm_metrics(dedup)["sum_net_r"] == pytest.approx(1.)
 
 
+def test_identity_dedup_canonicalizes_denomination_wrappers_and_controls_inherit_parent() -> None:
+    first = _rows([1.], arm="baseline", base="1000PEPE").assign(
+        event_id="pepe_4h", entry_time=pd.Timestamp("2025-10-01T00:00:00Z"),
+        entry_day="2025-10-01", timeframe_min=240, venue="binance", dedup_keep=True)
+    # A later arm of the same native event must receive the baseline's choice.
+    first_arm = first.assign(arm="triple")
+    second = _rows([2.], arm="baseline", base="PEPE").assign(
+        event_id="pepe_15m", entry_time=pd.Timestamp("2025-10-01T00:00:00Z"),
+        entry_day="2025-10-01", timeframe_min=15, venue="okx", dedup_keep=True)
+    inch = _rows([3.], arm="baseline", base="1INCH").assign(
+        event_id="oneinch", entry_time=pd.Timestamp("2025-10-01T00:00:00Z"),
+        entry_day="2025-10-01", timeframe_min=60, venue="gate", dedup_keep=True)
+    outcomes = stats.normalize_outcomes(pd.concat([first, first_arm, second, inch], ignore_index=True))
+    random_control = _rows([0.], arm="baseline", base="OTHER").assign(
+        event_id="control_loser", parent_event_id="pepe_15m", entry_time=pd.Timestamp("2025-10-03T00:00:00Z"),
+        entry_day="2025-10-03", dedup_keep=True)
+    native, controls, identity = stats.apply_identity_dedup(outcomes, stats.normalize_outcomes(random_control))
+    by_event = identity.set_index("event_id")
+    assert list(identity.columns) == ["event_id", "original_base_asset", "base_asset", "dedup_keep", "original_dedup_keep"]
+    assert (by_event.loc["pepe_4h", "base_asset"], by_event.loc["pepe_4h", "dedup_keep"]) == ("PEPE", True)
+    assert (by_event.loc["pepe_15m", "base_asset"], by_event.loc["pepe_15m", "dedup_keep"]) == ("PEPE", False)
+    assert (by_event.loc["oneinch", "base_asset"], by_event.loc["oneinch", "dedup_keep"]) == ("1INCH", True)
+    assert native.loc[native.event_id.eq("pepe_4h") & native.arm.eq("triple"), "dedup_keep"].item()
+    assert (controls.iloc[0].base_asset, controls.iloc[0].dedup_keep) == ("PEPE", False)
+
+
 def test_matched_excess_collapses_twenty_controls_to_one_parent_observation() -> None:
     native = _rows([3.]).assign(event_id="parent")
     controls = pd.concat([_rows([1.]).assign(event_id=f"c{i}", parent_event_id="parent") for i in range(20)], ignore_index=True)
@@ -79,6 +105,18 @@ def test_opportunity_capture_uses_baseline_mfe_not_candidate_truncated_mfe() -> 
     events, summary = stats.baseline_opportunity_capture(pd.concat([baseline, triple], ignore_index=True))
     assert events.iloc[0].baseline_opportunity_capture == pytest.approx(.25)
     assert summary.iloc[0].baseline_mfe_bucket == "gt2_to_10"
+
+
+def test_paired_baseline_triple_delta_separates_newly_closed_events() -> None:
+    baseline = pd.concat([_rows([1.], arm="baseline").assign(event_id="both"),
+                          _rows([np.nan], arm="baseline", censored=[True]).assign(event_id="baseline_censored")], ignore_index=True)
+    triple = pd.concat([_rows([3.], arm="triple").assign(event_id="both"),
+                        _rows([2.], arm="triple").assign(event_id="baseline_censored")], ignore_index=True)
+    events, summary = stats.paired_baseline_triple_delta(pd.concat([baseline, triple], ignore_index=True))
+    all_scope = summary.loc[summary.asset_scope.eq("all")].iloc[0]
+    assert set(events.closure_case) == {"both_closed", "triple_only_closed"}
+    assert (all_scope.both_closed_delta_net_r, all_scope.triple_only_closed_net_r, all_scope.observed_total_delta_net_r) == (pytest.approx(2.), pytest.approx(2.), pytest.approx(4.))
+    assert all_scope.reconciliation_difference_net_r == pytest.approx(0.)
 
 
 def test_build_writes_compact_summary_from_synthetic_stream_ledgers(tmp_path) -> None:
