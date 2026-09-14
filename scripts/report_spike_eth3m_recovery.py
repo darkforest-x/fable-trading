@@ -58,6 +58,8 @@ Owner本轮明确授权“参数什么的，自己去优化”，已在PROJECT_P
 
 Builder提交411c851d9d早于开发运行；冻结提交2d27ce8ec6早于后续评估。选择文件绑定输入上下文、开发CSV、配置、三个builder及搜索表SHA。无新增TP/保护的引擎以744笔、10个字段逐笔重现旧开发串行基线。36项合成测试通过；36个账户窗口的现金、周期、候选数量与连亏独立重算一致。
 
+最终独立证据复核发现加码第一有两个JSON表示哈希：搜索ID为065185f5db64，冻结诊断ID为62ee4a3e50a6，区别是TP整数2与浮点2.0的序列化，数值参数全部一致；identity_reconciliation.json保存映射及逐字段相等证明。不改写冻结选择或重选策略。
+
 ## 冻结的V8与退出方式
 
 V8准入仍是原始V6事件＋V7此前压缩门＋同向绳索距离≤3ATR，确认后下一根开盘入场。初始止损保留5bar结构、0.2ATR缓冲、2ATR下限、tick0.01；原始V6反向信号下一开盘退出；原2R收盘启动4ATR跟踪保留。
@@ -140,6 +142,8 @@ V8准入仍是原始V6事件＋V7此前压缩门＋同向绳索距离≤3ATR，�
 # builder/config已提交411c851d9d
 .venv/bin/python -m yoyo.evaluation.spike_eth3m_recovery_study develop
 # 按PROJECT_PLAN冻结补充best_escalation，提交2d27ce8ec6
+# 复现时恢复同一已提交冻结件（开发重建的search SHA须与之匹配）：
+git show 2d27ce8ec6:experiments/active/exp-spike-eth3m-recovery-20260914-v2/results/selection.json > experiments/active/exp-spike-eth3m-recovery-20260914-v2/results/selection.json
 .venv/bin/python -m yoyo.evaluation.spike_eth3m_recovery_study evaluate
 # audit/control builder已提交edf53d29fe
 .venv/bin/python -m yoyo.evaluation.spike_eth3m_recovery_report
