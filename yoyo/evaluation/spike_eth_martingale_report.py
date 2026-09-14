@@ -170,7 +170,11 @@ def _accepted_natural(directory: Path, stream: str, period: str, arm: str) -> pd
     merged = merged.loc[~censored].copy()
     merged["notional"] = pd.to_numeric(merged["notional"], errors="coerce")
     merged["initial_risk_frac"] = pd.to_numeric(merged.get("initial_risk_frac"), errors="coerce")
-    merged["risk_dollars"] = merged["notional"] * merged["initial_risk_frac"]
+    derived_risk = merged["notional"] * merged["initial_risk_frac"]
+    # Exact requested dollars avoid floating-point tie breaks turning a fixed
+    # risk baseline into an invented ranking of "higher risk" observations.
+    merged["risk_dollars"] = (pd.to_numeric(merged["planned_risk"], errors="coerce")
+                              if "planned_risk" in merged else derived_risk)
     merged["gross_pnl"] = merged["notional"] * pd.to_numeric(merged.get("gross_return"), errors="coerce")
     merged["net_pnl"] = merged["notional"] * pd.to_numeric(merged.get("net_return"), errors="coerce")
     return merged.dropna(subset=["risk_dollars", "notional"])
@@ -313,7 +317,7 @@ def _answer_first(search: pd.DataFrame, pre: pd.DataFrame, holdout: pd.DataFrame
     parts = [
         "## 先看结论",
         "",
-        f"开发搜索共比较 {len(search)} 次，涉及 {unique_policies} 个唯一仓位配置；候选期末余额最高 {_fmt(final_balances.max())}U。所有开发候选期末余额是否低于 1000U：{'是' if all_development_below else '否'}。",
+        f"开发搜索共比较 {len(search)} 次，涉及 {len(search[['stream']+policy_fields].drop_duplicates())} 个周期×参数组合（去掉周期后为 {unique_policies} 组不同参数）；候选期末余额最高 {_fmt(final_balances.max())}U。所有开发候选期末余额是否低于 1000U：{'是' if all_development_below else '否'}。",
     ]
     if validation.empty:
         parts.append("复用验证的倍投结果尚未生成。")
@@ -344,7 +348,8 @@ def _answer_first(search: pd.DataFrame, pre: pd.DataFrame, holdout: pd.DataFrame
                     fixed_note = f"；同窗 fixed 期末 {_fmt(fixed_row.final_balance)}U，更高"
                 else:
                     fixed_note = f"；同窗 fixed 期末 {_fmt(fixed_row.final_balance)}U，未更高"
-            parts.append(f"反例边界：{row.stream} 在 2026年1–4月 preholdout 单窗 martingale 利润 {_fmt(row.profit)}U{fixed_note}；它不能推翻连续账户与其他窗口的结论。")
+            level_note = ("；实际最高执行层级为0，该盈利窗口没有执行翻倍" if int(row.max_executed_level)==0 else "")
+            parts.append(f"反例边界：{row.stream} 在 2026年1–4月 preholdout 单窗 martingale 利润 {_fmt(row.profit)}U{fixed_note}{level_note}；它不能推翻连续账户与其他窗口的结论。")
     if holdout is not None:
         rows = holdout.loc[holdout.arm == "martingale"]
         details = "；".join(
@@ -434,7 +439,7 @@ def _build_report(pre: pd.DataFrame, holdout: pd.DataFrame | None, selection: di
         "",
         "## 最高实际风险 10% 的交易描述",
         "",
-        "仅将账户账本中 accepted 且非 censored 的交易与 opportunities 合并；按实际 risk_dollars=notional×initial_risk_frac 排序，取最高 10%。这描述仓位分配，并非训练排序或 alpha 证明。",
+        "仅将账户账本中 accepted 且非 censored 的交易与 opportunities 合并；按实际 risk_dollars=notional×initial_risk_frac 排序，取最高 10%。这描述仓位分配，并非训练排序或 alpha 证明。风险金额并列时按 trade_id 稳定取样；固定风险基线的最高10%只是一组并列样本，没有风险排序含义。",
         "",
     ]
     risk_rows = []
@@ -461,7 +466,7 @@ def _build_report(pre: pd.DataFrame, holdout: pd.DataFrame | None, selection: di
         "",
         "## 复现与 holdout 纪律",
         "",
-        "```bash\n# 先确认 builder、内核、测试和计划已提交；prepare 输出不可覆盖\n.venv/bin/python yoyo/evaluation/spike_eth_martingale_study.py prepare --phase pre\n.venv/bin/python yoyo/evaluation/spike_eth_martingale_study.py select\ngit add experiments/active/exp-spike-eth-martingale-20260914-v1/selection.json experiments/active/exp-spike-eth-martingale-20260914-v1/results/pre/development_search.csv\ngit commit -m 'Freeze ETH martingale development selection'\n.venv/bin/python yoyo/evaluation/spike_eth_martingale_study.py evaluate --phase pre\n# 仅在 Owner 已授权的冻结配置上执行一次；如需重跑，创建新版本并记录新的曝光，绝不直接重复 holdout\n.venv/bin/python yoyo/evaluation/spike_eth_martingale_study.py prepare --phase holdout\n.venv/bin/python yoyo/evaluation/spike_eth_martingale_study.py evaluate --phase holdout\n.venv/bin/python yoyo/evaluation/spike_eth_martingale_report.py\n```",
+        "```bash\n# 先确认 builder、内核、测试和计划已提交；prepare 输出不可覆盖\n.venv/bin/python -m yoyo.evaluation.spike_eth_martingale_study prepare --phase pre\n.venv/bin/python -m yoyo.evaluation.spike_eth_martingale_study select\ngit add experiments/active/exp-spike-eth-martingale-20260914-v1/selection.json experiments/active/exp-spike-eth-martingale-20260914-v1/results/pre/development_search.csv\ngit branch --show-current  # 必须为 main\ngit commit -m 'Freeze ETH martingale development selection'\n.venv/bin/python -m yoyo.evaluation.spike_eth_martingale_study evaluate --phase pre\n# 仅在 Owner 已授权的冻结配置上执行一次；如需重跑，创建新版本并记录新的曝光，绝不直接重复 holdout\n.venv/bin/python -m yoyo.evaluation.spike_eth_martingale_study prepare --phase holdout\n.venv/bin/python -m yoyo.evaluation.spike_eth_martingale_study evaluate --phase holdout\n.venv/bin/python -m yoyo.evaluation.spike_eth_martingale_report\n```",
         "",
     ]
     return "\n".join(parts)
