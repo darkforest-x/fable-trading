@@ -30970,3 +30970,17 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Descriptive audit of123trades,32winners,122nonempty paths and6301held bars. Winner peaks verified without exit-bar ambiguity;75tests pass. No new exit return evaluation or holdout.
+
+  - artifact_id: spike-v8-ict-net2r-owner-choice-20260915
+    artifact_type: manifest
+    role: owner_selected_followup_research_policy
+    source_repo: darkforest-x/fable-trading
+    source_commit: 67c20183c0c71ae606461dff8eb91b7afc26da3b
+    source_path: experiments/active/exp-spike-v8-ict-exits-20260915-v1/owner_research_choice.json
+    sha256: 3ac97bcb3c6373e8abec230d9714277d90c55bb398f500436487cc485620cd55
+    size_bytes: 2558
+    storage_uri: repo://experiments/active/exp-spike-v8-ict-exits-20260915-v1/owner_research_choice.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Existing cost_be2 selected by owner after results; original development fixed3r selection retained. No new replay or price reads;45existing focused checks passed. ETH15m ICT only,not a TradingView script update.
