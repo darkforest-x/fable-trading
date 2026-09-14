@@ -14,6 +14,19 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-v8-six-filters-20260914-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 345f3d5f27
+    status: active
+    question: Do six source observations from V1 transfer to frozen V8 after causal definition and separate serial replay?
+    single_variable: Independent admission or opening-quote gates;source-corrected joint overheat and timezone sensitivities are separate arms. Holding duration is only attribution plus a separate causal4h failure exit.
+    result: Preregistered; no new policy performance yet.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v8_six_filters_20260914.md
+    artifacts: []
+    notes: Owner permits all historical dates. Fixed gates on reused nonblind3531-stream30m1H4H pool; no stacked selection or live changes.
   - experiment_id: exp-spike-v1-v8-tier-lock-20260914-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 87511611b6c395dca35526bcd8a1194680d38d9f
