@@ -51,8 +51,8 @@ def figures(profiles,paths):
     for ax,r in zip(axes.flat,chosen.itertuples()):
         t=paths.loc[paths.signal_i==r.signal_i];h=t.minutes_from_entry/60
         ax.fill_between(h,t.adverse_r,t.favorable_r,color='#dce4f0',alpha=.8,label='Fully held bar range')
-        ax.plot(h,t.close_r,color='#356aaa',lw=1.2,label='Closed-bar profit')
-        ax.plot(h,t.peak_so_far_r,color='#a99b80',lw=1,ls='--',label='Peak observed so far')
+        ax.plot(h+.25,t.close_r,color='#356aaa',lw=1.2,label='Closed-bar profit')
+        ax.plot(h+.25,t.peak_so_far_r,color='#a99b80',lw=1,ls='--',label='Peak observed by close')
         # Shift next-bar protection by one bar so the visual shows activation.
         active=t.protection_next_bar_r.shift(fill_value=-1.)
         ax.step(h,active,color='#ac5347',lw=1.2,where='post',label='Protection active this bar')
@@ -125,8 +125,14 @@ def main():
     parts.append('35.59R大赢家峰值附近4ATR相当于9.41R，16.36R赢家相当于5.46R；这解释了为何会允许较大回吐。4月17日峰值5.85R，峰值根收盘5.50R、4ATR约3.21R，保护只到2.30R左右。这里有测试另一种锁盈方式的理由，但ATR较宽也帮助前两笔熬过了途中回撤，不能只看最终一段。\n')
     parts.append('## 止盈优化应该怎样落到下一轮实验\n')
     parts.append('1. **保留早期含费保护作为单独对照。** 原版收盘2R激活与“盘中触及净2R、收盘确认后下一根保本”分开评估。上一轮净2R保护在2026前4月从22.74R改善到24.68R，但连续历史从−9.84R变成−10.92R，仍不能直接定为新默认。\n')
-    parts.append('2. **优先验证较晚启动的峰值比例保护。** 一个明确待测规则是：最高收盘毛浮盈达到4R后，止损只向有利方向移动，至少保留最高收盘毛浮盈的50%，下一根生效；继续保留原4ATR止损，二者取更紧位置，原反向退出也保留。随后单变量比较保留比例40%/50%/60%，不要同时加入分批或提前保本。4R来自本轮观察到的分布分界，不是已经验证的最优阈值；50%也只是可复核起点。\n')
-    parts.append('3. **分批优先研究更晚、更小的兑现，而不是直接2R砍半。** 可另设一组“毛5R兑现25%、剩余75%保持原规则”与原版比较；5R只有14笔触达，必须如实报告样本少。不要与上条叠加后直接报一个收益，避免分不清谁起作用。上一轮2R兑现25%/50%已降低近期和连续净收益。\n')
+    parts.append('2. **晚启动的峰值比例保护值得研究，但早启动也会误伤。** 2月4日的大赢家曾有最高收盘5.019R，之后在北京时间2月5日02:30那根完整持仓K线，不利价到1.861R；若此时要求至少留住一半收盘峰值，下限2.510R已经高于该不利价，会在16.36R最终峰值前遇到止损。因此不能直接把“4R以后锁50%”当答案。一个更晚的待测样例是：最高收盘毛浮盈到8R后，至少保留其70%，下一根生效，与原4ATR保护取更紧且只向有利方向移动；独立比较保留比例60%/70%/80%，不同时加分批或保本。**当前历史只有3笔最高收盘达到8R，这个样例尚未回测，也没有足够样本支持定参数。**\n')
+    rows=[]
+    for level in [2,3,4,5,6,8,10]:
+        sub=allp.loc[allp.peak_known_gross_r>=level]
+        rows.append([level,len(sub),fmt(sub.gross_r.mean()),fmt(sub.net_r.mean())])
+    parts.append('3. **先用到达目标后的平均兑现筛查分批想法。** 下面这些触达组，原版最终平均毛R都高于触达R；把部分仓位统一在该R兑现，并没有直接的平均收益优势。这里只是原持仓路径的诊断，不能替代限价、跳空与完整账户回放。\n')
+    parts.append(table(['已触达毛R','交易数','原最终平均毛R','原最终平均净R'],rows))
+    parts.append('例如到5R的14笔最终平均净5.59R、毛收益更高。因此本轮不优先把“5R兑现25%”当提高总收益的方案；若目标改为降低回撤，可以另行比较，但需同时接受可能少赚。上一轮2R兑现25%/50%已经降低近期和连续净收益。\n')
     parts.append('下一轮必须重新走完整串行入场与同入场配对，同时报告：每笔救回多少亏损、哪几笔大赢家被提前截断、完整净收益、回撤和倍投账户。开发/后续年份分开，不能用本轮已观察到的峰值事后挑最优参数；本轮没有运行以上新机制，也没有把峰值金额当成假设可获得的收益。\n')
     parts.append('## 前一轮退出实测与随机对照\n')
     previous=ROOT/'experiments/active/exp-spike-v8-ict-exits-20260915-v1/results/evaluate/summary.csv'
