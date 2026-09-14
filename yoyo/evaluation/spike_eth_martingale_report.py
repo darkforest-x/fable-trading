@@ -111,8 +111,11 @@ def _stage_winners(search: pd.DataFrame) -> pd.DataFrame:
         raise ValueError(f"development search missing fields: {', '.join(sorted(missing))}")
     winners = []
     for (_, _), candidates in search.groupby(["stream", "stage"], sort=False):
-        ordered = candidates.sort_values(
-            ["final_balance", "base_risk_usdt", "max_level", "leverage_cap", "reset_mode"],
+        # This is deliberately the runner's max key written as sortable columns:
+        # (final balance, lower risk, lower level, lower capacity, win preferred).
+        # A Boolean final key avoids depending on alphabetical reset-mode order.
+        ordered = candidates.assign(_win_preferred=candidates["reset_mode"].eq("win")).sort_values(
+            ["final_balance", "base_risk_usdt", "max_level", "leverage_cap", "_win_preferred"],
             ascending=[False, True, True, True, False], kind="stable",
         )
         winners.append(ordered.iloc[0].to_dict())
@@ -159,7 +162,9 @@ def _accepted_natural(directory: Path, stream: str, period: str, arm: str) -> pd
     required = {"trade_id", "notional"}
     if missing := required - set(accepted.columns):
         raise ValueError(f"ledger missing fields: {', '.join(sorted(missing))}")
-    fields = [name for name in ["trade_id", "censored", "gross_return", "net_return", "net_r"] if name in opportunities]
+    fields = [name for name in [
+        "trade_id", "censored", "gross_return", "net_return", "net_r", "initial_risk_frac",
+    ] if name in opportunities]
     merged = accepted.merge(opportunities[fields], on="trade_id", how="inner", validate="one_to_one")
     censored = merged.get("censored", pd.Series(False, index=merged.index)).map(_truth)
     merged = merged.loc[~censored].copy()
@@ -169,6 +174,17 @@ def _accepted_natural(directory: Path, stream: str, period: str, arm: str) -> pd
     merged["gross_pnl"] = merged["notional"] * pd.to_numeric(merged.get("gross_return"), errors="coerce")
     merged["net_pnl"] = merged["notional"] * pd.to_numeric(merged.get("net_return"), errors="coerce")
     return merged.dropna(subset=["risk_dollars", "notional"])
+
+
+def _account_natural_pf(directory: Path, stream: str, period: str, arm: str) -> float | None:
+    """Profit factor for actually accepted, naturally closed cash-account trades."""
+    rows = _accepted_natural(directory, stream, period, arm)
+    if rows.empty or "net_pnl" not in rows:
+        return None
+    pnl = pd.to_numeric(rows.get("net_pnl"), errors="coerce")
+    gains = float(pnl.loc[pnl > 0].sum())
+    losses = float(-pnl.loc[pnl < 0].sum())
+    return None if losses == 0 else gains / losses
 
 
 def _risk_decile(directory: Path, stream: str, period: str, arm: str) -> dict[str, Any]:
@@ -221,6 +237,15 @@ def _continuous_chart(pre: pd.DataFrame, stream: str) -> Path | None:
         return None
     ASSETS.mkdir(parents=True, exist_ok=True)
     chart = ASSETS / f"{stream}_continuous_pre_equity.png"
+    opportunities = _read_csv(_opportunity_path(PRE_EVALUATION, stream, "continuous_pre"))
+    entry_times = pd.to_datetime(opportunities.get("entry_time"), utc=True, errors="coerce").dropna()
+    exit_times = pd.to_datetime(opportunities.get("exit_time"), utc=True, errors="coerce").dropna()
+    if entry_times.empty or exit_times.empty:
+        return None
+    window_start = entry_times.min()
+    # Censored opportunities carry the configured window end in exit_time, so
+    # this includes rejected-candidate time rather than truncating at the last fill.
+    window_end = exit_times.max()
     fig, ax = plt.subplots(figsize=(10, 4.8))
     plotted = False
     for arm, color in [("martingale", "#9b2226"), ("fixed", "#005f73")]:
@@ -228,22 +253,28 @@ def _continuous_chart(pre: pd.DataFrame, stream: str) -> Path | None:
             continue
         ledger = _read_csv(_ledger_path(PRE_EVALUATION, stream, "continuous_pre", arm))
         accepted = ledger.loc[ledger.get("accepted", pd.Series(False, index=ledger.index)).map(_truth)].copy()
-        if accepted.empty or "exit_time" not in accepted or "equity_after" not in accepted:
-            continue
-        accepted["exit_time"] = pd.to_datetime(accepted["exit_time"], utc=True, errors="coerce")
-        accepted["equity_after"] = pd.to_numeric(accepted["equity_after"], errors="coerce")
-        accepted = accepted.dropna(subset=["exit_time", "equity_after"]).sort_values("exit_time")
-        if accepted.empty:
-            continue
-        ax.step(accepted["exit_time"], accepted["equity_after"], where="post", label=arm, color=color)
+        if not accepted.empty and {"exit_time", "equity_after"}.issubset(accepted.columns):
+            accepted["exit_time"] = pd.to_datetime(accepted["exit_time"], utc=True, errors="coerce")
+            accepted["equity_after"] = pd.to_numeric(accepted["equity_after"], errors="coerce")
+            accepted = accepted.dropna(subset=["exit_time", "equity_after"]).sort_values("exit_time")
+        else:
+            accepted = pd.DataFrame(columns=["exit_time", "equity_after"])
+        times = [window_start, *accepted["exit_time"].tolist()]
+        equities = [1000.0, *accepted["equity_after"].tolist()]
+        # Explicitly retain the last realized balance across rejected-candidate
+        # intervals through the frozen window end.
+        if times[-1] < window_end:
+            times.append(window_end)
+            equities.append(equities[-1])
+        ax.step(times, equities, where="post", label=arm, color=color)
         plotted = True
     if not plotted:
         plt.close(fig)
         return None
     ax.axhline(1000, color="#555555", linewidth=0.8, linestyle="--")
-    ax.set_title(f"{stream} continuous_pre：已实现/窗口末标记权益（非逐bar权益）")
+    ax.set_title(f"{stream} continuous_pre: realized/window-end-marked equity (not bar-by-bar)")
     ax.set_ylabel("USDT")
-    ax.set_xlabel("退出或窗口末标记时间（UTC）")
+    ax.set_xlabel("exit or window-end mark time (UTC)")
     ax.legend()
     fig.autofmt_xdate()
     fig.tight_layout()
@@ -252,19 +283,77 @@ def _continuous_chart(pre: pd.DataFrame, stream: str) -> Path | None:
     return chart
 
 
-def _formal_table(frame: pd.DataFrame, period: str) -> str:
+def _formal_table(frame: pd.DataFrame, period: str, directory: Path) -> str:
     rows = frame.loc[frame.period == period]
     values: list[list[Any]] = []
     for row in rows.itertuples(index=False):
         values.append([
             row.stream, row.arm, _fmt(row.final_balance), _fmt(row.profit), _pct(row.max_realized_drawdown),
             int(row.n_accepted), int(row.n_rejected), _fmt(row.max_effective_leverage), int(row.boundary_marks),
-            "是" if _truth(row.ruined) else "否", _fmt(row.matched_control_pnl), _fmt(row.matched_delta), _fmt(row.matched_p, 4),
+            "是" if _truth(row.ruined) else "否", _fmt(_account_natural_pf(directory, row.stream, period, row.arm)),
+            _fmt(row.matched_control_pnl), _fmt(row.matched_delta), _fmt(row.matched_p, 4),
         ])
     return _table(
-        ["stream", "账户", "期末余额(U)", "利润(U)", "最大已实现回撤", "接受", "拒绝", "最高实际杠杆", "窗口末标记", "归零", "matched_control_pnl(U)", "matched_delta(U)", "matched_p"],
+        ["stream", "账户", "期末余额(U)", "利润(U)", "最大已实现回撤", "接受", "拒绝", "最高实际杠杆", "窗口末标记", "归零", "账户自然PF", "matched_control_pnl(U)", "matched_delta(U)", "matched_p"],
         values,
     )
+
+
+def _answer_first(search: pd.DataFrame, pre: pd.DataFrame, holdout: pd.DataFrame | None) -> list[str]:
+    """State the dynamic evidence before explaining the frozen workflow."""
+    policy_fields = ["base_risk_usdt", "max_level", "reset_mode", "leverage_cap"]
+    unique_policies = len(search[policy_fields].drop_duplicates())
+    final_balances = pd.to_numeric(search["final_balance"], errors="coerce")
+    development = search.loc[final_balances.notna()]
+    all_development_below = not development.empty and bool((final_balances.loc[development.index] < 1000).all())
+    validation = pre.loc[(pre.period == "validation") & (pre.arm == "martingale")]
+    continuous = pre.loc[(pre.period == "continuous_pre") & (pre.arm == "martingale")]
+    validation_lost = not validation.empty and bool((pd.to_numeric(validation["profit"], errors="coerce") < 0).all())
+    continuous_lost = not continuous.empty and bool((pd.to_numeric(continuous["profit"], errors="coerce") < 0).all())
+    parts = [
+        "## 先看结论",
+        "",
+        f"开发搜索共比较 {len(search)} 次，涉及 {unique_policies} 个唯一仓位配置；候选期末余额最高 {_fmt(final_balances.max())}U。所有开发候选期末余额是否低于 1000U：{'是' if all_development_below else '否'}。",
+    ]
+    if validation.empty:
+        parts.append("复用验证的倍投结果尚未生成。")
+    else:
+        verdict = "全部亏损" if validation_lost else "并非全部亏损"
+        details = "；".join(f"{row.stream} 利润 {_fmt(row.profit)}U" for row in validation.itertuples(index=False))
+        parts.append(f"复用验证 martingale：{verdict}（{details}）。")
+    if continuous.empty:
+        parts.append("continuous_pre 诊断尚未生成。")
+    else:
+        details = "；".join(
+            f"{row.stream} 期末 {_fmt(row.final_balance)}U、接受 {int(row.n_accepted)}、拒绝 {int(row.n_rejected)}"
+            for row in continuous.itertuples(index=False)
+        )
+        parts.append(f"continuous_pre 连续账户：{details}。")
+    if all_development_below and validation_lost and continuous_lost:
+        parts.append("本轮未找到可推荐的持续盈利倍投方案；以下仅为受限开发搜索中的开发冠军，不构成可用策略。")
+    else:
+        parts.append("证据未满足持续盈利方案的推荐门槛；以下仅报告受限开发搜索中的开发冠军及其窗口边界。")
+    preholdout_martingale = pre.loc[(pre.period == "preholdout") & (pre.arm == "martingale")]
+    for row in preholdout_martingale.itertuples(index=False):
+        if _number(row.profit) is not None and float(row.profit) > 0:
+            fixed = pre.loc[(pre.period == "preholdout") & (pre.arm == "fixed") & (pre.stream == row.stream)]
+            fixed_note = ""
+            if not fixed.empty:
+                fixed_row = fixed.iloc[0]
+                if float(fixed_row.final_balance) > float(row.final_balance):
+                    fixed_note = f"；同窗 fixed 期末 {_fmt(fixed_row.final_balance)}U，更高"
+                else:
+                    fixed_note = f"；同窗 fixed 期末 {_fmt(fixed_row.final_balance)}U，未更高"
+            parts.append(f"反例边界：{row.stream} 在 2026年1–4月 preholdout 单窗 martingale 利润 {_fmt(row.profit)}U{fixed_note}；它不能推翻连续账户与其他窗口的结论。")
+    if holdout is not None:
+        rows = holdout.loc[holdout.arm == "martingale"]
+        details = "；".join(
+            f"{row.stream} 期末 {_fmt(row.final_balance)}U、接受 {int(row.n_accepted)}、拒绝 {int(row.n_rejected)}"
+            for row in rows.itertuples(index=False)
+        )
+        parts.append(f"冻结后唯一授权的最终 holdout：{details}。")
+    parts.append("")
+    return parts
 
 
 def _build_report(pre: pd.DataFrame, holdout: pd.DataFrame | None, selection: dict[str, Any], search: pd.DataFrame) -> str:
@@ -275,7 +364,12 @@ def _build_report(pre: pd.DataFrame, holdout: pd.DataFrame | None, selection: di
         "",
         f"本地交付：[MD]({REPORT}) · [HTML]({HTML}) · [完整开发搜索 CSV]({SEARCH})。",
         "",
+    ]
+    parts += _answer_first(search, pre, holdout)
+    parts += [
         "本报告只渲染已冻结的研究产物：没有重新计算 V8 信号、OHLCV 或政策搜索。开发冠军由开发期四阶段单变量坐标搜索产生；验证、预 holdout 与最终 holdout 均只评估该冻结选择，不预设结果正负。",
+        "",
+        "开发冠军只是在受限开发搜索中期末余额最高的政策，不能等同于可用的“最佳方案”。特别是容量不足会导致大量 V8 候选被拒绝；账户参与率必须与余额一起判断，不能只看少数接受交易的结果。",
         "",
         "## 开发冠军与冻结选择",
         "",
@@ -296,6 +390,15 @@ def _build_report(pre: pd.DataFrame, holdout: pd.DataFrame | None, selection: di
         policy = item.get("policy", {})
         frozen_rows.append([stream, _fmt(policy.get("base_risk_usdt")), policy.get("max_level", "—"), policy.get("reset_mode", "—"), _fmt(policy.get("leverage_cap"))])
     parts += ["最终冻结政策：", "", _table(["stream", "底注(U)", "最大层级", "复位", "容量上限"], frozen_rows), ""]
+    development_participation = []
+    for item in pre.loc[(pre.period == "development") & (pre.arm == "martingale")].itertuples(index=False):
+        total = int(item.n_accepted) + int(item.n_rejected)
+        development_participation.append([
+            item.stream, int(item.n_accepted), int(item.n_rejected),
+            "—" if total == 0 else _pct(int(item.n_accepted) / total),
+        ])
+    if development_participation:
+        parts += ["开发冠军的容量参与情况（动态读取正式账本摘要）：", "", _table(["stream", "接受", "拒绝", "接受率"], development_participation), ""]
     parts += [
         "1/2/4 层是计划初始止损金额序列，底注为固定 USDT，不是保证金或 ETH 数量：notional = base_risk_usdt × 2**level / initial_risk_frac。触发仅为净亏损且退出原因含 stop；非 stop 亏损保持层级。触顶触发亏损会认亏、记录 capped_cycle_reset 并回到 level 0，绝不会抹掉账户损失。win 是任意净盈利复位，recovery 仅在本轮累计净 PnL 回本后复位。",
         "",
@@ -306,15 +409,15 @@ def _build_report(pre: pd.DataFrame, holdout: pd.DataFrame | None, selection: di
     ]
     for period, title in [("development", "开发"), ("validation", "复用验证"), ("preholdout", "预 holdout"), ("continuous_pre", "开发至预 holdout 连续账户诊断")]:
         if (pre.period == period).any():
-            parts += [f"### {title}", "", _formal_table(pre, period), ""]
+            parts += [f"### {title}", "", _formal_table(pre, period, PRE_EVALUATION), ""]
     if holdout is None:
         parts += ["### 最终 holdout", "", "尚未生成最终 holdout 结果。只有冻结选择提交后才能读取一次；本报告不把缺失的 Binance 5m holdout 伪造成数据。", ""]
     else:
-        parts += ["### 最终 holdout（冻结后授权第 1 次）", "", _formal_table(holdout, "holdout"), "", "最终 holdout 只允许 OKX ETH 3m；Binance 5m 源截至 2026-05-01，没有 holdout 数据。", ""]
+        parts += ["### 最终 holdout（冻结后授权第 1 次）", "", _formal_table(holdout, "holdout", HOLDOUT_EVALUATION), "", "最终 holdout 只允许 OKX ETH 3m；Binance 5m 源截至 2026-05-01，没有 holdout 数据。", ""]
     parts += [
         "## 数据统计与自然交易参考",
         "",
-        "以下胜率与 Profit Factor 只基于自然平仓；窗口末标记单列，不能混入自然胜率或 PF。AUC 不适用：本研究没有训练预测器或预测分数。",
+        "以下 refwinrate 与参考机会池 PF 来自全部自然平仓机会，未施加现金账户的拒单/接受约束，因此不是账户成交 PF；账户自然 PF 已单列在正式账户表。窗口末标记不混入任一胜率或 PF。AUC 不适用：本研究没有训练预测器或预测分数。",
         "",
     ]
     data_rows = []
@@ -325,7 +428,7 @@ def _build_report(pre: pd.DataFrame, holdout: pd.DataFrame | None, selection: di
             opportunities = _read_csv(_opportunity_path(directory, item.stream, item.period))
             stats = _natural_stats(opportunities)
             data_rows.append([item.stream, item.period, int(item.candidates), int(item.opportunities), stats["natural_closed"], stats["natural_wins"], _pct(stats["reference_win_rate"]), _fmt(stats["natural_pf"]), stats["boundary_marks"], stats["time_range"]])
-    parts += [_table(["stream", "窗口", "候选", "opportunity", "自然平仓", "自然胜", "refwinrate", "自然 PF", "窗口末标记", "时间范围"], data_rows), ""]
+    parts += [_table(["stream", "窗口", "候选", "opportunity", "自然平仓", "自然胜", "refwinrate", "参考机会池自然PF", "窗口末标记", "时间范围"], data_rows), ""]
     parts += [
         "既有原始 baseline：3m 111 笔均 −0.237R、5m 693 笔均 −0.275R，来自不同历史样本，不能与本报告各窗口从 1000U 重启的账户百分比直接比较。",
         "",
