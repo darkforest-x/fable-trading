@@ -1,0 +1,42 @@
+{
+  "audit_date": "2026-09-14",
+  "scope": "read-only OOXML/XML and 11 preview-image QA; no workbook, source, or preview mutation",
+  "workbook": {
+    "path": "outputs/01a086ad-0b77-7380-b6a6-2b62f505d12b/SPIKE_V1_三规则精确回测_20260914.xlsx",
+    "sha256": "650b9888d8fc3723ea53727468e2c8337c6cf66d3352df4f3ad5b7372b251002",
+    "sheet_count": 11,
+    "sheets": ["总体对比", "时间分区", "分周期", "单规则消融", "改善拆解", "逐月", "标的明细", "随机对照", "原6253逐笔", "前20逐笔", "口径与来源"]
+  },
+  "original6253_event_sheet": {
+    "populated_events": 6253,
+    "terminal_styled_blank_row": 1,
+    "default": {"closed_rows": 6170, "censored_rows": 83, "censored_net_r_nonblank": 0, "sum_closed_net_r": 838.178470318796, "required_sum_closed_net_r": 838.1784703181975},
+    "triple": {"closed_rows": 6237, "censored_rows": 16, "censored_net_r_nonblank": 0, "sum_closed_net_r": 1201.2537897008083, "required_sum_closed_net_r": 1201.2537896987315},
+    "delta_formula": "IF(OR(Ir=\"\",Nr=\"\"),\"\",Nr-Ir)",
+    "delta_formulas": 6253,
+    "delta_cached": 6170,
+    "delta_blank_inputs_and_blank_cache": 83,
+    "delta_blank_propagation_violations": 0
+  },
+  "top20_event_sheet": {
+    "populated_events": 439,
+    "terminal_styled_blank_row": 1,
+    "default": {"closed_rows": 437, "censored_rows": 2, "censored_net_r_nonblank": 0},
+    "triple": {"closed_rows": 438, "censored_rows": 1, "censored_net_r_nonblank": 0},
+    "delta_formulas": 439,
+    "delta_cached": 437,
+    "delta_blank_inputs_and_blank_cache": 2,
+    "delta_blank_propagation_violations": 0
+  },
+  "date_format": {"event_sheet_column": "D", "format_code": "yyyy-mm-dd hh:mm", "frozen_rows": 4},
+  "previews": {
+    "inspected": 11,
+    "visible_viewport_result": "legible title/header hierarchy, Chinese text, sign colour, and numeric formatting; wide-sheet right columns require horizontal scrolling",
+    "not_hash_bound_to_workbook": true,
+    "preview_mtime_range": "2026-09-14 18:33:12..18:33:20",
+    "workbook_mtime": "2026-09-14 18:33:43",
+    "specific_evidence": "10.png displays an incomplete leading year/date and no visible row-4 header; current workbook XML D5 is 45183.041666..., row-4 header is 入场UTC, and D format is yyyy-mm-dd hh:mm",
+    "conclusion": "do not use the pre-existing previews as final visual approval of this later-modified workbook"
+  },
+  "conclusion": "current workbook XML passes data/formula/cache/date checks; final visual sign-off requires previews regenerated from this workbook hash"
+}
