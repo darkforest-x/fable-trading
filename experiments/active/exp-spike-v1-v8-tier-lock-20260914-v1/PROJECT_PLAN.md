@@ -33,3 +33,7 @@ Reuse completed baseline/BE05 outcomes from `exp-spike-v1-v8-be05-20260914-v1` a
 - Terra High v1_v8_be05: new common tier replay/test module and `common/` only.
 
 Deliver `analysis/p1_spike_v1_v8_tier_lock_20260914.md` and matching HTML with hash-bound detailed CSVs and a version-linked Notion record. No Pine, live-monitor, notification, account, ACTIVE or paused-automation changes.
+
+## Implementation audit correction
+
+The first implementation applied floor/ceil to stage1's actual entry as well as stage2. Binary floating division can move an already valid exchange price one tick and violates the frozen BE05 control. Stage1 now uses the exact actual entry, with stage2 alone newly quantized; the existing trailing formula is unchanged. Regression cases require exact BE05 outcome parity when stage2 never arms. Common `full_tier_v1` is retained but not final evidence; native's first full attempt was interrupted after250/2247 streams and751 events with no completed ledger. Both are replayed into new directories after the correction. Common fixed-exit attribution also now records the active stop source when an opening-gap stop beats a scheduled reverse; this attribution correction changes no fill price.
