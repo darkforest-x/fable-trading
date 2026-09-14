@@ -49,6 +49,22 @@ def human(frame):
     return frame.rename(columns=LABELS)
 
 
+def markdown_table(frame: pd.DataFrame, *, decimals: int | None = None) -> str:
+    """Render a compact pipe table without requiring pandas' optional tabulate."""
+    if frame.empty:
+        return '当前分组无可报告样本。'
+    shown = frame.copy()
+    if decimals is not None:
+        for column in shown.select_dtypes(include='number'):
+            shown[column] = shown[column].map(lambda value: f'{value:.{decimals}f}' if pd.notna(value) else '不适用')
+    shown = shown.fillna('不适用').astype(str)
+    escape = lambda value: value.replace('|', '\\|').replace('\n', '<br>')
+    headers = [escape(str(column)) for column in shown.columns]
+    rows = [[escape(value) for value in row] for row in shown.to_numpy().tolist()]
+    return '\n'.join(['| ' + ' | '.join(headers) + ' |', '| ' + ' | '.join(['---'] * len(headers)) + ' |',
+                      *['| ' + ' | '.join(row) + ' |' for row in rows]])
+
+
 def table(frame, ids):
     cols = [x for x in ids + TABLE_FIELDS if x in frame]
     f = frame[cols].copy()
@@ -58,7 +74,7 @@ def table(frame, ids):
     for c in f.select_dtypes(include='number'):
         if c not in ('trades', 'timeframe_min'):
             f[c] = f[c].map(lambda x: f'{x:.3f}' if pd.notna(x) else '不适用')
-    return human(f).fillna('不适用').to_markdown(index=False) if len(f) else '当前分组无可报告样本。'
+    return markdown_table(human(f))
 
 
 def read_outcomes(cohort):
@@ -189,7 +205,7 @@ def build():
         '',
         '### 为什么近似改善不能兑现',
         '下表固定在原版已平仓的同一组事件，分开计算对原亏损单的帮助与对原盈利单的损害。额外平掉的原版未完成交易单列，不能把分母变化当成同样本改善。',
-        human(attribution).to_markdown(index=False, floatfmt='.2f'),
+        markdown_table(human(attribution), decimals=2),
         '保本或提前减损不会只作用于最终输家。它们也会扫掉曾经回踩、随后走出趋势的赢家。组合各规则共享同一路径，三个单规则改善不能相加。用户XLSX公式尚未取得，不能断言它具体漏了哪一项；此表给出精确回放中实际发生的两面影响。',
         '',
         '## 2. 固定前20流动性三年检验',
@@ -208,7 +224,7 @@ def build():
         table(period, ['cohort', 'period', 'arm']),
         '',
         '### 测试期随机对照与置信区间',
-        human(inference[[c for c in inference_columns if c in inference]]).to_markdown(index=False, floatfmt='.4f') if len(inference) else '无可计算的测试期匹配样本。',
+        markdown_table(human(inference[[c for c in inference_columns if c in inference]]), decimals=4) if len(inference) else '无可计算的测试期匹配样本。',
         '',
         '## 4. 精确成交规则',
         '- 入场沿用原始V1信号，下一根开盘成交。原版只做多；本轮不补空头，也不修改原始信号引擎。',
