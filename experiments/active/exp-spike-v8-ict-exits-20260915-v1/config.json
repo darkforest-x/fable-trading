@@ -1,0 +1,116 @@
+{
+  "experiment_id": "exp-spike-v8-ict-exits-20260915-v1",
+  "date": "2026-09-15",
+  "venue": "OKX",
+  "symbol": "ETH-USDT-SWAP",
+  "minutes": 15,
+  "source": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+  "start": "2023-08-01T00:00:00Z",
+  "development_end": "2025-01-01T00:00:00Z",
+  "validation_start": "2025-01-01T00:00:00Z",
+  "common_start": "2026-01-01T00:00:00Z",
+  "end": "2026-05-01T00:00:00Z",
+  "minimum_warmup_bars": 1500,
+  "tick": 0.01,
+  "round_trip_cost": 0.002,
+  "seed": 9152026,
+  "controls_per_trade": 5,
+  "permutations": 9999,
+  "session": "union",
+  "session_timezone": "America/New_York",
+  "session_hours": [
+    2,
+    11
+  ],
+  "cash": {
+    "initial_balance": 1000,
+    "base_risk": 1,
+    "leverage_cap": 10
+  },
+  "arms": {
+    "original": {
+      "partial_r": 2.0,
+      "partial_fraction": 0.0,
+      "final_tp_r": null,
+      "after_partial_stop_r": null,
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 4.0
+    },
+    "trail3_atr": {
+      "partial_r": 2.0,
+      "partial_fraction": 0.0,
+      "final_tp_r": null,
+      "after_partial_stop_r": null,
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 3.0
+    },
+    "trail2_atr": {
+      "partial_r": 2.0,
+      "partial_fraction": 0.0,
+      "final_tp_r": null,
+      "after_partial_stop_r": null,
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 2.0
+    },
+    "cost_be1": {
+      "partial_r": 2.0,
+      "partial_fraction": 0.0,
+      "final_tp_r": null,
+      "after_partial_stop_r": null,
+      "protection_mode": "cost",
+      "trigger_r": 1.0,
+      "trail_atr": 4.0
+    },
+    "cost_be2": {
+      "partial_r": 2.0,
+      "partial_fraction": 0.0,
+      "final_tp_r": null,
+      "after_partial_stop_r": null,
+      "protection_mode": "cost",
+      "trigger_r": 2.0,
+      "trail_atr": 4.0
+    },
+    "partial25_at2": {
+      "partial_r": 2.0,
+      "partial_fraction": 0.25,
+      "final_tp_r": null,
+      "after_partial_stop_r": null,
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 4.0
+    },
+    "partial50_at2": {
+      "partial_r": 2.0,
+      "partial_fraction": 0.5,
+      "final_tp_r": null,
+      "after_partial_stop_r": null,
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 4.0
+    },
+    "fixed3r": {
+      "partial_r": 2.0,
+      "partial_fraction": 0.0,
+      "final_tp_r": 3.0,
+      "after_partial_stop_r": null,
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 4.0
+    }
+  },
+  "selection": {
+    "window": "development",
+    "minimum_natural": 30,
+    "metric": "sum_net_r",
+    "order": "descending_then_name",
+    "positive_required_for_candidate_label": true
+  },
+  "previous_experiment": "experiments/active/exp-spike-v8-ict-multitf-20260915-v1",
+  "previous_manifest_sha256": "c06e060794b57de7e1e943be7410ec45560f15d96393d5b92b253161b572936f",
+  "holdout_consumed": false,
+  "production_eligible": false,
+  "training_eligible": false
+}

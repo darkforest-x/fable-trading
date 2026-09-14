@@ -9207,3 +9207,18 @@ experiments:
     notes: All versus NewYork02to11 local,actual next open,weekends included,no session-end close. No new holdout or live change.
     artifacts:
     - spike-v8-ict-multitf-20260915-delivery
+
+  - experiment_id: exp-spike-v8-ict-exits-20260915-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: e92ef2b65a
+    status: active
+    question: Can one exit-only change preserve large ETH15m ICT winners while reducing profit giveback?
+    single_variable: Eight frozen arms each change only trailing width, fee protection, partial fraction, or final target against original V8 exits.
+    result: Planned development-first selection followed by 2025 and Jan-Apr2026 evaluation; no results yet.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v8_ict_exits_20260915.md
+    notes: NewYork02to11 actual entry open. Development reads pre2025 only and committed selection precedes later price reads. No Fanshen exit or live changes.
+    artifacts:
+    - spike-v8-ict-exits-20260915-delivery
