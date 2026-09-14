@@ -39,6 +39,7 @@ def main():
     primary="arrows_augment_profit"
     common=summary.loc[summary.window=="common"]
     parts=["# V8 × 翻身 Stoch：六周期退出回测\n",
+           "六个周期已完成。直接加入翻身反向箭头提前退出，在3m、5m和15m共同窗口中提高了胜率，却减少了净收益；30m和1h仍亏损。4h有改善，但较长历史也只有15笔，尚不能确定最佳退出方案。\n",
            "日期：2026-09-14。市场为OKX ETH-USDT-SWAP。主方案在看数据前指定为：保留原V8保护，持仓扣费后盈利时，遇到同周期反向箭头于下一根开盘平仓。\n",
            "本轮比较9套冻结退出，共同窗口2026-01-01至2026-05-01（UTC，右端不含）；另报各周期可用历史。未使用holdout，没有调K/D或WVF参数，没有实盘操作。\n",
            "## 共同窗口：原V8与主方案\n"]
@@ -60,6 +61,7 @@ def main():
         rows.append([f"{m}m",int(r.paired_n),int(r.paired_improved),int(r.paired_worsened),
                      int(r.saved_losers),int(r.lost_3r_winners),int(r.fanshen_exits)])
     parts.append(table(["周期","同入场自然配对","改善笔数","变差笔数","原净亏变净赚","原毛3R变不足3R","实际翻身退出"],rows))
+    parts.append("5m是关键反例：救回7笔原亏损单，同时截短8笔原毛收益≥3R的交易。2026-04-13 13:00 UTC入场的同一笔，原退出净赚9.11R，主方案只赚0.06R。净胜率上升不能抵消这些大赢家被提前平掉的损失。\n")
     parts.append("MFE是沿用原引擎的审慎记录：先判断止损，止损根的新有利极值不计入。因此MFE≥1R后净亏只用于同口径诊断，不能证明盘中先赚1R后才止损，更不能把MFE≥3R当固定3R止盈成交。\n")
     parts.append("## 1000U账户：固定1U与亏损翻倍\n")
     rows=[]
@@ -73,6 +75,7 @@ def main():
             rows.append([f"{m}m",LABELS[p],fmt(f.final_balance),fmt(d.final_balance),
                          fmt(d.max_realized_drawdown,True),int(d.n_natural),capacity])
     parts.append(table(["周期","退出","固定1U期末U","翻倍期末U","翻倍已实现最大回撤","翻倍自然笔数","资金约束"],rows))
+    parts.append("上表现金账户会按容量拒绝入场，随后准入序列也可能改变；总净R表则是不受本金容量限制的串行回放，因此笔数和收益不能机械相加对齐。‘无永久终止’也可能伴随大量容量拒绝，并不表示所有信号都能参与。\n")
     parts.append("资金口径：本金1000U；基础1U是价格止损风险，另计费用；成本固定为名义金额0.2%往返，保留既有10倍保证金容量假设。亏损后风险翻倍，只有累计净回本才重置，保本不会抹去前亏。容量不足时保持欠账，风险已超过现金则终止。未建模交易所标记价格强平、资金费率、额外滑点及盘中浮动权益；此回撤是已实现现金回撤，不能叫实盘强平概率。边界单按最后完整收盘估值，未纳入自然胜率。\n")
     parts.append("## 所有冻结方案与匹配随机对照\n")
     for window,title in [("common","共同2026年1—4月"),("available","各周期可用历史")]:
@@ -97,6 +100,8 @@ def main():
                      r.get("aggregation",{}).get("rows",r.get("rows"))])
     parts.append(table(["周期","源前缀根数","源首根UTC","最后完整收盘UTC","聚合根数"],rows))
     parts.append(f"Builder提交：`{receipt['builder_commit']}`。原V8逐笔parity：{len(parity)}组，共{sum(r['rows'] for r in parity)}行通过（共同窗与可用历史有重叠，不代表独立交易总数）。29项公式、缺失处理、时间边界和执行测试通过；哈希及读取边界见results/run_receipt.json、input_receipts.json、manifest.json。\n")
+    parts.append("独立只读复核重算108组逐笔统计、配对变化、全部随机匹配及216组现金恒等式，未发现分母、算术或配对错误；605个结果文件哈希全部一致。现金恒等式最大残差1.56e-12U，统计误差约2.3e-13。复核没有再读源行情或holdout。\n")
+    parts.append("4h较长历史主方案15笔合计+10.03R，原版+2.30R；其中2024-05-18入场的一笔贡献+7.37R，约占净总额73.5%。已逐条核对8笔翻身退出的K/D交叉、收盘信号到下一开盘的时间及净R算式，均一致；这确认账本计算，不能消除小样本和行情集中风险。\n")
     parts.append("没有预测模型或事前交易评分排序，val AUC、top-decile排序毛／净收益及单特征排序基线不适用；不能用事后盈利挑top10%。零假设对照为原V8同入场配对与同成本匹配随机入场。样本数、胜率和时间范围均见完整表；正类率即净胜率。\n")
     parts.append("## 逐笔文件\n")
     delivery=EXP/"delivery"
