@@ -1,0 +1,20 @@
+{
+  "version": "spike-v9-entry-bundle-20260915-v1",
+  "parent": "SPIKE V8",
+  "entry_filters": {
+    "excluded_base_assets": ["USDC"],
+    "max_confirmation_volume_ratio": 50.0,
+    "excluded_scheduled_open_weekday_utc": "Sunday",
+    "combination": "all_required",
+    "unknown_inputs": "blocked_with_reason"
+  },
+  "calendar_clock": "signal_close_as_scheduled_next_open_on_continuous_time_bars",
+  "reference_cost_fraction": 0.002,
+  "reference_risk_basis": "signal_close_not_actual_fill",
+  "exits": "unchanged_parent_including_unfiltered_raw_V6_reversal_feed",
+  "new_performance_comparison_requested": false,
+  "holdout_consumptions": 0,
+  "training_eligible": false,
+  "production_eligible": false,
+  "owner_authorization": ["不需要对照啊 直接做", "升级为v9"]
+}
