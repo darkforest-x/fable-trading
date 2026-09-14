@@ -151,6 +151,9 @@ def run(admission: Path, exit_root: Path, out: Path):
       [r.timeframe_min,fmt(r.joint_closed,0),fmt(r.delta_r),fmt(r.rescued_losers,0),fmt(r.harmed_winners,0),f'{int(r.retained_original_ge10)}/{int(r.original_realized_ge10)}',fmt(r.mean_delta_weekly_ci_low,4)+' 至 '+fmt(r.mean_delta_weekly_ci_high,4)] for _,r in ep.loc[ep.period.eq('full')].iterrows()]),
     '## 原 V1 表述的来源复核',
     '原始账本为 6,253 行（含日线），其中 6,170 笔已结束、83 笔未结束。以下是旧账本静态分组，不是重新跑策略得到的可回收收益。',]
+    ar=json.loads((EXP/'source_audit/receipt.json').read_text())
+    for name, expected in ar['outputs'].items():
+        if digest(EXP/'source_audit'/name)!=expected: raise ValueError('Source audit changed')
     audit=pd.read_csv(EXP/'source_audit/source_claims.csv')
     sections.append(table(['分组','笔数','胜率','该分组净R'],[[LABELS.get(r.policy,r.policy),fmt(r.rows,0),fmt(r.win_rate*100)+'%',fmt(r.sum_net_r)] for _,r in audit.loc[audit.scope.eq('source_with_daily')].iterrows()]))
     sections += ['量比 >50 的约 -171R 可复现。原 Notion 的校正 p=0.0001 归于“量比>50 且 TR/ATR>10”的联合区，不属于单独量比上限；缺少原检验运行产物，不能把该 p 当成本轮证据。H00 原时钟未写明，本轮按 UTC 与北京时间分别记录。股票规则采用交易所元数据全部股票挂钩类型，不能冒充严格“美股” +44R；USDC 是底层标的过滤，不是计价币过滤。',
