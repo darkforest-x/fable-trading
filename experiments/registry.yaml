@@ -41,18 +41,18 @@ experiments:
     notes: Frozen human review snapshot323 boxes33 explicit no-target12 conflicts. Chronological development before2025-07-01; later pre-holdout reserved. No Gold admission or live changes.
   - experiment_id: exp-release-eth-multitf-20260914-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending_builder_commit
-    status: active
+    source_commit: 959329b09972cc91305904ae0492792cc1908b54
+    status: inconclusive
     question: Does release-20260201 retain an economic edge on OKX ETH perpetual at15m 1h and4h after honest execution, and can bounded development-only optimization improve it?
     single_variable: Parent-linked commission, sizing, stop timing, stop ownership and cooldown diagnostics; each signal challenger changes one dimension from the fixed engineering baseline.
-    result: Preregistered before market replay; source prefix and builder awaiting validation.
+    result: 136 result rows audited. Frozen15m SMA80 candidate returned54.03% in2025 but lost6.14% Jan-Apr2026 and Holm p0.19556;1h slope and4h SMA40 candidates failed2025.4h C0 execution baseline returned71.18% with32.77% drawdown over2023-Apr2026. No production qualification.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/html/p1_release_eth_multitf_20260914.html
-    artifacts: []
+    artifacts: [release-eth-multitf-20260914-delivery, release-eth-multitf-20260914-report, release-eth-multitf-20260914-bundle]
     reuse_allowed: false
-    notes: Owner explicitly requests detailed backtest and autonomous optimization in goal mode. Primary OKX15m source; development2023-24, validation2025, later retrospectiveJan-Apr2026. No holdout or live changes.
+    notes: Owner-authorized goal completed as research. Source104962-row development prefix frozen before151522-row full prefix; selection committed before2025 validation.104 synthetic/compatibility/boundary tests pass,136 ledger and matching audits pass. History reused, no clean blind OOS, full funding or native TV parity. Spike EXP-20 records failed trials; no holdout/live changes.
   - experiment_id: exp-spike-ma-drift-short-20260914-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 4b7fa9f0508ef5d802cb5e7b34584a60c3e52e3b

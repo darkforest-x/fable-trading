@@ -18,6 +18,48 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: release-eth-multitf-20260914-delivery
+    artifact_type: manifest
+    role: frozen_eth_multitimeframe_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3e55d2401e5e338f9b98d1bbe9ced20ccd394b0c
+    source_path: experiments/active/exp-release-eth-multitf-20260914-v1/results/delivery_manifest.json
+    sha256: b4a424a96212ed11bd93836cf304725631af1f4b8820e1fa4bafc0aade7ff226
+    size_bytes: 208811
+    storage_uri: repo://experiments/active/exp-release-eth-multitf-20260914-v1/results/delivery_manifest.json
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: '136 frozen result rows;15m C2 exploratory and statistical gate failed;1h C3/4h C1 validation failed. No native Pine ledger parity or full funding. Large ledgers and ZIP remain local, bound by SHA256.'
+  - artifact_id: release-eth-multitf-20260914-report
+    artifact_type: report
+    role: owner_html_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3e55d2401e5e338f9b98d1bbe9ced20ccd394b0c
+    source_path: analysis/html/p1_release_eth_multitf_20260914.html
+    sha256: 5a82ea9a7b610e43e3482a0b9e8ee5e0dcc170c7019aece961c4b27b178c68f8
+    size_bytes: 778249
+    storage_uri: repo://analysis/html/p1_release_eth_multitf_20260914.html
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: '136 frozen result rows;15m C2 exploratory and statistical gate failed;1h C3/4h C1 validation failed. No native Pine ledger parity or full funding. Large ledgers and ZIP remain local, bound by SHA256.'
+  - artifact_id: release-eth-multitf-20260914-bundle
+    artifact_type: report
+    role: local_complete_ledgers_and_report_bundle
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3e55d2401e5e338f9b98d1bbe9ced20ccd394b0c
+    source_path: experiments/active/exp-release-eth-multitf-20260914-v1/release_eth_complete_evidence.zip
+    sha256: 8b17f6a8f2a4e425c695971cfb19d6e803c4127f80563d6df0ba8978e634862a
+    size_bytes: 38132105
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-release-eth-multitf-20260914-v1/release_eth_complete_evidence.zip
+    holdout_status: pre_holdout
+    data_cutoff: '2026-05-01T00:00:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: '136 frozen result rows;15m C2 exploratory and statistical gate failed;1h C3/4h C1 validation failed. No native Pine ledger parity or full funding. Large ledgers and ZIP remain local, bound by SHA256.'
   - artifact_id: spike-ma-drift-short-20260914-delivery
     artifact_type: manifest
     role: causal_morphology_indicator_engineering_delivery

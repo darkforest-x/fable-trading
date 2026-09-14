@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from yoyo.evaluation.spike_native_v1_be05 import _native_exit
+from yoyo.evaluation.spike_native_v1_be05 import _frozen_stop, _native_exit
 
 
 def _bars(rows: list[tuple[float, float, float, float]]) -> pd.DataFrame:
@@ -49,3 +49,7 @@ def test_be_remains_active_after_later_lower_native_reference() -> None:
     assert result["be_triggered"] is True
     assert result["exit_price"] == 100
     assert result["exit_time"] == bars.index[2] + pd.Timedelta(hours=1)
+
+
+def test_csv_risk_subtraction_recovers_the_original_tick_stop() -> None:
+    assert _frozen_stop(0.005751, 0.001, 0.000001) == 0.004751

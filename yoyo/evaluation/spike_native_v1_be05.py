@@ -50,7 +50,7 @@ BE_TRIGGER_R = 0.5
 METHOD_VERSION = "native-v1-causal-mfe-0.5r-next-bar-be-v1"
 NUMERIC_PARITY_FIELDS = (
     "entry_price", "exit_price", "gross_return", "net_return", "net_r",
-    "risk_fraction_at_entry", "reference_signal_risk", "mfe_return",
+    "risk_fraction_at_entry", "mfe_return",
 )
 IDENTITY_PARITY_FIELDS = ("entry_time", "exit_time", "exit_reason", "censored")
 
@@ -195,6 +195,17 @@ def _cache_index() -> dict[tuple[str, str, int, str], list[Path]]:
     return index
 
 
+def _frozen_stop(signal_close: float, reference_risk: float, tick: float) -> float:
+    """Recover the original tick-grid stop from CSV signal-close/risk fields.
+
+    The immutable ledger stores decimal values through CSV.  Its subtraction
+    can land a few ULPs below the original exchange-tick stop, turning a true
+    equality touch into a false non-touch.  This is representation recovery,
+    not a new risk rule: V1 originally rounded protection to this same grid.
+    """
+    return round((signal_close - reference_risk) / tick) * tick
+
+
 def _native_exit_from_cache(
     bars: pd.DataFrame, signal_time: pd.Timestamp, signal_close: float, signal_risk: float,
     initial_stop: float, tick: float, *, use_be: bool,
@@ -270,7 +281,7 @@ def _cached_outcomes(expected: pd.DataFrame, cache_paths: list[Path], tick: floa
                 continue
             reference = float(row.reference_signal_risk)
             signal_close = float(row.signal_close)
-            stop = signal_close - reference
+            stop = _frozen_stop(signal_close, reference, tick)
             base = _native_exit_from_cache(bars, signal_time, signal_close, reference, stop, tick, use_be=False)
             be = _native_exit_from_cache(bars, signal_time, signal_close, reference, stop, tick, use_be=True)
             outcomes[event_id] = {"baseline": base, "be05": be, "signal_bar_open": signal_time,
@@ -386,6 +397,10 @@ def run(output: Path, *, max_streams: int | None = None) -> dict[str, Any]:
                 for field in NUMERIC_PARITY_FIELDS:
                     if not np.isclose(float(base[field]), float(row[field]), rtol=0, atol=1e-10, equal_nan=True):
                         raise ValueError(f"baseline parity failed {event_id} {field}: {base[field]!r} != {row[field]!r}")
+                for field, actual, expected_value in (("signal_close", replayed_outcome["signal_close"], row.signal_close),
+                                                      ("reference_signal_risk", replayed_outcome["reference_signal_risk"], row.reference_signal_risk)):
+                    if not np.isclose(float(actual), float(expected_value), rtol=0, atol=1e-10, equal_nan=True):
+                        raise ValueError(f"baseline parity failed {event_id} {field}: {actual!r} != {expected_value!r}")
                 be = replayed_outcome["be05"]
                 initial_r = float(be["initial_risk"])
                 records.append({"event_id": event_id, "venue": venue, "symbol": symbol, "timeframe_min": int(minutes),
