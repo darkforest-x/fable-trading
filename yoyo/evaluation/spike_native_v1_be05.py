@@ -48,6 +48,7 @@ CACHE_ROOT = ROOT / "experiments/active/exp-spike-v7-v1-compare-20260912-v1/resu
 ROUND_TRIP_COST = 0.002
 BE_TRIGGER_R = 0.5
 METHOD_VERSION = "native-v1-causal-mfe-0.5r-next-bar-be-v1"
+MIDPOINT = pd.Timestamp("2025-09-10T00:00:00Z")
 NUMERIC_PARITY_FIELDS = (
     "entry_price", "exit_price", "gross_return", "net_return", "net_r",
     "risk_fraction_at_entry", "mfe_return",
@@ -335,6 +336,35 @@ def _summary(frame: pd.DataFrame, groups: list[str]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def _paired_summary(pairs: pd.DataFrame) -> pd.DataFrame:
+    """Summarize a completed paired ledger using its two fixed UTC year blocks."""
+    pairs = pairs.copy()
+    for name in ("entry_time", "baseline_exit_time", "be05_exit_time"):
+        pairs[name] = pd.to_datetime(pairs[name], utc=True)
+    overall = pairs.assign(scope="all")
+    yearly = pairs.assign(entry_period=np.where(
+        pairs.entry_time < MIDPOINT, "2024-09-10..2025-09-10", "2025-09-10..2026-09-10"))
+    return pd.concat([_summary(overall, ["scope"]), _summary(pairs, ["timeframe_min"]),
+                      _summary(yearly, ["entry_period"])], ignore_index=True)
+
+
+def summarize_existing(output: Path) -> dict[str, Any]:
+    """Repair only aggregate presentation from a complete, hash-pinned paired table."""
+    receipt_path, pairs_path = output / "receipt.json", output / "paired_trade_ledger.csv.gz"
+    receipt = json.loads(receipt_path.read_text())
+    if receipt.get("status") != "complete" or receipt.get("files", {}).get("paired_trade_ledger.csv.gz") != sha256(pairs_path):
+        raise ValueError("paired ledger must be complete and match its receipt before summary-only rebuild")
+    pairs = pd.read_csv(pairs_path)
+    if len(pairs) != int(receipt.get("paired_events", -1)):
+        raise ValueError("paired ledger row count differs from complete receipt")
+    _paired_summary(pairs).to_csv(output / "summary.csv", index=False)
+    receipt["files"]["summary.csv"] = sha256(output / "summary.csv")
+    receipt["summary_rebuilt_from_paired_ledger"] = True
+    receipt["summary_periods"] = ["2024-09-10..2025-09-10", "2025-09-10..2026-09-10"]
+    write_json(receipt_path, receipt)
+    return receipt
+
+
 def run(output: Path, *, max_streams: int | None = None) -> dict[str, Any]:
     """Generate paired evidence, retaining a failure receipt if a source drifts."""
     output.mkdir(parents=True, exist_ok=True)
@@ -417,10 +447,7 @@ def run(output: Path, *, max_streams: int | None = None) -> dict[str, Any]:
         if len(pairs) != len(link) and max_streams is None:
             raise ValueError(f"linked event count mismatch: {len(pairs)} != {len(link)}")
         if max_streams is None:
-            overall = pairs.assign(scope="all")
-            yearly = pairs.assign(entry_period=pairs.entry_time.dt.to_period("365D").astype(str))
-            summary = pd.concat([_summary(overall, ["scope"]), _summary(pairs, ["timeframe_min"]),
-                                 _summary(yearly, ["entry_period"])], ignore_index=True)
+            summary = _paired_summary(pairs)
         else:
             summary = _summary(pairs, ["timeframe_min"])
         pairs.to_csv(output / "paired_trade_ledger.csv.gz", index=False, compression={"method": "gzip", "mtime": 0})
@@ -439,8 +466,15 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--max-streams", type=int, help="Bounded source timing/parity probe; never an all-universe result.")
+    parser.add_argument("--summarize-existing", action="store_true", help="Rebuild summary only from a complete hash-pinned paired ledger.")
     args = parser.parse_args()
-    print(json.dumps(run(args.output, max_streams=args.max_streams), ensure_ascii=False, indent=2))
+    if args.summarize_existing:
+        if args.max_streams is not None:
+            raise ValueError("--summarize-existing cannot combine with --max-streams")
+        result = summarize_existing(args.output)
+    else:
+        result = run(args.output, max_streams=args.max_streams)
+    print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

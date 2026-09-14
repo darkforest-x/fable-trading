@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from yoyo.evaluation.spike_native_v1_be05 import _frozen_stop, _native_exit
+from yoyo.evaluation.spike_native_v1_be05 import _frozen_stop, _native_exit, _paired_summary
 
 
 def _bars(rows: list[tuple[float, float, float, float]]) -> pd.DataFrame:
@@ -53,3 +53,13 @@ def test_be_remains_active_after_later_lower_native_reference() -> None:
 
 def test_csv_risk_subtraction_recovers_the_original_tick_stop() -> None:
     assert _frozen_stop(0.005751, 0.001, 0.000001) == 0.004751
+
+
+def test_summary_uses_the_two_frozen_year_blocks() -> None:
+    frame = pd.DataFrame({"event_id": ["a", "b"], "entry_time": ["2025-09-09T23:00:00Z", "2025-09-10T00:00:00Z"],
+                          "baseline_exit_time": ["2025-09-09T23:30:00Z", "2025-09-10T00:30:00Z"], "be05_exit_time": ["2025-09-09T23:30:00Z", "2025-09-10T00:30:00Z"],
+                          "baseline_censored": [False, False], "be05_censored": [False, False], "baseline_net_r": [1., 1.], "be05_net_r": [1., 1.],
+                          "baseline_mfe_r": [1., 1.], "be05_mfe_r": [1., 1.], "timeframe_min": [30, 30]})
+    summary = _paired_summary(frame)
+    yearly = summary.loc[summary.entry_period.notna(), "entry_period"].unique().tolist()
+    assert yearly == ["2024-09-10..2025-09-10", "2025-09-10..2026-09-10"]
