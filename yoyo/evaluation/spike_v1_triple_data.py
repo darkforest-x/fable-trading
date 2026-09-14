@@ -345,6 +345,11 @@ def freeze_top20(*, output_dir: Path, cache_dir: Path) -> dict[str, Any]:
             row["tick_status"] = "official_source_unavailable_not_inferred"
             row["tick_source_error"] = str(exc)
             continue
+        if not payload:
+            row["tick_status"] = "official_source_empty_not_inferred"
+            row["tick_source_url"] = str(record["url"])
+            row["tick_effective_at_claimed_by_announcement"] = str(record["effective_at"])
+            continue
         source_path = output_dir / "tick_sources" / f"{symbol}.html"
         source_path.parent.mkdir(parents=True, exist_ok=True)
         temporary = source_path.with_suffix(".html.part")
@@ -380,7 +385,9 @@ def freeze_top20(*, output_dir: Path, cache_dir: Path) -> dict[str, Any]:
         },
         "tick_metadata_snapshot": cached_tick_receipt,
         "external_tick_sources": tick_sources,
-        "unresolved_tick_symbols": [row["symbol"] for row in rows if row.get("tick_status") == "missing_not_inferred"],
+        "unresolved_tick_symbols": [
+            row["symbol"] for row in rows if str(row.get("tick_status", "")).endswith("not_inferred")
+        ],
         "assets": rows,
     }
     frozen["frozen_identity_sha256"] = _sha256_json(
