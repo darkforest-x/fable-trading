@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>ETH 15分钟＋ICT：加入净2R后的含费保本</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>ETH 15分钟＋ICT：加入净2R后的含费保本</h1>
+<p>2026-09-15，Owner明确选择把既有 <code>cost_be2</code> 加入后续研究。该分支已经实现并完成历史回测，本轮固定为可复用的研究配置，不重复生成历史结果。</p>
+<p>配置文件：<a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v8-ict-exits-20260915-v1/owner_research_choice.json">owner_research_choice.json</a>。原实验的开发期选择仍是 <code>fixed3r</code>；本次是看过结果后的Owner选择，不能改写成开发期自动选出的冠军。效果状态仍为不确定。</p>
+<h2>加入的精确规则</h2>
+<ol>
+<li>OKX ETHUSDT.P，15分钟；原V8信号下一根开盘入场，按实际开仓时间筛选纽约02:00—11:00，保留周末，退出全天有效。</li>
+<li>初始价格风险R固定。多单用本根最高价、空单用最低价计算有利幅度，减去按初始名义仓位估算的0.2%往返成本；净浮盈达到2R且本根未先触发已有止损时，在收盘确认。</li>
+<li>下一根起，多单保护价至少为入场价×1.002，空单至多为入场价×0.998；按0.01 tick向有利方向取整。不是触及2R那一瞬间就回头改变本根止损，也不要求收盘价仍有净2R。</li>
+<li>原来的收盘毛浮盈2R激活4ATR跟踪继续运行。保本线和跟踪线取更紧的一条，已有保护不放松；原始V6反向信号仍按下一开盘退出。没有固定止盈上限或新增分批。</li>
+<li>保本只覆盖本笔固定成本，不等于赚到2R，更不抵消此前亏损。资金加码、债务重置规则没有改变。</li>
+</ol>
+<h2>已有历史结果对照</h2>
+<p>以下直接引用原实验 <code>results/evaluate/summary.csv</code>，日期为UTC，右端不含；本轮不读取价格、不新跑回测。候选数2026窗21、长历史134；自然交易分别17和123，均无期末持仓。2025验证段40笔，原版净1.93R、加入后3.26R；开发期66笔，原版−34.51R、加入后−38.86R，均见原报告。</p>
+<table><thead><tr>
+<th>区间</th>
+<th>规则</th>
+<th>笔数</th>
+<th>总毛R</th>
+<th>总净R</th>
+<th>严格净正比例</th>
+<th>最长净亏</th>
+<th>结算回撤R</th>
+<th>匹配随机均净R/笔（覆盖）</th>
+<th>Holm p</th>
+</tr></thead><tbody>
+<tr><td>2026-01-01—05-01</td><td>原版</td><td>17</td><td>26.32</td><td>22.74</td><td>52.9%</td><td>2</td><td>3.29</td><td>0.1111（17/17）</td><td>0.9888</td></tr>
+<tr><td>2026-01-01—05-01</td><td>加入净2R含费保本</td><td>17</td><td>28.26</td><td>24.68</td><td>64.7%</td><td>2</td><td>2.25</td><td>0.1496（17/17）</td><td>0.9888</td></tr>
+<tr><td>2023-08-01—2026-05-01</td><td>原版</td><td>123</td><td>24.00</td><td>−9.84</td><td>26.0%</td><td>14</td><td>38.33</td><td>−0.1369（116/123）</td><td>1.0000</td></tr>
+<tr><td>2023-08-01—2026-05-01</td><td>加入净2R含费保本</td><td>123</td><td>22.92</td><td>−10.92</td><td>31.7%</td><td>14</td><td>42.68</td><td>−0.1363（116/123）</td><td>1.0000</td></tr>
+</tbody></table>
+<p>2026窗改善1.94R，来自两笔亏损变成覆盖成本后的微盈；9笔实质盈利保留，2笔保本取整微盈合计仅0.001184R，另6笔亏损。64.7%不能解释成每次都赚够1R或2R。长历史救回7笔亏损，同时使3笔交易收益变差，合计少1.08R。因此加入是研究选择，不能声称总体更赚钱。</p>
+<p>2025年4月17日至7月30日的14连亏仍存在，加入这条规则没有把历史最长连亏缩短。</p>
+<p>随机对照沿用同币、方向、实际入场月、纽约小时及周末、此前120根因果波动桶，每单最多5个同退出同成本的随机入场。p为月块9999次置换并在原8组内Holm调整，检验的是相对随机入场的超额，不能冒充两种退出之间的显著性。长历史有7笔缺匹配。AUC、top-decile和单特征排序基线不适用：这里没有预测分数或训练；以原版同入场配对和匹配随机作为对照。</p>
+<h2>配置使用与复核</h2>
+<p>研究端已经使用 <code>yoyo.evaluation.spike_partial_exit.replay_partial</code>。新文件保存完整 <code>exit_policy</code>，可作为该函数的关键字参数；它对应原实验 <code>arms.cost_be2</code>，通过SHA绑定原配置与已生成统计。后续研究先读取此配置，再沿用既有V8准入与单仓调度；不是修改原8组实验的默认选择，也没有修改TradingView图上的Pine。</p>
+<pre><code>
+import json
+from pathlib import Path
+from yoyo.evaluation.spike_partial_exit import replay_partial
+
+profile = json.loads(Path(
+    &quot;experiments/active/exp-spike-v8-ict-exits-20260915-v1/owner_research_choice.json&quot;
+).read_text())
+# prepared/signal_i/end_i must come from the approved V8+ICT research window.
+# trade = replay_partial(prepared, signal_i, end_i=end_i,
+#                        tick=profile[&quot;tick&quot;], **profile[&quot;exit_policy&quot;])
+</code></pre>
+<p>本轮实际执行45项既有检查全部通过，覆盖退出时序、保本、分批引擎委派与ICT准入。复现以下命令只执行合成检查和文档转换，不读取市场价格：</p>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+PYTHONPATH=/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages:/Users/zhangzc/fable-trading /usr/bin/python3 -m pytest -q tests/evaluation/test_spike_recovery_exit.py tests/evaluation/test_spike_partial_exit.py tests/test_spike_v8_ict_exit_study.py tests/test_spike_v8_ict.py
+/usr/bin/python3 scripts/md_to_html.py analysis/p1_spike_v8_ict_be2_adoption_20260915.md --out-dir analysis/html
+</code></pre>
+<p>完整原始回测命令、数据收据及逐笔文件见<a href="/Users/zhangzc/fable-trading/analysis/html/p1_spike_v8_ict_exits_20260915.html">原实验报告</a>。该报告保留原结果和所有失败方案。</p>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>本轮holdout消耗0次，未读取价格。历史已看过，Owner选择不构成新的盲测。</li>
+<li>止损跳空按实际观察到的开盘价成交，可能低于成本保本目标；固定0.2%没有另加资金费率和额外滑点。</li>
+<li>收盘确认与下一根生效不能保证本根曾有2R浮盈就一定保本。TV原生逐笔对齐未完成；本次是Python研究配置固定，未上传Pine或接入实盘。</li>
+<li>本轮HTML只做静态结构与本地链接检查，不声称浏览器视觉验收。</li>
+</ul>
+<p>下一步研究沿用本配置作为比较起点，原版始终保留对照；若继续优化止盈，每次只改一个变量。实际部署及新配置holdout评估仍按项目要求单独取得授权。</p>
+</body>
+</html>
