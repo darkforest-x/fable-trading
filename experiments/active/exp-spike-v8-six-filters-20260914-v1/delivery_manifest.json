@@ -1,0 +1,180 @@
+{
+  "experiment_id": "exp-spike-v8-six-filters-20260914-v1",
+  "status": "inconclusive",
+  "source_commit": "ad3bcb6c82614f14c933f7311469e30feeb1347f",
+  "scope": {
+    "venues": [
+      "binance",
+      "okx",
+      "gate"
+    ],
+    "streams": 3531,
+    "timeframes_minutes": [
+      30,
+      60,
+      240
+    ],
+    "start_inclusive_utc": "2024-09-10T00:00:00Z",
+    "end_exclusive_utc": "2026-09-10T00:00:00Z",
+    "split_utc": "2025-09-10T00:00:00Z",
+    "closed_original": 94746,
+    "censored_original": 445,
+    "cost_nominal_round_trip": 0.002
+  },
+  "eligibility": {
+    "training_eligible": false,
+    "production_eligible": false,
+    "holdout_status": "holdout_consumed",
+    "history": "owner-authorized reused nonblind history; partial/failed runs retained; not first historical exposure"
+  },
+  "receipts": [
+    {
+      "path": "experiments/active/exp-spike-v8-six-filters-20260914-v1/admission/config.json",
+      "sha256": "2950a3c49ca9ff60d3afbd82e8e5dea27ef7e66a6cdc96e49296e2ce09c005e5",
+      "size_bytes": 591
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-six-filters-20260914-v1/admission/results/full_v3/identity.json",
+      "sha256": "d7c8db1db5c40269fe2fa1c91ba05f4f1fb806b4ef8c78aed6c87dc203f6cf2c",
+      "size_bytes": 539
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-six-filters-20260914-v1/admission/results/full_v3/manifest.json",
+      "sha256": "c363281d76c72e09619e3949c5fa8afa6d4a9dc74207020c65bfb9cdbd313831",
+      "size_bytes": 543
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-six-filters-20260914-v1/admission/results/full_v3/stream_summary.csv",
+      "sha256": "084b82ea2ec538f6c208f12e80f3107e301cd5f2ee98779de41885466e07b3b1",
+      "size_bytes": 3168571
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-six-filters-20260914-v1/admission/audit_v1/receipt.json",
+      "sha256": "cfc38355eec6ba39fe1f5c1bd5fc8de50d484ad2c160acc1d4e57f43919e0d2b",
+      "size_bytes": 1031
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-six-filters-20260914-v1/source_audit/receipt.json",
+      "sha256": "edacb73afb3828accaca0e6d085f9843973e89fadefaf0058f934114a051ce62",
+      "size_bytes": 963
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-six-filters-20260914-v1/exit/full_v1/receipt.json",
+      "sha256": "89d344dc9c740aa7238a00ef001fddfb67ed574b7beedc4917e3e514787c227e",
+      "size_bytes": 1173
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-six-filters-20260914-v1/exit/schedule_audit_v1/receipt.json",
+      "sha256": "cf88ad7c5ad18bd9188820842f719eee6d40cdcd6a35aaa1e92c7a21968d07cf",
+      "size_bytes": 722
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-six-filters-20260914-v1/delivery/statistics_v1/statistics_receipt.json",
+      "sha256": "03328333758241be7598aabf11882652c264f09e61e4cbb5579a9fabd0da5eb0",
+      "size_bytes": 18725158
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-six-filters-20260914-v1/delivery/summary_v1/summary_receipt.json",
+      "sha256": "b7f9acabb27ad542b99e5a89506d7c0353870f3a7e9487c57616ceb637190fb7",
+      "size_bytes": 785
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-six-filters-20260914-v1/parent_validation.json",
+      "sha256": "ce95c4b8ef9e0ed9f9a3c8abcf4bea1b7bf042a6f44b515fe1e280f60267a081",
+      "size_bytes": 827
+    }
+  ],
+  "builders": [
+    {
+      "path": "yoyo/evaluation/spike_v8_six_filters.py",
+      "sha256": "365cef00b81151e51d11fddda061be3630cba1abf80a8be4cf4616fb14e71bfd",
+      "size_bytes": 28664
+    },
+    {
+      "path": "yoyo/evaluation/spike_v8_four_hour_exit.py",
+      "sha256": "cf8c931242099f3a5d3d08948082b471e42c81e607fba9bd66325e3d24bb9d07",
+      "size_bytes": 18748
+    },
+    {
+      "path": "yoyo/evaluation/spike_six_filter_statistics.py",
+      "sha256": "15b20c7607ea1562bd93f5581f2f3b592c261f99a8e4f623e0995d08451b4d0a",
+      "size_bytes": 13477
+    },
+    {
+      "path": "yoyo/evaluation/spike_six_filters_report.py",
+      "sha256": "d2ea71fe652f3fdfb5a0842d86f4ef072a49a117a459f4e529e3582a818358ee",
+      "size_bytes": 17262
+    },
+    {
+      "path": "yoyo/evaluation/spike_v1_v8_be05.py",
+      "sha256": "72a325fccdfc8b0298e651d136beb6fffc89bb9c79b1ae086cc92b0d5142c98f",
+      "size_bytes": 37311
+    },
+    {
+      "path": "yoyo/evaluation/spike_exit_policy_study.py",
+      "sha256": "f52d73309e0a28a26b0d9daa445c2a4484003dd4f32ec2f47b1e039c365c430c",
+      "size_bytes": 34405
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-six-filters-20260914-v1/reconcile_source.py",
+      "sha256": "bf83753eb265dd07cd8035b5945aa688fd6d192cd15d62cc79794e2c72971547",
+      "size_bytes": 3455
+    },
+    {
+      "path": "experiments/active/exp-spike-v8-six-filters-20260914-v1/admission/audit_v1.py",
+      "sha256": "db0b7da5f21ff244e6816499ad392f25352e0967350b5d5264f7afeee1d4f89c",
+      "size_bytes": 9483
+    }
+  ],
+  "final_report": [
+    {
+      "path": "analysis/p1_spike_v8_six_filters_20260914.md",
+      "sha256": "ed5f77f2d78d5c7ee4a777d7ec6b2e63e5593620773098d7aa5337830df825f8",
+      "size_bytes": 21881
+    },
+    {
+      "path": "analysis/html/p1_spike_v8_six_filters_20260914.html",
+      "sha256": "b5e306db0f25ab56675a76576a48626a1ed5786a5c6b8d1a03446c47eb1a1e7d",
+      "size_bytes": 30007
+    }
+  ],
+  "notion_url": "https://app.notion.com/p/3db8856479af81f8b41be2baab4d2f57",
+  "verification": {
+    "focused_tests": "17 passed",
+    "aggregate_outputs_checked": 21,
+    "aggregate_builder_sha_checked": 2,
+    "admission_csv_only_sha_checked": 42372,
+    "admission_csv_only_sha_mismatches": 0,
+    "candidate_clock_mismatches": 0,
+    "exit_archive_parity": true,
+    "notion_readback": "page fetched; experiment key, later-year losses and final next-step text present"
+  },
+  "non_selected_runs": {
+    "admission_completed_streams": {
+      "probe25": 0,
+      "probe25_v2": 0,
+      "probe25_v3": 25,
+      "full_v1": 135,
+      "full_v2": 586,
+      "full_v4": 139
+    },
+    "final_admission": "full_v3; same-identity interruption/resume included",
+    "exit": [
+      "sample_25 schema failure",
+      "sample_25_v2:25",
+      "sample_25_v3:25"
+    ],
+    "configuration_exposure_1_is_not_total_history_reads": true
+  },
+  "conclusions": {
+    "rv_gt50_serial_delta_r": 272.91224648701564,
+    "risk_gt30pct_serial_delta_r": 18.13991750109767,
+    "usdc_serial_delta_r": 2150.2901125265225,
+    "usdc_cost_contribution_fraction": 0.9616184556605271,
+    "stock_linked_all_serial_delta_r": 419.34563881188114,
+    "sunday_utc_serial_delta_r": 2768.7162449876196,
+    "four_hour_exit_serial_delta_r": -1895.5733461788714,
+    "four_hour_exit_decision": "rejected for this specification",
+    "universal_filter_decision": "none accepted; timezone/tail/statistical limits remain"
+  }
+}

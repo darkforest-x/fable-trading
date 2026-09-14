@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>V8：六批 V1 观察的独立过滤回放（2026-09-14）</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>V8：六批 V1 观察的独立过滤回放（2026-09-14）</h1>
+<p>本轮把原始 V1 观察迁移到 V8，逐项测试，不叠加。数据是重复研究过的历史，结论属于探索证据。正文与每笔账本保持相同样本、成本、规则；未修改 Pine、线上监控、Bark 或实盘。</p>
+<h2>本轮结论与处置</h2>
+<p>九个独立入场过滤和一个独立退出方案均已完成。<strong>这些规则中有局部改善，但没有一条已经证明能把 V8 变成高胜率、稳定盈利的系统。</strong> 本轮只测试冻结 V8；旧 V1 数字仅复核来源，没有把 V1 的静态删单结果当成 V8 的反事实收益。</p>
+<ul>
+<li><strong>USDC 排除</strong>适合作为研究标的范围的候选约束。它保留全部532笔原有兑现10R事件，但净胜率仅从30.05%升至30.10%。改善2150.29R中，2067.76R（96.16%）是成本R，毛价差贡献82.53R；这是固定成本与极小初始风险不匹配，不是识别到了新的趋势优势。剔除后两年总净R仅128.51，去掉最好一笔便是−6.14R。</li>
+<li><strong>量比&gt;50</strong>在两个年份、三个周期的串行结果均改善，但113295个候选仅拒绝306个（0.270%）。适合作为待验证的极端量能保护，无法解决绝大部分信号噪音；匹配后也没有显著的独立优势。不能从成交量异常直接断言FOMO机制成立。</li>
+<li><strong>风险宽度&gt;30%</strong>只拒绝84个候选（0.074%），其中81个到达开仓尝试、3个本就未尝试；收益改善很小，前一年1H/4H略差。它是报价风险范围测试，不是已经找到最优止损宽度。原执行用收盘2R启动跟随，不能沿用“只有MFE达到1R才启动”的旧机制描述。</li>
+<li><strong>UTC周日过滤</strong>是这组里最值得保留研究的日历候选：三个周期、前后两年均改善。但两年净胜率也仅30.81%，比原版多0.76个百分点；已结束交易减少13.23%，完整重跑的兑现10R单从532降至463。原有10R身份保留459/532，另新增4笔。它不能保证保留所有大行情。</li>
+<li><strong>H00</strong>不适合作为所有周期通用的开关：UTC口径伤害30m；北京时间口径伤害4H。UTC周日是北京时间周日08:00至周一08:00，北京周日则是周日00:00至周一00:00，不能混用。</li>
+<li><strong>股票挂钩排除</strong>两年改善419.35R，但该目录中的被删交易全部在后一年，缺乏前一年的独立支持。本轮覆盖所有股票挂钩，不能宣称已经复现“仅美股排除”的效果。</li>
+<li><strong>四小时未推进退出</strong>按预定条件执行后，三个周期全都变差，且更伤害右尾。拒绝把本轮这个退出规则接入V8；它也无法追回四小时之前已经发生的止损。</li>
+</ul>
+<p>还有一个不能忽略的结果：<strong>最近一年原版合计−4829.46R，UTC周日过滤后仍为−3022.71R，USDC排除后仍为−3840.48R。</strong> 两年总和偶尔转正，不能代表最近一年转好到可用。前一年与后一年因跨切点交易剔除，不应直接相加回全期。</p>
+<p>后续若继续：先对USDC标的范围和量比极端值作独立前向记录；UTC周日只保留为待验证日历候选，不继续从同一历史中寻找更漂亮的时钟。规则叠加、新的止损门槛、线上启用均不属于本轮已验证的结论。</p>
+<h2>两年全部交易：完整重跑后的结果</h2>
+<p>数据：Binance、OKX、Gate，共 3,531 条合约×周期数据流；30m、1H、4H；2024-09-10（含）至 2026-09-10（不含），UTC。前后两年以 2025-09-10 切分。原版共 95191 笔执行事件，94746 笔已结束，445 笔未完整结束。</p>
+<p>所有 R 为按单初始价格风险计算并扣 0.2% 名义往返成本的事件统计；R 相加不是账户收益率，事件序列回撤不是共享资金的最大回撤。</p>
+<table><thead><tr>
+<th>规则</th>
+<th>已结束笔数</th>
+<th>净胜率</th>
+<th>平均净R</th>
+<th>合计净R</th>
+<th>较原版ΔR</th>
+<th>R利润因子</th>
+<th>事件回撤R</th>
+<th>兑现≥10R笔数</th>
+</tr></thead><tbody>
+<tr><td>V8 原版</td><td>94,746</td><td>30.05%</td><td>-0.0213</td><td>-2,021.78</td><td>0.00</td><td>0.970</td><td>8,293.68</td><td>532</td></tr>
+<tr><td>量比 &gt;50 剔除</td><td>94,507</td><td>30.07%</td><td>-0.0185</td><td>-1,748.87</td><td>272.91</td><td>0.974</td><td>8,053.88</td><td>531</td></tr>
+<tr><td>初始风险宽度 &gt;30% 剔除</td><td>94,680</td><td>30.05%</td><td>-0.0212</td><td>-2,003.64</td><td>18.14</td><td>0.970</td><td>8,276.70</td><td>532</td></tr>
+<tr><td>USDC 标的剔除</td><td>94,578</td><td>30.10%</td><td>0.0014</td><td>128.51</td><td>2,150.29</td><td>1.002</td><td>7,127.78</td><td>532</td></tr>
+<tr><td>股票挂钩标的剔除</td><td>92,703</td><td>30.07%</td><td>-0.0173</td><td>-1,602.44</td><td>419.35</td><td>0.976</td><td>8,064.97</td><td>524</td></tr>
+<tr><td>UTC 0 点剔除</td><td>91,286</td><td>30.04%</td><td>-0.0192</td><td>-1,755.93</td><td>265.85</td><td>0.973</td><td>8,026.47</td><td>523</td></tr>
+<tr><td>UTC 周日剔除</td><td>82,213</td><td>30.81%</td><td>0.0091</td><td>746.93</td><td>2,768.72</td><td>1.013</td><td>6,788.70</td><td>463</td></tr>
+<tr><td>量比 &gt;50 且 TR/ATR &gt;10 剔除</td><td>94,711</td><td>30.05%</td><td>-0.0212</td><td>-2,005.10</td><td>16.68</td><td>0.970</td><td>8,273.11</td><td>531</td></tr>
+<tr><td>北京 0 点剔除（敏感性）</td><td>88,956</td><td>30.10%</td><td>-0.0215</td><td>-1,910.38</td><td>111.41</td><td>0.970</td><td>7,818.55</td><td>497</td></tr>
+<tr><td>北京周日剔除（敏感性）</td><td>84,376</td><td>30.36%</td><td>-0.0083</td><td>-698.38</td><td>1,323.40</td><td>0.988</td><td>7,306.12</td><td>465</td></tr>
+</tbody></table>
+<h2>各周期与前后年份</h2>
+<p>每格是相对同周期原版的合计净 R 变化。前一年排除跨切点未退出的交易；后一年按入场时间归属。不能只选改善的周期或年份。</p>
+<h3>两年</h3>
+<table><thead><tr>
+<th>规则（原版行是总净R，其余是ΔR）</th>
+<th>30m</th>
+<th>1H</th>
+<th>4H</th>
+</tr></thead><tbody>
+<tr><td>V8 原版</td><td>-1,376.95</td><td>-1,135.71</td><td>490.88</td></tr>
+<tr><td>量比 &gt;50 剔除</td><td>178.03</td><td>70.14</td><td>24.75</td></tr>
+<tr><td>初始风险宽度 &gt;30% 剔除</td><td>5.72</td><td>1.96</td><td>10.46</td></tr>
+<tr><td>USDC 标的剔除</td><td>1,188.11</td><td>788.54</td><td>173.64</td></tr>
+<tr><td>股票挂钩标的剔除</td><td>327.95</td><td>74.95</td><td>16.45</td></tr>
+<tr><td>UTC 0 点剔除</td><td>-55.96</td><td>141.61</td><td>180.20</td></tr>
+<tr><td>UTC 周日剔除</td><td>1,533.98</td><td>1,005.95</td><td>228.79</td></tr>
+<tr><td>量比 &gt;50 且 TR/ATR &gt;10 剔除</td><td>9.67</td><td>7.83</td><td>-0.82</td></tr>
+<tr><td>北京 0 点剔除（敏感性）</td><td>99.05</td><td>142.73</td><td>-130.37</td></tr>
+<tr><td>北京周日剔除（敏感性）</td><td>481.76</td><td>790.85</td><td>50.79</td></tr>
+</tbody></table>
+<h3>前一年</h3>
+<table><thead><tr>
+<th>规则（原版行是总净R，其余是ΔR）</th>
+<th>30m</th>
+<th>1H</th>
+<th>4H</th>
+</tr></thead><tbody>
+<tr><td>V8 原版</td><td>2,820.55</td><td>-1,104.64</td><td>385.56</td></tr>
+<tr><td>量比 &gt;50 剔除</td><td>119.40</td><td>49.93</td><td>13.11</td></tr>
+<tr><td>初始风险宽度 &gt;30% 剔除</td><td>2.00</td><td>-0.33</td><td>-0.38</td></tr>
+<tr><td>USDC 标的剔除</td><td>692.12</td><td>362.69</td><td>106.50</td></tr>
+<tr><td>股票挂钩标的剔除</td><td>0.00</td><td>0.00</td><td>0.00</td></tr>
+<tr><td>UTC 0 点剔除</td><td>13.17</td><td>-10.33</td><td>69.77</td></tr>
+<tr><td>UTC 周日剔除</td><td>464.90</td><td>507.20</td><td>129.57</td></tr>
+<tr><td>量比 &gt;50 且 TR/ATR &gt;10 剔除</td><td>0.09</td><td>1.10</td><td>0.00</td></tr>
+<tr><td>北京 0 点剔除（敏感性）</td><td>-76.69</td><td>159.39</td><td>69.07</td></tr>
+<tr><td>北京周日剔除（敏感性）</td><td>-5.56</td><td>263.45</td><td>-25.40</td></tr>
+</tbody></table>
+<h3>后一年</h3>
+<table><thead><tr>
+<th>规则（原版行是总净R，其余是ΔR）</th>
+<th>30m</th>
+<th>1H</th>
+<th>4H</th>
+</tr></thead><tbody>
+<tr><td>V8 原版</td><td>-4,290.63</td><td>-674.01</td><td>135.19</td></tr>
+<tr><td>量比 &gt;50 剔除</td><td>59.85</td><td>20.21</td><td>12.49</td></tr>
+<tr><td>初始风险宽度 &gt;30% 剔除</td><td>4.95</td><td>2.30</td><td>9.83</td></tr>
+<tr><td>USDC 标的剔除</td><td>496.00</td><td>425.85</td><td>67.14</td></tr>
+<tr><td>股票挂钩标的剔除</td><td>327.95</td><td>74.95</td><td>16.45</td></tr>
+<tr><td>UTC 0 点剔除</td><td>-78.28</td><td>167.96</td><td>107.68</td></tr>
+<tr><td>UTC 周日剔除</td><td>1,080.46</td><td>626.25</td><td>100.04</td></tr>
+<tr><td>量比 &gt;50 且 TR/ATR &gt;10 剔除</td><td>9.57</td><td>6.74</td><td>-0.82</td></tr>
+<tr><td>北京 0 点剔除（敏感性）</td><td>177.24</td><td>0.08</td><td>-202.84</td></tr>
+<tr><td>北京周日剔除（敏感性）</td><td>523.01</td><td>633.96</td><td>79.12</td></tr>
+</tbody></table>
+<h2>保留原入场的归因，与完整重跑的区别</h2>
+<table><thead><tr>
+<th>规则</th>
+<th>固定原单删除ΔR</th>
+<th>避开的亏损R</th>
+<th>牺牲的盈利R</th>
+<th>少掉原入场</th>
+<th>新增后续入场</th>
+<th>原≥10R保留</th>
+</tr></thead><tbody>
+<tr><td>量比 &gt;50 剔除</td><td>282.09</td><td>388.79</td><td>106.70</td><td>265</td><td>22</td><td>531/532</td></tr>
+<tr><td>初始风险宽度 &gt;30% 剔除</td><td>7.91</td><td>29.63</td><td>21.72</td><td>80</td><td>9</td><td>532/532</td></tr>
+<tr><td>USDC 标的剔除</td><td>2,150.29</td><td>2,150.29</td><td>0.00</td><td>168</td><td>0</td><td>532/532</td></tr>
+<tr><td>股票挂钩标的剔除</td><td>419.35</td><td>1,603.47</td><td>1,184.13</td><td>2,110</td><td>0</td><td>524/532</td></tr>
+<tr><td>UTC 0 点剔除</td><td>331.17</td><td>2,881.47</td><td>2,550.30</td><td>4,179</td><td>707</td><td>520/532</td></tr>
+<tr><td>UTC 周日剔除</td><td>2,913.43</td><td>10,861.64</td><td>7,948.22</td><td>14,018</td><td>1,472</td><td>459/532</td></tr>
+<tr><td>量比 &gt;50 且 TR/ATR &gt;10 剔除</td><td>18.91</td><td>41.77</td><td>22.86</td><td>38</td><td>2</td><td>531/532</td></tr>
+<tr><td>北京 0 点剔除（敏感性）</td><td>74.78</td><td>4,709.20</td><td>4,634.42</td><td>6,841</td><td>986</td><td>492/532</td></tr>
+<tr><td>北京周日剔除（敏感性）</td><td>1,474.57</td><td>9,009.97</td><td>7,535.40</td><td>11,907</td><td>1,519</td><td>462/532</td></tr>
+</tbody></table>
+<p>各项有重叠，ΔR 不能相加。完整串行回放维持每条流单仓，原始反向信号仍能结束旧仓，即使反向新入场被过滤。跨币、跨所不合并风险，所以上表不表示账户可兑现回报。</p>
+<h2>少交易是否真的选掉了更差的交易</h2>
+<p>后一年每规则×周期做 2,000 次匹配随机删除：同交易所、标的、周期、方向、入场月份、固定信号 ATR/价格桶，删除相同数量。共 27 项，Bonferroni 乘 27。extraΔR 为比匹配随机少交易额外少亏的 R。整币排除在同币内无法识别，明确不报告显著性。该对照检验 V8 信号池内的选择，不证明相对任意市场入场有 alpha。</p>
+<table><thead><tr>
+<th>规则</th>
+<th>周期</th>
+<th>实际固定ΔR</th>
+<th>相对匹配额外ΔR</th>
+<th>可随机重排删除数</th>
+<th>强制删除数</th>
+<th>校正p</th>
+</tr></thead><tbody>
+<tr><td>北京 0 点剔除（敏感性）</td><td>30</td><td>170.96</td><td>-29.64</td><td>1,086</td><td>926</td><td>1.0000</td></tr>
+<tr><td>北京 0 点剔除（敏感性）</td><td>60</td><td>-50.94</td><td>-23.13</td><td>431</td><td>666</td><td>1.0000</td></tr>
+<tr><td>北京 0 点剔除（敏感性）</td><td>240</td><td>-219.97</td><td>34.82</td><td>117</td><td>651</td><td>0.0540</td></tr>
+<tr><td>UTC 0 点剔除</td><td>30</td><td>-35.99</td><td>-63.69</td><td>609</td><td>448</td><td>1.0000</td></tr>
+<tr><td>UTC 0 点剔除</td><td>60</td><td>172.75</td><td>6.46</td><td>211</td><td>365</td><td>1.0000</td></tr>
+<tr><td>UTC 0 点剔除</td><td>240</td><td>134.93</td><td>-23.04</td><td>104</td><td>664</td><td>1.0000</td></tr>
+<tr><td>量比 &gt;50 且 TR/ATR &gt;10 剔除</td><td>30</td><td>10.82</td><td>6.20</td><td>11</td><td>5</td><td>1.0000</td></tr>
+<tr><td>量比 &gt;50 且 TR/ATR &gt;10 剔除</td><td>60</td><td>7.73</td><td>-10.38</td><td>1</td><td>15</td><td>1.0000</td></tr>
+<tr><td>量比 &gt;50 且 TR/ATR &gt;10 剔除</td><td>240</td><td>-0.82</td><td>0.00</td><td>0</td><td>3</td><td>不适用</td></tr>
+<tr><td>初始风险宽度 &gt;30% 剔除</td><td>30</td><td>-3.85</td><td>1.42</td><td>3</td><td>9</td><td>1.0000</td></tr>
+<tr><td>初始风险宽度 &gt;30% 剔除</td><td>60</td><td>1.12</td><td>-0.00</td><td>0</td><td>22</td><td>不适用</td></tr>
+<tr><td>初始风险宽度 &gt;30% 剔除</td><td>240</td><td>9.58</td><td>-0.00</td><td>0</td><td>28</td><td>不适用</td></tr>
+<tr><td>量比 &gt;50 剔除</td><td>30</td><td>67.98</td><td>14.20</td><td>63</td><td>58</td><td>1.0000</td></tr>
+<tr><td>量比 &gt;50 剔除</td><td>60</td><td>23.35</td><td>-11.48</td><td>10</td><td>48</td><td>1.0000</td></tr>
+<tr><td>量比 &gt;50 剔除</td><td>240</td><td>13.56</td><td>0.47</td><td>4</td><td>27</td><td>1.0000</td></tr>
+<tr><td>股票挂钩标的剔除</td><td>30</td><td>327.95</td><td>0.00</td><td>0</td><td>1,400</td><td>不适用</td></tr>
+<tr><td>股票挂钩标的剔除</td><td>60</td><td>74.95</td><td>-0.00</td><td>0</td><td>610</td><td>不适用</td></tr>
+<tr><td>股票挂钩标的剔除</td><td>240</td><td>16.45</td><td>0.00</td><td>0</td><td>33</td><td>不适用</td></tr>
+<tr><td>北京周日剔除（敏感性）</td><td>30</td><td>653.89</td><td>301.77</td><td>2,295</td><td>2,173</td><td>0.0135</td></tr>
+<tr><td>北京周日剔除（敏感性）</td><td>60</td><td>777.56</td><td>80.20</td><td>735</td><td>1,576</td><td>0.8096</td></tr>
+<tr><td>北京周日剔除（敏感性）</td><td>240</td><td>109.30</td><td>-8.31</td><td>85</td><td>364</td><td>1.0000</td></tr>
+<tr><td>UTC 周日剔除</td><td>30</td><td>1,176.52</td><td>287.62</td><td>2,750</td><td>2,691</td><td>0.0270</td></tr>
+<tr><td>UTC 周日剔除</td><td>60</td><td>706.81</td><td>82.86</td><td>763</td><td>1,613</td><td>1.0000</td></tr>
+<tr><td>UTC 周日剔除</td><td>240</td><td>120.38</td><td>1.77</td><td>78</td><td>388</td><td>1.0000</td></tr>
+<tr><td>USDC 标的剔除</td><td>30</td><td>496.00</td><td>-0.00</td><td>0</td><td>32</td><td>不适用</td></tr>
+<tr><td>USDC 标的剔除</td><td>60</td><td>425.85</td><td>-0.00</td><td>0</td><td>31</td><td>不适用</td></tr>
+<tr><td>USDC 标的剔除</td><td>240</td><td>67.14</td><td>-0.00</td><td>0</td><td>4</td><td>不适用</td></tr>
+</tbody></table>
+<p>匹配置换的27项检验中，北京周日30m校正p=0.01349，UTC周日30m为0.02699；其余可识别项未过0.05。这是探索性信号池内的删除对照，并非盲测。2,000次置换的最小可报告原始p为1/2001，乘27后的分辨率下限为0.01349，<strong>本轮计算不能支持p&lt;0.01的结论</strong>。没有因为结果接近阈值而追加置换次数。单独整币排除无法在同币分层内重排，p为不适用，不是p=0。</p>
+<h2>持仓不足 4 小时：单独的因果退出试验</h2>
+<p>不能在开仓时知道最终持仓时长。替代规则只在实际入场后首次达到 4 小时的已收盘 K 线检查一次：截至当时的 MFE&lt;1R，且收盘毛浮盈≤0R，下一根开盘退出。旧止损/跳空优先，其次原反向退出；此前已止损的单子仍计亏损。4H 在入场所在 4H K 收盘时检查，30m/1H 分别对应第8/4根。没有把上一轮 0.5R 保本或分档锁利混入。</p>
+<table><thead><tr>
+<th>周期</th>
+<th>原版净R</th>
+<th>4h退出净R</th>
+<th>串行ΔR</th>
+<th>原版胜率</th>
+<th>4h退出胜率</th>
+<th>原版兑现≥10R</th>
+<th>4h退出兑现≥10R</th>
+</tr></thead><tbody>
+<tr><td>all</td><td>-2,021.78</td><td>-3,917.36</td><td>-1,895.57</td><td>30.05%</td><td>20.94%</td><td>532</td><td>427</td></tr>
+<tr><td>30</td><td>-1,376.95</td><td>-2,356.05</td><td>-979.10</td><td>29.61%</td><td>21.77%</td><td>330</td><td>295</td></tr>
+<tr><td>60</td><td>-1,135.71</td><td>-1,847.47</td><td>-711.77</td><td>30.64%</td><td>19.94%</td><td>144</td><td>100</td></tr>
+<tr><td>240</td><td>490.88</td><td>286.17</td><td>-204.71</td><td>31.03%</td><td>18.85%</td><td>58</td><td>32</td></tr>
+</tbody></table>
+<table><thead><tr>
+<th>周期</th>
+<th>同入场双结束笔数</th>
+<th>配对ΔR</th>
+<th>改善亏单</th>
+<th>伤害赢单</th>
+<th>原10R保留</th>
+<th>每事件ΔR周块95%区间</th>
+</tr></thead><tbody>
+<tr><td>all</td><td>94,746</td><td>-2,170.21</td><td>30,351</td><td>8,698</td><td>385/532</td><td>-0.0716 至 0.0147</td></tr>
+<tr><td>30</td><td>57,575</td><td>-1,450.21</td><td>16,838</td><td>4,590</td><td>263/330</td><td>-0.0806 至 0.0128</td></tr>
+<tr><td>60</td><td>28,473</td><td>-531.41</td><td>10,243</td><td>3,052</td><td>93/144</td><td>-0.0705 至 0.0248</td></tr>
+<tr><td>240</td><td>8,698</td><td>-188.59</td><td>3,270</td><td>1,056</td><td>29/58</td><td>-0.1714 至 0.0967</td></tr>
+</tbody></table>
+<h2>原 V1 表述的来源复核</h2>
+<p>原始 V1 账本为多头版本；本轮 V8 为双向，两者不是同一策略契约。原始账本为 6,253 行（含日线），其中 6,170 笔已结束、83 笔未结束。以下是旧账本静态分组，不是重新跑策略得到的可回收收益。</p>
+<table><thead><tr>
+<th>分组</th>
+<th>笔数</th>
+<th>胜率</th>
+<th>该分组净R</th>
+</tr></thead><tbody>
+<tr><td>all_closed</td><td>6,170</td><td>28.07%</td><td>838.18</td></tr>
+<tr><td>量比 &gt;50 剔除</td><td>329</td><td>17.63%</td><td>-170.94</td></tr>
+<tr><td>量比 &gt;50 且 TR/ATR &gt;10 剔除</td><td>153</td><td>15.03%</td><td>-90.89</td></tr>
+<tr><td>初始风险宽度 &gt;30% 剔除</td><td>104</td><td>14.42%</td><td>-62.32</td></tr>
+<tr><td>USDC 标的剔除</td><td>16</td><td>0.00%</td><td>-101.01</td></tr>
+<tr><td>股票挂钩标的剔除</td><td>224</td><td>27.68%</td><td>-66.34</td></tr>
+<tr><td>UTC 0 点剔除</td><td>319</td><td>27.90%</td><td>-31.70</td></tr>
+<tr><td>UTC 周日剔除</td><td>1,147</td><td>20.49%</td><td>-413.99</td></tr>
+<tr><td>北京 0 点剔除（敏感性）</td><td>484</td><td>23.97%</td><td>-159.53</td></tr>
+<tr><td>北京周日剔除（敏感性）</td><td>952</td><td>23.84%</td><td>-270.68</td></tr>
+<tr><td>实际持仓 &lt;4h（事后，禁止准入）</td><td>386</td><td>7.25%</td><td>-348.62</td></tr>
+</tbody></table>
+<p>量比 &gt;50 的约 -171R 可复现。原 Notion 的校正 p=0.0001 归于“量比&gt;50 且 TR/ATR&gt;10”的联合区，不属于单独量比上限；缺少原检验运行产物，不能把该 p 当成本轮证据。H00 原时钟未写明，本轮按 UTC 与北京时间分别记录。股票规则采用交易所元数据全部股票挂钩类型，不能冒充严格“美股” +44R；USDC 是底层标的过滤，不是计价币过滤。</p>
+<h2>交易与过滤的精确定义</h2>
+<p>V8 保留原 BB 压缩、过热和确认/延迟准入。量比与 TR/ATR 读最终确认 K 线的冻结特征，不读早先强势证据 K 的最大值。风险宽度是下一根开盘报价下的初始止损距离/报价，&gt;0.30 是30%，开仓前判断，不把止损缩窄。时段过滤用信号收盘确认时间，下一根开盘成交；不是把 K 线开盘时间当成确认时间。</p>
+<p>原执行参数：5 根结构止损窗口、0.2ATR 缓冲、2ATR 最小风险；收盘浮盈达到2R才启动4ATR 跟随保护。每根先检查既有止损，再于收盘更新下一根保护；不把同一根的高点用于提前止损。缺口按可成交开盘处理，数据断档/期末未退出列为删失。不设固定止盈。</p>
+<p>未知类型或缺失特征保留但标为 unknown，不默认为已通过证据。元数据采用冻结当前目录；不是包含退市合约的完整历史时点分类。</p>
+<h2>数据覆盖与执行审计</h2>
+<table><thead><tr>
+<th>交易所</th>
+<th>30m 数据流</th>
+<th>1H 数据流</th>
+<th>4H 数据流</th>
+</tr></thead><tbody>
+<tr><td>Binance</td><td>653</td><td>651</td><td>649</td></tr>
+<tr><td>OKX</td><td>441</td><td>433</td><td>403</td></tr>
+<tr><td>Gate</td><td>50</td><td>42</td><td>209</td></tr>
+</tbody></table>
+<p>每条流内部原版/改版配对，跨周期的币池并不完全相同。时间范围是分析边界，不表示每个新上市标的都有两年数据。本轮未补跑15m、日线，也未冒称覆盖三家交易所全部历史上市和退市标的。</p>
+<p>标的分类使用2026-09-10冻结交易所原生目录，不通过模糊币名猜股票：OKX的instCategory=3表示股票（见<a href="https://app.okx.com/docs-v5/en/">OKX官方接口说明</a>）；Gate使用contract_type（见<a href="https://www.gate.com/docs/developers/apiv4/en/futures/">Gate官方合约接口</a>）。Binance按本地冻结的underlyingType字段归类。目录缺乏跨交易所可靠的上市地区字段，所以只能输出全部股票挂钩口径，不能将结果等同于严格美国股票子集。</p>
+<p>最终入场回放3531/3531条流完整，原版执行与冻结档案逐流核对。父级汇总再次验证逐流receipt与CSV SHA；新过滤后仍存在的同身份入场，其退出时间、删失与净R均与原版相同。17项针对性测试通过，覆盖门槛边界、方向/时间和因果退出、匹配空对照。</p>
+<p>CSV只读终审验证42,372个绑定文件，SHA不符为0。九臂各113295个候选的entry_time均等于信号bar开盘时间加周期，错位0，末端缺下一开盘0；这不等于所有量比特征都可用，候选层极少量缺失按unknown保留。风险被拒绝后的实际成交为0。USDC成本逐笔与0.002/初始风险比例核对，0不符，最大浮点误差1.27e−11。</p>
+<p>四小时退出另外保存了43539条从逐笔字段推导的调度记录，其中43529条实际执行；7条被既有跳空止损、2条被原反向退出、1条被边界删失覆盖。这个调度表是事后审计产物，不冒充原引擎当时写出的日志。</p>
+<h3>历史消耗记录</h3>
+<p>Owner已在对话允许任意历史时间。此次准入最终完整配置评估为1次，但不是只读了1次历史：probe25_v3完成25条、full_v1完成135条、full_v2完成586条、full_v3完成3531条；其中full_v3曾中断后按相同identity续跑；另一个增加摘要字段的full_v4完成139条后撤回，未进入本报告。更早probe25/probe25_v2在口径/类型检查阶段失败，无完整流；均保留目录。退出有失败schema试跑、两个25流试跑和最终3531流完整运行。统计汇总和调度审计只读取已保存结果，不重新读取K线。</p>
+<p>配置中的configuration_exposure=1仅标识这份配置，不能当作跨会话总holdout消耗次数。跨会话历史累计被使用的总次数未证实。最终使用admission/results/full_v3、exit/full_v1；不混入上述失败或撤回的输出。已观察到的多次历史使用使本轮不具备独立盲测资格。</p>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>全部为被多次研究过的历史，不是新的盲测或部署验收。观察原 V1 后测试 V8 仍然有选择偏差；月份切分不能消除前期反复研究。</li>
+</ul>
+<ul>
+<li>同币跨交易所、相近时间信号相关；胜率不是独立伯努利样本，采用周块区间与匹配删除。没有完整历史资金费率、订单簿、滑点和账户仓位模型，结果不是实际账户收益。</li>
+</ul>
+<ul>
+<li>FOMO、薄市、session 错配属于机制假设，这轮价格与成交量回放不能直接证明原因。过滤提高某项合计值也可能丢失右尾大趋势。</li>
+</ul>
+<ul>
+<li>AUC、模型 top-decile 毛/净收益：不适用；本轮未训练/评分分类器，也未据未来收益选 top-decile。严格对照是同事件原版、串行原版与匹配随机删除，而非虚构模型指标。缺少匹配任意市场入场对照，因此不宣称完整策略 alpha。</li>
+</ul>
+<ul>
+<li>研究与报告不更改线上准入、执行、通知或持仓。</li>
+</ul>
+<h2>产物与复现</h2>
+<p>逐笔与统计入口：</p>
+<ul>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v8-six-filters-20260914-v1/delivery/statistics_v1/serial_trades.csv.gz">完整串行逐笔账本</a></li>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v8-six-filters-20260914-v1/delivery/statistics_v1/serial_metrics.csv">按周期／年份／多空统计</a></li>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v8-six-filters-20260914-v1/delivery/statistics_v1/monthly_serial.csv">逐月统计</a></li>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v8-six-filters-20260914-v1/delivery/statistics_v1/matched_null.csv">匹配随机对照</a></li>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v8-six-filters-20260914-v1/delivery/summary_v1/asset_contributions.csv">币种贡献</a></li>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v8-six-filters-20260914-v1/admission/audit_v1/usdc_excluded_cost.csv">USDC成本分解</a></li>
+</ul>
+<p>完整逐笔文件、按周期/多空/月份统计、匹配检验和标的贡献见本地实验 delivery 目录。HTML 是可直接阅读版本；MD 与 builder 进入 git，较大的 gzip 账本保留本地并由 SHA receipt 绑定。</p>
+<pre><code>
+# 前提：本机已有冻结原始缓存、common/full_v3基准与V1不可变账本；身份与SHA见delivery_manifest.json。
+# 新复现目录必须不存在；已有source_audit保留并按receipt校验，不覆盖旧报告。
+if test ! -f experiments/active/exp-spike-v8-six-filters-20260914-v1/source_audit/receipt.json; then
+  .venv/bin/python -m experiments.active.exp-spike-v8-six-filters-20260914-v1.reconcile_source
+fi
+.venv/bin/python -m yoyo.evaluation.spike_v8_six_filters --official --output experiments/active/exp-spike-v8-six-filters-20260914-v1/admission/results/reproduce_v1
+.venv/bin/python -m yoyo.evaluation.spike_v8_four_hour_exit --output experiments/active/exp-spike-v8-six-filters-20260914-v1/exit/reproduce_v1
+.venv/bin/python -m yoyo.evaluation.spike_six_filter_statistics --input experiments/active/exp-spike-v8-six-filters-20260914-v1/admission/results/reproduce_v1 --output experiments/active/exp-spike-v8-six-filters-20260914-v1/delivery/reproduce_statistics
+.venv/bin/python -m yoyo.evaluation.spike_six_filters_report --admission experiments/active/exp-spike-v8-six-filters-20260914-v1/delivery/reproduce_statistics --exit experiments/active/exp-spike-v8-six-filters-20260914-v1/exit/reproduce_v1 --output experiments/active/exp-spike-v8-six-filters-20260914-v1/delivery/reproduce_summary
+.venv/bin/python scripts/md_to_html.py experiments/active/exp-spike-v8-six-filters-20260914-v1/delivery/reproduce_summary/report_generated.md --out-dir experiments/active/exp-spike-v8-six-filters-20260914-v1/delivery/reproduce_summary/html
+</code></pre>
+<p>来源：experiments/active/exp-spike-v8-six-filters-20260914-v1/delivery/statistics_v1；experiments/active/exp-spike-v8-six-filters-20260914-v1/exit/full_v1；原始 V1 Notion https://app.notion.com/p/nick-wiki/3d88856479af806d8abcf00b1c393d85 。</p>
+<p>知识库：<a href="https://app.notion.com/p/3db8856479af81f8b41be2baab4d2f57">Spike研究记录</a>。</p>
+</body>
+</html>
