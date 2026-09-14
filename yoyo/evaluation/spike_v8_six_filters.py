@@ -294,6 +294,10 @@ def assert_baseline_parity(actual: pd.DataFrame, expected: pd.DataFrame) -> None
     for column in ("censored", "trail_armed"):
         if column in left:
             right[column] = right[column].map(lambda value: bool(value) if isinstance(value, (bool, np.bool_)) else str(value).lower() == "true")
+    for column in ("cohort", "stream_key", "venue", "symbol", "asset", "exit_reason", "last_exit_reason", "precision"):
+        if column in left:
+            normalize = lambda value: pd.NA if pd.isna(value) else str(value)
+            left[column], right[column] = left[column].map(normalize), right[column].map(normalize)
     assert_frame_equal(left, right, check_dtype=False, check_like=False)
 
 

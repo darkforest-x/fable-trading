@@ -81,6 +81,9 @@ def test_baseline_noop_is_exact_clean_v8_contract() -> None:
     expected, _, _ = be05.replay_serial(context, arm="v8", enable_be=False, prepared=prepared)
     actual, _, _ = study.replay_serial(context, policy="baseline_noop", prepared=prepared, catalog=_catalog(context))
     study.assert_baseline_parity(actual, expected)
+    expected = expected.copy(); expected.loc[:, "asset"] = 4
+    actual = actual.copy(); actual.loc[:, "asset"] = "4"
+    study.assert_baseline_parity(actual, expected)
 
 
 def test_fixed_event_keeps_rejected_original_net_r_and_marks_unknown() -> None:
