@@ -191,7 +191,10 @@ def run(output: Path, *, limit: int | None = None) -> dict[str, Any]:
     for n, folder in enumerate(folders,1):
         context=base.load_verified_stream(folder); baseline,_,_=replay_serial(context,candidate=False); old_sha=validate_saved_baseline(context,baseline)
         candidate,_,_=replay_serial(context,candidate=True)
-        fixed_base=pd.DataFrame([_fixed(context,row,candidate=False) for _,row in baseline.iterrows()]); fixed_candidate=pd.DataFrame([_fixed(context,row,candidate=True) for _,row in baseline.iterrows()])
+        # Some authenticated streams have no V8 entries.  Keep the fixed-path
+        # schema so an empty baseline still receives its explicit parity check.
+        fixed_base=pd.DataFrame([_fixed(context,row,candidate=False) for _,row in baseline.iterrows()], columns=[*base.TRADE_COLUMNS, *EXTRA])
+        fixed_candidate=pd.DataFrame([_fixed(context,row,candidate=True) for _,row in baseline.iterrows()], columns=[*base.TRADE_COLUMNS, *EXTRA])
         common.validate_fixed_baseline(baseline, fixed_base)
         _gzip(streams/f"{context.key}.serial_baseline.csv.gz",baseline); _gzip(streams/f"{context.key}.serial_four_hour.csv.gz",candidate)
         _gzip(streams/f"{context.key}.fixed_baseline.csv.gz",fixed_base); _gzip(streams/f"{context.key}.fixed_four_hour.csv.gz",fixed_candidate)
