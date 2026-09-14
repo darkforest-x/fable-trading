@@ -321,7 +321,10 @@ def freeze_top20(*, output_dir: Path, cache_dir: Path) -> dict[str, Any]:
     receipt_path = output_dir / "ranking_receipt.json"
     if not ranked_path.exists() or not receipt_path.exists():
         raise TripleDataError("ranked top20 and ranking receipt must exist before freezing")
-    rows = list(pd.read_csv(ranked_path, dtype=str).to_dict("records"))
+    rows = [
+        {key: (None if pd.isna(value) else value) for key, value in row.items()}
+        for row in pd.read_csv(ranked_path, dtype=str).to_dict("records")
+    ]
     if len(rows) != int(config["universe_size"]):
         raise TripleDataError(f"expected {config['universe_size']} ranked assets, found {len(rows)}")
     if [int(row["rank"]) for row in rows] != list(range(1, len(rows) + 1)):
