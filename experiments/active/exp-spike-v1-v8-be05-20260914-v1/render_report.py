@@ -1,6 +1,5 @@
 """Render the BE05 report from completed saved outcome aggregates, no OHLC reads."""
 from pathlib import Path
-import hashlib
 import json
 import pandas as pd
 
@@ -90,10 +89,10 @@ def main():
         '以下命令在本仓根目录运行；原缓存必须存在并通过SHA核对。新输出目录不能覆盖已有冻结产物。',
         '```bash\n.venv/bin/python -m pytest tests/test_spike_native_v1_be05.py tests/test_spike_v1_v8_be05.py tests/test_spike_be05_report.py -q\n.venv/bin/python -m yoyo.evaluation.spike_native_v1_be05 --output experiments/active/exp-spike-v1-v8-be05-20260914-v1/native_reproduction\n.venv/bin/python -m yoyo.evaluation.spike_v1_v8_be05 --official --output experiments/active/exp-spike-v1-v8-be05-20260914-v1/common/results/reproduction\n.venv/bin/python -m yoyo.evaluation.spike_be05_report --common experiments/active/exp-spike-v1-v8-be05-20260914-v1/common/results/full_v3 --native experiments/active/exp-spike-v1-v8-be05-20260914-v1/native_v1 --output experiments/active/exp-spike-v1-v8-be05-20260914-v1/delivery_reproduction\n.venv/bin/python experiments/active/exp-spike-v1-v8-be05-20260914-v1/render_report.py\n.venv/bin/python scripts/md_to_html.py analysis/p1_spike_v1_v8_be05_20260914.md --out-dir analysis/html\n```',
         '主报告使用既有 delivery_v1；新复现汇总输出到 delivery_reproduction 后可与原CSV逐列核对。',
-        '- `delivery_v1/paired_trades.csv.gz`：同一入场的原退出与0.5R BE逐笔配对。',
-        '- `delivery_v1/all_outcomes.csv.gz`：含固定/串行、已结束/未结束及全部系统身份。',
-        '- `delivery_v1/metrics.csv` 与 `paired_changes.csv`：周期、年度、胜率、PF、R、尾部保留和差异分解。',
-        '- `native_v1/rave_concentration.csv`：RAVE事后集中度诊断。',
+        '- [下载逐笔配对CSV.gz](../../experiments/active/exp-spike-v1-v8-be05-20260914-v1/delivery_v1/paired_trades.csv.gz)：同一入场的原退出与0.5R BE逐笔配对。',
+        '- [下载全部退出CSV.gz](../../experiments/active/exp-spike-v1-v8-be05-20260914-v1/delivery_v1/all_outcomes.csv.gz)：含固定/串行、已结束/未结束及全部系统身份。',
+        '- [统计CSV](../../experiments/active/exp-spike-v1-v8-be05-20260914-v1/delivery_v1/metrics.csv) 与 [配对变化CSV](../../experiments/active/exp-spike-v1-v8-be05-20260914-v1/delivery_v1/paired_changes.csv)：周期、年度、胜率、PF、R、尾部保留和差异分解。',
+        '- [集中度CSV](../../experiments/active/exp-spike-v1-v8-be05-20260914-v1/native_v1/rave_concentration.csv)：RAVE事后集中度诊断。',
         '官方机制说明：[TradingView strategies](https://www.tradingview.com/pine-script-docs/concepts/strategies/) 对历史OHLC成交假设和更低周期细化有说明；本报告使用Python重放，不宣称已完成TV逐笔原生成交验收。',
         '## 下一步决策',
         '不把0.5R推保本自动设成全局默认。根据原版与V8、周期、实际≥10R保留分别评估取舍；任何上线需要另行决定。若要研究盘中触发立即改单，应独立冻结规则并用更细数据复核，不拿本次次根生效结果冒充。']
