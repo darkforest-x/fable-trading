@@ -220,6 +220,16 @@ def run():
         signals.append(row)
     for arm,ledger in ledgers.items():
         pd.DataFrame(ledger).to_csv(OUT/(arm+'_trades.csv'),index=False,encoding='utf-8-sig')
+    readable={
+        'trade_no':'序号','signal_confirm_bj':'信号确认_北京时间','entry_bj':'开仓_北京时间',
+        'direction':'方向','entry_price':'开仓价','initial_stop':'初始止损价','initial_risk':'1R价格距离',
+        'exit_bj_from':'退出时间下界_北京时间','exit_bj_to':'退出时间上界_北京时间',
+        'exit_price':'退出价_未平仓为估值价','exit_reason':'退出原因代码','status':'状态',
+        'gross_r':'毛收益R_初始价格风险1U时等于U','cost_r':'成本R_固定往返0.2百分比名义本金',
+        'net_r':'净收益R_未平仓为假设平仓净估值','favorable_r_lower':'最高浮盈R下界',
+        'favorable_r_upper':'最高浮盈R上界','carry_in':'是否9月前开仓'}
+    pd.DataFrame(ledgers['original'])[list(readable)].rename(columns=readable).to_csv(
+        OUT/'original_trades_zh.csv',index=False,encoding='utf-8-sig')
     pd.DataFrame(signals).to_csv(OUT/'all_v8_signals.csv',index=False,encoding='utf-8-sig')
     for arm,rows in opportunities.items():
         pd.DataFrame(rows).to_csv(OUT/(arm+'_independent_opportunities.csv'),index=False,encoding='utf-8-sig')
