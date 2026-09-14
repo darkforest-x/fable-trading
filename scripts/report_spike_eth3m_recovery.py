@@ -1,0 +1,159 @@
+"""Render the completed recovery audit as Chinese Markdown and HTML.
+
+Reads only frozen CSV/JSON outputs; no market-data or policy selection path.
+"""
+import json
+import subprocess
+from pathlib import Path
+import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[1]
+EXP = ROOT / 'experiments/active/exp-spike-eth3m-recovery-20260914-v2'
+OUT = EXP / 'results/diagnostics'
+NAMES = {'primary':'固定1U／3R止盈', 'closest_streak':'最短连亏诊断组',
+         'best_escalation':'加码开发第一：1.5倍', 'same_exit_fixed_1u':'主配置同退出固定1U',
+         'original_v8_fixed_1u':'原V8／固定1U', 'user_reference_factorial':'阶乘／1R移开仓价／3R止盈',
+         'user_reference_debt':'净债务×2／1R移开仓价／3R止盈',
+         'user_reference_double':'上一笔×2／1R移开仓价／3R止盈',
+         'best_escalation_exit_fixed_1u':'1.5倍组同退出／固定1U'}
+ORDER = ['original_v8_fixed_1u','primary','best_escalation_exit_fixed_1u','best_escalation',
+         'user_reference_double','user_reference_debt','user_reference_factorial','closest_streak']
+
+
+def table(headers, rows):
+    return '\n'.join(['| '+' | '.join(headers)+' |','| '+' | '.join(['---']*len(headers))+' |']+
+                     ['| '+' | '.join(str(v).replace('|','／') for v in row)+' |' for row in rows])+'\n'
+
+
+def main():
+    summary = pd.read_csv(OUT/'summary.csv')
+    controls = pd.read_csv(OUT/'controls.csv')
+    detail = pd.read_csv(OUT/'trade_diagnostics.csv')
+    search = pd.read_csv(EXP/'results/development/search.csv')
+    sel = json.loads((EXP/'results/selection.json').read_text())
+    merged = summary.merge(controls, on=['period','name'], validate='one_to_one')
+    sections = ['''# ETHUSDT.P 3分钟：1U起步的倍投与回本研究
+
+2026-09-14｜实验 exp-spike-eth3m-recovery-20260914-v2｜结论：本轮未找到达标方案，保持未启用。
+
+**理解的是“按上一轮实际亏损加大下一笔的风险，盈利后重置”，不是持仓中补仓。按这一定义跑了855组：开发期全部亏损，最长真实连续净亏损没有一组≤6。参与度门没有淘汰任何组；最短连亏仍为9次。固定1U、3R止盈的开发期末最高，也只剩479.82U；加码组最高剩249.48U。后续年份亦未扭转结论。**
+
+## 先把用户例子算清楚
+
+价格R是当笔入场价到初始止损的距离；资金风险B是该距离对应的USDT金额。首笔B=1U，账户1000U。此处1U是价格止损预算，费用另计，实际净止损会大于1U；没有擅自把0.2%成本改成零。仓位名义金额=B/初始止损比例，B不是保证金。
+
+| 递推规则 | 前6笔计划风险U：暂忽略费用 | 前3笔损失后第4笔 |
+| --- | --- | --- |
+| 上一笔×2 | 1、2、4、8、16、32 | 8U |
+| 本轮累计亏损×2 | 1、2、6、18、54、162 | 18U |
+| 与用户前四项一致的阶乘参考 | 1、2、6、24、120、720 | 24U |
+
+阶乘后两项是研究假设。若前3笔亏1+2+6=9U，第4笔风险24U，**实际平仓赚毛1R可赚24U，扣费前净回收15U；浮盈1R后移回开仓价并最终保本退出，则毛盈利是0U，9U旧亏损仍在。**想锁住整轮回本，保护退出至少应覆盖旧亏损D与本笔成本C，即保护的毛R≥(D+C)/B；这不是把止损放在开仓价。本轮没有把这个动态整轮保护假设冒充已验证方案。
+
+## 数据、授权与冻结
+
+使用已有OKX ETH-USDT-SWAP三分钟数据，是本项目ETHUSDT.P研究映射，不声称与其他交易所的TradingView同名图逐笔一致。原始上下文482176根，2023-07-31 11:12至2026-04-30 23:57 UTC；暖机后从2023-08-01开始交易。开发期2023-08至2024-12；2025年和2026年前4个月在配置冻结后评估，连续账户另列。
+
+Owner本轮明确授权“参数什么的，自己去优化”，已在PROJECT_PLAN记录退出与资金联合搜索。**本配置holdout消耗0次**，没有读取≥2026-05-04价格、交易或评分。此前配置用过的holdout不转作本轮挑参数。上述早期历史也曾被其他研究观察，后续时间段验证不能称为全新盲测。
+
+Builder提交411c851d9d早于开发运行；冻结提交2d27ce8ec6早于后续评估。选择文件绑定输入上下文、开发CSV、配置、三个builder及搜索表SHA。无新增TP/保护的引擎以744笔、10个字段逐笔重现旧开发串行基线。36项合成测试通过；36个账户窗口的现金、周期、候选数量与连亏独立重算一致。
+
+## 冻结的V8与退出方式
+
+V8准入仍是原始V6事件＋V7此前压缩门＋同向绳索距离≤3ATR，确认后下一根开盘入场。初始止损保留5bar结构、0.2ATR缓冲、2ATR下限、tick0.01；原始V6反向信号下一开盘退出；原2R收盘启动4ATR跟踪保留。
+
+45退出组：毛TP无／1／2／3／4R；无保护，或浮盈0.5／1／1.5／2R后移开仓价，或扣固定成本后的浮盈达到上述阈值后移至费用覆盖价。3分钟OHLC只能在本bar收盘观察触及，保护从下一bar生效；不假设先摸盈利、再回落时仍能在同bar保本。TP和旧止损同bar且路径不明时止损优先；已知开盘越过TP先成交，原始反向开盘退出优先级保留。
+
+19资金组：固定1U；上一筆×1.5／2；累计净亏损×1／1.5／2；阶乘。加码与3种重置交叉：整轮净回本、单笔净赢、价格保本或净赢。默认任何自然退出的净亏损进级；最多6个亏损级别，失败认亏重启。10倍名义敞口上限、费用预留及最低现金约束；拒单不占影子仓位。
+
+## 选中的只是失败诊断组
+
+- 主配置：固定1U、3R毛止盈、无新增保本。
+- 加码组开发第一：1.5倍，0.5R毛浮盈后移开仓价，2R毛止盈；价格保本或净赢即复位，最多6层。开发期实际最高风险7.59375U；本组不是达标或实盘建议。
+- 最短连亏组：累计净债务×1、费用覆盖保护在净浮盈1R后启动、无固定TP、单笔净赢复位。开发连亏9次，却只剩21.69U；减少连亏不等于减少总亏损。
+- 用户参考：3R止盈、1R移开仓价；上一笔×2配单笔净赢重置，债务×2配整轮回本重置，阶乘配价格保本或净赢重置。这三行同时改变了重置方式，不能把三者差异全归因为加码公式；完整855组保留同条件对照。
+
+开发先按账户盈利、真实连亏≤6、至少100笔及固定组50%交易覆盖和75%活跃月硬门判定；无通过者，按期末现金排序保留诊断。主配置是固定风险，因此在任何后续评估前另冻结非固定组最高现金者，明确为开发后补充诊断。后续添加其固定1U对照只用于解释，不参与选择。
+''']
+    for period, title in [('development','开发期：2023-08至2024-12'),('validation','冻结后：2025年'),
+                          ('preholdout','冻结后：2026年1至4月'),('continuous_pre','同一账户连续运行：2023-08至2026-04')]:
+        t = merged[merged.period.eq(period)].set_index('name')
+        sections.append('\n## '+title+'\n\n每段独立账户以1000U开始；连续段只投入一次1000U，不补钱。随机对照是同币×月份×方向×因果波动桶、同退出与成本的逐笔诊断，不能当作可交易随机账户。\n\n')
+        rows=[]
+        for name in ORDER:
+            r=t.loc[name]
+            rows.append([NAMES[name],f'{r.final_balance:.2f}',int(r.n_natural),f'{100*r.win_rate:.2f}%',
+                         f'{int(r.max_consecutive_net_loss)}／{int(r.max_consecutive_losing_stop)}',
+                         f'{100*r.max_realized_drawdown:.2f}%',f'{r.random_mean_net_r:.3f}',
+                         f'{r.mean_excess_net_r:+.3f}',f'{r.one_sided_month_signflip_p:.4f}'])
+        sections.append(table(['方案','期末U','自然平仓','净胜率','连净亏／连亏损止损','现金回撤','随机均值R','相对随机R','月块单侧p'],rows))
+        sections.append(f'本段原V8准入候选{int(t.loc["original_v8_fixed_1u"].n_candidates)}个；边界标记{int(t.n_boundary_marks.max())}笔。同表收益分母为各账户实际接受交易，容量不同会改变接受集，不能把净胜率差全归因于信号。\n')
+    sections.append('''
+## 手续费、保本与3R不是同一个胜率
+
+在固定1U原V8连续账户中，初始止损距离中位数约0.406%，20bp往返成本相当于中位0.493R。移回开仓价仍损失本笔成本。真实交易开仓和平仓都可能收费，计算基于交易数量与价格；本研究固定20bp是项目统一压力口径，并非声称当前所有用户的实际费率均为20bp。[OKX官方费用说明](https://www.okx.com/en-gb/help/how-to-calculate-the-contract-transaction-fee)
+
+以下均为连续账户实际自然退出，3R统计为已实现毛／净结果，不能与历史MFE触及3R混用。固定毛TP=3R通常净盈利不足3R。
+''')
+    d=detail[detail.period.eq('continuous_pre')].set_index('name')
+    sections.append(table(['方案','毛实现≥3R笔数','净实现≥3R笔数','开仓价退出','其中净亏笔数','成本中位R'],
+        [[NAMES[n],int(d.loc[n].gross_3r),int(d.loc[n].net_3r),int(d.loc[n].price_be_exits),
+          int(d.loc[n].price_be_net_losses),f'{d.loc[n].median_cost_r:.3f}'] for n in ORDER]))
+    sections.append('''
+## 周期重置有没有真的回本
+
+以下为连续账户。认亏结束不擦除现金损失，账户连亏跨所有轮次连续。若没有第7层，只能保证“不再下第7层风险”，无法保证重启后那笔盈利。价格保本即重置可产生大量亏损结束的轮次。
+''')
+    t=summary[summary.period.eq('continuous_pre')].set_index('name')
+    sections.append(table(['方案','净回本轮数','认亏轮数','容量失败轮数','六层失败轮数','容量拒单','最高风险U'],
+        [[NAMES[n],int(t.loc[n].recovered_cycles),int(t.loc[n].abandoned_cycles),int(t.loc[n].capacity_failed_cycles),
+          int(t.loc[n].capped_cycles),int(t.loc[n].n_rejected_capacity),f'{t.loc[n].max_risk:.3f}'] for n in ORDER]))
+    sections.append('''
+## 归因与方法边界
+
+同一0.5R移开仓价／2R止盈退出，固定1U在2025年剩729.38U，而1.5倍剩635.86U；2026年前4个月分别869.53U与822.85U。固定风险本身仍亏，加码把这个样本内亏损扩大。连续账户因容量拒单不同，接受交易集合不同，不能把差额当纯相同交易的因果效应。
+
+开发第一组所用固定3R目标在2025年比原V8少亏，但2026年前4个月反而更亏；这说明减少尾部大盈、增加较早兑现之间的取舍没有跨期稳定优势。开发855组全失败，不能声称穷尽了所有退出与资金策略。本轮没有搜索“动态整轮回本价保护”、改变入场过滤、真实账户费率或分钟内tick路径。
+
+10项开发期单字段敏感性已保留：杠杆3/5/10/20、最高层数3/4/5/6、任何净亏或亏损止损升级。它们围绕开发主配置固定1U，因此不具备证明加码稳健性的意义，未用于后续重选。
+
+**必报指标适用性**：本轮无训练、分类器或事前排序分数，val AUC和top-decile收益不适用；不伪造AUC或事后按盈利选十分位。对应严格对照为固定1U原V8、相同退出固定风险，以及同资产／UTC月／方向／此前120bar ATR比例桶的随机入场。没有新增单特征筛选；原V8是无新增退出和资金变量的基线。表中p是月份区块符号置换，验证12个月、2026年前4个月仅4个月，不宣称达到p<0.01。开发p经历参数选择，尤其不能解释为确认性检验。
+
+## 风险与诚实声明
+
+只用3分钟OHLC，有明确保守同bar顺序；成本保护也可能跳空穿透，触发条件不等于成交保证。[OKX官方TP/SL说明](https://www.okx.com/en-gb/help/how-to-set-up-profit-and-stop-loss-of-contract-transactions)
+
+这是有限现金与名义敞口研究，未建模标记价格、分档维持保证金、盘口排队、实际最小张数、完整滑点与资金费，不能把约10U剩余称为“扛住了爆仓”。现金回撤是平仓／边界估计清算权益，不是持仓内峰谷。边界头寸若存在会单列末完整收盘扣费标记，既不计自然胜率也不认作轮次回收；本次36个窗口边界标记均0。
+
+随机对照从全部合法bar抽取，也可恰好有V6信号；只在自然闭合子样本上比较，边界删失会再抽样。全部对照206123次尝试，23次边界删失、0次无效入场，3397次保留对照恰好有原始V6信号。对照现金差只按目标风险预算加权，不是随机账户路径。逐笔相关性只用月份区块近似，未做跨月市场制度推断。
+
+正式守门检查114通过、4失败：现有TOTAL2交付产物和ETH MA120实验注册项缺少source_commit，触发既有注册表错误；未更改或绕过这些无关条目。本轮单项合成测试36通过；本轮新注册项另行验证。
+
+## 复现、产物与下一步
+
+旧研究报告保留原意及当时的影子持仓容量限制：[第一次倍投研究](p1_spike_eth_martingale_20260914.html)。本轮改为所有V8原始准入候选逐条回放，实际拒单不占仓；两轮不能当成仅调了底注的同一实验。
+
+复现依赖已有SHA绑定pre上下文，无需读取holdout。输出目录拒绝覆盖。原始首次命令序列如下；重新生成时先受控归档原结果再运行，禁止覆盖证据：
+
+```bash
+.venv/bin/python -m pytest -q tests/evaluation/test_spike_recovery_exit.py tests/evaluation/test_spike_recovery_cash.py tests/evaluation/test_spike_eth3m_recovery_study.py tests/evaluation/test_spike_v8_eth3m_be_study.py
+# builder/config已提交411c851d9d
+.venv/bin/python -m yoyo.evaluation.spike_eth3m_recovery_study develop
+# 按PROJECT_PLAN冻结补充best_escalation，提交2d27ce8ec6
+.venv/bin/python -m yoyo.evaluation.spike_eth3m_recovery_study evaluate
+# audit/control builder已提交edf53d29fe
+.venv/bin/python -m yoyo.evaluation.spike_eth3m_recovery_report
+.venv/bin/python scripts/report_spike_eth3m_recovery.py
+```
+
+结果目录：experiments/active/exp-spike-eth3m-recovery-20260914-v2/results。search.csv包含完整855组；selection.json冻结3组；evaluation与diagnostics保存36组账户、逐笔、周期、匹配对照及现金核验；manifest.json保存哈希。训练／生产准入均false。
+
+本轮选择结论为拒绝，不继续消耗holdout寻找好看的结果。若后续做动态整轮回本保护或按真实费用重设每笔净损失预算，需单独冻结新假设，先在非holdout研究，不能承诺最长连亏6次。实盘、promote与新配置holdout仍需owner明确批准。
+''')
+    report=ROOT/'analysis/p1_spike_eth3m_recovery_20260914.md'
+    report.write_text('\n'.join(sections))
+    subprocess.run(['.venv/bin/python','scripts/md_to_html.py',str(report),'--out-dir','analysis/html'],cwd=ROOT,check=True)
+
+
+if __name__ == '__main__':
+    main()
