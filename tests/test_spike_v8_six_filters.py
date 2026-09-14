@@ -38,6 +38,20 @@ def test_rv_is_final_confirmation_bar_and_missing_is_unknown_not_rejected() -> N
     assert (unknown.gate_state, unknown.gate_reason) == ("unknown_untested", "rv_missing")
 
 
+def test_nonrisk_rejection_is_recorded_at_confirmation_close_not_bar_open() -> None:
+    context = _context(); prepared = be05.prepare_arm(context, arm="v8")
+    context.cache["bars"].loc[prepared.frame.index[4], "rv"] = 60.
+    row = study.decision_frame(prepared, "rv_gt50", catalog=_catalog(context)).iloc[0]
+    assert pd.Timestamp(row.rejected_at) == pd.Timestamp(row.signal_bar_open) + pd.Timedelta(minutes=30)
+
+
+def test_stock_missing_metadata_is_unknown_but_explicit_gate_empty_is_not_stock() -> None:
+    identity = {"venue":"binance", "symbol":"SYNUSDT", "asset":"SYN"}
+    assert study.stock_class(identity, {("binance", "SYNUSDT"): {"raw": {}}}) == ("unknown", "binance_underlyingType_missing")
+    gate_identity = {"venue":"gate", "symbol":"SYN_USDT", "asset":"SYN"}
+    assert study.stock_class(gate_identity, {("gate", "SYN_USDT"): {"raw": {"contract_type": ""}}}) == ("not_stock_linked", "gate_contract_type=")
+
+
 def test_actual_next_open_risk_gate_is_30_percent_not_point_three_percent() -> None:
     context = _context(); bars = context.cache["bars"]
     bars.loc[bars.index[1:5], "low"] = 50.  # known stop window before the signal; no future OHLC

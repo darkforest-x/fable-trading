@@ -96,14 +96,17 @@ def stock_class(identity: dict[str, object], catalog: dict[tuple[str, str], dict
     if row is None: return "unknown", "catalog_missing"
     raw = row.get("raw") if isinstance(row.get("raw"), dict) else {}
     if venue == "binance":
-        value = str(raw.get("underlyingType", ""))
-        return ("stock_linked", f"binance_underlyingType={value}") if value in {"EQUITY", "HK_EQUITY", "KR_EQUITY", "CN_EQUITY"} else ("not_stock_linked", f"binance_underlyingType={value or 'missing'}")
+        if not raw.get("underlyingType"): return "unknown", "binance_underlyingType_missing"
+        value = str(raw["underlyingType"])
+        return ("stock_linked", f"binance_underlyingType={value}") if value in {"EQUITY", "HK_EQUITY", "KR_EQUITY", "CN_EQUITY"} else ("not_stock_linked", f"binance_underlyingType={value}")
     if venue == "okx":
-        value = str(raw.get("instCategory", ""))
-        return ("stock_linked", "okx_instCategory=3") if value == "3" else ("not_stock_linked", f"okx_instCategory={value or 'missing'}")
+        if not raw.get("instCategory"): return "unknown", "okx_instCategory_missing"
+        value = str(raw["instCategory"])
+        return ("stock_linked", "okx_instCategory=3") if value == "3" else ("not_stock_linked", f"okx_instCategory={value}")
     if venue == "gate":
-        value = str(raw.get("contract_type", ""))
-        return ("stock_linked", "gate_contract_type=stocks") if value == "stocks" else ("not_stock_linked", f"gate_contract_type={value or 'missing'}")
+        if "contract_type" not in raw or raw["contract_type"] is None: return "unknown", "gate_contract_type_missing"
+        value = str(raw["contract_type"])
+        return ("stock_linked", "gate_contract_type=stocks") if value == "stocks" else ("not_stock_linked", f"gate_contract_type={value}")
     return "unknown", "unsupported_venue"
 
 
@@ -112,6 +115,7 @@ class Candidate:
     i: int
     original_i: int
     signal_time: pd.Timestamp
+    confirm_time: pd.Timestamp
     entry_time: pd.Timestamp | pd.NaT
     side: int
     rv: float
@@ -142,7 +146,7 @@ def candidates(prepared: be05.PreparedArm) -> dict[int, Candidate]:
         else:
             entry, stop, risk = (float(made[k]) for k in ("entry_price", "initial_stop", "initial_risk"))
             risk_pct = risk / entry
-        out[int(i)] = Candidate(int(i), int(original_i), frame.index[i], entry_time, side, rv, expansion,
+        out[int(i)] = Candidate(int(i), int(original_i), frame.index[i], frame.index[i] + pd.Timedelta(minutes=prepared.context.minutes), entry_time, side, rv, expansion,
                                 atr / close if math.isfinite(atr) and math.isfinite(close) and close > 0 else math.nan,
                                 entry, stop, risk, risk_pct)
     return out
@@ -150,25 +154,25 @@ def candidates(prepared: be05.PreparedArm) -> dict[int, Candidate]:
 
 def _gate(candidate: Candidate, policy: str, *, asset: str, stock: tuple[str, str]) -> tuple[str, str, object]:
     """Return pass/rejected/unknown_untested using only admission-time facts."""
-    if policy == "baseline_noop": return "passed", "baseline_noop", candidate.signal_time
+    if policy == "baseline_noop": return "passed", "baseline_noop", candidate.confirm_time
     if policy == "rv_gt50":
-        return ("rejected", "rv_gt50", candidate.signal_time) if math.isfinite(candidate.rv) and candidate.rv > 50 else ("passed", "rv_not_gt50", candidate.signal_time) if math.isfinite(candidate.rv) else ("unknown_untested", "rv_missing", pd.NaT)
+        return ("rejected", "rv_gt50", candidate.confirm_time) if math.isfinite(candidate.rv) and candidate.rv > 50 else ("passed", "rv_not_gt50", candidate.confirm_time) if math.isfinite(candidate.rv) else ("unknown_untested", "rv_missing", pd.NaT)
     if policy == "joint_rv_gt50_tratr_gt10":
         if not math.isfinite(candidate.rv) or not math.isfinite(candidate.expansion): return "unknown_untested", "rv_or_tratr_missing", pd.NaT
-        return ("rejected", "rv_gt50_and_tratr_gt10", candidate.signal_time) if candidate.rv > 50 and candidate.expansion > 10 else ("passed", "joint_not_met", candidate.signal_time)
+        return ("rejected", "rv_gt50_and_tratr_gt10", candidate.confirm_time) if candidate.rv > 50 and candidate.expansion > 10 else ("passed", "joint_not_met", candidate.confirm_time)
     if policy == "risk_gt30pct":
         if not math.isfinite(candidate.risk_pct): return "unknown_untested", "actual_initial_risk_unknown", pd.NaT
         return ("rejected", "actual_initial_risk_gt30pct", candidate.entry_time) if candidate.risk_pct > .30 else ("passed", "actual_initial_risk_not_gt30pct", candidate.entry_time)
-    if policy == "usdc_base": return ("rejected", "asset_usdc", candidate.signal_time) if asset == "USDC" else ("passed", "asset_not_usdc", candidate.signal_time)
+    if policy == "usdc_base": return ("rejected", "asset_usdc", candidate.confirm_time) if asset == "USDC" else ("passed", "asset_not_usdc", candidate.confirm_time)
     if policy == "stock_linked_all":
         if stock[0] == "unknown": return "unknown_untested", stock[1], pd.NaT
-        return ("rejected", stock[1], candidate.signal_time) if stock[0] == "stock_linked" else ("passed", stock[1], candidate.signal_time)
+        return ("rejected", stock[1], candidate.confirm_time) if stock[0] == "stock_linked" else ("passed", stock[1], candidate.confirm_time)
     if pd.isna(candidate.entry_time): return "unknown_untested", "entry_time_missing", pd.NaT
     clock = candidate.entry_time if policy.endswith("utc") else candidate.entry_time.tz_convert("Asia/Shanghai")
     if policy.startswith("h00"):
-        return ("rejected", "entry_hour_00", candidate.signal_time) if clock.hour == 0 else ("passed", "entry_hour_not_00", candidate.signal_time)
+        return ("rejected", "entry_hour_00", candidate.confirm_time) if clock.hour == 0 else ("passed", "entry_hour_not_00", candidate.confirm_time)
     if policy.startswith("sunday"):
-        return ("rejected", "entry_sunday", candidate.signal_time) if clock.dayofweek == 6 else ("passed", "entry_not_sunday", candidate.signal_time)
+        return ("rejected", "entry_sunday", candidate.confirm_time) if clock.dayofweek == 6 else ("passed", "entry_not_sunday", candidate.confirm_time)
     raise ValueError(f"unknown policy: {policy}")
 
 
