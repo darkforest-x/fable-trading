@@ -1,14 +1,28 @@
-# SPIKE V1 common-execution and V8 0.5R price-BE sensitivity
+# V1 / V8: observed 0.5R favorable excursion and entry-price protection
 
-One predeclared change: after a completed bar first reaches a favourable 0.5
-of frozen actual next-open initial R, protect at actual entry from the next
-bar. Prior protection is tested first; a gap through BE fills at the next open.
-The original initial stop, 2R/4ATR trail, raw opposite-signal priority, entry
-rounding, and 0.2% fixed round-trip cost remain unchanged.
+One predeclared change: after a completed bar first reaches favorable 0.5 of frozen actual next-open initial R, protect at actual entry from the next bar. Test the already-known stop and adverse gaps first; preserve tighter protection. Keep original admissions, original trailing/exit feeds and 0.20% fixed nominal round-trip cost.
 
-The inputs are the authenticated 3,531 Binance/OKX/Gate 30m/1H/4H caches. V1
-means `v1_common_execution_long`, explicitly not archived native V1: the
-native ledger is outcome-only for this purpose and cannot support a causal BE
-replacement replay. Both serial replay (including exit-created re-entry) and
-fixed-original-entry paired exits will be retained. Historical history is
-owner-authorized reused and nonblind; configuration exposure is recorded as 1.
+## Strategy identities
+
+1. Native original V1 is long-only and reproducible via `spike_v1_twoyear_allmarkets._trade_rows`, its frozen features/replay outputs and source receipts. Preserve its signal-reference protection contract and every original entry. Compare paired exits only; do not invent a serial account the event ledger never defined.
+2. Supplementary V1 common execution uses `v1_common_execution_long` from the 3531 authenticated caches. It shares next-open, 5-bar/0.2ATR/min2ATR initial risk, 2R/4ATR trail and raw V6 reverse exits with the common comparison. It must not be labelled native V1.
+3. V8 retains frozen both-direction admission and raw opposite exits. Both fixed-original-entry paired exits and serial replay allowing exit-created reentry are retained for common V1 and V8.
+
+The earlier plan text claiming native V1 could not be replayed was incorrect; this plan supersedes it before evaluation.
+
+## Scope and evidence
+
+- Existing Binance/OKX/Gate 30m/1H/4H data, 2024-09-10 inclusive to 2026-09-10 exclusive UTC, separate years at 2025-09-10. Current listings are not a historical census.
+- Owner explicitly permits historical research across all dates. Fixed-configuration holdout-era use 1; reused nonblind data, no parameter search.
+- Commit builders before evaluation. Baseline receipt and per-trade parity are prerequisites; retain failures explicitly.
+- Synthetic checks: stop-before-trigger, adverse gaps, next-bar activation, tighter protection, both sides, precision and causal prefixes.
+- Report closed/censored counts, net win rate, mean/sum net R, PF(R), nominal-return PF, original realized >=10R retention, rescued losers/harmed winners and timeframe/year splits.
+- R is frozen at actual entry. Price break-even still pays costs; funding and impact are unmodelled. Event cumulative-R drawdown is not account drawdown.
+- Fixed original entries control the exit intervention, not entry alpha versus random entries. Cross-venue/timeframe positions are correlated.
+- No live orders, Pine, monitoring, notification, ACTIVE or paused automation changes.
+
+## Ownership
+
+- Parent: this plan, shared registries, integrated report/HTML and Notion note.
+- Terra High `v1_v8_be05`: common V1/V8 replay and `common/` results.
+- Terra High `native_v1_be05`: original V1 replay and `native_v1/` results.
