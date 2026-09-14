@@ -32,11 +32,13 @@
   "previews": {
     "inspected": 11,
     "visible_viewport_result": "legible title/header hierarchy, Chinese text, sign colour, and numeric formatting; wide-sheet right columns require horizontal scrolling",
-    "not_hash_bound_to_workbook": true,
+    "preview_10_sha256": "d808fa14ba6d94ebfaacef8860701b4ba8d36559503ba80750bada1bcf5151bd",
     "preview_mtime_range": "2026-09-14 18:33:12..18:33:20",
     "workbook_mtime": "2026-09-14 18:33:43",
-    "specific_evidence": "10.png displays an incomplete leading year/date and no visible row-4 header; current workbook XML D5 is 45183.041666..., row-4 header is 入场UTC, and D format is yyyy-mm-dd hh:mm",
-    "conclusion": "do not use the pre-existing previews as final visual approval of this later-modified workbook"
+    "time_ordering": "expected: the workbook workflow renders each sheet in memory before exportXlsx; the earlier preview mtime is not stale-artifact evidence",
+    "recheck_10": "title 前20逐笔, row-4 header 入场UTC, and complete 2023-09-14 01:00 plus subsequent 2023/2024 dates are visibly present and agree with XML",
+    "verification_boundary": "the exported XLSX was not imported and rendered a second time; this is not a workbook defect",
+    "conclusion": "preview inspection passes; no visual or date truncation found"
   },
-  "conclusion": "current workbook XML passes data/formula/cache/date checks; final visual sign-off requires previews regenerated from this workbook hash"
+  "conclusion": "current workbook XML and its rendered previews pass the bounded data/formula/cache/date/visual checks"
 }

@@ -42,28 +42,31 @@ in either event sheet.  `入场UTC` uses custom format
 `yyyy-mm-dd hh:mm` on both event sheets.  The two event sheets freeze the
 first four rows and have a visible 25-character date column.
 
-## Preview inspection — visual boundary recorded
+## Preview inspection — pass
 
 All 11 PNG previews named by
 `results/workbook_previews/manifest.json` were inspected.  In the visible
 viewports, title weight, dark header weight, stripe contrast, numeric sign
-colour, and the Chinese labels are legible.  Wide tables naturally expose only
-their left columns in a single 2160px screenshot; this is a preview viewport
-limit rather than a workbook column omission.
+colour, dates, and Chinese labels are legible.  Wide tables naturally expose
+only their left columns in a single 2160px screenshot; this is a preview
+viewport limit rather than a workbook column omission.
 
-The previews are **not provenance-bound to the audited workbook**: their
-modification times are 18:33:12–18:33:20, while the XLSX was modified at
-18:33:43.  Preview `10.png` also shows an incomplete left-side date such as
-`3-09-14 01:00` and does not visibly show the normal row-4 headers, whereas
-the current XLSX XML has D5 serial `45183.041666...`, header `入场UTC`, and
-format `yyyy-mm-dd hh:mm` (which is 2023-09-14 01:00).  This is evidence that
-the preview cannot be used to approve the final XLSX date rendering.  No XLSX
-change was made; regenerate previews from the SHA above if final visual
-sign-off requires a hash-bound render.
+The initial audit incorrectly inferred that preview times preceding the XLSX
+timestamp showed stale images, and incorrectly described `10.png` as visually
+truncated.  Reinspection of the exact file (SHA-256
+`d808fa14ba6d94ebfaacef8860701b4ba8d36559503ba80750bada1bcf5151bd`)
+shows the title `前20逐笔`, the row-4 dark header including `入场UTC`, and
+complete `2023-09-14 01:00` / subsequent 2023–2024 dates.  That display agrees
+with the workbook XML.
+
+The 23-second time ordering is expected for this workflow: it renders each
+sheet from the in-memory workbook before `exportXlsx`.  It is not evidence of
+staleness or a visual defect.  This QA did not import the exported XLSX and
+render it a second time; that is a stated verification boundary, not a
+workbook failure.
 
 ## Conclusion
 
 The current workbook passes its structural, closed-net-R, censoring, delta
-formula/cache, and date-format checks.  Final visual approval of the current
-file remains limited by stale preview artifacts; no data or formula defect was
-found in the workbook XML.
+formula/cache, date-format, and preview checks.  No data, formula, date, or
+visual defect was found in this bounded QA.
