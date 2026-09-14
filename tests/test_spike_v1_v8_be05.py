@@ -1,0 +1,100 @@
+"""Focused causal contracts for the V1-common/V8 0.5R price-BE replay."""
+from __future__ import annotations
+
+import pandas as pd
+import pytest
+from pathlib import Path
+
+from yoyo.evaluation import spike_exit_policy_study as base
+from yoyo.evaluation import spike_v1_v8_be05 as study
+
+
+def _context(side: int = 1) -> base.StreamContext:
+    index = pd.date_range("2026-05-04", periods=11, freq="30min", tz="UTC")
+    bars = pd.DataFrame({"open": 100., "high": 100.4, "low": 99., "close": 100., "atr": 1.,
+                         "s20": 100., "e20": 100., "md": 1., "sb": 0., "ropeHigh": 100., "ropeLow": 100.}, index=index)
+    signals = pd.DataFrame({"long_signal": False, "short_signal": False}, index=index)
+    signals.loc[index[4], "long_signal" if side == 1 else "short_signal"] = True  # next open is index 5
+    cache = {"bars": bars, "signals": signals.copy(), "v1_signals": signals.copy(),
+             "data_gap": pd.Series(False, index=index), "bb_ready": pd.Series(True, index=index),
+             "bb": pd.DataFrame({"prior_squeeze_run3": True, "v7_ready": True}, index=index), "tick": .01}
+    ledger = pd.DataFrame({"signal_bar_open": [index[4]], "signal_i": [4]})
+    return base.StreamContext(path=Path("."), key="binance_30m_synthetic", receipt={"source_sha256": "synthetic", "cache_sha256": "synthetic"}, cache=cache, signals_ledger=ledger, minutes=30, identity={"venue": "binance", "symbol": "SYN", "asset": "SYN", "timeframe_min": 30})
+
+
+def test_wick_trigger_is_effective_only_next_bar_and_price_be_keeps_cost() -> None:
+    context = _context()
+    bars = context.cache["bars"]
+    bars.iloc[5] = [100., 101.1, 99.1, 100.4, 1., 100., 100., 1., 0., 100., 100.]  # initial R = 2
+    bars.iloc[6] = [100.2, 100.3, 99.9, 100., 1., 100., 100., 1., 0., 100., 100.]
+    trades, _, events = study.replay_serial(context, arm="v1_common_execution_long", enable_be=True)
+    trade = trades.loc[~trades.censored].iloc[0]
+    assert trade.exit_i == 6
+    assert trade.exit_price == pytest.approx(100.)
+    assert trade.net_return == pytest.approx(-.002)
+    assert events.iloc[0].reason == "be05_price_next_bar"
+
+
+def test_same_bar_initial_stop_and_trigger_keeps_initial_stop_priority() -> None:
+    context = _context()
+    context.cache["bars"].iloc[5] = [100., 101.1, 97.9, 100., 1., 100., 100., 1., 0., 100., 100.]
+    trades, _, events = study.replay_serial(context, arm="v1_common_execution_long", enable_be=True)
+    trade = trades.loc[~trades.censored].iloc[0]
+    assert trade.exit_i == 5
+    assert trade.exit_reason == "initial_stop"
+    assert events.empty
+
+
+def test_gap_through_be_fills_at_open_not_at_entry() -> None:
+    context = _context(); bars = context.cache["bars"]
+    bars.iloc[5] = [100., 101.1, 99.1, 100.5, 1., 100., 100., 1., 0., 100., 100.]
+    bars.iloc[6] = [99.5, 100., 99.4, 99.7, 1., 100., 100., 1., 0., 100., 100.]
+    trades, _, _ = study.replay_serial(context, arm="v1_common_execution_long", enable_be=True)
+    trade = trades.loc[~trades.censored].iloc[0]
+    assert (trade.exit_reason, trade.exit_price, trade.net_return) == ("trailing_stop_gap", pytest.approx(99.5), pytest.approx(-.007))
+
+
+def test_prefix_cannot_change_an_already_observed_be_exit() -> None:
+    context = _context(); bars = context.cache["bars"]
+    bars.iloc[5] = [100., 101.1, 99.1, 100.5, 1., 100., 100., 1., 0., 100., 100.]
+    bars.iloc[6] = [100.2, 100.3, 99.9, 100., 1., 100., 100., 1., 0., 100., 100.]
+    full, _, _ = study.replay_serial(context, arm="v1_common_execution_long", enable_be=True)
+    prefix = _context()
+    for key, value in list(prefix.cache.items()):
+        if isinstance(value, (pd.Series, pd.DataFrame)) and value.index.equals(context.cache["bars"].index): prefix.cache[key] = value.iloc[:7].copy()
+    prefix.cache["bars"].iloc[5] = bars.iloc[5]; prefix.cache["bars"].iloc[6] = bars.iloc[6]
+    got, _, _ = study.replay_serial(prefix, arm="v1_common_execution_long", enable_be=True)
+    pd.testing.assert_frame_equal(full.loc[~full.censored, study.KEY].reset_index(drop=True), got.loc[~got.censored, study.KEY].reset_index(drop=True), check_dtype=False)
+
+
+def test_entry_ratcheting_preserves_a_tighter_stop_and_tiny_prices() -> None:
+    long = {"protection": 0.0000007, "entry_price": 0.0000005, "side": 1}
+    short = {"protection": 0.0000003, "entry_price": 0.0000005, "side": -1}
+    assert not study._raise_to_entry(long) and long["protection"] == pytest.approx(.0000007)
+    assert not study._raise_to_entry(short) and short["protection"] == pytest.approx(.0000003)
+
+
+def test_short_wick_trigger_is_next_bar_only_and_fixed_baseline_matches_serial() -> None:
+    context = _context(side=-1)
+    bars = context.cache["bars"]
+    bars.iloc[5] = [100., 100.9, 98.9, 99.6, 1., 100., 100., 1., 0., 100., 100.]
+    bars.iloc[6] = [99.8, 100.1, 99.7, 100., 1., 100., 100., 1., 0., 100., 100.]
+    prepared = study.prepare_arm(context, arm="v8")
+    serial, _, _ = study.replay_serial(context, arm="v8", enable_be=False, prepared=prepared)
+    fixed = pd.DataFrame([study.replay_fixed_entry(context, row, arm="v8", enable_be=False, prepared=prepared)
+                          for _, row in serial.iterrows()], columns=study.FIXED_COLUMNS)
+    pd.testing.assert_frame_equal(serial.loc[~serial.censored, study.KEY].reset_index(drop=True), fixed.loc[~fixed.censored, study.KEY].reset_index(drop=True), check_dtype=False)
+    be, _, _ = study.replay_serial(context, arm="v8", enable_be=True, prepared=prepared)
+    trade = be.loc[~be.censored].iloc[0]
+    assert (trade.exit_i, trade.exit_price, trade.net_return) == (6, pytest.approx(100.), pytest.approx(-.002))
+
+
+def test_zero_trade_pair_and_realized_tail_are_schema_safe() -> None:
+    empty = pd.DataFrame(columns=study.FIXED_COLUMNS)
+    assert list(study.paired_decomposition(empty, empty).columns) == study.PAIR_COLUMNS
+    baseline = pd.DataFrame({"signal_i": [1, 2], "entry_i": [2, 3], "side": [1, 1], "net_r": [10., 9.],
+                             "net_return": [.1, .09], "mfe_r": [12., 15.], "censored": [False, False]})
+    be = baseline.copy(); be.loc[0, "net_r"] = 9.; be.loc[1, "net_r"] = 10.
+    pairs = study.paired_decomposition(baseline, be)
+    assert pairs.baseline_realized_ge_10r.tolist() == [True, False]
+    assert pairs.retained_realized_ge_10r.tolist() == [False, True]

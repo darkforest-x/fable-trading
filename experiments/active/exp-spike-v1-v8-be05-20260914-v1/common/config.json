@@ -1,0 +1,11 @@
+{
+  "scope": "common-execution V1 plus frozen-admission V8 only; native V1 is owned by the separate native_v1 replay",
+  "raw_manifest_sha256": "37f65499611877c8b8b10f0f2fb7a8c99a07d95cc90cda282f5b8a5ac89d41b6",
+  "v8_oracle_manifest_sha256": "04469ed2e694f23d27591d8316b71b66eab5e6d0338fc0847b6ae004f4bd30b9",
+  "expected_streams": 3531,
+  "arms": ["v1_common_execution_long", "v8"],
+  "single_change": "observed favourable high/low >= 0.5 frozen actual next-open initial R; ratchet to price entry effective next bar only",
+  "cost": "0.2% round trip fixed nominal cost; price BE is not fee-adjusted net BE",
+  "history_exposure_number": 1,
+  "history": "owner-authorized reused nonblind historical data"
+}
