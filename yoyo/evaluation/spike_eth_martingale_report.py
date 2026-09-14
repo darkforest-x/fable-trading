@@ -470,7 +470,7 @@ def _build_report(pre: pd.DataFrame, holdout: pd.DataFrame | None, selection: di
         "",
         "V8原始确认、压缩门、同方向绳索距离3ATR、次根开盘入场、结构止损、2R后4ATR跟踪及原V6反向退出均冻结。每笔成本固定为名义本金的0.2%往返，入场额外预留同额费用但不重复扣款。开发2023-08-01至2025-01-01，验证为2025全年，预holdout为2026年1至4月；区间右端不含。最大层级1至8、复位win/recovery、底注1/2/5/10/20/50U、模拟容量3/5/10/20依次单字段搜索，没有穷举全部交叉组合。",
         "",
-        "核验记录见实验目录verification.json：逐笔账本与18行账户摘要对账、产物哈希及13项专项测试。仓库级注册表检查受一个既有记录缺失source_commit阻塞，未把它计作本研究通过。浏览器安全策略阻止本地HTML页面预览，因此仅完成静态结构和图片资源检查，不声称浏览器视觉验收通过。",
+        "核验记录见实验目录verification.json：逐笔账本与18行账户摘要对账、产物哈希及13项专项测试。合计113项检查通过、4项仓库注册表检查失败：其他研究的两个记录缺失source_commit；本研究记录单独按契约核验。未把全库检查计为通过。浏览器安全策略阻止本地HTML页面预览，因此仅完成静态结构和图片资源检查，不声称浏览器视觉验收通过。",
         "",
         "```bash\n# 先确认 builder、内核、测试和计划已提交；prepare 输出不可覆盖\n.venv/bin/python -m yoyo.evaluation.spike_eth_martingale_study prepare --phase pre\n.venv/bin/python -m yoyo.evaluation.spike_eth_martingale_study select\ngit add experiments/active/exp-spike-eth-martingale-20260914-v1/selection.json experiments/active/exp-spike-eth-martingale-20260914-v1/results/pre/development_search.csv\ngit branch --show-current  # 必须为 main\ngit commit -m 'Freeze ETH martingale development selection'\n.venv/bin/python -m yoyo.evaluation.spike_eth_martingale_study evaluate --phase pre\n# 仅在 Owner 已授权的冻结配置上执行一次；如需重跑，创建新版本并记录新的曝光，绝不直接重复 holdout\n.venv/bin/python -m yoyo.evaluation.spike_eth_martingale_study prepare --phase holdout\n.venv/bin/python -m yoyo.evaluation.spike_eth_martingale_study evaluate --phase holdout\n.venv/bin/python -m yoyo.evaluation.spike_eth_martingale_report\n```",
         "",

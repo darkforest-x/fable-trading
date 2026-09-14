@@ -18,6 +18,23 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-eth-martingale-20260914-delivery
+    artifact_type: manifest
+    role: frozen_v8_finite_cash_stop_loss_doubling_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: f4aa4530bc
+    source_path: experiments/active/exp-spike-eth-martingale-20260914-v1/delivery_manifest.json
+    sha256: 26923c787016a6c1c9ee13d0ab7c14a127213447cf798a99bc6e3ad4160bd954
+    size_bytes: 21114
+    storage_uri: repo://experiments/active/exp-spike-eth-martingale-20260914-v1/delivery_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: 40 development comparisons,34 stream-policy combinations,25 parameter settings;
+      all lose. Frozen continuous3m724.82U/5m792.28U;3m holdout876.96U versus fixed974.92U.
+      One authorized final exposure. Large local contexts and ledgers are SHA-bound;
+      no exchange liquidation model. 13 focused tests pass; unrelated registry failures
+      retained in verification.
   - artifact_id: spike-v1-triple-exit-20260914-delivery
     artifact_type: manifest
     role: native_v1_causal_triple_exit_two_cohort_validation

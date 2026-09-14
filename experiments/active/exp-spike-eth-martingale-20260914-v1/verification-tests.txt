@@ -1,0 +1,113 @@
+........................................................................ [ 61%]
+.........................................FFFF                            [100%]
+=================================== FAILURES ===================================
+______________ test_the_committed_registries_load_and_cross_check ______________
+
+    def test_the_committed_registries_load_and_cross_check():
+>       registries = load_registries(root=REPO)
+
+tests/contracts/test_registries.py:155: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+yoyo/artifacts/registry.py:120: in load_registries
+    artifacts = load_artifact_registry(root=root)
+yoyo/artifacts/registry.py:91: in load_artifact_registry
+    records = [ArtifactRecord.from_mapping(row) for row in _rows(raw, "artifacts", resolved)]
+yoyo/artifacts/registry.py:91: in <listcomp>
+    records = [ArtifactRecord.from_mapping(row) for row in _rows(raw, "artifacts", resolved)]
+yoyo/contracts/artifacts.py:141: in from_mapping
+    source_commit=str(_require(raw, "source_commit", record_id)),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+record = {'artifact_id': 'spike-v8-total2-1h-native-20260914-delivery', 'artifact_type': 'manifest', 'generator_commit': '1b450ccaf9', 'holdout_status': 'holdout_consumed', ...}
+key = 'source_commit', record_id = 'spike-v8-total2-1h-native-20260914-delivery'
+
+    def _require(record: Dict[str, Any], key: str, record_id: str) -> Any:
+        if key not in record or record[key] in (None, ""):
+>           raise RegistryError(record_id, f"missing required field {key!r}")
+E           yoyo.contracts.artifacts.RegistryError: spike-v8-total2-1h-native-20260914-delivery: missing required field 'source_commit'
+
+yoyo/contracts/artifacts.py:71: RegistryError
+__________ test_nothing_in_the_registries_is_production_eligible_yet ___________
+
+    def test_nothing_in_the_registries_is_production_eligible_yet():
+        """Consolidation promotes nothing. Task book section 3.2."""
+>       registries = load_registries(root=REPO)
+
+tests/contracts/test_registries.py:162: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+yoyo/artifacts/registry.py:120: in load_registries
+    artifacts = load_artifact_registry(root=root)
+yoyo/artifacts/registry.py:91: in load_artifact_registry
+    records = [ArtifactRecord.from_mapping(row) for row in _rows(raw, "artifacts", resolved)]
+yoyo/artifacts/registry.py:91: in <listcomp>
+    records = [ArtifactRecord.from_mapping(row) for row in _rows(raw, "artifacts", resolved)]
+yoyo/contracts/artifacts.py:141: in from_mapping
+    source_commit=str(_require(raw, "source_commit", record_id)),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+record = {'artifact_id': 'spike-v8-total2-1h-native-20260914-delivery', 'artifact_type': 'manifest', 'generator_commit': '1b450ccaf9', 'holdout_status': 'holdout_consumed', ...}
+key = 'source_commit', record_id = 'spike-v8-total2-1h-native-20260914-delivery'
+
+    def _require(record: Dict[str, Any], key: str, record_id: str) -> Any:
+        if key not in record or record[key] in (None, ""):
+>           raise RegistryError(record_id, f"missing required field {key!r}")
+E           yoyo.contracts.artifacts.RegistryError: spike-v8-total2-1h-native-20260914-delivery: missing required field 'source_commit'
+
+yoyo/contracts/artifacts.py:71: RegistryError
+_______ test_holdout_consumption_is_declared_per_experiment_not_assumed ________
+
+    def test_holdout_consumption_is_declared_per_experiment_not_assumed():
+        """The count has to survive the merge, so it is asserted, not narrated."""
+>       registries = load_registries(root=REPO)
+
+tests/contracts/test_registries.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+yoyo/artifacts/registry.py:120: in load_registries
+    artifacts = load_artifact_registry(root=root)
+yoyo/artifacts/registry.py:91: in load_artifact_registry
+    records = [ArtifactRecord.from_mapping(row) for row in _rows(raw, "artifacts", resolved)]
+yoyo/artifacts/registry.py:91: in <listcomp>
+    records = [ArtifactRecord.from_mapping(row) for row in _rows(raw, "artifacts", resolved)]
+yoyo/contracts/artifacts.py:141: in from_mapping
+    source_commit=str(_require(raw, "source_commit", record_id)),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+record = {'artifact_id': 'spike-v8-total2-1h-native-20260914-delivery', 'artifact_type': 'manifest', 'generator_commit': '1b450ccaf9', 'holdout_status': 'holdout_consumed', ...}
+key = 'source_commit', record_id = 'spike-v8-total2-1h-native-20260914-delivery'
+
+    def _require(record: Dict[str, Any], key: str, record_id: str) -> Any:
+        if key not in record or record[key] in (None, ""):
+>           raise RegistryError(record_id, f"missing required field {key!r}")
+E           yoyo.contracts.artifacts.RegistryError: spike-v8-total2-1h-native-20260914-delivery: missing required field 'source_commit'
+
+yoyo/contracts/artifacts.py:71: RegistryError
+________ test_the_consolidation_itself_declares_no_holdout_consumption _________
+
+    def test_the_consolidation_itself_declares_no_holdout_consumption():
+>       experiments = load_experiment_registry(root=REPO)
+
+tests/contracts/test_registries.py:291: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+yoyo/artifacts/registry.py:101: in load_experiment_registry
+    records = [ExperimentRecord.from_mapping(row) for row in _rows(raw, "experiments", resolved)]
+yoyo/artifacts/registry.py:101: in <listcomp>
+    records = [ExperimentRecord.from_mapping(row) for row in _rows(raw, "experiments", resolved)]
+yoyo/contracts/artifacts.py:209: in from_mapping
+    source_commit=str(_require(raw, "source_commit", record_id)),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+record = {'artifacts': ['eth-ma120-longest-runs-20260914-manifest'], 'canonical_report': 'analysis/p1_eth_ma120_longest_runs_20260914.md', 'experiment_id': 'exp-eth-ma120-longest-runs-20260914-v1', 'holdout_consumed': True, ...}
+key = 'source_commit', record_id = 'exp-eth-ma120-longest-runs-20260914-v1'
+
+    def _require(record: Dict[str, Any], key: str, record_id: str) -> Any:
+        if key not in record or record[key] in (None, ""):
+>           raise RegistryError(record_id, f"missing required field {key!r}")
+E           yoyo.contracts.artifacts.RegistryError: exp-eth-ma120-longest-runs-20260914-v1: missing required field 'source_commit'
+
+yoyo/contracts/artifacts.py:71: RegistryError
+=========================== short test summary info ============================
+FAILED tests/contracts/test_registries.py::test_the_committed_registries_load_and_cross_check
+FAILED tests/contracts/test_registries.py::test_nothing_in_the_registries_is_production_eligible_yet
+FAILED tests/contracts/test_registries.py::test_holdout_consumption_is_declared_per_experiment_not_assumed
+FAILED tests/contracts/test_registries.py::test_the_consolidation_itself_declares_no_holdout_consumption
+4 failed, 113 passed in 14.19s

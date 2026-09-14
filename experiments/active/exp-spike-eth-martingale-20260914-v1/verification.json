@@ -1,0 +1,168 @@
+{
+  "verified_at": "2026-09-14T11:10:35.153214+00:00",
+  "account_rows": [
+    {
+      "stream": "ETH_3m_OKX",
+      "period": "development",
+      "arm": "martingale",
+      "final_balance": 923.3234502980324,
+      "n_accepted": 2,
+      "balance_error": 0.0
+    },
+    {
+      "stream": "ETH_3m_OKX",
+      "period": "development",
+      "arm": "fixed",
+      "final_balance": 286.32221674794414,
+      "n_accepted": 52,
+      "balance_error": 0.0
+    },
+    {
+      "stream": "ETH_3m_OKX",
+      "period": "validation",
+      "arm": "martingale",
+      "final_balance": 752.7182752301509,
+      "n_accepted": 14,
+      "balance_error": 1.1368683772161603e-13
+    },
+    {
+      "stream": "ETH_3m_OKX",
+      "period": "validation",
+      "arm": "fixed",
+      "final_balance": 381.0271287244045,
+      "n_accepted": 97,
+      "balance_error": 1.1368683772161603e-13
+    },
+    {
+      "stream": "ETH_3m_OKX",
+      "period": "preholdout",
+      "arm": "martingale",
+      "final_balance": 862.6334280662145,
+      "n_accepted": 4,
+      "balance_error": 0.0
+    },
+    {
+      "stream": "ETH_3m_OKX",
+      "period": "preholdout",
+      "arm": "fixed",
+      "final_balance": 727.3329817719283,
+      "n_accepted": 68,
+      "balance_error": 1.1368683772161603e-13
+    },
+    {
+      "stream": "ETH_3m_OKX",
+      "period": "continuous_pre",
+      "arm": "martingale",
+      "final_balance": 724.8232795529119,
+      "n_accepted": 11,
+      "balance_error": 0.0
+    },
+    {
+      "stream": "ETH_3m_OKX",
+      "period": "continuous_pre",
+      "arm": "fixed",
+      "final_balance": 387.3212347412781,
+      "n_accepted": 87,
+      "balance_error": 1.1368683772161603e-13
+    },
+    {
+      "stream": "ETH_5m_Binance",
+      "period": "development",
+      "arm": "martingale",
+      "final_balance": 885.1298026353684,
+      "n_accepted": 2,
+      "balance_error": 0.0
+    },
+    {
+      "stream": "ETH_5m_Binance",
+      "period": "development",
+      "arm": "fixed",
+      "final_balance": 799.9343787306178,
+      "n_accepted": 6,
+      "balance_error": 1.1368683772161603e-13
+    },
+    {
+      "stream": "ETH_5m_Binance",
+      "period": "validation",
+      "arm": "martingale",
+      "final_balance": 833.9118152330535,
+      "n_accepted": 5,
+      "balance_error": 0.0
+    },
+    {
+      "stream": "ETH_5m_Binance",
+      "period": "validation",
+      "arm": "fixed",
+      "final_balance": 726.914910245174,
+      "n_accepted": 8,
+      "balance_error": 0.0
+    },
+    {
+      "stream": "ETH_5m_Binance",
+      "period": "preholdout",
+      "arm": "martingale",
+      "final_balance": 1185.3808610733254,
+      "n_accepted": 4,
+      "balance_error": 0.0
+    },
+    {
+      "stream": "ETH_5m_Binance",
+      "period": "preholdout",
+      "arm": "fixed",
+      "final_balance": 1327.1248342376225,
+      "n_accepted": 7,
+      "balance_error": 0.0
+    },
+    {
+      "stream": "ETH_5m_Binance",
+      "period": "continuous_pre",
+      "arm": "martingale",
+      "final_balance": 792.2808729100045,
+      "n_accepted": 3,
+      "balance_error": 0.0
+    },
+    {
+      "stream": "ETH_5m_Binance",
+      "period": "continuous_pre",
+      "arm": "fixed",
+      "final_balance": 584.6605533172232,
+      "n_accepted": 13,
+      "balance_error": 1.1368683772161603e-13
+    },
+    {
+      "stream": "ETH_3m_OKX",
+      "period": "holdout",
+      "arm": "martingale",
+      "final_balance": 876.9590627843303,
+      "n_accepted": 7,
+      "balance_error": 0.0
+    },
+    {
+      "stream": "ETH_3m_OKX",
+      "period": "holdout",
+      "arm": "fixed",
+      "final_balance": 974.9245247258776,
+      "n_accepted": 46,
+      "balance_error": 0.0
+    }
+  ],
+  "evaluation_files_hash_verified": 56,
+  "source_hashes_verified": 2,
+  "tests": {
+    "passed": 113,
+    "failed": 4,
+    "focused_tests_passed": 13,
+    "log": "verification-tests.txt",
+    "external_registry_failures": [
+      "spike-v8-total2-1h-native-20260914-delivery missing source_commit",
+      "exp-eth-ma120-longest-runs-20260914-v1 missing source_commit"
+    ]
+  },
+  "html_static": {
+    "embedded_png_images": 2,
+    "tables": 10,
+    "visual_browser_qa": "blocked by local-file URL security policy; no workaround attempted"
+  },
+  "holdout_exposure": 1,
+  "no_new_signal_or_account_run_during_verification": true
+}

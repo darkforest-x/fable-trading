@@ -17,15 +17,15 @@ experiments:
   - experiment_id: exp-spike-eth-martingale-20260914-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 00cb37d879
-    status: active
-    result: Registered builder and synthetic tests; chronological development search in progress; no holdout has been read.
+    status: rejected
+    result: Bounded search rejected;40 comparisons across34 stream-policy combinations all lose. Both development champions accept2 trades then mostly reject. Continuous3m724.82U and5m792.28U;frozen3m holdout876.96U versus fixed974.92U. No usable martingale found.
     question: Which bounded stop-loss-triggered V8 capital schedule performs best in development and survives chronological validation under a 1000 USDT cash budget?
     single_variable: Four sequential development-only single-field sweeps of maximum doubling level, reset mode, base cash risk, and notional capacity; V8 signals exits and fixed 0.2pct cost remain frozen.
-    holdout_consumed: false
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_eth_martingale_20260914.md
-    artifacts: []
+    artifacts: [spike-eth-martingale-20260914-delivery]
     notes: Owner accepts loss of the 1000 USDT research principal and explicitly authorizes one holdout evaluation only after committed policy selection. Research cashbook is not an exchange liquidation model.
   - experiment_id: exp-spike-v1-triple-exit-20260914-v1
     source_repo: darkforest-x/fable-trading
