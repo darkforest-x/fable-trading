@@ -1,0 +1,53 @@
+//@version=6
+indicator(title="Stochastic", shorttitle="Stoch", format=format.price, precision=2, timeframe="", timeframe_gaps=true)
+periodK = input.int(5, title="%K Length", minval=1)
+smoothK = input.int(3, title="%K Smoothing", minval=1)
+periodD = input.int(3, title="%D Smoothing", minval=1)
+k = ta.sma(ta.stoch(close, high, low, periodK), smoothK)
+d = ta.sma(k, periodD)
+plot(k, title="%K", color=#2962FF)
+plot(d, title="%D", color=#FF6D00)
+h0 = hline(80, "Upper Band", color=#787B86)
+hline(50, "Middle Band", color=color.new(#787B86, 50))
+h1 = hline(20, "Lower Band", color=#787B86)
+fill(h0, h1, color=color.rgb(33, 150, 243, 90), title="Background")
+crossUp = ta.crossover(k, d)
+oversold = k < 20 and d < 20
+signalLong = crossUp and oversold
+plotshape(signalLong, title="做多", location=location.bottom, style=shape.triangleup, color=color.rgb(57, 243, 64), size=size.tiny)
+crossDown = ta.crossunder(k, d)
+overbought = k > 80 and d > 80
+signalShort = crossDown and overbought
+plotshape(signalShort, title="做空", location=location.top, style=shape.triangledown, color=color.rgb(255, 82, 82), size=size.tiny)
+
+// === 警报条件（可在TradingView设置报警） ===
+// alertcondition(signalLong, title="Stoch 超卖金叉", message="Stochastic 超卖金叉：买入信号")
+alertcondition(signalShort, title="Stoch 超买死叉", message="Stochastic 超买死叉：卖出信号")
+
+pd = input.int(22, title="LookBack Period Standard Deviation High")
+bbl = input.int(20, title="Bolinger Band Length")
+mult = input.float(2.0, minval=1.0, maxval=5.0, title="Bollinger Band Standard Deviation Up")
+lb = input.int(50, title="Look Back Period Percentile High")
+ph = input.float(0.85, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%")
+pl = input.float(1.01, title="Lowest Percentile - 1.10=90%, 1.05=95%, 1.01=99%")
+hp = input.bool(false, title="Show High Range - Based on Percentile and LookBack Period?")
+sd = input.bool(false, title="Show Standard Deviation Line?")
+
+wvf = ((ta.highest(close, pd) - low) / ta.highest(close, pd)) * 100
+sDev = mult * ta.stdev(wvf, bbl)
+midLine = ta.sma(wvf, bbl)
+lowerBand = midLine - sDev
+upperBand = midLine + sDev
+rangeHigh = ta.highest(wvf, lb) * ph
+rangeLow = ta.lowest(wvf, lb) * pl
+col = (wvf >= upperBand or wvf >= rangeHigh) ? color.lime : color.gray
+plot(hp ? rangeHigh : na, title="Range High Percentile", style=plot.style_line, linewidth=4, color=color.orange)
+plot(hp ? rangeLow : na, title="Range Low Percentile", style=plot.style_line, linewidth=4, color=color.orange)
+plot(wvf, title="Williams Vix Fix", style=plot.style_histogram, linewidth=4, color=col)
+plot(sd ? upperBand : na, title="Upper Band", style=plot.style_line, linewidth=3, color=color.aqua)
+
+// 添加柱子为绿色的条件
+wvfGreen = (wvf >= upperBand or wvf >= rangeHigh)
+// 修改后的警报条件：Stoch 超卖金叉 且 WVF 柱子为绿色
+alertcondition(signalLong and wvfGreen, title="Stoch 超卖金叉 + 柱子绿色", message="买入信号：Stochastic 超卖金叉，WVF柱子为绿色")
+

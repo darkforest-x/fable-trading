@@ -9164,3 +9164,23 @@ experiments:
     result: Frozen session configurations fail sustained positive net outcomes;NY immediate protection reduces observed full-history max net-loss streak to5 but finite recovery still halts.
     artifacts:
     - spike-eth3m-ict-sessions-20260914-delivery
+
+  - experiment_id: exp-spike-fanshen-source-audit-20260914-v1
+    source_repo: darkforest-x/fable-trading
+    status: completed
+    question: Identify the exact Fanshen V1 source in Notion before exit replay.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_fanshen_source_audit_20260914.md
+    notes: Owner supplied target Pine after the Notion candidate was excluded; no live changes.
+
+  - experiment_id: exp-spike-fanshen-exit-multitf-20260914-v1
+    source_repo: darkforest-x/fable-trading
+    status: running
+    question: Compare owner-supplied Stoch arrow and WVF-filtered alert exits against frozen V8 across six OKX ETH periods.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_fanshen_exit_multitf_20260914.md
+    notes: Owner supplied target Pine after the Notion candidate was excluded; no live changes.

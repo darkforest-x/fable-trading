@@ -1,0 +1,36 @@
+//@version=6
+indicator(title="Stochastic with Signal & Alert", shorttitle="Stoch", format=format.price, precision=2, timeframe="", timeframe_gaps=true, overlay=false)
+
+// 参数设置
+periodK = input.int(14, title="%K Length", minval=1)
+smoothK = input.int(1, title="%K Smoothing", minval=1)
+periodD = input.int(3, title="%D Smoothing", minval=1)
+
+// 计算 %K 和 %D
+k = ta.sma(ta.stoch(close, high, low, periodK), smoothK)
+d = ta.sma(k, periodD)
+
+// 绘制指标曲线
+plot(k, title="%K", color=#2962FF, linewidth=1)
+plot(d, title="%D", color=#FF6D00, linewidth=1)
+h0 = hline(80, "Upper Band", color=#787B86)
+hline(50, "Middle Band", color=color.new(#787B86, 50))
+h1 = hline(20, "Lower Band", color=#787B86)
+fill(h0, h1, color=color.rgb(33, 150, 243, 90), title="Background")
+
+// 信号条件：在超卖区金叉
+crossUp = ta.crossover(k, d)
+oversold = k < 20 and d < 20
+signal = crossUp and oversold
+
+// 副图上标记三角形
+plotshape(signal, title="Stoch Cross Signal", location=location.bottom, style=shape.triangleup, color=color.green, size=size.small)
+
+// === 在主图打信号（必须新建 overlay=true 的 indicator） ===
+if (signal)
+    label.new(bar_index, low, text="BUY", style=label.style_labelup, color=color.green, textcolor=color.white, size=size.small)
+
+// 警报条件
+alertcondition(signal, title="Stoch Oversold Bullish Cross", message="Stochastic 出现超卖金叉买入信号！")
+
+

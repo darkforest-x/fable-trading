@@ -1,0 +1,43 @@
+{
+  "experiment_id": "exp-spike-fanshen-exit-multitf-20260914-v1",
+  "created": "2026-09-14",
+  "source": "owner_pasted_pine_v6_in_current_conversation",
+  "venue": "OKX",
+  "symbol": "ETH-USDT-SWAP",
+  "minutes": [
+    3,
+    5,
+    15,
+    30,
+    60,
+    240
+  ],
+  "end": "2026-05-01T00:00:00Z",
+  "common_start": "2026-01-01T00:00:00Z",
+  "available_start": "2023-08-01T00:00:00Z",
+  "minimum_warmup_bars": 1500,
+  "tick": 0.01,
+  "round_trip_cost": 0.002,
+  "seed": 9142026,
+  "controls_per_trade": 5,
+  "permutations": 9999,
+  "primary": "arrows_augment_profit",
+  "selection": "none_all_policies_frozen_before_replay",
+  "holdout_consumed": false,
+  "production_eligible": false,
+  "training_eligible": false,
+  "context_3m": "experiments/active/exp-spike-eth-martingale-20260914-v1/results/pre/ETH_3m_OKX.pkl",
+  "context_3m_sha256": "9fc6f9dcbad7616f9c7ceab811ed9634ece2b07bf24327ff070ac09592c972fd",
+  "sources": {
+    "5": "data/kline_fetched/okx_ETH_USDT_SWAP_5m_57699.csv",
+    "15": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv"
+  },
+  "execution": "next_open_on_closed_opposite_signal; retain initial stop and raw V6 reverse; vary only fanshen overlay and optional original trailing removal",
+  "cash": {
+    "initial_balance": 1000,
+    "base_risk": 1,
+    "leverage_cap": 10
+  },
+  "sessions": "all"
+}
+
