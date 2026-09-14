@@ -303,14 +303,16 @@ def assert_baseline_parity(actual: pd.DataFrame, expected: pd.DataFrame) -> None
 
 def fixed_event(source_fixed: pd.DataFrame, decisions: pd.DataFrame, *, policy: str) -> pd.DataFrame:
     """Filter only original baseline events; this deliberately creates no re-entry."""
-    fields = ["signal_i", "gate_state", "gate_reason", "rv", "tr_atr_expansion", "signal_atr_pct", "stock_class"]
-    gate = decisions[fields].copy()
-    out = source_fixed.drop(columns=[c for c in fields[3:] if c in source_fixed], errors="ignore").merge(gate, on="signal_i", how="left", validate="many_to_one")
-    missing = out.gate_state.isna(); rejected = out.gate_state.eq("rejected"); unknown = missing | out.gate_state.eq("unknown_untested")
-    out["fixed_event_status"] = np.where(rejected, "rejected", np.where(unknown, "unknown_kept", "kept"))
-    out["fixed_event_reason"] = out.gate_reason.where(~missing, "candidate_missing")
-    out["gate_rejected"] = rejected.astype(bool); out["feature_known"] = (~unknown).astype(bool)
-    out = out.drop(columns=["gate_state", "gate_reason"])
+    gate = decisions.set_index("signal_i")[["gate_state", "gate_reason", "rv", "tr_atr_expansion", "signal_atr_pct", "stock_class"]]
+    out = source_fixed.copy(); out["fixed_event_status"] = "kept"; out["fixed_event_reason"] = ""; out["gate_rejected"] = False; out["feature_known"] = True
+    for i, row in out.iterrows():
+        item = gate.loc[int(row.signal_i)] if int(row.signal_i) in gate.index else None
+        if item is None:
+            out.loc[i, ["fixed_event_status", "fixed_event_reason", "feature_known"]] = ["unknown_kept", "candidate_missing", False]
+            continue
+        for col in ("rv", "tr_atr_expansion", "signal_atr_pct", "stock_class"): out.loc[i, col] = item[col]
+        if str(item.gate_state) == "unknown_untested": out.loc[i, ["fixed_event_status", "fixed_event_reason", "feature_known"]] = ["unknown_kept", str(item.gate_reason), False]
+        elif str(item.gate_state) == "rejected": out.loc[i, ["fixed_event_status", "fixed_event_reason", "gate_rejected"]] = ["rejected", str(item.gate_reason), True]
     out["policy"] = policy
     return out
 
@@ -359,17 +361,7 @@ def run(output: Path, *, limit: int | None = None, official: bool = False) -> pd
                 serial.to_csv(staging / f"v8.serial_{policy}.csv.gz", index=False, compression={"method":"gzip", "mtime":0})
                 fixed.to_csv(staging / f"v8.fixed_{policy}.csv.gz", index=False, compression={"method":"gzip", "mtime":0})
                 decisions.to_csv(staging / f"v8.{policy}.decisions.csv.gz", index=False, compression={"method":"gzip", "mtime":0})
-                confirm_time = prepared.frame.index + pd.Timedelta(minutes=context.minutes)
-                in_scope = (confirm_time >= base.START) & (confirm_time < base.END)
-                raw_scope = prepared.raw_side[in_scope]
-                risk_rejected = decisions.gate_state.eq("rejected") if policy == "risk_gt30pct" else pd.Series(False, index=decisions.index)
-                rows.append({"stream_key": context.key, **context.identity, "policy": policy,
-                             "raw_v6_signals": int((raw_scope != 0).sum()), "raw_v6_long": int((raw_scope == 1).sum()), "raw_v6_short": int((raw_scope == -1).sum()),
-                             "v8_candidates": len(decisions), "v8_candidate_long": int(decisions.side.eq(1).sum()), "v8_candidate_short": int(decisions.side.eq(-1).sum()),
-                             "gate_rejected_candidates": int(decisions.gate_state.eq("rejected").sum()), "gate_unknown_candidates": int(decisions.gate_state.eq("unknown_untested").sum()),
-                             "entry_attempted": int(decisions.entry_attempted.astype(bool).sum()), "entry_filled": int(decisions.entry_filled.astype(bool).sum()),
-                             "risk_rejected_candidates": int(risk_rejected.sum()), "risk_rejected_attempted": int((risk_rejected & decisions.entry_attempted.astype(bool)).sum()), "risk_rejected_unattempted": int((risk_rejected & ~decisions.entry_attempted.astype(bool)).sum()),
-                             "serial_rows": len(serial), "serial_closed": int((~serial.censored.astype(bool)).sum()), "serial_net_r": float(serial.loc[~serial.censored.astype(bool), "net_r"].sum()), "fixed_rejected": int(fixed.fixed_event_status.eq("rejected").sum())})
+                rows.append({"stream_key": context.key, **context.identity, "policy": policy, "signals": len(decisions), "gate_rejected": int(decisions.gate_state.eq("rejected").sum()), "gate_unknown": int(decisions.gate_state.eq("unknown_untested").sum()), "serial_rows": len(serial), "serial_closed": int((~serial.censored.astype(bool)).sum()), "serial_net_r": float(serial.loc[~serial.censored.astype(bool), "net_r"].sum()), "fixed_rejected": int(fixed.fixed_event_status.eq("rejected").sum())})
             pd.DataFrame(rows).to_csv(staging / "stream_summary.csv", index=False); files = {p.name: sha256(p) for p in staging.glob("*.csv.gz")}; wall = perf_counter() - started
             receipt = {"status":"complete", "stream_key":context.key, "stream_wall_seconds":wall, "source_completion_sha256":sha256(SOURCE / "streams" / folder.name / "completion.json"), "files":files, "summaries":rows}
             (staging / "completion.json").write_text(json.dumps(receipt, indent=2)); staging.replace(output / "streams" / folder.name); summaries.extend(rows)
