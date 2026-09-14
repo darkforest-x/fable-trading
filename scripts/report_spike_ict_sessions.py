@@ -31,6 +31,10 @@ def main():
     joined=summary.merge(controls,on=['period','arm','session'],how='left',validate='one_to_one')
     selection=json.loads((EXP/'selection.json').read_text());chosen=selection['chosen_session']
     receipt=json.loads((out/'receipt.json').read_text())
+    audit=json.loads((out/'validation_receipt.json').read_text())
+    ny=summary[(summary.period=='continuous_pre')&(summary.session=='new_york')&summary.arm.isin(['ohlc','olhc'])]
+    ny_fixed=cash[(cash.period=='continuous_pre')&(cash.session=='new_york')&cash.arm.isin(['ohlc','olhc'])&(cash.cash=='fixed1')]
+    ny_double=cash[(cash.period=='continuous_pre')&(cash.session=='new_york')&cash.arm.isin(['ohlc','olhc'])&(cash.cash=='double')]
     primary=summary[(summary.arm=='next_bar')&(summary.session=='union')&(summary.period!='continuous_pre')]
     later=primary[primary.period!='development']
     claim=('三段合并在两个后期窗口平均净R均为正，仍需看匹配对照和资金路径。'
@@ -38,6 +42,8 @@ def main():
     text=f'''# ETH3m V8：只在ICT指定时段开仓
 
 **{claim}**
+
+**只做New York＋盘中费用保本，在两种路径假设下，完整历史自然交易的最长连续净亏均为{int(ny.max_net_loss_streak.max())}次。这个改善值得保留，但固定1U风险账户仍从1000U降至{ny_fixed.final_balance.min():.2f}–{ny_fixed.final_balance.max():.2f}U，亏后翻倍账户剩{ny_double.final_balance.min():.2f}–{ny_double.final_balance.max():.2f}U且提前无法继续。** 这里的连亏来自覆盖全期的逐笔序列，不是资金早停后的短序列；盘内路径不是实际成交验证。
 
 按你当前图表核实的三段，夏令时北京时间为14:00–17:00、17:00–20:00、20:00–23:00；合起来是14:00–23:00。我们比较“全天、三段各自、三段合并、去午间”六组，保持V8及每组退出规则不变。
 
@@ -81,7 +87,7 @@ def main():
                     f'{int(r.max_initial_stop_streak)}/{int(r.max_net_loss_streak)}',f'{int(r.gross3r)}/{int(r.net3r)}',
                     number(r.random_mean_net_r),number(r.excess_net_r),number(r.p,4),int(r.matched_trades)])
             text+=table(['时段','自然笔数','每笔毛R','每笔净R','累计净R','完整SL/净亏最长','毛/净3R兑现','随机净R','超额R','p','足额匹配笔数'],rows)
-    text+='\n## 1000U连续资金：固定1U与亏后翻倍\n\n初始价格风险1U，名义杠杆容量10倍，净亏后风险翻倍，整轮实际净回本才重置。容量不足保留债务等待，不能继续时停机；没有六次后自动清债。原始退出不固定止盈；其他三时序固定净1R退出。亏损时成本可能令净亏超过价格风险1U。\n\n'
+    text+='\n## 1000U连续资金：固定1U与亏后翻倍\n\n初始价格风险1U，名义杠杆容量10倍，净亏后风险翻倍，整轮实际净回本才重置。容量不足保留债务等待，不能继续时停机；没有六次后自动清债。原始退出不固定止盈；其他三时序固定净1R退出。费用保本价为多单开仓价×1.002、空单×0.998，按0.01价格档向有利方向取整，价格再向有利方向越过一档才激活。下根生效组在收盘后安装，盘中组沿指定路径立即安装；保留原跟踪止损。亏损时成本可能令净亏超过价格风险1U。\n\n'
     rows=[]
     chosen_sessions=list(dict.fromkeys(['all','union',chosen]))
     for r in cash[(cash.period=='continuous_pre')&cash.session.isin(chosen_sessions)].itertuples():
@@ -93,10 +99,10 @@ def main():
             f'{int(r.max_initial_stop_streak)}/{int(r.max_net_loss_streak)}',last,
             str(r.halt_time)[:16] if pd.notna(r.halt_time) else '未永久停机'])
     text+=table(['退出','时段','资金','自然笔数','期末U','现金回撤','最大已用风险U','容量拒单','完整SL/净亏最长','最后实际开仓UTC','停止UTC'],rows)
-    text+='\n此表的匹配随机对照见同退出/时段自然序列表及controls.csv；它是独立入场收益诊断，不是模拟随机倍投账户。资金早停后的低交易数和短连损不能代表覆盖到2026年4月。\n'
+    text+='\n这是资金可持续性诊断，同一入场规则的固定1U账户作为资金管理对照。匹配随机入场收益见三个独立期间的同退出/时段表及controls.csv，不是模拟随机倍投账户，不能冒充连续资金随机对照。容量拒单不占仓，后续可能接受原本会被占仓挡掉的信号，所以有限资金账户笔数可能不同于不设容量的自然序列。资金早停后的低交易数和短连损不能代表覆盖到2026年4月。纽约盘中两组在2025-03-07均因下一档价格风险512U已超过剩余现金而停止；“保本打断连亏”没有清掉上一轮亏损。\n'
     text+='\n## 盘中保护时序敏感性\n\n先高后低/先低后高是两种OHLC路径假设，不能冒充真实tick或严格收益上下界。\n\n'
     rows=[]
-    for r in joined[(joined.period!='continuous_pre')&joined.session.isin(['all','union'])&joined.arm.isin(['ohlc','olhc'])].itertuples():
+    for r in joined[(joined.period!='continuous_pre')&joined.session.isin(['all','union',chosen])&joined.arm.isin(['ohlc','olhc'])].itertuples():
         rows.append([PERIOD[r.period],ARM[r.arm],LABEL[r.session],int(r.natural),number(r.mean_net_r),int(r.be),
             f'{int(r.max_initial_stop_streak)}/{int(r.max_net_loss_streak)}',number(r.random_mean_net_r),number(r.excess_net_r),number(r.p,4)])
     text+=table(['区间','时序','时段','自然笔数','每笔净R','保本次数','完整SL/净亏最长','随机净R','超额R','p'],rows)
@@ -105,13 +111,16 @@ def main():
 
 固定OKX ETH-USDT-SWAP 3m上下文482176根，2023-07-31 11:12至2026-04-30 23:57 UTC；交易开发从2023-08-01开始，保留前史预热。开发/2025/2026前4月每组从空仓开始，连续资金另算。正类率/val AUC/top-decile无预测模型不适用；以胜率、完整收益分布摘要和匹配随机入场代替。没有随机切分。
 
-这是该配置第0次消耗holdout；没有拿9月数据选择时段。此前历史已用于其他研究，不宣称全新盲样本。builder提交`{receipt['builder_commit']}`后运行；日历DST、边界、排除信号无影子仓位、保本/删失等13项合成检查通过。
+这是该配置第0次消耗holdout；没有拿9月数据选择时段。此前历史已用于其他研究，不宣称全新盲样本。研究代码与计划在`{audit['study_frozen_commit']}`冻结后运行；原receipt中的`{receipt['builder_commit']}`是运行结束时HEAD，其间仅提交了报告生成器，研究代码逐字节未变。config保留从上一研究继承的未使用arms/cash/permutation_draws字段，实际执行以冻结代码和PROJECT_PLAN为准；validation_receipt列出实际四组退出、两组资金参数，未运行无限杠杆组。
 
-同币、UTC月、纽约开仓小时、周末状态、当前ATR比例相对于此前120根的三分位桶匹配9次随机入场，同方向/退出/成本；月份区块符号置换9999次。控制只匹配自然出场，保留删失、无效及缺配对数量；p未做多重比较校正，开发排名后p不具有确认性含义。阈值单变量对照就是同退出的全天组。
+日历DST、边界、排除信号无影子仓位、保本/删失等13项合成检查通过。另核对96组完整自然序列、192份现金账本、72组匹配对照算术和744笔原始V8开发期基线逐笔一致；选择文件时间早于首份2025年产物。以上验证不等于原生Pine逐笔一致或盘内真实成交验证。
+
+同币、UTC月、纽约开仓小时、周末状态、当前ATR比例相对于此前120根的三分位桶匹配9次随机入场，同方向/退出/成本；月份区块符号置换9999次。控制只匹配自然出场，保留删失、无效及缺配对数量；随机均值、超额R及p只按足额9次匹配的子集计算，而策略均值包含全部自然交易。p未做多重比较校正，开发排名后p不具有确认性含义。阈值单变量对照就是同退出的全天组。
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q -p no:cacheprovider --capture=no tests/evaluation/test_spike_ict_session_study.py
 PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m yoyo.evaluation.spike_ict_session_study
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python scripts/validate_spike_ict_results.py
 PYTHONDONTWRITEBYTECODE=1 .venv/bin/python scripts/report_spike_ict_sessions.py
 ```
 
