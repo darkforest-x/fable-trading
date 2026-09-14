@@ -41,7 +41,7 @@ def check_committed():
 
 def measure(case, events, columns):
     left, right = case["main_start_i"], case["main_end_i"]
-    any_events = sorted(set(i for name in columns for i in np.flatnonzero(events[name].to_numpy(bool)) if left <= i <= right))
+    any_events = sorted(set(int(i) for name in columns for i in np.flatnonzero(events[name].to_numpy(bool)) if left <= i <= right))
     result = {"displayed_events_in_window": any_events, "window_event_count": len(any_events)}
     start, end = case.get("core_start_i"), case.get("core_end_i")
     if start is None:
@@ -61,7 +61,7 @@ def measure(case, events, columns):
     return result
 
 
-def run(phase):
+def run(phase, signals="marker"):
     commit = check_committed()
     input_sha = {str(p.relative_to(ROOT)): digest(p) for p in (DEFAULT_ANSWERS, DEFAULT_MANIFEST)}
     cases, excluded = load_cases()
@@ -75,7 +75,7 @@ def run(phase):
     for case in selected:
         groups[case["source_path"]].append(case)
     results, audits, failures = [], [], []
-    for source, group in sorted(groups.items()):
+    for source_number, (source, group) in enumerate(sorted(groups.items()), 1):
         try:
             frame, audit = load_source(group)
             events = replay(frame, bar_minutes=15)
@@ -83,12 +83,12 @@ def run(phase):
             for case in group:
                 item = dict(case)
                 if case.get("core_start_i") is None:
-                    old_cols = ["warning"]
-                    new_cols = ["a_long_marker", "a_short_marker"]
+                    old_cols = ["warning" if signals == "marker" else "confirmation"]
+                    new_cols = [f"a_long_{signals}", f"a_short_{signals}"]
                 else:
                     # V1 has no long branch; empty list is a structural miss.
-                    old_cols = ["warning"] if case["side"].lower() == "short" else []
-                    new_cols = ["a_"+case["side"].lower()+"_marker"]
+                    old_cols = ["warning" if signals == "marker" else "confirmation"] if case["side"].lower() == "short" else []
+                    new_cols = ["a_"+case["side"].lower()+"_"+signals]
                 item["v1"] = measure(case, events, old_cols)
                 item["candidate_a"] = measure(case, events, new_cols)
                 if case.get("core_start_i") is not None:
@@ -98,7 +98,8 @@ def run(phase):
                     item["candidate_a_predicate_support_in_core"] = {name: int(core[name].sum()) for name in names}
                     item["candidate_a_setup_bars_in_core"] = int(core[f"a_{case['side'].lower()}_setup"].sum())
                 results.append(item)
-            print(json.dumps({"completed_source": source, "cases": len(group)}, ensure_ascii=False), flush=True)
+            if source_number % 20 == 0:
+                print(json.dumps({"completed_sources": source_number, "total_sources": len(groups)}, ensure_ascii=False), flush=True)
         except Exception as error:
             failures.extend({"task_id": c["task_id"], "review_id": c["review_id"], "source_path": source,
                              "reason": type(error).__name__+": "+str(error)} for c in group)
@@ -117,13 +118,14 @@ def run(phase):
             "null_mean_hit_rate": float(np.mean(null)) if null else None,
             "side_inside": {side: {"n": sum(r["side"].lower() == side for r in positive),
                 "hit": sum(r["side"].lower() == side and r[model]["hit_inside"] for r in positive)} for side in ("long", "short")}}
-    output = HERE/"results"/phase
+    output = HERE/"results"/(phase if signals == "marker" else phase+"_confirmation")
     output.mkdir(parents=True, exist_ok=True)
     if (output/"summary.json").exists():
         raise RuntimeError("Frozen result exists; use a new version rather than overwrite")
     if any(digest(ROOT/name) != value for name, value in input_sha.items()):
         raise RuntimeError("Annotation metadata changed during replay")
     summary = {"phase": phase, "created_at": datetime.now(timezone.utc).isoformat(), "source_commit": commit,
+        "signal_kind": signals,
         "input_sha256": input_sha,
         "source_sha256": {name: digest(ROOT/name) for name in SOURCES},
         "metadata_accepted": len(cases), "selected": len(selected), "reserved": len(reserved),
@@ -140,4 +142,6 @@ def run(phase):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--phase", choices=("dev", "later"), required=True)
-    run(parser.parse_args().phase)
+    parser.add_argument("--signals", choices=("marker", "confirmation"), default="marker")
+    args = parser.parse_args()
+    run(args.phase, args.signals)

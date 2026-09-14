@@ -1,0 +1,276 @@
+//@version=6
+// Candidate A for closed-bar comparison to existing human YOLO gold boxes.
+// It does not recognize every gold box, prove performance, or create orders.
+indicator("SPIKE · 金标形态 V2（验证版）", shorttitle="SPIKE 金标 V2", overlay=true, explicit_plot_zorder=true, max_labels_count=500)
+
+string gView = "01 · 显示"
+bool showMas = input.bool(true, "显示六条均线", group=gView)
+bool showPanel = input.bool(true, "显示状态面板", group=gView)
+bool showRawDiagnostics = input.bool(false, "显示原始形态诊断", group=gView, tooltip="仅供 Python/Pine 对齐；识别与确认标记始终只在收盘后发生。")
+
+// These are Candidate A's frozen default morphology parameters. Changing an
+// input defines a separate comparison configuration from the Python defaults.
+string gRule = "02 · 形态参数"
+int atrLen = input.int(14, "ATR 长度", minval=1, group=gRule)
+float compactLimit = input.float(2.0, "六线宽度上限（ATR）", minval=0.1, step=0.1, group=gRule)
+float contactAtr = input.float(0.25, "实体接触扩展（ATR）", minval=0.01, step=0.01, group=gRule)
+int topologyFlips = input.int(2, "拓扑翻转最少次数", minval=1, group=gRule)
+float widthContract = input.float(0.90, "宽度收缩比", minval=0.1, step=0.01, group=gRule)
+float displacementAtr = input.float(0.4, "三根位移（ATR）", minval=0.1, step=0.1, group=gRule)
+float ropeDistanceAtr = input.float(2.5, "离六线最远（ATR）", minval=0.1, step=0.1, group=gRule)
+float rangeAtr = input.float(3.0, "单根 TR 上限（ATR）", minval=0.1, step=0.1, group=gRule)
+int rearmBars = input.int(3, "重臂非合格根数", minval=1, group=gRule)
+int minimumSeparation = input.int(6, "同向最小间隔", minval=1, group=gRule)
+int confirmationWait = input.int(5, "确认等待最多根数", minval=1, group=gRule)
+
+const int fastLen = 20
+const int midLen = 60
+const int slowLen = 120
+const int slopeBars = 3
+const int compactLookback = 12
+const int contactLookback = 8
+const int confirmationLevelBars = 5
+
+color teal = #008F82
+color blue = #4679C9
+color slate = #7D8490
+color bull = #1D9A6C
+color bear = #D34B66
+color amber = #D99A28
+
+// Each call site has independent series history. A zero MA difference carries
+// the previous sign; a missing difference remains missing, matching Candidate A.
+f_sign(float difference) =>
+    var float carried = na
+    carried := na(difference) ? na : difference > 0 ? 1.0 : difference < 0 ? -1.0 : nz(carried[1], 0.0)
+    carried
+
+f_flip(float difference, float carried) =>
+    not na(difference) and not na(difference[1]) and carried * carried[1] < 0 ? 1.0 : 0.0
+
+f_text(float value) =>
+    na(value) ? "—" : str.tostring(value, format.mintick)
+
+// All rolling calculations are global and unconditional so the historical
+// series used by each closed bar matches Pine's execution model.
+float s20 = ta.sma(close, fastLen)
+float e20 = ta.ema(close, fastLen)
+float s60 = ta.sma(close, midLen)
+float e60 = ta.ema(close, midLen)
+float s120 = ta.sma(close, slowLen)
+float e120 = ta.ema(close, slowLen)
+float ropeHigh = math.max(s20, e20, s60, e60, s120, e120)
+float ropeLow = math.min(s20, e20, s60, e60, s120, e120)
+float ropeWidth = ropeHigh - ropeLow
+float atr = ta.atr(atrLen)
+float tr = ta.tr(true)
+
+float dS20E20 = s20 - e20
+float dS20S60 = s20 - s60
+float dS20E60 = s20 - e60
+float dS20S120 = s20 - s120
+float dS20E120 = s20 - e120
+float dE20S60 = e20 - s60
+float dE20E60 = e20 - e60
+float dE20S120 = e20 - s120
+float dE20E120 = e20 - e120
+float dS60E60 = s60 - e60
+float dS60S120 = s60 - s120
+float dS60E120 = s60 - e120
+float dE60S120 = e60 - s120
+float dE60E120 = e60 - e120
+float dS120E120 = s120 - e120
+float signS20E20 = f_sign(dS20E20)
+float signS20S60 = f_sign(dS20S60)
+float signS20E60 = f_sign(dS20E60)
+float signS20S120 = f_sign(dS20S120)
+float signS20E120 = f_sign(dS20E120)
+float signE20S60 = f_sign(dE20S60)
+float signE20E60 = f_sign(dE20E60)
+float signE20S120 = f_sign(dE20S120)
+float signE20E120 = f_sign(dE20E120)
+float signS60E60 = f_sign(dS60E60)
+float signS60S120 = f_sign(dS60S120)
+float signS60E120 = f_sign(dS60E120)
+float signE60S120 = f_sign(dE60S120)
+float signE60E120 = f_sign(dE60E120)
+float signS120E120 = f_sign(dS120E120)
+float flips = f_flip(dS20E20, signS20E20) + f_flip(dS20S60, signS20S60) + f_flip(dS20E60, signS20E60) + f_flip(dS20S120, signS20S120) + f_flip(dS20E120, signS20E120) + f_flip(dE20S60, signE20S60) + f_flip(dE20E60, signE20E60) + f_flip(dE20S120, signE20S120) + f_flip(dE20E120, signE20E120) + f_flip(dS60E60, signS60E60) + f_flip(dS60S120, signS60S120) + f_flip(dS60E120, signS60E120) + f_flip(dE60S120, signE60S120) + f_flip(dE60E120, signE60E120) + f_flip(dS120E120, signS120E120)
+
+bool pricesValid = not na(open) and not na(high) and not na(low) and not na(close) and low > 0 and high >= low and high >= math.max(open, close) and low <= math.min(open, close)
+bool dataGap = not barstate.isfirst and (not pricesValid or not pricesValid[1] or time != time_close[1])
+var int segmentBars = 0
+if barstate.isconfirmed
+    segmentBars := not pricesValid ? 0 : dataGap ? 1 : segmentBars + 1
+int warmupBars = math.max(slowLen + atrLen, 3 * slowLen)
+bool ready = pricesValid and not dataGap and segmentBars >= warmupBars and atr[1] > 0
+
+float widthPriorAtr = atr[1] > 0 ? ropeWidth / atr[1] : na
+bool compact = widthPriorAtr <= compactLimit
+bool compactRun = compact and compact[1] and compact[2]
+float compactRunValue = compactRun ? 1.0 : 0.0
+float compactRecent = ta.highest(compactRunValue[1], 10)
+bool aCompact = compactRecent == 1.0
+float bodyLow = math.min(open, close)
+float bodyHigh = math.max(open, close)
+bool contact = bodyHigh >= ropeLow - contactAtr * atr[1] and bodyLow <= ropeHigh + contactAtr * atr[1]
+float contactValue = contact ? 1.0 : 0.0
+float contactRecent = ta.highest(contactValue[1], contactLookback)
+bool aContact = contactRecent == 1.0
+float priorFlips = math.sum(flips[1], compactLookback)
+bool aTopology = priorFlips >= topologyFlips or (ropeWidth[9] > 0 and ropeWidth[1] <= widthContract * ropeWidth[9])
+float outsideDistance = math.max(close - ropeHigh, 0.0) + math.max(ropeLow - close, 0.0)
+bool aNear = outsideDistance / atr[1] <= ropeDistanceAtr
+bool aRange = tr / atr[1] <= rangeAtr
+
+bool longSlope = s20 - s20[slopeBars] > 0 and e20 - e20[slopeBars] > 0 and ((s20 - s20[slopeBars] > 0 ? 1 : 0) + (e20 - e20[slopeBars] > 0 ? 1 : 0) + (s60 - s60[slopeBars] > 0 ? 1 : 0) + (e60 - e60[slopeBars] > 0 ? 1 : 0) + (s120 - s120[slopeBars] > 0 ? 1 : 0) + (e120 - e120[slopeBars] > 0 ? 1 : 0) >= 3)
+bool shortSlope = s20 - s20[slopeBars] < 0 and e20 - e20[slopeBars] < 0 and ((s20 - s20[slopeBars] < 0 ? 1 : 0) + (e20 - e20[slopeBars] < 0 ? 1 : 0) + (s60 - s60[slopeBars] < 0 ? 1 : 0) + (e60 - e60[slopeBars] < 0 ? 1 : 0) + (s120 - s120[slopeBars] < 0 ? 1 : 0) + (e120 - e120[slopeBars] < 0 ? 1 : 0) >= 3)
+bool longProgress = (close - close[slopeBars]) / atr[1] >= displacementAtr
+bool shortProgress = (close[slopeBars] - close) / atr[1] >= displacementAtr
+float fastHigh = math.max(s20, e20)
+float fastLow = math.min(s20, e20)
+bool longOutside = close > fastHigh
+bool shortOutside = close < fastLow
+bool common = ready and aCompact and aContact and aTopology and aNear and aRange
+bool longSetup = common and longSlope and longProgress and longOutside
+bool shortSetup = common and shortSlope and shortProgress and shortOutside
+float longLevel = ta.highest(high, confirmationLevelBars)
+float shortLevel = ta.lowest(low, confirmationLevelBars)
+
+var bool longEligible = true
+var bool shortEligible = true
+var int longOff = 3
+var int shortOff = 3
+var int lastLong = -100000
+var int lastShort = -100000
+var int longPendingBar = na
+var int shortPendingBar = na
+var float longPendingLevel = na
+var float shortPendingLevel = na
+bool longMarker = false
+bool shortMarker = false
+bool longConfirmation = false
+bool shortConfirmation = false
+bool longCancelled = false
+bool shortCancelled = false
+bool longExpired = false
+bool shortExpired = false
+
+if barstate.isconfirmed
+    if not ready
+        longEligible := true
+        shortEligible := true
+        longOff := rearmBars
+        shortOff := rearmBars
+        lastLong := -100000
+        lastShort := -100000
+        longPendingBar := na
+        shortPendingBar := na
+        longPendingLevel := na
+        shortPendingLevel := na
+    else
+        if not na(longPendingBar)
+            int longAge = bar_index - longPendingBar
+            bool longReclaimed = close < fastLow
+            if longAge > confirmationWait
+                longPendingBar := na
+                longPendingLevel := na
+                longExpired := true
+            else if longReclaimed
+                longPendingBar := na
+                longPendingLevel := na
+                longCancelled := true
+            else if longAge > 0 and close > longPendingLevel
+                longConfirmation := true
+                longPendingBar := na
+                longPendingLevel := na
+        if not na(shortPendingBar)
+            int shortAge = bar_index - shortPendingBar
+            bool shortReclaimed = close > fastHigh
+            if shortAge > confirmationWait
+                shortPendingBar := na
+                shortPendingLevel := na
+                shortExpired := true
+            else if shortReclaimed
+                shortPendingBar := na
+                shortPendingLevel := na
+                shortCancelled := true
+            else if shortAge > 0 and close < shortPendingLevel
+                shortConfirmation := true
+                shortPendingBar := na
+                shortPendingLevel := na
+        if longSetup
+            if longEligible and bar_index - lastLong >= minimumSeparation
+                longMarker := true
+                longEligible := false
+                lastLong := bar_index
+                longPendingBar := bar_index
+                longPendingLevel := longLevel
+            longOff := 0
+        else
+            longOff += 1
+            if longOff >= rearmBars
+                longEligible := true
+        if shortSetup
+            if shortEligible and bar_index - lastShort >= minimumSeparation
+                shortMarker := true
+                shortEligible := false
+                lastShort := bar_index
+                shortPendingBar := bar_index
+                shortPendingLevel := shortLevel
+            shortOff := 0
+        else
+            shortOff += 1
+            if shortOff >= rearmBars
+                shortEligible := true
+
+// A marker is a timestamp candidate for later human-box matching, never an
+// asserted YOLO rectangle or a claim that all manually labeled shapes match.
+plot(showMas ? s20 : na, "SMA 20", color=color.new(teal, 15), linewidth=2)
+plot(showMas ? e20 : na, "EMA 20", color=color.new(teal, 48), linewidth=1)
+plot(showMas ? s60 : na, "SMA 60", color=color.new(blue, 15), linewidth=2)
+plot(showMas ? e60 : na, "EMA 60", color=color.new(blue, 48), linewidth=1)
+plot(showMas ? s120 : na, "SMA 120", color=color.new(slate, 10), linewidth=2)
+plot(showMas ? e120 : na, "EMA 120", color=color.new(slate, 48), linewidth=1)
+plotshape(longMarker, title="多头识别", text="多", style=shape.labelup, location=location.belowbar, color=bull, textcolor=color.white, size=size.tiny)
+plotshape(shortMarker, title="空头识别", text="空", style=shape.labeldown, location=location.abovebar, color=bear, textcolor=color.white, size=size.tiny)
+plotshape(longConfirmation, title="多头确认", style=shape.triangleup, location=location.belowbar, color=color.new(bull, 20), size=size.tiny)
+plotshape(shortConfirmation, title="空头确认", style=shape.triangledown, location=location.abovebar, color=color.new(bear, 20), size=size.tiny)
+plot(longMarker ? 1 : 0, "V2多头识别", display=display.data_window)
+plot(shortMarker ? 1 : 0, "V2空头识别", display=display.data_window)
+plot(longConfirmation ? 1 : 0, "V2多头确认", display=display.data_window)
+plot(shortConfirmation ? 1 : 0, "V2空头确认", display=display.data_window)
+plot(showRawDiagnostics and longSetup ? 1 : 0, "V2多头原始形态", display=display.data_window)
+plot(showRawDiagnostics and shortSetup ? 1 : 0, "V2空头原始形态", display=display.data_window)
+
+var string lastState = "预热"
+var string lastGateOne = "—"
+var string lastGateTwo = "—"
+var string lastGateThree = "—"
+var string lastGateFour = "—"
+var string lastGateFive = "—"
+if barstate.isconfirmed
+    lastState := not ready ? "预热" : longConfirmation ? "多头确认" : shortConfirmation ? "空头确认" : longMarker ? "多头识别" : shortMarker ? "空头识别" : not na(longPendingBar) ? "等待多头确认" : not na(shortPendingBar) ? "等待空头确认" : "等待形态"
+    lastGateOne := "预热 " + (ready ? "✓" : "×")
+    lastGateTwo := "压缩/接触 " + (aCompact ? "✓" : "×") + "/" + (aContact ? "✓" : "×")
+    lastGateThree := "拓扑 " + (aTopology ? "✓" : "×")
+    lastGateFour := "位置/波幅 " + (aNear ? "✓" : "×") + "/" + (aRange ? "✓" : "×")
+    lastGateFive := "方向 多" + (longSlope and longProgress and longOutside ? "✓" : "×") + " 空" + (shortSlope and shortProgress and shortOutside ? "✓" : "×")
+
+var table panel = table.new(position.top_right, 2, 6, border_width=0, frame_width=0)
+if barstate.islast
+    if showPanel
+        table.cell(panel, 0, 0, "SPIKE 金标 V2", text_color=color.white, bgcolor=color.new(slate, 20))
+        table.cell(panel, 1, 0, lastState, text_color=lastState == "多头确认" ? bull : lastState == "空头确认" ? bear : chart.fg_color)
+        table.cell(panel, 0, 1, "门 1", text_color=color.new(chart.fg_color, 40))
+        table.cell(panel, 1, 1, lastGateOne, text_color=chart.fg_color)
+        table.cell(panel, 0, 2, "门 2", text_color=color.new(chart.fg_color, 40))
+        table.cell(panel, 1, 2, lastGateTwo, text_color=chart.fg_color)
+        table.cell(panel, 0, 3, "门 3", text_color=color.new(chart.fg_color, 40))
+        table.cell(panel, 1, 3, lastGateThree, text_color=chart.fg_color)
+        table.cell(panel, 0, 4, "门 4", text_color=color.new(chart.fg_color, 40))
+        table.cell(panel, 1, 4, lastGateFour, text_color=chart.fg_color)
+        table.cell(panel, 0, 5, "门 5", text_color=color.new(chart.fg_color, 40))
+        table.cell(panel, 1, 5, lastGateFive, text_color=chart.fg_color)
+    else
+        table.clear(panel, 0, 0, 1, 5)
