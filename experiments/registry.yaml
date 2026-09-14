@@ -14,6 +14,19 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-v1-triple-exit-20260914-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: a68a6d7ba4
+    status: active
+    question: Can exact native V1 bar replay substantiate supplied XLSX triple-exit gains and generalize to a pre-ranked top20 Binance three-year cohort?
+    single_variable: Owner-authorized three-exit bundle and entry-filter bundle; seven fixed arms include single components. Original6253 cohort and causal pre-period top20 are separate denominators.
+    result: Preregistered; no new outcome replay yet. MAE65 adverse-from-entry, MFE50 BE and MFEgt2 half-peak protection are next-bar only.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v1_triple_exit_20260914.md
+    artifacts: []
+    notes: User explicitly permits2023Sep2026Aug and combined thresholds. Existing later history and post-outcome slices are nonblind;original V1 long-only frozen. No live/Pine changes.
   - experiment_id: exp-spike-v8-six-filters-20260914-v1
     source_repo: darkforest-x/fable-trading
     source_commit: ad3bcb6c82

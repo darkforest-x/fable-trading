@@ -1,0 +1,47 @@
+{
+  "experiment_id": "exp-spike-v1-triple-exit-20260914-v1",
+  "start": "2023-09-01T00:00:00Z",
+  "development_end": "2025-09-01T00:00:00Z",
+  "holdout_era_start": "2026-05-04T00:00:00Z",
+  "end_exclusive": "2026-09-01T00:00:00Z",
+  "timeframes_minutes": [
+    15,
+    60,
+    240
+  ],
+  "arms": [
+    "baseline",
+    "adverse65",
+    "be05",
+    "lock50",
+    "triple",
+    "filters_only",
+    "filtered_triple"
+  ],
+  "mae_trigger_r": 0.65,
+  "be_trigger_r": 0.5,
+  "lock_trigger_gt_r": 2.0,
+  "lock_fraction": 0.5,
+  "rv_max": 20.0,
+  "entry_risk_fraction_max": 0.3,
+  "round_trip_cost": 0.002,
+  "universe_size": 20,
+  "ranking_month": "2023-08",
+  "seed": 20260914,
+  "bootstrap_draws": 5000,
+  "random_controls_per_event": 20,
+  "primary_multiple_test_family": 9,
+  "frozen_sources_sha256": {
+    "yoyo/evaluation/spike_burst_replay.py": "678cb55b25925833927dba8c714a59e3cba81de9c9adca84a1bf2f8347ce3fd3",
+    "yoyo/evaluation/spike_native_v1_be05.py": "e4606bbdd5848f22c11a3dcf549619f52872fb2fdba7029cd073b7af657cecf8",
+    "yoyo/evaluation/spike_v1_twoyear_allmarkets.py": "974c86a2d937ec3be80a5ba9002ae9acf381007e4794f2f3b679de2f4127ca9a",
+    "yoyo/data/binance_um_archives.py": "d48cf7284dd424000f2272f4f261f4d6e4d407dba1ae4665ec59e655e84c950a"
+  },
+  "history_status": "owner_authorized_reused_nonblind",
+  "configuration_consumption": {
+    "outcome_runs_completed": 0,
+    "trials": []
+  },
+  "production_eligible": false,
+  "training_eligible": false
+}
