@@ -206,6 +206,15 @@ def run(root: Path, output: Path):
             old = original if minutes == 'all' else original.loc[original.timeframe_min.eq(minutes)]
             new = g if minutes == 'all' else g.loc[g.timeframe_min.eq(minutes)]
             oldkeys, newkeys = set(old.event_key), set(new.event_key)
+            shared = old[['event_key','net_r','exit_time','censored']].merge(
+                new[['event_key','net_r','exit_time','censored']], on='event_key',
+                suffixes=('_old','_new'), validate='one_to_one')
+            # Admissions may change which entries happen, never the exits of
+            # an identical surviving entry while the raw reverse feed is fixed.
+            if not (np.allclose(shared.net_r_old, shared.net_r_new, equal_nan=True)
+                    and shared.exit_time_old.equals(shared.exit_time_new)
+                    and shared.censored_old.equals(shared.censored_new)):
+                raise ValueError(f'Admission gate changed an identical entry outcome: {policy}/{minutes}')
             lost, added = old.loc[~old.event_key.isin(newkeys)], new.loc[~new.event_key.isin(oldkeys)]
             original_tail = set(old.loc[~old.censored & old.net_r.ge(10), 'event_key'])
             new_tail = set(new.loc[~new.censored & new.net_r.ge(10), 'event_key'])
