@@ -1,0 +1,1774 @@
+{
+  "experiment_id": "exp-spike-eth3m-partial-tp-20260914-v1",
+  "generated_at": "2026-09-14T12:42:38.615881+00:00",
+  "builder_commit": "863ce24db971542c29526fe869045cb0d6fd0794",
+  "selection_commit": "61e94fc8b877612997ad3b443cee341d527e233d",
+  "holdout_consumptions": 0,
+  "training_eligible": false,
+  "production_eligible": false,
+  "status": "rejected",
+  "notion_url": "https://app.notion.com/p/3db8856479af81e19fead530a0bec2c7",
+  "source_inputs": [
+    {
+      "path": "experiments/active/exp-spike-eth-martingale-20260914-v1/results/pre/ETH_3m_OKX.pkl",
+      "sha256": "9fc6f9dcbad7616f9c7ceab811ed9634ece2b07bf24327ff070ac09592c972fd",
+      "verification": "Checked by load_context before replay"
+    },
+    {
+      "path": "experiments/active/exp-spike-eth-martingale-20260914-v1/results/pre/ETH_3m_OKX_development.csv",
+      "sha256": "6cafc9aca7f9faa8b01ea8e6ad989f967a376cbee1045297fc30ef5fcd937a48",
+      "verification": "Pinned original baseline; giveback audit only"
+    }
+  ],
+  "files": [
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/PROJECT_PLAN.md",
+      "sha256": "340b30ec307ca8b92608679100a4f20ee730b1bbe28bf8333cc4429efcc17d35",
+      "size_bytes": 2731
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/config.json",
+      "sha256": "fb4a62db8954e0b03a0de3b06ac9b778a88c890c9f2e3184deae5ac026e43674",
+      "size_bytes": 3898
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p30_1_be_cycles.csv",
+      "sha256": "889077eb47facde6575adfb47dde6ff26c2967ca9616c2181b4ba48a5870e67f",
+      "size_bytes": 10356
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p30_1_be_ledger.csv.gz",
+      "sha256": "e62f2c70433d674154223d54396b5ecd66a4083a9c4f504e0203c62699a36c7f",
+      "size_bytes": 61865
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p30_1_be_opportunities.csv.gz",
+      "sha256": "e4eb7a55997d1cee2639b16ece3b7c7eeb6706de9cf346ac4dc6da36953b267f",
+      "size_bytes": 164959
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p50_05_be_cycles.csv",
+      "sha256": "61612c6b2fd5d6a2d5e6756a7d3cf85568f4327a361a64f4299c99b18ca4de27",
+      "size_bytes": 9286
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p50_05_be_ledger.csv.gz",
+      "sha256": "4c6fc550a091dbb98b14ad8aa4f5fde2b9eccc680eb8e53a2c19404edea2a0b0",
+      "size_bytes": 66328
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p50_05_be_opportunities.csv.gz",
+      "sha256": "d71142ed8497ef3a9af0faa0759a31c1ec0e99deecc1f15d739cd68c64129040",
+      "size_bytes": 175850
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p50_15_be_cycles.csv",
+      "sha256": "dee53b3039881f2228a6a1ff4a151f69f3af7b4a9d0e4e5a0a4df787c2e6a273",
+      "size_bytes": 9497
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p50_15_be_ledger.csv.gz",
+      "sha256": "b48aabe535095bcaf6120cf7893bf441d27f7abdd5014844dc7f63d00c10f002",
+      "size_bytes": 61365
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p50_15_be_opportunities.csv.gz",
+      "sha256": "c0b0334304f853da6b75bb32903835783c06d52fdc41fb1666af587c80a3e0af",
+      "size_bytes": 158069
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p50_1_be_cycles.csv",
+      "sha256": "09239a76851f757792903939aed6922c62df02f6130be8690cc3e7c5c3202c57",
+      "size_bytes": 10085
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p50_1_be_ledger.csv.gz",
+      "sha256": "b781d9080e43d855544624a273e31e758e3a19c1fa69c7d09f71a0a1ce85ab0a",
+      "size_bytes": 61688
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p50_1_be_opportunities.csv.gz",
+      "sha256": "0f84c8205061c1d906a51663a73f1aac905367b57f62d497ff86be07254ca212",
+      "size_bytes": 159844
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p50_1_keep_cycles.csv",
+      "sha256": "10a370ab24714eee78c8585d16d074fc4b48412076ab6aecf3edf7b6433c8535",
+      "size_bytes": 8969
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p50_1_keep_ledger.csv.gz",
+      "sha256": "502fb34e0f0a912089b4a498d77ab956e794bcfc48b198217e4ac037c06cb8b7",
+      "size_bytes": 60684
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p50_1_keep_opportunities.csv.gz",
+      "sha256": "63c17e101b3fbb624e5cd708fe6300fcfb541db3dfb477ffaf51643d9509ba71",
+      "size_bytes": 160606
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p50_1_lock05_cycles.csv",
+      "sha256": "3aae5b63f5c4f42df5ea3c4828e915b68a3b0b6cfa8566c63976616e8dfc024f",
+      "size_bytes": 9311
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p50_1_lock05_ledger.csv.gz",
+      "sha256": "bd1f10fb4ed6c2163a6a2c29ed5f03f3a701df49d8232e9bc873cd51e7d9e887",
+      "size_bytes": 63683
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p50_1_lock05_opportunities.csv.gz",
+      "sha256": "f071c7bb38e062e48d13d8f60fbc106ef5e1125b01038a2fe51aabb1bc3b42ab",
+      "size_bytes": 164630
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p50_1_netbe_cycles.csv",
+      "sha256": "11efdc56a411d2158649fa7df9a7fc3616f86a942b1ade7ede4f7ccd0f5de5fb",
+      "size_bytes": 9704
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p50_1_netbe_ledger.csv.gz",
+      "sha256": "1d315d99470aca3820eaae3b1c90d9a3cd776f6a3e5acbf05c705278f0eae52c",
+      "size_bytes": 63704
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p50_1_netbe_opportunities.csv.gz",
+      "sha256": "9e19cadc3128d7949ac875b294eaa5ef38bb286ed262b6715efbfd70ed3b4ef3",
+      "size_bytes": 168595
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p70_1_be_cycles.csv",
+      "sha256": "dc4590e97e20cda44eeb5abde1221cdc9523e9aee300877d4b6084634f0c9a9d",
+      "size_bytes": 8270
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p70_1_be_ledger.csv.gz",
+      "sha256": "84bc5ab85e983fc9e73027dfe8668ffc847bdefe2300291fd29d8301f41472e8",
+      "size_bytes": 61748
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/p70_1_be_opportunities.csv.gz",
+      "sha256": "6e5d5720dc6fa40e1ff4d9097f7892fba24f37892c55fc4b51062b10c4b8a55a",
+      "size_bytes": 164477
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/summary.csv",
+      "sha256": "afdad67b82339a06f9dc3c84cd62e2b9ccf793e258996d86902b6a91d3ddf946",
+      "size_bytes": 4899
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/whole_3r_be1_cycles.csv",
+      "sha256": "fe990aaa0d38f47d002963fc134d08395f3090805f0e716c1d19c3c8da75bfce",
+      "size_bytes": 10467
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/whole_3r_be1_ledger.csv.gz",
+      "sha256": "4e2c8c454e1c814dfddfd05a5af39b0c6c89486da2cd08a9569d404ab2fbd8ef",
+      "size_bytes": 61218
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/whole_3r_be1_opportunities.csv.gz",
+      "sha256": "54bb7ab7bce1426d2f4da93295f4edfc30e496c8584beb755b2f5566c6e4efee",
+      "size_bytes": 129062
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/whole_3r_cycles.csv",
+      "sha256": "7a66f5c52bb45e745fe8916b78035ba84d8fd16c987996476d1626264ba13168",
+      "size_bytes": 9293
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/whole_3r_ledger.csv.gz",
+      "sha256": "bf7dc5c9f346891aaf62e1d021d017423c76239ef9c1b9539dcbc76b489d6f5d",
+      "size_bytes": 59926
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/whole_3r_opportunities.csv.gz",
+      "sha256": "cc636011b5147b492ce36a491f5c8257da2f6b8e14af8d3046e98fa567315c82",
+      "size_bytes": 133316
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/whole_3r_trail1_cycles.csv",
+      "sha256": "08ac339711bd7a1bd8f78c0c2dea6a22c477375dfcc6222bb96ab5e39c481517",
+      "size_bytes": 9525
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/whole_3r_trail1_ledger.csv.gz",
+      "sha256": "a443477d0daea477faf78283b334cc9fc9eb95e52a1862f3ae18592f53fc4daa",
+      "size_bytes": 60390
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/whole_3r_trail1_opportunities.csv.gz",
+      "sha256": "f5c8d45bddd5d2a1c175eab7b88cbff31f7da3032b5c2e68e4677b8f798cc85c",
+      "size_bytes": 135686
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/whole_3r_trail2_cycles.csv",
+      "sha256": "59c3655f71d14fefd21ff7f2e320d4b1ac3ff0afa80a963e9ac3786c9f6d4e55",
+      "size_bytes": 10223
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/whole_3r_trail2_ledger.csv.gz",
+      "sha256": "ee4f0a50e865fbdf9fe8beb8a691e5d67309cdddd9bd0155c358d00836420aae",
+      "size_bytes": 60269
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/whole_3r_trail2_opportunities.csv.gz",
+      "sha256": "7358f6178c0e12aea2004606ee946b11af497abf0b31fc946be74b1cd23722ce",
+      "size_bytes": 135128
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/whole_3r_trail3_cycles.csv",
+      "sha256": "a2f04225bf96b1f8cbe16f3f82c27618e33f53c5d9a2e4ad84b17baafd82d562",
+      "size_bytes": 9327
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/whole_3r_trail3_ledger.csv.gz",
+      "sha256": "82b71186f21ba844f539cef795c529dc4bfc3da8d79465e84d28cc8fcff4c0e4",
+      "size_bytes": 60260
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/development/whole_3r_trail3_opportunities.csv.gz",
+      "sha256": "2574018c5211eebd035a14f6ad5e674d4c6e5cf342c4996f9bc997ed0b72745f",
+      "size_bytes": 134639
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p50_1_be_fixed_cycles.csv",
+      "sha256": "d6ab3a750e99e5df2a875ce64e1e0312eba4f7b80f0229504826df8f0fe9dd9d",
+      "size_bytes": 19155
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p50_1_be_fixed_ledger.csv.gz",
+      "sha256": "358663819b6b1e823a62e159ec38a78a356e9caf97beb50bab486aae13df73f2",
+      "size_bytes": 122573
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p50_1_be_fixed_matched.csv.gz",
+      "sha256": "2a8392287459d994f9e7de77e7a2061648b44c8a0f4a7670e2e3b27a77fede9f",
+      "size_bytes": 54971
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p50_1_be_fixed_opportunities.csv.gz",
+      "sha256": "802024bbb16d94fbac1b4f08c2f2d2561f13bd683b845def3d2c32f542a22922",
+      "size_bytes": 312792
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p50_1_be_x1.5_net_win_cycles.csv",
+      "sha256": "658fbfec1329439c8c73d92d29ccbfcaff4bdad30234728842e7a76ccc61c8c0",
+      "size_bytes": 19966
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p50_1_be_x1.5_net_win_ledger.csv.gz",
+      "sha256": "bc99d994f993d2866fc5808c2262db664b480db47ce233afd5b6deff6801244f",
+      "size_bytes": 78841
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p50_1_be_x1.5_net_win_matched.csv.gz",
+      "sha256": "75ea3e92580740b69e772deb7c45b7a82d79b290c23eccf259e4390feefbe09f",
+      "size_bytes": 28483
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p50_1_be_x1.5_recovery_cycles.csv",
+      "sha256": "cd7a2040f9b6e84408e77a84b15bb54854b02c96147fa4c355ccc434cd466715",
+      "size_bytes": 15967
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p50_1_be_x1.5_recovery_ledger.csv.gz",
+      "sha256": "482a6f264bfcbd95d9ed55e68884048e31d5097364b0bf800a8a7c35e78873ff",
+      "size_bytes": 77478
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p50_1_be_x1.5_recovery_matched.csv.gz",
+      "sha256": "4a8b7214d43cc97833ab9e74f9271cfd77859796ee7b2fe38cbdf24e6dce4153",
+      "size_bytes": 27228
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p50_1_be_x2.0_net_win_cycles.csv",
+      "sha256": "fc64c60c3c1de43ebc7c94a518e9e392b8d93915326b6433f7777ad34b62d27b",
+      "size_bytes": 24087
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p50_1_be_x2.0_net_win_ledger.csv.gz",
+      "sha256": "b9ec3739f373892d2500be8056f962d9819d0cbf5e989a9a4f05c7b1dd0f50ae",
+      "size_bytes": 77843
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p50_1_be_x2.0_net_win_matched.csv.gz",
+      "sha256": "6e109753d992c0147c081a14bf2ca42bfe5f43d12282ac44a00cdb091d1ac6f7",
+      "size_bytes": 27810
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p50_1_be_x2.0_recovery_cycles.csv",
+      "sha256": "cf7cca19444dcbdcc9d7f909d0925a0b8f2d1013ecc8ccf000422f4cfc29bba8",
+      "size_bytes": 18625
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p50_1_be_x2.0_recovery_ledger.csv.gz",
+      "sha256": "cb0b6787eaa318976030fe629e21033cfaec98eff044e235ca87f3e487566162",
+      "size_bytes": 72307
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p50_1_be_x2.0_recovery_matched.csv.gz",
+      "sha256": "42b12953bf0920bd1c472e62d6ab6f2f832cd052df58bb4998c104b6407ef71c",
+      "size_bytes": 23983
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p70_1_be_fixed_cycles.csv",
+      "sha256": "9d40eb45d30a1db9b33bbab30dbee39d4e4d4f5353b447a2bd83598f7deae92a",
+      "size_bytes": 18035
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p70_1_be_fixed_ledger.csv.gz",
+      "sha256": "f5b4eddcc4b4ad5dc3aea063a8dae341e756ee7cf19729cf4a9398618fd639ab",
+      "size_bytes": 122506
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p70_1_be_fixed_matched.csv.gz",
+      "sha256": "2622f183c1b9249b39a8af23022426f41443b60487b43eeb132190ede171cefb",
+      "size_bytes": 54874
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p70_1_be_fixed_opportunities.csv.gz",
+      "sha256": "960b61c035d6ac55eefcf628929ef64e2b9ccd43b1259f20a407f773c8fe4c3a",
+      "size_bytes": 321577
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p70_1_be_x1.5_net_win_cycles.csv",
+      "sha256": "c3968ae15e3d6b16538cd5d64326315a0630aeec75b498ef465c8a2507132cd8",
+      "size_bytes": 24835
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p70_1_be_x1.5_net_win_ledger.csv.gz",
+      "sha256": "e8935af87410ab033063d5eefb21b353c22813a07466c8951655bb04ba9ae47e",
+      "size_bytes": 82625
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p70_1_be_x1.5_net_win_matched.csv.gz",
+      "sha256": "d3a4cbe1343f7c58c3cce920383bbd5ea6e91366c126494693b91b441fd9f0d5",
+      "size_bytes": 31351
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p70_1_be_x1.5_recovery_cycles.csv",
+      "sha256": "a4fec622ccdcb236e010c88cffa42e9baa19245095f1bd8d5cf375a00d3de977",
+      "size_bytes": 15678
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p70_1_be_x1.5_recovery_ledger.csv.gz",
+      "sha256": "9b899470c5b3c7253dad86974b7c7c7e405fbd73aa36d1783cd3094efc12578d",
+      "size_bytes": 77834
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p70_1_be_x1.5_recovery_matched.csv.gz",
+      "sha256": "75806761921b57b937fc5d7484021e9a94575501ad99277763f686229535a6df",
+      "size_bytes": 27517
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p70_1_be_x2.0_net_win_cycles.csv",
+      "sha256": "b1f1e29b105d52a9c93f9b588dabafd31a22ca8270c6bd513a89581c1f1c2a27",
+      "size_bytes": 26019
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p70_1_be_x2.0_net_win_ledger.csv.gz",
+      "sha256": "5d674f97c9c5c2db441ec245d0ecd344e22b4748f3e785bc05a704c49a28b1d9",
+      "size_bytes": 77860
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p70_1_be_x2.0_net_win_matched.csv.gz",
+      "sha256": "d260945a77562aa586d678aa5dcb53049bef55b154e228596a97a86d70a13dbe",
+      "size_bytes": 28008
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p70_1_be_x2.0_recovery_cycles.csv",
+      "sha256": "a239c713ad93fddcb81cfe70ea03d9a94dd77315cc85b056cbd9efbf8d52d8d5",
+      "size_bytes": 18713
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p70_1_be_x2.0_recovery_ledger.csv.gz",
+      "sha256": "241a6bf11f3b84293a19a9ce2e98b9abcb57888ffb730cdcdb5608af916f155f",
+      "size_bytes": 72685
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_p70_1_be_x2.0_recovery_matched.csv.gz",
+      "sha256": "4c6832c7eb88bcd18a23a2d3d2e271aadcd844acdf7b6f0a70cf941ac566f1fd",
+      "size_bytes": 24384
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_be1_fixed_cycles.csv",
+      "sha256": "12d1c9ff432bb47b026d4a59f3174d954c8d3fafc72193cffd7707b9c5c2aa80",
+      "size_bytes": 20203
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_be1_fixed_ledger.csv.gz",
+      "sha256": "949b553ed1a5147294ee658ab935cc0b9b36f007a32aa847319e4bd08adc90bc",
+      "size_bytes": 121703
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_be1_fixed_matched.csv.gz",
+      "sha256": "d54a34b552cf3a7d4a1d168c7797488fea9f1ff98aca36547f7d27ff04426aa0",
+      "size_bytes": 55051
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_be1_fixed_opportunities.csv.gz",
+      "sha256": "57c5d1729d6054fed942e511c671704f5250c1a733e7097b4e5fd836f6d09300",
+      "size_bytes": 253380
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_be1_x1.5_net_win_cycles.csv",
+      "sha256": "04530623c791658d170731bcbda727c92db9643ed62e95aaecc220b9b3f90151",
+      "size_bytes": 15817
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_be1_x1.5_net_win_ledger.csv.gz",
+      "sha256": "07c8269505849e7fe3c63a0d8ba12b206b11e07895a4ed7ae0df2e54cf6c505e",
+      "size_bytes": 76133
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_be1_x1.5_net_win_matched.csv.gz",
+      "sha256": "2b09a1c06c8b9bb655c9e60310deb165c8150e2e1201f45fa2485fec76039490",
+      "size_bytes": 26609
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_be1_x1.5_recovery_cycles.csv",
+      "sha256": "2f31341a1704ce898cb03798bbee5bd70df0f01e43a111c716b535c0b52d3315",
+      "size_bytes": 14625
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_be1_x1.5_recovery_ledger.csv.gz",
+      "sha256": "e0ecce4e5b8396a3d54b6e71d71a0dc9a09bebc6fc13d4d911a04852e36fcc11",
+      "size_bytes": 73308
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_be1_x1.5_recovery_matched.csv.gz",
+      "sha256": "9cb352286680b377c966ccb66ef8662329327a2c0499e09a48abb4d367c65661",
+      "size_bytes": 24716
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_be1_x2.0_net_win_cycles.csv",
+      "sha256": "2a554a97bdf1bf00f22e468f1d3d0903f5d82c044e034a9c3f9d4749f55f55ac",
+      "size_bytes": 17596
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_be1_x2.0_net_win_ledger.csv.gz",
+      "sha256": "5219a96d93a286ffa23f2da227ddd172f5f7c84b106185aee64bd25589af3495",
+      "size_bytes": 72052
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_be1_x2.0_net_win_matched.csv.gz",
+      "sha256": "45787dd00fcf89e8fedb53d50d1e9e80ad082dcc7c9e5d29dcfe4af233ca9956",
+      "size_bytes": 24064
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_be1_x2.0_recovery_cycles.csv",
+      "sha256": "b3287f58ffbf7070f983cca8f918f4e9a11324ceb93c019edb0bfaaf7350c369",
+      "size_bytes": 17281
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_be1_x2.0_recovery_ledger.csv.gz",
+      "sha256": "8c3f693ffba41b81760aacdb68fd0109ecd74e8966e1120518b33b2352ee8544",
+      "size_bytes": 71260
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_be1_x2.0_recovery_matched.csv.gz",
+      "sha256": "f72f7bde7eb90d03d7d5c04449624c3e01f4a570f9c7e294dea0978a9666c5fa",
+      "size_bytes": 23332
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_fixed_cycles.csv",
+      "sha256": "4e3fedeeafd0b366e867f74fdc1263e92d4f1d7523a53ff1aa69e55a3b7b3130",
+      "size_bytes": 19465
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_fixed_ledger.csv.gz",
+      "sha256": "2bacc04dbd66c058ae68e58751e5b59c8e76cea8b485d6a73c8de8e283dfb3f4",
+      "size_bytes": 116687
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_fixed_matched.csv.gz",
+      "sha256": "f733acbc79e9ef0afb82b6fd30a946bfc48b8a8f509d11c2162ffc407d76ba06",
+      "size_bytes": 53083
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_fixed_opportunities.csv.gz",
+      "sha256": "54a8b3d39c2d5d82cba328a9cef878587f484b6b01fd77956b1d54e07389d2fb",
+      "size_bytes": 261531
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_x1.5_net_win_cycles.csv",
+      "sha256": "17e6416773b76190721e5456b1a462c152513836a6ddc4501c2d99e67ad1c3f9",
+      "size_bytes": 16791
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_x1.5_net_win_ledger.csv.gz",
+      "sha256": "73103cef40c5a4c7d94426ef4247f23b58172603d65ec5ade59b514200307069",
+      "size_bytes": 75541
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_x1.5_net_win_matched.csv.gz",
+      "sha256": "16e3010eee961c3fd9a0508ef232e9a3d5ce88264608746354ea60cf97f2d3f5",
+      "size_bytes": 26256
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_x1.5_recovery_cycles.csv",
+      "sha256": "1c2ca95b639761c19048d5885ba460ee982aa98cc30fb1c9e69a7b1382d43e1d",
+      "size_bytes": 15010
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_x1.5_recovery_ledger.csv.gz",
+      "sha256": "a83408d396e6314725d2079cc92ea9926e1bc7edda5a07d5c0163e7c23045dca",
+      "size_bytes": 73611
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_x1.5_recovery_matched.csv.gz",
+      "sha256": "231fdf85a58777affdcae1074715a26207a3db80a7f1485fd4e1d2160df86be8",
+      "size_bytes": 24942
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_x2.0_net_win_cycles.csv",
+      "sha256": "bcce886bfae80c529dee4a9ec66c075556dbb74dfb91717d44b4c0f61788420c",
+      "size_bytes": 13367
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_x2.0_net_win_ledger.csv.gz",
+      "sha256": "28c401635339d25f1f1ca60edbb776800283fa64bf7be95da7a63e99fbc553eb",
+      "size_bytes": 62871
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_x2.0_net_win_matched.csv.gz",
+      "sha256": "3846a28f6cb09771627dbf1c9aa3117939cec2672f58d3b222fc95460e11b331",
+      "size_bytes": 18027
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_x2.0_recovery_cycles.csv",
+      "sha256": "6c824e020abd895999e651db1c84fa8a6b61a76bc6dd4dab6c0733b9efa58998",
+      "size_bytes": 15363
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_x2.0_recovery_ledger.csv.gz",
+      "sha256": "86ee70f963135833f63dd76360f90ff57b1f22b6b152cd630434b558d3f9392e",
+      "size_bytes": 64903
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/continuous_pre_whole_3r_x2.0_recovery_matched.csv.gz",
+      "sha256": "4c2cbf98fd574e794041483281b1a44268455bcf1cec1c7f8078b1362f4cf0e0",
+      "size_bytes": 19111
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/controls.csv",
+      "sha256": "265c21a91e8edd0231195cef2fa65753f508fea5589ff68cab4148fae4ccc0f2",
+      "size_bytes": 10374
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p30_1_be_fixed_cycles.csv",
+      "sha256": "889077eb47facde6575adfb47dde6ff26c2967ca9616c2181b4ba48a5870e67f",
+      "size_bytes": 10356
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p30_1_be_fixed_ledger.csv.gz",
+      "sha256": "91ece61eea417f6b23075dcb5d1d3cb06b912c40f9afcb0c57edbb598a9194c4",
+      "size_bytes": 61883
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p30_1_be_fixed_matched.csv.gz",
+      "sha256": "016eb5306bcd683f48d0d3b8756fa7ee5ed026c296c6190b0b6da130d582f950",
+      "size_bytes": 28484
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p30_1_be_fixed_opportunities.csv.gz",
+      "sha256": "6996c61638ce654bc24756b07fb2147ae16e31b7bda3ca7a0e1137e211d11e3e",
+      "size_bytes": 164977
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_05_be_fixed_cycles.csv",
+      "sha256": "61612c6b2fd5d6a2d5e6756a7d3cf85568f4327a361a64f4299c99b18ca4de27",
+      "size_bytes": 9286
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_05_be_fixed_ledger.csv.gz",
+      "sha256": "50635035f87ae27d293a086ac81455a598adbb56acfcfc41f1271f24b744c6c4",
+      "size_bytes": 66346
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_05_be_fixed_matched.csv.gz",
+      "sha256": "24274070c5d5f5048c03a0ae18d9ec8c787943902c3d3dafe4e01bc823f18a00",
+      "size_bytes": 29870
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_05_be_fixed_opportunities.csv.gz",
+      "sha256": "8158d6b972b56258589f86934225a4935f27646ca8ecef07dd591bfe49edd549",
+      "size_bytes": 175868
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_15_be_fixed_cycles.csv",
+      "sha256": "dee53b3039881f2228a6a1ff4a151f69f3af7b4a9d0e4e5a0a4df787c2e6a273",
+      "size_bytes": 9497
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_15_be_fixed_ledger.csv.gz",
+      "sha256": "82a4075134b6b1b4febb8e75d1ec1e13ac5212b1fb66ab7360b1dfb36e32f0b8",
+      "size_bytes": 61383
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_15_be_fixed_matched.csv.gz",
+      "sha256": "cd020c05d0ad36141ceb5280c678d869340a03b53af490a0823582c15c6379dd",
+      "size_bytes": 28104
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_15_be_fixed_opportunities.csv.gz",
+      "sha256": "b9ce4542f671d3b67e71d6c5c92ffa531763b30c25b3aa32c0bd2d67a1602bfd",
+      "size_bytes": 158087
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_be_fixed_cycles.csv",
+      "sha256": "09239a76851f757792903939aed6922c62df02f6130be8690cc3e7c5c3202c57",
+      "size_bytes": 10085
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_be_fixed_ledger.csv.gz",
+      "sha256": "e6d9cfbc27b4542569d5d5d7a0b806e1c5a8d6f7bc8bc1902a02de342f1f804b",
+      "size_bytes": 61706
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_be_fixed_matched.csv.gz",
+      "sha256": "64fe14b0bfed76b48862035b082855ecea95bf8b7d523c7fe3b1b12b0992a85a",
+      "size_bytes": 28491
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_be_fixed_opportunities.csv.gz",
+      "sha256": "5754727c6b957b0f2b9b62548c8edbb80f74b872f1fd87a78aa5c0cd459ef68d",
+      "size_bytes": 159862
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_be_x1.5_net_win_cycles.csv",
+      "sha256": "32c364a0302b966af02229e1e74aad9097224f516ddb6a660cf63b734ea668b4",
+      "size_bytes": 17522
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_be_x1.5_net_win_ledger.csv.gz",
+      "sha256": "93196402eff9b3567fcdf290f322c0e55ca75153cd35cdc36c96707576e65cf2",
+      "size_bytes": 58230
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_be_x1.5_net_win_matched.csv.gz",
+      "sha256": "a0ffa6a691f272d28da60e5c3800e80ccfcd244ff4872c3fc1dced66429b5d50",
+      "size_bytes": 26705
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_be_x1.5_recovery_cycles.csv",
+      "sha256": "1c1349ef4e4ed6d25d42b0e472ea8593ac65be3ffc76dd7c230f90deacbc9983",
+      "size_bytes": 13453
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_be_x1.5_recovery_ledger.csv.gz",
+      "sha256": "04aef934e336b699cd90cf383e15dd580250fea31a7264b368da917f0bc6946e",
+      "size_bytes": 56741
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_be_x1.5_recovery_matched.csv.gz",
+      "sha256": "aeed9672b8d32ec08640090cf9f109398aae803d0e3b80026135845aa93b7dc0",
+      "size_bytes": 25423
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_be_x2.0_net_win_cycles.csv",
+      "sha256": "36604dbb0717a8061bfc9c857528cf10c3748b14cd495cda267b66af12ecb155",
+      "size_bytes": 20190
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_be_x2.0_net_win_ledger.csv.gz",
+      "sha256": "b7117e2fabb125a9ed58383931886ed338424b7d398512f98bc8f70d3ebc5923",
+      "size_bytes": 55666
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_be_x2.0_net_win_matched.csv.gz",
+      "sha256": "a3d5b6fcfef7773a064ce0ee167df7fd3e89cb359656e2a21daff4c9f32a75e7",
+      "size_bytes": 25215
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_be_x2.0_recovery_cycles.csv",
+      "sha256": "33f2f7e3c6379b97999346e36db46205d703f2cfc7b76c5386c73e25e7031028",
+      "size_bytes": 16426
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_be_x2.0_recovery_ledger.csv.gz",
+      "sha256": "c51507d7bf8fd60f72ac9e42dfc571aa49f418d06fc237cf45aece37cae6a1f5",
+      "size_bytes": 52105
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_be_x2.0_recovery_matched.csv.gz",
+      "sha256": "a10dbad824378adfd53936a435c14704fb63515d3ead4829593508d2db135af5",
+      "size_bytes": 22422
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_keep_fixed_cycles.csv",
+      "sha256": "10a370ab24714eee78c8585d16d074fc4b48412076ab6aecf3edf7b6433c8535",
+      "size_bytes": 8969
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_keep_fixed_ledger.csv.gz",
+      "sha256": "04629950cb9fb77b3998dcd46dec4d0d9993335d4876a5922bede482f1d00a85",
+      "size_bytes": 60702
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_keep_fixed_matched.csv.gz",
+      "sha256": "cf9c40b0893f8dd041d7586bed31e6baf606bb51ff46370c7f678cfa54d5384b",
+      "size_bytes": 27568
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_keep_fixed_opportunities.csv.gz",
+      "sha256": "1d03df4f695fcc87fa3fe3596518a8947d54776793c215542239996eeb0553bc",
+      "size_bytes": 160624
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_lock05_fixed_cycles.csv",
+      "sha256": "3aae5b63f5c4f42df5ea3c4828e915b68a3b0b6cfa8566c63976616e8dfc024f",
+      "size_bytes": 9311
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_lock05_fixed_ledger.csv.gz",
+      "sha256": "500694de92145d23cecf4b9ed88a474dfa54d2ae9b0c600e1ddab3cb971c0c04",
+      "size_bytes": 63701
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_lock05_fixed_matched.csv.gz",
+      "sha256": "78ce5e80539cd3efe09baed35acd778b7442818f85e915ea791beae5fbcb9f6a",
+      "size_bytes": 29061
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_lock05_fixed_opportunities.csv.gz",
+      "sha256": "b1b067ca210abfa17512549fc4ee4697e68651c63e7d770b93eead5bcf83f2a6",
+      "size_bytes": 164648
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_netbe_fixed_cycles.csv",
+      "sha256": "11efdc56a411d2158649fa7df9a7fc3616f86a942b1ade7ede4f7ccd0f5de5fb",
+      "size_bytes": 9704
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_netbe_fixed_ledger.csv.gz",
+      "sha256": "541dd2e882904c04d74a46fe172ecb987d2f8d0733f96da0671ec9d0d905a38c",
+      "size_bytes": 63722
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_netbe_fixed_matched.csv.gz",
+      "sha256": "4aabc179809c388cd2e01d872344e8d0d826df1617e2b55cabef8d113b3e2d38",
+      "size_bytes": 28951
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p50_1_netbe_fixed_opportunities.csv.gz",
+      "sha256": "d07fa6882333f53d72483834d9c966e7d368d7b51e397db2697f18d090472248",
+      "size_bytes": 168613
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p70_1_be_fixed_cycles.csv",
+      "sha256": "dc4590e97e20cda44eeb5abde1221cdc9523e9aee300877d4b6084634f0c9a9d",
+      "size_bytes": 8270
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p70_1_be_fixed_ledger.csv.gz",
+      "sha256": "d8bf35ac7f748844a9563cdc3c996620a9be9db0d72263b893adeb652bc27e48",
+      "size_bytes": 61766
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p70_1_be_fixed_matched.csv.gz",
+      "sha256": "c42019f569d114e71d29bad10764e846272d34be16a372f3910b5c051d834b1f",
+      "size_bytes": 28427
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p70_1_be_fixed_opportunities.csv.gz",
+      "sha256": "f7a097db44049411021223c50ac2ccb86550299886f4f30d88afb6e14bc2d5ee",
+      "size_bytes": 164495
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p70_1_be_x1.5_net_win_cycles.csv",
+      "sha256": "81820777bb0df7df4ab147878e01f40085928a26120cdd1a65f94eb7674e185f",
+      "size_bytes": 21602
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p70_1_be_x1.5_net_win_ledger.csv.gz",
+      "sha256": "dccb3b9fe15b1fd08e2cee1693fff7533ebbe0238dca14925ddd02b478eb80e6",
+      "size_bytes": 60886
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p70_1_be_x1.5_net_win_matched.csv.gz",
+      "sha256": "cc78f8bee4cffde799c926318cf2c3f68e386e83c44b1793435eb5907933d723",
+      "size_bytes": 29097
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p70_1_be_x1.5_recovery_cycles.csv",
+      "sha256": "05185e23d3dbdb4b8f56edf52def9d9048722632ee2d85633b3febe79b48ec41",
+      "size_bytes": 12860
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p70_1_be_x1.5_recovery_ledger.csv.gz",
+      "sha256": "5de8d4577eab61ddac43c3a6c66af8d6dd6b38b3ff68f8fa3ba43f198235657a",
+      "size_bytes": 56723
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p70_1_be_x1.5_recovery_matched.csv.gz",
+      "sha256": "70d8d82b1d0bdea5bdda19e67b6a5a99cb9cf4011d03c9d25d0f83e19f293cc5",
+      "size_bytes": 25527
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p70_1_be_x2.0_net_win_cycles.csv",
+      "sha256": "23cfd4a50fe94f470d64dc1a1c31bd03cbf90c130caac0302fcf5126db582d72",
+      "size_bytes": 22546
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p70_1_be_x2.0_net_win_ledger.csv.gz",
+      "sha256": "f4c558bdefd6beb865582a4c98220f3580a3b67cec2606db71736a3fc703743f",
+      "size_bytes": 56164
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p70_1_be_x2.0_net_win_matched.csv.gz",
+      "sha256": "60e23496aac083045aad2d033f43c76f37962f001483011a57d4fa99e2455735",
+      "size_bytes": 25673
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p70_1_be_x2.0_recovery_cycles.csv",
+      "sha256": "7518a712dcaf82dcd51c5b1b6686777b5b3d6e0b55efd6c73bcc1f169679fb1a",
+      "size_bytes": 16809
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p70_1_be_x2.0_recovery_ledger.csv.gz",
+      "sha256": "ae544951fc4fe169d9a6e6cb148fd69042f46247ab298d1d6181586f969a8b6b",
+      "size_bytes": 52901
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_p70_1_be_x2.0_recovery_matched.csv.gz",
+      "sha256": "45b5c2027bf16e9917d5fcbc4c18d591697e33fdbd235d169d7aaeace9099445",
+      "size_bytes": 23005
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_be1_fixed_cycles.csv",
+      "sha256": "fe990aaa0d38f47d002963fc134d08395f3090805f0e716c1d19c3c8da75bfce",
+      "size_bytes": 10467
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_be1_fixed_ledger.csv.gz",
+      "sha256": "9eb70f3fae2cb8fc19fbb32b5be5fdb8a611029c225c653447c1669f265ca007",
+      "size_bytes": 61236
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_be1_fixed_matched.csv.gz",
+      "sha256": "cdfa1708af124ee8817ea0e704a5b3f66d4ed35589b77bbd5c95dcdeef341248",
+      "size_bytes": 28515
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_be1_fixed_opportunities.csv.gz",
+      "sha256": "a2030af16042ce37ae5eb3c6466847c30b93089e1526f747ca4630f07da227cd",
+      "size_bytes": 129080
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_be1_x1.5_net_win_cycles.csv",
+      "sha256": "2f63021a3cde6b4e827d5f5bba6a7d515436d0c1e1a4ff0c00c0cf75b447f362",
+      "size_bytes": 12734
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_be1_x1.5_net_win_ledger.csv.gz",
+      "sha256": "35d7eb8f7a47af5e3caacd81f77d4f725802927f50aa0aece82ddca55e1b946c",
+      "size_bytes": 54579
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_be1_x1.5_net_win_matched.csv.gz",
+      "sha256": "0edcc812ba3645b127ea0f66789da16ece6fb8def08937e96f80b76202f1df99",
+      "size_bytes": 24385
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_be1_x1.5_recovery_cycles.csv",
+      "sha256": "3902eeb8bc452c056d7e81537e90ff97b114d91f91e1b3a1dcba0257aa99bd4d",
+      "size_bytes": 11834
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_be1_x1.5_recovery_ledger.csv.gz",
+      "sha256": "ac49016d3bf8598a9331075dee1c2c411380fa614afc4a294437ed0d72c11bb2",
+      "size_bytes": 52179
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_be1_x1.5_recovery_matched.csv.gz",
+      "sha256": "dd5f795f9c39371cba272b84fd1766f1e301e574b360e0443e24f3c2b8d91ca0",
+      "size_bytes": 22675
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_be1_x2.0_net_win_cycles.csv",
+      "sha256": "b39aea732b4830cbd21d92b853a343be3a63915d0a4156f51ed7b1b24136d80a",
+      "size_bytes": 14823
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_be1_x2.0_net_win_ledger.csv.gz",
+      "sha256": "c5a4dcb64112c6373b153b5b86e38a2069bb307ef00ef4c2e5f53b0ea568cff0",
+      "size_bytes": 51085
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_be1_x2.0_net_win_matched.csv.gz",
+      "sha256": "db8026268dce763374876f54b48a3995775320d9c68bba3cda95c40336f76df0",
+      "size_bytes": 22016
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_be1_x2.0_recovery_cycles.csv",
+      "sha256": "5a3b33c530acc6a9a2c94b9e60e5552866c748a9fa4d5a3e033fa93d483a5563",
+      "size_bytes": 15168
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_be1_x2.0_recovery_ledger.csv.gz",
+      "sha256": "e50e8fe88a495b8dbbc9972ccbd01d8c2851172f917d13cc3d95f0239d335fcf",
+      "size_bytes": 50993
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_be1_x2.0_recovery_matched.csv.gz",
+      "sha256": "064a78cf12c2d9281803cc58122116762b3299c8ebf02bad12c9ca47e0d8c6a1",
+      "size_bytes": 21829
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_fixed_cycles.csv",
+      "sha256": "7a66f5c52bb45e745fe8916b78035ba84d8fd16c987996476d1626264ba13168",
+      "size_bytes": 9293
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_fixed_ledger.csv.gz",
+      "sha256": "788bc8f41e57d7babb1dd1a3f361097642f277fa33cf3774f0a12aeb9bd51287",
+      "size_bytes": 59944
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_fixed_matched.csv.gz",
+      "sha256": "4ecc99f2ac0887bfea97b8a5bdb1ad6f92e9d6cacf487f40183f9b2b0e56894b",
+      "size_bytes": 27538
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_fixed_opportunities.csv.gz",
+      "sha256": "92947c1a21cf63bb6902c4f1b613e81ad0c642d66eca48361a09e52630d1fa48",
+      "size_bytes": 133334
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_trail1_fixed_cycles.csv",
+      "sha256": "08ac339711bd7a1bd8f78c0c2dea6a22c477375dfcc6222bb96ab5e39c481517",
+      "size_bytes": 9525
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_trail1_fixed_ledger.csv.gz",
+      "sha256": "6e7beefc5b1e9ff1a094978ec2a8e9100dda68ab46c1dcca15c3375df4fd87af",
+      "size_bytes": 60408
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_trail1_fixed_matched.csv.gz",
+      "sha256": "0103aaefef176862785c7ffb4cf56ed3b68e14415068bdf0a3635a5456f8d80a",
+      "size_bytes": 27728
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_trail1_fixed_opportunities.csv.gz",
+      "sha256": "72ccad972688744557d28e1cbe2dbe390acbd620949e2e9f37f1dbf5641218f0",
+      "size_bytes": 135704
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_trail2_fixed_cycles.csv",
+      "sha256": "59c3655f71d14fefd21ff7f2e320d4b1ac3ff0afa80a963e9ac3786c9f6d4e55",
+      "size_bytes": 10223
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_trail2_fixed_ledger.csv.gz",
+      "sha256": "1942bb53668c933a611d01fe73695d9b586c8604b73a6e8e9c5f1f87e60d4db5",
+      "size_bytes": 60287
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_trail2_fixed_matched.csv.gz",
+      "sha256": "df3432d47f7a9aeda7aab9ac449121763bff35288102a8c2724922e5d144239e",
+      "size_bytes": 27603
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_trail2_fixed_opportunities.csv.gz",
+      "sha256": "d83d312697c3bc2eb660070bd0c2e4d956018700afb636a8ffe51f2ea1341308",
+      "size_bytes": 135146
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_trail3_fixed_cycles.csv",
+      "sha256": "a2f04225bf96b1f8cbe16f3f82c27618e33f53c5d9a2e4ad84b17baafd82d562",
+      "size_bytes": 9327
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_trail3_fixed_ledger.csv.gz",
+      "sha256": "9f87f108b231218acac57bc9db41ec018740797fef508169b6c8657ccc8631c7",
+      "size_bytes": 60278
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_trail3_fixed_matched.csv.gz",
+      "sha256": "cc9f3f75866dba5058d3c1a3e547c914cee2e4bc4dc5c3f39a2ba8f71a8322c1",
+      "size_bytes": 27539
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_trail3_fixed_opportunities.csv.gz",
+      "sha256": "8d46372b144ca9e40581fe1ff0b192546ee34a3c4f64397d787f5b6a25cda6cc",
+      "size_bytes": 134657
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_x1.5_net_win_cycles.csv",
+      "sha256": "ac8a4707f42dd5572ff0fd5d55e2d14fc260ebea264ea19cd3fe5e85dfe4c627",
+      "size_bytes": 14186
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_x1.5_net_win_ledger.csv.gz",
+      "sha256": "5756116ab65603516d1507f5f46ee76b196594cbc3d0924232620cb31f034395",
+      "size_bytes": 54770
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_x1.5_net_win_matched.csv.gz",
+      "sha256": "58d19ff79a30f1d87dd9739c443d8e70b473af3fddc1deab28c6c2fe6e1ddb8f",
+      "size_bytes": 24433
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_x1.5_recovery_cycles.csv",
+      "sha256": "d791a32bd7afbc7b4c6755e61f219d6efe3a035ec7f632a7c032c1c0bfd32f3b",
+      "size_bytes": 12459
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_x1.5_recovery_ledger.csv.gz",
+      "sha256": "7452640f06eb9e3ff78d989effc511a6df1fff010274dd7993de800a4a9eddeb",
+      "size_bytes": 52881
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_x1.5_recovery_matched.csv.gz",
+      "sha256": "7d92b4ac3cb3718f0c5c3aaaf11f3d5481d86c47a1126f4965d242748370a205",
+      "size_bytes": 23132
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_x2.0_net_win_cycles.csv",
+      "sha256": "d42a476423dadbae5a5e17a028d2d0daaa6ae244d21cc789edf7644528008b78",
+      "size_bytes": 12588
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_x2.0_net_win_ledger.csv.gz",
+      "sha256": "05f7f346aac4f10a9d8189326007a52d18ef3af7f7b9490f53306dc5587bedc1",
+      "size_bytes": 44468
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_x2.0_net_win_matched.csv.gz",
+      "sha256": "0f4eda0c4a8ca224f23c80703de33c57570c8466b36a95e9c0052f0ec21cd6db",
+      "size_bytes": 17487
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_x2.0_recovery_cycles.csv",
+      "sha256": "cbd0cf18c6095d5acfb0082fc3777f88597b78a46135e66f51ba959a20a7137e",
+      "size_bytes": 14524
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_x2.0_recovery_ledger.csv.gz",
+      "sha256": "baed23c693a47e5f32c499505b6e2756ca55cc011a641f21684ed06065e6419a",
+      "size_bytes": 46364
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/development_whole_3r_x2.0_recovery_matched.csv.gz",
+      "sha256": "4d14438bd5d84ffa258d6e8187073bad462d902f210839d2a062b5e08632fb84",
+      "size_bytes": 18538
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p50_1_be_fixed_cycles.csv",
+      "sha256": "7332bc3f8b65cbaba60065cc9281d3db445164bf957a3cc3897b04280cc4c2e2",
+      "size_bytes": 2307
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p50_1_be_fixed_ledger.csv.gz",
+      "sha256": "b5bdff829864c4f8401513d990ebec69fa4d9f4d0e46d384a0818b84c6558543",
+      "size_bytes": 16082
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p50_1_be_fixed_matched.csv.gz",
+      "sha256": "473b78af372368b90b030839568792429203046f57a39cb70b06d4fc1186b01b",
+      "size_bytes": 7371
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p50_1_be_fixed_opportunities.csv.gz",
+      "sha256": "983d54a6981bba6ba0b9d131b03c110b535e9e858b60b2869c397651fce4bb9f",
+      "size_bytes": 41339
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p50_1_be_x1.5_net_win_cycles.csv",
+      "sha256": "87fb9baf33fa3e876b11b2497c35f1b76342b636e11fe5fac36d3586d748a33b",
+      "size_bytes": 4886
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p50_1_be_x1.5_net_win_ledger.csv.gz",
+      "sha256": "bb782d751c3b4dc38191a5a85da34f7bdfd161c6c375ab2228378e41ef37ebe6",
+      "size_bytes": 16801
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p50_1_be_x1.5_net_win_matched.csv.gz",
+      "sha256": "e413a1e2551a4282018f370525b056fedf8830b025da08feecacf38c2c2ec439",
+      "size_bytes": 8436
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p50_1_be_x1.5_recovery_cycles.csv",
+      "sha256": "364888f34b21a13137119f229072f4bf6031604d4e12b6adb0a77e33695b1087",
+      "size_bytes": 2455
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p50_1_be_x1.5_recovery_ledger.csv.gz",
+      "sha256": "691652b10da62d1f2b0548bde2c988720a6b31dc6f36bbadd2a9802113d8bcc6",
+      "size_bytes": 17414
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p50_1_be_x1.5_recovery_matched.csv.gz",
+      "sha256": "9cacde1228e479fa2f25155dfa246eb68088bb7d9f635dde368e08c4652e062b",
+      "size_bytes": 8725
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p50_1_be_x2.0_net_win_cycles.csv",
+      "sha256": "344bebe81edf5e3007b7e8381876ed8be917206d6cfdb914058439b59bcf8649",
+      "size_bytes": 4926
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p50_1_be_x2.0_net_win_ledger.csv.gz",
+      "sha256": "00af359648ae32eb6a7d08320a7d3bc6356b4becb726e552b27dad1506d54183",
+      "size_bytes": 16667
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p50_1_be_x2.0_net_win_matched.csv.gz",
+      "sha256": "c3fe08a4a2e3f85209ea74a420a4e1363fc2015b662d3ff6ce093d7f4d4d645f",
+      "size_bytes": 8141
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p50_1_be_x2.0_recovery_cycles.csv",
+      "sha256": "ff6f7b7753fbfe1ab71a68762a71b5010ba790b02eded2824f22a83ae009b382",
+      "size_bytes": 3076
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p50_1_be_x2.0_recovery_ledger.csv.gz",
+      "sha256": "b4166d138bc00ab19e2ec2faa9b348924e1fe9f7ecaf73930cbfa5342b04d850",
+      "size_bytes": 17044
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p50_1_be_x2.0_recovery_matched.csv.gz",
+      "sha256": "f2bffa20d437f425b367142cb8e009d3a57448631bb2222c7e32c0856b716ee2",
+      "size_bytes": 8249
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p70_1_be_fixed_cycles.csv",
+      "sha256": "9383d9249125db9d55702ddc5ccdb719719cd2fe46bd4db4de7bb088ff8f9753",
+      "size_bytes": 2381
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p70_1_be_fixed_ledger.csv.gz",
+      "sha256": "5cf5d812c73df93ecef13ac8cd3e67649ac91c8eea649859c7247b22176026b0",
+      "size_bytes": 16099
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p70_1_be_fixed_matched.csv.gz",
+      "sha256": "f2ae88e67c14e55d13662f886d2da970e0d5eea91e871c85259860335294040d",
+      "size_bytes": 7356
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p70_1_be_fixed_opportunities.csv.gz",
+      "sha256": "05d8699ccde91ea1540fad515c84e54096ee56ea75217eae694fc438f1d94f19",
+      "size_bytes": 42480
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p70_1_be_x1.5_net_win_cycles.csv",
+      "sha256": "a1196a9e1d4186e54097ab9bdc22c2865846e815c76948eb8ed616cc57f5a1da",
+      "size_bytes": 5142
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p70_1_be_x1.5_net_win_ledger.csv.gz",
+      "sha256": "7870bdba69cb28a3223fb3a642bde8030e869f67eda29b2b06053db17eb7e8ae",
+      "size_bytes": 16738
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p70_1_be_x1.5_net_win_matched.csv.gz",
+      "sha256": "4a779a8cb9468361a8dd853be186bd0586df5db93d1a2ea3750fffc655d584ba",
+      "size_bytes": 8367
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p70_1_be_x1.5_recovery_cycles.csv",
+      "sha256": "64b965bd3300d4670f0290f5f343a5d1da52e6f847194cb7962dcecfda9ae979",
+      "size_bytes": 2843
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p70_1_be_x1.5_recovery_ledger.csv.gz",
+      "sha256": "4d03572defb719a3b386329892d295ce12191df83cf68c1dc1b6c44e9df21502",
+      "size_bytes": 17332
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p70_1_be_x1.5_recovery_matched.csv.gz",
+      "sha256": "4ecef296f49053c1e851cf95b07b7bc39bf4b357210c893fbac89eea56e29c0b",
+      "size_bytes": 8664
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p70_1_be_x2.0_net_win_cycles.csv",
+      "sha256": "b5efce8a4d085baf6d585370166b9d518c90358d2755982983d963fed0449e45",
+      "size_bytes": 5248
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p70_1_be_x2.0_net_win_ledger.csv.gz",
+      "sha256": "8f60ffb0cc5567437ca82f178aba345934099226bfdc0f440cd3f2bd24dba345",
+      "size_bytes": 16483
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p70_1_be_x2.0_net_win_matched.csv.gz",
+      "sha256": "8878b17d3b082baa89eadb32763a14125607f8a031c2b203b6c0fe81db6bd56a",
+      "size_bytes": 8086
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p70_1_be_x2.0_recovery_cycles.csv",
+      "sha256": "c3a90e7cdeb30a2277c30ddb90b84dca242fc84f3400a016b011854221ad597f",
+      "size_bytes": 3260
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p70_1_be_x2.0_recovery_ledger.csv.gz",
+      "sha256": "743774e79ea491d5cf476fe6304c9d1a3bcfcb0507a0fc82d4aa25087019c8cc",
+      "size_bytes": 16825
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_p70_1_be_x2.0_recovery_matched.csv.gz",
+      "sha256": "bfc93754006b8e8a082b418c94242c997810900c335f5829923c1d99b6e2606a",
+      "size_bytes": 8131
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_be1_fixed_cycles.csv",
+      "sha256": "cb418b7cde3e322ed8a7bc873a879af201e557594cb21f6c66b71a1ce0bc7286",
+      "size_bytes": 2660
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_be1_fixed_ledger.csv.gz",
+      "sha256": "607a1fcef2a76232c88996eadfce679fe4278c1b2ce2392a78edbb0786462f37",
+      "size_bytes": 15936
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_be1_fixed_matched.csv.gz",
+      "sha256": "5b5a93319ebebf8a4f6f23fa7cb87e3cccb895af205ac1f170b8e733c9d0790a",
+      "size_bytes": 7383
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_be1_fixed_opportunities.csv.gz",
+      "sha256": "d2d1a6b50189abf2b34e29b0c882346c737eccd3d0cabb8e134d63e1d7777991",
+      "size_bytes": 33292
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_be1_x1.5_net_win_cycles.csv",
+      "sha256": "ee6a85b14a1117f6d589db3947a8d8644349703ba7219d0d61e9713ac0d50b91",
+      "size_bytes": 3125
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_be1_x1.5_net_win_ledger.csv.gz",
+      "sha256": "1724a296916772772173f68337ae9c88a99cf4fab94a3a18361ed43c48ac02d6",
+      "size_bytes": 17100
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_be1_x1.5_net_win_matched.csv.gz",
+      "sha256": "06b3a31027b4cbd0deff2881fbe32fc4b88b35fa838151203abf63357543f132",
+      "size_bytes": 8674
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_be1_x1.5_recovery_cycles.csv",
+      "sha256": "a039a997f1f8741da6728e224e855344d6cc9e4381e46025622056216baa14da",
+      "size_bytes": 2621
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_be1_x1.5_recovery_ledger.csv.gz",
+      "sha256": "6880d058a6f3716157a02d56abc5069c1e699300d9764ab19f727109e1de1e83",
+      "size_bytes": 17188
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_be1_x1.5_recovery_matched.csv.gz",
+      "sha256": "92576f9132a879aaa9bd1c407c71daf20fb80b8902b8fc34a75d0679e95af3e0",
+      "size_bytes": 8727
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_be1_x2.0_net_win_cycles.csv",
+      "sha256": "e3d972e2707b66624d55915ce8c8e9b0b72621ad87c624b74dcb9731e64a6b1d",
+      "size_bytes": 3341
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_be1_x2.0_net_win_ledger.csv.gz",
+      "sha256": "52cdf0c9dd113dcb6e5259eef1a230e37a3957e8606afe6175a8444b48bb6f18",
+      "size_bytes": 16661
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_be1_x2.0_net_win_matched.csv.gz",
+      "sha256": "085c36e8539dad320c4805dc57042e21b9e84fd8cf8f89938c6329862e8cf964",
+      "size_bytes": 8155
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_be1_x2.0_recovery_cycles.csv",
+      "sha256": "f8ba009e48bbf029d742580e08b4e7d4b069efa606a5d741b13593d4ef4cdb30",
+      "size_bytes": 3038
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_be1_x2.0_recovery_ledger.csv.gz",
+      "sha256": "7e5ecf48a672c769160379d80d6153f9f1dbb66e75a7089b1964a102e22a7422",
+      "size_bytes": 16647
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_be1_x2.0_recovery_matched.csv.gz",
+      "sha256": "d2ee00355d9d5a6f02719321c0ba6ba1504e690040fa9896ff8c59974a8206ce",
+      "size_bytes": 8089
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_fixed_cycles.csv",
+      "sha256": "1a59de21634aa6218655992446fcb415f8d78942aa1d66f021a497b309748011",
+      "size_bytes": 1997
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_fixed_ledger.csv.gz",
+      "sha256": "acc8e2a106a026515759dd7d1812b17aa2390672cc75c77c092bf2ade666c157",
+      "size_bytes": 15667
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_fixed_matched.csv.gz",
+      "sha256": "74b4c224f6ce1f4d01519b1ae1e19ec4a21923494589b9abe89003a166590359",
+      "size_bytes": 7172
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_fixed_opportunities.csv.gz",
+      "sha256": "35abc1f418167710a24ee5a98fe2cc44a9f7ac75a06fda9d960049ae0ad9b559",
+      "size_bytes": 34623
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_x1.5_net_win_cycles.csv",
+      "sha256": "d9b9499043ec2b7386a934ca3667d18dc461e6e845a578ab5c43685306701e7d",
+      "size_bytes": 3685
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_x1.5_net_win_ledger.csv.gz",
+      "sha256": "5ccd39d7a73a241fafc3acf4c228d3df7b70bdba21f3fb94fc166e369d27b86a",
+      "size_bytes": 16618
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_x1.5_net_win_matched.csv.gz",
+      "sha256": "e053f1e7c0429b75f8eab41b9c37fa432ad1a11ff51eaba471562671fb8d8a1e",
+      "size_bytes": 8314
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_x1.5_recovery_cycles.csv",
+      "sha256": "483e37ea7a456d22af8534422995d3d00eb2867691a487f06822f1e7aaf08aa1",
+      "size_bytes": 2768
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_x1.5_recovery_ledger.csv.gz",
+      "sha256": "3d4a5069d46d5ad62fdc4454e462bcc04290fcef3dd85d499fe5329e2e10aeef",
+      "size_bytes": 16848
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_x1.5_recovery_matched.csv.gz",
+      "sha256": "df5c5b9cedbd31076aca2151fc2778db81924694329fca1c01dcaa0919293125",
+      "size_bytes": 8440
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_x2.0_net_win_cycles.csv",
+      "sha256": "9e2c99862a417347427dacc8aa9aa49b552db7f53bbffd0573202831434038f6",
+      "size_bytes": 3725
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_x2.0_net_win_ledger.csv.gz",
+      "sha256": "e0c221c8ad3c2f35fae486a907e9fa52336f4387117c9a16171780f06d857bd5",
+      "size_bytes": 16596
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_x2.0_net_win_matched.csv.gz",
+      "sha256": "bc7d246a6f0c18211561a4be2c2154c9737f9914a0f9bf636817a5a7cc1d8f30",
+      "size_bytes": 8120
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_x2.0_recovery_cycles.csv",
+      "sha256": "2d52c0de5d20ace4d5147c35dd9a0ae5cbc9b0578da05673b3612b6f20170c81",
+      "size_bytes": 3132
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_x2.0_recovery_ledger.csv.gz",
+      "sha256": "8a6501bb63b8809e43b84bd8722571f2db9dddb9e5ab5f69ee051833dd8f6cfd",
+      "size_bytes": 16582
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/preholdout_whole_3r_x2.0_recovery_matched.csv.gz",
+      "sha256": "0a6d1392e9f9361c865679656aa99ef9ae1975f83fb847b223f17307a15781d3",
+      "size_bytes": 8100
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/receipt.json",
+      "sha256": "e157b83b347f65074474182e336fb7292d1351ffe62ccfef00b4cc7f2a3d101e",
+      "size_bytes": 921
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/summary.csv",
+      "sha256": "58eea54df92b27f9caf50953ee7881330eb1e5d865fb18d31e98942c2028d3b4",
+      "size_bytes": 31724
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p50_1_be_fixed_cycles.csv",
+      "sha256": "3df58bcf8b5984c2aa8f9807513f921e6d4a12185a9a136c047a2f91f03ad535",
+      "size_bytes": 7024
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p50_1_be_fixed_ledger.csv.gz",
+      "sha256": "15940ec69905c5a38cd7c03b082ac851fa7c405758b9a117be90628b07eef73c",
+      "size_bytes": 44147
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p50_1_be_fixed_matched.csv.gz",
+      "sha256": "ee09877c5eb08f9d5c1c5e676256b936b8dd2b9efe5a185df41c61e76029bccd",
+      "size_bytes": 20440
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p50_1_be_fixed_opportunities.csv.gz",
+      "sha256": "72bb658a0b50c63d302ab74ff85e926508df05cca11351ec0afb3a6c0fecba7b",
+      "size_bytes": 113617
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p50_1_be_x1.5_net_win_cycles.csv",
+      "sha256": "9007d597b5ed34f73624a215e50b3e8707ea990cef6f00f2823ed5f2f4b5513a",
+      "size_bytes": 13176
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p50_1_be_x1.5_net_win_ledger.csv.gz",
+      "sha256": "56809b856cc5b0b867979189415e1f174398180e5d5b7d7bc8ed7c4210ebab18",
+      "size_bytes": 46939
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p50_1_be_x1.5_net_win_matched.csv.gz",
+      "sha256": "503eacb0f4ea440253a33a425a3922d62da8395086284fd741e8c3e019596242",
+      "size_bytes": 23209
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p50_1_be_x1.5_recovery_cycles.csv",
+      "sha256": "c2d3c748a8933dce0f98dcb28c03b868db9d666e8c60aac6656d7626a5d347c9",
+      "size_bytes": 8780
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p50_1_be_x1.5_recovery_ledger.csv.gz",
+      "sha256": "a5be63ff07563ebfdd2d176176b570b6cdae049183e545a2472be9f5deeb0422",
+      "size_bytes": 48004
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p50_1_be_x1.5_recovery_matched.csv.gz",
+      "sha256": "cd7150424c4d32ec4cea9e3d731498146a4f85924c5391d386e655331b810168",
+      "size_bytes": 23724
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p50_1_be_x2.0_net_win_cycles.csv",
+      "sha256": "4979aeb69e4f8db502aaf17d2b8d6632c8c01e42db783bf0f70b639e844c4194",
+      "size_bytes": 13566
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p50_1_be_x2.0_net_win_ledger.csv.gz",
+      "sha256": "1e3f5d4f44e08b982ff689753f1f3b4b10d6902f37872632af6bfd07b69c1759",
+      "size_bytes": 45672
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p50_1_be_x2.0_net_win_matched.csv.gz",
+      "sha256": "5be2f35e6a1c26887a7ea27ea0d24841fb18e8971ce2878de6eed3762b07cc85",
+      "size_bytes": 22368
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p50_1_be_x2.0_recovery_cycles.csv",
+      "sha256": "a451df2e9b3b59d3ff8017f1008c3534e41885cdd6e6b5dc3650919d393479c4",
+      "size_bytes": 11250
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p50_1_be_x2.0_recovery_ledger.csv.gz",
+      "sha256": "e5fd762637306cc81f9a72e3828b0341c140ec051d0e1aa92d0727d68f8fda85",
+      "size_bytes": 45472
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p50_1_be_x2.0_recovery_matched.csv.gz",
+      "sha256": "cc1ec7f1a2622502a236eb2d056b175f0477a7f37bdff8617b568ff5bcdff33a",
+      "size_bytes": 21767
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p70_1_be_fixed_cycles.csv",
+      "sha256": "48f614c63ee70d9a0a28de740f9df7cd6a050be602b8ce239f3b3b65d80533c8",
+      "size_bytes": 7089
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p70_1_be_fixed_ledger.csv.gz",
+      "sha256": "ee7d8610f46d990473c27625c00ba7117dc154a725b344e8dea787f6992f80e8",
+      "size_bytes": 44133
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p70_1_be_fixed_matched.csv.gz",
+      "sha256": "08444d4e200f139121f6462fa1e30f744f0336a9a6c27edfbcbed78a2369fc34",
+      "size_bytes": 20334
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p70_1_be_fixed_opportunities.csv.gz",
+      "sha256": "526569cfea2d4f3360bc132df56264fc029e980e4e120fbeca3cdf6d6c8a6b70",
+      "size_bytes": 116635
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p70_1_be_x1.5_net_win_cycles.csv",
+      "sha256": "13a37fbceabd472d2838e3d90d00874786cc97cbb0c7fc20516ea39bd3d91e57",
+      "size_bytes": 15164
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p70_1_be_x1.5_net_win_ledger.csv.gz",
+      "sha256": "bf1bb62d1afedfb36546033240c438ca6d08b42e81627133c559dccb21f7b350",
+      "size_bytes": 46390
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p70_1_be_x1.5_net_win_matched.csv.gz",
+      "sha256": "c6113d004575866aeee0f32e79179f96cdeb98976c05d4a0ad76d4888cb6960c",
+      "size_bytes": 22891
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p70_1_be_x1.5_recovery_cycles.csv",
+      "sha256": "b5475f675c20c051b75f29e94dee0efe30a80ce463fab495da4dede48ae4ab0a",
+      "size_bytes": 7985
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p70_1_be_x1.5_recovery_ledger.csv.gz",
+      "sha256": "4da9a30586a26d4c8beb40b2459921e46df39aa091e18d6746ddd82e2777b266",
+      "size_bytes": 48119
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p70_1_be_x1.5_recovery_matched.csv.gz",
+      "sha256": "db3ed1388fff06b24fa17ba4cab337a0fa73fbb8d3a9407c4dd628adbf67f70d",
+      "size_bytes": 23748
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p70_1_be_x2.0_net_win_cycles.csv",
+      "sha256": "b81f26fd9d1c961b76ad7ceddb4ff3d00a6f9aff033e8e21c21b0469a2206017",
+      "size_bytes": 15424
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p70_1_be_x2.0_net_win_ledger.csv.gz",
+      "sha256": "f4c752f116bbb6233ede4d6c929ff5d18335ced002a23828d69890efd54e3fba",
+      "size_bytes": 45406
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p70_1_be_x2.0_net_win_matched.csv.gz",
+      "sha256": "c5b4e58c12dd9a61ee041974c5d721fef61e6d781426a61fdd5927bcd09f3984",
+      "size_bytes": 22239
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p70_1_be_x2.0_recovery_cycles.csv",
+      "sha256": "3ad7a2eaa04b8a7c71872a72f23e560a4178c35020057ae309cd27cc376784b2",
+      "size_bytes": 11640
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p70_1_be_x2.0_recovery_ledger.csv.gz",
+      "sha256": "6ae013517b27fb96da63bbd0395283b49fa2d0a8a7e5c0dc512c721f06522990",
+      "size_bytes": 45032
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_p70_1_be_x2.0_recovery_matched.csv.gz",
+      "sha256": "da3555f296c0c86bb400e2ea1571cd50d1050d8d5c80dad19e5d54121365a6c9",
+      "size_bytes": 21614
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_be1_fixed_cycles.csv",
+      "sha256": "62ad8d80d5cf887a0670ede0d0a7ac821d0b2143a2964c17fb71a23128109842",
+      "size_bytes": 7202
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_be1_fixed_ledger.csv.gz",
+      "sha256": "6387ab9d7d4d9124b68776d56ebf9d2427b58956b9be2af4551d5a56fb8fca91",
+      "size_bytes": 44049
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_be1_fixed_matched.csv.gz",
+      "sha256": "4a5b73af226ac01161f0d9457cb9ceb1cbae2f4a503ed8851a5b7ae89927ecf0",
+      "size_bytes": 20368
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_be1_fixed_opportunities.csv.gz",
+      "sha256": "9bf1f547da4ee4fa8bdbb3620d83ab2af94ff0bdea9ecf661bedb87039a443a0",
+      "size_bytes": 92996
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_be1_x1.5_net_win_cycles.csv",
+      "sha256": "6aa8548fd654e754ae271fd32ba880da282614ec31645e9d7b84a6f33bd871da",
+      "size_bytes": 8837
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_be1_x1.5_net_win_ledger.csv.gz",
+      "sha256": "dee3ecab32fb2e3bec6b86db4aa4a292d3ff337316c53dd3fbc9224ed8614ab6",
+      "size_bytes": 47670
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_be1_x1.5_net_win_matched.csv.gz",
+      "sha256": "39f258adb00eb8b91796cb6d22fe3d94ee5aaaa3c3a8dd2111003110e0272ef5",
+      "size_bytes": 23698
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_be1_x1.5_recovery_cycles.csv",
+      "sha256": "4613cbb7325f2def30fc4444bd5c2f68299f2266d3ccf0dc5b4711bbcddc7765",
+      "size_bytes": 7967
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_be1_x1.5_recovery_ledger.csv.gz",
+      "sha256": "84fd52ef59c4b872b40320142036d4382c40960d4271900a829c0b69a274f5e1",
+      "size_bytes": 47921
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_be1_x1.5_recovery_matched.csv.gz",
+      "sha256": "578dfebf9024f0dd9545fca905d6ddea9666fad4f9b80db6fa90e2111a9822b6",
+      "size_bytes": 23777
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_be1_x2.0_net_win_cycles.csv",
+      "sha256": "ced31ec02b0441c5957006cd977ddc8902e91ed8ed615e3e75a78230a2b8ae6b",
+      "size_bytes": 8849
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_be1_x2.0_net_win_ledger.csv.gz",
+      "sha256": "4a778c115142773fabf1d51eda59a5cd4c86c8beb9f5daaa6b7ff34c6cae37ab",
+      "size_bytes": 46763
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_be1_x2.0_net_win_matched.csv.gz",
+      "sha256": "28fbba40f039fa327fca4210b2956a2677ab684ca1863c8b704c35e9a237c634",
+      "size_bytes": 23082
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_be1_x2.0_recovery_cycles.csv",
+      "sha256": "c61b77450cfce3946c445d8b0bef02f5dbe59eda52ab82dd0b86ccde6fae88a2",
+      "size_bytes": 9218
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_be1_x2.0_recovery_ledger.csv.gz",
+      "sha256": "36d68ade1d586d97a5ee17fe91e2e94876a5145d490817c60077df863764fccd",
+      "size_bytes": 45716
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_be1_x2.0_recovery_matched.csv.gz",
+      "sha256": "bd1f69fbeceaaae40bd7c9c1d3fc087e2544ee5338c71f16dc490cca1389e58c",
+      "size_bytes": 22078
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_fixed_cycles.csv",
+      "sha256": "f61abcc8bde4690c9568100c033782f92d18c2121e529113c201066007839f1b",
+      "size_bytes": 7612
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_fixed_ledger.csv.gz",
+      "sha256": "7ff66173d9182b5fbbd196fd8094393a81cf7d4d17891cf815b22ddc162a32ce",
+      "size_bytes": 42438
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_fixed_matched.csv.gz",
+      "sha256": "03ae7aafd1615e26b74835501ef46acafece1017f2297a1a13a39344918de6d8",
+      "size_bytes": 19503
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_fixed_opportunities.csv.gz",
+      "sha256": "3208196233ed9b5d36b1adea259afbe1a6d11cbdaf9aaca7a6e664a91a6346a6",
+      "size_bytes": 95504
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_x1.5_net_win_cycles.csv",
+      "sha256": "98cd93baddab427f864e1d5db6d7f951283dee03a051adcb45e843cdb7f0f648",
+      "size_bytes": 10347
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_x1.5_net_win_ledger.csv.gz",
+      "sha256": "f90ff25732ab880ea5c3851792acbc130e57254b4c00a1a490c37769c462dc17",
+      "size_bytes": 45704
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_x1.5_net_win_matched.csv.gz",
+      "sha256": "31cd443d83802b92e5b5d80287c9f3f46bc561a7e9c9013cc3f2e53f86413d78",
+      "size_bytes": 22507
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_x1.5_recovery_cycles.csv",
+      "sha256": "9a736d36d2028f07afcdc0a6927d2894f4266eb096e56afda22f735cf03fa4b5",
+      "size_bytes": 8742
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_x1.5_recovery_ledger.csv.gz",
+      "sha256": "131137fe74e223721e25be0d6226c60b2190d9bb2637658ba414eca457927ac2",
+      "size_bytes": 46022
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_x1.5_recovery_matched.csv.gz",
+      "sha256": "6e844021e10898a84d0c7631fe194602073de6711743b0b318f9c4a510ee8964",
+      "size_bytes": 22718
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_x2.0_net_win_cycles.csv",
+      "sha256": "0eaf65fdcb6f5699092f5780c6db38aef0c30add4d34e8bb609bc512fbbc26af",
+      "size_bytes": 10366
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_x2.0_net_win_ledger.csv.gz",
+      "sha256": "f381feb350a11eefa07bb50a98ff6c47238b90efc887d3f4a125d34c01998dc5",
+      "size_bytes": 44950
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_x2.0_net_win_matched.csv.gz",
+      "sha256": "398897654723ce26ad06b43fc9e61a4c0b256ea5f60206af0011f7f1d8347f56",
+      "size_bytes": 21955
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_x2.0_recovery_cycles.csv",
+      "sha256": "5f4a48694b3cb8ea391a4a7a397ac5d3b1d7a83bd63070bd8f0e81649b636388",
+      "size_bytes": 9329
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_x2.0_recovery_ledger.csv.gz",
+      "sha256": "d86c73f8195859879855e13445658d0b984e362d547875ed0970fb591450284c",
+      "size_bytes": 44713
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/evaluation/validation_whole_3r_x2.0_recovery_matched.csv.gz",
+      "sha256": "bc31d340c48b8b2f34e9f47e97230b23a78391c25d41871853f2d50b6834ab5c",
+      "size_bytes": 21659
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/notion_receipt.json",
+      "sha256": "587afdfac8e4bab6d97a8a4567dda5627986e30cad528dd7b26d704eecca1512",
+      "size_bytes": 313
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/selection.json",
+      "sha256": "edd3ff9e6d8cb91f424ebc7a70306e1bfb36d7d013fad0f8c73e1b4e9fdb9aad",
+      "size_bytes": 1859
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/validation.json",
+      "sha256": "9c70a00a2b1036912a908d6dd167bc7d2c7a0155b78d98fbb4e3d71579d30256",
+      "size_bytes": 3622
+    },
+    {
+      "path": "yoyo/evaluation/spike_partial_exit.py",
+      "sha256": "4fe63950d4c09de0586ac30ff76a50df5c78c267f2a97ac1e8a6603825ddf79f",
+      "size_bytes": 18519
+    },
+    {
+      "path": "yoyo/evaluation/spike_partial_study.py",
+      "sha256": "e162fd345e85b4725656bc7813132c2a535cfab1b4a71ff5cccadbc861998467",
+      "size_bytes": 10086
+    },
+    {
+      "path": "tests/evaluation/test_spike_partial_exit.py",
+      "sha256": "3862f191384977a52a5d4229f577d33eb844c0ae98d6041bd0cc394b9821fe17",
+      "size_bytes": 7900
+    },
+    {
+      "path": "scripts/report_spike_partial.py",
+      "sha256": "0b4164d617b1c4e74ab418ae2e1d71f7b00bfcc42afe243bd757f869094ed9d4",
+      "size_bytes": 13070
+    },
+    {
+      "path": "analysis/p1_spike_eth3m_partial_tp_20260914.md",
+      "sha256": "629ede6c56fbba0826b919730d71b1fa0768548bc292461550e279071962a072",
+      "size_bytes": 16727
+    },
+    {
+      "path": "analysis/html/p1_spike_eth3m_partial_tp_20260914.html",
+      "sha256": "ad23dd8660aef6536944f906aebf43731e6eb85ed6aaf2e69e138879e21de5d1",
+      "size_bytes": 23751
+    },
+    {
+      "path": "docs/learnings/partial-profit-is-a-weighted-trade-not-an-additional-full-trade.md",
+      "sha256": "c9d67ff3c9fc7926bb9f44673f5007d57da5c7500819a222606d2f247299df47",
+      "size_bytes": 1364
+    },
+    {
+      "path": "docs/learnings/a-higher-win-rate-after-partial-exits-does-not-imply-better-recovery.md",
+      "sha256": "f8127831e46365dc1e635fd8b33f392030bdf6794f5853d53e7c215440065097",
+      "size_bytes": 1558
+    }
+  ],
+  "validation_summary": {
+    "focused_passed": 127,
+    "boundary_causality_parity_passed": 468,
+    "boundary_causality_parity_failed": 7,
+    "registry_passed": 12,
+    "registry_failed": 4,
+    "own_registry_rows_valid": true,
+    "full_registry_green": false
+  }
+}

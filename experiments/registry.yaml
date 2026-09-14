@@ -9107,12 +9107,15 @@ experiments:
 
   - experiment_id: exp-spike-eth3m-partial-tp-20260914-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 4f2e061a5a
-    status: active
+    source_commit: 863ce24db971542c29526fe869045cb0d6fd0794
+    status: rejected
     question: Can partial realization or tighter trailing reduce ETH3m V8 profit giveback and improve recovery-account outcomes?
     single_variable: Thirteen owner-authorized exit configurations with unchanged entry,initial stop and20bp cost; cash policies evaluated only after exit selection freezes.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/PROJECT_PLAN.md
+    canonical_report: analysis/p1_spike_eth3m_partial_tp_20260914.md
+    result: All thirteen development exits lost; continuous fixed baseline131.80U versus partial50pct76.10U and70pct71.85U. No profitable recovery policy.
+    artifacts:
+    - spike-eth3m-partial-tp-20260914-v1-delivery
     notes: Pre-May2026 only; record full initial-stop,gross-loss and net-loss streaks separately. No live actions.

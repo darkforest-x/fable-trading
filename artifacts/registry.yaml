@@ -30839,3 +30839,17 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: 855 failed development policies,36 audited account windows,full matched controls and HTML. No holdout prices or scores consumed; report-only and non-production.
+
+  - artifact_id: spike-eth3m-partial-tp-20260914-v1-delivery
+    artifact_type: manifest
+    role: partial_tp_frozen_preholdout_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 863ce24db971542c29526fe869045cb0d6fd0794
+    source_path: experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/manifest.json
+    sha256: cc374e55d7595947e86be8a6b72b4ab5194177f55a40c418bddaa67537aed0bc
+    size_bytes: 91578
+    storage_uri: repo://experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Thirteen failed exit arms,89 account windows,matched controls and HTML. Partial win-rate gains did not improve net equity. Zero holdout use.

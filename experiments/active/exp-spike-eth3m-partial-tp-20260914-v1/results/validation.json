@@ -1,0 +1,89 @@
+{
+  "focused_tests": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q -p no:cacheprovider --capture=no tests/evaluation/test_spike_partial_exit.py tests/evaluation/test_spike_recovery_exit.py tests/evaluation/test_spike_recovery_cash.py tests/boundaries/test_layer_imports.py tests/causality/test_holdout_boundary_is_single_valued.py",
+    "exit_code": 0,
+    "passed": 127,
+    "elapsed_s": 2.2,
+    "tool_session": 16694
+  },
+  "scope": "Synthetic exit/cash tests, cross-layer imports and single holdout boundary; no claim that every repository gate is green.",
+  "holdout_consumptions": 0,
+  "training_eligible": false,
+  "production_eligible": false,
+  "independent_artifact_audit": {
+    "reviewer": "recovery_exit_engine, Terra High",
+    "scope": "All development/validation/preholdout exported opportunities and ledgers; excludes continuous_pre. Read only, no price data or replay.",
+    "opportunity_files": 21,
+    "opportunity_rows": 15543,
+    "ledger_files": 69,
+    "ledger_rows": 37753,
+    "invalid_rows": 0,
+    "fraction_max_abs_error": 0,
+    "weighted_gross_max_abs_error": 4.440892098500626e-16,
+    "cost_max_abs_error": 4.440892098500626e-16,
+    "net_max_abs_error": 2.1405099914773018e-13,
+    "cash_step_max_abs_error": 2.3092638912203256e-13,
+    "cash_cumulative_max_abs_error": 2.014388655879884e-12,
+    "entry_geometry_parity": "p50_1_be and p70_1_be versus whole_3r_be1: 923/653/233 rows across development/validation/preholdout, seven geometry columns, zero differences."
+  },
+  "html_static_qa": {
+    "path": "analysis/html/p1_spike_eth3m_partial_tp_20260914.html",
+    "utf8": true,
+    "tables": 6,
+    "rows": 71,
+    "required_values": [
+      "131.80",
+      "76.10",
+      "71.85",
+      "0.5",
+      "36",
+      "未启用"
+    ],
+    "passed": true,
+    "visual_browser": "Not inspected; previous file preview policy rejection respected. Open in Codex file panel only.",
+    "post_final_report_regeneration": true
+  },
+  "runtime_account_assertions": {
+    "accounts": 89,
+    "cash_and_cycle_tolerance": 1e-07,
+    "baseline_natural": 751,
+    "baseline_final_balance": 479.82100723452197,
+    "evaluation_exit_code": 0
+  },
+  "repository_gates": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q -p no:cacheprovider --capture=no tests/boundaries tests/causality tests/parity",
+    "tool_session": 16224,
+    "passed": 468,
+    "failed": 7,
+    "exit_code": 1,
+    "elapsed_s": 77.74,
+    "failures": {
+      "tests/boundaries/test_teacher_proposals_are_isolated.py": 5,
+      "tests/parity/test_migration_ledger_parity.py": 2
+    },
+    "causes": [
+      "Existing spike-v8-total2-1h-native-20260914-delivery missing source_commit",
+      "Untouched candidates.py working-tree migration hash differs",
+      "Untouched render.py migration hash already differs in builder commit"
+    ]
+  },
+  "registry_contracts": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q -p no:cacheprovider --capture=no tests/contracts/test_registries.py",
+    "tool_session": 39640,
+    "passed": 12,
+    "failed": 4,
+    "exit_code": 1,
+    "elapsed_s": 10.69,
+    "causes": [
+      "spike-v8-total2-1h-native-20260914-delivery missing source_commit",
+      "exp-eth-ma120-longest-runs-20260914-v1 missing source_commit"
+    ],
+    "preexisting_evidence": "Both records lack source_commit in git show 863ce24db9:<registry path>."
+  },
+  "own_registry_rows": {
+    "ArtifactRecord.from_mapping": true,
+    "ExperimentRecord.from_mapping": true,
+    "artifact_reference_crosslink": true,
+    "full_registry_green": false
+  }
+}

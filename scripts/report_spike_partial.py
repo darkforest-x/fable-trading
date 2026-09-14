@@ -30,11 +30,18 @@ def main():
     joined=s.merge(c,on=['period','name','cash'],validate='one_to_one')
     chosen=sel['best'];d=s[(s.period=='development')&(s.cash=='fixed')]
     b=d[d.name==chosen].iloc[0];base=d[d.name=='whole_3r'].iloc[0]
+    continuous=s[s.period=='continuous_pre']
+    continuous_fixed=continuous[continuous.cash=='fixed'].set_index('name')
+    escalating=continuous[continuous.cash!='fixed']
     text=f'''# ETHUSDT.P 3分钟：分批止盈和收紧移动止损
 
 2026-09-14｜exp-spike-eth3m-partial-tp-20260914-v1｜仅研究、未启用
 
 **已完成13组退出对照。开发期净权益最高是“{NAMES[chosen]}”，1000U变为{b.final_balance:.2f}U；全仓3R基线为{base.final_balance:.2f}U。开发期盈利组数为{int((d.final_balance>1000).sum())}/13，盈利且完整初始止损与净亏最长均≤6的组数为{sel['hard_pass_count']}。这一结果只能选择诊断候选，不能称为实盘最佳。**
+
+可以做分批，但本轮没有找到能支撑倍投的净盈利方案。2023-08至2026-04连续固定1U，全仓3R期末{continuous_fixed.loc['whole_3r','final_balance']:.2f}U，1R平50%并保护残仓期末{continuous_fixed.loc['p50_1_be','final_balance']:.2f}U，平70%期末{continuous_fixed.loc['p70_1_be','final_balance']:.2f}U。四种冻结退出分别配合两种倍率、两种复位方式，共16个连续加码账户，期末仅{escalating.final_balance.min():.2f}—{escalating.final_balance.max():.2f}U；这是容量约束下的研究账户余额，不是交易所强平金额。
+
+净胜率提高没有抵消小盈利、费用及交易笔数变化。连续基线每笔平均毛收益{continuous_fixed.loc['whole_3r','mean_gross_r']:.3f}R、研究成本约{continuous_fixed.loc['whole_3r','mean_gross_r']-continuous_fixed.loc['whole_3r','mean_net_r']:.3f}R；平70%组毛收益仅{continuous_fixed.loc['p70_1_be','mean_gross_r']:.3f}R。0.5R平半仓在开发期把完整初始止损最长压到6，但净亏最长仍36；不能把这个历史完整止损数字当作未来或账户连亏保证。
 
 ## Owner观察与原始证据
 
@@ -72,11 +79,11 @@ partial与最终目标预置；无法确认同bar先后时旧止损先；已知�
 每组从1000U开始。原始止损指整笔尚未减仓时命中初始止损；毛亏与净亏分别计数，价格保本不冒充净盈利。随机对照为同ETH/月份/方向/此前120bar ATR比例桶，每成交匹配9次同退出/成本；只比较自然退出子样本，不是可交易随机资金账户。
 '''
     def add_rows(t,with_cash=False):
-        headers=['退出']+(['资金方式'] if with_cash else [])+['期末U','笔数','净胜率','分批触发','完整初始／毛亏／净亏最长','随机均值R','超额R','月块p']
+        headers=['退出']+(['资金方式'] if with_cash else [])+['期末U','笔数','净胜率','均值毛／净R','分批触发','完整初始／毛亏／净亏最长','随机均值R','超额R','月块p']
         rows=[]
         for r in t.itertuples():
             rows.append([NAMES[r.name]]+([r.cash] if with_cash else [])+[f'{r.final_balance:.2f}',r.n_natural,
-                f'{100*r.win_rate:.2f}%',r.n_partial,f'{r.max_full_initial_stop}/{r.max_price_loss}/{r.max_consecutive_net_loss}',
+                f'{100*r.win_rate:.2f}%',f'{r.mean_gross_r:.3f}/{r.mean_net_r:.3f}',r.n_partial,f'{r.max_full_initial_stop}/{r.max_price_loss}/{r.max_consecutive_net_loss}',
                 f'{r.random_mean_net_r:.3f}',f'{r.excess_net_r:+.3f}',f'{r.p:.4f}'])
         return table(headers,rows)
     text+=add_rows(joined[(joined.period=='development')&(joined.cash=='fixed')])
@@ -93,7 +100,9 @@ partial与最终目标预置；无法确认同bar先后时旧止损先；已知�
 
 开发基线固定1U的751笔及479.821007U与上一轮同退出结果一致；每个账户都核对逐笔现金和周期现金总和。新引擎另用合成路径检查多空分批比例、同bar歧义、跳空、下一bar保护、反向残仓、边界和成本分摊。具体测试收据在results/validation.json；不得把未运行的测试记为通过。
 
-与基线的差异归因需要区分：提前兑现可降低曾达目标后回吐的损失，同时截走大赢家的一部分收益；收紧ATR会更早退出但也可能更早退出后续趋势。所有表展示净结果、完整止损及相同退出随机对照，不以首批命中率替代整笔盈利。对加码的裁决必须对照同退出fixed账户，不能把不同退出的差额全归因为倍率。
+实际定向测试127通过。全套boundaries/causality/parity为468通过、7失败：5项被既有TOTAL2产物缺source_commit阻断，另2项为本轮未改动的candidates.py/render.py迁移哈希漂移。注册契约12通过、4失败，来自同一TOTAL2记录及既有MA120实验缺source_commit。两条缺字段记录在本轮builder提交中已存在；render.py在该提交时已漂移，candidates.py为本轮未纳入提交的工作区改动。新实验与产物两行单独通过真实契约解析和交叉链接；未篡改旧记录或迁移账本使全套变绿。
+
+与基线的差异归因需要区分：提前兑现可降低曾达目标后回吐的损失，同时截走大赢家的一部分收益；收紧ATR会更早退出但也可能更早退出后续趋势。提前退出也释放单仓名额，改变后续可成交笔数；开发全仓基线751笔，而1R平70%组775笔，平均净R近似但总亏损更大，不能把总额差异全部解释为单笔退出价。所有表展示净结果、完整止损及相同退出随机对照，不以首批命中率替代整笔盈利。对加码的裁决必须对照同退出fixed账户，不能把不同退出的差额全归因为倍率。
 
 分批现金先到账，但本研究直到整笔平仓才更新可开下一笔的账户状态，单仓约束下没有利用中途释放现金开新仓。现金回撤按整笔退出/边界估计清算权益，不是持仓内峰谷；边界累计部分已实现收益与残仓标记分别保留，边界不计自然胜率/连亏。未重建标记价格强平、分档维持保证金、完整资金费、真实盘口滑点或最小张数，不能以不归零称安全。
 
@@ -113,6 +122,10 @@ PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q -p no:cacheprovider --ca
 ```
 
 输出目录拒绝覆盖。源context仍为原SHA绑定pre-May缓存，未复制或修改行情。results下保存13开发组、冻结配置、所有窗口/资金表、逐笔份额成交与匹配对照；manifest.json核对哈希。策略仅为研究候选，production_eligible=false、training_eligible=false。新配置最终holdout或实盘仍需Owner明确批准。
+
+## 下一步边界
+
+本轮结论为拒绝将这13组退出作为倍投可行性的依据。可复用的是份额成交账本和整轮债务公式；没有证据可给出实盘最优参数。若继续研究，应先独立验证入场扣费后的优势或整轮净债务保护假设，再考虑加码。修改固定研究成本或新增holdout评估需Owner决策，未在本轮执行。
 '''
     report=ROOT/'analysis/p1_spike_eth3m_partial_tp_20260914.md';report.write_text(text)
     subprocess.run(['.venv/bin/python','scripts/md_to_html.py',str(report),'--out-dir','analysis/html'],cwd=ROOT,check=True)
