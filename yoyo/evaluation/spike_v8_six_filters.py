@@ -315,10 +315,12 @@ def run(output: Path, *, limit: int | None = None, official: bool = False) -> pd
         raise ValueError("official replay requires committed builder, tests and config")
     config = json.loads(CONFIG.read_text())
     if sha256(CATALOG) != config["catalog_sha256"]: raise ValueError("frozen catalog changed")
-    folders = sorted(p for p in (SOURCE / "streams").iterdir() if (p / "completion.json").is_file())
+    # Execution cache belongs to the original frozen V7 source.  ``SOURCE``
+    # contains only the preceding receipt-bound outputs used as baseline.
+    folders = sorted(p for p in (be05.RAW / "streams").iterdir() if (p / "completion.json").is_file())
     if len(folders) != int(config["expected_streams"]): raise ValueError("unexpected source stream count")
     folders = folders if limit is None else folders[:limit]; output.mkdir(parents=True, exist_ok=True); (output / "streams").mkdir(exist_ok=True); (output / "failures").mkdir(exist_ok=True)
-    identity = {"builder_sha256": sha256(Path(__file__)), "test_sha256": sha256(TEST), "config_sha256": sha256(CONFIG), "source_manifest_sha256": sha256(SOURCE / "manifest.json"), "catalog_sha256": sha256(CATALOG)}
+    identity = {"builder_sha256": sha256(Path(__file__)), "test_sha256": sha256(TEST), "config_sha256": sha256(CONFIG), "source_manifest_sha256": sha256(SOURCE / "manifest.json"), "raw_manifest_sha256": sha256(be05.RAW / "manifest.json"), "catalog_sha256": sha256(CATALOG)}
     identity_path = output / "identity.json"
     if identity_path.exists() and json.loads(identity_path.read_text()) != identity: raise ValueError("output identity changed; choose new directory")
     identity_path.write_text(json.dumps(identity, indent=2, sort_keys=True)); catalog = _catalog_map(); summaries: list[dict[str, object]] = []
