@@ -9092,12 +9092,15 @@ experiments:
 
   - experiment_id: exp-spike-eth3m-recovery-20260914-v2
     source_repo: darkforest-x/fable-trading
-    source_commit: 9767b7a149
-    status: active
+    source_commit: 4e49691380
+    status: rejected
     question: Can one-USDT base risk with causal protection and recovery sizing satisfy six real consecutive net losses on ETH 3m V8?
-    single_variable: Owner authorized joint exit and cash optimization; 855 preregistered development configurations, unchanged V8 admission, initial stop and 20bp cost.
+    single_variable: Owner authorized 45 exits by 19 cash policies; frozen V8, initial stop and 20bp cost. Selected before later-period evaluation.
+    result: All 855 development configurations lose and exceed six real consecutive net losses. Best escalation ends development at 249.48U and continuous pre-May-2026 account at 10.31U; 588 entry-price exits are all net losses.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: experiments/active/exp-spike-eth3m-recovery-20260914-v2/PROJECT_PLAN.md
-    notes: Pre-May-2026 context only; commit builders before runs and selected policies before later-period evaluation. Six-layer cycle cap never resets account streaks.
+    canonical_report: analysis/p1_spike_eth3m_recovery_20260914.md
+    artifacts:
+    - spike-eth3m-recovery-20260914-v2-delivery
+    notes: Zero holdout use. 744-trade baseline parity,36 synthetic checks and36 account audits. Same-exit fixed1U and matched random controls retained. No live eligibility; unrelated registry gates remain red.

@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>ETHUSDT.P 3分钟：1U起步的倍投与回本研究</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>ETHUSDT.P 3分钟：1U起步的倍投与回本研究</h1>
+<p>2026-09-14｜实验 exp-spike-eth3m-recovery-20260914-v2｜结论：本轮未找到达标方案，保持未启用。</p>
+<p><strong>理解的是“按上一轮实际亏损加大下一笔的风险，盈利后重置”，不是持仓中补仓。按这一定义跑了855组：开发期全部亏损，最长真实连续净亏损没有一组≤6。参与度门没有淘汰任何组；最短连亏仍为9次。固定1U、3R止盈的开发期末最高，也只剩479.82U；加码组最高剩249.48U。后续年份亦未扭转结论。</strong></p>
+<h2>先把用户例子算清楚</h2>
+<p>价格R是当笔入场价到初始止损的距离；资金风险B是该距离对应的USDT金额。首笔B=1U，账户1000U。此处1U是价格止损预算，费用另计，实际净止损会大于1U；没有擅自把0.2%成本改成零。仓位名义金额=B/初始止损比例，B不是保证金。</p>
+<table><thead><tr>
+<th>递推规则</th>
+<th>前6笔计划风险U：暂忽略费用</th>
+<th>前3笔损失后第4笔</th>
+</tr></thead><tbody>
+<tr><td>上一笔×2</td><td>1、2、4、8、16、32</td><td>8U</td></tr>
+<tr><td>本轮累计亏损×2</td><td>1、2、6、18、54、162</td><td>18U</td></tr>
+<tr><td>与用户前四项一致的阶乘参考</td><td>1、2、6、24、120、720</td><td>24U</td></tr>
+</tbody></table>
+<p>阶乘后两项是研究假设。若前3笔亏1+2+6=9U，第4笔风险24U，<strong>实际平仓赚毛1R可赚24U，扣费前净回收15U；浮盈1R后移回开仓价并最终保本退出，则毛盈利是0U，9U旧亏损仍在。</strong>想锁住整轮回本，保护退出至少应覆盖旧亏损D与本笔成本C，即保护的毛R≥(D+C)/B；这不是把止损放在开仓价。本轮没有把这个动态整轮保护假设冒充已验证方案。</p>
+<h2>数据、授权与冻结</h2>
+<p>使用已有OKX ETH-USDT-SWAP三分钟数据，是本项目ETHUSDT.P研究映射，不声称与其他交易所的TradingView同名图逐笔一致。原始上下文482176根，2023-07-31 11:12至2026-04-30 23:57 UTC；暖机后从2023-08-01开始交易。开发期2023-08至2024-12；2025年和2026年前4个月在配置冻结后评估，连续账户另列。</p>
+<p>Owner本轮明确授权“参数什么的，自己去优化”，已在PROJECT_PLAN记录退出与资金联合搜索。<strong>本配置holdout消耗0次</strong>，没有读取≥2026-05-04价格、交易或评分。此前配置用过的holdout不转作本轮挑参数。上述早期历史也曾被其他研究观察，后续时间段验证不能称为全新盲测。</p>
+<p>Builder提交411c851d9d早于开发运行；冻结提交2d27ce8ec6早于后续评估。选择文件绑定输入上下文、开发CSV、配置、三个builder及搜索表SHA。无新增TP/保护的引擎以744笔、10个字段逐笔重现旧开发串行基线。36项合成测试通过；36个账户窗口的现金、周期、候选数量与连亏独立重算一致。</p>
+<p>最终独立证据复核发现加码第一有两个JSON表示哈希：搜索ID为065185f5db64，冻结诊断ID为62ee4a3e50a6，区别是TP整数2与浮点2.0的序列化，数值参数全部一致；identity_reconciliation.json保存映射及逐字段相等证明。不改写冻结选择或重选策略。</p>
+<h2>冻结的V8与退出方式</h2>
+<p>V8准入仍是原始V6事件＋V7此前压缩门＋同向绳索距离≤3ATR，确认后下一根开盘入场。初始止损保留5bar结构、0.2ATR缓冲、2ATR下限、tick0.01；原始V6反向信号下一开盘退出；原2R收盘启动4ATR跟踪保留。</p>
+<p>45退出组：毛TP无／1／2／3／4R；无保护，或浮盈0.5／1／1.5／2R后移开仓价，或扣固定成本后的浮盈达到上述阈值后移至费用覆盖价。3分钟OHLC只能在本bar收盘观察触及，保护从下一bar生效；不假设先摸盈利、再回落时仍能在同bar保本。TP和旧止损同bar且路径不明时止损优先；已知开盘越过TP先成交，原始反向开盘退出优先级保留。</p>
+<p>19资金组：固定1U；上一筆×1.5／2；累计净亏损×1／1.5／2；阶乘。加码与3种重置交叉：整轮净回本、单笔净赢、价格保本或净赢。默认任何自然退出的净亏损进级；最多6个亏损级别，失败认亏重启。10倍名义敞口上限、费用预留及最低现金约束；拒单不占影子仓位。</p>
+<h2>选中的只是失败诊断组</h2>
+<ul>
+<li>主配置：固定1U、3R毛止盈、无新增保本。</li>
+<li>加码组开发第一：1.5倍，0.5R毛浮盈后移开仓价，2R毛止盈；价格保本或净赢即复位，最多6层。开发期实际最高风险7.59375U；本组不是达标或实盘建议。</li>
+<li>最短连亏组：累计净债务×1、费用覆盖保护在净浮盈1R后启动、无固定TP、单笔净赢复位。开发连亏9次，却只剩21.69U；减少连亏不等于减少总亏损。</li>
+<li>用户参考：3R止盈、1R移开仓价；上一笔×2配单笔净赢重置，债务×2配整轮回本重置，阶乘配价格保本或净赢重置。这三行同时改变了重置方式，不能把三者差异全归因为加码公式；完整855组保留同条件对照。</li>
+</ul>
+<p>开发先按账户盈利、真实连亏≤6、至少100笔及固定组50%交易覆盖和75%活跃月硬门判定；无通过者，按期末现金排序保留诊断。主配置是固定风险，因此在任何后续评估前另冻结非固定组最高现金者，明确为开发后补充诊断。后续添加其固定1U对照只用于解释，不参与选择。</p>
+<h2>开发期：2023-08至2024-12</h2>
+<p>每段独立账户以1000U开始；连续段只投入一次1000U，不补钱。随机对照是同币×月份×方向×因果波动桶、同退出与成本的逐笔诊断，不能当作可交易随机账户。</p>
+<table><thead><tr>
+<th>方案</th>
+<th>期末U</th>
+<th>自然平仓</th>
+<th>净胜率</th>
+<th>连净亏／连亏损止损</th>
+<th>现金回撤</th>
+<th>随机均值R</th>
+<th>相对随机R</th>
+<th>月块单侧p</th>
+</tr></thead><tbody>
+<tr><td>原V8／固定1U</td><td>434.93</td><td>744</td><td>22.45%</td><td>27／13</td><td>56.51%</td><td>-0.820</td><td>+0.060</td><td>0.2376</td></tr>
+<tr><td>固定1U／3R止盈</td><td>479.82</td><td>751</td><td>25.43%</td><td>17／13</td><td>52.02%</td><td>-0.776</td><td>+0.083</td><td>0.1278</td></tr>
+<tr><td>1.5倍组同退出／固定1U</td><td>436.23</td><td>821</td><td>19.00%</td><td>28／28</td><td>56.38%</td><td>-0.758</td><td>+0.071</td><td>0.0501</td></tr>
+<tr><td>加码开发第一：1.5倍</td><td>249.48</td><td>821</td><td>19.00%</td><td>28／28</td><td>75.10%</td><td>-0.758</td><td>+0.071</td><td>0.0501</td></tr>
+<tr><td>上一笔×2／1R移开仓价／3R止盈</td><td>21.44</td><td>528</td><td>18.18%</td><td>24／14</td><td>98.82%</td><td>-0.759</td><td>+0.091</td><td>0.0723</td></tr>
+<tr><td>净债务×2／1R移开仓价／3R止盈</td><td>28.99</td><td>578</td><td>19.20%</td><td>40／16</td><td>97.97%</td><td>-0.740</td><td>+0.118</td><td>0.0409</td></tr>
+<tr><td>阶乘／1R移开仓价／3R止盈</td><td>47.22</td><td>710</td><td>18.73%</td><td>42／15</td><td>95.75%</td><td>-0.781</td><td>+0.112</td><td>0.0248</td></tr>
+<tr><td>最短连亏诊断组</td><td>21.69</td><td>625</td><td>38.40%</td><td>9／9</td><td>98.41%</td><td>-0.788</td><td>+0.085</td><td>0.1173</td></tr>
+</tbody></table>
+<p>本段原V8准入候选923个；边界标记0笔。同表收益分母为各账户实际接受交易，容量不同会改变接受集，不能把净胜率差全归因于信号。</p>
+<h2>冻结后：2025年</h2>
+<p>每段独立账户以1000U开始；连续段只投入一次1000U，不补钱。随机对照是同币×月份×方向×因果波动桶、同退出与成本的逐笔诊断，不能当作可交易随机账户。</p>
+<table><thead><tr>
+<th>方案</th>
+<th>期末U</th>
+<th>自然平仓</th>
+<th>净胜率</th>
+<th>连净亏／连亏损止损</th>
+<th>现金回撤</th>
+<th>随机均值R</th>
+<th>相对随机R</th>
+<th>月块单侧p</th>
+</tr></thead><tbody>
+<tr><td>原V8／固定1U</td><td>747.09</td><td>525</td><td>26.29%</td><td>25／11</td><td>25.36%</td><td>-0.493</td><td>+0.012</td><td>0.4655</td></tr>
+<tr><td>固定1U／3R止盈</td><td>772.06</td><td>526</td><td>28.33%</td><td>16／11</td><td>23.20%</td><td>-0.517</td><td>+0.083</td><td>0.1634</td></tr>
+<tr><td>1.5倍组同退出／固定1U</td><td>729.38</td><td>584</td><td>17.64%</td><td>28／20</td><td>27.13%</td><td>-0.519</td><td>+0.056</td><td>0.1220</td></tr>
+<tr><td>加码开发第一：1.5倍</td><td>635.86</td><td>584</td><td>17.64%</td><td>28／20</td><td>36.57%</td><td>-0.519</td><td>+0.056</td><td>0.1220</td></tr>
+<tr><td>上一笔×2／1R移开仓价／3R止盈</td><td>336.03</td><td>533</td><td>20.83%</td><td>27／17</td><td>70.33%</td><td>-0.538</td><td>+0.060</td><td>0.1253</td></tr>
+<tr><td>净债务×2／1R移开仓价／3R止盈</td><td>114.65</td><td>479</td><td>20.25%</td><td>22／14</td><td>88.71%</td><td>-0.520</td><td>+0.049</td><td>0.1868</td></tr>
+<tr><td>阶乘／1R移开仓价／3R止盈</td><td>322.82</td><td>529</td><td>21.55%</td><td>24／14</td><td>67.72%</td><td>-0.533</td><td>+0.079</td><td>0.1083</td></tr>
+<tr><td>最短连亏诊断组</td><td>251.98</td><td>523</td><td>39.58%</td><td>11／7</td><td>74.86%</td><td>-0.452</td><td>+0.029</td><td>0.3809</td></tr>
+</tbody></table>
+<p>本段原V8准入候选653个；边界标记0笔。同表收益分母为各账户实际接受交易，容量不同会改变接受集，不能把净胜率差全归因于信号。</p>
+<h2>冻结后：2026年1至4月</h2>
+<p>每段独立账户以1000U开始；连续段只投入一次1000U，不补钱。随机对照是同币×月份×方向×因果波动桶、同退出与成本的逐笔诊断，不能当作可交易随机账户。</p>
+<table><thead><tr>
+<th>方案</th>
+<th>期末U</th>
+<th>自然平仓</th>
+<th>净胜率</th>
+<th>连净亏／连亏损止损</th>
+<th>现金回撤</th>
+<th>随机均值R</th>
+<th>相对随机R</th>
+<th>月块单侧p</th>
+</tr></thead><tbody>
+<tr><td>原V8／固定1U</td><td>914.92</td><td>185</td><td>26.49%</td><td>13／12</td><td>8.51%</td><td>-0.633</td><td>+0.173</td><td>0.2439</td></tr>
+<tr><td>固定1U／3R止盈</td><td>879.92</td><td>189</td><td>26.46%</td><td>13／12</td><td>12.01%</td><td>-0.652</td><td>+0.017</td><td>0.3711</td></tr>
+<tr><td>1.5倍组同退出／固定1U</td><td>869.53</td><td>207</td><td>16.91%</td><td>19／19</td><td>13.05%</td><td>-0.654</td><td>+0.024</td><td>0.4325</td></tr>
+<tr><td>加码开发第一：1.5倍</td><td>822.85</td><td>207</td><td>16.91%</td><td>19／19</td><td>17.72%</td><td>-0.654</td><td>+0.024</td><td>0.4325</td></tr>
+<tr><td>上一笔×2／1R移开仓价／3R止盈</td><td>400.52</td><td>184</td><td>19.02%</td><td>13／12</td><td>59.95%</td><td>-0.673</td><td>-0.005</td><td>0.5620</td></tr>
+<tr><td>净债务×2／1R移开仓价／3R止盈</td><td>588.01</td><td>175</td><td>18.29%</td><td>12／12</td><td>42.74%</td><td>-0.586</td><td>-0.129</td><td>0.9375</td></tr>
+<tr><td>阶乘／1R移开仓价／3R止盈</td><td>666.92</td><td>190</td><td>19.47%</td><td>13／13</td><td>33.31%</td><td>-0.617</td><td>-0.036</td><td>0.8110</td></tr>
+<tr><td>最短连亏诊断组</td><td>540.95</td><td>184</td><td>36.41%</td><td>10／10</td><td>46.11%</td><td>-0.513</td><td>-0.048</td><td>0.6226</td></tr>
+</tbody></table>
+<p>本段原V8准入候选233个；边界标记0笔。同表收益分母为各账户实际接受交易，容量不同会改变接受集，不能把净胜率差全归因于信号。</p>
+<h2>同一账户连续运行：2023-08至2026-04</h2>
+<p>每段独立账户以1000U开始；连续段只投入一次1000U，不补钱。随机对照是同币×月份×方向×因果波动桶、同退出与成本的逐笔诊断，不能当作可交易随机账户。</p>
+<table><thead><tr>
+<th>方案</th>
+<th>期末U</th>
+<th>自然平仓</th>
+<th>净胜率</th>
+<th>连净亏／连亏损止损</th>
+<th>现金回撤</th>
+<th>随机均值R</th>
+<th>相对随机R</th>
+<th>月块单侧p</th>
+</tr></thead><tbody>
+<tr><td>原V8／固定1U</td><td>94.40</td><td>1455</td><td>24.33%</td><td>27／13</td><td>90.56%</td><td>-0.666</td><td>+0.044</td><td>0.2314</td></tr>
+<tr><td>固定1U／3R止盈</td><td>131.80</td><td>1466</td><td>26.60%</td><td>17／13</td><td>86.82%</td><td>-0.674</td><td>+0.081</td><td>0.0413</td></tr>
+<tr><td>1.5倍组同退出／固定1U</td><td>52.78</td><td>1605</td><td>18.32%</td><td>28／28</td><td>94.72%</td><td>-0.646</td><td>+0.056</td><td>0.0166</td></tr>
+<tr><td>加码开发第一：1.5倍</td><td>10.31</td><td>1335</td><td>18.88%</td><td>28／28</td><td>98.97%</td><td>-0.654</td><td>+0.088</td><td>0.0008</td></tr>
+<tr><td>上一笔×2／1R移开仓价／3R止盈</td><td>5.08</td><td>581</td><td>19.10%</td><td>24／14</td><td>99.49%</td><td>-0.720</td><td>+0.091</td><td>0.0659</td></tr>
+<tr><td>净债务×2／1R移开仓价／3R止盈</td><td>6.23</td><td>656</td><td>19.97%</td><td>40／16</td><td>99.41%</td><td>-0.695</td><td>+0.119</td><td>0.0253</td></tr>
+<tr><td>阶乘／1R移开仓价／3R止盈</td><td>5.06</td><td>796</td><td>19.10%</td><td>42／15</td><td>99.49%</td><td>-0.760</td><td>+0.114</td><td>0.0186</td></tr>
+<tr><td>最短连亏诊断组</td><td>13.28</td><td>692</td><td>39.02%</td><td>9／9</td><td>99.43%</td><td>-0.746</td><td>+0.100</td><td>0.0742</td></tr>
+</tbody></table>
+<p>本段原V8准入候选1809个；边界标记0笔。同表收益分母为各账户实际接受交易，容量不同会改变接受集，不能把净胜率差全归因于信号。</p>
+<h2>手续费、保本与3R不是同一个胜率</h2>
+<p>在固定1U原V8连续账户中，初始止损距离中位数约0.406%，20bp往返成本相当于中位0.493R。移回开仓价仍损失本笔成本。真实交易开仓和平仓都可能收费，计算基于交易数量与价格；本研究固定20bp是项目统一压力口径，并非声称当前所有用户的实际费率均为20bp。<a href="https://www.okx.com/en-gb/help/how-to-calculate-the-contract-transaction-fee">OKX官方费用说明</a></p>
+<p>以下均为连续账户实际自然退出，3R统计为已实现毛／净结果，不能与历史MFE触及3R混用。固定毛TP=3R通常净盈利不足3R。</p>
+<table><thead><tr>
+<th>方案</th>
+<th>毛实现≥3R笔数</th>
+<th>净实现≥3R笔数</th>
+<th>开仓价退出</th>
+<th>其中净亏笔数</th>
+<th>成本中位R</th>
+</tr></thead><tbody>
+<tr><td>原V8／固定1U</td><td>86</td><td>69</td><td>0</td><td>0</td><td>0.493</td></tr>
+<tr><td>固定1U／3R止盈</td><td>296</td><td>0</td><td>0</td><td>0</td><td>0.491</td></tr>
+<tr><td>1.5倍组同退出／固定1U</td><td>0</td><td>0</td><td>717</td><td>717</td><td>0.493</td></tr>
+<tr><td>加码开发第一：1.5倍</td><td>0</td><td>0</td><td>588</td><td>588</td><td>0.478</td></tr>
+<tr><td>上一笔×2／1R移开仓价／3R止盈</td><td>82</td><td>0</td><td>167</td><td>167</td><td>0.475</td></tr>
+<tr><td>净债务×2／1R移开仓价／3R止盈</td><td>98</td><td>0</td><td>190</td><td>190</td><td>0.467</td></tr>
+<tr><td>阶乘／1R移开仓价／3R止盈</td><td>120</td><td>0</td><td>223</td><td>223</td><td>0.524</td></tr>
+<tr><td>最短连亏诊断组</td><td>28</td><td>19</td><td>0</td><td>0</td><td>0.494</td></tr>
+</tbody></table>
+<h2>周期重置有没有真的回本</h2>
+<p>以下为连续账户。认亏结束不擦除现金损失，账户连亏跨所有轮次连续。若没有第7层，只能保证“不再下第7层风险”，无法保证重启后那笔盈利。价格保本即重置可产生大量亏损结束的轮次。</p>
+<table><thead><tr>
+<th>方案</th>
+<th>净回本轮数</th>
+<th>认亏轮数</th>
+<th>容量失败轮数</th>
+<th>六层失败轮数</th>
+<th>容量拒单</th>
+<th>最高风险U</th>
+</tr></thead><tbody>
+<tr><td>原V8／固定1U</td><td>128</td><td>161</td><td>1</td><td>160</td><td>1</td><td>1.000</td></tr>
+<tr><td>固定1U／3R止盈</td><td>172</td><td>147</td><td>0</td><td>147</td><td>0</td><td>1.000</td></tr>
+<tr><td>1.5倍组同退出／固定1U</td><td>142</td><td>198</td><td>4</td><td>194</td><td>8</td><td>1.000</td></tr>
+<tr><td>加码开发第一：1.5倍</td><td>219</td><td>656</td><td>34</td><td>1</td><td>311</td><td>7.594</td></tr>
+<tr><td>上一笔×2／1R移开仓价／3R止盈</td><td>103</td><td>190</td><td>182</td><td>0</td><td>1115</td><td>16.000</td></tr>
+<tr><td>净债务×2／1R移开仓价／3R止盈</td><td>126</td><td>234</td><td>234</td><td>0</td><td>1032</td><td>19.637</td></tr>
+<tr><td>阶乘／1R移开仓价／3R止盈</td><td>141</td><td>365</td><td>116</td><td>0</td><td>862</td><td>24.000</td></tr>
+<tr><td>最短连亏诊断组</td><td>177</td><td>213</td><td>120</td><td>0</td><td>965</td><td>29.266</td></tr>
+</tbody></table>
+<h2>归因与方法边界</h2>
+<p>同一0.5R移开仓价／2R止盈退出，固定1U在2025年剩729.38U，而1.5倍剩635.86U；2026年前4个月分别869.53U与822.85U。固定风险本身仍亏，加码把这个样本内亏损扩大。连续账户因容量拒单不同，接受交易集合不同，不能把差额当纯相同交易的因果效应。</p>
+<p>开发第一组所用固定3R目标在2025年比原V8少亏，但2026年前4个月反而更亏；这说明减少尾部大盈、增加较早兑现之间的取舍没有跨期稳定优势。开发855组全失败，不能声称穷尽了所有退出与资金策略。本轮没有搜索“动态整轮回本价保护”、改变入场过滤、真实账户费率或分钟内tick路径。</p>
+<p>10项开发期单字段敏感性已保留：杠杆3/5/10/20、最高层数3/4/5/6、任何净亏或亏损止损升级。它们围绕开发主配置固定1U，因此不具备证明加码稳健性的意义，未用于后续重选。</p>
+<p><strong>必报指标适用性</strong>：本轮无训练、分类器或事前排序分数，val AUC和top-decile收益不适用；不伪造AUC或事后按盈利选十分位。对应严格对照为固定1U原V8、相同退出固定风险，以及同资产／UTC月／方向／此前120bar ATR比例桶的随机入场。没有新增单特征筛选；原V8是无新增退出和资金变量的基线。表中p是月份区块符号置换，验证12个月、2026年前4个月仅4个月，不宣称达到p&lt;0.01。开发p经历参数选择，尤其不能解释为确认性检验。</p>
+<h2>风险与诚实声明</h2>
+<p>只用3分钟OHLC，有明确保守同bar顺序；成本保护也可能跳空穿透，触发条件不等于成交保证。<a href="https://www.okx.com/en-gb/help/how-to-set-up-profit-and-stop-loss-of-contract-transactions">OKX官方TP/SL说明</a></p>
+<p>这是有限现金与名义敞口研究，未建模标记价格、分档维持保证金、盘口排队、实际最小张数、完整滑点与资金费，不能把约10U剩余称为“扛住了爆仓”。现金回撤是平仓／边界估计清算权益，不是持仓内峰谷。边界头寸若存在会单列末完整收盘扣费标记，既不计自然胜率也不认作轮次回收；本次36个窗口边界标记均0。</p>
+<p>随机对照从全部合法bar抽取，也可恰好有V6信号；只在自然闭合子样本上比较，边界删失会再抽样。全部对照206123次尝试，23次边界删失、0次无效入场，3397次保留对照恰好有原始V6信号。对照现金差只按目标风险预算加权，不是随机账户路径。逐笔相关性只用月份区块近似，未做跨月市场制度推断。</p>
+<p>正式守门检查114通过、4失败：现有TOTAL2交付产物和ETH MA120实验注册项缺少source_commit，触发既有注册表错误；未更改或绕过这些无关条目。本轮单项合成测试36通过；本轮新注册项另行验证。</p>
+<h2>复现、产物与下一步</h2>
+<p>旧研究报告保留原意及当时的影子持仓容量限制：<a href="p1_spike_eth_martingale_20260914.html">第一次倍投研究</a>。本轮改为所有V8原始准入候选逐条回放，实际拒单不占仓；两轮不能当成仅调了底注的同一实验。</p>
+<p>复现依赖已有SHA绑定pre上下文，无需读取holdout。输出目录拒绝覆盖。原始首次命令序列如下；重新生成时先受控归档原结果再运行，禁止覆盖证据：</p>
+<pre><code>
+.venv/bin/python -m pytest -q tests/evaluation/test_spike_recovery_exit.py tests/evaluation/test_spike_recovery_cash.py tests/evaluation/test_spike_eth3m_recovery_study.py tests/evaluation/test_spike_v8_eth3m_be_study.py
+# builder/config已提交411c851d9d
+.venv/bin/python -m yoyo.evaluation.spike_eth3m_recovery_study develop
+# 按PROJECT_PLAN冻结补充best_escalation，提交2d27ce8ec6
+# 复现时恢复同一已提交冻结件（开发重建的search SHA须与之匹配）：
+git show 2d27ce8ec6:experiments/active/exp-spike-eth3m-recovery-20260914-v2/results/selection.json &gt; experiments/active/exp-spike-eth3m-recovery-20260914-v2/results/selection.json
+.venv/bin/python -m yoyo.evaluation.spike_eth3m_recovery_study evaluate
+# audit/control builder已提交edf53d29fe
+.venv/bin/python -m yoyo.evaluation.spike_eth3m_recovery_report
+.venv/bin/python scripts/report_spike_eth3m_recovery.py
+</code></pre>
+<p>结果目录：experiments/active/exp-spike-eth3m-recovery-20260914-v2/results。search.csv包含完整855组；selection.json冻结3组；evaluation与diagnostics保存36组账户、逐笔、周期、匹配对照及现金核验；manifest.json保存哈希。训练／生产准入均false。</p>
+<p>本轮选择结论为拒绝，不继续消耗holdout寻找好看的结果。若后续做动态整轮回本保护或按真实费用重设每笔净损失预算，需单独冻结新假设，先在非holdout研究，不能承诺最长连亏6次。实盘、promote与新配置holdout仍需owner明确批准。</p>
+</body>
+</html>

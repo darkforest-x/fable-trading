@@ -1,0 +1,123 @@
+{
+  "code_commit": "2d27ce8ec63d9ffa32cdcf9a0fdd0b0c2a77718b",
+  "config_sha256": "159f7b0e57cbc751c6734bc00c2acc20b26fffba03d1a45c4e41d931e3cd23f0",
+  "holdout_consumed": false,
+  "builder_sha256": {
+    "spike_eth3m_recovery_study.py": "08f52daa37bcdbe2482767010b53787c47e812a0795ac029d4311a915be2b774",
+    "spike_recovery_exit.py": "dd6ff1862aa24956fba9617f69a3db4d0a62323f5f47a8a4e6bb8c9051552444",
+    "spike_recovery_cash.py": "17ddc32b73c7673ecfa0a42b9536d5a3b10b84d9be1f14b495e700810fb501fa"
+  },
+  "selection_sha256": "40f02f569c15540d0846e65d5fcfea2c0d730467d0a21ddcfc41e54ed4f55b54",
+  "policies": {
+    "primary": {
+      "exit": {
+        "take_profit_r": 3,
+        "protection_mode": "none",
+        "trigger_r": null
+      },
+      "cash": {
+        "schedule": "fixed",
+        "factor": 1.0,
+        "reset_mode": "recovery",
+        "max_losses": 6,
+        "leverage_cap": 10.0
+      }
+    },
+    "closest_streak": {
+      "exit": {
+        "take_profit_r": null,
+        "protection_mode": "cost",
+        "trigger_r": 1
+      },
+      "cash": {
+        "schedule": "debt",
+        "factor": 1.0,
+        "reset_mode": "net_win",
+        "max_losses": 6,
+        "leverage_cap": 10.0
+      }
+    },
+    "best_escalation": {
+      "exit": {
+        "take_profit_r": 2.0,
+        "protection_mode": "entry",
+        "trigger_r": 0.5
+      },
+      "cash": {
+        "schedule": "double",
+        "factor": 1.5,
+        "reset_mode": "be_or_win",
+        "max_losses": 6,
+        "leverage_cap": 10.0
+      }
+    },
+    "same_exit_fixed_1u": {
+      "exit": {
+        "take_profit_r": 3,
+        "protection_mode": "none",
+        "trigger_r": null
+      },
+      "cash": {
+        "schedule": "fixed",
+        "factor": 1.0,
+        "reset_mode": "recovery"
+      }
+    },
+    "original_v8_fixed_1u": {
+      "exit": {
+        "take_profit_r": null,
+        "protection_mode": "none",
+        "trigger_r": null
+      },
+      "cash": {
+        "schedule": "fixed",
+        "factor": 1.0,
+        "reset_mode": "recovery"
+      }
+    },
+    "user_reference_factorial": {
+      "exit": {
+        "take_profit_r": 3.0,
+        "protection_mode": "entry",
+        "trigger_r": 1.0
+      },
+      "cash": {
+        "schedule": "factorial",
+        "factor": 2.0,
+        "reset_mode": "be_or_win",
+        "max_losses": 6,
+        "leverage_cap": 10.0
+      }
+    },
+    "user_reference_debt": {
+      "exit": {
+        "take_profit_r": 3.0,
+        "protection_mode": "entry",
+        "trigger_r": 1.0
+      },
+      "cash": {
+        "schedule": "debt",
+        "factor": 2.0,
+        "reset_mode": "recovery",
+        "max_losses": 6,
+        "leverage_cap": 10.0
+      }
+    },
+    "user_reference_double": {
+      "exit": {
+        "take_profit_r": 3.0,
+        "protection_mode": "entry",
+        "trigger_r": 1.0
+      },
+      "cash": {
+        "schedule": "double",
+        "factor": 2.0,
+        "reset_mode": "net_win",
+        "max_losses": 6,
+        "leverage_cap": 10.0
+      }
+    }
+  },
+  "summary_sha256": "3c972ab3c61c1abdd2113a823b4192b0623636f631ea8026dc8972b1b70fdb5b",
+  "controls_sha256": "d37f27cf48201e1735629eb913c2b7745e28fb9e282c84ef88040ec49369bb34"
+}

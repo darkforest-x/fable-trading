@@ -30825,3 +30825,17 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: One completed long on 1794 loaded TOTAL2 hours. UI-reading corrections preserved; parent checks arithmetic only. Index volume semantics, warmup delay, matched-random control and account drawdown remain unverified.
+
+  - artifact_id: spike-eth3m-recovery-20260914-v2-delivery
+    artifact_type: manifest
+    role: one_usdt_recovery_frozen_preholdout_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4e49691380
+    source_path: experiments/active/exp-spike-eth3m-recovery-20260914-v2/results/manifest.json
+    sha256: 7768f012ad6309630a2f15f31e098f80facc6bc15050eecd397f9219d4cb14c3
+    size_bytes: 41364
+    storage_uri: repo://experiments/active/exp-spike-eth3m-recovery-20260914-v2/results/manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 855 failed development policies,36 audited account windows,full matched controls and HTML. No holdout prices or scores consumed; report-only and non-production.
