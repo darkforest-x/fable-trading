@@ -253,6 +253,16 @@ def run(output: Path, *, max_streams: int | None = None) -> dict[str, Any]:
                 raise ValueError(f"{venue}/{symbol}/{minutes}: {len(missing)} expected events missing from tier cache replay")
             for event_id, tier in outcomes.items():
                 old = old_by_event.loc[event_id]
+                # Tier replay must share the exact fixed V1 admission and
+                # following-open fill already paired in the old ledger.  Do
+                # not silently pair a valid-looking exit with a shifted cache
+                # entry or a CSV-reconstructed stop.
+                if pd.Timestamp(tier["entry_time"]) != pd.Timestamp(old.entry_time):
+                    raise ValueError(f"tier entry-time parity failed {event_id}")
+                for field, actual, expected_value in (("entry_price", tier["entry_price"], old.entry_price),
+                                                      ("initial_stop", tier["initial_stop"], old.initial_stop)):
+                    if not np.isclose(float(actual), float(expected_value), rtol=0, atol=1e-10):
+                        raise ValueError(f"tier {field} parity failed {event_id}")
                 records.append({"event_id": event_id, "venue": venue, "symbol": symbol, "timeframe_min": int(minutes), "side": 1,
                                 "signal_bar_open": old.signal_bar_open,
                                 "entry_time": old.entry_time, "entry_price": old.entry_price, "initial_stop": tier["initial_stop"], "initial_risk": tier["initial_risk"],
