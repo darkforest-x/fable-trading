@@ -1,0 +1,210 @@
+//@version=6
+// Research-only bearish MA-drift display. It records closed-bar observations;
+// it is not a strategy, execution signal, or profitability claim.
+indicator("SPIKE · 均线下压预警 V1", shorttitle="SPIKE 下压 V1", overlay=true, explicit_plot_zorder=true, max_labels_count=500)
+
+// The six MA lengths are fixed so the rope has one documented geometry.
+// Threshold defaults are provisional morphology controls, not trading settings.
+string gView = "01 · 显示"
+bool showMas = input.bool(true, "显示六条均线", group=gView)
+bool showPanel = input.bool(true, "显示状态面板", group=gView)
+bool showCancelMarkers = input.bool(false, "显示取消/超时", group=gView)
+
+string gRule = "02 · 形态参数"
+int atrLen = input.int(14, "ATR 长度", minval=1, group=gRule, tooltip="暂定研究默认值。")
+float compactWidthAtr = input.float(3.0, "六线宽度上限（ATR）", minval=0.1, step=0.1, group=gRule, tooltip="暂定研究默认值；只检验预警前已完成K线，每根宽度除以前一根 ATR。")
+float maxTrAtr = input.float(1.8, "下压窗口最大 TR / 前 ATR", minval=0.1, step=0.1, group=gRule, tooltip="暂定研究默认值。")
+float maxGapAtr = input.float(1.5, "预警收盘离绳下沿上限（ATR）", minval=0.1, step=0.1, group=gRule, tooltip="暂定研究默认值。")
+int maxWait = input.int(8, "等待破位最多 K 线", minval=1, group=gRule, tooltip="暂定研究默认值。")
+int cooldownBars = input.int(12, "终态冷却 K 线", minval=0, group=gRule, tooltip="暂定研究默认值。")
+
+const int fastLen = 20
+const int midLen = 60
+const int slowLen = 120
+const int blockLen = 3
+const int driftLen = 2 * blockLen
+const int compactBars = 3
+const int compactLookback = 12
+
+color teal = #008F82
+color blue = #4679C9
+color slate = #7D8490
+color amber = #D99A28
+color red = #D34B66
+
+// BEGIN PURE STEP HELPER
+// Pure closed-bar transition. The caller owns persistence and only invokes it
+// on confirmed bars, which permits native Pine fixtures to exercise terminals.
+f_step(bool priorPending, int priorWarnBar, float priorFrozenLow, int priorLastEnd, bool valid, bool setup, bool reclaim, bool breakout, float setupLow, int barId, int waitBars, int coolBars) =>
+    bool nextPending = priorPending
+    int nextWarnBar = priorWarnBar
+    float nextFrozenLow = priorFrozenLow
+    int nextLastEnd = priorLastEnd
+    bool warningEvent = false
+    bool confirmEvent = false
+    bool cancelEvent = false
+    bool expireEvent = false
+    if not valid
+        nextPending := false
+        nextWarnBar := na
+        nextFrozenLow := na
+    else if priorPending
+        int age = barId - priorWarnBar
+        // Terminal precedence is expiry, then reclaim, then later-bar breakout.
+        if age > waitBars
+            nextPending := false
+            nextWarnBar := na
+            nextFrozenLow := na
+            nextLastEnd := barId
+            expireEvent := true
+        else if reclaim
+            nextPending := false
+            nextWarnBar := na
+            nextFrozenLow := na
+            nextLastEnd := barId
+            cancelEvent := true
+        else if barId > priorWarnBar and breakout
+            nextPending := false
+            nextWarnBar := na
+            nextFrozenLow := na
+            nextLastEnd := barId
+            confirmEvent := true
+    else
+        bool cooldownDone = na(priorLastEnd) or barId - priorLastEnd > coolBars
+        // A terminal bar stays terminal: this branch only sees a prior idle bar.
+        if setup and cooldownDone
+            nextPending := true
+            nextWarnBar := barId
+            nextFrozenLow := setupLow
+            warningEvent := true
+    [nextPending, nextWarnBar, nextFrozenLow, nextLastEnd, warningEvent, confirmEvent, cancelEvent, expireEvent]
+// END PURE STEP HELPER
+
+f_text(float value) =>
+    na(value) ? "—" : str.tostring(value, format.mintick)
+
+// All rolling values are global and unconditional. No calculation is hidden in
+// a short-circuit branch, so historical and real-time series stay aligned.
+float s20 = ta.sma(close, fastLen)
+float e20 = ta.ema(close, fastLen)
+float s60 = ta.sma(close, midLen)
+float e60 = ta.ema(close, midLen)
+float s120 = ta.sma(close, slowLen)
+float e120 = ta.ema(close, slowLen)
+float ropeHigh = math.max(s20, e20, s60, e60, s120, e120)
+float ropeLow = math.min(s20, e20, s60, e60, s120, e120)
+float tr = ta.tr(true)
+float atr = ta.atr(atrLen)
+float ropeWidthPriorAtr = atr[1] > 0 ? (ropeHigh - ropeLow) / atr[1] : na
+float trPriorAtr = atr[1] > 0 ? tr / atr[1] : na
+float driftLow = ta.lowest(low, driftLen)
+float maxDriftTr = ta.highest(trPriorAtr, driftLen)
+float highBlockNow = ta.sma(high, blockLen)
+float highBlockPrior = ta.sma(high[blockLen], blockLen)
+float lowBlockNow = ta.sma(low, blockLen)
+float lowBlockPrior = ta.sma(low[blockLen], blockLen)
+float underRopeCount = math.sum(close < ropeLow ? 1.0 : 0.0, driftLen)
+
+bool pricesValid = not na(open) and not na(high) and not na(low) and not na(close) and low > 0 and high >= low and high >= math.max(open, close) and low <= math.min(open, close)
+// Crypto intraday bars should be contiguous. Any missing interval, or invalid
+// OHLC, starts a new segment and prevents evidence from bridging the gap.
+bool dataGap = not barstate.isfirst and (not pricesValid or not pricesValid[1] or time != time_close[1])
+var int segmentBars = 0
+if barstate.isconfirmed
+    segmentBars := not pricesValid ? 0 : dataGap ? 1 : segmentBars + 1
+int warmupBars = math.max(slowLen + atrLen, 3 * slowLen)
+bool ready = pricesValid and not dataGap and segmentBars >= warmupBars and not na(atr[1]) and atr[1] > 0
+
+// Compression is entirely before the warning: offsets 1..12 are completed
+// bars, and each width uses that bar's preceding ATR rather than its own range.
+bool recentCompact = false
+for offset = 1 to compactLookback - compactBars + 1
+    bool compactRun = ropeWidthPriorAtr[offset] <= compactWidthAtr and ropeWidthPriorAtr[offset + 1] <= compactWidthAtr and ropeWidthPriorAtr[offset + 2] <= compactWidthAtr
+    recentCompact := recentCompact or compactRun
+
+bool fastDown = s20 - s20[blockLen] < 0 and e20 - e20[blockLen] < 0
+bool descendingBlocks = highBlockNow < highBlockPrior and lowBlockNow < lowBlockPrior
+// The close comparison remains inside the same six-bar drift window (0..5).
+bool netCloseDown = close < close[driftLen - 1]
+bool mostlyUnderRope = underRopeCount >= math.ceil(driftLen * 0.60)
+bool containedDrift = maxDriftTr <= maxTrAtr
+bool closeUnderRope = close < ropeLow
+float ropeGapAtr = atr[1] > 0 ? (ropeLow - close) / atr[1] : na
+bool closeNearRope = ropeGapAtr >= 0 and ropeGapAtr <= maxGapAtr
+bool setup = ready and recentCompact and fastDown and descendingBlocks and netCloseDown and mostlyUnderRope and containedDrift and closeUnderRope and closeNearRope
+bool reclaim = close >= ropeLow
+
+var bool pending = false
+var int warnBar = na
+var float frozenLow = na
+var int lastEnd = na
+bool breakout = close < frozenLow and close < ropeLow
+bool warningSignal = false
+bool confirmSignal = false
+bool cancelSignal = false
+bool expireSignal = false
+float frozenBeforeStep = frozenLow
+
+if barstate.isconfirmed
+    [nextPending, nextWarnBar, nextFrozenLow, nextLastEnd, nextWarning, nextConfirm, nextCancel, nextExpire] = f_step(pending, warnBar, frozenLow, lastEnd, ready, setup, reclaim, breakout, driftLow, bar_index, maxWait, cooldownBars)
+    pending := nextPending
+    warnBar := nextWarnBar
+    frozenLow := nextFrozenLow
+    lastEnd := nextLastEnd
+    warningSignal := nextWarning
+    confirmSignal := nextConfirm
+    cancelSignal := nextCancel
+    expireSignal := nextExpire
+
+// Store only completed values so the panel does not replace them with an
+// unfinished bar's transient calculations.
+var string lastState = "预热"
+var string lastGates = "—"
+var float lastRopeLow = na
+var float lastFrozenLow = na
+if barstate.isconfirmed
+    bool cooldownActive = not na(lastEnd) and bar_index - lastEnd <= cooldownBars
+    lastState := not ready ? "预热" : confirmSignal ? "本根确认" : cancelSignal ? "取消" : expireSignal ? "超时" : pending ? "等待破位" : cooldownActive ? "冷却" : "等待形态"
+    lastGates := "压缩 " + (recentCompact ? "✓" : "×") + "  下压 " + (fastDown and descendingBlocks ? "✓" : "×") + "  收盘 " + (netCloseDown and mostlyUnderRope ? "✓" : "×") + "  波幅 " + (containedDrift and closeNearRope ? "✓" : "×")
+    lastRopeLow := ropeLow
+    lastFrozenLow := warningSignal ? driftLow : confirmSignal ? frozenBeforeStep : pending ? frozenLow : na
+
+float frozenPlot = pending ? frozenLow : confirmSignal ? frozenBeforeStep : na
+plot(showMas ? s20 : na, "SMA 20", color=teal, linewidth=2)
+plot(showMas ? e20 : na, "EMA 20", color=color.new(teal, 30), linewidth=1)
+plot(showMas ? s60 : na, "SMA 60", color=blue, linewidth=2)
+plot(showMas ? e60 : na, "EMA 60", color=color.new(blue, 30), linewidth=1)
+plot(showMas ? s120 : na, "SMA 120", color=slate, linewidth=2)
+plot(showMas ? e120 : na, "EMA 120", color=color.new(slate, 30), linewidth=1)
+plot(frozenPlot, "冻结破位线", color=red, linewidth=2, style=plot.style_linebr)
+bgcolor(pending ? color.new(amber, 92) : na, title="等待破位阴影")
+plotshape(warningSignal, title="预警", text="预警", style=shape.labeldown, location=location.abovebar, color=amber, textcolor=color.black, size=size.tiny)
+plotshape(confirmSignal, title="确认", text="确认", style=shape.triangledown, location=location.abovebar, color=red, textcolor=color.white, size=size.small)
+plotshape(showCancelMarkers and cancelSignal, title="取消", text="取消", style=shape.xcross, location=location.abovebar, color=slate, size=size.tiny)
+plotshape(showCancelMarkers and expireSignal, title="超时", text="超时", style=shape.xcross, location=location.abovebar, color=slate, size=size.tiny)
+plot(warningSignal ? 1 : 0, "预警诊断", display=display.data_window)
+plot(confirmSignal ? 1 : 0, "确认诊断", display=display.data_window)
+
+var table panel = table.new(position.top_right, 2, 4, border_width=0, frame_width=0)
+if barstate.islast
+    if showPanel
+        table.cell(panel, 0, 0, "SPIKE 下压 V1", text_color=color.white, bgcolor=color.new(slate, 20))
+        table.cell(panel, 1, 0, lastState, text_color=lastState == "本根确认" ? red : lastState == "等待破位" ? amber : chart.fg_color, bgcolor=color.new(chart.bg_color, 10))
+        table.cell(panel, 0, 1, "形态门", text_color=color.new(chart.fg_color, 35))
+        table.cell(panel, 1, 1, lastGates, text_color=chart.fg_color)
+        table.cell(panel, 0, 2, "绳下沿", text_color=color.new(chart.fg_color, 35))
+        table.cell(panel, 1, 2, f_text(lastRopeLow), text_color=chart.fg_color)
+        table.cell(panel, 0, 3, "冻结低点", text_color=color.new(chart.fg_color, 35))
+        table.cell(panel, 1, 3, f_text(lastFrozenLow), text_color=red)
+    else
+        table.clear(panel, 0, 0, 1, 3)
+
+// State commits use barstate.isconfirmed only (TradingView: https://www.tradingview.com/pine-script-docs/concepts/bar-states/#barstateisconfirmed).
+// The state is deliberately explicit under Pine's execution model: https://www.tradingview.com/pine-script-docs/language/execution-model/.
+// Close-only booleans: no alert is created by this script. Users may opt in to
+// these alert conditions, which point to the actual warning/confirmation bar;
+// alert behavior follows https://www.tradingview.com/pine-script-docs/concepts/alerts/.
+bool anySignal = warningSignal or confirmSignal
+alertcondition(warningSignal, "SPIKE 下压预警", "{{exchange}}:{{ticker}} {{interval}} 均线下压预警（收盘确认）")
+alertcondition(confirmSignal, "SPIKE 下压确认", "{{exchange}}:{{ticker}} {{interval}} 均线下压破位确认（收盘确认）")
+alertcondition(anySignal, "SPIKE 下压事件", "{{exchange}}:{{ticker}} {{interval}} 均线下压事件（收盘确认）")
