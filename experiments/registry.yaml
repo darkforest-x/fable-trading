@@ -9149,3 +9149,15 @@ experiments:
     result: Completed descriptive audit;25 signals,20 original trades including19 natural exits and1 boundary open. Each fixed net1R timing has22 natural trades. No strategy-acceptance decision.
     artifacts:
     - spike-eth3m-september-trade-audit-20260914-delivery
+
+  - experiment_id: exp-spike-eth3m-ict-sessions-20260914-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 922286e68c
+    status: active
+    question: Does restricting frozen ETH3m V8 entries to the owners ICT London,lunch,and New York sessions improve per-trade net outcomes and recovery cash stability?
+    single_variable: Entry session only within each already-frozen exit timing; no new exit or cost tuning.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_eth3m_ict_sessions_20260914.md
+    notes: NY local02-05,05-08,08-11 from current EDT UI; winter IANA behavior is a disclosed model. Pre-May2026 research only.

@@ -1,0 +1,72 @@
+{
+  "context": "experiments/active/exp-spike-eth-martingale-20260914-v1/results/pre/ETH_3m_OKX.pkl",
+  "context_sha256": "9fc6f9dcbad7616f9c7ceab811ed9634ece2b07bf24327ff070ac09592c972fd",
+  "baseline_csv": "experiments/active/exp-spike-eth-martingale-20260914-v1/results/pre/ETH_3m_OKX_development.csv",
+  "baseline_sha256": "6cafc9aca7f9faa8b01ea8e6ad989f967a376cbee1045297fc30ef5fcd937a48",
+  "periods": {
+    "development": [
+      "2023-08-01T00:00:00Z",
+      "2025-01-01T00:00:00Z"
+    ],
+    "validation": [
+      "2025-01-01T00:00:00Z",
+      "2026-01-01T00:00:00Z"
+    ],
+    "preholdout": [
+      "2026-01-01T00:00:00Z",
+      "2026-05-01T00:00:00Z"
+    ],
+    "continuous_pre": [
+      "2023-08-01T00:00:00Z",
+      "2026-05-01T00:00:00Z"
+    ]
+  },
+  "experiment_id": "exp-spike-eth3m-ict-sessions-20260914-v1",
+  "arms": [
+    "legacy_gross1",
+    "next_bar",
+    "ohlc",
+    "olhc"
+  ],
+  "net_take_profit_r": 1,
+  "round_trip_cost": 0.002,
+  "tick": 0.01,
+  "activation_offset_ticks": 1,
+  "seed": 20260914,
+  "controls_per_trade": 9,
+  "permutation_draws": 9999,
+  "training_eligible": false,
+  "production_eligible": false,
+  "holdout_consumptions": 0,
+  "cash": {
+    "fixed10": {
+      "schedule": "fixed",
+      "leverage_cap": 10
+    },
+    "double10": {
+      "schedule": "double",
+      "leverage_cap": 10
+    },
+    "double_risk_only": {
+      "schedule": "double",
+      "leverage_cap": null
+    }
+  },
+  "sessions": {
+    "london": [
+      2,
+      5
+    ],
+    "lunch": [
+      5,
+      8
+    ],
+    "new_york": [
+      8,
+      11
+    ]
+  },
+  "timezone": "America/New_York",
+  "weekends": true,
+  "permutations": 9999
+}
