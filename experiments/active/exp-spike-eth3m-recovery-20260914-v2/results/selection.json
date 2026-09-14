@@ -1,0 +1,67 @@
+{
+  "code_commit": "411c851d9df5c56b69611b8dedc9ff7da5460a15",
+  "config_sha256": "159f7b0e57cbc751c6734bc00c2acc20b26fffba03d1a45c4e41d931e3cd23f0",
+  "holdout_consumed": false,
+  "builder_sha256": {
+    "spike_eth3m_recovery_study.py": "08f52daa37bcdbe2482767010b53787c47e812a0795ac029d4311a915be2b774",
+    "spike_recovery_exit.py": "dd6ff1862aa24956fba9617f69a3db4d0a62323f5f47a8a4e6bb8c9051552444",
+    "spike_recovery_cash.py": "17ddc32b73c7673ecfa0a42b9536d5a3b10b84d9be1f14b495e700810fb501fa"
+  },
+  "n_configurations": 855,
+  "n_hard_target_pass": 0,
+  "selection_status": "no_accepted_policy_diagnostic_only",
+  "primary_id": "fe47d0350b83",
+  "closest_id": "837eaef04fea",
+  "policies": {
+    "primary": {
+      "exit": {
+        "take_profit_r": 3,
+        "protection_mode": "none",
+        "trigger_r": null
+      },
+      "cash": {
+        "schedule": "fixed",
+        "factor": 1.0,
+        "reset_mode": "recovery",
+        "max_losses": 6,
+        "leverage_cap": 10.0
+      }
+    },
+    "closest_streak": {
+      "exit": {
+        "take_profit_r": null,
+        "protection_mode": "cost",
+        "trigger_r": 1
+      },
+      "cash": {
+        "schedule": "debt",
+        "factor": 1.0,
+        "reset_mode": "net_win",
+        "max_losses": 6,
+        "leverage_cap": 10.0
+      }
+    },
+    "best_escalation": {
+      "exit": {
+        "take_profit_r": 2.0,
+        "protection_mode": "entry",
+        "trigger_r": 0.5
+      },
+      "cash": {
+        "schedule": "double",
+        "factor": 1.5,
+        "reset_mode": "be_or_win",
+        "max_losses": 6,
+        "leverage_cap": 10.0
+      }
+    }
+  },
+  "search_sha256": "9b197457b108caaf1bff7f58f89a1d7b6870848bfea2657fa96cb8c5e77a8b9c",
+  "baseline_parity": {
+    "trades": 744,
+    "matched_fields": 10,
+    "baseline_sha256": "6cafc9aca7f9faa8b01ea8e6ad989f967a376cbee1045297fc30ef5fcd937a48"
+  },
+  "best_escalation_id": "065185f5db64",
+  "supplement": "After development, before any later-period evaluation: primary is fixed-risk, so additionally freeze highest-cash participating nonfixed arm to directly answer owner recovery question; diagnostic only, same ranking, no new parameter search."
+}
