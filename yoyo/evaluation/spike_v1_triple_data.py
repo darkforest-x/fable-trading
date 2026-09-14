@@ -61,6 +61,8 @@ RANK_INTERVAL = "15m"
 EXPECTED_MONTH_ROWS = 31 * 24 * 4
 USDT_PERPETUAL_SYMBOL = re.compile(r"^[A-Z0-9]+USDT$")
 S3_NS = "{http://s3.amazonaws.com/doc/2006-03-01/}"
+MONTH_START = "2023-08-01T00:00:00+00:00"
+MONTH_END = "2023-08-31T23:45:00+00:00"
 
 
 class TripleDataError(RuntimeError):
@@ -193,6 +195,22 @@ def _load_rank_month(
     }
 
 
+def _month_coverage(audit: dict[str, Any]) -> str:
+    """Classify a continuous August span without excluding a new listing."""
+
+    if audit["non_bar_gaps"] != 0:
+        raise TripleDataError(f"internal 15m gap: {audit}")
+    starts_at_month_open = audit["first_time"] == MONTH_START
+    ends_at_month_close = audit["last_time"] == MONTH_END
+    if starts_at_month_open and ends_at_month_close and audit["rows"] == EXPECTED_MONTH_ROWS:
+        return "complete_month"
+    if not starts_at_month_open and ends_at_month_close:
+        return "partial_listing_month"
+    if starts_at_month_open and not ends_at_month_close:
+        return "partial_delisting_month"
+    return "partial_listing_and_delisting_month"
+
+
 def _quote_turnover(payload: bytes, *, symbol: str, expected_sha256: str) -> tuple[Decimal, dict[str, Any]]:
     """Validate and sum native column 7 ``quote_volume`` for August 2023."""
 
@@ -203,17 +221,7 @@ def _quote_turnover(payload: bytes, *, symbol: str, expected_sha256: str) -> tup
         interval=RANK_INTERVAL,
         expected_sha256=expected_sha256,
     )
-    expected_first = "2023-08-01T00:00:00+00:00"
-    expected_last = "2023-08-31T23:45:00+00:00"
-    if (
-        audit["rows"] != EXPECTED_MONTH_ROWS
-        or audit["first_time"] != expected_first
-        or audit["last_time"] != expected_last
-        or audit["non_bar_gaps"] != 0
-    ):
-        raise TripleDataError(
-            f"partial or gapped {RANK_MONTH} archive for {symbol}: {audit}"
-        )
+    audit["month_coverage"] = _month_coverage(audit)
     expected_member = f"{symbol}-{RANK_INTERVAL}-{RANK_MONTH}.csv"
     with zipfile.ZipFile(io.BytesIO(payload)) as archive:
         members = [name for name in archive.namelist() if name.endswith(".csv")]
@@ -223,7 +231,7 @@ def _quote_turnover(payload: bytes, *, symbol: str, expected_sha256: str) -> tup
     frame = pd.read_csv(io.BytesIO(raw), header=None, dtype=str)
     if str(frame.iloc[0, 0]).strip().lower() in {"open_time", "open time"}:
         frame = frame.iloc[1:].reset_index(drop=True)
-    if frame.shape != (EXPECTED_MONTH_ROWS, len(KLINE_COLUMNS)):
+    if frame.shape != (audit["rows"], len(KLINE_COLUMNS)):
         raise TripleDataError(f"unexpected native schema for {symbol}: {frame.shape}")
     quote_values = frame.iloc[:, 7].astype(str)
     try:
@@ -233,6 +241,41 @@ def _quote_turnover(payload: bytes, *, symbol: str, expected_sha256: str) -> tup
     if not turnover.is_finite() or turnover <= 0:
         raise TripleDataError(f"non-positive August quote turnover for {symbol}: {turnover}")
     return turnover, audit
+
+
+def _tick_metadata(cache_dir: Path) -> tuple[dict[str, str], dict[str, Any]]:
+    """Read actual tick sizes from the existing immutable exchange-info snapshot.
+
+    The snapshot is evidence of one retrieved exchange metadata state, not an
+    attempted reconstruction of historical tick changes.  Absent symbols remain
+    explicitly unknown; price decimal precision is never a tick-size proxy.
+    """
+
+    path = cache_dir / "exchange_info.json"
+    if not path.exists():
+        return {}, {"status": "missing", "path": str(path), "sha256": None}
+    payload = path.read_bytes()
+    try:
+        symbols = json.loads(payload).get("symbols", [])
+    except json.JSONDecodeError as exc:
+        raise TripleDataError(f"invalid cached exchange metadata: {path}") from exc
+    ticks: dict[str, str] = {}
+    for row in symbols:
+        price_filter = next(
+            (item for item in row.get("filters", []) if item.get("filterType") == "PRICE_FILTER"),
+            None,
+        )
+        tick = None if price_filter is None else price_filter.get("tickSize")
+        if isinstance(tick, str) and Decimal(tick) > 0:
+            ticks[str(row.get("symbol"))] = tick
+    return ticks, {
+        "status": "loaded",
+        "path": str(path),
+        "sha256": hashlib.sha256(payload).hexdigest(),
+        "symbols_with_price_filter": len(ticks),
+        "source": "existing cached exchange-info snapshot; no fapi request made",
+        "limitation": "one metadata snapshot only; no time-varying tick reconstruction",
+    }
 
 
 def _rank_one(symbol: str, *, cache_dir: Path, output_dir: Path) -> dict[str, Any]:
@@ -286,14 +329,18 @@ def rank_august_2023(*, output_dir: Path, cache_dir: Path, top_n: int, workers: 
         key=lambda row: (-Decimal(str(row["august_2023_quote_volume"])), str(row["symbol"])),
     )
     top = ranked[:top_n]
+    ticks, tick_receipt = _tick_metadata(cache_dir)
     ranking_rows = [
         {
             "rank": index,
             "symbol": row["symbol"],
             "august_2023_quote_volume": row["august_2023_quote_volume"],
+            "august_2023_month_coverage": row["month_coverage"],
             "zip_source": row["zip_source"],
             "expected_zip_sha256": row["expected_zip_sha256"],
             "csv_sha256": row["csv_sha256"],
+            "tick_size": ticks.get(str(row["symbol"])),
+            "tick_status": "cached_metadata" if str(row["symbol"]) in ticks else "missing_not_inferred",
         }
         for index, row in enumerate(top, 1)
     ]
@@ -304,7 +351,7 @@ def rank_august_2023(*, output_dir: Path, cache_dir: Path, top_n: int, workers: 
         "purpose": "fixed asset universe only; no returns, signals, or exit outcomes read",
         "rank_month": RANK_MONTH,
         "rank_interval": RANK_INTERVAL,
-        "rank_metric": "sum of native Binance kline column 7 quote_volume",
+        "rank_metric": "sum of native Binance kline column 7 quote_volume over its actual continuous August span",
         "rank_metric_not_used": ["close_times_base_volume proxy", "current turnover", "full-period return"],
         "candidate_universe": "all public data.binance.vision monthly-kline symbol directories matching USDT contract name; historical archive coverage, not a claim of every contract Binance ever listed",
         "listing_source": str(output_dir / "s3_historical_symbol_listing.json"),
@@ -313,6 +360,7 @@ def rank_august_2023(*, output_dir: Path, cache_dir: Path, top_n: int, workers: 
         "quarantined_count": len(rows) - len(ranked),
         "top_n": top_n,
         "top_universe": ranking_rows,
+        "tick_metadata": tick_receipt,
         "cache_dir": str(cache_dir),
         "acquisition_limit": {"workers": workers, "recommended_nice": 10},
         "next_contract": "A parent-approved freeze must content-address ranked_top_universe.csv before three-year archive acquisition. Do not rerun ranking or select monthly universes.",
