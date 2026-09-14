@@ -18,6 +18,20 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v1-v8-tier-lock-20260914-delivery
+    artifact_type: manifest
+    role: three_arm_tier_exit_sensitivity
+    source_repo: darkforest-x/fable-trading
+    source_commit: 87511611b6c395dca35526bcd8a1194680d38d9f
+    source_path: experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/delivery_manifest.json
+    sha256: cb3fa52a6eda8e689cd843e68229894dca33f0e3589375df899262eba2f95a9d
+    size_bytes: 5147
+    storage_uri: repo://experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/delivery_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Native V1 and common V1 remain separate. Three-arm tier-minusBE native+14.78R andV8-211.52R;netwin rate higher thanBE but lower thanoriginal,10R tail declines. Authorized nonblind history;superseded runs retained.
+      Large CSV and audit files remain local and are SHA-bound.
   - artifact_id: spike-v1-v8-be05-20260914-delivery
     artifact_type: manifest
     role: receipt_bound_be05_exit_sensitivity
