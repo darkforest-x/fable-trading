@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: eth-ma120-longest-runs-20260914-manifest
+    artifact_type: manifest
+    role: descriptive_ma120_interval_inventory
+    source_repo: darkforest-x/fable-trading
+    source_commit: 420a6cedcf03f503e7575b94f0b4861c775ea8f7
+    source_path: experiments/active/exp-eth-ma120-longest-runs-20260914-v1/results/manifest.json
+    sha256: e42ecf345cf4542a72ba3b8e485ff4f2d1d51f07ecaa88af498d4834174d49bf
+    size_bytes: 5041
+    storage_uri: repo://experiments/active/exp-eth-ma120-longest-runs-20260914-v1/results/manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Descriptive OKX ETH 5m 15m 1H closed-bar runs; binds input OHLCV and output CSV plus chart hashes. Not a strategy or prediction validation.
   - artifact_id: spike-account-growth-20260913-replay-manifest
     artifact_type: manifest
     role: shared_account_growth_replay

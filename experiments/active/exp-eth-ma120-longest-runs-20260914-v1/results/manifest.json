@@ -1,0 +1,111 @@
+{
+  "schema": "ma120-runs-v1",
+  "generated_at": "2026-09-14T04:36:45.688583+00:00",
+  "builder_path": "/Users/zhangzc/fable-trading/yoyo/evaluation/ma120_runs.py",
+  "builder_sha256": "fd32992a7477b307f6504abeb2bec50a6d2fab60fa4db7e0f658e5a57169bdf1",
+  "builder_commit": "420a6cedcf03f503e7575b94f0b4861c775ea8f7",
+  "sources": [
+    {
+      "path": "/Users/zhangzc/fable-trading/data/kline_fetched/okx_ETH_USDT_SWAP_5m_57699.csv",
+      "sha256": "0f164249ef356b2fc7118078b6d9379b0da4f507e0ef7cb6aef0ca0cc5e67d01",
+      "minutes": 5
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+      "sha256": "f6d8c10a995ca328f2de33e3e1a2a74b06f1e621cc657ccd50a6e9b16565ebe4",
+      "minutes": 15
+    }
+  ],
+  "coverage": [
+    {
+      "minutes": 5,
+      "rows": 57699,
+      "start_utc": "2025-12-20T10:00:00+00:00",
+      "end_close_utc": "2026-07-08T18:15:00+00:00",
+      "gaps": 0,
+      "valid_ma_bars": 57580
+    },
+    {
+      "minutes": 15,
+      "rows": 158499,
+      "start_utc": "2022-01-03T15:30:00+00:00",
+      "end_close_utc": "2026-07-12T16:15:00+00:00",
+      "gaps": 0,
+      "valid_ma_bars": 158380
+    },
+    {
+      "minutes": 60,
+      "rows": 39624,
+      "start_utc": "2022-01-03T16:00:00+00:00",
+      "end_close_utc": "2026-07-12T16:00:00+00:00",
+      "gaps": 0,
+      "valid_ma_bars": 39505
+    }
+  ],
+  "common_start": "2025-12-20T10:00:00+00:00",
+  "common_end": "2026-07-08T18:00:00+00:00",
+  "holdout_exposure": 1,
+  "authorization": "Owner explicitly permitted any historical period; descriptive search only; not new blind validation.",
+  "outputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-ma120-longest-runs-20260914-v1/results/15m_body_above.png",
+      "sha256": "3dc5f3c15f4e42b797f44c15d669fce596a30741aab3278137f4cad45904f489"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-ma120-longest-runs-20260914-v1/results/15m_body_below.png",
+      "sha256": "be3059ad30a457b3328eea4729bae487f620322fce70be8908d52128f53a2b6a"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-ma120-longest-runs-20260914-v1/results/15m_close_above.png",
+      "sha256": "20cda7b3966e93c05fd36145a6555b57efdea15b710036def2a7bafd79e9e528"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-ma120-longest-runs-20260914-v1/results/15m_close_below.png",
+      "sha256": "45ced3c8612906dcd6c55bd0add58a332f6e8c38b197a0fde307eb2c1687bc65"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-ma120-longest-runs-20260914-v1/results/5m_body_above.png",
+      "sha256": "c2a0a0438a7497a9f2671683c0b258565195c739fbbaa96e6cf99f73b664842c"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-ma120-longest-runs-20260914-v1/results/5m_body_below.png",
+      "sha256": "eced01a643117487933992e28acc8ef6df2bff8c2dd6e82d3b258f0cac4513eb"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-ma120-longest-runs-20260914-v1/results/5m_close_above.png",
+      "sha256": "23213e2d40032e77a666a0c48aec117a494114d092498d828f29221289b983e8"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-ma120-longest-runs-20260914-v1/results/5m_close_below.png",
+      "sha256": "ba5b08ba0da7764169fe85e456760718bc19f775e49440f316fb15c686593dc2"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-ma120-longest-runs-20260914-v1/results/60m_body_above.png",
+      "sha256": "b7f13b1961374ad9e61c162f8792f06cef0e11bad894022c3235a1069f497132"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-ma120-longest-runs-20260914-v1/results/60m_body_below.png",
+      "sha256": "705a8965a968a048317b7576afd280a2c76b76f25127ae4dd63242ede7a5879e"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-ma120-longest-runs-20260914-v1/results/60m_close_above.png",
+      "sha256": "489134338764bbf4d7b69ec573d71c5517b244be4ae1227c1555a3889bce1e9b"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-ma120-longest-runs-20260914-v1/results/60m_close_below.png",
+      "sha256": "ee77b848c67cb759a9f353723f65141c0bbf9d818a69f777cb7fce1b7f665e27"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-ma120-longest-runs-20260914-v1/results/all_runs.csv.gz",
+      "sha256": "ba06d7fe5e05da4664f86f0458352d3c139c147bc4e8c235756f6800f55bf582"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-ma120-longest-runs-20260914-v1/results/longest_runs.csv",
+      "sha256": "93fd0758b887c5eb2f25a4f4879164c032dbab63970648bd7d74ec5f5faf5454"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-ma120-longest-runs-20260914-v1/results/top20_runs.csv",
+      "sha256": "819fd6558c7299cb04aa1d99340882abfc64f3738c47eb8fd5461c6162f55a11"
+    }
+  ]
+}

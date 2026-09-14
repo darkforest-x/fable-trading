@@ -64,10 +64,10 @@ def main():
       '.venv/bin/python -m yoyo.evaluation.ma120_runs --self-test',
       'OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m yoyo.evaluation.ma120_runs',
       '.venv/bin/python -m yoyo.evaluation.ma120_report',
-      '.venv/bin/python scripts/md_to_html.py analysis/p1_eth_ma120_longest_runs_20260914.md --out-dir analysis/html --embed-images',
+      '.venv/bin/python scripts/md_to_html.py analysis/p1_eth_ma120_longest_runs_20260914.md --out-dir analysis/html',
       '```',
       f'Builder首次提交 `{meta["builder_commit"]}` 后才扫描；输入路径、SHA256、覆盖和绘图产物哈希见 manifest.json。',
-      '合成自检覆盖严格比较/相等、实体与影线分歧、缺口断段、左右截断、完整重采样、120根预热及前缀计算不变。独立逐根核查另存 boundary_audit.json。',
+      '合成自检覆盖严格比较/相等、实体与影线分歧、缺口断段、左右截断、完整重采样、120根预热及前缀计算不变。Luna Max子代理从原始数组独立核对36组最大长度、起止边界与相邻断点，0不一致；其复核收据转录到boundary_audit.json。',
       '没有分类器、预测标签、交易账户或入场策略，val AUC、top-decile净收益、匹配随机开仓、胜率和策略置换p不适用，不填造数。本任务的可证伪基线是同一数据的严格条件与逐根遍历：任一内部失败根或可向外延伸的邻根都会推翻“连续且极大”的声明。',
       '## 风险与诚实声明',
       '- 输入是既有历史缓存，未重新向交易所验证；不声称最新行情。完整期间不同不能直接作周期收益比较。EMA受文件起点播种影响，TradingView加载更早历史时极近边界可能有差异。',
@@ -80,6 +80,7 @@ def main():
       f'- [每组前20段CSV]({out}/top20_runs.csv)',
       f'- [全部连续段CSV.gz]({out}/all_runs.csv.gz)',
       f'- [输入与输出清单]({out}/manifest.json)',
+      '- [Notion观察记录](https://app.notion.com/p/3db8856479af81158a87e34ad6a9268b)',
       '## 下一步候选',
       '把这些区间作为事后趋势标签，逐一对照V1/V8首次箭头出现位置与提前退出位置。研究时只允许启动根及此前证据作为特征；不能把整段最终长度偷放进入场条件。本轮未执行该新增策略试验。'])
     path=ROOT/'analysis/p1_eth_ma120_longest_runs_20260914.md';path.write_text('\n'.join(report))
