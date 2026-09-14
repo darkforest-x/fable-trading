@@ -33,7 +33,16 @@ for (const spec of payload.sheets) {
     fill: '#253B57', font: { bold: true, color: '#FFFFFF', name: 'Helvetica Neue', size: 11 },
     rowHeight: 36, wrapText: true,
   };
-  if (n) sheet.getRangeByIndexes(4, 0, n, cols).values = spec.rows;
+  const rows = spec.rows.map(row => row.map((value, col) =>
+    (spec.dateColumns || []).includes(col) && value ? new Date(value) : value));
+  if (n) sheet.getRangeByIndexes(4, 0, n, cols).values = rows;
+  for (const col of spec.dateColumns || []) {
+    if (n) sheet.getRangeByIndexes(4, col, n, 1).setNumberFormat('yyyy-mm-dd hh:mm');
+  }
+  if (n && spec.bodyWrap) {
+    sheet.getRangeByIndexes(4, 0, n, cols).format.wrapText = true;
+    sheet.getRangeByIndexes(4, 0, n, cols).format.rowHeight = 39;
+  }
   for (const [col, width] of Object.entries(spec.widths || {})) {
     sheet.getRangeByIndexes(0, Number(col), Math.max(n + 5, 8), 1).format.columnWidth = width;
   }

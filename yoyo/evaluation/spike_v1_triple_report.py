@@ -97,6 +97,9 @@ def build():
     ex = summary.loc[summary.group_type.eq('primary') & summary.asset_scope.eq('ex_rave') & summary.arm.eq('triple')]
     timeframe = summary.loc[summary.group_type.eq('timeframe') & summary.asset_scope.eq('all') & summary.arm.isin(MAIN)]
     period = summary.loc[summary.group_type.eq('period') & summary.event_scope.eq('dedup') & summary.asset_scope.eq('all') & summary.arm.isin(MAIN)]
+    inference = summary.loc[summary.cohort.eq('top20') & summary.group_type.eq('primary_timeframe') & summary.asset_scope.eq('all')]
+    inference_columns = ['period','timeframe_min','arm','trades','mean_net_r','mean_net_r_ci95_low','mean_net_r_ci95_high',
+                         'mean_matched_excess_net_r','excess_ci95_low','excess_ci95_high','excess_one_sided_p','excess_one_sided_p_bonferroni9']
     # Preserve the full result table as CSV; the report uses the preregistered primary views.
     original_rows = {r['arm']: r for r in original_main.to_dict('records')}
     baseline = original_rows.get('baseline', {})
@@ -122,6 +125,9 @@ def build():
         '## 3. 按时间向前验证',
         '开发期入场早于2025-09-01且在切点前结束；测试期从2025-09-01开始。测试区间已被既往研究接触，因此是冻结配置的时序复验，不是新的盲测。2026-05-04之后单列。各月不调阈值。',
         table(period, ['cohort', 'period', 'arm']),
+        '',
+        '### 测试期随机对照与置信区间',
+        human(inference[[c for c in inference_columns if c in inference]]).to_markdown(index=False, floatfmt='.4f') if len(inference) else '无可计算的测试期匹配样本。',
         '',
         '## 4. 精确成交规则',
         '- 入场沿用原始V1信号，下一根开盘成交。原版只做多；本轮不补空头，也不修改原始信号引擎。',
@@ -174,6 +180,7 @@ def build():
     for group, name, title in [('month', '逐月', '固定规则逐月表现'), ('symbol', '标的明细', '逐标的已平仓结果')]:
         part = summary.loc[summary.group_type.eq(group) & summary.event_scope.eq('dedup') & summary.asset_scope.eq('all') & summary.arm.isin(MAIN)]
         specs.append(sheet_spec(name, title, part, '去重后的事件；不依据此榜单反选历史', ['cohort','period','symbol','timeframe_min','arm']+TABLE_FIELDS))
+    specs.append(sheet_spec('随机对照','测试期超额与置信区间', inference, '前20测试期3规则×3周期；校正p涵盖9次主要比较', inference_columns))
     for cohort, title in [('original6253','原6253逐笔'), ('top20','前20逐笔')]:
         frame = wide_trades(cohort)
         cols = ['venue','symbol','timeframe_min','entry_time','entry_price','initial_stop','volume_ratio','risk_fraction_at_entry',
@@ -183,6 +190,7 @@ def build():
                            '仅锁利净R','三规则净R','过滤组合净R','三规则改善R','默认退出UTC','组合退出UTC','原版峰值R','组合退出来源','去重保留','事件ID']
         spec['widths'].update({3:25,4:17,5:17,15:25,16:25,18:24,20:30})
         spec['formats'].update({4:'0.########',5:'0.########'})
+        spec['dateColumns']=[3,15,16]
         spec['formulas'] = {14:[f'=M{i+5}-I{i+5}' for i in range(len(frame))]}
         specs.append(spec)
     notes = pd.DataFrame([
