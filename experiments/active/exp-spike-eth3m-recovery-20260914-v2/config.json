@@ -1,0 +1,20 @@
+{
+  "experiment_id": "exp-spike-eth3m-recovery-20260914-v2",
+  "context": "experiments/active/exp-spike-eth-martingale-20260914-v1/results/pre/ETH_3m_OKX.pkl",
+  "context_sha256": "9fc6f9dcbad7616f9c7ceab811ed9634ece2b07bf24327ff070ac09592c972fd",
+  "baseline_csv": "experiments/active/exp-spike-eth-martingale-20260914-v1/results/pre/ETH_3m_OKX_development.csv",
+  "baseline_sha256": "6cafc9aca7f9faa8b01ea8e6ad989f967a376cbee1045297fc30ef5fcd937a48",
+  "periods": {
+    "development": ["2023-08-01T00:00:00Z", "2025-01-01T00:00:00Z"],
+    "validation": ["2025-01-01T00:00:00Z", "2026-01-01T00:00:00Z"],
+    "preholdout": ["2026-01-01T00:00:00Z", "2026-05-01T00:00:00Z"],
+    "continuous_pre": ["2023-08-01T00:00:00Z", "2026-05-01T00:00:00Z"]
+  },
+  "take_profit_r": [null, 1, 2, 3, 4],
+  "trigger_r": [0.5, 1, 1.5, 2],
+  "seed": 20260914,
+  "controls_per_trade": 9,
+  "permutation_draws": 9999,
+  "training_eligible": false,
+  "production_eligible": false
+}

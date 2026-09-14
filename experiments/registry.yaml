@@ -9089,3 +9089,15 @@ experiments:
     notes: Owner-authorized reused nonblind history, configuration use 1 with same-source rereads. First fully ready close is Aug 14 07 UTC; warmup delay and Volume aggregation remain unverified. No matched-random control or Python fill parity. Original scripts and monitor unchanged; temporary layout restored.
     artifacts:
     - spike-v8-total2-1h-native-20260914-delivery
+
+  - experiment_id: exp-spike-eth3m-recovery-20260914-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9767b7a149
+    status: active
+    question: Can one-USDT base risk with causal protection and recovery sizing satisfy six real consecutive net losses on ETH 3m V8?
+    single_variable: Owner authorized joint exit and cash optimization; 855 preregistered development configurations, unchanged V8 admission, initial stop and 20bp cost.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/active/exp-spike-eth3m-recovery-20260914-v2/PROJECT_PLAN.md
+    notes: Pre-May-2026 context only; commit builders before runs and selected policies before later-period evaluation. Six-layer cycle cap never resets account streaks.
