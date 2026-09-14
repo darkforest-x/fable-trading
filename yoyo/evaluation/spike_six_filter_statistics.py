@@ -22,6 +22,13 @@ SEED = 14092026
 N_NULL = 2000
 FAMILY = 27
 VOL_BINS = [-np.inf, .005, .01, .02, .05, .1, np.inf]
+READ_COLUMNS = {
+    'stream_key', 'signal_i', 'side', 'entry_time', 'exit_time', 'censored',
+    'net_r', 'net_return', 'venue', 'asset', 'symbol', 'timeframe_min', 'rv',
+    'tr_atr_expansion', 'signal_atr_pct', 'stock_class', 'gate_rejected',
+    'feature_known', 'fixed_event_status', 'exit_reason', 'entry_price',
+    'initial_risk', 'exit_price', 'initial_stop',
+}
 
 
 def digest(path: Path) -> str:
@@ -141,7 +148,10 @@ def load_results(root: Path) -> tuple[pd.DataFrame, pd.DataFrame, list[dict]]:
             path = rp.parent / name
             if digest(path) != expected:
                 raise ValueError(f'File hash changed: {path}')
-            g = pd.read_csv(path)
+            # Full trade records remain in authenticated per-stream files.
+            # Load only analysis columns to bound memory on the owner's Mac.
+            g = pd.read_csv(path, usecols=lambda c: c in READ_COLUMNS,
+                            dtype={'asset': str, 'symbol': str, 'venue': str})
             policy = name.removeprefix(f'v8.{kind}_').removesuffix('.csv.gz')
             g['policy'] = policy
             sources.append(dict(path=str(path), sha256=expected, rows=len(g)))
