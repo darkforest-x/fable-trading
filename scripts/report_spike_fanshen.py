@@ -68,8 +68,10 @@ def main():
             sub=cash.loc[(cash.window=="common")&(cash.minutes==m)&(cash.policy==p)]
             f=sub.loc[sub.schedule=="fixed"].iloc[0]
             d=sub.loc[sub.schedule=="double"].iloc[0]
+            capacity=(str(d.halt_reason) if pd.notna(d.halt_reason) else "无永久终止")
+            capacity+=f"；容量拒绝{int(d.n_capacity_rejected)}次；未回本{fmt(d.residual_debt)}U"
             rows.append([f"{m}m",LABELS[p],fmt(f.final_balance),fmt(d.final_balance),
-                         fmt(d.max_realized_drawdown,True),int(d.n_natural),str(d.halt_reason) if pd.notna(d.halt_reason) else "未触发容量终止"])
+                         fmt(d.max_realized_drawdown,True),int(d.n_natural),capacity])
     parts.append(table(["周期","退出","固定1U期末U","翻倍期末U","翻倍已实现最大回撤","翻倍自然笔数","资金约束"],rows))
     parts.append("资金口径：本金1000U；基础1U是价格止损风险，另计费用；成本固定为名义金额0.2%往返，保留既有10倍保证金容量假设。亏损后风险翻倍，只有累计净回本才重置，保本不会抹去前亏。容量不足时保持欠账，风险已超过现金则终止。未建模交易所标记价格强平、资金费率、额外滑点及盘中浮动权益；此回撤是已实现现金回撤，不能叫实盘强平概率。边界单按最后完整收盘估值，未纳入自然胜率。\n")
     parts.append("## 所有冻结方案与匹配随机对照\n")
@@ -123,4 +125,3 @@ def main():
 
 
 if __name__=="__main__":main()
-
