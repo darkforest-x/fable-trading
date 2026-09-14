@@ -1,0 +1,90 @@
+{
+  "focused_tests": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q -p no:cacheprovider --capture=no tests/evaluation/test_spike_net_recovery_exit.py tests/evaluation/test_spike_net_recovery_cash.py tests/evaluation/test_spike_recovery_exit.py tests/evaluation/test_spike_recovery_cash.py tests/boundaries/test_layer_imports.py tests/causality/test_holdout_boundary_is_single_valued.py",
+    "passed": 132,
+    "exit_code": 0,
+    "elapsed_s": 1.49,
+    "tool_session": 17334
+  },
+  "independent_code_review": {
+    "agent": "recovery_exit_engine, Terra High",
+    "cash_scope": [
+      "yoyo/evaluation/spike_net_recovery_cash.py",
+      "tests/evaluation/test_spike_net_recovery_cash.py"
+    ],
+    "findings": "No reachable debt/reset/double-charge/capacity defect found; no historical data read in code review."
+  },
+  "holdout_consumptions": 0,
+  "production_eligible": false,
+  "training_eligible": false,
+  "independent_development_artifact_audit": {
+    "opportunity_files": 3,
+    "opportunity_rows": 2769,
+    "ledger_files": 10,
+    "ledger_rows": 6168,
+    "invalid_rows": 0,
+    "max_net_r_error": 3.0464519795714295e-13,
+    "max_gross_r_error": 2.9531932455029164e-13,
+    "max_cash_step_error": 2.2737367544323206e-13,
+    "max_cash_cumulative_error": 1.8758328224066645e-12,
+    "minimum_normal_be_net_r": -3.684e-14,
+    "minimum_tp_net_r": 1.0000212869,
+    "halt_cycle": "development_ohlc_double_risk_only: 8 unrecouped net loss events, max 3 consecutive initial stops, 4 BE within losing cycle; balance101.233041 and next risk256 rejected. OHLC scenario only."
+  },
+  "runtime_audit": {
+    "evaluation_session": 24199,
+    "evaluation_exit_code": 0,
+    "accounts": 40,
+    "cash_and_cycle_tolerance": 1e-07,
+    "legacy_gross1_baseline_natural": 809,
+    "legacy_gross1_baseline_final": 437.586101
+  },
+  "prior_repository_gate_state": {
+    "source": "Earlier same-session partial-exit validation: experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/results/validation.json",
+    "rerun_in_this_net_recovery_round": false,
+    "boundary_causality_parity": {
+      "passed": 468,
+      "failed": 7,
+      "causes": [
+        "TOTAL2 registry missing source_commit",
+        "Untouched candidates.py/render.py migration hash drift"
+      ]
+    },
+    "registry_contracts": {
+      "passed": 12,
+      "failed": 4,
+      "causes": [
+        "TOTAL2 artifact missing source_commit",
+        "MA120 experiment missing source_commit"
+      ]
+    },
+    "claim": "Only 132 focused tests and new row validation are claimed for this round; no whole-repository green claim."
+  },
+  "html_static_qa": {
+    "path": "analysis/html/p1_spike_eth3m_net_recovery_20260914.html",
+    "tables": 6,
+    "rows": 55,
+    "values_checked": [
+      "463.25",
+      "399.23",
+      "580.78",
+      "115.2252",
+      "64.0024",
+      "51.2228",
+      "132"
+    ],
+    "passed": true,
+    "visual_preview": "Not claimed; prior browser file-preview policy denial respected, file panel delivery only."
+  },
+  "key_cycle_export": {
+    "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/key_cycle_ohlc_double10.csv",
+    "rows": 22,
+    "includes_final_rejection": true,
+    "method": "Filter final cycle_id from continuous_pre_ohlc_double10_ledger.csv.gz; retain accepted trades and final price_risk_exceeds_cash rejection."
+  },
+  "own_registry_rows": {
+    "ArtifactRecord.from_mapping": true,
+    "ExperimentRecord.from_mapping": true,
+    "artifact_crosslink": true
+  }
+}

@@ -30853,3 +30853,17 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Thirteen failed exit arms,89 account windows,matched controls and HTML. Partial win-rate gains did not improve net equity. Zero holdout use.
+
+  - artifact_id: spike-eth3m-net-recovery-20260914-v3-delivery
+    artifact_type: manifest
+    role: net1r_cost_breakeven_finite_recovery_verification
+    source_repo: darkforest-x/fable-trading
+    source_commit: f0a4847ac2f982bc6570919dde620ff6704412a7
+    source_path: experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/manifest.json
+    sha256: e38d7875c784c902895eaba2801b98ebc1a7c913aa7d91a2b45a546925103bee
+    size_bytes: 40539
+    storage_uri: repo://experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Forty frozen account windows; same-exit fixed and matched random controls. BE correctly classified but no profitable account. No holdout use; two intrabar paths are assumptions.

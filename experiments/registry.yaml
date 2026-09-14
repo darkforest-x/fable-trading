@@ -9122,12 +9122,15 @@ experiments:
 
   - experiment_id: exp-spike-eth3m-net-recovery-20260914-v3
     source_repo: darkforest-x/fable-trading
-    source_commit: afa1aba63d
-    status: active
+    source_commit: f0a4847ac2f982bc6570919dde620ff6704412a7
+    status: rejected
     question: Does fee-covered breakeven and net1R full take-profit permit finite-cash ETH3m doubling with reset only after cumulative net recovery?
     single_variable: Owner-authorized frozen net-target and cost-protection semantics; three timing scenarios and same-exit fixed/double capacity controls.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/PROJECT_PLAN.md
+    canonical_report: analysis/p1_spike_eth3m_net_recovery_20260914.md
+    result: No nine consecutive full initial stops under new scenarios,but no profitable account. Continuous10x intrabar balances463.25/399.23U fail next512U risk despite only2 consecutive full initial stops.
+    artifacts:
+    - spike-eth3m-net-recovery-20260914-v3-delivery
     notes: No six-loss reset; no debt forgiveness; no new holdout use. OHLC paths are assumptions rather than observed intrabar truth.

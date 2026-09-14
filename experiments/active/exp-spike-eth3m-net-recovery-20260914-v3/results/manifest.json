@@ -1,0 +1,798 @@
+{
+  "experiment_id": "exp-spike-eth3m-net-recovery-20260914-v3",
+  "generated_at": "2026-09-14T13:21:43.498182+00:00",
+  "builder_commit": "f0a4847ac2f982bc6570919dde620ff6704412a7",
+  "report_renderer_commit": "0d58e25f3ac4be83c5e66b8558959f3a786f3a2b",
+  "status": "rejected",
+  "holdout_consumptions": 0,
+  "training_eligible": false,
+  "production_eligible": false,
+  "notion_url": "https://app.notion.com/p/3db8856479af81eba17ac7308df03aeb",
+  "source_context": {
+    "path": "experiments/active/exp-spike-eth-martingale-20260914-v1/results/pre/ETH_3m_OKX.pkl",
+    "sha256": "9fc6f9dcbad7616f9c7ceab811ed9634ece2b07bf24327ff070ac09592c972fd",
+    "verification": "Checked by hash-bound loader before replay"
+  },
+  "files": [
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/PROJECT_PLAN.md",
+      "sha256": "a5c5df55f3b7bd1a55688438d3c438c70b174b7eb6fb49c727865112b1cca4a0",
+      "size_bytes": 4111
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/config.json",
+      "sha256": "9a42591c1016681eec541ce8c82abff55a63e61e30f44e202f342f51a2cc0a43",
+      "size_bytes": 1430
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_legacy_gross1_fixed10_cycles.csv",
+      "sha256": "d572fd5df8000a6c282b67f7db5e6c2375c4a26a249f1fa04e45443bc9f30f1e",
+      "size_bytes": 142
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_legacy_gross1_fixed10_ledger.csv.gz",
+      "sha256": "86e7d1f1f0b3d2e046264c3d93d9adbe26742e4579477c28383b3ee3446a88f3",
+      "size_bytes": 162250
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_legacy_gross1_fixed10_matched.csv.gz",
+      "sha256": "a1e6d3772acb12aa1ee59249cb2cd035d21e192f71f6259f337620929d428948",
+      "size_bytes": 255205
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_legacy_gross1_opportunities.csv.gz",
+      "sha256": "f9f0907c75a0a93a3360d22a3de17e196f2d8ea19de3c15462285ae2d2825327",
+      "size_bytes": 189635
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_next_bar_double10_cycles.csv",
+      "sha256": "0ae4e1999fe181bee123f034beb85d1ef36bcbf7f3486b8ddd980b72d8736cf0",
+      "size_bytes": 138
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_next_bar_double10_ledger.csv.gz",
+      "sha256": "35af9a266995d95d61233a28cfcf20c7fe7a029fc296d5e782e127ae5aed6ef6",
+      "size_bytes": 75407
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_next_bar_double10_matched.csv.gz",
+      "sha256": "a2ffc312cbb6825f9235eafe8cef4b8ab8a0ff8050c84b69c7be495b939c9952",
+      "size_bytes": 2246
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_next_bar_double_risk_only_cycles.csv",
+      "sha256": "227b30f146beeb911bf3e1bf6e9b66e67611a205d789d53887e869077be4e845",
+      "size_bytes": 139
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_next_bar_double_risk_only_ledger.csv.gz",
+      "sha256": "35d96f13bf8b3d79467c0b8eab5f9877f30718aea4772364385975e54324ed61",
+      "size_bytes": 1238
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_next_bar_double_risk_only_matched.csv.gz",
+      "sha256": "7e55783e2d83cc4fecfd3f8914747dc8013421052f52fc043ba45c60d84e904c",
+      "size_bytes": 1663
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_next_bar_fixed10_cycles.csv",
+      "sha256": "5675bb8457b60a8efa18da4827fdc25baf64a239081993b4cd0d976e890bf74b",
+      "size_bytes": 143
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_next_bar_fixed10_ledger.csv.gz",
+      "sha256": "3e564c85bfc39492d225fbcd9d27127a092b48819885153bd5574c4d9c434198",
+      "size_bytes": 177972
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_next_bar_fixed10_matched.csv.gz",
+      "sha256": "38759a334dd0d0f81a14a313221efb66ea686141dfe05e5fe0c058c57185c4d9",
+      "size_bytes": 269906
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_next_bar_opportunities.csv.gz",
+      "sha256": "120a4ba61d7c6749b452bbd2ec8d022a8bd4b6dd41d237dcb7b23514f2d1d92a",
+      "size_bytes": 231500
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_ohlc_double10_cycles.csv",
+      "sha256": "c1f6b57a6636a193d1db1a03d4229279e638d58ea413ca13e5cacb39e9220698",
+      "size_bytes": 203
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_ohlc_double10_ledger.csv.gz",
+      "sha256": "d03efa49e89bd5452a625129ea243a1f5d1e4c0eb7e6f8a1513680dccf3bd16a",
+      "size_bytes": 45294
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_ohlc_double10_matched.csv.gz",
+      "sha256": "93acf84871c1aaadb5729b51a33dc1b492419d05c63aac5018a880c1707e2a78",
+      "size_bytes": 4253
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_ohlc_double_risk_only_cycles.csv",
+      "sha256": "302894314e9dd0afb134d5595e37e0900a8632b97f35de2477568bf5555be989",
+      "size_bytes": 203
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_ohlc_double_risk_only_ledger.csv.gz",
+      "sha256": "52abc1762df0f6fb04c58ceb40aa8d93f8b92957f27f0865e84bf35329bdd619",
+      "size_bytes": 1771
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_ohlc_double_risk_only_matched.csv.gz",
+      "sha256": "d1e515000c804a98e5099997fb7956951449179652763a6f3aab837d5aaffd81",
+      "size_bytes": 2518
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_ohlc_fixed10_cycles.csv",
+      "sha256": "5867fcc28f81defdfe2f5964a07862fedd5d000060177727346369996531fd9a",
+      "size_bytes": 203
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_ohlc_fixed10_ledger.csv.gz",
+      "sha256": "88cc6d2bbccabfb87c82627f07bfd069d10f20ea27046a5a886004e225ec7f9c",
+      "size_bytes": 177725
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_ohlc_fixed10_matched.csv.gz",
+      "sha256": "dd96aea85d97a95afe63f6c97ace52911027304a030322053327587887e3f9dd",
+      "size_bytes": 275963
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_ohlc_opportunities.csv.gz",
+      "sha256": "8ae6e3674f2e361d017f5574be4d68dd5f4ee3cdb28681cad123e6200378dd34",
+      "size_bytes": 224575
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_olhc_double10_cycles.csv",
+      "sha256": "bf796d3ea65257182641010f0411eebc21f419c03f21947a6ea5f58176a33970",
+      "size_bytes": 203
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_olhc_double10_ledger.csv.gz",
+      "sha256": "145ef06facb3f55d99a4edcbf7ff2cb8cdf6f144b0715f953dd6a8f5a60132ee",
+      "size_bytes": 45187
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_olhc_double10_matched.csv.gz",
+      "sha256": "558d72d494a5a5a860362066c116d94e73982513519907203f5b8e14e9acca4b",
+      "size_bytes": 4077
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_olhc_double_risk_only_cycles.csv",
+      "sha256": "302894314e9dd0afb134d5595e37e0900a8632b97f35de2477568bf5555be989",
+      "size_bytes": 203
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_olhc_double_risk_only_ledger.csv.gz",
+      "sha256": "dcf5ff4bfa76c736dc432ce1626520c3bac8301224a50be1f6caf1e8219c2585",
+      "size_bytes": 1773
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_olhc_double_risk_only_matched.csv.gz",
+      "sha256": "c63142d8e4092fec6a388289dc043c4c12b2d1f6a77568973dc154d82ea4dc2f",
+      "size_bytes": 2520
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_olhc_fixed10_cycles.csv",
+      "sha256": "e826bdf699a3f92bd9613771f5e94d26f044b2a9c5d77790690ab771abe26d94",
+      "size_bytes": 203
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_olhc_fixed10_ledger.csv.gz",
+      "sha256": "a11bcdb303f02c4f29c23916e8f6e022663093ea509c2b755212f713620dfe7e",
+      "size_bytes": 177903
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_olhc_fixed10_matched.csv.gz",
+      "sha256": "97198ddee50645ec22451e9f49dd4fbf4bceb24b2b988015b0d0b7ffde33215a",
+      "size_bytes": 276474
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/continuous_pre_olhc_opportunities.csv.gz",
+      "sha256": "d62b4027315a1edb38cdc8e27b4813f7ec954830bbb095bbc77244d1efc6940c",
+      "size_bytes": 224437
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/controls.csv",
+      "sha256": "fcd24389623866a7dfa3b4c0b2e789b8cfac4ea3ae602a99e88126126b5f44b2",
+      "size_bytes": 4474
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_legacy_gross1_fixed10_cycles.csv",
+      "sha256": "b9b1ff5939ea8fd361a0878be8a824540875e71a7e2eef69ef88c14d53968e74",
+      "size_bytes": 140
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_legacy_gross1_fixed10_ledger.csv.gz",
+      "sha256": "1c494a51709e4f2072e222f26cf24fc453b85b84e73a8a2f99ef79ee9bd6e4a1",
+      "size_bytes": 81860
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_legacy_gross1_fixed10_matched.csv.gz",
+      "sha256": "39e821e2ce0a79a6de71af73e898e7e26707dc3a73a79a34f5cc37bc0830d151",
+      "size_bytes": 131291
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_legacy_gross1_opportunities.csv.gz",
+      "sha256": "5b8e0be1dd7916ed2fa12e7dae52c622c490cc7ee3d9f4bf5a35294d86ddd38e",
+      "size_bytes": 96853
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_next_bar_double10_cycles.csv",
+      "sha256": "2a59a7402c47523fdf822aa7931da3142e2c6ff1a1106119f3cc0570f85cd89c",
+      "size_bytes": 136
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_next_bar_double10_ledger.csv.gz",
+      "sha256": "11e8f6deb095768a9f502dfe6b8aae6cdc2f52dc9b884c63cea5bb7c3ac8c72f",
+      "size_bytes": 38974
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_next_bar_double10_matched.csv.gz",
+      "sha256": "1247113bafd5afc45c002ce3e765463265874ed15d3bac2e6c5ebbbed91cb650",
+      "size_bytes": 1854
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_next_bar_double_risk_only_cycles.csv",
+      "sha256": "227b30f146beeb911bf3e1bf6e9b66e67611a205d789d53887e869077be4e845",
+      "size_bytes": 139
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_next_bar_double_risk_only_ledger.csv.gz",
+      "sha256": "51fb55508b2e4f3f57774b42422fd973716247ce46b8d882f28724115b4870af",
+      "size_bytes": 1235
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_next_bar_double_risk_only_matched.csv.gz",
+      "sha256": "f20ada271f794057f2f66fabb1b2795d3255f079a66712b73686c4c63b1f92e3",
+      "size_bytes": 1660
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_next_bar_fixed10_cycles.csv",
+      "sha256": "59cbaeb4949e975e547ab547bd769bc7c85a0f22d7bc2fa8313938127257893a",
+      "size_bytes": 141
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_next_bar_fixed10_ledger.csv.gz",
+      "sha256": "5e040ed6b09ddb0bebf6dffc99288bbdf611d45afb52e077027da65ccf7853ba",
+      "size_bytes": 89187
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_next_bar_fixed10_matched.csv.gz",
+      "sha256": "23e83680515c64b4987fa8e22ee51cd9e891dd0a23b7360706b935620462f14d",
+      "size_bytes": 138916
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_next_bar_opportunities.csv.gz",
+      "sha256": "2762b61938455bb098bfc0d29c80118d0b811c2cd480f0a08506ac705a777eb5",
+      "size_bytes": 117114
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_ohlc_double10_cycles.csv",
+      "sha256": "45ed4ec277afc55d6c6a6bb95383f4d72326044a19e555707ec2ddc1e8dab8f8",
+      "size_bytes": 200
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_ohlc_double10_ledger.csv.gz",
+      "sha256": "f13545f30e4cf2debb66cab230de97d30f1a4ee6d58ccca4b3e28b4a50b8e331",
+      "size_bytes": 39622
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_ohlc_double10_matched.csv.gz",
+      "sha256": "5b5b320f6d0520f51f75c8f8c2c7d23ca516e7e32fa5e68e8a1599d5e1ff6119",
+      "size_bytes": 3136
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_ohlc_double_risk_only_cycles.csv",
+      "sha256": "302894314e9dd0afb134d5595e37e0900a8632b97f35de2477568bf5555be989",
+      "size_bytes": 203
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_ohlc_double_risk_only_ledger.csv.gz",
+      "sha256": "c37935fa3b24dd4871b0f3ad0cd49764427079435b43d93c632af70a6ffe4076",
+      "size_bytes": 1768
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_ohlc_double_risk_only_matched.csv.gz",
+      "sha256": "79d89b55c5f23441256189113512ce5688eb9ccf1382f64aa6255ee6d2bddef0",
+      "size_bytes": 2515
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_ohlc_fixed10_cycles.csv",
+      "sha256": "6ffedc7d4a707ba6fcbe174e3a3db3c4321d0f3a96e83fff51c4470293cbeb05",
+      "size_bytes": 203
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_ohlc_fixed10_ledger.csv.gz",
+      "sha256": "15f1277633799de7a6e5e974c7c66a3ee7c70faf6ac6361e601fcbddde968691",
+      "size_bytes": 88525
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_ohlc_fixed10_matched.csv.gz",
+      "sha256": "08735e7d3633da0c34a683fefe131b2b4fd7a345d0f72cc9c7229bc41385ab53",
+      "size_bytes": 139614
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_ohlc_opportunities.csv.gz",
+      "sha256": "0ceda33d224543666acdafd94b7d45a6380ca1c14d82f678fe2b326bf7a8a09e",
+      "size_bytes": 113900
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_olhc_double10_cycles.csv",
+      "sha256": "0b4654e393bf5a34d321a8546341760e2aa2ac742311db4cbe81999db2ee4c09",
+      "size_bytes": 199
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_olhc_double10_ledger.csv.gz",
+      "sha256": "f271a8b0ffe56e1171543dc5561a6c3a509d5a0abc20c8f9a0a1e381be186a0d",
+      "size_bytes": 39529
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_olhc_double10_matched.csv.gz",
+      "sha256": "63524bf132991e67e0ce2d34f487a45b1b29be0551fa01493be17030cfd8c580",
+      "size_bytes": 2956
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_olhc_double_risk_only_cycles.csv",
+      "sha256": "302894314e9dd0afb134d5595e37e0900a8632b97f35de2477568bf5555be989",
+      "size_bytes": 203
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_olhc_double_risk_only_ledger.csv.gz",
+      "sha256": "9a308f2b7efa56dc6b75a63dbcab15efbe70e53cdf859dee16cb476d38222a63",
+      "size_bytes": 1770
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_olhc_double_risk_only_matched.csv.gz",
+      "sha256": "e214aba46425bec4937d3d67ee27fe2d8d677c58a1a3fa5312a91a42c201923c",
+      "size_bytes": 2517
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_olhc_fixed10_cycles.csv",
+      "sha256": "6b0d3deddd27697106976f80fb053fa46e1c6bfd01d1f4e11c3589fc4a4e93c3",
+      "size_bytes": 202
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_olhc_fixed10_ledger.csv.gz",
+      "sha256": "3aaf36718296914036e7dc233a1bbccd05015f74370b06d573cf62ad3d149bf8",
+      "size_bytes": 88475
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_olhc_fixed10_matched.csv.gz",
+      "sha256": "e0e4ad757276b8817db46351daa7821949c92828e2c28041b040fa15143683e9",
+      "size_bytes": 139617
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/development_olhc_opportunities.csv.gz",
+      "sha256": "dd192873ced614b0db7e805e291123bb87895bb7f7ff8acfa092a6ec7102cc5a",
+      "size_bytes": 113831
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/frozen.json",
+      "sha256": "cfc11b9f05c480c96aed2f2d2e309ffb23af9b7e0784bb2e35ba63a4bcc2cbf9",
+      "size_bytes": 2517
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/halt_cycles.csv",
+      "sha256": "c12dd391b443a48cf24410c0499130ff33b06e56073d59c2044fad6385e30d59",
+      "size_bytes": 646588
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/longest_streaks.csv",
+      "sha256": "8354b5432777f46c0007f863b7ec54ec565e0b732251a75b772f07ea3aeba3d4",
+      "size_bytes": 182488
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_legacy_gross1_fixed10_cycles.csv",
+      "sha256": "6fdb7950354a5c13be90524ea3fd212490bb4bf15e8427989e78a3942cd77e27",
+      "size_bytes": 140
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_legacy_gross1_fixed10_ledger.csv.gz",
+      "sha256": "614e6d2a62e26d439bd1937aec8565e122d301745020b05951d67a3f1f5f880f",
+      "size_bytes": 21190
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_legacy_gross1_fixed10_matched.csv.gz",
+      "sha256": "61dc8d1c8d055e84f56eac65eec74eb755fe2cb3b5c927ba93626d2dc7255779",
+      "size_bytes": 33561
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_legacy_gross1_opportunities.csv.gz",
+      "sha256": "3bc64a6c5ed2d15e368145d15d655aa4235bf9580ac82894d88a4e9b3bce246a",
+      "size_bytes": 25293
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_next_bar_double10_cycles.csv",
+      "sha256": "27fc270f6fb80060da020c532fbdb7572170f19b286660663efab2a9c026a66c",
+      "size_bytes": 194
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_next_bar_double10_ledger.csv.gz",
+      "sha256": "69fc6c39159214755946e04e4a472b584cb0d0aba8dacd890e6db5b40807a544",
+      "size_bytes": 11520
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_next_bar_double10_matched.csv.gz",
+      "sha256": "ffc65aca45bc90470741263a7ac49ea68d7900ec0298ec5f8b36c43613669ae7",
+      "size_bytes": 3313
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_next_bar_double_risk_only_cycles.csv",
+      "sha256": "d7202fbf21d65cddf7c2c72734c1f48a9f7fe0f8914b24707ba7946922975857",
+      "size_bytes": 200
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_next_bar_double_risk_only_ledger.csv.gz",
+      "sha256": "4042f1e8e6b575165f90117e1242555fce0a494b9d15fef787cfbe1731f0a1b8",
+      "size_bytes": 3512
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_next_bar_double_risk_only_matched.csv.gz",
+      "sha256": "9713fb7021f937ff23c366b5d7fd6fedf8d4b0e886e91b106c696d523b94098f",
+      "size_bytes": 4742
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_next_bar_fixed10_cycles.csv",
+      "sha256": "cd5c51166b5e89e63682d9264636244107ee4af4913142e336a5c70b2677536f",
+      "size_bytes": 141
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_next_bar_fixed10_ledger.csv.gz",
+      "sha256": "55f86e7fce8dd60e9969f64061e144c698007bf2e2365cc0e170b1182c85ce70",
+      "size_bytes": 23332
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_next_bar_fixed10_matched.csv.gz",
+      "sha256": "31e46f47bbc84e40bfd220df69ca845a1083e060132d071199b731ef720e863e",
+      "size_bytes": 36017
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_next_bar_opportunities.csv.gz",
+      "sha256": "9911271116eb2341db92b2dcfa56b4a9f763fa1b0717709793d469df868d8526",
+      "size_bytes": 30682
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_ohlc_double10_cycles.csv",
+      "sha256": "2cdac27c86dff2be27420f87e956d9efe6484d4c21f77a318f15bd55319e1c43",
+      "size_bytes": 137
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_ohlc_double10_ledger.csv.gz",
+      "sha256": "7aca36e9a141746843a9828e26f597f0d37c043780f364b16e2db00650752243",
+      "size_bytes": 11848
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_ohlc_double10_matched.csv.gz",
+      "sha256": "7a087da9672c0b41bc8a4adf366803c1b8b2c3d7b4baea3c775f8aa94399017c",
+      "size_bytes": 3850
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_ohlc_double_risk_only_cycles.csv",
+      "sha256": "3f39e546d24bbd5a12838f2a83a933ee5e6af32e7d4eecf4770e6e1894c29788",
+      "size_bytes": 140
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_ohlc_double_risk_only_ledger.csv.gz",
+      "sha256": "95953a644d0666add15e91815f0338d5ecf60f3e671407a3b2706cfba81591a3",
+      "size_bytes": 3481
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_ohlc_double_risk_only_matched.csv.gz",
+      "sha256": "9672e09876a262db0a731405484173cd1cb050fb3c680af3bea9513f8ba6dddd",
+      "size_bytes": 4933
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_ohlc_fixed10_cycles.csv",
+      "sha256": "b95d6c016b8fd0c823da4d93cf3ba261376409397631586291ed59a2dd5ec4be",
+      "size_bytes": 139
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_ohlc_fixed10_ledger.csv.gz",
+      "sha256": "260ddb07cc7b7f36c67ab40d569aa05cfab435a7baca9c21e36a87f72e48682e",
+      "size_bytes": 23049
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_ohlc_fixed10_matched.csv.gz",
+      "sha256": "e88b11a5c4ee3505e0098d69def4b738ec9ef01ed072b635591d68ba7f8968fa",
+      "size_bytes": 35983
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_ohlc_opportunities.csv.gz",
+      "sha256": "045f1313bed6eb257a15bca03ef4700400ed267a5db4dbe4917cabc20fa77cb0",
+      "size_bytes": 29658
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_olhc_double10_cycles.csv",
+      "sha256": "2cdac27c86dff2be27420f87e956d9efe6484d4c21f77a318f15bd55319e1c43",
+      "size_bytes": 137
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_olhc_double10_ledger.csv.gz",
+      "sha256": "72759d32dc019521af8dd61b3cf3e5f14c64f2245a25825b8463ceab2cbc9759",
+      "size_bytes": 11846
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_olhc_double10_matched.csv.gz",
+      "sha256": "73a34a3b193cd185429b8d762fad60c5f2e17ee5c808fa1fcf3a50158e489865",
+      "size_bytes": 3853
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_olhc_double_risk_only_cycles.csv",
+      "sha256": "428d0571b837654fa45010dd4f652cbee695a6b2bdfea513e5f172f66418d775",
+      "size_bytes": 140
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_olhc_double_risk_only_ledger.csv.gz",
+      "sha256": "6aa0637d04f00e6d03bfd34930887da35fe440ac152f8409e115814a6ac35212",
+      "size_bytes": 3499
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_olhc_double_risk_only_matched.csv.gz",
+      "sha256": "110b7b548ac295d2aa440ce83c9270e51d0b8e157dd6fb381f70fcf4f27b4563",
+      "size_bytes": 4937
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_olhc_fixed10_cycles.csv",
+      "sha256": "21a9d65b62dfc2a58ca0ed971213660c4524f2f95445fde9bb0f176d3325b650",
+      "size_bytes": 139
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_olhc_fixed10_ledger.csv.gz",
+      "sha256": "473c3ffdd003b77ee1f2709c709bea51e6c0ddf28a095678eb5eb520482dca68",
+      "size_bytes": 23258
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_olhc_fixed10_matched.csv.gz",
+      "sha256": "a092e7792f7b1cbad64bca7554e11b981681040aeb1514608e2a1270e05838fe",
+      "size_bytes": 36327
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/preholdout_olhc_opportunities.csv.gz",
+      "sha256": "ed4890c0bbb1a0e937f27266416318b7ae144e0c3b0a1b93a99ef00d38ac76bf",
+      "size_bytes": 29718
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/receipt.json",
+      "sha256": "410916edd431c0817312284f039c4096f18a29943086c3a44c8004348c158bc3",
+      "size_bytes": 1163
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/summary.csv",
+      "sha256": "a556d6b2aeb48b890d7b8b83fc936b5dfbc0fd536f6e82619f8cfcccc67238cf",
+      "size_bytes": 16682
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_legacy_gross1_fixed10_cycles.csv",
+      "sha256": "f7b91ca0bf1ca9c8aac58d47dd00f2ada8fa1de11b5d7f83b30ed81463d002c0",
+      "size_bytes": 200
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_legacy_gross1_fixed10_ledger.csv.gz",
+      "sha256": "8009490e8273ac6b19ed0b11c2af8010689102cdeb46eb29787d77037085fe22",
+      "size_bytes": 58755
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_legacy_gross1_fixed10_matched.csv.gz",
+      "sha256": "8524edbbdb5798d7343062f64ceae962eca89c6719296367e08098e67c5e3d79",
+      "size_bytes": 93887
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_legacy_gross1_opportunities.csv.gz",
+      "sha256": "13c358630f51cc764a95159cef70be25fa58e4072f57531e4a3727b5f5ea64cf",
+      "size_bytes": 69171
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_next_bar_double10_cycles.csv",
+      "sha256": "6a238cfb5b480b915d97d758dec4de9955d45bc94010fa5ad9b44b12d4188d10",
+      "size_bytes": 137
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_next_bar_double10_ledger.csv.gz",
+      "sha256": "855a43e8dfa91fd35a26f0cd7f2b64818aa25b0b455b3c23846400bf43cb0a65",
+      "size_bytes": 28506
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_next_bar_double10_matched.csv.gz",
+      "sha256": "b33957ae1cf0873f906a36078ad041e7e91c3a546bd53450c83af124af1db0f3",
+      "size_bytes": 2425
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_next_bar_double_risk_only_cycles.csv",
+      "sha256": "05c408d6fe5aaf6599a255eaf62b58bfcb19174bfb8da2e0f805aef8798642bf",
+      "size_bytes": 140
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_next_bar_double_risk_only_ledger.csv.gz",
+      "sha256": "e33d025fbebbb547f068a4b1571fdc98bfc07daf673fb8981575a9b37646df33",
+      "size_bytes": 1765
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_next_bar_double_risk_only_matched.csv.gz",
+      "sha256": "c5d23e1ddbf8ee27c207deeea7881073cee528edabab411067ee34450769db78",
+      "size_bytes": 2437
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_next_bar_fixed10_cycles.csv",
+      "sha256": "342e72c3a2ce92b93877d8b528e863dcda8bb82806b6fb4aa8958475b9d0355d",
+      "size_bytes": 141
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_next_bar_fixed10_ledger.csv.gz",
+      "sha256": "120019afe840a5571e602b9925b9e9dd9f5d6e9daf482f3abc8a5eff7a2db5d7",
+      "size_bytes": 65850
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_next_bar_fixed10_matched.csv.gz",
+      "sha256": "18c29b4a4aaa59e976570397430ce010fe12fb7a75f1527c0b95514ab754d7fd",
+      "size_bytes": 102245
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_next_bar_opportunities.csv.gz",
+      "sha256": "baf4d0b5f86aa9e8736d297b68576eece75027bab7c9b9857441ac350617893f",
+      "size_bytes": 85627
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_ohlc_double10_cycles.csv",
+      "sha256": "28dcbab01250fa963b47cc64fdafe07cdb7f4f01deb38461eaeea80e81133af0",
+      "size_bytes": 200
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_ohlc_double10_ledger.csv.gz",
+      "sha256": "da198a5d6fcd06ea149c4da053ee1266d4d9d7288f32c9b351a3138da386d060",
+      "size_bytes": 7229
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_ohlc_double10_matched.csv.gz",
+      "sha256": "6425b5a9a6dd98a46abd944576d36e6cefe81094da0b9bcfc2f77f3db3a5398a",
+      "size_bytes": 3879
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_ohlc_double_risk_only_cycles.csv",
+      "sha256": "53a194085c2bacfcf9492209b299da259db36656981b2e4312e4e255f7d8726c",
+      "size_bytes": 202
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_ohlc_double_risk_only_ledger.csv.gz",
+      "sha256": "b41b3827b1612ddb4c2bb5bbc03dec289b1e34a911e495e40cd8a904e3b57f2a",
+      "size_bytes": 3067
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_ohlc_double_risk_only_matched.csv.gz",
+      "sha256": "350214d4a9253c9ed27043e381f78855892aaaf1c3f38029fde0cbc846f4ceb8",
+      "size_bytes": 4582
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_ohlc_fixed10_cycles.csv",
+      "sha256": "5d30dfd48f6aea49dee3f2cab9daf51855d56e2ba5a40637d9331bf5fcfdac8f",
+      "size_bytes": 202
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_ohlc_fixed10_ledger.csv.gz",
+      "sha256": "be05cbb6ca11c50c72efabdd440d4d4035c67742dd14546c41fa17037ef73738",
+      "size_bytes": 65060
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_ohlc_fixed10_matched.csv.gz",
+      "sha256": "abacf3d6955863e763d863f5c8ffecbf89623a51cc50bce18fcc2452c1d2ee2d",
+      "size_bytes": 102380
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_ohlc_opportunities.csv.gz",
+      "sha256": "d30c4d334434c78f253269524c54103a2a2a57f59e556ed8050da4bf4b608780",
+      "size_bytes": 82708
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_olhc_double10_cycles.csv",
+      "sha256": "28dcbab01250fa963b47cc64fdafe07cdb7f4f01deb38461eaeea80e81133af0",
+      "size_bytes": 200
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_olhc_double10_ledger.csv.gz",
+      "sha256": "9d6dc64e7aff9e6460e4aa4e87fd5983abbba1ab06f6c2772d21e7c514e739e0",
+      "size_bytes": 7229
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_olhc_double10_matched.csv.gz",
+      "sha256": "841ca94f66fe79337b9f82d81699287951e183c109aa6cce54a2fef44c3e0ba3",
+      "size_bytes": 3877
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_olhc_double_risk_only_cycles.csv",
+      "sha256": "5f7b7dfcab6f6fe48630b7a143084ff16a33eaa33e981c45fcb2d23fed109a65",
+      "size_bytes": 201
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_olhc_double_risk_only_ledger.csv.gz",
+      "sha256": "cf479c19c532276e0fbc6f1ede244b74f228b4ab0b5e913285df4d17cbd3ee57",
+      "size_bytes": 3086
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_olhc_double_risk_only_matched.csv.gz",
+      "sha256": "bba303a0757e3d9dec9ee93c6bcc5076f1cac419f65d38cfe1bc2e501146deee",
+      "size_bytes": 4579
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_olhc_fixed10_cycles.csv",
+      "sha256": "2d8178641374f9523bca91b048ab4a807b3c0ef4e67df3d00fb4aad30978cad6",
+      "size_bytes": 202
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_olhc_fixed10_ledger.csv.gz",
+      "sha256": "b5587121413e1f79ad3cde56071db0009111be7dba20650e814d82cdffec20b1",
+      "size_bytes": 65238
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_olhc_fixed10_matched.csv.gz",
+      "sha256": "8324b47fc8e649320189734bc08df09752ce2b3771ac0d10f283ceaa7005b200",
+      "size_bytes": 102730
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/evaluation/validation_olhc_opportunities.csv.gz",
+      "sha256": "fe9947fa404c203dfe105f407ff07e4dd93834ab282e59aa415e7989b1cc8820",
+      "size_bytes": 82638
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/key_cycle_ohlc_double10.csv",
+      "sha256": "7ce86464e17a6d37ccf523883f6e01b9ae2b143f26e13be0a5a3d6c439afa1b6",
+      "size_bytes": 7682
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/notion_receipt.json",
+      "sha256": "59f3d5ae1d52a01b815ebcb591e0db7781f0bffbf2c6877d77000eea94b68a79",
+      "size_bytes": 270
+    },
+    {
+      "path": "experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/results/validation.json",
+      "sha256": "9e20b06a2a7d210cc02ef75340a878636859f65b3113a5887b08b9d5a4c03ff0",
+      "size_bytes": 3531
+    },
+    {
+      "path": "yoyo/evaluation/spike_net_recovery_exit.py",
+      "sha256": "885cec8d9de05335df5e9fa2608ef4eec464e8a9f2526ec4114668735a139380",
+      "size_bytes": 12755
+    },
+    {
+      "path": "yoyo/evaluation/spike_net_recovery_cash.py",
+      "sha256": "10abd8450dba9227133d941cb450d0a2fa79bd43836e4b74ab7fa4e327f54b54",
+      "size_bytes": 8820
+    },
+    {
+      "path": "yoyo/evaluation/spike_net_recovery_study.py",
+      "sha256": "bdc692736efe5957610bebd63621d40907d1ee3a6da319b6fde7ac0a1c4639ad",
+      "size_bytes": 8917
+    },
+    {
+      "path": "tests/evaluation/test_spike_net_recovery_exit.py",
+      "sha256": "6e595db1d40b6edecccf39a3010baf984d6964a408e22b4341586e7e9d853efb",
+      "size_bytes": 5003
+    },
+    {
+      "path": "tests/evaluation/test_spike_net_recovery_cash.py",
+      "sha256": "019be9cad01b669bfd5eba53406640087910916b5044dea039b125e7ceb65f95",
+      "size_bytes": 3620
+    },
+    {
+      "path": "scripts/report_spike_net_recovery.py",
+      "sha256": "f9847b60a621d324918c11cff844d803dae83ce697bbd325ff1d237a0b8660e9",
+      "size_bytes": 13077
+    },
+    {
+      "path": "analysis/p1_spike_eth3m_net_recovery_20260914.md",
+      "sha256": "ea584d2769f2ccb483537cc636123650a84434031e610aa266bf4f5a8937ebca",
+      "size_bytes": 16599
+    },
+    {
+      "path": "analysis/html/p1_spike_eth3m_net_recovery_20260914.html",
+      "sha256": "5929d5ee77ed24c727239e385939286ca1fc9ceb536afd3d1b352f4d610fd088",
+      "size_bytes": 22969
+    },
+    {
+      "path": "docs/learnings/breakeven-breaks-streaks-without-clearing-recovery-debt.md",
+      "sha256": "12e2faaf69faa041e980054b6becfe55013865db3bdda2bcf8d85a1008b513a8",
+      "size_bytes": 1787
+    }
+  ]
+}
