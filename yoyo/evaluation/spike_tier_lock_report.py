@@ -54,6 +54,9 @@ def load_common(path: Path, sources: list) -> pd.DataFrame:
         receipt = json.loads(rp.read_text())
         if receipt.get('status') != 'complete':
             raise ValueError(f'incomplete receipt: {rp}')
+        expected_names = {f'{arm}.{mode}_tier.csv.gz' for arm in ('v1_common_execution_long','v8') for mode in ('fixed','serial')}
+        if not expected_names.issubset(receipt['files']):
+            raise ValueError(f'missing tier arm or replay mode: {rp}')
         for name, expected in receipt['files'].items():
             if not name.endswith(('.fixed_tier.csv.gz', '.serial_tier.csv.gz')):
                 continue
