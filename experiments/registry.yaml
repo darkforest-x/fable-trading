@@ -9119,3 +9119,15 @@ experiments:
     artifacts:
     - spike-eth3m-partial-tp-20260914-v1-delivery
     notes: Pre-May2026 only; record full initial-stop,gross-loss and net-loss streaks separately. No live actions.
+
+  - experiment_id: exp-spike-eth3m-net-recovery-20260914-v3
+    source_repo: darkforest-x/fable-trading
+    source_commit: afa1aba63d
+    status: active
+    question: Does fee-covered breakeven and net1R full take-profit permit finite-cash ETH3m doubling with reset only after cumulative net recovery?
+    single_variable: Owner-authorized frozen net-target and cost-protection semantics; three timing scenarios and same-exit fixed/double capacity controls.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/active/exp-spike-eth3m-net-recovery-20260914-v3/PROJECT_PLAN.md
+    notes: No six-loss reset; no debt forgiveness; no new holdout use. OHLC paths are assumptions rather than observed intrabar truth.
