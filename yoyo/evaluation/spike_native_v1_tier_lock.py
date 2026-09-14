@@ -48,7 +48,13 @@ def write_json(path: Path, value: dict[str, Any]) -> None:
 
 def _lock_price(entry: float, initial_risk: float, tick: float, stage: int) -> float:
     """Return the conservative long-side tick-grid protection for one stage."""
-    target = entry if stage == 1 else entry + TIER_LOCK_R * initial_risk
+    # The first tier is exactly the old BE05 contract: protect the actual
+    # following-open entry, even when binary division makes a tick-grid entry
+    # look microscopically below its integer tick count.  Only the new 0.5R
+    # profit-lock target needs an executable conservative tick conversion.
+    if stage == 1:
+        return entry
+    target = entry + TIER_LOCK_R * initial_risk
     # A long protective stop rounds down: it never claims a higher executable
     # lock than the exchange tick grid permits.
     return math.floor(target / tick) * tick

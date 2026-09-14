@@ -34,4 +34,16 @@ def test_tighter_native_protection_is_not_relaxed_by_stage() -> None:
 
 
 def test_long_lock_rounds_down_on_the_tick_grid() -> None:
+    assert _lock_price(.004751, .001, .000001, 1) == pytest.approx(.004751)
     assert _lock_price(.005751, .001, .000001, 2) == pytest.approx(.006251)
+
+
+def test_stage_one_keeps_exact_entry_and_matches_be_when_stage_two_never_triggers() -> None:
+    bars = _bars([(.004751, .004751, .004750, .004751),
+                  (.004751, .004811, .004700, .004780),
+                  (.004751, .004751, .004751, .004751)])
+    outcome = _tier_exit(bars, bars.index[0], .004751, .000100, .004651, .000001)
+    assert outcome["be05_trigger_count"] == 1
+    assert outcome["tier15_trigger_count"] == 0
+    assert outcome["exit_reason"] == "protective_stop"
+    assert outcome["exit_price"] == pytest.approx(.004751)
