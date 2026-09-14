@@ -70,10 +70,22 @@ def load_common(path: Path, sources: list) -> pd.DataFrame:
 
 def load_native(path: Path, receipt_path: Path, sources: list) -> pd.DataFrame:
     receipt = json.loads(receipt_path.read_text())
+    if receipt.get('status') != 'complete' or int(receipt['paired_events']) != 6185:
+        raise ValueError('native tier receipt is not complete')
     expected = receipt['files'][path.name]
     f = verified(path, expected, sources)
     if len(f) != 6185:
         raise ValueError('native tier must retain all 6185 frozen events')
+    # Native writer preserves old controls with prefixes in its audit ledger.
+    # Load only the new tier economics; old controls come from OLD manifest.
+    if 'tier_net_r' in f:
+        for name in ('exit_time','exit_price','exit_reason','net_r','net_return','mfe_r','censored'):
+            f[name] = f[f'tier_{name}']
+        f['stage1_armed'] = f.be05_trigger_count.gt(0)
+        f['stage2_armed'] = f.tier15_trigger_count.gt(0)
+        f['stage1_trigger_count'],f['stage2_trigger_count'] = f.be05_trigger_count,f.tier15_trigger_count
+        for target,source in [('stage1_trigger_time','be05_trigger_bar_open'),('stage2_trigger_time','tier15_trigger_bar_open')]:
+            f[target] = pd.to_datetime(f[source],utc=True)+pd.to_timedelta(f.timeframe_min,unit='m')
     f['system'], f['mode'], f['rule'], f['side'] = 'v1_native', 'fixed', 'tier', 1
     f['event_key'] = f.event_id
     return f
