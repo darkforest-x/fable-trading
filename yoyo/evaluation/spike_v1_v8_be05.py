@@ -263,13 +263,16 @@ def replay_fixed_entry(context: base.StreamContext, row: pd.Series, *, arm: str,
     prepared = prepare_arm(context, arm=arm) if prepared is None else prepared
     if prepared.arm != arm:
         raise ValueError("prepared arm differs from requested arm")
-    context, frame, gap, raw_side, spec = prepared.context, prepared.frame, prepared.gap, prepared.raw_side, prepared.spec
+    context, cohort, frame, gap, raw_side, spec = prepared.context, prepared.cohort, prepared.frame, prepared.gap, prepared.raw_side, prepared.spec
     oa, ha, la, ca, aa = prepared.open, prepared.high, prepared.low, prepared.close, prepared.atr
     side = int(row.side); start = int(frame.index.get_loc(pd.Timestamp(row.entry_time)))
     pos = {key: row[key] for key in ("signal_i", "signal_bar_open", "entry_i", "entry_time", "side", "entry_price", "initial_stop", "initial_risk", "initial_risk_frac")}
-    pos.update(protection=float(row.initial_stop), mfe_r=0., trail_armed=False, be_armed=False, be_trigger_count=0,
-               qty_remaining=1., qty_realized=0., realized_gross_return=0., realized_net_return=-base.ENTRY_COST,
-               trade_id=f"{context.key}:{arm}:fixed")
+    # Serial output preserves full-frame ordinals even though each cache begins
+    # at a shorter authenticated prefix.  Fixed exits need the same offset.
+    pos["frozen_index_offset"] = int(row.entry_i) - start
+    pos = base._new_trade(pos, trade_id=f"{context.key}:{arm}:fixed", cohort=cohort,
+                          policy="be05" if enable_be else "baseline", context=context)
+    pos.update(protection=float(row.initial_stop), mfe_r=0., trail_armed=False, be_armed=False, be_trigger_count=0)
     pending_reverse = False
     for i in range(start, len(frame)):
         stamp = frame.index[i]
@@ -294,20 +297,35 @@ def replay_fixed_entry(context: base.StreamContext, row: pd.Series, *, arm: str,
     return base._trade_row(pos, censored=True, precision="last_complete_close") | {"be_armed": pos["be_armed"], "be_trigger_count": pos["be_trigger_count"], "protection": float(pos["protection"])}
 
 
-def validate_baseline(context: base.StreamContext, trades: pd.DataFrame, *, arm: str) -> None:
+def _oracle_path(context: base.StreamContext, arm: str) -> Path:
+    """Resolve the exact frozen per-stream baseline oracle for one arm."""
+    if arm == "v1_common_execution_long":
+        return context.path / "trades.csv.gz"
+    if arm == "v8":
+        return V8_ORACLE / "streams" / f"{context.key}.trades.csv.gz"
+    raise ValueError(arm)
+
+
+def validate_baseline(context: base.StreamContext, trades: pd.DataFrame, *, arm: str) -> dict[str, str]:
     """Require exact closed baseline parity against the arm's frozen oracle."""
     from pandas.testing import assert_frame_equal
-    if arm == "v1_common_execution_long":
-        expected = pd.read_csv(context.path / "trades.csv.gz").query("variant == 'v1_common_execution_long'")
-    elif arm == "v8":
-        path = V8_ORACLE / "streams" / f"{context.key}.trades.csv.gz"
-        expected = pd.read_csv(path).query("arm == 'v8'")
-    else:
-        raise ValueError(arm)
+    path = _oracle_path(context, arm)
+    expected = pd.read_csv(path)
+    expected = expected.query("variant == 'v1_common_execution_long'") if arm == "v1_common_execution_long" else expected.query("arm == 'v8'")
     actual = trades.loc[~trades.censored.astype(bool)]
     expected = expected.loc[~expected.censored.astype(bool)]
     assert_frame_equal(expected.reindex(columns=KEY).sort_values("signal_i").reset_index(drop=True),
                        actual.reindex(columns=KEY).sort_values("signal_i").reset_index(drop=True), check_dtype=False, rtol=1e-9, atol=1e-9)
+    return {"arm": arm, "path": str(path), "sha256": sha256(path)}
+
+
+def validate_fixed_baseline(serial: pd.DataFrame, fixed: pd.DataFrame) -> None:
+    """Require paired baseline exits to retain serial baseline fees and fills exactly."""
+    from pandas.testing import assert_frame_equal
+    fields = [*KEY, "censored"]
+    left = serial.loc[:, fields].sort_values("signal_i").reset_index(drop=True)
+    right = fixed.loc[:, fields].sort_values("signal_i").reset_index(drop=True)
+    assert_frame_equal(left, right, check_dtype=False, rtol=1e-9, atol=1e-9)
 
 
 def summarize(trades: pd.DataFrame, *, label: str) -> dict[str, object]:
@@ -360,16 +378,21 @@ def run(output: Path, *, limit: int | None = None, official: bool = False) -> pd
     folders = sorted(p for p in (RAW / "streams").iterdir() if (p / "completion.json").is_file())
     if len(folders) != int(config["expected_streams"]): raise ValueError("unexpected raw stream count")
     folders = folders if limit is None else folders[:limit]
-    output.mkdir(parents=True, exist_ok=False); summaries: list[dict[str, object]] = []
+    output.mkdir(parents=True, exist_ok=False); summaries: list[dict[str, object]] = []; oracle_receipts: list[dict[str, str]] = []
     for number, folder in enumerate(folders, 1):
         context = base.load_verified_stream(folder)
         for arm in ARMS:
             prepared = prepare_arm(context, arm=arm)
             baseline, _, _ = replay_serial(context, arm=arm, enable_be=False, prepared=prepared)
-            validate_baseline(context, baseline, arm=arm)
+            oracle_receipts.append(validate_baseline(context, baseline, arm=arm))
             be, _, _ = replay_serial(context, arm=arm, enable_be=True, prepared=prepared)
             fixed_base = pd.DataFrame([replay_fixed_entry(context, row, arm=arm, enable_be=False, prepared=prepared) for _, row in baseline.iterrows()], columns=FIXED_COLUMNS)
             fixed_be = pd.DataFrame([replay_fixed_entry(context, row, arm=arm, enable_be=True, prepared=prepared) for _, row in baseline.iterrows()], columns=FIXED_COLUMNS)
+            for table in (fixed_base, fixed_be):
+                table["stream_key"] = context.key
+                for key, value in context.identity.items():
+                    table[key] = value
+            validate_fixed_baseline(baseline, fixed_base)
             prefix = f"{folder.name}.{arm}"
             for kind, table in (("serial_baseline", baseline), ("serial_be05", be), ("fixed_baseline", fixed_base), ("fixed_be05", fixed_be)):
                 table.to_csv(output / f"{prefix}.{kind}.csv.gz", index=False, compression={"method": "gzip", "mtime": 0})
@@ -386,7 +409,8 @@ def run(output: Path, *, limit: int | None = None, official: bool = False) -> pd
     summary = pd.DataFrame(summaries); summary.to_csv(output / "stream_summary.csv", index=False)
     (output / "manifest.json").write_text(json.dumps({"complete": limit is None, "streams": len(folders), "expected_streams": config["expected_streams"],
         "configuration_exposure": 1, "history": "authorized reused nonblind history",
-        "native_v1": "implemented separately; excluded from this common-execution/V8 module", "source": {"raw": sha256(RAW / "manifest.json"), "v8": sha256(V8_ORACLE / "manifest.json")}}, indent=2))
+        "native_v1": "implemented separately; excluded from this common-execution/V8 module", "source": {"raw": sha256(RAW / "manifest.json"), "v8": sha256(V8_ORACLE / "manifest.json")},
+        "oracle_ledgers": oracle_receipts}, indent=2))
     return summary
 
 

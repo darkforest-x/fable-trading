@@ -83,10 +83,12 @@ def test_short_wick_trigger_is_next_bar_only_and_fixed_baseline_matches_serial()
     serial, _, _ = study.replay_serial(context, arm="v8", enable_be=False, prepared=prepared)
     fixed = pd.DataFrame([study.replay_fixed_entry(context, row, arm="v8", enable_be=False, prepared=prepared)
                           for _, row in serial.iterrows()], columns=study.FIXED_COLUMNS)
-    pd.testing.assert_frame_equal(serial.loc[~serial.censored, study.KEY].reset_index(drop=True), fixed.loc[~fixed.censored, study.KEY].reset_index(drop=True), check_dtype=False)
+    study.validate_fixed_baseline(serial, fixed)
     be, _, _ = study.replay_serial(context, arm="v8", enable_be=True, prepared=prepared)
     trade = be.loc[~be.censored].iloc[0]
     assert (trade.exit_i, trade.exit_price, trade.net_return) == (6, pytest.approx(100.), pytest.approx(-.002))
+    fixed_be = study.replay_fixed_entry(context, serial.iloc[0], arm="v8", enable_be=True, prepared=prepared)
+    assert (fixed_be["exit_i"], fixed_be["exit_price"], fixed_be["net_return"]) == (6, pytest.approx(100.), pytest.approx(-.002))
 
 
 def test_zero_trade_pair_and_realized_tail_are_schema_safe() -> None:
@@ -98,3 +100,14 @@ def test_zero_trade_pair_and_realized_tail_are_schema_safe() -> None:
     pairs = study.paired_decomposition(baseline, be)
     assert pairs.baseline_realized_ge_10r.tolist() == [True, False]
     assert pairs.retained_realized_ge_10r.tolist() == [False, True]
+
+
+def test_fixed_exit_restores_full_source_ordinal_from_prefixed_cache() -> None:
+    context = _context(); bars = context.cache["bars"]
+    bars.iloc[5] = [100., 101.1, 99.1, 100.5, 1., 100., 100., 1., 0., 100., 100.]
+    bars.iloc[6] = [100.2, 100.3, 99.9, 100., 1., 100., 100., 1., 0., 100., 100.]
+    prepared = study.prepare_arm(context, arm="v1_common_execution_long")
+    serial, _, _ = study.replay_serial(context, arm="v1_common_execution_long", enable_be=False, prepared=prepared)
+    row = serial.iloc[0].copy(); row["signal_i"] += 100; row["entry_i"] += 100
+    fixed = study.replay_fixed_entry(context, row, arm="v1_common_execution_long", enable_be=False, prepared=prepared)
+    assert fixed["exit_i"] == int(serial.iloc[0].exit_i) + 100
