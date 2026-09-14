@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v1-v8-be05-20260914-delivery
+    artifact_type: manifest
+    role: receipt_bound_be05_exit_sensitivity
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2b430b1523
+    source_path: experiments/active/exp-spike-v1-v8-be05-20260914-v1/delivery_manifest.json
+    sha256: 9af1cfaa9f3965824bbfab3b625830eecd247b4c1060efd64c1c7ecb92860d35
+    size_bytes: 4448
+    storage_uri: repo://experiments/active/exp-spike-v1-v8-be05-20260914-v1/delivery_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Native V1 and common V1/V8 remain separate. Same-entry native V1 improves188.17R but harms tail retention;V8 deteriorates2492.14R. Reused authorized history with failed attempts retained;19 tests and3531-stream archive parity pass. Large CSV ledgers stay local and are hash-bound.
   - artifact_id: gold-ma-indicator-20260914-rejected-candidate
     artifact_type: manifest
     role: human_annotation_morphology_replay_rejected_candidate
