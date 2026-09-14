@@ -1,0 +1,66 @@
+{
+  "date": "2026-09-15",
+  "builder_commit": "f931af0fb5e8438b096d2c109050b7840c38a656",
+  "reporter_commit": "2e5eff6ef5ffb47b037efd3cc59284e1267cba9c",
+  "tests": {
+    "passed": 75,
+    "focused": 4,
+    "layer_boundary": 71,
+    "command": "PYTHONPATH=.venv/lib/python3.9/site-packages:. /usr/bin/python3 -m pytest -q tests/test_spike_v8_winner_peaks.py tests/boundaries/test_layer_imports.py"
+  },
+  "runtime": {
+    "python": "3.9.6",
+    "pandas": "2.3.3",
+    "numpy": "2.0.2",
+    "interpreter": "/usr/bin/python3",
+    "dependencies_installed": false
+  },
+  "notion_url": "https://app.notion.com/p/3db8856479af8110872ae2b7cdfa9c59",
+  "holdout_consumption_number": 0,
+  "new_exit_return_backtests": 0,
+  "native_tv_parity": false,
+  "independent_audit": {
+    "reviewer": "ict_result_audit / budget-evidence / Luna Max",
+    "scope": "Code and frozen CSV/JSON outputs only; no raw OHLC/pickle/holdout",
+    "verdict": "PASS descriptive peak/path arithmetic and timing, no new-strategy endorsement",
+    "unique_trades": 123,
+    "nonempty_held_paths": 122,
+    "fully_held_bars": 6301,
+    "winners": 32,
+    "winner_peaks_with_exit_bar_uncertainty": 0,
+    "uncertain_loser_peak_interval": [
+      0,
+      0.356
+    ],
+    "thresholds_at_or_above_1R_affected": 0,
+    "peak_at_least_5R_winners": 14,
+    "prepeak_pullback_over_2R": 7,
+    "maximum_confirmed_prepeak_pullback_r": 7.232387923147257,
+    "result_hashes_verified": 15,
+    "max_mfe_error": 8.9e-16,
+    "max_net_peak_error": 1.8e-15
+  },
+  "presentation_checks": {
+    "html_tables": 9,
+    "figure_count": 3,
+    "csv_links": 4,
+    "notebook_links": 1,
+    "figure_pngs_visually_inspected": 3,
+    "notebook_code_cells_executed_in_reporter": 4,
+    "html_browser_preview": "Not attempted: session browser policy blocks local file URLs; no circumvention",
+    "chart_time_semantics": "Full-bar range indexed by bar open; close/known peak plotted at bar close; active protection shifted one bar; exit point uses bar-open lower time bound"
+  },
+  "additional_path_counterexample": {
+    "trade_entry_utc": "2026-02-04T13:00:00Z",
+    "later_bar_open_utc": "2026-02-04T18:30:00Z",
+    "prior_max_close_r": 5.019193,
+    "later_adverse_r": 1.860768,
+    "half_prior_close_r": 2.5095965,
+    "interpretation": "Earlier protection at half this prior closed peak would encounter the later adverse price; no new strategy PnL computed"
+  },
+  "peak_reached_vs_close_reached": {
+    "intrabar_at_least_8R": 7,
+    "close_at_least_8R": 3
+  },
+  "report_surface": "Project-required markdown to HTML; static structure checked; standalone PNG figures inspected"
+}

@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>ETH15min＋ICT：盈利单峰值与止盈诊断</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>ETH15min＋ICT：盈利单峰值与止盈诊断</h1>
+<h2>核心结论 / Executive Summary</h2>
+<p><strong>盈利单多数能走到约4—6R，少数走到10R以上。</strong> 连续历史123笔中32笔最终净盈利；赢家峰值中位4.36R、均值6.09R、最大35.59R。2026前4月9笔赢家的峰值中位5.24R、最大16.36R。只看最大值会被两笔超大行情带偏。</p>
+<p><strong>回吐确实存在，但不能把回吐总额当可追回利润。</strong> 32笔赢家平均从峰值回吐2.79R后退出，最终兑现约54.2%的毛峰值；扣费后兑现约52.6%的净峰值。与此同时，14笔峰值≥5R的大赢家中，7笔在原跟踪激活后、抵达峰值前已有超过2R的回落。</p>
+<p><strong>下一步应区分盈利初期保本与趋势后段锁盈。</strong> 不宜直接统一3R全平或把所有尾仓压成1—2R回撤；更值得单独验证“较晚启动的峰值比例保护”。本轮只做路径诊断，没有测试这个新规则，也没有证明它优于原版。</p>
+<h2>盈利单的峰值究竟有多大</h2>
+<p>这里的峰值是从真实开仓到真实退出之间的最大有利价格变化，除以初始价格止损距离。浮盈峰值为毛R，最终净R扣名义往返0.2%成本。所有32笔赢家都已核对退出根：该根的有利极值没有超过此前峰值，因此赢家峰值不受退出根先后顺序影响。</p>
+<table><thead><tr>
+<th>窗口</th>
+<th>盈利/全部</th>
+<th>最小峰值</th>
+<th>P25</th>
+<th>中位峰值</th>
+<th>P75</th>
+<th>P90</th>
+<th>最大峰值</th>
+<th>平均峰值</th>
+<th>盈利单净R中位</th>
+</tr></thead><tbody>
+<tr><td>2023年8月—2024年末</td><td>14/66</td><td>2.19</td><td>3.83</td><td>5.10</td><td>6.68</td><td>8.22</td><td>8.55</td><td>5.18</td><td>1.89</td></tr>
+<tr><td>2025全年</td><td>9/40</td><td>2.63</td><td>2.82</td><td>3.66</td><td>4.27</td><td>12.08</td><td>35.59</td><td>7.21</td><td>1.66</td></tr>
+<tr><td>2026年1—4月</td><td>9/17</td><td>2.14</td><td>2.74</td><td>5.24</td><td>8.38</td><td>10.94</td><td>16.36</td><td>6.38</td><td>3.09</td></tr>
+<tr><td>连续2023年8月—2026年4月</td><td>32/123</td><td>2.14</td><td>2.82</td><td>4.36</td><td>6.38</td><td>8.54</td><td>35.59</td><td>6.09</td><td>1.89</td></tr>
+</tbody></table>
+<p>连续窗口与前三行重叠，不能加总样本。2025的平均峰值7.21R高于中位3.66R，主要受那笔35.59R推动；它独自贡献2025全部正收益的65.0%。研究止盈应主要看分布和逐笔路径，不能把平均或最大峰值直接设成统一目标。</p>
+<p><img src="../../experiments/active/exp-spike-v8-ict-winner-peaks-20260915-v1/figures/all_peak_distribution.png" alt="全部交易峰值与32个赢家分布"></p>
+<table><thead><tr>
+<th>赢家峰值区间</th>
+<th>笔数</th>
+<th>占32笔赢家</th>
+</tr></thead><tbody>
+<tr><td>不足2R</td><td>0</td><td>0.0%</td></tr>
+<tr><td>2—3R</td><td>10</td><td>31.2%</td></tr>
+<tr><td>3—4R</td><td>3</td><td>9.4%</td></tr>
+<tr><td>4—5R</td><td>5</td><td>15.6%</td></tr>
+<tr><td>5—8R</td><td>7</td><td>21.9%</td></tr>
+<tr><td>8—10R</td><td>5</td><td>15.6%</td></tr>
+<tr><td>10R以上</td><td>2</td><td>6.2%</td></tr>
+</tbody></table>
+<p>32笔赢家里10笔止步于2—3R，14笔达到5R，7笔达到8R，只有2笔达到10R。这说明小幅盈利兑现和趋势尾仓确实有不同需求，但这些分组按最终结果划分，开仓时不能预先知道自己属于哪一组。</p>
+<h2>2026年前四个月：9笔盈利单逐笔拆解</h2>
+<p>先看最近讨论窗口。浅色条为峰值毛R，深色条为最终净R；两者差额包含价格回吐和成本，表格另列纯价格回吐，避免把手续费重复算成止盈问题。</p>
+<p><img src="../../experiments/active/exp-spike-v8-ict-winner-peaks-20260915-v1/figures/common_winner_peaks.png" alt="9笔赢家峰值与兑现"></p>
+<table><thead><tr>
+<th>入场北京时间</th>
+<th>方向</th>
+<th>盘中峰值毛R</th>
+<th>最高收盘毛R</th>
+<th>兑现毛R</th>
+<th>兑现净R</th>
+<th>价格回吐R</th>
+<th>到峰值约小时</th>
+<th>总持仓约小时</th>
+</tr></thead><tbody>
+<tr><td>2026-02-03 23:15</td><td>空</td><td>2.42</td><td>2.22</td><td>0.46</td><td>0.38</td><td>1.97</td><td>3.50</td><td>5.00</td></tr>
+<tr><td>2026-02-04 21:00</td><td>空</td><td>16.36</td><td>15.48</td><td>10.19</td><td>10.05</td><td>6.17</td><td>35.25</td><td>36.50</td></tr>
+<tr><td>2026-02-13 18:15</td><td>多</td><td>8.38</td><td>7.96</td><td>6.05</td><td>5.83</td><td>2.33</td><td>25.00</td><td>26.75</td></tr>
+<tr><td>2026-02-18 19:30</td><td>空</td><td>2.14</td><td>1.92</td><td>0.79</td><td>0.68</td><td>1.35</td><td>28.50</td><td>40.25</td></tr>
+<tr><td>2026-02-22 21:30</td><td>空</td><td>2.74</td><td>2.28</td><td>0.50</td><td>0.16</td><td>2.24</td><td>4.00</td><td>9.00</td></tr>
+<tr><td>2026-03-04 15:00</td><td>多</td><td>9.58</td><td>8.70</td><td>5.49</td><td>5.32</td><td>4.09</td><td>12.25</td><td>18.75</td></tr>
+<tr><td>2026-03-06 17:30</td><td>空</td><td>4.68</td><td>4.36</td><td>3.24</td><td>3.09</td><td>1.44</td><td>43.25</td><td>47.75</td></tr>
+<tr><td>2026-03-18 19:30</td><td>空</td><td>5.24</td><td>5.01</td><td>3.45</td><td>3.33</td><td>1.79</td><td>28.25</td><td>44.50</td></tr>
+<tr><td>2026-04-17 16:45</td><td>多</td><td>5.85</td><td>5.50</td><td>2.30</td><td>2.06</td><td>3.55</td><td>7.75</td><td>23.50</td></tr>
+</tbody></table>
+<p>最明显的两个问题：2月4日那笔峰值16.36R，最终毛10.19R/净10.05R，回吐6.17R；4月17日峰值5.85R，最终净2.06R，回吐3.55R。另一方面，2月18日那笔盘中虽到2.14R，最高收盘只有1.92R，原版“收盘2R才启动”始终没触发，最后由反向信号净赚0.68R退出。触及2R与收盘站上2R是两种不同的保护触发。</p>
+<p>时间按15min K线标签估计：峰值可能发生在该根任何时刻，盘中退出也没有精确秒，所以“约小时”不是精确成交时长。9笔赢家持仓中位26.75小时，到峰值中位25小时；不能因为使用15min信号，就假定盈利单都应在几根K线内结束。</p>
+<h2>峰值之外，还要看最终亏损的单子</h2>
+<p>只看赢家会高估目标可达性。以下以每个窗口的全部原版交易为分母，先按持仓期间达到阈值筛选，再观察最终结局。它描述原退出下的路径，既不是新固定止盈的成交胜率，也不能预测下一笔。</p>
+<h3>连续2023年8月—2026年4月</h3>
+<table><thead><tr>
+<th>曾达到毛R</th>
+<th>到达/全部</th>
+<th>最终赢/亏</th>
+<th>最终净盈利比例</th>
+<th>最终净R中位</th>
+<th>下一档</th>
+<th>继续到下一档</th>
+</tr></thead><tbody>
+<tr><td>1</td><td>59/123</td><td>32/27</td><td>54.2%</td><td>0.27</td><td>2</td><td>41/59</td></tr>
+<tr><td>2</td><td>41/123</td><td>32/9</td><td>78.0%</td><td>1.21</td><td>3</td><td>26/41</td></tr>
+<tr><td>3</td><td>26/123</td><td>22/4</td><td>84.6%</td><td>2.56</td><td>4</td><td>19/26</td></tr>
+<tr><td>4</td><td>19/123</td><td>19/0</td><td>100.0%</td><td>3.32</td><td>5</td><td>14/19</td></tr>
+<tr><td>5</td><td>14/123</td><td>14/0</td><td>100.0%</td><td>4.13</td><td>6</td><td>10/14</td></tr>
+<tr><td>6</td><td>10/123</td><td>10/0</td><td>100.0%</td><td>4.75</td><td>8</td><td>7/10</td></tr>
+<tr><td>8</td><td>7/123</td><td>7/0</td><td>100.0%</td><td>5.32</td><td>10</td><td>2/7</td></tr>
+<tr><td>10</td><td>2/123</td><td>2/0</td><td>100.0%</td><td>17.02</td><td>15</td><td>2/2</td></tr>
+</tbody></table>
+<h3>2026年1—4月</h3>
+<table><thead><tr>
+<th>曾达到毛R</th>
+<th>到达/全部</th>
+<th>最终赢/亏</th>
+<th>最终净盈利比例</th>
+<th>最终净R中位</th>
+<th>下一档</th>
+<th>继续到下一档</th>
+</tr></thead><tbody>
+<tr><td>1</td><td>12/17</td><td>9/3</td><td>75.0%</td><td>1.37</td><td>2</td><td>11/12</td></tr>
+<tr><td>2</td><td>11/17</td><td>9/2</td><td>81.8%</td><td>2.06</td><td>3</td><td>7/11</td></tr>
+<tr><td>3</td><td>7/17</td><td>6/1</td><td>85.7%</td><td>3.33</td><td>4</td><td>6/7</td></tr>
+<tr><td>4</td><td>6/17</td><td>6/0</td><td>100.0%</td><td>4.33</td><td>5</td><td>5/6</td></tr>
+<tr><td>5</td><td>5/17</td><td>5/0</td><td>100.0%</td><td>5.32</td><td>6</td><td>3/5</td></tr>
+<tr><td>6</td><td>3/17</td><td>3/0</td><td>100.0%</td><td>5.83</td><td>8</td><td>3/3</td></tr>
+<tr><td>8</td><td>3/17</td><td>3/0</td><td>100.0%</td><td>5.83</td><td>10</td><td>1/3</td></tr>
+<tr><td>10</td><td>1/17</td><td>1/0</td><td>100.0%</td><td>10.05</td><td>15</td><td>1/1</td></tr>
+</tbody></table>
+<p>完整历史达到1R的59笔有27笔最终净亏；达到2R的41笔仍有9笔净亏；达到3R的26笔有4笔净亏。达到4R的19笔最终均盈利，但其中只有14笔继续到5R。达到8R的7笔只有2笔继续到10R。不能把“19/19最终盈利”理解成未来必胜；样本和原退出共同决定了这个结果。</p>
+<h2>大赢家的回吐，有多少发生在抵达峰值之前</h2>
+<p>图中灰色带只画完整持仓K线；蓝线为收盘浮盈，虚线为此前已见峰值，红线为当根已生效保护位，绿点为最终毛R成交。保护位按前一根收盘计算，图中没有提前一根显示止损。</p>
+<p><img src="../../experiments/active/exp-spike-v8-ict-winner-peaks-20260915-v1/figures/large_winner_paths.png" alt="大赢家的持仓路径"></p>
+<table><thead><tr>
+<th>入场北京时间</th>
+<th>最终峰值R</th>
+<th>最终净R</th>
+<th>途中已确认回落至少R</th>
+<th>峰值根4ATR相当R</th>
+<th>峰后价格回吐R</th>
+</tr></thead><tbody>
+<tr><td>2025-04-06 15:45</td><td>35.59</td><td>24.00</td><td>7.23</td><td>9.41</td><td>11.26</td></tr>
+<tr><td>2026-02-04 21:00</td><td>16.36</td><td>10.05</td><td>4.00</td><td>5.46</td><td>6.17</td></tr>
+<tr><td>2026-03-04 15:00</td><td>9.58</td><td>5.32</td><td>2.45</td><td>3.31</td><td>4.09</td></tr>
+</tbody></table>
+<p>峰值≥5R的14笔中，7笔在原收盘2R激活后、到最终峰值前已有超过2R的回落，中位至少2.03R，最大至少7.23R。因此从早期就用“见过的峰值减1R或2R”紧跟，会触碰到多笔本来可长成大赢家的途中回撤；具体新规则收益仍须重新模拟。</p>
+<p>途中回落定义严格限定在激活之后、最终峰值所在K线之前：此前已经发生的有利峰值减后来完整K线的不利极值，是顺序可确定的下界。另存同根高低顺序可能上界；峰值所在根的回落没有加入，以免把峰后回落误算成到峰值前必须承受的回落。</p>
+<h2>为什么原4ATR看起来放得很宽</h2>
+<p>R固定在入场风险，ATR会随行情变化。原跟踪是“收盘价±4×当前ATR”，所以4ATR不等于固定4R；波动扩大时，以初始R衡量的距离可以很大。旧止损位仍单向收紧，不能把距离扩大误说成止损价倒退。</p>
+<table><thead><tr>
+<th>入场北京时间</th>
+<th>峰值毛R</th>
+<th>峰值根收盘R</th>
+<th>当根4ATR/R</th>
+<th>收盘后保护毛R（下一根生效）</th>
+<th>最终净R</th>
+</tr></thead><tbody>
+<tr><td>2026-02-03 23:15</td><td>2.42</td><td>2.22</td><td>1.77</td><td>0.46</td><td>0.38</td></tr>
+<tr><td>2026-02-04 21:00</td><td>16.36</td><td>14.84</td><td>5.46</td><td>10.19</td><td>10.05</td></tr>
+<tr><td>2026-02-13 18:15</td><td>8.38</td><td>7.70</td><td>1.88</td><td>5.86</td><td>5.83</td></tr>
+<tr><td>2026-02-18 19:30</td><td>2.14</td><td>1.81</td><td>1.61</td><td>-1.00</td><td>0.68</td></tr>
+<tr><td>2026-02-22 21:30</td><td>2.74</td><td>2.28</td><td>2.15</td><td>0.13</td><td>0.16</td></tr>
+<tr><td>2026-03-04 15:00</td><td>9.58</td><td>8.41</td><td>3.31</td><td>5.49</td><td>5.32</td></tr>
+<tr><td>2026-03-06 17:30</td><td>4.68</td><td>4.36</td><td>1.12</td><td>3.24</td><td>3.09</td></tr>
+<tr><td>2026-03-18 19:30</td><td>5.24</td><td>4.65</td><td>1.81</td><td>3.41</td><td>3.33</td></tr>
+<tr><td>2026-04-17 16:45</td><td>5.85</td><td>5.50</td><td>3.21</td><td>2.30</td><td>2.06</td></tr>
+</tbody></table>
+<p>35.59R大赢家峰值附近4ATR相当于9.41R，16.36R赢家相当于5.46R；这解释了为何会允许较大回吐。4月17日峰值5.85R，峰值根收盘5.50R、4ATR约3.21R，保护只到2.30R左右。这里有测试另一种锁盈方式的理由，但ATR较宽也帮助前两笔熬过了途中回撤，不能只看最终一段。</p>
+<h2>止盈优化应该怎样落到下一轮实验</h2>
+<ol>
+<li><strong>保留早期含费保护作为单独对照。</strong> 原版收盘2R激活与“盘中触及净2R、收盘确认后下一根保本”分开评估。上一轮净2R保护在2026前4月从22.74R改善到24.68R，但连续历史从−9.84R变成−10.92R，仍不能直接定为新默认。</li>
+</ol>
+<ol>
+<li><strong>晚启动的峰值比例保护值得研究，但早启动也会误伤。</strong> 2月4日的大赢家曾有最高收盘5.019R，之后在北京时间2月5日02:30那根完整持仓K线，不利价到1.861R；若此时要求至少留住一半收盘峰值，下限2.510R已经高于该不利价，会在16.36R最终峰值前遇到止损。因此不能直接把“4R以后锁50%”当答案。一个更晚的待测样例是：最高收盘毛浮盈到8R后，至少保留其70%，下一根生效，与原4ATR保护取更紧且只向有利方向移动；独立比较保留比例60%/70%/80%，不同时加分批或保本。<strong>当前历史只有3笔最高收盘达到8R，这个样例尚未回测，也没有足够样本支持定参数。</strong></li>
+</ol>
+<ol>
+<li><strong>先用到达目标后的平均兑现筛查分批想法。</strong> 下面这些触达组，原版最终平均毛R都高于触达R；把部分仓位统一在该R兑现，并没有直接的平均收益优势。这里只是原持仓路径的诊断，不能替代限价、跳空与完整账户回放。</li>
+</ol>
+<table><thead><tr>
+<th>已触达毛R</th>
+<th>交易数</th>
+<th>原最终平均毛R</th>
+<th>原最终平均净R</th>
+</tr></thead><tbody>
+<tr><td>2</td><td>41</td><td>2.46</td><td>2.22</td></tr>
+<tr><td>3</td><td>26</td><td>3.69</td><td>3.42</td></tr>
+<tr><td>4</td><td>19</td><td>4.92</td><td>4.71</td></tr>
+<tr><td>5</td><td>14</td><td>5.82</td><td>5.59</td></tr>
+<tr><td>6</td><td>10</td><td>6.91</td><td>6.67</td></tr>
+<tr><td>8</td><td>7</td><td>8.63</td><td>8.40</td></tr>
+<tr><td>10</td><td>2</td><td>17.26</td><td>17.02</td></tr>
+</tbody></table>
+<p>例如到5R的14笔最终平均净5.59R、毛收益更高。因此本轮不优先把“5R兑现25%”当提高总收益的方案；若目标改为降低回撤，可以另行比较，但需同时接受可能少赚。上一轮2R兑现25%/50%已经降低近期和连续净收益。</p>
+<p>下一轮必须重新走完整串行入场与同入场配对，同时报告：每笔救回多少亏损、哪几笔大赢家被提前截断、完整净收益、回撤和倍投账户。开发/后续年份分开，不能用本轮已观察到的峰值事后挑最优参数；本轮没有运行以上新机制，也没有把峰值金额当成假设可获得的收益。</p>
+<h2>前一轮退出实测与随机对照</h2>
+<table><thead><tr>
+<th>窗口</th>
+<th>前轮冻结规则</th>
+<th>自然笔数</th>
+<th>总净R</th>
+<th>匹配随机均净R</th>
+<th>匹配超额均净R</th>
+<th>Holm校正p</th>
+</tr></thead><tbody>
+<tr><td>2026年1—4月</td><td>original</td><td>17</td><td>22.74</td><td>0.11</td><td>1.23</td><td>0.99</td></tr>
+<tr><td>2026年1—4月</td><td>cost_be2</td><td>17</td><td>24.68</td><td>0.15</td><td>1.30</td><td>0.99</td></tr>
+<tr><td>2026年1—4月</td><td>partial25_at2</td><td>17</td><td>20.37</td><td>0.02</td><td>1.18</td><td>0.99</td></tr>
+<tr><td>2026年1—4月</td><td>partial50_at2</td><td>17</td><td>18.00</td><td>-0.06</td><td>1.12</td><td>0.99</td></tr>
+<tr><td>2026年1—4月</td><td>fixed3r</td><td>17</td><td>13.00</td><td>-0.02</td><td>0.78</td><td>0.99</td></tr>
+<tr><td>2026年1—4月</td><td>trail2_atr</td><td>17</td><td>16.61</td><td>0.25</td><td>0.73</td><td>0.99</td></tr>
+<tr><td>连续2023年8月—2026年4月</td><td>original</td><td>123</td><td>-9.84</td><td>-0.14</td><td>0.06</td><td>1.00</td></tr>
+<tr><td>连续2023年8月—2026年4月</td><td>cost_be2</td><td>123</td><td>-10.92</td><td>-0.14</td><td>0.04</td><td>1.00</td></tr>
+<tr><td>连续2023年8月—2026年4月</td><td>partial25_at2</td><td>123</td><td>-14.59</td><td>-0.18</td><td>0.06</td><td>1.00</td></tr>
+<tr><td>连续2023年8月—2026年4月</td><td>partial50_at2</td><td>123</td><td>-19.33</td><td>-0.22</td><td>0.05</td><td>1.00</td></tr>
+<tr><td>连续2023年8月—2026年4月</td><td>fixed3r</td><td>123</td><td>-27.70</td><td>-0.26</td><td>0.00</td><td>1.00</td></tr>
+<tr><td>连续2023年8月—2026年4月</td><td>trail2_atr</td><td>123</td><td>-26.76</td><td>-0.23</td><td>-0.00</td><td>1.00</td></tr>
+</tbody></table>
+<p>这张表直接引用上一轮冻结回测，不是本轮新实验。随机对照按同币、周期、方向、入场月、纽约小时/周末和先前120根波动桶匹配，每笔目标5个；随机均值/超额只用完整匹配子集。上述p针对相较随机入场的超额，不是不同退出方案的显著性检验。结果说明“看起来有很多回吐”并不意味着先前尝试的止盈规则已经改进净收益。</p>
+<h2>风险与诚实声明</h2>
+<p>这次是原版成交路径的描述性诊断。盈利单按最终净结果筛选，不能在开仓时识别；所有条件比例只适用于原退出允许的持仓长度，改退出后会改变成交集合。峰值位于已持有的K线，不计退出后的新行情。32赢家峰值无退出根歧义；123笔中仅一笔初始止损单的峰值可能为0—0.356R，不影响≥1R统计。</p>
+<p>普通OHLC不能提供每根内的精确高低顺序，订单和保护生效时序须明确建模，不能假定在事后最高点成交。<a href="https://www.tradingview.com/pine-script-docs/concepts/strategies/">TradingView策略执行文档</a></p>
+<p>数据截止2026-05-01 UTC之前，holdout消耗0。研究历史此前已看过，不是新盲测。仍是Python原V8＋纽约[02,11)实际下一开盘准入、周末保留；受保护ICT脚本冬季行为和TV原生逐笔对齐仍未完成。没有新方向性实验、预测模型或排名，AUC/top-decile/单特征排序不适用；用原MFE、开仓/退出价格、原4ATR保护位的逐笔重建及已有匹配随机结果提供同等严格的事实对照。费用仅为既定0.2%，未计资金费率和额外滑点，没有实盘、训练或promote。</p>
+<h2>明细与复现</h2>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-winner-peaks-20260915-v1/delivery/ETH15m_development_winning_peaks.csv">2023年8月—2024年末：全部盈利单峰值明细</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-winner-peaks-20260915-v1/delivery/ETH15m_validation_winning_peaks.csv">2025全年：全部盈利单峰值明细</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-winner-peaks-20260915-v1/delivery/ETH15m_common_winning_peaks.csv">2026年1—4月：全部盈利单峰值明细</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-winner-peaks-20260915-v1/delivery/ETH15m_available_winning_peaks.csv">连续2023年8月—2026年4月：全部盈利单峰值明细</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-winner-peaks-20260915-v1/peak_analysis.ipynb">可运行的数据核对Notebook</a></li>
+</ul>
+<p>生成代码、输入与输出SHA、123笔独立交易的核验记录见实验目录。其中122条非空路径共有6301根完整持仓bar，另1笔入场根即止损、没有完整持仓bar。报告图表来自同一profiles和持仓路径导出。运行检查75项通过（4项峰值专项＋71项层间边界），没有把上一轮更广检查的失败说成通过。</p>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+export PYTHONPATH=/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages:/Users/zhangzc/fable-trading
+/usr/bin/python3 -m pytest -q tests/test_spike_v8_winner_peaks.py tests/boundaries/test_layer_imports.py
+# builder需先提交；仅在新结果目录不存在时运行，禁止覆盖本轮证据
+/usr/bin/python3 -m yoyo.evaluation.spike_v8_winner_peaks
+/usr/bin/python3 scripts/report_spike_v8_winner_peaks.py
+/usr/bin/python3 scripts/md_to_html.py analysis/p1_spike_v8_ict_winner_peaks_20260915.md --out-dir analysis/html
+</code></pre>
+</body>
+</html>
