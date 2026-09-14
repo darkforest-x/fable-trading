@@ -20,7 +20,7 @@ import json
 import math
 from pathlib import Path
 import subprocess
-from time import perf_counter
+from time import perf_counter, time_ns
 from dataclasses import dataclass
 
 import numpy as np
@@ -39,7 +39,7 @@ V8_ORACLE = Path("experiments/active/exp-spike-v8-noise-filter-20260913-v1/repla
 BE_TRIGGER_R = 0.5
 ARMS = ("v1_common_execution_long", "v8")
 KEY = ["signal_i", "entry_i", "side", "exit_i", "exit_reason", "entry_price", "exit_price", "initial_stop", "initial_risk", "net_return", "net_r"]
-FIXED_COLUMNS = [*base.TRADE_COLUMNS, "be_armed", "be_trigger_count", "protection"]
+FIXED_COLUMNS = [*base.TRADE_COLUMNS, "be_armed", "be_trigger_count"]
 PAIR_COLUMNS = ["signal_i_baseline", "entry_i_baseline", "side_baseline", "net_r_baseline", "net_return_baseline", "mfe_r_baseline", "censored_baseline", "signal_i_be", "entry_i_be", "side_be", "net_r_be", "net_return_be", "mfe_r_be", "censored_be", "delta_r", "reduced_loss", "harmed_winner", "baseline_mfe_ge_10r", "baseline_realized_ge_10r", "retained_realized_ge_10r"]
 
 
@@ -367,6 +367,21 @@ def _committed(paths: tuple[Path, ...]) -> bool:
     return True
 
 
+def _completed_stream(streams: Path, key: str) -> dict[str, object] | None:
+    """Accept a resumable stream only when every receipt-bound output still hashes."""
+    receipt = streams / key / "completion.json"
+    if not receipt.is_file():
+        return None
+    item = json.loads(receipt.read_text())
+    if item.get("status") != "complete" or item.get("stream_key") != key:
+        raise ValueError(f"invalid completion receipt: {receipt}")
+    for name, digest in item.get("files", {}).items():
+        path = receipt.parent / name
+        if not path.is_file() or sha256(path) != digest:
+            raise ValueError(f"completed stream output drift: {path}")
+    return item
+
+
 def run(output: Path, *, limit: int | None = None, official: bool = False) -> pd.DataFrame:
     """Write paired per-stream results; official evidence requires a committed builder."""
     config = json.loads(CONFIG.read_text())
@@ -378,34 +393,70 @@ def run(output: Path, *, limit: int | None = None, official: bool = False) -> pd
     folders = sorted(p for p in (RAW / "streams").iterdir() if (p / "completion.json").is_file())
     if len(folders) != int(config["expected_streams"]): raise ValueError("unexpected raw stream count")
     folders = folders if limit is None else folders[:limit]
-    output.mkdir(parents=True, exist_ok=False); summaries: list[dict[str, object]] = []; oracle_receipts: list[dict[str, str]] = []
+    output.mkdir(parents=True, exist_ok=True)
+    identity = {"study_sha256": sha256(Path(__file__)), "test_sha256": sha256(TEST), "config_sha256": sha256(CONFIG),
+                "plan_sha256": sha256(PLAN), "raw_manifest_sha256": sha256(RAW / "manifest.json"),
+                "v8_oracle_manifest_sha256": sha256(V8_ORACLE / "manifest.json")}
+    identity_path = output / "identity.json"
+    if identity_path.exists() and json.loads(identity_path.read_text()) != identity:
+        raise ValueError("output identity differs; preserve prior receipt-bound output and choose a new directory")
+    identity_path.write_text(json.dumps(identity, indent=2, sort_keys=True))
+    streams, failures = output / "streams", output / "failures"
+    streams.mkdir(exist_ok=True); failures.mkdir(exist_ok=True)
+    summaries: list[dict[str, object]] = []; oracle_receipts: list[dict[str, str]] = []
     for number, folder in enumerate(folders, 1):
+        existing = _completed_stream(streams, folder.name)
+        if existing is not None:
+            summaries.extend(existing["summaries"]); oracle_receipts.extend(existing["oracle_ledgers"])
+            print(json.dumps({"stream": number, "target": len(folders), "stream_key": folder.name, "resumed": True,
+                              "stream_wall_seconds": existing["stream_wall_seconds"]}), flush=True)
+            continue
+        staging = streams / f".{folder.name}.staging"
+        if staging.exists():
+            raise ValueError(f"incomplete stream staging preserved for inspection: {staging}")
+        staging.mkdir()
+        started = perf_counter()
         context = base.load_verified_stream(folder)
-        for arm in ARMS:
-            prepared = prepare_arm(context, arm=arm)
-            baseline, _, _ = replay_serial(context, arm=arm, enable_be=False, prepared=prepared)
-            oracle_receipts.append(validate_baseline(context, baseline, arm=arm))
-            be, _, _ = replay_serial(context, arm=arm, enable_be=True, prepared=prepared)
-            fixed_base = pd.DataFrame([replay_fixed_entry(context, row, arm=arm, enable_be=False, prepared=prepared) for _, row in baseline.iterrows()], columns=FIXED_COLUMNS)
-            fixed_be = pd.DataFrame([replay_fixed_entry(context, row, arm=arm, enable_be=True, prepared=prepared) for _, row in baseline.iterrows()], columns=FIXED_COLUMNS)
-            for table in (fixed_base, fixed_be):
-                table["stream_key"] = context.key
-                for key, value in context.identity.items():
-                    table[key] = value
-            validate_fixed_baseline(baseline, fixed_base)
-            prefix = f"{folder.name}.{arm}"
-            for kind, table in (("serial_baseline", baseline), ("serial_be05", be), ("fixed_baseline", fixed_base), ("fixed_be05", fixed_be)):
-                table.to_csv(output / f"{prefix}.{kind}.csv.gz", index=False, compression={"method": "gzip", "mtime": 0})
-            paired = paired_decomposition(fixed_base, fixed_be)
-            row = {"stream_key": context.key, "arm": arm, **context.identity, **summarize(baseline, label="serial_baseline"),
-                   **{f"be05_{k}": v for k, v in summarize(be, label="serial_be05").items() if k != "label"},
-                   "fixed_pairs": len(paired), "delta_net_r_same_entry": float(paired.delta_r.sum()),
-                   "reduced_loss_count": int(paired.reduced_loss.sum()), "reduced_loss_delta_r": float(paired.loc[paired.reduced_loss, "delta_r"].sum()),
-                   "harmed_winner_count": int(paired.harmed_winner.sum()), "harmed_winner_delta_r": float(paired.loc[paired.harmed_winner, "delta_r"].sum()),
-                   "baseline_mfe_ge_10r_pairs": int(paired.baseline_mfe_ge_10r.sum()), "mfe_ge_10r_retained": int((paired.baseline_mfe_ge_10r & paired.retained_realized_ge_10r).sum()),
-                   "baseline_realized_ge_10r_pairs": int(paired.baseline_realized_ge_10r.sum()), "realized_ge10r_retained": int((paired.baseline_realized_ge_10r & paired.retained_realized_ge_10r).sum())}
-            summaries.append(row)
-        if number % 25 == 0 or number == len(folders): print(json.dumps({"completed": number, "target": len(folders)}), flush=True)
+        stream_summaries: list[dict[str, object]] = []; stream_oracles: list[dict[str, str]] = []
+        try:
+            for arm in ARMS:
+                prepared = prepare_arm(context, arm=arm)
+                baseline, _, _ = replay_serial(context, arm=arm, enable_be=False, prepared=prepared)
+                stream_oracles.append(validate_baseline(context, baseline, arm=arm))
+                be, _, _ = replay_serial(context, arm=arm, enable_be=True, prepared=prepared)
+                fixed_base = pd.DataFrame([replay_fixed_entry(context, row, arm=arm, enable_be=False, prepared=prepared) for _, row in baseline.iterrows()], columns=FIXED_COLUMNS)
+                fixed_be = pd.DataFrame([replay_fixed_entry(context, row, arm=arm, enable_be=True, prepared=prepared) for _, row in baseline.iterrows()], columns=FIXED_COLUMNS)
+                for table in (fixed_base, fixed_be):
+                    table["stream_key"] = context.key
+                    for key, value in context.identity.items(): table[key] = value
+                validate_fixed_baseline(baseline, fixed_base)
+                for kind, table in (("serial_baseline", baseline), ("serial_be05", be), ("fixed_baseline", fixed_base), ("fixed_be05", fixed_be)):
+                    table.to_csv(staging / f"{arm}.{kind}.csv.gz", index=False, compression={"method": "gzip", "mtime": 0})
+                paired = paired_decomposition(fixed_base, fixed_be)
+                row = {"stream_key": context.key, "arm": arm, **context.identity, **summarize(baseline, label="serial_baseline"),
+                       **{f"be05_{k}": v for k, v in summarize(be, label="serial_be05").items() if k != "label"},
+                       "fixed_pairs": len(paired), "delta_net_r_same_entry": float(paired.delta_r.sum()),
+                       "reduced_loss_count": int(paired.reduced_loss.sum()), "reduced_loss_delta_r": float(paired.loc[paired.reduced_loss, "delta_r"].sum()),
+                       "harmed_winner_count": int(paired.harmed_winner.sum()), "harmed_winner_delta_r": float(paired.loc[paired.harmed_winner, "delta_r"].sum()),
+                       "baseline_mfe_ge_10r_pairs": int(paired.baseline_mfe_ge_10r.sum()), "mfe_ge_10r_retained": int((paired.baseline_mfe_ge_10r & paired.retained_realized_ge_10r).sum()),
+                       "baseline_realized_ge_10r_pairs": int(paired.baseline_realized_ge_10r.sum()), "realized_ge10r_retained": int((paired.baseline_realized_ge_10r & paired.retained_realized_ge_10r).sum())}
+                stream_summaries.append(row)
+            pd.DataFrame(stream_summaries).to_csv(staging / "stream_summary.csv", index=False)
+            files = {path.name: sha256(path) for path in staging.glob("*.csv.gz")}
+            wall = perf_counter() - started
+            completion = {"status": "complete", "stream_key": context.key, "stream_wall_seconds": wall, "files": files,
+                          "summaries": stream_summaries, "oracle_ledgers": stream_oracles}
+            (staging / "completion.json").write_text(json.dumps(completion, indent=2, default=str))
+            staging.replace(streams / folder.name)
+            summaries.extend(stream_summaries); oracle_receipts.extend(stream_oracles)
+            print(json.dumps({"stream": number, "target": len(folders), "stream_key": folder.name, "resumed": False,
+                              "stream_wall_seconds": round(wall, 4)}), flush=True)
+        except Exception as exc:
+            failure = {"status": "failed", "stream_key": folder.name, "stream_wall_seconds": perf_counter() - started,
+                       "error_type": type(exc).__name__, "error": str(exc), "source_cache_sha256": context.receipt.get("cache_sha256")}
+            (staging / "failure.json").write_text(json.dumps(failure, indent=2, default=str))
+            staging.replace(failures / f"{folder.name}.{time_ns()}.failed")
+            raise
     summary = pd.DataFrame(summaries); summary.to_csv(output / "stream_summary.csv", index=False)
     (output / "manifest.json").write_text(json.dumps({"complete": limit is None, "streams": len(folders), "expected_streams": config["expected_streams"],
         "configuration_exposure": 1, "history": "authorized reused nonblind history",

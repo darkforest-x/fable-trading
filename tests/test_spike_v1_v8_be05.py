@@ -92,6 +92,7 @@ def test_short_wick_trigger_is_next_bar_only_and_fixed_baseline_matches_serial()
 
 
 def test_zero_trade_pair_and_realized_tail_are_schema_safe() -> None:
+    assert len(study.FIXED_COLUMNS) == len(set(study.FIXED_COLUMNS))
     empty = pd.DataFrame(columns=study.FIXED_COLUMNS)
     assert list(study.paired_decomposition(empty, empty).columns) == study.PAIR_COLUMNS
     baseline = pd.DataFrame({"signal_i": [1, 2], "entry_i": [2, 3], "side": [1, 1], "net_r": [10., 9.],
