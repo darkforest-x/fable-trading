@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Render the owner-approved September ETH3m V8 trade-audit payload.
 
 This renderer never reads OHLCV, calls an exchange, or replays a strategy.  It
