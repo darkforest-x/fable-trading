@@ -1,0 +1,141 @@
+//@version=6
+// E5 research port for OKX:ETHUSDT.P. This source is research-only: it has no
+// alerts, live integration, or deployment behavior.
+strategy("ETH multi-timeframe E5 - research", overlay=true, initial_capital=500,
+     pyramiding=0, default_qty_type=strategy.fixed, calc_on_every_tick=false,
+     calc_on_order_fills=false, process_orders_on_close=false,
+     commission_type=strategy.commission.percent, commission_value=0.10,
+     slippage=0, margin_long=0, margin_short=0, use_bar_magnifier=false)
+
+// C0 is the predetermined E5 baseline for all three supported parent frames.
+string variantInput = input.string("Auto", "Research variant", options=["Auto", "C0", "C1", "C2", "C3", "C4", "C5"])
+string preset15 = "C0"
+string preset60 = "C0"
+string preset240 = "C0"
+string researchVariant = variantInput == "Auto" ? (timeframe.period == "15" ? preset15 : timeframe.period == "60" ? preset60 : preset240) : variantInput
+int analysisStart = input.time(timestamp("2023-01-01T00:00:00Z"), "Research start UTC")
+int requestedEnd = input.time(timestamp("2026-05-01T00:00:00Z"), "Research end UTC, exclusive")
+int hardEnd = timestamp("2026-05-04T00:00:00Z")
+int analysisEnd = math.min(requestedEnd, hardEnd)
+
+bool supportedFrame = timeframe.period == "15" or timeframe.period == "60" or timeframe.period == "240"
+if barstate.isfirst and (syminfo.tickerid != "OKX:ETHUSDT.P" or not supportedFrame)
+    runtime.error("Use ordinary OKX:ETHUSDT.P candles on 15m, 1h, or 4h only.")
+if barstate.isfirst and requestedEnd > hardEnd
+    runtime.error("Research end must be no later than 2026-05-04T00:00:00Z.")
+if barstate.isfirst and analysisStart >= analysisEnd
+    runtime.error("Research start must precede the exclusive research end.")
+
+// Candidate mapping: C0=E5; C1=slow40; C2=slow80; C3=flat-entry slope;
+// C4=cooldown off; C5=Sunday exclusion off. No candidates alter risk values.
+int slowLength = researchVariant == "C1" ? 40 : researchVariant == "C2" ? 80 : 60
+bool slopeFlatEntryOnly = researchVariant == "C3"
+bool cooldownEnabled = researchVariant != "C4"
+bool sundayExcluded = researchVariant != "C5"
+
+// Every feature ends on this confirmed parent bar; no lower-timeframe request is used.
+float fastMa = ta.sma(hl2, 10)
+float slowMa = ta.sma(hl2, slowLength)
+float regimeMa = ta.ema(close, 100)
+float atr14 = ta.atr(14)
+float diff = hl2 - ta.sma(hl2, 40)
+float p99 = ta.percentile_linear_interpolation(diff, 200, 99)
+float ratio = not na(p99) and p99 != 0.0 ? diff / p99 : 0.0
+float osc = ta.hma(ratio - ratio[10], 10)
+
+bool rawLong = ta.crossover(fastMa, slowMa) and close > slowMa and close > regimeMa and osc > 0.2 and osc > osc[1]
+bool rawShort = ta.crossunder(fastMa, slowMa) and close < slowMa and close < regimeMa and osc < -0.2 and osc < osc[1]
+int rawDirection = rawLong ? 1 : rawShort ? -1 : 0
+float atrPct = atr14 / close * 100.0
+bool volatilityAllowed = atrPct >= 0.1 and atrPct <= 10.0
+bool utcSundayAllowed = not sundayExcluded or dayofweek(time, "UTC") != dayofweek.sunday
+bool utcHourAllowed = not (hour(time, "UTC") >= 21 and hour(time, "UTC") < 23)
+bool calendarAllowed = utcSundayAllowed and utcHourAllowed
+bool rangeAllowed = time >= analysisStart and time_close < analysisEnd
+
+// E5 freshness: incorporate the latest closed P/L before deciding this bar's
+// eligibility. Raw signals consume cooldown even if a calendar gate rejects them.
+bool parentConfirmed = barstate.isconfirmed
+var int tradesToSkip = 0
+if strategy.closedtrades > nz(strategy.closedtrades[1])
+    int closedIndex = strategy.closedtrades - 1
+    float closedNotional = math.abs(strategy.closedtrades.entry_price(closedIndex) * strategy.closedtrades.size(closedIndex))
+    float closedReturnPct = closedNotional > 0.0 ? strategy.closedtrades.profit(closedIndex) / closedNotional * 100.0 : 0.0
+    if cooldownEnabled
+        if closedReturnPct > 20.0
+            tradesToSkip := 7
+        else if closedReturnPct > 2.0
+            tradesToSkip := 1
+if not cooldownEnabled
+    tradesToSkip := 0
+bool cooling = cooldownEnabled and tradesToSkip > 0
+if parentConfirmed and rawDirection != 0 and cooling
+    tradesToSkip -= 1
+
+// Order identity keeps an old opposite stop distinct from the next entry's stop.
+var string activeId = ""
+var float activeStop = na
+var string pendingId = ""
+var float pendingStop = na
+bool hasPosition = strategy.position_size != 0
+if hasPosition
+    string observedId = strategy.opentrades.entry_id(strategy.opentrades - 1)
+    if observedId != activeId
+        activeId := observedId
+        activeStop := pendingStop
+else
+    activeId := ""
+    activeStop := na
+
+bool commonSignalGate = parentConfirmed and rangeAllowed and calendarAllowed and volatilityAllowed and not cooling
+bool slopeAllowsFlat = not slopeFlatEntryOnly or (not na(slowMa[1]) and rawDirection * (slowMa - slowMa[1]) > 0.0)
+// C3 gates only a new flat entry. Same-side management and opposite exits remain unchanged.
+bool eligibleSignal = commonSignalGate and rawDirection != 0 and (hasPosition or slopeAllowsFlat)
+float stopDistance = math.min(atr14 * 4.0, close * 0.03)
+float fixedOneXQuantity = math.max(strategy.equity, 0.0) / close
+bool oppositeSubmitted = false
+// There is intentionally no take-profit and no elapsed-time exit; only stops,
+// opposite signals, and the administrative research cutoff can close a trade.
+
+if eligibleSignal and stopDistance > 0.0 and fixedOneXQuantity > 0.0
+    int side = rawDirection
+    float proposedStop = close - side * stopDistance
+    string nextId = (side > 0 ? "L-" : "S-") + str.tostring(time)
+    if not hasPosition
+        pendingId := nextId
+        pendingStop := proposedStop
+        strategy.entry(nextId, side > 0 ? strategy.long : strategy.short, qty=fixedOneXQuantity, comment="Research entry")
+        // Submitted with the entry so the initial 4xATR/3% stop is active on its fill bar.
+        strategy.exit("STOP-" + nextId, from_entry=nextId, stop=proposedStop, comment="Initial stop")
+    else if strategy.position_size * side > 0
+        // E3 ratchet: a same-side signal can only tighten protection.
+        activeStop := side > 0 ? math.max(activeStop, proposedStop) : math.min(activeStop, proposedStop)
+    else
+        // E4 ownership: cancel the old stop and use one automatic reversal.
+        // Margin liquidation is not modeled; quantity is fixed at signal-time 1x.
+        strategy.cancel("STOP-" + activeId)
+        pendingId := nextId
+        pendingStop := proposedStop
+        strategy.entry(nextId, side > 0 ? strategy.long : strategy.short, qty=fixedOneXQuantity, comment="Research reverse")
+        strategy.exit("STOP-" + nextId, from_entry=nextId, stop=proposedStop, comment="Initial stop")
+        oppositeSubmitted := true
+
+if hasPosition and not oppositeSubmitted and not na(activeStop) and time < analysisEnd
+    float entryPrice = strategy.position_avg_price
+    if strategy.position_size > 0 and high > entryPrice * 1.015
+        activeStop := math.max(activeStop, entryPrice * 1.001)
+    if strategy.position_size < 0 and low < entryPrice * 0.985
+        activeStop := math.min(activeStop, entryPrice * 0.999)
+    strategy.exit("STOP-" + activeId, from_entry=activeId, stop=activeStop, comment="Managed stop")
+
+// Administrative settlement at the exclusive endpoint avoids using any post-cutoff bar.
+if parentConfirmed and time < analysisEnd and time_close >= analysisEnd
+    strategy.cancel_all()
+    strategy.close_all(comment="Research end", immediately=true)
+
+plot(fastMa, "SMA10", color=color.new(color.teal, 15))
+plot(slowMa, "Slow SMA", color=color.new(color.orange, 15))
+plot(regimeMa, "EMA100", color=color.new(color.gray, 35))
+plot(hasPosition ? activeStop : na, "Active stop", color=color.red, style=plot.style_linebr)
+plotshape(eligibleSignal and not hasPosition and rawDirection > 0, "Long request", shape.triangleup, location.belowbar, color.teal, size=size.tiny)
+plotshape(eligibleSignal and not hasPosition and rawDirection < 0, "Short request", shape.triangledown, location.abovebar, color.orange, size=size.tiny)
