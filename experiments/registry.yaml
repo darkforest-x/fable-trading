@@ -9104,3 +9104,15 @@ experiments:
     artifacts:
     - spike-eth3m-recovery-20260914-v2-delivery
     notes: Zero holdout use. 744-trade baseline parity,36 synthetic checks and36 account audits. Same-exit fixed1U and matched random controls retained. No live eligibility; unrelated registry gates remain red.
+
+  - experiment_id: exp-spike-eth3m-partial-tp-20260914-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4f2e061a5a
+    status: active
+    question: Can partial realization or tighter trailing reduce ETH3m V8 profit giveback and improve recovery-account outcomes?
+    single_variable: Thirteen owner-authorized exit configurations with unchanged entry,initial stop and20bp cost; cash policies evaluated only after exit selection freezes.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/PROJECT_PLAN.md
+    notes: Pre-May2026 only; record full initial-stop,gross-loss and net-loss streaks separately. No live actions.

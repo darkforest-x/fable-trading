@@ -1,0 +1,149 @@
+{
+  "experiment_id": "exp-spike-eth3m-partial-tp-20260914-v1",
+  "context": "experiments/active/exp-spike-eth-martingale-20260914-v1/results/pre/ETH_3m_OKX.pkl",
+  "context_sha256": "9fc6f9dcbad7616f9c7ceab811ed9634ece2b07bf24327ff070ac09592c972fd",
+  "baseline_csv": "experiments/active/exp-spike-eth-martingale-20260914-v1/results/pre/ETH_3m_OKX_development.csv",
+  "baseline_sha256": "6cafc9aca7f9faa8b01ea8e6ad989f967a376cbee1045297fc30ef5fcd937a48",
+  "periods": {
+    "development": [
+      "2023-08-01T00:00:00Z",
+      "2025-01-01T00:00:00Z"
+    ],
+    "validation": [
+      "2025-01-01T00:00:00Z",
+      "2026-01-01T00:00:00Z"
+    ],
+    "preholdout": [
+      "2026-01-01T00:00:00Z",
+      "2026-05-01T00:00:00Z"
+    ],
+    "continuous_pre": [
+      "2023-08-01T00:00:00Z",
+      "2026-05-01T00:00:00Z"
+    ]
+  },
+  "seed": 20260914,
+  "controls_per_trade": 9,
+  "permutation_draws": 9999,
+  "training_eligible": false,
+  "production_eligible": false,
+  "arms": {
+    "whole_3r": {
+      "partial_r": 1.0,
+      "partial_fraction": 0.0,
+      "final_tp_r": 3.0,
+      "after_partial_stop_r": null,
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 4.0
+    },
+    "whole_3r_be1": {
+      "partial_r": 1.0,
+      "partial_fraction": 0.0,
+      "final_tp_r": 3.0,
+      "after_partial_stop_r": null,
+      "protection_mode": "entry",
+      "trigger_r": 1.0,
+      "trail_atr": 4.0
+    },
+    "p50_1_keep": {
+      "partial_r": 1.0,
+      "partial_fraction": 0.5,
+      "final_tp_r": 3.0,
+      "after_partial_stop_r": null,
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 4.0
+    },
+    "p50_1_be": {
+      "partial_r": 1.0,
+      "partial_fraction": 0.5,
+      "final_tp_r": 3.0,
+      "after_partial_stop_r": 0.0,
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 4.0
+    },
+    "p70_1_be": {
+      "partial_r": 1.0,
+      "partial_fraction": 0.7,
+      "final_tp_r": 3.0,
+      "after_partial_stop_r": 0.0,
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 4.0
+    },
+    "p30_1_be": {
+      "partial_r": 1.0,
+      "partial_fraction": 0.3,
+      "final_tp_r": 3.0,
+      "after_partial_stop_r": 0.0,
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 4.0
+    },
+    "p50_05_be": {
+      "partial_r": 0.5,
+      "partial_fraction": 0.5,
+      "final_tp_r": 3.0,
+      "after_partial_stop_r": 0.0,
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 4.0
+    },
+    "p50_15_be": {
+      "partial_r": 1.5,
+      "partial_fraction": 0.5,
+      "final_tp_r": 3.0,
+      "after_partial_stop_r": 0.0,
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 4.0
+    },
+    "p50_1_lock05": {
+      "partial_r": 1.0,
+      "partial_fraction": 0.5,
+      "final_tp_r": 3.0,
+      "after_partial_stop_r": 0.5,
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 4.0
+    },
+    "p50_1_netbe": {
+      "partial_r": 1.0,
+      "partial_fraction": 0.5,
+      "final_tp_r": 3.0,
+      "after_partial_stop_r": "net_be",
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 4.0
+    },
+    "whole_3r_trail1": {
+      "partial_r": 1.0,
+      "partial_fraction": 0.0,
+      "final_tp_r": 3.0,
+      "after_partial_stop_r": null,
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 1.0
+    },
+    "whole_3r_trail2": {
+      "partial_r": 1.0,
+      "partial_fraction": 0.0,
+      "final_tp_r": 3.0,
+      "after_partial_stop_r": null,
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 2.0
+    },
+    "whole_3r_trail3": {
+      "partial_r": 1.0,
+      "partial_fraction": 0.0,
+      "final_tp_r": 3.0,
+      "after_partial_stop_r": null,
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 3.0
+    }
+  }
+}
