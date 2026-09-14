@@ -109,6 +109,8 @@ def main():
     parts.append('## 可复现证据\n')
     parts.append(table(['窗口','基线核验','明细'],[[r['window'],r['kind'],json.dumps({k:v for k,v in r.items() if k not in ['window','kind']},ensure_ascii=False)] for r in parity]))
     parts.append(f'共{len(data)}组统计、{len(cash)}组现金账本。冻结builder为`{selection["builder_commit"]}`；开发选择提交与评价读入提交见results/evaluate/read_receipt.json。每个输入前缀和输出文件的SHA在分阶段manifest.json中，分批比例、毛R贡献、成本与净R均由运行断言核对。测试与复核详情见validation_receipt.json。\n')
+    parts.append('开发读入104962根，最早2022-01-03 15:30 UTC用于预热，最后完整收盘2025-01-01 00:00；评价读入151522根，最后完整收盘2026-05-01 00:00。两个前缀均无缺口、无重复、受限价格解析行数为0；正式开仓起点2023-08-01，较早价格只用于因果预热。\n')
+    parts.append('本轮45项退出专项检查通过。扩大至仓库边界和holdout单一定义的检查为184通过、5失败；失败均因既有spike-v8-total2-1h-native-20260914-delivery登记缺source_commit，原HEAD已存在此缺项，本轮未改该记录，不能声称仓库检查全绿。HTML静态结构为19张表、16个逐笔CSV链接均可解析到本地文件；应用浏览器安全策略阻止file URL预览，因此未声称完成视觉渲染核验。\n')
     parts.append('每窗口8项月块9999次符号置换做Holm校正；这些检验针对匹配随机入场超额，不是退出修改相对原版的显著性检验。无预测模型或排名，AUC、top-decile毛净收益、单特征评分基线不适用，给出原版与匹配随机入场作为零假设对照，不编造分类指标。\n')
     parts.append('## 逐笔下载\n');delivery=EXP/'delivery';delivery.mkdir(exist_ok=True)
     for window in ['common','available']:
