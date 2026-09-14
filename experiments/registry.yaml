@@ -9195,13 +9195,15 @@ experiments:
 
   - experiment_id: exp-spike-v8-ict-multitf-20260915-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 3454c0945dd21c744f0e69946bdbac8ef876d339
-    status: active
+    source_commit: 525bcacb6447f3587224b50063eeb38038d4cb82
+    status: inconclusive
     question: Does the owner supplied ICT union improve original V8 entries across six OKX ETH periods?
     single_variable: Entry session only; original V8 initial stop, trailing, reverse exit and20bp costs frozen. Owner removed Fanshen exits before evaluation.
-    result: Frozen before evaluation; no result yet.
+    result: ICT15m common17trades improve mean netR0.925to1.338 and loss streak5to2 but available123trades remain net-9.84R with14losses.4h only5available trades and2fully matched controls. No stable profitability or live acceptance established.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_v8_ict_multitf_20260915.md
     notes: All versus NewYork02to11 local,actual next open,weekends included,no session-end close. No new holdout or live change.
+    artifacts:
+    - spike-v8-ict-multitf-20260915-delivery

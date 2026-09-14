@@ -30927,3 +30927,18 @@ artifacts:
     production_eligible: false
     notes: 108 statistics,216 cash ledgers,12 baseline parity groups,605 result hashes reconciled; no native TV signal
       parity or validated best strategy.
+
+  - artifact_id: spike-v8-ict-multitf-20260915-delivery
+    artifact_type: manifest
+    role: original_v8_six_timeframe_ict_entry_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 525bcacb6447f3587224b50063eeb38038d4cb82
+    source_path: experiments/active/exp-spike-v8-ict-multitf-20260915-v1/delivery_manifest.json
+    sha256: b719a2016d4898cb6eb12b4d96ce3e7f1f580a11fc4db2675e936d86a9ea7deb
+    size_bytes: 8833
+    storage_uri: repo://experiments/active/exp-spike-v8-ict-multitf-20260915-v1/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Original exits only;24trade groups,48cash accounts,24parity groups,104result hashes reconciled.15m recent
+      efficiency improves but long window remains negative;4h sparse matching explicit. Zero holdout, no live changes.

@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>原V8 × ICT时段：六周期对照</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>原V8 × ICT时段：六周期对照</h1>
+<p>Owner在2026-09-15要求所有周期只在此前ICT时段开仓。本次已比较6周期、原V8退出、全天与ICT合并时段、两历史窗口，共24组交易统计和48组资金账本。</p>
+<p>按Owner最新要求，已经去掉翻身指标退出，保留原V8止损和跟踪。共同2026年1—4月中，ICT后总净R改善的周期：3min、1h、4h；ICT后净R为正的周期：15min、4h。这两组名单不等价，少做交易可减亏但未必建立正期望。</p>
+<p>15min共同窗口是17笔、净胜率52.9%、净收益+22.74R、PF3.79、最长净亏2次；全天对应30笔、43.3%、+27.75R、PF2.65、最长净亏5次。平均每笔净R从0.925提高到1.338，总盈利略少。较长历史ICT仍为123笔净−9.84R、最长净亏14次，因此近期改善值得保留，但没有证明长期稳定。</p>
+<h2>原V8：全天开仓与ICT开仓</h2>
+<h3>共同2026年1—4月</h3>
+<table><thead><tr>
+<th>周期</th>
+<th>自然笔数 全天→ICT</th>
+<th>净胜率</th>
+<th>总净R</th>
+<th>PF</th>
+<th>最长净亏连单</th>
+<th>随机均净R 全天→ICT</th>
+<th>ICT超额均净R</th>
+<th>校正p</th>
+</tr></thead><tbody>
+<tr><td>3min</td><td>185→90</td><td>26.5%→25.6%</td><td>-85.08→-34.31</td><td>0.60→0.67</td><td>13→11</td><td>-0.56→-0.58</td><td>0.20</td><td>1.00</td></tr>
+<tr><td>5min</td><td>84→43</td><td>33.3%→30.2%</td><td>11.89→-6.77</td><td>1.15→0.84</td><td>12→11</td><td>-0.41→-0.45</td><td>0.29</td><td>1.00</td></tr>
+<tr><td>15min</td><td>30→17</td><td>43.3%→52.9%</td><td>27.75→22.74</td><td>2.65→3.79</td><td>5→2</td><td>0.40→0.32</td><td>1.02</td><td>1.00</td></tr>
+<tr><td>30min</td><td>14→7</td><td>21.4%→0.0%</td><td>-6.42→-6.95</td><td>0.45→0.00</td><td>6→7</td><td>0.10→0.18</td><td>-1.17</td><td>1.00</td></tr>
+<tr><td>1h</td><td>7→4</td><td>0.0%→0.0%</td><td>-5.68→-3.96</td><td>0.00→0.00</td><td>7→4</td><td>-0.28→-0.97</td><td>-0.02</td><td>1.00</td></tr>
+<tr><td>4h</td><td>4→1</td><td>25.0%→100.0%</td><td>-1.91→0.57</td><td>0.23→—</td><td>3→0</td><td>0.13→—</td><td>—</td><td>—</td></tr>
+</tbody></table>
+<h3>各周期较长可用历史</h3>
+<table><thead><tr>
+<th>周期</th>
+<th>自然笔数 全天→ICT</th>
+<th>净胜率</th>
+<th>总净R</th>
+<th>PF</th>
+<th>最长净亏连单</th>
+<th>随机均净R 全天→ICT</th>
+<th>ICT超额均净R</th>
+<th>校正p</th>
+</tr></thead><tbody>
+<tr><td>3min</td><td>1453→756</td><td>24.4%→24.2%</td><td>-901.25→-451.72</td><td>0.45→0.48</td><td>27→22</td><td>-0.70→-0.82</td><td>0.22</td><td>0.05</td></tr>
+<tr><td>5min</td><td>89→46</td><td>31.5%→28.3%</td><td>4.89→-10.09</td><td>1.06→0.78</td><td>12→11</td><td>-0.44→-0.48</td><td>0.26</td><td>1.00</td></tr>
+<tr><td>15min</td><td>269→123</td><td>23.8%→26.0%</td><td>-28.55→-9.84</td><td>0.88→0.91</td><td>20→14</td><td>-0.25→-0.26</td><td>0.19</td><td>1.00</td></tr>
+<tr><td>30min</td><td>124→62</td><td>25.0%→27.4%</td><td>-15.81→-6.67</td><td>0.84→0.86</td><td>9→10</td><td>-0.23→-0.37</td><td>0.28</td><td>1.00</td></tr>
+<tr><td>1h</td><td>65→32</td><td>15.4%→12.5%</td><td>-6.18→-5.62</td><td>0.89→0.81</td><td>15→18</td><td>-0.09→-0.05</td><td>-0.08</td><td>1.00</td></tr>
+<tr><td>4h</td><td>15→5</td><td>40.0%→60.0%</td><td>2.29→6.17</td><td>1.27→3.86</td><td>3→1</td><td>1.05→-1.02</td><td>1.84</td><td>1.00</td></tr>
+</tbody></table>
+<p>R为初始价格止损距离单位，净收益已扣名义金额0.2%往返成本。固定价格风险1U与无限容量串行总净R不是任何杠杆的账户百分比；末尾未自然平仓单独估值，不混进胜率。PF在没有亏损分母时显示“—”，不显示虚假的零值。</p>
+<h2>时段定义与执行</h2>
+<p>纽约本地London[02:00,05:00)、lunch[05:00,08:00)、NewYork[08:00,11:00)，三段合并为[02:00,11:00)。夏令时北京时间14:00—23:00；冬令时15:00—次日00:00。使用America/New_York处理DST。起点含、终点不含，周末保留。</p>
+<p>按信号确认后的下一根实际开盘判定是否准入，信号bar的开盘时刻不能替代它；时段外不延后排队。只筛开仓，持仓可跨时段，全部退出一直有效。先筛完整机会集合再重建单仓；全天旧持仓被剔除后，原本被挡住的信号可以进入，不能仅删除旧成交表中的几行。高周期只在自身网格开盘，时段并非连续下单窗口。</p>
+<p>时段来源是Owner图表在上轮观察到的夏令时边界；冬季按纽约同钟面的实现仍是明确模型假设，受保护原脚本尚未核实冬季行为。未做TradingView原生逐信号/成交对齐。</p>
+<h2>保护规则与准入变化</h2>
+<p>原V8保持5bar初始极值止损、0.2ATR缓冲及2ATR风险下限；收盘浮盈达到2R激活原4ATR跟踪，原V6反向信号仍按下一开盘退出。没有新增固定止盈、保本或翻身指标退出。</p>
+<h3>common</h3>
+<table><thead><tr>
+<th>周期</th>
+<th>起点UTC</th>
+<th>最长初始SL 全天→ICT</th>
+<th>实现毛3R 全天→ICT</th>
+<th>保留旧成交</th>
+<th>新增准入</th>
+<th>旧成交未进入</th>
+<th>ICT完整随机匹配</th>
+</tr></thead><tbody>
+<tr><td>3min</td><td>2026-01-01 00:00:00+00:00</td><td>9→6</td><td>15→7</td><td>86</td><td>4</td><td>99</td><td>90/90</td></tr>
+<tr><td>5min</td><td>2026-01-01 00:00:00+00:00</td><td>12→9</td><td>11→6</td><td>42</td><td>1</td><td>42</td><td>43/43</td></tr>
+<tr><td>15min</td><td>2026-01-01 00:00:00+00:00</td><td>4→2</td><td>6→5</td><td>16</td><td>1</td><td>14</td><td>17/17</td></tr>
+<tr><td>30min</td><td>2026-01-01 00:00:00+00:00</td><td>6→6</td><td>0→0</td><td>7</td><td>0</td><td>7</td><td>7/7</td></tr>
+<tr><td>1h</td><td>2026-01-01 00:00:00+00:00</td><td>3→3</td><td>0→0</td><td>4</td><td>1</td><td>4</td><td>4/4</td></tr>
+<tr><td>4h</td><td>2026-01-01 00:00:00+00:00</td><td>1→0</td><td>0→0</td><td>1</td><td>0</td><td>3</td><td>0/1</td></tr>
+</tbody></table>
+<h3>available</h3>
+<table><thead><tr>
+<th>周期</th>
+<th>起点UTC</th>
+<th>最长初始SL 全天→ICT</th>
+<th>实现毛3R 全天→ICT</th>
+<th>保留旧成交</th>
+<th>新增准入</th>
+<th>旧成交未进入</th>
+<th>ICT完整随机匹配</th>
+</tr></thead><tbody>
+<tr><td>3min</td><td>2023-08-03 14:15:00+00:00</td><td>12→11</td><td>85→48</td><td>725</td><td>31</td><td>728</td><td>756/756</td></tr>
+<tr><td>5min</td><td>2025-12-25 15:05:00+00:00</td><td>12→9</td><td>11→6</td><td>45</td><td>1</td><td>44</td><td>46/46</td></tr>
+<tr><td>15min</td><td>2023-08-01 00:00:00+00:00</td><td>11→14</td><td>25→13</td><td>108</td><td>15</td><td>161</td><td>116/123</td></tr>
+<tr><td>30min</td><td>2023-08-01 00:00:00+00:00</td><td>8→9</td><td>12→6</td><td>56</td><td>6</td><td>68</td><td>61/62</td></tr>
+<tr><td>1h</td><td>2023-08-01 00:00:00+00:00</td><td>7→12</td><td>4→3</td><td>31</td><td>2</td><td>35</td><td>30/32</td></tr>
+<tr><td>4h</td><td>2023-08-01 00:00:00+00:00</td><td>2→1</td><td>1→1</td><td>5</td><td>0</td><td>10</td><td>2/5</td></tr>
+</tbody></table>
+<h2>1000U固定风险与亏后翻倍</h2>
+<h3>共同窗口：原V8退出</h3>
+<table><thead><tr>
+<th>周期</th>
+<th>固定1U期末 全天→ICT</th>
+<th>翻倍期末 全天→ICT</th>
+<th>ICT翻倍自然笔数</th>
+<th>已实现最大回撤</th>
+<th>容量拒绝</th>
+<th>未回本U</th>
+<th>永久终止时刻UTC</th>
+</tr></thead><tbody>
+<tr><td>3min</td><td>914.92→965.69</td><td>867.79→822.72</td><td>15</td><td>18.0%</td><td>92</td><td>180.42</td><td>无永久终止</td></tr>
+<tr><td>5min</td><td>1011.89→993.23</td><td>2546.70→1742.55</td><td>37</td><td>12.9%</td><td>8</td><td>10.37</td><td>无永久终止</td></tr>
+<tr><td>15min</td><td>1027.75→1022.74</td><td>1123.22→1132.28</td><td>17</td><td>0.8%</td><td>0</td><td>0.00</td><td>无永久终止</td></tr>
+<tr><td>30min</td><td>993.58→993.05</td><td>1087.12→920.31</td><td>7</td><td>8.0%</td><td>0</td><td>79.69</td><td>无永久终止</td></tr>
+<tr><td>1h</td><td>995.01→996.73</td><td>994.13→997.93</td><td>4</td><td>1.3%</td><td>0</td><td>2.07</td><td>无永久终止</td></tr>
+<tr><td>4h</td><td>998.09→1000.57</td><td>995.29→1000.57</td><td>1</td><td>0.0%</td><td>0</td><td>0.00</td><td>无永久终止</td></tr>
+</tbody></table>
+<h3>各周期可用历史：原V8退出</h3>
+<table><thead><tr>
+<th>周期</th>
+<th>固定1U期末 全天→ICT</th>
+<th>翻倍期末 全天→ICT</th>
+<th>ICT翻倍自然笔数</th>
+<th>已实现最大回撤</th>
+<th>容量拒绝</th>
+<th>未回本U</th>
+<th>永久终止时刻UTC</th>
+</tr></thead><tbody>
+<tr><td>3min</td><td>96.21→548.28</td><td>564.24→575.65</td><td>28</td><td>46.7%</td><td>875</td><td>505.24</td><td>无永久终止</td></tr>
+<tr><td>5min</td><td>1004.89→989.91</td><td>2556.73→2692.58</td><td>36</td><td>13.9%</td><td>12</td><td>10.37</td><td>无永久终止</td></tr>
+<tr><td>15min</td><td>971.45→990.16</td><td>692.36→678.33</td><td>9</td><td>32.2%</td><td>125</td><td>321.67</td><td>无永久终止</td></tr>
+<tr><td>30min</td><td>984.19→993.33</td><td>625.82→829.66</td><td>52</td><td>27.9%</td><td>11</td><td>320.93</td><td>无永久终止</td></tr>
+<tr><td>1h</td><td>994.51→995.07</td><td>1181.79→608.12</td><td>23</td><td>44.9%</td><td>10</td><td>494.78</td><td>无永久终止</td></tr>
+<tr><td>4h</td><td>1002.29→1006.17</td><td>1012.77→1013.93</td><td>5</td><td>0.1%</td><td>0</td><td>0.00</td><td>无永久终止</td></tr>
+</tbody></table>
+<p>基础1U仅为价格止损风险，费用另计；10倍保证金容量沿用旧研究。亏后翻倍，累计净回本才重置；保本不抹去前亏，也不跨日清账。容量不足会拒绝入场且不占仓，因此现金账户可能与不受容量约束的串行交易表走出不同序列。“无永久终止”可能只是长期等待容量，必须一起看成交数、拒绝次数及未回本金额。未建模标记价格强平、资金费率、额外滑点或盘中浮动权益。</p>
+<h2>对照与核验</h2>
+<table><thead><tr>
+<th>核验</th>
+<th>组数</th>
+<th>行数（重叠窗口不独立）</th>
+<th>通过</th>
+</tr></thead><tbody>
+<tr><td>archived_all_day</td><td>12</td><td>2341</td><td>True</td></tr>
+<tr><td>original_engine_union</td><td>12</td><td>1188</td><td>True</td></tr>
+</tbody></table>
+<p>每笔自然交易匹配5个同ETH/周期/方向、实际入场UTC月、纽约小时、纽约周末状态、信号ATR/close相对前120根波动桶的随机入场，退出规则与成本一致。池仅在对应窗口和允许时段内；未来收益只用于标签，不用于选桶。匹配不够5笔的交易不混入完整匹配均值，缺配对与删失重抽保留。相较上轮，本轮全天对照也加入相同小时/周末条件，故随机列不应与旧报告直接数值比对。</p>
+<p>随机入场是独立交易对照，不构成可执行随机账户。月块符号置换9999次，每窗口最多12项Holm校正；两个窗口重叠，不能视为两次独立验证。无预测排序，AUC、top-decile排序收益与单特征评分基线不适用，以全天同规则及匹配随机交易作为零假设对照。</p>
+<p>4h共同窗口ICT只剩1笔，无法配满5个同条件随机入场，完整匹配数为0，随机均值和p值不可用；较长历史也仅5笔、完整匹配2笔。其中一笔净+4.98R占总净+6.17R约80.8%。不能把缺失的统计量说成“检验通过”，也不能用100%胜率给4h排名。</p>
+<p>15min共同窗口删除14笔全天旧成交（净合计+3.60R），又因释放占仓新增1笔（−1.41R），故总净R由27.75降至22.74。月度ICT净R为1月−1.95、2月+13.45、3月+10.42、4月+0.82；最大一笔+10.05R，约占总额44.2%。过滤提升近期平均交易表现，不能等同于每个月或所有行情都有效。</p>
+<p>独立只读复核通过：24组交易统计、48组现金账本、24组基线parity与104个结果文件哈希一致；所有ICT成交都在规定入场时段，退出中没有翻身规则。统计最大误差约4.4e-15，现金恒等式最大残差1.09e-12U。15min共同窗前三个赢家贡献净总额约93.2%，收益仍集中；这是计算复现证据，不是稳定盈利认证。</p>
+<p>冻结builder：<code>525bcacb6447f3587224b50063eeb38038d4cb82</code>。所有源前缀、旧机会表与输出哈希见input_receipts.json、verified_previous_inputs.json、manifest.json。holdout使用次数为0，所有价格在2026-05-01之前。测试与独立复核记录见实验目录的validation_receipt.json。</p>
+<h2>逐笔CSV</h2>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-multitf-20260915-v1/delivery/ETH_3m_common_ict_original_exit.csv">3min common ICT原V8逐笔</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-multitf-20260915-v1/delivery/ETH_3m_available_ict_original_exit.csv">3min available ICT原V8逐笔</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-multitf-20260915-v1/delivery/ETH_5m_common_ict_original_exit.csv">5min common ICT原V8逐笔</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-multitf-20260915-v1/delivery/ETH_5m_available_ict_original_exit.csv">5min available ICT原V8逐笔</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-multitf-20260915-v1/delivery/ETH_15m_common_ict_original_exit.csv">15min common ICT原V8逐笔</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-multitf-20260915-v1/delivery/ETH_15m_available_ict_original_exit.csv">15min available ICT原V8逐笔</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-multitf-20260915-v1/delivery/ETH_30m_common_ict_original_exit.csv">30min common ICT原V8逐笔</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-multitf-20260915-v1/delivery/ETH_30m_available_ict_original_exit.csv">30min available ICT原V8逐笔</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-multitf-20260915-v1/delivery/ETH_60m_common_ict_original_exit.csv">1h common ICT原V8逐笔</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-multitf-20260915-v1/delivery/ETH_60m_available_ict_original_exit.csv">1h available ICT原V8逐笔</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-multitf-20260915-v1/delivery/ETH_240m_common_ict_original_exit.csv">4h common ICT原V8逐笔</a></li>
+</ul>
+<ul>
+<li><a href="../../experiments/active/exp-spike-v8-ict-multitf-20260915-v1/delivery/ETH_240m_available_ict_original_exit.csv">4h available ICT原V8逐笔</a></li>
+</ul>
+<p>退出根北京时间对盘中止损只是所属K线开盘标签，不能冒充精确秒；exit_at_open为true才是该根开盘成交。全天和ICT的逐笔、随机匹配、现金账户及准入变化在实验results目录。</p>
+<h2>风险与诚实声明</h2>
+<p>这轮只改变ICT开仓时段，没有调退出参数、成本或止损。历史已在先前研究中看过，不是盲测。5m较长源只从2025-12-25预热后开始，其余可用起点不同，不能用较长总R跨周期排序；4h信号稀少，缩小时段后样本可能更少。自然连亏变短可能来自样本缩小，不能承诺未来最多6次；多个周期单独账户不是并行组合回测。未训练、promote或改动实盘。</p>
+<h2>复现命令</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+export PYTHONPATH=/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages:/Users/zhangzc/fable-trading
+/usr/bin/python3 -m pytest -q tests/test_spike_v8_ict.py tests/test_spike_v8_ict_multitf.py
+# 必须保留原结果；冻结源码回放要求新实验results目录尚不存在
+/usr/bin/python3 -m yoyo.evaluation.spike_v8_ict_multitf
+/usr/bin/python3 scripts/report_spike_v8_ict_multitf.py
+/usr/bin/python3 scripts/md_to_html.py analysis/p1_spike_v8_ict_multitf_20260915.md --out-dir analysis/html
+</code></pre>
+<h2>下一步</h2>
+<p>只有跨窗口表现一致且样本足够的候选才值得单独冻结验证；任何新的holdout评估须按配置确认授权并记录次数。当前结果不能代替原生TV逐笔核对，也没有实盘准入。</p>
+</body>
+</html>

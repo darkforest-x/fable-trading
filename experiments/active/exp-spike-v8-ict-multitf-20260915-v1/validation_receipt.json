@@ -1,0 +1,79 @@
+{
+  "date": "2026-09-15",
+  "scope": "Frozen original V8 with all versus ICT union on six OKX ETH timeframes; no Fanshen exit rules",
+  "tests": {
+    "focused": 38,
+    "layer_import_boundaries": 71,
+    "total_distinct_parent_checks": 109,
+    "commands": [
+      "PYTHONPATH=.venv/lib/python3.9/site-packages:. /usr/bin/python3 -m pytest -q tests/test_spike_v8_ict.py tests/test_spike_v8_ict_multitf.py tests/test_spike_fanshen_study.py tests/evaluation/test_spike_recovery_exit.py",
+      "PYTHONPATH=.venv/lib/python3.9/site-packages:. /usr/bin/python3 -m pytest -q tests/boundaries/test_layer_imports.py"
+    ]
+  },
+  "runtime": {
+    "python": "3.9.6",
+    "pandas": "2.3.3",
+    "numpy": "2.0.2",
+    "interpreter": "/usr/bin/python3",
+    "package_source": ".venv/lib/python3.9/site-packages",
+    "dependencies_installed": false
+  },
+  "parent_checks": {
+    "frozen_builder_hashes_unchanged": 14,
+    "html_tables": 7,
+    "csv_links_resolved": 12,
+    "baseline_parity_groups": 24,
+    "new_exit_rules": false
+  },
+  "focal_15m_common": {
+    "all_day_net_r": 27.749027270376367,
+    "ict_net_r": 22.739913029701768,
+    "removed_old_n": 14,
+    "removed_old_net_r": 3.6038141023620236,
+    "new_admitted_n": 1,
+    "new_admitted_net_r": -1.405300138312576,
+    "largest_ict_trade_net_r": 10.048275862068882,
+    "ict_net_r_by_entry_month": {
+      "2026-01": -1.951016,
+      "2026-02": 13.453272,
+      "2026-03": 10.420443,
+      "2026-04": 0.817215
+    }
+  },
+  "sparse_4h": {
+    "common_natural": 1,
+    "common_full_matches": 0,
+    "p_available": false,
+    "available_natural": 5,
+    "available_full_matches": 2,
+    "largest_trade_net_r": 4.984452024647879,
+    "available_total_net_r": 6.170192416819682
+  },
+  "holdout_consumption_number": 0,
+  "native_tradingview_parity": false,
+  "notion_url": "https://app.notion.com/p/3db8856479af81e0bab8fa4d59b863e4",
+  "independent_audit": {
+    "reviewer": "ict_result_audit / budget-evidence / Luna Max",
+    "scope": "Existing result artifacts only; no raw OHLC, pickle or holdout reads",
+    "verdict": "PASS for arithmetic and filtering reproducibility, not profitability validation",
+    "trade_statistic_groups": 24,
+    "cash_ledgers": 48,
+    "parity_groups": 24,
+    "result_files_sha256_verified": 104,
+    "ict_entry_out_of_window": 0,
+    "fanshen_exit_rows": 0,
+    "statistic_max_error": 4.4e-15,
+    "control_mean_max_error": 2.22e-16,
+    "cash_identity_max_residual": 1.09e-12,
+    "cash_ledgers_with_boundary": 8,
+    "cash_ledgers_with_capacity_rejection": 16,
+    "fifteen_minute_common_top_three_profit_fraction": 0.932
+  },
+  "configuration_description_clarification": {
+    "field": "config.json execution",
+    "issue": "Unused prose copied from the previous study still mentions varying Fanshen overlays; frozen original bytes are preserved for provenance.",
+    "operative_behavior": "policies=[original] and primary=original asserted by runner; iteration only original with policy=None; original stop/trailing/raw-reverse replay. No Fanshen signals computed.",
+    "evidence": "24 original/archived parity groups pass; all trade and cash exit reasons audited without Fanshen; execution prose is not read by the runner.",
+    "changes_to_evaluated_policy": false
+  }
+}
