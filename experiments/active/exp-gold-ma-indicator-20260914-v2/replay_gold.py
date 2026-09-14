@@ -119,7 +119,7 @@ def run(phase, signals="marker", output_root=None, verify_against=None):
         four5 = sum(not r[model]["hit_inside"] and r[model]["first_late_delay"] in (4, 5) for r in positive)
         null = [r[model]["disjoint_boundary_null_hit_rate"] for r in positive if r[model]["disjoint_boundary_null_hit_rate"] is not None]
         metrics[model] = {"positive_n": len(positive), "inside": inside, "late_1_3_only": one3,
-            "late_4_5_only": four5, "no_hit_by_available_end": len(positive)-inside-one3-four5,
+            "late_4_5_only": four5, "no_inside_or_late_through_5": len(positive)-inside-one3-four5,
             "inside_recall": inside/len(positive) if positive else None,
             "negative_n": len(negative), "negative_false_positive": sum(r[model]["false_positive_on_owner_no_target"] for r in negative),
             "null_mean_hit_rate": float(np.mean(null)) if null else None,

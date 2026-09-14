@@ -142,6 +142,24 @@ python3 experiments/active/exp-gold-ma-indicator-20260914-v2/build_report.py
     path=ROOT/"analysis/p0_gold_ma_indicator_20260914.md"
     path.write_text(report,encoding="utf-8")
     subprocess.run(["python3","scripts/md_to_html.py",str(path),"--out-dir","analysis/html"],cwd=ROOT,check=True)
+    files = [path, ROOT/"analysis/html/p0_gold_ma_indicator_20260914.html",
+        ROOT/"yoyo/evaluation/pine/spike_gold_shape_v2.pine",
+        ROOT/"yoyo/evaluation/gold_ma_candidate.py", ROOT/"yoyo/evaluation/ma_drift_v1_reference.py",
+        ROOT/"yoyo/evaluation/owner_gold_indicator_bridge.py", HERE/"PROJECT_PLAN.md", HERE/"replay_gold.py",
+        HERE/"verify_pine.mjs", Path(__file__).resolve(), HERE/"results/pine_parity.json",
+        HERE/"results/gallery.html", HERE/"results/gallery_images.json"]
+    for phase in ("dev", "dev_confirmation"):
+        files.extend(HERE/"results"/phase/name for name in ("summary.json", "source_audits.json", "cases.jsonl"))
+    receipts = [{"path": str(p.relative_to(ROOT)), "sha256": hashlib.sha256(p.read_bytes()).hexdigest(), "size_bytes": p.stat().st_size} for p in files]
+    parity = json.loads((HERE/"results/pine_parity.json").read_text())
+    if parity["pine_sha256"] != hashlib.sha256((ROOT/"yoyo/evaluation/pine/spike_gold_shape_v2.pine").read_bytes()).hexdigest():
+        raise ValueError("Pine source drifted after auxiliary parity")
+    delivery = {"experiment_id":"exp-gold-ma-indicator-20260914-v2", "status":"rejected_candidate",
+        "builder_commit":subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip(),
+        "files":receipts, "holdout_read":False, "new_training":False, "training_eligible":False,
+        "production_eligible":False, "native_compile":False, "tradingview_saved":False,
+        "input_clock":"15m closed bars before2025-07-01UTC", "remaining_scope":"Owner gold-reference and observation-delay clarification pending"}
+    (HERE/"results/delivery_manifest.json").write_text(json.dumps(delivery,ensure_ascii=False,indent=2)+"\n")
     print("report", path)
     print("gallery",HERE/"results/gallery.html")
 
