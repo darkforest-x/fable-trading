@@ -1,0 +1,47 @@
+{
+  "status": "complete",
+  "tests": {
+    "passed": 49,
+    "log": "verification_tests.log"
+  },
+  "streams": 3531,
+  "baseline_parity_streams": 3531,
+  "required_files_per_stream": 6,
+  "aggregate_rows": 7062,
+  "failed_streams": 0,
+  "source_commit_before_replay": "c26b0ebfa6",
+  "statistics_commit_before_aggregation": "7f9da6fd21",
+  "holdout_consumptions": 1,
+  "history": "owner-authorized exposed history; not blind OOS",
+  "html": {
+    "tables": 6,
+    "existing_local_links": 8,
+    "visual_preview": [
+      "report_preview.png",
+      "report_table_preview.png"
+    ],
+    "method": "CUA in-app browser localhost preview; native local links verified on filesystem; narrow-screen tables use horizontal overflow"
+  },
+  "review": {
+    "delegates": [
+      "map_v8_shadow Luna Max",
+      "v8_exit_evidence Luna Max"
+    ],
+    "resolved": [
+      "Full schema/universe/hash/per-arm count aggregation gate",
+      "Explicit candidate versus admission versus event versus paired denominators",
+      "One random-entry draw distinguished from 2000 monthly bootstrap/signflip draws",
+      "Matched deletion includes unknown admission rejection; 3 later closed unknown events disclosed",
+      "Signal month matching distinguished from entry month resampling"
+    ],
+    "no_market_rerun_for_reporting": true
+  },
+  "notion": {
+    "strategy": "https://app.notion.com/p/3db8856479af81e1b257dbd9ae09aca3",
+    "experiment": "https://app.notion.com/p/3db8856479af819c8be7f793b2e35002",
+    "readback_verified": true
+  },
+  "financial_verdict": "inconclusive; later-year loss and non-significant matched excess",
+  "training_eligible": false,
+  "production_eligible": false
+}

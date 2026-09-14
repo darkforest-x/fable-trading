@@ -1,5 +1,11 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
+## 最新：SPIKE V9 已保存 TV，原全量对比完成（2026-09-15）
+
+Owner后续明确要求子代理、TV保存与全量对照，覆盖前一实现阶段不做对照的范围。3531原冻结流完整串行回放，V8逐笔parity通过；V8净−2021.78R→V9+2758.17R、PF0.970→1.050，但后一年仍−2089.19R。原532净10R保留458、丢74、新4；改善69.12%来自成本R减少。后一年匹配随机入场超额p=0.1924，仍为研究不确定。
+V9私有脚本「SPIKE V9 · 标的量能时段过滤」第1版已保存；未加图表/提醒，未切换监控或实盘，不声称TV成交parity。49针对性测试、完整回执/源集合核验及两位Luna Max子代理复核完成；HTML6表、8本地链接和窄屏预览通过。此次V9配置holdout消耗第1次，重用暴露历史，非盲OOS。
+交付：analysis/html/p1_spike_v9_full_backtest_20260915.html；逐笔及来源：experiments/active/exp-spike-v9-full-backtest-20260915-v1/；Notion：https://app.notion.com/p/3db8856479af819c8be7f793b2e35002。回放源码c26b0ebfa6、统计7f9da6fd21，配置未改；production_eligible=false。
+
 ## 最新：SPIKE V9 三条过滤已实现（2026-09-15）
 
 Owner 明确“不需要对照啊 直接做”“升级为v9”，故合并底层USDC、确认RV>50、UTC周日计划开仓三条排除；继承V8结构与退出，增加确认价风险/成本R说明。134项合成与边界检查通过，源码ef4de009d0；未读真实行情、holdout0次，未运行新收益对照。

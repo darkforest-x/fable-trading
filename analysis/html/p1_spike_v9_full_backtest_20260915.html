@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>SPIKE V9 全量回测：优于 V8，但后一年仍亏损</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>SPIKE V9 全量回测：优于 V8，但后一年仍亏损</h1>
+<p>2026-09-15 · 固定三门组合 · 原 3,531 流完整串行回放 · V9 配置首次 holdout 消耗</p>
+<p><strong>V9 已保存到 TradingView 私有脚本「SPIKE V9 · 标的量能时段过滤」第 1 版。两年净 R 从 V8 的 −2,021.78 提高到 +2,758.17，改善 +4,779.95R；后一年仍亏 −2,089.19R，尚未证明稳定盈利。</strong> 原 532 笔实现净 10R 的交易保留 458 笔，丢失 74 笔，新增 4 笔；不能把版本升级当作实盘验收。</p>
+<h2>1. 本次做了什么</h2>
+<p>Owner 先批准直接合并底层 USDC、RV＞50、UTC 周日三条过滤并升级 V9，之后明确要求“用子代理 好了之后 v9保存到tv 跑一下v9全量回测 对比一下v8”。后一个请求授权了本次新对照，原实现阶段未评估收益的历史记录不改写。</p>
+<p>固定 V9 源码为 <code>ef4de009d068c30bba33166b52423e53d26d1781</code>，只改变新入场准入：精确底层资产为 USDC、确认 RV＞50、计划下一开盘为 UTC 周日时拒绝；未知元数据不准入。ETH/USDC 不因计价币 USDC 被排除。UTC 周日对应北京时间周日 08:00 至周一 08:00。</p>
+<p>继承原五根 K 初始止损、0.2ATR 缓冲/2ATR 下限、收盘达到 2R 后启用 4ATR 跟踪、原始 V6 反向退出、下一开盘成交、既有盘中止损优先级，以及固定名义往返 0.002 成本。此次不加入 MFE/BE 退出处理。新增风险距离/成本 R 字段仅解释确认价参考风险，不改变入场阈值或仓位。</p>
+<h2>2. 数据范围和分母</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>本次覆盖</th>
+</tr></thead><tbody>
+<tr><td>冻结数据流</td><td>Binance / OKX / Gate，30m / 1H / 4H，共 3,531 流，全部完成</td></tr>
+<tr><td>UTC 入场窗口</td><td>2024-09-10 00:00（含）至 2026-09-10 00:00（不含）</td></tr>
+<tr><td>年度切点</td><td>2025-09-10 00:00 UTC</td></tr>
+<tr><td>原始共同候选池</td><td>113,295 条 V8 候选</td></tr>
+<tr><td>V9 准入 / 拒绝</td><td>96,200 / 17,095，拒绝 15.09%</td></tr>
+<tr><td>实际有交易的覆盖</td><td>3,263 流、822 个底层资产；未成交的空流仍计入完整性验收</td></tr>
+<tr><td>基线一致性</td><td>3,531 流 V8 重放均与原 <code>full_v3</code> 逐笔一致，含删失行</td></tr>
+<tr><td>Holdout</td><td><strong>这是该 V9 配置第 1 次消耗 holdout</strong>；Owner 此次明确授权原全量历史</td></tr>
+</tbody></table>
+<p>“全量”指原 V8 冻结池，不是当前全部币种，也不包含另一个 ETH 3m/5m 专项样本。原池剔除的 3 条 OKX SATS zero-tick 流维持原样；历史上市/缓存/可用性偏差仍存在。没有重新 fetch、扩池、训练或调参。此前 V8 研究已使用这些历史，后一年不是盲样本外。</p>
+<p>前一年只纳入入场与出场均早于切点的事件；后一年按入场不早于切点。跨切点旧持仓另留在全期：V8 有 568 事件（566 已平仓，+706.20R），V9 有 540（538 已平仓，+564.42R）。因此两年分表不能直接相加等于全期。删失行保留计数，不把未知最终收益算成 0。</p>
+<h2>3. V8 / V9 主结果</h2>
+<p>净胜率定义为已平仓净 R＞0，10R 定义为<strong>实际实现净 R≥10</strong>，不是 MFE。PF 为净 R 正收益之和除以负收益绝对值之和。表中“随机均值/超额”在独立的共同平仓配对分母上计算，不能拿随机均值乘以全部交易数。</p>
+<table><thead><tr>
+<th>范围</th>
+<th>版本</th>
+<th>已平仓</th>
+<th>净 R 合计</th>
+<th>PF(R)</th>
+<th>净胜率</th>
+<th>净10R</th>
+<th>随机配对数</th>
+<th>随机均值R</th>
+<th>配对超额R</th>
+</tr></thead><tbody>
+<tr><td>全期</td><td>V8</td><td>94,746</td><td>−2,021.78</td><td>0.970</td><td>30.05%</td><td>532</td><td>94,580</td><td>−0.06974</td><td>+0.04877</td></tr>
+<tr><td>全期</td><td>V9</td><td>81,854</td><td>+2,758.17</td><td>1.050</td><td>30.88%</td><td>462</td><td>81,703</td><td>−0.02867</td><td>+0.06281</td></tr>
+<tr><td>前一年</td><td>V8</td><td>36,573</td><td>+2,101.48</td><td>1.082</td><td>31.54%</td><td>198</td><td>36,351</td><td>−0.02906</td><td>+0.09128</td></tr>
+<tr><td>前一年</td><td>V9</td><td>31,295</td><td>+4,282.94</td><td>1.211</td><td>32.82%</td><td>176</td><td>31,076</td><td>+0.00420</td><td>+0.13862</td></tr>
+<tr><td>后一年</td><td>V8</td><td>57,607</td><td>−4,829.46</td><td>0.884</td><td>28.86%</td><td>319</td><td>57,446</td><td>−0.10690</td><td>+0.02353</td></tr>
+<tr><td>后一年</td><td>V9</td><td>50,021</td><td>−2,089.19</td><td>0.940</td><td>29.43%</td><td>275</td><td>49,874</td><td>−0.06001</td><td>+0.01880</td></tr>
+</tbody></table>
+<p>全期实际事件 V8 95,191、V9 82,282；删失分别 445、428。全期平均净 R 从 −0.02134 变为 +0.03370；按名义收益计算的 PF 从 1.00085 变为 1.04876，说明 R 归一化和等名义本金不是同一统计口径。</p>
+<p>按出场时间排列的<strong>事件累计 R 最大回撤</strong>从 8,293.68R 降到 5,716.58R，减少 31.07%；后一年为 5,997.20R→3,852.68R。此处多币、多所、多周期叠加，未配置共同资金或仓位，不能当作实际账户回撤。</p>
+<p>V9 去掉最大一笔赢家后全期仍 +2,623.52R，区别于原先单独排 USDC 的脆弱结果。但 25 个入场自然月中只有 13 个月净正（V8 为 11），且后一年总计仍负；去掉一笔最大赢家不是稳定性证明。</p>
+<h2>4. 改善从哪里来，付出什么代价</h2>
+<p>逐事件身份核对：两组共同事件 80,803 笔，其删失、出场时间/原因与净 R 全部不变；V9 移除了 14,388 个原事件，并因持仓/重入路径改变新增 1,479 个事件。因此结果来自完整串行回放，不能用删除原交易或把三项历史改善相加替代。</p>
+<p>收益差额的算术分解为：避开亏损 <strong>+12,956.08R</strong>，错过盈利 <strong>−8,045.96R</strong>，新增入场合计 <strong>−130.17R</strong>，合计 <strong>+4,779.95R</strong>。其中毛 R 改善 +1,476.09R，成本 R 减少 +3,303.85R，后者占改善 <strong>69.12%</strong>。这是原 0.002 名义成本在各自初始风险上的换算变化，并不是把手续费率调低。</p>
+<p>原 532 笔净 10R 保留 458 笔（86.09%），丢失 74 笔，新入场贡献 4 笔，得到 V9 的 462 笔。不能把总笔数差 70 当成只错过 70 个原赢家。</p>
+<p>候选拒绝原因按互斥组合计数：仅 UTC 周日 16,608；仅 RV＞50 为 252；仅 USDC 为 161；USDC＋周日 16；USDC＋RV 9；RV＋周日 45；RV 未知 3；RV 未知＋周日 1。总计 17,095；不是每门影响的可加收益。按边际原因算，周日 16,670、RV＞50 共 306、USDC 186、RV 未知 4，有重叠。</p>
+<p>USDC 原净 −2,150.29R 被完整移除，占本次净改善约 44.99%。其后单币改善最大 AVAX +43.06R、LINK +40.83R、ENJ +35.60R；并非另一个单币贡献了同量级改善。V9 净收益最高的底层为 XRP +254.37R、RAVE +218.98R、ZEC +180.74R。这些只是归因，不能据此事后挑币。</p>
+<h2>5. 周期和交易所：正收益不等于信号超额</h2>
+<p>下表每个周期都保留 V8 对照与匹配随机入场。更细前一年数据、名义收益、区间和回撤见 CSV。</p>
+<table><thead><tr>
+<th>范围/周期</th>
+<th>版本</th>
+<th>已平仓</th>
+<th>净 R</th>
+<th>PF(R)</th>
+<th>配对数</th>
+<th>随机均值R</th>
+<th>配对超额R</th>
+</tr></thead><tbody>
+<tr><td>全期30m</td><td>V8</td><td>57,575</td><td>−1,376.95</td><td>0.967</td><td>57,501</td><td>−0.11305</td><td>+0.08923</td></tr>
+<tr><td>全期30m</td><td>V9</td><td>48,937</td><td>+1,223.70</td><td>1.036</td><td>48,866</td><td>−0.07108</td><td>+0.09621</td></tr>
+<tr><td>全期1H</td><td>V8</td><td>28,473</td><td>−1,135.71</td><td>0.943</td><td>28,423</td><td>−0.07024</td><td>+0.03087</td></tr>
+<tr><td>全期1H</td><td>V9</td><td>25,016</td><td>+620.27</td><td>1.038</td><td>24,967</td><td>−0.03541</td><td>+0.06088</td></tr>
+<tr><td>全期4H</td><td>V8</td><td>8,698</td><td>+490.88</td><td>1.083</td><td>8,656</td><td>+0.21958</td><td>−0.16118</td></tr>
+<tr><td>全期4H</td><td>V9</td><td>7,901</td><td>+914.19</td><td>1.179</td><td>7,870</td><td>+0.25606</td><td>−0.13848</td></tr>
+<tr><td>后一年30m</td><td>V8</td><td>35,605</td><td>−4,290.63</td><td>0.836</td><td>35,534</td><td>−0.15873</td><td>+0.03822</td></tr>
+<tr><td>后一年30m</td><td>V9</td><td>30,578</td><td>−2,757.97</td><td>0.874</td><td>30,509</td><td>−0.10792</td><td>+0.01774</td></tr>
+<tr><td>后一年1H</td><td>V8</td><td>17,051</td><td>−674.01</td><td>0.944</td><td>17,003</td><td>−0.08530</td><td>+0.04667</td></tr>
+<tr><td>后一年1H</td><td>V9</td><td>14,913</td><td>+355.94</td><td>1.036</td><td>14,866</td><td>−0.04441</td><td>+0.06944</td></tr>
+<tr><td>后一年4H</td><td>V8</td><td>4,951</td><td>+135.19</td><td>1.040</td><td>4,909</td><td>+0.19347</td><td>−0.16295</td></tr>
+<tr><td>后一年4H</td><td>V9</td><td>4,530</td><td>+312.84</td><td>1.105</td><td>4,499</td><td>+0.21334</td><td>−0.14131</td></tr>
+</tbody></table>
+<p>后一年主要亏损仍在 30m。1H 后一年转正但随机超额区间仍跨 0；4H 虽然净正，匹配随机入场更强，不能据此直接接受 4H 策略。</p>
+<table><thead><tr>
+<th>全期交易所</th>
+<th>版本</th>
+<th>已平仓</th>
+<th>净 R</th>
+<th>PF(R)</th>
+<th>配对数</th>
+<th>随机均值R</th>
+<th>配对超额R</th>
+</tr></thead><tbody>
+<tr><td>Binance</td><td>V8</td><td>60,335</td><td>−1,066.92</td><td>0.975</td><td>60,241</td><td>−0.06463</td><td>+0.04732</td></tr>
+<tr><td>Binance</td><td>V9</td><td>52,129</td><td>+1,446.30</td><td>1.041</td><td>52,044</td><td>−0.02937</td><td>+0.05755</td></tr>
+<tr><td>OKX</td><td>V8</td><td>31,075</td><td>−1,352.19</td><td>0.940</td><td>31,017</td><td>−0.11495</td><td>+0.07214</td></tr>
+<tr><td>OKX</td><td>V9</td><td>26,739</td><td>+883.23</td><td>1.049</td><td>26,686</td><td>−0.06074</td><td>+0.09463</td></tr>
+<tr><td>Gate</td><td>V8</td><td>3,336</td><td>+397.33</td><td>1.177</td><td>3,322</td><td>+0.25966</td><td>−0.14294</td></tr>
+<tr><td>Gate</td><td>V9</td><td>2,986</td><td>+428.64</td><td>1.217</td><td>2,973</td><td>+0.27147</td><td>−0.13071</td></tr>
+</tbody></table>
+<h2>6. 匹配随机对照与检验</h2>
+<p>每个实际事件固定抽取 <strong>1 个</strong>随机入场，匹配同 stream（所以同交易所/底层/周期）、方向、信号 bar 起始自然月、同期 ATR/close 固定桶；桶界为 0.5%、1%、2%、5%、10%。选取只使用当时指标和固定种子 91509，不依据未来输赢抽样；未来 K 线只用于给选中路径评分。排除目标信号自身；未决/无有效初始止损的随机路径不重抽。共同事件复用同一个随机选择。</p>
+<p>随机路径继承同一父级初始止损、原始反向退出、跟踪和固定成本，但逐事件独立，不对随机入场另建全池单仓组合。随机抽样不要求 V9 三门通过，因此它回答“实际交易相对同条件一般市场入场”的超额；并不单独识别 V9 三门选择能力。月份是信号开始月，fold 按计划下一开盘；跨月 bar 按信号月配对。前一年还要求随机入场和出场都早于切点。</p>
+<p>全期 V8 95,191 份控制回执，94,580 有效配对、611 未匹配；V9 82,282 份，81,703 有效、579 未匹配。V9 后一年有效 49,874、未匹配或跨界 573。保留每个失败原因，不把共同平仓分母混为策略全体。</p>
+<p>对保存的策略减随机收益差，另做 <strong>2,000 次整自然月块 bootstrap</strong> 和 <strong>2,000 次整月符号置换</strong>；分块按目标实际入场月份，区别于随机选择所用的信号开始月份，整月同时保留跨币/交易所共振。<code>monthly.csv</code> 也按已平仓事件的入场月份归因，不是逐月盯市收益。全期 25 个部分/完整自然月，单年度 13 个；区间为描述性 95% 月块区间，p 为“超额为正”的单侧未校正值，不是两年净盈利的 p。</p>
+<table><thead><tr>
+<th>范围</th>
+<th>版本</th>
+<th>配对策略均值R</th>
+<th>配对随机均值R</th>
+<th>超额R</th>
+<th>月块95%区间</th>
+<th>单侧p</th>
+</tr></thead><tbody>
+<tr><td>全期</td><td>V8</td><td>−0.02097</td><td>−0.06974</td><td>+0.04877</td><td>[+0.00833,+0.09333]</td><td>0.01849</td></tr>
+<tr><td>全期</td><td>V9</td><td>+0.03414</td><td>−0.02867</td><td>+0.06281</td><td>[+0.01236,+0.11850]</td><td>0.01699</td></tr>
+<tr><td>前一年</td><td>V8</td><td>+0.06222</td><td>−0.02906</td><td>+0.09128</td><td>[+0.00223,+0.18577]</td><td>0.04748</td></tr>
+<tr><td>前一年</td><td>V9</td><td>+0.14282</td><td>+0.00420</td><td>+0.13862</td><td>[+0.03016,+0.24894]</td><td>0.01449</td></tr>
+<tr><td>后一年</td><td>V8</td><td>−0.08337</td><td>−0.10690</td><td>+0.02353</td><td>[−0.00650,+0.05703]</td><td>0.11794</td></tr>
+<tr><td>后一年</td><td>V9</td><td>−0.04121</td><td>−0.06001</td><td>+0.01880</td><td>[−0.02119,+0.05411]</td><td>0.19240</td></tr>
+</tbody></table>
+<p>另在后一年原 V8 已平仓固定事件上，按 venue/asset/timeframe/side/入场月份/同期 ATR 桶匹配，做 2,000 次同数量随机删除，检验<strong>完整 V9 准入规则（含未知值拒绝）</strong>删掉的是否比随机删除更差。子代理指出未知值不应被默认为已知三门的选择效果：4 条 RV 未知候选都是 V8 实际事件，其中 3 条在后一年已平仓（30m 两条净 −0.79747R，1H 一条净 −3.49675R）。本表明确包含这些拒绝，因此 p 不能仅归因于三个已知条件。此检验不模拟新增重入，不替代上面的随机入场对照。该统计沿用已提交函数，种子 14092026；三周期 Bonferroni 校正只覆盖本组合的 3 个周期，不含之前反复探索过的全部历史候选。</p>
+<table><thead><tr>
+<th>后一年周期</th>
+<th>实际删除净R</th>
+<th>匹配随机删除均值R</th>
+<th>多避免损失R</th>
+<th>固定拒绝/可移动拒绝</th>
+<th>原始p</th>
+<th>三项校正p</th>
+</tr></thead><tbody>
+<tr><td>30m</td><td>−1,624.60</td><td>−1,368.71</td><td>+255.88</td><td>2,777 / 2,790</td><td>0.00100</td><td>0.00300</td></tr>
+<tr><td>1H</td><td>−1,114.02</td><td>−998.92</td><td>+115.10</td><td>1,686 / 766</td><td>0.00350</td><td>0.01049</td></tr>
+<tr><td>4H</td><td>−196.55</td><td>−194.31</td><td>+2.23</td><td>412 / 82</td><td>0.37731</td><td>1.00000</td></tr>
+</tbody></table>
+<p>整个 USDC 资产或小分层全部被拒绝时，无可移动随机选择，属于固定部分，不能拿它证明选择显著性。30m 有删劣证据，但最终串行后一年仍亏损。AUC、模型 top-decile 毛/净收益、正类标签率和单特征模型基线不适用于无训练标签、无排序分数的固定入场门；这里用净胜率、已提交 V8、同条件随机入场和同量随机删除给出可证伪对照。原单门结果另见历史六过滤报告，本次没有重选最佳单门。</p>
+<h2>7. 技术验收与 TradingView 保存</h2>
+<p>回放 builder <code>c26b0ebfa6</code> 在第一次市场运行之前提交；统计 builder <code>7f9da6fd21</code> 在聚合之前提交。完整回放 731.42 秒、3 个进程。49 项针对性测试通过，含 6 个合成路径的优化引擎与已发布 V9 adapter 逐笔等价、未知元数据、未来扰动不影响准入、随机路径固定和原父级退出核验、统计分母/完整回执/schema/共享结果约束。</p>
+<p>两个 Luna Max 子代理分别核对映射/主汇总与统计证据。子代理发现初始完成检查只验证回执所列文件，聚合门已补强为固定六文件、两 arm、7062 汇总行、源 3531 key 集合相等、源与输出 SHA 绑定、每流平仓/删失/净 R/10R/准入数核对。最终全部通过，失败流 0；没有为了统计改动重跑或重新评分 V9 行情。</p>
+<p>优化回放器与原 V9 adapter 保持交易/成交等价，继承 <code>enable_be=False</code> 父级路径；它不生成原 adapter 的逐根跟踪更新事件诊断，所以只交付交易/成交表，不声称完整诊断事件列表相同。pandas 出现空表拼接未来版本警告，当前固定依赖下完成；未改库或忽略业务断言。</p>
+<p>TradingView 在 2026-09-15 北京时间 <strong>03:02:45</strong> 显示脚本第 1 版“已保存”；保存触发编译后没有显示错误。上传源 SHA256 <code>162e5a3e8f9647b061a4cb51794707978b3fbe8cc5285981741263d5bc40774b</code>，872 行，编辑器末行 873。证据为标题/保存状态/版本/行数/可见页脚和截图，<strong>不是从 TV 导出全文再核 hash</strong>；没有添加图表或做成交 parity 验证。</p>
+<p>原生编辑器初次输入失焦并误加 3 个 V8 副本；已经逐个移除，核对恢复原 Stoch＋单个 V8。之后先用短文本确认焦点，再用显式纯文本粘贴完成保存。没有新提醒、公开发布、监控切换或交易操作。Python 的 next-open 回放和 Pine 的确认收盘参考保留各自既有语义，不宣称跨平台成交一致。</p>
+<h2>8. 风险与诚实声明</h2>
+<ul>
+<li>净收益转正不能掩盖后一年负收益、仅约 1.05 的全期 PF，以及成本 R 减少占改善 69.12%。同样名义费用在很窄风险距离上会放大成大量 R。</li>
+<li>R 加总不是账户收益率；同币跨所与多周期可能重叠，未建真实资金容量、保证金、流动性、资金费率或额外滑点模型。0.002 是冻结研究成本假设。</li>
+<li>候选选择来自已分析过的 V8 历史。月块统计只有 13/25 块，固定单次随机入场有抽样波动，先前研究多重选择未被三项校正消除。不得宣传盲 OOS 或实盘胜率。</li>
+<li>三门会改变重入路径，新增 1,479 个事件反而合计亏 −130.17R。过滤的真实代价包括丢掉 74 个原净10R赢家。</li>
+<li>所有来源、代码、候选、逐笔和失败控制回执均保留。实验状态为 <code>inconclusive</code>，<code>training_eligible=false</code>、<code>production_eligible=false</code>，TV 私有保存不是 promote。</li>
+</ul>
+<h2>9. 复现与交付文件</h2>
+<p>在原 SHA 绑定缓存及冻结源目录仍可访问的前提下，以下为已执行序列。将来再次评估 holdout 必须单独授权和记录次数；本次报告的统计重建只读已保存结果，不重复消耗行情。</p>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+git branch --show-current
+python3 -m pytest -q tests/evaluation/test_spike_v9_full_replay.py tests/evaluation/test_spike_v9_full_report.py tests/evaluation/test_spike_v9.py
+python3 -m yoyo.evaluation.spike_v9_full_replay --output experiments/active/exp-spike-v9-full-backtest-20260915-v1/results/full_v1 --workers 3
+python3 -m yoyo.evaluation.spike_v9_full_report --input experiments/active/exp-spike-v9-full-backtest-20260915-v1/results/full_v1 --output experiments/active/exp-spike-v9-full-backtest-20260915-v1/statistics/full_v1
+python3 scripts/md_to_html.py analysis/p1_spike_v9_full_backtest_20260915.md --out-dir analysis/html
+</code></pre>
+<p>原行情池 <code>exp-spike-v7-v1-compare-20260912-v1/results/replay_two_year_20260912_v3</code> 的 manifest SHA 为 <code>37f65499611877c8b8b10f0f2fb7a8c99a07d95cc90cda282f5b8a5ac89d41b6</code>；原 V8 <code>exp-spike-v1-v8-be05-20260914-v1/common/results/full_v3</code> 的 manifest SHA 为 <code>613b445c69d1b74459dff7334e633e2dc3079061ab828286d70c22aac7837899</code>。当前运行身份 <code>0cfa06ae957685868d4514e6019f39ed1957b5a2184a42ec1a5d28ade8e08a38</code>。</p>
+<ul>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v9-full-backtest-20260915-v1/statistics/full_v1/summary.csv">主汇总 CSV</a></li>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v9-full-backtest-20260915-v1/statistics/full_v1/trades.csv.gz">全部逐笔交易</a></li>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v9-full-backtest-20260915-v1/statistics/full_v1/decisions.csv.gz">全部候选与风险解释</a></li>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v9-full-backtest-20260915-v1/statistics/full_v1/controls.csv.gz">随机入场逐事件回执</a></li>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v9-full-backtest-20260915-v1/statistics/full_v1/statistics_receipt.json">统计 SHA 回执</a></li>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v9-full-backtest-20260915-v1/tv/v9_saved.png">TradingView 保存截图</a></li>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v9-full-backtest-20260915-v1/tv/save_receipt.json">TradingView 保存回执</a></li>
+<li><a href="/Users/zhangzc/fable-trading/analysis/html/p1_spike_v8_six_filters_20260914.html">原单门历史报告</a></li>
+<li><a href="https://app.notion.com/p/3db8856479af819c8be7f793b2e35002">Notion 本次研究记录</a></li>
+</ul>
+<p>下一步可直接在 TradingView 的私有脚本列表查看 V9 源码。若要新增前向观察或切换实际提醒/监控，需要 Owner 明确对应入口与授权；本次任务只交付私有保存和历史对比。任何新的参数筛选应另立配置，不能用本次后一年继续挑优再称独立验证。</p>
+</body>
+</html>

@@ -18,6 +18,20 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v9-full-backtest-20260915-delivery
+    artifact_type: manifest
+    role: fixed_v9_v8_full_serial_comparison_and_private_tv_save
+    source_repo: darkforest-x/fable-trading
+    source_commit: c26b0ebfa6567dd823f56d1d131662059583b2cf
+    source_path: experiments/active/exp-spike-v9-full-backtest-20260915-v1/delivery_manifest.json
+    sha256: 6e03d883f3f237aa94319e30bc45087e61beec8c04bd280eb60a75f1684ec08d
+    size_bytes: 8451
+    storage_uri: repo://experiments/active/exp-spike-v9-full-backtest-20260915-v1/delivery_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: 3531 source/receipt keys and V8 parity validated; manifest binds 36 files including raw-run identity, aggregated ledgers and statistics receipts.
+      V9 net2758.17R but later-2089.19R; not production. TV saved privately, no chart fill parity claim.
   - artifact_id: spike-v9-entry-bundle-20260915-delivery
     artifact_type: manifest
     role: owner_selected_v9_implementation_and_synthetic_validation
