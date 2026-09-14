@@ -114,11 +114,35 @@ def test_fixed_exit_restores_full_source_ordinal_from_prefixed_cache() -> None:
     assert fixed["exit_i"] == int(serial.iloc[0].exit_i) + 100
 
 
-def test_fixed_path_preserves_serial_stale_reverse_state_at_entry() -> None:
-    context = _context(side=-1)
+def test_reverse_intent_is_consumed_by_gap_close_and_cannot_close_new_entry() -> None:
+    """A reverse belongs to its original long even when that long gaps out."""
+    context = _context()
+    bars, index = context.cache["bars"], context.cache["bars"].index
+    context.cache["signals"].loc[:, ["long_signal", "short_signal"]] = False
+    context.cache["v1_signals"].loc[:, ["long_signal", "short_signal"]] = False
+    context.cache["signals"].loc[index[4], "long_signal"] = True
+    context.cache["signals"].loc[index[5], "short_signal"] = True
+    context.cache["v1_signals"].loc[:, :] = context.cache["signals"]
+    # Long enters at 100.  The opposite signal schedules a reverse, then the
+    # next opening gaps through its initial stop.  A new short is admitted at
+    # that opening and must not inherit the old long's reverse intent.
+    bars.iloc[5] = [100., 100.5, 99., 100., 1., 100., 100., 1., 0., 100., 100.]
+    bars.iloc[6] = [97., 98.8, 96., 97.5, 1., 100., 100., 1., 0., 100., 100.]
+    bars.iloc[7] = [97.5, 98., 96.5, 97.5, 1., 100., 100., 1., 0., 100., 100.]
     prepared = study.prepare_arm(context, arm="v8")
     serial, _, _ = study.replay_serial(context, arm="v8", enable_be=False, prepared=prepared)
-    row = serial.iloc[0].copy()
-    row["serial_pending_reverse_side_at_entry"] = -1
-    fixed = study.replay_fixed_entry(context, row, arm="v8", enable_be=False, prepared=prepared)
-    assert (fixed["exit_i"], fixed["exit_reason"]) == (int(row.entry_i) + 1, "opposite_v6_next_open")
+    assert serial.loc[0, "exit_reason"] == "initial_stop_gap"
+    assert serial.loc[1, ["side", "entry_i", "censored"]].tolist() == [-1, 6, True]
+    assert "opposite_v6_next_open" not in serial.exit_reason.tolist()
+    fixed = pd.DataFrame([study.replay_fixed_entry(context, row, arm="v8", enable_be=False, prepared=prepared)
+                          for _, row in serial.iterrows()], columns=study.FIXED_COLUMNS)
+    study.validate_fixed_baseline(serial, fixed)
+
+
+def test_legacy_clean_audit_has_stable_schema_for_no_difference() -> None:
+    context = _context()
+    prepared = study.prepare_arm(context, arm="v1_common_execution_long")
+    legacy, _, _ = study.replay_legacy_baseline(context, arm="v1_common_execution_long", prepared=prepared)
+    clean, _, _ = study.replay_serial(context, arm="v1_common_execution_long", enable_be=False, prepared=prepared)
+    assert list(study.legacy_clean_events(legacy, clean).columns) == study.LEGACY_CLEAN_COLUMNS
+    assert study.legacy_clean_events(legacy, clean).empty

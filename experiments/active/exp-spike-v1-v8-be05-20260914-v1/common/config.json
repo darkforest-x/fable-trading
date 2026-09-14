@@ -5,6 +5,8 @@
   "expected_streams": 3531,
   "arms": ["v1_common_execution_long", "v8"],
   "single_change": "observed favourable high/low >= 0.5 frozen actual next-open initial R; ratchet to price entry effective next bar only",
+  "execution_contract": "canonical serial/fixed baseline and BE05 use clean intent lifecycle: pending reverse is cleared whenever the position that scheduled it closes; legacy archived baseline is replayed only for receipt parity and legacy-to-clean audit",
+  "legacy_audit": "per arm legacy_baseline.csv.gz must exactly match its frozen oracle; legacy_to_clean_events.csv.gz records every clean-contract divergence and net-R/net-return change",
   "cost": "0.2% round trip fixed nominal cost; price BE is not fee-adjusted net BE",
   "history_exposure_number": 1,
   "history": "owner-authorized reused nonblind historical data"

@@ -41,6 +41,7 @@ ARMS = ("v1_common_execution_long", "v8")
 KEY = ["signal_i", "entry_i", "side", "exit_i", "exit_reason", "entry_price", "exit_price", "initial_stop", "initial_risk", "net_return", "net_r"]
 FIXED_COLUMNS = [*base.TRADE_COLUMNS, "be_armed", "be_trigger_count"]
 PAIR_COLUMNS = ["signal_i_baseline", "entry_i_baseline", "side_baseline", "net_r_baseline", "net_return_baseline", "mfe_r_baseline", "censored_baseline", "signal_i_be", "entry_i_be", "side_be", "net_r_be", "net_return_be", "mfe_r_be", "censored_be", "delta_r", "reduced_loss", "harmed_winner", "baseline_mfe_ge_10r", "baseline_realized_ge_10r", "retained_realized_ge_10r"]
+LEGACY_CLEAN_COLUMNS = ["signal_i", "entry_i", "side", "legacy_exit_i", "clean_exit_i", "legacy_exit_reason", "clean_exit_reason", "legacy_censored", "clean_censored", "legacy_net_r", "clean_net_r", "delta_net_r", "legacy_net_return", "clean_net_return", "delta_net_return"]
 
 
 def sha256(path: Path) -> str:
@@ -155,7 +156,14 @@ def _close_updates(position: dict[str, object], *, high: float, low: float, clos
 
 
 def replay_serial(context: base.StreamContext, *, arm: str, enable_be: bool, prepared: PreparedArm | None = None) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Replay one stream serially so an earlier BE exit may create a real re-entry."""
+    """Replay the clean serial contract, clearing an intent when its owner closes.
+
+    ``pending_reverse`` belongs to the position that scheduled it.  Every
+    terminal close, including an opening gap, therefore clears that intent
+    before a subsequent entry can be considered.  This preserves the frozen
+    source engine's intent lifetime while allowing the BE treatment to alter
+    the sequence of later entries causally.
+    """
     prepared = prepare_arm(context, arm=arm) if prepared is None else prepared
     if prepared.arm != arm:
         raise ValueError("prepared arm differs from requested arm")
@@ -169,7 +177,6 @@ def replay_serial(context: base.StreamContext, *, arm: str, enable_be: bool, pre
     pending_entry: tuple[int, int] | None = None
     pending_reverse: tuple[int, int] | None = None
     next_id = 0
-    stale_reverse_at_entry: dict[str, int | None] = {}
     for i, stamp in enumerate(frame.index):
         ended_side = 0
         if bool(gap[i]):
@@ -194,7 +201,7 @@ def replay_serial(context: base.StreamContext, *, arm: str, enable_be: bool, pre
                 base._append_fill(fills, position, leg_no=int(position.get("fill_count", 0)) + 1, bar_open=stamp, event_time=stamp,
                                   phase="open", precision="bar_open", kind="exit", fraction=fraction, price=oa[i], cost=fraction * base.EXIT_COST, reason=reason, context=context)
                 trades.append(base._trade_row(position, censored=False, precision="bar_open_or_intrabar_window"))
-                ended_side, position = side, None
+                ended_side, position, pending_reverse = side, None, None
         if position is not None and pending_reverse is not None:
             _, old_side = pending_reverse
             if int(position["side"]) == old_side:
@@ -220,11 +227,6 @@ def replay_serial(context: base.StreamContext, *, arm: str, enable_be: bool, pre
                     position = base._new_trade(made, trade_id=f"{context.key}:{arm}:{'be05' if enable_be else 'baseline'}:{next_id}", cohort=cohort,
                                                policy="be05" if enable_be else "baseline", context=context)
                     position.update(be_armed=False, be_trigger_count=0)
-                    # The frozen serial state machine retains a pending raw
-                    # reverse after a same-open protective gap.  Preserve that
-                    # exact state at the new entry so fixed paired baseline
-                    # exits can reproduce the receipt-bound serial ledger.
-                    stale_reverse_at_entry[str(position["trade_id"])] = None if pending_reverse is None else int(pending_reverse[1])
                     base._append_fill(fills, position, leg_no=1, bar_open=stamp, event_time=stamp, phase="open", precision="bar_open",
                                       kind="entry", fraction=1., price=float(position["entry_price"]), cost=base.ENTRY_COST, reason="next_open_entry", context=context)
             pending_entry = None
@@ -242,7 +244,7 @@ def replay_serial(context: base.StreamContext, *, arm: str, enable_be: bool, pre
                 base._append_fill(fills, position, leg_no=int(position.get("fill_count", 0)) + 1, bar_open=stamp, event_time=stamp,
                                   phase="open" if reason.endswith("_gap") else "intrabar", precision="bar_open" if reason.endswith("_gap") else "within_bar",
                                   kind="exit", fraction=fraction, price=price, cost=fraction * base.EXIT_COST, reason=reason, context=context)
-                trades.append(base._trade_row(position, censored=False, precision="bar_open_or_intrabar_window")); ended_side, position = side, None
+                trades.append(base._trade_row(position, censored=False, precision="bar_open_or_intrabar_window")); ended_side, position, pending_reverse = side, None, None
             else:
                 _close_updates(position, high=ha[i], low=la[i], close=ca[i], atr=aa[i], spec=spec, enable_be=enable_be,
                                events=events, context=context, arm=arm, policy="be05" if enable_be else "baseline", i=i)
@@ -260,9 +262,7 @@ def replay_serial(context: base.StreamContext, *, arm: str, enable_be: bool, pre
                           kind="censor", fraction=float(position["qty_remaining"]), price=ca[last], cost=0., reason="boundary_mark", context=context)
         position["last_exit_i"], position["last_exit_time"], position["last_exit_price"], position["last_exit_reason"] = last, stamp, ca[last], "boundary_mark"
         trades.append(base._trade_row(position, censored=True, precision="last_complete_close"))
-    trade_frame = pd.DataFrame(trades, columns=base.TRADE_COLUMNS)
-    trade_frame["serial_pending_reverse_side_at_entry"] = trade_frame.trade_id.map(stale_reverse_at_entry)
-    return (trade_frame, pd.DataFrame(fills, columns=base.FILL_COLUMNS),
+    return (pd.DataFrame(trades, columns=base.TRADE_COLUMNS), pd.DataFrame(fills, columns=base.FILL_COLUMNS),
             pd.DataFrame(events))
 
 
@@ -281,16 +281,14 @@ def replay_fixed_entry(context: base.StreamContext, row: pd.Series, *, arm: str,
     pos = base._new_trade(pos, trade_id=f"{context.key}:{arm}:fixed", cohort=cohort,
                           policy="be05" if enable_be else "baseline", context=context)
     pos.update(protection=float(row.initial_stop), mfe_r=0., trail_armed=False, be_armed=False, be_trigger_count=0)
-    stale = row.get("serial_pending_reverse_side_at_entry", None)
-    pending_reverse: int | None = None if pd.isna(stale) else int(stale)
-    stale_from_prior_position = pending_reverse is not None
+    pending_reverse: int | None = None
     for i in range(start, len(frame)):
         stamp = frame.index[i]
         if gap[i]:
             pos["last_exit_i"], pos["last_exit_time"], pos["last_exit_reason"] = i, stamp, "data_gap_censored"
             return base._trade_row(pos, censored=True, precision="unknown_gap") | {"be_armed": pos["be_armed"], "be_trigger_count": pos["be_trigger_count"]}
         protection = float(pos["protection"])
-        if pending_reverse is not None and (not stale_from_prior_position or i > start):
+        if pending_reverse is not None:
             if side == pending_reverse:
                 price = oa[i]; reason = ("trailing_stop_gap" if protection != float(pos["initial_stop"]) else "initial_stop_gap") if (price <= protection if side == 1 else price >= protection) else "opposite_v6_next_open"
                 pos["qty_realized"], pos["qty_remaining"] = 1., 0.; pos["realized_gross_return"] = side * (price / float(pos["entry_price"]) - 1); pos["realized_net_return"] = pos["realized_gross_return"] - base.ENTRY_COST - base.EXIT_COST
@@ -308,6 +306,19 @@ def replay_fixed_entry(context: base.StreamContext, row: pd.Series, *, arm: str,
             pending_reverse = side
     pos["last_exit_i"], pos["last_exit_time"], pos["last_exit_price"], pos["last_exit_reason"] = len(frame)-1, frame.index[-1], ca[-1], "boundary_mark"
     return base._trade_row(pos, censored=True, precision="last_complete_close") | {"be_armed": pos["be_armed"], "be_trigger_count": pos["be_trigger_count"], "protection": float(pos["protection"])}
+
+
+def replay_legacy_baseline(context: base.StreamContext, *, arm: str, prepared: PreparedArm | None = None) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Replay the archived baseline engine verbatim for a parity-only receipt.
+
+    This is intentionally not a BE arm.  The canonical study tables use the
+    clean replay above; this ledger makes the frozen-source comparison and any
+    archived-to-clean divergence explicit.
+    """
+    prepared = prepare_arm(context, arm=arm) if prepared is None else prepared
+    if prepared.arm != arm:
+        raise ValueError("prepared arm differs from requested arm")
+    return base.replay_policy(prepared.context, cohort=prepared.cohort, policy="baseline")
 
 
 def _oracle_path(context: base.StreamContext, arm: str) -> Path:
@@ -339,6 +350,25 @@ def validate_fixed_baseline(serial: pd.DataFrame, fixed: pd.DataFrame) -> None:
     left = serial.loc[:, fields].sort_values("signal_i").reset_index(drop=True)
     right = fixed.loc[:, fields].sort_values("signal_i").reset_index(drop=True)
     assert_frame_equal(left, right, check_dtype=False, rtol=1e-9, atol=1e-9)
+
+
+def legacy_clean_events(legacy: pd.DataFrame, clean: pd.DataFrame) -> pd.DataFrame:
+    """Record every archived-to-clean outcome difference, including zero rows."""
+    fields = ["signal_i", "entry_i", "side", "exit_i", "exit_reason", "censored", "net_r", "net_return"]
+    left = legacy.reindex(columns=fields).add_prefix("legacy_")
+    right = clean.reindex(columns=fields).add_prefix("clean_")
+    keys_left, keys_right = [f"legacy_{x}" for x in ("signal_i", "entry_i", "side")], [f"clean_{x}" for x in ("signal_i", "entry_i", "side")]
+    both = left.merge(right, left_on=keys_left, right_on=keys_right, how="outer", indicator=True, validate="one_to_one")
+    for name in ("signal_i", "entry_i", "side"):
+        both[name] = both[f"legacy_{name}"].combine_first(both[f"clean_{name}"])
+    equal_float = lambda a, b: np.isclose(a.astype(float), b.astype(float), equal_nan=True)
+    same = (both._merge.eq("both") & both.legacy_exit_i.eq(both.clean_exit_i) & both.legacy_exit_reason.eq(both.clean_exit_reason)
+            & both.legacy_censored.eq(both.clean_censored) & equal_float(both.legacy_net_r, both.clean_net_r)
+            & equal_float(both.legacy_net_return, both.clean_net_return))
+    changed = both.loc[~same].copy()
+    changed["delta_net_r"] = changed.clean_net_r - changed.legacy_net_r
+    changed["delta_net_return"] = changed.clean_net_return - changed.legacy_net_return
+    return changed.reindex(columns=LEGACY_CLEAN_COLUMNS)
 
 
 def summarize(trades: pd.DataFrame, *, label: str) -> dict[str, object]:
@@ -434,8 +464,13 @@ def run(output: Path, *, limit: int | None = None, official: bool = False) -> pd
         try:
             for arm in ARMS:
                 prepared = prepare_arm(context, arm=arm)
+                # The source replay is receipt-bound archival evidence only.
+                # It is never paired with a clean BE result.
+                legacy_base, _, _ = replay_legacy_baseline(context, arm=arm, prepared=prepared)
+                stream_oracles.append(validate_baseline(context, legacy_base, arm=arm))
+                legacy_fixed = pd.DataFrame([replay_fixed_entry(context, row, arm=arm, enable_be=False, prepared=prepared) for _, row in legacy_base.iterrows()], columns=FIXED_COLUMNS)
+                validate_fixed_baseline(legacy_base, legacy_fixed)
                 baseline, _, _ = replay_serial(context, arm=arm, enable_be=False, prepared=prepared)
-                stream_oracles.append(validate_baseline(context, baseline, arm=arm))
                 be, _, _ = replay_serial(context, arm=arm, enable_be=True, prepared=prepared)
                 fixed_base = pd.DataFrame([replay_fixed_entry(context, row, arm=arm, enable_be=False, prepared=prepared) for _, row in baseline.iterrows()], columns=FIXED_COLUMNS)
                 fixed_be = pd.DataFrame([replay_fixed_entry(context, row, arm=arm, enable_be=True, prepared=prepared) for _, row in baseline.iterrows()], columns=FIXED_COLUMNS)
@@ -443,7 +478,10 @@ def run(output: Path, *, limit: int | None = None, official: bool = False) -> pd
                     table["stream_key"] = context.key
                     for key, value in context.identity.items(): table[key] = value
                 validate_fixed_baseline(baseline, fixed_base)
-                for kind, table in (("serial_baseline", baseline), ("serial_be05", be), ("fixed_baseline", fixed_base), ("fixed_be05", fixed_be)):
+                audit = legacy_clean_events(legacy_base, baseline)
+                for kind, table in (("legacy_baseline", legacy_base), ("legacy_to_clean_events", audit),
+                                    ("serial_baseline", baseline), ("serial_be05", be),
+                                    ("fixed_baseline", fixed_base), ("fixed_be05", fixed_be)):
                     table.to_csv(staging / f"{arm}.{kind}.csv.gz", index=False, compression={"method": "gzip", "mtime": 0})
                 paired = paired_decomposition(fixed_base, fixed_be)
                 row = {"stream_key": context.key, "arm": arm, **context.identity, **summarize(baseline, label="serial_baseline"),
@@ -452,7 +490,9 @@ def run(output: Path, *, limit: int | None = None, official: bool = False) -> pd
                        "reduced_loss_count": int(paired.reduced_loss.sum()), "reduced_loss_delta_r": float(paired.loc[paired.reduced_loss, "delta_r"].sum()),
                        "harmed_winner_count": int(paired.harmed_winner.sum()), "harmed_winner_delta_r": float(paired.loc[paired.harmed_winner, "delta_r"].sum()),
                        "baseline_mfe_ge_10r_pairs": int(paired.baseline_mfe_ge_10r.sum()), "mfe_ge_10r_retained": int((paired.baseline_mfe_ge_10r & paired.retained_realized_ge_10r).sum()),
-                       "baseline_realized_ge_10r_pairs": int(paired.baseline_realized_ge_10r.sum()), "realized_ge10r_retained": int((paired.baseline_realized_ge_10r & paired.retained_realized_ge_10r).sum())}
+                       "baseline_realized_ge_10r_pairs": int(paired.baseline_realized_ge_10r.sum()), "realized_ge10r_retained": int((paired.baseline_realized_ge_10r & paired.retained_realized_ge_10r).sum()),
+                       "legacy_to_clean_event_count": len(audit), "legacy_to_clean_delta_net_r": float(audit.delta_net_r.sum()),
+                       "legacy_to_clean_delta_net_return": float(audit.delta_net_return.sum())}
                 stream_summaries.append(row)
             pd.DataFrame(stream_summaries).to_csv(staging / "stream_summary.csv", index=False)
             files = {path.name: sha256(path) for path in staging.glob("*.csv.gz")}
