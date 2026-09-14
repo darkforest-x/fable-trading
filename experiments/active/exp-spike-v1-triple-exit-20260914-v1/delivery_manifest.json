@@ -1,0 +1,512 @@
+{
+  "schema": "spike-v1-exact-triple-exit-delivery-v1",
+  "experiment_id": "exp-spike-v1-triple-exit-20260914-v1",
+  "generated_at": "2026-09-14T10:42:08.085983+00:00",
+  "source_commit": "01c0090e637f038dc62254462a4dee13969d22fd",
+  "builder_commits": {
+    "protocol": "3bb28f3eee",
+    "engine": "9d980467aa",
+    "statistics": "c2cefc5f17",
+    "report": "48a5b230f3"
+  },
+  "configuration_trial": 1,
+  "history_status": "owner_authorized_reused_nonblind",
+  "holdout_consumed": true,
+  "training_eligible": false,
+  "production_eligible": false,
+  "live_changes": false,
+  "signal_direction": "native_frozen_long_only",
+  "coverage": {
+    "original_events": 6253,
+    "original_streams": 2312,
+    "original_baseline_parity_errors": 0,
+    "top20_rank_month": "2023-08",
+    "top20_planned_assets": 20,
+    "top20_replayable_assets": 18,
+    "top20_tick_missing": [
+      "TOMOUSDT",
+      "MATICUSDT"
+    ],
+    "top20_streams_with_signals": 52,
+    "top20_original_events": 439,
+    "top20_dedup_events": 419,
+    "top20_period": "2023-09-01/2026-09-01",
+    "top20_planned_native_streams": 60,
+    "top20_replayable_native_streams": 54
+  },
+  "validation": {
+    "engine_and_stats_tests_passed": 33,
+    "study_tests_passed": 3,
+    "independent_causal_events_checked": 4,
+    "workbook_sheets_checked": 11,
+    "workbook_error_cells": 0,
+    "workbook_censored_netR_violations": 0,
+    "frozen_source_check": "pass",
+    "output_inventory_files": 11774,
+    "own_registry_records": "pass",
+    "full_registry_preexisting_failure": "spike-v8-total2-1h-native-20260914-delivery missing source_commit; present in HEAD and working tree; unrelated row left unchanged"
+  },
+  "conclusion": "Original raw closed R improves363.075 but does not reproduce supplied4326 approximation. ExRAVE triple3.702R. Three-year dedup cohort triple and filtered totals negative; recent OOS improves but all nine main tests lack positive matched-random excess evidence. Not accepted for universal live upgrade.",
+  "primary_results": [
+    {
+      "cohort": "original6253",
+      "event_scope": "raw",
+      "asset_scope": "all",
+      "arm": "baseline",
+      "events": 6253,
+      "trades": 6170,
+      "censored": 83,
+      "sum_net_r": 838.1784703182,
+      "win_rate": 0.280713128,
+      "top5_profit_share": 0.2355203342,
+      "mean_matched_excess_net_r": -1.1307258244,
+      "closed_event_cumulative_r_maxdd": -899.1008394677
+    },
+    {
+      "cohort": "original6253",
+      "event_scope": "raw",
+      "asset_scope": "ex_rave",
+      "arm": "baseline",
+      "events": 6246,
+      "trades": 6163,
+      "censored": 83,
+      "sum_net_r": -355.553906741,
+      "win_rate": 0.2802206718,
+      "top5_profit_share": 0.0367364308,
+      "mean_matched_excess_net_r": -1.0413831372,
+      "closed_event_cumulative_r_maxdd": -1155.3151473134
+    },
+    {
+      "cohort": "original6253",
+      "event_scope": "raw",
+      "asset_scope": "all",
+      "arm": "filtered_triple",
+      "events": 5034,
+      "trades": 5027,
+      "censored": 7,
+      "sum_net_r": 1366.7804383639,
+      "win_rate": 0.1581460115,
+      "top5_profit_share": 0.4290068878,
+      "mean_matched_excess_net_r": -0.4243436257,
+      "closed_event_cumulative_r_maxdd": -164.6192337998
+    },
+    {
+      "cohort": "original6253",
+      "event_scope": "raw",
+      "asset_scope": "ex_rave",
+      "arm": "filtered_triple",
+      "events": 5027,
+      "trades": 5020,
+      "censored": 7,
+      "sum_net_r": 169.2289400998,
+      "win_rate": 0.1571713147,
+      "top5_profit_share": 0.0615706606,
+      "mean_matched_excess_net_r": -0.6062253954,
+      "closed_event_cumulative_r_maxdd": -277.705337885
+    },
+    {
+      "cohort": "original6253",
+      "event_scope": "raw",
+      "asset_scope": "all",
+      "arm": "triple",
+      "events": 6253,
+      "trades": 6237,
+      "censored": 16,
+      "sum_net_r": 1201.2537896987,
+      "win_rate": 0.1564854898,
+      "top5_profit_share": 0.3820872524,
+      "mean_matched_excess_net_r": -0.4344610966,
+      "closed_event_cumulative_r_maxdd": -275.2827743393
+    },
+    {
+      "cohort": "original6253",
+      "event_scope": "raw",
+      "asset_scope": "ex_rave",
+      "arm": "triple",
+      "events": 6246,
+      "trades": 6230,
+      "censored": 16,
+      "sum_net_r": 3.7022914345,
+      "win_rate": 0.1556982343,
+      "top5_profit_share": 0.0510071126,
+      "mean_matched_excess_net_r": -0.5820716015,
+      "closed_event_cumulative_r_maxdd": -427.2632070448
+    },
+    {
+      "cohort": "original6253",
+      "event_scope": "dedup",
+      "asset_scope": "all",
+      "arm": "baseline",
+      "events": 4384,
+      "trades": 4330,
+      "censored": 54,
+      "sum_net_r": 286.815765952,
+      "win_rate": 0.2792147806,
+      "top5_profit_share": 0.198376522,
+      "mean_matched_excess_net_r": -1.0491459611,
+      "closed_event_cumulative_r_maxdd": -552.5948011497
+    },
+    {
+      "cohort": "original6253",
+      "event_scope": "dedup",
+      "asset_scope": "ex_rave",
+      "arm": "baseline",
+      "events": 4380,
+      "trades": 4326,
+      "censored": 54,
+      "sum_net_r": -294.45841959,
+      "win_rate": 0.278779473,
+      "top5_profit_share": 0.0520849616,
+      "mean_matched_excess_net_r": -0.992272583,
+      "closed_event_cumulative_r_maxdd": -709.7105831509
+    },
+    {
+      "cohort": "original6253",
+      "event_scope": "dedup",
+      "asset_scope": "all",
+      "arm": "filtered_triple",
+      "events": 3531,
+      "trades": 3526,
+      "censored": 5,
+      "sum_net_r": 590.6175703205,
+      "win_rate": 0.155984118,
+      "top5_profit_share": 0.3785337607,
+      "mean_matched_excess_net_r": -0.495307157,
+      "closed_event_cumulative_r_maxdd": -115.0249010439
+    },
+    {
+      "cohort": "original6253",
+      "event_scope": "dedup",
+      "asset_scope": "ex_rave",
+      "arm": "filtered_triple",
+      "events": 3527,
+      "trades": 3522,
+      "censored": 5,
+      "sum_net_r": 7.8993632545,
+      "win_rate": 0.1553094832,
+      "top5_profit_share": 0.0732272841,
+      "mean_matched_excess_net_r": -0.5950979887,
+      "closed_event_cumulative_r_maxdd": -192.1562564527
+    },
+    {
+      "cohort": "original6253",
+      "event_scope": "dedup",
+      "asset_scope": "all",
+      "arm": "triple",
+      "events": 4384,
+      "trades": 4371,
+      "censored": 13,
+      "sum_net_r": 458.2700784596,
+      "win_rate": 0.1546556852,
+      "top5_profit_share": 0.3299101301,
+      "mean_matched_excess_net_r": -0.4635143019,
+      "closed_event_cumulative_r_maxdd": -211.5259865953
+    },
+    {
+      "cohort": "original6253",
+      "event_scope": "dedup",
+      "asset_scope": "ex_rave",
+      "arm": "triple",
+      "events": 4380,
+      "trades": 4367,
+      "censored": 13,
+      "sum_net_r": -124.4481286064,
+      "win_rate": 0.1541103733,
+      "top5_profit_share": 0.0598623293,
+      "mean_matched_excess_net_r": -0.5445499692,
+      "closed_event_cumulative_r_maxdd": -302.5903753029
+    },
+    {
+      "cohort": "top20",
+      "event_scope": "raw",
+      "asset_scope": "all",
+      "arm": "baseline",
+      "events": 439,
+      "trades": 437,
+      "censored": 2,
+      "sum_net_r": 17.2285474047,
+      "win_rate": 0.3272311213,
+      "top5_profit_share": 0.1886321537,
+      "mean_matched_excess_net_r": -0.7123587267,
+      "closed_event_cumulative_r_maxdd": -50.9839049715
+    },
+    {
+      "cohort": "top20",
+      "event_scope": "raw",
+      "asset_scope": "ex_rave",
+      "arm": "baseline",
+      "events": 439,
+      "trades": 437,
+      "censored": 2,
+      "sum_net_r": 17.2285474047,
+      "win_rate": 0.3272311213,
+      "top5_profit_share": 0.1886321537,
+      "mean_matched_excess_net_r": -0.7123587267,
+      "closed_event_cumulative_r_maxdd": -50.9839049715
+    },
+    {
+      "cohort": "top20",
+      "event_scope": "raw",
+      "asset_scope": "all",
+      "arm": "filtered_triple",
+      "events": 409,
+      "trades": 408,
+      "censored": 1,
+      "sum_net_r": -18.0321189611,
+      "win_rate": 0.1544117647,
+      "top5_profit_share": 0.2907559763,
+      "mean_matched_excess_net_r": -0.3673095679,
+      "closed_event_cumulative_r_maxdd": -46.2249694556
+    },
+    {
+      "cohort": "top20",
+      "event_scope": "raw",
+      "asset_scope": "ex_rave",
+      "arm": "filtered_triple",
+      "events": 409,
+      "trades": 408,
+      "censored": 1,
+      "sum_net_r": -18.0321189611,
+      "win_rate": 0.1544117647,
+      "top5_profit_share": 0.2907559763,
+      "mean_matched_excess_net_r": -0.3673095679,
+      "closed_event_cumulative_r_maxdd": -46.2249694556
+    },
+    {
+      "cohort": "top20",
+      "event_scope": "raw",
+      "asset_scope": "all",
+      "arm": "triple",
+      "events": 439,
+      "trades": 438,
+      "censored": 1,
+      "sum_net_r": -23.7653992443,
+      "win_rate": 0.1529680365,
+      "top5_profit_share": 0.2759222166,
+      "mean_matched_excess_net_r": -0.3783433769,
+      "closed_event_cumulative_r_maxdd": -51.9582497387
+    },
+    {
+      "cohort": "top20",
+      "event_scope": "raw",
+      "asset_scope": "ex_rave",
+      "arm": "triple",
+      "events": 439,
+      "trades": 438,
+      "censored": 1,
+      "sum_net_r": -23.7653992443,
+      "win_rate": 0.1529680365,
+      "top5_profit_share": 0.2759222166,
+      "mean_matched_excess_net_r": -0.3783433769,
+      "closed_event_cumulative_r_maxdd": -51.9582497387
+    },
+    {
+      "cohort": "top20",
+      "event_scope": "dedup",
+      "asset_scope": "all",
+      "arm": "baseline",
+      "events": 419,
+      "trades": 418,
+      "censored": 1,
+      "sum_net_r": 2.111778685,
+      "win_rate": 0.3277511962,
+      "top5_profit_share": 0.1894970911,
+      "mean_matched_excess_net_r": -0.6296753025,
+      "closed_event_cumulative_r_maxdd": -46.8235199189
+    },
+    {
+      "cohort": "top20",
+      "event_scope": "dedup",
+      "asset_scope": "ex_rave",
+      "arm": "baseline",
+      "events": 419,
+      "trades": 418,
+      "censored": 1,
+      "sum_net_r": 2.111778685,
+      "win_rate": 0.3277511962,
+      "top5_profit_share": 0.1894970911,
+      "mean_matched_excess_net_r": -0.6296753025,
+      "closed_event_cumulative_r_maxdd": -46.8235199189
+    },
+    {
+      "cohort": "top20",
+      "event_scope": "dedup",
+      "asset_scope": "all",
+      "arm": "filtered_triple",
+      "events": 390,
+      "trades": 389,
+      "censored": 1,
+      "sum_net_r": -14.8157137882,
+      "win_rate": 0.1542416452,
+      "top5_profit_share": 0.2976909161,
+      "mean_matched_excess_net_r": -0.336245749,
+      "closed_event_cumulative_r_maxdd": -41.192435472
+    },
+    {
+      "cohort": "top20",
+      "event_scope": "dedup",
+      "asset_scope": "ex_rave",
+      "arm": "filtered_triple",
+      "events": 390,
+      "trades": 389,
+      "censored": 1,
+      "sum_net_r": -14.8157137882,
+      "win_rate": 0.1542416452,
+      "top5_profit_share": 0.2976909161,
+      "mean_matched_excess_net_r": -0.336245749,
+      "closed_event_cumulative_r_maxdd": -41.192435472
+    },
+    {
+      "cohort": "top20",
+      "event_scope": "dedup",
+      "asset_scope": "all",
+      "arm": "triple",
+      "events": 419,
+      "trades": 418,
+      "censored": 1,
+      "sum_net_r": -21.9647892646,
+      "win_rate": 0.1507177033,
+      "top5_profit_share": 0.2852209291,
+      "mean_matched_excess_net_r": -0.3539847014,
+      "closed_event_cumulative_r_maxdd": -48.3415109485
+    },
+    {
+      "cohort": "top20",
+      "event_scope": "dedup",
+      "asset_scope": "ex_rave",
+      "arm": "triple",
+      "events": 419,
+      "trades": 418,
+      "censored": 1,
+      "sum_net_r": -21.9647892646,
+      "win_rate": 0.1507177033,
+      "top5_profit_share": 0.2852209291,
+      "mean_matched_excess_net_r": -0.3539847014,
+      "closed_event_cumulative_r_maxdd": -48.3415109485
+    }
+  ],
+  "notion_url": "https://app.notion.com/p/3db8856479af8166b1a4f0c1abfaed41",
+  "notion_html_attachment": "SPIKE_V1_triple_exact_20260914.html",
+  "artifacts": [
+    {
+      "path": "experiments/active/exp-spike-v1-triple-exit-20260914-v1/PROJECT_PLAN.md",
+      "size_bytes": 7414,
+      "sha256": "b10849b15deeff704cfdb758b07e042dc6b264934d0df0080a9fa5b245b965d0"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-triple-exit-20260914-v1/config.json",
+      "size_bytes": 1468,
+      "sha256": "35441409e58f26e7a0d148adfe0e14b22df73a026cb41a617a63de5d90a987ec"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-triple-exit-20260914-v1/run_journal.json",
+      "size_bytes": 791,
+      "sha256": "2e8a9b82743457803ef1bd79058ae0c7a24f9004648168d2dc2d28a4f867fe79"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-triple-exit-20260914-v1/data/frozen_top20.json",
+      "size_bytes": 11870,
+      "sha256": "687a26e835f6adce11dc7c2e59bc75927d998a12da64723a3eea7bb81372964b"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-triple-exit-20260914-v1/data/native_history_summary.json",
+      "size_bytes": 2687874,
+      "sha256": "6afd10ad3384919b9d0a875702780f826c1f39ef46db1b0e8209b49386ca5e50"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-triple-exit-20260914-v1/data/stream_manifest.json",
+      "size_bytes": 56389,
+      "sha256": "2b91ca3bbb22625e036468d57b02005474953e4030974cec0e1f6e04d5fb8ced"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-triple-exit-20260914-v1/results/original6253/events.csv.gz",
+      "size_bytes": 1301563,
+      "sha256": "ca27280ec1ab2a98809052bf281854db18b24986ae4779494b0d88299f0b59ac"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-triple-exit-20260914-v1/results/top20/events.csv.gz",
+      "size_bytes": 41820,
+      "sha256": "c713f2e5c00104e9900a926a4a28ae739d728fdfbc2ba4e65cdcf75f49191dea"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-triple-exit-20260914-v1/results/top20/prepared_manifest.json",
+      "size_bytes": 78114,
+      "sha256": "2274aeb223d7fe207632eca48b6e6c1e2d3729839bfe2b1e6bc4a496af7c36b3"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-triple-exit-20260914-v1/results/output_inventory.json",
+      "size_bytes": 2540638,
+      "sha256": "c94eac07296dc67adf0563e558bece45a12e4fcc661a5b317fb05fda06108994"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-triple-exit-20260914-v1/results/stats/receipt.json",
+      "size_bytes": 347,
+      "sha256": "ced8792d330b0749f74dcad8c090e0acedff4ce5de31e07d5cee0d8dd8b74971"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-triple-exit-20260914-v1/results/stats/summary.csv",
+      "size_bytes": 3554834,
+      "sha256": "b0881c9bf8ba7b220aaf45521d01e2b67a5e389e39547650430aaa3cdab8ba1a"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-triple-exit-20260914-v1/results/report_receipt.json",
+      "size_bytes": 465,
+      "sha256": "4d2083e61d7afeb25792bd3e6c7195d675bc4c46d87670b57c2ac59614e64b50"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-triple-exit-20260914-v1/results/workbook_payload.json",
+      "size_bytes": 5951768,
+      "sha256": "570513f24064ccb0d728112cf919122b269f8025c24dab898b380f9af1737f41"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-triple-exit-20260914-v1/audit/independent_exit_checks.json",
+      "size_bytes": 4789,
+      "sha256": "3b56f1b795763303b64a383c788a9d968bb49e3a7dae065eb580c0e2a1395715"
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-triple-exit-20260914-v1/audit/workbook_qa.json",
+      "size_bytes": 2783,
+      "sha256": "504a66417eda0f4894c8345e03ce9cbbd1e61bc0e9406061dd9fdb711827d6e2"
+    },
+    {
+      "path": "yoyo/evaluation/spike_burst_replay.py",
+      "size_bytes": 21772,
+      "sha256": "678cb55b25925833927dba8c714a59e3cba81de9c9adca84a1bf2f8347ce3fd3"
+    },
+    {
+      "path": "yoyo/evaluation/spike_v1_triple_exit.py",
+      "size_bytes": 24280,
+      "sha256": "cefacf20b8ebb9aa8b1d2de59b0ac201df1f6a8aa73f33d25fa175e3e3f8d404"
+    },
+    {
+      "path": "yoyo/evaluation/spike_v1_triple_study.py",
+      "size_bytes": 21038,
+      "sha256": "8ce4de2c4630a0d23a37562aa6050f5183e4943298cf13e5ec1afc8df593023f"
+    },
+    {
+      "path": "yoyo/evaluation/spike_v1_triple_stats.py",
+      "size_bytes": 29837,
+      "sha256": "a67ceb12773d2b40f7381ce063909ae4983345086a35e9a89c4cba33792066e3"
+    },
+    {
+      "path": "yoyo/evaluation/spike_v1_triple_report.py",
+      "size_bytes": 27394,
+      "sha256": "e5e88f0a0062644c3d5c1636dc2242875e9689e4c9c1562b35841c575de4602e"
+    },
+    {
+      "path": "analysis/p1_spike_v1_triple_exit_20260914.md",
+      "size_bytes": 22939,
+      "sha256": "95c118b520c603a3e13720cd116d658fd9314c792d0f00e24d200c5d18ceac38"
+    },
+    {
+      "path": "analysis/html/p1_spike_v1_triple_exit_20260914.html",
+      "size_bytes": 34026,
+      "sha256": "f7f56cc51e04f4a0c8e34143951ada70265e9054ae15ca067b5929c4247201bc"
+    },
+    {
+      "path": "outputs/01a086ad-0b77-7380-b6a6-2b62f505d12b/SPIKE_V1_三规则精确回测_20260914.xlsx",
+      "size_bytes": 1711829,
+      "sha256": "650b9888d8fc3723ea53727468e2c8337c6cf66d3352df4f3ad5b7372b251002"
+    }
+  ]
+}

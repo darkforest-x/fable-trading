@@ -18,6 +18,21 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v1-triple-exit-20260914-delivery
+    artifact_type: manifest
+    role: native_v1_causal_triple_exit_two_cohort_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 01c0090e637f038dc62254462a4dee13969d22fd
+    source_path: experiments/active/exp-spike-v1-triple-exit-20260914-v1/delivery_manifest.json
+    sha256: ffaecef390c0cce808ded00687bf1f19f4038adca8a402d60f2c090839fd445a
+    size_bytes: 16988
+    storage_uri: repo://experiments/active/exp-spike-v1-triple-exit-20260914-v1/delivery_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: 6253 original events with exact native parity;439 new fixed-pool events across18 verifiable assets. Nextbar protection,7
+      fixed arms,matched controls,5000 clustered bootstrap. Triple improves363R in original raw ledger but 3year dedup negative.
+      No live changes;large files remain local and SHA-bound.
   - artifact_id: spike-v8-six-filters-20260914-delivery
     artifact_type: manifest
     role: independent_v8_admission_and_causal_exit_replay
