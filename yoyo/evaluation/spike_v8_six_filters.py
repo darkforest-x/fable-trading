@@ -281,7 +281,16 @@ def replay_serial(context: base.StreamContext, *, policy: str, prepared: be05.Pr
 def assert_baseline_parity(actual: pd.DataFrame, expected: pd.DataFrame) -> None:
     """Exact replay parity, including censored rows; policy labels are excluded."""
     cols = [c for c in base.TRADE_COLUMNS if c not in {"policy", "trade_id"}]
-    assert_frame_equal(actual.reindex(columns=cols).reset_index(drop=True), expected.reindex(columns=cols).reset_index(drop=True), check_dtype=False, check_like=False)
+    left, right = actual.reindex(columns=cols).reset_index(drop=True).copy(), expected.reindex(columns=cols).reset_index(drop=True).copy()
+    # CSV source rows preserve ISO clocks; normalize their representation, not
+    # their values, before demanding equality with in-memory UTC timestamps.
+    for column in ("signal_bar_open", "entry_time", "exit_time", "last_exit_time"):
+        if column in left:
+            left[column], right[column] = pd.to_datetime(left[column], utc=True), pd.to_datetime(right[column], utc=True)
+    for column in ("censored", "trail_armed"):
+        if column in left:
+            right[column] = right[column].map(lambda value: bool(value) if isinstance(value, (bool, np.bool_)) else str(value).lower() == "true")
+    assert_frame_equal(left, right, check_dtype=False, check_like=False)
 
 
 def fixed_event(source_fixed: pd.DataFrame, decisions: pd.DataFrame, *, policy: str) -> pd.DataFrame:
@@ -333,6 +342,9 @@ def run(output: Path, *, limit: int | None = None, official: bool = False) -> pd
             saved_serial = pd.read_csv(SOURCE / "streams" / folder.name / "v8.serial_baseline.csv.gz")
             noop, _, _ = replay_serial(context, policy="baseline_noop", prepared=prepared, catalog=catalog)
             assert_baseline_parity(noop, saved_serial)
+            # Parent aggregation reads this locally receipt-bound no-op table;
+            # it is a parity-proven copy of full_v3, never another policy arm.
+            noop.to_csv(staging / "v8.serial_baseline.csv.gz", index=False, compression={"method":"gzip", "mtime":0})
             rows: list[dict[str, object]] = []
             source_fixed = pd.read_csv(SOURCE / "streams" / folder.name / "v8.fixed_baseline.csv.gz")
             for policy in POLICIES:
