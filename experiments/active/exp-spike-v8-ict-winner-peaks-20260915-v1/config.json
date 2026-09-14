@@ -1,0 +1,24 @@
+{
+  "experiment_id": "exp-spike-v8-ict-winner-peaks-20260915-v1",
+  "previous_experiment": "experiments/active/exp-spike-v8-ict-exits-20260915-v1",
+  "symbol": "ETH-USDT-SWAP",
+  "venue": "OKX",
+  "minutes": 15,
+  "source": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+  "end": "2026-05-01T00:00:00Z",
+  "expected_prefix_sha256": "e6945708914c3e7e04b4c6fb9778aa7623b5a988fe18852f62d401dc2c46399b",
+  "ledgers": {
+    "development": "results/develop/development_original_trades.csv.gz",
+    "validation": "results/evaluate/validation_original_trades.csv.gz",
+    "common": "results/evaluate/common_original_trades.csv.gz",
+    "available": "results/evaluate/available_original_trades.csv.gz"
+  },
+  "manifests": {
+    "results/develop/manifest.json": "9372383f13f560ad57a779c4fd2fb1bea332a6daa494e11ef23d36187dba6687",
+    "results/evaluate/manifest.json": "f496d0ec127a8f6e8ed6b778f458c5ebe9967d4eb3130527ba16fd26b84f4e82"
+  },
+  "holdout_consumed": false,
+  "new_exit_policies_evaluated": 0,
+  "production_eligible": false,
+  "training_eligible": false
+}
