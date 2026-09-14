@@ -507,6 +507,7 @@ def _acquire_symbol_interval(
         "normalized_path": None,
         "normalized_sha256": None,
     }
+    result["source_sha256"] = _sha256_json(monthly)
     if frames:
         combined = pd.concat(frames, ignore_index=True).sort_values("open_time", kind="mergesort")
         if combined["open_time"].duplicated().any():
@@ -532,6 +533,45 @@ def _acquire_symbol_interval(
         result["status"] = "no_data"
     _write_json(audit_path, result)
     return result
+
+
+def _stream_manifest(*, output_dir: Path, frozen: Mapping[str, Any], results: list[dict[str, Any]]) -> dict[str, Any]:
+    """Publish direct runner inputs without hiding missing ticks or bar gaps."""
+
+    assets = {str(row["symbol"]): row for row in frozen["assets"]}
+    minutes_by_interval = {interval: minutes for minutes, interval in INTERVALS.items()}
+    streams: list[dict[str, Any]] = []
+    for result in sorted(results, key=lambda row: (row["symbol"], row["interval"])):
+        universe_row = assets[str(result["symbol"])]
+        tick = universe_row.get("tick_size")
+        streams.append(
+            {
+                "symbol": result["symbol"],
+                "asset": str(result["symbol"])[:-4],
+                "minutes": minutes_by_interval[result["interval"]],
+                "tick_size": tick if isinstance(tick, str) and tick.strip() else None,
+                "tick_status": universe_row.get("tick_status"),
+                "normalized_path": result.get("normalized_path"),
+                "normalized_sha256": result.get("normalized_sha256"),
+                "source_sha256": result["source_sha256"],
+                "coverage_status": result["status"],
+                "months_missing": result["months_missing"],
+                "months_gapped": result["months_gapped"],
+                "continuous_segments": result.get("continuous_segments", []),
+            }
+        )
+    manifest = {
+        "schema": "spike-v1-triple-stream-manifest-v1",
+        "generated_at": _utc_now(),
+        "frozen_top20_sha256": sha256_file(output_dir / "frozen_top20.json"),
+        "streams": streams,
+        "runner_contract": "A stream with missing tick_size, coverage gaps, or no >=341-bar segment is disclosed as unavailable for its affected replay segment; no bar is filled or substituted.",
+    }
+    manifest["manifest_sha256"] = _sha256_json(
+        {key: value for key, value in manifest.items() if key not in {"generated_at", "manifest_sha256"}}
+    )
+    _write_json(output_dir / "stream_manifest.json", manifest)
+    return manifest
 
 
 def acquire_frozen_history(*, output_dir: Path, cache_dir: Path, workers: int) -> dict[str, Any]:
@@ -581,6 +621,9 @@ def acquire_frozen_history(*, output_dir: Path, cache_dir: Path, workers: int) -
         "workers": workers,
         "results": sorted(results, key=lambda row: (row["symbol"], row["interval"])),
     }
+    stream_manifest = _stream_manifest(output_dir=output_dir, frozen=frozen, results=results)
+    summary["stream_manifest_path"] = str(output_dir / "stream_manifest.json")
+    summary["stream_manifest_sha256"] = stream_manifest["manifest_sha256"]
     summary["source_identity_sha256"] = _sha256_json(
         {key: value for key, value in summary.items() if key not in {"generated_at", "source_identity_sha256"}}
     )
