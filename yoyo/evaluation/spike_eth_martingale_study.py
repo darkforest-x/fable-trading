@@ -155,6 +155,12 @@ def window(ctx, start, end):
     trades['signal_confirm_time'] = pd.to_datetime(trades.signal_bar_open,utc=True)+pd.Timedelta(minutes=stream['minutes'])
     trades['entry_time'] = pd.to_datetime(trades.entry_time,utc=True)
     trades['exit_time_raw'] = pd.to_datetime(trades.exit_time,utc=True)
+    expected_precision = {'bar_open_or_intrabar_window','last_complete_close'}
+    if not set(trades.exit_time_precision).issubset(expected_precision):
+        raise ValueError('unknown frozen exit precision')
+    # The frozen engine deliberately labels all ordinary exits with one broad
+    # precision. Its gap/opposite branches execute at open; ordinary stops are
+    # only known within that bar and conservatively become known at its close.
     exact = trades.exit_reason.str.endswith('_gap') | trades.exit_reason.eq('opposite_v6_next_open')
     trades['exit_time'] = trades.exit_time_raw + pd.to_timedelta(np.where(exact,0,stream['minutes']),unit='m')
     trades['trade_id'] = [hashlib.sha256(f'{stream["name"]}|{r.signal_bar_open}|{r.side}'.encode()).hexdigest()[:24] for r in trades.itertuples()]
@@ -179,14 +185,26 @@ def run_policy(trades, policy, ledger=True):
                     record_ledger=ledger, **policy)
 
 
+def verified_development_csv(name, config):
+    """Bind selection input to the prepared source/context, not an arbitrary CSV."""
+    receipt=json.loads((RESULTS/'pre'/'preparation.json').read_text())
+    if receipt['config_sha256']!=sha(CONFIG): raise ValueError('prepared config hash drift')
+    ctx=context_for(name)
+    rebuilt,_=window(ctx,*config['development'])
+    expected=hashlib.sha256(rebuilt.to_csv(index=False).encode()).hexdigest()
+    path=RESULTS/'pre'/(name+'_development.csv')
+    if sha(path)!=expected: raise ValueError('development CSV differs from pinned context replay')
+    return pd.read_csv(path),expected
+
+
 def select():
     clean_committed(BUILDERS)
     if SELECTION.exists(): raise FileExistsError('selection already frozen')
     cfg = json.loads(CONFIG.read_text())
-    rows, selected = [], {}
+    rows, selected, input_hashes = [], {}, {}
     for stream in cfg['streams']:
         name = stream['name']
-        trades = pd.read_csv(RESULTS/'pre'/(name+'_development.csv'))
+        trades,input_hashes[name] = verified_development_csv(name,cfg)
         policy = dict(base_risk_usdt=10,max_level=3,reset_mode='win',leverage_cap=10)
         for stage, key, values in [
             ('1_levels','max_level',cfg['max_levels']),
@@ -209,6 +227,9 @@ def select():
         search_method='four single-field development-only sweeps; bounded coordinate search, not global optimum',
         search_sha256=sha(RESULTS/'pre'/'development_search.csv'),
         config_sha256=sha(CONFIG),selected=selected,holdout_exposures_at_selection=0))
+    saved=json.loads(SELECTION.read_text())
+    saved['development_input_sha256']=input_hashes
+    dump(SELECTION,saved)
 
 
 def controls_for(ctx,trades,start,end,seeds):
@@ -239,6 +260,8 @@ def attribution(trades,ledger,matches,seed,draws):
     # from actual notional and the frozen entry stop fraction, never future PNL.
     paired['risk_dollars']=paired.notional*paired.initial_risk_frac
     paired['actual_pnl']=paired.notional*paired.net_return
+    # Equal stop-dollar budgets, not equal contract counts: each control R is
+    # normalised by that control's own initial stop distance, by construction.
     paired['control_pnl']=paired.risk_dollars*paired.control_net_r
     paired['delta']=paired.actual_pnl-paired.control_pnl
     paired['month']=paired.target_time.dt.strftime('%Y-%m')

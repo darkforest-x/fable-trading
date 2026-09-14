@@ -16,7 +16,9 @@ schema_version: 1
 experiments:
   - experiment_id: exp-spike-eth-martingale-20260914-v1
     source_repo: darkforest-x/fable-trading
+    source_commit: 00cb37d879
     status: active
+    result: Registered builder and synthetic tests; chronological development search in progress; no holdout has been read.
     question: Which bounded stop-loss-triggered V8 capital schedule performs best in development and survives chronological validation under a 1000 USDT cash budget?
     single_variable: Four sequential development-only single-field sweeps of maximum doubling level, reset mode, base cash risk, and notional capacity; V8 signals exits and fixed 0.2pct cost remain frozen.
     holdout_consumed: false
@@ -27,17 +29,24 @@ experiments:
     notes: Owner accepts loss of the 1000 USDT research principal and explicitly authorizes one holdout evaluation only after committed policy selection. Research cashbook is not an exchange liquidation model.
   - experiment_id: exp-spike-v1-triple-exit-20260914-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: a68a6d7ba4
-    status: active
-    question: Can exact native V1 bar replay substantiate supplied XLSX triple-exit gains and generalize to a pre-ranked top20 Binance three-year cohort?
-    single_variable: Owner-authorized three-exit bundle and entry-filter bundle; seven fixed arms include single components. Original6253 cohort and causal pre-period top20 are separate denominators.
-    result: Preregistered; no new outcome replay yet. MAE65 adverse-from-entry, MFE50 BE and MFEgt2 half-peak protection are next-bar only.
-    holdout_consumed: false
+    source_commit: 01c0090e637f038dc62254462a4dee13969d22fd
+    status: inconclusive
+    question: Can exact native V1 bar replay substantiate supplied XLSX triple-exit gains and generalize to a pre-ranked top20 Binance
+      three-year cohort?
+    single_variable: Owner-authorized three-exit bundle and entry-filter bundle; seven fixed arms include single components. Original6253
+      cohort and causal pre-period top20 are separate denominators.
+    result: Completed6253 original events;default closed838.178R to triple1201.254R(delta363.075),filtered1366.780R;exRAVE triple3.702R.
+      Pre-ranked20 with18 replayable assets yields439 signals;dedup3year default2.112R,triple-21.965R,filtered-14.816R. Recent OOS improves
+      but all9 primary matched-excess Bonferroni p=1;universal upgrade not accepted.
+    holdout_consumed: true
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_v1_triple_exit_20260914.md
-    artifacts: []
-    notes: User explicitly permits2023Sep2026Aug and combined thresholds. Existing later history and post-outcome slices are nonblind;original V1 long-only frozen. No live/Pine changes.
+    artifacts:
+    - spike-v1-triple-exit-20260914-delivery
+    notes: Owner permits full historical ranges and fixed bundles. Prior exposure means not blind. 33 engine/stats plus3 study tests,4
+      independent causal checks,11 sheet QA. Native long-only source unchanged;no trading or notification changes.
+    reuse_allowed: false
   - experiment_id: exp-spike-v8-six-filters-20260914-v1
     source_repo: darkforest-x/fable-trading
     source_commit: ad3bcb6c82
