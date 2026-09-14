@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-spike-eth3m-september-trade-audit-20260914-v1",
+  "venue": "OKX",
+  "symbol": "ETH-USDT-SWAP",
+  "minutes": 3,
+  "tick": 0.01,
+  "start": "2026-08-31T16:00:00Z",
+  "cutoff": "2026-09-14T13:19:00Z",
+  "prefix": "data/kline_deep/okx_ETH_USDT_SWAP_3m_525599.csv",
+  "prefix_sha256": "37a49d3e7150bdefdbfa21bd507fbfe60200532dbd70c1604a5e770081eadbb3",
+  "arms": [
+    "original",
+    "next_bar",
+    "ohlc",
+    "olhc"
+  ],
+  "round_trip_cost": 0.002,
+  "original_start": "continuous full prefix; include carry-in active after period start",
+  "alternative_start": "flat at period start; no bankroll or leverage admission filter",
+  "training_eligible": false,
+  "production_eligible": false
+}

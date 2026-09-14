@@ -9134,3 +9134,15 @@ experiments:
     artifacts:
     - spike-eth3m-net-recovery-20260914-v3-delivery
     notes: No six-loss reset; no debt forgiveness; no new holdout use. OHLC paths are assumptions rather than observed intrabar truth.
+
+  - experiment_id: exp-spike-eth3m-september-trade-audit-20260914-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: aba4bc4f7e
+    status: active
+    question: Enumerate every OKX ETH3m frozen V8 trade and all admitted signals from Sep1 through Sep14 21:19 Beijing for owner row-level audit.
+    single_variable: No optimization; fixed original and already-frozen fee-protected net1R rules.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_eth3m_september_trade_audit_20260914.md
+    notes: Explicit owner September audit authorization; source-read receipt must precede all data reads. No live action.
