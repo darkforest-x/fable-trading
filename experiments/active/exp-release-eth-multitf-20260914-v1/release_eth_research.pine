@@ -1,14 +1,16 @@
 //@version=6
 // E5 research port for OKX:ETHUSDT.P. This source is research-only: it has no
 // alerts, live integration, or deployment behavior.
-strategy("ETH multi-timeframe E5 - research", overlay=true, initial_capital=500,
+// Frozen candidates:15m C2 remains exploratory;1h C3 and4h C1 failed2025 validation.
+// The default C0 is the execution baseline; Auto reproduces the frozen selection. C0 keeps original signals with E5 execution fixes.
+strategy("release-20260914-ETH-MTF研究版", overlay=true, initial_capital=500,
      pyramiding=0, default_qty_type=strategy.fixed, calc_on_every_tick=false,
      calc_on_order_fills=false, process_orders_on_close=false,
      commission_type=strategy.commission.percent, commission_value=0.10,
      slippage=0, margin_long=0, margin_short=0, use_bar_magnifier=false)
 
 // Frozen on2026-09-14 from independent2023/2024 development folds only.
-string variantInput = input.string("Auto", "Research variant", options=["Auto", "C0", "C1", "C2", "C3", "C4", "C5"])
+string variantInput = input.string("C0", "Variant: C0 baseline, Auto frozen trials", options=["Auto", "C0", "C1", "C2", "C3", "C4", "C5"])
 string preset15 = "C2"
 string preset60 = "C3"
 string preset240 = "C1"

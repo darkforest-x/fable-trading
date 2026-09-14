@@ -10,6 +10,7 @@ impossible to present as a final report.
 from __future__ import annotations
 
 import hashlib
+import argparse
 import json
 import math
 import subprocess
@@ -128,10 +129,10 @@ def _table(headers: Sequence[str], rows: Iterable[Sequence[Any]]) -> str:
     return "\n".join(output)
 
 
-def _summary_index(summaries: Iterable[dict[str, Any]]) -> dict[tuple[int, str, str], dict[str, Any]]:
-    indexed: dict[tuple[int, str, str], dict[str, Any]] = {}
+def _summary_index(summaries: Iterable[dict[str, Any]]) -> dict[tuple, dict[str, Any]]:
+    indexed: dict[tuple, dict[str, Any]] = {}
     for summary in summaries:
-        key = (int(summary["minutes"]), str(summary["period"]), str(summary["arm"]))
+        key = (int(summary["minutes"]), str(summary["period"]), str(summary["arm"]), summary.get("precision", "parent_ohlc"))
         if key in indexed:
             raise RuntimeError(f"duplicate summary receipt for {key}")
         indexed[key] = summary
@@ -143,7 +144,7 @@ def _find_summary(
 ) -> dict[str, Any] | None:
     for summary in summaries:
         if (int(summary["minutes"]) == minutes and str(summary["period"]) == period
-                and str(summary["arm"]) == arm):
+                and str(summary["arm"]) == arm and summary.get("precision", "parent_ohlc") == "parent_ohlc"):
             return summary
     return None
 
@@ -185,6 +186,7 @@ def _summary_row(summary: dict[str, Any], label: str | None = None) -> list[str]
         _count(stats.get("trades")),
         _bp(stats.get("gross_bp")),
         _bp(stats.get("net_bp")),
+        _bp(stats.get("matched_case_bp")),
         _bp(stats.get("control_bp")),
         _bp(stats.get("excess_bp")),
         _count(stats.get("matched_n")),
@@ -260,7 +262,9 @@ def _plot_equities(
         fig, axis = plt.subplots(figsize=(10, 4.8), constrained_layout=True)
         all_positive = True
         series: list[tuple[str, pd.DataFrame, str]] = []
-        for (label, arm), color in zip(arms, colors, strict=True):
+        if len(arms) != len(colors):
+            raise RuntimeError("plot labels/colors differ")
+        for (label, arm), color in zip(arms, colors):
             active_arm = selected if arm is None else arm
             summary = _require_summary(continuous, minutes, "continuous", active_arm)
             frame = pd.read_csv(_equity_path(summary, VALIDATION), parse_dates=["time"])
@@ -315,11 +319,11 @@ def _plot_validation_heatmap(
     bound = max(1.0, float(np.nanmax(np.abs(array))))
     fig, axis = plt.subplots(figsize=(10.5, 3.5), constrained_layout=True)
     image = axis.imshow(array, cmap="RdYlGn", vmin=-bound, vmax=bound, aspect="auto")
-    axis.set_title("Selected validation 2025 monthly account return")
+    axis.set_title("Frozen candidates:2025 monthly return (fees included)")
     axis.set_xlabel("Month")
     axis.set_ylabel("Timeframe")
     axis.set_xticks(np.arange(12), [str(month) for month in range(1, 13)])
-    axis.set_yticks(np.arange(3), [f"{minutes}m" for minutes in TIMEFRAMES])
+    axis.set_yticks(np.arange(3), ["15m", "1h", "4h"])
     for row in range(array.shape[0]):
         for column in range(array.shape[1]):
             axis.text(column, row, f"{array[row, column]:+.1f}%", ha="center", va="center", fontsize=8)
@@ -365,6 +369,8 @@ def _inference_rows(
             f"{minutes}m", selected, _number(inference.get("auc"), 4),
             _count(inference.get("top_decile_n")), _bp(inference.get("top_decile_gross_bp")),
             _bp(inference.get("top_decile_net_bp")), _bp(inference.get("top_decile_matched_excess_bp")),
+            _bp(inference.get("top_decile_matched_case_bp")), _bp(inference.get("top_decile_control_bp")),
+            _count(inference.get("top_decile_matched_n")),
             _number(inference.get("ranking_p"), 6), _number(inference.get("matched_p"), 6),
             f"[{_bp(inference.get('excess_ci95_lower_bp'))}, {_bp(inference.get('excess_ci95_upper_bp'))}]",
             _number(family_row.get("holm_p"), 6), str(family_row.get("threshold", "不可用")),
@@ -407,6 +413,16 @@ def _narrative() -> str:
 def main() -> int:
     """Create Markdown, figures and self-contained HTML after both phases freeze."""
 
+    global RESULTS, DEVELOPMENT, VALIDATION, SELECTION_PATH, FIGURES, REPORT, HTML_DIR
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--results", type=Path, default=RESULTS)
+    parser.add_argument("--report", type=Path, default=REPORT)
+    args = parser.parse_args()
+    RESULTS, REPORT = args.results.resolve(), args.report.resolve()
+    DEVELOPMENT, VALIDATION = RESULTS / "development", RESULTS / "validation"
+    SELECTION_PATH, FIGURES = RESULTS / "selection.json", RESULTS / "report"
+    HTML_DIR = REPORT.parent / "html"
+    REPORT.parent.mkdir(parents=True, exist_ok=True)
     development_path = DEVELOPMENT / "all_summaries.json"
     validation_path = VALIDATION / "all_summaries.json"
     family_path = VALIDATION / "validation_family.json"
@@ -451,6 +467,23 @@ def main() -> int:
     builder_sha = selection.get("builder_sha256", "不可用")
     builder_commit = selection.get("builder_commit", "不可用")
     narrative = _narrative()
+    precision_rows = []
+    for r in validation:
+        if r.get("precision") == "15m":
+            base = _require_summary(validation, r["minutes"], r["period"], r["arm"])
+            precision_rows.append([str(r["minutes"])+"m", r["arm"], _pct(base["stats"]["return_pct"]),
+                                   *_summary_row(r)[1:]])
+    precision_table = _table(["父周期", "臂", "父OHLC账户收益", "15m精度账户收益", "标记收益", "路径DD", "交易", "毛bp", "净bp", "匹配case bp", "匹配control bp", "超额bp", "匹配n"], precision_rows)
+    operating_rows = []
+    for m in TIMEFRAMES:
+        selected = str(_get(selection, "selection", str(m), "selected"))
+        for arm in ("C0", selected):
+            s = _require_summary(validation, m, "continuous", arm)["stats"]
+            operating_rows.append([str(m)+"m", arm, _count(s["trades"]), _pct(s["gross_win_rate_pct"]),
+                _pct(s["win_rate_pct"]), _number(s["pf_currency"],3), _number(s["pf_unit"],3), _number(s["fees"]),
+                _pct(s["exposure_pct"]), _count(s["gross_winners_turned_net_losers"]), _number(s["holding_hours_mean"]),
+                _count(s["boundary_exits"]), _bp(s["matched_case_bp"]), _bp(s["control_bp"]), _bp(s["excess_bp"]), _count(s["matched_n"])])
+    operating_table = _table(["周期", "臂", "交易", "毛胜率", "扣费胜率", "货币PF", "单位PF", "手续费USDT", "在场时间比例", "毛赢转净亏笔数", "平均持有h", "行政退出数", "匹配case bp", "匹配control bp", "超额bp", "匹配n"], operating_rows)
 
     continuous_rows: list[list[str]] = []
     for minutes in TIMEFRAMES:
@@ -458,7 +491,7 @@ def main() -> int:
         for label, arm in (("O0 original / zero cost", "O0"), ("O1 cost", "O1"),
                            ("E1 unit notional", "E1"), ("O1 immediate-stop diagnostic", "O1_immediate"),
                            ("C0 baseline", "C0"), ("Selected", selected), ("SMA", "SMA")):
-            continuous_rows.append([f"{minutes}m {label}", *_summary_row(
+            continuous_rows.append([f"{minutes}m {label} ({arm})", *_summary_row(
                 _require_summary(validation, minutes, "continuous", arm), arm
             )[1:]])
 
@@ -481,7 +514,7 @@ def main() -> int:
     for minutes in TIMEFRAMES:
         selected = str(_get(selection, "selection", str(minutes), "selected"))
         for period in ("validation2025", "later2026"):
-            for label, arm in (("O1 cost", "O1"), ("Selected", selected), ("SMA", "SMA")):
+            for label, arm in (("O1 cost", "O1"), ("C0 execution baseline", "C0"), ("Selected", selected), ("SMA", "SMA")):
                 validation_rows.append([f"{minutes}m", period, label, *_summary_row(
                     _require_summary(validation, minutes, period, arm), arm
                 )[1:]])
@@ -495,7 +528,7 @@ def main() -> int:
             f"### {minutes}m selected {arm} — {summary['period']}",
             "",
             _table(
-                ["分组", "交易", "净单位bp（全样本）", "匹配case bp", "匹配control bp", "超额bp", "匹配n", "匹配覆盖", "货币PF", "单位PF", "平均持有小时"],
+                ["分组", "交易", "净胜率", "净单位bp（全样本）", "匹配case bp", "匹配control bp", "超额bp", "匹配n", "匹配覆盖", "货币PF", "单位PF", "平均持有小时"],
                 _direction_rows(summary, "side"),
             ),
             "",
@@ -517,7 +550,7 @@ def main() -> int:
         ],
     )
     figure_links = "\n".join(
-        f"![{path.stem}](../experiments/active/exp-release-eth-multitf-20260914-v1/results/report/{path.name})"
+        f"![{path.stem}]({path})"
         for path in (*figures, heatmap)
     )
     report = f"""# P1 ETH multi-timeframe release replay — 2026-09-14
@@ -526,7 +559,7 @@ def main() -> int:
 
 本轮账本初始账户为 **500 USDT**；每次成交费率为 **0.1% notional**，开/平各一次；期末行政结算若发生，按退出费处理。`账户收益%` 是连续复利账户权益变化，`单位bp` 是每笔等权单笔收益均值，二者不能互换或相加。开发期为2023–2024，验证期为2025，后段描述期为2026-01至2026-04；2022仅作指标 warmup。完整历史此前已被研究使用，不能称为 pristine / blind OOS。
 
-未消费中央 holdout（>=2026-05-04）：**{validation_receipt.get('holdout_consumed', '不可用')}**。没有 TradingView 原生编译/逐笔 ledger parity；没有 funding、维持保证金、合约最小量或 tick rounding 模型。本报告不把这些缺口默认为零。
+中央 holdout（>=2026-05-04）消费标记：**{validation_receipt.get('holdout_consumed', '不可用')}**（False = 未使用）。没有 TradingView 原生编译/逐笔 ledger parity；没有 funding、维持保证金、合约最小量或 tick rounding 模型。本报告不把这些缺口默认为零。
 
 ## 主叙事
 
@@ -544,22 +577,22 @@ def main() -> int:
 
 ## 连续账户主对照（2023-01至2026-04；仅描述、不参与选择）
 
-| 周期／臂 | 账户收益% | 标记收益% | 路径DD% | 交易 | 毛单位bp | 净单位bp | 匹配control bp | 匹配超额bp | 匹配n |
-|---|---|---|---|---|---|---|---|---|---|
+| 周期／臂 | 账户收益% | 标记收益% | 路径DD% | 交易 | 毛单位bp | 净单位bp | 匹配case bp | 匹配control bp | 匹配超额bp | 匹配n |
+|---|---|---|---|---|---|---|---|---|---|---|
 """ + "\n".join("| " + " | ".join(row) + " |" for row in continuous_rows) + f"""
 
 这里的 `净单位bp` 是全样本均值；当匹配支持不足时，匹配 case/control/超额和匹配 n 保持分别呈现，绝不把全样本均值替作匹配估计。
 
 ## 单变量工程链（全 27 行）
 
-| 周期 | 臂 | 账户收益% | 标记收益% | 路径DD% | 交易 | 毛单位bp | 净单位bp | 匹配control bp | 匹配超额bp | 匹配n |
-|---|---|---|---|---|---|---|---|---|---|---|
+| 周期 | 臂 | 账户收益% | 标记收益% | 路径DD% | 交易 | 毛单位bp | 净单位bp | 匹配case bp | 匹配control bp | 匹配超额bp | 匹配n |
+|---|---|---|---|---|---|---|---|---|---|---|---|
 """ + "\n".join("| " + " | ".join(row) + " |" for row in engineering_rows) + f"""
 
 ## 开发期候选链：2023 / 2024 独立折
 
-| 周期 | 折 | 臂 | 账户收益% | 标记收益% | 路径DD% | 交易 | 毛单位bp | 净单位bp | 匹配control bp | 匹配超额bp | 匹配n |
-|---|---|---|---|---|---|---|---|---|---|---|---|
+| 周期 | 折 | 臂 | 账户收益% | 标记收益% | 路径DD% | 交易 | 毛单位bp | 净单位bp | 匹配case bp | 匹配control bp | 匹配超额bp | 匹配n |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
 """ + "\n".join("| " + " | ".join(row) + " |" for row in candidate_rows) + f"""
 
 ## 冻结选择检查
@@ -570,22 +603,32 @@ def main() -> int:
 
 ## 验证 2025 与后段 2026-01至04
 
-| 周期 | 时段 | 对照 | 账户收益% | 标记收益% | 路径DD% | 交易 | 毛单位bp | 净单位bp | 匹配control bp | 匹配超额bp | 匹配n |
-|---|---|---|---|---|---|---|---|---|---|---|---|
+| 周期 | 时段 | 对照 | 账户收益% | 标记收益% | 路径DD% | 交易 | 毛单位bp | 净单位bp | 匹配case bp | 匹配control bp | 匹配超额bp | 匹配n |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
 """ + "\n".join("| " + " | ".join(row) + " |" for row in validation_rows) + f"""
 
 ## 2025 冻结选择：分数与月簇推断
 
-{_table(["周期", "选择", "AUC", "top-decile n", "top gross", "top net", "top 匹配超额", "排名置换p", "月簇匹配p", "月簇95% CI", "Holm family p", "门槛"], _inference_rows(validation, selection, family))}
+{_table(["周期", "选择", "AUC", "top-decile n", "top gross", "top net", "top 匹配超额", "top匹配case", "top匹配control", "top匹配n", "排名置换p", "月簇匹配p", "月簇95% CI", "Holm family p", "门槛"], _inference_rows(validation, selection, family))}
 
 `ranking p` 只检验排序诊断；月簇 p 和 CI 针对匹配超额。Holm 仅校正这次预先定义的验证家族，不能消除完整历史已被观察带来的选择偏差。
+
+## 2025 成交精度诊断（信号与BE仍在父周期收盘更新）
+
+{precision_table}
+
+这四组使用同源完整15m子K线，只改变止损成交路径精度。收益相同不代表有逐笔 tick 或 TradingView 原生 parity。
+
+## 连续账户运营指标（原信号执行修正版与冻结候选）
+
+{operating_table}
 
 ## 连续选择臂：多空、年度、集中度与兑现
 
 {chr(10).join(selected_breakdowns)}
 
 | 周期 | 分组类型 | 分组 | 交易 | 净单位bp（全样本） | 匹配case bp | 匹配control bp | 超额bp | 匹配n | Top1正盈利占比 | Top5正盈利占比 | 去掉Top1净bp | MFE≥1R | 实现≥1R | MFE≥3R | 实现≥3R | MFE≥10R | 实现≥10R | 平均持有h | 中位持有h |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 """ + "\n".join("| " + " | ".join(row) + " |" for row in selected_details) + f"""
 
 MFE 是曾达到对应 R 的笔数，`实现≥R` 是实际结算达到对应 R 的笔数；它们描述兑现/回吐，不表示加入新的止盈参数。
@@ -597,19 +640,21 @@ MFE 是曾达到对应 R 的笔数，`实现≥R` 是实际结算达到对应 R 
 ## 可复现命令
 
 ```bash
-python3 -m yoyo.evaluation.release_eth_multitf development
-python3 -m yoyo.evaluation.release_eth_multitf validation
-python3 scripts/report_release_eth_multitf.py
+.venv/bin/python scripts/reproduce_release_eth_multitf.py --out /tmp/release-eth-reproduction-20260914
+.venv/bin/python scripts/report_release_eth_multitf.py --results /tmp/release-eth-reproduction-20260914 --report /tmp/release-eth-reproduction-20260914/report.md
+# Reconcile delivered ledgers and rebuild the canonical report:
+.venv/bin/python scripts/audit_release_eth_evidence.py
+.venv/bin/python scripts/report_release_eth_multitf.py
 ```
 
-## 风险与诚实声明（待主负责人补全结论）
+## 风险与诚实声明
 
 本报告没有读取或评分 holdout，也没有自动 promote、修改阈值、改变成本假设或执行任何实盘动作。不可用字段显示为“不可用”，没有从其他期间、其他臂或原始行情推断填补。后段2026是既见历史上的描述检查，不能升级为盲测或实盘证据。
 
 ## 下一步选项（待项目所有者决策）
 
-- 在主负责人完成叙事与风险审阅后，决定是否记录为负面/探索性研究结论。
-- 任何 holdout 读取、参数改变、promote 或实盘步骤仍需项目所有者逐项明确批准。
+- 本轮已记录为探索性研究：15m C2 保留观察，1h C3 /4h C1 优化失败；无实盘准入。
+- 后续值得研究的是保本净成本与趋势利润兑现；TP/SL/BE 数值改动、holdout、promote 和实盘动作依项目规则另需明确授权。本轮未执行。
 """
     REPORT.write_text(report, encoding="utf-8")
     subprocess.run(
