@@ -66,6 +66,8 @@ def markdown(payload: dict) -> str:
 
 - 时段：北京时间 2026-09-01 00:00 至 2026-09-14 21:19；最后完整 3 分钟 bar 在北京时间 21:18 收盘（UTC `{last}`）。
 - 数据：OKX `ETH-USDT-SWAP` 已完成 3 分钟 candle；来源端点 `{source.get('endpoint', '见 source_receipt.json')}`，来源收据和尾部哈希保留在实验结果目录。
+- 本次按 owner 指定近期范围专项核对：这是列出各冻结配置第 1 次专项消耗 holdout；不是新的盲验收，未搜索或重新选择参数。
+- R 是初始开仓价到初始止损价的距离。若每笔初始价格风险固定 1U，毛R/费用R/净R分别对应毛U/费用U/净U；0.2% 是冻结的名义本金往返成本假设，不能把价格保本自动记成净保本。
 - 原始 V8 有 `{counts['original']}` 条串行记录（`{closed['original']}` 条自然平仓 + `{censored['original']}` 条截止估值）；`next_bar` / `ohlc` / `olhc` 分别有 `{counts['next_bar']}` / `{counts['ohlc']}` / `{counts['olhc']}` 条记录（自然平仓分别 `{closed['next_bar']}` / `{closed['ohlc']}` / `{closed['olhc']}`，截止估值分别 `{censored['next_bar']}` / `{censored['ohlc']}` / `{censored['olhc']}`）。原始 arm 的 `carry_in` 若存在，表示入场早于 9 月但仓位延续到审计窗；净目标 arms 从 9 月起始空仓，且不应用账户容量过滤。
 
 ## 怎样检查
@@ -101,6 +103,8 @@ PYTHONPATH=. .venv/bin/python scripts/report_spike_september_trade_audit.py
 原始 arm 保持冻结 V8 准入、5-bar / 0.2 ATR / 2 ATR floor 初始止损、2R 收盘 arm、4 ATR trail 与 20bp 往返成本。独立原始回放的 parity 是零变化对照：它只检验同一入场/退出实现的一致性，不是随机基准，也不构成新策略证据。
 
 AUC、随机对照收益、置换检验和方向性收益宣称不适用于这份逐笔对账；本交付的等价严格检查是：每笔可追溯到信号、入场、退出、成本和 cutoff，且原始/情景 arms 的范围与是否串行明确披露。
+
+原始20笔与独立入场回放全部匹配，有效止损逐bar重算全部匹配；86条交易记录的价格/R重算最大误差6.11e-14，112项相关测试通过。交互脚本已做86图/全部时序切换的最小DOM逻辑检查；未做浏览器像素级验收。此前全库无关注册/迁移哈希失败未在本轮修复或重跑，详见validation.json。
 
 ## 风险与诚实声明
 
