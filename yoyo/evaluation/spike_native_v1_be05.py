@@ -417,7 +417,10 @@ def run(output: Path, *, max_streams: int | None = None) -> dict[str, Any]:
         if len(pairs) != len(link) and max_streams is None:
             raise ValueError(f"linked event count mismatch: {len(pairs)} != {len(link)}")
         if max_streams is None:
-            summary = pd.concat([_summary(pairs, []), _summary(pairs, ["timeframe_min"]), _summary(pairs.assign(entry_period=pairs.entry_time.dt.to_period("365D").astype(str)), ["entry_period"])], ignore_index=True)
+            overall = pairs.assign(scope="all")
+            yearly = pairs.assign(entry_period=pairs.entry_time.dt.to_period("365D").astype(str))
+            summary = pd.concat([_summary(overall, ["scope"]), _summary(pairs, ["timeframe_min"]),
+                                 _summary(yearly, ["entry_period"])], ignore_index=True)
         else:
             summary = _summary(pairs, ["timeframe_min"])
         pairs.to_csv(output / "paired_trade_ledger.csv.gz", index=False, compression={"method": "gzip", "mtime": 0})
