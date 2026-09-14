@@ -1,0 +1,71 @@
+{
+  "frozen_at": "2026-09-14T10:54:06.912664+00:00",
+  "search_method": "four single-field development-only sweeps; bounded coordinate search, not global optimum",
+  "search_sha256": "7d01e17b00536d3cd496653d8889fc0bf4e4c287cefc5026f625f87772554687",
+  "config_sha256": "040ecebfec9bf6ecb8553df43f27902c81fd2d964966588d718d7a675272f97c",
+  "selected": {
+    "ETH_3m_OKX": {
+      "policy": {
+        "base_risk_usdt": 20,
+        "max_level": 4,
+        "reset_mode": "win",
+        "leverage_cap": 5
+      },
+      "development_summary": {
+        "initial_balance": 1000.0,
+        "final_balance": 923.3234502980325,
+        "min_balance": 923.3234502980325,
+        "max_balance": 1000.0,
+        "profit": -76.67654970196747,
+        "return": -0.07667654970196747,
+        "max_realized_drawdown": 0.07667654970196748,
+        "n_candidates": 744,
+        "n_accepted": 2,
+        "n_rejected": 742,
+        "ruined": false,
+        "max_requested_level": 2,
+        "max_executed_level": 1,
+        "max_executed_notional": 4946.5171898356475,
+        "max_effective_leverage": 4.946517189835648,
+        "wins": 0,
+        "losses": 2,
+        "capped_cycle_resets": 0,
+        "ending_level": 2
+      }
+    },
+    "ETH_5m_Binance": {
+      "policy": {
+        "base_risk_usdt": 50,
+        "max_level": 4,
+        "reset_mode": "recovery",
+        "leverage_cap": 3
+      },
+      "development_summary": {
+        "initial_balance": 1000.0,
+        "final_balance": 885.1298026353683,
+        "min_balance": 885.1298026353683,
+        "max_balance": 1000.0,
+        "profit": -114.87019736463174,
+        "return": -0.11487019736463178,
+        "max_realized_drawdown": 0.11487019736463173,
+        "n_candidates": 439,
+        "n_accepted": 2,
+        "n_rejected": 437,
+        "ruined": false,
+        "max_requested_level": 1,
+        "max_executed_level": 1,
+        "max_executed_notional": 2979.906429942437,
+        "max_effective_leverage": 2.9799064299424374,
+        "wins": 0,
+        "losses": 2,
+        "capped_cycle_resets": 0,
+        "ending_level": 1
+      }
+    }
+  },
+  "holdout_exposures_at_selection": 0,
+  "development_input_sha256": {
+    "ETH_3m_OKX": "6cafc9aca7f9faa8b01ea8e6ad989f967a376cbee1045297fc30ef5fcd937a48",
+    "ETH_5m_Binance": "2cfa195aa2d8d730f3105f186cde51802229995492211476fb635695ed9e2767"
+  }
+}
