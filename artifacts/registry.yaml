@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-ma-drift-short-20260914-delivery
+    artifact_type: manifest
+    role: causal_morphology_indicator_engineering_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4b7fa9f0508ef5d802cb5e7b34584a60c3e52e3b
+    source_path: experiments/active/exp-spike-ma-drift-short-20260914-v1/results/delivery_manifest.json
+    sha256: c5b0dabcace52a8fc359b27c673d1b17eff01b5e95165e9225c5076ae3596a52
+    size_bytes: 1772
+    storage_uri: repo://experiments/active/exp-spike-ma-drift-short-20260914-v1/results/delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Engineering-only synthetic test and native compile receipts; unknown is conservative and does not imply market evaluation. Binds exact source pasted, not full cloud readback. No profitability claim.
   - artifact_id: eth-ma120-longest-runs-20260914-manifest
     artifact_type: manifest
     role: descriptive_ma120_interval_inventory

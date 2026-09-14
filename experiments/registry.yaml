@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-ma-drift-short-20260914-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4b7fa9f0508ef5d802cb5e7b34584a60c3e52e3b
+    status: inconclusive
+    question: Can the owner's bearish MA-rope drift be expressed as distinct causal warning and frozen-low breakout events?
+    single_variable: Engineering implementation of one independent short-only morphology indicator; no market experiment or threshold tuning.
+    result: Pine v6 privately saved after native compilation; five static checks and eight synthetic PineTS groups pass, including nine pure-state assertions. Real-sample recall and profitability are untested.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_spike_ma_drift_short_indicator_20260914.md
+    artifacts:
+    - spike-ma-drift-short-20260914-delivery
+    notes: Owner requested this indicator. Only provided screenshot semantics and synthetic OHLC used; no new indicator added to historical chart, no real OHLC replay, no live or alert changes.
   - experiment_id: exp-eth-ma120-longest-runs-20260914-v1
     source_repo: darkforest-x/fable-trading
     status: inconclusive

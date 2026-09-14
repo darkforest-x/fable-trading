@@ -1,0 +1,27 @@
+{
+  "generated_at": "2026-09-14T05:15:30.293Z",
+  "source_sha256": "144f462de9025d128bbb1d568a09e355a026a8582aa49c090d356260d2284d70",
+  "helper_sha256": "85185c286d00ccabb680da283bca3e180c6c17076571fd6b074900d5ba3ad3e5",
+  "verifier_sha256": "ff3acfb43ccc9be88b1ce988d796b39755c259780f28abb6fe703eb565471481",
+  "runtime": "PineTS 0.9.33 (auxiliary; not native TradingView)",
+  "market_data_read": false,
+  "holdout_scoring": false,
+  "synthetic_rows": 413,
+  "warning_bars": [
+    403
+  ],
+  "confirmation_bars": [
+    409
+  ],
+  "checks": [
+    "flat negative control has zero warnings and confirmations",
+    "slow drift produces warning before the synthetic impulse",
+    "confirmation follows an earlier warning, never the same bar",
+    "future impulse cannot change previously closed events",
+    "adversarial future replacement leaves the decision prefix intact",
+    "missing bar resets warmup and prevents evidence crossing the gap",
+    "same synthetic bar geometry at 3m has the same bar-based events",
+    "nine exact-source state-helper assertions pass"
+  ],
+  "native_compile": "recorded separately; not established by this runner"
+}
