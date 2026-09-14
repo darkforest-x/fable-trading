@@ -164,7 +164,7 @@ def load_results(root: Path) -> tuple[pd.DataFrame, pd.DataFrame, list[dict]]:
 def run(root: Path, output: Path):
     output.mkdir(parents=True, exist_ok=False)
     fixed, serial, sources = load_results(root)
-    rows, infer, months, srows = [], [], [], []
+    rows, infer, months, srows, smonths, changes = [], [], [], [], [], []
     for policy, g in fixed.groupby('policy'):
         if policy == 'baseline':
             continue
@@ -187,11 +187,32 @@ def run(root: Path, output: Path):
                 for side in ('all', 1, -1):
                     group = tf if side == 'all' else tf.loc[tf.side == side]
                     srows.append(dict(policy=policy, period=period, timeframe_min=minutes, side_group=str(side), **metrics(group)))
-    for name, data in [('fixed_effects', rows), ('matched_null', infer), ('monthly_fixed', months), ('serial_metrics', srows)]:
+        for (month, minutes), part in g.groupby([g.entry_time.dt.strftime('%Y-%m'), 'timeframe_min']):
+            smonths.append(dict(policy=policy, month=month, timeframe_min=int(minutes), **metrics(part)))
+        if policy == 'baseline':
+            continue
+        original = serial.loc[serial.policy.eq('baseline')]
+        for minutes in ('all', 30, 60, 240):
+            old = original if minutes == 'all' else original.loc[original.timeframe_min.eq(minutes)]
+            new = g if minutes == 'all' else g.loc[g.timeframe_min.eq(minutes)]
+            oldkeys, newkeys = set(old.event_key), set(new.event_key)
+            lost, added = old.loc[~old.event_key.isin(newkeys)], new.loc[~new.event_key.isin(oldkeys)]
+            original_tail = set(old.loc[~old.censored & old.net_r.ge(10), 'event_key'])
+            new_tail = set(new.loc[~new.censored & new.net_r.ge(10), 'event_key'])
+            changes.append(dict(policy=policy, timeframe_min=minutes,
+                                unchanged_entry_events=len(oldkeys & newkeys),
+                                lost_entry_events=len(oldkeys-newkeys), added_entry_events=len(newkeys-oldkeys),
+                                lost_entry_closed_r=float(lost.loc[~lost.censored,'net_r'].sum()),
+                                added_entry_closed_r=float(added.loc[~added.censored,'net_r'].sum()),
+                                original_ge10=len(original_tail), retained_original_ge10=len(original_tail & new_tail),
+                                new_ge10=len(new_tail-original_tail)))
+    for name, data in [('fixed_effects', rows), ('matched_null', infer), ('monthly_fixed', months),
+                       ('serial_metrics', srows), ('monthly_serial', smonths), ('serial_entry_changes', changes)]:
         pd.DataFrame(data).to_csv(output / f'{name}.csv', index=False)
     for name, table in [('fixed_events', fixed), ('serial_trades', serial)]:
         table.to_csv(output / f'{name}.csv.gz', index=False, compression={'method': 'gzip', 'mtime': 0})
     receipt = dict(source_kind='saved outcomes only', sources=sources, seed=SEED, family=FAMILY,
+                   builder_sha256=digest(Path(__file__)), input_manifest_sha256=digest(root/'manifest.json'),
                    null='same asset/venue/tf/side/month/fixed signalATRpct bucket matched deletion;whole-stratum removals not identified',
                    files={p.name: digest(p) for p in output.iterdir() if p.is_file()})
     (output / 'statistics_receipt.json').write_text(json.dumps(receipt, ensure_ascii=False, indent=2))
