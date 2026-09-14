@@ -1,0 +1,117 @@
+{
+  "experiment_id": "exp-spike-v1-v8-tier-lock-20260914-v1",
+  "status": "historical_inconclusive",
+  "source_repo": "darkforest-x/fable-trading",
+  "main_builder_commit": "87511611b6c395dca35526bcd8a1194680d38d9f",
+  "common_replay_commit": "8017b1a79ea50d2e8cd4c4a8c33409ee5682ea26",
+  "native_replay_commit": "8f88a55637743025c7d86bfd12737366c24d286b",
+  "native_later_assertion_commit": "87511611b6c395dca35526bcd8a1194680d38d9f",
+  "scope": {
+    "start_inclusive": "2024-09-10T00:00:00Z",
+    "end_exclusive": "2026-09-10T00:00:00Z",
+    "timeframes_min": [
+      30,
+      60,
+      240
+    ],
+    "venues": [
+      "binance",
+      "okx",
+      "gate"
+    ],
+    "cost_roundtrip_nominal": 0.002,
+    "common_streams": 3531,
+    "native_entries": 6185,
+    "three_closed_native": 6116,
+    "three_closed_v8": 94746
+  },
+  "rules": [
+    "original baseline",
+    "0.5R high-low MFE confirmed at close arms exact entry from next bar",
+    "same plus1.5R observed MFE arms gross0.5R profit from next bar"
+  ],
+  "audit": {
+    "synthetic_and_aggregation_tests": 16,
+    "independent_saved_csv_review": "passed; paired and triple denominators separately labelled",
+    "first_common_full_tier_v1": "superseded; unintended stage1 rounding corrected; retained",
+    "first_native_full": "stopped250 streams751 events; retained receipt",
+    "later_native_assertion_only": "stopped200 streams593 events; final results unchanged and6185-entry CSV-only audit passed",
+    "common_final": "3531 complete receipts;28248 file SHA passed by delegate;14124 canonical arm SHA reverified by aggregator",
+    "holdout": "Owner permits all historical dates; previously researched pool reused; sample, full and interrupted attempts are not independent blind evaluations"
+  },
+  "notion_url": "https://app.notion.com/p/3db8856479af815bb3aacfc436ead4d2",
+  "training_eligible": false,
+  "production_eligible": false,
+  "files": [
+    {
+      "path": "experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/delivery_v1/aggregation_receipt.json",
+      "sha256": "d92f42c352842f91d519d2abf1e9ada2e0bee370438a938f3597701e027309ad",
+      "size_bytes": 4005252
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/common/results/full_tier_v2/manifest.json",
+      "sha256": "99b9eb4bea3a24b1ecc12d76e8f9b988e924d54c7b98a8bd27999191167bbd9f",
+      "size_bytes": 358
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/common/results/full_tier_v2/identity.json",
+      "sha256": "48f667ac4c582e76908a2e55cc341d6b2416977e23c934f175b479dedafbb149",
+      "size_bytes": 930
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/native_v1/full_exact_entry/receipt.json",
+      "sha256": "b374cc3db488863b9f9e531fa9fcd6b8162aca58f9f0045e3b293e13b4880f05",
+      "size_bytes": 1496
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/native_v1/full_exact_entry/entry_stop_risk_audit_receipt.json",
+      "sha256": "c8c6fa3f6e7cd851e9e7e5f1127eaab9011bdaec730a4f649e6bc3acd50e0163",
+      "size_bytes": 1318
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/native_v1/interrupted_pre_stage1_fix.json",
+      "sha256": "672546b64f7f36ff62b66cde884b60eb321b60dd8615e170110482dcdd02d1ea",
+      "size_bytes": 508
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/native_v1/interrupted_input_parity_replay.json",
+      "sha256": "09ac7406ab02254d7645e935d99a368aeaaaf8428591b161d7a141483e737dc6",
+      "size_bytes": 494
+    },
+    {
+      "path": "analysis/p1_spike_v1_v8_tier_lock_20260914.md",
+      "sha256": "51029696daf59da2cbe22d897df125d27520a630aa9b7e6c089be60cdf7c254e",
+      "size_bytes": 14778
+    },
+    {
+      "path": "analysis/html/p1_spike_v1_v8_tier_lock_20260914.html",
+      "sha256": "2ddd8c034c426d204eca643bac4d4c1d058ed93bd4e5d21eed527a20be286dd5",
+      "size_bytes": 21137
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/delivery_v1/three_arm_summary.csv",
+      "sha256": "3afdb66824cf0de5a28a9ee5052da5e45112cb88a614a455c28ad2b7b964b5b6",
+      "size_bytes": 25607
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/delivery_v1/three_arm_trades.csv.gz",
+      "sha256": "ee2323ac90dc3917f80b6133d63558825d86d12b1b949b1a55bbcaddc6f2128a",
+      "size_bytes": 7476049
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/delivery_v1/comparison_summary.csv",
+      "sha256": "8677dcdeb64e374a804ab1b5c446f35c39b87f93333e4a08aaad118ec83489c8",
+      "size_bytes": 48622
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/delivery_v1/independent_metrics.csv",
+      "sha256": "e497bfb30092ed36fbd6c0e203873aedf3cb28930667f9b9887f0cc641e571d6",
+      "size_bytes": 44837
+    },
+    {
+      "path": "experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/delivery_v1/all_outcomes.csv.gz",
+      "sha256": "cc402c932dbd7c0a8fc354286429e3a9772927e08fe5b9cbe6dd01140e77eca4",
+      "size_bytes": 43436383
+    }
+  ]
+}

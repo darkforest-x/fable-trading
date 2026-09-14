@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>V1 / V8：0.5R保本＋1.5R锁0.5R，三组对照</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>V1 / V8：0.5R保本＋1.5R锁0.5R，三组对照</h1>
+<p>研究日期：2026-09-14。实验键：<code>exp-spike-v1-v8-tier-lock-20260914-v1</code>。历史研究，未上线。</p>
+<h2>结论先看</h2>
+<p>原版V1（多头）：相同入场、三组均已结束的6,116笔，原退出 854.70R → 单独保本 1,042.87R → 分档 1,057.65R。分档相较原退出 202.95R，相较单独保本 14.78R。</p>
+<p>V8（多空）：相同入场、三组均已结束的94,746笔，原退出 -2,021.78R → 单独保本 -4,513.92R → 分档 -4,725.44R。分档相较原退出 -2,703.66R，相较单独保本 -211.52R。</p>
+<p><strong>累计R是每笔初始风险单位的事件加总，不是账户收益率。</strong> 不能把这些R直接换算为本金或复利收益。以下主表固定同一入场并要求三组退出都已观察，避免未结束交易和重入次数混淆。</p>
+<p>新增第二档相较单独保本，原生V1净胜率13.85%→22.78%，但累计只增加14.78R，实际兑现≥10R从34笔降到29笔；V8净胜率15.55%→23.34%，累计却再减少211.52R，实际兑现≥10R从265笔降到231笔。它把部分保本扣费小亏改成小赚，同时也更早截断趋势。<strong>胜率提高不能替代净收益与大趋势保留率。</strong> 所有总体差值的周块区间跨零，尚不能确认稳定改善。</p>
+<table><thead><tr>
+<th>系统</th>
+<th>规则</th>
+<th>共同已结束</th>
+<th>累计净R</th>
+<th>平均净R</th>
+<th>净胜率</th>
+<th>PF(R)</th>
+<th>实际≥10R</th>
+<th>事件回撤R</th>
+</tr></thead><tbody>
+<tr><td>统一退出V1（补充）</td><td>原退出</td><td>6138</td><td>1,060.98</td><td>0.1729</td><td>29.05%</td><td>1.259</td><td>51</td><td>689.70</td></tr>
+<tr><td>统一退出V1（补充）</td><td>0.5R保本</td><td>6138</td><td>1,097.07</td><td>0.1787</td><td>15.02%</td><td>1.478</td><td>33</td><td>421.37</td></tr>
+<tr><td>统一退出V1（补充）</td><td>分档锁利</td><td>6138</td><td>1,097.84</td><td>0.1789</td><td>23.10%</td><td>1.484</td><td>28</td><td>336.00</td></tr>
+<tr><td>原版V1（多头）</td><td>原退出</td><td>6116</td><td>854.70</td><td>0.1397</td><td>28.14%</td><td>1.184</td><td>53</td><td>886.08</td></tr>
+<tr><td>原版V1（多头）</td><td>0.5R保本</td><td>6116</td><td>1,042.87</td><td>0.1705</td><td>13.85%</td><td>1.447</td><td>34</td><td>468.31</td></tr>
+<tr><td>原版V1（多头）</td><td>分档锁利</td><td>6116</td><td>1,057.65</td><td>0.1729</td><td>22.78%</td><td>1.458</td><td>29</td><td>371.95</td></tr>
+<tr><td>V8（多空）</td><td>原退出</td><td>94746</td><td>-2,021.78</td><td>-0.0213</td><td>30.05%</td><td>0.970</td><td>532</td><td>8,293.68</td></tr>
+<tr><td>V8（多空）</td><td>0.5R保本</td><td>94746</td><td>-4,513.92</td><td>-0.0476</td><td>15.55%</td><td>0.885</td><td>265</td><td>7,978.57</td></tr>
+<tr><td>V8（多空）</td><td>分档锁利</td><td>94746</td><td>-4,725.44</td><td>-0.0499</td><td>23.34%</td><td>0.877</td><td>231</td><td>7,697.53</td></tr>
+</tbody></table>
+<p>原版V1保留原生只做多与信号参考保护路径；统一退出V1用另一套通用ATR和反向退出，是补充敏感性，不能替代原版V1。V8保留多空和已冻结的入场规则。</p>
+<h2>分周期：原退出、单独保本、分档锁利</h2>
+<table><thead><tr>
+<th>系统</th>
+<th>周期</th>
+<th>共同已结束</th>
+<th>原净R</th>
+<th>单独BE净R</th>
+<th>分档净R</th>
+<th>分档减原R</th>
+<th>分档减BE R</th>
+<th>净胜率 原/BE/分档</th>
+</tr></thead><tbody>
+<tr><td>原版V1（多头）</td><td>4H</td><td>513</td><td>-46.95</td><td>-57.72</td><td>-42.46</td><td>4.49</td><td>15.26</td><td>28.46% / 14.42% / 22.81%</td></tr>
+<tr><td>原版V1（多头）</td><td>30m</td><td>3579</td><td>-41.39</td><td>15.60</td><td>11.69</td><td>53.08</td><td>-3.91</td><td>29.00% / 13.94% / 23.58%</td></tr>
+<tr><td>原版V1（多头）</td><td>1H</td><td>2024</td><td>943.03</td><td>1,084.99</td><td>1,088.42</td><td>145.38</td><td>3.43</td><td>26.53% / 13.54% / 21.34%</td></tr>
+<tr><td>V8（多空）</td><td>4H</td><td>8698</td><td>490.88</td><td>406.85</td><td>368.87</td><td>-122.00</td><td>-37.98</td><td>31.03% / 16.46% / 24.86%</td></tr>
+<tr><td>V8（多空）</td><td>30m</td><td>57575</td><td>-1,376.95</td><td>-3,715.82</td><td>-3,994.68</td><td>-2,617.73</td><td>-278.86</td><td>29.61% / 15.17% / 22.87%</td></tr>
+<tr><td>V8（多空）</td><td>1H</td><td>28473</td><td>-1,135.71</td><td>-1,204.95</td><td>-1,099.64</td><td>36.07</td><td>105.31</td><td>30.64% / 16.02% / 23.84%</td></tr>
+</tbody></table>
+<h2>第二档究竟救回了什么、牺牲了什么</h2>
+<p>下面分别以原退出或上一轮BE05作为对照。各自使用双方共同已结束的事件，数量可能不同于三方共同样本。“减轻原亏损”不是新增盈利单；锁定的0.5R是扣费前价差。</p>
+<table><thead><tr>
+<th>系统</th>
+<th>比较</th>
+<th>双方已结束</th>
+<th>减轻原亏损R</th>
+<th>削减原盈利R</th>
+<th>其他变化R</th>
+<th>总变化R</th>
+<th>原兑现≥10R保留</th>
+<th>每笔变化95%周块区间</th>
+</tr></thead><tbody>
+<tr><td>统一退出V1（补充）</td><td>原退出→分档锁利</td><td>6138</td><td>2,024.98</td><td>-2,012.08</td><td>23.95</td><td>36.85</td><td>28/51</td><td>[-0.0905, 0.0991]</td></tr>
+<tr><td>统一退出V1（补充）</td><td>0.5R保本→分档锁利</td><td>6165</td><td>244.02</td><td>-256.85</td><td>14.60</td><td>1.76</td><td>28/33</td><td>[-0.0323, 0.0228]</td></tr>
+<tr><td>原版V1（多头）</td><td>原退出→分档锁利</td><td>6116</td><td>2,549.00</td><td>-2,356.53</td><td>10.47</td><td>202.95</td><td>29/53</td><td>[-0.0723, 0.1339]</td></tr>
+<tr><td>原版V1（多头）</td><td>0.5R保本→分档锁利</td><td>6165</td><td>271.21</td><td>-262.97</td><td>10.04</td><td>18.28</td><td>29/34</td><td>[-0.0305, 0.0270]</td></tr>
+<tr><td>V8（多空）</td><td>原退出→分档锁利</td><td>94746</td><td>32,015.98</td><td>-34,988.22</td><td>268.58</td><td>-2,703.66</td><td>231/532</td><td>[-0.0824, 0.0198]</td></tr>
+<tr><td>V8（多空）</td><td>0.5R保本→分档锁利</td><td>94907</td><td>3,670.25</td><td>-4,086.20</td><td>211.64</td><td>-204.31</td><td>231/265</td><td>[-0.0102, 0.0048]</td></tr>
+</tbody></table>
+<p>达到10R的峰值不等于实际兑现10R，尾部保留只看原先已经兑现的净R≥10交易。周块区间使用整周重采样2000次、固定seed14092026，保留同周跨币跨市场相关性；不能作为全新样本验证或保证。</p>
+<h2>前后年份与方向</h2>
+<p>2025-09-10 00:00 UTC切分；前一年要求三组退出都早于切点，后一年按切点后入场。跨切点事件仅留在完整两年表，所以前后段不一定相加等于总表。</p>
+<table><thead><tr>
+<th>系统</th>
+<th>阶段</th>
+<th>规则</th>
+<th>共同已结束</th>
+<th>累计净R</th>
+<th>净胜率</th>
+<th>实际≥10R</th>
+</tr></thead><tbody>
+<tr><td>原版V1（多头）</td><td>前一年</td><td>原退出</td><td>1627</td><td>-291.89</td><td>25.63%</td><td>10</td></tr>
+<tr><td>原版V1（多头）</td><td>前一年</td><td>0.5R保本</td><td>1627</td><td>-215.56</td><td>12.29%</td><td>5</td></tr>
+<tr><td>原版V1（多头）</td><td>前一年</td><td>分档锁利</td><td>1627</td><td>-210.48</td><td>19.79%</td><td>5</td></tr>
+<tr><td>原版V1（多头）</td><td>后一年</td><td>原退出</td><td>4448</td><td>1,128.79</td><td>28.91%</td><td>42</td></tr>
+<tr><td>原版V1（多头）</td><td>后一年</td><td>0.5R保本</td><td>4448</td><td>1,257.59</td><td>14.46%</td><td>29</td></tr>
+<tr><td>原版V1（多头）</td><td>后一年</td><td>分档锁利</td><td>4448</td><td>1,265.41</td><td>23.76%</td><td>24</td></tr>
+<tr><td>V8（多空）</td><td>前一年</td><td>原退出</td><td>36573</td><td>2,101.48</td><td>31.54%</td><td>198</td></tr>
+<tr><td>V8（多空）</td><td>前一年</td><td>0.5R保本</td><td>36573</td><td>770.86</td><td>17.47%</td><td>103</td></tr>
+<tr><td>V8（多空）</td><td>前一年</td><td>分档锁利</td><td>36573</td><td>495.64</td><td>24.63%</td><td>100</td></tr>
+<tr><td>V8（多空）</td><td>后一年</td><td>原退出</td><td>57607</td><td>-4,829.46</td><td>28.86%</td><td>319</td></tr>
+<tr><td>V8（多空）</td><td>后一年</td><td>0.5R保本</td><td>57607</td><td>-5,482.19</td><td>14.34%</td><td>157</td></tr>
+<tr><td>V8（多空）</td><td>后一年</td><td>分档锁利</td><td>57607</td><td>-5,365.27</td><td>22.54%</td><td>128</td></tr>
+</tbody></table>
+<table><thead><tr>
+<th>V8方向</th>
+<th>规则</th>
+<th>共同已结束</th>
+<th>累计净R</th>
+<th>净胜率</th>
+</tr></thead><tbody>
+<tr><td>空头</td><td>原退出</td><td>46758</td><td>-1,132.84</td><td>31.67%</td></tr>
+<tr><td>空头</td><td>0.5R保本</td><td>46758</td><td>-2,191.07</td><td>16.55%</td></tr>
+<tr><td>空头</td><td>分档锁利</td><td>46758</td><td>-2,220.99</td><td>23.87%</td></tr>
+<tr><td>多头</td><td>原退出</td><td>47988</td><td>-888.94</td><td>28.47%</td></tr>
+<tr><td>多头</td><td>0.5R保本</td><td>47988</td><td>-2,322.85</td><td>14.57%</td></tr>
+<tr><td>多头</td><td>分档锁利</td><td>47988</td><td>-2,504.46</td><td>22.83%</td></tr>
+</tbody></table>
+<h2>独立账本：未结束与串行重入</h2>
+<table><thead><tr>
+<th>系统</th>
+<th>方式</th>
+<th>规则</th>
+<th>入场/结束/未结束</th>
+<th>累计净R</th>
+<th>净胜率</th>
+<th>PF(名义收益)</th>
+<th>事件回撤R</th>
+</tr></thead><tbody>
+<tr><td>统一退出V1（补充）</td><td>fixed</td><td>原退出</td><td>6185/6138/47</td><td>1,060.98</td><td>29.05%</td><td>1.089</td><td>689.70</td></tr>
+<tr><td>统一退出V1（补充）</td><td>fixed</td><td>0.5R保本</td><td>6185/6165/20</td><td>1,096.21</td><td>14.96%</td><td>1.208</td><td>421.37</td></tr>
+<tr><td>统一退出V1（补充）</td><td>fixed</td><td>分档锁利</td><td>6185/6165/20</td><td>1,097.97</td><td>23.03%</td><td>1.238</td><td>336.00</td></tr>
+<tr><td>统一退出V1（补充）</td><td>serial</td><td>原退出</td><td>6185/6138/47</td><td>1,060.98</td><td>29.05%</td><td>1.089</td><td>689.70</td></tr>
+<tr><td>统一退出V1（补充）</td><td>serial</td><td>0.5R保本</td><td>6185/6165/20</td><td>1,096.21</td><td>14.96%</td><td>1.208</td><td>421.37</td></tr>
+<tr><td>统一退出V1（补充）</td><td>serial</td><td>分档锁利</td><td>6185/6165/20</td><td>1,097.23</td><td>23.03%</td><td>1.238</td><td>336.95</td></tr>
+<tr><td>原版V1（多头）</td><td>fixed</td><td>原退出</td><td>6185/6116/69</td><td>854.70</td><td>28.14%</td><td>1.026</td><td>886.08</td></tr>
+<tr><td>原版V1（多头）</td><td>fixed</td><td>0.5R保本</td><td>6185/6165/20</td><td>1,040.68</td><td>13.74%</td><td>1.165</td><td>468.31</td></tr>
+<tr><td>原版V1（多头）</td><td>fixed</td><td>分档锁利</td><td>6185/6165/20</td><td>1,058.96</td><td>22.71%</td><td>1.200</td><td>371.95</td></tr>
+<tr><td>V8（多空）</td><td>fixed</td><td>原退出</td><td>95191/94746/445</td><td>-2,021.78</td><td>30.05%</td><td>1.001</td><td>8,293.68</td></tr>
+<tr><td>V8（多空）</td><td>fixed</td><td>0.5R保本</td><td>95191/94907/284</td><td>-4,527.67</td><td>15.52%</td><td>0.951</td><td>7,978.75</td></tr>
+<tr><td>V8（多空）</td><td>fixed</td><td>分档锁利</td><td>95191/94931/260</td><td>-4,721.87</td><td>23.34%</td><td>0.953</td><td>7,695.72</td></tr>
+<tr><td>V8（多空）</td><td>serial</td><td>原退出</td><td>95191/94746/445</td><td>-2,021.78</td><td>30.05%</td><td>1.001</td><td>8,293.68</td></tr>
+<tr><td>V8（多空）</td><td>serial</td><td>0.5R保本</td><td>102150/101845/305</td><td>-4,912.64</td><td>15.50%</td><td>0.948</td><td>8,604.98</td></tr>
+<tr><td>V8（多空）</td><td>serial</td><td>分档锁利</td><td>102480/102201/279</td><td>-5,179.26</td><td>23.32%</td><td>0.950</td><td>8,371.23</td></tr>
+</tbody></table>
+<p>fixed锁住原入场集合；serial允许提前退出后因后续原信号重新入场。原生V1本来是事件账本，只做fixed，没有人为发明一个串行账户。事件回撤按退出时间累计R计算，不含账户保证金、仓位并发、复利或资金约束。</p>
+<h2>锁利阶段与实际费用</h2>
+<p>多头有利最高价、空头有利最低价达到0.5个实际初始R，收盘确认后从下一根将保护推到精确开仓价；达到1.5R则从下一根推到开仓价±0.5R。两档可以在同一根触发，更紧的原止损继续保留。先检查旧保护与跳空，再更新阶段；不根据最终MFE回头判断。</p>
+<p>新第二档多头向下取整、空头向上取整到最小报价单位；原第一档和原跟踪公式保持原样。跳空按较差开盘退出。保本仍扣0.20%往返名义成本；锁0.5R的净R约为0.5−0.20%/初始止损百分比，还可能受tick与gap影响，因此并不保证净盈利0.5R。</p>
+<h2>数据范围与审计</h2>
+<p>现有 Binance／OKX／Gate 30m／1H／4H 历史池，2024-09-10含至2026-09-10不含UTC。原生V1冻结6185个入场；共同执行与V8覆盖3531条流。之前的baseline和BE05只读取已完成、SHA绑定的逐笔结果；新分档只增加第二档，没有改入场参数，没有另搜阈值。16项本轮相关合成与统计口径测试通过。</p>
+<p>首次实现错误地将第一档开仓价也量化，可能因二进制floor/ceil漂移一跳。父审查后保留精确actual entry，仅第二档新价位量化。共同结果full_tier_v1保留但不使用；原生首次全量在250流/751事件后中断，过程已记录。修复后新目录full_tier_v2与native_v1/full_exact_entry为本报告来源。fixed gap优先于预定reverse时的退出归因字段也已修正，填单价未因此改变。</p>
+<p>原生最终结果由8f88a55637生成。随后仅增加入场核对断言的87511611b6曾启动复跑，在200流/593事件时停止；最终结果仍使用前述完整结果，不混入这个未完成复跑。独立CSV审计对6185笔核对事件集、入场时价、初始止损和风险，重构入场价误差小于1e-10；receipt记录了两次中断与最终来源。共同最终回放由8017b1a79e生成，3531条流的28248个输出哈希通过。没有把runner无失败等同于市场历史没有缺口。</p>
+<p>Owner已允许任意历史日期研究。本轮是新的固定档位配置，但重复用了上轮历史；样本、首次全量和修复重跑都是重复读取，配置编号1不等于只消耗一次数据。保留样本与失败记录，不声称新盲测。</p>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>数据池来自现有缓存，不是历史全部上市和退市合约的完整普查。跨所跨周期事件相关，不能当成独立账户交易。</li>
+</ul>
+<ul>
+<li>原V1旧研究盈利高度集中于RAVE，剔除诊断仍亏；本次增加退出档位不自动解决入场收益集中度。不得据事后结果制作获利币白名单。</li>
+</ul>
+<ul>
+<li>费用沿用0.20%统一假设，完整资金费率、盘口冲击与逐笔成交未覆盖。本次是收盘更新保护，不等于盘中触价立刻改单。</li>
+</ul>
+<ul>
+<li>AUC、top-decile和随机入场alpha检验不适用于同一入场的退出干预，未计算、不编造；对照是同一事件的原退出和上一档规则。</li>
+</ul>
+<ul>
+<li>没有修改Pine、Bark、Telegram、线上监控、ACTIVE、自动化或真实仓位。未将任何本次配置标记为可实盘。</li>
+</ul>
+<h2>复现与逐笔数据</h2>
+<p>在仓库根目录运行；既有缓存需通过SHA验证，重跑应使用新的空输出目录。</p>
+<pre><code>
+.venv/bin/python -m pytest tests/test_spike_native_v1_tier_lock.py tests/test_spike_v1_v8_tier_lock.py tests/test_spike_tier_lock_report.py -q
+.venv/bin/python -m yoyo.evaluation.spike_v1_v8_tier_lock --official --output experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/common/results/reproduction
+.venv/bin/python -m yoyo.evaluation.spike_native_v1_tier_lock --output experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/native_v1/reproduction
+.venv/bin/python -m yoyo.evaluation.spike_tier_lock_report --common experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/common/results/full_tier_v2 --native experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/native_v1/full_exact_entry/tier_paired_trade_ledger.csv.gz --native-receipt experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/native_v1/full_exact_entry/receipt.json --output experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/delivery_reproduction
+.venv/bin/python experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/render_report.py
+.venv/bin/python scripts/md_to_html.py analysis/p1_spike_v1_v8_tier_lock_20260914.md --out-dir analysis/html
+</code></pre>
+<p>报告读取原delivery_v1；重跑生成delivery_reproduction后按事件键核对原表，避免覆盖。</p>
+<p><a href="../../experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/delivery_v1/three_arm_trades.csv.gz">三方逐笔配对CSV.gz</a> · <a href="../../experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/delivery_v1/three_arm_summary.csv">三组统计CSV</a> · <a href="../../experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/delivery_v1/comparison_summary.csv">两两差异与区间CSV</a> · <a href="../../experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/delivery_v1/independent_metrics.csv">独立账本CSV</a></p>
+<p><a href="p1_spike_v1_v8_be05_20260914.html">上轮0.5R保本研究</a> · <a href="https://app.notion.com/p/3db8856479af817e8bb8d93773c5a171">上轮Notion记录</a></p>
+<p><a href="https://app.notion.com/p/3db8856479af815bb3aacfc436ead4d2">本轮Notion记录</a></p>
+<h2>下一步决策</h2>
+<p>按原版、周期和方向分别评估新增第二档的增益与尾部损失；不因胜率提高就自动上线，也不据这次单配置对照宣称最优。任何不同激活时机或净费用锁利均属于新实验。</p>
+<h2>阶段实际触发次数</h2>
+<table><thead><tr>
+<th>系统</th>
+<th>方式</th>
+<th>入场</th>
+<th>到第一档</th>
+<th>到第二档</th>
+</tr></thead><tbody>
+<tr><td>统一退出V1（补充）</td><td>fixed</td><td>6185</td><td>4159</td><td>1405</td></tr>
+<tr><td>统一退出V1（补充）</td><td>serial</td><td>6185</td><td>4158</td><td>1405</td></tr>
+<tr><td>原版V1（多头）</td><td>fixed</td><td>6185</td><td>4200</td><td>1414</td></tr>
+<tr><td>V8（多空）</td><td>fixed</td><td>95191</td><td>63591</td><td>22147</td></tr>
+<tr><td>V8（多空）</td><td>serial</td><td>102480</td><td>68442</td><td>23828</td></tr>
+</tbody></table>
+<p>次数统计只表示已完成K线观察到相应MFE并启用保护，不能直接当成该档成交或获利笔数。common逐笔表另外保留exit_protection_source用于区分锁利、原跟踪和反向退出。</p>
+</body>
+</html>

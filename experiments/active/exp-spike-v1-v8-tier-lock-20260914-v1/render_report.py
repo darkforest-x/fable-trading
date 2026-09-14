@@ -37,6 +37,7 @@ def main():
         '研究日期：2026-09-14。实验键：`exp-spike-v1-v8-tier-lock-20260914-v1`。历史研究，未上线。',
         '## 结论先看',*summary,
         '**累计R是每笔初始风险单位的事件加总，不是账户收益率。** 不能把这些R直接换算为本金或复利收益。以下主表固定同一入场并要求三组退出都已观察，避免未结束交易和重入次数混淆。',
+        '新增第二档相较单独保本，原生V1净胜率13.85%→22.78%，但累计只增加14.78R，实际兑现≥10R从34笔降到29笔；V8净胜率15.55%→23.34%，累计却再减少211.52R，实际兑现≥10R从265笔降到231笔。它把部分保本扣费小亏改成小赚，同时也更早截断趋势。**胜率提高不能替代净收益与大趋势保留率。** 所有总体差值的周块区间跨零，尚不能确认稳定改善。',
         tbl(['系统','规则','共同已结束','累计净R','平均净R','净胜率','PF(R)','实际≥10R','事件回撤R'],[
             [NAMES[r.system],LABELS[r.rule],int(r.closed),f(r.total_r),f(r.mean_r,4),f(r.win_rate*100)+'%',f(r.pf_r,3),int(r.realized_ge10),f(r.event_drawdown_r)] for _,r in full.iterrows()]),
         '原版V1保留原生只做多与信号参考保护路径；统一退出V1用另一套通用ATR和反向退出，是补充敏感性，不能替代原版V1。V8保留多空和已冻结的入场规则。',
@@ -71,6 +72,7 @@ def main():
         '## 数据范围与审计',
         '现有 Binance／OKX／Gate 30m／1H／4H 历史池，2024-09-10含至2026-09-10不含UTC。原生V1冻结6185个入场；共同执行与V8覆盖3531条流。之前的baseline和BE05只读取已完成、SHA绑定的逐笔结果；新分档只增加第二档，没有改入场参数，没有另搜阈值。16项本轮相关合成与统计口径测试通过。',
         '首次实现错误地将第一档开仓价也量化，可能因二进制floor/ceil漂移一跳。父审查后保留精确actual entry，仅第二档新价位量化。共同结果full_tier_v1保留但不使用；原生首次全量在250流/751事件后中断，过程已记录。修复后新目录full_tier_v2与native_v1/full_exact_entry为本报告来源。fixed gap优先于预定reverse时的退出归因字段也已修正，填单价未因此改变。',
+        '原生最终结果由8f88a55637生成。随后仅增加入场核对断言的87511611b6曾启动复跑，在200流/593事件时停止；最终结果仍使用前述完整结果，不混入这个未完成复跑。独立CSV审计对6185笔核对事件集、入场时价、初始止损和风险，重构入场价误差小于1e-10；receipt记录了两次中断与最终来源。共同最终回放由8017b1a79e生成，3531条流的28248个输出哈希通过。没有把runner无失败等同于市场历史没有缺口。',
         'Owner已允许任意历史日期研究。本轮是新的固定档位配置，但重复用了上轮历史；样本、首次全量和修复重跑都是重复读取，配置编号1不等于只消耗一次数据。保留样本与失败记录，不声称新盲测。',
         '## 风险与诚实声明',
         '- 数据池来自现有缓存，不是历史全部上市和退市合约的完整普查。跨所跨周期事件相关，不能当成独立账户交易。',
@@ -84,6 +86,7 @@ def main():
         '报告读取原delivery_v1；重跑生成delivery_reproduction后按事件键核对原表，避免覆盖。',
         '[三方逐笔配对CSV.gz](../../experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/delivery_v1/three_arm_trades.csv.gz) · [三组统计CSV](../../experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/delivery_v1/three_arm_summary.csv) · [两两差异与区间CSV](../../experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/delivery_v1/comparison_summary.csv) · [独立账本CSV](../../experiments/active/exp-spike-v1-v8-tier-lock-20260914-v1/delivery_v1/independent_metrics.csv)',
         '[上轮0.5R保本研究](p1_spike_v1_v8_be05_20260914.html) · [上轮Notion记录](https://app.notion.com/p/3db8856479af817e8bb8d93773c5a171)',
+        '[本轮Notion记录](https://app.notion.com/p/3db8856479af815bb3aacfc436ead4d2)',
         '## 下一步决策',
         '按原版、周期和方向分别评估新增第二档的增益与尾部损失；不因胜率提高就自动上线，也不据这次单配置对照宣称最优。任何不同激活时机或净费用锁利均属于新实验。']
     stage=trades.loc[trades.rule=='tier']
