@@ -1,0 +1,1592 @@
+{
+  "created_at": "2026-09-14T14:37:45.043096+00:00",
+  "experiment_id": "exp-spike-eth3m-ict-sessions-20260914-v1",
+  "builder_commit": "69c9c7636bed121a872b7e72fd63a534b590a00c",
+  "report_and_validation_builder_commit": "8e312faee209ae7da68e2851a8093765ba133809",
+  "holdout_consumptions": 0,
+  "tests": "13 passed;96serial,192cash,72control,744baseline rows reconciled",
+  "html_qa": "11tables and all relative links valid;no browser visual QA",
+  "notion": {
+    "url": "https://app.notion.com/p/3db8856479af8122afc9fd6a57768240",
+    "status": "succeeded",
+    "unique_key": "exp-spike-eth3m-ict-sessions-20260914-v1"
+  },
+  "files": {
+    "analysis/html/p1_spike_eth3m_ict_sessions_20260914.html": {
+      "sha256": "8ed41c52317be1bf22ef824e4adef13b0868298c193f5a19c80c6e38f4f9cc2c",
+      "size_bytes": 30798
+    },
+    "analysis/p1_spike_eth3m_ict_sessions_20260914.md": {
+      "sha256": "ee6d46c35fb09fe1ea7ad57adec57974ac4da71c174289008e0b2922a557250b",
+      "size_bytes": 20757
+    },
+    "docs/learnings/session-filtered-loss-streaks-do-not-measure-recovery.md": {
+      "sha256": "16bcff0d87d54f2fa1da6b33885d3c205724bb223269af58ee2f24537276ad12",
+      "size_bytes": 1843
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/PROJECT_PLAN.md": {
+      "sha256": "bfe041e39ebc4260402a69d68113482f531390e1443414c4ea74064184627220",
+      "size_bytes": 2572
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/config.json": {
+      "sha256": "db9174d6ce31e1f5723e1c3302ff5f9ecf5e583209f83bb6560e1cf4f05a1ea4",
+      "size_bytes": 1650
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/notion_receipt.json": {
+      "sha256": "532c210787ef6f9f81f4ef1a0b8c7577fbefb973631d2e19b079aefd418289be",
+      "size_bytes": 158
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/cash.csv": {
+      "sha256": "9370095a8bedad3a250742f419a3ac6fcacbaf4dc853ceb85962039196a2ed1f",
+      "size_bytes": 75598
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_next_bar_all_double_ledger.csv.gz": {
+      "sha256": "99abb1725a2dbf74a43a354373fd1d51c299e759c414340d2660e6431ba5d7aa",
+      "size_bytes": 75409
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_next_bar_all_fixed1_ledger.csv.gz": {
+      "sha256": "6d94436d90d743f6a33894fbfcff079ec9197da7be9647a8bdb014973c28c059",
+      "size_bytes": 177975
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_next_bar_all_serial.csv.gz": {
+      "sha256": "93c809c91daf3471d40b497ceb37df0b507b4384f766736529de75a82c8cadf7",
+      "size_bytes": 216572
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_next_bar_london_double_ledger.csv.gz": {
+      "sha256": "ee29987f481af4a654d791bc93ab321b500b96e8c937da29f4704f8120ac08e7",
+      "size_bytes": 13689
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_next_bar_london_fixed1_ledger.csv.gz": {
+      "sha256": "8664eae96a963a5e531b631bc42e0b3c1e348f595d980d1419c54b2d37072ba0",
+      "size_bytes": 30770
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_next_bar_london_new_york_double_ledger.csv.gz": {
+      "sha256": "82a7ce8c9a66c9728e9e6c8f7952d3ed8a32843e4819cd9cc8aab541cec7934f",
+      "size_bytes": 17244
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_next_bar_london_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "35a7be1f0cb00183c2a8cd0767b47dc2afd22378333d0508ee72ef0eb859b8eb",
+      "size_bytes": 65723
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_next_bar_london_new_york_serial.csv.gz": {
+      "sha256": "e5a650104d729fdd24098954cacb7f6ce872e204f4f76105e12ef817c77aa914",
+      "size_bytes": 80999
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_next_bar_london_serial.csv.gz": {
+      "sha256": "5794ed129094bf644374b3725e2e6b404ea18cf83d30f1dc6f467b204913cde2",
+      "size_bytes": 37718
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_next_bar_lunch_double_ledger.csv.gz": {
+      "sha256": "e1bf54acf237938a1c0d9f941725574a993573d0dcc24d766f5814c4f1865b92",
+      "size_bytes": 12576
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_next_bar_lunch_fixed1_ledger.csv.gz": {
+      "sha256": "53034d986a3039ed1bb851b95bce118c21c5ef0d35fad4ae0b419bd110f8cb66",
+      "size_bytes": 27486
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_next_bar_lunch_serial.csv.gz": {
+      "sha256": "b99e50658b916977d12e9900359c8f44dfc032fc4b400e22bcb4c5abed4a58a7",
+      "size_bytes": 33811
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_next_bar_new_york_double_ledger.csv.gz": {
+      "sha256": "b8d001025fea13221faf8d0e121d88eb2238797632c451b8413732bffb93e887",
+      "size_bytes": 10118
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_next_bar_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "1ffa90b29b31c5d2c63fb07d03c71ad1663ed9a2fde8a69d22d800f846660cb9",
+      "size_bytes": 35852
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_next_bar_new_york_serial.csv.gz": {
+      "sha256": "3a4dc49c73a0483012170e9d51ff9681d2ff1eab0fc99abeaaeb0a0f3a452069",
+      "size_bytes": 44687
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_next_bar_opportunities.csv.gz": {
+      "sha256": "3deb67a7a6a063ae7e2930feb38180b8afae02167181e2496590f47ae748abdd",
+      "size_bytes": 231500
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_next_bar_union_double_ledger.csv.gz": {
+      "sha256": "24ff51984b4984544c48de061420ee718e04f42877949767a94968002685cf84",
+      "size_bytes": 39085
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_next_bar_union_fixed1_ledger.csv.gz": {
+      "sha256": "2503cd842fd86bbede7d84adce2bd71a174cd1082d5e3a4b6d58aee274a71a97",
+      "size_bytes": 90856
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_next_bar_union_serial.csv.gz": {
+      "sha256": "ed53bafef3d9d1acf717265fa8df4df1b6b95432551d2c2cafd5fcc619651193",
+      "size_bytes": 111354
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_ohlc_all_double_ledger.csv.gz": {
+      "sha256": "dfb955107e11d800a8da8a9845444d2376452f626d2a2e67570193b1f1d9b08f",
+      "size_bytes": 45296
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_ohlc_all_fixed1_ledger.csv.gz": {
+      "sha256": "6d578890f70eac127a3178cd7ba66ea3d860cf324c5a6594c887d3aa9ad78037",
+      "size_bytes": 177728
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_ohlc_all_serial.csv.gz": {
+      "sha256": "2629fc089a8f3df4956b1d9554f1d5eff99e4c733858d612757a7911ca737bbf",
+      "size_bytes": 210907
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_ohlc_london_double_ledger.csv.gz": {
+      "sha256": "be089739a11fdd489b40d3f9814e57732fa16a871973305f1b86fc5733526ee9",
+      "size_bytes": 14045
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_ohlc_london_fixed1_ledger.csv.gz": {
+      "sha256": "df7f5e4ded1522d76529eeb2b13560084a2887025305826aa3fe3231a8d9685a",
+      "size_bytes": 30403
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_ohlc_london_new_york_double_ledger.csv.gz": {
+      "sha256": "6162204da3b6cb0b24e703a2a666db4e636deed1bd5668bcc06d524bac8152b6",
+      "size_bytes": 17385
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_ohlc_london_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "bf79b50e23d95483755ebfd2987a65a84801e5ab9beff3ea7bdf5f2d211499e9",
+      "size_bytes": 65027
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_ohlc_london_new_york_serial.csv.gz": {
+      "sha256": "ffc06ad63f738b871d6e215822ca7f3f215be560513ce00b4f5d06e584cd577f",
+      "size_bytes": 78753
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_ohlc_london_serial.csv.gz": {
+      "sha256": "a88f90303b81c1111761d8b949baaa4bb2e6e4ecf84015fa0506a5d076d70807",
+      "size_bytes": 36747
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_ohlc_lunch_double_ledger.csv.gz": {
+      "sha256": "897e7acc79057a043734bd89782fc49c4f129080fe9a83876bc50ba3334ce209",
+      "size_bytes": 12903
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_ohlc_lunch_fixed1_ledger.csv.gz": {
+      "sha256": "942024cd790bb19b289c5438a4729f46e2ed165771d2003c0b623d134b49796e",
+      "size_bytes": 27142
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_ohlc_lunch_serial.csv.gz": {
+      "sha256": "4a6aee43ed75625c3bcea6f87d7c3600b350a658312496ff4a81c0e76685006c",
+      "size_bytes": 32820
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_ohlc_new_york_double_ledger.csv.gz": {
+      "sha256": "cbe0c94334b783c5a7a64cfb60282dd56c1fc194daec8c5243487edf66decea6",
+      "size_bytes": 11052
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_ohlc_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "18496ae429d38686d5878240635c3cd927a86a7c897a18395f1020a4bc22be03",
+      "size_bytes": 35511
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_ohlc_new_york_serial.csv.gz": {
+      "sha256": "87227576d3ed7a86415bf4ed9530b177524f8aca2ea3be1a957e61f797c6ce76",
+      "size_bytes": 43271
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_ohlc_opportunities.csv.gz": {
+      "sha256": "41d7e2189ff1e5baf3a2be486b18a3f2bb4a50baf5ade9f139bea102bef761c4",
+      "size_bytes": 224575
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_ohlc_union_double_ledger.csv.gz": {
+      "sha256": "28e1d47addb9877d310f4c259345cbc5775eeedbddd39bfdfc24a9b21d472659",
+      "size_bytes": 22971
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_ohlc_union_fixed1_ledger.csv.gz": {
+      "sha256": "2d2f5e0c43d7396587bbd09180450ebad28f10b85cc28eaaeb382ae2dda9066b",
+      "size_bytes": 89880
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_ohlc_union_serial.csv.gz": {
+      "sha256": "209c15a87485a2d9e677639be5b45062b40d9481b6002dad07474db5c93201b0",
+      "size_bytes": 108319
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_olhc_all_double_ledger.csv.gz": {
+      "sha256": "2b7c812b46d5e039979a339e75f3ff1492eea1460abf28ed0838b0fcbefd16be",
+      "size_bytes": 45189
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_olhc_all_fixed1_ledger.csv.gz": {
+      "sha256": "b1d6c7e3253fac4c12bfac6ffd2a9d4b76fe0f20f77a8034c5387c8b6e8b407f",
+      "size_bytes": 177906
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_olhc_all_serial.csv.gz": {
+      "sha256": "4dff976cebcc9c4f349b3ad054154a29fafb1bb208fb87ce7242a30c06d7d2a2",
+      "size_bytes": 211260
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_olhc_london_double_ledger.csv.gz": {
+      "sha256": "8c3dacd42c0d2e2671611ad7d17c62dc4f0ebe111c960de638fdb64f91d8818f",
+      "size_bytes": 14016
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_olhc_london_fixed1_ledger.csv.gz": {
+      "sha256": "f0691c672dcdf6e6776463416a03657a6d50b32144af90301a14a4d5c20780d4",
+      "size_bytes": 30359
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_olhc_london_new_york_double_ledger.csv.gz": {
+      "sha256": "2d0073a69f157e8242a6e02efc6e5ee784d3a21ae0901b52afdf732abd70c58e",
+      "size_bytes": 17248
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_olhc_london_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "c583fa98f0424e229818d368c45e3a394a2935b088f7f24701101497a70d9e10",
+      "size_bytes": 64823
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_olhc_london_new_york_serial.csv.gz": {
+      "sha256": "3df148c504efa72a220b40b168c136ab759f8cd4fa74df316bbe7e0e393218ea",
+      "size_bytes": 78546
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_olhc_london_serial.csv.gz": {
+      "sha256": "67dbcbb00ae4a8d9d5c5b1db568569efaa591a2a2598a44bf890f9be7d08cdc6",
+      "size_bytes": 36736
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_olhc_lunch_double_ledger.csv.gz": {
+      "sha256": "a94a32607371bcb05bced90183872ac3ee98e868cb2f1d8560a677957134fc47",
+      "size_bytes": 12901
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_olhc_lunch_fixed1_ledger.csv.gz": {
+      "sha256": "780f1452a5dcf620bf1d952c215a0db3125d101df00fc6cf2ebde8076ce4bea7",
+      "size_bytes": 27391
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_olhc_lunch_serial.csv.gz": {
+      "sha256": "6a980dc51a84e646256793b8a258271a38fefff46c3f0599c408d8b63fef6dd0",
+      "size_bytes": 33088
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_olhc_new_york_double_ledger.csv.gz": {
+      "sha256": "cc48bae59c6e57fe5942ad05c0c1fccb56f0531e41c9d1b3a07c869ef03314eb",
+      "size_bytes": 11042
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_olhc_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "74111d762499351b2d12f8ad4f803562f0fb2347b23e236d769a75a73dd7d9ff",
+      "size_bytes": 35397
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_olhc_new_york_serial.csv.gz": {
+      "sha256": "66fe094b017c8d9d8a1192dc1bca3d63e1aefe1fa4ae2356ec041e6d2c2d722f",
+      "size_bytes": 43129
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_olhc_opportunities.csv.gz": {
+      "sha256": "e0953c994b9458a222ce8a693edc71e0f83ac7235ebf883308a7c177540d50c2",
+      "size_bytes": 224437
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_olhc_union_double_ledger.csv.gz": {
+      "sha256": "51a27cbdcae4687ed0423224f78eac1fc143fb1f459bd483784ffa7491ac1e9e",
+      "size_bytes": 22756
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_olhc_union_fixed1_ledger.csv.gz": {
+      "sha256": "46ebbaaddfd9836eab7955ee85efe5b569c1444cd35d0d8eb9e8ca2f361c98b2",
+      "size_bytes": 89793
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_olhc_union_serial.csv.gz": {
+      "sha256": "96cac2b87d557edc219f7d0e40c22b7ab888d57cf3c036522e9c42328ed23a50",
+      "size_bytes": 108254
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_original_all_double_ledger.csv.gz": {
+      "sha256": "0f528373bc7efd334ff6c10d93543d45d761ff89b21ecc8dddb844dea86571f3",
+      "size_bytes": 75813
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_original_all_fixed1_ledger.csv.gz": {
+      "sha256": "22335025b0a29ea3fe67943d77b967220dbb84370fb18c1d8385740bb1021856",
+      "size_bytes": 152818
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_original_all_serial.csv.gz": {
+      "sha256": "55fc7a3b1ae5113511ea893a62f0d9a1fa3678c659ce28f1582646f5c5a475fa",
+      "size_bytes": 159329
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_original_london_double_ledger.csv.gz": {
+      "sha256": "6c4a4937364f1e74f4d90e96ba44e6d95551b6a69f209392a965b384c71b64f5",
+      "size_bytes": 13501
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_original_london_fixed1_ledger.csv.gz": {
+      "sha256": "94d1ab16485760316d18bec678124141187f82b9e536c07d9f7060d4d11c3a06",
+      "size_bytes": 28581
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_original_london_new_york_double_ledger.csv.gz": {
+      "sha256": "7f606276b50d182cb61f955531bd3a53a99cb50135d7c2fe6f37ca6515df8505",
+      "size_bytes": 16910
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_original_london_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "f67e79d52815081e999a47d2d27b06d89824d91e9725ebcc160c832899fbb286",
+      "size_bytes": 59278
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_original_london_new_york_serial.csv.gz": {
+      "sha256": "642ff33e6d92f6eee3efd9db5f26f1d7ee21626c64201c3583c2672fc25e99b1",
+      "size_bytes": 63190
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_original_london_serial.csv.gz": {
+      "sha256": "f2c8624e30b1bf1737daedc6fe1fba31fd55d7399fdb649922e9032028a51af3",
+      "size_bytes": 30718
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_original_lunch_double_ledger.csv.gz": {
+      "sha256": "c3102d77481c1153b0f84be23c013c3cb23f103420fabf396063933b0901edfe",
+      "size_bytes": 13184
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_original_lunch_fixed1_ledger.csv.gz": {
+      "sha256": "68d875e4a9fbbd4bf52023084f3ba6fc0ca646f49ecf0d426f5fdcde8e6f9fb3",
+      "size_bytes": 25650
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_original_lunch_serial.csv.gz": {
+      "sha256": "7b58efe4ceaf10c4f1db017091b5cfc823b59e86c3caab9b66d90b98b661b715",
+      "size_bytes": 27249
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_original_new_york_double_ledger.csv.gz": {
+      "sha256": "8361028a7967b0d1039d3521b6c9f47b85fc5c301112bafdaee735a792698a62",
+      "size_bytes": 10192
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_original_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "69c8b037e22af3a9dc316836e629bbecbfed0c0708fd6a1bddb512b1de954f70",
+      "size_bytes": 32014
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_original_new_york_serial.csv.gz": {
+      "sha256": "d235ccd118e64563f57c8e290a46c740f56daf6fb6c2ad58c68d4194eee62c99",
+      "size_bytes": 34369
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_original_opportunities.csv.gz": {
+      "sha256": "913a7e7b1e1d90ce460ec2167d9d7df179150181568be10d227abbfc9e10954f",
+      "size_bytes": 194600
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_original_union_double_ledger.csv.gz": {
+      "sha256": "0800bbaf5f90aad63d4511a691ca91b812ecf620a09a8384efcc6201b6c601ba",
+      "size_bytes": 40060
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_original_union_fixed1_ledger.csv.gz": {
+      "sha256": "04c68c7886448c3a06e250bc4acbdee77dfe67d52d92d5932b68ad65c0b47c0d",
+      "size_bytes": 78859
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/continuous_pre_original_union_serial.csv.gz": {
+      "sha256": "1d96ef18965ed18fc3567bb77e450e94a397b072441cb47e9463c120d5d28838",
+      "size_bytes": 83612
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/controls.csv": {
+      "sha256": "9a80232e96dfb201347ec53b731e92fa3d88fc1fbcf9bd98186aaed71bb093d3",
+      "size_bytes": 5953
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_all_double_ledger.csv.gz": {
+      "sha256": "babff2e2f18de4e4c81688c4d648072700e68a8a2cf7bb03137989c0baa1d6f1",
+      "size_bytes": 38976
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_all_fixed1_ledger.csv.gz": {
+      "sha256": "c6fdbc3575f483e7a1c316f87a79fe3ccc2921053e7027e2c27ab964ae6060a5",
+      "size_bytes": 89190
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_all_matched.csv.gz": {
+      "sha256": "5f249fd0417ed2e913e487271db3ac498870e58d48362a8e26d1cb201ef6e300",
+      "size_bytes": 136256
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_all_serial.csv.gz": {
+      "sha256": "6e82778ad9162d96041100ce5ace41217d4549f89e0d36803371169d022a44f6",
+      "size_bytes": 108374
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_london_double_ledger.csv.gz": {
+      "sha256": "16c628c463925e9adfd6413bac21113a451aa5c2332cbebcdca4a3bae061f478",
+      "size_bytes": 7903
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_london_fixed1_ledger.csv.gz": {
+      "sha256": "d5b6a1b8ed4789e6f3fc0af05720b01d98d2d11e857e13793861199f9a6f0434",
+      "size_bytes": 16729
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_london_matched.csv.gz": {
+      "sha256": "c77fc062c59d784cfa5eb6949c1c87930f43f31bda44ac2f2e82774b0662d6dc",
+      "size_bytes": 25583
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_london_new_york_double_ledger.csv.gz": {
+      "sha256": "78de22e55a3d32b2571c37022eb1ed04e4c2bb4997037b1928970aebf10e48f0",
+      "size_bytes": 15387
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_london_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "d2a931f5d8100c8390093d064afdafed52d352add70ecdada2a7a73494a0be2a",
+      "size_bytes": 34558
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_london_new_york_matched.csv.gz": {
+      "sha256": "50081c41d0c1d17989d0a2932f4267bceb70efa52d18cb9ce7a798540c128417",
+      "size_bytes": 52477
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_london_new_york_serial.csv.gz": {
+      "sha256": "e29d0299e504ad90ee791d087efbd686e98dd7af10ea8f8e2d7242f9c826fd77",
+      "size_bytes": 42003
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_london_serial.csv.gz": {
+      "sha256": "1a2b01eb66ee4f150fd61ef880769fd92972e46f2c2f51e259cd8be26ee23b1c",
+      "size_bytes": 20271
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_lunch_double_ledger.csv.gz": {
+      "sha256": "86f09078e715ffe8c5bd61b47f611f7b97cfa90c7854d4fc2a277a3d5bbf278d",
+      "size_bytes": 6501
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_lunch_fixed1_ledger.csv.gz": {
+      "sha256": "d44db6bf975e33c5acdf9d010e29810d174bc9d5171e2e15c01e391d5c8f169d",
+      "size_bytes": 13170
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_lunch_matched.csv.gz": {
+      "sha256": "5293c508a04f6f5d1f569e593e89e80d2025f12c7ff17938d3e54f7e4038c728",
+      "size_bytes": 19824
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_lunch_serial.csv.gz": {
+      "sha256": "3dedf828e06ba74cdda5b78909c3cb552466b6991303a41594e5b8407425e2ba",
+      "size_bytes": 16147
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_new_york_double_ledger.csv.gz": {
+      "sha256": "92ac12fc9b6db32794105ab74a203b2e5f7ea6c1f696d500f9e7b60443247955",
+      "size_bytes": 8904
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "e43ab3d96e62e4a7dec25d6fbe86fd6076a8c7e554ef5ae81204ba0d47f64979",
+      "size_bytes": 18426
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_new_york_matched.csv.gz": {
+      "sha256": "7f7a93e4479cfdec91c6b746037d930b4087b6fa1b814d5a55c944b5f0c9e8be",
+      "size_bytes": 27859
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_new_york_serial.csv.gz": {
+      "sha256": "be254c0252e8cc385c674eefa72d1dfff4bf505b76489939f8259cdeac88d6c8",
+      "size_bytes": 22757
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_opportunities.csv.gz": {
+      "sha256": "480a0cf749f9fd04a6d4513be653c6d3eca4b2a61d3d57e3bfdd4c878a4c168f",
+      "size_bytes": 117114
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_union_double_ledger.csv.gz": {
+      "sha256": "078f17ef96aff7e8b9751ce0c6512dffa3b5050c1fc5a6d64a348565fe942dbf",
+      "size_bytes": 20432
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_union_fixed1_ledger.csv.gz": {
+      "sha256": "7a84f9de0402f16582c920ba9b951d76e1588913f1092849fe952a9b3b7f6be8",
+      "size_bytes": 45680
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_union_matched.csv.gz": {
+      "sha256": "239fe4f901d2eac7a5ddc2824d55ce45031385f75d67f2f47c07747f83d348ee",
+      "size_bytes": 69360
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_next_bar_union_serial.csv.gz": {
+      "sha256": "22dc3e0d8c4821bd70a0b8ce2563cccabb3db59074bb96f715488a4c078db1e9",
+      "size_bytes": 55412
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_all_double_ledger.csv.gz": {
+      "sha256": "5cf345609fd2fa2387bb25fee77535780d70a0431ba4240ee82b36528d4e8e72",
+      "size_bytes": 39624
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_all_fixed1_ledger.csv.gz": {
+      "sha256": "99efd1d6a82f61ea0f0576904c17bcb9e29e1e1cf001379691b2a4463b957cd0",
+      "size_bytes": 88528
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_all_matched.csv.gz": {
+      "sha256": "4f0ddf407d6092b7214606f49567893388dc672e53c5478784fa7692a18b26ac",
+      "size_bytes": 136915
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_all_serial.csv.gz": {
+      "sha256": "67e620e63700cf5ff2337698a952807addb1f0c02c897a2310dadf07886f382d",
+      "size_bytes": 106049
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_london_double_ledger.csv.gz": {
+      "sha256": "1ccab8eb1112931b93324f263556955e5c78b4286d37ee7333ee14a3c319a449",
+      "size_bytes": 8260
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_london_fixed1_ledger.csv.gz": {
+      "sha256": "92218e25932456749fde6469b85fad52f7549000d8510ba75f36a8d08e436980",
+      "size_bytes": 16497
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_london_matched.csv.gz": {
+      "sha256": "1a21e14da6cd014aeb0a7c3b4be7cef79c8a4979a1eb911a931aa8d6a261c532",
+      "size_bytes": 25497
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_london_new_york_double_ledger.csv.gz": {
+      "sha256": "54495ac6472ef2018cf41cdf8a5c9c516ceaf5a1971482cb06245dc0c4a93c66",
+      "size_bytes": 15533
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_london_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "acea6ff3f4ad825a9d568367a0b77b3feba8e6feb15e65a206577a85f912b115",
+      "size_bytes": 34146
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_london_new_york_matched.csv.gz": {
+      "sha256": "cfbf77fc67074bd758590d1c5906efdd943c56369b3ad8615926e8dbe97d36c8",
+      "size_bytes": 52633
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_london_new_york_serial.csv.gz": {
+      "sha256": "55b13bf131fb6936a940ba20c2ba5240083b004e3a96c427b4ac7b583ebb0fa0",
+      "size_bytes": 40993
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_london_serial.csv.gz": {
+      "sha256": "0bf4c1f4c7d532d0722bad4589e2a3a8ebeb821e32fd05cb6c34cc9b99b2c2aa",
+      "size_bytes": 19820
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_lunch_double_ledger.csv.gz": {
+      "sha256": "88826d2df1fd751d68342988881246dfbd41f1a915f5465da66feab26dc0004c",
+      "size_bytes": 6726
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_lunch_fixed1_ledger.csv.gz": {
+      "sha256": "a2510c1f88dd44545eba5e2f69efd1e4cf9e56b5709553b2748bd1a03c1a80de",
+      "size_bytes": 12949
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_lunch_matched.csv.gz": {
+      "sha256": "431129c371405d15a59438e9c3405655ca8649da526cc8410b4a1113b771e22b",
+      "size_bytes": 19827
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_lunch_serial.csv.gz": {
+      "sha256": "000f2d74ccb327802cdea97d98eda11f250037abdaa1299c1abfe033bb66d4d2",
+      "size_bytes": 15616
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_new_york_double_ledger.csv.gz": {
+      "sha256": "209b46d971520c099566ff7ed696a85ef6cb7be2b6fe39b5454544824925c747",
+      "size_bytes": 9842
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "5bfd7da2f9f53ef664450b0bb0719a0845cfcb5c6a14f25a454081d966e8c433",
+      "size_bytes": 18255
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_new_york_matched.csv.gz": {
+      "sha256": "0c303342aa51792b66f644a279212d612eb574971ba118a47d08efadfe22b090",
+      "size_bytes": 28050
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_new_york_serial.csv.gz": {
+      "sha256": "e0eaf90d61784bcdc1bd174c7a4021f045dae86d35d97d6234bd078c7b774f39",
+      "size_bytes": 22164
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_opportunities.csv.gz": {
+      "sha256": "50eccf400eea5a84ace5bbb6527fa2d64058ce0c1f7d7272f1fb926a3131f702",
+      "size_bytes": 113900
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_union_double_ledger.csv.gz": {
+      "sha256": "2af83363259817bd09dfa3fe6596527c0a79d69ec7ec0ca65b7c98defb5190c1",
+      "size_bytes": 20628
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_union_fixed1_ledger.csv.gz": {
+      "sha256": "2d7f3a6c807aefc5d6300a80418b8aa2945af82a68299dc2e221081fb13a08f4",
+      "size_bytes": 45159
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_union_matched.csv.gz": {
+      "sha256": "81fcc30ddc7031f0389694358afc783d5cb1adda9a590856a7a09e91f6481834",
+      "size_bytes": 69688
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_ohlc_union_serial.csv.gz": {
+      "sha256": "59a9cb1a254efb3b444dbf50282c9e13c324f3ebee7c34fcb1c85f99b985e0a1",
+      "size_bytes": 54103
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_all_double_ledger.csv.gz": {
+      "sha256": "57084227fb79afc9e1f3aa0b5cc30034b26530fe71adf679e0fa30e9304b64df",
+      "size_bytes": 39531
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_all_fixed1_ledger.csv.gz": {
+      "sha256": "dfbfccdd007db30702dfb8f173c580db40a9a22580800ffe88b29da22b4e6f64",
+      "size_bytes": 88478
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_all_matched.csv.gz": {
+      "sha256": "4302364263ec2d38d65918150134d1b99d8532c116030d14ea6156f7be7da6f6",
+      "size_bytes": 136889
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_all_serial.csv.gz": {
+      "sha256": "5b64f69fe0c0c492a63197696cf70e5ae099c82efdb38a0e5f6dc6bbf2038f2f",
+      "size_bytes": 106075
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_london_double_ledger.csv.gz": {
+      "sha256": "57e01fc3939981854cf9a86fd4e5e6403952039fdc652a7a2313606f046dbdeb",
+      "size_bytes": 8218
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_london_fixed1_ledger.csv.gz": {
+      "sha256": "15679ac7cf9b5fee40cf5183b35fc08cbb61c2ae602eb0a1d80dcc317bf9c207",
+      "size_bytes": 16482
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_london_matched.csv.gz": {
+      "sha256": "3412ce0950d990c5b7229fb44e1c78fcddf8ed57966f2162700d6518b29c4e16",
+      "size_bytes": 25504
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_london_new_york_double_ledger.csv.gz": {
+      "sha256": "ae9cc03150589668d55fc73901ee562ff3c3a484dd754c31c91452c1f3a70721",
+      "size_bytes": 15392
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_london_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "8ae7d925936d40795012f83078432fc011b9022c40ecba3eb3d5a3fcdd99e446",
+      "size_bytes": 34082
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_london_new_york_matched.csv.gz": {
+      "sha256": "d467c6b719b63156a090e94f506074e27480522fcee72f2d5eb9c4042b0414b0",
+      "size_bytes": 52638
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_london_new_york_serial.csv.gz": {
+      "sha256": "e54e5568b2ed2a43d563fcce328d76024759449852f821d25756887f4d77d3f4",
+      "size_bytes": 40927
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_london_serial.csv.gz": {
+      "sha256": "1342c16174ea6182ccaae05453193a5ba8365af4b786fa4f406de8f5a7d59b1c",
+      "size_bytes": 19801
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_lunch_double_ledger.csv.gz": {
+      "sha256": "73d28b62711f1032b98b37fe13174f99765f8a17862d88858e92a740c4244366",
+      "size_bytes": 6721
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_lunch_fixed1_ledger.csv.gz": {
+      "sha256": "92d5f15fc25066fadd5ca440ea2604b5d5f6f90b26df1f2dea68199a2f25cd5f",
+      "size_bytes": 12941
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_lunch_matched.csv.gz": {
+      "sha256": "a766b862e79e12caf725cb013a7e3099d81a8ba56771f0111b0e42325c89a8d9",
+      "size_bytes": 19804
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_lunch_serial.csv.gz": {
+      "sha256": "071ae3e6459e5d8bb233faa840c5ceb64747002dbdc7e5c63eb9c153cccaeaa0",
+      "size_bytes": 15590
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_new_york_double_ledger.csv.gz": {
+      "sha256": "40272e711e672b82c1f58d6d9d4d34e1b76f6ff0da734e3cf3d66c14c65f46ca",
+      "size_bytes": 9830
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "8eea5cc4dd97c690171086975ca374387be37af9e6458d029af819450b1c457c",
+      "size_bytes": 18265
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_new_york_matched.csv.gz": {
+      "sha256": "7b7e68d8c30aa3edf5bd4f430507f67118c2d5634fb10916a245d257b8029e86",
+      "size_bytes": 28060
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_new_york_serial.csv.gz": {
+      "sha256": "a3177bf8d36baf98df5c6b12d1baf57d615c132045f4405b5abb5c82a21dbcdd",
+      "size_bytes": 22128
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_opportunities.csv.gz": {
+      "sha256": "5a9289bfe66a94e3c650b69e102b8e6e4bb0ac22fbc69451683f69e417cd1c23",
+      "size_bytes": 113831
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_union_double_ledger.csv.gz": {
+      "sha256": "579132807d316dc0eca22bfe8b93c3962e7af9932a97a0bb47fa62ac5c0329eb",
+      "size_bytes": 20401
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_union_fixed1_ledger.csv.gz": {
+      "sha256": "1c16fe0c07717741f0a299054ce0f7cad4be1ce4974d0aceb25a560051310527",
+      "size_bytes": 44931
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_union_matched.csv.gz": {
+      "sha256": "2acf41495a4a190c82326652212a1213b8fc46124491909ddac8d480ab35997b",
+      "size_bytes": 69549
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_olhc_union_serial.csv.gz": {
+      "sha256": "8233d44460b35f8fae33aa6e4252cfc56f6cfda7ac378353b6e2666ba4253f38",
+      "size_bytes": 53876
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_all_double_ledger.csv.gz": {
+      "sha256": "54bf6e38fd39bf0252b4b36dd2687950427014d520101baac477ff6b5694b0af",
+      "size_bytes": 39474
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_all_fixed1_ledger.csv.gz": {
+      "sha256": "22181a50b4225a6a9f23e4b82aca9953aad6a6b28dd904001a70a1f8511865cc",
+      "size_bytes": 77113
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_all_matched.csv.gz": {
+      "sha256": "1daa9b8009111ef24667e38995e4b074787ed4cab64a0408ac5a2be8fd8415d9",
+      "size_bytes": 119174
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_all_serial.csv.gz": {
+      "sha256": "1e855987844d6efd1b9c700f3145b2c14cc628eca7de3c95bb8db269d9a110d1",
+      "size_bytes": 81503
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_london_double_ledger.csv.gz": {
+      "sha256": "ed44b5a608a060ce622280a14209c87dbb9fcece2fa2c66bdda0dfe73c65d183",
+      "size_bytes": 7719
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_london_fixed1_ledger.csv.gz": {
+      "sha256": "8b28d305a837e807a1cb60f556f451f2c32de9b2afaa38c3811ff89f70f30868",
+      "size_bytes": 15507
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_london_matched.csv.gz": {
+      "sha256": "7934e949cf453fea9e397a4a98a63ae8d5055515a3a191a9642ef9a0c24ead07",
+      "size_bytes": 23704
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_london_new_york_double_ledger.csv.gz": {
+      "sha256": "240f7545ecafe7d387cdae881a07d6a39420ab681fc7f3d2bcbc533238dabc64",
+      "size_bytes": 15140
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_london_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "8765f185b766ff8e9c405e567a4ebaabfd86cb33145c330c8f03940f0c1ed405",
+      "size_bytes": 31259
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_london_new_york_matched.csv.gz": {
+      "sha256": "aaa2c70a1de829ea08513583870e5fbe4048db5b2cd62f4cd7dac6b1fd851ff2",
+      "size_bytes": 47835
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_london_new_york_serial.csv.gz": {
+      "sha256": "c2c947b1b4bfcffaaccca0987f36ec36525b9e079f1db7c7937fb702be163889",
+      "size_bytes": 33121
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_london_serial.csv.gz": {
+      "sha256": "07d84e23e1c1341be1f24a5b354d9a7e2eb33c6aa051daaf587f271a9203d082",
+      "size_bytes": 16578
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_lunch_double_ledger.csv.gz": {
+      "sha256": "235ad640daf58e46edc636638bd91b9eaa3cfe88f3f2f328777448e88945d300",
+      "size_bytes": 6930
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_lunch_fixed1_ledger.csv.gz": {
+      "sha256": "90151cf0180795cc63d49123022e3c3f5e39ea3a8785d32ca140cbc2433c70d7",
+      "size_bytes": 12576
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_lunch_matched.csv.gz": {
+      "sha256": "b13e1e187220fbe5b239b5d6f3c01254e9fb5899864ba79477068056010d16c3",
+      "size_bytes": 19214
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_lunch_serial.csv.gz": {
+      "sha256": "df93d5e0ddbf17dd16ed6c6e870714901a384c47932fb2498c9193a07a05a578",
+      "size_bytes": 13401
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_new_york_double_ledger.csv.gz": {
+      "sha256": "7240b12a191679f8b96f4e72d3b26f682a09a20f7469770bd4ed282ee53a1b0f",
+      "size_bytes": 9038
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "0c830627c88596047e93a90857e6f6c0b50406f039d3047a03b59e15ec1ef81c",
+      "size_bytes": 16908
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_new_york_matched.csv.gz": {
+      "sha256": "fda8fda645079cfc670467e447079bef221389ba8fa4a8bc5c52404beae5ad15",
+      "size_bytes": 25857
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_new_york_serial.csv.gz": {
+      "sha256": "b790e2d284f19d16abca6adf0b97f2d9728017b7080a45f275c40f58da625b3e",
+      "size_bytes": 18086
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_opportunities.csv.gz": {
+      "sha256": "a1cd08c845d4989c2c5b3071afc8e06c5d317f37123572446f7c8539bd32e994",
+      "size_bytes": 99393
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_union_double_ledger.csv.gz": {
+      "sha256": "3cace7ac8543dcd7b90dcf36cff7ffdab5757d82d6b157c2a8540094c0e4510d",
+      "size_bytes": 21390
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_union_fixed1_ledger.csv.gz": {
+      "sha256": "c9405905f35bb745955d69e41c7e5d3b77867d34c8f7fd7a7360d81561dee2f2",
+      "size_bytes": 39731
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_union_matched.csv.gz": {
+      "sha256": "315d688f2da9f807e95afc089a4836520691bdcab7fd759fbf68e5a6cb4fc6c7",
+      "size_bytes": 60996
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/development_original_union_serial.csv.gz": {
+      "sha256": "60cfe24c3b92d547f2059e98c436347a6614e2f5fb5b311e635af9c558bebca7",
+      "size_bytes": 41997
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_all_double_ledger.csv.gz": {
+      "sha256": "c9651a5a72c028221865112a0a797bc5ecca4a97e195b8e6703e539e47224e4b",
+      "size_bytes": 11522
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_all_fixed1_ledger.csv.gz": {
+      "sha256": "0d2163e2c36ce3ef73f63587ab4f74f0aa37de351605167868429a6ad2847b54",
+      "size_bytes": 23335
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_all_matched.csv.gz": {
+      "sha256": "a8cb05df513256962bb62574ddcabc22567f8a13d3170f4eff64558b831e4ed0",
+      "size_bytes": 35524
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_all_serial.csv.gz": {
+      "sha256": "58226a796208427501a0f15b6e62de2ee2cebc29674c3c3c28d428c660538e5f",
+      "size_bytes": 28717
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_london_double_ledger.csv.gz": {
+      "sha256": "ed086aa670eacdb517fcedc0ed67793b1ebdacd6d58f3ff3d290b2adc0ec7431",
+      "size_bytes": 3285
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_london_fixed1_ledger.csv.gz": {
+      "sha256": "0248196be39aa96e9fa0279d925a3c2da5e73be64cc9883330a42b283823bda8",
+      "size_bytes": 4980
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_london_matched.csv.gz": {
+      "sha256": "374c67ca0299cd27a2570c2c3d76167bfafc439b645139b06a4fdcf53f359e12",
+      "size_bytes": 7484
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_london_new_york_double_ledger.csv.gz": {
+      "sha256": "9d0de335507b3648ef351fce01ff840a31a86043ff4ccf5c8b3e3b0a28a0e011",
+      "size_bytes": 4756
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_london_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "eedbd1868bf6dc25722f6a368aa8a5343060b2c3720b518c7596145627b49296",
+      "size_bytes": 8033
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_london_new_york_matched.csv.gz": {
+      "sha256": "db5b123c58da4a851fa53e591ab47108a0a67c38afc5c69c1ad92882f45c853c",
+      "size_bytes": 12114
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_london_new_york_serial.csv.gz": {
+      "sha256": "4876a1bf18dd6a9c51f8dde818d90f3e9ebf77aa223d836132c0f988e9babe0f",
+      "size_bytes": 10090
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_london_serial.csv.gz": {
+      "sha256": "a23189b9e207c9be378758c29f5eeec66553fa3a69141d908ccb158d150e4fe5",
+      "size_bytes": 6392
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_lunch_double_ledger.csv.gz": {
+      "sha256": "bc9c45b41ed5cb06870be50f4a72af9bdd3ffcc98651fd4f7fbcccca7c6a7554",
+      "size_bytes": 2549
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_lunch_fixed1_ledger.csv.gz": {
+      "sha256": "583596fb6bd128acbd94d7b5af2297b8944c36d451d51690f2a2b91824dcd9d4",
+      "size_bytes": 3692
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_lunch_matched.csv.gz": {
+      "sha256": "54f648d7ce78485b39111c60662f0feab5798af247b5400fed71f68323572edb",
+      "size_bytes": 5519
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_lunch_serial.csv.gz": {
+      "sha256": "3e8fc4cf925f3e8ee08ea2f0c4c9ef75f0c90810672388e038641a5bcdac9672",
+      "size_bytes": 4652
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_new_york_double_ledger.csv.gz": {
+      "sha256": "aba7be79cf4a169f99ff8809d3e40eb302aa844844dbd13dde7c88c6d8fa37b8",
+      "size_bytes": 3613
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "d5606ae142adea0600cb19b4ccb7c2b3e89b362718aa13b1d93c686b6575d425",
+      "size_bytes": 3358
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_new_york_matched.csv.gz": {
+      "sha256": "8dd9dea5965326495844eec667b4baac4c8bb5f6cfb17d82874611816347f507",
+      "size_bytes": 4978
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_new_york_serial.csv.gz": {
+      "sha256": "afcfa2be1a850e8d92f051713c3e16925e214491c37304fdeab095e76403e30b",
+      "size_bytes": 4295
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_opportunities.csv.gz": {
+      "sha256": "f3568999f5d83ebb825a9f1d9d4dfbb9aa0257f6dab97c80c4304de927caab46",
+      "size_bytes": 30682
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_union_double_ledger.csv.gz": {
+      "sha256": "aafdb7d0269bedb4ef7f2efc9d424d62a02c7266d0241fd4bd3d6de4b8690b2a",
+      "size_bytes": 6085
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_union_fixed1_ledger.csv.gz": {
+      "sha256": "2fc83505abd369567d438c2a052d7a6b98768a45f7397ca3c41b9e081a37b2b2",
+      "size_bytes": 11343
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_union_matched.csv.gz": {
+      "sha256": "04a08f6823ebc91be8d1b4010efd08fef77ba5737d0724e0661ffa16f4c76dbb",
+      "size_bytes": 17089
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_next_bar_union_serial.csv.gz": {
+      "sha256": "a429ffcd0ed6b865f49904e70a498777ca1d3d9b315dc1aa8afd3c492caeb4d4",
+      "size_bytes": 14026
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_all_double_ledger.csv.gz": {
+      "sha256": "31f2f35a34c0aaa1420b133616bc4ef3aa8c964f7fcca91a4ec06e1601256c73",
+      "size_bytes": 11850
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_all_fixed1_ledger.csv.gz": {
+      "sha256": "9824e9c313a39fdbdd0af8475bbeb03270242333a9ada9c745ed6c88b68d08b9",
+      "size_bytes": 23052
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_all_matched.csv.gz": {
+      "sha256": "6fd97ca1cadf785e552031351e872fbc3dcef794c2e699daadba31670f391b1e",
+      "size_bytes": 35457
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_all_serial.csv.gz": {
+      "sha256": "782797381424d13482f26fa0bca74a76e369454a66c64807640f297a8572d94e",
+      "size_bytes": 27721
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_london_double_ledger.csv.gz": {
+      "sha256": "06db667960285599bcd5e18d8d4bdf344c63c900f247e41da749bbfc9f710417",
+      "size_bytes": 4057
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_london_fixed1_ledger.csv.gz": {
+      "sha256": "263cf00ae4b3ded3599d5f707a0c143a5626be7d376bbad423b347f9f2b88a9c",
+      "size_bytes": 4887
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_london_matched.csv.gz": {
+      "sha256": "f029d1ef0cf06aed5c18fe14087dc022f4668b2793b6b255696485f390bcbda7",
+      "size_bytes": 7492
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_london_new_york_double_ledger.csv.gz": {
+      "sha256": "7becf5aedafb7fc8c762e71d68543168881c55d95f957973ea12cf1350be3a6f",
+      "size_bytes": 6195
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_london_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "ded9edda6a522de52600441f8a0ca65399d8470e0108f03ef7610be90b9e152f",
+      "size_bytes": 7866
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_london_new_york_matched.csv.gz": {
+      "sha256": "f26b0ca877cf058c7e558be1e00b0847a979ec7fd0cb53e3e5c1e2cad34a5a0b",
+      "size_bytes": 12104
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_london_new_york_serial.csv.gz": {
+      "sha256": "bd5b36cf5e5133230dd6b8dffc4aa49f1886e9003c2a703455c30a1f108e2035",
+      "size_bytes": 9747
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_london_serial.csv.gz": {
+      "sha256": "b5a3a1f218d3b076735e60027c515c6cb843ec294cdf9a17b3b4538973df4b07",
+      "size_bytes": 6167
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_lunch_double_ledger.csv.gz": {
+      "sha256": "5f471852c81383e04eff286643a49fd3b4ce11559e5f2204858b57a464165b24",
+      "size_bytes": 3596
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_lunch_fixed1_ledger.csv.gz": {
+      "sha256": "621d20bbcd0d5f66500e85b0b7125a7ef41b9b831ca874f11652127d7f15f2a4",
+      "size_bytes": 3637
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_lunch_matched.csv.gz": {
+      "sha256": "8e37ae444b32f64dbd5c7c9e9ff1938dbb0ff0616f7c8c9dca3d7612531cabff",
+      "size_bytes": 5513
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_lunch_serial.csv.gz": {
+      "sha256": "baf722d6813774a49b16e053037512921f106c1d65cf4318cce44c5c9986e0c7",
+      "size_bytes": 4495
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_new_york_double_ledger.csv.gz": {
+      "sha256": "7da5acad86dca6eb83e83d4993342f54ff16b0b56bc3bb0c813e5ebe0f3b65bd",
+      "size_bytes": 3338
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "a4d62591fd265ff95fdd66574e87860d07ad15692d2c74c25fd6f0d1002e10d8",
+      "size_bytes": 3269
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_new_york_matched.csv.gz": {
+      "sha256": "e946d92ed983d260c0ebead3b4960815f3134046812ba79da12feacd3a5a8d42",
+      "size_bytes": 5009
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_new_york_serial.csv.gz": {
+      "sha256": "57b11b39e36f63d3cb3ff42595fc95494ffb724e0717c9b6d353307769b7fb6e",
+      "size_bytes": 4139
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_opportunities.csv.gz": {
+      "sha256": "47407dd1970e0c61bcbe21cbcf4cfdc84b64f4a3836851a8fc04049edf8f0ba9",
+      "size_bytes": 29658
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_union_double_ledger.csv.gz": {
+      "sha256": "a6e4e29158d094a15db1ef62b1225143f8a9a3d92e1f65d54b2b6651f0999685",
+      "size_bytes": 6424
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_union_fixed1_ledger.csv.gz": {
+      "sha256": "bb618847003a428bb51e4109529d1c7201a7913fe05b3a68a92843b6ddba2660",
+      "size_bytes": 11189
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_union_matched.csv.gz": {
+      "sha256": "3198bed79b04faf7f6dfb8a5ea06efc4dec4faad4adf4a75060bc447378ab652",
+      "size_bytes": 17086
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_ohlc_union_serial.csv.gz": {
+      "sha256": "2aebd229757e15b43bcc56c3958029bd9a23ad1066ca6dd240abfc52128ef77d",
+      "size_bytes": 13559
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_all_double_ledger.csv.gz": {
+      "sha256": "74249419f130250c81cc114334d0c68ed00d53dceae80b6e8c4bc803492e5f29",
+      "size_bytes": 11848
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_all_fixed1_ledger.csv.gz": {
+      "sha256": "f3470a753876280de1224f75034f13d40b3548fcfecde609d97ed221c32d777f",
+      "size_bytes": 23261
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_all_matched.csv.gz": {
+      "sha256": "2c064eac2a4b51b7a27600d0be3d02cc6526ad85b5e0c8e56c659462cca06d86",
+      "size_bytes": 35815
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_all_serial.csv.gz": {
+      "sha256": "fa1edc78a56f506ea0e9f72c80d6ae4ac80dbfbf775d1cc6f5e7352f7afc7ea9",
+      "size_bytes": 27993
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_london_double_ledger.csv.gz": {
+      "sha256": "b9a9e012f0370db795c51a7c14fdf8054e992602ba08b7423d129c8cb74f1f0d",
+      "size_bytes": 4056
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_london_fixed1_ledger.csv.gz": {
+      "sha256": "946ec400581e9f7aa84db127da01e60f7d30d51a7b89cd083349b1877d1f2f48",
+      "size_bytes": 4888
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_london_matched.csv.gz": {
+      "sha256": "addf6d680b08d42e3cf86c67db02fb73301362a75f909e5210e8fd08ab9d61a2",
+      "size_bytes": 7468
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_london_new_york_double_ledger.csv.gz": {
+      "sha256": "9460af26f59cbfea63fedaec5a3c6ff02ba7f30b79813073f4503706d1e6d7c1",
+      "size_bytes": 6294
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_london_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "befa4c837ba0f2d8125e322651b71a139f2553b367636a3442ca3074a423ddb9",
+      "size_bytes": 7868
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_london_new_york_matched.csv.gz": {
+      "sha256": "3ac3d901859fae471d51f9a434e2b44b2ffb5ed8a15d2882dee71f8cbab37f38",
+      "size_bytes": 12059
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_london_new_york_serial.csv.gz": {
+      "sha256": "a501ae6b80b04c902423c705c368b6e8bbf19903e1d1967ee1ebfcb8a59a1465",
+      "size_bytes": 9789
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_london_serial.csv.gz": {
+      "sha256": "bad6526d6db48444d51b7e5575712da7fcb916893ef39cbffc49160d0a854265",
+      "size_bytes": 6176
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_lunch_double_ledger.csv.gz": {
+      "sha256": "f5759797dc0a449cac7b1582e32b8fb997395ea0be0c4818fb70b6543647a66b",
+      "size_bytes": 3071
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_lunch_fixed1_ledger.csv.gz": {
+      "sha256": "1efb43abed9edfd5893b206c2aee31ce3502c4b6153b2bcb2a754a71f9cb034c",
+      "size_bytes": 3626
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_lunch_matched.csv.gz": {
+      "sha256": "441ab7be3ab86c22deceb825da4550a7305fad623475d842a1a1af5dc2429c70",
+      "size_bytes": 5517
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_lunch_serial.csv.gz": {
+      "sha256": "8d7b68082375c566b714dd1e1abe9722d259e69aa95e750bb341463b01081d87",
+      "size_bytes": 4518
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_new_york_double_ledger.csv.gz": {
+      "sha256": "364841e708bda784165d7e734a5106a0c87a5b82793509b757f1780bed1c356d",
+      "size_bytes": 3362
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "0fbe7f70ec6c3a9695cb513e9d7362282cd8aea74ccbdcc6b6f5c3f690706013",
+      "size_bytes": 3288
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_new_york_matched.csv.gz": {
+      "sha256": "ebee8f38a27c78001343feb3b34c10a116046c844f5ff64547cf15b2ab3b9be7",
+      "size_bytes": 4982
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_new_york_serial.csv.gz": {
+      "sha256": "a830fd615632cbe6c5e3604a797d3b9ebb956571e728cd2c85baf88e0c2ed3cd",
+      "size_bytes": 4150
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_opportunities.csv.gz": {
+      "sha256": "2efd6cdf9296f4433c97d11b91534734c5d7a4c3d52ebecc31d9acdcc002a06a",
+      "size_bytes": 29718
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_union_double_ledger.csv.gz": {
+      "sha256": "cbf4d92f42af48cce8a70587ef8d7dabb22da3cad110953a52912a1ba26bf7c6",
+      "size_bytes": 6419
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_union_fixed1_ledger.csv.gz": {
+      "sha256": "a17b25ad5dee917456d054fc085b3794b1f72b29830c8742e4aba70073bd11fd",
+      "size_bytes": 11164
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_union_matched.csv.gz": {
+      "sha256": "642974272137381d337a409e857b98ccbd351997d92188fb6ab59a249e1f7155",
+      "size_bytes": 17055
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_olhc_union_serial.csv.gz": {
+      "sha256": "4631545c0ef79f73027a0a120f7abd727e7f6941cb504f028ebadf686635b5c1",
+      "size_bytes": 13621
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_all_double_ledger.csv.gz": {
+      "sha256": "101cf34967bf39058e31704a614da3cc73a1a61278ac80dec1fc8c884b8c0edb",
+      "size_bytes": 11167
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_all_fixed1_ledger.csv.gz": {
+      "sha256": "82a2e94162c6b738693ce0a60fd16954c20d96597006dcb7ad7df948660714e5",
+      "size_bytes": 19784
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_all_matched.csv.gz": {
+      "sha256": "1bff8228d2855cf6e7818c091eb1045f10647e0c0ce3a07984e95ba8807e9c4e",
+      "size_bytes": 30363
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_all_serial.csv.gz": {
+      "sha256": "ac20ed3b54031a1be49f55cf8ad57b7b10c22df54212c4b3e5d4f142768b7bef",
+      "size_bytes": 21047
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_london_double_ledger.csv.gz": {
+      "sha256": "9dff374eed73edc4a0d66c20512894bff2250e7558ea44aff74b2de0294c0c7f",
+      "size_bytes": 4058
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_london_fixed1_ledger.csv.gz": {
+      "sha256": "0c2bcf58d02884d31c7d952621d05ecd589f0c41e99a61c1759ae37b8089717e",
+      "size_bytes": 4526
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_london_matched.csv.gz": {
+      "sha256": "ea31cbb618d29c29714210f45f848c145ac150c60912ed6df77c5075d82b436b",
+      "size_bytes": 6837
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_london_new_york_double_ledger.csv.gz": {
+      "sha256": "e452356ff4dde6323db05b89d3d946fd3f6c4fab70caf46b971feb6ebd747fdb",
+      "size_bytes": 4430
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_london_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "b37854b5fbff904420f07c931a3de3b77af217339ff22b025ef680cb7ff34640",
+      "size_bytes": 7367
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_london_new_york_matched.csv.gz": {
+      "sha256": "fa140f911a1caadff53f83c375f7ff87c2b7d0c1095ca8e570358598d17aafeb",
+      "size_bytes": 11175
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_london_new_york_serial.csv.gz": {
+      "sha256": "ff5a7b442522fd06ce03c08b3ab32cce118c3bc7aef453192840eadb8dc47af3",
+      "size_bytes": 8120
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_london_serial.csv.gz": {
+      "sha256": "a7679159d3a7ef92ae813e4adcf36c528537d81ae56a04c84c0a5450bce983ec",
+      "size_bytes": 5158
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_lunch_double_ledger.csv.gz": {
+      "sha256": "2a78392c89304e46c6d97a34e5907d001df2a3ce11f9913c539fb55f45e78a22",
+      "size_bytes": 2608
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_lunch_fixed1_ledger.csv.gz": {
+      "sha256": "c08850af1b7818fc24189620f8abe277d4bcb7c1b3b44be77c63cf473053246d",
+      "size_bytes": 3472
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_lunch_matched.csv.gz": {
+      "sha256": "a2ab88fd20b202c648fe2eea41f78ab76e95f153a8995242a8e63430be688463",
+      "size_bytes": 5311
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_lunch_serial.csv.gz": {
+      "sha256": "99b8f2d1e5f91e10b09a28ee3c6dfc16cd7270c6e9c41449ec752a376c56fbdc",
+      "size_bytes": 3873
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_new_york_double_ledger.csv.gz": {
+      "sha256": "734396631f9fde4b43f058eec6c331ba949f4353407ab4fe568221e9b7762ceb",
+      "size_bytes": 3245
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "593493ac493b4747338911f7d166cce20199b8a9f286e0975fe90096daa4e10f",
+      "size_bytes": 3133
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_new_york_matched.csv.gz": {
+      "sha256": "1e77f3dca1434f52e5a1c32a1d83964ff8b715556c40a757acba3a3a4eeadcba",
+      "size_bytes": 4623
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_new_york_serial.csv.gz": {
+      "sha256": "1268bb9fc45ce50decddfb3f2d5520cd8ea469de7e9f21c739a789e7edfe1f1e",
+      "size_bytes": 3484
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_opportunities.csv.gz": {
+      "sha256": "3de7586aad394d52e457fb475639f738fe8b582f2cbd6525c1d3f7a171b2dd5d",
+      "size_bytes": 25792
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_union_double_ledger.csv.gz": {
+      "sha256": "3ba086ee43a818c4461e2de1d0a8afd86b2f9f391d559c16f9ed311b55c44034",
+      "size_bytes": 6150
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_union_fixed1_ledger.csv.gz": {
+      "sha256": "eedf5eabad959e1bb1921013d847ff6b092ab84c494fc42ec76180a90876c0e4",
+      "size_bytes": 9970
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_union_matched.csv.gz": {
+      "sha256": "5d31ad5ee1cc176657182b61bbb9cc9da579cf98a39c05d9b8270bafb42feee4",
+      "size_bytes": 15184
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/preholdout_original_union_serial.csv.gz": {
+      "sha256": "e38a2032880df46f2d0b1ae7f8877eccc2d5b711d8f1e80ad41dfb5a5834e596",
+      "size_bytes": 10755
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/receipt.json": {
+      "sha256": "dfb5b640c0a58ac2544266e9fcc9f459b6236243fcb6e6441c648be36f6dd378",
+      "size_bytes": 561
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/summary.csv": {
+      "sha256": "2c12bc846ff380393c8320679a6b3483e744f7e946270f06927dd03b65614f6e",
+      "size_bytes": 16162
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_all_double_ledger.csv.gz": {
+      "sha256": "217d929952a2a398917d571e36b2c123d75f8ac87c5a79a8cffc8402389551de",
+      "size_bytes": 28508
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_all_fixed1_ledger.csv.gz": {
+      "sha256": "ba5465e622b59032b32880f36725338eb805ba241f64141c94b0c8b6c8d627ea",
+      "size_bytes": 65853
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_all_matched.csv.gz": {
+      "sha256": "35d93a1ee96577b8589890c5b6ada7575f99630c57b2cadd2951ff1f083e4226",
+      "size_bytes": 100462
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_all_serial.csv.gz": {
+      "sha256": "8741496c51fde99375a2056f323deacb0322ef604876162466e4eaadacf84db3",
+      "size_bytes": 81370
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_london_double_ledger.csv.gz": {
+      "sha256": "c9a01627bcdab592601c02023dd6d40177762418c4393cc10c64e9afcd2877ae",
+      "size_bytes": 5910
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_london_fixed1_ledger.csv.gz": {
+      "sha256": "0540bef956a58321387da9b616316f7f5a53bab2d2fb89549c389e9dd3ed7fb0",
+      "size_bytes": 10083
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_london_matched.csv.gz": {
+      "sha256": "46e259dccd58b4c85b24bfc5e3953c550526af474db37864798fce041a486e1e",
+      "size_bytes": 15208
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_london_new_york_double_ledger.csv.gz": {
+      "sha256": "0217a285069e310dbc55c8b24196d728af1e3b345d08fe46854b0533568e77a5",
+      "size_bytes": 3749
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_london_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "32ecf864d184d901c1efc5b2409d2d803020a741debb09cf50f121e3acff0f52",
+      "size_bytes": 24533
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_london_new_york_matched.csv.gz": {
+      "sha256": "ee63512821ffbf9f86abd228350ae9a6ec0546df629d2609a511ee90b303320d",
+      "size_bytes": 37180
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_london_new_york_serial.csv.gz": {
+      "sha256": "3f86dde62c722d63266aa19f8b415a06e3080623b9f2bb64f84c62cab9dd02de",
+      "size_bytes": 30749
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_london_serial.csv.gz": {
+      "sha256": "49efae8a486f9f280a7e5d6853118a47e2c3ce47db23fb753b9936007e139ccb",
+      "size_bytes": 12562
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_lunch_double_ledger.csv.gz": {
+      "sha256": "b32f7e71e5cdc1feda2cc48b723b9424d7b4dceac6965dd68ed2b7a4acc38845",
+      "size_bytes": 5794
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_lunch_fixed1_ledger.csv.gz": {
+      "sha256": "1a10235c38bfbc3f5f7fb7d5b0612913b2e54a17b78d72d5818c702d791e9f38",
+      "size_bytes": 11631
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_lunch_matched.csv.gz": {
+      "sha256": "2d6c9a954ec02f9ce01a57b545232ac5baca8443f47b5ad3be61d6582652edd3",
+      "size_bytes": 17731
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_lunch_serial.csv.gz": {
+      "sha256": "36275b116a1255565bc5006cc4417d54038ecba7dfdf6764c9ffbb059b269a53",
+      "size_bytes": 14455
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_new_york_double_ledger.csv.gz": {
+      "sha256": "22d2cd0c05a501897c80e4660f7e9d43ded23dc565e35ef828cf65868d5df9f9",
+      "size_bytes": 2536
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "294277a09730ee9cee7e8792ed7fdbfbba6104ccf540c7366beb55bc86bd0d78",
+      "size_bytes": 15050
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_new_york_matched.csv.gz": {
+      "sha256": "b3ab01277cd6cbbb3888b53c9fc4fd1268fe52c36492f6e465c43f0a2e270a7e",
+      "size_bytes": 22663
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_new_york_serial.csv.gz": {
+      "sha256": "724eb76ad49749c828b904037cd23f62dbe2d50e6385d02eca96aba6735b427d",
+      "size_bytes": 19104
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_opportunities.csv.gz": {
+      "sha256": "6f3fc8d4bf779a5a72126398ffa596c0af4dc6c68a40a036ae6d63ffcfba7d6e",
+      "size_bytes": 85627
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_union_double_ledger.csv.gz": {
+      "sha256": "621aa13eea62eb4183a74ea0281d644d298e48d2585333804bd8adb80c8ea46c",
+      "size_bytes": 16555
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_union_fixed1_ledger.csv.gz": {
+      "sha256": "e661ca47ee6215246c3f9b4b7b266114260b40bc1a78cffcfd4551034580dc59",
+      "size_bytes": 35317
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_union_matched.csv.gz": {
+      "sha256": "71b42ba6f67c32210e5fa45b3d3604c9b21b478a0cd277ad841fb7e6b0af1f41",
+      "size_bytes": 53548
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_next_bar_union_serial.csv.gz": {
+      "sha256": "44787b833eaf1cb4c5e0c7dc39a3412e86fbdb591d8a078ee01696d9e79154cd",
+      "size_bytes": 43748
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_all_double_ledger.csv.gz": {
+      "sha256": "71f1cdabbf5cb84abc6c614dbd228e31947295ce6d99b24ba1573086d850a2d8",
+      "size_bytes": 7231
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_all_fixed1_ledger.csv.gz": {
+      "sha256": "f3769933e6dd4b4635b09f78306aa1bd95d3fb4612954729867ee38f4f398a20",
+      "size_bytes": 65063
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_all_matched.csv.gz": {
+      "sha256": "a4ea970eb991cb251bb7b566931e9da3fa00841615b07c375de578dabb79ccc0",
+      "size_bytes": 100495
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_all_serial.csv.gz": {
+      "sha256": "bf7a406b1a4df7fe356a23515ec6c46b6e311cf85f2b1bfe06c998adbace2522",
+      "size_bytes": 78819
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_london_double_ledger.csv.gz": {
+      "sha256": "e4124f34bbfb31c33e0b6f6ada492a351b002d524d9558e1259154409fe9136c",
+      "size_bytes": 5832
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_london_fixed1_ledger.csv.gz": {
+      "sha256": "60eef57e9a47ea328b6d2c9a7a45692ec96e9895c0a97b79055269a1a7ae0b27",
+      "size_bytes": 9926
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_london_matched.csv.gz": {
+      "sha256": "1c153612a60b249189cf8aff3a9f42e0802f0a53665f58e8bbc13c4b2d9c55c7",
+      "size_bytes": 15195
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_london_new_york_double_ledger.csv.gz": {
+      "sha256": "fe7360b96de7efa9c268970d464eeb04579b22bbb9e955f06e9daf2368ad3545",
+      "size_bytes": 3641
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_london_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "eae4fad8d474f5bbac39bed9b280a46fed4748819f6926754096d73f472f2d41",
+      "size_bytes": 24262
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_london_new_york_matched.csv.gz": {
+      "sha256": "edb067efbe6376d56b04ef7088efb69f7822f1e7e4e1b94aeb4493c6e70cb5d3",
+      "size_bytes": 37283
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_london_new_york_serial.csv.gz": {
+      "sha256": "c64ebaa9c468679717b0e3376342d855f180f4c58f85932ed1f1be84a26110b7",
+      "size_bytes": 29685
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_london_serial.csv.gz": {
+      "sha256": "eaf6599ab22d29ec3b73c130732a40fa1bf3afe83c51283e057fffd15214dee0",
+      "size_bytes": 12198
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_lunch_double_ledger.csv.gz": {
+      "sha256": "be3f3ff6ef9a84ac91f71a99f4bb501d7cfd3682a273ee49210c2ff25977d5ab",
+      "size_bytes": 7070
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_lunch_fixed1_ledger.csv.gz": {
+      "sha256": "202cf971459295c2b5ae79348091e1f55b8110ce35e261f4652919cdca9c4f11",
+      "size_bytes": 11515
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_lunch_matched.csv.gz": {
+      "sha256": "963c2a3ec8b6601c163be2a6f9875c817082cb55cf4b8781b0d0c03c9f1ae376",
+      "size_bytes": 17751
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_lunch_serial.csv.gz": {
+      "sha256": "20b59296fc215b5d5ed3df286306271d13c1a75633220f5b277f50f58a5b3c05",
+      "size_bytes": 14101
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_new_york_double_ledger.csv.gz": {
+      "sha256": "fd58c1696caf43834c5d7ccaa621cbdeda88d39b76314f4b18e44fb5642e4f3f",
+      "size_bytes": 8924
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "a73d4d3f7ffa8d82fad663cc113d948fa479ca8a4206e893cff4c9c059cb2f8b",
+      "size_bytes": 14951
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_new_york_matched.csv.gz": {
+      "sha256": "23deec038373e36f8197abbaa4915b9fc00004c01fe643bf8aa4cd8e7d2a970b",
+      "size_bytes": 22731
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_new_york_serial.csv.gz": {
+      "sha256": "04d0b279334f6671f9b8ee768a9c80ef2cb35b7b6e768649f3feb9547cf1374f",
+      "size_bytes": 18312
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_opportunities.csv.gz": {
+      "sha256": "6983743367b6c697a8280b5097720932b0f116aa40b7a6719370f0725c7e8527",
+      "size_bytes": 82708
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_union_double_ledger.csv.gz": {
+      "sha256": "2c4f5782033667a97feba7cc7281b2221e3c93e98bf22e38e331b373b99bc233",
+      "size_bytes": 4364
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_union_fixed1_ledger.csv.gz": {
+      "sha256": "0b7eb7162f0b5a033c52682c6a0b76a3e4eb55e8801f248dea066419be2aa5d3",
+      "size_bytes": 34938
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_union_matched.csv.gz": {
+      "sha256": "a39bfa6c06db7eb9204d0d1e9ab26496c8480aeb546e3d86dc00411f432fd3b9",
+      "size_bytes": 53731
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_ohlc_union_serial.csv.gz": {
+      "sha256": "0fadb00962cfb5901d9e829ccde6b61c94fa8863bc70b898ac53858dc351f4b8",
+      "size_bytes": 42369
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_all_double_ledger.csv.gz": {
+      "sha256": "bfe74284d683d8e69622b30e86c4175c42462219094df513d3e86075f602fba2",
+      "size_bytes": 7231
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_all_fixed1_ledger.csv.gz": {
+      "sha256": "8020cb3bc35e92f73971d8a45cddb3aa6a6de85165300f793d0c5ba057085626",
+      "size_bytes": 65241
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_all_matched.csv.gz": {
+      "sha256": "f163a59772a3deb485e27b2d496655c0fe3b48dc027ef5450c85af9b0cebb947",
+      "size_bytes": 100787
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_all_serial.csv.gz": {
+      "sha256": "b5c75b00c6852efb391a86820efab4a765cb4e834699f948becbc6b8973a39a8",
+      "size_bytes": 78939
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_london_double_ledger.csv.gz": {
+      "sha256": "bb784d1622117064363f223b6937717334b0c0629481123475d97ab7aca48efe",
+      "size_bytes": 5880
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_london_fixed1_ledger.csv.gz": {
+      "sha256": "60454b4c1b3f8d156c4380b5ca9748b966143d4cbdc3b135986d9c36580c6e6b",
+      "size_bytes": 9941
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_london_matched.csv.gz": {
+      "sha256": "96ed4d8506d55ce6b252d8ecc48f1e06b70b40ab32369f70cf643b923dbae427",
+      "size_bytes": 15192
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_london_new_york_double_ledger.csv.gz": {
+      "sha256": "3c3845e85ea1cc61bde7c5e5cb7f274d10a0f232f7987ccc5c1e885c530ed3e1",
+      "size_bytes": 3777
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_london_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "42d2859217129702a3e6f360cf7ecbd6705701c0d3a785d90df21d497ca2b76b",
+      "size_bytes": 24153
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_london_new_york_matched.csv.gz": {
+      "sha256": "65b4cfd2e6cf521a44e067b577312506582fff8c9cafbd12108eb07c6ed142a1",
+      "size_bytes": 37150
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_london_new_york_serial.csv.gz": {
+      "sha256": "9c1f6c93b6b43cd29cf8b2a8539b0eb8d8cb3410dd8fb7449e92057f52dc92ad",
+      "size_bytes": 29546
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_london_serial.csv.gz": {
+      "sha256": "62dae46eeafaf1248d8ee9f8e81f9c02f551f23ab9989cf42f956bb0dd6184a5",
+      "size_bytes": 12192
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_lunch_double_ledger.csv.gz": {
+      "sha256": "16c166f1d64e5306a806b520f21088465dbd64d9af17ddc6a47268056dfe72a1",
+      "size_bytes": 7071
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_lunch_fixed1_ledger.csv.gz": {
+      "sha256": "6b14503fd22018e74e7798c41b45d669fd8ee0f8e2c8ec9085badec508c50d7b",
+      "size_bytes": 11750
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_lunch_matched.csv.gz": {
+      "sha256": "b661bb07c1a5fcce8ec4507a235956e5d400fa61b4c7626a561ef962fcc3c25c",
+      "size_bytes": 18082
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_lunch_serial.csv.gz": {
+      "sha256": "ef96d07a36069e5bd5322add83c26b82636c4b93c04c335ac4dcbe652871fc27",
+      "size_bytes": 14334
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_new_york_double_ledger.csv.gz": {
+      "sha256": "e7add8a2008097a19caedd3d194821ad39408b59bc2d476e1c4ceace1c40f7ac",
+      "size_bytes": 8918
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "8729d8db886abd33957615a7a78f6e9d5af5d8da09f8644af5bc98db65feda3a",
+      "size_bytes": 14806
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_new_york_matched.csv.gz": {
+      "sha256": "59a9bf5e2c39ecdda85da6d168df2f31c1b87bf39b03214ff66864f0a5212200",
+      "size_bytes": 22627
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_new_york_serial.csv.gz": {
+      "sha256": "5854bccf618380d98cd4b2de28985a1aa1222f46ac565bbd7ed62bd166a9c950",
+      "size_bytes": 18195
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_opportunities.csv.gz": {
+      "sha256": "a3994b9fb07cbe4cbddc37ed5ca88037442c0d5ed8ee8c7717090e0de88b1636",
+      "size_bytes": 82638
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_union_double_ledger.csv.gz": {
+      "sha256": "6cd2f9c261bd97d7fcd52050b7a0f19a08ea3d15eb2f60359c875daf288dd66a",
+      "size_bytes": 4425
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_union_fixed1_ledger.csv.gz": {
+      "sha256": "0b7c1a483700ff0425e9ebe9f1ee81a47642455166659321b6b876d8012dd60e",
+      "size_bytes": 35036
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_union_matched.csv.gz": {
+      "sha256": "ef1199081797c69736d051e92192d43b6f1bf1c8cde1b76c2a96c90080c7d23f",
+      "size_bytes": 53968
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_olhc_union_serial.csv.gz": {
+      "sha256": "e56b29e093fedadebf07d2b38d2f7df2d80fd564bd44a2fd16e79f8e357dc8a0",
+      "size_bytes": 42497
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_all_double_ledger.csv.gz": {
+      "sha256": "95a147130d1b5ee99d60b178700bd3402d97144effd89b7fd44ea2f5a93e629d",
+      "size_bytes": 28783
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_all_fixed1_ledger.csv.gz": {
+      "sha256": "bff266d605a5a4d44584186330b7c99e530899455c7ef814744e685b207ba965",
+      "size_bytes": 55046
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_all_matched.csv.gz": {
+      "sha256": "db74a730f507f773c8d1b991848bafe00f884eff27545c7d70ed84a58c0d080e",
+      "size_bytes": 85022
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_all_serial.csv.gz": {
+      "sha256": "e41f5744d56fcc3c12171bacff9fd7bf3c6f46bc1fbe59c4ad37d16db377cf09",
+      "size_bytes": 58473
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_london_double_ledger.csv.gz": {
+      "sha256": "d224c61ea0cdf6cca5d06729198e3f3da8bd3c9cb8b60f071eb4b5c633998b1b",
+      "size_bytes": 6123
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_london_fixed1_ledger.csv.gz": {
+      "sha256": "afd7faeb51f369cbc3f5272f782a531b950f890830968711b2bfcad89d8bb6d1",
+      "size_bytes": 9509
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_london_matched.csv.gz": {
+      "sha256": "45f95b538e6addc5177f2dcb7ee3eca47fc09f7ac159cb917d7e12e92a431433",
+      "size_bytes": 14500
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_london_new_york_double_ledger.csv.gz": {
+      "sha256": "e6c4e9908c5583f39ba5836973ce16d9de11e7d7df7bc65109305508c8f447f5",
+      "size_bytes": 2810
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_london_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "b2b1eb763c05e7f3f5f85660dbd956658cecf6f6164ec66f9042823e084aa408",
+      "size_bytes": 21947
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_london_new_york_matched.csv.gz": {
+      "sha256": "116051645a87b8c81cddbc46cc025873012e1168142512885df5fdc701b2556e",
+      "size_bytes": 33479
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_london_new_york_serial.csv.gz": {
+      "sha256": "303528076c2070c47200a71997c8660775bc21bbbf350f00a4ed7f1a0963e886",
+      "size_bytes": 23547
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_london_serial.csv.gz": {
+      "sha256": "482b08970a063ba7c778b50c6b9c93e04bd3857941535d3adc5b0ad65c42fb38",
+      "size_bytes": 10335
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_lunch_double_ledger.csv.gz": {
+      "sha256": "fb91c15de39e9131da94f6f5e6867ef7a13c8a2f8780ca0fef6d532d70de7305",
+      "size_bytes": 6096
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_lunch_fixed1_ledger.csv.gz": {
+      "sha256": "609b1d57f32c4926fa97d1f0bb072345a29399b1eaaca915dbec0147337a4765",
+      "size_bytes": 10537
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_lunch_matched.csv.gz": {
+      "sha256": "b96a8eaab9951b315ae067e5c19888c075913b6852ede74aab683ca335e12060",
+      "size_bytes": 16136
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_lunch_serial.csv.gz": {
+      "sha256": "fb9158d86f448e6b6a407fb6037f3ad57be059115f5b1b06e93ff98dbe803d92",
+      "size_bytes": 11308
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_new_york_double_ledger.csv.gz": {
+      "sha256": "4ffd47b5ab930d236a0bd358d4f86ed24cf681a63acff767b242e5a00ecb6d33",
+      "size_bytes": 2107
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_new_york_fixed1_ledger.csv.gz": {
+      "sha256": "556bbfd80adeb9977cf6c2a8811927d61d2c7aa8d4ec2e6dcf38c6ba21b6d068",
+      "size_bytes": 12959
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_new_york_matched.csv.gz": {
+      "sha256": "39a67b49b989df0422d871000448b006c56fa1ddf5d649ec784f2ecc8570a296",
+      "size_bytes": 19609
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_new_york_serial.csv.gz": {
+      "sha256": "a86f8ec2da0101c2b8b29bf86d4a379e7fc4f46987e5fdb1d0992bb1f6aaf6b0",
+      "size_bytes": 14053
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_opportunities.csv.gz": {
+      "sha256": "8f50cbe68e259834530e7c6dbef5665492144146fc8ec40fb42466410bdd9781",
+      "size_bytes": 71104
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_union_double_ledger.csv.gz": {
+      "sha256": "851ea7a0d82610104a9d731abaa71a11cb716881f36c3633663136752feb1ba5",
+      "size_bytes": 3275
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_union_fixed1_ledger.csv.gz": {
+      "sha256": "c32d54baef32f67a8e9b5dbfa4844706b2787504249c9a82929905252183dd10",
+      "size_bytes": 30549
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_union_matched.csv.gz": {
+      "sha256": "c4eef1d659584b1acdd46e03a8c767440f07de1975e5112347e8299ce0c13135",
+      "size_bytes": 46846
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_original_union_serial.csv.gz": {
+      "sha256": "8df5dfada9a6823306b84a9035351b96a6989699ff3e11c93a18b471e4aa1d8c",
+      "size_bytes": 32563
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/validation_receipt.json": {
+      "sha256": "71734bc1d7573cfabfcb5d447dfbfc5ca4cbd82ce40959a1d1b487ce057a42cc",
+      "size_bytes": 1026
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/selection.json": {
+      "sha256": "df9f7a47ec68e547a582fec95c959d86380f84c974f933dd08373ada19e2e34f",
+      "size_bytes": 885
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/session_source_evidence.json": {
+      "sha256": "e5a610e637eb9fb8b67b152d061f0606df7bd1556cb7d4cfd29f3c5b3b920bcd",
+      "size_bytes": 754
+    },
+    "scripts/report_spike_ict_sessions.py": {
+      "sha256": "f65889c410437c2562f49e2abc061a1f9fa7162a12a88ae217859b83a99f3759",
+      "size_bytes": 13725
+    },
+    "scripts/validate_spike_ict_results.py": {
+      "sha256": "cc8ce93a1b424edbbd9745e90a78baac9ae4d5aeb0c161ae8045717daeb69007",
+      "size_bytes": 5900
+    },
+    "tests/evaluation/test_spike_ict_session_study.py": {
+      "sha256": "fd981f62154de6694947c0facdefc7f65c5167b72073b77b014269df11250817",
+      "size_bytes": 2296
+    },
+    "yoyo/evaluation/spike_ict_session_study.py": {
+      "sha256": "d7a188f8cb8a74fa57dbc4439df332b454c500576d4bfd2cd8c42d0e0ea50690",
+      "size_bytes": 10971
+    },
+    "experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/review_receipt.json": {
+      "sha256": "b9445fc36de0cee9d05d2afdf7adea2a54361b08e18f45ee2155af3c628892fb",
+      "size_bytes": 1055
+    }
+  }
+}

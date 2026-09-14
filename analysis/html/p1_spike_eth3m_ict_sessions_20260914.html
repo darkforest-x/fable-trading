@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>ETH3m V8：只在ICT指定时段开仓</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>ETH3m V8：只在ICT指定时段开仓</h1>
+<p><strong>三段合并未在两个后期窗口都取得正的平均净R，暂不能认定可用于倍投。</strong></p>
+<p><strong>只做New York＋盘中费用保本，在两种路径假设下，完整历史自然交易的最长连续净亏均为5次。这个改善值得保留，但固定1U风险账户仍从1000U降至848.58–851.64U，亏后翻倍账户剩422.45–486.45U且提前无法继续。</strong> 这里的连亏来自覆盖全期的逐笔序列，不是资金早停后的短序列；盘内路径不是实际成交验证。</p>
+<p>按你当前图表核实的三段，夏令时北京时间为14:00–17:00、17:00–20:00、20:00–23:00；合起来是14:00–23:00。我们比较“全天、三段各自、三段合并、去午间”六组，保持V8及每组退出规则不变。</p>
+<p>开发期按事前规则选出的候选是 <strong>New York</strong>（净1R/下根费用保本，至少50笔，以平均净R排序）。其开发平均净R为-0.6366；若该值为负，只代表候选中少亏，不能称已找到盈利时段。选择记录先于2025及2026前4月的评估写入；后期没有重选冠军。</p>
+<h2>时段定义</h2>
+<table><thead><tr>
+<th>色带</th>
+<th>纽约本地时间</th>
+<th>夏令时北京时间</th>
+<th>冬令时北京时间模型</th>
+</tr></thead><tbody>
+<tr><td>London</td><td>02:00–05:00</td><td>14:00–17:00</td><td>15:00–18:00</td></tr>
+<tr><td>London lunch</td><td>05:00–08:00</td><td>17:00–20:00</td><td>18:00–21:00</td></tr>
+<tr><td>New York</td><td>08:00–11:00</td><td>20:00–23:00</td><td>21:00–次日00:00</td></tr>
+</tbody></table>
+<p>三个区间左闭右开，按<strong>实际计划开仓时刻</strong>过滤：13:57信号bar于14:00确认并次开入场时，可落入London；23:00不再新开。周末也包括。时段结束不强制平仓；原止损、跟踪与所有原始V6反向退出继续运行。被排除的信号不排队、不占用影子仓位；跳过信号或隔夜不重置倍投债务。</p>
+<p>公开介绍的初版GMT+0时段已经过多次更新，不直接当当前参数。我们读取了你启用的London/London lunch/New York开关，在2026-09-13图上核对14:00、17:00、20:00、23:00边界。<a href="https://www.tradingview.com/script/1POwxCmq-ICT-Killzones-28Trades/">脚本作者及变更记录</a> 跨季节按<code>America/New_York</code>自动转换。当前EDT有运行时证据，<strong>冬季同纽约钟面是模型假设，未直接验证受保护脚本冬季代码</strong>。<a href="https://www.tradingview.com/pine-script-docs/concepts/time/">TradingView时间文档</a></p>
+<h2>你提出的三段合并：与全天直接比较</h2>
+<p>以下是完整自然交易序列的每笔R，不受倍投资金耗尽截短；费用为冻结的名义本金往返0.2%。赢/保本/亏把费用保本的tick微利单列，严格净胜率则包括所有净正收益。毛/净3R为实际兑现，不是最高浮盈。</p>
+<h3>原始V8退出</h3>
+<table><thead><tr>
+<th>区间</th>
+<th>时段</th>
+<th>自然笔数</th>
+<th>赢/保本/亏</th>
+<th>严格净胜率</th>
+<th>每笔净R</th>
+<th>累计净R</th>
+<th>完整SL/净亏最长</th>
+<th>匹配随机每笔净R</th>
+<th>超额R</th>
+<th>月块p</th>
+</tr></thead><tbody>
+<tr><td>开发：2023年8月至2024年末</td><td>全天</td><td>744</td><td>167/0/577</td><td>22.4%</td><td>-0.759</td><td>-565.07</td><td>12/27</td><td>-0.810</td><td>0.050</td><td>0.2523</td></tr>
+<tr><td>开发：2023年8月至2024年末</td><td>三段合并</td><td>379</td><td>87/0/292</td><td>23.0%</td><td>-0.708</td><td>-268.25</td><td>10/22</td><td>-0.839</td><td>0.131</td><td>0.1223</td></tr>
+<tr><td>2025年</td><td>全天</td><td>525</td><td>138/0/387</td><td>26.3%</td><td>-0.482</td><td>-252.91</td><td>11/25</td><td>-0.453</td><td>-0.027</td><td>0.5988</td></tr>
+<tr><td>2025年</td><td>三段合并</td><td>287</td><td>73/0/214</td><td>25.4%</td><td>-0.520</td><td>-149.17</td><td>11/15</td><td>-0.556</td><td>0.039</td><td>0.4055</td></tr>
+<tr><td>2026年前4月</td><td>全天</td><td>185</td><td>49/0/136</td><td>26.5%</td><td>-0.460</td><td>-85.08</td><td>9/13</td><td>-0.551</td><td>0.091</td><td>0.3176</td></tr>
+<tr><td>2026年前4月</td><td>三段合并</td><td>90</td><td>23/0/67</td><td>25.6%</td><td>-0.381</td><td>-34.31</td><td>6/11</td><td>-0.603</td><td>0.222</td><td>0.1884</td></tr>
+</tbody></table>
+<h3>净1R＋费用保本（下根生效）</h3>
+<table><thead><tr>
+<th>区间</th>
+<th>时段</th>
+<th>自然笔数</th>
+<th>赢/保本/亏</th>
+<th>严格净胜率</th>
+<th>每笔净R</th>
+<th>累计净R</th>
+<th>完整SL/净亏最长</th>
+<th>匹配随机每笔净R</th>
+<th>超额R</th>
+<th>月块p</th>
+</tr></thead><tbody>
+<tr><td>开发：2023年8月至2024年末</td><td>全天</td><td>848</td><td>71/150/627</td><td>25.9%</td><td>-0.716</td><td>-607.24</td><td>6/27</td><td>-0.805</td><td>0.087</td><td>0.0006</td></tr>
+<tr><td>开发：2023年8月至2024年末</td><td>三段合并</td><td>430</td><td>38/74/318</td><td>26.0%</td><td>-0.772</td><td>-332.10</td><td>9/16</td><td>-0.918</td><td>0.145</td><td>0.0032</td></tr>
+<tr><td>2025年</td><td>全天</td><td>617</td><td>43/146/428</td><td>30.3%</td><td>-0.471</td><td>-290.90</td><td>4/17</td><td>-0.520</td><td>0.050</td><td>0.0682</td></tr>
+<tr><td>2025年</td><td>三段合并</td><td>327</td><td>24/77/226</td><td>30.3%</td><td>-0.466</td><td>-152.41</td><td>4/22</td><td>-0.553</td><td>0.090</td><td>0.0291</td></tr>
+<tr><td>2026年前4月</td><td>全天</td><td>216</td><td>23/48/145</td><td>32.9%</td><td>-0.583</td><td>-126.00</td><td>7/13</td><td>-0.650</td><td>0.067</td><td>0.1884</td></tr>
+<tr><td>2026年前4月</td><td>三段合并</td><td>102</td><td>13/22/67</td><td>34.3%</td><td>-0.577</td><td>-58.87</td><td>3/10</td><td>-0.707</td><td>0.130</td><td>0.1270</td></tr>
+</tbody></table>
+<h2>六组时段完整对照</h2>
+<p>各行均对应匹配随机入场。单独看最长连损变短不足以证明优势：开仓次数更少本来就会缩短可观察的连续段。</p>
+<h3>开发：2023年8月至2024年末 · 原始V8退出</h3>
+<table><thead><tr>
+<th>时段</th>
+<th>自然笔数</th>
+<th>每笔毛R</th>
+<th>每笔净R</th>
+<th>累计净R</th>
+<th>完整SL/净亏最长</th>
+<th>毛/净3R兑现</th>
+<th>随机净R</th>
+<th>超额R</th>
+<th>p</th>
+<th>足额匹配笔数</th>
+</tr></thead><tbody>
+<tr><td>全天</td><td>744</td><td>-0.038</td><td>-0.759</td><td>-565.07</td><td>12/27</td><td>41/32</td><td>-0.810</td><td>0.050</td><td>0.2523</td><td>744</td></tr>
+<tr><td>London</td><td>144</td><td>0.228</td><td>-0.631</td><td>-90.79</td><td>8/14</td><td>10/8</td><td>-0.941</td><td>0.310</td><td>0.1303</td><td>144</td></tr>
+<tr><td>London lunch</td><td>115</td><td>-0.307</td><td>-1.107</td><td>-127.36</td><td>11/11</td><td>2/1</td><td>-0.975</td><td>-0.133</td><td>0.8139</td><td>115</td></tr>
+<tr><td>New York</td><td>157</td><td>0.057</td><td>-0.586</td><td>-92.06</td><td>6/27</td><td>15/11</td><td>-0.745</td><td>0.159</td><td>0.1338</td><td>157</td></tr>
+<tr><td>三段合并</td><td>379</td><td>0.050</td><td>-0.708</td><td>-268.25</td><td>10/22</td><td>26/19</td><td>-0.839</td><td>0.131</td><td>0.1223</td><td>379</td></tr>
+<tr><td>London＋New York（去午间）</td><td>296</td><td>0.152</td><td>-0.593</td><td>-175.60</td><td>9/18</td><td>25/19</td><td>-0.828</td><td>0.235</td><td>0.0676</td><td>296</td></tr>
+</tbody></table>
+<h3>开发：2023年8月至2024年末 · 净1R＋费用保本（下根生效）</h3>
+<table><thead><tr>
+<th>时段</th>
+<th>自然笔数</th>
+<th>每笔毛R</th>
+<th>每笔净R</th>
+<th>累计净R</th>
+<th>完整SL/净亏最长</th>
+<th>毛/净3R兑现</th>
+<th>随机净R</th>
+<th>超额R</th>
+<th>p</th>
+<th>足额匹配笔数</th>
+</tr></thead><tbody>
+<tr><td>全天</td><td>848</td><td>-0.017</td><td>-0.716</td><td>-607.24</td><td>6/27</td><td>0/0</td><td>-0.805</td><td>0.087</td><td>0.0006</td><td>847</td></tr>
+<tr><td>London</td><td>155</td><td>-0.088</td><td>-0.925</td><td>-143.38</td><td>8/25</td><td>0/0</td><td>-1.048</td><td>0.123</td><td>0.0712</td><td>155</td></tr>
+<tr><td>London lunch</td><td>118</td><td>-0.079</td><td>-0.872</td><td>-102.95</td><td>4/22</td><td>0/0</td><td>-0.971</td><td>0.099</td><td>0.1237</td><td>118</td></tr>
+<tr><td>New York</td><td>169</td><td>-0.011</td><td>-0.637</td><td>-107.58</td><td>5/22</td><td>0/0</td><td>-0.790</td><td>0.154</td><td>0.0794</td><td>169</td></tr>
+<tr><td>三段合并</td><td>430</td><td>-0.035</td><td>-0.772</td><td>-332.10</td><td>9/16</td><td>0/0</td><td>-0.918</td><td>0.145</td><td>0.0032</td><td>430</td></tr>
+<tr><td>London＋New York（去午间）</td><td>324</td><td>-0.048</td><td>-0.775</td><td>-250.96</td><td>7/24</td><td>0/0</td><td>-0.913</td><td>0.139</td><td>0.0291</td><td>324</td></tr>
+</tbody></table>
+<h3>2025年 · 原始V8退出</h3>
+<table><thead><tr>
+<th>时段</th>
+<th>自然笔数</th>
+<th>每笔毛R</th>
+<th>每笔净R</th>
+<th>累计净R</th>
+<th>完整SL/净亏最长</th>
+<th>毛/净3R兑现</th>
+<th>随机净R</th>
+<th>超额R</th>
+<th>p</th>
+<th>足额匹配笔数</th>
+</tr></thead><tbody>
+<tr><td>全天</td><td>525</td><td>-0.001</td><td>-0.482</td><td>-252.91</td><td>11/25</td><td>29/24</td><td>-0.453</td><td>-0.027</td><td>0.5988</td><td>524</td></tr>
+<tr><td>London</td><td>85</td><td>0.144</td><td>-0.427</td><td>-36.33</td><td>6/8</td><td>6/4</td><td>-0.610</td><td>0.182</td><td>0.1970</td><td>85</td></tr>
+<tr><td>London lunch</td><td>96</td><td>-0.194</td><td>-0.738</td><td>-70.86</td><td>7/18</td><td>4/3</td><td>-0.727</td><td>-0.005</td><td>0.5254</td><td>95</td></tr>
+<tr><td>New York</td><td>118</td><td>-0.071</td><td>-0.431</td><td>-50.84</td><td>8/15</td><td>5/4</td><td>-0.405</td><td>-0.026</td><td>0.5428</td><td>118</td></tr>
+<tr><td>三段合并</td><td>287</td><td>-0.039</td><td>-0.520</td><td>-149.17</td><td>11/15</td><td>15/11</td><td>-0.556</td><td>0.039</td><td>0.4055</td><td>286</td></tr>
+<tr><td>London＋New York（去午间）</td><td>203</td><td>0.019</td><td>-0.429</td><td>-87.16</td><td>9/12</td><td>11/8</td><td>-0.491</td><td>0.061</td><td>0.3699</td><td>203</td></tr>
+</tbody></table>
+<h3>2025年 · 净1R＋费用保本（下根生效）</h3>
+<table><thead><tr>
+<th>时段</th>
+<th>自然笔数</th>
+<th>每笔毛R</th>
+<th>每笔净R</th>
+<th>累计净R</th>
+<th>完整SL/净亏最长</th>
+<th>毛/净3R兑现</th>
+<th>随机净R</th>
+<th>超额R</th>
+<th>p</th>
+<th>足额匹配笔数</th>
+</tr></thead><tbody>
+<tr><td>全天</td><td>617</td><td>-0.001</td><td>-0.471</td><td>-290.90</td><td>4/17</td><td>0/0</td><td>-0.520</td><td>0.050</td><td>0.0682</td><td>616</td></tr>
+<tr><td>London</td><td>89</td><td>0.055</td><td>-0.524</td><td>-46.59</td><td>4/10</td><td>0/0</td><td>-0.635</td><td>0.112</td><td>0.0410</td><td>89</td></tr>
+<tr><td>London lunch</td><td>104</td><td>0.001</td><td>-0.540</td><td>-56.16</td><td>4/11</td><td>0/0</td><td>-0.684</td><td>0.151</td><td>0.1248</td><td>103</td></tr>
+<tr><td>New York</td><td>136</td><td>0.008</td><td>-0.346</td><td>-47.07</td><td>3/10</td><td>0/0</td><td>-0.396</td><td>0.049</td><td>0.2843</td><td>136</td></tr>
+<tr><td>三段合并</td><td>327</td><td>0.007</td><td>-0.466</td><td>-152.41</td><td>4/22</td><td>0/0</td><td>-0.553</td><td>0.090</td><td>0.0291</td><td>326</td></tr>
+<tr><td>London＋New York（去午间）</td><td>225</td><td>0.027</td><td>-0.416</td><td>-93.66</td><td>3/14</td><td>0/0</td><td>-0.490</td><td>0.074</td><td>0.1226</td><td>225</td></tr>
+</tbody></table>
+<h3>2026年前4月 · 原始V8退出</h3>
+<table><thead><tr>
+<th>时段</th>
+<th>自然笔数</th>
+<th>每笔毛R</th>
+<th>每笔净R</th>
+<th>累计净R</th>
+<th>完整SL/净亏最长</th>
+<th>毛/净3R兑现</th>
+<th>随机净R</th>
+<th>超额R</th>
+<th>p</th>
+<th>足额匹配笔数</th>
+</tr></thead><tbody>
+<tr><td>全天</td><td>185</td><td>0.192</td><td>-0.460</td><td>-85.08</td><td>9/13</td><td>15/13</td><td>-0.551</td><td>0.091</td><td>0.3176</td><td>185</td></tr>
+<tr><td>London</td><td>39</td><td>0.807</td><td>0.056</td><td>2.18</td><td>4/5</td><td>4/3</td><td>-0.505</td><td>0.561</td><td>0.3139</td><td>39</td></tr>
+<tr><td>London lunch</td><td>30</td><td>-0.030</td><td>-0.740</td><td>-22.20</td><td>5/9</td><td>2/2</td><td>-0.850</td><td>0.110</td><td>0.5010</td><td>30</td></tr>
+<tr><td>New York</td><td>26</td><td>-0.244</td><td>-0.666</td><td>-17.31</td><td>5/5</td><td>1/1</td><td>-0.406</td><td>-0.259</td><td>0.7489</td><td>26</td></tr>
+<tr><td>三段合并</td><td>90</td><td>0.278</td><td>-0.381</td><td>-34.31</td><td>6/11</td><td>7/6</td><td>-0.603</td><td>0.222</td><td>0.1884</td><td>90</td></tr>
+<tr><td>London＋New York（去午间）</td><td>65</td><td>0.386</td><td>-0.233</td><td>-15.13</td><td>4/8</td><td>5/4</td><td>-0.466</td><td>0.233</td><td>0.3139</td><td>65</td></tr>
+</tbody></table>
+<h3>2026年前4月 · 净1R＋费用保本（下根生效）</h3>
+<table><thead><tr>
+<th>时段</th>
+<th>自然笔数</th>
+<th>每笔毛R</th>
+<th>每笔净R</th>
+<th>累计净R</th>
+<th>完整SL/净亏最长</th>
+<th>毛/净3R兑现</th>
+<th>随机净R</th>
+<th>超额R</th>
+<th>p</th>
+<th>足额匹配笔数</th>
+</tr></thead><tbody>
+<tr><td>全天</td><td>216</td><td>0.044</td><td>-0.583</td><td>-126.00</td><td>7/13</td><td>0/0</td><td>-0.650</td><td>0.067</td><td>0.1884</td><td>216</td></tr>
+<tr><td>London</td><td>43</td><td>0.242</td><td>-0.481</td><td>-20.70</td><td>2/8</td><td>0/0</td><td>-0.743</td><td>0.262</td><td>0.0628</td><td>43</td></tr>
+<tr><td>London lunch</td><td>31</td><td>-0.080</td><td>-0.787</td><td>-24.40</td><td>4/9</td><td>0/0</td><td>-0.932</td><td>0.145</td><td>0.2524</td><td>31</td></tr>
+<tr><td>New York</td><td>28</td><td>-0.085</td><td>-0.492</td><td>-13.77</td><td>2/4</td><td>0/0</td><td>-0.402</td><td>-0.090</td><td>0.8757</td><td>28</td></tr>
+<tr><td>三段合并</td><td>102</td><td>0.055</td><td>-0.577</td><td>-58.87</td><td>3/10</td><td>0/0</td><td>-0.707</td><td>0.130</td><td>0.1270</td><td>102</td></tr>
+<tr><td>London＋New York（去午间）</td><td>71</td><td>0.113</td><td>-0.485</td><td>-34.47</td><td>2/11</td><td>0/0</td><td>-0.608</td><td>0.123</td><td>0.1270</td><td>71</td></tr>
+</tbody></table>
+<h2>1000U连续资金：固定1U与亏后翻倍</h2>
+<p>初始价格风险1U，名义杠杆容量10倍，净亏后风险翻倍，整轮实际净回本才重置。容量不足保留债务等待，不能继续时停机；没有六次后自动清债。原始退出不固定止盈；其他三时序固定净1R退出。费用保本价为多单开仓价×1.002、空单×0.998，按0.01价格档向有利方向取整，价格再向有利方向越过一档才激活。下根生效组在收盘后安装，盘中组沿指定路径立即安装；保留原跟踪止损。亏损时成本可能令净亏超过价格风险1U。</p>
+<table><thead><tr>
+<th>退出</th>
+<th>时段</th>
+<th>资金</th>
+<th>自然笔数</th>
+<th>期末U</th>
+<th>现金回撤</th>
+<th>最大已用风险U</th>
+<th>容量拒单</th>
+<th>完整SL/净亏最长</th>
+<th>最后实际开仓UTC</th>
+<th>停止UTC</th>
+</tr></thead><tbody>
+<tr><td>原始V8退出</td><td>全天</td><td>固定1U</td><td>1455</td><td>94.40</td><td>90.6%</td><td>1</td><td>1</td><td>13/27</td><td>2026-04-30 22:54</td><td>未永久停机</td></tr>
+<tr><td>原始V8退出</td><td>全天</td><td>亏后翻倍</td><td>18</td><td>566.89</td><td>45.8%</td><td>256</td><td>1784</td><td>3/7</td><td>2025-01-20 17:42</td><td>未永久停机</td></tr>
+<tr><td>原始V8退出</td><td>New York</td><td>固定1U</td><td>301</td><td>839.80</td><td>16.0%</td><td>1</td><td>0</td><td>8/27</td><td>2026-04-30 14:30</td><td>未永久停机</td></tr>
+<tr><td>原始V8退出</td><td>New York</td><td>亏后翻倍</td><td>16</td><td>477.52</td><td>54.3%</td><td>256</td><td>182</td><td>3/9</td><td>2025-03-04 14:42</td><td>2025-03-07 13:33</td></tr>
+<tr><td>原始V8退出</td><td>三段合并</td><td>固定1U</td><td>756</td><td>548.28</td><td>45.2%</td><td>1</td><td>0</td><td>11/22</td><td>2026-04-30 14:30</td><td>未永久停机</td></tr>
+<tr><td>原始V8退出</td><td>三段合并</td><td>亏后翻倍</td><td>28</td><td>575.65</td><td>46.7%</td><td>256</td><td>875</td><td>4/9</td><td>2025-03-04 14:42</td><td>未永久停机</td></tr>
+<tr><td>净1R＋费用保本（下根生效）</td><td>全天</td><td>固定1U</td><td>1645</td><td>24.75</td><td>97.5%</td><td>1</td><td>41</td><td>6/27</td><td>2026-04-30 14:30</td><td>未永久停机</td></tr>
+<tr><td>净1R＋费用保本（下根生效）</td><td>全天</td><td>亏后翻倍</td><td>11</td><td>580.78</td><td>41.9%</td><td>256</td><td>1797</td><td>1/4</td><td>2025-03-04 14:42</td><td>未永久停机</td></tr>
+<tr><td>净1R＋费用保本（下根生效）</td><td>New York</td><td>固定1U</td><td>333</td><td>831.58</td><td>16.8%</td><td>1</td><td>0</td><td>5/22</td><td>2026-04-30 14:30</td><td>未永久停机</td></tr>
+<tr><td>净1R＋费用保本（下根生效）</td><td>New York</td><td>亏后翻倍</td><td>14</td><td>489.40</td><td>51.1%</td><td>256</td><td>185</td><td>2/2</td><td>2025-03-04 14:42</td><td>2025-03-07 13:33</td></tr>
+<tr><td>净1R＋费用保本（下根生效）</td><td>三段合并</td><td>固定1U</td><td>859</td><td>456.63</td><td>54.3%</td><td>1</td><td>0</td><td>9/22</td><td>2026-04-30 14:30</td><td>未永久停机</td></tr>
+<tr><td>净1R＋费用保本（下根生效）</td><td>三段合并</td><td>亏后翻倍</td><td>12</td><td>625.23</td><td>37.5%</td><td>256</td><td>897</td><td>2/4</td><td>2025-03-04 14:42</td><td>未永久停机</td></tr>
+<tr><td>净1R＋费用保本（先高后低）</td><td>全天</td><td>固定1U</td><td>1685</td><td>62.06</td><td>93.8%</td><td>1</td><td>5</td><td>7/10</td><td>2026-04-30 22:54</td><td>未永久停机</td></tr>
+<tr><td>净1R＋费用保本（先高后低）</td><td>全天</td><td>亏后翻倍</td><td>22</td><td>463.25</td><td>53.7%</td><td>256</td><td>1023</td><td>2/3</td><td>2025-03-04 14:42</td><td>2025-03-05 07:51</td></tr>
+<tr><td>净1R＋费用保本（先高后低）</td><td>New York</td><td>固定1U</td><td>335</td><td>848.58</td><td>15.1%</td><td>1</td><td>0</td><td>5/5</td><td>2026-04-30 14:30</td><td>未永久停机</td></tr>
+<tr><td>净1R＋费用保本（先高后低）</td><td>New York</td><td>亏后翻倍</td><td>26</td><td>486.45</td><td>51.8%</td><td>256</td><td>173</td><td>2/3</td><td>2025-03-04 14:42</td><td>2025-03-07 13:33</td></tr>
+<tr><td>净1R＋费用保本（先高后低）</td><td>三段合并</td><td>固定1U</td><td>863</td><td>496.52</td><td>50.3%</td><td>1</td><td>0</td><td>9/11</td><td>2026-04-30 14:30</td><td>未永久停机</td></tr>
+<tr><td>净1R＋费用保本（先高后低）</td><td>三段合并</td><td>亏后翻倍</td><td>16</td><td>455.32</td><td>54.5%</td><td>256</td><td>494</td><td>2/4</td><td>2025-03-04 14:42</td><td>2025-03-05 07:51</td></tr>
+<tr><td>净1R＋费用保本（先低后高）</td><td>全天</td><td>固定1U</td><td>1688</td><td>56.86</td><td>94.3%</td><td>1</td><td>6</td><td>7/10</td><td>2026-04-30 14:30</td><td>未永久停机</td></tr>
+<tr><td>净1R＋费用保本（先低后高）</td><td>全天</td><td>亏后翻倍</td><td>21</td><td>399.23</td><td>60.1%</td><td>256</td><td>1024</td><td>2/3</td><td>2025-03-04 14:42</td><td>2025-03-05 07:51</td></tr>
+<tr><td>净1R＋费用保本（先低后高）</td><td>New York</td><td>固定1U</td><td>334</td><td>851.64</td><td>14.8%</td><td>1</td><td>0</td><td>5/5</td><td>2026-04-30 14:30</td><td>未永久停机</td></tr>
+<tr><td>净1R＋费用保本（先低后高）</td><td>New York</td><td>亏后翻倍</td><td>26</td><td>422.45</td><td>58.1%</td><td>256</td><td>173</td><td>2/3</td><td>2025-03-04 14:42</td><td>2025-03-07 13:33</td></tr>
+<tr><td>净1R＋费用保本（先低后高）</td><td>三段合并</td><td>固定1U</td><td>863</td><td>493.21</td><td>50.7%</td><td>1</td><td>0</td><td>9/11</td><td>2026-04-30 14:30</td><td>未永久停机</td></tr>
+<tr><td>净1R＋费用保本（先低后高）</td><td>三段合并</td><td>亏后翻倍</td><td>14</td><td>391.28</td><td>60.9%</td><td>256</td><td>496</td><td>2/4</td><td>2025-03-04 14:42</td><td>2025-03-05 07:51</td></tr>
+</tbody></table>
+<p>这是资金可持续性诊断，同一入场规则的固定1U账户作为资金管理对照。匹配随机入场收益见三个独立期间的同退出/时段表及controls.csv，不是模拟随机倍投账户，不能冒充连续资金随机对照。容量拒单不占仓，后续可能接受原本会被占仓挡掉的信号，所以有限资金账户笔数可能不同于不设容量的自然序列。资金早停后的低交易数和短连损不能代表覆盖到2026年4月。纽约盘中两组在2025-03-07均因下一档价格风险512U已超过剩余现金而停止；“保本打断连亏”没有清掉上一轮亏损。</p>
+<h2>盘中保护时序敏感性</h2>
+<p>先高后低/先低后高是两种OHLC路径假设，不能冒充真实tick或严格收益上下界。</p>
+<table><thead><tr>
+<th>区间</th>
+<th>时序</th>
+<th>时段</th>
+<th>自然笔数</th>
+<th>每笔净R</th>
+<th>保本次数</th>
+<th>完整SL/净亏最长</th>
+<th>随机净R</th>
+<th>超额R</th>
+<th>p</th>
+</tr></thead><tbody>
+<tr><td>开发：2023年8月至2024年末</td><td>净1R＋费用保本（先高后低）</td><td>全天</td><td>854</td><td>-0.661</td><td>465</td><td>6/10</td><td>-0.771</td><td>0.108</td><td>0.0005</td></tr>
+<tr><td>开发：2023年8月至2024年末</td><td>净1R＋费用保本（先高后低）</td><td>New York</td><td>170</td><td>-0.581</td><td>98</td><td>5/5</td><td>-0.752</td><td>0.171</td><td>0.0475</td></tr>
+<tr><td>开发：2023年8月至2024年末</td><td>净1R＋费用保本（先高后低）</td><td>三段合并</td><td>432</td><td>-0.723</td><td>232</td><td>9/11</td><td>-0.878</td><td>0.154</td><td>0.0040</td></tr>
+<tr><td>开发：2023年8月至2024年末</td><td>净1R＋费用保本（先低后高）</td><td>全天</td><td>854</td><td>-0.671</td><td>477</td><td>6/10</td><td>-0.775</td><td>0.103</td><td>0.0004</td></tr>
+<tr><td>开发：2023年8月至2024年末</td><td>净1R＋费用保本（先低后高）</td><td>New York</td><td>170</td><td>-0.570</td><td>96</td><td>5/5</td><td>-0.749</td><td>0.180</td><td>0.0506</td></tr>
+<tr><td>开发：2023年8月至2024年末</td><td>净1R＋费用保本（先低后高）</td><td>三段合并</td><td>431</td><td>-0.725</td><td>235</td><td>9/11</td><td>-0.882</td><td>0.157</td><td>0.0034</td></tr>
+<tr><td>2025年</td><td>净1R＋费用保本（先高后低）</td><td>全天</td><td>619</td><td>-0.430</td><td>400</td><td>4/5</td><td>-0.487</td><td>0.059</td><td>0.0422</td></tr>
+<tr><td>2025年</td><td>净1R＋费用保本（先高后低）</td><td>New York</td><td>137</td><td>-0.277</td><td>95</td><td>3/5</td><td>-0.361</td><td>0.084</td><td>0.1745</td></tr>
+<tr><td>2025年</td><td>净1R＋费用保本（先高后低）</td><td>三段合并</td><td>329</td><td>-0.416</td><td>208</td><td>4/6</td><td>-0.518</td><td>0.104</td><td>0.0248</td></tr>
+<tr><td>2025年</td><td>净1R＋费用保本（先低后高）</td><td>全天</td><td>621</td><td>-0.422</td><td>398</td><td>4/5</td><td>-0.488</td><td>0.067</td><td>0.0271</td></tr>
+<tr><td>2025年</td><td>净1R＋费用保本（先低后高）</td><td>New York</td><td>136</td><td>-0.286</td><td>97</td><td>3/5</td><td>-0.373</td><td>0.087</td><td>0.1776</td></tr>
+<tr><td>2025年</td><td>净1R＋费用保本（先低后高）</td><td>三段合并</td><td>330</td><td>-0.422</td><td>211</td><td>4/6</td><td>-0.521</td><td>0.101</td><td>0.0225</td></tr>
+<tr><td>2026年前4月</td><td>净1R＋费用保本（先高后低）</td><td>全天</td><td>216</td><td>-0.534</td><td>124</td><td>7/7</td><td>-0.611</td><td>0.078</td><td>0.1884</td></tr>
+<tr><td>2026年前4月</td><td>净1R＋费用保本（先高后低）</td><td>New York</td><td>28</td><td>-0.521</td><td>19</td><td>2/2</td><td>-0.384</td><td>-0.137</td><td>0.9401</td></tr>
+<tr><td>2026年前4月</td><td>净1R＋费用保本（先高后低）</td><td>三段合并</td><td>102</td><td>-0.530</td><td>58</td><td>3/3</td><td>-0.672</td><td>0.142</td><td>0.1270</td></tr>
+<tr><td>2026年前4月</td><td>净1R＋费用保本（先低后高）</td><td>全天</td><td>218</td><td>-0.541</td><td>129</td><td>7/7</td><td>-0.624</td><td>0.083</td><td>0.2524</td></tr>
+<tr><td>2026年前4月</td><td>净1R＋费用保本（先低后高）</td><td>New York</td><td>28</td><td>-0.450</td><td>17</td><td>2/2</td><td>-0.364</td><td>-0.086</td><td>0.8757</td></tr>
+<tr><td>2026年前4月</td><td>净1R＋费用保本（先低后高）</td><td>三段合并</td><td>102</td><td>-0.540</td><td>59</td><td>3/3</td><td>-0.663</td><td>0.124</td><td>0.1910</td></tr>
+</tbody></table>
+<h2>数据、复现与验证</h2>
+<p>固定OKX ETH-USDT-SWAP 3m上下文482176根，2023-07-31 11:12至2026-04-30 23:57 UTC；交易开发从2023-08-01开始，保留前史预热。开发/2025/2026前4月每组从空仓开始，连续资金另算。正类率/val AUC/top-decile无预测模型不适用；以胜率、完整收益分布摘要和匹配随机入场代替。没有随机切分。</p>
+<p>这是该配置第0次消耗holdout；没有拿9月数据选择时段。此前历史已用于其他研究，不宣称全新盲样本。研究代码与计划在<code>69c9c7636bed121a872b7e72fd63a534b590a00c</code>冻结后运行；原receipt中的<code>033500d3f6bb451badabff211ff0a8205ed21ace</code>是运行结束时HEAD，其间仅提交了报告生成器，研究代码逐字节未变。config保留从上一研究继承的未使用arms/cash/permutation_draws字段，实际执行以冻结代码和PROJECT_PLAN为准；validation_receipt列出实际四组退出、两组资金参数，未运行无限杠杆组。</p>
+<p>日历DST、边界、排除信号无影子仓位、保本/删失等13项合成检查通过。另核对96组完整自然序列、192份现金账本、72组匹配对照算术和744笔原始V8开发期基线逐笔一致；选择文件时间早于首份2025年产物。以上验证不等于原生Pine逐笔一致或盘内真实成交验证。</p>
+<p>同币、UTC月、纽约开仓小时、周末状态、当前ATR比例相对于此前120根的三分位桶匹配9次随机入场，同方向/退出/成本；月份区块符号置换9999次。控制只匹配自然出场，保留删失、无效及缺配对数量；随机均值、超额R及p只按足额9次匹配的子集计算，而策略均值包含全部自然交易。p未做多重比较校正，开发排名后p不具有确认性含义。阈值单变量对照就是同退出的全天组。</p>
+<pre><code>
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q -p no:cacheprovider --capture=no tests/evaluation/test_spike_ict_session_study.py
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m yoyo.evaluation.spike_ict_session_study
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python scripts/validate_spike_ict_results.py
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python scripts/report_spike_ict_sessions.py
+</code></pre>
+<p>结果目录拒绝覆盖。固定输入SHA、源证据和开发选择在实验目录。完整<a href="../../experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/summary.csv">自然交易摘要</a>、<a href="../../experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/cash.csv">资金账本摘要</a>、<a href="../../experiments/active/exp-spike-eth3m-ict-sessions-20260914-v1/results/controls.csv">匹配随机摘要</a>以及各序列逐笔CSV均可核对。运行后报告立即由md_to_html转换HTML。</p>
+<h2>风险与诚实声明</h2>
+<p>这次改变开仓时段，没有修正Pine参考框与Python次开成交的差异；之前18笔与20笔仍未完成原生图表逐项映射。当前时段方案只是此明确Python模型下的研究，尚未部署或实盘验证。无资金费、标记价格强平、滑点/延迟/最小张数重建；固定20bp成本不是当前账户实际费率的声明。冬季与历史版本的受保护指标时段尚未逐年原生校验。</p>
+<p>下一步只有在每笔净收益、后期稳定性和资金可持续性同时支持时才考虑新的前向验证。若继续调整退出或实际费用预算，另立单变量实验；新holdout使用与实盘操作仍需owner明确授权。本轮不promote、不修改图表参数或交易执行器。</p>
+</body>
+</html>

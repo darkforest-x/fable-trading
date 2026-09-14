@@ -1,0 +1,20 @@
+{
+  "reviewer_role": "budget-evidence (Luna Max)",
+  "scope": "existing serial/cash artifacts and formulas; no source price reads",
+  "core_claims_verified": true,
+  "verified": [
+    "NewYork full natural335/334, maxnetloss5, no censored trades, final entry2026-04-30",
+    "fixed1 balances848.5768/851.6363; double486.4536/422.4536; halt512 price risk on2025-03-07",
+    "20bp cost deducted once; fee reserve is only capacity guard; feeBE activation +1 tick",
+    "report separates cash filtered sequences and complete natural sequences"
+  ],
+  "reviewer_concern_rejected": {
+    "claim": "prior.quantile uses full-period cutpoints",
+    "reason": "prior is a pandas Rolling object from vol.shift().rolling(120), so quantile is calculated separately on each preceding window. Parent verified type and future perturbation on a minimal series. No whole-period quantile is used."
+  },
+  "unresolved_limits": [
+    "No true tick order",
+    "Winter protected script not directly checked",
+    "18 chart trades versus20 Python trades remains unmapped"
+  ]
+}

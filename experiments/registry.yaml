@@ -9152,8 +9152,8 @@ experiments:
 
   - experiment_id: exp-spike-eth3m-ict-sessions-20260914-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 922286e68c
-    status: active
+    source_commit: 69c9c7636bed121a872b7e72fd63a534b590a00c
+    status: rejected
     question: Does restricting frozen ETH3m V8 entries to the owners ICT London,lunch,and New York sessions improve per-trade net outcomes and recovery cash stability?
     single_variable: Entry session only within each already-frozen exit timing; no new exit or cost tuning.
     holdout_consumed: false
@@ -9161,3 +9161,6 @@ experiments:
     production_eligible: false
     canonical_report: analysis/p1_spike_eth3m_ict_sessions_20260914.md
     notes: NY local02-05,05-08,08-11 from current EDT UI; winter IANA behavior is a disclosed model. Pre-May2026 research only.
+    result: Frozen session configurations fail sustained positive net outcomes;NY immediate protection reduces observed full-history max net-loss streak to5 but finite recovery still halts.
+    artifacts:
+    - spike-eth3m-ict-sessions-20260914-delivery

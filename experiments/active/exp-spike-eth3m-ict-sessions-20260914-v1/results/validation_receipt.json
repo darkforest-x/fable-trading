@@ -1,0 +1,36 @@
+{
+  "status": "passed",
+  "serial_groups": 96,
+  "cash_ledgers": 192,
+  "control_groups": 72,
+  "original_baseline_rows_identical": 744,
+  "holdout_consumptions": 0,
+  "study_frozen_commit": "69c9c7636bed121a872b7e72fd63a534b590a00c",
+  "runner_sha256": "d7a188f8cb8a74fa57dbc4439df332b454c500576d4bfd2cd8c42d0e0ea50690",
+  "runner_unchanged_since_freeze": true,
+  "selection_mtime_ns": 1789395731070399774,
+  "first_validation_artifact_mtime_ns": 1789395731841220895,
+  "provenance_note": "Original receipt builder_commit captured end-of-run HEAD, not run-start HEAD.",
+  "effective_arms": [
+    "original",
+    "next_bar",
+    "ohlc",
+    "olhc"
+  ],
+  "effective_cash": {
+    "fixed1": {
+      "schedule": "fixed",
+      "leverage_cap": 10
+    },
+    "double": {
+      "schedule": "double",
+      "leverage_cap": 10
+    }
+  },
+  "inherited_unused_config_keys": [
+    "arms",
+    "cash",
+    "permutation_draws"
+  ],
+  "limitations": "Artifact arithmetic and baseline parity, not actual ticks or Pine chart trade parity."
+}
