@@ -17,15 +17,33 @@ LABELS = {'cohort': '数据池', 'event_scope': '事件口径', 'asset_scope': '
           'trades': '已平仓笔数', 'events': '事件数', 'censored': '未完成', 'win_rate': '净胜率', 'pf_r': 'R利润因子',
           'sum_net_r': '净R合计', 'mean_net_r': '平均净R', 'median_net_r': '净R中位数',
           'closed_event_cumulative_r_maxdd': '已平仓累计R回撤', 'top5_positive_net_r': '前5笔盈利R',
-          'sum_without_top5_net_r': '去前5笔净R', 'realized_ge_10r': '兑现10R笔数', 'cost_r': '费用R',
+          'top5_profit_share': '前5笔盈利贡献占比', 'sum_without_top5_net_r': '去前5笔净R', 'realized_ge_10r': '兑现10R笔数', 'cost_r': '费用R',
+          'mean_net_r_ci95_low': '平均净R CI下界', 'mean_net_r_ci95_high': '平均净R CI上界',
           'mean_matched_excess_net_r': '相对随机平均超额R', 'excess_ci95_low': '超额CI下界', 'excess_ci95_high': '超额CI上界',
-          'excess_one_sided_p': '超额单侧p', 'excess_one_sided_p_bonferroni9': '校正p', 'cross_cut_excluded': '跨切点排除'}
-TABLE_FIELDS = ['trades', 'win_rate', 'sum_net_r', 'top5_positive_net_r', 'sum_without_top5_net_r',
+          'excess_one_sided_p': '超额单侧p', 'excess_one_sided_p_bonferroni9': '校正p',
+          'cross_cut_excluded': '开发期跨切点事件（仅开发分区排除）',
+          'paired_trades': '同事件双闭合笔数', 'prior_losers_delta_r': '原亏损组变化R',
+          'prior_winners_delta_r': '原盈利组变化R', 'paired_delta_r': '同事件变化R',
+          'winner_to_nonwinner': '原赢家变非赢家笔数', 'loss_to_winner': '原非赢家变赢家笔数',
+          'newly_closed_trades': '原版未完成而本臂闭合笔数', 'newly_closed_net_r': '新增闭合净R'}
+TABLE_FIELDS = ['trades', 'censored', 'win_rate', 'sum_net_r', 'mean_net_r', 'mean_net_r_ci95_low', 'mean_net_r_ci95_high',
+                'top5_positive_net_r', 'top5_profit_share', 'sum_without_top5_net_r',
                 'mean_matched_excess_net_r', 'excess_ci95_low', 'excess_ci95_high', 'closed_event_cumulative_r_maxdd']
+
+VALUE_LABELS = {
+    'cohort': {'original6253': '原6253账本', 'top20': '固定前20池'},
+    'event_scope': {'raw': '原始事件', 'dedup': '按标的日去重'},
+    'asset_scope': {'all': '全标的', 'ex_rave': '去RAVE'},
+    'period': {'all': '全期', 'dev': '开发期', 'oos': '测试期', 'oos_pre_holdout': '测试期（holdout前）',
+               'holdout_era': 'holdout期', 'cross_cut_or_censored': '跨切点或未完成'},
+}
 
 
 def human(frame):
     frame = frame.copy()
+    for column, labels in VALUE_LABELS.items():
+        if column in frame:
+            frame[column] = frame[column].map(labels).fillna(frame[column])
     if 'arm' in frame:
         frame['arm'] = frame.arm.map(ARMS).fillna(frame.arm)
     return frame.rename(columns=LABELS)
@@ -34,8 +52,9 @@ def human(frame):
 def table(frame, ids):
     cols = [x for x in ids + TABLE_FIELDS if x in frame]
     f = frame[cols].copy()
-    if 'win_rate' in f:
-        f['win_rate'] = f.win_rate.map(lambda x: f'{x:.2%}' if pd.notna(x) else '不适用')
+    for column in ('win_rate', 'top5_profit_share'):
+        if column in f:
+            f[column] = f[column].map(lambda x: f'{x:.2%}' if pd.notna(x) else '不适用')
     for c in f.select_dtypes(include='number'):
         if c not in ('trades', 'timeframe_min'):
             f[c] = f[c].map(lambda x: f'{x:.3f}' if pd.notna(x) else '不适用')
@@ -48,19 +67,30 @@ def read_outcomes(cohort):
 
 
 def wide_trades(cohort):
+    """Return one row per event with only realized R in accounting columns.
+
+    Censored outcomes retain a mark-to-market ``net_r`` for replay audit, but
+    that value is not realized accounting and must never be exported as a trade
+    net-R.  Status columns keep the distinction visible to workbook readers.
+    """
     events = pd.read_csv(EXP / 'results' / cohort / 'events.csv.gz')
     result = read_outcomes(cohort)
     projection = EXP / 'results/stats' / f'{cohort}_identity_dedup.csv'
     if projection.exists():
         identity = pd.read_csv(projection).set_index('event_id')
         events['dedup_keep'] = events.event_id.map(identity.dedup_keep)
-    metric = result.pivot(index='event_id', columns='arm', values='net_r')
+    result['net_r'] = pd.to_numeric(result.net_r, errors='coerce')
+    realized = result.loc[~result.censored.astype(bool) & np.isfinite(result.net_r)]
+    metric = realized.pivot(index='event_id', columns='arm', values='net_r')
+    status = result.pivot(index='event_id', columns='arm', values='censored')
+    status = status.apply(lambda column: np.where(column.isna(), 'excluded', np.where(column.astype(bool), 'censored', 'closed')))
+    status = status.rename(columns={arm: f'{arm}_status' for arm in status.columns})
     primary = result.loc[result.arm.eq('baseline')].set_index('event_id')
     combo = result.loc[result.arm.eq('triple')].set_index('event_id')
     f = events.set_index('event_id')
     columns = ['venue', 'symbol', 'timeframe_min', 'entry_time', 'volume_ratio', 'dedup_keep']
     out = f[columns].join(primary[['entry_price', 'initial_stop', 'risk_fraction_at_entry', 'exit_time', 'mfe_r']], rsuffix='_out')
-    out = out.join(combo[['exit_time', 'exit_protection_source']], rsuffix='_triple').join(metric)
+    out = out.join(combo[['exit_time', 'exit_protection_source']], rsuffix='_triple').join(metric).join(status)
     out['delta_triple_r'] = out['triple'] - out['baseline']
     return out.reset_index()
 
@@ -95,7 +125,7 @@ def sheet_spec(name, title, frame, subtitle='', columns=None):
     for i, col in enumerate(frame.columns):
         if col in ('trades', 'events', 'censored', 'timeframe_min', 'realized_ge_10r', 'cross_cut_excluded'):
             spec['formats'][i] = '#,##0'
-        elif col in ('win_rate', 'risk_fraction_at_entry'):
+        elif col in ('win_rate', 'top5_profit_share', 'risk_fraction_at_entry'):
             spec['formats'][i] = '0.00%'
         elif pd.api.types.is_numeric_dtype(frame[col]):
             spec['formats'][i] = '#,##0.00;[Red]-#,##0.00'
@@ -120,8 +150,9 @@ def build():
     top = summary.loc[summary.cohort.eq('top20') & summary.event_scope.eq('dedup') & summary.asset_scope.eq('all')]
     original_main = original.loc[original.group_type.eq('primary') & original.arm.isin(MAIN)]
     top_main = top.loc[top.group_type.eq('primary') & top.arm.isin(MAIN)]
-    ex = summary.loc[summary.group_type.eq('primary') & summary.asset_scope.eq('ex_rave') & summary.arm.eq('triple')]
-    timeframe = summary.loc[summary.group_type.eq('timeframe') & summary.asset_scope.eq('all') & summary.arm.isin(MAIN)]
+    ex = summary.loc[summary.cohort.eq('original6253') & summary.event_scope.eq('raw') & summary.group_type.eq('primary')
+                     & summary.asset_scope.eq('ex_rave') & summary.arm.isin(MAIN)]
+    timeframe = summary.loc[summary.group_type.eq('timeframe_min') & summary.asset_scope.eq('all') & summary.arm.isin(MAIN)]
     period = summary.loc[summary.group_type.eq('period') & summary.event_scope.eq('dedup') & summary.asset_scope.eq('all') & summary.arm.isin(MAIN)]
     inference = summary.loc[summary.cohort.eq('top20') & summary.group_type.eq('primary_timeframe') & summary.asset_scope.eq('all')]
     inference_columns = ['period','timeframe_min','arm','trades','mean_net_r','mean_net_r_ci95_low','mean_net_r_ci95_high',
@@ -130,18 +161,31 @@ def build():
     original_rows = {r['arm']: r for r in original_main.to_dict('records')}
     baseline = original_rows.get('baseline', {})
     triple = original_rows.get('triple', {})
+    filtered = original_rows.get('filtered_triple', {})
     delta = triple.get('sum_net_r', np.nan) - baseline.get('sum_net_r', np.nan)
+    ex_rows = {r['arm']: r for r in ex.to_dict('records')}
+    top_rows = {r['arm']: r for r in top_main.to_dict('records')}
+    top_oos = period.loc[period.cohort.eq('top20') & period.period.eq('oos')]
+    top_oos_rows = {r['arm']: r for r in top_oos.to_dict('records')}
+    diagnostic = summary.loc[summary.group_type.eq('diagnostic') & summary.asset_scope.eq('all')]
+    required_views = {'原始主表': original_main, '固定前20主表': top_main, '去RAVE主表': ex,
+                      '分周期表': timeframe, '时间分区表': period, '随机对照表': inference, '单规则消融表': diagnostic}
+    if empty := [name for name, frame in required_views.items() if frame.empty]:
+        raise ValueError('missing report table rows: ' + ', '.join(empty))
     attribution = exit_attribution('original6253')
     report = [
         '# SPIKE V1 三规则组合退出：逐根回放',
         '',
-        f'原6253笔队列的已平仓净R：默认 **{baseline.get("sum_net_r", np.nan):,.2f}R**，三规则 **{triple.get("sum_net_r", np.nan):,.2f}R**，差额 **{delta:+,.2f}R**。这与用户提供的近似改善+4326R分开核对，不能把单规则改善相加。',
+        f'原6253账本原始事件的已平仓净R：默认 **{baseline.get("sum_net_r", np.nan):,.2f}R**，三规则 **{triple.get("sum_net_r", np.nan):,.2f}R**，差额 **{delta:+,.2f}R**。过滤+三规则为 **{filtered.get("sum_net_r", np.nan):,.2f}R**。这些是冻结逐根回放结果；来源XLSX近似数不是数学上界。',
         '',
         '## 1. 原始队列核账',
-        '本表保留原始事件，包括同币跨交易所、跨周期重复。未结束持仓不混入已兑现净R。它回答近似XLSX在原分母上能否成立。',
+        '本表保留原始事件，包括同币跨交易所、跨周期重复。未结束持仓不混入已兑现净R。默认净胜率从 **{:.2%}** 降至三规则 **{:.2%}**、过滤+三规则 **{:.2%}**：更高的总净R并不是靠提高胜率取得。'.format(baseline.get('win_rate', np.nan), triple.get('win_rate', np.nan), filtered.get('win_rate', np.nan)),
         table(original_main, ['arm']),
         '',
-        '### 去RAVE敏感性', table(ex, ['cohort', 'event_scope', 'arm']),
+        '### 去RAVE敏感性', table(ex, ['arm']),
+        '去RAVE后，默认为 **{:.2f}R**、三规则仅 **{:.2f}R**、过滤+三规则 **{:.2f}R**；原账本的三规则改善高度依赖RAVE，不能据原始总额宣布稳健。'.format(
+            ex_rows.get('baseline', {}).get('sum_net_r', np.nan), ex_rows.get('triple', {}).get('sum_net_r', np.nan),
+            ex_rows.get('filtered_triple', {}).get('sum_net_r', np.nan)),
         '',
         '### 为什么近似改善不能兑现',
         '下表固定在原版已平仓的同一组事件，分开计算对原亏损单的帮助与对原盈利单的损害。额外平掉的原版未完成交易单列，不能把分母变化当成同样本改善。',
@@ -149,13 +193,18 @@ def build():
         '保本或提前减损不会只作用于最终输家。它们也会扫掉曾经回踩、随后走出趋势的赢家。组合各规则共享同一路径，三个单规则改善不能相加。用户XLSX公式尚未取得，不能断言它具体漏了哪一项；此表给出精确回放中实际发生的两面影响。',
         '',
         '## 2. 固定前20流动性三年检验',
-        '先按2023年8月真实USDT成交额选池，再观察2023年9月至2026年8月。不会按今天涨幅排行倒选历史。主表按底层标的×UTC入场日只保留最早可执行一笔，过滤后不补选当天其他信号。',
+        '固定20资产中仅18个具有可复现tick；TOMO、MATIC缺tick，明确保留覆盖缺口而不替补。计划54个交易所×周期stream，其中52个有信号；产生439个原始事件、419个按标的×UTC日去重事件、418笔已平仓基准交易。先按2023年8月真实USDT成交额选池，再观察2023年9月至2026年8月，不按今天涨幅排行倒选历史。',
         table(top_main, ['arm']),
+        '三年去重主表中，默认 **{:.2f}R**，三规则 **{:.2f}R**，过滤+三规则 **{:.2f}R**。这不是支持组合的长期绝对收益证据。'.format(
+            top_rows.get('baseline', {}).get('sum_net_r', np.nan), top_rows.get('triple', {}).get('sum_net_r', np.nan),
+            top_rows.get('filtered_triple', {}).get('sum_net_r', np.nan)),
         '',
         '### 分周期', table(timeframe.loc[timeframe.event_scope.eq('dedup')], ['cohort', 'timeframe_min', 'arm']),
         '',
         '## 3. 按时间向前验证',
-        '开发期入场早于2025-09-01且在切点前结束；测试期从2025-09-01开始。测试区间已被既往研究接触，因此是冻结配置的时序复验，不是新的盲测。2026-05-04之后单列。各月不调阈值。',
+        '开发期入场早于2025-09-01且在切点前结束；测试期从2025-09-01开始。测试区间已被既往研究接触，因此是冻结配置的时序复验，不是新的盲测。2026-05-04之后单列。固定前20去重测试期绝对净R从默认 **{:.2f}R** 提升到三规则 **{:.2f}R**、过滤+三规则 **{:.2f}R**，但这不改变随机对照结论。开发期跨切点事件只从开发分区排除，未被用来解释全期主表差异。'.format(
+            top_oos_rows.get('baseline', {}).get('sum_net_r', np.nan), top_oos_rows.get('triple', {}).get('sum_net_r', np.nan),
+            top_oos_rows.get('filtered_triple', {}).get('sum_net_r', np.nan)),
         table(period, ['cohort', 'period', 'arm']),
         '',
         '### 测试期随机对照与置信区间',
@@ -170,7 +219,7 @@ def build():
         '- 过滤量比>20、实际入场风险宽度>30%、USDC、PAXG和明确美股关联标的。PAXG为黄金支持标的。股票类型先由交易所元数据确认，再与美国上市目录核对，避免误删同名加密币。',
         '',
         '## 5. 对照、费用与集中度',
-        '随机对照匹配同标的、同UTC入场日、同周期和固定ATR/price分桶，最多20次不同随机入场。控制交易使用自己的因果初始止损和相同退出/成本；先求每笔信号的随机均值，再计算超额。4H可匹配数量有限，日线同日没有其他入场时刻，不能伪造对照。',
+        '随机对照匹配同标的、同UTC入场日、同周期和固定ATR/price分桶，最多20次不同随机入场。控制交易使用自己的因果初始止损和相同退出/成本；先求每笔信号的随机均值，再计算超额。4H可匹配数量有限，日线同日没有其他入场时刻，不能伪造对照。测试期三周期所有主臂的匹配超额均为负，9项Bonferroni校正p均为1；绝对OOS改善只说明指定的账本比较，不能排除日内趋势beta或选择偏差。',
         '按symbol-day聚类进行5000次bootstrap，给出平均净R与随机超额95%CI；主要测试为前20测试期3臂×3周期，单侧p另做9次比较校正。前五贡献是盈利最大的5笔交易，不是5个币种。',
         '所有净收益固定扣0.2%往返名义成本。移到入场价仍会产生费用亏损，窄风险分母会放大成本R。累计R回撤来自已平仓事件，未包含持仓浮亏与保证金约束，不能当作账户最大回撤。',
         '',
@@ -178,21 +227,22 @@ def build():
         '- 原6253队列来源为当时可用交易所目录，存在历史幸存者/覆盖偏差；独立前20池修复了用今天热门标的选历史的问题，但不是动态全市场策略。',
         '- 持仓期限结束或数据终止时未触发保护的交易标为censored；缺失K线切断序列，不填充。缺少可靠tick的入选币保留覆盖缺口，不以其它币替补。',
         '- 历史价格步长使用可追溯静态快照/公告，未重建所有逐次tick变更。缺少真实资金费率、成交滑点、流动性与账户并发约束。',
-        '- 参数源于已观察过的交易结果；0.65/2.20不是已证明的普适相变。这里只验证已固定规则，不重新寻找最优阈值。',
+        '- 参数源于已观察过的交易结果；0.65/2.20不是已证明的普适相变。这里只验证已固定规则，不重新寻找最优阈值，也无盲测、无promote。',
         '- symbol-day聚类仍可能低估不同币在同一市场冲击中的共同波动；小样本和尾部集中时，显著性应谨慎解释。',
         '- val AUC不适用：本轮不是概率模型训练。top-decile排序没有因果事前评分，不能按事后利润排行冒充预测分组。对应零假设检验为匹配随机入场超额与聚类置换。',
-        '- 用户提供的XLSX近似公式工作簿尚待逐格来源核对，+4326R仅作为待验证参考，不能声称是数学上界。',
+        '- 用户提供的XLSX近似公式工作簿尚待逐格来源核对，+4326R仅作为待验证参考；没有严格数学上界的主张。',
         '',
         '## 7. 复现与来源',
         '```bash',
         'git checkout main',
-        '.venv/bin/python -m yoyo.evaluation.spike_v1_triple_data --help',
-        '.venv/bin/python -m yoyo.evaluation.spike_v1_triple_study original6253',
-        '.venv/bin/python -m yoyo.evaluation.spike_v1_triple_study top20',
-        '# 统计命令以stats/README.md中已冻结CLI为准',
-        '.venv/bin/python -m yoyo.evaluation.spike_v1_triple_report',
-        '.venv/bin/python scripts/md_to_html.py analysis/p1_spike_v1_triple_exit_20260914.md --out-dir analysis/html',
+        '# 先保留不可变原6253账本、原始缓存、冻结Top20及其receipt；本实验不声称可从网络重建旧6253。',
+        'python3 -m yoyo.evaluation.spike_v1_triple_study original6253',
+        'python3 -m yoyo.evaluation.spike_v1_triple_study top20',
+        'python3 -m yoyo.evaluation.spike_v1_triple_stats',
+        'python3 -m yoyo.evaluation.spike_v1_triple_report',
+        'python3 scripts/md_to_html.py analysis/p1_spike_v1_triple_exit_20260914.md --out-dir analysis/html',
         '```',
+        '前两条回放命令依赖本机已保留的不可变账本、原始K线缓存和冻结收据；缺少它们时应停止并报告缺口，而不是联网以当前目录或币池替换历史来源。统计命令与输出契约见`experiments/active/exp-spike-v1-triple-exit-20260914-v1/stats/README.md`。',
         '- 实验与固定规则：`experiments/active/exp-spike-v1-triple-exit-20260914-v1/PROJECT_PLAN.md`。',
         '- 原始账本SHA：`b15b69b8864e5eb651f2417fc6681ea688b5fbb95dacd15af1284b42744e3578`。',
         '- [Binance公开数据及校验说明](https://github.com/binance/binance-public-data)。',
@@ -208,7 +258,7 @@ def build():
     specs = [sheet_spec('总体对比', 'SPIKE V1 三规则逐根回放', primary, '净R已扣0.2%往返成本；已平仓累计R回撤不是账户回撤', fields),
              sheet_spec('时间分区', '开发期与时序测试期', period, '固定阈值；历史已暴露，不能称为新盲测', fields),
              sheet_spec('分周期', '15m 1H 4H与原队列周期', timeframe, '旧队列和独立前20池分开比较', ['cohort','event_scope','timeframe_min','arm']+TABLE_FIELDS),
-             sheet_spec('单规则消融', '单规则与组合的差别', summary.loc[summary.group_type.eq('primary')], '不能把单规则改善值相加', fields)]
+             sheet_spec('单规则消融', '单规则与组合的差别', diagnostic, '不能把单规则改善值相加', fields)]
     specs.append(sheet_spec('改善拆解','救回亏损与截断盈利', attribution, '同一组原版已平仓交易；新增平仓另列'))
     for group, name, title in [('month', '逐月', '固定规则逐月表现'), ('symbol', '标的明细', '逐标的已平仓结果')]:
         part = summary.loc[summary.group_type.eq(group) & summary.event_scope.eq('dedup') & summary.asset_scope.eq('all') & summary.arm.isin(MAIN)]
@@ -217,14 +267,16 @@ def build():
     for cohort, title in [('original6253','原6253逐笔'), ('top20','前20逐笔')]:
         frame = wide_trades(cohort)
         cols = ['venue','symbol','timeframe_min','entry_time','entry_price','initial_stop','volume_ratio','risk_fraction_at_entry',
-                'baseline','adverse65','be05','lock50','triple','filtered_triple','delta_triple_r','exit_time','exit_time_triple','mfe_r','exit_protection_source','dedup_keep','event_id']
+                'baseline','baseline_status','adverse65','be05','lock50','triple','triple_status','filtered_triple','filtered_triple_status',
+                'delta_triple_r','exit_time','exit_time_triple','mfe_r','exit_protection_source','dedup_keep','event_id']
         spec = sheet_spec(title, title, frame, 'R基于实际入价和固定初始风险；过滤未通过为空白', cols)
-        spec['headers'] = ['交易所','标的','周期分钟','入场UTC','入价','初始SL','量比','风险宽度','默认净R','仅MAE净R','仅保本净R',
-                           '仅锁利净R','三规则净R','过滤组合净R','三规则改善R','默认退出UTC','组合退出UTC','原版峰值R','组合退出来源','去重保留','事件ID']
-        spec['widths'].update({3:25,4:17,5:17,15:25,16:25,18:24,20:30})
+        spec['headers'] = ['交易所','标的','周期分钟','入场UTC','入价','初始SL','量比','风险宽度','默认已平仓净R','默认状态','仅MAE已平仓净R','仅保本已平仓净R',
+                           '仅锁利已平仓净R','三规则已平仓净R','三规则状态','过滤组合已平仓净R','过滤组合状态','同事件双闭合三规则变化R','默认退出UTC','组合退出UTC',
+                           '原版已观察峰值R（未平仓亦可有）','组合退出来源','去重保留','事件ID']
+        spec['widths'].update({3:25,4:17,5:17,18:25,19:25,21:28,23:30})
         spec['formats'].update({4:'0.########',5:'0.########'})
-        spec['dateColumns']=[3,15,16]
-        spec['formulas'] = {14:[f'=M{i+5}-I{i+5}' for i in range(len(frame))]}
+        spec['dateColumns']=[3,18,19]
+        spec['formulas'] = {17:[f'=IF(OR(I{i+5}="",N{i+5}=""),"",N{i+5}-I{i+5})' for i in range(len(frame))]}
         specs.append(spec)
     notes = pd.DataFrame([
         ('成本','0.2%往返名义成本；资金费率与真实滑点未建模'),
