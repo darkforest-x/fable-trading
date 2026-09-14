@@ -23,7 +23,8 @@ CUT = pd.Timestamp("2025-09-01T00:00:00Z")
 HOLDOUT = pd.Timestamp("2026-05-04T00:00:00Z")
 SUMMARY_COLUMNS = ("cohort", "event_scope", "asset_scope", "period", "group_type", "timeframe_min", "venue", "symbol", "arm",
                    "events", "trades", "censored", "sum_net_r", "mean_net_r", "median_net_r", "win_rate", "pf_r",
-                   "maxdd_r", "top5_positive_net_r", "top5_profit_share", "sum_without_top5_net_r", "realized_ge_10r", "cost_r",
+                   "closed_event_cumulative_r_maxdd", "top5_positive_net_r", "top5_profit_share", "sum_without_top5_net_r", "realized_ge_10r", "cost_r",
+                   "mean_net_r_ci95_low", "mean_net_r_ci95_high",
                    "mean_matched_excess_net_r", "excess_ci95_low", "excess_ci95_high", "excess_one_sided_p",
                    "excess_one_sided_p_bonferroni9", "cross_cut_excluded")
 
@@ -69,8 +70,13 @@ def closed(frame: pd.DataFrame) -> pd.DataFrame:
 
 
 def _drawdown(values: pd.Series) -> float:
-    curve = np.r_[0.0, values.to_numpy(dtype=float).cumsum()]
-    return float(np.min(curve - np.maximum.accumulate(curve))) if len(values) else np.nan
+    if not len(values):
+        return np.nan
+    # Concurrent exits are one event-clock point; lexical IDs must not invent
+    # an order, peak, or drawdown inside the same close timestamp.
+    by_exit = values.groupby(level=0, sort=True).sum()
+    curve = np.r_[0.0, by_exit.to_numpy(dtype=float).cumsum()]
+    return float(np.min(curve - np.maximum.accumulate(curve)))
 
 
 def arm_metrics(frame: pd.DataFrame, *, group: dict[str, object] | None = None) -> dict[str, object]:
@@ -84,6 +90,7 @@ def arm_metrics(frame: pd.DataFrame, *, group: dict[str, object] | None = None) 
     cost_r = ((realized.net_return - realized.gross_return) / realized.risk_fraction_at_entry).sum() if (
         len(realized) and "net_return" in realized and "gross_return" in realized and "risk_fraction_at_entry" in realized) else np.nan
     return group | {"events": int(len(frame)), "trades": int(len(realized)), "censored": int(frame.censored.sum()),
+                    "cross_cut_excluded": int(frame.cross_cut_excluded.sum()) if "cross_cut_excluded" in frame else 0,
                     "win_rate": float((values > 0).mean()) if len(values) else np.nan,
                     "pf_r": positive_sum / abs(negative_sum) if negative_sum < 0 else np.nan,
                     "sum_net_r": float(values.sum()) if len(values) else np.nan,
@@ -92,7 +99,7 @@ def arm_metrics(frame: pd.DataFrame, *, group: dict[str, object] | None = None) 
                     "top5_positive_net_r": top5, "sum_without_top5_net_r": float(values.sum() - top5) if len(values) else np.nan,
                     "top5_profit_share": top5 / positive_sum if positive_sum > 0 else np.nan,
                     "realized_ge_10r": int((values >= 10).sum()), "cost_r": float(cost_r) if np.isfinite(cost_r) else np.nan,
-                    "closed_event_cumulative_r_maxdd": _drawdown(values)}
+                    "closed_event_cumulative_r_maxdd": _drawdown(values.set_axis(realized.exit_time))}
 
 
 def grouped_metrics(frame: pd.DataFrame, by: list[str]) -> pd.DataFrame:
@@ -117,6 +124,22 @@ def time_labels(frame: pd.DataFrame) -> pd.DataFrame:
     out["strict_dev"] = out.entry_time.lt(CUT) & out.exit_time.le(CUT) & ~out.censored
     out["cross_cut_excluded"] = out.entry_time.lt(CUT) & ~out.exit_time.le(CUT)
     return out
+
+
+def protocol_period_metrics(frame: pd.DataFrame) -> pd.DataFrame:
+    """Report the fixed all/dev/OOS periods without mixing a cut-crossing dev trade."""
+    parts = {
+        "all": frame,
+        "dev": frame.loc[frame.strict_dev],
+        "oos": frame.loc[frame.entry_time.ge(CUT)],
+        "oos_pre_holdout": frame.loc[frame.entry_time.ge(CUT) & frame.entry_time.lt(HOLDOUT)],
+        "holdout_era": frame.loc[frame.entry_time.ge(HOLDOUT)],
+    }
+    rows = []
+    for period, part in parts.items():
+        for arm, arm_part in part.groupby("arm", sort=True):
+            rows.append(arm_metrics(arm_part, group={"period": period, "arm": arm}))
+    return pd.DataFrame(rows)
 
 
 def matched_excess(native: pd.DataFrame, controls: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -155,12 +178,14 @@ def cluster_bootstrap(values: pd.DataFrame, value: str, *, draws: int = DRAWS, s
     part[value] = pd.to_numeric(part[value], errors="coerce")
     if part.empty:
         return {"clusters": 0, "mean": np.nan, "ci95_low": np.nan, "ci95_high": np.nan}
-    clusters = [x[value].to_numpy(float) for _, x in part.groupby(["base_asset", "entry_day"], sort=True)]
-    rng, means = np.random.default_rng(seed), np.empty(draws)
-    for draw in range(draws):
-        picked = rng.integers(0, len(clusters), len(clusters))
-        means[draw] = np.concatenate([clusters[i] for i in picked]).mean()
-    return {"clusters": len(clusters), "mean": float(part[value].mean()), "ci95_low": float(np.quantile(means, .025)), "ci95_high": float(np.quantile(means, .975))}
+    clusters = part.groupby(["base_asset", "entry_day"], sort=True)[value].agg(["sum", "count"])
+    sums, counts = clusters["sum"].to_numpy(float), clusters["count"].to_numpy(float)
+    rng, means, width = np.random.default_rng(seed), np.empty(draws), 256
+    for start in range(0, draws, width):
+        size = min(width, draws - start)
+        picked = rng.integers(0, len(sums), size=(size, len(sums)))
+        means[start:start + size] = sums[picked].sum(axis=1) / counts[picked].sum(axis=1)
+    return {"clusters": len(sums), "mean": float(part[value].mean()), "ci95_low": float(np.quantile(means, .025)), "ci95_high": float(np.quantile(means, .975))}
 
 
 def cluster_sign_p(values: pd.DataFrame, value: str, *, draws: int = DRAWS, seed: int = SEED) -> float:
@@ -180,6 +205,10 @@ def primary_statistics(frame: pd.DataFrame, controls: pd.DataFrame, *, analysis_
                        timeframe_min: int | None = None) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Return main-arm summaries, matched parent-level excess, and its inference."""
     main = frame.loc[frame.arm.isin(PRIMARY_ARMS)].copy()
+    if infer_excess:
+        # This is the preregistered top20 test family, never dev-plus-test.
+        main = main.loc[main.entry_time.ge(CUT)].copy()
+        controls = controls.loc[controls.entry_time.ge(CUT)].copy() if not controls.empty else controls
     if timeframe_min is not None:
         main = main.loc[main.timeframe_min.eq(timeframe_min)].copy()
         controls = controls.loc[controls.timeframe_min.eq(timeframe_min)].copy() if not controls.empty else controls
@@ -219,7 +248,9 @@ def baseline_opportunity_capture(frame: pd.DataFrame) -> tuple[pd.DataFrame, pd.
         return pd.DataFrame(), _empty(("arm", "baseline_mfe_bucket", "events", "mean_capture", "median_capture"))
     paired = paired.loc[paired.baseline_mfe_r.gt(0)].copy()
     paired["baseline_opportunity_capture"] = paired.net_r / paired.baseline_mfe_r
-    paired["baseline_mfe_bucket"] = np.select([paired.baseline_mfe_r.gt(10), paired.baseline_mfe_r.gt(2)], ["gt10", "gt2"], default="positive")
+    # Mutually exclusive conservative-baseline opportunity intervals: (0,2],
+    # (2,10], and >10. Stop bars are excluded by the frozen baseline MFE path.
+    paired["baseline_mfe_bucket"] = np.select([paired.baseline_mfe_r.gt(10), paired.baseline_mfe_r.gt(2)], ["gt10", "gt2_to_10"], default="gt0_to_2")
     summary = paired.groupby(["arm", "baseline_mfe_bucket"], as_index=False).agg(
         events=("event_id", "size"), mean_capture=("baseline_opportunity_capture", "mean"),
         median_capture=("baseline_opportunity_capture", "median"))
@@ -235,11 +266,17 @@ def _summary_rows(frame: pd.DataFrame, *, cohort: str) -> pd.DataFrame:
     """Normalize primary rows into the compact owner-facing CSV contract."""
     if frame.empty:
         return _empty(SUMMARY_COLUMNS)
-    out = frame.rename(columns={"analysis_scope": "event_scope", "scope": "asset_scope",
-                                "closed_event_cumulative_r_maxdd": "maxdd_r"}).copy()
+    out = frame.rename(columns={"analysis_scope": "event_scope", "scope": "asset_scope"}).copy()
     out.insert(0, "cohort", cohort)
-    out["period"] = "all"
-    out["group_type"] = np.where(out.timeframe_min.notna(), "primary_timeframe", "primary")
+    if "period" not in out:
+        out["period"] = "all"
+    if "group_type" not in out:
+        out["group_type"] = np.where(out.timeframe_min.notna(), "primary_timeframe", "primary")
+    if "event_scope" not in out:
+        out["event_scope"] = "raw"
+    if "asset_scope" not in out:
+        out["asset_scope"] = "all"
+    out.loc[out.group_type.eq("primary_timeframe"), "period"] = "oos"
     for column in SUMMARY_COLUMNS:
         if column not in out:
             out[column] = np.nan
@@ -258,7 +295,7 @@ def build(results: Path = EXP / "results") -> dict[str, object]:
             receipt["cohorts"][cohort] = {"status": "no_stream_outcomes"}
             continue
         outcomes, controls = time_labels(outcomes), time_labels(controls) if not controls.empty else controls
-        primary_frames, matching_frames, paired_frames, diagnostic_frames = [], [], [], []
+        primary_frames, matching_frames, paired_frames, grouped_outputs = [], [], [], {"diagnostic_arms": [], "period": [], "month": [], "year": [], "timeframe_min": [], "venue": [], "symbol": []}
         for scope, scoped, scoped_controls in (
             ("raw", outcomes, controls),
             ("dedup", select_scope(outcomes, dedup=True, ex_rave=False), select_scope(controls, dedup=True, ex_rave=False) if not controls.empty else controls),
@@ -267,26 +304,29 @@ def build(results: Path = EXP / "results") -> dict[str, object]:
             primary_frames.append(primary)
             matching_frames.append(matching.assign(analysis_scope=scope))
             paired_frames.append(paired.assign(analysis_scope=scope))
-            diagnostic_frames.append(grouped_metrics(scoped, []).assign(analysis_scope=scope))
+            diagnostic = grouped_metrics(scoped, []).assign(event_scope=scope, asset_scope="all", period="all", group_type="diagnostic")
+            grouped_outputs["diagnostic_arms"].append(diagnostic)
+            grouped_outputs["period"].append(protocol_period_metrics(scoped).assign(event_scope=scope, asset_scope="all", group_type="period"))
+            for name, field in (("month", "entry_month"), ("year", "entry_year"), ("timeframe_min", "timeframe_min"), ("venue", "venue"), ("symbol", "symbol")):
+                if field in scoped:
+                    grouped_outputs[name].append(grouped_metrics(scoped, [field]).assign(event_scope=scope, asset_scope="all", period="all", group_type=name))
         if cohort == "top20":
             dedup_outcomes = select_scope(outcomes, dedup=True, ex_rave=False)
             dedup_controls = select_scope(controls, dedup=True, ex_rave=False) if not controls.empty else controls
             for timeframe in (15, 60, 240):
                 primary, matching, paired = primary_statistics(dedup_outcomes, dedup_controls,
-                                                               analysis_scope="dedup_fixed_test_timeframe",
+                                                               analysis_scope="dedup",
                                                                infer_excess=True, timeframe_min=timeframe)
                 primary_frames.append(primary)
-                matching_frames.append(matching.assign(analysis_scope="dedup_fixed_test_timeframe", timeframe_min=timeframe))
-                paired_frames.append(paired.assign(analysis_scope="dedup_fixed_test_timeframe", timeframe_min=timeframe))
-        _write_csv(output / f"{cohort}_primary.csv", pd.concat(primary_frames, ignore_index=True))
-        summary_frames.append(_summary_rows(pd.concat(primary_frames, ignore_index=True), cohort=cohort))
-        _write_csv(output / f"{cohort}_diagnostic_arms.csv", pd.concat(diagnostic_frames, ignore_index=True))
-        _write_csv(output / f"{cohort}_period.csv", grouped_metrics(outcomes, ["period"]))
-        _write_csv(output / f"{cohort}_month.csv", grouped_metrics(outcomes, ["entry_month"]))
-        _write_csv(output / f"{cohort}_year.csv", grouped_metrics(outcomes, ["entry_year"]))
-        for field in ("timeframe_min", "venue", "symbol"):
-            if field in outcomes:
-                _write_csv(output / f"{cohort}_{field}.csv", grouped_metrics(outcomes, [field]))
+                matching_frames.append(matching.assign(analysis_scope="dedup", timeframe_min=timeframe))
+                paired_frames.append(paired.assign(analysis_scope="dedup", timeframe_min=timeframe))
+        primary_all = pd.concat(primary_frames, ignore_index=True)
+        _write_csv(output / f"{cohort}_primary.csv", primary_all)
+        summary_frames.append(_summary_rows(primary_all, cohort=cohort))
+        for name, frames in grouped_outputs.items():
+            combined = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+            _write_csv(output / f"{cohort}_{name}.csv", combined)
+            summary_frames.append(_summary_rows(combined, cohort=cohort))
         matching_all, paired_all = pd.concat(matching_frames, ignore_index=True), pd.concat(paired_frames, ignore_index=True)
         _write_csv(output / f"{cohort}_matching.csv", matching_all)
         _write_csv(output / f"{cohort}_matched_excess.csv", paired_all)

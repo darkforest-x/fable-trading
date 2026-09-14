@@ -44,6 +44,13 @@ def test_metrics_exclude_censoring_and_drawdown_has_zero_prefix() -> None:
     assert (metrics["trades"], metrics["censored"], metrics["mean_net_r"], metrics["closed_event_cumulative_r_maxdd"]) == (2, 1, pytest.approx(-.5), pytest.approx(-3.))
 
 
+def test_same_exit_clock_is_aggregated_before_event_curve_drawdown() -> None:
+    frame = _rows([2., -3.])
+    frame.loc[:, "exit_time"] = pd.Timestamp("2025-01-02T00:00:00Z")
+    # A same-clock aggregate is -1R, rather than a lexical-ID path of +2 then -3.
+    assert stats.arm_metrics(frame)["closed_event_cumulative_r_maxdd"] == pytest.approx(-1.)
+
+
 def test_top_five_positive_contribution_is_not_all_positive_trades() -> None:
     metrics = stats.arm_metrics(_rows([10., 9., 8., 7., 6., 5., -1.]))
     assert (metrics["top5_positive_net_r"], metrics["sum_net_r"], metrics["sum_without_top5_net_r"]) == (pytest.approx(40.), pytest.approx(44.), pytest.approx(4.))
@@ -71,7 +78,7 @@ def test_opportunity_capture_uses_baseline_mfe_not_candidate_truncated_mfe() -> 
     triple = _rows([2.], arm="triple").assign(event_id="same", mfe_r=.5)
     events, summary = stats.baseline_opportunity_capture(pd.concat([baseline, triple], ignore_index=True))
     assert events.iloc[0].baseline_opportunity_capture == pytest.approx(.25)
-    assert summary.iloc[0].baseline_mfe_bucket == "gt2"
+    assert summary.iloc[0].baseline_mfe_bucket == "gt2_to_10"
 
 
 def test_build_writes_compact_summary_from_synthetic_stream_ledgers(tmp_path) -> None:
@@ -85,3 +92,18 @@ def test_build_writes_compact_summary_from_synthetic_stream_ledgers(tmp_path) ->
     assert receipt["cohorts"]["original6253"]["status"] == "complete"
     assert set(stats.SUMMARY_COLUMNS).issubset(summary.columns)
     assert set(summary.event_scope) == {"raw", "dedup"}
+    assert {"primary", "diagnostic", "period", "month", "year", "timeframe_min", "venue", "symbol"}.issubset(set(summary.group_type))
+    assert {"mean_net_r_ci95_low", "mean_net_r_ci95_high", "closed_event_cumulative_r_maxdd"}.issubset(summary.columns)
+
+
+def test_fixed_test_inference_excludes_development_entries() -> None:
+    native = pd.concat([_rows([1.], arm="baseline"), _rows([3.], arm="baseline")], ignore_index=True)
+    native.loc[0, "entry_time"] = pd.Timestamp("2025-08-01T00:00:00Z")
+    native.loc[0, "exit_time"] = pd.Timestamp("2025-08-02T00:00:00Z")
+    native.loc[1, "entry_time"] = pd.Timestamp("2025-10-01T00:00:00Z")
+    native.loc[1, "exit_time"] = pd.Timestamp("2025-10-02T00:00:00Z")
+    native = stats.time_labels(stats.normalize_outcomes(native))
+    controls = native.copy().assign(parent_event_id=native.event_id, event_id=["c0", "c1"], net_r=[0., 1.])
+    summary, _, paired = stats.primary_statistics(native, controls, analysis_scope="dedup", infer_excess=True, timeframe_min=60)
+    row = summary.loc[summary.arm.eq("baseline") & summary.scope.eq("all")].iloc[0]
+    assert (row.events, row.trades, len(paired), paired.entry_time.min()) == (1, 1, 1, pd.Timestamp("2025-10-01T00:00:00Z"))
