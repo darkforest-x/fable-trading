@@ -145,6 +145,33 @@ def enrich(trade, frame, arm, number):
     return t
 
 
+def stop_path(trade, frame, raw):
+    """Audit original protection using current/prior OHLC/ATR and raw side.
+
+    active_stop is the stop available at this bar's open; next_stop only becomes
+    available on the following bar. This does not change the execution result.
+    """
+    side=int(trade['side']); entry=float(trade['entry_price'])
+    risk=float(trade['initial_risk']); protection=float(trade['initial_stop'])
+    armed=False; rows=[]
+    for i in range(int(trade['entry_i']),int(trade['exit_i'])+1):
+        old=protection
+        last=i==int(trade['exit_i'])
+        if not last or bool(trade['censored']):
+            close=float(frame.close.iloc[i]); atr=float(frame.atr.iloc[i])
+            armed=armed or side*(close-entry)/risk>=2.
+            if armed and np.isfinite(atr) and atr>0:
+                price=close-side*4.*atr
+                candidate=(np.floor(price/.01) if side==1 else np.ceil(price/.01))*.01
+                protection=max(protection,candidate) if side==1 else min(protection,candidate)
+        raw_side=1 if raw.long_signal.iloc[i] else (-1 if raw.short_signal.iloc[i] else 0)
+        rows.append(dict(trade_no=trade['trade_no'],bar_i=i,open_bj=stamp(frame.index[i]),
+                         active_stop=old,next_stop=protection,trail_armed=armed,raw_v6_side=raw_side))
+    if not np.isclose(protection,float(trade['protection']),rtol=0,atol=1e-8):
+        raise ValueError('original trailing-stop path does not match frozen replay')
+    return rows
+
+
 def run():
     cfg=config(); receipt=json.loads((OUT/'source_receipt.json').read_text())
     if sha(ROOT/cfg['prefix'])!=cfg['prefix_sha256'] or sha(OUT/'okx_tail_evidence.json.gz')!=receipt['tail_sha256']:
@@ -196,7 +223,13 @@ def run():
     pd.DataFrame(signals).to_csv(OUT/'all_v8_signals.csv',index=False,encoding='utf-8-sig')
     for arm,rows in opportunities.items():
         pd.DataFrame(rows).to_csv(OUT/(arm+'_independent_opportunities.csv'),index=False,encoding='utf-8-sig')
-    chart=frame.loc[frame.index>=pd.Timestamp(cfg['start'])-pd.Timedelta(hours=12),['open','high','low','close','volume','atr']].copy()
+    stop_rows=[]
+    for trade in ledgers['original']:
+        trade['stop_path']=stop_path(trade,frame,raw)
+        stop_rows.extend(trade['stop_path'])
+    pd.DataFrame(stop_rows).to_csv(OUT/'original_stop_path.csv',index=False,encoding='utf-8-sig')
+    earliest=min([pd.Timestamp(cfg['start'])]+[pd.Timestamp(t['entry_time']) for t in ledgers['original']])
+    chart=frame.loc[frame.index>=earliest-pd.Timedelta(hours=12),['open','high','low','close','volume','atr']].copy()
     chart.insert(0,'bar_i',frame.index.get_indexer(chart.index)); chart.insert(1,'open_bj',[stamp(t) for t in chart.index])
     chart.to_csv(OUT/'inspection_bars.csv',index_label='open_utc',encoding='utf-8-sig')
     save(OUT/'audit_payload.json',dict(config=cfg,source=receipt,signals=signals,trades=ledgers,
