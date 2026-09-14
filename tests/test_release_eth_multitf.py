@@ -195,9 +195,14 @@ def test_no_equity_replay_peaks_settle_administrative_fee() -> None:
     out = Replay(f, policy, 240).run(0, len(f), record_equity=False)
     assert out["equity"].empty
     assert out["open_position"] is not None
-    assert out["path_peak"] == pytest.approx(500.0)
+    assert out["path_peak"] == pytest.approx(508.0)
     assert out["close_peak"] == pytest.approx(500.0)
     settled = settle(out, f, len(f), policy.fee, 240)
     assert settled["final_equity"] == pytest.approx(496.0)
-    assert settled["max_drawdown_path"] == pytest.approx(.008)
+    # Existing intrabar low (488 after a508 peak) exceeds the settlement drop.
+    assert settled["max_drawdown_path"] == pytest.approx((508.0 - 488.0) / 508.0)
     assert settled["max_drawdown_close"] == pytest.approx(.008)
+    f.loc[:, ["high", "low"]] = 100.0
+    flat = Replay(f, policy, 240).run(0, len(f), record_equity=False)
+    flat = settle(flat, f, len(f), policy.fee, 240)
+    assert flat["max_drawdown_path"] == pytest.approx(.008)
