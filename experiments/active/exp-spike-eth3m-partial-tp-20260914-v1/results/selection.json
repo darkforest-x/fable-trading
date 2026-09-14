@@ -1,0 +1,58 @@
+{
+  "best": "whole_3r",
+  "selected": [
+    "whole_3r",
+    "whole_3r_be1",
+    "p50_1_be",
+    "p70_1_be"
+  ],
+  "policies": {
+    "whole_3r": {
+      "partial_r": 1.0,
+      "partial_fraction": 0.0,
+      "final_tp_r": 3.0,
+      "after_partial_stop_r": null,
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 4.0
+    },
+    "whole_3r_be1": {
+      "partial_r": 1.0,
+      "partial_fraction": 0.0,
+      "final_tp_r": 3.0,
+      "after_partial_stop_r": null,
+      "protection_mode": "entry",
+      "trigger_r": 1.0,
+      "trail_atr": 4.0
+    },
+    "p50_1_be": {
+      "partial_r": 1.0,
+      "partial_fraction": 0.5,
+      "final_tp_r": 3.0,
+      "after_partial_stop_r": 0.0,
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 4.0
+    },
+    "p70_1_be": {
+      "partial_r": 1.0,
+      "partial_fraction": 0.7,
+      "final_tp_r": 3.0,
+      "after_partial_stop_r": 0.0,
+      "protection_mode": "none",
+      "trigger_r": null,
+      "trail_atr": 4.0
+    }
+  },
+  "identities": {
+    "yoyo/evaluation/spike_partial_study.py": "e162fd345e85b4725656bc7813132c2a535cfab1b4a71ff5cccadbc861998467",
+    "yoyo/evaluation/spike_partial_exit.py": "4fe63950d4c09de0586ac30ff76a50df5c78c267f2a97ac1e8a6603825ddf79f",
+    "yoyo/evaluation/spike_recovery_exit.py": "dd6ff1862aa24956fba9617f69a3db4d0a62323f5f47a8a4e6bb8c9051552444",
+    "yoyo/evaluation/spike_recovery_cash.py": "17ddc32b73c7673ecfa0a42b9536d5a3b10b84d9be1f14b495e700810fb501fa",
+    "experiments/active/exp-spike-eth3m-partial-tp-20260914-v1/config.json": "fb4a62db8954e0b03a0de3b06ac9b778a88c890c9f2e3184deae5ac026e43674"
+  },
+  "code_commit": "863ce24db971542c29526fe869045cb0d6fd0794",
+  "development_summary_sha256": "afdad67b82339a06f9dc3c84cd62e2b9ccf793e258996d86902b6a91d3ddf946",
+  "hard_pass_count": 0,
+  "holdout_consumed": false
+}
