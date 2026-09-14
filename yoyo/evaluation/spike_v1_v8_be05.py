@@ -169,6 +169,7 @@ def replay_serial(context: base.StreamContext, *, arm: str, enable_be: bool, pre
     pending_entry: tuple[int, int] | None = None
     pending_reverse: tuple[int, int] | None = None
     next_id = 0
+    stale_reverse_at_entry: dict[str, int | None] = {}
     for i, stamp in enumerate(frame.index):
         ended_side = 0
         if bool(gap[i]):
@@ -219,6 +220,11 @@ def replay_serial(context: base.StreamContext, *, arm: str, enable_be: bool, pre
                     position = base._new_trade(made, trade_id=f"{context.key}:{arm}:{'be05' if enable_be else 'baseline'}:{next_id}", cohort=cohort,
                                                policy="be05" if enable_be else "baseline", context=context)
                     position.update(be_armed=False, be_trigger_count=0)
+                    # The frozen serial state machine retains a pending raw
+                    # reverse after a same-open protective gap.  Preserve that
+                    # exact state at the new entry so fixed paired baseline
+                    # exits can reproduce the receipt-bound serial ledger.
+                    stale_reverse_at_entry[str(position["trade_id"])] = None if pending_reverse is None else int(pending_reverse[1])
                     base._append_fill(fills, position, leg_no=1, bar_open=stamp, event_time=stamp, phase="open", precision="bar_open",
                                       kind="entry", fraction=1., price=float(position["entry_price"]), cost=base.ENTRY_COST, reason="next_open_entry", context=context)
             pending_entry = None
@@ -254,7 +260,9 @@ def replay_serial(context: base.StreamContext, *, arm: str, enable_be: bool, pre
                           kind="censor", fraction=float(position["qty_remaining"]), price=ca[last], cost=0., reason="boundary_mark", context=context)
         position["last_exit_i"], position["last_exit_time"], position["last_exit_price"], position["last_exit_reason"] = last, stamp, ca[last], "boundary_mark"
         trades.append(base._trade_row(position, censored=True, precision="last_complete_close"))
-    return (pd.DataFrame(trades, columns=base.TRADE_COLUMNS), pd.DataFrame(fills, columns=base.FILL_COLUMNS),
+    trade_frame = pd.DataFrame(trades, columns=base.TRADE_COLUMNS)
+    trade_frame["serial_pending_reverse_side_at_entry"] = trade_frame.trade_id.map(stale_reverse_at_entry)
+    return (trade_frame, pd.DataFrame(fills, columns=base.FILL_COLUMNS),
             pd.DataFrame(events))
 
 
@@ -273,18 +281,22 @@ def replay_fixed_entry(context: base.StreamContext, row: pd.Series, *, arm: str,
     pos = base._new_trade(pos, trade_id=f"{context.key}:{arm}:fixed", cohort=cohort,
                           policy="be05" if enable_be else "baseline", context=context)
     pos.update(protection=float(row.initial_stop), mfe_r=0., trail_armed=False, be_armed=False, be_trigger_count=0)
-    pending_reverse = False
+    stale = row.get("serial_pending_reverse_side_at_entry", None)
+    pending_reverse: int | None = None if pd.isna(stale) else int(stale)
+    stale_from_prior_position = pending_reverse is not None
     for i in range(start, len(frame)):
         stamp = frame.index[i]
         if gap[i]:
             pos["last_exit_i"], pos["last_exit_time"], pos["last_exit_reason"] = i, stamp, "data_gap_censored"
             return base._trade_row(pos, censored=True, precision="unknown_gap") | {"be_armed": pos["be_armed"], "be_trigger_count": pos["be_trigger_count"]}
         protection = float(pos["protection"])
-        if pending_reverse:
-            price = oa[i]; reason = ("trailing_stop_gap" if protection != float(pos["initial_stop"]) else "initial_stop_gap") if (price <= protection if side == 1 else price >= protection) else "opposite_v6_next_open"
-            pos["qty_realized"], pos["qty_remaining"] = 1., 0.; pos["realized_gross_return"] = side * (price / float(pos["entry_price"]) - 1); pos["realized_net_return"] = pos["realized_gross_return"] - base.ENTRY_COST - base.EXIT_COST
-            pos["last_exit_i"], pos["last_exit_time"], pos["last_exit_price"], pos["last_exit_reason"] = i, stamp, price, reason
-            return base._trade_row(pos, censored=False, precision="bar_open_or_intrabar_window") | {"be_armed": pos["be_armed"], "be_trigger_count": pos["be_trigger_count"], "protection": protection}
+        if pending_reverse is not None and (not stale_from_prior_position or i > start):
+            if side == pending_reverse:
+                price = oa[i]; reason = ("trailing_stop_gap" if protection != float(pos["initial_stop"]) else "initial_stop_gap") if (price <= protection if side == 1 else price >= protection) else "opposite_v6_next_open"
+                pos["qty_realized"], pos["qty_remaining"] = 1., 0.; pos["realized_gross_return"] = side * (price / float(pos["entry_price"]) - 1); pos["realized_net_return"] = pos["realized_gross_return"] - base.ENTRY_COST - base.EXIT_COST
+                pos["last_exit_i"], pos["last_exit_time"], pos["last_exit_price"], pos["last_exit_reason"] = i, stamp, price, reason
+                return base._trade_row(pos, censored=False, precision="bar_open_or_intrabar_window") | {"be_armed": pos["be_armed"], "be_trigger_count": pos["be_trigger_count"], "protection": protection}
+            pending_reverse = None
         if la[i] <= protection if side == 1 else ha[i] >= protection:
             price = min(oa[i], protection) if side == 1 else max(oa[i], protection); reason = "trailing_stop" if protection != float(pos["initial_stop"]) else "initial_stop"
             if oa[i] <= protection if side == 1 else oa[i] >= protection: reason += "_gap"
@@ -292,7 +304,8 @@ def replay_fixed_entry(context: base.StreamContext, row: pd.Series, *, arm: str,
             pos["last_exit_i"], pos["last_exit_time"], pos["last_exit_price"], pos["last_exit_reason"] = i, stamp, price, reason
             return base._trade_row(pos, censored=False, precision="bar_open_or_intrabar_window") | {"be_armed": pos["be_armed"], "be_trigger_count": pos["be_trigger_count"], "protection": protection}
         _close_updates(pos, high=ha[i], low=la[i], close=ca[i], atr=aa[i], spec=spec, enable_be=enable_be, events=[], context=context, arm=arm, policy="be05", i=i)
-        pending_reverse = int(raw_side[i]) == -side
+        if int(raw_side[i]) == -side:
+            pending_reverse = side
     pos["last_exit_i"], pos["last_exit_time"], pos["last_exit_price"], pos["last_exit_reason"] = len(frame)-1, frame.index[-1], ca[-1], "boundary_mark"
     return base._trade_row(pos, censored=True, precision="last_complete_close") | {"be_armed": pos["be_armed"], "be_trigger_count": pos["be_trigger_count"], "protection": float(pos["protection"])}
 

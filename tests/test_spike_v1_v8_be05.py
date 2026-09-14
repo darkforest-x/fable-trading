@@ -112,3 +112,13 @@ def test_fixed_exit_restores_full_source_ordinal_from_prefixed_cache() -> None:
     row = serial.iloc[0].copy(); row["signal_i"] += 100; row["entry_i"] += 100
     fixed = study.replay_fixed_entry(context, row, arm="v1_common_execution_long", enable_be=False, prepared=prepared)
     assert fixed["exit_i"] == int(serial.iloc[0].exit_i) + 100
+
+
+def test_fixed_path_preserves_serial_stale_reverse_state_at_entry() -> None:
+    context = _context(side=-1)
+    prepared = study.prepare_arm(context, arm="v8")
+    serial, _, _ = study.replay_serial(context, arm="v8", enable_be=False, prepared=prepared)
+    row = serial.iloc[0].copy()
+    row["serial_pending_reverse_side_at_entry"] = -1
+    fixed = study.replay_fixed_entry(context, row, arm="v8", enable_be=False, prepared=prepared)
+    assert (fixed["exit_i"], fixed["exit_reason"]) == (int(row.entry_i) + 1, "opposite_v6_next_open")
