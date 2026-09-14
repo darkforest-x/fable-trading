@@ -384,8 +384,13 @@ def rave_diagnostic_existing(output: Path) -> dict[str, Any]:
     if joined.asset.isna().any() or len(joined) != len(pairs):
         raise ValueError("paired events do not map one-to-one to immutable native asset identity")
     rows: list[dict[str, Any]] = []
-    for scope, part in (("all", joined), ("asset_RAVE", joined.loc[joined.asset.eq("RAVE")]),
-                        ("excluding_asset_RAVE", joined.loc[~joined.asset.eq("RAVE")])):
+    original_closed = joined.loc[~joined.baseline_censored.astype(bool)]
+    scopes = (("all", joined), ("asset_RAVE", joined.loc[joined.asset.eq("RAVE")]),
+              ("excluding_asset_RAVE", joined.loc[~joined.asset.eq("RAVE")]),
+              ("original_closed_footprint", original_closed),
+              ("original_closed_asset_RAVE", original_closed.loc[original_closed.asset.eq("RAVE")]),
+              ("original_closed_excluding_RAVE", original_closed.loc[~original_closed.asset.eq("RAVE")]))
+    for scope, part in scopes:
         for arm in ("baseline", "be05"):
             closed = ~part[f"{arm}_censored"].astype(bool)
             values = pd.to_numeric(part.loc[closed, f"{arm}_net_r"], errors="coerce").dropna()
