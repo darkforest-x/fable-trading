@@ -26,3 +26,11 @@ The earlier plan text claiming native V1 could not be replayed was incorrect; th
 - Parent: this plan, shared registries, integrated report/HTML and Notion note.
 - Terra High `v1_v8_be05`: common V1/V8 replay and `common/` results.
 - Terra High `native_v1_be05`: original V1 replay and `native_v1/` results.
+
+## Execution correction discovered during parity (2026-09-14)
+
+The archived V8 replay uses `spike_exit_policy_study.replay_policy`. Its separate opening-gap stop can close a position before the pending-reverse cleanup block, leaving an old position's exit intent available to a later entry. A fixed-entry replay exposed the discrepancy. Reproducing that stale intent merely to match the archive is not an acceptable new executable baseline.
+
+The revised evidence sequence retains a legacy baseline solely for exact archive parity, then measures the change to a corrected baseline which clears exit intent when its owning position ends. Only after this separately identified correction are clean baseline and clean 0.5R-BE compared. Both BE arms use the same corrected engine; no signal parameters, costs or risk widths change. Save legacy-to-clean event/count/R differences and both clean serial and fixed-entry outcomes. Previously generated `full_v1` and `full_v2` outputs remain historical failed/interrupted attempts and cannot be presented as final evidence.
+
+This is an explicit correction of simulator state ownership, not a selected profitable parameter. Native V1 uses its own protection loop and remains a separate experiment arm. No shared historical builder, live execution or notification behavior is changed by this study.
