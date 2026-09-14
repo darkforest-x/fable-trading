@@ -14,6 +14,19 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-v1-v8-tier-lock-20260914-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: eb10a1139e
+    status: active
+    question: Does adding a 1.5R observed-MFE lock at positive0.5R improve native V1 and V8 beyond price BE at0.5R?
+    single_variable: Add the second next-bar protection tier to the fixed BE05 rule; admissions, actual initialR, original exits and cost0.002 remain unchanged.
+    result: Preregistered three-arm fixed-entry comparison and supplemental serial replay on the preceding authenticated30m1H4H pool; new tier results pending.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v1_v8_tier_lock_20260914.md
+    artifacts: []
+    notes: Owner requests both levels and permits all historical dates. New fixed-tier configuration on reused nonblind history; sample/full attempts must be recorded. No live or Pine changes.
   - experiment_id: exp-spike-v1-v8-be05-20260914-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2b430b1523
