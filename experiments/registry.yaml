@@ -9224,6 +9224,16 @@ experiments:
     - spike-v8-ict-exits-20260915-delivery
     - spike-v8-ict-net2r-owner-choice-20260915
 
+  - experiment_id: exp-spike-okx-midnight-rank-20260915-v1
+    source_repo: darkforest-x/fable-trading
+    status: planned
+    question: Do OKX coins ranked by the first10orNminutes after Beijing midnight keep trending and improve V1/V8 ICT entries?
+    single_variable: Causal daily entry universe; frozen six lookbacks and three topK sizes, unchanged signals exits and costs.
+    notes: All known current and archived OKX USDT perpetual names attempted. Current catalog is not a historical census. Development precedes frozen later evaluation; no holdout. Plan in experiment directory.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+
   - experiment_id: exp-spike-v8-ict-winner-peaks-20260915-v1
     source_repo: darkforest-x/fable-trading
     source_commit: f931af0fb5e8438b096d2c109050b7840c38a656

@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-spike-okx-midnight-rank-20260915-v1",
+  "catalog_source": "experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/data/catalog.json",
+  "owner_rank_anchor": "Asia/Shanghai 00:00",
+  "rank_minutes": [5, 10, 15, 30, 60, 120],
+  "top_k": [5, 10, 20],
+  "primary_n": 10,
+  "primary_k": 10,
+  "forward_minutes": [15, 30, 60, 240, "day"],
+  "entry_delay_minutes": 1,
+  "signal_timeframes": [3, 5, 15, 30, 60, 240],
+  "sessions": ["union", "new_york"],
+  "archive_months": {"develop": ["2023-07", "2024-12"], "evaluate": ["2025-01", "2026-04"]},
+  "windows": {"development": ["2023-08-01", "2025-01-01"], "validation": ["2025-01-01", "2026-01-01"], "recent": ["2026-01-01", "2026-05-01"]},
+  "selection": {"metric": "daily_equal_weight_matched_excess_net_240", "minimum_days": 100, "tie_break": "smaller_n_then_k", "positive_required": true},
+  "round_trip_cost": 0.002,
+  "seed": 9152026,
+  "bootstrap_draws": 2000,
+  "holdout_consumed": false,
+  "production_eligible": false,
+  "training_eligible": false
+}
