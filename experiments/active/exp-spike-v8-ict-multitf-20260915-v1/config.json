@@ -1,0 +1,56 @@
+{
+  "experiment_id": "exp-spike-v8-ict-multitf-20260915-v1",
+  "created": "2026-09-15",
+  "source": "existing frozen V8 original entry and exit",
+  "venue": "OKX",
+  "symbol": "ETH-USDT-SWAP",
+  "minutes": [
+    3,
+    5,
+    15,
+    30,
+    60,
+    240
+  ],
+  "end": "2026-05-01T00:00:00Z",
+  "common_start": "2026-01-01T00:00:00Z",
+  "available_start": "2023-08-01T00:00:00Z",
+  "minimum_warmup_bars": 1500,
+  "tick": 0.01,
+  "round_trip_cost": 0.002,
+  "seed": 9152026,
+  "controls_per_trade": 5,
+  "permutations": 9999,
+  "primary": "original",
+  "selection": "none; original V8 exit frozen and only entry session changes",
+  "holdout_consumed": false,
+  "production_eligible": false,
+  "training_eligible": false,
+  "context_3m": "experiments/active/exp-spike-eth-martingale-20260914-v1/results/pre/ETH_3m_OKX.pkl",
+  "context_3m_sha256": "9fc6f9dcbad7616f9c7ceab811ed9634ece2b07bf24327ff070ac09592c972fd",
+  "sources": {
+    "5": "data/kline_fetched/okx_ETH_USDT_SWAP_5m_57699.csv",
+    "15": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv"
+  },
+  "execution": "next_open_on_closed_opposite_signal; retain initial stop and raw V6 reverse; vary only fanshen overlay and optional original trailing removal",
+  "cash": {
+    "initial_balance": 1000,
+    "base_risk": 1,
+    "leverage_cap": 10
+  },
+  "sessions": [
+    "all",
+    "union"
+  ],
+  "session_timezone": "America/New_York",
+  "session_start_hour": 2,
+  "session_end_hour": 11,
+  "session_timestamp": "planned_next_observed_open",
+  "weekends": true,
+  "primary_reason": "Owner explicitly removed Fanshen exits before this study was frozen or evaluated",
+  "previous_experiment": "experiments/active/exp-spike-fanshen-exit-multitf-20260914-v1",
+  "previous_result_manifest_sha256": "a7ddf9f0a9b32e6ef2b1f8bc5a4d582ffb78bc425c55600cc8ac7af2074a22e8",
+  "policies": [
+    "original"
+  ]
+}

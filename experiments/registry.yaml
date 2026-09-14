@@ -9192,3 +9192,16 @@ experiments:
     artifacts:
     - spike-fanshen-exit-multitf-20260914-delivery
     notes: Nine exits frozen before replay,108rows and216cash ledgers independently reconciled,605result hashes verified. Zero holdout use.3m5m early-exit improvement hypothesis fails;4h remains exploratory. No live changes.
+
+  - experiment_id: exp-spike-v8-ict-multitf-20260915-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3454c0945dd21c744f0e69946bdbac8ef876d339
+    status: active
+    question: Does the owner supplied ICT union improve original V8 entries across six OKX ETH periods?
+    single_variable: Entry session only; original V8 initial stop, trailing, reverse exit and20bp costs frozen. Owner removed Fanshen exits before evaluation.
+    result: Frozen before evaluation; no result yet.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v8_ict_multitf_20260915.md
+    notes: All versus NewYork02to11 local,actual next open,weekends included,no session-end close. No new holdout or live change.
