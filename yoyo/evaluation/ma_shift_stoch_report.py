@@ -63,9 +63,15 @@ def main():
     md.append(table(['规则','方向','已平仓','净胜率','平均净bp','PF','同方向匹配随机净bp'],rows))
     rows=[]
     for key,r in arms.items():
+        targets=pd.read_csv(out/f'{key}_trades.csv')
+        controls=pd.read_csv(out/f'{key}_controls.csv')
+        midpoint=pd.Timestamp(summary['config']['start_utc'])+(pd.Timestamp(summary['config']['end_utc'])-pd.Timestamp(summary['config']['start_utc']))/2
         for label,v in r['entry_time_halves'].items():
-            rows.append([names[key],'前半窗' if label=='earlier' else '后半窗',v['n'],num(v['net_mean_bp']),num(v['pf'])])
-    md += [table(['规则','按入场分段','已平仓','平均净bp','PF'],rows),
+            early=pd.to_datetime(targets.entry_time,utc=True)<midpoint
+            ids=targets.loc[early if label=='earlier' else ~early,'trade_id']
+            paired=controls[controls.target_trade_id.isin(ids)&controls.matched]
+            rows.append([names[key],'前半窗' if label=='earlier' else '后半窗',v['n'],num(v['net_mean_bp']),num(v['pf']),num(paired.control_net_return.mean()*1e4 if len(paired) else None)])
+    md += [table(['规则','按入场分段','已平仓','平均净bp','PF','分段匹配随机净bp'],rows),
            '上表仅按入场时间把连续回测账本分两半，不重开账户、不改退出，不用这两半选参数；对应随机对照完整保留在CSV（同UTC日桶），全期对照见主表。\n',
            f'组合最长连续净亏{a["longest_loss"]}笔；持仓中位{num(a["median_hold_minutes"])}分钟、最长{num(a["max_hold_minutes"])}分钟。最大单笔净收益{num(a["max_trade_net_pct"])}%、最小{num(a["min_trade_net_pct"])}%。无初始止损风险单位，因此R、10R频率不适用。\n',
            '## 5. 匹配随机对照和统计边界\n']
