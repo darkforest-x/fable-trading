@@ -38,8 +38,7 @@ def finalize():
     ax[1].margins(y=.20)
     ax[1].set_xlabel('Windows differ; OKX 5m begins in Dec 2025.',fontsize=8)
     for i,v in enumerate(changes):ax[1].annotate(f'{v:+.2f}',(i,v),xytext=(0,4 if v>=0 else -12),textcoords='offset points',ha='center',fontsize=9)
-    fig.suptitle('A tighter profit-protection rule does not improve every timeframe',fontsize=12)
-    plot=results/'exit_comparison.png';fig.savefig(plot,dpi=170);plt.close(fig)
+    plot=results/'exit_comparison.png';fig.savefig(plot,dpi=170,bbox_inches='tight',pad_inches=.15);plt.close(fig)
     notes=[]
     notes.append('## 本轮结论\n\n**规则已实现，效果分化，不能称为统一改进。** 以下均为OKX ETH、未使用holdout；共同区间是2026-01-01至2026-05-01 UTC。')
     notes.append(f'- 3m：共同区间净{old[0]:.2f}R→{new[0]:.2f}R；较长可用历史{wide_old[0]:.2f}R→{wide_new[0]:.2f}R。提高净正率没有弥补被截断的趋势收益。')
