@@ -38,8 +38,11 @@ def main():
     controls = json.loads((EXP / "tv_controls.json").read_text())
     closed = [r for r in rows if not r["censored"]]
     partial = [r for r in closed if r["partial"]]
-    be = [r for r in closed if str(r["exit_reason"]).startswith("break_even")]
-    header = ["样本", "完整交易", "毛 R", "净 R", "净胜率", "PF", "已实现回撤 R", "配对数", "随机均值 R/笔", "配对超额 R/笔"]
+    be = [r for r in closed if r["exit_reason"] in ("break_even", "break_even_gap")]
+    cash_wins = sum(r["net_pnl"] for r in closed if r["net_pnl"] > 0)
+    cash_losses = -sum(r["net_pnl"] for r in closed if r["net_pnl"] < 0)
+    cash_pf = cash_wins / cash_losses if cash_losses else None
+    header = ["样本", "完整交易", "毛 R", "净 R", "净胜率", "PF（R）", "已实现回撤 R", "配对数", "随机均值 R/笔", "配对超额 R/笔"]
     main_table = table(header, [performance_row("v2 · TV OHLC 路径", primary["all"]),
                                 performance_row("v2 · 先走逆向路径", sensitive["all"]),
                                 ["v1 · 指标稿（未回测）"]+["N/A"]*9])
@@ -73,9 +76,9 @@ def main():
 
 ## 结论
 
-**这版在本地可用历史上净{direction}：{s['natural']}笔完整交易，净{number(s['net_r'], signed=True)}R，胜率{number(100*s['win_rate'])}%，PF {number(s['profit_factor'])}。** {evidence}。这次测试没有调整任何策略参数，V1门禁未加入。
+**这版在本地可用历史上净{direction}：{s['natural']}笔完整交易，净{number(s['net_r'], signed=True)}R，胜率{number(100*s['win_rate'])}%，按R计算PF {number(s['profit_factor'])}。** {evidence}。这次测试没有调整任何策略参数，V1门禁未加入。
 
-按每笔完整仓位固定1 ETH归一化，毛盈亏{number(s['gross_pnl'], signed=True)} USDT，实际成交手续费{number(s['fees'])} USDT，净盈亏{number(s['net_pnl'], signed=True)} USDT。这是仓位归一化数字，不能当作账户收益百分比。
+按每笔完整仓位固定1 ETH归一化，毛盈亏{number(s['gross_pnl'], signed=True)} USDT，实际成交手续费{number(s['fees'])} USDT，净盈亏{number(s['net_pnl'], signed=True)} USDT，现金PF {number(cash_pf)}。这是仓位归一化数字，不能当作账户收益百分比。
 
 ## 数据与执行口径
 
@@ -106,7 +109,7 @@ PF=盈利交易净R之和/亏损交易净R绝对值之和。净胜率在扣手�
 
 {exit_table}
 
-完整交易中{len(partial)}笔触轨平半，占{number(100*len(partial)/len(closed))}%；{len(be)}笔尾仓保本退出。保本只指尾仓价格回到开仓价，整笔是否盈利还取决于前半仓利润与手续费。最大连续净亏损{s['max_loss_streak']}笔，平均盈利交易{number(s['avg_win_r'], signed=True)}R，平均亏损交易{number(s['avg_loss_r'], signed=True)}R，平均持仓约{number(s['mean_hold_hours'])}小时（按覆盖K线根数估计）。
+完整交易中{len(partial)}笔触轨平半，占{number(100*len(partial)/len(closed))}%；{len(be)}笔尾仓在保本价退出。另外{s['marketable_be_approximations']}笔触轨时已经亏损，移到入场价的保护单已经被当前价格越过，不能算成以入场价保本离场。保本只指尾仓价格回到开仓价，整笔是否盈利还取决于前半仓利润与手续费。最大连续净亏损{s['max_loss_streak']}笔，平均盈利交易{number(s['avg_win_r'], signed=True)}R，平均亏损交易{number(s['avg_loss_r'], signed=True)}R，平均持仓约{number(s['mean_hold_hours'])}小时（按覆盖K线根数估计）。
 
 ## 匹配随机检验
 
