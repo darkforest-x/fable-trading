@@ -18,6 +18,20 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v9-asset-exclusions-20260915-delivery
+    artifact_type: manifest
+    role: static_asset_exclusion_posthoc_and_temporal_diagnostics
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0ec3a7de5ef93e0d54eb590ad29caa5f388550e7
+    source_path: experiments/active/exp-spike-v9-asset-exclusions-20260915-v1/delivery_manifest.json
+    sha256: 3607b35d931601c18010524374b179bdb2ae228310d09e5d3de98e0cd2725f32
+    size_bytes: 3349
+    storage_uri: repo://experiments/active/exp-spike-v9-asset-exclusions-20260915-v1/delivery_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Binds14 files,32 summary rows and2670 asset score rows. Source177473 trades/controls authenticated;independent V9 six-group residual netR<=1.82e-12.
+      All three temporal V9 exclusions worsen results;no strategy change.
   - artifact_id: spike-v9-eth-lowtf-20260915-delivery
     artifact_type: manifest
     role: fixed_eth_lowtf_v9_v8_serial_comparison

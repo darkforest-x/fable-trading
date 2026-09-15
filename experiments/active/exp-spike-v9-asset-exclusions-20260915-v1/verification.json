@@ -1,0 +1,81 @@
+{
+  "verified_at": "2026-09-15T00:47:10.803841+00:00",
+  "source_commit": "0ec3a7de5ef93e0d54eb590ad29caa5f388550e7",
+  "source_events": 177473,
+  "baseline_period_checks": 6,
+  "summary_rows": 32,
+  "asset_score_rows": 2670,
+  "blacklist_groups": 4,
+  "new_ohlc_reads": 0,
+  "new_market_replays": 0,
+  "tests": {
+    "command": "python3 -m pytest -q tests/evaluation/test_spike_v9_asset_exclusions.py tests/evaluation/test_spike_v9_full_report.py",
+    "passed": 8,
+    "seconds": 1.16,
+    "evidence": "observed completed command output before source aggregation"
+  },
+  "validations": {
+    "source_receipt_and_three_input_hashes": true,
+    "trade_control_event_asset_target_net_r_identity": true,
+    "baseline_full_earlier_later_both_arms": true,
+    "gross_plus_cost_equals_net_delta": true,
+    "retained_plus_lost_original_10r": true,
+    "control_denominators": true,
+    "blacklist_score_flags_equal_sets": true
+  },
+  "html": {
+    "tables": 5,
+    "local_links": 5,
+    "all_local_links_exist": true,
+    "browser_pixel_validation": false,
+    "codex_file_preview": "queued"
+  },
+  "reviews": [
+    {
+      "agent": "/root/map_v8_shadow",
+      "role": "budget-mapper",
+      "model_effort": "Luna Max",
+      "source_semantics": "verified original metrics, periods, controls and exact thresholds",
+      "eth_cross_period_example": {
+        "earlier_closed": 148,
+        "earlier_net_r": -62.6758601637,
+        "earlier_mean_r": -0.4234855416,
+        "earlier_pf_r": 0.4624263303,
+        "later_events": 136,
+        "later_closed": 134,
+        "later_censored": 2,
+        "later_net_r": 116.2332066804,
+        "later_mean_r": 0.8674119902,
+        "later_pf_r": 2.2425335992,
+        "later_ge10": 8
+      },
+      "scope": "saved outcomes only; no OHLC or replay",
+      "v9_six_groups": {
+        "passed": true,
+        "blacklist_symmetric_differences": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "max_abs_net_r_residual": 1.82e-12,
+        "max_abs_mean_r_residual": 9.72e-17,
+        "max_abs_pf_r_residual": 2.22e-16,
+        "closed_and_ge10_exact": true,
+        "independent_non_sequential_thresholds": true,
+        "earlier_fit_closed": 31295,
+        "actual_assets_exactly_at_threshold": 0
+      }
+    }
+  ],
+  "notion": {
+    "url": "https://app.notion.com/p/3dc8856479af81989d09c1919b1bb238",
+    "dedup_matches": 0,
+    "created_and_fetched": true,
+    "strategy_relation": "https://app.notion.com/p/3db8856479af81e1b257dbd9ae09aca3"
+  },
+  "training_eligible": false,
+  "production_eligible": false
+}

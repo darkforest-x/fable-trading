@@ -14,6 +14,23 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-v9-asset-exclusions-20260915-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0ec3a7de5ef93e0d54eb590ad29caa5f388550e7
+    status: rejected
+    question: Do three owner-fixed poor-performance asset exclusion rules improve V9 after the score window?
+    single_variable: Independently remove exact base assets with net win rate<=0.10,mean netR<-.36,or PF(R)<.5;no combined policy or new replay.
+    result: V9 hindsight net2758.17R becomes2908.45/4637.89/4391.25R;earlier-frozen lists instead worsen later-2089.19R to-2228.28/-2314.03/-2254.94R and
+      lose9/39/42 original10R events. ETH illustrates sign reversal.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v9_asset_exclusions_20260915.md
+    artifacts:
+    - spike-v9-asset-exclusions-20260915-delivery
+    reuse_allowed: false
+    notes: First saved-outcome what-if consumption per exact threshold/mode,already-exposed history. Zero new OHLC or replay. Eight tests,six original baseline
+      reconciliations,one Luna Max independent source/ETH/six-group arithmetic review. Frozen lists are not dynamic or a shared-account replay.
   - experiment_id: exp-spike-v9-eth-lowtf-20260915-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 37215d29c01249e47903f49d17d1de7a6da9efea

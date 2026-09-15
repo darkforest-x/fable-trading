@@ -1,0 +1,64 @@
+{
+  "complete": true,
+  "source_receipt_sha256": "c13feddd2cc8bde66ee738b51e583971b99d06b8cb566d8293077abaafdace0b",
+  "source_files": {
+    "trades.csv.gz": "55f4b9d0ec98e38da37f8c2a43bee73a2d65f98e232deeb181d3ee1ffd83a748",
+    "controls.csv.gz": "d2864a942825b19f569fca7f3dec12ae7245d6433229ed6cdb7d98f6df1fb179",
+    "summary.csv": "d513574006a15fe902a5262fbadbab75701a43cd2c19c81182ff8c0d29ccb800"
+  },
+  "configuration": {
+    "experiment_id": "exp-spike-v9-asset-exclusions-20260915-v1",
+    "source": "experiments/active/exp-spike-v9-full-backtest-20260915-v1/statistics/full_v1",
+    "source_receipt_sha256": "c13feddd2cc8bde66ee738b51e583971b99d06b8cb566d8293077abaafdace0b",
+    "files": {
+      "trades.csv.gz": "55f4b9d0ec98e38da37f8c2a43bee73a2d65f98e232deeb181d3ee1ffd83a748",
+      "controls.csv.gz": "d2864a942825b19f569fca7f3dec12ae7245d6433229ed6cdb7d98f6df1fb179",
+      "summary.csv": "d513574006a15fe902a5262fbadbab75701a43cd2c19c81182ff8c0d29ccb800"
+    },
+    "arms": [
+      "v9",
+      "v8"
+    ],
+    "asset_grouping": "original exact base asset, pooled venues and timeframes",
+    "policies": {
+      "win_le_10pct": {
+        "metric": "win_rate",
+        "operator": "<=",
+        "threshold": 0.1
+      },
+      "mean_lt_neg036": {
+        "metric": "mean_r",
+        "operator": "<",
+        "threshold": -0.36
+      },
+      "pf_lt_05": {
+        "metric": "pf_r",
+        "operator": "<",
+        "threshold": 0.5
+      }
+    },
+    "selection_modes": [
+      "full_history_posthoc",
+      "earlier_frozen_later"
+    ],
+    "start": "2024-09-10T00:00:00Z",
+    "split": "2025-09-10T00:00:00Z",
+    "end": "2026-09-10T00:00:00Z",
+    "minimum_closed": null,
+    "unknown_score_action": "retain and report",
+    "round_trip_cost": 0.002,
+    "union_or_intersection": false,
+    "new_market_reads": false,
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "baseline_period_checks": 6,
+  "source_events": 177473,
+  "rows": 32,
+  "files": {
+    "summary.csv": "86b0d1c12591da91dfa04c8ccd7c79108850ba1e7e0d355dddb6f2ae880ff0b2",
+    "asset_scores.csv": "89e4324d9cd8052af36a4752c54afd3858186802515e842cd6ca328c659a08ca",
+    "blacklists.json": "32f323fce0512beb7b5923869c1e6542ce5fdc1dfe6a5f393a490aa4275a8c0b",
+    "evaluation_started.json": "a9037d89d0394ef24c53c71e4fbec91aad7140a99e6b13a9d00c2cffd7d8809a"
+  }
+}
