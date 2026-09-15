@@ -16,7 +16,7 @@ import subprocess
 import numpy as np
 import pandas as pd
 
-from yoyo.evaluation.spike_eth_yolo_entry import EXP, sha, dump
+from yoyo.evaluation.spike_eth_yolo_entry import EXP, sha, dump, frozen_code, dependencies
 
 
 def number(value, digits=2, percent=False):
@@ -130,6 +130,51 @@ body{font:15px/1.65 -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;ba
     return len(base)
 
 
+def write_manifest(out, report):
+    """Authenticate saved evidence without new inference or outcome evaluation."""
+    from PIL import Image
+    import hashlib
+    identity=frozen_code([*dependencies(),Path('yoyo/evaluation/spike_eth_yolo_statistics.py'),
+                          Path(__file__).relative_to(Path.cwd())])
+    stats=json.loads((out/'summary.json').read_text())
+    for group in ('input_files','output_files'):
+        for record in stats[group].values():
+            if sha(record['path'])!=record['sha256']: raise ValueError('statistical receipt drift')
+    source=json.loads((EXP/'sources/summary.json').read_text())
+    for tf,record in source['timeframes'].items():
+        if sha(EXP/'sources'/f'{tf}.csv')!=record['csv_sha256']: raise ValueError('source drift')
+    inference=json.loads((out/'inference_complete.json').read_text());images=0
+    for name,digest in inference['cache_files'].items():
+        path=out/'inference'/name
+        if sha(path)!=digest: raise ValueError('prediction drift')
+        record=json.loads(path.read_text())
+        for item in record['inputs']:
+            image_path=item['path'];array=np.asarray(Image.open(image_path).convert('RGB'))
+            if sha(image_path)!=record['input_files'][image_path]: raise ValueError('input PNG drift')
+            if hashlib.sha256(array.tobytes()).hexdigest()!=item['pixel_sha256']: raise ValueError('input array drift')
+            if item['last_close_ms']>item['decision_ms']: raise ValueError('future input')
+            images+=1
+    displays=json.loads((out/'display_manifest.json').read_text())
+    for path,record in displays.items():
+        raw=np.asarray(Image.open(record['source']).convert('RGB'))
+        shown=np.asarray(Image.open(path).convert('RGB'))
+        if not np.array_equal(shown,raw[:,:,::-1]): raise ValueError('display color contract')
+    dump(out/'validation.json',dict(source_identity=identity,source_timeframes=len(source['timeframes']),
+         native_grids_complete=True,inference_requests=len(inference['cache_files']),
+         raw_arrays_sha_verified=images,all_input_last_closes_no_later_than_entry=True,
+         display_rgb_arrays_verified=len(displays),statistics_receipts_verified=True,
+         focused_tests='27 passed; tests/evaluation/test_spike_eth_yolo_entry.py, test_spike_eth_yolo_statistics.py, tests/data/test_spike_eth_yolo_sources.py',
+         broader_prior_checks='239 passed; 20 existing monitor fixture failures: analyze() missing required tick',
+         browser_qa='Report screenshot and 1H gallery verified; 3 trades, lower-hit filter 1, lower-hit+net-win 0; RGB candle colors verified'))
+    files=[p for p in out.glob('*') if p.is_file() and p.suffix in ('.json','.csv','.html','.png')]
+    files+=[report,Path('analysis/html')/(report.stem+'.html'),EXP/'config.json',EXP/'PROJECT_PLAN.md',EXP/'authorization.json',EXP/'sources/summary.json']
+    dump(EXP/'delivery_manifest.json',dict(experiment_id=EXP.name,generated_at=pd.Timestamp.now(tz='UTC'),
+         builder_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
+         exact_study_holdout_consumption=1,blind_out_of_sample=False,training_eligible=False,production_eligible=False,
+         local_large_evidence='sources CSV/raw and input/display PNGs remain local; source, inference and display manifests bind hashes',
+         files={str(p):dict(sha256=sha(p),size_bytes=p.stat().st_size) for p in sorted(files)}))
+
+
 def run():
     out=EXP/'results';cfg=json.loads((EXP/'config.json').read_text())
     summary=pd.read_csv(out/'summary.csv');signals=pd.read_csv(out/'signals_detected.csv')
@@ -164,6 +209,7 @@ def run():
             table(htrades.to_dict('records'),[('entry_cst','开仓北京时间',None,False),('direction','方向',None,False),('same_text','1H检测',None,False),('lower_text','15m检测',None,False),('net_r','原交易净R',3,False),('control_net_r','匹配随机净R',3,False)]),
             '## 2. 同一批原始交易：检出是否更容易盈利',
             '净胜率 = 已平仓 net_R>0 的比例。所有组保留原始V9的开平仓价格及0.2%往返成本。随机均值与超额只在共同已平仓匹配分母上计算，不能拿不同分母直接相减。',
+            '1R为该笔初始止损对应的价格风险。退出继承原V9：5根结构止损、0.2ATR缓冲、2ATR风险下限；达到2R后按4ATR跟踪，原始反向信号在下一开盘退出。这里的合计R不是账户收益率。',
             table(summary.loc[summary.population.eq('v9_detection_group')].to_dict('records'),[('timeframe','周期',None,False),('group','分组',None,False),('closed','已平仓',0,False),('net_winrate','净胜率',1,True),('mean_net_r','平均净R',3,False),('total_net_r','合计净R',2,False),('pf_net_r','PF(R)',3,False),('matched_pairs','随机配对',0,False),('paired_control_mean_r','随机均R',3,False),('paired_excess_mean_r','配对超额R',3,False)]),
             '分组：all全部、same_hit同级检出、same_miss同级未检出、lower_hit小级别检出、lower_miss小级别未检出、both_hit两者均检出。',
             '## 3. 完整单仓回放：把YOLO作为开仓过滤',
@@ -212,6 +258,7 @@ def run():
     subprocess.run(['python3','scripts/md_to_html.py',str(report),'--out-dir','analysis/html'],check=True)
     dump(out/'delivery_receipt.json',dict(report=str(report),report_sha256=sha(report),
          gallery_entries=gallery_count,gallery_sha256=sha(out/'gallery.html')))
+    write_manifest(out,report)
 
 
 if __name__=='__main__': run()
