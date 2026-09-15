@@ -1,0 +1,56 @@
+{
+  "experiment_id": "exp-spike-v9-cost-be2-20260915-v1",
+  "strategy_version": "spike-v9-net2r-cost-be-20260915-v1",
+  "parent_version": "spike-v9-entry-bundle-20260915-v1",
+  "owner_request": "加上吧。然后用这个回测一下",
+  "single_variable": "Add surviving-bar net favorable excursion 2R cost protection to unchanged V9",
+  "net_favorable_trigger_r": 2.0,
+  "round_trip_cost": 0.002,
+  "long_stop_multiplier": 1.002,
+  "short_stop_multiplier": 0.998,
+  "activation": "Observe current surviving bar high/low at close; effective next bar; old stop priority",
+  "original_trail": {"gross_close_arm_r": 2.0, "distance_atr": 4.0},
+  "reverse_exit": "unfiltered raw V6 opposite confirmation at next open",
+  "parameter_search": false,
+  "ict_filter": false,
+  "partial_take_profit": false,
+  "martingale": false,
+  "eth": {
+    "venue": "okx",
+    "symbol": "ETH-USDT-SWAP",
+    "asset": "ETH",
+    "timeframes": [3, 5, 15, 30, 60, 240],
+    "available_start": "2023-08-01T00:00:00Z",
+    "end": "2026-05-01T00:00:00Z",
+    "common_start": "2026-01-01T00:00:00Z",
+    "minimum_warmup_bars": 1500,
+    "tick": 0.01,
+    "context_3m": "experiments/active/exp-spike-eth-martingale-20260914-v1/results/pre/ETH_3m_OKX.pkl",
+    "context_3m_sha256": "9fc6f9dcbad7616f9c7ceab811ed9634ece2b07bf24327ff070ac09592c972fd",
+    "sources": {
+      "5": "data/kline_fetched/okx_ETH_USDT_SWAP_5m_57699.csv",
+      "15": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv"
+    }
+  },
+  "universe": {
+    "expected_streams": 3531,
+    "start": "2024-09-10T00:00:00Z",
+    "split": "2025-09-10T00:00:00Z",
+    "end": "2026-09-10T00:00:00Z",
+    "raw": "experiments/active/exp-spike-v7-v1-compare-20260912-v1/results/replay_two_year_20260912_v3",
+    "raw_manifest_sha256": "37f65499611877c8b8b10f0f2fb7a8c99a07d95cc90cda282f5b8a5ac89d41b6",
+    "oracle": "experiments/active/exp-spike-v9-full-backtest-20260915-v1/results/full_v1",
+    "requires_configuration_specific_holdout_approval": true
+  },
+  "controls": {
+    "seed": 915220,
+    "draws_per_event": 1,
+    "match": ["stream", "side", "calendar_month", "fixed_current_atr_price_bin", "evaluation_window"],
+    "atr_price_bins": [0.005, 0.01, 0.02, 0.05, 0.1],
+    "resample_failed_draws": false,
+    "block": "UTC calendar month across assets and venues",
+    "repetitions": 2000
+  },
+  "training_eligible": false,
+  "production_eligible": false
+}
