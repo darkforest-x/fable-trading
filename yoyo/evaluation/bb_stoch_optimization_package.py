@@ -18,6 +18,7 @@ def main():
         'tests/evaluation/test_bb_stoch_optimization.py',
         'tests/evaluation/test_bb_stoch_parameter_replay.py',
         'docs/learnings/stop-optimization-needs-a-fixed-cash-denominator.md',
+        'docs/learnings/a-grid-winner-can-depend-on-one-boundary-position.md',
         'analysis/p1_eth_bb_stoch_optimization_20260916.md',
         'analysis/html/p1_eth_bb_stoch_optimization_20260916.html',
         'analysis/html/eth_bb_stoch_optimization_20260916_equity.png'])
