@@ -64,6 +64,7 @@ int sig = selfTest or not chartOK ? 0 : f_signal(high, low, upper, lower, green,
 varip float seenSize = 0.0
 varip int seenClosed = 0
 varip int lastDecisionBar = na
+varip int queuedEntry = 0
 varip float pendingUpper = na
 varip float pendingLower = na
 varip float entryPrice = na
@@ -103,7 +104,13 @@ if not selfTest and chartOK and not na(nextUpperTouch) and decisionClose
         strategy.cancel_all()
         strategy.close(sideNow == 1 ? "L" : "S", comment="REV", immediately=true)
     if sig != 0 and (sideNow == 0 or reverseNow)
-        strategy.entry(sig == 1 ? "L" : "S", sig == 1 ? strategy.long : strategy.short, comment=sig == 1 ? "L" : "S")
+        queuedEntry := sig
+
+// Wait for the immediate close's fill callback before issuing a reverse entry.
+// Otherwise strategy.entry may include the still-open old size in its order.
+if not selfTest and queuedEntry != 0 and strategy.position_size == 0
+    strategy.entry(queuedEntry == 1 ? "L" : "S", queuedEntry == 1 ? strategy.long : strategy.short, comment=queuedEntry == 1 ? "L" : "S")
+    queuedEntry := 0
 
 // Two independent reserved tranches. A first-half stop is not a TP and must
 // never move the runner to BE or recreate a half-position exit order.

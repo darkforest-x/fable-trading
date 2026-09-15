@@ -12,8 +12,8 @@ needle = 'bool selfTest = input.bool(false,'
 assert source.count(needle) == 1
 probe = source.replace(needle, 'bool selfTest = input.bool(true,', 1)
 (HERE / 'native_selftest.pine').write_text(probe)
-(HERE / 'native_selftest.html').write_text(copy_page(probe, 'BB Stoch v2 · 合成检查'))
-(ROOT / 'analysis/html/eth_bb_stoch_strategy_v2_code.html').write_text(copy_page(source, 'ETH 5m · BB × Stoch 策略 v2'))
+(HERE / 'native_selftest.html').write_text(copy_page(probe, 'BB Stoch v2 · 合成检查').replace('新建指标', '新建策略'))
+(ROOT / 'analysis/html/eth_bb_stoch_strategy_v2_code.html').write_text(copy_page(source, 'ETH 5m · BB × Stoch 策略 v2').replace('新建指标', '新建策略'))
 receipt = {'source_sha256': hashlib.sha256(source.encode()).hexdigest(), 'native_probe_sha256': hashlib.sha256(probe.encode()).hexdigest(), 'probe_delta': 'selfTest input default true only', 'native_probe_orders': False}
 (HERE / 'source_receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
 print(json.dumps(receipt))

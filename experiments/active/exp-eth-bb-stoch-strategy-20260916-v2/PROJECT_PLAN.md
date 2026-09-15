@@ -8,7 +8,7 @@ The owner explicitly requests nine changes together: whole candle including wick
 
 - ETHUSDT.P standard 5m only. V9 SMA200 ±2 population standard deviations. Original Stoch5/3/3 green crossover below20 and red crossunder above80; no WVF gate.
 - Long high strictly below lower band plus green arrow on confirmed close. Short low strictly above upper band plus red. Equality fails. Full opposite composite exits the runner, even before first TP.
-- Entry signal confirmed close; native entry fills next available tick (normally next open). Stop is3% from actual strategy average entry. No pyramiding. Full opposite composite closes immediately on the confirmed close, then opposite entry fills next tick.
+- Entry signal confirmed close; native entry fills next available tick (normally next open). Stop is3% from actual strategy average entry. No pyramiding. Full opposite composite closes immediately on the confirmed close, then a queued opposite entry is issued only after the broker position is flat and fills next tick.
 - First upper-band touch long / lower-band touch short exits50%. The runner moves to entry after actual TP fill. Initial SL on the first half does not count as TP.
 - Two strategy.exit brackets reserve exact half quantities with separate OCA groups. Fill executions update protective orders but cannot make new signal decisions using historical final OHLC.
 - Developing BB touch is algebraically solved from preceding N−1 closes. At each normal confirmed close the script updates the next bar's resting limit; long rounds up/short down to the instrument tick. No same-bar final close is used to retrospectively fill at a wick.
