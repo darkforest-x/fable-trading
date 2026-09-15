@@ -9327,3 +9327,14 @@ experiments:
     canonical_report: analysis/p1_spike_v8_ict_winner_peaks_20260915.md
     artifacts:
     - spike-v8-ict-winner-peaks-20260915-delivery
+
+  - experiment_id: exp-ifvg-lrl-eth-20260915-v1
+    source_repo: darkforest-x/fable-trading
+    status: active
+    question: Does a frozen causal LRL admission gate improve native ETH3m iFVG candidates and serial results after20bp costs?
+    single_variable: LRL admission on/off including target still ahead at actual next open; all other entry,structural stop,1R target and costs fixed.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_ifvg_lrl_eth_20260915.md
+    notes: Owner selected existing ETH perpetual minute data. Native3m only; no30s or highest-timeframe arbitration. Prefix stops before2026-05-01. Config and builder must be committed before prices.
