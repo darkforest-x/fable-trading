@@ -132,6 +132,22 @@ def test_disabled_engine_matches_old_serial_and_fixed_semantics() -> None:
         assert fixed[field] == pytest.approx(old_fixed[field]) if isinstance(fixed[field], float) else fixed[field] == old_fixed[field]
 
 
+@pytest.mark.parametrize("enable_be", [False, True])
+def test_boundary_held_fixed_entry_returns_censored_row_for_both_policies(enable_be: bool) -> None:
+    """A held trade must return a complete fixed row instead of Python None."""
+    context = _context(); bars = context.cache["bars"]
+    bars.iloc[5] = _long_trigger_bar(high=104.3, low=100.3)
+    for i in range(6, len(bars)):
+        bars.iloc[i] = [100.4, 100.5, 100.3, 100.4, 1., 100., 100., 1., 0., 100., 100.]
+    prepared = study.prepare_arm(context, arm="v8")
+    serial, _, _ = study.replay_serial(context, arm="v8", enable_be=enable_be, prepared=prepared)
+    assert len(serial) == 1 and bool(serial.iloc[0].censored)
+    fixed = study.replay_fixed_entry(context, serial.iloc[0], arm="v8", enable_be=enable_be, prepared=prepared)
+    assert fixed is not None
+    assert (fixed["censored"], fixed["exit_reason"], fixed["exit_i"]) == (True, "boundary_mark", serial.iloc[0].exit_i)
+    assert bool(fixed["be_armed"]) is enable_be
+
+
 def test_prefix_and_fixed_entry_match_serial_cost_be_outcome() -> None:
     context = _context(); bars = context.cache["bars"]
     bars.iloc[5] = _long_trigger_bar(high=104.3, low=99.)

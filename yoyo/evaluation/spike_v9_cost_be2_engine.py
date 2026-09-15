@@ -316,3 +316,4 @@ def replay_fixed_entry(context: base.StreamContext, row: pd.Series, *, arm: str,
         if int(raw_side[i]) == -side:
             pending_reverse = side
     pos["last_exit_i"], pos["last_exit_time"], pos["last_exit_price"], pos["last_exit_reason"] = len(frame)-1, frame.index[-1], ca[-1], "boundary_mark"
+    return _trade_row(pos, censored=True, precision="last_complete_close") | {"protection": float(pos["protection"])}
