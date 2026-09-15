@@ -1,0 +1,15 @@
+
+  - artifact_id: eth-bb-stoch-strategy-20260916-v2-delivery
+    artifact_type: manifest
+    role: pine_strategy_conversion_and_synthetic_visual_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3bb80aaf83bd184c08e0520ef95110452efb5137
+    source_path: experiments/active/exp-eth-bb-stoch-strategy-20260916-v2/delivery_manifest.json
+    sha256: 746418c283b59efb0de55c3d98a0c085d0b65ce3389ffae2bb948583cf3f21c3
+    size_bytes: 2203
+    storage_uri: repo://experiments/active/exp-eth-bb-stoch-strategy-20260916-v2/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Native compile and no-order fixtures pass;2400BB boundary comparisons and800rounding checks pass. No market return
+      evaluation or full broker-fill-sequence parity.

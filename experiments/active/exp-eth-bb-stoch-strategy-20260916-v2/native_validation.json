@@ -1,0 +1,20 @@
+{
+  "source_sha256": "d329a60a4b355ee47c530277e8f04aabab0290603ecc9ab49fcd1c8949eb01ea",
+  "native_probe_sha256": "d08447e5629d2090846b3dbce62efe045fb8f6ad61022210d410112d9331604f",
+  "probe_delta": "selfTest input default true only",
+  "native_probe_orders": false,
+  "observed_date": "2026-09-16 Asia/Shanghai",
+  "native_compile": "PASS",
+  "native_runtime": "SELFTEST PASS",
+  "visual_checks": [
+    "plain text without label arrows/background",
+    "bottom-right panel",
+    "long TP50% then REV+2R green box ends at reversal",
+    "short TP50% then BE0R text separated"
+  ],
+  "broker_fill_sequences_tested": false,
+  "market_signals_and_orders_in_probe": false,
+  "holdout_consumed": 0,
+  "source_commit": "3bb80aaf83bd184c08e0520ef95110452efb5137",
+  "final_native_recompile": "PASS; SELFTEST PASS observed again after flat-fill queue change"
+}

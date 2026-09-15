@@ -1,0 +1,16 @@
+
+  - experiment_id: exp-eth-bb-stoch-strategy-20260916-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3bb80aaf83bd184c08e0520ef95110452efb5137
+    status: active
+    question: Convert owner whole-candle BB Stoch idea to Pine strategy with intrabar half exit and clear runner drawings.
+    single_variable: Owner explicitly requested nine implementation changes together; no parameter search or return experiment.
+    result: Native compiler, synthetic formula and layout checks pass; economic effectiveness untested.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_eth_bb_stoch_strategy_20260916.md
+    artifacts:
+    - eth-bb-stoch-strategy-20260916-v2-delivery
+    notes: Supersedes v1 body-only and1.5percent defaults;v2 whole candle includes wicks,3percent stop,price R. V1 multi-timeframe
+      gate deferred.

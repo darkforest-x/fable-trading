@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>ETH 5m · BB × Stoch 策略 v2</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>ETH 5m · BB × Stoch 策略 v2</h1>
+<p>已按本次九项修改改成 Pine v6 策略。<strong>整根含影线离开 BB 才入场、默认止损3%、触轨平半、尾仓移保本。</strong> V1 门禁仍未加入。</p>
+<p><a href="eth_bb_stoch_strategy_v2_code.html">打开完整策略源码复制页</a></p>
+<h2>怎么使用</h2>
+<ol>
+<li>打开 ETHUSDT.P 的5分钟普通K线。</li>
+<li>Pine 编辑器新建策略，粘贴复制页的完整源码，添加到图表。旧指标可先从图表移除，避免重复提示。</li>
+<li>保持“合成自检与样式预览”关闭。BB默认不显示，需要时勾选“显示 BB 通道”。</li>
+<li>“提示横向间距”默认2根，可调整；1R/2R/3R观察线也可关闭。</li>
+</ol>
+<h2>九项修改逐一对应</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>v1</th>
+<th>v2</th>
+</tr></thead><tbody>
+<tr><td>入场</td><td>只有实体在轨外</td><td>整根含影线在轨外；多头 high 严格低于下轨，空头 low 严格高于上轨，贴线不算</td></tr>
+<tr><td>默认止损</td><td>1.5%</td><td>实际模拟开仓价的3%</td></tr>
+<tr><td>提示位置</td><td>事件标记容易叠在一起</td><td>TP放事件左侧；移BE放右侧并离开入场线；最终退出和R放框右侧</td></tr>
+<tr><td>脚本类型</td><td>指标参考仓位</td><td>原生 strategy，使用模拟成交记录管理和绘图</td></tr>
+<tr><td>BB</td><td>默认显示</td><td>默认隐藏，提供开关</td></tr>
+<tr><td>面板</td><td>右上角</td><td>右下角</td></tr>
+<tr><td>尾仓框与R</td><td>首次TP目标冻结、R加权</td><td>框跟随尾仓到最后退出，R是价格距离，不加权</td></tr>
+<tr><td>标注样式</td><td>带底色形状</td><td>1R、2R、3R、SL、BE、TP50%、REV全部纯文字</td></tr>
+<tr><td>触轨止盈</td><td>历史参考近似</td><td>提前挂平半限价，影线触到即可成交，不要求收盘在轨外</td></tr>
+</tbody></table>
+<p>原Stoch箭头逻辑未改：5/3/3，金叉时K和D均低于20；死叉时均高于80。 多头退出目标为上轨，空头为下轨。尾仓的反向退出仍要求“整根越过反向BB＋反向Stoch箭头”同时成立。</p>
+<h2>框和R</h2>
+<ul>
+<li>红框保留初始3%风险，R分母固定。</li>
+<li>TP50%标在第一半实际成交处。BE表示剩余仓位已移到开仓价。</li>
+<li>平半后绿框跟随尾仓，反向平仓时右边缘与高度落在最终退出位置。若尾仓BE，绿色尾仓框高度归零，TP50%文字仍保留。</li>
+<li><code>REV +2R</code>表示尾仓退出价距离开仓价为2倍初始风险；不是整单赚2R，也不声称是加权收益。</li>
+<li>策略测试器仍依据实际成交份额和费用计算盈亏。TradingView自带的成交箭头属于其策略样式设置；脚本自绘文字没有背景或箭头。</li>
+</ul>
+<h2>策略成交口径</h2>
+<p>入场信号在收盘确认，市价入场按下一可成交tick（通常下一根开盘）成交；3%止损使用实际模拟成交价。 完整反向信号在确认收盘立即平旧仓，反手开仓先等待旧仓已平的确认，再发单于下一tick成交，避免自动反手加量。与旧版“信号收盘参考价”不同。</p>
+<p>每个仓位有两个独立保护的50%份额。第一份在对侧BB碰轨限价与初始止损之间先到先执行；第二份先用3%止损。 只有第一份<strong>实际止盈成交</strong>后，第二份才改成BE；第一份止损不算TP。</p>
+<p>盘中BB也随着当前价格变化。本版由前199根已确认收盘求出下一根盘中与BB相交的价格，预先挂单， 避免等影线出现、收盘以后才下平半单。图上历史BB是最终收盘轨道，可能与盘中碰到的轨道略有不同。 两根K线间跳空、同根止损与止盈先后按TradingView可用价格路径成交，不能保证指定价格无滑差成交。</p>
+<p>模拟默认：初始资金100000、每次固定1单位、无加仓、每边手续费0.1%（沿用往返0.2%口径）、附加滑点0。 这些是观察设置，不是仓位建议；可在策略属性中检查。</p>
+<h2>验证</h2>
+<ul>
+<li>TradingView原生编译通过；合成模式显示 <strong>SELFTEST PASS</strong>。</li>
+<li>原生固定检查包含整根越轨/影线贴线反例、BB交点、非加权R、成交重算不得触发新信号；两组合成交易实际检查了纯文字、右下角面板、REV尾仓框与BE退出布局。</li>
+<li>独立算术验证：2400次与完整窗口总体BB直接重算的比较通过；800次最小报价单位取整检查通过，最大边界误差1.43e-14。</li>
+<li>原生合成副本仅把自检默认值改为true：市场信号输入为空，所有订单禁用。<strong>未验证真实行情逐笔成交、未运行收益回测，也未宣称券商模拟器的每种盘中成交序列均已验收。</strong></li>
+<li>源码SHA-256：<code>d329a60a4b355ee47c530277e8f04aabab0290603ecc9ab49fcd1c8949eb01ea</code>。</li>
+</ul>
+<p>本轮真实行情研究样本数0、holdout消耗0。候选数、正类率、val样本数、AUC、置换p、top-decile毛净收益、胜率、匹配随机入场不适用：本轮交付为代码转换和工程验证。 工程反例对照是影线贴线/缺箭头不能入场，BB交点前后价格必须分居带内/带外，成交回调不能使用历史终值触发新入场；没有用伪造收益替代这些检查。</p>
+<h2>风险与诚实声明</h2>
+<p>策略能加载不代表策略盈利。盘中路径由TradingView模拟；开仓价BE未覆盖手续费和资金费。 当前没有完整行情逐笔对齐或可接受收益结论。原生检查页面上的两组交易为固定算例，不是真实交易。</p>
+<h2>复现</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+python3 experiments/active/exp-eth-bb-stoch-strategy-20260916-v2/check_bb_touch.py
+python3 scripts/md_to_html.py analysis/p1_eth_bb_stoch_strategy_20260916.md --out-dir analysis/html
+python3 experiments/active/exp-eth-bb-stoch-strategy-20260916-v2/build_delivery.py
+</code></pre>
+<p>原生检查：从实验目录 <code>native_selftest.html</code> 复制完整源码到新建Pine策略，添加后应显示SELFTEST PASS和两组合成框。 正式使用请复制本说明顶部的正式源码，默认自检关闭。</p>
+<h2>来源与下一步</h2>
+<ul>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-eth-bb-stoch-strategy-20260916-v2/PROJECT_PLAN.md">Owner九项修订记录</a></li>
+<li><a href="/Users/zhangzc/fable-trading/yoyo/evaluation/pine/eth_bb_stoch_strategy_v2.pine">策略源码</a></li>
+<li><a href="https://www.tradingview.com/pine-script-docs/concepts/strategies/">TradingView官方策略订单与执行模型</a></li>
+<li><a href="https://app.notion.com/p/3dc8856479af81c39504ca876044ca7d">Spike知识库v2，关联旧版</a></li>
+</ul>
+<p>下一步先由Owner看策略信号和图形效果；正式收益评估需要指定时间范围，再记录对照和验收标准。</p>
+</body>
+</html>

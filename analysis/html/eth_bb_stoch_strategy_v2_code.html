@@ -1,0 +1,248 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>body{font:16px system-ui;margin:40px auto;max-width:1000px;padding:0 24px;color:#203036;background:#f7f9fa}button{background:#008f82;color:white;border:0;border-radius:8px;padding:12px 22px;font-size:16px;cursor:pointer}textarea{display:block;width:100%;height:65vh;box-sizing:border-box;margin-top:20px;padding:16px;border:1px solid #ccd6da;border-radius:8px;font:13px monospace;background:white;white-space:pre}</style><title>ETH 5m · BB × Stoch 策略 v2</title><h1>ETH 5m · BB × Stoch 策略 v2</h1><p>TradingView → Pine 编辑器 → 新建策略 → 粘贴完整源码 → 添加到图表。</p><button onclick="navigator.clipboard.writeText(document.querySelector('textarea').value).then(()=>this.textContent='已复制').catch(()=>{document.querySelector('textarea').select();this.textContent='请按 ⌘C / Ctrl+C'})">复制完整源码</button><textarea readonly aria-label="Pine 源码">//@version=6
+// Owner revision 2026-09-16: whole candle outside BB, 3% SL, native strategy.
+// Signals: original V9 SMA200/population stdev2 + owner Stoch5/3/3 arrows.
+// Real fills own the position and drawings. R labels are price-distance R.
+// Resting limits solve the developing BB touch exactly using prior N-1 closes.
+// See the experiment PROJECT_PLAN for execution timing and synthetic validation.
+strategy(&quot;ETH BB × Stoch · 策略 v2&quot;, shorttitle=&quot;BB×Stoch v2&quot;, overlay=true, pyramiding=0, initial_capital=100000, default_qty_type=strategy.fixed, default_qty_value=1, commission_type=strategy.commission.percent, commission_value=0.1, slippage=0, margin_long=100, margin_short=100, calc_on_every_tick=true, calc_on_order_fills=true, process_orders_on_close=false, max_boxes_count=100, max_lines_count=200, max_labels_count=300, behind_chart=false)
+
+string gb = &quot;布林带&quot;
+int bbLength = input.int(200, &quot;BB 长度&quot;, minval=3, group=gb)
+float bbMult = input.float(2.0, &quot;BB 倍数&quot;, minval=0.1, step=0.1, group=gb)
+bool showBB = input.bool(false, &quot;显示 BB 通道&quot;, group=gb)
+bool showBasis = input.bool(false, &quot;显示 BB 中线&quot;, group=gb)
+string gr = &quot;仓位&quot;
+float stopPct = input.float(3.0, &quot;初始止损 (%)&quot;, minval=0.1, maxval=50, step=0.1, group=gr) / 100
+string gv = &quot;显示&quot;
+int keepGroups = input.int(15, &quot;保留交易框&quot;, minval=1, maxval=30, group=gv)
+bool showR = input.bool(true, &quot;显示 1R / 2R / 3R&quot;, group=gv)
+int labelGap = input.int(2, &quot;提示横向间距 (K线)&quot;, minval=1, maxval=8, group=gv)
+bool showPanel = input.bool(true, &quot;显示右下角面板&quot;, group=gv)
+bool selfTest = input.bool(false, &quot;合成自检与样式预览&quot;, group=&quot;检查&quot;, tooltip=&quot;禁止真实行情信号和模拟订单，只运行固定算例并绘制两组合成交易。&quot;)
+
+color up = #008F82
+color down = #D34B66
+color ink = chart.fg_color
+color faint = color.new(ink, 55)
+float src = selfTest ? na : close
+float basis = ta.sma(src, bbLength)
+float dev = ta.stdev(src, bbLength, true)
+float upper = basis + bbMult * dev
+float lower = basis - bbMult * dev
+float k = ta.sma(ta.stoch(src, selfTest ? na : high, selfTest ? na : low, 5), 3)
+float d = ta.sma(k, 3)
+bool green = ta.crossover(k, d) and k &lt; 20 and d &lt; 20
+bool red = ta.crossunder(k, d) and k &gt; 80 and d &gt; 80
+
+f_signal(float h, float l, float hi, float lo, bool g, bool r) =&gt;
+    h &lt; lo and g ? 1 : l &gt; hi and r ? -1 : 0
+f_r(int side, float entry, float risk, float price) =&gt;
+    risk &gt; 0 ? side * (price - entry) / risk : na
+f_rt(float value) =&gt;
+    (value &gt; 0 ? &quot;+&quot; : &quot;&quot;) + str.tostring(value, &quot;#.##&quot;) + &quot;R&quot;
+f_px(float value) =&gt;
+    str.tostring(value, format.mintick)
+// For a developing bar x and fixed preceding N-1 closes, solve x=BB(x).
+// This limit can rest BEFORE the wick occurs; no final-bar band is backdated.
+f_touch(float meanPrev, float sdPrev, int n, float mult, int side) =&gt;
+    meanPrev + side * mult * sdPrev * math.sqrt(n / (n - 1.0 - mult * mult))
+f_limit(float value, int side) =&gt;
+    (side == 1 ? math.ceil(value / syminfo.mintick) : math.floor(value / syminfo.mintick)) * syminfo.mintick
+f_decision(bool confirmed, bool changedByFill, int priorDecision, int thisBar) =&gt;
+    confirmed and not changedByFill and (na(priorDecision) or priorDecision != thisBar)
+if bbLength &lt;= 1 + bbMult * bbMult
+    runtime.error(&quot;BB 长度必须大于 1 + 倍数²，才能计算盘中触轨价。&quot;)
+float nextMean = ta.sma(src, bbLength - 1)
+float nextSd = ta.stdev(src, bbLength - 1, true)
+float nextUpperTouch = f_limit(f_touch(nextMean, nextSd, bbLength, bbMult, 1), 1)
+float nextLowerTouch = f_limit(f_touch(nextMean, nextSd, bbLength, bbMult, -1), -1)
+bool chartOK = syminfo.ticker == &quot;ETHUSDT.P&quot; and syminfo.basecurrency == &quot;ETH&quot; and syminfo.currency == &quot;USDT&quot; and timeframe.isminutes and timeframe.multiplier == 5 and chart.is_standard
+int sig = selfTest or not chartOK ? 0 : f_signal(high, low, upper, lower, green, red)
+
+// varip facts survive realtime rollback. Fill recalculations MUST NOT consume
+// historical final H/L/C for new entries or for updating the next-bar target.
+varip float seenSize = 0.0
+varip int seenClosed = 0
+varip int lastDecisionBar = na
+varip int queuedEntry = 0
+varip float pendingUpper = na
+varip float pendingLower = na
+varip float entryPrice = na
+varip float fullQty = na
+varip float risk = na
+varip bool partial = false
+varip bool halfStopped = false
+varip float lastPriceR = na
+bool fillPass = strategy.position_size != seenSize or strategy.closedtrades != seenClosed
+bool newPosition = strategy.position_size != 0 and (seenSize == 0 or math.sign(strategy.position_size) != math.sign(seenSize))
+if newPosition
+    entryPrice := strategy.position_avg_price
+    fullQty := math.abs(strategy.position_size)
+    risk := entryPrice * stopPct
+    partial := false
+    halfStopped := false
+if strategy.closedtrades &gt; seenClosed
+    for i = seenClosed to strategy.closedtrades - 1
+        string reason = strategy.closedtrades.exit_comment(i)
+        float oldEntry = strategy.closedtrades.entry_price(i)
+        int oldSide = strategy.closedtrades.size(i) &gt; 0 ? 1 : -1
+        lastPriceR := f_r(oldSide, oldEntry, oldEntry * stopPct, strategy.closedtrades.exit_price(i))
+        if reason == &quot;TP50%&quot;
+            partial := true
+        if reason == &quot;SL50%&quot;
+            halfStopped := true
+bool decisionClose = f_decision(barstate.isconfirmed, fillPass, lastDecisionBar, bar_index)
+bool reverseNow = false
+if not selfTest and chartOK and not na(nextUpperTouch) and decisionClose
+    lastDecisionBar := bar_index
+    // These bands belong to the next bar. This block never runs on fill passes.
+    pendingUpper := nextUpperTouch
+    pendingLower := nextLowerTouch
+    int sideNow = strategy.position_size &gt; 0 ? 1 : strategy.position_size &lt; 0 ? -1 : 0
+    reverseNow := sideNow != 0 and sig == -sideNow
+    if reverseNow
+        strategy.cancel_all()
+        strategy.close(sideNow == 1 ? &quot;L&quot; : &quot;S&quot;, comment=&quot;REV&quot;, immediately=true)
+    if sig != 0 and (sideNow == 0 or reverseNow)
+        queuedEntry := sig
+
+// Wait for the immediate close&#x27;s fill callback before issuing a reverse entry.
+// Otherwise strategy.entry may include the still-open old size in its order.
+if not selfTest and queuedEntry != 0 and strategy.position_size == 0
+    strategy.entry(queuedEntry == 1 ? &quot;L&quot; : &quot;S&quot;, queuedEntry == 1 ? strategy.long : strategy.short, comment=queuedEntry == 1 ? &quot;L&quot; : &quot;S&quot;)
+    queuedEntry := 0
+
+// Two independent reserved tranches. A first-half stop is not a TP and must
+// never move the runner to BE or recreate a half-position exit order.
+if not selfTest and strategy.position_size != 0 and not reverseNow
+    int sideNow = strategy.position_size &gt; 0 ? 1 : -1
+    float stopNow = entryPrice - sideNow * risk
+    float targetNow = sideNow == 1 ? pendingUpper : pendingLower
+    string entryId = sideNow == 1 ? &quot;L&quot; : &quot;S&quot;
+    if not partial and not halfStopped
+        strategy.exit(&quot;HALF&quot;, from_entry=entryId, qty=fullQty * 0.5, limit=targetNow, stop=stopNow, oca_name=&quot;HALF&quot;, comment_profit=&quot;TP50%&quot;, comment_loss=&quot;SL50%&quot;)
+    strategy.exit(&quot;TAIL&quot;, from_entry=entryId, qty=fullQty * 0.5, stop=partial ? entryPrice : stopNow, oca_name=&quot;TAIL&quot;, comment_loss=partial ? &quot;BE&quot; : &quot;SL&quot;)
+seenSize := strategy.position_size
+seenClosed := strategy.closedtrades
+
+// Rebuild drawings from the broker ledger, so partial exits and reverse fills
+// cannot leave an old reference box extending forever or an intrabar label lost.
+// One View groups a full position and its two native closed-trade records.
+int barMillis = int(timeframe.in_seconds() * 1000)
+int textMillis = labelGap * barMillis
+
+type View
+    int entryTime
+    int side
+    float entry
+    float initialRisk
+    int endTime
+    float endPrice
+    string reason
+    bool live = false
+    int tpTime = na
+    float tpPrice = na
+
+var array&lt;box&gt; drawnBoxes = array.new&lt;box&gt;()
+var array&lt;line&gt; drawnLines = array.new&lt;line&gt;()
+var array&lt;label&gt; drawnLabels = array.new&lt;label&gt;()
+f_text(int x, float y, string caption, color tone, string align) =&gt;
+    array.push(drawnLabels, label.new(x, y, caption, xloc=xloc.bar_time, style=label.style_none, textcolor=tone, size=size.small, textalign=align, force_overlay=true))
+f_line(int left, float price, int right, color tone, string style) =&gt;
+    array.push(drawnLines, line.new(left, price, right, price, xloc=xloc.bar_time, color=tone, style=style, force_overlay=true))
+f_draw(View v) =&gt;
+    int right = v.live ? time + textMillis * 3 : v.endTime
+    float sl = v.entry - v.side * v.initialRisk
+    float reward = v.live and na(v.tpTime) ? (v.side == 1 ? pendingUpper : pendingLower) : v.endPrice
+    if selfTest
+        reward := v.endPrice
+    float rewardEdge = v.entry + v.side * math.max(v.side * (reward - v.entry), 0)
+    array.push(drawnBoxes, box.new(v.entryTime, math.max(v.entry, sl), right, math.min(v.entry, sl), xloc=xloc.bar_time, border_color=color.new(down, 72), bgcolor=color.new(down, 93), force_overlay=true))
+    array.push(drawnBoxes, box.new(v.entryTime, math.max(v.entry, rewardEdge), right, math.min(v.entry, rewardEdge), xloc=xloc.bar_time, border_color=color.new(up, 68), bgcolor=color.new(up, 93), force_overlay=true))
+    f_line(v.entryTime, v.entry, right, color.new(ink, 65), line.style_dotted)
+    f_line(v.entryTime, sl, na(v.tpTime) ? right : v.tpTime, color.new(down, 40), line.style_solid)
+    f_text(v.entryTime, sl - v.side * v.initialRisk * 0.20, v.side == 1 ? &quot;L&quot; : &quot;S&quot;, v.side == 1 ? up : down, text.align_left)
+    f_text(v.entryTime + textMillis, sl - v.side * v.initialRisk * 0.07, &quot;SL&quot;, down, text.align_left)
+    if showR
+        for level = 1 to 3
+            float price = v.entry + v.side * v.initialRisk * level
+            f_line(v.entryTime, price, right, color.new(up, 82), line.style_dotted)
+            f_text(v.entryTime + textMillis, price + v.side * v.initialRisk * 0.06, str.tostring(level) + &quot;R&quot;, color.new(up, 15), text.align_left)
+    if not na(v.tpTime)
+        f_line(v.tpTime, v.entry, right, color.new(up, 40), line.style_dashed)
+        f_text(v.tpTime - textMillis, v.tpPrice + v.side * v.initialRisk * 0.16, &quot;TP50%&quot;, up, text.align_right)
+        f_text(v.tpTime + textMillis, v.entry - v.side * v.initialRisk * 0.13, &quot;BE&quot;, up, text.align_left)
+    if v.live
+        f_text(right + textMillis, v.endPrice, f_rt(f_r(v.side, v.entry, v.initialRisk, v.endPrice)), ink, text.align_left)
+    else
+        string exitWord = v.reason == &quot;REV&quot; ? &quot;REV&quot; : v.reason == &quot;BE&quot; ? &quot;BE&quot; : &quot;SL&quot;
+        f_text(right + textMillis, v.endPrice + v.side * v.initialRisk * 0.08, exitWord + &quot; &quot; + f_rt(f_r(v.side, v.entry, v.initialRisk, v.endPrice)), v.reason == &quot;SL&quot; or v.reason == &quot;SL50%&quot; ? down : up, text.align_left)
+
+// Fixed numerical fixtures; no market series is used in their arithmetic.
+bool signalsPass = f_signal(98, 95, 102, 99, true, false) == 1 and f_signal(99, 95, 102, 99, true, false) == 0 and f_signal(100, 97, 102, 99, true, false) == 0 and f_signal(105, 103, 102, 99, false, true) == -1 and f_signal(105, 102, 102, 99, false, true) == 0 and f_signal(98, 95, 102, 99, false, false) == 0
+float fixtureTouch = f_touch(100, 3, 200, 2, 1)
+float fixtureMean = (199 * 100 + fixtureTouch) / 200
+float fixtureVariance = (199 * 9 + 199.0 / 200 * math.pow(fixtureTouch - 100, 2)) / 200
+bool touchPass = math.abs(fixtureTouch - (fixtureMean + 2 * math.sqrt(fixtureVariance))) &lt; 0.0000001
+bool riskPass = math.abs(f_r(1, 100, 3, 106) - 2) &lt; 0.0000001 and math.abs(f_r(-1, 100, 3, 94) - 2) &lt; 0.0000001
+bool decisionPass = f_decision(true, false, 10, 11) and not f_decision(true, true, 10, 11) and not f_decision(false, false, 10, 11) and not f_decision(true, false, 11, 11)
+if selfTest and not (signalsPass and touchPass and riskPass and decisionPass)
+    runtime.error(&quot;BB Stoch v2 synthetic check failed&quot;)
+
+if barstate.islast
+    while array.size(drawnBoxes) &gt; 0
+        box.delete(array.pop(drawnBoxes))
+    while array.size(drawnLines) &gt; 0
+        line.delete(array.pop(drawnLines))
+    while array.size(drawnLabels) &gt; 0
+        label.delete(array.pop(drawnLabels))
+    array&lt;View&gt; views = array.new&lt;View&gt;()
+    if selfTest
+        // Layout-only, fixed prices and bar-relative positions; no trade orders.
+        array.push(views, View.new(time - 105 * barMillis, 1, 2400, 72, time - 65 * barMillis, 2544, &quot;REV&quot;, false, time - 87 * barMillis, 2472))
+        array.push(views, View.new(time - 50 * barMillis, -1, 2530, 75.9, time - 12 * barMillis, 2530, &quot;BE&quot;, false, time - 31 * barMillis, 2454.1))
+    else
+        if strategy.opentrades &gt; 0
+            int openSide = strategy.position_size &gt; 0 ? 1 : -1
+            float openEntry = strategy.opentrades.entry_price(0)
+            array.push(views, View.new(strategy.opentrades.entry_time(0), openSide, openEntry, openEntry * stopPct, time, close, &quot;&quot;, true))
+        if strategy.closedtrades &gt; 0
+            int oldest = math.max(strategy.closedtrades.first_index, strategy.closedtrades - keepGroups * 2 - 2)
+            for i = strategy.closedtrades - 1 to oldest
+                int eb = strategy.closedtrades.entry_time(i)
+                int side = strategy.closedtrades.size(i) &gt; 0 ? 1 : -1
+                View v = array.size(views) &gt; 0 ? array.get(views, array.size(views) - 1) : na
+                bool same = not na(v) and v.entryTime == eb and v.side == side
+                if not same
+                    if array.size(views) &gt;= keepGroups
+                        break
+                    float ep = strategy.closedtrades.entry_price(i)
+                    v := View.new(eb, side, ep, ep * stopPct, strategy.closedtrades.exit_time(i), strategy.closedtrades.exit_price(i), strategy.closedtrades.exit_comment(i))
+                    array.push(views, v)
+                if strategy.closedtrades.exit_comment(i) == &quot;TP50%&quot;
+                    v.tpTime := strategy.closedtrades.exit_time(i)
+                    v.tpPrice := strategy.closedtrades.exit_price(i)
+        // A live runner&#x27;s first partial is paired above with the same entry bar.
+    if array.size(views) &gt; 0
+        for v in views
+            f_draw(v)
+
+p1 = plot(showBB and not selfTest ? upper : na, &quot;BB 上轨&quot;, color.new(ink, 50))
+p2 = plot(showBB and not selfTest ? lower : na, &quot;BB 下轨&quot;, color.new(ink, 50))
+plot(showBB and showBasis and not selfTest ? basis : na, &quot;BB 中线&quot;, color.new(ink, 75))
+fill(p1, p2, showBB and not selfTest ? color.new(up, 97) : na, title=&quot;BB 通道&quot;)
+var table panel = table.new(position.bottom_right, 2, 4, bgcolor=color.new(chart.bg_color, 15), border_width=0)
+if barstate.islast and showPanel
+    int ps = strategy.position_size &gt; 0 ? 1 : strategy.position_size &lt; 0 ? -1 : 0
+    string positionCaption = ps == 0 ? &quot;空仓&quot; : (ps == 1 ? &quot;L &quot; : &quot;S &quot;) + (partial ? &quot;50%&quot; : &quot;100%&quot;)
+    float currentR = ps == 0 ? lastPriceR : f_r(ps, entryPrice, risk, close)
+    table.cell(panel, 0, 0, &quot;BB × Stoch v2&quot;, text_color=ink, text_size=size.small)
+    table.cell(panel, 1, 0, selfTest ? &quot;合成预览&quot; : chartOK ? &quot;5m&quot; : &quot;请用 ETHUSDT.P 5m&quot;, text_color=chartOK ? up : down, text_size=size.small)
+    table.cell(panel, 0, 1, &quot;仓位&quot;, text_color=faint, text_size=size.small)
+    table.cell(panel, 1, 1, selfTest ? &quot;SELFTEST PASS&quot; : positionCaption, text_color=up, text_size=size.small)
+    table.cell(panel, 0, 2, &quot;价格 R&quot;, text_color=faint, text_size=size.small)
+    table.cell(panel, 1, 2, selfTest or na(currentR) ? &quot;—&quot; : f_rt(currentR), text_color=ink, text_size=size.small)
+    table.cell(panel, 0, 3, ps != 0 and partial ? &quot;BE&quot; : &quot;SL&quot;, text_color=faint, text_size=size.small)
+    table.cell(panel, 1, 3, ps == 0 ? &quot;—&quot; : f_px(partial ? entryPrice : entryPrice - ps * risk), text_color=partial ? up : down, text_size=size.small)
+</textarea></html>
