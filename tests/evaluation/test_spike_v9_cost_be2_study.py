@@ -1,5 +1,6 @@
 """Synthetic study accounting and admission boundaries; no market reads."""
 from dataclasses import replace
+import json
 
 import numpy as np
 import pandas as pd
@@ -12,6 +13,35 @@ def test_missing_approval_fails_before_universe_read(tmp_path, monkeypatch):
     monkeypatch.setattr(study,'EXP',tmp_path)
     with pytest.raises(FileNotFoundError):
         study.verify_approval({'strategy_version':'unapproved'},{})
+
+
+def test_resume_rejects_changed_input_before_replacing_inventory(tmp_path):
+    path=tmp_path/'inputs.json'
+    first={'prefix_sha256':'original','rows':10}
+    study.accept_input_receipt(path,5,first)
+    original=path.read_bytes()
+    assert study.accept_input_receipt(path,5,first)['prefix_sha256']=='original'
+    with pytest.raises(ValueError,match='receipt changed'):
+        study.accept_input_receipt(path,5,{'prefix_sha256':'changed','rows':10})
+    assert path.read_bytes()==original
+
+
+def test_report_rejects_stale_builder_before_reading_outcomes(tmp_path,monkeypatch):
+    from yoyo.evaluation import spike_v9_cost_be2_report as report
+    monkeypatch.setattr(report,'frozen_identity',lambda:{'current.py':'new'})
+    (tmp_path/'run_started.json').write_text(json.dumps({'scope':'eth','run_identity':'old','builders':{'old.py':'old'}}))
+    with pytest.raises(ValueError,match='differs from frozen run'):
+        report.verify_run_identity('eth',tmp_path)
+
+
+def test_deleted_outputs_cannot_reuse_holdout_approval(tmp_path,monkeypatch):
+    monkeypatch.setattr(study,'EXP',tmp_path)
+    (tmp_path/'authorization.json').write_text('{}')
+    approval={'authorization_id':'owner-approval-one','holdout_consumption_number':1}
+    study.claim_holdout(approval,'run-one',tmp_path/'results',False)
+    study.claim_holdout(approval,'run-one',tmp_path/'results',True)  # Resume same evaluation.
+    with pytest.raises(ValueError,match='already consumed'):
+        study.claim_holdout(approval,'run-one',tmp_path/'results',False)
 
 
 def test_fill_audit_uses_both_cost_legs_and_exit_quantity():

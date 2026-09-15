@@ -15,6 +15,7 @@ from dataclasses import replace
 import hashlib
 import json
 from pathlib import Path
+import re
 import subprocess
 import time
 
@@ -58,6 +59,22 @@ def sha(path):
 
 def save(path, value):
     Path(path).write_text(json.dumps(value, indent=2, ensure_ascii=False, default=str)+'\n')
+
+
+def accept_input_receipt(path, minutes, receipt):
+    """An existing run may resume only with exactly the same input identity.
+
+    Compare before rewriting the inventory or accepting completed windows;
+    output hashes alone cannot establish which source produced those outputs.
+    """
+    values=json.loads(path.read_text()) if path.exists() else []
+    item=dict(minutes=minutes,**receipt)
+    previous=[row for row in values if row['minutes']==minutes]
+    if previous:
+        if len(previous)!=1 or previous[0]!=item:raise ValueError('ETH input receipt changed before resume')
+    else:
+        values.append(item);save(path,values)
+    return item
 
 
 def frozen_identity():
@@ -229,11 +246,36 @@ def verify_approval(cfg,identity):
     rel = str(path.relative_to(ROOT))
     if raw!=subprocess.check_output(['git','show',f'HEAD:{rel}'],cwd=ROOT): raise ValueError('approval must be committed')
     approved = json.loads(raw)
+    number=approved.get('holdout_consumption_number')
     if (approved.get('approved') is not True or approved.get('config_sha256')!=sha(CONFIG)
-            or approved.get('strategy_version')!=cfg['strategy_version'] or approved.get('configuration_exposure')!=1):
+            or approved.get('strategy_version')!=cfg['strategy_version']
+            or type(number) is not int or number<1
+            or not re.fullmatch('[a-z0-9-]+',str(approved.get('authorization_id','')))):
         raise ValueError('new configuration-specific holdout approval required')
     if approved.get('builders') != identity: raise ValueError('implementation changed after approval freeze')
     return approved
+
+
+def claim_holdout(approval,run_id,out,started_exists):
+    """Bind one explicit approval to one resumable evaluation, outside outputs.
+
+    Removing a results directory cannot silently reuse consumption number one.
+    A fresh evaluation needs a fresh owner approval and next ordinal.
+    """
+    ledger=EXP/'holdout_consumptions';ledger.mkdir(exist_ok=True)
+    path=ledger/(approval['authorization_id']+'.json')
+    claim=dict(authorization_id=approval['authorization_id'],
+        holdout_consumption_number=approval['holdout_consumption_number'],run_identity=run_id,
+        output=str(out),authorization_sha256=sha(EXP/'authorization.json'))
+    if path.exists():
+        if not started_exists or json.loads(path.read_text())!=claim:
+            raise ValueError('holdout approval already consumed; missing or changed original run')
+    else:
+        if started_exists:raise ValueError('run has no matching holdout consumption claim')
+        numbers=[json.loads(p.read_text())['holdout_consumption_number'] for p in ledger.glob('*.json')]
+        if claim['holdout_consumption_number']!=max(numbers,default=0)+1:raise ValueError('holdout consumption ordinal mismatch')
+        with path.open('x') as handle:handle.write(json.dumps(claim,indent=2)+'\n')
+    return claim
 
 
 def universe_stream(args):
@@ -267,27 +309,32 @@ def run(scope,workers=4):
     out.mkdir(parents=True,exist_ok=True)
     run_id=hashlib.sha256(json.dumps(identity,sort_keys=True).encode()).hexdigest()
     started=out/'run_started.json'
+    claim=claim_holdout(approval,run_id,out,started.exists()) if scope=='universe' else None
     if started.exists():
         prior=json.loads(started.read_text())
         if prior['run_identity']!=run_id: raise ValueError('use new output for changed builders')
     else:
         save(started,dict(scope=scope,started_at=pd.Timestamp.now(tz='UTC'),run_identity=run_id,builders=identity,
             source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
-            holdout_consumed=scope=='universe',configuration_exposure=1 if scope=='universe' else 0,approval=approval))
+            holdout_consumed=scope=='universe',holdout_consumption_number=approval['holdout_consumption_number'] if approval else 0,
+            configuration_exposure=1 if scope=='universe' else 0,approval=approval,holdout_claim=claim))
     results=[];began=time.monotonic()
     if scope=='eth':
-        ecfg=cfg['eth']; receipts=[]
+        ecfg=cfg['eth']
         for minutes,frame,raw,mask,receipt in contexts(ecfg):
-            receipts.append(dict(minutes=minutes,**receipt));save(out/'inputs.json',receipts)
+            input_identity=accept_input_receipt(out/'inputs.json',minutes,receipt)
             start=max(pd.Timestamp(ecfg['available_start']),frame.index[ecfg['minimum_warmup_bars']]+pd.Timedelta(minutes=minutes))
             for window,left in [('available',start),('common',max(start,pd.Timestamp(ecfg['common_start'])))]:
                 right=pd.Timestamp(ecfg['end']);p=eth_prepared(frame,raw,mask,minutes,left,right,ecfg)
                 folder=out/'streams'/f'eth_{minutes}m_{window}'
                 if (folder/'completion.json').exists():
                     result=json.loads((folder/'completion.json').read_text())
+                    if result.get('input_receipt')!=input_identity:raise ValueError('completed ETH stream input changed')
                     for name,d in result['files'].items():
                         if sha(folder/name)!=d: raise ValueError('completed ETH output changed')
-                else: result=run_prepared(p,folder,window,left,right,cfg)
+                else:
+                    result=run_prepared(p,folder,window,left,right,cfg)
+                    result['input_receipt']=input_identity;save(folder/'completion.json',result)
                 results.append(result); print('completed',folder.name,'seconds',round(time.monotonic()-began,1),flush=True)
     else:
         u=cfg['universe'];raw=ROOT/u['raw']
@@ -302,7 +349,9 @@ def run(scope,workers=4):
                     print('completed',len(results),'of',len(keys),'seconds',round(time.monotonic()-began,1),flush=True)
     save(out/'manifest.json',dict(status='complete',scope=scope,run_identity=run_id,streams=len(results),
         expected_streams=12 if scope=='eth' else cfg['universe']['expected_streams'],holdout_consumed=scope=='universe',
-        configuration_exposure=1 if scope=='universe' else 0,receipts=results))
+        configuration_exposure=1 if scope=='universe' else 0,
+        holdout_consumption_number=approval['holdout_consumption_number'] if approval else 0,
+        run_started_sha256=sha(started),receipts=results))
     print('COMPLETE',scope,len(results),flush=True)
 
 

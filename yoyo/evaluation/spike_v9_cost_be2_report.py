@@ -7,6 +7,7 @@ Original-entry counterfactuals and changed serial admissions remain separate.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -14,7 +15,7 @@ import subprocess
 import numpy as np
 import pandas as pd
 
-from yoyo.evaluation.spike_v9_cost_be2_study import EXP, ROOT, ARMS, sha, save
+from yoyo.evaluation.spike_v9_cost_be2_study import EXP, ROOT, ARMS, CONFIG, sha, save, frozen_identity, verify_approval
 from yoyo.evaluation.spike_v9_full_report import block_statistics
 from yoyo.evaluation.spike_be05_report import metrics
 
@@ -32,9 +33,31 @@ def boolean(series):
     return out.astype(bool)
 
 
+def verify_run_identity(scope,out):
+    """Verify code/config/authorization before reading even an outcome CSV."""
+    identity=frozen_identity()
+    run_id=hashlib.sha256(json.dumps(identity,sort_keys=True).encode()).hexdigest()
+    started=json.loads((out/'run_started.json').read_text())
+    if started.get('scope')!=scope or started.get('run_identity')!=run_id or started.get('builders')!=identity:
+        raise ValueError('report source/config differs from frozen run')
+    if scope=='universe':
+        approval=verify_approval(json.loads(CONFIG.read_text()),identity)
+        if started.get('approval')!=approval:raise ValueError('report approval differs from original run')
+        claim_path=EXP/'holdout_consumptions'/(approval['authorization_id']+'.json')
+        if (json.loads(claim_path.read_text())!=started.get('holdout_claim')
+                or started.get('holdout_consumption_number')!=approval['holdout_consumption_number']):
+            raise ValueError('report holdout consumption claim mismatch')
+    return started
+
+
 def load(scope):
     out=EXP/'results'/scope
+    started=verify_run_identity(scope,out)
     manifest=json.loads((out/'manifest.json').read_text())
+    if (manifest.get('scope')!=scope or manifest.get('run_identity')!=started['run_identity']
+            or manifest.get('run_started_sha256')!=sha(out/'run_started.json')
+            or manifest.get('holdout_consumption_number')!=started['holdout_consumption_number']):
+        raise ValueError('final manifest differs from frozen run')
     if manifest['status']!='complete' or manifest['streams']!=manifest['expected_streams']:
         raise ValueError('incomplete requested scope')
     folders=sorted(p for p in (out/'streams').iterdir() if (p/'completion.json').exists())
@@ -43,6 +66,7 @@ def load(scope):
     for folder in folders:
         receipt=json.loads((folder/'completion.json').read_text())
         if not receipt['baseline_parent_parity'] or not receipt['fixed_baseline_parity']:raise ValueError('missing baseline check')
+        if scope=='universe' and receipt.get('archived_v9_parity') is not True:raise ValueError('missing original V9 archive parity')
         for name,digest in receipt['files'].items():
             if sha(folder/name)!=digest:raise ValueError('output changed: '+str(folder/name))
         for arm in ARMS:trades.append(pd.read_csv(folder/f'{arm}.trades.csv.gz'))
@@ -156,6 +180,7 @@ def run(scopes):
             'harmed_winners':'赢单变差','harmed_winner_delta_r':'损失R','original_ge10':'原净10R','retained_original_ge10':'保留净10R','p_holm':'Holm p'}))
     config=json.loads((EXP/'config.json').read_text())
     is_holdout='universe' in scopes
+    consumption=manifests['universe']['holdout_consumption_number'] if is_holdout else 0
     command='PYTHONPATH="$PWD/.venv/lib/python3.9/site-packages:$PWD" /usr/bin/python3'
     report=ROOT/'analysis/p1_spike_v9_cost_be2_20260915.md'
     body=f'''# V9 加入净2R后的0.2%保护：同入场与串行回测
@@ -172,7 +197,7 @@ V9原多空准入全部保留。当前有效止损先执行；存活K线收盘�
 
 - ETH：OKX，3m/5m/15m/30m/1H/4H。`available`从2023-08-01与各源1500根预热结束的较晚者起，`common`从2026-01-01与上述起点较晚者起，均止于2026-05-01 UTC。各周期精确起止与数据行数见inputs和completion收据；5m历史短，不用其他交易所补齐。
 - 原池（仅在本次范围包含时）：3531冻结流，2024-09-10至2026-09-10 UTC，分界2025-09-10。全量指原V9固定池，不代表所有曾上市合约；沿用原池覆盖和存活偏差。分段排除跨右边界交易，跨边界仓位不会塞进早期样本。
-- 本轮holdout：{'本精确配置第1次消耗holdout；只在代码、参数和授权冻结后最终评估，复用已暴露历史，不是盲OOS。' if is_holdout else '消耗0次，未读取2026-05-04及以后价格；原全量池尚未评估。'}
+- 本轮holdout：{f'本精确配置第{consumption}次消耗holdout；只在代码、参数和授权冻结后最终评估，复用已暴露历史，不是盲OOS。' if is_holdout else '消耗0次，未读取2026-05-04及以后价格；原全量池尚未评估。'}
 - 每条流关闭新规则后对齐原串行引擎，每笔原始入场的固定回放也逐笔对齐。{'全币种旧V9账本另有逐笔归档parity。' if is_holdout else ''} 全部自然交易的进出成本、平仓数量、毛净收益和R换算独立核对；未闭合或数据缺口记censored，不计自然胜负。
 - 净正率严格按净R>0；`近保本`为绝对净R不超过一个价格tick对应的R，单独展示。取整微盈仍可能使净正率看起来更高。最长连亏按实际退出排序，保本不会偿还前序倍投亏损。
 - 随机对照匹配同币、同方向、同月、因果ATR/价格桶和评估时间段，周日同样禁入，同退出同成本；一次固定抽样，未完成不补抽。月块同时覆盖所有资产/交易所，2000次置换/重采样。Holm对本scope内展示及导出全部分组检验统一校正。
