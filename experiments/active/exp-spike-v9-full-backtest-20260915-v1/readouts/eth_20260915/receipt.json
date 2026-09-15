@@ -1,0 +1,17 @@
+{
+  "kind": "saved_ledger_subgroup_readout",
+  "filter": "asset == ETH",
+  "source_receipt": "experiments/active/exp-spike-v9-full-backtest-20260915-v1/statistics/full_v1/statistics_receipt.json",
+  "source_receipt_sha256": "c13feddd2cc8bde66ee738b51e583971b99d06b8cb566d8293077abaafdace0b",
+  "summary_sha256": "4a5478b7ad308c42537a40d263156b8ca9d42e14a57773b1b8d0732ac7e578d1",
+  "new_market_replay": false,
+  "new_configuration": false,
+  "metrics": "Committed spike_be05_report.metrics/periods and spike_v9_full_report.control_metrics on source-hash-verified saved ledgers",
+  "independent_check": "map_v8_shadow Luna Max independently reconciled 7 streams: V8 321closed 21.075846R; V9 283closed 52.462261R; 8 net10R each.",
+  "coverage": "Binance/OKX 30m,1H,4H; Gate 4H; original frozen two-year pool, no ETH3m/5m",
+  "gates": "All44 rejected ETH candidates are UTC-Sunday; no ETH RV>50 or unknown rejections",
+  "retained_original_net10R": 8,
+  "owner_authorization": "v9 eth 的回测结果呢",
+  "holdout_era_results_read": true,
+  "exposure_note": "Descriptive subgroup reading of the same already-exposed V9 configuration; original source evaluation count1 retained; not fresh blind validation."
+}
