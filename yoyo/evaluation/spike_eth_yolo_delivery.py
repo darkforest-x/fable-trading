@@ -67,7 +67,6 @@ def answer_first(coverage, summary, association, out):
     """Deterministic factual headline; all seven comparisons stay in the report."""
     count=sum(r['entries'] for r in coverage);same=sum(r['same'] for r in coverage)
     lower=sum(r['lower_hit'] for r in coverage);both=sum(r['both'] for r in coverage)
-    base=summary.loc[summary.population.eq('serial_arm')&summary.arm.eq('v9')]
     h=next(r for r in coverage if r['tf']=='1H')
     def cell(arm,key):
         return summary.loc[summary.population.eq('serial_arm')&summary.arm.eq(arm)&summary.timeframe.eq('1H'),key].iloc[0]
@@ -75,6 +74,7 @@ def answer_first(coverage, summary, association, out):
       f'**你提到的1H→15m：** 1H共{h["entries"]}笔开仓，1H模型检出{h["same"]}笔、15m模型检出{h["lower_hit"]}笔。原V9净胜率{number(cell("v9","net_winrate"),1,True)}、合计{number(cell("v9","total_net_r"))}R；只允许15m检出的完整回放为{number(cell("v9_lower","closed"),0)}笔已平仓、{number(cell("v9_lower","total_net_r"))}R。样本不足以确认稳定关系。']
     significant=association.loc[association.holm14_p.lt(.05)]
     findings.append(f'固定14项检出／胜率比较中，Holm校正后p<0.05的项目为{len(significant)}项。显著性与收益表一起看；本次历史研究不能据此决定上线。')
+    findings.append('**本批不支持将现有YOLO直接作为所有V9周期的硬过滤。** 检出覆盖稀疏，命中后胜率没有稳定提高；15m同级命中虽为1赢1亏，但只有2笔。1H盈利18.16R的原始交易被1H和15m两种门同时漏过。3m的小级别命中组胜率较高，完整回放却仍是净亏，说明胜率不能替代扣费收益。')
     lines=['## 结论',*findings,f'![全部V9原始开仓的同级与小级别检出覆盖率]({(out/"coverage.png").resolve()})',
            f'[打开全部开仓的检测图册]({(out/"gallery.html").resolve()})']
     return lines
@@ -140,7 +140,16 @@ def run():
     lines+=['### 全部准入信号的检出率',
             '此处包括因单仓占用而没有成交的准入信号，分母与上表实际开仓不同。',
             table(pd.read_csv(out/'coverage.csv').to_dict('records'),[('timeframe','周期',None,False),('signals_n','全部信号',0,False),('signal_same_hit_n','同级检出',0,False),('signal_same_hit_rate','同级比例',1,True),('signal_lower_hit_n','小级别检出',0,False),('signal_lower_hit_rate','小级别比例',1,True),('signal_both_hit_n','均检出',0,False)])]
-    lines+=['## 2. 同一批原始交易：检出是否更容易盈利',
+    htrades=trades.loc[trades.arm.eq('v9')&trades.timeframe.eq('1H')].copy()
+    hcontrols=pd.read_csv(out/'controls.csv')
+    htrades=htrades.merge(hcontrols.loc[hcontrols.arm.eq('v9'),['event_key','control_net_r']],on='event_key',how='left',validate='one_to_one')
+    htrades['entry_cst']=htrades.entry_time.map(cst)
+    htrades['direction']=htrades.side.map({1:'多',-1:'空'})
+    htrades['same_text']=htrades.same_hit.map({True:'检出',False:'未检出'})
+    htrades['lower_text']=htrades.lower_hit.map({True:'检出',False:'未检出'})
+    lines+=['### 1H信号看15m：全部3笔',
+            table(htrades.to_dict('records'),[('entry_cst','开仓北京时间',None,False),('direction','方向',None,False),('same_text','1H检测',None,False),('lower_text','15m检测',None,False),('net_r','原交易净R',3,False),('control_net_r','匹配随机净R',3,False)]),
+            '## 2. 同一批原始交易：检出是否更容易盈利',
             '净胜率 = 已平仓 net_R>0 的比例。所有组保留原始V9的开平仓价格及0.2%往返成本。随机均值与超额只在共同已平仓匹配分母上计算，不能拿不同分母直接相减。',
             table(summary.loc[summary.population.eq('v9_detection_group')].to_dict('records'),[('timeframe','周期',None,False),('group','分组',None,False),('closed','已平仓',0,False),('net_winrate','净胜率',1,True),('mean_net_r','平均净R',3,False),('total_net_r','合计净R',2,False),('pf_net_r','PF(R)',3,False),('matched_pairs','随机配对',0,False),('paired_control_mean_r','随机均R',3,False),('paired_excess_mean_r','配对超额R',3,False)]),
             '分组：all全部、same_hit同级检出、same_miss同级未检出、lower_hit小级别检出、lower_miss小级别未检出、both_hit两者均检出。',
@@ -178,6 +187,8 @@ def run():
             '- 原始下一开盘假设未计模型推理、网络或撮合延迟。这是零额外等待的历史关系检验，真实部署须另行评估延迟与滑点。',
             '- 成本固定名义20bp，未加入完整资金费、真实滑点、杠杆保证金与跨周期组合容量；R总和和事件累计R回撤不是共同资金账户收益与回撤。官方tick是本次快照，不声称重建历史tick变更表。',
             '- 时间不足两月半、周期重叠、少量高周期交易会限制统计效力；分组条件、14项主比较与次级排序均完整保留，不据看见的结果再挑周期、调conf或换权重。',
+            '- 一些bootstrap差值区间不含0，但命中组只有1–4笔，且无命中重抽样被标为无效；这种退化区间不能当成稳健显著性证据。14项Fisher经Holm校正无显著项。',
+            '- 无命中分数记0。top-decile若含大量0分并列，按事件键选出的交易是复现约定，不是模型提供的排序信息；30m／4H等常数分数组没有可解释的模型top-decile优势。',
             '- 新研究定向检查通过；旧监控测试有20项在同一未更新fixture处缺tick参数失败，本研究不调用该fixture。不得声称整仓所有测试全绿。',
             '## 下一步',
             '本报告用于判断是否值得继续收集独立前向配对证据。任何更换权重、追加等待、改变小级别窗口、调阈值或上线过滤都应另立配置并由Owner决定，不能在本批结果上迭代后仍称首次验收。',
