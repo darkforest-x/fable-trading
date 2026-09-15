@@ -1,5 +1,20 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
+## 最新：ETH近一月 MA Shift颜色 × Stoch反向退出已完成（2026-09-15）
+
+Owner当前TV为OKX ETHUSDT.P；15m SMA40/hl2染色限制5m翻身Stoch5/3/3超买超卖箭头准入。
+北京时间8/15 00:00—9/15 18:15，收盘确认下一开盘、单仓、反向箭头全平、成本0.2%固定。
+组合116平仓+1末仓，1000U按1x权益名义复投剩829.64U（−17.04%），净胜率37.07%，PF0.585、
+逐5m收盘MTM回撤17.72%；单Stoch剩698.88U（−30.11%）。每笔毛4.62bp低于20bp成本，
+匹配随机115对超额−10.11bp、日块单侧p0.8396，不支持该月盈利主张。分批规则尚未指定，未择优。
+本精确配置holdout第1次、已暴露历史；9867完整5m含720预热，缺根0。18定向测试及306笔独立
+账本核对通过；全库468通过/7既有失败（TOTAL2资产缺source_commit×5、迁移哈希×2），未绕过。
+HTML结构及权益图已检，内置浏览器拒绝file地址，未做HTML浏览器像素验收。无生产变更。
+HTML：analysis/html/p1_ma_shift_stoch_eth_month_20260915.html；逐笔、控制与27文件manifest：
+experiments/active/exp-ma-shift-stoch-eth-month-20260915-v1/；源码6864e83489。
+Notion：https://app.notion.com/p/3dc8856479af81828e6cc91ec50f88d0；状态rejected，交付完成。
+
+
 ## 最新：前端与 Bark 已切换 V9，旧信号已清空（2026-09-15）
 
 Owner 明确“前端信号，和 bark 信号通知改成 v9 的”“之前的信号全部删掉”。

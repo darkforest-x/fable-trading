@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-ma-shift-stoch-eth-month-20260915-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6864e834895fc38b39cc737ad22c3483fdb708d6
+    status: rejected
+    question: Does closed-15m MA Shift color improve 5m Stoch arrow entries on the owner-selected recent ETH month after fixed costs?
+    single_variable: Add completed-15m hl2 SMA40 admission filter to Stoch5-3-3 arrows; same opposite-arrow next-open exits and20bp cost.
+    result: Combined116 closed plus1 open,1000U to829.64U(-17.04pct),netwin37.07pct,PF0.585,closeMTM drawdown17.72pct. Stoch-only190 closed plus1 open ends698.88U(-30.11pct). Combined matched excess-10.11bp,p0.8396;reject profitability in this frozen window.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_ma_shift_stoch_eth_month_20260915.md
+    artifacts: [ma-shift-stoch-eth-month-20260915-delivery]
+    reuse_allowed: false
+    notes: Owner requested recent month;exact configuration consumption1,prior exposure preserved. No exit optimisation or partial-TP assumption.18 focused tests passed;independent306 trade review passed;468 gates passed with7 existing failures recorded. No production change.
   - experiment_id: exp-spike-eth-v9-yolo-entry-20260915-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 68fa0d5e8ee28bc6c265ddc3f72115dbe6fea4f0

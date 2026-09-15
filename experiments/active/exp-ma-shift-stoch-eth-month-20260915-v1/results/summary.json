@@ -1,0 +1,269 @@
+{
+  "config": {
+    "experiment_id": "exp-ma-shift-stoch-eth-month-20260915-v1",
+    "instrument": "ETH-USDT-SWAP",
+    "start_utc": "2026-08-14T16:00:00Z",
+    "end_utc": "2026-09-15T10:15:00Z",
+    "warmup_bars": 720,
+    "timeframes": {
+      "5m": 5
+    },
+    "direction_timeframe_minutes": 15,
+    "ma_type": "SMA",
+    "ma_length": 40,
+    "ma_source": "hl2",
+    "stoch_k_length": 5,
+    "stoch_k_smoothing": 3,
+    "stoch_d_smoothing": 3,
+    "long_threshold_exclusive": 20,
+    "short_threshold_exclusive": 80,
+    "exit_modes": [
+      "full_opposite"
+    ],
+    "round_trip_cost": 0.002,
+    "initial_equity": 1000,
+    "exposure_multiple": 1,
+    "control_seed": 9151801,
+    "permutations": 9999,
+    "volatility_bins": [
+      0.001,
+      0.002,
+      0.004,
+      0.008
+    ],
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "source": {
+    "confirmed": 9867,
+    "csv_sha256": "5d33100baf3eb9ef3ce4b4032d141e2aed9d94701319802da3c1924fbb8dd086",
+    "end": "2026-09-15T10:15:00Z",
+    "excluded": {
+      "exact_duplicates": 0,
+      "outside_window": 0,
+      "unconfirmed": 0
+    },
+    "expected": 9867,
+    "gaps": [],
+    "raw_sha256": "f39aaeb4c9259349fc6efe363f749fbdf07ffa71b5bf51e7eb00eee83424cd1f",
+    "revised": 0,
+    "start": "2026-08-12T04:00:00Z",
+    "study_start": "2026-08-14T16:00:00Z"
+  },
+  "arms": {
+    "ma_stoch": {
+      "n": 116,
+      "net_win_rate": 0.3706896551724138,
+      "gross_win_rate": 0.5517241379310345,
+      "gross_mean_bp": 4.61600967959808,
+      "net_mean_bp": -15.383990320401924,
+      "gross_sum_pct": 5.354571228333773,
+      "net_sum_pct": -17.84542877166623,
+      "pf": 0.5848071331017648,
+      "longest_loss": 10,
+      "median_hold_minutes": 187.5,
+      "max_hold_minutes": 750.0,
+      "max_trade_net_pct": 6.391735698037934,
+      "min_trade_net_pct": -3.2493578091604545,
+      "engine_stats": {
+        "initial_equity": 1000.0,
+        "closed_trade_count": 116,
+        "realised_equity": 831.877773919911,
+        "realised_return": -0.1681222260800891,
+        "close_mtm_equity": 829.6386457505347,
+        "close_mtm_return": -0.1703613542494653,
+        "realised_max_drawdown": -0.17051554526076518,
+        "close_mtm_max_drawdown": -0.1772299897564421
+      },
+      "entries": 117,
+      "candidates": 176,
+      "open_count": 1,
+      "final_equity": 829.6386457505347,
+      "mtm_return_pct": -17.03613542494653,
+      "mtm_max_drawdown_pct": 17.72299897564421,
+      "control": {
+        "matched": 115,
+        "unmatched": 1,
+        "utc_day_blocks": 31,
+        "unique_controls": 115,
+        "target_mean_bp": -15.76866060691694,
+        "control_mean_bp": -5.656348426392756,
+        "excess_mean_bp": -10.11231218052418,
+        "p_greater": 0.8396,
+        "p_two_sided": 0.311,
+        "test": "UTC-day block sign-flip of paired net excess; descriptive symmetry null, not randomized causal proof"
+      },
+      "sides": {
+        "long": {
+          "n": 59,
+          "net_win_rate": 0.423728813559322,
+          "gross_win_rate": 0.5932203389830508,
+          "gross_mean_bp": 11.054835718858422,
+          "net_mean_bp": -8.945164281141581,
+          "gross_sum_pct": 6.522353074126469,
+          "net_sum_pct": -5.277646925873533,
+          "pf": 0.7701369452402465,
+          "longest_loss": 8,
+          "median_hold_minutes": 195.0,
+          "max_hold_minutes": 750.0,
+          "max_trade_net_pct": 6.391735698037934,
+          "min_trade_net_pct": -3.2493578091604545
+        },
+        "short": {
+          "n": 57,
+          "net_win_rate": 0.3157894736842105,
+          "gross_win_rate": 0.5087719298245614,
+          "gross_mean_bp": -2.0487400803380638,
+          "net_mean_bp": -22.04874008033807,
+          "gross_sum_pct": -1.1677818457926963,
+          "net_sum_pct": -12.5677818457927,
+          "pf": 0.37227305047901427,
+          "longest_loss": 7,
+          "median_hold_minutes": 180.0,
+          "max_hold_minutes": 700.0,
+          "max_trade_net_pct": 1.0782773825478966,
+          "min_trade_net_pct": -1.962788344962137
+        }
+      },
+      "entry_time_halves": {
+        "earlier": {
+          "n": 56,
+          "net_win_rate": 0.375,
+          "gross_win_rate": 0.5714285714285714,
+          "gross_mean_bp": 8.197533038667423,
+          "net_mean_bp": -11.80246696133258,
+          "gross_sum_pct": 4.590618501653757,
+          "net_sum_pct": -6.609381498346245,
+          "pf": 0.6248861846012622,
+          "longest_loss": 7,
+          "median_hold_minutes": 180.0,
+          "max_hold_minutes": 660.0,
+          "max_trade_net_pct": 2.3198377136525883,
+          "min_trade_net_pct": -2.7551200490045025
+        },
+        "later": {
+          "n": 60,
+          "net_win_rate": 0.36666666666666664,
+          "gross_win_rate": 0.5333333333333333,
+          "gross_mean_bp": 1.2732545444666892,
+          "net_mean_bp": -18.726745455533315,
+          "gross_sum_pct": 0.7639527266800135,
+          "net_sum_pct": -11.236047273319988,
+          "pf": 0.5569624571528973,
+          "longest_loss": 10,
+          "median_hold_minutes": 200.0,
+          "max_hold_minutes": 750.0,
+          "max_trade_net_pct": 6.391735698037934,
+          "min_trade_net_pct": -3.2493578091604545
+        }
+      }
+    },
+    "stoch_only": {
+      "n": 190,
+      "net_win_rate": 0.45263157894736844,
+      "gross_win_rate": 0.6210526315789474,
+      "gross_mean_bp": 2.570405783268171,
+      "net_mean_bp": -17.429594216731832,
+      "gross_sum_pct": 4.883770988209525,
+      "net_sum_pct": -33.11622901179048,
+      "pf": 0.5752647214781506,
+      "longest_loss": 10,
+      "median_hold_minutes": 167.5,
+      "max_hold_minutes": 1970.0,
+      "max_trade_net_pct": 6.391735698037934,
+      "min_trade_net_pct": -16.829241516966086,
+      "engine_stats": {
+        "initial_equity": 1000.0,
+        "closed_trade_count": 190,
+        "realised_equity": 700.7646646015743,
+        "realised_return": -0.29923533539842573,
+        "close_mtm_equity": 698.8784477199534,
+        "close_mtm_return": -0.30112155228004656,
+        "realised_max_drawdown": -0.3185568533642914,
+        "close_mtm_max_drawdown": -0.3273004803028793
+      },
+      "entries": 191,
+      "candidates": 356,
+      "open_count": 1,
+      "final_equity": 698.8784477199534,
+      "mtm_return_pct": -30.112155228004656,
+      "mtm_max_drawdown_pct": 32.730048030287925,
+      "control": {
+        "matched": 188,
+        "unmatched": 2,
+        "utc_day_blocks": 32,
+        "unique_controls": 188,
+        "target_mean_bp": -17.34579586737133,
+        "control_mean_bp": -4.7153915618205655,
+        "excess_mean_bp": -12.630404305550766,
+        "p_greater": 0.831,
+        "p_two_sided": 0.3384,
+        "test": "UTC-day block sign-flip of paired net excess; descriptive symmetry null, not randomized causal proof"
+      },
+      "sides": {
+        "long": {
+          "n": 95,
+          "net_win_rate": 0.5052631578947369,
+          "gross_win_rate": 0.6526315789473685,
+          "gross_mean_bp": 17.935274215905352,
+          "net_mean_bp": -2.0647257840946525,
+          "gross_sum_pct": 17.038510505110082,
+          "net_sum_pct": -1.9614894948899195,
+          "pf": 0.9320109476401713,
+          "longest_loss": 7,
+          "median_hold_minutes": 140.0,
+          "max_hold_minutes": 750.0,
+          "max_trade_net_pct": 6.391735698037934,
+          "min_trade_net_pct": -3.2493578091604545
+        },
+        "short": {
+          "n": 95,
+          "net_win_rate": 0.4,
+          "gross_win_rate": 0.5894736842105263,
+          "gross_mean_bp": -12.794462649369013,
+          "net_mean_bp": -32.79446264936902,
+          "gross_sum_pct": -12.154739516900563,
+          "net_sum_pct": -31.154739516900566,
+          "pf": 0.3657296880310835,
+          "longest_loss": 7,
+          "median_hold_minutes": 180.0,
+          "max_hold_minutes": 1970.0,
+          "max_trade_net_pct": 3.471961777818361,
+          "min_trade_net_pct": -16.829241516966086
+        }
+      },
+      "entry_time_halves": {
+        "earlier": {
+          "n": 92,
+          "net_win_rate": 0.43478260869565216,
+          "gross_win_rate": 0.6413043478260869,
+          "gross_mean_bp": -6.888441526419363,
+          "net_mean_bp": -26.888441526419367,
+          "gross_sum_pct": -6.337366204305813,
+          "net_sum_pct": -24.737366204305815,
+          "pf": 0.4234579414982103,
+          "longest_loss": 10,
+          "median_hold_minutes": 180.0,
+          "max_hold_minutes": 1970.0,
+          "max_trade_net_pct": 2.3198377136525883,
+          "min_trade_net_pct": -16.829241516966086
+        },
+        "later": {
+          "n": 98,
+          "net_win_rate": 0.46938775510204084,
+          "gross_win_rate": 0.6020408163265306,
+          "gross_mean_bp": 11.45013999236259,
+          "net_mean_bp": -8.549860007637415,
+          "gross_sum_pct": 11.22113719251534,
+          "net_sum_pct": -8.378862807484666,
+          "pf": 0.761031779285706,
+          "longest_loss": 8,
+          "median_hold_minutes": 160.0,
+          "max_hold_minutes": 1355.0,
+          "max_trade_net_pct": 6.391735698037934,
+          "min_trade_net_pct": -3.8050756271775574
+        }
+      }
+    }
+  }
+}

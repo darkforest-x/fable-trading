@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: ma-shift-stoch-eth-month-20260915-delivery
+    artifact_type: manifest
+    role: causal_ma_color_filter_and_stoch_opposite_exit_monthly_research
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6864e834895fc38b39cc737ad22c3483fdb708d6
+    source_path: experiments/active/exp-ma-shift-stoch-eth-month-20260915-v1/delivery_manifest.json
+    sha256: 59ef59d63ccaf3559a16e9408d373a31fc24f646a81b66db79bcfd3fdf2e0b5d
+    size_bytes: 6207
+    storage_uri: repo://experiments/active/exp-ma-shift-stoch-eth-month-20260915-v1/delivery_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Binds27 delivery files and separate immutable raw CSV SHA.9867 confirmed5m bars including720 warmup;no gaps. Negative result retained;306 closed trades independently reconciled;not production.
   - artifact_id: spike-eth-v9-yolo-entry-20260915-delivery
     artifact_type: manifest
     role: entry_time_same_and_lower_timeframe_yolo_association

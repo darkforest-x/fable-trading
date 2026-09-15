@@ -1,0 +1,30 @@
+{
+  "focused_tests": {
+    "command": ".venv/bin/python -m pytest -q tests/test_spike_fanshen_exit.py tests/test_ma_shift_stoch.py",
+    "passed": 18,
+    "failed": 0,
+    "source": "implementer tool execution"
+  },
+  "project_gates": {
+    "command": ".venv/bin/python -m pytest -q tests/boundaries tests/causality tests/parity",
+    "passed": 468,
+    "failed": 7,
+    "existing_failures": [
+      "5 teacher-proposal tests blocked by existing spike-v8-total2-1h-native-20260914-delivery missing source_commit",
+      "2 migration hash mismatches: yoyo/layers/l1_detection/candidates.py and render.py"
+    ],
+    "log": "gates.log"
+  },
+  "independent_review": "review.md; no correctness finding; all 306 closed trades, fills, equity and controls reconciled",
+  "html": {
+    "tables": 4,
+    "embedded_images": 1,
+    "missing_local_links": 0,
+    "plot_visually_checked": true,
+    "browser_visual_check": false,
+    "browser_block": "URL safety policy blocks local file://; no workaround attempted"
+  },
+  "notion_url": "https://app.notion.com/p/3dc8856479af81828e6cc91ec50f88d0",
+  "exact_configuration_holdout_consumption": 1,
+  "production_eligible": false
+}
