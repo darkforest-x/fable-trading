@@ -18,6 +18,20 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v9-eth-lowtf-20260915-delivery
+    artifact_type: manifest
+    role: fixed_eth_lowtf_v9_v8_serial_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 37215d29c01249e47903f49d17d1de7a6da9efea
+    source_path: experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/delivery_manifest.json
+    sha256: 8c4aa27f0f26a8aa1908ac43091b9e4d52848be77626a8c1fd0bb219280c0071
+    size_bytes: 8885
+    storage_uri: repo://experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/delivery_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Binds36 source/receipt/report/outcome files;large local cached contexts are additionally SHA-bound inconfig. Two streams,four folds,6602 actual
+      event/control rows,6598 matched. All original folds net negative;no TV edit or live actions.
   - artifact_id: spike-v9-full-backtest-20260915-delivery
     artifact_type: manifest
     role: fixed_v9_v8_full_serial_comparison_and_private_tv_save

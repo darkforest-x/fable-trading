@@ -14,6 +14,24 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-v9-eth-lowtf-20260915-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 37215d29c01249e47903f49d17d1de7a6da9efea
+    status: rejected
+    question: Does the fixed V9 bundle make the original ETH 3m and 5m histories profitable after unchanged cost?
+    single_variable: Owner-selected combined V9 admission gates; preserve native V8 exits, original lowtf fold resets and 0.002 roundtrip cost.
+    result: 3m V8 -935.30R to V9 -773.89R PF0.4966;5m -624.48R to -476.81R PF0.6910. Every original fold remains negative. Cost reduction explains90.60pct/95.68pct
+      of improvement;original net10R retained11/11 and15/16.
+    holdout_consumed: true
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v9_eth_lowtf_20260915.md
+    artifacts:
+    - spike-v9-eth-lowtf-20260915-delivery
+    reuse_allowed: false
+    notes: Complete engineering delivery, negative financial finding. First lowtf-specific V9 exposure, second unchanged V9 historical evaluation;already-exposed3m
+      history,5m pre-holdout. Original3525 closed V8 trades and candidates match;45 synthetic plus116 boundary/causality/numeric tests pass. Two Luna Max
+      reviews;not a cross-venue causal timeframe comparison.
   - experiment_id: exp-spike-v9-full-backtest-20260915-v1
     source_repo: darkforest-x/fable-trading
     source_commit: c26b0ebfa6567dd823f56d1d131662059583b2cf

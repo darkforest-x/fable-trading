@@ -1,0 +1,83 @@
+{
+  "verified_at": "2026-09-15T00:29:49.353435+00:00",
+  "source_commit": "37215d29c01249e47903f49d17d1de7a6da9efea",
+  "run_complete": true,
+  "checked_saved_file_count": 22,
+  "checked_saved_files": [
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/summary.csv",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/decisions.csv.gz",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/attribution.csv",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/controls.csv.gz",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/evaluation_started.json",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/trades.csv.gz",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/ETH_5m_Binance/development.v8.trades.csv.gz",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/ETH_5m_Binance/validation.v8.trades.csv.gz",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/ETH_5m_Binance/development.decisions.csv.gz",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/ETH_5m_Binance/development.controls.csv.gz",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/ETH_5m_Binance/validation.controls.csv.gz",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/ETH_5m_Binance/validation.decisions.csv.gz",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/ETH_5m_Binance/validation.v9.trades.csv.gz",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/ETH_5m_Binance/development.v9.trades.csv.gz",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/ETH_3m_OKX/development.v8.trades.csv.gz",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/ETH_3m_OKX/validation.v8.trades.csv.gz",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/ETH_3m_OKX/development.decisions.csv.gz",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/ETH_3m_OKX/development.controls.csv.gz",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/ETH_3m_OKX/validation.controls.csv.gz",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/ETH_3m_OKX/validation.decisions.csv.gz",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/ETH_3m_OKX/validation.v9.trades.csv.gz",
+    "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/results/full_v1/ETH_3m_OKX/development.v9.trades.csv.gz"
+  ],
+  "actual_event_rows": 6602,
+  "actual_closed_rows": 6600,
+  "matched_controls": 6598,
+  "unmatched_controls": 4,
+  "v8_oracle_closed": 3525,
+  "v9_closed": 3075,
+  "tests": {
+    "focused": {
+      "command": "python3 -m pytest -q tests/evaluation/test_spike_v9_eth_lowtf.py tests/evaluation/test_spike_v9.py",
+      "passed": 45,
+      "seconds": 1.49,
+      "source": "observed completed command output before market reads"
+    },
+    "boundaries": {
+      "command": "python3 -m pytest -q tests/boundaries/test_layer_imports.py tests/boundaries/test_yoyo_package_is_local.py tests/causality/test_holdout_boundary_is_single_valued.py tests/causality/test_future_mutation.py tests/parity/test_numeric_baseline_parity.py",
+      "passed": 116,
+      "seconds": 19.21,
+      "log": "experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/boundary_checks.log"
+    }
+  },
+  "html": {
+    "tables": 6,
+    "existing_local_links": 4,
+    "browser_pixel_validation": false,
+    "codex_file_preview": "queued"
+  },
+  "reviews": [
+    {
+      "agent": "/root/map_v8_shadow",
+      "role": "budget-mapper",
+      "model_effort": "Luna Max",
+      "scope": "source only, no OHLC/pickle",
+      "result": "native lowtf V8 primary path unchanged; V9 admission-only; raw reversal and fold clocks correct",
+      "limitation": "closed parity has no old censored oracle; own control output schema is not compatible with full-pool report loader, which this run never calls"
+    },
+    {
+      "agent": "/root/v8_exit_evidence",
+      "role": "budget-evidence",
+      "model_effort": "Luna Max",
+      "scope": "saved result files only",
+      "result": "all summary arithmetic/identities/control denominators matched; maximum arithmetic residual about 8e-13; no profitable full or original fold result",
+      "limitation": "control starts may repeat across targets, monthly blocks descriptive; cross-venue/timeframe comparison not causal"
+    }
+  ],
+  "notion": {
+    "research_url": "https://app.notion.com/p/3dc8856479af8154b70dea07b6952ff4",
+    "strategy_url": "https://app.notion.com/p/3db8856479af81e1b257dbd9ae09aca3",
+    "dedup_matches": 0,
+    "created_and_fetched": true,
+    "strategy_updated_and_fetched": true
+  },
+  "training_eligible": false,
+  "production_eligible": false
+}

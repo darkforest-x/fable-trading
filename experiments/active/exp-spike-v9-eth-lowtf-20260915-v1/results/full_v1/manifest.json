@@ -1,0 +1,108 @@
+{
+  "complete": true,
+  "streams": 2,
+  "folds": 4,
+  "configuration": {
+    "experiment_id": "exp-spike-v9-eth-lowtf-20260915-v1",
+    "strategy_version": "spike-v9-entry-bundle-20260915-v1",
+    "round_trip_cost": 0.002,
+    "streams": [
+      {
+        "name": "ETH_5m_Binance",
+        "symbol": "ETHUSDT",
+        "venue": "binance",
+        "minutes": 5,
+        "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_ETHUSDT_5m_665856.csv",
+        "tick": 0.01,
+        "development_start": "2020-01-01 00:00:00+00:00",
+        "split": "2024-01-01 00:00:00+00:00",
+        "end": "2026-05-01 00:00:00+00:00",
+        "asset": "ETH",
+        "source_path": "data/kline_preholdout_binance_um5m/series/binance_um_ETHUSDT_5m_665856.csv",
+        "source_sha256": "8041770149cff3551f84966b1b5f3641f2f731dc3ae7c7d0bfeaf7b24dcd64e8",
+        "context": "experiments/active/exp-spike-eth-martingale-20260914-v1/results/pre/ETH_5m_Binance.pkl",
+        "context_sha256": "3c9555197d88e1592222e7de6129ae779899fecc7b96c4d6b38c1011f3a39539",
+        "preparation_receipt": "experiments/active/exp-spike-eth-martingale-20260914-v1/results/pre/preparation.json",
+        "preparation_sha256": "4d53b1ae9a7ce3939c2dbe63f52f7c1cd41c19dafbe870e5cae3554ee19c20cc",
+        "bars": 665856
+      },
+      {
+        "name": "ETH_3m_OKX",
+        "symbol": "ETH-USDT-SWAP",
+        "venue": "okx",
+        "minutes": 3,
+        "path": "/Users/zhangzc/fable-trading/data/kline_deep/okx_ETH_USDT_SWAP_3m_525599.csv",
+        "tick": 0.01,
+        "development_start": "2023-07-31 11:12:00+00:00",
+        "split": "2026-05-04 00:00:00+00:00",
+        "end": "2026-07-30 11:09:00+00:00",
+        "asset": "ETH",
+        "source_path": "data/kline_deep/okx_ETH_USDT_SWAP_3m_525599.csv",
+        "source_sha256": "37a49d3e7150bdefdbfa21bd507fbfe60200532dbd70c1604a5e770081eadbb3",
+        "context": "experiments/active/exp-spike-eth-martingale-20260914-v1/results/holdout/ETH_3m_OKX.pkl",
+        "context_sha256": "7902c225a8a4573827556e7a055b383b951b910b2a5ca62c81ad101ecbd17d26",
+        "preparation_receipt": "experiments/active/exp-spike-eth-martingale-20260914-v1/results/holdout/preparation.json",
+        "preparation_sha256": "498b05cb25276954d19999c1f7aa8d2bec7f1cad02a3409e1ec1c73aca800166",
+        "bars": 525599
+      }
+    ],
+    "baseline": "experiments/active/exp-spike-v8-lowtf-20260913-v1/results/run_20260913_v3",
+    "baseline_files": {
+      "manifest.json": "accf17e4cca0964faee682e969648c0f4e8350e077dca6a5cb0b3ac0539495aa",
+      "primary_signals.csv.gz": "8fa22643bcaa84ad8f2f058a8f4eebd76ba55f18e9c76532801b71e465e3d8db",
+      "primary_closed_trades.csv.gz": "2606f302dad35626251090ee2be6f1688c34499b84b0fd562077dc3f9469753f"
+    },
+    "control_seed": 91535,
+    "vol_bins": [
+      0.005,
+      0.01,
+      0.02,
+      0.05,
+      0.1
+    ],
+    "monthly_repetitions": 2000,
+    "search": false,
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "receipts": [
+    {
+      "stream": "ETH_5m_Binance",
+      "baseline_closed_and_signals_parity": true,
+      "fixed_control_target_parity": true,
+      "files": {
+        "development.v8.trades.csv.gz": "b5ccd84cd79ac22bfcf4a6edd30d7fd45e942e2931cf058a2f39bed0d1e10aea",
+        "validation.v8.trades.csv.gz": "6696324c65c95d1873a121b27186f84b7e1643f217981aad0ec6e343f862231e",
+        "development.decisions.csv.gz": "8b6a5ef38b2b3113275b4735e896c4ac4c9739ac894fae0407552f44ae8005a0",
+        "development.controls.csv.gz": "2e35c48f83b6d6297c96e1407b9f23f60ab7bbc0ecaf6de21ae3fc0f721e2a31",
+        "validation.controls.csv.gz": "f5f6ea38cb3d2a7df376ac1a0e820d66c11190c8200a9f169ec056766670dbc9",
+        "validation.decisions.csv.gz": "96ce4a7bc2818fbeb5b5ef8617885e1f11ce28fd3b44ae1cface3b69ed515191",
+        "validation.v9.trades.csv.gz": "0be251e85b4e9b14d7c888099538f7ceba1d57b8eaae4a278fcf6296e20605cc",
+        "development.v9.trades.csv.gz": "2c7c441fc590dcb203ac61c7cb218171c3acf0c6b9ce0322fe7ce90d7b8286a9"
+      }
+    },
+    {
+      "stream": "ETH_3m_OKX",
+      "baseline_closed_and_signals_parity": true,
+      "fixed_control_target_parity": true,
+      "files": {
+        "development.v8.trades.csv.gz": "5596f10411c4b21430a3c94780ac22efdf55b946280a31bc98fe5d5406c31098",
+        "validation.v8.trades.csv.gz": "6f9e75fc00bdc719f125aa6bcc2ca8cf325540c5b9363a7dc3d11ab69fa54f4a",
+        "development.decisions.csv.gz": "385dc56430e58ddf80929c0b6951c978b0b1c6f726e74c6da9107da030cbc37c",
+        "development.controls.csv.gz": "9a4dabc33cf486ff34fb5b5f602786bcf4ca37cb5693502b640d53a41157d8a9",
+        "validation.controls.csv.gz": "dc30f6ae3a637cb892db863736b514adf545338a869e5b8b8d178da1301a5573",
+        "validation.decisions.csv.gz": "2ededb0afaa7d17549acbb2c901c5570c8617a0d81387c52e0cb2cf00ca89fef",
+        "validation.v9.trades.csv.gz": "89c602251ad55c73807a6d87943336cd21fa77d6669f7d2eecc3a426a43d3afb",
+        "development.v9.trades.csv.gz": "48b50dc9dda54dc39d570f43e4d9c9694412e3b7c8becd13f2ba01ea5ba068d0"
+      }
+    }
+  ],
+  "files": {
+    "summary.csv": "761bcb8b64c36159b23aa4dca149616656d86c8cfdd67c522d908f233ea27bb4",
+    "decisions.csv.gz": "2af9e5b8ca421bb7f2c9cfca2841eaed626d6221bc23f9425aad8c1a971d43d4",
+    "attribution.csv": "e1e961504a2f628531341756fbb729f2251347c7f4a073ba5b2bf76d6cc52a8a",
+    "controls.csv.gz": "b7a43ee5aa051053bb65ce43e8ac4013f2d787f0cf88e854a9961bb6f16e24b3",
+    "evaluation_started.json": "f955ca7415b23665193037d6711c1f35bb05162c776f2a0b3b3b46cd6e75a707",
+    "trades.csv.gz": "afa16ba4c2fb859dba092efb66ee55df65e8ddcc4552406874e8a0f771461d50"
+  }
+}
