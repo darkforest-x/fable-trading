@@ -9330,11 +9330,14 @@ experiments:
 
   - experiment_id: exp-ifvg-lrl-eth-20260915-v1
     source_repo: darkforest-x/fable-trading
-    status: active
+    status: rejected
     question: Does a frozen causal LRL admission gate improve native ETH3m iFVG candidates and serial results after20bp costs?
     single_variable: LRL admission on/off including target still ahead at actual next open; all other entry,structural stop,1R target and costs fixed.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_ifvg_lrl_eth_20260915.md
-    notes: Owner selected existing ETH perpetual minute data. Native3m only; no30s or highest-timeframe arbitration. Prefix stops before2026-05-01. Config and builder must be committed before prices.
+    source_commit: 844c0c94417e4221af719560d89bf1374cd9a4fe
+    result: Validation24LRL trades net-22.8906R,net win37.5percent,PF.2040;matched random excess-.0833R,p.6333. Full52trades net-52.6258R. Frozen native3m configuration has no established net profitability or LRL advantage.
+    notes: Existing ETH perpetual3m prefix only; no30s or highest-timeframe arbitration. Zero holdout,122focused tests passed. Pine compiled and3m cutoff panel verified;no full cross-platform ledger parity.
+    artifacts: [ifvg-lrl-eth-20260915-delivery]

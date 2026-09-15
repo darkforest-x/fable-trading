@@ -14,6 +14,7 @@ import hashlib
 import json
 from pathlib import Path
 import platform
+import re
 import subprocess
 
 import numpy as np
@@ -144,7 +145,8 @@ def write_report(summary, cfg, output):
         '- 可先逐张检查指标与原帖形态的一致性；主观规则差异需Owner确认，不用结果反推定义。',
         '- 若要完整多周期复刻，需要明确最高周期仲裁、LRL容差与失效规则；属于新配置，先定规则再回测。',
         '- 更换成本、TP/SL、时段或消耗holdout均需要Owner决定；本轮不自动做。']
-    REPORT.write_text('\n\n'.join(parts)+'\n')
+    report_text = re.sub(r'(?m)(^\|[^\n]*\|)\n\n(?=\|)', r'\1\n', '\n\n'.join(parts))
+    REPORT.write_text(report_text+'\n')
     subprocess.run(['python3','scripts/md_to_html.py',str(REPORT),'--out-dir','analysis/html'], cwd=ROOT, check=True)
 
 

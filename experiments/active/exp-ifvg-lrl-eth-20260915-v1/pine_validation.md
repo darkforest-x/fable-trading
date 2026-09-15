@@ -1,0 +1,10 @@
+# Pine v6 validation · 2026-09-15
+
+- Created a separate script named `iFVG + LRL · ETH 3m v1` in the owner's existing TradingView account, using the new-indicator action. No existing script source was replaced; no publication or alert was created.
+- Saved and added the script through the Pine editor. TradingView showed a saved version and an indicator instance on the chart, with no compiler error. On the initial 15-minute chart it raised the deliberate user-defined timeframe guard (`RE10142`).
+- On standard `OKX:ETHUSDT.P`, 3-minute chart, the guard cleared. A screenshot visibly showed the `ETH 3m iFVG + LRL` table with LRL enabled, 0 candidates/0 closed trades, no trades, and zero gross/net R. This is expected because the chart currently loaded September 2026 while the default research end remains 2026-05-01.
+- Added an opaque chart-background color to the statistics table for readability, and saved the display-only update. LRL lines were also added after the Python run; neither change alters signal or return logic.
+- The editor's accessible textbox exposes a truncated/virtualized text window; comparing that value with the complete pasted source did not establish byte-for-byte identity. The local Pine file SHA in the delivery manifest identifies the delivered source. No full TradingView/Python ledger parity is claimed.
+- Browser pointer operations repeatedly timed out; semantic keyboard activation allowed saving, compilation and switching to 3 minutes. These transient tool failures are not evidence of a Pine compile failure.
+- Scope of runtime verification: compilation, chart/timeframe guard, table rendering and no-trade cutoff behavior. Nonempty historical entries and TP/SL behavior are validated in the local Python tests/backtest, not a full replay of the same long history inside TradingView.
+- No holdout trade outcomes were calculated by this script. Live quotes and existing unrelated indicators were incidentally visible during UI validation; they were not used to select or change this configuration.

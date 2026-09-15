@@ -598,3 +598,5 @@
 
 - [V7 132,593 条信号全量失败归因与 V8 冻结回放](html/p1_spike_v8_noise_filter_20260913.html) · 3ATR 六线距离门删除 14.55% 确认，逐周期保留 91.75%–96.77% 的原 V7 已实现 10R；平均回撤下降，但未证明收益显著优于 V7。最终复核发现 discovery_v1 暴露验证结果，证据已降级为非盲描述性，不进入生产。
 - [`p1_spike_ashare_v1_v8_three_year_20260913.md`](p1_spike_ashare_v1_v8_three_year_20260913.md) — SPIKE V1 / V8：沪深主板近三年日线与周线
+
+- [ETH 3m iFVG＋LRL v1](p1_ifvg_lrl_eth_20260915.md) / [HTML](html/p1_ifvg_lrl_eth_20260915.html)：验证24笔净-22.89R，未显示LRL增量；零holdout，Pine已编译。

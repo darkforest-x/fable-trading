@@ -31052,3 +31052,17 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Existing cost_be2 selected by owner after results; original development fixed3r selection retained. No new replay or price reads;45existing focused checks passed. ETH15m ICT only,not a TradingView script update.
+
+  - artifact_id: ifvg-lrl-eth-20260915-delivery
+    artifact_type: manifest
+    role: causal_ifvg_lrl_native_eth3m_paired_backtest
+    source_repo: darkforest-x/fable-trading
+    source_commit: 844c0c94417e4221af719560d89bf1374cd9a4fe
+    source_path: experiments/active/exp-ifvg-lrl-eth-20260915-v1/delivery_manifest.json
+    sha256: f16aaa90c10a607ce2fa5ff97354b6c6003b71af904344297c4c9d5958f44e83
+    size_bytes: 11116
+    storage_uri: repo://experiments/active/exp-ifvg-lrl-eth-20260915-v1/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Native3m only,12groups and50770events audited;40raw output hashes plus report,HTML,Pine and validation documents. Negative frozen configuration;zero holdout,no live changes.
