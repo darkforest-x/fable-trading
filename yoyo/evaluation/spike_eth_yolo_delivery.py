@@ -2,8 +2,9 @@
 
 Only frozen study outputs are summarized. All baseline entries appear in the
 gallery; no outcome-based example selection or new inference occurs here.
-Model images preserve their original bytes; browser rectangles show saved
-normalized prediction coordinates. No future chart is passed to YOLO.
+Raw input arrays preserve their original BGR bytes; browser PNG previews
+encode the same colors in RGB and show saved normalized prediction coordinates.
+No future chart is passed to YOLO.
 """
 from __future__ import annotations
 
@@ -82,7 +83,9 @@ def answer_first(coverage, summary, association, out):
 
 def gallery(trades, out):
     """All baseline trades in timestamp order; saved boxes overlay raw PNGs."""
-    cards=[]
+    from PIL import Image
+    cards=[];display_receipts={}
+    display=out/'display_inputs';display.mkdir(exist_ok=True)
     base=trades.loc[trades.arm.eq('v9')].sort_values(['entry_time','timeframe','event_key'])
     for n,row in enumerate(base.to_dict('records'),1):
         panels=[]
@@ -99,7 +102,16 @@ def gallery(trades, out):
                     selected=p['detection_id']==row.get(field+'_detection_id')
                     caption=f"{p['side']} {p['confidence']:.3f} · core{p['core_length_bars']} post{p['post_bars']}"
                     boxes.append(f'<div class="box" style="left:{100*(cx-w/2)}%;top:{100*(cy-h/2)}%;width:{100*w}%;height:{100*h}%;border-color:{color};border-style:{"solid" if selected else "dashed"}"><span>{html.escape(caption)}</span></div>')
-                rel='model_inputs/'+Path(item['path']).name
+                raw_path=Path(item['path']);shown=display/raw_path.name
+                if str(shown) not in display_receipts:
+                    # render_chart and Ultralytics numpy inputs use BGR. The raw
+                    # receipt PNG preserves that array literally; only the browser
+                    # preview needs BGR->RGB for the original candle colors.
+                    array=np.asarray(Image.open(raw_path).convert('RGB'))
+                    Image.fromarray(array[:,:,::-1]).save(shown)
+                    display_receipts[str(shown)]=dict(source=str(raw_path),source_sha256=sha(raw_path),
+                        display_sha256=sha(shown),conversion='BGR array to RGB PNG; inference unchanged')
+                rel='display_inputs/'+shown.name
                 images.append(f'<div class="image"><img loading="lazy" src="{rel}" alt="实际模型输入 W{item["length"]}">{"".join(boxes)}</div><small>W{item["length"]} · 最后收盘 {cst(pd.to_datetime(item["last_close_ms"],unit="ms",utc=True))} · SHA {item["pixel_sha256"][:12]}</small>')
             hit=bool(row[field+'_hit'])
             panels.append(f'<section><h3>{label} {record["timeframe"]}：{"检出" if hit else "未检出"} · 同向分数 {row[field+"_score"]:.3f}</h3>{"".join(images)}</section>')
@@ -114,6 +126,7 @@ body{font:15px/1.65 -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;ba
     page+='''</select></label><label>交易结果<select id="result"><option value="">全部</option><option>净赢</option><option>净亏/平</option><option>未平仓</option></select></label><label>检测<select id="hit"><option value="">全部</option><option value="same">同级检出</option><option value="lower">小级别检出</option><option value="none">两者均未检出</option></select></label><b id="count"></b></nav>'''
     page+=''.join(cards)+'''</main><script>function filter(){let n=0;document.querySelectorAll('article').forEach(a=>{let t=document.getElementById('tf').value,r=document.getElementById('result').value,h=document.getElementById('hit').value;let ok=(!t||a.dataset.tf===t)&&(!r||a.dataset.result===r)&&(!h||(h==='none'?!a.dataset.hit:a.dataset.hit.split(' ').includes(h)));a.hidden=!ok;if(ok)n++;});document.getElementById('count').textContent='显示 '+n+' 笔';}document.querySelectorAll('select').forEach(s=>s.onchange=filter);filter();</script></html>'''
     (out/'gallery.html').write_text(page)
+    dump(out/'display_manifest.json',display_receipts)
     return len(base)
 
 
@@ -189,6 +202,7 @@ def run():
             '- 时间不足两月半、周期重叠、少量高周期交易会限制统计效力；分组条件、14项主比较与次级排序均完整保留，不据看见的结果再挑周期、调conf或换权重。',
             '- 一些bootstrap差值区间不含0，但命中组只有1–4笔，且无命中重抽样被标为无效；这种退化区间不能当成稳健显著性证据。14项Fisher经Holm校正无显著项。',
             '- 无命中分数记0。top-decile若含大量0分并列，按事件键选出的交易是复现约定，不是模型提供的排序信息；30m／4H等常数分数组没有可解释的模型top-decile优势。',
+            '- 原绘图器和YOLO的numpy入口使用BGR。model_inputs保存原数组通道及像素SHA；图册的display_inputs转为浏览器所需RGB，纠正首次预览的红蓝通道显示错位。原始输入、预测与收益均未重跑或改变。',
             '- 新研究定向检查通过；旧监控测试有20项在同一未更新fixture处缺tick参数失败，本研究不调用该fixture。不得声称整仓所有测试全绿。',
             '## 下一步',
             '本报告用于判断是否值得继续收集独立前向配对证据。任何更换权重、追加等待、改变小级别窗口、调阈值或上线过滤都应另立配置并由Owner决定，不能在本批结果上迭代后仍称首次验收。',
