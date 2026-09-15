@@ -35,6 +35,8 @@ def finalize():
     ax[1].bar(x,changes,color=['#b91c1c' if v<0 else '#0f766e' for v in changes])
     ax[1].axhline(0,color='#334155',linewidth=.8);ax[1].set_xticks(x,labels)
     ax[1].set_title('Available history | Change in net R');ax[1].set_ylabel('BE version minus original V9')
+    ax[1].margins(y=.20)
+    ax[1].set_xlabel('Windows differ; OKX 5m begins in Dec 2025.',fontsize=8)
     for i,v in enumerate(changes):ax[1].annotate(f'{v:+.2f}',(i,v),xytext=(0,4 if v>=0 else -12),textcoords='offset points',ha='center',fontsize=9)
     fig.suptitle('A tighter profit-protection rule does not improve every timeframe',fontsize=12)
     plot=results/'exit_comparison.png';fig.savefig(plot,dpi=170);plt.close(fig)
