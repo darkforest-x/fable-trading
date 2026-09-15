@@ -18,6 +18,20 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v9-cost-be2-20260915-eth-delivery
+    artifact_type: manifest
+    role: v9_cost_protection_fixed_entry_and_serial_eth_evaluation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 515e50ea6b8f3d4d5fa0b677a88f9388cbd6673c
+    source_path: experiments/active/exp-spike-v9-cost-be2-20260915-v1/delivery_manifest.json
+    sha256: 2d23c756290c27a59715c65f240f417c4616564f55e5295d11b3b7ae9fffc977
+    size_bytes: 34393
+    storage_uri: repo://experiments/active/exp-spike-v9-cost-be2-20260915-v1/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Binds137 delivery files;ETH3m/5m/15m/30m/1H/4H pre-May,12 window receipts. Fixed original-entry and serial/control ledgers. No uniform
+      profitability improvement;full universe pending authorization.
   - artifact_id: ma-stoch-exit-optimization-20260915-v2-delivery
     artifact_type: manifest
     role: bounded_second_exit_search_with_exposed_history_recheck

@@ -1,0 +1,45 @@
+{
+  "status": "complete",
+  "stream_key": "okx_eth_3m",
+  "window": "available",
+  "start": "2023-08-03 14:15:00+00:00",
+  "end": "2026-05-01 00:00:00+00:00",
+  "bars": 482176,
+  "candidates": 1612,
+  "baseline_parent_parity": true,
+  "archived_v9_parity": false,
+  "fixed_baseline_parity": true,
+  "accounting": [
+    {
+      "arm": "v9_original",
+      "closed_checked": 1293,
+      "fill_accounting_passed": true
+    },
+    {
+      "arm": "v9_cost_be2",
+      "closed_checked": 1296,
+      "fill_accounting_passed": true
+    }
+  ],
+  "files": {
+    "v9_original.trades.csv.gz": "094f0320c34eea010db45425b14a41123892bd6d35317fd51894b2a168f3e725",
+    "v9_original.events.csv.gz": "7ad08150bb49126e9cbbdccb9d7ce7a93e4e2f576d1083b10f091e52d03d0516",
+    "v9_cost_be2.fills.csv.gz": "5a0ced577c628ceab89f1184aeec5509a041c42d5852aa5fbb9fc83e719bce9a",
+    "v9_cost_be2.events.csv.gz": "257c5bad3863d73ee49d42825773f1fc396a477e7809e608c84cdd9a697f5197",
+    "v9_cost_be2.trades.csv.gz": "40eee13ef3c3173d420debe1cbc838e9fe38566665ecad3fdfc853863a0faf19",
+    "v9_original.fills.csv.gz": "fe2b189668cd0c0b3af1184f5f4c645a4a58451b732f45df3d6936d0e67ffe5d",
+    "paired.csv.gz": "a0a496c85ecf347920a621e1921aff31abed96038b252ca89aed9cd18c3f24de",
+    "controls.csv.gz": "3101bfe4c817cdfc74240adbc2e76c233890452cd16fd765791784efbfa51810",
+    "fixed_original_entries.cost_be2.csv.gz": "9884982494c6399fddb5094004e3d99907927599e95142a739eac97f8b19007e"
+  },
+  "input_receipt": {
+    "minutes": 3,
+    "type": "hash_pinned_pre_only_context",
+    "source": "experiments/active/exp-spike-eth-martingale-20260914-v1/results/pre/ETH_3m_OKX.pkl",
+    "sha256": "9fc6f9dcbad7616f9c7ceab811ed9634ece2b07bf24327ff070ac09592c972fd",
+    "rows": 482176,
+    "first_open": "2023-07-31 11:12:00+00:00",
+    "last_close": "2026-05-01 00:00:00+00:00",
+    "holdout_consumed": false
+  }
+}

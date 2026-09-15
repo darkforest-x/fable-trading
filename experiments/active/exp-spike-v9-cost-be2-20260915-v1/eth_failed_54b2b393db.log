@@ -1,0 +1,28 @@
+completed eth_3m_available seconds 29.1
+completed eth_3m_common seconds 37.7
+completed eth_5m_available seconds 42.8
+completed eth_5m_common seconds 44.5
+completed eth_15m_available seconds 58.8
+completed eth_15m_common seconds 61.3
+completed eth_30m_available seconds 69.1
+completed eth_30m_common seconds 70.6
+Traceback (most recent call last):
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 197, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v9_cost_be2_study.py", line 312, in <module>
+    args=parser.parse_args();run(args.scope,args.workers)
+  File "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v9_cost_be2_study.py", line 290, in run
+    else: result=run_prepared(p,folder,window,left,right,cfg)
+  File "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v9_cost_be2_study.py", line 190, in run_prepared
+    assert_parity(pd.DataFrame([fixed_base]),pd.DataFrame([row]))
+  File "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v9_cost_be2_study.py", line 76, in assert_parity
+    pd.testing.assert_frame_equal(actual[PARITY].sort_values(['signal_i','side']).reset_index(drop=True),
+  File "/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/pandas/core/frame.py", line 4119, in __getitem__
+    indexer = self.columns._get_indexer_strict(key, "columns")[1]
+  File "/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/pandas/core/indexes/base.py", line 6212, in _get_indexer_strict
+    self._raise_if_missing(keyarr, indexer, axis_name)
+  File "/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/pandas/core/indexes/base.py", line 6261, in _raise_if_missing
+    raise KeyError(f"None of [{key}] are in the [{axis_name}]")
+KeyError: "None of [Index(['signal_i', 'entry_i', 'side', 'exit_i', 'exit_reason', 'entry_price',\n       'exit_price', 'initial_stop', 'initial_risk', 'net_return', 'net_r',\n       'censored'],\n      dtype='object')] are in the [columns]"

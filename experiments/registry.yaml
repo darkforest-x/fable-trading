@@ -16,18 +16,22 @@ schema_version: 1
 experiments:
   - experiment_id: exp-spike-v9-cost-be2-20260915-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: null
-    status: planned
-    question: Does adding net2R-triggered cost protection improve unchanged V9 exits?
-    single_variable: Surviving closed-bar net favorable excursion2R ratchets next-bar protection to entry plus/minus0.2percent; all entries and original trailing remain fixed.
-    result: Implementation and configuration being frozen before data evaluation; ETH pre-May six timeframes and optional separately authorized original3531-stream universe.
+    source_commit: 515e50ea6b8f3d4d5fa0b677a88f9388cbd6673c
+    status: inconclusive
+    question: Does net2R-triggered cost protection improve unchanged V9 exits?
+    single_variable: Surviving closed-bar net favorable2R ratchets next-bar protection to entry plus/minus0.2percent; unchanged V9 entries and original4ATR
+      trail.
+    result: ETH six pre-May timeframes complete. Jan-Apr netR3m -68.41 to-70.63,5m9.99 to11.82,15m23.07 to24.77,30m unchanged,1H rounding-only,4H-1.91
+      to-0.87. Longer3m and15m worsen;no uniform improvement.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_v9_cost_be2_20260915.md
-    artifacts: []
+    artifacts:
+    - spike-v9-cost-be2-20260915-eth-delivery
     reuse_allowed: false
-    notes: Owner explicitly requested add rule then backtest. New named Pine/engine preserve original V9 and monitor identity. No tuning,ICT,martingale or production changes.
+    notes: 39 distinct targeted checks;12 windows and closed fills/fixed-parent parity verified. Initial terminal-return failure and pre-hardening
+      run preserved. Original3531-stream universe awaiting new configuration-specific authorization. New Pine delivered locally;no TV/monitor deployment.
   - experiment_id: exp-ma-stoch-exit-optimization-20260915-v2
     source_repo: darkforest-x/fable-trading
     source_commit: c139acc181e4503adbb66a3e963aabb60ebaa493

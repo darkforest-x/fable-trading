@@ -1,0 +1,56 @@
+{
+  "status": "complete",
+  "stream_key": "okx_eth_30m",
+  "window": "available",
+  "start": "2023-08-01 00:00:00+00:00",
+  "end": "2026-05-01 00:00:00+00:00",
+  "bars": 75761,
+  "candidates": 126,
+  "baseline_parent_parity": true,
+  "archived_v9_parity": false,
+  "fixed_baseline_parity": true,
+  "accounting": [
+    {
+      "arm": "v9_original",
+      "closed_checked": 103,
+      "fill_accounting_passed": true
+    },
+    {
+      "arm": "v9_cost_be2",
+      "closed_checked": 103,
+      "fill_accounting_passed": true
+    }
+  ],
+  "files": {
+    "v9_original.trades.csv.gz": "cf7d3dbfb891d905bb8e6edf84bcfe87befeebea42e909596517cbb3d6668081",
+    "v9_original.events.csv.gz": "7e5bed329962a96d96efc430d55cedc59560ba1dc1d41abbe647ee2da25869bb",
+    "v9_cost_be2.fills.csv.gz": "506eaef036056007a469fdc1660225a8c410afc8224a42ac6848f5b70a5be98d",
+    "v9_cost_be2.events.csv.gz": "69ffacae5b8e71ef768108c948c90377944b01a07e69388a514167fd72a27448",
+    "v9_cost_be2.trades.csv.gz": "f421ce0e1a2818dc51accb1f5ded7c59cd8705e7212b9373a687f0ea72a6d414",
+    "v9_original.fills.csv.gz": "41748f2dea0c67d7856dcc36b0b4b091c868daee6a15a0b4ce0a7cfcf7adca5c",
+    "paired.csv.gz": "06e9a07cc6fd876d43b71c922fe0d171b06c6dae09661d45594ebfa95c48696b",
+    "controls.csv.gz": "9462382be2f57ccdac28e4d628f0b4fe3a24d744fc12158734348afa5c777eff",
+    "fixed_original_entries.cost_be2.csv.gz": "691df05ba449766dbac1b71eccf4a10a4d28dc9b3cdd940c5dcd8fda2b6a174f"
+  },
+  "input_receipt": {
+    "minutes": 30,
+    "path": "/Users/zhangzc/fable-trading/data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv",
+    "source_size_metadata_only": 12617188,
+    "rows": 151522,
+    "first_open": "2022-01-03 15:30:00+00:00",
+    "last_close": "2026-05-01 00:00:00+00:00",
+    "prefix_sha256": "e6945708914c3e7e04b4c6fb9778aa7623b5a988fe18852f62d401dc2c46399b",
+    "first_excluded_timestamp_only": "2026-05-01T00:00:00+00:00",
+    "holdout_consumed": false,
+    "restricted_price_rows_parsed": 0,
+    "gaps": 0,
+    "duplicates": 0,
+    "aggregation": {
+      "source_minutes": 15,
+      "minutes": 30,
+      "rows": 75761,
+      "discarded_partial_edge_groups": 0,
+      "internal_incomplete_groups": 0
+    }
+  }
+}
