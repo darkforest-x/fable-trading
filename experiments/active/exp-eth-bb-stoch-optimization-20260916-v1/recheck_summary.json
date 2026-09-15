@@ -1,0 +1,268 @@
+{
+  "bb200_m2_sl3": {
+    "params": {
+      "bb_length": 200,
+      "bb_mult": 2.0,
+      "stop_fraction": 0.03,
+      "stoch_length": 5,
+      "k_smooth": 3,
+      "d_smooth": 3,
+      "oversold": 20.0
+    },
+    "modes": {
+      "tv": {
+        "stats": {
+          "total_entries": 39,
+          "natural": 38,
+          "censored": 1,
+          "wins": 15,
+          "losses": 23,
+          "win_rate": 0.39473684210526316,
+          "gross_r": -5.001144135109279,
+          "net_r": -7.537086316239121,
+          "mean_net_r": -0.19834437674313476,
+          "profit_factor": 0.6043893349998039,
+          "avg_win_r": 0.7676460704963767,
+          "avg_loss_r": -0.8283381466819467,
+          "max_realized_drawdown_r": 13.73378511552799,
+          "max_realized_drawdown_usdt": 895.5643275999989,
+          "max_loss_streak": 5,
+          "gross_pnl": -355.98019999999894,
+          "fees": 164.3236626,
+          "net_pnl": -520.303862599999,
+          "partial": 21,
+          "reasons": {
+            "opposite_signal_close": 11,
+            "initial_stop": 17,
+            "break_even_marketable": 4,
+            "break_even": 6
+          },
+          "mean_hold_hours": 21.467105263157897,
+          "boundary_mark_net_r": 1.4021599023590556,
+          "boundary_mark_net_pnl": 100.75234000000017,
+          "ambiguous_bar_count": 5,
+          "entries_open_beyond_target": 0,
+          "same_open_be_approximations": 0,
+          "marketable_be_approximations": 4,
+          "cash_profit_factor": 0.5820175503902641,
+          "month_natural_counts": {
+            "2026-03": 20,
+            "2026-04": 18
+          }
+        },
+        "equity": {
+          "net_liquidation_mark_usdt": -420.6798926000047,
+          "gross_mark_usdt": -251.67020000000775,
+          "close_mtm_drawdown_usdt": 921.3224281999865,
+          "close_mtm_drawdown_percent": 0.9181600709842204,
+          "ending_equity": 99579.3201074
+        },
+        "control": {
+          "paired_n": 34,
+          "unpaired_n": 5,
+          "drawn": 195,
+          "censored": 4,
+          "paired_actual_mean_bp": -67.32608147803553,
+          "random_mean_bp": -60.915437343719624,
+          "excess_mean_bp": -6.4106441343159135,
+          "month_blocks": 2,
+          "p": 0.75,
+          "all_boundary_mark_excess_bp": 5.911791992697476
+        }
+      },
+      "adverse_first": {
+        "stats": {
+          "total_entries": 39,
+          "natural": 38,
+          "censored": 1,
+          "wins": 15,
+          "losses": 23,
+          "win_rate": 0.39473684210526316,
+          "gross_r": -5.001144135109279,
+          "net_r": -7.537086316239121,
+          "mean_net_r": -0.19834437674313476,
+          "profit_factor": 0.6043893349998039,
+          "avg_win_r": 0.7676460704963767,
+          "avg_loss_r": -0.8283381466819467,
+          "max_realized_drawdown_r": 13.73378511552799,
+          "max_realized_drawdown_usdt": 895.5643275999989,
+          "max_loss_streak": 5,
+          "gross_pnl": -355.98019999999894,
+          "fees": 164.3236626,
+          "net_pnl": -520.303862599999,
+          "partial": 21,
+          "reasons": {
+            "opposite_signal_close": 11,
+            "initial_stop": 17,
+            "break_even_marketable": 4,
+            "break_even": 6
+          },
+          "mean_hold_hours": 21.467105263157897,
+          "boundary_mark_net_r": 1.4021599023590556,
+          "boundary_mark_net_pnl": 100.75234000000017,
+          "ambiguous_bar_count": 5,
+          "entries_open_beyond_target": 0,
+          "same_open_be_approximations": 0,
+          "marketable_be_approximations": 4,
+          "cash_profit_factor": 0.5820175503902641,
+          "month_natural_counts": {
+            "2026-03": 20,
+            "2026-04": 18
+          }
+        },
+        "equity": {
+          "net_liquidation_mark_usdt": -420.6798926000047,
+          "gross_mark_usdt": -251.67020000000775,
+          "close_mtm_drawdown_usdt": 921.3224281999865,
+          "close_mtm_drawdown_percent": 0.9181600709842204,
+          "ending_equity": 99579.3201074
+        },
+        "control": {
+          "paired_n": 34,
+          "unpaired_n": 5,
+          "drawn": 195,
+          "censored": 4,
+          "paired_actual_mean_bp": -67.32608147803553,
+          "random_mean_bp": -60.915437343719624,
+          "excess_mean_bp": -6.4106441343159135,
+          "month_blocks": 2,
+          "p": 0.75,
+          "all_boundary_mark_excess_bp": 5.911791992697476
+        }
+      }
+    },
+    "signal_count": 58
+  },
+  "bb200_m2.5_sl0.75": {
+    "params": {
+      "bb_length": 200,
+      "bb_mult": 2.5,
+      "stop_fraction": 0.0075,
+      "stoch_length": 5,
+      "k_smooth": 3,
+      "d_smooth": 3,
+      "oversold": 20.0
+    },
+    "modes": {
+      "tv": {
+        "stats": {
+          "total_entries": 39,
+          "natural": 38,
+          "censored": 1,
+          "wins": 4,
+          "losses": 34,
+          "win_rate": 0.10526315789473684,
+          "gross_r": -11.251760046204739,
+          "net_r": -21.39733909438782,
+          "mean_net_r": -0.5630878709049426,
+          "profit_factor": 0.503203903018578,
+          "avg_win_r": 5.418331893069705,
+          "avg_loss_r": -1.2667843137254895,
+          "max_realized_drawdown_r": 34.97332895543441,
+          "max_realized_drawdown_usdt": 577.8695552749996,
+          "max_loss_streak": 22,
+          "gross_pnl": -211.7790249999997,
+          "fees": 164.68720527500003,
+          "net_pnl": -376.46623027499965,
+          "partial": 4,
+          "reasons": {
+            "opposite_signal_close": 3,
+            "initial_stop": 34,
+            "break_even": 1
+          },
+          "mean_hold_hours": 7.304824561403511,
+          "boundary_mark_net_r": 5.951059006250087,
+          "boundary_mark_net_pnl": 106.90348500000016,
+          "ambiguous_bar_count": 0,
+          "entries_open_beyond_target": 0,
+          "same_open_be_approximations": 0,
+          "marketable_be_approximations": 0,
+          "cash_profit_factor": 0.4641652528123665,
+          "month_natural_counts": {
+            "2026-03": 22,
+            "2026-04": 16
+          }
+        },
+        "equity": {
+          "net_liquidation_mark_usdt": -270.6911152750108,
+          "gross_mark_usdt": -101.32402500000899,
+          "close_mtm_drawdown_usdt": 591.5452817499754,
+          "close_mtm_drawdown_percent": 0.5903255803073859,
+          "ending_equity": 99729.30888472499
+        },
+        "control": {
+          "paired_n": 35,
+          "unpaired_n": 4,
+          "drawn": 195,
+          "censored": 3,
+          "paired_actual_mean_bp": -37.702155202259576,
+          "random_mean_bp": -29.773704326699214,
+          "excess_mean_bp": -7.928450875560371,
+          "month_blocks": 2,
+          "p": 1.0,
+          "all_boundary_mark_excess_bp": -1.5707894677754655
+        }
+      },
+      "adverse_first": {
+        "stats": {
+          "total_entries": 39,
+          "natural": 38,
+          "censored": 1,
+          "wins": 4,
+          "losses": 34,
+          "win_rate": 0.10526315789473684,
+          "gross_r": -11.251760046204739,
+          "net_r": -21.39733909438782,
+          "mean_net_r": -0.5630878709049426,
+          "profit_factor": 0.503203903018578,
+          "avg_win_r": 5.418331893069705,
+          "avg_loss_r": -1.2667843137254895,
+          "max_realized_drawdown_r": 34.97332895543441,
+          "max_realized_drawdown_usdt": 577.8695552749996,
+          "max_loss_streak": 22,
+          "gross_pnl": -211.7790249999997,
+          "fees": 164.68720527500003,
+          "net_pnl": -376.46623027499965,
+          "partial": 4,
+          "reasons": {
+            "opposite_signal_close": 3,
+            "initial_stop": 34,
+            "break_even": 1
+          },
+          "mean_hold_hours": 7.304824561403511,
+          "boundary_mark_net_r": 5.951059006250087,
+          "boundary_mark_net_pnl": 106.90348500000016,
+          "ambiguous_bar_count": 0,
+          "entries_open_beyond_target": 0,
+          "same_open_be_approximations": 0,
+          "marketable_be_approximations": 0,
+          "cash_profit_factor": 0.4641652528123665,
+          "month_natural_counts": {
+            "2026-03": 22,
+            "2026-04": 16
+          }
+        },
+        "equity": {
+          "net_liquidation_mark_usdt": -270.6911152750108,
+          "gross_mark_usdt": -101.32402500000899,
+          "close_mtm_drawdown_usdt": 591.5452817499754,
+          "close_mtm_drawdown_percent": 0.5903255803073859,
+          "ending_equity": 99729.30888472499
+        },
+        "control": {
+          "paired_n": 35,
+          "unpaired_n": 4,
+          "drawn": 195,
+          "censored": 3,
+          "paired_actual_mean_bp": -37.702155202259576,
+          "random_mean_bp": -30.307877591814357,
+          "excess_mean_bp": -7.394277610445228,
+          "month_blocks": 2,
+          "p": 1.0,
+          "all_boundary_mark_excess_bp": -1.0914032042105937
+        }
+      }
+    },
+    "signal_count": 41
+  }
+}

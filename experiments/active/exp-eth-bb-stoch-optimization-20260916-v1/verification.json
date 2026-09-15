@@ -1,0 +1,25 @@
+{
+  "focused_tests": {
+    "command": ".venv/bin/python -m pytest tests/evaluation/test_bb_stoch_parameter_replay.py tests/evaluation/test_bb_stoch_optimization.py tests/evaluation/test_bb_stoch_replay.py -q",
+    "passed": 33
+  },
+  "scoped_repository_gates": {
+    "command": ".venv/bin/python -m pytest tests/evaluation/test_bb_stoch_optimization.py tests/boundaries/test_layer_imports.py tests/boundaries/test_yoyo_package_is_local.py tests/boundaries/test_no_cross_repository_bridges.py tests/causality/test_holdout_boundary_is_single_valued.py tests/boundaries/test_experiment_isolation.py -q",
+    "passed": 110,
+    "seconds": 173.43
+  },
+  "report_only_revision": "cd410719ef",
+  "notion": "https://app.notion.com/p/3dc8856479af81eeb53cf76cbe4f5756",
+  "no_new_price_reads_after_recheck": true,
+  "full_repository_suite": "Not rerun this turn. Prior unrelated registry/migration failures remain outside this task.",
+  "browser_visual_check": {
+    "passed": true,
+    "surfaces": [
+      "answer-first HTML",
+      "compact comparison table with all columns visible",
+      "both chronological equity plots"
+    ],
+    "app": "Chrome native UI",
+    "report_only_revision": "cd410719ef"
+  }
+}

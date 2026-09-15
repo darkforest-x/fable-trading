@@ -1,0 +1,28 @@
+{
+  "experiment_id": "exp-eth-bb-stoch-optimization-20260916-v1",
+  "primary": "bb200_m2.5_sl0.75",
+  "peak": "bb200_m2.5_sl0.75",
+  "parameters": {
+    "bb200_m2_sl3": {
+      "bb_length": 200,
+      "bb_mult": 2.0,
+      "stop_fraction": 0.03,
+      "stoch_length": 5,
+      "k_smooth": 3,
+      "d_smooth": 3,
+      "oversold": 20.0
+    },
+    "bb200_m2.5_sl0.75": {
+      "bb_length": 200,
+      "bb_mult": 2.5,
+      "stop_fraction": 0.0075,
+      "stoch_length": 5,
+      "k_smooth": 3,
+      "d_smooth": 3,
+      "oversold": 20.0
+    }
+  },
+  "stoch_unchanged": true,
+  "production_eligible": false,
+  "note": "Frozen from development only; original Pine defaults were not overwritten."
+}
