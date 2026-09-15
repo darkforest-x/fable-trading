@@ -54,7 +54,9 @@ def test_grid_selector_uses_cash_neighborhood_and_trade_floor():
     assert opt.select_candidates(worse, cfg)['peak'] == 'bb300_m2_sl3'
 
 
-def test_freeze_failure_prevents_price_read(monkeypatch):
+def test_freeze_failure_prevents_price_read(monkeypatch, tmp_path):
+    (tmp_path/'config.json').write_text((opt.EXP/'config.json').read_text())
+    monkeypatch.setattr(opt, 'EXP', tmp_path)
     called = []
     def reject(*args):
         raise ValueError('Uncommitted selection')
