@@ -1,0 +1,71 @@
+{
+  "key": "1m_1785450600000",
+  "timeframe": "1m",
+  "decision_at": "2026-07-30 22:30:00+00:00",
+  "model_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+  "device": "mps",
+  "input_files": {
+    "experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/results/model_inputs/1m_1785450600000_w18.png": "2dbb372deaf9b1188055653f92f45662ad710e782e21afab8f576ca423723b9e",
+    "experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/results/model_inputs/1m_1785450600000_w19.png": "f182e0ae43ab9afaf64b7a7b35142a0aaa8ff7227ec692c68335c35c4d9b4ace"
+  },
+  "inputs": [
+    {
+      "path": "experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/results/model_inputs/1m_1785450600000_w18.png",
+      "pixel_sha256": "6a1cfda2f459791ed8d03064c2e5f0249303d1c9a24fdc25e51ac4fd46eeeb84",
+      "window_start_ms": 1785449520000,
+      "window_end_ms": 1785450540000,
+      "last_close_ms": 1785450600000,
+      "decision_ms": 1785450600000,
+      "length": 18
+    },
+    {
+      "path": "experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/results/model_inputs/1m_1785450600000_w19.png",
+      "pixel_sha256": "856f88008396d290729a8112ba770a59380b30a844d357fa6d18605ee3661b2c",
+      "window_start_ms": 1785449460000,
+      "window_end_ms": 1785450540000,
+      "last_close_ms": 1785450600000,
+      "decision_ms": 1785450600000,
+      "length": 19
+    }
+  ],
+  "proposals": [
+    {
+      "model_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+      "confidence": 0.5576721429824829,
+      "detection_id": "yolo_55ef7e36eaefe93af1cf30f8",
+      "input_pixel_sha256": "6a1cfda2f459791ed8d03064c2e5f0249303d1c9a24fdc25e51ac4fd46eeeb84",
+      "window_len": 18,
+      "window_start_ms": 1785449520000,
+      "window_end_ms": 1785450540000,
+      "core_start_ms": 1785450120000,
+      "core_end_ms": 1785450300000,
+      "core_length_bars": 4,
+      "post_bars": 4,
+      "side": "long",
+      "structural_pass": true,
+      "prediction_cx_norm": 0.6719247102737427,
+      "prediction_cy_norm": 0.5127092003822327,
+      "prediction_w_norm": 0.21590633690357208,
+      "prediction_h_norm": 0.055268075317144394
+    },
+    {
+      "model_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+      "confidence": 0.2900668978691101,
+      "detection_id": "yolo_ea4167ab9b4c17f3d1c3682f",
+      "input_pixel_sha256": "856f88008396d290729a8112ba770a59380b30a844d357fa6d18605ee3661b2c",
+      "window_len": 19,
+      "window_start_ms": 1785449460000,
+      "window_end_ms": 1785450540000,
+      "core_start_ms": 1785450120000,
+      "core_end_ms": 1785450360000,
+      "core_length_bars": 5,
+      "post_bars": 3,
+      "side": "long",
+      "structural_pass": true,
+      "prediction_cx_norm": 0.7169160842895508,
+      "prediction_cy_norm": 0.50957852602005,
+      "prediction_w_norm": 0.25767746567726135,
+      "prediction_h_norm": 0.06030372157692909
+    }
+  ]
+}

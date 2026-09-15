@@ -1,5 +1,11 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
+## 最新：ETH V9 全周期开仓时 YOLO 检测已完成（2026-09-15）
+
+北京时间7/15 00:00—9/15 12:00，OKX ETH-USDT-SWAP；3m/5m/15m/30m/1H/4H/UTC日线及各自小级别。当前close1280权重、原V9退出与0.2%成本固定。205准入信号、162实际开仓；同级检出6、小级别10、均检出2。1H三笔只有亏损−0.76R的单检出，+18.16R赢家未检出；完整1H从+16.19R降至−0.76R。14项Holm无显著，稀疏样本不支持直接硬过滤，不能据此反向选择未检出。
+本精确配置holdout第1次；旧V9/权重消费保留，非盲OOS。814输入数组SHA与开仓时钟、646份RGB预览、全部逐笔固定退出核验通过；27专项测试通过，旧监控fixture20失败如实记录。无训练、阈值修改、monitor/ACTIVE或真金变更。
+HTML：analysis/html/p1_spike_eth_v9_yolo_entry_20260915.html；逐笔图册：experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/results/gallery.html；manifest：experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/delivery_manifest.json；Notion：https://app.notion.com/p/3dc8856479af819b9b56d592c23a0105。状态inconclusive（关系样本不足），交付complete，production_eligible=false。
+
 ## 最新：V9 三条币种成绩排除，跨期检查全部恶化（2026-09-15）
 
 Owner指定胜率≤10%、平均净R<−0.36、PF(R)<0.5，分别对已有全量30m/1H/4H账本做统计。V9事后排除26/118/107币，净+2758.17R→+2908.45/+4637.89/+4391.25R；前一年定名单后，后一年却由−2089.19R→−2228.28/−2314.03/−2254.94R，错过9/39/42笔原净10R。ETH早期会被后两门排除，后期净+116.23R，说明不能用同窗输家名单冒充前瞻效果。

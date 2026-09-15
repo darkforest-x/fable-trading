@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-eth-v9-yolo-entry-20260915-delivery
+    artifact_type: manifest
+    role: entry_time_same_and_lower_timeframe_yolo_association
+    source_repo: darkforest-x/fable-trading
+    source_commit: 65a8041adc62884a45b62195f50b433819c4b3dd
+    source_path: experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/delivery_manifest.json
+    sha256: d045db01298180733e10a29c4ca3ae773fbfd0aae787862cdc6da85d3a1a0ac7
+    size_bytes: 6013
+    storage_uri: repo://experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/delivery_manifest.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: 205 admitted signals;162 original trades;407 inference requests;814 input arrays authenticated. Same hits6;lower10;both2. All14 Holm tests nonsignificant;1H lower gate loses original18.16R winner. Historical exposed data;not blind OOS.
   - artifact_id: spike-v9-asset-exclusions-20260915-delivery
     artifact_type: manifest
     role: static_asset_exclusion_posthoc_and_temporal_diagnostics

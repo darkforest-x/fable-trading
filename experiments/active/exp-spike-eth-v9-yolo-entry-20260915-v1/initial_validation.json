@@ -1,0 +1,16 @@
+{
+  "builder_commit": "8e9da01943",
+  "local_test_command": "PYTHONPATH=/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages python3 -m pytest tests/data/test_spike_eth_yolo_sources.py tests/evaluation/test_spike_eth_yolo_entry.py -q",
+  "local_tests_passed": 20,
+  "broader_tests_passed": 239,
+  "broader_tests_failed": 20,
+  "broader_failure": "All20 in unchanged tests/monitor/test_yolo_detector.py share chart_rows fixture calling signals.analyze without its now-required tick. This fixture is not used by the new research runner; dedicated pixel parity/core/post/future checks passed. No legacy fixture altered.",
+  "runtime": {
+    "interpreter": "/usr/bin/python3 via CommandLineTools Python3.9.6",
+    "venv_site_packages": "/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages",
+    "broken_entry": "old .venv/bin/python3 points to removed /Applications/Xcode.app path",
+    "versions_unchanged": true
+  },
+  "no_training": true,
+  "no_live_mutation": true
+}

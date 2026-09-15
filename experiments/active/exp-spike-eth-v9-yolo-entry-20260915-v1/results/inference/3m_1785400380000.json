@@ -1,0 +1,52 @@
+{
+  "key": "3m_1785400380000",
+  "timeframe": "3m",
+  "decision_at": "2026-07-30 08:33:00+00:00",
+  "model_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+  "device": "mps",
+  "input_files": {
+    "experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/results/model_inputs/3m_1785400380000_w18.png": "5179384526b6a82d42b48bc7d532c8d5a9018591ab61b9d4db4d9f730c5d96a6",
+    "experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/results/model_inputs/3m_1785400380000_w19.png": "bbe4b230ec3505f0179b92d4decc38e85ee4cf84bcd9007cec1903686a495f8a"
+  },
+  "inputs": [
+    {
+      "path": "experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/results/model_inputs/3m_1785400380000_w18.png",
+      "pixel_sha256": "0a242fc1684a7fb0b7877aa0f0d42d03bf1068134a2926157bccc7048fd66fbf",
+      "window_start_ms": 1785397140000,
+      "window_end_ms": 1785400200000,
+      "last_close_ms": 1785400380000,
+      "decision_ms": 1785400380000,
+      "length": 18
+    },
+    {
+      "path": "experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/results/model_inputs/3m_1785400380000_w19.png",
+      "pixel_sha256": "334f629851d00f3e4332660346b2453dc482df9ba18c53f02128692e745995a3",
+      "window_start_ms": 1785396960000,
+      "window_end_ms": 1785400200000,
+      "last_close_ms": 1785400380000,
+      "decision_ms": 1785400380000,
+      "length": 19
+    }
+  ],
+  "proposals": [
+    {
+      "model_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+      "confidence": 0.2619864344596863,
+      "detection_id": "yolo_bd0818d885de690d3cda6d1f",
+      "input_pixel_sha256": "0a242fc1684a7fb0b7877aa0f0d42d03bf1068134a2926157bccc7048fd66fbf",
+      "window_len": 18,
+      "window_start_ms": 1785397140000,
+      "window_end_ms": 1785400200000,
+      "core_start_ms": 1785398940000,
+      "core_end_ms": 1785399660000,
+      "core_length_bars": 5,
+      "post_bars": 3,
+      "side": "long",
+      "structural_pass": true,
+      "prediction_cx_norm": 0.7255441546440125,
+      "prediction_cy_norm": 0.5212594866752625,
+      "prediction_w_norm": 0.22190017998218536,
+      "prediction_h_norm": 0.05416927859187126
+    }
+  ]
+}

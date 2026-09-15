@@ -1,0 +1,74 @@
+{
+  "complete": true,
+  "source": "frozen ETH V9 entry-time YOLO generated ledgers only",
+  "input_files": {
+    "trades.csv": {
+      "path": "experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/results/trades.csv",
+      "sha256": "8d8b8a368ee6f3f5f914798e368a3eb2416928e349e33afe9b9910423266d9c9"
+    },
+    "controls.csv": {
+      "path": "experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/results/controls.csv",
+      "sha256": "b8ea914deae36645e584e85f875d9c68bd317db6c20328542d2a79c6a07e7a20"
+    },
+    "signals_detected.csv": {
+      "path": "experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/results/signals_detected.csv",
+      "sha256": "76c5dda790a5eab5da090a9baacb895b82911c91192e8f2e5d873ea9ddf0d9ce"
+    }
+  },
+  "output_files": {
+    "summary.csv": {
+      "path": "experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/results/summary.csv",
+      "sha256": "c0881d76d532462cec29637c3ae5adda8bb64c1cf2718463e5d3e091a7814ae6"
+    },
+    "descriptives.csv": {
+      "path": "experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/results/descriptives.csv",
+      "sha256": "11fc2032b749be5cafe224ee2ff0479c82bccf35959a899db58dffa38cb743aa"
+    },
+    "association.csv": {
+      "path": "experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/results/association.csv",
+      "sha256": "3966668e63233f447aa0c5d36ed14beb44716a9335e092545e796c439d14c13e"
+    },
+    "ranking.csv": {
+      "path": "experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/results/ranking.csv",
+      "sha256": "9ff13bfc26f123885d9311a1b8191b228eb7a1da555917d10f91c994c39eef88"
+    },
+    "diagnostics.csv": {
+      "path": "experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/results/diagnostics.csv",
+      "sha256": "427fcf9ea8189d5dd4e2bbd1244a965451e7bc611eb7087fa723fb00c434745e"
+    },
+    "attribution.csv": {
+      "path": "experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/results/attribution.csv",
+      "sha256": "d701d574b66f42c14f97770f8e490d610b185f7d48b15a2cac8d91c031bf5973"
+    },
+    "coverage.csv": {
+      "path": "experiments/active/exp-spike-eth-v9-yolo-entry-20260915-v1/results/coverage.csv",
+      "sha256": "fffcdd76524e6eaccfacb4469ea0257752918e6be1f34f2f81bd96befd70e766"
+    }
+  },
+  "configuration": {
+    "statistics_timeframes": [
+      "3m",
+      "5m",
+      "15m",
+      "30m",
+      "1H",
+      "4H",
+      "1Dutc"
+    ],
+    "split_utc": "2026-08-14T16:00:00+00:00",
+    "statistics_seed": 915152,
+    "bootstrap_draws": 2000,
+    "permutations": 9999,
+    "holm_family_size": 14
+  },
+  "row_counts": {
+    "summary.csv": 70,
+    "descriptives.csv": 28,
+    "association.csv": 14,
+    "ranking.csv": 21,
+    "diagnostics.csv": 168,
+    "attribution.csv": 28,
+    "coverage.csv": 7
+  },
+  "interpretation": "descriptive association and ranking diagnostics; no threshold/model selection or causal claim"
+}
