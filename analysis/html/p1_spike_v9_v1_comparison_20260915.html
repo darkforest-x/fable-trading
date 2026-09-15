@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>SPIKE V9 与 V1：已有全量结果对读</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>SPIKE V9 与 V1：已有全量结果对读</h1>
+<p>日期：2026-09-15。范围为 Binance / OKX / Gate 现有冻结历史池，30m、1H、4H，UTC <code>[2024-09-10, 2026-09-10)</code>；不含 ETH 3m / 5m。此次仅引用已经发布的汇总，不重放行情、不新增配置或 holdout 评分。V9 尚未加入按币种胜率、平均净 R、PF 的黑名单。</p>
+<p><strong>V9 累计净 R 与实现净 10R 的笔数更多；两种 V1 的平均净 R 和 PF(R) 更高。但原版 V1 的利润由 RAVE 极少数交易支撑，V9 后一年整体亏损，现有结果不足以认定哪一个具有稳定盈利优势。</strong></p>
+<h2>为什么列两种 V1</h2>
+<p>原版 V1 沿用自身的信号收盘保护位及原生保护退出，仅做多。统一退出 V1 使用同一组 6,185 条 V1 冻结入口，换用通用风控：下一开盘入场、5 bar 结构止损加 0.2 ATR 缓冲、至少 2 ATR 初始风险、收盘达到 2R 后启用 4 ATR 跟踪、原始反向信号下一开盘退出。之前币种排名报告使用的是统一退出 V1。</p>
+<p>V9 沿用通用风控，入场来自 V8 多空规则，再加底层 USDC、量比大于 50、UTC 周日过滤。因此同日历和同成本并不意味着单变量对照：原生 V1 与 V9 的初始 R、出场、方向、信号集合均有差异；统一退出 V1 与 V9 仍有方向及入场规则差异。全部结果固定扣除名义往返 0.2% 成本，均未启用此次讨论过的 MFE / BE 改动。</p>
+<h2>完整两年</h2>
+<table><thead><tr>
+<th>指标</th>
+<th>原版 V1（只做多）</th>
+<th>V1 统一退出（只做多）</th>
+<th>V9（多空）</th>
+</tr></thead><tbody>
+<tr><td>已平仓笔数</td><td>6,116</td><td>6,138</td><td>81,854</td></tr>
+<tr><td>未结束笔数</td><td>69</td><td>47</td><td>428</td></tr>
+<tr><td>累计净 R</td><td>+854.70</td><td>+1,060.98</td><td>+2,758.17</td></tr>
+<tr><td>平均净 R / 笔</td><td>+0.1397</td><td>+0.1729</td><td>+0.0337</td></tr>
+<tr><td>净胜率</td><td>28.14%</td><td>29.05%</td><td>30.88%</td></tr>
+<tr><td>PF(R)</td><td>1.184</td><td>1.259</td><td>1.050</td></tr>
+<tr><td>PF(名义收益)</td><td>1.026</td><td>1.089</td><td>1.049</td></tr>
+<tr><td>实现净 R ≥ 10 的笔数</td><td>53</td><td>51</td><td>462</td></tr>
+</tbody></table>
+<p>净胜率指已平仓净 R &gt; 0；PF(R) 为正净 R 之和除以负净 R 绝对值之和。未结束样本不计已实现收益；净 10R 不是 MFE 触达 10R。V9 交易数远多于 V1，累计 R 不能单独衡量交易效率，也不能换算为账户收益率。</p>
+<h2>后一年：2025-09-10 起入场</h2>
+<table><thead><tr>
+<th>系统</th>
+<th>已平仓</th>
+<th>累计净 R</th>
+<th>平均净 R</th>
+<th>PF(R)</th>
+</tr></thead><tbody>
+<tr><td>原版 V1（只做多）</td><td>4,448</td><td>+1,128.79</td><td>+0.2538</td><td>1.341</td></tr>
+<tr><td>V1 统一退出（只做多）</td><td>4,470</td><td>+1,243.18</td><td>+0.2781</td><td>1.423</td></tr>
+<tr><td>V9（多空）</td><td>50,021</td><td>-2,089.19</td><td>-0.0418</td><td>0.940</td></tr>
+</tbody></table>
+<p>这不是盲样本外验证。跨切点交易仍保留在完整两年结果中，不能用完整表减后一年表冒充严格的前一年闭合交易结果。</p>
+<h2>全期按周期的净 R</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>原版 V1（只做多）</th>
+<th>V1 统一退出（只做多）</th>
+<th>V9（多空）</th>
+</tr></thead><tbody>
+<tr><td>30m</td><td>-41.39</td><td>+50.58</td><td>+1,223.70</td></tr>
+<tr><td>1H</td><td>+943.03</td><td>+1,054.32</td><td>+620.27</td></tr>
+<tr><td>4H</td><td>-46.95</td><td>-43.91</td><td>+914.19</td></tr>
+</tbody></table>
+<p>V1 的净 R 主要集中在 1H；V9 三周期全期净 R 都为正，但其后一年 30m 为 −2,757.97R，1H 为 +355.94R，4H 为 +312.84R。不能把事后选择正收益周期视为已验证的优化。</p>
+<h2>集中度与可比性</h2>
+<p>原版 V1 的 RAVE 仅 7 笔，就贡献 +1,193.73R；剔除这 7 笔，其余 6,109 笔合计 −339.03R。统一退出 V1 中 RAVE 同样贡献 +1,193.67R，其余资产 −132.69R。因此 V1 高平均 R 与高 PF 必须连同极端赢家集中度一起解读。此处是事后分解，不是可执行的选币规则。</p>
+<p>V9 去掉最大单笔赢家后仍 +2,623.52R，但这只是单笔集中度诊断，不等价于 V1 的“剔除整个 RAVE 资产”，也不能消除 V9 后一年亏损的事实。</p>
+<h2>对照与风险与诚实声明</h2>
+<p>V9 已有匹配随机入场证据：全期 81,703 个共同平仓配对，策略均值 +0.03414R、随机 −0.02867R、超额 +0.06281R，月块单侧 p=0.01699；后一年 49,874 配对，策略 −0.04121R、随机 −0.06001R、超额 +0.01880R，95% 区间 [−0.02119,+0.05411]，p=0.19240。两项均未达到项目 p&lt;0.01 门槛。没有把该随机组套到原版 V1：原版保护退出和初始 R 不同，本次未取得同契约随机入场对照，所以不宣称两版本的 alpha 孰优。</p>
+<p>本次是既有策略汇总的描述性对读，没有训练分类器或排序模型；val AUC、top-decile 毛/净收益、单特征分类基线不适用。上面已有随机入场检验按原报告引用，未重算或补造 V1 对照。</p>
+<p>事件累计 R 不是账户曲线，未统一资金、并发仓位、复利、资金费率或成交容量。固定 0.2% 成本无法证明极端交易的实际成交能力。V1 与 V9 均保留研究未确定状态；本次不修改策略、TradingView 或生产配置。</p>
+<h2>复核与来源</h2>
+<p>数值从以下已发布 CSV 的明确行读取，核对 events = closed + censored、mean_r × closed = total_r。原始行情与逐笔路径未重评。</p>
+<ul>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-v8-be05-20260914-v1/delivery_v1/metrics.csv">V1 原生与统一退出汇总</a>：<code>rule=baseline</code>；原生 <code>system=v1_native,mode=fixed</code>，统一退出 <code>system=v1_common,mode=serial</code>。</li>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v9-full-backtest-20260915-v1/statistics/full_v1/summary.csv">V9 汇总</a>：<code>arm=v9,group=all</code>。</li>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v9-full-backtest-20260915-v1/statistics/full_v1/by_timeframe.csv">V9 分周期</a>。</li>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-v8-be05-20260914-v1/native_v1/rave_concentration.csv">原生 V1 的 RAVE 分解</a>：<code>arm=baseline</code>。</li>
+<li><a href="/Users/zhangzc/fable-trading/analysis/html/p1_spike_v1_v8_asset_ranking_20260914.html">V1 原有排名报告</a>。</li>
+<li><a href="/Users/zhangzc/fable-trading/analysis/html/p1_spike_v9_full_backtest_20260915.html">V9 原有全量报告</a>。</li>
+</ul>
+<p>本报告 HTML 重建命令（在仓库根目录，输入为以上已发布实验产物）：</p>
+<pre><code>
+python3 scripts/md_to_html.py analysis/p1_spike_v9_v1_comparison_20260915.md --out-dir analysis/html
+</code></pre>
+<p>如需下一步严格检验 V1/V9 的信号质量，应先固定方向、入场风险、出场、可交易资产与评估区间，再对共同协议重放；读取新增 holdout 或修改风控须获得相应授权。当前对读并未开展这项新实验。</p>
+</body>
+</html>
