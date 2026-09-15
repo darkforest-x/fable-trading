@@ -70,6 +70,25 @@ def test_unclosed_last_trade_is_censored():
     assert len(trades)==1 and trades.iloc[0].censored
 
 
+def test_random_control_month_uses_entry_clock(monkeypatch):
+    from types import SimpleNamespace
+    from yoyo.evaluation import spike_eth_yolo_entry as study
+    f=frame(4,60);f.index=pd.date_range('2026-08-31T22:00Z',periods=4,freq='h')
+    f['ready']=True
+    prep=SimpleNamespace(frame=f,context=SimpleNamespace(minutes=60),
+                         atr=np.ones(4),close=np.full(4,100.))
+    monkeypatch.setattr(study,'evaluate',lambda p,i,s:dict(censored=False,net_r=.5,
+        net_return=.01,exit_time=f.index[-1]))
+    target=pd.DataFrame([dict(signal_i=1,side=1,event_key='month_boundary',arm='v9',
+        stream='1H',fold='full',entry_time=pd.Timestamp('2026-09-01T00:00Z'),
+        censored=False,net_r=.5,net_return=.01)])
+    control=study.entry_month_controls(prep,target,pd.Timestamp('2026-08-31T00:00Z'),
+                                       pd.Timestamp('2026-09-02T00:00Z')).iloc[0]
+    assert control.month=='2026-09'
+    assert control.control_signal_i in (2,3)
+    assert control.matched
+
+
 def test_research_pixels_equal_monitor_original_adapter():
     data=add_mas(frame())
     rows=[]

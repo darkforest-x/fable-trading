@@ -22,7 +22,7 @@ import pandas as pd
 
 from yoyo.evaluation.spike_burst_replay import features
 from yoyo.evaluation.spike_v8_lowtf_study import v8_mask
-from yoyo.evaluation.spike_v9_eth_lowtf import admission, prepared_control, evaluate, controls
+from yoyo.evaluation.spike_v9_eth_lowtf import admission, prepared_control, evaluate
 from yoyo.evaluation.spike_v7_fast import simulate_v6_variant
 from yoyo.evaluation.spike_v6_wvf_study import ExecutionSpec, _data_gap
 from yoyo.layers.l1_detection.data import add_mas
@@ -131,6 +131,42 @@ def replay(context, mask, tick):
                                     variant='v9',data_gap=_data_gap(context['frame'],context['minutes']),
                                     spec=ExecutionSpec(tick=tick))
     return trades if len(trades) else pd.DataFrame(columns=TRADE_COLUMNS)
+
+
+def entry_month_controls(prepared, targets, start, end, *, seed=915151):
+    """Match random entry by its available entry month, side and ATR/close.
+
+    Port of the existing V9 control contract: same fixed one-draw hash and
+    bins, no replacement of failures. All pool features use signal-bar ATR
+    and close; month uses the scheduled next-open clock, including boundaries.
+    """
+    frame=prepared.frame;delta=pd.Timedelta(minutes=prepared.context.minutes)
+    vol=np.searchsorted((.005,.01,.02,.05,.1),prepared.atr/prepared.close,side='left')
+    month=(frame.index+delta).strftime('%Y-%m')
+    eligible=frame.ready.fillna(False).to_numpy(bool)&np.isfinite(prepared.atr)&(prepared.atr>0)&np.isfinite(prepared.close)&(prepared.close>0)
+    eligible&=(frame.index+delta>=start)&(frame.index+delta<end)
+    groups,cache,rows={},{},[]
+    for target in targets.itertuples(index=False):
+        i,side=int(target.signal_i),int(target.side);key=(month[i],int(vol[i]));event=target.event_key
+        if key not in groups: groups[key]=np.flatnonzero(eligible&(month==key[0])&(vol==key[1]))
+        if event not in cache:
+            choices=groups[key][groups[key]!=i]
+            if not len(choices): cache[event]=(None,None,'empty_stratum')
+            else:
+                value=int(hashlib.sha256(f'{seed}|{event}'.encode()).hexdigest(),16)
+                chosen=int(choices[value%len(choices)]);result=evaluate(prepared,chosen,side)
+                cache[event]=(chosen,result,'invalid_initial' if result is None else 'censored' if result['censored'] else 'matched')
+        chosen,result,reason=cache[event]
+        matched=result is not None and not bool(result['censored']) and not bool(target.censored)
+        rows.append(dict(event_key=event,arm=target.arm,stream=target.stream,fold=target.fold,
+             entry_time=target.entry_time,signal_i=i,side=side,matched=matched,
+             reason='target_censored' if target.censored else reason,target_net_r=target.net_r,
+             target_net_return=target.net_return,control_signal_i=chosen,
+             control_signal_time=None if chosen is None else frame.index[chosen],
+             control_net_r=np.nan if result is None or result['censored'] else result['net_r'],
+             control_net_return=np.nan if result is None or result['censored'] else result['net_return'],
+             control_exit_time=None if result is None else result['exit_time'],month=key[0],vol_bin=key[1]))
+    return pd.DataFrame(rows)
 
 
 def prepare():
@@ -279,7 +315,7 @@ def evaluate_trades(tick):
                         raise ValueError(f'fixed exit mismatch {tf} {arm} {row.event_key} {field}')
                 if row.exit_reason!=independent['exit_reason']: raise ValueError('fixed exit reason mismatch')
             if len(trades):
-                matches=controls(prep,trades,pd.Timestamp(cfg['start_utc']),pd.Timestamp(cfg['end_utc']),seed=cfg['control_seed'])
+                matches=entry_month_controls(prep,trades,pd.Timestamp(cfg['start_utc']),pd.Timestamp(cfg['end_utc']),seed=cfg['control_seed'])
                 matches['timeframe']=tf;all_controls.append(matches)
             all_trades.append(trades)
             audit.append(dict(timeframe=tf,arm=arm,signals=len(chosen),trades=len(trades),
