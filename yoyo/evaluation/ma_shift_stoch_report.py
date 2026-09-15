@@ -97,6 +97,14 @@ def main():
     trades['side']=trades.side.map({1:'做多',-1:'做空'})
     trades['gross_return']=trades.gross_return*100;trades['net_return']=trades.net_return*100
     trades.rename(columns={'trade_id':'序号','side':'方向','entry_signal_time':'入场信号收盘北京时间','entry_time':'入场北京时间','entry_price':'入场价','exit_signal_time':'退出信号收盘北京时间','exit_time':'退出北京时间','exit_price':'退出价','gross_return':'毛收益百分比','net_return':'净收益百分比'}).to_csv(out/'ma_stoch_trades_zh.csv',index=False,encoding='utf-8-sig')
+    validation_path=EXP/'validation.json'
+    if validation_path.exists():
+        v=json.loads(validation_path.read_text())
+        md += ['## 9. 验证记录\n',
+               '18项Stoch/多周期执行定向测试通过；独立只读核对全部306笔已平交易、份额成交、复投/期末权益和随机配对，未发现可复现的正确性缺陷。\n',
+               '项目边界/因果/parity检查：468通过、7失败。5项被已有TOTAL2资产缺source_commit阻断，另2项为已有candidates.py与render.py迁移哈希不一致，与本轮新引擎无关；未改写旧资产或绕过守门。详见实验gates.log。\n',
+               'HTML结构检查4表、1张内嵌图、所有本地链接存在；已目视检查独立权益图。内置浏览器URL安全策略拒绝本地file地址，因此未完成HTML浏览器像素验收，未绕过该限制。\n',
+               f'[独立核对]({EXP/"review.md"}) · [验证收据]({validation_path}) · [Spike Notion研究记录]({v["notion_url"]})\n']
     report=ROOT/'analysis/p1_ma_shift_stoch_eth_month_20260915.md';report.write_text('\n'.join(md))
     subprocess.run(['python3','scripts/md_to_html.py',str(report),'--out-dir','analysis/html'],cwd=ROOT,check=True)
     print(report)
