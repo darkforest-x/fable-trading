@@ -14,6 +14,25 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-ma-stoch-exit-optimization-20260915-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: c139acc181e4503adbb66a3e963aabb60ebaa493
+    status: rejected
+    question: Can wider barriers or alternative profit exits improve fixed15m MA color and5m Stoch entries in a bounded second exploration?
+    single_variable: 31 preregistered arms including3 old anchors,each one exit component versus specified reference;28 new candidates,one selected before
+      exposed-history recheck.
+    result: Selected6ATR stop/2R target/no opposite-arrow exit. Jan-Feb+7.88pct versus original-11.25pct;Mar-Apr-26.10pct versus-34.91pct,drawdown28.89pct
+      versus37.12pct. Relative improvement but per-trade recheck net worsens to-45.86bp;matched excess-22.93bp,p0.7811. Reject stable-profitability claim.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_ma_stoch_exit_optimization_v2_20260915.md
+    artifacts:
+    - ma-stoch-exit-optimization-20260915-v2-delivery
+    reuse_allowed: false
+    notes: Both periods previously exposed in v1;whole round exploratory,not blind validation. Dev35 and recheck60 closed;max dev single loss10.22pct,max
+      recheck9 consecutive stops.130 distinct relevant tests pass;5690 ledger audit passes. Earlier native OKX5m not found in bounded metadata search;no venue
+      substitution or holdout access.
   - experiment_id: exp-ma-stoch-exit-optimization-20260915-v1
     source_repo: darkforest-x/fable-trading
     source_commit: d949e02946182bc9875756e8914801f825256c0c
