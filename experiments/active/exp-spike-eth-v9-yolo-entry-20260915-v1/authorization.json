@@ -1,0 +1,13 @@
+{
+  "owner_request": "ethusdt.p 最近两个月的回测 开仓时 用yolo模型检测一下 看下都能检测出来吗 模型识别和v9指标的胜率关系如何 或者说 比如说开仓信号是1h的信号 用模型检测一下小级别15min?",
+  "owner_scope_reply": "所有V9周期＋各自/小级别检测",
+  "default_model_disclosed": "current Spike close 1280; V9 original exit/cost",
+  "recorded_before_data_reads": true,
+  "authorization": "Explicit recent-two-month backtest and multi-timeframe YOLO inference; includes May4 holdout-era bars and necessary preceding indicator warmup. Research only. No training, tuning, live changes or orders.",
+  "holdout_consumption": {
+    "this_exact_paired_study": 1,
+    "each_timeframe_model_gate_configuration": 1,
+    "prior_exposures_preserved": true,
+    "not_blind_out_of_sample": true
+  }
+}
