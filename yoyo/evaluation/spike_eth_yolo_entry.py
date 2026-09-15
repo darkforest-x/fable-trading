@@ -143,6 +143,9 @@ def prepare():
         raise ValueError('preparation exists; do not overwrite frozen evidence')
     source = EXP/'sources'
     source_summary = json.loads((source/'summary.json').read_text())
+    for tf in cfg['timeframes']:
+        if sha(source/f'{tf}.csv') != source_summary['timeframes'][tf]['csv_sha256']:
+            raise ValueError('source CSV differs from acquisition receipt: '+tf)
     dump(out/'evaluation_started.json',dict(started_at=pd.Timestamp.now(tz='UTC'),
          source_identity=identity,source_summary_sha256=sha(source/'summary.json'),
          source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
@@ -247,6 +250,10 @@ def evaluate_trades(tick):
     frozen_code(dependencies())
     receipt=json.loads((out/'inference_complete.json').read_text())
     if sha(out/'signals_detected.csv')!=receipt['decisions_sha256']: raise ValueError('detections changed')
+    prepared_receipt=json.loads((out/'prepared.json').read_text())
+    if sha(out/'contexts.pkl')!=prepared_receipt['contexts_sha256']: raise ValueError('context changed')
+    for name,digest in receipt['cache_files'].items():
+        if sha(out/'inference'/name)!=digest: raise ValueError('prediction cache changed')
     with (out/'contexts.pkl').open('rb') as f: saved=pickle.load(f)
     signals=pd.read_csv(out/'signals_detected.csv',parse_dates=['entry_time','signal_bar_open'])
     all_trades=[]; all_controls=[]; audit=[]
@@ -279,7 +286,9 @@ def evaluate_trades(tick):
                               fixed_exit_parity=True,censored=int(trades.censored.sum()) if len(trades) else 0))
             print(json.dumps(audit[-1]),flush=True)
     pd.concat(all_trades,ignore_index=True).to_csv(out/'trades.csv',index=False)
-    pd.concat(all_controls,ignore_index=True).to_csv(out/'controls.csv',index=False)
+    (pd.concat(all_controls,ignore_index=True) if all_controls else
+     pd.DataFrame(columns=['event_key','arm','timeframe','matched','target_net_r','control_net_r',
+                           'target_net_return','control_net_return'])).to_csv(out/'controls.csv',index=False)
     dump(out/'replay_validation.json',dict(arms=audit,tick=tick,
          trades_sha256=sha(out/'trades.csv'),controls_sha256=sha(out/'controls.csv')))
 
