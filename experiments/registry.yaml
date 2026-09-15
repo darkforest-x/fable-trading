@@ -14,6 +14,23 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-ma-stoch-exit-optimization-20260915-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: d949e02946182bc9875756e8914801f825256c0c
+    status: rejected
+    question: Can exit protection improve frozen15m MA color and5m Stoch arrow entries after20bp costs?
+    single_variable: Sixteen preregistered dev policies:change one exit component versus baseline or fixed2ATR anchor;frozen validation onlybaseline/stop_2.
+    result: All16 development arms lose;baseline selected(-11.25pct). Validation baseline-34.91pct versus2ATR-36.34pct;worst trade loss6.59pct to1.30pct but
+      drawdown37.12pct to36.46pct. Matched excess-7.37/-8.19bp,p0.7375/0.9061;reject profitable exit improvement.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_ma_stoch_exit_optimization_20260915.md
+    artifacts:
+    - ma-stoch-exit-optimization-20260915-delivery
+    reuse_allowed: false
+    notes: Jan-Feb2026 development,Mar-Apr validation;selection committed before validation;no new recent-month evaluation.120 relevant tests pass;3601 closed-trade
+      ledger audit passes;no independently verified delegate review;not production.
   - experiment_id: exp-ma-shift-stoch-eth-month-20260915-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 6864e834895fc38b39cc737ad22c3483fdb708d6

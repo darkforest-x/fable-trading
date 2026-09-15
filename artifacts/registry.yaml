@@ -18,6 +18,20 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: ma-stoch-exit-optimization-20260915-delivery
+    artifact_type: manifest
+    role: preregistered_exit_protection_and_temporal_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: d949e02946182bc9875756e8914801f825256c0c
+    source_path: experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/delivery_manifest.json
+    sha256: f4943ff093553a20267b77d8a236b6a0d71b4160fad1661ff3066ca752bc2388
+    size_bytes: 27923
+    storage_uri: repo://experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Binds110 files including18 dense curves stored locally and git-ignored.18 dev/validation arm results,3601 closed trades,7288 fills,3599 matched
+      controls. All candidates net-negative;frozen selection preserved.
   - artifact_id: ma-shift-stoch-eth-month-20260915-delivery
     artifact_type: manifest
     role: causal_ma_color_filter_and_stoch_opposite_exit_monthly_research

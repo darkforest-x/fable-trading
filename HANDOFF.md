@@ -1,5 +1,20 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
+## 最新：MA Shift × Stoch退出优化已完成，未找到盈利改善（2026-09-15）
+
+保持15m已收盘颜色＋5m原Stoch箭头、1x权益名义、20bp成本。1—2月16组开发全部亏，
+baseline净−11.25%最少亏，选择bcbd8fdd3c提交后才评分3—4月验证；仅原规则和预设2ATR锚点。
+验证baseline156平＋1末仓，1000→650.89U（−34.91%），PF0.559，回撤37.12%；stop_2
+191平＋1末仓，636.56U（−36.34%），PF0.457，回撤36.46%。最差单笔净亏6.59%→1.30%，
+连亏9→12；风险尾部缩小不等于收益改善。随机净超额−7.37/−8.19bp，p0.7375/0.9061。
+原近月−17.04%结论仍保留；本轮不读近期价格调参，timestamp-first仅pre-May，holdout0。
+120相关测试通过；主代理核对3601笔平仓、7288条成交和3599对控制通过，无独立代理复核声明。
+全库上一轮468通过/7既有失败未重跑，未绕过。HTML4表1图及链接已检、权益图已目视，未做HTML浏览器像素QA。
+HTML：analysis/html/p1_ma_stoch_exit_optimization_20260915.html；实验：
+experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/；源引擎d949e02946。
+110文件manifest含18份仅本地保存、git忽略的稠密曲线；逐笔、控制和摘要入库。
+Notion：https://app.notion.com/p/3dc8856479af81078409ce4bbebaa155；状态rejected，不接生产。
+
 ## 最新：ETH近一月 MA Shift颜色 × Stoch反向退出已完成（2026-09-15）
 
 Owner当前TV为OKX ETHUSDT.P；15m SMA40/hl2染色限制5m翻身Stoch5/3/3超买超卖箭头准入。

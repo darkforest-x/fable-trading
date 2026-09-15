@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "focused_tests": 32,
+  "boundary_and_holdout_tests": 88,
+  "commands": [
+    ".venv/bin/python -m pytest -q tests/test_ma_stoch_exit_engine.py tests/test_ma_stoch_exit_study.py tests/test_ma_shift_stoch.py tests/test_spike_fanshen_exit.py",
+    ".venv/bin/python -m pytest -q tests/boundaries/test_layer_imports.py tests/causality/test_holdout_boundary_is_single_valued.py"
+  ],
+  "baseline_real_ledger_parity": {
+    "dev": 167,
+    "validation": 156
+  },
+  "broader_gates": "Not repeated. Prior monthly run:468 passed,7 existing failures;TOTAL2 source_commit5,migration hash2.",
+  "equity_plot_visual_check": "Main Codex viewed full equity/drawdown PNG; labels, dates, endpoints and legends readable.",
+  "html_browser_pixel_qa": false,
+  "html_browser_limitation": "Earlier browser file URL denied by URL policy; no alternative route attempted.",
+  "independent_agent_review": false,
+  "holdout_consumed": false,
+  "notion_url": "https://app.notion.com/p/3dc8856479af81078409ce4bbebaa155",
+  "html_structure": {
+    "tables": 4,
+    "images": 1,
+    "links": 10,
+    "missing_local_links": []
+  }
+}

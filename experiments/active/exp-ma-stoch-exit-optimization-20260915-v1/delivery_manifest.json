@@ -1,0 +1,671 @@
+{
+  "experiment_id": "exp-ma-stoch-exit-optimization-20260915-v1",
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "source_commit": "d949e02946182bc9875756e8914801f825256c0c",
+  "delivery_builder_commit": "be950ecd85057ffaf25416f25a768e13838e5486",
+  "dense_curves": "Local-only, ignored in git; reproducible from frozen code/config and original source prefix.",
+  "files": [
+    {
+      "path": "analysis/html/p1_ma_stoch_exit_optimization_20260915.html",
+      "sha256": "24bd0e51f2713461bb90068c267fea44361e27ab744abc18864f8d9a4f741482",
+      "size_bytes": 328035,
+      "storage": "repo"
+    },
+    {
+      "path": "analysis/p1_ma_stoch_exit_optimization_20260915.md",
+      "sha256": "2ef443368cf73e51c4e3eac0d78550a1a168b2cb94eaaa7291faeeeb023a23b4",
+      "size_bytes": 14578,
+      "storage": "repo"
+    },
+    {
+      "path": "docs/learnings/exit-protection-must-follow-the-bar-event-clock.md",
+      "sha256": "71a21092a96c96e6ce6b475aa89df5f4663c95ddd9f24585ad0088af15f7ccdf",
+      "size_bytes": 1277,
+      "storage": "repo"
+    },
+    {
+      "path": "docs/learnings/smaller-single-trade-loss-does-not-imply-smaller-drawdown.md",
+      "sha256": "f055aaad61c7f1f330d4d534591268151ebbf491ba875d822e405f27c3058515",
+      "size_bytes": 1339,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/.gitignore",
+      "sha256": "fb0c010b46d49ee8b4927d94971ef993d8ce134579240ae849f33582ed54015e",
+      "size_bytes": 121,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/PROJECT_PLAN.md",
+      "sha256": "369600b099156a1c9457539e1519d065d242a08cd59c6f120e7d15d8f891b12f",
+      "size_bytes": 5719,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/config.json",
+      "sha256": "84750cf75267a0cdc3d2886244be63ae4744c9e67eae7868bb89a4eb3734f073",
+      "size_bytes": 681,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/baseline_controls.csv",
+      "sha256": "fe04940a250f4f2c05e730da8199a6768e9b26f05d34b66c80c70d40c4656afa",
+      "size_bytes": 39469,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/baseline_curve.csv",
+      "sha256": "d79570bb1878780769ff8a49542369ede27d210eea40c9fa62f43f2ee5d634c0",
+      "size_bytes": 810836,
+      "storage": "local_only_rebuildable"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/baseline_fills.csv",
+      "sha256": "64ac84a60bf88dff0a040d42794bbec7f05d4f3a5e4f0b1d4f47cdcaf82d4195",
+      "size_bytes": 43042,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/baseline_open_positions.csv",
+      "sha256": "dd35e6d6aa7a814640e997b4521a0b4544b500c322796170992c12b32f9f568c",
+      "size_bytes": 190,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/baseline_trades.csv",
+      "sha256": "c44a54375b79587af6dbb3547cf84098737a297515365011e16af21b1c290a39",
+      "size_bytes": 35391,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/break_even_controls.csv",
+      "sha256": "8d67005756c56a07f95c35edfa1b3d6e982040d08a92c875fcc6c31a75ae5b2e",
+      "size_bytes": 47979,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/break_even_curve.csv",
+      "sha256": "0450b0ddb297b9db19b7ec13ed3f8fc6387bc803a11bbb538927719a2a284b21",
+      "size_bytes": 781489,
+      "storage": "local_only_rebuildable"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/break_even_fills.csv",
+      "sha256": "439cbb41bc0a574d2923b07de8024b85949a84c75163cf797058be5b48501fec",
+      "size_bytes": 51684,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/break_even_open_positions.csv",
+      "sha256": "30fec955f785c3774ef00345eef554f4dce775f0e061c74ddaad6664ccc8aac8",
+      "size_bytes": 190,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/break_even_trades.csv",
+      "sha256": "83148d03d9ba788b76ef07df9611c80844b90d91c90435ff30d1a228e84d3974",
+      "size_bytes": 54828,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/partial_1r_controls.csv",
+      "sha256": "797834b6f4a91bc029c9246eecc2933af75d63f9a63c9da91f6d266ca870f5bd",
+      "size_bytes": 45595,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/partial_1r_curve.csv",
+      "sha256": "1768201af3d112e0b590a55b894c32da3a384574a05552420a261d4e5738dca6",
+      "size_bytes": 784325,
+      "storage": "local_only_rebuildable"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/partial_1r_fills.csv",
+      "sha256": "4bfc343a64472ff64d50d8b7d2633df8c8ebf747ccd3fc857ba4c958055a7f71",
+      "size_bytes": 60064,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/partial_1r_open_positions.csv",
+      "sha256": "5f014b1a5712fb5ef68f6b85d13a3146823b04837142faed5ebf85d3ef206e7f",
+      "size_bytes": 190,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/partial_1r_trades.csv",
+      "sha256": "a34c1af10611e22feb5c01466d6375434c585a894d48543d1c9d00143e0aca90",
+      "size_bytes": 52440,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/reverse_kd_controls.csv",
+      "sha256": "5f20c8ff3df0d2ae192944bd6b390616a3e4b281ec4edeb1573d7c9e8ab6d462",
+      "size_bytes": 57481,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/reverse_kd_curve.csv",
+      "sha256": "d552928fbc31ae9df72ef3d4f1b9b073b060d3926fc945fe95186613afc50186",
+      "size_bytes": 767838,
+      "storage": "local_only_rebuildable"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/reverse_kd_fills.csv",
+      "sha256": "2405f6a6ab8cbee4fbe16ff1c9785d7683b2ece3c9e392c0ffa00e7d0e95bca7",
+      "size_bytes": 61445,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/reverse_kd_open_positions.csv",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "size_bytes": 1,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/reverse_kd_trades.csv",
+      "sha256": "0665fa3458c007283a182792822ed68bf6f115e8a168a7c84fb6a13bc28b59d6",
+      "size_bytes": 50934,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/reverse_ma_controls.csv",
+      "sha256": "0ba6e1710e12a47990a5ad2afe106780926e571234d653d142a380263bc45926",
+      "size_bytes": 42466,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/reverse_ma_curve.csv",
+      "sha256": "8095a34df0eac7c65971dddf2f875c3c6dedf918d27fd120fcc9a99f070b1929",
+      "size_bytes": 781646,
+      "storage": "local_only_rebuildable"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/reverse_ma_fills.csv",
+      "sha256": "97c9ab3dfa1911ade58d1c7670be5ac08fa7b0dd0c09283461cc6684f6695020",
+      "size_bytes": 45658,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/reverse_ma_open_positions.csv",
+      "sha256": "aa35e8427459e72ddd3f6934e1b972ae2744df8e5e24818e43224c7731160236",
+      "size_bytes": 190,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/reverse_ma_trades.csv",
+      "sha256": "5aff83a761fe9562f67964d393238cde62f86e328c2e90879ffaf68c66270bf1",
+      "size_bytes": 37803,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/stop_1_controls.csv",
+      "sha256": "ba482fda8889dfcde80629e17718602000fffea1d2b482f7c177c37d7f54be9f",
+      "size_bytes": 50210,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/stop_1_curve.csv",
+      "sha256": "c73f5ff9d1e79e2eff34bab218ddfc3b59a96e70c78fdded28e896ec4bf4cd44",
+      "size_bytes": 775501,
+      "storage": "local_only_rebuildable"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/stop_1_fills.csv",
+      "sha256": "84c1f75694bf0cf7edc7ad1966de374fb92ef8afe10c3fbf1ff6a4587665c063",
+      "size_bytes": 53886,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/stop_1_open_positions.csv",
+      "sha256": "11d0159d00814dd92efc14cafd21e7b441bd9be2f0181700c03561cffb55319e",
+      "size_bytes": 190,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/stop_1_trades.csv",
+      "sha256": "87a88bdf8760e5b9b583b313719a4a4734f9f271dbf2932204b8b5b850cccc74",
+      "size_bytes": 56241,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/stop_2_controls.csv",
+      "sha256": "d856aad6e48de8a077d1ff4ed4a555798e14cda4dd1c5f83eeefaf521c4027f8",
+      "size_bytes": 45811,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/stop_2_curve.csv",
+      "sha256": "c3634cb37ca46bfe18d621affd5c3c42db9f6f95c063655ecd910d22e60f80e5",
+      "size_bytes": 783531,
+      "storage": "local_only_rebuildable"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/stop_2_fills.csv",
+      "sha256": "06e1233fc58f35063657f68e8493bfa1b0f2b15d5334896f351f8846f8cf51a2",
+      "size_bytes": 49412,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/stop_2_open_positions.csv",
+      "sha256": "5f014b1a5712fb5ef68f6b85d13a3146823b04837142faed5ebf85d3ef206e7f",
+      "size_bytes": 190,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/stop_2_trades.csv",
+      "sha256": "7ff783bfe7ce4ab2f739096f7f04b87c800b9b16128f9d20cf8a325ba85d78b0",
+      "size_bytes": 51557,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/stop_3_controls.csv",
+      "sha256": "25898b24e1e8f4bf97c20394a235bd27360858e6a606b6d82fb8be37c947e01b",
+      "size_bytes": 41936,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/stop_3_curve.csv",
+      "sha256": "ba5e40a4257e361716132b4a2b9689cb80ca2abf45ae9ed07954844e02482824",
+      "size_bytes": 791073,
+      "storage": "local_only_rebuildable"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/stop_3_fills.csv",
+      "sha256": "3fbfea5d6b43aaad39a5997be560a9c4f27ba13a4a723236c40aec9b783aaa12",
+      "size_bytes": 45356,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/stop_3_open_positions.csv",
+      "sha256": "8db82c72bdd7206e9e7833dcd56e76fe58a602754488b452b863ea2aaf1fb72a",
+      "size_bytes": 190,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/stop_3_trades.csv",
+      "sha256": "8e6c9b87325c6d92fc414cebe9aa0d59aadf4f102956aee1e5ef162c4cb395d9",
+      "size_bytes": 47370,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/summary.json",
+      "sha256": "3ab3ec0c812f375cf809d9c4d90fa284c3155d848a56646646df841f8bf373ba",
+      "size_bytes": 47266,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/time_12_controls.csv",
+      "sha256": "956485ebac1f6f4fb6252f4dd51ddc1176a2ebe8abb53cc7fbcc6909943c47f4",
+      "size_bytes": 51482,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/time_12_curve.csv",
+      "sha256": "725b0652a8fc6c563cf21c0231b07b5da079e494f7a2658075371c24fd7cacb2",
+      "size_bytes": 773173,
+      "storage": "local_only_rebuildable"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/time_12_fills.csv",
+      "sha256": "d1a2713b86255eb8e26ac388951623d5d57d99d103179af1f7e28d3c978511f5",
+      "size_bytes": 54100,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/time_12_open_positions.csv",
+      "sha256": "830465b0912082fb6ecfa3912252c6a9949afcd5f68e2523bf1a7f57c67fa371",
+      "size_bytes": 190,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/time_12_trades.csv",
+      "sha256": "27e150c963dc49e9f29847871986d10e8f01f497504c954bc75907448b436f21",
+      "size_bytes": 43897,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/time_24_controls.csv",
+      "sha256": "53781176bbf949c9007d063ec4c1257053fdb4ef8eb0cfc93851305549d7e651",
+      "size_bytes": 47502,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/time_24_curve.csv",
+      "sha256": "ef6feadcfba825b49296490583c6969dfa98945d02b299451d2d616cb9c5770a",
+      "size_bytes": 782136,
+      "storage": "local_only_rebuildable"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/time_24_fills.csv",
+      "sha256": "2c9a7e7fc078a8ea8b44d14b04a187f1156036d8fa6a061150b44d84cb87879d",
+      "size_bytes": 50352,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/time_24_open_positions.csv",
+      "sha256": "0935999b17402bcd86f28129319278ba279c54c2ffb5cfd8c0bc5a1948b6b757",
+      "size_bytes": 190,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/time_24_trades.csv",
+      "sha256": "011598bedf3a2f53c7665d8d34f317670d23e189d43909a94270e6f585a11a5d",
+      "size_bytes": 40941,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/time_6_controls.csv",
+      "sha256": "fdc4c939b502d0135f0901f7b985f6c548fa6656709b3b009f5d631533bdc0e5",
+      "size_bytes": 54052,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/time_6_curve.csv",
+      "sha256": "4f9eee19709f27e1af445824123c0c91a1a5e3eea7ea7e911d9ad1cac850d52c",
+      "size_bytes": 767740,
+      "storage": "local_only_rebuildable"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/time_6_fills.csv",
+      "sha256": "b616d9fad32c9b0ee573b3d14341215c0acd0eccd6d9b2477503fb2d4de73018",
+      "size_bytes": 56481,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/time_6_open_positions.csv",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "size_bytes": 1,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/time_6_trades.csv",
+      "sha256": "e62f895390aec0ec06a7bb57c309022f2db1f30bc26a4ded64ab4fd18d24008a",
+      "size_bytes": 45673,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/tp_1_controls.csv",
+      "sha256": "ca76677193204bc932a2e11e170ab6854cee61e648e01eb827fb41bb3fa17d60",
+      "size_bytes": 51998,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/tp_1_curve.csv",
+      "sha256": "7c67334693777a241538f997270139870f891abb6aef648e8b25fe21cf0f8d28",
+      "size_bytes": 775947,
+      "storage": "local_only_rebuildable"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/tp_1_fills.csv",
+      "sha256": "40675d3f34d500003a71dacb55af7d7f6b58af7e8b1fda1cdeeaa90aa72508d6",
+      "size_bytes": 56059,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/tp_1_open_positions.csv",
+      "sha256": "8cb30290815deb4a986937eb6649bc3cb998135e6403a106c058bb91d75c1e06",
+      "size_bytes": 190,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/tp_1_trades.csv",
+      "sha256": "ecf17e734d5543bfe7716d462e3bfe2d69585d71263dea3460e26e2a59e70c77",
+      "size_bytes": 58024,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/tp_2_controls.csv",
+      "sha256": "d3c9911c7316d197dadd55b6137b9e2de49094af2072d14027469f870e6b058a",
+      "size_bytes": 49124,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/tp_2_curve.csv",
+      "sha256": "0d8c1adcc4e7c881b9f4be5c4df24df1d8ef4598636ba28f630a2cbebcfb3012",
+      "size_bytes": 780411,
+      "storage": "local_only_rebuildable"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/tp_2_fills.csv",
+      "sha256": "f2ab85aa19a5f74425fd3c8da8d1a94e08cf7de5e127fc392dbcb86688b3d0b4",
+      "size_bytes": 52949,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/tp_2_open_positions.csv",
+      "sha256": "34a05223602e0f86069d76d5918c2c51e2bd10a48163eae241c8b9095c6aa667",
+      "size_bytes": 190,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/tp_2_trades.csv",
+      "sha256": "98c76ccce96b75ed9a66e8c1f8af8f95add09eb7ebe861b58430fefe357c955e",
+      "size_bytes": 54812,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/tp_3_controls.csv",
+      "sha256": "227e91c3a1c1aa899376b5ba53867493a255779f0df6874232134205aeca5a11",
+      "size_bytes": 48168,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/tp_3_curve.csv",
+      "sha256": "6f0b701c6573012ccf7b218eb6497c001f7bb4021fbe32a62c0f878e2d8b4214",
+      "size_bytes": 781196,
+      "storage": "local_only_rebuildable"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/tp_3_fills.csv",
+      "sha256": "d897c41bf9370231cdfa4d4656591a75f16271d8a49031a7f56aaa9dc210cceb",
+      "size_bytes": 51952,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/tp_3_open_positions.csv",
+      "sha256": "bcbd6935ecb9d58266e120828832b2996793749dc504b08459333f4120034d11",
+      "size_bytes": 190,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/tp_3_trades.csv",
+      "sha256": "5aa7c370361f30f214caa149bbce8fd185ae4f3560bca900427a703bf14f25fa",
+      "size_bytes": 53792,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/trail_1_controls.csv",
+      "sha256": "a7f76ef705a94286286037787174794bdde0ab08c0c397fdd125db23184d33f8",
+      "size_bytes": 50294,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/trail_1_curve.csv",
+      "sha256": "c4d525956eb337746769f9a3d51a9a8f64db4f79f43fdb9e8fcf6867701b69ee",
+      "size_bytes": 778434,
+      "storage": "local_only_rebuildable"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/trail_1_fills.csv",
+      "sha256": "199ebb13864b042911bcae0738887e3beeb9689c09d37f21c30614108a7fe4c6",
+      "size_bytes": 54207,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/trail_1_open_positions.csv",
+      "sha256": "8cff4d88b856ed56fa9f01dab2e53b9d7f96f2ec3ab3e47ba585ab31e5ee9271",
+      "size_bytes": 190,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/trail_1_trades.csv",
+      "sha256": "b5eef57512bf465ea0ff28d1b46fce56ff4f09352bee98554a1eeafda053d713",
+      "size_bytes": 56770,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/trail_2_controls.csv",
+      "sha256": "07f7cfdbbb45c38a72bb8a5ddb3d50470f0b422aa6d33cfaaf4240fdb4ab1ddc",
+      "size_bytes": 50107,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/trail_2_curve.csv",
+      "sha256": "84b6ddfd23d49e0d6eee65c1fceb70a4af8ae7695585506478e54e81dce5dc49",
+      "size_bytes": 780482,
+      "storage": "local_only_rebuildable"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/trail_2_fills.csv",
+      "sha256": "35a7daa35f0eaef1b24e277c016e281ba606a54b914e6a5cb924a459163be93c",
+      "size_bytes": 53951,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/trail_2_open_positions.csv",
+      "sha256": "74f5aba053a42152515e5a024978c5aece887128e7ec89c664f361b208bc461f",
+      "size_bytes": 190,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/dev/trail_2_trades.csv",
+      "sha256": "1608b9dd98ecca129477a9937ca3c514525012468ad21ec4f90af04cbca629f9",
+      "size_bytes": 56509,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/equity.png",
+      "sha256": "b7f3f04ebb0ac92378a56ee49b47034966c374203f5b03a08c6f6806b37fd487",
+      "size_bytes": 229854,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/ledger_audit.json",
+      "sha256": "7707e350d7e05377d6f864d85c5eb19e737c54e6c75151000987aebd650ce87a",
+      "size_bytes": 588,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/selection.json",
+      "sha256": "a34ba2e367415111a92a5bf49b9573f9c727e87f8f7f22b16f0a4d8fadf96b22",
+      "size_bytes": 1651,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/validate/baseline_controls.csv",
+      "sha256": "ab94a6a599cca7156befd4f4cf43df4d12ed495c7a181c3e6feb856b10a3f19d",
+      "size_bytes": 37007,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/validate/baseline_curve.csv",
+      "sha256": "afb5822b9f58e641ad3a9cd76b91940ca3cd55d065831a397bac9da427c6e07f",
+      "size_bytes": 836826,
+      "storage": "local_only_rebuildable"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/validate/baseline_fills.csv",
+      "sha256": "b7ed381a353ef82abc3f773fd9e89325d3bb03d5b83df918e647f6d002a334c3",
+      "size_bytes": 40225,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/validate/baseline_open_positions.csv",
+      "sha256": "9179639bad9de3ad76a1636a7f6cb84244fef47971925d24c4037b91521e20a3",
+      "size_bytes": 191,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/validate/baseline_trades.csv",
+      "sha256": "88cf514e0dbb7833910880383d338d26a4434f6236037d8bfbc62060963f924b",
+      "size_bytes": 33274,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/validate/stop_2_controls.csv",
+      "sha256": "540b05138b96774d6146d683d8ccf43326e12e5aca5120841baee5f3fea3e05b",
+      "size_bytes": 45494,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/validate/stop_2_curve.csv",
+      "sha256": "23e3978c9fec9ad0ddd4efd95d4d476e977e933f5bb44bad6fec6bf6e3542a55",
+      "size_bytes": 814497,
+      "storage": "local_only_rebuildable"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/validate/stop_2_fills.csv",
+      "sha256": "e839ac306243243d7f62a95c053e841ecf45007f494115b992b25d20bf536869",
+      "size_bytes": 48892,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/validate/stop_2_open_positions.csv",
+      "sha256": "ca19e543fffffddb529e4b6274d96a7c750751f02fc2be758a3e11a9ffdc0abb",
+      "size_bytes": 191,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/validate/stop_2_trades.csv",
+      "sha256": "c885d66aa0d55e820f508f24561702ad6d5eb80c5d8792e17f677925f9cf46a9",
+      "size_bytes": 51237,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/validate/summary.json",
+      "sha256": "7c6298688d6b742ee1efdbf2194c8ba9652add499083f7c4db53935d17bf709a",
+      "size_bytes": 8696,
+      "storage": "repo"
+    },
+    {
+      "path": "experiments/active/exp-ma-stoch-exit-optimization-20260915-v1/validation.json",
+      "sha256": "581023cfd78e242ede18fbd8007e68f0817b3635e8d8f79f9c0e922ff34292ed",
+      "size_bytes": 1128,
+      "storage": "repo"
+    },
+    {
+      "path": "tests/test_ma_stoch_exit_engine.py",
+      "sha256": "a2d1de46edbf734aca274669640fcc52e982a8ea5e9a38974d86b1d410c4cb6f",
+      "size_bytes": 5458,
+      "storage": "repo"
+    },
+    {
+      "path": "tests/test_ma_stoch_exit_study.py",
+      "sha256": "8c8c82184d94939fd501ffd33098df64c64cd5677e94fddc97b98783ebd61213",
+      "size_bytes": 1702,
+      "storage": "repo"
+    },
+    {
+      "path": "yoyo/evaluation/ma_stoch_exit_audit.py",
+      "sha256": "d779012df9845657d0b81a3973b48263869dfe92e49ee6c3b279fab59fcf7111",
+      "size_bytes": 4691,
+      "storage": "repo"
+    },
+    {
+      "path": "yoyo/evaluation/ma_stoch_exit_delivery.py",
+      "sha256": "dacdf0d611ec2dcf7a680b5b359d7892ad6b5cc8cd15c8b2c8412b43f6a4357e",
+      "size_bytes": 4119,
+      "storage": "repo"
+    },
+    {
+      "path": "yoyo/evaluation/ma_stoch_exit_engine.py",
+      "sha256": "8916faa9f65c1ad0eb5ec87407d533fbc523f176f64a310520f4859dd73d717c",
+      "size_bytes": 11214,
+      "storage": "repo"
+    },
+    {
+      "path": "yoyo/evaluation/ma_stoch_exit_report.py",
+      "sha256": "d5c164d948ddd6666b2c85f102583ff8aaea012c600f57d329219292e6cf7e97",
+      "size_bytes": 14888,
+      "storage": "repo"
+    },
+    {
+      "path": "yoyo/evaluation/ma_stoch_exit_study.py",
+      "sha256": "1258815461d9125ec686bfa078c1b10e82402878408d71541cf3a0f70550ef19",
+      "size_bytes": 8135,
+      "storage": "repo"
+    }
+  ]
+}
