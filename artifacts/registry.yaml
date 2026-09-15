@@ -31121,3 +31121,17 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Native3m only,12groups and50770events audited;40raw output hashes plus report,HTML,Pine and validation documents. Negative frozen configuration;zero holdout,no live changes.
+
+  - artifact_id: eth-bb-stoch-backtest-20260916-delivery
+    artifact_type: manifest
+    role: frozen_bb_stoch_pre_only_economic_replay_with_matched_null
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2feef5767e7d21b536dead1dddeac4845c132f93
+    source_path: experiments/active/exp-eth-bb-stoch-backtest-20260916-v1/delivery_manifest.json
+    sha256: 6bda3ec62cfa9d1081c638143235f222d67653f3055ff9d46bdac40a10fb28ec
+    size_bytes: 7611
+    storage_uri: repo://experiments/active/exp-eth-bb-stoch-backtest-20260916-v1/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 75natural plus1censored,380controls per path,23focused checks pass;projectvenv45checks pass. Seven unrelated registry/migration failures remain. No live change.
