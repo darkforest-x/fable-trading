@@ -1,6 +1,6 @@
 """Independent Mac scan loop: public OHLCV -> Pine-equivalent events -> outbox.
 
-The V1 monitor scans 15m/30m/1H/4H. All four periods send
+The V9 monitor scans 15m/30m/1H/4H. All four periods send
 starts and extra confirmations via Bark from their own activation boundaries;
 Telegram is disabled. This is an indicator monitor, not an ACTIVE/model
 promotion, broker position tracker, execution path or backtest. Existing VPS
@@ -74,6 +74,8 @@ class Monitor:
 
     def start(self):
         # Called only after server lifespan owns the singleton process lock.
+        if self.store.get_meta("migration:spike-v9-reset-v1") is None:
+            raise RuntimeError("v9_explicit_reset_required")
         self.store.recover_outbox()
         self.store.retire_telegram_pending()
         self.store.retire_disabled_timeframes()
@@ -97,7 +99,7 @@ class Monitor:
 
     def run(self):
         """Launch the persistent isolated worker; never block FastAPI's GIL."""
-        from yoyo.monitor.v1_worker import scan_forever
+        from yoyo.monitor.v9_worker import scan_forever
         while not self.stop_event.is_set():
             if self.scan_process is None or not self.scan_process.is_alive():
                 generation = uuid.uuid4().hex
@@ -132,7 +134,7 @@ class Monitor:
     def deliver_bark(self):
         while not self.stop_event.is_set():
             if not self.notification_ready.is_set():
-                if self.store.get_meta("notification_policy:v1_bark_arm") is None:
+                if self.store.get_meta("notification_policy:v9_bark_arm") is None:
                     self.stop_event.wait(3)
                     continue
                 self.notification_ready.set()
@@ -202,7 +204,8 @@ class Monitor:
         LOG.info("scan complete: %s/%s pairs, %s errors, %.1fs", scan["completed"], scan["total"], scan["errors"], (end - start) / 1000)
 
     def scan_symbol(self, instrument):
-        from yoyo.monitor.signals import analyze
+        from yoyo.monitor.v9_signals import analyze
+        from yoyo.monitor.v9_worker import instrument_base
 
         symbol = instrument["instId"]
         errors, loaded, gaps = [], {}, {}
@@ -246,7 +249,7 @@ class Monitor:
                 if not stale:
                     self.model_gate.submit(symbol, timeframe, cached["candles"])
                 continue
-            result = analyze(lower, loaded[higher], timeframe, tick=float(instrument["tickSz"]))
+            result = analyze(lower, loaded[higher], timeframe, tick=float(instrument["tickSz"]), base_asset=instrument_base(instrument))
             state = dict(result["state"], symbol=symbol, timeframe=timeframe, active=True,
                          last_scan_ms=now, stale=stale, gap_count=gaps.get(timeframe, 0),
                          available_bars=len(lower), higher_bars=len(loaded[higher]),
@@ -322,13 +325,13 @@ class Monitor:
         try:
             # Reuse the scanner's exact full-seed validator.  A UI-sized chart
             # must never seed the frozen recurrence.
-            from yoyo.monitor.v1_worker import _valid_checkpoint
-            from yoyo.monitor.signals import WARMUP, analyze
+            from yoyo.monitor.v9_worker import _valid_checkpoint
+            from yoyo.monitor.v9_signals import WARMUP, analyze
             tick = float(stored.get("tick_size"))
             if (not _valid_checkpoint(seed, timeframe) or len(seed) < WARMUP
                     or not math.isfinite(tick) or tick <= 0):
                 raise ValueError("incomplete checkpoint")
-            rebuilt = analyze(seed, [], timeframe, tick=tick, chart_limit=240)
+            rebuilt = analyze(seed, [], timeframe, tick=tick, base_asset=stored.get("base_asset"), chart_limit=240)
         except (TypeError, ValueError):
             fallback_state.update(chart_features_complete=False,
                                   error=fallback_state.get("error") or "cached_chart_features_unavailable")
@@ -343,7 +346,7 @@ class Monitor:
                 "scan": {"status": "starting", "completed": 0, "total": 0, "errors": 0},
                 "universe": {"count": 0, "scope": "OKX all live SWAP"}, "counts": {},
                 "runtime": {"host": "This Mac", "notification_only": True,
-                            "signal_mode": "SPIKE V1 多空 15m/30m/1H/4H；多头 Bark 与 YOLO 追加确认，空头仅展示"},
+                            "signal_mode": "SPIKE V9 多空 15m/30m/1H/4H；Bark 启动与 YOLO 追加确认"},
                 "snapshot_at_ms": None, "stale": True}
 
     def _current_scan(self, scan):
@@ -356,8 +359,8 @@ class Monitor:
 
     def _collect_status(self):
         counts = self.store.market_phase_counts(MONITORED_TIMEFRAMES)
-        arm_receipt = self.store.get_meta("notification_policy:v1_bark_arm")
-        model_status = self.store.get_meta("v1:model_gate")
+        arm_receipt = self.store.get_meta("notification_policy:v9_bark_arm")
+        model_status = self.store.get_meta("v9:model_gate")
         if model_status is None:
             model_status = self.model_gate.status()
         return dict(service="spike Impulse Monitor", version=VERSION, protocol=PROTOCOL,
@@ -370,7 +373,7 @@ class Monitor:
                     "fresh_minutes": FRESH_MS // 60000, "interval_seconds": self.interval, "timeframes": list(MONITORED_TIMEFRAMES),
                     "clock_offset_ms": self.client.offset_ms, "public_requests": self.client.requests,
                     "candle_storage": "memory_only", "history_days": 7,
-                    "signal_mode": "SPIKE V1 多空 15m/30m/1H/4H；多头 Bark 与 YOLO 追加确认，空头仅展示", "signal_kind": MODEL_KIND,
+                    "signal_mode": "SPIKE V9 多空 15m/30m/1H/4H；Bark 启动与 YOLO 追加确认", "signal_kind": MODEL_KIND,
                     "notification_mode": "two_stage" if arm_receipt else "two_stage_disarmed", "direct_timeframes": list(DIRECT_TIMEFRAMES),
                     "notification_channels": ["bark"],
                     "bark_timeframes": list(BARK_TIMEFRAMES),
@@ -380,15 +383,14 @@ class Monitor:
                     "direct_timeframe_since_ms": {tf: self.store.timeframe_activation(tf, protocol=DIRECT_POLICY) for tf in DIRECT_TIMEFRAMES},
                     "model_gate": model_status,
                     "notification_armed": bool(arm_receipt),
-                    "tv_profile": {"id": TV_PROFILE_ID, "show_focus": True, "show_marks": False,
-                                   "focus_min_bars": 12, "focus_atr_band": .10, "verified_on": "2026-09-08",
-                                   "sync_mode": "observed_settings_snapshot"},
+                    "tv_profile": {"id": TV_PROFILE_ID, "direction": "both",
+                                   "sync_mode": "v9_source_contract", "chart_settings_verified": False},
                     "notification_since_ms": self.notification_since,
                     "bark_notification_since_ms": self.bark_since,
                     "timeframe_notification_since_ms": dict(self.timeframe_since),
-                    "higher_mode": "已确认高周期背景标注，不过滤启动",
+                    "higher_mode": "V9 本周期 V7 压缩、V8 距离与三条准入过滤",
                     "source_commit": self.source_commit, "startup_source_sha256": self.source_hashes,
-                    "warmup_bars": 340, "launch_agent": "com.fable.impulse-monitor"})
+                    "warmup_bars": 520, "launch_agent": "com.fable.impulse-monitor"})
 
     def refresh_status(self):
         """Replace the status cache after one complete, possibly slow DB read."""
@@ -421,7 +423,7 @@ class Monitor:
         """Return liveness without decoding charts, events, or receipt history."""
         now = self.client.clock()
         scan = self._current_scan(self.store.get_meta("scan", {"status": "starting", "completed": 0, "total": 0, "errors": 0}))
-        model = self.store.get_meta("v1:model_gate")
+        model = self.store.get_meta("v9:model_gate")
         if model is None:
             model = self.model_gate.status()
         last = scan.get("finished_at_ms")

@@ -13,8 +13,11 @@ import numpy as np
 import pandas as pd
 
 from yoyo.evaluation.spike_burst_replay import SOURCE_SHA256, features, replay
-from yoyo.monitor import (SHORT_SIGNAL_KIND, SHORT_SIGNAL_PROTOCOL, SIGNAL_KIND,
-                          SIGNAL_PROTOCOL, TIMEFRAMES, TV_SHORT_PROFILE_ID)
+from yoyo.monitor import (SHORT_SIGNAL_KIND, SHORT_SIGNAL_PROTOCOL, TIMEFRAMES, TV_SHORT_PROFILE_ID)
+
+# This offline V1 adapter must never inherit the active monitor's V9 identity.
+SIGNAL_PROTOCOL = "spike-burst-v1-monitor-v1"
+SIGNAL_KIND = "spike_burst_v1"
 from yoyo.monitor.v1_short_replay import replay_short
 
 WARMUP = 340

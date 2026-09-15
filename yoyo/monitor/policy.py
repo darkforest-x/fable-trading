@@ -1,4 +1,4 @@
-"""Validation for frozen SPIKE V1 raw signals and YOLO-extra records."""
+"""Validation for frozen SPIKE V9 raw signals and YOLO-extra records."""
 import math
 import re
 
@@ -13,10 +13,12 @@ def finite(value):
 
 
 def is_tv_start(event):
-    """Compatibility name: validate a closed, raw, long-only V1 signal."""
+    """Compatibility name: validate a closed, raw V9 signal in either direction."""
     return (event.get("protocol") == SIGNAL_PROTOCOL and event.get("kind") == SIGNAL_KIND
             and event.get("source") == "live" and event.get("confirmation") == "raw"
-            and event.get("direction") == "long" and event.get("side") == "long"
+            and event.get("strategy_version") == "spike-v9-entry-bundle-20260915-v1"
+            and event.get("v9_admitted") is True
+            and event.get("side") in ("long", "short") and event.get("direction") == event.get("side")
             and event.get("confirmed") is True and event.get("is_closed") is True
             and finite(event.get("price")) and event["price"] > 0
             and finite(event.get("risk")) and event["risk"] > 0)
@@ -47,7 +49,7 @@ def is_model_signal(event):
         return False
     if (event.get("protocol") != MODEL_PROTOCOL or event.get("kind") != MODEL_KIND
             or event.get("source") != "live" or event.get("confirmation") != "yolo"
-            or event.get("direction") != "long" or event.get("side") != "long"
+            or event.get("side") not in ("long", "short") or event.get("direction") != event.get("side")
             or model.get("status") != "confirmed" or model.get("protocol") != MODEL_PROTOCOL
             or model.get("side") != event.get("side")
             or not isinstance(model.get("detection_id"), str) or not model["detection_id"]

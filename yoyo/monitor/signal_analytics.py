@@ -88,16 +88,16 @@ def ledger(store, *, now, source="live", confirmation="raw", period="all", timef
         raise ValueError("unsupported ledger filter")
     cutoff = None
     if source != "replay":
-        receipt = store.get_meta("notification_policy:v1_bark_arm", {})
+        receipt = store.get_meta("notification_policy:v9_bark_arm", {})
         cutoff = receipt.get("activated_ms") if isinstance(receipt, dict) else None
         if type(cutoff) is not int or cutoff < 0:
-            raise RuntimeError("未找到 V1 首次启用时间，暂不混合展示实时与预热历史。")
+            raise RuntimeError("未找到 V9 首次启用时间，暂不混合展示实时与预热历史。")
     rows = store.list_events(source="replay" if source == "replay" else "live",
                              display_scope=None if source == "replay" else source,
                              display_cutoff_ms=cutoff, summary=True, complete=True)
     raw = {}
     for r in rows:
-        if (r.get("kind") == SIGNAL_KIND and r.get("protocol") in (SIGNAL_PROTOCOL, SHORT_SIGNAL_PROTOCOL)
+        if (r.get("kind") == SIGNAL_KIND and r.get("protocol") == SIGNAL_PROTOCOL
                 and r.get("confirmation") in ("raw", "raw_yolo")):
             # Old combined rows cannot create a second raw observation or
             # constitute a current-protocol YOLO proof by their name alone.

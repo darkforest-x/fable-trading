@@ -188,6 +188,18 @@ class Store:
 
     @staticmethod
     def _insert_event(db, e, notify, bark_notify, telegram_photo=None, photo_error=None):
+        reset = db.execute("SELECT payload FROM meta WHERE key='migration:spike-v9-reset-v1'").fetchone()
+        if reset is not None:
+            from yoyo.monitor.policy import is_model_signal, is_tv_start
+            if not (is_tv_start(e) or is_model_signal(e)):
+                return False
+            cutoff = json.loads(reset[0])["activated_ms"]
+            original = e.get("indicator", e) if e.get("kind") == MODEL_KIND else e
+            if (e.get("protocol") not in (SIGNAL_PROTOCOL, MODEL_PROTOCOL)
+                    or e.get("source") != "live"
+                    or type(original.get("bar_close_ms")) is not int
+                    or original["bar_close_ms"] <= cutoff):
+                return False
         cur = db.execute("INSERT OR IGNORE INTO events VALUES (?,?,?,?,?,?,?,?)", (
             e["id"], e["symbol"], e["timeframe"], e["kind"], e["side"],
             e["bar_close_ms"], e["detected_at_ms"], encode(e)))
@@ -208,6 +220,8 @@ class Store:
     def register_candidate(self, event, model):
         """Journal the immutable original arrow; registration never sends it."""
         self.upsert_event(event)
+        if not self.has_event(event):
+            return False
         with self.connect() as db:
             return db.execute("INSERT OR IGNORE INTO model_candidates VALUES (?,?,?,?,?,?)",
                               (self.event_id(event), event["symbol"], event["timeframe"],
@@ -375,7 +389,9 @@ class Store:
                     "executable_entry_time", "entry_reference", "risk", "initial_stop", "source_sha256",
                     "performance_status", "performance", "notification_status", "bark_notification_status",
                     "near_zero_bars", "dense", "htf_side", "ready", "phase", "stale", "error",
-                    "source_event_id", "display_only", "notification_eligible", "direction_profile")
+                    "source_event_id", "display_only", "notification_eligible", "direction_profile",
+                    "strategy_version", "v9_admitted", "base_asset", "volume_ratio", "rope_distance_atr",
+                    "reference_cost_r", "risk_basis")
             compact = {key: event[key] for key in keys if key in event}
             indicator = event.get("indicator")
             if isinstance(indicator, dict):
@@ -414,23 +430,18 @@ class Store:
         if scope not in ("live", "warmup") or type(cutoff_ms) is not int or cutoff_ms < 0:
             raise ValueError("invalid display boundary")
         origin = "CASE WHEN json_extract(e.payload,'$.confirmation')='yolo' THEN json_extract(e.payload,'$.indicator.bar_close_ms') ELSE e.close_ms END"
-        # 15m was enabled after the original V1 streams. NULL excludes an
-        # unarmed stream until the scanner saves its synchronized cutover.
-        boundary = ("CASE WHEN json_extract(e.payload,'$.protocol')='" + SHORT_SIGNAL_PROTOCOL + "' "
-                    "THEN (SELECT json_extract(payload,'$.activated_ms') FROM meta WHERE key='display_policy:spike-v1-short') "
-                    "WHEN e.timeframe='15m' THEN (SELECT json_extract(payload,'$.activated_ms') FROM meta WHERE key='display_policy:spike-v1:15m') ELSE ? END")
-        return (f"(json_extract(e.payload,'$.source')='live' AND ({origin}) {'>' if scope == 'live' else '<='} ({boundary}))", [cutoff_ms])
+        return (f"(json_extract(e.payload,'$.source')='live' AND ({origin}) {'>' if scope == 'live' else '<='} ?)", [cutoff_ms])
 
     def displayed_start_count(self, since=0):
         """Count current display streams, including muted 15m, excluding warmup."""
-        receipt = self.get_meta("notification_policy:v1_bark_arm", {})
+        receipt = self.get_meta("notification_policy:v9_bark_arm", {})
         cutoff = receipt.get("activated_ms") if isinstance(receipt, dict) else None
         if type(cutoff) is not int or cutoff < 0:
             return 0
         clause, args = self._display_filter("live", cutoff)
         with self.connect() as db:
-            return db.execute("SELECT COUNT(*) FROM events e WHERE e.kind=? AND json_extract(e.payload,'$.protocol') IN (?,?) AND e.close_ms>=? AND " + clause,
-                              [SIGNAL_KIND, SIGNAL_PROTOCOL, SHORT_SIGNAL_PROTOCOL, since] + args).fetchone()[0]
+            return db.execute("SELECT COUNT(*) FROM events e WHERE e.kind=? AND json_extract(e.payload,'$.protocol')=? AND e.close_ms>=? AND " + clause,
+                              [SIGNAL_KIND, SIGNAL_PROTOCOL, since] + args).fetchone()[0]
 
     def arm_display_timeframe(self, timeframe, activated_ms):
         """Persist a newly added display stream before its first cold scan.
@@ -774,3 +785,42 @@ class Store:
                     db.execute("DELETE FROM " + table + " WHERE " + column + " IN (" + marks + ")", removable)
                 db.execute("DELETE FROM events WHERE id IN (" + marks + ")", removable)
         return {"removed": len(removable), "deferred_without_canonical": deferred}
+
+    def reset_for_v9(self, activated_ms):
+        """Clear the owner's monitor history once, while the caller holds its service lock.
+
+        The caller must stop scanner/sender processes and take a private SQLite
+        backup first. Candle seeds are retained solely for indicator warmup;
+        the insertion fence prevents any pre-reset event from being restored.
+        Research files, the independent shadow book and execution logs are
+        outside this database and are never touched.
+        """
+        if type(activated_ms) is not int or activated_ms < 0:
+            raise ValueError("invalid V9 activation")
+        key = "migration:spike-v9-reset-v1"
+        with self.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            existing = db.execute("SELECT payload FROM meta WHERE key=?", (key,)).fetchone()
+            if existing:
+                return json.loads(existing[0])
+            counts = {}
+            for table in ("telegram_media", "outbox", "bark_outbox", "model_candidates",
+                          "events", "market_summaries", "markets"):
+                counts[table] = db.execute("SELECT COUNT(*) FROM " + table).fetchone()[0]
+                db.execute("DELETE FROM " + table)
+            db.execute("DELETE FROM meta WHERE key LIKE 'v1:%' OR key LIKE 'v1short:%' "
+                       "OR key IN ('scan','market_summary_backfill')")
+            for protocol in (DIRECT_POLICY, MODEL_PROTOCOL):
+                db.execute("INSERT OR REPLACE INTO meta VALUES (?,?)",
+                           ("notification_policy:bark:" + protocol,
+                            encode({"activated_ms": activated_ms})))
+                for timeframe in BARK_TIMEFRAMES:
+                    db.execute("INSERT OR REPLACE INTO meta VALUES (?,?)",
+                               ("notification_timeframe:" + protocol + ":" + timeframe,
+                                encode({"activated_ms": activated_ms})))
+            arm = {"activated_ms": activated_ms, "protocols": [DIRECT_POLICY, MODEL_PROTOCOL],
+                   "timeframes": list(BARK_TIMEFRAMES), "telegram": "disabled"}
+            db.execute("INSERT OR REPLACE INTO meta VALUES (?,?)", ("notification_policy:v9_bark_arm", encode(arm)))
+            receipt = dict(arm, removed=counts, signal_protocol=SIGNAL_PROTOCOL)
+            db.execute("INSERT INTO meta VALUES (?,?)", (key, encode(receipt)))
+            return receipt

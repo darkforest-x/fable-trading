@@ -21,7 +21,7 @@
     ashare: ["A股回测", "沪深主板近三年 · 固定 V1 / V8 · 日线与周线对照。"],
     system: ["运行状态", "行情、扫描与通知，每个环节都清晰可见。"],
   };
-  const eventNames = { tv_start: "原始 V1 启动", yolo_confirmed: "YOLO 补充确认" };
+  const eventNames = { tv_start: "V9 启动", yolo_confirmed: "YOLO 补充确认" };
   const modelStates = { pending: "等待确认", confirmed: "模型已通过", invalidated: "结构失效", expired: "等待已到期", error: "检测异常", disabled: "周期已关闭" };
   const TV_SETTINGS = "近零至少 12 根 · 0.1 ATR · 普通系统标记关闭";
   // Server cursor pages are intentionally smaller than its 2,000-row safety cap.
@@ -52,9 +52,9 @@
   const modelProtocol = () => state.status?.runtime?.signal_kind === "yolo_confirmed" && typeof state.status?.protocol === "string";
   const isConfirmed = (item) => item?.confirmation === "yolo" || item?.confirmation === "raw_yolo";
   const isCandidate = (item) => item?.confirmation === "raw" || item?.confirmation === "raw_yolo";
-  // The monitor's current raw event kind is SPIKE V1.  Keep tv_start only for
+  // The monitor's current raw event kind is SPIKE V9.  Keep tv_start only for
   // already-persisted legacy chart rows; it is not the current backend kind.
-  const isV1StartMarker = (event) => event?.kind === "spike_burst_v1" || event?.kind === "tv_start";
+  const isV1StartMarker = (event) => event?.kind === "spike_burst_v9" || event?.kind === "tv_start";
   const isDirectRecord = (item) => isCandidate(item) && TV_INTERVALS.has(String(item.timeframe));
   const signalView = (view = state.view) => view === "signals" || view === "warmup";
   const signalQuerySource = () => state.view === "warmup" ? "warmup" : state.signalSource;
@@ -103,7 +103,7 @@
     const muted = displayOnlyTimeframes(), bark = runtimeTimeframes("bark_timeframes");
     const mutedNote = muted.length ? `${muted.map(timeframeLabel).join(" / ")} ${DISPLAY_ONLY_NOTE}；` : "";
     const delivery = bark === null ? "Bark 通知周期尚未同步；以实际回执为准。" : !bark.length ? "当前所有周期的 Bark 推送均已关闭。" : twoStage() ? `${bark.map(timeframeLabel).join(" / ")} 收盘启动先推送 Bark，YOLO 通过后追加推送；历史箭头不补发。` : `${bark.map(timeframeLabel).join(" / ")} 仍按模型确认通知，分阶段通知规则尚未启用。`;
-    return mutedNote + delivery + " 空头已接入信号中心，当前仅展示。";
+    return mutedNote + delivery + " V9 多空均按同一规则推送。";
   };
   function candidateNotificationNote(item) {
     if (isDisplayOnly(item)) return DISPLAY_ONLY_NOTE;
@@ -332,9 +332,9 @@
   function performanceView(item) {
     const performance = signalPerformance(item);
     if (!performance || !["active", "profit", "loss", "breakeven"].includes(performance.status)) return {
-      className: "outcome-unknown", badge: "走势计算中", value: "—", valueLabel: "当前 R",
+      className: "outcome-unknown", badge: "仅入场参考", value: "—", valueLabel: "当前 R",
       peak: "—", stop: finite(originalSignal(item)?.initial_stop) ? price(originalSignal(item).initial_stop) : "—",
-      stopLabel: "初始 SL", note: "等待已收盘行情更新",
+      stopLabel: "初始 SL", note: "V9 暂不计算持仓路径 R",
     };
     const status = String(performance.status || "active");
     const outcomeR = status === "active" ? performance.current_r : performance.exit_r;
@@ -354,10 +354,10 @@
     const loaded = Boolean(data), total = data?.total || 0;
     const confirmed = state.signalScope === "confirmed", warmup = state.view === "warmup";
     $("filtered-count").textContent = loaded ? `${number(total)} 条` : "—";
-    $("signal-section-title").textContent = confirmed ? "YOLO 补充确认" : "原始 V1 启动 · 多空";
+    $("signal-section-title").textContent = confirmed ? "YOLO 补充确认" : "V9 启动 · 多空";
     $("signal-scope-note").textContent = confirmed
-      ? "统计回到原始启动的参考路径；YOLO 追加确认不会再算一笔。"
-      : "多空分开记录；R 是信号参考路径，未扣交易成本，不代表账户实际成交。";
+      ? "YOLO 追加确认关联原始 V9 启动，不重复计数。"
+      : "V9 多空过滤后启动；价格与止损为确认收盘参考，暂不计算持仓路径 R。";
     $("signal-window-note").textContent = loaded ? `全量 ${number(total)} 条 · 第 ${state.page + 1} 页` : "正在读取全量统计";
     $("load-more-signals").classList.toggle("hidden", !data?.has_more);
     $("load-more-signals").disabled = state.syncing;
@@ -402,18 +402,18 @@
     const side = item.side === "short" ? "short" : item.side === "long" ? "long" : "neutral";
     const venue = String(item.venue || "OKX").toUpperCase();
     const fresh = isFresh(item, now);
-    const status = confirmed ? "YOLO 补充确认" : "原始 V1 启动", caption = "信号收盘价";
+    const status = confirmed ? "YOLO 补充确认" : "V9 启动", caption = "信号收盘价";
     const outcome = performanceView(item);
     return `<article class="signal-card ${side} ${outcome.className}${confirmed || direct ? "" : " candidate-card"}${fresh ? " is-fresh" : ""}"><button type="button" class="card-primary-action" data-signal-id="${escapeHTML(item.id)}" data-signal-kind="${escapeHTML(item.kind)}" data-tradingview-action="signal" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击整张卡片，在本机 TradingView 打开" aria-label="${escapeHTML(`${venue} ${shortSymbol(item.symbol)} ${quoteSymbol(item.symbol)} ${timeframeLabel(item.timeframe)} ${sideName(item.side)}，${status}，${caption} ${price(item.price)}，${outcome.badge}，${shortDate(item.bar_close_ms)}，在本机 TradingView 打开`)}"></button>
       <span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>${escapeHTML(venue)} · ${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(timeframeLabel(item.timeframe))}</span></span>
       <span class="signal-card-direction"><span class="card-direction-group"><span class="card-direction"><span class="direction-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${side === "short" ? "m3 6 6 6 4-4 8 10M15 18h6v-6" : side === "long" ? "m3 18 6-6 4 4 8-10M15 6h6v6" : "M5 12h14"}"/></svg></span><span class="direction-name">${sideName(item.side)}</span></span><span class="direction-stage">${confirmed ? "确认" : "启动"}</span></span><span class="card-recency">${isWarmupRecord(item) ? "预热历史" : item.source === "replay" ? "历史回放" : fresh ? "新 · " + ageLabel(item.bar_close_ms) : ageLabel(item.bar_close_ms)}</span></span>
       <span class="model-card-status"><span class="model-badge ${confirmed ? "confirmed" : "pending"}">${escapeHTML(status)}</span><span>${isWarmupRecord(item) ? "预热回算 · 不通知" : item.source === "replay" ? "回放记录 · 不通知" : confirmed ? "补充确认 · 非启动门" : "第一阶段 · 已收盘"}</span></span>
       <span class="card-price-label">${caption}</span><span class="card-price">${escapeHTML(price(item.price))}</span>
-      ${confirmed && item.indicator ? `<span class="card-origin">原始 V1 ${escapeHTML(price(original.price))} · ${escapeHTML(shortDate(original.bar_close_ms))}</span>` : ""}
+      ${confirmed && item.indicator ? `<span class="card-origin">V9 ${escapeHTML(price(original.price))} · ${escapeHTML(shortDate(original.bar_close_ms))}</span>` : ""}
       <span class="performance-badge">${escapeHTML(outcome.badge)}</span>
       <dl class="card-performance"><div><dt>${escapeHTML(outcome.valueLabel)}</dt><dd>${escapeHTML(outcome.value)}</dd></div><div><dt>最高 R</dt><dd>${escapeHTML(outcome.peak)}</dd></div><div><dt>${escapeHTML(outcome.stopLabel)}</dt><dd>${escapeHTML(outcome.stop)}</dd></div></dl>
       <span class="performance-note">${escapeHTML(outcome.note)} · 信号收盘参考，并非账户实际成交</span>
-      <span class="card-context"><span>${item.side === "short" ? "TV 对照设置" : "信号 K 线"}</span><strong>${item.side === "short" ? "V1 · 方向＝空头" : item.is_closed ? "已确认" : "待确认"}</strong></span>
+      <span class="card-context"><span>${"信号 K 线"}</span><strong>${item.is_closed ? "V9 已确认" : "待确认"}</strong></span>
       <span class="card-confirmed"><span>${isWarmupRecord(item) ? "回算信号 · 仅供复盘" : item.executable_entry_time ? item.source === "replay" ? `回放执行时钟 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : `实际进场 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : item.entry_reference === "next_open" ? "次开盘参考 · 等待实际成交" : "仅信号收盘参考"}</span><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))}</time></span>
       <span class="card-footer"><span class="notification-stack">${item.source === "replay" ? `<span class="candidate-notice">历史回放不通知</span>` : notificationHTML(item)}</span><span class="card-open" data-tradingview-label="整卡打开 TradingView ↗" aria-hidden="true">整卡打开 TradingView ↗</span></span>
     </article>`;
@@ -619,7 +619,7 @@
     const gate = runtime.model_gate || {};
     const gateImpact = twoStage() ? `指标启动记录独立运行；仅 YOLO 追加确认需要模型通过。${notificationPolicy()}` : "模型确认通知暂不可用，候选保留等待。";
     const gateIdle = gate.status === "idle" && gate.loaded !== true && Number(gate.queue_depth || 0) === 0;
-    const gateNotice = !modelProtocol() ? "模型确认口径尚未同步，原始箭头不会显示为模型确认。" : gate.last_error ? `模型检测异常：${String(gate.last_error)}。${gateImpact}` : gate.status === "error" ? `部分候选检测异常，可在等待确认中查看。${gateImpact}` : gateIdle ? `YOLO 待命；当前没有合格原始 V1 候选，出现候选时才加载模型。${gateImpact}` : gate.loaded !== true ? `YOLO 模型正在加载；原始 V1 启动不受影响。${gateImpact}` : "";
+    const gateNotice = !modelProtocol() ? "模型确认口径尚未同步，原始箭头不会显示为模型确认。" : gate.last_error ? `模型检测异常：${String(gate.last_error)}。${gateImpact}` : gate.status === "error" ? `部分候选检测异常，可在等待确认中查看。${gateImpact}` : gateIdle ? `YOLO 待命；当前没有合格V9 候选，出现候选时才加载模型。${gateImpact}` : gate.loaded !== true ? `YOLO 模型正在加载；V9 启动不受影响。${gateImpact}` : "";
     $("model-gate-notice").textContent = gateNotice;
     $("model-gate-notice").classList.toggle("hidden", !gateNotice);
     runtimeFacts.push(["模型检测", gate.last_error ? "检测异常 · 暂无模型确认" : gate.loaded === true ? "已加载" : "等待加载"]);

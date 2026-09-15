@@ -137,7 +137,7 @@ test("unknown outcome remains unavailable rather than being reported as zero R",
   const view = client.performanceView(unknown);
   assert.equal(view.className, "outcome-unknown");
   assert.equal(view.value, "—");
-  assert.equal(view.badge, "走势计算中");
+  assert.equal(view.badge, "仅入场参考");
   assert.doesNotMatch(client.signalCardHTML(unknown), /0\.00R/);
 });
 

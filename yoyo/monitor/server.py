@@ -149,13 +149,13 @@ def create_app(runtime=None, start_monitor=True):
         display_scope = source if source in ("live", "warmup") else None
         display_cutoff_ms = None
         if display_scope:
-            # The one-time V1 arm receipt survives restarts and notification
+            # The one-time V9 arm receipt survives restarts and notification
             # setting changes. Migration timestamps can move on later cleanups.
-            receipt = store.get_meta("notification_policy:v1_bark_arm", {})
+            receipt = store.get_meta("notification_policy:v9_bark_arm", {})
             display_cutoff_ms = receipt.get("activated_ms") if isinstance(receipt, dict) else None
             if type(display_cutoff_ms) is not int or display_cutoff_ms < 0:
-                raise HTTPException(503, "未找到 V1 首次启用时间，暂不混合展示实时与预热历史。")
-        # The V1 UI filters by confirmation.  Infer its event kind when the
+                raise HTTPException(503, "未找到 V9 首次启用时间，暂不混合展示实时与预热历史。")
+        # The V9 UI filters by confirmation.  Infer its event kind when the
         # legacy `kind` parameter is omitted, rather than silently querying
         # only YOLO rows for `confirmation=raw`.
         if kind is None:
@@ -163,7 +163,7 @@ def create_app(runtime=None, start_monitor=True):
         if kind not in (None, MODEL_KIND, SIGNAL_KIND):
             raise HTTPException(400, "支持指标启动或 YOLO 确认信号。")
         direct = kind == SIGNAL_KIND
-        protocol = (SIGNAL_PROTOCOL, SHORT_SIGNAL_PROTOCOL) if kind == SIGNAL_KIND else MODEL_PROTOCOL if kind == MODEL_KIND else None
+        protocol = SIGNAL_PROTOCOL if kind == SIGNAL_KIND else MODEL_PROTOCOL if kind == MODEL_KIND else None
         if (before_close_ms is None) != (before_id is None):
             raise HTTPException(400, "cursor requires both close time and event id")
         event_timing = {} if DISPATCH_TRACE else None

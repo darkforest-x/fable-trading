@@ -77,17 +77,17 @@ def message(event):
     interval = TV_INTERVALS[event["timeframe"]]
     web_url = f"https://www.tradingview.com/chart/?symbol=OKX%3A{tv_symbol}&interval={interval}"
     if event["kind"] == SIGNAL_KIND:
-        subtitle = "指标启动 · 未经 YOLO 确认"
+        subtitle = "V9 启动 · 未经 YOLO 确认"
         body = f"收盘价 {event['price']:.10g} · {time(event['bar_close_ms'])} 北京时间"
     else:
         indicator, model = event["indicator"], event["model"]
-        subtitle = f"YOLO 确认 · 等待 {model['wait_bars']} 根"
+        subtitle = f"V9 · YOLO 确认 · 等待 {model['wait_bars']} 根"
         body = (f"确认 {event['price']:.10g} · {time(event['bar_close_ms'])}\n"
                 f"原箭头 {indicator['price']:.10g} · {time(indicator['bar_close_ms'])} 北京时间")
-    return {"title": f"{symbol} · {timeframe_label(event['timeframe'])} · {side}",
+    return {"title": f"V9 · {symbol} · {timeframe_label(event['timeframe'])} · {side}",
             "subtitle": subtitle,
             "body": body + f"\n\n网页备用：{web_url}",
-            "group": "spike IMACD", "level": "active", "isArchive": "1",
+            "group": "SPIKE V9", "level": "active", "isArchive": "1",
             # Bark's long-press Copy action uses this value. Ordinary taps
             # only open the URL; do not promise clipboard changes on iOS.
             "copy": f"OKX:{tv_symbol}",

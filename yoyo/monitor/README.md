@@ -1,5 +1,32 @@
 # Fable · Impulse Monitor
 
+## 当前运行：SPIKE V9（2026-09-15）
+
+Owner 已授权前端与 Bark 改为 V9，并删除此前信号。本次使用 V9 原始多空准入，
+保留 15m/30m/1H/4H 与两阶段 Bark，Telegram 关闭。算法依次使用 V6 结构、
+V7 布林压缩、V8 距六均线方向边界不超过 3ATR，再排除 USDC 底层资产、RV>50
+和 UTC 周日计划开仓。参数来自已冻结 V9，未调参。
+
+前端仅显示本次切点后的 V9 原始事件及其 YOLO 追加确认。价格、止损为确认收盘参考，
+暂不计算持仓路径 R。A股研究页和独立 V7/V8 影子账本保留原版本，不是当前通知来源。
+
+首次迁移流程（重跑 reset 幂等，不再删除新信号）：
+
+```bash
+.venv/bin/python -m yoyo.monitor.manage stop
+.venv/bin/python -m yoyo.monitor.v9_migration --apply
+.venv/bin/python -m yoyo.monitor.manage install
+```
+
+迁移取得服务独占锁，备份 `monitor.sqlite3` 到运行目录的私有 `backups/`，
+再在一个事务中清空事件、候选、通知队列、相关回执及展示缓存，保存新启用时间。
+纯行情预热缓存保留。数据库插入端拒绝旧协议、回放与原始收盘时间不晚于切点的事件，
+所以冷启动不能恢复已清除的信号。运行回执在 `v9-reset-receipt.json`。
+禁止在服务运行时手工删表；需要再次清空时应另建明确的 reset 操作，不改首次切点。
+
+以下旧版本细节仅供追溯，现行信号/通知身份以本节和 `__init__.py` 为准。
+
+
 Local, notification-only OKX all-live-perpetual monitoring, authorized by the
 owner on 2026-09-08. Active signal periods are **15m / 30m / 1H / 4H / daily**. This service
 has no exchange credentials or order endpoints.

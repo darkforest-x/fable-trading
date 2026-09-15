@@ -1,8 +1,8 @@
-"""Durable, causal SPIKE V1 -> YOLO-extra confirmation for notifications.
+"""Durable, causal SPIKE V9 -> YOLO-extra confirmation for notifications.
 
-The raw V1 signal remains authoritative.  YOLO reads only closed OHLCV and six
+The raw V9 signal remains authoritative.  YOLO reads only closed OHLCV and six
 close-source moving averages in its p..p+9 causal window, and may add a later
-record; it never invalidates, delays, recolors, or replaces the raw V1 event.
+record; it never invalidates, delays, recolors, or replaces the raw V9 event.
 """
 from __future__ import annotations
 
@@ -26,15 +26,15 @@ def pending_proof(event):
 
 
 def confirmation(event, proposal, candle, checked_at):
-    """Link a detector proposal to a V1 raw event at a closed endpoint."""
+    """Link a detector proposal to a V9 raw event at a closed endpoint."""
     if (proposal.get("structural_pass") is not True or proposal.get("side") != event["side"]
             or proposal.get("model_sha256") != MODEL_SHA256):
         return None
     step = TIMEFRAMES[event["timeframe"]]
     a, b = proposal["core_start_ms"], proposal["core_end_ms"]
-    # A detector core must begin no later than the V1 source bar.  This binds
+    # A detector core must begin no later than the V9 source bar.  This binds
     # the extra confirmation to the same causal launch window without making
-    # an IMACD/focus predicate part of the V1 signal definition.
+    # an IMACD/focus predicate part of the V9 signal definition.
     if a > event["bar_open_ms"] or b < a:
         return None
     proof = dict(proposal, status="confirmed", protocol=MODEL_PROTOCOL,
@@ -43,8 +43,8 @@ def confirmation(event, proposal, candle, checked_at):
                  confirmation_close_ms=candle["t"] + step, checked_at_ms=checked_at,
                  last_checked_close_ms=candle["t"] + step, reason=None)
     derived = dict(protocol=MODEL_PROTOCOL, kind=MODEL_KIND, source="live", confirmation="yolo",
-                   direction="long", venue=event.get("venue", "okx"), symbol=event["symbol"],
-                   timeframe=event["timeframe"], timeframe_min=event["timeframe_min"], side="long", price=candle["c"],
+                   direction=event["direction"], venue=event.get("venue", "okx"), symbol=event["symbol"],
+                   timeframe=event["timeframe"], timeframe_min=event["timeframe_min"], side=event["side"], price=candle["c"],
                    bar_open_ms=candle["t"], bar_close_ms=candle["t"] + step,
                    signal_close_time=candle["t"] + step, is_closed=True,
                    source_sha256=event["source_sha256"], entry_reference="next_open", executable_entry_time=None,
@@ -151,7 +151,7 @@ class ModelGate:
         for event in self.store.list_candidates(2000, symbol, timeframe, pending_only=True):
             proof, p = dict(event["model"]), event["bar_open_ms"]
             # A candidate persisted by an older worker must still prove that
-            # its raw V1 leg was post-cutover at the original close. Evaluate
+            # its raw V9 leg was post-cutover at the original close. Evaluate
             # at that close, not at ``now``: a legitimate pending 4H candidate
             # may wait beyond the 30-minute raw freshness window.
             raw_error = delivery_error(self.store, event, event["bar_close_ms"], "bark")

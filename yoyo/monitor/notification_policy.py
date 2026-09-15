@@ -13,14 +13,14 @@ from yoyo.monitor import (DIRECT_POLICY, DIRECT_TIMEFRAMES, FRESH_MS, MODEL_PROT
 from yoyo.monitor.policy import finite, is_model_signal, is_tv_start, is_v1_short_display_signal
 
 
-def arm_v1_bark(store, activated_ms):
-    """Create one forward-only V1 Bark cutover for raw and YOLO-extra stages.
+def arm_v9_bark(store, activated_ms):
+    """Create one forward-only V9 Bark cutover for raw and YOLO-extra stages.
 
     This is deliberately independent of Telegram and is idempotent.  The
     caller supplies the synchronized exchange clock before scanning a new bar;
     pre-cutover rows remain history and are never enqueued retrospectively.
     """
-    key = "notification_policy:v1_bark_arm"
+    key = "notification_policy:v9_bark_arm"
     existing = store.get_meta(key)
     # A later owner-authorized timeframe needs its own fresh boundary. Keep
     # the original arm receipt immutable: the history UI relies on that date.
@@ -92,3 +92,7 @@ def delivery_error(store, event, now, channel):
     if not 0 <= now - event["bar_close_ms"] <= FRESH_MS:
         return "signal_expired"
     return None
+
+
+# Retain the import name for older offline fixtures; policy identity is V9.
+arm_v1_bark = arm_v9_bark
