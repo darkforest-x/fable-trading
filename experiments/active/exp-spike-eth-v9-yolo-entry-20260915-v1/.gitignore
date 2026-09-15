@@ -1,0 +1,8 @@
+# Preserve compact receipts and actual trade/prediction ledgers in git.
+# Raw exchange responses, OHLCV, serialized frames and rendered inputs stay local.
+/sources/*.csv
+/sources/raw/**/*.json.gz
+/sources/raw/**/*.receipt.json
+/results/contexts.pkl
+/results/model_inputs/*.png
+/*.log
