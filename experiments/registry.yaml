@@ -9438,3 +9438,23 @@ experiments:
     canonical_report: analysis/p1_eth_bb_stoch_backtest_20260916.md
     artifacts: [eth-bb-stoch-backtest-20260916-delivery]
     notes: OKXnative5m permitted37896bars ending2026-05-01;1boundary position separate. 5marketable protection approximations;no native broker ledger parity,no V1 gate.
+
+  - experiment_id: exp-eth-bb-stoch-optimization-20260916-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f3cc67746515ac01c0b1c7f61b10fb6e461757da
+    status: inconclusive
+    question: Does a frozen315-combination BB/stop grid select an ETH5m candidate that retains net profitability on a later
+      chronological recheck?
+    single_variable: Owner explicitly requested offline multi-variable parameter search;315 BB-length/multiple/stop combinations.
+      Stoch5/3/3 and costs/exits fixed.
+    result: 212eligible;development peak and neighborhood selection bothBB200/2.5/SL0.75percent. Dev netmark+100.52USDT but
+      natural-2.19;later netmark-270.69,38natural trades,10.53percent wins,PFcash.4642,maxlossstreak22. Matched excess-7.93bp,p1.0;effective
+      parameters not established.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_eth_bb_stoch_optimization_20260916.md
+    artifacts:
+    - eth-bb-stoch-optimization-20260916-delivery
+    notes: Jan-Feb selection committed before Mar-Apr recheck;both periods previously exposed,not freshOOS.1ETH,10bp each side.
+      No recheck reselection;no nativeTV broker ledger parity,no V1 gate.

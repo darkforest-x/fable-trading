@@ -31135,3 +31135,18 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: 75natural plus1censored,380controls per path,23focused checks pass;projectvenv45checks pass. Seven unrelated registry/migration failures remain. No live change.
+
+  - artifact_id: eth-bb-stoch-optimization-20260916-delivery
+    artifact_type: manifest
+    role: fixed_bb_stoch_grid_with_frozen_chronological_recheck
+    source_repo: darkforest-x/fable-trading
+    source_commit: f3cc67746515ac01c0b1c7f61b10fb6e461757da
+    source_path: experiments/active/exp-eth-bb-stoch-optimization-20260916-v1/delivery_manifest.json
+    sha256: 535e3d10516a44de811354983fc52f69a06513f6a424e78d518193ac5a015793
+    size_bytes: 7849
+    storage_uri: repo://experiments/active/exp-eth-bb-stoch-optimization-20260916-v1/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Full315 development grid,212eligible,2frozen later arms,matched controls and fill ledgers.33focused tests and110scoped
+      repository checks pass. Candidate fails later profitability;zero holdout,no live changes.
