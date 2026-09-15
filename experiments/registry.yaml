@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-chartart-bbrsi-martingale-20260915-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2a2cf9a2b1570564332533216c24933e7e979f1e
+    status: active
+    question: Does doubling after a closed net loss improve original ChartArt BB RSI v1.1 on OKX ETH?
+    single_variable: Fixed entry notional versus loss-doubling, same RSI6 BB200x2 entries and opposite-signal exits; each margin budget paired.
+    result: Frozen original-source reconstruction and finite-account protocol; pre-May evaluation pending.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_chartart_bbrsi_martingale_20260915.md
+    artifacts: []
+    reuse_allowed: false
+    notes: 1000U cash;100U default entry notional;no fixed initial SL so R not defined;1x/10x initial-margin budgets and zero-equity bound are not
+      exact OKX liquidation.
   - experiment_id: exp-spike-v9-cost-be2-20260915-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 515e50ea6b8f3d4d5fa0b677a88f9388cbd6673c
