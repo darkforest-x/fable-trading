@@ -35,9 +35,13 @@ def parameter_text(p):
     return f"BB {p['bb_length']} / {p['bb_mult']:g}；止损 {p['stop_fraction']*100:g}%"
 
 
+def compact_parameters(p):
+    return f"{p['bb_length']} / {p['bb_mult']:g} / {p['stop_fraction']*100:g}%"
+
+
 def performance_row(label, arm, mode):
     v = arm['modes'][mode]; s,e,c = v['stats'],v['equity'],v['control']
-    return [label, mode, s['natural'], s['censored'], fmt(e['net_liquidation_mark_usdt']),
+    return [label, {'tv':'TV','adverse_first':'逆向优先'}[mode], f"{s['natural']} / {s['censored']}", fmt(e['net_liquidation_mark_usdt']),
             fmt(e['close_mtm_drawdown_usdt']), fmt(s['cash_profit_factor']),
             fmt(s['win_rate']*100 if s['win_rate'] is not None else None,1),
             fmt(c['random_mean_bp']), fmt(c['excess_mean_bp']), c['paired_n'], fmt(c['p'])]
@@ -55,33 +59,40 @@ def main():
     if sel['primary']: labels[sel['primary']] = labels.get(sel['primary'],'')+' / 邻近参数优选'
     labels = {k:v.strip(' /') for k,v in labels.items()}
     selected = sel['primary']
+    diagnosis = ''
     if selected:
         score = min(v['equity']['net_liquidation_mark_usdt'] for v in later[selected]['modes'].values())
         verdict = ('后段复查仍为正收益，但样本与成交精度尚不足以确认实盘优势。' if score>0 else
                    '后段复查未能保持正收益；本轮没有找到可确认有效的参数。')
         lead = f"前段按预定规则选出 **{parameter_text(dev[selected]['params'])}**。{verdict}"
+        early=dev[selected]['modes']['tv']; late=later[selected]['modes']['tv']
+        diagnosis = (f"候选前段自然平仓净盈亏 **{fmt(early['stats']['net_pnl'])} USDT**，"
+                     f"计入期末持仓及预留退出费后为 **{fmt(early['equity']['net_liquidation_mark_usdt'])} USDT**。"
+                     f"后段 {late['stats']['natural']} 笔完整交易仅 {late['stats']['wins']} 笔盈利，"
+                     f"最长连续亏损 **{late['stats']['max_loss_streak']} 笔**；已平仓净盈亏 "
+                     f"{fmt(late['stats']['net_pnl'])} USDT，计入期末持仓后仍亏 "
+                     f"{fmt(-late['equity']['net_liquidation_mark_usdt'])} USDT。前段排名提升没有转化为后段盈利。")
     else:
         lead = '没有参数同时达到预先规定的交易数量要求，本轮不选出优胜配置。'
-    headers = ['配置','路径','自然平仓','期末持仓','净值盈亏 USDT','收盘回撤 USDT','现金 PF','胜率 %',
-               '随机均值 bp','相对随机 bp','完整配对','月块 p']
+    headers = ['配置','路径','平仓/未平','净盈亏','回撤','PF','胜率%','随机bp','超额bp','配对','p']
     all_rows=[]
     for stage,results in [('1—2 月选参',dev),('3—4 月复查',later)]:
         for key in sel['finalists']:
             for mode in cfg['path_modes']:
-                all_rows.append(performance_row(stage+' · '+labels[key],results[key],mode))
+                all_rows.append(performance_row(stage[:4]+' · '+('原始' if key==baseline else '候选'),results[key],mode))
     param_rows = [[labels[k],k,parameter_text(dev[k]['params']),
                    '5 / 3 / 3；20 / 80',fmt(dev[k].get('neighborhood_median_usdt'))] for k in sel['finalists']]
     ranked = sorted((k for k in dev if dev[k]['eligible']),key=lambda k:(-dev[k]['worst_net_mark'],dev[k]['worst_close_mtm_drawdown'],k))[:10]
     top_rows=[]
     for k in ranked:
         a=dev[k]; mode=min(a['modes'],key=lambda m:a['modes'][m]['equity']['net_liquidation_mark_usdt'])
-        top_rows.append(performance_row(parameter_text(a['params']),a,mode))
+        top_rows.append(performance_row(compact_parameters(a['params']),a,mode))
     anchor_rows=[]
     base=dev[baseline]['params']
     for k,a in dev.items():
         if sum(a['params'][field]!=base[field] for field in ['bb_length','bb_mult','stop_fraction'])<=1:
             mode=min(a['modes'],key=lambda m:a['modes'][m]['equity']['net_liquidation_mark_usdt'])
-            anchor_rows.append(performance_row(parameter_text(a['params']),a,mode))
+            anchor_rows.append(performance_row(compact_parameters(a['params']),a,mode))
     curve_name='eth_bb_stoch_optimization_20260916_equity.png'
     fig,axes=plt.subplots(2,1,figsize=(12,8),layout='constrained')
     for ax,stage,title in zip(axes,['development','recheck'],['Jan-Feb: parameter selection','Mar-Apr: frozen chronological recheck']):
@@ -111,6 +122,8 @@ def main():
 
 {lead}
 
+{diagnosis}
+
 本轮搜索 **{len(dev)} 组**，符合交易数门槛 **{sel['eligible_count']} 组**。这是固定网格内的历史选择，**不是全局最优，也不是全新样本外验证**。3—4 月已在上一轮基准回测中看过；本轮未使用 5 月之后的保留数据。
 
 ## 参数结果
@@ -122,6 +135,8 @@ def main():
 ## 同期结果与匹配随机对照
 
 全部固定每次 **1 ETH**，每边手续费 **0.1%**。净值盈亏包含期末持仓按最后收盘计价，并预留剩余仓位退出费；PF、胜率只统计自然平仓。收盘回撤包含持仓浮盈浮亏，**不是盘中最大回撤**。初始权益 100,000 USDT 只是曲线记账基数，不表示全仓或杠杆设置。
+
+下表净盈亏、回撤单位均为 USDT；“平仓/未平”分别为自然结束笔数和截止时未平仓笔数。后面参数表的“配置”依次为 BB 长度 / 倍数 / 止损百分比。
 
 {table(headers,all_rows)}
 
