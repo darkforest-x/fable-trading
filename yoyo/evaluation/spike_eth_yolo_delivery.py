@@ -137,6 +137,9 @@ def run():
     overview(coverage,out)
     lines[3:3]=answer_first(coverage,summary,association,out)
     lines.append(table(coverage,[('tf','V9周期',None,False),('lower','小级别',None,False),('candidates','准入信号',0,False),('entries','实际开仓',0,False),('same','同级检出',0,False),('same_rate','同级占比',1,True),('lower_hit','小级别检出',0,False),('lower_rate','小级别占比',1,True),('both','均检出',0,False),('censored','未平仓',0,False)]))
+    lines+=['### 全部准入信号的检出率',
+            '此处包括因单仓占用而没有成交的准入信号，分母与上表实际开仓不同。',
+            table(pd.read_csv(out/'coverage.csv').to_dict('records'),[('timeframe','周期',None,False),('signals_n','全部信号',0,False),('signal_same_hit_n','同级检出',0,False),('signal_same_hit_rate','同级比例',1,True),('signal_lower_hit_n','小级别检出',0,False),('signal_lower_hit_rate','小级别比例',1,True),('signal_both_hit_n','均检出',0,False)])]
     lines+=['## 2. 同一批原始交易：检出是否更容易盈利',
             '净胜率 = 已平仓 net_R>0 的比例。所有组保留原始V9的开平仓价格及0.2%往返成本。随机均值与超额只在共同已平仓匹配分母上计算，不能拿不同分母直接相减。',
             table(summary.loc[summary.population.eq('v9_detection_group')].to_dict('records'),[('timeframe','周期',None,False),('group','分组',None,False),('closed','已平仓',0,False),('net_winrate','净胜率',1,True),('mean_net_r','平均净R',3,False),('total_net_r','合计净R',2,False),('pf_net_r','PF(R)',3,False),('matched_pairs','随机配对',0,False),('paired_control_mean_r','随机均R',3,False),('paired_excess_mean_r','配对超额R',3,False)]),
