@@ -1,3 +1,5 @@
+> **Owner 授权 ETH V9 3m/5m 固定对照（2026-09-15）**：Owner 在收到 ETH 30m/1H/4H 结果后要求“3min 5min 也跑一下”。复用原 ETH 3m OKX / 5m Binance 完整历史及分段，保持 V9 三门和原 V8 退出/0.002 成本；允许已暴露的 3m holdout 后段本次固定比较，不调参、不扩池。V9 低周期专项曝光第 1 次，固定 V9 全历史评估累计第 2 次。合同：`experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/PROJECT_PLAN.md`。
+
 > **Owner 后续授权 SPIKE V9 全量对比与 TV 保存（2026-09-15）**：完成代码后，Owner 明确要求
 > “用子代理 好了之后 v9保存到tv 跑一下v9全量回测 对比一下v8”。新实验按原 3,531 流、
 > UTC 2024-09-10 至 2026-09-10、原成本/退出执行 V8/V9 固定对比，记录 V9 holdout 使用第 1 次。
